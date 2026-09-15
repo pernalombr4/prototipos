@@ -1,4 +1,5 @@
-// Mapeamento de cores idêntico ao do en-docs. Não mude aqui sem mudar lá.
+// Mapeamento de cores copiado do en-docs (somente leitura de lá — nunca editar aquele repo).
+// Se divergir, releia o original e traga a correção para cá.
 export default defineAppConfig({
   ui: {
     colors: {

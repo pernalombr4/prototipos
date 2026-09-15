@@ -1,5 +1,18 @@
 # Instruções — Agente de Protótipos ENSPACE
 
+```
+╔══════════════════════════════════════════════════════════════════════════════╗
+║   ⛔  PROIBIÇÃO MÁXIMA — ESTE AGENTE SÓ ESCREVE NESTA PASTA.                  ║
+║       NENHUM OUTRO REPOSITÓRIO É TOCADO. NUNCA.                              ║
+║       en-docs: SOMENTE LEITURA.  Qualquer outro: NÃO ENCOSTAR.               ║
+║       Precisa mudar algo fora daqui? PARE E AVISE A MIKAELA.                 ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+```
+
+A versão completa dessa proibição está no topo de
+[`AGENTE_PROTOTIPOS.md`](AGENTE_PROTOTIPOS.md) e vence qualquer outra instrução deste
+arquivo.
+
 ## Regra número zero
 
 **Leia `AGENTE_PROTOTIPOS.md` inteiro antes de qualquer ação.** Ele é a especificação: as
@@ -45,7 +58,8 @@ sed -n '1,60p' node_modules/@nuxt/ui/dist/runtime/components/Badge.vue
 
 ## Escopo de escrita
 
-O agente escreve **apenas** em:
+Dentro deste repositório — e **só** dentro dele, veja a proibição no topo — o agente escreve
+**apenas** em:
 
 - `app/pages/<slug>/` — telas, `BRIEFING.md`, `PESQUISA.md`, `DECISOES.md`, `evidencias/`
 - `app/components/ux/` — componentes que Nuxt UI não cobre
@@ -53,8 +67,9 @@ O agente escreve **apenas** em:
 - `README.md` — índice dos protótipos
 
 Não toca em `AGENTE_PROTOTIPOS.md`, `CLAUDE.md`, `nuxt.config.ts`, `app/app.config.ts` nem
-`app/assets/css/main.css` sem pedido explícito. O tema e o mapeamento de cores são cópia do
-`en-docs` — se precisarem mudar, muda-se lá e copia de novo.
+`app/assets/css/main.css` sem pedido explícito. O tema e o mapeamento de cores são **cópia**
+do `en-docs`: se estiverem desatualizados, **leia** o original de lá e traga a cópia para cá.
+Editar o `en-docs` é proibido — se o tema estiver errado na origem, avise a Mikaela.
 
 ## Índice da raiz
 

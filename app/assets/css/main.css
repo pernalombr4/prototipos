@@ -2,7 +2,8 @@
 @import "@nuxt/ui";
 
 /* Tema ENSPACE — copiado de en-docs/app/assets/css/main.css em 15/09/2026.
-   Fonte da verdade continua sendo o en-docs: se o tema mudar lá, copie de novo. */
+   Fonte da verdade continua sendo o en-docs, que é SOMENTE LEITURA para este agente:
+   se o tema mudar lá, leia e copie de novo para cá. Nunca editar o en-docs. */
 
 @theme static {
   --font-sans: 'Acumin Pro Wide', sans-serif;
