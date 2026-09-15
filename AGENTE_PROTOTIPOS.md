@@ -169,9 +169,11 @@ ENSPACE.
 
 Regras da biblioteca na **Parte 2**. "Alta fidelidade" aqui tem definição fechada:
 
-1. **Dado real.** Os nomes, categorias e campos que aparecem na tela saem do develop
-   (Fase 2). Nada de "Item 1", "Lorem ipsum" ou "João da Silva" quando o workspace de teste
-   tem conteúdo de verdade.
+1. **Dado mockado, mas verossímil.** A estrutura vem do develop (Fase 2) — nome de campo,
+   tipo, status, vocabulário do produto. Os valores são **inventados**, num `mocks.ts` da
+   própria pasta: nunca dado de cliente real, nunca chamada de API. Verossímil quer dizer
+   nem "Lorem ipsum" nem "Item 1", e em volume que prove a tela. Detalhe inteiro em
+   **Parte 2 → E o protótipo é 100% front-end**.
 2. **Texto final, em PT-BR.** O rótulo do protótipo é o rótulo que vai para o produto —
    escrito com o nome que a tela usa ("fixar", não "congelar"). Passe pela skill
    `design:ux-copy` antes de considerar pronto.
@@ -180,8 +182,8 @@ Regras da biblioteca na **Parte 2**. "Alta fidelidade" aqui tem definição fech
 4. **Responsivo e nos dois temas.** Claro é o padrão; escuro é estado a conferir de
    propósito.
 5. **O que a proposta depende funciona de verdade** — se a ideia é "filtrar sem sair da
-   tela", o filtro filtra. O resto pode ser estático, **desde que declarado** no
-   `DECISOES.md`, na lista "o que é maquete".
+   tela", o filtro filtra: sobre o mock, em memória, no navegador. O resto pode ser
+   estático, **desde que declarado** no `DECISOES.md`, na lista "o que é maquete".
 6. **Jornada de mais de duas telas ganha diagrama** (`artifact-diagramming`), no
    `DECISOES.md`.
 
@@ -202,9 +204,13 @@ novo, literal), o que mudou, e o que foi descartado com o motivo.
 
 ---
 
-## Parte 2 — A biblioteca é Nuxt UI, e mais nada
+## Parte 2 — Do que o protótipo é feito
 
-### A fonte da verdade está em disco, não na memória
+Duas restrições, e as duas são absolutas: **só Nuxt UI** e **só front-end**.
+
+### A biblioteca é Nuxt UI, e mais nada
+
+#### A fonte da verdade está em disco, não na memória
 
 A fonte é o `node_modules` **deste** repositório — nunca o de outro projeto, que pode estar
 numa versão diferente do Nuxt UI:
@@ -224,7 +230,7 @@ invente. **Prop que não aparece no arquivo não existe** — nem que pareça ó
 O total muda de uma versão para outra (hoje são 124), então conte na pasta em vez de confiar
 em número decorado.
 
-### A escada do que falta
+#### A escada do que falta
 
 1. **Procure pelo nome** na pasta de componentes.
 2. **Não achou? Componha** com o que tem: `UCard` + `UButton` + `UInput` + `UBadge` +
@@ -234,13 +240,55 @@ em número decorado.
 4. **E registre** em `COMPONENTES-CUSTOM.md`: o que é, por que Nuxt UI não cobriu, de qual
    primitiva partiu, o que o dev vai ter que construir. Esse arquivo é metade do handoff.
 
-### Cor e espaçamento só por token
+#### Cor e espaçamento só por token
 
 `text-muted`, `text-highlighted`, `text-dimmed`, `bg-elevated`, `bg-accented`,
 `border-default`, `text-primary`, `text-error`. **Nunca hex cru, nunca `bg-fuchsia-500`
 direto.** O mapeamento das cores da marca está em `app/app.config.ts` e o tema em
 `app/assets/css/main.css`, ambos copiados do `en-docs` — se o tema mudar lá, copie de novo,
 não corrija à mão aqui.
+
+### E o protótipo é 100% front-end
+
+> ## 🚫 SEM BACK-END. SEM API. DADO SEMPRE MOCKADO.
+>
+> **Um protótipo daqui roda inteiro no navegador, sozinho, offline, sem nada atrás dele.**
+> Quem abre a URL vê a tela funcionando sem login, sem servidor e sem conexão com o ENSPACE.
+
+**O que NUNCA entra em um protótipo:**
+
+- ❌ nenhuma chamada de rede em tempo de execução — sem `fetch`, `$fetch`, `useFetch`,
+  `useAsyncData` apontando para fora, `axios`, WebSocket, SSE;
+- ❌ nada em `server/` — sem rota de API do Nitro, sem middleware de servidor, sem proxy;
+- ❌ nenhum banco, nenhum ORM, nenhum Supabase, nenhum arquivo de migração;
+- ❌ nenhuma autenticação — sem login, sem SSO, sem sessão, sem guarda de rota de verdade;
+- ❌ nenhuma variável de ambiente com segredo, nenhuma chave, nenhum token no código;
+- ❌ **nenhum dado real de cliente, em hipótese nenhuma** — e o repositório é público, então
+  isso não é preferência, é a regra 13.
+
+**De onde vem o dado, então:** de um arquivo `mocks.ts` dentro da pasta do próprio protótipo,
+tipado, escrito à mão. Dado mockado **verossímil**, não dado de brincadeira:
+
+- a **estrutura** vem do develop (Fase 2) — nome de campo, tipo, status, hierarquia, o
+  vocabulário que o produto usa de verdade;
+- os **valores** são inventados — empresa fictícia, pessoa fictícia, número fictício;
+- volume realista: uma tabela que na vida real tem 200 linhas não se prova com 3;
+- e casos de canto de propósito: nome longo que estoura a coluna, campo vazio, status raro,
+  data antiga. É onde o desenho quebra, e é para isso que o protótipo serve.
+
+**Interação é estado local.** `ref`, `reactive`, `useState`. Criar, editar, filtrar, ordenar
+e excluir mexem **no array em memória** — e ao recarregar a página tudo volta ao começo.
+"Salvar" mostra o toast e muda a lista local; não persiste nada. Se um caso específico
+precisar sobreviver ao reload, use `localStorage` e **escreva isso no `DECISOES.md`**.
+
+**Por que a regra é absoluta:** o protótipo existe para responder "essa tela resolve?", não
+"esse código funciona?". Back-end no meio troca uma pergunta de dias por um projeto de
+semanas — e ainda quebra na publicação, porque o GitHub Pages serve arquivo estático e não
+roda servidor nenhum: rota de API aqui funciona no `pnpm dev` e morre publicada.
+
+**O `API_TOKEN` do `config/tokens.md` é da Fase 2, não do protótipo.** Ele serve para você
+*aprender* o nome real dos campos enquanto investiga. O protótipo nunca o usa, nunca o
+importa, nunca chama a API do ENSPACE.
 
 ---
 
@@ -281,6 +329,7 @@ caso sem procurar em outro lugar.
 app/pages/<slug>/
 ├── index.vue            tela principal  (rota /<slug>)
 ├── <outra-tela>.vue     demais telas    (rota /<slug>/<outra-tela>)
+├── mocks.ts             o dado do protótipo — fictício, tipado, sem API
 ├── BRIEFING.md          demanda + o que o develop faz hoje (Fases 1 e 2)
 ├── PESQUISA.md          as 5 referências + as extras (Fase 3)
 ├── DECISOES.md          o que foi proposto, por quê, o que é maquete, as iterações
@@ -337,17 +386,22 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
 2. **Chrome da usuária, sempre.** Nunca o browser interno. Nunca digitar senha.
 3. **Nuxt UI e mais nada.** Outra biblioteca de componente não entra, nem por CDN, nem
    "só para esse gráfico".
-4. **Componente e prop se conferem em disco** antes de usar. Não existe prop lembrada.
-5. **Token semântico, nunca hex cru.**
-6. **As cinco referências obrigatórias são cinco**, mais três por conta do problema. Pesquisa
+4. **🚫 100% FRONT-END, SEM EXCEÇÃO.** Nenhuma chamada de rede, nada em `server/`, nenhum
+   banco, nenhuma autenticação, nenhum segredo. O protótipo roda no navegador, sozinho,
+   offline. "Só uma rotinha de API para funcionar direito" **não existe** — nem em rascunho,
+   nem temporariamente.
+5. **Componente e prop se conferem em disco** antes de usar. Não existe prop lembrada.
+6. **Token semântico, nunca hex cru.**
+7. **As cinco referências obrigatórias são cinco**, mais três por conta do problema. Pesquisa
    com menos que isso não fecha a Fase 3.
-7. **Não se copia identidade de outro produto** — só o padrão de interação.
-8. **Dado do protótipo vem do develop.** Nome inventado só quando o develop não tem nenhum.
-9. **O que é maquete se declara.** Interação que não funciona e está na tela vai escrita no
-   `DECISOES.md`.
-10. **Iteração não apaga história.** Versão anterior sai em commit próprio, depois de ela
+8. **Não se copia identidade de outro produto** — só o padrão de interação.
+9. **Dado é sempre mockado.** A estrutura vem do develop; os valores são fictícios e moram
+   no `mocks.ts` do protótipo. **Dado real de cliente nunca entra.**
+10. **O que é maquete se declara.** Interação que não funciona e está na tela vai escrita no
+    `DECISOES.md`.
+11. **Iteração não apaga história.** Versão anterior sai em commit próprio, depois de ela
     escolher.
-11. **Toda entrega tem link para ver e print.**
-12. **O repositório é público.** Credencial, token, dado de cliente real, e-mail de pessoa e
+12. **Toda entrega tem link para ver e print.**
+13. **O repositório é público.** Credencial, token, dado de cliente real, e-mail de pessoa e
     URL com token **não se commitam**. Na dúvida sobre um arquivo, pergunte antes — depois de
     subir, já foi.

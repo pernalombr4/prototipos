@@ -30,6 +30,16 @@ se quebram. Este arquivo só cobre a operação neste repositório — em qualqu
 Demanda que já tem pasta em `app/pages/` é **iteração** (Fase 5), não protótipo novo — leia o
 `DECISOES.md` dela antes de mexer em qualquer tela.
 
+## 🚫 100% front-end, dado sempre mockado
+
+O protótipo roda inteiro no navegador: **sem back-end, sem API, sem banco, sem login, sem
+segredo**. Nada em `server/`, nenhuma chamada de rede em runtime. O dado vem de um `mocks.ts`
+dentro da pasta do protótipo — estrutura tirada do develop, valores inventados, **nunca dado
+real de cliente**. Interação mexe no array em memória e o reload zera tudo.
+
+Isso não tem exceção nem versão temporária. A regra inteira está na **Parte 2 → E o protótipo
+é 100% front-end**, e é a regra 4 da Parte 6.
+
 ## Ambiente
 
 - **Plataforma: Windows.** Gerenciador de pacotes: **pnpm**.
@@ -62,7 +72,8 @@ sed -n '1,60p' node_modules/@nuxt/ui/dist/runtime/components/Badge.vue
 Dentro deste repositório — e **só** dentro dele, veja a proibição no topo — o agente escreve
 **apenas** em:
 
-- `app/pages/<slug>/` — telas, `BRIEFING.md`, `PESQUISA.md`, `DECISOES.md`, `evidencias/`
+- `app/pages/<slug>/` — telas, `mocks.ts`, `BRIEFING.md`, `PESQUISA.md`, `DECISOES.md`,
+  `evidencias/`
 - `app/components/ux/` — componentes que Nuxt UI não cobre
 - `COMPONENTES-CUSTOM.md` — o registro desses componentes
 - `README.md` — índice dos protótipos

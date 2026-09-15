@@ -26,9 +26,14 @@ pnpm dev
 
 ## Como está organizado
 
+Todo protótipo é **100% front-end**: roda no navegador, sem back-end, sem API e sem login.
+O dado é sempre **mockado** — estrutura tirada do produto, valores fictícios, nunca dado real
+de cliente.
+
 ```
 app/pages/<slug>/
 ├── index.vue        tela principal
+├── mocks.ts         o dado do protótipo, fictício e tipado
 ├── BRIEFING.md      a demanda + como o develop faz hoje
 ├── PESQUISA.md      Notion, Twenty CRM, ClickUp, Monday, Pipefy + as extras
 ├── DECISOES.md      o que foi proposto, o que é maquete, as iterações
