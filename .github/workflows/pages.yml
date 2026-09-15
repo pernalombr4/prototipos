@@ -2,7 +2,7 @@
 #
 # Antes de servir para alguma coisa, dois passos manuais no repositório:
 #   1. Settings > Pages > Source: GitHub Actions
-#   2. trocar NUXT_APP_BASE_URL abaixo pelo nome real do repositório
+#   2. NUXT_APP_BASE_URL abaixo tem que bater com o nome do repositório (prototipos)
 #
 # Atenção: Pages em repositório PRIVADO exige plano pago. Se o repositório for privado e o
 # plano for gratuito, a publicação sai pela Vercel — veja a Parte 3 de AGENTE_PROTOTIPOS.md.
@@ -41,7 +41,7 @@ jobs:
 
       - run: pnpm generate
         env:
-          NUXT_APP_BASE_URL: /enspace-prototipos/
+          NUXT_APP_BASE_URL: /prototipos/
 
       - uses: actions/configure-pages@v5
 

@@ -8,8 +8,8 @@
 > A regra inteira está no topo de [`AGENTE_PROTOTIPOS.md`](AGENTE_PROTOTIPOS.md).
 
 Protótipos de alta fidelidade para o ENSPACE, feitos em **Nuxt 4 + Nuxt UI 4** com o mesmo
-tema do produto. Cada protótipo nasce de uma demanda, passa por uma investigação no
-`develop.enspace.io` e por uma pesquisa de referências de mercado antes de virar tela.
+tema do produto. Cada protótipo nasce de uma demanda, passa por uma investigação no ambiente
+de develop e por uma pesquisa de referências de mercado antes de virar tela.
 
 - **A spec do agente:** [`AGENTE_PROTOTIPOS.md`](AGENTE_PROTOTIPOS.md)
 - **A operação no repositório:** [`CLAUDE.md`](CLAUDE.md)

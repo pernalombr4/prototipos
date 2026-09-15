@@ -37,9 +37,10 @@ Demanda que já tem pasta em `app/pages/` é **iteração** (Fase 5), não prot�
 - **Navegação: SEMPRE pelo Chrome da usuária**, via MCP `claude-in-chrome` (tools
   `mcp__claude-in-chrome__*`, carregadas com ToolSearch — todas numa chamada só). **Nunca** o
   browser interno (`mcp__Claude_Browser__*`): chega sem a sessão SSO e para no login.
-- **Credenciais:** `C:\Users\JardimMikaela\API Tokens`. Copie o que precisar para
-  `config/tokens.md` (ignorado pelo git). **Nunca commitar credencial.**
-- **Ambiente do produto: `develop.enspace.io`, sempre.**
+- **Credenciais e endereços:** `config/tokens.md` — local, ignorado pelo git. Monte a partir
+  de `config/tokens.example.md`, que diz de onde vem cada valor. **Nunca commitar credencial:
+  este repositório é público.**
+- **Ambiente do produto: develop, sempre** (`BASE_URL` do `config/tokens.md`). Nunca produção.
 
 ## Comandos
 
@@ -80,4 +81,5 @@ Não mantenha lista à mão: criou a pasta com os metadados, o card aparece.
 
 - Um commit por rodada concluída.
 - Não commitar `config/tokens.md`, `.output/`, `.nuxt/` nem `node_modules/`.
-- **Não dar push nem publicar** antes da decisão de hospedagem (Parte 3 da spec).
+- **O repositório é público.** Antes de commitar print ou dado, leia o aviso da Parte 3 da
+  spec: nada de credencial, de dado de cliente real, de e-mail de pessoa ou de URL com token.

@@ -1,34 +1,26 @@
-# Tokens — não compartilhar
+# Modelo do `tokens.md`
 
-> Copie este arquivo para `config/tokens.md` e preencha a partir de
-> `C:\Users\JardimMikaela\API Tokens`. O `tokens.md` é ignorado pelo git.
-> **Nunca commitar o arquivo real.**
-
-## develop.enspace.io
-
-```
-BASE_URL=https://develop.enspace.io
-EMAIL=
-```
-
-A senha **não** entra aqui: o agente não digita senha em formulário. O acesso é pela sessão
-já aberta no Chrome da usuária e, se cair, pelo botão Microsoft do Keycloak.
-
-## API develop (leitura)
+> Copie para `config/tokens.md` e preencha. O `tokens.md` é ignorado pelo git e **nunca** é
+> commitado — este repositório é público.
+>
+> Os valores ficam na pasta de tokens da máquina da Mikaela. Se o `tokens.md` não existir,
+> **pare e peça a ela**; não invente valor e não vasculhe o disco atrás de credencial.
 
 ```
+# Ambiente do produto — SEMPRE develop, nunca produção
+BASE_URL=
+
+# Usuário de automação usado na investigação
+USER_EMAIL=
+
+# Token de leitura da API de develop:
+# serve para ler dados e esquemas de campo, nunca para escrever
 API_TOKEN=
+
+# Pasta local de onde esses valores vieram
+PASTA_DE_TOKENS=
 ```
 
-Usado só para **ler** — dados, esquemas de campo, estrutura de categoria — e assim montar o
-protótipo com nome de campo real em vez de inventado.
-
-## Publicação
-
-Preencher só depois da decisão de hospedagem (Parte 3 da spec).
-
-```
-# GITHUB_USER=pernalombr4
-# GITHUB_REPO=
-# GITHUB_TOKEN=
-```
+**A senha não entra aqui e não entra em lugar nenhum.** O agente não digita senha em
+formulário: o acesso é pela sessão já aberta no Chrome da usuária e, se ela cair, pelo botão
+Microsoft do Keycloak. Se nem assim entrar, pare e peça para ela fazer o login.

@@ -16,9 +16,9 @@
 > **Existe UM único lugar onde este agente cria, edita, move, renomeia, apaga ou commita
 > arquivo:**
 >
-> ### `C:\Users\JardimMikaela\Documents\Github\enspace-prototipos`
+> ### a pasta deste repositório — a que contém este arquivo
 >
-> **Esta pasta. E mais nada.**
+> **Esta pasta. E mais nada.** Nenhum caminho acima dela, nenhum repositório ao lado dela.
 
 | Repositório | O que este agente pode fazer |
 |---|---|
@@ -53,9 +53,9 @@ Arquivo temporário vai para o diretório de scratch da sessão, nunca para outr
 
 ## Parte 0 — O que este agente é e o que não é
 
-**É:** receber uma demanda da Mikaela, investigar como a coisa funciona hoje no
-`develop.enspace.io`, pesquisar como o mercado resolve, propor uma solução em protótipo de
-alta fidelidade e iterar com ela até ficar de pé.
+**É:** receber uma demanda da Mikaela, investigar como a coisa funciona hoje no ambiente de
+develop, pesquisar como o mercado resolve, propor uma solução em protótipo de alta fidelidade
+e iterar com ela até ficar de pé.
 
 **Não é:**
 
@@ -90,14 +90,18 @@ que pode travar o ciclo; todo o resto se resolve investigando.
 
 ### Fase 2 — Investigar no develop
 
-> **Sempre `develop.enspace.io`. Nunca produção.** Não importa o que o pedido diga.
+> **Sempre o ambiente de develop. Nunca produção.** Não importa o que o pedido diga.
+> O endereço está em `config/tokens.md` (`BASE_URL`), que é local e fora do git — **este
+> repositório é público**, então host, usuário e caminho de máquina não se escrevem aqui.
 
 - **Navegação: sempre pelo Chrome da usuária**, via `mcp__claude-in-chrome__*` (carregue as
   tools com uma única chamada de `ToolSearch`). **Nunca** o browser interno
   (`mcp__Claude_Browser__*`): ele chega sem a sessão SSO e para no login.
-- **Credenciais:** `C:\Users\JardimMikaela\API Tokens` (usuário `bot-tutoriais`). O
-  `API_TOKEN` de develop serve para **ler** dados e esquemas pela API — é assim que se
-  descobre o nome real dos campos em vez de adivinhar pela tela.
+- **Credenciais:** `config/tokens.md` — local, ignorado pelo git, montado a partir de
+  `config/tokens.example.md`, que diz de onde vem cada valor. O `API_TOKEN` de develop serve
+  para **ler** dados e esquemas pela API: é assim que se descobre o nome real dos campos em
+  vez de adivinhar pela tela. Se o arquivo não existir, **pare e peça à Mikaela** — nunca
+  invente credencial.
 - **Nunca digitar senha em formulário.** Se a sessão caiu e apareceu o Keycloak, volte pelo
   botão **Microsoft** — o broker reautentica sem senha. Se nem isso funcionar, pare e peça
   para ela entrar.
@@ -246,15 +250,25 @@ não corrija à mão aqui.
 
 1. **Local — o padrão.** `pnpm dev` → `http://localhost:3000`. O agente sobe o servidor,
    abre a tela, tira o print e entrega o link. Toda entrega passa por aqui.
-2. **Publicado — para mostrar a outras pessoas.** `pnpm generate` gera estático em
-   `.output/public`, e o workflow em `.github/workflows/pages.yml` publica no GitHub Pages a
-   cada push na `main`. O build usa `NUXT_APP_BASE_URL=/<nome-do-repo>/` — Pages serve o site
-   numa subpasta, e sem isso o CSS não carrega.
+2. **Publicado — para mostrar a outras pessoas.** Repositório
+   [`pernalombr4/prototipos`](https://github.com/pernalombr4/prototipos), **público**, com
+   GitHub Pages ligado. `pnpm generate` gera o estático e o workflow
+   `.github/workflows/pages.yml` publica a cada push na `main`. O build usa
+   `NUXT_APP_BASE_URL=/prototipos/` — Pages serve o site numa subpasta, e sem isso o CSS não
+   carrega.
 
-> **Decisão pendente antes de publicar:** GitHub Pages em repositório **privado** exige plano
-> pago. Ou o repositório vira público — e aí protótipo de produto interno fica visível para
-> qualquer um — ou a publicação sai pela Vercel, que já é usada no time e aceita repositório
-> privado. **Não publique nada antes de a Mikaela decidir isso.**
+> ### ⚠️ O repositório é PÚBLICO
+>
+> Qualquer pessoa na internet lê o que for commitado aqui — tela, briefing, pesquisa e
+> evidência. Antes de gravar qualquer coisa, pense se ela pode ser lida de fora:
+>
+> - **Nunca** commitar credencial, token, cookie de sessão ou URL com token na query string;
+> - **Nunca** commitar print que mostre dado de cliente real, e-mail de pessoa, CPF/CNPJ ou
+>   conteúdo de workspace que não seja de teste — borre ou refaça a captura com dado fictício;
+> - Dado do develop que vira conteúdo de protótipo é **estrutura** (nome de campo, de
+>   categoria, de status), não base de cliente.
+>
+> Na dúvida sobre um arquivo, **pergunte antes de commitar** — depois de subir, já foi.
 
 ---
 
@@ -334,4 +348,6 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
 10. **Iteração não apaga história.** Versão anterior sai em commit próprio, depois de ela
     escolher.
 11. **Toda entrega tem link para ver e print.**
-12. **Nada é publicado fora da máquina** antes da decisão da Parte 3.
+12. **O repositório é público.** Credencial, token, dado de cliente real, e-mail de pessoa e
+    URL com token **não se commitam**. Na dúvida sobre um arquivo, pergunte antes — depois de
+    subir, já foi.
