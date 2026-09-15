@@ -1,0 +1,101 @@
+@import "tailwindcss" theme(static);
+@import "@nuxt/ui";
+
+/* Tema ENSPACE — copiado de en-docs/app/assets/css/main.css em 15/09/2026.
+   Fonte da verdade continua sendo o en-docs: se o tema mudar lá, copie de novo. */
+
+@theme static {
+  --font-sans: 'Acumin Pro Wide', sans-serif;
+ 
+  /* Primary: Fuchsia */
+  --color-fuchsia-50:  #FEF2F9;
+  --color-fuchsia-100: #FCE4F3;
+  --color-fuchsia-200: #F9C4E8;
+  --color-fuchsia-300: #F49DD6;
+  --color-fuchsia-400: #ED63BC;
+  --color-fuchsia-500: #FF04D1;
+  --color-fuchsia-600: #CC00A8;
+  --color-fuchsia-700: #990080;
+  --color-fuchsia-800: #660057;
+  --color-fuchsia-900: #33002B;
+  --color-fuchsia-950: #1A0016;
+ 
+  /* Secondary: Cyan */
+  --color-cyan-50:  #E6F0FB;
+  --color-cyan-100: #C0D8F7;
+  --color-cyan-200: #94BBF0;
+  --color-cyan-300: #629EE8;
+  --color-cyan-400: #3580DF;
+  --color-cyan-500: #0D58CE;
+  --color-cyan-600: #0A45A4;
+  --color-cyan-700: #08337B;
+  --color-cyan-800: #052252;
+  --color-cyan-900: #031129;
+  --color-cyan-950: #010814;
+ 
+  /* Neutral: Space - quase cinza, toque de lilás (escuros mais escuros) */
+  --color-space-50:  #F8F8FA;
+  --color-space-100: #F0EFF5;
+  --color-space-200: #d9d7e6;
+  --color-space-300: #a5a3b6;
+  --color-space-400: #9591ac;
+  --color-space-500: #736F8F;
+  --color-space-600: #4E4A68;
+  --color-space-700: #4F3F66;
+  --color-space-800: #352A4A;
+  --color-space-900: #0E0916;
+  --color-space-950: #120C1D;
+ 
+  /* Purple (for smooth transitions) */
+  --color-purple-50:  #F0EAFE;
+  --color-purple-100: #D9CCFC;
+  --color-purple-200: #BFA8F8;
+  --color-purple-300: #A082F5;
+  --color-purple-400: #8C59F9;
+  --color-purple-500: #7A30F7;
+  --color-purple-600: #6122CC;
+  --color-purple-700: #491999;
+  --color-purple-800: #311066;
+  --color-purple-900: #190833;
+  --color-purple-950: #0C0419;
+ 
+  /* Brand neutrals */
+  --color-brand-light: #D9D9D9;
+  --color-brand-dark: #1E293B;
+  --color-brand-pure-light: #FFFFFF;
+  --color-brand-pure-dark: #000000;
+
+  /* Semantic colors — exact values from hardcoded usage */
+  --color-text-body: #334155;
+  --color-text-title: #0f172a;
+  --color-text-dark: #1E293B;
+  --color-text-light: #D9D9D9;
+  --color-text-muted: #9ca3af;
+  --color-text-inverse: #FFFFFF;
+  --color-text-inverse-dark: #000000;
+
+  --color-bg-inverse: #FFFFFF;
+  --color-bg-inverse-dark: #000000;
+
+  --color-star-accent: rgba(232, 62, 161, 0.6);
+  --color-star-pure: #ffffff;
+  --color-grid-light: rgb(139, 122, 168);
+  --color-grid-dark: white;
+  --color-shadow-card: rgba(0, 0, 0, 0.08);
+  --color-mask-light: rgba(217, 217, 217, 0.8);
+  --color-mask-solid: #d9d9d9;
+  --color-mask-white: #fff;
+
+  /* Success: Teal */
+  --color-teal-50:  #F0FDFA;
+  --color-teal-100: #CCFBF1;
+  --color-teal-200: #99F6E4;
+  --color-teal-300: #5EEEAD;
+  --color-teal-400: #2DD4BF;
+  --color-teal-500: #14B8A6;
+  --color-teal-600: #0D9488;
+  --color-teal-700: #0F766E;
+  --color-teal-800: #115E59;
+  --color-teal-900: #134E4A;
+  --color-teal-950: #0D3331;
+}

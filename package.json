@@ -1,0 +1,19 @@
+{
+  "name": "enspace-prototipos",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.96",
+    "@iconify-json/simple-icons": "^1.2.0",
+    "@nuxt/ui": "^4.5.1",
+    "nuxt": "^4.4.2"
+  },
+  "packageManager": "pnpm@10.6.5"
+}
