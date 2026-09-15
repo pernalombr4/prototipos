@@ -298,12 +298,19 @@ importa, nunca chama a API do ENSPACE.
 
 1. **Local — o padrão.** `pnpm dev` → `http://localhost:3000`. O agente sobe o servidor,
    abre a tela, tira o print e entrega o link. Toda entrega passa por aqui.
-2. **Publicado — para mostrar a outras pessoas.** Repositório
-   [`pernalombr4/prototipos`](https://github.com/pernalombr4/prototipos), **público**, com
-   GitHub Pages ligado. `pnpm generate` gera o estático e o workflow
-   `.github/workflows/pages.yml` publica a cada push na `main`. O build usa
+2. **Publicado — para mostrar a outras pessoas.**
+   ### 🌐 https://pernalombr4.github.io/prototipos/
+   Repositório [`pernalombr4/prototipos`](https://github.com/pernalombr4/prototipos),
+   **público**, com Pages servido pelo GitHub Actions. O workflow
+   `.github/workflows/pages.yml` roda a cada push na `main`: `pnpm generate` gera o estático
+   e o deploy sobe sozinho, em cerca de um minuto. O build usa
    `NUXT_APP_BASE_URL=/prototipos/` — Pages serve o site numa subpasta, e sem isso o CSS não
    carrega.
+
+   Duas armadilhas já resolvidas, para não voltarem: a versão do pnpm vive **só** no campo
+   `packageManager` do `package.json` (declarar também na action faz o build falhar), e o
+   Pages **não roda servidor** — qualquer rota de API funcionaria no `pnpm dev` e morreria
+   publicada.
 
 > ### ⚠️ O repositório é PÚBLICO
 >

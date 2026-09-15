@@ -15,14 +15,20 @@ de develop e por uma pesquisa de referências de mercado antes de virar tela.
 - **A operação no repositório:** [`CLAUDE.md`](CLAUDE.md)
 - **Componentes fora da biblioteca:** [`COMPONENTES-CUSTOM.md`](COMPONENTES-CUSTOM.md)
 
-## Rodar
+## Ver
+
+**Publicado:** https://pernalombr4.github.io/prototipos/ — atualiza sozinho a cada push na
+`main`, em cerca de um minuto.
+
+**Local:**
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-`http://localhost:3000` abre o índice, que lista sozinho todos os protótipos existentes.
+`http://localhost:3000` abre o mesmo índice, que lista sozinho todos os protótipos
+existentes.
 
 ## Como está organizado
 
