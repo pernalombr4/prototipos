@@ -30,6 +30,17 @@ Então o seletor virou **componente compartilhado**, que é o degrau 4 da escada
    Hoje o produto só acha pelo slug em inglês, o que obriga a saber como o ícone se chama em
    outro idioma antes de procurá-lo.
 
+**Uma correção durante a própria rodada.** O campo prometia "procure por contrato, balança,
+caminhão" e `contrato` devolvia **zero**: a biblioteca gerada trazia o nome em inglês e alguns
+poucos sinônimos, e faltava justamente o vocabulário de quem configura workspace. Entrou no
+componente uma camada de **34 termos de negócio** (contrato, fornecedor, nota fiscal, prazo,
+chamado, obra, frota, auditoria...), cada um apontando para os ícones que fazem sentido, e o que
+vem por significado aparece antes do que vem por coincidência de letras. Agora `contrato`
+devolve seis, começando por `file-signature`.
+
+Essa camada mora no componente, e não no arquivo gerado, porque é curadoria: muda com o negócio,
+não com a versão do pacote de ícones.
+
 ### Como entra na tela
 
 O tile do logo abre o popover, e "Escolher ícone" abre o seletor em camada. Escolher troca o

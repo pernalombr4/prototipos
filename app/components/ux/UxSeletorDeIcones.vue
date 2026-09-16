@@ -36,13 +36,72 @@ function normaliza(texto: string) {
   return texto.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
 }
 
+/**
+ * Vocabulário de negócio: o que as pessoas digitam quando procuram um ícone
+ * para um workspace, e que não é o nome do ícone em inglês.
+ *
+ * A biblioteca gerada já traz o nome em inglês e alguns sinônimos, mas fica
+ * devendo justamente as palavras do dia a dia de quem configura. Esta camada
+ * mora aqui, e não no arquivo gerado, porque ela é curadoria: muda com o
+ * negócio, não com a versão do pacote de ícones.
+ */
+const SINONIMOS: Record<string, string[]> = {
+  'contrato': ['file-signature', 'file-check', 'file-text', 'stamp', 'handshake', 'scroll-text'],
+  'assinatura': ['file-signature', 'pen-tool', 'signature', 'stamp'],
+  'juridico': ['scale', 'gavel', 'landmark', 'shield-check', 'book-marked'],
+  'processo': ['gavel', 'scale', 'folder-open', 'file-clock'],
+  'fornecedor': ['truck', 'package', 'factory', 'building-2', 'handshake'],
+  'cliente': ['users', 'user-round', 'heart-handshake', 'contact', 'smile'],
+  'pessoas': ['users', 'user-plus', 'contact', 'id-card', 'users-round'],
+  'equipe': ['users', 'users-round', 'user-check'],
+  'financeiro': ['calculator', 'banknote', 'coins', 'wallet', 'chart-line', 'piggy-bank'],
+  'dinheiro': ['banknote', 'coins', 'wallet', 'circle-dollar-sign'],
+  'pagamento': ['credit-card', 'banknote', 'receipt', 'wallet'],
+  'nota fiscal': ['receipt', 'file-text', 'calculator'],
+  'imposto': ['receipt', 'calculator', 'landmark', 'percent'],
+  'prazo': ['clock', 'alarm-clock', 'calendar-clock', 'hourglass', 'timer'],
+  'agenda': ['calendar', 'calendar-days', 'calendar-check'],
+  'tarefa': ['list-checks', 'check-square', 'clipboard-list', 'square-check'],
+  'chamado': ['life-buoy', 'headset', 'message-circle', 'ticket', 'inbox'],
+  'suporte': ['life-buoy', 'headset', 'message-circle-question'],
+  'obra': ['hard-hat', 'crane', 'hammer', 'building', 'ruler'],
+  'frota': ['truck', 'car', 'bus', 'fuel', 'map-pin'],
+  'entrega': ['truck', 'package', 'package-check', 'map-pin'],
+  'estoque': ['boxes', 'package', 'warehouse', 'clipboard-list'],
+  'compra': ['shopping-cart', 'shopping-bag', 'package', 'receipt'],
+  'venda': ['shopping-cart', 'chart-line', 'handshake', 'tag'],
+  'documento': ['file-text', 'files', 'folder', 'paperclip', 'archive'],
+  'auditoria': ['search-check', 'clipboard-check', 'shield-check', 'file-search'],
+  'seguranca': ['shield', 'shield-check', 'lock', 'key', 'eye-off'],
+  'saude': ['cross', 'stethoscope', 'heart-pulse', 'pill', 'syringe'],
+  'treinamento': ['graduation-cap', 'book-open', 'presentation', 'lightbulb'],
+  'tecnologia': ['cpu', 'server', 'database', 'code', 'cloud', 'bug'],
+  'imovel': ['building', 'building-2', 'home', 'key', 'map-pin'],
+  'relatorio': ['chart-line', 'chart-bar', 'file-chart-column', 'presentation'],
+  'aprovacao': ['check-check', 'thumbs-up', 'badge-check', 'stamp'],
+  'risco': ['triangle-alert', 'shield-alert', 'octagon-alert', 'flame'],
+}
+
 const busca = ref('')
 const categoria = ref<string | null>(null)
 const buscando = computed(() => busca.value.trim().length > 0)
 
 const resultado = computed(() => {
   const termo = normaliza(busca.value.trim())
-  if (termo) return biblioteca.filter(([, termos]) => normaliza(termos).includes(termo))
+  if (termo) {
+    // O que o vocabulário de negócio indica vem primeiro: é a intenção de quem
+    // digitou "contrato", e não a coincidência de letras em outro nome.
+    const porSignificado = new Set<string>()
+    for (const [palavra, nomes] of Object.entries(SINONIMOS)) {
+      if (normaliza(palavra).includes(termo)) nomes.forEach(n => porSignificado.add(n))
+    }
+    const porNome = biblioteca.filter(([nome, termos]) =>
+      !porSignificado.has(nome) && normaliza(termos).includes(termo))
+    return [
+      ...biblioteca.filter(([nome]) => porSignificado.has(nome)),
+      ...porNome,
+    ]
+  }
   if (categoria.value) {
     const nomes = categoriasDeIcone.find(c => c.nome === categoria.value)?.icones ?? []
     return biblioteca.filter(([nome]) => nomes.includes(nome))
