@@ -183,6 +183,39 @@ introduzir `G S` aqui seria resolver na tela B um problema da tela A (regra 19).
 
 ---
 
+## Rodada 4 — identidade como perfil
+
+Pesquisa extra, pedida na rodada 4: "esse bloco não poderia ter mais cara de perfil, numa ordem
+de hierarquia que o pessoal já está acostumado em sistemas como HubSpot?".
+
+**Slack** edita um bloco único chamado **"Name, domain, and icon"** — os três juntos, na mesma
+caixa. <https://slack.com/help/articles/201663443-Change-your-workspace-or-org-name-and-URL>
+
+**Linear** descreve a configuração geral como **"workspace logo, name, and URL"**, nessa ordem.
+<https://linear.app/docs/workspaces>
+
+**Notion**, em Settings › Workspace › General: **Name**, **Icon**, **Domain**. E o ícone é o
+próprio controle: clica-se nele para trocar, sem um campo separado dizendo o tipo.
+<https://www.notion.com/help/workspace-settings>
+
+**HubSpot** separa duas coisas que aqui estavam no mesmo cartão: **Company Information** (nome,
+domínio, endereço, indústria) e **Account Defaults** (idioma, fuso, moeda).
+<https://knowledge.hubspot.com/account-management/update-your-account-name-and-company-information>
+
+**O que os quatro fazem igual:**
+
+1. **Identidade é logo + nome + identificador**, juntos e nessa vizinhança. Nenhum deles espalha
+   o logo para o fim do formulário, que era o caso aqui.
+2. **O logo é o primeiro elemento, e ele mesmo é o controle** — clicar no símbolo é o caminho de
+   trocá-lo.
+3. **Idioma não mora na identidade.** É preferência, e vive em outro grupo (ou é preferência da
+   pessoa, não do workspace).
+
+**O que não serve:** o vocabulário de empresa do HubSpot (endereço, indústria, receita). Um
+workspace do ENSPACE não é uma empresa; é um espaço de trabalho dentro dela.
+
+---
+
 ## O padrão que todos seguem
 
 Os cinco obrigatórios fazem igual nestes quatro pontos — divergir aqui custa aprendizado e

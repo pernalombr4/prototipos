@@ -564,7 +564,7 @@ function workspaceCriado(nome: string) {
           icon="i-lucide-door-closed"
           title="Você ainda não faz parte de nenhum workspace"
           description="Quem administra o ENSPACE na sua empresa precisa convidar você. Se recebeu um convite por e-mail, abra o link que veio nele."
-          :actions="[{ label: 'Criar um workspace', color: 'neutral', variant: 'outline', onClick: abrirCriacao }]"
+          :actions="[{ label: 'Criar um workspace', color: 'primary', onClick: abrirCriacao }]"
         />
       </template>
     </UContainer>

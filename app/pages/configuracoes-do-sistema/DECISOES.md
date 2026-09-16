@@ -1,5 +1,65 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 4 — 16/09/2026 — identidade em forma de perfil
+
+**O que ela pediu, literal:**
+
+> "em vez de "marca" o nome do campo que define imagem ou ícone deve ser "Logo"
+>
+> me questiono tambem se esse bloco nao poderia ter mais cara de "perfil", numa ordem um pouco
+> mais logica de hierarquia que o pessoal ja ta acostumado na hora de definir identidade da
+> organizaçao em sistemas como hubspot e outros de gestao empresarial.
+>
+> o que acha? pode rodar mais uma pesquisa antes de opinar, se precisar"
+
+### "Marca" volta a ser "Logo"
+
+Na rodada 1 eu troquei "Tipo de Logo" por "Marca" e registrei como divergência de nome, com o
+argumento de que o campo guarda ícone *ou* imagem e "logo" seria só um dos casos. **Argumento
+fraco:** ícone e imagem são as duas formas do logo, não duas coisas diferentes. O produto já
+dizia "Logo", as pessoas já chamam de logo, e a linha da tabela de divergências foi removida.
+
+### A pesquisa, antes de opinar
+
+Rodei os quatro e está em [`PESQUISA.md`](PESQUISA.md), em "Rodada 4 — identidade como perfil".
+O resumo: **Slack** edita um bloco chamado "Name, domain, and icon"; **Linear** fala em
+"workspace logo, name and URL"; **Notion** lista Name, Icon, Domain e faz do próprio ícone o
+controle; **HubSpot** separa "Company Information" de "Account Defaults" (idioma, fuso, moeda).
+
+Os quatro concordam em três coisas, e as três contrariavam o meu bloco:
+
+| O que eles fazem | O que eu tinha feito |
+|---|---|
+| logo + nome + identificador **juntos**, no topo | logo em quarto lugar, depois da descrição |
+| o **logo é o primeiro elemento** e ele mesmo é o controle | um campo "Marca" com prévia, segmentado e botão, em linha |
+| **idioma não mora na identidade** | idioma era o último campo do cartão de Identidade |
+
+### O que mudou
+
+1. **O bloco virou perfil:** o logo (64 px, com o lápis no canto) à esquerda, e **Nome** e
+   **Referência** empilhados ao lado dele. Descrição embaixo, na largura inteira.
+2. **O logo é o controle.** Clicar no símbolo abre a escolha (Ícone ou Imagem) e o botão de
+   trocar. O campo "Marca", com prévia, segmentado e botão soltos na linha, deixou de existir:
+   eram quatro pesos diferentes para uma decisão que quase ninguém revisita.
+3. **"Idioma padrão" saiu da Identidade** e virou a primeira linha de "Comportamento da
+   interface". Identidade é quem o workspace é; idioma é preferência do que os membros veem, que
+   é exatamente o assunto daquele cartão. A ressalva importante ("trocar aqui não mexe no que
+   você criou") foi para o "?" da linha, com um botão que leva aos Dicionários.
+4. **A linha de ajuste ganhou um slot de controle**, para o idioma usar a mesma estrutura das
+   chaves e o select cair na mesma coluna dos switches. Alinhamento mantido, um componente só.
+5. O resumo da aba passou de "Nome, marca, comportamento…" para "**Logo, nome**, comportamento…",
+   e a busca de configuração agora acha "Logo do workspace" por `marca`, `ícone`, `símbolo` e
+   `avatar`.
+
+### O que não fiz
+
+- **Não criei um cartão "Preferências"** só para o idioma. Um cartão com uma linha só fragmenta
+  mais do que organiza; e a linha cabe no cartão que já trata do que os membros veem.
+- **Não trouxe o vocabulário de empresa do HubSpot** (endereço, indústria, receita). Um workspace
+  do ENSPACE não é uma empresa, é um espaço de trabalho dentro dela.
+
+---
+
 ## Rodada 3 — 16/09/2026 — a zona de perigo volta a gritar, e a linha emagrece
 
 **O que ela pediu, literal:**
@@ -282,7 +342,7 @@ O nome vem da tela. Quando ele contradiz a coisa, o protótipo propõe o certo e
 | Na tela hoje | No protótipo | Motivo |
 |---|---|---|
 | `Juridico` | **Jurídico** | falta de acento, não é decisão de produto |
-| Tipo de Logo | **Marca** | o campo guarda ícone *ou* imagem; "logo" é só um dos casos |
+| ~~Tipo de Logo → Marca~~ | **Logo** | revertido na rodada 4: ícone e imagem são as duas formas do logo, não duas coisas |
 | Linguagem Padrão | **Idioma padrão** | "linguagem" é tradução torta de *language* |
 | Carteira do usuário | **Sua carteira** | "do usuário" não diz de qual; a carteira é de quem está olhando |
 | Ativar notificações personalizadas | **Usar as minhas regras** | descreve o efeito, não o mecanismo |

@@ -50,10 +50,8 @@ type CamposDoWorkspace = Pick<
 >
 
 export interface Identidade extends CamposDoWorkspace {
-  /** Acrescentado pelo protótipo: a tela de hoje chama de "Tipo de Logo". */
+  /** O produto chama de "Tipo de Logo": escolhe entre um ícone e uma imagem. */
   tipoDeMarca: 'icone' | 'imagem'
-  /** `config.default_language` no produto; a tela mostra como "Linguagem Padrão". */
-  idiomaPadrao: 'pt-BR' | 'en' | 'es'
 }
 
 export const identidade: Identidade = {
@@ -67,8 +65,48 @@ export const identidade: Identidade = {
   status: 'active',
   members_count: 34,
   tipoDeMarca: 'icone',
-  idiomaPadrao: 'pt-BR',
 }
+
+/* ------------------------------------------------------------------ *
+ * Padrões do workspace
+ *
+ * O que vale quando ninguém escolheu nada. O HubSpot chama de "Account
+ * Defaults" e separa isso da identidade da empresa (PESQUISA.md, rodada 4).
+ * Aqui o objeto é o workspace, não a conta, e o nome segue o objeto.
+ *
+ * `idioma` existe hoje no produto (a tela mostra como "Linguagem Padrão").
+ * `fuso` e `moeda` são PROPOSTA do protótipo: não existem na tela de hoje.
+ * A moeda tem precedente na API, que já enumera BRL, USD, EUR e ENCOIN no
+ * schema de carteira.
+ * ------------------------------------------------------------------ */
+
+export interface PadroesDoWorkspace {
+  idioma: 'pt-BR' | 'en' | 'es'
+  /** Acrescentado pelo protótipo. */
+  fuso: string
+  /** Acrescentado pelo protótipo, com os códigos que a API já usa em Wallet. */
+  moeda: 'BRL' | 'USD' | 'EUR'
+}
+
+export const padroes: PadroesDoWorkspace = {
+  idioma: 'pt-BR',
+  fuso: 'America/Sao_Paulo',
+  moeda: 'BRL',
+}
+
+export const fusos = [
+  { label: 'Brasília (GMT-3)', value: 'America/Sao_Paulo' },
+  { label: 'Manaus (GMT-4)', value: 'America/Manaus' },
+  { label: 'Fernando de Noronha (GMT-2)', value: 'America/Noronha' },
+  { label: 'Lisboa (GMT+1)', value: 'Europe/Lisbon' },
+  { label: 'Nova York (GMT-4)', value: 'America/New_York' },
+]
+
+export const moedas = [
+  { label: 'Real brasileiro (R$)', value: 'BRL' },
+  { label: 'Dólar americano (US$)', value: 'USD' },
+  { label: 'Euro (€)', value: 'EUR' },
+]
 
 /* ------------------------------------------------------------------ *
  * Comportamento e módulos

@@ -27,7 +27,7 @@ export const abas: { chave: Aba, rotulo: string, resumo: string, icone: string }
   {
     chave: 'basicas',
     rotulo: 'Informações Básicas',
-    resumo: 'Nome, marca, comportamento da interface, módulos e exclusão do workspace.',
+    resumo: 'Logo, nome, comportamento da interface, módulos e exclusão do workspace.',
     icone: 'i-lucide-id-card',
   },
   {
@@ -149,8 +149,8 @@ export interface ItemDeBusca {
 export const indiceDeBusca: ItemDeBusca[] = [
   { aba: 'basicas', secao: 'identidade', rotulo: 'Nome do workspace', sinonimos: ['renomear', 'título', 'como aparece'] },
   { aba: 'basicas', secao: 'identidade', rotulo: 'Referência', sinonimos: ['slug', 'url', 'endereço', 'identificador'] },
-  { aba: 'basicas', secao: 'identidade', rotulo: 'Marca do workspace', sinonimos: ['ícone', 'logo', 'imagem', 'avatar'] },
-  { aba: 'basicas', secao: 'identidade', rotulo: 'Idioma padrão', sinonimos: ['linguagem', 'português', 'inglês', 'tradução'] },
+  { aba: 'basicas', secao: 'identidade', rotulo: 'Logo do workspace', sinonimos: ['ícone', 'marca', 'imagem', 'avatar', 'símbolo'] },
+  { aba: 'basicas', secao: 'comportamento', rotulo: 'Idioma padrão', sinonimos: ['linguagem', 'português', 'inglês', 'tradução', 'idioma'] },
   { aba: 'basicas', secao: 'comportamento', rotulo: 'Mostrar categorias', sinonimos: ['tela de início', 'home'] },
   { aba: 'basicas', secao: 'comportamento', rotulo: 'Ignorar permissões para membros full', sinonimos: ['permissão', 'cargo', 'acesso irrestrito'] },
   { aba: 'basicas', secao: 'comportamento', rotulo: 'Ocultar botão de criar', sinonimos: ['criar item', 'botão novo'] },

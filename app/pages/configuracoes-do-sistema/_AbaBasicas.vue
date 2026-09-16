@@ -23,6 +23,16 @@ const marcas = [
   { valor: 'imagem' as const, rotulo: 'Imagem', ajuda: 'Um arquivo PNG, JPG ou GIF sem animação.' },
 ]
 
+/** O idioma usa a mesma linha das chaves de ligar/desligar, com outro controle. */
+const ajusteDeIdioma = {
+  chave: 'idioma_padrao',
+  rotulo: 'Idioma padrão',
+  descricao: 'Idioma dos termos nativos da interface.',
+  detalhe:
+    'Trocar aqui não mexe no que você criou. Nomes de categorias, campos, formulários e textos de ajuda se traduzem em Dicionários, um idioma por vez.',
+  valor: true,
+}
+
 /* ------------------------- zona de perigo ------------------------- */
 
 const confirmandoExclusao = ref(false)
@@ -135,7 +145,7 @@ async function excluir() {
 
           <div class="grid flex-1 gap-4">
             <UFormField label="Nome" help="Aparece no topo da tela e nos e-mails enviados pelo workspace.">
-              <UInput v-model="form.identidade.name" class="w-full" />
+              <UInput v-model="form.identidade.name" class="w-full sm:max-w-md" />
             </UFormField>
 
             <UFormField label="Referência" help="Faz parte do endereço e não muda depois de criado.">
@@ -170,75 +180,6 @@ async function excluir() {
           />
         </UFormField>
 
-        <UFormField
-          class="sm:col-span-2"
-          label="Marca"
-          :help="`O símbolo que identifica o workspace na barra lateral. ${marcas.find(m => m.valor === form.identidade.tipoDeMarca)?.ajuda}`"
-        >
-          <div class="flex flex-wrap items-center gap-3">
-            <div
-              class="flex size-12 shrink-0 items-center justify-center rounded-lg border border-default bg-elevated transition-colors"
-            >
-              <UIcon
-                v-if="form.identidade.tipoDeMarca === 'icone'"
-                :name="form.identidade.icon || 'lucide:box'"
-                class="size-6 text-primary"
-              />
-              <UIcon v-else name="i-lucide-image" class="size-6 text-muted" />
-            </div>
-
-            <div class="flex rounded-lg border border-default p-0.5">
-              <button
-                v-for="m in marcas"
-                :key="m.valor"
-                type="button"
-                class="rounded-md px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                :class="form.identidade.tipoDeMarca === m.valor
-                  ? 'bg-primary text-inverted'
-                  : 'text-muted hover:text-highlighted hover:bg-elevated'"
-                :aria-pressed="form.identidade.tipoDeMarca === m.valor"
-                @click="form.identidade.tipoDeMarca = m.valor"
-              >
-                {{ m.rotulo }}
-              </button>
-            </div>
-
-            <UButton
-              v-if="form.identidade.tipoDeMarca === 'icone'"
-              label="Trocar ícone"
-              icon="i-lucide-shapes"
-              size="xs"
-              color="neutral"
-              variant="subtle"
-              class="transition-transform hover:-translate-y-0.5"
-            />
-            <UButton
-              v-else
-              label="Enviar imagem"
-              icon="i-lucide-upload"
-              size="xs"
-              color="neutral"
-              variant="subtle"
-              class="transition-transform hover:-translate-y-0.5"
-            />
-          </div>
-        </UFormField>
-
-        <UFormField class="sm:col-span-2" label="Idioma padrão">
-          <template #help>
-            <span>
-              Vale para os termos nativos da interface. Os textos que
-              <strong class="text-toned">você</strong> criou (campos, formulários, ajudas)
-              se traduzem em
-              <button
-                type="button"
-                class="text-primary underline underline-offset-2 hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                @click="emit('irPara', 'dicionarios')"
-              >Dicionários</button>.
-            </span>
-          </template>
-          <USelect v-model="form.identidade.idiomaPadrao" :items="idiomas" class="w-full sm:max-w-xs" />
-        </UFormField>
       </div>
     </Secao>
 
@@ -261,6 +202,36 @@ async function excluir() {
         :doc="documentacao.basicas"
         style="animation: entrada .4s ease-out both; animation-delay: 60ms"
       >
+        <!--
+          O idioma padrão saiu da Identidade e veio para cá. Identidade é
+          logo, nome e referência (Slack, Linear e Notion agrupam assim);
+          idioma é preferência, e o HubSpot separa uma coisa da outra. Aqui a
+          preferência cai no cartão que trata justamente do que os membros
+          veem, e usa a mesma linha das chaves, com o controle na mesma coluna.
+        -->
+        <LinhaDeAjuste :ajuste="ajusteDeIdioma">
+          <template #detalhe>
+            <UButton
+              label="Abrir Dicionários"
+              icon="i-lucide-languages"
+              size="xs"
+              color="neutral"
+              variant="subtle"
+              class="mt-2"
+              @click="emit('irPara', 'dicionarios')"
+            />
+          </template>
+
+          <template #controle>
+            <USelect
+              v-model="form.identidade.idiomaPadrao"
+              :items="idiomas"
+              aria-label="Idioma padrão do workspace"
+              class="w-44"
+            />
+          </template>
+        </LinhaDeAjuste>
+
         <LinhaDeAjuste
           v-for="a in comportamento"
           :key="a.chave"

@@ -134,6 +134,17 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 12 — 16/09/2026 · o criar ganha destaque onde ele é a única saída
+
+**Pedido:** no estado sem nenhum workspace, o botão do centro passa a ser rosa.
+
+Faz sentido e não contradiz o resto. Nos outros estados, criar é secundário **porque existe
+uma ação melhor**: entrar. No estado vazio não existe onde entrar, então criar deixa de ser
+alternativa e vira a única saída que a tela oferece. Ação única pede peso de ação primária.
+
+O botão do topo continua neutro nesse estado, e é assim que tem que ser: dois rosas na mesma
+tela para a mesma ação tirariam o destaque um do outro.
+
 ### Rodada 11 — 16/09/2026 · a estrela sai do hover
 
 **Pedido:** *"faça com que as estrelinhas de favoritar apareçam nos cards de workspace por
