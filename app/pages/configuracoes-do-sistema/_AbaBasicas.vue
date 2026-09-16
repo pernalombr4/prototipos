@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Secao from './_Secao.vue'
 import LinhaDeAjuste from './_LinhaDeAjuste.vue'
+import UxSeletorDeIcones from '~/components/ux/UxSeletorDeIcones.vue'
 import { comportamento, modulos, documentacao, fusos, identidade, moedas } from './mocks'
 import { form } from './estado'
 
@@ -23,6 +24,21 @@ const marcas = [
   { valor: 'imagem' as const, rotulo: 'Imagem', ajuda: 'Um arquivo PNG, JPG ou GIF sem animação.' },
 ]
 
+
+/* ----------------------------- o logo ----------------------------- */
+
+const escolhendoIcone = ref(false)
+
+/**
+ * O produto guarda o ícone no formato do iconify (`colecao:nome`). O seletor
+ * trabalha só com o nome, então a coleção entra e sai aqui.
+ */
+const iconeEscolhido = computed({
+  get: () => (form.identidade.icon ?? '').replace(/^lucide:/, ''),
+  set: (nome: string) => {
+    form.identidade.icon = `lucide:${nome}`
+  },
+})
 
 /* ------------------------- zona de perigo ------------------------- */
 
@@ -121,8 +137,20 @@ async function excluir() {
                   </p>
 
                   <UButton
-                    :label="form.identidade.tipoDeMarca === 'icone' ? 'Escolher ícone' : 'Enviar imagem'"
-                    :icon="form.identidade.tipoDeMarca === 'icone' ? 'i-lucide-shapes' : 'i-lucide-upload'"
+                    v-if="form.identidade.tipoDeMarca === 'icone'"
+                    label="Escolher ícone"
+                    icon="i-lucide-shapes"
+                    size="sm"
+                    color="neutral"
+                    variant="subtle"
+                    block
+                    class="mt-3"
+                    @click="escolhendoIcone = true"
+                  />
+                  <UButton
+                    v-else
+                    label="Enviar imagem"
+                    icon="i-lucide-upload"
                     size="sm"
                     color="neutral"
                     variant="subtle"
@@ -305,6 +333,25 @@ async function excluir() {
         />
       </div>
     </Secao>
+
+    <!-- O seletor de ícone, para uma biblioteca de 50 mil -->
+    <UModal
+      v-model:open="escolhendoIcone"
+      title="Escolher o ícone do workspace"
+      description="A busca aceita português e ignora acento: procure por contrato, balança, caminhão."
+      :ui="{ content: 'sm:max-w-xl' }"
+    >
+      <template #body>
+        <UxSeletorDeIcones v-model="iconeEscolhido" />
+      </template>
+
+      <template #footer>
+        <div class="flex w-full justify-end gap-2">
+          <UButton label="Fechar" color="neutral" variant="ghost" @click="escolhendoIcone = false" />
+          <UButton label="Usar este ícone" @click="escolhendoIcone = false" />
+        </div>
+      </template>
+    </UModal>
 
     <!-- Confirmação em camada, sobre a mesma tela. -->
     <UModal v-model:open="confirmandoExclusao" title="Excluir este workspace?">

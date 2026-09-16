@@ -1,5 +1,52 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 6 — 16/09/2026 — o seletor de ícone para 50 mil
+
+**O que ela pediu, literal:**
+
+> "quando o user clicar em adicionar icone tem que renderizar um seletor que seja capaz de cobrir
+> nosso caso de uso. isso porque temos uma biblioteca com mais de 50 mil icones. pense em como
+> fazer e aplique"
+
+### Primeiro procurei, depois escrevi
+
+O protótipo vizinho `tela-de-workspaces` resolveu isso na rodada 13 dele, horas antes: busca como
+navegação, grade virtualizada e biblioteca lida do pacote instalado. Reescrever do zero seria
+retrabalho e, pior, daria ao ENSPACE dois seletores de ícone diferentes.
+
+Então o seletor virou **componente compartilhado**, que é o degrau 4 da escada da spec:
+`app/components/ux/UxSeletorDeIcones.vue`, registrado no
+[`COMPONENTES-CUSTOM.md`](../../../COMPONENTES-CUSTOM.md).
+
+### As três decisões que fazem 50 mil caber numa caixa
+
+1. **A busca é a navegação.** Sem busca, a tela não mostra a biblioteca: mostra uma **curadoria**
+   de 48 ícones que resolve o caso comum em um clique, mais atalhos por assunto (Jurídico,
+   Pessoas, Finanças, Operação, Tecnologia, Saúde). Quem precisa de mais, digita.
+2. **A grade é virtualizada.** Só as linhas visíveis existem no DOM. Medido no navegador:
+   **busca por "e" devolve 1.526 ícones e coloca 101 botões na tela.** Com 50 mil o número de
+   botões seria o mesmo; o que cresce é a barra de rolagem.
+3. **A busca entende português e ignora acento.** Quem digita `balanca` acha `scale`. Testado.
+   Hoje o produto só acha pelo slug em inglês, o que obriga a saber como o ícone se chama em
+   outro idioma antes de procurá-lo.
+
+### Como entra na tela
+
+O tile do logo abre o popover, e "Escolher ícone" abre o seletor em camada. Escolher troca o
+ícone na hora, a aba marca pendência e a barra de baixo oferece Salvar. O produto guarda o nome
+no formato do iconify (`colecao:nome`), então a coleção entra e sai na borda do componente.
+
+### O que é maquete aqui
+
+- **A biblioteca do protótipo tem 2.128 ícones, não 50 mil**: são os do Lucide que existem
+  offline neste repositório. O que se prova com eles é o comportamento em escala (virtualização,
+  busca como navegação), que é o que muda de figura quando o número cresce.
+- **No produto o índice não vem no bundle.** Aqui ele é um arquivo gerado; lá seria consulta ao
+  servidor de ícones, com paginação e busca do lado do servidor. O desenho da tela não muda.
+- **"Enviar imagem" continua sem abrir nada.** Upload é outra rodada.
+
+---
+
 ## Rodada 5 — 16/09/2026 — dicionários com 14 mil chaves
 
 **O que ela pediu, literal:**
