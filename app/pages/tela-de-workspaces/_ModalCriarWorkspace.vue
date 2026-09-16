@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { categoriasDeIcone, localidades, templates, type Template } from './mocks'
+import { localidades, templates, type Template } from './mocks'
+import { biblioteca, categoriasDeIcone, totalDeIcones } from './icones'
 
 /**
  * Criação de workspace — reconstrução da jornada real do develop.
@@ -67,7 +68,6 @@ function removerLogo() {
 }
 const referenciaEditada = ref(false)
 const detalhesAbertos = ref(false)
-const buscaIcone = ref('')
 const locaisSelecionados = ref<string[]>(['pt-br'])
 const criando = ref(false)
 
@@ -77,6 +77,7 @@ watch(aberto, (v) => {
   referenciaEditada.value = false
   detalhesAbertos.value = false
   buscaIcone.value = ''
+  categoriaAtiva.value = null
   locaisSelecionados.value = ['pt-br']
   removerLogo()
   Object.assign(form, { nome: '', referencia: '', descricao: '', icone: '', logo: null, logoNome: '', template: 'zero' })
@@ -99,8 +100,72 @@ watch(referenciaAuto, (v) => {
 })
 
 /* -------- ícone: sugerido pelo nome, ajustável em dois cliques -------- */
-const todosIcones = computed(() => categoriasDeIcone.flatMap(c =>
-  c.icones.map(i => ({ ...i, categoria: c.nome }))))
+/** Acentos fora dos dois lados: quem digita "balanca" acha "balança". */
+function normaliza(t: string) {
+  return t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
+const buscaIcone = ref('')
+const categoriaAtiva = ref<string | null>(null)
+
+/**
+ * Com uma biblioteca desse tamanho, a busca é a navegação. As categorias são
+ * atalho para quem não sabe o que procurar, não a forma principal de achar.
+ */
+const iconesFiltrados = computed(() => {
+  let lista: readonly (readonly [string, string])[] = biblioteca
+
+  if (categoriaAtiva.value) {
+    const daCategoria = new Set(
+      categoriasDeIcone.find(c => c.nome === categoriaAtiva.value)?.icones ?? [])
+    lista = lista.filter(([nome]) => daCategoria.has(nome))
+  }
+
+  const termo = normaliza(buscaIcone.value.trim())
+  if (termo) lista = lista.filter(([, termos]) => normaliza(termos).includes(termo))
+
+  return lista
+})
+
+/* ---- virtualização: só as linhas visíveis existem no DOM ---- */
+const CELULA = 44
+const grade = ref<HTMLElement>()
+const rolagem = ref(0)
+const larguraDaGrade = ref(0)
+const ALTURA_VISIVEL = 264
+
+const colunas = computed(() => Math.max(1, Math.floor(larguraDaGrade.value / CELULA) || 8))
+const totalDeLinhas = computed(() => Math.ceil(iconesFiltrados.value.length / colunas.value))
+const alturaTotal = computed(() => totalDeLinhas.value * CELULA)
+
+const primeiraLinha = computed(() =>
+  Math.max(0, Math.floor(rolagem.value / CELULA) - 1))
+const ultimaLinha = computed(() =>
+  Math.min(totalDeLinhas.value, primeiraLinha.value + Math.ceil(ALTURA_VISIVEL / CELULA) + 2))
+
+const iconesVisiveis = computed(() =>
+  iconesFiltrados.value.slice(primeiraLinha.value * colunas.value, ultimaLinha.value * colunas.value))
+
+function aoRolar(e: Event) {
+  rolagem.value = (e.target as HTMLElement).scrollTop
+}
+
+function medirGrade() {
+  larguraDaGrade.value = grade.value?.clientWidth ?? 0
+}
+
+onMounted(() => {
+  medirGrade()
+  window.addEventListener('resize', medirGrade)
+})
+onBeforeUnmount(() => window.removeEventListener('resize', medirGrade))
+
+// Busca nova volta ao topo: continuar no meio da rolagem antiga desorienta.
+watch([iconesFiltrados, () => identidade.value], () => {
+  rolagem.value = 0
+  if (grade.value) grade.value.scrollTop = 0
+  nextTick(medirGrade)
+})
 
 const palavrasPorIcone: Record<string, string[]> = {
   'i-lucide-scale': ['juridico', 'jurídico', 'legal', 'contrato', 'advocacia'],
@@ -123,13 +188,6 @@ const iconeSugerido = computed(() => {
 
 /** O que aparece no card: o escolhido, ou o sugerido pelo nome. */
 const iconeEfetivo = computed(() => form.icone || iconeSugerido.value)
-
-const iconesFiltrados = computed(() => {
-  const termo = buscaIcone.value.trim().toLowerCase()
-  if (!termo) return todosIcones.value
-  return todosIcones.value.filter(i =>
-    i.nome.toLowerCase().includes(termo) || i.categoria.toLowerCase().includes(termo))
-})
 
 /* ---------------------------- templates ---------------------------- */
 const templatesDisponiveis = computed<Template[]>(() =>
@@ -203,7 +261,7 @@ function criar() {
                   </button>
 
                   <template #content>
-                    <div class="w-80 p-3">
+                    <div class="w-[26rem] max-w-[calc(100vw-2rem)] p-3">
                       <div class="mb-3 flex gap-0.5 rounded-md border border-default p-0.5">
                         <UButton
                           label="Ícone"
@@ -281,42 +339,102 @@ function criar() {
                         >
                       </div>
 
-                      <!-- Ícone: biblioteca, buscável em português -->
-                      <div v-else class="space-y-3">
+                      <!-- Ícone: a biblioteca inteira, achável em português -->
+                      <div v-else class="space-y-2">
                         <UInput
                           v-model="buscaIcone"
                           icon="i-lucide-search"
                           size="sm"
-                          placeholder="Buscar por nome ou categoria"
+                          autofocus
+                          placeholder="Buscar ícone: balança, caminhão, chamado…"
                           class="w-full"
-                        />
-                        <div class="max-h-56 overflow-y-auto pr-1">
-                          <div v-for="cat in categoriasDeIcone" :key="cat.nome" class="mb-3">
-                            <template v-if="cat.icones.some(i => iconesFiltrados.some(f => f.id === i.id))">
-                              <p class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-dimmed">
-                                {{ cat.nome }}
-                              </p>
-                              <div class="flex flex-wrap gap-1.5">
-                                <UTooltip
-                                  v-for="ic in cat.icones.filter(i => iconesFiltrados.some(f => f.id === i.id))"
-                                  :key="ic.id"
-                                  :text="ic.nome"
-                                >
-                                  <button
-                                    type="button"
-                                    class="flex size-8 items-center justify-center rounded-md border transition-all duration-200 hover:-translate-y-0.5"
-                                    :class="!form.logo && iconeEfetivo === ic.id
-                                      ? 'border-primary bg-primary/10 text-primary'
-                                      : 'border-default text-muted hover:border-primary/40'"
-                                    @click="escolherIcone(ic.id)"
-                                  >
-                                    <UIcon :name="ic.id" class="size-4" />
-                                  </button>
-                                </UTooltip>
-                              </div>
-                            </template>
-                          </div>
+                          :ui="{ trailing: 'pe-1' }"
+                        >
+                          <template v-if="buscaIcone" #trailing>
+                            <UButton
+                              icon="i-lucide-x"
+                              size="xs"
+                              square
+                              variant="ghost"
+                              color="neutral"
+                              aria-label="Limpar busca"
+                              @click="buscaIcone = ''"
+                            />
+                          </template>
+                        </UInput>
+
+                        <div class="flex flex-wrap gap-1">
+                          <UButton
+                            v-for="cat in categoriasDeIcone"
+                            :key="cat.nome"
+                            :label="cat.nome"
+                            size="xs"
+                            :color="categoriaAtiva === cat.nome ? 'primary' : 'neutral'"
+                            :variant="categoriaAtiva === cat.nome ? 'soft' : 'ghost'"
+                            @click="categoriaAtiva = categoriaAtiva === cat.nome ? null : cat.nome"
+                          />
                         </div>
+
+                        <!-- Grade virtualizada: só as linhas visíveis vão para o DOM -->
+                        <div
+                          ref="grade"
+                          class="relative overflow-y-auto rounded-lg border border-default p-1"
+                          :style="{ height: ALTURA_VISIVEL + 'px' }"
+                          @scroll="aoRolar"
+                        >
+                          <div :style="{ height: alturaTotal + 'px', position: 'relative' }">
+                            <div
+                              class="absolute inset-x-0 grid"
+                              :style="{
+                                top: primeiraLinha * CELULA + 'px',
+                                gridTemplateColumns: `repeat(${colunas}, minmax(0, 1fr))`,
+                              }"
+                            >
+                              <UTooltip
+                                v-for="[nome] in iconesVisiveis"
+                                :key="nome"
+                                :text="nome"
+                                :delay-duration="300"
+                              >
+                                <button
+                                  type="button"
+                                  class="flex items-center justify-center rounded-md border border-transparent transition-colors hover:border-primary/40 hover:bg-elevated"
+                                  :style="{ height: CELULA + 'px' }"
+                                  :class="!form.logo && iconeEfetivo === `i-lucide-${nome}`
+                                    ? 'border-primary bg-primary/10 text-primary'
+                                    : 'text-muted'"
+                                  @click="escolherIcone(`i-lucide-${nome}`)"
+                                >
+                                  <UIcon :name="`i-lucide-${nome}`" class="size-5" />
+                                </button>
+                              </UTooltip>
+                            </div>
+                          </div>
+
+                          <p
+                            v-if="!iconesFiltrados.length"
+                            class="absolute inset-0 flex flex-col items-center justify-center gap-1 px-6 text-center"
+                          >
+                            <span class="text-sm font-medium text-highlighted">
+                              Nenhum ícone para "{{ buscaIcone }}"
+                            </span>
+                            <span class="text-xs text-muted">
+                              Tente outra palavra, ou envie o logo da empresa na aba Imagem.
+                            </span>
+                          </p>
+                        </div>
+
+                        <p class="text-xs text-dimmed">
+                          <template v-if="buscaIcone || categoriaAtiva">
+                            {{ iconesFiltrados.length.toLocaleString('pt-BR') }}
+                            {{ iconesFiltrados.length === 1 ? 'ícone encontrado' : 'ícones encontrados' }}
+                            de {{ totalDeIcones.toLocaleString('pt-BR') }}
+                          </template>
+                          <template v-else>
+                            {{ totalDeIcones.toLocaleString('pt-BR') }} ícones na biblioteca.
+                            Busque pelo que o ícone representa.
+                          </template>
+                        </p>
                       </div>
                     </div>
                   </template>

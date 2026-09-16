@@ -645,3 +645,9 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
 
     **Comentário de código e os `.md` do protótipo não são interface** e seguem livres.
     Antes de entregar: `grep -n "—" app/pages/**/*.vue` e confira que só sobrou comentário.
+34. **Controle de escolha se desenha para o volume real, não para o do mock.** Antes de
+    desenhar seletor, lista ou filtro, **pergunte quantos itens existem no produto**. Com 20,
+    mostrar tudo funciona. Com milhares, o mesmo desenho é impossível: a busca vira a
+    navegação, a categoria vira atalho, a grade precisa ser virtualizada e a tela tem que dizer
+    quantos resultados sobraram. **Mock pequeno esconde esse problema** — foi o que aconteceu
+    com o seletor de ícones, desenhado para 26 quando a biblioteca tem mais de 50 mil.

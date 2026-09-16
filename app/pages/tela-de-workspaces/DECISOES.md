@@ -134,6 +134,40 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 13 — 16/09/2026 · o seletor de ícones no tamanho real da biblioteca
+
+**Pedido:** *"quando o user clicar em adicionar ícone tem que renderizar melhor o seletor. isso
+porque temos uma biblioteca com mais de 50 mil ícones. não dá esse modelo atual."*
+
+Estava certo, e o erro é de método: **eu desenhei para o meu mock, não para o produto.** Como
+o mock tinha 26 ícones em 6 categorias, uma caixa de 320 px com a lista inteira aberta parecia
+resolver. Com 50 mil, esse desenho não é ruim — ele é impossível.
+
+**O que mudou:**
+
+1. **A biblioteca de verdade entrou.** O seletor agora lista os **1.909 ícones do Lucide** que
+   existem offline neste repositório, lidos do pacote instalado e gerados em `icones.ts`. Não
+   são 50 mil, e está escrito no arquivo que não são: o que o protótipo prova é o **padrão**
+   que aguenta escala, não o número.
+2. **Busca virou a navegação.** Campo com foco automático, e as categorias viraram **atalho**
+   (chips que filtram), não a forma principal de achar. Com biblioteca grande, ninguém navega:
+   procura.
+3. **Busca em português, por significado.** O produto hoje só acha por slug em inglês — quem
+   procura "balança" não acha nada, precisa saber que é `scale` (Briefing). Aqui cada ícone
+   carrega sinônimos em PT-BR, e "balança", "caminhão", "chamado" e "remédio" encontram.
+   Acento não atrapalha: "balanca" acha "balança".
+4. **Grade virtualizada.** Só as linhas visíveis existem no DOM — umas 50 células de cada vez,
+   em vez de 1.909. É o que permite rolar a biblioteca inteira sem travar, e é o mesmo
+   mecanismo que aguentaria 50 mil.
+5. **A tela diz onde você está**: "1.909 ícones na biblioteca" vira "23 ícones encontrados de
+   1.909" ao buscar. E o vazio explica em vez de só sumir: *"Tente outra palavra, ou envie o
+   logo da empresa na aba Imagem."*
+
+**Detalhe de implementação que vale registrar:** o site é estático, então não existe servidor
+para entregar ícone sob demanda. A biblioteca inteira precisou ir **embutida no bundle do
+cliente** (599 KB, `icon.clientBundle.icons` no `nuxt.config.ts`). Num produto com servidor
+isso não seria necessário.
+
 ### Rodada 12 — 16/09/2026 · o criar ganha destaque onde ele é a única saída
 
 **Pedido:** no estado sem nenhum workspace, o botão do centro passa a ser rosa.

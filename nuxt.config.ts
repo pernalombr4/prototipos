@@ -1,6 +1,7 @@
 // Protótipos ENSPACE — Nuxt 4 + Nuxt UI 4, mesmo tema do en-docs.
 import { readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
+import { biblioteca } from './app/pages/tela-de-workspaces/icones'
 
 /**
  * As rotas a prerenderizar, lidas dos arquivos em app/pages.
@@ -40,6 +41,17 @@ export default defineNuxtConfig({
   enspaceUi: {
     // Sem o módulo de dados de propósito — cala o aviso de build.
     dataModuleCheck: false,
+  },
+
+  // O site é estático: não existe servidor para servir ícone sob demanda.
+  // Então a biblioteca inteira do Lucide vai embutida no bundle do cliente,
+  // que é o que permite o seletor de ícones funcionar offline.
+  icon: {
+    clientBundle: {
+      icons: biblioteca.map(([nome]) => `lucide:${nome}`),
+      scan: true,
+      sizeLimitKb: 2048,
+    },
   },
   css: ['~/assets/css/main.css'],
   compatibilityDate: 'latest',

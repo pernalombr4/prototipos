@@ -216,6 +216,64 @@ workspace do ENSPACE não é uma empresa; é um espaço de trabalho dentro dela.
 
 ---
 
+## Rodada 5 — traduzir 14 mil chaves
+
+Pesquisa pedida na rodada 5: "tenho um workspace hoje que chega a ter 14 mil chaves. no seu
+modelo atual, sem nada colapsado, é insano, seria um scroll infinito. como outros produtos
+resolvem?".
+
+### Crowdin
+
+1. A pessoa **não abre o projeto inteiro**: o editor tem um **painel lateral de arquivos**
+   (Ctrl+[ mostra e esconde) e se trabalha **arquivo por arquivo**. "All Strings", que mostra
+   tudo, é um botão explícito, não o estado inicial.
+2. O filtro de status tem uma opção que é quase uma fila: **"All, Untranslated First"** — nada
+   some, o que falta sobe.
+3. O modo lado a lado divide a tela em **lista à esquerda, string atual no centro, contexto à
+   direita**.
+4. **50 strings por página** no modo multilíngue: paginação explícita, não rolagem infinita.
+5. Existe **"Automatically move to next string"**: ao salvar, o editor já vai para a próxima.
+
+<https://support.crowdin.com/online-editor/>
+
+### Weblate
+
+1. Ao abrir um componente, o que se vê são **links que fatiam o trabalho**: não traduzidas,
+   inacabadas, com erro. Você escolhe a fatia; não existe "abra as 14 mil".
+2. **A busca vira a fila de trabalho**: você pesquisa e depois anda pelos resultados com o
+   teclado.
+3. **Zen mode**: um editor que "remove elementos adicionais da interface, como Strings Próximas
+   ou o Glossário". Sobra traduzir.
+4. Atalhos de navegação na fila: `Alt+Home` e `Alt+End` (primeira e última do resultado atual),
+   `Alt+PageUp` / `Alt+PageDown` (anterior e próxima), `←` e `→` entre strings, `?` para ver os
+   atalhos.
+
+<https://docs.weblate.org/en/latest/user/translating.html>
+
+### Lokalise
+
+1. **Ações em massa a partir da seleção**: marcou chaves, aparece a barra com o que dá para
+   fazer com todas de uma vez.
+2. **Filtros salvos e compartilhados** com o resto do time: o recorte vira um lugar ao qual se
+   volta.
+3. **Paginação por cursor acima de 5 mil chaves**, porque paginação por deslocamento fica lenta
+   nesse tamanho. E operações em lote de 500 por requisição.
+
+<https://docs.lokalise.com/en/articles/2089277-project-editor> ·
+<https://docs.lokalise.com/en/articles/2074190-bulk-actions>
+
+### O que os três fazem igual, e é a resposta
+
+1. **Ninguém renderiza o conjunto inteiro.** Navega-se por container (arquivo, componente,
+   pasta) e só a fatia escolhida vira lista.
+2. **A lista é paginada em dezenas**, não rolada em milhares.
+3. **O filtro por status é o começo do trabalho**, não um refinamento opcional.
+4. **Existe um modo de fila**: uma string por vez, teclado, avanço automático ao salvar. É o que
+   torna 14 mil um trabalho possível, porque ninguém precisa *ver* 14 mil, só atravessá-las.
+5. **Ação em massa sobre o filtro**, para o que dá para resolver sem olhar uma a uma.
+
+---
+
 ## O padrão que todos seguem
 
 Os cinco obrigatórios fazem igual nestes quatro pontos — divergir aqui custa aprendizado e
