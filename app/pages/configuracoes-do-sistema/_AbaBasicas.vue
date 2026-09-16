@@ -221,22 +221,36 @@ async function excluir() {
     <!-- 4. ZONA DE PERIGO --------------------------------------------- -->
     <Secao
       id="exclusao"
-      titulo="Excluir workspace"
+      titulo="Zona de perigo"
       resumo="A única ação desta tela que não tem volta."
       perigo
       :doc="documentacao.basicas"
       style="animation: entrada .4s ease-out both; animation-delay: 180ms"
     >
-      <div class="flex flex-wrap items-center justify-between gap-4">
-        <p class="max-w-xl text-sm text-muted">
-          Apaga o workspace <strong class="text-toned">{{ form.identidade.name }}</strong> e tudo
-          o que existe dentro dele. Não há backup, não há lixeira e não há como restaurar.
-        </p>
+      <p class="text-sm text-muted">
+        Excluir o workspace <strong class="text-toned">{{ form.identidade.name }}</strong> apaga
+        tudo o que existe dentro dele, para todos os membros. Não há backup, não há lixeira e não
+        há como restaurar.
+      </p>
+
+      <!-- O que se perde fica na tela, não só no modal: é o aviso, não o detalhe. -->
+      <ul class="mt-4 grid gap-2 sm:grid-cols-2">
+        <li
+          v-for="(item, i) in oQueSePerde"
+          :key="item.texto"
+          class="flex items-center gap-2 rounded-md bg-error/5 px-3 py-2 text-sm text-toned"
+          :style="`animation: entrada .35s ease-out both; animation-delay: ${180 + i * 50}ms`"
+        >
+          <UIcon :name="item.icone" class="size-4 shrink-0 text-error" />
+          {{ item.texto }}
+        </li>
+      </ul>
+
+      <div class="mt-4 flex justify-end">
         <UButton
           label="Excluir workspace"
           icon="i-lucide-trash-2"
           color="error"
-          variant="subtle"
           class="transition-transform hover:-translate-y-0.5"
           @click="confirmandoExclusao = true"
         />

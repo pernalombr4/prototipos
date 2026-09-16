@@ -134,6 +134,43 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 10 — 16/09/2026 · revisão de texto
+
+Rodada só de copy: levantei os 40 textos visíveis da tela, propus, ela validou item a item.
+
+**A correção que puxou o resto: duas palavras para a mesma coisa.** A tela dizia *workspace* o
+tempo todo; o construtor dizia *espaço* — "Como esse espaço se chama?", "Um espaço vazio",
+"o ícone do espaço". Grave justamente aqui, porque **o trabalho desta tela é ensinar a palavra
+"workspace"**: ensinar e, no passo seguinte, usar outra palavra desfaz o que a tela acabou de
+fazer. Padronizado em *workspace* no fluxo inteiro.
+
+A única sobrevivente é a frase de definição do topo — *"Workspace é o espaço da sua empresa no
+ENSPACE"* —, onde "espaço" é a palavra comum que **explica** o termo, não um segundo nome
+para ele.
+
+**O que mais mudou:**
+
+| Onde | De | Para |
+|---|---|---|
+| Topo | *"…acontece dentro de um deles. Esta tela só escolhe por qual porta entrar."* | *"É dentro de um deles que o seu trabalho acontece."* |
+| Convite | Aceite para **poder** entrar | Aceite para entrar |
+| Busca vazia | …peça acesso a quem administra **o workspace** | Confira o nome. Se ainda não achar, peça acesso a quem administra **o ENSPACE** |
+| Nenhum workspace | …abra o link **de lá** | …abra o link **que veio nele** |
+| Tooltip do Criar | **Abre** um espaço novo e vazio para a sua equipe | **Cria** um workspace vazio, só com você dentro |
+| Modelo vazio | ou **siga** do zero | ou **comece** do zero |
+| Prévia | Como vai aparecer | Como vai aparecer na sua lista |
+
+Três dessas são consistência, não estilo: a busca vazia agora usa a mesma frase do estado
+vazio logo abaixo; o "comece do zero" casa com o rótulo "Começar do zero" da opção acima; e o
+tooltip usa o verbo do botão que ele explica.
+
+**Reprovado:** trocar *"Não foi possível carregar seus workspaces"* por *"Seus workspaces não
+carregaram"*. Fica como está.
+
+**Em aberto:** "Ver em cards" mantém o anglicismo, por falta de termo de casa melhor. E o
+`Full` no meio de `Proprietário / Membro / Leitor` virou achado no Briefing — vem do produto,
+não do protótipo.
+
 ### Rodada 9 — 16/09/2026 · a identidade sai de baixo do "opcional"
 
 **Pedido:** *"esse construtor aqui ter todos os outros campos escondidos pode ser ruim, não? pelo

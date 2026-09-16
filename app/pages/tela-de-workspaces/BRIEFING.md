@@ -121,11 +121,16 @@ imagem. É a lacuna que a proposta preenche.
 Resumo: três campos obrigatórios, sendo um deles decoração escolhida numa árvore; um passo
 inteiro que abre em branco e costuma terminar vazio.
 
-### Achado extra (fora do escopo, mas registrado)
+### Achados extras (fora do escopo, mas registrados)
 
-Os botões da barra superior expõem **chaves de tradução cruas** como nome acessível:
+**Chaves de tradução cruas como nome acessível.** Os botões da barra superior expõem
 `button.home`, `button.back`, `words.forward`, `button.refresh`. Quem usa leitor de tela ouve
 a chave, não o rótulo.
+
+**Os papéis misturam dois idiomas.** Na mesma lista aparecem `Proprietário`, `Membro`, `Leitor`
+— e `Full`. Três em português e um em inglês, lado a lado no mesmo card. Vem do produto, não do
+protótipo, mas a tela de entrada é onde a inconsistência fica mais visível: é o primeiro selo
+que a pessoa lê depois de logar.
 
 ---
 

@@ -21,20 +21,30 @@ const aceso = computed(() => destaque.value === props.id)
 </script>
 
 <template>
+  <!--
+    A variante `perigo` não é o mesmo cartão com o título vermelho: é borda
+    vermelha, cabeçalho com fundo tingido e ícone de aviso antes do nome. A
+    tela de hoje grita nessa seção e faz certo; a rodada 1 tinha apagado o
+    grito sem motivo.
+  -->
   <section
     :id="id"
-    class="scroll-mt-40 rounded-xl border bg-default transition-shadow duration-500"
+    class="scroll-mt-40 rounded-xl border transition-shadow duration-500"
     :class="[
-      perigo ? 'border-error/40' : 'border-default',
+      perigo ? 'border-error/50 bg-error/[0.02]' : 'border-default bg-default',
       aceso ? 'ring-2 ring-primary shadow-lg' : 'ring-0',
     ]"
   >
-    <header class="flex flex-wrap items-start gap-x-4 gap-y-2 border-b border-default px-5 py-4">
+    <header
+      class="flex flex-wrap items-start gap-x-4 gap-y-2 border-b px-5 py-4"
+      :class="perigo ? 'border-error/30 bg-error/5' : 'border-default'"
+    >
       <div class="min-w-0 flex-1">
         <h2
-          class="text-base font-semibold"
+          class="flex items-center gap-2 text-base font-semibold"
           :class="perigo ? 'text-error' : 'text-highlighted'"
         >
+          <UIcon v-if="perigo" name="i-lucide-triangle-alert" class="size-5 shrink-0" />
           {{ titulo }}
         </h2>
         <p v-if="resumo" class="mt-0.5 text-sm text-muted">

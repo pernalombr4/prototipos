@@ -73,20 +73,28 @@ export const identidade: Identidade = {
 /* ------------------------------------------------------------------ *
  * Comportamento e módulos
  *
- * Os textos de ajuda dos cinco primeiros existem hoje no produto, no "?"
- * de cada linha — e são bons. O que muda no protótipo é o lugar: sai do
- * extremo direito da tela e encosta no rótulo que explica.
+ * Cada chave tem DOIS textos, e a divisão é o desenho:
+ *
+ *   `descricao` — uma linha, sempre visível. Curta de propósito (cabe em
+ *     uma linha da coluna) porque é ela que deixa a lista escaneável: dá
+ *     para decidir sem interagir com nada.
+ *   `detalhe`  — o que a pessoa lê quando quer saber mais, atrás do "?"
+ *     ao lado do rótulo. Aqui cabe o efeito, o exemplo e a ressalva.
+ *
+ * O "?" existe no produto de hoje e o texto dele é bom; o que estava
+ * errado era o lugar (extremo direito da tela, a 1290 px do rótulo).
+ * Aqui ele encosta no nome da coisa que explica.
  * ------------------------------------------------------------------ */
 
 export interface Ajuste {
   chave: string
   rotulo: string
-  /** Uma linha, visível sem hover. Hoje mora dentro de um "?" a 1290 px do rótulo. */
+  /** Uma linha, sempre visível. Curta: é o que faz a lista ser escaneável. */
   descricao: string
   valor: boolean
-  /** Acrescentado pelo protótipo: o que muda na tela quando isso liga. */
-  efeito?: string
-  /** Acrescentado pelo protótipo: aviso de risco, quando existe. */
+  /** Atrás do "?" ao lado do rótulo: o efeito, o exemplo, a ressalva. */
+  detalhe?: string
+  /** Acrescentado pelo protótipo: aviso de risco. Aparece na tela quando está ligado. */
   risco?: string
   /** Acrescentado pelo protótipo: âncora do artigo que explica. */
   doc?: string
@@ -96,38 +104,42 @@ export const comportamento: Ajuste[] = [
   {
     chave: 'mostrar_categorias',
     rotulo: 'Mostrar categorias',
-    descricao: 'Exibe as categorias do workspace na tela de Início.',
-    efeito: 'Muda a tela de Início de todos os membros.',
+    descricao: 'Lista as categorias na tela de Início.',
+    detalhe:
+      'A tela de Início passa a mostrar os atalhos para cada categoria do workspace. Vale para todos os membros, não só para você.',
     valor: true,
   },
   {
     chave: 'ignorar_permissoes_full',
     rotulo: 'Ignorar permissões para membros full',
-    descricao:
-      'Membros com licença Full passam a ter acesso irrestrito, ignorando as regras do cargo.',
-    risco: 'Na prática, equipara o membro Full ao Proprietário. Hoje isso afeta 6 membros.',
+    descricao: 'Membros Full deixam de seguir as regras do cargo.',
+    detalhe:
+      'Quem tem licença Full passa a enxergar e editar tudo, como se fosse Proprietário, mesmo que o cargo diga o contrário. Serve para destravar uma operação pequena, em que manter regra de acesso custa mais do que ajuda.',
+    risco: 'Equipara o membro Full ao Proprietário. Hoje isso afeta 6 membros.',
     valor: false,
   },
   {
     chave: 'ocultar_botao_criar',
     rotulo: 'Ocultar botão de criar na tela de categorias',
-    descricao:
-      'Remove o botão de criar item. Útil para categorias que só recebem item por Spaceflow.',
-    efeito: 'Ninguém cria item pela tela; a criação passa a ser só por automação ou API.',
+    descricao: 'Tira o botão de criar item das telas de categoria.',
+    detalhe:
+      'Útil quando a categoria só deve receber item por automação. Ninguém cria pela tela; a criação passa a ser só por Spaceflow ou API, e quem tentar não encontra o botão.',
     valor: false,
   },
   {
     chave: 'mostrar_url_integracao',
     rotulo: 'Mostrar URL de integração',
-    descricao: 'Exibe, no item, o endereço usado por integrações externas para referenciá-lo.',
-    efeito: 'Aparece um campo a mais no topo de cada item.',
+    descricao: 'Mostra no item o endereço usado por integrações.',
+    detalhe:
+      'Aparece um campo a mais no topo de cada item, com o endereço que sistemas externos usam para apontar para ele. Quem integra copia dali; quem não integra vê um campo a mais.',
     valor: false,
   },
   {
     chave: 'carimbo_personalizado',
     rotulo: 'Habilitar carimbo personalizado em documentos',
-    descricao: 'Cada membro passa a ter a própria chancela para documentos gerados por fluxos.',
-    efeito: 'É o pré-requisito da Chancela de Documentos.',
+    descricao: 'Cada membro ganha a própria chancela.',
+    detalhe:
+      'Cada pessoa passa a ter a sua chancela para assinar documentos gerados por fluxos. É o pré-requisito da Chancela de Documentos: sem isso ligado, a chancela não aparece nos documentos.',
     valor: true,
   },
 ]
@@ -136,20 +148,25 @@ export const modulos: Ajuste[] = [
   {
     chave: 'correcao_monetaria',
     rotulo: 'Correção Monetária',
-    descricao: 'Atualiza valores por índices oficiais (IPCA, INPC, IGP-M) nos campos de moeda.',
-    efeito: 'Desligar não desfaz o que já foi corrigido: só interrompe novas correções.',
+    descricao: 'Atualiza valores de moeda por índices oficiais.',
+    detalhe:
+      'Corrige campos de moeda por IPCA, INPC ou IGP-M, para contratos e cobranças que precisam acompanhar o índice. Desligar não desfaz o que já foi corrigido: só interrompe novas correções.',
     valor: true,
   },
   {
     chave: 'comparacoes',
     rotulo: 'Comparações',
-    descricao: 'Permite comparar dois itens da mesma categoria lado a lado.',
+    descricao: 'Permite comparar dois itens lado a lado.',
+    detalhe:
+      'Acrescenta a ação de comparar na tela de itens da mesma categoria, com os campos alinhados um ao lado do outro.',
     valor: false,
   },
   {
     chave: 'juridico',
     rotulo: 'Jurídico',
-    descricao: 'Recursos de acompanhamento processual e prazos judiciais.',
+    descricao: 'Acompanhamento processual e prazos judiciais.',
+    detalhe:
+      'Acrescenta campos e telas para número de processo, andamento e prazo judicial, com o prazo contado pelo calendário do workspace.',
     // Na tela de hoje está escrito "Juridico", sem acento. A divergência está no DECISOES.md.
     valor: true,
   },

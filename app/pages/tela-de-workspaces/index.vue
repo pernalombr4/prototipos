@@ -172,7 +172,7 @@ function abrirCriacao() {
 function workspaceCriado(nome: string) {
   toast.add({
     title: `Workspace "${nome}" criado`,
-    description: 'No produto, a pessoa entraria agora no espaço recém-criado.',
+    description: 'No produto, a pessoa entraria agora no workspace recém-criado.',
     icon: 'i-lucide-check',
     color: 'success',
   })
@@ -202,16 +202,16 @@ function workspaceCriado(nome: string) {
             Escolha um workspace para entrar
           </h1>
           <p class="mt-2 max-w-2xl text-muted">
-            Workspace é o espaço da sua empresa dentro do ENSPACE. Seu trabalho acontece
-            <strong class="text-highlighted">dentro</strong> de um deles. Esta tela só escolhe
-            por qual porta entrar.
+            Workspace é o espaço da sua empresa no ENSPACE. É
+            <strong class="text-highlighted">dentro</strong> de um deles que o seu trabalho
+            acontece.
           </p>
 
         </div>
 
         <!-- Atalho no topo, como sempre esteve. Secundário no peso, não no
              endereço: quem precisa, encontra onde já procurava. -->
-        <UTooltip text="Abre um espaço novo e vazio para a sua equipe.">
+        <UTooltip text="Cria um workspace vazio, só com você dentro.">
           <UButton
             label="Criar workspace"
             icon="i-lucide-plus"
@@ -259,7 +259,7 @@ function workspaceCriado(nome: string) {
             color="secondary"
             variant="subtle"
             :title="`${convite.convidadoPor} convidou você para ${convite.name}`"
-            description="Aceite para poder entrar neste workspace."
+            description="Aceite para entrar neste workspace."
             :actions="[
               { label: 'Aceitar convite', color: 'secondary', variant: 'solid', onClick: () => aceitar(convite) },
               { label: 'Recusar', color: 'neutral', variant: 'ghost', onClick: () => recusar(convite) },
@@ -428,7 +428,7 @@ function workspaceCriado(nome: string) {
               <!-- rodapé ancorado: meta à esquerda, a ação à direita -->
               <div class="mt-auto flex items-end justify-between gap-2 pt-4">
                 <p class="text-xs text-dimmed">
-                  <template v-if="estaPendente(w)">Aceite para poder entrar</template>
+                  <template v-if="estaPendente(w)">Aceite para entrar</template>
                   <template v-else>
                     {{ w.members_count }} pessoas · {{ tempoRelativo(w.ultimoAcessoMin).replace('Você esteve aqui ', '').replace('Você ainda não entrou aqui', 'nunca acessado') }}
                   </template>
@@ -521,7 +521,7 @@ function workspaceCriado(nome: string) {
 
             <template #cell-ultimoAcessoMin="{ row }">
               <span class="text-muted">
-                {{ estaPendente(row) ? 'Aceite para poder entrar' : tempoRelativo(row.ultimoAcessoMin) }}
+                {{ estaPendente(row) ? 'Aceite para entrar' : tempoRelativo(row.ultimoAcessoMin) }}
               </span>
             </template>
 
@@ -549,7 +549,7 @@ function workspaceCriado(nome: string) {
             class="animate-[entrada_0.3s_ease-out_both]"
             icon="i-lucide-search-x"
             :title="`Nenhum workspace com &quot;${busca}&quot;`"
-            description="Confira o nome, ou peça acesso a quem administra o workspace na sua empresa."
+            description="Confira o nome. Se ainda não achar, peça acesso a quem administra o ENSPACE na sua empresa."
           />
         </section>
 
@@ -559,7 +559,7 @@ function workspaceCriado(nome: string) {
           class="animate-[entrada_0.3s_ease-out_both]"
           icon="i-lucide-door-closed"
           title="Você ainda não faz parte de nenhum workspace"
-          description="Quem administra o ENSPACE na sua empresa precisa convidar você. Se recebeu um convite por e-mail, abra o link de lá."
+          description="Quem administra o ENSPACE na sua empresa precisa convidar você. Se recebeu um convite por e-mail, abra o link que veio nele."
           :actions="[{ label: 'Criar um workspace', color: 'neutral', variant: 'outline', onClick: abrirCriacao }]"
         />
       </template>

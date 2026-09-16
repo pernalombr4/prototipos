@@ -179,7 +179,7 @@ function criar() {
             <!-- ============ DECISÃO 1: o nome ============ -->
             <div v-if="passo === 1" key="1">
               <h2 class="text-xl font-bold tracking-tight text-highlighted">
-                Como esse espaço se chama?
+                Como esse workspace se chama?
               </h2>
               <p class="mt-1.5 text-sm text-muted">
                 É o nome que a sua equipe vai procurar na lista. Dá para mudar depois.
@@ -193,7 +193,7 @@ function criar() {
                     type="button"
                     class="group/logo relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-default transition-all duration-200 hover:border-primary hover:shadow-sm"
                     :class="!form.logo && 'bg-elevated'"
-                    aria-label="Escolher o logo ou o ícone do espaço"
+                    aria-label="Escolher o logo ou o ícone do workspace"
                   >
                     <img v-if="form.logo" :src="form.logo" alt="" class="size-full object-cover">
                     <UIcon v-else :name="iconeEfetivo" class="size-5 text-muted" />
@@ -440,7 +440,7 @@ function criar() {
                   <div class="min-w-0">
                     <span class="block font-medium text-highlighted">Começar do zero</span>
                     <span class="block text-sm text-muted">
-                      Um espaço vazio, montado por você. É o caminho mais comum.
+                      Um workspace vazio, montado por você. É o caminho mais comum.
                     </span>
                   </div>
                   <UIcon
@@ -491,7 +491,7 @@ function criar() {
                     Nenhum modelo para essa localidade
                   </p>
                   <p class="mt-1 text-sm text-muted">
-                    Escolha outra acima, ou siga do zero: você não perde nada.
+                    Escolha outra acima, ou comece do zero: você não perde nada.
                   </p>
                 </div>
               </div>
@@ -537,7 +537,7 @@ function criar() {
         <!-- ------------------------- prévia ao vivo ------------------------- -->
         <aside class="hidden border-l border-default bg-elevated/30 p-6 md:block">
           <p class="text-xs font-semibold uppercase tracking-wider text-dimmed">
-            Como vai aparecer
+            Como vai aparecer na sua lista
           </p>
 
           <div class="mt-4 rounded-xl border border-default bg-default p-4 shadow-sm transition-all duration-300">
