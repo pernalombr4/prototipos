@@ -307,10 +307,24 @@ importa, nunca chama a API do ENSPACE.
    `NUXT_APP_BASE_URL=/prototipos/` — Pages serve o site numa subpasta, e sem isso o CSS não
    carrega.
 
-   Duas armadilhas já resolvidas, para não voltarem: a versão do pnpm vive **só** no campo
-   `packageManager` do `package.json` (declarar também na action faz o build falhar), e o
-   Pages **não roda servidor** — qualquer rota de API funcionaria no `pnpm dev` e morreria
-   publicada.
+   **Confira a URL publicada antes de entregar.** Build verde não prova site certo — já
+   aconteceu de o workflow passar e o site subir só com a home.
+
+   Armadilhas já resolvidas, para não voltarem:
+
+   - a versão do pnpm vive **só** no `packageManager` do `package.json`; declarar também na
+     action faz o build falhar;
+   - **arquivo `.ts` dentro de `app/pages/` viraria rota** — por isso o `nuxt.config.ts` tem
+     `pages: { pattern: ['**/*.vue'] }`. Sem isso, o `mocks.ts` do protótipo é tratado como
+     página, o Nuxt tenta usá-lo como componente e o prerender inteiro aborta;
+   - **o prerender não usa crawler.** A lista de rotas é derivada dos arquivos em
+     `app/pages` pela função `rotasDasPaginas()`. Com `baseURL`, o crawler seguia os links já
+     prefixados (`/prototipos/...`) e quebrava. Protótipo novo entra na lista só de existir —
+     não precisa mexer em nada;
+   - `failOnError: true` está ligado de propósito: protótipo quebrado derruba o build em vez
+     de publicar um site pela metade;
+   - o Pages **não roda servidor** — qualquer rota de API funcionaria no `pnpm dev` e morreria
+     publicada.
 
 > ### ⚠️ O repositório é PÚBLICO
 >
