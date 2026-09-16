@@ -2,7 +2,7 @@
 import type { Ajuste } from './mocks'
 
 /**
- * Uma linha de configuração de ligar/desligar.
+ * Uma linha de configuração.
  *
  * Três decisões, nesta ordem:
  *
@@ -16,12 +16,13 @@ import type { Ajuste } from './mocks'
  *    fica na tela, e só quando o ajuste está ligado: alertar sobre risco
  *    que não está correndo é ruído.
  *
- * A linha ocupa a largura inteira do cartão (a régua vai de ponta a ponta);
- * em cartão largo, o texto para em 40rem e o controle vem logo depois.
+ * O controle padrão é um switch. Quem precisar de outro (um select, por
+ * exemplo) passa pelo slot `controle` e herda o mesmo alinhamento, que é o
+ * que mantém a coluna de controles reta.
  */
 defineProps<{ ajuste: Ajuste }>()
 
-const valor = defineModel<boolean>({ required: true })
+const valor = defineModel<boolean | undefined>()
 </script>
 
 <template>
@@ -37,7 +38,7 @@ const valor = defineModel<boolean>({ required: true })
           {{ ajuste.rotulo }}
         </label>
 
-        <UPopover v-if="ajuste.detalhe" :content="{ side: 'top', align: 'start' }">
+        <UPopover v-if="ajuste.detalhe || $slots.detalhe" :content="{ side: 'top', align: 'start' }">
           <UButton
             icon="i-lucide-circle-help"
             size="xs"
@@ -52,9 +53,10 @@ const valor = defineModel<boolean>({ required: true })
               <p class="text-sm font-medium text-highlighted">
                 {{ ajuste.rotulo }}
               </p>
-              <p class="mt-1.5 text-sm text-muted">
+              <p v-if="ajuste.detalhe" class="mt-1.5 text-sm text-muted">
                 {{ ajuste.detalhe }}
               </p>
+              <slot name="detalhe" />
             </div>
           </template>
         </UPopover>
@@ -80,11 +82,14 @@ const valor = defineModel<boolean>({ required: true })
       </Transition>
     </div>
 
-    <USwitch
-      :id="`ajuste-${ajuste.chave}`"
-      v-model="valor"
-      :aria-label="ajuste.rotulo"
-      class="mt-0.5 shrink-0"
-    />
+    <div class="mt-0.5 shrink-0">
+      <slot name="controle">
+        <USwitch
+          :id="`ajuste-${ajuste.chave}`"
+          v-model="valor"
+          :aria-label="ajuste.rotulo"
+        />
+      </slot>
+    </div>
   </div>
 </template>

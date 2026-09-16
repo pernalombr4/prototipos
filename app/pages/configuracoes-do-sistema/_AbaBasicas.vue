@@ -63,26 +63,93 @@ async function excluir() {
       :doc="documentacao.basicas"
       style="animation: entrada .4s ease-out both; animation-delay: 0ms"
     >
-      <div class="grid gap-5 sm:grid-cols-2">
-        <UFormField label="Nome" help="Aparece no topo da tela e nos e-mails enviados pelo workspace.">
-          <UInput v-model="form.identidade.name" class="w-full" />
-        </UFormField>
+      <!--
+        Identidade em forma de perfil: o logo colado ao nome, e a referência
+        logo abaixo dele. É como Slack ("Name, domain, and icon"), Linear
+        ("workspace logo, name and URL") e Notion (General: Name, Icon, Domain)
+        agrupam a mesma coisa. Ver PESQUISA.md, "Identidade como perfil".
+      -->
+      <div class="grid gap-5">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
+          <UFormField label="Logo" class="shrink-0">
+            <UPopover :content="{ side: 'bottom', align: 'start' }">
+              <button
+                type="button"
+                aria-label="Alterar o logo do workspace"
+                class="group relative flex size-16 items-center justify-center rounded-xl border border-default bg-elevated transition-all hover:-translate-y-0.5 hover:border-accented focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              >
+                <UIcon
+                  v-if="form.identidade.tipoDeMarca === 'icone'"
+                  :name="form.identidade.icon || 'lucide:box'"
+                  class="size-7 text-primary"
+                />
+                <UIcon v-else name="i-lucide-image" class="size-7 text-muted" />
 
-        <UFormField label="Referência">
-          <template #help>
-            <span class="flex items-center gap-1">
-              Faz parte do endereço e não muda depois de criado.
-            </span>
-          </template>
-          <UInput
-            :model-value="form.identidade.reference"
-            disabled
-            icon="i-lucide-lock"
-            class="w-full"
-          />
-        </UFormField>
+                <span
+                  class="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full border border-default bg-default text-muted transition-colors group-hover:text-highlighted"
+                >
+                  <UIcon name="i-lucide-pencil" class="size-3.5" />
+                </span>
+              </button>
 
-        <UFormField class="sm:col-span-2" label="Descrição">
+              <template #content>
+                <div class="w-64 p-3">
+                  <p class="text-sm font-medium text-highlighted">Logo do workspace</p>
+                  <p class="mt-1 text-sm text-muted">
+                    O símbolo que identifica este workspace na barra lateral.
+                  </p>
+
+                  <div class="mt-3 flex rounded-lg border border-default p-0.5">
+                    <button
+                      v-for="m in marcas"
+                      :key="m.valor"
+                      type="button"
+                      class="flex-1 rounded-md px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                      :class="form.identidade.tipoDeMarca === m.valor
+                        ? 'bg-primary text-inverted'
+                        : 'text-muted hover:bg-elevated hover:text-highlighted'"
+                      :aria-pressed="form.identidade.tipoDeMarca === m.valor"
+                      @click="form.identidade.tipoDeMarca = m.valor"
+                    >
+                      {{ m.rotulo }}
+                    </button>
+                  </div>
+
+                  <p class="mt-2 text-xs text-muted">
+                    {{ marcas.find(m => m.valor === form.identidade.tipoDeMarca)?.ajuda }}
+                  </p>
+
+                  <UButton
+                    :label="form.identidade.tipoDeMarca === 'icone' ? 'Escolher ícone' : 'Enviar imagem'"
+                    :icon="form.identidade.tipoDeMarca === 'icone' ? 'i-lucide-shapes' : 'i-lucide-upload'"
+                    size="sm"
+                    color="neutral"
+                    variant="subtle"
+                    block
+                    class="mt-3"
+                  />
+                </div>
+              </template>
+            </UPopover>
+          </UFormField>
+
+          <div class="grid flex-1 gap-4">
+            <UFormField label="Nome" help="Aparece no topo da tela e nos e-mails enviados pelo workspace.">
+              <UInput v-model="form.identidade.name" class="w-full" />
+            </UFormField>
+
+            <UFormField label="Referência" help="Faz parte do endereço e não muda depois de criado.">
+              <UInput
+                :model-value="form.identidade.reference"
+                disabled
+                icon="i-lucide-lock"
+                class="w-full sm:max-w-sm"
+              />
+            </UFormField>
+          </div>
+        </div>
+
+        <UFormField label="Descrição">
           <template #help>
             <span class="flex justify-between gap-4">
               <span>Para que serve este workspace. Quem entra pela primeira vez lê isto.</span>

@@ -232,6 +232,7 @@ function workspaceCriado(nome: string) {
         variant="subtle"
         title="Não foi possível carregar seus workspaces"
         description="A conexão falhou. Seus workspaces continuam lá. É só tentar de novo."
+        :ui="{ title: 'font-bold' }"
         :actions="[{ label: 'Tentar de novo', color: 'error', variant: 'solid', onClick: tentarDeNovo }]"
       />
 
@@ -260,6 +261,7 @@ function workspaceCriado(nome: string) {
             variant="subtle"
             :title="`${convite.convidadoPor} convidou você para ${convite.name}`"
             description="Aceite para entrar neste workspace."
+            :ui="{ title: 'font-bold' }"
             :actions="[
               { label: 'Aceitar convite', color: 'secondary', variant: 'solid', onClick: () => aceitar(convite) },
               { label: 'Recusar', color: 'neutral', variant: 'ghost', onClick: () => recusar(convite) },
