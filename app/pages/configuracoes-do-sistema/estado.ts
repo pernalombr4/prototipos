@@ -33,7 +33,7 @@ export const abas: { chave: Aba, rotulo: string, resumo: string, icone: string }
   {
     chave: 'calendario',
     rotulo: 'Calendário',
-    resumo: 'Quais dias contam como úteis — é daqui que saem os prazos e o SLA das tarefas.',
+    resumo: 'Quais dias contam como úteis: é daqui que saem os prazos e o SLA das tarefas.',
     icone: 'i-lucide-calendar-days',
   },
   {

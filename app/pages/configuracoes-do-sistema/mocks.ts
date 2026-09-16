@@ -137,7 +137,7 @@ export const modulos: Ajuste[] = [
     chave: 'correcao_monetaria',
     rotulo: 'Correção Monetária',
     descricao: 'Atualiza valores por índices oficiais (IPCA, INPC, IGP-M) nos campos de moeda.',
-    efeito: 'Desligar não desfaz o que já foi corrigido — só interrompe novas correções.',
+    efeito: 'Desligar não desfaz o que já foi corrigido: só interrompe novas correções.',
     valor: true,
   },
   {
@@ -689,6 +689,6 @@ export const definicaoDoCredito = {
   exemplos: [
     'Uma execução de agente custa entre 8 e 120 en-credits, conforme o tamanho do documento.',
     'Traduzir o dicionário inteiro para um idioma custa cerca de 230 en-credits.',
-    'Ações sem IA — criar item, rodar fluxo, enviar e-mail — não consomem en-credits.',
+    'Ações sem IA (criar item, rodar fluxo, enviar e-mail) não consomem en-credits.',
   ],
 }
