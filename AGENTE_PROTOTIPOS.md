@@ -535,3 +535,10 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
     verdade, acima com `z-10`.
     **Com DUAS ações de peso igual — aceitar/recusar —, botão é o certo e o card não vira
     link:** card clicável só funciona quando existe um destino óbvio.
+26. **Card é informação por pixel.** Antes de entregar uma grade, conte: quantos itens cabem na
+    tela e quantas informações cada card carrega. Card grande com quatro linhas de conteúdo é
+    rolagem disfarçada de layout. Selo vira texto, rótulo de ação vira seta no hover, e o que
+    dá para dizer numa linha não ocupa três.
+27. **Não compre alinhamento com espaço morto.** Altura mínima e rodapé ancorado alinham a
+    grade criando buraco em todo item curto. Em card compacto, deixe cada um com a altura do
+    próprio conteúdo (`items-start`): irregularidade leve custa menos que vazio repetido.

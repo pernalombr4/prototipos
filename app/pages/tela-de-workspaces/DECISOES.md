@@ -134,6 +134,40 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 7 — 16/09/2026 · densidade
+
+**Pedido:** *"cards continuam ruins. muito grande com pouca informação"*
+
+Estava certo: ~150 px de altura para quatro informações, e a grade mostrava dois ou três
+workspaces por tela. Para quem tem 18, isso é rolagem pura.
+
+**O card virou uma linha, não um quadro.** Ícone à esquerda, conteúdo à direita, três linhas:
+nome, descrição (uma linha, truncada) e uma meta única — `62 pessoas · há 2 dias · Full`.
+Altura caiu de ~150 px para ~72 px. Onde cabiam dois cards agora cabem seis.
+
+O que sumiu, e por quê:
+
+- **o selo de papel virou texto na meta.** Badge é peso visual caro para um metadado que se lê
+  de passagem;
+- **o rótulo "Entrar" saiu.** Com o card inteiro clicável, a afordância virou **uma seta que
+  entra da esquerda no hover** — custa zero altura e diz a mesma coisa. No clique ela vira
+  spinner;
+- **a altura mínima e o rodapé ancorado saíram** — eram da rodada 6, e alinhavam a grade ao
+  preço de um buraco em todo card sem descrição. Agora cada card tem a altura do próprio
+  conteúdo (`items-start`): a grade fica levemente irregular e não sobra espaço morto. Num card
+  compacto, a irregularidade custa menos que o buraco.
+
+**E entrou informação que não custa espaço: cor de identidade por workspace.** O fundo do ícone
+recebe uma cor derivada da referência, dentro da paleta da marca — fuchsia, cyan, purple, teal
+e space. Deliberadamente **fora das cores semânticas**: nenhuma delas significa erro, sucesso ou
+alerta. É o que faz reconhecer o espaço de relance, sem ler o nome — o que Slack, Linear e
+Notion fazem com o mesmo objetivo. Era a proposta 4 que tinha ficado para depois; entrou agora
+porque responde direto ao "pouca informação".
+
+O skeleton de carregamento encolheu junto, senão ele prometeria um card que não existe mais.
+
+**Ainda na fila:** sinal visual de recência na borda dos usados nos últimos dias.
+
 ### Rodada 6 — 16/09/2026 · o card vira um alvo só
 
 **Pergunta:** *"é interessante o card do workspace ter o botão de entrar já que ele é totalmente
