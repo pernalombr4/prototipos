@@ -134,6 +134,51 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 3 — 16/09/2026
+
+**Pedido:** *"na hora de criar workspace nao tem que ter opçao entre abrir chamado e ele. isso
+nao tem nada a ver. a jornada só tem que ser suficientemente boa. ja viu como é a jornada real
+de criar workspace? ja testou? (…) veja como é o form por completo antes de finalizar. e
+replique ali de modo intuitivo e interessante, com boa hierarquia de decisoes e que seja ainda
+BONITO"*
+
+**Antes de mexer:** percorri a criação inteira no develop, sem finalizar. O que achei está no
+Briefing, seção "A jornada real de criar um workspace". O resumo: três campos obrigatórios,
+sendo um deles decoração escolhida numa árvore de categorias e exibida como `carbon:scales`; e
+um segundo passo que abre ~4 s em branco para, no Brasil, responder "Não há dados".
+
+**O que mudou:**
+
+1. **A pergunta de intenção saiu.** Você tem razão: interceptar chamado no meio da criação
+   misturava dois assuntos. A criação agora é só uma boa criação. O que resolve a confusão é a
+   tela de entrada — que já diz o que é, onde o trabalho acontece e deixa `Entrar` como a ação
+   de maior peso.
+2. **Uma decisão por vez, na ordem em que a pessoa decide.**
+   **1 de 2 — o nome:** campo grande, foco automático, e o endereço aparecendo embaixo como
+   consequência (`enspace.io/juridico-aurora`) em vez de um campo obrigatório chamado
+   "Referência".
+   **2 de 2 — de onde partir:** "Começar do zero" como opção de primeira classe (não como
+   ausência de escolha), com os modelos ao lado.
+3. **Ícone deixou de ser obrigatório e deixou de ser uma árvore.** Ele é *sugerido pelo nome*
+   — digitar "Jurídico Aurora" já traz a balança — e fica dentro de "Ícone, descrição e
+   endereço — opcional", recolhido. Aberto, são seis ícones em destaque e um "Ver todos" com
+   busca por nome e categoria. Em nenhum momento aparece `carbon:scales`.
+4. **Prévia ao vivo, à direita.** O card muda enquanto se digita: nome, ícone, descrição. Ao
+   escolher um modelo, aparece **"Já vem com"** listando o que ele traz — a consequência fica
+   visível **antes** de confirmar, não depois.
+5. **O vazio passou a explicar.** Em vez de "Não há dados": *"Nenhum modelo para essa
+   localidade — escolha outra acima, ou siga do zero, você não perde nada."* E a Localidade
+   virou chips de múltipla escolha, com o que está marcado à vista.
+6. **Movimento.** Barra de progresso que avança, transição lateral entre os passos, o ícone da
+   prévia girando ao trocar, "Já vem com" entrando em cascata, `loading` no botão ao criar.
+
+**Também nesta rodada:** briefing, pesquisa e decisões entraram **dentro do site**, no rodapé
+de andaime, em "Por trás" → *O problema · As referências · As decisões*. O conteúdo vem dos
+próprios `.md` desta pasta, importados como texto — fonte única, sem cópia paralela.
+
+**O que aprendi, e virou regra:** *percorrer o fluxo inteiro antes de redesenhá-lo*. Eu tinha
+visto só o passo 1 e redesenhei em cima disso — regra 18 da Parte 6.
+
 ### Rodada 2 — 16/09/2026
 
 **Pedido:** *"nao ta legal ter que clicar em 2 botoes diferentes no mesmo card (…) isso tem que

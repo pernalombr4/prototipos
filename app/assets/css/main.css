@@ -125,3 +125,31 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ------------------------------------------------------------------
+   Markdown do painel de contexto (briefing, pesquisa e decisões).
+   Sem plugin de tipografia: são poucas regras e elas usam os mesmos
+   tokens do resto do site.
+------------------------------------------------------------------ */
+.markdown { color: var(--ui-text-muted); line-height: 1.7; }
+.markdown > *:first-child { margin-top: 0; }
+.markdown h1 { font-size: 1.5rem; font-weight: 700; color: var(--ui-text-highlighted); margin: 2rem 0 .75rem; }
+.markdown h2 { font-size: 1.15rem; font-weight: 650; color: var(--ui-text-highlighted); margin: 2rem 0 .5rem; padding-top: 1.25rem; border-top: 1px solid var(--ui-border); }
+.markdown h3 { font-size: 1rem; font-weight: 600; color: var(--ui-text-highlighted); margin: 1.5rem 0 .4rem; }
+.markdown h4 { font-size: .9rem; font-weight: 600; color: var(--ui-text-highlighted); margin: 1.25rem 0 .35rem; }
+.markdown p { margin: .75rem 0; }
+.markdown strong { color: var(--ui-text-highlighted); font-weight: 600; }
+.markdown a { color: var(--ui-primary); text-decoration: underline; text-underline-offset: 2px; }
+.markdown ul, .markdown ol { margin: .75rem 0; padding-left: 1.25rem; }
+.markdown ul { list-style: disc; }
+.markdown ol { list-style: decimal; }
+.markdown li { margin: .35rem 0; }
+.markdown li::marker { color: var(--ui-text-dimmed); }
+.markdown blockquote { border-left: 3px solid var(--ui-primary); padding: .25rem 0 .25rem 1rem; margin: 1rem 0; color: var(--ui-text-toned); }
+.markdown code { font-family: ui-monospace, monospace; font-size: .85em; background: var(--ui-bg-elevated); padding: .1rem .35rem; border-radius: .25rem; }
+.markdown pre { background: var(--ui-bg-elevated); padding: 1rem; border-radius: .5rem; overflow-x: auto; margin: 1rem 0; font-size: .8rem; line-height: 1.6; }
+.markdown pre code { background: none; padding: 0; }
+.markdown table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .85rem; display: block; overflow-x: auto; }
+.markdown th, .markdown td { border: 1px solid var(--ui-border); padding: .5rem .65rem; text-align: left; vertical-align: top; }
+.markdown th { background: var(--ui-bg-elevated); color: var(--ui-text-highlighted); font-weight: 600; }
+.markdown hr { border: 0; border-top: 1px solid var(--ui-border); margin: 2rem 0; }

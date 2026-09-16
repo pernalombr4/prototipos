@@ -140,3 +140,130 @@ export const corDoPapel: Record<Papel, 'primary' | 'secondary' | 'neutral' | 'su
   'Membro': 'neutral',
   'Leitor': 'neutral',
 }
+
+/* ------------------------------------------------------------------
+   Criação de workspace — estrutura tirada da jornada real do develop
+   (percorrida em 16/09/2026, sem finalizar a criação).
+
+   Passo 1 "Dados Gerais": Nome*, Referência* (preenchida a partir do
+   nome), Descrição (com contador) e Ícone* — que no produto é uma
+   árvore de categorias e, depois de escolhido, mostra o id técnico
+   (`carbon:scales`) em vez do nome ou do desenho.
+   Passo 2 "Selecionar Template (Opcional)": Localidade (Brasil pt-br,
+   Estados Unidos en-us, Global — múltipla escolha) e Templates, que
+   em Brasil responde "Não há dados".
+------------------------------------------------------------------ */
+
+export interface CategoriaDeIcone {
+  nome: string
+  icones: { id: string, nome: string }[]
+}
+
+/** Mesmas categorias e nomes em português do produto; ícones do Lucide. */
+export const categoriasDeIcone: CategoriaDeIcone[] = [
+  {
+    nome: 'Jurídico',
+    icones: [
+      { id: 'i-lucide-scale', nome: 'Balança' },
+      { id: 'i-lucide-file-check', nome: 'Certidão' },
+      { id: 'i-lucide-file-text', nome: 'Documento legal' },
+      { id: 'i-lucide-gavel', nome: 'Martelo' },
+      { id: 'i-lucide-file-signature', nome: 'Contrato' },
+      { id: 'i-lucide-shield-check', nome: 'Escudo verificado' },
+    ],
+  },
+  {
+    nome: 'Pessoas',
+    icones: [
+      { id: 'i-lucide-users', nome: 'Equipe' },
+      { id: 'i-lucide-user-plus', nome: 'Admissão' },
+      { id: 'i-lucide-id-card', nome: 'Crachá' },
+      { id: 'i-lucide-heart-handshake', nome: 'Benefícios' },
+    ],
+  },
+  {
+    nome: 'Finanças',
+    icones: [
+      { id: 'i-lucide-calculator', nome: 'Calculadora' },
+      { id: 'i-lucide-banknote', nome: 'Pagamento' },
+      { id: 'i-lucide-chart-line', nome: 'Resultado' },
+      { id: 'i-lucide-receipt', nome: 'Nota fiscal' },
+    ],
+  },
+  {
+    nome: 'Operação',
+    icones: [
+      { id: 'i-lucide-truck', nome: 'Logística' },
+      { id: 'i-lucide-package', nome: 'Estoque' },
+      { id: 'i-lucide-factory', nome: 'Produção' },
+      { id: 'i-lucide-wrench', nome: 'Manutenção' },
+    ],
+  },
+  {
+    nome: 'Tecnologia',
+    icones: [
+      { id: 'i-lucide-database', nome: 'Dados' },
+      { id: 'i-lucide-server', nome: 'Servidor' },
+      { id: 'i-lucide-code', nome: 'Desenvolvimento' },
+      { id: 'i-lucide-life-buoy', nome: 'Suporte' },
+    ],
+  },
+  {
+    nome: 'Saúde',
+    icones: [
+      { id: 'i-lucide-cross', nome: 'Saúde' },
+      { id: 'i-lucide-stethoscope', nome: 'Atendimento' },
+      { id: 'i-lucide-pill', nome: 'Medicamento' },
+      { id: 'i-lucide-activity', nome: 'Indicador' },
+    ],
+  },
+]
+
+export interface Localidade { id: string, nome: string }
+
+export const localidades: Localidade[] = [
+  { id: 'pt-br', nome: 'Brasil' },
+  { id: 'en-us', nome: 'Estados Unidos' },
+  { id: 'global', nome: 'Global' },
+]
+
+export interface Template {
+  id: string
+  nome: string
+  descricao: string
+  icone: string
+  localidades: string[]
+  inclui: string[]
+}
+
+/**
+ * Templates fictícios. No develop, a Localidade Brasil hoje responde
+ * "Não há dados" — o estado vazio é real e está no protótipo como estado.
+ * Estes existem para mostrar como o passo se comporta quando houver.
+ */
+export const templates: Template[] = [
+  {
+    id: 'chamados',
+    nome: 'Central de chamados',
+    descricao: 'Abertura, triagem e acompanhamento de pedidos internos.',
+    icone: 'i-lucide-life-buoy',
+    localidades: ['pt-br', 'global'],
+    inclui: ['Categoria de chamados', 'Formulário de abertura', 'Fluxo de triagem', 'Painel de SLA'],
+  },
+  {
+    id: 'rh',
+    nome: 'Jornada do colaborador',
+    descricao: 'Admissão, férias, benefícios e desligamento num lugar só.',
+    icone: 'i-lucide-users',
+    localidades: ['pt-br'],
+    inclui: ['Categoria de pessoas', 'Fluxo de admissão', 'Solicitação de férias'],
+  },
+  {
+    id: 'juridico',
+    nome: 'Contratos e prazos',
+    descricao: 'Guarda de contratos com alerta de vencimento e reajuste.',
+    icone: 'i-lucide-scale',
+    localidades: ['pt-br', 'global'],
+    inclui: ['Categoria de contratos', 'Alerta de vencimento', 'Correção monetária'],
+  },
+]

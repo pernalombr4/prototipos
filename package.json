@@ -13,6 +13,7 @@
     "@iconify-json/lucide": "^1.2.96",
     "@iconify-json/simple-icons": "^1.2.0",
     "@nuxt/ui": "^4.5.1",
+    "marked": "^18.0.13",
     "nuxt": "^4.4.2"
   },
   "packageManager": "pnpm@10.6.5"

@@ -8,6 +8,13 @@ import {
   corDoPapel,
   type Workspace,
 } from './mocks'
+import ModalCriarWorkspace from './_ModalCriarWorkspace.vue'
+
+// O contexto do protótipo vem dos próprios .md desta pasta, como texto.
+// Fonte única: editar o .md muda o painel, sem duplicar conteúdo.
+import briefingMd from './BRIEFING.md?raw'
+import pesquisaMd from './PESQUISA.md?raw'
+import decisoesMd from './DECISOES.md?raw'
 
 definePageMeta({
   titulo: 'Tela de entrada (Workspaces)',
@@ -123,50 +130,15 @@ function tentarDeNovo() {
 
 /* ------------------- criação: mesma tela, em camada ------------------- */
 const criando = ref(false)
-type PassoCriar = 'intencao' | 'desviado' | 'formulario'
-const passo = ref<PassoCriar>('intencao')
-const form = reactive({ nome: '', referencia: '', descricao: '', icone: 'i-lucide-building-2' })
-const icones = [
-  'i-lucide-building-2', 'i-lucide-users', 'i-lucide-truck',
-  'i-lucide-scale', 'i-lucide-calculator', 'i-lucide-database',
-]
 
 function abrirCriacao() {
-  passo.value = 'intencao'
-  Object.assign(form, { nome: '', referencia: '', descricao: '', icone: 'i-lucide-building-2' })
   criando.value = true
 }
 
-watch(() => form.nome, (nome) => {
-  form.referencia = nome
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-})
-
-const pareceChamado = computed(() => {
-  const n = form.nome.toLowerCase()
-  const pistas = [
-    'preciso', 'solicito', 'solicitação', 'solicitacao', 'chamado', 'pedido',
-    'favor', 'urgente', 'não consigo', 'nao consigo', 'erro', 'problema',
-    'acesso', 'ajuda', 'reembolso', 'férias', 'ferias', 'atestado',
-  ]
-  return n.length > 12 && pistas.some(p => n.includes(p))
-})
-
-const referenciaJaExiste = computed(() =>
-  workspaces.some(w => w.referencia === form.referencia && form.referencia.length > 2))
-
-const podeCriar = computed(() => form.nome.trim().length >= 3 && !referenciaJaExiste.value)
-
-function criar() {
-  criando.value = false
+function workspaceCriado(nome: string) {
   toast.add({
-    title: `Workspace "${form.nome}" criado`,
-    description: 'No produto, a pessoa entraria agora num espaço vazio, só com ela dentro.',
+    title: `Workspace "${nome}" criado`,
+    description: 'No produto, a pessoa entraria agora no espaço recém-criado.',
     icon: 'i-lucide-check',
     color: 'success',
   })
@@ -216,7 +188,7 @@ function criar() {
 
         <!-- Atalho no topo, como sempre esteve. Secundário no peso, não no
              endereço: quem precisa, encontra onde já procurava. -->
-        <UTooltip text="Abre um espaço vazio. Não é aqui que se abre chamado.">
+        <UTooltip text="Abre um espaço novo e vazio para a sua equipe.">
           <UButton
             label="Criar workspace"
             icon="i-lucide-plus"
@@ -471,168 +443,8 @@ function criar() {
       </template>
     </UContainer>
 
-    <!-- 5. Criação: mesma tela, em camada. A pergunta que intercepta o engano. -->
-    <UModal v-model:open="criando" :title="passo === 'formulario' ? 'Criar um workspace' : 'O que você quer fazer?'">
-      <template #body>
-        <Transition
-          mode="out-in"
-          enter-active-class="transition duration-200 ease-out"
-          enter-from-class="opacity-0 translate-x-3"
-          leave-active-class="transition duration-150 ease-in"
-          leave-to-class="opacity-0 -translate-x-3"
-        >
-          <!-- Passo 1 — a pergunta que o produto não faz hoje -->
-          <div v-if="passo === 'intencao'" key="intencao" class="space-y-3">
-            <p class="text-muted">
-              Criar um workspace é raro — quase ninguém precisa. Vamos confirmar antes.
-            </p>
-            <button
-              type="button"
-              class="w-full rounded-lg border border-default p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:bg-elevated/50"
-              @click="passo = 'desviado'"
-            >
-              <div class="flex items-start gap-3">
-                <UIcon name="i-lucide-life-buoy" class="mt-0.5 size-5 shrink-0 text-primary" />
-                <div>
-                  <span class="block font-medium text-highlighted">
-                    Abrir um chamado, pedir algo ou enviar um documento
-                  </span>
-                  <span class="mt-1 block text-sm text-muted">
-                    Para o RH, o jurídico, o TI ou qualquer área da minha empresa.
-                  </span>
-                </div>
-              </div>
-            </button>
-            <button
-              type="button"
-              class="w-full rounded-lg border border-default p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:bg-elevated/50"
-              @click="passo = 'formulario'"
-            >
-              <div class="flex items-start gap-3">
-                <UIcon name="i-lucide-layout-grid" class="mt-0.5 size-5 shrink-0 text-primary" />
-                <div>
-                  <span class="block font-medium text-highlighted">
-                    Criar um espaço novo, vazio, para a minha equipe
-                  </span>
-                  <span class="mt-1 block text-sm text-muted">
-                    Com membros, processos e configuração próprios, separado dos outros.
-                  </span>
-                </div>
-              </div>
-            </button>
-          </div>
-
-          <!-- Passo 1b — quem errou o caminho é devolvido, não bloqueado -->
-          <div v-else-if="passo === 'desviado'" key="desviado">
-            <UAlert
-              icon="i-lucide-map-pin"
-              color="secondary"
-              variant="subtle"
-              title="Então o caminho é outro — e é mais curto"
-              description="Chamados, pedidos e documentos acontecem dentro do workspace da sua empresa. Entre nele e procure por Chamados no menu lateral."
-            />
-            <div class="mt-5 flex flex-wrap gap-3">
-              <UButton label="Escolher meu workspace" icon="i-lucide-log-in" @click="criando = false" />
-              <UButton
-                label="Não é isso, quero mesmo criar"
-                color="neutral"
-                variant="ghost"
-                @click="passo = 'formulario'"
-              />
-            </div>
-          </div>
-
-          <!-- Passo 2 — o formulário, com a consequência escrita -->
-          <div v-else key="formulario" class="space-y-5">
-            <p class="text-muted">
-              Ele nasce vazio e só com você dentro. Depois você convida as pessoas.
-            </p>
-
-            <UFormField
-              label="Nome do espaço"
-              description="Como a equipe vai reconhecer esse espaço na lista. Ex.: Jurídico Aurora, Vértice Log."
-              required
-            >
-              <UInput v-model="form.nome" placeholder="Nome da empresa, área ou equipe" class="w-full" />
-            </UFormField>
-
-            <Transition
-              enter-active-class="transition duration-200 ease-out"
-              enter-from-class="opacity-0 -translate-y-2"
-              leave-active-class="transition duration-150 ease-in"
-              leave-to-class="opacity-0"
-            >
-              <UAlert
-                v-if="pareceChamado"
-                icon="i-lucide-triangle-alert"
-                color="warning"
-                variant="subtle"
-                title="Isso parece o assunto de um chamado, não o nome de um espaço"
-                description="Se a intenção é pedir alguma coisa, o caminho é entrar no workspace da sua empresa."
-                :actions="[{ label: 'Me leva pra lá', color: 'warning', variant: 'solid', onClick: () => (passo = 'desviado') }]"
-              />
-            </Transition>
-
-            <UFormField
-              label="Referência"
-              description="Identificador usado na URL. Preenchido a partir do nome — dá para mudar."
-              :error="referenciaJaExiste ? 'Já existe um workspace com essa referência.' : undefined"
-            >
-              <UInput v-model="form.referencia" class="w-full font-mono text-sm" />
-            </UFormField>
-
-            <UFormField
-              label="Descrição"
-              description="Uma frase dizendo para que serve. É o que aparece no card — sem ela, ele fica mudo."
-            >
-              <UInput v-model="form.descricao" placeholder="Ex.: Chamados, RH e jurídico do Grupo Aurora" class="w-full" />
-            </UFormField>
-
-            <UFormField label="Ícone">
-              <div class="flex flex-wrap gap-2">
-                <UButton
-                  v-for="ic in icones"
-                  :key="ic"
-                  :icon="ic"
-                  square
-                  class="transition-transform hover:scale-110"
-                  :color="form.icone === ic ? 'primary' : 'neutral'"
-                  :variant="form.icone === ic ? 'solid' : 'subtle'"
-                  @click="form.icone = ic"
-                />
-              </div>
-            </UFormField>
-
-            <div>
-              <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-dimmed">
-                Como vai aparecer na sua lista
-              </p>
-              <div class="rounded-xl border border-default bg-elevated/20 p-4 transition-all">
-                <div class="flex size-10 items-center justify-center rounded-lg bg-elevated">
-                  <UIcon :name="form.icone" class="size-5 text-muted" />
-                </div>
-                <h3 class="mt-3 font-medium text-highlighted">
-                  {{ form.nome || 'Nome do workspace' }}
-                </h3>
-                <p class="mt-1 text-sm text-muted">
-                  {{ form.descricao || 'Sem descrição' }}
-                </p>
-                <p class="mt-1 text-xs text-dimmed">
-                  Você ainda não entrou aqui
-                </p>
-              </div>
-            </div>
-          </div>
-        </Transition>
-      </template>
-
-      <template v-if="passo === 'formulario'" #footer>
-        <div class="flex w-full justify-end gap-3">
-          <UButton label="Cancelar" color="neutral" variant="ghost" @click="criando = false" />
-          <UButton label="Criar workspace" icon="i-lucide-check" :disabled="!podeCriar" @click="criar" />
-        </div>
-      </template>
-    </UModal>
+    <!-- 5. Criação: mesma tela, em camada. -->
+    <ModalCriarWorkspace v-model:open="criando" @criado="workspaceCriado" />
 
     <!-- ANDAIME DE PROTÓTIPO — não faz parte da proposta -->
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">
@@ -650,6 +462,18 @@ function criar() {
           :variant="estado === e.valor ? 'solid' : 'subtle'"
           @click="estado = e.valor"
         />
+
+        <span class="ml-auto flex flex-wrap items-center gap-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-dimmed">
+            Por trás
+          </span>
+          <PainelDeContexto
+            :briefing="briefingMd"
+            :pesquisa="pesquisaMd"
+            :decisoes="decisoesMd"
+            repositorio="https://github.com/pernalombr4/prototipos/tree/main/app/pages/tela-de-workspaces"
+          />
+        </span>
       </UContainer>
     </div>
   </div>

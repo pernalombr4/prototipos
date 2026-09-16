@@ -14,7 +14,10 @@ function rotasDasPaginas(): string[] {
   const dir = fileURLToPath(new URL('./app/pages', import.meta.url))
   return readdirSync(dir, { recursive: true })
     .map(String)
-    .filter(arquivo => arquivo.endsWith('.vue'))
+    .map(arquivo => arquivo.replace(/\\/g, '/'))
+    // `_Componente.vue` é peça de protótipo, não página — mesma regra do
+    // `pages.pattern` abaixo. As duas listas têm que concordar.
+    .filter(arquivo => arquivo.endsWith('.vue') && !arquivo.split('/').pop()!.startsWith('_'))
     .map((arquivo) => {
       const rota = arquivo
         .replace(/\\/g, '/')
@@ -47,7 +50,10 @@ export default defineNuxtConfig({
   // Só .vue vira rota. Sem isso, um `mocks.ts` dentro da pasta do protótipo é
   // tratado como página, o Nuxt tenta usá-lo como componente, o prerender
   // aborta — e o site publica só a home, sem ninguém avisar.
-  pages: { pattern: ['**/*.vue'] },
+  //
+  // `_Nome.vue` fica de fora: é como um protótipo tem componentes próprios
+  // sem sair da sua pasta e sem virar rota.
+  pages: { pattern: ['**/*.vue', '!**/_*.vue'] },
 
   nitro: {
     prerender: {

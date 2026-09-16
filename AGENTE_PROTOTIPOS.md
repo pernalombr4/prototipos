@@ -119,6 +119,11 @@ O que precisa estar no `BRIEFING.md` quando esta fase fecha:
 do produto, não bloqueio — abra o configurador. Recurso que depende de outro (Campos →
 Formulários → tela) só parece ausente porque a dependência não foi montada.
 
+**Fluxo de vários passos se percorre até o fim.** Preencha o que for preciso, abra cada campo,
+avance até o último passo — e **pare antes de confirmar**. Nada de criar, salvar ou excluir no
+develop: o objetivo é ver, não alterar. Se algum passo só abrir depois de gravar, escreva isso
+como limitação em vez de adivinhar o que vinha depois.
+
 **Armadilhas conhecidas do develop** — já custaram tempo, não caia de novo:
 
 | Sintoma | O que é |
@@ -369,6 +374,7 @@ caso sem procurar em outro lugar.
 app/pages/<slug>/
 ├── index.vue            tela principal  (rota /<slug>)
 ├── <outra-tela>.vue     demais telas    (rota /<slug>/<outra-tela>)
+├── _Componente.vue      peça do protótipo — o "_" impede que vire rota
 ├── mocks.ts             o dado do protótipo — fictício, tipado, sem API
 ├── BRIEFING.md          demanda + o que o develop faz hoje (Fases 1 e 2)
 ├── PESQUISA.md          as 5 referências + as extras (Fase 3)
@@ -391,6 +397,11 @@ definePageMeta({
 Fora da pasta do protótipo, o agente só escreve em `app/components/ux/`,
 `COMPONENTES-CUSTOM.md` e `README.md`. **Não toca** nesta spec nem no `CLAUDE.md` sem pedido
 explícito.
+
+**O protótipo carrega o próprio contexto.** Toda tela principal traz, no rodapé de andaime, o
+`<PainelDeContexto>` com o briefing, a pesquisa e as decisões — importados dos `.md` da própria
+pasta com `?raw`, sem cópia paralela. Assim o protótipo se defende sozinho quando for mostrado
+a outra pessoa, em vez de depender de alguém abrir o repositório.
 
 ---
 
@@ -452,3 +463,10 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
 16. **Ação do topo continua no topo.** Rebaixe o peso visual, nunca o endereço.
 17. **Entrega sem movimento não é alta fidelidade.** Transição, hover e estado de
     carregamento são parte do que está sendo avaliado.
+18. **Percorra o fluxo inteiro antes de redesenhá-lo.** Formulário de vários passos se
+    atravessa até o último — preenchendo o que for preciso e **parando antes de confirmar**.
+    Redesenhar tendo visto só a primeira tela é adivinhar. O que se descobre no passo 3
+    costuma mudar o passo 1.
+19. **Não resolva na tela B um problema da tela A.** Cada jornada carrega o próprio objetivo.
+    Enfiar o conserto de outra confusão no meio de um fluxo que não é dela deixa as duas
+    piores.

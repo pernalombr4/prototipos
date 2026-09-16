@@ -58,6 +58,34 @@ funcionalidade faltando.
 | 6 | **O convite pendente vira um card apagado** ("Alou"), borrado, sem ação visível. | O que mais precisa de ação é o que menos parece acionável. |
 | 7 | **O modal de criação não desambigua.** Pede Nome, Referência, Descrição e Ícone; o Nome aceita "Apenas letras, números e espaços, de 3 a 50 caracteres". | O assunto de um chamado passa nessa validação. Nada no caminho pergunta "é isso mesmo que você quer?". |
 
+### A jornada real de criar um workspace
+
+Percorrida inteira em 16/09/2026, **sem finalizar a criação**. São dois passos.
+
+**Passo 1 — Dados Gerais**
+
+| Campo | Como é | O que incomoda |
+|---|---|---|
+| **Nome*** | Texto. "Apenas letras, números e espaços. De 3 a 50 caracteres." | — |
+| **Referência*** | Preenchida a partir do nome | O texto de ajuda promete **snake_case** e o campo entrega **kebab-case** (`teste-jornada-criacao`). E nada diz que isso é o endereço do workspace |
+| **Descrição** | Texto com contador | É o único campo opcional — e é justamente o que faz o card não ficar mudo na tela de entrada |
+| **Ícone*** | **Árvore de categorias**: Jurídico, Imóveis, Tecnologia, Gestão de Usuários, Finanças, Configurações, Saúde, Dados, Educação… cada uma abre em ~6 ícones nomeados (Balança, Certidão, Martelo…), mais um botão **Busca Avançada** | **Obrigatório.** Escolher uma decoração custa mais decisões do que escolher o nome. E depois de escolhido, o campo mostra **`carbon:scales`** — o id técnico, não o nome nem o desenho |
+
+**Passo 2 — Selecionar Template (Opcional)**
+
+- Ao clicar em **Próximo**, o modal fica **~4 segundos em branco**, sem skeleton nem spinner —
+  só um retângulo vazio com os botões embaixo.
+- Depois aparecem dois campos: **Localidade** (Brasil pt-br, Estados Unidos en-us, Global) e
+  **Templates**.
+- A Localidade **parece seleção única e é múltipla**: o campo exibe um rótulo só, mas a lista
+  marca vários com check.
+- Em **Brasil (pt-br)**, Templates responde **"Não há dados"**. O passo existe inteiro para
+  oferecer algo que, na localidade padrão, não existe.
+- Botões: **Cancelar · Voltar · Criar Workspace**.
+
+Resumo: três campos obrigatórios, sendo um deles decoração escolhida numa árvore; um passo
+inteiro que abre em branco e costuma terminar vazio.
+
 ### Achado extra (fora do escopo, mas registrado)
 
 Os botões da barra superior expõem **chaves de tradução cruas** como nome acessível:
