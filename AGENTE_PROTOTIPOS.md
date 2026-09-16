@@ -131,9 +131,9 @@ informação; silêncio não é.
   (`mcp__Claude_Browser__*`): ele chega sem a sessão SSO e para no login.
 - **Credenciais:** `config/tokens.md` — local, ignorado pelo git, montado a partir de
   `config/tokens.example.md`, que diz de onde vem cada valor. O `API_TOKEN` de develop serve
-  para **ler** dados e esquemas pela API: é assim que se descobre o nome real dos campos em
-  vez de adivinhar pela tela. Se o arquivo não existir, **pare e peça à Mikaela** — nunca
-  invente credencial.
+  para **ler** dados e esquemas — é assim que se descobre o nome real dos campos — e para
+  **preparar cenário em massa**, nos limites da seção "Onde explorar, e como". Se o arquivo não
+  existir, **pare e peça à Mikaela** — nunca invente credencial.
 - **Nunca digitar senha em formulário.** Se a sessão caiu e apareceu o Keycloak, volte pelo
   botão **Microsoft** — o broker reautentica sem senha. Se nem isso funcionar, pare e peça
   para ela entrar.
@@ -152,9 +152,40 @@ do produto, não bloqueio — abra o configurador. Recurso que depende de outro 
 Formulários → tela) só parece ausente porque a dependência não foi montada.
 
 **Fluxo de vários passos se percorre até o fim.** Preencha o que for preciso, abra cada campo,
-avance até o último passo — e **pare antes de confirmar**. Nada de criar, salvar ou excluir no
-develop: o objetivo é ver, não alterar. Se algum passo só abrir depois de gravar, escreva isso
-como limitação em vez de adivinhar o que vinha depois.
+avance até o último passo. Se algum passo só abrir depois de gravar, grave — no lugar certo,
+que é o de baixo.
+
+### Onde explorar, e como
+
+> **Toda exploração acontece em UM workspace só: o de exploração.**
+> `WORKSPACE_EXPLORACAO` e `URL_EXPLORACAO` estão no `config/tokens.md`; a porta de entrada é a
+> tela de **configurações do sistema** dele.
+>
+> **Nunca explore em outro workspace.** Os demais têm dado de gente de verdade, e criar, editar
+> ou apagar lá é estrago real, não teste.
+
+**Dentro do workspace de exploração, pode criar, editar e apagar à vontade** — item, categoria,
+campo, formulário, tela. É assim que se descobre o que a tela faz, quanto custa cada passo e
+onde ela trava. Fluxo que só se entende gravando, grave.
+
+**Mas a exploração é sempre PELA TELA.** Criar por API o que você ia criar clicando é pular
+exatamente o que está sendo medido: quantos campos, quantas decisões, o que a tela avisa e o
+que ela esconde.
+
+**A exceção é o preparo em massa.** Quando a avaliação precisa de volume — 200 itens para ver a
+lista paginar, 40 categorias para ver o menu quebrar, um workspace cheio para ver a busca
+importar —, encher pela interface é perda de tempo e não ensina nada. Esse **preparo** pode ir
+pela API.
+
+| | Como fazer |
+|---|---|
+| **Preparo** — encher, popular, montar o cenário antes de avaliar | API liberada |
+| **Exploração** — a jornada que você vai descrever no `BRIEFING.md` | **Só pela tela** |
+
+A regra para decidir: **se a ação faz parte do que você vai contar no briefing, ela acontece na
+tela.** Se é só o palco que precisava estar montado antes, pode ir por API. E o que foi
+preparado por API se declara no briefing — quem lê precisa saber que aquele volume não foi
+criado à mão.
 
 **Armadilhas conhecidas do develop** — já custaram tempo, não caia de novo:
 
@@ -590,3 +621,10 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
     opinião de UX sobre esse assunto ou sobre assunto vizinho. Achou, entra no `BRIEFING.md`
     citando a fricção pelo código. Não achou, escreva que procurou. **Só leitura** — quem
     escreve lá é o agente de lá.
+31. **Um workspace só para explorar.** O `WORKSPACE_EXPLORACAO` do `config/tokens.md`, entrando
+    pela tela de configurações do sistema. **Nunca outro** — os demais têm dado de gente de
+    verdade. Lá dentro, criar, editar e apagar é liberado.
+32. **A exploração é pela tela; a API só prepara o palco.** Criar por API o que se criaria
+    clicando é pular exatamente o que está sendo medido. Volume para o cenário (centenas de
+    itens, dezenas de categorias) pode ir por API — e vai declarado no `BRIEFING.md`. **Se a
+    ação entra no que você vai contar no briefing, ela acontece na tela.**

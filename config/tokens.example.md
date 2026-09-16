@@ -13,8 +13,15 @@ BASE_URL=
 # Usuário de automação usado na investigação
 USER_EMAIL=
 
-# Token de leitura da API de develop:
-# serve para ler dados e esquemas de campo, nunca para escrever
+# O ÚNICO workspace onde a exploração acontece, e a tela por onde ela começa.
+# Nunca explorar em outro: os demais têm dado de gente de verdade.
+WORKSPACE_EXPLORACAO=
+URL_EXPLORACAO=
+
+# Token da API de develop.
+# Leitura: esquemas e estrutura de campo, sempre liberado.
+# Escrita: SÓ para preparo em massa de cenário de teste, no workspace de
+# exploração. A jornada avaliada acontece pela tela — ver a Fase 2 da spec.
 API_TOKEN=
 
 # Pasta local de onde esses valores vieram

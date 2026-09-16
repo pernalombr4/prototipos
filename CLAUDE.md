@@ -69,6 +69,22 @@ Isso não tem exceção nem versão temporária. A regra inteira está na **Part
   de `config/tokens.example.md`, que diz de onde vem cada valor. **Nunca commitar credencial:
   este repositório é público.**
 - **Ambiente do produto: develop, sempre** (`BASE_URL` do `config/tokens.md`). Nunca produção.
+- **Exploração: só no workspace de exploração** (`WORKSPACE_EXPLORACAO` / `URL_EXPLORACAO`),
+  entrando pela tela de configurações do sistema. Nunca em outro workspace — os demais têm dado
+  de gente de verdade.
+
+## Explorar: pela tela. API: só para preparar
+
+Dentro do workspace de exploração, **criar, editar e apagar é liberado** — é assim que se
+descobre o que a tela faz e onde ela trava.
+
+| | Como |
+|---|---|
+| **Preparo** — encher com volume antes de avaliar (200 itens, 40 categorias) | API liberada, e **declarado no briefing** |
+| **Exploração** — a jornada que vai para o `BRIEFING.md` | **só pela tela** |
+
+Critério: **se a ação entra no que você vai contar no briefing, ela acontece na tela.** Regras
+31 e 32 da Parte 6.
 
 ## Comandos
 
