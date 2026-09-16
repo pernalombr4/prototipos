@@ -71,6 +71,16 @@ Percorrida inteira em 16/09/2026, **sem finalizar a criação**. São dois passo
 | **Descrição** | Texto com contador | É o único campo opcional — e é justamente o que faz o card não ficar mudo na tela de entrada |
 | **Ícone*** | **Árvore de categorias**: Jurídico, Imóveis, Tecnologia, Gestão de Usuários, Finanças, Configurações, Saúde, Dados, Educação… cada uma abre em ~6 ícones nomeados (Balança, Certidão, Martelo…), mais um botão **Busca Avançada** | **Obrigatório.** Escolher uma decoração custa mais decisões do que escolher o nome. E depois de escolhido, o campo mostra **`carbon:scales`** — o id técnico, não o nome nem o desenho |
 
+**O que o "Busca Avançada" abre** (conferido em 16/09/2026): uma gaveta lateral com a
+biblioteca inteira de ícones — `3d-cursor`, `accessibility-alt`, `accumulation-rain`… — com o
+**slug técnico em inglês embaixo de cada um** e um botão de copiar. A busca é por esse slug:
+quem procura "balança" não acha nada; precisa saber que é `scale`.
+
+**E não existe envio de imagem em lugar nenhum desse fluxo.** O campo aceita só ícone de
+biblioteca. Mas o que a empresa quer colocar ali é o **logo dela** — o campo é de identidade,
+não de decoração —, e o schema da API guarda `icon` como string, que comportaria a URL de uma
+imagem. É a lacuna que a proposta preenche.
+
 **Passo 2 — Selecionar Template (Opcional)**
 
 - Ao clicar em **Próximo**, o modal fica **~4 segundos em branco**, sem skeleton nem spinner —

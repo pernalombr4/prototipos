@@ -134,6 +134,41 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 9 — 16/09/2026 · a identidade sai de baixo do "opcional"
+
+**Pedido:** *"esse construtor aqui ter todos os outros campos escondidos pode ser ruim, não? pelo
+menos o ícone que é importante pras pessoas. e saiba que o ícone nem sempre é ÍCONE mesmo. pode
+ser uma imagem. é logo de fato. a empresa pode querer botar a imagem."*
+
+**Fui conferir o que faltava ver.** O botão **Busca Avançada** do campo Ícone abre uma gaveta
+com a biblioteca inteira, cada ícone com o **slug técnico em inglês** embaixo (`3d-cursor`,
+`accessibility-alt`) e um botão de copiar. A busca é por esse slug: quem procura "balança" não
+acha nada. E **não há envio de imagem em nenhum ponto do fluxo** — está no Briefing.
+
+**As duas mudanças:**
+
+1. **A identidade voltou para a superfície, ao lado do nome.** Um quadrado clicável à esquerda
+   do campo, mostrando o logo ou o ícone atual, com um lápis no hover. É o mesmo par que
+   aparece no card depois — nome e identidade lado a lado —, e resolve o erro que eu tinha
+   cometido: enfiar em "opcional" uma decisão que as pessoas querem tomar. **Descrição e
+   endereço continuam recolhidos**, porque esses sim são secundários de verdade.
+2. **O campo passou a aceitar as duas naturezas.** O popover tem duas abas:
+   - **Imagem** — área de arrastar e soltar para o **logo da empresa**, com prévia, trocar e
+     remover. É a lacuna que o produto não cobre hoje;
+   - **Ícone** — a biblioteca, buscável **por nome e categoria em português** ("balança",
+     "jurídico"), não por slug em inglês.
+
+   O ícone sugerido pelo nome continua valendo como padrão: quem não decidir nada sai com algo
+   coerente.
+
+**Sobre o nome do campo:** a tela chama de "Ícone", e a minha regra é usar o nome que está na
+tela. Mas aqui o nome está errado sobre a própria coisa — é a identidade do espaço, e a empresa
+quer o logo dela. O protótipo propõe tratar como **logo ou ícone** e deixa a divergência
+registrada, em vez de herdar o rótulo por inércia.
+
+**O que é maquete:** a imagem enviada vive só nesta aba, por `object URL`. Não sobe para lugar
+nenhum — protótipo é 100% front-end.
+
 ### Rodada 8 — 16/09/2026 · o card volta ao tamanho da rodada 6
 
 **Pedido:** *"agora ta pequeno demais. pode voltar os cards pra como eram antes"*

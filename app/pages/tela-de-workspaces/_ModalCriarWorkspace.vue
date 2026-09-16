@@ -22,12 +22,51 @@ const form = reactive({
   nome: '',
   referencia: '',
   descricao: '',
+  /** Ícone da biblioteca. Vale quando não há logo enviado. */
   icone: '',
+  /** Logo enviado pela empresa. Ganha do ícone quando existe. */
+  logo: null as string | null,
+  logoNome: '',
   template: 'zero',
 })
+
+/** O campo do produto chama "Ícone", mas aceita a identidade da empresa —
+    que na prática é um logo. Aqui as duas naturezas convivem. */
+const identidade = ref<'icone' | 'imagem'>('icone')
+const entradaDeArquivo = ref<HTMLInputElement>()
+const arrastando = ref(false)
+
+function aplicarArquivo(arquivo: File | undefined) {
+  if (!arquivo || !arquivo.type.startsWith('image/')) return
+  if (form.logo) URL.revokeObjectURL(form.logo)
+  // Maquete: a imagem vive só nesta aba, via object URL. Não sobe para lugar nenhum.
+  form.logo = URL.createObjectURL(arquivo)
+  form.logoNome = arquivo.name
+  identidade.value = 'imagem'
+}
+
+function aoSoltar(e: DragEvent) {
+  arrastando.value = false
+  aplicarArquivo(e.dataTransfer?.files?.[0])
+}
+
+function aoEscolherArquivo(e: Event) {
+  aplicarArquivo((e.target as HTMLInputElement).files?.[0])
+}
+
+function escolherIcone(id: string) {
+  removerLogo()
+  form.icone = id
+}
+
+function removerLogo() {
+  if (form.logo) URL.revokeObjectURL(form.logo)
+  form.logo = null
+  form.logoNome = ''
+  identidade.value = 'icone'
+}
 const referenciaEditada = ref(false)
 const detalhesAbertos = ref(false)
-const mostrarTodosIcones = ref(false)
 const buscaIcone = ref('')
 const locaisSelecionados = ref<string[]>(['pt-br'])
 const criando = ref(false)
@@ -37,10 +76,11 @@ watch(aberto, (v) => {
   passo.value = 1
   referenciaEditada.value = false
   detalhesAbertos.value = false
-  mostrarTodosIcones.value = false
   buscaIcone.value = ''
   locaisSelecionados.value = ['pt-br']
-  Object.assign(form, { nome: '', referencia: '', descricao: '', icone: '', template: 'zero' })
+  removerLogo()
+  Object.assign(form, { nome: '', referencia: '', descricao: '', icone: '', logo: null, logoNome: '', template: 'zero' })
+  identidade.value = 'icone'
 })
 
 /* -------- referência: espelha o nome até alguém mexer nela à mão -------- */
@@ -89,14 +129,6 @@ const iconesFiltrados = computed(() => {
   if (!termo) return todosIcones.value
   return todosIcones.value.filter(i =>
     i.nome.toLowerCase().includes(termo) || i.categoria.toLowerCase().includes(termo))
-})
-
-/** Atalho: um ícone por categoria, para resolver sem abrir a grade inteira. */
-const iconesEmDestaque = computed(() => {
-  const destaque = categoriasDeIcone.map(c => ({ ...c.icones[0]!, categoria: c.nome }))
-  const sugerido = todosIcones.value.find(i => i.id === iconeSugerido.value)
-  if (sugerido && !destaque.some(d => d.id === sugerido.id)) destaque.unshift(sugerido)
-  return destaque.slice(0, 6)
 })
 
 /* ---------------------------- templates ---------------------------- */
@@ -153,14 +185,152 @@ function criar() {
                 É o nome que a sua equipe vai procurar na lista. Dá para mudar depois.
               </p>
 
-              <UInput
-                v-model="form.nome"
-                autofocus
-                size="xl"
-                placeholder="Jurídico Aurora, Vértice Log, RH…"
-                class="mt-5 w-full"
-                :ui="{ base: 'text-base' }"
-              />
+              <!-- Identidade e nome juntos: é o par que aparece no card, e o
+                   logo deixa de ficar escondido atrás de "opcional". -->
+              <div class="mt-5 flex items-center gap-3">
+                <UPopover :content="{ align: 'start' }">
+                  <button
+                    type="button"
+                    class="group/logo relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-default transition-all duration-200 hover:border-primary hover:shadow-sm"
+                    :class="!form.logo && 'bg-elevated'"
+                    aria-label="Escolher o logo ou o ícone do espaço"
+                  >
+                    <img v-if="form.logo" :src="form.logo" alt="" class="size-full object-cover">
+                    <UIcon v-else :name="iconeEfetivo" class="size-5 text-muted" />
+                    <span class="absolute inset-0 flex items-center justify-center bg-default/70 opacity-0 transition-opacity group-hover/logo:opacity-100">
+                      <UIcon name="i-lucide-pencil" class="size-4 text-highlighted" />
+                    </span>
+                  </button>
+
+                  <template #content>
+                    <div class="w-80 p-3">
+                      <div class="mb-3 flex gap-0.5 rounded-md border border-default p-0.5">
+                        <UButton
+                          label="Ícone"
+                          icon="i-lucide-shapes"
+                          size="xs"
+                          block
+                          :color="identidade === 'icone' ? 'primary' : 'neutral'"
+                          :variant="identidade === 'icone' ? 'soft' : 'ghost'"
+                          @click="identidade = 'icone'"
+                        />
+                        <UButton
+                          label="Imagem"
+                          icon="i-lucide-image"
+                          size="xs"
+                          block
+                          :color="identidade === 'imagem' ? 'primary' : 'neutral'"
+                          :variant="identidade === 'imagem' ? 'soft' : 'ghost'"
+                          @click="identidade = 'imagem'"
+                        />
+                      </div>
+
+                      <!-- Imagem: o logo da empresa -->
+                      <div v-if="identidade === 'imagem'">
+                        <div
+                          v-if="!form.logo"
+                          class="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed p-6 text-center transition-colors"
+                          :class="arrastando ? 'border-primary bg-primary/5' : 'border-default hover:border-primary/60'"
+                          @click="entradaDeArquivo?.click()"
+                          @dragover.prevent="arrastando = true"
+                          @dragleave="arrastando = false"
+                          @drop.prevent="aoSoltar"
+                        >
+                          <UIcon name="i-lucide-upload" class="size-5 text-muted" />
+                          <p class="text-sm font-medium text-highlighted">
+                            Arraste o logo aqui
+                          </p>
+                          <p class="text-xs text-muted">
+                            ou clique para escolher · PNG, JPG ou SVG
+                          </p>
+                        </div>
+
+                        <div v-else class="space-y-3">
+                          <div class="flex items-center gap-3 rounded-lg border border-default p-3">
+                            <img :src="form.logo" alt="" class="size-12 shrink-0 rounded-md object-cover">
+                            <p class="min-w-0 flex-1 truncate text-sm text-muted">
+                              {{ form.logoNome }}
+                            </p>
+                          </div>
+                          <div class="flex gap-2">
+                            <UButton
+                              label="Trocar"
+                              icon="i-lucide-refresh-cw"
+                              size="xs"
+                              color="neutral"
+                              variant="subtle"
+                              @click="entradaDeArquivo?.click()"
+                            />
+                            <UButton
+                              label="Remover"
+                              icon="i-lucide-trash-2"
+                              size="xs"
+                              color="neutral"
+                              variant="ghost"
+                              @click="removerLogo"
+                            />
+                          </div>
+                        </div>
+
+                        <input
+                          ref="entradaDeArquivo"
+                          type="file"
+                          accept="image/*"
+                          class="hidden"
+                          @change="aoEscolherArquivo"
+                        >
+                      </div>
+
+                      <!-- Ícone: biblioteca, buscável em português -->
+                      <div v-else class="space-y-3">
+                        <UInput
+                          v-model="buscaIcone"
+                          icon="i-lucide-search"
+                          size="sm"
+                          placeholder="Buscar por nome ou categoria"
+                          class="w-full"
+                        />
+                        <div class="max-h-56 overflow-y-auto pr-1">
+                          <div v-for="cat in categoriasDeIcone" :key="cat.nome" class="mb-3">
+                            <template v-if="cat.icones.some(i => iconesFiltrados.some(f => f.id === i.id))">
+                              <p class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-dimmed">
+                                {{ cat.nome }}
+                              </p>
+                              <div class="flex flex-wrap gap-1.5">
+                                <UTooltip
+                                  v-for="ic in cat.icones.filter(i => iconesFiltrados.some(f => f.id === i.id))"
+                                  :key="ic.id"
+                                  :text="ic.nome"
+                                >
+                                  <button
+                                    type="button"
+                                    class="flex size-8 items-center justify-center rounded-md border transition-all duration-200 hover:-translate-y-0.5"
+                                    :class="!form.logo && iconeEfetivo === ic.id
+                                      ? 'border-primary bg-primary/10 text-primary'
+                                      : 'border-default text-muted hover:border-primary/40'"
+                                    @click="escolherIcone(ic.id)"
+                                  >
+                                    <UIcon :name="ic.id" class="size-4" />
+                                  </button>
+                                </UTooltip>
+                              </div>
+                            </template>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </UPopover>
+
+                <UInput
+                  v-model="form.nome"
+                  autofocus
+                  size="xl"
+                  placeholder="Jurídico Aurora, Vértice Log, RH…"
+                  class="flex-1"
+                  :ui="{ base: 'text-base' }"
+                />
+              </div>
               <p class="mt-2 h-4 text-xs" :class="nomeCurto ? 'text-error' : 'text-dimmed'">
                 {{ nomeCurto ? 'Pelo menos 3 caracteres.' : 'De 3 a 50 caracteres.' }}
               </p>
@@ -189,7 +359,7 @@ function criar() {
                   class="size-4 transition-transform duration-200"
                   :class="detalhesAbertos && 'rotate-90'"
                 />
-                Ícone, descrição e endereço
+                Descrição e endereço
                 <span class="font-normal text-dimmed">— opcional</span>
               </button>
 
@@ -202,76 +372,6 @@ function criar() {
                 leave-to-class="opacity-0 max-h-0"
               >
                 <div v-if="detalhesAbertos" class="space-y-5 pt-5">
-                  <!-- ÍCONE: escolhe vendo o desenho, não navegando uma árvore -->
-                  <div>
-                    <div class="mb-2 flex items-center justify-between">
-                      <label class="text-sm font-medium text-highlighted">Ícone</label>
-                      <UButton
-                        :label="mostrarTodosIcones ? 'Ver menos' : 'Ver todos'"
-                        size="xs"
-                        color="neutral"
-                        variant="link"
-                        @click="mostrarTodosIcones = !mostrarTodosIcones"
-                      />
-                    </div>
-
-                    <div v-if="!mostrarTodosIcones" class="flex flex-wrap gap-2">
-                      <UTooltip v-for="ic in iconesEmDestaque" :key="ic.id" :text="ic.nome">
-                        <button
-                          type="button"
-                          class="flex size-10 items-center justify-center rounded-lg border transition-all duration-200 hover:-translate-y-0.5"
-                          :class="iconeEfetivo === ic.id
-                            ? 'border-primary bg-primary/10 text-primary'
-                            : 'border-default text-muted hover:border-primary/40'"
-                          @click="form.icone = ic.id"
-                        >
-                          <UIcon :name="ic.id" class="size-5" />
-                        </button>
-                      </UTooltip>
-                    </div>
-
-                    <div v-else class="animate-[entrada_0.25s_ease-out_both] space-y-3">
-                      <UInput
-                        v-model="buscaIcone"
-                        icon="i-lucide-search"
-                        size="sm"
-                        placeholder="Buscar por nome ou categoria"
-                        class="w-full"
-                      />
-                      <div class="max-h-56 overflow-y-auto pr-1">
-                        <div
-                          v-for="cat in categoriasDeIcone"
-                          :key="cat.nome"
-                          class="mb-4"
-                        >
-                          <template v-if="cat.icones.some(i => iconesFiltrados.some(f => f.id === i.id))">
-                            <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-dimmed">
-                              {{ cat.nome }}
-                            </p>
-                            <div class="flex flex-wrap gap-2">
-                              <UTooltip
-                                v-for="ic in cat.icones.filter(i => iconesFiltrados.some(f => f.id === i.id))"
-                                :key="ic.id"
-                                :text="ic.nome"
-                              >
-                                <button
-                                  type="button"
-                                  class="flex size-9 items-center justify-center rounded-lg border transition-all duration-200 hover:-translate-y-0.5"
-                                  :class="iconeEfetivo === ic.id
-                                    ? 'border-primary bg-primary/10 text-primary'
-                                    : 'border-default text-muted hover:border-primary/40'"
-                                  @click="form.icone = ic.id"
-                                >
-                                  <UIcon :name="ic.id" class="size-4.5" />
-                                </button>
-                              </UTooltip>
-                            </div>
-                          </template>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                   <UFormField
                     label="Descrição"
                     :description="`Uma frase dizendo para que serve. ${form.descricao.length}/140`"
@@ -441,15 +541,16 @@ function criar() {
           </p>
 
           <div class="mt-4 rounded-xl border border-default bg-default p-4 shadow-sm transition-all duration-300">
-            <div class="flex size-10 items-center justify-center rounded-lg bg-elevated transition-colors">
+            <div class="flex size-10 items-center justify-center overflow-hidden rounded-lg" :class="!form.logo && 'bg-elevated'">
               <Transition
                 mode="out-in"
                 enter-active-class="transition duration-200"
-                enter-from-class="opacity-0 scale-50 rotate-12"
+                enter-from-class="opacity-0 scale-50"
                 leave-active-class="transition duration-100"
                 leave-to-class="opacity-0 scale-50"
               >
-                <UIcon :key="iconeEfetivo" :name="iconeEfetivo" class="size-5 text-muted" />
+                <img v-if="form.logo" :key="form.logo" :src="form.logo" alt="" class="size-full object-cover">
+                <UIcon v-else :key="iconeEfetivo" :name="iconeEfetivo" class="size-5 text-muted" />
               </Transition>
             </div>
             <h3 class="mt-3 line-clamp-2 font-medium text-highlighted">

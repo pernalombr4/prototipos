@@ -545,3 +545,11 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
 27. **Alinhamento por altura mínima é aceitável quando o card tem presença.** O buraco embaixo
     do item curto só pesa quando o card já está comprimido — e aí o problema é a compressão,
     não o alinhamento.
+28. **Recolher campo é decidir por quem usa — e só vale para o que é mesmo secundário.**
+    Identidade (nome, logo, cor) as pessoas *querem* escolher; descrição e identificador
+    técnico, quase nunca. Esconder atrás de "opcional" o que a pessoa procura é tirar dela uma
+    decisão que ela ia tomar de qualquer jeito. Na dúvida, pergunte.
+29. **O rótulo da tela nem sempre diz o que a coisa é.** "Ícone" que guarda o logo da empresa é
+    campo de identidade com nome errado. O nome vem da tela (regra do produto), mas quando ele
+    contradiz a coisa, o protótipo propõe o nome certo **e registra a divergência** no
+    `DECISOES.md` — em vez de herdar o engano por inércia.
