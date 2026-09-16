@@ -41,22 +41,50 @@ Os quatro concordam em três coisas, e as três contrariavam o meu bloco:
 2. **O logo é o controle.** Clicar no símbolo abre a escolha (Ícone ou Imagem) e o botão de
    trocar. O campo "Marca", com prévia, segmentado e botão soltos na linha, deixou de existir:
    eram quatro pesos diferentes para uma decisão que quase ninguém revisita.
-3. **"Idioma padrão" saiu da Identidade** e virou a primeira linha de "Comportamento da
-   interface". Identidade é quem o workspace é; idioma é preferência do que os membros veem, que
-   é exatamente o assunto daquele cartão. A ressalva importante ("trocar aqui não mexe no que
-   você criou") foi para o "?" da linha, com um botão que leva aos Dicionários.
-4. **A linha de ajuste ganhou um slot de controle**, para o idioma usar a mesma estrutura das
-   chaves e o select cair na mesma coluna dos switches. Alinhamento mantido, um componente só.
-5. O resumo da aba passou de "Nome, marca, comportamento…" para "**Logo, nome**, comportamento…",
-   e a busca de configuração agora acha "Logo do workspace" por `marca`, `ícone`, `símbolo` e
+3. **"Idioma padrão" saiu da Identidade.** Identidade é quem o workspace é; idioma é padrão de
+   comportamento, e o HubSpot separa as duas coisas.
+4. A busca de configuração agora acha "Logo do workspace" por `marca`, `ícone`, `símbolo` e
    `avatar`.
+
+### Correção no meio da rodada
+
+Enquanto eu montava, chegou:
+
+> "nome e referencia devem ficar lado a lado, em metade do tamanho, e descriçao abaixo
+>
+> e o campo idioma padrao nao tem que estar dentro de comportamento da interface. deve haver uma
+> sessao de account defaults como é no hubspot.
+>
+> pode botar idioma, fuso e moeda tambem"
+
+Nas duas ela estava certa, e a segunda corrige um atalho meu: eu tinha jogado o idioma dentro de
+"Comportamento da interface" para não criar um cartão com uma linha só. Com fuso e moeda ao
+lado, o cartão tem três campos e o problema deixa de existir.
+
+5. **Nome e Referência lado a lado**, metade da largura cada, ao lado do logo. **Descrição
+   embaixo**, na largura inteira.
+6. **Seção nova: "Padrões do workspace"**, com **idioma, fuso horário e moeda** em três colunas.
+   Três campos do mesmo tipo pedem grade de campos, não linha de ajuste: cada um ocupa um terço e
+   a seção não fica com meia largura vazia.
+7. O idioma voltou a ter a ressalva visível ("o que **você** criou se traduz em Dicionários"),
+   com o link para a aba. Em campo de formulário isso cabe na ajuda, sem precisar do "?".
+
+**O nome da seção.** O HubSpot chama de "Account Defaults", e eu escrevi **"Padrões do
+workspace"**, não "Padrões da conta": no ENSPACE, conta é a da pessoa (tem Painel do Usuário e
+carteira própria), e a auditoria já registrou que confundir workspace com pessoa é uma das
+fricções desta tela (S3-F5). O padrão é o mesmo; o substantivo é o que existe aqui.
+
+**Fuso e moeda não existem no produto hoje.** São proposta, e estão marcados como invenção no
+`mocks.ts`. A moeda tem precedente na API, que já enumera BRL, USD, EUR e ENCOIN no schema de
+carteira; o fuso não tem nada, e hoje toda data do workspace depende do fuso do navegador de
+quem olha.
 
 ### O que não fiz
 
-- **Não criei um cartão "Preferências"** só para o idioma. Um cartão com uma linha só fragmenta
-  mais do que organiza; e a linha cabe no cartão que já trata do que os membros veem.
 - **Não trouxe o vocabulário de empresa do HubSpot** (endereço, indústria, receita). Um workspace
   do ENSPACE não é uma empresa, é um espaço de trabalho dentro dela.
+- **Não desfiz a grade de duas colunas** de Comportamento e Módulos. Ela resolveu o vazio da
+  rodada 2 e continua valendo com a seção nova acima.
 
 ---
 

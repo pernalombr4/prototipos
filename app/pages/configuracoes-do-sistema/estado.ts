@@ -10,6 +10,7 @@ import {
   comportamento as comportamentoBase,
   modulos as modulosBase,
   identidade as identidadeBase,
+  padroes as padroesBase,
   diasUteisPadrao,
   feriadosImportados,
   ocorrencias as ocorrenciasBase,
@@ -27,7 +28,7 @@ export const abas: { chave: Aba, rotulo: string, resumo: string, icone: string }
   {
     chave: 'basicas',
     rotulo: 'Informações Básicas',
-    resumo: 'Logo, nome, comportamento da interface, módulos e exclusão do workspace.',
+    resumo: 'Identidade, padrões, comportamento da interface, módulos e exclusão do workspace.',
     icone: 'i-lucide-id-card',
   },
   {
@@ -62,6 +63,7 @@ function clonar<T>(valor: T): T {
 
 export const form = reactive({
   identidade: clonar(identidadeBase),
+  padroes: clonar(padroesBase),
   comportamento: Object.fromEntries(comportamentoBase.map(a => [a.chave, a.valor])) as Record<string, boolean>,
   modulos: Object.fromEntries(modulosBase.map(a => [a.chave, a.valor])) as Record<string, boolean>,
   calendario: {
@@ -84,7 +86,7 @@ export const form = reactive({
 
 /** Qual fatia do formulário pertence a cada aba. Cobrança não edita nada. */
 const fatia: Record<Exclude<Aba, 'cobranca'>, () => unknown> = {
-  basicas: () => ({ i: form.identidade, c: form.comportamento, m: form.modulos }),
+  basicas: () => ({ i: form.identidade, p: form.padroes, c: form.comportamento, m: form.modulos }),
   calendario: () => form.calendario,
   notificacoes: () => form.notificacoes,
   dicionarios: () => form.dicionarios.traducoes,
@@ -120,6 +122,7 @@ export function descartar(aba: Aba) {
   const anterior = JSON.parse(salvo[aba]!)
   if (aba === 'basicas') {
     Object.assign(form.identidade, anterior.i)
+    Object.assign(form.padroes, anterior.p)
     Object.assign(form.comportamento, anterior.c)
     Object.assign(form.modulos, anterior.m)
   }
@@ -150,7 +153,9 @@ export const indiceDeBusca: ItemDeBusca[] = [
   { aba: 'basicas', secao: 'identidade', rotulo: 'Nome do workspace', sinonimos: ['renomear', 'título', 'como aparece'] },
   { aba: 'basicas', secao: 'identidade', rotulo: 'Referência', sinonimos: ['slug', 'url', 'endereço', 'identificador'] },
   { aba: 'basicas', secao: 'identidade', rotulo: 'Logo do workspace', sinonimos: ['ícone', 'marca', 'imagem', 'avatar', 'símbolo'] },
-  { aba: 'basicas', secao: 'comportamento', rotulo: 'Idioma padrão', sinonimos: ['linguagem', 'português', 'inglês', 'tradução', 'idioma'] },
+  { aba: 'basicas', secao: 'padroes', rotulo: 'Idioma padrão', sinonimos: ['linguagem', 'português', 'inglês', 'tradução', 'idioma'] },
+  { aba: 'basicas', secao: 'padroes', rotulo: 'Fuso horário', sinonimos: ['hora', 'timezone', 'gmt', 'horário de verão'] },
+  { aba: 'basicas', secao: 'padroes', rotulo: 'Moeda', sinonimos: ['real', 'dólar', 'euro', 'currency', 'valor'] },
   { aba: 'basicas', secao: 'comportamento', rotulo: 'Mostrar categorias', sinonimos: ['tela de início', 'home'] },
   { aba: 'basicas', secao: 'comportamento', rotulo: 'Ignorar permissões para membros full', sinonimos: ['permissão', 'cargo', 'acesso irrestrito'] },
   { aba: 'basicas', secao: 'comportamento', rotulo: 'Ocultar botão de criar', sinonimos: ['criar item', 'botão novo'] },

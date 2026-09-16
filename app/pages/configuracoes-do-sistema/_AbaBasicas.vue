@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Secao from './_Secao.vue'
 import LinhaDeAjuste from './_LinhaDeAjuste.vue'
-import { comportamento, modulos, documentacao, identidade } from './mocks'
+import { comportamento, modulos, documentacao, fusos, identidade, moedas } from './mocks'
 import { form } from './estado'
 
 const emit = defineEmits<{ irPara: [aba: string] }>()
@@ -23,15 +23,6 @@ const marcas = [
   { valor: 'imagem' as const, rotulo: 'Imagem', ajuda: 'Um arquivo PNG, JPG ou GIF sem animação.' },
 ]
 
-/** O idioma usa a mesma linha das chaves de ligar/desligar, com outro controle. */
-const ajusteDeIdioma = {
-  chave: 'idioma_padrao',
-  rotulo: 'Idioma padrão',
-  descricao: 'Idioma dos termos nativos da interface.',
-  detalhe:
-    'Trocar aqui não mexe no que você criou. Nomes de categorias, campos, formulários e textos de ajuda se traduzem em Dicionários, um idioma por vez.',
-  valor: true,
-}
 
 /* ------------------------- zona de perigo ------------------------- */
 
@@ -143,9 +134,9 @@ async function excluir() {
             </UPopover>
           </UFormField>
 
-          <div class="grid flex-1 gap-4">
+          <div class="grid flex-1 gap-4 sm:grid-cols-2">
             <UFormField label="Nome" help="Aparece no topo da tela e nos e-mails enviados pelo workspace.">
-              <UInput v-model="form.identidade.name" class="w-full sm:max-w-md" />
+              <UInput v-model="form.identidade.name" class="w-full" />
             </UFormField>
 
             <UFormField label="Referência" help="Faz parte do endereço e não muda depois de criado.">
@@ -153,7 +144,7 @@ async function excluir() {
                 :model-value="form.identidade.reference"
                 disabled
                 icon="i-lucide-lock"
-                class="w-full sm:max-w-sm"
+                class="w-full"
               />
             </UFormField>
           </div>
@@ -184,7 +175,57 @@ async function excluir() {
     </Secao>
 
     <!--
-      2 e 3. COMPORTAMENTO E MÓDULOS, LADO A LADO
+      2. PADRÕES DO WORKSPACE
+
+      O "Account Defaults" do HubSpot, com o nome do objeto que existe aqui:
+      o que vale quando ninguém escolheu nada. Identidade é quem o workspace
+      é; padrão é como ele se comporta por omissão, e uma coisa não mora
+      dentro da outra (PESQUISA.md, rodada 4).
+
+      Três campos do mesmo tipo pedem grade de campos, não linhas de ajuste:
+      cada um ocupa um terço e a seção não fica com meia largura vazia.
+    -->
+    <Secao
+      id="padroes"
+      titulo="Padrões do workspace"
+      resumo="O que vale quando ninguém escolheu nada: idioma, fuso e moeda."
+      :doc="documentacao.basicas"
+      style="animation: entrada .4s ease-out both; animation-delay: 40ms"
+    >
+      <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <UFormField label="Idioma padrão">
+          <template #help>
+            <span>
+              Vale para os termos nativos da interface. O que
+              <strong class="text-toned">você</strong> criou se traduz em
+              <button
+                type="button"
+                class="text-primary underline underline-offset-2 hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                @click="emit('irPara', 'dicionarios')"
+              >Dicionários</button>.
+            </span>
+          </template>
+          <USelect v-model="form.padroes.idioma" :items="idiomas" class="w-full" />
+        </UFormField>
+
+        <UFormField
+          label="Fuso horário"
+          help="Base de toda data e hora do workspace: prazo, SLA e Agenda."
+        >
+          <USelect v-model="form.padroes.fuso" :items="fusos" class="w-full" />
+        </UFormField>
+
+        <UFormField
+          label="Moeda"
+          help="Símbolo e formato dos campos de valor. Não converte o que já foi digitado."
+        >
+          <USelect v-model="form.padroes.moeda" :items="moedas" class="w-full" />
+        </UFormField>
+      </div>
+    </Secao>
+
+    <!--
+      3 e 4. COMPORTAMENTO E MÓDULOS, LADO A LADO
 
       Os dois blocos são a mesma coisa em natureza — chaves de ligar/desligar que
       mudam o workspace inteiro —, e cada um sozinho numa faixa de 1.200 px deixa
@@ -202,36 +243,6 @@ async function excluir() {
         :doc="documentacao.basicas"
         style="animation: entrada .4s ease-out both; animation-delay: 60ms"
       >
-        <!--
-          O idioma padrão saiu da Identidade e veio para cá. Identidade é
-          logo, nome e referência (Slack, Linear e Notion agrupam assim);
-          idioma é preferência, e o HubSpot separa uma coisa da outra. Aqui a
-          preferência cai no cartão que trata justamente do que os membros
-          veem, e usa a mesma linha das chaves, com o controle na mesma coluna.
-        -->
-        <LinhaDeAjuste :ajuste="ajusteDeIdioma">
-          <template #detalhe>
-            <UButton
-              label="Abrir Dicionários"
-              icon="i-lucide-languages"
-              size="xs"
-              color="neutral"
-              variant="subtle"
-              class="mt-2"
-              @click="emit('irPara', 'dicionarios')"
-            />
-          </template>
-
-          <template #controle>
-            <USelect
-              v-model="form.identidade.idiomaPadrao"
-              :items="idiomas"
-              aria-label="Idioma padrão do workspace"
-              class="w-44"
-            />
-          </template>
-        </LinhaDeAjuste>
-
         <LinhaDeAjuste
           v-for="a in comportamento"
           :key="a.chave"
