@@ -52,4 +52,4 @@ app/pages/<slug>/
 
 | Protótipo | Demanda | Status |
 |---|---|---|
-| _nenhum ainda_ | | |
+| [Tela de entrada (Workspaces)](app/pages/tela-de-workspaces/) | Fazer a pessoa entender que é uma tela de escolha, e não o lugar onde se abre chamado | em revisão |
