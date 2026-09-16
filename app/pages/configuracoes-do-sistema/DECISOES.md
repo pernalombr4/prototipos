@@ -1,0 +1,295 @@
+# Decisões — Configurações do Sistema
+
+## Rodada 1 — 16/09/2026
+
+**O que ela pediu:** as seis queixas do [`BRIEFING.md`](BRIEFING.md), copiadas literais lá.
+
+**A tese da rodada:** as cinco abas não são cinco variações do mesmo assunto — são cinco
+produtos diferentes atrás de uma linha de abas. A tela não fica boa se cada aba for arrumada
+por dentro sem que a casca resolva o que é comum a todas: **achar**, **não perder o que se
+mudou** e **aprender o que a coisa faz**. Por isso a proposta tem duas camadas.
+
+---
+
+## Camada 1 — a casca, que vale para as cinco abas
+
+### 1.1 A aba vive na URL
+
+`?aba=calendario`. Link direto, botão voltar e recarregar passam a funcionar. É a S3-F6 pela
+metade, e é o padrão dos cinco obrigatórios da pesquisa (nenhum deles empilha cinco telas numa
+URL só).
+
+### 1.2 As abas viram abas de verdade
+
+A linha de abas usa o `UTabs` do Nuxt UI, que implementa o padrão WAI-ARIA: `role="tablist"`,
+`role="tab"`, `aria-selected`, um único ponto de entrada no Tab e navegação por setas. Hoje as
+abas são `<span>` dentro de `<div>` e **nenhuma** das cinco aparece na ordem de foco — 46
+elementos focáveis na tela, zero abas.
+
+Não foi preciso criar componente: o produto já usa Nuxt UI e o componente já faz isso.
+
+### 1.3 Uma convenção de gravação só
+
+Some o "Salvar" de cada cartão (eram três só na primeira aba, mais o verde de largura total da
+segunda). No lugar entra **uma barra de rodapé que só aparece quando há alteração pendente**,
+com Descartar e Salvar, e que diz **em quais abas** há coisa não salva.
+
+Isso resolve de uma vez a S3-F1 e a S3-F7, como a auditoria já tinha previsto:
+
+- o formulário passa a viver **fora** do componente da aba (`estado.ts`), então trocar de aba
+  não desmonta nada e nada se perde em silêncio;
+- a aba com pendência ganha um ponto âmbar que pulsa;
+- verde deixa de ser botão. Verde vira confirmação, que é o que ele já era no toast.
+
+### 1.4 Busca de configuração (Ctrl+K)
+
+Vinte e três configurações indexadas com os **sinônimos que as pessoas usam quando não sabem o
+nome da coisa na tela** — "reajuste" acha Correção Monetária, "recesso" acha Ocorrências,
+"quanto falta" acha o saldo. Escolher um resultado troca de aba, rola até a seção e **pisca a
+seção por 2,4 s**.
+
+O padrão é do Notion, incluindo o piscar (PESQUISA.md §1). É a resposta mais direta ao "não
+consigo me encontrar": em vez de adivinhar a aba, digita-se o nome da coisa.
+
+### 1.5 Documentação em cada seção
+
+Cada seção tem **"Documentação ↗"** no canto, e cada aba tem o link do artigo dela logo abaixo
+do título. Os endereços são os reais, conferidos hoje:
+
+```
+docs.enspace.io/pt/docs/workspace/sections/settings/system/{basic-information|calendar|
+notifications|dictionaries|billing}
+```
+
+Essa é a queixa que custa menos para resolver e que ninguém no mercado resolve (PESQUISA.md,
+"O que nenhum deles faz"): a documentação **já existe, escrita aba por aba**, e a tela nunca
+apontou para ela.
+
+### 1.6 A aba diz o que ela decide
+
+Uma linha embaixo de cada aba dizendo do que ela trata — "é daqui que saem os prazos e o SLA
+das tarefas" vale mais que o rótulo "Calendário".
+
+---
+
+## Camada 2 — o que muda dentro de cada aba
+
+### Informações Básicas — "as informações são desorganizadas"
+
+| Antes | Agora | Por quê |
+|---|---|---|
+| Quatro cartões, cada um com o seu Salvar | Quatro seções, uma barra de gravação | S3-F7 |
+| Ajuda no "?" a 1290 px do rótulo | Descrição visível embaixo do rótulo | a ajuda existe e é boa; só estava longe |
+| "Configurações Adicionais" em 1 coluna e "Módulos" em 2 | **A mesma linha** nos dois blocos | duas grades a três centímetros uma da outra era metade da sensação de bagunça |
+| "Tipo de Logo" em dois cartões de 100 px | Um alternador de dois botões + prévia | escolha binária não precisa de 200 px de altura |
+| Contador "0" solto na borda | `0 / 280`, ao lado da ajuda do campo | número sem rótulo não informa |
+| Aviso da exclusão em linha corrida | Lista do que se perde, item a item, e confirmação digitando a referência | a Zona de Perigo já era boa; ficou legível |
+| Sem aviso de consequência | Risco aparece **só quando o ajuste está ligado** | avisar sobre risco que não está correndo é ruído |
+
+### Calendário — "parece que tá em MVP"
+
+O que dava essa impressão, ponto a ponto:
+
+1. **A data repetida dentro da célula.** O cabeçalho diz "7" e a caixa colorida diz
+   "07/09/2026". Saiu. No lugar, a célula mostra **o nome do feriado ou da ocorrência**.
+2. **Feriado com a mesma cor de fim de semana.** Agora feriado é âmbar, ocorrência é primária,
+   fora do expediente é cinza, dia útil é o fundo normal. A legenda fica junto do calendário,
+   não flutuando acima dele.
+3. **Campo de tags para dias úteis.** Virou uma fileira de sete botões que dizem "útil" ou
+   "folga", com uma frase de resumo embaixo — e um aviso vermelho quando ninguém sobrou (S3-F2).
+4. **"Sincronizar Feriados" sem volta.** Agora é **"Importar feriados"**, com país explícito,
+   **prévia da lista** e o botão dizendo o efeito: "Importar 6 feriados". E existe a lista do
+   que já entrou, **agrupada por país**, com remoção — hoje não há tela nenhuma que desfaça o
+   que foi gravado (S3-F3). O Veterans Day aparece sob "Estados Unidos", com selo
+   "fora do país do workspace".
+5. **O mês como resultado, não como formulário.** O bloco se chama "Como o mês fica" e diz
+   quantos dias úteis sobraram. O tooltip que explica a causa — a melhor coisa da tela de hoje —
+   continua, só nos dias que precisam de explicação.
+
+### Notificações — "é até bonitinha, mas ninguém entende"
+
+1. **O que o produto faz sozinho vira a primeira seção.** Os três e-mails nativos (1 dia antes,
+   no dia, 1 dia depois) aparecem nomeados. Hoje eles não estão escritos em lugar nenhum da
+   tela, e o toggle promete desligá-los sem dizer o que são.
+2. **A regra vira frase.** "Avisar 3 dias antes do vencimento, com o modelo 'Prazo se
+   aproximando'." Some o número com sinal: a direção é um botão **Antes / Depois**
+   (padrão monday e ClickUp, PESQUISA.md §3 e §4).
+3. **A frase aparece enquanto se edita**, num bloco fixo dentro do modal. Você lê a regra antes
+   de salvar, não depois.
+4. **Linha do tempo** com os avisos posicionados em relação ao vencimento — antes à esquerda,
+   depois à direita. Quatro regras viram um desenho, não uma lista de números.
+5. **O estado perigoso ganhou aviso**: toggle ligado e nenhuma regra = "Nenhum aviso será
+   enviado". A documentação já avisava disso; a tela, não.
+6. **Toggle desligado não esconde as regras** — mostra quantas estão guardadas e sem efeito.
+7. O select de modelo de e-mail diz **onde os modelos se criam** (S3-F4).
+
+### Dicionários — "com muito campo fica extenso demais"
+
+O diagnóstico está no briefing: cada campo carrega até cinco textos traduzíveis, então a árvore
+cresce por multiplicação. A árvore é **fiel à estrutura e ruim como plano de trabalho**.
+
+A proposta trata tradução como **fila**, não como árvore:
+
+- **filtro por status** — "Faltam 74" / "Traduzidas 22" / "Todas" (padrão Crowdin);
+- **busca** no original e na tradução, e filtro por categoria;
+- **progresso por categoria** em cartões clicáveis — o ENSPACE já mostrava progresso por nó, que
+  é bom; aqui ele também vira filtro;
+- **barra de trabalho grudada no topo** enquanto se rola, com o caminho
+  `Categoria › Grupo › Campo` em cada bloco: você nunca perde de vista onde está;
+- **Enter pula para a próxima que falta** — traduzir vira uma sequência, não uma caça;
+- **custo da IA antes do clique**: "traduzir as 74 que faltam custa cerca de 15 en-credits",
+  com link para o saldo na aba Cobrança.
+
+A árvore de hoje não foi jogada fora: ela virou **agrupamento**, que é o que ela fazia de bom.
+
+### Cobrança — "a melhor, mas parece pobre"
+
+Ela parece pobre porque mostra um número e nenhuma consequência. O que entrou:
+
+- **"Sua carteira"**, e a primeira linha diz que o saldo é da pessoa e vale em todos os
+  workspaces (S3-F5 — hoje a tela diz "Carteira do usuário" dentro de um workspace);
+- **"en-credit" definido** num popover, com três exemplos de custo — a unidade nunca foi
+  explicada em lugar nenhum da tela;
+- **ritmo e projeção**: consumo em 30 dias, média por dia de uso e "no ritmo atual, dura até 12
+  de outubro" (padrão Stripe, PESQUISA.md §7). É a única coisa que responde à pergunta real;
+- **linha do consumo diário** — 30 pontos, em SVG escrito à mão, sem biblioteca de gráfico;
+- **"No que os créditos foram"**, por recurso, com execuções — hoje isso só existe espalhado
+  nas linhas do extrato;
+- **extrato legível**: data em português ("15 de set, 16:40" em vez de "yesterday"), nome do
+  recurso em vez do slug `analista-de-duplicidade---juridico-bp`, e **selo do workspace** —
+  âmbar quando o gasto aconteceu em outro workspace seu, que era o que mais confundia;
+- **o pedido de recarga diz o efeito**: "com 2.000 a mais, o saldo passa a durar cerca de 44
+  dias de uso".
+
+---
+
+## Nomes que o protótipo mudou — e por quê (regra 29)
+
+O nome vem da tela. Quando ele contradiz a coisa, o protótipo propõe o certo e registra aqui:
+
+| Na tela hoje | No protótipo | Motivo |
+|---|---|---|
+| `Juridico` | **Jurídico** | falta de acento, não é decisão de produto |
+| Tipo de Logo | **Marca** | o campo guarda ícone *ou* imagem; "logo" é só um dos casos |
+| Linguagem Padrão | **Idioma padrão** | "linguagem" é tradução torta de *language* |
+| Carteira do usuário | **Sua carteira** | "do usuário" não diz de qual; a carteira é de quem está olhando |
+| Ativar notificações personalizadas | **Usar as minhas regras** | descreve o efeito, não o mecanismo |
+| Sincronizar Feriados | **Importar feriados** | "sincronizar" promete duas vias; isso só traz |
+| Habilitar Ocorrências | **Registrar ocorrências no calendário** | o rótulo antigo não diz onde aparece |
+
+---
+
+## O que é maquete (regra 10)
+
+Funciona de verdade, sobre o mock, em memória: trocar de aba, a URL da aba, a busca com Ctrl+K
+e o destaque da seção, todos os toggles, a pendência e a barra de Salvar/Descartar, os dias
+úteis repintando o mês, importar e remover feriado, criar e remover ocorrência, criar/editar/
+remover regra de aviso com a frase ao vivo, os filtros e a busca dos dicionários, o Enter que
+pula para a próxima chave, o pedido de recarga e o filtro do extrato.
+
+**Não funciona — é maquete:**
+
+1. **"Trocar ícone" e "Enviar imagem"** não abrem nada. A escolha da marca está fora do escopo
+   desta demanda e tem tela própria a desenhar.
+2. **A tradução por IA** só tem sugestão para o vocabulário do exemplo (~50 termos). As chaves
+   sem sugestão continuam vazias **de propósito**, e a tela diz isso — inventar tradução para
+   tudo esconderia o comportamento real.
+3. **Exclusão do workspace** percorre a confirmação inteira e não apaga nada; mostra um aviso
+   dizendo isso.
+4. **Salvar** troca o estado local e mostra o toast. Nada persiste: recarregar zera (regra 4).
+5. **O calendário** só tem dado de setembro a dezembro de 2026. Navegar para 2028 mostra um mês
+   correto, mas sem feriados.
+6. **A projeção de saldo** usa média por dia de uso e um fator fixo para pular fim de semana. É
+   plausível, não é o cálculo que o back faria.
+
+---
+
+## O que foi descartado, e por quê
+
+- **Trocar a linha de abas por um menu lateral**, como Notion e Twenty fazem. É provavelmente
+  melhor para cinco produtos diferentes — e foi descartado pela regra 15: o produto já ensinou
+  "abas no topo", e tela de configuração não é lugar de reaprender navegação. Se essa troca for
+  desejada, ela é uma decisão de produto, não um detalhe desta rodada.
+- **Mover a Cobrança para fora de `settings/system`**, já que a carteira é da pessoa. Regra 20:
+  destaque soma, não substitui — tirar a aba de onde as pessoas já a procuram faria elas
+  pararem de achar. O que entrou foi a frase que explica o escopo.
+- **Atalhos de teclado no estilo Linear (`G` `S`)**. Regra 19: é conserto de outra tela.
+  Ficou só o Ctrl+K, que já é convenção de busca.
+- **Converter en-credit em reais.** Quanto vale um crédito é decisão comercial; o protótipo não
+  inventa preço. O que dava para fazer — definir a unidade e mostrar o consumo — foi feito.
+
+---
+
+## Achados fora do escopo, para a Mikaela decidir
+
+Nenhum deles foi mexido: os dois moram em repositórios que este agente não escreve.
+
+1. **Os links internos da documentação estão quebrados em produção.** As páginas do `en-docs`
+   linkam `/workspace/settings/system/calendar`, mas o site serve
+   `/pt/docs/workspace/sections/settings/system/calendar`. Conferido hoje: a primeira forma
+   devolve "Page not found" e a segunda abre. Isso vale para os cinco links cruzados da página
+   de Sistema — e provavelmente para o resto do `en-docs`.
+2. **A documentação não cobre um dos toggles.** A tela tem cinco em Configurações Adicionais;
+   o artigo de Informações Básicas descreve quatro — falta **"Mostrar URL de integração"**.
+3. **`Juridico` sem acento** no produto (o módulo).
+4. **A pendência que a auditoria deixou aberta** continua aberta: gravar "Dias Úteis" vazio e
+   recarregar para ver se o back aceita array vazio. Não testei — teria mudado a configuração
+   do workspace de exploração de novo, e o protótipo não dependia da resposta.
+
+---
+
+## A crítica que rodei no próprio trabalho
+
+### `design:accessibility-review` — medido no navegador, não estimado
+
+**O que passou:**
+
+- A linha de abas entra na ordem do foco com **um único ponto de entrada**: o `tablist` tem
+  `tabindex="0"` e delega para a aba ativa; as setas trocam de aba e a URL acompanha.
+  Medido: Tab a partir do botão de busca → aba ativa → painel da aba. É o padrão WAI-ARIA, e é
+  exatamente o que a S3-F6 diz não existir hoje.
+- 41 elementos focáveis na tela, **nenhum sem nome acessível**.
+
+**O que a crítica achou e eu corrigi na mesma rodada:**
+
+| Achado | Medida | O que fiz |
+|---|---|---|
+| `text-dimmed` em texto de 11–12 px | **3,03:1** sobre branco (exige 4,5:1) | trocado por `text-muted` (**4,77:1**) nos 34 pontos onde carregava conteúdo |
+| Os 10 botões que não são do Nuxt UI (dias da semana, segmentados, filtros, cartões de categoria) sem foco visível | WCAG 2.4.7 | contorno de 2 px com deslocamento, em todos |
+| Remover feriado / ocorrência / regra só aparecia no hover | descoberta e toque | ficam a 60% de opacidade e acendem no hover e no foco |
+
+Vale registrar o constrangimento: **eu cometi, com 3,03:1, a mesma falha que apontei no produto
+com 4,22:1.** A auditoria mediu; eu não tinha medido até rodar a crítica.
+
+**O que a crítica achou e eu não corrigi:**
+
+- **O primário do tema dá 3,39:1 sobre branco** (fúcsia, texto de 14 px) — abaixo dos 4,5:1.
+  Atinge o rótulo da aba ativa, os links e o texto claro sobre botão primário. A paleta é
+  **cópia do `en-docs`** e este agente não edita aquele repositório (regra 0). É achado de
+  sistema de design, vale para o produto inteiro, e fica para a Mikaela decidir.
+- **Botões de ícone têm 24×24 px.** Cumprem o mínimo da WCAG 2.2 AA (2.5.8, 24 px), não chegam
+  aos 44 px do nível AAA. Mantive o tamanho do Nuxt UI para não divergir do produto.
+
+### `design:design-critique`
+
+**Primeira impressão.** O olho vai para "Sistema", depois para a aba ativa, depois para o
+primeiro campo. É a ordem certa. A tela já não parece uma pilha de cartões: parece uma tela com
+assunto.
+
+| Achado | Severidade | O que fiz |
+|---|---|---|
+| A linha "Marca" juntava quatro pesos diferentes (prévia, segmentado, texto de ajuda e botão) na mesma altura | 🟡 moderado | a ajuda desceu para o rodapé do campo, como nos outros; sobraram três elementos |
+| O controle ficava a ~900 px do rótulo nas linhas de ligar/desligar — **o defeito que eu estava corrigindo** | 🟡 moderado | linha limitada a 768 px de largura de leitura |
+| "Documentação ↗" aparece uma vez por seção (cinco por aba) | 🟢 menor | mantido. É repetição de propósito: o pedido da demanda é justamente que **cada coisa** leve ao artigo dela. O peso visual é o mais baixo que existe (fantasma, 12 px) |
+| Medidas diferentes na mesma aba: o cartão de identidade ocupa 960 px e as linhas de ajuste param em 768 px | 🟢 menor | aceito. Campo de formulário em duas colunas pede largura; linha de rótulo + controle, não |
+| A cor primária do protótipo é **fúcsia** (paleta do `en-docs`) e o produto hoje é **azul** | 🟢 menor | registrado. É a convenção deste repositório desde o primeiro protótipo; trocar é decisão da Mikaela, não desta rodada |
+
+**O que funciona:**
+
+- A barra de pendência resolve duas fricções com uma peça só, e deixa a tela sem nenhum botão
+  "Salvar" solto.
+- A aba de Notificações virou legível em português: a linha do tempo mostra em um olhar o que
+  quatro regras fazem.
+- A aba de Dicionários aguenta volume sem virar árvore: o filtro "Faltam 58" é o plano de
+  trabalho que a tela de hoje não dá.
+- A Cobrança responde "dura até quando", que é a pergunta que a pessoa tinha.

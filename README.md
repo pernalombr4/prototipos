@@ -53,3 +53,4 @@ app/pages/<slug>/
 | Protótipo | Demanda | Status |
 |---|---|---|
 | [Tela de entrada (Workspaces)](app/pages/tela-de-workspaces/) | Fazer a pessoa entender que é uma tela de escolha, e não o lugar onde se abre chamado | em revisão |
+| [Configurações do Sistema](app/pages/configuracoes-do-sistema/) | "Não consigo me encontrar em /settings/system" — abas desorganizadas, calendário em MVP, notificações que ninguém entende, cobrança pobre e nenhuma ligação com a documentação | em revisão |
