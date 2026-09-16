@@ -128,3 +128,56 @@ escondem a ação de criar; se a pessoa achar o botão mesmo assim, o formulári
 Aí está a chance: o ENSPACE pode ser o que **intercepta com uma pergunta** — "o que você quer
 fazer?" — e devolve a pessoa ao caminho certo em vez de deixá-la criar um espaço órfão. É
 barato de construir, e resolve o caso relatado mesmo quando a pessoa insiste no botão errado.
+
+---
+
+## Pesquisa complementar — seletor de ícone/logo (16/09/2026)
+
+**Pergunta:** como os produtos resolvem a escolha de ícone ou logo de um espaço, quando a
+biblioteca é grande.
+
+### Notion
+
+**Como resolve:** o seletor abre em abas — **Emoji / Ícones / Custom**. Emoji é o padrão, e é um
+conjunto que as pessoas já sabem usar de outros lugares. "Custom" aceita **upload de imagem** ou
+**colar uma URL**. Upload vira emoji da biblioteca do workspace, reaproveitável por todo mundo.
+🔗 https://www.notion.com/help/customize-and-style-your-content
+
+### Linear
+
+**Como resolve:** times têm ícone **e cor**. A cor é escolha livre e de primeira classe. E o
+produto **sugere o ícone a partir do nome do time**, por palavra-chave. A busca varre ícones e
+emojis juntos.
+🔗 https://linear.app/changelog/2022-01-20-linear-preview-new-sidebar-and-team-icons
+
+### ClickUp
+
+**Como resolve:** ao criar um Space, escolhe-se **ícone e cor, ou envia-se a própria imagem**
+(300×300). O padrão é **cor + iniciais** — ninguém é obrigado a escolher nada para seguir.
+🔗 https://help.clickup.com/hc/en-us/articles/6309390855319-Create-and-edit-Spaces
+
+### Jira
+
+**Como resolve:** um **conjunto pequeno** de avatares prontos, mais upload com recorte. Para
+pessoas existe o **"custom initials avatar"**: iniciais digitadas sobre uma cor escolhida.
+🔗 https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-project-avatars/
+
+---
+
+### O padrão que todos seguem
+
+1. **Ninguém oferece a biblioteca inteira de cara.** Notion abre no emoji, Jira mostra um punhado
+   de avatares, ClickUp um conjunto pequeno. A busca existe para quem precisa, não como porta.
+2. **Cor é metade da identidade, e é escolha explícita.** Linear e ClickUp tratam cor como decisão
+   de primeira classe. Ícone sem cor é meio caminho.
+3. **Existe um padrão de esforço zero: cor + iniciais.** ClickUp e Jira usam. É o que faz a
+   maioria passar sem decidir nada.
+4. **Upload é caminho de primeira classe**, não escondido: a empresa quer o logo dela.
+5. **O nome sugere o ícone** (Linear) — o que este protótipo já fazia.
+
+### O que nenhum deles faz
+
+**Buscar por significado no idioma de quem usa.** Todos buscam pelo nome técnico do ícone, em
+inglês. O ENSPACE hoje tem o mesmo problema, agravado: o "Busca Avançada" mostra o slug
+(`3d-cursor`, `accessibility-alt`) como se fosse o nome. Manter a busca em português por
+sinônimo — "balança", "chamado", "caminhão" — continua sendo o pedaço original da proposta.

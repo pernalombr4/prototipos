@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { localidades, templates, type Template } from './mocks'
-import { biblioteca, categoriasDeIcone, totalDeIcones } from './icones'
+import { biblioteca, curadoria, totalDeIcones } from './icones'
 
 /**
  * Criação de workspace — reconstrução da jornada real do develop.
@@ -33,7 +33,37 @@ const form = reactive({
 
 /** O campo do produto chama "Ícone", mas aceita a identidade da empresa —
     que na prática é um logo. Aqui as duas naturezas convivem. */
-const identidade = ref<'icone' | 'imagem'>('icone')
+const identidade = ref<'iniciais' | 'icone' | 'imagem'>('iniciais')
+
+/* -------- cor: metade da identidade, e escolha explícita --------
+   ClickUp e Linear tratam a cor como decisão de primeira classe, não como
+   consequência. Aqui ela vale para os três modos e começa sugerida pelo nome. */
+const paleta = [
+  { id: 'fuchsia', fundo: 'bg-fuchsia-500/12', texto: 'text-fuchsia-600 dark:text-fuchsia-400', amostra: 'bg-fuchsia-500' },
+  { id: 'cyan', fundo: 'bg-cyan-500/12', texto: 'text-cyan-600 dark:text-cyan-400', amostra: 'bg-cyan-500' },
+  { id: 'purple', fundo: 'bg-purple-500/12', texto: 'text-purple-600 dark:text-purple-400', amostra: 'bg-purple-500' },
+  { id: 'teal', fundo: 'bg-teal-500/12', texto: 'text-teal-600 dark:text-teal-400', amostra: 'bg-teal-500' },
+  { id: 'space', fundo: 'bg-space-500/12', texto: 'text-space-600 dark:text-space-300', amostra: 'bg-space-500' },
+]
+
+const corEscolhida = ref<string | null>(null)
+
+const corSugerida = computed(() => {
+  const semente = form.nome || form.referencia || ''
+  if (!semente) return paleta[0]!.id
+  const soma = [...semente].reduce((acc, c) => acc + c.charCodeAt(0), 0)
+  return paleta[soma % paleta.length]!.id
+})
+
+const cor = computed(() => paleta.find(c => c.id === (corEscolhida.value ?? corSugerida.value)) ?? paleta[0]!)
+
+/** Iniciais: o padrão de esforço zero. Ninguém precisa escolher nada. */
+const iniciais = computed(() => {
+  const palavras = form.nome.trim().split(/\s+/).filter(w => w.length > 1)
+  if (!palavras.length) return 'W'
+  if (palavras.length === 1) return palavras[0]!.slice(0, 2).toUpperCase()
+  return (palavras[0]![0]! + palavras[1]![0]!).toUpperCase()
+})
 const entradaDeArquivo = ref<HTMLInputElement>()
 const arrastando = ref(false)
 
@@ -58,6 +88,7 @@ function aoEscolherArquivo(e: Event) {
 function escolherIcone(id: string) {
   removerLogo()
   form.icone = id
+  identidade.value = 'icone'
 }
 
 function removerLogo() {
@@ -77,11 +108,11 @@ watch(aberto, (v) => {
   referenciaEditada.value = false
   detalhesAbertos.value = false
   buscaIcone.value = ''
-  categoriaAtiva.value = null
   locaisSelecionados.value = ['pt-br']
   removerLogo()
   Object.assign(form, { nome: '', referencia: '', descricao: '', icone: '', logo: null, logoNome: '', template: 'zero' })
-  identidade.value = 'icone'
+  identidade.value = 'iniciais'
+  corEscolhida.value = null
 })
 
 /* -------- referência: espelha o nome até alguém mexer nela à mão -------- */
@@ -106,25 +137,17 @@ function normaliza(t: string) {
 }
 
 const buscaIcone = ref('')
-const categoriaAtiva = ref<string | null>(null)
 
 /**
  * Com uma biblioteca desse tamanho, a busca é a navegação. As categorias são
  * atalho para quem não sabe o que procurar, não a forma principal de achar.
  */
+const buscando = computed(() => buscaIcone.value.trim().length > 0)
+
 const iconesFiltrados = computed(() => {
-  let lista: readonly (readonly [string, string])[] = biblioteca
-
-  if (categoriaAtiva.value) {
-    const daCategoria = new Set(
-      categoriasDeIcone.find(c => c.nome === categoriaAtiva.value)?.icones ?? [])
-    lista = lista.filter(([nome]) => daCategoria.has(nome))
-  }
-
   const termo = normaliza(buscaIcone.value.trim())
-  if (termo) lista = lista.filter(([, termos]) => normaliza(termos).includes(termo))
-
-  return lista
+  if (!termo) return []
+  return biblioteca.filter(([, termos]) => normaliza(termos).includes(termo))
 })
 
 /* ---- virtualização: só as linhas visíveis existem no DOM ---- */
@@ -250,31 +273,62 @@ function criar() {
                   <button
                     type="button"
                     class="group/logo relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-default transition-all duration-200 hover:border-primary hover:shadow-sm"
-                    :class="!form.logo && 'bg-elevated'"
+                    :class="!form.logo && 'bg-default'"
                     aria-label="Escolher o logo ou o ícone do workspace"
                   >
                     <img v-if="form.logo" :src="form.logo" alt="" class="size-full object-cover">
-                    <UIcon v-else :name="iconeEfetivo" class="size-5 text-muted" />
+                    <span
+                      v-else
+                      class="flex size-full items-center justify-center"
+                      :class="[cor.fundo, cor.texto]"
+                    >
+                      <UIcon v-if="identidade === 'icone'" :name="iconeEfetivo" class="size-5" />
+                      <span v-else class="text-sm font-semibold">{{ iniciais }}</span>
+                    </span>
                     <span class="absolute inset-0 flex items-center justify-center bg-default/70 opacity-0 transition-opacity group-hover/logo:opacity-100">
                       <UIcon name="i-lucide-pencil" class="size-4 text-highlighted" />
                     </span>
                   </button>
 
                   <template #content>
-                    <div class="w-[26rem] max-w-[calc(100vw-2rem)] p-3">
+                    <div class="w-[22rem] max-w-[calc(100vw-2rem)] p-3">
+                      <!-- COR primeiro: vale para os três modos. Linear e ClickUp
+                           tratam a cor como decisão de primeira classe, não como
+                           consequência de ter escolhido um ícone. -->
+                      <div class="mb-3 flex items-center gap-2">
+                        <span class="text-xs font-medium text-dimmed">Cor</span>
+                        <div class="flex gap-1.5">
+                          <button
+                            v-for="c in paleta"
+                            :key="c.id"
+                            type="button"
+                            class="size-5 rounded-full transition-transform hover:scale-110"
+                            :class="[c.amostra, cor.id === c.id ? 'ring-2 ring-offset-2 ring-offset-default ring-inverted/40' : '']"
+                            :aria-label="`Cor ${c.id}`"
+                            @click="corEscolhida = c.id"
+                          />
+                        </div>
+                      </div>
+
                       <div class="mb-3 flex gap-0.5 rounded-md border border-default p-0.5">
                         <UButton
+                          label="Iniciais"
+                          size="xs"
+                          block
+                          :color="identidade === 'iniciais' ? 'primary' : 'neutral'"
+                          :variant="identidade === 'iniciais' ? 'soft' : 'ghost'"
+                          @click="removerLogo(); identidade = 'iniciais'"
+                        />
+                        <UButton
                           label="Ícone"
-                          icon="i-lucide-shapes"
                           size="xs"
                           block
                           :color="identidade === 'icone' ? 'primary' : 'neutral'"
                           :variant="identidade === 'icone' ? 'soft' : 'ghost'"
-                          @click="identidade = 'icone'"
+                          @click="removerLogo(); identidade = 'icone'"
                         />
                         <UButton
                           label="Imagem"
-                          icon="i-lucide-image"
                           size="xs"
                           block
                           :color="identidade === 'imagem' ? 'primary' : 'neutral'"
@@ -283,8 +337,22 @@ function criar() {
                         />
                       </div>
 
-                      <!-- Imagem: o logo da empresa -->
-                      <div v-if="identidade === 'imagem'">
+                      <!-- INICIAIS: o padrão de esforço zero -->
+                      <div v-if="identidade === 'iniciais'" class="py-3 text-center">
+                        <span
+                          class="mx-auto flex size-16 items-center justify-center rounded-xl text-xl font-semibold"
+                          :class="[cor.fundo, cor.texto]"
+                        >{{ iniciais }}</span>
+                        <p class="mt-3 text-sm text-muted">
+                          As iniciais do nome, na cor escolhida.
+                        </p>
+                        <p class="mt-1 text-xs text-dimmed">
+                          É o que a maioria dos workspaces usa. Não precisa escolher nada.
+                        </p>
+                      </div>
+
+                      <!-- IMAGEM: o logo da empresa -->
+                      <div v-else-if="identidade === 'imagem'">
                         <div
                           v-if="!form.logo"
                           class="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed p-6 text-center transition-colors"
@@ -311,22 +379,8 @@ function criar() {
                             </p>
                           </div>
                           <div class="flex gap-2">
-                            <UButton
-                              label="Trocar"
-                              icon="i-lucide-refresh-cw"
-                              size="xs"
-                              color="neutral"
-                              variant="subtle"
-                              @click="entradaDeArquivo?.click()"
-                            />
-                            <UButton
-                              label="Remover"
-                              icon="i-lucide-trash-2"
-                              size="xs"
-                              color="neutral"
-                              variant="ghost"
-                              @click="removerLogo"
-                            />
+                            <UButton label="Trocar" icon="i-lucide-refresh-cw" size="xs" color="neutral" variant="subtle" @click="entradaDeArquivo?.click()" />
+                            <UButton label="Remover" icon="i-lucide-trash-2" size="xs" color="neutral" variant="ghost" @click="removerLogo" />
                           </div>
                         </div>
 
@@ -339,14 +393,13 @@ function criar() {
                         >
                       </div>
 
-                      <!-- Ícone: a biblioteca inteira, achável em português -->
+                      <!-- ÍCONE: curadoria primeiro, biblioteca sob busca -->
                       <div v-else class="space-y-2">
                         <UInput
                           v-model="buscaIcone"
                           icon="i-lucide-search"
                           size="sm"
-                          autofocus
-                          placeholder="Buscar ícone: balança, caminhão, chamado…"
+                          placeholder="Buscar em 2.128 ícones: balança, caminhão…"
                           class="w-full"
                           :ui="{ trailing: 'pe-1' }"
                         >
@@ -363,78 +416,84 @@ function criar() {
                           </template>
                         </UInput>
 
-                        <div class="flex flex-wrap gap-1">
-                          <UButton
-                            v-for="cat in categoriasDeIcone"
-                            :key="cat.nome"
-                            :label="cat.nome"
-                            size="xs"
-                            :color="categoriaAtiva === cat.nome ? 'primary' : 'neutral'"
-                            :variant="categoriaAtiva === cat.nome ? 'soft' : 'ghost'"
-                            @click="categoriaAtiva = categoriaAtiva === cat.nome ? null : cat.nome"
-                          />
+                        <!-- Sem busca: a curadoria, que cabe na tela e resolve o caso comum -->
+                        <div v-if="!buscando">
+                          <p class="mb-1.5 text-xs font-medium text-dimmed">
+                            Mais usados
+                          </p>
+                          <div class="grid grid-cols-8 gap-1">
+                            <UTooltip
+                              v-for="nome in curadoria"
+                              :key="nome"
+                              :text="nome"
+                              :delay-duration="400"
+                            >
+                              <button
+                                type="button"
+                                class="flex size-9 items-center justify-center rounded-md border border-transparent transition-colors hover:border-primary/40 hover:bg-elevated"
+                                :class="iconeEfetivo === `i-lucide-${nome}` ? 'border-primary bg-primary/10 text-primary' : 'text-muted'"
+                                @click="escolherIcone(`i-lucide-${nome}`)"
+                              >
+                                <UIcon :name="`i-lucide-${nome}`" class="size-4.5" />
+                              </button>
+                            </UTooltip>
+                          </div>
                         </div>
 
-                        <!-- Grade virtualizada: só as linhas visíveis vão para o DOM -->
-                        <div
-                          ref="grade"
-                          class="relative overflow-y-auto rounded-lg border border-default p-1"
-                          :style="{ height: ALTURA_VISIVEL + 'px' }"
-                          @scroll="aoRolar"
-                        >
-                          <div :style="{ height: alturaTotal + 'px', position: 'relative' }">
-                            <div
-                              class="absolute inset-x-0 grid"
-                              :style="{
-                                top: primeiraLinha * CELULA + 'px',
-                                gridTemplateColumns: `repeat(${colunas}, minmax(0, 1fr))`,
-                              }"
-                            >
-                              <UTooltip
-                                v-for="[nome] in iconesVisiveis"
-                                :key="nome"
-                                :text="nome"
-                                :delay-duration="300"
+                        <!-- Com busca: a biblioteca inteira, virtualizada -->
+                        <template v-else>
+                          <div
+                            ref="grade"
+                            class="relative overflow-y-auto rounded-lg border border-default p-1"
+                            :style="{ height: ALTURA_VISIVEL + 'px' }"
+                            @scroll="aoRolar"
+                          >
+                            <div :style="{ height: alturaTotal + 'px', position: 'relative' }">
+                              <div
+                                class="absolute inset-x-0 grid"
+                                :style="{
+                                  top: primeiraLinha * CELULA + 'px',
+                                  gridTemplateColumns: `repeat(${colunas}, minmax(0, 1fr))`,
+                                }"
                               >
-                                <button
-                                  type="button"
-                                  class="flex items-center justify-center rounded-md border border-transparent transition-colors hover:border-primary/40 hover:bg-elevated"
-                                  :style="{ height: CELULA + 'px' }"
-                                  :class="!form.logo && iconeEfetivo === `i-lucide-${nome}`
-                                    ? 'border-primary bg-primary/10 text-primary'
-                                    : 'text-muted'"
-                                  @click="escolherIcone(`i-lucide-${nome}`)"
+                                <UTooltip
+                                  v-for="[nome] in iconesVisiveis"
+                                  :key="nome"
+                                  :text="nome"
+                                  :delay-duration="400"
                                 >
-                                  <UIcon :name="`i-lucide-${nome}`" class="size-5" />
-                                </button>
-                              </UTooltip>
+                                  <button
+                                    type="button"
+                                    class="flex items-center justify-center rounded-md border border-transparent transition-colors hover:border-primary/40 hover:bg-elevated"
+                                    :style="{ height: CELULA + 'px' }"
+                                    :class="iconeEfetivo === `i-lucide-${nome}` ? 'border-primary bg-primary/10 text-primary' : 'text-muted'"
+                                    @click="escolherIcone(`i-lucide-${nome}`)"
+                                  >
+                                    <UIcon :name="`i-lucide-${nome}`" class="size-5" />
+                                  </button>
+                                </UTooltip>
+                              </div>
                             </div>
+
+                            <p
+                              v-if="!iconesFiltrados.length"
+                              class="absolute inset-0 flex flex-col items-center justify-center gap-1 px-6 text-center"
+                            >
+                              <span class="text-sm font-medium text-highlighted">
+                                Nada para "{{ buscaIcone }}"
+                              </span>
+                              <span class="text-xs text-muted">
+                                Tente outra palavra, ou envie o logo da empresa na aba Imagem.
+                              </span>
+                            </p>
                           </div>
 
-                          <p
-                            v-if="!iconesFiltrados.length"
-                            class="absolute inset-0 flex flex-col items-center justify-center gap-1 px-6 text-center"
-                          >
-                            <span class="text-sm font-medium text-highlighted">
-                              Nenhum ícone para "{{ buscaIcone }}"
-                            </span>
-                            <span class="text-xs text-muted">
-                              Tente outra palavra, ou envie o logo da empresa na aba Imagem.
-                            </span>
-                          </p>
-                        </div>
-
-                        <p class="text-xs text-dimmed">
-                          <template v-if="buscaIcone || categoriaAtiva">
+                          <p class="text-xs text-dimmed">
                             {{ iconesFiltrados.length.toLocaleString('pt-BR') }}
-                            {{ iconesFiltrados.length === 1 ? 'ícone encontrado' : 'ícones encontrados' }}
+                            {{ iconesFiltrados.length === 1 ? 'resultado' : 'resultados' }}
                             de {{ totalDeIcones.toLocaleString('pt-BR') }}
-                          </template>
-                          <template v-else>
-                            {{ totalDeIcones.toLocaleString('pt-BR') }} ícones na biblioteca.
-                            Busque pelo que o ícone representa.
-                          </template>
-                        </p>
+                          </p>
+                        </template>
                       </div>
                     </div>
                   </template>
@@ -659,7 +718,10 @@ function criar() {
           </p>
 
           <div class="mt-4 rounded-xl border border-default bg-default p-4 shadow-sm transition-all duration-300">
-            <div class="flex size-10 items-center justify-center overflow-hidden rounded-lg" :class="!form.logo && 'bg-elevated'">
+            <div
+              class="flex size-10 items-center justify-center overflow-hidden rounded-lg"
+              :class="!form.logo && [cor.fundo, cor.texto]"
+            >
               <Transition
                 mode="out-in"
                 enter-active-class="transition duration-200"
@@ -668,7 +730,8 @@ function criar() {
                 leave-to-class="opacity-0 scale-50"
               >
                 <img v-if="form.logo" :key="form.logo" :src="form.logo" alt="" class="size-full object-cover">
-                <UIcon v-else :key="iconeEfetivo" :name="iconeEfetivo" class="size-5 text-muted" />
+                <UIcon v-else-if="identidade === 'icone'" :key="iconeEfetivo" :name="iconeEfetivo" class="size-5" />
+                <span v-else :key="iniciais" class="text-sm font-semibold">{{ iniciais }}</span>
               </Transition>
             </div>
             <h3 class="mt-3 line-clamp-2 font-medium text-highlighted">

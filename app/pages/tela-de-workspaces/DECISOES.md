@@ -134,6 +134,43 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 14 — 16/09/2026 · o seletor refeito pelo que o mercado faz
+
+**Pedido:** *"ta ruim o seletor. veja como o mercado lida com isso."*
+
+Fui pesquisar (Pesquisa, seção complementar). Notion, Linear, ClickUp e Jira convergem em cinco
+coisas, e o meu seletor acertava **uma**.
+
+| O padrão do mercado | O que eu tinha |
+|---|---|
+| Ninguém abre com a biblioteca inteira | Abria com 2.128 ícones em ordem alfabética |
+| Cor é escolha explícita, de primeira classe | Cor era derivada do nome, sem a pessoa saber |
+| Existe padrão de esforço zero: **cor + iniciais** | Não existia |
+| Upload é caminho de primeira classe | ✅ já era |
+| O nome sugere o ícone | ✅ já era |
+
+**O seletor agora abre assim:**
+
+1. **Cor primeiro**, cinco amostras da paleta da marca, valendo para os três modos. Começa
+   sugerida pelo nome, e dá para trocar. Linear e ClickUp tratam cor assim.
+2. **Três modos: Iniciais · Ícone · Imagem**, com **Iniciais como padrão** — as duas letras do
+   nome sobre a cor, com a frase *"É o que a maioria dos workspaces usa. Não precisa escolher
+   nada."* É o padrão do ClickUp e do avatar de iniciais do Jira.
+3. **Ícone abre numa curadoria de 48**, agrupada pelo que o ENSPACE faz: empresa, pessoas,
+   chamados, jurídico, finanças, operação, tecnologia, saúde. Cabe na tela sem rolar e resolve o
+   caso comum em um clique. A biblioteca inteira continua lá, mas **atrás da busca** — que é o
+   que Notion e Jira fazem.
+4. **A grade virtualizada da rodada 13 não morreu**: ela agora é o resultado da busca, não a
+   porta de entrada. Continua sendo o que aguentaria 50 mil.
+
+**O que segue original.** Nenhum dos quatro busca por significado no idioma de quem usa — todos
+buscam pelo nome técnico, em inglês. Aqui "balança", "chamado" e "caminhão" encontram, e é
+exatamente o que o "Busca Avançada" do produto não faz.
+
+**Correção de bastidor:** a biblioteca gerada ignorava os 219 *aliases* do Iconify, e
+`building-2` e `file-signature` são aliases. Eles funcionavam em desenvolvimento e teriam
+quebrado no site publicado. São 2.128 ícones agora, aliases incluídos.
+
 ### Rodada 13 — 16/09/2026 · o seletor de ícones no tamanho real da biblioteca
 
 **Pedido:** *"quando o user clicar em adicionar ícone tem que renderizar melhor o seletor. isso
