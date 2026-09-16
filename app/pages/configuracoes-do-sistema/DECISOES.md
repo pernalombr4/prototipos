@@ -1,5 +1,85 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 5 — 16/09/2026 — dicionários com 14 mil chaves
+
+**O que ela pediu, literal:**
+
+> "saiba tambem que o dicionario ainda ta ruim.
+>
+> voce fez esse modelo e serve pra poucos campos. tenho um workspace hoje que chega a ter 14 mil
+> chaves de traduçao. no seu modelo atual, sem nada ser colapsado/expansivel, é insano. seria um
+> scroll infinito. como resolver isso? como outros produtos resolvem? pesquise no mercado e
+> depois volte com soluçao de interface, ok?"
+
+**Ela está certa, e o erro é de fundo.** A rodada 1 trocou a árvore por uma fila com filtro, o
+que resolvia "me perco na árvore" e não resolvia "são 14 mil". Com o filtro em "faltam", a tela
+renderizava **tudo o que o filtro devolvesse**: 9 mil linhas com um campo de texto em cada.
+
+### A pesquisa
+
+Está em [`PESQUISA.md`](PESQUISA.md), "Rodada 5 — traduzir 14 mil chaves". O que **Crowdin**,
+**Weblate** e **Lokalise** fazem igual:
+
+1. **Ninguém renderiza o conjunto inteiro.** Navega-se por container (arquivo, componente,
+   pasta). No Crowdin, "All Strings" é um botão explícito, não o estado inicial. No Weblate, o
+   componente abre em fatias: não traduzidas, inacabadas, com erro.
+2. **A lista é paginada em dezenas.** Crowdin usa 50 por página; Lokalise troca para paginação
+   por cursor acima de 5 mil.
+3. **O filtro por status é o começo do trabalho**, não um refinamento.
+4. **Existe um modo de fila**: uma string por vez, teclado, avanço automático ao salvar. É o
+   "Zen mode" do Weblate e o "Automatically move to next string" do Crowdin.
+5. **Ação em massa sobre o filtro**, para o que dá para resolver sem olhar uma a uma.
+
+### A solução: três níveis, e a tela nunca mostra 14 mil
+
+| Nível | O que aparece | Quantas linhas |
+|---|---|---|
+| **1. Visão geral** | as 18 categorias com progresso, e o que falta em cada uma | 18 cartões, **nenhuma chave** |
+| **2. Recorte** | as chaves de uma categoria, ou o resultado de uma busca | **50 por página** |
+| **3. Fila** | uma chave por vez, com contexto e teclado | **1** |
+
+- **A tela abre no nível 1.** Sem categoria escolhida e sem busca, o universo é vazio de
+  propósito: não existe caminho que liste 14 mil chaves por acidente.
+- **A busca global cai no nível 2**, como no Weblate: buscar é recortar, e o recorte já é a fila.
+- **Os grupos (Geral, Campos, Formulários) viraram filtro**, com a contagem no próprio botão, em
+  vez de sanfona. Sanfona com 1.196 itens dentro empurra a página inteira para baixo.
+- **A fila é o coração da proposta.** `Enter` salva e traz a próxima, `Esc` sai, e a chave
+  traduzida sai da fila na hora, então o contador anda para trás enquanto o progresso anda para
+  frente. É como se atravessa 9 mil chaves sem nunca ver 9 mil linhas.
+- **A IA em massa mostra o preço antes**: "traduzir 9.036 chaves custa 1.808 en-credits", com
+  link para o saldo. E age sobre o recorte atual, não sempre sobre tudo.
+
+### O mock passou a ter o tamanho do problema
+
+São **13.970 chaves** geradas por fórmula, em 18 categorias, com distribuição desigual de
+progresso (algumas completas, uma pela metade, muitas intocadas). Sem isso, a solução não se
+prova: era exatamente o tamanho que derrubava o desenho anterior.
+
+**Medido no navegador, com as 13.970 no ar:** trocar de categoria, paginar, filtrar e digitar
+na fila respondem na hora. A tradução em massa de **9.036 chaves** levou pouco mais de um
+segundo (o tempo é a espera fingida da IA), e o **Descartar** devolveu as 9.036 ao estado salvo
+em cerca de 140 ms.
+
+### O que mudou por baixo, e por que importa
+
+O estado das traduções saiu do `form` e virou store próprio no `estado.ts`, por um motivo
+concreto: a pendência era calculada com `JSON.stringify` da fatia da aba, e com 14 mil chaves
+isso significaria serializar 14 mil textos **a cada tecla digitada**. Agora cada chave se
+observa sozinha (`shallowReactive`), e os números que a tela mostra (total preenchido, progresso
+por categoria, quantas mudaram) são mantidos de forma incremental, na hora da edição.
+
+### O que não fiz
+
+- **Não implementei rolagem virtual.** Ela adiaria a decisão de navegação em vez de tomá-la, e
+  exigiria biblioteca fora do Nuxt UI. A paginação de 50 é o que o Crowdin faz, e resolve.
+- **Não trouxe "traduzido / aprovado" em dois estágios.** É vocabulário de tradução profissional;
+  quem traduz aqui é quem configurou o workspace.
+- **Importar e exportar planilha continuam maquete** (os botões não abrem nada). Para 14 mil
+  chaves, essa é provavelmente a estrada principal de quem traduz em lote, e merece uma rodada
+  só dela.
+
+---
+
 ## Rodada 4 — 16/09/2026 — identidade em forma de perfil
 
 **O que ela pediu, literal:**

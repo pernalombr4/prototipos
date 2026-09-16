@@ -326,8 +326,15 @@ export const regrasAgendadas: RegraDeAviso[] = [
  * (name, singularName, description), Campos (label, description, help,
  * instruction, placeholder, e um por opção de lista) e Formulários.
  *
- * É essa multiplicação que faz a aba "ficar extensa": 3 categorias com
- * 17 campos viram 96 chaves. Um workspace de verdade passa de 3.000.
+ * ESTE MOCK GERA O TAMANHO REAL DO PROBLEMA: um workspace configurado
+ * chega a 14 mil chaves, e foi esse número que derrubou o desenho da
+ * rodada 1. Por isso as chaves são compostas por fórmula a partir de um
+ * vocabulário controlado, e não escritas uma a uma: o que importa aqui é
+ * o volume e a distribuição, não a variedade de cada frase.
+ *
+ * Como o vocabulário tem o par português/inglês, toda chave tem uma
+ * tradução correta disponível, e o botão de IA do protótipo funciona de
+ * verdade em cima do mock.
  * ------------------------------------------------------------------ */
 
 export type TipoDeChave =
@@ -348,299 +355,187 @@ export interface ChaveDeTraducao {
   dono: string
   tipo: TipoDeChave
   original: string
+  /** O que já está traduzido. Vazio quer dizer que falta. */
   traducao: string
 }
 
-interface CampoFonte {
-  nome: string
-  label: string
-  ajuda?: string
-  instrucao?: string
-  exemplo?: string
-  opcoes?: string[]
-}
+type Par = [pt: string, en: string]
 
-interface CategoriaFonte {
-  nome: string
-  singular: string
-  descricao: string
-  campos: CampoFonte[]
-  formularios: { nome: string, descricao: string }[]
-}
-
-const categoriasFonte: CategoriaFonte[] = [
-  {
-    nome: 'Contratos',
-    singular: 'Contrato',
-    descricao: 'Contratos assinados com fornecedores e prestadores.',
-    campos: [
-      {
-        nome: 'numero',
-        label: 'Número do contrato',
-        ajuda: 'Use o número do sistema de origem, sem pontos.',
-        exemplo: 'CT-2026-0148',
-      },
-      {
-        nome: 'vigencia_inicio',
-        label: 'Início da vigência',
-        ajuda: 'Data em que o contrato passa a valer.',
-        instrucao: 'A data não pode ser posterior ao fim da vigência.',
-      },
-      {
-        nome: 'vigencia_fim',
-        label: 'Fim da vigência',
-        instrucao: 'Deixe em branco para contrato por prazo indeterminado.',
-      },
-      {
-        nome: 'valor_total',
-        label: 'Valor total',
-        ajuda: 'Valor cheio do contrato, sem descontar aditivos.',
-        exemplo: 'R$ 250.000,00',
-      },
-      {
-        nome: 'modalidade',
-        label: 'Modalidade',
-        opcoes: ['Prestação de serviço', 'Fornecimento', 'Comodato', 'Parceria'],
-      },
-      {
-        nome: 'situacao',
-        label: 'Situação',
-        ajuda: 'Muda sozinha quando a vigência termina.',
-        opcoes: ['Em elaboração', 'Vigente', 'Encerrado', 'Rescindido'],
-      },
-      {
-        nome: 'responsavel_juridico',
-        label: 'Responsável jurídico',
-        instrucao: 'Só aparecem membros com o cargo Jurídico.',
-      },
-      {
-        nome: 'clausula_rescisao',
-        label: 'Cláusula de rescisão',
-        ajuda: 'Cole o texto exatamente como está no contrato assinado.',
-        exemplo: 'Rescisão mediante aviso prévio de 30 dias.',
-      },
-    ],
-    formularios: [
-      { nome: 'Abertura de contrato', descricao: 'O que o time comercial preenche ao enviar para o jurídico.' },
-      { nome: 'Aditivo', descricao: 'Alteração de valor ou de prazo em contrato vigente.' },
-    ],
-  },
-  {
-    nome: 'Fornecedores',
-    singular: 'Fornecedor',
-    descricao: 'Empresas homologadas para prestar serviço ao grupo.',
-    campos: [
-      {
-        nome: 'razao_social',
-        label: 'Razão social',
-        ajuda: 'Como consta no cartão CNPJ.',
-        exemplo: 'Aurora Serviços Integrados Ltda.',
-      },
-      {
-        nome: 'documento',
-        label: 'CNPJ',
-        instrucao: 'Somente números.',
-        exemplo: '00.000.000/0001-00',
-      },
-      {
-        nome: 'porte',
-        label: 'Porte',
-        opcoes: ['MEI', 'Pequeno', 'Médio', 'Grande'],
-      },
-      {
-        nome: 'homologado_em',
-        label: 'Homologado em',
-        ajuda: 'Data do parecer favorável do compliance.',
-      },
-      {
-        nome: 'risco',
-        label: 'Grau de risco',
-        ajuda: 'Calculado pelo questionário de compliance.',
-        opcoes: ['Baixo', 'Médio', 'Alto'],
-      },
-      {
-        nome: 'contato_comercial',
-        label: 'Contato comercial',
-        exemplo: 'nome@fornecedor.com.br',
-      },
-    ],
-    formularios: [
-      { nome: 'Cadastro de fornecedor', descricao: 'Primeira entrada, antes da homologação.' },
-    ],
-  },
-  {
-    nome: 'Chamados jurídicos',
-    singular: 'Chamado jurídico',
-    descricao: 'Pedidos de análise e parecer feitos pelas áreas.',
-    campos: [
-      {
-        nome: 'assunto',
-        label: 'Assunto',
-        instrucao: 'Uma frase. O detalhe vai na descrição.',
-        exemplo: 'Revisão de cláusula de confidencialidade',
-      },
-      {
-        nome: 'urgencia',
-        label: 'Urgência',
-        ajuda: 'Urgência alta encurta o prazo de resposta para 1 dia útil.',
-        opcoes: ['Baixa', 'Normal', 'Alta'],
-      },
-      {
-        nome: 'area_solicitante',
-        label: 'Área solicitante',
-      },
-    ],
-    formularios: [
-      { nome: 'Abertura de chamado', descricao: 'O que a área preenche para pedir análise.' },
-      { nome: 'Devolutiva', descricao: 'O parecer que o jurídico devolve.' },
-    ],
-  },
+/** As categorias do workspace, com quantos campos cada uma tem. */
+const CATEGORIAS: { par: Par, campos: number }[] = [
+  { par: ['Contratos', 'Contracts'], campos: 470 },
+  { par: ['Fornecedores', 'Suppliers'], campos: 290 },
+  { par: ['Chamados jurídicos', 'Legal requests'], campos: 200 },
+  { par: ['Processos', 'Lawsuits'], campos: 420 },
+  { par: ['Notas fiscais', 'Invoices'], campos: 270 },
+  { par: ['Pagamentos', 'Payments'], campos: 335 },
+  { par: ['Colaboradores', 'Employees'], campos: 380 },
+  { par: ['Treinamentos', 'Trainings'], campos: 165 },
+  { par: ['Ativos', 'Assets'], campos: 310 },
+  { par: ['Imóveis', 'Properties'], campos: 210 },
+  { par: ['Frota', 'Fleet'], campos: 235 },
+  { par: ['Auditorias', 'Audits'], campos: 255 },
+  { par: ['Políticas internas', 'Internal policies'], campos: 135 },
+  { par: ['Incidentes', 'Incidents'], campos: 290 },
+  { par: ['Clientes', 'Customers'], campos: 445 },
+  { par: ['Propostas', 'Proposals'], campos: 355 },
+  { par: ['Licenças', 'Licenses'], campos: 155 },
+  { par: ['Obras', 'Construction'], campos: 220 },
 ]
 
-/** Traduções que já existem — de propósito, distribuídas de forma desigual. */
-const traducoesProntas: Record<string, string> = {
-  'contratos.geral.nome': 'Contracts',
-  'contratos.geral.singular': 'Contract',
-  'contratos.geral.descricao': 'Contracts signed with suppliers and service providers.',
-  'contratos.numero.label': 'Contract number',
-  'contratos.numero.ajuda': 'Use the number from the source system, without dots.',
-  'contratos.vigencia_inicio.label': 'Start of term',
-  'contratos.vigencia_fim.label': 'End of term',
-  'contratos.valor_total.label': 'Total value',
-  'contratos.modalidade.label': 'Type',
-  'contratos.modalidade.opcao.0': 'Service agreement',
-  'contratos.modalidade.opcao.1': 'Supply',
-  'contratos.situacao.label': 'Status',
-  'fornecedores.geral.nome': 'Suppliers',
-  'fornecedores.geral.singular': 'Supplier',
-  'fornecedores.razao_social.label': 'Legal name',
-  'fornecedores.documento.label': 'Tax ID',
-  'fornecedores.porte.label': 'Size',
+const SUBSTANTIVOS: Par[] = [
+  ['Número', 'Number'], ['Valor', 'Amount'], ['Data', 'Date'], ['Responsável', 'Owner'],
+  ['Situação', 'Status'], ['Observação', 'Note'], ['Anexo', 'Attachment'], ['Prazo', 'Deadline'],
+  ['Tipo', 'Type'], ['Origem', 'Source'], ['Destino', 'Destination'], ['Categoria', 'Category'],
+  ['Documento', 'Document'], ['Título', 'Title'], ['Descrição', 'Description'],
+  ['Quantidade', 'Quantity'], ['Início', 'Start'], ['Término', 'End'],
+  ['Aprovador', 'Approver'], ['Área', 'Team'], ['Motivo', 'Reason'],
+  ['Referência', 'Reference'], ['Contato', 'Contact'], ['Endereço', 'Address'],
+]
+
+const QUALIFICADORES: Par[] = [
+  ['', ''], ['do contrato', 'of the contract'], ['do fornecedor', 'of the supplier'],
+  ['principal', 'primary'], ['secundário', 'secondary'], ['interno', 'internal'],
+  ['externo', 'external'], ['de entrega', 'of delivery'], ['de análise', 'of review'],
+  ['do cliente', 'of the customer'], ['da proposta', 'of the proposal'], ['de origem', 'of origin'],
+]
+
+const INSTRUCOES: Par[] = [
+  ['Preencha antes de enviar para aprovação.', 'Fill this in before sending for approval.'],
+  ['Aparece somente quando a situação está em análise.', 'Only shown while the status is under review.'],
+  ['Somente números, sem pontuação.', 'Digits only, no punctuation.'],
+  ['Deixe em branco quando não se aplicar.', 'Leave blank when it does not apply.'],
+]
+
+const EXEMPLOS: Par[] = [
+  ['Ex.: CT-2026-0148', 'E.g.: CT-2026-0148'],
+  ['Ex.: R$ 250.000,00', 'E.g.: R$ 250,000.00'],
+  ['Ex.: 30/09/2026', 'E.g.: 09/30/2026'],
+  ['Ex.: Aurora Serviços Integrados Ltda.', 'E.g.: Aurora Integrated Services Ltd.'],
+]
+
+const LISTAS_DE_OPCOES: Par[][] = [
+  [['Em elaboração', 'Draft'], ['Vigente', 'Active'], ['Encerrado', 'Closed']],
+  [['Baixo', 'Low'], ['Médio', 'Medium'], ['Alto', 'High']],
+  [['Pendente', 'Pending'], ['Aprovado', 'Approved'], ['Recusado', 'Rejected']],
+]
+
+const FORMULARIOS: Par[] = [
+  ['Abertura', 'Intake'], ['Revisão', 'Review'], ['Encerramento', 'Closing'],
+]
+
+/**
+ * Quanto de cada categoria já foi traduzido. Distribuição desigual de
+ * propósito: é assim que um workspace real fica, e é o que faz a visão
+ * geral valer a pena (algumas prontas, uma começada, muitas intocadas).
+ */
+function fracaoTraduzida(indice: number) {
+  const padrao = [1, 0.7, 0.25, 0, 0, 0.4, 0, 0.1, 1, 0]
+  return padrao[indice % padrao.length]!
 }
 
-function chavesDaCategoria(cat: CategoriaFonte): ChaveDeTraducao[] {
-  const base = cat.nome.toLowerCase().split(' ')[0]
+function semAcento(texto: string) {
+  return texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-')
+}
+
+/** Par português/inglês de toda chave gerada, para a sugestão de IA. */
+const traducaoDoOriginal: Record<string, string> = {}
+
+function gerarChaves(): ChaveDeTraducao[] {
   const lista: ChaveDeTraducao[] = []
 
-  const push = (
-    grupo: ChaveDeTraducao['grupo'],
-    dono: string,
-    tipo: TipoDeChave,
-    sufixo: string,
-    original: string,
-  ) => {
-    const id = `${base}.${sufixo}`
-    lista.push({
-      id,
-      categoria: cat.nome,
-      grupo,
-      dono,
-      tipo,
-      original,
-      traducao: traducoesProntas[id] ?? '',
+  CATEGORIAS.forEach((categoria, ic) => {
+    const [catPt, catEn] = categoria.par
+    const base = semAcento(catPt)
+    const corte = Math.round(fracaoTraduzida(ic) * 100)
+    let indiceNaCategoria = 0
+
+    const push = (
+      grupo: ChaveDeTraducao['grupo'],
+      dono: string,
+      tipo: TipoDeChave,
+      sufixo: string,
+      pt: string,
+      en: string,
+    ) => {
+      traducaoDoOriginal[pt] = en
+      // A fração vira um corte determinístico: dentro de cada bloco de cem
+      // chaves da categoria, as primeiras N já estão traduzidas.
+      const traduzida = indiceNaCategoria % 100 < corte
+      indiceNaCategoria++
+      lista.push({
+        id: `${base}.${sufixo}`,
+        categoria: catPt,
+        grupo,
+        dono,
+        tipo,
+        original: pt,
+        traducao: traduzida ? en : '',
+      })
+    }
+
+    push('Geral', '', 'Nome', 'geral.nome', catPt, catEn)
+    push('Geral', '', 'Nome no singular', 'geral.singular', catPt.replace(/s$/, ''), catEn.replace(/s$/, ''))
+    push('Geral', '', 'Descrição', 'geral.descricao',
+      `Registros de ${catPt.toLowerCase()} do workspace.`, `${catEn} records in this workspace.`)
+
+    for (let i = 0; i < categoria.campos; i++) {
+      const [subPt, subEn] = SUBSTANTIVOS[i % SUBSTANTIVOS.length]!
+      const [qualPt, qualEn] = QUALIFICADORES[Math.floor(i / SUBSTANTIVOS.length) % QUALIFICADORES.length]!
+      const rotuloPt = `${subPt} ${qualPt}`.trim()
+      const rotuloEn = `${subEn} ${qualEn}`.trim()
+      const campo = `campo.${i}`
+
+      push('Campos', rotuloPt, 'Rótulo', `${campo}.label`, rotuloPt, rotuloEn)
+
+      if (i % 2 === 0) {
+        push('Campos', rotuloPt, 'Texto de ajuda', `${campo}.ajuda`,
+          `Usado para localizar o registro por ${rotuloPt.toLowerCase()}.`,
+          `Used to find the record by ${rotuloEn.toLowerCase()}.`)
+      }
+      if (i % 3 === 0) {
+        const [pt, en] = INSTRUCOES[i % INSTRUCOES.length]!
+        push('Campos', rotuloPt, 'Instrução', `${campo}.instrucao`, pt, en)
+      }
+      if (i % 4 === 0) {
+        const [pt, en] = EXEMPLOS[i % EXEMPLOS.length]!
+        push('Campos', rotuloPt, 'Texto de exemplo', `${campo}.exemplo`, pt, en)
+      }
+      if (i % 5 === 0) {
+        LISTAS_DE_OPCOES[i % LISTAS_DE_OPCOES.length]!.forEach(([pt, en], io) => {
+          push('Campos', rotuloPt, 'Opção', `${campo}.opcao.${io}`, pt, en)
+        })
+      }
+    }
+
+    FORMULARIOS.forEach(([formPt, formEn], i) => {
+      const nome = `${formPt} de ${catPt.toLowerCase()}`
+      push('Formulários', nome, 'Nome', `formulario.${i}.nome`, nome, `${catEn} ${formEn.toLowerCase()}`)
+      push('Formulários', nome, 'Descrição', `formulario.${i}.descricao`,
+        `O que se preenche na ${formPt.toLowerCase()} de ${catPt.toLowerCase()}.`,
+        `What to fill in during ${catEn.toLowerCase()} ${formEn.toLowerCase()}.`)
     })
-  }
-
-  push('Geral', '', 'Nome', 'geral.nome', cat.nome)
-  push('Geral', '', 'Nome no singular', 'geral.singular', cat.singular)
-  push('Geral', '', 'Descrição', 'geral.descricao', cat.descricao)
-
-  for (const campo of cat.campos) {
-    push('Campos', campo.label, 'Rótulo', `${campo.nome}.label`, campo.label)
-    if (campo.ajuda) push('Campos', campo.label, 'Texto de ajuda', `${campo.nome}.ajuda`, campo.ajuda)
-    if (campo.instrucao) push('Campos', campo.label, 'Instrução', `${campo.nome}.instrucao`, campo.instrucao)
-    if (campo.exemplo) push('Campos', campo.label, 'Texto de exemplo', `${campo.nome}.exemplo`, campo.exemplo)
-    campo.opcoes?.forEach((opcao, i) => {
-      push('Campos', campo.label, 'Opção', `${campo.nome}.opcao.${i}`, opcao)
-    })
-  }
-
-  cat.formularios.forEach((form, i) => {
-    push('Formulários', form.nome, 'Nome', `formulario.${i}.nome`, form.nome)
-    push('Formulários', form.nome, 'Descrição', `formulario.${i}.descricao`, form.descricao)
   })
 
   return lista
 }
 
-export const chavesDeTraducao: ChaveDeTraducao[] = categoriasFonte.flatMap(chavesDaCategoria)
+export const chavesDeTraducao: ChaveDeTraducao[] = gerarChaves()
+
+/** O tamanho do problema, que é o que esta aba precisa aguentar. */
+export const totalDeChaves = chavesDeTraducao.length
 
 /**
- * Sugestões de tradução para o inglês.
- *
- * Existe para o botão de IA fazer alguma coisa de verdade no protótipo. É
- * **de propósito incompleto**: algumas chaves ficam sem sugestão, porque é
- * assim que a tela se comporta quando a IA não dá conta — e a tela precisa
- * dizer isso em vez de fingir que traduziu tudo.
+ * Sugestão de tradução para o inglês. Existe para o botão de IA fazer
+ * alguma coisa de verdade no protótipo, e cobre todo o vocabulário gerado.
  */
-export const sugestoesDeIa: Record<string, string> = {
-  'Contratos': 'Contracts',
-  'Contrato': 'Contract',
-  'Contratos assinados com fornecedores e prestadores.': 'Contracts signed with suppliers and service providers.',
-  'Número do contrato': 'Contract number',
-  'Use o número do sistema de origem, sem pontos.': 'Use the number from the source system, without dots.',
-  'Início da vigência': 'Start of term',
-  'Data em que o contrato passa a valer.': 'The date the contract takes effect.',
-  'Fim da vigência': 'End of term',
-  'Deixe em branco para contrato por prazo indeterminado.': 'Leave blank for open-ended contracts.',
-  'Valor total': 'Total value',
-  'Valor cheio do contrato, sem descontar aditivos.': 'Full contract value, before amendments.',
-  'Modalidade': 'Type',
-  'Prestação de serviço': 'Service agreement',
-  'Fornecimento': 'Supply',
-  'Comodato': 'Loan for use',
-  'Parceria': 'Partnership',
-  'Situação': 'Status',
-  'Muda sozinha quando a vigência termina.': 'Changes on its own when the term ends.',
-  'Em elaboração': 'Draft',
-  'Vigente': 'Active',
-  'Encerrado': 'Closed',
-  'Rescindido': 'Terminated',
-  'Responsável jurídico': 'Legal owner',
-  'Cláusula de rescisão': 'Termination clause',
-  'Abertura de contrato': 'New contract request',
-  'Aditivo': 'Amendment',
-  'Fornecedores': 'Suppliers',
-  'Fornecedor': 'Supplier',
-  'Empresas homologadas para prestar serviço ao grupo.': 'Companies approved to provide services to the group.',
-  'Razão social': 'Legal name',
-  'Como consta no cartão CNPJ.': 'As registered with the tax authority.',
-  'CNPJ': 'Tax ID',
-  'Somente números.': 'Digits only.',
-  'Porte': 'Size',
-  'MEI': 'Sole proprietor',
-  'Pequeno': 'Small',
-  'Médio': 'Medium',
-  'Grande': 'Large',
-  'Homologado em': 'Approved on',
-  'Grau de risco': 'Risk level',
-  'Baixo': 'Low',
-  'Alto': 'High',
-  'Contato comercial': 'Sales contact',
-  'Cadastro de fornecedor': 'Supplier registration',
-  'Chamados jurídicos': 'Legal requests',
-  'Chamado jurídico': 'Legal request',
-  'Assunto': 'Subject',
-  'Urgência': 'Urgency',
-  'Baixa': 'Low',
-  'Normal': 'Normal',
-  'Alta': 'High',
-  'Área solicitante': 'Requesting team',
-  'Abertura de chamado': 'New request',
-  'Devolutiva': 'Legal response',
-}
+export const sugestoesDeIa: Record<string, string> = traducaoDoOriginal
 
 export const idiomas = [
   { codigo: 'en', nome: 'Inglês', bandeira: '🇺🇸' },
   { codigo: 'es', nome: 'Espanhol', bandeira: '🇪🇸' },
   { codigo: 'pt-BR', nome: 'Português (Brasil)', bandeira: '🇧🇷' },
 ]
-
-/**
- * Quantas chaves um workspace de verdade tem. O número está na documentação
- * do produto ("0 de 3651 traduzidas") e é o que o desenho precisa aguentar.
- */
-export const chavesNoWorkspaceReal = 3651
 
 /* ------------------------------------------------------------------ *
  * Cobrança

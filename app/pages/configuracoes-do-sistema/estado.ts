@@ -5,7 +5,7 @@
 // derivada de um diff contra o último estado salvo. Trocar de aba não desmonta
 // nada, e a barra de rodapé sabe sozinha se há o que gravar.
 
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, shallowReactive } from 'vue'
 import {
   comportamento as comportamentoBase,
   modulos as modulosBase,
@@ -80,16 +80,72 @@ export const form = reactive({
   },
   dicionarios: {
     idioma: 'en',
-    traducoes: Object.fromEntries(chavesDeTraducao.map(c => [c.id, c.traducao])) as Record<string, string>,
   },
 })
+
+/* ------------------------------------------------------------------ *
+ * Dicionários: 14 mil chaves pedem outra estrutura de estado.
+ *
+ * Guardar as traduções dentro do `form` e comparar por JSON a cada tecla
+ * seria varrer 14 mil chaves para responder "tem coisa não salva?". Aqui
+ * o estado é raso (cada chave se observa sozinha) e todo número que a
+ * tela mostra é mantido de forma incremental, na hora da edição.
+ * ------------------------------------------------------------------ */
+
+export const traducoes = shallowReactive<Record<string, string>>(
+  Object.fromEntries(chavesDeTraducao.map(c => [c.id, c.traducao])),
+)
+
+const categoriaDaChave: Record<string, string> = Object.fromEntries(
+  chavesDeTraducao.map(c => [c.id, c.categoria]),
+)
+
+let salvasDoDicionario: Record<string, string> = { ...traducoes }
+const alteradas = new Set<string>()
+
+/** Quantas chaves estão preenchidas, no total e por categoria. */
+export const preenchidasNoTotal = ref(0)
+export const preenchidasPorCategoria = reactive<Record<string, number>>({})
+
+for (const chave of chavesDeTraducao) {
+  preenchidasPorCategoria[chave.categoria] ??= 0
+  if (chave.traducao) {
+    preenchidasNoTotal.value++
+    preenchidasPorCategoria[chave.categoria]!++
+  }
+}
+
+/** Quantas chaves mudaram desde o último Salvar. É a pendência da aba. */
+export const chavesAlteradas = ref(0)
+
+export function traduzir(id: string, valor: string) {
+  const antes = traducoes[id] ?? ''
+  if (antes === valor) return
+
+  traducoes[id] = valor
+
+  const categoria = categoriaDaChave[id]!
+  if (!antes && valor) {
+    preenchidasNoTotal.value++
+    preenchidasPorCategoria[categoria]!++
+  }
+  else if (antes && !valor) {
+    preenchidasNoTotal.value--
+    preenchidasPorCategoria[categoria]!--
+  }
+
+  if ((salvasDoDicionario[id] ?? '') !== valor) alteradas.add(id)
+  else alteradas.delete(id)
+  chavesAlteradas.value = alteradas.size
+}
+
 
 /** Qual fatia do formulário pertence a cada aba. Cobrança não edita nada. */
 const fatia: Record<Exclude<Aba, 'cobranca'>, () => unknown> = {
   basicas: () => ({ i: form.identidade, p: form.padroes, c: form.comportamento, m: form.modulos }),
   calendario: () => form.calendario,
   notificacoes: () => form.notificacoes,
-  dicionarios: () => form.dicionarios.traducoes,
+  dicionarios: () => form.dicionarios.idioma,
 }
 
 function instantaneo(aba: Exclude<Aba, 'cobranca'>) {
@@ -105,6 +161,9 @@ const salvo = reactive<Record<string, string>>({
 
 export function pendente(aba: Aba) {
   if (aba === 'cobranca') return false
+  // Dicionários não se compara por JSON: são 14 mil chaves, e o contador
+  // de alteradas já sabe a resposta sem varrer nada.
+  if (aba === 'dicionarios') return chavesAlteradas.value > 0
   return instantaneo(aba) !== salvo[aba]
 }
 
@@ -114,6 +173,11 @@ export const abasPendentes = computed(() =>
 
 export function marcarSalvo(aba: Aba) {
   if (aba === 'cobranca') return
+  if (aba === 'dicionarios') {
+    salvasDoDicionario = { ...traducoes }
+    alteradas.clear()
+    chavesAlteradas.value = 0
+  }
   salvo[aba] = instantaneo(aba)
 }
 
@@ -127,7 +191,10 @@ export function descartar(aba: Aba) {
     Object.assign(form.modulos, anterior.m)
   }
   else if (aba === 'dicionarios') {
-    Object.assign(form.dicionarios.traducoes, anterior)
+    for (const id of alteradas) traduzir(id, salvasDoDicionario[id] ?? '')
+    alteradas.clear()
+    chavesAlteradas.value = 0
+    form.dicionarios.idioma = anterior
   }
   else {
     Object.assign(form[aba], anterior)
