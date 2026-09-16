@@ -134,6 +134,49 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 6 — 16/09/2026 · o card vira um alvo só
+
+**Pergunta:** *"é interessante o card do workspace ter o botão de entrar já que ele é totalmente
+clicável? e tem melhoria visual a propor nos formatos dos cards?"*
+
+**Primeiro, um defeito meu:** o card **não era** clicável — só o botão. Mas levantava, mudava a
+borda e acendia o "Entrar" no hover. Prometia clique e não entregava, o que é pior que qualquer
+uma das duas opções.
+
+**A decisão: o card inteiro vira o alvo, e o botão vira afordância.**
+
+Não era o botão que sobrava — era ter **dois alvos visualmente diferentes para a mesma ação**.
+A saída foi fundir:
+
+- o título traz um `<a href="/w/{reference}">` que se estica por cima do card inteiro
+  (`after:absolute after:inset-0`). Isso mantém HTML válido — nada de botão dentro de link —,
+  deixa **um** item na árvore de acessibilidade, dá foco por teclado com anel visível no card
+  todo, e faz clique do meio e botão direito funcionarem. No produto o `href` leva ao
+  workspace; aqui o clique é interceptado;
+- o "Entrar" deixou de ser `<button>` e virou **`Entrar →`**, rótulo com seta que anda no hover
+  e vira `Entrando…` com spinner ao clicar;
+- a estrela de favorito continua botão de verdade, acima do link com `z-10`;
+- **o card de convite não virou link.** Ele tem duas ações de peso igual — Aceitar e Recusar —
+  e nenhum destino óbvio. Card clicável só funciona quando existe **uma** ação principal.
+
+**As correções visuais que vieram junto:**
+
+1. **O papel subiu.** O selo *Proprietário / Full* saiu do rodapé, onde competia com a ação, e
+   foi para o topo com a estrela. Papel é metadado, não ação — e o rodapé ficou inteiro para a
+   afordância.
+2. **A grade se alinhou.** Área de título com altura mínima e rodapé ancorado (`mt-auto`): os
+   cards da mesma linha terminam na mesma altura, mesmo com nome de três linhas ao lado de nome
+   de uma.
+3. **O ritmo mudou.** Nome com mais peso, descrição em duas linhas no máximo, e a recência
+   desceu para a linha de meta junto do número de pessoas: `62 pessoas · há 2 dias`.
+4. **"Sem descrição" sumiu.** Era o que eu critiquei no produto e tinha reaparecido no meu card.
+   Sem descrição, a linha simplesmente não existe — o espaço vazio conta a mesma coisa sem
+   gastar texto, e a altura mínima segura o alinhamento.
+
+**Ficou para uma próxima rodada**, porque são proposta de produto e não correção: **cor de
+identidade por workspace** (derivada do nome, dentro dos tokens) para reconhecer o espaço de
+relance, e **sinal visual de recência** na borda dos usados nos últimos dias.
+
 ### Rodada 5 — 16/09/2026 · SDK do ENSPACE
 
 **Pedido:** usar o SDK do ENSPACE para os protótipos saírem de acordo com a estrutura que já

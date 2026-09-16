@@ -526,3 +526,12 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
     nada do client HTTP — tudo isso precisa de back-end e cai na regra 4.
 23. **Mock é tipado pelo `enspace-sdk-schemas`.** Campo que o schema não tem e o protótipo
     precisou inventar vai marcado com comentário dizendo de onde veio.
+24. **Hover que promete clique tem que entregar clique.** Card que levanta, muda borda e acende
+    a ação no hover está dizendo "sou clicável". Ou ele é, ou o hover sai.
+25. **Card com UMA ação principal é um alvo só.** O card inteiro vira link — pelo *stretched
+    link* (`<a>` no título com `after:absolute after:inset-0`), que mantém HTML válido, um item
+    só na árvore de acessibilidade, foco por teclado e abrir-em-nova-aba. O rótulo da ação vira
+    **afordância** (`Entrar →`), não botão concorrente. Ações secundárias continuam botões de
+    verdade, acima com `z-10`.
+    **Com DUAS ações de peso igual — aceitar/recusar —, botão é o certo e o card não vira
+    link:** card clicável só funciona quando existe um destino óbvio.
