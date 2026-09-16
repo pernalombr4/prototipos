@@ -1,5 +1,70 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 3 — 16/09/2026 — a zona de perigo volta a gritar, e a linha emagrece
+
+**O que ela pediu, literal:**
+
+> "a seçao de excluir workspace era interessante ser chamada de ZONA DE RISCO/DANGER ZONE em
+> ingles
+>
+> chama mais atençao. precisamos realmente chamar atençao como é hoje já. com ícone, vermelho,
+> fundo levemente destacado diferente...
+>
+> alem disso, as opçoes aqui parecem excessivamente detalhadas (print). será que não deveria ser
+> só a opção e um help num tooltip num "?" explicando melhor o que é?"
+
+### 1. A seção de exclusão
+
+Na rodada 1 eu troquei "Zona de Perigo" por "Excluir workspace" e deixei o cartão igual aos
+outros, só com o título vermelho. **Foi um erro meu**, e contra o que eu mesma tinha escrito no
+briefing: a Zona de Perigo é uma das quatro coisas que a tela de hoje faz bem.
+
+O que voltou, mais forte que antes:
+
+- **nome de zona de novo**, com ícone de aviso antes dele;
+- **borda vermelha, cabeçalho com fundo tingido** e o corpo levemente tingido — a seção não se
+  parece com nenhuma outra da tela;
+- **o que se perde saiu do modal e voltou para a tela**: quatro linhas com número real (1.842
+  itens, 34 membros, 12 fluxos, 96 chaves traduzidas). Aviso que só aparece depois do clique
+  chega tarde;
+- o botão virou **vermelho sólido**, não mais contornado.
+
+A confirmação continua pedindo que se digite a referência do workspace.
+
+**Uma divergência de palavra, para você decidir.** Você escreveu "ZONA DE RISCO"; eu escrevi
+**"Zona de perigo"**, por dois motivos: é o nome que o produto e a documentação já usam hoje (e
+o seu próprio pedido foi "como é hoje já"), e "perigo" bate mais forte que "risco" para a única
+ação da tela que apaga tudo sem volta. Em inglês os dois viram "Danger Zone", que é a convenção.
+Se ainda assim você preferir "Zona de risco", é uma linha no `_AbaBasicas.vue`.
+
+### 2. As opções excessivamente detalhadas
+
+Você tem razão: eram **três linhas por chave** (rótulo, descrição e o "↳ efeito"), cinco chaves
+seguidas, e isso vira parede. Onde eu não fui até o fim foi em colocar *tudo* no "?".
+
+O que ficou:
+
+| Onde | O quê | Por quê |
+|---|---|---|
+| Sempre na tela | rótulo + **uma linha** | é o que deixa a lista escaneável: dá para decidir sem hover e sem clique. Reescrevi as oito descrições para caberem em uma linha da coluna |
+| Atrás do **"?"** ao lado do rótulo | o detalhe: efeito, exemplo, ressalva | é o que só interessa a quem parou naquela chave |
+| Sempre na tela, **só quando ligado** | o risco | aviso que a pessoa precisa ver não se esconde atrás de hover |
+
+**Por que não só o rótulo e o "?".** Uma tela de configuração se visita de vez em quando, e a
+pessoa costuma chegar procurando "aquela opção que faz X" — sem a linha de descrição, achar o
+que se procura exige abrir chave por chave. A linha é o índice; o "?" é o verbete.
+
+**Por que popover e não tooltip.** O "?" é um botão de verdade: abre no clique, fecha no Esc,
+funciona no toque e entra na ordem do teclado. Tooltip de hover deixaria de fora quem usa
+teclado e quem usa telefone — e o conteúdo aqui tem duas a três linhas, que é muito para
+tooltip.
+
+**O que o produto já acertava e continua valendo:** o "?" existe hoje e o texto dele é bom. O
+que estava errado era o endereço, no extremo direito da tela, a 1290 px do rótulo. Agora ele
+encosta no nome da coisa que explica.
+
+---
+
 ## Rodada 2 — 16/09/2026 — a largura das linhas de ajuste
 
 **O que ela pediu, literal:**
