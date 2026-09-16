@@ -134,6 +134,22 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 11 — 16/09/2026 · a estrela sai do hover
+
+**Pedido:** *"faça com que as estrelinhas de favoritar apareçam nos cards de workspace por
+padrão, não só com hover"*
+
+A estrela só existia no hover quando o workspace não era favorito. Agora ela está sempre lá:
+**amarela** quando é favorito, **cinza-fraca** quando não é, e amarela ao passar o mouse.
+
+Vale a autocrítica: esconder ação no hover é o padrão que eu já tinha criticado na regra 24 —
+afordância que só aparece depois que a pessoa passa por cima não ensina que existe. Quem nunca
+usou favoritos não descobriria que dá para favoritar, e a aba **Favoritos** ficaria zerada para
+sempre, que é exatamente o que acontece no produto hoje.
+
+Fica só nos cards. Na visualização em lista a estrela continua sendo **indicador**, não botão,
+porque lá a coluna de ações já está ocupada por Entrar.
+
 ### Rodada 10 — 16/09/2026 · revisão de texto
 
 Rodada só de copy: levantei os 40 textos visíveis da tela, propus, ela validou item a item.

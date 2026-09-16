@@ -392,7 +392,9 @@ function workspaceCriado(nome: string) {
                     square
                     variant="ghost"
                     :color="ehFavorito(w) ? 'warning' : 'neutral'"
-                    :class="ehFavorito(w) ? 'opacity-100' : 'opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100'"
+                    :class="ehFavorito(w)
+                      ? 'text-warning'
+                      : 'text-dimmed transition-colors hover:text-warning'"
                     :aria-label="ehFavorito(w) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
                     @click="alternarFavorito(w)"
                   />
