@@ -203,7 +203,7 @@ function workspaceCriado(nome: string) {
           </h1>
           <p class="mt-2 max-w-2xl text-muted">
             Workspace é o espaço da sua empresa dentro do ENSPACE. Seu trabalho acontece
-            <strong class="text-highlighted">dentro</strong> de um deles — esta tela só escolhe
+            <strong class="text-highlighted">dentro</strong> de um deles. Esta tela só escolhe
             por qual porta entrar.
           </p>
 
@@ -231,7 +231,7 @@ function workspaceCriado(nome: string) {
         color="error"
         variant="subtle"
         title="Não foi possível carregar seus workspaces"
-        description="A conexão falhou. Seus workspaces continuam lá — é só tentar de novo."
+        description="A conexão falhou. Seus workspaces continuam lá. É só tentar de novo."
         :actions="[{ label: 'Tentar de novo', color: 'error', variant: 'solid', onClick: tentarDeNovo }]"
       />
 

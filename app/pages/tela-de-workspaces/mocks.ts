@@ -77,7 +77,7 @@ export const workspaces: Workspace[] = [
     // caso de canto de propósito: nome longo que estoura a linha
     id: 4,
     status: 'active',
-    name: 'Jurídico — Correções Monetárias e Acordos Trabalhistas',
+    name: 'Jurídico Correções Monetárias e Acordos Trabalhistas',
     reference: 'juridico-correcoes-monetarias',
     description: 'Cálculo de correção e acompanhamento de acordos',
     icon: 'i-lucide-scale',
@@ -89,7 +89,7 @@ export const workspaces: Workspace[] = [
   {
     id: 5,
     status: 'active',
-    name: 'Aurora Saúde — Homologação',
+    name: 'Aurora Saúde Homologação',
     reference: 'aurora-saude-homologacao',
     description: '',
     icon: 'i-lucide-cross',
@@ -115,7 +115,7 @@ export const workspaces: Workspace[] = [
   {
     id: 7,
     status: 'active',
-    name: 'Base de teste — migração',
+    name: 'Base de teste de migração',
     reference: 'base-de-teste-migracao',
     description: '',
     icon: 'i-lucide-database',

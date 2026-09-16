@@ -360,7 +360,7 @@ function criar() {
                   :class="detalhesAbertos && 'rotate-90'"
                 />
                 Descrição e endereço
-                <span class="font-normal text-dimmed">— opcional</span>
+                <span class="font-normal text-dimmed">(opcional)</span>
               </button>
 
               <Transition
@@ -404,7 +404,7 @@ function criar() {
                 Quer começar de um modelo?
               </h2>
               <p class="mt-1.5 text-sm text-muted">
-                Um modelo já traz categorias, formulários e fluxos prontos — dá para mudar tudo
+                Um modelo já traz categorias, formulários e fluxos prontos. Dá para mudar tudo
                 depois.
               </p>
 
@@ -491,7 +491,7 @@ function criar() {
                     Nenhum modelo para essa localidade
                   </p>
                   <p class="mt-1 text-sm text-muted">
-                    Escolha outra acima, ou siga do zero — você não perde nada.
+                    Escolha outra acima, ou siga do zero: você não perde nada.
                   </p>
                 </div>
               </div>

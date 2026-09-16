@@ -161,7 +161,7 @@ async function excluir() {
           <template #help>
             <span>
               Vale para os termos nativos da interface. Os textos que
-              <strong class="text-toned">você</strong> criou — campos, formulários, ajudas —
+              <strong class="text-toned">você</strong> criou (campos, formulários, ajudas)
               se traduzem em
               <button
                 type="button"
@@ -175,37 +175,48 @@ async function excluir() {
       </div>
     </Secao>
 
-    <!-- 2. COMPORTAMENTO --------------------------------------------- -->
-    <Secao
-      id="comportamento"
-      titulo="Comportamento da interface"
-      resumo="O que os membros veem e o que eles podem fazer nas telas do workspace."
-      :doc="documentacao.basicas"
-      style="animation: entrada .4s ease-out both; animation-delay: 60ms"
-    >
-      <LinhaDeAjuste
-        v-for="a in comportamento"
-        :key="a.chave"
-        v-model="form.comportamento[a.chave]"
-        :ajuste="a"
-      />
-    </Secao>
+    <!--
+      2 e 3. COMPORTAMENTO E MÓDULOS, LADO A LADO
 
-    <!-- 3. MÓDULOS ---------------------------------------------------- -->
-    <Secao
-      id="modulos"
-      titulo="Módulos"
-      resumo="Funcionalidades opcionais. Ligar um módulo acrescenta telas e campos ao workspace."
-      :doc="documentacao.basicas"
-      style="animation: entrada .4s ease-out both; animation-delay: 120ms"
-    >
-      <LinhaDeAjuste
-        v-for="m in modulos"
-        :key="m.chave"
-        v-model="form.modulos[m.chave]"
-        :ajuste="m"
-      />
-    </Secao>
+      Os dois blocos são a mesma coisa em natureza — chaves de ligar/desligar que
+      mudam o workspace inteiro —, e cada um sozinho numa faixa de 1.200 px deixa
+      meio cartão vazio à direita do controle. Em duas colunas, a coluna passa a
+      ter a largura de leitura, o controle fica perto do rótulo e não sobra buraco.
+
+      `items-start` porque os cartões têm alturas diferentes (cinco chaves contra
+      três) e esticar o menor só criaria vazio de novo.
+    -->
+    <div class="grid items-start gap-5 lg:grid-cols-2">
+      <Secao
+        id="comportamento"
+        titulo="Comportamento da interface"
+        resumo="O que os membros veem e o que eles podem fazer nas telas do workspace."
+        :doc="documentacao.basicas"
+        style="animation: entrada .4s ease-out both; animation-delay: 60ms"
+      >
+        <LinhaDeAjuste
+          v-for="a in comportamento"
+          :key="a.chave"
+          v-model="form.comportamento[a.chave]"
+          :ajuste="a"
+        />
+      </Secao>
+
+      <Secao
+        id="modulos"
+        titulo="Módulos"
+        resumo="Funcionalidades opcionais. Ligar um módulo acrescenta telas e campos ao workspace."
+        :doc="documentacao.basicas"
+        style="animation: entrada .4s ease-out both; animation-delay: 120ms"
+      >
+        <LinhaDeAjuste
+          v-for="m in modulos"
+          :key="m.chave"
+          v-model="form.modulos[m.chave]"
+          :ajuste="m"
+        />
+      </Secao>
+    </div>
 
     <!-- 4. ZONA DE PERIGO --------------------------------------------- -->
     <Secao

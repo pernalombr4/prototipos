@@ -160,7 +160,7 @@ const custoEstimado = computed(() => Math.ceil(faltando.value * CUSTO_POR_CHAVE)
     <Secao
       id="traducoes"
       titulo="Dicionários de tradução"
-      resumo="Os textos que você criou — categorias, campos, formulários — no idioma de quem lê."
+      resumo="Os textos que você criou (categorias, campos, formulários) no idioma de quem lê."
       :doc="documentacao.dicionarios"
       style="animation: entrada .4s ease-out both"
     >
@@ -364,7 +364,7 @@ const custoEstimado = computed(() => Math.ceil(faltando.value * CUSTO_POR_CHAVE)
       <template #rodape>
         <p class="text-xs text-muted">
           Este exemplo tem {{ total }} chaves. Um workspace configurado passa de
-          {{ chavesNoWorkspaceReal.toLocaleString('pt-BR') }} — por isso a tela é uma fila com
+          {{ chavesNoWorkspaceReal.toLocaleString('pt-BR') }}. Por isso a tela é uma fila com
           filtro, e não uma árvore para abrir nó por nó.
         </p>
       </template>

@@ -123,6 +123,20 @@ Parte 2 da spec, resumida:
 - 🚫 **Nada de componente wired, do módulo de dados (`enspace-sdk-vue/nuxt`) nem do client
   HTTP.** Tudo isso precisa de back-end.
 
+## ⛔ Texto de interface nunca leva travessão
+
+Nem `—` nem `–`, em nada que a pessoa leia na tela: rótulo, placeholder, ajuda, descrição,
+estado vazio, toast, tooltip, botão, e também o dado do `mocks.ts`. No lugar: ponto (quase
+sempre), vírgula, dois-pontos ou parênteses. Comentário de código e `.md` seguem livres.
+
+Confira antes de entregar:
+
+```bash
+grep -n "—" app/pages/**/*.vue app/pages/**/mocks.ts
+```
+
+Regra 33 da Parte 6, com a tabela de substituições.
+
 ## Escopo de escrita
 
 Dentro deste repositório — e **só** dentro dele, veja a proibição no topo — o agente escreve

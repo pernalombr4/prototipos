@@ -21,7 +21,7 @@ function alternarDia(chave: number) {
 
 const resumoDosDias = computed(() => {
   const n = form.calendario.diasUteis.length
-  if (n === 0) return 'Nenhum dia útil — todo prazo do workspace fica parado.'
+  if (n === 0) return 'Nenhum dia útil. Todo prazo do workspace fica parado.'
   if (n === 7) return 'Todos os dias contam como úteis, inclusive o fim de semana.'
   const nomes = diasDaSemana
     .filter(d => form.calendario.diasUteis.includes(d.chave))
@@ -313,7 +313,7 @@ function formatarData(data: string) {
       :doc="documentacao.calendario"
       style="animation: entrada .4s ease-out both; animation-delay: 120ms"
     >
-      <div class="mb-4 flex max-w-3xl items-start justify-between gap-6">
+      <div class="mb-4 flex items-start justify-between gap-6">
         <div>
           <p class="text-sm font-medium text-highlighted">
             Registrar ocorrências no calendário

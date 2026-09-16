@@ -177,7 +177,7 @@ const modelosParaSelect = computed(() =>
 
       <p class="mt-3 text-sm text-muted">
         Quando você liga as suas próprias regras para um tipo de tarefa, <strong class="text-toned">estes
-          três avisos param</strong> para aquele tipo — e só o que você escrever é enviado.
+          três avisos param</strong> para aquele tipo, e só o que você escrever é enviado.
       </p>
     </Secao>
 
@@ -191,7 +191,7 @@ const modelosParaSelect = computed(() =>
       :doc="documentacao.notificacoes"
       :style="`animation: entrada .4s ease-out both; animation-delay: ${60 + idx * 60}ms`"
     >
-      <div class="flex max-w-3xl items-start justify-between gap-6 border-b border-default pb-4">
+      <div class="flex items-start justify-between gap-6 border-b border-default pb-4">
         <div class="min-w-0">
           <p class="text-sm font-medium text-highlighted">Usar as minhas regras</p>
           <p class="mt-1 text-sm text-muted">

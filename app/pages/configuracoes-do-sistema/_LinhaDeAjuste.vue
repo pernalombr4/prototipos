@@ -19,12 +19,13 @@ const valor = defineModel<boolean>({ required: true })
 
 <template>
   <!--
-    A linha tem largura de leitura (max-w-3xl). Sem isso, o controle vai parar
-    no extremo direito da tela e o rótulo fica a 900 px dele — que é metade do
-    problema da tela de hoje.
+    A linha ocupa a largura da COLUNA em que está — e é a coluna que tem a
+    medida de leitura. Travar a linha dentro de um cartão largo resolve a
+    distância entre rótulo e controle, mas deixa meio cartão vazio; quem
+    estreita é o container, não a linha.
   -->
   <div
-    class="flex max-w-3xl items-start gap-4 border-b border-default py-4 last:border-0 sm:gap-8"
+    class="flex items-start gap-4 border-b border-default py-4 last:border-0 sm:gap-6"
   >
     <div class="min-w-0 flex-1">
       <label

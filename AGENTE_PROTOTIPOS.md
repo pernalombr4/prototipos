@@ -244,9 +244,10 @@ Regras da biblioteca na **Parte 2**. "Alta fidelidade" aqui tem definição fech
    rota, ou é invenção do protótipo — nos dois casos, marque com comentário. Os valores são
    inventados: nunca dado de cliente real, nunca chamada de API, nem "Lorem ipsum" nem
    "Item 1", e em volume que prove a tela. Detalhe em **Parte 2**.
-2. **Texto final, em PT-BR.** O rótulo do protótipo é o rótulo que vai para o produto —
-   escrito com o nome que a tela usa ("fixar", não "congelar"). Passe pela skill
-   `design:ux-copy` antes de considerar pronto.
+2. **Texto final, em PT-BR, e sem travessão.** O rótulo do protótipo é o rótulo que vai para o
+   produto, escrito com o nome que a tela usa ("fixar", não "congelar"). **Nenhum texto de
+   interface leva travessão** (regra 33). Passe pela skill `design:ux-copy` antes de considerar
+   pronto.
 3. **Os estados, não só o feliz.** Vazio, carregando, erro, sem permissão e cheio. O estado
    vazio costuma ser onde a proposta se prova.
 4. **Responsivo e nos dois temas.** Claro é o padrão; escuro é estado a conferir de
@@ -628,3 +629,19 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
     clicando é pular exatamente o que está sendo medido. Volume para o cenário (centenas de
     itens, dezenas de categorias) pode ir por API — e vai declarado no `BRIEFING.md`. **Se a
     ação entra no que você vai contar no briefing, ela acontece na tela.**
+33. **⛔ TEXTO DE INTERFACE NUNCA LEVA TRAVESSÃO.** Nem `—` nem `–`. Vale para **tudo o que a
+    pessoa lê na tela**: rótulo, placeholder, texto de ajuda, descrição, estado vazio, toast,
+    tooltip, botão, título de seção — e também o dado do `mocks.ts`, que aparece renderizado.
+
+    No lugar dele, quase sempre **ponto**: travessão costuma esconder duas frases que ficam
+    melhores separadas. Depois, na ordem, vírgula, dois-pontos e parênteses.
+
+    | Em vez de | Escreva |
+    |---|---|
+    | `Seus workspaces continuam lá — é só tentar de novo.` | `Seus workspaces continuam lá. É só tentar de novo.` |
+    | `Os textos que você criou — categorias, campos — no idioma de quem lê.` | `Os textos que você criou (categorias, campos) no idioma de quem lê.` |
+    | `siga do zero — você não perde nada.` | `siga do zero: você não perde nada.` |
+    | `— opcional` | `(opcional)` |
+
+    **Comentário de código e os `.md` do protótipo não são interface** e seguem livres.
+    Antes de entregar: `grep -n "—" app/pages/**/*.vue` e confira que só sobrou comentário.

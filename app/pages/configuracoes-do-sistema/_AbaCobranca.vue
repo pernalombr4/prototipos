@@ -129,7 +129,7 @@ function dataLonga(iso: string) {
     <Secao
       id="carteira"
       titulo="Sua carteira"
-      resumo="O saldo é seu e vale em todos os workspaces de que você participa — não é do workspace."
+      resumo="O saldo é seu e vale em todos os workspaces de que você participa. Não é do workspace."
       :doc="documentacao.cobranca"
       style="animation: entrada .4s ease-out both"
     >
@@ -328,7 +328,7 @@ function dataLonga(iso: string) {
         v-else
         icon="i-lucide-inbox"
         title="Nenhum pedido de recarga"
-        description="Quando o saldo estiver acabando, peça aqui — o financeiro responde por e-mail."
+        description="Quando o saldo estiver acabando, peça aqui. O financeiro responde por e-mail."
         class="py-8"
       />
     </Secao>
@@ -396,7 +396,7 @@ function dataLonga(iso: string) {
             :color="t.origem.workspace === identidade.name ? 'neutral' : 'warning'"
             :title="t.origem.workspace === identidade.name
               ? 'Aconteceu neste workspace'
-              : 'Aconteceu em outro workspace seu — a carteira é a mesma'"
+              : 'Aconteceu em outro workspace seu. A carteira é a mesma'"
           />
 
           <span class="w-28 shrink-0 text-right text-xs tabular-nums text-muted">
