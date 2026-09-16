@@ -13,6 +13,31 @@
 
 `/workspaces` — a primeira tela depois do login, antes de entrar em qualquer workspace.
 
+## 2.1 O que a pesquisa de UX já dizia
+
+Consultado em 16/09/2026 no `enspace-ux-research` — **depois** das rodadas 1 a 9, porque a
+consulta ainda não era regra. Passou a ser (regra 30), e o que estava lá teria mudado a Fase 1.
+
+Na **Sessão 1**, a persona BR-GEN-LEIGA — uma pessoa sem familiaridade com sistemas, que entrou
+para organizar clientes e horários — narrou a chegada assim:
+
+> *"Entrei e apareceu uma tela com um monte de nome que eu não conheço. 'Workspaces'. Cliquei
+> num que estava escrito '[nome de um workspace de teste]' porque foi o que pareceu mais com
+> teste, já que eu estou testando."*
+
+É a mesma falha da demanda, por outro caminho: a tela não se explica, e a pessoa escolhe **por
+semelhança de palavra com a própria intenção**. Quem vem abrir chamado clica em "Criar
+workspace" pelo verbo "criar"; quem vem testar clica no que tem "teste" no nome. A tela não
+orienta nenhuma das duas.
+
+Também registrada na mesma sessão, na mesma URL (`/workspaces/…`): **`S1-F1` — o modal do
+Stonly em inglês cobrindo a tela a cada navegação**, classificada P1, com GIF e wireframe em
+`temas/plataforma/`. Não é escopo desta demanda, mas mora na mesma tela e assusta quem chega:
+*"achei que meu acesso tinha sido bloqueado ou que iam me cobrar"*.
+
+**O que isso muda:** a proposta deixa de ser opinião de uma rodada e vira convergência de dois
+métodos — a persona que tropeçou numa auditoria e a demanda que chegou do suporte depois.
+
 ## 3. O que seria sucesso
 
 Quem chega para abrir um chamado entende, sem ler nada com atenção, que precisa **entrar**

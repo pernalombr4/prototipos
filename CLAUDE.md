@@ -3,8 +3,9 @@
 ```
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║   ⛔  PROIBIÇÃO MÁXIMA — ESTE AGENTE SÓ ESCREVE NESTA PASTA.                  ║
-║       NENHUM OUTRO REPOSITÓRIO É TOCADO. NUNCA.                              ║
-║       en-docs: SOMENTE LEITURA.  Qualquer outro: NÃO ENCOSTAR.               ║
+║       NENHUM OUTRO REPOSITÓRIO É ESCRITO. NUNCA.                             ║
+║       en-docs e enspace-ux-research: SOMENTE LEITURA.                        ║
+║       Qualquer outro: NÃO ENCOSTAR.                                          ║
 ║       Precisa mudar algo fora daqui? PARE E AVISE A MIKAELA.                 ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 ```
@@ -23,9 +24,26 @@ se quebram. Este arquivo só cobre a operação neste repositório — em qualqu
 ## O que acontece quando ela chega com uma demanda
 
 1. Abrir `AGENTE_PROTOTIPOS.md`.
-2. Rodar as cinco fases na ordem: demanda → develop → pesquisa → protótipo → iteração.
-3. Subir o protótipo, mandar o link e o print.
-4. Commitar: `[PROTO] <slug> — rodada N — <o que mudou>`.
+2. **Procurar no `enspace-ux-research` o que já foi pesquisado sobre o assunto** — obrigatório,
+   antes de tudo (ver abaixo).
+3. Rodar as cinco fases na ordem: demanda → develop → pesquisa → protótipo → iteração.
+4. Subir o protótipo, mandar o link e o print.
+5. Commitar: `[PROTO] <slug> — rodada N — <o que mudou>`.
+
+## Antes de desenhar: o que já foi pesquisado
+
+O repositório vizinho `../enspace-ux-research` guarda auditoria de UX feita por persona, com
+fricções numeradas, evidência e wireframe. **Leitura obrigatória na Fase 1** — e **somente
+leitura**: quem escreve lá é o agente de lá.
+
+```bash
+cat ../enspace-ux-research/temas/README.md          # o índice dos temas
+cat ../enspace-ux-research/temas/<tema>/auditoria.md
+grep -in "<palavra da demanda>" ../enspace-ux-research/UX_REPORT.md
+```
+
+O que achar vai para o `BRIEFING.md`, em "O que a pesquisa de UX já dizia", citando a fricção
+pelo código (`S1-F2`). Não achou nada? Escreva que procurou.
 
 Demanda que já tem pasta em `app/pages/` é **iteração** (Fase 5), não protótipo novo — leia o
 `DECISOES.md` dela antes de mexer em qualquer tela.

@@ -23,8 +23,12 @@
 | Repositório | O que este agente pode fazer |
 |---|---|
 | **`enspace-prototipos`** (este) | ✅ ler e escrever |
-| **`en-docs`** | 👀 **SOMENTE LEITURA** — nunca editar, nunca commitar, nunca `git` nenhum |
-| `enspace-ux-research`, `en-api-docs`, `analises-dados`, `ux-analytics` — **e qualquer outro** | 🚫 **NÃO ENCOSTAR** |
+| **`en-docs`** | 👀 **SOMENTE LEITURA** — tema e componentes |
+| **`enspace-ux-research`** | 👀 **SOMENTE LEITURA** — é consulta **obrigatória** na Fase 1 |
+| `en-api-docs`, `analises-dados`, `ux-analytics` — **e qualquer outro** | 🚫 **NÃO ENCOSTAR** |
+
+**Somente leitura quer dizer leitura mesmo:** nunca editar, nunca commitar, nunca rodar `git`
+neles. O `enspace-ux-research` tem um agente próprio que escreve lá; este aqui só lê.
 
 **Isso quer dizer, sem margem para interpretação:**
 
@@ -34,8 +38,8 @@
   qualquer outro `git` em outro repositório;
 - ❌ **NÃO** "aproveita para arrumar" nada que encontrar em outro repositório;
 - ❌ **NÃO** move nem copia arquivo *daqui para lá* — a cópia só vem de lá para cá;
-- ✅ **PODE** ler o `en-docs` — e só ele — para consultar o tema, o `app.config.ts` e os
-  componentes do Nuxt UI. **Ler. Copiar para cá. Nunca escrever lá.**
+- ✅ **PODE** ler o `en-docs` (tema, `app.config.ts`, componentes) e o `enspace-ux-research`
+  (pesquisa de UX já feita). **Ler. Trazer o que serve para cá. Nunca escrever lá.**
 
 **Se alguma coisa fora desta pasta precisar mudar** — o tema do `en-docs` está errado, o
 mapeamento de cores mudou, o protótipo virou tarefa de implementação — **PARE E AVISE A
@@ -87,6 +91,34 @@ Primeiro arquivo da pasta é o `BRIEFING.md`, e ele começa com:
 
 Se a demanda não diz em qual tela ou jornada ela acontece, **pergunte**. É a única pergunta
 que pode travar o ciclo; todo o resto se resolve investigando.
+
+#### Antes de qualquer outra coisa: o que já foi pesquisado
+
+**Abra o `enspace-ux-research` — repositório vizinho, `../enspace-ux-research` — e procure
+opinião de UX já registrada sobre esse assunto.** Não é opcional e não é o último recurso: é o
+primeiro passo depois de ler a demanda. Lá existe auditoria feita por persona, com fricções
+numeradas, evidência e wireframe — trabalho que já custou sessão de gente, e que muitas vezes
+já descreveu o problema que a demanda está pedindo para resolver.
+
+```bash
+# 1) o índice dos temas — tem pasta que cabe no assunto?
+cat ../enspace-ux-research/temas/README.md
+
+# 2) o tema em si, se existir
+cat ../enspace-ux-research/temas/<tema>/README.md
+cat ../enspace-ux-research/temas/<tema>/auditoria.md
+
+# 3) e o relatório cumulativo, por palavra-chave da demanda
+grep -in "workspace\|chamado\|<palavra da demanda>" ../enspace-ux-research/UX_REPORT.md
+```
+
+O que achar entra no `BRIEFING.md` numa seção **"O que a pesquisa de UX já dizia"**, citando a
+fricção pelo código (`S1-F2`) e o trecho. Isso muda o peso da proposta: deixa de ser opinião de
+uma rodada e passa a ser convergência de dois métodos — a persona que tropeçou e a demanda que
+chegou depois.
+
+Se não houver nada sobre o assunto, **escreva que não havia**. "Procurei e não tinha" é
+informação; silêncio não é.
 
 ### Fase 2 — Investigar no develop
 
@@ -553,3 +585,8 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
     campo de identidade com nome errado. O nome vem da tela (regra do produto), mas quando ele
     contradiz a coisa, o protótipo propõe o nome certo **e registra a divergência** no
     `DECISOES.md` — em vez de herdar o engano por inércia.
+30. **Todo protótipo começa lendo o `enspace-ux-research`.** Antes de abrir o develop, antes de
+    pesquisar referência, antes de desenhar: procure no repositório vizinho se já existe
+    opinião de UX sobre esse assunto ou sobre assunto vizinho. Achou, entra no `BRIEFING.md`
+    citando a fricção pelo código. Não achou, escreva que procurou. **Só leitura** — quem
+    escreve lá é o agente de lá.
