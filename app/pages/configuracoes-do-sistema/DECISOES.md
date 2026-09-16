@@ -1,5 +1,52 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 2 — 16/09/2026 — a largura das linhas de ajuste
+
+**O que ela pediu, literal:**
+
+> "isso nao ta legal. muito espaço vazio na lateral. tem que distribuir melhor isso aí
+>
+> se for o caso, é só colocar comportamentos da interface dividindo tela com modulos, cada um
+> ocupando metade... nao sei se fica muito ruim. mas de um jeito com boa ux"
+
+**O que estava errado, e era meu.** Na rodada 1 eu travei a linha de ajuste em 768 px para
+aproximar o controle do rótulo — dentro de um cartão de 1.200 px. Ganhei a proximidade e comprei
+um buraco: **a régua embaixo de cada linha parava a 870 px** e o resto do cartão ficava vazio.
+Era o mesmo erro da tela de hoje de cabeça para baixo: lá o controle está longe demais, aqui o
+cartão ficou largo demais para o conteúdo.
+
+**O que mudou:**
+
+1. **Comportamento da interface e Módulos passaram a dividir a largura** (`lg:grid-cols-2`), como
+   ela sugeriu. Os dois são a mesma coisa em natureza — chaves que mudam o workspace inteiro — e
+   em coluna de ~500 px o controle fica a 24 px do fim do texto, sem trava nenhuma. Some o vazio
+   e some a distância, de uma vez.
+   `items-start` no grid: os cartões têm alturas diferentes (cinco chaves contra três) e esticar
+   o menor recriaria o vazio que estávamos tirando.
+2. **A trava de 768 px saiu de todas as linhas.** A régua volta a ir de ponta a ponta do cartão,
+   que é o que faz a lista parecer lista.
+3. **A linha passou a se medir pelo cartão, não pela janela** (`@container` do Tailwind 4).
+   Em cartão estreito — a coluna — o controle vai para a borda direita. Em cartão largo
+   (≥ 56rem, que é o caso quando a tela encolhe e as colunas empilham) o texto para em 40rem e o
+   controle vem logo depois, em vez de viajar até o outro lado; como a largura do texto é fixa,
+   os controles continuam alinhados entre si. Medido no navegador: coluna de 500 px → vão de
+   24 px; empilhado em 920 px → vão de 24 px. Em nenhum dos dois sobra buraco.
+4. **Notificações e Calendário:** o toggle do topo de cada bloco perdeu a trava e passou a
+   terminar na mesma borda da lista que ele governa — o switch fica na mesma coluna dos
+   controles das regras e das ocorrências logo abaixo. Ali a distância vira estrutura, porque
+   tem com o que se alinhar.
+
+**Por que não fiz a Zona de Perigo virar terceira coluna.** Ela continua sozinha, na largura
+inteira, embaixo. É a única ação sem volta da tela e a separação é parte do aviso — a tela de
+hoje acerta nisso (está no briefing, em "o que funciona"), e espremê-la ao lado de uns toggles
+tiraria o peso dela.
+
+**A regra que ficou, e vale para as próximas telas:** quem estreita é o container, nunca a
+linha. Se o controle está longe demais do rótulo, o cartão é que está largo demais para o
+conteúdo — a resposta é dividir a largura, não encolher a linha dentro dela.
+
+---
+
 ## Rodada 1 — 16/09/2026
 
 **O que ela pediu:** as seis queixas do [`BRIEFING.md`](BRIEFING.md), copiadas literais lá.

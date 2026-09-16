@@ -19,15 +19,20 @@ const valor = defineModel<boolean>({ required: true })
 
 <template>
   <!--
-    A linha ocupa a largura da COLUNA em que está — e é a coluna que tem a
-    medida de leitura. Travar a linha dentro de um cartão largo resolve a
-    distância entre rótulo e controle, mas deixa meio cartão vazio; quem
-    estreita é o container, não a linha.
+    A linha sempre ocupa a largura inteira do cartão — a régua embaixo dela vai
+    de ponta a ponta, que é o que faz a lista parecer lista.
+
+    O que muda com a largura do cartão (container query, não media query):
+      • cartão estreito (uma coluna de ~590 px): o controle vai para a borda
+        direita e fica a uma distância de leitura do rótulo;
+      • cartão largo (≥ 56rem): o texto para em 40rem e o controle vem logo
+        depois dele, em vez de viajar até o outro lado. Como a largura do texto
+        é fixa, os controles continuam alinhados entre si.
   -->
   <div
     class="flex items-start gap-4 border-b border-default py-4 last:border-0 sm:gap-6"
   >
-    <div class="min-w-0 flex-1">
+    <div class="min-w-0 flex-1 @4xl:w-[40rem] @4xl:flex-none">
       <label
         :for="`ajuste-${ajuste.chave}`"
         class="block text-sm font-medium text-highlighted"

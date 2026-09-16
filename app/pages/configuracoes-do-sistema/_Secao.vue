@@ -56,7 +56,12 @@ const aceso = computed(() => destaque.value === props.id)
       />
     </header>
 
-    <div class="px-5 py-4">
+    <!--
+      `@container` para o conteúdo saber a largura do CARTÃO, e não a da janela.
+      É o que deixa a mesma linha de ajuste se comportar certo tanto numa coluna
+      de 590 px quanto num cartão de 1.200 px.
+    -->
+    <div class="@container px-5 py-4">
       <slot />
     </div>
 
