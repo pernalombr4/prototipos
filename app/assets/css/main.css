@@ -100,3 +100,28 @@
   --color-teal-900: #134E4A;
   --color-teal-950: #0D3331;
 }
+
+/* ------------------------------------------------------------------
+   Movimento.
+   Protótipo de alta fidelidade mostra como a tela se comporta, não só
+   como ela é parada. Entrada em cascata, troca de visualização e
+   estados usam estas curvas.
+------------------------------------------------------------------ */
+@keyframes entrada {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulso-suave {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}
+
+/* Quem pediu menos movimento no sistema operacional recebe menos movimento. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

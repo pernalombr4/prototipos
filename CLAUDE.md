@@ -88,6 +88,21 @@ Editar o `en-docs` é proibido — se o tema estiver errado na origem, avise a M
 `app/pages/index.vue` se monta sozinho a partir das rotas e do `definePageMeta` de cada tela.
 Não mantenha lista à mão: criou a pasta com os metadados, o card aparece.
 
+**Cada protótipo tem UM card com UM link.** As outras telas e fluxos dele se navegam por
+dentro — camada, painel, passo. Nunca dois botões no mesmo card.
+
+## Ao desenhar — os quatro erros já cometidos
+
+Regras 14 a 17 da Parte 6 da spec, repetidas aqui porque saíram de correção da Mikaela:
+
+1. **Uma porta por protótipo.** Duas jornadas que no produto acontecem na mesma tela ficam na
+   mesma tela do protótipo.
+2. **Não troque a forma que o produto usa.** Card só vira lista se houver alternador visível;
+   o padrão continua card.
+3. **Ação do topo continua no topo.** Rebaixe cor e variante, nunca o endereço.
+4. **Sem movimento não é alta fidelidade.** Entrada em cascata, hover, transição de estado,
+   carregamento no botão clicado. As curvas e o `prefers-reduced-motion` estão no `main.css`.
+
 ## Commits
 
 - Um commit por rodada concluída.

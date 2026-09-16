@@ -186,6 +186,25 @@ Regras da biblioteca na **Parte 2**. "Alta fidelidade" aqui tem definição fech
    estático, **desde que declarado** no `DECISOES.md`, na lista "o que é maquete".
 6. **Jornada de mais de duas telas ganha diagrama** (`artifact-diagramming`), no
    `DECISOES.md`.
+7. **Movimento faz parte.** Protótipo parado é wireframe pintado. Entrada dos itens em
+   cascata, hover que responde, transição ao trocar de visualização ou de filtro, estado de
+   carregamento no botão que foi clicado, camada que abre com transição. É o que separa
+   avaliar **UI** de avaliar só o esqueleto. Respeite `prefers-reduced-motion` — já está no
+   `main.css`.
+8. **Uma porta por protótipo.** O índice da raiz leva a **um** endereço. As telas e os fluxos
+   de um mesmo protótipo se navegam **por dentro** — camada, painel, aba, passo. Dois botões
+   no mesmo card do índice é erro: quem revisa quer entrar uma vez e percorrer, não escolher
+   por onde começar.
+9. **Duas jornadas na mesma tela do produto vivem na mesma tela do protótipo.** Se no ENSPACE
+   escolher e criar acontecem na mesma tela, no protótipo também — em camada sobre ela, não
+   em rota separada.
+10. **Não troque a forma que o produto já usa.** Card não vira lista, tabela não vira card,
+    menu não vira aba. Se a outra forma for melhor, ela entra como **alternativa**, com o
+    controle de troca visível na tela — e o padrão continua sendo o do produto. Trocar sem
+    oferecer a volta tira da pessoa a referência que ela já tinha.
+11. **Ação que hoje está no topo continua no topo.** Dá para rebaixar o **peso** — cor,
+    variante, tamanho —, nunca o **endereço**. Quem já sabe onde clicar não pode perder o
+    caminho; o que se corrige é o destaque, não o lugar.
 
 Antes de chamar de pronto, rode `design:design-critique` no próprio trabalho e
 `design:accessibility-review` no contraste, foco e rótulo. Achado da própria crítica entra
@@ -426,3 +445,10 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
 13. **O repositório é público.** Credencial, token, dado de cliente real, e-mail de pessoa e
     URL com token **não se commitam**. Na dúvida sobre um arquivo, pergunte antes — depois de
     subir, já foi.
+14. **Uma porta por protótipo**, e as telas se navegam por dentro. Nunca dois botões para o
+    mesmo protótipo no índice.
+15. **Não troque a forma que o produto usa.** Card vira lista só com alternador visível na
+    tela; o padrão continua sendo o do produto.
+16. **Ação do topo continua no topo.** Rebaixe o peso visual, nunca o endereço.
+17. **Entrega sem movimento não é alta fidelidade.** Transição, hover e estado de
+    carregamento são parte do que está sendo avaliado.

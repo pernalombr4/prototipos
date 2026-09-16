@@ -67,39 +67,42 @@ const corDoStatus = {
       </p>
     </div>
 
+    <!-- Um protótipo, um card, UMA porta de entrada. A navegação entre as telas
+         de um protótipo acontece dentro dele, nunca aqui. -->
     <UPageGrid v-if="prototipos.length">
-      <UCard v-for="proto in prototipos" :key="proto.slug">
-        <template #header>
-          <div class="flex items-start justify-between gap-3">
-            <h2 class="font-semibold text-highlighted">
-              {{ proto.titulo }}
-            </h2>
-            <UBadge :color="corDoStatus[proto.status]" variant="subtle" size="sm">
-              {{ proto.status }}
-            </UBadge>
-          </div>
-        </template>
+      <NuxtLink
+        v-for="(proto, i) in prototipos"
+        :key="proto.slug"
+        :to="`/${proto.slug}`"
+        class="group block animate-[entrada_0.45s_ease-out_both] rounded-xl border border-default bg-elevated/30 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:shadow-lg hover:shadow-primary/5"
+        :style="{ animationDelay: `${i * 70}ms` }"
+      >
+        <div class="flex items-start justify-between gap-3">
+          <h2 class="font-semibold text-highlighted transition-colors group-hover:text-primary">
+            {{ proto.titulo }}
+          </h2>
+          <UBadge :color="corDoStatus[proto.status]" variant="subtle" size="sm">
+            {{ proto.status }}
+          </UBadge>
+        </div>
 
-        <p v-if="proto.descricao" class="text-sm text-muted">
+        <p v-if="proto.descricao" class="mt-2 text-sm text-muted">
           {{ proto.descricao }}
         </p>
 
-        <div class="mt-4 flex flex-wrap gap-2">
-          <UButton
-            v-for="tela in proto.telas"
-            :key="tela.path"
-            :to="tela.path"
-            :label="tela.titulo"
-            color="neutral"
-            variant="subtle"
-            size="xs"
-          />
+        <div class="mt-5 flex items-center justify-between">
+          <span v-if="proto.atualizado" class="text-xs text-dimmed">
+            Atualizado em {{ proto.atualizado }}
+          </span>
+          <span class="flex items-center gap-1.5 text-sm font-medium text-primary">
+            Abrir protótipo
+            <UIcon
+              name="i-lucide-arrow-right"
+              class="size-4 transition-transform duration-200 group-hover:translate-x-1"
+            />
+          </span>
         </div>
-
-        <template v-if="proto.atualizado" #footer>
-          <span class="text-xs text-dimmed">Atualizado em {{ proto.atualizado }}</span>
-        </template>
-      </UCard>
+      </NuxtLink>
     </UPageGrid>
 
     <UEmpty

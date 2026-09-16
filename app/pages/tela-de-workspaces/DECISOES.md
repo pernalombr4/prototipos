@@ -10,8 +10,10 @@ começa perguntando a intenção, para devolver quem se enganou.
 
 | Rota | O que mostra |
 |---|---|
-| `/tela-de-workspaces` | A tela de entrada proposta, com seletor dos cinco estados |
-| `/tela-de-workspaces/criar` | O caminho de criação com a pergunta que intercepta |
+| `/tela-de-workspaces` | Tudo: a tela de entrada, os cinco estados e a criação em camada |
+
+Uma rota só, de propósito. No produto, escolher e criar acontecem na mesma tela — então no
+protótipo também (rodada 2).
 
 ---
 
@@ -101,13 +103,14 @@ Declarado conforme a regra 10. Nesta tela **não funciona de verdade**:
 - **`Entrar`** — mostra um toast e não navega. Não existe "dentro do workspace" para ir.
 - **Aceitar / Recusar convite** — muda a lista em memória; recarregar volta tudo.
 - **`Criar workspace`** no fim do formulário — toast de sucesso, não cria nada.
-- **Favoritar** — a estrela é indicador, não botão, nesta versão.
+- **Favoritar** — alterna e a aba Favoritos responde, mas some ao recarregar.
 - **Barra superior** (ENSPACE, Suporte, avatar) — casca, só para dar contexto à tela.
 - **Seletor de estados no rodapé** — andaime de protótipo, não é proposta de produto.
 
 **Funciona de verdade** (é o que a proposta depende): busca, abas Todos/Favoritos/Recentes,
-ordenação por uso, a troca dos cinco estados, o desvio de intenção em `/criar`, o
-preenchimento automático da referência, o detector de nome-de-chamado e a prévia do card.
+alternador card/lista, favoritar, ordenação por uso, a troca dos cinco estados, o desvio de
+intenção dentro do modal, o preenchimento automático da referência, o detector de
+nome-de-chamado, a prévia do card e todas as transições.
 
 ## Autocrítica
 
@@ -130,6 +133,38 @@ Rodada antes de entregar, e o que ficou de fora:
 ---
 
 ## Iterações
+
+### Rodada 2 — 16/09/2026
+
+**Pedido:** *"nao ta legal ter que clicar em 2 botoes diferentes no mesmo card (…) isso tem que
+ser jornada unica (…) o botao de atalho pra criar um novo tem que continuar no topo (…) seu
+prototipo ta mal elaborado. sem usar animaçoes nem nada (…) voce mudou a aparencia de cards
+pra lista. nao pode mudar. se for pra ser lista, daí tem que adicionar botao pra alternar."*
+
+**O que mudou:**
+
+1. **Uma porta só.** A rota `/criar` foi apagada. A criação virou **camada sobre a própria
+   tela**, com os mesmos três passos — intenção → desvio → formulário. No produto isso é um
+   modal sobre a lista; agora o protótipo também é. E o índice da raiz passou a ter um card
+   com **um** link por protótipo.
+2. **O atalho de criar voltou para o topo.** Fica no canto superior direito, onde sempre
+   esteve. O que mudou é o **peso**, não o endereço: `outline` neutro em vez de sólido, então
+   o destaque visual da tela continua sendo "Entrar em …". Ganhou tooltip — *"Abre um espaço
+   vazio. Não é aqui que se abre chamado."* A desambiguação forte segue no modal.
+3. **Card voltou a ser o padrão**, com **alternador card / lista** ao lado da busca. A lista
+   continua existindo porque é melhor para comparar muitos workspaces — mas como escolha de
+   quem usa, não como troca imposta por mim.
+4. **Movimento.** Entrada dos cards em cascata, hover que levanta o card e acende ícone e
+   botão, `TransitionGroup` ao filtrar, buscar e trocar de visualização, `loading` no botão
+   que foi clicado, transição entre os passos do modal, e o convite saindo ao ser aceito.
+   Tudo sob `prefers-reduced-motion`.
+5. **Favoritar virou ação de verdade** — a estrela aparece no hover do card e alterna, e a aba
+   Favoritos responde na hora. Na rodada 1 era só indicador.
+
+**O que aprendi, e virou regra:** as quatro correções entraram como regras 14 a 17 da Parte 6
+da spec e estão repetidas no `CLAUDE.md`. As duas que mais doem: *não trocar a forma que o
+produto já usa sem oferecer a volta*, e *ação do topo continua no topo — rebaixa-se o peso,
+nunca o endereço*.
 
 ### Rodada 1 — 16/09/2026
 
