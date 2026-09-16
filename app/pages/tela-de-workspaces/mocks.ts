@@ -1,25 +1,32 @@
-// Dado do protótipo — 100% fictício.
+// Dado do protótipo — 100% fictício, mas com a ESTRUTURA do produto.
 //
-// A ESTRUTURA veio do develop (Fase 2): todo workspace tem nome, referência em
-// kebab-case, descrição (quase sempre vazia, aparecendo como "Sem descrição"),
-// um papel do usuário e um ícone. Convite pendente é um estado do próprio card.
-// Os VALORES são inventados: nenhuma empresa, pessoa ou chamado aqui é real.
+// O tipo `Workspace` abaixo é ancorado no schema real da API, vindo do
+// `@be-enlighten/enspace-sdk-schemas`: `id`, `name`, `reference`, `status`,
+// `description`, `icon` e `members_count` são os campos que existem de verdade,
+// com os tipos de verdade. O que o protótipo acrescenta está marcado como tal —
+// e campo acrescentado é sinal de que ou vem de outra rota, ou é invenção.
+//
+// Os VALORES continuam inventados: nenhuma empresa ou pessoa aqui é real.
+
+import type { Workspace as WorkspaceApi } from '@be-enlighten/enspace-sdk-schemas'
 
 export type Papel = 'Proprietário' | 'Full' | 'Membro' | 'Leitor'
 
-export interface Workspace {
-  id: string
-  nome: string
-  referencia: string
-  descricao: string
-  icone: string
+/** O que a API entrega de verdade sobre um workspace. */
+type CamposDaApi = Pick<
+  WorkspaceApi,
+  'id' | 'name' | 'reference' | 'status' | 'description' | 'icon' | 'members_count'
+>
+
+export interface Workspace extends CamposDaApi {
+  /** Papel do usuário — vem da listagem por membro, não do modelo Workspace. */
   papel: Papel
+  /** Acrescentado pelo protótipo: hoje a tela não tem favorito por usuário. */
   favorito: boolean
-  /** Minutos desde o último acesso. null = nunca entrou. */
+  /** Acrescentado pelo protótipo: minutos desde o último acesso. null = nunca entrou. */
   ultimoAcessoMin: number | null
-  membros: number
+  /** Estado de convite — na tela de hoje é um estado do próprio card. */
   convitePendente?: boolean
-  /** Quem convidou — só existe quando convitePendente. */
   convidadoPor?: string
 }
 
@@ -31,84 +38,91 @@ export const usuario = {
 
 export const workspaces: Workspace[] = [
   {
-    id: 'w1',
-    nome: 'Grupo Aurora',
-    referencia: 'grupo-aurora',
-    descricao: 'Chamados, RH e jurídico do Grupo Aurora',
-    icone: 'i-lucide-building-2',
+    id: 1,
+    status: 'active',
+    name: 'Grupo Aurora',
+    reference: 'grupo-aurora',
+    description: 'Chamados, RH e jurídico do Grupo Aurora',
+    icon: 'i-lucide-building-2',
     papel: 'Membro',
     favorito: true,
     ultimoAcessoMin: 95,
-    membros: 340,
+    members_count: 340,
   },
   {
-    id: 'w2',
-    nome: 'Vértice Log',
-    referencia: 'vertice-log',
-    descricao: 'Processos de logística, frota e expedição',
-    icone: 'i-lucide-truck',
+    id: 2,
+    status: 'active',
+    name: 'Vértice Log',
+    reference: 'vertice-log',
+    description: 'Processos de logística, frota e expedição',
+    icon: 'i-lucide-truck',
     papel: 'Full',
     favorito: true,
     ultimoAcessoMin: 2 * 24 * 60,
-    membros: 62,
+    members_count: 62,
   },
   {
-    id: 'w3',
-    nome: 'RH Aurora',
-    referencia: 'rh-aurora',
-    descricao: '',
-    icone: 'i-lucide-users',
+    id: 3,
+    status: 'active',
+    name: 'RH Aurora',
+    reference: 'rh-aurora',
+    description: '',
+    icon: 'i-lucide-users',
     papel: 'Membro',
     favorito: false,
     ultimoAcessoMin: 9 * 24 * 60,
-    membros: 28,
+    members_count: 28,
   },
   {
     // caso de canto de propósito: nome longo que estoura a linha
-    id: 'w4',
-    nome: 'Jurídico — Correções Monetárias e Acordos Trabalhistas',
-    referencia: 'juridico-correcoes-monetarias',
-    descricao: 'Cálculo de correção e acompanhamento de acordos',
-    icone: 'i-lucide-scale',
+    id: 4,
+    status: 'active',
+    name: 'Jurídico — Correções Monetárias e Acordos Trabalhistas',
+    reference: 'juridico-correcoes-monetarias',
+    description: 'Cálculo de correção e acompanhamento de acordos',
+    icon: 'i-lucide-scale',
     papel: 'Leitor',
     favorito: false,
     ultimoAcessoMin: 41 * 24 * 60,
-    membros: 11,
+    members_count: 11,
   },
   {
-    id: 'w5',
-    nome: 'Aurora Saúde — Homologação',
-    referencia: 'aurora-saude-homologacao',
-    descricao: '',
-    icone: 'i-lucide-cross',
+    id: 5,
+    status: 'active',
+    name: 'Aurora Saúde — Homologação',
+    reference: 'aurora-saude-homologacao',
+    description: '',
+    icon: 'i-lucide-cross',
     papel: 'Proprietário',
     favorito: false,
     ultimoAcessoMin: null,
-    membros: 4,
+    members_count: 4,
   },
   {
-    id: 'w6',
-    nome: 'Lumen Contábil',
-    referencia: 'lumen-contabil',
-    descricao: 'Fechamento contábil e obrigações acessórias',
-    icone: 'i-lucide-calculator',
+    id: 6,
+    status: 'active',
+    name: 'Lumen Contábil',
+    reference: 'lumen-contabil',
+    description: 'Fechamento contábil e obrigações acessórias',
+    icon: 'i-lucide-calculator',
     papel: 'Membro',
     favorito: false,
     ultimoAcessoMin: null,
-    membros: 19,
+    members_count: 19,
     convitePendente: true,
     convidadoPor: 'Rodrigo Petrone',
   },
   {
-    id: 'w7',
-    nome: 'Base de teste — migração',
-    referencia: 'base-de-teste-migracao',
-    descricao: '',
-    icone: 'i-lucide-database',
+    id: 7,
+    status: 'active',
+    name: 'Base de teste — migração',
+    reference: 'base-de-teste-migracao',
+    description: '',
+    icon: 'i-lucide-database',
     papel: 'Proprietário',
     favorito: false,
     ultimoAcessoMin: 6 * 24 * 60,
-    membros: 2,
+    members_count: 2,
   },
 ]
 
@@ -162,7 +176,7 @@ export interface CategoriaDeIcone {
 /** Mesmas categorias e nomes em português do produto; ícones do Lucide. */
 export const categoriasDeIcone: CategoriaDeIcone[] = [
   {
-    nome: 'Jurídico',
+    name: 'Jurídico',
     icones: [
       { id: 'i-lucide-scale', nome: 'Balança' },
       { id: 'i-lucide-file-check', nome: 'Certidão' },
@@ -173,7 +187,7 @@ export const categoriasDeIcone: CategoriaDeIcone[] = [
     ],
   },
   {
-    nome: 'Pessoas',
+    name: 'Pessoas',
     icones: [
       { id: 'i-lucide-users', nome: 'Equipe' },
       { id: 'i-lucide-user-plus', nome: 'Admissão' },
@@ -182,7 +196,7 @@ export const categoriasDeIcone: CategoriaDeIcone[] = [
     ],
   },
   {
-    nome: 'Finanças',
+    name: 'Finanças',
     icones: [
       { id: 'i-lucide-calculator', nome: 'Calculadora' },
       { id: 'i-lucide-banknote', nome: 'Pagamento' },
@@ -191,7 +205,7 @@ export const categoriasDeIcone: CategoriaDeIcone[] = [
     ],
   },
   {
-    nome: 'Operação',
+    name: 'Operação',
     icones: [
       { id: 'i-lucide-truck', nome: 'Logística' },
       { id: 'i-lucide-package', nome: 'Estoque' },
@@ -200,7 +214,7 @@ export const categoriasDeIcone: CategoriaDeIcone[] = [
     ],
   },
   {
-    nome: 'Tecnologia',
+    name: 'Tecnologia',
     icones: [
       { id: 'i-lucide-database', nome: 'Dados' },
       { id: 'i-lucide-server', nome: 'Servidor' },
@@ -209,7 +223,7 @@ export const categoriasDeIcone: CategoriaDeIcone[] = [
     ],
   },
   {
-    nome: 'Saúde',
+    name: 'Saúde',
     icones: [
       { id: 'i-lucide-cross', nome: 'Saúde' },
       { id: 'i-lucide-stethoscope', nome: 'Atendimento' },
@@ -244,25 +258,25 @@ export interface Template {
 export const templates: Template[] = [
   {
     id: 'chamados',
-    nome: 'Central de chamados',
-    descricao: 'Abertura, triagem e acompanhamento de pedidos internos.',
-    icone: 'i-lucide-life-buoy',
+    name: 'Central de chamados',
+    description: 'Abertura, triagem e acompanhamento de pedidos internos.',
+    icon: 'i-lucide-life-buoy',
     localidades: ['pt-br', 'global'],
     inclui: ['Categoria de chamados', 'Formulário de abertura', 'Fluxo de triagem', 'Painel de SLA'],
   },
   {
     id: 'rh',
-    nome: 'Jornada do colaborador',
-    descricao: 'Admissão, férias, benefícios e desligamento num lugar só.',
-    icone: 'i-lucide-users',
+    name: 'Jornada do colaborador',
+    description: 'Admissão, férias, benefícios e desligamento num lugar só.',
+    icon: 'i-lucide-users',
     localidades: ['pt-br'],
     inclui: ['Categoria de pessoas', 'Fluxo de admissão', 'Solicitação de férias'],
   },
   {
     id: 'juridico',
-    nome: 'Contratos e prazos',
-    descricao: 'Guarda de contratos com alerta de vencimento e reajuste.',
-    icone: 'i-lucide-scale',
+    name: 'Contratos e prazos',
+    description: 'Guarda de contratos com alerta de vencimento e reajuste.',
+    icon: 'i-lucide-scale',
     localidades: ['pt-br', 'global'],
     inclui: ['Categoria de contratos', 'Alerta de vencimento', 'Correção monetária'],
   },

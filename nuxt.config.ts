@@ -28,7 +28,19 @@ function rotasDasPaginas(): string[] {
 }
 
 export default defineNuxtConfig({
-  modules: ['@nuxt/ui'],
+  modules: [
+    '@nuxt/ui',
+    // Componentes do ENSPACE, construídos sobre o mesmo Nuxt UI 4.
+    // O módulo de dados (`@be-enlighten/enspace-sdk-vue/nuxt`) NÃO entra:
+    // ele liga a data layer /query e o Keycloak, e protótipo aqui é
+    // 100% front-end. Só os componentes base (dumb) são usados.
+    '@be-enlighten/enspace-sdk-ui/nuxt',
+  ],
+
+  enspaceUi: {
+    // Sem o módulo de dados de propósito — cala o aviso de build.
+    dataModuleCheck: false,
+  },
   css: ['~/assets/css/main.css'],
   compatibilityDate: 'latest',
   devtools: { enabled: true },

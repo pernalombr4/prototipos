@@ -7,6 +7,7 @@ import {
   corDoPapel,
   type Workspace,
 } from './mocks'
+import { type EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import ModalCriarWorkspace from './_ModalCriarWorkspace.vue'
 
 // O contexto do protótipo vem dos próprios .md desta pasta, como texto.
@@ -50,9 +51,9 @@ const busca = ref('')
 const aba = ref('todos')
 /** Card é o padrão do produto hoje. Lista é alternativa, nunca substituição. */
 const visual = ref<'cards' | 'lista'>('cards')
-const convitesRecusados = ref<string[]>([])
-const convitesAceitos = ref<string[]>([])
-const favoritados = ref<string[]>([])
+const convitesRecusados = ref<number[]>([])
+const convitesAceitos = ref<number[]>([])
+const favoritados = ref<number[]>([])
 
 const visiveis = computed(() => base.value.filter(w => !convitesRecusados.value.includes(w.id)))
 
@@ -86,7 +87,7 @@ const listados = computed(() => {
   if (aba.value === 'recentes') lista = lista.filter(w => w.ultimoAcessoMin !== null)
   if (termo) {
     lista = lista.filter(w =>
-      w.nome.toLowerCase().includes(termo) || w.referencia.includes(termo))
+      w.name.toLowerCase().includes(termo) || w.reference.includes(termo))
   }
   return lista.sort((a, b) => (a.ultimoAcessoMin ?? 9e9) - (b.ultimoAcessoMin ?? 9e9))
 })
@@ -97,15 +98,24 @@ const abas = computed(() => [
   { label: `Recentes (${disponiveis.value.filter(w => w.ultimoAcessoMin !== null).length})`, value: 'recentes' },
 ])
 
+/* -------- visualização em lista: EnTable, o componente do produto -------- */
+const colunasDaLista: EnTableColumn[] = [
+  { key: 'name', label: 'Workspace' },
+  { key: 'description', label: 'Descrição' },
+  { key: 'papel', label: 'Papel' },
+  { key: 'ultimoAcessoMin', label: 'Último acesso', sortable: true },
+  { key: 'acoes', label: '', align: 'right' },
+]
+
 /* ---------------------------- ações (maquete) ---------------------------- */
-const entrando = ref<string | null>(null)
+const entrando = ref<number | null>(null)
 
 function entrar(w: Workspace) {
   entrando.value = w.id
   setTimeout(() => {
     entrando.value = null
     toast.add({
-      title: `Entrando em ${w.nome}`,
+      title: `Entrando em ${w.name}`,
       description: 'No produto, a pessoa já estaria dentro do workspace.',
       icon: 'i-lucide-log-in',
       color: 'primary',
@@ -121,12 +131,12 @@ function alternarFavorito(w: Workspace) {
 
 function aceitar(w: Workspace) {
   convitesAceitos.value.push(w.id)
-  toast.add({ title: `Convite de ${w.nome} aceito`, icon: 'i-lucide-check', color: 'success' })
+  toast.add({ title: `Convite de ${w.name} aceito`, icon: 'i-lucide-check', color: 'success' })
 }
 
 function recusar(w: Workspace) {
   convitesRecusados.value.push(w.id)
-  toast.add({ title: `Convite de ${w.nome} recusado`, icon: 'i-lucide-x', color: 'neutral' })
+  toast.add({ title: `Convite de ${w.name} recusado`, icon: 'i-lucide-x', color: 'neutral' })
 }
 
 function tentarDeNovo() {
@@ -230,7 +240,7 @@ function workspaceCriado(nome: string) {
             icon="i-lucide-mail-open"
             color="secondary"
             variant="subtle"
-            :title="`${convite.convidadoPor} convidou você para ${convite.nome}`"
+            :title="`${convite.convidadoPor} convidou você para ${convite.name}`"
             description="Aceite para poder entrar neste workspace."
             :actions="[
               { label: 'Aceitar convite', color: 'secondary', variant: 'solid', onClick: () => aceitar(convite) },
@@ -251,19 +261,19 @@ function workspaceCriado(nome: string) {
           <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex min-w-0 items-center gap-4">
               <div class="flex size-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 transition-transform duration-300 hover:scale-105">
-                <UIcon :name="ultimo.icone" class="size-6 text-primary" />
+                <UIcon :name="ultimo.icon" class="size-6 text-primary" />
               </div>
               <div class="min-w-0">
                 <h2 class="truncate text-lg font-semibold text-highlighted">
-                  {{ ultimo.nome }}
+                  {{ ultimo.name }}
                 </h2>
                 <p class="truncate text-sm text-muted">
-                  {{ ultimo.descricao || tempoRelativo(ultimo.ultimoAcessoMin) }}
+                  {{ ultimo.description || tempoRelativo(ultimo.ultimoAcessoMin) }}
                 </p>
               </div>
             </div>
             <UButton
-              :label="`Entrar em ${ultimo.nome}`"
+              :label="`Entrar em ${ultimo.name}`"
               icon="i-lucide-log-in"
               size="lg"
               :loading="entrando === ultimo.id"
@@ -336,7 +346,7 @@ function workspaceCriado(nome: string) {
                   :class="estaPendente(w) ? 'bg-secondary/10' : 'bg-elevated group-hover:bg-primary/10'"
                 >
                   <UIcon
-                    :name="estaPendente(w) ? 'i-lucide-mail-open' : w.icone"
+                    :name="estaPendente(w) ? 'i-lucide-mail-open' : w.icon"
                     class="size-5 transition-colors"
                     :class="estaPendente(w) ? 'text-secondary' : 'text-muted group-hover:text-primary'"
                   />
@@ -362,12 +372,12 @@ function workspaceCriado(nome: string) {
               </div>
 
               <h3 class="mt-3 line-clamp-2 font-medium text-highlighted">
-                {{ w.nome }}
+                {{ w.name }}
               </h3>
               <p class="mt-1 line-clamp-2 text-sm text-muted">
                 {{ estaPendente(w)
                   ? `${w.convidadoPor} convidou você`
-                  : (w.descricao || `${w.membros} pessoas`) }}
+                  : (w.description || `${w.members_count} pessoas`) }}
               </p>
               <p class="mt-1 text-xs text-dimmed">
                 {{ estaPendente(w) ? 'Aceite para poder entrar' : tempoRelativo(w.ultimoAcessoMin) }}
@@ -406,78 +416,92 @@ function workspaceCriado(nome: string) {
             </article>
           </TransitionGroup>
 
-          <!-- LISTA (alternativa) -->
-          <TransitionGroup
+          <!-- LISTA (alternativa) — EnTable, a listagem padrão do ENSPACE.
+               Componente do próprio produto (@be-enlighten/enspace-sdk-ui),
+               em modo dumb: recebe linhas e colunas, navega por emit. -->
+          <EnTable
             v-else
-            tag="ul"
-            class="divide-y divide-default overflow-hidden rounded-xl border border-default"
-            enter-active-class="transition duration-300 ease-out"
-            enter-from-class="opacity-0 -translate-x-2"
-            leave-active-class="transition duration-150 ease-in"
-            leave-to-class="opacity-0"
-            move-class="transition-transform duration-300"
+            :columns="colunasDaLista"
+            :rows="listados"
+            :empty-state="{
+              icon: 'i-lucide-search-x',
+              title: 'Nenhum workspace encontrado',
+              description: 'Confira o nome, ou peça acesso a quem administra o ENSPACE na sua empresa.',
+            }"
+            class="animate-[entrada_0.3s_ease-out_both]"
+            @row-click="(row: Workspace) => !estaPendente(row) && entrar(row)"
           >
-            <li
-              v-for="(w, i) in listados"
-              :key="w.id"
-              class="group flex animate-[entrada_0.3s_ease-out_both] items-center gap-4 px-4 py-3 transition-colors hover:bg-elevated/60"
-              :style="{ animationDelay: `${i * 35}ms` }"
-            >
-              <div class="flex size-9 shrink-0 items-center justify-center rounded-md bg-elevated transition-colors group-hover:bg-primary/10">
-                <UIcon
-                  :name="estaPendente(w) ? 'i-lucide-mail-open' : w.icone"
-                  class="size-4.5 transition-colors"
-                  :class="estaPendente(w) ? 'text-secondary' : 'text-muted group-hover:text-primary'"
-                />
-              </div>
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2">
-                  <span class="truncate font-medium text-highlighted">{{ w.nome }}</span>
+            <template #cell-name="{ row }">
+              <div class="flex min-w-0 items-center gap-3">
+                <div
+                  class="flex size-8 shrink-0 items-center justify-center rounded-md"
+                  :class="estaPendente(row) ? 'bg-secondary/10' : 'bg-elevated'"
+                >
                   <UIcon
-                    v-if="ehFavorito(w) && !estaPendente(w)"
-                    name="i-lucide-star"
-                    class="size-3.5 shrink-0 text-warning"
-                  />
-                  <UBadge
-                    v-if="estaPendente(w)"
-                    label="Convite pendente"
-                    color="secondary"
-                    variant="subtle"
-                    size="sm"
-                    class="shrink-0"
+                    :name="estaPendente(row) ? 'i-lucide-mail-open' : row.icon!"
+                    class="size-4"
+                    :class="estaPendente(row) ? 'text-secondary' : 'text-muted'"
                   />
                 </div>
-                <p class="truncate text-sm text-muted">
-                  {{ estaPendente(w)
-                    ? `${w.convidadoPor} convidou você · aceite para poder entrar`
-                    : `${w.descricao || w.membros + ' pessoas'} · ${tempoRelativo(w.ultimoAcessoMin)}` }}
-                </p>
-              </div>
-
-              <template v-if="estaPendente(w)">
-                <UButton label="Aceitar" size="sm" color="secondary" class="shrink-0" @click="aceitar(w)" />
-                <UButton label="Recusar" size="sm" color="neutral" variant="ghost" class="shrink-0" @click="recusar(w)" />
-              </template>
-              <template v-else>
+                <span class="truncate font-medium text-highlighted">{{ row.name }}</span>
+                <UIcon
+                  v-if="ehFavorito(row) && !estaPendente(row)"
+                  name="i-lucide-star"
+                  class="size-3.5 shrink-0 text-warning"
+                />
                 <UBadge
-                  :label="w.papel"
-                  :color="corDoPapel[w.papel]"
+                  v-if="estaPendente(row)"
+                  label="Convite pendente"
+                  color="secondary"
                   variant="subtle"
                   size="sm"
-                  class="hidden shrink-0 sm:inline-flex"
+                  class="shrink-0"
                 />
+              </div>
+            </template>
+
+            <template #cell-description="{ row }">
+              <span class="text-muted">
+                {{ estaPendente(row)
+                  ? `${row.convidadoPor} convidou você`
+                  : (row.description || `${row.members_count} pessoas`) }}
+              </span>
+            </template>
+
+            <template #cell-papel="{ row }">
+              <UBadge
+                v-if="!estaPendente(row)"
+                :label="row.papel"
+                :color="corDoPapel[row.papel]"
+                variant="subtle"
+                size="sm"
+              />
+            </template>
+
+            <template #cell-ultimoAcessoMin="{ row }">
+              <span class="text-muted">
+                {{ estaPendente(row) ? 'Aceite para poder entrar' : tempoRelativo(row.ultimoAcessoMin) }}
+              </span>
+            </template>
+
+            <template #cell-acoes="{ row }">
+              <div class="flex items-center justify-end gap-2">
+                <template v-if="estaPendente(row)">
+                  <UButton label="Aceitar" size="sm" color="secondary" @click.stop="aceitar(row)" />
+                  <UButton label="Recusar" size="sm" color="neutral" variant="ghost" @click.stop="recusar(row)" />
+                </template>
                 <UButton
+                  v-else
                   label="Entrar"
                   size="sm"
                   color="neutral"
                   variant="subtle"
-                  :loading="entrando === w.id"
-                  class="shrink-0 transition-colors group-hover:bg-primary group-hover:text-inverted"
-                  @click="entrar(w)"
+                  :loading="entrando === row.id"
+                  @click.stop="entrar(row)"
                 />
-              </template>
-            </li>
-          </TransitionGroup>
+              </div>
+            </template>
+          </EnTable>
 
           <UEmpty
             v-if="!listados.length && busca"

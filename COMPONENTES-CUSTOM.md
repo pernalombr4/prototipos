@@ -3,13 +3,15 @@
 Tudo que está aqui é código que **o time de front vai ter que construir** se o protótipo for
 aprovado. Por isso a lista existe: ela é metade do handoff.
 
-A regra (Parte 2 da spec) é uma escada — só se chega aqui depois de tentar os três degraus
+A regra (Parte 2 da spec) é uma escada — só se chega aqui depois de tentar os degraus
 anteriores:
 
-1. procurar o componente pelo nome em `node_modules/@nuxt/ui/dist/runtime/components/`;
-2. compor com as primitivas que existem;
-3. só então criar em `app/components/ux/Ux<Nome>.vue`;
-4. e registrar nesta tabela.
+1. **o ENSPACE já tem?** — `EnTable`, `EnKanbanBoard`, `EnLayout`, `EnApp` do
+   `@be-enlighten/enspace-sdk-ui/base`;
+2. procurar o componente pelo nome em `node_modules/@nuxt/ui/dist/runtime/components/`;
+3. compor com as primitivas que existem;
+4. só então criar em `app/components/ux/Ux<Nome>.vue`;
+5. e registrar nesta tabela.
 
 ## Registro
 

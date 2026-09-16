@@ -134,6 +134,29 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 5 — 16/09/2026 · SDK do ENSPACE
+
+**Pedido:** usar o SDK do ENSPACE para os protótipos saírem de acordo com a estrutura que já
+existe.
+
+**O que mudou nesta tela:**
+
+1. **O mock passou a ser tipado pelo schema real.** `mocks.ts` importa `Workspace` do
+   `@be-enlighten/enspace-sdk-schemas` e monta em cima dele. Os campos viraram os de verdade —
+   `name`, `reference`, `status`, `description`, `icon`, `members_count` —, e `id` virou
+   número, como na API. O que o protótipo acrescenta (`papel`, `favorito`, `ultimoAcessoMin`,
+   convite) está marcado com comentário dizendo de onde vem.
+2. **A visualização em lista virou `EnTable`**, a listagem padrão do produto, em modo dumb:
+   recebe `columns` e `rows`, e a navegação sai por `@row-click`. Os slots `#cell-{key}`
+   mantêm o ícone, a estrela de favorito, o selo de convite e os botões. O card continua sendo
+   o padrão — o alternador segue valendo.
+3. **A raiz virou `<EnApp locale="pt-BR">`**, que abraça o `UApp` do Nuxt UI por dentro e provê
+   locale e mensagens para os componentes `En*`.
+
+**Descoberta que vale registrar:** o schema de `Workspace` tem `description`, `icon` e
+`members_count` — ou seja, o card mudo cheio de "Sem descrição" na tela de hoje **não é falta
+de campo no modelo**. O dado cabe; o produto só não pede nem mostra.
+
 ### Rodada 4 — 16/09/2026
 
 **Pedido:** *"nao precisamos dessa parte aqui"* (a lista "Abrir e acompanhar chamados · Ver

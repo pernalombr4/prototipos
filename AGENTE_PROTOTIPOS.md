@@ -174,11 +174,13 @@ ENSPACE.
 
 Regras da biblioteca na **Parte 2**. "Alta fidelidade" aqui tem definição fechada:
 
-1. **Dado mockado, mas verossímil.** A estrutura vem do develop (Fase 2) — nome de campo,
-   tipo, status, vocabulário do produto. Os valores são **inventados**, num `mocks.ts` da
-   própria pasta: nunca dado de cliente real, nunca chamada de API. Verossímil quer dizer
-   nem "Lorem ipsum" nem "Item 1", e em volume que prove a tela. Detalhe inteiro em
-   **Parte 2 → E o protótipo é 100% front-end**.
+1. **Dado mockado, mas verossímil, e tipado pelo schema real.** O `mocks.ts` importa o tipo do
+   `@be-enlighten/enspace-sdk-schemas` e monta o mock em cima dele — `name`, `reference`,
+   `status`, `description`, `icon`, `members_count` são os campos que existem de verdade, com
+   os tipos de verdade. **Campo que você precisou acrescentar é um sinal**: ou vem de outra
+   rota, ou é invenção do protótipo — nos dois casos, marque com comentário. Os valores são
+   inventados: nunca dado de cliente real, nunca chamada de API, nem "Lorem ipsum" nem
+   "Item 1", e em volume que prove a tela. Detalhe em **Parte 2**.
 2. **Texto final, em PT-BR.** O rótulo do protótipo é o rótulo que vai para o produto —
    escrito com o nome que a tela usa ("fixar", não "congelar"). Passe pela skill
    `design:ux-copy` antes de considerar pronto.
@@ -230,9 +232,50 @@ novo, literal), o que mudou, e o que foi descartado com o motivo.
 
 ## Parte 2 — Do que o protótipo é feito
 
-Duas restrições, e as duas são absolutas: **só Nuxt UI** e **só front-end**.
+Três restrições, e as três são absolutas: **primeiro o SDK do ENSPACE**, depois **só Nuxt UI**,
+e **só front-end**.
 
-### A biblioteca é Nuxt UI, e mais nada
+### Primeiro o SDK do ENSPACE — o produto já tem peça pronta
+
+O ENSPACE publica o próprio SDK, e o `enspace-sdk-ui` é construído **sobre o mesmo Nuxt UI 4 +
+Tailwind 4** que este repositório usa. Protótipo que redesenha do zero uma tabela que já existe
+no produto entrega uma proposta que ninguém vai conseguir implementar igual.
+
+**O que está instalado, e para quê:**
+
+| Pacote | Uso |
+|---|---|
+| `@be-enlighten/enspace-sdk-schemas` | **Sempre.** Schemas Zod e tipos reais da API: `Workspace`, `Member`, `Item`, `Field`, `Task`, `Workflow`, `Role`, `Invite`… O `mocks.ts` de cada protótipo é **tipado por eles** |
+| `@be-enlighten/enspace-sdk-ui` | Componentes do produto — **só o entry `/base`** |
+| `@be-enlighten/beni-avatar` | O mascote BENI, Vue + GSAP, puro front-end |
+| `@be-enlighten/enspace-sdk-core` e `-sdk-vue` | Instalados **só** por serem peers obrigatórios de tipagem. Não se importa nada deles |
+
+**Os quatro componentes base** (`@be-enlighten/enspace-sdk-ui/base`) são *dumb*: só props, slots
+e emits, zero data fetching, zero router — navegação sai por emit e a tela decide o que fazer.
+
+| Componente | O que é |
+|---|---|
+| `EnApp` | Provider raiz. Abraça o `UApp` do Nuxt UI e provê locale/mensagens. Já está no `app.vue` |
+| `EnLayout` | Shell de layout do produto: 7 variants, sidebar primária e secundária, inspector, navbar |
+| `EnTable` | A listagem padrão do ENSPACE: colunas, ordenação, paginação, seleção, slots `#cell-{key}` |
+| `EnKanbanBoard` | O board padrão: agrupamento, arrastar entre colunas, menu de contexto no cartão |
+
+> ### 🚫 O que do SDK **não** entra
+>
+> - **Componentes de entidade (wired)** — `En*ViewMany*`, `En*Forms*` e afins consomem a data
+>   layer `/query` e precisam de back-end. Protótipo aqui é 100% front-end;
+> - **o módulo `@be-enlighten/enspace-sdk-vue/nuxt`** — liga a data layer e o Keycloak;
+> - **o client HTTP do `enspace-sdk-core`** — é chamada de rede, proibida pela regra 4.
+>
+> Se um componente base não bastar, componha ou crie — **nunca** ligue o módulo de dados para
+> resolver.
+
+**Como já está montado:** o `nuxt.config.ts` registra `@be-enlighten/enspace-sdk-ui/nuxt` com
+`enspaceUi.dataModuleCheck: false` (o aviso existe para apps que usam componentes wired; aqui
+é de propósito). O módulo auto-importa os componentes e injeta o CSS — não é preciso importar
+`style.css` à mão. O `<EnApp locale="pt-BR">` já está na raiz.
+
+### Depois, o Nuxt UI — e mais nada
 
 #### A fonte da verdade está em disco, não na memória
 
@@ -256,13 +299,16 @@ em número decorado.
 
 #### A escada do que falta
 
-1. **Procure pelo nome** na pasta de componentes.
-2. **Não achou? Componha** com o que tem: `UCard` + `UButton` + `UInput` + `UBadge` +
-   `UTable`… A maioria do que parece faltar é composição.
-3. **Ainda não dá? Crie** em `app/components/ux/Ux<Nome>.vue`, feito só de utilitários
+1. **O ENSPACE já tem?** Confira os quatro base do SDK. Tabela é `EnTable`, board é
+   `EnKanbanBoard`, casca de tela é `EnLayout`. Se existe lá, usa-se de lá.
+2. **Não? Procure pelo nome** na pasta de componentes do Nuxt UI.
+3. **Não achou? Componha** com o que tem: `UCard` + `UButton` + `UInput` + `UBadge`…
+   A maioria do que parece faltar é composição.
+4. **Ainda não dá? Crie** em `app/components/ux/Ux<Nome>.vue`, feito só de utilitários
    Tailwind com os tokens semânticos.
-4. **E registre** em `COMPONENTES-CUSTOM.md`: o que é, por que Nuxt UI não cobriu, de qual
-   primitiva partiu, o que o dev vai ter que construir. Esse arquivo é metade do handoff.
+5. **E registre** em `COMPONENTES-CUSTOM.md`: o que é, por que nem o SDK nem o Nuxt UI
+   cobriram, de qual primitiva partiu, o que o dev vai ter que construir. Esse arquivo é
+   metade do handoff.
 
 #### Cor e espaçamento só por token
 
@@ -473,3 +519,10 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
 20. **Destaque soma, não substitui.** Promover um item para um aviso no topo é atalho — o item
     continua no lugar onde sempre esteve. Tirá-lo de lá faz quem procurava no lugar de sempre
     deixar de encontrar.
+21. **O SDK do ENSPACE vem antes do Nuxt UI.** Tabela é `EnTable`, board é `EnKanbanBoard`,
+    casca é `EnLayout`. Redesenhar do zero o que o produto já tem entrega proposta que o time
+    não consegue implementar igual.
+22. **Do SDK, só os componentes base.** Nada de componente wired, nada do módulo de dados,
+    nada do client HTTP — tudo isso precisa de back-end e cai na regra 4.
+23. **Mock é tipado pelo `enspace-sdk-schemas`.** Campo que o schema não tem e o protótipo
+    precisou inventar vai marcado com comentário dizendo de onde veio.

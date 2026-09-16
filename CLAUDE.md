@@ -63,9 +63,31 @@ pnpm postinstall  # nuxt prepare, se os tipos sumirem
 Para conferir um componente antes de usar:
 
 ```bash
+# 1) o ENSPACE já tem? (os quatro base do SDK)
+cat node_modules/@be-enlighten/enspace-sdk-ui/dist/base.d.ts
+
+# 2) o Nuxt UI tem?
 ls node_modules/@nuxt/ui/dist/runtime/components/ | grep -i badge
 sed -n '1,60p' node_modules/@nuxt/ui/dist/runtime/components/Badge.vue
 ```
+
+Para conferir o formato real de uma entidade da API:
+
+```bash
+grep -n "declare const Workspace: z.ZodObject" -A 20 \
+  node_modules/@be-enlighten/enspace-sdk-schemas/dist/index.d.ts
+```
+
+## O SDK do ENSPACE — primeiro o que o produto já tem
+
+Parte 2 da spec, resumida:
+
+- **`EnTable`, `EnKanbanBoard`, `EnLayout`, `EnApp`** — os quatro componentes base do
+  `@be-enlighten/enspace-sdk-ui`, *dumb*, sem data fetching. Vêm antes de desenhar do zero.
+- **`@be-enlighten/enspace-sdk-schemas`** tipa o `mocks.ts`. Campo inventado vai comentado.
+- **`@be-enlighten/beni-avatar`** para o BENI.
+- 🚫 **Nada de componente wired, do módulo de dados (`enspace-sdk-vue/nuxt`) nem do client
+  HTTP.** Tudo isso precisa de back-end.
 
 ## Escopo de escrita
 
