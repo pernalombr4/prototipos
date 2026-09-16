@@ -134,7 +134,24 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
-### Rodada 7 — 16/09/2026 · densidade
+### Rodada 8 — 16/09/2026 · o card volta ao tamanho da rodada 6
+
+**Pedido:** *"agora ta pequeno demais. pode voltar os cards pra como eram antes"*
+
+Voltou. O card da rodada 6 está de volta inteiro: ícone no topo à esquerda, selo de papel e
+estrela à direita, título, descrição, e o rodapé ancorado com `62 pessoas · há 2 dias` de um
+lado e `Entrar →` do outro. Grade, espaçamento e skeleton voltaram junto.
+
+**O que mantive da rodada 7:** a **cor de identidade por workspace**. Ela não tem nada a ver com
+tamanho — é cor no fundo do ícone — e a reclamação era de dimensão. Se preferir sem, é um
+comando.
+
+**O registro que importa:** as rodadas 6, 7 e 8 desenham a faixa. ~150 px foi *"muito grande
+com pouca informação"*; ~72 px foi *"pequeno demais"*; o acordo ficou no primeiro formato, com a
+meta enxugada numa linha e a cor carregando o sinal que faltava. Não vale recomprimir — está na
+regra 26, com o resultado do teste.
+
+### Rodada 7 — 16/09/2026 · densidade (revertida na 8)
 
 **Pedido:** *"cards continuam ruins. muito grande com pouca informação"*
 

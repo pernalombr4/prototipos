@@ -535,10 +535,13 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
     verdade, acima com `z-10`.
     **Com DUAS ações de peso igual — aceitar/recusar —, botão é o certo e o card não vira
     link:** card clicável só funciona quando existe um destino óbvio.
-26. **Card é informação por pixel.** Antes de entregar uma grade, conte: quantos itens cabem na
-    tela e quantas informações cada card carrega. Card grande com quatro linhas de conteúdo é
-    rolagem disfarçada de layout. Selo vira texto, rótulo de ação vira seta no hover, e o que
-    dá para dizer numa linha não ocupa três.
-27. **Não compre alinhamento com espaço morto.** Altura mínima e rodapé ancorado alinham a
-    grade criando buraco em todo item curto. Em card compacto, deixe cada um com a altura do
-    próprio conteúdo (`items-start`): irregularidade leve custa menos que vazio repetido.
+26. **Card é informação por pixel — e densidade tem piso.** Conte quantos itens cabem na tela e
+    quantas informações cada card carrega. Mas comprimir até o card virar uma linha tira dele a
+    presença que justifica ser card: selo vira texto, ação vira seta, e no fim sobrou uma lista
+    pior que a lista de verdade. **Testado e reprovado nesta tela** (rodadas 6 e 7): ~150 px foi
+    "muito grande com pouca informação", ~72 px foi "pequeno demais", e o acordo ficou no
+    primeiro com a meta enxugada. Quando a compressão chega no ponto de virar linha, o formato
+    certo é a **lista** — e ela já existe no alternador.
+27. **Alinhamento por altura mínima é aceitável quando o card tem presença.** O buraco embaixo
+    do item curto só pesa quando o card já está comprimido — e aí o problema é a compressão,
+    não o alinhamento.

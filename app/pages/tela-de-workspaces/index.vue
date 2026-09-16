@@ -116,14 +116,6 @@ function corDoWorkspace(w: Workspace) {
   return paletaDeIdentidade[soma % paletaDeIdentidade.length]!
 }
 
-/** Meta compacta: tudo o que importa numa linha só. */
-function metaDoCard(w: Workspace) {
-  const quando = tempoRelativo(w.ultimoAcessoMin)
-    .replace('Você esteve aqui ', '')
-    .replace('Você ainda não entrou aqui', 'nunca acessado')
-  return `${w.members_count} pessoas · ${quando} · ${w.papel}`
-}
-
 /* -------- visualização em lista: EnTable, o componente do produto -------- */
 const colunasDaLista: EnTableColumn[] = [
   { key: 'name', label: 'Workspace' },
@@ -247,7 +239,7 @@ function workspaceCriado(nome: string) {
       <div v-else-if="estado === 'carregando'" class="space-y-4">
         <USkeleton class="h-28 w-full rounded-xl" />
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <USkeleton v-for="i in 6" :key="i" class="h-[4.5rem] rounded-lg" />
+          <USkeleton v-for="i in 6" :key="i" class="h-36 rounded-xl" />
         </div>
       </div>
 
@@ -350,7 +342,7 @@ function workspaceCriado(nome: string) {
           <TransitionGroup
             v-if="visual === 'cards'"
             tag="div"
-            class="grid items-start gap-3 sm:grid-cols-2 lg:grid-cols-3"
+            class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
             enter-active-class="transition duration-300 ease-out"
             enter-from-class="opacity-0 translate-y-3"
             leave-active-class="transition duration-150 ease-in absolute"
@@ -360,68 +352,107 @@ function workspaceCriado(nome: string) {
             <article
               v-for="(w, i) in listados"
               :key="w.id"
-              class="group relative flex animate-[entrada_0.4s_ease-out_both] items-start gap-3 rounded-lg border p-3 transition-all duration-200 hover:shadow-md focus-within:shadow-md"
+              class="group relative flex animate-[entrada_0.4s_ease-out_both] flex-col rounded-xl border bg-elevated/20 p-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg focus-within:-translate-y-1 focus-within:shadow-lg"
               :class="estaPendente(w)
-                ? 'border-secondary/50 border-dashed bg-secondary/[0.03] hover:border-secondary'
-                : 'border-default bg-elevated/20 hover:border-primary/60 focus-within:border-primary'"
-              :style="{ animationDelay: `${i * 45}ms` }"
+                ? 'border-secondary/50 border-dashed hover:border-secondary hover:shadow-secondary/5'
+                : 'border-default hover:border-primary/60 hover:shadow-primary/5 focus-within:border-primary'"
+              :style="{ animationDelay: `${i * 55}ms` }"
             >
-              <!-- identidade: ícone com a cor do workspace -->
-              <div
-                class="flex size-9 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-105"
-                :class="estaPendente(w) ? 'bg-secondary/10 text-secondary' : corDoWorkspace(w)"
-              >
-                <UIcon :name="estaPendente(w) ? 'i-lucide-mail-open' : w.icon!" class="size-4.5" />
-              </div>
+              <!-- topo: identidade à esquerda, metadado e favorito à direita -->
+              <div class="relative z-10 flex items-start justify-between gap-2">
+                <div
+                  class="flex size-10 items-center justify-center rounded-lg transition-colors"
+                  :class="estaPendente(w) ? 'bg-secondary/10' : corDoWorkspace(w)"
+                >
+                  <UIcon
+                    :name="estaPendente(w) ? 'i-lucide-mail-open' : w.icon!"
+                    class="size-5"
+                  />
+                </div>
 
-              <div class="min-w-0 flex-1">
-                <div class="flex items-start gap-2">
-                  <h3 class="min-w-0 flex-1 truncate font-medium leading-snug text-highlighted">
-                    <!-- Link esticado: o card inteiro é o alvo, com HTML válido -->
-                    <a
-                      v-if="!estaPendente(w)"
-                      :href="`/w/${w.reference}`"
-                      class="outline-none after:absolute after:inset-0 after:rounded-lg focus-visible:after:ring-2 focus-visible:after:ring-primary"
-                      @click.prevent="entrar(w)"
-                    >{{ w.name }}</a>
-                    <template v-else>{{ w.name }}</template>
-                  </h3>
-
+                <div class="flex items-center gap-1.5">
+                  <UBadge
+                    v-if="estaPendente(w)"
+                    label="Convite pendente"
+                    color="secondary"
+                    variant="subtle"
+                    size="sm"
+                  />
+                  <UBadge
+                    v-else
+                    :label="w.papel"
+                    :color="corDoPapel[w.papel]"
+                    variant="subtle"
+                    size="sm"
+                  />
                   <UButton
                     v-if="!estaPendente(w)"
                     icon="i-lucide-star"
                     size="xs"
                     square
                     variant="ghost"
-                    class="relative z-10 -mr-1 -mt-1 shrink-0"
                     :color="ehFavorito(w) ? 'warning' : 'neutral'"
                     :class="ehFavorito(w) ? 'opacity-100' : 'opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100'"
                     :aria-label="ehFavorito(w) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
                     @click="alternarFavorito(w)"
                   />
-                  <UIcon
+                </div>
+              </div>
+
+              <!-- corpo: altura mínima para os cards da grade se alinharem -->
+              <div class="mt-3 min-h-16">
+                <h3 class="line-clamp-2 font-semibold text-highlighted">
+                  <!-- O card inteiro é o alvo: este link se estica por cima dele
+                       (after:inset-0). A estrela fica acima, com z-10. No produto
+                       o href leva ao workspace; aqui o clique é interceptado. -->
+                  <a
                     v-if="!estaPendente(w)"
+                    :href="`/w/${w.reference}`"
+                    class="outline-none after:absolute after:inset-0 after:rounded-xl focus-visible:after:ring-2 focus-visible:after:ring-primary"
+                    @click.prevent="entrar(w)"
+                  >{{ w.name }}</a>
+                  <template v-else>{{ w.name }}</template>
+                </h3>
+                <!-- Sem descrição não vira linha dizendo "sem descrição": o
+                     espaço vazio já conta isso, e a altura mínima segura a grade. -->
+                <p
+                  v-if="estaPendente(w) || w.description"
+                  class="mt-1 line-clamp-2 text-sm text-muted"
+                >
+                  {{ estaPendente(w)
+                    ? `${w.convidadoPor} convidou você para este workspace`
+                    : w.description }}
+                </p>
+              </div>
+
+              <!-- rodapé ancorado: meta à esquerda, a ação à direita -->
+              <div class="mt-auto flex items-end justify-between gap-2 pt-4">
+                <p class="text-xs text-dimmed">
+                  <template v-if="estaPendente(w)">Aceite para poder entrar</template>
+                  <template v-else>
+                    {{ w.members_count }} pessoas · {{ tempoRelativo(w.ultimoAcessoMin).replace('Você esteve aqui ', '').replace('Você ainda não entrou aqui', 'nunca acessado') }}
+                  </template>
+                </p>
+
+                <!-- Convite tem duas ações de peso igual: aqui botão é o certo -->
+                <div v-if="estaPendente(w)" class="relative z-10 flex items-center gap-2">
+                  <UButton label="Aceitar" size="sm" color="secondary" @click="aceitar(w)" />
+                  <UButton label="Recusar" size="sm" color="neutral" variant="ghost" @click="recusar(w)" />
+                </div>
+
+                <!-- Uma ação principal: vira afordância dentro do próprio alvo -->
+                <span
+                  v-else
+                  class="pointer-events-none flex shrink-0 items-center gap-1 text-sm font-medium transition-colors"
+                  :class="entrando === w.id ? 'text-primary' : 'text-muted group-hover:text-primary'"
+                >
+                  {{ entrando === w.id ? 'Entrando…' : 'Entrar' }}
+                  <UIcon
                     :name="entrando === w.id ? 'i-lucide-loader-circle' : 'i-lucide-arrow-right'"
-                    class="mt-0.5 size-4 shrink-0 text-primary transition-all duration-200"
-                    :class="entrando === w.id
-                      ? 'animate-spin opacity-100'
-                      : 'opacity-0 -translate-x-1 group-hover:translate-x-0 group-hover:opacity-100'"
+                    class="size-4 transition-transform duration-200"
+                    :class="entrando === w.id ? 'animate-spin' : 'group-hover:translate-x-1'"
                   />
-                </div>
-
-                <p v-if="w.description || estaPendente(w)" class="truncate text-sm text-muted">
-                  {{ estaPendente(w) ? `${w.convidadoPor} convidou você` : w.description }}
-                </p>
-
-                <p class="mt-0.5 truncate text-xs text-dimmed">
-                  {{ estaPendente(w) ? 'Aceite para poder entrar neste workspace' : metaDoCard(w) }}
-                </p>
-
-                <!-- Convite: duas ações de peso igual, então botões -->
-                <div v-if="estaPendente(w)" class="relative z-10 mt-2.5 flex items-center gap-2">
-                  <UButton label="Aceitar" size="xs" color="secondary" @click="aceitar(w)" />
-                  <UButton label="Recusar" size="xs" color="neutral" variant="ghost" @click="recusar(w)" />
-                </div>
+                </span>
               </div>
             </article>
           </TransitionGroup>
