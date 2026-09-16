@@ -3,7 +3,6 @@ import {
   workspaces,
   workspaceUnico,
   usuario,
-  exemplosDoQueSeFazDentro,
   tempoRelativo,
   corDoPapel,
   type Workspace,
@@ -72,9 +71,16 @@ const ultimo = computed(() =>
     .filter(w => w.ultimoAcessoMin !== null)
     .sort((a, b) => (a.ultimoAcessoMin ?? 0) - (b.ultimoAcessoMin ?? 0))[0])
 
+/** Convite ainda não respondido — o card entra na lista com outro corpo. */
+function estaPendente(w: Workspace) {
+  return !!w.convitePendente && !convitesAceitos.value.includes(w.id)
+}
+
 const listados = computed(() => {
   const termo = busca.value.trim().toLowerCase()
-  let lista = disponiveis.value.filter(w => w.id !== ultimo.value?.id)
+  // Os pendentes também aparecem aqui: o aviso do topo é atalho, não
+  // substituto do card. É assim que o produto mostra hoje.
+  let lista = visiveis.value.filter(w => w.id !== ultimo.value?.id)
 
   if (aba.value === 'favoritos') lista = lista.filter(w => ehFavorito(w))
   if (aba.value === 'recentes') lista = lista.filter(w => w.ultimoAcessoMin !== null)
@@ -86,7 +92,7 @@ const listados = computed(() => {
 })
 
 const abas = computed(() => [
-  { label: `Todos (${disponiveis.value.length})`, value: 'todos' },
+  { label: `Todos (${visiveis.value.length})`, value: 'todos' },
   { label: `Favoritos (${disponiveis.value.filter(w => ehFavorito(w)).length})`, value: 'favoritos' },
   { label: `Recentes (${disponiveis.value.filter(w => w.ultimoAcessoMin !== null).length})`, value: 'recentes' },
 ])
@@ -173,17 +179,6 @@ function workspaceCriado(nome: string) {
             por qual porta entrar.
           </p>
 
-          <ul class="mt-4 flex flex-wrap gap-x-6 gap-y-2">
-            <li
-              v-for="(exemplo, i) in exemplosDoQueSeFazDentro"
-              :key="exemplo.texto"
-              class="flex animate-[entrada_0.4s_ease-out_both] items-center gap-2 text-sm text-muted"
-              :style="{ animationDelay: `${120 + i * 80}ms` }"
-            >
-              <UIcon :name="exemplo.icone" class="size-4 text-primary" />
-              {{ exemplo.texto }}
-            </li>
-          </ul>
         </div>
 
         <!-- Atalho no topo, como sempre esteve. Secundário no peso, não no
@@ -329,14 +324,32 @@ function workspaceCriado(nome: string) {
             <article
               v-for="(w, i) in listados"
               :key="w.id"
-              class="group flex animate-[entrada_0.4s_ease-out_both] flex-col rounded-xl border border-default bg-elevated/20 p-4 transition-all duration-200 hover:-translate-y-1 hover:border-primary/60 hover:shadow-lg hover:shadow-primary/5"
+              class="group flex animate-[entrada_0.4s_ease-out_both] flex-col rounded-xl border bg-elevated/20 p-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+              :class="estaPendente(w)
+                ? 'border-secondary/50 border-dashed hover:border-secondary hover:shadow-secondary/5'
+                : 'border-default hover:border-primary/60 hover:shadow-primary/5'"
               :style="{ animationDelay: `${i * 55}ms` }"
             >
               <div class="flex items-start justify-between gap-2">
-                <div class="flex size-10 items-center justify-center rounded-lg bg-elevated transition-colors group-hover:bg-primary/10">
-                  <UIcon :name="w.icone" class="size-5 text-muted transition-colors group-hover:text-primary" />
+                <div
+                  class="flex size-10 items-center justify-center rounded-lg transition-colors"
+                  :class="estaPendente(w) ? 'bg-secondary/10' : 'bg-elevated group-hover:bg-primary/10'"
+                >
+                  <UIcon
+                    :name="estaPendente(w) ? 'i-lucide-mail-open' : w.icone"
+                    class="size-5 transition-colors"
+                    :class="estaPendente(w) ? 'text-secondary' : 'text-muted group-hover:text-primary'"
+                  />
                 </div>
+                <UBadge
+                  v-if="estaPendente(w)"
+                  label="Convite pendente"
+                  color="secondary"
+                  variant="subtle"
+                  size="sm"
+                />
                 <UButton
+                  v-if="!estaPendente(w)"
                   :icon="ehFavorito(w) ? 'i-lucide-star' : 'i-lucide-star'"
                   size="xs"
                   square
@@ -352,13 +365,32 @@ function workspaceCriado(nome: string) {
                 {{ w.nome }}
               </h3>
               <p class="mt-1 line-clamp-2 text-sm text-muted">
-                {{ w.descricao || `${w.membros} pessoas` }}
+                {{ estaPendente(w)
+                  ? `${w.convidadoPor} convidou você`
+                  : (w.descricao || `${w.membros} pessoas`) }}
               </p>
               <p class="mt-1 text-xs text-dimmed">
-                {{ tempoRelativo(w.ultimoAcessoMin) }}
+                {{ estaPendente(w) ? 'Aceite para poder entrar' : tempoRelativo(w.ultimoAcessoMin) }}
               </p>
 
-              <div class="mt-4 flex items-center justify-between gap-2 pt-1">
+              <!-- Convite pendente: o card existe na lista, com a ação dele -->
+              <div v-if="estaPendente(w)" class="mt-4 flex items-center gap-2 pt-1">
+                <UButton
+                  label="Aceitar"
+                  icon="i-lucide-check"
+                  size="sm"
+                  color="secondary"
+                  @click="aceitar(w)"
+                />
+                <UButton
+                  label="Recusar"
+                  size="sm"
+                  color="neutral"
+                  variant="ghost"
+                  @click="recusar(w)"
+                />
+              </div>
+              <div v-else class="mt-4 flex items-center justify-between gap-2 pt-1">
                 <UBadge :label="w.papel" :color="corDoPapel[w.papel]" variant="subtle" size="sm" />
                 <UButton
                   label="Entrar"
@@ -392,33 +424,58 @@ function workspaceCriado(nome: string) {
               :style="{ animationDelay: `${i * 35}ms` }"
             >
               <div class="flex size-9 shrink-0 items-center justify-center rounded-md bg-elevated transition-colors group-hover:bg-primary/10">
-                <UIcon :name="w.icone" class="size-4.5 text-muted transition-colors group-hover:text-primary" />
+                <UIcon
+                  :name="estaPendente(w) ? 'i-lucide-mail-open' : w.icone"
+                  class="size-4.5 transition-colors"
+                  :class="estaPendente(w) ? 'text-secondary' : 'text-muted group-hover:text-primary'"
+                />
               </div>
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2">
                   <span class="truncate font-medium text-highlighted">{{ w.nome }}</span>
-                  <UIcon v-if="ehFavorito(w)" name="i-lucide-star" class="size-3.5 shrink-0 text-warning" />
+                  <UIcon
+                    v-if="ehFavorito(w) && !estaPendente(w)"
+                    name="i-lucide-star"
+                    class="size-3.5 shrink-0 text-warning"
+                  />
+                  <UBadge
+                    v-if="estaPendente(w)"
+                    label="Convite pendente"
+                    color="secondary"
+                    variant="subtle"
+                    size="sm"
+                    class="shrink-0"
+                  />
                 </div>
                 <p class="truncate text-sm text-muted">
-                  {{ w.descricao || `${w.membros} pessoas` }} · {{ tempoRelativo(w.ultimoAcessoMin) }}
+                  {{ estaPendente(w)
+                    ? `${w.convidadoPor} convidou você · aceite para poder entrar`
+                    : `${w.descricao || w.membros + ' pessoas'} · ${tempoRelativo(w.ultimoAcessoMin)}` }}
                 </p>
               </div>
-              <UBadge
-                :label="w.papel"
-                :color="corDoPapel[w.papel]"
-                variant="subtle"
-                size="sm"
-                class="hidden shrink-0 sm:inline-flex"
-              />
-              <UButton
-                label="Entrar"
-                size="sm"
-                color="neutral"
-                variant="subtle"
-                :loading="entrando === w.id"
-                class="shrink-0 transition-colors group-hover:bg-primary group-hover:text-inverted"
-                @click="entrar(w)"
-              />
+
+              <template v-if="estaPendente(w)">
+                <UButton label="Aceitar" size="sm" color="secondary" class="shrink-0" @click="aceitar(w)" />
+                <UButton label="Recusar" size="sm" color="neutral" variant="ghost" class="shrink-0" @click="recusar(w)" />
+              </template>
+              <template v-else>
+                <UBadge
+                  :label="w.papel"
+                  :color="corDoPapel[w.papel]"
+                  variant="subtle"
+                  size="sm"
+                  class="hidden shrink-0 sm:inline-flex"
+                />
+                <UButton
+                  label="Entrar"
+                  size="sm"
+                  color="neutral"
+                  variant="subtle"
+                  :loading="entrando === w.id"
+                  class="shrink-0 transition-colors group-hover:bg-primary group-hover:text-inverted"
+                  @click="entrar(w)"
+                />
+              </template>
             </li>
           </TransitionGroup>
 

@@ -470,3 +470,6 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
 19. **Não resolva na tela B um problema da tela A.** Cada jornada carrega o próprio objetivo.
     Enfiar o conserto de outra confusão no meio de um fluxo que não é dela deixa as duas
     piores.
+20. **Destaque soma, não substitui.** Promover um item para um aviso no topo é atalho — o item
+    continua no lugar onde sempre esteve. Tirá-lo de lá faz quem procurava no lugar de sempre
+    deixar de encontrar.

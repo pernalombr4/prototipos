@@ -134,6 +134,27 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 4 — 16/09/2026
+
+**Pedido:** *"nao precisamos dessa parte aqui"* (a lista "Abrir e acompanhar chamados · Ver
+suas tarefas e prazos · Consultar dados e documentos") *"e o convite, alem de aparecer no topo,
+deve aparecer no card também como aparece hoje. no topo seria só um atalho"*
+
+**O que mudou:**
+
+1. **A lista de exemplos saiu.** O título e a frase abaixo dele já dizem que o trabalho
+   acontece dentro do workspace; os três exemplos repetiam a mesma ideia e empurravam a lista
+   para baixo.
+2. **O convite passou a existir nos dois lugares.** O card volta para a grade — com moldura
+   tracejada, ícone de envelope, o selo *Convite pendente*, quem convidou e os botões
+   **Aceitar** e **Recusar** no lugar de *Entrar*. O aviso do topo continua, agora no papel que
+   é dele: **atalho**, não substituto. Vale para as duas visualizações, card e lista, e o
+   contador de "Todos" passou a incluí-lo.
+
+**O que aprendi, e virou regra:** aviso em destaque **soma** ao lugar natural do item, não o
+substitui — regra 20. Eu tinha tirado o card da grade ao promover o convite para o topo, e com
+isso quem procurasse o convite onde ele sempre esteve não o encontrava mais.
+
 ### Rodada 3 — 16/09/2026
 
 **Pedido:** *"na hora de criar workspace nao tem que ter opçao entre abrir chamado e ele. isso
