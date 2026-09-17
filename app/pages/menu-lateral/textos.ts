@@ -150,6 +150,14 @@ export interface TextosDaTela {
   faltaCaminho: string
   preverNaTrilha: string
   preverNoPainel: string
+
+  // rodada 5: arrastar e salvar
+  menuAlterado: string
+  descartar: string
+  arrastarDica: string
+  arrastarTeclado: string
+  menuSalvo: string
+  semAlteracao: string
   motivos: Record<string, string>
   tipos: Record<string, string>
 
@@ -333,6 +341,12 @@ const ptBR: TextosDaTela = {
   faltaNome: 'Dê um nome à seção.',
   faltaCaminho: 'Este tipo precisa de um caminho.',
   preverNaTrilha: 'Como fica na trilha',
+  menuAlterado: 'Menu alterado',
+  descartar: 'Descartar',
+  arrastarDica: 'Arraste para reordenar',
+  arrastarTeclado: 'Com o foco no item, Alt e as setas movem sem o mouse.',
+  menuSalvo: 'Menu salvo.',
+  semAlteracao: 'Nada mudou ainda. Arraste um item para reordenar.',
   preverNoPainel: 'Como fica no painel',
 
   motivos: {
@@ -536,6 +550,12 @@ const en: TextosDaTela = {
   faltaNome: 'Give the section a name.',
   faltaCaminho: 'This type needs a path.',
   preverNaTrilha: 'How it looks on the rail',
+  menuAlterado: 'Menu changed',
+  descartar: 'Discard',
+  arrastarDica: 'Drag to reorder',
+  arrastarTeclado: 'With the item focused, Alt and the arrows move it without the mouse.',
+  menuSalvo: 'Menu saved.',
+  semAlteracao: 'Nothing has changed yet. Drag an item to reorder.',
   preverNoPainel: 'How it looks in the panel',
 
   motivos: {
@@ -739,6 +759,12 @@ const es: TextosDaTela = {
   faltaNome: 'Dale un nombre a la sección.',
   faltaCaminho: 'Este tipo necesita una ruta.',
   preverNaTrilha: 'Cómo queda en el riel',
+  menuAlterado: 'Menú modificado',
+  descartar: 'Descartar',
+  arrastarDica: 'Arrastra para reordenar',
+  arrastarTeclado: 'Con el foco en el elemento, Alt y las flechas lo mueven sin ratón.',
+  menuSalvo: 'Menú guardado.',
+  semAlteracao: 'Todavía no cambió nada. Arrastra un elemento para reordenar.',
   preverNoPainel: 'Cómo queda en el panel',
 
   motivos: {

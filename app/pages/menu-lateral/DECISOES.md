@@ -233,6 +233,10 @@ Roda sobre o array em memória, no navegador. Recarregar a página volta tudo ao
   o motivo;
 - **os dois formulários de criação**, com o campo de lugar que só existe no modelo de trilha,
   a prévia que muda junto e o escopo por grupo de membros;
+- **a seção criada aparecendo na barra ao vivo**, nos dois modelos;
+- **arrastar para reordenar**, na barra e no editor, com a marca de onde vai cair, a recusa
+  com o motivo preso na linha, e o caminho de teclado com Alt e as setas;
+- **salvar e descartar**, com a barra de "Menu alterado" e nenhuma gravação antes do clique;
 - os seis estados do andaime, incluindo vazio, carregando, erro e sem permissão.
 
 ## O que é maquete
@@ -350,8 +354,9 @@ Precisam de resposta antes da rodada 2.
    oferece "Restringir ainda mais neste item" como proposta, e isso é superfície nova: se
    não for para existir, sai em uma linha.
 
-9. **A seção criada deve aparecer na barra ao vivo?** Hoje ela entra só na árvore do editor.
-   Ligar as duas pontas é uma rodada própria.
+10. **A lista de categorias devia ganhar ordenação `Personalizada`?** Hoje ela ordena por
+    critério e não se arrasta. O Attio tem `Custom`, que desliga a ordenação automática e
+    libera o arraste. É a única lista do menu que ainda não se reordena à mão.
 
 7. **A seção `Análise` deve nascer aberta ou recolhida?** Recolhida custa uma linha e esconde
    três; aberta custa quatro. Depende de quanto essas telas vão ser usadas no dia a dia.
@@ -363,6 +368,86 @@ Precisam de resposta antes da rodada 2.
 ---
 
 ## Rodadas
+
+### Rodada 5 · 17/09/2026
+
+**O que ela pediu**, literal:
+
+> "faz a seçao criada aparecer na barra ao vivo
+>
+> e alem disso saiba que a reordenaçao SEMPRE deve ser por drag and drop. drag and drop dentro
+> do proprio menu ou no modalzinho. e salvar depois de arrastar tudo. nao salva em tempo real"
+
+#### 1. Uma árvore só, do editor até a barra
+
+Era a pendência que eu tinha declarado na rodada 4, e ela cobrou. Antes o editor tinha uma
+cópia sua e a barra lia o `mocks.ts` direto: criar uma seção mudava o editor e não mudava o
+menu.
+
+Agora existe o `estado.ts`, com **uma** árvore, e tudo lê dela: a barra única, a trilha e o
+editor. Criar uma seção faz ela aparecer na barra na hora, e no modelo de trilha o campo
+`lugar` decide se ela vira ícone na trilha ou seção dentro de um painel.
+
+#### 2. Arrastar, e só arrastar
+
+**As setinhas saíram.** Reordenar é arrastando, nos dois lugares:
+
+- **dentro do próprio menu**, arrastando destino nativo ou seção;
+- **no editor**, arrastando qualquer linha.
+
+O arraste é o do navegador, HTML5 nativo, sem biblioteca: a regra 3 diz Nuxt UI e mais nada.
+
+**Onde a coisa cai:**
+
+| Onde você solta | O que acontece |
+|---|---|
+| Metade de cima de uma linha | Entra antes dela |
+| Metade de baixo de uma linha | Entra depois dela |
+| Meio de um cabeçalho de seção | Entra dentro daquela seção |
+
+Uma linha azul mostra onde vai cair. Quando a regra do ENSPACE não deixa, a linha fica
+vermelha, o item não sai do lugar, e **o motivo aparece preso na linha** que não coube, além
+do toast. Toast some sozinho e passa despercebido no meio de um arraste, que é quando a
+pessoa está olhando para a lista e não para o canto da tela.
+
+**Precedente:** arrastar para reordenar na própria barra é o que o Attio faz
+("Drag and drop favorites or folders in the sidebar to reorder them"), e o Notion, o Linear e
+o monday também.
+
+#### 3. Salvar depois, nunca em tempo real
+
+Duas árvores no `estado.ts`: `rascunho`, onde o arraste mexe, e `aoVivo`, a linha de base.
+
+- arrastar acende uma barra **"Menu alterado"** no rodapé da barra lateral, com `Salvar` e
+  `Descartar`;
+- o editor mostra o mesmo estado no rodapé, e os dois botões ficam desligados enquanto nada
+  mudou ("Nada mudou ainda");
+- **`Salvar` é a única gravação.** `Descartar` volta para o último salvo, e não para o estado
+  de fábrica: testei criando uma seção, salvando, arrastando e descartando, e a seção salva
+  ficou enquanto o arraste voltou atrás.
+
+**Por que a barra mostra o rascunho e não o ao vivo:** arrastar sem ver o resultado é arrastar
+no escuro. O que a regra dela protege é a **gravação**, e essa só acontece no clique.
+
+#### 4. O teclado, que o arraste não cobre
+
+Arraste nativo não tem teclado, e a WCAG 2.1.1 exige que tudo se faça sem mouse. Com o foco
+no item, **Alt com as setas** move um passo. Não é botão na linha, é atalho, então a interface
+continua sendo só arraste, como ela pediu. A dica está escrita no rodapé do editor.
+
+#### O que não virou arraste, e por quê
+
+**A lista de categorias continua ordenada por critério** (mais usadas, alfabética, criadas
+recentemente), como no Attio, e não por arraste. Ordenar e reordenar são coisas diferentes:
+com ordenação automática ligada, arrastar um item mente, porque o próximo recálculo desfaz.
+O Attio resolve isso com uma quarta opção, `Custom`, que **desliga** a ordenação automática e
+aí libera o arraste. Não implementei, e virou pergunta em aberto 10.
+
+#### Um defeito encontrado e corrigido no caminho
+
+**Classe Tailwind montada por interpolação não existe.** A primeira versão da marca de solta
+fazia `before:bg-${cor}`, e o Tailwind lê o código-fonte para decidir o que gerar: a classe
+nunca chegava ao CSS. Virou string literal por caso.
 
 ### Rodada 4 · 17/09/2026
 

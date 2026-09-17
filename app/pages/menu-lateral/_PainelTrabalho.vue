@@ -1,28 +1,32 @@
 <script setup lang="ts">
 import LinhaDeMenu from './_LinhaDeMenu.vue'
 import SecaoDeMenu from './_SecaoDeMenu.vue'
-import { secoesPersonalizadas, type Categoria } from './mocks'
+import { useMenuDoWorkspace, useArraste } from './estado'
+import type { NoDoMenu, Categoria } from './mocks'
 import type { TextosDaTela } from './textos'
 
 /**
  * O painel de trabalho: o menu do dia a dia.
  *
- * Dois níveis e nada mais. Nível 1 é destino solto ou nome de seção; nível 2 é item
- * dentro de seção. O terceiro nível de hoje (formulário dentro de categoria) virou
- * aba na tela da categoria.
+ * Dois níveis e nada mais. Nível 1 é destino solto ou nome de seção; nível 2 é
+ * item dentro de seção. O terceiro nível de hoje (formulário dentro de
+ * categoria) virou aba na tela da categoria.
  *
- * A ordem dos destinos nativos é a MESMA de hoje. Regra 16: o peso pode mudar,
- * o endereço não.
+ * RODADA 5, e é a mudança estrutural:
  *
- * RODADA 3, três mudanças:
- * 1. a busca global saiu daqui e subiu para a barra de cima. O que ficou no topo
- *    da barra é o FILTRO DO MENU, que é outra coisa: um filtra o que está no
- *    menu, o outro busca conteúdo. ClickUp ("Search your Home Sidebar") e Slack
- *    (filtro com correspondência aproximada) mantêm os dois separados assim;
- * 2. entraram as quatro telas nativas que estão por vir, com selo "Em breve";
- * 3. Dashboard de tarefas, Dashboard de dados e Meus relatórios entraram numa
- *    seção `Análise` recolhida, em vez de virarem três destinos soltos. É
- *    premissa minha, e está registrada no DECISOES.md.
+ * O menu agora vem do `estado.ts`, a MESMA árvore que o editor manipula. Antes a
+ * barra lia o `mocks.ts` direto, e por isso criar uma seção mudava o editor e
+ * não mudava o menu. Agora muda.
+ *
+ * E a reordenação é ARRASTANDO, aqui dentro também, não só no editor. Arrastar
+ * mexe no rascunho e acende a barra de salvar no rodapé: a gravação só acontece
+ * no clique em Salvar. É a regra dela, "salvar depois de arrastar tudo".
+ *
+ * O que é arrastável: destino nativo, seção e item de seção, que é o que o
+ * editor edita. A lista de categorias continua ORDENADA por critério (mais
+ * usadas, alfabética, recentes), como no Attio, e não por arraste: ordenação e
+ * reordenação manual são coisas diferentes, e misturar as duas na mesma lista
+ * confunde. Está no DECISOES.md como pergunta em aberto.
  */
 const props = defineProps<{
   t: TextosDaTela
@@ -49,16 +53,64 @@ const emit = defineEmits<{
   ajuda: []
 }>()
 
-/** Estado de aberto/fechado por seção. */
-const abertas = ref<Record<string, boolean>>({
-  favoritos: true,
-  categorias: true,
-  analise: false,
-  ...Object.fromEntries(secoesPersonalizadas.map(s => [s.id, false])),
+const menu = useMenuDoWorkspace()
+const arraste = useArraste()
+const toast = useToast()
+
+/** Rótulo de um nó: nativo vem do dicionário, do workspace vem do próprio nó. */
+function rotuloDe(no: NoDoMenu) {
+  if (no.rotulo) return no.rotulo
+  const mapa: Record<string, string> = {
+    inicio: props.t.inicio,
+    tarefas: props.t.tarefas,
+    agenda: props.t.agenda,
+    spaceflows: props.t.spaceflows,
+    documentos: props.t.documentos,
+    categorias: props.t.categorias,
+  }
+  return mapa[no.chave ?? ''] ?? (no.chave ?? '')
+}
+
+/* ------------------------------ o arraste ------------------------------ */
+
+function marcaDe(id: string) {
+  return arraste.alvo.value?.id === id ? arraste.alvo.value.posicao : null
+}
+
+const recusandoAgora = computed(() => {
+  const a = arraste.alvo.value
+  if (!a) return false
+  return !menu.avaliar(arraste.arrastando.value, a.id, a.posicao).ok
 })
 
+function mirar(id: string, posicao: 'antes' | 'depois' | 'dentro') {
+  arraste.mirar(id, posicao)
+}
+
+function largar(id: string, posicao: 'antes' | 'depois' | 'dentro') {
+  const quem = arraste.arrastando.value
+  arraste.terminar()
+  if (!quem) return
+  const r = menu.soltar(quem, id, posicao)
+  if (!r.ok) {
+    toast.add({ title: props.t.motivos[r.motivo] ?? '', icon: 'i-lucide-ban', color: 'error' })
+  }
+}
+
+function salvarMenu() {
+  menu.salvar()
+  toast.add({ title: props.t.menuSalvo, icon: 'i-lucide-check', color: 'neutral' })
+}
+
+/* ------------------------------ seções abertas ------------------------------ */
+
+const abertas = ref<Record<string, boolean>>({ favoritos: true, categorias: true })
+
+function aberta(id: string) {
+  return abertas.value[id] ?? false
+}
 function alternar(id: string) {
-  abertas.value[id] = !abertas.value[id]
+  abertas.value[id] = !aberta(id)
 }
 
 const opcoesDeOrdem = computed(() => [[
@@ -67,11 +119,8 @@ const opcoesDeOrdem = computed(() => [[
   { label: props.t.ordemRecentes, icon: 'i-lucide-clock', onSelect: () => emit('ordem', 'recentes') },
 ]])
 
-/* ---------------------------------------------------------------
-   O FILTRO DO MENU. Filtra o que está NO menu, em memória, na hora.
-   Com filtro ativo a seção de categorias procura em TODAS, e não só no
-   recorte de cinco: senão o filtro mentiria sobre o que existe.
---------------------------------------------------------------- */
+/* ------------------------------ o filtro ------------------------------ */
+
 const filtro = ref('')
 const filtrando = computed(() => filtro.value.trim().length > 0)
 
@@ -79,40 +128,24 @@ function casa(texto: string) {
   return texto.toLowerCase().includes(filtro.value.trim().toLowerCase())
 }
 
-const destinos = computed(() => [
-  { id: 'inicio', rotulo: props.t.inicio, icone: 'i-lucide-house', contador: undefined as number | undefined, emBreve: false },
-  { id: 'tarefas', rotulo: props.t.tarefas, icone: 'i-lucide-square-check-big', contador: 3, emBreve: false },
-  { id: 'agenda', rotulo: props.t.agenda, icone: 'i-lucide-calendar-days', contador: undefined, emBreve: false },
-  { id: 'spaceflows', rotulo: props.t.spaceflows, icone: 'i-lucide-workflow', contador: undefined, emBreve: false },
-  { id: 'documentos', rotulo: props.t.documentos, icone: 'i-lucide-folder-open', contador: undefined, emBreve: true },
-])
-
-const analise = computed(() => [
-  { id: 'painel-tarefas', rotulo: props.t.painelTarefas, icone: 'i-lucide-chart-column' },
-  { id: 'painel-dados', rotulo: props.t.painelDados, icone: 'i-lucide-chart-pie' },
-  { id: 'meus-relatorios', rotulo: props.t.meusRelatorios, icone: 'i-lucide-file-chart-column' },
-])
-
-const destinosVisiveis = computed(() => filtrando.value ? destinos.value.filter(d => casa(d.rotulo)) : destinos.value)
-const analiseVisivel = computed(() => filtrando.value ? analise.value.filter(a => casa(a.rotulo)) : analise.value)
+const destinosVisiveis = computed(() =>
+  filtrando.value ? menu.destinos.value.filter(d => casa(rotuloDe(d))) : menu.destinos.value,
+)
 const favoritasVisiveis = computed(() => filtrando.value ? props.favoritas.filter(c => casa(c.name)) : props.favoritas)
-
 const categoriasVisiveis = computed(() => {
   if (!filtrando.value) return props.recorte
   return props.todas.filter(c => !c.favorita && casa(c.name))
 })
-
 const secoesVisiveis = computed(() => {
-  if (!filtrando.value) return secoesPersonalizadas.map(s => ({ ...s, aberta: abertas.value[s.id] ?? false }))
-  return secoesPersonalizadas
-    .map(s => ({ ...s, itens: s.itens.filter(i => casa(i.rotulo)), aberta: true }))
-    .filter(s => s.itens.length > 0 || casa(s.rotulo))
+  if (!filtrando.value) return menu.secoes.value
+  return menu.secoes.value
+    .map(s => ({ ...s, filhos: (s.filhos ?? []).filter(f => casa(rotuloDe(f))) }))
+    .filter(s => (s.filhos?.length ?? 0) > 0 || casa(rotuloDe(s)))
 })
 
 const nadaNoFiltro = computed(() =>
   filtrando.value
   && !destinosVisiveis.value.length
-  && !analiseVisivel.value.length
   && !favoritasVisiveis.value.length
   && !categoriasVisiveis.value.length
   && !secoesVisiveis.value.length,
@@ -171,26 +204,35 @@ const nadaNoFiltro = computed(() =>
           class="animate-[entrada_0.25s_ease-out_both]"
         />
 
-        <!-- destinos soltos, na ordem de hoje -->
+        <!-- destinos nativos, arrastáveis entre si -->
         <div v-if="destinosVisiveis.length" class="space-y-0.5">
           <LinhaDeMenu
             v-for="(d, i) in destinosVisiveis"
             :key="d.id"
             :icone="d.icone"
-            :rotulo="d.rotulo"
-            :contador="d.contador"
+            :rotulo="rotuloDe(d)"
+            :contador="d.chave === 'tarefas' ? 3 : undefined"
             :selo="d.emBreve ? props.t.emBreve : undefined"
             :ativo="props.destinoAtivo === d.id"
             :atraso="i * 25"
+            :arrastavel="!filtrando"
+            :saindo="arraste.arrastando.value === d.id"
+            :marca="marcaDe(d.id) === 'dentro' ? null : marcaDe(d.id)"
+            :recusando="recusandoAgora"
             @selecionar="emit('destino', d.id)"
+            @arrastar-inicio="arraste.comecar(d.id)"
+            @arrastar-sobre="p => mirar(d.id, p)"
+            @soltar="p => largar(d.id, p)"
+            @arrastar-fim="arraste.terminar()"
+            @mover="p => menu.mover(d.id, p)"
           />
         </div>
 
-        <!-- Favoritos: nasce do uso, some quando esvazia. Padrão 4. -->
+        <!-- Favoritos: pessoal, nasce do uso, não entra no arraste do menu -->
         <SecaoDeMenu
           v-if="favoritasVisiveis.length"
           :rotulo="props.t.favoritos"
-          :aberta="filtrando || abertas.favoritos"
+          :aberta="filtrando || aberta('favoritos')"
           :texto-recolher="props.t.recolherSecao(props.t.favoritos)"
           :texto-expandir="props.t.expandirSecao(props.t.favoritos)"
           @alternar="alternar('favoritos')"
@@ -212,11 +254,11 @@ const nadaNoFiltro = computed(() =>
           />
         </SecaoDeMenu>
 
-        <!-- Categorias: a seção que cresce. Recorte mais "ver todas". Padrão 3. -->
+        <!-- Categorias: a seção que cresce. Ordenada por critério, não por arraste. -->
         <SecaoDeMenu
           v-if="!filtrando || categoriasVisiveis.length"
           :rotulo="props.t.categorias"
-          :aberta="filtrando || abertas.categorias"
+          :aberta="filtrando || aberta('categorias')"
           :contador="props.totalDeCategorias || undefined"
           :texto-recolher="props.t.recolherSecao(props.t.categorias)"
           :texto-expandir="props.t.expandirSecao(props.t.categorias)"
@@ -235,10 +277,6 @@ const nadaNoFiltro = computed(() =>
           </template>
 
           <template v-if="props.estado === 'vazio' && !filtrando">
-            <!--
-              Estado vazio que ENSINA. A fricção S1-F4 diz que a categoria criada
-              some porque "Menu automático" nasce desligado.
-            -->
             <div class="mx-1 mt-1 rounded-lg border border-dashed border-default p-3">
               <p class="text-sm font-medium text-highlighted">{{ props.t.vazioTitulo }}</p>
               <p class="mt-1 text-xs leading-relaxed text-muted">{{ props.t.vazioDescricao }}</p>
@@ -277,8 +315,6 @@ const nadaNoFiltro = computed(() =>
               class="mt-0.5 flex w-full items-center gap-2.5 rounded-md py-1.5 pl-8 pr-2.5 text-sm font-medium text-highlighted transition-colors hover:bg-primary/10"
               @click="emit('verTodas')"
             >
-              <!-- Ícone na cor de marca, texto não: `text-primary` em 14px não passa
-                   em AA no tema claro (medido em 3,39:1). -->
               <UIcon name="i-lucide-layout-grid" class="size-4 shrink-0 text-primary" />
               <span class="min-w-0 flex-1 truncate text-left">
                 {{ props.t.verTodas(props.totalDeCategorias) }}
@@ -287,53 +323,65 @@ const nadaNoFiltro = computed(() =>
           </template>
         </SecaoDeMenu>
 
-        <!-- Análise: as telas novas de painel e de relatório. -->
-        <SecaoDeMenu
-          v-if="analiseVisivel.length"
-          :rotulo="props.t.secaoAnalise"
-          :aberta="filtrando || abertas.analise"
-          :texto-recolher="props.t.recolherSecao(props.t.secaoAnalise)"
-          :texto-expandir="props.t.expandirSecao(props.t.secaoAnalise)"
-          @alternar="alternar('analise')"
-        >
-          <LinhaDeMenu
-            v-for="(a, i) in analiseVisivel"
-            :key="a.id"
-            :icone="a.icone"
-            :rotulo="a.rotulo"
-            :nivel="2"
-            :selo="props.t.emBreve"
-            :ativo="props.destinoAtivo === a.id"
-            :atraso="i * 25"
-            @selecionar="emit('destino', a.id)"
-          />
-        </SecaoDeMenu>
-
-        <!-- Seções do workspace: mesma gramática das nativas. -->
+        <!-- As seções do workspace, vindas da MESMA árvore que o editor edita. -->
         <SecaoDeMenu
           v-for="s in secoesVisiveis"
           :key="s.id"
-          :rotulo="s.rotulo"
-          :aberta="s.aberta"
-          :texto-recolher="props.t.recolherSecao(s.rotulo)"
-          :texto-expandir="props.t.expandirSecao(s.rotulo)"
+          :rotulo="rotuloDe(s)"
+          :aberta="filtrando || aberta(s.id)"
+          :texto-recolher="props.t.recolherSecao(rotuloDe(s))"
+          :texto-expandir="props.t.expandirSecao(rotuloDe(s))"
+          :arrastavel="!filtrando"
+          :saindo="arraste.arrastando.value === s.id"
+          :marca="marcaDe(s.id)"
+          :recusando="recusandoAgora"
           @alternar="alternar(s.id)"
+          @arrastar-inicio="arraste.comecar(s.id)"
+          @arrastar-sobre="p => mirar(s.id, p)"
+          @soltar="p => largar(s.id, p)"
+          @arrastar-fim="arraste.terminar()"
+          @mover="p => menu.mover(s.id, p)"
         >
           <LinhaDeMenu
-            v-for="(item, i) in s.itens"
+            v-for="(item, i) in (s.filhos ?? [])"
             :key="item.id"
             :icone="item.icone"
-            :rotulo="item.rotulo"
+            :rotulo="rotuloDe(item)"
             :nivel="2"
+            :selo="item.emBreve ? props.t.emBreve : undefined"
             :ativo="props.destinoAtivo === item.id"
             :atraso="i * 25"
+            :arrastavel="!filtrando"
+            :saindo="arraste.arrastando.value === item.id"
+            :marca="marcaDe(item.id) === 'dentro' ? null : marcaDe(item.id)"
+            :recusando="recusandoAgora"
             @selecionar="emit('destino', item.id)"
+            @arrastar-inicio="arraste.comecar(item.id)"
+            @arrastar-sobre="p => mirar(item.id, p)"
+            @soltar="p => largar(item.id, p)"
+            @arrastar-fim="arraste.terminar()"
+            @mover="p => menu.mover(item.id, p)"
           />
         </SecaoDeMenu>
       </template>
     </nav>
 
-    <!-- ============ rodapé: configurações, ajuda, pessoa ============ -->
+    <!-- ============ a barra de salvar, só quando há o que salvar ============ -->
+    <div
+      v-if="menu.alterado.value"
+      class="shrink-0 animate-[entrada_0.2s_ease-out_both] border-t border-default bg-primary/5 p-2"
+    >
+      <p class="mb-1.5 flex items-center gap-1.5 px-1 text-xs font-medium text-highlighted">
+        <UIcon name="i-lucide-grip-vertical" class="size-3.5 shrink-0 text-primary" />
+        {{ props.t.menuAlterado }}
+      </p>
+      <div class="flex gap-1.5">
+        <UButton :label="props.t.salvar" size="xs" color="primary" class="flex-1 justify-center" @click="salvarMenu" />
+        <UButton :label="props.t.descartar" size="xs" color="neutral" variant="subtle" @click="menu.descartar()" />
+      </div>
+    </div>
+
+    <!-- ============ rodapé: configurações e ajuda ============ -->
     <div class="shrink-0 border-t border-default p-2">
       <div class="space-y-0.5">
         <UTooltip :text="props.podeConfigurar ? props.t.configuracoesDica : props.t.semPermissaoTitulo">
@@ -364,11 +412,6 @@ const nadaNoFiltro = computed(() =>
           <span class="min-w-0 flex-1 truncate text-left">{{ props.t.ajuda }}</span>
         </button>
       </div>
-
-      <!--
-        O bloco da pessoa saiu daqui na rodada 3: com o avatar na barra de cima,
-        repetir nome e cargo no rodapé era só altura gasta duas vezes.
-      -->
     </div>
   </div>
 </template>

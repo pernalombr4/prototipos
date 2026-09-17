@@ -10,12 +10,12 @@ import {
   categoriasNormais,
   categoriasVolume,
   gruposDeConfiguracao,
-  secoesPersonalizadas,
-  destinosDeTrabalho,
   workspace,
   usuaria,
+  type NoDoMenu,
   type Categoria,
 } from './mocks'
+import { useMenuDoWorkspace } from './estado'
 import { textos } from './textos'
 
 // O contexto do protótipo vem dos próprios .md desta pasta, como texto.
@@ -33,6 +33,28 @@ definePageMeta({
 
 const t = useTextos(textos)
 const toast = useToast()
+
+/** A árvore do menu, a mesma que o editor edita e que as duas barras mostram. */
+const menu = useMenuDoWorkspace()
+
+/** Rótulo de um nó: nativo vem do dicionário, do workspace vem do próprio nó. */
+function rotuloDoNo(no: NoDoMenu) {
+  if (no.rotulo) return no.rotulo
+  const mapa: Record<string, string> = {
+    inicio: t.value.inicio,
+    tarefas: t.value.tarefas,
+    agenda: t.value.agenda,
+    spaceflows: t.value.spaceflows,
+    documentos: t.value.documentos,
+    categorias: t.value.categorias,
+  }
+  return mapa[no.chave ?? ''] ?? (no.chave ?? '')
+}
+
+/** Todos os itens de seção, achatados, para a busca e para o breadcrumb. */
+const itensDeSecao = computed(() =>
+  menu.secoes.value.flatMap(s => (s.filhos ?? []).map(f => ({ no: f, secao: s }))),
+)
 
 /* ------------------------------------------------------------------
    ANDAIME: o seletor de estados não faz parte da proposta. Existe para
@@ -109,12 +131,10 @@ const rotuloConfigAtivo = ref('')
 
 const rotuloDoDestino = computed(() => {
   if (painel.value === 'config') return rotuloConfigAtivo.value || t.value.itens[itemConfigAtivo.value] || ''
-  const nativo = destinosDeTrabalho.find(d => d.id === destinoAtivo.value)
-  if (nativo) return t.value[nativo.rotulo as 'inicio' | 'spaceflows' | 'tarefas' | 'agenda']
-  for (const s of secoesPersonalizadas) {
-    const item = s.itens.find(i => i.id === destinoAtivo.value)
-    if (item) return item.rotulo
-  }
+  const nativo = menu.destinos.value.find(d => d.id === destinoAtivo.value)
+  if (nativo) return rotuloDoNo(nativo)
+  const emSecao = itensDeSecao.value.find(x => x.no.id === destinoAtivo.value)
+  if (emSecao) return rotuloDoNo(emSecao.no)
   return ''
 })
 
@@ -231,17 +251,17 @@ const gruposDaBusca = computed(() => [
     id: 'destinos',
     label: workspace.nome,
     items: [
-      ...destinosDeTrabalho.map(d => ({
-        label: t.value[d.rotulo as 'inicio' | 'spaceflows' | 'tarefas' | 'agenda'],
+      ...menu.destinos.value.map(d => ({
+        label: rotuloDoNo(d),
         icon: d.icone,
         onSelect: () => { irParaDestino(d.id); painel.value = 'trabalho' },
       })),
-      ...secoesPersonalizadas.flatMap(s => s.itens.map(i => ({
-        label: i.rotulo,
-        icon: i.icone,
-        suffix: s.rotulo,
-        onSelect: () => { irParaDestino(i.id); painel.value = 'trabalho' },
-      }))),
+      ...itensDeSecao.value.map(({ no, secao }) => ({
+        label: rotuloDoNo(no),
+        icon: no.icone,
+        suffix: rotuloDoNo(secao),
+        onSelect: () => { irParaDestino(no.id); painel.value = 'trabalho' },
+      })),
     ],
   },
   {

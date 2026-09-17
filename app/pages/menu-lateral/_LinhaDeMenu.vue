@@ -25,21 +25,81 @@ const props = withDefaults(defineProps<{
   selo?: string
   /** Atraso da entrada em cascata, em milissegundos. */
   atraso?: number
+
+  /* ---- arraste (rodada 5) ---- */
+  /** Liga o arraste HTML5 nativo nesta linha. */
+  arrastavel?: boolean
+  /** Linha sendo arrastada agora. */
+  saindo?: boolean
+  /** Onde a linha arrastada vai cair: acima ou abaixo desta. */
+  marca?: 'antes' | 'depois' | null
+  /** A regra do ENSPACE recusa soltar aqui. */
+  recusando?: boolean
 }>(), {
   nivel: 1,
   atraso: 0,
+  marca: null,
 })
 
 const emit = defineEmits<{
   selecionar: []
   alternarEstrela: []
+  arrastarInicio: []
+  arrastarSobre: [posicao: 'antes' | 'depois']
+  soltar: [posicao: 'antes' | 'depois']
+  arrastarFim: []
+  mover: [passo: -1 | 1]
 }>()
+
+/** Metade de cima solta antes, metade de baixo solta depois. */
+function ondeCai(e: DragEvent): 'antes' | 'depois' {
+  const alvo = e.currentTarget as HTMLElement
+  const r = alvo.getBoundingClientRect()
+  return e.clientY - r.top < r.height / 2 ? 'antes' : 'depois'
+}
+
+function aoPassar(e: DragEvent) {
+  if (!props.arrastavel) return
+  e.preventDefault()
+  emit('arrastarSobre', ondeCai(e))
+}
+
+function aoSoltar(e: DragEvent) {
+  if (!props.arrastavel) return
+  e.preventDefault()
+  emit('soltar', ondeCai(e))
+}
+
+/**
+ * Caminho de teclado para a mesma reordenação.
+ *
+ * Arrastar com o mouse é o que ela pediu e é o que a tela mostra. Mas arraste
+ * nativo não tem teclado, e a WCAG 2.1.1 exige que tudo se faça sem mouse. Alt
+ * com as setas resolve sem colocar botão nenhum na linha.
+ */
+function aoTeclar(e: KeyboardEvent) {
+  if (!props.arrastavel || !e.altKey) return
+  if (e.key === 'ArrowUp') { e.preventDefault(); emit('mover', -1) }
+  if (e.key === 'ArrowDown') { e.preventDefault(); emit('mover', 1) }
+}
 </script>
 
 <template>
   <div
     class="group relative animate-[entrada_0.22s_ease-out_both]"
+    :class="[
+      props.saindo ? 'opacity-40' : '',
+      props.marca === 'antes' ? 'before:absolute before:inset-x-1 before:-top-px before:z-20 before:h-0.5 before:rounded-full' : '',
+      props.marca === 'depois' ? 'after:absolute after:inset-x-1 after:-bottom-px after:z-20 after:h-0.5 after:rounded-full' : '',
+      props.marca && props.recusando ? 'before:bg-error after:bg-error' : 'before:bg-primary after:bg-primary',
+    ]"
     :style="{ animationDelay: `${props.atraso}ms` }"
+    :draggable="props.arrastavel ? 'true' : undefined"
+    @dragstart="emit('arrastarInicio')"
+    @dragover="aoPassar"
+    @drop="aoSoltar"
+    @dragend="emit('arrastarFim')"
+    @keydown="aoTeclar"
   >
     <button
       type="button"

@@ -16,14 +16,76 @@ const props = withDefaults(defineProps<{
   contador?: number
   textoRecolher: string
   textoExpandir: string
-}>(), {})
 
-const emit = defineEmits<{ alternar: [] }>()
+  /* ---- arraste (rodada 5) ---- */
+  arrastavel?: boolean
+  saindo?: boolean
+  marca?: 'antes' | 'depois' | 'dentro' | null
+  recusando?: boolean
+}>(), { marca: null })
+
+const emit = defineEmits<{
+  alternar: []
+  arrastarInicio: []
+  arrastarSobre: [posicao: 'antes' | 'depois' | 'dentro']
+  soltar: [posicao: 'antes' | 'depois' | 'dentro']
+  arrastarFim: []
+  mover: [passo: -1 | 1]
+}>()
+
+/**
+ * No cabeçalho de seção o terço do meio solta DENTRO, e as bordas soltam antes
+ * ou depois. É o que deixa mover um item para dentro de outra seção e reordenar
+ * as seções entre si com o mesmo gesto.
+ */
+function ondeCai(e: DragEvent): 'antes' | 'depois' | 'dentro' {
+  const alvo = e.currentTarget as HTMLElement
+  const r = alvo.getBoundingClientRect()
+  const y = e.clientY - r.top
+  if (y < r.height * 0.3) return 'antes'
+  if (y > r.height * 0.7) return 'depois'
+  return 'dentro'
+}
+
+function aoPassar(e: DragEvent) {
+  if (!props.arrastavel) return
+  e.preventDefault()
+  emit('arrastarSobre', ondeCai(e))
+}
+
+function aoSoltar(e: DragEvent) {
+  if (!props.arrastavel) return
+  e.preventDefault()
+  emit('soltar', ondeCai(e))
+}
+
+function aoTeclar(e: KeyboardEvent) {
+  if (!props.arrastavel || !e.altKey) return
+  if (e.key === 'ArrowUp') { e.preventDefault(); emit('mover', -1) }
+  if (e.key === 'ArrowDown') { e.preventDefault(); emit('mover', 1) }
+}
 </script>
 
 <template>
-  <div class="group/secao mt-2 first:mt-0">
-    <div class="flex items-center gap-1 pr-1">
+  <div
+    class="group/secao mt-2 first:mt-0"
+    :class="props.saindo ? 'opacity-40' : ''"
+  >
+    <div
+      class="relative flex items-center gap-1 rounded pr-1"
+      :class="[
+        props.marca === 'dentro' ? (props.recusando ? 'bg-error/10 ring-1 ring-error' : 'bg-primary/10 ring-1 ring-primary') : '',
+        props.marca === 'antes' ? 'before:absolute before:inset-x-1 before:-top-px before:z-20 before:h-0.5 before:rounded-full' : '',
+        props.marca === 'depois' ? 'after:absolute after:inset-x-1 after:-bottom-px after:z-20 after:h-0.5 after:rounded-full' : '',
+        props.marca && props.recusando ? 'before:bg-error after:bg-error' : 'before:bg-primary after:bg-primary',
+      ]"
+      :draggable="props.arrastavel ? 'true' : undefined"
+      @dragstart="emit('arrastarInicio')"
+      @dragover="aoPassar"
+      @drop="aoSoltar"
+      @dragend="emit('arrastarFim')"
+      @keydown="aoTeclar"
+    >
       <button
         type="button"
         class="flex min-w-0 flex-1 items-center gap-1.5 rounded px-2.5 py-1 text-left text-xs font-semibold uppercase tracking-wider text-toned transition-colors hover:text-highlighted"

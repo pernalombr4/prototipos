@@ -526,6 +526,10 @@ export interface NoDoMenu {
   escopo?: string[]
   /** Só para seção, e só no modelo de trilha: trilha ou dentro de um painel. */
   lugar?: LugarDaSecao
+  /** Quando lugar é painel: em qual painel a seção entra. */
+  painel?: string
+  /** Tela informada pela Mikaela que ainda não existe no develop. */
+  emBreve?: boolean
   filhos?: NoDoMenu[]
 }
 
@@ -534,7 +538,7 @@ export const menuDoEditor: NoDoMenu[] = [
   { id: 'n-tarefas', tipo: 'destino', chave: 'tarefas', icone: 'i-lucide-square-check-big' },
   { id: 'n-agenda', tipo: 'destino', chave: 'agenda', icone: 'i-lucide-calendar-days' },
   { id: 'n-spaceflows', tipo: 'destino', chave: 'spaceflows', icone: 'i-lucide-workflow' },
-  { id: 'n-documentos', tipo: 'destino', chave: 'documentos', icone: 'i-lucide-folder-open' },
+  { id: 'n-documentos', tipo: 'destino', chave: 'documentos', icone: 'i-lucide-folder-open', emBreve: true },
   {
     id: 'n-categorias',
     tipo: 'secao-nativa',
@@ -551,10 +555,13 @@ export const menuDoEditor: NoDoMenu[] = [
     tipo: 'secao',
     rotulo: 'Análise',
     icone: 'i-lucide-chart-column',
+    lugar: 'painel',
+    painel: 'dados',
+    escopo: [],
     filhos: [
-      { id: 't-pt', tipo: 'tela', rotulo: 'Dashboard de tarefas', icone: 'i-lucide-chart-column', tipoDeTela: 'paineis' },
-      { id: 't-pd', tipo: 'tela', rotulo: 'Dashboard de dados', icone: 'i-lucide-chart-pie', tipoDeTela: 'paineis' },
-      { id: 't-mr', tipo: 'tela', rotulo: 'Meus relatórios', icone: 'i-lucide-file-chart-column', tipoDeTela: 'personalizada' },
+      { id: 't-pt', tipo: 'tela', emBreve: true, rotulo: 'Dashboard de tarefas', icone: 'i-lucide-chart-column', tipoDeTela: 'paineis' },
+      { id: 't-pd', tipo: 'tela', emBreve: true, rotulo: 'Dashboard de dados', icone: 'i-lucide-chart-pie', tipoDeTela: 'paineis' },
+      { id: 't-mr', tipo: 'tela', emBreve: true, rotulo: 'Meus relatórios', icone: 'i-lucide-file-chart-column', tipoDeTela: 'personalizada' },
     ],
   },
   {
@@ -562,6 +569,7 @@ export const menuDoEditor: NoDoMenu[] = [
     tipo: 'secao',
     rotulo: 'Conhecimento',
     icone: 'i-lucide-book-open',
+    lugar: 'trilha',
     escopo: [],
     filhos: [
       { id: 't-base', tipo: 'tela', rotulo: 'Base de Conhecimento', icone: 'i-lucide-library', tipoDeTela: 'personalizada' },
@@ -573,6 +581,7 @@ export const menuDoEditor: NoDoMenu[] = [
     tipo: 'secao',
     rotulo: 'Comercial',
     icone: 'i-lucide-trending-up',
+    lugar: 'trilha',
     escopo: ['comercial'],
     filhos: [
       { id: 't-pv', tipo: 'tela', rotulo: 'Painel de vendas', icone: 'i-lucide-chart-line', tipoDeTela: 'paineis' },
