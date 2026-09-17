@@ -323,6 +323,27 @@ das cinco que, nos concorrentes, nem sequer vive em configuração de organizaç
 
 ---
 
+## Rodada 12 — dá para clicar no calendário de configuração?
+
+A pergunta dela: *"acha que na aba calendário o calendário em si deve ser interativo? deve dar
+pra clicar nele?"*. Fui ver quem já respondeu isso.
+
+| Produto | Clica no dia? | O que faz |
+|---|---|---|
+| **Cal.com** ([doc](https://cal.com/help/availabilities/date-overrides)) | **sim** | "date override": abre um mês, você clica uma ou várias datas e define o horário daquelas datas. A regra semanal continua em campos, fora do calendário |
+| **Calendly** ([doc](https://community.calendly.com/how-do-i-40/date-override-434)) | **sim** | mesma ideia, mesmo nome. Exceção nasce escolhendo a data no mês |
+| **Zendesk** ([doc](https://support.zendesk.com/hc/en-us/articles/4408842938522-Setting-your-schedule-with-business-hours-and-holidays)) | não | feriado é formulário: nome, data inicial, data final. Grade semanal separada, e até dois anos de antecedência |
+| **Jira** ([doc](https://support.atlassian.com/jira-software-cloud/docs/configure-working-days/)) | não | "Add Date" numa lista de dias não úteis, x para remover |
+
+**A divisão não é sobre gosto, é sobre o que cada um considera a unidade.** Quem trata a data
+como **exceção** deixa clicar (Cal.com, Calendly). Quem trata tudo como **regra** não deixa
+(Zendesk, Jira), e paga o preço: você digita a data sem nunca ver o mês que ela produz.
+
+O ENSPACE está no propósito do segundo grupo (prazo e SLA saem daqui), mas já tem o mês desenhado
+na tela. Deixá-lo mudo era desperdiçar o desenho.
+
+---
+
 ## O padrão que todos seguem
 
 Os cinco obrigatórios fazem igual nestes quatro pontos — divergir aqui custa aprendizado e

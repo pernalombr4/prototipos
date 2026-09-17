@@ -1,5 +1,71 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 12 — 16/09/2026 — o calendário virou lugar de perguntar e de agir
+
+**O que ela pediu, literal:**
+
+> "acha que na aba calendario o calendario em si deve ser interativo? deve dar pra clicar nele?
+> como voce faria pra melhorar?" (...) "pode implementar quando quiser. um componente e o modal
+> de ocorrencia"
+
+A pesquisa está em [`PESQUISA.md`](PESQUISA.md), "Rodada 12".
+
+### A regra que separa o que pode do que não pode
+
+**Clicar num dia é manipular uma data. A regra semanal é sobre todas as terças do ano.** Se
+clicar em 22/09 pudesse desligar as terças, um clique mudaria 52 dias em silêncio. Por isso o
+calendário ganhou ação **sobre a data** e continua sem poder editar **a regra**.
+
+### Um defeito meu, corrigido de passagem
+
+A célula era um `<div>` dentro de tooltip: o motivo de cada dia ("Feriado: Independência do
+Brasil", "o dia da semana está fora do expediente") **só existia no hover**, e quem navega por
+teclado não alcançava. Agora a célula é `<button>` com `aria-label` que diz a data e o estado, e
+o motivo abre no clique e no foco.
+
+### O que cada dia oferece
+
+| Dia | O popover mostra |
+|---|---|
+| útil comum | o motivo, e **Marcar como exceção** |
+| com ocorrência | **Suspender o expediente neste dia** (ou voltar a contar) e **Remover** |
+| feriado | **Remover \<nome do feriado\>** |
+| fim de semana | o motivo, **Marcar como exceção** e **Mudar os dias úteis da semana**, que rola até a seção de cima e a destaca |
+
+O fim de semana é o caso que prova a regra: a célula **leva** até o lugar onde a regra mora, em
+vez de editar a regra dali.
+
+**Um padrão que sai do próprio dia:** marcar exceção num dia útil já nasce com "mantém o
+expediente" desligado; num sábado, ligado. Marcar exceção num dia de trabalho quase sempre é
+suspender, e num dia de folga é o contrário.
+
+### Teclado
+
+A grade inteira tem **uma** parada de tabulação, e as setas andam por dentro (padrão de grade,
+tabindex rotativo). Quarenta e duas tabulações para atravessar um mês seria pior que não ter
+teclado nenhum.
+
+### A ocorrência ganhou fim
+
+`Ocorrencia` agora tem `ate?`, e o modal tem **De** e **Até**. Sem isso, o recesso de fim de ano
+era uma linha por dia: no mock, "Recesso de fim de ano" aparecia duas vezes, 28 e 29 de dezembro,
+e um recesso de verdade viraria doze linhas iguais. Agora é uma linha, `28/12/2026 a 30/12/2026`,
+e o mês pinta os três dias.
+
+O resumo do mês passou a dizer **"1 dia com ocorrência"** em vez de "1 ocorrência": com
+intervalo, o que ele conta é dia, e chamar dia de ocorrência daria "4 ocorrências" para duas.
+
+### O que não entrou, de propósito
+
+- **Arrastar para pintar dias úteis.** É editar regra por gesto, e é exatamente o que a regra
+  acima proíbe.
+- **Criar feriado pela célula.** Feriado tem país e vem de importação; a lista é o lugar certo.
+- **Shift-clique para intervalo.** O "Até" no modal resolve o mesmo caso com muito menos
+  superfície. Se o intervalo virar rotina, aí sim vale o gesto.
+- **Virar agenda.** A tela é de configuração: o que ela mostra são regras e exceções, não eventos.
+
+---
+
 ## Rodada 11 — 16/09/2026 — cada linha do consumo diz o que ela é
 
 **O que ela pediu, literal:**

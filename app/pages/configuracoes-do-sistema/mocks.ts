@@ -272,6 +272,11 @@ export const feriadosDisponiveisBR: Feriado[] = [
 export interface Ocorrencia {
   id: number
   data: string
+  /**
+   * Acrescentado pelo protótipo: o último dia, quando a ocorrência dura mais
+   * de um. Sem isso, um recesso de doze dias vira doze linhas iguais na lista.
+   */
+  ate?: string
   nome: string
   tipo: 'Recesso' | 'Evento interno' | 'Ponto facultativo'
   /** Acrescentado pelo protótipo: ocorrência pode ou não suspender o expediente. */
@@ -280,8 +285,7 @@ export interface Ocorrencia {
 
 export const ocorrencias: Ocorrencia[] = [
   { id: 1, data: '2026-09-25', nome: 'Reunião geral do jurídico', tipo: 'Evento interno', contaComoUtil: true },
-  { id: 2, data: '2026-12-28', nome: 'Recesso de fim de ano', tipo: 'Recesso', contaComoUtil: false },
-  { id: 3, data: '2026-12-29', nome: 'Recesso de fim de ano', tipo: 'Recesso', contaComoUtil: false },
+  { id: 2, data: '2026-12-28', ate: '2026-12-30', nome: 'Recesso de fim de ano', tipo: 'Recesso', contaComoUtil: false },
 ]
 
 /* ------------------------------------------------------------------ *
