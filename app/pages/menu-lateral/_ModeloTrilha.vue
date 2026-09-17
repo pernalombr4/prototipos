@@ -86,6 +86,13 @@ const areas = computed(() => [
    */
 ])
 
+/** Seção inteira por vir: o selo sobe para o cabeçalho e as linhas ficam limpas. */
+function seloDaSecao(no: NoDoMenu) {
+  const filhos = no.filhos ?? []
+  if (!filhos.length || !filhos.every(f => f.emBreve)) return undefined
+  return props.t.emBreve
+}
+
 /** O contador do Inbox vem do estado das notificações e some no zero. */
 function contadorDe(no: NoDoMenu) {
   if (no.chave === 'inbox') return menu.naoLidas.value || undefined
@@ -94,6 +101,9 @@ function contadorDe(no: NoDoMenu) {
 }
 
 const tituloDaArea = computed(() => areas.value.find(a => a.id === area.value)?.rotulo ?? '')
+
+/** Seção inteira por vir, na trilha: o selo vai para o título do painel. */
+const seloDaArea = computed(() => (secaoAtual.value ? seloDaSecao(secaoAtual.value) : undefined))
 
 const secaoAtual = computed(() => {
   if (!area.value.startsWith('sec:')) return null
@@ -204,7 +214,9 @@ watch(areas, (lista) => {
     <!-- ==================== O PAINEL DA ÁREA ==================== -->
     <div class="flex min-w-0 flex-1 flex-col">
       <div class="flex h-12 shrink-0 items-center gap-2 border-b border-default px-3">
-        <h2 class="min-w-0 flex-1 truncate text-sm font-bold text-highlighted">{{ tituloDaArea }}</h2>
+        <h2 class="min-w-0 truncate text-sm font-bold text-highlighted">{{ tituloDaArea }}</h2>
+        <UBadge v-if="seloDaArea" :label="seloDaArea" size="sm" color="neutral" variant="subtle" class="shrink-0" />
+        <span class="flex-1" />
       </div>
 
       <nav class="min-h-0 flex-1 overflow-y-auto px-2 py-2" :aria-label="tituloDaArea">
@@ -228,6 +240,7 @@ watch(areas, (lista) => {
             v-for="s in secoesDoPainel('trabalho')"
             :key="s.id"
             :rotulo="rotuloDe(s)"
+            :selo="seloDaSecao(s)"
             :aberta="aberta(s.id)"
             :texto-recolher="props.t.recolherSecao(rotuloDe(s))"
             :texto-expandir="props.t.expandirSecao(rotuloDe(s))"
@@ -346,7 +359,7 @@ watch(areas, (lista) => {
             :key="item.id"
             :icone="item.icone"
             :rotulo="rotuloDe(item)"
-            :selo="item.emBreve ? props.t.emBreve : undefined"
+            :selo="seloDaArea ? undefined : (item.emBreve ? props.t.emBreve : undefined)"
             :ativo="props.destinoAtivo === item.id"
             :atraso="i * 25"
             @selecionar="emit('destino', item.id)"

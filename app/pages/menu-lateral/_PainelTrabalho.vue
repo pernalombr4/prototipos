@@ -94,6 +94,17 @@ function contadorDe(no: NoDoMenu) {
   return undefined
 }
 
+/**
+ * Seção em que TODAS as telas ainda vão existir carrega o selo no cabeçalho, e
+ * as linhas de dentro ficam limpas. Seção em que só uma é futura não: ali o
+ * selo precisa dizer qual.
+ */
+function seloDaSecao(no: NoDoMenu) {
+  const filhos = no.filhos ?? []
+  if (!filhos.length || !filhos.every(f => f.emBreve)) return undefined
+  return props.t.emBreve
+}
+
 /* ------------------------------ o arraste ------------------------------ */
 
 function marcaDe(id: string) {
@@ -403,6 +414,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
           <SecaoDeMenu
             v-else
             :rotulo="rotuloDe(no)"
+            :selo="seloDaSecao(no)"
             :aberta="filtrando || aberta(no.id)"
             :texto-recolher="props.t.recolherSecao(rotuloDe(no))"
             :texto-expandir="props.t.expandirSecao(rotuloDe(no))"
@@ -423,7 +435,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
               :icone="item.icone"
               :rotulo="rotuloDe(item)"
               :nivel="2"
-              :selo="item.emBreve ? props.t.emBreve : undefined"
+              :selo="seloDaSecao(no) ? undefined : (item.emBreve ? props.t.emBreve : undefined)"
               :ativo="props.destinoAtivo === item.id"
               :atraso="i * 25"
               :arrastavel="!filtrando"

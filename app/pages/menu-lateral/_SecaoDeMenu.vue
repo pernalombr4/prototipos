@@ -14,6 +14,8 @@ const props = withDefaults(defineProps<{
   rotulo: string
   aberta: boolean
   contador?: number
+  /** Selo curto no cabeçalho, como "Em breve" quando a seção inteira ainda virá. */
+  selo?: string
   textoRecolher: string
   textoExpandir: string
 
@@ -107,6 +109,20 @@ function aoTeclar(e: KeyboardEvent) {
         <span v-if="props.contador !== undefined" class="shrink-0 text-toned/80 normal-case tracking-normal">
           {{ props.contador }}
         </span>
+        <!--
+          O selo da seção inteira. Dito uma vez aqui, ele sai das linhas de
+          dentro: três selos "Em breve" empurravam o nome de cada tela para o
+          reticente, e "Dashboard de tarefas" e "Dashboard de dados" viravam a
+          mesma linha cortada.
+        -->
+        <UBadge
+          v-if="props.selo"
+          :label="props.selo"
+          size="sm"
+          color="neutral"
+          variant="subtle"
+          class="shrink-0 normal-case tracking-normal"
+        />
       </button>
 
       <!-- Ações da seção: aparecem no hover, como no Attio. -->

@@ -386,7 +386,12 @@ function emBreve() {
          O QUADRO DO PRODUTO: barra lateral mais conteúdo.
          A barra tem dois painéis que se substituem, nunca se somam.
     ============================================================ -->
-    <div class="flex min-h-0 flex-1 gap-0 pb-[3.25rem]">
+    <!--
+      A barra de andaime tem 76px (duas fileiras), e a folga aqui era de 52px:
+      os ultimos 24px da barra lateral ficavam ATRAS dela, e quem pagava era o
+      rodape, onde moram Configuracoes e o icone de ajuda. Rodada 9.
+    -->
+    <div class="flex min-h-0 flex-1 gap-0 pb-20">
       <div class="flex min-h-0 w-full overflow-hidden border-t border-default bg-default">
         <!-- barra lateral -->
         <aside

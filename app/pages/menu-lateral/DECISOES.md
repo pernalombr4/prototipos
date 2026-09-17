@@ -484,6 +484,28 @@ E isso com três destinos que o menu de hoje nem tem.
 criação. Só que nenhum painel de Análise era desenhado: escolher aquela opção criava uma
 seção que não aparecia em lugar nenhum. Saiu da lista.
 
+#### Dois consertos que a rodada obrigou
+
+**O selo da seção subiu para o cabeçalho.** Com Análise aberta na barra, "Dashboard de
+tarefas" e "Dashboard de dados" viravam **a mesma linha cortada**: três selos "Em breve"
+empurravam o nome de cada tela para o reticente. Agora, quando **todas** as telas de uma seção
+são futuras, o selo aparece uma vez, no nome da seção, e as linhas de dentro ficam limpas.
+Seção em que só uma é futura continua marcando linha por linha, porque ali o selo precisa
+dizer qual.
+
+**A barra lateral estava 24px atrás da barra de andaime.** A folga no rodapé do quadro era de
+52px e a barra de andaime tem 76px (duas fileiras). Quem pagava era exatamente o rodapé do
+menu, onde moram Configurações e agora o ícone de ajuda: o menu abria por cima dela. É
+andaime, não produto, mas escondia a decisão que esta rodada pediu para mostrar.
+
+#### As evidências
+
+- [`evidencias/proposta-inbox-e-ajuda.gif`](evidencias/proposta-inbox-e-ajuda.gif): o Inbox
+  com 6 não lidas, o clique que derruba o contador na barra, o "marcar todas" que apaga o
+  selo, e a Ajuda abrindo no hover do ícone do rodapé.
+- [`evidencias/proposta-analise-primeiro-nivel.gif`](evidencias/proposta-analise-primeiro-nivel.gif):
+  Análise como menu de primeiro nível na barra única e como ícone próprio na trilha.
+
 #### Perguntas que esta rodada abre
 
 - **Quais são os outros menus nativos que vêm junto com o Inbox?** Você disse "inbox sera um
