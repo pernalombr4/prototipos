@@ -32,16 +32,56 @@ export function useMenuDoWorkspace() {
   const aoVivo = useState<NoDoMenu[]>('menu-ao-vivo', () => clonar(menuDoEditor))
   const rascunho = useState<NoDoMenu[]>('menu-rascunho', () => clonar(menuDoEditor))
 
+  /*
+   * A ordem manual das categorias.
+   *
+   * Fica fora da árvore de propósito: a árvore é a configuração do workspace, e
+   * a ordem das categorias é preferência de quem usa, como o favorito. Mas
+   * viaja no mesmo rascunho, porque arrastar é arrastar: acende a mesma barra e
+   * grava no mesmo Salvar.
+   *
+   * Vazia significa "nunca foi ordenada à mão".
+   */
+  const ordemCategorias = useState<number[]>('menu-ordem-cat', () => [])
+  const ordemCategoriasRascunho = useState<number[]>('menu-ordem-cat-rascunho', () => [])
+
   const alterado = computed(() =>
-    JSON.stringify(aoVivo.value) !== JSON.stringify(rascunho.value),
+    JSON.stringify(aoVivo.value) !== JSON.stringify(rascunho.value)
+    || JSON.stringify(ordemCategorias.value) !== JSON.stringify(ordemCategoriasRascunho.value),
   )
 
   function salvar() {
     aoVivo.value = clonar(rascunho.value)
+    ordemCategorias.value = [...ordemCategoriasRascunho.value]
   }
 
   function descartar() {
     rascunho.value = clonar(aoVivo.value)
+    ordemCategoriasRascunho.value = [...ordemCategorias.value]
+  }
+
+  /**
+   * Semeia a ordem manual com o que está na tela AGORA, sempre.
+   *
+   * Sempre, e não só na primeira vez: quem estava vendo a lista em ordem
+   * alfabética e arrasta espera que ela continue alfabética e só o item movido
+   * mude de lugar. Reaproveitar uma ordem manual antiga embaralharia tudo no
+   * primeiro gesto, que é o contrário do que o gesto pediu.
+   */
+  function semearOrdemDeCategorias(ids: number[]) {
+    ordemCategoriasRascunho.value = [...ids]
+  }
+
+  /** Move uma categoria na ordem manual, em relação a outra. */
+  function reordenarCategoria(arrastadoId: number, alvoId: number, posicao: 'antes' | 'depois') {
+    const lista = [...ordemCategoriasRascunho.value]
+    const de = lista.indexOf(arrastadoId)
+    if (de < 0) return
+    lista.splice(de, 1)
+    const para = lista.indexOf(alvoId)
+    if (para < 0) return
+    lista.splice(para + (posicao === 'depois' ? 1 : 0), 0, arrastadoId)
+    ordemCategoriasRascunho.value = lista
   }
 
   /** Onde um nó está dentro de uma árvore: os irmãos, o índice e o pai. */
@@ -182,6 +222,9 @@ export function useMenuDoWorkspace() {
     soltar,
     avaliar,
     mover,
+    ordemCategoriasRascunho,
+    semearOrdemDeCategorias,
+    reordenarCategoria,
     adicionarSecao,
     adicionarItem,
     localizar,

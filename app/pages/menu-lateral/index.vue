@@ -96,15 +96,44 @@ const categorias = computed<Categoria[]>(() =>
 
 const favoritas = computed(() => categorias.value.filter(c => c.favorita))
 
-/** Ordenação da seção, como no Attio. */
-const ordem = ref<'uso' | 'alfabetica' | 'recentes'>('uso')
+/**
+ * Ordenação da seção, como no Attio: três critérios automáticos e um manual.
+ *
+ * `manual` é o `Custom` do Attio: desliga o cálculo e passa a respeitar a ordem
+ * que a pessoa arrastou. Quem arrasta com um critério automático ligado cai
+ * nele sozinho, senão o arraste seria desfeito no recálculo seguinte.
+ */
+const ordem = ref<'uso' | 'alfabetica' | 'recentes' | 'manual'>('uso')
 
 const naoFavoritas = computed(() => {
   const lista = categorias.value.filter(c => !c.favorita)
+
+  if (ordem.value === 'manual') {
+    const posicao = new Map(menu.ordemCategoriasRascunho.value.map((id, i) => [id, i]))
+    // Categoria que nunca foi arrastada vai para o fim, na ordem que já tinha.
+    return [...lista].sort((a, b) =>
+      (posicao.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (posicao.get(b.id) ?? Number.MAX_SAFE_INTEGER),
+    )
+  }
   if (ordem.value === 'alfabetica') return [...lista].sort((a, b) => a.name.localeCompare(b.name))
   if (ordem.value === 'recentes') return [...lista].sort((a, b) => b.id - a.id)
   return [...lista].sort((a, b) => b.aberturas - a.aberturas)
 })
+
+/**
+ * Arrastar uma categoria com critério automático ligado: o critério vira
+ * `manual` e a ordem parte do que estava na tela, para nada embaralhar.
+ */
+function virarOrdemManual() {
+  menu.semearOrdemDeCategorias(naoFavoritas.value.map(c => c.id))
+  ordem.value = 'manual'
+}
+
+/** Trocar o critério pelo menu: escolher Personalizada parte do que está na tela. */
+function trocarOrdem(v: 'uso' | 'alfabetica' | 'recentes' | 'manual') {
+  if (v === 'manual') { virarOrdemManual(); return }
+  ordem.value = v
+}
 
 /**
  * O TETO da seção. Cinco, para a seção inteira mais os favoritos caberem sem
@@ -394,7 +423,8 @@ function emBreve() {
               @busca="buscando = true"
               @criar="emBreve"
               @ajuda="emBreve"
-              @ordem="v => ordem = v"
+              @ordem="trocarOrdem"
+              @virar-manual="virarOrdemManual"
             />
           <PainelConfiguracoes
             v-else

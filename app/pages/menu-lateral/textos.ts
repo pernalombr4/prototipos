@@ -37,6 +37,9 @@ export interface TextosDaTela {
   ordemMaisUsadas: string
   ordemAlfabetica: string
   ordemRecentes: string
+  ordemPersonalizada: string
+  viraPersonalizada: string
+  ordemAutomatica: string
   secaoPersonalizada: string
   recolherSecao: (nome: string) => string
   expandirSecao: (nome: string) => string
@@ -204,6 +207,9 @@ const ptBR: TextosDaTela = {
   ordemMaisUsadas: 'Mais usadas',
   ordemAlfabetica: 'Ordem alfabética',
   ordemRecentes: 'Criadas recentemente',
+  ordemPersonalizada: 'Personalizada',
+  viraPersonalizada: 'A ordenação virou Personalizada para o arraste valer.',
+  ordemAutomatica: 'Ordenada automaticamente. Arraste para virar personalizada.',
   secaoPersonalizada: 'Seção criada pelo workspace',
   recolherSecao: nome => `Recolher ${nome}`,
   expandirSecao: nome => `Expandir ${nome}`,
@@ -413,6 +419,9 @@ const en: TextosDaTela = {
   ordemMaisUsadas: 'Most used',
   ordemAlfabetica: 'Alphabetical',
   ordemRecentes: 'Recently created',
+  ordemPersonalizada: 'Custom',
+  viraPersonalizada: 'Sorting switched to Custom so the drag can stick.',
+  ordemAutomatica: 'Sorted automatically. Drag to switch to custom.',
   secaoPersonalizada: 'Section created by the workspace',
   recolherSecao: nome => `Collapse ${nome}`,
   expandirSecao: nome => `Expand ${nome}`,
@@ -622,6 +631,9 @@ const es: TextosDaTela = {
   ordemMaisUsadas: 'Más usadas',
   ordemAlfabetica: 'Orden alfabético',
   ordemRecentes: 'Creadas recientemente',
+  ordemPersonalizada: 'Personalizada',
+  viraPersonalizada: 'El orden pasó a Personalizado para que el arrastre valga.',
+  ordemAutomatica: 'Ordenada automáticamente. Arrastra para volverla personalizada.',
   secaoPersonalizada: 'Sección creada por el workspace',
   recolherSecao: nome => `Contraer ${nome}`,
   expandirSecao: nome => `Expandir ${nome}`,

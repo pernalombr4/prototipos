@@ -237,6 +237,8 @@ Roda sobre o array em memória, no navegador. Recarregar a página volta tudo ao
 - **arrastar para reordenar**, na barra e no editor, com a marca de onde vai cair, a recusa
   com o motivo preso na linha, e o caminho de teclado com Alt e as setas;
 - **salvar e descartar**, com a barra de "Menu alterado" e nenhuma gravação antes do clique;
+- **a ordenação `Personalizada` das categorias**, que liga sozinha ao arrastar e parte da
+  ordem que estava na tela;
 - os seis estados do andaime, incluindo vazio, carregando, erro e sem permissão.
 
 ## O que é maquete
@@ -354,9 +356,11 @@ Precisam de resposta antes da rodada 2.
    oferece "Restringir ainda mais neste item" como proposta, e isso é superfície nova: se
    não for para existir, sai em uma linha.
 
-10. **A lista de categorias devia ganhar ordenação `Personalizada`?** Hoje ela ordena por
-    critério e não se arrasta. O Attio tem `Custom`, que desliga a ordenação automática e
-    libera o arraste. É a única lista do menu que ainda não se reordena à mão.
+10. ~~A lista de categorias devia ganhar ordenação `Personalizada`?~~ **Feito na rodada 6.**
+
+11. **A ordem personalizada é por pessoa ou por workspace?** No protótipo é por pessoa, como
+    o favorito. Se o administrador puder fixar uma ordem para todos, aparece a pergunta de
+    quem ganha quando os dois ordenam.
 
 7. **A seção `Análise` deve nascer aberta ou recolhida?** Recolhida custa uma linha e esconde
    três; aberta custa quatro. Depende de quanto essas telas vão ser usadas no dia a dia.
@@ -368,6 +372,72 @@ Precisam de resposta antes da rodada 2.
 ---
 
 ## Rodadas
+
+### Rodada 6 · 17/09/2026
+
+**O que ela pediu**, literal:
+
+> "faz a ordenação personalizada nas categorias também"
+
+Era a pergunta em aberto 10, e virou pedido. A lista de categorias agora tem **quatro**
+ordenações, que são as do Attio:
+
+| Ordenação | O que faz |
+|---|---|
+| Mais usadas | Por aberturas nos últimos 30 dias. É o padrão |
+| Ordem alfabética | Pelo nome |
+| Criadas recentemente | Pela data de criação |
+| **Personalizada** | Respeita a ordem que a pessoa arrastou |
+
+#### Arrastar liga a personalizada sozinho
+
+Esta é a decisão que importa. Com um critério automático ligado, arrastar seria **desfeito no
+recálculo seguinte**: a pessoa move, o menu volta, e ela conclui que o arraste não funciona.
+
+Então arrastar com critério automático ligado **liga a Personalizada antes de mover**, e
+avisa: "A ordenação virou Personalizada para o arraste valer."
+
+O Attio exige escolher `Custom` no menu antes de poder arrastar. Diverge aqui de propósito:
+exigir o passo anterior transforma um gesto direto em caça ao menu, e quem não achar o menu
+conclui que a lista não se reordena. Ligar sozinho e dizer que ligou custa uma frase e resolve.
+
+**Enquanto está no automático, a seção diz isso**, embaixo da lista: "Ordenada automaticamente.
+Arraste para virar personalizada." A dica some quando a ordenação vira Personalizada.
+
+#### A ordem parte do que está na tela
+
+Ao virar Personalizada, a ordem é semeada com **a ordem que estava visível**, sempre, e não só
+na primeira vez. Quem estava vendo a lista em ordem alfabética e arrasta espera que ela
+continue alfabética e só o item movido mude de lugar. Reaproveitar uma ordem manual antiga
+embaralharia tudo no primeiro gesto, que é o contrário do que o gesto pediu.
+
+Categoria que nunca foi arrastada, ou criada depois, vai para o fim da lista, na ordem que já
+tinha. Não some e não pula para o meio.
+
+#### Onde essa ordem mora
+
+A ordem das categorias é **preferência de quem usa**, como o favorito, e não configuração do
+workspace, então ela fica **fora da árvore** do menu no `estado.ts`.
+
+Mas viaja no **mesmo rascunho** e grava no **mesmo Salvar**: arrastar é arrastar, e ter duas
+regras de gravação na mesma barra, uma que salva na hora e outra que espera, confundiria.
+Arrastar categoria acende a mesma barra "Menu alterado", e `Descartar` desfaz junto com o
+resto.
+
+**A troca de critério pelo menu, essa sim, vale na hora.** É preferência de visualização,
+reversível em um clique e sem nada a perder. O que espera o Salvar é a ordem construída à mão.
+
+#### Sobre a verificação desta rodada
+
+Verifiquei por script que a ordenação troca sozinha ao arrastar, que a dica some, que a barra
+de salvar acende e que a ordem muda. **O antes/depois exato do arraste não deu para verificar**:
+a janela do Chrome estava oculta, e aba oculta não calcula layout. Sem layout,
+`getBoundingClientRect()` devolve altura zero, e a conta que decide "soltei na metade de cima
+ou de baixo" cai sempre no mesmo lado. É artefato do teste, não do código: com a janela à
+frente e um mouse de verdade, a coordenada existe.
+
+Pelo mesmo motivo não deu para ler nenhum toast nesta rodada: em aba oculta o `innerText`
+volta vazio e a fila de toasts não anda.
 
 ### Rodada 5 · 17/09/2026
 

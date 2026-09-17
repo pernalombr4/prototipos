@@ -22,11 +22,17 @@ import type { TextosDaTela } from './textos'
  * mexe no rascunho e acende a barra de salvar no rodapé: a gravação só acontece
  * no clique em Salvar. É a regra dela, "salvar depois de arrastar tudo".
  *
- * O que é arrastável: destino nativo, seção e item de seção, que é o que o
- * editor edita. A lista de categorias continua ORDENADA por critério (mais
- * usadas, alfabética, recentes), como no Attio, e não por arraste: ordenação e
- * reordenação manual são coisas diferentes, e misturar as duas na mesma lista
- * confunde. Está no DECISOES.md como pergunta em aberto.
+ * RODADA 6: a lista de categorias também se arrasta.
+ *
+ * Ela tem quatro ordenações, como no Attio: três automáticas (mais usadas,
+ * alfabética, criadas recentemente) e `Personalizada`, que é o `Custom` de lá.
+ * Arrastar com uma automática ligada LIGA a personalizada antes de mover, e
+ * avisa: senão o gesto seria desfeito no recálculo seguinte, e a pessoa acharia
+ * que o arraste não funciona.
+ *
+ * A ordem das categorias é preferência de quem usa, não configuração do
+ * workspace, mas viaja no mesmo rascunho e grava no mesmo Salvar: arrastar é
+ * arrastar, e ter duas regras de gravação na mesma barra confundiria.
  */
 const props = defineProps<{
   t: TextosDaTela
@@ -39,7 +45,7 @@ const props = defineProps<{
   categoriaAtivaId: number | null
   estado: 'normal' | 'vazio' | 'carregando' | 'erro'
   podeConfigurar: boolean
-  ordem: 'uso' | 'alfabetica' | 'recentes'
+  ordem: 'uso' | 'alfabetica' | 'recentes' | 'manual'
 }>()
 
 const emit = defineEmits<{
@@ -49,7 +55,8 @@ const emit = defineEmits<{
   verTodas: []
   configuracoes: []
   criar: []
-  ordem: [valor: 'uso' | 'alfabetica' | 'recentes']
+  ordem: [valor: 'uso' | 'alfabetica' | 'recentes' | 'manual']
+  virarManual: []
   ajuda: []
 }>()
 
@@ -97,6 +104,29 @@ function largar(id: string, posicao: 'antes' | 'depois' | 'dentro') {
   }
 }
 
+/*
+ * O arraste das categorias anda no mesmo estado do arraste do menu, com um
+ * prefixo para os dois nao se confundirem: um mexe na arvore, o outro na ordem
+ * pessoal da lista.
+ */
+function arrastarCategoria(id: number) {
+  arraste.comecar(`cat:${id}`)
+}
+
+function largarCategoria(alvoId: number, posicao: 'antes' | 'depois') {
+  const quem = arraste.arrastando.value
+  arraste.terminar()
+  if (!quem || !quem.startsWith('cat:')) return
+
+  // Arrastar com criterio automatico ligado liga o manual antes, senao o
+  // proximo recalculo desfaz o gesto.
+  if (props.ordem !== 'manual') {
+    emit('virarManual')
+    toast.add({ title: props.t.viraPersonalizada, icon: 'i-lucide-grip-vertical', color: 'neutral' })
+  }
+  menu.reordenarCategoria(Number(quem.slice(4)), alvoId, posicao)
+}
+
 function salvarMenu() {
   menu.salvar()
   toast.add({ title: props.t.menuSalvo, icon: 'i-lucide-check', color: 'neutral' })
@@ -117,6 +147,8 @@ const opcoesDeOrdem = computed(() => [[
   { label: props.t.ordemMaisUsadas, icon: 'i-lucide-flame', onSelect: () => emit('ordem', 'uso') },
   { label: props.t.ordemAlfabetica, icon: 'i-lucide-arrow-down-a-z', onSelect: () => emit('ordem', 'alfabetica') },
   { label: props.t.ordemRecentes, icon: 'i-lucide-clock', onSelect: () => emit('ordem', 'recentes') },
+], [
+  { label: props.t.ordemPersonalizada, icon: 'i-lucide-grip-vertical', onSelect: () => emit('ordem', 'manual') },
 ]])
 
 /* ------------------------------ o filtro ------------------------------ */
@@ -305,9 +337,27 @@ const nadaNoFiltro = computed(() =>
               :rotulo-desafixar="props.t.desafixar"
               :ativo="props.categoriaAtivaId === c.id"
               :atraso="180 + i * 25"
+              :arrastavel="!filtrando"
+              :saindo="arraste.arrastando.value === `cat:${c.id}`"
+              :marca="marcaDe(`cat:${c.id}`) === 'dentro' ? null : marcaDe(`cat:${c.id}`)"
               @selecionar="emit('categoria', c)"
               @alternar-estrela="emit('alternarFixar', c.id)"
+              @arrastar-inicio="arrastarCategoria(c.id)"
+              @arrastar-sobre="p => arraste.mirar(`cat:${c.id}`, p)"
+              @soltar="p => largarCategoria(c.id, p)"
+              @arrastar-fim="arraste.terminar()"
             />
+
+            <!--
+              Diz por que arrastar aqui muda o criterio. Sem isto a ordenacao
+              trocar sozinha depois de um arraste parece defeito.
+            -->
+            <p
+              v-if="!filtrando && props.ordem !== 'manual'"
+              class="px-2.5 pb-0.5 pt-1 text-xs leading-relaxed text-muted"
+            >
+              {{ props.t.ordemAutomatica }}
+            </p>
 
             <button
               v-if="!filtrando"
