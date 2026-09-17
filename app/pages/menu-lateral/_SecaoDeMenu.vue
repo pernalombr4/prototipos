@@ -95,11 +95,20 @@ function aoTeclar(e: KeyboardEvent) {
         :aria-label="props.aberta ? props.textoRecolher : props.textoExpandir"
         @click="emit('alternar')"
       >
-        <UIcon
-          name="i-lucide-chevron-right"
-          class="size-3 shrink-0 transition-transform duration-200"
-          :class="props.aberta ? 'rotate-90' : ''"
-        />
+        <!-- A pega troca com a seta no hover, como na linha. Rodada 11. -->
+        <span class="relative flex size-3 shrink-0 items-center justify-center">
+          <UIcon
+            name="i-lucide-chevron-right"
+            class="size-3 transition-transform duration-200"
+            :class="[props.aberta ? 'rotate-90' : '', props.arrastavel ? 'group-hover/secao:opacity-0' : '']"
+          />
+          <UIcon
+            v-if="props.arrastavel"
+            name="i-lucide-grip-vertical"
+            class="absolute size-3.5 opacity-0 transition-opacity group-hover/secao:opacity-100"
+            aria-hidden="true"
+          />
+        </span>
         <!--
           Sem marca visual para "seção do workspace". A primeira versão punha um
           ✦ ao lado do nome, e num produto que tem o BENI o sparkle lê como IA.

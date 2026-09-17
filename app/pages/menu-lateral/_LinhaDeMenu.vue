@@ -118,7 +118,26 @@ function aoTeclar(e: KeyboardEvent) {
         abaixo do mínimo AA de 4,5:1. O estado é dito por fundo, peso da fonte, cor
         do ícone e aria-current, nunca por cor de texto sozinha.
       -->
-      <UIcon :name="props.icone" class="size-4 shrink-0" :class="props.ativo ? 'text-primary' : 'text-toned'" />
+      <!--
+        A PEGA DE ARRASTE (rodada 11).
+        O arraste na barra existe desde a rodada 5 e não tinha aviso nenhum:
+        quem não tentasse arrastar por conta própria não descobria. A pega
+        aparece no hover NO LUGAR do ícone, e não ao lado: assim ela não empurra
+        o rótulo meio pixel para o lado quando o mouse passa.
+      -->
+      <span class="relative flex size-4 shrink-0 items-center justify-center">
+        <UIcon
+          :name="props.icone"
+          class="size-4 transition-opacity"
+          :class="[props.ativo ? 'text-primary' : 'text-toned', props.arrastavel ? 'group-hover:opacity-0' : '']"
+        />
+        <UIcon
+          v-if="props.arrastavel"
+          name="i-lucide-grip-vertical"
+          class="absolute size-4 text-toned opacity-0 transition-opacity group-hover:opacity-100"
+          aria-hidden="true"
+        />
+      </span>
       <!-- title para o nome que não cabe: "Solicitações de compra e reembolso" corta
            na largura da barra, e sem isto o nome inteiro não existe em lugar nenhum. -->
       <span class="min-w-0 flex-1 truncate text-left" :title="props.rotulo">{{ props.rotulo }}</span>

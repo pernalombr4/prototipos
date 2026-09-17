@@ -316,6 +316,19 @@ const gruposDaBusca = computed(() => [
     ],
   },
   {
+    // A busca tambem e porta do editor: quem procura "menu" quer mexer nele.
+    id: 'acoes',
+    label: t.value.editarMenu,
+    items: podeConfigurar.value
+      ? [{
+          label: t.value.editarMenu,
+          icon: 'i-lucide-list-tree',
+          suffix: t.value.editarMenuDica,
+          onSelect: () => abrirEditor(null),
+        }]
+      : [],
+  },
+  {
     id: 'config',
     label: t.value.configuracoes,
     items: gruposDeConfiguracao.flatMap(g => g.itens.map(i => ({
@@ -438,6 +451,7 @@ function emBreve() {
             @busca="buscando = true"
             @item="abrirItemDeConfiguracao"
             @ajuda="avisarAjuda"
+            @editar="abrirEditor(null)"
           />
           <template v-else>
           <!--
@@ -468,6 +482,7 @@ function emBreve() {
               @busca="buscando = true"
               @criar="emBreve"
               @ajuda="avisarAjuda"
+            @editar="abrirEditor(null)"
               @ordem="trocarOrdem"
               @virar-manual="virarOrdemManual"
             />

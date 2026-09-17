@@ -43,6 +43,7 @@ const emit = defineEmits<{
   busca: []
   item: [id: string, rotulo: string]
   ajuda: [rotulo: string]
+  editar: []
 }>()
 
 const menu = useMenuDoWorkspace()
@@ -485,6 +486,21 @@ watch(areas, (lista) => {
           </SecaoDeMenu>
         </template>
 
+        <!-- A porta do editor, a mesma da barra unica. Rodada 11. -->
+        <UTooltip
+          v-if="props.podeConfigurar && area !== 'config'"
+          :text="props.t.editarMenuDica"
+          :content="{ side: 'right' }"
+        >
+          <button
+            type="button"
+            class="mt-2 flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-muted transition-colors hover:bg-elevated hover:text-default"
+            @click="emit('editar')"
+          >
+            <UIcon name="i-lucide-list-tree" class="size-4 shrink-0" />
+            <span class="min-w-0 flex-1 truncate text-left">{{ props.t.editarMenu }}</span>
+          </button>
+        </UTooltip>
       </nav>
     </div>
   </div>

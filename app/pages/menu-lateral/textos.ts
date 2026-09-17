@@ -73,6 +73,10 @@ export interface TextosDaTela {
   grupos: Record<string, string>
   itens: Record<string, string>
 
+  // a porta do editor, na própria barra (rodada 11)
+  editarMenu: string
+  editarMenuDica: string
+
   // ajuda: virou ícone com menu na base, na rodada 9
   ajuda: string
   suporte: string
@@ -302,6 +306,9 @@ const ptBR: TextosDaTela = {
     'logs-auditoria': 'Logs de auditoria',
     'logs-requisicao': 'Logs de requisição',
   },
+
+  editarMenu: 'Editar menu',
+  editarMenuDica: 'Arraste aqui mesmo para reordenar. No editor você agrupa, cria e escolhe o tipo de cada tela.',
 
   ajuda: 'Ajuda',
   suporte: 'Suporte',
@@ -542,6 +549,9 @@ const en: TextosDaTela = {
     'logs-requisicao': 'Request logs',
   },
 
+  editarMenu: 'Edit menu',
+  editarMenuDica: 'Drag right here to reorder. In the editor you group, create and pick each screen type.',
+
   ajuda: 'Help',
   suporte: 'Support',
   releases: 'Platform updates',
@@ -780,6 +790,9 @@ const es: TextosDaTela = {
     'logs-auditoria': 'Registros de auditoría',
     'logs-requisicao': 'Registros de solicitud',
   },
+
+  editarMenu: 'Editar menú',
+  editarMenuDica: 'Arrastra aquí mismo para reordenar. En el editor agrupas, creas y eliges el tipo de cada pantalla.',
 
   ajuda: 'Ayuda',
   suporte: 'Soporte',

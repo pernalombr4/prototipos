@@ -389,6 +389,62 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 11 · 17/09/2026
+
+**O que ela pediu**, literal:
+
+> "nao ta claro pro user ainda onde ele vai pra EDITAR os menus, porque o arraste nao ta
+> liberado ao vivo direto no menu, so quando vai adicionar um novo"
+
+Ela está certa nas duas metades, e a segunda metade merece uma correção de fato: **o arraste
+ao vivo existia desde a rodada 5**, só que sem aviso nenhum. Quem não tentasse arrastar por
+conta própria não descobria que dava. Funcionalidade que ninguém vê é funcionalidade que não
+existe, então na prática o diagnóstico dela estava certo: não estava liberado, porque não
+estava visível.
+
+#### A pega de arraste, no hover
+
+Cada linha e cada cabeçalho de seção mostra a **pega** (`⫴`) quando o mouse passa. Ela
+aparece **no lugar do ícone**, não ao lado: assim o rótulo não anda meio pixel para o lado a
+cada hover, que é o defeito da pega que "abre espaço". Notion, Linear e ClickUp fazem igual.
+
+Quem usa teclado continua com Alt mais as setas, que existe desde a rodada 5.
+
+#### A porta do editor, na própria barra
+
+O editor só aparecia por dois caminhos, e os dois eram tortos:
+
+1. `Configurações > Interface > Menus`, que é fundo de gaveta;
+2. o botão "+", que é para **criar**, não para arrumar o que já existe.
+
+Agora existe **"Editar menu"**, uma linha no fim da própria lista, que é onde o ClickUp, o
+monday e o Slack põem o "customizar barra". A dica dela diz a outra metade da história:
+"Arraste aqui mesmo para reordenar. No editor você agrupa, cria e escolhe o tipo de cada
+tela." Ou seja: a linha ensina que o arraste existe, mesmo para quem nunca passar o mouse
+sobre uma linha do menu.
+
+A mesma porta responde na **busca geral**: digitar "menu" traz `Editar menu` junto com
+`Configurações > Menus`.
+
+**O que fica em aberto:** com módulos e seções do workspace ligados, a lista rola, e a linha
+fica abaixo da dobra. Pus no fim da lista porque é o padrão de mercado e porque o rodapé é
+fixo e já está ocupado por Configurações e pela ajuda. Se você preferir permanente, o lugar
+seria o rodapé, e aí ele volta a ter duas linhas.
+
+**A evidência:** [`evidencias/proposta-porta-do-editor.gif`](evidencias/proposta-porta-do-editor.gif).
+A pega aparecendo no hover, a linha "Editar menu" no fim da lista e o editor abrindo por ela.
+
+#### Um erro que esta rodada revelou
+
+**Quem não pode configurar estava arrastando o menu.** No estado "Sem permissão", as linhas
+continuavam arrastáveis, a barra "Menu alterado" acendia e o Salvar aparecia, para uma pessoa
+que não pode mudar o menu de ninguém.
+
+Agora o arraste do MENU pede permissão, e o das CATEGORIAS não. Não é detalhe: a ordem das
+categorias é preferência de quem usa, decidida na rodada 6, e continua livre para todo mundo.
+Medido no navegador: em "Sem permissão" sobram exatamente as cinco categorias arrastáveis, e
+nada da árvore; no estado normal, dezoito.
+
 ### Rodada 10 · 17/09/2026
 
 **O que ela pediu**, literal:

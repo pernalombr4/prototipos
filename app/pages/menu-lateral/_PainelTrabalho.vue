@@ -59,6 +59,7 @@ const emit = defineEmits<{
   ordem: [valor: 'uso' | 'alfabetica' | 'recentes' | 'manual']
   virarManual: []
   ajuda: [rotulo: string]
+  editar: []
 }>()
 
 const menu = useMenuDoWorkspace()
@@ -243,6 +244,13 @@ const opcoesDeOrdem = computed(() => [[
 const filtro = ref('')
 const filtrando = computed(() => filtro.value.trim().length > 0)
 
+/*
+ * Quem nao pode configurar nao arrasta o MENU, que e do workspace inteiro.
+ * Mas continua arrastando as CATEGORIAS, porque aquela ordem e preferencia de
+ * quem usa, e nao configuracao (decisao da rodada 6).
+ */
+const podeArrastarMenu = computed(() => !filtrando.value && props.podeConfigurar)
+
 function casa(texto: string) {
   return texto.toLowerCase().includes(filtro.value.trim().toLowerCase())
 }
@@ -353,7 +361,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             :contador="contadorDe(no)"
             :selo="no.emBreve ? props.t.emBreve : undefined"
             :ativo="props.destinoAtivo === no.id"
-            :arrastavel="!filtrando"
+            :arrastavel="podeArrastarMenu"
             :saindo="arraste.arrastando.value === no.id"
             :marca="marcaDe(no.id) === 'dentro' ? null : marcaDe(no.id)"
             :recusando="recusandoAgora"
@@ -484,7 +492,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             :rotulo="rotuloDe(no)"
             :selo="seloDaSecao(no)"
             :ativo="props.destinoAtivo === unicoFilho(no).id"
-            :arrastavel="!filtrando"
+            :arrastavel="podeArrastarMenu"
             :saindo="arraste.arrastando.value === no.id"
             :marca="marcaDe(no.id) === 'dentro' ? null : marcaDe(no.id)"
             :recusando="recusandoAgora"
@@ -504,7 +512,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             :aberta="filtrando || aberta(no.id)"
             :texto-recolher="props.t.recolherSecao(rotuloDe(no))"
             :texto-expandir="props.t.expandirSecao(rotuloDe(no))"
-            :arrastavel="!filtrando"
+            :arrastavel="podeArrastarMenu"
             :saindo="arraste.arrastando.value === no.id"
             :marca="marcaDe(no.id)"
             :recusando="recusandoAgora"
@@ -524,7 +532,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
               :selo="seloDaSecao(no) ? undefined : (item.emBreve ? props.t.emBreve : undefined)"
               :ativo="props.destinoAtivo === item.id"
               :atraso="i * 25"
-              :arrastavel="!filtrando"
+              :arrastavel="podeArrastarMenu"
               :saindo="arraste.arrastando.value === item.id"
               :marca="marcaDe(item.id) === 'dentro' ? null : marcaDe(item.id)"
               :recusando="recusandoAgora"
@@ -537,6 +545,37 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             />
           </SecaoDeMenu>
         </template>
+
+        <!--
+          ============ A PORTA DO EDITOR (rodada 11) ============
+
+          "nao ta claro pro user ainda onde ele vai pra EDITAR os menus" (Mikaela).
+
+          Estava certo: o editor só aparecia por dentro de
+          `Configurações > Interface > Menus`, ou por acidente, no "+" quando a
+          pessoa ia CRIAR alguma coisa. Editar o que já existe não tinha porta.
+
+          Agora tem uma linha no fim da própria lista, que é onde o ClickUp, o
+          monday e o Slack põem o "customizar barra". Ela some para quem não pode
+          configurar, porque o menu é do workspace inteiro.
+
+          E a dica dela diz a outra metade: dá para arrastar aqui mesmo, sem
+          abrir nada.
+        -->
+        <UTooltip
+          v-if="props.podeConfigurar && !filtrando"
+          :text="props.t.editarMenuDica"
+          :content="{ side: 'right' }"
+        >
+          <button
+            type="button"
+            class="mt-2 flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-muted transition-colors hover:bg-elevated hover:text-default"
+            @click="emit('editar')"
+          >
+            <UIcon name="i-lucide-list-tree" class="size-4 shrink-0" />
+            <span class="min-w-0 flex-1 truncate text-left">{{ props.t.editarMenu }}</span>
+          </button>
+        </UTooltip>
       </template>
     </nav>
 
