@@ -28,6 +28,19 @@ const marcas = [
 /* ----------------------------- o logo ----------------------------- */
 
 const escolhendoIcone = ref(false)
+const enviandoImagem = ref(false)
+
+/**
+ * O arquivo escolhido vira uma URL de objeto, que e o que o `<img>` mostra
+ * sem servidor nenhum. Trocar de arquivo libera a URL anterior: sem isso,
+ * cada troca deixa um blob preso na memoria da aba.
+ */
+const arquivoDoLogo = ref<File | null>(null)
+
+watch(arquivoDoLogo, (arquivo) => {
+  if (form.identidade.logoImagem) URL.revokeObjectURL(form.identidade.logoImagem)
+  form.identidade.logoImagem = arquivo ? URL.createObjectURL(arquivo) : null
+})
 
 /**
  * O produto guarda o ícone no formato do iconify (`colecao:nome`). O seletor
@@ -100,6 +113,12 @@ async function excluir() {
                   :name="form.identidade.icon || 'lucide:box'"
                   class="size-7 text-primary"
                 />
+                <img
+                  v-else-if="form.identidade.logoImagem"
+                  :src="form.identidade.logoImagem"
+                  alt=""
+                  class="size-full rounded-xl object-cover"
+                >
                 <UIcon v-else name="i-lucide-image" class="size-7 text-muted" />
 
                 <span
@@ -149,13 +168,14 @@ async function excluir() {
                   />
                   <UButton
                     v-else
-                    label="Enviar imagem"
+                    :label="form.identidade.logoImagem ? 'Trocar imagem' : 'Enviar imagem'"
                     icon="i-lucide-upload"
                     size="sm"
                     color="neutral"
                     variant="subtle"
                     block
                     class="mt-3"
+                  @click="enviandoImagem = true"
                   />
                 </div>
               </template>
@@ -349,6 +369,64 @@ async function excluir() {
         <div class="flex w-full justify-end gap-2">
           <UButton label="Fechar" color="neutral" variant="ghost" @click="escolhendoIcone = false" />
           <UButton label="Usar este ícone" @click="escolhendoIcone = false" />
+        </div>
+      </template>
+    </UModal>
+
+    <!--
+      O envio do logo usa o campo de arquivo do Nuxt UI, que já é clicável e
+      área de arraste ao mesmo tempo. Nada sobe: o arquivo vira uma URL de
+      objeto no próprio navegador, que morre no reload (regra 4).
+    -->
+    <UModal
+      v-model:open="enviandoImagem"
+      title="Enviar o logo do workspace"
+      description="Clique para escolher um arquivo ou arraste-o para cá."
+      :ui="{ content: 'sm:max-w-lg' }"
+    >
+      <template #body>
+        <UFileUpload
+          v-model="arquivoDoLogo"
+          accept="image/png,image/jpeg,image/gif,image/svg+xml"
+          icon="i-lucide-image-up"
+          label="Arraste a imagem ou clique para escolher"
+          description="PNG, JPG, GIF ou SVG, até 2 MB. O melhor resultado vem de uma imagem quadrada."
+          class="min-h-48 w-full"
+        />
+
+        <!--
+          A prévia do campo mostra a imagem grande, e o X dele já remove. O que
+          falta ali é o tamanho de verdade: na barra lateral o logo tem 64 px e
+          é cortado em quadrado. É isso, e só isso, que este bloco acrescenta.
+        -->
+        <div
+          v-if="form.identidade.logoImagem"
+          class="mt-4 flex items-center gap-3 rounded-lg border border-default bg-elevated/60 px-3 py-2.5"
+        >
+          <img
+            :src="form.identidade.logoImagem"
+            alt=""
+            class="size-10 shrink-0 rounded-lg object-cover"
+          >
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-highlighted">
+              No tamanho em que vai aparecer
+            </p>
+            <p class="truncate text-sm text-muted">
+              {{ arquivoDoLogo?.name ?? 'Imagem enviada' }}
+            </p>
+          </div>
+        </div>
+      </template>
+
+      <template #footer>
+        <div class="flex w-full justify-end gap-2">
+          <UButton label="Fechar" color="neutral" variant="ghost" @click="enviandoImagem = false" />
+          <UButton
+            label="Usar esta imagem"
+            :disabled="!form.identidade.logoImagem"
+            @click="enviandoImagem = false"
+          />
         </div>
       </template>
     </UModal>

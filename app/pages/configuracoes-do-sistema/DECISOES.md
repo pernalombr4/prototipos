@@ -1,5 +1,34 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 7 — 16/09/2026 — enviar o logo com o campo de arquivo do Nuxt UI
+
+**O que ela pediu, literal:**
+
+> "no espaço de adicionar imagem deve ser o campo do nuxt ui de arquivo que pode clicar ou
+> arrastar algo por cima dele"
+
+Era a ponta que ficou de fora da rodada 6: "Enviar imagem" existia e não abria nada.
+
+**O componente existe e é `UFileUpload`** (conferido em disco, como manda a regra 5). O padrão
+dele já é `variant: "area"`, ou seja, a caixa tracejada que aceita clique **e** arraste, com
+`dropzone` ligado por padrão. Não foi preciso criar nada: o degrau 2 da escada resolveu.
+
+**Como ficou:** "Enviar imagem" abre a mesma camada que "Escolher ícone" abre, com o campo de
+arquivo dentro, aceitando PNG, JPG, GIF e SVG. O arquivo escolhido vira prévia na hora, o tile
+do logo mostra a imagem, o botão passa a dizer "Trocar imagem" e a aba marca pendência.
+
+**Uma coisa que o campo não mostra, e que eu acrescentei:** a prévia dele é grande, e o logo na
+barra lateral tem 64 px, cortado em quadrado. Embaixo da prévia grande entrou uma linha com a
+imagem **no tamanho real** e o nome do arquivo. A ação de remover ficou só no X do próprio
+campo: ter dois botões para a mesma coisa era o tipo de repetição que esta tela veio corrigir.
+
+**O que é maquete:** nada sobe. O arquivo vira uma **URL de objeto criada no próprio navegador**,
+que morre no reload; nenhum byte sai da máquina, como manda a regra 4. No produto, o upload
+gravaria o arquivo e o workspace guardaria a URL, e é por isso que o campo `logoImagem` do
+`mocks.ts` está marcado como invenção do protótipo.
+
+---
+
 ## Rodada 6 — 16/09/2026 — o seletor de ícone para 50 mil
 
 **O que ela pediu, literal:**

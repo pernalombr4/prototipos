@@ -52,6 +52,12 @@ type CamposDoWorkspace = Pick<
 export interface Identidade extends CamposDoWorkspace {
   /** O produto chama de "Tipo de Logo": escolhe entre um ícone e uma imagem. */
   tipoDeMarca: 'icone' | 'imagem'
+  /**
+   * Acrescentado pelo protótipo: no produto o logo enviado vira arquivo no
+   * servidor e o workspace guarda a URL. Aqui é uma URL de objeto criada pelo
+   * próprio navegador, que morre no reload. Nada sai da máquina.
+   */
+  logoImagem?: string | null
 }
 
 export const identidade: Identidade = {
@@ -65,6 +71,7 @@ export const identidade: Identidade = {
   status: 'active',
   members_count: 34,
   tipoDeMarca: 'icone',
+  logoImagem: null,
 }
 
 /* ------------------------------------------------------------------ *
