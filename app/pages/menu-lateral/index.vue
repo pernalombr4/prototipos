@@ -2,6 +2,7 @@
 import PainelTrabalho from './_PainelTrabalho.vue'
 import PainelConfiguracoes from './_PainelConfiguracoes.vue'
 import ModeloTrilha from './_ModeloTrilha.vue'
+import EditorDeMenus from './_EditorDeMenus.vue'
 import TodasAsCategorias from './_TodasAsCategorias.vue'
 import MenuDeHoje from './_MenuDeHoje.vue'
 import Conteudo from './_Conteudo.vue'
@@ -12,6 +13,7 @@ import {
   secoesPersonalizadas,
   destinosDeTrabalho,
   workspace,
+  usuaria,
   type Categoria,
 } from './mocks'
 import { textos } from './textos'
@@ -165,6 +167,9 @@ function voltarParaTrabalho() {
 function abrirItemDeConfiguracao(id: string, rotulo: string) {
   itemConfigAtivo.value = id
   rotuloConfigAtivo.value = rotulo
+  // Interface > Menus abre o editor do menu, que é onde o administrador
+  // reordena, reagrupa e escolhe o tipo de cada tela.
+  if (id === 'menus') editando.value = true
 }
 
 /** "Configurar categoria" leva para Estrutura > Categorias, já na área certa. */
@@ -196,6 +201,7 @@ function avisarMaquete(oQue: string) {
 
 /* ------------------------------ camadas ------------------------------ */
 const vendoTodas = ref(false)
+const editando = ref(false)
 const vendoHoje = ref(false)
 const buscando = ref(false)
 
@@ -261,6 +267,42 @@ function emBreve() {
 <template>
   <div class="flex h-dvh flex-col bg-elevated/30">
     <!-- ============================================================
+         A BARRA DE CIMA. A busca global subiu para cá na rodada 3, que é
+         onde o Jira novo, o Airtable e o HubSpot a põem: atravessa a tela
+         inteira e não disputa altura com a navegação. O filtro do menu
+         continua dentro da barra lateral, porque é outra função.
+    ============================================================ -->
+    <header class="flex h-12 shrink-0 items-center gap-2 border-b border-default bg-default px-3">
+      <UButton color="neutral" variant="ghost" class="shrink-0" :aria-label="t.trocarWorkspace">
+        <span class="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary text-xs font-bold text-inverted">
+          {{ workspace.inicial }}
+        </span>
+        <span class="hidden truncate text-sm font-semibold text-highlighted sm:inline">{{ workspace.nome }}</span>
+        <UIcon name="i-lucide-chevrons-up-down" class="size-4 shrink-0 text-muted" />
+      </UButton>
+
+      <div class="flex min-w-0 flex-1 justify-center">
+        <UButton
+          color="neutral"
+          variant="outline"
+          class="w-full max-w-md justify-start"
+          @click="buscando = true"
+        >
+          <UIcon name="i-lucide-search" class="size-4 shrink-0 text-muted" />
+          <span class="min-w-0 flex-1 truncate text-left text-sm font-normal text-muted">{{ t.buscarEmTudo }}</span>
+          <UKbd value="ctrl" size="sm" />
+          <UKbd value="K" size="sm" />
+        </UButton>
+      </div>
+
+      <UDropdownMenu :items="itensDeCriar" :content="{ align: 'end' }">
+        <UButton icon="i-lucide-plus" color="primary" :label="t.criar" class="shrink-0" />
+      </UDropdownMenu>
+
+      <UAvatar :alt="usuaria.nome" size="xs" class="shrink-0" />
+    </header>
+
+    <!-- ============================================================
          O QUADRO DO PRODUTO: barra lateral mais conteúdo.
          A barra tem dois painéis que se substituem, nunca se somam.
     ============================================================ -->
@@ -307,6 +349,7 @@ function emBreve() {
               :t="t"
               :favoritas="favoritas"
               :recorte="recorte"
+              :todas="categorias"
               :total-de-categorias="categorias.length"
               :destino-ativo="destinoAtivo"
               :categoria-ativa-id="categoriaAtiva?.id ?? null"
@@ -322,7 +365,6 @@ function emBreve() {
               @criar="emBreve"
               @ajuda="emBreve"
               @ordem="v => ordem = v"
-            :itens-de-criar="itensDeCriar"
             />
           <PainelConfiguracoes
             v-else
@@ -363,6 +405,8 @@ function emBreve() {
     />
 
     <MenuDeHoje v-model:open="vendoHoje" :t="t" />
+
+    <EditorDeMenus v-model:open="editando" :t="t" />
 
     <UModal v-model:open="buscando" :ui="{ content: 'max-w-xl' }">
       <template #content>

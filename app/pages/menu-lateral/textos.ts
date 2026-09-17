@@ -90,6 +90,33 @@ export interface TextosDaTela {
   semPermissaoTitulo: string
   semPermissaoDescricao: string
 
+  // rodada 3: busca, telas novas e editor
+  buscarEmTudo: string
+  filtroDoMenu: string
+  filtroSemResultado: string
+  documentos: string
+  painelTarefas: string
+  painelDados: string
+  meusRelatorios: string
+  secaoAnalise: string
+  emBreve: string
+  editorAbrir: string
+  editorTitulo: string
+  editorDescricao: string
+  moverAcima: string
+  moverAbaixo: string
+  moverPara: string
+  foraDeSecao: string
+  tipoDeTela: string
+  exigeCategoria: string
+  categoriasLigadas: (n: number) => string
+  novaSecao: string
+  novaTela: string
+  seloNativo: string
+  seloWorkspace: string
+  motivos: Record<string, string>
+  tipos: Record<string, string>
+
   // comparação
   hojeTitulo: string
   hojeLegenda: string
@@ -213,6 +240,51 @@ const ptBR: TextosDaTela = {
   semPermissaoTitulo: 'Você não administra este workspace',
   semPermissaoDescricao: 'As configurações ficam com quem tem licença Owner ou Full. Peça a quem administra, ou continue no seu trabalho.',
 
+  buscarEmTudo: 'Buscar em tudo',
+  filtroDoMenu: 'Filtrar o menu',
+  filtroSemResultado: 'Nada no menu com esse nome',
+  documentos: 'Documentos',
+  painelTarefas: 'Dashboard de tarefas',
+  painelDados: 'Dashboard de dados',
+  meusRelatorios: 'Meus relatórios',
+  secaoAnalise: 'Análise',
+  emBreve: 'Em breve',
+  editorAbrir: 'Montar o menu',
+  editorTitulo: 'Montar o menu',
+  editorDescricao: 'Reordene, agrupe em seções e escolha o tipo de cada tela. Encaixe que quebra a lógica do ENSPACE é recusado na hora, com o motivo.',
+  moverAcima: 'Mover para cima',
+  moverAbaixo: 'Mover para baixo',
+  moverPara: 'Mover para',
+  foraDeSecao: 'Fora de seção',
+  tipoDeTela: 'Tipo de tela',
+  exigeCategoria: 'Este tipo pede ao menos uma categoria',
+  categoriasLigadas: n => `${n} categorias ligadas`,
+  novaSecao: 'Nova seção',
+  novaTela: 'Nova tela',
+  seloNativo: 'Nativo',
+  seloWorkspace: 'Do workspace',
+  motivos: {
+    destinoEhFolha: 'Tela nativa não recebe item dentro. Solte dentro de uma seção.',
+    categoriaSoEmCategorias: 'Categoria só entra na seção Categorias.',
+    telaNaoEmCategorias: 'A seção Categorias só aceita categoria.',
+    secaoDentroDeSecao: 'O menu tem dois níveis. Seção não entra dentro de seção.',
+  },
+  tipos: {
+    'arquivos': 'Arquivos',
+    'consultas': 'Consultas',
+    'consultas-grupo': 'Consultas (Grupo de Membros)',
+    'embutido': 'Conteúdo Embutido',
+    'customizado': 'Customizado',
+    'meus-itens': 'Meus Itens',
+    'minhas-requisicoes': 'Minhas Requisições',
+    'paineis': 'Painéis',
+    'requisicoes': 'Requisições',
+    'tarefas': 'Tarefas',
+    'tarefas-geral': 'Tarefas Geral',
+    'personalizada': 'Telas Personalizadas',
+    'triagem': 'Triagem',
+  },
+
   hojeTitulo: 'O menu nativo de hoje',
   hojeLegenda: 'O que existe em qualquer workspace, com zero categorias cadastradas. Capturado no develop em 16/09/2026, com os rótulos como foram capturados.',
   hojeRodape: 'Cada categoria com menu automático soma mais uma linha, e mais uma por formulário quando expandida. Cada seção do workspace soma uma mais os itens dela.',
@@ -335,6 +407,51 @@ const en: TextosDaTela = {
   semPermissaoTitulo: 'You do not administer this workspace',
   semPermissaoDescricao: 'Settings belong to Owner or Full licences. Ask whoever administers it, or carry on with your work.',
 
+  buscarEmTudo: 'Search everything',
+  filtroDoMenu: 'Filter the menu',
+  filtroSemResultado: 'Nothing in the menu by that name',
+  documentos: 'Documents',
+  painelTarefas: 'Task dashboard',
+  painelDados: 'Data dashboard',
+  meusRelatorios: 'My reports',
+  secaoAnalise: 'Analysis',
+  emBreve: 'Coming soon',
+  editorAbrir: 'Build the menu',
+  editorTitulo: 'Build the menu',
+  editorDescricao: 'Reorder, group into sections and choose the type of each screen. A placement that breaks the logic of ENSPACE is refused on the spot, with the reason.',
+  moverAcima: 'Move up',
+  moverAbaixo: 'Move down',
+  moverPara: 'Move to',
+  foraDeSecao: 'Outside a section',
+  tipoDeTela: 'Screen type',
+  exigeCategoria: 'This type needs at least one category',
+  categoriasLigadas: n => `${n} categories linked`,
+  novaSecao: 'New section',
+  novaTela: 'New screen',
+  seloNativo: 'Native',
+  seloWorkspace: 'Workspace',
+  motivos: {
+    destinoEhFolha: 'A native screen takes no items inside. Drop it into a section.',
+    categoriaSoEmCategorias: 'A category only goes in the Categories section.',
+    telaNaoEmCategorias: 'The Categories section only takes categories.',
+    secaoDentroDeSecao: 'The menu has two levels. A section does not go inside a section.',
+  },
+  tipos: {
+    'arquivos': 'Files',
+    'consultas': 'Queries',
+    'consultas-grupo': 'Queries (Member Group)',
+    'embutido': 'Embedded Content',
+    'customizado': 'Custom',
+    'meus-itens': 'My Items',
+    'minhas-requisicoes': 'My Requests',
+    'paineis': 'Dashboards',
+    'requisicoes': 'Requests',
+    'tarefas': 'Tasks',
+    'tarefas-geral': 'All Tasks',
+    'personalizada': 'Custom Screens',
+    'triagem': 'Triage',
+  },
+
   hojeTitulo: 'The native menu today',
   hojeLegenda: 'What exists in any workspace, with zero categories created. Captured on develop on 16 Sep 2026, labels as captured.',
   hojeRodape: 'Each category with the automatic menu adds one more row, plus one per form when expanded. Each workspace section adds one plus its items.',
@@ -456,6 +573,51 @@ const es: TextosDaTela = {
   erroAcao: 'Intentar otra vez',
   semPermissaoTitulo: 'No administras este workspace',
   semPermissaoDescricao: 'La configuración es de quien tiene licencia Owner o Full. Pídeselo a quien administra, o sigue con tu trabajo.',
+
+  buscarEmTudo: 'Buscar en todo',
+  filtroDoMenu: 'Filtrar el menú',
+  filtroSemResultado: 'Nada en el menú con ese nombre',
+  documentos: 'Documentos',
+  painelTarefas: 'Panel de tareas',
+  painelDados: 'Panel de datos',
+  meusRelatorios: 'Mis informes',
+  secaoAnalise: 'Análisis',
+  emBreve: 'Próximamente',
+  editorAbrir: 'Armar el menú',
+  editorTitulo: 'Armar el menú',
+  editorDescricao: 'Reordena, agrupa en secciones y elige el tipo de cada pantalla. Un encaje que rompe la lógica de ENSPACE se rechaza al momento, con el motivo.',
+  moverAcima: 'Mover arriba',
+  moverAbaixo: 'Mover abajo',
+  moverPara: 'Mover a',
+  foraDeSecao: 'Fuera de sección',
+  tipoDeTela: 'Tipo de pantalla',
+  exigeCategoria: 'Este tipo pide al menos una categoría',
+  categoriasLigadas: n => `${n} categorías vinculadas`,
+  novaSecao: 'Nueva sección',
+  novaTela: 'Nueva pantalla',
+  seloNativo: 'Nativo',
+  seloWorkspace: 'Del workspace',
+  motivos: {
+    destinoEhFolha: 'Una pantalla nativa no recibe elementos dentro. Suéltalo en una sección.',
+    categoriaSoEmCategorias: 'Una categoría solo entra en la sección Categorías.',
+    telaNaoEmCategorias: 'La sección Categorías solo acepta categorías.',
+    secaoDentroDeSecao: 'El menú tiene dos niveles. Una sección no entra dentro de otra.',
+  },
+  tipos: {
+    'arquivos': 'Archivos',
+    'consultas': 'Consultas',
+    'consultas-grupo': 'Consultas (Grupo de Miembros)',
+    'embutido': 'Contenido Embebido',
+    'customizado': 'Personalizado',
+    'meus-itens': 'Mis Elementos',
+    'minhas-requisicoes': 'Mis Solicitudes',
+    'paineis': 'Paneles',
+    'requisicoes': 'Solicitudes',
+    'tarefas': 'Tareas',
+    'tarefas-geral': 'Tareas General',
+    'personalizada': 'Pantallas Personalizadas',
+    'triagem': 'Triaje',
+  },
 
   hojeTitulo: 'El menú nativo de hoy',
   hojeLegenda: 'Lo que existe en cualquier workspace, con cero categorías creadas. Capturado en develop el 16/09/2026, con las etiquetas tal como se capturaron.',

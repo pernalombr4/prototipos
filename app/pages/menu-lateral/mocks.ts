@@ -411,3 +411,163 @@ export const usuaria = {
   iniciais: 'RA',
   cargo: 'Coordenadora de operações',
 }
+
+/* ==================================================================
+   TELAS E REGRAS DO MENU
+   Rodada 3. Base documental: `Configurações > Interface > Telas` do en-docs
+   (somente leitura), que lista os 13 tipos e diz que os tipos que leem dados
+   de categoria pedem a seleção de uma ou mais categorias na configuração.
+================================================================== */
+
+/** Os 13 tipos de tela que o produto oferece hoje, na ordem da documentação. */
+export interface TipoDeTela {
+  id: string
+  /** Precisa escolher categoria na configuração. */
+  exigeCategoria?: boolean
+  /** Precisa de uma URL. */
+  exigeCaminho?: boolean
+}
+
+export const tiposDeTela: TipoDeTela[] = [
+  { id: 'arquivos' },
+  { id: 'consultas', exigeCategoria: true },
+  { id: 'consultas-grupo', exigeCategoria: true },
+  { id: 'embutido', exigeCaminho: true },
+  { id: 'customizado', exigeCaminho: true },
+  { id: 'meus-itens', exigeCategoria: true },
+  { id: 'minhas-requisicoes' },
+  { id: 'paineis' },
+  { id: 'requisicoes', exigeCategoria: true },
+  { id: 'tarefas' },
+  { id: 'tarefas-geral' },
+  { id: 'personalizada' },
+  { id: 'triagem', exigeCategoria: true },
+]
+
+/**
+ * As telas NATIVAS que já existem e as que estão por vir.
+ *
+ * As quatro marcadas com `emBreve` foram informadas pela Mikaela em 17/09/2026 e
+ * ainda não existem no develop. Entraram no protótipo para o desenho ser testado
+ * com o menu que o ENSPACE vai ter, não só com o de hoje.
+ */
+export interface TelaNativa {
+  id: string
+  icone: string
+  /** Onde ela entra na proposta. */
+  lugar: 'destino' | 'analise'
+  emBreve?: boolean
+}
+
+export const telasNativas: TelaNativa[] = [
+  { id: 'inicio', icone: 'i-lucide-house', lugar: 'destino' },
+  { id: 'tarefas', icone: 'i-lucide-square-check-big', lugar: 'destino' },
+  { id: 'agenda', icone: 'i-lucide-calendar-days', lugar: 'destino' },
+  { id: 'spaceflows', icone: 'i-lucide-workflow', lugar: 'destino' },
+  { id: 'documentos', icone: 'i-lucide-folder-open', lugar: 'destino', emBreve: true },
+  { id: 'painel-tarefas', icone: 'i-lucide-chart-column', lugar: 'analise', emBreve: true },
+  { id: 'painel-dados', icone: 'i-lucide-chart-pie', lugar: 'analise', emBreve: true },
+  { id: 'meus-relatorios', icone: 'i-lucide-file-chart-column', lugar: 'analise', emBreve: true },
+]
+
+/**
+ * AS REGRAS DE ENCAIXE DO MENU.
+ *
+ * "não da pra deixar o cara botar uma categoria dentro de tarefas" (Mikaela).
+ * As quatro regras abaixo saem do modelo que o produto já tem: seção tem itens,
+ * item é tela, e destino nativo é folha.
+ */
+export type TipoDeNo = 'raiz' | 'destino' | 'secao-nativa' | 'secao' | 'categoria' | 'tela'
+
+export interface ResultadoDeEncaixe {
+  pode: boolean
+  /** Chave do motivo no textos.ts, quando não pode. */
+  motivo?: 'destinoEhFolha' | 'categoriaSoEmCategorias' | 'telaNaoEmCategorias' | 'secaoDentroDeSecao'
+}
+
+export function podeMover(oQue: TipoDeNo, paraDentroDe: TipoDeNo): ResultadoDeEncaixe {
+  // R1. Destino nativo é folha: não recebe nada. É a regra que ela citou.
+  if (paraDentroDe === 'destino') return { pode: false, motivo: 'destinoEhFolha' }
+
+  // R2. Seção não entra em seção: o menu tem dois níveis, e é o ponto da demanda.
+  if ((oQue === 'secao' || oQue === 'secao-nativa' || oQue === 'destino') && paraDentroDe !== 'raiz') {
+    return { pode: false, motivo: 'secaoDentroDeSecao' }
+  }
+
+  // R3. Categoria só mora na seção nativa de categorias.
+  if (oQue === 'categoria' && paraDentroDe !== 'secao-nativa') {
+    return { pode: false, motivo: 'categoriaSoEmCategorias' }
+  }
+
+  // R4. Tela não entra na seção nativa de categorias.
+  if (oQue === 'tela' && paraDentroDe === 'secao-nativa') {
+    return { pode: false, motivo: 'telaNaoEmCategorias' }
+  }
+
+  return { pode: true }
+}
+
+/** O menu como o administrador o vê no editor. Dado do protótipo. */
+export interface NoDoMenu {
+  id: string
+  tipo: TipoDeNo
+  /** Rótulo livre, escrito pelo administrador. Nativo usa chave do textos.ts. */
+  rotulo?: string
+  chave?: string
+  icone: string
+  /** Só para item do tipo tela. */
+  tipoDeTela?: string
+  categoriasLigadas?: number
+  filhos?: NoDoMenu[]
+}
+
+export const menuDoEditor: NoDoMenu[] = [
+  { id: 'n-inicio', tipo: 'destino', chave: 'inicio', icone: 'i-lucide-house' },
+  { id: 'n-tarefas', tipo: 'destino', chave: 'tarefas', icone: 'i-lucide-square-check-big' },
+  { id: 'n-agenda', tipo: 'destino', chave: 'agenda', icone: 'i-lucide-calendar-days' },
+  { id: 'n-spaceflows', tipo: 'destino', chave: 'spaceflows', icone: 'i-lucide-workflow' },
+  { id: 'n-documentos', tipo: 'destino', chave: 'documentos', icone: 'i-lucide-folder-open' },
+  {
+    id: 'n-categorias',
+    tipo: 'secao-nativa',
+    chave: 'categorias',
+    icone: 'i-lucide-database',
+    filhos: [
+      { id: 'c-1', tipo: 'categoria', rotulo: 'Contratos', icone: 'i-lucide-file-signature' },
+      { id: 'c-2', tipo: 'categoria', rotulo: 'Clientes', icone: 'i-lucide-building-2' },
+      { id: 'c-3', tipo: 'categoria', rotulo: 'Chamados', icone: 'i-lucide-life-buoy' },
+    ],
+  },
+  {
+    id: 's-analise',
+    tipo: 'secao',
+    rotulo: 'Análise',
+    icone: 'i-lucide-chart-column',
+    filhos: [
+      { id: 't-pt', tipo: 'tela', rotulo: 'Dashboard de tarefas', icone: 'i-lucide-chart-column', tipoDeTela: 'paineis' },
+      { id: 't-pd', tipo: 'tela', rotulo: 'Dashboard de dados', icone: 'i-lucide-chart-pie', tipoDeTela: 'paineis' },
+      { id: 't-mr', tipo: 'tela', rotulo: 'Meus relatórios', icone: 'i-lucide-file-chart-column', tipoDeTela: 'personalizada' },
+    ],
+  },
+  {
+    id: 's-conhecimento',
+    tipo: 'secao',
+    rotulo: 'Conhecimento',
+    icone: 'i-lucide-book-open',
+    filhos: [
+      { id: 't-base', tipo: 'tela', rotulo: 'Base de Conhecimento', icone: 'i-lucide-library', tipoDeTela: 'personalizada' },
+      { id: 't-pol', tipo: 'tela', rotulo: 'Políticas internas', icone: 'i-lucide-file-text', tipoDeTela: 'arquivos' },
+    ],
+  },
+  {
+    id: 's-comercial',
+    tipo: 'secao',
+    rotulo: 'Comercial',
+    icone: 'i-lucide-trending-up',
+    filhos: [
+      { id: 't-pv', tipo: 'tela', rotulo: 'Painel de vendas', icone: 'i-lucide-chart-line', tipoDeTela: 'paineis' },
+      { id: 't-tri', tipo: 'tela', rotulo: 'Triagem de propostas', icone: 'i-lucide-list-filter', tipoDeTela: 'triagem', categoriasLigadas: 2 },
+      { id: 't-req', tipo: 'tela', rotulo: 'Minhas requisições', icone: 'i-lucide-inbox', tipoDeTela: 'minhas-requisicoes' },
+    ],
+  },
+]

@@ -14,17 +14,20 @@ import type { TextosDaTela } from './textos'
  * MODELO ALTERNATIVO: trilha de ícones mais painel da área.
  *
  * É o desenho do Jira antigo, do Microsoft Teams, do Slack, do monday e da
- * Global Navigation do ClickUp: uma trilha estreita com as áreas agregadoras e,
- * ao lado, o menu daquela área.
+ * Global Navigation do ClickUp. Está aqui para ser COMPARADO com a barra única,
+ * não para substituí-la: a pesquisa (PESQUISA.md, "Trilha de ícones") mostra que
+ * o padrão serve produtos com vários modos de trabalho que convivem, e que o
+ * proprio Jira saiu dele na navegação nova.
  *
- * Existe aqui para ser COMPARADO com a barra única, não para substituí-la. A
- * pesquisa (PESQUISA.md, secção "Trilha de ícones") mostra que o padrão é real,
- * mas que ele serve produtos com vários modos de trabalho que convivem, e que o
- * proprio Jira saiu dele na navegação nova. O alternador fica na barra de
- * andaime, porque no produto só um dos dois vai existir.
+ * RODADA 3: o balde "Seções" saiu. A Mikaela perguntou se era a melhor ideia, e
+ * não era: aquilo agrupava por MECANISMO ("são seções") em vez de por assunto,
+ * o mesmo vício que a pesquisa de UX aponta em "Menu automático" (S1-F4). Agora
+ * cada seção que o administrador cria vira um ícone próprio na trilha, como o
+ * Teams e o monday fazem com app fixado.
  *
- * As cinco áreas foram escolhidas para dar a versão mais forte da ideia: cada
- * uma tem conteúdo de verdade, nenhuma é um item só fingindo de área.
+ * E isso expõe o custo do modelo, que é informação útil: a trilha passa a crescer
+ * com o número de seções do workspace. O problema de volume mudou de lugar, não
+ * desapareceu.
  */
 const props = defineProps<{
   t: TextosDaTela
@@ -49,40 +52,64 @@ const emit = defineEmits<{
   ajuda: []
 }>()
 
-type Area = 'trabalho' | 'dados' | 'secoes' | 'config' | 'ajuda'
-const area = ref<Area>('trabalho')
+const area = ref('trabalho')
 
-const areas = computed(() => {
-  const lista: { id: Area, icone: string, rotulo: string, bloqueada?: boolean }[] = [
-    { id: 'trabalho', icone: 'i-lucide-house', rotulo: props.t.areaTrabalho },
-    { id: 'dados', icone: 'i-lucide-database', rotulo: props.t.areaDados },
-    { id: 'secoes', icone: 'i-lucide-layout-grid', rotulo: props.t.areaSecoes },
-    { id: 'config', icone: 'i-lucide-settings', rotulo: props.t.configuracoes, bloqueada: !props.podeConfigurar },
-    { id: 'ajuda', icone: 'i-lucide-circle-question-mark', rotulo: props.t.ajuda },
-  ]
-  return lista
-})
+/**
+ * As áreas da trilha. As nativas primeiro, depois UMA POR SEÇÃO do workspace, e
+ * por último administração e ajuda. Não existe mais um balde genérico.
+ */
+const areas = computed(() => [
+  { id: 'trabalho', icone: 'i-lucide-house', rotulo: props.t.areaTrabalho, bloqueada: false },
+  { id: 'dados', icone: 'i-lucide-database', rotulo: props.t.areaDados, bloqueada: false },
+  { id: 'analise', icone: 'i-lucide-chart-column', rotulo: props.t.secaoAnalise, bloqueada: false },
+  ...secoesPersonalizadas.map(s => ({
+    id: `sec:${s.id}`,
+    icone: s.icone,
+    rotulo: s.rotulo,
+    bloqueada: false,
+  })),
+  { id: 'config', icone: 'i-lucide-settings', rotulo: props.t.configuracoes, bloqueada: !props.podeConfigurar },
+  { id: 'ajuda', icone: 'i-lucide-circle-question-mark', rotulo: props.t.ajuda, bloqueada: false },
+])
 
 const tituloDaArea = computed(() => areas.value.find(a => a.id === area.value)?.rotulo ?? '')
 
-/** Um grupo de configuração aberto por vez, igual ao modelo de barra única. */
+const secaoAtual = computed(() => {
+  if (!area.value.startsWith('sec:')) return null
+  return secoesPersonalizadas.find(s => s.id === area.value.slice(4)) ?? null
+})
+
+const destinosDoTrabalho = computed(() => [
+  { id: 'inicio', rotulo: props.t.inicio, icone: 'i-lucide-house', contador: undefined as number | undefined, emBreve: false },
+  { id: 'tarefas', rotulo: props.t.tarefas, icone: 'i-lucide-square-check-big', contador: 3, emBreve: false },
+  { id: 'agenda', rotulo: props.t.agenda, icone: 'i-lucide-calendar-days', contador: undefined, emBreve: false },
+  { id: 'spaceflows', rotulo: props.t.spaceflows, icone: 'i-lucide-workflow', contador: undefined, emBreve: false },
+  { id: 'documentos', rotulo: props.t.documentos, icone: 'i-lucide-folder-open', contador: undefined, emBreve: true },
+])
+
+const telasDeAnalise = computed(() => [
+  { id: 'painel-tarefas', rotulo: props.t.painelTarefas, icone: 'i-lucide-chart-column' },
+  { id: 'painel-dados', rotulo: props.t.painelDados, icone: 'i-lucide-chart-pie' },
+  { id: 'meus-relatorios', rotulo: props.t.meusRelatorios, icone: 'i-lucide-file-chart-column' },
+])
+
 const grupoAberto = ref('estrutura')
 const secaoAberta = ref<Record<string, boolean>>({ favoritos: true, categorias: true })
 
-function irPara(a: Area) {
-  if (a === 'config' && !props.podeConfigurar) return
-  area.value = a
+function irPara(a: { id: string, bloqueada: boolean }) {
+  if (a.bloqueada) return
+  area.value = a.id
 }
 </script>
 
 <template>
   <div class="flex h-full">
     <!-- ==================== A TRILHA ==================== -->
-    <div class="flex w-[4.5rem] shrink-0 flex-col items-center gap-1 border-r border-default bg-accented/40 py-2">
+    <div class="flex w-[4.5rem] shrink-0 flex-col items-center gap-1 overflow-y-auto border-r border-default bg-accented/40 py-2">
       <UTooltip :text="workspace.nome" :content="{ side: 'right' }">
         <button
           type="button"
-          class="mb-1 flex size-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-inverted transition-transform hover:scale-105"
+          class="mb-1 flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-bold text-inverted transition-transform hover:scale-105"
           :aria-label="props.t.trocarWorkspace"
         >
           {{ workspace.inicial }}
@@ -93,7 +120,7 @@ function irPara(a: Area) {
         v-for="a in areas"
         :key="a.id"
         type="button"
-        class="flex w-full flex-col items-center gap-0.5 rounded-lg px-1 py-2 transition-colors"
+        class="flex w-full shrink-0 flex-col items-center gap-0.5 rounded-lg px-1 py-2 transition-colors"
         :class="[
           area === a.id
             ? 'bg-primary/15 text-highlighted'
@@ -103,7 +130,7 @@ function irPara(a: Area) {
         ]"
         :aria-current="area === a.id ? 'page' : undefined"
         :disabled="a.bloqueada"
-        @click="irPara(a.id)"
+        @click="irPara(a)"
       >
         <UIcon
           :name="a.bloqueada ? 'i-lucide-lock' : a.icone"
@@ -113,24 +140,13 @@ function irPara(a: Area) {
         <span class="w-full truncate text-center text-[10px] font-medium leading-tight">{{ a.rotulo }}</span>
       </button>
 
-      <div class="flex-1" />
-
-      <UTooltip :text="props.t.buscar" :content="{ side: 'right' }">
-        <button
-          type="button"
-          class="flex size-9 items-center justify-center rounded-lg text-default transition-colors hover:bg-elevated"
-          :aria-label="props.t.buscar"
-          @click="emit('busca')"
-        >
-          <UIcon name="i-lucide-search" class="size-5" />
-        </button>
-      </UTooltip>
+      <div class="min-h-2 flex-1" />
 
       <UDropdownMenu :items="props.itensDeCriar" :content="{ side: 'right', align: 'end' }">
         <UTooltip :text="props.t.criar" :content="{ side: 'right' }">
           <button
             type="button"
-            class="flex size-9 items-center justify-center rounded-lg bg-primary text-inverted transition-transform hover:scale-105"
+            class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-inverted transition-transform hover:scale-105"
             :aria-label="props.t.criar"
           >
             <UIcon name="i-lucide-plus" class="size-5" />
@@ -138,7 +154,7 @@ function irPara(a: Area) {
         </UTooltip>
       </UDropdownMenu>
 
-      <UAvatar :alt="usuaria.nome" size="sm" class="mt-1" />
+      <UAvatar :alt="usuaria.nome" size="sm" class="mt-1 shrink-0" />
     </div>
 
     <!-- ==================== O PAINEL DA ÁREA ==================== -->
@@ -149,39 +165,19 @@ function irPara(a: Area) {
 
       <nav class="min-h-0 flex-1 overflow-y-auto px-2 py-2" :aria-label="tituloDaArea">
         <!-- ---------- Trabalho ---------- -->
-        <template v-if="area === 'trabalho'">
-          <div class="space-y-0.5">
-            <LinhaDeMenu
-              icone="i-lucide-house"
-              :rotulo="props.t.inicio"
-              :ativo="props.destinoAtivo === 'inicio'"
-              :atraso="0"
-              @selecionar="emit('destino', 'inicio')"
-            />
-            <LinhaDeMenu
-              icone="i-lucide-square-check-big"
-              :rotulo="props.t.tarefas"
-              :contador="3"
-              :ativo="props.destinoAtivo === 'tarefas'"
-              :atraso="25"
-              @selecionar="emit('destino', 'tarefas')"
-            />
-            <LinhaDeMenu
-              icone="i-lucide-calendar-days"
-              :rotulo="props.t.agenda"
-              :ativo="props.destinoAtivo === 'agenda'"
-              :atraso="50"
-              @selecionar="emit('destino', 'agenda')"
-            />
-            <LinhaDeMenu
-              icone="i-lucide-workflow"
-              :rotulo="props.t.spaceflows"
-              :ativo="props.destinoAtivo === 'spaceflows'"
-              :atraso="75"
-              @selecionar="emit('destino', 'spaceflows')"
-            />
-          </div>
-        </template>
+        <div v-if="area === 'trabalho'" class="space-y-0.5">
+          <LinhaDeMenu
+            v-for="(d, i) in destinosDoTrabalho"
+            :key="d.id"
+            :icone="d.icone"
+            :rotulo="d.rotulo"
+            :contador="d.contador"
+            :selo="d.emBreve ? props.t.emBreve : undefined"
+            :ativo="props.destinoAtivo === d.id"
+            :atraso="i * 25"
+            @selecionar="emit('destino', d.id)"
+          />
+        </div>
 
         <!-- ---------- Dados ---------- -->
         <template v-else-if="area === 'dados'">
@@ -255,29 +251,32 @@ function irPara(a: Area) {
           </template>
         </template>
 
-        <!-- ---------- Seções do workspace ---------- -->
-        <template v-else-if="area === 'secoes'">
-          <SecaoDeMenu
-            v-for="s in secoesPersonalizadas"
-            :key="s.id"
-            :rotulo="s.rotulo"
-            :aberta="true"
-            :texto-recolher="props.t.recolherSecao(s.rotulo)"
-            :texto-expandir="props.t.expandirSecao(s.rotulo)"
-            @alternar="() => {}"
-          >
-            <LinhaDeMenu
-              v-for="(item, i) in s.itens"
-              :key="item.id"
-              :icone="item.icone"
-              :rotulo="item.rotulo"
-              :nivel="2"
-              :ativo="props.destinoAtivo === item.id"
-              :atraso="i * 25"
-              @selecionar="emit('destino', item.id)"
-            />
-          </SecaoDeMenu>
-        </template>
+        <!-- ---------- Análise ---------- -->
+        <div v-else-if="area === 'analise'" class="space-y-0.5">
+          <LinhaDeMenu
+            v-for="(a, i) in telasDeAnalise"
+            :key="a.id"
+            :icone="a.icone"
+            :rotulo="a.rotulo"
+            :selo="props.t.emBreve"
+            :ativo="props.destinoAtivo === a.id"
+            :atraso="i * 25"
+            @selecionar="emit('destino', a.id)"
+          />
+        </div>
+
+        <!-- ---------- Uma seção do workspace ---------- -->
+        <div v-else-if="secaoAtual" class="space-y-0.5">
+          <LinhaDeMenu
+            v-for="(item, i) in secaoAtual.itens"
+            :key="item.id"
+            :icone="item.icone"
+            :rotulo="item.rotulo"
+            :ativo="props.destinoAtivo === item.id"
+            :atraso="i * 25"
+            @selecionar="emit('destino', item.id)"
+          />
+        </div>
 
         <!-- ---------- Configurações ---------- -->
         <template v-else-if="area === 'config'">
@@ -304,28 +303,26 @@ function irPara(a: Area) {
         </template>
 
         <!-- ---------- Ajuda ---------- -->
-        <template v-else>
-          <div class="space-y-0.5">
-            <LinhaDeMenu
-              icone="i-lucide-bot"
-              :rotulo="props.t.falarComBeni"
-              :atraso="0"
-              @selecionar="emit('ajuda')"
-            />
-            <LinhaDeMenu
-              icone="i-lucide-rocket"
-              :rotulo="props.t.releases"
-              :atraso="25"
-              @selecionar="emit('ajuda')"
-            />
-            <LinhaDeMenu
-              icone="i-lucide-book-open"
-              :rotulo="props.t.documentacao"
-              :atraso="50"
-              @selecionar="emit('ajuda')"
-            />
-          </div>
-        </template>
+        <div v-else class="space-y-0.5">
+          <LinhaDeMenu
+            icone="i-lucide-bot"
+            :rotulo="props.t.falarComBeni"
+            :atraso="0"
+            @selecionar="emit('ajuda')"
+          />
+          <LinhaDeMenu
+            icone="i-lucide-rocket"
+            :rotulo="props.t.releases"
+            :atraso="25"
+            @selecionar="emit('ajuda')"
+          />
+          <LinhaDeMenu
+            icone="i-lucide-book-open"
+            :rotulo="props.t.documentacao"
+            :atraso="50"
+            @selecionar="emit('ajuda')"
+          />
+        </div>
       </nav>
     </div>
   </div>

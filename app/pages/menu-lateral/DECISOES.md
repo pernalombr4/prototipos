@@ -226,8 +226,11 @@ Roda sobre o array em memória, no navegador. Recarregar a página volta tudo ao
   verdade para o que for escolhido;
 - **as abas de formulário** da tela da categoria, trocando a tabela;
 - **o botão `+`**, com as quatro opções de criação;
-- **o alternador de modelo** entre barra única e trilha de ícones, com as cinco áreas da
-  trilha navegáveis;
+- **o alternador de modelo** entre barra única e trilha de ícones, com as áreas navegáveis;
+- **o filtro do menu**, que procura em todas as categorias e não só no recorte, e o filtro
+  do painel de configurações;
+- **o editor de menus**: reordenar, reagrupar, trocar o tipo da tela e as quatro recusas com
+  o motivo;
 - os seis estados do andaime, incluindo vazio, carregando, erro e sem permissão.
 
 ## O que é maquete
@@ -336,6 +339,14 @@ Precisam de resposta antes da rodada 2.
 
 4. **A Ajuda pode mesmo virar um item só?** É a única redução de endereço da proposta.
 
+6. **Os dashboards novos são uma tela cada, ou lista que o usuário cria?** Se forem lista, o
+   problema das categorias se repete e eles precisam da mesma mecânica: favoritos, teto e
+   "ver todas". O protótipo já está desenhado para isso, mas o número muda o desenho da
+   seção (regra 34).
+
+7. **A seção `Análise` deve nascer aberta ou recolhida?** Recolhida custa uma linha e esconde
+   três; aberta custa quatro. Depende de quanto essas telas vão ser usadas no dia a dia.
+
 5. **Seção do workspace devia poder nascer aberta?** Hoje `Interface › Menus` tem nome,
    ícone, ordem e grupos permitidos. Faltaria um "começa aberta" para o administrador
    decidir o que a equipe vê de cara. É campo novo, então não inventei.
@@ -343,6 +354,128 @@ Precisam de resposta antes da rodada 2.
 ---
 
 ## Rodadas
+
+### Rodada 3 · 17/09/2026
+
+**O que ela pediu**, literal:
+
+> "a barra de busca deve ficar mais pro topo. e deve ter a barra de busca geral e a barra
+> dentro de cada menu tambem, talvez.
+>
+> seçoes é a melhor ideia? os menus que voce botou em seçoes sao menus personalizados que o
+> user criou.
+>
+> saiba que teremos tambem outras telas nativas aí em breve, sendo elas: dashboards de
+> tarefas, dashboards de dados (itens), documentos (arquivos do workspace), meus relatórios
+> (relatórios emitidos no workspace pelo usuario)
+>
+> e o user quando cria novos menus tem que escolher que tipo de tela ele ta botando ali:
+> requisiçoes, tela de conteudo embedado, tela de formularios... por ai vai. e deve poder
+> reordenar o menu e reagrupar, sem quebrar a logica do enspace. por exemplo, nao da pra
+> deixar o cara botar uma categoria dentro de tarefas."
+
+#### 1. A busca subiu, e viraram duas
+
+**Busca global na barra de cima**, atravessando a tela inteira, com `Ctrl K`. É onde o Jira
+novo a põe ("Search across all apps on your site, and Create work items"), e também o
+Airtable e o HubSpot. Sair da barra lateral devolveu altura para a navegação, que é
+justamente o que está sendo medido aqui.
+
+**Filtro dentro do menu**, no topo da barra lateral. Não é a mesma coisa e por isso tem
+outro ícone e outro texto: um **filtra o que está no menu**, o outro **busca conteúdo**.
+ClickUp tem os dois ("Search your Home Sidebar" além da busca global) e o Slack também
+(filtro de barra lateral com correspondência aproximada).
+
+O "talvez" dela era justificado, e a resposta é sim: com teto de cinco categorias na seção,
+sem filtro a pessoa não tem como alcançar pelo nome o que está fora do recorte sem abrir a
+camada de todas. O filtro procura em **todas** as categorias, não só nas cinco visíveis.
+
+**O painel de configurações também ganhou o seu**, filtrando os 23 itens.
+
+#### 2. "Seções" não era a melhor ideia. Ela estava certa.
+
+O balde `Seções` existia só no modelo de trilha, e agrupava por **mecanismo** ("são
+seções") em vez de por assunto. É o mesmo vício que a pesquisa de UX aponta em
+"Menu automático" (**S1-F4**): nome que descreve o mecanismo em vez do efeito.
+
+- **Na barra única o problema nunca existiu**: `Conhecimento` e `Comercial` sempre
+  apareceram com o nome que o administrador deu. Não há balde.
+- **Na trilha, cada seção virou um ícone próprio**, como o Teams e o monday fazem com app
+  fixado pelo administrador.
+
+E isso **expôs o custo do modelo de trilha**, que é informação útil: a trilha passa a crescer
+com o número de seções do workspace, e os rótulos dos ícones já truncam com dois
+("Conhecim...", "Configuraç..."). O problema de volume mudou de lugar, não desapareceu. É
+mais um argumento para a barra única.
+
+#### 3. As quatro telas novas entraram
+
+| Tela | Onde ficou |
+|---|---|
+| Documentos (arquivos do workspace) | destino solto, junto de Início, Tarefas, Agenda e Spaceflows |
+| Dashboard de tarefas | seção `Análise`, recolhida por padrão |
+| Dashboard de dados | seção `Análise` |
+| Meus relatórios | seção `Análise` |
+
+Todas com selo **Em breve**, porque ainda não existem no develop.
+
+**A premissa, declarada:** agrupei as três de análise em vez de soltá-las. Solto, cada uma
+custa uma linha permanente; na seção recolhida, as três custam uma. **Se a ideia for que elas
+fiquem sempre visíveis, é só abrir a seção por padrão**, e aí custam quatro.
+
+**O princípio que vale para o futuro:** toda coleção que cresce usa a mesma mecânica dos
+favoritos, do teto e do "ver todas". Vale hoje para categorias, e vale para dashboards se
+eles virarem lista que o usuário cria. Isso está na pergunta em aberto 6.
+
+**Custo da rodada:** quatro telas novas entraram por **duas linhas** de menu, porque a seção
+recolhe. No menu de hoje elas custariam quatro linhas fixas, em cima das 31.
+
+#### 4. O editor de menus, com as regras de encaixe
+
+`Configurações › Interface › Menus` agora abre o editor, e ele faz o que ela pediu:
+
+- **escolher o tipo da tela**: os **13 tipos** que o produto já tem em `Interface › Telas`,
+  de `Arquivos` a `Triagem`, num seletor por item;
+- **reordenar**, com as setas, dentro do mesmo pai;
+- **reagrupar**, com `Mover para`;
+- **recusar o que quebra a lógica**, com o motivo na tela e no toast.
+
+As quatro regras, tiradas do modelo que o produto já tem (seção tem itens, item é tela,
+destino nativo é folha):
+
+| # | Regra | Mensagem |
+|---|---|---|
+| R1 | Destino nativo é folha | "Tela nativa não recebe item dentro. Solte dentro de uma seção." |
+| R2 | Só dois níveis | "O menu tem dois níveis. Seção não entra dentro de seção." |
+| R3 | Categoria só na seção Categorias | "Categoria só entra na seção Categorias." |
+| R4 | A seção Categorias só aceita categoria | "A seção Categorias só aceita categoria." |
+
+O exemplo dela, categoria dentro de Tarefas, cai na R1. Evidência em
+[`evidencias/editor-regras-de-encaixe.gif`](evidencias/editor-regras-de-encaixe.gif).
+
+**Decisão de desenho:** o destino inválido **aparece na lista** e é recusado com o motivo,
+em vez de ser escondido. Esconder deixa a pessoa sem entender por que não dá; recusar com o
+motivo ensina a regra na primeira tentativa.
+
+O editor também avisa quando o tipo escolhido **pede categoria e não tem** (Consultas,
+Requisições, Meus Itens, Triagem e Consultas por Grupo), que é a regra que a documentação de
+Telas descreve.
+
+#### 5. O avatar saiu do rodapé da barra
+
+Com o avatar na barra de cima, repetir nome e cargo no rodapé era altura gasta duas vezes.
+Saiu, e os 44 px pagaram quase tudo o que as telas novas custaram.
+
+**Medido depois de tudo:** o menu continua cabendo sem rolagem, com as cinco telas nativas,
+os três favoritos, as cinco categorias, o "ver todas" e as três seções recolhidas.
+
+**O que foi descartado nesta rodada:**
+
+- **`Settings` na barra de cima**, como o Jira novo faz. Mudaria o endereço de quem já sabe
+  clicar em Configurações no menu lateral (regra 16). Fica no rodapé da barra;
+- **arrastar para reordenar.** As setas e o `Mover para` resolvem, são acessíveis pelo
+  teclado e não pedem biblioteca fora do Nuxt UI (regra 3). Arrastar é o que o dev deve
+  implementar por cima disso, e está declarado como maquete.
 
 ### Rodada 2 · 17/09/2026
 
