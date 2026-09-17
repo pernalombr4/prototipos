@@ -3,10 +3,10 @@ import {
   workspaces,
   workspaceUnico,
   usuario,
-  tempoRelativo,
   corDoPapel,
   type Workspace,
 } from './mocks'
+import { textos } from './textos'
 import { type EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import ModalCriarWorkspace from './_ModalCriarWorkspace.vue'
 
@@ -25,6 +25,18 @@ definePageMeta({
 })
 
 const toast = useToast()
+const t = useTextos(textos)
+
+/** Tempo relativo no idioma corrente. */
+function tempoRelativo(minutos: number | null): string {
+  if (minutos === null) return t.value.nuncaEntrou
+  if (minutos < 60) return t.value.haMinutos(minutos)
+  const horas = Math.round(minutos / 60)
+  if (horas < 24) return t.value.haHoras(horas)
+  const dias = Math.round(horas / 24)
+  if (dias < 30) return t.value.haDias(dias)
+  return t.value.haMeses(Math.round(dias / 30))
+}
 
 /* ------------------------------------------------------------------
    Andaime de protótipo: o seletor de estados do rodapé NÃO é parte da
@@ -93,9 +105,9 @@ const listados = computed(() => {
 })
 
 const abas = computed(() => [
-  { label: `Todos (${visiveis.value.length})`, value: 'todos' },
-  { label: `Favoritos (${disponiveis.value.filter(w => ehFavorito(w)).length})`, value: 'favoritos' },
-  { label: `Recentes (${disponiveis.value.filter(w => w.ultimoAcessoMin !== null).length})`, value: 'recentes' },
+  { label: t.value.todos(visiveis.value.length), value: 'todos' },
+  { label: t.value.favoritos(disponiveis.value.filter(w => ehFavorito(w)).length), value: 'favoritos' },
+  { label: t.value.recentes(disponiveis.value.filter(w => w.ultimoAcessoMin !== null).length), value: 'recentes' },
 ])
 
 /* -------- identidade visual por workspace --------
@@ -117,13 +129,13 @@ function corDoWorkspace(w: Workspace) {
 }
 
 /* -------- visualização em lista: EnTable, o componente do produto -------- */
-const colunasDaLista: EnTableColumn[] = [
-  { key: 'name', label: 'Workspace' },
-  { key: 'description', label: 'Descrição' },
-  { key: 'papel', label: 'Papel' },
-  { key: 'ultimoAcessoMin', label: 'Último acesso', sortable: true },
+const colunasDaLista = computed<EnTableColumn[]>(() => [
+  { key: 'name', label: t.value.colunaWorkspace },
+  { key: 'description', label: t.value.colunaDescricao },
+  { key: 'papel', label: t.value.colunaPapel },
+  { key: 'ultimoAcessoMin', label: t.value.colunaUltimoAcesso, sortable: true },
   { key: 'acoes', label: '', align: 'right' },
-]
+])
 
 /* ---------------------------- ações (maquete) ---------------------------- */
 const entrando = ref<number | null>(null)
@@ -133,8 +145,8 @@ function entrar(w: Workspace) {
   setTimeout(() => {
     entrando.value = null
     toast.add({
-      title: `Entrando em ${w.name}`,
-      description: 'No produto, a pessoa já estaria dentro do workspace.',
+      title: t.value.entrandoEm(w.name),
+      description: t.value.entrandoDescricao,
       icon: 'i-lucide-log-in',
       color: 'primary',
     })
@@ -149,12 +161,12 @@ function alternarFavorito(w: Workspace) {
 
 function aceitar(w: Workspace) {
   convitesAceitos.value.push(w.id)
-  toast.add({ title: `Convite de ${w.name} aceito`, icon: 'i-lucide-check', color: 'success' })
+  toast.add({ title: t.value.conviteAceito(w.name), icon: 'i-lucide-check', color: 'success' })
 }
 
 function recusar(w: Workspace) {
   convitesRecusados.value.push(w.id)
-  toast.add({ title: `Convite de ${w.name} recusado`, icon: 'i-lucide-x', color: 'neutral' })
+  toast.add({ title: t.value.conviteRecusado(w.name), icon: 'i-lucide-x', color: 'neutral' })
 }
 
 function tentarDeNovo() {
@@ -171,8 +183,8 @@ function abrirCriacao() {
 
 function workspaceCriado(nome: string) {
   toast.add({
-    title: `Workspace "${nome}" criado`,
-    description: 'No produto, a pessoa entraria agora no workspace recém-criado.',
+    title: t.value.criadoTitulo(nome),
+    description: t.value.criadoDescricao,
     icon: 'i-lucide-check',
     color: 'success',
   })
@@ -185,7 +197,7 @@ function workspaceCriado(nome: string) {
       <UContainer class="flex h-14 items-center justify-between">
         <span class="text-sm font-medium text-muted">ENSPACE</span>
         <div class="flex items-center gap-3">
-          <UButton icon="i-lucide-life-buoy" label="Suporte" color="neutral" variant="ghost" size="sm" />
+          <UButton icon="i-lucide-life-buoy" :label="t.suporte" color="neutral" variant="ghost" size="sm" />
           <UAvatar :text="usuario.iniciais" size="sm" />
         </div>
       </UContainer>
@@ -196,24 +208,24 @@ function workspaceCriado(nome: string) {
       <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div class="animate-[entrada_0.4s_ease-out_both]">
           <p class="text-sm text-muted">
-            Olá, {{ usuario.nome.split(' ')[0] }}
+            {{ t.saudacao(usuario.nome.split(' ')[0]!) }}
           </p>
           <h1 class="mt-1 text-2xl font-bold tracking-tight text-highlighted sm:text-3xl">
-            Escolha um workspace para entrar
+            {{ t.titulo }}
           </h1>
           <p class="mt-2 max-w-2xl text-muted">
-            Workspace é o espaço da sua empresa no ENSPACE. É
-            <strong class="text-highlighted">dentro</strong> de um deles que o seu trabalho
-            acontece.
+            {{ t.explicacaoAntes
+            }}<strong class="text-highlighted">{{ t.explicacaoDestaque }}</strong>{{
+              t.explicacaoDepois }}
           </p>
 
         </div>
 
         <!-- Atalho no topo, como sempre esteve. Secundário no peso, não no
              endereço: quem precisa, encontra onde já procurava. -->
-        <UTooltip text="Cria um workspace vazio, só com você dentro.">
+        <UTooltip :text="t.criarTooltip">
           <UButton
-            label="Criar workspace"
+            :label="t.criarWorkspace"
             icon="i-lucide-plus"
             color="neutral"
             variant="outline"
@@ -230,10 +242,10 @@ function workspaceCriado(nome: string) {
         icon="i-lucide-triangle-alert"
         color="error"
         variant="subtle"
-        title="Não foi possível carregar seus workspaces"
-        description="A conexão falhou. Seus workspaces continuam lá. É só tentar de novo."
+        :title="t.erroTitulo"
+        :description="t.erroDescricao"
         :ui="{ title: 'font-bold' }"
-        :actions="[{ label: 'Tentar de novo', color: 'error', variant: 'solid', onClick: tentarDeNovo }]"
+        :actions="[{ label: t.tentarDeNovo, color: 'error', variant: 'solid', onClick: tentarDeNovo }]"
       />
 
       <!-- Carregando -->
@@ -259,12 +271,12 @@ function workspaceCriado(nome: string) {
             icon="i-lucide-mail-open"
             color="secondary"
             variant="subtle"
-            :title="`${convite.convidadoPor} convidou você para ${convite.name}`"
-            description="Aceite para entrar neste workspace."
+            :title="t.conviteTitulo(convite.convidadoPor!, convite.name)"
+            :description="t.conviteDescricao"
             :ui="{ title: 'font-bold' }"
             :actions="[
-              { label: 'Aceitar convite', color: 'secondary', variant: 'solid', onClick: () => aceitar(convite) },
-              { label: 'Recusar', color: 'neutral', variant: 'ghost', onClick: () => recusar(convite) },
+              { label: t.aceitarConvite, color: 'secondary', variant: 'solid', onClick: () => aceitar(convite) },
+              { label: t.recusar, color: 'neutral', variant: 'ghost', onClick: () => recusar(convite) },
             ]"
           />
         </TransitionGroup>
@@ -275,8 +287,8 @@ function workspaceCriado(nome: string) {
           class="mb-8 animate-[entrada_0.45s_ease-out_both] rounded-xl border border-default bg-elevated/40 p-5 transition-shadow hover:shadow-md sm:p-6"
           style="animation-delay: 80ms"
         >
-          <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-dimmed">
-            {{ estado === 'unico' ? 'Seu workspace' : 'Continue de onde você parou' }}
+          <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
+            {{ estado === 'unico' ? t.seuWorkspace : t.continueDeOndeParou }}
           </p>
           <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex min-w-0 items-center gap-4">
@@ -293,7 +305,7 @@ function workspaceCriado(nome: string) {
               </div>
             </div>
             <UButton
-              :label="`Entrar em ${ultimo.name}`"
+              :label="t.entrarEm(ultimo.name)"
               icon="i-lucide-log-in"
               size="lg"
               :loading="entrando === ultimo.id"
@@ -312,7 +324,7 @@ function workspaceCriado(nome: string) {
               <UInput
                 v-model="busca"
                 icon="i-lucide-search"
-                placeholder="Buscar workspace"
+                :placeholder="t.buscarWorkspace"
                 size="sm"
                 class="w-full sm:w-56"
               />
@@ -324,7 +336,7 @@ function workspaceCriado(nome: string) {
                   square
                   :color="visual === 'cards' ? 'primary' : 'neutral'"
                   :variant="visual === 'cards' ? 'soft' : 'ghost'"
-                  aria-label="Ver em cards"
+                  :aria-label="t.verEmCards"
                   @click="visual = 'cards'"
                 />
                 <UButton
@@ -333,7 +345,7 @@ function workspaceCriado(nome: string) {
                   square
                   :color="visual === 'lista' ? 'primary' : 'neutral'"
                   :variant="visual === 'lista' ? 'soft' : 'ghost'"
-                  aria-label="Ver em lista"
+                  :aria-label="t.verEmLista"
                   @click="visual = 'lista'"
                 />
               </div>
@@ -375,14 +387,14 @@ function workspaceCriado(nome: string) {
                 <div class="flex items-center gap-1.5">
                   <UBadge
                     v-if="estaPendente(w)"
-                    label="Convite pendente"
+                    :label="t.convitePendente"
                     color="secondary"
                     variant="subtle"
                     size="sm"
                   />
                   <UBadge
                     v-else
-                    :label="w.papel"
+                    :label="t.papeis[w.papel]"
                     :color="corDoPapel[w.papel]"
                     variant="subtle"
                     size="sm"
@@ -396,8 +408,8 @@ function workspaceCriado(nome: string) {
                     :color="ehFavorito(w) ? 'warning' : 'neutral'"
                     :class="ehFavorito(w)
                       ? 'text-warning'
-                      : 'text-dimmed transition-colors hover:text-warning'"
-                    :aria-label="ehFavorito(w) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+                      : 'text-muted transition-colors hover:text-warning'"
+                    :aria-label="ehFavorito(w) ? t.removerDosFavoritos : t.adicionarAosFavoritos"
                     @click="alternarFavorito(w)"
                   />
                 </div>
@@ -423,25 +435,23 @@ function workspaceCriado(nome: string) {
                   v-if="estaPendente(w) || w.description"
                   class="mt-1 line-clamp-2 text-sm text-muted"
                 >
-                  {{ estaPendente(w)
-                    ? `${w.convidadoPor} convidou você para este workspace`
-                    : w.description }}
+                  {{ estaPendente(w) ? t.conviteCurto(w.convidadoPor!) : w.description }}
                 </p>
               </div>
 
               <!-- rodapé ancorado: meta à esquerda, a ação à direita -->
               <div class="mt-auto flex items-end justify-between gap-2 pt-4">
-                <p class="text-xs text-dimmed">
-                  <template v-if="estaPendente(w)">Aceite para entrar</template>
+                <p class="text-xs text-muted">
+                  <template v-if="estaPendente(w)">{{ t.aceiteParaEntrar }}</template>
                   <template v-else>
-                    {{ w.members_count }} pessoas · {{ tempoRelativo(w.ultimoAcessoMin).replace('Você esteve aqui ', '').replace('Você ainda não entrou aqui', 'nunca acessado') }}
+                    {{ t.pessoas(w.members_count ?? 0) }} · {{ tempoRelativo(w.ultimoAcessoMin) }}
                   </template>
                 </p>
 
                 <!-- Convite tem duas ações de peso igual: aqui botão é o certo -->
                 <div v-if="estaPendente(w)" class="relative z-10 flex items-center gap-2">
-                  <UButton label="Aceitar" size="sm" color="secondary" @click="aceitar(w)" />
-                  <UButton label="Recusar" size="sm" color="neutral" variant="ghost" @click="recusar(w)" />
+                  <UButton :label="t.aceitar" size="sm" color="secondary" @click="aceitar(w)" />
+                  <UButton :label="t.recusar" size="sm" color="neutral" variant="ghost" @click="recusar(w)" />
                 </div>
 
                 <!-- Uma ação principal: vira afordância dentro do próprio alvo -->
@@ -450,7 +460,7 @@ function workspaceCriado(nome: string) {
                   class="pointer-events-none flex shrink-0 items-center gap-1 text-sm font-medium transition-colors"
                   :class="entrando === w.id ? 'text-primary' : 'text-muted group-hover:text-primary'"
                 >
-                  {{ entrando === w.id ? 'Entrando…' : 'Entrar' }}
+                  {{ entrando === w.id ? t.entrandoEm('').trim() + '…' : t.entrar }}
                   <UIcon
                     :name="entrando === w.id ? 'i-lucide-loader-circle' : 'i-lucide-arrow-right'"
                     class="size-4 transition-transform duration-200"
@@ -470,8 +480,8 @@ function workspaceCriado(nome: string) {
             :rows="listados"
             :empty-state="{
               icon: 'i-lucide-search-x',
-              title: 'Nenhum workspace encontrado',
-              description: 'Confira o nome, ou peça acesso a quem administra o ENSPACE na sua empresa.',
+              title: t.buscaVaziaTitulo(busca),
+              description: t.buscaVaziaDescricao,
             }"
             class="animate-[entrada_0.3s_ease-out_both]"
             @row-click="(row: Workspace) => !estaPendente(row) && entrar(row)"
@@ -496,7 +506,7 @@ function workspaceCriado(nome: string) {
                 />
                 <UBadge
                   v-if="estaPendente(row)"
-                  label="Convite pendente"
+                  :label="t.convitePendente"
                   color="secondary"
                   variant="subtle"
                   size="sm"
@@ -508,15 +518,15 @@ function workspaceCriado(nome: string) {
             <template #cell-description="{ row }">
               <span class="text-muted">
                 {{ estaPendente(row)
-                  ? `${row.convidadoPor} convidou você`
-                  : (row.description || `${row.members_count} pessoas`) }}
+                  ? t.conviteCurto(row.convidadoPor!)
+                  : (row.description || t.pessoas(row.members_count ?? 0)) }}
               </span>
             </template>
 
             <template #cell-papel="{ row }">
               <UBadge
                 v-if="!estaPendente(row)"
-                :label="row.papel"
+                :label="t.papeis[row.papel]"
                 :color="corDoPapel[row.papel]"
                 variant="subtle"
                 size="sm"
@@ -525,19 +535,19 @@ function workspaceCriado(nome: string) {
 
             <template #cell-ultimoAcessoMin="{ row }">
               <span class="text-muted">
-                {{ estaPendente(row) ? 'Aceite para entrar' : tempoRelativo(row.ultimoAcessoMin) }}
+                {{ estaPendente(row) ? t.aceiteParaEntrar : tempoRelativo(row.ultimoAcessoMin) }}
               </span>
             </template>
 
             <template #cell-acoes="{ row }">
               <div class="flex items-center justify-end gap-2">
                 <template v-if="estaPendente(row)">
-                  <UButton label="Aceitar" size="sm" color="secondary" @click.stop="aceitar(row)" />
-                  <UButton label="Recusar" size="sm" color="neutral" variant="ghost" @click.stop="recusar(row)" />
+                  <UButton :label="t.aceitar" size="sm" color="secondary" @click.stop="aceitar(row)" />
+                  <UButton :label="t.recusar" size="sm" color="neutral" variant="ghost" @click.stop="recusar(row)" />
                 </template>
                 <UButton
                   v-else
-                  label="Entrar"
+                  :label="t.entrar"
                   size="sm"
                   color="neutral"
                   variant="subtle"
@@ -552,8 +562,8 @@ function workspaceCriado(nome: string) {
             v-if="!listados.length && busca"
             class="animate-[entrada_0.3s_ease-out_both]"
             icon="i-lucide-search-x"
-            :title="`Nenhum workspace com &quot;${busca}&quot;`"
-            description="Confira o nome. Se ainda não achar, peça acesso a quem administra o ENSPACE na sua empresa."
+            :title="t.buscaVaziaTitulo(busca)"
+            :description="t.buscaVaziaDescricao"
           />
         </section>
 
@@ -562,9 +572,9 @@ function workspaceCriado(nome: string) {
           v-if="estado === 'vazio' && !pendentes.length"
           class="animate-[entrada_0.3s_ease-out_both]"
           icon="i-lucide-door-closed"
-          title="Você ainda não faz parte de nenhum workspace"
-          description="Quem administra o ENSPACE na sua empresa precisa convidar você. Se recebeu um convite por e-mail, abra o link que veio nele."
-          :actions="[{ label: 'Criar um workspace', color: 'primary', onClick: abrirCriacao }]"
+          :title="t.semWorkspaceTitulo"
+          :description="t.semWorkspaceDescricao"
+          :actions="[{ label: t.criarUmWorkspace, color: 'primary', onClick: abrirCriacao }]"
         />
       </template>
     </UContainer>
@@ -575,7 +585,7 @@ function workspaceCriado(nome: string) {
     <!-- ANDAIME DE PROTÓTIPO — não faz parte da proposta -->
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">
       <UContainer class="flex flex-wrap items-center gap-2 py-3">
-        <span class="mr-1 text-xs font-semibold uppercase tracking-wider text-dimmed">
+        <span class="mr-1 text-xs font-semibold uppercase tracking-wider text-muted">
           Protótipo · estado
         </span>
         <UButton
@@ -589,8 +599,10 @@ function workspaceCriado(nome: string) {
           @click="estado = e.valor"
         />
 
-        <span class="ml-auto flex flex-wrap items-center gap-2">
-          <span class="text-xs font-semibold uppercase tracking-wider text-dimmed">
+        <ControlesDePrototipo class="ml-auto" />
+
+        <span class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-muted">
             Por trás
           </span>
           <PainelDeContexto

@@ -58,6 +58,14 @@ const corDoStatus = {
 <template>
   <UContainer class="py-12">
     <div class="mb-10">
+      <!--
+        A chave de tema também aqui: o índice é a primeira tela que alguém vê,
+        e quem quer conferir o escuro não deveria ter que entrar num protótipo
+        para achar o controle.
+      -->
+      <div class="mb-4 flex justify-end">
+        <ControlesDePrototipo />
+      </div>
       <h1 class="text-3xl font-bold text-highlighted">
         Protótipos ENSPACE
       </h1>

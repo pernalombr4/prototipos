@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { localidades, templates, type Template } from './mocks'
+import { textos } from './textos'
 import { biblioteca, curadoria, totalDeIcones } from './icones'
 
 /**
@@ -16,6 +17,8 @@ import { biblioteca, curadoria, totalDeIcones } from './icones'
  * ajuste opcional com bom padrão.
  */
 const aberto = defineModel<boolean>('open', { default: false })
+const t = useTextos(textos)
+const idioma = useIdioma()
 const emit = defineEmits<{ criado: [nome: string] }>()
 
 const passo = ref(1)
@@ -247,7 +250,7 @@ function criar() {
               class="h-1 flex-1 rounded-full transition-all duration-500"
               :class="passo >= n ? 'bg-primary' : 'bg-accented'"
             />
-            <span class="shrink-0 text-xs font-medium text-dimmed">{{ passo }} de 2</span>
+            <span class="shrink-0 text-xs font-medium text-dimmed">{{ t.criar.passoDe(passo, 2) }}</span>
           </div>
 
           <Transition
@@ -260,10 +263,10 @@ function criar() {
             <!-- ============ DECISÃO 1: o nome ============ -->
             <div v-if="passo === 1" key="1">
               <h2 class="text-xl font-bold tracking-tight text-highlighted">
-                Como esse workspace se chama?
+                {{ t.criar.comoSeChama }}
               </h2>
               <p class="mt-1.5 text-sm text-muted">
-                É o nome que a sua equipe vai procurar na lista. Dá para mudar depois.
+                {{ t.criar.nomeAjuda }}
               </p>
 
               <!-- Identidade e nome juntos: é o par que aparece no card, e o
@@ -274,7 +277,7 @@ function criar() {
                     type="button"
                     class="group/logo relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-default transition-all duration-200 hover:border-primary hover:shadow-sm"
                     :class="!form.logo && 'bg-default'"
-                    aria-label="Escolher o logo ou o ícone do workspace"
+                    :aria-label="t.criar.escolherIdentidade"
                   >
                     <img v-if="form.logo" :src="form.logo" alt="" class="size-full object-cover">
                     <span
@@ -296,7 +299,7 @@ function criar() {
                            tratam a cor como decisão de primeira classe, não como
                            consequência de ter escolhido um ícone. -->
                       <div class="mb-3 flex items-center gap-2">
-                        <span class="text-xs font-medium text-dimmed">Cor</span>
+                        <span class="text-xs font-medium text-dimmed">{{ t.criar.cor }}</span>
                         <div class="flex gap-1.5">
                           <button
                             v-for="c in paleta"
@@ -312,7 +315,7 @@ function criar() {
 
                       <div class="mb-3 flex gap-0.5 rounded-md border border-default p-0.5">
                         <UButton
-                          label="Iniciais"
+                          :label="t.criar.iniciais"
                           size="xs"
                           block
                           :color="identidade === 'iniciais' ? 'primary' : 'neutral'"
@@ -320,7 +323,7 @@ function criar() {
                           @click="removerLogo(); identidade = 'iniciais'"
                         />
                         <UButton
-                          label="Ícone"
+                          :label="t.criar.icone"
                           size="xs"
                           block
                           :color="identidade === 'icone' ? 'primary' : 'neutral'"
@@ -328,7 +331,7 @@ function criar() {
                           @click="removerLogo(); identidade = 'icone'"
                         />
                         <UButton
-                          label="Imagem"
+                          :label="t.criar.imagem"
                           size="xs"
                           block
                           :color="identidade === 'imagem' ? 'primary' : 'neutral'"
@@ -344,10 +347,10 @@ function criar() {
                           :class="[cor.fundo, cor.texto]"
                         >{{ iniciais }}</span>
                         <p class="mt-3 text-sm text-muted">
-                          As iniciais do nome, na cor escolhida.
+                          {{ t.criar.iniciaisExplicacao }}
                         </p>
                         <p class="mt-1 text-xs text-dimmed">
-                          É o que a maioria dos workspaces usa. Não precisa escolher nada.
+                          {{ t.criar.iniciaisRodape }}
                         </p>
                       </div>
 
@@ -364,10 +367,10 @@ function criar() {
                         >
                           <UIcon name="i-lucide-upload" class="size-5 text-muted" />
                           <p class="text-sm font-medium text-highlighted">
-                            Arraste o logo aqui
+                            {{ t.criar.arrasteLogo }}
                           </p>
                           <p class="text-xs text-muted">
-                            ou clique para escolher · PNG, JPG ou SVG
+                            {{ t.criar.ouClique }}
                           </p>
                         </div>
 
@@ -379,8 +382,8 @@ function criar() {
                             </p>
                           </div>
                           <div class="flex gap-2">
-                            <UButton label="Trocar" icon="i-lucide-refresh-cw" size="xs" color="neutral" variant="subtle" @click="entradaDeArquivo?.click()" />
-                            <UButton label="Remover" icon="i-lucide-trash-2" size="xs" color="neutral" variant="ghost" @click="removerLogo" />
+                            <UButton :label="t.criar.trocar" icon="i-lucide-refresh-cw" size="xs" color="neutral" variant="subtle" @click="entradaDeArquivo?.click()" />
+                            <UButton :label="t.criar.remover" icon="i-lucide-trash-2" size="xs" color="neutral" variant="ghost" @click="removerLogo" />
                           </div>
                         </div>
 
@@ -399,7 +402,7 @@ function criar() {
                           v-model="buscaIcone"
                           icon="i-lucide-search"
                           size="sm"
-                          placeholder="Buscar em 2.128 ícones: balança, caminhão…"
+                          :placeholder="t.criar.buscarIcones(totalDeIcones.toLocaleString(idioma))"
                           class="w-full"
                           :ui="{ trailing: 'pe-1' }"
                         >
@@ -410,7 +413,7 @@ function criar() {
                               square
                               variant="ghost"
                               color="neutral"
-                              aria-label="Limpar busca"
+                              :aria-label="t.criar.limparBusca"
                               @click="buscaIcone = ''"
                             />
                           </template>
@@ -419,7 +422,7 @@ function criar() {
                         <!-- Sem busca: a curadoria, que cabe na tela e resolve o caso comum -->
                         <div v-if="!buscando">
                           <p class="mb-1.5 text-xs font-medium text-dimmed">
-                            Mais usados
+                            {{ t.criar.maisUsados }}
                           </p>
                           <div class="grid grid-cols-8 gap-1">
                             <UTooltip
@@ -480,18 +483,18 @@ function criar() {
                               class="absolute inset-0 flex flex-col items-center justify-center gap-1 px-6 text-center"
                             >
                               <span class="text-sm font-medium text-highlighted">
-                                Nada para "{{ buscaIcone }}"
+                                {{ t.criar.nadaPara(buscaIcone) }}
                               </span>
                               <span class="text-xs text-muted">
-                                Tente outra palavra, ou envie o logo da empresa na aba Imagem.
+                                {{ t.criar.tenteOutra }}
                               </span>
                             </p>
                           </div>
 
                           <p class="text-xs text-dimmed">
-                            {{ iconesFiltrados.length.toLocaleString('pt-BR') }}
-                            {{ iconesFiltrados.length === 1 ? 'resultado' : 'resultados' }}
-                            de {{ totalDeIcones.toLocaleString('pt-BR') }}
+                            {{ t.criar.resultados(
+                              iconesFiltrados.length.toLocaleString(idioma),
+                              totalDeIcones.toLocaleString(idioma)) }}
                           </p>
                         </template>
                       </div>
@@ -503,13 +506,13 @@ function criar() {
                   v-model="form.nome"
                   autofocus
                   size="xl"
-                  placeholder="Jurídico Aurora, Vértice Log, RH…"
+  :placeholder="t.criar.nomePlaceholder"
                   class="flex-1"
                   :ui="{ base: 'text-base' }"
                 />
               </div>
               <p class="mt-2 h-4 text-xs" :class="nomeCurto ? 'text-error' : 'text-dimmed'">
-                {{ nomeCurto ? 'Pelo menos 3 caracteres.' : 'De 3 a 50 caracteres.' }}
+                {{ nomeCurto ? t.criar.nomeCurto : t.criar.tamanhoNome }}
               </p>
 
               <!-- Endereço: consequência do nome, mostrada como endereço mesmo -->
@@ -518,7 +521,7 @@ function criar() {
                 class="mt-5 animate-[entrada_0.3s_ease-out_both] rounded-lg border border-default bg-elevated/40 px-4 py-3"
               >
                 <p class="text-xs font-medium text-dimmed">
-                  Endereço do workspace
+                  {{ t.criar.enderecoDoWorkspace }}
                 </p>
                 <p class="mt-1 font-mono text-sm text-muted">
                   enspace.io/<span class="text-primary">{{ form.referencia || '…' }}</span>
@@ -536,8 +539,8 @@ function criar() {
                   class="size-4 transition-transform duration-200"
                   :class="detalhesAbertos && 'rotate-90'"
                 />
-                Descrição e endereço
-                <span class="font-normal text-dimmed">(opcional)</span>
+                {{ t.criar.detalhesOpcionais }}
+                <span class="font-normal text-dimmed">{{ t.criar.opcional }}</span>
               </button>
 
               <Transition
@@ -550,20 +553,20 @@ function criar() {
               >
                 <div v-if="detalhesAbertos" class="space-y-5 pt-5">
                   <UFormField
-                    label="Descrição"
-                    :description="`Uma frase dizendo para que serve. ${form.descricao.length}/140`"
+                    :label="t.criar.descricao"
+                    :description="t.criar.descricaoAjuda(form.descricao.length)"
                   >
                     <UInput
                       v-model="form.descricao"
                       maxlength="140"
-                      placeholder="Ex.: Chamados, RH e jurídico do Grupo Aurora"
+                      :placeholder="t.criar.descricaoPlaceholder"
                       class="w-full"
                     />
                   </UFormField>
 
                   <UFormField
-                    label="Endereço"
-                    description="Vem do nome. Mude só se precisar de um endereço específico."
+                    :label="t.criar.endereco"
+                    :description="t.criar.enderecoAjuda"
                   >
                     <UInput
                       v-model="form.referencia"
@@ -578,15 +581,14 @@ function criar() {
             <!-- ============ DECISÃO 2: do zero ou de um modelo ============ -->
             <div v-else key="2">
               <h2 class="text-xl font-bold tracking-tight text-highlighted">
-                Quer começar de um modelo?
+                {{ t.criar.querModelo }}
               </h2>
               <p class="mt-1.5 text-sm text-muted">
-                Um modelo já traz categorias, formulários e fluxos prontos. Dá para mudar tudo
-                depois.
+                {{ t.criar.modeloAjuda }}
               </p>
 
               <div class="mt-5 flex flex-wrap items-center gap-2">
-                <span class="text-xs font-medium text-dimmed">Modelos de</span>
+                <span class="text-xs font-medium text-dimmed">{{ t.criar.modelosDe }}</span>
                 <UButton
                   v-for="loc in localidades"
                   :key="loc.id"
@@ -615,9 +617,9 @@ function criar() {
                     <UIcon name="i-lucide-sparkles" class="size-5 text-muted" />
                   </div>
                   <div class="min-w-0">
-                    <span class="block font-medium text-highlighted">Começar do zero</span>
+                    <span class="block font-medium text-highlighted">{{ t.criar.doZero }}</span>
                     <span class="block text-sm text-muted">
-                      Um workspace vazio, montado por você. É o caminho mais comum.
+                      {{ t.criar.doZeroAjuda }}
                     </span>
                   </div>
                   <UIcon
@@ -665,10 +667,10 @@ function criar() {
                 >
                   <UIcon name="i-lucide-layout-template" class="mx-auto size-6 text-dimmed" />
                   <p class="mt-2 text-sm font-medium text-highlighted">
-                    Nenhum modelo para essa localidade
+                    {{ t.criar.semModelo }}
                   </p>
                   <p class="mt-1 text-sm text-muted">
-                    Escolha outra acima, ou comece do zero: você não perde nada.
+                    {{ t.criar.semModeloAjuda }}
                   </p>
                 </div>
               </div>
@@ -679,7 +681,7 @@ function criar() {
           <div class="mt-8 flex items-center justify-between gap-3">
             <UButton
               v-if="passo === 2"
-              label="Voltar"
+              :label="t.criar.voltar"
               icon="i-lucide-arrow-left"
               color="neutral"
               variant="ghost"
@@ -687,7 +689,7 @@ function criar() {
             />
             <UButton
               v-else
-              label="Cancelar"
+              :label="t.criar.cancelar"
               color="neutral"
               variant="ghost"
               @click="aberto = false"
@@ -695,7 +697,7 @@ function criar() {
 
             <UButton
               v-if="passo === 1"
-              label="Continuar"
+              :label="t.criar.continuar"
               trailing-icon="i-lucide-arrow-right"
               :disabled="!podeAvancar"
               class="transition-transform hover:translate-x-0.5"
@@ -703,7 +705,7 @@ function criar() {
             />
             <UButton
               v-else
-              :label="templateEscolhido ? `Criar com ${templateEscolhido.nome}` : 'Criar workspace'"
+              :label="templateEscolhido ? t.criar.criarCom(templateEscolhido.nome) : t.criar.criarWorkspace"
               icon="i-lucide-check"
               :loading="criando"
               @click="criar"
@@ -714,7 +716,7 @@ function criar() {
         <!-- ------------------------- prévia ao vivo ------------------------- -->
         <aside class="hidden border-l border-default bg-elevated/30 p-6 md:block">
           <p class="text-xs font-semibold uppercase tracking-wider text-dimmed">
-            Como vai aparecer na sua lista
+            {{ t.criar.comoVaiAparecer }}
           </p>
 
           <div class="mt-4 rounded-xl border border-default bg-default p-4 shadow-sm transition-all duration-300">
@@ -735,17 +737,17 @@ function criar() {
               </Transition>
             </div>
             <h3 class="mt-3 line-clamp-2 font-medium text-highlighted">
-              {{ form.nome || 'Nome do workspace' }}
+              {{ form.nome || t.criar.nomeDoWorkspace }}
             </h3>
             <p class="mt-1 line-clamp-2 text-sm text-muted">
-              {{ form.descricao || (templateEscolhido ? templateEscolhido.descricao : 'Sem descrição') }}
+              {{ form.descricao || (templateEscolhido ? templateEscolhido.descricao : t.criar.semDescricao) }}
             </p>
             <p class="mt-1 text-xs text-dimmed">
-              Você ainda não entrou aqui
+              {{ t.criar.aindaNaoEntrou }}
             </p>
             <div class="mt-4 flex items-center justify-between">
-              <UBadge label="Proprietário" color="primary" variant="subtle" size="sm" />
-              <UBadge label="Entrar" color="neutral" variant="subtle" size="sm" />
+              <UBadge :label="t.criar.proprietario" color="primary" variant="subtle" size="sm" />
+              <UBadge :label="t.criar.entrar" color="neutral" variant="subtle" size="sm" />
             </div>
           </div>
 
@@ -758,7 +760,7 @@ function criar() {
           >
             <div v-if="templateEscolhido" class="mt-6">
               <p class="text-xs font-semibold uppercase tracking-wider text-dimmed">
-                Já vem com
+                {{ t.criar.jaVemCom }}
               </p>
               <ul class="mt-3 space-y-2">
                 <li

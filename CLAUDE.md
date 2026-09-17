@@ -123,6 +123,23 @@ Parte 2 da spec, resumida:
 - 🚫 **Nada de componente wired, do módulo de dados (`enspace-sdk-vue/nuxt`) nem do client
   HTTP.** Tudo isso precisa de back-end.
 
+## ⛔ Tema e idioma em toda tela
+
+Todo protótipo tem alternador **claro/escuro** e **PT · EN · ES**. É a referência do dev: é no
+escuro que aparece o contraste que não passa, e em espanhol que o texto estoura o botão.
+
+```vue
+<ControlesDePrototipo />          <!-- na barra de andaime -->
+```
+
+```ts
+import { textos } from './textos' // pt-BR, en, es, na pasta do protótipo
+const t = useTextos(textos)
+```
+
+O idioma alimenta o `<EnApp locale>` no `app.vue`, então os componentes do SDK e o Nuxt UI
+trocam junto. Texto novo entra nos três idiomas na hora. Regra 35 e Parte 4 da spec.
+
 ## ⛔ Texto de interface nunca leva travessão
 
 Nem `—` nem `–`, em nada que a pessoa leia na tela: rótulo, placeholder, ajuda, descrição,

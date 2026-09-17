@@ -134,6 +134,28 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 15 — 16/09/2026 · tema e idioma, para o dev usar como referência
+
+**Pedido:** todo protótipo passa a ter alternador de tema claro/escuro e de idioma entre
+português, inglês e espanhol, *"pros devs poderem já usar como referência"*.
+
+Virou a **regra 35**, e esta tela é a primeira a cumprir.
+
+**O que entrou:**
+
+- **`<ControlesDePrototipo />`**, componente compartilhado na barra de andaime: chave de tema e
+  os três idiomas. Qualquer protótipo herda com uma linha.
+- **`textos.ts` na pasta**, com a copy nos três idiomas num `Record<Idioma, …>` tipado. A tela
+  inteira passou a ler de lá: 60 textos traduzidos, incluindo o construtor.
+- O idioma escolhido alimenta o **`<EnApp locale>`** do `enspace-sdk-ui` no `app.vue`, então os
+  componentes `En*` e o Nuxt UI trocam de idioma junto com a tela.
+- Plural, data e contagem saem do dicionário (`haDias`, `pessoas`), não concatenados no
+  template: é onde a tradução quebra primeiro.
+
+**Por que os dois juntos:** o protótipo é o que o dev abre para implementar. Se ele só existe em
+claro e em português, o contraste ruim e o rótulo estourado aparecem depois do código escrito,
+que é o lugar mais caro de descobrir.
+
 ### Rodada 14 — 16/09/2026 · o seletor refeito pelo que o mercado faz
 
 **Pedido:** *"ta ruim o seletor. veja como o mercado lida com isso."*

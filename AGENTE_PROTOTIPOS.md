@@ -486,6 +486,7 @@ app/pages/<slug>/
 ├── <outra-tela>.vue     demais telas    (rota /<slug>/<outra-tela>)
 ├── _Componente.vue      peça do protótipo — o "_" impede que vire rota
 ├── mocks.ts             o dado do protótipo — fictício, tipado, sem API
+├── textos.ts            a copy nos três idiomas: pt-BR, en, es
 ├── BRIEFING.md          demanda + o que o develop faz hoje (Fases 1 e 2)
 ├── PESQUISA.md          as 5 referências + as extras (Fase 3)
 ├── DECISOES.md          o que foi proposto, por quê, o que é maquete, as iterações
@@ -503,6 +504,34 @@ definePageMeta({
   tela: 'Lista com filtro aplicado',
 })
 ```
+
+### Tema e idioma — obrigatórios em toda tela
+
+Duas linhas resolvem, porque a peça já existe:
+
+```vue
+<!-- na barra de andaime, junto com o seletor de estados -->
+<ControlesDePrototipo />
+```
+
+```ts
+// no <script setup> da tela
+import { textos } from './textos'
+const t = useTextos(textos)
+```
+
+- **`app/components/ControlesDePrototipo.vue`** é compartilhado: traz o botão claro/escuro e
+  os três idiomas. Não reescreva por protótipo.
+- **`textos.ts`** mora na pasta do protótipo e tem as três traduções — `pt-BR`, `en`, `es` —
+  num `Record<Idioma, …>` tipado. Texto novo entra nos três **na hora**, não depois.
+- O idioma escolhido alimenta o **`<EnApp locale>`** do `enspace-sdk-ui` no `app.vue`, então os
+  componentes `En*` e o Nuxt UI trocam de idioma junto com a tela.
+- Data, número e plural saem do dicionário (`haDias`, `pessoas`), nunca concatenados no
+  template: é onde a tradução quebra primeiro.
+
+**Por que os dois, e não só o tema:** o protótipo é o que o dev abre para implementar. Se ele
+só existe em claro e em português, o dev descobre o contraste ruim e o rótulo estourado depois
+de escrever o código, que é o lugar mais caro de descobrir.
 
 Fora da pasta do protótipo, o agente só escreve em `app/components/ux/`,
 `COMPONENTES-CUSTOM.md` e `README.md`. **Não toca** nesta spec nem no `CLAUDE.md` sem pedido
@@ -651,3 +680,7 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
     navegação, a categoria vira atalho, a grade precisa ser virtualizada e a tela tem que dizer
     quantos resultados sobraram. **Mock pequeno esconde esse problema** — foi o que aconteceu
     com o seletor de ícones, desenhado para 26 quando a biblioteca tem mais de 50 mil.
+35. **⛔ TODO PROTÓTIPO TEM ALTERNADOR DE TEMA E DE IDIOMA.** Claro/escuro, e português,
+    inglês e espanhol. Não é enfeite: o protótipo é a **referência que o dev vai implementar**,
+    e é no escuro que aparece o contraste que não passa, e em espanhol que o texto estoura o
+    botão. Ver **Parte 4 → Tema e idioma**.

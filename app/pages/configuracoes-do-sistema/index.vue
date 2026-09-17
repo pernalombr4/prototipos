@@ -319,7 +319,9 @@ const estados: { valor: EstadoDemo, rotulo: string }[] = [
           @click="estado = e.valor"
         />
 
-        <span class="ml-auto flex flex-wrap items-center gap-2">
+        <ControlesDePrototipo class="ml-auto" />
+
+        <span class="flex flex-wrap items-center gap-2">
           <span class="text-xs font-semibold uppercase tracking-wider text-muted">
             Por trás
           </span>
