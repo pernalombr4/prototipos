@@ -1,5 +1,55 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 14 — 17/09/2026 — o conserto e a auditoria nas outras quatro abas
+
+**O que ela pediu, literal:**
+
+> "quebrou. talvez tenha que botar abaixo mesmo, como era antes. outro bloco só pra módulos.
+> depois de fazer isso, repita a auditoria em todas as outras abas pra tirar exageros"
+
+### O que eu quebrei na rodada 13
+
+Juntar Comportamento e Módulos em duas colunas dentro de um cartão só **estourou o layout**: a
+chave de cada linha foi parar no meio da tela, por cima da coluna vizinha.
+
+**A causa:** `LinhaDeAjuste` usa container query (`@4xl`), e container query mede **o container**,
+não a coluna. Dentro de um cartão de 1.160 px a linha entra no modo largo, reserva 40rem para o
+rótulo e joga a chave para fora da coluna de 560. Foi erro de análise meu: eu tinha medido bordas
+e fios, não o que o corte fazia com o controle.
+
+**Consertado como ela mandou:** Módulos voltou a ser bloco próprio, abaixo, com título próprio.
+
+**E um defeito que o conserto expôs:** com os cartões de novo em largura cheia, a chave parava em
+x=753 num cartão que termina em 1.233, deixando 480 px de nada à direita. Era a mesma queixa da
+rodada 2 ("quem estreita é o container, nunca a linha"). Agora a linha é `justify-between`: o
+texto para de crescer aos 40rem e **a chave vai para a borda direita**, como em toda tela de
+configuração que se preze.
+
+### A auditoria nas outras quatro abas
+
+Mesmo script, mesma largura, mesmo critério: **dentro de um cartão não entra outra moldura**, a
+menos que o conteúdo seja grade de dados (a grade do mês fecha a tabela) ou um aviso que precisa
+saltar (o "dura até" da carteira).
+
+| Aba | Molduras antes | depois | O que saiu |
+|---|---|---|---|
+| Calendário | 7 | **5** | as listas de feriados e de ocorrências perderam a moldura e ficaram só com o fio entre linhas |
+| Notificações | 8 | **3** | os três avisos nativos, a faixa da linha do tempo e as regras viraram fundo em vez de borda |
+| Dicionários | 22 | **2** | as 20 categorias eram 20 molduras dentro de uma; viraram ladrilho de fundo, clicável do mesmo jeito |
+| Cobrança | 9 | **5** | o painel do gráfico, os pedidos de recarga e o extrato perderam a borda; o aviso de saldo manteve a dele |
+| Informações Básicas | 5 | 5 | já tinha sido cortada na rodada 13 |
+
+**Das 51 molduras das cinco abas sobraram 20**, e o número de fios não subiu: o que saiu virou
+espaço ou fundo, nunca linha nova. É o que a Mews recomenda no lugar de cartão aninhado, trocar a
+borda pelo preenchimento.
+
+**O que não mexi, e por quê:** a grade do mês (as bordas fecham a tabela), o aviso de saldo na
+carteira (é o caso de destacar o que exige atenção), a moldura vermelha da zona de perigo, os
+grupos de botão segmentado (são controle, não layout) e as listas dentro de modal, onde não existe
+cartão para servir de moldura.
+
+---
+
 ## Rodada 13 — 17/09/2026 — o corte das divisões visuais
 
 **O que ela pediu, literal:**

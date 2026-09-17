@@ -392,7 +392,7 @@ async function rodarIaEmMassa() {
         >
           <button
             type="button"
-            class="w-full rounded-lg border border-default px-3 py-2.5 text-left transition-all hover:-translate-y-0.5 hover:border-accented hover:bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            class="w-full rounded-lg bg-elevated/40 px-3 py-2.5 text-left transition-all hover:-translate-y-0.5 hover:bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             @click="abrirCategoria(c.nome)"
           >
             <div class="flex items-baseline justify-between gap-3">
@@ -534,7 +534,7 @@ async function rodarIaEmMassa() {
         <template v-else>Nenhuma chave neste recorte.</template>
       </p>
 
-      <ul v-if="visiveis.length" class="divide-y divide-default overflow-hidden rounded-lg border border-default">
+      <ul v-if="visiveis.length" class="divide-y divide-default">
         <li
           v-for="chave in visiveis"
           :key="chave.id"
@@ -688,7 +688,7 @@ async function rodarIaEmMassa() {
           <template v-else>no workspace inteiro</template>, para {{ idiomaAtual?.nome }}.
         </p>
 
-        <div class="mt-4 rounded-lg border border-default bg-elevated/60 px-3 py-2.5">
+        <div class="mt-4 rounded-lg bg-elevated/60 px-3 py-2.5">
           <p class="text-sm text-muted">
             Custo estimado:
             <strong class="text-highlighted">{{ custoDaIa.toLocaleString('pt-BR') }} en-credits</strong>.

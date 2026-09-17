@@ -385,7 +385,7 @@ function periodoDaOcorrencia(o: Ocorrencia) {
           />
         </div>
 
-        <ul class="divide-y divide-default overflow-hidden rounded-lg border border-default">
+        <ul class="divide-y divide-default">
           <li
             v-for="f in lista"
             :key="f.id"
@@ -431,7 +431,7 @@ function periodoDaOcorrencia(o: Ocorrencia) {
       <div v-if="form.calendario.ocorrenciasHabilitadas">
         <ul
           v-if="form.calendario.ocorrencias.length"
-          class="divide-y divide-default overflow-hidden rounded-lg border border-default"
+          class="divide-y divide-default"
         >
           <li
             v-for="o in form.calendario.ocorrencias"

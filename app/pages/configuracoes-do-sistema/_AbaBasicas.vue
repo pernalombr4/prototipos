@@ -273,49 +273,44 @@ async function excluir() {
     </Secao>
 
     <!--
-      3. COMPORTAMENTO E MÓDULOS, NUMA MOLDURA SÓ
+      3 e 4. COMPORTAMENTO E MÓDULOS, UM ABAIXO DO OUTRO
 
-      Eram dois cartões lado a lado, e isso era moldura demais para a mesma
-      natureza de coisa: chaves de ligar/desligar que mudam o workspace inteiro.
-      Agora é um cartão com duas colunas rotuladas. A coluna continua com a
-      largura de leitura e o controle continua perto do rótulo, mas o olho
-      atravessa uma borda em vez de duas.
+      Já foram duas colunas dentro de um cartão só, na rodada 13, e quebrou: a
+      `LinhaDeAjuste` mede o CONTAINER, não a coluna. Num cartão de 1.160 px ela
+      entra no modo largo, reserva 40rem para o rótulo e manda a chave para fora
+      da coluna, por cima da coluna vizinha.
 
-      `items-start` porque as colunas têm alturas diferentes (cinco chaves
-      contra três) e esticar a menor só criaria vazio.
+      Empilhado, cada bloco tem a largura do cartão, a linha volta a funcionar e
+      Módulos continua sendo o que é: outro assunto, com outro título.
     -->
     <Secao
       id="comportamento"
-      titulo="Comportamento e módulos"
-      resumo="O que os membros veem nas telas, e quais funcionalidades opcionais o workspace liga."
+      titulo="Comportamento da interface"
+      resumo="O que os membros veem e o que eles podem fazer nas telas do workspace."
       :doc="documentacao.basicas"
       style="animation: entrada .4s ease-out both; animation-delay: 60ms"
     >
-      <div class="grid items-start gap-x-10 gap-y-6 @4xl:grid-cols-2">
-        <div>
-          <h3 class="mb-1 text-xs font-semibold uppercase tracking-wider text-muted">
-            Comportamento da interface
-          </h3>
-          <LinhaDeAjuste
-            v-for="a in comportamento"
-            :key="a.chave"
-            v-model="form.comportamento[a.chave]"
-            :ajuste="a"
-          />
-        </div>
+      <LinhaDeAjuste
+        v-for="a in comportamento"
+        :key="a.chave"
+        v-model="form.comportamento[a.chave]"
+        :ajuste="a"
+      />
+    </Secao>
 
-        <div id="modulos" class="scroll-mt-40">
-          <h3 class="mb-1 text-xs font-semibold uppercase tracking-wider text-muted">
-            Módulos
-          </h3>
-          <LinhaDeAjuste
-            v-for="m in modulos"
-            :key="m.chave"
-            v-model="form.modulos[m.chave]"
-            :ajuste="m"
-          />
-        </div>
-      </div>
+    <Secao
+      id="modulos"
+      titulo="Módulos"
+      resumo="Funcionalidades opcionais. Ligar um módulo acrescenta telas e campos ao workspace."
+      :doc="documentacao.basicas"
+      style="animation: entrada .4s ease-out both; animation-delay: 120ms"
+    >
+      <LinhaDeAjuste
+        v-for="m in modulos"
+        :key="m.chave"
+        v-model="form.modulos[m.chave]"
+        :ajuste="m"
+      />
     </Secao>
 
     <!-- 4. ZONA DE PERIGO --------------------------------------------- -->

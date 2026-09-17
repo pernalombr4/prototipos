@@ -167,7 +167,7 @@ const modelosParaSelect = computed(() =>
         <li
           v-for="(a, i) in avisosNativos"
           :key="a.rotulo"
-          class="rounded-lg border border-default bg-elevated/60 px-3 py-2.5"
+          class="rounded-lg bg-elevated/60 px-3 py-2.5"
           :style="`animation: entrada .35s ease-out both; animation-delay: ${i * 60}ms`"
         >
           <p class="text-sm font-medium text-highlighted">{{ a.rotulo }}</p>
@@ -215,7 +215,7 @@ const modelosParaSelect = computed(() =>
       <!-- linha do tempo: onde cada aviso cai em relação ao vencimento -->
       <div
         v-if="personalizado(e.chave) && regras(e.chave).length"
-        class="mt-5 rounded-lg border border-default bg-elevated/40 px-4 pb-6 pt-5"
+        class="mt-5 rounded-lg bg-elevated/40 px-4 pb-6 pt-5"
       >
         <div class="relative flex items-center">
           <!-- antes: à esquerda do vencimento, do mais distante ao mais próximo -->
@@ -267,7 +267,7 @@ const modelosParaSelect = computed(() =>
         <li
           v-for="r in regras(e.chave)"
           :key="r.id"
-          class="group flex items-center gap-3 rounded-lg border border-default px-3 py-2.5 transition-colors hover:bg-elevated"
+          class="group flex items-center gap-3 rounded-lg bg-elevated/40 px-3 py-2.5 transition-colors hover:bg-elevated"
         >
           <UIcon
             :name="r.direcao === 'antes' ? 'i-lucide-alarm-clock' : 'i-lucide-alarm-clock-off'"

@@ -193,7 +193,7 @@ function dataLonga(iso: string) {
         </div>
 
         <!-- a linha do consumo -->
-        <div class="rounded-lg border border-default bg-elevated/40 p-4">
+        <div class="rounded-lg bg-elevated/40 p-4">
           <div class="mb-2 flex items-baseline justify-between">
             <p class="text-sm font-medium text-highlighted">Consumo diário</p>
             <p class="text-xs text-muted">últimos 30 dias</p>
@@ -349,7 +349,7 @@ function dataLonga(iso: string) {
         <li
           v-for="s in solicitacoes"
           :key="s.id"
-          class="rounded-lg border border-default px-3 py-2.5 transition-colors hover:bg-elevated"
+          class="rounded-lg bg-elevated/40 px-3 py-2.5 transition-colors hover:bg-elevated"
         >
           <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span class="text-sm font-medium tabular-nums text-highlighted">
@@ -408,7 +408,7 @@ function dataLonga(iso: string) {
         </button>
       </div>
 
-      <ul class="divide-y divide-default overflow-hidden rounded-lg border border-default">
+      <ul class="divide-y divide-default">
         <li
           v-for="(t, i) in extrato"
           :key="t.id"
@@ -481,7 +481,7 @@ function dataLonga(iso: string) {
             />
           </UFormField>
 
-          <div class="rounded-lg border border-default bg-elevated/60 px-3 py-2.5 text-sm">
+          <div class="rounded-lg bg-elevated/60 px-3 py-2.5 text-sm">
             <p class="text-muted">
               Com <strong class="text-highlighted">{{ pedido.valor.toLocaleString('pt-BR') }}</strong>
               en-credits a mais, no ritmo atual, o saldo passa a durar cerca de

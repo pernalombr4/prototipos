@@ -25,10 +25,16 @@ const valor = defineModel<boolean>({ required: true })
 </script>
 
 <template>
+  <!--
+    A chave vai para a borda direita da linha, e o texto para de crescer aos
+    40rem. Com largura fixa no rótulo, a chave parava no meio do cartão largo e
+    sobrava meio metro de nada à direita, que é justamente o que ela reclamou na
+    rodada 2: quem estreita é o container, nunca a linha.
+  -->
   <div
-    class="flex items-start gap-4 border-b border-default py-3.5 last:border-0 sm:gap-6"
+    class="flex items-start justify-between gap-4 border-b border-default py-3.5 last:border-0 sm:gap-6"
   >
-    <div class="min-w-0 flex-1 @4xl:w-[40rem] @4xl:flex-none">
+    <div class="min-w-0 flex-1 @4xl:max-w-[40rem]">
       <div class="flex items-center gap-1">
         <label
           :for="`ajuste-${ajuste.chave}`"
