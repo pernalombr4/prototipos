@@ -1,5 +1,36 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 15 — 17/09/2026 — a instrução do campo foi para o "?"
+
+**O que ela pediu, literal:**
+
+> "os instructions abaixo dos campos aqui podem ser tooltips num "?" de help pra deixar a tela
+> mais limpa."
+
+Cada campo de **Padrões do workspace** carregava duas linhas de instrução permanente embaixo de
+si. É texto para uma dúvida que a pessoa tem **uma vez**: na terceira visita virou ruído, e numa
+seção que são três selects ele dobrava a altura. A seção caiu de 204 px para **160 px**.
+
+A instrução foi para um `_Ajuda.vue` novo, o mesmo "?" que as linhas de ajuste já usavam, então a
+tela passou a ter um jeito só de guardar explicação. Abre no clique **e no foco**, nunca só no
+hover.
+
+**Dois cuidados:**
+
+- O "?" vive dentro do `<label>` do campo, e clique em label ativa o controle. Sem `.prevent`, o
+  clique no "?" abriria o select junto. Conferi que não abre.
+- O link para **Dicionários**, que morava na instrução do idioma, foi junto para dentro do popover
+  e continua funcionando: clicar leva para a aba e muda a URL.
+
+**Estendi para Identidade, que ela não pediu**, porque as duas seções ficam uma embaixo da outra e
+metade da tela com instrução fixa e metade com "?" seria pior que qualquer um dos dois. Se não for
+isso, é uma linha para voltar.
+
+**O contador de caracteres da descrição ficou onde estava**: contador não é instrução, é estado, e
+muda enquanto se digita.
+
+---
+
 ## Rodada 14 — 17/09/2026 — o conserto e a auditoria nas outras quatro abas
 
 **O que ela pediu, literal:**

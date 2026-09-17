@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Ajuda from './_Ajuda.vue'
 import Secao from './_Secao.vue'
 import LinhaDeAjuste from './_LinhaDeAjuste.vue'
 import UxSeletorDeIcones from '~/components/ux/UxSeletorDeIcones.vue'
@@ -183,11 +184,27 @@ async function excluir() {
           </UFormField>
 
           <div class="grid flex-1 gap-4 sm:grid-cols-2">
-            <UFormField label="Nome" help="Aparece no topo da tela e nos e-mails enviados pelo workspace.">
+            <UFormField>
+              <template #label>
+                <span class="flex items-center gap-1">
+                  Nome
+                  <Ajuda titulo="Nome">
+                    Aparece no topo da tela e nos e-mails enviados pelo workspace.
+                  </Ajuda>
+                </span>
+              </template>
               <UInput v-model="form.identidade.name" class="w-full" />
             </UFormField>
 
-            <UFormField label="Referência" help="Faz parte do endereço e não muda depois de criado.">
+            <UFormField>
+              <template #label>
+                <span class="flex items-center gap-1">
+                  Referência
+                  <Ajuda titulo="Referência">
+                    Faz parte do endereço do workspace e não muda depois de criado.
+                  </Ajuda>
+                </span>
+              </template>
               <UInput
                 :model-value="form.identidade.reference"
                 disabled
@@ -198,16 +215,25 @@ async function excluir() {
           </div>
         </div>
 
-        <UFormField label="Descrição">
+        <!--
+          Aqui a instrução foi para o "?", mas o contador **fica**: ele não é
+          instrução, é estado, e muda enquanto se digita.
+        -->
+        <UFormField>
+          <template #label>
+            <span class="flex items-center gap-1">
+              Descrição
+              <Ajuda titulo="Descrição">
+                Para que serve este workspace. Quem entra pela primeira vez lê isto.
+              </Ajuda>
+            </span>
+          </template>
           <template #help>
-            <span class="flex justify-between gap-4">
-              <span>Para que serve este workspace. Quem entra pela primeira vez lê isto.</span>
-              <span
-                class="tabular-nums"
-                :class="(form.identidade.description?.length ?? 0) > LIMITE_DESCRICAO - 30 ? 'text-warning' : 'text-muted'"
-              >
-                {{ form.identidade.description?.length ?? 0 }} / {{ LIMITE_DESCRICAO }}
-              </span>
+            <span
+              class="block text-right tabular-nums"
+              :class="(form.identidade.description?.length ?? 0) > LIMITE_DESCRICAO - 30 ? 'text-warning' : 'text-muted'"
+            >
+              {{ form.identidade.description?.length ?? 0 }} / {{ LIMITE_DESCRICAO }}
             </span>
           </template>
           <UTextarea
@@ -240,33 +266,51 @@ async function excluir() {
       :doc="documentacao.basicas"
       style="animation: entrada .4s ease-out both; animation-delay: 40ms"
     >
+      <!--
+        A instrução de cada campo saiu de baixo dele e foi para o "?" do rótulo.
+        Eram três parágrafos permanentes para dúvidas que a pessoa tem uma vez,
+        e eles dobravam a altura de uma seção que são três selects.
+      -->
       <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        <UFormField label="Idioma padrão">
-          <template #help>
-            <span>
-              Vale para os termos nativos da interface. O que
-              <strong class="text-toned">você</strong> criou se traduz em
-              <button
-                type="button"
-                class="text-primary underline underline-offset-2 hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                @click="emit('irPara', 'dicionarios')"
-              >Dicionários</button>.
+        <UFormField>
+          <template #label>
+            <span class="flex items-center gap-1">
+              Idioma padrão
+              <Ajuda titulo="Idioma padrão">
+                Vale para os termos nativos da interface. O que
+                <strong class="text-toned">você</strong> criou se traduz em
+                <button
+                  type="button"
+                  class="text-primary underline underline-offset-2 hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  @click="emit('irPara', 'dicionarios')"
+                >Dicionários</button>.
+              </Ajuda>
             </span>
           </template>
           <USelect v-model="form.padroes.idioma" :items="idiomas" class="w-full" />
         </UFormField>
 
-        <UFormField
-          label="Fuso horário"
-          help="Base de toda data e hora do workspace: prazo, SLA e Agenda."
-        >
+        <UFormField>
+          <template #label>
+            <span class="flex items-center gap-1">
+              Fuso horário
+              <Ajuda titulo="Fuso horário">
+                Base de toda data e hora do workspace: prazo, SLA e Agenda.
+              </Ajuda>
+            </span>
+          </template>
           <USelect v-model="form.padroes.fuso" :items="fusos" class="w-full" />
         </UFormField>
 
-        <UFormField
-          label="Moeda"
-          help="Símbolo e formato dos campos de valor. Não converte o que já foi digitado."
-        >
+        <UFormField>
+          <template #label>
+            <span class="flex items-center gap-1">
+              Moeda
+              <Ajuda titulo="Moeda">
+                Símbolo e formato dos campos de valor. Não converte o que já foi digitado.
+              </Ajuda>
+            </span>
+          </template>
           <USelect v-model="form.padroes.moeda" :items="moedas" class="w-full" />
         </UFormField>
       </div>
