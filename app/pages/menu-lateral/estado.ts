@@ -34,6 +34,9 @@ function arvoreCompleta(): NoDoMenu[] {
   return clonar([...menuDoEditor, ...secoesDeModulo])
 }
 
+/** Para quem vale o que eu acabei de arrumar. */
+export type Alcance = 'todos' | 'local'
+
 export interface Recusa {
   id: string
   motivo: string
@@ -127,19 +130,70 @@ export function useMenuDoWorkspace() {
   const ordemCategorias = useState<number[]>('menu-ordem-cat', () => [])
   const ordemCategoriasRascunho = useState<number[]>('menu-ordem-cat-rascunho', () => [])
 
+  /*
+   * ============ O ALCANCE DO SALVAR (rodada 12) ============
+   *
+   * "o botao flutuante de salvar pra todos os usuarios ou só alterar
+   * localmente" (Mikaela).
+   *
+   * São duas camadas de verdade, não dois rótulos do mesmo botão:
+   *
+   *   `aoVivo`   o menu PUBLICADO, que todo mundo do workspace vê;
+   *   `pessoal`  o meu menu, por cima daquele, quando eu arrumei só para mim.
+   *
+   * A barra sempre desenha o rascunho, e o rascunho nasce do meu menu se eu
+   * tiver um, senão do menu do workspace. Publicar joga a cópia pessoal fora,
+   * de propósito: o que eu publiquei virou o de todos, inclusive o meu.
+   */
+  const pessoal = useState<NoDoMenu[] | null>('menu-pessoal', () => null)
+  const alcanceSalvo = useState<Alcance | null>('menu-alcance', () => null)
+
+  /** O que o rascunho tem de bater para "nada mudou". */
+  const base = computed(() => pessoal.value ?? aoVivo.value)
+
+  /*
+   * A BOLINHA AMARELA.
+   *
+   * Guardo os ids que a pessoa MEXEU, em vez de comparar as duas árvores e
+   * deduzir. Comparação marcaria também todo mundo que andou de lugar por
+   * tabela, e aí metade do menu ficaria amarela por causa de um arraste só.
+   * A bolinha é "isto aqui foi você", não "isto aqui está diferente".
+   */
+  const tocados = useState<string[]>('menu-tocados', () => [])
+
+  function marcarTocado(id: string) {
+    if (!tocados.value.includes(id)) tocados.value.push(id)
+  }
+
   const alterado = computed(() =>
-    JSON.stringify(aoVivo.value) !== JSON.stringify(rascunho.value)
+    JSON.stringify(base.value) !== JSON.stringify(rascunho.value)
     || JSON.stringify(ordemCategorias.value) !== JSON.stringify(ordemCategoriasRascunho.value),
   )
 
-  function salvar() {
-    aoVivo.value = clonar(rascunho.value)
+  function salvar(alcance: Alcance = 'todos') {
+    if (alcance === 'local') {
+      pessoal.value = clonar(rascunho.value)
+    }
+    else {
+      aoVivo.value = clonar(rascunho.value)
+      pessoal.value = null
+    }
     ordemCategorias.value = [...ordemCategoriasRascunho.value]
+    alcanceSalvo.value = alcance
+    tocados.value = []
   }
 
   function descartar() {
-    rascunho.value = clonar(aoVivo.value)
+    rascunho.value = clonar(base.value)
     ordemCategoriasRascunho.value = [...ordemCategorias.value]
+    tocados.value = []
+  }
+
+  /** Desfazer o "só para mim" e voltar ao menu que o workspace publicou. */
+  function voltarAoDoWorkspace() {
+    pessoal.value = null
+    rascunho.value = clonar(aoVivo.value)
+    tocados.value = []
   }
 
   /**
@@ -164,6 +218,7 @@ export function useMenuDoWorkspace() {
     if (para < 0) return
     lista.splice(para + (posicao === 'depois' ? 1 : 0), 0, arrastadoId)
     ordemCategoriasRascunho.value = lista
+    marcarTocado(`cat:${arrastadoId}`)
   }
 
   /** Onde um nó está dentro de uma árvore: os irmãos, o índice e o pai. */
@@ -246,12 +301,14 @@ export function useMenuDoWorkspace() {
     if (posicao === 'dentro') {
       alvo.filhos = alvo.filhos ?? []
       alvo.filhos.push(arrastado)
+      marcarTocado(arrastadoId)
       return { ok: true }
     }
 
     const destino = localizar(arvore, alvoId)
     if (!destino) return { ok: true }
     destino.irmaos.splice(destino.indice + (posicao === 'depois' ? 1 : 0), 0, arrastado)
+    marcarTocado(arrastadoId)
     return { ok: true }
   }
 
@@ -263,10 +320,12 @@ export function useMenuDoWorkspace() {
     if (alvo < 0 || alvo >= onde.irmaos.length) return
     const [no] = onde.irmaos.splice(onde.indice, 1)
     onde.irmaos.splice(alvo, 0, no!)
+    marcarTocado(id)
   }
 
   function adicionarSecao(no: NoDoMenu) {
     rascunho.value.push(no)
+    marcarTocado(no.id)
   }
 
   function adicionarItem(no: NoDoMenu, secaoId: string) {
@@ -274,6 +333,7 @@ export function useMenuDoWorkspace() {
     if (!secao) return
     secao.filhos = secao.filhos ?? []
     secao.filhos.push(no)
+    marcarTocado(no.id)
   }
 
   /* --------------- o que a barra lê --------------- */
@@ -321,6 +381,11 @@ export function useMenuDoWorkspace() {
     modulosAtivos,
     mostrarPersonalizados,
     alternarModulo,
+    pessoal,
+    alcanceSalvo,
+    voltarAoDoWorkspace,
+    tocados,
+    marcarTocado,
     naoLidas,
     lida,
     marcarLida,

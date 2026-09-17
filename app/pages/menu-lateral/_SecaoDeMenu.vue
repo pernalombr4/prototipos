@@ -16,6 +16,9 @@ const props = withDefaults(defineProps<{
   contador?: number
   /** Selo curto no cabeçalho, como "Em breve" quando a seção inteira ainda virá. */
   selo?: string
+  /** Bolinha amarela: esta seção foi mexida e ainda não foi salva. */
+  alterado?: boolean
+  dicaAlterado?: string
   textoRecolher: string
   textoExpandir: string
 
@@ -118,6 +121,14 @@ function aoTeclar(e: KeyboardEvent) {
         <span v-if="props.contador !== undefined" class="shrink-0 text-toned/80 normal-case tracking-normal">
           {{ props.contador }}
         </span>
+        <!-- Mexida e não salva, rodada 12. -->
+        <span
+          v-if="props.alterado"
+          class="size-2 shrink-0 rounded-full bg-warning"
+          :title="props.dicaAlterado"
+          role="img"
+          :aria-label="props.dicaAlterado"
+        />
         <!--
           O selo da seção inteira. Dito uma vez aqui, ele sai das linhas de
           dentro: três selos "Em breve" empurravam o nome de cada tela para o

@@ -73,9 +73,20 @@ export interface TextosDaTela {
   grupos: Record<string, string>
   itens: Record<string, string>
 
-  // a porta do editor, na própria barra (rodada 11)
+  // a porta do editor, na busca (rodada 11)
   editarMenu: string
   editarMenuDica: string
+
+  // salvar com alcance, e a bolinha (rodada 12)
+  naoSalvoTitulo: string
+  naoSalvoDica: string
+  salvarTodos: string
+  salvarLocal: string
+  salvoParaTodos: string
+  salvoSoParaMim: string
+  menuSoMeu: string
+  voltarAoDoWorkspace: string
+  pontoAlterado: string
 
   // ajuda: virou ícone com menu na base, na rodada 9
   ajuda: string
@@ -309,6 +320,16 @@ const ptBR: TextosDaTela = {
 
   editarMenu: 'Editar menu',
   editarMenuDica: 'Arraste aqui mesmo para reordenar. No editor você agrupa, cria e escolhe o tipo de cada tela.',
+
+  naoSalvoTitulo: 'Alterações não salvas',
+  naoSalvoDica: 'Arraste o quanto quiser. Nada muda para ninguém até você salvar.',
+  salvarTodos: 'Salvar para todos',
+  salvarLocal: 'Salvar só para mim',
+  salvoParaTodos: 'Menu salvo para todo o workspace.',
+  salvoSoParaMim: 'Menu salvo só para você.',
+  menuSoMeu: 'Este menu é só seu.',
+  voltarAoDoWorkspace: 'Voltar ao do workspace',
+  pontoAlterado: 'Mexido, ainda não salvo',
 
   ajuda: 'Ajuda',
   suporte: 'Suporte',
@@ -552,6 +573,16 @@ const en: TextosDaTela = {
   editarMenu: 'Edit menu',
   editarMenuDica: 'Drag right here to reorder. In the editor you group, create and pick each screen type.',
 
+  naoSalvoTitulo: 'Unsaved changes',
+  naoSalvoDica: 'Drag as much as you want. Nothing changes for anyone until you save.',
+  salvarTodos: 'Save for everyone',
+  salvarLocal: 'Save just for me',
+  salvoParaTodos: 'Menu saved for the whole workspace.',
+  salvoSoParaMim: 'Menu saved just for you.',
+  menuSoMeu: 'This menu is yours only.',
+  voltarAoDoWorkspace: 'Back to the workspace menu',
+  pontoAlterado: 'Moved, not saved yet',
+
   ajuda: 'Help',
   suporte: 'Support',
   releases: 'Platform updates',
@@ -793,6 +824,16 @@ const es: TextosDaTela = {
 
   editarMenu: 'Editar menú',
   editarMenuDica: 'Arrastra aquí mismo para reordenar. En el editor agrupas, creas y eliges el tipo de cada pantalla.',
+
+  naoSalvoTitulo: 'Cambios sin guardar',
+  naoSalvoDica: 'Arrastra lo que quieras. Nada cambia para nadie hasta que guardes.',
+  salvarTodos: 'Guardar para todos',
+  salvarLocal: 'Guardar solo para mí',
+  salvoParaTodos: 'Menú guardado para todo el workspace.',
+  salvoSoParaMim: 'Menú guardado solo para ti.',
+  menuSoMeu: 'Este menú es solo tuyo.',
+  voltarAoDoWorkspace: 'Volver al del workspace',
+  pontoAlterado: 'Movido, sin guardar',
 
   ajuda: 'Ayuda',
   suporte: 'Soporte',

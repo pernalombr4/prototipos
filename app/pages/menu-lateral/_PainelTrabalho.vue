@@ -59,7 +59,6 @@ const emit = defineEmits<{
   ordem: [valor: 'uso' | 'alfabetica' | 'recentes' | 'manual']
   virarManual: []
   ajuda: [rotulo: string]
-  editar: []
 }>()
 
 const menu = useMenuDoWorkspace()
@@ -159,9 +158,31 @@ function largarCategoria(alvoId: number, posicao: 'antes' | 'depois') {
   menu.reordenarCategoria(Number(quem.slice(4)), alvoId, posicao)
 }
 
-function salvarMenu() {
-  menu.salvar()
-  toast.add({ title: props.t.menuSalvo, icon: 'i-lucide-check', color: 'neutral' })
+/*
+ * ============ SALVAR, E PARA QUEM (rodada 12) ============
+ *
+ * "o botao flutuante de salvar pra todos os usuarios ou só alterar
+ * localmente" (Mikaela).
+ *
+ * Os dois botões existem porque as duas coisas existem: o menu é configuração
+ * do workspace, e ao mesmo tempo cada pessoa quer o seu do seu jeito. Sem a
+ * segunda opção, quem não é administrador não poderia arrumar nada; sem a
+ * primeira, o administrador não conseguiria consertar o menu de todo mundo.
+ *
+ * "Salvar para todos" só aparece para quem pode configurar.
+ */
+function salvarMenu(alcance: 'todos' | 'local') {
+  menu.salvar(alcance)
+  toast.add({
+    title: alcance === 'todos' ? props.t.salvoParaTodos : props.t.salvoSoParaMim,
+    icon: alcance === 'todos' ? 'i-lucide-users' : 'i-lucide-user',
+    color: 'neutral',
+  })
+}
+
+/** A bolinha amarela de uma linha: foi mexida e ainda não foi salva. */
+function tocado(id: string) {
+  return menu.tocados.value.includes(id)
 }
 
 /* ------------------------------ seções abertas ------------------------------ */
@@ -300,7 +321,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
 </script>
 
 <template>
-  <div class="flex h-full flex-col">
+  <div class="relative flex h-full flex-col">
     <!-- ============ topo: o FILTRO do menu, não a busca global ============ -->
     <div class="shrink-0 px-2 pb-1 pt-1.5">
       <UInput
@@ -360,6 +381,8 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             :rotulo="rotuloDe(no)"
             :contador="contadorDe(no)"
             :selo="no.emBreve ? props.t.emBreve : undefined"
+            :alterado="tocado(no.id)"
+            :dica-alterado="props.t.pontoAlterado"
             :ativo="props.destinoAtivo === no.id"
             :arrastavel="podeArrastarMenu"
             :saindo="arraste.arrastando.value === no.id"
@@ -451,6 +474,8 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
                   :rotulo-fixar="props.t.fixar"
                   :rotulo-desafixar="props.t.desafixar"
                   :ativo="props.categoriaAtivaId === c.id"
+                  :alterado="tocado(`cat:${c.id}`)"
+                  :dica-alterado="props.t.pontoAlterado"
                   :atraso="180 + i * 25"
                   :arrastavel="!filtrando"
                   :saindo="arraste.arrastando.value === `cat:${c.id}`"
@@ -492,9 +517,12 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             :rotulo="rotuloDe(no)"
             :selo="seloDaSecao(no)"
             :ativo="props.destinoAtivo === unicoFilho(no).id"
+            :alterado="tocado(no.id)"
+            :dica-alterado="props.t.pontoAlterado"
             :arrastavel="podeArrastarMenu"
+            aceita-dentro
             :saindo="arraste.arrastando.value === no.id"
-            :marca="marcaDe(no.id) === 'dentro' ? null : marcaDe(no.id)"
+            :marca="marcaDe(no.id)"
             :recusando="recusandoAgora"
             @selecionar="emit('destino', unicoFilho(no).id)"
             @arrastar-inicio="arraste.comecar(no.id)"
@@ -509,6 +537,8 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             v-else
             :rotulo="rotuloDe(no)"
             :selo="seloDaSecao(no)"
+            :alterado="tocado(no.id)"
+            :dica-alterado="props.t.pontoAlterado"
             :aberta="filtrando || aberta(no.id)"
             :texto-recolher="props.t.recolherSecao(rotuloDe(no))"
             :texto-expandir="props.t.expandirSecao(rotuloDe(no))"
@@ -530,6 +560,8 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
               :rotulo="rotuloDe(item)"
               :nivel="2"
               :selo="seloDaSecao(no) ? undefined : (item.emBreve ? props.t.emBreve : undefined)"
+              :alterado="tocado(item.id)"
+              :dica-alterado="props.t.pontoAlterado"
               :ativo="props.destinoAtivo === item.id"
               :atraso="i * 25"
               :arrastavel="podeArrastarMenu"
@@ -546,51 +578,79 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
           </SecaoDeMenu>
         </template>
 
+
         <!--
-          ============ A PORTA DO EDITOR (rodada 11) ============
-
-          "nao ta claro pro user ainda onde ele vai pra EDITAR os menus" (Mikaela).
-
-          Estava certo: o editor só aparecia por dentro de
-          `Configurações > Interface > Menus`, ou por acidente, no "+" quando a
-          pessoa ia CRIAR alguma coisa. Editar o que já existe não tinha porta.
-
-          Agora tem uma linha no fim da própria lista, que é onde o ClickUp, o
-          monday e o Slack põem o "customizar barra". Ela some para quem não pode
-          configurar, porque o menu é do workspace inteiro.
-
-          E a dica dela diz a outra metade: dá para arrastar aqui mesmo, sem
-          abrir nada.
+          O menu so meu, quando existe (rodada 12). Nao e botao de entrar em
+          modo de edicao: e o aviso de que o que esta na tela nao e mais o que
+          o workspace publicou, com a saida ao lado.
         -->
-        <UTooltip
-          v-if="props.podeConfigurar && !filtrando"
-          :text="props.t.editarMenuDica"
-          :content="{ side: 'right' }"
+        <div
+          v-if="menu.pessoal.value"
+          class="mt-3 flex items-center gap-1.5 rounded-lg bg-elevated/60 px-2.5 py-1.5 text-xs text-muted"
         >
-          <button
-            type="button"
-            class="mt-2 flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-muted transition-colors hover:bg-elevated hover:text-default"
-            @click="emit('editar')"
-          >
-            <UIcon name="i-lucide-list-tree" class="size-4 shrink-0" />
-            <span class="min-w-0 flex-1 truncate text-left">{{ props.t.editarMenu }}</span>
-          </button>
-        </UTooltip>
+          <UIcon name="i-lucide-user" class="size-3.5 shrink-0" />
+          <span class="min-w-0 flex-1 truncate">{{ props.t.menuSoMeu }}</span>
+          <UTooltip :text="props.t.voltarAoDoWorkspace">
+            <UButton
+              icon="i-lucide-rotate-ccw"
+              size="xs"
+              color="neutral"
+              variant="ghost"
+              :aria-label="props.t.voltarAoDoWorkspace"
+              @click="menu.voltarAoDoWorkspace()"
+            />
+          </UTooltip>
+        </div>
       </template>
     </nav>
 
-    <!-- ============ a barra de salvar, só quando há o que salvar ============ -->
-    <div
-      v-if="menu.alterado.value"
-      class="shrink-0 animate-[entrada_0.2s_ease-out_both] border-t border-default bg-primary/5 p-2"
-    >
-      <p class="mb-1.5 flex items-center gap-1.5 px-1 text-xs font-medium text-highlighted">
-        <UIcon name="i-lucide-grip-vertical" class="size-3.5 shrink-0 text-primary" />
-        {{ props.t.menuAlterado }}
-      </p>
-      <div class="flex gap-1.5">
-        <UButton :label="props.t.salvar" size="xs" color="primary" class="flex-1 justify-center" @click="salvarMenu" />
-        <UButton :label="props.t.descartar" size="xs" color="neutral" variant="subtle" @click="menu.descartar()" />
+    <!--
+      ============ O CARTÃO FLUTUANTE DE SALVAR (rodada 12) ============
+
+      Flutua sobre o fim da lista, em vez de empurrar a barra: enquanto a pessoa
+      arruma o menu, o que ela quer ver é o menu.
+
+      Duas ações, porque são dois alcances de verdade, e o de todos só aparece
+      para quem pode configurar. A terceira, descartar, fica em texto: ela é a
+      saída, não a intenção.
+    -->
+    <div v-if="menu.alterado.value" class="pointer-events-none absolute inset-x-2 bottom-14 z-30">
+      <div class="pointer-events-auto animate-[entrada_0.2s_ease-out_both] rounded-xl border border-default bg-default p-2.5 shadow-lg ring-1 ring-warning/30">
+        <p class="mb-0.5 flex items-center gap-1.5 text-xs font-semibold text-highlighted">
+          <span class="size-2 shrink-0 rounded-full bg-warning" />
+          {{ props.t.naoSalvoTitulo }}
+        </p>
+        <p class="mb-2 text-xs leading-snug text-muted">{{ props.t.naoSalvoDica }}</p>
+
+        <div class="space-y-1.5">
+          <UButton
+            v-if="props.podeConfigurar"
+            :label="props.t.salvarTodos"
+            icon="i-lucide-users"
+            size="xs"
+            color="primary"
+            block
+            @click="salvarMenu('todos')"
+          />
+          <div class="flex items-center gap-1.5">
+            <UButton
+              :label="props.t.salvarLocal"
+              icon="i-lucide-user"
+              size="xs"
+              color="neutral"
+              :variant="props.podeConfigurar ? 'subtle' : 'solid'"
+              class="flex-1 justify-center"
+              @click="salvarMenu('local')"
+            />
+            <UButton
+              :label="props.t.descartar"
+              size="xs"
+              color="neutral"
+              variant="ghost"
+              @click="menu.descartar()"
+            />
+          </div>
+        </div>
       </div>
     </div>
 

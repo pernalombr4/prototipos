@@ -357,6 +357,25 @@ function avisarAjuda(rotulo: string) {
   })
 }
 
+/*
+ * O AVISO DA PRIMEIRA MEXIDA (rodada 12).
+ *
+ * "na hora que o user mover O PRIMEIRO, deve aparecer em algum lugar um toast
+ * ou algo do tipo dizendo que tem alteracoes nao salvas" (Mikaela).
+ *
+ * Uma vez por sessao de edicao, e nao a cada arraste: o cartao flutuante fica
+ * na tela o tempo todo depois disso, entao repetir o toast seria barulho.
+ */
+watch(() => menu.alterado.value, (agora, antes) => {
+  if (!agora || antes) return
+  toast.add({
+    title: t.value.naoSalvoTitulo,
+    description: t.value.naoSalvoDica,
+    icon: 'i-lucide-circle-alert',
+    color: 'warning',
+  })
+})
+
 function emBreve() {
   toast.add({
     title: 'Maquete',
@@ -451,7 +470,6 @@ function emBreve() {
             @busca="buscando = true"
             @item="abrirItemDeConfiguracao"
             @ajuda="avisarAjuda"
-            @editar="abrirEditor(null)"
           />
           <template v-else>
           <!--
@@ -482,7 +500,6 @@ function emBreve() {
               @busca="buscando = true"
               @criar="emBreve"
               @ajuda="avisarAjuda"
-            @editar="abrirEditor(null)"
               @ordem="trocarOrdem"
               @virar-manual="virarOrdemManual"
             />

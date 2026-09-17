@@ -389,6 +389,96 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 12 · 17/09/2026
+
+**O que ela pediu**, literal:
+
+> "esse botao editar menu ta horrivel. tire ele. simplesmente os elementos do menu devem ser
+> reordenaveis, agrupaveis... etc. drag and drop e outras funçoes ativadas automaticamente
+> ali. mas na hora que o user mover O PRIMEIRO, deve aparecer em algum lugar um toast ou algo
+> do tipo dizendo que tem alterações nao salvas, com indicativo visual de bolinha amarela onde
+> foi alterado e o botao flutuante de salvar pra todos os usuarios ou só alterar localmente."
+
+O botão saiu. E ela tem razão no princípio: **não existe "modo de edição"**. O menu é editável
+o tempo todo, e o que aparece é a **consequência** de ter mexido, não a permissão para mexer.
+
+#### O que está ligado ali, sem porta nenhuma
+
+| Gesto | O que faz |
+|---|---|
+| Arrastar uma linha para cima ou para baixo | Reordena |
+| Arrastar uma linha para **o meio** de uma seção | Agrupa: ela entra na seção |
+| Arrastar para fora, entre dois de primeiro nível | Desagrupa |
+| Arrastar um cabeçalho de seção | Move a seção inteira |
+| Alt com as setas | O mesmo, sem mouse |
+
+A seção de uma tela só, que na rodada 10 virou linha simples, **voltou a aceitar que soltem
+dentro dela**: senão agrupar naquela seção seria impossível na barra. Ela usa terços, como o
+cabeçalho de seção: bordas reordenam, meio agrupa.
+
+#### A bolinha amarela é "isto aqui foi você"
+
+Guardo os ids que a pessoa **mexeu**, em vez de comparar as duas árvores e deduzir o que está
+diferente. Comparando, um arraste só deixaria amarelo também todo mundo que andou de lugar por
+tabela, e metade do menu ficaria marcada. A bolinha marca o gesto, não o efeito colateral.
+
+Verificado: mover um item deixa **uma** bolinha, na linha movida.
+
+#### O toast, uma vez
+
+Dispara na **primeira** mexida de cada sessão de edição, e não a cada arraste: depois dela o
+cartão flutuante fica na tela o tempo todo, e repetir o aviso seria barulho. O texto diz a
+coisa que tira o medo: "Arraste o quanto quiser. Nada muda para ninguém até você salvar."
+
+#### Salvar para todos, ou só para mim: são duas camadas de verdade
+
+Não são dois rótulos do mesmo botão. O `estado.ts` passou a ter duas camadas:
+
+| Camada | O que é |
+|---|---|
+| `aoVivo` | o menu **publicado**, que todo o workspace vê |
+| `pessoal` | o **meu** menu, por cima daquele, quando eu arrumei só para mim |
+
+A barra desenha o rascunho, e o rascunho nasce do meu menu se eu tiver um, senão do menu do
+workspace. **Publicar joga a cópia pessoal fora**, de propósito: o que eu publiquei virou o de
+todos, inclusive o meu.
+
+Quem tem um menu só seu vê isso dito, no fim da lista, com a saída ao lado: "Este menu é só
+seu" mais o botão de voltar ao do workspace. Menu pessoal sem caminho de volta seria uma
+armadilha, e essa linha aparece **só quando existe**, ao contrário do botão que ela mandou
+tirar.
+
+**"Salvar para todos" só aparece para quem pode configurar.** Quem não pode enxerga um botão
+só, "Salvar só para mim", e é o que sustenta a regra da rodada 11: o arraste da árvore pede
+permissão, o das categorias não, e agora existe onde guardar o resultado de quem não pode
+publicar.
+
+#### O que foi verificado no navegador
+
+- Mover um item: toast aparece, **uma** bolinha amarela na linha movida, cartão flutuante com
+  os três caminhos.
+- "Salvar só para mim": toast "Menu salvo só para você", cartão e bolinha somem, a linha
+  "Este menu é só seu" aparece.
+- "Voltar ao do workspace": a ordem publicada volta, e o aviso some. **É a prova de que as duas
+  camadas são reais**, e não dois textos diferentes para a mesma gravação.
+- "Salvar para todos": toast do workspace, e nenhuma linha de menu pessoal.
+- Em "Sem permissão", o cartão mostra só "Salvar só para mim" e "Descartar".
+
+**O que não consegui verificar daqui:** o gesto de arrastar com o mouse. Arraste HTML5 nativo
+não se dirige por script, e o caminho que ele usa é o mesmo do teclado e o mesmo do editor,
+que estão verificados. É limitação do teste, não do código.
+
+**A evidência:** [`evidencias/proposta-salvar-com-alcance.gif`](evidencias/proposta-salvar-com-alcance.gif).
+Mover uma linha, a bolinha amarela nela, o toast, o cartão flutuante, o "Salvar só para mim" e
+a linha "Este menu é só seu" que aparece no fim da lista depois disso.
+
+#### O que sobrou do editor
+
+O editor em camada continua existindo, e continua sendo onde se **cria** (seção nova, tela
+nova, tipo de tela) e onde as regras de encaixe explicam a recusa por escrito. Ele se abre por
+`Configurações > Interface > Menus`, pelo "+" e pela busca geral. O que sumiu foi a linha fixa
+no meio da barra.
+
 ### Rodada 11 · 17/09/2026
 
 **O que ela pediu**, literal:
@@ -411,6 +501,10 @@ cada hover, que é o defeito da pega que "abre espaço". Notion, Linear e ClickU
 Quem usa teclado continua com Alt mais as setas, que existe desde a rodada 5.
 
 #### A porta do editor, na própria barra
+
+> **Revogado na rodada 12.** A linha "Editar menu" saiu: "esse botao editar menu ta horrivel.
+> tire ele". O que ficou desta rodada é a pega de arraste e a entrada pela busca. A leitura
+> dela é melhor: o menu não precisa de porta, precisa de estar editável.
 
 O editor só aparecia por dois caminhos, e os dois eram tortos:
 

@@ -31,10 +31,18 @@ const props = withDefaults(defineProps<{
   arrastavel?: boolean
   /** Linha sendo arrastada agora. */
   saindo?: boolean
-  /** Onde a linha arrastada vai cair: acima ou abaixo desta. */
-  marca?: 'antes' | 'depois' | null
+  /** Onde a linha arrastada vai cair: acima, abaixo ou dentro desta. */
+  marca?: 'antes' | 'depois' | 'dentro' | null
   /** A regra do ENSPACE recusa soltar aqui. */
   recusando?: boolean
+  /**
+   * Esta linha é uma seção de uma tela só, desenhada como linha: ela continua
+   * aceitando que soltem DENTRO, senão agrupar nela seria impossível na barra.
+   */
+  aceitaDentro?: boolean
+  /** Bolinha amarela: esta linha foi mexida e ainda não foi salva. */
+  alterado?: boolean
+  dicaAlterado?: string
 }>(), {
   nivel: 1,
   atraso: 0,
@@ -45,17 +53,26 @@ const emit = defineEmits<{
   selecionar: []
   alternarEstrela: []
   arrastarInicio: []
-  arrastarSobre: [posicao: 'antes' | 'depois']
-  soltar: [posicao: 'antes' | 'depois']
+  arrastarSobre: [posicao: 'antes' | 'depois' | 'dentro']
+  soltar: [posicao: 'antes' | 'depois' | 'dentro']
   arrastarFim: []
   mover: [passo: -1 | 1]
 }>()
 
-/** Metade de cima solta antes, metade de baixo solta depois. */
-function ondeCai(e: DragEvent): 'antes' | 'depois' {
+/**
+ * Metade de cima solta antes, metade de baixo solta depois.
+ *
+ * Quando a linha aceita dentro (seção de uma tela só), são TERÇOS, como no
+ * cabeçalho de seção: as bordas reordenam e o meio agrupa.
+ */
+function ondeCai(e: DragEvent): 'antes' | 'depois' | 'dentro' {
   const alvo = e.currentTarget as HTMLElement
   const r = alvo.getBoundingClientRect()
-  return e.clientY - r.top < r.height / 2 ? 'antes' : 'depois'
+  const y = e.clientY - r.top
+  if (!props.aceitaDentro) return y < r.height / 2 ? 'antes' : 'depois'
+  if (y < r.height * 0.3) return 'antes'
+  if (y > r.height * 0.7) return 'depois'
+  return 'dentro'
 }
 
 function aoPassar(e: DragEvent) {
@@ -89,6 +106,7 @@ function aoTeclar(e: KeyboardEvent) {
     class="group relative animate-[entrada_0.22s_ease-out_both]"
     :class="[
       props.saindo ? 'opacity-40' : '',
+      props.marca === 'dentro' ? (props.recusando ? 'rounded-md bg-error/10 ring-1 ring-error' : 'rounded-md bg-primary/10 ring-1 ring-primary') : '',
       props.marca === 'antes' ? 'before:absolute before:inset-x-1 before:-top-px before:z-20 before:h-0.5 before:rounded-full' : '',
       props.marca === 'depois' ? 'after:absolute after:inset-x-1 after:-bottom-px after:z-20 after:h-0.5 after:rounded-full' : '',
       props.marca && props.recusando ? 'before:bg-error after:bg-error' : 'before:bg-primary after:bg-primary',
@@ -141,6 +159,18 @@ function aoTeclar(e: KeyboardEvent) {
       <!-- title para o nome que não cabe: "Solicitações de compra e reembolso" corta
            na largura da barra, e sem isto o nome inteiro não existe em lugar nenhum. -->
       <span class="min-w-0 flex-1 truncate text-left" :title="props.rotulo">{{ props.rotulo }}</span>
+      <!--
+        A BOLINHA AMARELA (rodada 12): esta linha foi mexida e ainda não foi
+        salva. Fica antes dos selos, na mesma coluna em que o contador já
+        mora, para não abrir mais uma faixa à direita.
+      -->
+      <span
+        v-if="props.alterado"
+        class="size-2 shrink-0 rounded-full bg-warning"
+        :title="props.dicaAlterado"
+        role="img"
+        :aria-label="props.dicaAlterado"
+      />
       <UBadge
         v-if="props.contador"
         :label="String(props.contador)"
