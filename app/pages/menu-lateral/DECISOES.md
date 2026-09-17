@@ -188,15 +188,20 @@ trabalho: no painel de configurações, com um grupo aberto por vez, o painel mo
 
 ### Ajuda
 
-| Hoje | Proposta |
+| Hoje | Proposta (rodada 9) |
 |---|---|
-| Releases | Ajuda, no rodapé |
-| Documentação | Ajuda, no rodapé |
+| Releases | Novidades da plataforma, dentro do ícone de ajuda |
+| Documentação | Documentação, dentro do ícone de ajuda |
+| (não existe) | Suporte, dentro do ícone de ajuda |
+| Falar com o BENI | **Chat de IA**, menu de primeiro nível |
 
-O grupo `Ajuda` com dois itens virou **um** item de rodapé. Notion, Stripe, Linear e
-Intercom fazem assim. É a única redução de endereço da proposta, e vale registrar como
-divergência da regra 16: o destino continua alcançável em um clique, mas deixou de ter linha
-própria no corpo do menu.
+O grupo `Ajuda` virou **um ícone** no canto de baixo da barra, com o menu abrindo ao passar o
+mouse. Notion, Stripe, Linear e Intercom fazem assim. É a única redução de endereço da
+proposta, e vale registrar como divergência da regra 16: os destinos continuam alcançáveis em
+um clique, mas deixaram de ter linha própria no corpo do menu.
+
+O BENI foi no sentido contrário: era o primeiro item desta lista e virou destino nativo, com
+o nome `Chat de IA`. Ferramenta de trabalho diário não mora no balcão de suporte.
 
 ### E a Base de Conhecimento
 
@@ -372,6 +377,121 @@ Precisam de resposta antes da rodada 2.
 ---
 
 ## Rodadas
+
+### Rodada 9 · 17/09/2026
+
+**O que ela pediu**, literal:
+
+> "analise deve ser um grande menu fora, de primeiro nivel, com os dashboards dentro"
+>
+> "ajuda em vez de ser um menu grande, deve ser um ícone de ajuda na base que com hover abre
+> um dropdown com as opções de suporte, novidades, documentação"
+>
+> "o beni deve ser 'chat de ia' no menu grande"
+>
+> "teremos tambem outros menus nativos: inbox sera um deles. com notificaçoes pra abrir"
+
+Quatro pedidos, e os quatro puxam para o mesmo lado: **o que se usa todo dia sobe, o que se
+usa quando algo trava desce.**
+
+#### Análise virou menu de primeiro nível
+
+Estava dentro do painel de `Dados`, no modelo de trilha, e no fim da barra única. Agora:
+
+- **Barra única:** seção de primeiro nível logo abaixo dos destinos nativos, **acima dos
+  favoritos e das categorias**, com os três dashboards dentro.
+- **Trilha:** ícone próprio, com painel próprio. Sai de dentro de Dados.
+
+Ela abre **fechada** por padrão: as três telas ainda não existem, e três linhas com selo "Em
+breve" abertas todo dia seria propaganda, não navegação. (Era a pergunta em aberto 8. Vira
+decisão provisória: quando os dashboards existirem, vale medir de novo.)
+
+#### A barra passou a ser desenhada na ordem da árvore
+
+Esta é a mudança estrutural da rodada, e ela nasceu do pedido acima.
+
+O gabarito da barra tinha blocos fixos: destinos, favoritos, categorias e, por último, as
+seções. Ordem de gabarito, não ordem da árvore. Enquanto as duas coincidiam ninguém via a
+diferença, mas **arrastar uma seção para cima dos destinos era um gesto que o editor aceitava
+e a barra ignorava**: a árvore mudava e o desenho ficava igual.
+
+Agora a barra percorre a árvore e desenha cada nó conforme o tipo. Foi assim que Análise
+pôde ir para onde ela pediu, e é o que faz o que se arrasta ficar onde foi solto. Verificado:
+subir Análise pelo teclado a leva para o meio dos destinos nativos, na barra, na hora.
+
+Os favoritos são o único bloco que continua fora da árvore, porque são preferência de quem
+usa e não configuração do workspace. Eles viajam grudados na seção de categorias, logo acima
+dela, porque é de lá que eles saem.
+
+#### Ajuda virou ícone na base
+
+O rodapé tinha duas linhas, Configurações e Ajuda. Agora tem uma: Configurações ocupa a
+linha e a Ajuda é um `?` na ponta direita. Passar o mouse abre **Suporte, Novidades da
+plataforma e Documentação**. No modelo de trilha o mesmo ícone fica na base, entre a lupa e o
+`+`.
+
+O rodapé é o único trecho da barra que **não rola**: cada linha gasta ali é uma linha a
+menos de navegação, todo dia, para um caminho que se usa quando algo trava.
+
+**Sobre o hover e a acessibilidade.** Hover sozinho reprova na WCAG 2.1.1: sem mouse o menu
+não existiria. Então o que está ali é um menu de verdade, com botão, `aria-haspopup`, setas e
+Esc, e **o hover é um atalho por cima disso**. Quem passa o mouse abre sem clicar; quem usa
+teclado abre com Enter; os dois chegam ao mesmo menu. O conteúdo não é portado para fora da
+barra, senão atravessar do ícone até o menu disparava o `pointerleave` e fechava na cara da
+pessoa.
+
+#### O BENI virou "Chat de IA", e subiu
+
+Era o primeiro item de Ajuda. Virou destino nativo, logo abaixo do Inbox. O nome mudou de
+marca para função: quem chega hoje no workspace não sabe o que é um BENI, e "Chat de IA" se
+lê sem tradução em pt, en e es.
+
+#### Inbox, com as notificações
+
+Destino nativo novo, logo abaixo de Início, com **contador do que não foi lido**. Ele não é
+maquete: o contador da barra e a tela leem o mesmo estado, então abrir uma notificação baixa
+o número na esquerda e "Marcar todas como lidas" o apaga. Verificado no navegador: 6, clique,
+5, marcar todas, o selo some da barra.
+
+Duas decisões dentro dele:
+
+1. **Inbox é destino, não sino no canto.** Sino guarda a notificação num popover que some ao
+   clicar fora; destino deixa voltar, reler e terminar depois. É o que o Linear, o ClickUp e
+   o Notion fazem.
+2. **O contador some no zero.** Número que nunca zera vira decoração e para de ser lido.
+
+Tudo lido não esvazia a lista: o que já foi lido continua ali, porque "eu vi isso ontem, onde
+foi mesmo?" é metade do uso de um inbox.
+
+O texto das notificações é fictício e está em português nos três idiomas, como o nome das
+categorias: é **dado** de maquete, não interface. O que troca de idioma é a moldura (título,
+contador, "há 6 minutos", botão), e isso está nos três.
+
+#### O menu nativo, agora
+
+Com dois destinos novos e Análise subindo, o modo "Só nativo" ficou assim, e **continua
+cabendo sem rolagem** (medido no navegador, transbordo zero):
+
+> Início, Inbox, Chat de IA, Tarefas, Agenda, Spaceflows, Documentos, Análise, favoritos (3),
+> Categorias (5 mais "Ver todas as 8"), e no rodapé Configurações com o ícone de ajuda.
+
+São **20 linhas** ao todo, 19 na parte que rola e uma no rodapé, contra as 31 do menu de hoje.
+E isso com três destinos que o menu de hoje nem tem.
+
+#### Um conserto que veio junto
+
+`Análise` estava na lista de painéis que podem receber uma seção nova, no formulário de
+criação. Só que nenhum painel de Análise era desenhado: escolher aquela opção criava uma
+seção que não aparecia em lugar nenhum. Saiu da lista.
+
+#### Perguntas que esta rodada abre
+
+- **Quais são os outros menus nativos que vêm junto com o Inbox?** Você disse "inbox sera um
+  deles", no plural. Cada um muda a conta de linhas.
+- **O Chat de IA abre tela ou painel lateral?** Aqui ele é destino, como os outros. Se no
+  produto ele abre por cima da tela atual, o lugar dele no menu muda.
+- **O contador do Inbox conta o quê?** Aqui é "não lido". Se for "não resolvido", como no
+  Linear, a regra de zerar muda.
 
 ### Rodada 8 · 17/09/2026
 

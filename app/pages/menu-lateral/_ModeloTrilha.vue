@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import LinhaDeMenu from './_LinhaDeMenu.vue'
 import SecaoDeMenu from './_SecaoDeMenu.vue'
+import MenuDeAjuda from './_MenuDeAjuda.vue'
 import { useMenuDoWorkspace } from './estado'
 import { gruposDeConfiguracao, workspace, type NoDoMenu, type Categoria } from './mocks'
 import type { TextosDaTela } from './textos'
@@ -41,7 +42,7 @@ const emit = defineEmits<{
   verTodas: []
   busca: []
   item: [id: string, rotulo: string]
-  ajuda: []
+  ajuda: [rotulo: string]
 }>()
 
 const menu = useMenuDoWorkspace()
@@ -51,6 +52,8 @@ function rotuloDe(no: NoDoMenu) {
   if (no.rotulo) return no.rotulo
   const mapa: Record<string, string> = {
     inicio: props.t.inicio,
+    inbox: props.t.inbox,
+    chatIa: props.t.chatIa,
     tarefas: props.t.tarefas,
     agenda: props.t.agenda,
     spaceflows: props.t.spaceflows,
@@ -75,8 +78,20 @@ const areas = computed(() => [
     bloqueada: false,
   })),
   { id: 'config', icone: 'i-lucide-settings', rotulo: props.t.configuracoes, bloqueada: !props.podeConfigurar },
-  { id: 'ajuda', icone: 'i-lucide-circle-question-mark', rotulo: props.t.ajuda, bloqueada: false },
+  /*
+   * RODADA 9: a Ajuda SAIU daqui. Ela era uma área da trilha, do mesmo tamanho
+   * de Trabalho e de Dados, para três links que se usam quando algo trava.
+   * Virou ícone na base, junto da lupa e do criar. O BENI, que era o primeiro
+   * item dela, virou "Chat de IA" e está nos destinos nativos.
+   */
 ])
+
+/** O contador do Inbox vem do estado das notificações e some no zero. */
+function contadorDe(no: NoDoMenu) {
+  if (no.chave === 'inbox') return menu.naoLidas.value || undefined
+  if (no.chave === 'tarefas') return 3
+  return undefined
+}
 
 const tituloDaArea = computed(() => areas.value.find(a => a.id === area.value)?.rotulo ?? '')
 
@@ -170,6 +185,9 @@ watch(areas, (lista) => {
         </button>
       </UTooltip>
 
+      <!-- RODADA 9: a Ajuda mora aqui agora, ícone com menu no hover. -->
+      <MenuDeAjuda :t="props.t" @escolher="r => emit('ajuda', r)" />
+
       <UDropdownMenu :items="props.itensDeCriar" :content="{ side: 'right', align: 'end' }">
         <UTooltip :text="props.t.criar" :content="{ side: 'right' }">
           <button
@@ -198,7 +216,7 @@ watch(areas, (lista) => {
               :key="d.id"
               :icone="d.icone"
               :rotulo="rotuloDe(d)"
-              :contador="d.chave === 'tarefas' ? 3 : undefined"
+              :contador="contadorDe(d)"
               :selo="d.emBreve ? props.t.emBreve : undefined"
               :ativo="props.destinoAtivo === d.id"
               :atraso="i * 25"
@@ -359,12 +377,6 @@ watch(areas, (lista) => {
           </SecaoDeMenu>
         </template>
 
-        <!-- ---------- Ajuda ---------- -->
-        <div v-else class="space-y-0.5">
-          <LinhaDeMenu icone="i-lucide-bot" :rotulo="props.t.falarComBeni" :atraso="0" @selecionar="emit('ajuda')" />
-          <LinhaDeMenu icone="i-lucide-rocket" :rotulo="props.t.releases" :atraso="25" @selecionar="emit('ajuda')" />
-          <LinhaDeMenu icone="i-lucide-book-open" :rotulo="props.t.documentacao" :atraso="50" @selecionar="emit('ajuda')" />
-        </div>
       </nav>
     </div>
   </div>

@@ -25,6 +25,8 @@ export interface TextosDaTela {
 
   // destinos fixos
   inicio: string
+  inbox: string
+  chatIa: string
   spaceflows: string
   tarefas: string
   agenda: string
@@ -71,11 +73,21 @@ export interface TextosDaTela {
   grupos: Record<string, string>
   itens: Record<string, string>
 
-  // ajuda
+  // ajuda: virou ícone com menu na base, na rodada 9
   ajuda: string
+  suporte: string
   releases: string
   documentacao: string
-  falarComBeni: string
+
+  // inbox, rodada 9
+  inboxDescricao: string
+  inboxNaoLidas: (n: number) => string
+  inboxMarcarTodas: string
+  inboxTudoLido: string
+  inboxNaoLida: string
+  haMinutos: (n: number) => string
+  haHoras: (n: number) => string
+  haDias: (n: number) => string
 
   // tela da categoria
   todosOsItens: string
@@ -101,7 +113,6 @@ export interface TextosDaTela {
   painelTarefas: string
   painelDados: string
   meusRelatorios: string
-  secaoAnalise: string
   emBreve: string
   editorAbrir: string
   editorTitulo: string
@@ -214,6 +225,8 @@ const ptBR: TextosDaTela = {
   areaSecoes: 'Seções',
 
   inicio: 'Início',
+  inbox: 'Inbox',
+  chatIa: 'Chat de IA',
   spaceflows: 'Spaceflows',
   tarefas: 'Tarefas',
   agenda: 'Agenda',
@@ -291,9 +304,18 @@ const ptBR: TextosDaTela = {
   },
 
   ajuda: 'Ajuda',
+  suporte: 'Suporte',
   releases: 'Novidades da plataforma',
   documentacao: 'Documentação',
-  falarComBeni: 'Falar com o BENI',
+
+  inboxDescricao: 'O que mudou nos itens que você segue, nas suas tarefas e nas suas requisições.',
+  inboxNaoLidas: n => (n === 1 ? '1 não lida' : `${n} não lidas`),
+  inboxMarcarTodas: 'Marcar todas como lidas',
+  inboxTudoLido: 'Nada por ler',
+  inboxNaoLida: 'Não lida',
+  haMinutos: n => (n === 1 ? 'há 1 minuto' : `há ${n} minutos`),
+  haHoras: n => (n === 1 ? 'há 1 hora' : `há ${n} horas`),
+  haDias: n => (n === 1 ? 'há 1 dia' : `há ${n} dias`),
 
   todosOsItens: 'Todos',
   configurarCategoria: 'Configurar categoria',
@@ -316,7 +338,6 @@ const ptBR: TextosDaTela = {
   painelTarefas: 'Dashboard de tarefas',
   painelDados: 'Dashboard de dados',
   meusRelatorios: 'Meus relatórios',
-  secaoAnalise: 'Análise',
   emBreve: 'Em breve',
   editorAbrir: 'Montar o menu',
   editorTitulo: 'Montar o menu',
@@ -443,6 +464,8 @@ const en: TextosDaTela = {
   areaSecoes: 'Sections',
 
   inicio: 'Home',
+  inbox: 'Inbox',
+  chatIa: 'AI chat',
   spaceflows: 'Spaceflows',
   tarefas: 'Tasks',
   agenda: 'Schedule',
@@ -520,9 +543,18 @@ const en: TextosDaTela = {
   },
 
   ajuda: 'Help',
+  suporte: 'Support',
   releases: 'Platform updates',
   documentacao: 'Documentation',
-  falarComBeni: 'Talk to BENI',
+
+  inboxDescricao: 'What changed in the items you follow, in your tasks and in your requests.',
+  inboxNaoLidas: n => (n === 1 ? '1 unread' : `${n} unread`),
+  inboxMarcarTodas: 'Mark all as read',
+  inboxTudoLido: 'Nothing to read',
+  inboxNaoLida: 'Unread',
+  haMinutos: n => (n === 1 ? '1 minute ago' : `${n} minutes ago`),
+  haHoras: n => (n === 1 ? '1 hour ago' : `${n} hours ago`),
+  haDias: n => (n === 1 ? '1 day ago' : `${n} days ago`),
 
   todosOsItens: 'All',
   configurarCategoria: 'Configure category',
@@ -545,7 +577,6 @@ const en: TextosDaTela = {
   painelTarefas: 'Task dashboard',
   painelDados: 'Data dashboard',
   meusRelatorios: 'My reports',
-  secaoAnalise: 'Analysis',
   emBreve: 'Coming soon',
   editorAbrir: 'Build the menu',
   editorTitulo: 'Build the menu',
@@ -672,6 +703,8 @@ const es: TextosDaTela = {
   areaSecoes: 'Secciones',
 
   inicio: 'Inicio',
+  inbox: 'Inbox',
+  chatIa: 'Chat de IA',
   spaceflows: 'Spaceflows',
   tarefas: 'Tareas',
   agenda: 'Agenda',
@@ -749,9 +782,18 @@ const es: TextosDaTela = {
   },
 
   ajuda: 'Ayuda',
+  suporte: 'Soporte',
   releases: 'Novedades de la plataforma',
   documentacao: 'Documentación',
-  falarComBeni: 'Hablar con BENI',
+
+  inboxDescricao: 'Lo que cambió en los ítems que sigues, en tus tareas y en tus solicitudes.',
+  inboxNaoLidas: n => (n === 1 ? '1 sin leer' : `${n} sin leer`),
+  inboxMarcarTodas: 'Marcar todas como leídas',
+  inboxTudoLido: 'Nada por leer',
+  inboxNaoLida: 'Sin leer',
+  haMinutos: n => (n === 1 ? 'hace 1 minuto' : `hace ${n} minutos`),
+  haHoras: n => (n === 1 ? 'hace 1 hora' : `hace ${n} horas`),
+  haDias: n => (n === 1 ? 'hace 1 día' : `hace ${n} días`),
 
   todosOsItens: 'Todos',
   configurarCategoria: 'Configurar categoría',
@@ -774,7 +816,6 @@ const es: TextosDaTela = {
   painelTarefas: 'Panel de tareas',
   painelDados: 'Panel de datos',
   meusRelatorios: 'Mis informes',
-  secaoAnalise: 'Análisis',
   emBreve: 'Próximamente',
   editorAbrir: 'Armar el menú',
   editorTitulo: 'Armar el menú',

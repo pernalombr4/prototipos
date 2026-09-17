@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { type EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import TelaDeModulos from './_TelaDeModulos.vue'
+import TelaDeInbox from './_TelaDeInbox.vue'
 import type { Categoria } from './mocks'
 import type { TextosDaTela } from './textos'
 
@@ -92,6 +93,12 @@ const linhas = computed(() => {
       -->
       <TelaDeModulos v-if="props.itemConfig === 'modulos'" :t="props.t" />
 
+      <!--
+        O Inbox tambem e mecanismo, nao maquete: o contador da barra e esta
+        lista leem o mesmo estado, e abrir uma notificacao baixa o numero la.
+      -->
+      <TelaDeInbox v-else-if="props.destino === 'n-inbox'" :t="props.t" />
+
       <!-- ---------------- tela de uma categoria ---------------- -->
       <div v-else-if="props.categoria" :key="props.categoria.id" class="animate-[entrada_0.25s_ease-out_both]">
         <div class="mb-4 flex items-center gap-3">
@@ -148,7 +155,7 @@ const linhas = computed(() => {
         </div>
       </div>
 
-      <p v-if="props.itemConfig !== 'modulos'" class="mt-4 text-xs text-muted">
+      <p v-if="props.itemConfig !== 'modulos' && props.destino !== 'n-inbox'" class="mt-4 text-xs text-muted">
         {{ props.t.conteudoIlustrativo }}
       </p>
     </div>

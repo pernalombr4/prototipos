@@ -17,7 +17,7 @@
  * Nada persiste: recarregar a página volta ao começo, como todo o protótipo.
  */
 
-import { menuDoEditor, secoesDeModulo, modulos, podeMover, type NoDoMenu, type TipoDeNo } from './mocks'
+import { menuDoEditor, secoesDeModulo, modulos, notificacoes, podeMover, type NoDoMenu, type TipoDeNo } from './mocks'
 
 function clonar(a: NoDoMenu[]): NoDoMenu[] {
   return JSON.parse(JSON.stringify(a))
@@ -57,6 +57,29 @@ export function useMenuDoWorkspace() {
     modulos.filter(m => m.ativoPorPadrao).map(m => m.id),
   )
   const mostrarPersonalizados = useState<boolean>('menu-personalizados', () => true)
+
+  /*
+   * AS NOTIFICAÇÕES DO INBOX (rodada 9).
+   *
+   * Moram aqui, e não dentro da tela, porque quem mostra o contador é o MENU e
+   * quem zera é a tela: se cada um tivesse a sua lista, abrir o Inbox não
+   * apagaria o número da barra, que é justamente o que ela pediu para ver.
+   */
+  const lidas = useState<string[]>('menu-notificacoes-lidas', () => [])
+
+  const naoLidas = computed(() => notificacoes.filter(n => !lidas.value.includes(n.id)).length)
+
+  function lida(id: string) {
+    return lidas.value.includes(id)
+  }
+
+  function marcarLida(id: string) {
+    if (!lidas.value.includes(id)) lidas.value.push(id)
+  }
+
+  function marcarTodasLidas() {
+    lidas.value = notificacoes.map(n => n.id)
+  }
 
   /** Um nó sem origem declarada é nativo: nativo é o padrão do produto. */
   function origemDe(n: NoDoMenu) {
@@ -298,6 +321,10 @@ export function useMenuDoWorkspace() {
     modulosAtivos,
     mostrarPersonalizados,
     alternarModulo,
+    naoLidas,
+    lida,
+    marcarLida,
+    marcarTodasLidas,
     soNativo,
     comTudo,
     modoDoMenu,

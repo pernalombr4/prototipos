@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import LinhaDeMenu from './_LinhaDeMenu.vue'
 import SecaoDeMenu from './_SecaoDeMenu.vue'
+import MenuDeAjuda from './_MenuDeAjuda.vue'
 import { useMenuDoWorkspace, useArraste } from './estado'
 import type { NoDoMenu, Categoria } from './mocks'
 import type { TextosDaTela } from './textos'
@@ -57,7 +58,7 @@ const emit = defineEmits<{
   criar: []
   ordem: [valor: 'uso' | 'alfabetica' | 'recentes' | 'manual']
   virarManual: []
-  ajuda: []
+  ajuda: [rotulo: string]
 }>()
 
 const menu = useMenuDoWorkspace()
@@ -69,6 +70,8 @@ function rotuloDe(no: NoDoMenu) {
   if (no.rotulo) return no.rotulo
   const mapa: Record<string, string> = {
     inicio: props.t.inicio,
+    inbox: props.t.inbox,
+    chatIa: props.t.chatIa,
     tarefas: props.t.tarefas,
     agenda: props.t.agenda,
     spaceflows: props.t.spaceflows,
@@ -76,6 +79,19 @@ function rotuloDe(no: NoDoMenu) {
     categorias: props.t.categorias,
   }
   return mapa[no.chave ?? ''] ?? (no.chave ?? '')
+}
+
+/**
+ * O contador de um destino.
+ *
+ * Rodada 9. O do Inbox vem do estado das notificações, o mesmo que a tela lê:
+ * abrir uma notificação baixa o número aqui. E ele SOME no zero, de propósito:
+ * número que nunca zera vira decoração e para de ser lido.
+ */
+function contadorDe(no: NoDoMenu) {
+  if (no.chave === 'inbox') return menu.naoLidas.value || undefined
+  if (no.chave === 'tarefas') return 3
+  return undefined
 }
 
 /* ------------------------------ o arraste ------------------------------ */
@@ -160,28 +176,48 @@ function casa(texto: string) {
   return texto.toLowerCase().includes(filtro.value.trim().toLowerCase())
 }
 
-const destinosVisiveis = computed(() =>
-  filtrando.value ? menu.destinos.value.filter(d => casa(rotuloDe(d))) : menu.destinos.value,
-)
 const favoritasVisiveis = computed(() => filtrando.value ? props.favoritas.filter(c => casa(c.name)) : props.favoritas)
 const categoriasVisiveis = computed(() => {
   if (!filtrando.value) return props.recorte
   return props.todas.filter(c => !c.favorita && casa(c.name))
 })
-const secoesVisiveis = computed(() => {
-  if (!filtrando.value) return menu.secoes.value
-  return menu.secoes.value
-    .map(s => ({ ...s, filhos: (s.filhos ?? []).filter(f => casa(rotuloDe(f))) }))
-    .filter(s => (s.filhos?.length ?? 0) > 0 || casa(rotuloDe(s)))
+
+/**
+ * A BARRA PASSA A SER DESENHADA NA ORDEM DA ÁRVORE (rodada 9).
+ *
+ * Antes o gabarito tinha blocos fixos: destinos, favoritos, categorias e, por
+ * último, as seções. Ordem de gabarito, não ordem da árvore. Enquanto a árvore
+ * combinava com o gabarito ninguém via a diferença, mas arrastar uma seção para
+ * cima dos destinos, ou pôr Análise antes das categorias, era um gesto que o
+ * editor aceitava e a barra ignorava.
+ *
+ * Agora a barra percorre a árvore e desenha cada nó conforme o tipo. É o que
+ * faz Análise aparecer onde ela pediu, logo abaixo dos destinos nativos, e é o
+ * que faz o que se arrasta ficar onde foi solto.
+ *
+ * Os favoritos são o único bloco que não está na árvore: eles são preferência
+ * de quem usa, não configuração do workspace. Entram grudados na seção de
+ * categorias, logo acima dela, porque é dela que eles saem.
+ */
+const nosVisiveis = computed(() => {
+  const arvore = menu.arvoreVisivel.value
+  if (!filtrando.value) return arvore
+
+  return arvore
+    .map(n => (n.tipo === 'secao'
+      ? { ...n, filhos: (n.filhos ?? []).filter(f => casa(rotuloDe(f))) }
+      : n))
+    .filter((n) => {
+      if (n.tipo === 'destino') return casa(rotuloDe(n))
+      if (n.tipo === 'secao') return (n.filhos?.length ?? 0) > 0 || casa(rotuloDe(n))
+      // A seção nativa de categorias carrega junto os favoritos.
+      return favoritasVisiveis.value.length > 0
+        || categoriasVisiveis.value.length > 0
+        || casa(rotuloDe(n))
+    })
 })
 
-const nadaNoFiltro = computed(() =>
-  filtrando.value
-  && !destinosVisiveis.value.length
-  && !favoritasVisiveis.value.length
-  && !categoriasVisiveis.value.length
-  && !secoesVisiveis.value.length,
-)
+const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length)
 </script>
 
 <template>
@@ -236,179 +272,173 @@ const nadaNoFiltro = computed(() =>
           class="animate-[entrada_0.25s_ease-out_both]"
         />
 
-        <!-- destinos nativos, arrastáveis entre si -->
-        <div v-if="destinosVisiveis.length" class="space-y-0.5">
+        <template v-for="no in nosVisiveis" :key="no.id">
+          <!-- ---------- destino nativo: folha, uma linha ---------- -->
           <LinhaDeMenu
-            v-for="(d, i) in destinosVisiveis"
-            :key="d.id"
-            :icone="d.icone"
-            :rotulo="rotuloDe(d)"
-            :contador="d.chave === 'tarefas' ? 3 : undefined"
-            :selo="d.emBreve ? props.t.emBreve : undefined"
-            :ativo="props.destinoAtivo === d.id"
-            :atraso="i * 25"
+            v-if="no.tipo === 'destino'"
+            class="mt-0.5 first:mt-0"
+            :icone="no.icone"
+            :rotulo="rotuloDe(no)"
+            :contador="contadorDe(no)"
+            :selo="no.emBreve ? props.t.emBreve : undefined"
+            :ativo="props.destinoAtivo === no.id"
             :arrastavel="!filtrando"
-            :saindo="arraste.arrastando.value === d.id"
-            :marca="marcaDe(d.id) === 'dentro' ? null : marcaDe(d.id)"
+            :saindo="arraste.arrastando.value === no.id"
+            :marca="marcaDe(no.id) === 'dentro' ? null : marcaDe(no.id)"
             :recusando="recusandoAgora"
-            @selecionar="emit('destino', d.id)"
-            @arrastar-inicio="arraste.comecar(d.id)"
-            @arrastar-sobre="p => mirar(d.id, p)"
-            @soltar="p => largar(d.id, p)"
+            @selecionar="emit('destino', no.id)"
+            @arrastar-inicio="arraste.comecar(no.id)"
+            @arrastar-sobre="p => mirar(no.id, p)"
+            @soltar="p => largar(no.id, p)"
             @arrastar-fim="arraste.terminar()"
-            @mover="p => menu.mover(d.id, p)"
+            @mover="p => menu.mover(no.id, p)"
           />
-        </div>
 
-        <!-- Favoritos: pessoal, nasce do uso, não entra no arraste do menu -->
-        <SecaoDeMenu
-          v-if="favoritasVisiveis.length"
-          :rotulo="props.t.favoritos"
-          :aberta="filtrando || aberta('favoritos')"
-          :texto-recolher="props.t.recolherSecao(props.t.favoritos)"
-          :texto-expandir="props.t.expandirSecao(props.t.favoritos)"
-          @alternar="alternar('favoritos')"
-        >
-          <LinhaDeMenu
-            v-for="(c, i) in favoritasVisiveis"
-            :key="c.id"
-            :icone="c.icon ?? 'i-lucide-folder'"
-            :rotulo="c.name"
-            :nivel="2"
-            com-estrela
-            :fixada="true"
-            :rotulo-fixar="props.t.fixar"
-            :rotulo-desafixar="props.t.desafixar"
-            :ativo="props.categoriaAtivaId === c.id"
-            :atraso="100 + i * 25"
-            @selecionar="emit('categoria', c)"
-            @alternar-estrela="emit('alternarFixar', c.id)"
-          />
-        </SecaoDeMenu>
-
-        <!-- Categorias: a seção que cresce. Ordenada por critério, não por arraste. -->
-        <SecaoDeMenu
-          v-if="!filtrando || categoriasVisiveis.length"
-          :rotulo="props.t.categorias"
-          :aberta="filtrando || aberta('categorias')"
-          :contador="props.totalDeCategorias || undefined"
-          :texto-recolher="props.t.recolherSecao(props.t.categorias)"
-          :texto-expandir="props.t.expandirSecao(props.t.categorias)"
-          @alternar="alternar('categorias')"
-        >
-          <template #acoes>
-            <UDropdownMenu :items="opcoesDeOrdem">
-              <UButton
-                icon="i-lucide-settings-2"
-                size="xs"
-                color="neutral"
-                variant="ghost"
-                :aria-label="props.t.ordenarPor"
-              />
-            </UDropdownMenu>
-          </template>
-
-          <template v-if="props.estado === 'vazio' && !filtrando">
-            <div class="mx-1 mt-1 rounded-lg border border-dashed border-default p-3">
-              <p class="text-sm font-medium text-highlighted">{{ props.t.vazioTitulo }}</p>
-              <p class="mt-1 text-xs leading-relaxed text-muted">{{ props.t.vazioDescricao }}</p>
-              <UButton
-                :label="props.t.vazioAcao"
-                icon="i-lucide-plus"
-                size="xs"
-                color="primary"
-                variant="soft"
-                class="mt-2"
-                @click="emit('criar')"
-              />
-            </div>
-          </template>
-
-          <template v-else>
-            <LinhaDeMenu
-              v-for="(c, i) in categoriasVisiveis"
-              :key="c.id"
-              :icone="c.icon ?? 'i-lucide-folder'"
-              :rotulo="c.name"
-              :nivel="2"
-              com-estrela
-              :fixada="c.favorita"
-              :rotulo-fixar="props.t.fixar"
-              :rotulo-desafixar="props.t.desafixar"
-              :ativo="props.categoriaAtivaId === c.id"
-              :atraso="180 + i * 25"
-              :arrastavel="!filtrando"
-              :saindo="arraste.arrastando.value === `cat:${c.id}`"
-              :marca="marcaDe(`cat:${c.id}`) === 'dentro' ? null : marcaDe(`cat:${c.id}`)"
-              @selecionar="emit('categoria', c)"
-              @alternar-estrela="emit('alternarFixar', c.id)"
-              @arrastar-inicio="arrastarCategoria(c.id)"
-              @arrastar-sobre="p => arraste.mirar(`cat:${c.id}`, p)"
-              @soltar="p => largarCategoria(c.id, p)"
-              @arrastar-fim="arraste.terminar()"
-            />
-
-            <!--
-              A dica de arrastar saiu da lista na rodada 7: ela ocupava duas
-              linhas permanentes para ensinar uma coisa que se aprende uma vez.
-              Quem arrasta com criterio automatico ligado recebe o aviso no
-              toast, no momento em que importa.
-            -->
-
-            <button
-              v-if="!filtrando"
-              type="button"
-              class="mt-0.5 flex w-full items-center gap-2.5 rounded-md py-1.5 pl-8 pr-2.5 text-sm font-medium text-highlighted transition-colors hover:bg-primary/10"
-              @click="emit('verTodas')"
+          <!-- ---------- a seção nativa: favoritos mais categorias ---------- -->
+          <template v-else-if="no.tipo === 'secao-nativa'">
+            <!-- Favoritos: pessoal, nasce do uso, não entra no arraste do menu -->
+            <SecaoDeMenu
+              v-if="favoritasVisiveis.length"
+              :rotulo="props.t.favoritos"
+              :aberta="filtrando || aberta('favoritos')"
+              :texto-recolher="props.t.recolherSecao(props.t.favoritos)"
+              :texto-expandir="props.t.expandirSecao(props.t.favoritos)"
+              @alternar="alternar('favoritos')"
             >
-              <UIcon name="i-lucide-layout-grid" class="size-4 shrink-0 text-primary" />
-              <span class="min-w-0 flex-1 truncate text-left">
-                {{ props.t.verTodas(props.totalDeCategorias) }}
-              </span>
-            </button>
-          </template>
-        </SecaoDeMenu>
+              <LinhaDeMenu
+                v-for="(c, i) in favoritasVisiveis"
+                :key="c.id"
+                :icone="c.icon ?? 'i-lucide-folder'"
+                :rotulo="c.name"
+                :nivel="2"
+                com-estrela
+                :fixada="true"
+                :rotulo-fixar="props.t.fixar"
+                :rotulo-desafixar="props.t.desafixar"
+                :ativo="props.categoriaAtivaId === c.id"
+                :atraso="100 + i * 25"
+                @selecionar="emit('categoria', c)"
+                @alternar-estrela="emit('alternarFixar', c.id)"
+              />
+            </SecaoDeMenu>
 
-        <!-- As seções do workspace, vindas da MESMA árvore que o editor edita. -->
-        <SecaoDeMenu
-          v-for="s in secoesVisiveis"
-          :key="s.id"
-          :rotulo="rotuloDe(s)"
-          :aberta="filtrando || aberta(s.id)"
-          :texto-recolher="props.t.recolherSecao(rotuloDe(s))"
-          :texto-expandir="props.t.expandirSecao(rotuloDe(s))"
-          :arrastavel="!filtrando"
-          :saindo="arraste.arrastando.value === s.id"
-          :marca="marcaDe(s.id)"
-          :recusando="recusandoAgora"
-          @alternar="alternar(s.id)"
-          @arrastar-inicio="arraste.comecar(s.id)"
-          @arrastar-sobre="p => mirar(s.id, p)"
-          @soltar="p => largar(s.id, p)"
-          @arrastar-fim="arraste.terminar()"
-          @mover="p => menu.mover(s.id, p)"
-        >
-          <LinhaDeMenu
-            v-for="(item, i) in (s.filhos ?? [])"
-            :key="item.id"
-            :icone="item.icone"
-            :rotulo="rotuloDe(item)"
-            :nivel="2"
-            :selo="item.emBreve ? props.t.emBreve : undefined"
-            :ativo="props.destinoAtivo === item.id"
-            :atraso="i * 25"
+            <!-- Categorias: a seção que cresce. Ordenada por critério, não por arraste. -->
+            <SecaoDeMenu
+              v-if="!filtrando || categoriasVisiveis.length"
+              :rotulo="props.t.categorias"
+              :aberta="filtrando || aberta('categorias')"
+              :contador="props.totalDeCategorias || undefined"
+              :texto-recolher="props.t.recolherSecao(props.t.categorias)"
+              :texto-expandir="props.t.expandirSecao(props.t.categorias)"
+              @alternar="alternar('categorias')"
+            >
+              <template #acoes>
+                <UDropdownMenu :items="opcoesDeOrdem">
+                  <UButton
+                    icon="i-lucide-settings-2"
+                    size="xs"
+                    color="neutral"
+                    variant="ghost"
+                    :aria-label="props.t.ordenarPor"
+                  />
+                </UDropdownMenu>
+              </template>
+
+              <template v-if="props.estado === 'vazio' && !filtrando">
+                <div class="mx-1 mt-1 rounded-lg border border-dashed border-default p-3">
+                  <p class="text-sm font-medium text-highlighted">{{ props.t.vazioTitulo }}</p>
+                  <p class="mt-1 text-xs leading-relaxed text-muted">{{ props.t.vazioDescricao }}</p>
+                  <UButton
+                    :label="props.t.vazioAcao"
+                    icon="i-lucide-plus"
+                    size="xs"
+                    color="primary"
+                    variant="soft"
+                    class="mt-2"
+                    @click="emit('criar')"
+                  />
+                </div>
+              </template>
+
+              <template v-else>
+                <LinhaDeMenu
+                  v-for="(c, i) in categoriasVisiveis"
+                  :key="c.id"
+                  :icone="c.icon ?? 'i-lucide-folder'"
+                  :rotulo="c.name"
+                  :nivel="2"
+                  com-estrela
+                  :fixada="c.favorita"
+                  :rotulo-fixar="props.t.fixar"
+                  :rotulo-desafixar="props.t.desafixar"
+                  :ativo="props.categoriaAtivaId === c.id"
+                  :atraso="180 + i * 25"
+                  :arrastavel="!filtrando"
+                  :saindo="arraste.arrastando.value === `cat:${c.id}`"
+                  :marca="marcaDe(`cat:${c.id}`) === 'dentro' ? null : marcaDe(`cat:${c.id}`)"
+                  @selecionar="emit('categoria', c)"
+                  @alternar-estrela="emit('alternarFixar', c.id)"
+                  @arrastar-inicio="arrastarCategoria(c.id)"
+                  @arrastar-sobre="p => arraste.mirar(`cat:${c.id}`, p)"
+                  @soltar="p => largarCategoria(c.id, p)"
+                  @arrastar-fim="arraste.terminar()"
+                />
+
+                <button
+                  v-if="!filtrando"
+                  type="button"
+                  class="mt-0.5 flex w-full items-center gap-2.5 rounded-md py-1.5 pl-8 pr-2.5 text-sm font-medium text-highlighted transition-colors hover:bg-primary/10"
+                  @click="emit('verTodas')"
+                >
+                  <UIcon name="i-lucide-layout-grid" class="size-4 shrink-0 text-primary" />
+                  <span class="min-w-0 flex-1 truncate text-left">
+                    {{ props.t.verTodas(props.totalDeCategorias) }}
+                  </span>
+                </button>
+              </template>
+            </SecaoDeMenu>
+          </template>
+
+          <!-- ---------- seção: nativa, de módulo ou do workspace ---------- -->
+          <SecaoDeMenu
+            v-else
+            :rotulo="rotuloDe(no)"
+            :aberta="filtrando || aberta(no.id)"
+            :texto-recolher="props.t.recolherSecao(rotuloDe(no))"
+            :texto-expandir="props.t.expandirSecao(rotuloDe(no))"
             :arrastavel="!filtrando"
-            :saindo="arraste.arrastando.value === item.id"
-            :marca="marcaDe(item.id) === 'dentro' ? null : marcaDe(item.id)"
+            :saindo="arraste.arrastando.value === no.id"
+            :marca="marcaDe(no.id)"
             :recusando="recusandoAgora"
-            @selecionar="emit('destino', item.id)"
-            @arrastar-inicio="arraste.comecar(item.id)"
-            @arrastar-sobre="p => mirar(item.id, p)"
-            @soltar="p => largar(item.id, p)"
+            @alternar="alternar(no.id)"
+            @arrastar-inicio="arraste.comecar(no.id)"
+            @arrastar-sobre="p => mirar(no.id, p)"
+            @soltar="p => largar(no.id, p)"
             @arrastar-fim="arraste.terminar()"
-            @mover="p => menu.mover(item.id, p)"
-          />
-        </SecaoDeMenu>
+            @mover="p => menu.mover(no.id, p)"
+          >
+            <LinhaDeMenu
+              v-for="(item, i) in (no.filhos ?? [])"
+              :key="item.id"
+              :icone="item.icone"
+              :rotulo="rotuloDe(item)"
+              :nivel="2"
+              :selo="item.emBreve ? props.t.emBreve : undefined"
+              :ativo="props.destinoAtivo === item.id"
+              :atraso="i * 25"
+              :arrastavel="!filtrando"
+              :saindo="arraste.arrastando.value === item.id"
+              :marca="marcaDe(item.id) === 'dentro' ? null : marcaDe(item.id)"
+              :recusando="recusandoAgora"
+              @selecionar="emit('destino', item.id)"
+              @arrastar-inicio="arraste.comecar(item.id)"
+              @arrastar-sobre="p => mirar(item.id, p)"
+              @soltar="p => largar(item.id, p)"
+              @arrastar-fim="arraste.terminar()"
+              @mover="p => menu.mover(item.id, p)"
+            />
+          </SecaoDeMenu>
+        </template>
       </template>
     </nav>
 
@@ -427,10 +457,16 @@ const nadaNoFiltro = computed(() =>
       </div>
     </div>
 
-    <!-- ============ rodapé: configurações e ajuda ============ -->
+    <!--
+      ============ rodapé ============
+      RODADA 9. Uma linha só: Configurações ocupa a linha e a Ajuda virou ícone
+      na ponta, com o menu abrindo no hover. Pedido dela, e o rodapé desceu de
+      duas linhas para uma: é o trecho da barra que não rola, e cada linha
+      gasta ali é uma linha a menos para a navegação.
+    -->
     <div class="shrink-0 border-t border-default p-2">
-      <div class="space-y-0.5">
-        <UTooltip :text="props.podeConfigurar ? props.t.configuracoesDica : props.t.semPermissaoTitulo">
+      <div class="flex items-center gap-1">
+        <UTooltip :text="props.podeConfigurar ? props.t.configuracoesDica : props.t.semPermissaoTitulo" class="min-w-0 flex-1">
           <button
             type="button"
             class="flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm transition-colors"
@@ -449,14 +485,7 @@ const nadaNoFiltro = computed(() =>
           </button>
         </UTooltip>
 
-        <button
-          type="button"
-          class="flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-default transition-colors hover:bg-elevated"
-          @click="emit('ajuda')"
-        >
-          <UIcon name="i-lucide-circle-question-mark" class="size-4 shrink-0 text-toned" />
-          <span class="min-w-0 flex-1 truncate text-left">{{ props.t.ajuda }}</span>
-        </button>
+        <MenuDeAjuda :t="props.t" @escolher="r => emit('ajuda', r)" />
       </div>
     </div>
   </div>

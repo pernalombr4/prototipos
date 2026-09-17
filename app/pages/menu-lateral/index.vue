@@ -42,6 +42,8 @@ function rotuloDoNo(no: NoDoMenu) {
   if (no.rotulo) return no.rotulo
   const mapa: Record<string, string> = {
     inicio: t.value.inicio,
+    inbox: t.value.inbox,
+    chatIa: t.value.chatIa,
     tarefas: t.value.tarefas,
     agenda: t.value.agenda,
     spaceflows: t.value.spaceflows,
@@ -314,6 +316,15 @@ defineShortcuts({
   meta_k: () => { buscando.value = !buscando.value },
 })
 
+/** O menu de ajuda é maquete: os três caminhos saem do produto para fora dele. */
+function avisarAjuda(rotulo: string) {
+  toast.add({
+    title: t.value.criarAberto(rotulo.toLowerCase()),
+    icon: 'i-lucide-hammer',
+    color: 'neutral',
+  })
+}
+
 function emBreve() {
   toast.add({
     title: 'Maquete',
@@ -402,7 +413,7 @@ function emBreve() {
             @ver-todas="vendoTodas = true"
             @busca="buscando = true"
             @item="abrirItemDeConfiguracao"
-            @ajuda="emBreve"
+            @ajuda="avisarAjuda"
           />
           <template v-else>
           <!--
@@ -432,7 +443,7 @@ function emBreve() {
               @configuracoes="abrirConfiguracoes"
               @busca="buscando = true"
               @criar="emBreve"
-              @ajuda="emBreve"
+              @ajuda="avisarAjuda"
               @ordem="trocarOrdem"
               @virar-manual="virarOrdemManual"
             />

@@ -468,6 +468,8 @@ export interface TelaNativa {
 
 export const telasNativas: TelaNativa[] = [
   { id: 'inicio', icone: 'i-lucide-house', lugar: 'destino' },
+  { id: 'inbox', icone: 'i-lucide-inbox', lugar: 'destino', emBreve: true },
+  { id: 'chat-ia', icone: 'i-lucide-bot', lugar: 'destino' },
   { id: 'tarefas', icone: 'i-lucide-square-check-big', lugar: 'destino' },
   { id: 'agenda', icone: 'i-lucide-calendar-days', lugar: 'destino' },
   { id: 'spaceflows', icone: 'i-lucide-workflow', lugar: 'destino' },
@@ -547,10 +549,50 @@ export interface NoDoMenu {
 
 export const menuDoEditor: NoDoMenu[] = [
   { id: 'n-inicio', tipo: 'destino', chave: 'inicio', icone: 'i-lucide-house' },
+  /*
+   * RODADA 9. Dois destinos nativos novos, no alto.
+   *
+   * `Inbox` ela anunciou: "teremos tambem outros menus nativos: inbox sera um
+   * deles. com notificacoes pra abrir". Ainda nao existe no develop.
+   *
+   * `Chat de IA` e o BENI, que hoje mora dentro de Ajuda. Ela mandou tirar de
+   * la: "o beni deve ser 'chat de ia' no menu grande". Ferramenta de trabalho
+   * nao se guarda no balcao de suporte.
+   *
+   * Os dois ficam logo abaixo de Inicio porque sao fluxos pessoais, o que chega
+   * para mim e o que eu pergunto, e nao objetos do workspace. E a ordem do
+   * Linear (Inbox e My Issues no topo) e do Notion (AI acima do conteudo).
+   */
+  { id: 'n-inbox', tipo: 'destino', chave: 'inbox', icone: 'i-lucide-inbox', emBreve: true },
+  { id: 'n-chat-ia', tipo: 'destino', chave: 'chatIa', icone: 'i-lucide-bot' },
   { id: 'n-tarefas', tipo: 'destino', chave: 'tarefas', icone: 'i-lucide-square-check-big' },
   { id: 'n-agenda', tipo: 'destino', chave: 'agenda', icone: 'i-lucide-calendar-days' },
   { id: 'n-spaceflows', tipo: 'destino', chave: 'spaceflows', icone: 'i-lucide-workflow' },
   { id: 'n-documentos', tipo: 'destino', chave: 'documentos', icone: 'i-lucide-folder-open', emBreve: true },
+  /*
+   * RODADA 9. Analise saiu de dentro do painel de Dados e virou menu de
+   * primeiro nivel, acima da lista de categorias, com os dashboards dentro.
+   * Pedido dela, literal: "analise deve ser um grande menu fora, de primeiro
+   * nivel, com os dashboards dentro".
+   *
+   * No modelo de trilha isso significa icone proprio na trilha (`lugar`), e na
+   * barra unica significa esta posicao: logo depois dos destinos nativos e
+   * antes dos favoritos e das categorias.
+   */
+  {
+    id: 's-analise',
+    tipo: 'secao',
+    origem: 'nativo',
+    rotulo: 'Análise',
+    icone: 'i-lucide-chart-column',
+    lugar: 'trilha',
+    escopo: [],
+    filhos: [
+      { id: 't-pt', tipo: 'tela', emBreve: true, rotulo: 'Dashboard de tarefas', icone: 'i-lucide-chart-column', tipoDeTela: 'paineis' },
+      { id: 't-pd', tipo: 'tela', emBreve: true, rotulo: 'Dashboard de dados', icone: 'i-lucide-chart-pie', tipoDeTela: 'paineis' },
+      { id: 't-mr', tipo: 'tela', emBreve: true, rotulo: 'Meus relatórios', icone: 'i-lucide-file-chart-column', tipoDeTela: 'personalizada' },
+    ],
+  },
   {
     id: 'n-categorias',
     tipo: 'secao-nativa',
@@ -560,21 +602,6 @@ export const menuDoEditor: NoDoMenu[] = [
       { id: 'c-1', tipo: 'categoria', rotulo: 'Contratos', icone: 'i-lucide-file-signature' },
       { id: 'c-2', tipo: 'categoria', rotulo: 'Clientes', icone: 'i-lucide-building-2' },
       { id: 'c-3', tipo: 'categoria', rotulo: 'Chamados', icone: 'i-lucide-life-buoy' },
-    ],
-  },
-  {
-    id: 's-analise',
-    tipo: 'secao',
-    origem: 'nativo',
-    rotulo: 'Análise',
-    icone: 'i-lucide-chart-column',
-    lugar: 'painel',
-    painel: 'dados',
-    escopo: [],
-    filhos: [
-      { id: 't-pt', tipo: 'tela', emBreve: true, rotulo: 'Dashboard de tarefas', icone: 'i-lucide-chart-column', tipoDeTela: 'paineis' },
-      { id: 't-pd', tipo: 'tela', emBreve: true, rotulo: 'Dashboard de dados', icone: 'i-lucide-chart-pie', tipoDeTela: 'paineis' },
-      { id: 't-mr', tipo: 'tela', emBreve: true, rotulo: 'Meus relatórios', icone: 'i-lucide-file-chart-column', tipoDeTela: 'personalizada' },
     ],
   },
   {
@@ -643,7 +670,6 @@ export type LugarDaSecao = 'trilha' | 'painel'
 export const paineisQueRecebem = [
   { id: 'trabalho', chave: 'areaTrabalho' },
   { id: 'dados', chave: 'areaDados' },
-  { id: 'analise', chave: 'secaoAnalise' },
 ]
 
 
@@ -706,4 +732,31 @@ export const secoesDeModulo: NoDoMenu[] = [
       { id: 'mm-calc', tipo: 'tela', origem: 'modulo', moduloId: 'correcao-monetaria', rotulo: 'Calculadora avulsa', icone: 'i-lucide-calculator', tipoDeTela: 'personalizada' },
     ],
   },
+]
+
+
+/* ==================================================================
+   AS NOTIFICAÇÕES DO INBOX
+   Rodada 9. "inbox sera um deles. com notificaçoes pra abrir" (Mikaela).
+   Conteúdo fictício: nenhuma pessoa, empresa ou item aqui é real.
+================================================================== */
+
+export interface Notificacao {
+  id: string
+  icone: string
+  /** O que aconteceu. Texto de maquete, como o nome das categorias. */
+  texto: string
+  /** Onde aconteceu, para a pessoa saber se aquilo é com ela. */
+  onde: string
+  /** Há quanto tempo, em unidade e valor, para o dicionário formatar. */
+  quando: { valor: number, unidade: 'min' | 'h' | 'd' }
+}
+
+export const notificacoes: Notificacao[] = [
+  { id: 'nt-1', icone: 'i-lucide-at-sign', texto: 'Rita A. mencionou você em um comentário', onde: 'Contrato 1284', quando: { valor: 6, unidade: 'min' } },
+  { id: 'nt-2', icone: 'i-lucide-circle-check-big', texto: 'Sua requisição de compra foi aprovada', onde: 'Solicitações de compra e reembolso', quando: { valor: 40, unidade: 'min' } },
+  { id: 'nt-3', icone: 'i-lucide-user-plus', texto: 'Caio M. atribuiu uma tarefa a você', onde: 'Revisar minuta do aditivo', quando: { valor: 2, unidade: 'h' } },
+  { id: 'nt-4', icone: 'i-lucide-message-square', texto: 'Lúcia P. respondeu no chamado que você segue', onde: 'Chamados', quando: { valor: 5, unidade: 'h' } },
+  { id: 'nt-5', icone: 'i-lucide-calendar-clock', texto: 'Um prazo que você acompanha vence amanhã', onde: 'Contrato 1301', quando: { valor: 1, unidade: 'd' } },
+  { id: 'nt-6', icone: 'i-lucide-workflow', texto: 'O spaceflow de onboarding terminou', onde: 'Spaceflows', quando: { valor: 2, unidade: 'd' } },
 ]

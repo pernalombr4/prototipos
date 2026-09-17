@@ -53,6 +53,8 @@ function rotuloDe(no: NoDoMenu) {
   if (no.rotulo) return no.rotulo
   const mapa: Record<string, string> = {
     inicio: props.t.inicio,
+    inbox: props.t.inbox,
+    chatIa: props.t.chatIa,
     tarefas: props.t.tarefas,
     agenda: props.t.agenda,
     spaceflows: props.t.spaceflows,
