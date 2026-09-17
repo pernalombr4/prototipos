@@ -274,6 +274,55 @@ resolvem?".
 
 ---
 
+## Rodada 8 — onde cada uma das cinco coisas mora nos outros sistemas
+
+Pesquisa pedida na rodada 8: "as abas estão na melhor hierarquia possível, considerando também o
+que outros sistemas fazem?".
+
+### O critério que apareceu, e que vale mais que qualquer lista
+
+> "Abas devem estruturar conteúdo do **mesmo nível hierárquico**, cada aba sendo uma **faceta da
+> mesma entidade**."
+
+E o arranjo dominante de configuração em SaaS tem **três camadas**, não uma:
+**Pessoal** (perfil, notificações, segurança) · **Conta** (cobrança, plano, pagamento) ·
+**Organização** (membros, cargos, marca). A recomendação explícita é que conta e cobrança fiquem
+**sempre no mesmo lugar**, para ninguém ter de caçá-las.
+
+<https://memorable.design/saas-settings-page-examples/> ·
+<https://www.techinterview.org/post/3233475401/build-settings-page-architecture-that-scales/>
+
+### Calendário de trabalho: mora junto das regras que o consomem
+
+**Zendesk** guarda dias úteis e feriados em **Admin Center › Objects and rules › Business rules ›
+Schedules**, ou seja, ao lado das políticas de SLA que os usam. E **feriado é uma aba dentro do
+horário**, não um assunto separado.
+
+<https://support.zendesk.com/hc/en-us/articles/4408842938522-Setting-your-schedule-with-business-hours-and-holidays>
+
+### Tradução de campo: é ferramenta, com endereço próprio
+
+**Salesforce** tem o **Translation Workbench**, em Setup › User Interface › Translation Workbench
+› Translate, e o fluxo é **idioma → tipo de componente → objeto → traduzir**. É a mesma navegação
+em três níveis da rodada 5, e confirma que tradução de rótulo é uma **ferramenta de trabalho**
+com endereço próprio, não uma preferência dentro das configurações gerais.
+
+<https://help.salesforce.com/s/articleView?id=service.wcc_setup_enable_translation.htm>
+
+### Aviso de prazo: nos outros, é preferência da pessoa
+
+No **Asana**, lembrete de vencimento é **configuração pessoal** (Perfil › Settings ›
+Notifications), com digest e Do Not Disturb. No **ClickUp**, idem: as notificações são por
+pessoa, e o que é do espaço são as automações.
+
+O ENSPACE faz diferente **de propósito**: a regra é do workspace e usa um modelo de e-mail do
+próprio workspace. Isso não é erro, mas explica por que a aba parece deslocada: ela é a única
+das cinco que, nos concorrentes, nem sequer vive em configuração de organização.
+
+<https://help.asana.com/s/article/notification-settings>
+
+---
+
 ## O padrão que todos seguem
 
 Os cinco obrigatórios fazem igual nestes quatro pontos — divergir aqui custa aprendizado e

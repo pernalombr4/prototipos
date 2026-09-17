@@ -1,5 +1,96 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 8 — 16/09/2026 — avaliação da hierarquia das abas
+
+> ⏸ **Proposta, não aplicada.** Ela pediu avaliação e opinião, não mudança. Nada nesta seção está
+> no protótipo; está aqui para ela decidir o que entra.
+
+**O que ela pediu, literal:**
+
+> "acha que as abas estao na melhor hierarquia possivel, considerando tambem o que outros
+> sistemas fazem? considere: 1. a ordem das abas 2. o título das abas 3. os agrupamentos dentro
+> delas (se tem aba que deveria ser so um conteudo dentro de outra etc) 4. a ordenaçao dos
+> conteudos DENTRO das abas. faça a uma avaliaçao geral de ux e a pesquisa em outros sistemas e
+> volte com a opiniao"
+
+A pesquisa está em [`PESQUISA.md`](PESQUISA.md), "Rodada 8". O critério que organiza a resposta
+inteira veio de lá: **aba é faceta da mesma entidade, no mesmo nível hierárquico**. E a
+configuração em SaaS costuma ter **três camadas** (pessoal, conta, organização), não uma.
+
+### Resposta curta
+
+**Não, não está na melhor hierarquia.** Mas o problema não é a ordem: é que **duas das cinco abas
+não são facetas do workspace**, e que **os títulos prometem mais do que as abas entregam**.
+
+### 1. A ordem: é a parte que está quase certa
+
+Identidade primeiro e dinheiro por último é a convenção, e a tela já faz isso. Se as cinco
+ficarem como estão, a ordem que eu proporia é a mesma de hoje, com um argumento em vez de
+acaso: **quem o workspace é → quando ele trabalha → o que ele avisa → como ele fala → quanto
+ele gastou**.
+
+### 2. Os títulos: quatro dos cinco prometem errado
+
+| Hoje | Proposta | Por quê |
+|---|---|---|
+| Informações Básicas | **Geral** | "Básicas" não descreve módulos nem exclusão de workspace. "Geral" é o que Notion, Slack e Linear usam para exatamente este conteúdo, e some a colisão com "Visão Geral", que já existe no menu ao lado |
+| Calendário | **Expediente** | O produto **tem** uma Agenda. Chamar isto de Calendário manda procurar a agenda aqui. O que a aba define é dia útil e feriado, e o Zendesk chama de Schedules |
+| Notificações | **Avisos de prazo** | A aba só trata e-mail de tarefa com prazo. "Notificações" promete o sino, o push e o alerta do sistema, que moram em outro lugar |
+| Dicionários | **Traduções** | "Dicionário" sugere glossário. O que se faz ali é traduzir, e é assim que Salesforce, Crowdin e Lokalise chamam |
+| Cobrança | **Créditos** | Não há fatura, plano nem preço nesta aba: há saldo de en-credits e pedido de recarga. "Cobrança" promete boleto |
+
+### 3. Os agrupamentos: aqui está o problema de verdade
+
+Pelo critério da pesquisa, **quatro abas são facetas do workspace e uma é faceta da pessoa**:
+
+| Aba | De quem é | Depende de | Onde deveria morar |
+|---|---|---|---|
+| Informações Básicas | workspace | — | fica |
+| Calendário | workspace | — | fica (renomeada) |
+| Notificações | workspace | **Modelos de E-mail**, que são a seção `Configurações › E-mails` | **dentro de E-mails** |
+| Dicionários | workspace | **Estrutura** (categorias, campos, formulários), que é a seção vizinha | **junto de Estrutura**, ou como item próprio do menu |
+| Cobrança | **da pessoa** | carteira que atravessa workspaces | **Painel do Usuário**, com resumo de consumo aqui |
+
+Três consequências práticas, se isso for aceito:
+
+1. **Notificações dentro de E-mails resolve a S3-F4 de raiz.** O campo obrigatório "Modelo de
+   e-mail" abre hoje com zero opções porque os modelos moram em outra seção. Na mesma seção, a
+   dependência deixa de ser invisível: criar o modelo e usar o modelo ficam a um clique.
+2. **Traduções junto de Estrutura junta quem cria com quem traduz.** Hoje a pessoa cria o campo
+   numa seção e vai traduzir em outra, sem nenhum caminho entre as duas.
+3. **Cobrança fora daqui acaba com a confusão de escopo** que a auditoria registrou (S3-F5): a
+   carteira é sua e atravessa workspaces, mas mora numa tela cujo cabeçalho inteiro diz o nome
+   deste workspace.
+
+**"Sistema" voltaria a ser o que o nome diz**: identidade, padrões, comportamento, módulos,
+expediente e exclusão. Duas abas, ou nem isso: cabe numa tela só com seções.
+
+### 4. A ordem dentro das abas: está certa, com uma dúvida
+
+| Aba | Ordem atual | Veredito |
+|---|---|---|
+| Informações Básicas | Identidade → Padrões → Comportamento e Módulos → Zona de perigo | certa: quem é, o que vale por omissão, o que muda a tela, e o irreversível por último |
+| Calendário | Dias úteis → Feriados → Ocorrências → Como o mês fica | certa: regra, exceção nacional, exceção sua, resultado |
+| Notificações | O que o ENSPACE já avisa → Tarefas rápidas → Tarefas agendadas | certa: o padrão antes da exceção |
+| Dicionários | Visão geral → recorte → fila | certa, e é o caminho do Salesforce |
+| Cobrança | Carteira → No que foi → Pedidos → Extrato | certa: estado, causa, ação pendente, histórico |
+
+**A dúvida honesta:** em Geral, **Módulos** talvez devesse vir antes de **Comportamento**. Ligar
+um módulo acrescenta telas e campos ao workspace, o que é mais estrutural do que ajustar o
+comportamento de telas que já existem. Mantive como está porque a mudança é de gosto e não tenho
+evidência; se for para trocar, é uma linha.
+
+### O que eu faria, em duas doses
+
+**Dose 1, cabe nesta tela e nesta demanda:** os cinco títulos e a ordem argumentada. Muda rótulo,
+não estrutura, e já melhora o "não consigo me encontrar".
+
+**Dose 2, é decisão de produto:** mover Notificações para E-mails, Traduções para junto de
+Estrutura e Cobrança para o Painel do Usuário. Isso mexe em telas que não são desta demanda
+(regra 19), então não faço por conta própria.
+
+---
+
 ## Rodada 7 — 16/09/2026 — enviar o logo com o campo de arquivo do Nuxt UI
 
 **O que ela pediu, literal:**
