@@ -1,5 +1,73 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 9 — 16/09/2026 — a hierarquia real dos dicionários
+
+**O que ela pediu, literal:**
+
+> "a aba dicionarios nao ta fidedigna. abra os dicionarios do enspace. pra isso, pode entrar
+> SOMENTE DESTA VEZ neste workspace que ja tem bastante campo criado (...) abra geral, abra
+> campos, abra formularios, tudo ate O ULTIMO NIVEL DISPONIVEL pra voce entender exatamente as
+> hierarquias do enspace que devem ser consideradas nas traduçoes. seu modelo ta muito mais
+> simples que o real."
+
+**Autorização pontual, e usada como tal.** Entrei no workspace indicado só para ler: abri a
+árvore até o último nível, não criei, não editei, não salvei e não apaguei nada. Nenhum dado de
+lá entrou no protótipo: o que atravessou foi **a estrutura**, que é o que a regra 9 permite.
+
+### A hierarquia real, como ela é
+
+```
+Categoria                                          "Clients" = 710 chaves
+├── Geral ............ 3 ...... Nome · Nome Singular · Descrição
+├── Campos ........... 349
+│   └── Campo ......... Nome · Descrição · Rótulo · Ajuda · Instrução · Placeholder
+│       └── Opções .... uma chave por opção da lista
+└── Formulários ...... 358
+    └── Formulário .... Nome · Descrição
+        └── Campos .... O MESMO CAMPO OUTRA VEZ, com os seis textos
+            └── Opções     e as opções dele
+```
+
+**São sete níveis**, contra os três que eu tinha modelado. E o que eu não tinha visto é o que
+mais pesa:
+
+1. **O campo aparece duas vezes.** Uma na definição da categoria, outra dentro de cada
+   formulário que o usa, cada uma com os seus seis textos e as suas opções. Por isso
+   **Formulários tem mais chaves que Campos** (358 contra 349 em Clients), e por isso uma
+   categoria de formulários sozinha chega a **2.440 chaves**.
+2. **São seis textos por campo, não cinco**: Nome, Descrição, Rótulo, Ajuda, Instrução e
+   Placeholder. Eu tinha deixado o Nome de fora.
+3. **Categoria sem campo mostra só o Geral.** Vi uma com 3 chaves no total.
+4. O workspace real tem **7.524 chaves em 27 categorias, com 180 traduzidas**. Confirma a ordem
+   de grandeza da rodada 5 e corrige a distribuição: quase tudo intocado.
+
+### O que mudou no protótipo
+
+- **O mock foi refeito na estrutura real**: 7.476 chaves em 20 categorias, com o campo repetido
+  dentro de cada formulário, os seis textos e as opções. O número quase bate com o real de
+  propósito.
+- **O formulário virou o segundo recorte.** Dentro de uma categoria, escolher Formulários mostra
+  uma fila de chips com os formulários e quantas chaves cada um carrega (Cliente · 221,
+  Eventos · 59). É o nível que faltava, e ele entra como filtro, não como mais um nível de
+  sanfona: sanfona de sete níveis é a árvore que a rodada 5 aposentou.
+- **Cada linha mostra o caminho inteiro**, como a árvore do produto:
+  `Formulários › Cliente › Número`, com o tipo no selo (Nome, Descrição, Rótulo, Ajuda,
+  Instrução, Placeholder, Opção). A fila também passou a mostrar o caminho.
+
+### Um defeito do produto que apareceu na visita
+
+Dentro de um formulário, a árvore de hoje trunca o rótulo da chave:
+`Tax Classification › N…`, `› De…`, `› Ró…`, `› Aj…`, `› In…`, `› Pl…`. **Não dá para saber se
+a linha é o Nome, a Descrição ou a Instrução sem passar o mouse.** Seis linhas seguidas do mesmo
+campo, indistinguíveis. No protótipo isso não acontece porque o tipo é um selo, e o caminho vem
+embaixo.
+
+E o subtítulo da tela promete traduzir **"types, fields, formulários, estágios"**, mas não achei
+grupo de estágios em nenhuma das categorias que abri. Ou a promessa sobra, ou os estágios estão
+em outro lugar.
+
+---
+
 ## Rodada 8 — 16/09/2026 — avaliação da hierarquia das abas
 
 > ⏸ **Proposta, não aplicada.** Ela pediu avaliação e opinião, não mudança. Nada nesta seção está

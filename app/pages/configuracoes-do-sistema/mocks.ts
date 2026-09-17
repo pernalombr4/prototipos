@@ -329,65 +329,91 @@ export const regrasAgendadas: RegraDeAviso[] = [
 /* ------------------------------------------------------------------ *
  * Dicionários
  *
- * A estrutura é a do `DictionaryKeysTree`: cada categoria tem Geral
- * (name, singularName, description), Campos (label, description, help,
- * instruction, placeholder, e um por opção de lista) e Formulários.
+ * A HIERARQUIA AQUI É A REAL, conferida em 16/09/2026 no workspace de
+ * produção interna (só leitura, com autorização pontual). O que se vê lá:
  *
- * ESTE MOCK GERA O TAMANHO REAL DO PROBLEMA: um workspace configurado
- * chega a 14 mil chaves, e foi esse número que derrubou o desenho da
- * rodada 1. Por isso as chaves são compostas por fórmula a partir de um
- * vocabulário controlado, e não escritas uma a uma: o que importa aqui é
- * o volume e a distribuição, não a variedade de cada frase.
+ *   Categoria                                    "Clients" = 710 chaves
+ *   ├── Geral ............ 3 ...... Nome · Nome Singular · Descrição
+ *   ├── Campos ........... 349
+ *   │   └── Campo ......... Nome · Descrição · Rótulo · Ajuda ·
+ *   │       │               Instrução · Placeholder
+ *   │       └── Opções .... uma chave por opção da lista
+ *   └── Formulários ...... 358
+ *       └── Formulário .... Nome · Descrição
+ *           └── Campos .... O MESMO CAMPO OUTRA VEZ, com os seis textos
+ *               └── Opções     e as opções dele
  *
- * Como o vocabulário tem o par português/inglês, toda chave tem uma
- * tradução correta disponível, e o botão de IA do protótipo funciona de
- * verdade em cima do mock.
+ * O ponto que a rodada 5 não tinha: **o campo aparece duas vezes**, na
+ * definição da categoria e dentro de cada formulário que o usa. É por isso
+ * que Formulários costuma ter mais chaves que Campos (358 contra 349 em
+ * Clients) e que uma categoria de formulários chega a 2.440 sozinha.
+ *
+ * O workspace real tem 7.524 chaves em 27 categorias, com 180 traduzidas.
+ * Categoria sem campo mostra só o Geral (vi uma com 3 chaves no total).
  * ------------------------------------------------------------------ */
 
 export type TipoDeChave =
   | 'Nome'
-  | 'Nome no singular'
+  | 'Nome Singular'
   | 'Descrição'
   | 'Rótulo'
-  | 'Texto de ajuda'
+  | 'Ajuda'
   | 'Instrução'
-  | 'Texto de exemplo'
+  | 'Placeholder'
   | 'Opção'
 
 export interface ChaveDeTraducao {
   id: string
   categoria: string
   grupo: 'Geral' | 'Campos' | 'Formulários'
-  /** O campo ou formulário a que a chave pertence. Vazio no grupo Geral. */
+  /** Só em Formulários: a qual formulário a chave pertence. */
+  formulario?: string
+  /** O campo dono da chave. Vazio no Geral e no cabeçalho do formulário. */
   dono: string
   tipo: TipoDeChave
   original: string
-  /** O que já está traduzido. Vazio quer dizer que falta. */
   traducao: string
 }
 
 type Par = [pt: string, en: string]
 
-/** As categorias do workspace, com quantos campos cada uma tem. */
-const CATEGORIAS: { par: Par, campos: number }[] = [
-  { par: ['Contratos', 'Contracts'], campos: 470 },
-  { par: ['Fornecedores', 'Suppliers'], campos: 290 },
-  { par: ['Chamados jurídicos', 'Legal requests'], campos: 200 },
-  { par: ['Processos', 'Lawsuits'], campos: 420 },
-  { par: ['Notas fiscais', 'Invoices'], campos: 270 },
-  { par: ['Pagamentos', 'Payments'], campos: 335 },
-  { par: ['Colaboradores', 'Employees'], campos: 380 },
-  { par: ['Treinamentos', 'Trainings'], campos: 165 },
-  { par: ['Ativos', 'Assets'], campos: 310 },
-  { par: ['Imóveis', 'Properties'], campos: 210 },
-  { par: ['Frota', 'Fleet'], campos: 235 },
-  { par: ['Auditorias', 'Audits'], campos: 255 },
-  { par: ['Políticas internas', 'Internal policies'], campos: 135 },
-  { par: ['Incidentes', 'Incidents'], campos: 290 },
-  { par: ['Clientes', 'Customers'], campos: 445 },
-  { par: ['Propostas', 'Proposals'], campos: 355 },
-  { par: ['Licenças', 'Licenses'], campos: 155 },
-  { par: ['Obras', 'Construction'], campos: 220 },
+/**
+ * As categorias, com quantos campos cada uma tem e quais formulários.
+ * Os números seguem a proporção do workspace real: Formulários pesa tanto
+ * quanto Campos, e uma categoria de formulários sozinha vale um terço do
+ * workspace.
+ */
+const CATEGORIAS: { par: Par, campos: number, formularios: { nome: Par, campos: number }[] }[] = [
+  { par: ['Clientes', 'Clients'], campos: 66, formularios: [{ nome: ['Cliente', 'Client'], campos: 31 }, { nome: ['Eventos', 'Events'], campos: 8 }] },
+  { par: ['Impostos', 'Tax'], campos: 50, formularios: [{ nome: ['Apuração', 'Assessment'], campos: 26 }] },
+  { par: ['Contabilidade', 'Bookkeeping'], campos: 39, formularios: [{ nome: ['Lançamento', 'Entry'], campos: 21 }] },
+  { par: ['Desenvolvimento comercial', 'Business Development'], campos: 18, formularios: [{ nome: ['Oportunidade', 'Opportunity'], campos: 10 }] },
+  { par: ['Produtos e serviços', 'Products and Services'], campos: 21, formularios: [{ nome: ['Cadastro', 'Registration'], campos: 13 }] },
+  { par: ['Leads', 'Leads'], campos: 24, formularios: [{ nome: ['Entrada de lead', 'Lead intake'], campos: 16 }] },
+  { par: ['Contatos', 'Contacts'], campos: 16, formularios: [{ nome: ['Contato', 'Contact'], campos: 10 }] },
+  { par: ['Pedidos de venda', 'Sales Orders'], campos: 52, formularios: [{ nome: ['Pedido', 'Order'], campos: 18 }] },
+  { par: ['Administrativo', 'ADM'], campos: 7, formularios: [] },
+  { par: ['Parceiros', 'Partners'], campos: 0, formularios: [] },
+  { par: ['Consultores', 'Consultants'], campos: 24, formularios: [{ nome: ['Consultor', 'Consultant'], campos: 13 }] },
+  { par: ['Faturas', 'Invoices'], campos: 34, formularios: [{ nome: ['Fatura', 'Invoice'], campos: 16 }] },
+  { par: ['Membros do cliente', 'Client members'], campos: 3, formularios: [] },
+  { par: ['Atendimento', 'Customer Service'], campos: 37, formularios: [{ nome: ['Chamado', 'Ticket'], campos: 21 }] },
+  { par: ['Entrega de serviço', 'Service Delivery'], campos: 26, formularios: [{ nome: ['Entrega', 'Delivery'], campos: 16 }] },
+  { par: ['Orçamentos', 'Estimates'], campos: 45, formularios: [{ nome: ['Orçamento', 'Estimate'], campos: 24 }] },
+  { par: ['Satisfação do cliente', 'Customer Satisfaction'], campos: 1, formularios: [] },
+  { par: ['Cartas', 'Letters'], campos: 18, formularios: [{ nome: ['Carta', 'Letter'], campos: 8 }] },
+  {
+    par: ['Formulários de serviço', 'Service forms'],
+    campos: 52,
+    formularios: [
+      { nome: ['Abertura de serviço', 'Service intake'], campos: 52 },
+      { nome: ['Execução', 'Execution'], campos: 52 },
+      { nome: ['Encerramento', 'Closing'], campos: 47 },
+      { nome: ['Conferência', 'Review'], campos: 39 },
+      { nome: ['Aprovação do cliente', 'Client approval'], campos: 31 },
+    ],
+  },
+  { par: ['Tutoriais', 'Tutorials'], campos: 29, formularios: [{ nome: ['Roteiro', 'Script'], campos: 13 }] },
 ]
 
 const SUBSTANTIVOS: Par[] = [
@@ -414,11 +440,11 @@ const INSTRUCOES: Par[] = [
   ['Deixe em branco quando não se aplicar.', 'Leave blank when it does not apply.'],
 ]
 
-const EXEMPLOS: Par[] = [
+const PLACEHOLDERS: Par[] = [
   ['Ex.: CT-2026-0148', 'E.g.: CT-2026-0148'],
   ['Ex.: R$ 250.000,00', 'E.g.: R$ 250,000.00'],
-  ['Ex.: 30/09/2026', 'E.g.: 09/30/2026'],
-  ['Ex.: Aurora Serviços Integrados Ltda.', 'E.g.: Aurora Integrated Services Ltd.'],
+  ['Selecione uma opção', 'Select an option'],
+  ['Digite para buscar', 'Type to search'],
 ]
 
 const LISTAS_DE_OPCOES: Par[][] = [
@@ -427,17 +453,13 @@ const LISTAS_DE_OPCOES: Par[][] = [
   [['Pendente', 'Pending'], ['Aprovado', 'Approved'], ['Recusado', 'Rejected']],
 ]
 
-const FORMULARIOS: Par[] = [
-  ['Abertura', 'Intake'], ['Revisão', 'Review'], ['Encerramento', 'Closing'],
-]
-
 /**
- * Quanto de cada categoria já foi traduzido. Distribuição desigual de
- * propósito: é assim que um workspace real fica, e é o que faz a visão
- * geral valer a pena (algumas prontas, uma começada, muitas intocadas).
+ * Quanto de cada categoria já foi traduzido. Desigual de propósito: no
+ * workspace real são 180 de 7.524, com algumas categorias começadas e a
+ * maioria intocada.
  */
 function fracaoTraduzida(indice: number) {
-  const padrao = [1, 0.7, 0.25, 0, 0, 0.4, 0, 0.1, 1, 0]
+  const padrao = [0.3, 0.05, 0, 0, 0.02, 0, 0, 0.6, 0, 0, 0.01, 0, 0, 0, 0, 0.1, 0, 0, 0, 0]
   return padrao[indice % padrao.length]!
 }
 
@@ -445,7 +467,6 @@ function semAcento(texto: string) {
   return texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-')
 }
 
-/** Par português/inglês de toda chave gerada, para a sugestão de IA. */
 const traducaoDoOriginal: Record<string, string> = {}
 
 function gerarChaves(): ChaveDeTraducao[] {
@@ -455,10 +476,11 @@ function gerarChaves(): ChaveDeTraducao[] {
     const [catPt, catEn] = categoria.par
     const base = semAcento(catPt)
     const corte = Math.round(fracaoTraduzida(ic) * 100)
-    let indiceNaCategoria = 0
+    let indice = 0
 
     const push = (
       grupo: ChaveDeTraducao['grupo'],
+      formulario: string | undefined,
       dono: string,
       tipo: TipoDeChave,
       sufixo: string,
@@ -466,14 +488,13 @@ function gerarChaves(): ChaveDeTraducao[] {
       en: string,
     ) => {
       traducaoDoOriginal[pt] = en
-      // A fração vira um corte determinístico: dentro de cada bloco de cem
-      // chaves da categoria, as primeiras N já estão traduzidas.
-      const traduzida = indiceNaCategoria % 100 < corte
-      indiceNaCategoria++
+      const traduzida = indice % 100 < corte
+      indice++
       lista.push({
         id: `${base}.${sufixo}`,
         categoria: catPt,
         grupo,
+        formulario,
         dono,
         tipo,
         original: pt,
@@ -481,46 +502,67 @@ function gerarChaves(): ChaveDeTraducao[] {
       })
     }
 
-    push('Geral', '', 'Nome', 'geral.nome', catPt, catEn)
-    push('Geral', '', 'Nome no singular', 'geral.singular', catPt.replace(/s$/, ''), catEn.replace(/s$/, ''))
-    push('Geral', '', 'Descrição', 'geral.descricao',
+    /* --- Geral: três chaves, sempre --- */
+    push('Geral', undefined, '', 'Nome', 'geral.nome', catPt, catEn)
+    push('Geral', undefined, '', 'Nome Singular', 'geral.singular',
+      catPt.replace(/s$/, ''), catEn.replace(/s$/, ''))
+    push('Geral', undefined, '', 'Descrição', 'geral.descricao',
       `Registros de ${catPt.toLowerCase()} do workspace.`, `${catEn} records in this workspace.`)
 
-    for (let i = 0; i < categoria.campos; i++) {
+    /* --- um campo, com os seis textos e as opções --- */
+    const empurrarCampo = (
+      grupo: ChaveDeTraducao['grupo'],
+      formulario: string | undefined,
+      i: number,
+      prefixo: string,
+    ) => {
       const [subPt, subEn] = SUBSTANTIVOS[i % SUBSTANTIVOS.length]!
       const [qualPt, qualEn] = QUALIFICADORES[Math.floor(i / SUBSTANTIVOS.length) % QUALIFICADORES.length]!
       const rotuloPt = `${subPt} ${qualPt}`.trim()
       const rotuloEn = `${subEn} ${qualEn}`.trim()
-      const campo = `campo.${i}`
+      const chave = `${prefixo}.${i}`
 
-      push('Campos', rotuloPt, 'Rótulo', `${campo}.label`, rotuloPt, rotuloEn)
+      push(grupo, formulario, rotuloPt, 'Nome', `${chave}.nome`, rotuloPt, rotuloEn)
+      push(grupo, formulario, rotuloPt, 'Descrição', `${chave}.descricao`,
+        `Guarda ${rotuloPt.toLowerCase()} do registro.`, `Holds the ${rotuloEn.toLowerCase()} of the record.`)
+      push(grupo, formulario, rotuloPt, 'Rótulo', `${chave}.rotulo`, rotuloPt, rotuloEn)
+      push(grupo, formulario, rotuloPt, 'Ajuda', `${chave}.ajuda`,
+        `Usado para localizar o registro por ${rotuloPt.toLowerCase()}.`,
+        `Used to find the record by ${rotuloEn.toLowerCase()}.`)
+      const [instPt, instEn] = INSTRUCOES[i % INSTRUCOES.length]!
+      push(grupo, formulario, rotuloPt, 'Instrução', `${chave}.instrucao`, instPt, instEn)
+      const [phPt, phEn] = PLACEHOLDERS[i % PLACEHOLDERS.length]!
+      push(grupo, formulario, rotuloPt, 'Placeholder', `${chave}.placeholder`, phPt, phEn)
 
-      if (i % 2 === 0) {
-        push('Campos', rotuloPt, 'Texto de ajuda', `${campo}.ajuda`,
-          `Usado para localizar o registro por ${rotuloPt.toLowerCase()}.`,
-          `Used to find the record by ${rotuloEn.toLowerCase()}.`)
-      }
+      // Campo de lista também traduz cada opção.
       if (i % 3 === 0) {
-        const [pt, en] = INSTRUCOES[i % INSTRUCOES.length]!
-        push('Campos', rotuloPt, 'Instrução', `${campo}.instrucao`, pt, en)
-      }
-      if (i % 4 === 0) {
-        const [pt, en] = EXEMPLOS[i % EXEMPLOS.length]!
-        push('Campos', rotuloPt, 'Texto de exemplo', `${campo}.exemplo`, pt, en)
-      }
-      if (i % 5 === 0) {
         LISTAS_DE_OPCOES[i % LISTAS_DE_OPCOES.length]!.forEach(([pt, en], io) => {
-          push('Campos', rotuloPt, 'Opção', `${campo}.opcao.${io}`, pt, en)
+          push(grupo, formulario, rotuloPt, 'Opção', `${chave}.opcao.${io}`, pt, en)
         })
       }
     }
 
-    FORMULARIOS.forEach(([formPt, formEn], i) => {
-      const nome = `${formPt} de ${catPt.toLowerCase()}`
-      push('Formulários', nome, 'Nome', `formulario.${i}.nome`, nome, `${catEn} ${formEn.toLowerCase()}`)
-      push('Formulários', nome, 'Descrição', `formulario.${i}.descricao`,
-        `O que se preenche na ${formPt.toLowerCase()} de ${catPt.toLowerCase()}.`,
+    /* --- Campos: a definição --- */
+    for (let i = 0; i < categoria.campos; i++) {
+      empurrarCampo('Campos', undefined, i, 'campo')
+    }
+
+    /* --- Formulários: nome, descrição e os campos OUTRA VEZ --- */
+    categoria.formularios.forEach((formulario, iform) => {
+      const [formPt, formEn] = formulario.nome
+      // No produto o formulário se chama só "Client", dentro de "Clients": o
+      // nome da categoria não entra no nome do formulário.
+      const nomeDoForm = formPt
+
+      push('Formulários', nomeDoForm, '', 'Nome', `form.${iform}.nome`,
+        nomeDoForm, `${catEn} ${formEn.toLowerCase()}`)
+      push('Formulários', nomeDoForm, '', 'Descrição', `form.${iform}.descricao`,
+        `O que se preenche no formulário ${formPt}, em ${catPt}.`,
         `What to fill in during ${catEn.toLowerCase()} ${formEn.toLowerCase()}.`)
+
+      for (let i = 0; i < formulario.campos; i++) {
+        empurrarCampo('Formulários', nomeDoForm, i, `form.${iform}.campo`)
+      }
     })
   })
 

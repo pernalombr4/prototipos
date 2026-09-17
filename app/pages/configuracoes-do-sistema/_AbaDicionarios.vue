@@ -58,6 +58,15 @@ const pagina = ref(1)
 const ordem = ref<'faltantes' | 'nome'>('faltantes')
 const gruposAtivos = ref<string[]>(['Geral', 'Campos', 'Formulários'])
 
+/**
+ * O nível que faltava. No ENSPACE, Formulários não é um grupo raso: dentro
+ * dele cada formulário repete os campos da categoria, com textos próprios.
+ * Em "Clients", Formulários tem mais chaves que Campos justamente por isso.
+ * Aqui o formulário vira o segundo recorte, em vez de virar mais um nível de
+ * sanfona.
+ */
+const formularioAberto = ref<string | null>(null)
+
 const idiomaAtual = computed(() => idiomas.find(i => i.codigo === form.dicionarios.idioma))
 const faltamNoTotal = computed(() => totalDeChaves - preenchidasNoTotal.value)
 
@@ -94,6 +103,7 @@ const recorte = computed(() => {
   const termo = busca.value.trim().toLowerCase()
   return universo.value.filter((c) => {
     if (!gruposAtivos.value.includes(c.grupo)) return false
+    if (formularioAberto.value && c.formulario !== formularioAberto.value) return false
     const preenchida = !!traducoes[c.id]
     if (filtro.value === 'faltam' && preenchida) return false
     if (filtro.value === 'traduzidas' && !preenchida) return false
@@ -117,18 +127,39 @@ const contagemPorGrupo = computed(() => {
   return contagem
 })
 
-watch([categoriaAberta, filtro, busca, gruposAtivos], () => {
+/** Os formulários da categoria aberta, com quantas chaves cada um carrega. */
+const formulariosDoUniverso = computed(() => {
+  const contagem = new Map<string, number>()
+  for (const c of universo.value) {
+    if (!c.formulario) continue
+    contagem.set(c.formulario, (contagem.get(c.formulario) ?? 0) + 1)
+  }
+  return [...contagem.entries()].map(([nome, total]) => ({ nome, total }))
+})
+
+/** O caminho da chave, como o produto mostra na árvore. */
+function caminhoDaChave(c: ChaveDeTraducao) {
+  return [c.grupo, c.formulario, c.dono].filter(Boolean).join(' › ')
+}
+
+watch([categoriaAberta, filtro, busca, gruposAtivos, formularioAberto], () => {
   pagina.value = 1
+})
+
+watch([categoriaAberta, gruposAtivos], () => {
+  if (!gruposAtivos.value.includes('Formulários')) formularioAberto.value = null
 })
 
 function abrirCategoria(nome: string) {
   categoriaAberta.value = nome
   busca.value = ''
+  formularioAberto.value = null
 }
 
 function voltarParaCategorias() {
   categoriaAberta.value = null
   busca.value = ''
+  formularioAberto.value = null
 }
 
 function alternarGrupo(grupo: string) {
@@ -456,6 +487,41 @@ async function rodarIaEmMassa() {
         />
       </div>
 
+      <!--
+        Os formulários da categoria. No produto, cada um deles repete os campos
+        com textos próprios, então escolher o formulário é escolher o trabalho.
+      -->
+      <div
+        v-if="formulariosDoUniverso.length && gruposAtivos.includes('Formulários')"
+        class="mb-3 flex flex-wrap items-center gap-1.5"
+      >
+        <span class="mr-1 text-xs uppercase tracking-wider text-muted">Formulário</span>
+        <button
+          type="button"
+          class="rounded-full border px-2.5 py-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          :class="!formularioAberto
+            ? 'border-primary bg-primary/10 text-primary'
+            : 'border-default text-muted hover:bg-elevated'"
+          :aria-pressed="!formularioAberto"
+          @click="formularioAberto = null"
+        >
+          Todos
+        </button>
+        <button
+          v-for="f in formulariosDoUniverso"
+          :key="f.nome"
+          type="button"
+          class="rounded-full border px-2.5 py-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          :class="formularioAberto === f.nome
+            ? 'border-primary bg-primary/10 text-primary'
+            : 'border-default text-muted hover:bg-elevated'"
+          :aria-pressed="formularioAberto === f.nome"
+          @click="formularioAberto = f.nome"
+        >
+          {{ f.nome }} · {{ f.total.toLocaleString('pt-BR') }}
+        </button>
+      </div>
+
       <p class="mb-3 text-sm text-muted">
         <template v-if="recorte.length">
           Mostrando
@@ -480,8 +546,8 @@ async function rodarIaEmMassa() {
               <p class="truncate text-sm text-highlighted" :title="chave.original">
                 {{ chave.original }}
               </p>
-              <p v-if="chave.dono" class="truncate text-xs text-muted">
-                {{ chave.grupo }} · {{ chave.dono }}
+              <p class="truncate text-xs text-muted" :title="caminhoDaChave(chave)">
+                {{ caminhoDaChave(chave) }}
               </p>
             </div>
           </div>
@@ -542,7 +608,7 @@ async function rodarIaEmMassa() {
               <template v-if="categoriaAberta || busca.trim()"> neste recorte</template>
             </p>
             <UBadge
-              :label="`${atual.categoria} · ${atual.grupo}`"
+              :label="atual.categoria"
               size="sm"
               color="neutral"
               variant="subtle"
@@ -551,8 +617,9 @@ async function rodarIaEmMassa() {
 
           <UProgress :model-value="preenchidasNoTotal" :max="totalDeChaves" size="xs" class="mb-5" />
 
-          <p class="text-xs uppercase tracking-wider text-muted">
-            {{ atual.tipo }}<template v-if="atual.dono"> · {{ atual.dono }}</template>
+          <p class="text-xs text-muted">
+            {{ caminhoDaChave(atual) }}
+            <span class="uppercase tracking-wider"> · {{ atual.tipo }}</span>
           </p>
           <p class="mt-1 text-lg text-highlighted">
             {{ atual.original }}
