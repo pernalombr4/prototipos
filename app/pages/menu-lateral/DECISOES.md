@@ -467,6 +467,10 @@ verdade, a variável é o teto da lista de categorias, hoje em cinco: baixar par
 devolve uma linha e meia. Não mexi porque o teto de cinco tem justificativa própria, escrita
 na decisão 2.
 
+**A evidência:** [](evidencias/proposta-auditoria-e-abertura.gif).
+Clicar em AUDITORIA abre a lista e já abre os Logs de auditoria; clicar em Correção
+monetária, que tem uma tela só e por isso nem tem seta, abre a Calculadora avulsa.
+
 No modelo de trilha, a Auditoria levou a trilha a **oito ícones** (Trabalho, Dados, Análise,
 Auditoria, Conhecimento, Comercial, Comparações, Configurações). É mais um argumento para a
 barra única, que a pesquisa já preferia: na trilha, cada seção nova custa um ícone numa
