@@ -231,6 +231,8 @@ Roda sobre o array em memória, no navegador. Recarregar a página volta tudo ao
   do painel de configurações;
 - **o editor de menus**: reordenar, reagrupar, trocar o tipo da tela e as quatro recusas com
   o motivo;
+- **os dois formulários de criação**, com o campo de lugar que só existe no modelo de trilha,
+  a prévia que muda junto e o escopo por grupo de membros;
 - os seis estados do andaime, incluindo vazio, carregando, erro e sem permissão.
 
 ## O que é maquete
@@ -344,6 +346,13 @@ Precisam de resposta antes da rodada 2.
    "ver todas". O protótipo já está desenhado para isso, mas o número muda o desenho da
    seção (regra 34).
 
+8. **Escopo por item faz sentido?** Hoje o produto escopa a seção. O formulário do item
+   oferece "Restringir ainda mais neste item" como proposta, e isso é superfície nova: se
+   não for para existir, sai em uma linha.
+
+9. **A seção criada deve aparecer na barra ao vivo?** Hoje ela entra só na árvore do editor.
+   Ligar as duas pontas é uma rodada própria.
+
 7. **A seção `Análise` deve nascer aberta ou recolhida?** Recolhida custa uma linha e esconde
    três; aberta custa quatro. Depende de quanto essas telas vão ser usadas no dia a dia.
 
@@ -354,6 +363,86 @@ Precisam de resposta antes da rodada 2.
 ---
 
 ## Rodadas
+
+### Rodada 4 · 17/09/2026
+
+**O que ela pediu**, literal:
+
+> "deixe abrir o form de criação de seção de menu e criação de menus. nesse caso o user
+> poderia criar no menu grandao e no menu pequeno sçoes pra ele. me mostre como vai ser isso.
+> precisa estar escopado tambem"
+
+Os dois formulários abrem de verdade, pelo `+ Criar` da barra de cima (`Seção de menu` e
+`Novo item de menu`) e por dentro do editor, em `Configurações › Interface › Menus`.
+
+#### O menu grandão e o menu pequeno
+
+É a pergunta central da rodada, e a resposta é **um campo que só existe quando faz sentido**.
+
+- **No modelo de barra única existe um lugar só.** O campo não aparece. Perguntar onde a
+  seção vai seria inventar uma decisão que o modelo não tem.
+- **No modelo de trilha existem dois**, e aí o campo aparece com as duas opções, cada uma
+  dizendo para que serve:
+
+| Opção | O que acontece | Quando usar |
+|---|---|---|
+| **Na trilha, com ícone próprio** (o menu pequeno) | Vira um ícone na barra estreita e abre um painel só dela | Área que a equipe usa o dia inteiro |
+| **Dentro de um painel** (o menu grandão) | Vira uma seção recolhível dentro de uma área que já existe | Assunto que acompanha outro |
+
+Escolhendo "dentro de um painel", um segundo campo pergunta **em qual**: Trabalho, Dados ou
+Análise.
+
+#### A prévia responde "me mostre como vai ser isso"
+
+O formulário tem uma **prévia que muda junto** com o nome, o ícone, o lugar e o escopo. Quem
+escolhe "na trilha" vê o ícone com o rótulo curto, do tamanho real, e descobre ali mesmo que
+nome comprido trunca. Quem escolhe "dentro de um painel" vê o cabeçalho da seção com um item
+embaixo.
+
+Isso não é enfeite: **o truncamento do rótulo na trilha é o custo do modelo pequeno**, e a
+prévia é onde ele aparece antes de a pessoa salvar.
+
+#### O escopo
+
+Não inventei nada: é o **Grupos Permitidos** que o produto já tem na seção de menu. Nenhum
+grupo marcado significa que todo o workspace enxerga; marcando, só quem está nos grupos. O
+resumo aparece na prévia e na linha da seção dentro do editor.
+
+**O item herda o escopo da seção** e mostra de quem herda ("Herda o escopo de Análise"). A
+caixa **"Restringir ainda mais neste item"** é **proposta minha**, e está marcada como tal:
+hoje o produto só tem escopo na seção. Vale perguntar se faz sentido para vocês.
+
+#### O formulário do item pede o que o tipo pede
+
+Escolhido o tipo entre os 13, o formulário muda:
+
+- tipo que lê categoria (`Consultas`, `Requisições`, `Meus Itens`, `Triagem`,
+  `Consultas (Grupo de Membros)`) pede **categorias**, e avisa enquanto estiver vazio;
+- tipo que precisa de URL (`Conteúdo Embutido`, `Customizado`) pede **caminho**;
+- os outros não pedem nada além do nome e do ícone.
+
+É o comportamento que a documentação de `Interface › Telas` descreve: "o sistema solicita a
+seleção de uma ou mais categorias durante a configuração".
+
+#### Detalhes que a rodada corrigiu
+
+- **"1 grupos" virou "1 grupo".** Plural saindo do dicionário, nos três idiomas, e não
+  concatenado no template. É onde a tradução quebra primeiro;
+- **o seletor de ícones é o componente que já existe no repositório**
+  (`app/components/ux/UxSeletorDeIcones.vue`), com busca em português e grade virtualizada,
+  em vez de uma grade nova só para este formulário;
+- **um defeito de montagem:** o formulário vive dentro do corpo do editor, que só renderiza
+  quando o editor abre. Vindo do `+ Criar`, os dois abriam no mesmo instante e o componente
+  montava com o modal já aberto, então o `watch` nunca disparava e a seção de destino nascia
+  vazia. Resolvido com `immediate`.
+
+**O que continua maquete:** salvar não persiste. A seção criada entra na árvore do editor em
+memória e some no reload, como todo o resto do protótipo.
+
+**O que ficou de fora, e por quê:** a seção criada **ainda não aparece na barra lateral ao
+vivo**, só no editor. Ligar as duas pontas pede subir o estado do menu do editor para a
+página inteira, o que é refatoração de verdade e merece uma rodada própria em vez de um
+puxadinho no fim desta.
 
 ### Rodada 3 · 17/09/2026
 

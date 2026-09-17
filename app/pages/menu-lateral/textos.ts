@@ -114,6 +114,42 @@ export interface TextosDaTela {
   novaTela: string
   seloNativo: string
   seloWorkspace: string
+
+  // rodada 4: formularios de criacao
+  formSecaoTitulo: string
+  formSecaoDescricao: string
+  formItemTitulo: string
+  formItemDescricao: string
+  campoNome: string
+  campoNomeDica: string
+  campoIcone: string
+  campoOnde: string
+  campoOndeDica: string
+  ondeTrilha: string
+  ondeTrilhaDica: string
+  ondePainel: string
+  ondePainelDica: string
+  campoPainel: string
+  campoOrdem: string
+  campoSecao: string
+  campoEscopo: string
+  escopoTodos: string
+  escopoDica: string
+  escopoHerdado: (secao: string) => string
+  escopoRestringir: string
+  escopoResumo: (n: number) => string
+  campoCaminho: string
+  campoCaminhoDica: string
+  campoCategorias: string
+  adicionarSecao: string
+  adicionarItem: string
+  salvar: string
+  cancelar: string
+  criada: (nome: string) => string
+  faltaNome: string
+  faltaCaminho: string
+  preverNaTrilha: string
+  preverNoPainel: string
   motivos: Record<string, string>
   tipos: Record<string, string>
 
@@ -263,6 +299,42 @@ const ptBR: TextosDaTela = {
   novaTela: 'Nova tela',
   seloNativo: 'Nativo',
   seloWorkspace: 'Do workspace',
+
+  formSecaoTitulo: 'Nova seção de menu',
+  formSecaoDescricao: 'Seção é o agrupamento do menu lateral. Ela recebe telas dentro, aparece com o nome e o ícone que você der, e só quem estiver no escopo enxerga.',
+  formItemTitulo: 'Novo item de menu',
+  formItemDescricao: 'Item é uma tela dentro de uma seção. Escolha o tipo, e o ENSPACE pede o que aquele tipo precisa.',
+  campoNome: 'Nome',
+  campoNomeDica: 'É o que aparece no menu. Use a palavra que a equipe usa.',
+  campoIcone: 'Ícone',
+  campoOnde: 'Onde a seção aparece',
+  campoOndeDica: 'No modelo de trilha existem dois lugares. A escolha muda o caminho de quem usa, não o conteúdo.',
+  ondeTrilha: 'Na trilha, com ícone próprio',
+  ondeTrilhaDica: 'Vira um ícone na barra estreita e abre um painel só dela. Bom para área que a equipe usa o dia inteiro.',
+  ondePainel: 'Dentro de um painel',
+  ondePainelDica: 'Vira uma seção recolhível dentro de uma área que já existe. Bom para assunto que acompanha outro.',
+  campoPainel: 'Em qual painel',
+  campoOrdem: 'Ordem',
+  campoSecao: 'Dentro de qual seção',
+  campoEscopo: 'Quem enxerga',
+  escopoTodos: 'Todo o workspace',
+  escopoDica: 'Sem nenhum grupo marcado, todos enxergam. Marcando, só quem está nos grupos.',
+  escopoHerdado: secao => `Herda o escopo de ${secao}`,
+  escopoRestringir: 'Restringir ainda mais neste item',
+  escopoResumo: n => n === 1 ? '1 grupo' : `${n} grupos`,
+  campoCaminho: 'Caminho',
+  campoCaminhoDica: 'A URL para onde esta tela leva.',
+  campoCategorias: 'Categorias',
+  adicionarSecao: 'Nova seção',
+  adicionarItem: 'Adicionar item',
+  salvar: 'Salvar',
+  cancelar: 'Cancelar',
+  criada: nome => `${nome} entrou no menu.`,
+  faltaNome: 'Dê um nome à seção.',
+  faltaCaminho: 'Este tipo precisa de um caminho.',
+  preverNaTrilha: 'Como fica na trilha',
+  preverNoPainel: 'Como fica no painel',
+
   motivos: {
     destinoEhFolha: 'Tela nativa não recebe item dentro. Solte dentro de uma seção.',
     categoriaSoEmCategorias: 'Categoria só entra na seção Categorias.',
@@ -430,6 +502,42 @@ const en: TextosDaTela = {
   novaTela: 'New screen',
   seloNativo: 'Native',
   seloWorkspace: 'Workspace',
+
+  formSecaoTitulo: 'New menu section',
+  formSecaoDescricao: 'A section is the grouping in the sidebar. It holds screens, shows up with the name and icon you give it, and only people in its scope see it.',
+  formItemTitulo: 'New menu item',
+  formItemDescricao: 'An item is a screen inside a section. Pick the type and ENSPACE asks for what that type needs.',
+  campoNome: 'Name',
+  campoNomeDica: 'This is what shows in the menu. Use the word the team uses.',
+  campoIcone: 'Icon',
+  campoOnde: 'Where the section shows',
+  campoOndeDica: 'In the rail model there are two places. The choice changes the path people take, not the content.',
+  ondeTrilha: 'On the rail, with its own icon',
+  ondeTrilhaDica: 'Becomes an icon on the narrow bar and opens a panel of its own. Good for an area the team uses all day.',
+  ondePainel: 'Inside a panel',
+  ondePainelDica: 'Becomes a collapsible section inside an area that already exists. Good for a subject that follows another.',
+  campoPainel: 'In which panel',
+  campoOrdem: 'Order',
+  campoSecao: 'Inside which section',
+  campoEscopo: 'Who sees it',
+  escopoTodos: 'The whole workspace',
+  escopoDica: 'With no group ticked, everyone sees it. Tick groups and only they do.',
+  escopoHerdado: secao => `Inherits the scope of ${secao}`,
+  escopoRestringir: 'Restrict further on this item',
+  escopoResumo: n => n === 1 ? '1 group' : `${n} groups`,
+  campoCaminho: 'Path',
+  campoCaminhoDica: 'The URL this screen leads to.',
+  campoCategorias: 'Categories',
+  adicionarSecao: 'New section',
+  adicionarItem: 'Add item',
+  salvar: 'Save',
+  cancelar: 'Cancel',
+  criada: nome => `${nome} is now in the menu.`,
+  faltaNome: 'Give the section a name.',
+  faltaCaminho: 'This type needs a path.',
+  preverNaTrilha: 'How it looks on the rail',
+  preverNoPainel: 'How it looks in the panel',
+
   motivos: {
     destinoEhFolha: 'A native screen takes no items inside. Drop it into a section.',
     categoriaSoEmCategorias: 'A category only goes in the Categories section.',
@@ -597,6 +705,42 @@ const es: TextosDaTela = {
   novaTela: 'Nueva pantalla',
   seloNativo: 'Nativo',
   seloWorkspace: 'Del workspace',
+
+  formSecaoTitulo: 'Nueva sección de menú',
+  formSecaoDescricao: 'Una sección es la agrupación del menú lateral. Recibe pantallas dentro, aparece con el nombre y el icono que le des, y solo la ve quien esté en el alcance.',
+  formItemTitulo: 'Nuevo elemento de menú',
+  formItemDescricao: 'Un elemento es una pantalla dentro de una sección. Elige el tipo y ENSPACE pide lo que ese tipo necesita.',
+  campoNome: 'Nombre',
+  campoNomeDica: 'Es lo que aparece en el menú. Usa la palabra que usa el equipo.',
+  campoIcone: 'Icono',
+  campoOnde: 'Dónde aparece la sección',
+  campoOndeDica: 'En el modelo de riel hay dos lugares. La elección cambia el camino de quien usa, no el contenido.',
+  ondeTrilha: 'En el riel, con icono propio',
+  ondeTrilhaDica: 'Se vuelve un icono en la barra estrecha y abre un panel propio. Bueno para un área que el equipo usa todo el día.',
+  ondePainel: 'Dentro de un panel',
+  ondePainelDica: 'Se vuelve una sección plegable dentro de un área que ya existe. Bueno para un asunto que acompaña a otro.',
+  campoPainel: 'En qué panel',
+  campoOrdem: 'Orden',
+  campoSecao: 'Dentro de qué sección',
+  campoEscopo: 'Quién la ve',
+  escopoTodos: 'Todo el workspace',
+  escopoDica: 'Sin ningún grupo marcado, todos la ven. Al marcar, solo quien está en los grupos.',
+  escopoHerdado: secao => `Hereda el alcance de ${secao}`,
+  escopoRestringir: 'Restringir aún más en este elemento',
+  escopoResumo: n => n === 1 ? '1 grupo' : `${n} grupos`,
+  campoCaminho: 'Ruta',
+  campoCaminhoDica: 'La URL a la que lleva esta pantalla.',
+  campoCategorias: 'Categorías',
+  adicionarSecao: 'Nueva sección',
+  adicionarItem: 'Añadir elemento',
+  salvar: 'Guardar',
+  cancelar: 'Cancelar',
+  criada: nome => `${nome} entró en el menú.`,
+  faltaNome: 'Dale un nombre a la sección.',
+  faltaCaminho: 'Este tipo necesita una ruta.',
+  preverNaTrilha: 'Cómo queda en el riel',
+  preverNoPainel: 'Cómo queda en el panel',
+
   motivos: {
     destinoEhFolha: 'Una pantalla nativa no recibe elementos dentro. Suéltalo en una sección.',
     categoriaSoEmCategorias: 'Una categoría solo entra en la sección Categorías.',

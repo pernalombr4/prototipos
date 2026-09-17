@@ -210,6 +210,8 @@ export interface SecaoDeMenu {
   icone: string
   /** Seção criada pelo administrador em Interface > Menus. */
   personalizada: boolean
+  /** Grupos Permitidos: vazio significa que todo o workspace enxerga. */
+  escopo?: string[]
   itens: ItemDeMenu[]
 }
 
@@ -227,6 +229,7 @@ export const secoesPersonalizadas: SecaoDeMenu[] = [
     id: 'conhecimento',
     rotulo: 'Conhecimento',
     icone: 'i-lucide-book-open',
+    escopo: [],
     personalizada: true,
     itens: [
       { id: 'base', rotulo: 'Base de Conhecimento', icone: 'i-lucide-library', nativaEscondida: true },
@@ -237,6 +240,7 @@ export const secoesPersonalizadas: SecaoDeMenu[] = [
     id: 'comercial',
     rotulo: 'Comercial',
     icone: 'i-lucide-trending-up',
+    escopo: ['comercial'],
     personalizada: true,
     itens: [
       { id: 'painel-vendas', rotulo: 'Painel de vendas', icone: 'i-lucide-chart-line' },
@@ -518,6 +522,10 @@ export interface NoDoMenu {
   /** Só para item do tipo tela. */
   tipoDeTela?: string
   categoriasLigadas?: number
+  /** Grupos de membros que enxergam. Vazio significa que todos enxergam. */
+  escopo?: string[]
+  /** Só para seção, e só no modelo de trilha: trilha ou dentro de um painel. */
+  lugar?: LugarDaSecao
   filhos?: NoDoMenu[]
 }
 
@@ -554,6 +562,7 @@ export const menuDoEditor: NoDoMenu[] = [
     tipo: 'secao',
     rotulo: 'Conhecimento',
     icone: 'i-lucide-book-open',
+    escopo: [],
     filhos: [
       { id: 't-base', tipo: 'tela', rotulo: 'Base de Conhecimento', icone: 'i-lucide-library', tipoDeTela: 'personalizada' },
       { id: 't-pol', tipo: 'tela', rotulo: 'Políticas internas', icone: 'i-lucide-file-text', tipoDeTela: 'arquivos' },
@@ -564,10 +573,51 @@ export const menuDoEditor: NoDoMenu[] = [
     tipo: 'secao',
     rotulo: 'Comercial',
     icone: 'i-lucide-trending-up',
+    escopo: ['comercial'],
     filhos: [
       { id: 't-pv', tipo: 'tela', rotulo: 'Painel de vendas', icone: 'i-lucide-chart-line', tipoDeTela: 'paineis' },
       { id: 't-tri', tipo: 'tela', rotulo: 'Triagem de propostas', icone: 'i-lucide-list-filter', tipoDeTela: 'triagem', categoriasLigadas: 2 },
       { id: 't-req', tipo: 'tela', rotulo: 'Minhas requisições', icone: 'i-lucide-inbox', tipoDeTela: 'minhas-requisicoes' },
     ],
   },
+]
+
+/* ==================================================================
+   GRUPOS DE MEMBROS, para o escopo do menu
+   O produto já tem "Grupos Permitidos" na seção de menu: restringe a
+   visibilidade a grupos específicos, e nenhum grupo marcado significa que
+   todos veem. Base: `Configurações > Interface > Menus` do en-docs.
+================================================================== */
+
+export interface GrupoDeMembros {
+  id: string
+  nome: string
+  pessoas: number
+}
+
+/** Fictícios. Nenhum grupo, empresa ou pessoa aqui é real. */
+export const gruposDeMembros: GrupoDeMembros[] = [
+  { id: 'comercial', nome: 'Comercial', pessoas: 12 },
+  { id: 'juridico', nome: 'Jurídico', pessoas: 5 },
+  { id: 'financeiro', nome: 'Financeiro', pessoas: 8 },
+  { id: 'operacoes', nome: 'Operações', pessoas: 31 },
+  { id: 'atendimento', nome: 'Atendimento', pessoas: 19 },
+]
+
+/**
+ * Onde uma seção pode morar.
+ *
+ * No modelo de barra única existe um lugar só, então o campo nem aparece.
+ * No modelo de trilha existem dois, e é a pergunta da Mikaela: "o user poderia
+ * criar no menu grandão e no menu pequeno seções pra ele".
+ *   - `trilha`: vira um ícone na trilha estreita, com painel próprio;
+ *   - `painel`: vira uma seção dentro do painel de uma área que já existe.
+ */
+export type LugarDaSecao = 'trilha' | 'painel'
+
+/** Os painéis que podem receber uma seção nova, no modelo de trilha. */
+export const paineisQueRecebem = [
+  { id: 'trabalho', chave: 'areaTrabalho' },
+  { id: 'dados', chave: 'areaDados' },
+  { id: 'analise', chave: 'secaoAnalise' },
 ]

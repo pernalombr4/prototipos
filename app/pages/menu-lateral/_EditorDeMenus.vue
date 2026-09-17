@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FormularioDeMenu from './_FormularioDeMenu.vue'
 import { menuDoEditor, tiposDeTela, podeMover, type NoDoMenu, type TipoDeNo } from './mocks'
 import type { TextosDaTela } from './textos'
 
@@ -16,7 +17,13 @@ import type { TextosDaTela } from './textos'
  * aparece na lista de propósito: recusar com o motivo ensina a regra, esconder
  * o destino só deixa a pessoa sem entender por que não dá.
  */
-const props = defineProps<{ t: TextosDaTela }>()
+const props = defineProps<{
+  t: TextosDaTela
+  /** Muda o formulário de seção: só no modelo de trilha existem dois lugares. */
+  modelo: 'barra' | 'trilha'
+  /** Quando o editor abre vindo do "+ Criar", já abre o formulário certo. */
+  abrirFormulario?: 'secao' | 'item' | null
+}>()
 const aberto = defineModel<boolean>('open', { default: false })
 const toast = useToast()
 
@@ -24,12 +31,52 @@ const toast = useToast()
 const arvore = ref<NoDoMenu[]>(JSON.parse(JSON.stringify(menuDoEditor)))
 const recusa = ref<{ id: string, motivo: string } | null>(null)
 
+/** O formulário de criação, nos dois modos. */
+const formAberto = ref(false)
+const modoDoForm = ref<'secao' | 'item'>('secao')
+const secaoDoNovoItem = ref('')
+
 watch(aberto, (v) => {
-  if (v) {
-    arvore.value = JSON.parse(JSON.stringify(menuDoEditor))
-    recusa.value = null
+  if (!v) return
+  arvore.value = JSON.parse(JSON.stringify(menuDoEditor))
+  recusa.value = null
+  if (props.abrirFormulario) {
+    modoDoForm.value = props.abrirFormulario
+    // Vindo do "+ Criar" não há seção escolhida: o item cai na primeira que recebe.
+    secaoDoNovoItem.value = props.abrirFormulario === 'item' ? (secoesQueRecebem.value[0]?.id ?? '') : ''
+    formAberto.value = true
   }
 })
+
+/**
+ * As seções que podem receber um item: só as do workspace.
+ * A seção nativa de categorias não entra, pela regra R4 (ela só aceita
+ * categoria), e destino nativo não entra pela R1.
+ */
+const secoesQueRecebem = computed(() =>
+  arvore.value
+    .filter(n => n.tipo === 'secao')
+    .map(n => ({ id: n.id, rotulo: rotuloDe(n), escopo: n.escopo ?? [] })),
+)
+
+function abrirForm(modo: 'secao' | 'item', secaoId = '') {
+  modoDoForm.value = modo
+  secaoDoNovoItem.value = secaoId
+  formAberto.value = true
+}
+
+function receberCriado(no: NoDoMenu & { lugar?: string, escopo: string[] }) {
+  if (no.tipo === 'secao') {
+    arvore.value.push(no)
+  }
+  else {
+    const alvo = arvore.value.find(n => n.id === (secaoDoNovoItem.value || secoesQueRecebem.value[0]?.id))
+    if (!alvo) return
+    alvo.filhos = alvo.filhos ?? []
+    alvo.filhos.push(no)
+  }
+  toast.add({ title: props.t.criada(no.rotulo ?? ''), icon: 'i-lucide-check', color: 'neutral' })
+}
 
 function rotuloDe(no: NoDoMenu) {
   if (no.rotulo) return no.rotulo
@@ -132,7 +179,27 @@ function acoesDe(no: NoDoMenu) {
     :ui="{ content: 'max-w-3xl' }"
   >
     <template #body>
-      <div class="max-h-[60vh] space-y-1 overflow-y-auto pr-1">
+      <div class="mb-3 flex flex-wrap gap-2">
+        <UButton
+          :label="props.t.adicionarSecao"
+          icon="i-lucide-folder-plus"
+          size="sm"
+          color="primary"
+          variant="soft"
+          @click="abrirForm('secao')"
+        />
+        <UButton
+          :label="props.t.adicionarItem"
+          icon="i-lucide-file-plus"
+          size="sm"
+          color="neutral"
+          variant="subtle"
+          :disabled="!secoesQueRecebem.length"
+          @click="abrirForm('item', secoesQueRecebem[0]?.id)"
+        />
+      </div>
+
+      <div class="max-h-[55vh] space-y-1 overflow-y-auto pr-1">
         <template v-for="no in arvore" :key="no.id">
           <!-- nível 1 -->
           <div
@@ -167,7 +234,30 @@ function acoesDe(no: NoDoMenu) {
                 :aria-label="props.t.moverAbaixo"
                 @click="reordenar(no.id, 1)"
               />
+              <UButton
+                v-if="no.tipo === 'secao'"
+                icon="i-lucide-plus"
+                size="xs"
+                color="neutral"
+                variant="ghost"
+                :aria-label="props.t.adicionarItem"
+                @click="abrirForm('item', no.id)"
+              />
             </div>
+
+            <!-- o escopo da seção, que decide quem enxerga -->
+            <p v-if="no.tipo === 'secao'" class="mt-1 flex items-center gap-1.5 pl-6 text-xs text-muted">
+              <UIcon name="i-lucide-eye" class="size-3.5 shrink-0" />
+              <span v-if="!no.escopo?.length">{{ props.t.escopoTodos }}</span>
+              <span v-else>{{ props.t.escopoResumo(no.escopo.length) }}</span>
+              <UBadge
+                v-if="no.lugar === 'trilha'"
+                :label="props.t.ondeTrilha"
+                size="sm"
+                color="primary"
+                variant="subtle"
+              />
+            </p>
 
             <!-- nível 2 -->
             <div v-if="no.filhos?.length" class="mt-2 space-y-1 border-l border-default pl-3">
@@ -254,6 +344,16 @@ function acoesDe(no: NoDoMenu) {
           </div>
         </template>
       </div>
+
+      <!-- os dois formulários de criação, em camada sobre o editor -->
+      <FormularioDeMenu
+        v-model:open="formAberto"
+        :t="props.t"
+        :modo="modoDoForm"
+        :modelo="props.modelo"
+        :secoes="secoesQueRecebem"
+        @criado="receberCriado"
+      />
     </template>
   </UModal>
 </template>

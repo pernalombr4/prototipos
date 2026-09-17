@@ -169,7 +169,7 @@ function abrirItemDeConfiguracao(id: string, rotulo: string) {
   rotuloConfigAtivo.value = rotulo
   // Interface > Menus abre o editor do menu, que é onde o administrador
   // reordena, reagrupa e escolhe o tipo de cada tela.
-  if (id === 'menus') editando.value = true
+  if (id === 'menus') abrirEditor(null)
 }
 
 /** "Configurar categoria" leva para Estrutura > Categorias, já na área certa. */
@@ -188,8 +188,17 @@ const itensDeCriar = computed(() => [[
   { label: t.value.criarTarefa, icon: 'i-lucide-square-check-big', onSelect: () => avisarMaquete(t.value.criarTarefa) },
 ], [
   { label: t.value.criarCategoria, icon: 'i-lucide-folder-plus', onSelect: () => avisarMaquete(t.value.criarCategoria) },
-  { label: t.value.criarSecao, icon: 'i-lucide-menu', onSelect: () => avisarMaquete(t.value.criarSecao) },
+], [
+  // Estes dois abrem o editor de menus com o formulário certo já aberto: criar
+  // seção sem ver o menu em volta é decidir no escuro.
+  { label: t.value.criarSecao, icon: 'i-lucide-menu', onSelect: () => abrirEditor('secao') },
+  { label: t.value.formItemTitulo, icon: 'i-lucide-file-plus', onSelect: () => abrirEditor('item') },
 ]])
+
+function abrirEditor(form: 'secao' | 'item' | null) {
+  formInicial.value = form
+  editando.value = true
+}
 
 function avisarMaquete(oQue: string) {
   toast.add({
@@ -202,6 +211,7 @@ function avisarMaquete(oQue: string) {
 /* ------------------------------ camadas ------------------------------ */
 const vendoTodas = ref(false)
 const editando = ref(false)
+const formInicial = ref<'secao' | 'item' | null>(null)
 const vendoHoje = ref(false)
 const buscando = ref(false)
 
@@ -406,7 +416,12 @@ function emBreve() {
 
     <MenuDeHoje v-model:open="vendoHoje" :t="t" />
 
-    <EditorDeMenus v-model:open="editando" :t="t" />
+    <EditorDeMenus
+      v-model:open="editando"
+      :t="t"
+      :modelo="modelo"
+      :abrir-formulario="formInicial"
+    />
 
     <UModal v-model:open="buscando" :ui="{ content: 'max-w-xl' }">
       <template #content>
