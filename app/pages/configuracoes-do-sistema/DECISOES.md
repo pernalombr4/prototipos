@@ -1,5 +1,71 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 10 — 16/09/2026 — o gráfico do consumo passou a falar
+
+**O que ela pediu, literal:**
+
+> "o grafico da tela de cobrança deve ter mais informaçao com mouse hover. e informaçoes de eixo
+> x e y pra facilitar a leitura. nada muito sobrecarregado. simples. usando os graficos do modelo
+> de dash do nuxt. tem na doc deles"
+
+O gráfico era um `<polyline>` que eu desenhei à mão: bonito, leve e **mudo**. Dava a silhueta do
+gasto e não respondia nem "quanto foi aquele pico" nem "que dia é aquele vale". Sem escala, um
+pico de 210 e um pico de 2.100 têm exatamente o mesmo desenho.
+
+### A peça
+
+O template de dashboard do Nuxt UI monta os gráficos com **Unovis** (`@unovis/vue`), e é o que
+está aqui: `VisXYContainer` com `VisLine`, `VisArea`, dois `VisAxis`, `VisCrosshair` e
+`VisTooltip`. As cores saem dos tokens (`--ui-primary`, `--ui-border`), então o gráfico troca de
+tema junto com a tela, como manda a regra 35.
+
+Ficou **de fora** de propósito o resto do painel do Unovis: legenda, zoom, seleção de período e
+segunda série. Para 30 pontos e uma métrica só, cada um deles é peso sem resposta nova, e o
+pedido foi "nada muito sobrecarregado".
+
+### Os dois eixos
+
+- **Y**: quatro marcas redondas tiradas do pico (0, 70, 140, 210) com linha de grade fina, e o
+  rótulo `en-credits`. Marca quebrada (0, 52, 105, 157) não ajuda ninguém a ler.
+- **X**: cinco paradas (18 ago, 25 ago, 1 set, 8 set, **hoje**), e não trinta. O último é "hoje"
+  porque é assim que a pessoa pensa a ponta da linha.
+
+### O que o ponteiro conta
+
+Três linhas, no máximo:
+
+```
+Segunda-feira, 7 de setembro
+Sem consumo
+Feriado: Independência do Brasil.
+```
+
+1. **O dia com o dia da semana.** É o que explica o desenho: os vales são sábado e domingo.
+2. **O valor**, ou "Sem consumo".
+3. **O tamanho daquilo no período** (`7% do consumo dos 30 dias`) ou, quando o dia é zero, **o
+   motivo**: fim de semana, feriado (lido dos feriados do próprio workspace, na aba Calendário)
+   ou "Nenhuma execução neste dia".
+
+O terceiro item é o que evita a leitura errada mais provável desta tela: vale no gráfico
+parecendo falha de registro. Aqui o gráfico se explica sozinho.
+
+### Duas notas de implementação
+
+- **Só no cliente.** O Unovis mede o container para desenhar, e no prerender não existe container
+  para medir. O gráfico entra num `<ClientOnly>` com um esqueleto da mesma altura, para a seção
+  não pular quando ele aparece.
+- **`text-muted` nas marcas, não `text-dimmed`.** O template do Nuxt usa `--ui-text-dimmed`; no
+  escuro isso dá 3,03:1 e reprova no WCAG AA, o mesmo defeito que a auditoria apontou no produto.
+
+### O que fica pendente
+
+Tooltip é informação que só existe no hover: quem navega por teclado não alcança. O resumo do
+período continua em texto ao lado (total, média, pico pela escala), mas o valor dia a dia, hoje,
+só sai no mouse. Se esta tela virar produto, o caminho é o que o Highcharts faz: a série navegável
+por seta com o valor anunciado.
+
+---
+
 ## Rodada 9 — 16/09/2026 — a hierarquia real dos dicionários
 
 **O que ela pediu, literal:**

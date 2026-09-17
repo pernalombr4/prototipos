@@ -19,6 +19,8 @@
     "@iconify-json/simple-icons": "^1.2.0",
     "@nuxt/ui": "^4.5.1",
     "@tanstack/vue-table": "^8.21.3",
+    "@unovis/ts": "^1.7.0",
+    "@unovis/vue": "^1.7.0",
     "marked": "^18.0.13",
     "nuxt": "^4.4.2"
   },

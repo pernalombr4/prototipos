@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import GraficoDeConsumo from './_GraficoDeConsumo.vue'
 import Secao from './_Secao.vue'
 import {
   carteira,
@@ -46,24 +47,6 @@ const dataDoFim = computed(() => {
 })
 
 const saldoBaixo = computed(() => diasDeFolego.value <= 20)
-
-/* --------------------------- a linha do consumo -------------------- */
-
-const pico = computed(() => Math.max(...consumoDiario.map(d => d.credits), 1))
-
-const linha = computed(() => {
-  const L = 300
-  const A = 56
-  return consumoDiario
-    .map((d, i) => {
-      const x = (i / (consumoDiario.length - 1)) * L
-      const y = A - (d.credits / pico.value) * (A - 6)
-      return `${x.toFixed(1)},${y.toFixed(1)}`
-    })
-    .join(' ')
-})
-
-const area = computed(() => `0,56 ${linha.value} 300,56`)
 
 /* ----------------------------- por recurso ------------------------- */
 
@@ -203,31 +186,20 @@ function dataLonga(iso: string) {
         <div class="rounded-lg border border-default bg-elevated/40 p-4">
           <div class="mb-2 flex items-baseline justify-between">
             <p class="text-sm font-medium text-highlighted">Consumo diário</p>
-            <p class="text-xs text-muted">últimos 30 dias · pico de {{ pico }}</p>
+            <p class="text-xs text-muted">últimos 30 dias</p>
           </div>
 
-          <svg
-            viewBox="0 0 300 56"
-            preserveAspectRatio="none"
-            class="h-28 w-full overflow-visible text-primary"
-            role="img"
-            :aria-label="`Consumo diário dos últimos 30 dias. Total de ${consumo30} en-credits, pico de ${pico}.`"
-          >
-            <polygon :points="area" class="fill-current opacity-10" />
-            <polyline
-              :points="linha"
-              class="stroke-current"
-              fill="none"
-              stroke-width="1.5"
-              vector-effect="non-scaling-stroke"
-              stroke-linejoin="round"
-            />
-          </svg>
-
-          <div class="mt-1 flex justify-between text-[11px] text-muted">
-            <span>18 de agosto</span>
-            <span>hoje</span>
-          </div>
+          <!--
+            Só no cliente: o Unovis mede o container para desenhar, e no
+            prerender não existe container para medir. O esqueleto tem a
+            altura do gráfico para a seção não pular quando ele entra.
+          -->
+          <ClientOnly>
+            <GraficoDeConsumo />
+            <template #fallback>
+              <div class="h-44 w-full animate-pulse rounded-md bg-elevated" />
+            </template>
+          </ClientOnly>
 
           <p class="mt-3 text-xs text-muted">
             Os vales são fim de semana: sem tarefa rodando, não há consumo.
