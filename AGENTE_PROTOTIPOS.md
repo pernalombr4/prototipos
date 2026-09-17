@@ -294,6 +294,39 @@ novo, literal), o que mudou, e o que foi descartado com o motivo.
 
 ---
 
+### Antes de encerrar: limpeza do que ficou na máquina
+
+Investigar e pesquisar espalha arquivo. Print do develop, GIF de jornada, captura de
+referência: tudo isso cai em **Downloads** ou numa pasta temporária antes de chegar no lugar
+certo. Encerrar a rodada sem limpar deixa lixo na máquina da Mikaela, e daqui a três protótipos
+são dezenas de arquivos que ninguém sabe mais de onde vieram.
+
+**A regra tem dois lados:**
+
+| | |
+|---|---|
+| **Fica** | O que é entrega: print e GIF movidos para `app/pages/<slug>/evidencias/`, dentro do repositório e versionados |
+| **Sai** | Todo o resto: a cópia que sobrou em Downloads, o arquivo intermediário, a captura que não foi usada |
+
+**Apague só o que você mesma criou nesta rodada.** Downloads é pasta de gente, não do agente:
+tem arquivo de trabalho, anexo de e-mail, coisa que ela baixou e ainda vai usar. Data de
+modificação recente não prova autoria. Se não tiver certeza de que o arquivo é seu, **deixe e
+pergunte**. Arquivo esquecido custa muito menos que arquivo dela apagado.
+
+No fim da rodada, antes de entregar:
+
+```bash
+ls -lt ~/Downloads | head -20
+```
+
+E **diga na entrega o que apagou**, em uma linha. Limpeza silenciosa é pior que nenhuma: ela
+não tem como saber o que sumiu.
+
+Arquivo intermediário que você mesma escreve nasce no **diretório de scratch da sessão**, nunca
+em Downloads nem na área de trabalho. Assim não há o que limpar depois.
+
+---
+
 ## Parte 2 — Do que o protótipo é feito
 
 Três restrições, e as três são absolutas: **primeiro o SDK do ENSPACE**, depois **só Nuxt UI**,
@@ -684,3 +717,9 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
     inglês e espanhol. Não é enfeite: o protótipo é a **referência que o dev vai implementar**,
     e é no escuro que aparece o contraste que não passa, e em espanhol que o texto estoura o
     botão. Ver **Parte 4 → Tema e idioma**.
+
+36. **Limpe o que a pesquisa deixou na máquina.** Print, GIF e captura que caíram em Downloads
+    ou em pasta temporária saem antes de encerrar a rodada. Fica só o que virou entrega, dentro
+    de `evidencias/`. **Apague apenas o que você mesma criou** — na dúvida, deixe e pergunte —
+    e **diga na entrega o que apagou**. Arquivo intermediário nasce no diretório de scratch da
+    sessão, não em Downloads. Ver **Parte 1 → Antes de encerrar: limpeza**.

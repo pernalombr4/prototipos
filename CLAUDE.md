@@ -123,6 +123,18 @@ Parte 2 da spec, resumida:
 - 🚫 **Nada de componente wired, do módulo de dados (`enspace-sdk-vue/nuxt`) nem do client
   HTTP.** Tudo isso precisa de back-end.
 
+## Limpeza no fim da rodada
+
+Print, GIF e captura que a investigação deixou em **Downloads** ou em pasta temporária saem
+antes de entregar. Fica só o que virou entrega, em `app/pages/<slug>/evidencias/`.
+
+```bash
+ls -lt ~/Downloads | head -20
+```
+
+**Apague só o que você criou nesta rodada** — Downloads é pasta de gente, tem arquivo dela ali.
+Na dúvida, deixe e pergunte. E **diga na entrega o que apagou**. Regra 36.
+
 ## ⛔ Tema e idioma em toda tela
 
 Todo protótipo tem alternador **claro/escuro** e **PT · EN · ES**. É a referência do dev: é no
