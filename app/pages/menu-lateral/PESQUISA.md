@@ -275,6 +275,79 @@ Aqui é onde o ENSPACE pode sair melhor, e não apenas igual:
 
 ---
 
+## Trilha de ícones: é tendência de mercado?
+
+**Pergunta da rodada 2, com o print do Jira antigo como referência:** "quando falamos em
+menu de 2 níveis, o que pensamos foi naquele tipo de menu que primeiro tem uns grandes
+ícones (opções maiores, agregadoras) e dentro um menu específico dali, como é no Jira por
+exemplo."
+
+**Resposta curta: o padrão existe e é usado por produtos grandes, mas ele não resolve o
+problema desta demanda, e o Jira saiu dele.**
+
+### Quem usa trilha de ícones, e para quê
+
+| Produto | O que a trilha separa |
+|---|---|
+| **Microsoft Teams** | Chat, Teams, Calendário, Arquivos, apps. Modos de trabalho diferentes, cada um com conteúdo próprio. O admin fixa apps na trilha por política, e a pessoa pode fixar os seus |
+| **Slack** | `Home`, `DMs`, `Activity`, `Files`, e `Later` e `Tools` atrás de `More`. Cada aba abre sua própria barra lateral |
+| **monday.com** | `Workspace`, `AI Sidekick`, `Vibe`, `AI Agents`, `Notetaker`, `Favorites`, `More`. São produtos diferentes dentro da mesma conta |
+| **ClickUp** | A `Global Navigation` troca entre `Home Sidebar`, `Spaces Sidebar` e `Chat Sidebar`. `Home` não pode ser desafixada; `Chat`, `AI Hub`, `Planner` e `App Center` se fixam pelo `More` |
+| **Intercom** | Inbox, Tickets, Reports, Settings |
+
+O que os cinco têm em comum: **vários modos de trabalho que convivem**. Conversa e tarefa e
+calendário são coisas que a pessoa alterna o dia inteiro, e nenhuma cabe dentro da outra.
+A trilha existe para trocar de modo sem perder o lugar no modo anterior.
+
+### Quem não usa, e o que faz no lugar
+
+Notion, Linear, Attio, Airtable, Twenty, Stripe, Asana e Pipefy: **uma barra só**, com
+seções nomeadas, favoritos e busca, e a administração fora dela.
+
+### E o Jira, que foi a referência da demanda
+
+O print da demanda é a navegação **antiga** do Jira. Na navegação nova, documentada pela
+própria Atlassian em
+[What is the new navigation in Jira?](https://support.atlassian.com/jira-software-cloud/docs/what-is-the-new-navigation-in-jira/)
+([print](evidencias/ref-jira-nova-navegacao.gif)), **a trilha azul de ícones não existe
+mais**. A seção do documento se chama, literalmente, **"Navigation starts from the
+sidebar"**, e a legenda numerada da imagem oficial diz:
+
+> 2. Access essentials like **For you**, **Recent**, **Starred**, and **Apps**
+> 3. Browse available **Spaces** and expand to navigate within them
+> 6. Find **More** navigation items and **Customize sidebar**
+> 7. **Search** across all apps on your site, and **Create** work items and requests
+> 8. Use **AI Chat** and find utility items like **Notifications**, **Settings** (⚙), and **Account**
+
+Ou seja: uma barra lateral com seções (`Starred`, `Spaces`, `More`), busca e `Create` na
+barra de cima, e **`Settings` na barra de cima também**, fora do corpo do menu. É quase item
+por item a proposta desta pasta, feita antes de eu ler esse documento.
+
+### Por que a trilha não resolve esta demanda
+
+1. **A trilha separa modos, e o ENSPACE tem um modo só.** Trabalho no ENSPACE é
+   olhar e mexer em item de categoria. Tarefa, agenda e spaceflow orbitam isso, não são
+   modos paralelos como conversa e calendário. Numa trilha, o ENSPACE teria uma área gorda
+   e três magras.
+2. **A trilha não tira linha do menu, ela tira da tela.** O problema medido é que 31 linhas
+   nativas não cabem em 847 px. A trilha não apaga nenhuma linha: ela esconde as das outras
+   áreas atrás de um clique. Ajuda, mas ao custo de a pessoa não ver mais o menu inteiro.
+3. **O que resolve é a mesma coisa nos dois modelos:** tirar a administração do caminho e dar
+   teto à lista que cresce. Isso já é o que a proposta faz, e é o que o Jira novo faz.
+4. **Custo de aprendizado.** Trocar barra com rótulo por ícone sem rótulo piora a descoberta,
+   que é exatamente a queixa do cliente ("todo mundo se confunde").
+
+### O que foi feito com isso
+
+O modelo de trilha foi **construído assim mesmo**, como alternativa visível no protótipo
+(alternador `Modelo` na barra de andaime), com cinco áreas de conteúdo real: `Trabalho`,
+`Dados`, `Seções`, `Configurações` e `Ajuda`. Não é espantalho: é a versão mais forte da
+ideia, para a comparação acontecer olhando, e não discutindo.
+
+A recomendação, sustentada pelo que está acima, continua sendo a **barra única**.
+
+---
+
 ## Sobre HubSpot e Asana
 
 A demanda citou os dois. Nenhum entrou como referência formal porque a documentação pública

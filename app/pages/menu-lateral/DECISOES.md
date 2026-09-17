@@ -12,18 +12,19 @@ exatamente o mesmo menu.
 
 | | Hoje | Proposta |
 |---|---|---|
-| Linhas, workspace medido no develop (1 categoria) | **36** | 12 |
-| Linhas com 8 categorias | 43 | **17** |
-| Linhas com 40 categorias | 75 | **17** |
+| Menu nativo, nenhuma categoria cadastrada | **31 linhas** | 9 linhas e um cartão |
+| Com 8 categorias | 39 | **17** |
+| Com 40 categorias | 71 | **17** |
 | Níveis | 3 | **2** |
 | Linhas de administração no menu de trabalho | 19 | **1** (a porta) |
 | Teto da lista de categorias | nenhum | **5 mais os favoritos** |
 
-As contas de "hoje": 36 linhas foram medidas no develop com uma categoria, e cada categoria
-com menu automático soma uma linha (36 menos 1, mais N). As da proposta contam o que a tela
-renderiza: 4 destinos, Favoritos com cabeçalho e 3, Categorias com cabeçalho, 5 e o "ver
-todas", mais 2 cabeçalhos de seção do workspace recolhidos, mais Configurações e Ajuda no
-rodapé.
+As contas de "hoje" partem do **menu nativo**: 28 itens mais 3 rótulos de grupo, presentes em
+qualquer workspace. Cada categoria com menu automático soma uma linha, então 8 dão 39 e 40 dão
+71. As da proposta são contadas na tela: 4 destinos, Favoritos com cabeçalho e 3, Categorias
+com cabeçalho, 5 e o "ver todas", mais 2 cabeçalhos de seção do workspace recolhidos, mais
+Configurações e Ajuda no rodapé. No workspace vazio a seção de categorias vira um cartão que
+ensina, e o menu fica em 9 linhas.
 
 ---
 
@@ -76,11 +77,11 @@ sem que o administrador precise decidir por todo mundo.
 
 **Por que:** copiado do comportamento do Attio, que oferece `Most relevant`,
 `Recently added`, `Alphabetical` e `Custom` no hover do rótulo da seção. `Mais usadas` é o
-padrão porque é o que faz o recorte de seis acertar sem ninguém configurar nada.
+padrão porque é o que faz o recorte de cinco acertar sem ninguém configurar nada.
 
 ### 5. Formulário vira aba, não terceiro nível
 
-**O que muda:** `Categorias › leve › Todos` deixa de existir. Ao abrir uma categoria, os
+**O que muda:** `Categorias › <categoria> › Todos` deixa de existir. Ao abrir uma categoria, os
 formulários aparecem como abas no topo da tela, ao lado de `Todos`.
 
 **Por que:** é o padrão 2. Airtable organiza vistas em seções **dentro** da base, Twenty
@@ -104,7 +105,8 @@ apêndice no fim do menu nativo e passam a ser seções iguais às nativas, com 
 comportamento de recolher, contar e ordenar.
 
 **Por que:** é o item 1 do "o que nenhum deles faz" da pesquisa. O ENSPACE já tem a peça,
-só não a usa no próprio menu. O `✦` ao lado do nome diz que a seção é do workspace.
+só não a usa no próprio menu. A seção do workspace não ganha marca visual nenhuma: ver a
+revisão de design mais abaixo.
 
 ### 8. O contraste sai daqui já passando
 
@@ -131,7 +133,7 @@ Twenty fazem.
 
 ## O de-para, item a item
 
-Os 33 itens de hoje, onde cada um foi parar. Nenhum sumiu.
+Os 28 itens do menu nativo de hoje, onde cada um foi parar. Nenhum sumiu.
 
 ### Membro
 
@@ -139,7 +141,7 @@ Os 33 itens de hoje, onde cada um foi parar. Nenhum sumiu.
 |---|---|
 | Início | Início, destino solto, mesma posição |
 | Spaceflows | Spaceflows, destino solto, mesma posição |
-| Categorias | Seção `Categorias`, com teto de 6 mais favoritos |
+| Categorias | Seção `Categorias`, com teto de 5 mais favoritos |
 | Categorias › *cada categoria* | Item nível 2 da seção, ou da seção `Favoritos` |
 | Categorias › categoria › Todos | **Aba `Todos`** na tela da categoria |
 | Categorias › categoria › *formulário* | **Aba por formulário** na tela da categoria |
@@ -147,7 +149,7 @@ Os 33 itens de hoje, onde cada um foi parar. Nenhum sumiu.
 | Tarefas › Agendadas | **Aba** dentro de Tarefas |
 | Tarefas › Rápidas | **Aba** dentro de Tarefas |
 | Agenda | Agenda, destino solto |
-| *seção personalizada* | Seção igual às nativas, com `✦` |
+| *seção personalizada* | Seção igual às nativas, sem marca visual |
 
 ### Configurações
 
@@ -223,6 +225,9 @@ Roda sobre o array em memória, no navegador. Recarregar a página volta tudo ao
 - **a paleta `Ctrl K`**, buscando em categorias, destinos e configurações, e navegando de
   verdade para o que for escolhido;
 - **as abas de formulário** da tela da categoria, trocando a tabela;
+- **o botão `+`**, com as quatro opções de criação;
+- **o alternador de modelo** entre barra única e trilha de ícones, com as cinco áreas da
+  trilha navegáveis;
 - os seis estados do andaime, incluindo vazio, carregando, erro e sem permissão.
 
 ## O que é maquete
@@ -231,7 +236,8 @@ Declarado, conforme a regra 10:
 
 - **o miolo da direita**, fora das abas da categoria. Os números, as linhas e o esqueleto são
   ilustrativos: o que está sendo proposto é a navegação da esquerda (regra 19);
-- **`Criar`** e **`Ajuda`** abrem um toast dizendo que são maquete, em vez de fingir um menu;
+- **as quatro opções do `+`** abrem um toast dizendo qual formulário abririam. O menu é real,
+  o formulário é maquete. O mesmo vale para **`Ajuda`**;
 - **o trocador de workspace** não troca nada. A tela de escolha de workspace tem protótipo
   próprio, em [tela-de-workspaces](../tela-de-workspaces/);
 - **`Configurar categoria`** leva para Estrutura › Categorias, mas não abre a categoria
@@ -338,6 +344,70 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 2 · 17/09/2026
+
+**O que ela pediu**, literal:
+
+> "tem coisa errada aí. voce pegou como exemplo um menu de hoje de um workspace especifico.
+>
+> e quando falamos em menu de 2 níveis, o que pensamos foi naquele tipo de menu que primeiro
+> tem uns grandes icones (opçoes maiores, agregadoras) e dentro um menu especifico dali, como
+> é no jira por exemplo
+>
+> faça desse modo simulado SE PERCEBER QUE É TENDENCIA DE MERCADO. Se nao for tendencia de
+> mercado esse modelo, me prove com pesquisa.
+>
+> e pode simular a ação do botão de "+" que voce fez no topo tambem se ele for continuar
+> existindo"
+
+**1. O erro do menu de hoje, corrigido.** Ela está certa: o painel de comparação reproduzia
+o menu do workspace `teste-ux` inteiro, com a categoria `leve`, o formulário `AUD Formulario`
+e a seção `Knowledge` que alguém criou lá. Isso é o menu de **um** workspace, não do produto.
+
+Agora o painel mostra o **menu nativo**: **31 linhas** (28 itens mais 3 rótulos de grupo) que
+existem em qualquer workspace, com zero categorias cadastradas. Das 36 linhas que eu tinha
+medido, 5 eram daquele workspace.
+
+A medição em pixel continua sendo a do `teste-ux` (1208 px em 847 px), e a altura do menu
+nativo é **derivada** dela, não medida à parte: 1208 / 36 = 33,5 px por linha, vezes 31 =
+cerca de 1040 px. Continua acima dos 847 px. **O menu nativo não cabe na tela sozinho**, o
+que é um argumento mais forte que o anterior, e não mais fraco.
+
+**2. A trilha de ícones: pesquisada, construída, e não recomendada.** A pesquisa inteira está
+no `PESQUISA.md`, seção "Trilha de ícones: é tendência de mercado?". O resumo:
+
+- **o padrão é real**: Microsoft Teams, Slack, monday, ClickUp e Intercom usam trilha;
+- **mas ele separa MODOS DE TRABALHO que convivem** (conversa, calendário, tarefa), e o
+  ENSPACE tem um modo só, com satélites. Numa trilha, o ENSPACE fica com uma área gorda e
+  três magras;
+- **e o Jira, que foi a referência da demanda, saiu dele.** A navegação nova do Jira,
+  documentada pela Atlassian, tem a seção "Navigation starts from the sidebar", sem trilha,
+  com `Starred`, `Spaces` e `More` na barra, e `Search`, `Create` e `Settings` na barra de
+  cima. É quase item por item o que esta pasta já propunha;
+- **a trilha não apaga linha nenhuma**, ela esconde as das outras áreas atrás de um clique. O
+  problema medido é volume de linha, não falta de gaveta.
+
+**Construí assim mesmo**, como alternativa visível: o alternador `Modelo` na barra de andaime
+troca entre `Barra única` e `Trilha e painel`. A trilha tem cinco áreas com conteúdo de
+verdade (`Trabalho`, `Dados`, `Seções`, `Configurações`, `Ajuda`), porque comparar com um
+espantalho não vale nada. Medido no navegador: as cinco áreas cabem sem rolagem.
+
+O alternador fica no andaime, e não na tela, porque **no produto só um dos dois vai existir**.
+Oferecer os dois ao usuário seria absurdo.
+
+**3. O botão "+" agora abre menu de verdade.** Quatro opções: `Item em uma categoria`,
+`Tarefa`, `Categoria` e `Seção de menu`. Cada uma dispara um toast dizendo qual formulário
+abriria, porque o formulário em si é maquete. O botão existe nos dois modelos. No Jira novo,
+`Create` fica na barra de cima; aqui fica ao lado da busca, que é onde o Linear e o Attio
+põem.
+
+**O que foi descartado nesta rodada:**
+
+- **trilha como modelo padrão.** Pelos quatro motivos acima. Fica disponível para ela ver e
+  decidir;
+- **misturar os dois** (trilha para as áreas e barra para o conteúdo, ao mesmo tempo). Seria
+  três níveis, que é o contrário do que a demanda pede.
+
 ### Rodada 1 · 16/09/2026
 
 **O que ela pediu**, literal:
@@ -347,7 +417,7 @@ Precisam de resposta antes da rodada 2.
 > todo mundo se confunde" — "a ideia de produtos é fazer um menu em 2 níveis pro enspace."
 
 **O que foi feito:** a proposta inteira acima, com os seis estados, a comparação lado a lado
-com o menu medido no develop, e o de-para dos 33 itens.
+com o menu medido no develop, e o de-para item a item.
 
 **O que foi descartado no caminho:**
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { menuDeHoje } from './mocks'
+import { menuNativoDeHoje } from './mocks'
 import type { TextosDaTela } from './textos'
 
 /**
@@ -14,22 +14,33 @@ import type { TextosDaTela } from './textos'
 const props = defineProps<{ t: TextosDaTela }>()
 const aberto = defineModel<boolean>('open', { default: false })
 
-/** Medido no develop em 16/09/2026, viewport 1920 x 911. */
+/**
+ * Medido no develop em 16/09/2026, viewport 1920 x 911.
+ *
+ * O que está desenhado abaixo é o menu NATIVO: 31 linhas que existem em
+ * qualquer workspace, com zero categorias cadastradas.
+ *
+ * A medição em pixel foi feita no `teste-ux`, que tinha 36 linhas (as 31
+ * nativas mais 5 daquele workspace): 1208 px de menu em 847 px de área.
+ * A altura do menu nativo é DERIVADA dessa medição, não medida à parte:
+ * 1208 / 36 = 33,5 px por linha, vezes 31 = cerca de 1040 px. Continua
+ * acima dos 847 px disponíveis, sem nenhuma categoria cadastrada.
+ */
 const medicao = {
-  linhas: 36,
-  itens: 33,
+  linhasNativas: 31,
+  itensNativos: 28,
   niveis: 3,
-  alturaConteudo: 1208,
+  alturaNativaDerivada: 1040,
+  alturaMedida: 1208,
+  linhasMedidas: 36,
   alturaDisponivel: 847,
-  sobra: 361,
   deConfiguracoes: 19,
 }
 
-/**
- * Onde a tela corta. Como cada linha tem 26 px na captura, a linha de água cai
- * na 32a linha: é o mesmo 30% que a medição em pixel encontrou.
- */
-const linhaDagua = Math.floor(medicao.alturaDisponivel / 26)
+const sobraNativa = medicao.alturaNativaDerivada - medicao.alturaDisponivel
+
+/** Onde a tela corta: 847 px divididos pelos 33,5 px por linha da medição. */
+const linhaDagua = Math.floor(medicao.alturaDisponivel / 33.5)
 
 const recuo: Record<number, string> = {
   0: 'pl-0',
@@ -52,8 +63,8 @@ const recuo: Record<number, string> = {
         <!-- A medição, antes da lista: é ela que sustenta o argumento. -->
         <div class="grid grid-cols-2 gap-2">
           <div class="rounded-lg border border-default p-3">
-            <div class="text-2xl font-bold text-highlighted">{{ medicao.linhas }}</div>
-            <div class="text-xs text-muted">{{ props.t.linhas(medicao.linhas) }}</div>
+            <div class="text-2xl font-bold text-highlighted">{{ medicao.linhasNativas }}</div>
+            <div class="text-xs text-muted">{{ props.t.linhas(medicao.linhasNativas) }}</div>
           </div>
           <div class="rounded-lg border border-default p-3">
             <div class="text-2xl font-bold text-highlighted">{{ medicao.niveis }}</div>
@@ -65,13 +76,13 @@ const recuo: Record<number, string> = {
           icon="i-lucide-move-vertical"
           color="warning"
           variant="subtle"
-          :title="props.t.naoCabeNaTela(medicao.sobra)"
-          :description="`${medicao.alturaConteudo} px / ${medicao.alturaDisponivel} px · ${medicao.deConfiguracoes}/${medicao.itens}`"
+          :title="props.t.naoCabeNaTela(sobraNativa)"
+          :description="`~${medicao.alturaNativaDerivada} px / ${medicao.alturaDisponivel} px · ${medicao.deConfiguracoes}/${medicao.itensNativos}`"
         />
 
         <!-- A lista, do jeito que ela é. -->
         <div class="rounded-lg border border-default bg-elevated/40 p-2">
-          <template v-for="(linha, i) in menuDeHoje" :key="i">
+          <template v-for="(linha, i) in menuNativoDeHoje" :key="i">
             <div
               v-if="i === linhaDagua"
               class="my-2 flex items-center gap-2"
@@ -79,7 +90,7 @@ const recuo: Record<number, string> = {
             >
               <span class="h-px flex-1 border-t border-dashed border-warning" />
               <span class="text-[10px] font-semibold uppercase tracking-wider text-warning">
-                {{ props.t.naoCabeNaTela(medicao.sobra) }}
+                {{ props.t.naoCabeNaTela(sobraNativa) }}
               </span>
             </div>
 
@@ -102,6 +113,9 @@ const recuo: Record<number, string> = {
             </div>
           </template>
         </div>
+
+        <!-- O que o menu nativo NÃO mostra, e que cresce por workspace. -->
+        <p class="text-xs leading-relaxed text-muted">{{ props.t.hojeRodape }}</p>
       </div>
     </template>
   </USlideover>

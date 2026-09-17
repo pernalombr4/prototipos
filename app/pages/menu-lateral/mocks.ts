@@ -336,15 +336,26 @@ export const gruposDeConfiguracao: GrupoDeConfiguracao[] = [
 ]
 
 /* ==================================================================
-   O MENU DE HOJE, para a comparação lado a lado.
+   O MENU NATIVO DE HOJE, para a comparação lado a lado.
 
-   Copiado linha por linha do DOM do develop em 16/09/2026, workspace teste-ux,
-   que estava em pt-BR. x = 16 é nível 1, x = 42 é nível 2, x = 68 é nível 3.
+   ATENÇÃO, e isto foi uma correção: esta lista é o menu **nativo**, o que
+   existe em QUALQUER workspace antes de alguém cadastrar qualquer coisa.
+   A primeira versão reproduzia o menu do workspace `teste-ux` inteiro, com a
+   categoria `leve`, o formulário `AUD Formulario` e a seção `Knowledge` que
+   alguém criou lá. Aquilo é o menu de UM workspace, não do produto.
 
-   Estes rótulos NÃO passam pelo textos.ts de propósito: são registro de uma
-   captura, como o GIF em evidencias/, e não a copy da proposta. Traduzi-los
-   seria inventar strings do produto em espanhol. A legenda do painel, essa
-   sim, está nos três idiomas e avisa que é reprodução do que foi capturado.
+   28 itens mais 3 rótulos de grupo = 31 linhas, sem nenhuma categoria.
+   Cada categoria com menu automático soma 1 linha, e mais uma por formulário
+   quando expandida. Cada seção do workspace soma 1 mais os itens dela.
+
+   No `teste-ux`, em 16/09/2026, o menu media 36 linhas: estas 31 mais 5 que
+   eram daquele workspace (leve, Todos, AUD Formulario, Knowledge e
+   Knowledge Base).
+
+   Copiado do DOM do develop, que estava em pt-BR. Os rótulos NÃO passam pelo
+   textos.ts de propósito: são registro de uma captura, como o GIF em
+   evidencias/, e não a copy da proposta. Traduzi-los seria inventar strings
+   do produto em espanhol. A legenda do painel, essa sim, está nos três idiomas.
 ================================================================== */
 
 export interface LinhaDeHoje {
@@ -353,20 +364,15 @@ export interface LinhaDeHoje {
   grupo: 'membro' | 'configuracoes' | 'ajuda'
 }
 
-export const menuDeHoje: LinhaDeHoje[] = [
+export const menuNativoDeHoje: LinhaDeHoje[] = [
   { rotulo: 'Membro', nivel: 0, grupo: 'membro' },
   { rotulo: 'Início', nivel: 1, grupo: 'membro' },
   { rotulo: 'Spaceflows', nivel: 1, grupo: 'membro' },
   { rotulo: 'Categorias', nivel: 1, grupo: 'membro' },
-  { rotulo: 'leve', nivel: 2, grupo: 'membro' },
-  { rotulo: 'Todos', nivel: 3, grupo: 'membro' },
-  { rotulo: 'AUD Formulario', nivel: 3, grupo: 'membro' },
   { rotulo: 'Tarefas', nivel: 1, grupo: 'membro' },
   { rotulo: 'Agendadas', nivel: 2, grupo: 'membro' },
   { rotulo: 'Rápidas', nivel: 2, grupo: 'membro' },
   { rotulo: 'Agenda', nivel: 1, grupo: 'membro' },
-  { rotulo: 'Knowledge', nivel: 1, grupo: 'membro' },
-  { rotulo: 'Knowledge Base', nivel: 2, grupo: 'membro' },
   { rotulo: 'Configurações', nivel: 0, grupo: 'configuracoes' },
   { rotulo: 'Visão Geral', nivel: 1, grupo: 'configuracoes' },
   { rotulo: 'Sistema', nivel: 1, grupo: 'configuracoes' },

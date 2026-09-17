@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import PainelTrabalho from './_PainelTrabalho.vue'
 import PainelConfiguracoes from './_PainelConfiguracoes.vue'
+import ModeloTrilha from './_ModeloTrilha.vue'
 import TodasAsCategorias from './_TodasAsCategorias.vue'
 import MenuDeHoje from './_MenuDeHoje.vue'
 import Conteudo from './_Conteudo.vue'
@@ -24,7 +25,7 @@ definePageMeta({
   titulo: 'Menu lateral em dois níveis',
   descricao: 'Tirar a administração do caminho do trabalho e dar teto à lista de categorias, sem mudar de endereço.',
   status: 'em-revisao',
-  atualizado: '2026-09-16',
+  atualizado: '2026-09-17',
   tela: 'Menu lateral do workspace',
 })
 
@@ -89,6 +90,13 @@ const naoFavoritas = computed(() => {
  */
 const TETO_DA_SECAO = 5
 const recorte = computed(() => naoFavoritas.value.slice(0, TETO_DA_SECAO))
+
+/* ------------------------------------------------------------------
+   ANDAIME: o modelo de navegação. No produto só um dos dois existe; os
+   dois convivem aqui para a comparação. A pesquisa que sustenta a escolha
+   está no PESQUISA.md, secção "Trilha de icones".
+------------------------------------------------------------------ */
+const modelo = ref<'barra' | 'trilha'>('barra')
 
 /* ---------------------------- navegação ---------------------------- */
 const painel = ref<'trabalho' | 'config'>('trabalho')
@@ -165,6 +173,27 @@ function configurarCategoriaAtual() {
   abrirItemDeConfiguracao('cfg-categorias', t.value.itens['cfg-categorias'] ?? '')
 }
 
+/**
+ * O botão "+". Existe nos dois modelos e abre o mesmo menu: é o padrão do
+ * Notion, do Asana, do monday e do Jira novo, onde "Create" fica na barra de
+ * cima. Cada opção é maquete e diz isso no toast.
+ */
+const itensDeCriar = computed(() => [[
+  { label: t.value.criarItem, icon: 'i-lucide-file-plus', onSelect: () => avisarMaquete(t.value.criarItem) },
+  { label: t.value.criarTarefa, icon: 'i-lucide-square-check-big', onSelect: () => avisarMaquete(t.value.criarTarefa) },
+], [
+  { label: t.value.criarCategoria, icon: 'i-lucide-folder-plus', onSelect: () => avisarMaquete(t.value.criarCategoria) },
+  { label: t.value.criarSecao, icon: 'i-lucide-menu', onSelect: () => avisarMaquete(t.value.criarSecao) },
+]])
+
+function avisarMaquete(oQue: string) {
+  toast.add({
+    title: t.value.criarAberto(oQue.toLowerCase()),
+    icon: 'i-lucide-hammer',
+    color: 'neutral',
+  })
+}
+
 /* ------------------------------ camadas ------------------------------ */
 const vendoTodas = ref(false)
 const vendoHoje = ref(false)
@@ -239,9 +268,32 @@ function emBreve() {
       <div class="flex min-h-0 w-full overflow-hidden border-t border-default bg-default">
         <!-- barra lateral -->
         <aside
-          class="relative hidden w-[17.5rem] shrink-0 border-r border-default bg-elevated/40 md:block"
+          class="relative hidden shrink-0 border-r border-default bg-elevated/40 md:block"
+          :class="modelo === 'trilha' ? 'w-[19rem]' : 'w-[17.5rem]'"
           :aria-label="t.configuracoes"
         >
+          <!-- MODELO ALTERNATIVO: trilha de icones mais painel da area. -->
+          <ModeloTrilha
+            v-if="modelo === 'trilha'"
+            :t="t"
+            :favoritas="favoritas"
+            :recorte="recorte"
+            :total-de-categorias="categorias.length"
+            :destino-ativo="destinoAtivo"
+            :categoria-ativa-id="categoriaAtiva?.id ?? null"
+            :item-config-ativo="itemConfigAtivo"
+            :estado="estadoDoPainel"
+            :pode-configurar="podeConfigurar"
+            :itens-de-criar="itensDeCriar"
+            @destino="irParaDestino"
+            @categoria="abrirCategoria"
+            @alternar-fixar="alternarFixar"
+            @ver-todas="vendoTodas = true"
+            @busca="buscando = true"
+            @item="abrirItemDeConfiguracao"
+            @ajuda="emBreve"
+          />
+          <template v-else>
           <!--
             A troca de painel usa a animação `entrada` do main.css, a mesma do
             resto do repositório, em vez de um <Transition>. Keyframe não depende
@@ -270,6 +322,7 @@ function emBreve() {
               @criar="emBreve"
               @ajuda="emBreve"
               @ordem="v => ordem = v"
+            :itens-de-criar="itensDeCriar"
             />
           <PainelConfiguracoes
             v-else
@@ -280,6 +333,7 @@ function emBreve() {
             @voltar="voltarParaTrabalho"
             @item="abrirItemDeConfiguracao"
           />
+          </template>
         </aside>
 
         <!-- conteúdo -->
@@ -337,6 +391,20 @@ function emBreve() {
           :color="estado === e.valor ? 'primary' : 'neutral'"
           :variant="estado === e.valor ? 'solid' : 'subtle'"
           @click="estado = e.valor"
+        />
+
+        <span class="ml-2 mr-0.5 text-xs font-semibold uppercase tracking-wider text-muted">
+          {{ t.modeloRotulo }}
+        </span>
+        <UButton
+          v-for="m in [{ v: 'barra', r: t.modeloBarra }, { v: 'trilha', r: t.modeloTrilha }]"
+          :key="m.v"
+          :label="m.r"
+          size="xs"
+          class="transition-transform hover:-translate-y-0.5"
+          :color="modelo === m.v ? 'primary' : 'neutral'"
+          :variant="modelo === m.v ? 'solid' : 'subtle'"
+          @click="modelo = m.v as 'barra' | 'trilha'"
         />
 
         <UButton

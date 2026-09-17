@@ -1,6 +1,6 @@
 # Briefing — Menu lateral em dois níveis
 
-**Slug:** `menu-lateral` · **Rodada:** 1 · **Data:** 16/09/2026
+**Slug:** `menu-lateral` · **Rodadas:** 1 e 2 · **Data:** 16 e 17/09/2026
 **Ambiente investigado:** develop, workspace de exploração `teste-ux`
 
 ---
@@ -72,16 +72,19 @@ menu vai ser redesenhado, sai daqui já passando em AA.
 
 ### A estrutura completa, como ela é
 
-Três grupos com rótulo, e dentro deles 33 itens clicáveis:
+Três grupos com rótulo, e dentro deles 33 itens clicáveis. **Cinco deles são deste
+workspace, não do produto**, e estão marcados com `‹ws›` abaixo: a categoria `leve`, os dois
+formulários dela e a seção `Knowledge` que alguém criou ali. O menu **nativo**, o que existe
+em qualquer workspace, são as outras linhas: 28 itens mais 3 rótulos = **31 linhas**.
 
 ```
 MEMBRO                              CONFIGURAÇÕES              AJUDA
 ├ Início                            ├ Visão Geral              ├ Releases
 ├ Spaceflows                        ├ Sistema                  └ Documentação ↗
 ├ Categorias          ▾             ├ Estrutura        ▾
-│ └ leve              ▾             │ ├ Categorias
-│   ├ Todos                         │ ├ Listas
-│   └ AUD Formulario                │ └ Spaceflow
+│ └ leve        ‹ws›  ▾             │ ├ Categorias
+│   ├ Todos     ‹ws›                │ ├ Listas
+│   └ AUD Formulario ‹ws›           │ └ Spaceflow
 ├ Tarefas             ▾             ├ Gestão de Membros
 │ ├ Agendadas                       ├ Interface        ▾
 │ └ Rápidas                         │ ├ Menus
@@ -101,14 +104,14 @@ MEMBRO                              CONFIGURAÇÕES              AJUDA
 
 | | Valor |
 |---|---|
-| Itens clicáveis com tudo aberto | **33** |
-| Rótulos de grupo | 3 |
-| Total de linhas | **36** |
-| Níveis de profundidade | **3** (Categorias › leve › Todos) |
-| Altura do conteúdo do menu | **1208 px** |
+| **Linhas do menu nativo** (qualquer workspace, zero categorias) | **31** (28 itens + 3 rótulos) |
+| Linhas neste workspace, com tudo aberto | 36 (as 31 mais 5 dele) |
+| Níveis de profundidade | **3** (Categorias › categoria › formulário) |
+| Altura do conteúdo do menu, medida aqui | **1208 px** |
 | Altura disponível para ele | **847 px** |
 | Sobra para fora da tela | **361 px**, ou 30% |
-| Linhas que são de Configurações | **19 de 33**, ou 58% |
+| Altura do menu nativo, derivada (1208 / 36 × 31) | **~1040 px**, ainda acima de 847 |
+| Linhas que são de Configurações | **19 de 28 nativas**, ou 68% |
 | Categorias neste workspace | **1** |
 | Seções personalizadas | **1** (Knowledge) |
 
@@ -116,14 +119,16 @@ MEMBRO                              CONFIGURAÇÕES              AJUDA
 
 1. **O menu não cabe na tela, e isso não depende de volume.** Com **uma** categoria e
    **uma** seção personalizada, em um monitor de 1920 × 911, 30% do menu já nasce fora da
-   área visível. A queixa do cliente ("se eu tiver muitas categorias então piorou") descreve
-   o agravamento, não a causa: a causa já está lá no workspace vazio.
+   área visível. E tirando as cinco linhas que são deste workspace, **o menu nativo sozinho
+   já passa de mil pixels** contra os 847 disponíveis. A queixa do cliente ("se eu tiver
+   muitas categorias então piorou") descreve o agravamento, não a causa: a causa está no
+   workspace vazio.
 
 2. **Cada categoria cadastrada soma uma linha, direto no menu de trabalho.** Não há teto,
    não há agrupamento, não há favoritos. A lista de categorias é o único item do menu que
    cresce sem limite, e ela cresce no meio do caminho entre Spaceflows e Tarefas.
 
-3. **58% do menu é administração.** Dezenove das 33 linhas são de Configurações: estrutura
+3. **Dois terços do menu são administração.** Dezenove dos 28 itens nativos são de Configurações: estrutura
    de dados, membros, integrações, credenciais, logs. Coisas que se configuram uma vez e se
    revisitam raramente dividem espaço, peso visual e rolagem com o que a pessoa usa todo
    dia.

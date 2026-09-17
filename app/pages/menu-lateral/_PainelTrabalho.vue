@@ -24,6 +24,7 @@ const props = defineProps<{
   estado: 'normal' | 'volume' | 'vazio' | 'carregando' | 'erro'
   podeConfigurar: boolean
   ordem: 'uso' | 'alfabetica' | 'recentes'
+  itensDeCriar: { label: string, icon: string, onSelect: () => void }[][]
 }>()
 
 const emit = defineEmits<{
@@ -94,14 +95,16 @@ const opcoesDeOrdem = computed(() => [[
           <UKbd value="K" size="sm" />
         </UButton>
 
-        <UTooltip :text="props.t.criar">
-          <UButton
-            icon="i-lucide-plus"
-            color="primary"
-            :aria-label="props.t.criar"
-            @click="emit('criar')"
-          />
-        </UTooltip>
+        <!-- O "+" abre menu de verdade: item, tarefa, categoria, seção de menu. -->
+        <UDropdownMenu :items="props.itensDeCriar" :content="{ align: 'end' }">
+          <UTooltip :text="props.t.criar">
+            <UButton
+              icon="i-lucide-plus"
+              color="primary"
+              :aria-label="props.t.criar"
+            />
+          </UTooltip>
+        </UDropdownMenu>
       </div>
     </div>
 

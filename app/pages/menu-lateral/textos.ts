@@ -14,6 +14,14 @@ export interface TextosDaTela {
   buscarDica: string
   criar: string
   trocarWorkspace: string
+  criarItem: string
+  criarTarefa: string
+  criarCategoria: string
+  criarSecao: string
+  criarAberto: (o: string) => string
+  areaTrabalho: string
+  areaDados: string
+  areaSecoes: string
 
   // destinos fixos
   inicio: string
@@ -85,6 +93,10 @@ export interface TextosDaTela {
   // comparação
   hojeTitulo: string
   hojeLegenda: string
+  hojeRodape: string
+  modeloBarra: string
+  modeloTrilha: string
+  modeloRotulo: string
   propostaTitulo: string
   propostaLegenda: string
   linhas: (n: number) => string
@@ -100,6 +112,14 @@ const ptBR: TextosDaTela = {
   buscarDica: 'Busque categoria, tela, configuração ou item',
   criar: 'Criar',
   trocarWorkspace: 'Trocar de workspace',
+  criarItem: 'Item em uma categoria',
+  criarTarefa: 'Tarefa',
+  criarCategoria: 'Categoria',
+  criarSecao: 'Seção de menu',
+  criarAberto: o => `Abriria o formulário de ${o}.`,
+  areaTrabalho: 'Trabalho',
+  areaDados: 'Dados',
+  areaSecoes: 'Seções',
 
   inicio: 'Início',
   spaceflows: 'Spaceflows',
@@ -193,8 +213,12 @@ const ptBR: TextosDaTela = {
   semPermissaoTitulo: 'Você não administra este workspace',
   semPermissaoDescricao: 'As configurações ficam com quem tem licença Owner ou Full. Peça a quem administra, ou continue no seu trabalho.',
 
-  hojeTitulo: 'Como é hoje',
-  hojeLegenda: 'Reprodução do menu capturado no develop em 16/09/2026, com uma categoria e uma seção personalizada. Os rótulos estão como foram capturados.',
+  hojeTitulo: 'O menu nativo de hoje',
+  hojeLegenda: 'O que existe em qualquer workspace, com zero categorias cadastradas. Capturado no develop em 16/09/2026, com os rótulos como foram capturados.',
+  hojeRodape: 'Cada categoria com menu automático soma mais uma linha, e mais uma por formulário quando expandida. Cada seção do workspace soma uma mais os itens dela.',
+  modeloBarra: 'Barra única',
+  modeloTrilha: 'Trilha e painel',
+  modeloRotulo: 'Modelo',
   propostaTitulo: 'A proposta',
   propostaLegenda: 'Dois níveis. A administração continua no mesmo endereço, mas abre no lugar do menu em vez de morar dentro dele.',
   linhas: n => `${n} linhas`,
@@ -210,6 +234,14 @@ const en: TextosDaTela = {
   buscarDica: 'Search a category, screen, setting or item',
   criar: 'Create',
   trocarWorkspace: 'Switch workspace',
+  criarItem: 'Item in a category',
+  criarTarefa: 'Task',
+  criarCategoria: 'Category',
+  criarSecao: 'Menu section',
+  criarAberto: o => `This would open the ${o} form.`,
+  areaTrabalho: 'Work',
+  areaDados: 'Data',
+  areaSecoes: 'Sections',
 
   inicio: 'Home',
   spaceflows: 'Spaceflows',
@@ -303,8 +335,12 @@ const en: TextosDaTela = {
   semPermissaoTitulo: 'You do not administer this workspace',
   semPermissaoDescricao: 'Settings belong to Owner or Full licences. Ask whoever administers it, or carry on with your work.',
 
-  hojeTitulo: 'How it is today',
-  hojeLegenda: 'Reproduction of the menu captured on develop on 16 Sep 2026, with one category and one custom section. Labels are as captured.',
+  hojeTitulo: 'The native menu today',
+  hojeLegenda: 'What exists in any workspace, with zero categories created. Captured on develop on 16 Sep 2026, labels as captured.',
+  hojeRodape: 'Each category with the automatic menu adds one more row, plus one per form when expanded. Each workspace section adds one plus its items.',
+  modeloBarra: 'Single sidebar',
+  modeloTrilha: 'Rail and panel',
+  modeloRotulo: 'Model',
   propostaTitulo: 'The proposal',
   propostaLegenda: 'Two levels. Administration keeps the same address, but opens in place of the menu instead of living inside it.',
   linhas: n => `${n} rows`,
@@ -320,6 +356,14 @@ const es: TextosDaTela = {
   buscarDica: 'Busca una categoría, pantalla, configuración o elemento',
   criar: 'Crear',
   trocarWorkspace: 'Cambiar de workspace',
+  criarItem: 'Elemento en una categoría',
+  criarTarefa: 'Tarea',
+  criarCategoria: 'Categoría',
+  criarSecao: 'Sección de menú',
+  criarAberto: o => `Abriría el formulario de ${o}.`,
+  areaTrabalho: 'Trabajo',
+  areaDados: 'Datos',
+  areaSecoes: 'Secciones',
 
   inicio: 'Inicio',
   spaceflows: 'Spaceflows',
@@ -413,8 +457,12 @@ const es: TextosDaTela = {
   semPermissaoTitulo: 'No administras este workspace',
   semPermissaoDescricao: 'La configuración es de quien tiene licencia Owner o Full. Pídeselo a quien administra, o sigue con tu trabajo.',
 
-  hojeTitulo: 'Cómo es hoy',
-  hojeLegenda: 'Reproducción del menú capturado en develop el 16/09/2026, con una categoría y una sección personalizada. Las etiquetas están tal como se capturaron.',
+  hojeTitulo: 'El menú nativo de hoy',
+  hojeLegenda: 'Lo que existe en cualquier workspace, con cero categorías creadas. Capturado en develop el 16/09/2026, con las etiquetas tal como se capturaron.',
+  hojeRodape: 'Cada categoría con el menú automático suma una fila más, y otra por formulario cuando se expande. Cada sección del workspace suma una más sus elementos.',
+  modeloBarra: 'Barra única',
+  modeloTrilha: 'Riel y panel',
+  modeloRotulo: 'Modelo',
   propostaTitulo: 'La propuesta',
   propostaLegenda: 'Dos niveles. La administración mantiene la misma dirección, pero se abre en lugar del menú en vez de vivir dentro de él.',
   linhas: n => `${n} filas`,
