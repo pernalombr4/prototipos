@@ -9,6 +9,7 @@ import {
   documentacao,
   identidade,
   solicitacoes as solicitacoesBase,
+  tiposDeConsumo,
   transacoes,
   type Solicitacao,
 } from './mocks'
@@ -51,6 +52,15 @@ const saldoBaixo = computed(() => diasDeFolego.value <= 20)
 /* ----------------------------- por recurso ------------------------- */
 
 const maiorRecurso = computed(() => Math.max(...consumoPorRecurso.map(r => r.credits), 1))
+
+/**
+ * O número que a barra não dá: quanto custa cada uso.
+ * O agente caro não é o que mais aparece, é o que cobra mais por interação.
+ */
+function mediaPorUso(r: typeof consumoPorRecurso[number]) {
+  const m = r.credits / Math.max(r.usos, 1)
+  return m.toLocaleString('pt-BR', { maximumFractionDigits: m < 10 ? 1 : 0 })
+}
 
 /* ---------------------------- solicitações ------------------------- */
 
@@ -223,17 +233,84 @@ function dataLonga(iso: string) {
       :doc="documentacao.cobranca"
       style="animation: entrada .4s ease-out both; animation-delay: 60ms"
     >
-      <ul class="space-y-3">
+      <ul class="space-y-3.5">
         <li
           v-for="(r, i) in consumoPorRecurso"
           :key="r.recurso"
           :style="`animation: entrada .35s ease-out both; animation-delay: ${i * 60}ms`"
         >
-          <div class="mb-1 flex items-baseline justify-between gap-4 text-sm">
-            <span class="truncate text-highlighted">{{ r.recurso }}</span>
+          <div class="mb-1.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-sm">
+            <span class="flex min-w-0 items-center gap-2">
+              <UIcon :name="tiposDeConsumo[r.tipo].icone" class="size-4 shrink-0 text-muted" />
+              <span class="truncate text-highlighted">{{ r.recurso }}</span>
+
+              <!--
+                O selo responde "isso aí foi o quê": agente, nó de fluxo ou
+                tradução. Abre no ponteiro e no foco, porque informação que só
+                existe no hover é informação que o teclado não alcança.
+              -->
+              <UPopover mode="hover" :ui="{ content: 'max-w-xs' }">
+                <button
+                  type="button"
+                  class="shrink-0 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  :aria-label="`O que é ${tiposDeConsumo[r.tipo].rotulo}`"
+                >
+                  <UBadge
+                    :label="tiposDeConsumo[r.tipo].rotulo"
+                    size="sm"
+                    color="neutral"
+                    variant="subtle"
+                    class="cursor-help"
+                  />
+                </button>
+
+                <template #content>
+                  <div class="space-y-2 p-3">
+                    <p class="flex items-center gap-1.5 text-sm font-medium text-highlighted">
+                      <UIcon :name="tiposDeConsumo[r.tipo].icone" class="size-4" />
+                      {{ tiposDeConsumo[r.tipo].rotulo }}
+                    </p>
+                    <p class="text-sm text-muted">
+                      {{ tiposDeConsumo[r.tipo].oQueE }}
+                    </p>
+
+                    <dl class="space-y-2 border-t border-default pt-2 text-xs">
+                      <div>
+                        <dt class="uppercase tracking-wider text-muted">Onde foi usado</dt>
+                        <dd class="text-toned">{{ r.onde }}</dd>
+                      </div>
+                      <div>
+                        <dt class="uppercase tracking-wider text-muted">Como cobra</dt>
+                        <dd class="text-toned">{{ tiposDeConsumo[r.tipo].comoCobra }}</dd>
+                      </div>
+                      <div>
+                        <dt class="uppercase tracking-wider text-muted">Média no período</dt>
+                        <dd class="text-toned">
+                          {{ mediaPorUso(r) }} en-credits por {{ tiposDeConsumo[r.tipo].unidadeSingular }}
+                        </dd>
+                      </div>
+                    </dl>
+
+                    <UButton
+                      :to="tiposDeConsumo[r.tipo].doc"
+                      target="_blank"
+                      label="Documentação"
+                      icon="i-lucide-book-open"
+                      trailing-icon="i-lucide-arrow-up-right"
+                      variant="link"
+                      size="xs"
+                      class="px-0"
+                    />
+                  </div>
+                </template>
+              </UPopover>
+            </span>
+
             <span class="shrink-0 tabular-nums text-muted">
               {{ r.credits.toLocaleString('pt-BR') }}
-              <span class="text-muted">· {{ r.execucoes }} execuções</span>
+              <span class="text-muted">
+                · {{ r.usos.toLocaleString('pt-BR') }} {{ tiposDeConsumo[r.tipo].unidade }}
+              </span>
             </span>
           </div>
           <div class="h-2 overflow-hidden rounded-full bg-accented">

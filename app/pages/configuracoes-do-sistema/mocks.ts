@@ -29,7 +29,8 @@ import type {
  * que a explica.
  * ------------------------------------------------------------------ */
 
-const DOCS = 'https://docs.enspace.io/pt/docs/workspace/sections/settings/system'
+const WS = 'https://docs.enspace.io/pt/docs/workspace'
+const DOCS = `${WS}/sections/settings/system`
 
 export const documentacao = {
   indice: DOCS,
@@ -38,6 +39,10 @@ export const documentacao = {
   notificacoes: `${DOCS}/notifications`,
   dicionarios: `${DOCS}/dictionaries`,
   cobranca: `${DOCS}/billing`,
+  /* Fora de Sistema: o que gasta en-credits mora em outras seções. */
+  agentes: `${WS}/sections/settings/ai-agents`,
+  chatDeIa: `${WS}/resources/ai-chat`,
+  nosDeIa: `${WS}/sections/settings/structure/spaceflow/nodes`,
 }
 
 /* ------------------------------------------------------------------ *
@@ -625,10 +630,10 @@ export const transacoes: Transacao[] = [
   { id: 4, type: 'debit', amount: 70, description: 'Uso de agente de IA', data: '2026-09-14T08:55:00', origem: { recurso: 'Analista de duplicidade', workspace: 'Contratos Aurora', pessoa: 'Ana Ribeiro', detalhe: '213 mil tokens' } },
   { id: 5, type: 'debit', amount: 111, description: 'Uso de agente de IA', data: '2026-09-13T18:20:00', origem: { recurso: 'Analista de duplicidade', workspace: 'Contratos Aurora', pessoa: 'Ana Ribeiro', detalhe: '343 mil tokens' } },
   { id: 6, type: 'debit', amount: 17, description: 'Tradução automática do dicionário', data: '2026-09-13T15:44:00', origem: { recurso: 'Dicionários', workspace: 'Chamados Aurora', pessoa: 'Ana Ribeiro', detalhe: '48 chaves' } },
-  { id: 7, type: 'debit', amount: 32, description: 'Uso de agente de IA', data: '2026-09-12T10:31:00', origem: { recurso: 'Triagem de entrada', workspace: 'Chamados Aurora', pessoa: 'Ana Ribeiro', detalhe: '85 mil tokens' } },
+  { id: 7, type: 'debit', amount: 32, description: 'Execução de nó de IA', data: '2026-09-12T10:31:00', origem: { recurso: 'Triagem de entrada', workspace: 'Chamados Aurora', pessoa: 'Ana Ribeiro', detalhe: '85 mil tokens' } },
   { id: 8, type: 'debit', amount: 79, description: 'Uso de agente de IA', data: '2026-09-11T17:05:00', origem: { recurso: 'Analista de duplicidade', workspace: 'Contratos Aurora', pessoa: 'Ana Ribeiro', detalhe: '239 mil tokens' } },
   { id: 9, type: 'debit', amount: 84, description: 'Uso de agente de IA', data: '2026-09-11T09:48:00', origem: { recurso: 'Analista de duplicidade', workspace: 'Contratos Aurora', pessoa: 'Ana Ribeiro', detalhe: '258 mil tokens' } },
-  { id: 10, type: 'debit', amount: 8, description: 'Extração de documento', data: '2026-09-10T14:22:00', origem: { recurso: 'Leitor de PDF', workspace: 'Contratos Aurora', pessoa: 'Bruno Sales', detalhe: '12 páginas' } },
+  { id: 10, type: 'debit', amount: 8, description: 'Interação com o BENI', data: '2026-09-10T14:22:00', origem: { recurso: 'BENI', workspace: 'Contratos Aurora', pessoa: 'Bruno Sales', detalhe: 'ajuda sobre importação de feriados' } },
   { id: 11, type: 'debit', amount: 51, description: 'Uso de agente de IA', data: '2026-09-09T16:10:00', origem: { recurso: 'Analista de duplicidade', workspace: 'Contratos Aurora', pessoa: 'Ana Ribeiro', detalhe: '152 mil tokens' } },
   { id: 12, type: 'credit', amount: 400, description: 'Estorno de execução interrompida', data: '2026-09-08T12:00:00', origem: { recurso: 'Suporte ENSPACE', workspace: 'Contratos Aurora', pessoa: 'Suporte' } },
 ]
@@ -652,13 +657,73 @@ export const consumoDiario: { dia: string, credits: number }[] = [
   { dia: '2026-09-15', credits: 165 }, { dia: '2026-09-16', credits: 44 },
 ]
 
-/** No que os créditos foram, nos últimos 30 dias. */
-export const consumoPorRecurso: { recurso: string, credits: number, execucoes: number }[] = [
-  { recurso: 'Analista de duplicidade', credits: 1840, execucoes: 26 },
-  { recurso: 'Triagem de entrada', credits: 412, execucoes: 14 },
-  { recurso: 'Tradução automática do dicionário', credits: 231, execucoes: 5 },
-  { recurso: 'Leitor de PDF', credits: 104, execucoes: 13 },
-  { recurso: 'Resumo de chamado', credits: 62, execucoes: 9 },
+/**
+ * O que gasta en-credits, segundo a documentação do produto (conferida em
+ * 16/09/2026). São só três famílias, e a lista de consumo se apoia nelas:
+ * sem o tipo, "Triagem de entrada" e "Analista de duplicidade" são dois
+ * nomes iguais que cobram de jeitos diferentes.
+ */
+export type TipoDeConsumo = 'agente' | 'fluxo' | 'traducao'
+
+export const tiposDeConsumo: Record<TipoDeConsumo, {
+  rotulo: string
+  icone: string
+  /** Como se conta o uso deste tipo. O agente tem interação; o nó tem execução. */
+  unidade: string
+  unidadeSingular: string
+  oQueE: string
+  comoCobra: string
+  doc: string
+}> = {
+  agente: {
+    rotulo: 'Agente de IA',
+    icone: 'i-lucide-bot',
+    unidade: 'interações',
+    unidadeSingular: 'interação',
+    oQueE: 'Um agente do workspace, seu ou nativo (BENI, BENI BUILDER, REVIEWER). Responde no Chat de IA e quando um fluxo o chama.',
+    comoCobra: 'Cobra a cada interação. O custo varia com o modelo de linguagem do agente e a complexidade do pedido.',
+    doc: `${WS}/sections/settings/ai-agents`,
+  },
+  fluxo: {
+    rotulo: 'Nó de IA no fluxo',
+    icone: 'i-lucide-workflow',
+    unidade: 'execuções',
+    unidadeSingular: 'execução',
+    oQueE: 'Um nó de IA dentro de um Spaceflow. Criar fluxo e rodar fluxo não custam nada: só o nó de IA custa.',
+    comoCobra: 'Cobra a cada execução do nó, conforme o volume de dados processados e o tipo de operação.',
+    doc: `${WS}/sections/settings/structure/spaceflow/nodes`,
+  },
+  traducao: {
+    rotulo: 'Tradução por IA',
+    icone: 'i-lucide-languages',
+    unidade: 'chaves',
+    unidadeSingular: 'chave',
+    oQueE: 'A tradução automática dos dicionários, na aba Dicionários desta mesma tela.',
+    comoCobra: 'Cobra por chave traduzida. Termo técnico e nome próprio do negócio pedem revisão depois.',
+    doc: `${DOCS}/dictionaries`,
+  },
+}
+
+/**
+ * No que os créditos foram, nos últimos 30 dias.
+ *
+ * A soma bate com o total dos 30 dias da carteira (2.747), de propósito: a
+ * seção promete dizer "onde mexer para gastar menos", e número que não fecha
+ * com o de cima derruba a promessa.
+ */
+export const consumoPorRecurso: {
+  recurso: string
+  tipo: TipoDeConsumo
+  /** Onde aquilo rodou. É a pergunta que o nome do recurso não responde. */
+  onde: string
+  credits: number
+  usos: number
+}[] = [
+  { recurso: 'Analista de duplicidade', tipo: 'agente', onde: 'Chat de IA e fluxo de contratos', credits: 1840, usos: 26 },
+  { recurso: 'Triagem de entrada', tipo: 'fluxo', onde: 'Spaceflow "Entrada de chamados"', credits: 412, usos: 14 },
+  { recurso: 'Dicionário de Clientes', tipo: 'traducao', onde: 'Aba Dicionários, para inglês', credits: 231, usos: 629 },
+  { recurso: 'REVIEWER', tipo: 'agente', onde: 'Chat de IA, revisão de texto', credits: 160, usos: 9 },
+  { recurso: 'BENI', tipo: 'agente', onde: 'Chat de IA, ajuda sobre o produto', credits: 104, usos: 13 },
 ]
 
 type CamposDaSolicitacao = Pick<CreditRequestApi, 'id' | 'amount' | 'status' | 'reason'>

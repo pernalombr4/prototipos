@@ -1,5 +1,62 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 11 — 16/09/2026 — cada linha do consumo diz o que ela é
+
+**O que ela pediu, literal:**
+
+> "essa seção precisa de mais detalhe nos itens, talvez usando badges ou ícones com tooltip.
+> o que significa cada linha? foi agente de ia? foi o chat de ia? foi outra coisa? sei la"
+
+A pergunta estava certa e a seção não respondia. "Analista de duplicidade" e "Triagem de entrada"
+são dois nomes no mesmo formato, e um é agente e o outro é nó de fluxo: cobram de jeitos
+diferentes, se ajustam em telas diferentes e nada disso aparecia.
+
+### A taxonomia veio da documentação, não da minha cabeça
+
+Fui ler o que o produto documenta como consumidor de en-credits (`docs.enspace.io`, conferido em
+16/09/2026). São três famílias, e só três:
+
+| Família | O que é | Como cobra, segundo a doc |
+|---|---|---|
+| **Agente de IA** | agente do workspace, seu ou nativo (BENI, BENI BUILDER, REVIEWER) | "a cada interação; varia conforme o modelo de linguagem selecionado e a complexidade" |
+| **Nó de IA no fluxo** | nó de IA dentro de um Spaceflow | "a execução de nós de I.A. consome en-credits; varia conforme o volume de dados e o tipo de operação" |
+| **Tradução por IA** | tradução automática dos dicionários | "a tradução por IA consome en-credits" |
+
+E o que **não** cobra também ficou claro: criar fluxo, rodar fluxo sem nó de IA, criar item,
+enviar e-mail.
+
+**Isso corrigiu o mock.** "Leitor de PDF" e "Resumo de chamado" eram invenção minha: não existe
+extração de documento documentada como consumidor de crédito. Saíram, entraram BENI e REVIEWER,
+que existem. O extrato acompanhou: a linha que dizia "Extração de documento" virou "Interação com
+o BENI", e a da triagem virou "Execução de nó de IA".
+
+### O que a linha mostra agora
+
+```
+🤖 Analista de duplicidade  [Agente de IA]        1.840 · 26 interações
+██████████████████████████████████████████
+```
+
+- **Ícone e selo** com a família. O selo é botão: abre no ponteiro **e no foco**, porque a lição
+  do gráfico (rodada 10) valia aqui também.
+- **A unidade certa por família**: o agente tem *interações*, o nó tem *execuções*, a tradução tem
+  *chaves*. Contar tudo como "execuções" era o que fazia "231 · 5 execuções" não querer dizer nada.
+- **No detalhe**: o que é a família, **onde aquilo rodou** (`Chat de IA e fluxo de contratos`,
+  `Spaceflow "Entrada de chamados"`), como cobra, a **média por uso** e o link para a documentação
+  daquela família.
+
+**A média é o número que a barra esconde.** A barra ordena por total, e total premia quem roda
+muito. `71 en-credits por interação` do Analista contra `8` do BENI é o que responde de verdade
+"onde mexer para gastar menos", que é a promessa do subtítulo da seção.
+
+### Um detalhe de coerência
+
+A soma das cinco linhas passou a bater com o consumo dos 30 dias da carteira: **2.747**. Antes
+dava 2.649 e ninguém ia conferir, mas uma tela que promete explicar o gasto não pode ter dois
+totais diferentes na mesma aba.
+
+---
+
 ## Rodada 10 — 16/09/2026 — o gráfico do consumo passou a falar
 
 **O que ela pediu, literal:**
