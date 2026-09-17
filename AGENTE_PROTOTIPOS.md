@@ -520,7 +520,7 @@ import { textos } from './textos'
 const t = useTextos(textos)
 ```
 
-- **`app/components/ControlesDePrototipo.vue`** é compartilhado: traz o botão claro/escuro e
+- **`app/components/ControlesDePrototipo.vue`** é compartilhado: traz a chave claro/escuro e
   os três idiomas. Não reescreva por protótipo.
 - **`textos.ts`** mora na pasta do protótipo e tem as três traduções — `pt-BR`, `en`, `es` —
   num `Record<Idioma, …>` tipado. Texto novo entra nos três **na hora**, não depois.
