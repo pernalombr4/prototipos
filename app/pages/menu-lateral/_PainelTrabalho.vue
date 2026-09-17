@@ -77,6 +77,10 @@ function rotuloDe(no: NoDoMenu) {
     spaceflows: props.t.spaceflows,
     documentos: props.t.documentos,
     categorias: props.t.categorias,
+    // Auditoria reaproveita os rótulos que já existiam nas configurações.
+    auditoria: props.t.grupos.auditoria,
+    logsAuditoria: props.t.itens['logs-auditoria'],
+    logsRequisicao: props.t.itens['logs-requisicao'],
   }
   return mapa[no.chave ?? ''] ?? (no.chave ?? '')
 }
@@ -168,6 +172,62 @@ function aberta(id: string) {
 }
 function alternar(id: string) {
   abertas.value[id] = !aberta(id)
+}
+
+/*
+ * ============ AS DUAS REGRAS DE ABERTURA (rodada 10) ============
+ *
+ * Ela ditou as duas:
+ *
+ *   "se algo tem so um menu interno, ja deve abrir automaticamente nele"
+ *   "todo menu de primeiro nivel quando clicado deve abrir o primeiro menu
+ *    da lista"
+ *
+ * Juntas elas dizem uma coisa só: **menu de primeiro nível não é beco sem
+ * saída.** Clicar sempre leva a algum lugar; nunca só revela uma lista e deixa
+ * a pessoa escolher de novo. É o que o Linear e o Notion fazem com seção.
+ *
+ * Duas fronteiras, que são decisão minha:
+ *
+ * 1. **Fechar é só fechar.** Abrir leva para a primeira tela; fechar não leva
+ *    a lugar nenhum. Senão recolher a lista de categorias para ganhar espaço
+ *    arrastaria a pessoa para dentro de uma categoria toda vez.
+ * 2. **A regra vale também para Favoritos e Categorias**, que são menus de
+ *    primeiro nível como os outros. Abrir Categorias abre a primeira da lista.
+ */
+
+/** Seção com uma tela só: vira linha simples, e clicar abre a tela. */
+function temUmaSo(no: NoDoMenu) {
+  return (no.filhos?.length ?? 0) === 1
+}
+
+function unicoFilho(no: NoDoMenu) {
+  return (no.filhos ?? [])[0]
+}
+
+/** Abrir a seção abre a primeira tela dela. Fechar só fecha. */
+function abrirSecao(no: NoDoMenu) {
+  const estavaAberta = aberta(no.id)
+  alternar(no.id)
+  if (estavaAberta) return
+  const primeiro = (no.filhos ?? [])[0]
+  if (primeiro) emit('destino', primeiro.id)
+}
+
+function abrirFavoritos() {
+  const estavaAberta = aberta('favoritos')
+  alternar('favoritos')
+  if (estavaAberta) return
+  const primeira = favoritasVisiveis.value[0]
+  if (primeira) emit('categoria', primeira)
+}
+
+function abrirCategorias() {
+  const estavaAberta = aberta('categorias')
+  alternar('categorias')
+  if (estavaAberta) return
+  const primeira = categoriasVisiveis.value[0]
+  if (primeira) emit('categoria', primeira)
 }
 
 const opcoesDeOrdem = computed(() => [[
@@ -314,7 +374,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
               :aberta="filtrando || aberta('favoritos')"
               :texto-recolher="props.t.recolherSecao(props.t.favoritos)"
               :texto-expandir="props.t.expandirSecao(props.t.favoritos)"
-              @alternar="alternar('favoritos')"
+              @alternar="abrirFavoritos()"
             >
               <LinhaDeMenu
                 v-for="(c, i) in favoritasVisiveis"
@@ -341,7 +401,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
               :contador="props.totalDeCategorias || undefined"
               :texto-recolher="props.t.recolherSecao(props.t.categorias)"
               :texto-expandir="props.t.expandirSecao(props.t.categorias)"
-              @alternar="alternar('categorias')"
+              @alternar="abrirCategorias()"
             >
               <template #acoes>
                 <UDropdownMenu :items="opcoesDeOrdem">
@@ -410,6 +470,32 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             </SecaoDeMenu>
           </template>
 
+          <!--
+            ---------- seção com uma tela só ----------
+            Vira linha simples, com o nome da seção, e clicar abre a tela. Uma
+            seta para revelar um item único é um clique cobrado sem nada em
+            troca. O editor continua tratando a seção como seção: é lá que se
+            põe a segunda tela dentro dela.
+          -->
+          <LinhaDeMenu
+            v-else-if="temUmaSo(no)"
+            class="mt-0.5"
+            :icone="no.icone"
+            :rotulo="rotuloDe(no)"
+            :selo="seloDaSecao(no)"
+            :ativo="props.destinoAtivo === unicoFilho(no).id"
+            :arrastavel="!filtrando"
+            :saindo="arraste.arrastando.value === no.id"
+            :marca="marcaDe(no.id) === 'dentro' ? null : marcaDe(no.id)"
+            :recusando="recusandoAgora"
+            @selecionar="emit('destino', unicoFilho(no).id)"
+            @arrastar-inicio="arraste.comecar(no.id)"
+            @arrastar-sobre="p => mirar(no.id, p)"
+            @soltar="p => largar(no.id, p)"
+            @arrastar-fim="arraste.terminar()"
+            @mover="p => menu.mover(no.id, p)"
+          />
+
           <!-- ---------- seção: nativa, de módulo ou do workspace ---------- -->
           <SecaoDeMenu
             v-else
@@ -422,7 +508,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             :saindo="arraste.arrastando.value === no.id"
             :marca="marcaDe(no.id)"
             :recusando="recusandoAgora"
-            @alternar="alternar(no.id)"
+            @alternar="abrirSecao(no)"
             @arrastar-inicio="arraste.comecar(no.id)"
             @arrastar-sobre="p => mirar(no.id, p)"
             @soltar="p => largar(no.id, p)"

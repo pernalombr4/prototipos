@@ -28,7 +28,14 @@ const emit = defineEmits<{
   item: [id: string, rotulo: string]
 }>()
 
-const grupoAberto = ref<string>('estrutura')
+/*
+ * O grupo aberto acompanha o item ativo (rodada 10). Abrir Configuracoes agora
+ * cai no primeiro item da lista, e deixar aberto um grupo que nao e o dele
+ * mostraria a lista certa com a marca em lugar nenhum.
+ */
+const grupoDoItem = (id: string) => gruposDeConfiguracao.find(g => g.itens.some(i => i.id === id))?.id ?? 'workspace'
+const grupoAberto = ref<string>(grupoDoItem(props.itemAtivo))
+watch(() => props.itemAtivo, (id) => { grupoAberto.value = grupoDoItem(id) })
 const busca = ref('')
 
 function alternar(id: string) {

@@ -60,6 +60,10 @@ function rotuloDe(no: NoDoMenu) {
     spaceflows: props.t.spaceflows,
     documentos: props.t.documentos,
     categorias: props.t.categorias,
+    // Auditoria reaproveita os rótulos que já existiam nas configurações.
+    auditoria: props.t.grupos.auditoria,
+    logsAuditoria: props.t.itens['logs-auditoria'],
+    logsRequisicao: props.t.itens['logs-requisicao'],
   }
   return mapa[no.chave ?? ''] ?? (no.chave ?? '')
 }

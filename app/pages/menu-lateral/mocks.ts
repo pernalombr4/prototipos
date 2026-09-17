@@ -332,14 +332,15 @@ export const gruposDeConfiguracao: GrupoDeConfiguracao[] = [
       { id: 'agentes', icone: 'i-lucide-bot' },
     ],
   },
-  {
-    id: 'auditoria',
-    icone: 'i-lucide-history',
-    itens: [
-      { id: 'logs-auditoria', icone: 'i-lucide-scroll-text' },
-      { id: 'logs-requisicao', icone: 'i-lucide-activity' },
-    ],
-  },
+  /*
+   * RODADA 10: o grupo `Auditoria` SAIU daqui. Ela disse: "auditoria nao fica
+   * em configuracao. e um grande menu a parte". Ele virou seção nativa de
+   * primeiro nível, lá embaixo em `menuDoEditor`.
+   *
+   * O motivo cabe numa frase: configuração é onde se MUDA o workspace, e
+   * auditoria é onde se OLHA o que ele fez. Quem consulta um log não está
+   * configurando nada, e quem configura não quer passar pelo log.
+   */
 ]
 
 /* ==================================================================
@@ -602,6 +603,28 @@ export const menuDoEditor: NoDoMenu[] = [
       { id: 'c-1', tipo: 'categoria', rotulo: 'Contratos', icone: 'i-lucide-file-signature' },
       { id: 'c-2', tipo: 'categoria', rotulo: 'Clientes', icone: 'i-lucide-building-2' },
       { id: 'c-3', tipo: 'categoria', rotulo: 'Chamados', icone: 'i-lucide-life-buoy' },
+    ],
+  },
+  /*
+   * AUDITORIA, rodada 10. Menu nativo de primeiro nível, fora das
+   * configurações.
+   *
+   * Fica DEPOIS das categorias, e não antes: é primeiro nível porque é um
+   * assunto próprio, não porque é diário. Acima das categorias ele empurraria
+   * o trabalho de todo dia para baixo por um menu que se abre quando algo
+   * precisa ser explicado.
+   */
+  {
+    id: 's-auditoria',
+    tipo: 'secao',
+    origem: 'nativo',
+    chave: 'auditoria',
+    icone: 'i-lucide-history',
+    lugar: 'trilha',
+    escopo: [],
+    filhos: [
+      { id: 'a-logs', tipo: 'tela', chave: 'logsAuditoria', icone: 'i-lucide-scroll-text', tipoDeTela: 'personalizada' },
+      { id: 'a-req', tipo: 'tela', chave: 'logsRequisicao', icone: 'i-lucide-activity', tipoDeTela: 'personalizada' },
     ],
   },
   {

@@ -49,6 +49,10 @@ function rotuloDoNo(no: NoDoMenu) {
     spaceflows: t.value.spaceflows,
     documentos: t.value.documentos,
     categorias: t.value.categorias,
+    // Auditoria reaproveita os rótulos que já existiam nas configurações.
+    auditoria: t.value.grupos.auditoria,
+    logsAuditoria: t.value.itens['logs-auditoria'],
+    logsRequisicao: t.value.itens['logs-requisicao'],
   }
   return mapa[no.chave ?? ''] ?? (no.chave ?? '')
 }
@@ -158,7 +162,11 @@ const painel = ref<'trabalho' | 'config'>('trabalho')
 // O id vem da arvore do menu, e la os destinos nativos tem prefixo.
 const destinoAtivo = ref('n-inicio')
 const categoriaAtiva = ref<Categoria | null>(null)
-const itemConfigAtivo = ref('cfg-categorias')
+/*
+ * A regra dela vale tambem para Configuracoes, que e menu de primeiro nivel:
+ * abrir cai no primeiro item da lista, e nao numa tela escolhida a dedo.
+ */
+const itemConfigAtivo = ref(gruposDeConfiguracao[0]?.itens[0]?.id ?? 'visao-geral')
 const rotuloConfigAtivo = ref('')
 
 const rotuloDoDestino = computed(() => {
@@ -206,19 +214,30 @@ function alternarFixar(id: number) {
 
 function abrirConfiguracoes() {
   if (!podeConfigurar.value) return
+  const primeiro = gruposDeConfiguracao[0]?.itens[0]
+  if (primeiro) {
+    abrirItemDeConfiguracao(primeiro.id, t.value.itens[primeiro.id] ?? primeiro.id)
+    return
+  }
   painel.value = 'config'
   categoriaAtiva.value = null
-  rotuloConfigAtivo.value = t.value.itens[itemConfigAtivo.value] ?? ''
 }
 
 function voltarParaTrabalho() {
   painel.value = 'trabalho'
-  destinoAtivo.value = 'inicio'
+  // O id vem da arvore, onde o destino nativo tem prefixo: com 'inicio' a
+  // volta deixava o menu inteiro sem linha ativa.
+  destinoAtivo.value = menu.destinos.value[0]?.id ?? 'n-inicio'
 }
 
 function abrirItemDeConfiguracao(id: string, rotulo: string) {
   itemConfigAtivo.value = id
   rotuloConfigAtivo.value = rotulo
+  // No modelo de trilha a configuracao vive dentro do painel da area, e sem
+  // isto o clique num item de configuracao nao mudava o miolo: a barra
+  // marcava o item e a direita continuava na tela anterior.
+  painel.value = 'config'
+  categoriaAtiva.value = null
   // Interface > Menus abre o editor do menu, que é onde o administrador
   // reordena, reagrupa e escolhe o tipo de cada tela.
   if (id === 'menus') abrirEditor(null)

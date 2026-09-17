@@ -203,6 +203,17 @@ um clique, mas deixaram de ter linha própria no corpo do menu.
 O BENI foi no sentido contrário: era o primeiro item desta lista e virou destino nativo, com
 o nome `Chat de IA`. Ferramenta de trabalho diário não mora no balcão de suporte.
 
+### Auditoria, desde a rodada 10
+
+| Hoje | Proposta |
+|---|---|
+| Configurações > Auditoria > Logs de auditoria | **Auditoria** > Logs de auditoria |
+| Configurações > Auditoria > Logs de requisição | **Auditoria** > Logs de requisição |
+
+Menu nativo de primeiro nível, fora das configurações. É a única parte da administração de
+hoje que a proposta tira de lá em vez de arrumar lá dentro, e a razão é que ela não é
+administração: é consulta.
+
 ### E a Base de Conhecimento
 
 A fricção **S2-F1** diz que ela "não aparece em lugar nenhum por padrão". O protótipo a
@@ -377,6 +388,89 @@ Precisam de resposta antes da rodada 2.
 ---
 
 ## Rodadas
+
+### Rodada 10 · 17/09/2026
+
+**O que ela pediu**, literal:
+
+> "auditoria nao fica em configuraçao. é um grande menu a parte."
+>
+> "se algo tem so um menu interno, ja deve abrir automaticamente nele. e todo menu de
+> primeiro nivel quando clicado deve abrir o primeiro menu de primeiro nivel da lista."
+
+#### Auditoria saiu das configurações
+
+O grupo `Auditoria`, com `Logs de auditoria` e `Logs de requisição`, era o último item da
+lista de configurações. Virou **seção nativa de primeiro nível**, e no modelo de trilha ganha
+ícone próprio.
+
+O motivo cabe numa frase: **configuração é onde se MUDA o workspace, auditoria é onde se OLHA
+o que ele fez.** Quem consulta um log não está configurando nada, e quem está configurando não
+quer passar pelo log. Guardar os dois atrás da mesma porta é o mesmo erro que a rodada 1
+desfez com as 19 linhas de administração no meio do trabalho.
+
+**Onde ela ficou:** depois das categorias, antes das seções do workspace. É primeiro nível
+porque é assunto próprio, não porque é diário; acima das categorias ela empurraria o trabalho
+de todo dia para baixo por um menu que se abre quando algo precisa ser explicado. **Se você
+quiser mais acima, é um campo no `mocks.ts`.**
+
+Fica uma pergunta: **quem enxerga Auditoria?** Está visível para todo o workspace, como estava
+dentro das configurações (onde a porta já era restrita). Se log é assunto de administrador, a
+seção precisa de escopo, e o escopo já existe no formulário.
+
+#### As duas regras de abertura
+
+Elas dizem a mesma coisa, de dois ângulos: **menu de primeiro nível não é beco sem saída.**
+
+| Situação | O que acontece agora |
+|---|---|
+| Menu de primeiro nível com várias telas | Abre a lista **e já abre a primeira tela** |
+| Menu de primeiro nível com **uma** tela só | Vira linha simples, sem seta, e clicar abre a tela |
+| Fechar um menu que estava aberto | Só fecha, não navega |
+| Ícone da trilha (modelo de dois níveis) | Trocar de área já abre a primeira tela da área |
+
+Antes, clicar em `ANÁLISE` revelava três linhas e deixava a pessoa escolher de novo: um clique
+cobrado sem nada em troca. Agora clicar em Análise abre o Dashboard de tarefas, clicar em
+Auditoria abre os Logs de auditoria, clicar em Categorias abre a primeira categoria, e clicar
+em `Correção monetária`, que tem uma tela só, abre a Calculadora avulsa **sem nem mostrar a
+seta**.
+
+**Duas fronteiras, que são decisão minha:**
+
+1. **Fechar é só fechar.** Se fechar também navegasse, recolher a lista de categorias para
+   ganhar espaço arrastaria a pessoa para dentro de uma categoria toda vez.
+2. **A regra vale também para Favoritos, Categorias e Configurações**, que são menus de
+   primeiro nível como os outros. Abrir Configurações cai em `Workspace > Visão geral`, que é
+   o primeiro item da lista, e o grupo que abre é o do item ativo.
+
+**O que a seção de uma tela só perde:** na barra ela deixa de ser um alvo onde se pode
+SOLTAR outra tela arrastada, porque virou linha. O editor continua tratando ela como seção, e
+é lá que se põe a segunda tela dentro dela.
+
+#### Dois cliques mortos que apareceram no caminho
+
+- **No modelo de trilha, clicar num item de configuração não mudava o miolo.** A barra marcava
+  o item e a direita continuava na tela anterior: o painel de configuração só trocava o
+  conteúdo quando a barra única o abria. Consertado.
+- **"Voltar ao workspace" deixava o menu inteiro sem linha ativa**, porque devolvia para um id
+  antigo (`inicio`) que a árvore não usa mais (`n-inicio`). Consertado, lendo o primeiro
+  destino da árvore em vez de um id escrito à mão.
+
+#### O tamanho, depois desta rodada
+
+O modo "Só nativo" foi de 20 para **21 linhas** com a Auditoria. Medido nesta janela: o
+conteúdo pede 758px e a área de rolagem tem 723px, então **transborda 35px aqui dentro**. Mas
+a barra de andaime do protótipo come 76px que no produto não existem: sem ela, sobram 41px.
+
+Ou seja: **cabe no produto, e não cabe na moldura do protótipo.** Se você quiser folga de
+verdade, a variável é o teto da lista de categorias, hoje em cinco: baixar para quatro
+devolve uma linha e meia. Não mexi porque o teto de cinco tem justificativa própria, escrita
+na decisão 2.
+
+No modelo de trilha, a Auditoria levou a trilha a **oito ícones** (Trabalho, Dados, Análise,
+Auditoria, Conhecimento, Comercial, Comparações, Configurações). É mais um argumento para a
+barra única, que a pesquisa já preferia: na trilha, cada seção nova custa um ícone numa
+coluna que não cresce.
 
 ### Rodada 9 · 17/09/2026
 

@@ -59,6 +59,10 @@ function rotuloDe(no: NoDoMenu) {
     spaceflows: props.t.spaceflows,
     documentos: props.t.documentos,
     categorias: props.t.categorias,
+    // Auditoria reaproveita os rótulos que já existiam nas configurações.
+    auditoria: props.t.grupos.auditoria,
+    logsAuditoria: props.t.itens['logs-auditoria'],
+    logsRequisicao: props.t.itens['logs-requisicao'],
   }
   return mapa[no.chave ?? ''] ?? (no.chave ?? '')
 }
@@ -115,7 +119,10 @@ function secoesDoPainel(painel: string) {
   return menu.secoesNoPainel.value.filter(s => (s.painel ?? 'trabalho') === painel)
 }
 
-const grupoAberto = ref('estrutura')
+/* O grupo aberto acompanha o item ativo, como na barra unica (rodada 10). */
+const grupoDoItem = (id: string) => gruposDeConfiguracao.find(g => g.itens.some(i => i.id === id))?.id ?? 'workspace'
+const grupoAberto = ref(grupoDoItem(props.itemConfigAtivo))
+watch(() => props.itemConfigAtivo, (id) => { grupoAberto.value = grupoDoItem(id) })
 const abertas = ref<Record<string, boolean>>({ favoritos: true, categorias: true })
 
 function aberta(id: string) {
@@ -125,9 +132,73 @@ function alternar(id: string) {
   abertas.value[id] = !aberta(id)
 }
 
+/*
+ * AS DUAS REGRAS DE ABERTURA (rodada 10), as mesmas da barra única:
+ * clicar num menu de primeiro nível abre a primeira tela dele, e seção com uma
+ * tela só vira linha que abre direto. Aqui o "menu de primeiro nível" é o
+ * ícone da trilha, então escolher a área já escolhe a primeira tela da área.
+ */
+function temUmaSo(no: NoDoMenu) {
+  return (no.filhos?.length ?? 0) === 1
+}
+
+function unicoFilho(no: NoDoMenu) {
+  return (no.filhos ?? [])[0]
+}
+
+function abrirSecao(no: NoDoMenu) {
+  const estavaAberta = aberta(no.id)
+  alternar(no.id)
+  if (estavaAberta) return
+  const primeiro = (no.filhos ?? [])[0]
+  if (primeiro) emit('destino', primeiro.id)
+}
+
+function abrirFavoritos() {
+  const estavaAberta = aberta('favoritos')
+  alternar('favoritos')
+  if (estavaAberta) return
+  const primeira = props.favoritas[0]
+  if (primeira) emit('categoria', primeira)
+}
+
+function abrirCategorias() {
+  const estavaAberta = aberta('categorias')
+  alternar('categorias')
+  if (estavaAberta) return
+  const primeira = props.recorte[0]
+  if (primeira) emit('categoria', primeira)
+}
+
+/** A primeira tela da área, que é o que trocar de área passa a abrir. */
+function abrirPrimeiraDaArea(id: string) {
+  if (id === 'trabalho') {
+    const d = menu.destinos.value[0]
+    if (d) emit('destino', d.id)
+    return
+  }
+  if (id === 'dados') {
+    const c = props.favoritas[0] ?? props.recorte[0]
+    if (c) emit('categoria', c)
+    return
+  }
+  if (id.startsWith('sec:')) {
+    const secao = menu.secoes.value.find(x => x.id === id.slice(4))
+    const primeiro = (secao?.filhos ?? [])[0]
+    if (primeiro) emit('destino', primeiro.id)
+    return
+  }
+  if (id === 'config') {
+    const primeiro = gruposDeConfiguracao[0]?.itens[0]
+    if (primeiro) emit('item', primeiro.id, props.t.itens[primeiro.id] ?? primeiro.id)
+  }
+}
+
 function irPara(a: { id: string, bloqueada: boolean }) {
   if (a.bloqueada) return
+  const jaEstava = area.value === a.id
   area.value = a.id
+  if (!jaEstava) abrirPrimeiraDaArea(a.id)
 }
 
 /*
@@ -236,27 +307,38 @@ watch(areas, (lista) => {
             />
           </div>
 
-          <SecaoDeMenu
-            v-for="s in secoesDoPainel('trabalho')"
-            :key="s.id"
-            :rotulo="rotuloDe(s)"
-            :selo="seloDaSecao(s)"
-            :aberta="aberta(s.id)"
-            :texto-recolher="props.t.recolherSecao(rotuloDe(s))"
-            :texto-expandir="props.t.expandirSecao(rotuloDe(s))"
-            @alternar="alternar(s.id)"
-          >
+          <template v-for="s in secoesDoPainel('trabalho')" :key="s.id">
             <LinhaDeMenu
-              v-for="(item, i) in (s.filhos ?? [])"
-              :key="item.id"
-              :icone="item.icone"
-              :rotulo="rotuloDe(item)"
-              :nivel="2"
-              :selo="item.emBreve ? props.t.emBreve : undefined"
-              :atraso="i * 25"
-              @selecionar="emit('destino', item.id)"
+              v-if="temUmaSo(s)"
+              class="mt-2"
+              :icone="s.icone"
+              :rotulo="rotuloDe(s)"
+              :selo="seloDaSecao(s)"
+              :ativo="props.destinoAtivo === unicoFilho(s).id"
+              @selecionar="emit('destino', unicoFilho(s).id)"
             />
-          </SecaoDeMenu>
+            <SecaoDeMenu
+              v-else
+              :rotulo="rotuloDe(s)"
+              :selo="seloDaSecao(s)"
+              :aberta="aberta(s.id)"
+              :texto-recolher="props.t.recolherSecao(rotuloDe(s))"
+              :texto-expandir="props.t.expandirSecao(rotuloDe(s))"
+              @alternar="abrirSecao(s)"
+            >
+              <LinhaDeMenu
+                v-for="(item, i) in (s.filhos ?? [])"
+                :key="item.id"
+                :icone="item.icone"
+                :rotulo="rotuloDe(item)"
+                :nivel="2"
+                :selo="item.emBreve ? props.t.emBreve : undefined"
+                :ativo="props.destinoAtivo === item.id"
+                :atraso="i * 25"
+                @selecionar="emit('destino', item.id)"
+              />
+            </SecaoDeMenu>
+          </template>
         </template>
 
         <!-- ---------- Dados ---------- -->
@@ -277,7 +359,7 @@ watch(areas, (lista) => {
               :aberta="aberta('favoritos')"
               :texto-recolher="props.t.recolherSecao(props.t.favoritos)"
               :texto-expandir="props.t.expandirSecao(props.t.favoritos)"
-              @alternar="alternar('favoritos')"
+              @alternar="abrirFavoritos()"
             >
               <LinhaDeMenu
                 v-for="(c, i) in props.favoritas"
@@ -302,7 +384,7 @@ watch(areas, (lista) => {
               :contador="props.totalDeCategorias || undefined"
               :texto-recolher="props.t.recolherSecao(props.t.categorias)"
               :texto-expandir="props.t.expandirSecao(props.t.categorias)"
-              @alternar="alternar('categorias')"
+              @alternar="abrirCategorias()"
             >
               <LinhaDeMenu
                 v-for="(c, i) in props.recorte"
@@ -329,26 +411,39 @@ watch(areas, (lista) => {
               </button>
             </SecaoDeMenu>
 
-            <SecaoDeMenu
-              v-for="s in secoesDoPainel('dados')"
-              :key="s.id"
-              :rotulo="rotuloDe(s)"
-              :aberta="aberta(s.id)"
-              :texto-recolher="props.t.recolherSecao(rotuloDe(s))"
-              :texto-expandir="props.t.expandirSecao(rotuloDe(s))"
-              @alternar="alternar(s.id)"
-            >
+            <template v-for="s in secoesDoPainel('dados')" :key="s.id">
+              <!-- Uma tela só: linha simples que abre direto, sem seta. -->
               <LinhaDeMenu
-                v-for="(item, i) in (s.filhos ?? [])"
-                :key="item.id"
-                :icone="item.icone"
-                :rotulo="rotuloDe(item)"
-                :nivel="2"
-                :selo="item.emBreve ? props.t.emBreve : undefined"
-                :atraso="i * 25"
-                @selecionar="emit('destino', item.id)"
+                v-if="temUmaSo(s)"
+                class="mt-2"
+                :icone="s.icone"
+                :rotulo="rotuloDe(s)"
+                :selo="seloDaSecao(s)"
+                :ativo="props.destinoAtivo === unicoFilho(s).id"
+                @selecionar="emit('destino', unicoFilho(s).id)"
               />
-            </SecaoDeMenu>
+              <SecaoDeMenu
+                v-else
+                :rotulo="rotuloDe(s)"
+                :selo="seloDaSecao(s)"
+                :aberta="aberta(s.id)"
+                :texto-recolher="props.t.recolherSecao(rotuloDe(s))"
+                :texto-expandir="props.t.expandirSecao(rotuloDe(s))"
+                @alternar="abrirSecao(s)"
+              >
+                <LinhaDeMenu
+                  v-for="(item, i) in (s.filhos ?? [])"
+                  :key="item.id"
+                  :icone="item.icone"
+                  :rotulo="rotuloDe(item)"
+                  :nivel="2"
+                  :selo="item.emBreve ? props.t.emBreve : undefined"
+                  :ativo="props.destinoAtivo === item.id"
+                  :atraso="i * 25"
+                  @selecionar="emit('destino', item.id)"
+                />
+              </SecaoDeMenu>
+            </template>
           </template>
         </template>
 
