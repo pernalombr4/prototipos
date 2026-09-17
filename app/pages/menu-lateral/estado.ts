@@ -17,10 +17,21 @@
  * Nada persiste: recarregar a página volta ao começo, como todo o protótipo.
  */
 
-import { menuDoEditor, podeMover, type NoDoMenu, type TipoDeNo } from './mocks'
+import { menuDoEditor, secoesDeModulo, modulos, podeMover, type NoDoMenu, type TipoDeNo } from './mocks'
 
 function clonar(a: NoDoMenu[]): NoDoMenu[] {
   return JSON.parse(JSON.stringify(a))
+}
+
+/**
+ * A árvore completa: o nativo mais o que os módulos trazem mais o que o
+ * workspace criou. Ela nasce inteira e o que decide o que aparece é o filtro
+ * de origem, não a montagem: assim o administrador pode reordenar a seção de
+ * um módulo como reordena qualquer outra, e ligar o módulo de volta devolve a
+ * seção no lugar em que ele a tinha deixado.
+ */
+function arvoreCompleta(): NoDoMenu[] {
+  return clonar([...menuDoEditor, ...secoesDeModulo])
 }
 
 export interface Recusa {
@@ -29,8 +40,56 @@ export interface Recusa {
 }
 
 export function useMenuDoWorkspace() {
-  const aoVivo = useState<NoDoMenu[]>('menu-ao-vivo', () => clonar(menuDoEditor))
-  const rascunho = useState<NoDoMenu[]>('menu-rascunho', () => clonar(menuDoEditor))
+  const aoVivo = useState<NoDoMenu[]>('menu-ao-vivo', () => arvoreCompleta())
+  const rascunho = useState<NoDoMenu[]>('menu-rascunho', () => arvoreCompleta())
+
+  /*
+   * OS DOIS MODOS DA DEMONSTRAÇÃO.
+   *
+   * `modulosAtivos`        quais módulos estão ligados em Configurações > Módulos;
+   * `mostrarPersonalizados` se as seções que o workspace criou aparecem.
+   *
+   * Com os dois vazios/desligados, o menu fica 100% nativo: é o que existe em
+   * qualquer workspace recém-criado, e é o estado que a demanda pediu para
+   * poder ver separado.
+   */
+  const modulosAtivos = useState<string[]>('menu-modulos-ativos', () =>
+    modulos.filter(m => m.ativoPorPadrao).map(m => m.id),
+  )
+  const mostrarPersonalizados = useState<boolean>('menu-personalizados', () => true)
+
+  /** Um nó sem origem declarada é nativo: nativo é o padrão do produto. */
+  function origemDe(n: NoDoMenu) {
+    return n.origem ?? 'nativo'
+  }
+
+  function visivel(n: NoDoMenu) {
+    const o = origemDe(n)
+    if (o === 'modulo') return modulosAtivos.value.includes(n.moduloId ?? '')
+    if (o === 'workspace') return mostrarPersonalizados.value
+    return true
+  }
+
+  function alternarModulo(id: string) {
+    const i = modulosAtivos.value.indexOf(id)
+    if (i >= 0) modulosAtivos.value.splice(i, 1)
+    else modulosAtivos.value.push(id)
+  }
+
+  /** Os dois modos que a demanda pediu, num controle só. */
+  function soNativo() {
+    modulosAtivos.value = []
+    mostrarPersonalizados.value = false
+  }
+
+  function comTudo() {
+    modulosAtivos.value = modulos.filter(m => m.ativoPorPadrao).map(m => m.id)
+    mostrarPersonalizados.value = true
+  }
+
+  const modoDoMenu = computed<'nativo' | 'completo'>(() =>
+    modulosAtivos.value.length === 0 && !mostrarPersonalizados.value ? 'nativo' : 'completo',
+  )
 
   /*
    * A ordem manual das categorias.
@@ -203,11 +262,14 @@ export function useMenuDoWorkspace() {
    * O `aoVivo` é a linha de base: é com ele que o `alterado` compara, e é para
    * ele que o `descartar()` volta.
    */
-  const destinos = computed(() => rascunho.value.filter(n => n.tipo === 'destino'))
+  const destinos = computed(() => rascunho.value.filter(n => n.tipo === 'destino' && visivel(n)))
   const secaoDeCategorias = computed(() => rascunho.value.find(n => n.tipo === 'secao-nativa') ?? null)
 
-  /** Todas as seções do workspace, na ordem em que ficaram. */
-  const secoes = computed(() => rascunho.value.filter(n => n.tipo === 'secao'))
+  /** As seções que aparecem agora: nativas sempre, módulo e workspace conforme o modo. */
+  const secoes = computed(() => rascunho.value.filter(n => n.tipo === 'secao' && visivel(n)))
+
+  /** A árvore inteira filtrada, que é o que o editor mostra. */
+  const arvoreVisivel = computed(() => rascunho.value.filter(visivel))
 
   /** No modelo de trilha: as que o administrador mandou para a trilha. */
   const secoesNaTrilha = computed(() => secoes.value.filter(s => s.lugar === 'trilha'))
@@ -231,6 +293,14 @@ export function useMenuDoWorkspace() {
     destinos,
     secaoDeCategorias,
     secoes,
+    arvoreVisivel,
+    origemDe,
+    modulosAtivos,
+    mostrarPersonalizados,
+    alternarModulo,
+    soNativo,
+    comTudo,
+    modoDoMenu,
     secoesNaTrilha,
     secoesNoPainel,
   }

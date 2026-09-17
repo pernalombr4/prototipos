@@ -2,7 +2,7 @@
 import LinhaDeMenu from './_LinhaDeMenu.vue'
 import SecaoDeMenu from './_SecaoDeMenu.vue'
 import { useMenuDoWorkspace } from './estado'
-import { gruposDeConfiguracao, workspace, usuaria, type NoDoMenu, type Categoria } from './mocks'
+import { gruposDeConfiguracao, workspace, type NoDoMenu, type Categoria } from './mocks'
 import type { TextosDaTela } from './textos'
 
 /**
@@ -154,6 +154,11 @@ watch(areas, (lista) => {
 
       <div class="min-h-2 flex-1" />
 
+      <!--
+        RODADA 8: a lupa e o criar voltaram para a base da trilha, a pedido dela.
+        Subiram na rodada 7 e desceram aqui: ela viu os dois arranjos e preferiu
+        este. É também onde o Slack, o Teams e o monday os põem.
+      -->
       <UTooltip :text="props.t.buscarEmTudo" :content="{ side: 'right' }">
         <button
           type="button"
@@ -176,8 +181,6 @@ watch(areas, (lista) => {
           </button>
         </UTooltip>
       </UDropdownMenu>
-
-      <UAvatar :alt="usuaria.nome" size="sm" class="mt-1 shrink-0" />
     </div>
 
     <!-- ==================== O PAINEL DA ÁREA ==================== -->

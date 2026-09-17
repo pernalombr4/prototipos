@@ -153,7 +153,8 @@ const modelo = ref<'barra' | 'trilha'>('barra')
 
 /* ---------------------------- navegação ---------------------------- */
 const painel = ref<'trabalho' | 'config'>('trabalho')
-const destinoAtivo = ref('inicio')
+// O id vem da arvore do menu, e la os destinos nativos tem prefixo.
+const destinoAtivo = ref('n-inicio')
 const categoriaAtiva = ref<Categoria | null>(null)
 const itemConfigAtivo = ref('cfg-categorias')
 const rotuloConfigAtivo = ref('')
@@ -340,6 +341,17 @@ function emBreve() {
         <UIcon name="i-lucide-chevrons-up-down" class="size-4 shrink-0 text-muted" />
       </UButton>
 
+      <!--
+        RODADA 7: o perfil fica AQUI, na esquerda de cima, e em lugar nenhum
+        mais. Ele estava também no pé da barra lateral e no pé da trilha: três
+        lugares para a mesma pessoa, gastando altura que a navegação precisava.
+        Um lugar só, ao lado do workspace, e o canto superior esquerdo vira a
+        zona de identidade: onde eu estou e quem eu sou.
+      -->
+      <UTooltip :text="usuaria.nome">
+        <UAvatar :alt="usuaria.nome" size="xs" class="shrink-0" />
+      </UTooltip>
+
       <div class="flex min-w-0 flex-1 justify-center">
         <UButton
           color="neutral"
@@ -357,8 +369,6 @@ function emBreve() {
       <UDropdownMenu :items="itensDeCriar" :content="{ align: 'end' }">
         <UButton icon="i-lucide-plus" color="primary" :label="t.criar" class="shrink-0" />
       </UDropdownMenu>
-
-      <UAvatar :alt="usuaria.nome" size="xs" class="shrink-0" />
     </header>
 
     <!-- ============================================================
@@ -445,6 +455,7 @@ function emBreve() {
           :rotulo-do-destino="rotuloDoDestino"
           :categoria="categoriaAtiva"
           :breadcrumb="breadcrumb"
+          :item-config="painel === 'config' ? itemConfigAtivo : undefined"
           @configurar-categoria="configurarCategoriaAtual"
         />
       </div>
@@ -500,6 +511,26 @@ function emBreve() {
           :color="estado === e.valor ? 'primary' : 'neutral'"
           :variant="estado === e.valor ? 'solid' : 'subtle'"
           @click="estado = e.valor"
+        />
+
+        <span class="ml-2 mr-0.5 text-xs font-semibold uppercase tracking-wider text-muted">
+          {{ t.modoRotulo }}
+        </span>
+        <UButton
+          :label="t.modoNativo"
+          size="xs"
+          class="transition-transform hover:-translate-y-0.5"
+          :color="menu.modoDoMenu.value === 'nativo' ? 'primary' : 'neutral'"
+          :variant="menu.modoDoMenu.value === 'nativo' ? 'solid' : 'subtle'"
+          @click="menu.soNativo()"
+        />
+        <UButton
+          :label="t.modoCompleto"
+          size="xs"
+          class="transition-transform hover:-translate-y-0.5"
+          :color="menu.modoDoMenu.value === 'completo' ? 'primary' : 'neutral'"
+          :variant="menu.modoDoMenu.value === 'completo' ? 'solid' : 'subtle'"
+          @click="menu.comTudo()"
         />
 
         <span class="ml-2 mr-0.5 text-xs font-semibold uppercase tracking-wider text-muted">

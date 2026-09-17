@@ -349,15 +349,11 @@ const nadaNoFiltro = computed(() =>
             />
 
             <!--
-              Diz por que arrastar aqui muda o criterio. Sem isto a ordenacao
-              trocar sozinha depois de um arraste parece defeito.
+              A dica de arrastar saiu da lista na rodada 7: ela ocupava duas
+              linhas permanentes para ensinar uma coisa que se aprende uma vez.
+              Quem arrasta com criterio automatico ligado recebe o aviso no
+              toast, no momento em que importa.
             -->
-            <p
-              v-if="!filtrando && props.ordem !== 'manual'"
-              class="px-2.5 pb-0.5 pt-1 text-xs leading-relaxed text-muted"
-            >
-              {{ props.t.ordemAutomatica }}
-            </p>
 
             <button
               v-if="!filtrando"

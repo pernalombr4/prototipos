@@ -211,7 +211,7 @@ function classeDaMarca(id: string, comMeio = false) {
       </div>
 
       <div class="max-h-[50vh] space-y-1 overflow-y-auto pr-1">
-        <template v-for="no in menu.rascunho.value" :key="no.id">
+        <template v-for="no in menu.arvoreVisivel.value" :key="no.id">
           <div
             class="relative animate-[entrada_0.2s_ease-out_both] rounded-lg border border-default p-2"
             :class="[arraste.arrastando.value === no.id ? 'opacity-40' : '', classeDaMarca(no.id, no.tipo !== 'destino')]"
@@ -230,7 +230,7 @@ function classeDaMarca(id: string, comMeio = false) {
               <span class="min-w-0 flex-1 truncate text-sm font-semibold text-highlighted">{{ rotuloDe(no) }}</span>
 
               <UBadge
-                :label="no.tipo === 'secao' ? props.t.seloWorkspace : props.t.seloNativo"
+                :label="menu.origemDe(no) === 'modulo' ? props.t.seloModulo : menu.origemDe(no) === 'workspace' ? props.t.seloWorkspace : props.t.seloNativo"
                 size="sm"
                 color="neutral"
                 variant="subtle"

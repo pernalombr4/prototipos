@@ -373,6 +373,121 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 8 · 17/09/2026
+
+**O que ela pediu**, literal:
+
+> "pode voltar pra base do menu o botao de criar e a lupa de busca. tava melhor."
+
+> "saiba que o enspace tem módulos (que sao ativados dentro de sistema > informaçoes
+> gerais), mas eles precisam passar a ter mais destaque no menu, ser uma opçao pra fora
+> dali. esses modulos, quando ativados, acabam criando mais menus (de primeiro e segundo
+> nivel), por exemplo, 'comercial' no seu exemplo poderia significar isso. / voce deve
+> prototipar SOMENTE os menus nativos. estado 100% só com menus nativos. e aí outro modo da
+> demonstração deve ter modulos ativados e menus personalizados junto (como ta agora)."
+
+#### A lupa e o "+" voltaram para a base da trilha
+
+Voltaram. E isso não briga com a rodada 3 nem com a 7, porque **são três buscas diferentes**,
+e só uma desceu:
+
+| Onde | O que é | Onde ficou |
+|---|---|---|
+| Barra do topo, centro | Busca geral do workspace (`CTRL K`) | Topo, e continua lá |
+| Alto do painel | Filtro do próprio menu, que some o que não casa | Alto, e continua lá |
+| Trilha (modelo de dois níveis) | O ícone de lupa e o `+` da trilha | **Base**, de volta |
+
+Na trilha a lupa e o `+` são ícone sem rótulo, num corredor de 56 px. No topo eles disputavam
+o olho com o workspace e com a primeira área, que é onde a navegação começa. Na base ficam
+onde o polegar e o cursor já param quando a pessoa termina de ler a lista.
+
+#### Módulos saiu de dentro de Informações Básicas
+
+Hoje os módulos se ligam numa seção no fim de `Sistema > Informações Gerais`. Ligar um módulo
+**muda o menu do workspace inteiro, para todo mundo**, e isso é grande demais para viver no
+rodapé de outra tela.
+
+Virou item próprio: `Configurações > Workspace > Módulos`. A tela diz, em uma frase, o que a
+troca provoca: "Ligar um módulo acrescenta as telas dele ao menu lateral; desligar tira, e a
+configuração fica guardada."
+
+#### Cada módulo diz o que acrescenta ao menu, antes de ser ligado
+
+Debaixo de cada módulo há a lista do que ele põe no menu, em selos: o menu de primeiro nível
+em cheio, os de segundo em contorno. Hoje a pessoa liga e vai procurar o que apareceu. Aqui
+ela lê antes e decide.
+
+Essa lista **é lida da própria árvore do menu**, não é texto solto: o que o selo promete é
+exatamente o que entra na barra.
+
+> **Honestidade sobre o conteúdo:** os itens de segundo nível de Comparações vieram do fluxo
+> documentado do módulo, não de tela observada no develop. A **mecânica** é a proposta; os
+> rótulos exatos precisam da sua conferência.
+
+#### Os dois modos da demonstração
+
+Na barra de andaime, em `MENU`:
+
+- **Só nativo.** Nenhum módulo, nenhuma seção que o workspace criou. É o menu de um workspace
+  recém-aberto, e é o piso: se já confunde aqui, módulo e menu personalizado só agravam.
+- **Com módulos e do workspace.** Dois módulos ligados (Comparações, Correção monetária) e as
+  seções do workspace (Conhecimento, Comercial).
+
+O que o modo nativo mostra, medido no navegador: a barra cabe inteira, **sem rolagem**, com
+Início, Tarefas, Agenda, Spaceflows, Documentos, os três favoritos, cinco categorias mais o
+"Ver todas as 8 categorias", a seção Análise e o rodapé com Configurações e Ajuda. O menu de
+hoje, no mesmo espaço, pede 1208 px de altura para 847 px disponíveis.
+
+No modelo de trilha o mesmo corte deixa a trilha com **quatro áreas**: Trabalho, Dados,
+Configurações e Ajuda. Com tudo ligado ela vai a sete, e a seção de módulo marcada para a
+trilha (Comparações) vira área própria, do lado de Conhecimento e Comercial.
+
+#### Toda linha do menu agora tem origem
+
+`nativo`, `modulo` ou `workspace`. Serve para três coisas: filtrar os dois modos acima, mostrar
+o selo de procedência no editor de menus, e deixar explícito no código que **nativo é o
+padrão** (linha sem origem declarada é nativa).
+
+#### O que verifiquei, no navegador
+
+- Em `Configurações > Workspace > Módulos`, desligar Comparações **tira a seção da barra ao
+  vivo** na hora e o rodapé da tela passa a dizer "1 módulo ativo" (singular pelo dicionário,
+  não por concatenação). Religar devolve a seção.
+- Em "Só nativo" a barra fica com a lista acima e nada de CONHECIMENTO, COMERCIAL, COMPARAÇÕES
+  ou CORREÇÃO MONETÁRIA.
+- No modelo de trilha, a ordem da trilha é Trabalho, Dados, Conhecimento, Comercial,
+  Comparações, Configurações, Ajuda, e a lupa e o Criar vêm **depois** de Ajuda, na base.
+
+**Um erro meu, no caminho:** a marcação `origem: 'workspace'` tinha caído numa exportação
+antiga do `mocks.ts` em vez das seções de verdade, e "Só nativo" continuava mostrando
+Conhecimento e Comercial. Corrigido mirando pelo id da seção.
+
+### Rodada 7 · 17/09/2026
+
+**O que ela pediu**, literal:
+
+> "a barra de busca deve ficar mais no alto. e na parte inferior nao deve repetir o perfil do
+> user no menu. só la na esquerda superoir ja é suficiente."
+
+#### O perfil saiu do rodapé do menu
+
+Ficou só o avatar do topo, à esquerda, ao lado do nome do workspace. O rodapé da barra ficou
+com Configurações e Ajuda.
+
+Repetir o mesmo alvo em dois cantos da mesma tela não dobra o acesso, cria dúvida: quem vê os
+dois pergunta se abrem a mesma coisa, e a resposta ("abrem") só se descobre clicando. E o
+rodapé é o trecho mais disputado da barra, porque é o único que não rola junto com a lista.
+
+Notion, ClickUp e monday põem a conta **em um canto só**. O Twenty põe no topo. Nenhum dos
+sete que li repete.
+
+#### A busca subiu
+
+O filtro do menu passou a ser a primeira coisa depois do cabeçalho da barra, antes de Início.
+Quem chega com um destino na cabeça digita; quem chega para olhar, ignora e desce. (A lupa da
+trilha desceu de novo na rodada 8, pelo pedido dela; os dois pedidos falam de barras
+diferentes, e a tabela da rodada 8 separa as três.)
+
 ### Rodada 6 · 17/09/2026
 
 **O que ela pediu**, literal:

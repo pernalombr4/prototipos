@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { type EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
+import TelaDeModulos from './_TelaDeModulos.vue'
 import type { Categoria } from './mocks'
 import type { TextosDaTela } from './textos'
 
@@ -18,6 +19,8 @@ const props = defineProps<{
   rotuloDoDestino: string
   categoria: Categoria | null
   breadcrumb: string[]
+  /** Qual item das configurações está aberto, quando o painel é o de config. */
+  itemConfig?: string
 }>()
 
 const emit = defineEmits<{ configurarCategoria: [] }>()
@@ -83,8 +86,14 @@ const linhas = computed(() => {
     </header>
 
     <div class="min-h-0 flex-1 overflow-y-auto p-5">
+      <!--
+        A tela de Módulos é a única do miolo que não é maquete: é o mecanismo
+        que a demanda mandou mostrar, e ligar um módulo mexe no menu de verdade.
+      -->
+      <TelaDeModulos v-if="props.itemConfig === 'modulos'" :t="props.t" />
+
       <!-- ---------------- tela de uma categoria ---------------- -->
-      <div v-if="props.categoria" :key="props.categoria.id" class="animate-[entrada_0.25s_ease-out_both]">
+      <div v-else-if="props.categoria" :key="props.categoria.id" class="animate-[entrada_0.25s_ease-out_both]">
         <div class="mb-4 flex items-center gap-3">
           <UIcon :name="props.categoria.icon ?? 'i-lucide-folder'" class="size-6 text-toned" />
           <div class="min-w-0">
@@ -139,7 +148,9 @@ const linhas = computed(() => {
         </div>
       </div>
 
-      <p class="mt-4 text-xs text-muted">{{ props.t.conteudoIlustrativo }}</p>
+      <p v-if="props.itemConfig !== 'modulos'" class="mt-4 text-xs text-muted">
+        {{ props.t.conteudoIlustrativo }}
+      </p>
     </div>
   </div>
 </template>

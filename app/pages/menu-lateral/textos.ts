@@ -161,6 +161,24 @@ export interface TextosDaTela {
   arrastarTeclado: string
   menuSalvo: string
   semAlteracao: string
+
+  // rodada 8: modulos e os dois modos do menu
+  modoRotulo: string
+  modoNativo: string
+  modoCompleto: string
+  seloModulo: string
+  modulosTitulo: string
+  modulosDescricao: string
+  modulosAtivos: (n: number) => string
+  modulosTraz: string
+  modulosNadaAtivo: string
+  modulosOndeFica: string
+  moduloComparacoes: string
+  moduloComparacoesDesc: string
+  moduloCorrecao: string
+  moduloCorrecaoDesc: string
+  personalizadosRotulo: string
+  personalizadosDica: string
   motivos: Record<string, string>
   tipos: Record<string, string>
 
@@ -248,6 +266,7 @@ const ptBR: TextosDaTela = {
   itens: {
     'visao-geral': 'Visão geral',
     'informacoes': 'Informações básicas',
+    'modulos': 'Módulos',
     'calendario': 'Calendário',
     'notificacoes': 'Notificações',
     'dicionarios': 'Dicionários',
@@ -352,6 +371,22 @@ const ptBR: TextosDaTela = {
   arrastarDica: 'Arraste para reordenar',
   arrastarTeclado: 'Com o foco no item, Alt e as setas movem sem o mouse.',
   menuSalvo: 'Menu salvo.',
+  modoRotulo: 'Menu',
+  modoNativo: 'Só nativo',
+  modoCompleto: 'Com módulos e do workspace',
+  seloModulo: 'Módulo',
+  modulosTitulo: 'Módulos',
+  modulosDescricao: 'Módulos são funcionalidades que o workspace liga quando precisa. Ligar um módulo acrescenta as telas dele ao menu lateral; desligar tira, e a configuração fica guardada.',
+  modulosAtivos: n => n === 1 ? '1 módulo ativo' : `${n} módulos ativos`,
+  modulosTraz: 'O que ele acrescenta ao menu',
+  modulosNadaAtivo: 'Nenhum módulo ativo. O menu está com as telas nativas apenas.',
+  modulosOndeFica: 'Antes esta tela ficava dentro de Informações Básicas. Agora é um item próprio, porque ligar um módulo muda o menu de todo mundo.',
+  moduloComparacoes: 'Comparações',
+  moduloComparacoesDesc: 'Duas partes comparam dados sobre os mesmos itens, com aprovação e rastreabilidade.',
+  moduloCorrecao: 'Correção monetária',
+  moduloCorrecaoDesc: 'Atualiza valores por índices econômicos oficiais, como IPCA e INPC.',
+  personalizadosRotulo: 'Seções do workspace',
+  personalizadosDica: 'As seções que alguém criou em Interface, Menus.',
   semAlteracao: 'Nada mudou ainda. Arraste um item para reordenar.',
   preverNoPainel: 'Como fica no painel',
 
@@ -460,6 +495,7 @@ const en: TextosDaTela = {
   itens: {
     'visao-geral': 'Overview',
     'informacoes': 'Basic information',
+    'modulos': 'Modules',
     'calendario': 'Calendar',
     'notificacoes': 'Notifications',
     'dicionarios': 'Dictionaries',
@@ -564,6 +600,22 @@ const en: TextosDaTela = {
   arrastarDica: 'Drag to reorder',
   arrastarTeclado: 'With the item focused, Alt and the arrows move it without the mouse.',
   menuSalvo: 'Menu saved.',
+  modoRotulo: 'Menu',
+  modoNativo: 'Native only',
+  modoCompleto: 'With modules and workspace',
+  seloModulo: 'Module',
+  modulosTitulo: 'Modules',
+  modulosDescricao: 'Modules are features the workspace turns on when it needs them. Turning one on adds its screens to the sidebar; turning it off removes them, and the setup is kept.',
+  modulosAtivos: n => n === 1 ? '1 module on' : `${n} modules on`,
+  modulosTraz: 'What it adds to the menu',
+  modulosNadaAtivo: 'No module is on. The menu has the native screens only.',
+  modulosOndeFica: 'This screen used to live inside Basic information. It is its own item now, because turning a module on changes the menu for everyone.',
+  moduloComparacoes: 'Comparisons',
+  moduloComparacoesDesc: 'Two parties compare data on the same items, with approval and traceability.',
+  moduloCorrecao: 'Monetary adjustment',
+  moduloCorrecaoDesc: 'Updates values by official economic indexes, such as IPCA and INPC.',
+  personalizadosRotulo: 'Workspace sections',
+  personalizadosDica: 'The sections someone created in Interface, Menus.',
   semAlteracao: 'Nothing has changed yet. Drag an item to reorder.',
   preverNoPainel: 'How it looks in the panel',
 
@@ -672,6 +724,7 @@ const es: TextosDaTela = {
   itens: {
     'visao-geral': 'Visión general',
     'informacoes': 'Información básica',
+    'modulos': 'Módulos',
     'calendario': 'Calendario',
     'notificacoes': 'Notificaciones',
     'dicionarios': 'Diccionarios',
@@ -776,6 +829,22 @@ const es: TextosDaTela = {
   arrastarDica: 'Arrastra para reordenar',
   arrastarTeclado: 'Con el foco en el elemento, Alt y las flechas lo mueven sin ratón.',
   menuSalvo: 'Menú guardado.',
+  modoRotulo: 'Menú',
+  modoNativo: 'Solo nativo',
+  modoCompleto: 'Con módulos y del workspace',
+  seloModulo: 'Módulo',
+  modulosTitulo: 'Módulos',
+  modulosDescricao: 'Los módulos son funciones que el workspace activa cuando las necesita. Activar uno añade sus pantallas al menú lateral; desactivarlo las quita, y la configuración queda guardada.',
+  modulosAtivos: n => n === 1 ? '1 módulo activo' : `${n} módulos activos`,
+  modulosTraz: 'Lo que añade al menú',
+  modulosNadaAtivo: 'Ningún módulo activo. El menú tiene solo las pantallas nativas.',
+  modulosOndeFica: 'Antes esta pantalla estaba dentro de Información básica. Ahora es un elemento propio, porque activar un módulo cambia el menú de todos.',
+  moduloComparacoes: 'Comparaciones',
+  moduloComparacoesDesc: 'Dos partes comparan datos sobre los mismos elementos, con aprobación y trazabilidad.',
+  moduloCorrecao: 'Corrección monetaria',
+  moduloCorrecaoDesc: 'Actualiza valores por índices económicos oficiales, como IPCA e INPC.',
+  personalizadosRotulo: 'Secciones del workspace',
+  personalizadosDica: 'Las secciones que alguien creó en Interfaz, Menús.',
   semAlteracao: 'Todavía no cambió nada. Arrastra un elemento para reordenar.',
   preverNoPainel: 'Cómo queda en el panel',
 

@@ -229,6 +229,7 @@ export const secoesPersonalizadas: SecaoDeMenu[] = [
     id: 'conhecimento',
     rotulo: 'Conhecimento',
     icone: 'i-lucide-book-open',
+    origem: 'workspace',
     escopo: [],
     personalizada: true,
     itens: [
@@ -240,6 +241,7 @@ export const secoesPersonalizadas: SecaoDeMenu[] = [
     id: 'comercial',
     rotulo: 'Comercial',
     icone: 'i-lucide-trending-up',
+    origem: 'workspace',
     escopo: ['comercial'],
     personalizada: true,
     itens: [
@@ -272,6 +274,7 @@ export const gruposDeConfiguracao: GrupoDeConfiguracao[] = [
     itens: [
       { id: 'visao-geral', icone: 'i-lucide-layout-dashboard' },
       { id: 'informacoes', icone: 'i-lucide-id-card' },
+      { id: 'modulos', icone: 'i-lucide-package' },
       { id: 'calendario', icone: 'i-lucide-calendar' },
       { id: 'notificacoes', icone: 'i-lucide-bell' },
       { id: 'dicionarios', icone: 'i-lucide-languages' },
@@ -530,6 +533,15 @@ export interface NoDoMenu {
   painel?: string
   /** Tela informada pela Mikaela que ainda não existe no develop. */
   emBreve?: boolean
+  /**
+   * De onde o item veio. É o que separa os três modos de demonstração:
+   *   `nativo`    existe em qualquer workspace, sempre;
+   *   `modulo`    apareceu porque um módulo foi ativado;
+   *   `workspace` alguém criou em Interface > Menus.
+   */
+  origem?: 'nativo' | 'modulo' | 'workspace'
+  /** Qual módulo trouxe este item, quando a origem é `modulo`. */
+  moduloId?: string
   filhos?: NoDoMenu[]
 }
 
@@ -553,6 +565,7 @@ export const menuDoEditor: NoDoMenu[] = [
   {
     id: 's-analise',
     tipo: 'secao',
+    origem: 'nativo',
     rotulo: 'Análise',
     icone: 'i-lucide-chart-column',
     lugar: 'painel',
@@ -567,6 +580,7 @@ export const menuDoEditor: NoDoMenu[] = [
   {
     id: 's-conhecimento',
     tipo: 'secao',
+    origem: 'workspace',
     rotulo: 'Conhecimento',
     icone: 'i-lucide-book-open',
     lugar: 'trilha',
@@ -579,6 +593,7 @@ export const menuDoEditor: NoDoMenu[] = [
   {
     id: 's-comercial',
     tipo: 'secao',
+    origem: 'workspace',
     rotulo: 'Comercial',
     icone: 'i-lucide-trending-up',
     lugar: 'trilha',
@@ -629,4 +644,66 @@ export const paineisQueRecebem = [
   { id: 'trabalho', chave: 'areaTrabalho' },
   { id: 'dados', chave: 'areaDados' },
   { id: 'analise', chave: 'secaoAnalise' },
+]
+
+
+/* ==================================================================
+   MÓDULOS
+   Base documental: `Módulos` do en-docs (somente leitura). São dois, e são
+   estes: "Os módulos podem ser ativados ou desativados conforme as
+   necessidades da organização", em `Configurações > Sistema > Informações
+   Básicas`, seção Módulos.
+================================================================== */
+
+export interface Modulo {
+  id: string
+  icone: string
+  /** Ativado por padrão no modo completo da demonstração. */
+  ativoPorPadrao: boolean
+}
+
+export const modulos: Modulo[] = [
+  { id: 'comparacoes', icone: 'i-lucide-scale', ativoPorPadrao: true },
+  { id: 'correcao-monetaria', icone: 'i-lucide-percent', ativoPorPadrao: true },
+]
+
+/**
+ * O menu que cada módulo traz quando é ativado.
+ *
+ * `Calculadora avulsa` é documentada: o módulo de Correção Monetária tem a tela
+ * e ela é alcançável. Os três itens de Comparações são DERIVADOS do fluxo que a
+ * documentação descreve (Visão do Responsável, Visão do Aprovador e Extrair
+ * relatórios), e não de uma tela de menu que eu tenha visto. Marcado aqui para
+ * ninguém ler como fato do produto.
+ */
+export const secoesDeModulo: NoDoMenu[] = [
+  {
+    id: 'm-comparacoes',
+    tipo: 'secao',
+    origem: 'modulo',
+    moduloId: 'comparacoes',
+    rotulo: 'Comparações',
+    icone: 'i-lucide-scale',
+    lugar: 'trilha',
+    escopo: [],
+    filhos: [
+      { id: 'mc-minhas', tipo: 'tela', origem: 'modulo', moduloId: 'comparacoes', rotulo: 'Minhas comparações', icone: 'i-lucide-list-checks', tipoDeTela: 'consultas', categoriasLigadas: 1 },
+      { id: 'mc-aprovar', tipo: 'tela', origem: 'modulo', moduloId: 'comparacoes', rotulo: 'Para aprovar', icone: 'i-lucide-circle-check-big', tipoDeTela: 'triagem', categoriasLigadas: 1 },
+      { id: 'mc-relatorios', tipo: 'tela', origem: 'modulo', moduloId: 'comparacoes', rotulo: 'Relatórios de comparação', icone: 'i-lucide-file-chart-column', tipoDeTela: 'paineis' },
+    ],
+  },
+  {
+    id: 'm-correcao',
+    tipo: 'secao',
+    origem: 'modulo',
+    moduloId: 'correcao-monetaria',
+    rotulo: 'Correção monetária',
+    icone: 'i-lucide-percent',
+    lugar: 'painel',
+    painel: 'dados',
+    escopo: [],
+    filhos: [
+      { id: 'mm-calc', tipo: 'tela', origem: 'modulo', moduloId: 'correcao-monetaria', rotulo: 'Calculadora avulsa', icone: 'i-lucide-calculator', tipoDeTela: 'personalizada' },
+    ],
+  },
 ]
