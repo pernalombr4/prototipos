@@ -35,9 +35,17 @@ const aceso = computed(() => destaque.value === props.id)
       aceso ? 'ring-2 ring-primary shadow-lg' : 'ring-0',
     ]"
   >
+    <!--
+      Sem linha sob o título.
+      A hierarquia já está na tipografia (16px semibold sobre 14px cinza) e a
+      moldura já disse onde a seção começa. A linha era a terceira vez que o
+      mesmo agrupamento era desenhado, e é o que o Material chama de divisor
+      que não se paga. Na zona de perigo o fundo tingido continua: ali a faixa
+      trabalha, separa o aviso do que é irreversível.
+    -->
     <header
-      class="flex flex-wrap items-start gap-x-4 gap-y-2 border-b px-5 py-4"
-      :class="perigo ? 'border-error/30 bg-error/5' : 'border-default'"
+      class="flex flex-wrap items-start gap-x-4 gap-y-2 px-5 pt-4"
+      :class="perigo ? 'rounded-t-xl bg-error/5 pb-4' : 'pb-2'"
     >
       <div class="min-w-0 flex-1">
         <h2
@@ -71,7 +79,7 @@ const aceso = computed(() => destaque.value === props.id)
       É o que deixa a mesma linha de ajuste se comportar certo tanto numa coluna
       de 590 px quanto num cartão de 1.200 px.
     -->
-    <div class="@container px-5 py-4">
+    <div class="@container px-5 pb-4 pt-3">
       <slot />
     </div>
 

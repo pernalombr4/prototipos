@@ -1,5 +1,56 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 13 — 17/09/2026 — o corte das divisões visuais
+
+**O que ela pediu, literal:**
+
+> "analise o modo como voce ta propondo as divisoes de seçoes. é padrao de mercado? ou tem muito
+> box e divider no seu, acabando por sujar a tela? PESQUISE antes de responder." (...) "pode
+> aplicar o corte"
+
+Pesquisa e método em [`PESQUISA.md`](PESQUISA.md), "Rodada 13".
+
+### O veredito
+
+Não era cartão demais: cartão por grupo é padrão (Polaris). Era **o mesmo agrupamento desenhado
+três vezes**: moldura, linha sob o título dentro da moldura, e fio entre as linhas de conteúdo.
+Em Informações Básicas isso dava **uma linha horizontal a cada 140 px de rolagem**, e duas delas
+a 40 px uma da outra no topo, sem nada no meio.
+
+### O corte, medido
+
+| | Antes | Depois |
+|---|---|---|
+| Molduras | 5 | **4** |
+| Fios | 13 | **7** |
+| Fios estruturais | 6 | **0** |
+| Altura da página | 1.831 px | 1.766 px |
+
+Três cortes:
+
+1. **A linha sob o título saiu de `_Secao`**, nas cinco abas. O título é 16 px semibold sobre
+   texto de 14 px cinza: a hierarquia já estava na tipografia. Na **zona de perigo o fundo
+   tingido continua** (agora com canto de cima arredondado, acompanhando a moldura): ali a faixa
+   trabalha, e é o caso que o Material descreve.
+2. **A faixa de subtítulo da tela perdeu a borda.** A lista de abas já tem a dela, 40 px acima.
+3. **Comportamento e Módulos viraram um cartão só**, com duas colunas rotuladas. Mesma natureza
+   de coisa, mesma largura de leitura, uma borda a menos para o olho atravessar. O `id="modulos"`
+   virou âncora da coluna, e as três entradas da busca que apontavam para ele agora apontam para
+   a moldura única.
+
+**O que ficou de pé, com motivo:** a moldura por seção, que é o padrão e é a âncora da busca e do
+link de documentação; os fios entre linhas de ajuste, que é o caso de lista repetida; e a moldura
+vermelha da zona de perigo.
+
+### O que a mesma medição diz das outras abas
+
+Cobrança agora tem **9 molduras e 15 fios** em 2.433 px. A maior parte é conteúdo que pede
+moldura mesmo (pedidos de recarga, painel da carteira, gráfico), mas é a próxima aba a auditar
+com o mesmo critério: pergunta a fazer em cada caixa interna é se ela separa algo que o espaço
+não separaria.
+
+---
+
 ## Rodada 12 — 16/09/2026 — o calendário virou lugar de perguntar e de agir
 
 **O que ela pediu, literal:**

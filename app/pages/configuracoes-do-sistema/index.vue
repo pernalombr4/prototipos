@@ -212,7 +212,8 @@ const estados: { valor: EstadoDemo, rotulo: string }[] = [
 
         <template v-for="a in abas" #[a.chave] :key="a.chave">
           <!-- O que esta aba decide, dito antes do primeiro campo. -->
-          <div class="mb-5 mt-4 flex flex-wrap items-center justify-between gap-3 border-b border-default pb-4">
+          <!-- Sem borda: a lista de abas já tem a dela, a 40 px daqui. -->
+          <div class="mb-5 mt-3 flex flex-wrap items-center justify-between gap-3">
             <p class="max-w-2xl text-sm text-muted">
               {{ abaAtual.resumo }}
             </p>

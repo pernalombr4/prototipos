@@ -323,6 +323,56 @@ das cinco que, nos concorrentes, nem sequer vive em configuração de organizaç
 
 ---
 
+## Rodada 13 — quanta moldura e quanto fio uma tela de configuração aguenta
+
+A pergunta dela: *"é padrao de mercado? ou tem muito box e divider no seu, acabando por sujar a
+tela?"*, pedindo produtos corporativos reconhecidos por boa usabilidade **e** interface bonita.
+
+### O método: medir, não olhar
+
+Script rodado na página, a 1280 px de largura, contando dois tipos de coisa:
+
+- **moldura**: elemento com as quatro bordas visíveis (ou sombra) e canto arredondado, maior que
+  160x48;
+- **fio**: elemento com borda só em cima ou só embaixo, mais largo que 160.
+
+| Tela | Molduras | Fios | Níveis empilhados |
+|---|---|---|---|
+| Informações Básicas, antes | 5 | 13 | 3 |
+| [Template de dashboard do Nuxt UI](https://dashboard-template.nuxt.dev/settings), Settings | **1** | 7 | 1 |
+| Informações Básicas, depois | 4 | 7 | **1** |
+
+O template do Nuxt UI é a implementação de referência do próprio stack desta tela, e é o único
+produto que consegui **medir**: as configurações de Linear, Stripe e Vercel estão atrás de login.
+O que ele faz: **um cartão só**, com o título da seção **fora** dele, e os fios internos servindo
+para uma coisa só, separar um campo do outro.
+
+### As regras publicadas
+
+- **[Material 3, divisores](https://m3.material.io/components/divider/guidelines)** (lido na
+  fonte): *"Use full-width dividers sparingly. Too many divider lines will make an interface look
+  cluttered"*. E: divisor de largura total serve para **separar área interativa de não
+  interativa** dentro de um cartão, o caso do rodapé com botão. Também: *"Content may not require
+  a divider line"* para itens de lista com formato repetido.
+- **[Polaris, padrão de settings](https://polaris-react.shopify.com/patterns/app-settings-layout)**:
+  colocar os grupos de configuração dentro de cartões, empilhados verticalmente. Ou seja, cartão
+  por grupo **é** padrão de mercado. (A página migrou para `shopify.dev` durante a pesquisa.)
+- **[Carbon, da IBM](https://www.ibm.com/standards/carbon/guidelines/spacing/)**: espaço em branco
+  é o recurso para quebrar seções; borda é do cartão.
+- **[Mews](https://www.mews.design/latest/components/card/usage-kW4eJuQo)**, sobre aninhar
+  cartões: *"can have an overwhelming effect on the UI"*; eles depreciaram o cartão aninhado em
+  favor de trocar só o fundo.
+
+### A conclusão
+
+Há **dois padrões legítimos** para tela de configuração: cartão por grupo (Shopify, Vercel,
+GitHub) e título solto com fios (Linear, Notion, template do Nuxt UI). **O que ninguém faz é
+empilhar os dois.** A conta que importa não é quantos fios existem, é **quantos deles são
+estruturais** — desenham de novo um agrupamento que a moldura já desenhou. Fio de lista se paga;
+fio estrutural, não.
+
+---
+
 ## Rodada 12 — dá para clicar no calendário de configuração?
 
 A pergunta dela: *"acha que na aba calendário o calendário em si deve ser interativo? deve dar
