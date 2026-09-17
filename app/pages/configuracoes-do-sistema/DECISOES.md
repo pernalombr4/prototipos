@@ -1,5 +1,47 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 16 — 17/09/2026 — o aviso da referência, e um contraste que reprovava
+
+**O que ela pediu, literal:**
+
+> "em referencia deve haver um aviso abaixo mesmo, num amarelinho diferente, com aviso de alerta
+> de q nao pode ser alterado"
+
+Certíssimo, e é a exceção que confirma a rodada 15: **instrução vai para o "?", aviso de
+irreversibilidade não.** O que não tem volta não pode depender de a pessoa ter curiosidade de
+clicar. Então a Referência ficou com os dois: o "?" diz o que o campo **é** (o nome curto no
+endereço, o que as integrações usam), e embaixo do campo fica a faixa amarela com ícone de alerta:
+*"Não pode ser alterado depois de criado."*
+
+É a mesma faixa que as linhas de ajuste já usavam para risco, para a tela ter um jeito só de
+avisar.
+
+### O contraste que a medição reprovou
+
+Ao medir a faixa nova: **1,8:1**. O amarelo do tema sobre o próprio amarelo a 10% não se lê, e o
+mínimo do WCAG AA para texto é 4,5:1. Corrigido com `text-warning-700` no claro e
+`text-warning-300` no escuro: **4,65:1 no claro e 12,58:1 no escuro**. A faixa de risco das linhas
+de ajuste tinha o mesmo defeito e foi junto.
+
+### O que a mesma medição achou e eu não consertei
+
+Os **selos `variant="subtle"` do Nuxt UI, com as cores do ENSPACE, reprovam**:
+
+| Selo | Contraste | Mínimo |
+|---|---|---|
+| "fora do país do workspace" (warning) | 1,8:1 | 4,5:1 |
+| "suspende o expediente" (warning) | 1,8:1 | 4,5:1 |
+| "Aguardando análise" (warning) | 1,8:1 | 4,5:1 |
+| "Carteira ativa" (success) | 2,26:1 | 4,5:1 |
+
+Não é defeito desta tela: é o cruzamento da paleta (`warning: yellow`, `success: teal`) com a
+variante `subtle`, e as cores vieram do tema do produto. Consertar significa **sobrescrever o tema
+do selo no `app.config.ts`**, que é arquivo compartilhado por todos os protótipos do repositório e
+está sendo mexido por outra sessão. Fica registrado aqui e proposto a ela, não aplicado por conta
+própria.
+
+---
+
 ## Rodada 15 — 17/09/2026 — a instrução do campo foi para o "?"
 
 **O que ela pediu, literal:**

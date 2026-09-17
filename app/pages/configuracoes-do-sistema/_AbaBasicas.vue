@@ -201,10 +201,26 @@ async function excluir() {
                 <span class="flex items-center gap-1">
                   Referência
                   <Ajuda titulo="Referência">
-                    Faz parte do endereço do workspace e não muda depois de criado.
+                    É o nome curto do workspace no endereço: aparece na URL e no que as
+                    integrações usam para achar este workspace.
                   </Ajuda>
                 </span>
               </template>
+
+              <!--
+                Este é o único campo da tela que não tem volta, e a regra continua
+                embaixo dele, em amarelo, em vez de ir para o "?": aviso de
+                irreversibilidade não pode depender de a pessoa ter curiosidade.
+                Mesma faixa do risco das linhas de ajuste, para a tela ter um jeito
+                só de avisar.
+              -->
+              <template #help>
+                <span class="flex items-start gap-1.5 rounded-md bg-warning/10 px-2.5 py-1.5 text-xs text-warning-700 dark:text-warning-300">
+                  <UIcon name="i-lucide-triangle-alert" class="mt-0.5 size-3.5 shrink-0" />
+                  <span>Não pode ser alterado depois de criado.</span>
+                </span>
+              </template>
+
               <UInput
                 :model-value="form.identidade.reference"
                 disabled

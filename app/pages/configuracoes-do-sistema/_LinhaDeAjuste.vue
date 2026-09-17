@@ -78,7 +78,7 @@ const valor = defineModel<boolean>({ required: true })
       >
         <p
           v-if="ajuste.risco && valor"
-          class="mt-2 flex items-start gap-1.5 rounded-md bg-warning/10 px-2.5 py-1.5 text-xs text-warning"
+          class="mt-2 flex items-start gap-1.5 rounded-md bg-warning/10 px-2.5 py-1.5 text-xs text-warning-700 dark:text-warning-300"
         >
           <UIcon name="i-lucide-triangle-alert" class="mt-0.5 size-3.5 shrink-0" />
           <span>{{ ajuste.risco }}</span>
