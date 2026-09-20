@@ -389,6 +389,80 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 13 · 20/09/2026
+
+**O que ela disse**, literal:
+
+> "ta muito pesado qudno entro. tudo travando. tente refatorar pra deixar mais leve sem
+> perder o que ja tem la"
+
+Fui medir antes de mexer, e a maior parte do peso **não estava no protótipo**. Vale escrever
+os números, porque a conclusão muda o que fazer.
+
+#### O que estava travando de verdade
+
+**O servidor de desenvolvimento estava com 1,58 GB de memória.** É o mesmo processo `node` do
+`pnpm dev`, rodando havia horas, acumulando recompilação a cada arquivo que eu salvava. Com
+ele nesse estado:
+
+| Medida | Antes | Depois de reiniciar |
+|---|---|---|
+| Primeira resposta da página | 17,8 s | 0,19 s |
+| Resposta com o servidor quente | 2,5 s | 0,45 s |
+| Tela pronta no navegador | não chegava a responder | 0,34 s a 0,73 s |
+
+Reiniciei o servidor. **Quando ele voltar a ficar pesado, é só parar e subir de novo**, e o
+sintoma some:
+
+```bash
+pnpm dev
+```
+
+**A segunda causa é do Nuxt em desenvolvimento, e não tem conserto daqui:** a primeira vez
+que se entra em CADA rota, o servidor compila aquela rota inteira na hora. Medido hoje, com o
+servidor limpo: `/` levou 5 s na primeira vez e 0,3 s na segunda;
+`/configuracoes-do-sistema`, 32 s e 0,67 s. Depois da primeira entrada, todas ficam rápidas.
+
+#### O que deu para tirar do protótipo
+
+**As três camadas só nascem quando alguém as abre.** "Ver todas", "o menu de hoje" e o editor
+eram construídos na entrada, fechados, todas as vezes. Agora a página entra com zero janelas
+montadas, e cada uma passa a existir na primeira vez que é aberta (e fica, para a animação de
+saída continuar existindo).
+
+**A pergunta "tem coisa para salvar?" deixou de serializar o menu inteiro.** Ela é feita em
+toda renderização da barra, e respondia comparando o texto JSON das duas árvores, duas vezes.
+Agora quem responde é a lista de linhas tocadas, que já existia para a bolinha amarela: quem
+mexeu em alguma coisa está na lista, e ninguém mexe sem passar por lá.
+
+De quebra consertou um exagero: escolher "Personalizada" no menu de ordenação acendia a barra
+de salvar, e a decisão da rodada 6 diz que trocar o critério vale na hora. Agora só acende
+quando alguém arrasta.
+
+**A barra de andaime perdeu o `backdrop-blur`.** Uma faixa desfocada da largura da tela obriga
+o navegador a recompor a página inteira a cada repintura, e isso é sentido como travada. O
+fundo já era 95% opaco: ninguém vai notar a diferença, e ela também escondia menos.
+
+#### O que eu tentei e desfiz
+
+**Trazer pedaços por `import()` sob demanda** (o modelo de trilha, o painel de configurações,
+as telas do miolo, e os quase 100 KB dos três `.md` que alimentam os botões "O problema / As
+referências / As decisões").
+
+Em produção isso seria certo. Em `pnpm dev` é **pior**, e dá para ver acontecendo: o servidor
+só compila o pedaço na hora em que alguém pede, então o primeiro clique em "Trilha e painel"
+deixava a barra **em branco** esperando, e um pedido de módulo novo chegou a segurar o
+navegador por mais de 45 segundos. Trocar uma entrada mais leve por um clique pendurado, num
+protótipo que existe para ser demonstrado, é mau negócio.
+
+Ficou o que não depende de compilar nada na hora do clique.
+
+#### Nada mudou na tela
+
+Conferido no navegador depois da refatoração: o menu desenha igual, arrastar acende o cartão
+com a bolinha, Descartar devolve a ordem, as três camadas abrem, o editor abre pelo "+" e a
+barra entra com **zero** janelas montadas, contra três antes.
+
 ### Rodada 12 · 17/09/2026
 
 **O que ela pediu**, literal:

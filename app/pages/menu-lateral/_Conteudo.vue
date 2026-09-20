@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
+import type { EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import TelaDeModulos from './_TelaDeModulos.vue'
 import TelaDeInbox from './_TelaDeInbox.vue'
 import type { Categoria } from './mocks'

@@ -165,10 +165,22 @@ export function useMenuDoWorkspace() {
     if (!tocados.value.includes(id)) tocados.value.push(id)
   }
 
-  const alterado = computed(() =>
-    JSON.stringify(base.value) !== JSON.stringify(rascunho.value)
-    || JSON.stringify(ordemCategorias.value) !== JSON.stringify(ordemCategoriasRascunho.value),
-  )
+  /*
+   * "Tem coisa para salvar?" e uma pergunta que a barra faz em toda
+   * renderizacao. Antes ela era respondida serializando as duas arvores
+   * inteiras e comparando os textos, o que custava a arvore toda, duas vezes,
+   * a cada mexida.
+   *
+   * Agora e a lista de tocados que responde, e ela ja existia para a bolinha
+   * amarela: TODO caminho que muda alguma coisa passa por marcarTocado, entao
+   * ter alguem na lista e exatamente ter o que salvar. Rodada 13.
+   *
+   * De quebra conserta um exagero: escolher "Personalizada" no menu de
+   * ordenacao mexia no rascunho da ordem e acendia a barra de salvar, e a
+   * decisao da rodada 6 diz que a troca de criterio vale na hora e nao espera
+   * Salvar. Agora so acende quando alguem arrasta de verdade.
+   */
+  const alterado = computed(() => tocados.value.length > 0)
 
   function salvar(alcance: Alcance = 'todos') {
     if (alcance === 'local') {

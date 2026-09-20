@@ -2,10 +2,26 @@
 import PainelTrabalho from './_PainelTrabalho.vue'
 import PainelConfiguracoes from './_PainelConfiguracoes.vue'
 import ModeloTrilha from './_ModeloTrilha.vue'
+import Conteudo from './_Conteudo.vue'
+
+/*
+ * ============ O QUE ENTRA DEPOIS (rodada 13) ============
+ *
+ * "ta muito pesado quando entro. tudo travando" (Mikaela).
+ *
+ * As três CAMADAS abaixo (ver todas, menu de hoje, editor) continuam sendo
+ * importadas com a página, mas só são MONTADAS depois da primeira vez que
+ * alguém as abre. A entrada deixa de construir três árvores de componentes
+ * que ninguém pediu, e nada fica esperando download no meio do clique.
+ *
+ * Já tentei trazê-las por `import()` sob demanda, e é pior AQUI: em
+ * desenvolvimento o servidor compila o pedaço só na hora do clique, e o
+ * primeiro clique fica pendurado. Em produção seria o contrário; como o
+ * protótipo vive rodando em `pnpm dev`, mandou quem manda.
+ */
 import EditorDeMenus from './_EditorDeMenus.vue'
 import TodasAsCategorias from './_TodasAsCategorias.vue'
 import MenuDeHoje from './_MenuDeHoje.vue'
-import Conteudo from './_Conteudo.vue'
 import {
   categoriasNormais,
   categoriasVolume,
@@ -19,6 +35,10 @@ import { useMenuDoWorkspace } from './estado'
 import { textos } from './textos'
 
 // O contexto do protótipo vem dos próprios .md desta pasta, como texto.
+// Ja tentei traze-los por import() depois da primeira pintura, para tirar
+// quase 100 KB do modulo da pagina. Em `pnpm dev` fica PIOR: o servidor so
+// compila o pedaco na hora em que alguem pede, e o pedido fica pendurado
+// dezenas de segundos. Entao continuam entrando com a pagina. Rodada 13.
 import briefingMd from './BRIEFING.md?raw'
 import pesquisaMd from './PESQUISA.md?raw'
 import decisoesMd from './DECISOES.md?raw'
@@ -286,6 +306,18 @@ const formInicial = ref<'secao' | 'item' | null>(null)
 const vendoHoje = ref(false)
 const buscando = ref(false)
 
+/*
+ * Cada camada só existe depois da primeira vez que foi aberta, e depois disso
+ * fica montada: assim a entrada não paga por elas, e fechar continua com a
+ * animação de saída, que um `v-if` no próprio `open` cortaria pela metade.
+ */
+const usouTodas = ref(false)
+const usouHoje = ref(false)
+const usouEditor = ref(false)
+watch(vendoTodas, v => { if (v) usouTodas.value = true })
+watch(vendoHoje, v => { if (v) usouHoje.value = true })
+watch(editando, v => { if (v) usouEditor.value = true })
+
 /** A paleta busca em tudo: categoria, seção do workspace e configuração. */
 const gruposDaBusca = computed(() => [
   {
@@ -535,6 +567,7 @@ function emBreve() {
 
     <!-- ===================== camadas ===================== -->
     <TodasAsCategorias
+      v-if="usouTodas"
       v-model:open="vendoTodas"
       :categorias="categorias"
       :t="t"
@@ -542,9 +575,10 @@ function emBreve() {
       @abrir="abrirCategoria"
     />
 
-    <MenuDeHoje v-model:open="vendoHoje" :t="t" />
+    <MenuDeHoje v-if="usouHoje" v-model:open="vendoHoje" :t="t" />
 
     <EditorDeMenus
+      v-if="usouEditor"
       v-model:open="editando"
       :t="t"
       :modelo="modelo"
@@ -564,7 +598,12 @@ function emBreve() {
     </UModal>
 
     <!-- ============== ANDAIME, não faz parte da proposta ============== -->
-    <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">
+    <!--
+      Sem `backdrop-blur` desde a rodada 13: uma faixa desfocada da largura da
+      tela obriga o navegador a recompor a página inteira a cada repintura, e
+      isso é sentido como travada. O fundo já era 95% opaco.
+    -->
+    <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated">
       <div class="flex flex-wrap items-center gap-1.5 px-4 py-1.5">
         <span class="mr-0.5 text-xs font-semibold uppercase tracking-wider text-muted">
           Estado
