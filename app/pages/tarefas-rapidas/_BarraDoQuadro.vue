@@ -16,6 +16,19 @@ import { pessoas, visualizacoes } from './mocks'
 import { ordenacoes, type ChaveAgrupamento, type ChaveOrdenacao } from './quadro'
 import type { Textos } from './textos'
 
+/**
+ * O período, como o produto faz: dia único ou intervalo, sobre o campo de data
+ * escolhido. Os atalhos "vence hoje / em 7 dias" saíram: eles falavam de prazo
+ * enquanto o campo podia estar em "criada em", e as duas coisas se contradiziam
+ * na mesma janelinha.
+ */
+export interface Periodo {
+  modo: 'tudo' | 'dia' | 'intervalo'
+  /** `YYYY-MM-DD`, do jeito que o `input[type=date]` fala. */
+  de: string
+  ate: string
+}
+
 export interface Filtros {
   status: Task['status'][]
   prioridade: Task['priority'][]
@@ -66,7 +79,7 @@ const ordenacaoDesc = defineModel<boolean>('ordenacaoDesc', { required: true })
 const densidade = defineModel<'pequeno' | 'medio' | 'grande'>('densidade', { required: true })
 const campos = defineModel<Record<string, boolean>>('campos', { required: true })
 const filtros = defineModel<Filtros>('filtros', { required: true })
-const periodo = defineModel<string>('periodo', { required: true })
+const periodo = defineModel<Periodo>('periodo', { required: true })
 const campoDeData = defineModel<'created_at' | 'due_date'>('campoDeData', { required: true })
 const ocultarVazias = defineModel<boolean>('ocultarVazias', { required: true })
 const raiasOcultas = defineModel<string[]>('raiasOcultas', { required: true })
@@ -95,12 +108,32 @@ const camposDoCartao = computed<{ chave: string, rotulo: string }[]>(() => [
   { chave: 'item', rotulo: props.t.campos.item },
 ])
 
-const periodos = computed(() => [
-  { valor: 'tudo', rotulo: props.t.todoOPeriodo },
-  { valor: 'hoje', rotulo: props.t.venceHoje },
-  { valor: '7', rotulo: props.t.venceEmDias(7) },
-  { valor: '30', rotulo: props.t.venceEmDias(30) },
-])
+/** Data em `YYYY-MM-DD` para o formato que a pessoa lê. */
+function dataLegivel(valor: string) {
+  if (!valor) return ''
+  const [ano, mes, dia] = valor.split('-')
+  return `${dia}/${mes}/${ano}`
+}
+
+/** O que o botão da barra mostra: o período escolhido, por extenso. */
+const rotuloDoPeriodo = computed(() => {
+  const p = periodo.value
+  if (p.modo === 'dia' && p.de) return props.t.periodoDoDia(dataLegivel(p.de))
+  if (p.modo === 'intervalo' && p.de && p.ate) {
+    return props.t.periodoDoIntervalo(dataLegivel(p.de), dataLegivel(p.ate))
+  }
+  return props.t.todoOPeriodo
+})
+
+const periodoLigado = computed(() => periodo.value.modo !== 'tudo')
+
+function trocarModo(modo: Periodo['modo']) {
+  periodo.value = { ...periodo.value, modo }
+}
+
+function limparPeriodo() {
+  periodo.value = { modo: 'tudo', de: '', ate: '' }
+}
 
 const listaDePessoas = Object.values(pessoas)
 
@@ -109,7 +142,7 @@ const quantosFiltros = computed(() => {
   const f = filtros.value
   return f.status.length + f.prioridade.length + f.responsavel.length + f.tipo.length
     + (f.somenteMinhas ? 1 : 0) + (f.somenteAtrasadas ? 1 : 0) + (f.semResponsavel ? 1 : 0)
-    + (periodo.value !== 'tudo' ? 1 : 0)
+    + (periodoLigado.value ? 1 : 0)
     + (busca.value ? 1 : 0)
 })
 
@@ -140,9 +173,8 @@ const chips = computed(() => {
   if (filtros.value.semResponsavel) {
     lista.push({ chave: 'semresp', rotulo: props.t.semResponsavel, remover: () => { filtros.value.semResponsavel = false } })
   }
-  if (periodo.value !== 'tudo') {
-    const p = periodos.value.find(x => x.valor === periodo.value)
-    lista.push({ chave: 'periodo', rotulo: p?.rotulo ?? '', remover: () => { periodo.value = 'tudo' } })
+  if (periodoLigado.value) {
+    lista.push({ chave: 'periodo', rotulo: rotuloDoPeriodo.value, remover: limparPeriodo })
   }
   return lista
 })
@@ -381,27 +413,92 @@ const rotuloDaOrdenacao = computed(() => {
         </template>
       </UPopover>
 
-      <!-- Período: o filtro que já existe, agora com atalhos -->
+      <!-- Período: o filtro do produto, com o campo de data no pé -->
       <UPopover>
-        <UButton icon="i-lucide-calendar-range" size="sm" color="neutral" variant="outline">
-          <span class="font-medium">{{ periodos.find(p => p.valor === periodo)?.rotulo }}</span>
+        <UButton
+          icon="i-lucide-calendar-range"
+          size="sm"
+          :color="periodoLigado ? 'primary' : 'neutral'"
+          :variant="periodoLigado ? 'soft' : 'outline'"
+        >
+          <span class="font-medium">{{ rotuloDoPeriodo }}</span>
         </UButton>
+
         <template #content>
-          <div class="w-60 divide-y divide-default">
-            <div class="p-1.5">
+          <div class="w-72 divide-y divide-default">
+            <div class="p-3">
+              <div class="mb-3 flex gap-1">
+                <UButton
+                  :label="t.diaUnico"
+                  icon="i-lucide-calendar"
+                  size="xs"
+                  class="flex-1 justify-center"
+                  :color="periodo.modo === 'dia' ? 'primary' : 'neutral'"
+                  :variant="periodo.modo === 'dia' ? 'soft' : 'outline'"
+                  @click="trocarModo('dia')"
+                />
+                <UButton
+                  :label="t.intervalo"
+                  icon="i-lucide-calendar-range"
+                  size="xs"
+                  class="flex-1 justify-center"
+                  :color="periodo.modo === 'intervalo' ? 'primary' : 'neutral'"
+                  :variant="periodo.modo === 'intervalo' ? 'soft' : 'outline'"
+                  @click="trocarModo('intervalo')"
+                />
+              </div>
+
+              <div v-if="periodo.modo === 'dia'">
+                <label for="periodo-dia" class="mb-1 block text-xs text-muted">{{ t.diaUnico }}</label>
+                <UInput
+                  id="periodo-dia"
+                  type="date"
+                  :model-value="periodo.de"
+                  size="sm"
+                  class="w-full"
+                  @update:model-value="(v) => periodo = { modo: 'dia', de: String(v), ate: String(v) }"
+                />
+              </div>
+
+              <div v-else-if="periodo.modo === 'intervalo'" class="grid grid-cols-2 gap-2">
+                <div>
+                  <label for="periodo-de" class="mb-1 block text-xs text-muted">{{ t.deData }}</label>
+                  <UInput
+                    id="periodo-de"
+                    type="date"
+                    :model-value="periodo.de"
+                    size="sm"
+                    class="w-full"
+                    @update:model-value="(v) => periodo = { ...periodo, de: String(v) }"
+                  />
+                </div>
+                <div>
+                  <label for="periodo-ate" class="mb-1 block text-xs text-muted">{{ t.ateData }}</label>
+                  <UInput
+                    id="periodo-ate"
+                    type="date"
+                    :model-value="periodo.ate"
+                    size="sm"
+                    class="w-full"
+                    @update:model-value="(v) => periodo = { ...periodo, ate: String(v) }"
+                  />
+                </div>
+              </div>
+
               <UButton
-                v-for="p in periodos"
-                :key="p.valor"
-                :label="p.rotulo"
-                :icon="periodo === p.valor ? 'i-lucide-check' : 'i-lucide-minus'"
-                block
-                size="sm"
+                v-if="periodoLigado"
+                :label="t.todoOPeriodo"
+                icon="i-lucide-x"
+                size="xs"
                 color="neutral"
-                :variant="periodo === p.valor ? 'soft' : 'ghost'"
-                class="justify-start"
-                @click="periodo = p.valor"
+                variant="ghost"
+                block
+                class="mt-2 justify-start"
+                @click="limparPeriodo"
               />
             </div>
+
+            <!-- A melhoria: escolher o campo aqui, e não num botão à parte -->
             <div class="p-3">
               <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">{{ t.campoDeData }}</p>
               <div class="flex gap-1">

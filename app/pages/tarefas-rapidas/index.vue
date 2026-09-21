@@ -8,16 +8,16 @@
  */
 import type { Task } from '@be-enlighten/enspace-sdk-schemas'
 import type { EnKanbanCardConfig, EnKanbanColumn } from '@be-enlighten/enspace-sdk-ui/base'
-import BarraDoQuadro, { type Filtros } from './_BarraDoQuadro.vue'
+import BarraDoQuadro, { type Filtros, type Periodo } from './_BarraDoQuadro.vue'
 import CascaDoEnspace from './_CascaDoEnspace.vue'
 import ModalNovaTarefa from './_ModalNovaTarefa.vue'
 import PainelDaTarefa from './_PainelDaTarefa.vue'
 import RaiaDoQuadro from './_RaiaDoQuadro.vue'
-import { hoje, itensRelacionados, tarefas as tarefasMock, usuarioAtual } from './mocks'
+import { itensRelacionados, tarefas as tarefasMock, usuarioAtual } from './mocks'
 import type { OrdemDaRaia } from './_RaiaDoQuadro.vue'
 import {
   type Calculo, type ChaveAgrupamento, type ChaveOrdenacao,
-  calculoPadrao, camposCalculaveis, compararTarefas, diasAteOPrazo, estaAtrasada,
+  calculoPadrao, camposCalculaveis, compararTarefas, estaAtrasada,
   raiaDaTarefa, raiasDoAgrupamento,
 } from './quadro'
 import { textos } from './textos'
@@ -62,7 +62,7 @@ const agrupamento = ref<ChaveAgrupamento>('status')
 const ordenacao = ref<ChaveOrdenacao>('due_date')
 const ordenacaoDesc = ref(false)
 const densidade = ref<'pequeno' | 'medio' | 'grande'>('medio')
-const periodo = ref('tudo')
+const periodo = ref<Periodo>({ modo: 'tudo', de: '', ate: '' })
 const campoDeData = ref<'created_at' | 'due_date'>('created_at')
 const ocultarVazias = ref(false)
 const raiasOcultas = ref<string[]>([])
@@ -137,19 +137,15 @@ const filtradas = computed<Task[]>(() => {
     if (f.somenteAtrasadas && !estaAtrasada(tarefa)) return false
     if (f.semResponsavel && tarefa.assigned_to) return false
 
-    if (periodo.value !== 'tudo') {
+    // Período: dia único ou intervalo, sobre o campo de data escolhido.
+    if (periodo.value.modo !== 'tudo') {
       const data = campoDeData.value === 'created_at' ? tarefa.created_at : tarefa.due_date
       if (!data) return false
-      const dias = Math.round(
-        (Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth(), hoje.getUTCDate())
-          - Date.UTC(new Date(data).getUTCFullYear(), new Date(data).getUTCMonth(), new Date(data).getUTCDate()))
-        / 86_400_000)
-      const limite = periodo.value === 'hoje' ? 0 : Number(periodo.value)
-      if (campoDeData.value === 'created_at' && (dias < 0 || dias > limite)) return false
-      if (campoDeData.value === 'due_date') {
-        const ate = diasAteOPrazo(tarefa)
-        if (ate === null || ate < 0 || ate > limite) return false
-      }
+      const dia = new Date(data).toISOString().slice(0, 10)
+      const de = periodo.value.de
+      const ate = periodo.value.modo === 'dia' ? periodo.value.de : periodo.value.ate
+      if (de && dia < de) return false
+      if (ate && dia > ate) return false
     }
 
     return true
@@ -285,7 +281,7 @@ function arquivar(tarefa: Task) {
 
 function limparFiltros() {
   busca.value = ''
-  periodo.value = 'tudo'
+  periodo.value = { modo: 'tudo', de: '', ate: '' }
   filtros.value = {
     status: [], prioridade: [], responsavel: [], tipo: [],
     somenteMinhas: false, somenteAtrasadas: false, semResponsavel: false,

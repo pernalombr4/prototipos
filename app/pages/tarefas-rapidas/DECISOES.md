@@ -772,3 +772,43 @@ O que mudou foram duas coisas:
    Agora **campo ligado aparece em qualquer tamanho**, e o tamanho decide **quanto** de cada um:
    linhas do título, linhas da descrição e se criador e colaboradores cabem. Visibilidade é do
    campo; tamanho é do cartão.
+
+---
+
+## Rodada 11 — 21/09/2026
+
+### O que ela pediu, literal
+
+> nao ta fazendo sentido esse filtro. pode deixar como o nosso é hoje, com essa melhoria da
+> base de botar criado em ou prazo como ja é hoje na base
+
+### Por que não fazia sentido
+
+Eu tinha trocado o calendário do produto por três atalhos: `Vence hoje`, `Vence em 7 dias`,
+`Vence em 30 dias`. E deixei, no pé do mesmo popover, a escolha do campo de data entre
+**Criada em** e **Prazo**.
+
+As duas coisas se contradiziam na mesma janelinha: com o campo em "Criada em", o atalho
+continuava escrito "Vence hoje" e filtrava por criação. O rótulo dizia uma coisa e o filtro
+fazia outra. Atalho bom precisa ser neutro em relação ao campo, e os meus não eram.
+
+### O que ficou
+
+**O filtro voltou a ser o do produto**: `Dia único` e `Intervalo`, com o campo de data
+correspondente. Sem atalho nenhum, porque no produto não tem.
+
+**A melhoria que ela pediu para manter**: a escolha do campo (`Criada em` ou `Prazo`) fica no
+**pé do mesmo popover**, em vez de morar num botão separado ao lado, como hoje. Assim a pessoa
+vê, no mesmo lugar, sobre qual data o período está contando. O botão da barra passou a mostrar
+o período escolhido por extenso (`19/09/2026 a 21/09/2026`), e o chip da linha de estado
+repete isso com o X para tirar.
+
+De dois botões na barra (`Criado em` e `Todo o período`) sobrou um.
+
+### Declarado
+
+No produto o período é escolhido num **calendário** do design system. Aqui são campos de data
+nativos, porque o `UCalendar` do Nuxt UI trabalha com objetos do `@internationalized/date`, que
+não é dependência declarada deste repositório e eu não instalo pacote sem pedir. **A forma é a
+mesma (dia único ou intervalo); o controle é que é mais simples.** Na implementação, o
+calendário do produto entra no lugar dos dois campos.

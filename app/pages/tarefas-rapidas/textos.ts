@@ -52,6 +52,12 @@ export interface Textos {
   periodo: string
   todoOPeriodo: string
   campoDeData: string
+  diaUnico: string
+  intervalo: string
+  deData: string
+  ateData: string
+  periodoDoDia: (dia: string) => string
+  periodoDoIntervalo: (de: string, ate: string) => string
   novaTarefa: string
   mais: string
   relatorios: string
@@ -293,6 +299,12 @@ export const textos: Record<Idioma, Textos> = {
     periodo: 'Período',
     todoOPeriodo: 'Todo o período',
     campoDeData: 'Contar o período por',
+    diaUnico: 'Dia único',
+    intervalo: 'Intervalo',
+    deData: 'De',
+    ateData: 'Até',
+    periodoDoDia: dia => dia,
+    periodoDoIntervalo: (de, ate) => `${de} a ${ate}`,
     novaTarefa: 'Nova tarefa',
     mais: 'Mais',
     relatorios: 'Relatórios',
@@ -525,6 +537,12 @@ export const textos: Record<Idioma, Textos> = {
     periodo: 'Period',
     todoOPeriodo: 'All time',
     campoDeData: 'Count the period by',
+    diaUnico: 'Single day',
+    intervalo: 'Range',
+    deData: 'From',
+    ateData: 'To',
+    periodoDoDia: dia => dia,
+    periodoDoIntervalo: (de, ate) => `${de} to ${ate}`,
     novaTarefa: 'New task',
     mais: 'More',
     relatorios: 'Reports',
@@ -757,6 +775,12 @@ export const textos: Record<Idioma, Textos> = {
     periodo: 'Período',
     todoOPeriodo: 'Todo el período',
     campoDeData: 'Contar el período por',
+    diaUnico: 'Día único',
+    intervalo: 'Intervalo',
+    deData: 'De',
+    ateData: 'Hasta',
+    periodoDoDia: dia => dia,
+    periodoDoIntervalo: (de, ate) => `${de} a ${ate}`,
     novaTarefa: 'Nueva tarea',
     mais: 'Más',
     relatorios: 'Informes',
