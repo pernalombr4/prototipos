@@ -63,22 +63,49 @@ export function medirCor(frente, fundo) {
 }
 
 /**
+ * A opacidade real de uma cor CSS, em qualquer notação.
+ *
+ * Ler `rgba(...)` com split não serve. Com o tema em oklch, o navegador devolve
+ * a camada translúcida como `oklab(0.31 0.02 -0.05 / 0.2)`: não começa com
+ * `rgba`, então passava por opaca, a subida parava no primeiro cartão e o fundo
+ * saía composto sobre papel branco. No tema claro o engano se escondia; no
+ * escuro ele media texto branco contra cinza claro e reprovava a tela inteira.
+ *
+ * Pintar num canvas limpo e ler o quarto canal funciona para toda notação que o
+ * navegador entende, inclusive as que ainda não existem.
+ */
+function alfaDe(cor) {
+  const c = document.createElement('canvas')
+  c.width = c.height = 1
+  const x = c.getContext('2d')
+  x.clearRect(0, 0, 1, 1)
+  x.fillStyle = cor
+  x.fillRect(0, 0, 1, 1)
+  return x.getImageData(0, 0, 1, 1).data[3] / 255
+}
+
+/**
  * O fundo que o olho realmente vê atrás do elemento: sobe a árvore compondo
  * cada camada translúcida até encontrar uma opaca.
+ *
+ * A subida vai até o `<html>` inclusive, e a base só entra se nada na página
+ * pintar de verdade. Qual base usar vem do `color-scheme`: no tema escuro o
+ * papel do navegador é preto, não branco.
  */
 export function fundoEfetivo(el) {
   const camadas = []
-  for (let n = el; n && n !== document.documentElement; n = n.parentElement) {
+  for (let n = el; n; n = n.parentElement) {
     const bg = getComputedStyle(n).backgroundColor
-    if (bg === 'transparent' || bg === 'rgba(0, 0, 0, 0)') continue
+    const alfa = alfaDe(bg)
+    if (alfa === 0) continue
     camadas.push(bg)
-    const alfa = bg.startsWith('rgba') ? Number.parseFloat(bg.split(',')[3]) : 1
     if (alfa >= 1) break
   }
-  camadas.push(getComputedStyle(document.documentElement).backgroundColor || 'rgb(255,255,255)')
+
+  const esquema = getComputedStyle(document.documentElement).colorScheme || ''
+  let base = esquema.includes('dark') ? 'rgb(0,0,0)' : 'rgb(255,255,255)'
 
   // De trás para a frente: a mais funda é a base, cada uma pinta por cima.
-  let base = 'rgb(255,255,255)'
   for (const camada of camadas.reverse()) {
     const [r, g, b] = paraRGB(camada, base)
     base = `rgb(${r},${g},${b})`
