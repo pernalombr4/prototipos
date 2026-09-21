@@ -123,6 +123,15 @@ export interface Textos {
   ordenarNestaRaia: string
   definirLimite: string
   limiteExcedido: (n: number, limite: number) => string
+  limiteTitulo: string
+  limiteAjuda: string
+  limitePergunta: string
+  limiteSugestoes: string
+  limiteAtual: (n: number, limite: number) => string
+  limiteSemLimite: string
+  limiteRemover: string
+  limiteSalvar: string
+  limiteHoje: (n: number) => string
   carregarMais: (n: number) => string
   raiaVazia: string
   raiaVaziaAjuda: string
@@ -342,6 +351,15 @@ export const textos: Record<Idioma, Textos> = {
     ordenarNestaRaia: 'Ordenar só esta raia',
     definirLimite: 'Definir limite de cartões',
     limiteExcedido: (n, limite) => `${n} de ${limite}, acima do limite`,
+    limiteTitulo: 'Limite de cartões',
+    limiteAjuda: 'A raia avisa quando passa do limite. Ninguém fica impedido de mover cartão.',
+    limitePergunta: 'Quantos cartões cabem nesta raia?',
+    limiteSugestoes: 'Sugestões',
+    limiteAtual: (n, limite) => `${n} de ${limite} cartões`,
+    limiteSemLimite: 'Sem limite',
+    limiteRemover: 'Tirar o limite',
+    limiteSalvar: 'Definir limite',
+    limiteHoje: n => `Nesta raia há ${n} ${n === 1 ? 'cartão' : 'cartões'} agora`,
     carregarMais: n => `Ver mais ${n}`,
     raiaVazia: 'Nada aqui',
     raiaVaziaAjuda: 'Arraste um cartão ou crie uma tarefa.',
@@ -555,6 +573,15 @@ export const textos: Record<Idioma, Textos> = {
     ordenarNestaRaia: 'Sort this lane only',
     definirLimite: 'Set card limit',
     limiteExcedido: (n, limite) => `${n} of ${limite}, over the limit`,
+    limiteTitulo: 'Card limit',
+    limiteAjuda: 'The lane warns when it goes over. Nobody is blocked from moving a card.',
+    limitePergunta: 'How many cards fit in this lane?',
+    limiteSugestoes: 'Suggestions',
+    limiteAtual: (n, limite) => `${n} of ${limite} cards`,
+    limiteSemLimite: 'No limit',
+    limiteRemover: 'Remove the limit',
+    limiteSalvar: 'Set limit',
+    limiteHoje: n => `This lane has ${n} ${n === 1 ? 'card' : 'cards'} right now`,
     carregarMais: n => `Show ${n} more`,
     raiaVazia: 'Nothing here',
     raiaVaziaAjuda: 'Drag a card in or create a task.',
@@ -768,6 +795,15 @@ export const textos: Record<Idioma, Textos> = {
     ordenarNestaRaia: 'Ordenar solo este carril',
     definirLimite: 'Definir límite de tarjetas',
     limiteExcedido: (n, limite) => `${n} de ${limite}, por encima del límite`,
+    limiteTitulo: 'Límite de tarjetas',
+    limiteAjuda: 'El carril avisa cuando pasa del límite. Nadie queda impedido de mover una tarjeta.',
+    limitePergunta: '¿Cuántas tarjetas caben en este carril?',
+    limiteSugestoes: 'Sugerencias',
+    limiteAtual: (n, limite) => `${n} de ${limite} tarjetas`,
+    limiteSemLimite: 'Sin límite',
+    limiteRemover: 'Quitar el límite',
+    limiteSalvar: 'Definir límite',
+    limiteHoje: n => `Este carril tiene ${n} ${n === 1 ? 'tarjeta' : 'tarjetas'} ahora`,
     carregarMais: n => `Ver ${n} más`,
     raiaVazia: 'Nada por aquí',
     raiaVaziaAjuda: 'Arrastre una tarjeta o cree una tarea.',

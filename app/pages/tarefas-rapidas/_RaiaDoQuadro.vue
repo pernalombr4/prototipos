@@ -76,6 +76,32 @@ const acimaDoLimite = computed(() => !!props.limite && props.tarefas.length > pr
 
 const recebendo = ref(false)
 
+/* ------------------------------ o limite ------------------------------ */
+
+/**
+ * Antes isto era um item de menu que ligava um `6` que ninguém escolheu.
+ * Agora abre um diálogo: a pessoa diz o número, vê quantos cartões tem hoje
+ * e lê o que o limite faz (avisa, não impede).
+ */
+const definindoLimite = ref(false)
+const limiteEmEdicao = ref(6)
+
+function abrirLimite() {
+  // Sem limite ainda? Parte do que a raia tem hoje, que é um número com sentido.
+  limiteEmEdicao.value = props.limite ?? Math.max(1, props.tarefas.length)
+  definindoLimite.value = true
+}
+
+function salvarLimite() {
+  emit('limite', Math.max(1, Math.round(limiteEmEdicao.value)))
+  definindoLimite.value = false
+}
+
+function removerLimite() {
+  emit('limite', null)
+  definindoLimite.value = false
+}
+
 /**
  * Cor da raia em classe estática. Interpolar (`bg-${cor}`) não funciona:
  * o Tailwind varre o arquivo e não encontra a classe montada em tempo de execução.
@@ -148,7 +174,7 @@ const itensDaRaia = computed(() => [[
   { label: props.t.ordemDaRaia, icon: 'i-lucide-arrow-up-down', children: itensDeOrdenacao.value },
 ], [
   { label: props.t.recolher, icon: 'i-lucide-chevrons-right-left', onSelect: () => emit('recolher') },
-  { label: props.t.definirLimite, icon: 'i-lucide-gauge', onSelect: () => emit('limite', props.limite ? null : 6) },
+  { label: props.t.definirLimite, icon: 'i-lucide-gauge', onSelect: abrirLimite },
   { label: props.t.ocultarRaia, icon: 'i-lucide-eye-off', onSelect: () => emit('ocultar') },
 ]])
 
@@ -192,12 +218,18 @@ function aoSoltar(evento: DragEvent) {
     <header class="flex items-center gap-2 border-b border-default px-3 py-2.5">
       <span class="size-2 shrink-0 rounded-full" :class="fundoDaCor[raia.cor]" />
       <h2 class="truncate text-sm font-semibold text-highlighted">{{ raia.rotulo }}</h2>
-      <span
-        class="rounded-full px-1.5 py-0.5 text-xs font-medium"
-        :class="acimaDoLimite ? 'bg-error/15 text-error' : 'bg-accented text-toned'"
+      <UTooltip
+        :text="limite
+          ? `${t.limiteTitulo}: ${t.limiteAtual(tarefas.length, limite)}`
+          : `${t.calculos.contagem}: ${tarefas.length}`"
       >
-        {{ limite ? `${tarefas.length}/${limite}` : tarefas.length }}
-      </span>
+        <span
+          class="cursor-default rounded-full px-1.5 py-0.5 text-xs font-medium"
+          :class="acimaDoLimite ? 'bg-error/15 text-error' : 'bg-accented text-toned'"
+        >
+          {{ limite ? `${tarefas.length}/${limite}` : tarefas.length }}
+        </span>
+      </UTooltip>
 
       <!-- Ordem própria: sem isto, a raia fora da ordem do quadro parece defeito -->
       <UTooltip v-if="ordenacaoDaRaia" :text="t.ordemPropria(rotuloDaOrdem)">
@@ -229,9 +261,21 @@ function aoSoltar(evento: DragEvent) {
       </div>
     </header>
 
-    <p v-if="acimaDoLimite" class="border-b border-default bg-error/10 px-3 py-1.5 text-xs text-error">
-      {{ t.limiteExcedido(tarefas.length, limite!) }}
-    </p>
+    <div
+      v-if="acimaDoLimite"
+      class="flex items-center gap-1.5 border-b border-default bg-error/10 px-3 py-1.5 text-xs text-error"
+    >
+      <UIcon name="i-lucide-triangle-alert" class="size-3.5 shrink-0" />
+      <span class="flex-1">{{ t.limiteExcedido(tarefas.length, limite!) }}</span>
+      <UButton
+        :label="t.editarCampo"
+        size="xs"
+        color="error"
+        variant="link"
+        class="p-0"
+        @click="abrirLimite"
+      />
+    </div>
 
     <!-- Corpo -->
     <div class="min-h-0 flex-1 space-y-2 overflow-y-auto p-2">
@@ -382,5 +426,72 @@ function aoSoltar(evento: DragEvent) {
         {{ resultado.valor }}
       </span>
     </footer>
+
+    <!-- Definir o limite: o número passa a ser escolha, não mágica -->
+    <UModal v-model:open="definindoLimite" :title="t.limiteTitulo" :ui="{ content: 'max-w-md' }">
+      <template #body>
+        <div class="space-y-4">
+          <p class="text-sm text-muted">
+            <span class="font-medium text-highlighted">{{ raia.rotulo }}</span>.
+            {{ t.limiteHoje(tarefas.length) }}.
+          </p>
+
+          <div>
+            <label for="limite-da-raia" class="mb-1.5 block text-sm font-medium text-highlighted">
+              {{ t.limitePergunta }}
+            </label>
+            <UInputNumber
+              id="limite-da-raia"
+              v-model="limiteEmEdicao"
+              :min="1"
+              :max="99"
+              size="lg"
+              class="w-40"
+            />
+          </div>
+
+          <div>
+            <p class="mb-1.5 text-xs font-medium uppercase tracking-wide text-muted">
+              {{ t.limiteSugestoes }}
+            </p>
+            <div class="flex flex-wrap gap-1">
+              <UButton
+                v-for="n in [3, 5, 8, 10, 15]"
+                :key="n"
+                :label="String(n)"
+                size="xs"
+                class="w-10 justify-center"
+                :color="limiteEmEdicao === n ? 'primary' : 'neutral'"
+                :variant="limiteEmEdicao === n ? 'soft' : 'outline'"
+                @click="limiteEmEdicao = n"
+              />
+            </div>
+          </div>
+
+          <p class="flex items-start gap-1.5 rounded-lg bg-elevated p-3 text-xs text-toned">
+            <UIcon name="i-lucide-info" class="mt-0.5 size-3.5 shrink-0 text-muted" />
+            {{ t.limiteAjuda }}
+          </p>
+        </div>
+      </template>
+
+      <template #footer>
+        <div class="flex w-full items-center gap-2">
+          <UButton
+            v-if="limite"
+            :label="t.limiteRemover"
+            icon="i-lucide-x"
+            color="neutral"
+            variant="ghost"
+            size="sm"
+            @click="removerLimite"
+          />
+          <div class="ml-auto flex gap-2">
+            <UButton :label="t.cancelar" color="neutral" variant="ghost" size="sm" @click="definindoLimite = false" />
+            <UButton :label="t.limiteSalvar" color="primary" size="sm" @click="salvarLimite" />
+          </div>
+        </div>
+      </template>
+    </UModal>
   </section>
 </template>

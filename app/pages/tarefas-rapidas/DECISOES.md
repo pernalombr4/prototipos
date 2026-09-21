@@ -560,3 +560,50 @@ Com os três papéis visíveis numa raia no mínimo (17 rem), o rodapé do cart�
 responsável na borda**. O rodapé passou a quebrar em duas linhas em vez de recortar, e o código
 do registro de origem parou de partir no meio (`DEM-` / `1190`). Vale a pena olhar sempre no
 tamanho mínimo da raia, não no confortável.
+
+---
+
+## Rodada 7 — 21/09/2026
+
+### O que ela pediu, literal
+
+> agora melhore a funcionalidade de definir limite do cartao. eu coloco limite ali e aparece
+> simplesmente 2/6 ou 4/6 enfim... de onde vem o 6?
+
+### De onde vinha o 6: de mim
+
+Era um número cravado no código. O item de menu não perguntava nada: ligava `6` e desligava.
+Defeito meu, e dos feios, porque a tela mostrava um número com ar de configuração que ninguém
+tinha configurado.
+
+### O que passou a acontecer
+
+**O item do menu abre um diálogo**, com quatro coisas que faltavam:
+
+1. **o contexto**: "Pendente. Nesta raia há 11 cartões agora". O número de hoje é a informação
+   que falta para escolher o limite;
+2. **o campo**, com mais e menos, começando **no número que a raia tem agora** quando ainda não
+   há limite, e no limite atual quando já há. Nada de valor mágico;
+3. **sugestões** (3, 5, 8, 10, 15), para quem só quer um número redondo;
+4. **o que o limite faz**, escrito: *"A raia avisa quando passa do limite. Ninguém fica
+   impedido de mover cartão."* Esta é a decisão de comportamento, e ela precisa estar na tela,
+   não na cabeça de quem implementou.
+
+E o caminho de volta: **"Tirar o limite"** aparece no rodapé do diálogo quando existe um.
+
+**Na raia**, o número deixou de ser mudo:
+
+- a contagem `11/8` ganhou tooltip: `Limite de cartões: 11 de 8 cartões`. Sem limite, o
+  tooltip diz `Tarefas: 11`;
+- a faixa de aviso ganhou ícone e um **Editar** que reabre o diálogo. Antes ela só acusava o
+  problema e deixava a pessoa procurar onde resolver.
+
+### Duas decisões que ficam registradas
+
+1. **O limite avisa, não impede.** É o que o Jira faz: passar do limite pinta a coluna, mas o
+   cartão entra. Bloquear o arraste transforma um aviso de processo em erro de sistema, e o
+   time perde o caminho para resolver o problema de verdade (que é tirar trabalho da raia).
+2. **O limite é da raia, e a raia muda com o agrupamento.** Ele fica guardado pelo valor
+   (`pending`, `high`, um id de pessoa), então agrupar por prioridade mostra outros limites,
+   não os de situação. É o comportamento certo, e é uma coisa a mais para o back guardar:
+   limite por visualização e por valor de agrupamento.
