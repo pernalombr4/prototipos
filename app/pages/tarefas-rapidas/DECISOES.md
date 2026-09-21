@@ -940,3 +940,49 @@ conferidos na tela (`Estimativa`, `Estimate`, `Estimación`).
 
 A lição, para a próxima: substituição por âncora só é segura quando a âncora **não** aparece no
 texto que entra no lugar dela.
+
+---
+
+## Rodada 14 — 21/09/2026
+
+### O que ela pediu, literal
+
+> dentro da tarefa, acredito que vale a pena fazermos esse campo de time tracking ocupar um
+> espaço menor. no clickup é um popover simplmente. o campo é pequeno. deveria ser assim e pode
+> ser só na barra lateral se for o caso. como ta hoje ocupa muito espaço. nao da
+
+### O que estava errado
+
+Eu tinha feito uma **seção inteira** no corpo do painel: cronômetro, barra de progresso,
+formulário de apontamento e lista, tudo aberto ao mesmo tempo. Num painel de 700 px isso comia
+metade da altura para mostrar um total que quase sempre é uma linha (`1h 55m`), e empurrava o
+formulário da tarefa para baixo, que é justamente o trabalho que a pessoa abriu a tarefa para
+fazer.
+
+No ClickUp o tempo é **um campo pequeno entre as propriedades da tarefa**, e tudo o mais mora
+num popover que abre ao clicar. Era o que eu deveria ter copiado desde o começo.
+
+### O que ficou
+
+**O tempo virou um campo na coluna de detalhes**, do mesmo tamanho dos outros:
+
+```
+⏱ Tempo registrado
+[ ⏱ 1h 55m                    / 4h ⌄ ]
+```
+
+O controle já diz o essencial sem abrir nada: o total, a estimativa ao lado quando existe, e
+o cronômetro correndo em vermelho quando é aquela a tarefa que está contando.
+
+**Clicando, abre o popover** com o que estava na seção: iniciar e parar, total, barra de
+progresso contra a estimativa, `Registrar tempo` com duração, etiqueta, nota e faturável, e a
+lista de apontamentos com rolagem própria (no máximo 224 px de altura).
+
+**O corpo do painel ficou só com o que é trabalho**: descrição, formulário da tarefa e, quando
+concluída, o que foi respondido.
+
+### O que saiu, e por quê
+
+A linha **Por pessoa** (avatares com o total de cada um) saiu. Num popover de 320 px ela
+repetia o que a lista logo abaixo já mostra, com avatar em cada apontamento. Se um dia a tarefa
+tiver muita gente apontando, ela volta como cabeçalho da lista, e não como linha à parte.
