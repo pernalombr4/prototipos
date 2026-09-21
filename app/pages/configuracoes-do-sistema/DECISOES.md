@@ -31,9 +31,25 @@ aviso colorido que aparecesse.
 isso vale para **todo botão e selo `solid` da cor primária**, aqui e no produto. Não é ajuste de
 tela, é decisão de marca: ou o fuchsia escurece, ou o texto sobre ele deixa de ser branco.
 
-> ⚠️ **`app/app.config.ts` é compartilhado por todos os protótipos do repositório.** A mudança
-> melhora o contraste em todos eles e não muda nenhuma cor da paleta, mas a outra sessão que
-> trabalha aqui foi avisada.
+### Onde a correção mora, e por que não no `app.config.ts`
+
+A primeira versão entrou no `app/app.config.ts`. **A sessão vizinha achou o defeito do plano:**
+aquele arquivo é cópia do en-docs, e a spec manda recopiá-lo quando o tema mudar lá, em vez de
+corrigir à mão. Um bloco local ali morreria na primeira recópia, em silêncio, e ninguém ligaria a
+volta do contraste ruim a essa causa.
+
+Em vez de pedir exceção na regra, tirei o bloco de lá:
+
+- **`app/tema-contraste.ts`** guarda as classes, escritas abertas. Mora sob `app/` porque é lá
+  que o Tailwind varre à procura de nome de classe.
+- **`nuxt.config.ts`** entrega isso ao Nuxt pelo `appConfig`. Não é cópia de lugar nenhum, então
+  sobrevive à recópia.
+- **`app/app.config.ts`** voltou a ser só o espelho das cores, com uma linha dizendo onde a
+  correção foi parar. E ele continua vencendo nas cores, porque `app.config.ts` tem precedência
+  sobre o `appConfig` do `nuxt.config`.
+
+**A pergunta que sobra é da Mikaela:** o defeito é do tema do produto, não do protótipo. Ou a
+correção vai para o en-docs um dia, ou todo protótipo vai carregar a sua.
 
 ---
 

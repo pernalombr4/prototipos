@@ -2,6 +2,7 @@
 import { readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { biblioteca } from './app/pages/tela-de-workspaces/icones'
+import { avisosLegiveis, selosLegiveis } from './app/tema-contraste'
 
 /**
  * As rotas a prerenderizar, lidas dos arquivos em app/pages.
@@ -53,6 +54,22 @@ export default defineNuxtConfig({
       sizeLimitKb: 2048,
     },
   },
+  /*
+   * Contraste dos selos e avisos, explicado em `app/tema-contraste.ts`.
+   *
+   * Entra por aqui, e não pelo `app/app.config.ts`, porque aquele arquivo é
+   * cópia do en-docs: a spec manda recopiá-lo quando o tema mudar lá, e um
+   * bloco local ali morreria na primeira recópia, sem ninguém perceber.
+   * O `app.config.ts` continua valendo por cima deste, então a cópia das cores
+   * segue mandando nas cores.
+   */
+  appConfig: {
+    ui: {
+      badge: { compoundVariants: selosLegiveis },
+      alert: { compoundVariants: avisosLegiveis },
+    },
+  },
+
   css: ['~/assets/css/main.css'],
   compatibilityDate: 'latest',
   devtools: { enabled: true },
