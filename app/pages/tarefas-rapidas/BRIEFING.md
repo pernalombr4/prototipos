@@ -139,6 +139,57 @@ aqui estiver diferente do develop, é defeito de cópia, não sugestão.
 O item 5 é o único da casca que a proposta substitui, e está declarado no `DECISOES.md`: a
 paginação da página vira `Ver mais` por raia.
 
+### A quickview, item por item
+
+O painel que abre ao clicar no cartão. É o componente padrão de painel lateral do produto,
+então aqui ele foi medido antes de qualquer proposta. Visitado em 21/09/2026.
+
+**A caixa.** `USlideover` à direita, altura inteira, canto esquerdo arredondado, anel em volta.
+Largura **700 px fixos** (`max-w-[calc(100%-2rem)]`), sem alça de redimensionar. O fundo da
+página fica visível e apagado; **não existe botão de fechar**: sai no Esc ou clicando fora.
+
+**Trilho de campos**, colado na borda esquerda do painel, com **sete ícones sem rótulo**, um
+a cada 60 px. Passando o mouse, cada um abre um cartãozinho com o nome do campo e o valor:
+
+1. `#` Identificador (`#13186`)
+2. 🏷 Ticket (`-`, com botão de copiar)
+3. 👤 Responsável (`Mikaela Jardim`)
+4. 📅 Data Limite (`23/09/2026, 12:25:06`)
+5. 📅 Concluída em (`—`)
+6. 📅 Criado em
+7. 📅 Atualizado em
+
+No pé do trilho, um `»` que **expande**. Expandir **não aumenta o painel**: os 700 px ficam,
+o trilho vira uma coluna de 275 px com os rótulos, e o conteúdo cai para cerca de 330 px. O
+editor da descrição ganha barra de rolagem horizontal, e o título é repetido, centralizado, no
+topo da coluna nova.
+
+**Abas**, no topo do conteúdo: `Tarefa`, `Comentários`, `Logs de Auditoria`.
+
+- **Tarefa**: título grande, selo da situação com o valor cru (`pending`), duas linhas de meta
+  (`Prazo` e `Reference`, esta com os 32 caracteres inteiros) e a seção **Descrição**, que é um
+  editor de texto rico sempre aberto, com a barra de formatação sempre visível.
+- **Comentários**: estado vazio com "Nenhum comentário ainda. Seja o primeiro!" e, no rodapé,
+  o campo "Escreva um comentário... (@ para mencionar, Ctrl+Enter para enviar)" com o botão de
+  enviar. Nesta aba o rodapé de ações some e dá lugar ao campo.
+- **Logs de Auditoria**: linha do tempo com bolinha verde, avatar, selo da ação (`Criou`), a
+  frase "Mikaela Jardim criou uma Tarefa" e, à direita, a data e o tempo relativo ("há 4
+  horas").
+
+**Rodapé** (nas abas Tarefa e Logs): `Guardar progresso` e `Concluir tarefa`.
+
+**O que o painel não mostra, tendo no payload:** prioridade, pontos, tipo, etiquetas e
+colaboradores. Nenhum deles aparece, nem no trilho, nem na coluna expandida, nem no cabeçalho.
+
+**Não consegui ver** a quickview de uma tarefa de formulário: o workspace de exploração não
+tem tarefa vinda de spaceflow, e criar uma pela tela exigiria montar um fluxo inteiro. O que o
+painel faz com `meta.form` fica como pergunta aberta, e a seção de formulário do protótipo é
+proposta, não cópia.
+
+**Duas travadas.** Ao clicar na aba `Comentários` com o painel aberto, a página parou de
+responder e só voltou com recarregamento. Aconteceu duas vezes seguidas, no mesmo ponto. Na
+terceira vez, depois de ela destravar o ambiente, funcionou.
+
 ### Onde trava
 
 1. **A configuração é de nascimento, não de uso.** Agrupar, ordenar e montar o cartão só

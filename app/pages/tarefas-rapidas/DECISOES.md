@@ -273,3 +273,74 @@ copia olhando o develop, mora em componente próprio marcado como "nada aqui é 
 lista do que foi copiado entra no briefing, a fronteira vai no `DECISOES.md`, e a casca não
 ganha melhoria de passagem. Se a proposta só couber mexendo na casca, isso é achado, não
 licença.
+
+---
+
+## Rodada 3 — 21/09/2026
+
+### O que ela pediu, literal
+
+> e tambem prototipe vendo como é a quickview de tarefas rapidas (como ela abre na aba
+> lateral), porque é nosso componente padrao de sidebar. olhe nossa sidebar de hoje e simule
+> só MELHORIAS naquilo ali, nao mudanças estruturais como ta hoje
+
+### O que eu tinha feito errado na rodada 1
+
+O painel que entreguei era **outra coisa**: eu tinha jogado fora o trilho de ícones, trocado
+as abas por botões meus, empilhado tudo em três camadas ("o que se decide, o que se responde,
+o rastro técnico") e colocado seletores de situação e prioridade no cabeçalho. Era
+reestruturação, não melhoria. Agora o painel voltou a ser o componente de hoje.
+
+### A estrutura, que ficou igual
+
+Medida no develop antes de mexer (está no `BRIEFING.md`, em "A quickview, item por item"):
+
+| Peça | Como está no protótipo |
+|---|---|
+| Painel à direita, altura inteira, canto esquerdo arredondado | igual, 700 px |
+| Trilho de ícones na borda esquerda, valor no hover | igual |
+| Botão de expandir no pé do trilho | igual |
+| Abas Tarefa, Comentários, Logs no topo | igual |
+| Cabeçalho com título, selo da situação, `Prazo` e `Referência` | igual |
+| Seção com ícone e nome ("Descrição") | igual |
+| Comentários com estado vazio e o campo de escrever no rodapé | igual, com `@` e Ctrl+Enter no texto de ajuda |
+| Logs em linha do tempo: bolinha, avatar, selo da ação, frase, data e tempo relativo | igual |
+| Rodapé com guardar e concluir | igual |
+
+### As melhorias, dentro dessa estrutura
+
+| # | O que | Por quê |
+|---|---|---|
+| 1 | **Expandir o trilho alarga o painel** (700 px para 980 px) em vez de roubar espaço do conteúdo | Hoje a coluna de detalhes come o conteúdo: a descrição cai para 330 px e o editor ganha barra de rolagem horizontal |
+| 2 | **O trilho ganha os cinco campos que faltavam**: prioridade, pontos, tipo, etiquetas e colaboradores | Estão no payload e não apareciam em lugar nenhum do painel. Agora são treze ícones, na mesma régua |
+| 3 | **Campo sem valor fica apagado, não some** | É o comportamento que o "Concluída em" já tem hoje, agora valendo para todos |
+| 4 | **Prioridade urgente e prazo vencido acendem em vermelho no trilho** | Dá para ver o que pega sem abrir nada |
+| 5 | **Botão de fechar (X) na barra de abas** | Hoje o painel só sai no Esc ou clicando fora |
+| 6 | **O selo da situação vira `Pendente`, com a cor da raia** | Hoje mostra `pending`, cru |
+| 7 | **`Guardar progresso` vira `Salvar sem concluir`** | Português de Portugal no meio de pt-BR |
+| 8 | **A referência mostra 6 caracteres com botão de copiar** | Hoje são os 32 caracteres inteiros, na linha de meta |
+| 9 | **O prazo ganha a leitura relativa** ("Atrasada 2 dias") ao lado da data | A data sozinha obriga a fazer a conta |
+| 10 | **O título não é mais repetido nem centralizado** quando o trilho abre | Hoje ele aparece duas vezes, e a segunda vez centralizado |
+| 11 | **A barra do editor da descrição só aparece ao focar o texto** | Hoje ela está sempre lá, com onze botões, num painel que na maior parte do tempo é de leitura |
+| 12 | **O registro de origem mostra código e título** no lugar de `-` | O `Ticket: -` de hoje não diz de qual chamado a tarefa veio |
+| 13 | **O tempo relativo passa a dias acima de 24 horas** | "há 101 horas" não se lê |
+
+### O que NÃO mudou, de propósito
+
+- **Editar situação, prioridade e responsável continua fora do painel.** Hoje o painel não
+  edita nenhum desses campos, e o caminho é o menu do cartão (`Mover para`, `Editar`). Mudar
+  isso seria reestruturação.
+- **O trilho continua sendo ícone sem rótulo em repouso.** É o desenho do componente; o que
+  melhorou foi o conteúdo do cartãozinho que abre e a cor de quem pede atenção.
+- **A largura de 700 px continua a mesma** no estado recolhido.
+- **A seção de formulário é proposta, não cópia**: não consegui abrir a quickview de uma
+  tarefa de formulário no workspace de exploração, porque lá não há tarefa criada por
+  spaceflow. Está declarado no `BRIEFING.md`.
+
+### Um defeito meu, corrigido
+
+O cartão do quadro não abria com clique de mouse, só por teclado ou por código. O `line-clamp`
+estava no `<h3>`, e `line-clamp` liga `overflow: hidden`, que **recortava o `after:inset-0` do
+link esticado**: a área clicável virava só a caixa do título. O corte passou para um `<span>`
+dentro do link, e o cartão inteiro voltou a ser clicável. Regra 25 continua valendo, e agora
+funciona de verdade.

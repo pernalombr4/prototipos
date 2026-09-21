@@ -93,15 +93,22 @@ const itensDoMenu = computed(() => [[
     </div>
 
     <!-- Título. O alvo de clique é o cartão inteiro, pelo link esticado. -->
-    <h3
-      class="text-sm font-medium leading-snug text-highlighted"
-      :class="densidade === 'compacto' ? 'line-clamp-1' : 'line-clamp-2'"
-    >
+    <!--
+      O corte do título vai no <span>, não no <h3>. `line-clamp` liga
+      `overflow: hidden`, e isso recorta o `after:inset-0` do link esticado:
+      o cartão deixa de ser clicável fora das duas linhas do título.
+    -->
+    <h3 class="text-sm font-medium leading-snug text-highlighted">
       <a
         :href="`#${tarefa.reference}`"
         class="outline-none after:absolute after:inset-0 after:rounded-lg"
         @click.prevent="emit('abrir')"
-      >{{ tarefa.name }}</a>
+      >
+        <span
+          class="block"
+          :class="densidade === 'compacto' ? 'line-clamp-1' : 'line-clamp-2'"
+        >{{ tarefa.name }}</span>
+      </a>
     </h3>
 
     <p v-if="mostraDescricao" class="mt-1 line-clamp-2 text-xs leading-relaxed text-muted">

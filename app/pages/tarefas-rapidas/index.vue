@@ -166,6 +166,11 @@ const totalVisivel = computed(() => raiasVisiveis.value.reduce((s, r) => s + r.t
 /* ------------------------------- interação ------------------------------- */
 
 const tarefaAberta = ref<Task | null>(null)
+/**
+ * Trilho de campos da quickview expandido. Mora aqui porque, na melhoria, é ele
+ * que muda a largura do painel: hoje expandir rouba espaço do conteúdo.
+ */
+const painelExpandido = ref(false)
 const painelAberto = computed({
   get: () => !!tarefaAberta.value,
   set: (v: boolean) => { if (!v) tarefaAberta.value = null },
@@ -220,15 +225,9 @@ function reabrir() {
   alvo.completed_by = null
 }
 
-function atualizarCampo(campo: keyof Task, valor: unknown) {
-  const alvo = tarefaAberta.value && lista.value.find(x => x.id === tarefaAberta.value!.id)
-  if (!alvo) return
-  if (campo === 'reference') {
-    toast.add({ title: t.value.referenciaCopiada, icon: 'i-lucide-copy', color: 'neutral' })
-    return
-  }
-  // @ts-expect-error atribuição dinâmica sobre o mock em memória
-  alvo[campo] = valor
+/** Maquete: mostra o toast sem escrever na área de transferência. */
+function copiarReferencia() {
+  toast.add({ title: t.value.referenciaCopiada, icon: 'i-lucide-copy', color: 'neutral' })
 }
 
 function arquivar(tarefa: Task) {
@@ -444,18 +443,23 @@ const cartaoDeHoje: EnKanbanCardConfig = {
     </CascaDoEnspace>
 
     <!-- O cartão aberto -->
-    <USlideover v-model:open="painelAberto" :ui="{ content: 'max-w-2xl' }">
+    <USlideover
+      v-model:open="painelAberto"
+      :ui="{ content: painelExpandido ? 'max-w-[61rem] transition-[max-width] duration-200' : 'max-w-[43.75rem] transition-[max-width] duration-200' }"
+    >
       <template #content>
         <PainelDaTarefa
           v-if="tarefaAberta"
           :tarefa="tarefaAberta"
           :t="t"
           :somente-leitura="somenteLeitura"
+          :expandido="painelExpandido"
           @fechar="tarefaAberta = null"
+          @expandir="(v) => painelExpandido = v"
           @salvar="toast.add({ title: t.tarefaSalva, icon: 'i-lucide-check', color: 'success' })"
           @concluir="concluir"
           @reabrir="reabrir"
-          @atualizar="atualizarCampo"
+          @copiar-referencia="copiarReferencia"
         />
       </template>
     </USlideover>

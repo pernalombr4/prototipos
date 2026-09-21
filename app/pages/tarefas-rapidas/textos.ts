@@ -167,6 +167,14 @@ export interface Textos {
   semFormulario: string
   comentariosVazios: string
   logsVazios: string
+  comentarioPlaceholder: string
+  enviarComentario: string
+  logCriou: string
+  logConcluiu: string
+  logCriouFrase: (nome: string) => string
+  logConcluiuFrase: (nome: string) => string
+  haHoras: (n: number) => string
+  haDias: (n: number) => string
 
   /* estados */
   vazioTitulo: string
@@ -349,6 +357,14 @@ export const textos: Record<Idioma, Textos> = {
     semFormulario: 'Esta tarefa não pede formulário. Basta concluir.',
     comentariosVazios: 'Nenhum comentário ainda.',
     logsVazios: 'Nada registrado ainda.',
+    comentarioPlaceholder: 'Escreva um comentário. Use @ para mencionar e Ctrl+Enter para enviar',
+    enviarComentario: 'Enviar comentário',
+    logCriou: 'Criou',
+    logConcluiu: 'Concluiu',
+    logCriouFrase: nome => `${nome} criou uma tarefa`,
+    logConcluiuFrase: nome => `${nome} concluiu a tarefa`,
+    haHoras: n => n < 1 ? 'agora há pouco' : `há ${n} ${n === 1 ? 'hora' : 'horas'}`,
+    haDias: n => `há ${n} ${n === 1 ? 'dia' : 'dias'}`,
 
     vazioTitulo: 'Nenhuma tarefa por aqui',
     vazioDescricao: 'As tarefas rápidas chegam pelos spaceflows. Você também pode criar uma à mão.',
@@ -528,6 +544,14 @@ export const textos: Record<Idioma, Textos> = {
     semFormulario: 'This task asks for no form. Just complete it.',
     comentariosVazios: 'No comments yet.',
     logsVazios: 'Nothing recorded yet.',
+    comentarioPlaceholder: 'Write a comment. Use @ to mention and Ctrl+Enter to send',
+    enviarComentario: 'Send comment',
+    logCriou: 'Created',
+    logConcluiu: 'Completed',
+    logCriouFrase: nome => `${nome} created a task`,
+    logConcluiuFrase: nome => `${nome} completed the task`,
+    haHoras: n => n < 1 ? 'just now' : `${n} ${n === 1 ? 'hour' : 'hours'} ago`,
+    haDias: n => `${n} ${n === 1 ? 'day' : 'days'} ago`,
 
     vazioTitulo: 'No tasks here',
     vazioDescricao: 'Quick tasks arrive from spaceflows. You can also create one by hand.',
@@ -707,6 +731,14 @@ export const textos: Record<Idioma, Textos> = {
     semFormulario: 'Esta tarea no pide formulario. Basta completarla.',
     comentariosVazios: 'Ningún comentario todavía.',
     logsVazios: 'Nada registrado todavía.',
+    comentarioPlaceholder: 'Escriba un comentario. Use @ para mencionar y Ctrl+Enter para enviar',
+    enviarComentario: 'Enviar comentario',
+    logCriou: 'Creó',
+    logConcluiu: 'Completó',
+    logCriouFrase: nome => `${nome} creó una tarea`,
+    logConcluiuFrase: nome => `${nome} completó la tarea`,
+    haHoras: n => n < 1 ? 'hace un momento' : `hace ${n} ${n === 1 ? 'hora' : 'horas'}`,
+    haDias: n => `hace ${n} ${n === 1 ? 'día' : 'días'}`,
 
     vazioTitulo: 'Ninguna tarea por aquí',
     vazioDescricao: 'Las tareas rápidas llegan por los spaceflows. También puede crear una a mano.',
