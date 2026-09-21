@@ -40,12 +40,18 @@ const identidade = ref<'iniciais' | 'icone' | 'imagem'>('iniciais')
 
 /* -------- cor: metade da identidade, e escolha explícita --------
    ClickUp e Linear tratam a cor como decisão de primeira classe, não como
-   consequência. Aqui ela vale para os três modos e começa sugerida pelo nome. */
+   consequência. Aqui ela vale para os três modos e começa sugerida pelo nome.
+
+   O tom do texto não é o mesmo para todas: medido no claro, o -600 dá 7,49:1
+   no cyan e 3,34:1 no teal, porque a paleta não tem luminância uniforme. As
+   duas que ficavam abaixo de 4,5:1 (fuchsia e teal) usam -700; as outras
+   continuam no -600, que já passa. No card da lista a mesma cor veste um
+   ícone, e ícone pede 3:1, não 4,5:1 — por isso lá a paleta não mudou. */
 const paleta = [
-  { id: 'fuchsia', fundo: 'bg-fuchsia-500/12', texto: 'text-fuchsia-600 dark:text-fuchsia-400', amostra: 'bg-fuchsia-500' },
+  { id: 'fuchsia', fundo: 'bg-fuchsia-500/12', texto: 'text-fuchsia-700 dark:text-fuchsia-400', amostra: 'bg-fuchsia-500' },
   { id: 'cyan', fundo: 'bg-cyan-500/12', texto: 'text-cyan-600 dark:text-cyan-400', amostra: 'bg-cyan-500' },
   { id: 'purple', fundo: 'bg-purple-500/12', texto: 'text-purple-600 dark:text-purple-400', amostra: 'bg-purple-500' },
-  { id: 'teal', fundo: 'bg-teal-500/12', texto: 'text-teal-600 dark:text-teal-400', amostra: 'bg-teal-500' },
+  { id: 'teal', fundo: 'bg-teal-500/12', texto: 'text-teal-700 dark:text-teal-400', amostra: 'bg-teal-500' },
   { id: 'space', fundo: 'bg-space-500/12', texto: 'text-space-600 dark:text-space-300', amostra: 'bg-space-500' },
 ]
 
@@ -250,7 +256,7 @@ function criar() {
               class="h-1 flex-1 rounded-full transition-all duration-500"
               :class="passo >= n ? 'bg-primary' : 'bg-accented'"
             />
-            <span class="shrink-0 text-xs font-medium text-dimmed">{{ t.criar.passoDe(passo, 2) }}</span>
+            <span class="shrink-0 text-xs font-medium text-muted">{{ t.criar.passoDe(passo, 2) }}</span>
           </div>
 
           <Transition
@@ -299,7 +305,7 @@ function criar() {
                            tratam a cor como decisão de primeira classe, não como
                            consequência de ter escolhido um ícone. -->
                       <div class="mb-3 flex items-center gap-2">
-                        <span class="text-xs font-medium text-dimmed">{{ t.criar.cor }}</span>
+                        <span class="text-xs font-medium text-muted">{{ t.criar.cor }}</span>
                         <div class="flex gap-1.5">
                           <button
                             v-for="c in paleta"
@@ -349,7 +355,7 @@ function criar() {
                         <p class="mt-3 text-sm text-muted">
                           {{ t.criar.iniciaisExplicacao }}
                         </p>
-                        <p class="mt-1 text-xs text-dimmed">
+                        <p class="mt-1 text-xs text-muted">
                           {{ t.criar.iniciaisRodape }}
                         </p>
                       </div>
@@ -421,7 +427,7 @@ function criar() {
 
                         <!-- Sem busca: a curadoria, que cabe na tela e resolve o caso comum -->
                         <div v-if="!buscando">
-                          <p class="mb-1.5 text-xs font-medium text-dimmed">
+                          <p class="mb-1.5 text-xs font-medium text-muted">
                             {{ t.criar.maisUsados }}
                           </p>
                           <div class="grid grid-cols-8 gap-1">
@@ -491,7 +497,7 @@ function criar() {
                             </p>
                           </div>
 
-                          <p class="text-xs text-dimmed">
+                          <p class="text-xs text-muted">
                             {{ t.criar.resultados(
                               iconesFiltrados.length.toLocaleString(idioma),
                               totalDeIcones.toLocaleString(idioma)) }}
@@ -511,7 +517,7 @@ function criar() {
                   :ui="{ base: 'text-base' }"
                 />
               </div>
-              <p class="mt-2 h-4 text-xs" :class="nomeCurto ? 'text-error' : 'text-dimmed'">
+              <p class="mt-2 h-4 text-xs" :class="nomeCurto ? 'text-error' : 'text-muted'">
                 {{ nomeCurto ? t.criar.nomeCurto : t.criar.tamanhoNome }}
               </p>
 
@@ -520,11 +526,11 @@ function criar() {
                 v-if="form.nome.length >= 3"
                 class="mt-5 animate-[entrada_0.3s_ease-out_both] rounded-lg border border-default bg-elevated/40 px-4 py-3"
               >
-                <p class="text-xs font-medium text-dimmed">
+                <p class="text-xs font-medium text-muted">
                   {{ t.criar.enderecoDoWorkspace }}
                 </p>
                 <p class="mt-1 font-mono text-sm text-muted">
-                  enspace.io/<span class="text-primary">{{ form.referencia || '…' }}</span>
+                  enspace.io/<span class="text-primary-700 dark:text-primary-300">{{ form.referencia || '…' }}</span>
                 </p>
               </div>
 
@@ -540,7 +546,7 @@ function criar() {
                   :class="detalhesAbertos && 'rotate-90'"
                 />
                 {{ t.criar.detalhesOpcionais }}
-                <span class="font-normal text-dimmed">{{ t.criar.opcional }}</span>
+                <span class="font-normal text-muted">{{ t.criar.opcional }}</span>
               </button>
 
               <Transition
@@ -588,7 +594,7 @@ function criar() {
               </p>
 
               <div class="mt-5 flex flex-wrap items-center gap-2">
-                <span class="text-xs font-medium text-dimmed">{{ t.criar.modelosDe }}</span>
+                <span class="text-xs font-medium text-muted">{{ t.criar.modelosDe }}</span>
                 <UButton
                   v-for="loc in localidades"
                   :key="loc.id"
@@ -618,7 +624,7 @@ function criar() {
                   </div>
                   <div class="min-w-0">
                     <span class="block font-medium text-highlighted">{{ t.criar.doZero }}</span>
-                    <span class="block text-sm text-muted">
+                    <span class="block text-sm text-toned">
                       {{ t.criar.doZeroAjuda }}
                     </span>
                   </div>
@@ -650,7 +656,7 @@ function criar() {
                     </div>
                     <div class="min-w-0">
                       <span class="block font-medium text-highlighted">{{ t.nome }}</span>
-                      <span class="block text-sm text-muted">{{ t.descricao }}</span>
+                      <span class="block text-sm text-toned">{{ t.descricao }}</span>
                     </div>
                     <UIcon
                       v-if="form.template === t.id"
@@ -715,7 +721,7 @@ function criar() {
 
         <!-- ------------------------- prévia ao vivo ------------------------- -->
         <aside class="hidden border-l border-default bg-elevated/30 p-6 md:block">
-          <p class="text-xs font-semibold uppercase tracking-wider text-dimmed">
+          <p class="text-xs font-semibold uppercase tracking-wider text-muted">
             {{ t.criar.comoVaiAparecer }}
           </p>
 
@@ -742,7 +748,7 @@ function criar() {
             <p class="mt-1 line-clamp-2 text-sm text-muted">
               {{ form.descricao || (templateEscolhido ? templateEscolhido.descricao : t.criar.semDescricao) }}
             </p>
-            <p class="mt-1 text-xs text-dimmed">
+            <p class="mt-1 text-xs text-muted">
               {{ t.criar.aindaNaoEntrou }}
             </p>
             <div class="mt-4 flex items-center justify-between">
@@ -759,7 +765,7 @@ function criar() {
             leave-to-class="opacity-0"
           >
             <div v-if="templateEscolhido" class="mt-6">
-              <p class="text-xs font-semibold uppercase tracking-wider text-dimmed">
+              <p class="text-xs font-semibold uppercase tracking-wider text-muted">
                 {{ t.criar.jaVemCom }}
               </p>
               <ul class="mt-3 space-y-2">

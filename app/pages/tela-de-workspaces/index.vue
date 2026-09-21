@@ -195,10 +195,10 @@ function workspaceCriado(nome: string) {
   <div class="min-h-screen bg-default pb-28">
     <header class="border-b border-default bg-elevated/50 backdrop-blur">
       <UContainer class="flex h-14 items-center justify-between">
-        <span class="text-sm font-medium text-muted">ENSPACE</span>
+        <span class="text-sm font-medium text-toned">ENSPACE</span>
         <div class="flex items-center gap-3">
           <UButton icon="i-lucide-life-buoy" :label="t.suporte" color="neutral" variant="ghost" size="sm" />
-          <UAvatar :text="usuario.iniciais" size="sm" />
+          <UAvatar :text="usuario.iniciais" size="sm" :ui="{ fallback: 'text-toned' }" />
         </div>
       </UContainer>
     </header>
@@ -585,7 +585,7 @@ function workspaceCriado(nome: string) {
     <!-- ANDAIME DE PROTÓTIPO — não faz parte da proposta -->
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">
       <UContainer class="flex flex-wrap items-center gap-2 py-3">
-        <span class="mr-1 text-xs font-semibold uppercase tracking-wider text-muted">
+        <span class="mr-1 text-xs font-semibold uppercase tracking-wider text-toned">
           Protótipo · estado
         </span>
         <UButton
@@ -594,7 +594,7 @@ function workspaceCriado(nome: string) {
           :label="e.rotulo"
           size="xs"
           class="transition-transform hover:-translate-y-0.5"
-          :color="estado === e.valor ? 'primary' : 'neutral'"
+          color="neutral"
           :variant="estado === e.valor ? 'solid' : 'subtle'"
           @click="estado = e.valor"
         />
@@ -602,7 +602,7 @@ function workspaceCriado(nome: string) {
         <ControlesDePrototipo class="ml-auto" />
 
         <span class="flex flex-wrap items-center gap-2">
-          <span class="text-xs font-semibold uppercase tracking-wider text-muted">
+          <span class="text-xs font-semibold uppercase tracking-wider text-toned">
             Por trás
           </span>
           <PainelDeContexto

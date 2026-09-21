@@ -134,6 +134,48 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 16 — 21/09/2026 · contraste medido, e a régua consertada antes
+
+A régua vinha antes da tela. A ferramenta de medir contraste compunha o fundo subindo pela
+árvore até achar uma camada opaca, e decidia a opacidade lendo o texto da cor: se não
+começasse com `rgba`, tratava como opaca. Com o tema em `oklch`, o navegador devolve
+`oklab(0.31 0.02 -0.05 / 0.2)` para um `bg-*/20`. A subida parava no primeiro cartão e
+compunha contra uma base branca fixa.
+
+No tema claro o engano se escondia, porque o papel é branco mesmo. No escuro ele media texto
+branco contra cinza claro: **37 reprovações, quase todas falsas** — incluindo todos os títulos
+de cartão a "1,47:1". A opacidade agora sai de pintar a cor num canvas limpo e ler o quarto
+canal, que funciona em qualquer notação, e a base vem do `color-scheme` em vez de ser branca
+por decreto. Medido de novo: **2 reprovações no escuro**, não 37.
+
+Vale como regra de método: *número que reprova a tela inteira é suspeito de ser da régua.*
+
+**O que era meu, e foi corrigido:**
+
+| onde | antes | depois |
+|---|---|---|
+| Rótulos do andaime e da barra simulada (`muted` sobre fundo tingido) | 4,18 a 4,46 | `text-toned`, 7,4 a 7,85 |
+| Botão de idioma ativo (`soft`, cor da marca) | 2,56 | pela correção do tema, passa |
+| Chip de estado ativo do andaime (cor cheia da marca) | 3,39 | neutro |
+| Aba ativa do painel "Por trás" | 3,39 | neutro |
+| Trechos de código nos documentos do painel | 4,18 (35 deles) | `--ui-text-toned` |
+| Texto de apoio do construtor (`dimmed`) | 3,03 | `muted`, 4,77 |
+| Iniciais na prévia do logo (fuchsia e teal a `-600`) | 3,34 e 4,18 | `-700`, 4,88 e 6,48 |
+| Endereço gerado (`enspace.io/…`, cor cheia da marca) | 3,23 | `primary-700` |
+| Descrição do cartão selecionado (fundo rosado por baixo) | 4,40 | `text-toned` |
+
+Duas escolhas que **não** viraram correção. O quadrado colorido do card veste um ícone, e
+ícone pede 3:1, não 4,5:1: a paleta lá continua no `-600`. E o ícone do estado vazio de
+modelos, pelo mesmo motivo.
+
+**O que sobrou é cor de tema, e não é decisão de protótipo:** os botões de cor cheia
+(`Entrar`, `Criar um workspace`, `Continuar`, `Criar workspace`) dão 3,39:1 de branco sobre
+`#FF04D1`; a aba ativa da lista dá os mesmos 3,39:1 de `#FF04D1` sobre branco; e `Tentar de
+novo` dá 3,81:1 de branco sobre o `error` do tema. Nenhuma sai daqui: mexer nelas é decidir
+sobre a marca, no `en-docs`, que este repositório só lê.
+
+No tema escuro, depois de tudo: **zero reprovações**, na tela e no construtor.
+
 ### Rodada 15 — 16/09/2026 · tema e idioma, para o dev usar como referência
 
 **Pedido:** todo protótipo passa a ter alternador de tema claro/escuro e de idioma entre
