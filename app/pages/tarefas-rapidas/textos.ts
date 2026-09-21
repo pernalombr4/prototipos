@@ -6,6 +6,27 @@
 import type { Idioma } from '~/composables/useIdioma'
 
 export interface Textos {
+  /* casca do produto (nada aqui e proposta: e copia do develop) */
+  casca: {
+    menuLateral: string
+    buscar: string
+    membro: string
+    configuracoes: string
+    ajuda: string
+    trilha: string
+    recolherMenu: string
+    abrirMenu: string
+    voltar: string
+    avancar: string
+    recarregar: string
+    suporte: string
+    notificacoes: string
+    idioma: string
+    tema: string
+    conta: string
+    itens: Record<string, string>
+  }
+
   /* casca */
   workspace: string
   trilhaTarefas: string
@@ -167,6 +188,34 @@ export interface Textos {
 
 export const textos: Record<Idioma, Textos> = {
   'pt-BR': {
+    casca: {
+      menuLateral: 'Menu do workspace',
+      buscar: 'Buscar',
+      membro: 'Membro',
+      configuracoes: 'Configurações',
+      ajuda: 'Ajuda',
+      trilha: 'Trilha',
+      recolherMenu: 'Recolher o menu',
+      abrirMenu: 'Abrir o menu',
+      voltar: 'Voltar',
+      avancar: 'Avançar',
+      recarregar: 'Recarregar',
+      suporte: 'Suporte',
+      notificacoes: 'Notificações',
+      idioma: 'Idioma',
+      tema: 'Tema',
+      conta: 'Sua conta',
+      itens: {
+        inicio: 'Início', spaceflows: 'Spaceflows', categorias: 'Categorias',
+        tarefas: 'Tarefas', agendadas: 'Agendadas', rapidas: 'Rápidas',
+        agenda: 'Agenda', knowledge: 'Knowledge', visaoGeral: 'Visão Geral',
+        sistema: 'Sistema', estrutura: 'Estrutura', gestaoDeMembros: 'Gestão de Membros',
+        interface: 'Interface', emails: 'E-mails', integracoes: 'Integrações',
+        agentesDeIa: 'Agentes de IA', logs: 'Logs', credenciais: 'Credenciais',
+        releases: 'Releases', documentacao: 'Documentação',
+      },
+    },
+
     workspace: 'Produtos',
     trilhaTarefas: 'Tarefas',
     trilhaRapidas: 'Rápidas',
@@ -318,6 +367,34 @@ export const textos: Record<Idioma, Textos> = {
   },
 
   en: {
+    casca: {
+      menuLateral: 'Workspace menu',
+      buscar: 'Search',
+      membro: 'Member',
+      configuracoes: 'Settings',
+      ajuda: 'Help',
+      trilha: 'Breadcrumb',
+      recolherMenu: 'Collapse the menu',
+      abrirMenu: 'Open the menu',
+      voltar: 'Back',
+      avancar: 'Forward',
+      recarregar: 'Reload',
+      suporte: 'Support',
+      notificacoes: 'Notifications',
+      idioma: 'Language',
+      tema: 'Theme',
+      conta: 'Your account',
+      itens: {
+        inicio: 'Home', spaceflows: 'Spaceflows', categorias: 'Categories',
+        tarefas: 'Tasks', agendadas: 'Scheduled', rapidas: 'Quick',
+        agenda: 'Schedule', knowledge: 'Knowledge', visaoGeral: 'Overview',
+        sistema: 'System', estrutura: 'Structure', gestaoDeMembros: 'Member management',
+        interface: 'Interface', emails: 'Emails', integracoes: 'Integrations',
+        agentesDeIa: 'AI agents', logs: 'Logs', credenciais: 'Credentials',
+        releases: 'Releases', documentacao: 'Documentation',
+      },
+    },
+
     workspace: 'Products',
     trilhaTarefas: 'Tasks',
     trilhaRapidas: 'Quick',
@@ -469,6 +546,34 @@ export const textos: Record<Idioma, Textos> = {
   },
 
   es: {
+    casca: {
+      menuLateral: 'Menú del workspace',
+      buscar: 'Buscar',
+      membro: 'Miembro',
+      configuracoes: 'Configuraciones',
+      ajuda: 'Ayuda',
+      trilha: 'Ruta',
+      recolherMenu: 'Contraer el menú',
+      abrirMenu: 'Abrir el menú',
+      voltar: 'Volver',
+      avancar: 'Avanzar',
+      recarregar: 'Recargar',
+      suporte: 'Soporte',
+      notificacoes: 'Notificaciones',
+      idioma: 'Idioma',
+      tema: 'Tema',
+      conta: 'Su cuenta',
+      itens: {
+        inicio: 'Inicio', spaceflows: 'Spaceflows', categorias: 'Categorías',
+        tarefas: 'Tareas', agendadas: 'Programadas', rapidas: 'Rápidas',
+        agenda: 'Agenda', knowledge: 'Knowledge', visaoGeral: 'Visión General',
+        sistema: 'Sistema', estrutura: 'Estructura', gestaoDeMembros: 'Gestión de Miembros',
+        interface: 'Interfaz', emails: 'Correos', integracoes: 'Integraciones',
+        agentesDeIa: 'Agentes de IA', logs: 'Registros', credenciais: 'Credenciales',
+        releases: 'Releases', documentacao: 'Documentación',
+      },
+    },
+
     workspace: 'Productos',
     trilhaTarefas: 'Tareas',
     trilhaRapidas: 'Rápidas',

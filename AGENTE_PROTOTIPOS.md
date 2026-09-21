@@ -266,14 +266,16 @@ Regras da biblioteca na **Parte 2**. "Alta fidelidade" aqui tem definição fech
    de um mesmo protótipo se navegam **por dentro** — camada, painel, aba, passo. Dois botões
    no mesmo card do índice é erro: quem revisa quer entrar uma vez e percorrer, não escolher
    por onde começar.
-9. **Duas jornadas na mesma tela do produto vivem na mesma tela do protótipo.** Se no ENSPACE
+9. **A tela vem inteira.** Menu lateral, barra do topo, trilha e abas entram no protótipo
+   como são hoje, e só o pedaço que a demanda pediu muda. Detalhe na regra 37.
+10. **Duas jornadas na mesma tela do produto vivem na mesma tela do protótipo.** Se no ENSPACE
    escolher e criar acontecem na mesma tela, no protótipo também — em camada sobre ela, não
    em rota separada.
-10. **Não troque a forma que o produto já usa.** Card não vira lista, tabela não vira card,
+11. **Não troque a forma que o produto já usa.** Card não vira lista, tabela não vira card,
     menu não vira aba. Se a outra forma for melhor, ela entra como **alternativa**, com o
     controle de troca visível na tela — e o padrão continua sendo o do produto. Trocar sem
     oferecer a volta tira da pessoa a referência que ela já tinha.
-11. **Ação que hoje está no topo continua no topo.** Dá para rebaixar o **peso** — cor,
+12. **Ação que hoje está no topo continua no topo.** Dá para rebaixar o **peso** — cor,
     variante, tamanho —, nunca o **endereço**. Quem já sabe onde clicar não pode perder o
     caminho; o que se corrige é o destaque, não o lugar.
 
@@ -723,3 +725,27 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
     de `evidencias/`. **Apague apenas o que você mesma criou** — na dúvida, deixe e pergunte —
     e **diga na entrega o que apagou**. Arquivo intermediário nasce no diretório de scratch da
     sessão, não em Downloads. Ver **Parte 1 → Antes de encerrar: limpeza**.
+
+37. **⛔ A TELA VEM INTEIRA. SÓ MUDA O QUE ESTÁ EM DISCUSSÃO.** O protótipo reproduz a tela
+    do produto como ela é hoje — menu lateral, barra do topo, trilha, abas, rodapé — e só
+    então muda a parte que a demanda pediu. Um quadro solto no meio de uma página branca não
+    deixa ninguém julgar se a mudança cabe no espaço que sobra, e obriga o dev a adivinhar
+    onde a peça entra. Foi correção dela, em 21/09/2026, na primeira rodada de
+    `tarefas-rapidas`.
+
+    **Como se faz:**
+
+    - a casca se copia do develop **olhando**: ordem dos itens, largura, ícone, rótulo, seção
+      aberta, item ativo, atalho de teclado. Print ao lado do código enquanto monta;
+    - a casca mora em componente próprio (`_CascaDo<Assunto>.vue`) e começa com um comentário
+      dizendo **"nada aqui é proposta"**, mais a URL e a data de onde foi copiada;
+    - o que foi copiado vira uma seção do `BRIEFING.md` ("A casca da tela, item por item"),
+      para a cópia poder ser conferida sem abrir o produto;
+    - o `DECISOES.md` declara a fronteira em uma linha: **o que muda e o que não muda**;
+    - a casca não ganha melhoria de passagem. Rótulo torto, ícone mudo e contraste ruim que
+      estiverem lá **ficam lá**, e viram achado no `BRIEFING.md`;
+    - se a proposta só couber mexendo na casca, isso é **achado, não licença**: escreva no
+      `DECISOES.md` e pergunte antes.
+
+    **A exceção é a tela que É a casca** (o menu lateral, a tela de login, a barra do topo).
+    Aí a casca é o objeto da demanda, e o que se congela é o conteúdo em volta.

@@ -220,3 +220,56 @@ número do rodapé, que era o que faltava.
 **O que funciona:** a barra diz o que está valendo sem abrir nada (`Agrupar: Situação`,
 `Ordenar: Prazo`); trocar o agrupamento redesenha o quadro na hora e o totalizador acompanha;
 o cartão atrasado se identifica por três sinais somados (borda, selo e ordem).
+
+---
+
+## Rodada 2 — 21/09/2026
+
+### O que ela pediu, literal
+
+> ta ruim como voce fez. simule exatamente a tela do enspace como voce viu. o menu lateral do
+> enspace ali ocupando o espaço que ele ja ocupa na esquerda, o header, o breacrumb... tudo o
+> que ja existe hoje, pra garantir que vce ta mexendo SÓ no kanban, nao no resto da estrutura.
+>
+> e tente colocar isso como regra nos seus docs. que simula tudo 100% igual e só mexe no que é
+> preciso. facilita os devs.
+
+### O que mudou
+
+**A tela agora vem inteira.** O quadro passou a viver dentro do `_CascaDoEnspace.vue`, que
+reproduz o que o develop tem hoje:
+
+- **menu lateral** com as três seções na ordem real (Membro, Configurações, Ajuda), os vinte
+  itens, os chevrons de quem expande, `Tarefas` aberta com `Agendadas` e `Rápidas`, e
+  `Rápidas` marcada como a tela atual. Recolhe para trilho de ícones pelo botão redondo da
+  borda, como no produto;
+- **barra do topo** com recolher, voltar, avançar, recarregar, início, a faixa arredondada da
+  trilha (`Produtos › Tarefas › Rápidas`) com `CTRL` `B` e a estrela, e à direita idioma,
+  tema, `Suporte`, sino e o avatar com bolinha verde;
+- a lista do que foi copiado está no `BRIEFING.md`, em "A casca da tela, item por item", para
+  a cópia poder ser conferida.
+
+**A fronteira, em uma linha:** a proposta mexe **no conteúdo da tela de Tarefas Rápidas**
+(barra de comandos, cartão fechado, cartão aberto, raia e totalizador) e **não mexe** em menu
+lateral, barra do topo, trilha, atalhos nem no lugar de nenhum deles.
+
+**Duas correções que vieram junto:**
+
+1. **a trilha saiu da minha barra de comandos.** Eu tinha repetido `Produtos › Tarefas ›
+   Rápidas` dentro do conteúdo, e no produto ela mora só na barra do topo. Era invenção minha,
+   e sumiu;
+2. **o `text-dimmed` que sobrava virou `text-muted`** em todo texto (a outra sessão mediu
+   3,03:1 sobre branco). Sobraram 11 usos, todos em ícone, onde o critério é 3:1.
+
+**A única coisa da casca que a proposta substitui** é o rodapé de paginação da página inteira
+(`Mostrando 1 a N de N resultados`, `500 por página`), que vira `Ver mais` por raia. Está
+declarado aqui e no briefing, e é mudança pedida pela demanda, não licença que eu tomei.
+
+### O que virou regra
+
+Isto deixou de ser decisão deste protótipo e virou **regra 37** da Parte 6 do
+`AGENTE_PROTOTIPOS.md`, com um bloco próprio no `CLAUDE.md`: a tela vem inteira, a casca se
+copia olhando o develop, mora em componente próprio marcado como "nada aqui é proposta", a
+lista do que foi copiado entra no briefing, a fronteira vai no `DECISOES.md`, e a casca não
+ganha melhoria de passagem. Se a proposta só couber mexendo na casca, isso é achado, não
+licença.

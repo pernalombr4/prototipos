@@ -157,16 +157,8 @@ const rotuloDaOrdenacao = computed(() => {
 
 <template>
   <div class="border-b border-default bg-default">
-    <!-- Linha 1: onde estou e qual visualização estou vendo -->
-    <div class="flex items-center gap-1 px-4 pt-2.5">
-      <nav class="mr-3 hidden items-center gap-1.5 text-xs text-muted md:flex" aria-label="Trilha">
-        <span>{{ t.workspace }}</span>
-        <UIcon name="i-lucide-chevron-right" class="size-3 text-dimmed" />
-        <span>{{ t.trilhaTarefas }}</span>
-        <UIcon name="i-lucide-chevron-right" class="size-3 text-dimmed" />
-        <span class="font-medium text-highlighted">{{ t.trilhaRapidas }}</span>
-      </nav>
-
+    <!-- Linha 1: as visualizações salvas, como no produto -->
+    <div class="flex items-center gap-1 px-4 pt-2">
       <div class="flex items-center gap-0.5 overflow-x-auto">
         <UButton
           v-for="v in visualizacoes"

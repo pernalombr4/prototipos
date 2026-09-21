@@ -103,6 +103,42 @@ Copiar Link Externo.
 O cartão aberto é um painel à direita com abas **Tarefa · Comentários · Logs de Auditoria**,
 e um trilho de ícones que expande para **DETALHES**.
 
+### A casca da tela, item por item
+
+Copiada para o protótipo como está, porque a proposta mexe só no conteúdo (regra 37). Se algo
+aqui estiver diferente do develop, é defeito de cópia, não sugestão.
+
+**Menu lateral** (cerca de 200 px, borda à direita, botão redondo de recolher na borda):
+
+1. topo: avatar circular do workspace, nome em negrito, slug abaixo em cinza, chevron à direita;
+2. `Buscar` com lupa e as teclas `CTRL` `K`;
+3. seção **Membro**: Início, Spaceflows, Categorias (com chevron), Tarefas (com chevron,
+   **aberta**, mostrando `Agendadas` e `Rápidas`, com `Rápidas` marcada como ativa), Agenda,
+   Knowledge (com chevron);
+4. seção **Configurações**: Visão Geral, Sistema, Estrutura (chevron), Gestão de Membros,
+   Interface (chevron), E-mails (chevron), Integrações, Agentes de IA, Logs, Credenciais;
+5. seção **Ajuda**: Releases, Documentação (com seta de link externo).
+
+**Barra do topo** (cerca de 44 px), da esquerda para a direita:
+
+1. botão de recolher o menu, voltar, avançar, recarregar, início;
+2. uma faixa arredondada que ocupa o meio e carrega a **trilha**: ícone, `teste ux 2` ›
+   `Tarefas` › `Rápidas`, e na ponta direita as teclas `CTRL` `B` e a estrela de favoritar;
+3. à direita: bandeira do idioma, sol do tema, `Suporte`, sino de notificações e o avatar da
+   conta com bolinha verde.
+
+**Conteúdo**, que é onde a proposta age:
+
+1. linha das visualizações salvas, com `+ Visualizar` no fim;
+2. barra de comandos;
+3. faixa `Filtros Rápidos` (vazia hoje, recolhida atrás da seta da direita);
+4. o quadro;
+5. rodapé de paginação da página inteira: `Mostrando 1 a N de N resultados`, `500 por página`
+   e as setas.
+
+O item 5 é o único da casca que a proposta substitui, e está declarado no `DECISOES.md`: a
+paginação da página vira `Ver mais` por raia.
+
 ### Onde trava
 
 1. **A configuração é de nascimento, não de uso.** Agrupar, ordenar e montar o cartão só

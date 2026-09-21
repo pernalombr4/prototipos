@@ -9,6 +9,7 @@
 import type { Task } from '@be-enlighten/enspace-sdk-schemas'
 import type { EnKanbanCardConfig, EnKanbanColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import BarraDoQuadro, { type Filtros } from './_BarraDoQuadro.vue'
+import CascaDoEnspace from './_CascaDoEnspace.vue'
 import PainelDaTarefa from './_PainelDaTarefa.vue'
 import RaiaDoQuadro from './_RaiaDoQuadro.vue'
 import { hoje, itensRelacionados, tarefas as tarefasMock, usuarioAtual } from './mocks'
@@ -324,8 +325,14 @@ const cartaoDeHoje: EnKanbanCardConfig = {
 </script>
 
 <template>
-  <div class="flex min-h-dvh flex-col bg-default pb-24">
-    <BarraDoQuadro
+  <div>
+    <!--
+      A casca (menu lateral, barra do topo, trilha) é cópia do develop e NÃO é
+      proposta. Está aqui para o quadro ser julgado no lugar onde ele vive, e
+      para ficar evidente que a mudança para no conteúdo.
+    -->
+    <CascaDoEnspace :t="t" :workspace="t.workspace" slug="produtos">
+      <BarraDoQuadro
       v-model:busca="busca"
       v-model:agrupamento="agrupamento"
       v-model:ordenacao="ordenacao"
@@ -357,7 +364,7 @@ const cartaoDeHoje: EnKanbanCardConfig = {
       class="mx-4 mt-3"
     />
 
-    <main class="flex-1 overflow-x-auto px-4 py-4">
+    <main class="flex min-h-0 flex-1 flex-col overflow-x-auto px-4 pb-28 pt-4">
       <!-- Erro -->
       <UEmpty
         v-if="estado === 'erro'"
@@ -406,7 +413,7 @@ const cartaoDeHoje: EnKanbanCardConfig = {
       />
 
       <!-- O quadro -->
-      <div v-else class="flex h-[calc(100dvh-15rem)] min-h-[30rem] items-stretch gap-3">
+      <div v-else class="flex min-h-0 flex-1 items-stretch gap-3">
         <RaiaDoQuadro
           v-for="(raia, i) in raiasVisiveis"
           :key="raia.definicao.valor"
@@ -433,7 +440,8 @@ const cartaoDeHoje: EnKanbanCardConfig = {
           @arquivar="arquivar"
         />
       </div>
-    </main>
+      </main>
+    </CascaDoEnspace>
 
     <!-- O cartão aberto -->
     <USlideover v-model:open="painelAberto" :ui="{ content: 'max-w-2xl' }">

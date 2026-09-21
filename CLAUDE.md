@@ -182,6 +182,26 @@ Não toca em `AGENTE_PROTOTIPOS.md`, `CLAUDE.md`, `nuxt.config.ts`, `app/app.con
 do `en-docs`: se estiverem desatualizados, **leia** o original de lá e traga a cópia para cá.
 Editar o `en-docs` é proibido — se o tema estiver errado na origem, avise a Mikaela.
 
+## ⛔ A tela vem inteira, e só muda o que está em discussão
+
+O protótipo reproduz a tela do produto **como ela é hoje** — menu lateral, barra do topo,
+trilha, abas, rodapé — e só então muda o pedaço que a demanda pediu. Quadro solto no meio de
+uma página branca não deixa julgar se a mudança cabe no espaço que existe, e faz o dev
+adivinhar onde a peça entra.
+
+- a casca se copia do develop **olhando**: ordem, largura, ícone, rótulo, seção aberta, item
+  ativo, atalho;
+- ela mora em `_CascaDo<Assunto>.vue`, começando com um comentário que diz **"nada aqui é
+  proposta"**, mais a URL e a data da cópia;
+- o que foi copiado vira a seção "A casca da tela, item por item" do `BRIEFING.md`;
+- o `DECISOES.md` declara a fronteira numa linha: **o que muda e o que não muda**;
+- a casca **não ganha melhoria de passagem**. O que estiver torto lá fica, e vira achado;
+- precisou mexer na casca para a proposta caber? É achado, não licença: escreva e pergunte.
+
+Exceção: quando a demanda É sobre a casca (menu lateral, login). Aí congela-se o conteúdo.
+
+Regra 37 da Parte 6 da spec.
+
 ## Índice da raiz
 
 `app/pages/index.vue` se monta sozinho a partir das rotas e do `definePageMeta` de cada tela.
