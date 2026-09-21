@@ -163,6 +163,8 @@ export interface Textos {
   camposDaTarefa: string
   camposDoFormulario: string
   contagens: string
+  numeros: string
+  comoCalcular: string
   ordemDaRaia: string
   usarOrdemDoQuadro: string
   ordemPropria: (campo: string) => string
@@ -394,6 +396,8 @@ export const textos: Record<Idioma, Textos> = {
     camposDaTarefa: 'Da tarefa',
     camposDoFormulario: 'Do formulário',
     contagens: 'Contagens',
+    numeros: 'Números',
+    comoCalcular: 'Como calcular',
     ordemDaRaia: 'Ordenar só esta raia',
     usarOrdemDoQuadro: 'Usar a ordem do quadro',
     ordemPropria: campo => `Esta raia está ordenada por ${campo}`,
@@ -620,6 +624,8 @@ export const textos: Record<Idioma, Textos> = {
     camposDaTarefa: 'From the task',
     camposDoFormulario: 'From the form',
     contagens: 'Counts',
+    numeros: 'Numbers',
+    comoCalcular: 'How to calculate',
     ordemDaRaia: 'Sort this lane only',
     usarOrdemDoQuadro: 'Use the board order',
     ordemPropria: campo => `This lane is sorted by ${campo}`,
@@ -846,6 +852,8 @@ export const textos: Record<Idioma, Textos> = {
     camposDaTarefa: 'De la tarea',
     camposDoFormulario: 'Del formulario',
     contagens: 'Conteos',
+    numeros: 'Números',
+    comoCalcular: 'Cómo calcular',
     ordemDaRaia: 'Ordenar solo este carril',
     usarOrdemDoQuadro: 'Usar el orden del tablero',
     ordemPropria: campo => `Este carril está ordenado por ${campo}`,

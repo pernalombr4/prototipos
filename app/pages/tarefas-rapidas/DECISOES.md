@@ -659,3 +659,61 @@ A ordem vive em memória e o reload zera, como todo o resto. E **reordenar cart�
 raia** continua fora: a ordem dos cartões é a do campo escolhido em `Ordenar`, e ordem manual
 por arraste dentro da coluna é outra decisão (a que o Linear avisa: escolher um campo de
 ordenação desliga o arraste vertical).
+
+---
+
+## Rodada 9 — 21/09/2026
+
+### O que ela pediu, literal
+
+> melhore esse popover da calculadora da base. ta ruim. 2 dropdowns um do lado do outro é bem
+> ruim. se for preciso, faça um modal de config pra ele em vez de ser dropdown ali no clque
+> mesmo. se nao der pra organizar assim. mas siga padrao de outros sistemas tipo clickup,
+> notion etc que tem esses totalizadores/calculadores de base de tabela e/ou kanban
+
+### O que o mercado faz, e o que eu tinha feito
+
+Fui conferir os quatro que fazem isso:
+
+| Produto | Como resolve |
+|---|---|
+| **Notion** | O número do grupo abre **um menu, uma coluna**. O campo não se escolhe: é a coluna clicada. O menu lista só os cálculos |
+| **ClickUp** | Igual: passa o mouse no fim da coluna, `Calculate`, **uma lista** de total, média, mínimo, máximo, contagem |
+| **Airtable** | Rodapé por coluna, **um dropdown** com as funções de resumo |
+| **Twenty** | É kanban, como aqui, então o campo precisa ser escolhido: resolve com **um menu e submenu**, com marca de seleção |
+
+Nenhum dos quatro põe dois painéis lado a lado. Nos três primeiros o campo **é a coluna**, e por
+isso a lista pode ser uma só. Num kanban o campo não vem de graça, e o Twenty é quem mostra a
+saída: um menu, submenu por item.
+
+### O que ficou
+
+**Uma coluna só**, com cabeçalho de grupo, no lugar dos dois painéis com rolagem:
+
+```
+Contagens
+  Tarefas · Atrasadas · Sem responsável · Prazo mais próximo    escolha direta
+Números
+  # Pontos                             ›   Soma · Média · Mínimo · Máximo · Preenchidas
+  # Horas estimadas de correção        ›
+  $ Custo estimado do retrabalho       ›
+  $ Valor do pedido                    ›
+Nenhum
+```
+
+Decisões dentro disso:
+
+- **contagem não tem operação**, então ela é escolha direta, com marca de seleção. Submenu ali
+  seria um clique a troco de nada;
+- **o ícone do campo passou a dizer o tipo**: `#` para número, cifrão para dinheiro. O selo
+  `R$` que ficava solto no meio da lista saiu, porque era ruído fazendo o trabalho do ícone;
+- **a linha escolhida fica destacada**, e dentro do submenu a operação corrente tem a marca.
+  Com dois cliques a pessoa vê onde está nos dois níveis;
+- **Nenhum** no fim desliga o rodapé, que antes era um item perdido no meio da lista de campos.
+
+**Não virou modal**, embora ela tenha autorizado. Escolher o totalizador é ação frequente e de
+baixo compromisso: modal pede confirmação, escurece a tela e tira o quadro de vista justamente
+quando a pessoa quer comparar as raias. Modal ficou para o **limite de cartões** (rodada 7),
+que é configuração, acontece uma vez e precisa de explicação. Se na prática o menu ficar longo
+demais com muitos campos numéricos por workspace, o próximo passo é busca dentro do menu, como
+o Notion faz, e não o modal.

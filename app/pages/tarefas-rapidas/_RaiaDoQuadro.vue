@@ -128,19 +128,71 @@ const rotuloDoCalculo = computed(() => {
   return `${props.t.operacoes[props.calculo.operacao]} · ${campo.rotulo}`
 })
 
-const gruposDeCampos = computed(() => [
-  { titulo: props.t.camposDaTarefa, itens: props.camposDoTotalizador.filter(c => c.origem === 'tarefa') },
-  { titulo: props.t.camposDoFormulario, itens: props.camposDoTotalizador.filter(c => c.origem === 'formulario') },
-  { titulo: props.t.contagens, itens: props.camposDoTotalizador.filter(c => c.origem === 'derivado') },
-].filter(g => g.itens.length))
+/**
+ * O menu do totalizador, numa coluna só.
+ *
+ * A primeira versão tinha dois painéis com rolagem, campo de um lado e
+ * operação do outro. Nenhum dos produtos que fazem isso trabalha assim:
+ * no Notion e no ClickUp o campo é a própria coluna e o menu só escolhe a
+ * operação; o Twenty, que é kanban como aqui, resolve com **um menu e
+ * submenu por operação**.
+ *
+ * Aqui a lista é uma só, na vertical, com cabeçalho de grupo:
+ *
+ *   Contagens        escolha direta, porque contar não tem operação
+ *   Números          cada campo abre o submenu com soma, média, mínimo…
+ *   Nenhum           desliga o rodapé
+ *
+ * O ícone do campo diz se ele é número ou dinheiro, e a linha escolhida fica
+ * destacada. O selo "R$" que ficava solto na lista saiu: virou o ícone.
+ */
+const SEM_CALCULO = 'nenhum'
 
-function escolherCampo(campo: CampoCalculavel) {
-  emit('calculo', { campo: campo.chave, operacao: props.calculo.operacao })
+function iconeDoCampo(campo: CampoCalculavel) {
+  return campo.tipo === 'moeda' ? 'i-lucide-circle-dollar-sign' : 'i-lucide-hash'
 }
 
-function escolherOperacao(operacao: Operacao) {
-  emit('calculo', { campo: props.calculo.campo, operacao })
-}
+const itensDoCalculo = computed(() => {
+  const t = props.t
+  const derivados = props.camposDoTotalizador.filter(c => c.origem === 'derivado')
+  const numericos = props.camposDoTotalizador.filter(c => c.origem !== 'derivado')
+
+  const contagens = [
+    { label: t.contagens, type: 'label' as const },
+    ...derivados.map(c => ({
+      label: c.rotulo,
+      type: 'checkbox' as const,
+      checked: props.calculo.campo === c.chave,
+      onSelect: () => emit('calculo', { campo: c.chave, operacao: props.calculo.operacao }),
+    })),
+  ]
+
+  const numeros = [
+    { label: t.numeros, type: 'label' as const },
+    ...numericos.map(c => ({
+      label: c.rotulo,
+      icon: iconeDoCampo(c),
+      class: props.calculo.campo === c.chave ? 'bg-elevated font-medium' : undefined,
+      children: [
+        { label: t.comoCalcular, type: 'label' as const },
+        ...operacoesNumericas.map(op => ({
+          label: t.operacoes[op],
+          type: 'checkbox' as const,
+          checked: props.calculo.campo === c.chave && props.calculo.operacao === op,
+          onSelect: () => emit('calculo', { campo: c.chave, operacao: op }),
+        })),
+      ],
+    })),
+  ]
+
+  const desligar = [{
+    label: t.calculos.nenhum,
+    icon: 'i-lucide-circle-slash',
+    onSelect: () => emit('calculo', { campo: SEM_CALCULO, operacao: props.calculo.operacao }),
+  }]
+
+  return [contagens, numeros, desligar]
+})
 
 /* ------------------------------ a ordenação ------------------------------ */
 
@@ -376,7 +428,7 @@ function aoComecarArrasteDaRaia(evento: DragEvent) {
 
     <!-- Totalizador. Fica sempre visível, mesmo com a raia rolada. -->
     <footer class="flex items-center gap-2 rounded-b-xl border-t border-default bg-elevated px-3 py-2">
-      <UPopover :content="{ align: 'start', side: 'top' }">
+      <UDropdownMenu :items="itensDoCalculo" :content="{ align: 'start', side: 'top' }">
         <button
           type="button"
           class="flex min-w-0 items-center gap-1 text-xs font-medium uppercase tracking-wide text-toned transition-colors hover:text-highlighted"
@@ -386,66 +438,7 @@ function aoComecarArrasteDaRaia(evento: DragEvent) {
           <span class="truncate">{{ rotuloDoCalculo }}</span>
           <UIcon name="i-lucide-chevron-down" class="size-3 shrink-0" />
         </button>
-
-        <template #content>
-          <div class="flex w-[28rem] divide-x divide-default">
-            <!-- Campo -->
-            <div class="max-h-80 w-1/2 overflow-y-auto p-1.5">
-              <p class="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted">
-                {{ t.campoDoCalculo }}
-              </p>
-              <template v-for="grupo in gruposDeCampos" :key="grupo.titulo">
-                <p class="px-2 pb-0.5 pt-2 text-xs text-muted">{{ grupo.titulo }}</p>
-                <UButton
-                  v-for="campo in grupo.itens"
-                  :key="campo.chave"
-                  :label="campo.rotulo"
-                  :icon="calculo.campo === campo.chave ? 'i-lucide-check' : 'i-lucide-minus'"
-                  block
-                  size="sm"
-                  color="neutral"
-                  :variant="calculo.campo === campo.chave ? 'soft' : 'ghost'"
-                  class="justify-start"
-                  @click="escolherCampo(campo)"
-                >
-                  <span class="truncate">{{ campo.rotulo }}</span>
-                  <UBadge
-                    v-if="campo.tipo === 'moeda'"
-                    label="R$"
-                    color="neutral"
-                    variant="subtle"
-                    size="sm"
-                    class="ml-auto"
-                  />
-                </UButton>
-              </template>
-            </div>
-
-            <!-- Operação -->
-            <div class="w-1/2 p-1.5">
-              <p class="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted">
-                {{ t.operacaoDoCalculo }}
-              </p>
-              <UButton
-                v-for="op in operacoesNumericas"
-                :key="op"
-                :label="t.operacoes[op]"
-                :icon="calculo.operacao === op ? 'i-lucide-check' : 'i-lucide-minus'"
-                block
-                size="sm"
-                color="neutral"
-                :variant="calculo.operacao === op ? 'soft' : 'ghost'"
-                class="justify-start"
-                :disabled="!temOperacao"
-                @click="escolherOperacao(op)"
-              />
-              <p v-if="!temOperacao" class="px-2 pt-2 text-xs text-muted">
-                {{ t.contagens }}
-              </p>
-            </div>
-          </div>
-        </template>
-      </UPopover>
+      </UDropdownMenu>
 
       <UTooltip
         v-if="resultado.cobertura && resultado.cobertura.com < resultado.cobertura.total"
@@ -456,7 +449,7 @@ function aoComecarArrasteDaRaia(evento: DragEvent) {
           :class="resultado.alerta ? 'text-error' : 'text-highlighted'"
           role="status"
         >
-          <span v-if="!resultado.valor" class="text-xs font-normal text-muted">
+          <span v-if="!resultado.valor" class="whitespace-nowrap text-xs font-normal text-muted">
             {{ t.semValorNaRaia }}
           </span>
           <template v-else>{{ resultado.valor }}</template>
