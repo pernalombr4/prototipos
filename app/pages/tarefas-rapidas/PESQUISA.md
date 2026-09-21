@@ -241,3 +241,37 @@ escolhe os campos do cartão**, porque as duas perguntas são a mesma: o que cab
 
 E os nomes seguem o Notion: **Pequeno, Médio, Grande**. "Compacto/Padrão/Completo" dava a
 entender que "Completo" mostrava todos os campos, o que confundia tamanho com visibilidade.
+
+---
+
+## Consulta extra — time tracking do ClickUp (21/09/2026)
+
+Pedido de cópia direta. O que o ClickUp faz, pela documentação e pelos guias:
+
+| Peça | Como é |
+|---|---|
+| **Cronômetro** | Botão de play junto ao nome da tarefa, que vira parar enquanto conta. Conta "down to the second" |
+| **Três formas de apontar** | cronômetro; **duração digitada** ("20 minutes", "1h 30m"); **intervalo** ("9:45am to 10:15am"), com o produto calculando a duração |
+| **Entrada manual** | Para o tempo que a pessoa esqueceu de contar |
+| **Nota** | Cada apontamento leva uma descrição, "para dar contexto ao dado" |
+| **Etiqueta do apontamento** | Labels próprias da entrada, diferentes das etiquetas da tarefa |
+| **Faturável** | Marca por apontamento, com padrão configurável no workspace |
+| **Total** | Soma do tempo da tarefa, **incluindo as subtarefas** (rollup) |
+| **Estimativa** | Campo separado do tempo registrado. Quando existe, aparece uma **barra de progresso** do registrado contra o estimado |
+| **Edição** | Clicar no apontamento, ícone de lápis, editar |
+| **Onde aparece** | Coluna "Time tracked" na Lista, painel da tarefa e barra de ações rápidas |
+| **Relatórios** | Dashboard com Time Tracked, Billable vs Non-Billable e Estimated vs Tracked, filtrando por pessoa, data e projeto |
+
+**URLs.** `help.clickup.com/hc/en-us/articles/6304291811479-Intro-to-time-tracking`,
+`.../6304106812823-Track-time-on-tasks`,
+`.../15484645073303-Rollup-time-tracking-data-in-Lists-and-tasks`,
+`.../7257011414807-See-time-estimates-in-tasks-views-and-Dashboard-cards`
+
+**O que serve, e foi copiado:** todas as peças acima que cabem numa tarefa rápida.
+
+**O que não foi copiado, e por quê:** a identidade (cor, ícone e texto do ClickUp), porque
+protótipo daqui tem que ser implementável no tema do ENSPACE, e porque copiar marca de outro
+produto é proibido pela regra 8 da spec. O comportamento é o mesmo; o vestido é nosso.
+
+**O que ficou de fora por não existir aqui:** o rollup de subtarefa, porque tarefa rápida do
+ENSPACE não tem subtarefa, e os relatórios, que são outra tela.

@@ -13,11 +13,12 @@ import CascaDoEnspace from './_CascaDoEnspace.vue'
 import ModalNovaTarefa from './_ModalNovaTarefa.vue'
 import PainelDaTarefa from './_PainelDaTarefa.vue'
 import RaiaDoQuadro from './_RaiaDoQuadro.vue'
-import { itensRelacionados, tarefas as tarefasMock, usuarioAtual } from './mocks'
+import { itensRelacionados, registrosDeTempo, tarefas as tarefasMock, usuarioAtual } from './mocks'
 import type { OrdemDaRaia } from './_RaiaDoQuadro.vue'
 import {
   type Calculo, type ChaveAgrupamento, type ChaveOrdenacao,
-  calculoPadrao, camposCalculaveis, compararTarefas, estaAtrasada,
+  calculoPadrao, camposCalculaveis, compararTarefas, estaAtrasada, formatarCronometro,
+  formatarDuracao,
   raiaDaTarefa, raiasDoAgrupamento,
 } from './quadro'
 import { textos } from './textos'
@@ -72,6 +73,81 @@ const raiasRecolhidas = ref<string[]>([])
 const limites = ref<Record<string, number | null>>({})
 const visualizacao = ref('todas')
 
+/* ------------------------------------------------------------------ *
+ * CRONÔMETRO                                                          *
+ *                                                                     *
+ * Como no ClickUp: **um cronômetro por vez** no workspace inteiro.     *
+ * Começar noutra tarefa para o anterior e grava o apontamento, em vez  *
+ * de deixar dois contando e a pessoa descobrir depois.                 *
+ * ------------------------------------------------------------------ */
+const cronometro = ref<{ tarefa: number, inicio: number } | null>(null)
+const agora = ref(Date.now())
+let relogio: ReturnType<typeof setInterval> | null = null
+
+onMounted(() => { relogio = setInterval(() => { agora.value = Date.now() }, 1000) })
+onBeforeUnmount(() => { if (relogio) clearInterval(relogio) })
+
+const segundosCorrendo = computed(() =>
+  cronometro.value ? Math.floor((agora.value - cronometro.value.inicio) / 1000) : 0)
+
+const tarefaDoCronometro = computed(() =>
+  cronometro.value ? lista.value.find(x => x.id === cronometro.value!.tarefa) ?? null : null)
+
+function proximoIdDeRegistro() {
+  return Math.max(0, ...registrosDeTempo.map(r => r.id)) + 1
+}
+
+function iniciarCronometro(tarefa: Task) {
+  if (somenteLeitura.value) return
+  if (cronometro.value?.tarefa === tarefa.id) { pararCronometro(); return }
+  if (cronometro.value) pararCronometro()
+  cronometro.value = { tarefa: tarefa.id, inicio: Date.now() }
+}
+
+function pararCronometro() {
+  if (!cronometro.value) return
+  const segundos = Math.max(60, segundosCorrendo.value)
+  registrosDeTempo.push({
+    id: proximoIdDeRegistro(),
+    tarefa: cronometro.value.tarefa,
+    usuario: usuarioAtual.id,
+    segundos,
+    inicio: new Date(cronometro.value.inicio),
+    faturavel: true,
+  })
+  cronometro.value = null
+  toast.add({
+    title: t.value.tempo.cronometroParado(formatarDuracao(segundos)),
+    icon: 'i-lucide-timer',
+    color: 'success',
+  })
+}
+
+function registrarTempo(dados: { segundos: number, nota: string, etiqueta: string, faturavel: boolean }) {
+  if (!tarefaAberta.value) return
+  registrosDeTempo.push({
+    id: proximoIdDeRegistro(),
+    tarefa: tarefaAberta.value.id,
+    usuario: usuarioAtual.id,
+    segundos: dados.segundos,
+    inicio: new Date(),
+    nota: dados.nota || undefined,
+    etiqueta: dados.etiqueta || undefined,
+    faturavel: dados.faturavel,
+  })
+  toast.add({
+    title: t.value.tempo.tempoAdicionado(formatarDuracao(dados.segundos)),
+    icon: 'i-lucide-timer',
+    color: 'success',
+  })
+}
+
+function apagarRegistro(id: number) {
+  const i = registrosDeTempo.findIndex(r => r.id === id)
+  if (i >= 0) registrosDeTempo.splice(i, 1)
+  toast.add({ title: t.value.tempo.registroApagado, icon: 'i-lucide-trash-2', color: 'neutral' })
+}
+
 const campos = ref<Record<string, boolean>>({
   referencia: true,
   tipo: true,
@@ -83,6 +159,7 @@ const campos = ref<Record<string, boolean>>({
   responsavel: true,
   item: true,
   colaboradores: true,
+  tempo: true,
   // Quem criou não costuma decidir nada no quadro, então nasce desligado.
   criador: false,
 })
@@ -493,6 +570,8 @@ const cartaoDeHoje: EnKanbanCardConfig = {
           :recolhida="raiasRecolhidas.includes(raia.definicao.valor)"
           :somente-leitura="somenteLeitura"
           :tarefa-ativa="tarefaAberta?.id ?? null"
+          :tarefa-do-cronometro="cronometro?.tarefa ?? null"
+          :segundos-correndo="segundosCorrendo"
           :carregando="carregando"
           :atraso="i * 60"
           @recolher="alternarRecolhida(raia.definicao.valor)"
@@ -506,6 +585,7 @@ const cartaoDeHoje: EnKanbanCardConfig = {
           @abrir="abrir"
           @mover="mover"
           @arquivar="arquivar"
+          @cronometrar="iniciarCronometro"
         />
       </div>
       </main>
@@ -523,6 +603,8 @@ const cartaoDeHoje: EnKanbanCardConfig = {
           :t="t"
           :somente-leitura="somenteLeitura"
           :expandido="painelExpandido"
+          :cronometro-ativo="cronometro?.tarefa === tarefaAberta.id"
+          :segundos-correndo="segundosCorrendo"
           @fechar="tarefaAberta = null"
           @expandir="(v) => painelExpandido = v"
           @salvar="toast.add({ title: t.tarefaSalva, icon: 'i-lucide-check', color: 'success' })"
@@ -530,6 +612,10 @@ const cartaoDeHoje: EnKanbanCardConfig = {
           @reabrir="reabrir"
           @copiar-referencia="copiarReferencia"
           @atualizar="atualizarCampo"
+          @iniciar-cronometro="iniciarCronometro(tarefaAberta)"
+          @parar-cronometro="pararCronometro"
+          @registrar-tempo="registrarTempo"
+          @apagar-registro="apagarRegistro"
         />
       </template>
     </USlideover>
@@ -542,6 +628,44 @@ const cartaoDeHoje: EnKanbanCardConfig = {
       @criar="criar"
       @fechar="criando = false"
     />
+
+    <!--
+      O cronômetro rodando precisa de um lugar fixo, senão a pessoa esquece que
+      está contando. No ClickUp é um widget no canto inferior direito, e é o
+      que está aqui. No produto ele provavelmente moraria na barra do topo, e
+      essa é uma decisão da Mikaela, não minha: está no DECISOES.md.
+    -->
+    <Transition
+      enter-active-class="transition duration-200"
+      enter-from-class="translate-y-2 opacity-0"
+      leave-active-class="transition duration-150"
+      leave-to-class="translate-y-2 opacity-0"
+    >
+      <div
+        v-if="cronometro && tarefaDoCronometro"
+        class="fixed bottom-28 right-6 z-40 flex max-w-sm items-center gap-3 rounded-xl border border-error/40 bg-default px-3 py-2 shadow-lg"
+      >
+        <span class="relative flex size-2.5 shrink-0">
+          <span class="absolute inline-flex size-full animate-ping rounded-full bg-error opacity-60" />
+          <span class="relative inline-flex size-2.5 rounded-full bg-error" />
+        </span>
+        <div class="min-w-0">
+          <p class="text-xs text-muted">{{ t.tempo.rodando }}</p>
+          <p class="truncate text-sm font-medium text-highlighted">{{ tarefaDoCronometro.name }}</p>
+        </div>
+        <span class="shrink-0 text-lg font-semibold tabular-nums text-error">
+          {{ formatarCronometro(segundosCorrendo) }}
+        </span>
+        <UButton
+          icon="i-lucide-square"
+          color="error"
+          variant="soft"
+          size="sm"
+          :aria-label="t.tempo.parar"
+          @click="pararCronometro"
+        />
+      </div>
+    </Transition>
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">

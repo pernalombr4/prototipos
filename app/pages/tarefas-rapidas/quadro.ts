@@ -8,7 +8,7 @@
 import type { Task } from '@be-enlighten/enspace-sdk-schemas'
 import type { EnKanbanColorScheme } from '@be-enlighten/enspace-sdk-ui/base'
 import type { CampoDeFormulario } from './mocks'
-import { etiquetas, hoje, pessoas } from './mocks'
+import { estimativaDeTempo, etiquetas, hoje, pessoas, registrosDeTempo } from './mocks'
 import type { Textos } from './textos'
 
 /* ----------------------------- agrupamento ----------------------------- */
@@ -246,7 +246,7 @@ export interface CampoCalculavel {
   /** `points`, `form:<refId>`, ou uma das chaves derivadas. */
   chave: string
   rotulo: string
-  tipo: 'numero' | 'moeda' | 'contagem' | 'data'
+  tipo: 'numero' | 'moeda' | 'contagem' | 'data' | 'duracao'
   origem: 'tarefa' | 'formulario' | 'derivado'
   cFormat?: CampoDeFormulario['cFormat']
 }
@@ -275,6 +275,8 @@ function camposDerivados(t: Textos): CampoCalculavel[] {
 export function camposCalculaveis(tarefas: Task[], t: Textos): CampoCalculavel[] {
   const lista: CampoCalculavel[] = [
     { chave: 'points', rotulo: t.campos.pontos, tipo: 'numero', origem: 'tarefa' },
+    { chave: 'tempo', rotulo: t.campos.tempoRegistrado, tipo: 'duracao', origem: 'tarefa' },
+    { chave: 'estimativa', rotulo: t.campos.estimativa, tipo: 'duracao', origem: 'tarefa' },
   ]
 
   const vistos = new Set<string>()
@@ -300,6 +302,15 @@ export function camposCalculaveis(tarefas: Task[], t: Textos): CampoCalculavel[]
 /** O valor numérico de uma tarefa para o campo escolhido, ou `null` se não tem. */
 export function valorDoCampo(tarefa: Task, chave: string): number | null {
   if (chave === 'points') return tarefa.points ?? 0
+  // Tempo vem de fora da tarefa: dos apontamentos e do campo novo de estimativa.
+  if (chave === 'tempo') {
+    const total = tempoRegistrado(tarefa.id)
+    return total || null
+  }
+  if (chave === 'estimativa') {
+    const total = estimativaDaTarefa(tarefa.id)
+    return total || null
+  }
   if (!chave.startsWith('form:')) return null
   const meta = (tarefa.meta ?? {}) as Record<string, unknown>
   const resultado = (meta.form_result ?? null) as Record<string, unknown> | null
@@ -310,6 +321,7 @@ export function valorDoCampo(tarefa: Task, chave: string): number | null {
 }
 
 function formatarValor(numero: number, campo: CampoCalculavel): string {
+  if (campo.tipo === 'duracao') return formatarDuracao(numero)
   const locale = campo.cFormat?.locale ?? 'pt-BR'
   if (campo.tipo === 'moeda') {
     return new Intl.NumberFormat(locale, {
@@ -380,6 +392,65 @@ export function calcular(
     default: numero = valores.reduce((a, b) => a + b, 0)
   }
   return { valor: formatarValor(numero, campo), alerta: false, cobertura }
+}
+
+/* --------------------------------- tempo --------------------------------- */
+
+/**
+ * O tempo, no formato do ClickUp: `2h 15m`, `45m`, `3h`. Sem segundos, porque
+ * segundo em cartão não ajuda ninguém, e sem zero à esquerda.
+ */
+export function formatarDuracao(segundos: number): string {
+  if (!segundos) return '0m'
+  const horas = Math.floor(segundos / 3600)
+  const minutos = Math.round((segundos % 3600) / 60)
+  if (horas && minutos) return `${horas}h ${minutos}m`
+  if (horas) return `${horas}h`
+  return `${minutos}m`
+}
+
+/** Com segundos, para o cronômetro em andamento. */
+export function formatarCronometro(segundos: number): string {
+  const h = Math.floor(segundos / 3600)
+  const m = Math.floor((segundos % 3600) / 60)
+  const s = Math.floor(segundos % 60)
+  const dois = (n: number) => String(n).padStart(2, '0')
+  return h ? `${h}:${dois(m)}:${dois(s)}` : `${m}:${dois(s)}`
+}
+
+/**
+ * Lê o que a pessoa digitou. O ClickUp aceita as três formas, e as três
+ * entram aqui: `1h 30m`, `90m`, `1:30`, `2h`, e número solto vira minuto.
+ */
+export function interpretarDuracao(texto: string): number {
+  const limpo = texto.trim().toLowerCase()
+  if (!limpo) return 0
+
+  const relogio = limpo.match(/^(\d{1,3}):(\d{1,2})$/)
+  if (relogio) return Number(relogio[1]) * 3600 + Number(relogio[2]) * 60
+
+  let total = 0
+  let achou = false
+  for (const parte of limpo.matchAll(/(\d+(?:[.,]\d+)?)\s*(h|m)/g)) {
+    const valor = Number(String(parte[1]).replace(',', '.'))
+    total += parte[2] === 'h' ? valor * 3600 : valor * 60
+    achou = true
+  }
+  if (achou) return Math.round(total)
+
+  const numero = Number(limpo.replace(',', '.'))
+  return Number.isFinite(numero) ? Math.round(numero * 60) : 0
+}
+
+/** Soma dos apontamentos de uma tarefa. */
+export function tempoRegistrado(idDaTarefa: number, extras: typeof registrosDeTempo = []): number {
+  return [...registrosDeTempo, ...extras]
+    .filter(r => r.tarefa === idDaTarefa)
+    .reduce((soma, r) => soma + r.segundos, 0)
+}
+
+export function estimativaDaTarefa(idDaTarefa: number): number {
+  return estimativaDeTempo[idDaTarefa] ?? 0
 }
 
 /* ------------------------------- auxiliares ------------------------------- */

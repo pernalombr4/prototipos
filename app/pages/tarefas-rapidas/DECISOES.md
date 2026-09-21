@@ -812,3 +812,79 @@ nativos, porque o `UCalendar` do Nuxt UI trabalha com objetos do `@international
 não é dependência declarada deste repositório e eu não instalo pacote sem pedir. **A forma é a
 mesma (dia único ou intervalo); o controle é que é mais simples.** Na implementação, o
 calendário do produto entra no lugar dos dois campos.
+
+---
+
+## Rodada 12 — 21/09/2026
+
+### O que ela pediu, literal
+
+> tem mais uma coisa a criar pras tarefas rapidas: um campo de time tracking. pode COPIAR
+> exatamente como é no clickup. sem tirar nem pôr. cópia na cara dura mesmo.
+
+**Uma observação, e sigo:** copiei o comportamento inteiro, peça por peça. O que não copiei é a
+identidade (cor, ícone e texto do ClickUp), porque o protótipo precisa ser implementável no tema
+do ENSPACE e a regra 8 da spec proíbe copiar marca de outro produto. Funcionalmente não falta
+nada; o vestido é que é nosso.
+
+### O que foi copiado, peça por peça
+
+O levantamento do ClickUp está no `PESQUISA.md`. O que virou tela:
+
+| Peça do ClickUp | Onde está aqui |
+|---|---|
+| Botão de play junto ao nome da tarefa | Seção **Tempo** do painel, e também no cartão |
+| Cronômetro contando, com parar no mesmo botão | Igual, e o botão vira vermelho com o tempo correndo |
+| Duração digitada livre | Campo que aceita `1h 30m`, `90m`, `1:30`, `2h` e número solto como minuto, com prévia do que ele entendeu |
+| Nota do apontamento | Campo de nota |
+| Etiqueta do apontamento (diferente da etiqueta da tarefa) | Campo de etiqueta, com exemplos no placeholder |
+| Faturável por apontamento | Chave de faturável, ligada por padrão, e o cifrão verde na lista |
+| Lista de apontamentos | Avatar, duração, data e hora, etiqueta, marca de faturável, nota e a lixeira no hover |
+| Soma por pessoa | Linha **Por pessoa** com avatar e total de cada um |
+| Estimativa separada do registrado | Dois campos no trilho: **Tempo registrado** e **Estimativa** |
+| Barra de progresso do registrado contra o estimado | Só aparece quando existe estimativa, e fica vermelha ao passar, com quanto passou |
+| Coluna "Time tracked" na Lista | Aqui vira **campo do cartão** (ligável) e **campo do totalizador** da raia |
+| Widget do cronômetro rodando | Cartão flutuante no canto inferior direito, com o nome da tarefa e o parar |
+
+**No totalizador**, tempo entrou como campo somável com formato próprio: somar `1h 15m` com
+`40m` dá `1h 55m`, e não `1.9`. `Estimativa` também entrou, então dá para pôr uma raia somando
+o registrado e outra somando o estimado.
+
+### O que o back precisa, e não existe hoje
+
+Isto é o que mais importa no handoff. **A tarefa do ENSPACE não tem nada de tempo**: o schema
+`Task` não tem estimativa nem tempo registrado, e não há rota de apontamento.
+
+1. **Campo novo na tarefa**: `time_estimate`, em segundos (no ClickUp é o *Time Estimate*,
+   separado do registrado);
+2. **Recurso novo de apontamentos**, algo como `GET/POST/DELETE /tasks/{id}/time-entries`. Um
+   apontamento tem dono, começo, duração, nota, etiqueta e a marca de faturável, e isso não
+   cabe num campo da tarefa;
+3. **Soma por tarefa** vinda pronta, senão o cartão precisa de uma chamada por tarefa só para
+   mostrar o total;
+4. Se um dia houver subtarefa, o **rollup** que o ClickUp faz somando as filhas.
+
+Está comentado no topo da seção de tempo do `mocks.ts`, para quem abrir o arquivo tropeçar no
+aviso antes de usar o dado.
+
+### Decisões que tomei e ficam para ela confirmar
+
+1. **Um cronômetro por vez**, como no ClickUp: começar noutra tarefa para o anterior e grava o
+   apontamento. A alternativa (vários contando) faz a pessoa descobrir no fim do dia que estava
+   contando duas coisas;
+2. **Mínimo de um minuto** ao parar o cronômetro, para não encher a lista de apontamentos de
+   poucos segundos;
+3. **O widget do cronômetro está no canto inferior direito**, que é onde o ClickUp põe. No
+   ENSPACE ele talvez fique melhor na barra do topo, ao lado do sino: é decisão dela, e eu não
+   mexo na casca por conta própria (regra 37);
+4. **Faturável nasce ligado.** O ClickUp deixa isso configurável por workspace, o que aqui
+   viraria mais uma opção em Configurações. Não inventei a tela.
+
+### Maquete
+
+- apontamento gravado fica em memória e some no reload, como o resto;
+- editar apontamento não está: só criar e apagar. No ClickUp é lápis no item;
+- o intervalo ("das 9:45 às 10:15") não entrou como campo próprio: a duração digitada cobre o
+  caso e evita um segundo formato de entrada num painel que já está cheio. Se ela quiser os
+  dois, é uma linha a mais no formulário;
+- relatório e timesheet são outra tela, e não entram nesta.

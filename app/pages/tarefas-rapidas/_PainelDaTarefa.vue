@@ -22,10 +22,11 @@
  */
 import type { Task } from '@be-enlighten/enspace-sdk-schemas'
 import type { CampoDeFormulario } from './mocks'
-import { etiquetas as todasEtiquetas, hoje, itensRelacionados, pessoas } from './mocks'
+import { etiquetas as todasEtiquetas, hoje, itensRelacionados, pessoas, registrosDeTempo } from './mocks'
 import {
-  corDaPrioridade, formatarDataHora, iconeDaPrioridade, iconeDoTipo, prazoLegivel,
-  referenciaCurta,
+  corDaPrioridade, estimativaDaTarefa, formatarCronometro, formatarDataHora, formatarDuracao,
+  iconeDaPrioridade, iconeDoTipo, interpretarDuracao, prazoLegivel, referenciaCurta,
+  tempoRegistrado,
 } from './quadro'
 import type { Textos } from './textos'
 
@@ -35,6 +36,10 @@ const props = defineProps<{
   somenteLeitura?: boolean
   /** Trilho expandido. O estado mora no pai porque muda a largura do painel. */
   expandido?: boolean
+  /** O cronômetro está rodando NESTA tarefa. */
+  cronometroAtivo?: boolean
+  /** Segundos corridos do cronômetro, contados pelo pai. */
+  segundosCorrendo?: number
 }>()
 
 const emit = defineEmits<{
@@ -45,6 +50,10 @@ const emit = defineEmits<{
   reabrir: []
   copiarReferencia: []
   atualizar: [campo: keyof Task, valor: unknown]
+  iniciarCronometro: []
+  pararCronometro: []
+  registrarTempo: [dados: { segundos: number, nota: string, etiqueta: string, faturavel: boolean }]
+  apagarRegistro: [id: number]
 }>()
 
 const aba = ref<'tarefa' | 'comentarios' | 'logs'>('tarefa')
@@ -208,6 +217,22 @@ const campos = computed<CampoDoPainel[]>(() => {
       vazio: props.tarefa.points === 0,
     },
     {
+      chave: 'tempoRegistrado',
+      icone: 'i-lucide-timer',
+      rotulo: t.campos.tempoRegistrado,
+      valor: totalDeTempo.value ? formatarDuracao(totalDeTempo.value) : '',
+      detalhe: estimativa.value ? t.tempo.deEstimativa(formatarDuracao(totalDeTempo.value), formatarDuracao(estimativa.value)) : undefined,
+      alerta: passouDaEstimativa.value,
+      vazio: !totalDeTempo.value,
+    },
+    {
+      chave: 'estimativa',
+      icone: 'i-lucide-hourglass',
+      rotulo: t.campos.estimativa,
+      valor: estimativa.value ? formatarDuracao(estimativa.value) : '',
+      vazio: !estimativa.value,
+    },
+    {
       chave: 'tipo',
       icone: iconeDoTipo[props.tarefa.type],
       rotulo: t.campos.tipo,
@@ -329,6 +354,68 @@ function tempoRelativo(data: Date): string {
 }
 
 const comentario = ref('')
+
+/* ---------------------------------------------------------------- *
+ * TEMPO. Cópia do que o ClickUp faz na tarefa: cronômetro, registro  *
+ * manual com duração livre, nota, etiqueta e a marca de faturável,   *
+ * lista dos apontamentos por pessoa e a barra de progresso contra a  *
+ * estimativa, que só aparece quando existe estimativa.               *
+ * ---------------------------------------------------------------- */
+const totalDeTempo = computed(() => tempoRegistrado(props.tarefa.id))
+const estimativa = computed(() => estimativaDaTarefa(props.tarefa.id))
+
+const registrosDaTarefa = computed(() =>
+  registrosDeTempo
+    .filter(r => r.tarefa === props.tarefa.id)
+    .slice()
+    .sort((a, b) => new Date(b.inicio).getTime() - new Date(a.inicio).getTime()))
+
+/** O ClickUp agrupa o tempo por pessoa no resumo da tarefa. */
+const tempoPorPessoa = computed(() => {
+  const mapa = new Map<number, number>()
+  for (const r of registrosDaTarefa.value) {
+    mapa.set(r.usuario, (mapa.get(r.usuario) ?? 0) + r.segundos)
+  }
+  return [...mapa.entries()]
+    .map(([id, segundos]) => ({ pessoa: pessoas[id], segundos }))
+    .sort((a, b) => b.segundos - a.segundos)
+})
+
+const progressoDaEstimativa = computed(() => {
+  if (!estimativa.value) return 0
+  return Math.min(100, Math.round((totalDeTempo.value / estimativa.value) * 100))
+})
+
+const passouDaEstimativa = computed(() =>
+  !!estimativa.value && totalDeTempo.value > estimativa.value)
+
+/* --------------------------- registro manual --------------------------- */
+const registrando = ref(false)
+const duracaoDigitada = ref('')
+const notaDoRegistro = ref('')
+const etiquetaDoRegistro = ref('')
+const faturavel = ref(true)
+
+const segundosDigitados = computed(() => interpretarDuracao(duracaoDigitada.value))
+
+function abrirRegistro() {
+  registrando.value = true
+  duracaoDigitada.value = ''
+  notaDoRegistro.value = ''
+  etiquetaDoRegistro.value = ''
+  faturavel.value = true
+}
+
+function confirmarRegistro() {
+  if (!segundosDigitados.value) return
+  emit('registrarTempo', {
+    segundos: segundosDigitados.value,
+    nota: notaDoRegistro.value.trim(),
+    etiqueta: etiquetaDoRegistro.value.trim(),
+    faturavel: faturavel.value,
+  })
+  registrando.value = false
+}
 
 const abas = computed(() => [
   { chave: 'tarefa' as const, rotulo: props.t.abaTarefa, icone: 'i-lucide-layers' },
@@ -728,6 +815,186 @@ const abas = computed(() => [
                   @click.stop="descricaoInteira = !descricaoInteira"
                 />
               </div>
+            </div>
+          </section>
+
+          <!-- ───────────────── Tempo (cópia do ClickUp) ───────────────── -->
+          <section class="px-5 pb-4">
+            <h3 class="mb-2 flex items-center gap-1.5 text-sm font-medium text-highlighted">
+              <UIcon name="i-lucide-timer" class="size-4 text-muted" />
+              {{ t.tempo.secao }}
+            </h3>
+
+            <div class="rounded-lg border border-default">
+              <!-- Cronômetro e total -->
+              <div class="flex items-center gap-3 p-3">
+                <UButton
+                  :icon="cronometroAtivo ? 'i-lucide-square' : 'i-lucide-play'"
+                  :label="cronometroAtivo ? formatarCronometro(segundosCorrendo ?? 0) : t.tempo.iniciar"
+                  :color="cronometroAtivo ? 'error' : 'success'"
+                  :variant="cronometroAtivo ? 'solid' : 'soft'"
+                  size="sm"
+                  :disabled="somenteLeitura"
+                  :class="cronometroAtivo ? 'tabular-nums' : ''"
+                  @click="cronometroAtivo ? emit('pararCronometro') : emit('iniciarCronometro')"
+                />
+
+                <div class="min-w-0 flex-1 text-right">
+                  <p class="text-lg font-semibold tabular-nums text-highlighted">
+                    {{ formatarDuracao(totalDeTempo) }}
+                  </p>
+                  <p v-if="estimativa" class="text-xs" :class="passouDaEstimativa ? 'text-error' : 'text-muted'">
+                    {{ t.tempo.deEstimativa(formatarDuracao(totalDeTempo), formatarDuracao(estimativa)) }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Barra de progresso: só existe quando há estimativa, como no ClickUp -->
+              <div v-if="estimativa" class="px-3 pb-3">
+                <UProgress
+                  :model-value="progressoDaEstimativa"
+                  :color="passouDaEstimativa ? 'error' : 'success'"
+                  size="sm"
+                />
+                <p v-if="passouDaEstimativa" class="mt-1 text-xs text-error">
+                  {{ t.tempo.acimaDaEstimativa(formatarDuracao(totalDeTempo - estimativa)) }}
+                </p>
+              </div>
+
+              <!-- Registro manual -->
+              <div class="border-t border-default p-3">
+                <UButton
+                  v-if="!registrando"
+                  :label="t.tempo.registrar"
+                  icon="i-lucide-plus"
+                  color="neutral"
+                  variant="ghost"
+                  size="xs"
+                  :disabled="somenteLeitura"
+                  @click="abrirRegistro"
+                />
+
+                <div v-else class="space-y-3" style="animation: entrada .2s ease-out both">
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label for="tempo-duracao" class="mb-1 block text-xs text-muted">
+                        {{ t.tempo.duracao }}
+                      </label>
+                      <UInput
+                        id="tempo-duracao"
+                        v-model="duracaoDigitada"
+                        :placeholder="t.tempo.duracaoAjuda"
+                        size="sm"
+                        class="w-full"
+                        autofocus
+                        @keydown.enter="confirmarRegistro"
+                      />
+                      <p v-if="segundosDigitados" class="mt-1 text-xs text-success">
+                        {{ formatarDuracao(segundosDigitados) }}
+                      </p>
+                    </div>
+                    <div>
+                      <label for="tempo-etiqueta" class="mb-1 block text-xs text-muted">
+                        {{ t.tempo.etiqueta }}
+                      </label>
+                      <UInput
+                        id="tempo-etiqueta"
+                        v-model="etiquetaDoRegistro"
+                        :placeholder="t.tempo.etiquetaPlaceholder"
+                        size="sm"
+                        class="w-full"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label for="tempo-nota" class="mb-1 block text-xs text-muted">{{ t.tempo.nota }}</label>
+                    <UInput
+                      id="tempo-nota"
+                      v-model="notaDoRegistro"
+                      :placeholder="t.tempo.notaPlaceholder"
+                      size="sm"
+                      class="w-full"
+                    />
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <USwitch v-model="faturavel" :label="faturavel ? t.tempo.faturavel : t.tempo.naoFaturavel" size="sm" />
+                    <div class="ml-auto flex gap-2">
+                      <UButton :label="t.cancelar" color="neutral" variant="ghost" size="xs" @click="registrando = false" />
+                      <UButton
+                        :label="t.tempo.adicionar"
+                        color="primary"
+                        size="xs"
+                        :disabled="!segundosDigitados"
+                        @click="confirmarRegistro"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Resumo por pessoa -->
+              <div v-if="tempoPorPessoa.length > 1" class="flex flex-wrap items-center gap-3 border-t border-default px-3 py-2">
+                <span class="text-xs text-muted">{{ t.tempo.porPessoa }}</span>
+                <span v-for="linha in tempoPorPessoa" :key="linha.pessoa!.id" class="flex items-center gap-1.5">
+                  <UAvatar size="2xs" :text="linha.pessoa!.iniciais" :alt="linha.pessoa!.fullname" />
+                  <span class="text-xs font-medium tabular-nums text-toned">{{ formatarDuracao(linha.segundos) }}</span>
+                </span>
+              </div>
+
+              <!-- Apontamentos -->
+              <ul v-if="registrosDaTarefa.length" class="divide-y divide-default border-t border-default">
+                <li
+                  v-for="registro in registrosDaTarefa"
+                  :key="registro.id"
+                  class="group/registro flex items-start gap-2 px-3 py-2"
+                >
+                  <UAvatar
+                    size="2xs"
+                    class="mt-0.5"
+                    :text="pessoas[registro.usuario]?.iniciais"
+                    :alt="pessoas[registro.usuario]?.fullname"
+                  />
+                  <div class="min-w-0 flex-1">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                      <span class="text-sm font-medium tabular-nums text-highlighted">
+                        {{ formatarDuracao(registro.segundos) }}
+                      </span>
+                      <span class="text-xs text-muted">{{ formatarDataHora(registro.inicio) }}</span>
+                      <UBadge
+                        v-if="registro.etiqueta"
+                        :label="registro.etiqueta"
+                        color="neutral"
+                        variant="subtle"
+                        size="sm"
+                      />
+                      <UTooltip :text="registro.faturavel ? t.tempo.faturavel : t.tempo.naoFaturavel">
+                        <UIcon
+                          :name="registro.faturavel ? 'i-lucide-circle-dollar-sign' : 'i-lucide-circle-slash'"
+                          class="size-3.5"
+                          :class="registro.faturavel ? 'text-success' : 'text-muted'"
+                        />
+                      </UTooltip>
+                    </div>
+                    <p v-if="registro.nota" class="mt-0.5 break-words text-xs text-muted">{{ registro.nota }}</p>
+                  </div>
+                  <UButton
+                    icon="i-lucide-trash-2"
+                    color="neutral"
+                    variant="ghost"
+                    size="xs"
+                    :disabled="somenteLeitura"
+                    :aria-label="t.tempo.apagarRegistro"
+                    class="opacity-0 transition-opacity group-hover/registro:opacity-100 focus-visible:opacity-100"
+                    @click="emit('apagarRegistro', registro.id)"
+                  />
+                </li>
+              </ul>
+
+              <p v-else class="border-t border-default px-3 py-3 text-xs text-muted">
+                {{ t.tempo.semRegistros }}
+              </p>
             </div>
           </section>
 

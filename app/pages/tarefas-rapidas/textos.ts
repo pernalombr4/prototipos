@@ -100,6 +100,36 @@ export interface Textos {
     linkExterno: string
     permissoes: string
     workspace: string
+    tempoRegistrado: string
+    estimativa: string
+  }
+
+  /* tempo, copiado do ClickUp */
+  tempo: {
+    secao: string
+    iniciar: string
+    parar: string
+    rodando: string
+    registrar: string
+    duracao: string
+    duracaoAjuda: string
+    quando: string
+    nota: string
+    notaPlaceholder: string
+    etiqueta: string
+    etiquetaPlaceholder: string
+    faturavel: string
+    naoFaturavel: string
+    adicionar: string
+    semRegistros: string
+    deEstimativa: (feito: string, estimado: string) => string
+    acimaDaEstimativa: (excedente: string) => string
+    apagarRegistro: string
+    editarRegistro: string
+    registroApagado: string
+    tempoAdicionado: (duracao: string) => string
+    cronometroParado: (duracao: string) => string
+    porPessoa: string
   }
 
   /* valores */
@@ -348,6 +378,93 @@ export const textos: Record<Idioma, Textos> = {
       linkExterno: 'Link externo',
       permissoes: 'Quem pode executar',
       workspace: 'Workspace',
+      tempoRegistrado: 'Tiempo registrado',
+      estimativa: 'Estimación',
+    },
+
+    tempo: {
+      secao: 'Tiempo',
+      iniciar: 'Iniciar el cronómetro',
+      parar: 'Parar el cronómetro',
+      rodando: 'Cronómetro en marcha',
+      registrar: 'Registrar tiempo',
+      duracao: 'Duración',
+      duracaoAjuda: 'Acepta 1h 30m, 90m o 1:30',
+      quando: 'Cuándo',
+      nota: 'Nota',
+      notaPlaceholder: 'Qué se hizo en este tiempo',
+      etiqueta: 'Etiqueta del registro',
+      etiquetaPlaceholder: 'Análisis, Corrección, Reunión',
+      faturavel: 'Facturable',
+      naoFaturavel: 'No facturable',
+      adicionar: 'Añadir',
+      semRegistros: 'Ningún tiempo registrado todavía.',
+      deEstimativa: (feito, estimado) => `${feito} de ${estimado}`,
+      acimaDaEstimativa: excedente => `${excedente} por encima de la estimación`,
+      apagarRegistro: 'Borrar el registro',
+      editarRegistro: 'Editar el registro',
+      registroApagado: 'Registro borrado.',
+      tempoAdicionado: duracao => `${duracao} registrados.`,
+      cronometroParado: duracao => `Cronómetro parado. ${duracao} registrados.`,
+      porPessoa: 'Por persona',
+      tempoRegistrado: 'Time tracked',
+      estimativa: 'Estimate',
+    },
+
+    tempo: {
+      secao: 'Time',
+      iniciar: 'Start the timer',
+      parar: 'Stop the timer',
+      rodando: 'Timer running',
+      registrar: 'Track time',
+      duracao: 'Duration',
+      duracaoAjuda: 'Accepts 1h 30m, 90m or 1:30',
+      quando: 'When',
+      nota: 'Note',
+      notaPlaceholder: 'What was done in this time',
+      etiqueta: 'Entry label',
+      etiquetaPlaceholder: 'Analysis, Fix, Meeting',
+      faturavel: 'Billable',
+      naoFaturavel: 'Not billable',
+      adicionar: 'Add',
+      semRegistros: 'No time tracked yet.',
+      deEstimativa: (feito, estimado) => `${feito} of ${estimado}`,
+      acimaDaEstimativa: excedente => `${excedente} over the estimate`,
+      apagarRegistro: 'Delete the entry',
+      editarRegistro: 'Edit the entry',
+      registroApagado: 'Entry deleted.',
+      tempoAdicionado: duracao => `${duracao} tracked.`,
+      cronometroParado: duracao => `Timer stopped. ${duracao} tracked.`,
+      porPessoa: 'Per person',
+      tempoRegistrado: 'Tempo registrado',
+      estimativa: 'Estimativa',
+    },
+
+    tempo: {
+      secao: 'Tempo',
+      iniciar: 'Iniciar o cronômetro',
+      parar: 'Parar o cronômetro',
+      rodando: 'Cronômetro rodando',
+      registrar: 'Registrar tempo',
+      duracao: 'Duração',
+      duracaoAjuda: 'Aceita 1h 30m, 90m ou 1:30',
+      quando: 'Quando',
+      nota: 'Nota',
+      notaPlaceholder: 'O que foi feito neste tempo',
+      etiqueta: 'Etiqueta do apontamento',
+      etiquetaPlaceholder: 'Análise, Correção, Reunião',
+      faturavel: 'Faturável',
+      naoFaturavel: 'Não faturável',
+      adicionar: 'Adicionar',
+      semRegistros: 'Nenhum tempo apontado ainda.',
+      deEstimativa: (feito, estimado) => `${feito} de ${estimado}`,
+      acimaDaEstimativa: excedente => `${excedente} acima da estimativa`,
+      apagarRegistro: 'Apagar o apontamento',
+      editarRegistro: 'Editar o apontamento',
+      registroApagado: 'Apontamento apagado.',
+      tempoAdicionado: duracao => `${duracao} apontados.`,
+      cronometroParado: duracao => `Cronômetro parado. ${duracao} apontados.`,
+      porPessoa: 'Por pessoa',
     },
 
     status: { pending: 'Pendente', working: 'Em andamento', blocked: 'Bloqueada', completed: 'Concluída' },

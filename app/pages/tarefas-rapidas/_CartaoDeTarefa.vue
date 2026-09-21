@@ -24,8 +24,9 @@
 import type { Task } from '@be-enlighten/enspace-sdk-schemas'
 import { itensRelacionados, pessoas } from './mocks'
 import {
-  corDaPrioridade, descricaoEmTexto, estaAtrasada, etiquetasDaTarefa, formatarDataHora,
-  iconeDaPrioridade, iconeDoTipo, prazoLegivel, referenciaCurta,
+  corDaPrioridade, descricaoEmTexto, estaAtrasada, etiquetasDaTarefa, formatarCronometro,
+  formatarDataHora, formatarDuracao, iconeDaPrioridade, iconeDoTipo, prazoLegivel,
+  referenciaCurta, tempoRegistrado,
 } from './quadro'
 import type { Textos } from './textos'
 
@@ -37,12 +38,16 @@ const props = defineProps<{
   somenteLeitura?: boolean
   /** Destaca o cartão que está aberto no painel. */
   ativo?: boolean
+  /** O cronômetro está rodando nesta tarefa. */
+  cronometroAtivo?: boolean
+  segundosCorrendo?: number
 }>()
 
 const emit = defineEmits<{
   abrir: []
   mover: [status: Task['status']]
   arquivar: []
+  cronometrar: []
 }>()
 
 const prazo = computed(() => prazoLegivel(props.tarefa, props.t))
@@ -55,6 +60,7 @@ const colaboradores = computed(() =>
   (props.tarefa.collaborators ?? []).map(id => pessoas[id]).filter(Boolean))
 
 const descricao = computed(() => descricaoEmTexto(props.tarefa.description))
+const tempo = computed(() => tempoRegistrado(props.tarefa.id))
 const temFormulario = computed(() => props.tarefa.type === 'form' || props.tarefa.type === 'crud')
 
 /**
@@ -107,6 +113,11 @@ const mostraPessoas = computed(() =>
 
 const itensDoMenu = computed(() => [[
   { label: props.t.abrirTarefa, icon: 'i-lucide-square-arrow-out-up-right', onSelect: () => emit('abrir') },
+  {
+    label: props.cronometroAtivo ? props.t.tempo.parar : props.t.tempo.iniciar,
+    icon: props.cronometroAtivo ? 'i-lucide-square' : 'i-lucide-play',
+    onSelect: () => emit('cronometrar'),
+  },
   { label: props.t.copiarReferencia, icon: 'i-lucide-copy' },
 ], [
   { label: props.t.status.pending, icon: 'i-lucide-circle-dashed', onSelect: () => emit('mover', 'pending') },
@@ -235,6 +246,36 @@ const itensDoMenu = computed(() => [[
 
       <UTooltip v-if="temFormulario && campos.tipo" :text="t.temFormulario">
         <UIcon name="i-lucide-clipboard-pen" class="size-3.5 text-muted" />
+      </UTooltip>
+
+      <!--
+        Tempo, como o ClickUp mostra no cartão: o total apontado, e o play
+        aparecendo no hover para começar a contar sem abrir a tarefa.
+        Rodando, o próprio cartão mostra o cronômetro correndo.
+      -->
+      <UTooltip
+        v-if="campos.tempo && (tempo || cronometroAtivo)"
+        :text="dica(t.campos.tempoRegistrado, formatarDuracao(tempo))"
+      >
+        <span
+          class="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium tabular-nums"
+          :class="cronometroAtivo ? 'bg-error/10 text-error' : 'bg-elevated text-toned'"
+        >
+          <UIcon :name="cronometroAtivo ? 'i-lucide-circle-dot' : 'i-lucide-timer'" class="size-3" />
+          {{ cronometroAtivo ? formatarCronometro(segundosCorrendo ?? 0) : formatarDuracao(tempo) }}
+        </span>
+      </UTooltip>
+
+      <UTooltip v-if="campos.tempo && !somenteLeitura && !cronometroAtivo" :text="t.tempo.iniciar">
+        <UButton
+          icon="i-lucide-play"
+          color="success"
+          variant="ghost"
+          size="xs"
+          class="z-10 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+          :aria-label="t.tempo.iniciar"
+          @click.stop="emit('cronometrar')"
+        />
       </UTooltip>
 
       <!-- Descrição desligada ou cortada: o ícone diz que existe mais texto -->

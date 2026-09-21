@@ -40,6 +40,9 @@ const props = defineProps<{
   recolhida?: boolean
   somenteLeitura?: boolean
   tarefaAtiva?: number | null
+  /** Id da tarefa com o cronômetro rodando, e os segundos corridos. */
+  tarefaDoCronometro?: number | null
+  segundosCorrendo?: number
   carregando?: boolean
   /** Atraso da animação de entrada, para as raias aparecerem em cascata. */
   atraso?: number
@@ -57,6 +60,7 @@ const emit = defineEmits<{
   abrir: [tarefa: Task]
   mover: [tarefa: Task, status: Task['status']]
   arquivar: [tarefa: Task]
+  cronometrar: [tarefa: Task]
 }>()
 
 /** Quantos cartões a raia mostra antes de pedir mais. Substitui a paginação global. */
@@ -398,9 +402,12 @@ function aoComecarArrasteDaRaia(evento: DragEvent) {
             :densidade="densidade"
             :somente-leitura="somenteLeitura"
             :ativo="tarefaAtiva === tarefa.id"
+            :cronometro-ativo="tarefaDoCronometro === tarefa.id"
+            :segundos-correndo="segundosCorrendo"
             @abrir="emit('abrir', tarefa)"
             @mover="(s) => emit('mover', tarefa, s)"
             @arquivar="emit('arquivar', tarefa)"
+            @cronometrar="emit('cronometrar', tarefa)"
           />
         </div>
 

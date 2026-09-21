@@ -14,6 +14,7 @@
  * Isso está separado de propósito: é o que o time de front vai precisar decidir
  * (resolver no back ou pagar a segunda chamada) para o cartão ficar completo.
  */
+import { reactive } from 'vue'
 import type { Task } from '@be-enlighten/enspace-sdk-schemas'
 
 /* ------------------------------------------------------------------ *
@@ -199,6 +200,61 @@ const formTriagem: CampoDeFormulario[] = [
     conditionals: { or: [{ op: '==', ref: '%prioridade_validada%', value: 'critica' }], and: [] },
   },
 ]
+
+/* ------------------------------------------------------------------ *
+ * TEMPO                                                               *
+ *                                                                     *
+ * ⚠️ NADA DISTO EXISTE NO PAYLOAD DA TAREFA HOJE. O schema `Task` não  *
+ * tem estimativa nem tempo registrado, e não há rota de apontamento.   *
+ * Para implementar, o back precisa de:                                 *
+ *                                                                      *
+ *  - um campo novo na tarefa, `time_estimate` em segundos (no ClickUp  *
+ *    é o "Time Estimate", separado do tempo registrado);               *
+ *  - um recurso novo de registros, algo como                           *
+ *    `GET/POST /tasks/{id}/time-entries`, porque um apontamento tem    *
+ *    dono, começo, fim, nota, etiqueta e a marca de faturável, e isso  *
+ *    não cabe num campo da tarefa;                                     *
+ *  - soma por tarefa (e, se um dia houver subtarefa, o rollup que o    *
+ *    ClickUp faz somando as filhas).                                   *
+ *                                                                      *
+ * Está tudo declarado no DECISOES.md, rodada 12.                       *
+ * ------------------------------------------------------------------ */
+
+/** Um apontamento, no formato que o ClickUp usa. */
+export interface RegistroDeTempo {
+  id: number
+  /** Id da tarefa a que pertence. */
+  tarefa: number
+  /** Quem apontou. */
+  usuario: number
+  segundos: number
+  inicio: Date
+  /** Nota livre do apontamento. No ClickUp é a descrição da entrada. */
+  nota?: string
+  /** Etiqueta do apontamento, que é diferente da etiqueta da tarefa. */
+  etiqueta?: string
+  faturavel: boolean
+}
+
+/** Estimativa por tarefa, em segundos. Campo novo, ver aviso acima. */
+export const estimativaDeTempo: Record<number, number> = {
+  22078: 4 * 3600,
+  22089: 6 * 3600,
+  22090: 8 * 3600,
+  22100: 2 * 3600,
+  22079: 90 * 60,
+}
+
+/** Reativa de propósito: o protótipo aponta tempo e a tela tem que acompanhar. */
+export const registrosDeTempo: RegistroDeTempo[] = reactive([
+  { id: 1, tarefa: 22078, usuario: 4057, segundos: 75 * 60, inicio: d('2026-09-21T12:10:00.000Z'), nota: 'Leitura do chamado e do histórico com o cliente', etiqueta: 'Análise', faturavel: true },
+  { id: 2, tarefa: 22078, usuario: 4072, segundos: 40 * 60, inicio: d('2026-09-21T13:30:00.000Z'), nota: 'Revisão do texto antes de enviar', faturavel: true },
+  { id: 3, tarefa: 22089, usuario: 4090, segundos: 2 * 3600 + 20 * 60, inicio: d('2026-09-21T09:00:00.000Z'), nota: 'Conferência do lote um', etiqueta: 'Migração', faturavel: true },
+  { id: 4, tarefa: 22089, usuario: 4090, segundos: 35 * 60, inicio: d('2026-09-21T14:05:00.000Z'), nota: 'Contato com o financeiro sobre a diferença', faturavel: false },
+  { id: 5, tarefa: 22090, usuario: 4088, segundos: 3 * 3600 + 10 * 60, inicio: d('2026-09-20T14:00:00.000Z'), nota: 'Investigação da fila travada', etiqueta: 'Correção', faturavel: true },
+  { id: 6, tarefa: 22100, usuario: 4061, segundos: 55 * 60, inicio: d('2026-09-20T10:15:00.000Z'), faturavel: true },
+  { id: 7, tarefa: 22079, usuario: 4072, segundos: 25 * 60, inicio: d('2026-09-21T11:00:00.000Z'), nota: 'Busca da demanda parecida', faturavel: false },
+])
 
 /* --------------------------------------------------------- *
  * As tarefas                                                 *

@@ -101,6 +101,7 @@ const camposDoCartao = computed<{ chave: string, rotulo: string }[]>(() => [
   { chave: 'prioridade', rotulo: props.t.campos.prioridade },
   { chave: 'prazo', rotulo: props.t.campos.prazo },
   { chave: 'pontos', rotulo: props.t.campos.pontos },
+  { chave: 'tempo', rotulo: props.t.campos.tempoRegistrado },
   { chave: 'etiquetas', rotulo: props.t.campos.etiquetas },
   { chave: 'responsavel', rotulo: props.t.campos.responsavel },
   { chave: 'colaboradores', rotulo: props.t.campos.colaboradores },
