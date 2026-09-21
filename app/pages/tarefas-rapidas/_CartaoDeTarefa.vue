@@ -2,18 +2,29 @@
 /**
  * O cartão fechado.
  *
- * Três decisões que vêm do que o quadro de hoje faz:
+ * Decisões que vêm do que o quadro de hoje faz:
  *  - o título não é capitalizado por CSS e quebra em duas linhas, em vez de
  *    truncar na primeira palavra;
  *  - a data mostrada é o PRAZO, não a data de criação (hoje o cartão mostra
  *    `created_at`, o que faz a tarefa vencida parecer recém-chegada);
  *  - todo campo do cartão é ligável e desligável pela barra, então esta peça
  *    recebe o mapa `campos` e não decide sozinha o que mostrar.
+ *
+ * **Tudo no cartão tem tooltip, no formato "Rótulo: valor".** Num cartão
+ * denso, cada ícone e cada selo é uma abreviação; sem o nome por extenso ao
+ * passar o mouse, a pessoa precisa abrir a tarefa só para conferir o que está
+ * vendo. A regra: se está no cartão sem rótulo escrito, tem tooltip.
+ *
+ * **As três pessoas aparecem separadas**, na mesma ordem sempre: quem criou,
+ * quem colabora e quem é responsável, da esquerda para a direita, terminando
+ * em quem tem que agir. Criador e colaboradores levam um ícone na frente
+ * porque avatar sozinho não diz o papel; o responsável não precisa, porque
+ * avatar no canto do cartão é convenção de mercado para "é dessa pessoa".
  */
 import type { Task } from '@be-enlighten/enspace-sdk-schemas'
 import { itensRelacionados, pessoas } from './mocks'
 import {
-  corDaPrioridade, descricaoEmTexto, estaAtrasada, etiquetasDaTarefa,
+  corDaPrioridade, descricaoEmTexto, estaAtrasada, etiquetasDaTarefa, formatarDataHora,
   iconeDaPrioridade, iconeDoTipo, prazoLegivel, referenciaCurta,
 } from './quadro'
 import type { Textos } from './textos'
@@ -37,6 +48,7 @@ const emit = defineEmits<{
 const prazo = computed(() => prazoLegivel(props.tarefa, props.t))
 const atrasada = computed(() => estaAtrasada(props.tarefa))
 const responsavel = computed(() => props.tarefa.assigned_to ? pessoas[props.tarefa.assigned_to] : null)
+const criador = computed(() => props.tarefa.creator ? pessoas[props.tarefa.creator] : null)
 const item = computed(() => props.tarefa.item ? itensRelacionados[props.tarefa.item] : null)
 const tags = computed(() => etiquetasDaTarefa(props.tarefa))
 const colaboradores = computed(() =>
@@ -47,6 +59,31 @@ const temFormulario = computed(() => props.tarefa.type === 'form' || props.taref
 
 const mostraDescricao = computed(() =>
   props.campos.descricao && props.densidade !== 'compacto' && !!descricao.value)
+
+/** O tooltip de todo mundo tem a mesma forma: "Rótulo: valor". */
+function dica(rotulo: string, valor: string) {
+  return `${rotulo}: ${valor}`
+}
+
+const dicaDoPrazo = computed(() => {
+  if (!props.tarefa.due_date) return dica(props.t.campos.prazo, props.t.semPrazo)
+  return `${dica(props.t.campos.prazo, formatarDataHora(props.tarefa.due_date))} (${prazo.value.texto})`
+})
+
+const dicaDosColaboradores = computed(() =>
+  dica(props.t.campos.colaboradores, colaboradores.value.map(p => p!.fullname).join(', ')))
+
+const dicaDasEtiquetasEscondidas = computed(() =>
+  dica(props.t.campos.etiquetas, tags.value.slice(2).map(x => x!.nome).join(', ')))
+
+const dicaDoItem = computed(() =>
+  item.value ? `${item.value.categoria} ${item.value.codigo}: ${item.value.titulo}` : '')
+
+/** Mostra as pessoas só quando há alguém e o campo está ligado. */
+const mostraPessoas = computed(() =>
+  (props.campos.responsavel)
+  || (props.campos.colaboradores && !!colaboradores.value.length && props.densidade !== 'compacto')
+  || (props.campos.criador && !!criador.value && props.densidade !== 'compacto'))
 
 const itensDoMenu = computed(() => [[
   { label: props.t.abrirTarefa, icon: 'i-lucide-square-arrow-out-up-right', onSelect: () => emit('abrir') },
@@ -73,26 +110,27 @@ const itensDoMenu = computed(() => [[
   >
     <!-- Linha de identificação: tipo, referência e o aviso que não pode esperar o clique -->
     <div v-if="campos.referencia || campos.tipo || atrasada" class="mb-1.5 flex items-center gap-1.5">
-      <UIcon
-        v-if="campos.tipo"
-        :name="iconeDoTipo[tarefa.type]"
-        class="size-3.5 shrink-0 text-dimmed"
-      />
-      <span v-if="campos.referencia" class="font-mono text-[11px] leading-none text-muted">
-        {{ referenciaCurta(tarefa.reference) }}
-      </span>
-      <UBadge
-        v-if="atrasada"
-        :label="prazo.texto"
-        color="error"
-        variant="subtle"
-        size="sm"
-        icon="i-lucide-alarm-clock"
-        class="ml-auto"
-      />
+      <UTooltip v-if="campos.tipo" :text="dica(t.campos.tipo, t.tipo[tarefa.type])">
+        <UIcon :name="iconeDoTipo[tarefa.type]" class="size-3.5 shrink-0 text-muted" />
+      </UTooltip>
+
+      <UTooltip v-if="campos.referencia" :text="dica(t.campos.referencia, tarefa.reference)">
+        <span class="font-mono text-[11px] leading-none text-muted">
+          {{ referenciaCurta(tarefa.reference) }}
+        </span>
+      </UTooltip>
+
+      <UTooltip v-if="atrasada" :text="dicaDoPrazo" class="ml-auto">
+        <UBadge
+          :label="prazo.texto"
+          color="error"
+          variant="subtle"
+          size="sm"
+          icon="i-lucide-alarm-clock"
+        />
+      </UTooltip>
     </div>
 
-    <!-- Título. O alvo de clique é o cartão inteiro, pelo link esticado. -->
     <!--
       O corte do título vai no <span>, não no <h3>. `line-clamp` liga
       `overflow: hidden`, e isso recorta o `after:inset-0` do link esticado:
@@ -116,37 +154,34 @@ const itensDoMenu = computed(() => [[
     </p>
 
     <!-- Registro de origem: é ele que diz de qual chamado a tarefa veio -->
-    <div
-      v-if="campos.item && item && densidade === 'completo'"
-      class="mt-2 flex items-center gap-1.5 text-xs text-muted"
-    >
-      <UIcon name="i-lucide-link" class="size-3.5 shrink-0 text-dimmed" />
-      <span class="font-medium text-toned">{{ item.codigo }}</span>
-      <span class="truncate">{{ item.titulo }}</span>
-    </div>
+    <UTooltip v-if="campos.item && item && densidade === 'completo'" :text="dicaDoItem">
+      <div class="mt-2 flex items-center gap-1.5 text-xs text-muted">
+        <UIcon name="i-lucide-link" class="size-3.5 shrink-0 text-muted" />
+        <span class="shrink-0 whitespace-nowrap font-medium text-toned">{{ item.codigo }}</span>
+        <span class="truncate">{{ item.titulo }}</span>
+      </div>
+    </UTooltip>
 
     <!-- Etiquetas -->
     <div v-if="campos.etiquetas && tags.length && densidade !== 'compacto'" class="mt-2 flex flex-wrap gap-1">
-      <UBadge
+      <UTooltip
         v-for="tag in tags.slice(0, 2)"
         :key="tag!.id"
-        :label="tag!.nome"
-        :color="tag!.cor"
-        variant="soft"
-        size="sm"
-      />
-      <UBadge
-        v-if="tags.length > 2"
-        :label="t.maisEtiquetas(tags.length - 2)"
-        color="neutral"
-        variant="soft"
-        size="sm"
-      />
+        :text="dica(t.campos.etiquetas, tag!.nome)"
+      >
+        <UBadge :label="tag!.nome" :color="tag!.cor" variant="soft" size="sm" />
+      </UTooltip>
+      <UTooltip v-if="tags.length > 2" :text="dicaDasEtiquetasEscondidas">
+        <UBadge :label="t.maisEtiquetas(tags.length - 2)" color="neutral" variant="soft" size="sm" />
+      </UTooltip>
     </div>
 
     <!-- Rodapé do cartão: tudo que se lê de relance, numa linha só -->
-    <div class="mt-2.5 flex items-center gap-2">
-      <UTooltip v-if="campos.prioridade && tarefa.priority !== 'normal'" :text="t.campos.prioridade">
+    <div class="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+      <UTooltip
+        v-if="campos.prioridade && tarefa.priority !== 'normal'"
+        :text="dica(t.campos.prioridade, t.prioridade[tarefa.priority])"
+      >
         <UBadge
           :label="t.prioridade[tarefa.priority]"
           :color="corDaPrioridade[tarefa.priority]"
@@ -156,7 +191,7 @@ const itensDoMenu = computed(() => [[
         />
       </UTooltip>
 
-      <UTooltip v-if="campos.prazo && tarefa.due_date && !atrasada" :text="t.campos.prazo">
+      <UTooltip v-if="campos.prazo && tarefa.due_date && !atrasada" :text="dicaDoPrazo">
         <span
           class="flex items-center gap-1 text-xs"
           :class="prazo.cor === 'warning' ? 'font-medium text-warning' : 'text-muted'"
@@ -166,36 +201,53 @@ const itensDoMenu = computed(() => [[
         </span>
       </UTooltip>
 
-      <UTooltip v-if="campos.pontos && tarefa.points > 0" :text="t.campos.pontos">
+      <UTooltip v-if="campos.pontos && tarefa.points > 0" :text="dica(t.campos.pontos, t.pontos(tarefa.points))">
         <span class="flex items-center gap-1 rounded bg-elevated px-1.5 py-0.5 text-xs font-medium text-toned">
           <UIcon name="i-lucide-hash" class="size-3" />{{ tarefa.points }}
         </span>
       </UTooltip>
 
       <UTooltip v-if="temFormulario && campos.tipo" :text="t.temFormulario">
-        <UIcon name="i-lucide-clipboard-pen" class="size-3.5 text-dimmed" />
+        <UIcon name="i-lucide-clipboard-pen" class="size-3.5 text-muted" />
       </UTooltip>
 
-      <div class="ml-auto flex items-center gap-1">
+      <!-- As três pessoas, sempre nesta ordem: criou, colabora, responde -->
+      <div v-if="mostraPessoas" class="ml-auto flex shrink-0 items-center gap-2">
         <UTooltip
-          v-if="campos.colaboradores && colaboradores.length && densidade === 'completo'"
-          :text="t.campos.colaboradores"
+          v-if="campos.criador && criador && densidade !== 'compacto'"
+          :text="dica(t.campos.criadoPor, criador.fullname)"
         >
-          <UAvatarGroup size="2xs" :max="2">
-            <UAvatar v-for="p in colaboradores" :key="p!.id" :alt="p!.fullname" :text="p!.iniciais" />
-          </UAvatarGroup>
+          <span class="flex items-center gap-1">
+            <UIcon name="i-lucide-pen-line" class="size-3 shrink-0 text-muted" />
+            <UAvatar size="2xs" :alt="criador.fullname" :text="criador.iniciais" />
+          </span>
         </UTooltip>
 
-        <UTooltip v-if="campos.responsavel" :text="responsavel?.fullname ?? t.semResponsavel">
+        <UTooltip
+          v-if="campos.colaboradores && colaboradores.length && densidade !== 'compacto'"
+          :text="dicaDosColaboradores"
+        >
+          <span class="flex items-center gap-1">
+            <UIcon name="i-lucide-users" class="size-3 shrink-0 text-muted" />
+            <UAvatarGroup size="2xs" :max="2">
+              <UAvatar v-for="p in colaboradores" :key="p!.id" :alt="p!.fullname" :text="p!.iniciais" />
+            </UAvatarGroup>
+          </span>
+        </UTooltip>
+
+        <UTooltip
+          v-if="campos.responsavel"
+          :text="dica(t.campos.responsavel, responsavel?.fullname ?? t.semResponsavel)"
+        >
           <UAvatar
             v-if="responsavel"
-            size="2xs"
+            size="xs"
             :alt="responsavel.fullname"
             :text="responsavel.iniciais"
           />
           <span
             v-else
-            class="flex size-5 items-center justify-center rounded-full border border-dashed border-accented text-dimmed"
+            class="flex size-5 items-center justify-center rounded-full border border-dashed border-accented text-muted"
           >
             <UIcon name="i-lucide-user" class="size-3" />
           </span>

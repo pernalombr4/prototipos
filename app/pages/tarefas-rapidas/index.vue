@@ -81,6 +81,8 @@ const campos = ref<Record<string, boolean>>({
   responsavel: true,
   item: true,
   colaboradores: true,
+  // Quem criou não costuma decidir nada no quadro, então nasce desligado.
+  criador: false,
 })
 
 const filtros = ref<Filtros>({
@@ -332,6 +334,8 @@ function atualizarCampo(campo: keyof Task, valor: unknown) {
 function mostrarCartaoCompleto() {
   estado.value = 'cheio'
   densidade.value = 'completo'
+  // Liga todos os campos: é o caso de borda pedido na demanda.
+  campos.value = Object.fromEntries(Object.keys(campos.value).map(k => [k, true]))
   limparFiltros()
   const completa = lista.value.find(x => x.id === 22078)
   if (completa) tarefaAberta.value = completa

@@ -67,8 +67,9 @@ const camposDoCartao = computed<{ chave: string, rotulo: string }[]>(() => [
   { chave: 'pontos', rotulo: props.t.campos.pontos },
   { chave: 'etiquetas', rotulo: props.t.campos.etiquetas },
   { chave: 'responsavel', rotulo: props.t.campos.responsavel },
-  { chave: 'item', rotulo: props.t.campos.item },
   { chave: 'colaboradores', rotulo: props.t.campos.colaboradores },
+  { chave: 'criador', rotulo: props.t.campos.criadoPor },
+  { chave: 'item', rotulo: props.t.campos.item },
 ])
 
 const periodos = computed(() => [

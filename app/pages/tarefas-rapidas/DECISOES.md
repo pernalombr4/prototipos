@@ -499,3 +499,64 @@ O `(obrigatório)` escrito substitui o quadradinho vermelho de hoje, que não di
 - A **descrição** continua texto simples com barra decorativa: o editor de verdade é do
   produto, e reescrevê-lo não é o assunto da tela.
 - **Editar salva no array em memória.** Recarregar zera, como o resto do protótipo.
+
+---
+
+## Rodada 6 — 21/09/2026
+
+### O que ela pediu, literal
+
+> faltam tooltips nos cards
+>
+> e os cards podem ter icone de: responsavel, colaborador, criador
+>
+> tem que organizar tudo isso.
+>
+> e tem que ter tooltip pras badges do card
+
+### 1. A regra do tooltip no cartão
+
+**Se está no cartão sem rótulo escrito, tem tooltip, e o tooltip tem a forma "Rótulo: valor".**
+Num cartão denso cada ícone e cada selo é uma abreviação; sem o nome por extenso, a pessoa abre
+a tarefa só para conferir o que está vendo.
+
+| O que ganhou tooltip | O que ele diz |
+|---|---|
+| Ícone do tipo | `Tipo: Aprovação` |
+| Referência curta | `Referência: Df4Gh1Jk8Lz5Xc2Vb9Nm6Qw3Er0Ty7Ui`, os 32 caracteres inteiros |
+| Selo de atraso | `Prazo: 19/09/2026, 21:00 (Atrasada 2 dias)`, que é a data que o selo esconde |
+| Cada etiqueta | `Etiquetas: Cliente VIP` |
+| O selo "mais 2" | `Etiquetas: Faturamento, Onboarding`, as que não couberam |
+| Selo de prioridade | `Prioridade: Urgente` |
+| Chip de prazo | `Prazo: 23/09/2026, 12:25 (Vence hoje)` |
+| Chip de pontos | `Pontos: 8 pontos` |
+| Ícone de formulário | `Pede formulário` |
+| Registro de origem | `Chamado CHA-4812: Acesso negado ao portal depois da troca de plano` |
+| As três pessoas | `Criada por: Mikaela Jardim`, `Colaboradores: Mikaela Jardim, Rafael Quintanilha`, `Responsável: Bruna Sato` |
+
+Antes desta rodada só prioridade, prazo, pontos e responsável tinham tooltip, e três deles
+mostravam só o rótulo (`Prioridade`), sem o valor. Agora são dez gatilhos por cartão.
+
+### 2. As três pessoas, organizadas
+
+Ordem fixa, da esquerda para a direita, terminando em quem tem que agir:
+
+| Papel | Como aparece | Por quê |
+|---|---|---|
+| **Criador** | ícone de caneta + avatar pequeno | Avatar sozinho não diz o papel, e criador é o mais incomum dos três |
+| **Colaboradores** | ícone de pessoas + grupo de avatares, no máximo dois com "+N" | Mesmo motivo, e o grupo já é convenção para "mais de um" |
+| **Responsável** | avatar maior, sem ícone, na ponta | Avatar no canto do cartão é convenção de mercado para "é dessa pessoa". Pôr ícone nele seria explicar o óbvio |
+
+Os três são campos ligáveis na barra (`Cartão › O que aparece no cartão`). **Criador nasce
+desligado**: quem criou raramente muda uma decisão no quadro, e ligado por padrão ele só
+disputa espaço. Em densidade compacta, só o responsável aparece.
+
+E o atalho **Cartão completo** do andaime agora liga **todos** os campos, não só a densidade.
+É o caso de borda pedido na demanda original: um cartão com tudo aparecendo.
+
+### 3. Um defeito que só apareceu com tudo ligado
+
+Com os três papéis visíveis numa raia no mínimo (17 rem), o rodapé do cartão **cortava o
+responsável na borda**. O rodapé passou a quebrar em duas linhas em vez de recortar, e o código
+do registro de origem parou de partir no meio (`DEM-` / `1190`). Vale a pena olhar sempre no
+tamanho mínimo da raia, não no confortável.
