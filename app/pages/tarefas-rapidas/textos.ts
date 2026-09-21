@@ -154,6 +154,22 @@ export interface Textos {
   usarOrdemDoQuadro: string
   ordemPropria: (campo: string) => string
 
+  /* edição no painel e no formulário de criação */
+  editarTitulo: string
+  editarCampo: string
+  atribuirAMim: string
+  prazoHoje: string
+  prazoAmanha: string
+  prazoProximaSemana: string
+  tirarPrazo: string
+  criarEmRaia: (raia: string) => string
+  cancelar: string
+  nomePlaceholder: string
+  dataLimitePlaceholder: string
+  responsavelPlaceholder: string
+  descricaoPlaceholder: string
+  campoObrigatorio: string
+
   /* painel */
   abaTarefa: string
   abaComentarios: string
@@ -356,6 +372,21 @@ export const textos: Record<Idioma, Textos> = {
     usarOrdemDoQuadro: 'Usar a ordem do quadro',
     ordemPropria: campo => `Esta raia está ordenada por ${campo}`,
 
+    editarTitulo: 'Editar o título',
+    editarCampo: 'Editar',
+    atribuirAMim: 'Atribuir a mim',
+    prazoHoje: 'Hoje',
+    prazoAmanha: 'Amanhã',
+    prazoProximaSemana: 'Semana que vem',
+    tirarPrazo: 'Sem prazo',
+    criarEmRaia: raia => `A tarefa nasce em ${raia}`,
+    cancelar: 'Cancelar',
+    nomePlaceholder: 'O que precisa ser feito?',
+    dataLimitePlaceholder: 'Escolha a data e a hora',
+    responsavelPlaceholder: 'Escolha quem faz',
+    descricaoPlaceholder: 'Contexto, links e o que a pessoa precisa saber para resolver',
+    campoObrigatorio: 'obrigatório',
+
     abaTarefa: 'Tarefa',
     abaComentarios: 'Comentários',
     abaLogs: 'Histórico',
@@ -554,6 +585,21 @@ export const textos: Record<Idioma, Textos> = {
     usarOrdemDoQuadro: 'Use the board order',
     ordemPropria: campo => `This lane is sorted by ${campo}`,
 
+    editarTitulo: 'Edit the title',
+    editarCampo: 'Edit',
+    atribuirAMim: 'Assign to me',
+    prazoHoje: 'Today',
+    prazoAmanha: 'Tomorrow',
+    prazoProximaSemana: 'Next week',
+    tirarPrazo: 'No due date',
+    criarEmRaia: raia => `The task starts in ${raia}`,
+    cancelar: 'Cancel',
+    nomePlaceholder: 'What needs to be done?',
+    dataLimitePlaceholder: 'Pick the date and time',
+    responsavelPlaceholder: 'Choose who does it',
+    descricaoPlaceholder: 'Context, links and what the person needs in order to solve it',
+    campoObrigatorio: 'required',
+
     abaTarefa: 'Task',
     abaComentarios: 'Comments',
     abaLogs: 'History',
@@ -751,6 +797,21 @@ export const textos: Record<Idioma, Textos> = {
     ordemDaRaia: 'Ordenar solo este carril',
     usarOrdemDoQuadro: 'Usar el orden del tablero',
     ordemPropria: campo => `Este carril está ordenado por ${campo}`,
+
+    editarTitulo: 'Editar el título',
+    editarCampo: 'Editar',
+    atribuirAMim: 'Asignarme',
+    prazoHoje: 'Hoy',
+    prazoAmanha: 'Mañana',
+    prazoProximaSemana: 'La próxima semana',
+    tirarPrazo: 'Sin fecha',
+    criarEmRaia: raia => `La tarea nace en ${raia}`,
+    cancelar: 'Cancelar',
+    nomePlaceholder: '¿Qué hay que hacer?',
+    dataLimitePlaceholder: 'Elija la fecha y la hora',
+    responsavelPlaceholder: 'Elija quién lo hace',
+    descricaoPlaceholder: 'Contexto, enlaces y lo que la persona necesita para resolverlo',
+    campoObrigatorio: 'obligatorio',
 
     abaTarefa: 'Tarea',
     abaComentarios: 'Comentarios',

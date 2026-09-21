@@ -415,3 +415,87 @@ viram chamada:
 - a ordem por raia precisa de `_sort` por requisição de coluna, já que cada raia pagina sozinha.
 
 Está no `COMPONENTES-CUSTOM.md`, na linha do `_RaiaDoQuadro`.
+
+---
+
+## Rodada 5 — 21/09/2026
+
+### O que ela pediu, literal
+
+> a esquerda da nossa sidebar ta melhor que a que voce desenhou. no sentido de organizaçao dos
+> campos. o icone ali no alto, o titulo grande, a badge de status... deixe o seu mais
+> elaborado. o nosso tem icones, ta tudo bonitinho.
+>
+> voce deve ajustar o seu pra ficar igual OU melhor. pode melhorar a barra se quiser.
+>
+> alem disso, garanta que ao abrir a tarefa o user possa editar todos os campos aos quais têm
+> acesso no form de criaçao da tarefa. e copie do nosso modelo o form de criaçao (os campos
+> dele). mas pode deixar mais bonito o form de criaçao se for o caso, considerando padrao de
+> mercado ok?
+
+### 1. A coluna de identidade voltou, e ela estava certa
+
+**Isto reverte a melhoria 10 da rodada 3.** Eu tinha tirado o ícone, o título e o selo do topo
+da coluna expandida, chamando de duplicação. Ela está certa: aquela composição é boa, e o
+problema nunca foi ter identidade na coluna; era o título aparecer **duas vezes**.
+
+Agora a coluna expandida tem, na ordem do produto:
+
+1. o rótulo **TAREFA**;
+2. o **ícone do tipo** da tarefa, dentro de um quadrado arredondado em cor primária. No
+   produto o ícone é sempre o mesmo; aqui ele diz se é formulário, ação em registro, aprovação
+   ou simples;
+3. o **título**, grande e centralizado;
+4. a **referência curta** embaixo, em mono;
+5. os **selos**: situação, prioridade (quando não é normal) e tarefa de notificação;
+6. a lista **DETALHES**, com ícone por campo, como hoje.
+
+E a duplicação sumiu pelo outro lado: **com a coluna aberta, o cabeçalho do conteúdo some**,
+porque a identidade já está à esquerda. Fechada a coluna, ele volta. Nenhum dos dois estados
+mostra o título duas vezes.
+
+### 2. Os cinco campos do formulário de criação se editam no painel
+
+Era o que faltava para o painel resolver a tarefa sem mandar a pessoa para o menu do cartão:
+
+| Campo | Onde se edita |
+|---|---|
+| **Nome** | no próprio título: clique, vira campo, Enter salva e Esc desiste. Vale nos dois estados |
+| **Responsável** | seletor na lista DETALHES |
+| **Prioridade** | seletor na lista DETALHES, com o ícone da prioridade |
+| **Data limite** | campo de data e hora na lista DETALHES, com "Atrasada 2 dias" logo abaixo |
+| **Descrição** | o editor da seção Descrição, que já existia |
+
+Com a coluna recolhida, o cartãozinho do trilho ganhou um botão **Editar** que abre a coluna e
+**acende o campo pedido** por um instante. É o caminho de volta: o trilho não vira um beco.
+
+**O que continua só de leitura, e por quê:** pontos, tipo, etiquetas, colaboradores, registro
+de origem e as datas de sistema. Nenhum deles está no formulário de criação de hoje, então
+editá-los é outra decisão, não esta. **Tarefa concluída não edita nada**: o painel passa a ser
+registro do que foi feito.
+
+### 3. O formulário de criação: os campos do produto, o acabamento refeito
+
+**Os campos são os de hoje, na mesma ordem:** Nome (obrigatório), Data limite, Descrição,
+Responsável e Prioridade. Não acrescentei nada. Pontos, tipo e etiquetas não existem na
+criação do produto e ficaram fora, mesmo o totalizador gostando de pontos.
+
+O que mudou, seguindo o que Linear, ClickUp e Asana fazem:
+
+| O que | Por quê |
+|---|---|
+| O **nome** ocupa a linha inteira, em tamanho maior | É o campo que decide a tarefa. Hoje ele divide a primeira linha com a data |
+| O **prazo** ganhou atalhos: hoje, amanhã, semana que vem | O calendário de hoje exige três cliques para "amanhã" |
+| A **prioridade** virou seletor segmentado colorido | Hoje são quatro botões de rádio quebrando em duas linhas, com a cor no selo e não no controle |
+| O **responsável** ganhou "atribuir a mim" | É o caso mais comum, e hoje exige abrir a lista |
+| A **barra da descrição** só aparece ao escrever | Doze botões antes de a pessoa digitar a primeira letra |
+| O rodapé diz **em qual raia a tarefa nasce** | Criar pelo "+" de uma raia e a tarefa aparecer em outra é surpresa |
+| Cada rótulo tem **ícone**, como no painel | Era o que ela apontou: "o nosso tem ícones, tá tudo bonitinho" |
+
+O `(obrigatório)` escrito substitui o quadradinho vermelho de hoje, que não diz o que é.
+
+### Maquete nesta rodada
+
+- A **descrição** continua texto simples com barra decorativa: o editor de verdade é do
+  produto, e reescrevê-lo não é o assunto da tela.
+- **Editar salva no array em memória.** Recarregar zera, como o resto do protótipo.

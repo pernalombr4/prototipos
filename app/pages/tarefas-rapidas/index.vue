@@ -10,6 +10,7 @@ import type { Task } from '@be-enlighten/enspace-sdk-schemas'
 import type { EnKanbanCardConfig, EnKanbanColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import BarraDoQuadro, { type Filtros } from './_BarraDoQuadro.vue'
 import CascaDoEnspace from './_CascaDoEnspace.vue'
+import ModalNovaTarefa from './_ModalNovaTarefa.vue'
 import PainelDaTarefa from './_PainelDaTarefa.vue'
 import RaiaDoQuadro from './_RaiaDoQuadro.vue'
 import { hoje, itensRelacionados, tarefas as tarefasMock, usuarioAtual } from './mocks'
@@ -270,41 +271,58 @@ function alternarRecolhida(valor: string) {
 /* ------------------------------ nova tarefa ------------------------------ */
 const criando = ref(false)
 const raiaDaCriacao = ref<string>('pending')
-const nova = reactive({ name: '', priority: 'normal' as Task['priority'], points: 0 })
+
+/** O nome da raia onde a tarefa vai nascer, para o rodapé do formulário dizer. */
+const nomeDaRaiaDaCriacao = computed(() =>
+  definicoesDeRaia.value.find(d => d.valor === raiaDaCriacao.value)?.rotulo
+  ?? t.value.status.pending)
 
 function abrirCriacao(valorDaRaia?: string) {
   if (somenteLeitura.value) return
   raiaDaCriacao.value = valorDaRaia ?? 'pending'
-  nova.name = ''
-  nova.priority = 'normal'
-  nova.points = 0
   criando.value = true
 }
 
-function criar() {
-  if (!nova.name.trim()) return
+/** Os cinco campos são os do formulário do produto. Nada a mais. */
+function criar(dados: {
+  name: string
+  due_date: Date | null
+  description: string | null
+  assigned_to: number | null
+  priority: Task['priority']
+}) {
   const id = Math.max(...lista.value.map(x => x.id)) + 1
   lista.value.unshift({
     ...tarefasMock[4]!,
     id,
     reference: `NOV${id}${'x'.repeat(26)}`.slice(0, 32),
-    name: nova.name,
-    description: null,
+    name: dados.name,
+    description: dados.description,
     type: 'generic',
     status: agrupamento.value === 'status' ? (raiaDaCriacao.value as Task['status']) : 'pending',
-    priority: nova.priority,
-    points: nova.points,
-    due_date: null,
+    priority: dados.priority,
+    points: 0,
+    due_date: dados.due_date,
     item: null,
     meta: {},
     tag_ids: [],
     collaborators: null,
     created_at: new Date(),
     updated_at: new Date(),
-    assigned_to: usuarioAtual.id,
+    creator: usuarioAtual.id,
+    assigned_to: dados.assigned_to,
   })
   criando.value = false
   toast.add({ title: t.value.tarefaSalva, icon: 'i-lucide-check', color: 'success' })
+}
+
+/** Edição vinda da quickview: mexe no mock em memória. */
+function atualizarCampo(campo: keyof Task, valor: unknown) {
+  const alvo = tarefaAberta.value && lista.value.find(x => x.id === tarefaAberta.value!.id)
+  if (!alvo) return
+  // @ts-expect-error atribuição dinâmica sobre o mock em memória
+  alvo[campo] = valor
+  alvo.updated_at = new Date()
 }
 
 /**
@@ -480,39 +498,19 @@ const cartaoDeHoje: EnKanbanCardConfig = {
           @concluir="concluir"
           @reabrir="reabrir"
           @copiar-referencia="copiarReferencia"
+          @atualizar="atualizarCampo"
         />
       </template>
     </USlideover>
 
-    <!-- Nova tarefa: o mesmo modal de hoje, com a raia já escolhida -->
-    <UModal v-model:open="criando" :title="t.novaTarefa">
-      <template #body>
-        <div class="space-y-4">
-          <UFormField :label="t.campos.descricao" required>
-            <UInput v-model="nova.name" :placeholder="t.escreva" class="w-full" autofocus />
-          </UFormField>
-          <div class="grid grid-cols-2 gap-3">
-            <UFormField :label="t.campos.prioridade">
-              <USelect
-                v-model="nova.priority"
-                :items="(['urgent', 'high', 'normal', 'low'] as const).map(p => ({ label: t.prioridade[p], value: p }))"
-                value-key="value"
-                class="w-full"
-              />
-            </UFormField>
-            <UFormField :label="t.campos.pontos">
-              <UInputNumber v-model="nova.points" :min="0" :max="21" class="w-full" />
-            </UFormField>
-          </div>
-        </div>
-      </template>
-      <template #footer>
-        <div class="flex w-full justify-end gap-2">
-          <UButton :label="t.fechar" color="neutral" variant="ghost" @click="criando = false" />
-          <UButton :label="t.novaTarefa" color="primary" :disabled="!nova.name.trim()" @click="criar" />
-        </div>
-      </template>
-    </UModal>
+    <!-- Nova tarefa: os campos do produto, com o acabamento refeito -->
+    <ModalNovaTarefa
+      v-model:open="criando"
+      :t="t"
+      :raia="nomeDaRaiaDaCriacao"
+      @criar="criar"
+      @fechar="criando = false"
+    />
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">

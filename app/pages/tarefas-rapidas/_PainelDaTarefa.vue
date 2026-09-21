@@ -2,27 +2,30 @@
 /**
  * A quickview da tarefa: o painel lateral que abre ao clicar no cartão.
  *
- * ⚠️ A ESTRUTURA É A DE HOJE. Este é o componente padrão de painel lateral do
- * ENSPACE, e aqui ele continua com as mesmas peças, nos mesmos lugares:
+ * ⚠️ A ESTRUTURA É A DE HOJE. É o componente padrão de painel lateral do
+ * ENSPACE, com as mesmas peças nos mesmos lugares:
  *
  *   - painel à direita, altura inteira, canto esquerdo arredondado;
- *   - trilho de ícones na borda esquerda, um por campo, com o valor aparecendo
- *     ao passar o mouse, e o botão de expandir no pé do trilho;
+ *   - trilho de ícones na borda esquerda, um por campo, com o valor no hover,
+ *     e o botão de expandir no pé do trilho;
+ *   - expandido, o trilho vira a coluna de identidade: rótulo "Tarefa", ícone,
+ *     título, selo da situação e a lista DETALHES com ícone por campo. Essa
+ *     composição é a do produto, e ela é boa: o que mudou foi o acabamento;
  *   - abas no topo: Tarefa, Comentários, Logs de Auditoria;
  *   - corpo em seções com ícone e nome ("Descrição");
  *   - rodapé com guardar e concluir.
  *
- * O que muda são MELHORIAS dentro dessa estrutura, listadas no DECISOES.md
- * (rodada 3). Nenhuma peça mudou de lugar.
- *
- * Medido no develop em 21/09/2026: o painel tem 700 px fixos, e expandir o
- * trilho não aumenta a largura, rouba do conteúdo. É a melhoria principal.
+ * O que muda são melhorias, listadas no DECISOES.md (rodadas 3 e 5). A maior
+ * delas: **os cinco campos do formulário de criação se editam aqui**, que é o
+ * que faltava para o painel resolver a tarefa sem mandar a pessoa para o menu
+ * do cartão.
  */
 import type { Task } from '@be-enlighten/enspace-sdk-schemas'
 import type { CampoDeFormulario } from './mocks'
 import { etiquetas as todasEtiquetas, hoje, itensRelacionados, pessoas } from './mocks'
 import {
-  formatarDataHora, iconeDaPrioridade, iconeDoTipo, prazoLegivel, referenciaCurta,
+  corDaPrioridade, formatarDataHora, iconeDaPrioridade, iconeDoTipo, prazoLegivel,
+  referenciaCurta,
 } from './quadro'
 import type { Textos } from './textos'
 
@@ -41,13 +44,18 @@ const emit = defineEmits<{
   concluir: [respostas: Record<string, unknown>]
   reabrir: []
   copiarReferencia: []
+  atualizar: [campo: keyof Task, valor: unknown]
 }>()
 
 const aba = ref<'tarefa' | 'comentarios' | 'logs'>('tarefa')
-/** A barra do editor só aparece quando a descrição entra em foco. */
 const editandoDescricao = ref(false)
+const editandoTitulo = ref(false)
+/** Campo que acabou de ser pedido pelo trilho: acende por um instante. */
+const campoEmFoco = ref<string | null>(null)
 
 const concluida = computed(() => props.tarefa.status === 'completed')
+const podeEditar = computed(() => !props.somenteLeitura && !concluida.value)
+
 const responsavel = computed(() => props.tarefa.assigned_to ? pessoas[props.tarefa.assigned_to] : null)
 const concluidaPor = computed(() => props.tarefa.completed_by ? pessoas[props.tarefa.completed_by] : null)
 const item = computed(() => props.tarefa.item ? itensRelacionados[props.tarefa.item] : null)
@@ -63,26 +71,70 @@ const corDaSituacao = {
   pending: 'info', working: 'warning', blocked: 'error', completed: 'success',
 } as const
 
+/* ------------------------------ edição ------------------------------ */
+
+/** `datetime-local` fala string; o mock fala Date. Estes dois traduzem. */
+function paraCampoDeData(data: Date | string | null | undefined): string {
+  if (!data) return ''
+  const d = new Date(data)
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())}T${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`
+}
+
+function deCampoDeData(valor: string): Date | null {
+  return valor ? new Date(`${valor}:00.000Z`) : null
+}
+
+const opcoesDePrioridade = computed(() =>
+  (['urgent', 'high', 'normal', 'low'] as const).map(p => ({
+    label: props.t.prioridade[p],
+    value: p,
+    icon: iconeDaPrioridade[p],
+  })))
+
+const opcoesDeResponsavel = computed(() => [
+  { label: props.t.semResponsavel, value: 0 },
+  ...Object.values(pessoas).map(p => ({ label: p.fullname, value: p.id })),
+])
+
+const tituloEmEdicao = ref('')
+
+function abrirEdicaoDoTitulo() {
+  if (!podeEditar.value) return
+  tituloEmEdicao.value = props.tarefa.name
+  editandoTitulo.value = true
+}
+
+function salvarTitulo() {
+  editandoTitulo.value = false
+  const novo = tituloEmEdicao.value.trim()
+  if (novo && novo !== props.tarefa.name) emit('atualizar', 'name', novo)
+}
+
+/** Vindo do trilho: abre a coluna e acende o campo pedido. */
+function editarPeloTrilho(chave: string) {
+  emit('expandir', true)
+  campoEmFoco.value = chave
+  setTimeout(() => { campoEmFoco.value = null }, 1800)
+}
+
 /* ------------------------------------------------------------------ *
- * O trilho. Hoje ele tem sete campos; aqui ganha os cinco que faltam  *
- * (prioridade, pontos, tipo, etiquetas, colaboradores), que estão no  *
- * payload e não apareciam em lugar nenhum do painel.                  *
+ * Os campos. Os cinco do formulário de criação são editáveis aqui.    *
  * ------------------------------------------------------------------ */
-interface CampoDoTrilho {
+interface CampoDoPainel {
   chave: string
   icone: string
   rotulo: string
   valor: string
-  /** Texto secundário, como o "Vence hoje" embaixo do prazo. */
   detalhe?: string
-  /** Acende quando o valor pede atenção. */
   alerta?: boolean
-  /** Sem valor. Continua no trilho, apagado, como o "Concluída em" de hoje. */
   vazio?: boolean
   copiavel?: boolean
+  /** Quando existe, a coluna expandida mostra controle no lugar do texto. */
+  editavel?: 'responsavel' | 'prioridade' | 'prazo'
 }
 
-const campos = computed<CampoDoTrilho[]>(() => {
+const campos = computed<CampoDoPainel[]>(() => {
   const t = props.t
   return [
     {
@@ -113,6 +165,7 @@ const campos = computed<CampoDoTrilho[]>(() => {
       rotulo: t.campos.responsavel,
       valor: responsavel.value?.fullname ?? '',
       vazio: !responsavel.value,
+      editavel: 'responsavel',
     },
     {
       chave: 'prioridade',
@@ -120,6 +173,17 @@ const campos = computed<CampoDoTrilho[]>(() => {
       rotulo: t.campos.prioridade,
       valor: t.prioridade[props.tarefa.priority],
       alerta: props.tarefa.priority === 'urgent',
+      editavel: 'prioridade',
+    },
+    {
+      chave: 'prazo',
+      icone: 'i-lucide-calendar-clock',
+      rotulo: t.campos.prazo,
+      valor: props.tarefa.due_date ? formatarDataHora(props.tarefa.due_date) : '',
+      detalhe: props.tarefa.due_date ? prazo.value.texto : undefined,
+      alerta: prazo.value.urgente,
+      vazio: !props.tarefa.due_date,
+      editavel: 'prazo',
     },
     {
       chave: 'pontos',
@@ -147,15 +211,6 @@ const campos = computed<CampoDoTrilho[]>(() => {
       rotulo: t.campos.colaboradores,
       valor: colaboradores.value.map(x => x!.fullname).join(', '),
       vazio: !colaboradores.value.length,
-    },
-    {
-      chave: 'prazo',
-      icone: 'i-lucide-calendar-clock',
-      rotulo: t.campos.prazo,
-      valor: props.tarefa.due_date ? formatarDataHora(props.tarefa.due_date) : '',
-      detalhe: props.tarefa.due_date ? prazo.value.texto : undefined,
-      alerta: prazo.value.urgente,
-      vazio: !props.tarefa.due_date,
     },
     {
       chave: 'concluidoEm',
@@ -226,11 +281,8 @@ function valorDaResposta(valor: unknown): string {
   return opcao?.label ?? String(valor)
 }
 
-/**
- * A aba de histórico do develop mostra uma linha do tempo: bolinha, avatar,
- * selo da ação, a frase e a data com o tempo relativo. Aqui ela se monta com o
- * que a própria tarefa carrega, sem rota nova.
- */
+/* --------------------------------- histórico --------------------------------- */
+
 const historico = computed(() => {
   const criador = props.tarefa.creator ? pessoas[props.tarefa.creator] : null
   const linhas: { chave: string, pessoa: typeof criador, acao: string, frase: string, data: Date }[] = []
@@ -255,7 +307,6 @@ const historico = computed(() => {
   return linhas.reverse()
 })
 
-/** Tempo relativo com o "hoje" fixo do mock, para o texto não mudar sozinho. */
 function tempoRelativo(data: Date): string {
   const horas = Math.max(0, Math.round((hoje.getTime() - data.getTime()) / 3_600_000))
   // Acima de um dia, hora deixa de dizer alguma coisa: "há 101 horas" não se lê.
@@ -310,16 +361,26 @@ const abas = computed(() => [
               <p v-if="campo.detalhe" class="mt-0.5 break-all text-xs text-muted">
                 {{ campo.detalhe }}
               </p>
-              <UButton
-                v-if="campo.copiavel"
-                :label="t.copiarReferencia"
-                icon="i-lucide-copy"
-                size="xs"
-                color="neutral"
-                variant="ghost"
-                class="-ms-1.5 mt-1"
-                @click="emit('copiarReferencia')"
-              />
+              <div class="-ms-1.5 mt-1 flex gap-1">
+                <UButton
+                  v-if="campo.copiavel"
+                  :label="t.copiarReferencia"
+                  icon="i-lucide-copy"
+                  size="xs"
+                  color="neutral"
+                  variant="ghost"
+                  @click="emit('copiarReferencia')"
+                />
+                <UButton
+                  v-if="campo.editavel && podeEditar"
+                  :label="t.editarCampo"
+                  icon="i-lucide-pencil"
+                  size="xs"
+                  color="primary"
+                  variant="ghost"
+                  @click="editarPeloTrilho(campo.chave)"
+                />
+              </div>
             </div>
           </template>
         </UPopover>
@@ -336,22 +397,134 @@ const abas = computed(() => [
       />
     </div>
 
-    <!-- ─────────── Trilho expandido: a mesma lista, com rótulo ─────────── -->
+    <!-- ─────────── Coluna de identidade e detalhes (trilho expandido) ─────────── -->
     <div
       v-else
-      class="flex w-64 shrink-0 flex-col border-r border-default"
+      class="flex w-72 shrink-0 flex-col border-r border-default"
       style="animation: entrada .25s ease-out both"
     >
-      <p class="px-4 pb-1 pt-4 text-xs font-semibold uppercase tracking-wide text-muted">
+      <!-- A identidade da tarefa, como o produto monta: ícone, título, selo -->
+      <div class="border-b border-default px-4 pb-4 pt-4">
+        <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
+          {{ t.abaTarefa }}
+        </p>
+
+        <div
+          class="mx-auto flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary"
+        >
+          <UIcon :name="iconeDoTipo[tarefa.type]" class="size-6" />
+        </div>
+
+        <div v-if="editandoTitulo" class="mt-3">
+          <UInput
+            v-model="tituloEmEdicao"
+            size="sm"
+            class="w-full"
+            autofocus
+            @blur="salvarTitulo"
+            @keydown.enter="salvarTitulo"
+            @keydown.esc="editandoTitulo = false"
+          />
+        </div>
+        <button
+          v-else
+          type="button"
+          class="group mt-3 block w-full rounded-md px-1 py-0.5 text-center text-base font-semibold leading-snug text-highlighted transition-colors"
+          :class="podeEditar ? 'hover:bg-elevated' : 'cursor-default'"
+          :aria-label="podeEditar ? t.editarTitulo : undefined"
+          @click="abrirEdicaoDoTitulo"
+        >
+          {{ tarefa.name }}
+          <UIcon
+            v-if="podeEditar"
+            name="i-lucide-pencil"
+            class="ml-1 inline size-3 align-middle text-dimmed opacity-0 transition-opacity group-hover:opacity-100"
+          />
+        </button>
+
+        <p class="mt-1 text-center font-mono text-xs text-muted">
+          {{ referenciaCurta(tarefa.reference) }}
+        </p>
+
+        <div class="mt-3 flex flex-wrap justify-center gap-1.5">
+          <UBadge
+            :label="t.status[tarefa.status]"
+            :color="corDaSituacao[tarefa.status]"
+            variant="subtle"
+            size="sm"
+          />
+          <UBadge
+            v-if="tarefa.priority !== 'normal'"
+            :label="t.prioridade[tarefa.priority]"
+            :color="corDaPrioridade[tarefa.priority]"
+            :icon="iconeDaPrioridade[tarefa.priority]"
+            variant="subtle"
+            size="sm"
+          />
+          <UBadge
+            v-if="tarefa.notification_task"
+            :label="t.campos.notificacao"
+            icon="i-lucide-bell"
+            color="neutral"
+            variant="subtle"
+            size="sm"
+          />
+        </div>
+      </div>
+
+      <p class="px-4 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide text-muted">
         {{ t.detalhes }}
       </p>
-      <dl class="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-2">
-        <div v-for="campo in campos" :key="campo.chave">
+
+      <dl class="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-2">
+        <div
+          v-for="campo in campos"
+          :key="campo.chave"
+          class="rounded-md transition-shadow"
+          :class="campoEmFoco === campo.chave ? 'ring-2 ring-primary/50' : ''"
+        >
           <dt class="flex items-center gap-1.5 text-xs text-muted">
             <UIcon :name="campo.icone" class="size-3.5" />
             {{ campo.rotulo }}
           </dt>
+
+          <!-- Os três campos de escolha viram controle, não texto -->
+          <dd v-if="campo.editavel === 'responsavel' && podeEditar" class="mt-1">
+            <USelect
+              :model-value="tarefa.assigned_to ?? 0"
+              :items="opcoesDeResponsavel"
+              value-key="value"
+              size="sm"
+              class="w-full"
+              @update:model-value="(v) => emit('atualizar', 'assigned_to', v === 0 ? null : v)"
+            />
+          </dd>
+          <dd v-else-if="campo.editavel === 'prioridade' && podeEditar" class="mt-1">
+            <USelect
+              :model-value="tarefa.priority"
+              :items="opcoesDePrioridade"
+              value-key="value"
+              size="sm"
+              class="w-full"
+              :icon="iconeDaPrioridade[tarefa.priority]"
+              @update:model-value="(v) => emit('atualizar', 'priority', v)"
+            />
+          </dd>
+          <dd v-else-if="campo.editavel === 'prazo' && podeEditar" class="mt-1">
+            <UInput
+              type="datetime-local"
+              :model-value="paraCampoDeData(tarefa.due_date)"
+              size="sm"
+              class="w-full"
+              @update:model-value="(v) => emit('atualizar', 'due_date', deCampoDeData(String(v)))"
+            />
+            <p v-if="campo.detalhe" class="mt-0.5 text-xs" :class="campo.alerta ? 'text-error' : 'text-muted'">
+              {{ campo.detalhe }}
+            </p>
+          </dd>
+
           <dd
+            v-else
             class="mt-0.5 break-words text-sm"
             :class="campo.vazio ? 'text-dimmed' : campo.alerta ? 'font-medium text-error' : 'text-highlighted'"
           >
@@ -362,6 +535,7 @@ const abas = computed(() => [
           </dd>
         </div>
       </dl>
+
       <UButton
         icon="i-lucide-chevrons-left"
         :label="t.recolher"
@@ -406,18 +580,45 @@ const abas = computed(() => [
 
       <div class="min-h-0 flex-1 overflow-y-auto">
         <template v-if="aba === 'tarefa'">
-          <!-- Cabeçalho: título, situação e as duas linhas de meta, como hoje -->
-          <header class="px-5 pb-3 pt-4">
+          <!--
+            Cabeçalho só no estado recolhido: expandido, a identidade mora na
+            coluna da esquerda, e repetir o título aqui era o defeito de hoje.
+          -->
+          <header v-if="!expandido" class="px-5 pb-3 pt-4">
             <div class="flex items-start gap-3">
-              <h2 class="min-w-0 flex-1 text-lg font-semibold leading-snug text-highlighted">
+              <div v-if="editandoTitulo" class="min-w-0 flex-1">
+                <UInput
+                  v-model="tituloEmEdicao"
+                  size="md"
+                  class="w-full"
+                  autofocus
+                  @blur="salvarTitulo"
+                  @keydown.enter="salvarTitulo"
+                  @keydown.esc="editandoTitulo = false"
+                />
+              </div>
+              <button
+                v-else
+                type="button"
+                class="group min-w-0 flex-1 rounded-md px-1 py-0.5 text-left text-lg font-semibold leading-snug text-highlighted transition-colors"
+                :class="podeEditar ? 'hover:bg-elevated' : 'cursor-default'"
+                :aria-label="podeEditar ? t.editarTitulo : undefined"
+                @click="abrirEdicaoDoTitulo"
+              >
                 {{ tarefa.name }}
-              </h2>
+                <UIcon
+                  v-if="podeEditar"
+                  name="i-lucide-pencil"
+                  class="ml-1 inline size-3.5 align-middle text-dimmed opacity-0 transition-opacity group-hover:opacity-100"
+                />
+              </button>
+
               <UBadge
                 :label="t.status[tarefa.status]"
                 :color="corDaSituacao[tarefa.status]"
                 variant="subtle"
                 size="sm"
-                class="mt-0.5 shrink-0"
+                class="mt-1.5 shrink-0"
               />
             </div>
 
@@ -431,6 +632,15 @@ const abas = computed(() => [
                   {{ tarefa.due_date ? formatarDataHora(tarefa.due_date) : t.semPrazo }}
                   <span v-if="tarefa.due_date && prazo.urgente">({{ prazo.texto }})</span>
                 </dd>
+                <UButton
+                  v-if="podeEditar"
+                  icon="i-lucide-pencil"
+                  color="neutral"
+                  variant="ghost"
+                  size="xs"
+                  :aria-label="t.editarCampo"
+                  @click="editarPeloTrilho('prazo')"
+                />
               </div>
               <div class="flex items-center gap-2 text-sm">
                 <dt class="flex items-center gap-1.5 text-muted">
@@ -453,7 +663,7 @@ const abas = computed(() => [
           </header>
 
           <!-- Seção Descrição, com ícone e nome, como hoje -->
-          <section class="px-5 pb-4">
+          <section class="px-5 pb-4" :class="expandido ? 'pt-4' : ''">
             <h3 class="mb-2 flex items-center gap-1.5 text-sm font-medium text-highlighted">
               <UIcon name="i-lucide-file-text" class="size-4 text-muted" />
               {{ t.campos.descricao }}
@@ -461,11 +671,10 @@ const abas = computed(() => [
 
             <div
               class="rounded-lg border border-default transition-colors focus-within:border-accented hover:border-accented"
-              @click="editandoDescricao = true"
+              @click="podeEditar && (editandoDescricao = true)"
             >
-              <!-- A barra do editor aparece quando a descrição entra em foco -->
               <div
-                v-if="editandoDescricao && !somenteLeitura"
+                v-if="editandoDescricao && podeEditar"
                 class="flex items-center gap-0.5 border-b border-default px-2 py-1"
                 style="animation: entrada .2s ease-out both"
               >
@@ -509,6 +718,20 @@ const abas = computed(() => [
                   class="w-full"
                   @update:model-value="(v) => respostas[campo.refId] = v"
                 />
+                <UInput
+                  v-else-if="campo.type === 'EnlNumber'"
+                  type="number"
+                  :model-value="(respostas[campo.refId] as number)"
+                  :placeholder="campo.cFormat?.n_style === 'currency' ? '0,00' : '0'"
+                  :disabled="somenteLeitura"
+                  size="sm"
+                  class="w-full"
+                  @update:model-value="(v) => respostas[campo.refId] = Number(v)"
+                >
+                  <template v-if="campo.cFormat?.n_style === 'currency'" #leading>
+                    <span class="text-xs text-muted">R$</span>
+                  </template>
+                </UInput>
                 <UTextarea
                   v-else
                   :model-value="(respostas[campo.refId] as string) ?? ''"
@@ -573,7 +796,7 @@ const abas = computed(() => [
               </div>
               <div class="shrink-0 text-right">
                 <p class="text-xs text-muted">{{ formatarDataHora(linha.data) }}</p>
-                <p class="text-xs text-dimmed">{{ tempoRelativo(linha.data) }}</p>
+                <p class="text-xs text-muted">{{ tempoRelativo(linha.data) }}</p>
               </div>
             </li>
           </ol>
