@@ -1,0 +1,572 @@
+/**
+ * Dado do protótipo de Tarefas Rápidas.
+ *
+ * Estrutura: tirada do payload real de `GET /tasks` do develop e do schema
+ * `Task` do @be-enlighten/enspace-sdk-schemas. Valores: todos inventados.
+ * Nenhum dado de cliente real entra aqui (regra 9 e 13).
+ *
+ * O que o payload da tarefa NÃO traz, e por isso mora em mapa separado aqui:
+ *  - o usuário resolvido: a tarefa carrega só `assigned_to`/`creator` (id numérico);
+ *  - o item (chamado/demanda) a que ela está pendurada: a tarefa carrega só `item`
+ *    (id) e `meta.itemReference`. Os dados custam uma segunda chamada em
+ *    `GET /ws/types/{slug}/items/{reference}`;
+ *  - as etiquetas: `tag_ids` é lista de id.
+ * Isso está separado de propósito: é o que o time de front vai precisar decidir
+ * (resolver no back ou pagar a segunda chamada) para o cartão ficar completo.
+ */
+import type { Task } from '@be-enlighten/enspace-sdk-schemas'
+
+/* ------------------------------------------------------------------ *
+ * Pessoas (recorte do `User` do schema: id, fullname, username, meta) *
+ * ------------------------------------------------------------------ */
+export interface Pessoa {
+  id: number
+  fullname: string
+  username: string
+  /** Iniciais são derivadas, não vêm da API. */
+  iniciais: string
+  cargo: string
+}
+
+export const pessoas: Record<number, Pessoa> = {
+  4057: { id: 4057, fullname: 'Mikaela Jardim', username: 'mikaela.jardim', iniciais: 'MJ', cargo: 'Produto' },
+  4061: { id: 4061, fullname: 'Rafael Quintanilha', username: 'rafael.quintanilha', iniciais: 'RQ', cargo: 'Suporte' },
+  4072: { id: 4072, fullname: 'Bruna Sato', username: 'bruna.sato', iniciais: 'BS', cargo: 'Liderança' },
+  4088: { id: 4088, fullname: 'Ivo Vasconcelos Nogueira', username: 'ivo.nogueira', iniciais: 'IV', cargo: 'Desenvolvimento' },
+  4090: { id: 4090, fullname: 'Alice Ferraz', username: 'alice.ferraz', iniciais: 'AF', cargo: 'Desenvolvimento' },
+}
+
+/* ----------------------------------------------------- *
+ * Etiquetas (a tarefa carrega só os ids em `tag_ids`)    *
+ * ----------------------------------------------------- */
+export interface Etiqueta {
+  id: number
+  nome: string
+  cor: 'primary' | 'success' | 'warning' | 'error' | 'info' | 'neutral'
+}
+
+export const etiquetas: Record<number, Etiqueta> = {
+  1: { id: 1, nome: 'Cliente VIP', cor: 'warning' },
+  2: { id: 2, nome: 'Regressão', cor: 'error' },
+  3: { id: 3, nome: 'Onboarding', cor: 'info' },
+  4: { id: 4, nome: 'Faturamento', cor: 'primary' },
+}
+
+/* ------------------------------------------------------------------ *
+ * Item relacionado. NÃO vem no payload da tarefa: é a segunda chamada *
+ * ------------------------------------------------------------------ */
+export interface ItemRelacionado {
+  id: number
+  reference: string
+  /** Rótulo da categoria no workspace, ex.: Chamado, Demanda. */
+  categoria: string
+  titulo: string
+  /** Identificador curto que a pessoa lê, ex.: CHA-4812. */
+  codigo: string
+}
+
+export const itensRelacionados: Record<number, ItemRelacionado> = {
+  574378: { id: 574378, reference: 'CHAB61C700CD08947259EAB2D67BAFCD', categoria: 'Chamado', titulo: 'Acesso negado ao portal depois da troca de plano', codigo: 'CHA-4812' },
+  574401: { id: 574401, reference: 'CHA10F15842341F4F159F6AB4E4A8922', categoria: 'Chamado', titulo: 'Boleto duplicado na virada do mês', codigo: 'CHA-4815' },
+  574420: { id: 574420, reference: 'DEM5C0A1F2B77D94E2B8C1D0E6F3A9B44', categoria: 'Demanda', titulo: 'Exportar relatório de horas por equipe', codigo: 'DEM-1190' },
+  574455: { id: 574455, reference: 'CHA77B2E9013C4D4A5C9F2E1B8D6A4C310', categoria: 'Chamado', titulo: 'Integração com o ERP parou de sincronizar', codigo: 'CHA-4822' },
+}
+
+/* --------------------------------------------- *
+ * Definição de formulário desenhado no nó        *
+ * (é o formato de `meta.form` quando type=form)  *
+ * --------------------------------------------- */
+export interface CampoDeFormulario {
+  name: string
+  refId: string
+  path?: string
+  label: string
+  type: string
+  width?: string
+  icon?: string
+  colorScheme?: string
+  validation?: string[]
+  options?: { label: string, value: string }[]
+  conditionals?: { or: { op: string, ref: string, value: string }[], and: unknown[] }
+}
+
+const formDecisaoCancelada: CampoDeFormulario[] = [
+  {
+    name: 'decisao_cancelada',
+    refId: 'decisao_cancelada',
+    path: 'decisao_cancelada',
+    label: 'O que fazer com este pedido?',
+    type: 'EnlDropdown',
+    width: '12',
+    icon: 'mdi:form',
+    colorScheme: 'primary',
+    validation: ['required'],
+    options: [
+      { label: 'Abrir demanda nova, o cenário mudou', value: 'nova' },
+      { label: 'Manter a recusa', value: 'recusar' },
+    ],
+    conditionals: { or: [], and: [] },
+  },
+  {
+    name: 'observacoes',
+    refId: 'observacoes',
+    path: 'observacoes',
+    label: 'Por que o cenário mudou?',
+    type: 'EnTextArea',
+    width: '12',
+    validation: ['required'],
+    conditionals: { or: [{ op: '==', ref: '%decisao_cancelada%', value: 'nova' }], and: [] },
+  },
+]
+
+const formTriagem: CampoDeFormulario[] = [
+  {
+    name: 'tipo_validado',
+    refId: 'tipo_validado',
+    label: 'O pedido é bug ou melhoria?',
+    type: 'EnlDropdown',
+    width: '6',
+    validation: ['required'],
+    options: [
+      { label: 'Bug', value: 'bug' },
+      { label: 'Melhoria', value: 'melhoria' },
+    ],
+    conditionals: { or: [], and: [] },
+  },
+  {
+    name: 'prioridade_validada',
+    refId: 'prioridade_validada',
+    label: 'Qual a gravidade?',
+    type: 'EnlDropdown',
+    width: '6',
+    validation: ['required'],
+    options: [
+      { label: 'Crítica', value: 'critica' },
+      { label: 'Alta', value: 'alta' },
+      { label: 'Normal', value: 'normal' },
+    ],
+    conditionals: { or: [], and: [] },
+  },
+  {
+    name: 'plano_de_contorno',
+    refId: 'plano_de_contorno',
+    label: 'Qual o contorno enquanto não sai a correção?',
+    type: 'EnTextArea',
+    width: '12',
+    conditionals: { or: [{ op: '==', ref: '%prioridade_validada%', value: 'critica' }], and: [] },
+  },
+]
+
+/* --------------------------------------------------------- *
+ * As tarefas                                                 *
+ * --------------------------------------------------------- */
+
+/** Hoje do protótipo. Fixo, para o cartão de prazo não mudar de cor sozinho. */
+export const hoje = new Date('2026-09-21T14:00:00.000Z')
+
+function d(iso: string) {
+  return new Date(iso)
+}
+
+/** Preenche o que toda tarefa tem, para o mock não virar parede de repetição. */
+function tarefa(parcial: Partial<Task> & Pick<Task, 'id' | 'reference' | 'name' | 'status'>): Task {
+  return {
+    created_at: d('2026-09-21T11:00:00.000Z'),
+    updated_at: d('2026-09-21T11:00:00.000Z'),
+    deleted_at: null,
+    description: null,
+    workspace: 'produtos',
+    type: 'generic',
+    priority: 'normal',
+    due_date: null,
+    points: 0,
+    meta: {},
+    creator: 4057,
+    assigned_to: 4057,
+    completed_by: null,
+    completed_at: null,
+    node_execution: null,
+    item: null,
+    notification_task: false,
+    archived: false,
+    collaborators: null,
+    // O payload real devolve `external_task` como objeto (link público) ou null.
+    // O schema declara número. Divergência registrada no DECISOES.md.
+    external_task: null,
+    permissions: null,
+    tag_ids: [],
+    ...parcial,
+  } as Task
+}
+
+export const tarefas: Task[] = [
+  /* ------------------------------------------------------------------ *
+   * A tarefa completa: todo campo possível preenchido. É o caso de      *
+   * borda que o cartão precisa aguentar sem virar parede de informação. *
+   * ------------------------------------------------------------------ */
+  tarefa({
+    id: 22078,
+    reference: 'KKwRcYSR9tBzfddG8nsXHI8msyYNVhOE',
+    name: 'Revisar a resposta ao cliente antes de enviar, o texto vai direto para quem abriu o chamado',
+    description: '<p><strong>Atenção: este texto vai direto para o cliente.</strong></p><p>O que ficar no campo abaixo é enviado por e-mail ao solicitante exatamente como está. Confira o tom, os prazos citados e os dados do contrato.</p>',
+    type: 'form',
+    status: 'pending',
+    priority: 'urgent',
+    due_date: d('2026-09-21T22:56:55.290Z'),
+    points: 13,
+    created_at: d('2026-09-21T11:56:55.525Z'),
+    updated_at: d('2026-09-21T13:10:02.000Z'),
+    meta: { form: formTriagem, itemReference: 'CHAB61C700CD08947259EAB2D67BAFCD' },
+    creator: 4061,
+    assigned_to: 4057,
+    node_execution: 615147,
+    item: 574378,
+    notification_task: true,
+    collaborators: [4072, 4088],
+    tag_ids: [1, 2],
+    permissions: [12, 18],
+  }),
+
+  /* ----------------------------- pendentes ----------------------------- */
+  tarefa({
+    id: 22079,
+    reference: 'Lm4TpQ2xRfVbNc8Ks1WdZy7HgJ0EaU6I',
+    name: 'Confirmar a duplicidade com a demanda já aberta pelo time de suporte',
+    description: '<p>A IA procurou no workspace inteiro e encontrou uma demanda que parece tratar do mesmo assunto deste chamado.</p>',
+    type: 'crud',
+    status: 'pending',
+    priority: 'high',
+    due_date: d('2026-09-20T18:00:00.000Z'),
+    points: 5,
+    created_at: d('2026-09-21T10:32:00.000Z'),
+    meta: { form: 'DUnVSD194euEu2XOc8y9GzIUaDXhnCEk', itemReference: 'DEM5C0A1F2B77D94E2B8C1D0E6F3A9B44' },
+    assigned_to: 4072,
+    item: 574420,
+    node_execution: 615150,
+    tag_ids: [3],
+  }),
+  tarefa({
+    id: 22080,
+    reference: 'Pq9ZxLn3KsWb2TvRc5Yd8Hf1Ga6JmE0U',
+    name: 'Decidir o encaminhamento da demanda cancelada',
+    description: '<p>A IA encontrou uma demanda <strong>cancelada</strong> que trata do mesmo assunto deste chamado. Cancelamento não é recusa definitiva.</p>',
+    type: 'form',
+    status: 'pending',
+    priority: 'high',
+    due_date: d('2026-09-22T12:00:00.000Z'),
+    points: 8,
+    created_at: d('2026-09-21T10:28:00.000Z'),
+    meta: { form: formDecisaoCancelada, itemReference: 'CHA10F15842341F4F159F6AB4E4A8922' },
+    assigned_to: 4061,
+    item: 574401,
+    node_execution: 615151,
+    tag_ids: [4],
+  }),
+  tarefa({
+    id: 22081,
+    reference: 'Rt5YuIo8PaSd2FgHj4KlZx1Cv7Bn3Mq9',
+    name: 'Novo chamado de acesso negado, cliente sem plano ativo',
+    description: '<p>Cliente: Aurora Log, cliente comum de teste. Chamado aberto pelo portal às 9h12.</p>',
+    type: 'crud',
+    status: 'pending',
+    points: 3,
+    created_at: d('2026-09-21T09:49:00.000Z'),
+    due_date: d('2026-09-24T18:00:00.000Z'),
+    meta: { form: 'DUnVSD194euEu2XOc8y9GzIUaDXhnCEk', itemReference: 'CHA77B2E9013C4D4A5C9F2E1B8D6A4C310' },
+    assigned_to: 4088,
+    item: 574455,
+  }),
+  tarefa({
+    id: 22082,
+    reference: 'Wq2EdRf5TgYh8UjIk3OlPz6Xc9Vb1Nm4',
+    name: 'Conferir o cadastro do fornecedor antes de liberar o pagamento',
+    type: 'generic',
+    status: 'pending',
+    priority: 'normal',
+    points: 0,
+    created_at: d('2026-09-20T16:05:00.000Z'),
+    assigned_to: null,
+  }),
+  tarefa({
+    id: 22083,
+    reference: 'Zx7Cv4Bn1Mq8Wr5Ty2Ui9Op6As3Df0Gh',
+    name: 'Validar com a liderança o corte de escopo combinado na reunião de quinta',
+    type: 'generic',
+    status: 'pending',
+    priority: 'low',
+    due_date: d('2026-10-02T21:00:00.000Z'),
+    points: 2,
+    created_at: d('2026-09-19T14:20:00.000Z'),
+    assigned_to: 4072,
+    collaborators: [4057],
+  }),
+  tarefa({
+    id: 22084,
+    reference: 'Bn3Mq9Wr2Ty5Ui8Op1As4Df7Gh0Jk6Lz',
+    name: 'Responder o pedido de reembolso com o cálculo do proporcional',
+    description: '<p>O cliente pede o valor proporcional dos 11 dias em que ficou sem acesso.</p>',
+    type: 'crud',
+    status: 'pending',
+    priority: 'high',
+    due_date: d('2026-09-21T20:00:00.000Z'),
+    points: 5,
+    created_at: d('2026-09-21T08:14:00.000Z'),
+    assigned_to: 4061,
+    item: 574401,
+    meta: { form: 'DUnVSD194euEu2XOc8y9GzIUaDXhnCEk', itemReference: 'CHA10F15842341F4F159F6AB4E4A8922' },
+    tag_ids: [1, 4],
+  }),
+  tarefa({
+    id: 22085,
+    reference: 'Cv8Bn5Mq2Wr9Ty6Ui3Op0As7Df4Gh1Jk',
+    name: 'Atualizar o texto do e-mail de boas-vindas com o novo endereço da central de ajuda',
+    type: 'generic',
+    status: 'pending',
+    points: 1,
+    created_at: d('2026-09-18T11:40:00.000Z'),
+    assigned_to: 4090,
+    tag_ids: [3],
+  }),
+  tarefa({
+    id: 22086,
+    reference: 'Df4Gh1Jk8Lz5Xc2Vb9Nm6Qw3Er0Ty7Ui',
+    name: 'Aprovar a exceção de prazo pedida pelo time de implantação',
+    type: 'approval',
+    status: 'pending',
+    priority: 'urgent',
+    due_date: d('2026-09-19T21:00:00.000Z'),
+    points: 8,
+    created_at: d('2026-09-17T09:02:00.000Z'),
+    assigned_to: 4072,
+    collaborators: [4057, 4061],
+    tag_ids: [1],
+  }),
+  tarefa({
+    id: 22087,
+    reference: 'Gh1Jk8Lz5Xc2Vb9Nm6Qw3Er0Ty7Ui4Op',
+    name: 'Revisar a régua de cobrança do plano anual',
+    type: 'generic',
+    status: 'pending',
+    points: 3,
+    created_at: d('2026-09-16T15:30:00.000Z'),
+    assigned_to: 4057,
+    due_date: d('2026-09-30T21:00:00.000Z'),
+    tag_ids: [4],
+  }),
+  tarefa({
+    id: 22088,
+    reference: 'Jk8Lz5Xc2Vb9Nm6Qw3Er0Ty7Ui4Op1As',
+    name: 'Checar se o relatório de horas bate com o apontamento do mês',
+    type: 'generic',
+    status: 'pending',
+    points: 0,
+    created_at: d('2026-09-15T10:10:00.000Z'),
+    assigned_to: null,
+  }),
+
+  /* --------------------------- em andamento --------------------------- */
+  tarefa({
+    id: 22090,
+    reference: 'Lz5Xc2Vb9Nm6Qw3Er0Ty7Ui4Op1As8Df',
+    name: 'Escrever a resposta técnica sobre a parada da integração com o ERP',
+    description: '<p>O time de desenvolvimento confirmou que a fila travou na madrugada de sexta. Falta explicar isso em linguagem de cliente.</p>',
+    type: 'form',
+    status: 'working',
+    priority: 'high',
+    due_date: d('2026-09-22T18:00:00.000Z'),
+    points: 8,
+    created_at: d('2026-09-20T13:45:00.000Z'),
+    updated_at: d('2026-09-21T09:30:00.000Z'),
+    meta: { form: formTriagem, itemReference: 'CHA77B2E9013C4D4A5C9F2E1B8D6A4C310' },
+    assigned_to: 4088,
+    item: 574455,
+    node_execution: 615160,
+    tag_ids: [2],
+  }),
+  tarefa({
+    id: 22091,
+    reference: 'Xc2Vb9Nm6Qw3Er0Ty7Ui4Op1As8Df5Gh',
+    name: 'Montar o cenário de teste do boleto duplicado',
+    type: 'generic',
+    status: 'working',
+    points: 5,
+    created_at: d('2026-09-21T08:00:00.000Z'),
+    assigned_to: 4090,
+    due_date: d('2026-09-23T21:00:00.000Z'),
+  }),
+  tarefa({
+    id: 22092,
+    reference: 'Vb9Nm6Qw3Er0Ty7Ui4Op1As8Df5Gh2Jk',
+    name: 'Conferir os dados do contrato antes de encerrar o chamado do plano anual',
+    type: 'crud',
+    status: 'working',
+    priority: 'low',
+    points: 2,
+    created_at: d('2026-09-19T17:20:00.000Z'),
+    assigned_to: 4061,
+    item: 574378,
+    meta: { form: 'DUnVSD194euEu2XOc8y9GzIUaDXhnCEk', itemReference: 'CHAB61C700CD08947259EAB2D67BAFCD' },
+  }),
+  tarefa({
+    id: 22093,
+    reference: 'Nm6Qw3Er0Ty7Ui4Op1As8Df5Gh2Jk9Lz',
+    name: 'Ajustar o filtro de período do painel de chamados',
+    type: 'generic',
+    status: 'working',
+    points: 3,
+    created_at: d('2026-09-18T09:15:00.000Z'),
+    assigned_to: 4088,
+    due_date: d('2026-09-21T21:00:00.000Z'),
+    tag_ids: [2],
+  }),
+
+  /* ----------------------------- bloqueadas ----------------------------- */
+  tarefa({
+    id: 22095,
+    reference: 'Qw3Er0Ty7Ui4Op1As8Df5Gh2Jk9Lz6Xc',
+    name: 'Esperar o retorno do cliente sobre a janela de manutenção',
+    description: '<p>Enviado em 18/09. Sem resposta até agora.</p>',
+    type: 'generic',
+    status: 'blocked',
+    priority: 'high',
+    due_date: d('2026-09-18T21:00:00.000Z'),
+    points: 5,
+    created_at: d('2026-09-16T11:00:00.000Z'),
+    assigned_to: 4061,
+    item: 574455,
+    tag_ids: [1],
+  }),
+  tarefa({
+    id: 22096,
+    reference: 'Er0Ty7Ui4Op1As8Df5Gh2Jk9Lz6Xc3Vb',
+    name: 'Liberar o acesso ao ambiente de homologação para o time do cliente',
+    type: 'approval',
+    status: 'blocked',
+    points: 8,
+    created_at: d('2026-09-14T16:40:00.000Z'),
+    assigned_to: 4072,
+    due_date: d('2026-09-17T21:00:00.000Z'),
+  }),
+
+  /* ----------------------------- concluídas ----------------------------- */
+  tarefa({
+    id: 22100,
+    reference: 'Ty7Ui4Op1As8Df5Gh2Jk9Lz6Xc3Vb0Nm',
+    name: 'Confirmar se o problema já tem correção liberada',
+    description: '<p>A IA encontrou uma demanda de correção <strong>já concluída</strong> que parece ser exatamente este caso.</p>',
+    type: 'form',
+    status: 'completed',
+    priority: 'normal',
+    points: 5,
+    created_at: d('2026-09-20T09:00:00.000Z'),
+    completed_at: d('2026-09-20T15:22:00.000Z'),
+    completed_by: 4061,
+    assigned_to: 4061,
+    item: 574378,
+    node_execution: 615120,
+    meta: {
+      form: formTriagem,
+      itemReference: 'CHAB61C700CD08947259EAB2D67BAFCD',
+      form_result: {
+        tipo_validado: 'bug',
+        prioridade_validada: 'critica',
+        plano_de_contorno: 'Reprocessar a fila manualmente às 7h enquanto a correção não sobe.',
+        responsavel_acompanhamento_rel: { id: 413170, display: 'Bruna Sato', reference: 'TIMDAA656187C914F0695FA78C2F638A' },
+      },
+    },
+    tag_ids: [2],
+  }),
+  tarefa({
+    id: 22101,
+    reference: 'Ui4Op1As8Df5Gh2Jk9Lz6Xc3Vb0Nm7Qw',
+    name: 'Responder ao cliente sobre a cobrança em duplicidade',
+    type: 'crud',
+    status: 'completed',
+    points: 3,
+    created_at: d('2026-09-19T13:10:00.000Z'),
+    completed_at: d('2026-09-19T14:05:00.000Z'),
+    completed_by: 4057,
+    assigned_to: 4057,
+    item: 574401,
+    meta: { form: 'DUnVSD194euEu2XOc8y9GzIUaDXhnCEk', itemReference: 'CHA10F15842341F4F159F6AB4E4A8922' },
+    tag_ids: [4],
+  }),
+  tarefa({
+    id: 22102,
+    reference: 'Op1As8Df5Gh2Jk9Lz6Xc3Vb0Nm7Qw4Er',
+    name: 'Publicar o artigo sobre a nova tela de tarefas na base de conhecimento',
+    type: 'generic',
+    status: 'completed',
+    points: 8,
+    created_at: d('2026-09-17T10:00:00.000Z'),
+    completed_at: d('2026-09-18T18:40:00.000Z'),
+    completed_by: 4090,
+    assigned_to: 4090,
+    tag_ids: [3],
+  }),
+  tarefa({
+    id: 22103,
+    reference: 'As8Df5Gh2Jk9Lz6Xc3Vb0Nm7Qw4Er1Ty',
+    name: 'Fechar o chamado do acesso negado depois da confirmação do cliente',
+    type: 'crud',
+    status: 'completed',
+    points: 2,
+    created_at: d('2026-09-16T08:30:00.000Z'),
+    completed_at: d('2026-09-16T17:12:00.000Z'),
+    completed_by: 4061,
+    assigned_to: 4061,
+    item: 574378,
+    priority: 'low',
+  }),
+  tarefa({
+    id: 22104,
+    reference: 'Df5Gh2Jk9Lz6Xc3Vb0Nm7Qw4Er1Ty8Ui',
+    name: 'Revisar o texto do aviso de manutenção programada',
+    type: 'generic',
+    status: 'completed',
+    points: 1,
+    created_at: d('2026-09-15T09:45:00.000Z'),
+    completed_at: d('2026-09-15T11:03:00.000Z'),
+    completed_by: 4072,
+    assigned_to: 4072,
+  }),
+  tarefa({
+    id: 22105,
+    reference: 'Gh2Jk9Lz6Xc3Vb0Nm7Qw4Er1Ty8Ui5Op',
+    name: 'Conferir o apontamento de horas do mês de agosto',
+    type: 'generic',
+    status: 'completed',
+    points: 0,
+    created_at: d('2026-09-12T14:00:00.000Z'),
+    completed_at: d('2026-09-12T16:30:00.000Z'),
+    completed_by: 4088,
+    assigned_to: 4088,
+  }),
+  tarefa({
+    id: 22106,
+    reference: 'Jk9Lz6Xc3Vb0Nm7Qw4Er1Ty8Ui5Op2As',
+    name: 'Arquivar as tarefas do piloto que terminou em agosto',
+    type: 'generic',
+    status: 'completed',
+    points: 3,
+    created_at: d('2026-09-10T10:20:00.000Z'),
+    completed_at: d('2026-09-11T09:15:00.000Z'),
+    completed_by: 4057,
+    assigned_to: 4057,
+  }),
+]
+
+/* ------------------------------------------------------------------ *
+ * Visualizações salvas. Vêm da rota de model-views, não de /tasks.    *
+ * Aqui servem só para a barra de visualizações do topo ter conteúdo.  *
+ * ------------------------------------------------------------------ */
+export const visualizacoes = [
+  { id: 'todas', nome: 'Tarefas Rápidas', icone: 'i-lucide-layout-dashboard', padrao: true },
+  { id: 'minhas', nome: 'Minhas tarefas', icone: 'i-lucide-user' },
+  { id: 'produto', nome: 'Tarefas produto', icone: 'i-lucide-package' },
+  { id: 'lideranca', nome: 'Tarefas liderança', icone: 'i-lucide-users' },
+  { id: 'dev', nome: 'Tarefas dev', icone: 'i-lucide-code' },
+]
+
+/** Quem está usando a tela. Define o que é "minha tarefa". */
+export const usuarioAtual = pessoas[4057]!
