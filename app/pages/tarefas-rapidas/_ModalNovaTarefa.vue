@@ -3,9 +3,12 @@
  * Nova tarefa.
  *
  * ⚠️ OS CAMPOS SÃO OS DO PRODUTO, na mesma ordem: Nome (obrigatório), Data
- * limite, Descrição, Responsável e Prioridade. Nada foi acrescentado nem
- * tirado: pontos, tipo e etiquetas não existem na criação de hoje e continuam
- * fora (está no DECISOES.md).
+ * limite, Descrição, Responsável e Prioridade. O único acréscimo é a
+ * **Estimativa**, pedida na rodada 13: é o campo de tempo que o ClickUp
+ * oferece na criação. Tempo REGISTRADO não entra aqui, e isso não é esquecimento
+ * meu nem do ClickUp: não existe tempo apontado numa tarefa que ainda não
+ * existe. Pontos, tipo e etiquetas continuam fora, porque também não existem na
+ * criação de hoje (está no DECISOES.md).
  *
  * O que mudou é o acabamento, no padrão que Linear, ClickUp e Asana usam:
  *
@@ -19,7 +22,7 @@
  */
 import type { Task } from '@be-enlighten/enspace-sdk-schemas'
 import { pessoas, usuarioAtual } from './mocks'
-import { corDaPrioridade, iconeDaPrioridade } from './quadro'
+import { corDaPrioridade, formatarDuracao, iconeDaPrioridade, interpretarDuracao } from './quadro'
 import type { Textos } from './textos'
 
 const props = defineProps<{
@@ -29,7 +32,15 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  criar: [tarefa: { name: string, due_date: Date | null, description: string | null, assigned_to: number | null, priority: Task['priority'] }]
+  criar: [tarefa: {
+    name: string
+    due_date: Date | null
+    description: string | null
+    assigned_to: number | null
+    priority: Task['priority']
+    /** Segundos. Campo novo, que hoje não existe na tarefa do ENSPACE. */
+    estimativa: number
+  }]
   fechar: []
 }>()
 
@@ -41,6 +52,14 @@ const descricao = ref('')
 const responsavel = ref<number>(0)
 const prioridade = ref<Task['priority']>('normal')
 const escrevendoDescricao = ref(false)
+
+/**
+ * Estimativa na criação, como no ClickUp: o formulário de criar tarefa oferece
+ * o **Time Estimate**, não o tempo registrado. Tempo registrado só existe
+ * depois que a tarefa existe, e começa pelo cronômetro ou pelo apontamento.
+ */
+const estimativa = ref('')
+const segundosEstimados = computed(() => interpretarDuracao(estimativa.value))
 
 const prioridades: Task['priority'][] = ['low', 'normal', 'high', 'urgent']
 
@@ -63,6 +82,7 @@ function limpar() {
   descricao.value = ''
   responsavel.value = 0
   prioridade.value = 'normal'
+  estimativa.value = ''
   escrevendoDescricao.value = false
 }
 
@@ -76,6 +96,7 @@ function criar() {
     description: descricao.value.trim() ? `<p>${descricao.value.trim()}</p>` : null,
     assigned_to: responsavel.value || null,
     priority: prioridade.value,
+    estimativa: segundosEstimados.value,
   })
 }
 </script>
@@ -163,6 +184,37 @@ function criar() {
               class="w-full"
               @focus="escrevendoDescricao = true"
             />
+          </div>
+        </div>
+
+        <!-- Estimativa: o campo de tempo que o ClickUp oferece na criação -->
+        <div>
+          <label for="nova-estimativa" class="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-highlighted">
+            <UIcon name="i-lucide-hourglass" class="size-4 text-muted" />
+            {{ t.campos.estimativa }}
+          </label>
+          <div class="flex flex-wrap items-center gap-2">
+            <UInput
+              id="nova-estimativa"
+              v-model="estimativa"
+              :placeholder="t.tempo.duracaoAjuda"
+              size="md"
+              class="w-56"
+            />
+            <div class="flex flex-wrap gap-1">
+              <UButton
+                v-for="atalho in ['30m', '1h', '2h', '4h', '8h']"
+                :key="atalho"
+                :label="atalho"
+                size="xs"
+                color="neutral"
+                :variant="estimativa === atalho ? 'soft' : 'outline'"
+                @click="estimativa = atalho"
+              />
+            </div>
+            <span v-if="segundosEstimados" class="text-xs text-success">
+              {{ formatarDuracao(segundosEstimados) }}
+            </span>
           </div>
         </div>
 

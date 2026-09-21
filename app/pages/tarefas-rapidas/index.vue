@@ -13,7 +13,7 @@ import CascaDoEnspace from './_CascaDoEnspace.vue'
 import ModalNovaTarefa from './_ModalNovaTarefa.vue'
 import PainelDaTarefa from './_PainelDaTarefa.vue'
 import RaiaDoQuadro from './_RaiaDoQuadro.vue'
-import { itensRelacionados, registrosDeTempo, tarefas as tarefasMock, usuarioAtual } from './mocks'
+import { estimativaDeTempo, itensRelacionados, registrosDeTempo, tarefas as tarefasMock, usuarioAtual } from './mocks'
 import type { OrdemDaRaia } from './_RaiaDoQuadro.vue'
 import {
   type Calculo, type ChaveAgrupamento, type ChaveOrdenacao,
@@ -393,8 +393,11 @@ function criar(dados: {
   description: string | null
   assigned_to: number | null
   priority: Task['priority']
+  estimativa: number
 }) {
   const id = Math.max(...lista.value.map(x => x.id)) + 1
+  // A estimativa mora fora da tarefa porque o payload não tem o campo ainda.
+  if (dados.estimativa) estimativaDeTempo[id] = dados.estimativa
   lista.value.unshift({
     ...tarefasMock[4]!,
     id,

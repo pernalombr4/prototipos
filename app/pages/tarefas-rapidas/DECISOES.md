@@ -888,3 +888,55 @@ aviso antes de usar o dado.
   caso e evita um segundo formato de entrada num painel que já está cheio. Se ela quiser os
   dois, é uma linha a mais no formulário;
 - relatório e timesheet são outra tela, e não entram nesta.
+
+---
+
+## Rodada 13 — 21/09/2026
+
+### O que ela pediu, literal
+
+> nao ta legal aqui a opçao de iniciar, pode passar pros 3 pontinhos somente
+>
+> e nos campos de criaçao da task tambem tem que aparecer o time tracking, como aparece la no
+> clickup tambem
+
+### 1. O play saiu do cartão
+
+Ela está certa: a linha de meta do cartão já carrega selo de prioridade, prazo, pontos, ícone
+de formulário, ícone de descrição e até três grupos de avatares. Mais um botão colorido ali
+vira ruído, e ainda por cima um botão que **age** no meio de uma linha que só **informa**.
+
+**Começar o cronômetro ficou só no menu ⋮**, onde já estava desde a rodada 12, com o rótulo
+mudando entre iniciar e parar conforme o estado.
+
+**O que ficou no cartão** é o selo de tempo, que é informação: o total apontado, e o
+cronômetro correndo quando é aquela a tarefa que está contando.
+
+### 2. Estimativa no formulário de criação
+
+**No ClickUp, o que aparece na criação é o Time Estimate**, não o tempo registrado. E o motivo
+é bom: não existe tempo apontado numa tarefa que ainda não existe. O tempo registrado começa
+depois, pelo cronômetro ou pelo apontamento manual.
+
+Então o formulário ganhou **Estimativa**, no mesmo formato do resto:
+
+- campo que aceita `1h 30m`, `90m`, `1:30`, `2h`, com prévia em verde do que foi entendido;
+- atalhos `30m · 1h · 2h · 4h · 8h`, como o prazo tem os dele;
+- ícone de ampulheta no rótulo, igual aos outros campos.
+
+Criando com `2h 30m`, a tarefa nasce com a barra de progresso em `0m de 2h 30m`. Conferido.
+
+**Isto revoga a decisão da rodada 5** de não acrescentar campo nenhum ao formulário de criação.
+Lá eu disse que os campos eram os do produto e nada mais; ela pediu este, e é dela a decisão.
+Pontos, tipo e etiquetas continuam fora.
+
+### Um erro meu, no caminho
+
+Ao inserir os textos de tempo nos três dicionários de idioma, usei um mesmo trecho como âncora
+e **repeti a âncora dentro do próprio texto inserido**. Resultado: as três traduções foram
+parar aninhadas dentro do dicionário português, e o rótulo da estimativa apareceu em espanhol
+numa tela em português. Consertado: cada dicionário tem o seu bloco, e os três idiomas foram
+conferidos na tela (`Estimativa`, `Estimate`, `Estimación`).
+
+A lição, para a próxima: substituição por âncora só é segura quando a âncora **não** aparece no
+texto que entra no lugar dela.

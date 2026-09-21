@@ -249,9 +249,10 @@ const itensDoMenu = computed(() => [[
       </UTooltip>
 
       <!--
-        Tempo, como o ClickUp mostra no cartão: o total apontado, e o play
-        aparecendo no hover para começar a contar sem abrir a tarefa.
-        Rodando, o próprio cartão mostra o cronômetro correndo.
+        Tempo: o total apontado, e o cronômetro correndo quando é esta a
+        tarefa que está contando. **Começar o cronômetro fica no menu ⋮**, não
+        num botão solto: o cartão já tem selo, prazo, pontos e avatares na
+        mesma linha, e mais um botão colorido ali vira ruído.
       -->
       <UTooltip
         v-if="campos.tempo && (tempo || cronometroAtivo)"
@@ -264,18 +265,6 @@ const itensDoMenu = computed(() => [[
           <UIcon :name="cronometroAtivo ? 'i-lucide-circle-dot' : 'i-lucide-timer'" class="size-3" />
           {{ cronometroAtivo ? formatarCronometro(segundosCorrendo ?? 0) : formatarDuracao(tempo) }}
         </span>
-      </UTooltip>
-
-      <UTooltip v-if="campos.tempo && !somenteLeitura && !cronometroAtivo" :text="t.tempo.iniciar">
-        <UButton
-          icon="i-lucide-play"
-          color="success"
-          variant="ghost"
-          size="xs"
-          class="z-10 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
-          :aria-label="t.tempo.iniciar"
-          @click.stop="emit('cronometrar')"
-        />
       </UTooltip>
 
       <!-- Descrição desligada ou cortada: o ícone diz que existe mais texto -->
