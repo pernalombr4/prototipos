@@ -81,6 +81,7 @@ export interface CampoDeFormulario {
   refId: string
   path?: string
   label: string
+  /** `EnlNumber`, `EnlDropdown`, `EnTextArea`, `EnlCalendar`, `EnlMask`… */
   type: string
   width?: string
   icon?: string
@@ -88,6 +89,20 @@ export interface CampoDeFormulario {
   validation?: string[]
   options?: { label: string, value: string }[]
   conditionals?: { or: { op: string, ref: string, value: string }[], and: unknown[] }
+  /**
+   * O formatador do campo, como o `Field.cFormat` do schema. É ele que diz se
+   * um `EnlNumber` é número puro ou dinheiro: moeda é `n_style: 'currency'`,
+   * não um tipo separado.
+   */
+  cFormat?: {
+    type?: 'number' | 'currency' | 'date' | 'text'
+    locale?: string
+    n_style?: 'currency' | 'decimal' | 'percent'
+    n_currencyDisplay?: 'symbol' | 'name' | 'code'
+    n_minimumFractionDigits?: number
+    /** Código ISO da moeda. O schema guarda no campo, aqui fica explícito. */
+    moeda?: string
+  }
 }
 
 const formDecisaoCancelada: CampoDeFormulario[] = [
@@ -105,6 +120,16 @@ const formDecisaoCancelada: CampoDeFormulario[] = [
       { label: 'Abrir demanda nova, o cenário mudou', value: 'nova' },
       { label: 'Manter a recusa', value: 'recusar' },
     ],
+    conditionals: { or: [], and: [] },
+  },
+  {
+    name: 'valor_do_pedido',
+    refId: 'valor_do_pedido',
+    path: 'valor_do_pedido',
+    label: 'Valor do pedido',
+    type: 'EnlNumber',
+    width: '6',
+    cFormat: { type: 'currency', locale: 'pt-BR', n_style: 'currency', n_currencyDisplay: 'symbol', n_minimumFractionDigits: 2, moeda: 'BRL' },
     conditionals: { or: [], and: [] },
   },
   {
@@ -145,6 +170,24 @@ const formTriagem: CampoDeFormulario[] = [
       { label: 'Alta', value: 'alta' },
       { label: 'Normal', value: 'normal' },
     ],
+    conditionals: { or: [], and: [] },
+  },
+  {
+    name: 'horas_estimadas',
+    refId: 'horas_estimadas',
+    label: 'Horas estimadas de correção',
+    type: 'EnlNumber',
+    width: '6',
+    cFormat: { type: 'number', locale: 'pt-BR', n_style: 'decimal', n_minimumFractionDigits: 1 },
+    conditionals: { or: [], and: [] },
+  },
+  {
+    name: 'custo_estimado',
+    refId: 'custo_estimado',
+    label: 'Custo estimado do retrabalho',
+    type: 'EnlNumber',
+    width: '6',
+    cFormat: { type: 'currency', locale: 'pt-BR', n_style: 'currency', n_currencyDisplay: 'symbol', n_minimumFractionDigits: 2, moeda: 'BRL' },
     conditionals: { or: [], and: [] },
   },
   {
@@ -470,6 +513,8 @@ export const tarefas: Task[] = [
       form_result: {
         tipo_validado: 'bug',
         prioridade_validada: 'critica',
+        horas_estimadas: 6.5,
+        custo_estimado: 4200,
         plano_de_contorno: 'Reprocessar a fila manualmente às 7h enquanto a correção não sobe.',
         responsavel_acompanhamento_rel: { id: 413170, display: 'Bruna Sato', reference: 'TIMDAA656187C914F0695FA78C2F638A' },
       },
@@ -488,7 +533,11 @@ export const tarefas: Task[] = [
     completed_by: 4057,
     assigned_to: 4057,
     item: 574401,
-    meta: { form: 'DUnVSD194euEu2XOc8y9GzIUaDXhnCEk', itemReference: 'CHA10F15842341F4F159F6AB4E4A8922' },
+    meta: {
+      form: formDecisaoCancelada,
+      itemReference: 'CHA10F15842341F4F159F6AB4E4A8922',
+      form_result: { decisao_cancelada: 'nova', valor_do_pedido: 1890.5 },
+    },
     tag_ids: [4],
   }),
   tarefa({
@@ -503,6 +552,10 @@ export const tarefas: Task[] = [
     completed_by: 4090,
     assigned_to: 4090,
     tag_ids: [3],
+    meta: {
+      form: formTriagem,
+      form_result: { tipo_validado: 'melhoria', prioridade_validada: 'normal', horas_estimadas: 12, custo_estimado: 7600 },
+    },
   }),
   tarefa({
     id: 22103,
@@ -517,6 +570,11 @@ export const tarefas: Task[] = [
     assigned_to: 4061,
     item: 574378,
     priority: 'low',
+    meta: {
+      form: formDecisaoCancelada,
+      itemReference: 'CHAB61C700CD08947259EAB2D67BAFCD',
+      form_result: { decisao_cancelada: 'recusar', valor_do_pedido: 640 },
+    },
   }),
   tarefa({
     id: 22104,

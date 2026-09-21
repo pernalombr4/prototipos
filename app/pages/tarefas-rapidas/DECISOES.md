@@ -344,3 +344,74 @@ estava no `<h3>`, e `line-clamp` liga `overflow: hidden`, que **recortava o `aft
 link esticado**: a área clicável virava só a caixa do título. O corte passou para um `<span>`
 dentro do link, e o cartão inteiro voltou a ser clicável. Regra 25 continua valendo, e agora
 funciona de verdade.
+
+---
+
+## Rodada 4 — 21/09/2026
+
+### O que ela pediu, literal
+
+> e saiba que o totalizador na base das raias pode somar qualquer campo que seja do tipo
+> numero ou valor monetario, veja no payload quais sao possiveis alem de ponto.
+>
+> e a ordenaçao deve ser possivel por raia tambem, nao só no botao de ordenar global
+
+### 1. O totalizador passou a ser campo mais operação
+
+Antes era uma lista de oito cálculos fechados. Agora o rodapé escolhe **um campo** e **uma
+operação**, e a lista de campos **sai do próprio dado carregado**.
+
+**A resposta à pergunta "quais são possíveis além de ponto":** no ENSPACE o tipo numérico é um
+só, **`EnlNumber`**, e **moeda não é um tipo à parte**: é o mesmo campo com
+`cFormat.n_style: 'currency'`. O `cFormat` também carrega `locale`, `n_currencyDisplay` e
+`n_minimumFractionDigits`, que é o que formata `R$ 11.800,00`. O inventário completo está no
+`BRIEFING.md`, em "O que dá para somar".
+
+Na tarefa, isso dá:
+
+- **`points`**, o único número de negócio que a tarefa tem;
+- **cada resposta numérica do formulário**, em `meta.form_result`. A definição vem junto, em
+  `meta.form`, então o quadro sabe quais respostas são `EnlNumber` e como formatá-las **sem
+  chamada a mais**. No mock isso aparece como "Horas estimadas de correção" (decimal), "Custo
+  estimado do retrabalho" (moeda) e "Valor do pedido" (moeda);
+- **contagens derivadas** (tarefas, atrasadas, sem responsável) e o **prazo mais próximo**, que
+  não são campo mas respondem à mesma pergunta.
+
+Operações: soma, média, mínimo, máximo e preenchidas. Campo derivado não tem operação, porque
+contar é o que ele faz.
+
+**Duas coisas que o desenho precisou dizer em voz alta:**
+
+1. **`meta.form_result` só existe depois de concluída.** Somar "Custo estimado" na raia de
+   pendentes dá vazio, e isso não é defeito. O rodapé mostra **quantas tarefas da raia têm
+   aquele campo preenchido** e escreve "sem valor" quando não há nenhuma. É o mesmo cuidado que
+   o ClickUp documenta (tarefa escondida por filtro não entra na conta) e que o Twenty
+   registrou como bug (issue #11067).
+2. **Campo numérico do item não entra**, porque não vem no payload da tarefa. Somar "valor do
+   contrato" por raia exigiria uma chamada por item. Está declarado como decisão de back-end.
+
+### 2. A ordenação agora é por raia também
+
+O menu da raia ganhou **"Ordenar só esta raia"**, com os mesmos seis campos do botão global,
+mais a direção e um **"Usar a ordem do quadro"** para voltar atrás. A raia com ordem própria
+mostra uma seta ao lado da contagem, com o campo no tooltip: sem isso, uma raia fora da ordem
+do quadro parece defeito.
+
+**Isto não é invenção: o componente do produto já aceita.** O `EnKanbanColumn` do
+`@be-enlighten/enspace-sdk-ui` tem `sortByField` e `sortDesc` **por coluna**, ao lado do
+`defaultColumnSortField` do board. A capacidade está no SDK desde sempre; o que faltava era a
+tela deixar escolher. É o mesmo padrão da rodada 1: a função existe, o lugar é que não.
+
+Regra do desenho: **a raia manda sobre o quadro**. Trocar a ordem global não apaga a ordem que
+a pessoa definiu numa raia; quem apaga é o "Usar a ordem do quadro".
+
+### O que isso pede do back
+
+Hoje o protótipo calcula em memória, sobre as tarefas carregadas. Com volume, os dois pedidos
+viram chamada:
+
+- o totalizador precisa de agregação com os mesmos filtros da tela, algo como
+  `GET /tasks/count` e um `sum`/`avg` por campo, inclusive sobre chave de `form_result`;
+- a ordem por raia precisa de `_sort` por requisição de coluna, já que cada raia pagina sozinha.
+
+Está no `COMPONENTES-CUSTOM.md`, na linha do `_RaiaDoQuadro`.

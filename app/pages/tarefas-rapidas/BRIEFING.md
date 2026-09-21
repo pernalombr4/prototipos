@@ -270,6 +270,46 @@ Distribuição: `crud` 60, `generic` 37, `form` 31; `pending` 74, `completed` 54
 - **Depois de concluída**: ganha `meta.form_result` com as respostas. Campo simples vem como
   texto, campo de relacionamento vem como objeto com `id`, `display` e `reference`.
 
+### O que dá para somar: os campos numéricos do payload
+
+Levantado no schema (`Field` do `@be-enlighten/enspace-sdk-schemas`) e no payload das tarefas.
+
+**No ENSPACE, dinheiro não é um tipo de campo.** O tipo numérico é um só, **`EnlNumber`**, e o
+que faz um número virar moeda é o formatador do campo, `cFormat`:
+
+```json
+"cFormat": { "type": "currency", "locale": "pt-BR", "n_style": "currency",
+             "n_currencyDisplay": "symbol", "n_minimumFractionDigits": 2 }
+```
+
+`n_style` aceita `currency`, `decimal` e `percent`. Então quem soma precisa olhar o `cFormat`
+do campo, não o `type`, para decidir se o total sai como `R$ 11.800,00` ou como `18,5`.
+
+**Onde estão os números, na tarefa:**
+
+| Origem | Campo | Serve para |
+|---|---|---|
+| **Da tarefa** | `points` | É o único número de negócio que a tarefa carrega. Soma, média, mínimo, máximo |
+| **Do formulário** | cada resposta em `meta.form_result` cujo campo em `meta.form` seja `EnlNumber` | Soma, média, mínimo, máximo, e formatação por `cFormat` (inclusive moeda) |
+| **Identificadores** | `id`, `creator`, `assigned_to`, `completed_by`, `node_execution`, `item`, `external_task` | São números, mas somá-los não quer dizer nada. Contar distintos, sim |
+| **Listas** | `tag_ids` | Contagem |
+| **Datas** | `created_at`, `updated_at`, `due_date`, `completed_at` | Mais antiga, mais recente, intervalo |
+| **Booleanos** | `archived`, `notification_task` | Contagem e porcentagem |
+
+**O ponto que muda o desenho:** a definição do formulário vem **junto com a tarefa**, em
+`meta.form`, com `type` e `cFormat` de cada campo. Então o quadro sabe quais respostas são
+numéricas e como formatá-las **sem nenhuma chamada a mais**. É isso que permite o totalizador
+oferecer "Custo estimado do retrabalho" na lista de campos.
+
+**E o limite honesto:** `meta.form_result` só existe **depois que a tarefa é concluída**. Numa
+raia de pendentes, somar um campo de formulário dá vazio. Por isso o totalizador mostra quantas
+tarefas da raia têm aquele campo preenchido.
+
+**O que não dá, só com o payload da tarefa:** somar campo numérico do **item** (o chamado ou a
+demanda), que é onde moram valores como "valor do contrato". A tarefa carrega só `item` e
+`meta.itemReference`; o valor exige `GET /ws/types/{slug}/items/{reference}`, uma chamada por
+item. Fica registrado como decisão de back-end, não de tela.
+
 ### O que não vem no payload
 
 A tarefa **não tem campos personalizados próprios**. O que varia por workspace está em

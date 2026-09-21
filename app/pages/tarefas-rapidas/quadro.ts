@@ -7,6 +7,7 @@
  */
 import type { Task } from '@be-enlighten/enspace-sdk-schemas'
 import type { EnKanbanColorScheme } from '@be-enlighten/enspace-sdk-ui/base'
+import type { CampoDeFormulario } from './mocks'
 import { etiquetas, hoje, pessoas } from './mocks'
 import type { Textos } from './textos'
 
@@ -217,55 +218,168 @@ export function formatarDataHora(data: Date | string | null | undefined): string
 
 /* ----------------------------- calculadora ----------------------------- */
 
-export type Calculo =
-  | 'contagem' | 'somaPontos' | 'mediaPontos' | 'maiorPontuacao'
-  | 'atrasadas' | 'semResponsavel' | 'prazoMaisProximo' | 'nenhum'
+/**
+ * O totalizador soma CAMPO por OPERAÇÃO, não um cálculo fechado.
+ *
+ * Que campo pode entrar, e de onde ele vem:
+ *
+ *  - **`points`**, o único número que a própria tarefa carrega (`EnlNumber`);
+ *  - **as respostas numéricas do formulário da tarefa**, em `meta.form_result`.
+ *    A definição vem junto, em `meta.form`, então dá para saber quais respostas
+ *    são numéricas sem chamada nenhuma: são os campos `type: 'EnlNumber'`.
+ *    **Dinheiro não é um tipo à parte no ENSPACE**: é um `EnlNumber` com
+ *    `cFormat.n_style: 'currency'`, e é isso que decide se o total sai como
+ *    `R$ 12.340,50` ou como `12.340,5`;
+ *  - **contagens derivadas** (tarefas, atrasadas, sem responsável) e **datas**
+ *    (prazo mais próximo), que não são campo mas respondem à mesma pergunta.
+ *
+ * O que NÃO dá para somar só com o payload da tarefa: qualquer campo numérico
+ * do **item** (o chamado ou a demanda). A tarefa carrega só `item` e
+ * `meta.itemReference`; o valor mora em `GET /ws/types/{slug}/items/{reference}`.
+ * Está declarado no DECISOES.md.
+ */
+export type Operacao = 'soma' | 'media' | 'minimo' | 'maximo' | 'preenchidos'
 
-export const calculosDisponiveis: Calculo[] = [
-  'contagem', 'somaPontos', 'mediaPontos', 'maiorPontuacao',
-  'atrasadas', 'semResponsavel', 'prazoMaisProximo', 'nenhum',
-]
+export const operacoesNumericas: Operacao[] = ['soma', 'media', 'minimo', 'maximo', 'preenchidos']
+
+export interface CampoCalculavel {
+  /** `points`, `form:<refId>`, ou uma das chaves derivadas. */
+  chave: string
+  rotulo: string
+  tipo: 'numero' | 'moeda' | 'contagem' | 'data'
+  origem: 'tarefa' | 'formulario' | 'derivado'
+  cFormat?: CampoDeFormulario['cFormat']
+}
+
+export interface Calculo {
+  campo: string
+  operacao: Operacao
+}
+
+export const calculoPadrao: Calculo = { campo: 'points', operacao: 'soma' }
+
+/** Os campos derivados, que não são campo do payload mas todo quadro quer. */
+function camposDerivados(t: Textos): CampoCalculavel[] {
+  return [
+    { chave: 'contagem', rotulo: t.calculos.contagem, tipo: 'contagem', origem: 'derivado' },
+    { chave: 'atrasadas', rotulo: t.calculos.atrasadas, tipo: 'contagem', origem: 'derivado' },
+    { chave: 'semResponsavel', rotulo: t.calculos.semResponsavel, tipo: 'contagem', origem: 'derivado' },
+    { chave: 'prazoMaisProximo', rotulo: t.calculos.prazoMaisProximo, tipo: 'data', origem: 'derivado' },
+  ]
+}
+
+/**
+ * Varre as tarefas carregadas e descobre que campos numéricos existem.
+ * É o mesmo que o produto faria: a definição do formulário vem no payload.
+ */
+export function camposCalculaveis(tarefas: Task[], t: Textos): CampoCalculavel[] {
+  const lista: CampoCalculavel[] = [
+    { chave: 'points', rotulo: t.campos.pontos, tipo: 'numero', origem: 'tarefa' },
+  ]
+
+  const vistos = new Set<string>()
+  for (const tarefa of tarefas) {
+    const meta = (tarefa.meta ?? {}) as Record<string, unknown>
+    const definicao = Array.isArray(meta.form) ? meta.form as CampoDeFormulario[] : []
+    for (const campo of definicao) {
+      if (campo.type !== 'EnlNumber' || vistos.has(campo.refId)) continue
+      vistos.add(campo.refId)
+      lista.push({
+        chave: `form:${campo.refId}`,
+        rotulo: campo.label,
+        tipo: campo.cFormat?.n_style === 'currency' || campo.cFormat?.type === 'currency' ? 'moeda' : 'numero',
+        origem: 'formulario',
+        cFormat: campo.cFormat,
+      })
+    }
+  }
+
+  return [...lista, ...camposDerivados(t)]
+}
+
+/** O valor numérico de uma tarefa para o campo escolhido, ou `null` se não tem. */
+export function valorDoCampo(tarefa: Task, chave: string): number | null {
+  if (chave === 'points') return tarefa.points ?? 0
+  if (!chave.startsWith('form:')) return null
+  const meta = (tarefa.meta ?? {}) as Record<string, unknown>
+  const resultado = (meta.form_result ?? null) as Record<string, unknown> | null
+  if (!resultado) return null
+  const bruto = resultado[chave.slice(5)]
+  const numero = typeof bruto === 'number' ? bruto : Number(bruto)
+  return Number.isFinite(numero) ? numero : null
+}
+
+function formatarValor(numero: number, campo: CampoCalculavel): string {
+  const locale = campo.cFormat?.locale ?? 'pt-BR'
+  if (campo.tipo === 'moeda') {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: campo.cFormat?.moeda ?? 'BRL',
+      currencyDisplay: campo.cFormat?.n_currencyDisplay ?? 'symbol',
+      minimumFractionDigits: campo.cFormat?.n_minimumFractionDigits ?? 2,
+    }).format(numero)
+  }
+  const casas = campo.cFormat?.n_minimumFractionDigits ?? 0
+  return new Intl.NumberFormat(locale, {
+    minimumFractionDigits: Number.isInteger(numero) && !casas ? 0 : casas,
+    maximumFractionDigits: Math.max(casas, 1),
+  }).format(numero)
+}
 
 export interface ResultadoDoCalculo {
   valor: string
-  /** Quando o número merece atenção, o rodapé acende. */
+  /** Quando o número pede atenção, o rodapé acende. */
   alerta: boolean
+  /** Quantas tarefas da raia têm esse campo preenchido, e quantas são. */
+  cobertura?: { com: number, total: number }
 }
 
-export function calcular(tarefas: Task[], calculo: Calculo, t: Textos): ResultadoDoCalculo {
-  if (calculo === 'nenhum' || !tarefas.length) {
-    return { valor: calculo === 'nenhum' ? '' : '0', alerta: false }
-  }
-  switch (calculo) {
-    case 'contagem':
-      return { valor: String(tarefas.length), alerta: false }
-    case 'somaPontos':
-      return { valor: String(tarefas.reduce((s, x) => s + (x.points ?? 0), 0)), alerta: false }
-    case 'mediaPontos': {
-      const media = tarefas.reduce((s, x) => s + (x.points ?? 0), 0) / tarefas.length
-      return { valor: media.toFixed(1).replace('.', ','), alerta: false }
-    }
-    case 'maiorPontuacao':
-      return { valor: String(Math.max(...tarefas.map(x => x.points ?? 0))), alerta: false }
-    case 'atrasadas': {
+export function calcular(
+  tarefas: Task[],
+  calculo: Calculo,
+  campo: CampoCalculavel | undefined,
+  t: Textos,
+): ResultadoDoCalculo {
+  if (!campo) return { valor: '', alerta: false }
+
+  if (campo.origem === 'derivado') {
+    if (!tarefas.length) return { valor: '0', alerta: false }
+    if (campo.chave === 'contagem') return { valor: String(tarefas.length), alerta: false }
+    if (campo.chave === 'atrasadas') {
       const n = tarefas.filter(x => estaAtrasada(x)).length
       return { valor: String(n), alerta: n > 0 }
     }
-    case 'semResponsavel': {
+    if (campo.chave === 'semResponsavel') {
       const n = tarefas.filter(x => !x.assigned_to).length
       return { valor: String(n), alerta: n > 0 }
     }
-    case 'prazoMaisProximo': {
-      const comPrazo = tarefas
-        .filter(x => x.due_date && x.status !== 'completed')
-        .sort((a, b) => new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime())
-      const primeira = comPrazo[0]
-      if (!primeira) return { valor: t.semPrazo, alerta: false }
-      return { valor: formatarData(primeira.due_date as Date), alerta: estaAtrasada(primeira) }
-    }
-    default:
-      return { valor: '', alerta: false }
+    const comPrazo = tarefas
+      .filter(x => x.due_date && x.status !== 'completed')
+      .sort((a, b) => new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime())
+    const primeira = comPrazo[0]
+    if (!primeira) return { valor: t.semPrazo, alerta: false }
+    return { valor: formatarData(primeira.due_date as Date), alerta: estaAtrasada(primeira) }
   }
+
+  const valores = tarefas
+    .map(x => valorDoCampo(x, campo.chave))
+    .filter((v): v is number => v !== null)
+
+  const cobertura = { com: valores.length, total: tarefas.length }
+
+  if (calculo.operacao === 'preenchidos') {
+    return { valor: String(valores.length), alerta: false, cobertura }
+  }
+  if (!valores.length) return { valor: '', alerta: false, cobertura }
+
+  let numero: number
+  switch (calculo.operacao) {
+    case 'media': numero = valores.reduce((a, b) => a + b, 0) / valores.length; break
+    case 'minimo': numero = Math.min(...valores); break
+    case 'maximo': numero = Math.max(...valores); break
+    default: numero = valores.reduce((a, b) => a + b, 0)
+  }
+  return { valor: formatarValor(numero, campo), alerta: false, cobertura }
 }
 
 /* ------------------------------- auxiliares ------------------------------- */

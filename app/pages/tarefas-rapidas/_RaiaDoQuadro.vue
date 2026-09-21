@@ -2,24 +2,40 @@
 /**
  * A raia: cabeçalho, corpo e o totalizador preso no rodapé.
  *
- * O rodapé é a peça nova. No quadro de hoje o único número da tela é a
- * contagem no topo e o "500 por página" do rodapé da página inteira. Aqui cada
- * raia fecha a própria conta, e o cálculo se troca pelo próprio rodapé.
+ * Duas coisas que o quadro de hoje não tem e que moram aqui:
+ *
+ *  - **o totalizador**, que soma CAMPO por OPERAÇÃO. O campo pode ser os
+ *    pontos da tarefa ou qualquer resposta numérica do formulário dela
+ *    (`EnlNumber`), inclusive monetária, que no ENSPACE é o mesmo campo com
+ *    `cFormat.n_style: 'currency'`. A lista sai do próprio dado carregado;
+ *  - **a ordem por raia**, que o `EnKanbanBoard` do SDK já aceita por coluna
+ *    (`sortByField` e `sortDesc`) e a tela nunca expôs.
  */
 import type { Task } from '@be-enlighten/enspace-sdk-schemas'
 import CartaoDeTarefa from './_CartaoDeTarefa.vue'
 import {
-  calcular, calculosDisponiveis, type Calculo, type DefinicaoDeRaia,
+  calcular, ordenacoes, operacoesNumericas,
+  type Calculo, type CampoCalculavel, type ChaveOrdenacao, type DefinicaoDeRaia, type Operacao,
 } from './quadro'
 import type { Textos } from './textos'
+
+export interface OrdemDaRaia {
+  chave: ChaveOrdenacao
+  desc: boolean
+}
 
 const props = defineProps<{
   raia: DefinicaoDeRaia
   tarefas: Task[]
   t: Textos
+  /** Quais campos aparecem no cartão. */
   campos: Record<string, boolean>
+  /** O que o totalizador pode somar, descoberto do dado carregado. */
+  camposDoTotalizador: CampoCalculavel[]
   densidade: 'compacto' | 'padrao' | 'completo'
   calculo: Calculo
+  /** Ordem só desta raia. `null` quer dizer "a mesma do quadro". */
+  ordenacaoDaRaia?: OrdemDaRaia | null
   limite?: number | null
   recolhida?: boolean
   somenteLeitura?: boolean
@@ -34,6 +50,7 @@ const emit = defineEmits<{
   ocultar: []
   novaTarefa: []
   calculo: [c: Calculo]
+  ordenacao: [o: OrdemDaRaia | null]
   limite: [n: number | null]
   soltar: [idDaTarefa: number]
   abrir: [tarefa: Task]
@@ -49,7 +66,12 @@ watch(() => props.tarefas.length, () => { mostrando.value = PASSO })
 const visiveis = computed(() => props.tarefas.slice(0, mostrando.value))
 const restantes = computed(() => Math.max(0, props.tarefas.length - mostrando.value))
 
-const resultado = computed(() => calcular(props.tarefas, props.calculo, props.t))
+const campoEscolhido = computed(() =>
+  props.camposDoTotalizador.find(c => c.chave === props.calculo.campo))
+
+const resultado = computed(() =>
+  calcular(props.tarefas, props.calculo, campoEscolhido.value, props.t))
+
 const acimaDoLimite = computed(() => !!props.limite && props.tarefas.length > props.limite)
 
 const recebendo = ref(false)
@@ -67,16 +89,65 @@ const textoDaCor: Record<string, string> = {
   error: 'text-error', info: 'text-info', neutral: 'text-toned',
 }
 
-const itensDoCalculo = computed(() => [calculosDisponiveis.map(c => ({
-  label: props.t.calculos[c],
-  icon: props.calculo === c ? 'i-lucide-check' : 'i-lucide-minus',
-  onSelect: () => emit('calculo', c),
-}))])
+/* ----------------------------- o totalizador ----------------------------- */
+
+/** Campo derivado não tem operação: contar é o que ele faz. */
+const temOperacao = computed(() => campoEscolhido.value?.origem !== 'derivado')
+
+const rotuloDoCalculo = computed(() => {
+  const campo = campoEscolhido.value
+  if (!campo) return props.t.calculadora
+  if (!temOperacao.value) return campo.rotulo
+  return `${props.t.operacoes[props.calculo.operacao]} · ${campo.rotulo}`
+})
+
+const gruposDeCampos = computed(() => [
+  { titulo: props.t.camposDaTarefa, itens: props.camposDoTotalizador.filter(c => c.origem === 'tarefa') },
+  { titulo: props.t.camposDoFormulario, itens: props.camposDoTotalizador.filter(c => c.origem === 'formulario') },
+  { titulo: props.t.contagens, itens: props.camposDoTotalizador.filter(c => c.origem === 'derivado') },
+].filter(g => g.itens.length))
+
+function escolherCampo(campo: CampoCalculavel) {
+  emit('calculo', { campo: campo.chave, operacao: props.calculo.operacao })
+}
+
+function escolherOperacao(operacao: Operacao) {
+  emit('calculo', { campo: props.calculo.campo, operacao })
+}
+
+/* ------------------------------ a ordenação ------------------------------ */
+
+const rotuloDaOrdem = computed(() => {
+  if (!props.ordenacaoDaRaia) return ''
+  const o = ordenacoes.find(x => x.valor === props.ordenacaoDaRaia!.chave)
+  return o ? props.t.campos[o.rotulo] : ''
+})
+
+const itensDeOrdenacao = computed(() => [
+  ordenacoes.map(o => ({
+    label: props.t.campos[o.rotulo],
+    icon: props.ordenacaoDaRaia?.chave === o.valor ? 'i-lucide-check' : 'i-lucide-minus',
+    onSelect: () => emit('ordenacao', { chave: o.valor, desc: props.ordenacaoDaRaia?.desc ?? false }),
+  })),
+  [{
+    label: props.ordenacaoDaRaia?.desc ? props.t.decrescente : props.t.crescente,
+    icon: props.ordenacaoDaRaia?.desc ? 'i-lucide-arrow-down-wide-narrow' : 'i-lucide-arrow-up-narrow-wide',
+    onSelect: () => emit('ordenacao', {
+      chave: props.ordenacaoDaRaia?.chave ?? 'due_date',
+      desc: !props.ordenacaoDaRaia?.desc,
+    }),
+  }, {
+    label: props.t.usarOrdemDoQuadro,
+    icon: 'i-lucide-rotate-ccw',
+    onSelect: () => emit('ordenacao', null),
+  }],
+])
 
 const itensDaRaia = computed(() => [[
   { label: props.t.novaTarefaNaRaia, icon: 'i-lucide-plus', onSelect: () => emit('novaTarefa') },
-  { label: props.t.recolher, icon: 'i-lucide-chevrons-right-left', onSelect: () => emit('recolher') },
+  { label: props.t.ordemDaRaia, icon: 'i-lucide-arrow-up-down', children: itensDeOrdenacao.value },
 ], [
+  { label: props.t.recolher, icon: 'i-lucide-chevrons-right-left', onSelect: () => emit('recolher') },
   { label: props.t.definirLimite, icon: 'i-lucide-gauge', onSelect: () => emit('limite', props.limite ? null : 6) },
   { label: props.t.ocultarRaia, icon: 'i-lucide-eye-off', onSelect: () => emit('ocultar') },
 ]])
@@ -127,6 +198,14 @@ function aoSoltar(evento: DragEvent) {
       >
         {{ limite ? `${tarefas.length}/${limite}` : tarefas.length }}
       </span>
+
+      <!-- Ordem própria: sem isto, a raia fora da ordem do quadro parece defeito -->
+      <UTooltip v-if="ordenacaoDaRaia" :text="t.ordemPropria(rotuloDaOrdem)">
+        <UIcon
+          :name="ordenacaoDaRaia.desc ? 'i-lucide-arrow-down-wide-narrow' : 'i-lucide-arrow-up-narrow-wide'"
+          class="size-3.5 shrink-0 text-primary"
+        />
+      </UTooltip>
 
       <div class="ml-auto flex items-center gap-0.5">
         <UButton
@@ -204,26 +283,101 @@ function aoSoltar(evento: DragEvent) {
     </div>
 
     <!-- Totalizador. Fica sempre visível, mesmo com a raia rolada. -->
-    <footer
-      class="flex items-center gap-2 rounded-b-xl border-t border-default bg-elevated px-3 py-2"
-    >
-      <UDropdownMenu :items="itensDoCalculo" :content="{ align: 'start' }">
+    <footer class="flex items-center gap-2 rounded-b-xl border-t border-default bg-elevated px-3 py-2">
+      <UPopover :content="{ align: 'start', side: 'top' }">
         <button
           type="button"
-          class="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-toned transition-colors hover:text-highlighted"
+          class="flex min-w-0 items-center gap-1 text-xs font-medium uppercase tracking-wide text-toned transition-colors hover:text-highlighted"
           :aria-label="t.escolherCalculo"
         >
-          <UIcon name="i-lucide-sigma" class="size-3.5" />
-          {{ calculo === 'nenhum' ? t.calculadora : t.calculos[calculo] }}
-          <UIcon name="i-lucide-chevron-down" class="size-3" />
+          <UIcon name="i-lucide-sigma" class="size-3.5 shrink-0" />
+          <span class="truncate">{{ rotuloDoCalculo }}</span>
+          <UIcon name="i-lucide-chevron-down" class="size-3 shrink-0" />
         </button>
-      </UDropdownMenu>
+
+        <template #content>
+          <div class="flex w-[28rem] divide-x divide-default">
+            <!-- Campo -->
+            <div class="max-h-80 w-1/2 overflow-y-auto p-1.5">
+              <p class="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted">
+                {{ t.campoDoCalculo }}
+              </p>
+              <template v-for="grupo in gruposDeCampos" :key="grupo.titulo">
+                <p class="px-2 pb-0.5 pt-2 text-xs text-muted">{{ grupo.titulo }}</p>
+                <UButton
+                  v-for="campo in grupo.itens"
+                  :key="campo.chave"
+                  :label="campo.rotulo"
+                  :icon="calculo.campo === campo.chave ? 'i-lucide-check' : 'i-lucide-minus'"
+                  block
+                  size="sm"
+                  color="neutral"
+                  :variant="calculo.campo === campo.chave ? 'soft' : 'ghost'"
+                  class="justify-start"
+                  @click="escolherCampo(campo)"
+                >
+                  <span class="truncate">{{ campo.rotulo }}</span>
+                  <UBadge
+                    v-if="campo.tipo === 'moeda'"
+                    label="R$"
+                    color="neutral"
+                    variant="subtle"
+                    size="sm"
+                    class="ml-auto"
+                  />
+                </UButton>
+              </template>
+            </div>
+
+            <!-- Operação -->
+            <div class="w-1/2 p-1.5">
+              <p class="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted">
+                {{ t.operacaoDoCalculo }}
+              </p>
+              <UButton
+                v-for="op in operacoesNumericas"
+                :key="op"
+                :label="t.operacoes[op]"
+                :icon="calculo.operacao === op ? 'i-lucide-check' : 'i-lucide-minus'"
+                block
+                size="sm"
+                color="neutral"
+                :variant="calculo.operacao === op ? 'soft' : 'ghost'"
+                class="justify-start"
+                :disabled="!temOperacao"
+                @click="escolherOperacao(op)"
+              />
+              <p v-if="!temOperacao" class="px-2 pt-2 text-xs text-muted">
+                {{ t.contagens }}
+              </p>
+            </div>
+          </div>
+        </template>
+      </UPopover>
+
+      <UTooltip
+        v-if="resultado.cobertura && resultado.cobertura.com < resultado.cobertura.total"
+        :text="t.cobertura(resultado.cobertura.com, resultado.cobertura.total)"
+      >
+        <span
+          class="ml-auto flex items-center gap-1 text-sm font-semibold tabular-nums transition-colors"
+          :class="resultado.alerta ? 'text-error' : 'text-highlighted'"
+          role="status"
+        >
+          <span v-if="!resultado.valor" class="text-xs font-normal text-muted">
+            {{ t.semValorNaRaia }}
+          </span>
+          <template v-else>{{ resultado.valor }}</template>
+          <UIcon name="i-lucide-info" class="size-3 text-muted" />
+        </span>
+      </UTooltip>
 
       <span
+        v-else
         class="ml-auto text-sm font-semibold tabular-nums transition-colors"
         :class="resultado.alerta ? 'text-error' : 'text-highlighted'"
         role="status"
-        :aria-label="`${t.calculos[calculo]}: ${resultado.valor}`"
+        :aria-label="`${rotuloDoCalculo}: ${resultado.valor}`"
       >
         {{ resultado.valor }}
       </span>

@@ -142,6 +142,17 @@ export interface Textos {
     prazoMaisProximo: string
   }
   aplicarEmTodas: string
+  operacoes: { soma: string, media: string, minimo: string, maximo: string, preenchidos: string }
+  campoDoCalculo: string
+  operacaoDoCalculo: string
+  semValorNaRaia: string
+  cobertura: (com: number, total: number) => string
+  camposDaTarefa: string
+  camposDoFormulario: string
+  contagens: string
+  ordemDaRaia: string
+  usarOrdemDoQuadro: string
+  ordemPropria: (campo: string) => string
 
   /* painel */
   abaTarefa: string
@@ -333,6 +344,17 @@ export const textos: Record<Idioma, Textos> = {
       prazoMaisProximo: 'Prazo mais próximo',
     },
     aplicarEmTodas: 'Usar o mesmo cálculo em todas as raias',
+    operacoes: { soma: 'Soma', media: 'Média', minimo: 'Mínimo', maximo: 'Máximo', preenchidos: 'Preenchidas' },
+    campoDoCalculo: 'Campo',
+    operacaoDoCalculo: 'Operação',
+    semValorNaRaia: 'sem valor',
+    cobertura: (com, total) => `${com} de ${total} preenchidas`,
+    camposDaTarefa: 'Da tarefa',
+    camposDoFormulario: 'Do formulário',
+    contagens: 'Contagens',
+    ordemDaRaia: 'Ordenar só esta raia',
+    usarOrdemDoQuadro: 'Usar a ordem do quadro',
+    ordemPropria: campo => `Esta raia está ordenada por ${campo}`,
 
     abaTarefa: 'Tarefa',
     abaComentarios: 'Comentários',
@@ -520,6 +542,17 @@ export const textos: Record<Idioma, Textos> = {
       prazoMaisProximo: 'Nearest due date',
     },
     aplicarEmTodas: 'Use the same calculation in every lane',
+    operacoes: { soma: 'Sum', media: 'Average', minimo: 'Minimum', maximo: 'Maximum', preenchidos: 'Filled' },
+    campoDoCalculo: 'Field',
+    operacaoDoCalculo: 'Operation',
+    semValorNaRaia: 'no value',
+    cobertura: (com, total) => `${com} of ${total} filled`,
+    camposDaTarefa: 'From the task',
+    camposDoFormulario: 'From the form',
+    contagens: 'Counts',
+    ordemDaRaia: 'Sort this lane only',
+    usarOrdemDoQuadro: 'Use the board order',
+    ordemPropria: campo => `This lane is sorted by ${campo}`,
 
     abaTarefa: 'Task',
     abaComentarios: 'Comments',
@@ -707,6 +740,17 @@ export const textos: Record<Idioma, Textos> = {
       prazoMaisProximo: 'Fecha más cercana',
     },
     aplicarEmTodas: 'Usar el mismo cálculo en todos los carriles',
+    operacoes: { soma: 'Suma', media: 'Promedio', minimo: 'Mínimo', maximo: 'Máximo', preenchidos: 'Completadas' },
+    campoDoCalculo: 'Campo',
+    operacaoDoCalculo: 'Operación',
+    semValorNaRaia: 'sin valor',
+    cobertura: (com, total) => `${com} de ${total} completadas`,
+    camposDaTarefa: 'De la tarea',
+    camposDoFormulario: 'Del formulario',
+    contagens: 'Conteos',
+    ordemDaRaia: 'Ordenar solo este carril',
+    usarOrdemDoQuadro: 'Usar el orden del tablero',
+    ordemPropria: campo => `Este carril está ordenado por ${campo}`,
 
     abaTarefa: 'Tarea',
     abaComentarios: 'Comentarios',

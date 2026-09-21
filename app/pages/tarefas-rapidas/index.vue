@@ -13,9 +13,11 @@ import CascaDoEnspace from './_CascaDoEnspace.vue'
 import PainelDaTarefa from './_PainelDaTarefa.vue'
 import RaiaDoQuadro from './_RaiaDoQuadro.vue'
 import { hoje, itensRelacionados, tarefas as tarefasMock, usuarioAtual } from './mocks'
+import type { OrdemDaRaia } from './_RaiaDoQuadro.vue'
 import {
   type Calculo, type ChaveAgrupamento, type ChaveOrdenacao,
-  compararTarefas, diasAteOPrazo, estaAtrasada, raiaDaTarefa, raiasDoAgrupamento,
+  calculoPadrao, camposCalculaveis, compararTarefas, diasAteOPrazo, estaAtrasada,
+  raiaDaTarefa, raiasDoAgrupamento,
 } from './quadro'
 import { textos } from './textos'
 
@@ -93,8 +95,17 @@ const filtros = ref<Filtros>({
 /** Cada raia guarda o próprio cálculo. Soma de pontos é o padrão. */
 const calculoPorRaia = ref<Record<string, Calculo>>({})
 function calculoDaRaia(valor: string): Calculo {
-  return calculoPorRaia.value[valor] ?? 'somaPontos'
+  return calculoPorRaia.value[valor] ?? calculoPadrao
 }
+
+/**
+ * E a própria ordem. O `EnKanbanBoard` já aceita ordem por coluna
+ * (`sortByField` e `sortDesc`); o que faltava era a tela deixar escolher.
+ */
+const ordenacaoPorRaia = ref<Record<string, OrdemDaRaia | null>>({})
+
+/** O que o totalizador pode somar, descoberto do dado que está carregado. */
+const camposDoTotalizador = computed(() => camposCalculaveis(lista.value, t.value))
 
 /* --------------------------- filtro e agrupamento --------------------------- */
 
@@ -148,12 +159,18 @@ interface RaiaMontada {
 }
 
 const raias = computed<RaiaMontada[]>(() =>
-  definicoesDeRaia.value.map(definicao => ({
-    definicao,
-    tarefas: filtradas.value
-      .filter(tarefa => raiaDaTarefa(tarefa, agrupamento.value) === definicao.valor)
-      .sort((a, b) => compararTarefas(a, b, ordenacao.value, ordenacaoDesc.value)),
-  })))
+  definicoesDeRaia.value.map((definicao) => {
+    // A raia com ordem própria manda; sem ela, vale a ordem do quadro.
+    const propria = ordenacaoPorRaia.value[definicao.valor]
+    const chave = propria?.chave ?? ordenacao.value
+    const desc = propria ? propria.desc : ordenacaoDesc.value
+    return {
+      definicao,
+      tarefas: filtradas.value
+        .filter(tarefa => raiaDaTarefa(tarefa, agrupamento.value) === definicao.valor)
+        .sort((a, b) => compararTarefas(a, b, chave, desc)),
+    }
+  }))
 
 const raiasVisiveis = computed(() => raias.value.filter((r) => {
   if (raiasOcultas.value.includes(r.definicao.valor)) return false
@@ -422,6 +439,8 @@ const cartaoDeHoje: EnKanbanCardConfig = {
           :campos="campos"
           :densidade="densidade"
           :calculo="calculoDaRaia(raia.definicao.valor)"
+          :campos-do-totalizador="camposDoTotalizador"
+          :ordenacao-da-raia="ordenacaoPorRaia[raia.definicao.valor] ?? null"
           :limite="limites[raia.definicao.valor] ?? null"
           :recolhida="raiasRecolhidas.includes(raia.definicao.valor)"
           :somente-leitura="somenteLeitura"
@@ -432,6 +451,7 @@ const cartaoDeHoje: EnKanbanCardConfig = {
           @ocultar="raiasOcultas = [...raiasOcultas, raia.definicao.valor]"
           @nova-tarefa="abrirCriacao(raia.definicao.valor)"
           @calculo="(c) => calculoPorRaia = { ...calculoPorRaia, [raia.definicao.valor]: c }"
+          @ordenacao="(o) => ordenacaoPorRaia = { ...ordenacaoPorRaia, [raia.definicao.valor]: o }"
           @limite="(n) => limites = { ...limites, [raia.definicao.valor]: n }"
           @soltar="(id) => soltarNaRaia(raia.definicao.valor, id)"
           @abrir="abrir"
