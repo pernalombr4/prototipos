@@ -34,7 +34,30 @@ const props = defineProps<{
   somenteLeitura?: boolean
 }>()
 
-const emit = defineEmits<{ novaTarefa: [], limpar: [] }>()
+const emit = defineEmits<{
+  novaTarefa: []
+  limpar: []
+  /** Reordenar a raia `valor` para a posição de `destino`. */
+  reordenarRaias: [valor: string, destino: string]
+  ordemPadrao: []
+}>()
+
+/** Arraste dentro do popover: guarda quem saiu para saber o que soltar onde. */
+const raiaArrastada = ref<string | null>(null)
+
+function soltarNaLinha(destino: string) {
+  if (raiaArrastada.value && raiaArrastada.value !== destino) {
+    emit('reordenarRaias', raiaArrastada.value, destino)
+  }
+  raiaArrastada.value = null
+}
+
+/** O caminho de teclado da reordenação: as setas de cada linha. */
+function mover(valor: string, direcao: -1 | 1) {
+  const i = props.raias.findIndex(r => r.valor === valor)
+  const destino = props.raias[i + direcao]
+  if (destino) emit('reordenarRaias', valor, destino.valor)
+}
 
 const busca = defineModel<string>('busca', { required: true })
 const agrupamento = defineModel<ChaveAgrupamento>('agrupamento', { required: true })
@@ -409,18 +432,59 @@ const rotuloDaOrdenacao = computed(() => {
         <UPopover>
           <UButton icon="i-lucide-panels-top-left" :label="t.raiasVisiveis" size="sm" color="neutral" variant="ghost" />
           <template #content>
-            <div class="w-60 p-1.5">
-              <p class="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-muted">{{ t.raiasVisiveis }}</p>
-              <div class="space-y-1.5 px-2 py-1">
-                <UCheckbox
-                  v-for="r in raias"
+            <div class="w-72 p-1.5">
+              <p class="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-muted">
+                {{ t.raiasVisiveis }}
+              </p>
+              <p class="px-2 pb-1.5 text-xs text-muted">{{ t.ordemDasRaias }}</p>
+
+              <ul class="space-y-0.5">
+                <li
+                  v-for="(r, i) in raias"
                   :key="r.valor"
-                  :model-value="!raiasOcultas.includes(r.valor)"
-                  :label="r.rotulo"
-                  size="sm"
-                  @update:model-value="raiasOcultas = alternar(raiasOcultas, r.valor)"
-                />
-              </div>
+                  class="group/linha flex items-center gap-1.5 rounded-md px-1.5 py-1 transition-colors"
+                  :class="raiaArrastada === r.valor ? 'bg-primary/10' : 'hover:bg-elevated'"
+                  draggable="true"
+                  @dragstart="raiaArrastada = r.valor"
+                  @dragover.prevent
+                  @drop.prevent="soltarNaLinha(r.valor)"
+                  @dragend="raiaArrastada = null"
+                >
+                  <UIcon
+                    name="i-lucide-grip-vertical"
+                    class="size-3.5 shrink-0 cursor-grab text-muted active:cursor-grabbing"
+                    :aria-label="t.arrastarRaia"
+                  />
+                  <UCheckbox
+                    :model-value="!raiasOcultas.includes(r.valor)"
+                    :label="r.rotulo"
+                    size="sm"
+                    class="min-w-0 flex-1"
+                    @update:model-value="raiasOcultas = alternar(raiasOcultas, r.valor)"
+                  />
+                  <span class="flex shrink-0 opacity-0 transition-opacity group-hover/linha:opacity-100 focus-within:opacity-100">
+                    <UButton
+                      icon="i-lucide-chevron-left"
+                      color="neutral"
+                      variant="ghost"
+                      size="xs"
+                      :disabled="i === 0"
+                      :aria-label="t.moverParaEsquerda"
+                      @click="mover(r.valor, -1)"
+                    />
+                    <UButton
+                      icon="i-lucide-chevron-right"
+                      color="neutral"
+                      variant="ghost"
+                      size="xs"
+                      :disabled="i === raias.length - 1"
+                      :aria-label="t.moverParaDireita"
+                      @click="mover(r.valor, 1)"
+                    />
+                  </span>
+                </li>
+              </ul>
+
               <USeparator class="my-1.5" />
               <UButton
                 :label="t.mostrarTodas"
@@ -431,6 +495,16 @@ const rotuloDaOrdenacao = computed(() => {
                 variant="ghost"
                 class="justify-start"
                 @click="raiasOcultas = []"
+              />
+              <UButton
+                :label="t.resetar"
+                icon="i-lucide-rotate-ccw"
+                block
+                size="sm"
+                color="neutral"
+                variant="ghost"
+                class="justify-start"
+                @click="emit('ordemPadrao')"
               />
             </div>
           </template>

@@ -66,6 +66,8 @@ const periodo = ref('tudo')
 const campoDeData = ref<'created_at' | 'due_date'>('created_at')
 const ocultarVazias = ref(false)
 const raiasOcultas = ref<string[]>([])
+/** Ordem escolhida à mão. Vazia quer dizer "a ordem natural do agrupamento". */
+const ordemDasRaias = ref<string[]>([])
 const raiasRecolhidas = ref<string[]>([])
 const limites = ref<Record<string, number | null>>({})
 const visualizacao = ref('todas')
@@ -154,7 +156,33 @@ const filtradas = computed<Task[]>(() => {
   })
 })
 
-const definicoesDeRaia = computed(() => raiasDoAgrupamento(agrupamento.value, t.value))
+const definicoesBase = computed(() => raiasDoAgrupamento(agrupamento.value, t.value))
+
+/** A ordem da tela: a escolhida à mão quando existe, senão a do agrupamento. */
+const definicoesDeRaia = computed(() => {
+  if (!ordemDasRaias.value.length) return definicoesBase.value
+  const posicao = (valor: string) => {
+    const i = ordemDasRaias.value.indexOf(valor)
+    return i === -1 ? Number.MAX_SAFE_INTEGER : i
+  }
+  return [...definicoesBase.value].sort((a, b) => posicao(a.valor) - posicao(b.valor))
+})
+
+/**
+ * Trocar o agrupamento troca as raias, então a ordem escolhida para as antigas
+ * não vale para as novas.
+ */
+watch(agrupamento, () => { ordemDasRaias.value = [] })
+
+/** Move a raia `valor` para a posição em que `destino` está agora. */
+function reordenarRaias(valor: string, destino: string) {
+  const lista = definicoesDeRaia.value.map(d => d.valor)
+  const origem = lista.indexOf(valor)
+  const alvo = lista.indexOf(destino)
+  if (origem < 0 || alvo < 0 || origem === alvo) return
+  lista.splice(alvo, 0, ...lista.splice(origem, 1))
+  ordemDasRaias.value = lista
+}
 
 interface RaiaMontada {
   definicao: ReturnType<typeof raiasDoAgrupamento>[number]
@@ -390,6 +418,8 @@ const cartaoDeHoje: EnKanbanCardConfig = {
       :somente-leitura="somenteLeitura"
       @nova-tarefa="abrirCriacao()"
       @limpar="limparFiltros"
+      @reordenar-raias="reordenarRaias"
+      @ordem-padrao="ordemDasRaias = []"
     />
 
     <UAlert
@@ -476,6 +506,7 @@ const cartaoDeHoje: EnKanbanCardConfig = {
           @ordenacao="(o) => ordenacaoPorRaia = { ...ordenacaoPorRaia, [raia.definicao.valor]: o }"
           @limite="(n) => limites = { ...limites, [raia.definicao.valor]: n }"
           @soltar="(id) => soltarNaRaia(raia.definicao.valor, id)"
+          @reordenar="(valor) => reordenarRaias(valor, raia.definicao.valor)"
           @abrir="abrir"
           @mover="mover"
           @arquivar="arquivar"

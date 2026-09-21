@@ -607,3 +607,55 @@ E o caminho de volta: **"Tirar o limite"** aparece no rodapé do diálogo quando
    (`pending`, `high`, um id de pessoa), então agrupar por prioridade mostra outros limites,
    não os de situação. É o comportamento certo, e é uma coisa a mais para o back guardar:
    limite por visualização e por valor de agrupamento.
+
+---
+
+## Rodada 8 — 21/09/2026
+
+### O que ela pediu, literal
+
+> prototipe tambem a possibilidade de reordenar as raias por arraste em tela e na config das
+> raias tb (no popover)
+
+### Os dois lugares
+
+**No quadro.** O cabeçalho da raia virou área de arraste: aparece uma pega (`⋮⋮`) à esquerda
+no hover, e soltar a raia sobre outra troca as duas de lugar. A raia que vai receber fica com
+borda tracejada e anel, para a pessoa ver onde vai cair.
+
+**No popover `Raias`.** Cada linha ganhou a pega de arraste, e continua com a caixa de marcar
+que já existia. Arrastar uma linha sobre outra reordena, igual ao quadro.
+
+### O cuidado que isso exigiu
+
+A raia já recebia arraste de **cartão**. Agora recebe dois tipos de coisa, e eles não podem se
+confundir: arrastar um cartão para outra raia move a tarefa, arrastar a raia reordena o quadro.
+
+A separação é pelo **tipo do `dataTransfer`**: cartão viaja em `text/plain`, raia viaja em
+`application/x-raia`. Durante o `dragover` o navegador não deixa ler o **valor** do
+`dataTransfer`, só os **tipos**, e é por isso que o realce visual (azul para cartão, tracejado
+para raia) consegue ser diferente antes mesmo de soltar. Testado nos dois sentidos: mover
+cartão continua mudando a contagem das raias, e arrastar raia não mexe em cartão nenhum.
+
+### O caminho de teclado
+
+Arraste não tem equivalente de teclado, então cada linha do popover tem também **duas setas**,
+esquerda e direita, com rótulo de leitor de tela. Quem não usa mouse reordena por ali, e a
+primeira e a última linha têm a seta correspondente desabilitada. É o mesmo padrão que resolve
+o arraste de cartão (o `Mover para` do menu do cartão).
+
+### Duas decisões
+
+1. **Trocar o agrupamento zera a ordem escolhida.** As raias de "situação" não são as mesmas
+   de "prioridade"; carregar a ordem de uma para a outra produziria uma sequência que ninguém
+   pediu. O botão **Voltar ao padrão**, no fim do popover, faz o mesmo à mão.
+2. **A ordem é da visualização, não do workspace.** Ela mora junto com filtro, agrupamento e
+   campos do cartão. Para o back, é mais um campo da visualização salva: a lista de valores na
+   ordem escolhida.
+
+### Maquete
+
+A ordem vive em memória e o reload zera, como todo o resto. E **reordenar cartão dentro da
+raia** continua fora: a ordem dos cartões é a do campo escolhido em `Ordenar`, e ordem manual
+por arraste dentro da coluna é outra decisão (a que o Linear avisa: escolher um campo de
+ordenação desliga o arraste vertical).

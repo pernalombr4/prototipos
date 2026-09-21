@@ -53,6 +53,7 @@ const emit = defineEmits<{
   ordenacao: [o: OrdemDaRaia | null]
   limite: [n: number | null]
   soltar: [idDaTarefa: number]
+  reordenar: [valorDaRaiaArrastada: string]
   abrir: [tarefa: Task]
   mover: [tarefa: Task, status: Task['status']]
   arquivar: [tarefa: Task]
@@ -178,10 +179,42 @@ const itensDaRaia = computed(() => [[
   { label: props.t.ocultarRaia, icon: 'i-lucide-eye-off', onSelect: () => emit('ocultar') },
 ]])
 
+/**
+ * A raia recebe dois tipos de arraste: cartão e a própria raia. O tipo do
+ * `dataTransfer` separa os dois, porque durante o `dragover` o navegador não
+ * deixa ler o valor, só os tipos.
+ */
+const TIPO_RAIA = 'application/x-raia'
+
+const recebendoRaia = ref(false)
+
+function aoArrastarSobre(evento: DragEvent) {
+  if (evento.dataTransfer?.types.includes(TIPO_RAIA)) recebendoRaia.value = true
+  else recebendo.value = true
+}
+
+function aoSair() {
+  recebendo.value = false
+  recebendoRaia.value = false
+}
+
 function aoSoltar(evento: DragEvent) {
   recebendo.value = false
+  recebendoRaia.value = false
+
+  const raiaArrastada = evento.dataTransfer?.getData(TIPO_RAIA)
+  if (raiaArrastada) {
+    if (raiaArrastada !== props.raia.valor) emit('reordenar', raiaArrastada)
+    return
+  }
+
   const id = Number(evento.dataTransfer?.getData('text/plain'))
   if (id) emit('soltar', id)
+}
+
+function aoComecarArrasteDaRaia(evento: DragEvent) {
+  evento.dataTransfer?.setData(TIPO_RAIA, props.raia.valor)
+  if (evento.dataTransfer) evento.dataTransfer.effectAllowed = 'move'
 }
 </script>
 
@@ -207,15 +240,30 @@ function aoSoltar(evento: DragEvent) {
   <section
     v-else
     class="flex h-full w-[19rem] min-w-[17rem] max-w-[26rem] flex-1 shrink-0 flex-col rounded-xl border border-default bg-elevated/30 transition-colors"
-    :class="recebendo ? 'border-primary bg-primary/5' : ''"
+    :class="[
+      recebendo ? 'border-primary bg-primary/5' : '',
+      recebendoRaia ? 'border-primary border-dashed ring-2 ring-primary/30' : '',
+    ]"
     :style="atraso ? `animation: entrada .35s ease-out ${atraso}ms both` : undefined"
     :aria-label="raia.rotulo"
-    @dragover.prevent="recebendo = true"
-    @dragleave="recebendo = false"
+    @dragover.prevent="aoArrastarSobre"
+    @dragleave="aoSair"
     @drop.prevent="aoSoltar"
   >
     <!-- Cabeçalho -->
-    <header class="flex items-center gap-2 border-b border-default px-3 py-2.5">
+    <header
+      class="group/raia flex items-center gap-2 border-b border-default px-3 py-2.5"
+      :draggable="!somenteLeitura"
+      @dragstart="aoComecarArrasteDaRaia"
+    >
+      <UTooltip v-if="!somenteLeitura" :text="t.arrastarRaia">
+        <span
+          class="-ml-1 cursor-grab text-muted opacity-0 transition-opacity active:cursor-grabbing group-hover/raia:opacity-100"
+          :aria-label="t.arrastarRaia"
+        >
+          <UIcon name="i-lucide-grip-vertical" class="size-3.5" />
+        </span>
+      </UTooltip>
       <span class="size-2 shrink-0 rounded-full" :class="fundoDaCor[raia.cor]" />
       <h2 class="truncate text-sm font-semibold text-highlighted">{{ raia.rotulo }}</h2>
       <UTooltip

@@ -59,6 +59,10 @@ export interface Textos {
   lixeira: string
   exportar: string
   raiasVisiveis: string
+  ordemDasRaias: string
+  arrastarRaia: string
+  moverParaEsquerda: string
+  moverParaDireita: string
   mostrarTodas: string
   ocultarVazias: string
   resetar: string
@@ -290,6 +294,10 @@ export const textos: Record<Idioma, Textos> = {
     lixeira: 'Lixeira',
     exportar: 'Exportar',
     raiasVisiveis: 'Raias',
+    ordemDasRaias: 'Arraste para trocar a ordem',
+    arrastarRaia: 'Arrastar para reordenar',
+    moverParaEsquerda: 'Mover para a esquerda',
+    moverParaDireita: 'Mover para a direita',
     mostrarTodas: 'Mostrar todas',
     ocultarVazias: 'Ocultar raias vazias',
     resetar: 'Voltar ao padrão',
@@ -512,6 +520,10 @@ export const textos: Record<Idioma, Textos> = {
     lixeira: 'Trash',
     exportar: 'Export',
     raiasVisiveis: 'Lanes',
+    ordemDasRaias: 'Drag to change the order',
+    arrastarRaia: 'Drag to reorder',
+    moverParaEsquerda: 'Move left',
+    moverParaDireita: 'Move right',
     mostrarTodas: 'Show all',
     ocultarVazias: 'Hide empty lanes',
     resetar: 'Back to default',
@@ -734,6 +746,10 @@ export const textos: Record<Idioma, Textos> = {
     lixeira: 'Papelera',
     exportar: 'Exportar',
     raiasVisiveis: 'Carriles',
+    ordemDasRaias: 'Arrastre para cambiar el orden',
+    arrastarRaia: 'Arrastrar para reordenar',
+    moverParaEsquerda: 'Mover a la izquierda',
+    moverParaDireita: 'Mover a la derecha',
     mostrarTodas: 'Mostrar todos',
     ocultarVazias: 'Ocultar carriles vacíos',
     resetar: 'Volver al estándar',
