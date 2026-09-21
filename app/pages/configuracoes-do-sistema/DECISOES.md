@@ -1,5 +1,42 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 17 — 21/09/2026 — os selos consertados no tema
+
+**O que ela pediu, literal:**
+
+> "pode consertar os selos tambem, e depois pode dar push"
+
+O conserto é de uma linha por cor, no `app/app.config.ts`: as variantes `subtle` e `soft` do Nuxt
+UI pintam o texto com a **mesma cor do fundo** (`bg-warning/10 text-warning`), e com a paleta do
+ENSPACE isso não se lê. Escurecer só o texto mantém fundo e anel: **o selo continua o mesmo de
+longe e passa a ser legível de perto**, e nenhuma cor nova entra no tema, porque os tons saem da
+mesma paleta.
+
+| Selo | Antes | Depois |
+|---|---|---|
+| "Aguardando análise", "suspende o expediente", "fora do país" (warning) | 1,80:1 | **4,65:1** |
+| "Carteira ativa", "Aprovada" (success) | 2,26:1 | **4,96:1** |
+| "Recusada" (error) | — | **5,52:1** |
+| marca do dia de hoje no calendário | 3,39:1 | **7,88:1** |
+
+No escuro, todos entre 7,88:1 e 12,58:1. O mínimo do WCAG AA é 4,5:1.
+
+O `Alert` levou a mesma correção: ele usa as mesmas variantes e teria o mesmo problema no primeiro
+aviso colorido que aparecesse.
+
+**A marca do "hoje" era minha**, não do Nuxt UI: branco sobre o fuchsia da marca dá 3,39:1. Virou
+`bg-primary-700` com texto branco.
+
+**O que fica registrado e não dá para consertar aqui:** `bg-primary` com texto branco é 3,39:1, e
+isso vale para **todo botão e selo `solid` da cor primária**, aqui e no produto. Não é ajuste de
+tela, é decisão de marca: ou o fuchsia escurece, ou o texto sobre ele deixa de ser branco.
+
+> ⚠️ **`app/app.config.ts` é compartilhado por todos os protótipos do repositório.** A mudança
+> melhora o contraste em todos eles e não muda nenhuma cor da paleta, mas a outra sessão que
+> trabalha aqui foi avisada.
+
+---
+
 ## Rodada 16 — 17/09/2026 — o aviso da referência, e um contraste que reprovava
 
 **O que ela pediu, literal:**

@@ -566,7 +566,7 @@ function periodoDaOcorrencia(o: Ocorrencia) {
               <span
                 class="text-xs tabular-nums"
                 :class="c.data === HOJE
-                  ? 'flex size-5 items-center justify-center rounded-full bg-primary font-semibold text-inverted'
+                  ? 'flex size-5 items-center justify-center rounded-full bg-primary-700 font-semibold text-white'
                   : c.util ? 'text-toned' : 'text-muted'"
               >
                 {{ c.dia }}
