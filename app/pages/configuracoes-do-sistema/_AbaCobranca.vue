@@ -418,12 +418,12 @@ function dataLonga(iso: string) {
           <UIcon
             :name="t.type === 'credit' ? 'i-lucide-arrow-down-left' : 'i-lucide-arrow-up-right'"
             class="size-4 shrink-0"
-            :class="t.type === 'credit' ? 'text-success' : 'text-muted'"
+            :class="t.type === 'credit' ? 'text-success-700 dark:text-success-300' : 'text-muted'"
           />
 
           <span
             class="w-24 shrink-0 text-sm font-medium tabular-nums"
-            :class="t.type === 'credit' ? 'text-success' : 'text-highlighted'"
+            :class="t.type === 'credit' ? 'text-success-700 dark:text-success-300' : 'text-highlighted'"
           >
             {{ t.type === 'credit' ? '+' : '−' }}{{ t.amount.toLocaleString('pt-BR') }}
           </span>

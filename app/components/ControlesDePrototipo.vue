@@ -26,7 +26,7 @@ const escuro = computed({
 
 <template>
   <span class="flex flex-wrap items-center gap-2">
-    <span class="text-xs font-semibold uppercase tracking-wider text-muted">
+    <span class="text-xs font-semibold uppercase tracking-wider text-toned">
       Tema
     </span>
     <!--
@@ -61,7 +61,7 @@ const escuro = computed({
       </template>
     </ClientOnly>
 
-    <span class="ml-1 text-xs font-semibold uppercase tracking-wider text-muted">
+    <span class="ml-1 text-xs font-semibold uppercase tracking-wider text-toned">
       Idioma
     </span>
     <div class="flex rounded-md border border-default p-0.5">

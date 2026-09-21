@@ -306,7 +306,7 @@ const estados: { valor: EstadoDemo, rotulo: string }[] = [
     <!-- ANDAIME DE PROTÓTIPO — não faz parte da proposta -->
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">
       <UContainer class="flex flex-wrap items-center gap-2 py-3">
-        <span class="mr-1 text-xs font-semibold uppercase tracking-wider text-muted">
+        <span class="mr-1 text-xs font-semibold uppercase tracking-wider text-toned">
           Protótipo · estado
         </span>
         <UButton
@@ -323,7 +323,7 @@ const estados: { valor: EstadoDemo, rotulo: string }[] = [
         <ControlesDePrototipo class="ml-auto" />
 
         <span class="flex flex-wrap items-center gap-2">
-          <span class="text-xs font-semibold uppercase tracking-wider text-muted">
+          <span class="text-xs font-semibold uppercase tracking-wider text-toned">
             Por trás
           </span>
           <PainelDeContexto

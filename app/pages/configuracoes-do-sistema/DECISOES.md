@@ -1,5 +1,48 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 18 — 21/09/2026 — a régua virou ferramenta, e sobrou só a cor da marca
+
+Medir contraste na mão, elemento por elemento, é como eu vinha fazendo desde a rodada 16. Virou
+**`ferramentas/medir-contraste.js`**: cola no console, `auditar()` devolve tudo que reprova na
+tela, do pior para o melhor. Não entra no bundle, não é importado por nada.
+
+Ela resolve três coisas que a conta na mão erra:
+
+1. o tema usa `oklch()`, e contraste pede RGB;
+2. selo e faixa têm fundo translúcido (`bg-warning/10`), então o fundo real é a **composição** com
+   o que está atrás, às vezes três níveis acima;
+3. o mínimo do WCAG muda com o tamanho da fonte: 3:1 só vale para 24 px, ou 18,66 px em negrito.
+
+### O que ela achou na aba Cobrança, e o que eu consertei
+
+| | Antes | Depois |
+|---|---|---|
+| "+1.500" e "+400", os créditos em verde no extrato | 2,49:1 | **5,47:1** |
+| Rótulos da barra de andaime (PROTÓTIPO · ESTADO, TEMA, IDIOMA) | 4,21:1 | **passa** |
+
+De **11 reprovações a aba foi para 5** — e as cinco que sobraram são **a mesma coisa**: a cor da
+marca como texto, ou como fundo de texto branco.
+
+| O que | Contraste |
+|---|---|
+| a aba ativa ("Cobrança", `text-primary`) | 3,39:1 |
+| "Pedir recarga" (botão sólido) | 3,39:1 |
+| "Tudo" (filtro em primary) | 3,39:1 |
+| "PT" e "Proprietária", no andaime | 2,88:1 e 3,39:1 |
+
+**Parei aqui de propósito.** Consertar isso é mexer no fuchsia da marca, vale para o produto
+inteiro e não é decisão de protótipo. As alternativas estão medidas (a sessão vizinha chegou aos
+mesmos números):
+
+- `fuchsia-600` com branco ... **5,08:1** — um passo mais escuro, quase igual ao de hoje
+- `fuchsia-500` com preto .... **6,19:1** — mantém o rosa, inverte o texto
+- `fuchsia-700` com branco ... **7,88:1**
+
+E o rótulo desses botões é 14 px, peso 500: **texto normal** pelo WCAG, então o mínimo é 4,5:1 e
+não 3:1. Não passa nem pela régua frouxa.
+
+---
+
 ## Rodada 17 — 21/09/2026 — os selos consertados no tema
 
 **O que ela pediu, literal:**
