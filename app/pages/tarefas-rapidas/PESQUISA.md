@@ -275,3 +275,34 @@ produto é proibido pela regra 8 da spec. O comportamento é o mesmo; o vestido 
 
 **O que ficou de fora por não existir aqui:** o rollup de subtarefa, porque tarefa rápida do
 ENSPACE não tem subtarefa, e os relatórios, que são outra tela.
+
+---
+
+## Consulta extra — a ordem dos campos na quickview (21/09/2026)
+
+Pedido: pôr os itens da barra lateral da tarefa em ordem de padrão de mercado. Fui ver como
+os cinco produtos que já estavam na pesquisa montam a lateral da tarefa. O conjunto de campos
+muda de produto para produto, mas a **sequência** é a mesma nos cinco:
+
+| Produto | Começa por | Termina por |
+|---|---|---|
+| **Linear** | situação, prioridade, responsável, etiquetas | projeto e ligações, e o bloco discreto de criada/atualizada no pé |
+| **Jira** | responsável, etiquetas, prioridade, relator | bloco **Created / Updated** recolhido no pé do painel de detalhes |
+| **ClickUp** | situação, responsável, datas, prioridade, estimativa, tempo registrado | campos personalizados atrás de "show more" |
+| **Asana** | responsável, data de entrega, projetos, dependências | "criada por" no pé da atividade |
+| **Notion** | as propriedades na ordem escolhida, com pessoa e data no topo por convenção | "created time" e "last edited time" no fim |
+
+**A regra que os cinco seguem:** primeiro o que a pessoa **mexe** (quem faz, para quando, com
+que peso), depois o que **classifica e liga** a tarefa a outras coisas, e por último o que o
+**sistema escreveu sozinho** (identificador, referência, carimbos de hora). Nenhum deles abre
+a lateral pelo identificador, e nenhum deles mistura carimbo de hora no meio dos campos de
+trabalho.
+
+**URLs.** `linear.app/docs/display-options`,
+`support.atlassian.com/jira-software-cloud/docs/update-a-work-items-details/`,
+`support.atlassian.com/jira-software-cloud/docs/configure-the-issue-detail-view/`
+
+**O que isso condena no ENSPACE de hoje:** o trilho do produto (registrado no BRIEFING) começa
+com `#` Identificador e Ticket, os dois campos que ninguém edita, e leva Concluída em, Criado
+em e Atualizado em no corpo da lista. Responsável, que é o primeiro campo em quatro dos cinco
+produtos, é o terceiro, e prioridade, pontos, tipo e etiquetas nem aparecem.

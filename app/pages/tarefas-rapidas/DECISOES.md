@@ -1025,3 +1025,68 @@ campo passou de `1h 55m` para `2h 15m`.
 
 **O que continua fora:** apontar por intervalo ("das 9:45 às 10:15"). A duração digitada cobre
 o caso, e o `quando` já ficou no formulário de edição.
+
+---
+
+## Rodada 16 — 21/09/2026
+
+### O que ela pediu, literal
+
+> coloque os itens da barra lateral das tarefas em ordem adequada pra ux, seguindo PADROES DE
+> MERCADO desse tipo de quickview
+
+### Como estava
+
+A lista da lateral nasceu na ordem em que os campos foram entrando nas rodadas, e o começo
+dela era herança do produto: **identificador, referência, registro de origem**, e só então
+responsável. Os três primeiros são justamente os campos que ninguém edita, e empurravam para
+baixo os que se mexem todo dia. No meio da lista, tempo registrado vinha antes da estimativa,
+e no fim, concluída em, criada em e atualizada em ocupavam três linhas de carimbo de hora com
+o mesmo peso visual de responsável e prazo.
+
+### O que o mercado faz (detalhe no PESQUISA.md)
+
+Linear, Jira, ClickUp, Asana e Notion montam a lateral em três blocos, nesta ordem:
+
+1. **o que se mexe** — quem faz, para quando, com que peso;
+2. **o que classifica e liga** — tipo, etiquetas, relações;
+3. **o que o sistema escreveu** — identificador, referência, carimbos de hora.
+
+Nenhum dos cinco abre a lateral pelo identificador. O Jira vai além e **recolhe** o bloco de
+datas no pé do painel.
+
+### O que ficou
+
+**A ordem nova**, uma lista só, que alimenta ao mesmo tempo o trilho de ícones e a coluna
+DETALHES, então os dois mudaram juntos:
+
+| Bloco | Campos |
+|---|---|
+| Trabalho | responsável, prazo, prioridade, **estimativa, tempo registrado**, pontos |
+| Classificação | tipo, etiquetas, registro de origem, colaboradores |
+| Sistema | concluída em, criada em, atualizada em, identificador, referência |
+
+**Estimativa antes de tempo registrado**, invertendo o que estava: é a ordem do ClickUp, e o
+tempo registrado só quer dizer alguma coisa lido contra a estimativa. O campo de tempo mostra
+`0m / 4h` justamente por isso.
+
+**Um traço entre os blocos**, no trilho e na coluna. Sem ele a lista é uma coluna única de
+quinze linhas, e a ordem nova não se percebe.
+
+**O bloco do sistema nasce fechado**, atrás de "Dados técnicos", como o bloco de datas do
+Jira. Ninguém abre uma tarefa para ver quando ela foi atualizada; quem precisa, abre, e o
+estado fica enquanto o painel estiver aberto. **Nada sumiu**: os cinco ícones continuam no
+trilho recolhido, cada um com o valor no hover, e a referência continua com o botão de copiar.
+
+**O que não mudou:** quais campos existem, quais são editáveis, o popover do tempo, a coluna
+de identidade (ícone, título, referência e selos) e o corpo do painel. Só a sequência e o
+agrupamento.
+
+### Conferido na tela
+
+Com o painel recolhido, os `aria-label` do trilho saem na ordem responsável, prazo,
+prioridade, estimativa, tempo registrado, pontos, tipo, etiquetas, registro de origem,
+colaboradores, concluída em, criada em, atualizada em, identificador, referência, com os dois
+traços nos lugares certos (6 ícones, traço, 4 ícones, traço, 5 ícones). Expandido, a coluna
+DETALHES mostra os dez primeiros e o botão **Dados técnicos** com `aria-expanded="false"`;
+clicando, ele abre os cinco restantes e vira `true`.
