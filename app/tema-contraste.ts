@@ -48,5 +48,21 @@ export const selosLegiveis = [
   ...legivel('error', 'text-error-700 dark:text-error-300'),
 ]
 
+/**
+ * O botão tem o mesmo defeito, e ele escapou porque o `nuxt.config` só ligava
+ * selo e aviso. Medido nesta tela, no claro: o botão de idioma ativo
+ * (`soft`, `primary`) dava 2,56:1 — pior que qualquer selo que motivou este
+ * arquivo. A lista é a mesma porque o remédio é o mesmo: escurecer só o texto.
+ *
+ * O tema do botão tem slots, mas seus próprios `compoundVariants` passam a
+ * classe solta, e nessa forma ela cai no `base`. Por isso aqui não se envolve
+ * a classe num objeto, como foi preciso fazer no Alert.
+ *
+ * Só `soft` e `subtle` entram. O `solid` (texto branco sobre a cor cheia) é
+ * outra conversa: mexer nele é decidir sobre a cor da marca, não sobre
+ * legibilidade de um texto secundário.
+ */
+export const botoesLegiveis = selosLegiveis
+
 /** O Alert tem slots: a mesma classe precisa ir no `root`. */
 export const avisosLegiveis = selosLegiveis.map(v => ({ ...v, class: { root: v.class } }))

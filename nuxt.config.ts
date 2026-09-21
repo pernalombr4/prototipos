@@ -2,7 +2,7 @@
 import { readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { biblioteca } from './app/pages/tela-de-workspaces/icones'
-import { avisosLegiveis, selosLegiveis } from './app/tema-contraste'
+import { avisosLegiveis, botoesLegiveis, selosLegiveis } from './app/tema-contraste'
 
 /**
  * As rotas a prerenderizar, lidas dos arquivos em app/pages.
@@ -67,6 +67,7 @@ export default defineNuxtConfig({
     ui: {
       badge: { compoundVariants: selosLegiveis },
       alert: { compoundVariants: avisosLegiveis },
+      button: { compoundVariants: botoesLegiveis },
     },
   },
 

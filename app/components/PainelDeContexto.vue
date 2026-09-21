@@ -70,7 +70,7 @@ defineExpose({ abrirEm })
           v-model="documento"
           :items="documentos"
           :content="false"
-          color="primary"
+          color="neutral"
           variant="link"
           size="sm"
           class="mb-6"
