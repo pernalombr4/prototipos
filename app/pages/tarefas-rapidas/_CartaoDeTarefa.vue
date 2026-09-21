@@ -33,7 +33,7 @@ const props = defineProps<{
   tarefa: Task
   t: Textos
   campos: Record<string, boolean>
-  densidade: 'compacto' | 'padrao' | 'completo'
+  densidade: 'pequeno' | 'medio' | 'grande'
   somenteLeitura?: boolean
   /** Destaca o cartão que está aberto no painel. */
   ativo?: boolean
@@ -57,8 +57,28 @@ const colaboradores = computed(() =>
 const descricao = computed(() => descricaoEmTexto(props.tarefa.description))
 const temFormulario = computed(() => props.tarefa.type === 'form' || props.tarefa.type === 'crud')
 
-const mostraDescricao = computed(() =>
-  props.campos.descricao && props.densidade !== 'compacto' && !!descricao.value)
+/**
+ * Descrição no cartão: o mercado não mostra texto longo em cartão.
+ * O Linear não mostra descrição nenhuma; o Trello põe um ícone dizendo que
+ * existe uma; o Notion mostra uma prévia cortada. Aqui ela aparece cortada,
+ * e **o tamanho do cartão decide quantas linhas, não se aparece**: quem liga
+ * o campo vê o campo.
+ */
+const linhasDaDescricao = computed(() => (
+  { pequeno: 'line-clamp-1', medio: 'line-clamp-2', grande: 'line-clamp-4' }
+)[props.densidade])
+
+const mostraDescricao = computed(() => props.campos.descricao && !!descricao.value)
+
+/** Descrição existe mas está desligada: vira ícone, como o Trello faz. */
+const soOIconeDaDescricao = computed(() => !props.campos.descricao && !!descricao.value)
+
+/** Descrição muito maior que o corte: o cartão avisa que tem mais. */
+const descricaoLonga = computed(() => descricao.value.length > 220)
+
+const linhasDoTitulo = computed(() => (
+  { pequeno: 'line-clamp-1', medio: 'line-clamp-2', grande: 'line-clamp-3' }
+)[props.densidade])
 
 /** O tooltip de todo mundo tem a mesma forma: "Rótulo: valor". */
 function dica(rotulo: string, valor: string) {
@@ -142,19 +162,25 @@ const itensDoMenu = computed(() => [[
         class="outline-none after:absolute after:inset-0 after:rounded-lg"
         @click.prevent="emit('abrir')"
       >
-        <span
-          class="block"
-          :class="densidade === 'compacto' ? 'line-clamp-1' : 'line-clamp-2'"
-        >{{ tarefa.name }}</span>
+        <span class="block break-words" :class="linhasDoTitulo">{{ tarefa.name }}</span>
       </a>
     </h3>
 
-    <p v-if="mostraDescricao" class="mt-1 line-clamp-2 text-xs leading-relaxed text-muted">
+    <!--
+      A descrição corta sempre, em qualquer tamanho de cartão: cartão que
+      cresce com o texto quebra a leitura da raia inteira. `break-words`
+      porque descrição de spaceflow costuma trazer URL sem espaço.
+    -->
+    <p
+      v-if="mostraDescricao"
+      class="mt-1 break-words text-xs leading-relaxed text-muted"
+      :class="linhasDaDescricao"
+    >
       {{ descricao }}
     </p>
 
     <!-- Registro de origem: é ele que diz de qual chamado a tarefa veio -->
-    <UTooltip v-if="campos.item && item && densidade === 'completo'" :text="dicaDoItem">
+    <UTooltip v-if="campos.item && item" :text="dicaDoItem">
       <div class="mt-2 flex items-center gap-1.5 text-xs text-muted">
         <UIcon name="i-lucide-link" class="size-3.5 shrink-0 text-muted" />
         <span class="shrink-0 whitespace-nowrap font-medium text-toned">{{ item.codigo }}</span>
@@ -163,7 +189,7 @@ const itensDoMenu = computed(() => [[
     </UTooltip>
 
     <!-- Etiquetas -->
-    <div v-if="campos.etiquetas && tags.length && densidade !== 'compacto'" class="mt-2 flex flex-wrap gap-1">
+    <div v-if="campos.etiquetas && tags.length" class="mt-2 flex flex-wrap gap-1">
       <UTooltip
         v-for="tag in tags.slice(0, 2)"
         :key="tag!.id"
@@ -211,10 +237,15 @@ const itensDoMenu = computed(() => [[
         <UIcon name="i-lucide-clipboard-pen" class="size-3.5 text-muted" />
       </UTooltip>
 
+      <!-- Descrição desligada ou cortada: o ícone diz que existe mais texto -->
+      <UTooltip v-if="soOIconeDaDescricao || (mostraDescricao && descricaoLonga)" :text="t.temDescricao">
+        <UIcon name="i-lucide-align-left" class="size-3.5 text-muted" />
+      </UTooltip>
+
       <!-- As três pessoas, sempre nesta ordem: criou, colabora, responde -->
       <div v-if="mostraPessoas" class="ml-auto flex shrink-0 items-center gap-2">
         <UTooltip
-          v-if="campos.criador && criador && densidade !== 'compacto'"
+          v-if="campos.criador && criador && densidade !== 'pequeno'"
           :text="dica(t.campos.criadoPor, criador.fullname)"
         >
           <span class="flex items-center gap-1">
@@ -224,7 +255,7 @@ const itensDoMenu = computed(() => [[
         </UTooltip>
 
         <UTooltip
-          v-if="campos.colaboradores && colaboradores.length && densidade !== 'compacto'"
+          v-if="campos.colaboradores && colaboradores.length && densidade !== 'pequeno'"
           :text="dicaDosColaboradores"
         >
           <span class="flex items-center gap-1">

@@ -196,3 +196,48 @@ visualização, e o rodapé é o da página.
 3. **Nenhum soma pontos de tarefa criada por automação.** Os cálculos são pensados para
    trabalho planejado por gente. Aqui o quadro inteiro nasce de spaceflow, então o rodapé
    responde outra pergunta: "quanto trabalho o fluxo jogou nesta raia hoje?".
+
+---
+
+## Consulta extra — descrição longa e tamanho do cartão (21/09/2026)
+
+Duas perguntas que apareceram na iteração, respondidas olhando os produtos.
+
+### Texto longo no cartão
+
+| Produto | O que faz |
+|---|---|
+| **Linear** | **Não mostra descrição no cartão**, e a documentação diz isso com todas as letras. O cartão é identificador, título e propriedades |
+| **Trello** | Mostra um **ícone** na frente do cartão dizendo que existe descrição, junto dos ícones de comentário, anexo e checklist. O texto não aparece |
+| **Jira** | Card layout escolhe **campos**, e descrição não está entre eles |
+| **Notion** | `Card preview: page content` mostra uma **prévia cortada** do conteúdo, nunca o texto inteiro |
+| **ClickUp** | Ícone de descrição entre os "task property icons" do cartão |
+
+**O padrão, então, é claro: cartão não cresce com o texto.** Ou o texto não aparece (Linear,
+Jira), ou vira ícone (Trello, ClickUp), ou aparece cortado (Notion). Nenhum dos cinco deixa a
+descrição definir a altura do cartão, porque isso quebra a leitura da raia inteira: dois
+cartões grandes e a pessoa perde a noção de quantas tarefas existem.
+
+**O que nenhum deles resolve** é o caso do ENSPACE: aqui a descrição costuma ser **instrução
+de trabalho escrita pelo spaceflow**, não anotação livre. Por isso ela fica no cartão (cortada,
+e só se a pessoa ligar o campo), em vez de sumir como no Linear.
+
+**No detalhe**, o padrão é outro: GitHub, Jira e Linear mostram corpo longo **recolhido**, com
+um "mostrar mais". O motivo é o mesmo em todos: o texto não pode empurrar para fora da vista o
+que vem depois dele (formulário, comentários, botões).
+
+### Tamanho do cartão
+
+| Produto | Onde fica | Opções |
+|---|---|---|
+| **Notion** | menu de configurações › Layout › **Card size** | Small, Medium, Large |
+| **ClickUp** | Customize view › Layout options › **Row height** (Lista e Tabela) | três alturas |
+| **Twenty** | Options › **Compact view** | liga e desliga |
+| **Airtable** | Customize cards › tamanho da prévia | três tamanhos |
+
+**Não é um botão separado na barra.** Nos quatro, o tamanho mora **dentro do mesmo menu que
+escolhe os campos do cartão**, porque as duas perguntas são a mesma: o que cabe no cartão.
+É onde ele está aqui: `Cartão › Tamanho do cartão`, logo acima de `O que aparece no cartão`.
+
+E os nomes seguem o Notion: **Pequeno, Médio, Grande**. "Compacto/Padrão/Completo" dava a
+entender que "Completo" mostrava todos os campos, o que confundia tamanho com visibilidade.

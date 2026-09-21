@@ -32,7 +32,7 @@ const props = defineProps<{
   campos: Record<string, boolean>
   /** O que o totalizador pode somar, descoberto do dado carregado. */
   camposDoTotalizador: CampoCalculavel[]
-  densidade: 'compacto' | 'padrao' | 'completo'
+  densidade: 'pequeno' | 'medio' | 'grande'
   calculo: Calculo
   /** Ordem só desta raia. `null` quer dizer "a mesma do quadro". */
   ordenacaoDaRaia?: OrdemDaRaia | null

@@ -717,3 +717,58 @@ quando a pessoa quer comparar as raias. Modal ficou para o **limite de cartões*
 que é configuração, acontece uma vez e precisa de explicação. Se na prática o menu ficar longo
 demais com muitos campos numéricos por workspace, o próximo passo é busca dentro do menu, como
 o Notion faz, e não o modal.
+
+---
+
+## Rodada 10 — 21/09/2026
+
+### O que ela pediu, literal
+
+> protitipe o que deve acontecer se uma tarefa tiver a descriçao bizarramente grande. como é o
+> padrao de mercado?
+>
+> e qual o padrao de mercado pra como os cartoes sao mostrados? é ter um bbotao no topo pra
+> completo, padrao, reduzido...
+
+### 1. Descrição bizarramente grande
+
+O levantamento está no `PESQUISA.md`, em "Consulta extra". O resumo: **cartão não cresce com o
+texto**, em nenhum dos cinco. Linear e Jira não mostram descrição; Trello e ClickUp mostram um
+**ícone** dizendo que existe; Notion mostra **prévia cortada**.
+
+O protótipo ganhou uma tarefa de teste com o caso real (`Conferir a migração de contratos`, id
+22089): cinco parágrafos, lista numerada, aviso em negrito e uma URL de 110 caracteres sem
+espaço, do tamanho que um spaceflow escreve quando o roteiro inteiro vai na descrição.
+
+**No cartão:**
+
+- a descrição **corta sempre**, em qualquer tamanho de cartão: 1 linha no pequeno, 2 no médio,
+  4 no grande. O cartão nunca cresce com o texto;
+- `break-words` no título e na descrição, senão a URL de 110 caracteres estoura a raia;
+- quando o texto está cortado ou o campo desligado, aparece o **ícone de descrição** (≡) na
+  linha de meta, como no Trello, com o tooltip "Tem descrição. Abra a tarefa para ler inteira".
+
+**No painel:** a descrição **começa recolhida** quando passa de 600 caracteres, com uma cortina
+em gradiente e o botão "Mostrar a descrição inteira". É o que GitHub, Jira e Linear fazem com
+corpo longo, e o motivo é prático: sem isso, o roteiro de cinco parágrafos empurra o
+formulário e os botões para fora da vista, e a pessoa rola sem saber que havia algo para
+responder embaixo. Conferido: com a descrição recolhida, a seção Formulário e o rodapé
+continuam visíveis na mesma tela.
+
+### 2. Tamanho do cartão: onde o mercado põe
+
+A pergunta era se deveria ser um botão no topo. **Não é assim em nenhum dos quatro que fazem
+isso**: Notion (`Layout › Card size`), ClickUp (`Customize › Row height`), Airtable e Twenty
+põem o tamanho **dentro do mesmo menu que escolhe os campos do cartão**, porque as duas
+perguntas são a mesma: o que cabe no cartão. É onde ele já estava aqui, em `Cartão`.
+
+O que mudou foram duas coisas:
+
+1. **Os nomes**, que agora seguem o Notion: **Pequeno, Médio, Grande**. "Compacto/Padrão/
+   Completo" dava a entender que "Completo" mostrava todos os campos, e isso confundia tamanho
+   com visibilidade;
+2. **A semântica, que estava errada.** Antes, o tamanho **escondia campos**: quem ligava
+   "Etiquetas" e escolhia compacto não via etiqueta nenhuma, e ficava sem entender por quê.
+   Agora **campo ligado aparece em qualquer tamanho**, e o tamanho decide **quanto** de cada um:
+   linhas do título, linhas da descrição e se criador e colaboradores cabem. Visibilidade é do
+   campo; tamanho é do cartão.

@@ -319,6 +319,44 @@ export const tarefas: Task[] = [
     assigned_to: 4088,
     item: 574455,
   }),
+  /* ------------------------------------------------------------------ *
+   * O caso de borda da descrição: spaceflow que escreve um manual dentro *
+   * da tarefa, com lista, aviso e um link gigante sem espaço. Existe para *
+   * provar o corte no cartão e o "mostrar tudo" no painel.                *
+   * ------------------------------------------------------------------ */
+  tarefa({
+    id: 22089,
+    reference: 'Hg3JdKf9Lm2Pq8Rt5Yw1Zx4Cv7Bn0Ms',
+    name: 'Conferir a migração de contratos antes de liberar o acesso do cliente',
+    description: '<p><strong>Atenção: este roteiro foi gerado pelo fluxo de migração e precisa ser seguido na ordem.</strong></p>'
+      + '<p>O cliente trocou de plano na virada do mês e os contratos vieram do sistema antigo em dois lotes. '
+      + 'O primeiro lote entrou na madrugada de sexta e o segundo só na segunda de manhã, depois da fila destravar. '
+      + 'Isso quer dizer que existem contratos duplicados, e é isso que esta tarefa pede para conferir antes de qualquer liberação de acesso.</p>'
+      + '<p>Passo a passo combinado com o time de dados:</p>'
+      + '<ol>'
+      + '<li>Abrir a categoria Contratos e filtrar por data de criação nos dois dias citados.</li>'
+      + '<li>Para cada contrato repetido, manter o que tem número de apólice preenchido e arquivar o outro.</li>'
+      + '<li>Se os dois tiverem apólice, não arquive nada: marque a etiqueta Regressão e avise a liderança, porque aí o problema é do conversor e não do dado.</li>'
+      + '<li>Conferir se o total de contratos ativos bate com o relatório que o time financeiro mandou por e-mail.</li>'
+      + '<li>Só depois disso liberar o acesso, pela tela de Gestão de Membros.</li>'
+      + '</ol>'
+      + '<p>O relatório do financeiro está neste endereço, que precisa ser aberto com a conta do workspace: '
+      + 'https://relatorios.exemplo-ficticio.com.br/financeiro/contratos/2026/09/conferencia-de-migracao-lote-um-e-lote-dois-consolidado.pdf</p>'
+      + '<p>Se o total não bater por diferença de até três contratos, siga assim mesmo e anote a diferença no comentário. '
+      + 'Acima disso, pare e escale: liberar acesso com contrato errado é cobrança errada no mês seguinte, e o cliente já abriu chamado por isso duas vezes neste trimestre.</p>'
+      + '<p>Prazo combinado na reunião de quinta: antes do fechamento do dia, porque o time de implantação depende desta conferência para marcar o treinamento.</p>',
+    type: 'crud',
+    status: 'pending',
+    priority: 'high',
+    due_date: d('2026-09-22T21:00:00.000Z'),
+    points: 8,
+    created_at: d('2026-09-21T07:30:00.000Z'),
+    meta: { form: 'DUnVSD194euEu2XOc8y9GzIUaDXhnCEk', itemReference: 'CHAB61C700CD08947259EAB2D67BAFCD' },
+    assigned_to: 4090,
+    item: 574378,
+    collaborators: [4072],
+    tag_ids: [1, 2],
+  }),
   tarefa({
     id: 22082,
     reference: 'Wq2EdRf5TgYh8UjIk3OlPz6Xc9Vb1Nm4',

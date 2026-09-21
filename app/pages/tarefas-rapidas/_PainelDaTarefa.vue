@@ -50,6 +50,15 @@ const emit = defineEmits<{
 const aba = ref<'tarefa' | 'comentarios' | 'logs'>('tarefa')
 const editandoDescricao = ref(false)
 const editandoTitulo = ref(false)
+
+/**
+ * Descrição bizarramente grande: no painel ela não é cortada, mas começa
+ * recolhida, com um "mostrar tudo". É o que GitHub, Jira e Linear fazem com
+ * corpo longo: o texto não pode empurrar o formulário e os botões para fora
+ * da vista, senão a pessoa rola sem saber que existe algo embaixo.
+ */
+const descricaoInteira = ref(false)
+const LIMITE_DE_TEXTO = 600
 /** Campo que acabou de ser pedido pelo trilho: acende por um instante. */
 const campoEmFoco = ref<string | null>(null)
 
@@ -66,6 +75,12 @@ const tags = computed(() => {
   const ids = Array.isArray(props.tarefa.tag_ids) ? props.tarefa.tag_ids as number[] : []
   return ids.map(id => todasEtiquetas[id]).filter(Boolean)
 })
+
+/** Quantos caracteres tem a descrição, sem as marcações. */
+const tamanhoDaDescricao = computed(() =>
+  (props.tarefa.description ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().length)
+
+const descricaoRecolhivel = computed(() => tamanhoDaDescricao.value > LIMITE_DE_TEXTO)
 
 const corDaSituacao = {
   pending: 'info', working: 'warning', blocked: 'error', completed: 'success',
@@ -688,8 +703,31 @@ const abas = computed(() => [
                   :aria-label="t.campos.descricao"
                 />
               </div>
-              <div v-if="tarefa.description" class="markdown px-3 py-2 text-sm" v-html="tarefa.description" />
+              <div v-if="tarefa.description" class="relative">
+                <div
+                  class="markdown overflow-hidden break-words px-3 py-2 text-sm transition-all duration-200"
+                  :class="descricaoRecolhivel && !descricaoInteira ? 'max-h-56' : ''"
+                  v-html="tarefa.description"
+                />
+                <!-- A cortina só existe quando há texto escondido embaixo -->
+                <div
+                  v-if="descricaoRecolhivel && !descricaoInteira"
+                  class="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-default to-transparent"
+                />
+              </div>
               <p v-else class="px-3 py-2 text-sm text-muted">{{ t.semDescricao }}</p>
+
+              <div v-if="descricaoRecolhivel" class="border-t border-default px-1 py-1">
+                <UButton
+                  :label="descricaoInteira ? t.mostrarMenos : t.mostrarTudo"
+                  :icon="descricaoInteira ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+                  color="neutral"
+                  variant="ghost"
+                  size="xs"
+                  block
+                  @click.stop="descricaoInteira = !descricaoInteira"
+                />
+              </div>
             </div>
           </section>
 

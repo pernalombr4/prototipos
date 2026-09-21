@@ -48,7 +48,7 @@ export interface Textos {
   cartao: string
   camposDoCartao: string
   densidade: string
-  densidades: { compacto: string, padrao: string, completo: string }
+  densidades: { pequeno: string, medio: string, grande: string }
   periodo: string
   todoOPeriodo: string
   campoDeData: string
@@ -116,6 +116,10 @@ export interface Textos {
   abrirTarefa: string
   acoesDaTarefa: string
   temFormulario: string
+  temDescricao: string
+  mostrarTudo: string
+  mostrarMenos: string
+  descricaoLonga: (linhas: number) => string
   respostaEnviada: string
 
   /* raia */
@@ -285,7 +289,7 @@ export const textos: Record<Idioma, Textos> = {
     cartao: 'Cartão',
     camposDoCartao: 'O que aparece no cartão',
     densidade: 'Tamanho do cartão',
-    densidades: { compacto: 'Compacto', padrao: 'Padrão', completo: 'Completo' },
+    densidades: { pequeno: 'Pequeno', medio: 'Médio', grande: 'Grande' },
     periodo: 'Período',
     todoOPeriodo: 'Todo o período',
     campoDeData: 'Contar o período por',
@@ -351,6 +355,10 @@ export const textos: Record<Idioma, Textos> = {
     abrirTarefa: 'Abrir tarefa',
     acoesDaTarefa: 'Ações da tarefa',
     temFormulario: 'Pede formulário',
+    temDescricao: 'Tem descrição. Abra a tarefa para ler inteira',
+    mostrarTudo: 'Mostrar a descrição inteira',
+    mostrarMenos: 'Mostrar menos',
+    descricaoLonga: linhas => `Descrição longa, cortada em ${linhas} linhas`,
     respostaEnviada: 'Resposta registrada',
 
     novaTarefaNaRaia: 'Nova tarefa aqui',
@@ -513,7 +521,7 @@ export const textos: Record<Idioma, Textos> = {
     cartao: 'Card',
     camposDoCartao: 'What shows on the card',
     densidade: 'Card size',
-    densidades: { compacto: 'Compact', padrao: 'Default', completo: 'Full' },
+    densidades: { pequeno: 'Small', medio: 'Medium', grande: 'Large' },
     periodo: 'Period',
     todoOPeriodo: 'All time',
     campoDeData: 'Count the period by',
@@ -579,6 +587,10 @@ export const textos: Record<Idioma, Textos> = {
     abrirTarefa: 'Open task',
     acoesDaTarefa: 'Task actions',
     temFormulario: 'Asks for a form',
+    temDescricao: 'Has a description. Open the task to read it in full',
+    mostrarTudo: 'Show the whole description',
+    mostrarMenos: 'Show less',
+    descricaoLonga: linhas => `Long description, cut at ${linhas} lines`,
     respostaEnviada: 'Answer recorded',
 
     novaTarefaNaRaia: 'New task here',
@@ -741,7 +753,7 @@ export const textos: Record<Idioma, Textos> = {
     cartao: 'Tarjeta',
     camposDoCartao: 'Qué aparece en la tarjeta',
     densidade: 'Tamaño de la tarjeta',
-    densidades: { compacto: 'Compacta', padrao: 'Estándar', completo: 'Completa' },
+    densidades: { pequeno: 'Pequeña', medio: 'Mediana', grande: 'Grande' },
     periodo: 'Período',
     todoOPeriodo: 'Todo el período',
     campoDeData: 'Contar el período por',
@@ -807,6 +819,10 @@ export const textos: Record<Idioma, Textos> = {
     abrirTarefa: 'Abrir tarea',
     acoesDaTarefa: 'Acciones de la tarea',
     temFormulario: 'Pide formulario',
+    temDescricao: 'Tiene descripción. Abra la tarea para leerla entera',
+    mostrarTudo: 'Mostrar la descripción entera',
+    mostrarMenos: 'Mostrar menos',
+    descricaoLonga: linhas => `Descripción larga, cortada en ${linhas} líneas`,
     respostaEnviada: 'Respuesta registrada',
 
     novaTarefaNaRaia: 'Nueva tarea aquí',

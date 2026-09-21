@@ -63,7 +63,7 @@ const busca = defineModel<string>('busca', { required: true })
 const agrupamento = defineModel<ChaveAgrupamento>('agrupamento', { required: true })
 const ordenacao = defineModel<ChaveOrdenacao>('ordenacao', { required: true })
 const ordenacaoDesc = defineModel<boolean>('ordenacaoDesc', { required: true })
-const densidade = defineModel<'compacto' | 'padrao' | 'completo'>('densidade', { required: true })
+const densidade = defineModel<'pequeno' | 'medio' | 'grande'>('densidade', { required: true })
 const campos = defineModel<Record<string, boolean>>('campos', { required: true })
 const filtros = defineModel<Filtros>('filtros', { required: true })
 const periodo = defineModel<string>('periodo', { required: true })
@@ -353,7 +353,7 @@ const rotuloDaOrdenacao = computed(() => {
               <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">{{ t.densidade }}</p>
               <div class="flex gap-1">
                 <UButton
-                  v-for="d in (['compacto', 'padrao', 'completo'] as const)"
+                  v-for="d in (['pequeno', 'medio', 'grande'] as const)"
                   :key="d"
                   :label="t.densidades[d]"
                   size="xs"

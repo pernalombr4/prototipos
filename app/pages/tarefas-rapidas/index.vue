@@ -61,7 +61,7 @@ const busca = ref('')
 const agrupamento = ref<ChaveAgrupamento>('status')
 const ordenacao = ref<ChaveOrdenacao>('due_date')
 const ordenacaoDesc = ref(false)
-const densidade = ref<'compacto' | 'padrao' | 'completo'>('padrao')
+const densidade = ref<'pequeno' | 'medio' | 'grande'>('medio')
 const periodo = ref('tudo')
 const campoDeData = ref<'created_at' | 'due_date'>('created_at')
 const ocultarVazias = ref(false)
@@ -361,7 +361,7 @@ function atualizarCampo(campo: keyof Task, valor: unknown) {
  */
 function mostrarCartaoCompleto() {
   estado.value = 'cheio'
-  densidade.value = 'completo'
+  densidade.value = 'grande'
   // Liga todos os campos: é o caso de borda pedido na demanda.
   campos.value = Object.fromEntries(Object.keys(campos.value).map(k => [k, true]))
   limparFiltros()
