@@ -986,3 +986,42 @@ concluída, o que foi respondido.
 A linha **Por pessoa** (avatares com o total de cada um) saiu. Num popover de 320 px ela
 repetia o que a lista logo abaixo já mostra, com avatar em cada apontamento. Se um dia a tarefa
 tiver muita gente apontando, ela volta como cabeçalho da lista, e não como linha à parte.
+
+---
+
+## Rodada 15 — 21/09/2026
+
+### O que ela pediu, literal
+
+> quando eu clicar no tempo inserido tenho que poder editar, como é no clickup. veja como é la
+
+### Como é no ClickUp
+
+Clicar no apontamento abre a edição dele: o produto descreve o caminho como "clicar no time
+entry, escolher o lápis e editar". O que se edita é a **duração**, o **quando**, a **nota**, as
+**etiquetas do apontamento** e o **faturável**, e é dali que também se apaga.
+
+### O que ficou
+
+**O apontamento virou botão.** Clicar nele troca a linha pelo formulário dele mesmo, com tudo
+já preenchido:
+
+- **duração**, aceitando os mesmos formatos (`1h 30m`, `90m`, `1:30`);
+- **quando**, com data e hora;
+- **nota** e **etiqueta**;
+- **faturável**;
+- **apagar**, em vermelho, dentro da edição, como no ClickUp: apagar é uma decisão da edição,
+  não um botão solto que se clica sem querer ao passar o mouse pela lista.
+
+Confirmando, o total do campo se refaz na hora: mudei um apontamento de `40m` para `1h` e o
+campo passou de `1h 55m` para `2h 15m`.
+
+**Duas coisas de acabamento:**
+
+1. a linha mostra um **lápis** no hover, senão nada diz que ela é clicável;
+2. o aviso ao salvar diz **"Apontamento atualizado"**, e não "1h apontados", que era o texto de
+   quando se cria. Mensagem errada em confirmação é pior que nenhuma: faz duvidar do que
+   aconteceu.
+
+**O que continua fora:** apontar por intervalo ("das 9:45 às 10:15"). A duração digitada cobre
+o caso, e o `quando` já ficou no formulário de edição.

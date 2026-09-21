@@ -53,6 +53,7 @@ const emit = defineEmits<{
   iniciarCronometro: []
   pararCronometro: []
   registrarTempo: [dados: { segundos: number, nota: string, etiqueta: string, faturavel: boolean }]
+  atualizarRegistro: [id: number, dados: { segundos: number, inicio: Date, nota: string, etiqueta: string, faturavel: boolean }]
   apagarRegistro: [id: number]
 }>()
 
@@ -389,11 +390,43 @@ const faturavel = ref(true)
 const segundosDigitados = computed(() => interpretarDuracao(duracaoDigitada.value))
 
 function abrirRegistro() {
+  registroEmEdicao.value = null
   registrando.value = true
   duracaoDigitada.value = ''
   notaDoRegistro.value = ''
   etiquetaDoRegistro.value = ''
   faturavel.value = true
+}
+
+/* ------------------------- editar um apontamento ------------------------- *
+ * No ClickUp, clicar no apontamento abre a edição dele: duração, quando,
+ * nota, etiqueta, faturável e apagar. É o mesmo formulário do registro, só
+ * que preenchido, e por isso ele reusa os mesmos campos.
+ * ------------------------------------------------------------------------ */
+const registroEmEdicao = ref<number | null>(null)
+const quandoDigitado = ref('')
+
+function abrirEdicaoDoRegistro(registro: typeof registrosDeTempo[number]) {
+  if (props.somenteLeitura) return
+  registrando.value = false
+  registroEmEdicao.value = registro.id
+  duracaoDigitada.value = formatarDuracao(registro.segundos)
+  quandoDigitado.value = paraCampoDeData(registro.inicio)
+  notaDoRegistro.value = registro.nota ?? ''
+  etiquetaDoRegistro.value = registro.etiqueta ?? ''
+  faturavel.value = registro.faturavel
+}
+
+function salvarEdicaoDoRegistro() {
+  if (registroEmEdicao.value === null || !segundosDigitados.value) return
+  emit('atualizarRegistro', registroEmEdicao.value, {
+    segundos: segundosDigitados.value,
+    inicio: deCampoDeData(quandoDigitado.value) ?? new Date(),
+    nota: notaDoRegistro.value.trim(),
+    etiqueta: etiquetaDoRegistro.value.trim(),
+    faturavel: faturavel.value,
+  })
+  registroEmEdicao.value = null
 }
 
 function confirmarRegistro() {
@@ -730,50 +763,104 @@ const abas = computed(() => [
 
                   <!-- Apontamentos -->
                   <ul v-if="registrosDaTarefa.length" class="max-h-56 divide-y divide-default overflow-y-auto">
-                    <li
-                      v-for="registro in registrosDaTarefa"
-                      :key="registro.id"
-                      class="group/registro flex items-start gap-2 px-3 py-2"
-                    >
-                      <UAvatar
-                        size="2xs"
-                        class="mt-0.5"
-                        :text="pessoas[registro.usuario]?.iniciais"
-                        :alt="pessoas[registro.usuario]?.fullname"
-                      />
-                      <div class="min-w-0 flex-1">
-                        <div class="flex flex-wrap items-center gap-1.5">
-                          <span class="text-sm font-medium tabular-nums text-highlighted">
-                            {{ formatarDuracao(registro.segundos) }}
-                          </span>
-                          <span class="text-xs text-muted">{{ formatarDataHora(registro.inicio) }}</span>
-                          <UBadge
-                            v-if="registro.etiqueta"
-                            :label="registro.etiqueta"
-                            color="neutral"
-                            variant="subtle"
-                            size="sm"
+                    <li v-for="registro in registrosDaTarefa" :key="registro.id">
+                      <!-- Clicou no apontamento: ele vira o formulário dele mesmo -->
+                      <div
+                        v-if="registroEmEdicao === registro.id"
+                        class="space-y-2 bg-elevated/50 p-3"
+                        style="animation: entrada .2s ease-out both"
+                      >
+                        <div class="flex gap-2">
+                          <UInput
+                            v-model="duracaoDigitada"
+                            :placeholder="t.tempo.duracaoAjuda"
+                            size="xs"
+                            class="flex-1"
+                            autofocus
+                            @keydown.enter="salvarEdicaoDoRegistro"
                           />
-                          <UTooltip :text="registro.faturavel ? t.tempo.faturavel : t.tempo.naoFaturavel">
+                          <UInput
+                            v-model="etiquetaDoRegistro"
+                            :placeholder="t.tempo.etiquetaPlaceholder"
+                            size="xs"
+                            class="w-28"
+                          />
+                        </div>
+                        <UInput v-model="quandoDigitado" type="datetime-local" size="xs" class="w-full" />
+                        <UInput
+                          v-model="notaDoRegistro"
+                          :placeholder="t.tempo.notaPlaceholder"
+                          size="xs"
+                          class="w-full"
+                        />
+                        <div class="flex items-center gap-2">
+                          <USwitch
+                            v-model="faturavel"
+                            :label="faturavel ? t.tempo.faturavel : t.tempo.naoFaturavel"
+                            size="xs"
+                          />
+                          <UButton
+                            icon="i-lucide-trash-2"
+                            color="error"
+                            variant="ghost"
+                            size="xs"
+                            :aria-label="t.tempo.apagarRegistro"
+                            @click="emit('apagarRegistro', registro.id); registroEmEdicao = null"
+                          />
+                          <div class="ml-auto flex gap-1">
+                            <UButton :label="t.cancelar" color="neutral" variant="ghost" size="xs" @click="registroEmEdicao = null" />
+                            <UButton
+                              :label="t.tempo.salvar"
+                              color="primary"
+                              size="xs"
+                              :disabled="!segundosDigitados"
+                              @click="salvarEdicaoDoRegistro"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        v-else
+                        type="button"
+                        class="group/registro flex w-full items-start gap-2 px-3 py-2 text-left transition-colors"
+                        :class="somenteLeitura ? 'cursor-default' : 'hover:bg-elevated'"
+                        :aria-label="t.tempo.editarRegistro"
+                        @click="abrirEdicaoDoRegistro(registro)"
+                      >
+                        <UAvatar
+                          size="2xs"
+                          class="mt-0.5"
+                          :text="pessoas[registro.usuario]?.iniciais"
+                          :alt="pessoas[registro.usuario]?.fullname"
+                        />
+                        <div class="min-w-0 flex-1">
+                          <div class="flex flex-wrap items-center gap-1.5">
+                            <span class="text-sm font-medium tabular-nums text-highlighted">
+                              {{ formatarDuracao(registro.segundos) }}
+                            </span>
+                            <span class="text-xs text-muted">{{ formatarDataHora(registro.inicio) }}</span>
+                            <UBadge
+                              v-if="registro.etiqueta"
+                              :label="registro.etiqueta"
+                              color="neutral"
+                              variant="subtle"
+                              size="sm"
+                            />
                             <UIcon
                               :name="registro.faturavel ? 'i-lucide-circle-dollar-sign' : 'i-lucide-circle-slash'"
                               class="size-3.5"
                               :class="registro.faturavel ? 'text-success' : 'text-muted'"
                             />
-                          </UTooltip>
+                          </div>
+                          <p v-if="registro.nota" class="mt-0.5 break-words text-xs text-muted">{{ registro.nota }}</p>
                         </div>
-                        <p v-if="registro.nota" class="mt-0.5 break-words text-xs text-muted">{{ registro.nota }}</p>
-                      </div>
-                      <UButton
-                        icon="i-lucide-trash-2"
-                        color="neutral"
-                        variant="ghost"
-                        size="xs"
-                        :disabled="somenteLeitura"
-                        :aria-label="t.tempo.apagarRegistro"
-                        class="opacity-0 transition-opacity group-hover/registro:opacity-100 focus-visible:opacity-100"
-                        @click="emit('apagarRegistro', registro.id)"
-                      />
+                        <UIcon
+                          v-if="!somenteLeitura"
+                          name="i-lucide-pencil"
+                          class="mt-1 size-3 shrink-0 text-muted opacity-0 transition-opacity group-hover/registro:opacity-100"
+                        />
+                      </button>
                     </li>
                   </ul>
 

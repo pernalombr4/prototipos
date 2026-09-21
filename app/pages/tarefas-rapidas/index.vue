@@ -142,6 +142,17 @@ function registrarTempo(dados: { segundos: number, nota: string, etiqueta: strin
   })
 }
 
+function atualizarRegistro(id: number, dados: { segundos: number, inicio: Date, nota: string, etiqueta: string, faturavel: boolean }) {
+  const registro = registrosDeTempo.find(r => r.id === id)
+  if (!registro) return
+  registro.segundos = dados.segundos
+  registro.inicio = dados.inicio
+  registro.nota = dados.nota || undefined
+  registro.etiqueta = dados.etiqueta || undefined
+  registro.faturavel = dados.faturavel
+  toast.add({ title: t.value.tempo.registroAtualizado, icon: 'i-lucide-timer', color: 'success' })
+}
+
 function apagarRegistro(id: number) {
   const i = registrosDeTempo.findIndex(r => r.id === id)
   if (i >= 0) registrosDeTempo.splice(i, 1)
@@ -618,6 +629,7 @@ const cartaoDeHoje: EnKanbanCardConfig = {
           @iniciar-cronometro="iniciarCronometro(tarefaAberta)"
           @parar-cronometro="pararCronometro"
           @registrar-tempo="registrarTempo"
+          @atualizar-registro="atualizarRegistro"
           @apagar-registro="apagarRegistro"
         />
       </template>

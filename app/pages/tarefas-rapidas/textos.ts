@@ -130,6 +130,8 @@ export interface Textos {
     tempoAdicionado: (duracao: string) => string
     cronometroParado: (duracao: string) => string
     porPessoa: string
+    salvar: string
+    registroAtualizado: string
   }
 
   /* valores */
@@ -407,6 +409,8 @@ export const textos: Record<Idioma, Textos> = {
       tempoAdicionado: duracao => `${duracao} apontados.`,
       cronometroParado: duracao => `Cronômetro parado. ${duracao} apontados.`,
       porPessoa: 'Por pessoa',
+      salvar: 'Salvar',
+      registroAtualizado: 'Apontamento atualizado.',
     },
 
     status: { pending: 'Pendente', working: 'Em andamento', blocked: 'Bloqueada', completed: 'Concluída' },
@@ -674,6 +678,8 @@ export const textos: Record<Idioma, Textos> = {
       tempoAdicionado: duracao => `${duracao} tracked.`,
       cronometroParado: duracao => `Timer stopped. ${duracao} tracked.`,
       porPessoa: 'Per person',
+      salvar: 'Save',
+      registroAtualizado: 'Entry updated.',
     },
 
     status: { pending: 'Pending', working: 'In progress', blocked: 'Blocked', completed: 'Completed' },
@@ -941,6 +947,8 @@ export const textos: Record<Idioma, Textos> = {
       tempoAdicionado: duracao => `${duracao} registrados.`,
       cronometroParado: duracao => `Cronómetro parado. ${duracao} registrados.`,
       porPessoa: 'Por persona',
+      salvar: 'Guardar',
+      registroAtualizado: 'Registro actualizado.',
     },
 
     status: { pending: 'Pendiente', working: 'En curso', blocked: 'Bloqueada', completed: 'Completada' },
