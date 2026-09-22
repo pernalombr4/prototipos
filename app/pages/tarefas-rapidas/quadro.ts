@@ -183,23 +183,49 @@ export function estaAtrasada(tarefa: Task, referencia: Date = hoje): boolean {
   return dias !== null && dias < 0
 }
 
+/**
+ * O prazo em duas formas, porque cada lugar da tela precisa de uma.
+ *
+ * **A DATA É A FORMA CURTA, e é ela que o cartão mostra.** Pesquisa da rodada
+ * 19, no PESQUISA.md: Trello, Jira, Linear, Notion e monday mostram a data, e
+ * quem diz a urgência é a COR, não a troca do texto. ClickUp e Asana mostram
+ * texto relativo, mas o ClickUp só nos dias vizinhos de hoje, e com um ajuste
+ * de workspace para desligar. O que nenhum deles faz é o que estava aqui:
+ * frase para uns cartões e data para outros, no mesmo quadro, sem a pessoa
+ * saber por quê.
+ */
 export interface PrazoLegivel {
-  texto: string
+  /** `21/09`, ou `21/09/27` quando cai em outro ano. É o que vai no cartão. */
+  data: string
+  /** "Vence hoje", "Atrasada 2 dias". Vai no painel e no tooltip. */
+  relativo: string
   cor: 'error' | 'warning' | 'neutral'
   urgente: boolean
 }
 
+/** Curta de propósito: no cartão, o ano só aparece quando não é o corrente. */
+export function formatarDataCurta(data: Date | string | null | undefined, referencia: Date = hoje): string {
+  if (!data) return ''
+  const d = new Date(data)
+  const dia = String(d.getUTCDate()).padStart(2, '0')
+  const mes = String(d.getUTCMonth() + 1).padStart(2, '0')
+  if (d.getUTCFullYear() === referencia.getUTCFullYear()) return `${dia}/${mes}`
+  return `${dia}/${mes}/${String(d.getUTCFullYear()).slice(2)}`
+}
+
 export function prazoLegivel(tarefa: Task, t: Textos): PrazoLegivel {
   const dias = diasAteOPrazo(tarefa)
-  if (dias === null) return { texto: t.semPrazo, cor: 'neutral', urgente: false }
+  if (dias === null) return { data: '', relativo: t.semPrazo, cor: 'neutral', urgente: false }
+
+  const data = formatarDataCurta(tarefa.due_date)
   if (tarefa.status === 'completed') {
-    return { texto: formatarData(tarefa.due_date as Date), cor: 'neutral', urgente: false }
+    return { data, relativo: t.concluidaEm(formatarData(tarefa.due_date as Date)), cor: 'neutral', urgente: false }
   }
-  if (dias < 0) return { texto: t.atrasadaDias(Math.abs(dias)), cor: 'error', urgente: true }
-  if (dias === 0) return { texto: t.venceHoje, cor: 'warning', urgente: true }
-  if (dias === 1) return { texto: t.venceAmanha, cor: 'warning', urgente: false }
-  if (dias <= 7) return { texto: t.venceEmDias(dias), cor: 'neutral', urgente: false }
-  return { texto: formatarData(tarefa.due_date as Date), cor: 'neutral', urgente: false }
+  if (dias < 0) return { data, relativo: t.atrasadaDias(Math.abs(dias)), cor: 'error', urgente: true }
+  if (dias === 0) return { data, relativo: t.venceHoje, cor: 'warning', urgente: true }
+  if (dias === 1) return { data, relativo: t.venceAmanha, cor: 'warning', urgente: false }
+  if (dias <= 7) return { data, relativo: t.venceEmDias(dias), cor: 'neutral', urgente: false }
+  return { data, relativo: formatarData(tarefa.due_date as Date), cor: 'neutral', urgente: false }
 }
 
 export function formatarData(data: Date | string | null | undefined): string {

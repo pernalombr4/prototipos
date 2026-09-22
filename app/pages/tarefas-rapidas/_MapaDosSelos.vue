@@ -12,10 +12,10 @@
  * de um cartão de 300 px obrigam metade das setas a atravessar a outra metade.
  * Agora cada quadro aponta um pedaço, com no máximo seis balões de cada lado:
  *
- *   1. a cabeça do cartão: identificação, título, texto, ligação e etiquetas;
- *   2. o rodapé do cartão: o que se lê de relance, e as três pessoas;
- *   3. a tarefa atrasada, porque dois selos só existem nesse caso;
- *   4. a tarefa com dez colaboradores, que é onde o contador aparece;
+ *   1. a cabeça do cartão: título, texto, ligação e etiquetas;
+ *   2. o rodapé do cartão: tipo, referência e o que se lê de relance;
+ *   3. as três pessoas, na tarefa que tem dez colaboradores;
+ *   4. a tarefa atrasada, que é o prazo em outro estado, não outra peça;
  *   5. a tarefa de descrição gigante, o caso de borda do texto.
  *
  * E embaixo, a legenda inteira, peça por peça, dizendo de qual campo da tarefa
@@ -48,7 +48,11 @@ function tarefaPorId(id: number) {
   return props.tarefas.find(x => x.id === id) ?? props.tarefas[0]!
 }
 
-const porChave = (chaves: string[]) => selosDoCartao.filter(s => chaves.includes(s.chave))
+/**
+ * Por número, e não por chave: desde a rodada 19 o selo 3 e o selo 10 apontam
+ * o MESMO elemento (o prazo), um no estado atrasado e o outro no normal.
+ */
+const porNumero = (numeros: number[]) => selosDoCartao.filter(s => numeros.includes(s.numero))
 
 const quadros = computed(() => [
   {
@@ -61,30 +65,30 @@ const quadros = computed(() => [
   {
     chave: 'rodape',
     titulo: 'O rodapé do mesmo cartão',
-    ajuda: 'A linha que se lê de relance, e as três pessoas na ordem de sempre: quem criou, quem colabora e quem responde.',
+    ajuda: 'A linha que se lê de relance. O tipo e a referência moram aqui desde a rodada 19, e não acima do título: é a camada de detalhe do Jira, que deixa o resumo sempre no topo.',
     tarefa: tarefaPorId(22078),
     selos: selosDoCartao.filter(s => s.quadro === 'rodape'),
   },
   {
-    chave: 'atraso',
-    titulo: 'Com a tarefa atrasada',
-    ajuda: 'Os selos 3 e 19 só existem aqui. Quando eles aparecem, o prazo normal (10) some do rodapé, para o cartão não dizer a mesma coisa em dois lugares.',
-    tarefa: tarefaPorId(22086),
-    selos: porChave(['atraso', 'borda']),
+    chave: 'pessoas',
+    titulo: 'As três pessoas, e o contador',
+    ajuda: 'Tarefa 22079, com um time inteiro avisado pelo spaceflow. Sempre na mesma ordem: quem criou, quem colabora e quem responde, terminando em quem tem que agir. Dez colaboradores viram dois avatares e um contador, senão o responsável sai da linha.',
+    tarefa: tarefaPorId(22079),
+    selos: selosDoCartao.filter(s => s.quadro === 'pessoas'),
   },
   {
-    chave: 'time',
-    titulo: 'Com dez colaboradores',
-    ajuda: 'Tarefa 22079, com um time inteiro avisado pelo spaceflow. O cartão mostra dois avatares e conta o resto: dez avatares empurrariam o responsável para fora da linha, e o responsável é quem tem que agir.',
-    tarefa: tarefaPorId(22079),
-    selos: porChave(['colaboradores', 'responsavel']),
+    chave: 'atraso',
+    titulo: 'Com a tarefa atrasada',
+    ajuda: 'O prazo não troca de lugar nem de formato: fica vermelho, troca o calendário pelo alarme e ganha o filete na borda esquerda, que é o aviso que sobrevive ao cartão pequeno.',
+    tarefa: tarefaPorId(22086),
+    selos: porNumero([3, 19]),
   },
   {
     chave: 'texto',
     titulo: 'Com a descrição gigante',
     ajuda: 'Tarefa 22089, com uma descrição de mais de trinta linhas. O cartão não cresce: corta em quatro linhas e acende o ícone que avisa que existe mais texto. O texto inteiro está no painel, e lá ele também começa recolhido.',
     tarefa: tarefaPorId(22089),
-    selos: porChave(['descricao', 'iconeDescricao']),
+    selos: porNumero([5, 14]),
   },
 ])
 

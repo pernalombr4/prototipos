@@ -98,7 +98,7 @@ function dica(rotulo: string, valor: string) {
 
 const dicaDoPrazo = computed(() => {
   if (!props.tarefa.due_date) return dica(props.t.campos.prazo, props.t.semPrazo)
-  return `${dica(props.t.campos.prazo, formatarDataHora(props.tarefa.due_date))} (${prazo.value.texto})`
+  return `${dica(props.t.campos.prazo, formatarDataHora(props.tarefa.due_date))} (${prazo.value.relativo})`
 })
 
 /**
@@ -177,30 +177,6 @@ const itensDoMenu = computed(() => [[
       />
     </UTooltip>
 
-    <!-- Linha de identificação: tipo, referência e o aviso que não pode esperar o clique -->
-    <div v-if="campos.referencia || campos.tipo || atrasada" class="mb-1.5 flex items-center gap-1.5">
-      <UTooltip v-if="campos.tipo" :text="dica(t.campos.tipo, t.tipo[tarefa.type])">
-        <UIcon :name="iconeDoTipo[tarefa.type]" data-selo="tipo" class="size-3.5 shrink-0 text-muted" />
-      </UTooltip>
-
-      <UTooltip v-if="campos.referencia" :text="dica(t.campos.referencia, tarefa.reference)">
-        <span data-selo="referencia" class="font-mono text-[11px] leading-none text-muted">
-          {{ referenciaCurta(tarefa.reference) }}
-        </span>
-      </UTooltip>
-
-      <UTooltip v-if="atrasada" :text="dicaDoPrazo" class="ml-auto">
-        <UBadge
-          :label="prazo.texto"
-          color="error"
-          variant="subtle"
-          size="sm"
-          icon="i-lucide-alarm-clock"
-          data-selo="atraso"
-        />
-      </UTooltip>
-    </div>
-
     <!--
       O corte do título vai no <span>, não no <h3>. `line-clamp` liga
       `overflow: hidden`, e isso recorta o `after:inset-0` do link esticado:
@@ -262,8 +238,27 @@ const itensDoMenu = computed(() => [[
       </UTooltip>
     </div>
 
-    <!-- Rodapé do cartão: tudo que se lê de relance, numa linha só -->
+    <!--
+      Rodapé do cartão: tudo que se lê de relance, numa linha só.
+
+      **O tipo e a referência moram aqui, não em cima do título.** É o que o
+      Jira faz: o resumo sempre no topo, e a camada de detalhe (tipo, chave,
+      prioridade, responsável) embaixo. Trello, monday e Notion nem mostram
+      identificador no cartão; o Linear mostra, mas o dele é legível ("ENG-123")
+      e o nosso é um hash de 32 caracteres, que serve para copiar, não para ler.
+      Está no PESQUISA.md, consulta da rodada 19.
+    -->
     <div class="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+      <UTooltip v-if="campos.tipo" :text="dica(t.campos.tipo, t.tipo[tarefa.type])">
+        <UIcon :name="iconeDoTipo[tarefa.type]" data-selo="tipo" class="size-3.5 shrink-0 text-muted" />
+      </UTooltip>
+
+      <UTooltip v-if="campos.referencia" :text="dica(t.campos.referencia, tarefa.reference)">
+        <span data-selo="referencia" class="font-mono text-[11px] leading-none text-muted">
+          {{ referenciaCurta(tarefa.reference) }}
+        </span>
+      </UTooltip>
+
       <UTooltip
         v-if="campos.prioridade && tarefa.priority !== 'normal'"
         :text="dica(t.campos.prioridade, t.prioridade[tarefa.priority])"
@@ -278,14 +273,24 @@ const itensDoMenu = computed(() => [[
         />
       </UTooltip>
 
-      <UTooltip v-if="campos.prazo && tarefa.due_date && !atrasada" :text="dicaDoPrazo">
+      <!--
+        UM prazo só, sempre a data, e a cor dizendo o estado: vermelho quando
+        passou, âmbar quando é hoje ou amanhã, neutro no resto. Antes eram duas
+        peças, um selo de atraso em cima e uma frase embaixo, e no mesmo quadro
+        um cartão dizia "em 3 dias" e o outro dizia "28/09".
+      -->
+      <UTooltip v-if="campos.prazo && tarefa.due_date" :text="dicaDoPrazo">
         <span
           data-selo="prazo"
-          class="flex items-center gap-1 text-xs"
-          :class="prazo.cor === 'warning' ? 'font-medium text-warning' : 'text-muted'"
+          class="flex items-center gap-1 rounded px-1 py-0.5 text-xs tabular-nums"
+          :class="{
+            'bg-error/10 font-medium text-error': prazo.cor === 'error',
+            'font-medium text-warning': prazo.cor === 'warning',
+            'text-muted': prazo.cor === 'neutral',
+          }"
         >
-          <UIcon name="i-lucide-calendar" class="size-3.5" />
-          {{ prazo.texto }}
+          <UIcon :name="atrasada ? 'i-lucide-alarm-clock' : 'i-lucide-calendar'" class="size-3.5" />
+          {{ prazo.data }}
         </span>
       </UTooltip>
 

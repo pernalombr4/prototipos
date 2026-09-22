@@ -1233,3 +1233,78 @@ metade. **Agora são cinco quadros**, cada um apontando um pedaço:
 Nenhuma coluna passa de cinco, contra as oito e nove de antes. A legenda embaixo continua
 inteira, com as 32 peças, porque ela é a lista de referência e não muda de tamanho com o
 quadro.
+
+---
+
+## Rodada 19 — 22/09/2026
+
+### O que ela pediu, literal
+
+> voce no canto superior esquerdo do card ta mostrnado o TIPO de tarefa e o ID dela. é padrao
+> de mercado fazer isso? clickup, monday, notion e jira fazem isso? e o texto pra dizer o item
+> que ta relacionado, mostrando ja o display... é padrao de mercado? ou só usam ícone pra
+> dizer que tem algum item relacionado (o ícone de link)? / alem disso, o "vence hoje" nao
+> deveria ser apresentado na mesma logica que as outras datas de vencimento? pq só o vence
+> hoje aparece? cade a data de vencimento nos outros? coloque a data em si, não um "vence em x
+> dias", a nao ser que isso seja padrao de mercado tambenm. VERIFIQUE o padrao de mercado.
+
+A pesquisa das três perguntas, com fonte e URL, está no PESQUISA.md. Aqui fica o que mudou.
+
+### 1. Tipo e referência desceram para o rodapé
+
+Ter os dois no cartão é padrão. **Acima do título não é.** Só o Linear põe o identificador
+antes do nome, e o dele é `ENG-123`. O nosso é um hash de 32 caracteres cortado em seis, que
+serve para copiar e colar em conversa, não para ler de relance, e estava ocupando a primeira
+linha, que é a mais valiosa do cartão. O Jira, que também mostra tipo e chave, põe os dois na
+camada de detalhe, embaixo, e deixa o resumo sempre no topo. Trello, monday e Notion não
+mostram identificador nenhum.
+
+Agora o cartão começa pelo título.
+
+### 2. O registro de origem continua com o nome
+
+Aqui a resposta da pesquisa foi contra a desconfiança: o ícone sozinho é como o mercado mostra
+**relação lateral** (depende de, bloqueia, duplicada). Para **pai, contêiner ou origem**, o
+padrão é o nome: o Jira mostra a etiqueta do épico no cartão, ligada por padrão; o ClickUp
+oferece "task locations" e "subtask parent names"; Notion e monday mostram o título do item
+relacionado.
+
+O nosso `item` é o registro que originou a tarefa. Num quadro alimentado 100% por spaceflow,
+ele é o contexto sem o qual a tarefa não se entende, e trocar o nome por um ícone obrigaria a
+abrir a tarefa só para descobrir de qual chamado ela veio, que é o defeito do quadro de hoje.
+**Fica como está.**
+
+### 3. O prazo virou um só, e sempre a data
+
+O defeito era real e maior do que parecia: existiam **duas peças** para o mesmo campo. Um selo
+vermelho de atraso no topo do cartão e uma frase no rodapé, que sumia quando o selo aparecia.
+E a frase mudava de forma conforme a distância: "Vence hoje", "em 3 dias", ou a data quando
+passava de uma semana. No mesmo quadro, três formatos.
+
+Nenhum dos cinco produtos faz isso. O que muda entre eles é só se o texto é relativo ou data,
+e **todos usam a cor para a urgência**. Agora:
+
+| Estado | Como fica |
+|---|---|
+| Atrasada | `19/09` em vermelho, com fundo, ícone de alarme, e o filete na borda esquerda |
+| Vence hoje ou amanhã | `21/09` em âmbar, ícone de calendário |
+| Depois | `24/09` em neutro |
+| Sem prazo | nada, como em todos eles |
+
+O relativo não se perdeu: ele é o tooltip (`Prazo: 19/09/2026, 21:00 (Atrasada 2 dias)`) e o
+detalhe embaixo do campo no painel, que é onde há espaço para frase.
+
+`prazoLegivel` passou a devolver `data` e `relativo` em vez de um `texto` só, e cada lugar da
+tela escolhe qual usa.
+
+### O mapa dos selos acompanhou
+
+Os selos 1 e 2 mudaram de quadro, o 3 deixou de ser peça própria e virou "o mesmo prazo,
+atrasado", e as três pessoas ganharam quadro próprio, que é o mesmo que mostra o contador de
+dez colaboradores. Continuam cinco quadros, agora com 7, 7, 3, 2 e 2 balões.
+
+### Conferido na tela
+
+Os treze cartões com prazo mostram data no formato `dd/mm`, nenhum com frase: quatro em
+vermelho, cinco em âmbar, quatro em neutro. Os oito sem prazo não mostram nada. O cartão
+começa pelo título em todos.

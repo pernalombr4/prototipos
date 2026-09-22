@@ -37,7 +37,7 @@ export interface Selo {
    * cartão de 300 px viram um novelo de setas: a cabeça do cartão e o rodapé
    * dele são apontados em dois quadros separados.
    */
-  quadro?: 'cabeca' | 'rodape'
+  quadro?: 'cabeca' | 'rodape' | 'pessoas'
 }
 
 export const origens: Record<OrigemDoSelo, { rotulo: string, cor: 'success' | 'info' | 'warning' | 'error' }> = {
@@ -58,9 +58,9 @@ export const selosDoCartao: Selo[] = [
     rotulo: 'Ícone do tipo',
     campo: 'type',
     origem: 'nativo',
-    comportamento: 'Ícone sem rótulo, um por tipo: aprovação, formulário, CRUD, início e genérica. O nome por extenso está no tooltip.',
+    comportamento: 'Ícone sem rótulo, um por tipo: aprovação, formulário, CRUD, início e genérica. Fica no rodapé, com a referência, e não acima do título: o Jira põe tipo e chave na camada de detalhe, embaixo, e deixa o resumo sempre no topo. O nome por extenso está no tooltip.',
     lado: 'esquerda',
-    quadro: 'cabeca',
+    quadro: 'rodape',
   },
   {
     numero: 2,
@@ -69,18 +69,18 @@ export const selosDoCartao: Selo[] = [
     rotulo: 'Referência curta',
     campo: 'reference',
     origem: 'nativo',
-    comportamento: 'Os seis primeiros caracteres dos 32. A referência inteira fica no tooltip e no painel, com botão de copiar.',
+    comportamento: 'Os seis primeiros caracteres dos 32. Desceu para o rodapé na rodada 19: Trello, monday e Notion nem mostram identificador no cartão, e o do Linear, que mostra, é legível e curto. O nosso é um hash, que serve para copiar e colar em conversa, não para ler de relance. A referência inteira fica no tooltip e no painel, com botão de copiar.',
     lado: 'esquerda',
-    quadro: 'cabeca',
+    quadro: 'rodape',
   },
   {
     numero: 3,
-    chave: 'atraso',
+    chave: 'prazo',
     onde: 'cartao',
-    rotulo: 'Selo de atraso',
+    rotulo: 'O mesmo prazo, atrasado',
     campo: 'due_date + status',
     origem: 'derivado',
-    comportamento: 'Só existe quando o prazo passou e a tarefa não está concluída. Quando ele aparece, o prazo normal (10) some, para não dizer a mesma coisa duas vezes.',
+    comportamento: 'Não é outra peça: é o campo 10 em vermelho, com o ícone de alarme no lugar do calendário. Até a rodada 18 era um selo separado no topo do cartão, e o prazo sumia quando ele aparecia. O mercado resolve pela cor: no Trello a etiqueta de data fica amarela perto do vencimento e vermelha depois, e no ClickUp a data fica laranja hoje e vermelha atrasada. Quantos dias de atraso, o tooltip diz.',
     lado: 'direita',
   },
   {
@@ -156,7 +156,7 @@ export const selosDoCartao: Selo[] = [
     rotulo: 'Prazo',
     campo: 'due_date',
     origem: 'nativo',
-    comportamento: 'Data em linguagem de gente ("em 3 dias"), amarela quando é hoje ou amanhã. O quadro de hoje mostra created_at neste lugar, e é por isso que tarefa vencida parece recém-chegada.',
+    comportamento: 'Sempre a data, no formato curto (21/09), nunca uma frase: é o que Trello, Jira, Linear, Notion e monday fazem. Âmbar quando vence hoje ou amanhã, vermelho quando passou, neutro no resto. O relativo ("Vence hoje", "Atrasada 2 dias") fica no tooltip e no painel, que é onde há espaço para ele. O quadro de hoje mostra created_at neste lugar, e é por isso que tarefa vencida parece recém-chegada.',
     lado: 'esquerda',
     quadro: 'rodape',
   },
@@ -168,7 +168,7 @@ export const selosDoCartao: Selo[] = [
     campo: 'points',
     origem: 'nativo',
     comportamento: 'Zero não aparece. É um dos campos que o totalizador da raia soma.',
-    lado: 'esquerda',
+    lado: 'direita',
     quadro: 'rodape',
   },
   {
@@ -179,7 +179,7 @@ export const selosDoCartao: Selo[] = [
     campo: 'type + meta.form',
     origem: 'derivado',
     comportamento: 'Prancheta: a tarefa pede resposta antes de poder ser concluída. Sem isso, a pessoa só descobre ao abrir.',
-    lado: 'esquerda',
+    lado: 'direita',
     quadro: 'rodape',
   },
   {
@@ -190,7 +190,7 @@ export const selosDoCartao: Selo[] = [
     campo: 'sem campo no payload',
     origem: 'novo',
     comportamento: 'Total apontado na tarefa. Quando o cronômetro está correndo nela, o selo fica vermelho e conta na tela.',
-    lado: 'esquerda',
+    lado: 'direita',
     quadro: 'rodape',
   },
   {
@@ -201,7 +201,7 @@ export const selosDoCartao: Selo[] = [
     campo: 'description',
     origem: 'derivado',
     comportamento: 'Aparece quando a descrição está desligada na barra ou quando ela é muito maior que o corte. É o que o Trello faz.',
-    lado: 'esquerda',
+    lado: 'direita',
     quadro: 'rodape',
   },
   {
@@ -212,8 +212,8 @@ export const selosDoCartao: Selo[] = [
     campo: 'creator',
     origem: 'relacao',
     comportamento: 'Caneta e avatar. Some no cartão pequeno. Num quadro alimentado por spaceflow, quase sempre é o robô.',
-    lado: 'direita',
-    quadro: 'rodape',
+    lado: 'esquerda',
+    quadro: 'pessoas',
   },
   {
     numero: 16,
@@ -224,7 +224,7 @@ export const selosDoCartao: Selo[] = [
     origem: 'relacao',
     comportamento: 'Ícone de pessoas e no máximo dois avatares. Do terceiro em diante entra o contador "+8", que é o caso comum quando o spaceflow avisa um time inteiro: dez avatares empurrariam o responsável para fora da linha. O tooltip mostra quatro nomes e conta o resto. Some no cartão pequeno.',
     lado: 'direita',
-    quadro: 'rodape',
+    quadro: 'pessoas',
   },
   {
     numero: 17,
@@ -235,7 +235,7 @@ export const selosDoCartao: Selo[] = [
     origem: 'relacao',
     comportamento: 'Avatar maior, sempre por último, encostado na direita. Sem responsável vira um círculo tracejado, que é o convite para atribuir.',
     lado: 'direita',
-    quadro: 'rodape',
+    quadro: 'pessoas',
   },
   {
     numero: 18,
@@ -266,7 +266,7 @@ export const selosDoCartao: Selo[] = [
     campo: 'status',
     origem: 'nativo',
     comportamento: 'De propósito. Quem diz a situação é a raia onde o cartão está. Repetir dentro do cartão gasta a linha do rodapé com o que a coluna já disse. Quando o agrupamento muda, o selo que falta passa a ser outro.',
-    lado: 'direita',
+    lado: 'esquerda',
     quadro: 'cabeca',
   },
 ]

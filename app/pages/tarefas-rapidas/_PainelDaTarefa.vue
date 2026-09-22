@@ -203,7 +203,7 @@ const campos = computed<CampoDoPainel[]>(() => {
       rotulo: t.campos.prazo,
       valor: props.tarefa.due_date ? formatarDataHora(props.tarefa.due_date) : '',
       grupo: 'trabalho',
-      detalhe: props.tarefa.due_date ? prazo.value.texto : undefined,
+      detalhe: props.tarefa.due_date ? prazo.value.relativo : undefined,
       alerta: prazo.value.urgente,
       vazio: !props.tarefa.due_date,
       editavel: 'prazo',
@@ -1109,7 +1109,7 @@ const abas = computed(() => [
                 </dt>
                 <dd :class="prazo.urgente ? 'font-medium text-error' : 'text-toned'">
                   {{ tarefa.due_date ? formatarDataHora(tarefa.due_date) : t.semPrazo }}
-                  <span v-if="tarefa.due_date && prazo.urgente">({{ prazo.texto }})</span>
+                  <span v-if="tarefa.due_date && prazo.urgente">({{ prazo.relativo }})</span>
                 </dd>
                 <UButton
                   v-if="podeEditar"

@@ -306,3 +306,71 @@ trabalho.
 com `#` Identificador e Ticket, os dois campos que ninguém edita, e leva Concluída em, Criado
 em e Atualizado em no corpo da lista. Responsável, que é o primeiro campo em quatro dos cinco
 produtos, é o terceiro, e prioridade, pontos, tipo e etiquetas nem aparecem.
+
+---
+
+## Consulta extra — três perguntas sobre o cartão (22/09/2026)
+
+Pedido dela, literal: "é padrão de mercado fazer isso? clickup, monday, notion e jira fazem
+isso?". As três perguntas foram para a documentação dos produtos, não para a memória.
+
+### 1. Tipo e identificador no alto do cartão
+
+| Produto | Mostra identificador no cartão? | Onde |
+|---|---|---|
+| **Jira** | Sim | Na **camada de baixo**. A documentação descreve o cartão em três camadas: o resumo **sempre no topo**, depois os campos personalizados, e por último os detalhes, que são tipo, prioridade, responsável e estimativa. Em projetos team-managed dá para esconder tipo, chave, prioridade e responsável |
+| **Linear** | Sim, por padrão | O ID é uma das propriedades que as "display options" ligam e desligam. O dele é legível: `ENG-123` |
+| **ClickUp** | Não por padrão | O que o cartão oferece é "task location" e "subtask parent names", opcionais |
+| **monday** | Não | O "Item ID" é uma coluna que precisa ser adicionada ao quadro |
+| **Notion** | Não existe | O cartão mostra as propriedades que a pessoa marca como visíveis, e ID não é propriedade nativa |
+| **Trello** | Não | O número do cartão não aparece |
+
+**O que isso decide:** ter tipo e referência no cartão está dentro do padrão. **Acima do
+título não está**: só o Linear põe o identificador antes do nome, e o identificador dele é
+curto e legível. O nosso é um hash de 32 caracteres, cortado em seis, que serve para copiar e
+colar numa conversa, não para ler de relance. Os dois desceram para o rodapé, que é onde o
+Jira os põe.
+
+**URLs.** `support.atlassian.com/jira-software-cloud/docs/customize-cards/`,
+`linear.app/docs/display-options`,
+`support.monday.com/hc/en-us/articles/360001263345-The-Item-ID-Column`,
+`help.clickup.com/hc/en-us/articles/35342044832279-Customize-Board-view`
+
+### 2. Registro relacionado: nome ou só o ícone de link?
+
+Os dois existem, e o que decide é **que tipo de vínculo é**:
+
+| Vínculo | Como o mercado mostra |
+|---|---|
+| **Pai, contêiner, origem** | Com o NOME. O Jira mostra a etiqueta do épico no cartão, ligada por padrão, com o menu "Hide epic labels" para desligar. O ClickUp oferece "Show task locations" e "Show subtask parent names". O Notion mostra a propriedade de relação com o título da página. O monday mostra o nome do item conectado |
+| **Relação lateral: depende de, bloqueia, duplicada** | Com ícone e contador, sem nome |
+
+**O que isso decide:** o nosso `item` é o registro que **originou** a tarefa, e num quadro
+alimentado 100% por spaceflow ele é o contexto sem o qual a tarefa não se entende. É vínculo
+de origem, não relação lateral, então o nome fica. O ícone sozinho obrigaria a abrir a tarefa
+para saber de qual chamado ela veio, que é exatamente o que o quadro de hoje já faz.
+
+**URLs.** `community.atlassian.com/forums/Jira-questions/how-to-show-associated-epic-name-on-issues-on-kanban-board/`,
+`www.notion.com/help/boards`
+
+### 3. A data de vencimento
+
+| Produto | O que mostra no cartão |
+|---|---|
+| **Trello** | A data, numa etiqueta que muda de cor: cinza acima de 24 horas, amarela dentro de 24 horas, vermelha vencida |
+| **ClickUp** | Por padrão, relativo **só nos dias vizinhos de hoje** ("Yesterday", "Today", "Tomorrow", "Wednesday") e data nos demais. Existe o ClickApp **Use Relative Dates**, que um admin desliga para o workspace inteiro passar a mostrar sempre data e hora. Cor: laranja para hoje, vermelho para atrasada |
+| **Asana** | Relativo sempre ("Today", "Tomorrow", "Saturday"). É pedido recorrente no fórum poder ver a data, e não existe a opção |
+| **Jira, Linear, Notion, monday** | A data do campo |
+
+**O que isso decide.** Mostrar a data é o padrão da maioria, e o relativo também é padrão
+(ClickUp e Asana). O que **nenhum deles faz** é o que estava aqui: no mesmo quadro, um cartão
+dizendo "em 3 dias", outro dizendo "28/09" e um terceiro sem prazo nenhum, com um selo
+vermelho separado no topo. Duas regras saem daqui, e as duas são unânimes:
+
+1. **a mesma lógica para todos os cartões**, sem misturar frase e data;
+2. **a urgência vai na cor**, não na troca do texto nem na presença do campo.
+
+**URLs.** `support.atlassian.com/trello/docs/adding-dates-to-cards/`,
+`help.clickup.com/hc/en-us/articles/34498518723863-Use-relative-or-absolute-dates`,
+`help.clickup.com/hc/en-us/articles/6309610317975-Intro-to-due-dates`,
+`forum.asana.com/t/display-date-instead-of-monday-or-tomorrow/82537`
