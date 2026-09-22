@@ -3,10 +3,12 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "nuxt dev",
+    "dev": "node ferramentas/conferir-sdk.js --aviso && nuxt dev",
     "build": "nuxt build",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
+    "atualizar": "pnpm dlx taze major -I -i && node ferramentas/conferir-sdk.js",
+    "atualizar:sdk": "pnpm dlx taze major -I -i -n \"@be-enlighten/*\" && node ferramentas/conferir-sdk.js",
     "conferir": "node ferramentas/conferir-sdk.js",
     "conferir:remoto": "node ferramentas/conferir-sdk.js --remoto",
     "postinstall": "nuxt prepare"

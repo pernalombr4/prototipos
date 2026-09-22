@@ -53,23 +53,45 @@ O SDK do ENSPACE é versionado em `0.x`, e o `^` do `package.json` **não atrave
 mais importante daqui é justamente o único que envelhece em silêncio, enquanto `@nuxt/ui` e
 `nuxt` andam sozinhos. Não dá para resolver isso lembrando.
 
-Três peças cuidam disso:
+A mesma regra vale para o [taze](https://github.com/antfu-collective/taze), e aqui mora a
+pegadinha: **`taze minor` responde "tudo em dia" com o 0.15.0 publicado.** Para o SDK, o modo
+é `major`, porque em `0.x` é o minor que carrega a quebra.
 
-| Peça | O que faz |
+E tem a segunda metade do problema: **saber que saiu versão nova não muda nada enquanto o
+`pnpm install` não rodar.** O `node_modules` continua velho, e a regra 5 da spec ("componente
+e prop se conferem em disco") fica conferindo em disco antigo.
+
+### O fluxo, do aviso até o protótipo de pé
+
+1. **`pnpm dev` avisa sozinho** quando há versão nova. Quando está tudo em dia, não fala nada.
+2. **`pnpm atualizar:sdk`** lista os quatro pacotes do SDK, você escolhe com as setas, e ele
+   escreve o `package.json` **e instala**.
+3. **`pnpm conferir` roda logo em seguida** e diz se algum `mocks.ts` perdeu um tipo.
+4. **`pnpm generate`** confirma que as telas ainda renderizam.
+
+| Comando | O que faz |
 |---|---|
-| [`.github/dependabot.yml`](.github/dependabot.yml) | Abre PR toda segunda. Os cinco `@be-enlighten` num PR só, porque são peers e sobem em lockstep |
-| [`.github/workflows/verificar.yml`](.github/workflows/verificar.yml) | Roda no PR o build de verdade mais a conferência abaixo. Verde quer dizer que os protótipos sobrevivem à versão nova |
-| [`ferramentas/conferir-sdk.js`](ferramentas/conferir-sdk.js) | Compara o que os protótipos **importam** com o que o pacote instalado **exporta** |
+| `pnpm atualizar:sdk` | Só os quatro `@be-enlighten/*`. Interativo, escreve e instala |
+| `pnpm atualizar` | Tudo, inclusive as actions dos workflows. Interativo |
+| `pnpm conferir` | Confere o contrato em disco, sem rede |
+| `pnpm conferir:remoto` | A tabela de versões, sem precisar baixar o taze |
 
-```bash
-pnpm conferir          # confere o que está em disco
-pnpm conferir:remoto   # e pergunta ao registry se saiu versão nova
-```
+O `atualizar` chama o taze por `pnpm dlx`, então ele não vira dependência do projeto.
 
-O `conferir` é a regra 5 da spec ("componente e prop se conferem em disco") feita de uma vez
+O [`ferramentas/conferir-sdk.js`](ferramentas/conferir-sdk.js) é a regra 5 feita de uma vez
 para o repositório inteiro: tipo do `enspace-sdk-schemas` que sumiu, componente base do
 `enspace-sdk-ui` que mudou de nome, componente `U*` do Nuxt UI que deixou de existir. Quando
 reprova, ele diz o arquivo e o nome.
+
+### E no repositório, como rede de segurança
+
+| Peça | O que faz |
+|---|---|
+| [`.github/dependabot.yml`](.github/dependabot.yml) | Abre PR toda segunda, para o que ninguém lembrou de atualizar à mão |
+| [`.github/workflows/verificar.yml`](.github/workflows/verificar.yml) | Roda em todo PR o `conferir` mais o build de verdade |
+
+Isso cuida do **repositório**. O `pnpm atualizar` cuida da **sua máquina**, que é onde o
+protótipo se constrói. São problemas diferentes, e é por isso que existem os dois.
 
 ## Protótipos
 

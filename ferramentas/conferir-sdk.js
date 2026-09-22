@@ -39,6 +39,48 @@ const caminho = (...p) => join(raiz, ...p)
 const ler = (...p) => readFileSync(caminho(...p), 'utf8')
 const existe = (...p) => existsSync(caminho(...p))
 
+/*
+ * Modo aviso, que é o que roda colado no `pnpm dev`.
+ *
+ * É a peça que fecha o ciclo. O Dependabot avisa o repositório; isto avisa a
+ * MÁQUINA, que é onde o protótipo se constrói. Baixar a versão nova não basta:
+ * enquanto o `pnpm install` não rodar, o `node_modules` continua velho e a
+ * regra "componente e prop se conferem em disco" está conferindo em disco
+ * antigo.
+ *
+ * Três exigências, porque ele roda antes de toda sessão de trabalho:
+ * cala a boca quando está tudo em dia, nunca reprova, e desiste em 3 segundos
+ * se a rede não responder. Aviso que atrapalha o `pnpm dev` seria desligado na
+ * primeira semana, e aí não avisaria mais nada.
+ */
+if (process.argv.includes('--aviso')) {
+  const pacotes = Object.keys(JSON.parse(ler('package.json')).dependencies ?? {})
+  const versoes = await Promise.all(pacotes.map(n => ultimaVersao(n, 3000)))
+
+  const atrasados = pacotes
+    .map((nome, i) => {
+      const manifesto = `node_modules/${nome}/package.json`
+      if (!versoes[i] || !existe(manifesto)) return null
+      const instalada = JSON.parse(ler(manifesto)).version
+      return versoes[i] === instalada ? null : { nome, instalada, ultima: versoes[i] }
+    })
+    .filter(Boolean)
+
+  const sdk = atrasados.filter(p => p.nome.startsWith('@be-enlighten/'))
+  const resto = atrasados.length - sdk.length
+
+  if (sdk.length) {
+    const { instalada, ultima } = sdk[0]
+    console.log(`\n  SDK do ENSPACE: ${instalada} instalado, ${ultima} publicado (${sdk.length} pacotes).`)
+    console.log('  Para atualizar e instalar de uma vez: pnpm atualizar:sdk\n')
+  }
+  if (resto) {
+    console.log(`  Mais ${resto} pacote(s) com versão nova. Veja com: pnpm atualizar\n`)
+  }
+
+  process.exit(0)
+}
+
 /** Os módulos do SDK que os protótipos importam, e onde mora a verdade de cada um. */
 const MODULOS = {
   '@be-enlighten/enspace-sdk-schemas': 'node_modules/@be-enlighten/enspace-sdk-schemas/dist/index.d.ts',
@@ -183,9 +225,11 @@ if (!existe(pastaNuxtUi)) {
  * por sua vez dispara o aviso DEP0190. Um GET resolve, roda igual nos dois
  * sistemas e ainda vai em paralelo.
  */
-async function ultimaVersao(nome) {
+async function ultimaVersao(nome, ms = 8000) {
   try {
-    const r = await fetch(`https://registry.npmjs.org/${nome.replace('/', '%2F')}/latest`)
+    const r = await fetch(`https://registry.npmjs.org/${nome.replace('/', '%2F')}/latest`, {
+      signal: AbortSignal.timeout(ms),
+    })
     if (!r.ok) return null
     return (await r.json()).version ?? null
   } catch {
