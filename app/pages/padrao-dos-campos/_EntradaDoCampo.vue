@@ -32,6 +32,33 @@ const valor = computed({
   set: v => emit('update:modelValue', v),
 })
 
+/**
+ * Proxies tipados do mesmo valor.
+ *
+ * O `v-model` do Vue não aceita expressão com `as` (não dá para atribuir a um
+ * cast), então cada família ganha a sua própria porta de entrada para o mesmo
+ * `valor`. Continua sendo um estado só.
+ */
+const comoTexto = computed<string>({
+  get: () => (valor.value ?? '') as string,
+  set: v => emit('update:modelValue', v),
+})
+
+const comoNumero = computed<number>({
+  get: () => (valor.value ?? 0) as number,
+  set: v => emit('update:modelValue', v),
+})
+
+const comoBooleano = computed<boolean>({
+  get: () => Boolean(valor.value),
+  set: v => emit('update:modelValue', v),
+})
+
+const comoListaDeTexto = computed<string[]>({
+  get: () => (valor.value ?? []) as string[],
+  set: v => emit('update:modelValue', v),
+})
+
 const lista = computed(
   () => (todasAsOpcoes as Record<string, readonly { value: string, label: string, cor?: string }[]>)[props.campo.refId] ?? [],
 )
@@ -156,7 +183,7 @@ const opcoesDeRelacao = computed(() =>
     <!-- ───────────────────────────── texto ──────────────────────────────── -->
     <UInput
       v-else-if="campo.tipo === 'inputText'"
-      v-model="valor as string"
+      v-model="comoTexto"
       size="sm"
       class="w-full"
       :maxlength="120"
@@ -165,7 +192,7 @@ const opcoesDeRelacao = computed(() =>
 
     <UTextarea
       v-else-if="campo.tipo === 'EnTextArea' || campo.tipo === 'EnNotes'"
-      v-model="valor as string"
+      v-model="comoTexto"
       size="sm"
       class="w-full"
       :rows="3"
@@ -189,7 +216,7 @@ const opcoesDeRelacao = computed(() =>
         />
       </div>
       <UTextarea
-        v-model="valor as string"
+        v-model="comoTexto"
         variant="none"
         size="sm"
         class="w-full"
@@ -200,7 +227,7 @@ const opcoesDeRelacao = computed(() =>
 
     <UInput
       v-else-if="campo.tipo === 'EnlMask'"
-      v-model="valor as string"
+      v-model="comoTexto"
       size="sm"
       class="w-full font-mono tabular-nums"
       placeholder="00.000.000/0000-00"
@@ -208,7 +235,7 @@ const opcoesDeRelacao = computed(() =>
 
     <UInput
       v-else-if="campo.tipo === 'email'"
-      v-model="valor as string"
+      v-model="comoTexto"
       type="email"
       size="sm"
       class="w-full"
@@ -227,7 +254,7 @@ const opcoesDeRelacao = computed(() =>
     <!-- ───────────────────────────── número ─────────────────────────────── -->
     <UInputNumber
       v-else-if="campo.tipo === 'EnlNumber'"
-      v-model="valor as number"
+      v-model="comoNumero"
       size="sm"
       class="w-full"
       :step="0.5"
@@ -235,7 +262,7 @@ const opcoesDeRelacao = computed(() =>
 
     <UInput
       v-else-if="campo.tipo === 'EnCurrency'"
-      v-model="valor as number"
+      v-model="comoNumero"
       type="number"
       size="sm"
       class="w-full"
@@ -249,7 +276,7 @@ const opcoesDeRelacao = computed(() =>
     <!-- ───────────────────────────── escolha ────────────────────────────── -->
     <USelectMenu
       v-else-if="campo.tipo === 'EnlDropdown' || (campo.tipo === 'radioButton' && radioViraLista)"
-      v-model="valor as string"
+      v-model="comoTexto"
       :items="lista.map(o => ({ label: o.label, value: o.value }))"
       value-key="value"
       size="sm"
@@ -259,14 +286,14 @@ const opcoesDeRelacao = computed(() =>
 
     <URadioGroup
       v-else-if="campo.tipo === 'radioButton'"
-      v-model="valor as string"
+      v-model="comoTexto"
       :items="lista.map(o => ({ label: o.label, value: o.value }))"
       size="sm"
     />
 
     <USelectMenu
       v-else-if="campo.tipo === 'multiSelect'"
-      v-model="valor as string[]"
+      v-model="comoListaDeTexto"
       multiple
       :items="lista.map(o => ({ label: o.label, value: o.value }))"
       value-key="value"
@@ -291,14 +318,14 @@ const opcoesDeRelacao = computed(() =>
 
     <UInputTags
       v-else-if="campo.tipo === 'EnlChips'"
-      v-model="valor as string[]"
+      v-model="comoListaDeTexto"
       size="sm"
       class="w-full"
     />
 
     <USelectMenu
       v-else-if="campo.tipo === 'EnTreeSelect'"
-      v-model="valor as string"
+      v-model="comoTexto"
       :items="lista.flatMap(o => [
         { label: o.label, value: o.value },
         ...((o as { children?: { label: string, value: string }[] }).children ?? []).map(c => ({ label: `  ${c.label}`, value: c.value })),
@@ -311,7 +338,7 @@ const opcoesDeRelacao = computed(() =>
     <!-- ──────────────────────────── booleano ────────────────────────────── -->
     <USwitch
       v-else-if="campo.tipo === 'inputSwitch'"
-      v-model="valor as boolean"
+      v-model="comoBooleano"
       :label="valor ? t.sim : t.nao"
       size="sm"
     />
