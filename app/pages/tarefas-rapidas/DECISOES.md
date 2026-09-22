@@ -1308,3 +1308,41 @@ dez colaboradores. Continuam cinco quadros, agora com 7, 7, 3, 2 e 2 balões.
 Os treze cartões com prazo mostram data no formato `dd/mm`, nenhum com frase: quatro em
 vermelho, cinco em âmbar, quatro em neutro. Os oito sem prazo não mostram nada. O cartão
 começa pelo título em todos.
+
+---
+
+## Rodada 20 — 22/09/2026
+
+### O que ela pediu, literal
+
+> o erro "Nao deu pra carregar as tarefas". texto horrivel!! melhore. 100% informal isso aí.
+> ruim o portugues. / e o aviso de sem tarefa tambem ta ruim. texto ruim no titulo e na
+> descriçao.
+
+### O que estava escrito, e o que havia de errado
+
+| Antes | O problema |
+|---|---|
+| "Não deu para carregar as tarefas" | "Não deu para" é fala, não escrita de produto. E a frase não diz nada: não deu por quê |
+| "Suas tarefas continuam lá. É só tentar de novo." | "lá" onde? E "é só" minimiza o problema de quem está olhando para uma tela que falhou. Quando o erro insiste, esse texto vira deboche |
+| "Nenhuma tarefa por aqui" | "por aqui" é vago: o quadro está vazio, o filtro escondeu tudo, ou a tela não carregou? |
+| "As tarefas rápidas chegam pelos spaceflows. Você também pode criar uma à mão." | O conteúdo estava certo e é a melhor parte do texto antigo. "à mão" que é coloquial |
+
+### O que ficou
+
+**Erro.** "Não foi possível carregar as tarefas" e, embaixo, "A conexão com o servidor falhou.
+Nenhuma tarefa foi perdida. Tente novamente e, se o erro continuar, fale com o suporte." Três
+coisas, nessa ordem: **o que falhou**, **o que está a salvo** e **o que fazer**, com a saída
+para quando tentar de novo não resolve. O botão virou "Tentar novamente".
+
+**Sem tarefas.** "Este quadro ainda não tem tarefas" e "As tarefas rápidas vêm dos spaceflows,
+quando um fluxo precisa da decisão de uma pessoa. Você também pode criar uma tarefa direto no
+quadro." O "ainda" diz que o lugar é esse e que ele vai encher; a descrição explica **de onde
+as tarefas vêm**, que é a dúvida real de quem abre um quadro vazio num produto em que quase
+nada é criado à mão.
+
+**Dois vizinhos entraram junto**, porque tinham o mesmo defeito e ficariam destoando: a busca
+sem resultado ("Nada encontrado para" virou "Nenhuma tarefa corresponde a") e a raia vazia
+("Nada aqui" virou "Nenhuma tarefa nesta raia"). Isso não foi pedido, e desfazer é uma linha.
+
+Tudo nos três idiomas, com o espanhol mantendo o tratamento formal que o dicionário já usa.
