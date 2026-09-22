@@ -132,6 +132,8 @@ export interface Textos {
   tipoAtivo: string
   tipoLegado: string
   tipoLegadoAviso: string
+  tipoProposto: string
+  tipoPropostoAviso: string
   alinhamento: string
   alinhamentoInicio: string
   alinhamentoFim: string
@@ -304,6 +306,8 @@ const ptBR: Textos = {
   tipoAtivo: 'No seletor',
   tipoLegado: 'Legado',
   tipoLegadoAviso: 'Existe em dado gravado, mas não se cria mais pelo seletor de tipo. A tela precisa renderizar mesmo assim.',
+  tipoProposto: 'Proposto',
+  tipoPropostoAviso: 'Este tipo não existe no produto. Ele vem do documento do time de produtos, e o padrão está aqui para nascer definido junto com o campo.',
   alinhamento: 'Alinhamento na célula',
   alinhamentoInicio: 'Esquerda',
   alinhamentoFim: 'Direita',
@@ -571,6 +575,20 @@ const ptBR: Textos = {
       formulario: 'Não entra na criação: a conversa só começa depois de o item existir.',
       cru: 'Fica só na coluna dos campos.',
     },
+    duracao: {
+      rotulo: 'Duração',
+      descricao: 'Um período entre duas datas, escolhido no mesmo campo.',
+      celula: 'As duas datas na mesma linha, em fonte tabular, unidas por "a".',
+      formulario: 'Um calendário só, que pinta o intervalo entre as duas pontas.',
+      cru: 'As duas datas, com a quantidade de dias ao lado.',
+    },
+    valorDinamico: {
+      rotulo: 'Valor dinâmico',
+      descricao: 'Valor calculado por expressão, preenchido pelo sistema.',
+      celula: 'O resultado formatado, com o ícone de calculado antes.',
+      formulario: 'Só leitura, com a expressão visível em texto de ajuda.',
+      cru: 'O resultado, com o ícone de calculado.',
+    },
   },
 }
 
@@ -713,6 +731,8 @@ const en: Textos = {
   tipoAtivo: 'In the selector',
   tipoLegado: 'Legacy',
   tipoLegadoAviso: 'It exists in stored data but is no longer offered in the type selector. The screen still has to render it.',
+  tipoProposto: 'Proposed',
+  tipoPropostoAviso: 'This type does not exist in the product yet. It comes from the product team document, and the standard is here so it is defined before the field is built.',
   alinhamento: 'Cell alignment',
   alinhamentoInicio: 'Left',
   alinhamentoFim: 'Right',
@@ -980,6 +1000,20 @@ const en: Textos = {
       formulario: 'Not part of creation: the conversation only starts once the item exists.',
       cru: 'Stays only in the fields column.',
     },
+    duracao: {
+      rotulo: 'Duration',
+      descricao: 'A period between two dates, picked in the same field.',
+      celula: 'Both dates on the same line, in tabular figures, joined by "to".',
+      formulario: 'A single calendar that paints the range between both ends.',
+      cru: 'Both dates, with the number of days beside them.',
+    },
+    valorDinamico: {
+      rotulo: 'Dynamic value',
+      descricao: 'A value computed by an expression and filled in by the system.',
+      celula: 'The formatted result, with the computed icon in front.',
+      formulario: 'Read only, with the expression visible in the help text.',
+      cru: 'The result, with the computed icon.',
+    },
   },
 }
 
@@ -1122,6 +1156,8 @@ const es: Textos = {
   tipoAtivo: 'En el selector',
   tipoLegado: 'Heredado',
   tipoLegadoAviso: 'Existe en datos guardados, pero ya no se crea desde el selector de tipo. La pantalla igual tiene que renderizarlo.',
+  tipoProposto: 'Propuesto',
+  tipoPropostoAviso: 'Este tipo todavía no existe en el producto. Viene del documento del equipo de producto, y el estándar está aquí para nacer definido junto con el campo.',
   alinhamento: 'Alineación en la celda',
   alinhamentoInicio: 'Izquierda',
   alinhamentoFim: 'Derecha',
@@ -1388,6 +1424,20 @@ const es: Textos = {
       celula: 'El último mensaje y el total, con la marca de no leído cuando la haya.',
       formulario: 'No entra en la creación: la conversación solo empieza cuando el elemento existe.',
       cru: 'Queda solo en la columna de campos.',
+    },
+    duracao: {
+      rotulo: 'Duración',
+      descricao: 'Un período entre dos fechas, elegido en el mismo campo.',
+      celula: 'Las dos fechas en la misma línea, en cifras tabulares, unidas por "a".',
+      formulario: 'Un solo calendario que pinta el intervalo entre las dos puntas.',
+      cru: 'Las dos fechas, con la cantidad de días al lado.',
+    },
+    valorDinamico: {
+      rotulo: 'Valor dinámico',
+      descricao: 'Valor calculado por una expresión y rellenado por el sistema.',
+      celula: 'El resultado formateado, con el icono de calculado delante.',
+      formulario: 'Solo lectura, con la expresión visible en el texto de ayuda.',
+      cru: 'El resultado, con el icono de calculado.',
     },
   },
 }

@@ -114,12 +114,178 @@ e no relatório. Trocar de tema troca os dois. Recarregar a página zera tudo.
 
 ## Divergências que precisam de conversa
 
-### 1. O doc do time de produtos não foi lido
+### 1. O que eu propus diferente do `Melhoria dos campos.docx`
 
-O `Melhoria dos campos.docx` no SharePoint exige login da Microsoft, e o agente não digita
-senha nem faz login. **Então não há comparação com os ensaios do time.** O que está aqui saiu
-do schema do SDK, da API de develop e do dicionário de i18n do produto. A comparação com o doc
-tem que ser feita a olho, com este arquivo ao lado.
+O documento foi lido em 22/09/2026 (ver `BRIEFING.md`, 5.7). Ele especifica 13 campos com a
+mesma estrutura desta demanda, e em **oito pontos** o protótipo está diferente. Ela pediu para
+reportar cada um.
+
+#### 1.1 Duração: a saída formatada está errada no doc
+
+O doc diz, no campo Duração:
+
+> Saída Formatada · Visualização: Exibição no formato resumido e padronizado HH/MM/SS.
+
+Isso contradiz o próprio campo três linhas acima, que define a Entrada como **duas datas**
+(inicial e final) e o Cell como `dd/mm/aa - dd/mm/aa`. `HH/MM/SS` é duração de tempo, não
+intervalo de datas. E `HH/MM/SS` com barra não é formato de hora em nenhuma localidade: o
+separador de hora é dois-pontos.
+
+**O protótipo faz:** as duas datas na localidade, unidas por "a" no cru e por seta na célula,
+com a contagem de dias ao lado no cru.
+
+#### 1.2 Lista longa: reticências não dizem quantos faltam
+
+O doc, em Seleção Múltipla:
+
+> Caso a quantidade de tags ultrapasse o espaço útil disponível na tela, o sistema insere
+> reticências (...) no final para indicar que existem mais itens.
+
+Reticências dizem "tem mais", não dizem **quantos**. "Elétrica, Civil..." não distingue 1 item
+escondido de 12. Os cinco referenciais usam contador: o Twenty tem `ExpandableList` com
+`MAX_RELATION_CHIPS_DISPLAYED_INLINE = 10` e chip de contagem, e Notion, Monday e Airtable
+fazem igual.
+
+**O protótipo faz:** os primeiros N selos e um `+N` com a lista inteira no tooltip. O N é por
+tipo, em `maximoNaCelula`.
+
+#### 1.3 Número e moeda: truncar dígito é perigoso
+
+O doc, em Número e repetido em Valor Monetário:
+
+> Caso o número seja muito extenso e ultrapasse o tamanho da coluna, o sistema aplica três
+> pontos (...) no final para indicar que o valor continua.
+
+Cortar dígito muda a ordem de magnitude do que a pessoa lê: `128.940,75` virando `128.94...`
+pode ser lido como cento e vinte e oito. Em coluna de dinheiro isso é erro de decisão, não de
+estética.
+
+**O protótipo faz:** a coluna nasce com largura mínima suficiente para o valor típico do tipo
+(no catálogo), alinhada à direita e em `tabular-nums`. Se um dia precisar encurtar, o certo é
+notação abreviada explícita ("128,9 mil"), nunca corte de dígito.
+
+#### 1.4 ID Personalizado: clique que copia sem avisar
+
+O doc, no Cell do ID:
+
+> Ao clicar na célula, o sistema copia automaticamente o ID completo para facilitar buscas
+> futuras na plataforma.
+
+Clicar numa célula é gesto de selecionar linha. Sobrescrever a área de transferência da pessoa
+nesse gesto é efeito colateral invisível: ela perde o que tinha copiado e não sabe por quê.
+
+**O protótipo faz:** botão de copiar ao lado do selo, que aparece no hover, com troca de ícone
+para confirmar. É o que o develop já faz hoje na coluna Referência.
+
+#### 1.5 Alternativa Binária: o terceiro estado existe
+
+O doc:
+
+> Como existe uma regra de valor padrão obrigatória na configuração do campo, ele nunca fica
+> sem informação.
+
+No dado gravado em develop existe item cujo `data` **não tem a chave** do campo booleano. Não
+é `false`: é ausente. Ou seja, o estado "nunca preenchido" existe e a tela precisa distinguir
+dele o "preenchido como falso", pelo menos enquanto houver dado antigo.
+
+E, no mesmo campo, o doc propõe:
+
+> Edição Inline: Ação de um único clique. Ao clicar em qualquer ponto da célula, o sistema
+> altera o valor diretamente.
+
+Um clique em qualquer ponto da célula que grava é edição destrutiva por clique acidental, numa
+tabela onde clicar é como se navega.
+
+**O protótipo faz:** texto ("Sim" / "Não") com ponto de cor, sem controle acionável na célula.
+A chave fica no formulário, que é onde se edita.
+
+#### 1.6 Limites fixos de caractere tiram a configuração que já existe
+
+O doc fixa **100 caracteres** no Texto Curto e **1.500** no Texto Longo, com contador.
+
+O produto não tem esses números: o que ele tem é `cFormat.t_length`, `cFormat.t_suffix` e
+`preserve_max_length`, **por campo**. Fixar o limite no tipo apaga uma configuração que já
+está publicada no schema e que o cliente já pode ter usado.
+
+**O protótipo faz:** o corte sai do `cFormat` do campo, e a ficha mostra quais chaves valem
+para o tipo. O contador no formulário aparece quando existe limite configurado, não sempre.
+
+#### 1.7 Endereço: texto livre quebraria o dado que existe
+
+O doc:
+
+> Trata-se de um campo único que aceita preenchimento de duas formas … Se o usuário optar por
+> digitar o endereço manualmente, o sistema grava o texto exatamente como foi escrito.
+
+O dado real em develop é **objeto estruturado** com oito chaves (`street`, `number`,
+`complement`, `neighborhood`, `city`, `state`, `zip`, `country`), e o
+`nestedConfig.displayString` é que monta a linha que a pessoa lê. Gravar texto livre:
+
+- quebra filtro e ordenação por cidade, estado e CEP;
+- quebra o `displayString` que os campos existentes já têm configurado;
+- e o próprio doc pede, na Saída Formatada, "exibe o nome da rua e as informações do endereço"
+  mais o CEP separado, que só dá para fazer com o dado separado.
+
+**O protótipo faz:** mantém o objeto, com a grade de subcampos no formulário e o
+`displayString` montando a linha única na célula. **Esta é a divergência mais séria das oito,
+porque é de modelo de dados, não de tela.**
+
+#### 1.8 Anotações e Comentários são dois campos, não um
+
+O doc trata "Anotações e Comentários" como um campo com histórico, autor e data, e a última
+mensagem aparecendo na célula.
+
+No produto são dois tipos distintos: `EnNotes` (anotação, uma string simples no `data`) e
+`EnChats` (conversa, um array de mensagens com autor e data). A regra do doc descreve o
+`EnChats`; o `EnNotes` não tem autor nem histórico.
+
+**O protótipo faz:** separa os dois. `EnNotes` é texto; `EnChats` é conversa, com a última
+mensagem e o contador na célula. Nos dois, o formulário de criação não exibe o campo, que é o
+que o doc diz e está certo.
+
+### 1.9 Onde o doc está certo e eu estava errado: a exportação .xlsx
+
+A seção "Padronização de Formatos de Exportação em Excel" do doc está **correta e eu não havia
+seguido**. A primeira versão do relatório escrevia tudo como texto, que é exatamente o erro
+que o doc previne:
+
+> Nunca concatenar o símbolo da moeda como texto dentro do valor da célula, pois isso
+> transforma o dado em String e impede a realização de cálculos nativos no Excel.
+
+Corrigido nesta mesma rodada, célula por tipo:
+
+| Tipo | Como sai agora | Por quê |
+|---|---|---|
+| Número | célula numérica com máscara `#,##0.00` | soma, média e filtro numérico funcionam |
+| Valor monetário | célula numérica com `numFmt` de moeda por localidade | o símbolo é formatação, não dado |
+| Data | serial de data do Excel com máscara da localidade | ordena cronologicamente e filtra por mês e ano |
+| Seleção múltipla e listas | texto separado por vírgula e espaço | regra do doc (a tela usa barra no tooltip, o arquivo usa vírgula) |
+| Arquivo, imagem, PDF, documento | hyperlink clicável com o nome do arquivo | planilha não incorpora arquivo |
+| Duração | texto | o Excel amarra hora a uma data base de 1900 e a leitura confunde |
+| Chat | não exportado | regra do doc |
+| Booleano | texto traduzido (Sim/Não) | regra do doc, com a ressalva dele de preferir Sim/Não a Verdadeiro/Falso |
+
+A máscara de moeda e de data troca com o idioma do andaime, então gerar em inglês produz
+`mm/dd/yyyy` e `$`.
+
+### 1.10 Os campos que o doc não cobre
+
+O doc especifica 13 tipos e declara 3 faltando. O produto tem 31. Ficaram sem nenhuma
+especificação, e estão definidos neste protótipo:
+
+**Relacionamento Simples** e **Relacionamento Múltiplo** (os mais usados depois de texto e
+lista), **Editor de texto HTML**, **E-mail**, **Texto com máscara**, **Seleção em árvore**,
+**Intervalo de horas**, **PDF**, **Editor de Documentos**, **Assinatura eletrônica** e **Tag**.
+
+A ausência do relacionamento é a mais grave: é o campo com o problema de `display` vazio
+descrito no `BRIEFING.md` 5.5, e é o que mais aparece nas categorias reais.
+
+### 1.11 Os dois campos que o doc planeja e o produto não tem
+
+**Duração** e **Campo virtual de valor dinâmico** não existem no enum do schema nem na API.
+Entraram no catálogo com `disponibilidade: 'proposto'`, com selo azul e aviso próprio na
+ficha, para ficar claro que são plano e não realidade. O padrão dos três formatos deles já
+está definido, então nascem padronizados.
 
 ### 2. Recomendação: a API devolver o valor formatado junto com o cru
 

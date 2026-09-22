@@ -211,8 +211,32 @@ trata isso: **display vazio cai para a referência, nunca para nada.**
 
 ### 5.7 O documento do time de produtos
 
-O doc `Melhoria dos campos.docx` no SharePoint **não pôde ser aberto**: o link exige sessão
-autenticada da Microsoft, e o agente não digita senha nem faz login (regra 2). Então **não há
-comparação com os ensaios do time** neste protótipo. O que está aqui saiu de três fontes
-verificáveis: o schema publicado no SDK, a API de develop e o dicionário de i18n do produto.
-Se o doc disser outra coisa, a divergência precisa ser conferida a olho com este briefing.
+O `Melhoria dos campos.docx` foi lido em 22/09/2026, pelo Chrome dela, na sessão já
+autenticada. A primeira tentativa falhou porque o Word Online renderiza dentro de um iframe
+sem texto acessível; o conteúdo saiu buscando o próprio arquivo pela API do SharePoint na
+sessão da página e abrindo o `word/document.xml` no navegador.
+
+**O que o documento tem:**
+
+1. uma lista de 21 nomes de campo (com "Grupo" repetido);
+2. anotações de pesquisa sobre ClickUp, Notion e Twenty CRM, com observações de comportamento;
+3. **especificação técnica de 13 campos**, cada um com Entrada, Saída, Saída Formatada, Form,
+   Cell e Naked. Exatamente a estrutura que esta demanda pediu;
+4. a declaração de que faltam as especificações de **Grupo**, **Pessoa/Empresa** e **Campo
+   virtual de valor dinâmico**;
+5. uma seção inteira de **"Padronização de Formatos de Exportação em Excel (.xlsx)"**.
+
+Os 13 especificados: Texto Curto, Texto Longo, Data, Duração, Alternativa Binária, Seleção
+Única, Seleção Múltipla, Arquivo e Imagem, Endereço, Anotações e Comentários, ID Personalizado,
+Número, Valor Monetário.
+
+**O que ele não cobre, e existe em dado gravado no develop:** Relacionamento Simples e
+Múltiplo (os dois mais usados depois de texto e lista: 36 e 20 campos criados no workspace que
+consultei), Editor de texto HTML, E-mail, Texto com máscara, Seleção em árvore, Intervalo de
+horas, PDF, Editor de Documentos, Assinatura eletrônica e Tag.
+
+**O que ele planeja e não existe:** Duração (par de datas) e Campo virtual de valor dinâmico.
+Os dois entraram no catálogo marcados como `proposto`, para o padrão nascer definido junto com
+o campo.
+
+A comparação item por item, com o que eu propus diferente, está no `DECISOES.md`.

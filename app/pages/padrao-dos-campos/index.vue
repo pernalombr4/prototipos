@@ -27,9 +27,9 @@ import ModalNovoItem from './_ModalNovoItem.vue'
 import PainelDoItem from './_PainelDoItem.vue'
 import TabelaDeItens from './_TabelaDeItens.vue'
 import { campoPorTipo, campos, type TipoDeCampo } from './campos'
-import { saidaFormatada } from './formatacao'
+import { celulaDeExportacao, saidaFormatada } from './formatacao'
 import { categoria, itens as itensDoMock, opcoes, workspace } from './mocks'
-import { baixar, gerarXlsx, type Aba } from './relatorio'
+import { baixar, gerarXlsx, type Aba, type Celula } from './relatorio'
 import { textos } from './textos'
 
 import briefingMd from './BRIEFING.md?raw'
@@ -130,9 +130,15 @@ const gerando = ref(false)
 
 async function baixarRelatorio() {
   gerando.value = true
-  /* Um quadro para o botão mostrar o carregamento antes de o navegador
-     travar no encode. Com 31 tipos isso é rápido, mas o estado importa. */
-  await new Promise(r => requestAnimationFrame(() => r(null)))
+  /*
+   * Uma folga para o botão pintar o carregamento antes de o navegador travar
+   * no encode. Com 33 tipos isso é rápido, mas o estado importa.
+   *
+   * `setTimeout` e não `requestAnimationFrame`: o rAF não dispara em aba de
+   * fundo, e o botão ficava preso em "Gerando" quando a aba não estava à
+   * frente. Foi assim que descobri, testando por fora.
+   */
+  await new Promise(r => setTimeout(r, 0))
 
   const exemplo = itens.value[0]
   const dadosDoExemplo = (exemplo?.data as Record<string, unknown>) ?? {}
@@ -148,7 +154,9 @@ async function baixarRelatorio() {
           c.tipo,
           regra.rotulo,
           t.value.familias[c.familia] ?? c.familia,
-          c.disponibilidade === 'ativo' ? t.value.tipoAtivo : t.value.tipoLegado,
+          c.disponibilidade === 'ativo'
+            ? t.value.tipoAtivo
+            : c.disponibilidade === 'proposto' ? t.value.tipoProposto : t.value.tipoLegado,
           regra.celula,
           regra.formulario,
           regra.cru,
@@ -165,21 +173,27 @@ async function baixarRelatorio() {
     ],
   }
 
+  /*
+   * A aba da saída usa CÉLULA TIPADA: número vai como número, data vai como
+   * serial de data e arquivo vai como hyperlink. É a regra da seção de
+   * exportação do documento do time de produtos, e ela está certa: texto em
+   * coluna de valor mata a soma no Excel.
+   */
   const abaDaSaida: Aba = {
     nome: idioma.value === 'en' ? 'Item output' : idioma.value === 'es' ? 'Salida de items' : 'Saida dos itens',
     larguras: [34, ...campos.map(c => Math.min(48, Math.round(c.largura / 7)))],
     linhas: [
-      [t.value.referencia, ...campos.map(c => t.value.campos[c.tipo].rotulo)],
+      [t.value.referencia, ...campos.map(c => t.value.campos[c.tipo].rotulo)] as Celula[],
       ...itens.value.map(item => [
         item.reference,
         ...campos.map(c =>
-          saidaFormatada(c, (item.data as Record<string, unknown>)?.[c.refId], idioma.value, opcoes as never),
+          celulaDeExportacao(c, (item.data as Record<string, unknown>)?.[c.refId], idioma.value, opcoes as never),
         ),
-      ]),
+      ] as Celula[]),
     ],
   }
 
-  baixar(gerarXlsx([abaDoPadrao, abaDaSaida]), `${t.value.relatorioNome}.xlsx`)
+  baixar(gerarXlsx([abaDoPadrao, abaDaSaida], idioma.value), `${t.value.relatorioNome}.xlsx`)
   gerando.value = false
   toast.add({ title: t.value.relatorioPronto, icon: 'i-lucide-file-down', color: 'success' })
 }

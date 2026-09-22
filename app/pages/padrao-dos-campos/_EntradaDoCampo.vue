@@ -369,6 +369,32 @@ const opcoesDeRelacao = computed(() =>
       />
     </div>
 
+    <!-- duração: um calendário só, com as duas pontas -->
+    <div v-else-if="campo.tipo === 'duracao'" class="flex items-center gap-2">
+      <UInput
+        :model-value="(valor as { start?: string })?.start?.slice(0, 10) ?? ''"
+        type="date"
+        size="sm"
+        @update:model-value="(v: string | number) => mudarSubcampo('start', v ? `${v}T12:00:00.000Z` : '')"
+      />
+      <UIcon name="i-lucide-arrow-right" class="size-4 shrink-0 text-dimmed" />
+      <UInput
+        :model-value="(valor as { end?: string })?.end?.slice(0, 10) ?? ''"
+        type="date"
+        size="sm"
+        @update:model-value="(v: string | number) => mudarSubcampo('end', v ? `${v}T12:00:00.000Z` : '')"
+      />
+    </div>
+
+    <UInput
+      v-else-if="campo.tipo === 'valorDinamico'"
+      :model-value="comoTexto"
+      size="sm"
+      class="w-full"
+      icon="i-lucide-function-square"
+      disabled
+    />
+
     <!-- ──────────────────────────── relações ────────────────────────────── -->
     <div v-else-if="campo.tipo === 'EnRel'" class="flex items-center gap-1.5">
       <USelectMenu

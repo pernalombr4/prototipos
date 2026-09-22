@@ -79,6 +79,14 @@ const comoRepetidor = computed(() => (props.valor as Record<string, unknown>[]) 
 const comoConversa = computed(() => (props.valor as { author: string, text: string }[]) ?? [])
 const comoAssinatura = computed(() => props.valor as { signer: string, signedAt: string })
 const comoIntervalo = computed(() => props.valor as { start: string, end: string })
+const comoPeriodo = computed(() => props.valor as { start: string, end: string })
+
+/** Quantos dias o período cobre, contando as duas pontas. */
+const diasDoPeriodo = computed(() => {
+  const p = comoPeriodo.value
+  if (!p?.start || !p?.end) return 0
+  return Math.round((new Date(p.end).getTime() - new Date(p.start).getTime()) / 86400000) + 1
+})
 
 /** Iniciais para o avatar da pessoa. */
 const iniciais = computed(() =>
@@ -399,6 +407,25 @@ async function copiar(texto: string) {
         {{ comoConversa.at(-1)?.text }}
       </span>
       <UBadge color="neutral" variant="soft" size="sm">{{ comoConversa.length }}</UBadge>
+    </span>
+
+    <!--
+      Duração: as duas datas. NÃO é HH:MM:SS, que é o que o documento do time
+      de produtos escreveu. Ver a divergência no DECISOES.md.
+    -->
+    <span v-else-if="campo.tipo === 'duracao'" class="flex min-w-0 items-baseline gap-1.5">
+      <span class="shrink-0 text-sm tabular-nums text-highlighted">
+        {{ formatarDataCurta(comoPeriodo.start, idioma) }} {{ naCelula ? '→' : 'a' }}
+        {{ formatarDataCurta(comoPeriodo.end, idioma) }}
+      </span>
+      <span v-if="!naCelula && diasDoPeriodo" class="shrink-0 text-xs text-muted">
+        {{ diasDoPeriodo }}d
+      </span>
+    </span>
+
+    <span v-else-if="campo.tipo === 'valorDinamico'" class="flex min-w-0 items-center gap-1.5">
+      <UIcon name="i-lucide-function-square" class="size-3.5 shrink-0 text-dimmed" />
+      <span class="min-w-0 truncate text-sm text-highlighted">{{ valor }}</span>
     </span>
 
     <!-- qualquer coisa que escape das regras acima aparece como texto -->

@@ -109,11 +109,13 @@ const blocos = computed(() => {
             {{ t.familia }}: {{ t.familias[campo.familia] }}
           </UBadge>
           <UBadge
-            :color="campo.disponibilidade === 'ativo' ? 'success' : 'warning'"
+            :color="campo.disponibilidade === 'ativo' ? 'success' : campo.disponibilidade === 'proposto' ? 'info' : 'warning'"
             variant="subtle"
             size="sm"
           >
-            {{ campo.disponibilidade === 'ativo' ? t.tipoAtivo : t.tipoLegado }}
+            {{ campo.disponibilidade === 'ativo'
+              ? t.tipoAtivo
+              : campo.disponibilidade === 'proposto' ? t.tipoProposto : t.tipoLegado }}
           </UBadge>
           <UBadge color="neutral" variant="outline" size="sm">
             {{ t.alinhamento }}:
@@ -130,6 +132,13 @@ const blocos = computed(() => {
           variant="subtle"
           icon="i-lucide-triangle-alert"
           :description="t.tipoLegadoAviso"
+        />
+        <UAlert
+          v-else-if="campo.disponibilidade === 'proposto'"
+          color="info"
+          variant="subtle"
+          icon="i-lucide-lightbulb"
+          :description="t.tipoPropostoAviso"
         />
 
         <!-- ─────────────── os três formatos, regra e desenho ─────────────── -->

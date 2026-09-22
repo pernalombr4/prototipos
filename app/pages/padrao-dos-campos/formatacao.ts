@@ -13,6 +13,7 @@
  * próprio navegador.
  */
 import type { Campo } from './campos'
+import type { Celula } from './relatorio'
 
 /** O idioma escolhido no andaime vira o locale do Intl. */
 export function localeDe(idioma: string): string {
@@ -262,4 +263,56 @@ export function saidaFormatada(
 export function saidaCrua(valor: unknown): string {
   if (valor === undefined) return 'undefined'
   return JSON.stringify(valor, null, 2)
+}
+
+/* -------------------------------------------------------------------------- *
+ *                        A CÉLULA DO RELATÓRIO .XLSX                         *
+ * -------------------------------------------------------------------------- */
+
+/**
+ * O tipo de célula que cada campo vira na exportação.
+ *
+ * A regra é a da seção "Padronização de Formatos de Exportação em Excel" do
+ * `Melhoria dos campos.docx`, e ela está certa: número e moeda vão como
+ * número, data vai como serial de data, arquivo vai como hyperlink, seleção
+ * múltipla vai separada por vírgula e espaço, e comentário não vai.
+ *
+ * O texto continua saindo do `saidaFormatada`, então a coluna de texto do
+ * .xlsx é a mesma string que a tela mostra.
+ */
+export function celulaDeExportacao(
+  campo: Campo,
+  valor: unknown,
+  idioma: string,
+  opcoes?: Record<string, readonly { value: string, label: string, cor?: string }[]>,
+): Celula {
+  if (estaVazio(valor)) return ''
+
+  switch (campo.tipo) {
+    case 'EnlNumber':
+      return { tipo: 'numero', valor: Number(valor) }
+
+    case 'EnCurrency':
+      return { tipo: 'moeda', valor: Number(valor) }
+
+    case 'EnlCalendar':
+      /* Serial de data, para ordenar e filtrar por mês e ano no Excel. */
+      return { tipo: 'data', valor: valor as string }
+
+    case 'uploadFile':
+    case 'uploadImage':
+    case 'EnPDF':
+    case 'EnOnlyoffice': {
+      const v = valor as { filename: string, url: string }
+      return { tipo: 'link', texto: v.filename, url: v.url }
+    }
+
+    case 'EnChats':
+      /* Histórico de conversa não vai para a planilha. Regra do documento. */
+      return ''
+
+    default:
+      /* Vírgula e espaço em lista, e não a barra que a tela usa no tooltip. */
+      return saidaFormatada(campo, valor, idioma, opcoes, ', ')
+  }
 }

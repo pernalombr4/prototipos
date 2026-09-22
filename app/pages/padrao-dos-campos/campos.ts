@@ -22,7 +22,10 @@
  * sozinho no navegador.
  */
 
-/** As 31 chaves de tipo que existem hoje, entre schema, API e seletor. */
+/**
+ * As 33 chaves de tipo: 31 que existem hoje (entre schema, API e seletor) e 2
+ * que o `Melhoria dos campos.docx` planeja e ainda não existem.
+ */
 export type TipoDeCampo =
   | 'inputText'
   | 'EnTextArea'
@@ -55,6 +58,11 @@ export type TipoDeCampo =
   | 'group'
   | 'EnChats'
   | 'EnCustomCode'
+  /* Os dois abaixo vêm do `Melhoria dos campos.docx` e NÃO existem no schema
+     nem na API. São tipos que o time de produtos está planejando, e estão aqui
+     marcados como `proposto` para o padrão já nascer definido. */
+  | 'duracao'
+  | 'valorDinamico'
 
 /**
  * A família diz que regra de renderização o tipo herda. É ela, e não o tipo,
@@ -78,6 +86,11 @@ export type Disponibilidade =
   | 'ativo'
   /** Existe no schema e em dado gravado, mas não se cria mais pelo seletor. */
   | 'legado'
+  /**
+   * Aparece no `Melhoria dos campos.docx` e não existe no schema nem na API.
+   * É plano do time de produtos, não realidade do produto.
+   */
+  | 'proposto'
 
 export interface ContratoDeBackend {
   /** O que o formulário manda no `data[refId]` do POST/PUT do item. */
@@ -678,6 +691,40 @@ export const campos: Campo[] = [
       formatada: 'a última mensagem e o total, fora da conversa aberta',
       cFormat: ['type: "list"'],
       config: [],
+    },
+  },
+
+  /* --------------------- os dois propostos pelo doc --------------------- */
+  {
+    tipo: 'duracao',
+    familia: 'dataHora',
+    disponibilidade: 'proposto',
+    refId: 'duracao',
+    icone: 'i-lucide-calendar-range',
+    alinhamento: 'inicio',
+    largura: 210,
+    backend: {
+      entrada: '{ "start": "2026-10-01", "end": "2026-10-15" }',
+      saida: '{ "start": "2026-10-01T12:00:00.000Z", "end": "2026-10-15T12:00:00.000Z" }',
+      formatada: 'as duas datas na localidade, unidas por "a". NÃO é HH:MM:SS',
+      cFormat: ['type: "object"', 'locale', 'd_style', 'l_separator'],
+      config: ['config.min', 'config.max'],
+    },
+  },
+  {
+    tipo: 'valorDinamico',
+    familia: 'texto',
+    disponibilidade: 'proposto',
+    refId: 'valor_dinamico',
+    icone: 'i-lucide-function-square',
+    alinhamento: 'inicio',
+    largura: 200,
+    backend: {
+      entrada: 'o campo não recebe digitação. A expressão é configurada no campo',
+      saida: 'o que a expressão devolver. O tipo do resultado varia por expressão',
+      formatada: 'o cFormat do resultado, que precisa ser declarado no campo',
+      cFormat: ['type: depende do resultado'],
+      config: ['config.expressionEditor', 'useExpressionAsStartValue'],
     },
   },
 ]
