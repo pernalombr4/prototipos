@@ -53,6 +53,8 @@ const emit = defineEmits<{
   /** Reordenar a raia `valor` para a posição de `destino`. */
   reordenarRaias: [valor: string, destino: string]
   ordemPadrao: []
+  /** Abrir o formulário da visualização. `null` quer dizer uma nova. */
+  configurarVisualizacao: [id: string | null]
 }>()
 
 /** Arraste dentro do popover: guarda quem saiu para saber o que soltar onde. */
@@ -217,17 +219,36 @@ const rotuloDaOrdenacao = computed(() => {
     <!-- Linha 1: as visualizações salvas, como no produto -->
     <div class="flex items-center gap-1 px-4 pt-2">
       <div class="flex items-center gap-0.5 overflow-x-auto">
-        <UButton
+        <!--
+          A visualização aberta ganha um lápis, que é o caminho para o
+          formulário dela. No produto de hoje não existe: a configuração só
+          aparece ao criar, e é a fricção 1 do BRIEFING.
+        -->
+        <div
           v-for="v in visualizacoes"
           :key="v.id"
-          :label="v.nome"
-          :icon="v.icone"
-          size="xs"
-          :color="visualizacaoAtual === v.id ? 'primary' : 'neutral'"
-          :variant="visualizacaoAtual === v.id ? 'soft' : 'ghost'"
-          class="shrink-0"
-          @click="visualizacaoAtual = v.id"
-        />
+          class="group/vis flex shrink-0 items-center"
+        >
+          <UButton
+            :label="v.nome"
+            :icon="v.icone"
+            size="xs"
+            :color="visualizacaoAtual === v.id ? 'primary' : 'neutral'"
+            :variant="visualizacaoAtual === v.id ? 'soft' : 'ghost'"
+            @click="visualizacaoAtual = v.id"
+          />
+          <UTooltip v-if="visualizacaoAtual === v.id" :text="t.vis.tituloEditar">
+            <UButton
+              icon="i-lucide-pencil"
+              size="xs"
+              color="neutral"
+              variant="ghost"
+              class="-ms-1 opacity-0 transition-opacity group-hover/vis:opacity-100 focus-visible:opacity-100"
+              :aria-label="t.vis.tituloEditar"
+              @click="emit('configurarVisualizacao', v.id)"
+            />
+          </UTooltip>
+        </div>
         <UButton
           :label="t.novaVisualizacao"
           icon="i-lucide-plus"
@@ -235,6 +256,7 @@ const rotuloDaOrdenacao = computed(() => {
           color="neutral"
           variant="ghost"
           class="shrink-0 text-muted"
+          @click="emit('configurarVisualizacao', null)"
         />
       </div>
     </div>

@@ -1468,3 +1468,62 @@ Linear resolve com "Save to view" e o ClickUp com "Save changes for everyone".
 1. entrar no develop e abrir `+ Visualizar` › editar uma visualização kanban existente;
 2. copiar o formulário campo por campo para o BRIEFING, na seção da casca;
 3. prototipar o formulário novo, com as peças acima e a decisão sobre o construtor de cartão.
+
+## Rodada 22 — 22/09/2026 (parte 2: a tela, e o formulário novo)
+
+A janela voltou e a sessão do develop também. Abri `+ Visualizar`, percorri o formulário
+inteiro e **cancelei sem salvar nada**. O que vi está no BRIEFING, item por item.
+
+### A análise da parte 1 se confirmou, e piorou num ponto
+
+O que eu previa pelo registro da Fase 1 estava certo: `Agrupar por` tem só três opções, a
+ordenação não tem sentido, e o cartão se monta por posição em cinco faixas.
+
+O que eu não sabia, e só a tela contou: **a lista de campos que o formulário conhece tem onze
+nomes**, e sete dos que a proposta usa no cartão não estão nela. Faltam pontos, tipo,
+etiquetas, registro de origem, referência, criador e concluída em. Quer dizer: mesmo que a
+pessoa quisesse montar o cartão da proposta com o construtor de hoje, ela não conseguiria, não
+por causa do modelo de configuração, mas porque os campos não são oferecidos.
+
+### O formulário novo
+
+Mesma casca, mesmas seções na mesma ordem, mesmos rótulos. O que mudou:
+
+| Onde | O que mudou |
+|---|---|
+| Agrupar por | ganhou **Tipo** e **Prazo**, e a ajuda "É este campo que vira as raias do quadro" |
+| Ordenar | ganhou o **sentido**, num botão ao lado que alterna crescente e decrescente |
+| O cartão | ganhou **tamanho** (pequeno, médio, grande) e virou **lista de peças que se ligam**, com o ícone de cada uma |
+| Campos personalizados | as cinco faixas por posição continuam aqui, para o campo que o produto não conhece |
+| As raias | seção nova, uma **tabela com uma linha por raia**: limite de cartões, totalizador e ordem própria, mais o "aplicar a todas" do totalizador |
+| Trazido do quadro | aviso com o botão "Usar o que está no quadro agora" |
+
+**Por que a tabela de raias.** Limite, totalizador e ordem própria não são do quadro, são de
+cada raia. Em campo único não cabem, e em modal separado por raia a pessoa perderia a visão do
+conjunto, que é justamente o que ela quer ver ao configurar (quatro raias, quatro limites).
+
+**Por que o formulário continua existindo**, já que a barra do quadro agora faz quase tudo: ele
+deixa de ser o único lugar de configurar e passa a ser **o ponto de partida** da visualização,
+o que a pessoa vê ao abrir. Por isso ele nasce com o que está no quadro agora, e por isso tem
+o aviso "Trazido do quadro".
+
+**Um acréscimo à barra:** a visualização aberta ganhou um **lápis**, que é o caminho para o
+formulário dela. No produto de hoje não existe jeito de editar uma visualização depois de
+criada, e sem isso o "ponto de partida" seria imutável.
+
+### As duas decisões que são dela
+
+1. **O construtor de cartão.** Deixei os dois modelos convivendo: peça ligável para o campo
+   nativo, posição para o personalizado. É a solução que não quebra nada, mas é uma tela com
+   dois jeitos de fazer a mesma coisa. A alternativa é o construtor por posição sair de vez,
+   e aí campo personalizado precisa de outro caminho para entrar no cartão.
+2. **O que a barra muda, quem herda.** Hoje o protótipo mexe no quadro sem salvar. O formulário
+   propõe "usar o que está no quadro agora", que é uma direção. Falta a outra: quando a pessoa
+   mexe na barra, o quadro devia oferecer "salvar nesta visualização", como o Linear faz com
+   "Save to view"? Se sim, é uma barra com estado sujo, e isso muda a barra.
+
+### Conferido na tela
+
+O formulário abre pelo `+ Visualizar` e pelo lápis da visualização aberta, com as cinco seções
+na ordem, a tabela das quatro raias do agrupamento atual e os três idiomas. Nada foi salvo no
+develop.

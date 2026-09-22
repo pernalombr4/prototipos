@@ -12,6 +12,7 @@ import Anotacoes from './_Anotacoes.vue'
 import BarraDoQuadro, { type Filtros, type Periodo } from './_BarraDoQuadro.vue'
 import CascaDoEnspace from './_CascaDoEnspace.vue'
 import MapaDosSelos from './_MapaDosSelos.vue'
+import ModalDeVisualizacao from './_ModalDeVisualizacao.vue'
 import ModalNovaTarefa from './_ModalNovaTarefa.vue'
 import PainelDaTarefa from './_PainelDaTarefa.vue'
 import RaiaDoQuadro from './_RaiaDoQuadro.vue'
@@ -209,6 +210,23 @@ const ordenacaoPorRaia = ref<Record<string, OrdemDaRaia | null>>({})
 
 /** O que o totalizador pode somar, descoberto do dado que está carregado. */
 const camposDoTotalizador = computed(() => camposCalculaveis(lista.value, t.value))
+
+/* ------------------------------------------------------------------ *
+ * O formulário da visualização. Ele abre pelo "+ Visualizar" e pelo   *
+ * lápis da visualização aberta, e parte do que está no quadro agora.  *
+ * ------------------------------------------------------------------ */
+const configurandoVisualizacao = ref(false)
+const visualizacaoEmEdicao = ref<string | null>(null)
+
+function abrirVisualizacao(id: string | null) {
+  visualizacaoEmEdicao.value = id
+  configurandoVisualizacao.value = true
+}
+
+function salvarVisualizacao() {
+  configurandoVisualizacao.value = false
+  toast.add({ title: t.value.tarefaSalva, icon: 'i-lucide-check', color: 'success' })
+}
 
 /* --------------------------- filtro e agrupamento --------------------------- */
 
@@ -526,6 +544,7 @@ const cartaoDeHoje: EnKanbanCardConfig = {
       @limpar="limparFiltros"
       @reordenar-raias="reordenarRaias"
       @ordem-padrao="ordemDasRaias = []"
+      @configurar-visualizacao="abrirVisualizacao"
     />
 
     <UAlert
@@ -698,6 +717,26 @@ const cartaoDeHoje: EnKanbanCardConfig = {
         />
       </template>
     </USlideover>
+
+    <!-- O formulário da visualização, com o que a proposta criou -->
+    <ModalDeVisualizacao
+      v-model:open="configurandoVisualizacao"
+      :t="t"
+      :editando="visualizacaoEmEdicao"
+      :campos-do-totalizador="camposDoTotalizador"
+      :do-quadro="{
+        agrupamento,
+        ordenacao,
+        ordenacaoDesc,
+        densidade,
+        campos,
+        raias: definicoesDeRaia.map(d => ({ valor: d.valor, rotulo: d.rotulo })),
+        limites,
+        calculos: calculoPorRaia,
+      }"
+      @fechar="configurandoVisualizacao = false"
+      @salvar="salvarVisualizacao"
+    />
 
     <!-- Nova tarefa: os campos do produto, com o acabamento refeito -->
     <ModalNovaTarefa

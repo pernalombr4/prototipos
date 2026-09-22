@@ -33,6 +33,64 @@ export interface Textos {
   trilhaRapidas: string
   novaVisualizacao: string
 
+  /* o formulario da visualizacao */
+  vis: {
+    tituloNova: string
+    tituloEditar: string
+    nome: string
+    nomeAjuda: string
+    nomePlaceholder: string
+    descricao: string
+    descricaoPlaceholder: string
+    icone: string
+    iconePlaceholder: string
+    tipo: string
+    tabela: string
+    kanban: string
+    cartoesAjuda: string
+    agruparPor: string
+    agruparPlaceholder: string
+    agruparAjuda: string
+    ordenarPor: string
+    sentido: string
+    oCartao: string
+    tamanho: string
+    pecas: string
+    pecasAjuda: string
+    personalizados: string
+    personalizadosAjuda: string
+    definirCabecalho: string
+    definirConteudo: string
+    definirTags: string
+    definirUtilizador: string
+    definirData: string
+    raias: string
+    raiasAjuda: string
+    raiaColuna: string
+    limiteColuna: string
+    totalColuna: string
+    ordemColuna: string
+    semLimite: string
+    comoNoQuadro: string
+    aplicarATodas: string
+    escolhaAgrupamento: string
+    filtros: string
+    filtrosAutomaticos: string
+    filtrosPersonalizados: string
+    adicionar: string
+    visibilidade: string
+    visibilidadeAjuda: string
+    grupos: string
+    gruposAjuda: string
+    funcoes: string
+    funcoesAjuda: string
+    salvar: string
+    salvarEdicao: string
+    daBarra: string
+    daBarraAjuda: string
+    trazerDaBarra: string
+  }
+
   /* barra de comandos */
   buscar: string
   buscarAtalho: string
@@ -312,6 +370,63 @@ export const textos: Record<Idioma, Textos> = {
     trilhaRapidas: 'Rápidas',
     novaVisualizacao: 'Visualizar',
 
+    vis: {
+      tituloNova: 'Nova visualização',
+      tituloEditar: 'Editar visualização',
+      nome: 'Nome da visualização',
+      nomeAjuda: 'Defina um nome claro e descritivo para esta visualização.',
+      nomePlaceholder: 'Digite o nome da visualização',
+      descricao: 'Descrição',
+      descricaoPlaceholder: 'Descrição opcional para esta visualização',
+      icone: 'Ícone',
+      iconePlaceholder: 'Por favor selecione',
+      tipo: 'Tipo de visualização',
+      tabela: 'Tabela',
+      kanban: 'Kanban',
+      cartoesAjuda: 'Configure os cartões para a visualização kanban.',
+      agruparPor: 'Agrupar por',
+      agruparPlaceholder: 'Selecionar campo',
+      agruparAjuda: 'É este campo que vira as raias do quadro.',
+      ordenarPor: 'Ordenar cartões em cada coluna por',
+      sentido: 'Sentido',
+      oCartao: 'O cartão',
+      tamanho: 'Tamanho do cartão',
+      pecas: 'O que o cartão mostra',
+      pecasAjuda: 'Cada peça sabe se comportar: o prazo fica vermelho quando passa, a prioridade tem cor por nível, o tempo vira cronômetro. Ligue as que a equipe precisa ver sem abrir a tarefa.',
+      personalizados: 'Campos personalizados',
+      personalizadosAjuda: 'Campo que o produto não conhece continua entrando por posição, como hoje.',
+      definirCabecalho: 'Definir campo do cabeçalho',
+      definirConteudo: 'Definir campo do conteúdo',
+      definirTags: 'Adicionar tags',
+      definirUtilizador: 'Definir campo de utilizador',
+      definirData: 'Definir campos de data',
+      raias: 'As raias',
+      raiasAjuda: 'Limite, totalizador e ordem são de cada raia, não do quadro inteiro. Quem abrir a visualização começa por aqui, e pode mudar no quadro depois.',
+      raiaColuna: 'Raia',
+      limiteColuna: 'Limite de cartões',
+      totalColuna: 'Totalizador',
+      ordemColuna: 'Ordem',
+      semLimite: 'Sem limite',
+      comoNoQuadro: 'Como o quadro',
+      aplicarATodas: 'Aplicar a todas',
+      escolhaAgrupamento: 'Escolha o campo do agrupamento para configurar as raias.',
+      filtros: 'Filtros',
+      filtrosAutomaticos: 'Filtros automáticos',
+      filtrosPersonalizados: 'Filtros por campos personalizados',
+      adicionar: 'Adicionar',
+      visibilidade: 'Visibilidade',
+      visibilidadeAjuda: 'Defina quem na sua empresa poderá ver esta tela.',
+      grupos: 'Grupos',
+      gruposAjuda: 'Selecione os grupos que terão acesso a esta visualização.',
+      funcoes: 'Funções',
+      funcoesAjuda: 'Selecione as funções que terão acesso a esta visualização.',
+      salvar: 'Salvar',
+      salvarEdicao: 'Salvar alterações',
+      daBarra: 'Trazido do quadro',
+      daBarraAjuda: 'Você mudou estas coisas no quadro. Salvar aqui deixa elas assim para quem abrir a visualização.',
+      trazerDaBarra: 'Usar o que está no quadro agora',
+    },
+
     buscar: 'Pesquisar tarefas',
     buscarAtalho: 'Buscar por nome, referência ou chamado',
     filtros: 'Filtros',
@@ -580,6 +695,63 @@ export const textos: Record<Idioma, Textos> = {
     trilhaRapidas: 'Quick',
     novaVisualizacao: 'View',
 
+    vis: {
+      tituloNova: 'New view',
+      tituloEditar: 'Edit view',
+      nome: 'View name',
+      nomeAjuda: 'Give this view a clear, descriptive name.',
+      nomePlaceholder: 'Type the view name',
+      descricao: 'Description',
+      descricaoPlaceholder: 'Optional description for this view',
+      icone: 'Icon',
+      iconePlaceholder: 'Please select',
+      tipo: 'View type',
+      tabela: 'Table',
+      kanban: 'Kanban',
+      cartoesAjuda: 'Set up the cards for the kanban view.',
+      agruparPor: 'Group by',
+      agruparPlaceholder: 'Select field',
+      agruparAjuda: 'This is the field that becomes the lanes of the board.',
+      ordenarPor: 'Sort cards in each column by',
+      sentido: 'Direction',
+      oCartao: 'The card',
+      tamanho: 'Card size',
+      pecas: 'What the card shows',
+      pecasAjuda: 'Each piece knows how to behave: the due date turns red once it passes, priority has a color per level, time becomes a timer. Turn on the ones the team needs to see without opening the task.',
+      personalizados: 'Custom fields',
+      personalizadosAjuda: 'A field the product does not know still goes in by position, as it does today.',
+      definirCabecalho: 'Set the header field',
+      definirConteudo: 'Set the content field',
+      definirTags: 'Add tags',
+      definirUtilizador: 'Set the user field',
+      definirData: 'Set the date fields',
+      raias: 'The lanes',
+      raiasAjuda: 'Limit, totals and order belong to each lane, not to the whole board. Whoever opens the view starts here, and can change it on the board afterwards.',
+      raiaColuna: 'Lane',
+      limiteColuna: 'Card limit',
+      totalColuna: 'Total',
+      ordemColuna: 'Order',
+      semLimite: 'No limit',
+      comoNoQuadro: 'Same as board',
+      aplicarATodas: 'Apply to all',
+      escolhaAgrupamento: 'Pick the grouping field to set up the lanes.',
+      filtros: 'Filters',
+      filtrosAutomaticos: 'Automatic filters',
+      filtrosPersonalizados: 'Filters by custom fields',
+      adicionar: 'Add',
+      visibilidade: 'Visibility',
+      visibilidadeAjuda: 'Choose who in your company can see this screen.',
+      grupos: 'Groups',
+      gruposAjuda: 'Select the groups that will have access to this view.',
+      funcoes: 'Roles',
+      funcoesAjuda: 'Select the roles that will have access to this view.',
+      salvar: 'Save',
+      salvarEdicao: 'Save changes',
+      daBarra: 'Brought from the board',
+      daBarraAjuda: 'You changed these on the board. Saving here makes them the starting point for whoever opens the view.',
+      trazerDaBarra: 'Use what is on the board now',
+    },
+
     buscar: 'Search tasks',
     buscarAtalho: 'Search by name, reference or record',
     filtros: 'Filters',
@@ -847,6 +1019,63 @@ export const textos: Record<Idioma, Textos> = {
     trilhaTarefas: 'Tareas',
     trilhaRapidas: 'Rápidas',
     novaVisualizacao: 'Vista',
+
+    vis: {
+      tituloNova: 'Nueva visualización',
+      tituloEditar: 'Editar visualización',
+      nome: 'Nombre de la visualización',
+      nomeAjuda: 'Defina un nombre claro y descriptivo para esta visualización.',
+      nomePlaceholder: 'Escriba el nombre de la visualización',
+      descricao: 'Descripción',
+      descricaoPlaceholder: 'Descripción opcional para esta visualización',
+      icone: 'Icono',
+      iconePlaceholder: 'Por favor seleccione',
+      tipo: 'Tipo de visualización',
+      tabela: 'Tabla',
+      kanban: 'Kanban',
+      cartoesAjuda: 'Configure las tarjetas para la visualización kanban.',
+      agruparPor: 'Agrupar por',
+      agruparPlaceholder: 'Seleccionar campo',
+      agruparAjuda: 'Es este campo el que se convierte en los carriles del tablero.',
+      ordenarPor: 'Ordenar tarjetas en cada columna por',
+      sentido: 'Sentido',
+      oCartao: 'La tarjeta',
+      tamanho: 'Tamaño de la tarjeta',
+      pecas: 'Lo que muestra la tarjeta',
+      pecasAjuda: 'Cada pieza sabe comportarse: la fecha límite se pone roja al vencer, la prioridad tiene color por nivel, el tiempo se convierte en cronómetro. Active las que el equipo necesita ver sin abrir la tarea.',
+      personalizados: 'Campos personalizados',
+      personalizadosAjuda: 'Un campo que el producto no conoce sigue entrando por posición, como hoy.',
+      definirCabecalho: 'Definir campo del encabezado',
+      definirConteudo: 'Definir campo del contenido',
+      definirTags: 'Agregar etiquetas',
+      definirUtilizador: 'Definir campo de usuario',
+      definirData: 'Definir campos de fecha',
+      raias: 'Los carriles',
+      raiasAjuda: 'Límite, totalizador y orden son de cada carril, no del tablero entero. Quien abra la visualización empieza por aquí, y puede cambiarlo en el tablero después.',
+      raiaColuna: 'Carril',
+      limiteColuna: 'Límite de tarjetas',
+      totalColuna: 'Totalizador',
+      ordemColuna: 'Orden',
+      semLimite: 'Sin límite',
+      comoNoQuadro: 'Como el tablero',
+      aplicarATodas: 'Aplicar a todos',
+      escolhaAgrupamento: 'Elija el campo de agrupación para configurar los carriles.',
+      filtros: 'Filtros',
+      filtrosAutomaticos: 'Filtros automáticos',
+      filtrosPersonalizados: 'Filtros por campos personalizados',
+      adicionar: 'Agregar',
+      visibilidade: 'Visibilidad',
+      visibilidadeAjuda: 'Defina quién en su empresa podrá ver esta pantalla.',
+      grupos: 'Grupos',
+      gruposAjuda: 'Seleccione los grupos que tendrán acceso a esta visualización.',
+      funcoes: 'Funciones',
+      funcoesAjuda: 'Seleccione las funciones que tendrán acceso a esta visualización.',
+      salvar: 'Guardar',
+      salvarEdicao: 'Guardar cambios',
+      daBarra: 'Traído del tablero',
+      daBarraAjuda: 'Usted cambió estas cosas en el tablero. Guardar aquí las deja así para quien abra la visualización.',
+      trazerDaBarra: 'Usar lo que está en el tablero ahora',
+    },
 
     buscar: 'Buscar tareas',
     buscarAtalho: 'Busque por nombre, referencia o registro',

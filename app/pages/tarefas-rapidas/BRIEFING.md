@@ -334,3 +334,69 @@ com `_gte`/`_lte`, `name_contains`, `completed_at_null`, `item`, `assigned_to`. 
 - As capturas de tela desta rodada não puderam ser gravadas em disco: a ferramenta de
   navegação desta sessão não devolveu caminho de arquivo. O que cada tela mostra está descrito
   acima, tela por tela, e a pasta `evidencias/` está esperando o print da próxima rodada.
+
+---
+
+## O formulário da visualização, item por item
+
+Visitado em 22/09/2026, em `/workspaces/teste-ux/tasks/quick` › `+ Visualizar`, no Chrome da
+Mikaela. Nada foi salvo: o modal foi aberto, percorrido e cancelado.
+
+**A caixa.** Modal centrado, com título `Nova Visualização` e ícone de tabela, corpo rolável e
+rodapé fixo com `Cancelar` e `Salvar`. Fecha no X, no Cancelar e clicando fora.
+
+**Identidade**, em cima, sempre visível:
+
+| Campo | Como é |
+|---|---|
+| `Nome da Visualização` | obrigatório, com a ajuda "Defina um nome claro e descritivo para esta visualização." e o placeholder "Digite o nome da visualização" |
+| `Descrição` | área de texto, "Descrição opcional para esta visualização" |
+| `Ícone` | obrigatório, select com "Por favor selecione" |
+| `Tipo de Visualização` | obrigatório, dois botões: **Tabela** e **Kanban** |
+
+**No tipo Tabela**, o corpo vira seleção de colunas: "Selecione as colunas desejadas. O preview
+mostra como ficará", com `CAMPOS DISPONÍVEIS` (busca, `Selecionar todos`) à esquerda e
+`COLUNAS SELECIONADAS (0)` à direita, com o vazio "Nenhuma coluna selecionada ainda. Clique em
+um campo para adicioná-lo como coluna." Os campos aparecem com o tipo ao lado: `ID EnlNumber`,
+`Nome InputText`, `Criado em EnlCalendar`, `Data limite EnlCalendar`, `Status radioButton`.
+
+**No tipo Kanban**, o corpo é "Configure os cartões para a visualização kanban" e tem três
+partes:
+
+1. **Agrupar por**, select com placeholder "Selecionar campo" e exatamente **três** opções:
+   `Status`, `Responsável`, `Prioridade`. Depois de escolhido, ganha um X para limpar.
+2. **Ordenar cartões em cada coluna por**, que começa em `Campo data de atualização` e oferece
+   catorze opções: três de data (`Campo data de atualização`, `Campo data de criação`, `Campo
+   data de vencimento`) e onze campos (`ID`, `Nome`, `Criado em`, `Data limite`, `Status`,
+   `Permissões`, `Responsável`, `Responsável externo`, `Colaboradores`, `Prioridade`,
+   `Descrição`). **Não há sentido**: nada diz se é crescente ou decrescente.
+3. **CONSTRUTOR VISUAL DE CARTÃO**, com a ajuda "Passe o mouse em cada seção para configurar" e
+   **cinco faixas empilhadas**, uma por posição do cartão:
+
+   | Faixa | O que diz quando vazia |
+   |---|---|
+   | CABEÇALHO | "Definir Campo Do Cabeçalho..." |
+   | CONTEÚDO | "Definir campo do conteúdo..." |
+   | TAGS | "Adicionar tags" |
+   | UTILIZADOR | "Definir campo de utilizador" |
+   | CAMPO DATA DE VENCIMENTO | "Definir campos de data" |
+
+   Passando o mouse, a faixa acende o nome da posição com um lápis e abre um popover com
+   `Selecionar campo` e um botão `{ }`. O select do cabeçalho oferece os mesmos onze campos da
+   ordenação.
+
+**Filtros**, acordeão fechado, com duas partes, cada uma com ícone de ajuda e um botão
+`Adicionar` centrado numa área tracejada: `Filtros Automáticos` e `Filtros por Campos
+Personalizados`.
+
+**Visibilidade**, acordeão fechado: "Defina quem na sua empresa poderá ver esta tela", com
+`Grupos` ("Selecione os grupos que terão acesso a esta visualização") e `Funções` ("Selecione
+as funções que terão acesso a esta visualização").
+
+**O que o formulário não conhece.** A lista de campos que ele oferece, tanto para ordenar
+quanto para montar o cartão, tem onze nomes. Não estão lá: **pontos**, **tipo**, **etiquetas**,
+**registro de origem**, **referência**, **criador**, **concluída em**, **concluída por** e
+**notificação**. Sete deles aparecem no cartão da proposta.
+
+**Não há como editar uma visualização depois de criada** pela tela que encontrei: a
+visualização aberta não tem menu nem lápis, e o modal só existe no caminho de criar.
