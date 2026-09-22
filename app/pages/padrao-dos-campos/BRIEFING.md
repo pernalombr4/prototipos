@@ -146,7 +146,43 @@ Cada seção tem um ponto colorido antes do título.
 **É esta coluna 1 que resolve o formato "naked" da demanda.** Ela já existe e já tem o
 desenho certo (ícone, rótulo em caixa alta, valor). Hoje ela só carrega metadado de sistema.
 
+### 5.3.1 Como se chega na sidebar e na tela dedicada
+
+Medido em 22/09/2026, na tela nova:
+
+| Gesto | O que abre | URL |
+|---|---|---|
+| **Duplo clique na linha** da tabela | a **quickview**, o painel pela direita | a mesma da lista, sem mudar |
+| `⋮ › Ver Detalhes` | a mesma quickview | a mesma da lista |
+| `⋮ › Editar` | a **tela dedicada do item**, em página inteira | `/workspaces/<ws>/types/<slug>/<REFERENCE>` |
+
+A tela dedicada tem a **mesma estrutura de duas colunas** da quickview: à esquerda o bloco de
+metadados em formato cru (ícone, rótulo em caixa alta, valor), à direita as abas `Visão Geral`,
+`Comentários` e `Logs de Auditoria` com os campos em formulário e o `Salvar` no rodapé. O
+navegador `‹ 1/3 ›` e o botão `«` de recolher a coluna da esquerda também são os mesmos.
+
+Ou seja: **a coluna da esquerda é o lugar do formato cru nos dois lugares**, e a parte de
+dentro é sempre formulário. A quickview é a versão em gaveta da tela dedicada.
+
 ### 5.4 Os tipos de campo que existem de verdade
+
+> ⚠️ **Esta contagem está incompleta e vai ser corrigida.** Ao abrir o seletor "Tipo de Campo"
+> em 22/09/2026, o menu é uma lista virtualizada com `scrollHeight = 1198 px` e item de 34 px,
+> ou seja **cerca de 35 tipos oferecidos**, não 22. Os dez primeiros, na ordem em que aparecem:
+> **Matriz de dados**, Texto Curto, Texto Longo, Número, **Duração**, Data (Calendário),
+> Alternativa Binária, Caixas de Seleção, Botões de Seleção única, Lista de Seleção Única.
+>
+> Dois aprendizados imediatos:
+>
+> - **"Matriz de dados" existe e eu não tinha.** A descrição no i18n do produto é *"Permite
+>   criar uma tabela personalizada onde cada linha representa um registro e cada coluna
+>   representa um campo específico"*, com configurações próprias (`all_rows_required`,
+>   `all_columns_unique_value`, `complement_label`). É parente do Repetidor, não o mesmo;
+> - **"Duração" existe no seletor.** Eu havia classificado como `proposto` por não achar no
+>   schema nem na API. Está errado: é tipo ativo.
+>
+> Os 25 restantes só se leem com a janela do Chrome visível, porque a lista é virtualizada e o
+> virtualizador não renderiza em aba de fundo.
 
 Três fontes, e elas **não batem**:
 
@@ -200,10 +236,12 @@ trata isso: **display vazio cai para a referência, nunca para nada.**
   API no workspace de exploração. Criar 31 campos pela tela, um a um, num painel que ainda por
   cima renderiza fora da área visível (ver abaixo), custaria a rodada inteira. A vitrine existe
   **no mock**, com a estrutura tirada das três fontes acima.
-- **O painel de criação de Campo renderiza fora da viewport.** Em `Estrutura › Categorias ›
-  leve › Campos › Criar +`, com a janela em 1920 px, o conteúdo do painel começa em
-  `x = 1928` (medido com `getBoundingClientRect`). O seletor "Tipo de Campo" fica inalcançável
-  por clique. É achado, não proposta, e não foi consertado aqui.
+- ~~**O painel de criação de Campo renderiza fora da viewport.**~~ **Isto estava errado e foi
+  retirado em 22/09/2026.** O painel realmente ficava parado em `x = 1928`, mas a causa era a
+  **janela do Chrome minimizada**: sem a aba visível o navegador congela o `requestAnimationFrame`,
+  e a transição de entrada do drawer do naive-ui fica presa no estado inicial
+  (`transform: translateX(921px)`). Com a aba visível o painel abre normalmente. Não é defeito
+  do produto. Fica aqui como armadilha de investigação, não como achado.
 - **Os prints do develop não foram commitados.** A única captura da sidebar de duas colunas
   mostra o e-mail de uma pessoa real no campo `E-MAIL DA SOLICITAÇÃO`, e o repositório é
   público (regra 13). A casca está descrita item por item acima, e os prints da entrega são os

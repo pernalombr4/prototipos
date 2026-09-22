@@ -698,7 +698,8 @@ export const campos: Campo[] = [
   {
     tipo: 'duracao',
     familia: 'dataHora',
-    disponibilidade: 'proposto',
+    /* Confirmado no seletor "Tipo de Campo" do develop em 22/09/2026: existe. */
+    disponibilidade: 'ativo',
     refId: 'duracao',
     icone: 'i-lucide-calendar-range',
     alinhamento: 'inicio',
