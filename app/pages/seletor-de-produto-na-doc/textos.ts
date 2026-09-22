@@ -44,7 +44,14 @@ export interface Textos {
      */
     aria: (produto: string) => string
     selo: Record<'beta' | 'novo', string>
+    /** Lido pelo leitor de tela no item bloqueado, onde só há o relógio. */
+    emBreve: string
+    /** Idem, no item que sai do site, onde só há a seta. */
+    abreFora: string
   }
+
+  /** Documentação que vive fora deste site. Nome de marca, não se traduz. */
+  externos: Record<'sdk', { nome: string }>
 
   /**
    * O nome de cada produto. Sem descrição de propósito: o menu tem uma linha
@@ -127,6 +134,11 @@ export const textos: Record<Idioma, Textos> = {
     seletor: {
       aria: p => `Produto da documentação: ${p}. Trocar de produto.`,
       selo: { beta: 'Beta', novo: 'Novo' },
+      emBreve: 'Em breve',
+      abreFora: 'Abre em outro site',
+    },
+    externos: {
+      sdk: { nome: 'SDK' },
     },
     produtos: {
       'enspace': { nome: 'ENSPACE' },
@@ -232,6 +244,11 @@ export const textos: Record<Idioma, Textos> = {
     seletor: {
       aria: p => `Documentation product: ${p}. Switch product.`,
       selo: { beta: 'Beta', novo: 'New' },
+      emBreve: 'Coming soon',
+      abreFora: 'Opens on another site',
+    },
+    externos: {
+      sdk: { nome: 'SDK' },
     },
     produtos: {
       'enspace': { nome: 'ENSPACE' },
@@ -337,6 +354,11 @@ export const textos: Record<Idioma, Textos> = {
     seletor: {
       aria: p => `Producto de la documentación: ${p}. Cambiar de producto.`,
       selo: { beta: 'Beta', novo: 'Nuevo' },
+      emBreve: 'Muy pronto',
+      abreFora: 'Se abre en otro sitio',
+    },
+    externos: {
+      sdk: { nome: 'SDK' },
     },
     produtos: {
       'enspace': { nome: 'ENSPACE' },

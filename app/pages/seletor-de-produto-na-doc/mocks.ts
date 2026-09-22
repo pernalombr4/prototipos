@@ -22,8 +22,6 @@ export type ChaveDeProduto = 'enspace' | 'plugin-word' | 'beni-app'
 
 export interface Produto {
   id: ChaveDeProduto
-  /** Ícone do Lucide. Serve de marca curta do produto no seletor e no topo. */
-  icone: string
   /**
    * Pedaço do endereço quando o produto entra na URL.
    * Hoje a doc é `/{idioma}/docs/...`; a proposta é `/{idioma}/docs/{prefixo}/...`,
@@ -37,9 +35,35 @@ export interface Produto {
 
 /** A ordem é a ordem do menu: a plataforma primeiro, os satélites depois. */
 export const produtos: Produto[] = [
-  { id: 'enspace', icone: 'i-lucide-layout-grid', prefixo: '' },
-  { id: 'plugin-word', icone: 'i-lucide-file-type', prefixo: 'word' },
-  { id: 'beni-app', icone: 'i-lucide-bot', prefixo: 'beni', selo: 'beta' },
+  { id: 'enspace', prefixo: '' },
+  { id: 'plugin-word', prefixo: 'word' },
+  { id: 'beni-app', prefixo: 'beni', selo: 'beta' },
+]
+
+/* ------------------------------------------------------------------ *
+ * DESTINO QUE SAI DAQUI                                               *
+ *                                                                     *
+ * A doc do SDK é um site próprio, com casca e navegação próprias. Ela  *
+ * entra no mesmo menu porque a pergunta de quem abre o menu é sempre a *
+ * mesma ("de qual produto é a documentação?"), mas não troca o         *
+ * conteúdo desta página: leva embora. Por isso mora numa lista         *
+ * separada, com separador no menu e seta de link externo.              *
+ * ------------------------------------------------------------------ */
+
+export interface DestinoExterno {
+  id: 'sdk'
+  /**
+   * Endereço final. **Ainda não definido**, e é pergunta para a Mikaela:
+   * o site já roda local em `/vue/start`, mas não se sabe onde ele publica.
+   * Enquanto `emBreve` for verdadeiro o item nem tenta navegar.
+   */
+  url?: string
+  /** Bloqueia o item e troca a seta de link pelo relógio de "em breve". */
+  emBreve: boolean
+}
+
+export const destinosExternos: DestinoExterno[] = [
+  { id: 'sdk', emBreve: true },
 ]
 
 /* ------------------------------------------------------------------ *

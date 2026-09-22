@@ -321,3 +321,54 @@ acontece só quando falta espaço de verdade.
 
 **Se o corte incomodar**, o conserto é voltar o ícone **só** abaixo de `sm`: some o nome, fica a
 marca do produto, e nada corta. Ficou fora porque contraria o pedido ao pé da letra.
+
+### Rodada 4 — 22/09/2026
+
+**O que ela pediu, em duas mensagens:**
+
+> pode ja fazer mais uma opçao no dropdown, a ultima, sendo "sdk", mas em vez de mudar na propria
+> doc, é um botao com seta de link pra fora, mostrando na direita do botao.
+>
+> mas ele por enquanto vai estar bloqueado com reloginho de coming soon ok?
+
+> nao é pra ter icone aqui no dropdown tb, ok? ajuste isso antes do push
+
+#### O SDK entrou como destino, não como produto
+
+A doc do SDK é um site próprio. Ela responde à mesma pergunta que o menu faz ("de qual produto é
+a documentação?"), então mora no mesmo menu. Mas ela **não troca o conteúdo desta página: leva
+embora**, e isso precisa estar dito antes do clique, não depois.
+
+Três coisas dizem isso:
+
+1. **Grupo separado**, com linha divisória acima. É o desenho do Supabase, que separa os produtos
+   dos módulos dentro do mesmo painel.
+2. **Fica por último**, como ela pediu, que é também onde o olho espera o item que sai do fluxo.
+3. **Seta de link externo à direita**, no lugar onde os outros itens têm o tique. Um item, um
+   sinal, sempre na mesma coluna.
+
+No código isso é uma lista à parte no `mocks.ts` (`destinosExternos`), e não um quarto produto:
+assim ninguém consegue selecioná-lo por engano como se fosse contexto desta doc.
+
+#### Bloqueado, por enquanto
+
+Enquanto `emBreve` for verdadeiro, o item **não navega, não tem endereço e não fica selecionável**,
+e o relógio ocupa o lugar da seta. Um sinal por item: mostrar seta e relógio juntos faria a pessoa
+ler duas coisas para entender uma. Quando o site publicar, basta virar a chave no `mocks.ts` e a
+seta volta.
+
+Quem usa leitor de tela não enxerga nem relógio nem seta, então o texto ("Em breve" / "Coming
+soon" / "Muy pronto") está lá em `sr-only`, dentro do mesmo item.
+
+**Pergunta para a Mikaela:** **qual vai ser o endereço da doc do SDK?** O campo `url` está vazio
+de propósito. O site roda local em `/vue/start`, mas não sei onde ele publica.
+
+#### E os ícones saíram do menu também
+
+A rodada 3 tinha tirado o ícone da pílula e mantido os do menu. Ela pediu para tirar de lá
+também, e o resultado é o Nuxt UI puro: **nenhum ícone decorativo**. Com três nomes curtos, o
+ícone não desempata nada e põe uma coluna a mais para o olho atravessar.
+
+O que sobrou no menu é só sinal que diz alguma coisa: **o tique** do produto em uso, **o selo
+Beta** e **o relógio ou a seta** do item que sai daqui. O menu lateral da doc continua com os
+ícones dele, que são casca copiada do site e não entram nesta conta.

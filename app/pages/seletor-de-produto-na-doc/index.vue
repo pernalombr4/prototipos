@@ -17,7 +17,7 @@ import CascaDaDoc from './_CascaDaDoc.vue'
 import CorpoDaPagina from './_CorpoDaPagina.vue'
 import MenuDaDoc from './_MenuDaDoc.vue'
 import SeletorDeProduto from './_SeletorDeProduto.vue'
-import { navegacao, paginas, produtos, type ChaveDeProduto } from './mocks'
+import { destinosExternos, navegacao, paginas, produtos, type ChaveDeProduto } from './mocks'
 import { textos } from './textos'
 
 import briefingMd from './BRIEFING.md?raw'
@@ -174,12 +174,12 @@ const enderecoProposto = computed(() => {
   <CascaDaDoc :t="t" :com-seletor="comSeletor" secao-ativa="docs">
     <!-- ✅ A PROPOSTA -->
     <template #produto>
-      <SeletorDeProduto v-model="produto" :t="t" :produtos="produtos" />
+      <SeletorDeProduto v-model="produto" :t="t" :produtos="produtos" :externos="destinosExternos" />
     </template>
 
     <!-- A mesma peça, em linha cheia, dentro do menu do celular. -->
     <template #produto-celular>
-      <SeletorDeProduto v-model="produto" :t="t" :produtos="produtos" largura-cheia />
+      <SeletorDeProduto v-model="produto" :t="t" :produtos="produtos" :externos="destinosExternos" largura-cheia />
     </template>
 
     <!-- Menu lateral: troca de árvore junto com o produto -->

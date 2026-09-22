@@ -17,9 +17,11 @@
  *   3. sem borda dura. Anel de 1px na própria cor, ou nada;
  *   4. caixa normal, peso médio, 12px. Nunca caixa alta;
  *   5. seta de 12px, da cor do texto;
- *   6. nada de ícone na pílula: só o nome e a seta (rodada 3). O Nuxt UI e o
- *      Tailwind já são assim. O ícone continua no menu, onde ele diferencia
- *      um produto do outro, que é o trabalho que ele faz de verdade.
+ *   6. nada de ícone, nem na pílula nem no menu (rodadas 3 e 4). O Nuxt UI e
+ *      o Tailwind são assim: com três nomes curtos, o ícone não desempata
+ *      nada e só põe uma coluna a mais para o olho atravessar. O único sinal
+ *      gráfico que sobra no menu é o que diz alguma coisa: o tique do produto
+ *      em uso, e o relógio ou a seta de link externo no item que sai daqui.
  *
  * O texto usa `text-primary-700 dark:text-primary-300` e não `text-primary`:
  * é a correção de contraste da casa (`app/tema-contraste.ts`), porque o
@@ -30,12 +32,14 @@
  * direita. Sem descrição: nenhuma das dez referências descreve os itens, e a
  * descrição era o que fazia o painel parecer formulário.
  */
-import type { Produto, ChaveDeProduto } from './mocks'
+import type { Produto, ChaveDeProduto, DestinoExterno } from './mocks'
 import type { Textos } from './textos'
 
 const props = defineProps<{
   t: Textos
   produtos: Produto[]
+  /** Documentação que mora fora deste site. Vai no fim, depois do separador. */
+  externos?: DestinoExterno[]
   /**
    * Trigger de largura cheia, com o nome sempre visível. É a versão que vai
    * dentro do menu do celular, onde existe linha inteira para o nome.
@@ -52,18 +56,34 @@ const atual = computed(() =>
 
 const nomeAtual = computed(() => props.t.produtos[atual.value.id].nome)
 
+/**
+ * Dois grupos, e o separador entre eles é o recado.
+ *
+ * Em cima, os produtos que **trocam** o conteúdo desta página. Embaixo, a
+ * documentação que **leva embora**, num grupo próprio, com ícone de link
+ * externo à direita. Misturar os dois faria a pessoa clicar em "SDK"
+ * esperando a página mudar e perder a que estava lendo.
+ */
 const itens = computed(() => [
   props.produtos.map(p => ({
     type: 'checkbox' as const,
     slot: 'produto' as const,
     checked: p.id === produtoAtual.value,
-    icon: p.icone,
     label: props.t.produtos[p.id].nome,
     selo: p.selo,
     atual: p.id === produtoAtual.value,
     onSelect: () => { produtoAtual.value = p.id },
   })),
-])
+  (props.externos ?? []).map(e => ({
+    slot: 'externo' as const,
+    label: props.t.externos[e.id].nome,
+    emBreve: e.emBreve,
+    /* Bloqueado enquanto não sai do forno: o item não navega e não fecha o menu. */
+    disabled: e.emBreve,
+    to: e.emBreve ? undefined : e.url,
+    target: e.emBreve ? undefined : ('_blank' as const),
+  })),
+].filter(grupo => grupo.length > 0))
 </script>
 
 <template>
@@ -71,10 +91,10 @@ const itens = computed(() => [
     v-model:open="aberto"
     :items="itens"
     :content="{ align: 'start', sideOffset: 8 }"
+    :external-icon="false"
     :ui="{
       content: 'w-auto min-w-52 max-w-[calc(100vw-2rem)] p-1',
       item: 'py-1.5 gap-2 text-sm',
-      itemLeadingIcon: 'size-4 text-dimmed',
       itemTrailingIcon: 'size-4 text-primary-700 dark:text-primary-300',
     }"
   >
@@ -108,13 +128,9 @@ const itens = computed(() => [
     </button>
 
     <!--
-      O produto em uso é marcado pela cor, como no Nuxt UI e na doc do SDK.
+      O produto em uso é marcado pela cor, como no Nuxt UI.
       O tique à direita repete o sinal para quem não distingue a cor.
     -->
-    <template #produto-leading="{ item }">
-      <UIcon :name="item.icon" class="size-4 shrink-0" :class="item.atual ? 'text-primary-700 dark:text-primary-300' : 'text-dimmed'" />
-    </template>
-
     <template #produto-label="{ item }">
       <span class="flex items-center gap-1.5" :class="item.atual ? 'font-medium text-primary-700 dark:text-primary-300' : ''">
         {{ item.label }}
@@ -129,6 +145,25 @@ const itens = computed(() => [
         >
           {{ t.seletor.selo[item.selo] }}
         </span>
+      </span>
+    </template>
+
+    <!--
+      A documentação que sai daqui.
+
+      À direita vai a seta de link externo, que é o aviso de que o clique
+      leva embora. Enquanto o site não existe, o lugar da seta é do relógio:
+      um só sinal por item, e o que ele diz é o que importa agora.
+      O texto ao lado some da tela e fica para o leitor de tela, que não
+      enxerga nem relógio nem seta.
+    -->
+    <template #externo-trailing="{ item }">
+      <UIcon
+        :name="item.emBreve ? 'i-lucide-clock' : 'i-lucide-arrow-up-right'"
+        class="size-4 shrink-0 text-dimmed"
+      />
+      <span class="sr-only">
+        {{ item.emBreve ? t.seletor.emBreve : t.seletor.abreFora }}
       </span>
     </template>
   </UDropdownMenu>
