@@ -117,6 +117,105 @@ menu com a mesma lista.
 para Excel. O mesmo conteúdo aparece duas vezes, no menu e na árvore, e nenhuma das duas diz
 qual está valendo. **O que não serve:** a duplicação. Aqui o produto vive em um lugar só.
 
+---
+
+# Segunda passada: a estética do controle
+
+A rodada 1 acertou o comportamento e errou o desenho. O retorno dela foi direto: *"tá
+grosseiro visualmente. feio. (…) o badge que o nuxt ui docs usa também é bem mais clean"*, com o
+print da **nossa própria doc do SDK**, que já resolve isso melhor. Esta passada olha só a forma.
+
+## A referência de dentro de casa: a doc do SDK
+
+`localhost:3000/vue/start`, no print que ela mandou. É a melhor referência do conjunto porque já
+é ENSPACE.
+
+**Como é:** logo "EN" em quadrado arredondado, a palavra **SDK**, e ao lado uma pílula discreta
+de borda fina com a marca do produto em miniatura (o "V" do Vue), o nome em caixa normal e uma
+seta pequena. Aberta, a lista traz `Schemas`, `Core`, `Vue`, `UI`, `Beni Avatar`: **uma linha por
+produto**, ícone pequeno à esquerda, nenhuma descrição, e o produto em uso escrito na cor da
+marca. O painel tem a largura do conteúdo, não mais.
+
+**O que serve:** tudo. Tamanho, caixa do texto, ícone por produto, item em uso pela cor, e o
+painel curto. **O que não serve:** nada. É o alvo.
+
+## Nuxt UI (`ui.nuxt.com`)
+
+**Como é:** pílula totalmente arredondada com `v4.11.2` em verde sobre verde a 10%, sem borda
+dura, uns 22px de altura, texto de 12px em peso normal, seta de 12px na mesma cor. Aberta: painel
+estreito, linhas de 26px, item em uso em verde com tique verde à direita. Sem ícone.
+
+**O que serve:** a fórmula de cor, que é a que este protótipo adotou: **uma família só, fundo a
+10%, texto e seta na mesma cor**. **O que não serve:** o verde deles passa de contraste; o fúcsia
+500 do ENSPACE sobre 10% dele mesmo dá 2,96:1 e reprova. Por isso o texto usa
+`text-primary-700 dark:text-primary-300`, que é a correção de contraste que este repositório já
+mantém em `app/tema-contraste.ts`.
+
+## Tailwind CSS (`tailwindcss.com/docs`)
+
+**Como é:** a mesma pílula, ainda mais apagada: `v4.3` em cinza sobre cinza claro, sem borda,
+sem cor de marca. Seta minúscula.
+
+**O que serve:** a prova de que o controle não precisa de cor para ser achado, desde que esteja
+colado à marca. **O que não serve:** com três produtos que a pessoa talvez não conheça, o cinza
+total esconde demais. Ficou no meio do caminho: cor da marca, mas em pílula.
+
+## Supabase (`supabase.com/docs`)
+
+**Como é:** menu `Products` na barra, painel de 210px com **ícones monocromáticos de traço**, uma
+linha por produto, um rótulo minúsculo em caixa alta separando o grupo `MODULES`, e nenhuma
+descrição, mesmo com dez produtos. E o produto em uso aparece **como cabeçalho do menu lateral**,
+com o mesmo ícone.
+
+**O que serve:** ícone monocromático e a ausência de descrição mesmo em escala. **O que não
+serve:** repetir o produto no topo do menu lateral. Ali é redundante quando a pílula já está
+colada à marca; faz sentido para eles porque o controle deles está escondido numa barra de menus.
+
+## Sentry (`docs.sentry.io`)
+
+**Como é:** o seletor de plataforma é uma **caixa de largura cheia no topo do menu lateral**,
+com ícone e seta, acima da árvore que ele comanda.
+
+**O que serve:** é o desenho certo quando a lista é enorme (dezenas de plataformas) e quando o
+seletor precisa de um campo de busca. **O que não serve:** com três produtos, uma caixa de
+largura cheia no menu lateral pesa mais que a árvore inteira.
+
+## Prisma (`prisma.io/docs`)
+
+**Como é:** o produto é um **segmento de caminho** ao lado da marca: `Prisma / docs / ORM`, com o
+último segmento em monoespaçada. Peso visual quase zero.
+
+**O que serve:** a leitura de hierarquia, que é o argumento a favor de manter a pílula colada ao
+logo. **O que não serve:** um caminho em texto puro não parece clicável, e aqui o controle
+precisa se anunciar.
+
+## Svelte (`svelte.dev/docs`)
+
+**Como é:** `Docs ⌄` na barra abre uma lista de quatro linhas de texto puro, sem ícone, sem
+tique, sem cor.
+
+**O que serve:** o lembrete de que o painel não precisa de enfeite. **O que não serve:** sem
+marca nenhuma do item em uso, a pessoa precisa fechar o menu para saber onde está.
+
+## Astro (`docs.astro.build`)
+
+**Como é:** não tem seletor. Versão nova vira **faixa no topo do conteúdo**.
+
+**O que serve:** confirma que faixa no conteúdo é o lugar de aviso de contexto, que é onde o
+aviso de página sem equivalente ficou. **O que não serve:** não resolve a demanda.
+
+## As cinco regras de forma que saíram daqui
+
+Sete das oito documentações limpas concordam:
+
+| # | Regra | O que a rodada 1 fazia |
+|---|---|---|
+| 1 | Pílula de 22 a 24px, não caixa de 29px | Caixa de 29px, do tamanho de um campo de formulário |
+| 2 | Uma família de cor: fundo a 10%, texto e seta na mesma cor | Borda preta, fundo branco, texto escuro e seta ciano: quatro valores |
+| 3 | Sem borda dura. Anel de 1px na própria cor, ou nada | Borda de 1px em preto puro |
+| 4 | Caixa normal, peso médio, 12px | CAIXA ALTA, semibold, 13px |
+| 5 | Painel da largura do conteúdo, uma linha por item | Painel de 336px com descrição de duas linhas por item |
+
 ## O padrão que todos seguem
 
 1. **O controle de contexto mora colado à marca, no alto e à esquerda.** Nuxt, GitHub Docs,

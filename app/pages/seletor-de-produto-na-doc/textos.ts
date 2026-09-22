@@ -38,14 +38,20 @@ export interface Textos {
    * SELETOR DE PRODUTO (a proposta)                                   *
    * ---------------------------------------------------------------- */
   seletor: {
-    /** Rótulo acessível do botão, porque na tela ele mostra só o nome. */
+    /**
+     * Rótulo acessível do botão. Existe porque no celular a pílula fica só
+     * com o ícone, e porque "trocar de produto" não está escrito na tela.
+     */
     aria: (produto: string) => string
-    /** Título do menu aberto. */
-    titulo: string
     selo: Record<'beta' | 'novo', string>
   }
 
-  produtos: Record<ChaveDeProduto, { nome: string, descricao: string }>
+  /**
+   * O nome de cada produto. Sem descrição de propósito: o menu tem uma linha
+   * por produto, como nas dez referências do PESQUISA.md. Quem precisa saber
+   * o que o produto é lê a descrição da página de abertura dele.
+   */
+  produtos: Record<ChaveDeProduto, { nome: string }>
 
   /** Título de cada página e de cada seção do menu, pela chave. */
   titulos: Record<string, string>
@@ -120,22 +126,12 @@ export const textos: Record<Idioma, Textos> = {
     },
     seletor: {
       aria: p => `Produto da documentação: ${p}. Trocar de produto.`,
-      titulo: 'Documentação do produto',
       selo: { beta: 'Beta', novo: 'Novo' },
     },
     produtos: {
-      'enspace': {
-        nome: 'ENSPACE',
-        descricao: 'A plataforma: workspaces, itens, automações e equipes.',
-      },
-      'plugin-word': {
-        nome: 'Plugin do Word',
-        descricao: 'Escrever documentos no Word com os dados da plataforma.',
-      },
-      'beni-app': {
-        nome: 'Beni App',
-        descricao: 'O assistente do ENSPACE no celular e no computador.',
-      },
+      'enspace': { nome: 'ENSPACE' },
+      'plugin-word': { nome: 'Plugin do Word' },
+      'beni-app': { nome: 'Beni App' },
     },
     titulos: {
       'inicio': 'Primeiros passos',
@@ -235,22 +231,12 @@ export const textos: Record<Idioma, Textos> = {
     },
     seletor: {
       aria: p => `Documentation product: ${p}. Switch product.`,
-      titulo: 'Product documentation',
       selo: { beta: 'Beta', novo: 'New' },
     },
     produtos: {
-      'enspace': {
-        nome: 'ENSPACE',
-        descricao: 'The platform: workspaces, items, automations and teams.',
-      },
-      'plugin-word': {
-        nome: 'Word Plugin',
-        descricao: 'Write documents in Word with data from the platform.',
-      },
-      'beni-app': {
-        nome: 'Beni App',
-        descricao: 'The ENSPACE assistant on your phone and computer.',
-      },
+      'enspace': { nome: 'ENSPACE' },
+      'plugin-word': { nome: 'Word Plugin' },
+      'beni-app': { nome: 'Beni App' },
     },
     titulos: {
       'inicio': 'Getting Started',
@@ -350,22 +336,12 @@ export const textos: Record<Idioma, Textos> = {
     },
     seletor: {
       aria: p => `Producto de la documentación: ${p}. Cambiar de producto.`,
-      titulo: 'Documentación del producto',
       selo: { beta: 'Beta', novo: 'Nuevo' },
     },
     produtos: {
-      'enspace': {
-        nome: 'ENSPACE',
-        descricao: 'La plataforma: workspaces, ítems, automatizaciones y equipos.',
-      },
-      'plugin-word': {
-        nome: 'Plugin de Word',
-        descricao: 'Escribir documentos en Word con los datos de la plataforma.',
-      },
-      'beni-app': {
-        nome: 'Beni App',
-        descricao: 'El asistente de ENSPACE en el móvil y en la computadora.',
-      },
+      'enspace': { nome: 'ENSPACE' },
+      'plugin-word': { nome: 'Plugin de Word' },
+      'beni-app': { nome: 'Beni App' },
     },
     titulos: {
       'inicio': 'Primeros pasos',

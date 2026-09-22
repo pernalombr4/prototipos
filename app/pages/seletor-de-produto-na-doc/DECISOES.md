@@ -51,14 +51,19 @@ o nome no `aria-label` e no `title`, e **o nome por extenso vai para dentro do m
 hambúrguer**, em linha cheia, na primeira posição, acima de `Docs`. É a mesma peça, com o mesmo
 menu: ninguém perde o controle, e quem abre o menu lê o nome inteiro.
 
-### 3. Cada item do menu leva uma linha de descrição
+### 3. O menu tem uma linha por produto, sem descrição
 
-**Divergência consciente do Nuxt e do GitHub Docs, que não descrevem os itens.** Versão e plano
-se explicam sozinhos; nome de produto não. "Beni App" não diz a ninguém que é o assistente, e
-quem não sabe não escolhe. O Monday chegou à mesma conclusão nos cartões de produto.
+**Revertido na rodada 2.** A rodada 1 dava a cada item uma linha de descrição, divergindo de
+propósito do Nuxt e do GitHub Docs, com o argumento de que "Beni App" não se explica sozinho.
 
-Custo: o menu fica com 80 de altura por item em vez de 32. Com três produtos, cabe.
-**Se um dia passarem de seis, a descrição sai e vira painel**, no desenho do Atlassian.
+O argumento não se sustentou contra a segunda passada de pesquisa: **nenhuma das dez
+documentações descreve os itens**, nem o Supabase, que tem dez produtos na lista. E a descrição
+era a causa principal do peso visual: transformava um menu de 96px num painel de 336px de largura
+com três blocos de texto, que é o que fazia a peça parecer formulário em vez de badge.
+
+Quem precisa saber o que o produto é descobre na página de abertura dele, que abre com a
+descrição em uma linha logo abaixo do título. **Se um dia passarem de seis produtos**, o desenho
+a copiar é o painel do Atlassian, não a descrição de volta.
 
 ### 4. Trocar de produto tenta manter a página, e avisa quando não dá
 
@@ -111,13 +116,28 @@ Leitor de tela anuncia "marcado" no produto em uso, que é exatamente a pergunta
 responde. O tique fica à direita, longe do ícone do produto, como o ponto verde do GitHub Docs.
 O selo `Beta` fica colado ao nome, e não na direita, para não disputar coluna com o tique.
 
-### 9. O menu do seletor é sólido, e não de vidro como o de idioma
+### 9. A forma é badge, não campo de formulário
 
-O seletor de idioma do site usa fundo translúcido com `backdrop-blur`. Ali são três palavras
-curtas e funciona. Um menu com descrição de duas linhas sobre conteúdo em movimento fica ilegível,
-então este usa o fundo sólido padrão do Nuxt UI. O **botão fechado**, esse sim, segue o desenho
-do de idioma: mesma altura `h-7.25`, mesmo canto `0.313rem`, mesma seta em ciano no claro e
-fúcsia no escuro.
+**Refeito na rodada 2.** A rodada 1 copiou a forma do seletor de idioma do site: altura
+`h-7.25`, borda de 1px em preto puro, canto de `0.313rem`, rótulo em CAIXA ALTA e seta em ciano.
+O resultado pesava mais que o logo ao lado e lia como campo de formulário.
+
+A forma agora é a das sete documentações limpas da segunda passada (`PESQUISA.md`), e a mais
+perto é a **nossa própria doc do SDK**:
+
+| | Como ficou |
+|---|---|
+| Forma | Pílula (`rounded-full`), 24px de altura |
+| Cor | Uma família só: `bg-primary/10`, anel `ring-primary/20`, texto e seta em primária |
+| Contraste | `text-primary-700 dark:text-primary-300`, a correção da casa em `app/tema-contraste.ts`. O `text-primary` cru dá 2,96:1 sobre o próprio fundo a 10% e reprova |
+| Texto | Caixa normal, peso médio, 12px |
+| Seta | 12px, da cor do texto, a 70% de opacidade |
+| Menu | Largura do conteúdo (mínimo 208px), linhas de 32px, ícone monocromático, item em uso em primária com tique em primária |
+| Selo Beta | Anotação em 10px apagada, como o "(EOL)" do Nuxt. Não é etiqueta com fundo |
+
+O menu continua **sólido**, e não de vidro como o de idioma: lista sobre conteúdo em movimento
+precisa de fundo opaco. O que mudou é que agora a pílula fechada **não** imita mais o seletor de
+idioma, e isso é o certo: um é badge de contexto, o outro é campo de escolha.
 
 ### 10. O que muda de nome com o idioma, e o que não muda
 
@@ -165,10 +185,11 @@ O que a própria revisão achou, incluindo o que eu escolhi não corrigir:
    Isso é proposital (são da mesma família), mas em telas entre 1024 e 1280 os dois ficam
    visualmente perto. No estreito o seletor de idioma some antes (`sm:flex`) e o de produto fica,
    que é a prioridade certa.
-3. **Alvo de toque:** o botão tem 29px de altura (`h-7.25`). Passa o mínimo de 24px da WCAG 2.2
-   (2.5.8, nível AA) e **não** chega aos 44px do critério AAA. É a altura dos outros controles da
-   barra, e mudar só este quebraria o alinhamento. Achado da casca, não correção de passagem
-   (regra 37): se for para crescer, crescem os quatro juntos, no `en-docs`.
+3. **Alvo de toque:** a pílula tem 24px de altura, exatamente o mínimo da WCAG 2.2 (2.5.8, nível
+   AA), e longe dos 44px do critério AAA. A rodada 2 a deixou **menor** que a rodada 1, que tinha
+   29px: é a escolha de forma, e ela troca folga de toque por leveza visual. No celular o alvo
+   cresce, porque ali a pílula vira linha de 32px dentro do menu. Se ela achar o alvo pequeno
+   demais no desktop, o conserto é subir para 28px sem mexer em mais nada.
 4. **Um aviso que aparece sozinho.** A faixa de página sem equivalente surge sem a pessoa pedir.
    Está com `role="status"`, então o leitor de tela anuncia sem roubar o foco, e o foco continua
    no botão do seletor, que foi onde a pessoa clicou.
@@ -181,17 +202,22 @@ Pela skill `design:accessibility-review`, contra a WCAG 2.1 AA. **Nenhum achado 
 
 ### Contraste, medido
 
+Medido de novo na rodada 2, já com a pílula.
+
 | Elemento | Frente | Fundo | Razão | Exige | Passa |
 |---|---|---|---|---|---|
-| Nome do produto, tema claro | `#1E293B` | branco do vidro | 14,6:1 | 4,5:1 | ✅ |
-| Nome do produto, tema escuro | `#D9D9D9` | `#0E0916` | 13,9:1 | 4,5:1 | ✅ |
-| Chevron, tema claro | ciano `#0D58CE` | branco do vidro | 6,2:1 | 3:1 | ✅ |
-| Chevron, tema escuro | fúcsia `#FF04D1` | `#0E0916` | 5,8:1 | 3:1 | ✅ |
-| Descrição do item, claro | `text-muted` `#736F8F` | branco | 4,8:1 | 4,5:1 | ✅ |
-| Descrição do item, escuro | `text-muted` `#9591AC` | `#0E0916` | 6,5:1 | 4,5:1 | ✅ |
+| Pílula, tema claro | `primary-700` `#990080` | `primary/10` sobre branco | 6,7:1 | 4,5:1 | ✅ |
+| Pílula, tema escuro | `primary-300` `#F49DD6` | `primary/15` sobre `#0E0916` | 8,8:1 | 4,5:1 | ✅ |
+| Ícone e seta da pílula | herdam a cor do texto | idem | 6,7:1 e 8,8:1 | 3:1 | ✅ |
+| Item em uso no menu, claro | `primary-700` | branco | 6,7:1 | 4,5:1 | ✅ |
+| Item em uso no menu, escuro | `primary-300` | `#0E0916` | 8,8:1 | 4,5:1 | ✅ |
+| Selo "Beta" | `text-dimmed` | fundo do menu | 4,6:1 no claro | 4,5:1 | ✅ |
 
-A descrição no tema claro é a mais apertada da tela: 4,8:1 contra 4,5:1 exigidos, em 12px.
-Passa, mas é onde uma mudança de cor do tema quebraria primeiro.
+**A armadilha, e ela pegou duas vezes:** `text-primary` cru é o fúcsia 500 `#FF04D1`, e sobre
+branco dá **2,96:1**. Reprova como texto e reprova até como ícone. A cor certa em qualquer
+superfície clara é `text-primary-700`, e no escuro `text-primary-300`, que é exatamente o que o
+`app/tema-contraste.ts` deste repositório já faz com selo, aviso e botão. Quem copiar esta peça
+para o `en-docs` precisa levar essa dupla junto.
 
 ### Teclado e leitor de tela
 
@@ -232,3 +258,46 @@ mostra a barra exatamente como ela está no ar.
   três produtos. Guardado para quando passarem de seis.
 - **Desabilitar `DEV` nos produtos sem API.** Descartado: tira endereço de quem já sabia o
   caminho (regra 20). O `DEV` continua global.
+
+### Rodada 2 — 22/09/2026
+
+**O que ela pediu, literal:**
+
+> ta grosseir0o visualmente. feio. uma outra doc nossa tem um modelo mais ou menos como esse do
+> print e ja é bbem melhor . o badge que o nuxt ui docs usa tambem é bem mais clean. ta horrivel
+> como ta hoje. busque referencias de mercado de documentaçoes de software e veja como essa chave
+> ou pra versao ou pra produto é feita esteticamente, visando melhoria de ui/ux, e ai corrija a
+> sua proposta
+
+Com o print da doc do SDK (`localhost:3000/vue/start`): a pílula "Vue" colada ao "SDK" e o menu
+de `Schemas`, `Core`, `Vue`, `UI`, `Beni Avatar`.
+
+**O que mudou:** só a forma. O comportamento da rodada 1 continua igual, inclusive o aviso de
+página sem equivalente, que é o miolo da proposta.
+
+| | Rodada 1 | Rodada 2 |
+|---|---|---|
+| Forma | Caixa de 29px, canto de 5px | Pílula de 24px |
+| Borda | 1px preto puro | Anel de 1px em `primary/20` |
+| Fundo | `white/25` | `primary/10` |
+| Texto | CAIXA ALTA, semibold, 13px, cinza escuro | Caixa normal, medium, 12px, `primary-700` |
+| Seta | Ciano de 16px, terceira cor | 12px, da cor do texto, a 70% |
+| Menu | 336px de largura, duas linhas por item, título no topo | Largura do conteúdo, uma linha por item, sem título |
+| Selo Beta | Etiqueta com fundo e anel | Anotação de 10px apagada |
+| Item em uso | Tique neutro | Nome e tique em primária |
+
+**De onde veio cada escolha:** a segunda metade do `PESQUISA.md`, com dez documentações olhadas
+só pela forma. A referência mais próxima é a nossa, a doc do SDK; a fórmula de cor é a do Nuxt UI;
+o painel curto com ícone monocromático é o do Supabase.
+
+**O que foi descartado nesta rodada:**
+
+- **Pílula cinza, à la Tailwind.** Fica limpa demais: com três produtos que a pessoa talvez não
+  conheça, o controle precisa de um pouco de cor para ser achado.
+- **Repetir o produto como cabeçalho do menu lateral, à la Supabase.** Redundante quando a pílula
+  já está colada à marca. Eles precisam disso porque o controle deles vive escondido numa barra
+  de menus.
+- **Caixa de largura cheia no topo do menu lateral, à la Sentry.** É o desenho para dezenas de
+  itens com busca. Com três, pesa mais que a árvore inteira.
+- **Tirar o ícone da pílula**, como fazem o Nuxt UI e o Tailwind. Mantido porque é o que sustenta
+  o estado só-ícone do celular, e porque a nossa doc do SDK também tem.

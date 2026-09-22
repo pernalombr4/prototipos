@@ -2,22 +2,30 @@
 /**
  * ✅ ESTA É A PROPOSTA. Todo o resto desta tela é casca copiada do docs.enspace.io.
  *
- * O seletor de produto da documentação, grudado na marca no alto da página,
- * no mesmo lugar onde o Nuxt põe a versão e o GitHub Docs põe o plano.
- * O produto escolhido é o contexto de tudo que vem abaixo: o menu lateral, a
- * página aberta e o escopo da busca.
+ * O seletor de produto da documentação, colado à marca, no mesmo lugar onde o
+ * Nuxt, o Nuxt UI, o Tailwind e a nossa própria doc do SDK põem o seu.
  *
- * Três decisões que valem explicação (o porquê está no DECISOES.md):
+ * ─── A gramática visual, que é o que mudou na rodada 2 ────────────────────
  *
- * 1. O nome do produto aparece SEMPRE, inclusive quando é o ENSPACE. Sem isso
- *    o controle só existe para quem já sabe que ele existe. A exceção é a
- *    barra do celular, que não tem largura: lá fica só o ícone, e o nome por
- *    extenso aparece nesta mesma peça dentro do menu do hambúrguer.
- * 2. Cada item leva uma linha de descrição. Versão ("v4", "v3") se entende
- *    sozinha; "Beni App" não. É a divergência consciente em relação ao Nuxt e
- *    ao GitHub Docs, que não descrevem os itens.
- * 3. Os itens são `checkbox` de propósito: o leitor de tela anuncia qual está
- *    marcado, que é a pergunta que o controle responde.
+ * A rodada 1 desenhou isto como um controle de formulário: 29px de altura,
+ * borda preta de 1px, rótulo em CAIXA ALTA e negrito, e a seta numa terceira
+ * cor. Ficava mais pesado que o logo ao lado. Varrendo dez documentações de
+ * software (`PESQUISA.md`), as limpas concordam em cinco coisas:
+ *
+ *   1. é PÍLULA, não caixa: cantos redondos de verdade, 22 a 24px de altura;
+ *   2. uma família de cor só. Fundo em 10% da cor, texto e seta na mesma cor;
+ *   3. sem borda dura. Anel de 1px na própria cor, ou nada;
+ *   4. caixa normal, peso médio, 12px. Nunca caixa alta;
+ *   5. seta de 12px, da cor do texto.
+ *
+ * O texto usa `text-primary-700 dark:text-primary-300` e não `text-primary`:
+ * é a correção de contraste da casa (`app/tema-contraste.ts`), porque o
+ * fúcsia 500 do ENSPACE sobre 10% dele mesmo dá 2,96:1 e reprova.
+ *
+ * O menu segue a mesma dieta: largura do conteúdo, uma linha por produto,
+ * ícone monocromático, e o produto em uso na cor da marca com o tique à
+ * direita. Sem descrição: nenhuma das dez referências descreve os itens, e a
+ * descrição era o que fazia o painel parecer formulário.
  */
 import type { Produto, ChaveDeProduto } from './mocks'
 import type { Textos } from './textos'
@@ -42,15 +50,14 @@ const atual = computed(() =>
 const nomeAtual = computed(() => props.t.produtos[atual.value.id].nome)
 
 const itens = computed(() => [
-  [{ type: 'label' as const, label: props.t.seletor.titulo }],
   props.produtos.map(p => ({
     type: 'checkbox' as const,
     slot: 'produto' as const,
     checked: p.id === produtoAtual.value,
     icon: p.icone,
     label: props.t.produtos[p.id].nome,
-    description: props.t.produtos[p.id].descricao,
     selo: p.selo,
+    atual: p.id === produtoAtual.value,
     onSelect: () => { produtoAtual.value = p.id },
   })),
 ])
@@ -60,16 +67,12 @@ const itens = computed(() => [
   <UDropdownMenu
     v-model:open="aberto"
     :items="itens"
-    :content="{ align: 'start', sideOffset: 10 }"
+    :content="{ align: 'start', sideOffset: 8 }"
     :ui="{
-      content: 'w-84 max-w-[calc(100vw-2rem)]',
-      item: 'items-start py-2',
-      itemLeadingIcon: 'size-4 mt-0.5',
-      itemWrapper: 'min-w-0',
-      itemLabel: 'font-semibold',
-      /* A descrição quebra em duas linhas: cortar a explicação é não explicar. */
-      itemDescription: 'text-xs leading-snug whitespace-normal',
-      itemTrailing: 'mt-0.5',
+      content: 'w-auto min-w-52 max-w-[calc(100vw-2rem)] p-1',
+      item: 'py-1.5 gap-2 text-sm',
+      itemLeadingIcon: 'size-4 text-dimmed',
+      itemTrailingIcon: 'size-4 text-primary-700 dark:text-primary-300',
     }"
   >
     <button
@@ -77,53 +80,55 @@ const itens = computed(() => [
       :aria-label="t.seletor.aria(nomeAtual)"
       :title="nomeAtual"
       class="
-        group flex h-7.25 cursor-pointer items-center gap-1.5 rounded-[0.313rem]
-        border border-(--color-text-inverse-dark) bg-white/25 px-2
-        text-(--color-brand-dark) transition-colors hover:bg-white/45
+        group flex h-6 cursor-pointer items-center gap-1.5 rounded-full bg-primary/10 px-2
+        text-xs font-medium text-primary-700 ring-1 ring-inset ring-primary/20
+        transition-colors hover:bg-primary/20
         focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
-        dark:border-(--color-text-inverse) dark:bg-white/8 dark:text-(--color-brand-light)
-        dark:hover:bg-white/15
+        dark:bg-primary/15 dark:text-primary-300 dark:ring-primary/25 dark:hover:bg-primary/25
       "
-      :class="larguraCheia ? 'w-full' : 'max-w-[11.5rem]'"
+      :class="larguraCheia ? 'h-8 w-full rounded-lg px-3 text-sm' : ''"
     >
-      <UIcon :name="atual.icone" class="size-3.5 shrink-0" />
+      <UIcon :name="atual.icone" class="size-3.5 shrink-0" :class="larguraCheia ? 'size-4' : ''" />
       <!--
         Abaixo de `sm` a barra não tem largura para o nome: sobram uns 100px
-        entre o logo e a chave de tema, e o nome sairia cortado em duas letras.
-        Aí o botão fica só com o ícone, e o nome por extenso vai para a mesma
-        peça dentro do menu do celular, onde existe linha inteira.
+        entre o logo e a chave de tema. Aí a pílula fica só com o ícone, e o
+        nome por extenso aparece nesta mesma peça dentro do menu do celular.
       -->
       <span
-        class="truncate text-[0.8125rem] font-semibold uppercase leading-none tracking-wide"
+        class="truncate"
         :class="larguraCheia ? '' : 'hidden sm:inline'"
       >
         {{ nomeAtual }}
       </span>
       <UIcon
         name="i-lucide-chevron-down"
-        class="
-          size-4 shrink-0 text-cyan-500 transition-transform duration-200
-          group-data-[state=open]:rotate-180 dark:text-fuchsia-500
-        "
-        :class="larguraCheia ? 'ml-auto' : ''"
+        class="size-3 shrink-0 opacity-70 transition-transform duration-200 group-data-[state=open]:rotate-180"
+        :class="larguraCheia ? 'ml-auto size-4' : ''"
       />
     </button>
 
     <!--
-      O selo vive colado ao nome, e não na coluna da direita, porque ali já
-      mora a marca do item em uso. Dois sinais na mesma coluna competem.
+      O produto em uso é marcado pela cor, como no Nuxt UI e na doc do SDK.
+      O tique à direita repete o sinal para quem não distingue a cor.
     -->
+    <template #produto-leading="{ item }">
+      <UIcon :name="item.icon" class="size-4 shrink-0" :class="item.atual ? 'text-primary-700 dark:text-primary-300' : 'text-dimmed'" />
+    </template>
+
     <template #produto-label="{ item }">
-      <span class="flex items-center gap-1.5">
+      <span class="flex items-center gap-1.5" :class="item.atual ? 'font-medium text-primary-700 dark:text-primary-300' : ''">
         {{ item.label }}
-        <UBadge
+        <!--
+          O selo é anotação, não etiqueta: texto pequeno e apagado, como o
+          "(EOL)" do Nuxt. Um selo com fundo e anel ao lado de um nome de
+          três palavras vira o item mais pesado do menu.
+        -->
+        <span
           v-if="item.selo"
-          :label="t.seletor.selo[item.selo]"
-          color="primary"
-          variant="subtle"
-          size="sm"
-          class="font-semibold uppercase"
-        />
+          class="text-[0.625rem] font-medium uppercase tracking-wider text-dimmed"
+        >
+          {{ t.seletor.selo[item.selo] }}
+        </span>
       </span>
     </template>
   </UDropdownMenu>
