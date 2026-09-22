@@ -299,5 +299,25 @@ o painel curto com ícone monocromático é o do Supabase.
   de menus.
 - **Caixa de largura cheia no topo do menu lateral, à la Sentry.** É o desenho para dezenas de
   itens com busca. Com três, pesa mais que a árvore inteira.
-- **Tirar o ícone da pílula**, como fazem o Nuxt UI e o Tailwind. Mantido porque é o que sustenta
-  o estado só-ícone do celular, e porque a nossa doc do SDK também tem.
+- **Tirar o ícone da pílula**, como fazem o Nuxt UI e o Tailwind. Mantido nesta rodada porque
+  sustentava o estado só-ícone do celular. **Revertido na rodada 3**, a pedido dela.
+
+### Rodada 3 — 22/09/2026
+
+**O que ela pediu, literal:** *"nao precisa de icone no dropdown do topo"*.
+
+**O que mudou:** a pílula ficou com o nome e a seta, e mais nada. É o desenho do Nuxt UI e do
+Tailwind, que também não têm ícone no controle fechado.
+
+**O ícone continua no menu**, onde ele faz o trabalho de diferenciar um produto do outro. Se for
+para sair de lá também, é uma linha.
+
+**A consequência, e ela foi medida:** o ícone era o que segurava o celular. Sem ele, abaixo de
+`sm` a pílula mostra o nome e corta o que não cabe: a 380px, `Plugin do Word` vira
+`Plugin do …`, com 12px de folga até a chave de tema e sem encostar nela. O nome por extenso
+continua em três lugares: no `title`, no `aria-label` e na mesma peça em linha cheia dentro do
+menu do hambúrguer. A pílula encolhe por `min-w-0` no flex, não por medida fixa, então o corte
+acontece só quando falta espaço de verdade.
+
+**Se o corte incomodar**, o conserto é voltar o ícone **só** abaixo de `sm`: some o nome, fica a
+marca do produto, e nada corta. Ficou fora porque contraria o pedido ao pé da letra.

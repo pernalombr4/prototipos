@@ -16,7 +16,10 @@
  *   2. uma família de cor só. Fundo em 10% da cor, texto e seta na mesma cor;
  *   3. sem borda dura. Anel de 1px na própria cor, ou nada;
  *   4. caixa normal, peso médio, 12px. Nunca caixa alta;
- *   5. seta de 12px, da cor do texto.
+ *   5. seta de 12px, da cor do texto;
+ *   6. nada de ícone na pílula: só o nome e a seta (rodada 3). O Nuxt UI e o
+ *      Tailwind já são assim. O ícone continua no menu, onde ele diferencia
+ *      um produto do outro, que é o trabalho que ele faz de verdade.
  *
  * O texto usa `text-primary-700 dark:text-primary-300` e não `text-primary`:
  * é a correção de contraste da casa (`app/tema-contraste.ts`), porque o
@@ -86,18 +89,15 @@ const itens = computed(() => [
         focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
         dark:bg-primary/15 dark:text-primary-300 dark:ring-primary/25 dark:hover:bg-primary/25
       "
-      :class="larguraCheia ? 'h-8 w-full rounded-lg px-3 text-sm' : ''"
+      :class="larguraCheia ? 'h-8 w-full rounded-lg px-3 text-sm' : 'min-w-0 max-w-44'"
     >
-      <UIcon :name="atual.icone" class="size-3.5 shrink-0" :class="larguraCheia ? 'size-4' : ''" />
       <!--
-        Abaixo de `sm` a barra não tem largura para o nome: sobram uns 100px
-        entre o logo e a chave de tema. Aí a pílula fica só com o ícone, e o
-        nome por extenso aparece nesta mesma peça dentro do menu do celular.
+        Sem ícone: o Nuxt UI e o Tailwind também não têm, e a pílula fica com
+        uma coisa só para ler. Abaixo de `sm` sobram uns 100px entre o logo e
+        a chave de tema, então o nome corta. O nome por extenso continua no
+        `title`, no `aria-label` e nesta mesma peça dentro do menu do celular.
       -->
-      <span
-        class="truncate"
-        :class="larguraCheia ? '' : 'hidden sm:inline'"
-      >
+      <span class="truncate">
         {{ nomeAtual }}
       </span>
       <UIcon
