@@ -66,6 +66,31 @@ const itensVisiveis = computed(() => (estado.value === 'vazio' ? [] : itens.valu
 
 const modalAberto = ref(false)
 const itemAberto = ref<Item | null>(null)
+/** A tela dedicada do item, a que o "Editar" do menu abre no develop. */
+const telaDoItem = ref<Item | null>(null)
+
+/* ------------------------------------------------------------------ *
+ * ANDAIME: as três facetas. Um botão para cada, como o de estados.    *
+ *                                                                     *
+ * Elas não são navegação do produto: são um atalho para pôr na tela o  *
+ * formato que está sendo discutido. No ENSPACE se chega em cada um     *
+ * pelos gestos de sempre (clicar na célula, "Novo registro", duplo     *
+ * clique na linha), e esses gestos continuam funcionando.             *
+ * ------------------------------------------------------------------ */
+type Faceta = 'tabela' | 'formulario' | 'naked'
+const faceta = ref<Faceta>('tabela')
+const facetasPossiveis: Faceta[] = ['tabela', 'formulario', 'naked']
+
+function irPara(f: Faceta) {
+  faceta.value = f
+  telaDoItem.value = null
+  modalAberto.value = f === 'formulario'
+  itemAberto.value = f === 'naked' ? (itens.value[0] ?? null) : null
+}
+
+/* Fechar o modal ou o painel pelo X volta a faceta para a tabela. */
+watch(modalAberto, (v) => { if (!v && faceta.value === 'formulario') faceta.value = 'tabela' })
+watch(itemAberto, (v) => { if (!v && faceta.value === 'naked') faceta.value = 'tabela' })
 
 const fichaAberta = ref(false)
 const tipoNaFicha = ref<TipoDeCampo | null>(null)
@@ -92,6 +117,26 @@ function inspecionar(tipo: string, item?: Item) {
 
 function abrirItem(item: Item) {
   itemAberto.value = item
+  telaDoItem.value = null
+  faceta.value = 'naked'
+}
+
+/** O "Editar" do menu de contexto, que no develop vai para a tela do item. */
+function abrirTelaDoItem(item: Item) {
+  telaDoItem.value = item
+  itemAberto.value = null
+  faceta.value = 'naked'
+}
+
+/** Editar na célula mexe no item em memória, e a tabela reflete na hora. */
+function editarValor(item: Item, refId: string, valor: unknown) {
+  itens.value = itens.value.map(i =>
+    i.id === item.id
+      ? { ...i, data: { ...(i.data as Record<string, unknown>), [refId]: valor }, updated_at: new Date() }
+      : i,
+  )
+  if (itemAberto.value?.id === item.id) itemAberto.value = itens.value.find(i => i.id === item.id) ?? null
+  if (telaDoItem.value?.id === item.id) telaDoItem.value = itens.value.find(i => i.id === item.id) ?? null
 }
 
 function navegar(passo: number) {
@@ -220,6 +265,22 @@ onMounted(() => {
       </span>
 
       <span class="flex items-center gap-2">
+        <span class="text-xs font-semibold uppercase tracking-wider text-toned">{{ t.faceta }}</span>
+        <div class="flex rounded-md border border-default p-0.5">
+          <UButton
+            v-for="f in facetasPossiveis"
+            :key="f"
+            :label="t.facetas[f]"
+            :icon="f === 'tabela' ? 'i-lucide-table-2' : f === 'formulario' ? 'i-lucide-square-pen' : 'i-lucide-panel-right'"
+            size="xs"
+            :color="faceta === f ? 'primary' : 'neutral'"
+            :variant="faceta === f ? 'soft' : 'ghost'"
+            @click="irPara(f)"
+          />
+        </div>
+      </span>
+
+      <span class="flex items-center gap-2">
         <span class="text-xs font-semibold uppercase tracking-wider text-toned">{{ t.estado }}</span>
         <div class="flex rounded-md border border-default p-0.5">
           <UButton
@@ -248,7 +309,7 @@ onMounted(() => {
 
       <span class="ml-auto hidden items-center gap-1.5 text-xs text-muted xl:flex">
         <UIcon name="i-lucide-mouse-pointer-click" class="size-3.5" />
-        {{ t.dicaDeUso }}
+        {{ t.facetaDica[faceta] }}
       </span>
     </div>
 
@@ -278,7 +339,43 @@ onMounted(() => {
           />
         </div>
 
-        <div class="flex min-h-0 flex-1">
+        <!--
+          A tela dedicada do item, que o "Editar" do menu abre. É a MESMA
+          estrutura da visão rápida, em página inteira: cru na coluna da
+          esquerda, formulário na parte de dentro. Medido no develop em
+          22/09/2026, em /types/<slug>/<REFERENCE>.
+        -->
+        <div v-if="telaDoItem" class="flex min-h-0 flex-1 flex-col">
+          <div class="flex shrink-0 items-center gap-2 border-b border-default px-3 py-1.5">
+            <UButton
+              icon="i-lucide-arrow-left"
+              :label="t.voltarParaLista"
+              color="neutral"
+              variant="ghost"
+              size="sm"
+              @click="telaDoItem = null; faceta = 'tabela'"
+            />
+            <UBadge color="neutral" variant="subtle" size="sm">{{ t.telaDedicada }}</UBadge>
+          </div>
+          <PainelDoItem
+            :item="telaDoItem"
+            :campos="campos"
+            :categoria="categoria.nome"
+            :t="t"
+            :idioma="idioma"
+            :indice="itens.findIndex(i => i.id === telaDoItem?.id) + 1"
+            :total="itens.length"
+            :campo-selecionado="tipoNaFicha"
+            em-pagina-inteira
+            @fechar="telaDoItem = null; faceta = 'tabela'"
+            @navegar="(p: number) => { const i = itens.findIndex(x => x.id === telaDoItem?.id) + p; if (i >= 0 && i < itens.length) telaDoItem = itens[i]! }"
+            @inspecionar="inspecionar"
+            @editar-valor="(refId: string, valor: unknown) => telaDoItem && editarValor(telaDoItem, refId, valor)"
+            @salvar="(d: Record<string, unknown>) => { if (telaDoItem) { itens = itens.map(i => i.id === telaDoItem?.id ? { ...i, data: d, updated_at: new Date() } : i); toast.add({ title: t.salvo, icon: 'i-lucide-check', color: 'success' }) } }"
+          />
+        </div>
+
+        <div v-else class="flex min-h-0 flex-1">
           <div class="flex min-w-0 flex-1 flex-col">
             <!-- erro e sem permissão substituem a tabela inteira -->
             <UEmpty
@@ -319,7 +416,9 @@ onMounted(() => {
               :campo-selecionado="tipoNaFicha"
               @inspecionar="inspecionar"
               @abrir-item="abrirItem"
-              @novo-item="modalAberto = true"
+              @abrir-tela-do-item="abrirTelaDoItem"
+              @editar-valor="editarValor"
+              @novo-item="irPara('formulario')"
             />
           </div>
 
@@ -336,6 +435,7 @@ onMounted(() => {
             @fechar="itemAberto = null"
             @navegar="navegar"
             @inspecionar="inspecionar"
+            @editar-valor="(refId: string, valor: unknown) => itemAberto && editarValor(itemAberto, refId, valor)"
             @salvar="salvarItem"
           />
         </div>

@@ -23,9 +23,37 @@ const props = defineProps<{
   idioma: string
   /** No modal de criação alguns tipos ainda não existem. */
   naCriacao?: boolean
+  /** Na célula o rótulo já é o cabeçalho da coluna, então ele sai. */
+  semRotulo?: boolean
+  /** Na célula o controle recebe o foco sozinho, para digitar direto. */
+  autofoco?: boolean
 }>()
 
-const emit = defineEmits<{ 'update:modelValue': [unknown], 'inspecionar': [] }>()
+const emit = defineEmits<{
+  'update:modelValue': [unknown]
+  'inspecionar': []
+  /** O controle pediu para fechar: Enter, Tab ou clique fora. */
+  'sair': []
+}>()
+
+const raizDoCampo = ref<HTMLElement | null>(null)
+
+/**
+ * Foco automático quando o campo nasce dentro de uma célula: quem clicou na
+ * célula quer digitar, não quer clicar de novo no controle.
+ */
+onMounted(() => {
+  if (!props.autofoco) return
+  nextTick(() => {
+    const alvo = raizDoCampo.value?.querySelector<HTMLElement>('input, textarea, [tabindex]')
+    alvo?.focus()
+  })
+})
+
+/** Clique fora e Enter fecham a edição na célula. */
+function aoTeclar(e: KeyboardEvent) {
+  if (e.key === 'Enter' && !(e.target as HTMLElement)?.matches('textarea')) emit('sair')
+}
 
 const valor = computed({
   get: () => props.modelValue,
@@ -157,8 +185,9 @@ const opcoesDeRelacao = computed(() =>
     O rótulo é um botão: clicar nele abre a ficha do campo. O controle fica
     livre para ser controle, e quem quer entender a regra tem um alvo claro.
   -->
-  <div class="min-w-0">
+  <div ref="raizDoCampo" class="min-w-0" @keydown="aoTeclar">
     <button
+      v-if="!semRotulo"
       type="button"
       class="group/rotulo mb-1 flex items-center gap-1.5 rounded text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       @click="emit('inspecionar')"
@@ -564,6 +593,6 @@ const opcoesDeRelacao = computed(() =>
       <span>{{ t.campos[campo.tipo].formulario }}</span>
     </div>
 
-    <p class="mt-1 text-xs text-muted">{{ t.campos[campo.tipo].descricao }}</p>
+    <p v-if="!semRotulo" class="mt-1 text-xs text-muted">{{ t.campos[campo.tipo].descricao }}</p>
   </div>
 </template>

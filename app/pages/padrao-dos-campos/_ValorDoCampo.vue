@@ -40,7 +40,10 @@ const props = defineProps<{
   idioma: string
 }>()
 
-const emit = defineEmits<{ inspecionar: [] }>()
+const emit = defineEmits<{
+  /** Clicar no valor entra em edição, que é o que a demanda pediu. */
+  editar: []
+}>()
 
 const vazio = computed(() => estaVazio(props.valor))
 const naCelula = computed(() => props.formato === 'celula')
@@ -124,13 +127,16 @@ async function copiar(texto: string) {
   -->
   <button
     type="button"
-    class="group/valor -mx-1 flex w-full min-w-0 rounded px-1 text-left transition-colors hover:bg-elevated focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
+    class="group/valor -mx-1 flex w-full min-w-0 rounded px-1 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
     :class="[
       naCelula ? 'h-6 items-center' : 'items-start py-0.5',
       campo.alinhamento === 'fim' && naCelula ? 'justify-end' : '',
+      /* O hover promete edição, e a edição acontece. Regra 24. Campo que o
+         sistema preenche não ganha hover, porque ele não abre nada. */
+      campo.somenteLeitura ? 'cursor-default' : 'cursor-text hover:bg-elevated hover:ring-1 hover:ring-default',
     ]"
     :aria-label="textoCompleto || t.vazio"
-    @click="emit('inspecionar')"
+    @click="emit('editar')"
   >
     <!-- ───────────────────────────── vazio ───────────────────────────── -->
     <span v-if="vazio" class="text-sm text-dimmed">

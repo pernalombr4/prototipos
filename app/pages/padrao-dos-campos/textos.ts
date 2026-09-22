@@ -140,6 +140,17 @@ export interface Textos {
   larguraMinima: string
   nenhumaChave: string
 
+  /* ------------------------------- as facetas ---------------------------- */
+  faceta: string
+  facetas: Record<string, string>
+  facetaDica: Record<string, string>
+  telaDedicada: string
+  visaoRapida: string
+  voltarParaLista: string
+  editando: string
+  confirmar: string
+  descartar: string
+
   /* ------------------------------- o andaime ----------------------------- */
   andaimeTitulo: string
   estado: string
@@ -314,6 +325,23 @@ const ptBR: Textos = {
   larguraMinima: 'Largura mínima da coluna',
   nenhumaChave: 'Nenhuma',
 
+  faceta: 'Faceta',
+  facetas: {
+    tabela: 'Tabela',
+    formulario: 'Formulário',
+    naked: 'Cru',
+  },
+  facetaDica: {
+    tabela: 'Clique numa célula para editar ali mesmo. Clique no nome da coluna para abrir a ficha do tipo.',
+    formulario: 'O formulário de criação, com um campo de cada tipo. O rótulo abre a ficha.',
+    naked: 'A visão rápida do item: cru na coluna da esquerda, formulário na parte de dentro. Clique num valor para editar.',
+  },
+  telaDedicada: 'Tela do item',
+  visaoRapida: 'Visão rápida',
+  voltarParaLista: 'Voltar para a lista',
+  editando: 'Editando',
+  confirmar: 'Confirmar',
+  descartar: 'Descartar',
   andaimeTitulo: 'Andaime do protótipo, não é produto',
   estado: 'Estado',
   estados: {
@@ -739,6 +767,23 @@ const en: Textos = {
   larguraMinima: 'Minimum column width',
   nenhumaChave: 'None',
 
+  faceta: 'Facet',
+  facetas: {
+    tabela: 'Table',
+    formulario: 'Form',
+    naked: 'Naked',
+  },
+  facetaDica: {
+    tabela: 'Click a cell to edit it in place. Click a column name to open the type sheet.',
+    formulario: 'The creation form, with one field of each type. The label opens the sheet.',
+    naked: 'The item quick view: naked on the left column, form inside. Click a value to edit it.',
+  },
+  telaDedicada: 'Item page',
+  visaoRapida: 'Quick view',
+  voltarParaLista: 'Back to the list',
+  editando: 'Editing',
+  confirmar: 'Confirm',
+  descartar: 'Discard',
   andaimeTitulo: 'Prototype scaffolding, not product',
   estado: 'State',
   estados: {
@@ -1164,6 +1209,23 @@ const es: Textos = {
   larguraMinima: 'Ancho mínimo de la columna',
   nenhumaChave: 'Ninguna',
 
+  faceta: 'Faceta',
+  facetas: {
+    tabela: 'Tabla',
+    formulario: 'Formulario',
+    naked: 'Crudo',
+  },
+  facetaDica: {
+    tabela: 'Haz clic en una celda para editarla ahí mismo. Haz clic en el nombre de la columna para abrir la ficha del tipo.',
+    formulario: 'El formulario de creación, con un campo de cada tipo. La etiqueta abre la ficha.',
+    naked: 'La vista rápida del elemento: crudo en la columna izquierda, formulario dentro. Haz clic en un valor para editarlo.',
+  },
+  telaDedicada: 'Pantalla del elemento',
+  visaoRapida: 'Vista rápida',
+  voltarParaLista: 'Volver a la lista',
+  editando: 'Editando',
+  confirmar: 'Confirmar',
+  descartar: 'Descartar',
   andaimeTitulo: 'Andamio del prototipo, no es producto',
   estado: 'Estado',
   estados: {

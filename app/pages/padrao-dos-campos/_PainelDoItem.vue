@@ -40,14 +40,25 @@ const props = defineProps<{
   indice: number
   total: number
   campoSelecionado?: string | null
+  /** A tela dedicada do item usa a mesma peça, em página inteira. */
+  emPaginaInteira?: boolean
 }>()
 
 const emit = defineEmits<{
   fechar: []
   navegar: [passo: number]
   inspecionar: [tipo: string]
+  /** Editar no formato cru grava direto, sem passar pelo Salvar. */
+  editarValor: [refId: string, valor: unknown]
   salvar: [dados: Record<string, unknown>]
 }>()
+
+/**
+ * Qual linha do resumo está em edição. No formato cru o valor vira controle no
+ * lugar, sem sair da coluna: é a "edição fluida" que o documento do time de
+ * produtos descreve, e é o que o Twenty faz no painel do registro.
+ */
+const cruEmEdicao = ref<string | null>(null)
 
 const resumoAberto = ref(true)
 const aba = ref('visaoGeral')
@@ -119,15 +130,19 @@ const metadados = computed(() => {
 <template>
   <aside
     v-if="item"
-    class="relative flex h-full shrink-0 flex-col border-l border-default bg-default"
-    :class="resumoAberto ? 'w-[46rem]' : 'w-[30rem]'"
+    class="relative flex h-full flex-col bg-default"
+    :class="[
+      emPaginaInteira ? 'w-full' : 'shrink-0 border-l border-default',
+      emPaginaInteira ? '' : (resumoAberto ? 'w-[46rem]' : 'w-[30rem]'),
+    ]"
     :aria-label="t.visaoGeral"
   >
     <div class="flex min-h-0 flex-1">
       <!-- ══════════════════ COLUNA 1: o formato CRU ══════════════════ -->
       <div
         v-if="resumoAberto"
-        class="flex w-64 shrink-0 flex-col overflow-y-auto border-r border-default"
+        class="flex shrink-0 flex-col overflow-y-auto border-r border-default"
+        :class="emPaginaInteira ? 'w-72' : 'w-64'"
       >
         <div class="flex items-start gap-2 p-3">
           <span class="flex size-8 shrink-0 items-center justify-center rounded-md border border-default text-muted">
@@ -179,20 +194,40 @@ const metadados = computed(() => {
             class="group/linha flex gap-2 rounded-md px-1 py-1 transition-colors hover:bg-elevated/60"
             :class="campoSelecionado === campo.tipo ? 'bg-primary/5 ring-1 ring-primary/30' : ''"
           >
-            <UTooltip :text="t.campos[campo.tipo].rotulo" :delay-duration="400">
-              <UIcon :name="campo.icone" class="mt-1 size-3.5 shrink-0 text-dimmed" />
+            <UTooltip :text="t.fichaTitulo" :delay-duration="400">
+              <button
+                type="button"
+                class="mt-1 shrink-0 rounded focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
+                :aria-label="t.campos[campo.tipo].rotulo"
+                @click="emit('inspecionar', campo.tipo)"
+              >
+                <UIcon :name="campo.icone" class="size-3.5 text-dimmed transition-colors hover:text-primary" />
+              </button>
             </UTooltip>
             <div class="min-w-0 flex-1">
               <p class="truncate text-[10px] uppercase tracking-wide text-dimmed">
                 {{ t.campos[campo.tipo].rotulo }}
               </p>
+              <!-- em edição: o mesmo controle do formulário, sem rótulo -->
+              <EntradaDoCampo
+                v-if="cruEmEdicao === campo.refId"
+                :campo="campo"
+                :model-value="rascunho[campo.refId]"
+                :t="t"
+                :idioma="idioma"
+                sem-rotulo
+                autofoco
+                @update:model-value="(v: unknown) => { rascunho[campo.refId] = v; emit('editarValor', campo.refId, v) }"
+                @sair="cruEmEdicao = null"
+              />
               <ValorDoCampo
+                v-else
                 :campo="campo"
                 :valor="rascunho[campo.refId]"
                 formato="cru"
                 :t="t"
                 :idioma="idioma"
-                @inspecionar="emit('inspecionar', campo.tipo)"
+                @editar="cruEmEdicao = campo.somenteLeitura ? null : campo.refId"
               />
             </div>
           </div>

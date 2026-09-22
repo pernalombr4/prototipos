@@ -125,6 +125,14 @@ export interface Campo {
   larguraCheiaNoFormulario?: boolean
   /** O tipo não cabe na coluna 1 da sidebar e por isso fica só na coluna 2. */
   foraDaColunaDeResumo?: boolean
+  /**
+   * A edição na célula abre em camada flutuante em vez de acontecer dentro da
+   * linha. Vale para o que não cabe na altura de uma linha: texto longo,
+   * bloco de subcampos, lista de caixas, anexo, repetidor.
+   */
+  edicaoEmPopover?: boolean
+  /** O valor não se edita: o sistema é que preenche. */
+  somenteLeitura?: boolean
   backend: ContratoDeBackend
 }
 
@@ -159,6 +167,7 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 280,
     larguraCheiaNoFormulario: true,
+    edicaoEmPopover: true,
     backend: {
       entrada: '"Trocar as luminárias do 3º andar…"',
       saida: '"Trocar as luminárias do 3º andar…"',
@@ -176,6 +185,7 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 280,
     larguraCheiaNoFormulario: true,
+    edicaoEmPopover: true,
     backend: {
       entrada: '"<p>Laudo com <strong>ressalva</strong>.</p>"',
       saida: '"<p>Laudo com <strong>ressalva</strong>.</p>"',
@@ -194,6 +204,7 @@ export const campos: Campo[] = [
     largura: 240,
     larguraCheiaNoFormulario: true,
     foraDaColunaDeResumo: true,
+    edicaoEmPopover: true,
     backend: {
       entrada: '"Cliente pediu retorno na sexta."',
       saida: '"Cliente pediu retorno na sexta."',
@@ -242,6 +253,7 @@ export const campos: Campo[] = [
     icone: 'i-lucide-braces',
     alinhamento: 'inicio',
     largura: 180,
+    somenteLeitura: true,
     backend: {
       entrada: 'o campo não recebe digitação. O valor vem da expressão',
       saida: '"OS-2026-0481"',
@@ -362,6 +374,7 @@ export const campos: Campo[] = [
     largura: 240,
     maximoNaCelula: 2,
     larguraCheiaNoFormulario: true,
+    edicaoEmPopover: true,
     backend: {
       entrada: '["Li e aceito o termo de responsabilidade"]',
       saida: '["Li e aceito o termo de responsabilidade"]',
@@ -379,6 +392,7 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 200,
     maximoNaCelula: 2,
+    edicaoEmPopover: true,
     backend: {
       entrada: '["a", "b"]',
       saida: '["a", "b"]',
@@ -529,6 +543,7 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 240,
     larguraCheiaNoFormulario: true,
+    edicaoEmPopover: true,
     backend: {
       entrada: '{ "name": "Marina Toledo", "cpf": "000.000.000-00" }',
       saida: '{ "name": "Marina Toledo", "email": "marina@…", "cpf": "…" }',
@@ -547,6 +562,7 @@ export const campos: Campo[] = [
     icone: 'i-lucide-paperclip',
     alinhamento: 'inicio',
     largura: 240,
+    edicaoEmPopover: true,
     backend: {
       entrada: 'multipart/form-data. O POST devolve a URL, e é ela que vai no data',
       saida: '{ "url": "…", "filename": "laudo.pdf", "mime": "application/pdf", "size": 45000 }',
@@ -563,6 +579,7 @@ export const campos: Campo[] = [
     icone: 'i-lucide-image',
     alinhamento: 'inicio',
     largura: 200,
+    edicaoEmPopover: true,
     backend: {
       entrada: 'multipart/form-data, igual ao arquivo',
       saida: '{ "url": "…", "filename": "quadro.jpg", "mime": "image/jpeg", "size": 220400 }',
@@ -579,6 +596,7 @@ export const campos: Campo[] = [
     icone: 'i-lucide-file-text',
     alinhamento: 'inicio',
     largura: 240,
+    edicaoEmPopover: true,
     backend: {
       entrada: 'multipart/form-data, igual ao arquivo',
       saida: '{ "url": "…", "filename": "contrato.pdf", "mime": "application/pdf", "size": 812300 }',
@@ -596,6 +614,7 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 240,
     foraDaColunaDeResumo: true,
+    edicaoEmPopover: true,
     backend: {
       entrada: 'o editor grava sozinho. O formulário só escolhe o modelo',
       saida: '{ "url": "…", "filename": "proposta.docx", "mime": "…wordprocessingml…" }',
@@ -612,6 +631,7 @@ export const campos: Campo[] = [
     icone: 'i-lucide-signature',
     alinhamento: 'inicio',
     largura: 220,
+    edicaoEmPopover: true,
     backend: {
       entrada: '{ "signer": "Marina Toledo", "signedAt": "2026-09-18T13:10:00.000Z" }',
       saida: '{ "signer": "…", "signedAt": "…", "url": "…" }',
@@ -631,6 +651,7 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 300,
     larguraCheiaNoFormulario: true,
+    edicaoEmPopover: true,
     backend: {
       entrada: '{ "street": "Av. Paulista", "number": "1000", "city": "São Paulo", … }',
       saida: '{ "street", "number", "complement", "neighborhood", "city", "state", "zip", "country" }',
@@ -648,6 +669,7 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 260,
     larguraCheiaNoFormulario: true,
+    edicaoEmPopover: true,
     backend: {
       entrada: '{ "login": "nortelux", "telefone": "+55 11 5555-0100" }',
       saida: '{ "login": "nortelux", "telefone": "+55 11 5555-0100" }',
@@ -667,6 +689,7 @@ export const campos: Campo[] = [
     maximoNaCelula: 1,
     larguraCheiaNoFormulario: true,
     foraDaColunaDeResumo: true,
+    edicaoEmPopover: true,
     backend: {
       entrada: '[{ "item": "Luminária LED", "quantidade": 12 }]',
       saida: '[{ "item": "Luminária LED", "quantidade": 12 }]',
@@ -685,6 +708,8 @@ export const campos: Campo[] = [
     largura: 220,
     larguraCheiaNoFormulario: true,
     foraDaColunaDeResumo: true,
+    edicaoEmPopover: true,
+    somenteLeitura: true,
     backend: {
       entrada: 'o campo não é preenchido pelo formulário. A conversa é gravada mensagem a mensagem',
       saida: '[{ "author": "Marina Toledo", "at": "…", "text": "…" }]',
@@ -704,6 +729,7 @@ export const campos: Campo[] = [
     icone: 'i-lucide-calendar-range',
     alinhamento: 'inicio',
     largura: 210,
+    edicaoEmPopover: true,
     backend: {
       entrada: '{ "start": "2026-10-01", "end": "2026-10-15" }',
       saida: '{ "start": "2026-10-01T12:00:00.000Z", "end": "2026-10-15T12:00:00.000Z" }',
@@ -720,6 +746,7 @@ export const campos: Campo[] = [
     icone: 'i-lucide-function-square',
     alinhamento: 'inicio',
     largura: 200,
+    somenteLeitura: true,
     backend: {
       entrada: 'o campo não recebe digitação. A expressão é configurada no campo',
       saida: 'o que a expressão devolver. O tipo do resultado varia por expressão',
