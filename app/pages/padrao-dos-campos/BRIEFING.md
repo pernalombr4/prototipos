@@ -166,23 +166,87 @@ dentro é sempre formulário. A quickview é a versão em gaveta da tela dedicad
 
 ### 5.4 Os tipos de campo que existem de verdade
 
-> ⚠️ **Esta contagem está incompleta e vai ser corrigida.** Ao abrir o seletor "Tipo de Campo"
-> em 22/09/2026, o menu é uma lista virtualizada com `scrollHeight = 1198 px` e item de 34 px,
-> ou seja **cerca de 35 tipos oferecidos**, não 22. Os dez primeiros, na ordem em que aparecem:
-> **Matriz de dados**, Texto Curto, Texto Longo, Número, **Duração**, Data (Calendário),
-> Alternativa Binária, Caixas de Seleção, Botões de Seleção única, Lista de Seleção Única.
->
-> Dois aprendizados imediatos:
->
-> - **"Matriz de dados" existe e eu não tinha.** A descrição no i18n do produto é *"Permite
->   criar uma tabela personalizada onde cada linha representa um registro e cada coluna
->   representa um campo específico"*, com configurações próprias (`all_rows_required`,
->   `all_columns_unique_value`, `complement_label`). É parente do Repetidor, não o mesmo;
-> - **"Duração" existe no seletor.** Eu havia classificado como `proposto` por não achar no
->   schema nem na API. Está errado: é tipo ativo.
->
-> Os 25 restantes só se leem com a janela do Chrome visível, porque a lista é virtualizada e o
-> virtualizador não renderiza em aba de fundo.
+#### A lista definitiva do seletor: 34 tipos, em dois grupos
+
+Lida item por item no seletor "Tipo de Campo" em 22/09/2026, percorrendo a lista virtualizada
+até o fim. **O próprio produto separa em dois grupos, e o segundo se chama "Legado".**
+
+**Atuais (28), na ordem em que o seletor mostra:**
+
+| # | Rótulo no seletor |
+|---|---|
+| 1 | Matriz de dados |
+| 2 | Texto Curto |
+| 3 | Texto Longo |
+| 4 | Número |
+| 5 | Duração |
+| 6 | Data (Calendário) |
+| 7 | Alternativa Binária |
+| 8 | Caixas de Seleção |
+| 9 | Botões de Seleção única |
+| 10 | Lista de Seleção Única |
+| 11 | Lista de Seleção Múltipla |
+| 12 | Arquivo |
+| 13 | Imagem |
+| 14 | Editor de texto HTML |
+| 15 | Editor de Documentos |
+| 16 | Tratamento de PDF |
+| 17 | Tags |
+| 18 | Relacionamento Simples |
+| 19 | Relacionamento Múltiplo |
+| 20 | Chat |
+| 21 | Anotações |
+| 22 | Grupo |
+| 23 | Repetidor |
+| 24 | Endereço |
+| 25 | Pessoa/Empresa |
+| 26 | Campo virtual (de valor dinâmico) |
+| 27 | Valor Monetário |
+| 28 | ID Personalizado |
+
+**Legado (6), sob o cabeçalho "Legado" do próprio seletor:**
+
+| # | Rótulo |
+|---|---|
+| 29 | E-mail |
+| 30 | Texto com Máscara |
+| 31 | Data |
+| 32 | Hora |
+| 33 | Datetime |
+| 34 | Editor de HTML (v1) |
+
+**O que isso corrige no protótipo:**
+
+1. **"Matriz de dados" existe e eu não tinha em lugar nenhum.** A descrição no i18n do produto
+   é *"Permite criar uma tabela personalizada onde cada linha representa um registro e cada
+   coluna representa um campo específico"*, com configurações próprias
+   (`all_rows_required`, `all_columns_unique_value`, `complement_label`). É parente do
+   Repetidor, não o mesmo. **Falta no catálogo.**
+2. **"Duração" e "Campo virtual (de valor dinâmico)" existem.** Eu os havia marcado como
+   `proposto` por não achá-los no schema nem na API. Os dois são tipos atuais.
+3. **O "Legado" é vocabulário do produto, não meu.** A separação `ativo` / `legado` do catálogo
+   bate com o que o seletor faz, e a lista de legados é outra do que eu tinha: `Data`, `Hora`,
+   `Datetime` e `Editor de HTML (v1)` são tipos legados próprios, distintos do
+   `Data (Calendário)` atual.
+4. **Quatro tipos que existem em dado gravado NÃO estão no seletor**, nem como legado:
+   `EnESign` (assinatura eletrônica), `EnTreeSelect` (seleção em árvore), `EnlTimeRange`
+   (intervalo de horas) e `EnlCheckbox`. Ou saíram de vez, ou têm outro nome. **A confirmar.**
+
+Ainda falta, e depende da janela do Chrome estar visível: o **valor técnico** de cada rótulo,
+as **Configurações Específicas** de cada tipo e o **modo de edição real** de cada um na tabela,
+no formulário e na quickview. O primeiro tipo que consegui abrir foi `Texto com Máscara`, e a
+seção "Configurações Específicas" dele já mostrou um erro do próprio produto:
+*"Ocorreu um erro ao carregar os campos aninhados."*
+
+#### Por que a exploração parou
+
+O Chrome que a extensão controla está com a janela minimizada. Nessa condição o navegador
+**congela o `requestAnimationFrame`** (medido: 0 quadros em 600 ms), e isso trava as
+transições do naive-ui, a lista virtualizada do seletor e, quando o tipo escolhido precisa
+carregar configuração aninhada, o renderizador inteiro deixa de responder. Substituir o
+`requestAnimationFrame` por `setTimeout` na aba resolve as transições, mas o `setTimeout` de
+aba em segundo plano também é limitado a um disparo por segundo, então qualquer sequência de
+passos estoura o tempo. **A exploração tipo a tipo precisa da janela visível.**
 
 Três fontes, e elas **não batem**:
 

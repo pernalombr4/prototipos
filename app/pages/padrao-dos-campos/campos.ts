@@ -741,7 +741,8 @@ export const campos: Campo[] = [
   {
     tipo: 'valorDinamico',
     familia: 'texto',
-    disponibilidade: 'proposto',
+    /* Confirmado no seletor do develop: "Campo virtual (de valor dinâmico)". */
+    disponibilidade: 'ativo',
     refId: 'valor_dinamico',
     icone: 'i-lucide-function-square',
     alinhamento: 'inicio',
