@@ -46,6 +46,31 @@ app/pages/<slug>/
 └── evidencias/      prints do develop e das referências
 ```
 
+## Manter o SDK em dia
+
+O SDK do ENSPACE é versionado em `0.x`, e o `^` do `package.json` **não atravessa minor em
+`0.x`**: `^0.14.0` para em `0.14.x` e nunca chega sozinho no `0.15.0`. Quer dizer que o pacote
+mais importante daqui é justamente o único que envelhece em silêncio, enquanto `@nuxt/ui` e
+`nuxt` andam sozinhos. Não dá para resolver isso lembrando.
+
+Três peças cuidam disso:
+
+| Peça | O que faz |
+|---|---|
+| [`.github/dependabot.yml`](.github/dependabot.yml) | Abre PR toda segunda. Os cinco `@be-enlighten` num PR só, porque são peers e sobem em lockstep |
+| [`.github/workflows/verificar.yml`](.github/workflows/verificar.yml) | Roda no PR o build de verdade mais a conferência abaixo. Verde quer dizer que os protótipos sobrevivem à versão nova |
+| [`ferramentas/conferir-sdk.js`](ferramentas/conferir-sdk.js) | Compara o que os protótipos **importam** com o que o pacote instalado **exporta** |
+
+```bash
+pnpm conferir          # confere o que está em disco
+pnpm conferir:remoto   # e pergunta ao registry se saiu versão nova
+```
+
+O `conferir` é a regra 5 da spec ("componente e prop se conferem em disco") feita de uma vez
+para o repositório inteiro: tipo do `enspace-sdk-schemas` que sumiu, componente base do
+`enspace-sdk-ui` que mudou de nome, componente `U*` do Nuxt UI que deixou de existir. Quando
+reprova, ele diz o arquivo e o nome.
+
 ## Protótipos
 
 <!-- O índice vivo é a home do app (pnpm dev). Esta tabela é o resumo para quem lê no GitHub. -->

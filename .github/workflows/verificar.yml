@@ -1,0 +1,56 @@
+# Confere um PR antes de ele poder entrar na main.
+#
+# Existe por causa do Dependabot. Sem isto, o PR de atualização do SDK seria só
+# um diff de número de versão, e a primeira notícia de que ele quebrou alguma
+# coisa viria do site publicado, depois do merge. Aqui o PR roda o mesmo build
+# da publicação, com o `failOnError: true` do nuxt.config ligado: protótipo que
+# não sobrevive à versão nova derruba o check, em vez de derrubar o site.
+#
+# São dois sinais diferentes, e os dois importam:
+#
+#   conferir-sdk  responde "o tipo que o mocks.ts importa ainda existe?"
+#   pnpm generate responde "a tela ainda renderiza?"
+#
+# O primeiro falha com o nome do tipo e do arquivo. O segundo falha com um
+# stack trace de prerender, que custa bem mais para ler. Por isso o barato
+# roda primeiro.
+name: Verificar
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verificar-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Sem `version:` de propósito, igual ao pages.yml: a versão do pnpm vive
+      # só no campo `packageManager` do package.json. Declarar nos dois lugares
+      # faz a action falhar.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Conferir o contrato do SDK
+        run: node ferramentas/conferir-sdk.js
+
+      # O build de verdade, com o mesmo baseURL da publicação.
+      - name: Gerar o site
+        run: pnpm generate
+        env:
+          NUXT_APP_BASE_URL: /prototipos/

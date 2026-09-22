@@ -1,0 +1,74 @@
+# Atualização de dependência, uma vez por semana.
+#
+# POR QUE ISTO EXISTE. O SDK do ENSPACE é versionado em 0.x, e o `^` do
+# package.json **não atravessa minor em 0.x**: `^0.14.0` para em 0.14.x e nunca
+# chega sozinho no 0.15.0. Quer dizer que justamente o pacote mais importante
+# daqui é o único que apodrece em silêncio, enquanto `@nuxt/ui: ^4.5.1` já
+# andou sozinho até o 4.11.1. Foi exatamente o que aconteceu: em 21/09/2026 o
+# repositório estava em 0.14.0 com 0.15.0 publicado havia tempo, sem ninguém
+# saber. O Dependabot abre o PR.
+#
+# Não precisa instalar nada: o Dependabot é nativo do GitHub e passa a valer
+# assim que este arquivo estiver na main. Ele lê o `pnpm-lock.yaml`
+# (lockfileVersion 9.0, que é o que o pnpm 10 escreve) e atualiza o
+# package.json e o lockfile no mesmo PR.
+#
+# Todo PR daqui passa pelo `.github/workflows/verificar.yml` antes de poder
+# entrar: o build de verdade mais a conferência do contrato do SDK. Check verde
+# quer dizer que os protótipos continuam de pé na versão nova. Check vermelho
+# aponta o protótipo e o tipo que quebraram.
+
+version: 2
+
+updates:
+  # `npm` também vale para pnpm: o ecossistema do Dependabot é o mesmo.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 5
+    # O espaço no fim é de propósito: sem ele o Dependabot cola dois-pontos e
+    # sai "[DEPS]: bump ...". Com ele, fica no formato dos commits daqui.
+    commit-message:
+      prefix: "[DEPS] "
+    labels: ["dependencias"]
+    groups:
+      # Os cinco do ENSPACE sobem juntos ou não sobem. core, schemas, ui e vue
+      # são peers uns dos outros e andam em lockstep (hoje todos em 0.14.0):
+      # subir um só deixa a tipagem inconsistente e o build quebra num lugar
+      # que não tem nada a ver com a mudança.
+      sdk-enspace:
+        patterns:
+          - "@be-enlighten/*"
+      # Nuxt e Nuxt UI, mesma lógica: o @nuxt/ui 4 é acoplado à versão do Nuxt.
+      nuxt:
+        patterns:
+          - "nuxt"
+          - "@nuxt/*"
+      # O resto (ícone, tabela, gráfico, marked) num PR só, e só patch e minor.
+      # Major de qualquer um deles vem sozinho, para ser lido com calma.
+      resto:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "@be-enlighten/*"
+          - "nuxt"
+          - "@nuxt/*"
+        update-types: ["minor", "patch"]
+
+  # As actions usadas em pages.yml e verificar.yml também envelhecem, e uma
+  # action abandonada é problema de segurança, não só de versão.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "[DEPS] "
+    labels: ["dependencias"]
+    groups:
+      actions:
+        patterns:
+          - "*"
