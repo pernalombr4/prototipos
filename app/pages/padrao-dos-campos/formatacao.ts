@@ -99,9 +99,42 @@ export function enderecoEmUmaLinha(e: Record<string, string> | null): string {
   return [linha1, resto, e.zip, cidade].filter(Boolean).join(' ')
 }
 
+/**
+ * O caminho de uma seleção em árvore, em rótulos.
+ *
+ * O valor gravado é o caminho técnico (`predial.eletrica`). O que a pessoa lê
+ * é o rótulo de cada nível, e é o `options[].children[]` do campo que tem os
+ * dois lados.
+ */
+export function caminhoDaArvore(
+  valor: string,
+  opcoes: readonly { value: string, label: string, children?: readonly { value: string, label: string }[] }[] | undefined,
+): string {
+  if (!opcoes?.length) return valor
+  const partes: string[] = []
+  let restantes: readonly { value: string, label: string, children?: readonly { value: string, label: string }[] }[] | undefined = opcoes
+  for (const pedaco of valor.split('.')) {
+    const alvo: string = partes.length
+      ? `${valor.split('.').slice(0, partes.length).join('.')}.${pedaco}`
+      : pedaco
+    const no = restantes?.find(o => o.value === alvo)
+    if (!no) break
+    partes.push(no.label)
+    restantes = no.children
+  }
+  return partes.length ? partes.join(' / ') : valor
+}
+
 /** O texto rico sem as tags, que é o que a célula mostra. */
 export function semTags(html: string): string {
-  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+  return html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    /* A troca de tag por espaço deixa um branco antes da pontuação
+       ("ressalva : o quadro"). Aqui ele sai. */
+    .replace(/\s+([,.;:!?)])/g, '$1')
+    .replace(/(\()\s+/g, '$1')
+    .trim()
 }
 
 /**
@@ -142,10 +175,10 @@ export function saidaFormatada(
     case 'radioButton':
       return rotuloDaOpcao(lista, valor as string)
 
-    case 'EnTreeSelect': {
-      const caminho = (valor as string).split('.')
-      return caminho.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' / ')
-    }
+    case 'EnTreeSelect':
+      /* O caminho gravado ("predial.eletrica") vira os rótulos da árvore, do
+         pai até a folha. Derivar do value perderia o acento do rótulo. */
+      return caminhoDaArvore(valor as string, lista as never)
 
     case 'multiSelect':
     case 'checkbox':
