@@ -16,18 +16,19 @@
  *   2. uma família de cor só. Fundo em 10% da cor, texto e seta na mesma cor;
  *   3. sem borda dura. Anel de 1px na própria cor, ou nada;
  *   4. peso médio, 12px;
- *   5. seta de 12px, da cor do texto;
- *   6. sem ícone na pílula: ela fica com o nome e a seta (rodada 3).
+ *   5. seta de 12px, da cor do texto.
  *
- * Duas coisas da rodada 5 divergem das referências, e é escolha dela:
+ * Duas coisas divergem das referências, e é escolha dela:
  *
  *   • **CAIXA ALTA** no rótulo da pílula e nos itens do menu. O Nuxt UI e o
  *     Tailwind usam caixa normal, mas esta barra não é a deles: `DOCS`,
  *     `DEV`, `BLOG`, `RELEASES` e `ENTRAR` já estão todos em caixa alta ali.
  *     Em caixa normal a pílula era a única coisa fora do compasso da barra.
  *     Vem com `tracking-wide`, que é o que torna caixa alta legível a 12px.
- *   • **ícone de volta no menu**, e só nele. No menu o ícone separa um
- *     produto do outro; na pílula ele não separava nada, porque só existe um.
+ *   • **ícone nos dois lugares** (rodada 6): no menu ele separa um produto do
+ *     outro, e na pílula ele dá ao produto uma marca curta que sobrevive ao
+ *     corte do nome no celular. Nem o Nuxt UI nem o Tailwind têm ícone na
+ *     pílula, mas os dois carregam versão, que se lê em cinco caracteres.
  *
  * O texto usa `text-primary-700 dark:text-primary-300` e não `text-primary`:
  * é a correção de contraste da casa (`app/tema-contraste.ts`), porque o
@@ -122,13 +123,22 @@ const itens = computed(() => [
       "
       :class="larguraCheia ? 'h-8 w-full rounded-lg px-3 text-sm' : 'min-w-0 max-w-44'"
     >
+      <UIcon
+        :name="atual.icone"
+        class="size-3.5 shrink-0"
+        :class="larguraCheia ? 'size-4' : ''"
+      />
       <!--
-        Sem ícone: o Nuxt UI e o Tailwind também não têm, e a pílula fica com
-        uma coisa só para ler. Abaixo de `sm` sobram uns 100px entre o logo e
-        a chave de tema, então o nome corta. O nome por extenso continua no
-        `title`, no `aria-label` e nesta mesma peça dentro do menu do celular.
+        Abaixo de `sm` sobram uns 100px entre o logo e a chave de tema, e em
+        caixa alta `WORD PLUGIN` virava `WOR…`. Pedaço de palavra não é nome:
+        ali fica só o ícone, que é a marca curta do produto. O nome por
+        extenso continua no `title`, no `aria-label`, no botão de busca e
+        nesta mesma peça em linha cheia dentro do menu do celular.
       -->
-      <span class="truncate uppercase tracking-wide">
+      <span
+        class="truncate uppercase tracking-wide"
+        :class="larguraCheia ? '' : 'hidden sm:inline'"
+      >
         {{ nomeAtual }}
       </span>
       <UIcon

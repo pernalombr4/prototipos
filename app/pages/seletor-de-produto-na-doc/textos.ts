@@ -74,8 +74,10 @@ export interface Textos {
    * O aviso que aparece quando a troca de produto não acha a página.
    *
    * O nome do produto entra sempre no começo da frase, nunca depois de
-   * preposição: "de Plugin do Word" pediria "do", e "de Beni App" não. Frase
-   * que começa pelo nome funciona com os três nomes e nos três idiomas.
+   * preposição: nome próprio em inglês no meio de frase em português obriga a
+   * escolher entre "de Word Plugin" e "do Word Plugin", e a escolha muda com
+   * o produto. Frase que começa pelo nome funciona com os três, nos três
+   * idiomas, e não precisa ser reescrita quando entrar o quarto.
    */
   semEquivalente: {
     titulo: (produto: string) => string
@@ -142,7 +144,7 @@ export const textos: Record<Idioma, Textos> = {
     },
     produtos: {
       'enspace': { nome: 'ENSPACE' },
-      'plugin-word': { nome: 'Plugin do Word' },
+      'plugin-word': { nome: 'Word Plugin' },
       'beni-app': { nome: 'Beni App' },
     },
     titulos: {
@@ -362,7 +364,7 @@ export const textos: Record<Idioma, Textos> = {
     },
     produtos: {
       'enspace': { nome: 'ENSPACE' },
-      'plugin-word': { nome: 'Plugin de Word' },
+      'plugin-word': { nome: 'Word Plugin' },
       'beni-app': { nome: 'Beni App' },
     },
     titulos: {

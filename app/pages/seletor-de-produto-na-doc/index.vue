@@ -160,11 +160,17 @@ function irPara(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
-/** O endereço que a proposta desenha. Andaime: serve para discutir a URL. */
+/**
+ * O endereço que a proposta desenha. Andaime: serve para discutir a URL.
+ *
+ * O produto vem ANTES da seção, porque ele escopa as quatro (`docs`, `dev`,
+ * `blog` e `releases`), e não só a documentação. O ENSPACE fica sem prefixo,
+ * então todo link de hoje continua valendo sem redirecionamento.
+ */
 const enderecoProposto = computed(() => {
   const prefixo = produtos.find(p => p.id === produto.value)?.prefixo
   const idiomaCurto = idioma.value === 'pt-BR' ? 'pt' : idioma.value
-  return ['docs.enspace.io', idiomaCurto, 'docs', prefixo, paginaAberta.value?.chave]
+  return ['docs.enspace.io', idiomaCurto, prefixo, 'docs', paginaAberta.value?.chave]
     .filter(Boolean)
     .join('/')
 })

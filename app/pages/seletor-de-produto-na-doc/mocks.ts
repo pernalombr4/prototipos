@@ -22,12 +22,19 @@ export type ChaveDeProduto = 'enspace' | 'plugin-word' | 'beni-app'
 
 export interface Produto {
   id: ChaveDeProduto
-  /** Ícone do Lucide, no menu. A pílula fechada não leva ícone. */
+  /** Ícone do Lucide. Aparece no menu e na pílula fechada. */
   icone: string
   /**
    * Pedaço do endereço quando o produto entra na URL.
-   * Hoje a doc é `/{idioma}/docs/...`; a proposta é `/{idioma}/docs/{prefixo}/...`,
-   * com o ENSPACE sem prefixo para os links de hoje continuarem valendo.
+   *
+   * O produto escopa **todas** as seções, não só a documentação, então ele
+   * fica um nível ACIMA delas: `/{idioma}/{prefixo}/{secao}/...`. O ENSPACE
+   * fica sem prefixo, e com isso todo link de hoje continua valendo.
+   *
+   *   /pt/docs/selo-do-documento          ENSPACE
+   *   /pt/word/docs/selo-do-documento     Word Plugin
+   *   /pt/beni/releases                   Beni App
+   *
    * Decisão registrada no DECISOES.md.
    */
   prefixo: string
@@ -186,7 +193,7 @@ export interface Pagina {
 /**
  * As páginas escritas por inteiro.
  *
- * `selo-do-documento` existe no ENSPACE e no Plugin do Word, e não existe no
+ * `selo-do-documento` existe no ENSPACE e no Word Plugin, e não existe no
  * Beni App. É de propósito: é o caso que prova o que a troca de produto faz
  * quando a página equivalente não existe do outro lado.
  */

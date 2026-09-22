@@ -78,15 +78,28 @@ a copiar é o painel do Atlassian, não a descrição de volta.
 A faixa fica acima do cabeçalho, no mesmo lugar onde o Nuxt põe o aviso de versão sem suporte,
 e some sozinha na primeira navegação. É dispensável com o X.
 
-### 5. O seletor escopa a documentação, e só ela
+### 5. O seletor escopa o site inteiro
 
-`DOCS` e a busca passam a ser do produto escolhido. `DEV`, `BLOG` e `RELEASES` continuam globais
-e não mudam: a API é uma só, o blog é da empresa e as notas de versão hoje também. Ninguém perde
-endereço (regra 20).
+**Decidido na rodada 6, por ela:** *"releases tambem vai respeitar o seletor. e blog tambem, dev
+tambem. tudo."*
 
-**Pergunta para a Mikaela:** as notas de versão deveriam ser por produto? Se o Plugin do Word
-tem ciclo próprio, `RELEASES` seria o segundo lugar a respeitar o seletor. Não foi feito porque
-é decisão de conteúdo, não de tela.
+As quatro seções (`DOCS`, `DEV`, `BLOG`, `RELEASES`) e a busca passam a ser do produto escolhido.
+A rodada 1 tinha proposto o contrário, escopando só a documentação, com o argumento de que a API
+é uma só e o blog é da empresa. **O argumento cai quando o produto passa a ser um eixo de
+verdade:** o Word Plugin tem ciclo de versão próprio, então tem notas de versão próprias; e quem
+está lendo a doc do Beni App e clica em `BLOG` quer os posts do Beni App, não os da plataforma.
+
+Isso promove o produto a **um nível acima das seções**, e é por isso que ele vem antes delas no
+endereço (decisão 7). Nenhum link some (regra 20): as quatro continuam na barra para todo
+produto.
+
+**O que acontece quando o produto não tem aquela seção** (o Word Plugin talvez nunca tenha `DEV`):
+a mesma regra das páginas, da decisão 4. Leva para o começo daquela seção no produto e diz em uma
+linha que ali ainda não há conteúdo, com o caminho de volta. Uma regra só para os dois casos,
+porque para quem usa é o mesmo caso.
+
+**O que é maquete aqui:** as outras três seções não existem no protótipo. O que se vê funcionando
+é o escopo em `DOCS`, e o endereço proposto no andaime, que mostra o produto acima da seção.
 
 ### 6. A busca diz em que produto busca
 
@@ -97,15 +110,19 @@ O atalho `Ctrl K` continua igual.
 **O que ficou de fora e é o próximo passo natural:** a tela de resultados com um jeito de
 ampliar a busca para todos os produtos ("buscar em todos"). Está fora do escopo desta demanda.
 
-### 7. O produto entra no endereço
+### 7. O produto entra no endereço, acima da seção
 
 Desenho proposto, visível na barra de andaime:
 
 ```
 docs.enspace.io/pt/docs/selo-do-documento          ENSPACE (sem prefixo)
-docs.enspace.io/pt/docs/word/selo-do-documento     Plugin do Word
-docs.enspace.io/pt/docs/beni/inicio                Beni App
+docs.enspace.io/pt/word/docs/selo-do-documento     Word Plugin
+docs.enspace.io/pt/beni/releases                   Beni App, notas de versão
 ```
+
+**O produto vem antes da seção**, e não depois, porque ele escopa as quatro (decisão 5). Pôr o
+produto dentro de `docs/` diria que ele só vale ali, e aí `releases` do Word Plugin não teria
+onde morar.
 
 O ENSPACE fica **sem prefixo** para os links de hoje continuarem valendo, sem redirecionamento e
 sem quebrar o que já está indexado. É o mesmo motivo pelo qual o Nuxt deixou a versão no caminho.
@@ -139,11 +156,22 @@ O menu continua **sólido**, e não de vidro como o de idioma: lista sobre conte
 precisa de fundo opaco. O que mudou é que agora a pílula fechada **não** imita mais o seletor de
 idioma, e isso é o certo: um é badge de contexto, o outro é campo de escolha.
 
-### 10. O que muda de nome com o idioma, e o que não muda
+### 10. Nenhum nome de produto se traduz
 
-`ENSPACE` e `Beni App` são nome próprio e não se traduzem. `Plugin do Word` vira `Word Plugin` em
-inglês e `Plugin de Word` em espanhol, porque a parte traduzível é a palavra "plugin" e a
-preposição. Está nos três dicionários do `textos.ts`.
+**Mudou na rodada 6.** A rodada 1 traduzia o nome do plugin: `Plugin do Word` em português,
+`Word Plugin` em inglês, `Plugin de Word` em espanhol. Ela cortou isso por tamanho: *"'plugin do
+word' ta muito grande. o nome pode ser só word plugin ate mesmo em portugues e espanhol."*
+
+E o corte melhora mais do que o tamanho. Os três agora são **nome próprio e iguais nos três
+idiomas** (`ENSPACE`, `Word Plugin`, `Beni App`), o que quer dizer que:
+
+- a pílula tem a mesma largura em qualquer idioma, e não estoura em espanhol;
+- quem procura "Word Plugin" acha, venha de onde vier;
+- o dicionário de cada idioma tem um nome a menos para manter em dia.
+
+Continua valendo a regra de escrita da decisão 4: o nome entra sempre no começo da frase, nunca
+depois de preposição, porque "de Word Plugin" e "do Word Plugin" são os dois defensáveis e a
+escolha mudaria a cada produto novo.
 
 ## O que é maquete
 
@@ -405,3 +433,36 @@ difícil de ler, e é o defeito que o `uppercase` sozinho costuma trazer.
 **O que isso custa, e está medido:** caixa alta é mais larga. `PLUGIN DO WORD` cabe inteiro no
 desktop e corta mais cedo no celular do que `Plugin do Word` cortava. O nome por extenso continua
 no `title`, no `aria-label` e na peça em linha cheia do menu do hambúrguer.
+
+### Rodada 6 — 22/09/2026
+
+**O que ela pediu, literal:**
+
+> releases tambem vai respeitar o seletor
+>
+> e blog tambem, dev tambem. tudo.
+>
+> "plugin do word" ta muito grande. o nome pode ser só word plugin ate mesmo em portugues e
+> espanhol.
+>
+> e no badge do seletor deve aparecer o icone tambem
+
+**Três mudanças, e a primeira é a maior da proposta até agora.**
+
+1. **O seletor escopa o site inteiro**, não só a documentação. Isso promove o produto a um nível
+   acima das quatro seções, e por isso ele subiu no endereço: `/pt/word/docs/...` no lugar de
+   `/pt/docs/word/...`. Decisões 5 e 7, reescritas.
+2. **`Word Plugin` nos três idiomas.** Decisão 10, reescrita.
+3. **Ícone de volta na pílula**, junto com o do menu. Decisão de forma, abaixo.
+
+#### O ícone na pílula, e o que ele resolveu de quebra
+
+A rodada 3 tinha tirado o ícone dali, e a 5 devolveu só ao menu. Agora ele fica nos dois: no menu
+separa um produto do outro, e na pílula dá ao produto **uma marca curta que sobrevive ao corte
+do nome**.
+
+Isso resolveu um problema que a caixa alta tinha criado. A 380px, `WORD PLUGIN` virava `WOR…`, e
+pedaço de palavra não é nome. Com o ícone de volta, abaixo de `sm` a pílula mostra **só o ícone**,
+que é limpo e identifica o produto. Medido: a 380px sobram 12px até a chave de tema; a 700px o
+nome inteiro cabe com 14px de folga. O nome por extenso continua no `title`, no `aria-label`, no
+botão de busca do menu lateral e na peça em linha cheia do menu do hambúrguer.
