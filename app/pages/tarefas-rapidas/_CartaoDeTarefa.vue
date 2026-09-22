@@ -66,7 +66,6 @@ const colaboradores = computed(() =>
 
 const descricao = computed(() => descricaoEmTexto(props.tarefa.description))
 const tempo = computed(() => tempoRegistrado(props.tarefa.id))
-const temFormulario = computed(() => props.tarefa.type === 'form' || props.tarefa.type === 'crud')
 
 /**
  * Descrição no cartão: o mercado não mostra texto longo em cartão.
@@ -300,9 +299,17 @@ const itensDoMenu = computed(() => [[
         </span>
       </UTooltip>
 
-      <UTooltip v-if="temFormulario && campos.tipo" :text="t.temFormulario">
-        <UIcon name="i-lucide-clipboard-pen" data-selo="formulario" class="size-3.5 text-muted" />
-      </UTooltip>
+      <!--
+        Aqui havia um ícone de "pede formulário". Ele saiu na rodada 21: a
+        condição dele era `type === 'form' || type === 'crud'`, quer dizer, ele
+        repetia com um segundo ícone o que o ícone do tipo já tinha dito, e
+        ainda por cima só aparecia quando o campo tipo estava ligado. Dois
+        símbolos para o mesmo fato é ruído num cartão que já tem muitos.
+
+        Se um dia existir formulário fora desses dois tipos (`meta.form` numa
+        tarefa genérica, por exemplo), o indicador volta a ter função, e aí ele
+        olha para `meta.form`, não para o tipo.
+      -->
 
       <!--
         Tempo: o total apontado, e o cronômetro correndo quando é esta a

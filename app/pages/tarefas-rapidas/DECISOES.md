@@ -1346,3 +1346,49 @@ sem resultado ("Nada encontrado para" virou "Nenhuma tarefa corresponde a") e a 
 ("Nada aqui" virou "Nenhuma tarefa nesta raia"). Isso não foi pedido, e desfazer é uma linha.
 
 Tudo nos três idiomas, com o espanhol mantendo o tratamento formal que o dicionário já usa.
+
+---
+
+## Rodada 21 — 22/09/2026
+
+### O que ela pediu, literal
+
+> em tasks de tipo formulario ter "formulario" + icone de "pede formulario" é redundante. só o
+> tipo da task já é suficiente.
+
+### Ela tem razão, e a redundância era literal
+
+O ícone de prancheta que dizia "pede formulário" tinha esta condição:
+
+```ts
+type === 'form' || type === 'crud'
+```
+
+Ou seja, ele não olhava para o formulário: olhava para o tipo, o mesmo tipo que o ícone ao
+lado já estava mostrando. Dois símbolos para o mesmo fato, num rodapé que já tem tipo,
+referência, prioridade, prazo, pontos, tempo e três avatares. Pior: a condição de exibição
+incluía `campos.tipo`, então ele nunca apareceria sozinho, nem no caso em que teria alguma
+função.
+
+**Saiu.** O ícone do tipo continua dizendo que a tarefa é de formulário, e o tooltip dele diz
+por extenso.
+
+**Quando ele volta a fazer sentido:** se existir formulário fora dos tipos `form` e `crud`,
+quer dizer, `meta.form` preenchido numa tarefa genérica ou de aprovação. Aí o indicador passa
+a dizer algo que o tipo não diz, e a condição dele tem que ser `meta.form`, não o tipo. Está
+comentado no componente.
+
+### O número da legenda deixou de ser escrito à mão
+
+Tirar uma peça do meio deixaria a legenda pulando do 11 para o 13. Agora o número **sai da
+posição na lista**: tirar ou acrescentar peça é mexer numa lista e mais nada.
+
+Junto veio um `id` estável por selo, que era o que faltava para o mapa se achar. A chave não
+serve para isso desde a rodada 19, quando dois selos passaram a apontar o mesmo elemento (o
+prazo, no estado normal e no atrasado), e o número não serve porque muda de posição. Os
+filtros dos quadros, o destaque da legenda e as `key` do Vue passaram todos a usar o id.
+
+### Conferido na tela
+
+O cartão não tem mais o `data-selo="formulario"`, a legenda fechou em 31 linhas numeradas de 1
+a 31 sem buraco, e os cinco quadros do mapa continuam apontando o que apontavam.

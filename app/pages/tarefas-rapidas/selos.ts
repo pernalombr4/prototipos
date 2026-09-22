@@ -18,7 +18,13 @@
 export type OrigemDoSelo = 'nativo' | 'derivado' | 'relacao' | 'novo'
 
 export interface Selo {
-  /** O número que aparece no balão e na legenda. */
+  /**
+   * Único, e é por ele que o mapa filtra. Nem sempre igual à chave: o prazo
+   * entra duas vezes, uma no estado normal e outra no atrasado, e os dois
+   * apontam o mesmo elemento da tela.
+   */
+  id: string
+  /** O número que aparece no balão e na legenda. Sai da ordem da lista. */
   numero: number
   /** Casa com o `data-selo` do elemento na tela. */
   chave: string
@@ -50,9 +56,23 @@ export const origens: Record<OrigemDoSelo, { rotulo: string, cor: 'success' | 'i
 /* ------------------------------------------------------------------ *
  * O cartão fechado, de cima para baixo.                               *
  * ------------------------------------------------------------------ */
-export const selosDoCartao: Selo[] = [
+type SeloSemNumero = Omit<Selo, 'numero'>
+
+/**
+ * O número sai da POSIÇÃO na lista, nunca escrito à mão.
+ *
+ * Na rodada 21 saiu uma peça do meio (o ícone de "pede formulário", que
+ * repetia o ícone do tipo) e, com número escrito à mão, a legenda teria ficado
+ * pulando do 11 para o 13. Assim, tirar ou acrescentar peça é mexer numa lista
+ * e mais nada.
+ */
+function numerar(lista: SeloSemNumero[], inicio: number): Selo[] {
+  return lista.map((selo, i) => ({ ...selo, numero: inicio + i }))
+}
+
+const pecasDoCartao: SeloSemNumero[] = [
   {
-    numero: 1,
+    id: 'tipo',
     chave: 'tipo',
     onde: 'cartao',
     rotulo: 'Ícone do tipo',
@@ -63,7 +83,7 @@ export const selosDoCartao: Selo[] = [
     quadro: 'rodape',
   },
   {
-    numero: 2,
+    id: 'referencia',
     chave: 'referencia',
     onde: 'cartao',
     rotulo: 'Referência curta',
@@ -74,17 +94,17 @@ export const selosDoCartao: Selo[] = [
     quadro: 'rodape',
   },
   {
-    numero: 3,
+    id: 'prazoAtrasado',
     chave: 'prazo',
     onde: 'cartao',
     rotulo: 'O mesmo prazo, atrasado',
     campo: 'due_date + status',
     origem: 'derivado',
-    comportamento: 'Não é outra peça: é o campo 10 em vermelho, com o ícone de alarme no lugar do calendário. Até a rodada 18 era um selo separado no topo do cartão, e o prazo sumia quando ele aparecia. O mercado resolve pela cor: no Trello a etiqueta de data fica amarela perto do vencimento e vermelha depois, e no ClickUp a data fica laranja hoje e vermelha atrasada. Quantos dias de atraso, o tooltip diz.',
+    comportamento: 'Não é outra peça: é o campo Prazo em vermelho, com o ícone de alarme no lugar do calendário. Até a rodada 18 era um selo separado no topo do cartão, e o prazo sumia quando ele aparecia. O mercado resolve pela cor: no Trello a etiqueta de data fica amarela perto do vencimento e vermelha depois, e no ClickUp a data fica laranja hoje e vermelha atrasada. Quantos dias de atraso, o tooltip diz.',
     lado: 'direita',
   },
   {
-    numero: 4,
+    id: 'titulo',
     chave: 'titulo',
     onde: 'cartao',
     rotulo: 'Título',
@@ -95,7 +115,7 @@ export const selosDoCartao: Selo[] = [
     quadro: 'cabeca',
   },
   {
-    numero: 5,
+    id: 'descricao',
     chave: 'descricao',
     onde: 'cartao',
     rotulo: 'Prévia da descrição',
@@ -106,7 +126,7 @@ export const selosDoCartao: Selo[] = [
     quadro: 'cabeca',
   },
   {
-    numero: 6,
+    id: 'item',
     chave: 'item',
     onde: 'cartao',
     rotulo: 'Registro de origem',
@@ -117,7 +137,7 @@ export const selosDoCartao: Selo[] = [
     quadro: 'cabeca',
   },
   {
-    numero: 7,
+    id: 'etiquetas',
     chave: 'etiquetas',
     onde: 'cartao',
     rotulo: 'Etiquetas',
@@ -128,7 +148,7 @@ export const selosDoCartao: Selo[] = [
     quadro: 'cabeca',
   },
   {
-    numero: 8,
+    id: 'maisEtiquetas',
     chave: 'maisEtiquetas',
     onde: 'cartao',
     rotulo: 'Contador de etiquetas',
@@ -139,7 +159,7 @@ export const selosDoCartao: Selo[] = [
     quadro: 'cabeca',
   },
   {
-    numero: 9,
+    id: 'prioridade',
     chave: 'prioridade',
     onde: 'cartao',
     rotulo: 'Selo de prioridade',
@@ -150,7 +170,7 @@ export const selosDoCartao: Selo[] = [
     quadro: 'rodape',
   },
   {
-    numero: 10,
+    id: 'prazo',
     chave: 'prazo',
     onde: 'cartao',
     rotulo: 'Prazo',
@@ -161,7 +181,7 @@ export const selosDoCartao: Selo[] = [
     quadro: 'rodape',
   },
   {
-    numero: 11,
+    id: 'pontos',
     chave: 'pontos',
     onde: 'cartao',
     rotulo: 'Pontos',
@@ -172,18 +192,7 @@ export const selosDoCartao: Selo[] = [
     quadro: 'rodape',
   },
   {
-    numero: 12,
-    chave: 'formulario',
-    onde: 'cartao',
-    rotulo: 'Tem formulário',
-    campo: 'type + meta.form',
-    origem: 'derivado',
-    comportamento: 'Prancheta: a tarefa pede resposta antes de poder ser concluída. Sem isso, a pessoa só descobre ao abrir.',
-    lado: 'direita',
-    quadro: 'rodape',
-  },
-  {
-    numero: 13,
+    id: 'tempo',
     chave: 'tempo',
     onde: 'cartao',
     rotulo: 'Tempo apontado',
@@ -194,7 +203,7 @@ export const selosDoCartao: Selo[] = [
     quadro: 'rodape',
   },
   {
-    numero: 14,
+    id: 'iconeDescricao',
     chave: 'iconeDescricao',
     onde: 'cartao',
     rotulo: 'Tem mais texto',
@@ -205,7 +214,7 @@ export const selosDoCartao: Selo[] = [
     quadro: 'rodape',
   },
   {
-    numero: 15,
+    id: 'criador',
     chave: 'criador',
     onde: 'cartao',
     rotulo: 'Quem criou',
@@ -216,7 +225,7 @@ export const selosDoCartao: Selo[] = [
     quadro: 'pessoas',
   },
   {
-    numero: 16,
+    id: 'colaboradores',
     chave: 'colaboradores',
     onde: 'cartao',
     rotulo: 'Quem colabora',
@@ -227,7 +236,7 @@ export const selosDoCartao: Selo[] = [
     quadro: 'pessoas',
   },
   {
-    numero: 17,
+    id: 'responsavel',
     chave: 'responsavel',
     onde: 'cartao',
     rotulo: 'Quem responde',
@@ -238,7 +247,7 @@ export const selosDoCartao: Selo[] = [
     quadro: 'pessoas',
   },
   {
-    numero: 18,
+    id: 'menu',
     chave: 'menu',
     onde: 'cartao',
     rotulo: 'Ações da tarefa',
@@ -249,7 +258,7 @@ export const selosDoCartao: Selo[] = [
     quadro: 'cabeca',
   },
   {
-    numero: 19,
+    id: 'borda',
     chave: 'borda',
     onde: 'cartao',
     rotulo: 'Filete de atraso',
@@ -259,7 +268,7 @@ export const selosDoCartao: Selo[] = [
     lado: 'esquerda',
   },
   {
-    numero: 20,
+    id: 'cartao',
     chave: 'cartao',
     onde: 'cartao',
     rotulo: 'A situação não está no cartão',
@@ -274,19 +283,21 @@ export const selosDoCartao: Selo[] = [
 /* ------------------------------------------------------------------ *
  * O painel lateral, de cima para baixo.                               *
  * ------------------------------------------------------------------ */
-export const selosDoPainel: Selo[] = [
+export const selosDoCartao: Selo[] = numerar(pecasDoCartao, 1)
+
+const pecasDoPainel: SeloSemNumero[] = [
   {
-    numero: 21,
+    id: 'painelIcone',
     chave: 'painelIcone',
     onde: 'painel',
     rotulo: 'Ícone do tipo',
     campo: 'type',
     origem: 'nativo',
-    comportamento: 'O mesmo ícone do cartão (1), em tamanho de identidade.',
+    comportamento: 'O mesmo ícone do tipo que abre o rodapé do cartão, aqui em tamanho de identidade.',
     lado: 'esquerda',
   },
   {
-    numero: 22,
+    id: 'painelTitulo',
     chave: 'painelTitulo',
     onde: 'painel',
     rotulo: 'Título editável',
@@ -296,7 +307,7 @@ export const selosDoPainel: Selo[] = [
     lado: 'esquerda',
   },
   {
-    numero: 23,
+    id: 'painelReferencia',
     chave: 'painelReferencia',
     onde: 'painel',
     rotulo: 'Referência',
@@ -306,7 +317,7 @@ export const selosDoPainel: Selo[] = [
     lado: 'esquerda',
   },
   {
-    numero: 24,
+    id: 'painelSelos',
     chave: 'painelSelos',
     onde: 'painel',
     rotulo: 'Selos da identidade',
@@ -316,7 +327,7 @@ export const selosDoPainel: Selo[] = [
     lado: 'esquerda',
   },
   {
-    numero: 25,
+    id: 'painelDetalhes',
     chave: 'painelDetalhes',
     onde: 'painel',
     rotulo: 'Lista DETALHES',
@@ -326,7 +337,7 @@ export const selosDoPainel: Selo[] = [
     lado: 'esquerda',
   },
   {
-    numero: 26,
+    id: 'painelTempo',
     chave: 'painelTempo',
     onde: 'painel',
     rotulo: 'Campo de tempo',
@@ -336,7 +347,7 @@ export const selosDoPainel: Selo[] = [
     lado: 'esquerda',
   },
   {
-    numero: 27,
+    id: 'painelAbas',
     chave: 'painelAbas',
     onde: 'painel',
     rotulo: 'Abas',
@@ -346,7 +357,7 @@ export const selosDoPainel: Selo[] = [
     lado: 'esquerda',
   },
   {
-    numero: 28,
+    id: 'painelDescricao',
     chave: 'painelDescricao',
     onde: 'painel',
     rotulo: 'Descrição',
@@ -356,7 +367,7 @@ export const selosDoPainel: Selo[] = [
     lado: 'esquerda',
   },
   {
-    numero: 29,
+    id: 'painelFormulario',
     chave: 'painelFormulario',
     onde: 'painel',
     rotulo: 'Formulário da tarefa',
@@ -366,7 +377,7 @@ export const selosDoPainel: Selo[] = [
     lado: 'esquerda',
   },
   {
-    numero: 30,
+    id: 'painelResultado',
     chave: 'painelResultado',
     onde: 'painel',
     rotulo: 'O que foi respondido',
@@ -376,7 +387,7 @@ export const selosDoPainel: Selo[] = [
     lado: 'esquerda',
   },
   {
-    numero: 31,
+    id: 'painelRodape',
     chave: 'painelRodape',
     onde: 'painel',
     rotulo: 'Guardar e concluir',
@@ -386,7 +397,7 @@ export const selosDoPainel: Selo[] = [
     lado: 'esquerda',
   },
   {
-    numero: 32,
+    id: 'painelHistorico',
     chave: 'painelHistorico',
     onde: 'painel',
     rotulo: 'Histórico',
@@ -396,5 +407,7 @@ export const selosDoPainel: Selo[] = [
     lado: 'esquerda',
   },
 ]
+
+export const selosDoPainel: Selo[] = numerar(pecasDoPainel, selosDoCartao.length + 1)
 
 export const todosOsSelos: Selo[] = [...selosDoCartao, ...selosDoPainel]

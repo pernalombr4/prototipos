@@ -49,10 +49,11 @@ function tarefaPorId(id: number) {
 }
 
 /**
- * Por número, e não por chave: desde a rodada 19 o selo 3 e o selo 10 apontam
- * o MESMO elemento (o prazo), um no estado atrasado e o outro no normal.
+ * Por id, e não por chave nem por número: dois selos apontam o MESMO elemento
+ * (o prazo, no estado normal e no atrasado), então a chave não distingue; e o
+ * número sai da ordem da lista, então ele muda quando uma peça entra ou sai.
  */
-const porNumero = (numeros: number[]) => selosDoCartao.filter(s => numeros.includes(s.numero))
+const porId = (ids: string[]) => selosDoCartao.filter(s => ids.includes(s.id))
 
 const quadros = computed(() => [
   {
@@ -81,14 +82,14 @@ const quadros = computed(() => [
     titulo: 'Com a tarefa atrasada',
     ajuda: 'O prazo não troca de lugar nem de formato: fica vermelho, troca o calendário pelo alarme e ganha o filete na borda esquerda, que é o aviso que sobrevive ao cartão pequeno.',
     tarefa: tarefaPorId(22086),
-    selos: porNumero([3, 19]),
+    selos: porId(['prazoAtrasado', 'borda']),
   },
   {
     chave: 'texto',
     titulo: 'Com a descrição gigante',
     ajuda: 'Tarefa 22089, com uma descrição de mais de trinta linhas. O cartão não cresce: corta em quatro linhas e acende o ícone que avisa que existe mais texto. O texto inteiro está no painel, e lá ele também começa recolhido.',
     tarefa: tarefaPorId(22089),
-    selos: porNumero([5, 14]),
+    selos: porId(['descricao', 'iconeDescricao']),
   },
 ])
 
@@ -176,15 +177,15 @@ const contagem = computed(() => selosDoCartao.length + selosDoPainel.length)
         <ul class="divide-y divide-default">
           <li
             v-for="selo in bloco.itens"
-            :key="selo.chave"
+            :key="selo.id"
             class="flex gap-3 px-4 py-2.5 transition-colors"
-            :class="foco === selo.chave ? 'bg-elevated' : ''"
-            @mouseenter="foco = selo.chave"
+            :class="foco === selo.id ? 'bg-elevated' : ''"
+            @mouseenter="foco = selo.id"
             @mouseleave="foco = null"
           >
             <span
               class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
-              :class="foco === selo.chave ? 'bg-primary text-inverted' : 'bg-elevated text-toned'"
+              :class="foco === selo.id ? 'bg-primary text-inverted' : 'bg-elevated text-toned'"
             >
               {{ selo.numero }}
             </span>

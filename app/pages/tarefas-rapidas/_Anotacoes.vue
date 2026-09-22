@@ -54,6 +54,9 @@ function guardarBalao(chave: string, el: unknown) {
 }
 
 interface Desenho {
+  /** O id do selo: e por ele que o balao, a seta e o destaque se acham. */
+  id: string
+  /** O `data-selo` do elemento na tela, que pode repetir entre selos. */
   chave: string
   numero: number
   topo: number
@@ -93,9 +96,9 @@ let agendada = false
 let seguidas = 0
 const TETO_DE_MEDIDAS = 40
 
-const porChave = computed(() => {
+const porId = computed(() => {
   const m = new Map<string, Desenho>()
-  for (const d of desenhos.value) m.set(d.chave, d)
+  for (const d of desenhos.value) m.set(d.id, d)
   return m
 })
 
@@ -140,7 +143,7 @@ function medir() {
     let piso = 0
 
     for (const alvo of doLado) {
-      const altura = balaoEl.get(alvo.selo.chave)?.offsetHeight ?? 64
+      const altura = balaoEl.get(alvo.selo.id)?.offsetHeight ?? 64
       const centro = alvo.y + alvo.h / 2
       const topo = Math.max(piso, centro - altura / 2)
       piso = topo + altura + 8
@@ -157,6 +160,7 @@ function medir() {
       const curva = Math.sign(vao) * Math.max(28, Math.abs(vao) * 0.5)
 
       saida.push({
+        id: alvo.selo.id,
         chave: alvo.selo.chave,
         numero: alvo.selo.numero,
         lado,
@@ -170,7 +174,7 @@ function medir() {
   }
 
   const assinatura = saida
-    .map(d => `${d.chave}:${Math.round(d.topo)}:${Math.round(d.discoX)}:${Math.round(d.discoY)}`)
+    .map(d => `${d.id}:${Math.round(d.topo)}:${Math.round(d.discoX)}:${Math.round(d.discoY)}`)
     .join('|')
   pronto.value = true
   alturaReservada.value = Math.ceil(maisBaixo)
@@ -260,8 +264,8 @@ defineExpose({ medir, remedir })
     >
       <g
         v-for="d in desenhos"
-        :key="d.chave"
-        :opacity="emFoco && emFoco !== d.chave ? 0.18 : 1"
+        :key="d.id"
+        :opacity="emFoco && emFoco !== d.id ? 0.18 : 1"
         class="transition-opacity duration-150"
       >
         <rect
@@ -274,14 +278,14 @@ defineExpose({ medir, remedir })
           stroke="currentColor"
           stroke-width="1"
           stroke-dasharray="4 3"
-          :opacity="emFoco === d.chave ? 0.9 : 0.45"
+          :opacity="emFoco === d.id ? 0.9 : 0.45"
         />
         <path
           :d="d.caminho"
           fill="none"
           stroke="currentColor"
           stroke-width="1.5"
-          :opacity="emFoco === d.chave ? 0.95 : 0.6"
+          :opacity="emFoco === d.id ? 0.95 : 0.6"
         />
       </g>
     </svg>
@@ -289,11 +293,11 @@ defineExpose({ medir, remedir })
     <!-- O número, cravado no ponto exato da peça -->
     <span
       v-for="d in desenhos"
-      :key="`n-${d.chave}`"
+      :key="`n-${d.id}`"
       class="pointer-events-none absolute z-20 flex size-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center
              rounded-full bg-primary text-[10px] font-bold text-inverted shadow transition-opacity duration-150"
       :style="{ left: `${d.discoX}px`, top: `${d.discoY}px` }"
-      :class="emFoco && emFoco !== d.chave ? 'opacity-30' : ''"
+      :class="emFoco && emFoco !== d.id ? 'opacity-30' : ''"
     >
       {{ d.numero }}
     </span>
@@ -301,21 +305,21 @@ defineExpose({ medir, remedir })
     <!-- Os balões. Ficam no DOM mesmo sem alvo, senão não dá para medi-los. -->
     <div
       v-for="selo in selos"
-      :key="selo.chave"
-      :ref="el => guardarBalao(selo.chave, el)"
+      :key="selo.id"
+      :ref="el => guardarBalao(selo.id, el)"
       class="absolute z-10 rounded-lg border bg-default p-2 shadow-sm transition-[opacity,border-color] duration-200"
       :class="[
-        porChave.has(selo.chave) && pronto ? 'opacity-100' : 'pointer-events-none opacity-0',
-        emFoco === selo.chave ? 'border-primary shadow-md' : 'border-default',
-        emFoco && emFoco !== selo.chave ? 'opacity-40' : '',
+        porId.has(selo.id) && pronto ? 'opacity-100' : 'pointer-events-none opacity-0',
+        emFoco === selo.id ? 'border-primary shadow-md' : 'border-default',
+        emFoco && emFoco !== selo.id ? 'opacity-40' : '',
       ]"
       :style="{
         width: `${largura}px`,
-        top: `${porChave.get(selo.chave)?.topo ?? 0}px`,
-        left: porChave.get(selo.chave)?.lado === 'direita' ? 'auto' : '0px',
-        right: porChave.get(selo.chave)?.lado === 'direita' ? '0px' : 'auto',
+        top: `${porId.get(selo.id)?.topo ?? 0}px`,
+        left: porId.get(selo.id)?.lado === 'direita' ? 'auto' : '0px',
+        right: porId.get(selo.id)?.lado === 'direita' ? '0px' : 'auto',
       }"
-      @mouseenter="focar(selo.chave)"
+      @mouseenter="focar(selo.id)"
       @mouseleave="focar(null)"
     >
       <div class="flex items-start gap-2">

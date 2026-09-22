@@ -153,7 +153,6 @@ export interface Textos {
   maisEtiquetas: (n: number) => string
   abrirTarefa: string
   acoesDaTarefa: string
-  temFormulario: string
   temDescricao: string
   mostrarTudo: string
   mostrarMenos: string
@@ -429,7 +428,6 @@ export const textos: Record<Idioma, Textos> = {
     maisEtiquetas: n => `+${n}`,
     abrirTarefa: 'Abrir tarefa',
     acoesDaTarefa: 'Ações da tarefa',
-    temFormulario: 'Pede formulário',
     temDescricao: 'Tem descrição. Abra a tarefa para ler inteira',
     mostrarTudo: 'Mostrar a descrição inteira',
     mostrarMenos: 'Mostrar menos',
@@ -698,7 +696,6 @@ export const textos: Record<Idioma, Textos> = {
     maisEtiquetas: n => `+${n}`,
     abrirTarefa: 'Open task',
     acoesDaTarefa: 'Task actions',
-    temFormulario: 'Asks for a form',
     temDescricao: 'Has a description. Open the task to read it in full',
     mostrarTudo: 'Show the whole description',
     mostrarMenos: 'Show less',
@@ -967,7 +964,6 @@ export const textos: Record<Idioma, Textos> = {
     maisEtiquetas: n => `+${n}`,
     abrirTarefa: 'Abrir tarea',
     acoesDaTarefa: 'Acciones de la tarea',
-    temFormulario: 'Pide formulario',
     temDescricao: 'Tiene descripción. Abra la tarea para leerla entera',
     mostrarTudo: 'Mostrar la descripción entera',
     mostrarMenos: 'Mostrar menos',
