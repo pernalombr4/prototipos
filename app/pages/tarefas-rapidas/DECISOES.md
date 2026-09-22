@@ -1090,3 +1090,81 @@ colaboradores, concluída em, criada em, atualizada em, identificador, referênc
 traços nos lugares certos (6 ícones, traço, 4 ícones, traço, 5 ícones). Expandido, a coluna
 DETALHES mostra os dez primeiros e o botão **Dados técnicos** com `aria-expanded="false"`;
 clicando, ele abre os cinco restantes e vira `true`.
+
+---
+
+## Rodada 17 — 22/09/2026
+
+### O que ela pediu, literal
+
+> faça um estado que mostra com indicadores na tela (setas, baloes) a posiçao de cada badge
+> nos cards do kanban. pra isso, mantenha em tela um card com legenda enorme tambem (+30
+> linhas) pra mostrar qual seria o comportamento em tela. faça as setas tambem ao abrir esse
+> card na sidebar. / indique o que é cada badge (referente a qual campo da tarefa)
+
+### O que ficou
+
+Um estado novo na barra do andaime, **Mapa dos selos**, com 32 peças apontadas.
+
+**Balão e seta em cada peça.** O cartão fica no meio, os balões nas duas colunas, e cada um
+liga na peça dele por uma curva que termina num número cravado no ponto exato. Passar o mouse
+num balão, ou numa linha da legenda, apaga os outros e acende só aquele. As posições são
+**medidas na tela**, não escritas à mão: o protótipo troca de idioma, de tema e de tamanho de
+cartão, e seta em posição fixa apontaria para o lugar errado no primeiro texto mais comprido.
+
+**Três cartões, porque três selos não existem no mesmo cartão:**
+
+| Bloco | Para quê |
+|---|---|
+| Tarefa 22078, todos os campos ligados | o pior caso: dezessete peças ao mesmo tempo |
+| Tarefa 22086, atrasada | o selo de atraso (3) e o filete na borda (19), que só existem aqui |
+| Tarefa 22089, descrição gigante | o corte em quatro linhas e o ícone de "tem mais texto" (14) |
+
+**A legenda, 32 linhas**, com quatro colunas de informação por peça: o número, o nome, o campo
+do payload em `code` e o que a peça faz na tela. A coluna que interessa ao back é a origem:
+
+- **Campo da tarefa**, que já vem no `GET /tasks` (a maioria);
+- **Calculado no front**, como o atraso, o contador de etiquetas e o filete da borda;
+- **Outra chamada**, para pessoas, etiquetas e registro de origem, que no payload são só ids;
+- **Não existe hoje**, que são as duas peças de tempo, já listadas nas rodadas 12 a 15.
+
+**As setas também no painel**, como ela pediu. Abrindo o cartão dentro do mapa, o painel abre
+com uma faixa vazia à esquerda e dez balões apontando as peças dele. O painel é o mesmo, do
+mesmo tamanho e com as mesmas peças: a faixa é só onde as setas correm.
+
+**O que mudou fora do andaime:** nada de comportamento. Os componentes ganharam `data-selo`
+nos elementos, que é o endereço que o mapa usa para achar cada peça, e o cartão ganhou uma
+prop `anotado` que mostra o menu ⋮ sem precisar do hover. A tarefa 22078 ganhou uma terceira
+etiqueta, porque ela é a tarefa do pior caso e o contador "+1" precisava aparecer em algum
+lugar.
+
+**Por que o mapa é só em português:** ele é andaime, como a barra de estados e o "Por trás".
+Não vai para o produto, e o que precisa acompanhar o idioma é a tela apontada, que acompanha.
+
+### O que custou uma aba travada
+
+Medir muda o desenho, o desenho muda a altura da pilha de balões, a altura faz aparecer barra
+de rolagem, a barra muda a largura da janela, e a largura muda a medida. Com um
+`ResizeObserver` na própria área, esse ciclo não fecha nunca: o Chrome girou nele até o
+renderer parar de responder, duas vezes.
+
+O sintoma foi enganoso. Os balões tinham `top` certo no atributo `style` e `top: 0` no
+computado, e um elemento de teste no mesmo lugar posicionava normalmente. Era o `transition`
+na posição, que nunca chegava ao fim porque o Vue repintava a cada quadro.
+
+Três guardas, e as três são necessárias:
+
+1. a medida só entra na tela quando muda de verdade (assinatura do desenho);
+2. no máximo uma medida por quadro;
+3. o observador olha o conteúdo, e não a área, porque o conteúdo não depende do desenho. Mais
+   um teto de medidas seguidas, que se renova quando a mudança vem de fora, porque guarda que
+   depende de eu ter raciocinado direito sobre layout é guarda que falha.
+
+E os balões deixaram de animar posição: eles aparecem onde estão, e só a opacidade transita.
+
+### Conferido na tela
+
+Dezessete balões no primeiro bloco, dois em cada um dos outros, sem sobreposição em nenhuma
+coluna e nada transbordando para a seção de baixo. Os números batem com a ordem visual,
+inclusive nas seis peças que dividem a mesma linha do rodapé. No painel, dez balões, das abas
+ao rodapé. A legenda fecha em 32 linhas, da peça 1 à 32.

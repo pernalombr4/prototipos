@@ -8,11 +8,14 @@
  */
 import type { Task } from '@be-enlighten/enspace-sdk-schemas'
 import type { EnKanbanCardConfig, EnKanbanColumn } from '@be-enlighten/enspace-sdk-ui/base'
+import Anotacoes from './_Anotacoes.vue'
 import BarraDoQuadro, { type Filtros, type Periodo } from './_BarraDoQuadro.vue'
 import CascaDoEnspace from './_CascaDoEnspace.vue'
+import MapaDosSelos from './_MapaDosSelos.vue'
 import ModalNovaTarefa from './_ModalNovaTarefa.vue'
 import PainelDaTarefa from './_PainelDaTarefa.vue'
 import RaiaDoQuadro from './_RaiaDoQuadro.vue'
+import { selosDoPainel } from './selos'
 import { estimativaDeTempo, itensRelacionados, registrosDeTempo, tarefas as tarefasMock, usuarioAtual } from './mocks'
 import type { OrdemDaRaia } from './_RaiaDoQuadro.vue'
 import {
@@ -31,7 +34,7 @@ definePageMeta({
   titulo: 'Tarefas rápidas',
   descricao: 'Agrupar, ordenar e somar no próprio quadro, com o cartão dizendo o que a pessoa precisa para decidir.',
   status: 'em-revisao',
-  atualizado: '2026-09-21',
+  atualizado: '2026-09-22',
   tela: 'Quadro de tarefas rápidas',
 })
 
@@ -42,7 +45,7 @@ const toast = useToast()
  * ANDAIME: o seletor de estados não faz parte da proposta. Existe     *
  * para percorrer os cinco estados e comparar com a tela de hoje.      *
  * ------------------------------------------------------------------ */
-type Estado = 'cheio' | 'vazio' | 'carregando' | 'erro' | 'leitura' | 'hoje'
+type Estado = 'cheio' | 'vazio' | 'carregando' | 'erro' | 'leitura' | 'hoje' | 'mapa'
 const estado = ref<Estado>('cheio')
 const estados: { valor: Estado, rotulo: string }[] = [
   { valor: 'cheio', rotulo: 'Quadro cheio' },
@@ -51,7 +54,14 @@ const estados: { valor: Estado, rotulo: string }[] = [
   { valor: 'erro', rotulo: 'Erro' },
   { valor: 'leitura', rotulo: 'Sem permissão' },
   { valor: 'hoje', rotulo: 'Como é hoje' },
+  { valor: 'mapa', rotulo: 'Mapa dos selos' },
 ]
+
+/**
+ * ANDAIME: no mapa dos selos o painel abre com uma faixa vazia à esquerda,
+ * onde as setas correm. O painel em si é o mesmo, do mesmo tamanho.
+ */
+const anotando = computed(() => estado.value === 'mapa')
 
 const somenteLeitura = computed(() => estado.value === 'leitura')
 const carregando = computed(() => estado.value === 'carregando')
@@ -446,6 +456,15 @@ function atualizarCampo(campo: keyof Task, valor: unknown) {
  * Andaime: leva direto ao cartão que tem todos os campos preenchidos, que é o
  * caso de borda pedido na demanda. Não faz parte da proposta.
  */
+/**
+ * ANDAIME: no mapa, clicar no cartão abre o painel já expandido, que é o
+ * estado em que as peças apontadas estão todas na tela.
+ */
+function abrirNoMapa(tarefa: Task) {
+  painelExpandido.value = true
+  tarefaAberta.value = tarefa
+}
+
 function mostrarCartaoCompleto() {
   estado.value = 'cheio'
   densidade.value = 'grande'
@@ -547,6 +566,14 @@ const cartaoDeHoje: EnKanbanCardConfig = {
         </div>
       </ClientOnly>
 
+      <!-- ANDAIME: o mapa dos selos, com balão e seta em cada peça -->
+      <MapaDosSelos
+        v-else-if="estado === 'mapa'"
+        :tarefas="lista"
+        :t="t"
+        @abrir="abrirNoMapa"
+      />
+
       <!-- Sem nenhuma tarefa no workspace -->
       <UEmpty
         v-else-if="!base.length && !carregando"
@@ -608,11 +635,48 @@ const cartaoDeHoje: EnKanbanCardConfig = {
     <!-- O cartão aberto -->
     <USlideover
       v-model:open="painelAberto"
-      :ui="{ content: painelExpandido ? 'max-w-[61rem] transition-[max-width] duration-200' : 'max-w-[43.75rem] transition-[max-width] duration-200' }"
+      :ui="{ content: anotando
+        ? 'max-w-[80rem] transition-[max-width] duration-200'
+        : painelExpandido ? 'max-w-[61rem] transition-[max-width] duration-200' : 'max-w-[43.75rem] transition-[max-width] duration-200' }"
     >
       <template #content>
+        <!--
+          ANDAIME: a faixa vazia à esquerda é só onde as setas correm. O painel
+          continua do mesmo tamanho e com as mesmas peças.
+        -->
+        <Anotacoes
+          v-if="anotando && tarefaAberta"
+          :selos="selosDoPainel"
+          apenas-esquerda
+          :largura="230"
+          :folga="40"
+          :refazer="`${tarefaAberta.id}-${painelExpandido}`"
+          class="h-full min-h-0 flex-1"
+        >
+          <PainelDaTarefa
+            :tarefa="tarefaAberta"
+            :t="t"
+            :somente-leitura="somenteLeitura"
+            :expandido="painelExpandido"
+            :cronometro-ativo="cronometro?.tarefa === tarefaAberta.id"
+            :segundos-correndo="segundosCorrendo"
+            @fechar="tarefaAberta = null"
+            @expandir="(v) => painelExpandido = v"
+            @salvar="toast.add({ title: t.tarefaSalva, icon: 'i-lucide-check', color: 'success' })"
+            @concluir="concluir"
+            @reabrir="reabrir"
+            @copiar-referencia="copiarReferencia"
+            @atualizar="atualizarCampo"
+            @iniciar-cronometro="iniciarCronometro(tarefaAberta)"
+            @parar-cronometro="pararCronometro"
+            @registrar-tempo="registrarTempo"
+            @atualizar-registro="atualizarRegistro"
+            @apagar-registro="apagarRegistro"
+          />
+        </Anotacoes>
+
         <PainelDaTarefa
-          v-if="tarefaAberta"
+          v-else-if="tarefaAberta"
           :tarefa="tarefaAberta"
           :t="t"
           :somente-leitura="somenteLeitura"

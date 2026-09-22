@@ -596,6 +596,7 @@ const abas = computed(() => [
         </p>
 
         <div
+          data-selo="painelIcone"
           class="mx-auto flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary"
         >
           <UIcon :name="iconeDoTipo[tarefa.type]" class="size-6" />
@@ -615,6 +616,7 @@ const abas = computed(() => [
         <button
           v-else
           type="button"
+          data-selo="painelTitulo"
           class="group mt-3 block w-full rounded-md px-1 py-0.5 text-center text-base font-semibold leading-snug text-highlighted transition-colors"
           :class="podeEditar ? 'hover:bg-elevated' : 'cursor-default'"
           :aria-label="podeEditar ? t.editarTitulo : undefined"
@@ -628,11 +630,11 @@ const abas = computed(() => [
           />
         </button>
 
-        <p class="mt-1 text-center font-mono text-xs text-muted">
+        <p data-selo="painelReferencia" class="mt-1 text-center font-mono text-xs text-muted">
           {{ referenciaCurta(tarefa.reference) }}
         </p>
 
-        <div class="mt-3 flex flex-wrap justify-center gap-1.5">
+        <div data-selo="painelSelos" class="mt-3 flex flex-wrap justify-center gap-1.5">
           <UBadge
             :label="t.status[tarefa.status]"
             :color="corDaSituacao[tarefa.status]"
@@ -662,7 +664,7 @@ const abas = computed(() => [
         {{ t.detalhes }}
       </p>
 
-      <dl class="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-2">
+      <dl data-selo="painelDetalhes" class="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-2">
         <template v-for="(campo, i) in camposDoDia" :key="campo.chave">
           <!-- Entre o que se decide e o que classifica, um traço -->
           <div v-if="abreGrupo(camposDoDia, i)" class="border-t border-default" />
@@ -707,6 +709,7 @@ const abas = computed(() => [
               <UPopover :content="{ align: 'start', side: 'left' }">
                 <button
                   type="button"
+                  data-selo="painelTempo"
                   class="flex w-full items-center gap-2 rounded-md border border-default px-2 py-1.5 text-left transition-colors hover:border-accented hover:bg-elevated"
                   :aria-label="t.tempo.secao"
                 >
@@ -1026,7 +1029,7 @@ const abas = computed(() => [
     <!-- ─────────────────────── Conteúdo ─────────────────────── -->
     <div class="flex min-w-0 flex-1 flex-col">
       <!-- Abas, no topo, como hoje -->
-      <div class="flex shrink-0 items-center gap-1 border-b border-default px-3">
+      <div data-selo="painelAbas" class="flex shrink-0 items-center gap-1 border-b border-default px-3">
         <button
           v-for="a in abas"
           :key="a.chave"
@@ -1139,7 +1142,7 @@ const abas = computed(() => [
           </header>
 
           <!-- Seção Descrição, com ícone e nome, como hoje -->
-          <section class="px-5 pb-4" :class="expandido ? 'pt-4' : ''">
+          <section data-selo="painelDescricao" class="px-5 pb-4" :class="expandido ? 'pt-4' : ''">
             <h3 class="mb-2 flex items-center gap-1.5 text-sm font-medium text-highlighted">
               <UIcon name="i-lucide-file-text" class="size-4 text-muted" />
               {{ t.campos.descricao }}
@@ -1193,7 +1196,7 @@ const abas = computed(() => [
           </section>
 
           <!-- Formulário da tarefa -->
-          <section v-if="camposDoFormulario.length && !concluida" class="px-5 pb-4">
+          <section v-if="camposDoFormulario.length && !concluida" data-selo="painelFormulario" class="px-5 pb-4">
             <h3 class="mb-2 flex items-center gap-1.5 text-sm font-medium text-highlighted">
               <UIcon name="i-lucide-clipboard-list" class="size-4 text-muted" />
               {{ t.formulario }}
@@ -1257,7 +1260,7 @@ const abas = computed(() => [
           </section>
 
           <!-- O que foi respondido, quando a tarefa já fechou -->
-          <section v-if="concluida && resultado" class="px-5 pb-4">
+          <section v-if="concluida && resultado" data-selo="painelResultado" class="px-5 pb-4">
             <h3 class="mb-2 flex items-center gap-1.5 text-sm font-medium text-highlighted">
               <UIcon name="i-lucide-clipboard-check" class="size-4 text-muted" />
               {{ t.resultado }}
@@ -1279,7 +1282,7 @@ const abas = computed(() => [
         />
 
         <!-- Histórico: a mesma linha do tempo do develop -->
-        <div v-else class="px-5 py-4">
+        <div v-else data-selo="painelHistorico" class="px-5 py-4">
           <div v-if="!historico.length" class="py-8">
             <UEmpty icon="i-lucide-shield-check" :title="t.logsVazios" />
           </div>
@@ -1327,7 +1330,7 @@ const abas = computed(() => [
       </footer>
 
       <!-- Rodapé com as duas ações, como hoje -->
-      <footer v-else class="flex shrink-0 items-center gap-2 border-t border-default px-5 py-3">
+      <footer v-else data-selo="painelRodape" class="flex shrink-0 items-center gap-2 border-t border-default px-5 py-3">
         <p v-if="concluida" class="flex-1 text-sm text-muted">{{ t.tarefaConcluida }}</p>
         <p v-else-if="camposVisiveis.length && !podeConcluir" class="flex-1 text-xs text-muted">
           {{ t.faltaResponder }}

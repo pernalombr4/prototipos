@@ -41,6 +41,11 @@ const props = defineProps<{
   /** O cronômetro está rodando nesta tarefa. */
   cronometroAtivo?: boolean
   segundosCorrendo?: number
+  /**
+   * ANDAIME: o cartão está sendo apontado pelo mapa dos selos. Só serve para
+   * mostrar de uma vez o que normalmente só aparece no hover. Não é proposta.
+   */
+  anotado?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -138,15 +143,19 @@ const itensDoMenu = computed(() => [[
       atrasada && !ativo ? 'border-l-2 border-l-error' : '',
       somenteLeitura ? '' : 'cursor-grab active:cursor-grabbing',
     ]"
+    data-selo="cartao"
   >
+    <!-- ANDAIME: marca invisível na faixa da borda, para o mapa ter onde apontar -->
+    <span v-if="anotado && atrasada" data-selo="borda" class="absolute inset-y-0 left-0 w-0.5" />
+
     <!-- Linha de identificação: tipo, referência e o aviso que não pode esperar o clique -->
     <div v-if="campos.referencia || campos.tipo || atrasada" class="mb-1.5 flex items-center gap-1.5">
       <UTooltip v-if="campos.tipo" :text="dica(t.campos.tipo, t.tipo[tarefa.type])">
-        <UIcon :name="iconeDoTipo[tarefa.type]" class="size-3.5 shrink-0 text-muted" />
+        <UIcon :name="iconeDoTipo[tarefa.type]" data-selo="tipo" class="size-3.5 shrink-0 text-muted" />
       </UTooltip>
 
       <UTooltip v-if="campos.referencia" :text="dica(t.campos.referencia, tarefa.reference)">
-        <span class="font-mono text-[11px] leading-none text-muted">
+        <span data-selo="referencia" class="font-mono text-[11px] leading-none text-muted">
           {{ referenciaCurta(tarefa.reference) }}
         </span>
       </UTooltip>
@@ -158,6 +167,7 @@ const itensDoMenu = computed(() => [[
           variant="subtle"
           size="sm"
           icon="i-lucide-alarm-clock"
+          data-selo="atraso"
         />
       </UTooltip>
     </div>
@@ -167,7 +177,7 @@ const itensDoMenu = computed(() => [[
       `overflow: hidden`, e isso recorta o `after:inset-0` do link esticado:
       o cartão deixa de ser clicável fora das duas linhas do título.
     -->
-    <h3 class="text-sm font-medium leading-snug text-highlighted">
+    <h3 data-selo="titulo" class="text-sm font-medium leading-snug text-highlighted">
       <a
         :href="`#${tarefa.reference}`"
         class="outline-none after:absolute after:inset-0 after:rounded-lg"
@@ -184,6 +194,7 @@ const itensDoMenu = computed(() => [[
     -->
     <p
       v-if="mostraDescricao"
+      data-selo="descricao"
       class="mt-1 break-words text-xs leading-relaxed text-muted"
       :class="linhasDaDescricao"
     >
@@ -192,7 +203,7 @@ const itensDoMenu = computed(() => [[
 
     <!-- Registro de origem: é ele que diz de qual chamado a tarefa veio -->
     <UTooltip v-if="campos.item && item" :text="dicaDoItem">
-      <div class="mt-2 flex items-center gap-1.5 text-xs text-muted">
+      <div data-selo="item" class="mt-2 flex items-center gap-1.5 text-xs text-muted">
         <UIcon name="i-lucide-link" class="size-3.5 shrink-0 text-muted" />
         <span class="shrink-0 whitespace-nowrap font-medium text-toned">{{ item.codigo }}</span>
         <span class="truncate">{{ item.titulo }}</span>
@@ -200,7 +211,7 @@ const itensDoMenu = computed(() => [[
     </UTooltip>
 
     <!-- Etiquetas -->
-    <div v-if="campos.etiquetas && tags.length" class="mt-2 flex flex-wrap gap-1">
+    <div v-if="campos.etiquetas && tags.length" data-selo="etiquetas" class="mt-2 flex flex-wrap gap-1">
       <UTooltip
         v-for="tag in tags.slice(0, 2)"
         :key="tag!.id"
@@ -209,7 +220,13 @@ const itensDoMenu = computed(() => [[
         <UBadge :label="tag!.nome" :color="tag!.cor" variant="soft" size="sm" />
       </UTooltip>
       <UTooltip v-if="tags.length > 2" :text="dicaDasEtiquetasEscondidas">
-        <UBadge :label="t.maisEtiquetas(tags.length - 2)" color="neutral" variant="soft" size="sm" />
+        <UBadge
+          :label="t.maisEtiquetas(tags.length - 2)"
+          color="neutral"
+          variant="soft"
+          size="sm"
+          data-selo="maisEtiquetas"
+        />
       </UTooltip>
     </div>
 
@@ -225,11 +242,13 @@ const itensDoMenu = computed(() => [[
           :icon="iconeDaPrioridade[tarefa.priority]"
           variant="subtle"
           size="sm"
+          data-selo="prioridade"
         />
       </UTooltip>
 
       <UTooltip v-if="campos.prazo && tarefa.due_date && !atrasada" :text="dicaDoPrazo">
         <span
+          data-selo="prazo"
           class="flex items-center gap-1 text-xs"
           :class="prazo.cor === 'warning' ? 'font-medium text-warning' : 'text-muted'"
         >
@@ -239,13 +258,13 @@ const itensDoMenu = computed(() => [[
       </UTooltip>
 
       <UTooltip v-if="campos.pontos && tarefa.points > 0" :text="dica(t.campos.pontos, t.pontos(tarefa.points))">
-        <span class="flex items-center gap-1 rounded bg-elevated px-1.5 py-0.5 text-xs font-medium text-toned">
+        <span data-selo="pontos" class="flex items-center gap-1 rounded bg-elevated px-1.5 py-0.5 text-xs font-medium text-toned">
           <UIcon name="i-lucide-hash" class="size-3" />{{ tarefa.points }}
         </span>
       </UTooltip>
 
       <UTooltip v-if="temFormulario && campos.tipo" :text="t.temFormulario">
-        <UIcon name="i-lucide-clipboard-pen" class="size-3.5 text-muted" />
+        <UIcon name="i-lucide-clipboard-pen" data-selo="formulario" class="size-3.5 text-muted" />
       </UTooltip>
 
       <!--
@@ -259,6 +278,7 @@ const itensDoMenu = computed(() => [[
         :text="dica(t.campos.tempoRegistrado, formatarDuracao(tempo))"
       >
         <span
+          data-selo="tempo"
           class="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium tabular-nums"
           :class="cronometroAtivo ? 'bg-error/10 text-error' : 'bg-elevated text-toned'"
         >
@@ -269,7 +289,7 @@ const itensDoMenu = computed(() => [[
 
       <!-- Descrição desligada ou cortada: o ícone diz que existe mais texto -->
       <UTooltip v-if="soOIconeDaDescricao || (mostraDescricao && descricaoLonga)" :text="t.temDescricao">
-        <UIcon name="i-lucide-align-left" class="size-3.5 text-muted" />
+        <UIcon name="i-lucide-align-left" data-selo="iconeDescricao" class="size-3.5 text-muted" />
       </UTooltip>
 
       <!-- As três pessoas, sempre nesta ordem: criou, colabora, responde -->
@@ -278,7 +298,7 @@ const itensDoMenu = computed(() => [[
           v-if="campos.criador && criador && densidade !== 'pequeno'"
           :text="dica(t.campos.criadoPor, criador.fullname)"
         >
-          <span class="flex items-center gap-1">
+          <span data-selo="criador" class="flex items-center gap-1">
             <UIcon name="i-lucide-pen-line" class="size-3 shrink-0 text-muted" />
             <UAvatar size="2xs" :alt="criador.fullname" :text="criador.iniciais" />
           </span>
@@ -288,7 +308,7 @@ const itensDoMenu = computed(() => [[
           v-if="campos.colaboradores && colaboradores.length && densidade !== 'pequeno'"
           :text="dicaDosColaboradores"
         >
-          <span class="flex items-center gap-1">
+          <span data-selo="colaboradores" class="flex items-center gap-1">
             <UIcon name="i-lucide-users" class="size-3 shrink-0 text-muted" />
             <UAvatarGroup size="2xs" :max="2">
               <UAvatar v-for="p in colaboradores" :key="p!.id" :alt="p!.fullname" :text="p!.iniciais" />
@@ -305,9 +325,11 @@ const itensDoMenu = computed(() => [[
             size="xs"
             :alt="responsavel.fullname"
             :text="responsavel.iniciais"
+            data-selo="responsavel"
           />
           <span
             v-else
+            data-selo="responsavel"
             class="flex size-5 items-center justify-center rounded-full border border-dashed border-accented text-muted"
           >
             <UIcon name="i-lucide-user" class="size-3" />
@@ -324,7 +346,9 @@ const itensDoMenu = computed(() => [[
         variant="ghost"
         size="xs"
         :aria-label="t.acoesDaTarefa"
-        class="absolute right-1.5 top-1.5 z-10 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+        data-selo="menu"
+        class="absolute right-1.5 top-1.5 z-10 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+        :class="anotado ? 'opacity-100' : 'opacity-0'"
         @click.stop
       />
     </UDropdownMenu>

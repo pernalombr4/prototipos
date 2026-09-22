@@ -322,7 +322,9 @@ export const tarefas: Task[] = [
     item: 574378,
     notification_task: true,
     collaborators: [4072, 4088],
-    tag_ids: [1, 2],
+    // Três etiquetas de propósito: esta é a tarefa do pior caso, e é preciso
+    // que o contador "+1" do que não coube no cartão apareça em algum lugar.
+    tag_ids: [1, 2, 4],
     permissions: [12, 18],
   }),
 
