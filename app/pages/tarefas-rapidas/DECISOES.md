@@ -1392,3 +1392,79 @@ filtros dos quadros, o destaque da legenda e as `key` do Vue passaram todos a us
 
 O cartão não tem mais o `data-selo="formulario"`, a legenda fechou em 31 linhas numeradas de 1
 a 31 sem buraco, e os cinco quadros do mapa continuam apontando o que apontavam.
+
+---
+
+## Rodada 22 — 22/09/2026 (parte 1: a análise, sem a tela)
+
+### O que ela pediu, literal
+
+> analise em develop como é nossa configuraçao de novas visualizaçoes (pode botar pra editar
+> uma que ja existe. / e aí veja a configuraçao de card de kanban. veja se teria que mudar
+> algo em como é hoje por conta das suas propostas de prototipo. / se sim, deve prototipar
+> tambem o novo form de configuraçao de nova visualizaçao
+
+### O que travou, e o que não travou
+
+O develop pediu login de novo, e login é dela: o Keycloak caiu na tela de conta, com o botão
+da Microsoft. A janela do Chrome também está minimizada, então a aba responde a leitura mas
+não a clique nem a captura. Sem a tela na frente, **copiar o formulário de hoje não dá**, e
+copiar é a regra 37: o protótipo reproduz a tela como ela é e só mexe no que a demanda pediu.
+
+O que **não** depende da tela é a resposta à pergunta do meio, "teria que mudar algo?". Essa
+conta se faz com o que a proposta guarda hoje contra o que o BRIEFING já registrou do modal de
+Nova Visualização, levantado na Fase 1 desta demanda. É o que está abaixo.
+
+### A resposta curta: sim, e a mudança é de modelo, não de campo
+
+Hoje o modal oferece cinco coisas: **Agrupar por** (Status, Responsável, Prioridade),
+**Ordenar cartões em cada coluna por**, **construtor visual de cartão** (campo do cabeçalho,
+campo do conteúdo, tags, campo de utilizador, campos de data), **Filtros** e **Visibilidade**.
+
+O protótipo criou, tirou ou mudou de lugar isto:
+
+| O que o protótipo tem | O modal de hoje | O que precisa acontecer |
+|---|---|---|
+| Agrupar por **tipo** e por **prazo** | só Status, Responsável e Prioridade | duas opções novas na mesma lista |
+| Ordenar por prazo, prioridade, pontos, criada, atualizada e nome, **com direção** | ordenação existe, sem direção declarada | acrescentar o sentido, crescente e decrescente |
+| **Ordenação própria por raia** | não existe | é por raia, não cabe num campo único |
+| **Limite de cartões por raia** | não existe | idem: é por raia |
+| **Totalizador no pé da raia**, campo mais operação | não existe | idem, e ainda escolhe entre campo da tarefa e resposta de formulário |
+| **Campos do cartão**, doze chaves que se ligam e desligam | construtor por posição: cabeçalho, conteúdo, tags, utilizador, datas | **é outro modelo**, e é o ponto que mais dói |
+| **Tamanho do cartão**, três densidades | não existe | campo novo |
+| Período e campo de data (criada em ou prazo) | está na barra, não no modal | decidir onde nasce |
+
+### O ponto que mais dói: dois modelos de cartão
+
+O construtor de hoje monta o cartão por **posição**: escolhe-se qual campo vai no cabeçalho,
+qual vai no conteúdo, qual vira tag. É o modelo de quem trata o cartão como um formulário
+livre, e ele é o certo quando os campos são personalizados por categoria, porque aí o produto
+não sabe o que cada campo significa.
+
+A proposta trata o cartão por **peça com significado**: prazo sabe ficar vermelho quando
+passa, prioridade sabe a cor de cada nível, as três pessoas sabem a ordem em que se lêem, o
+tempo sabe virar cronômetro. Ligar e desligar peça é o que ClickUp, Linear e Jira fazem, e é
+o que permite o cartão inteiro se comportar, em vez de ser um empilhado de valores.
+
+Os dois modelos não se somam sem escolha. Ou o construtor por posição vira uma lista de peças
+ligáveis para os campos nativos da tarefa (e continua por posição para campo personalizado),
+ou a proposta do cartão não cabe na configuração que existe. **Essa decisão é dela**, e é a
+primeira coisa a resolver quando a tela estiver aberta.
+
+### A segunda pergunta que a tela vai responder
+
+Hoje toda a configuração é **de nascimento**: para ver o mesmo quadro agrupado de outro jeito,
+cria-se outra visualização (é a fricção 1 do BRIEFING). A proposta trouxe agrupar, ordenar,
+escolher campos, período e raias para a **barra**, onde se mexe sem criar nada.
+
+Com as duas coisas no ar, o formulário muda de papel: ele deixa de ser o único lugar onde se
+configura e passa a ser **o estado inicial da visualização**, o que a pessoa vê ao abrir. Isso
+levanta a pergunta de produto que o protótipo tem que responder na tela: o que a barra muda
+fica só para quem mexeu, ou vira um "salvar nesta visualização"? É a mesma pergunta que o
+Linear resolve com "Save to view" e o ClickUp com "Save changes for everyone".
+
+### O que falta para fechar a rodada
+
+1. entrar no develop e abrir `+ Visualizar` › editar uma visualização kanban existente;
+2. copiar o formulário campo por campo para o BRIEFING, na seção da casca;
+3. prototipar o formulário novo, com as peças acima e a decisão sobre o construtor de cartão.
