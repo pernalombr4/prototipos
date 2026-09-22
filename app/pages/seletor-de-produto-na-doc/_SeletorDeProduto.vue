@@ -15,13 +15,19 @@
  *   1. é PÍLULA, não caixa: cantos redondos de verdade, 22 a 24px de altura;
  *   2. uma família de cor só. Fundo em 10% da cor, texto e seta na mesma cor;
  *   3. sem borda dura. Anel de 1px na própria cor, ou nada;
- *   4. caixa normal, peso médio, 12px. Nunca caixa alta;
+ *   4. peso médio, 12px;
  *   5. seta de 12px, da cor do texto;
- *   6. nada de ícone, nem na pílula nem no menu (rodadas 3 e 4). O Nuxt UI e
- *      o Tailwind são assim: com três nomes curtos, o ícone não desempata
- *      nada e só põe uma coluna a mais para o olho atravessar. O único sinal
- *      gráfico que sobra no menu é o que diz alguma coisa: o tique do produto
- *      em uso, e o relógio ou a seta de link externo no item que sai daqui.
+ *   6. sem ícone na pílula: ela fica com o nome e a seta (rodada 3).
+ *
+ * Duas coisas da rodada 5 divergem das referências, e é escolha dela:
+ *
+ *   • **CAIXA ALTA** no rótulo da pílula e nos itens do menu. O Nuxt UI e o
+ *     Tailwind usam caixa normal, mas esta barra não é a deles: `DOCS`,
+ *     `DEV`, `BLOG`, `RELEASES` e `ENTRAR` já estão todos em caixa alta ali.
+ *     Em caixa normal a pílula era a única coisa fora do compasso da barra.
+ *     Vem com `tracking-wide`, que é o que torna caixa alta legível a 12px.
+ *   • **ícone de volta no menu**, e só nele. No menu o ícone separa um
+ *     produto do outro; na pílula ele não separava nada, porque só existe um.
  *
  * O texto usa `text-primary-700 dark:text-primary-300` e não `text-primary`:
  * é a correção de contraste da casa (`app/tema-contraste.ts`), porque o
@@ -69,6 +75,7 @@ const itens = computed(() => [
     type: 'checkbox' as const,
     slot: 'produto' as const,
     checked: p.id === produtoAtual.value,
+    icon: p.icone,
     label: props.t.produtos[p.id].nome,
     selo: p.selo,
     atual: p.id === produtoAtual.value,
@@ -76,6 +83,7 @@ const itens = computed(() => [
   })),
   (props.externos ?? []).map(e => ({
     slot: 'externo' as const,
+    icon: e.icone,
     label: props.t.externos[e.id].nome,
     emBreve: e.emBreve,
     /* Bloqueado enquanto não sai do forno: o item não navega e não fecha o menu. */
@@ -95,6 +103,9 @@ const itens = computed(() => [
     :ui="{
       content: 'w-auto min-w-52 max-w-[calc(100vw-2rem)] p-1',
       item: 'py-1.5 gap-2 text-sm',
+      /* Caixa alta com um respiro entre as letras, que é o que a torna legível. */
+      itemLabel: 'uppercase tracking-wide',
+      itemLeadingIcon: 'size-4 text-dimmed',
       itemTrailingIcon: 'size-4 text-primary-700 dark:text-primary-300',
     }"
   >
@@ -117,7 +128,7 @@ const itens = computed(() => [
         a chave de tema, então o nome corta. O nome por extenso continua no
         `title`, no `aria-label` e nesta mesma peça dentro do menu do celular.
       -->
-      <span class="truncate">
+      <span class="truncate uppercase tracking-wide">
         {{ nomeAtual }}
       </span>
       <UIcon
@@ -131,6 +142,14 @@ const itens = computed(() => [
       O produto em uso é marcado pela cor, como no Nuxt UI.
       O tique à direita repete o sinal para quem não distingue a cor.
     -->
+    <template #produto-leading="{ item }">
+      <UIcon
+        :name="item.icon"
+        class="size-4 shrink-0"
+        :class="item.atual ? 'text-primary-700 dark:text-primary-300' : 'text-dimmed'"
+      />
+    </template>
+
     <template #produto-label="{ item }">
       <span class="flex items-center gap-1.5" :class="item.atual ? 'font-medium text-primary-700 dark:text-primary-300' : ''">
         {{ item.label }}

@@ -130,7 +130,7 @@ perto é a **nossa própria doc do SDK**:
 | Forma | Pílula (`rounded-full`), 24px de altura |
 | Cor | Uma família só: `bg-primary/10`, anel `ring-primary/20`, texto e seta em primária |
 | Contraste | `text-primary-700 dark:text-primary-300`, a correção da casa em `app/tema-contraste.ts`. O `text-primary` cru dá 2,96:1 sobre o próprio fundo a 10% e reprova |
-| Texto | Caixa normal, peso médio, 12px |
+| Texto | Peso médio, 12px. **Em caixa alta desde a rodada 5**, com `tracking-wide` |
 | Seta | 12px, da cor do texto, a 70% de opacidade |
 | Menu | Largura do conteúdo (mínimo 208px), linhas de 32px, ícone monocromático, item em uso em primária com tique em primária |
 | Selo Beta | Anotação em 10px apagada, como o "(EOL)" do Nuxt. Não é etiqueta com fundo |
@@ -372,3 +372,36 @@ também, e o resultado é o Nuxt UI puro: **nenhum ícone decorativo**. Com trê
 O que sobrou no menu é só sinal que diz alguma coisa: **o tique** do produto em uso, **o selo
 Beta** e **o relógio ou a seta** do item que sai daqui. O menu lateral da doc continua com os
 ícones dele, que são casca copiada do site e não entram nesta conta.
+
+*(Os ícones do menu voltaram na rodada 5, a pedido dela. Os da pílula, não.)*
+
+### Rodada 5 — 22/09/2026
+
+**O que ela pediu, literal:**
+
+> pode botar ícones de novo nos dropdowns, mas nao no badge.
+>
+> e escreva todos os textos do dropdown e do badge em caixa alta
+
+**Duas mudanças, e as duas divergem das referências de propósito.**
+
+#### Ícone no menu, não na pílula
+
+É a divisão certa, e a rodada 4 tinha exagerado ao tirar dos dois lugares. **No menu o ícone
+separa um produto do outro**, que é trabalho de verdade quando há quatro linhas parecidas. **Na
+pílula ele não separava nada**, porque ali só existe um item: era enfeite ocupando os 100px que
+faltam no celular.
+
+#### Caixa alta
+
+O Nuxt UI e o Tailwind usam caixa normal, e a rodada 2 copiou isso. **Mas esta barra não é a
+deles:** `DOCS`, `DEV`, `BLOG`, `RELEASES` e `ENTRAR` já estão todos em caixa alta no
+`docs.enspace.io`. Em caixa normal a pílula era a única coisa fora do compasso da barra em que
+ela vive, e a coerência com a casca vale mais do que a coerência com a referência.
+
+Vem com `tracking-wide`. Caixa alta sem respiro entre as letras é o que torna o texto pequeno
+difícil de ler, e é o defeito que o `uppercase` sozinho costuma trazer.
+
+**O que isso custa, e está medido:** caixa alta é mais larga. `PLUGIN DO WORD` cabe inteiro no
+desktop e corta mais cedo no celular do que `Plugin do Word` cortava. O nome por extenso continua
+no `title`, no `aria-label` e na peça em linha cheia do menu do hambúrguer.

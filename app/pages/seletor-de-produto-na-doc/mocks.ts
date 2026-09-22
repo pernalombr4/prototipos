@@ -22,6 +22,8 @@ export type ChaveDeProduto = 'enspace' | 'plugin-word' | 'beni-app'
 
 export interface Produto {
   id: ChaveDeProduto
+  /** Ícone do Lucide, no menu. A pílula fechada não leva ícone. */
+  icone: string
   /**
    * Pedaço do endereço quando o produto entra na URL.
    * Hoje a doc é `/{idioma}/docs/...`; a proposta é `/{idioma}/docs/{prefixo}/...`,
@@ -35,9 +37,9 @@ export interface Produto {
 
 /** A ordem é a ordem do menu: a plataforma primeiro, os satélites depois. */
 export const produtos: Produto[] = [
-  { id: 'enspace', prefixo: '' },
-  { id: 'plugin-word', prefixo: 'word' },
-  { id: 'beni-app', prefixo: 'beni', selo: 'beta' },
+  { id: 'enspace', icone: 'i-lucide-layout-grid', prefixo: '' },
+  { id: 'plugin-word', icone: 'i-lucide-file-type', prefixo: 'word' },
+  { id: 'beni-app', icone: 'i-lucide-bot', prefixo: 'beni', selo: 'beta' },
 ]
 
 /* ------------------------------------------------------------------ *
@@ -52,6 +54,7 @@ export const produtos: Produto[] = [
 
 export interface DestinoExterno {
   id: 'sdk'
+  icone: string
   /**
    * Endereço final. **Ainda não definido**, e é pergunta para a Mikaela:
    * o site já roda local em `/vue/start`, mas não se sabe onde ele publica.
@@ -63,7 +66,7 @@ export interface DestinoExterno {
 }
 
 export const destinosExternos: DestinoExterno[] = [
-  { id: 'sdk', emBreve: true },
+  { id: 'sdk', icone: 'i-lucide-package', emBreve: true },
 ]
 
 /* ------------------------------------------------------------------ *
