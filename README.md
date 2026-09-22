@@ -89,9 +89,15 @@ reprova, ele diz o arquivo e o nome.
 |---|---|
 | [`.github/dependabot.yml`](.github/dependabot.yml) | Abre PR toda segunda, para o que ninguém lembrou de atualizar à mão |
 | [`.github/workflows/verificar.yml`](.github/workflows/verificar.yml) | Roda em todo PR o `conferir` mais o build de verdade |
+| [`ferramentas/rotina-semanal.md`](ferramentas/rotina-semanal.md) | Toda segunda, uma sessão na nuvem sobe o SDK num clone descartável, roda `conferir` e `generate`, e manda o veredito no celular |
 
 Isso cuida do **repositório**. O `pnpm atualizar` cuida da **sua máquina**, que é onde o
 protótipo se constrói. São problemas diferentes, e é por isso que existem os dois.
+
+A rotina semanal existe porque o Dependabot **nunca abriu o PR do SDK**, então o `verificar`
+nunca chegou a testar a versão nova. Ela fecha esse buraco: o recado que chega deixa de ser
+"existe 0.15.0" e passa a ser "existe 0.15.0, testei, passa". O arquivo acima é uma cópia da
+receita, não a fonte: a rotina mora fora do repositório, e editar o arquivo não a muda.
 
 ## Protótipos
 
