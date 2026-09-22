@@ -35,6 +35,14 @@ export const pessoas: Record<number, Pessoa> = {
   4072: { id: 4072, fullname: 'Bruna Sato', username: 'bruna.sato', iniciais: 'BS', cargo: 'Liderança' },
   4088: { id: 4088, fullname: 'Ivo Vasconcelos Nogueira', username: 'ivo.nogueira', iniciais: 'IV', cargo: 'Desenvolvimento' },
   4090: { id: 4090, fullname: 'Alice Ferraz', username: 'alice.ferraz', iniciais: 'AF', cargo: 'Desenvolvimento' },
+  // As seis abaixo existem para um caso só: a tarefa com dez colaboradores,
+  // que é onde o cartão precisa provar que conta em vez de empilhar avatar.
+  4093: { id: 4093, fullname: 'Caio Bentes', username: 'caio.bentes', iniciais: 'CB', cargo: 'Suporte' },
+  4095: { id: 4095, fullname: 'Dora Linhares', username: 'dora.linhares', iniciais: 'DL', cargo: 'Financeiro' },
+  4097: { id: 4097, fullname: 'Elias Prado', username: 'elias.prado', iniciais: 'EP', cargo: 'Desenvolvimento' },
+  4099: { id: 4099, fullname: 'Fabiana Rocha', username: 'fabiana.rocha', iniciais: 'FR', cargo: 'Jurídico' },
+  4101: { id: 4101, fullname: 'Gustavo Amorim', username: 'gustavo.amorim', iniciais: 'GA', cargo: 'Infraestrutura' },
+  4103: { id: 4103, fullname: 'Helena Tavares', username: 'helena.tavares', iniciais: 'HT', cargo: 'Atendimento' },
 }
 
 /* ----------------------------------------------------- *
@@ -345,6 +353,9 @@ export const tarefas: Task[] = [
     item: 574420,
     node_execution: 615150,
     tag_ids: [3],
+    // Dez colaboradores: é o caso que o spaceflow cria sozinho quando avisa um
+    // time inteiro. O cartão mostra dois avatares e conta o resto.
+    collaborators: [4057, 4061, 4088, 4090, 4093, 4095, 4097, 4099, 4101, 4103],
   }),
   tarefa({
     id: 22080,

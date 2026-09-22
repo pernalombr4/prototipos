@@ -426,7 +426,7 @@ export const textos: Record<Idioma, Textos> = {
 
     semResponsavel: 'Sem responsável',
     pontos: n => `${n} ${n === 1 ? 'ponto' : 'pontos'}`,
-    maisEtiquetas: n => `mais ${n}`,
+    maisEtiquetas: n => `+${n}`,
     abrirTarefa: 'Abrir tarefa',
     acoesDaTarefa: 'Ações da tarefa',
     temFormulario: 'Pede formulário',
@@ -695,7 +695,7 @@ export const textos: Record<Idioma, Textos> = {
 
     semResponsavel: 'Unassigned',
     pontos: n => `${n} ${n === 1 ? 'point' : 'points'}`,
-    maisEtiquetas: n => `${n} more`,
+    maisEtiquetas: n => `+${n}`,
     abrirTarefa: 'Open task',
     acoesDaTarefa: 'Task actions',
     temFormulario: 'Asks for a form',
@@ -964,7 +964,7 @@ export const textos: Record<Idioma, Textos> = {
 
     semResponsavel: 'Sin responsable',
     pontos: n => `${n} ${n === 1 ? 'punto' : 'puntos'}`,
-    maisEtiquetas: n => `${n} más`,
+    maisEtiquetas: n => `+${n}`,
     abrirTarefa: 'Abrir tarea',
     acoesDaTarefa: 'Acciones de la tarea',
     temFormulario: 'Pide formulario',

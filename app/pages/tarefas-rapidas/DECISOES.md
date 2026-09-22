@@ -1168,3 +1168,68 @@ Dezessete balões no primeiro bloco, dois em cada um dos outros, sem sobreposiç
 coluna e nada transbordando para a seção de baixo. Os números batem com a ordem visual,
 inclusive nas seis peças que dividem a mesma linha do rodapé. No painel, dez balões, das abas
 ao rodapé. A legenda fecha em 32 linhas, da peça 1 à 32.
+
+---
+
+## Rodada 18 — 22/09/2026
+
+### O que ela pediu, literal
+
+> o contador de etiquetas pode ser "+1" numerico mesmo, pra encurtar. / e voce tem que colocar
+> no mapa dos selos o que acontece se tiver tipo 10 colaboradores. tem que ter contador ali.
+> bote com estado de contador ja / e deve mostrar o tooltip de tudo. tudo tem que ter tooltip
+> explicativo do que é no card se o suer jogar o mouse por cima. / e poerceba que ta muito
+> amontoado o primeiro que voce fez. o mapa em si, nao o card. ajuste isso. nem que seja
+> dividindo isso em 2 cartoes ali e colocando alguns mapeamentos em cada um.
+
+### O contador de etiquetas encurtou
+
+`mais 1` virou **`+1`**, nos três idiomas. Some a palavra e sobra a informação, que é o que
+cabe na linha das etiquetas. O tooltip continua listando os nomes que ficaram de fora, então
+nada se perdeu.
+
+### Dez colaboradores
+
+O caso existe e é comum: spaceflow que avisa um time inteiro. O cartão **mostra dois avatares
+e conta o resto** (`+8`), que é o que o `UAvatarGroup` já faz com `max`. Sem isso, dez
+avatares empurrariam o responsável para fora da linha, e o responsável é justamente quem tem
+que agir.
+
+Duas coisas entraram junto:
+
+1. **seis pessoas novas no mock** e dez colaboradores na tarefa 22079, porque o caso precisa
+   existir no dado para poder ser apontado;
+2. **o tooltip também conta**: com dez nomes ele virava um parágrafo em cima do cartão. Agora
+   mostra quatro e conta o resto, no mesmo formato do avatar.
+
+### Tooltip em tudo
+
+Faltavam três, e os três eram os maiores: **título**, **descrição** e o **menu ⋮**. Título e
+descrição cortam em uma a quatro linhas conforme o tamanho do cartão, então eram justamente os
+que mais precisavam devolver o texto inteiro no hover. A descrição corta em 300 caracteres no
+tooltip, senão ele cobre o quadro.
+
+Entrou também o **filete vermelho da borda**: no cartão pequeno ele é o único aviso de atraso
+que sobra, e aviso sem nome é enfeite. A faixa é transparente, tem largura de alvo de mouse e
+leva o clique para a tarefa, como o resto do cartão.
+
+Auditado elemento por elemento: as dezesseis peças do cartão têm gatilho de tooltip. O do
+título foi conferido com o mouse de verdade, porque ele é o caso arriscado: o link esticado
+cobre o cartão inteiro e passa por cima do texto. Abre, e o clique continua abrindo a tarefa.
+
+### O mapa desamontoou
+
+Dezessete balões em volta de um cartão de 300 px obrigam metade das setas a cruzar a outra
+metade. **Agora são cinco quadros**, cada um apontando um pedaço:
+
+| Quadro | Balões |
+|---|---|
+| A cabeça do cartão | 5 de um lado, 4 do outro |
+| O rodapé do mesmo cartão | 5 e 3 |
+| Com a tarefa atrasada | 1 e 1 |
+| Com dez colaboradores | 2 |
+| Com a descrição gigante | 2 |
+
+Nenhuma coluna passa de cinco, contra as oito e nove de antes. A legenda embaixo continua
+inteira, com as 32 peças, porque ela é a lista de referência e não muda de tamanho com o
+quadro.

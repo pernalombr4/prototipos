@@ -101,8 +101,26 @@ const dicaDoPrazo = computed(() => {
   return `${dica(props.t.campos.prazo, formatarDataHora(props.tarefa.due_date))} (${prazo.value.texto})`
 })
 
-const dicaDosColaboradores = computed(() =>
-  dica(props.t.campos.colaboradores, colaboradores.value.map(p => p!.fullname).join(', ')))
+/**
+ * Com dez colaboradores, listar os dez vira um parágrafo em cima do cartão.
+ * Mostra os quatro primeiros e conta o resto, que é o mesmo que o avatar faz.
+ */
+const dicaDosColaboradores = computed(() => {
+  const nomes = colaboradores.value.map(p => p!.fullname)
+  const lista = nomes.length > 4
+    ? `${nomes.slice(0, 4).join(', ')} ${props.t.maisEtiquetas(nomes.length - 4)}`
+    : nomes.join(', ')
+  return dica(props.t.campos.colaboradores, lista)
+})
+
+/** O título corta em uma a três linhas: o tooltip devolve o nome inteiro. */
+const dicaDoTitulo = computed(() => dica(props.t.campos.nome, props.tarefa.name))
+
+/** A descrição também corta, e a dela pode ser quilométrica. */
+const dicaDaDescricao = computed(() => {
+  const texto = descricao.value.length > 300 ? `${descricao.value.slice(0, 300)}...` : descricao.value
+  return dica(props.t.campos.descricao, texto)
+})
 
 const dicaDasEtiquetasEscondidas = computed(() =>
   dica(props.t.campos.etiquetas, tags.value.slice(2).map(x => x!.nome).join(', ')))
@@ -145,8 +163,19 @@ const itensDoMenu = computed(() => [[
     ]"
     data-selo="cartao"
   >
-    <!-- ANDAIME: marca invisível na faixa da borda, para o mapa ter onde apontar -->
-    <span v-if="anotado && atrasada" data-selo="borda" class="absolute inset-y-0 left-0 w-0.5" />
+    <!--
+      O filete vermelho da borda esquerda também precisa se explicar: no cartão
+      pequeno ele é o único aviso de atraso que sobra, e aviso sem nome é
+      enfeite. Esta faixa é transparente, tem a largura de um alvo de mouse e
+      leva o clique para a tarefa como o resto do cartão.
+    -->
+    <UTooltip v-if="atrasada" :text="dicaDoPrazo">
+      <span
+        data-selo="borda"
+        class="absolute inset-y-0 left-0 z-10 w-1.5"
+        @click="emit('abrir')"
+      />
+    </UTooltip>
 
     <!-- Linha de identificação: tipo, referência e o aviso que não pode esperar o clique -->
     <div v-if="campos.referencia || campos.tipo || atrasada" class="mb-1.5 flex items-center gap-1.5">
@@ -177,29 +206,32 @@ const itensDoMenu = computed(() => [[
       `overflow: hidden`, e isso recorta o `after:inset-0` do link esticado:
       o cartão deixa de ser clicável fora das duas linhas do título.
     -->
-    <h3 data-selo="titulo" class="text-sm font-medium leading-snug text-highlighted">
-      <a
-        :href="`#${tarefa.reference}`"
-        class="outline-none after:absolute after:inset-0 after:rounded-lg"
-        @click.prevent="emit('abrir')"
-      >
-        <span class="block break-words" :class="linhasDoTitulo">{{ tarefa.name }}</span>
-      </a>
-    </h3>
+    <UTooltip :text="dicaDoTitulo" :delay-duration="400" :ui="{ content: 'max-w-80' }">
+      <h3 data-selo="titulo" class="text-sm font-medium leading-snug text-highlighted">
+        <a
+          :href="`#${tarefa.reference}`"
+          class="outline-none after:absolute after:inset-0 after:rounded-lg"
+          @click.prevent="emit('abrir')"
+        >
+          <span class="block break-words" :class="linhasDoTitulo">{{ tarefa.name }}</span>
+        </a>
+      </h3>
+    </UTooltip>
 
     <!--
       A descrição corta sempre, em qualquer tamanho de cartão: cartão que
       cresce com o texto quebra a leitura da raia inteira. `break-words`
       porque descrição de spaceflow costuma trazer URL sem espaço.
     -->
-    <p
-      v-if="mostraDescricao"
-      data-selo="descricao"
-      class="mt-1 break-words text-xs leading-relaxed text-muted"
-      :class="linhasDaDescricao"
-    >
-      {{ descricao }}
-    </p>
+    <UTooltip v-if="mostraDescricao" :text="dicaDaDescricao" :delay-duration="400" :ui="{ content: 'max-w-80' }">
+      <p
+        data-selo="descricao"
+        class="mt-1 break-words text-xs leading-relaxed text-muted"
+        :class="linhasDaDescricao"
+      >
+        {{ descricao }}
+      </p>
+    </UTooltip>
 
     <!-- Registro de origem: é ele que diz de qual chamado a tarefa veio -->
     <UTooltip v-if="campos.item && item" :text="dicaDoItem">
@@ -340,17 +372,19 @@ const itensDoMenu = computed(() => [[
 
     <!-- Ações secundárias: botão de verdade, acima do link esticado -->
     <UDropdownMenu v-if="!somenteLeitura" :items="itensDoMenu" :content="{ align: 'end' }">
-      <UButton
-        icon="i-lucide-ellipsis-vertical"
-        color="neutral"
-        variant="ghost"
-        size="xs"
-        :aria-label="t.acoesDaTarefa"
-        data-selo="menu"
-        class="absolute right-1.5 top-1.5 z-10 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
-        :class="anotado ? 'opacity-100' : 'opacity-0'"
-        @click.stop
-      />
+      <UTooltip :text="t.acoesDaTarefa">
+        <UButton
+          icon="i-lucide-ellipsis-vertical"
+          color="neutral"
+          variant="ghost"
+          size="xs"
+          :aria-label="t.acoesDaTarefa"
+          data-selo="menu"
+          class="absolute right-1.5 top-1.5 z-10 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+          :class="anotado ? 'opacity-100' : 'opacity-0'"
+          @click.stop
+        />
+      </UTooltip>
     </UDropdownMenu>
   </article>
 </template>

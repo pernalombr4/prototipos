@@ -7,13 +7,19 @@
  * que normalmente vai num print com seta por cima, só que feito na tela de
  * verdade, então ele nunca fica desatualizado em relação ao protótipo.
  *
- * O que tem aqui:
+ * **São cinco quadros, e não um.** A primeira versão apontava as dezessete
+ * peças do cartão de uma vez só, e virou um novelo: dezessete balões em volta
+ * de um cartão de 300 px obrigam metade das setas a atravessar a outra metade.
+ * Agora cada quadro aponta um pedaço, com no máximo seis balões de cada lado:
  *
- *   1. o cartão com TODOS os campos ligados, com balão e seta em cada peça;
- *   2. o mesmo cartão atrasado, porque dois selos só existem nesse caso;
- *   3. o cartão da tarefa de descrição gigante, que é o caso de borda do texto;
- *   4. a legenda inteira, peça por peça, dizendo de qual campo da tarefa cada
- *      uma sai e o que é preciso para ter o dado.
+ *   1. a cabeça do cartão: identificação, título, texto, ligação e etiquetas;
+ *   2. o rodapé do cartão: o que se lê de relance, e as três pessoas;
+ *   3. a tarefa atrasada, porque dois selos só existem nesse caso;
+ *   4. a tarefa com dez colaboradores, que é onde o contador aparece;
+ *   5. a tarefa de descrição gigante, o caso de borda do texto.
+ *
+ * E embaixo, a legenda inteira, peça por peça, dizendo de qual campo da tarefa
+ * cada uma sai e o que é preciso para ter o dado.
  *
  * O texto é só em português, como o resto do andaime. O que acompanha o idioma
  * é a tela sendo apontada, que é a que vai para o produto.
@@ -38,13 +44,49 @@ const campos = Object.fromEntries(
     'responsavel', 'item', 'colaboradores', 'tempo', 'criador'].map(k => [k, true]),
 )
 
-const completa = computed(() => props.tarefas.find(x => x.id === 22078) ?? props.tarefas[0]!)
-const atrasada = computed(() => props.tarefas.find(x => x.id === 22086) ?? props.tarefas[0]!)
-const textona = computed(() => props.tarefas.find(x => x.id === 22089) ?? props.tarefas[0]!)
+function tarefaPorId(id: number) {
+  return props.tarefas.find(x => x.id === id) ?? props.tarefas[0]!
+}
 
-/** Cada bloco aponta só o que ele tem para mostrar. */
-const selosDoAtraso = selosDoCartao.filter(s => ['atraso', 'borda'].includes(s.chave))
-const selosDoTexto = selosDoCartao.filter(s => ['descricao', 'iconeDescricao'].includes(s.chave))
+const porChave = (chaves: string[]) => selosDoCartao.filter(s => chaves.includes(s.chave))
+
+const quadros = computed(() => [
+  {
+    chave: 'cabeca',
+    titulo: 'A cabeça do cartão',
+    ajuda: 'Tarefa 22078, tamanho grande, com todos os campos ligados. É o pior caso: tudo que pode aparecer, aparecendo junto.',
+    tarefa: tarefaPorId(22078),
+    selos: selosDoCartao.filter(s => s.quadro === 'cabeca'),
+  },
+  {
+    chave: 'rodape',
+    titulo: 'O rodapé do mesmo cartão',
+    ajuda: 'A linha que se lê de relance, e as três pessoas na ordem de sempre: quem criou, quem colabora e quem responde.',
+    tarefa: tarefaPorId(22078),
+    selos: selosDoCartao.filter(s => s.quadro === 'rodape'),
+  },
+  {
+    chave: 'atraso',
+    titulo: 'Com a tarefa atrasada',
+    ajuda: 'Os selos 3 e 19 só existem aqui. Quando eles aparecem, o prazo normal (10) some do rodapé, para o cartão não dizer a mesma coisa em dois lugares.',
+    tarefa: tarefaPorId(22086),
+    selos: porChave(['atraso', 'borda']),
+  },
+  {
+    chave: 'time',
+    titulo: 'Com dez colaboradores',
+    ajuda: 'Tarefa 22079, com um time inteiro avisado pelo spaceflow. O cartão mostra dois avatares e conta o resto: dez avatares empurrariam o responsável para fora da linha, e o responsável é quem tem que agir.',
+    tarefa: tarefaPorId(22079),
+    selos: porChave(['colaboradores', 'responsavel']),
+  },
+  {
+    chave: 'texto',
+    titulo: 'Com a descrição gigante',
+    ajuda: 'Tarefa 22089, com uma descrição de mais de trinta linhas. O cartão não cresce: corta em quatro linhas e acende o ícone que avisa que existe mais texto. O texto inteiro está no painel, e lá ele também começa recolhido.',
+    tarefa: tarefaPorId(22089),
+    selos: porChave(['descricao', 'iconeDescricao']),
+  },
+])
 
 /** A linha da legenda acende o balão dela, e o contrário também. */
 const foco = ref<string | null>(null)
@@ -67,8 +109,9 @@ const contagem = computed(() => selosDoCartao.length + selosDoPainel.length)
       </h2>
       <p class="mt-1 max-w-3xl text-xs leading-relaxed text-muted">
         Cada balão aponta uma peça da tela e diz de qual campo da tarefa ela sai. Passe o mouse
-        num balão ou numa linha da legenda para acender só aquela peça. Para ver as setas do
-        painel lateral, abra o cartão: elas aparecem por cima dele do mesmo jeito.
+        num balão ou numa linha da legenda para acender só aquela peça. Passando o mouse na peça
+        dentro do cartão, aparece o tooltip que ela tem no produto. Para ver as setas do painel
+        lateral, abra o cartão: elas aparecem por cima dele do mesmo jeito.
       </p>
       <div class="mt-3 flex flex-wrap gap-2">
         <UBadge
@@ -82,94 +125,33 @@ const contagem = computed(() => selosDoCartao.length + selosDoPainel.length)
       </div>
     </div>
 
-    <!-- 1. O cartão inteiro -->
-    <section>
+    <!-- Os cinco quadros -->
+    <section v-for="quadro in quadros" :key="quadro.chave">
       <h3 class="mb-1 text-xs font-semibold uppercase tracking-wider text-muted">
-        O cartão com todos os campos ligados
+        {{ quadro.titulo }}
       </h3>
-      <p class="mb-4 text-xs text-muted">
-        Tarefa 22078, tamanho grande. É o pior caso: tudo que pode aparecer, aparecendo junto.
-      </p>
+      <p class="mb-4 max-w-3xl text-xs leading-relaxed text-muted">{{ quadro.ajuda }}</p>
 
       <Anotacoes
-        :selos="selosDoCartao"
+        :selos="quadro.selos"
         :destaque="foco"
-        :refazer="`${t.campos.prazo}-completa`"
+        :refazer="`${t.campos.prazo}-${quadro.chave}`"
         @destacar="(c) => foco = c"
       >
         <div class="mx-auto w-72">
           <CartaoDeTarefa
-            :tarefa="completa"
+            :tarefa="quadro.tarefa"
             :t="t"
             :campos="campos"
             densidade="grande"
             anotado
-            @abrir="emit('abrir', completa)"
+            @abrir="emit('abrir', quadro.tarefa)"
           />
         </div>
       </Anotacoes>
     </section>
 
-    <!-- 2. Atrasada -->
-    <section>
-      <h3 class="mb-1 text-xs font-semibold uppercase tracking-wider text-muted">
-        A mesma peça, com a tarefa atrasada
-      </h3>
-      <p class="mb-4 text-xs text-muted">
-        Os selos 3 e 19 só existem aqui. Quando eles aparecem, o prazo normal (10) some do
-        rodapé, para o cartão não dizer a mesma coisa em dois lugares.
-      </p>
-
-      <Anotacoes
-        :selos="selosDoAtraso"
-        :destaque="foco"
-        :refazer="`${t.campos.prazo}-atrasada`"
-        @destacar="(c) => foco = c"
-      >
-        <div class="mx-auto w-72">
-          <CartaoDeTarefa
-            :tarefa="atrasada"
-            :t="t"
-            :campos="campos"
-            densidade="grande"
-            anotado
-            @abrir="emit('abrir', atrasada)"
-          />
-        </div>
-      </Anotacoes>
-    </section>
-
-    <!-- 3. Descrição gigante -->
-    <section>
-      <h3 class="mb-1 text-xs font-semibold uppercase tracking-wider text-muted">
-        O caso de borda do texto
-      </h3>
-      <p class="mb-4 text-xs text-muted">
-        Tarefa 22089, com uma descrição de mais de trinta linhas. O cartão não cresce: corta em
-        quatro linhas e acende o ícone que avisa que existe mais texto. Quem quer o texto
-        inteiro abre o cartão, e lá ele também começa recolhido.
-      </p>
-
-      <Anotacoes
-        :selos="selosDoTexto"
-        :destaque="foco"
-        :refazer="`${t.campos.prazo}-textona`"
-        @destacar="(c) => foco = c"
-      >
-        <div class="mx-auto w-72">
-          <CartaoDeTarefa
-            :tarefa="textona"
-            :t="t"
-            :campos="campos"
-            densidade="grande"
-            anotado
-            @abrir="emit('abrir', textona)"
-          />
-        </div>
-      </Anotacoes>
-    </section>
-
-    <!-- 4. A legenda -->
+    <!-- A legenda -->
     <section class="rounded-xl border border-default bg-default">
       <header class="border-b border-default px-4 py-3">
         <h3 class="flex items-center gap-2 text-sm font-semibold text-highlighted">

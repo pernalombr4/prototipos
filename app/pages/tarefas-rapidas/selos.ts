@@ -32,6 +32,12 @@ export interface Selo {
   comportamento: string
   /** De que lado do alvo o balão fica. */
   lado: 'esquerda' | 'direita'
+  /**
+   * Em qual quadro do mapa a peça é apontada. Dezessete balões em volta de um
+   * cartão de 300 px viram um novelo de setas: a cabeça do cartão e o rodapé
+   * dele são apontados em dois quadros separados.
+   */
+  quadro?: 'cabeca' | 'rodape'
 }
 
 export const origens: Record<OrigemDoSelo, { rotulo: string, cor: 'success' | 'info' | 'warning' | 'error' }> = {
@@ -54,6 +60,7 @@ export const selosDoCartao: Selo[] = [
     origem: 'nativo',
     comportamento: 'Ícone sem rótulo, um por tipo: aprovação, formulário, CRUD, início e genérica. O nome por extenso está no tooltip.',
     lado: 'esquerda',
+    quadro: 'cabeca',
   },
   {
     numero: 2,
@@ -64,6 +71,7 @@ export const selosDoCartao: Selo[] = [
     origem: 'nativo',
     comportamento: 'Os seis primeiros caracteres dos 32. A referência inteira fica no tooltip e no painel, com botão de copiar.',
     lado: 'esquerda',
+    quadro: 'cabeca',
   },
   {
     numero: 3,
@@ -84,6 +92,7 @@ export const selosDoCartao: Selo[] = [
     origem: 'nativo',
     comportamento: 'Corta em 1, 2 ou 3 linhas conforme o tamanho do cartão. É o link que abre o painel, e ele cobre o cartão inteiro.',
     lado: 'esquerda',
+    quadro: 'cabeca',
   },
   {
     numero: 5,
@@ -94,6 +103,7 @@ export const selosDoCartao: Selo[] = [
     origem: 'nativo',
     comportamento: 'O HTML vira texto puro e corta em 1, 2 ou 4 linhas. Cartão nunca cresce com o texto: quem tem descrição gigante corta igual.',
     lado: 'esquerda',
+    quadro: 'cabeca',
   },
   {
     numero: 6,
@@ -104,6 +114,7 @@ export const selosDoCartao: Selo[] = [
     origem: 'relacao',
     comportamento: 'Código e título do registro que gerou a tarefa. O id sozinho não serve: precisa do registro para mostrar o código.',
     lado: 'esquerda',
+    quadro: 'cabeca',
   },
   {
     numero: 7,
@@ -113,7 +124,8 @@ export const selosDoCartao: Selo[] = [
     campo: 'tag_ids',
     origem: 'relacao',
     comportamento: 'As duas primeiras, com a cor que a etiqueta tem. O payload traz só os ids.',
-    lado: 'esquerda',
+    lado: 'direita',
+    quadro: 'cabeca',
   },
   {
     numero: 8,
@@ -122,8 +134,9 @@ export const selosDoCartao: Selo[] = [
     rotulo: 'Contador de etiquetas',
     campo: 'tag_ids',
     origem: 'derivado',
-    comportamento: 'O que não coube vira "+2". O tooltip lista os nomes que ficaram de fora.',
-    lado: 'esquerda',
+    comportamento: 'O que não coube vira "+1", só o número, para caber na mesma linha das etiquetas. O tooltip lista os nomes que ficaram de fora.',
+    lado: 'direita',
+    quadro: 'cabeca',
   },
   {
     numero: 9,
@@ -133,7 +146,8 @@ export const selosDoCartao: Selo[] = [
     campo: 'priority',
     origem: 'nativo',
     comportamento: 'Só aparece fora do normal, com cor e ícone por nível. Normal em todo cartão é ruído: seria um selo cinza em 70% do quadro.',
-    lado: 'direita',
+    lado: 'esquerda',
+    quadro: 'rodape',
   },
   {
     numero: 10,
@@ -143,7 +157,8 @@ export const selosDoCartao: Selo[] = [
     campo: 'due_date',
     origem: 'nativo',
     comportamento: 'Data em linguagem de gente ("em 3 dias"), amarela quando é hoje ou amanhã. O quadro de hoje mostra created_at neste lugar, e é por isso que tarefa vencida parece recém-chegada.',
-    lado: 'direita',
+    lado: 'esquerda',
+    quadro: 'rodape',
   },
   {
     numero: 11,
@@ -153,7 +168,8 @@ export const selosDoCartao: Selo[] = [
     campo: 'points',
     origem: 'nativo',
     comportamento: 'Zero não aparece. É um dos campos que o totalizador da raia soma.',
-    lado: 'direita',
+    lado: 'esquerda',
+    quadro: 'rodape',
   },
   {
     numero: 12,
@@ -163,7 +179,8 @@ export const selosDoCartao: Selo[] = [
     campo: 'type + meta.form',
     origem: 'derivado',
     comportamento: 'Prancheta: a tarefa pede resposta antes de poder ser concluída. Sem isso, a pessoa só descobre ao abrir.',
-    lado: 'direita',
+    lado: 'esquerda',
+    quadro: 'rodape',
   },
   {
     numero: 13,
@@ -173,7 +190,8 @@ export const selosDoCartao: Selo[] = [
     campo: 'sem campo no payload',
     origem: 'novo',
     comportamento: 'Total apontado na tarefa. Quando o cronômetro está correndo nela, o selo fica vermelho e conta na tela.',
-    lado: 'direita',
+    lado: 'esquerda',
+    quadro: 'rodape',
   },
   {
     numero: 14,
@@ -183,7 +201,8 @@ export const selosDoCartao: Selo[] = [
     campo: 'description',
     origem: 'derivado',
     comportamento: 'Aparece quando a descrição está desligada na barra ou quando ela é muito maior que o corte. É o que o Trello faz.',
-    lado: 'direita',
+    lado: 'esquerda',
+    quadro: 'rodape',
   },
   {
     numero: 15,
@@ -194,6 +213,7 @@ export const selosDoCartao: Selo[] = [
     origem: 'relacao',
     comportamento: 'Caneta e avatar. Some no cartão pequeno. Num quadro alimentado por spaceflow, quase sempre é o robô.',
     lado: 'direita',
+    quadro: 'rodape',
   },
   {
     numero: 16,
@@ -202,8 +222,9 @@ export const selosDoCartao: Selo[] = [
     rotulo: 'Quem colabora',
     campo: 'collaborators',
     origem: 'relacao',
-    comportamento: 'Pessoas e um grupo de no máximo dois avatares. Some no cartão pequeno.',
+    comportamento: 'Ícone de pessoas e no máximo dois avatares. Do terceiro em diante entra o contador "+8", que é o caso comum quando o spaceflow avisa um time inteiro: dez avatares empurrariam o responsável para fora da linha. O tooltip mostra quatro nomes e conta o resto. Some no cartão pequeno.',
     lado: 'direita',
+    quadro: 'rodape',
   },
   {
     numero: 17,
@@ -214,6 +235,7 @@ export const selosDoCartao: Selo[] = [
     origem: 'relacao',
     comportamento: 'Avatar maior, sempre por último, encostado na direita. Sem responsável vira um círculo tracejado, que é o convite para atribuir.',
     lado: 'direita',
+    quadro: 'rodape',
   },
   {
     numero: 18,
@@ -224,6 +246,7 @@ export const selosDoCartao: Selo[] = [
     origem: 'derivado',
     comportamento: 'Aparece no hover e no foco do teclado. É onde moram abrir, iniciar o cronômetro, copiar a referência, mover de raia e arquivar.',
     lado: 'direita',
+    quadro: 'cabeca',
   },
   {
     numero: 19,
@@ -243,7 +266,8 @@ export const selosDoCartao: Selo[] = [
     campo: 'status',
     origem: 'nativo',
     comportamento: 'De propósito. Quem diz a situação é a raia onde o cartão está. Repetir dentro do cartão gasta a linha do rodapé com o que a coluna já disse. Quando o agrupamento muda, o selo que falta passa a ser outro.',
-    lado: 'esquerda',
+    lado: 'direita',
+    quadro: 'cabeca',
   },
 ]
 
