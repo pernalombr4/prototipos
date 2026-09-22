@@ -89,6 +89,15 @@ export interface Textos {
     daBarra: string
     daBarraAjuda: string
     trazerDaBarra: string
+    alterada: string
+    alteradaAjuda: string
+    salvarNesta: string
+    salvarNestaAjuda: string
+    salvarComoNova: string
+    voltarAoSalvo: string
+    deOutraPessoa: (nome: string) => string
+    salvaParaTodos: (nome: string) => string
+    voltouAoSalvo: string
   }
 
   /* barra de comandos */
@@ -425,6 +434,15 @@ export const textos: Record<Idioma, Textos> = {
       daBarra: 'Trazido do quadro',
       daBarraAjuda: 'Você mudou estas coisas no quadro. Salvar aqui deixa elas assim para quem abrir a visualização.',
       trazerDaBarra: 'Usar o que está no quadro agora',
+      alterada: 'Alterada',
+      alteradaAjuda: 'O quadro está diferente do que esta visualização guarda. As mudanças são suas e ficam com você.',
+      salvarNesta: 'Salvar nesta visualização',
+      salvarNestaAjuda: 'Passa a valer para todo mundo que abre esta visualização.',
+      salvarComoNova: 'Salvar como nova',
+      voltarAoSalvo: 'Voltar ao salvo',
+      deOutraPessoa: nome => `Esta visualização é de ${nome}. Você pode salvar as suas mudanças numa visualização nova.`,
+      salvaParaTodos: nome => `"${nome}" foi salva para todo mundo que a usa.`,
+      voltouAoSalvo: 'O quadro voltou ao que a visualização guarda.',
     },
 
     buscar: 'Pesquisar tarefas',
@@ -750,6 +768,15 @@ export const textos: Record<Idioma, Textos> = {
       daBarra: 'Brought from the board',
       daBarraAjuda: 'You changed these on the board. Saving here makes them the starting point for whoever opens the view.',
       trazerDaBarra: 'Use what is on the board now',
+      alterada: 'Changed',
+      alteradaAjuda: 'The board differs from what this view has saved. The changes are yours and they stay with you.',
+      salvarNesta: 'Save to this view',
+      salvarNestaAjuda: 'It becomes the starting point for everyone who opens this view.',
+      salvarComoNova: 'Save as new',
+      voltarAoSalvo: 'Back to saved',
+      deOutraPessoa: nome => `This view belongs to ${nome}. You can save your changes as a new view.`,
+      salvaParaTodos: nome => `"${nome}" was saved for everyone who uses it.`,
+      voltouAoSalvo: 'The board is back to what the view has saved.',
     },
 
     buscar: 'Search tasks',
@@ -1075,6 +1102,15 @@ export const textos: Record<Idioma, Textos> = {
       daBarra: 'Traído del tablero',
       daBarraAjuda: 'Usted cambió estas cosas en el tablero. Guardar aquí las deja así para quien abra la visualización.',
       trazerDaBarra: 'Usar lo que está en el tablero ahora',
+      alterada: 'Modificada',
+      alteradaAjuda: 'El tablero está distinto de lo que esta visualización guarda. Los cambios son suyos y se quedan con usted.',
+      salvarNesta: 'Guardar en esta visualización',
+      salvarNestaAjuda: 'Pasa a valer para todos los que abren esta visualización.',
+      salvarComoNova: 'Guardar como nueva',
+      voltarAoSalvo: 'Volver a lo guardado',
+      deOutraPessoa: nome => `Esta visualización es de ${nome}. Puede guardar sus cambios en una visualización nueva.`,
+      salvaParaTodos: nome => `"${nome}" se guardó para todos los que la usan.`,
+      voltouAoSalvo: 'El tablero volvió a lo que la visualización guarda.',
     },
 
     buscar: 'Buscar tareas',

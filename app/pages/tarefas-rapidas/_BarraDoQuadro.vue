@@ -45,6 +45,10 @@ const props = defineProps<{
   visiveis: number
   raias: { valor: string, rotulo: string }[]
   somenteLeitura?: boolean
+  /** O quadro está diferente do que a visualização aberta guarda. */
+  alterada?: boolean
+  /** Quem não é dono da visualização só pode criar a sua. */
+  podeSalvar?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -55,6 +59,8 @@ const emit = defineEmits<{
   ordemPadrao: []
   /** Abrir o formulário da visualização. `null` quer dizer uma nova. */
   configurarVisualizacao: [id: string | null]
+  salvarVisualizacao: []
+  descartarVisualizacao: []
 }>()
 
 /** Arraste dentro do popover: guarda quem saiu para saber o que soltar onde. */
@@ -86,6 +92,11 @@ const campoDeData = defineModel<'created_at' | 'due_date'>('campoDeData', { requ
 const ocultarVazias = defineModel<boolean>('ocultarVazias', { required: true })
 const raiasOcultas = defineModel<string[]>('raiasOcultas', { required: true })
 const visualizacaoAtual = defineModel<string>('visualizacao', { required: true })
+
+const donoDaVisualizacao = computed(() => {
+  const v = visualizacoes.find(x => x.id === visualizacaoAtual.value)
+  return v ? pessoas[v.dono]?.fullname ?? '' : ''
+})
 
 /** Computado, não constante: a barra troca de idioma junto com a tela. */
 const agrupamentos = computed<{ valor: ChaveAgrupamento, rotulo: string, jaExiste: boolean }[]>(() => [
@@ -257,6 +268,53 @@ const rotuloDaOrdenacao = computed(() => {
           variant="ghost"
           class="shrink-0 text-muted"
           @click="emit('configurarVisualizacao', null)"
+        />
+      </div>
+
+      <!--
+        O quadro saiu do que a visualização guarda. As mudanças são de quem
+        mexeu e ficam com ela; empurrar para o time é um ato à parte, com o
+        aviso de que vale para todos. Quem não é dono só tem "salvar como
+        nova", porque a visualização é compartilhada por grupo e função.
+      -->
+      <div v-if="alterada" class="ml-auto flex shrink-0 items-center gap-1" style="animation: entrada .2s ease-out both">
+        <UTooltip :text="podeSalvar ? t.vis.alteradaAjuda : t.vis.deOutraPessoa(donoDaVisualizacao)">
+          <UBadge
+            :label="t.vis.alterada"
+            icon="i-lucide-dot"
+            color="warning"
+            variant="subtle"
+            size="sm"
+          />
+        </UTooltip>
+
+        <UTooltip v-if="podeSalvar" :text="t.vis.salvarNestaAjuda">
+          <UButton
+            :label="t.vis.salvarNesta"
+            icon="i-lucide-save"
+            size="xs"
+            color="primary"
+            variant="soft"
+            @click="emit('salvarVisualizacao')"
+          />
+        </UTooltip>
+
+        <UButton
+          :label="t.vis.salvarComoNova"
+          icon="i-lucide-copy-plus"
+          size="xs"
+          color="neutral"
+          variant="ghost"
+          @click="emit('configurarVisualizacao', null)"
+        />
+
+        <UButton
+          :label="t.vis.voltarAoSalvo"
+          icon="i-lucide-rotate-ccw"
+          size="xs"
+          color="neutral"
+          variant="ghost"
+          @click="emit('descartarVisualizacao')"
         />
       </div>
     </div>

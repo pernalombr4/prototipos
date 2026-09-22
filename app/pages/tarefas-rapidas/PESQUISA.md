@@ -374,3 +374,36 @@ vermelho separado no topo. Duas regras saem daqui, e as duas são unânimes:
 `help.clickup.com/hc/en-us/articles/34498518723863-Use-relative-or-absolute-dates`,
 `help.clickup.com/hc/en-us/articles/6309610317975-Intro-to-due-dates`,
 `forum.asana.com/t/display-date-instead-of-monday-or-tomorrow/82537`
+
+---
+
+## Consulta extra — o que a barra muda, quem herda (22/09/2026)
+
+A proposta trouxe agrupar, ordenar, campos do cartão, limite e totalizador para a barra do
+quadro. Como a visualização é compartilhada, faltava decidir o que acontece com o que a pessoa
+mexe. O mercado tem **dois modelos, e eles são opostos**:
+
+| | ClickUp | Linear |
+|---|---|---|
+| Mexer na tela | marca a view com **"This view has unsaved changes"** | a mudança **vale para quem mexeu** e persiste ao navegar |
+| Salvar | **salva para todos** que têm acesso à view, e existe o **Autosave View**, que salva sozinho enquanto a pessoa mexe | é um ato separado: **"Set as default"** aplica a configuração ao workspace inteiro |
+| Voltar atrás | desfazer as alterações não salvas | **"Reset to default"** devolve a configuração salva |
+| Escapatória | tornar a view **privada**, para ninguém mexer | a mudança já é privada por padrão |
+
+**O que o próprio ClickUp mostra sobre o modelo dele:** o pedido mais votado sobre isso no
+canal de feedback é "option to disable the unsaved changes notification", e há pedido pedindo
+que a mudança de uma pessoa **não** se propague para todas. Quer dizer: o modelo em que mexer
+na tela é, por padrão, mexer na tela dos outros incomoda quem usa.
+
+**O que foi seguido, e por quê.** O do Linear. No ENSPACE a visualização é compartilhada por
+**grupo e função** (é o bloco Visibilidade do formulário), então salvar por cima muda a tela
+de gente que nem está ali. Isso não pode ser efeito colateral de arrastar uma raia. O que
+mudou fica com quem mudou, salvar é um ato explícito, e o texto do botão avisa que vale para
+todos.
+
+**Uma coisa do ClickUp que não veio:** o autosave. Salvar sozinho, numa tela compartilhada por
+função, é exatamente o que gera o pedido de "desligar isso".
+
+**URLs.** `help.clickup.com/hc/en-us/articles/6310370965911-Save-view-changes`,
+`feedback.clickup.com/feature-requests/p/option-to-disable-this-view-has-unsaved-changes-notification`,
+`linear.app/docs/display-options`

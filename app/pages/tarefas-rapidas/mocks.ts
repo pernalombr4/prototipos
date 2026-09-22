@@ -725,13 +725,102 @@ export const tarefas: Task[] = [
  * Visualizações salvas. Vêm da rota de model-views, não de /tasks.    *
  * Aqui servem só para a barra de visualizações do topo ter conteúdo.  *
  * ------------------------------------------------------------------ */
-export const visualizacoes = [
-  { id: 'todas', nome: 'Tarefas Rápidas', icone: 'i-lucide-layout-dashboard', padrao: true },
-  { id: 'minhas', nome: 'Minhas tarefas', icone: 'i-lucide-user' },
-  { id: 'produto', nome: 'Tarefas produto', icone: 'i-lucide-package' },
-  { id: 'lideranca', nome: 'Tarefas liderança', icone: 'i-lucide-users' },
-  { id: 'dev', nome: 'Tarefas dev', icone: 'i-lucide-code' },
-]
+export interface ConfigDaVisualizacao {
+  agrupamento: string
+  ordenacao: string
+  ordenacaoDesc: boolean
+  densidade: 'pequeno' | 'medio' | 'grande'
+  campos: Record<string, boolean>
+  limites: Record<string, number | null>
+  /** Totalizador por raia, guardado como `campo:operacao`. */
+  calculos: Record<string, string>
+  somenteMinhas: boolean
+}
+
+export interface Visualizacao {
+  id: string
+  nome: string
+  icone: string
+  padrao?: boolean
+  /**
+   * Quem não é dono só consegue "salvar como nova". A visualização é
+   * compartilhada por grupo e função (é o bloco Visibilidade do formulário),
+   * então salvar por cima muda a tela de quem mais a usa.
+   */
+  dono: number
+  config: ConfigDaVisualizacao
+}
+
+const cartaoPadrao: Record<string, boolean> = {
+  referencia: true, tipo: true, descricao: true, prioridade: true, prazo: true,
+  pontos: true, etiquetas: true, responsavel: true, item: true,
+  colaboradores: true, tempo: true, criador: false,
+}
+
+function config(mudancas: Partial<ConfigDaVisualizacao> = {}): ConfigDaVisualizacao {
+  return {
+    agrupamento: 'status',
+    ordenacao: 'due_date',
+    ordenacaoDesc: false,
+    densidade: 'medio',
+    campos: { ...cartaoPadrao },
+    limites: {},
+    calculos: {},
+    somenteMinhas: false,
+    ...mudancas,
+  }
+}
+
+/**
+ * Reativa de propósito, como os apontamentos de tempo: salvar na visualização
+ * muda a configuração guardada, e a barra precisa perceber na hora que o
+ * quadro voltou a ser igual ao que está salvo.
+ */
+export const visualizacoes: Visualizacao[] = reactive([
+  {
+    id: 'todas',
+    nome: 'Tarefas Rápidas',
+    icone: 'i-lucide-layout-dashboard',
+    padrao: true,
+    dono: 4057,
+    config: config(),
+  },
+  {
+    id: 'minhas',
+    nome: 'Minhas tarefas',
+    icone: 'i-lucide-user',
+    dono: 4057,
+    config: config({ somenteMinhas: true, densidade: 'pequeno' }),
+  },
+  {
+    id: 'produto',
+    nome: 'Tarefas produto',
+    icone: 'i-lucide-package',
+    dono: 4057,
+    config: config({ agrupamento: 'priority', ordenacao: 'points', ordenacaoDesc: true }),
+  },
+  {
+    // Esta é de outra pessoa: serve para mostrar o caso de quem não pode
+    // salvar por cima e só tem a saída de criar a sua.
+    id: 'lideranca',
+    nome: 'Tarefas liderança',
+    icone: 'i-lucide-users',
+    dono: 4072,
+    config: config({
+      agrupamento: 'assigned_to',
+      densidade: 'grande',
+      limites: { 4057: 5 },
+      calculos: { 4057: 'points:soma' },
+    }),
+  },
+  {
+    id: 'dev',
+    nome: 'Tarefas dev',
+    icone: 'i-lucide-code',
+    dono: 4088,
+    config: config({ agrupamento: 'type', ordenacao: 'updated_at' }),
+  },
+])
 
 /** Quem está usando a tela. Define o que é "minha tarefa". */
 export const usuarioAtual = pessoas[4057]!

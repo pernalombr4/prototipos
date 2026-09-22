@@ -17,7 +17,8 @@ import ModalNovaTarefa from './_ModalNovaTarefa.vue'
 import PainelDaTarefa from './_PainelDaTarefa.vue'
 import RaiaDoQuadro from './_RaiaDoQuadro.vue'
 import { selosDoPainel } from './selos'
-import { estimativaDeTempo, itensRelacionados, registrosDeTempo, tarefas as tarefasMock, usuarioAtual } from './mocks'
+import { estimativaDeTempo, itensRelacionados, registrosDeTempo, tarefas as tarefasMock, usuarioAtual, visualizacoes } from './mocks'
+import type { ConfigDaVisualizacao } from './mocks'
 import type { OrdemDaRaia } from './_RaiaDoQuadro.vue'
 import {
   type Calculo, type ChaveAgrupamento, type ChaveOrdenacao,
@@ -210,6 +211,104 @@ const ordenacaoPorRaia = ref<Record<string, OrdemDaRaia | null>>({})
 
 /** O que o totalizador pode somar, descoberto do dado que está carregado. */
 const camposDoTotalizador = computed(() => camposCalculaveis(lista.value, t.value))
+
+/* ------------------------------------------------------------------ *
+ * A VISUALIZAÇÃO ABERTA, E O QUE FOI MEXIDO DEPOIS                    *
+ *                                                                     *
+ * Pesquisa da rodada 23, no PESQUISA.md. Os dois modelos do mercado:   *
+ *                                                                     *
+ *   ClickUp  mexer marca a view como "unsaved changes", e salvar salva *
+ *            PARA TODOS que têm acesso. A própria comunidade reclama   *
+ *            de mudar a tela dos outros sem querer.                    *
+ *   Linear   o que a pessoa mexe vale só para ela e fica; empurrar     *
+ *            para o time é um ato separado ("set as default"), e       *
+ *            existe o caminho de volta ("reset to default").           *
+ *                                                                     *
+ * Aqui vale o do Linear, porque no ENSPACE a visualização é            *
+ * compartilhada por grupo e função: salvar por cima muda a tela de     *
+ * quem mais a usa, e isso não pode ser efeito colateral de arrastar    *
+ * uma raia. Quem não é dono da visualização só tem "salvar como nova". *
+ * ------------------------------------------------------------------ */
+const visualizacaoAberta = computed(() =>
+  visualizacoes.find(v => v.id === visualizacao.value) ?? visualizacoes[0]!)
+
+const podeSalvarNaVisualizacao = computed(() =>
+  visualizacaoAberta.value.dono === usuarioAtual.id && !somenteLeitura.value)
+
+/** O que é da visualização, e não do momento: a busca não entra. */
+function configDoQuadro(): ConfigDaVisualizacao {
+  const calculos: Record<string, string> = {}
+  for (const [raia, c] of Object.entries(calculoPorRaia.value)) {
+    if (c) calculos[raia] = `${c.campo}:${c.operacao}`
+  }
+  return {
+    agrupamento: agrupamento.value,
+    ordenacao: ordenacao.value,
+    ordenacaoDesc: ordenacaoDesc.value,
+    densidade: densidade.value,
+    campos: { ...campos.value },
+    limites: Object.fromEntries(Object.entries(limites.value).filter(([, n]) => n != null)),
+    calculos,
+    somenteMinhas: filtros.value.somenteMinhas,
+  }
+}
+
+/** Duas configurações são iguais quando dizem a mesma coisa, na ordem que for. */
+function assinatura(c: ConfigDaVisualizacao): string {
+  const mapa = (m: Record<string, unknown>) =>
+    Object.keys(m).sort().map(k => `${k}=${m[k]}`).join(',')
+  return [
+    c.agrupamento, c.ordenacao, c.ordenacaoDesc, c.densidade, c.somenteMinhas,
+    mapa(c.campos), mapa(c.limites), mapa(c.calculos),
+  ].join('|')
+}
+
+const visualizacaoAlterada = computed(() =>
+  assinatura(configDoQuadro()) !== assinatura(visualizacaoAberta.value.config))
+
+/** Abrir uma visualização é herdar a configuração dela. */
+function aplicarVisualizacao(id: string) {
+  const v = visualizacoes.find(x => x.id === id)
+  if (!v) return
+  const c = v.config
+  agrupamento.value = c.agrupamento as ChaveAgrupamento
+  ordenacao.value = c.ordenacao as ChaveOrdenacao
+  ordenacaoDesc.value = c.ordenacaoDesc
+  densidade.value = c.densidade
+  campos.value = { ...c.campos }
+  limites.value = { ...c.limites }
+  filtros.value = { ...filtros.value, somenteMinhas: c.somenteMinhas }
+  const calculos: Record<string, Calculo> = {}
+  for (const [raia, texto] of Object.entries(c.calculos)) {
+    const [campo, operacao] = texto.split(':')
+    calculos[raia] = { campo: campo!, operacao: operacao as Calculo['operacao'] }
+  }
+  calculoPorRaia.value = calculos
+  ordenacaoPorRaia.value = {}
+  raiasOcultas.value = []
+  raiasRecolhidas.value = []
+  ordemDasRaias.value = []
+}
+
+watch(visualizacao, aplicarVisualizacao)
+
+/** Salvar por cima: vale para todo mundo que abre esta visualização. */
+function salvarNaVisualizacao() {
+  const v = visualizacoes.find(x => x.id === visualizacao.value)
+  if (!v || !podeSalvarNaVisualizacao.value) return
+  Object.assign(v.config, configDoQuadro())
+  toast.add({
+    title: t.value.vis.salvaParaTodos(v.nome),
+    icon: 'i-lucide-check',
+    color: 'success',
+  })
+}
+
+function descartarAlteracoes() {
+  aplicarVisualizacao(visualizacao.value)
+  toast.add({ title: t.value.vis.voltouAoSalvo, icon: 'i-lucide-rotate-ccw', color: 'neutral' })
+}
+
 
 /* ------------------------------------------------------------------ *
  * O formulário da visualização. Ele abre pelo "+ Visualizar" e pelo   *
@@ -540,11 +639,15 @@ const cartaoDeHoje: EnKanbanCardConfig = {
       :visiveis="totalVisivel"
       :raias="definicoesDeRaia.map(d => ({ valor: d.valor, rotulo: d.rotulo }))"
       :somente-leitura="somenteLeitura"
+      :alterada="visualizacaoAlterada"
+      :pode-salvar="podeSalvarNaVisualizacao"
       @nova-tarefa="abrirCriacao()"
       @limpar="limparFiltros"
       @reordenar-raias="reordenarRaias"
       @ordem-padrao="ordemDasRaias = []"
       @configurar-visualizacao="abrirVisualizacao"
+      @salvar-visualizacao="salvarNaVisualizacao"
+      @descartar-visualizacao="descartarAlteracoes"
     />
 
     <UAlert

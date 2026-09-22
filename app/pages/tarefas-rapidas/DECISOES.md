@@ -1527,3 +1527,60 @@ criada, e sem isso o "ponto de partida" seria imutável.
 O formulário abre pelo `+ Visualizar` e pelo lápis da visualização aberta, com as cinco seções
 na ordem, a tabela das quatro raias do agrupamento atual e os três idiomas. Nada foi salvo no
 develop.
+
+---
+
+## Rodada 23 — 22/09/2026
+
+### O que ela pediu, literal
+
+> 1. O que a barra muda, quem herda. O formulário propõe "usar o que está no quadro agora".
+> Falta a direção contrária: quando a pessoa mexe na barra, o quadro devia oferecer "salvar
+> nesta visualização", como o Linear faz? Se sim, a barra passa a ter estado sujo, e isso muda
+> a barra. / concordo
+
+### O modelo escolhido, e o que ele recusa
+
+Os dois do mercado estão no PESQUISA.md e são opostos. O do ClickUp marca a view como não
+salva e, ao salvar, **salva para todos**, com autosave opcional. O do Linear deixa a mudança
+**com quem mexeu** e trata empurrar para o time como ato separado.
+
+Aqui vale o do Linear, por uma razão que é do ENSPACE e não de gosto: a visualização é
+compartilhada por **grupo e função**. Salvar por cima muda a tela de quem nem está ali, e isso
+não pode ser efeito colateral de arrastar uma raia. O autosave do ClickUp fica de fora pelo
+mesmo motivo.
+
+### O que apareceu na barra
+
+Quando o quadro sai do que a visualização guarda, a linha das visualizações mostra, à direita:
+
+| Peça | O que faz |
+|---|---|
+| Selo **Alterada** | diz que o quadro está diferente. O tooltip explica que as mudanças são de quem mexeu e ficam com ela |
+| **Salvar nesta visualização** | só para o dono. O tooltip avisa: "Passa a valer para todo mundo que abre esta visualização" |
+| **Salvar como nova** | abre o formulário já com o estado do quadro. É a saída de quem não é dono |
+| **Voltar ao salvo** | devolve a configuração guardada, como o "reset to default" do Linear |
+
+**Quem não é dono não vê o botão de salvar por cima.** Nas visualizações de exemplo, "Tarefas
+liderança" é de Bruna Sato e "Tarefas dev" é de Ivo: abrindo uma delas e mexendo, sobram
+"Salvar como nova" e "Voltar ao salvo", e o tooltip do selo diz de quem é a visualização.
+
+### O que isso consertou de quebra
+
+Trocar de visualização, no protótipo, **não mudava nada** além do filtro de "minhas tarefas":
+as abas eram enfeite. Agora cada visualização guarda a configuração dela (agrupamento,
+ordenação e sentido, tamanho do cartão, campos, limites, totalizadores e o filtro de minhas),
+e abrir uma é herdar o que ela guarda. É o que faz o "ponto de partida" da rodada 22 existir
+de verdade.
+
+### O que não entra na conta do "alterado"
+
+A **busca** não conta: ela é do momento, não da tela. Filtro, agrupamento, ordenação, tamanho,
+campos, limite e totalizador contam.
+
+### Conferido na tela
+
+Mudando o tamanho do cartão, o selo e as três ações aparecem. "Voltar ao salvo" limpa.
+"Salvar nesta visualização" salva, o selo some na hora e o aviso diz que a visualização foi
+salva para todo mundo que a usa. Abrindo "Tarefas liderança", o quadro passa a agrupar por
+responsável (que é o que ela guarda) e o botão de salvar por cima não aparece.
