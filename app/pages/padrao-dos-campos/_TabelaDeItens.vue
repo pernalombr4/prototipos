@@ -950,16 +950,12 @@ onMounted(() => nextTick(() => {
             </UTooltip>
           </span>
           <!--
-            O selo de estado não encolhe: "Rascu..." não é um estado, é um
-            enigma. Quem cede espaço é a referência, que é hash e não perde
-            sentido ao ser cortada (ela já vive cortada).
+            SEM SELO DE ESTADO AQUI. Rascunho e Inativo saíram da célula da
+            referência por decisão dela: estado do REGISTRO não é assunto da
+            coluna de identificação, e numa coluna que já carrega selo, botão
+            de copiar e botão de abrir, ele era o quarto elemento disputando o
+            mesmo espaço. O estado continua onde pertence, no painel do item.
           -->
-          <UBadge v-if="(row as Item).isDraft" color="warning" variant="subtle" size="sm" class="shrink-0">
-            {{ t.rascunho }}
-          </UBadge>
-          <UBadge v-else-if="(row as Item).status === 'inactive'" color="neutral" variant="soft" size="sm">
-            {{ t.inativo }}
-          </UBadge>
         </div>
       </template>
 

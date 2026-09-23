@@ -1536,3 +1536,61 @@ não recebe quadro de animação, logo **não recebe evento de rolagem**. Isso m
 fez medir "zero disparos" duas vezes e acusar o código errado. A verificação
 final foi feita disparando o evento de rolagem no contêiner certo, o que exercita
 o mesmo caminho. Vale repetir o gesto com a mão, com o Chrome na frente.
+
+## Rodada 21: o "i" do valor monetário, e a referência sem selo de estado
+
+### O "i", copiado do ENSPACE
+
+Ela avisou que o produto tem um "i" com quadro informativo E interativo no valor
+monetário, e que ele não pode faltar. Fui ler em tela no develop, na tela nova de
+itens, em 24/09/2026:
+
+| O que | Como o produto faz |
+|---|---|
+| gatilho | um `i` pequeno, encostado à direita do valor, dentro da célula |
+| quando abre | **no passar do mouse**, não no clique |
+| conteúdo | Valor inicial, Correções acumuladas e **Valor atual** em negrito |
+| a parte interativa | "Mostrar Legenda", que **expande dentro do mesmo quadro** |
+| quando aparece | em todo valor monetário, inclusive no `R$ 0` sem correção |
+
+Essa última linha é a que quase me escapou: o "i" não é sinal de que houve
+correção. Ele aparece sempre, porque o quadro também serve para dizer que **não
+houve** correção nenhuma. No protótipo ele só falta na célula vazia.
+
+A legenda tem dois grupos, e os sete textos foram copiados palavra por palavra:
+
+- **Vigência do Período**: Ativo, Inativo, Não Vinculado;
+- **Status da Correção**: Bem-sucedida, Erro fatal, Pendente, Falha temporária.
+
+Eles estão no `textos.ts`, com o português como fonte (é copy do produto) e
+inglês e espanhol como tradução nossa.
+
+Como o quadro abre no hover mas recebe clique por dentro, ele é um
+`UPopover mode="hover"`: o ponteiro entra no conteúdo sem que ele feche, e o
+"Mostrar Legenda" é um `UCollapsible` de verdade. O gatilho é um `span` com
+`role="button"`, e não um `UButton`, porque a célula inteira já é um `<button>`
+e botão dentro de botão é marcação inválida, com o navegador engolindo o clique
+de dentro.
+
+**O que não pude ler: a lista de períodos.** No develop nenhum item tinha
+correção aplicada (todos com correção zero), e não dá para forjar um sem mexer
+em configuração. A forma de `periodos` no `mocks.ts` está marcada como proposta,
+e os nomes saíram do vocabulário da própria legenda, que só existe para explicar
+esses dois indicadores. No protótipo o item 4 tem dois períodos, um inativo e
+bem-sucedido e um ativo e pendente, porque é com eles que a legenda deixa de ser
+decoração.
+
+Um detalhe que a tela pegou: `new Date('2026-01-01')` é meia-noite em UTC, e num
+fuso a oeste isso volta para 31/12/2025. O período começava em 12/2025 na tela.
+As datas dos períodos agora são lidas ao meio-dia.
+
+### Rascunho e Inativo saíram da célula da referência
+
+Decisão dela, e está certa: estado do REGISTRO não é assunto da coluna de
+identificação. Numa coluna que já carrega o selo da referência, o botão de
+copiar e o botão de abrir, o selo de estado era o quarto elemento disputando o
+mesmo espaço, e foi ele que apareceu de novo no teste de coluna apertada da
+rodada 17, empurrando a referência para uma letra só.
+
+O estado continua onde pertence, no painel do item. A tabela perdeu um sinal e
+ganhou uma coluna de identificação que só identifica.

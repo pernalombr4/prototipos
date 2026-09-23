@@ -17,6 +17,7 @@
  */
 import type { Campo } from './campos'
 import CartaoDoRegistro from './_CartaoDoRegistro.vue'
+import InfoDaCorrecao from './_InfoDaCorrecao.vue'
 import { itensRelacionaveis, matrizDeDados } from './mocks'
 import type { Textos } from './textos'
 import { corDaOpcao, enderecoEmUmaLinha, estaVazio, estaVencida, foiCorrigido, formatarBytes, formatarDataCurta, formatarDataMedia, mascararDocumento, moedaOriginalFormatada, relativoEmDias, rotuloDaOpcao, saidaFormatada, semTags } from './formatacao'
@@ -429,13 +430,25 @@ async function copiar(texto: string) {
       <UTooltip v-if="foiCorrigido(valor)" :text="t.valorCorrigido">
         <UIcon name="i-lucide-trending-up" class="size-3 shrink-0 text-info" />
       </UTooltip>
-      <span class="text-sm tabular-nums text-highlighted">{{ textoCompleto }}</span>
+      <span class="min-w-0 truncate text-sm tabular-nums text-highlighted">{{ textoCompleto }}</span>
       <span
         v-if="!naCelula && foiCorrigido(valor)"
         class="shrink-0 text-xs tabular-nums text-muted line-through"
       >
         {{ moedaOriginalFormatada(valor, campo.localeDoCampo ?? 'pt-BR') }}
       </span>
+      <!--
+        O "i" do ENSPACE. Ele acompanha o valor monetário em toda parte, e não
+        só quando houve correção: no develop ele aparece inclusive no valor
+        zerado, porque o quadro também serve para dizer que NÃO houve correção
+        nenhuma. Copiado da tela em 24/09/2026.
+      -->
+      <InfoDaCorrecao
+        v-if="!vazio"
+        :valor="valor as { currency?: string, value?: number, originalValue?: number }"
+        :t="t"
+        :idioma="idioma"
+      />
     </span>
 
     <!-- ──────────────────────── escolha: os selos ─────────────────────── -->

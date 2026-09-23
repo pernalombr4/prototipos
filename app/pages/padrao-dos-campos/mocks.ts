@@ -378,7 +378,23 @@ export const itens: Item[] = [
       email: 'fiscal@construtorasaomateus.com.br',
       codigo: 'OS-2026-0333',
       numero: 128940.75,
-      moeda: { currency: 'BRL', value: 134187.38, originalValue: 128940.75 },
+      /*
+       * O único valor com correção aplicada, e por isso o único com períodos.
+       *
+       * A FORMA DE `periodos` É PROPOSTA. No develop não havia item com
+       * correção aplicada para ler (todos estavam com correção zero), e os
+       * nomes aqui vêm do vocabulário da legenda do próprio produto, que só
+       * existe para explicar estes dois indicadores. Confirmar com o dev.
+       */
+      moeda: {
+        currency: 'BRL',
+        value: 134187.38,
+        originalValue: 128940.75,
+        periodos: [
+          { inicio: '2026-01-01', fim: '2026-06-30', indice: 'IPCA', vigencia: 'inativo', status: 'bemSucedida', valor: 3120.4 },
+          { inicio: '2026-07-01', fim: null, indice: 'IPCA', vigencia: 'ativo', status: 'pendente', valor: 2126.23 },
+        ],
+      },
       selecao_unica: 'suspenso',
       selecao_radio: 'sim',
       selecao_multipla: ['eletrica', 'civil', 'seguranca', 'climatizacao'],

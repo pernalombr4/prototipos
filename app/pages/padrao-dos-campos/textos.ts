@@ -190,6 +190,41 @@ export interface Textos {
   moverParaBaixo: string
   arrasteParaReordenar: string
   limparCampo: string
+  /**
+   * O quadro do "i" do valor monetário, copiado do ENSPACE em 24/09/2026.
+   * Os textos da legenda são do produto, palavra por palavra, e por isso o
+   * português é a fonte: o inglês e o espanhol são tradução nossa.
+   */
+  correcao: {
+    detalhes: string
+    valorInicial: string
+    acumuladas: string
+    valorAtual: string
+    mostrarLegenda: string
+    periodos: string
+    semFim: string
+    desde: string
+    ate: string
+    legenda: {
+      vigencia: {
+        titulo: string
+        entradas: {
+          ativo: { rotulo: string, texto: string }
+          inativo: { rotulo: string, texto: string }
+          naoVinculado: { rotulo: string, texto: string }
+        }
+      }
+      status: {
+        titulo: string
+        entradas: {
+          bemSucedida: { rotulo: string, texto: string }
+          erroFatal: { rotulo: string, texto: string }
+          pendente: { rotulo: string, texto: string }
+          falhaTemporaria: { rotulo: string, texto: string }
+        }
+      }
+    }
+  }
   /* O popover de link do editor de texto rico. */
   linkInserir: string
   linkEndereco: string
@@ -466,6 +501,57 @@ const ptBR: Textos = {
   moverParaBaixo: 'Mover para baixo',
   arrasteParaReordenar: 'Arraste para reordenar',
   limparCampo: 'Limpar o campo',
+  correcao: {
+    detalhes: 'Detalhes da correção monetária',
+    valorInicial: 'Valor inicial',
+    acumuladas: 'Correções acumuladas',
+    valorAtual: 'Valor atual',
+    mostrarLegenda: 'Mostrar Legenda',
+    periodos: 'Períodos',
+    semFim: 'sem data final',
+    desde: 'desde',
+    ate: 'até',
+    legenda: {
+      vigencia: {
+        titulo: 'Vigência do Período',
+        entradas: {
+          ativo: {
+            rotulo: 'Ativo',
+            texto: 'Período não possui data final ou data final é futura. Está apto a receber correções recorrentes.',
+          },
+          inativo: {
+            rotulo: 'Inativo',
+            texto: 'Período possui data final no passado. Já deve estar corrigido.',
+          },
+          naoVinculado: {
+            rotulo: 'Não Vinculado',
+            texto: 'Período salvo apenas no campo. Não está vinculado a uma correção monetária. (id ausente)',
+          },
+        },
+      },
+      status: {
+        titulo: 'Status da Correção',
+        entradas: {
+          bemSucedida: {
+            rotulo: 'Bem-sucedida',
+            texto: 'A correção do período foi bem sucedida e seu valor atualizado computado no valor final.',
+          },
+          erroFatal: {
+            rotulo: 'Erro fatal',
+            texto: 'Ocorreu um erro não identificado ao processar a correção para o período.',
+          },
+          pendente: {
+            rotulo: 'Pendente',
+            texto: 'Aguardando correção recorrente quando houver publicação do Índice.',
+          },
+          falhaTemporaria: {
+            rotulo: 'Falha temporária',
+            texto: 'Houve uma falha temporária ao obter o fator de correção para o Índice do Período. Ele deverá ser processado em breve, pois não está mais vigente.',
+          },
+        },
+      },
+    },
+  },
   linkInserir: 'Inserir link',
   linkEndereco: 'Endereço',
   linkTexto: 'Texto do link',
@@ -1004,6 +1090,57 @@ const en: Textos = {
   moverParaBaixo: 'Move down',
   arrasteParaReordenar: 'Drag to reorder',
   limparCampo: 'Clear the field',
+  correcao: {
+    detalhes: 'Monetary correction details',
+    valorInicial: 'Initial value',
+    acumuladas: 'Accumulated corrections',
+    valorAtual: 'Current value',
+    mostrarLegenda: 'Show legend',
+    periodos: 'Periods',
+    semFim: 'no end date',
+    desde: 'since',
+    ate: 'to',
+    legenda: {
+      vigencia: {
+        titulo: 'Period validity',
+        entradas: {
+          ativo: {
+            rotulo: 'Active',
+            texto: 'The period has no end date, or its end date is in the future. It can still receive recurring corrections.',
+          },
+          inativo: {
+            rotulo: 'Inactive',
+            texto: 'The period has an end date in the past. It should already be corrected.',
+          },
+          naoVinculado: {
+            rotulo: 'Not linked',
+            texto: 'The period is saved on the field only. It is not linked to a monetary correction. (missing id)',
+          },
+        },
+      },
+      status: {
+        titulo: 'Correction status',
+        entradas: {
+          bemSucedida: {
+            rotulo: 'Successful',
+            texto: 'The correction for the period succeeded and its updated value is included in the final value.',
+          },
+          erroFatal: {
+            rotulo: 'Fatal error',
+            texto: 'An unidentified error happened while processing the correction for the period.',
+          },
+          pendente: {
+            rotulo: 'Pending',
+            texto: 'Waiting for the recurring correction once the index is published.',
+          },
+          falhaTemporaria: {
+            rotulo: 'Temporary failure',
+            texto: 'Getting the correction factor for the period index failed temporarily. It should be processed soon, since the period is no longer current.',
+          },
+        },
+      },
+    },
+  },
   linkInserir: 'Insert link',
   linkEndereco: 'Address',
   linkTexto: 'Link text',
@@ -1542,6 +1679,57 @@ const es: Textos = {
   moverParaBaixo: 'Mover hacia abajo',
   arrasteParaReordenar: 'Arrastre para reordenar',
   limparCampo: 'Limpiar el campo',
+  correcao: {
+    detalhes: 'Detalles de la corrección monetaria',
+    valorInicial: 'Valor inicial',
+    acumuladas: 'Correcciones acumuladas',
+    valorAtual: 'Valor actual',
+    mostrarLegenda: 'Mostrar leyenda',
+    periodos: 'Períodos',
+    semFim: 'sin fecha final',
+    desde: 'desde',
+    ate: 'hasta',
+    legenda: {
+      vigencia: {
+        titulo: 'Vigencia del período',
+        entradas: {
+          ativo: {
+            rotulo: 'Activo',
+            texto: 'El período no tiene fecha final o su fecha final es futura. Todavía puede recibir correcciones recurrentes.',
+          },
+          inativo: {
+            rotulo: 'Inactivo',
+            texto: 'El período tiene fecha final en el pasado. Ya debería estar corregido.',
+          },
+          naoVinculado: {
+            rotulo: 'No vinculado',
+            texto: 'El período está guardado solo en el campo. No está vinculado a una corrección monetaria. (id ausente)',
+          },
+        },
+      },
+      status: {
+        titulo: 'Estado de la corrección',
+        entradas: {
+          bemSucedida: {
+            rotulo: 'Exitosa',
+            texto: 'La corrección del período fue exitosa y su valor actualizado entra en el valor final.',
+          },
+          erroFatal: {
+            rotulo: 'Error fatal',
+            texto: 'Ocurrió un error no identificado al procesar la corrección del período.',
+          },
+          pendente: {
+            rotulo: 'Pendiente',
+            texto: 'Esperando la corrección recurrente cuando se publique el índice.',
+          },
+          falhaTemporaria: {
+            rotulo: 'Falla temporal',
+            texto: 'Hubo una falla temporal al obtener el factor de corrección del índice del período. Debería procesarse pronto, ya que el período no está vigente.',
+          },
+        },
+      },
+    },
+  },
   linkInserir: 'Insertar enlace',
   linkEndereco: 'Dirección',
   linkTexto: 'Texto del enlace',
