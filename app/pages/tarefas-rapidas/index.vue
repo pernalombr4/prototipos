@@ -18,7 +18,7 @@ import ModalNovaTarefa from './_ModalNovaTarefa.vue'
 import PainelDaTarefa from './_PainelDaTarefa.vue'
 import RaiaDoQuadro from './_RaiaDoQuadro.vue'
 import { selosDoPainel } from './selos'
-import { estimativaDeTempo, itensRelacionados, pessoas, registrosDeTempo, tarefas as tarefasMock, usuarioAtual, visualizacoes } from './mocks'
+import { estimativaDeTempo, hoje, itensRelacionados, pessoas, registrosDeTempo, tarefas as tarefasMock, usuarioAtual, visualizacoes } from './mocks'
 import type { ConfigDaVisualizacao } from './mocks'
 import type { OrdemDaRaia } from './_RaiaDoQuadro.vue'
 import {
@@ -325,6 +325,16 @@ function prioridadeSelecionadas(valor: Task['priority']) {
   const alvos = tarefasSelecionadas.value
   guardarParaDesfazer(alvos, (x) => { x.priority = valor })
   avisar(t.value.selecao.prioridadeMudada(alvos.length), 'i-lucide-flag')
+  limparSelecao()
+}
+
+/** Prazo em massa, com os mesmos atalhos do formulário de criação. */
+function prazoSelecionadas(dias: number | null) {
+  const alvos = tarefasSelecionadas.value
+  const data = dias === null ? null : new Date(hoje.getTime() + dias * 86_400_000)
+  if (data) data.setUTCHours(18, 0, 0, 0)
+  guardarParaDesfazer(alvos, (x) => { x.due_date = data })
+  avisar(t.value.selecao.prazoMudado(alvos.length), 'i-lucide-calendar-clock')
   limparSelecao()
 }
 
@@ -1046,6 +1056,7 @@ const cartaoDeHoje: EnKanbanCardConfig = {
       @mover="moverSelecionadas"
       @atribuir="atribuirSelecionadas"
       @prioridade="prioridadeSelecionadas"
+      @prazo="prazoSelecionadas"
       @arquivar="arquivarSelecionadas"
       @lixeira="lixeiraSelecionadas"
     />

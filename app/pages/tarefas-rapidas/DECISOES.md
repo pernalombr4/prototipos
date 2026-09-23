@@ -1641,3 +1641,62 @@ quadro caiu de 25 para 23 tarefas; e "Selecionar as 12 desta raia" selecionou as
 navegador estava atrás, e página que não pinta não termina transição de saída, então o nó fica
 preso com a contagem velha. O estado zera certo (nenhum cartão fica marcado e a ação acontece),
 e o mesmo fluxo com a janela na frente resolve. Vale um olhar dela.
+
+---
+
+## Rodada 25 — 23/09/2026
+
+### O que ela pediu, literal
+
+> pode fazer como o do monday, e a barra de açoes que aparece na base pode fazer como do
+> clickup (mas com as açoes que fazem sentido pra gente, pro nosso prototipo)
+
+### A seleção, como no monday
+
+A caixinha deixou de flutuar por cima do título. **Assim que existe seleção, o cartão abre uma
+coluna à esquerda e ela mora lá**, como a linha do monday: o conteúdo desliza, nada fica
+tapado, e a caixinha tem lugar próprio em vez de dividir o canto com o texto.
+
+Enquanto ninguém selecionou nada, ela continua aparecendo só no hover, sobreposta e com fundo,
+e o cartão não reserva espaço nenhum. Shift continua pegando a faixa dentro da raia.
+
+### A barra, como a Bulk Action Toolbar do ClickUp
+
+| Peça | Como ficou |
+|---|---|
+| Bloco da contagem | à esquerda, em cor cheia, com o **número grande** e o que ele significa ao lado |
+| Ações | **ícone em cima, rótulo embaixo**, lado a lado, largura igual |
+| Fundo | **invertido**, e com isso a barra para de competir com os cartões: enquanto existe seleção, é a única coisa escura na tela |
+| Sair | X na ponta, separado por uma linha, com **Esc** fazendo o mesmo |
+| Posição | flutuando no pé, centralizada, sem empurrar o quadro |
+
+**O que não foi copiado é a identidade.** Cor, tipografia e ícones são os do ENSPACE, pela
+regra 8. O que veio do ClickUp é o formato, e ele veio porque resolve três coisas: não empurra
+o quadro, começa pela contagem (que é o que deixa clicar em algo destrutivo com segurança) e
+separa visualmente o modo de seleção do resto da tela.
+
+### As ações, que são as nossas
+
+Mover para (raia), Responsável, Prioridade, **Prazo**, Arquivar e Lixeira.
+
+**Prazo entrou nesta rodada**, com os mesmos atalhos do formulário de criação: hoje, amanhã,
+semana que vem e tirar o prazo. É a ação em massa que mais se pede num quadro que vive de
+spaceflow, e ela já existe uma a uma no painel.
+
+**Etiquetas ficaram de fora**, e não por esquecimento: hoje elas não se editam nem uma a uma,
+nem no cartão nem no painel. Ação em massa que não existe sozinha seria invenção.
+
+**O rótulo da lixeira encurtou para "Lixeira"** embaixo do ícone, porque "Enviar para a
+lixeira" quebrava em três linhas num botão de 80 px. O nome inteiro está no tooltip e na
+confirmação, que é onde ele precisa aparecer.
+
+### Conferido na tela
+
+Seleção de dois cartões abre a coluna da caixinha em todos e destaca os dois; a barra mostra
+"2" grande com as seis ações; o menu de prazo traz Hoje, Amanhã, Semana que vem e Sem prazo, e
+aplicar deixou os dois cartões em 21/09; depois da ação a seleção zera e os cartões voltam ao
+normal.
+
+**O mesmo aviso da rodada 24:** a janela do navegador estava atrás, e página que não pinta não
+termina transição, então o nó da barra fica na tela com a contagem velha. O estado zera certo
+(nenhum cartão marcado, nenhum recuo sobrando). Com a janela na frente isso não acontece.

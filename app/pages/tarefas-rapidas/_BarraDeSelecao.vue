@@ -1,24 +1,32 @@
 <script setup lang="ts">
 /**
- * A barra da seleção em massa.
+ * A barra da seleção em massa, no formato do ClickUp.
  *
- * **Fica flutuando no pé da tela**, e não é escolha de gosto: é onde ClickUp e
- * monday põem a delas, e o motivo é que a barra precisa aparecer sem empurrar
- * o quadro para baixo nem tapar a raia onde a pessoa está selecionando. Ela
- * começa dizendo quantas estão selecionadas, que é a informação que decide se
- * a pessoa pode clicar em algo destrutivo com segurança.
+ * **O desenho é o da Bulk Action Toolbar dele**, pedido na rodada 25: barra
+ * escura flutuando no pé da tela, centralizada; à esquerda um bloco com o
+ * número grande e o que ele significa; depois as ações, cada uma com o ícone
+ * em cima e o rótulo embaixo; e o X de sair na ponta.
  *
- * As ações são as que o produto já tem no menu do cartão (mover de raia,
- * responsável, prioridade, arquivar, enviar para a lixeira), porque ação em
- * massa que não existe uma a uma seria invenção, não escala.
+ * Três coisas explicam por que esse formato funciona, e por isso foram
+ * copiadas:
  *
- * A lixeira é a única com confirmação, e o texto dela diz para onde as tarefas
- * vão. É o que o Jira faz: mudança em massa passa por uma tela de confirmação
- * antes de acontecer. Está no PESQUISA.md, consulta da rodada 24.
+ *   - **flutua**, então não empurra o quadro nem tapa a raia onde se está
+ *     selecionando;
+ *   - **começa pela contagem**, que é a informação que decide se dá para
+ *     clicar em algo destrutivo com segurança;
+ *   - **inverte o fundo**, e com isso ela para de competir com os cartões:
+ *     enquanto existe seleção, é a única coisa escura na tela.
+ *
+ * ⚠️ O que NÃO foi copiado é a identidade: cor, tipografia e ícones são os do
+ * ENSPACE (regra 8). E as ações são as nossas, as que o produto já faz uma a
+ * uma no menu do cartão e no painel. Ação em massa que não existe sozinha
+ * seria invenção, não escala.
+ *
+ * A lixeira é a única que confirma, como no Jira. Está no PESQUISA.md.
  */
 import type { Task } from '@be-enlighten/enspace-sdk-schemas'
 import { pessoas } from './mocks'
-import { corDaPrioridade, iconeDaPrioridade } from './quadro'
+import { iconeDaPrioridade } from './quadro'
 import type { Textos } from './textos'
 
 const props = defineProps<{
@@ -36,6 +44,7 @@ const emit = defineEmits<{
   mover: [valor: string]
   atribuir: [id: number | null]
   prioridade: [valor: Task['priority']]
+  prazo: [dias: number | null]
   arquivar: []
   lixeira: []
 }>()
@@ -51,6 +60,14 @@ async function confirmar() {
   await nextTick()
   emit('lixeira')
 }
+
+/** Esc larga a seleção, que é o caminho de fuga de todo modo de seleção. */
+function aoTeclar(e: KeyboardEvent) {
+  if (e.key === 'Escape' && props.quantas && !confirmando.value) emit('limpar')
+}
+
+onMounted(() => window.addEventListener('keydown', aoTeclar))
+onBeforeUnmount(() => window.removeEventListener('keydown', aoTeclar))
 
 const itensDeRaia = computed(() =>
   props.raias.map(r => ({ label: r.rotulo, onSelect: () => emit('mover', r.valor) })))
@@ -70,6 +87,15 @@ const itensDePrioridade = computed(() =>
     icon: iconeDaPrioridade[p],
     onSelect: () => emit('prioridade', p),
   })))
+
+/** Os mesmos atalhos do formulário de criação, mais o "tirar prazo". */
+const itensDePrazo = computed(() => [[
+  { label: props.t.prazoHoje, icon: 'i-lucide-calendar-clock', onSelect: () => emit('prazo', 0) },
+  { label: props.t.prazoAmanha, icon: 'i-lucide-calendar-arrow-up', onSelect: () => emit('prazo', 1) },
+  { label: props.t.prazoProximaSemana, icon: 'i-lucide-calendar-days', onSelect: () => emit('prazo', 7) },
+], [
+  { label: props.t.tirarPrazo, icon: 'i-lucide-calendar-off', onSelect: () => emit('prazo', null) },
+]])
 </script>
 
 <template>
@@ -85,57 +111,79 @@ const itensDePrioridade = computed(() =>
       role="region"
       :aria-label="t.selecao.selecionadas(quantas)"
     >
-      <div class="flex flex-wrap items-center gap-1.5 rounded-xl border border-default bg-default px-3 py-2 shadow-lg">
-        <span class="flex items-center gap-2 pe-1.5 text-sm font-medium text-highlighted">
-          <UBadge :label="String(quantas)" color="primary" variant="solid" size="sm" class="tabular-nums" />
-          {{ t.selecao.selecionadas(quantas) }}
-        </span>
+      <div class="flex items-stretch overflow-hidden rounded-xl bg-inverted shadow-xl ring-1 ring-inverted/10">
+        <!-- O bloco da contagem: número grande, e o que ele significa embaixo -->
+        <div class="flex items-center gap-2.5 bg-primary px-4 py-2 text-inverted">
+          <span class="text-2xl font-semibold leading-none tabular-nums">{{ quantas }}</span>
+          <span class="max-w-24 text-xs leading-tight">{{ t.selecao.selecionadas(quantas) }}</span>
+        </div>
 
-        <span class="h-5 w-px bg-accented" />
+        <!-- As ações, ícone em cima e rótulo embaixo -->
+        <div class="flex items-stretch gap-0.5 px-1.5 py-1.5">
+          <UDropdownMenu v-if="podeMover" :items="itensDeRaia" :content="{ side: 'top' }">
+            <button type="button" class="flex w-20 flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-inverted transition-colors hover:bg-inverted/10">
+              <UIcon name="i-lucide-corner-down-right" class="size-4" />
+              <span class="text-[11px] leading-none">{{ t.selecao.mover }}</span>
+            </button>
+          </UDropdownMenu>
 
-        <UDropdownMenu v-if="podeMover" :items="itensDeRaia">
-          <UButton :label="t.selecao.mover" icon="i-lucide-corner-down-right" size="xs" color="neutral" variant="ghost" />
-        </UDropdownMenu>
+          <UDropdownMenu :items="itensDePessoa" :content="{ side: 'top' }">
+            <button type="button" class="flex w-20 flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-inverted transition-colors hover:bg-inverted/10">
+              <UIcon name="i-lucide-user" class="size-4" />
+              <span class="text-[11px] leading-none">{{ t.selecao.atribuir }}</span>
+            </button>
+          </UDropdownMenu>
 
-        <UDropdownMenu :items="itensDePessoa">
-          <UButton :label="t.selecao.atribuir" icon="i-lucide-user" size="xs" color="neutral" variant="ghost" />
-        </UDropdownMenu>
+          <UDropdownMenu :items="itensDePrioridade" :content="{ side: 'top' }">
+            <button type="button" class="flex w-20 flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-inverted transition-colors hover:bg-inverted/10">
+              <UIcon name="i-lucide-flag" class="size-4" />
+              <span class="text-[11px] leading-none">{{ t.selecao.prioridade }}</span>
+            </button>
+          </UDropdownMenu>
 
-        <UDropdownMenu :items="itensDePrioridade">
-          <UButton :label="t.selecao.prioridade" icon="i-lucide-flag" size="xs" color="neutral" variant="ghost" />
-        </UDropdownMenu>
+          <UDropdownMenu :items="itensDePrazo" :content="{ side: 'top' }">
+            <button type="button" class="flex w-20 flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-inverted transition-colors hover:bg-inverted/10">
+              <UIcon name="i-lucide-calendar-clock" class="size-4" />
+              <span class="text-[11px] leading-none">{{ t.campos.prazo }}</span>
+            </button>
+          </UDropdownMenu>
 
-        <UButton
-          :label="t.selecao.arquivar"
-          icon="i-lucide-archive"
-          size="xs"
-          color="neutral"
-          variant="ghost"
-          @click="emit('arquivar')"
-        />
+          <button
+            type="button"
+            class="flex w-20 flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-inverted transition-colors hover:bg-inverted/10"
+            @click="emit('arquivar')"
+          >
+            <UIcon name="i-lucide-archive" class="size-4" />
+            <span class="text-[11px] leading-none">{{ t.selecao.arquivar }}</span>
+          </button>
 
-        <!-- A única que confirma: depois da lixeira, o caminho de volta é outro -->
-        <UButton
-          :label="t.selecao.lixeira"
-          icon="i-lucide-trash-2"
-          size="xs"
-          color="error"
-          variant="ghost"
-          @click="confirmando = true"
-        />
+          <!-- A única destrutiva: cor de erro mesmo no fundo escuro, e confirma -->
+          <UTooltip :text="t.selecao.lixeira">
+            <button
+              type="button"
+              class="flex w-20 flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-error transition-colors hover:bg-error/15"
+              @click="confirmando = true"
+            >
+              <UIcon name="i-lucide-trash-2" class="size-4" />
+              <span class="text-[11px] leading-none">{{ t.selecao.lixeiraCurto }}</span>
+            </button>
+          </UTooltip>
+        </div>
 
-        <span class="h-5 w-px bg-accented" />
-
-        <UButton
-          icon="i-lucide-x"
-          size="xs"
-          color="neutral"
-          variant="ghost"
-          :aria-label="t.selecao.limpar"
-          @click="emit('limpar')"
-        />
+        <!-- Sair da seleção, separado do resto por uma linha -->
+        <div class="flex items-center border-s border-inverted/15 px-1.5">
+          <UTooltip :text="`${t.selecao.limpar} (Esc)`">
+            <button
+              type="button"
+              class="flex size-8 items-center justify-center rounded-lg text-inverted transition-colors hover:bg-inverted/10"
+              :aria-label="t.selecao.limpar"
+              @click="emit('limpar')"
+            >
+              <UIcon name="i-lucide-x" class="size-4" />
+            </button>
+          </UTooltip>
+        </div>
       </div>
-
     </div>
   </Transition>
 

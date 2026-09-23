@@ -163,10 +163,16 @@ const itensDoMenu = computed(() => [[
 </script>
 
 <template>
+  <!--
+    Com seleção no ar, o cartão abre uma coluna à esquerda e a caixinha mora
+    nela, como a linha do monday: ela deixa de flutuar por cima do título e
+    passa a ter lugar próprio.
+  -->
   <article
     class="group relative rounded-lg border bg-default p-3 transition-all duration-200
            hover:-translate-y-0.5 hover:border-accented hover:shadow-md focus-within:ring-2 focus-within:ring-primary/40"
     :class="[
+      selecionando ? 'ps-9' : '',
       selecionada ? 'border-primary bg-primary/5 ring-1 ring-primary/40' : '',
       ativo && !selecionada ? 'border-primary ring-1 ring-primary/40' : '',
       !ativo && !selecionada ? 'border-default' : '',
@@ -182,8 +188,11 @@ const itensDoMenu = computed(() => [[
     -->
     <UTooltip v-if="!somenteLeitura" :text="t.selecao.selecionar">
       <span
-        class="absolute left-1.5 top-1.5 z-20 flex items-center rounded bg-default p-0.5 transition-opacity focus-within:opacity-100"
-        :class="selecionada || selecionando ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
+        class="absolute left-2.5 top-3 z-20 flex items-center rounded transition-opacity focus-within:opacity-100"
+        :class="[
+          selecionada || selecionando ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+          selecionando ? '' : 'bg-default p-0.5',
+        ]"
         @click.stop="aoMarcar"
       >
         <UCheckbox
@@ -215,11 +224,7 @@ const itensDoMenu = computed(() => [[
       o cartão deixa de ser clicável fora das duas linhas do título.
     -->
     <UTooltip :text="dicaDoTitulo" :delay-duration="400" :ui="{ content: 'max-w-80' }">
-      <h3
-        data-selo="titulo"
-        class="text-sm font-medium leading-snug text-highlighted transition-[padding] duration-150"
-        :class="selecionando ? 'ps-6' : ''"
-      >
+      <h3 data-selo="titulo" class="text-sm font-medium leading-snug text-highlighted">
         <a
           :href="`#${tarefa.reference}`"
           class="outline-none after:absolute after:inset-0 after:rounded-lg"

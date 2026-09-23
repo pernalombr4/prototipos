@@ -348,6 +348,8 @@ export interface Textos {
     prioridade: string
     arquivar: string
     lixeira: string
+    /** O mesmo, curto, para caber embaixo do ícone na barra. */
+    lixeiraCurto: string
     confirmarTitulo: (n: number) => string
     confirmarTexto: string
     confirmarLixeira: string
@@ -356,6 +358,7 @@ export interface Textos {
     movidas: (n: number, raia: string) => string
     atribuidas: (n: number, nome: string) => string
     prioridadeMudada: (n: number) => string
+    prazoMudado: (n: number) => string
     desfazer: string
     desfeito: string
   }
@@ -707,6 +710,7 @@ export const textos: Record<Idioma, Textos> = {
       prioridade: 'Prioridade',
       arquivar: 'Arquivar',
       lixeira: 'Enviar para a lixeira',
+      lixeiraCurto: 'Lixeira',
       confirmarTitulo: n => n === 1 ? 'Enviar 1 tarefa para a lixeira?' : `Enviar ${n} tarefas para a lixeira?`,
       confirmarTexto: 'Elas saem do quadro e param na lixeira do workspace, onde podem ser restauradas.',
       confirmarLixeira: 'Enviar para a lixeira',
@@ -715,6 +719,7 @@ export const textos: Record<Idioma, Textos> = {
       movidas: (n, raia) => `${n} em ${raia}`,
       atribuidas: (n, nome) => `${n} para ${nome}`,
       prioridadeMudada: n => n === 1 ? 'Prioridade de 1 tarefa' : `Prioridade de ${n} tarefas`,
+      prazoMudado: n => n === 1 ? 'Prazo de 1 tarefa' : `Prazo de ${n} tarefas`,
       desfazer: 'Desfazer',
       desfeito: 'Tudo como estava',
     },
@@ -1063,6 +1068,7 @@ export const textos: Record<Idioma, Textos> = {
       prioridade: 'Priority',
       arquivar: 'Archive',
       lixeira: 'Send to trash',
+      lixeiraCurto: 'Trash',
       confirmarTitulo: n => n === 1 ? 'Send 1 task to the trash?' : `Send ${n} tasks to the trash?`,
       confirmarTexto: 'They leave the board and land in the workspace trash, where they can be restored.',
       confirmarLixeira: 'Send to trash',
@@ -1071,6 +1077,7 @@ export const textos: Record<Idioma, Textos> = {
       movidas: (n, raia) => `${n} in ${raia}`,
       atribuidas: (n, nome) => `${n} to ${nome}`,
       prioridadeMudada: n => n === 1 ? 'Priority of 1 task' : `Priority of ${n} tasks`,
+      prazoMudado: n => n === 1 ? 'Due date of 1 task' : `Due date of ${n} tasks`,
       desfazer: 'Undo',
       desfeito: 'Back as it was',
     },
@@ -1419,6 +1426,7 @@ export const textos: Record<Idioma, Textos> = {
       prioridade: 'Prioridad',
       arquivar: 'Archivar',
       lixeira: 'Enviar a la papelera',
+      lixeiraCurto: 'Papelera',
       confirmarTitulo: n => n === 1 ? '¿Enviar 1 tarea a la papelera?' : `¿Enviar ${n} tareas a la papelera?`,
       confirmarTexto: 'Salen del tablero y quedan en la papelera del workspace, donde se pueden restaurar.',
       confirmarLixeira: 'Enviar a la papelera',
@@ -1427,6 +1435,7 @@ export const textos: Record<Idioma, Textos> = {
       movidas: (n, raia) => `${n} en ${raia}`,
       atribuidas: (n, nome) => `${n} para ${nome}`,
       prioridadeMudada: n => n === 1 ? 'Prioridad de 1 tarea' : `Prioridad de ${n} tareas`,
+      prazoMudado: n => n === 1 ? 'Fecha límite de 1 tarea' : `Fecha límite de ${n} tareas`,
       desfazer: 'Deshacer',
       desfeito: 'Todo como estaba',
     },
