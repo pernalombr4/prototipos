@@ -1460,3 +1460,79 @@ medido é zero.
 **Mesma forma, mesmo caso:** a Alternativa Binária também é alvo e não valor (é
 uma caixa que alterna no clique), e continua à esquerda. Não mexi porque não foi
 pedido, mas a regra que acabou de ser escrita vale para ela.
+
+## Rodada 20: rolar com o quadro aberto, e o que fechar significa
+
+Duas coisas: aplicar o alinhamento ao centro na Alternativa Binária (ela é alvo
+e não valor, como Anotações e Chat) e **definir o que acontece quando a pessoa
+está editando uma célula e rola a tabela de lado**.
+
+### O que o Notion faz
+
+Medido em tela em 24/09/2026, no board dela, com o editor de seleção múltipla
+aberto e a tabela rolada na horizontal: **o editor fecha**. Não acompanha, não
+gruda na borda, não segura a rolagem.
+
+### O que fica aqui
+
+O meio termo, porque o quadro do Notion é pequeno e o nosso tem cabeçalho e
+rodapé, e fechar à primeira rolagem custaria caro:
+
+1. **enquanto a célula estiver visível, o quadro acompanha.** Rolar um pouco
+   para conferir a coluna do lado não deve custar a edição em andamento;
+2. **quando a célula sai da área visível da tabela, o quadro fecha**, com o
+   mesmo significado de clicar fora.
+
+O limite é 24 px de célula visível: com menos que isso, a âncora não ancora
+nada.
+
+Descartadas, e por quê:
+
+| Alternativa | Por que não |
+|---|---|
+| grudar o quadro na borda | era o que acontecia antes desta rodada, por causa do limite que impede o quadro de sair da janela: um quadro flutuando apontando para célula nenhuma, e a pessoa editando às cegas |
+| travar a rolagem enquanto edita | resolve tirando da pessoa a coisa que ela pediu, que é ver a coluna do lado |
+| puxar a rolagem de volta | é o sistema discutindo com a mão de quem rola |
+
+### Fechar passou a significar duas coisas, e o rodapé já prometia as duas
+
+Definir a rolagem obrigou a definir **fechar**, e aí apareceu um defeito antigo:
+o rodapé do quadro dizia "Esc descarta" e o Esc **não descartava nada**. O
+protótipo grava a cada mudança (é o que faz a tabela reagir ao vivo), e o Esc só
+fechava a janela com o valor já trocado. A promessa estava na tela desde a
+rodada 8.
+
+Agora o quadro guarda o valor de quando abriu, e fechar tem dois sentidos, que
+quem decide é o `comoSalva` do campo:
+
+| Campo | Salva quando | Descarta quando |
+|---|---|---|
+| `imediato`, `enterOuSair`, `aoFechar` | escolher, Enter, sair, clicar fora, rolar para fora | Esc |
+| `confirmar` | **só** o botão Confirmar | Esc, clicar fora, rolar para fora |
+
+A linha do `confirmar` é o que dá sentido ao botão: se clicar fora também
+salvasse, o Confirmar seria enfeite. O texto do rodapé foi corrigido nos três
+idiomas para dizer isso inteiro: "Só o botão Confirmar salva. Esc ou sair daqui
+descarta."
+
+Conferido em tela: escrever num Texto Curto e rolar a coluna para fora **mantém**
+o que foi escrito; responder uma linha da Matriz de dados e rolar para fora
+**devolve** a matriz ao que era (`+2` volta para `+1`).
+
+### Dois achados de implementação, e os dois eram falsos comentários meus
+
+1. **`scroll` de elemento interno não chega a ouvinte em captura na `window`.**
+   O código dizia "Rolar ou redimensionar reancora o quadro" desde a rodada 8, e
+   só o redimensionar funcionava. A rolagem que existe nesta tela é justamente a
+   horizontal da tabela, com 35 colunas.
+2. **quem rola não é o contêiner deste componente.** É um invólucro que a
+   `UTable` monta por dentro, irmão da `<table>`. Pendurar o ouvinte no `raiz`
+   daqui não acompanhava nada, e a área visível a comparar também é a dele.
+
+### Nota de método
+
+A janela do Chrome estava em segundo plano durante parte do teste, e aba oculta
+não recebe quadro de animação, logo **não recebe evento de rolagem**. Isso me
+fez medir "zero disparos" duas vezes e acusar o código errado. A verificação
+final foi feita disparando o evento de rolagem no contêiner certo, o que exercita
+o mesmo caminho. Vale repetir o gesto com a mão, com o Chrome na frente.

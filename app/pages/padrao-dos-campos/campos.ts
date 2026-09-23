@@ -604,7 +604,7 @@ export const campos: Campo[] = [
     comoSalva: 'imediato',
     refId: 'binario',
     icone: 'i-lucide-toggle-right',
-    alinhamento: 'inicio',
+    alinhamento: 'centro',
     largura: 140,
     configuracoes: [],
     backend: {

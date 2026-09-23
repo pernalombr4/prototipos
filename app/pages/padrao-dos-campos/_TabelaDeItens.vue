@@ -115,14 +115,86 @@ function editando(item: Item, refId: string) {
   return emEdicao.value?.item.id === item.id && emEdicao.value?.refId === refId
 }
 
+/**
+ * ──────────── ROLAR COM O QUADRO ABERTO, E O QUE ACONTECE ────────────
+ *
+ * O quadro de edição nasce ancorado na célula: é o gesto do Notion, e essa
+ * âncora é a promessa de que se está editando AQUELA célula. Rolar a tabela
+ * quebra a promessa de um jeito ou de outro, e só havia duas saídas honestas.
+ *
+ * Medido no Notion em 24/09/2026, com o editor de seleção múltipla aberto e a
+ * tabela rolada na horizontal: **o editor fecha**. Não acompanha, não gruda na
+ * borda, não segura a rolagem. Fecha.
+ *
+ * O que fazemos aqui é o meio termo que o Notion não precisa fazer, porque o
+ * quadro dele é pequeno e o nosso tem cabeçalho e rodapé:
+ *
+ * 1. **enquanto a célula estiver visível, o quadro acompanha.** Rolar um
+ *    pouco para ler a coluna do lado não deve custar a edição em andamento;
+ * 2. **quando a célula sai da área visível da tabela, o quadro fecha**, com o
+ *    mesmo significado de clicar fora: salva no campo que salva sozinho,
+ *    descarta no campo que pede Confirmar.
+ *
+ * O que NÃO fazemos, e por quê:
+ *
+ * - **grudar o quadro na borda** é o que acontecia antes desta rodada, por
+ *   causa do limite que impede o quadro de sair da janela. Ficava um quadro
+ *   flutuando apontando para célula nenhuma, e a pessoa editando às cegas;
+ * - **travar a rolagem** enquanto edita resolve o problema tirando da pessoa
+ *   uma coisa que ela pediu (ver a coluna do lado);
+ * - **puxar a rolagem de volta** para manter a célula em vista é o sistema
+ *   discutindo com a mão de quem rola.
+ *
+ * `MINIMO_VISIVEL` existe para o quadro não sobreviver a uma tira de 2 px da
+ * célula: com menos que isso na tela, a âncora já não ancora nada.
+ */
+const MINIMO_VISIVEL = 24
+
+/**
+ * QUEM ROLA DE VERDADE.
+ *
+ * Não é o `raiz` deste componente: é um invólucro que a `UTable` monta por
+ * dentro, irmão da `<table>` (medido: `relative overflow-auto ...`). O `raiz`
+ * existe e não rola na horizontal, então pendurar o ouvinte nele não
+ * acompanhava nada. Achado nesta rodada, junto com o do `scroll` que não sobe
+ * para a `window`.
+ */
+const roladorDaTabela = ref<HTMLElement | null>(null)
+
 function medirAlvo() {
-  if (alvoDaEdicao.value) retanguloDoAlvo.value = alvoDaEdicao.value.getBoundingClientRect()
+  const alvo = alvoDaEdicao.value
+  if (!alvo) return
+  const r = alvo.getBoundingClientRect()
+  const area = (roladorDaTabela.value ?? raiz.value)?.getBoundingClientRect()
+
+  if (area) {
+    const foraNaHorizontal = r.right < area.left + MINIMO_VISIVEL || r.left > area.right - MINIMO_VISIVEL
+    const foraNaVertical = r.bottom < area.top + MINIMO_VISIVEL || r.top > area.bottom - MINIMO_VISIVEL
+    if (foraNaHorizontal || foraNaVertical) {
+      fecharComoOCampoManda()
+      return
+    }
+  }
+
+  retanguloDoAlvo.value = r
 }
+
+/**
+ * O valor de quando o quadro abriu, para o Esc poder desfazer.
+ *
+ * O protótipo grava a cada mudança (é o que faz a tabela reagir ao vivo), e
+ * por isso "desfazer" precisa de um retrato do antes. Sem ele o rodapé mentia:
+ * dizia "Esc descarta" e o Esc só fechava a janela com o valor já trocado.
+ */
+const valorAoAbrir = ref<unknown>(undefined)
 
 function abrirEdicao(campo: Campo, item: Item, alvo?: HTMLElement) {
   if (campo.somenteLeitura) return
   emEdicao.value = { item, refId: campo.refId }
   alvoDaEdicao.value = alvo ?? null
+  valorAoAbrir.value = ehLinhaNova(item)
+    ? rascunhoDaLinha.value[campo.refId]
+    : (item.data as Record<string, unknown>)?.[campo.refId]
   medirAlvo()
 }
 
@@ -211,19 +283,54 @@ function aoPressionarFundo(e: PointerEvent) {
 }
 
 function aoClicarNoFundo(e: MouseEvent) {
-  if (gestoComecouNoFundo.value && e.target === e.currentTarget) fecharEdicao()
+  if (gestoComecouNoFundo.value && e.target === e.currentTarget) fecharComoOCampoManda()
 }
 
-function fecharEdicao() {
+/**
+ * ───────────────── FECHAR O QUADRO, E O QUE ISSO SIGNIFICA ─────────────────
+ *
+ * Fechar não é um gesto só: fechar SALVANDO e fechar DESCARTANDO são coisas
+ * diferentes, e o rodapé do quadro já anunciava as duas. Quem decide é o
+ * `comoSalva` do campo:
+ *
+ * | Campo | Salva quando | Descarta quando |
+ * |---|---|---|
+ * | `imediato`, `enterOuSair`, `aoFechar` | escolher, Enter, sair, clicar fora | Esc |
+ * | `confirmar` | **só** o botão Confirmar | Esc, clicar fora, rolar para fora |
+ *
+ * A linha do `confirmar` é o que dá sentido ao botão: se clicar fora também
+ * salvasse, o Confirmar seria enfeite. É o mesmo contrato do formulário, onde
+ * ninguém espera que fechar a janela grave.
+ */
+function fecharEdicao(descartando = false) {
+  if (descartando && emEdicao.value) {
+    const { item, refId } = emEdicao.value
+    gravarValor(item, refId, valorAoAbrir.value)
+  }
   gestoComecouNoFundo.value = false
   comentando.value = false
   rascunhoDoComentario.value = ''
   emEdicao.value = null
   alvoDaEdicao.value = null
   retanguloDoAlvo.value = null
+  valorAoAbrir.value = undefined
 }
 
-/** Rolar ou redimensionar reancora o quadro, em vez de deixá-lo órfão. */
+/** Fechar sem confirmar: descarta no campo que pede Confirmar, salva no resto. */
+function fecharComoOCampoManda() {
+  fecharEdicao(campoEmEdicao.value?.comoSalva === 'confirmar')
+}
+
+/**
+ * Rolar ou redimensionar reancora o quadro, em vez de deixá-lo órfão.
+ *
+ * O ouvinte de rolagem tem que estar NO CONTÊINER DA TABELA, e não só na
+ * janela com captura. Medido nesta rodada: um `scroll` de elemento interno não
+ * chega a um ouvinte em captura na `window`, e por isso o quadro nunca
+ * acompanhou a rolagem horizontal da tabela, que é justamente a que existe
+ * aqui (a tabela tem 35 colunas e a página não rola de lado). O comentário
+ * antigo dizia que reancorava, e não reancorava.
+ */
 onMounted(() => {
   window.addEventListener('scroll', medirAlvo, true)
   window.addEventListener('resize', medirAlvo)
@@ -453,7 +560,8 @@ onMounted(() => {
 
     if (e.key === 'Escape') {
       e.stopPropagation()
-      fecharEdicao()
+      /* Esc é o gesto de desfazer, em todo campo. */
+      fecharEdicao(true)
       return
     }
 
@@ -624,6 +732,10 @@ onMounted(() => nextTick(() => {
   const tabela = raiz.value?.querySelector('table')
   if (!tabela) return
   corpoDaTabela.value = tabela.querySelector('tbody')
+
+  /* O ouvinte de rolagem vive aqui, onde a tabela já existe para ser achada. */
+  roladorDaTabela.value = tabela.parentElement
+  roladorDaTabela.value?.addEventListener('scroll', medirAlvo, { passive: true })
 
   /*
    * ───────── O DUPLO CLIQUE QUE ABRE O REGISTRO, E ONDE ELE VALE ─────────
