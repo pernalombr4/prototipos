@@ -10,6 +10,7 @@ import type { Task } from '@be-enlighten/enspace-sdk-schemas'
 import type { EnKanbanCardConfig, EnKanbanColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import Anotacoes from './_Anotacoes.vue'
 import BarraDoQuadro, { type Filtros, type Periodo } from './_BarraDoQuadro.vue'
+import BarraDeSelecao from './_BarraDeSelecao.vue'
 import CascaDoEnspace from './_CascaDoEnspace.vue'
 import MapaDosSelos from './_MapaDosSelos.vue'
 import ModalDeVisualizacao from './_ModalDeVisualizacao.vue'
@@ -17,7 +18,7 @@ import ModalNovaTarefa from './_ModalNovaTarefa.vue'
 import PainelDaTarefa from './_PainelDaTarefa.vue'
 import RaiaDoQuadro from './_RaiaDoQuadro.vue'
 import { selosDoPainel } from './selos'
-import { estimativaDeTempo, itensRelacionados, registrosDeTempo, tarefas as tarefasMock, usuarioAtual, visualizacoes } from './mocks'
+import { estimativaDeTempo, itensRelacionados, pessoas, registrosDeTempo, tarefas as tarefasMock, usuarioAtual, visualizacoes } from './mocks'
 import type { ConfigDaVisualizacao } from './mocks'
 import type { OrdemDaRaia } from './_RaiaDoQuadro.vue'
 import {
@@ -211,6 +212,150 @@ const ordenacaoPorRaia = ref<Record<string, OrdemDaRaia | null>>({})
 
 /** O que o totalizador pode somar, descoberto do dado que está carregado. */
 const camposDoTotalizador = computed(() => camposCalculaveis(lista.value, t.value))
+
+/* ------------------------------------------------------------------ *
+ * SELEÇÃO EM MASSA                                                    *
+ *                                                                     *
+ * Pesquisa da rodada 24, no PESQUISA.md. ClickUp e monday fazem igual: *
+ * caixinha no cartão e uma barra flutuante no pé da tela dizendo       *
+ * quantas estão selecionadas. O Jira acrescenta a peça que falta nos   *
+ * outros: mudança em massa passa por uma CONFIRMAÇÃO antes de valer.   *
+ * O Trello não tem seleção nenhuma, e resolve com "arquivar todos os   *
+ * cartões desta lista", que virou aqui o "selecionar as N desta raia". *
+ * ------------------------------------------------------------------ */
+const selecionadas = ref<number[]>([])
+/** A última marcada, que é de onde o Shift conta a faixa. */
+const ancoraDaSelecao = ref<number | null>(null)
+
+/** Mover em massa só faz sentido quando a raia é a situação da tarefa. */
+const podeMoverEmMassa = computed(() => agrupamento.value === 'status')
+
+function alternarSelecao(tarefa: Task, faixa: boolean) {
+  const naRaia = raiasVisiveis.value.find(r => r.tarefas.some(x => x.id === tarefa.id))?.tarefas ?? []
+  const ancora = ancoraDaSelecao.value
+
+  // Shift pega daqui até a última marcada, mas só dentro da mesma raia: entre
+  // raias não existe "entre", e o que sairia disso ninguém consegue prever.
+  if (faixa && ancora !== null && naRaia.some(x => x.id === ancora)) {
+    const de = naRaia.findIndex(x => x.id === ancora)
+    const ate = naRaia.findIndex(x => x.id === tarefa.id)
+    const fatia = naRaia.slice(Math.min(de, ate), Math.max(de, ate) + 1).map(x => x.id)
+    selecionadas.value = [...new Set([...selecionadas.value, ...fatia])]
+    return
+  }
+
+  selecionadas.value = selecionadas.value.includes(tarefa.id)
+    ? selecionadas.value.filter(id => id !== tarefa.id)
+    : [...selecionadas.value, tarefa.id]
+  ancoraDaSelecao.value = tarefa.id
+}
+
+function selecionarRaia(valor: string) {
+  const raia = raiasVisiveis.value.find(r => r.definicao.valor === valor)
+  if (!raia) return
+  const ids = raia.tarefas.map(x => x.id)
+  const todasJa = ids.every(id => selecionadas.value.includes(id))
+  selecionadas.value = todasJa
+    ? selecionadas.value.filter(id => !ids.includes(id))
+    : [...new Set([...selecionadas.value, ...ids])]
+  ancoraDaSelecao.value = null
+}
+
+function limparSelecao() {
+  selecionadas.value = []
+  ancoraDaSelecao.value = null
+}
+
+/** Trocar de visualização ou de agrupamento desfaz a seleção: o quadro é outro. */
+watch([visualizacao, agrupamento], limparSelecao)
+
+/** As tarefas escolhidas, na ordem em que estão no array. */
+const tarefasSelecionadas = computed(() =>
+  lista.value.filter(x => selecionadas.value.includes(x.id)))
+
+/**
+ * Desfazer de verdade: guarda o estado anterior das tarefas mexidas e devolve.
+ * Sem isso, "desfazer" num toast é promessa que a tela não cumpre.
+ */
+const desfazerEmMassa = ref<(() => void) | null>(null)
+
+function guardarParaDesfazer(tarefas: Task[], mudar: (t: Task) => void) {
+  const antes = tarefas.map(t => ({ ...t }))
+  tarefas.forEach(mudar)
+  desfazerEmMassa.value = () => {
+    for (const copia of antes) {
+      const alvo = lista.value.find(x => x.id === copia.id)
+      if (alvo) Object.assign(alvo, copia)
+    }
+    desfazerEmMassa.value = null
+    toast.add({ title: t.value.selecao.desfeito, icon: 'i-lucide-rotate-ccw', color: 'neutral' })
+  }
+}
+
+function avisar(titulo: string, icone: string) {
+  toast.add({
+    title: titulo,
+    icon: icone,
+    color: 'success',
+    actions: desfazerEmMassa.value
+      ? [{ label: t.value.selecao.desfazer, color: 'neutral', variant: 'outline', onClick: () => desfazerEmMassa.value?.() }]
+      : undefined,
+  })
+}
+
+function moverSelecionadas(status: string) {
+  const alvos = tarefasSelecionadas.value
+  const raia = definicoesDeRaia.value.find(d => d.valor === status)
+  guardarParaDesfazer(alvos, (x) => { x.status = status as Task['status'] })
+  avisar(t.value.selecao.movidas(alvos.length, raia?.rotulo ?? ''), 'i-lucide-corner-down-right')
+  limparSelecao()
+}
+
+function atribuirSelecionadas(id: number | null) {
+  const alvos = tarefasSelecionadas.value
+  guardarParaDesfazer(alvos, (x) => { x.assigned_to = id })
+  avisar(
+    t.value.selecao.atribuidas(alvos.length, id ? pessoas[id]?.fullname ?? '' : t.value.semResponsavel),
+    'i-lucide-user',
+  )
+  limparSelecao()
+}
+
+function prioridadeSelecionadas(valor: Task['priority']) {
+  const alvos = tarefasSelecionadas.value
+  guardarParaDesfazer(alvos, (x) => { x.priority = valor })
+  avisar(t.value.selecao.prioridadeMudada(alvos.length), 'i-lucide-flag')
+  limparSelecao()
+}
+
+function arquivarSelecionadas() {
+  const alvos = tarefasSelecionadas.value
+  const quantas = alvos.length
+  const copias = alvos.map(x => ({ ...x }))
+  lista.value = lista.value.filter(x => !selecionadas.value.includes(x.id))
+  desfazerEmMassa.value = () => {
+    lista.value = [...lista.value, ...copias]
+    desfazerEmMassa.value = null
+    toast.add({ title: t.value.selecao.desfeito, icon: 'i-lucide-rotate-ccw', color: 'neutral' })
+  }
+  avisar(t.value.selecao.arquivadas(quantas), 'i-lucide-archive')
+  limparSelecao()
+}
+
+function lixeiraSelecionadas() {
+  const alvos = tarefasSelecionadas.value
+  const quantas = alvos.length
+  const copias = alvos.map(x => ({ ...x }))
+  lista.value = lista.value.filter(x => !selecionadas.value.includes(x.id))
+  desfazerEmMassa.value = () => {
+    lista.value = [...lista.value, ...copias]
+    desfazerEmMassa.value = null
+    toast.add({ title: t.value.selecao.desfeito, icon: 'i-lucide-rotate-ccw', color: 'neutral' })
+  }
+  avisar(t.value.selecao.naLixeira(quantas), 'i-lucide-trash-2')
+  limparSelecao()
+}
+
 
 /* ------------------------------------------------------------------ *
  * A VISUALIZAÇÃO ABERTA, E O QUE FOI MEXIDO DEPOIS                    *
@@ -733,6 +878,7 @@ const cartaoDeHoje: EnKanbanCardConfig = {
           :recolhida="raiasRecolhidas.includes(raia.definicao.valor)"
           :somente-leitura="somenteLeitura"
           :tarefa-ativa="tarefaAberta?.id ?? null"
+          :selecionadas="selecionadas"
           :tarefa-do-cronometro="cronometro?.tarefa ?? null"
           :segundos-correndo="segundosCorrendo"
           :carregando="carregando"
@@ -749,6 +895,8 @@ const cartaoDeHoje: EnKanbanCardConfig = {
           @mover="mover"
           @arquivar="arquivar"
           @cronometrar="iniciarCronometro"
+          @selecionar="alternarSelecao"
+          @selecionar-raia="selecionarRaia(raia.definicao.valor)"
         />
       </div>
       </main>
@@ -887,6 +1035,20 @@ const cartaoDeHoje: EnKanbanCardConfig = {
         />
       </div>
     </Transition>
+
+    <!-- A barra da seleção em massa -->
+    <BarraDeSelecao
+      :t="t"
+      :quantas="selecionadas.length"
+      :raias="definicoesDeRaia.map(d => ({ valor: d.valor, rotulo: d.rotulo }))"
+      :pode-mover="podeMoverEmMassa"
+      @limpar="limparSelecao"
+      @mover="moverSelecionadas"
+      @atribuir="atribuirSelecionadas"
+      @prioridade="prioridadeSelecionadas"
+      @arquivar="arquivarSelecionadas"
+      @lixeira="lixeiraSelecionadas"
+    />
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">

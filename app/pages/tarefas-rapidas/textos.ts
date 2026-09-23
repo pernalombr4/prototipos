@@ -337,6 +337,29 @@ export interface Textos {
   somenteLeitura: string
   somenteLeituraAjuda: string
 
+  /* seleção em massa */
+  selecao: {
+    selecionar: string
+    selecionadas: (n: number) => string
+    selecionarRaia: (n: number) => string
+    limpar: string
+    mover: string
+    atribuir: string
+    prioridade: string
+    arquivar: string
+    lixeira: string
+    confirmarTitulo: (n: number) => string
+    confirmarTexto: string
+    confirmarLixeira: string
+    arquivadas: (n: number) => string
+    naLixeira: (n: number) => string
+    movidas: (n: number, raia: string) => string
+    atribuidas: (n: number, nome: string) => string
+    prioridadeMudada: (n: number) => string
+    desfazer: string
+    desfeito: string
+  }
+
   /* toasts */
   tarefaMovida: (nome: string, raia: string) => string
   tarefaSalva: string
@@ -674,6 +697,28 @@ export const textos: Record<Idioma, Textos> = {
     somenteLeituraAjuda: 'Você pode ver este quadro, mas não mover nem criar tarefas.',
 
     tarefaMovida: (nome, raia) => `"${nome}" foi para ${raia}.`,
+    selecao: {
+      selecionar: 'Selecionar',
+      selecionadas: n => n === 1 ? '1 tarefa selecionada' : `${n} tarefas selecionadas`,
+      selecionarRaia: n => `Selecionar as ${n} desta raia`,
+      limpar: 'Limpar seleção',
+      mover: 'Mover para',
+      atribuir: 'Responsável',
+      prioridade: 'Prioridade',
+      arquivar: 'Arquivar',
+      lixeira: 'Enviar para a lixeira',
+      confirmarTitulo: n => n === 1 ? 'Enviar 1 tarefa para a lixeira?' : `Enviar ${n} tarefas para a lixeira?`,
+      confirmarTexto: 'Elas saem do quadro e param na lixeira do workspace, onde podem ser restauradas.',
+      confirmarLixeira: 'Enviar para a lixeira',
+      arquivadas: n => n === 1 ? '1 tarefa arquivada' : `${n} tarefas arquivadas`,
+      naLixeira: n => n === 1 ? '1 tarefa na lixeira' : `${n} tarefas na lixeira`,
+      movidas: (n, raia) => `${n} em ${raia}`,
+      atribuidas: (n, nome) => `${n} para ${nome}`,
+      prioridadeMudada: n => n === 1 ? 'Prioridade de 1 tarefa' : `Prioridade de ${n} tarefas`,
+      desfazer: 'Desfazer',
+      desfeito: 'Tudo como estava',
+    },
+
     tarefaSalva: 'Progresso salvo.',
     tarefaConcluidaToast: 'Tarefa concluída.',
     desfazer: 'Desfazer',
@@ -1008,6 +1053,28 @@ export const textos: Record<Idioma, Textos> = {
     somenteLeituraAjuda: 'You can see this board, but not move or create tasks.',
 
     tarefaMovida: (nome, raia) => `"${nome}" moved to ${raia}.`,
+    selecao: {
+      selecionar: 'Select',
+      selecionadas: n => n === 1 ? '1 task selected' : `${n} tasks selected`,
+      selecionarRaia: n => `Select the ${n} in this lane`,
+      limpar: 'Clear selection',
+      mover: 'Move to',
+      atribuir: 'Assignee',
+      prioridade: 'Priority',
+      arquivar: 'Archive',
+      lixeira: 'Send to trash',
+      confirmarTitulo: n => n === 1 ? 'Send 1 task to the trash?' : `Send ${n} tasks to the trash?`,
+      confirmarTexto: 'They leave the board and land in the workspace trash, where they can be restored.',
+      confirmarLixeira: 'Send to trash',
+      arquivadas: n => n === 1 ? '1 task archived' : `${n} tasks archived`,
+      naLixeira: n => n === 1 ? '1 task in the trash' : `${n} tasks in the trash`,
+      movidas: (n, raia) => `${n} in ${raia}`,
+      atribuidas: (n, nome) => `${n} to ${nome}`,
+      prioridadeMudada: n => n === 1 ? 'Priority of 1 task' : `Priority of ${n} tasks`,
+      desfazer: 'Undo',
+      desfeito: 'Back as it was',
+    },
+
     tarefaSalva: 'Progress saved.',
     tarefaConcluidaToast: 'Task completed.',
     desfazer: 'Undo',
@@ -1342,6 +1409,28 @@ export const textos: Record<Idioma, Textos> = {
     somenteLeituraAjuda: 'Puede ver este tablero, pero no mover ni crear tareas.',
 
     tarefaMovida: (nome, raia) => `"${nome}" pasó a ${raia}.`,
+    selecao: {
+      selecionar: 'Seleccionar',
+      selecionadas: n => n === 1 ? '1 tarea seleccionada' : `${n} tareas seleccionadas`,
+      selecionarRaia: n => `Seleccionar las ${n} de este carril`,
+      limpar: 'Limpiar selección',
+      mover: 'Mover a',
+      atribuir: 'Responsable',
+      prioridade: 'Prioridad',
+      arquivar: 'Archivar',
+      lixeira: 'Enviar a la papelera',
+      confirmarTitulo: n => n === 1 ? '¿Enviar 1 tarea a la papelera?' : `¿Enviar ${n} tareas a la papelera?`,
+      confirmarTexto: 'Salen del tablero y quedan en la papelera del workspace, donde se pueden restaurar.',
+      confirmarLixeira: 'Enviar a la papelera',
+      arquivadas: n => n === 1 ? '1 tarea archivada' : `${n} tareas archivadas`,
+      naLixeira: n => n === 1 ? '1 tarea en la papelera' : `${n} tareas en la papelera`,
+      movidas: (n, raia) => `${n} en ${raia}`,
+      atribuidas: (n, nome) => `${n} para ${nome}`,
+      prioridadeMudada: n => n === 1 ? 'Prioridad de 1 tarea' : `Prioridad de ${n} tareas`,
+      desfazer: 'Deshacer',
+      desfeito: 'Todo como estaba',
+    },
+
     tarefaSalva: 'Progreso guardado.',
     tarefaConcluidaToast: 'Tarea completada.',
     desfazer: 'Deshacer',

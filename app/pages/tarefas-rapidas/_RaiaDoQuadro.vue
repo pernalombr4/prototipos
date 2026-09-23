@@ -40,6 +40,8 @@ const props = defineProps<{
   recolhida?: boolean
   somenteLeitura?: boolean
   tarefaAtiva?: number | null
+  /** Ids que estão na seleção em massa. */
+  selecionadas?: number[]
   /** Id da tarefa com o cronômetro rodando, e os segundos corridos. */
   tarefaDoCronometro?: number | null
   segundosCorrendo?: number
@@ -61,6 +63,8 @@ const emit = defineEmits<{
   mover: [tarefa: Task, status: Task['status']]
   arquivar: [tarefa: Task]
   cronometrar: [tarefa: Task]
+  selecionar: [tarefa: Task, faixa: boolean]
+  selecionarRaia: []
 }>()
 
 /** Quantos cartões a raia mostra antes de pedir mais. Substitui a paginação global. */
@@ -228,6 +232,13 @@ const itensDeOrdenacao = computed(() => [
 
 const itensDaRaia = computed(() => [[
   { label: props.t.novaTarefaNaRaia, icon: 'i-lucide-plus', onSelect: () => emit('novaTarefa') },
+  // O equivalente ao "arquivar todos os cartões desta lista" do Trello, só que
+  // ele seleciona em vez de agir: o que fazer com as tarefas vem depois.
+  {
+    label: props.t.selecao.selecionarRaia(props.tarefas.length),
+    icon: 'i-lucide-check-check',
+    onSelect: () => emit('selecionarRaia'),
+  },
   { label: props.t.ordemDaRaia, icon: 'i-lucide-arrow-up-down', children: itensDeOrdenacao.value },
 ], [
   { label: props.t.recolher, icon: 'i-lucide-chevrons-right-left', onSelect: () => emit('recolher') },
@@ -402,9 +413,12 @@ function aoComecarArrasteDaRaia(evento: DragEvent) {
             :densidade="densidade"
             :somente-leitura="somenteLeitura"
             :ativo="tarefaAtiva === tarefa.id"
+            :selecionada="selecionadas?.includes(tarefa.id)"
+            :selecionando="!!selecionadas?.length"
             :cronometro-ativo="tarefaDoCronometro === tarefa.id"
             :segundos-correndo="segundosCorrendo"
             @abrir="emit('abrir', tarefa)"
+            @selecionar="(faixa) => emit('selecionar', tarefa, faixa)"
             @mover="(s) => emit('mover', tarefa, s)"
             @arquivar="emit('arquivar', tarefa)"
             @cronometrar="emit('cronometrar', tarefa)"

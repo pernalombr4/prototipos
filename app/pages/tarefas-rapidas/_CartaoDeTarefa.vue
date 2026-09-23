@@ -46,10 +46,16 @@ const props = defineProps<{
    * mostrar de uma vez o que normalmente só aparece no hover. Não é proposta.
    */
   anotado?: boolean
+  /** Esta tarefa está na seleção. */
+  selecionada?: boolean
+  /** Existe seleção no quadro: aí a caixinha fica visível em todos. */
+  selecionando?: boolean
 }>()
 
 const emit = defineEmits<{
   abrir: []
+  /** `faixa` é o clique com Shift, que pega daqui até a última marcada. */
+  selecionar: [faixa: boolean]
   mover: [status: Task['status']]
   arquivar: []
   cronometrar: []
@@ -133,6 +139,11 @@ const mostraPessoas = computed(() =>
   || (props.campos.colaboradores && !!colaboradores.value.length && props.densidade !== 'compacto')
   || (props.campos.criador && !!criador.value && props.densidade !== 'compacto'))
 
+/** Shift pega a faixa desde a última marcada. O `.stop` é do template. */
+function aoMarcar(evento: MouseEvent) {
+  emit('selecionar', evento.shiftKey)
+}
+
 const itensDoMenu = computed(() => [[
   { label: props.t.abrirTarefa, icon: 'i-lucide-square-arrow-out-up-right', onSelect: () => emit('abrir') },
   {
@@ -156,12 +167,34 @@ const itensDoMenu = computed(() => [[
     class="group relative rounded-lg border bg-default p-3 transition-all duration-200
            hover:-translate-y-0.5 hover:border-accented hover:shadow-md focus-within:ring-2 focus-within:ring-primary/40"
     :class="[
-      ativo ? 'border-primary ring-1 ring-primary/40' : 'border-default',
+      selecionada ? 'border-primary bg-primary/5 ring-1 ring-primary/40' : '',
+      ativo && !selecionada ? 'border-primary ring-1 ring-primary/40' : '',
+      !ativo && !selecionada ? 'border-default' : '',
       atrasada && !ativo ? 'border-l-2 border-l-error' : '',
       somenteLeitura ? '' : 'cursor-grab active:cursor-grabbing',
     ]"
     data-selo="cartao"
   >
+    <!--
+      A caixinha da seleção em massa. Aparece no hover e fica de vez quando já
+      existe seleção, que é o que ClickUp e monday fazem: enquanto ninguém
+      selecionou nada, ela não ocupa espaço nenhum no cartão.
+    -->
+    <UTooltip v-if="!somenteLeitura" :text="t.selecao.selecionar">
+      <span
+        class="absolute left-1.5 top-1.5 z-20 flex items-center rounded bg-default p-0.5 transition-opacity focus-within:opacity-100"
+        :class="selecionada || selecionando ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
+        @click.stop="aoMarcar"
+      >
+        <UCheckbox
+          :model-value="!!selecionada"
+          size="sm"
+          :aria-label="t.selecao.selecionar"
+          class="pointer-events-none"
+        />
+      </span>
+    </UTooltip>
+
     <!--
       O filete vermelho da borda esquerda também precisa se explicar: no cartão
       pequeno ele é o único aviso de atraso que sobra, e aviso sem nome é
@@ -182,7 +215,11 @@ const itensDoMenu = computed(() => [[
       o cartão deixa de ser clicável fora das duas linhas do título.
     -->
     <UTooltip :text="dicaDoTitulo" :delay-duration="400" :ui="{ content: 'max-w-80' }">
-      <h3 data-selo="titulo" class="text-sm font-medium leading-snug text-highlighted">
+      <h3
+        data-selo="titulo"
+        class="text-sm font-medium leading-snug text-highlighted transition-[padding] duration-150"
+        :class="selecionando ? 'ps-6' : ''"
+      >
         <a
           :href="`#${tarefa.reference}`"
           class="outline-none after:absolute after:inset-0 after:rounded-lg"

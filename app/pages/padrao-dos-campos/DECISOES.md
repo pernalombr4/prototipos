@@ -1013,3 +1013,55 @@ a conversa. Agora o quadro lê o item sempre da lista, pelo id.
 
 Os dois estavam no protótipo desde a rodada 6 e passaram por quatro rodadas sem
 aparecer. Apareceram no primeiro campo que precisou reagir ao próprio valor.
+
+---
+
+## Rodada 12: os erros de z-index, e por que o culpado era um número meu
+
+Ela mandou dois prints: a lista do **Relacionamento Múltiplo** abrindo por baixo
+do quadro de edição, e o menu de três pontos do **anexo** também por baixo.
+
+### A causa
+
+Fui medir as camadas flutuantes do Nuxt UI, em 23/09/2026, e o achado é simples:
+**nenhuma delas tem z-index**. A lista de um seletor, o menu de três pontos, o
+balão de ajuda, o cartão da relação, o modal e a gaveta são todos
+`position: fixed` com `z-index: auto`, filhos diretos do `body`, dentro de um
+`div[data-reka-popper-content-wrapper]`. Quem decide quem fica na frente é a
+**ordem no DOM**: quem abriu depois fica em cima.
+
+O quadro de edição tinha `z-40` na camada de fundo. Um número explícito ganha de
+qualquer `auto`, então o quadro passava na frente de **tudo** o que abrisse de
+dentro dele. Não era um caso isolado de um campo: era todo seletor e todo menu
+dentro do quadro, e valeria para qualquer camada nova que aparecesse depois.
+
+### O conserto
+
+Tirei o `z-40`. Sem número, o quadro entra na mesma regra da biblioteca:
+
+- ele entra no `body` quando abre, portanto **depois** da aplicação (que é o
+  primeiro filho do `body` e tem `isolation: isolate`), e fica acima da tabela
+  inteira, incluindo as alças de redimensionar coluna e a bandeja de copiar;
+- a lista ou o menu que abrir **de dentro** dele entra depois, e fica acima
+  dele.
+
+Conferido de três jeitos: criando uma camada idêntica à do Nuxt UI por cima do
+quadro e testando quem ganha o ponto (ganha a camada), abrindo o menu de três
+pontos do anexo dentro do quadro (o menu aparece inteiro, na frente), e
+inventariando todo z-index da página.
+
+### O inventário, para não voltar a acontecer
+
+| Camada | z-index | Onde |
+|---|---|---|
+| alça de redimensionar coluna | 2 | dentro da aplicação, do `EnTable` |
+| bandeja de copiar da célula | 10 | dentro da aplicação, minha |
+| botão de recolher o resumo | 10 | dentro da aplicação, cópia do develop |
+| botão do laboratório | 20 | dentro da aplicação, cópia do develop |
+| **quadro de edição** | **nenhum** | filho do `body` |
+| **camadas do Nuxt UI** | **nenhum** | filhos do `body`, criados ao abrir |
+| aviso (toast) | 100 | acima de tudo, e é onde tem que ficar |
+
+A regra que fica: **camada flutuante nossa não ganha z-index.** Quem precisa
+ficar na frente entra depois no DOM, e é assim que a biblioteca resolve. Número
+explícito só onde existe hierarquia de verdade, como o aviso.

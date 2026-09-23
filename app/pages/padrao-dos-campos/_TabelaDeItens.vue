@@ -797,6 +797,23 @@ onMounted(() => nextTick(() => {
     seria cortado pelo `overflow` da célula e pelo da área de rolagem, que é
     o que aconteceu com a dica de "o que salva" na rodada passada.
 
+    ## E ele NÃO tem z-index, de propósito
+
+    Eu tinha posto `z-40` na camada de fundo, e era isso que quebrava. Medi as
+    camadas do Nuxt UI em 23/09/2026 e **nenhuma delas tem z-index**: a lista de
+    um seletor, o menu de três pontos, o balão de ajuda, o modal e a gaveta são
+    todos `position: fixed` com `z-index: auto`, filhos diretos do `body`. Quem
+    decide quem fica na frente é a ORDEM NO DOM.
+
+    Com `z-40` aqui, o quadro passava na frente de tudo o que abrisse de dentro
+    dele: a lista do relacionamento múltiplo e o menu do anexo ficavam por
+    baixo, que é o que ela mandou o print.
+
+    Sem z-index, a ordem resolve sozinha: o quadro entra no `body` quando abre,
+    portanto depois da aplicação, e fica acima da tabela; e a lista que abrir de
+    dentro dele entra depois do quadro, e fica acima dele. É a convenção da
+    própria biblioteca, e vale para as camadas que ainda não existem.
+
     A camada de fundo é transparente e serve de alvo do clique fora. O quadro
     tem três faixas: o nome do campo em cima, o controle no meio e, embaixo, a
     frase de o que salva com o botão que fecha.
@@ -804,7 +821,7 @@ onMounted(() => nextTick(() => {
   <Teleport to="body">
     <div
       v-if="emEdicao && campoEmEdicao && retanguloDoAlvo"
-      class="fixed inset-0 z-40"
+      class="fixed inset-0"
       @pointerdown="aoPressionarFundo"
       @click="aoClicarNoFundo"
     >
