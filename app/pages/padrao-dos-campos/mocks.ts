@@ -134,7 +134,12 @@ export const itens: Item[] = [
         { id: 43891, display: 'OS 2026-0481', reference: 'OSC1F0A2B4' },
         { id: 43892, display: 'OS 2026-0502', reference: 'OSC1F0A2B7' },
       ],
-      pessoa: { name: 'Marina Toledo', email: 'marina.toledo@nortelux.com.br', cpf: '000.000.000-00' },
+      pessoa: {
+        type: 'PJ',
+        document: '11222333000181',
+        razao_social: 'NORTELUX INSTALACOES ELETRICAS LTDA',
+        nome_fantasia: 'Nortelux Elétrica',
+      },
       endereco: {
         street: 'Av. Paulista',
         number: '1000',
@@ -230,7 +235,7 @@ export const itens: Item[] = [
       data: '2026-09-30T12:00:00.000Z',
       relacao_simples: { id: 43888, display: 'Vega Predial', reference: 'FORNA11B2C3D4' },
       relacao_multipla: [{ id: 43893, display: 'OS 2026-0511', reference: 'OSC1F0A2C1' }],
-      pessoa: { name: 'Rafael Pimenta', email: 'rafael.pimenta@vegapredial.com.br', cpf: '111.111.111-11' },
+      pessoa: { type: 'PF', document: '52998224725', name: 'Rafael Pimenta' },
       endereco: {
         street: 'Rua Doutor Renato Paes de Barros',
         number: '750',
@@ -288,7 +293,11 @@ export const itens: Item[] = [
       data: null,
       relacao_simples: null,
       relacao_multipla: [],
-      pessoa: null,
+      /*
+       * Caso de canto: o tipo já foi escolhido e o documento não. É o estado em
+       * que o bloco fica esperando a consulta, e o dev precisa vê-lo.
+       */
+      pessoa: { type: 'PJ' },
       endereco: null,
       arquivo: [],
       imagem: [],
@@ -343,7 +352,13 @@ export const itens: Item[] = [
         { id: 43896, display: 'OS 2026-0335', reference: 'OSC1F0A2E1' },
         { id: 43897, display: 'OS 2026-0340', reference: 'OSC1F0A2E2' },
       ],
-      pessoa: { name: 'Eduardo Bastos Marinho Vasconcelos', email: 'eduardo@construtorasaomateus.com.br', cpf: '222.222.222-22' },
+      /* Caso de canto: PJ com razão social longa e sem nome fantasia. */
+      pessoa: {
+        type: 'PJ',
+        document: '45221900000177',
+        razao_social: 'CONSTRUTORA SAO MATEUS EMPREENDIMENTOS E PARTICIPACOES LTDA',
+        nome_fantasia: '',
+      },
       endereco: {
         street: 'Rodovia Anhanguera, km 42',
         number: 's/n',
@@ -426,7 +441,7 @@ export const itens: Item[] = [
       data: '2024-03-01T12:00:00.000Z',
       relacao_simples: { id: 43887, display: 'Nortelux Elétrica', reference: 'FORNC55D9212D9' },
       relacao_multipla: [],
-      pessoa: { name: 'Marina Toledo', email: 'marina.toledo@nortelux.com.br', cpf: '000.000.000-00' },
+      pessoa: { type: 'PF', document: '52998224725', name: 'Marina Toledo' },
       endereco: null,
       arquivo: [],
       imagem: [],
@@ -471,7 +486,12 @@ export const itens: Item[] = [
       data: '2026-10-15T12:00:00.000Z',
       relacao_simples: { id: 43888, display: 'Vega Predial', reference: 'FORNA11B2C3D4' },
       relacao_multipla: [{ id: 43898, display: 'OS 2026-0527', reference: 'OSC1F0A2F5' }],
-      pessoa: { name: 'Rafael Pimenta', email: 'rafael.pimenta@vegapredial.com.br', cpf: '111.111.111-11' },
+      pessoa: {
+        type: 'PJ',
+        document: '98765432000110',
+        razao_social: 'VEGA PREDIAL SERVICOS DE MANUTENCAO LTDA',
+        nome_fantasia: 'Vega Predial',
+      },
       endereco: {
         street: 'Rua das Palmeiras',
         number: '42',
@@ -539,6 +559,29 @@ export const indicesDeCorrecao = [
 ]
 
 /** Os membros que o seletor de pessoa oferece no formulário. */
+/**
+ * O cadastro que a consulta de documento devolve.
+ *
+ * O campo Pessoa/Empresa do develop **consulta o documento e preenche razão
+ * social e nome fantasia sozinho** (medido em 23/09/2026 com o CNPJ
+ * 11.222.333/0001-81). Aqui a consulta é este objeto: o protótipo precisa do
+ * comportamento, não do serviço.
+ */
+export const cadastroPorDocumento: Record<string, { razao_social: string, nome_fantasia: string }> = {
+  '11222333000181': {
+    razao_social: 'CAIXA ESCOLAR DA ESCOLA ESTADUAL DE ENSINO FUNDAMENTAL JOSEFINA JACQUES NORONHA',
+    nome_fantasia: 'CAIXA ESCOLA DA ESCOLA ESTADUAL DE ENSINO FUNDAMENTAL J',
+  },
+  '45221900000177': {
+    razao_social: 'CONSTRUTORA SAO MATEUS EMPREENDIMENTOS E PARTICIPACOES LTDA',
+    nome_fantasia: '',
+  },
+  '98765432000110': {
+    razao_social: 'VEGA PREDIAL SERVICOS DE MANUTENCAO LTDA',
+    nome_fantasia: 'Vega Predial',
+  },
+}
+
 export const membros = [
   { nome: 'Marina Toledo', email: 'marina.toledo@nortelux.com.br', iniciais: 'MT' },
   { nome: 'Rafael Pimenta', email: 'rafael.pimenta@vegapredial.com.br', iniciais: 'RP' },

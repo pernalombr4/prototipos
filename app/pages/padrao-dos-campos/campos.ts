@@ -697,13 +697,34 @@ export const campos: Campo[] = [
   /* ---------------------------- família pessoa ---------------------------- */
   {
     tipo: 'EnPerson',
+    /*
+     * MEDIDO NA TELA em 23/09/2026, e é bem diferente do que eu tinha
+     * prototipado. Eu tinha feito um seletor de MEMBROS do workspace, e o
+     * campo não é isso: é um bloco de cadastro de pessoa ou empresa, com
+     * revelação progressiva por tipo.
+     *
+     * | Passo | O que aparece |
+     * |---|---|
+     * | 1 | **Tipo**, com "Por favor, selecione": Pessoa Física ou Pessoa Jurídica |
+     * | 2a, Pessoa Física | **Nome** (opcional) e **CPF** (obrigatório), máscara `999.999.999-99`, contador `0/14` |
+     * | 2b, Pessoa Jurídica | **CNPJ** (obrigatório), máscara `**.***.***​/****-##`, contador `0/18`, mais **Razão Social** e **Nome Fantasia**, os dois obrigatórios |
+     *
+     * E tem duas coisas que nenhum outro campo nosso faz:
+     *
+     * 1. **valida o documento**, não só mascara: CNPJ com dígito errado dá
+     *    "CNPJ Inválido" embaixo do bloco;
+     * 2. **consulta o cadastro e preenche sozinho**: com um CNPJ válido, Razão
+     *    Social e Nome Fantasia vêm preenchidos da consulta. Testei com
+     *    11.222.333/0001-81 e voltou a razão social de uma caixa escolar
+     *    estadual.
+     */
     familia: 'pessoa',
     disponibilidade: 'ativo',
     comoSalva: 'confirmar',
     refId: 'pessoa',
-    icone: 'i-lucide-user-round',
+    icone: 'i-lucide-contact',
     alinhamento: 'inicio',
-    largura: 240,
+    largura: 260,
     larguraCheiaNoFormulario: true,
     saltoLargo: true,
     configuracoes: [
@@ -711,11 +732,20 @@ export const campos: Campo[] = [
       'Configurações de Pessoa: cnpj, name, cpf, razao_social, nome_fantasia',
     ],
     backend: {
-      entrada: '{ "name": "Marina Toledo", "cpf": "000.000.000-00" }',
-      saida: '{ "name": "Marina Toledo", "email": "marina@…", "cpf": "…" }',
-      formatada: 'nestedConfig.displayString escolhe quais subcampos aparecem',
+      entrada: '{ "type": "PJ", "document": "11222333000181", "razao_social": "…", "nome_fantasia": "…" }  (PROPOSTA: ver abaixo)',
+      saida: '{ "type": "PJ", "document": "…", "razao_social": "…", "nome_fantasia": "…" }  ou, em PF, { "type": "PF", "document": "…", "name": "…" }',
+      formatada: 'o nome de exibição (nome fantasia na PJ, nome na PF) e o documento mascarado ao lado',
       cFormat: ['type: "object"', 'display_string', 'value_path'],
       config: ['personConfig.availableFields[]', 'nestedConfig.displayString'],
+      /*
+       * A CHAVE DE CADA SUBCAMPO É PROPOSTA, NÃO MEDIDA. O formulário do
+       * develop envia o item como multipart (ele carrega arquivo junto), então
+       * não consegui ler o corpo da requisição para conferir os nomes. Os
+       * rótulos da tela são Tipo, Nome, CPF, CNPJ, Razão Social e Nome
+       * Fantasia, e as chaves acima saem da lista que a própria configuração
+       * do campo mostra: `cnpj, name, cpf, razao_social, nome_fantasia`.
+       * Confirmar com o dev antes de implementar.
+       */
     },
   },
 

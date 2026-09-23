@@ -948,3 +948,68 @@ solto (`Record<string, unknown>`), então ele não diz quais são os subcampos, 
 eu não vou adivinhar duas vezes o mesmo campo. Preciso ver a interação na tela
 do develop, e a janela do Chrome estava minimizada (largura 0) durante esta
 rodada. Fica como o primeiro item da próxima.
+
+---
+
+## Rodada 11: o Pessoa/Empresa de verdade, e dois defeitos que ele revelou
+
+### O campo, medido na tela
+
+Ela disse que o meu não tinha relação com o real, e não tinha. Eu tinha feito um
+**seletor de membros do workspace**. Fui ver no develop, em 23/09/2026:
+
+| Passo | O que o campo faz |
+|---|---|
+| 1 | começa **só com Tipo**, em "Por favor, selecione" |
+| 2a | **Pessoa Física** revela **Nome** (opcional) e **CPF** (obrigatório), máscara `999.999.999-99`, contador `0/14` |
+| 2b | **Pessoa Jurídica** revela **CNPJ** (obrigatório), máscara `**.***.***​/****-##`, contador `0/18`, mais **Razão Social** e **Nome Fantasia**, os dois obrigatórios |
+| 3 | o documento é **validado**, não só mascarado: dígito errado dá "CNPJ Inválido" |
+| 4 | e o documento válido é **consultado**: razão social e nome fantasia vêm preenchidos da consulta. Testei com 11.222.333/0001-81 e voltou a razão social de uma caixa escolar estadual |
+
+Os pontos 3 e 4 são os que **nenhum outro campo nosso faz**, e eram justamente
+os que faltavam no protótipo.
+
+### O que o protótipo passou a fazer
+
+- **formulário e quadro:** o bloco começa no Tipo e revela os subcampos daquele
+  tipo, com máscara, contador, marca de obrigatório, o estado "consultando", a
+  mensagem de documento inválido e o aviso "preenchido pela consulta";
+- **célula:** saiu o avatar com iniciais, que era herança do seletor de membros.
+  Entrou o **selo PF ou PJ**, o nome de exibição e o documento mascarado;
+- **cru:** nome, razão social quando difere do fantasia, e o documento;
+- **saída formatada:** `nome · documento mascarado`, no lugar de `nome (e-mail)`;
+- **mocks:** os cinco itens ganharam valores do formato novo, inclusive dois
+  casos de canto: PJ sem nome fantasia e **PJ com tipo escolhido e documento
+  ainda vazio**, que é o estado em que o bloco espera a consulta.
+
+**A chave de cada subcampo é PROPOSTA, não medida.** O formulário do develop
+envia o item como multipart, porque carrega arquivo junto, então não consegui
+ler o corpo da requisição. Os rótulos da tela são Tipo, Nome, CPF, CNPJ, Razão
+Social e Nome Fantasia, e as chaves que usei (`type`, `document`,
+`razao_social`, `nome_fantasia`, `name`) saem da lista que a própria
+configuração do campo mostra. **Confirmar com o dev antes de implementar.**
+
+**Maquete declarada:** a consulta é o `cadastroPorDocumento` do `mocks.ts`, com
+meio segundo de espera para o estado "consultando" existir na tela. E a
+validação aceita o que está no mock: calcular dígito verificador é regra de
+back-end, e o que está em discussão é o comportamento do campo.
+
+### Dois defeitos que só apareceram porque fui testar
+
+**1. Escolher opção fechava o quadro inteiro.** A lista de opção de um seletor é
+teleportada para o `body`, fora do quadro. Ao escolher, a sequência é
+`pointerdown` na opção, a lista se desmonta ali mesmo, e o `mousedown` e o
+`click` que faltavam caem em quem ficou embaixo do cursor: a camada de fundo do
+quadro. Conserto: o fechar exige que o gesto **comece e termine** no fundo, e
+quem sabe onde ele começou é o `pointerdown`. Valia para todos os seletores
+dentro do quadro, não só para este campo.
+
+**2. O quadro lia o item de um retrato antigo.** O estado de edição guardava o
+objeto do item de quando a célula foi clicada, e quem manda na lista troca o
+objeto a cada gravação. Em campo de digitar não aparecia, porque o controle
+guarda o próprio texto. Aparece em tudo que **recalcula a partir do valor**: a
+consulta do documento, o original riscado da moeda corrigida, a lista de anexos,
+a conversa. Agora o quadro lê o item sempre da lista, pelo id.
+
+Os dois estavam no protótipo desde a rodada 6 e passaram por quatro rodadas sem
+aparecer. Apareceram no primeiro campo que precisou reagir ao próprio valor.

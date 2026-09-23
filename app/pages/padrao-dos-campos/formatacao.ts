@@ -29,6 +29,18 @@ export function estaVazio(valor: unknown): boolean {
   return false
 }
 
+/**
+ * A máscara do documento, do jeito que o develop desenha: `999.999.999-99` no
+ * CPF e `99.999.999/9999-99` no CNPJ. O que decide é o tamanho, porque é o que
+ * o produto tem na mão quando o valor chega.
+ */
+export function mascararDocumento(documento: string): string {
+  const d = (documento ?? '').replace(/\D/g, '')
+  if (d.length === 11) return d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
+  if (d.length === 14) return d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
+  return documento ?? ''
+}
+
 /** O rótulo de uma opção a partir do value gravado. */
 export function rotuloDaOpcao(
   opcoes: readonly { value: string, label: string }[] | undefined,
@@ -252,8 +264,22 @@ export function saidaFormatada(
         .join(separador)
 
     case 'EnPerson': {
-      const v = valor as { name: string, email?: string }
-      return v.email ? `${v.name} (${v.email})` : v.name
+      /*
+       * Pessoa/Empresa é bloco, não pessoa do workspace: o que sai é o nome de
+       * exibição (nome fantasia na PJ, nome na PF, e a razão social quando não
+       * há fantasia) com o documento mascarado ao lado. Medido na tela em
+       * 23/09/2026, ver o catálogo.
+       */
+      const v = valor as {
+        type?: string
+        document?: string
+        name?: string
+        razao_social?: string
+        nome_fantasia?: string
+      }
+      const nome = v.nome_fantasia?.trim() || v.name?.trim() || v.razao_social?.trim() || ''
+      const doc = mascararDocumento(v.document ?? '')
+      return [nome, doc].filter(Boolean).join(' · ')
     }
 
     case 'EnAddress':

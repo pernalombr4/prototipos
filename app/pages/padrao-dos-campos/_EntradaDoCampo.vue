@@ -18,7 +18,7 @@ import type { Campo } from './campos'
 import type { Textos } from './textos'
 import { corDaOpcao, formatarBytes, formatarDataHora, rotuloDaOpcao } from './formatacao'
 import CartaoDoRegistro from './_CartaoDoRegistro.vue'
-import { indicesDeCorrecao, itensRelacionaveis, membros, moedas, opcoes as todasAsOpcoes } from './mocks'
+import { cadastroPorDocumento, indicesDeCorrecao, itensRelacionaveis, moedas, opcoes as todasAsOpcoes } from './mocks'
 
 const props = defineProps<{
   campo: Campo
@@ -300,12 +300,74 @@ const acoesDoCompositor = computed(() => [
   { icone: 'i-lucide-video', rotulo: props.t.gravarVideo },
 ])
 
-const pessoaEscolhida = computed({
-  get: () => (valor.value as { name: string } | null)?.name ?? '',
-  set: (nome: string) => {
-    const m = membros.find(x => x.nome === nome)
-    emit('update:modelValue', m ? { name: m.nome, email: m.email } : null)
-  },
+/* --------------------------- pessoa e empresa ---------------------------- */
+
+/**
+ * O BLOCO DE PESSOA/EMPRESA, refeito com o comportamento real.
+ *
+ * Eu tinha prototipado um seletor de membros do workspace, e o campo não é
+ * isso. Medido na tela do develop em 23/09/2026:
+ *
+ * 1. começa só com **Tipo**, em "Por favor, selecione";
+ * 2. **Pessoa Física** revela Nome (opcional) e CPF (obrigatório);
+ * 3. **Pessoa Jurídica** revela CNPJ (obrigatório), Razão Social e Nome
+ *    Fantasia, os dois obrigatórios;
+ * 4. o documento é **validado**, não só mascarado;
+ * 5. e o documento válido **é consultado**: razão social e nome fantasia vêm
+ *    preenchidos da consulta.
+ *
+ * A consulta aqui é o `cadastroPorDocumento` do mocks, com meio segundo de
+ * espera para o estado "consultando" existir na tela. O que o protótipo tem
+ * que provar é o comportamento, não o serviço.
+ */
+interface Pessoa {
+  type?: 'PF' | 'PJ'
+  document?: string
+  name?: string
+  razao_social?: string
+  nome_fantasia?: string
+}
+
+const pessoa = computed<Pessoa>(() => (valor.value as Pessoa) ?? {})
+
+function mudarPessoa(troca: Partial<Pessoa>) {
+  emit('update:modelValue', { ...pessoa.value, ...troca })
+}
+
+/** Só dígitos, que é como o documento vai gravado. */
+const digitosDoDocumento = computed(() => (pessoa.value.document ?? '').replace(/\D/g, ''))
+
+const tamanhoDoDocumento = computed(() => (pessoa.value.type === 'PJ' ? 14 : 11))
+
+const documentoCompleto = computed(
+  () => digitosDoDocumento.value.length === tamanhoDoDocumento.value,
+)
+
+/**
+ * A validação do dígito, que é o que o develop faz ("CNPJ Inválido").
+ *
+ * MAQUETE: aqui vale o documento que existe no `cadastroPorDocumento` mais o
+ * CPF de teste. Calcular dígito verificador de CPF e CNPJ é regra de
+ * back-end, e o que está em discussão é o comportamento do campo.
+ */
+const documentoValido = computed(() => {
+  const d = digitosDoDocumento.value
+  if (!documentoCompleto.value) return true
+  if (pessoa.value.type === 'PJ') return d in cadastroPorDocumento
+  return d === '52998224725'
+})
+
+const consultando = ref(false)
+
+/** Documento válido consulta o cadastro e preenche o resto. */
+watch(digitosDoDocumento, async (d) => {
+  if (pessoa.value.type !== 'PJ' || d.length !== 14) return
+  const achado = cadastroPorDocumento[d]
+  if (!achado) return
+  consultando.value = true
+  await new Promise(r => setTimeout(r, 500))
+  consultando.value = false
+  mudarPessoa({ razao_social: achado.razao_social, nome_fantasia: achado.nome_fantasia })
 })
 
 const relacaoEscolhida = computed({
@@ -965,17 +1027,115 @@ const opcoesDeRelacao = computed(() =>
       </template>
     </USelectMenu>
 
-    <!-- ───────────────────────────── pessoa ─────────────────────────────── -->
-    <div v-else-if="campo.tipo === 'EnPerson'" class="rounded-md border border-default p-3">
-      <USelectMenu
-        v-model="pessoaEscolhida"
-        :items="membros.map(m => ({ label: m.nome, value: m.nome }))"
-        value-key="value"
-        size="sm"
-        class="w-full"
-      />
-      <p class="mt-2 text-xs text-muted">
-        {{ t.campos.EnPerson.formulario }}
+    <!--
+      ───────────────────────────── pessoa ─────────────────────────────
+      O bloco começa no Tipo e revela os subcampos daquele tipo, como no
+      develop. O documento valida e, quando vale, é consultado: razão social e
+      nome fantasia vêm da consulta, e o aviso embaixo diz de onde vieram.
+    -->
+    <div v-else-if="campo.tipo === 'EnPerson'" class="space-y-2.5 rounded-md border border-default p-3">
+      <div>
+        <p class="mb-1 text-xs font-medium text-highlighted">{{ t.pessoaTipo }}</p>
+        <USelectMenu
+          :model-value="pessoa.type ?? ''"
+          :items="[
+            { label: t.pessoaFisica, value: 'PF' },
+            { label: t.pessoaJuridica, value: 'PJ' },
+          ]"
+          value-key="value"
+          size="sm"
+          class="w-full"
+          :placeholder="t.pessoaSelecione"
+          @update:model-value="(v: unknown) => emit('update:modelValue', { type: v as 'PF' | 'PJ' })"
+        />
+      </div>
+
+      <template v-if="pessoa.type === 'PF'">
+        <div>
+          <p class="mb-1 text-xs font-medium text-highlighted">{{ t.pessoaNome }}</p>
+          <UInput
+            :model-value="pessoa.name ?? ''"
+            size="sm"
+            class="w-full"
+            @update:model-value="(v: string | number) => mudarPessoa({ name: String(v) })"
+          />
+        </div>
+        <div>
+          <p class="mb-1 flex items-center gap-1 text-xs font-medium text-highlighted">
+            <UIcon name="i-lucide-asterisk" class="size-3 shrink-0 text-error" />
+            {{ t.pessoaCpf }}
+          </p>
+          <UInput
+            :model-value="pessoa.document ?? ''"
+            size="sm"
+            class="w-full font-mono tabular-nums"
+            placeholder="999.999.999-99"
+            :maxlength="11"
+            @update:model-value="(v: string | number) => mudarPessoa({ document: String(v) })"
+          >
+            <template #trailing>
+              <span class="text-xs text-dimmed">{{ digitosDoDocumento.length }}/11</span>
+            </template>
+          </UInput>
+        </div>
+      </template>
+
+      <template v-else-if="pessoa.type === 'PJ'">
+        <div>
+          <p class="mb-1 flex items-center gap-1 text-xs font-medium text-highlighted">
+            <UIcon name="i-lucide-asterisk" class="size-3 shrink-0 text-error" />
+            {{ t.pessoaCnpj }}
+          </p>
+          <UInput
+            :model-value="pessoa.document ?? ''"
+            size="sm"
+            class="w-full font-mono tabular-nums"
+            placeholder="99.999.999/9999-99"
+            :maxlength="14"
+            @update:model-value="(v: string | number) => mudarPessoa({ document: String(v) })"
+          >
+            <template #trailing>
+              <UIcon v-if="consultando" name="i-lucide-loader-circle" class="size-3.5 animate-spin text-primary" />
+              <span v-else class="text-xs text-dimmed">{{ digitosDoDocumento.length }}/14</span>
+            </template>
+          </UInput>
+        </div>
+        <div>
+          <p class="mb-1 flex items-center gap-1 text-xs font-medium text-highlighted">
+            <UIcon name="i-lucide-asterisk" class="size-3 shrink-0 text-error" />
+            {{ t.pessoaRazaoSocial }}
+          </p>
+          <UInput
+            :model-value="pessoa.razao_social ?? ''"
+            size="sm"
+            class="w-full"
+            @update:model-value="(v: string | number) => mudarPessoa({ razao_social: String(v) })"
+          />
+        </div>
+        <div>
+          <p class="mb-1 flex items-center gap-1 text-xs font-medium text-highlighted">
+            <UIcon name="i-lucide-asterisk" class="size-3 shrink-0 text-error" />
+            {{ t.pessoaNomeFantasia }}
+          </p>
+          <UInput
+            :model-value="pessoa.nome_fantasia ?? ''"
+            size="sm"
+            class="w-full"
+            @update:model-value="(v: string | number) => mudarPessoa({ nome_fantasia: String(v) })"
+          />
+        </div>
+      </template>
+
+      <p v-if="consultando" class="flex items-center gap-1 text-xs text-muted">
+        <UIcon name="i-lucide-search" class="size-3 shrink-0" />
+        {{ t.pessoaConsultando }}
+      </p>
+      <p v-else-if="!documentoValido" class="text-xs text-error">
+        {{ t.pessoaDocumentoInvalido }}
+      </p>
+      <p v-else-if="pessoa.type === 'PJ' && pessoa.razao_social" class="flex items-center gap-1 text-xs text-muted">
+        <UIcon name="i-lucide-badge-check" class="size-3 shrink-0 text-success" />
+        {{ t.pessoaVeioDaConsulta }}
       </p>
     </div>
 

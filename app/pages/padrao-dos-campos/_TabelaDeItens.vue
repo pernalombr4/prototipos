@@ -116,6 +116,26 @@ function abrirEdicao(campo: Campo, item: Item, alvo?: HTMLElement) {
   medirAlvo()
 }
 
+/**
+ * O ITEM em edição, lido SEMPRE da lista, e não do retrato guardado.
+ *
+ * `emEdicao.item` é o objeto que existia no instante do clique. Quem manda na
+ * lista troca o objeto do item a cada gravação (`{ ...item, data }`), então o
+ * retrato envelhece na hora: o quadro continuava mostrando o valor de quando
+ * abriu.
+ *
+ * Em campo de digitar isso não aparecia, porque o controle guarda o próprio
+ * texto. Aparece em tudo que RECALCULA a partir do valor: a consulta do
+ * documento em Pessoa/Empresa, o original riscado da moeda corrigida, a lista
+ * de anexos, a conversa. Achado testando o bloco de Pessoa/Empresa.
+ */
+const itemEmEdicao = computed<Item | null>(() => {
+  const estado = emEdicao.value
+  if (!estado) return null
+  if (ehLinhaNova(estado.item)) return linhaNova.value
+  return props.itens.find(i => i.id === estado.item.id) ?? estado.item
+})
+
 /** O campo que está em edição agora. */
 const campoEmEdicao = computed(
   () => props.campos.find(c => c.refId === emEdicao.value?.refId) ?? null,
@@ -162,7 +182,30 @@ const estiloDoSalto = computed(() => {
   }
 })
 
+/**
+ * O CLIQUE FORA, e por que ele não pode ser só um `mousedown`.
+ *
+ * A lista de opção de um seletor é teleportada para o `body`, fora do quadro.
+ * Quando a pessoa escolhe uma opção, a sequência é esta: `pointerdown` na
+ * opção, a lista se desmonta ali mesmo, e então o `mousedown` e o `click` que
+ * faltavam caem em quem ficou embaixo do cursor, que é a camada de fundo do
+ * quadro. Resultado: escolher a opção fechava o quadro inteiro.
+ *
+ * O conserto é exigir que o gesto COMECE e TERMINE no fundo. O `pointerdown`
+ * é o primeiro evento da sequência, e é ele que sabe onde o clique nasceu.
+ */
+const gestoComecouNoFundo = ref(false)
+
+function aoPressionarFundo(e: PointerEvent) {
+  gestoComecouNoFundo.value = e.target === e.currentTarget
+}
+
+function aoClicarNoFundo(e: MouseEvent) {
+  if (gestoComecouNoFundo.value && e.target === e.currentTarget) fecharEdicao()
+}
+
 function fecharEdicao() {
+  gestoComecouNoFundo.value = false
   comentando.value = false
   rascunhoDoComentario.value = ''
   emEdicao.value = null
@@ -302,20 +345,20 @@ function descartarRascunho() {
  * desmarcar opção por opção.
  */
 function limparCampo() {
-  const estado = emEdicao.value
+  const item = itemEmEdicao.value
   const campo = campoEmEdicao.value
-  if (!estado || !campo) return
+  if (!item || !campo) return
   /* Campo que guarda lista volta para lista vazia; os outros, para nulo. */
   const deLista = ['multiSelect', 'checkbox', 'EnlCheckbox', 'EnlChips', 'EnRelMulti', 'uploadFile', 'uploadImage', 'EnPDF', 'EnNotes']
   const vazio = deLista.includes(campo.tipo) ? [] : null
-  gravarValor(estado.item, campo.refId, vazio)
+  gravarValor(item, campo.refId, vazio)
 }
 
 const temValorNoQuadro = computed(() => {
-  const estado = emEdicao.value
+  const item = itemEmEdicao.value
   const campo = campoEmEdicao.value
-  if (!estado || !campo) return false
-  return !estaVazio((estado.item.data as Record<string, unknown>)?.[campo.refId])
+  if (!item || !campo) return false
+  return !estaVazio((item.data as Record<string, unknown>)?.[campo.refId])
 })
 
 /**
@@ -334,11 +377,11 @@ const comentando = ref(false)
 const rascunhoDoComentario = ref('')
 
 function enviarComentario() {
-  const estado = emEdicao.value
+  const item = itemEmEdicao.value
   const campo = campoEmEdicao.value
   const texto = rascunhoDoComentario.value.trim()
-  if (!estado || !campo || !texto) return
-  emit('comentarNoCampo', estado.item, campo, texto)
+  if (!item || !campo || !texto) return
+  emit('comentarNoCampo', item, campo, texto)
   rascunhoDoComentario.value = ''
   comentando.value = false
 }
@@ -762,7 +805,8 @@ onMounted(() => nextTick(() => {
     <div
       v-if="emEdicao && campoEmEdicao && retanguloDoAlvo"
       class="fixed inset-0 z-40"
-      @mousedown.self="fecharEdicao()"
+      @pointerdown="aoPressionarFundo"
+      @click="aoClicarNoFundo"
     >
       <div
         class="salto absolute flex flex-col rounded-lg border border-default bg-default p-2 shadow-2xl"
@@ -791,14 +835,14 @@ onMounted(() => nextTick(() => {
         <div class="min-h-0 flex-1 overflow-y-auto px-0.5">
           <EntradaDoCampo
             :campo="campoEmEdicao"
-            :model-value="(emEdicao.item.data as Record<string, unknown>)?.[campoEmEdicao.refId]"
+            :model-value="(itemEmEdicao?.data as Record<string, unknown>)?.[campoEmEdicao.refId]"
             :t="t"
             :idioma="idioma"
             :pode-configurar="podeConfigurar"
             :itens="itens"
             sem-rotulo
             autofoco
-            @update:model-value="(v: unknown) => gravarValor(emEdicao!.item, campoEmEdicao!.refId, v)"
+            @update:model-value="(v: unknown) => gravarValor(itemEmEdicao!, campoEmEdicao!.refId, v)"
             @sair="aoSairDoQuadro()"
           />
         </div>

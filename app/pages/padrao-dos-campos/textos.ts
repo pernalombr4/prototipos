@@ -159,6 +159,18 @@ export interface Textos {
   criarNaLinha: string
   criarAbaixo: string
   abrirRegistro: string
+  pessoaTipo: string
+  pessoaSelecione: string
+  pessoaFisica: string
+  pessoaJuridica: string
+  pessoaNome: string
+  pessoaCpf: string
+  pessoaCnpj: string
+  pessoaRazaoSocial: string
+  pessoaNomeFantasia: string
+  pessoaConsultando: string
+  pessoaDocumentoInvalido: string
+  pessoaVeioDaConsulta: string
   totalDaColuna: string
   totalPorMoeda: string
   comentarNoCampo: string
@@ -408,6 +420,18 @@ const ptBR: Textos = {
   criarNaLinha: 'Criar registro aqui',
   criarAbaixo: 'Criar registro abaixo',
   abrirRegistro: 'Abrir o registro',
+  pessoaTipo: 'Tipo',
+  pessoaSelecione: 'Por favor, selecione',
+  pessoaFisica: 'Pessoa Física',
+  pessoaJuridica: 'Pessoa Jurídica',
+  pessoaNome: 'Nome',
+  pessoaCpf: 'CPF',
+  pessoaCnpj: 'CNPJ',
+  pessoaRazaoSocial: 'Razão Social',
+  pessoaNomeFantasia: 'Nome Fantasia',
+  pessoaConsultando: 'Consultando o documento',
+  pessoaDocumentoInvalido: 'Documento inválido',
+  pessoaVeioDaConsulta: 'Preenchido pela consulta ao documento',
   totalDaColuna: 'Total da coluna',
   totalPorMoeda: 'Moedas diferentes nunca somam juntas. O total sai por moeda.',
   comentarNoCampo: 'Comentar neste campo',
@@ -658,10 +682,10 @@ const ptBR: Textos = {
     },
     EnPerson: {
       rotulo: 'Pessoa/Empresa',
-      descricao: 'Cadastro de pessoa ou empresa, com os subcampos que a categoria escolher.',
-      celula: 'Avatar com as iniciais e o nome ao lado.',
-      formulario: 'Bloco com os subcampos de personConfig, na linha inteira.',
-      cru: 'Avatar e nome, com o e-mail em segunda linha menor.',
+      descricao: 'Cadastro de pessoa ou empresa. O tipo decide os subcampos, e o documento é consultado.',
+      celula: 'Nome de exibição, com o selo PF ou PJ e o documento mascarado.',
+      formulario: 'Bloco que começa no Tipo e revela os subcampos daquele tipo.',
+      cru: 'Nome, documento e razão social, uma por linha.',
     },
     EnAddress: {
       rotulo: 'Endereço',
@@ -908,6 +932,18 @@ const en: Textos = {
   criarNaLinha: 'Create a record here',
   criarAbaixo: 'Create a record below',
   abrirRegistro: 'Open record',
+  pessoaTipo: 'Type',
+  pessoaSelecione: 'Please select',
+  pessoaFisica: 'Individual',
+  pessoaJuridica: 'Company',
+  pessoaNome: 'Name',
+  pessoaCpf: 'CPF',
+  pessoaCnpj: 'CNPJ',
+  pessoaRazaoSocial: 'Legal name',
+  pessoaNomeFantasia: 'Trade name',
+  pessoaConsultando: 'Looking up the document',
+  pessoaDocumentoInvalido: 'Invalid document',
+  pessoaVeioDaConsulta: 'Filled in by the document lookup',
   totalDaColuna: 'Column total',
   totalPorMoeda: 'Different currencies never add up together. The total comes per currency.',
   comentarNoCampo: 'Comment on this field',
@@ -1158,10 +1194,10 @@ const en: Textos = {
     },
     EnPerson: {
       rotulo: 'Person/Company',
-      descricao: 'A person or company record, with the sub fields the category chooses.',
-      celula: 'Avatar with initials and the name beside it.',
-      formulario: 'A block with the personConfig sub fields, on the whole row.',
-      cru: 'Avatar and name, with the e-mail on a smaller second line.',
+      descricao: 'A person or company record. The type decides the sub fields, and the document is looked up.',
+      celula: 'Display name, with the PF or PJ tag and the masked document.',
+      formulario: 'A block that starts at Type and reveals the sub fields of that type.',
+      cru: 'Name, document and legal name, one per line.',
     },
     EnAddress: {
       rotulo: 'Address',
@@ -1408,6 +1444,18 @@ const es: Textos = {
   criarNaLinha: 'Crear registro aquí',
   criarAbaixo: 'Crear registro abajo',
   abrirRegistro: 'Abrir el registro',
+  pessoaTipo: 'Tipo',
+  pessoaSelecione: 'Por favor, seleccione',
+  pessoaFisica: 'Persona física',
+  pessoaJuridica: 'Persona jurídica',
+  pessoaNome: 'Nombre',
+  pessoaCpf: 'CPF',
+  pessoaCnpj: 'CNPJ',
+  pessoaRazaoSocial: 'Razón social',
+  pessoaNomeFantasia: 'Nombre comercial',
+  pessoaConsultando: 'Consultando el documento',
+  pessoaDocumentoInvalido: 'Documento no válido',
+  pessoaVeioDaConsulta: 'Rellenado por la consulta al documento',
   totalDaColuna: 'Total de la columna',
   totalPorMoeda: 'Monedas distintas nunca se suman juntas. El total sale por moneda.',
   comentarNoCampo: 'Comentar en este campo',
@@ -1658,10 +1706,10 @@ const es: Textos = {
     },
     EnPerson: {
       rotulo: 'Persona/Empresa',
-      descricao: 'Registro de persona o empresa, con los subcampos que elija la categoría.',
-      celula: 'Avatar con las iniciales y el nombre al lado.',
-      formulario: 'Bloque con los subcampos de personConfig, en la fila entera.',
-      cru: 'Avatar y nombre, con el correo en una segunda línea más pequeña.',
+      descricao: 'Registro de persona o empresa. El tipo decide los subcampos, y el documento se consulta.',
+      celula: 'Nombre de exhibición, con la etiqueta PF o PJ y el documento con máscara.',
+      formulario: 'Bloque que empieza en el Tipo y revela los subcampos de ese tipo.',
+      cru: 'Nombre, documento y razón social, uno por línea.',
     },
     EnAddress: {
       rotulo: 'Dirección',

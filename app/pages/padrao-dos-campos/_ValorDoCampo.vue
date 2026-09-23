@@ -19,21 +19,7 @@ import type { Campo } from './campos'
 import CartaoDoRegistro from './_CartaoDoRegistro.vue'
 import { itensRelacionaveis } from './mocks'
 import type { Textos } from './textos'
-import {
-  corDaOpcao,
-  foiCorrigido,
-  moedaOriginalFormatada,
-  enderecoEmUmaLinha,
-  estaVazio,
-  estaVencida,
-  formatarBytes,
-  formatarDataCurta,
-  formatarDataMedia,
-  relativoEmDias,
-  rotuloDaOpcao,
-  saidaFormatada,
-  semTags,
-} from './formatacao'
+import { corDaOpcao, enderecoEmUmaLinha, estaVazio, estaVencida, foiCorrigido, formatarBytes, formatarDataCurta, formatarDataMedia, mascararDocumento, moedaOriginalFormatada, relativoEmDias, rotuloDaOpcao, saidaFormatada, semTags } from './formatacao'
 import { opcoes as todasAsOpcoes } from './mocks'
 
 const props = defineProps<{
@@ -99,22 +85,28 @@ const comoAnexos = computed<Anexo[]>(() => {
   return []
 })
 const comoArquivo = computed(() => comoAnexos.value[0] ?? ({} as Anexo))
-const comoPessoa = computed(() => props.valor as { name: string, email?: string })
+/**
+ * Pessoa/Empresa é BLOCO, não pessoa do workspace. O nome de exibição é o nome
+ * fantasia na PJ, o nome na PF, e a razão social quando não há fantasia.
+ * Medido na tela do develop em 23/09/2026; ver o catálogo.
+ */
+const comoPessoa = computed(() => props.valor as {
+  type?: 'PF' | 'PJ'
+  document?: string
+  name?: string
+  razao_social?: string
+  nome_fantasia?: string
+})
+
+const nomeDaPessoa = computed(() => {
+  const p = comoPessoa.value
+  return p?.nome_fantasia?.trim() || p?.name?.trim() || p?.razao_social?.trim() || ''
+})
 const comoEndereco = computed(() => props.valor as Record<string, string>)
 const comoGrupo = computed(() => props.valor as Record<string, string>)
 const comoRepetidor = computed(() => (props.valor as Record<string, unknown>[]) ?? [])
 const comoConversa = computed(() => (Array.isArray(props.valor) ? props.valor : []) as { author: string, at?: string, text: string }[])
 const comoAssinatura = computed(() => props.valor as { signer: string, signedAt: string })
-/** Iniciais para o avatar da pessoa. */
-const iniciais = computed(() =>
-  comoPessoa.value?.name
-    ?.split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map(p => p[0])
-    .join('')
-    .toUpperCase() ?? '',
-)
 
 /** O "ver mais" do formato cru, para texto que não cabe em três linhas. */
 const expandido = ref(false)
@@ -460,13 +452,32 @@ async function copiar(texto: string) {
     </span>
 
     <!-- ───────────────────────────── pessoa ───────────────────────────── -->
-    <span v-else-if="campo.tipo === 'EnPerson'" class="flex min-w-0 items-center gap-2">
-      <UAvatar size="2xs" :text="iniciais" :alt="comoPessoa.name" />
+    <!--
+      Pessoa/Empresa. Saiu o avatar com iniciais, que era herança do seletor de
+      membros que eu tinha prototipado errado: aqui não há pessoa do workspace,
+      e sim um cadastro. O que identifica é o NOME de exibição mais o selo do
+      tipo, e o documento mascarado ao lado.
+    -->
+    <span v-else-if="campo.tipo === 'EnPerson'" class="flex min-w-0 items-center gap-1.5">
+      <UBadge
+        :color="comoPessoa.type === 'PJ' ? 'info' : 'neutral'"
+        variant="subtle"
+        size="sm"
+        class="shrink-0 font-mono text-[10px]"
+      >
+        {{ comoPessoa.type === 'PJ' ? 'PJ' : 'PF' }}
+      </UBadge>
       <span class="min-w-0">
-        <span class="block truncate text-sm text-highlighted">{{ comoPessoa.name }}</span>
-        <span v-if="!naCelula && comoPessoa.email" class="block truncate text-xs text-muted">
-          {{ comoPessoa.email }}
+        <span class="block truncate text-sm text-highlighted">{{ nomeDaPessoa }}</span>
+        <span v-if="!naCelula && comoPessoa.razao_social && comoPessoa.razao_social !== nomeDaPessoa" class="block truncate text-xs text-muted">
+          {{ comoPessoa.razao_social }}
         </span>
+        <span v-if="!naCelula && comoPessoa.document" class="block font-mono text-xs tabular-nums text-muted">
+          {{ mascararDocumento(comoPessoa.document) }}
+        </span>
+      </span>
+      <span v-if="naCelula && comoPessoa.document" class="shrink-0 font-mono text-xs tabular-nums text-muted">
+        {{ mascararDocumento(comoPessoa.document) }}
       </span>
     </span>
 
