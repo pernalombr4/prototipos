@@ -158,6 +158,14 @@ export interface Textos {
   nenhumAnexo: string
   criarNaLinha: string
   criarAbaixo: string
+  totalDaColuna: string
+  totalPorMoeda: string
+  comentarNoCampo: string
+  comentarioEnviado: string
+  opcoesDoCampo: string
+  renomearOpcao: string
+  renomearOpcaoAviso: (quantos: number) => string
+  podeConfigurar: string
   hoje: string
   amanha: string
   proximaSemana: string
@@ -398,6 +406,14 @@ const ptBR: Textos = {
   nenhumAnexo: 'Nenhum arquivo ainda.',
   criarNaLinha: 'Criar registro aqui',
   criarAbaixo: 'Criar registro abaixo',
+  totalDaColuna: 'Total da coluna',
+  totalPorMoeda: 'Moedas diferentes nunca somam juntas. O total sai por moeda.',
+  comentarNoCampo: 'Comentar neste campo',
+  comentarioEnviado: 'Comentário enviado para a conversa do item',
+  opcoesDoCampo: 'Opções do campo',
+  renomearOpcao: 'Renomear a opção',
+  renomearOpcaoAviso: (quantos: number) => `Muda o rótulo em ${quantos} registros.`,
+  podeConfigurar: 'Configurar campos',
   hoje: 'Hoje',
   amanha: 'Amanhã',
   proximaSemana: 'Semana que vem',
@@ -889,6 +905,14 @@ const en: Textos = {
   nenhumAnexo: 'No files yet.',
   criarNaLinha: 'Create a record here',
   criarAbaixo: 'Create a record below',
+  totalDaColuna: 'Column total',
+  totalPorMoeda: 'Different currencies never add up together. The total comes per currency.',
+  comentarNoCampo: 'Comment on this field',
+  comentarioEnviado: 'Comment sent to the item conversation',
+  opcoesDoCampo: 'Field options',
+  renomearOpcao: 'Rename option',
+  renomearOpcaoAviso: (quantos: number) => `Changes the label in ${quantos} records.`,
+  podeConfigurar: 'Configure fields',
   hoje: 'Today',
   amanha: 'Tomorrow',
   proximaSemana: 'Next week',
@@ -1380,6 +1404,14 @@ const es: Textos = {
   nenhumAnexo: 'Todavía no hay archivos.',
   criarNaLinha: 'Crear registro aquí',
   criarAbaixo: 'Crear registro abajo',
+  totalDaColuna: 'Total de la columna',
+  totalPorMoeda: 'Monedas distintas nunca se suman juntas. El total sale por moneda.',
+  comentarNoCampo: 'Comentar en este campo',
+  comentarioEnviado: 'Comentario enviado a la conversación del elemento',
+  opcoesDoCampo: 'Opciones del campo',
+  renomearOpcao: 'Renombrar la opción',
+  renomearOpcaoAviso: (quantos: number) => `Cambia la etiqueta en ${quantos} registros.`,
+  podeConfigurar: 'Configurar campos',
   hoje: 'Hoy',
   amanha: 'Mañana',
   proximaSemana: 'La próxima semana',

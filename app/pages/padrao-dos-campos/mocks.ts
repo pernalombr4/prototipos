@@ -13,6 +13,7 @@
  * o item 3 tem quase tudo vazio, o item 4 tem nome que estoura a coluna, o
  * item 5 tem lista longa demais para a célula e data antiga.
  */
+import { reactive } from 'vue'
 import type { Item } from '@be-enlighten/enspace-sdk-schemas'
 
 /**
@@ -33,7 +34,15 @@ export const workspace = { nome: 'teste ux 2', slug: 'teste-ux' }
  * As opções das listas, do jeito que a API devolve em `Field.options[]`:
  * `value` é o que vai gravado, `label` é o que a pessoa lê.
  */
-export const opcoes = {
+/*
+ * As opções são REATIVAS de propósito.
+ *
+ * Renomear uma opção a partir da célula (decidido na rodada 9) muda o rótulo em
+ * todos os registros que a usam, e o protótipo só prova isso se a tabela
+ * inteira reagir. Num back-end de verdade isto é um PATCH na configuração do
+ * campo; aqui é o objeto em memória.
+ */
+export const opcoes = reactive({
   selecao_unica: [
     { value: 'triagem', label: 'Em triagem', cor: 'neutral' },
     { value: 'em_analise', label: 'Em análise', cor: 'info' },
@@ -81,7 +90,7 @@ export const opcoes = {
       children: [{ value: 'frota.preventiva', label: 'Preventiva' }],
     },
   ],
-} as const
+})
 
 /**
  * Os itens. `data` é `z.any()` no schema, então o tipo aqui é o do produto e o

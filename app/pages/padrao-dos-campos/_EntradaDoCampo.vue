@@ -13,6 +13,7 @@
  * remover funcionam), e o editor de documentos não abre editor. A conversa,
  * essa, recebe mensagem. Está declarado no DECISOES.md.
  */
+import type { Item } from '@be-enlighten/enspace-sdk-schemas'
 import type { Campo } from './campos'
 import type { Textos } from './textos'
 import { corDaOpcao, formatarBytes, formatarDataHora, rotuloDaOpcao } from './formatacao'
@@ -29,6 +30,18 @@ const props = defineProps<{
   semRotulo?: boolean
   /** Na célula o controle recebe o foco sozinho, para digitar direto. */
   autofoco?: boolean
+  /**
+   * Quem pode configurar o campo vê as ações de opção dentro da célula.
+   *
+   * Decidido na rodada 9, depois de ver o "⋯" por opção do Notion: criar e
+   * reordenar são aditivos e liberados; renomear muda o rótulo em todos os
+   * registros que usam a opção, então avisa o alcance antes; **excluir não
+   * existe aqui**, porque deixa item com valor órfão e isso mora na
+   * configuração do campo, onde o estrago está à vista.
+   */
+  podeConfigurar?: boolean
+  /** A lista inteira, só para contar quantos registros usam cada opção. */
+  itens?: Item[]
 }>()
 
 const emit = defineEmits<{
@@ -323,7 +336,7 @@ const relacoesEscolhidas = computed({
  * busca, mostrando só o código ISO. Aqui são duas portas para o mesmo objeto.
  */
 const moedaDoValor = computed({
-  get: () => (valor.value as { currency?: string } | null)?.currency ?? 'BRL',
+  get: () => (valor.value as { currency?: string } | null)?.currency ?? props.campo.moedaPadrao ?? 'BRL',
   set: (c: string) => {
     const v = (valor.value as Record<string, unknown>) ?? {}
     emit('update:modelValue', { ...v, currency: c })
@@ -343,9 +356,16 @@ const simboloDaMoeda = computed(
   () => moedas.find(m => m.codigo === moedaDoValor.value)?.simbolo ?? moedaDoValor.value,
 )
 
-const opcoesDeMoeda = computed(() =>
-  moedas.map(m => ({ label: m.codigo, value: m.codigo, suffix: m.nome })),
-)
+/**
+ * As moedas que o campo permite. Sem lista declarada valem as 179 do produto;
+ * com lista, só elas. É a resposta ao custo de guardar a moeda no valor: quem
+ * só trabalha em real vê uma moeda, e não um seletor com busca.
+ */
+const opcoesDeMoeda = computed(() => {
+  const permitidas = props.campo.moedasPermitidas
+  const lista = permitidas ? moedas.filter(m => permitidas.includes(m.codigo)) : moedas
+  return lista.map(m => ({ label: m.codigo, value: m.codigo, suffix: m.nome }))
+})
 
 /* A calculadora de correção monetária. É maquete: não calcula nada. */
 const calculadoraAberta = ref(false)
@@ -387,6 +407,68 @@ function criarOpcaoDaBusca() {
   if (!q) return
   emit('update:modelValue', [...escolhidos.value, q])
   buscaDeOpcao.value = ''
+}
+
+/* ---------------------- as ações de opção na célula ---------------------- */
+
+/** Quantos registros usam a opção. É o alcance que o aviso de renomear mostra. */
+function usosDaOpcao(value: string) {
+  return (props.itens ?? []).filter((item) => {
+    const v = (item.data as Record<string, unknown>)?.[props.campo.refId]
+    return Array.isArray(v) ? v.includes(value) : v === value
+  }).length
+}
+
+const renomeandoOpcao = ref<string | null>(null)
+const rascunhoDaOpcao = ref('')
+
+function abrirRenomeioDaOpcao(value: string) {
+  renomeandoOpcao.value = value
+  rascunhoDaOpcao.value = lista.value.find(o => o.value === value)?.label ?? ''
+}
+
+function confirmarRenomeioDaOpcao() {
+  const value = renomeandoOpcao.value
+  const nome = rascunhoDaOpcao.value.trim()
+  renomeandoOpcao.value = null
+  if (!value || !nome) return
+  const opcao = lista.value.find(o => o.value === value)
+  if (opcao) (opcao as { label: string }).label = nome
+}
+
+function moverOpcao(value: string, passo: number) {
+  const atual = (todasAsOpcoes as Record<string, { value: string, label: string }[]>)[props.campo.refId]
+  if (!atual) return
+  const i = atual.findIndex(o => o.value === value)
+  const destino = i + passo
+  if (i < 0 || destino < 0 || destino >= atual.length) return
+  const [item] = atual.splice(i, 1)
+  atual.splice(destino, 0, item!)
+}
+
+function acoesDaOpcao(value: string) {
+  const atual = lista.value
+  const i = atual.findIndex(o => o.value === value)
+  return [[
+    {
+      label: props.t.renomearOpcao,
+      icon: 'i-lucide-pencil',
+      onSelect: () => abrirRenomeioDaOpcao(value),
+    },
+  ], [
+    {
+      label: props.t.moverParaCima,
+      icon: 'i-lucide-chevron-up',
+      disabled: i === 0,
+      onSelect: () => moverOpcao(value, -1),
+    },
+    {
+      label: props.t.moverParaBaixo,
+      icon: 'i-lucide-chevron-down',
+      disabled: i === atual.length - 1,
+      onSelect: () => moverOpcao(value, 1),
+    },
+  ]]
 }
 
 const opcoesDeRelacao = computed(() =>
@@ -526,7 +608,7 @@ const opcoesDeRelacao = computed(() =>
         value-key="value"
         size="sm"
         class="w-28 shrink-0"
-        :search-input="{ placeholder: t.pesquisar }"
+        :search-input="opcoesDeMoeda.length >= 10 ? { placeholder: t.pesquisar } : false"
       />
       <UInput
         v-model="valorDaMoeda"
@@ -629,22 +711,60 @@ const opcoesDeRelacao = computed(() =>
         />
       </div>
       <div class="max-h-44 overflow-y-auto p-1">
-        <button
+        <div
           v-for="o in opcoesFiltradas"
           :key="o.value"
-          type="button"
-          class="flex w-full items-center gap-2 rounded px-1.5 py-1 text-left transition-colors hover:bg-elevated"
-          @click="alternarOpcao(o.value)"
+          class="group/opcao flex w-full items-center gap-2 rounded px-1.5 py-1 transition-colors hover:bg-elevated"
         >
-          <UIcon
-            :name="escolhidos.includes(o.value) ? 'i-lucide-square-check-big' : 'i-lucide-square'"
-            class="size-4 shrink-0"
-            :class="escolhidos.includes(o.value) ? 'text-primary' : 'text-dimmed'"
-          />
-          <UBadge :color="(o.cor ?? 'neutral') as never" variant="subtle" size="sm">
-            {{ o.label }}
-          </UBadge>
-        </button>
+          <button
+            type="button"
+            class="flex min-w-0 flex-1 items-center gap-2 text-left"
+            @click="alternarOpcao(o.value)"
+          >
+            <UIcon
+              :name="escolhidos.includes(o.value) ? 'i-lucide-square-check-big' : 'i-lucide-square'"
+              class="size-4 shrink-0"
+              :class="escolhidos.includes(o.value) ? 'text-primary' : 'text-dimmed'"
+            />
+            <UInput
+              v-if="renomeandoOpcao === o.value"
+              v-model="rascunhoDaOpcao"
+              size="xs"
+              class="min-w-0 flex-1"
+              autofocus
+              @click.stop
+              @blur="confirmarRenomeioDaOpcao()"
+              @keydown.enter.stop="confirmarRenomeioDaOpcao()"
+              @keydown.esc.stop="renomeandoOpcao = null"
+            />
+            <UBadge v-else :color="(o.cor ?? 'neutral') as never" variant="subtle" size="sm">
+              {{ o.label }}
+            </UBadge>
+          </button>
+
+          <!--
+            As ações da opção, só para quem pode configurar o campo. Renomear
+            avisa o alcance antes, porque muda o rótulo em todos os registros
+            que usam a opção. Excluir não está aqui de propósito.
+          -->
+          <span v-if="podeConfigurar" class="flex shrink-0 items-center gap-1">
+            <span
+              v-if="renomeandoOpcao === o.value"
+              class="whitespace-nowrap text-[11px] text-warning"
+            >{{ t.renomearOpcaoAviso(usosDaOpcao(o.value)) }}</span>
+            <UDropdownMenu :items="acoesDaOpcao(o.value)">
+              <UButton
+                icon="i-lucide-ellipsis"
+                color="neutral"
+                variant="ghost"
+                size="xs"
+                class="opacity-0 transition-opacity group-hover/opcao:opacity-100"
+                :aria-label="t.opcoesDoCampo"
+                @click.stop
+              />
+            </UDropdownMenu>
+          </span>
+        </div>
         <!--
           Criar a opção dali mesmo, que é o que o ClickUp e o Notion fazem. No
           nosso campo isso hoje exige ir na configuração, e é uma diferença de

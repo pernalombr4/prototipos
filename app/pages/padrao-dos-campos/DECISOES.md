@@ -780,3 +780,105 @@ outras células são todas área de edição de campo.
   então o clique nele fica livre para abrir. É o chip do nome do Twenty;
 - **duplo clique na linha**, que é o gesto que o develop já tem hoje, mantido
   para quem já aprendeu.
+
+---
+
+## Rodada 9: as cinco decisões, e o copiar flutuante
+
+Ela aprovou as cinco propostas. O que cada uma virou:
+
+### 1. As ações de opção dentro da célula, partidas por risco
+
+O Notion tem um "⋯" por opção que renomeia, troca a cor e **exclui** a opção do
+campo a partir do preenchimento. Adotamos em pedaços, porque "mexer na opção"
+não é uma coisa só:
+
+| Ação | O que ficou | Por quê |
+|---|---|---|
+| **Criar** | liberado, já estava | é aditivo, nada quebra, e é o que trava o preenchimento hoje |
+| **Reordenar** | liberado | muda a ordem da lista, não o dado |
+| **Renomear** | liberado **com o alcance à vista**: "Muda o rótulo em 2 registros." | o `value` gravado não muda, então o dado está seguro. O que muda é o que todo mundo lê |
+| **Excluir** | **não existe na célula** | deixa item com valor órfão. Mora na configuração do campo, onde o estrago está na tela |
+
+Tudo atrás de **permissão**: o "⋯" só aparece para quem pode configurar o campo,
+e o andaime tem o interruptor **Configurar campos** para a diferença entre
+preencher e configurar ficar visível. Com ele desligado, a lista continua
+escolhendo e os menus somem.
+
+**Pendência para o dev:** confirmar se o nosso modelo de permissão já separa
+"preencher campo" de "configurar campo". Se não separar, essa é a decisão de
+fundo e o resto depende dela.
+
+**Maquete declarada:** renomear grava no objeto de opções em memória, que virou
+`reactive` no `mocks.ts` de propósito, para o protótipo provar que o rótulo muda
+na tabela inteira. Num back-end de verdade é um PATCH na configuração do campo.
+
+### 2. Comentário: um lugar só, ancorado no campo
+
+O Notion comenta **por célula**. Não fizemos, e a razão não é esforço: já temos
+Chat e Anotações no item, e uma caixa de entrada por célula multiplicaria
+notificação, "resolvido" e histórico por N campos. A pergunta "onde falaram
+disso?" passaria a ter três respostas.
+
+O que ficou: **comentar a partir do campo**, pelo rodapé do quadro de edição,
+com o texto indo para a **conversa do item** citando o campo
+(`sobre Texto Curto: ...`). Uma caixa de entrada só, e ainda assim ancorada onde
+a dúvida nasceu. Se um dia medirmos que as pessoas comentam muito sobre valores
+específicos, aí sim vale o modelo por célula.
+
+### 3. Formato de data continua sendo configuração
+
+O Notion deixa trocar o formato da data **dentro da célula**. Não trouxemos, por
+dois motivos concretos: duas pessoas leriam a mesma coluna em formatos
+diferentes, e **o .xlsx sairia com máscara diferente da tela**, porque a
+exportação usa o formato do campo. O que trouxemos foi o ALCANCE, não a
+semântica: o rodapé do quadro tem a engrenagem que abre a ficha, que é onde o
+formato mora.
+
+Ficou marcado para revisar: **"incluir hora" tem cara de formato mas é dado**
+(compromisso às 14h não é a mesma coisa que uma data). Hoje é `Exibir Hora` na
+configuração, e fica assim até aparecer categoria que precise dos dois no mesmo
+campo.
+
+### 4. A moeda continua no valor, e o custo foi resolvido
+
+O ClickUp e o Notion põem a moeda na configuração do campo. Ficamos com a nossa,
+que guarda `{ currency, value }`, porque é o que serve contrato em moeda
+estrangeira. O custo tinha duas pontas, e as duas foram tratadas:
+
+- **o seletor de 179 moedas**: o campo agora declara `moedaPadrao` e
+  `moedasPermitidas`. Quem só trabalha em real vê uma moeda, e a busca só
+  aparece a partir de dez opções;
+- **somar a coluna**: a ficha do campo de moeda mostra o **total por moeda**
+  (`R$ 1.234,56 · US$ 7.250,90 · € 9.820,00`) com a regra escrita:
+  **moedas diferentes nunca somam juntas**. Somar misturado daria um número que
+  não existe, e é justamente o que o ClickUp evita escolhendo a moeda no campo.
+
+### 5. O teclado, que é a metade boa do modelo de planilha
+
+Não adotamos "primeiro clique seleciona, segundo edita": isso cobra dois cliques
+de todo mundo para servir quem navega pelo teclado. Adotamos só o que aquilo
+compra:
+
+| Tecla | O que faz |
+|---|---|
+| Esc | fecha o quadro |
+| Tab | próximo campo da mesma linha |
+| Shift+Tab | campo anterior |
+| Enter | salva e **desce** para a mesma coluna da linha de baixo |
+
+### E o copiar flutuante, que ela pediu
+
+No hover de uma célula preenchida aparece uma **bandeja flutuante** encostada na
+borda, por cima do conteúdo, com **copiar** e, nos campos com máscara de e-mail
+ou URL, **abrir**. Copia a **saída formatada**, que é o que se cola num e-mail e
+é a mesma string que a ficha mostra. Em coluna alinhada à direita a bandeja vai
+para a esquerda, senão taparia o número.
+
+Fica de fora o que não tem "o valor" para colar: binário, anexo, conversa,
+assinatura e repetidor.
+
+### A Referência não abre mais no clique
+
+Decisão dela: **abrir fica no botão Abrir e no duplo clique**, e mais nada. O
+selo da referência voltou a ser só identificação.

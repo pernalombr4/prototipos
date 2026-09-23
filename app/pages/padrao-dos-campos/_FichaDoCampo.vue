@@ -16,11 +16,12 @@
  * ⚠️ Isto é andaime de protótipo, não é produto. A ficha existe para a
  * discussão do padrão. Ela não vai para a tela do ENSPACE.
  */
+import type { Item } from '@be-enlighten/enspace-sdk-schemas'
 import type { Campo } from './campos'
 import type { Textos } from './textos'
 import ValorDoCampo from './_ValorDoCampo.vue'
 import EntradaDoCampo from './_EntradaDoCampo.vue'
-import { saidaCrua, saidaFormatada } from './formatacao'
+import { localeDe, saidaCrua, saidaFormatada } from './formatacao'
 import { opcoes as todasAsOpcoes } from './mocks'
 
 const props = defineProps<{
@@ -28,11 +29,43 @@ const props = defineProps<{
   campo: Campo | null
   /** O valor do item que estava aberto quando a ficha foi chamada. */
   valor: unknown
+  /** A lista inteira, para o total da coluna do campo de moeda. */
+  itens?: Item[]
   t: Textos
   idioma: string
 }>()
 
 const emit = defineEmits<{ 'update:aberta': [boolean] }>()
+
+/**
+ * O TOTAL DA COLUNA DE MOEDA, por moeda.
+ *
+ * Aqui mora a resposta ao custo de guardar a moeda no VALOR em vez de no campo,
+ * que é como o ClickUp e o Notion fazem. Guardando no valor, a coluna pode ter
+ * real e dólar na mesma tela, e somar os dois daria um número que não existe.
+ *
+ * A regra, decidida na rodada 9: **moedas diferentes nunca somam juntas**. Ou a
+ * coluna inteira tem uma moeda só e sai um total, ou saem subtotais por moeda.
+ * Nunca um número mudo.
+ */
+const totaisPorMoeda = computed(() => {
+  if (props.campo?.tipo !== 'EnCurrency') return []
+  const soma = new Map<string, number>()
+  for (const item of props.itens ?? []) {
+    const v = (item.data as Record<string, unknown>)?.[props.campo.refId] as
+      { currency?: string, value?: number } | null
+    if (!v?.currency) continue
+    soma.set(v.currency, (soma.get(v.currency) ?? 0) + (v.value ?? 0))
+  }
+  return [...soma].map(([moeda, valor]) => ({
+    moeda,
+    texto: new Intl.NumberFormat(props.campo?.localeDoCampo ?? localeDe(props.idioma), {
+      style: 'currency',
+      currency: moeda,
+      maximumFractionDigits: 2,
+    }).format(valor),
+  }))
+})
 
 const aberta = computed({
   get: () => props.aberta,
@@ -124,6 +157,30 @@ const blocos = computed(() => {
           <UBadge color="neutral" variant="outline" size="sm">
             {{ t.larguraMinima }}: {{ campo.largura }}px
           </UBadge>
+        </div>
+
+        <!--
+          O total da coluna, só no campo de moeda. Ver o comentário do
+          `totaisPorMoeda`: moedas diferentes nunca somam juntas.
+        -->
+        <div v-if="totaisPorMoeda.length" class="rounded-lg border border-default p-3">
+          <p class="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-highlighted">
+            <UIcon name="i-lucide-sigma" class="size-4 shrink-0 text-muted" />
+            {{ t.totalDaColuna }}
+          </p>
+          <div class="flex flex-wrap gap-1.5">
+            <UBadge
+              v-for="total in totaisPorMoeda"
+              :key="total.moeda"
+              color="neutral"
+              variant="subtle"
+              size="sm"
+              class="tabular-nums"
+            >
+              {{ total.texto }}
+            </UBadge>
+          </div>
+          <p class="mt-1.5 text-xs text-muted">{{ t.totalPorMoeda }}</p>
         </div>
 
         <!--

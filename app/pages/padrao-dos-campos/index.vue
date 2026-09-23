@@ -26,7 +26,7 @@ import FichaDoCampo from './_FichaDoCampo.vue'
 import ModalNovoItem from './_ModalNovoItem.vue'
 import PainelDoItem from './_PainelDoItem.vue'
 import TabelaDeItens from './_TabelaDeItens.vue'
-import { campoPorTipo, campos, type TipoDeCampo } from './campos'
+import { campoPorTipo, campos, type Campo, type TipoDeCampo } from './campos'
 import { celulaDeExportacao, saidaFormatada } from './formatacao'
 import { categoria, itens as itensDoMock, opcoes, workspace } from './mocks'
 import { baixar, gerarXlsx, type Aba, type Celula } from './relatorio'
@@ -149,6 +149,36 @@ function navegar(passo: number) {
  * exatamente onde o rascunho estava, que é o que o "+" do vão promete. Sem
  * posição (o modal de criação), ele entra no topo.
  */
+/**
+ * Quem pode configurar o campo.
+ *
+ * As ações de opção dentro da célula (renomear, reordenar) são de quem
+ * configura o campo, não de quem preenche. O interruptor está no andaime para
+ * a diferença ficar visível: é ela que decide se o "⋯" aparece na lista.
+ */
+const podeConfigurar = ref(true)
+
+/**
+ * Comentário feito a partir de um campo. Ele vai para a conversa do ITEM,
+ * citando o campo, em vez de abrir uma caixa de entrada por célula. Decidido
+ * na rodada 9, ver o DECISOES.md.
+ */
+function comentarNoCampo(item: Item, campo: Campo, texto: string) {
+  const rotulo = t.value.campos[campo.tipo].rotulo
+  const mensagem = {
+    author: 'Mikaela Jardim',
+    at: new Date().toISOString(),
+    text: `sobre ${rotulo}: ${texto}`,
+  }
+  itens.value = itens.value.map((i) => {
+    if (i.id !== item.id) return i
+    const dados = { ...(i.data as Record<string, unknown>) }
+    dados.chat = [...((dados.chat as unknown[]) ?? []), mensagem]
+    return { ...i, data: dados, updated_at: new Date() }
+  })
+  toast.add({ title: t.value.comentarioEnviado, icon: 'i-lucide-message-circle', color: 'success' })
+}
+
 function criarItem(dados: Record<string, unknown>, posicao?: number) {
   const agora = new Date()
   const novo = {
@@ -320,6 +350,19 @@ onMounted(() => {
         </div>
       </span>
 
+      <!--
+        O interruptor de permissão. Ele existe no andaime porque a diferença
+        entre PREENCHER o campo e CONFIGURAR o campo é uma decisão de produto,
+        e ela precisa estar visível: com ele desligado, o "⋯" das opções some
+        da célula e sobra só escolher.
+      -->
+      <USwitch
+        v-model="podeConfigurar"
+        :label="t.podeConfigurar"
+        size="sm"
+        :ui="{ label: 'text-xs uppercase tracking-wider text-toned' }"
+      />
+
       <UButton
         icon="i-lucide-file-spreadsheet"
         :label="gerando ? t.gerandoRelatorio : t.baixarRelatorio"
@@ -444,7 +487,9 @@ onMounted(() => {
               @abrir-tela-do-item="abrirTelaDoItem"
               @editar-valor="editarValor"
               @novo-item="irPara('formulario')"
+              :pode-configurar="podeConfigurar"
               @criar-na-linha="criarItem"
+              @comentar-no-campo="comentarNoCampo"
             />
           </div>
 
@@ -481,6 +526,7 @@ onMounted(() => {
       v-model:aberta="fichaAberta"
       :campo="campoNaFicha"
       :valor="valorNaFicha"
+      :itens="itens"
       :t="t"
       :idioma="idioma"
     />

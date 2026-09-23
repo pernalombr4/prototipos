@@ -155,6 +155,16 @@ export interface Campo {
   /** O valor não se edita: o sistema é que preenche. */
   somenteLeitura?: boolean
   /**
+   * Moeda padrão e lista de moedas permitidas, do campo de valor monetário.
+   *
+   * O ClickUp e o Notion põem a moeda na CONFIGURAÇÃO do campo, e nós no VALOR.
+   * Ficamos com o nosso, que é o que serve contrato em moeda estrangeira, e
+   * pagamos o custo aqui: quem só trabalha em real não enfrenta um seletor de
+   * 179 moedas, porque o campo declara quais valem e qual é a padrão.
+   */
+  moedaPadrao?: string
+  moedasPermitidas?: string[]
+  /**
    * A localidade da formatação, quando o tipo tem. Ela é do CAMPO, não de quem
    * lê: no develop fica em "Interface e Formatação", numa aba que só existe ao
    * EDITAR o campo. Trocar o idioma da interface não muda este formato.
@@ -377,6 +387,9 @@ export const campos: Campo[] = [
     largura: 200,
     /* A localidade sai do campo, e o mock a tem em pt-BR. */
     localeDoCampo: 'pt-BR',
+    /* O campo declara a moeda padrão e as que valem. Ver o tipo `Campo`. */
+    moedaPadrao: 'BRL',
+    moedasPermitidas: ['BRL', 'USD', 'EUR', 'GBP'],
     /* Ligada de propósito neste mock, para a calculadora aparecer. */
     correcaoMonetaria: true,
     /*
@@ -387,6 +400,8 @@ export const campos: Campo[] = [
      */
     saltoLargo: true,
     configuracoes: [
+      'Moeda padrão',
+      'Moedas permitidas',
       'Configurar Correção Monetária',
       'Interface e Formatação: Localidade',
       'Interface e Formatação: Dígitos da Fração Mínima (0 a 20, padrão 0)',

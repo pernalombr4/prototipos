@@ -47,6 +47,8 @@ const props = defineProps<{
   total: number
   carregando?: boolean
   campoSelecionado?: string | null
+  /** Quem pode configurar o campo vê as ações de opção dentro da célula. */
+  podeConfigurar?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -57,6 +59,8 @@ const emit = defineEmits<{
   novoItem: []
   /** A linha de criação fechou com valor: nasce um item com esses dados. */
   criarNaLinha: [dados: Record<string, unknown>, posicao: number]
+  /** Comentário feito a partir de um campo, que vai para a conversa do item. */
+  comentarNoCampo: [item: Item, campo: Campo, texto: string]
 }>()
 
 const selecionados = ref<Item[]>([])
@@ -157,6 +161,8 @@ const estiloDoSalto = computed(() => {
 })
 
 function fecharEdicao() {
+  comentando.value = false
+  rascunhoDoComentario.value = ''
   emEdicao.value = null
   alvoDaEdicao.value = null
   retanguloDoAlvo.value = null
@@ -310,19 +316,96 @@ const temValorNoQuadro = computed(() => {
   return !estaVazio((estado.item.data as Record<string, unknown>)?.[campo.refId])
 })
 
-/** Enter na linha de criação cria. Nas outras, só fecha o quadro. */
+/**
+ * COMENTAR NO CAMPO.
+ *
+ * O Notion tem comentário por CÉLULA. A decisão da rodada 9 foi não criar um
+ * terceiro lugar de conversa: já temos o Chat e as Anotações no item, e uma
+ * caixa de entrada por célula multiplicaria notificação, "resolvido" e
+ * histórico por N campos.
+ *
+ * O que ficou: comentar **a partir** do campo, com o comentário indo para a
+ * conversa do ITEM, citando o campo. Uma caixa de entrada só, e ainda assim
+ * ancorada onde a dúvida nasceu.
+ */
+const comentando = ref(false)
+const rascunhoDoComentario = ref('')
+
+function enviarComentario() {
+  const estado = emEdicao.value
+  const campo = campoEmEdicao.value
+  const texto = rascunhoDoComentario.value.trim()
+  if (!estado || !campo || !texto) return
+  emit('comentarNoCampo', estado.item, campo, texto)
+  rascunhoDoComentario.value = ''
+  comentando.value = false
+}
+
+/** Enter na linha de criação cria. Nas outras, salva e desce uma linha. */
 function aoSairDoQuadro() {
   const item = emEdicao.value?.item
   if (item && ehLinhaNova(item)) criarDaLinha()
-  else fecharEdicao()
+  else andarParaLinha(1)
 }
 
-/* Esc fecha a edição da célula sem desfazer, antes de qualquer outro Esc. */
+/**
+ * O TECLADO DENTRO DO QUADRO.
+ *
+ * É a metade boa do modelo de planilha do ClickUp, sem a metade ruim. Lá o
+ * primeiro clique seleciona e o segundo edita, o que cobra dois cliques de
+ * todo mundo para servir a quem navega pelo teclado. Aqui o clique continua
+ * abrindo direto, e quem quer velocidade tem as teclas:
+ *
+ * | Tecla | O que faz |
+ * |---|---|
+ * | Esc | fecha o quadro |
+ * | Tab | vai para o PRÓXIMO campo da mesma linha |
+ * | Shift+Tab | volta para o campo anterior |
+ * | Enter | salva e DESCE para a mesma coluna da linha de baixo |
+ *
+ * Enter dentro de um campo de texto já fechava o quadro (o `sair` da entrada);
+ * aqui ele passa a fechar e reabrir embaixo, que é o que a planilha faz e o
+ * que quem lança dado em série espera.
+ */
+function andarParaCampo(passo: number) {
+  const estado = emEdicao.value
+  if (!estado) return
+  const i = props.campos.findIndex(c => c.refId === estado.refId)
+  const seguintes = passo > 0 ? props.campos.slice(i + 1) : props.campos.slice(0, Math.max(0, i)).reverse()
+  const campo = seguintes.find(c => !c.somenteLeitura)
+  if (!campo) return
+  const linha = linhas.value.findIndex(l => l.id === estado.item.id)
+  const coluna = props.campos.findIndex(c => c.refId === campo.refId)
+  const celula = raiz.value?.querySelectorAll('tbody tr')[linha]?.children[coluna + 2] as HTMLElement | undefined
+  abrirEdicao(campo, estado.item, celula)
+}
+
+function andarParaLinha(passo: number) {
+  const estado = emEdicao.value
+  const campo = campoEmEdicao.value
+  if (!estado || !campo) return
+  const i = linhas.value.findIndex(l => l.id === estado.item.id)
+  const destino = linhas.value[i + passo]
+  if (!destino || ehLinhaNova(destino)) return fecharEdicao()
+  const coluna = props.campos.findIndex(c => c.refId === campo.refId)
+  const celula = raiz.value?.querySelectorAll('tbody tr')[i + passo]?.children[coluna + 2] as HTMLElement | undefined
+  abrirEdicao(campo, destino, celula)
+}
+
 onMounted(() => {
   const aoTeclar = (e: KeyboardEvent) => {
-    if (e.key === 'Escape' && emEdicao.value) {
+    if (!emEdicao.value) return
+
+    if (e.key === 'Escape') {
       e.stopPropagation()
       fecharEdicao()
+      return
+    }
+
+    if (e.key === 'Tab') {
+      e.preventDefault()
+      e.stopPropagation()
+      andarParaCampo(e.shiftKey ? -1 : 1)
     }
   }
   window.addEventListener('keydown', aoTeclar, true)
@@ -523,13 +606,13 @@ onMounted(() => nextTick(() => {
               @click.stop="abrirRascunho(posicaoDoItem(row as Item) + 1, $event.currentTarget as HTMLElement)"
             />
           </UTooltip>
-          <UBadge
-            color="info"
-            variant="subtle"
-            size="sm"
-            class="cursor-pointer font-mono text-[11px] hover:ring-1 hover:ring-primary/40"
-            @click.stop="emit('abrirItem', row as Item)"
-          >
+          <!--
+            O selo da referência NÃO abre o item. Decisão dela: abrir fica no
+            botão Abrir e no duplo clique, e mais nada. A razão é a mesma que
+            vale para a linha: célula é área de campo, e um clique que abre
+            rouba o clique que edita. Quem abre é uma ação explícita.
+          -->
+          <UBadge color="info" variant="subtle" size="sm" class="font-mono text-[11px]">
             {{ (row as Item).reference }}
           </UBadge>
           <UButton
@@ -708,6 +791,8 @@ onMounted(() => nextTick(() => {
             :model-value="(emEdicao.item.data as Record<string, unknown>)?.[campoEmEdicao.refId]"
             :t="t"
             :idioma="idioma"
+            :pode-configurar="podeConfigurar"
+            :itens="itens"
             sem-rotulo
             autofoco
             @update:model-value="(v: unknown) => gravarValor(emEdicao!.item, campoEmEdicao!.refId, v)"
@@ -725,6 +810,31 @@ onMounted(() => nextTick(() => {
           errada, e o caminho até a configuração não devia passar por outra
           tela.
         -->
+        <!--
+          O compositor do comentário. O texto vai para a conversa do ITEM,
+          citando o campo: uma caixa de entrada só, ancorada onde a dúvida
+          nasceu. Ver o comentário do `enviarComentario`.
+        -->
+        <div v-if="comentando" class="mt-1.5 flex items-center gap-1.5 border-t border-default px-0.5 pt-1.5">
+          <UInput
+            v-model="rascunhoDoComentario"
+            size="xs"
+            class="min-w-0 flex-1"
+            autofocus
+            :placeholder="t.comentarNoCampo"
+            @keydown.enter.stop="enviarComentario()"
+            @keydown.esc.stop="comentando = false"
+          />
+          <UButton
+            icon="i-lucide-send"
+            color="primary"
+            size="xs"
+            :disabled="!rascunhoDoComentario.trim()"
+            :aria-label="t.enviarMensagem"
+            @click="enviarComentario()"
+          />
+        </div>
+
         <div class="mt-1.5 flex items-center gap-2 border-t border-default px-0.5 pt-1.5">
           <UTooltip :text="t.fichaTitulo">
             <UButton
@@ -734,6 +844,16 @@ onMounted(() => nextTick(() => {
               size="xs"
               :aria-label="t.fichaTitulo"
               @click="emit('inspecionar', campoEmEdicao.tipo, emEdicao.item); fecharEdicao()"
+            />
+          </UTooltip>
+          <UTooltip v-if="!ehLinhaNova(emEdicao.item)" :text="t.comentarNoCampo">
+            <UButton
+              icon="i-lucide-message-circle"
+              color="neutral"
+              variant="ghost"
+              size="xs"
+              :aria-label="t.comentarNoCampo"
+              @click="comentando = !comentando"
             />
           </UTooltip>
           <p class="flex min-w-0 items-center gap-1 text-[11px] text-dimmed">

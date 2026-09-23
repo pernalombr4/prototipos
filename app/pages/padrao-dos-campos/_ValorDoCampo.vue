@@ -138,6 +138,40 @@ function aoClicar(e: MouseEvent) {
   emit('editar', alvo.closest('td') ?? alvo)
 }
 
+/**
+ * ───────────────── A BANDEJA DE AÇÕES DA CÉLULA ─────────────────
+ *
+ * O Notion mostra, no hover de qualquer célula preenchida, uma bandeja
+ * flutuante com comentar e copiar, encostada na borda da célula e por cima do
+ * conteúdo. Ela pediu esse gesto, e ele resolve um problema real: hoje quem
+ * quer o valor em outro lugar abre o campo, seleciona o texto e copia.
+ *
+ * O que entra na bandeja:
+ *
+ * - **copiar**, em todo campo cujo valor é uma string que se cola em outro
+ *   lugar. Copia a SAÍDA FORMATADA, que é o que a pessoa quer no e-mail, e é
+ *   a mesma string que a ficha do campo mostra;
+ * - **abrir**, nos campos com máscara de e-mail ou URL, que antes era um ícone
+ *   solto na célula e agora mora aqui.
+ *
+ * Fica de fora o que não tem "o valor" para colar: binário, anexo e conversa.
+ */
+const TIPOS_SEM_BANDEJA = [
+  'inputSwitch',
+  'uploadFile',
+  'uploadImage',
+  'EnPDF',
+  'EnOnlyoffice',
+  'EnChats',
+  'EnNotes',
+  'EnESign',
+  'EnRepeater',
+]
+
+const temBandeja = computed(
+  () => naCelula.value && !vazio.value && !TIPOS_SEM_BANDEJA.includes(props.campo.tipo),
+)
+
 async function copiar(texto: string) {
   try {
     await navigator.clipboard.writeText(texto)
@@ -159,7 +193,7 @@ async function copiar(texto: string) {
   -->
   <button
     type="button"
-    class="group/valor -mx-1 flex w-full min-w-0 rounded px-1 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
+    class="group/valor relative -mx-1 flex w-full min-w-0 rounded px-1 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
     :class="[
       naCelula ? 'h-6 items-center' : 'items-start py-0.5',
       campo.alinhamento === 'fim' && naCelula ? 'justify-end' : '',
@@ -226,24 +260,6 @@ async function copiar(texto: string) {
         class="min-w-0 truncate text-sm tabular-nums"
         :class="campo.tipo === 'email' ? 'text-primary underline decoration-dotted' : 'text-highlighted'"
       >{{ valor }}</span>
-      <!--
-        E-mail é o Texto simples com máscara de e-mail, e o que a máscara muda
-        na célula é isto: o valor ganha o atalho de abrir. Com máscara de URL
-        o mesmo ícone abre a página em outra aba.
-      -->
-      <UIcon
-        v-if="campo.tipo === 'email'"
-        name="i-lucide-external-link"
-        class="size-3 shrink-0 cursor-pointer text-dimmed opacity-0 transition-opacity group-hover/valor:opacity-100"
-        :aria-label="t.abrir"
-        @click.stop="abrirEmail(String(valor))"
-      />
-      <UIcon
-        :name="copiado ? 'i-lucide-check' : 'i-lucide-copy'"
-        class="size-3 shrink-0 cursor-pointer text-dimmed opacity-0 transition-opacity group-hover/valor:opacity-100"
-        :aria-label="t.copiar"
-        @click.stop="copiar(String(valor))"
-      />
     </span>
 
     <!-- ───────────────────────────── número ───────────────────────────── -->
@@ -523,5 +539,31 @@ async function copiar(texto: string) {
 
     <!-- qualquer coisa que escape das regras acima aparece como texto -->
     <span v-else class="min-w-0 truncate text-sm text-highlighted">{{ textoCompleto }}</span>
+
+    <!--
+      A bandeja flutuante, encostada na borda da célula e por cima do conteúdo.
+      Em coluna alinhada à direita ela vai para a ESQUERDA, senão taparia o
+      número, que é justamente o que se quer ler.
+    -->
+    <span
+      v-if="temBandeja"
+      class="absolute top-1/2 z-10 flex -translate-y-1/2 items-center gap-0.5 rounded-md bg-default p-0.5 opacity-0 shadow-sm ring-1 ring-default transition-opacity group-hover/valor:opacity-100"
+      :class="campo.alinhamento === 'fim' ? 'left-0' : 'right-0'"
+    >
+      <UIcon
+        v-if="campo.tipo === 'email'"
+        name="i-lucide-external-link"
+        class="size-4 cursor-pointer rounded p-0.5 text-dimmed hover:bg-elevated hover:text-highlighted"
+        :aria-label="t.abrir"
+        @click.stop="abrirEmail(String(valor))"
+      />
+      <UIcon
+        :name="copiado ? 'i-lucide-check' : 'i-lucide-copy'"
+        class="size-4 cursor-pointer rounded p-0.5"
+        :class="copiado ? 'text-success' : 'text-dimmed hover:bg-elevated hover:text-highlighted'"
+        :aria-label="t.copiar"
+        @click.stop="copiar(textoCompleto)"
+      />
+    </span>
   </button>
 </template>
