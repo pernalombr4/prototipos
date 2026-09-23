@@ -560,14 +560,53 @@ onMounted(() => nextTick(() => {
   if (!tabela) return
   corpoDaTabela.value = tabela.querySelector('tbody')
 
+  /*
+   * ───────── O DUPLO CLIQUE QUE ABRE O REGISTRO, E ONDE ELE VALE ─────────
+   *
+   * A decisão da rodada 9 é que o registro abre de dois jeitos, e só dois: o
+   * botão Abrir da célula de referência e o duplo clique. Testando a rodada 15
+   * descobri que o duplo clique só funciona FORA das células de campo, e que
+   * isso não é defeito de implementação: é consequência do gesto que ela
+   * pediu.
+   *
+   * Numa célula de campo, o primeiro clique já abre o quadro de edição, e o
+   * quadro nasce ANCORADO SOBRE A CÉLULA (é o "salto" do Notion, 4 px acima e
+   * à esquerda, de propósito, para a edição acontecer onde os olhos já
+   * estavam). Quando o segundo clique chega, quem está debaixo do ponteiro é o
+   * quadro, não a célula. O navegador nem dispara `dblclick` na tabela: o
+   * evento sai no ancestral comum dos dois alvos, que passa a ser o `body`.
+   *
+   * Não tem conserto que não custe mais do que resolve:
+   *
+   * - atrasar o primeiro clique em 200 ms para esperar o segundo põe atraso na
+   *   ação PRINCIPAL da tela (editar) para servir a secundária (abrir);
+   * - deixar o próprio quadro atender o duplo clique rouba o duplo clique de
+   *   dentro dos campos de texto, onde ele seleciona palavra.
+   *
+   * Então a fronteira é esta, e é a mesma do mercado: **o gesto de abrir vive
+   * onde não há campo para editar.** Sobram, e bastam:
+   *
+   * | Onde | Gesto |
+   * |---|---|
+   * | botão Abrir, na célula de referência | um clique |
+   * | célula de referência | duplo clique |
+   * | calha da linha (número e caixa de seleção) | duplo clique |
+   * | célula de campo somente leitura | duplo clique |
+   * | célula de campo editável | um clique já edita, e é o que ela faz |
+   *
+   * O ClickUp e o Notion chegam no mesmo lugar por outro caminho: lá a célula
+   * não edita com um clique, então eles podem pendurar o abrir na linha. Aqui
+   * a célula edita, e o abrir se concentra na coluna da identificação, que é
+   * exatamente o botão que ela mandou copiar do print do ClickUp.
+   */
   tabela.addEventListener('dblclick', (e) => {
     const linha = (e.target as HTMLElement).closest('tbody tr')
     if (!linha) return
     const i = [...(linha.parentElement?.children ?? [])].indexOf(linha)
     const item = linhas.value[i]
     if (!item || ehLinhaNova(item)) return
-    /* O primeiro clique do duplo já abriu a célula em edição: ela fecha, para
-       a quickview não nascer com um controle aberto atrás dela. */
+    /* O primeiro clique do duplo pode ter aberto uma célula somente leitura
+       vizinha: fecha, para a quickview não nascer com um controle atrás. */
     fecharEdicao()
     emit('abrirItem', item)
   })

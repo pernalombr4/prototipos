@@ -189,6 +189,10 @@ export interface Textos {
   moverParaBaixo: string
   arrasteParaReordenar: string
   limparCampo: string
+  /* Matriz de dados e ID personalizado, os dois tipos medidos na rodada 15. */
+  matrizSemResposta: string
+  idGeradoPeloSistema: string
+  idComposicao: string
   enterCria: string
   semResultado: string
   umaTagPorEnter: string
@@ -450,6 +454,9 @@ const ptBR: Textos = {
   moverParaBaixo: 'Mover para baixo',
   arrasteParaReordenar: 'Arraste para reordenar',
   limparCampo: 'Limpar o campo',
+  matrizSemResposta: 'Sem resposta',
+  idGeradoPeloSistema: 'O sistema gera este identificador ao salvar.',
+  idComposicao: 'Composição',
   enterCria: 'Enter cria o registro. Esc descarta.',
   semResultado: 'Nada encontrado',
   umaTagPorEnter: 'Digite e aperte Enter para cada tag',
@@ -750,6 +757,20 @@ const ptBR: Textos = {
       formulario: 'Não entra na criação: a conversa só começa depois de o item existir.',
       cru: 'Fica só na coluna dos campos.',
     },
+    matrizDeDados: {
+      rotulo: 'Matriz de dados',
+      descricao: 'Uma pergunta por linha, uma resposta por coluna. Cada linha aceita uma resposta só.',
+      celula: 'A primeira resposta, com contador das outras. O valor inteiro abre no quadro.',
+      formulario: 'A grade inteira, com o rótulo complementar de título e o rótulo da coluna no cabeçalho.',
+      cru: 'Uma linha por pergunta respondida, no formato pergunta: resposta.',
+    },
+    idPersonalizado: {
+      rotulo: 'ID personalizado',
+      descricao: 'Identificador que o sistema compõe de texto fixo, data, campo e contador.',
+      celula: 'O identificador em fonte monoespaçada. A célula não entra em edição.',
+      formulario: 'Só leitura, com a composição visível em texto de ajuda.',
+      cru: 'O identificador, com o ícone de gerado pelo sistema.',
+    },
     duracao: {
       rotulo: 'Duração',
       descricao: 'Uma duração escrita em linguagem natural: 1 dia, 2 semanas, 30 min.',
@@ -962,6 +983,9 @@ const en: Textos = {
   moverParaBaixo: 'Move down',
   arrasteParaReordenar: 'Drag to reorder',
   limparCampo: 'Clear the field',
+  matrizSemResposta: 'Not answered',
+  idGeradoPeloSistema: 'The system generates this identifier when you save.',
+  idComposicao: 'Composition',
   enterCria: 'Enter creates the record. Esc discards.',
   semResultado: 'Nothing found',
   umaTagPorEnter: 'Type and press Enter for each tag',
@@ -1262,6 +1286,20 @@ const en: Textos = {
       formulario: 'Not part of creation: the conversation only starts once the item exists.',
       cru: 'Stays only in the fields column.',
     },
+    matrizDeDados: {
+      rotulo: 'Data matrix',
+      descricao: 'One question per row, one answer per column. Each row takes a single answer.',
+      celula: 'The first answer plus a counter for the rest. The full value opens in the editor.',
+      formulario: 'The whole grid, with the complementary label as its title and the column label in the header.',
+      cru: 'One line per answered question, as question: answer.',
+    },
+    idPersonalizado: {
+      rotulo: 'Custom ID',
+      descricao: 'Identifier the system composes from fixed text, date, field and counter.',
+      celula: 'The identifier in a monospaced font. The cell never enters edit mode.',
+      formulario: 'Read only, with the composition shown as help text.',
+      cru: 'The identifier, with the system generated icon.',
+    },
     duracao: {
       rotulo: 'Duration',
       descricao: 'A duration written in plain language: 1 day, 2 weeks, 30 min.',
@@ -1474,6 +1512,9 @@ const es: Textos = {
   moverParaBaixo: 'Mover hacia abajo',
   arrasteParaReordenar: 'Arrastre para reordenar',
   limparCampo: 'Limpiar el campo',
+  matrizSemResposta: 'Sin respuesta',
+  idGeradoPeloSistema: 'El sistema genera este identificador al guardar.',
+  idComposicao: 'Composición',
   enterCria: 'Enter crea el registro. Esc descarta.',
   semResultado: 'Nada encontrado',
   umaTagPorEnter: 'Escriba y pulse Enter para cada etiqueta',
@@ -1773,6 +1814,20 @@ const es: Textos = {
       celula: 'El último mensaje y el total, con la marca de no leído cuando la haya.',
       formulario: 'No entra en la creación: la conversación solo empieza cuando el elemento existe.',
       cru: 'Queda solo en la columna de campos.',
+    },
+    matrizDeDados: {
+      rotulo: 'Matriz de datos',
+      descricao: 'Una pregunta por fila, una respuesta por columna. Cada fila acepta una sola respuesta.',
+      celula: 'La primera respuesta y un contador para el resto. El valor completo se abre en el cuadro.',
+      formulario: 'La cuadrícula completa, con la etiqueta complementaria como título y la etiqueta de columna en el encabezado.',
+      cru: 'Una línea por pregunta respondida, con el formato pregunta: respuesta.',
+    },
+    idPersonalizado: {
+      rotulo: 'ID personalizado',
+      descricao: 'Identificador que el sistema compone de texto fijo, fecha, campo y contador.',
+      celula: 'El identificador en fuente monoespaciada. La celda no entra en edición.',
+      formulario: 'Solo lectura, con la composición visible en el texto de ayuda.',
+      cru: 'El identificador, con el icono de generado por el sistema.',
     },
     duracao: {
       rotulo: 'Duración',

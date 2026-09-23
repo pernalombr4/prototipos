@@ -31,6 +31,43 @@ export const categoria = {
 export const workspace = { nome: 'teste ux 2', slug: 'teste-ux' }
 
 /**
+ * A configuração da MATRIZ DE DADOS, na forma que a tela de campo pede:
+ * Rótulo Complementar, lista de linhas e lista de colunas, cada item com
+ * rótulo e referência técnica.
+ *
+ * Medida em tela no develop em 23/09/2026. Lá eu criei duas linhas e duas
+ * colunas; aqui vão três de cada, porque é com três que a grade mostra se o
+ * rótulo de coluna cabe e se a linha sem resposta aparece.
+ */
+export const matrizDeDados = {
+  rotuloComplementar: 'Situação por disciplina',
+  linhas: [
+    { value: 'eletrica', label: 'Elétrica' },
+    { value: 'hidraulica', label: 'Hidráulica' },
+    { value: 'civil', label: 'Civil' },
+  ],
+  colunas: [
+    { value: 'conforme', label: 'Conforme' },
+    { value: 'nao_conforme', label: 'Não conforme' },
+    { value: 'nao_se_aplica', label: 'Não se aplica' },
+  ],
+}
+
+/**
+ * A composição do ID PERSONALIZADO, na ordem em que o back-end monta a string.
+ * É a lista "Componentes" da configuração do campo, com os quatro tipos que o
+ * seletor oferece: Conteúdo, Data, Campo e Contador.
+ *
+ * Esta aqui usa três dos quatro e produz `VIT-2026-0001`.
+ */
+export const componentesDoId = [
+  { tipo: 'Conteúdo', detalhe: 'VIT-' },
+  { tipo: 'Data', detalhe: 'YYYY' },
+  { tipo: 'Conteúdo', detalhe: '-' },
+  { tipo: 'Contador', detalhe: '4 dígitos, começando em 1' },
+]
+
+/**
  * As opções das listas, do jeito que a API devolve em `Field.options[]`:
  * `value` é o que vai gravado, `label` é o que a pessoa lê.
  */
@@ -200,6 +237,8 @@ export const itens: Item[] = [
       grupo: { login: 'nortelux', telefone: '+55 11 5555-0100' },
       duracao: '2 semanas',
       valor_dinamico: 'Prazo em 11 dias',
+      matriz: { eletrica: 'nao_conforme', hidraulica: 'conforme' },
+      id_personalizado: 'VIT-2026-0001',
       chat: [
         { author: 'Marina Toledo', at: '2026-09-18T09:12:00.000Z', text: 'Consigo a visita na quinta?' },
         { author: 'Rafael Pimenta', at: '2026-09-18T09:40:00.000Z', text: 'Quinta de manhã está livre.' },
@@ -260,6 +299,8 @@ export const itens: Item[] = [
       grupo: { login: 'vega.pred', telefone: '+55 11 5555-0240' },
       duracao: '2 semanas',
       valor_dinamico: 'Prazo em 8 dias',
+      matriz: { eletrica: 'conforme', hidraulica: 'conforme', civil: 'nao_se_aplica' },
+      id_personalizado: 'VIT-2026-0002',
       chat: [],
     },
   },
@@ -308,6 +349,10 @@ export const itens: Item[] = [
       grupo: null,
       duracao: '',
       valor_dinamico: '',
+      /* Matriz vazia: nenhuma pergunta respondida ainda. */
+      matriz: {},
+      /* O ID existe mesmo no item vazio: quem escreve é o sistema. */
+      id_personalizado: 'VIT-2026-0003',
       chat: [],
     },
   },
@@ -406,6 +451,8 @@ export const itens: Item[] = [
       grupo: { login: 'saomateus.fiscal', telefone: '+55 11 5555-0777' },
       duracao: '2 semanas',
       valor_dinamico: 'Prazo em 100 dias',
+      matriz: { civil: 'nao_conforme' },
+      id_personalizado: 'VIT-2026-0004',
       chat: [
         { author: 'Eduardo Bastos', at: '2026-09-20T08:10:00.000Z', text: 'A ART já está assinada.' },
       ],
@@ -452,6 +499,8 @@ export const itens: Item[] = [
       grupo: null,
       duracao: '2 semanas',
       valor_dinamico: 'Encerrado',
+      matriz: { eletrica: 'nao_se_aplica', hidraulica: 'nao_conforme', civil: 'conforme' },
+      id_personalizado: 'VIT-2026-0005',
       chat: [],
     },
   },
@@ -526,6 +575,8 @@ export const itens: Item[] = [
       grupo: { login: 'vega.obras', telefone: '+55 11 5555-0241' },
       duracao: '2 semanas',
       valor_dinamico: 'Prazo em 23 dias',
+      matriz: { eletrica: 'conforme', civil: 'nao_conforme' },
+      id_personalizado: 'VIT-2026-0006',
       chat: [],
     },
   },

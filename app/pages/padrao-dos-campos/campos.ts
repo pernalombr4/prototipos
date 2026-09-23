@@ -57,6 +57,13 @@ export type TipoDeCampo =
   | 'group'
   | 'EnChats'
   | 'EnCustomCode'
+  /* Os dois abaixo eu CRIEI em tela no develop em 23/09/2026, no workspace de
+     exploração, para medir o formato. Existem no seletor "Tipo de Campo" e não
+     existem na versão do `enspace-sdk-schemas` instalada aqui: são mais novos
+     que o pacote. A chave do tipo na API, por isso, é a única coisa deste
+     catálogo que está marcada como a confirmar. */
+  | 'matrizDeDados'
+  | 'idPersonalizado'
   /* Os dois abaixo vêm do `Melhoria dos campos.docx` e NÃO existem no schema
      nem na API. São tipos que o time de produtos está planejando, e estão aqui
      marcados como `proposto` para o padrão já nascer definido. */
@@ -982,6 +989,94 @@ export const campos: Campo[] = [
       formatada: 'a última mensagem e o total, fora da conversa aberta',
       cFormat: ['type: "list"'],
       config: [],
+    },
+  },
+
+  /*
+   * MATRIZ DE DADOS. Criada em tela no develop em 23/09/2026: nome "Matriz de
+   * dados", Rótulo Complementar "Situacao por disciplina", duas linhas
+   * (Eletrica, Hidraulica) e duas colunas (Conforme, Nao conforme). Depois
+   * respondida num item e lida nos três formatos.
+   */
+  {
+    tipo: 'matrizDeDados',
+    /*
+     * Família composto, e não escolha: o valor não é UMA escolha, é um saco de
+     * escolhas chaveado por linha. Quem herda de `escolha` ganha a célula de
+     * selo único, que aqui mentiria.
+     */
+    familia: 'composto',
+    disponibilidade: 'ativo',
+    /*
+     * Confirmar, porque a edição tem mais de um passo: são N linhas por
+     * responder, e fechar no meio gravaria matriz pela metade sem a pessoa
+     * saber.
+     */
+    comoSalva: 'confirmar',
+    refId: 'matriz',
+    icone: 'i-lucide-grid-3x3',
+    alinhamento: 'inicio',
+    largura: 240,
+    maximoNaCelula: 1,
+    larguraCheiaNoFormulario: true,
+    foraDaColunaDeResumo: true,
+    saltoLargo: true,
+    configuracoes: [
+      'Rótulo Complementar (vira o título do bloco)',
+      'Linhas (obrigatória): lista ordenada, cada item com rótulo, referência técnica e obrigatoriedade',
+      'Colunas (obrigatória): lista ordenada, cada item com rótulo, obrigatoriedade e "valor único por coluna"',
+      'Exportar e Importar, nas duas listas',
+    ],
+    backend: {
+      /*
+       * A FORMA do valor é PROPOSTA, e é a única coisa aqui que não medi: o
+       * formulário do develop manda o item como multipart, e a célula da
+       * tabela não imprime o valor cru (imprime um botão de olho). O que medi
+       * foi o comportamento e a saída formatada.
+       *
+       * A proposta é linha -> coluna, porque é o que o controle garante (uma
+       * resposta por linha) e o que a leitura mostra. Confirmar com o dev.
+       */
+      entrada: '{ "eletrica": "nao_conforme", "hidraulica": "conforme" }  (PROPOSTA: ver o comentário)',
+      saida: '{ "eletrica": "nao_conforme", "hidraulica": "conforme" }  (PROPOSTA)',
+      formatada: 'uma linha por pergunta respondida, `rótulo da linha: rótulo da coluna`, com o Rótulo Complementar de título. MEDIDO em tela',
+      cFormat: ['a confirmar: o tipo não existe no schema instalado'],
+      config: ['linhas[]', 'colunas[]', 'Rótulo Complementar'],
+    },
+  },
+  /*
+   * ID PERSONALIZADO. Criado em tela no develop em 23/09/2026 com dois
+   * componentes, Conteúdo "OS-" e Contador de 4 dígitos começando em 1, e
+   * depois lido num item novo: veio `OS-004`.
+   */
+  {
+    tipo: 'idPersonalizado',
+    familia: 'texto',
+    disponibilidade: 'ativo',
+    comoSalva: 'naoSeAplica',
+    refId: 'id_personalizado',
+    icone: 'i-lucide-hash',
+    alinhamento: 'inicio',
+    largura: 170,
+    /*
+     * O campo é só leitura de verdade, e não por decisão nossa: no formulário
+     * do develop o `<input>` vem com `readonly` E `disabled`. Quem escreve o
+     * valor é o back-end, ao salvar, compondo os componentes em ordem.
+     */
+    somenteLeitura: true,
+    configuracoes: [
+      'Componentes (obrigatória): lista ordenada, com Acima, Abaixo, Remover e Editar',
+      'componente Conteúdo: Conteúdo Fixo (texto)',
+      'componente Data: Formato de Data',
+      'componente Campo: Campo de Referência, Transformações de Texto, Limite de Caracteres',
+      'componente Contador: Dígitos do Contador, Início do Contador',
+    ],
+    backend: {
+      entrada: 'o campo não recebe digitação. No formulário ele vem readonly e disabled',
+      saida: '"VIT-2026-0001"  (a composição dos componentes, em ordem)',
+      formatada: 'o próprio valor, que já nasce formatado pela composição',
+      cFormat: ['a confirmar: o tipo não existe no schema instalado'],
+      config: ['componentes[]: { tipo, conteudoFixo | formatoDeData | campoDeReferencia | digitos + inicio }'],
     },
   },
 

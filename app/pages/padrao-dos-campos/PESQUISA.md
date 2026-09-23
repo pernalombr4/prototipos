@@ -367,3 +367,23 @@ dele e o do Notion, com o custo de não poder somar a coluna sem converter.
 | "–" na célula vazia | ela decidiu o contrário, e o Notion concorda |
 | "⋯" por opção, para renomear e excluir opção da célula | mexe no catálogo de opções do campo, que é configuração. Fica como proposta |
 | moeda como configuração do campo | o nosso produto já guarda a moeda no valor, e isso é melhor para contrato com moeda estrangeira |
+
+## Rodada 15: o que o produto faz na tela nova de itens
+
+Medido na própria tela nova de itens do develop (a da flag de laboratório), no
+workspace de exploração, em 23/09/2026. Serve de referência porque é a tela que
+este protótipo padroniza.
+
+| O que | Como o develop faz |
+|---|---|
+| abrir o registro | **duplo clique na linha** abre uma sidebar à direita, com abas Visão Geral, Comentários e Logs de Auditoria, paginador 1/3, trilha de ícones à esquerda e botão Salvar no pé |
+| a referência | selo azul com botão de copiar ao lado. **Não é link**: clicar nela não abre nada |
+| ações da linha | coluna própria, com menu de três pontos |
+| seleção | caixa fixa no cabeçalho, caixa por linha |
+| ordem dos itens | o registro novo entra **no topo** da lista |
+| célula de campo | não edita com um clique. Para mudar valor, abre-se o registro |
+
+A última linha é a diferença que explica o resto: como no develop a célula não
+edita, ele pode pendurar o abrir na linha inteira. No protótipo a célula edita,
+e por isso o abrir se concentra na célula da identificação. Esta é a razão da
+fronteira de gestos registrada no `DECISOES.md`.

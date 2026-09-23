@@ -18,7 +18,8 @@ import type { Campo } from './campos'
 import type { Textos } from './textos'
 import { corDaOpcao, formatarBytes, formatarDataHora, rotuloDaOpcao } from './formatacao'
 import CartaoDoRegistro from './_CartaoDoRegistro.vue'
-import { cadastroPorDocumento, indicesDeCorrecao, itensRelacionaveis, moedas, opcoes as todasAsOpcoes } from './mocks'
+import MatrizDeDados from './_MatrizDeDados.vue'
+import { cadastroPorDocumento, componentesDoId, indicesDeCorrecao, itensRelacionaveis, matrizDeDados, moedas, opcoes as todasAsOpcoes } from './mocks'
 
 const props = defineProps<{
   campo: Campo
@@ -90,6 +91,9 @@ const valor = computed({
  * cast), então cada família ganha a sua própria porta de entrada para o mesmo
  * `valor`. Continua sendo um estado só.
  */
+/** Linha -> coluna respondida, da matriz de dados. */
+const comoMatriz = computed(() => (valor.value as Record<string, string>) ?? {})
+
 const comoTexto = computed<string>({
   get: () => (valor.value ?? '') as string,
   set: v => emit('update:modelValue', v),
@@ -964,6 +968,45 @@ const opcoesDeRelacao = computed(() =>
       class="w-full"
       placeholder='Ex.: "1 dia", "2 semanas", "3 meses", "1 ano" ou "30 min"'
     />
+
+    <!--
+      ───────────────────────── matriz de dados ─────────────────────────
+      A grade inteira, a mesma nos três formatos. Na célula ela chega pelo
+      quadro largo, que é o único lugar onde uma grade de radios cabe sem
+      empurrar a linha da tabela.
+    -->
+    <MatrizDeDados
+      v-else-if="campo.tipo === 'matrizDeDados'"
+      :rotulo="matrizDeDados.rotuloComplementar"
+      :linhas="matrizDeDados.linhas"
+      :colunas="matrizDeDados.colunas"
+      :model-value="comoMatriz"
+      :rotulo-limpar="t.limparCampo"
+      :mostrar-limpar="!semRotulo"
+      @update:model-value="(v: Record<string, string>) => emit('update:modelValue', v)"
+    />
+
+    <!--
+      ──────────────────────── ID personalizado ─────────────────────────
+      No develop este campo é um `<input>` com readonly E disabled, vazio e com
+      o placeholder "Por favor digite". Ou seja: parece que dá para escrever, e
+      não dá. Aqui ele diz o que é, mostra a composição que o sistema vai usar
+      e, no registro que ainda não salvou, diz que o valor vem depois.
+    -->
+    <div v-else-if="campo.tipo === 'idPersonalizado'" class="space-y-1.5">
+      <UInput
+        :model-value="comoTexto"
+        size="sm"
+        class="w-full font-mono tabular-nums"
+        icon="i-lucide-hash"
+        :placeholder="t.idGeradoPeloSistema"
+        disabled
+      />
+      <p class="text-xs text-muted">
+        {{ t.idComposicao }}:
+        {{ componentesDoId.map(c => `${c.tipo} (${c.detalhe})`).join(' + ') }}
+      </p>
+    </div>
 
     <UInput
       v-else-if="campo.tipo === 'valorDinamico'"

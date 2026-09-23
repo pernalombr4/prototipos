@@ -17,7 +17,7 @@
  */
 import type { Campo } from './campos'
 import CartaoDoRegistro from './_CartaoDoRegistro.vue'
-import { itensRelacionaveis } from './mocks'
+import { itensRelacionaveis, matrizDeDados } from './mocks'
 import type { Textos } from './textos'
 import { corDaOpcao, enderecoEmUmaLinha, estaVazio, estaVencida, foiCorrigido, formatarBytes, formatarDataCurta, formatarDataMedia, mascararDocumento, moedaOriginalFormatada, relativoEmDias, rotuloDaOpcao, saidaFormatada, semTags } from './formatacao'
 import { opcoes as todasAsOpcoes } from './mocks'
@@ -110,6 +110,21 @@ const nomeDaPessoa = computed(() => {
 })
 const comoEndereco = computed(() => props.valor as Record<string, string>)
 const comoGrupo = computed(() => props.valor as Record<string, string>)
+
+/**
+ * A matriz lida: uma entrada por pergunta RESPONDIDA, na ordem em que as
+ * linhas estão configuradas (e não na ordem em que a pessoa respondeu, que não
+ * significa nada para quem lê depois).
+ */
+const comoMatriz = computed(() => {
+  const respostas = (props.valor as Record<string, string>) ?? {}
+  return matrizDeDados.linhas
+    .filter(l => respostas[l.value])
+    .map(l => ({
+      linha: l.label,
+      coluna: matrizDeDados.colunas.find(c => c.value === respostas[l.value])?.label ?? '',
+    }))
+})
 const comoRepetidor = computed(() => (props.valor as Record<string, unknown>[]) ?? [])
 const comoConversa = computed(() => (Array.isArray(props.valor) ? props.valor : []) as { author: string, at?: string, text: string }[])
 const comoAssinatura = computed(() => props.valor as { signer: string, signedAt: string })
@@ -593,6 +608,48 @@ async function copiar(texto: string) {
       </UChip>
       <span v-if="!naCelula && comoConversa.length" class="min-w-0 truncate text-sm text-highlighted">
         {{ comoConversa.at(-1)?.text }}
+      </span>
+    </span>
+
+    <!--
+      ───────────────────────── matriz de dados ─────────────────────────
+      A célula mostra a PRIMEIRA pergunta respondida e conta as outras, que é o
+      que o grupo e o repetidor já fazem: mesma família, mesmo desenho.
+
+      No develop a célula não mostra nada: só um botão de olho que abre um
+      quadro chamado "Perguntas". Um campo com dado dentro e a célula em
+      branco é justamente o que este protótipo existe para consertar, e o olho
+      fica redundante aqui porque a bandeja flutuante e o quadro de edição já
+      dão os dois gestos (ver e editar).
+
+      Fora da célula, no formulário e no cru, vão todas as respostas.
+    -->
+    <span v-else-if="campo.tipo === 'matrizDeDados'" class="min-w-0">
+      <span v-if="naCelula" class="flex min-w-0 items-center gap-1.5">
+        <span class="min-w-0 truncate text-sm text-highlighted">
+          {{ comoMatriz[0]?.linha }}: {{ comoMatriz[0]?.coluna }}
+        </span>
+        <UBadge v-if="comoMatriz.length > 1" color="neutral" variant="soft" size="sm">
+          {{ t.maisN(comoMatriz.length - 1) }}
+        </UBadge>
+      </span>
+      <span v-else class="block space-y-0.5">
+        <span v-for="r in comoMatriz" :key="r.linha" class="flex gap-1.5 text-sm">
+          <span class="shrink-0 text-muted">{{ r.linha }}</span>
+          <span class="min-w-0 truncate text-highlighted">{{ r.coluna }}</span>
+        </span>
+      </span>
+    </span>
+
+    <!--
+      ID personalizado: monoespaçado, porque identificador se compara caractere
+      a caractere, e com o ícone de gerado pelo sistema, o mesmo do valor
+      dinâmico. A célula não entra em edição (`somenteLeitura` no catálogo).
+    -->
+    <span v-else-if="campo.tipo === 'idPersonalizado'" class="flex min-w-0 items-center gap-1.5">
+      <UIcon name="i-lucide-hash" class="size-3.5 shrink-0 text-dimmed" />
+      <span class="min-w-0 truncate font-mono text-sm tabular-nums text-highlighted">
+        {{ String(valor) }}
       </span>
     </span>
 

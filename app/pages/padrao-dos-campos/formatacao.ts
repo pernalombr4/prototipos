@@ -14,6 +14,7 @@
  */
 import type { Campo } from './campos'
 import type { Celula } from './relatorio'
+import { matrizDeDados } from './mocks'
 
 /** O idioma escolhido no andaime vira o locale do Intl. */
 export function localeDe(idioma: string): string {
@@ -316,6 +317,25 @@ export function saidaFormatada(
     case 'group': {
       const v = valor as Record<string, string>
       return Object.values(v).filter(Boolean).join(separador)
+    }
+
+    /*
+     * A matriz formatada é `pergunta: resposta` por linha respondida, que é o
+     * que o develop mostra no quadro "Perguntas" (medido em tela em
+     * 23/09/2026). A ordem é a da configuração das linhas.
+     *
+     * O develop imprime o índice da coluna entre colchetes, `Conforme [1]`.
+     * Não vai: o número é da configuração, não da resposta.
+     */
+    case 'matrizDeDados': {
+      const respostas = (valor as Record<string, string>) ?? {}
+      return matrizDeDados.linhas
+        .filter(l => respostas[l.value])
+        .map((l) => {
+          const col = matrizDeDados.colunas.find(c => c.value === respostas[l.value])
+          return `${l.label}: ${col?.label ?? respostas[l.value]}`
+        })
+        .join(separador)
     }
 
     /*

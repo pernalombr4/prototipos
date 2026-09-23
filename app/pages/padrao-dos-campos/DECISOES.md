@@ -1065,3 +1065,162 @@ inventariando todo z-index da página.
 A regra que fica: **camada flutuante nossa não ganha z-index.** Quem precisa
 ficar na frente entra depois no DOM, e é assim que a biblioteca resolve. Número
 explícito só onde existe hierarquia de verdade, como o aviso.
+
+## Rodada 13, 14 e 15: o que a tela do develop ensinou, e dois tipos novos
+
+Três rodadas que são uma só investigação: ela pediu para eu **olhar de novo em
+tela** o Pessoa/Empresa, conferir se a tabela usa o componente do Nuxt UI e
+criar em tela a **Matriz de dados** e o **ID Personalizado** para entender o
+formato. No meio, o conserto do quadro que abria atrás da tabela.
+
+### A tabela é o componente do Nuxt UI, sim
+
+Conferido no código do pacote: o `EnTable` do `@be-enlighten/enspace-sdk-ui`
+importa `@nuxt/ui/components/Table.vue` por dentro, e junta a ele o Checkbox, o
+Empty e o Pagination. A tabela do protótipo e a do produto são o mesmo
+componente, e o que eu acrescento (numeração, caixa de seleção ao passar o
+mouse, bandeja flutuante, quadro de edição) são camadas em volta, não um
+componente concorrente.
+
+### Pessoa/Empresa: as chaves saíram da tela
+
+O comportamento já estava registrado na rodada 11. O que faltava eram as
+**chaves**, e elas apareceram sem precisar de dev:
+
+- o formulário do develop é FormKit, e o FormKit põe a chave do campo no `for`
+  do rótulo. O rótulo "Tipo" vem com `for="person_type"`;
+- a configuração do campo lista os subcampos disponíveis com o nome técnico, em
+  ordem: **`cnpj`, `name`, `cpf`, `razao_social`, `nome_fantasia`**. O documento
+  não é uma chave só: são `cpf` e `cnpj`, separadas. É por isso que a máscara
+  troca junto com o tipo em vez de se adaptar ao tamanho;
+- a expressão de visualização do aninhado mostra os 15 subcampos que o tipo
+  conhece, e não só os 5 disponíveis: `name, cnpj, cpf, rg, marital_status,
+  profession, razao_social, nome_fantasia, descricao_situacao_cadastral,
+  data_inicio_atividade, cnae_fiscal, cnae_fiscal_descricao, contact_name,
+  contact_phone, email`;
+- cada subcampo tem editor próprio, com Obrigatoriedade, Bloquear Campo,
+  Transformadores de Texto e Máscaras. No `cpf`, a máscara configurada é
+  `999.999.999-99` e a obrigatoriedade está ligada.
+
+### Matriz de dados, criada em tela
+
+Criei o campo do zero no workspace de exploração, respondi num item e li nos
+três formatos. A anatomia:
+
+| Parte | O que é |
+|---|---|
+| Rótulo Complementar | vira o **título do bloco**, acima da grade |
+| Linhas | lista ordenada, cada item com rótulo, referência técnica e obrigatoriedade |
+| Colunas | lista ordenada, cada item com rótulo, obrigatoriedade e "valor único por coluna" |
+| Exportar e Importar | nas duas listas |
+| a resposta | **uma por linha**: marcar a segunda desmarca a primeira. As linhas são independentes |
+| Limpar | aparece no pé do bloco quando há resposta |
+
+E a leitura, que era o que mais importava: o develop mostra na célula **só um
+botão de olho**, sem nenhum texto, e o olho abre um quadro chamado
+**"Perguntas"** com a linha e, embaixo, a resposta com o índice da coluna entre
+colchetes.
+
+### O que decidi diferente do produto, e por quê
+
+1. **A célula mostra o valor.** Campo com dado dentro e célula em branco é o
+   defeito que este protótipo existe para consertar. A matriz na célula vira
+   `Elétrica: Não conforme` mais o contador `+2`, que é exatamente o que o Grupo
+   e o Repetidor já fazem: mesma família, mesmo desenho. O olho sai, porque a
+   bandeja flutuante e o quadro de edição já dão os dois gestos, ver e editar.
+2. **Sai o número da coluna debaixo do radio.** O develop imprime 1, 2, 3 sob
+   cada bolinha. É o índice da configuração vazando para quem responde: o rótulo
+   já está no cabeçalho da coluna, e o número só concorre com ele.
+3. **Um "Limpar" só.** O produto põe o Limpar no pé do bloco, e ele fica no
+   formulário e no cru. Dentro do quadro da tabela vale o Limpar do quadro, que
+   é igual para todos os tipos: dois botões idênticos a dois centímetros um do
+   outro é o frankenstein que ela mandou evitar.
+4. **Salva com Confirmar.** São N linhas por responder, e fechar no meio
+   gravaria matriz pela metade sem a pessoa saber. O quadro anuncia: "Precisa do
+   botão Confirmar. Esc descarta."
+
+### Considerado e recusado: a célula contar quantas faltam
+
+Pensei em a célula dizer "2 de 3 respondidas", porque numa matriz o que
+interessa de longe é a completude. Recusei: esconde **qual** foi a resposta, e
+quebra a família (Grupo e Repetidor mostram o primeiro valor mais contador). A
+completude continua legível pelo contador `+N` comparado com o número de linhas,
+e o quadro mostra tudo em um clique.
+
+### ID Personalizado, criado em tela
+
+Também criado do zero. A configuração é uma lista ordenada de **Componentes**,
+com Acima, Abaixo, Remover e Editar, e quatro tipos de componente:
+
+| Componente | O que configura |
+|---|---|
+| Conteúdo | Conteúdo Fixo (texto) |
+| Data | Formato de Data |
+| Campo | Campo de Referência, Transformações de Texto, Limite de Caracteres |
+| Contador | Dígitos do Contador, Início do Contador |
+
+O achado que muda o desenho: no formulário o controle é um `input` com
+**`readonly` E `disabled`**, e com o placeholder "Por favor digite". Quem
+escreve o valor é o back-end, ao salvar, compondo os componentes em ordem. Criei
+com Conteúdo `OS-` e Contador de 4 dígitos começando em 1, e o item novo veio
+com `OS-004`.
+
+No protótipo o campo é `somenteLeitura`: a célula não entra em edição, o valor
+sai em fonte monoespaçada com o ícone de gerado pelo sistema, e no formulário o
+placeholder diz a verdade, "O sistema gera este identificador ao salvar", com a
+composição escrita embaixo em texto de ajuda. No mock a composição é
+`Conteúdo (VIT-) + Data (YYYY) + Conteúdo (-) + Contador (4 dígitos)`, e os
+valores vão de `VIT-2026-0001` a `VIT-2026-0006`. **Inclusive no item vazio**,
+porque campo que o sistema escreve nunca está em branco.
+
+### O duplo clique que abre o registro só funciona fora das células de campo
+
+Achado testando esta rodada, e é consequência do gesto que ela pediu, não
+defeito de implementação.
+
+Numa célula de campo, o primeiro clique já abre o quadro, e o quadro nasce
+**ancorado sobre a célula** (o salto do Notion, 4 px acima e à esquerda, de
+propósito, para a edição acontecer onde os olhos já estavam). Quando o segundo
+clique chega, quem está debaixo do ponteiro é o quadro. O navegador nem dispara
+`dblclick` na tabela: o evento sai no ancestral comum dos dois alvos, que passa
+a ser o `body`.
+
+Tentei dois consertos e descartei os dois: atrasar o primeiro clique em 200 ms
+para esperar o segundo põe atraso na ação **principal** da tela (editar) para
+servir a secundária (abrir); e deixar o quadro atender o duplo clique rouba o
+duplo clique de dentro dos campos de texto, onde ele seleciona palavra.
+
+Então a fronteira fica assim, e é a mesma do mercado:
+
+| Onde | Gesto que abre o registro |
+|---|---|
+| botão Abrir, na célula de referência | um clique |
+| célula de referência | duplo clique |
+| calha da linha (número e caixa de seleção) | duplo clique |
+| célula de campo somente leitura | duplo clique |
+| célula de campo editável | não abre: um clique já edita, e é o que ela faz |
+
+O ClickUp e o Notion chegam no mesmo lugar por outro caminho: lá a célula não
+edita com um clique, então eles podem pendurar o abrir na linha inteira. Aqui a
+célula edita, e o abrir se concentra na coluna da identificação, que é
+exatamente o botão que ela mandou copiar do print do ClickUp.
+
+### Achados do develop nesta rodada
+
+1. **Matriz de dados: célula em branco com dado dentro.** A coluna mostra só um
+   botão de olho, sem texto nenhum.
+2. **Número da coluna impresso debaixo de cada radio**, na configuração e no
+   formulário.
+3. **ID Personalizado com placeholder "Por favor digite"** num campo que é
+   `readonly` e `disabled`. O campo mente que aceita digitação.
+4. **Contador de 4 dígitos gerando 3.** Configurei Dígitos do Contador = 4 e
+   Início do Contador = 1, reabri para confirmar que salvou 4, e o valor gerado
+   foi `OS-004`. Ou o dígito não é o que o nome diz, ou falta um zero.
+5. **"Formato de Data" sem opção nenhuma.** O componente Data do ID
+   Personalizado tem um seletor com placeholder "Escolha uma opção" que não abre
+   lista alguma e aceita texto livre.
+6. **`choose_an_option` sem tradução** no seletor "Campo de Referência" do
+   componente Campo.
+7. **Campo virtual imprimindo `[object Object]`** na célula da tabela de itens.
+8. O quadro de editar componente abre **sobre a tabela, à esquerda do painel**,
+   e não centrado nem ancorado no item que se está editando.
