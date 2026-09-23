@@ -152,7 +152,9 @@ const blocos = computed(() => {
           </UBadge>
           <UBadge color="neutral" variant="outline" size="sm">
             {{ t.alinhamento }}:
-            {{ campo.alinhamento === 'fim' ? t.alinhamentoFim : t.alinhamentoInicio }}
+            {{ campo.alinhamento === 'fim'
+              ? t.alinhamentoFim
+              : campo.alinhamento === 'centro' ? t.alinhamentoCentro : t.alinhamentoInicio }}
           </UBadge>
           <UBadge color="neutral" variant="outline" size="sm">
             {{ t.larguraMinima }}: {{ campo.largura }}px

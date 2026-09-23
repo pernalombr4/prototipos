@@ -136,8 +136,16 @@ export interface Campo {
   /** A chave do campo no `data` do item, no mock desta tela. */
   refId: string
   icone: string
-  /** Alinhamento do conteúdo da célula na tabela. */
-  alinhamento: 'inicio' | 'fim'
+  /**
+   * Alinhamento do conteúdo da célula na tabela.
+   *
+   * `centro` é para célula que não tem VALOR escrito, e sim um alvo: o ícone
+   * que abre a conversa em Anotações e Chat. Alvo encostado na esquerda de uma
+   * coluna larga fica longe do rótulo da coluna e perto do valor do campo
+   * vizinho, e a pessoa mira errado. É a mesma razão pela qual a caixa de
+   * seleção da linha e o número dela vivem centralizados.
+   */
+  alinhamento: 'inicio' | 'centro' | 'fim'
   /** Largura mínima da coluna, em px, para o valor típico caber. */
   largura: number
   /**
@@ -277,7 +285,7 @@ export const campos: Campo[] = [
     comoSalva: 'confirmar',
     refId: 'anotacoes',
     icone: 'i-lucide-sticky-note',
-    alinhamento: 'inicio',
+    alinhamento: 'centro',
     largura: 240,
     larguraCheiaNoFormulario: true,
     foraDaColunaDeResumo: true,
@@ -972,7 +980,7 @@ export const campos: Campo[] = [
     comoSalva: 'naoSeAplica',
     refId: 'chat',
     icone: 'i-lucide-message-square',
-    alinhamento: 'inicio',
+    alinhamento: 'centro',
     largura: 220,
     larguraCheiaNoFormulario: true,
     foraDaColunaDeResumo: true,

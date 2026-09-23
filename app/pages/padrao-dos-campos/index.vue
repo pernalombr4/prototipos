@@ -285,7 +285,9 @@ async function baixarRelatorio() {
           c.backend.formatada,
           c.backend.cFormat.join('; '),
           c.backend.config.join('; '),
-          c.alinhamento === 'fim' ? t.value.alinhamentoFim : t.value.alinhamentoInicio,
+          c.alinhamento === 'fim'
+            ? t.value.alinhamentoFim
+            : c.alinhamento === 'centro' ? t.value.alinhamentoCentro : t.value.alinhamentoInicio,
           String(c.largura),
           saidaFormatada(c, dadosDoExemplo[c.refId], idioma.value, opcoes as never),
         ]

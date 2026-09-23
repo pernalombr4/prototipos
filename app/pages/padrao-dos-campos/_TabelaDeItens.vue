@@ -473,7 +473,14 @@ const colunas = computed<EnTableColumn[]>(() => [
     key: c.refId,
     label: props.t.campos[c.tipo].rotulo,
     sortable: true,
-    align: (c.alinhamento === 'fim' ? 'right' : 'left') as 'left' | 'right',
+    /*
+     * O `EnTableColumn` aceita center, e é o que Anotações e Chat pedem: a
+     * célula deles é um alvo, não um valor. Alinhar o cabeçalho junto é de
+     * propósito, senão o rótulo aponta para um lugar onde não tem nada.
+     */
+    align: (c.alinhamento === 'fim'
+      ? 'right'
+      : c.alinhamento === 'centro' ? 'center' : 'left') as 'left' | 'center' | 'right',
   })),
 ])
 

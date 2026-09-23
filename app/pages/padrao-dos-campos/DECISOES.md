@@ -1399,3 +1399,64 @@ Não entra num protótipo que existe para julgar interface.
 Para o dev: inserir link precisa de um popover nosso, com campo de URL, texto do
 link e o botão de remover, como o Notion faz. É o único controle da barra que o
 `UEditorToolbar` não entrega pronto em condições de uso.
+
+## Rodada 19: o popover de link, e o alvo centralizado
+
+Duas coisas pedidas juntas: fazer o popover de link que eu havia deixado como
+achado na rodada 18, e centralizar o botão de Anotações e Chat na célula, que
+estava encostado na esquerda.
+
+### O popover de link
+
+O `UEditorToolbar` tem o `kind: 'link'`, e o handler dele chama um `prompt()` do
+navegador. Então o botão é nosso, o `_BotaoDeLink.vue`, e ele faz o que o Notion
+faz, nesta ordem:
+
+| Situação | O que o popover mostra |
+|---|---|
+| com texto selecionado | texto preenchido, endereço vazio |
+| cursor dentro de um link | os dois preenchidos, mais Abrir e Remover |
+| sem seleção | os dois vazios, e o endereço vira o rótulo se ninguém escrever um texto |
+
+Enter aplica, Esc fecha sem mexer em nada, e o endereço é **normalizado**: quem
+digita `enspace.io` recebe `https://enspace.io`, e quem digita algo com arroba e
+sem barra recebe `mailto:`. Link sem esquema não navega, e é erro de digitação
+que ninguém vê antes de clicar.
+
+A barra do editor ficou em dois grupos com o link no meio (marcas, link,
+blocos), porque o link pertence às marcas de texto, que é onde o develop o põe.
+
+### Dois achados consertando este botão
+
+1. **`isActive` do TipTap não é fonte reativa do Vue.** Eu tinha posto o "o
+   cursor está dentro de um link?" num `computed`, e ele calculava uma vez e
+   nunca mais: o popover abria sempre no modo "link novo". A biblioteca resolve
+   chamando na renderização, e funciona porque o `UEditor` redesenha a cada
+   transação e leva o slot com ele. Virou função, chamada no template.
+2. **A seleção tem que ser esticada para a marca inteira ANTES de ler.** Quem
+   clicava no meio de "Laudo" via o campo de texto com uma letra só ("u"), e
+   aplicar trocava o link inteiro por essa letra, porque o `extendMarkRange` do
+   aplicar age sobre a marca toda. Agora o popover estica a seleção ao abrir, o
+   que de quebra realça o link enquanto ele está aberto.
+
+### O alvo centralizado
+
+Anotações e Chat não têm valor escrito na célula: têm um **alvo**, o ícone que
+abre a conversa. Alvo encostado na esquerda de uma coluna de 240 px fica longe
+do rótulo da coluna e perto do valor do campo vizinho, e a pessoa mira errado.
+
+Entrou `centro` no alinhamento do catálogo, que é o eixo que já decidia
+esquerda e direita, e ele leva junto o `align: 'center'` da coluna do `EnTable`
+(o cabeçalho centraliza também, senão o rótulo aponta para um lugar onde não tem
+nada), o `justify-center` da célula, e a linha da ficha do campo e do relatório
+`.xlsx`, que agora dizem Centro.
+
+Um detalhe que só apareceu medindo: o invólucro do valor avança 4 px para cada
+lado (`-mx-1`), para o realce do hover não encostar no texto. Numa caixa de
+largura fixa, avançar só para a esquerda joga o centro do invólucro 4 px à
+esquerda do centro da célula. Na célula centralizada esse avanço sai, e o desvio
+medido é zero.
+
+**Mesma forma, mesmo caso:** a Alternativa Binária também é alvo e não valor (é
+uma caixa que alterna no clique), e continua à esquerda. Não mexi porque não foi
+pedido, mas a regra que acabou de ser escrita vale para ela.

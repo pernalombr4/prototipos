@@ -333,10 +333,18 @@ async function copiar(texto: string) {
   <button
     ref="raizDoValor"
     type="button"
-    class="group/valor relative -mx-1 flex w-full min-w-0 rounded px-1 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
+    class="group/valor relative flex w-full min-w-0 rounded px-1 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
     :class="[
       naCelula ? 'h-6 items-center' : 'items-start py-0.5',
       campo.alinhamento === 'fim' && naCelula ? 'justify-end' : '',
+      /*
+       * O invólucro avança 4 px para cada lado (`-mx-1`), para o realce do
+       * hover não encostar no texto. Na célula CENTRALIZADA ele não avança:
+       * avançando só para a esquerda dentro de uma caixa de largura fixa, o
+       * centro do invólucro cai 4 px à esquerda do centro da célula, e o alvo
+       * sai do lugar justamente na célula onde ele É o conteúdo.
+       */
+      campo.alinhamento === 'centro' && naCelula ? 'justify-center' : '-mx-1',
       /* O hover promete edição, e a edição acontece. Regra 24. Campo que o
          sistema preenche não ganha hover, porque ele não abre nada. */
       campo.somenteLeitura ? 'cursor-default' : 'cursor-text hover:bg-elevated hover:ring-1 hover:ring-default',

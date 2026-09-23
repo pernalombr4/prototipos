@@ -137,6 +137,7 @@ export interface Textos {
   alinhamento: string
   alinhamentoInicio: string
   alinhamentoFim: string
+  alinhamentoCentro: string
   larguraMinima: string
   nenhumaChave: string
   configuracoesDoTipo: string
@@ -189,6 +190,14 @@ export interface Textos {
   moverParaBaixo: string
   arrasteParaReordenar: string
   limparCampo: string
+  /* O popover de link do editor de texto rico. */
+  linkInserir: string
+  linkEndereco: string
+  linkTexto: string
+  linkTextoVazio: string
+  linkAplicar: string
+  linkAbrir: string
+  linkRemover: string
   /** O andaime devolve as colunas ao tamanho do catálogo. */
   largurasOriginais: string
   /* Matriz de dados e ID personalizado, os dois tipos medidos na rodada 15. */
@@ -405,6 +414,7 @@ const ptBR: Textos = {
   alinhamento: 'Alinhamento na célula',
   alinhamentoInicio: 'Esquerda',
   alinhamentoFim: 'Direita',
+  alinhamentoCentro: 'Centro',
   larguraMinima: 'Largura mínima da coluna',
   nenhumaChave: 'Nenhuma',
   comoSalva: 'Como salva',
@@ -456,6 +466,13 @@ const ptBR: Textos = {
   moverParaBaixo: 'Mover para baixo',
   arrasteParaReordenar: 'Arraste para reordenar',
   limparCampo: 'Limpar o campo',
+  linkInserir: 'Inserir link',
+  linkEndereco: 'Endereço',
+  linkTexto: 'Texto do link',
+  linkTextoVazio: 'o próprio endereço',
+  linkAplicar: 'Aplicar',
+  linkAbrir: 'Abrir em nova aba',
+  linkRemover: 'Remover o link',
   largurasOriginais: 'Larguras originais',
   matrizSemResposta: 'Sem resposta',
   idGeradoPeloSistema: 'O sistema gera este identificador ao salvar.',
@@ -935,6 +952,7 @@ const en: Textos = {
   alinhamento: 'Cell alignment',
   alinhamentoInicio: 'Left',
   alinhamentoFim: 'Right',
+  alinhamentoCentro: 'Center',
   larguraMinima: 'Minimum column width',
   nenhumaChave: 'None',
   comoSalva: 'How it saves',
@@ -986,6 +1004,13 @@ const en: Textos = {
   moverParaBaixo: 'Move down',
   arrasteParaReordenar: 'Drag to reorder',
   limparCampo: 'Clear the field',
+  linkInserir: 'Insert link',
+  linkEndereco: 'Address',
+  linkTexto: 'Link text',
+  linkTextoVazio: 'the address itself',
+  linkAplicar: 'Apply',
+  linkAbrir: 'Open in a new tab',
+  linkRemover: 'Remove the link',
   largurasOriginais: 'Original widths',
   matrizSemResposta: 'Not answered',
   idGeradoPeloSistema: 'The system generates this identifier when you save.',
@@ -1465,6 +1490,7 @@ const es: Textos = {
   alinhamento: 'Alineación en la celda',
   alinhamentoInicio: 'Izquierda',
   alinhamentoFim: 'Derecha',
+  alinhamentoCentro: 'Centro',
   larguraMinima: 'Ancho mínimo de la columna',
   nenhumaChave: 'Ninguna',
   comoSalva: 'Cómo guarda',
@@ -1516,6 +1542,13 @@ const es: Textos = {
   moverParaBaixo: 'Mover hacia abajo',
   arrasteParaReordenar: 'Arrastre para reordenar',
   limparCampo: 'Limpiar el campo',
+  linkInserir: 'Insertar enlace',
+  linkEndereco: 'Dirección',
+  linkTexto: 'Texto del enlace',
+  linkTextoVazio: 'la dirección misma',
+  linkAplicar: 'Aplicar',
+  linkAbrir: 'Abrir en una pestaña nueva',
+  linkRemover: 'Quitar el enlace',
   largurasOriginais: 'Anchos originales',
   matrizSemResposta: 'Sin respuesta',
   idGeradoPeloSistema: 'El sistema genera este identificador al guardar.',

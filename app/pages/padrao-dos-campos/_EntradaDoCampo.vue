@@ -18,6 +18,7 @@ import type { Campo } from './campos'
 import type { Textos } from './textos'
 import { corDaOpcao, formatarBytes, formatarDataHora, rotuloDaOpcao } from './formatacao'
 import CartaoDoRegistro from './_CartaoDoRegistro.vue'
+import BotaoDeLink from './_BotaoDeLink.vue'
 import MatrizDeDados from './_MatrizDeDados.vue'
 import { cadastroPorDocumento, componentesDoId, indicesDeCorrecao, itensRelacionaveis, matrizDeDados, moedas, opcoes as todasAsOpcoes } from './mocks'
 
@@ -465,9 +466,17 @@ const opcoesDeMoeda = computed(() => {
  * biblioteca não põe ícone por tipo. A ordem é a do develop: negrito, itálico,
  * lista, título.
  */
-const ferramentasDoTextoRico = [
+/*
+ * A barra vai em dois grupos com o LINK no meio, e não num bloco só, porque o
+ * link é nosso (ver `_BotaoDeLink.vue`) e precisa ficar junto das marcas de
+ * texto, onde o develop o põe, em vez de sobrar no fim da fila.
+ */
+const marcasDoTextoRico = [
   { kind: 'mark' as const, mark: 'bold', icon: 'i-lucide-bold' },
   { kind: 'mark' as const, mark: 'italic', icon: 'i-lucide-italic' },
+]
+
+const blocosDoTextoRico = [
   { kind: 'bulletList' as const, icon: 'i-lucide-list' },
   { kind: 'orderedList' as const, icon: 'i-lucide-list-ordered' },
   { kind: 'heading' as const, level: 2, icon: 'i-lucide-heading-2' },
@@ -650,10 +659,9 @@ const opcoesDeRelacao = computed(() =>
       resolve para `html` sozinho). A barra é o `UEditorToolbar`, ligada à
       instância que o slot do editor entrega.
 
-      O botão de LINK ficou fora de propósito: o handler do Nuxt UI chama um
-      `prompt()` do navegador com o texto "Enter the URL:", em inglês e fora do
-      nosso alternador de idioma. Fica como achado do handoff, não como controle
-      do protótipo.
+      O botão de LINK é nosso, o `_BotaoDeLink.vue`: o handler do Nuxt UI chama
+      um `prompt()` do navegador com o texto "Enter the URL:", em inglês e fora
+      do nosso alternador de idioma.
     -->
     <div v-else-if="campo.tipo === 'EnHtml'" class="overflow-hidden rounded-md border border-default">
       <UEditor
@@ -663,11 +671,11 @@ const opcoesDeRelacao = computed(() =>
         :ui="{ base: 'min-h-20 px-2.5 py-2 text-sm focus:outline-none' }"
       >
         <template #default="{ editor }">
-          <UEditorToolbar
-            :editor="editor"
-            :items="ferramentasDoTextoRico"
-            class="border-b border-default bg-elevated/40 px-1.5 py-1"
-          />
+          <div class="flex items-center gap-0.5 border-b border-default bg-elevated/40 px-1.5 py-1">
+            <UEditorToolbar :editor="editor" :items="marcasDoTextoRico" />
+            <BotaoDeLink :editor="editor" :t="t" />
+            <UEditorToolbar :editor="editor" :items="blocosDoTextoRico" />
+          </div>
         </template>
       </UEditor>
     </div>
