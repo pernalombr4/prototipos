@@ -141,6 +141,29 @@ const blocos = computed(() => {
           :description="t.tipoPropostoAviso"
         />
 
+        <!-- ──────── as configurações que o tipo tem no develop ─────────── -->
+        <div class="rounded-lg border border-default">
+          <div class="flex items-center gap-2 border-b border-default bg-elevated/40 px-3 py-2">
+            <UIcon name="i-lucide-sliders-horizontal" class="size-4 shrink-0 text-muted" />
+            <span class="text-sm font-semibold text-highlighted">{{ t.configuracoesDoTipo }}</span>
+            <span class="text-xs text-muted">{{ t.configuracoesOnde }}</span>
+          </div>
+          <div class="p-3">
+            <div v-if="campo.configuracoes.length" class="flex flex-wrap gap-1">
+              <UBadge
+                v-for="c in campo.configuracoes"
+                :key="c"
+                color="neutral"
+                variant="subtle"
+                size="sm"
+              >
+                {{ c }}
+              </UBadge>
+            </div>
+            <p v-else class="text-sm text-muted">{{ t.semConfiguracaoPropria }}</p>
+          </div>
+        </div>
+
         <!-- ─────────────── os três formatos, regra e desenho ─────────────── -->
         <div v-for="bloco in blocos" :key="bloco.chave" class="rounded-lg border border-default">
           <div class="flex items-center gap-2 border-b border-default bg-elevated/40 px-3 py-2">

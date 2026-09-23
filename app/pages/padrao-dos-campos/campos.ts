@@ -133,6 +133,13 @@ export interface Campo {
   edicaoEmPopover?: boolean
   /** O valor não se edita: o sistema é que preenche. */
   somenteLeitura?: boolean
+  /**
+   * As configurações que o tipo oferece no painel de criação de Campo, em
+   * "Configurações Específicas" (ou "Configuração de Opções"). Lidas uma a uma
+   * no develop em 22/09/2026. Lista vazia quer dizer que o tipo não tem
+   * configuração própria, só a base que todos têm.
+   */
+  configuracoes: string[]
   backend: ContratoDeBackend
 }
 
@@ -150,6 +157,12 @@ export const campos: Campo[] = [
     icone: 'i-lucide-type',
     alinhamento: 'inicio',
     largura: 200,
+    configuracoes: [
+      'Transformadores de Texto',
+      'Botão de Cópia',
+      'Transcrição de Voz',
+      'Máscaras',
+    ],
     backend: {
       entrada: '"Contrato de manutenção predial"',
       saida: '"Contrato de manutenção predial"',
@@ -168,6 +181,11 @@ export const campos: Campo[] = [
     largura: 280,
     larguraCheiaNoFormulario: true,
     edicaoEmPopover: true,
+    configuracoes: [
+      'Transformadores de Texto',
+      'Botão de Cópia',
+      'Transcrição de Voz',
+    ],
     backend: {
       entrada: '"Trocar as luminárias do 3º andar…"',
       saida: '"Trocar as luminárias do 3º andar…"',
@@ -186,6 +204,7 @@ export const campos: Campo[] = [
     largura: 280,
     larguraCheiaNoFormulario: true,
     edicaoEmPopover: true,
+    configuracoes: [],
     backend: {
       entrada: '"<p>Laudo com <strong>ressalva</strong>.</p>"',
       saida: '"<p>Laudo com <strong>ressalva</strong>.</p>"',
@@ -205,6 +224,7 @@ export const campos: Campo[] = [
     larguraCheiaNoFormulario: true,
     foraDaColunaDeResumo: true,
     edicaoEmPopover: true,
+    configuracoes: [],
     backend: {
       entrada: '"Cliente pediu retorno na sexta."',
       saida: '"Cliente pediu retorno na sexta."',
@@ -221,6 +241,9 @@ export const campos: Campo[] = [
     icone: 'i-lucide-hash',
     alinhamento: 'inicio',
     largura: 180,
+    configuracoes: [
+      'não carrega no develop: erro ao carregar os campos aninhados',
+    ],
     backend: {
       entrada: '"12.345.678/0001-90"',
       saida: '"12.345.678/0001-90"',
@@ -237,6 +260,7 @@ export const campos: Campo[] = [
     icone: 'i-lucide-at-sign',
     alinhamento: 'inicio',
     largura: 220,
+    configuracoes: [],
     backend: {
       entrada: '"compras@nortelux.com.br"',
       saida: '"compras@nortelux.com.br"',
@@ -254,6 +278,9 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 180,
     somenteLeitura: true,
+    configuracoes: [
+      'Componentes (obrigatório)',
+    ],
     backend: {
       entrada: 'o campo não recebe digitação. O valor vem da expressão',
       saida: '"OS-2026-0481"',
@@ -272,6 +299,11 @@ export const campos: Campo[] = [
     icone: 'i-lucide-hash',
     alinhamento: 'fim',
     largura: 140,
+    configuracoes: [
+      'Mostrar Botões',
+      'Valor Mínimo',
+      'Valor Máximo',
+    ],
     backend: {
       entrada: '1480.5',
       saida: '1480.5',
@@ -295,6 +327,9 @@ export const campos: Campo[] = [
     icone: 'i-lucide-banknote',
     alinhamento: 'fim',
     largura: 160,
+    configuracoes: [
+      'Configurar Correção Monetária',
+    ],
     backend: {
       entrada: '18400',
       saida: '18400',
@@ -318,6 +353,13 @@ export const campos: Campo[] = [
     icone: 'i-lucide-chevron-down-circle',
     alinhamento: 'inicio',
     largura: 180,
+    configuracoes: [
+      'Caixa de Busca',
+      'Editável',
+      'Origem da Lista',
+      'Lista Personalizada (obrigatória)',
+      'Exportar e Importar opções',
+    ],
     backend: {
       entrada: '"em_analise"',
       saida: '"em_analise"',
@@ -339,6 +381,10 @@ export const campos: Campo[] = [
     icone: 'i-lucide-circle-dot',
     alinhamento: 'inicio',
     largura: 160,
+    configuracoes: [
+      'Origem da Lista',
+      'Lista Personalizada (obrigatória)',
+    ],
     backend: {
       entrada: '"sim"',
       saida: '"sim"',
@@ -356,6 +402,12 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 240,
     maximoNaCelula: 2,
+    configuracoes: [
+      'Caixa de Busca',
+      'Editável',
+      'Origem da Lista',
+      'Lista Personalizada (obrigatória)',
+    ],
     backend: {
       entrada: '["eletrica", "hidraulica"]',
       saida: '["eletrica", "hidraulica"]',
@@ -375,6 +427,10 @@ export const campos: Campo[] = [
     maximoNaCelula: 2,
     larguraCheiaNoFormulario: true,
     edicaoEmPopover: true,
+    configuracoes: [
+      'Origem da Lista',
+      'Lista Personalizada (obrigatória)',
+    ],
     backend: {
       entrada: '["Li e aceito o termo de responsabilidade"]',
       saida: '["Li e aceito o termo de responsabilidade"]',
@@ -393,6 +449,10 @@ export const campos: Campo[] = [
     largura: 200,
     maximoNaCelula: 2,
     edicaoEmPopover: true,
+    configuracoes: [
+      'Origem da Lista',
+      'Lista Personalizada (obrigatória)',
+    ],
     backend: {
       entrada: '["a", "b"]',
       saida: '["a", "b"]',
@@ -410,6 +470,7 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 240,
     maximoNaCelula: 3,
+    configuracoes: [],
     backend: {
       entrada: '["urgente", "predial"]',
       saida: '["urgente", "predial"]',
@@ -426,6 +487,7 @@ export const campos: Campo[] = [
     icone: 'i-lucide-list-tree',
     alinhamento: 'inicio',
     largura: 220,
+    configuracoes: [],
     backend: {
       entrada: '"predial.eletrica.quadros"',
       saida: '"predial.eletrica.quadros"',
@@ -444,6 +506,7 @@ export const campos: Campo[] = [
     icone: 'i-lucide-toggle-right',
     alinhamento: 'inicio',
     largura: 140,
+    configuracoes: [],
     backend: {
       entrada: 'true',
       saida: 'true',
@@ -462,6 +525,10 @@ export const campos: Campo[] = [
     icone: 'i-lucide-calendar',
     alinhamento: 'inicio',
     largura: 170,
+    configuracoes: [
+      'Exibir Hora',
+      'Preencher com a data atual',
+    ],
     backend: {
       entrada: '"2026-09-14T21:32:11.000Z"',
       saida: '"2026-09-14T21:32:11.000Z"',
@@ -484,6 +551,7 @@ export const campos: Campo[] = [
     icone: 'i-lucide-clock',
     alinhamento: 'inicio',
     largura: 190,
+    configuracoes: [],
     backend: {
       entrada: '{ "start": "08:00", "end": "17:30" }',
       saida: '{ "start": "08:00", "end": "17:30" }',
@@ -502,6 +570,16 @@ export const campos: Campo[] = [
     icone: 'i-lucide-link',
     alinhamento: 'inicio',
     largura: 240,
+    configuracoes: [
+      'Categoria',
+      'Formulários',
+      'Filtros de Exibição',
+      'Formato de Visualização',
+      'Agrupar por',
+      'Desanexar Agrupamento',
+      'Desabilitar Criação',
+      'Habilitar Dependência',
+    ],
     backend: {
       entrada: '{ "id": 43887, "reference": "FORNC55D9212D9" }',
       saida: '{ "id": 43887, "display": "Nortelux Elétrica", "reference": "FORNC55D9212D9" }',
@@ -524,6 +602,17 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 280,
     maximoNaCelula: 2,
+    configuracoes: [
+      'Habilitar Aba deste campo na tabela do item',
+      'Categoria',
+      'Formulários',
+      'Filtros de Exibição',
+      'Formato de Visualização',
+      'Agrupar por',
+      'Desanexar Agrupamento',
+      'Desabilitar Criação',
+      'Habilitar Dependência',
+    ],
     backend: {
       entrada: '[{ "id": 43891, "reference": "OSC1F0A2B" }]',
       saida: '[{ "id": 43891, "display": "OS 2026-0481", "reference": "OSC1F0A2B" }]',
@@ -544,6 +633,10 @@ export const campos: Campo[] = [
     largura: 240,
     larguraCheiaNoFormulario: true,
     edicaoEmPopover: true,
+    configuracoes: [
+      'Ativar preenchimento de endereço',
+      'Configurações de Pessoa: cnpj, name, cpf, razao_social, nome_fantasia',
+    ],
     backend: {
       entrada: '{ "name": "Marina Toledo", "cpf": "000.000.000-00" }',
       saida: '{ "name": "Marina Toledo", "email": "marina@…", "cpf": "…" }',
@@ -563,6 +656,11 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 240,
     edicaoEmPopover: true,
+    configuracoes: [
+      'Tipos Permitidos',
+      'Tamanho máximo do arquivo',
+      'Quantidade máxima',
+    ],
     backend: {
       entrada: 'multipart/form-data. O POST devolve a URL, e é ela que vai no data',
       saida: '{ "url": "…", "filename": "laudo.pdf", "mime": "application/pdf", "size": 45000 }',
@@ -580,6 +678,9 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 200,
     edicaoEmPopover: true,
+    configuracoes: [
+      'Tamanho máximo do arquivo',
+    ],
     backend: {
       entrada: 'multipart/form-data, igual ao arquivo',
       saida: '{ "url": "…", "filename": "quadro.jpg", "mime": "image/jpeg", "size": 220400 }',
@@ -597,6 +698,15 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 240,
     edicaoEmPopover: true,
+    configuracoes: [
+      'Tamanho máximo do arquivo',
+      'Quantidade máxima',
+      'Inserir Chancela',
+      'Posição da Chancela',
+      'Tipo de Chancela',
+      'Configurar Chancela',
+      'Subir Imagem',
+    ],
     backend: {
       entrada: 'multipart/form-data, igual ao arquivo',
       saida: '{ "url": "…", "filename": "contrato.pdf", "mime": "application/pdf", "size": 812300 }',
@@ -615,6 +725,15 @@ export const campos: Campo[] = [
     largura: 240,
     foraDaColunaDeResumo: true,
     edicaoEmPopover: true,
+    configuracoes: [
+      'Permitir Upload de Documento Externo',
+      'Permitir upload de PDF',
+      'Chat',
+      'Comentar',
+      'Editar',
+      'Acompanhar Mudanças',
+      'Revisão',
+    ],
     backend: {
       entrada: 'o editor grava sozinho. O formulário só escolhe o modelo',
       saida: '{ "url": "…", "filename": "proposta.docx", "mime": "…wordprocessingml…" }',
@@ -632,6 +751,7 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 220,
     edicaoEmPopover: true,
+    configuracoes: [],
     backend: {
       entrada: '{ "signer": "Marina Toledo", "signedAt": "2026-09-18T13:10:00.000Z" }',
       saida: '{ "signer": "…", "signedAt": "…", "url": "…" }',
@@ -652,6 +772,10 @@ export const campos: Campo[] = [
     largura: 300,
     larguraCheiaNoFormulario: true,
     edicaoEmPopover: true,
+    configuracoes: [
+      'País',
+      'Aninhado',
+    ],
     backend: {
       entrada: '{ "street": "Av. Paulista", "number": "1000", "city": "São Paulo", … }',
       saida: '{ "street", "number", "complement", "neighborhood", "city", "state", "zip", "country" }',
@@ -670,6 +794,11 @@ export const campos: Campo[] = [
     largura: 260,
     larguraCheiaNoFormulario: true,
     edicaoEmPopover: true,
+    configuracoes: [
+      'Escopo das condicionais',
+      'Aninhados',
+      'Formato de Visualização',
+    ],
     backend: {
       entrada: '{ "login": "nortelux", "telefone": "+55 11 5555-0100" }',
       saida: '{ "login": "nortelux", "telefone": "+55 11 5555-0100" }',
@@ -690,6 +819,15 @@ export const campos: Campo[] = [
     larguraCheiaNoFormulario: true,
     foraDaColunaDeResumo: true,
     edicaoEmPopover: true,
+    configuracoes: [
+      'Habilitar Aba deste campo na tabela do item',
+      'Quantidade predefinida de itens',
+      'Valor Mínimo',
+      'Valor Máximo',
+      'Aninhados',
+      'Formato de Visualização',
+      'Modo de Visualização',
+    ],
     backend: {
       entrada: '[{ "item": "Luminária LED", "quantidade": 12 }]',
       saida: '[{ "item": "Luminária LED", "quantidade": 12 }]',
@@ -710,6 +848,7 @@ export const campos: Campo[] = [
     foraDaColunaDeResumo: true,
     edicaoEmPopover: true,
     somenteLeitura: true,
+    configuracoes: [],
     backend: {
       entrada: 'o campo não é preenchido pelo formulário. A conversa é gravada mensagem a mensagem',
       saida: '[{ "author": "Marina Toledo", "at": "…", "text": "…" }]',
@@ -722,20 +861,26 @@ export const campos: Campo[] = [
   /* --------------------- os dois propostos pelo doc --------------------- */
   {
     tipo: 'duracao',
-    familia: 'dataHora',
-    /* Confirmado no seletor "Tipo de Campo" do develop em 22/09/2026: existe. */
+    /*
+     * Família texto, e não data: medido no develop em 22/09/2026, o controle é
+     * um campo de texto com o placeholder
+     * `Ex.: "1 dia", "2 semanas", "3 meses", "1 ano" ou "30 min"`.
+     * NÃO é um par de datas, ao contrário do que o documento do time de
+     * produtos descreve. Ver BRIEFING.md, 6.3.
+     */
+    familia: 'texto',
     disponibilidade: 'ativo',
     refId: 'duracao',
-    icone: 'i-lucide-calendar-range',
+    icone: 'i-lucide-hourglass',
     alinhamento: 'inicio',
-    largura: 210,
-    edicaoEmPopover: true,
+    largura: 190,
+    configuracoes: [],
     backend: {
-      entrada: '{ "start": "2026-10-01", "end": "2026-10-15" }',
-      saida: '{ "start": "2026-10-01T12:00:00.000Z", "end": "2026-10-15T12:00:00.000Z" }',
-      formatada: 'as duas datas na localidade, unidas por "a". NÃO é HH:MM:SS',
-      cFormat: ['type: "object"', 'locale', 'd_style', 'l_separator'],
-      config: ['config.min', 'config.max'],
+      entrada: '"2 semanas"  (duração em linguagem natural)',
+      saida: 'a confirmar: o produto aceita texto, e não observei item gravado com valor',
+      formatada: 'a confirmar. O campo não tem cFormat próprio no painel',
+      cFormat: ['a confirmar'],
+      config: [],
     },
   },
   {
@@ -748,6 +893,10 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 200,
     somenteLeitura: true,
+    configuracoes: [
+      'Editor de Expressão',
+      'Habilitar Editor Visual',
+    ],
     backend: {
       entrada: 'o campo não recebe digitação. A expressão é configurada no campo',
       saida: 'o que a expressão devolver. O tipo do resultado varia por expressão',

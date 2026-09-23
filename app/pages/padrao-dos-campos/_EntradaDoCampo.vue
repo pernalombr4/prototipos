@@ -398,8 +398,19 @@ const opcoesDeRelacao = computed(() =>
       />
     </div>
 
-    <!-- duração: um calendário só, com as duas pontas -->
-    <div v-else-if="campo.tipo === 'duracao'" class="flex items-center gap-2">
+    <!--
+      Duração: campo de texto, com os exemplos que o produto usa no
+      placeholder. Não é par de datas. Ver BRIEFING.md, 6.3.
+    -->
+    <UInput
+      v-else-if="campo.tipo === 'duracao'"
+      v-model="comoTexto"
+      size="sm"
+      class="w-full"
+      placeholder='Ex.: "1 dia", "2 semanas", "3 meses", "1 ano" ou "30 min"'
+    />
+
+    <div v-else-if="campo.tipo === '__duracao_antigo'" class="flex items-center gap-2">
       <UInput
         :model-value="(valor as { start?: string })?.start?.slice(0, 10) ?? ''"
         type="date"

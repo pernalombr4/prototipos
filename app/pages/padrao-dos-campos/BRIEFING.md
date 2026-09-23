@@ -342,3 +342,152 @@ Os dois entraram no catálogo marcados como `proposto`, para o padrão nascer de
 o campo.
 
 A comparação item por item, com o que eu propus diferente, está no `DECISOES.md`.
+
+---
+
+## 6. O que cada campo faz de verdade no develop
+
+Criei **29 dos 34 tipos** na categoria `leve` do workspace de exploração, pela tela, em
+22/09/2026, e percorri o formulário e a tela do item com todos eles dentro. O que está abaixo
+foi medido, não deduzido. Faltaram cinco, e o motivo de cada um está na seção 6.4.
+
+### 6.1 A configuração de cada tipo, do próprio produto
+
+Todo campo, seja qual for o tipo, tem as mesmas cinco abas no painel de criação
+(`Definição`, `Visual`, `Regras e Condições`, `Eventos de Campo`, `Ajuda`) e a mesma base:
+**Nome do campo** (31 caracteres), **Referência técnica** (31, irreversível depois de salvar),
+**Rótulo Visível** (255), **Formulário**, **Largura** (Total 1/1), **Esquema de Cores**
+(Primária, Sucesso, Aviso, Erro, Info), **Nome da Seção** (agrupa campos com o mesmo nome),
+**Ordenação**, **Ícone** e **Validações Básicas**.
+
+O que muda por tipo é a seção **Configurações Específicas**, que em alguns tipos se chama
+**Configuração de Opções**:
+
+| Tipo | Configurações próprias |
+|---|---|
+| Texto Curto | Transformadores de Texto, Botão de Cópia, Transcrição de Voz, **Máscaras** |
+| Texto Longo | Transformadores de Texto, Botão de Cópia, Transcrição de Voz |
+| Número | Mostrar Botões, Valor Mínimo, Valor Máximo |
+| Valor Monetário | Configurar Correção Monetária |
+| Duração | nenhuma |
+| Data (Calendário) | Exibir Hora, Preencher com a data atual |
+| Alternativa Binária | nenhuma |
+| Lista de Seleção Única | Caixa de Busca, Editável, Origem da Lista, **Lista Personalizada (obrigatória)** com Exportar e Importar |
+| Lista de Seleção Múltipla | as mesmas da Única |
+| Botões de Seleção única | Origem da Lista, Lista Personalizada (obrigatória). **Sem** Caixa de Busca e **sem** Editável |
+| Caixas de Seleção | Origem da Lista, Lista Personalizada (obrigatória) |
+| Matriz de dados | Limitar a uma resposta por coluna, Rótulo Complementar, Tornar obrigatórias todas as linhas, Tornar obrigatórias todas as colunas |
+| Arquivo | Tipos Permitidos, Tamanho máximo do arquivo, quantidade máxima |
+| Imagem | Tamanho máximo do arquivo |
+| Editor de texto HTML | nenhuma |
+| Editor de Documentos | Permitir Upload de Documento Externo, Permitir upload de PDF, Chat, Comentar, Editar, Acompanhar Mudanças, Revisão |
+| Tratamento de PDF | Tamanho máximo, quantidade máxima, e o bloco da **Chancela**: Inserir, Posição (Inferior Direito), Tipo, Configurar, Subir Imagem |
+| Tags | nenhuma |
+| Relacionamento Simples | Relação: Categoria, Formulários, Filtros de Exibição, Formato de Visualização, Agrupar por, Formulários usados para filtrar, Desanexar Agrupamento, Desabilitar Criação, Habilitar Dependência |
+| Relacionamento Múltiplo | as do Simples, mais **Habilitar Aba deste campo na tabela do item** |
+| Chat | nenhuma |
+| Anotações | nenhuma |
+| Grupo | Configurações das Condicionais (escopo "Somente este grupo"), **Aninhados**, Formato de Visualização |
+| Repetidor | Habilitar Aba deste campo na tabela do item, Quantidade predefinida de itens, Valor Mínimo, Valor Máximo, **Aninhados**, Formato de Visualização, **Modo de Visualização (Lista)** |
+| Endereço | País, com a nota "se atua em mais de um país, escolha Outros", e Aninhado |
+| Pessoa/Empresa | Ativar preenchimento de endereço, Aninhado, **Configurações de Pessoa** com os Campos Disponíveis: `cnpj`, `name`, `cpf`, `razao_social`, `nome_fantasia` |
+| Campo virtual (de valor dinâmico) | **Editor de Expressão**, Habilitar Editor Visual, com blocos de Matemática e de Campo |
+| ID Personalizado | **Componentes (obrigatório)** |
+| E-mail (legado) | nenhuma |
+| **Texto com Máscara (legado)** | **não carrega**: mostra "Ocorreu um erro ao carregar os campos aninhados." e o botão Recarregar não resolve |
+| Data, Hora, Datetime (legado) | nenhuma |
+| Editor de HTML (v1) (legado) | Botão de Cópia |
+
+**Detalhe da opção de lista.** Cada opção de um campo de escolha é um registro próprio, criado
+num modal com: **Rótulo** (obrigatório), **Valor** (obrigatório, e é um `textarea`, não um
+campo de uma linha), **Color Scheme** (Primária, Sucesso, Aviso, Erro, Info), **Icon** e
+**Descrição**. A cor é **por opção**, e isso não está no `Field.options[]` do schema publicado,
+que só tem `label`, `value`, `icon` e `description`. Divergência para o time de back-end.
+
+### 6.2 O formulário de criação, controle por controle
+
+Medido com os 29 campos dentro, em uma coluna, largura cheia. A altura é a do bloco inteiro
+(rótulo mais controle), em pixels:
+
+| Campo | Controle real | Altura |
+|---|---|---|
+| Texto Curto | `input` de uma linha | 60 |
+| **Texto Longo** | **`textarea` de UMA linha, da mesma altura do Texto Curto** | 60 |
+| Número | `input` de texto, não é `input[type=number]` | 60 |
+| Valor Monetário | seletor de moeda (BRL) mais campo de valor mostrando `R$ 0` | 60 |
+| **Duração** | **`input` de texto**, placeholder `Ex.: "1 dia", "2 semanas", "3 meses", "1 ano", "12 horas" ou "30 min"` | 62 |
+| Data (Calendário) | seletor de data | 60 |
+| **Alternativa Binária** | **`input[type=checkbox]`**, não uma chave | 52 |
+| Arquivo | área de soltar com "Clique ou arraste um arquivo para esta área para fazer upload" e "Suporte para upload único ou em massa" | **170** |
+| Imagem | a mesma área de soltar | **170** |
+| Tags | `input` de texto simples | 60 |
+| Editor de texto HTML | **editor de blocos** com barra (desfazer, refazer, título, negrito, itálico, sublinhado, tachado, código, emoji, alinhamento, mais) e placeholder `Escreva ou digite "/" para acessar os comandos...` | **268** |
+| **Anotações** | **painel de conversa** com área de histórico e compositor embaixo (anexar, digitar, enviar) | **759** |
+| Chat | painel de conversa | 273 |
+| Endereço | bloco com **CEP, País, Rua, Número, Complemento, Bairro, Cidade, Estado** | 378 |
+| Pessoa/Empresa | bloco com o campo **Tipo** | 108 |
+| Tratamento de PDF | `input[type=file]` | 60 |
+| Editor de Documentos | bloco de escolha | 72 |
+| E-mail (legado) | `input` de texto | 64 |
+| Datetime (legado) | **`input[type=datetime-local]`**, controle nativo do navegador | 61 |
+| Data (legado) | seletor de data | 60 |
+| Hora (legado) | **`input[type=time]`**, controle nativo | 61 |
+| Editor de HTML (v1) (legado) | editor | 320 |
+| Lista de Seleção Única | seletor | 60 |
+| Lista de Seleção Múltipla | seletor | 60 |
+| Botões de Seleção única | `input[type=radio]` visíveis | 89 |
+| Caixas de Seleção | caixas visíveis | 73 |
+| Texto com Máscara (legado) | `input` de texto | 76 |
+| Repetidor | bloco | 140 |
+| Campo virtual | `input` de texto, só leitura | 60 |
+
+### 6.3 Os quatro achados que mudam a proposta
+
+1. **Duração NÃO é um par de datas.** É um campo de texto que aceita duração em linguagem
+   natural. O documento do time de produtos descreve Duração como "duas datas para determinar
+   um período", com calendário duplo, e o produto faz outra coisa. **Eu havia seguido o
+   documento e estava errado junto com ele.**
+2. **Alternativa Binária é caixa de seleção no formulário, não chave.** O documento recomenda
+   Toggle, dizendo que ele "transmite clareza imediata de alternância de estado", e o produto
+   usa checkbox. Vale decidir qual fica, mas o protótipo tem que mostrar o que existe.
+3. **Anotações é conversa, não texto.** São 759 px de painel com histórico e compositor de
+   mensagem. Aqui **o documento estava certo e eu estava errado**: eu havia modelado
+   `EnNotes` como uma string simples.
+4. **Texto Longo é uma linha só.** O `textarea` nasce com a altura do Texto Curto e não
+   cresce. Para um campo pensado para descrição, é o achado mais caro da lista.
+
+### 6.3.1 O que a tela nova faz, e o que ela não faz
+
+- **Clicar numa célula não faz nada.** Testado em várias colunas: nenhuma seleção, nenhuma
+  edição, nenhum destaque. A edição na célula é **proposta**, não ajuste;
+- **célula vazia mostra um hífen** (`-`), e é isso que o protótipo usa;
+- **a coluna `Ações` é a segunda**, logo depois da seleção, e tem ícone de fixar. No protótipo
+  ela sai no fim, porque o slot `#actions` do `EnTable` renderiza a última coluna. É limitação
+  do `EnTable`, não escolha;
+- **selecionar linha abre uma barra de ação em massa** com `1 Selecionado`, **Comparar** e
+  **Excluir**. O protótipo ainda não tem essa barra;
+- **a tela do item avisa quando está suja**: o rodapé mostra `Alterações não salvas`, com
+  **Sair sem salvar** ao lado do **Salvar**. O protótipo só tem o Salvar;
+- **a coluna da esquerda, hoje, só tem metadado de sistema**, nos dois lugares (quickview e
+  tela dedicada): IDENTIFICAÇÃO (ID), ORIGEM (STATUS, E-MAIL DA SOLICITAÇÃO) e HISTÓRICO
+  (CRIADO EM, ATUALIZADO EM). Pôr os campos da categoria ali, em formato cru, continua sendo
+  **proposta**, e é o que a demanda pediu.
+
+### 6.4 Os cinco tipos que não consegui criar, e por quê
+
+| Tipo | O que trava |
+|---|---|
+| Matriz de dados | exige três configurações obrigatórias (linhas, colunas e rótulo) antes de salvar |
+| ID Personalizado | exige **Componentes**, uma lista de partes do código (prefixo, número, sufixo) montada num sub-modal |
+| Relacionamento Simples | exige **Categoria** de destino, e o seletor dela fica dentro do bloco Relação |
+| Relacionamento Múltiplo | o mesmo do Simples |
+| Grupo e Repetidor | foram criados, mas **sem campos aninhados**, então ainda não dá para ver o desenho deles com conteúdo |
+
+### 6.5 Uma armadilha de investigação que custou caro
+
+Com a **janela do Chrome minimizada**, o navegador congela o `requestAnimationFrame` (medido:
+0 quadros em 600 ms). Isso trava as transições do naive-ui, a lista virtualizada do seletor de
+tipo e, quando o tipo escolhido carrega configuração aninhada, o renderizador inteiro para de
+responder. Trocar o `requestAnimationFrame` por `setTimeout` na aba resolve as transições, mas
+o `setTimeout` de aba em segundo plano também é limitado a um disparo por segundo. **Não há
+atalho: a janela tem que estar visível.** Entra na lista de armadilhas do develop.

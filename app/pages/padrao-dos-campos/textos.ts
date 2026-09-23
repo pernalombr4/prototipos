@@ -139,6 +139,9 @@ export interface Textos {
   alinhamentoFim: string
   larguraMinima: string
   nenhumaChave: string
+  configuracoesDoTipo: string
+  configuracoesOnde: string
+  semConfiguracaoPropria: string
 
   /* ------------------------------- as facetas ---------------------------- */
   faceta: string
@@ -324,6 +327,9 @@ const ptBR: Textos = {
   alinhamentoFim: 'Direita',
   larguraMinima: 'Largura mínima da coluna',
   nenhumaChave: 'Nenhuma',
+  configuracoesDoTipo: 'Configurações do tipo',
+  configuracoesOnde: 'no painel de criar campo',
+  semConfiguracaoPropria: 'Este tipo não tem configuração própria. Só a base que todos têm: nome, referência, rótulo, formulário, largura, esquema de cores, seção, ordenação, ícone e validações.',
 
   faceta: 'Faceta',
   facetas: {
@@ -409,10 +415,10 @@ const ptBR: Textos = {
     },
     EnNotes: {
       rotulo: 'Anotações',
-      descricao: 'Bloco de anotação livre, ligado ao item.',
-      celula: 'A primeira linha da anotação, com reticências.',
-      formulario: 'Bloco de anotação na linha inteira.',
-      cru: 'Fica só na coluna dos campos. No resumo, anotação vira ruído.',
+      descricao: 'Conversa ligada ao item, com histórico e compositor de mensagem.',
+      celula: 'A última anotação e o total, com reticências quando não cabe.',
+      formulario: 'Painel de conversa com o histórico e o compositor embaixo. No produto ele ocupa 759 px.',
+      cru: 'Fica só na coluna dos campos: conversa não cabe em resumo.',
     },
     EnlMask: {
       rotulo: 'Texto com máscara',
@@ -488,7 +494,7 @@ const ptBR: Textos = {
       rotulo: 'Alternativa Binária',
       descricao: 'Liga ou desliga. Grava verdadeiro ou falso.',
       celula: 'Sim ou Não em texto, com um ponto de cor. Chave ligada na célula promete edição que a célula não faz.',
-      formulario: 'A chave, com o rótulo do lado direito.',
+      formulario: 'Hoje o produto usa caixa de seleção. A proposta é a chave, que diz melhor que o estado alterna.',
       cru: 'Sim ou Não, com o ponto de cor.',
     },
     EnlChips: {
@@ -605,10 +611,10 @@ const ptBR: Textos = {
     },
     duracao: {
       rotulo: 'Duração',
-      descricao: 'Um período entre duas datas, escolhido no mesmo campo.',
-      celula: 'As duas datas na mesma linha, em fonte tabular, unidas por "a".',
-      formulario: 'Um calendário só, que pinta o intervalo entre as duas pontas.',
-      cru: 'As duas datas, com a quantidade de dias ao lado.',
+      descricao: 'Uma duração escrita em linguagem natural: 1 dia, 2 semanas, 30 min.',
+      celula: 'A duração como o produto guardou, em uma linha.',
+      formulario: 'Campo de texto, com os exemplos do produto no placeholder.',
+      cru: 'A duração em uma linha.',
     },
     valorDinamico: {
       rotulo: 'Valor dinâmico',
@@ -766,6 +772,9 @@ const en: Textos = {
   alinhamentoFim: 'Right',
   larguraMinima: 'Minimum column width',
   nenhumaChave: 'None',
+  configuracoesDoTipo: 'Type settings',
+  configuracoesOnde: 'in the field creation panel',
+  semConfiguracaoPropria: 'This type has no settings of its own. Only the base every field has: name, reference, label, form, width, color scheme, section, order, icon and validations.',
 
   faceta: 'Facet',
   facetas: {
@@ -851,10 +860,10 @@ const en: Textos = {
     },
     EnNotes: {
       rotulo: 'Notes',
-      descricao: 'A free note block attached to the item.',
-      celula: 'The first line of the note, with ellipsis.',
-      formulario: 'Note block on the whole row.',
-      cru: 'Stays only in the fields column. In the summary a note becomes noise.',
+      descricao: 'A conversation attached to the item, with history and a composer.',
+      celula: 'The last note and the total, with ellipsis when it does not fit.',
+      formulario: 'A conversation panel with the history and the composer below. In the product it takes 759 px.',
+      cru: 'Stays only in the fields column: a conversation does not fit a summary.',
     },
     EnlMask: {
       rotulo: 'Masked text',
@@ -930,7 +939,7 @@ const en: Textos = {
       rotulo: 'Binary Choice',
       descricao: 'On or off. Stores true or false.',
       celula: 'Yes or No as text, with a colored dot. A switch in a cell promises an edit the cell does not do.',
-      formulario: 'The switch, with the label on its right.',
+      formulario: 'Today the product uses a checkbox. The proposal is the switch, which says better that the state toggles.',
       cru: 'Yes or No, with the colored dot.',
     },
     EnlChips: {
@@ -1047,10 +1056,10 @@ const en: Textos = {
     },
     duracao: {
       rotulo: 'Duration',
-      descricao: 'A period between two dates, picked in the same field.',
-      celula: 'Both dates on the same line, in tabular figures, joined by "to".',
-      formulario: 'A single calendar that paints the range between both ends.',
-      cru: 'Both dates, with the number of days beside them.',
+      descricao: 'A duration written in plain language: 1 day, 2 weeks, 30 min.',
+      celula: 'The duration as the product stored it, on one line.',
+      formulario: 'Text input, with the product examples in the placeholder.',
+      cru: 'The duration on one line.',
     },
     valorDinamico: {
       rotulo: 'Dynamic value',
@@ -1208,6 +1217,9 @@ const es: Textos = {
   alinhamentoFim: 'Derecha',
   larguraMinima: 'Ancho mínimo de la columna',
   nenhumaChave: 'Ninguna',
+  configuracoesDoTipo: 'Configuración del tipo',
+  configuracoesOnde: 'en el panel de crear campo',
+  semConfiguracaoPropria: 'Este tipo no tiene configuración propia. Solo la base que todos tienen: nombre, referencia, etiqueta, formulario, ancho, esquema de colores, sección, orden, icono y validaciones.',
 
   faceta: 'Faceta',
   facetas: {
@@ -1293,10 +1305,10 @@ const es: Textos = {
     },
     EnNotes: {
       rotulo: 'Notas',
-      descricao: 'Bloque de nota libre, unido al elemento.',
-      celula: 'La primera línea de la nota, con puntos suspensivos.',
-      formulario: 'Bloque de nota en la fila entera.',
-      cru: 'Queda solo en la columna de campos. En el resumen, una nota es ruido.',
+      descricao: 'Conversación unida al elemento, con historial y compositor de mensaje.',
+      celula: 'La última nota y el total, con puntos suspensivos cuando no cabe.',
+      formulario: 'Panel de conversación con el historial y el compositor abajo. En el producto ocupa 759 px.',
+      cru: 'Queda solo en la columna de campos: una conversación no cabe en un resumen.',
     },
     EnlMask: {
       rotulo: 'Texto con máscara',
@@ -1372,7 +1384,7 @@ const es: Textos = {
       rotulo: 'Alternativa binaria',
       descricao: 'Encendido o apagado. Guarda verdadero o falso.',
       celula: 'Sí o No como texto, con un punto de color. Un interruptor en la celda promete una edición que la celda no hace.',
-      formulario: 'El interruptor, con la etiqueta a su derecha.',
+      formulario: 'Hoy el producto usa una casilla. La propuesta es el interruptor, que dice mejor que el estado alterna.',
       cru: 'Sí o No, con el punto de color.',
     },
     EnlChips: {
@@ -1489,10 +1501,10 @@ const es: Textos = {
     },
     duracao: {
       rotulo: 'Duración',
-      descricao: 'Un período entre dos fechas, elegido en el mismo campo.',
-      celula: 'Las dos fechas en la misma línea, en cifras tabulares, unidas por "a".',
-      formulario: 'Un solo calendario que pinta el intervalo entre las dos puntas.',
-      cru: 'Las dos fechas, con la cantidad de días al lado.',
+      descricao: 'Una duración escrita en lenguaje natural: 1 día, 2 semanas, 30 min.',
+      celula: 'La duración tal como el producto la guardó, en una línea.',
+      formulario: 'Campo de texto, con los ejemplos del producto en el placeholder.',
+      cru: 'La duración en una línea.',
     },
     valorDinamico: {
       rotulo: 'Valor dinámico',

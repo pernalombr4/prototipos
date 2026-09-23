@@ -419,7 +419,7 @@ async function copiar(texto: string) {
       Duração: as duas datas. NÃO é HH:MM:SS, que é o que o documento do time
       de produtos escreveu. Ver a divergência no DECISOES.md.
     -->
-    <span v-else-if="campo.tipo === 'duracao'" class="flex min-w-0 items-baseline gap-1.5">
+    <span v-else-if="campo.tipo === '__duracao_antigo'" class="flex min-w-0 items-baseline gap-1.5">
       <span class="shrink-0 text-sm tabular-nums text-highlighted">
         {{ formatarDataCurta(comoPeriodo.start, idioma) }} {{ naCelula ? '→' : 'a' }}
         {{ formatarDataCurta(comoPeriodo.end, idioma) }}
