@@ -150,7 +150,11 @@ onMounted(() => nextTick(() => {
     if (!linha) return
     const i = [...(linha.parentElement?.children ?? [])].indexOf(linha)
     const item = props.itens[i]
-    if (item) emit('abrirItem', item)
+    if (!item) return
+    /* O primeiro clique do duplo já abriu a célula em edição: ela fecha, para
+       a quickview não nascer com um controle aberto atrás dela. */
+    fecharEdicao()
+    emit('abrirItem', item)
   })
 
   tabela.addEventListener('click', (e) => {
@@ -285,7 +289,7 @@ onMounted(() => nextTick(() => {
             :idioma="idioma"
           />
           <template #content>
-            <div class="w-96 max-w-[90vw] p-3">
+            <div class="w-[26rem] max-w-[90vw] p-3">
               <EntradaDoCampo
                 :campo="campo"
                 :model-value="((row as Item).data as Record<string, unknown>)?.[campo.refId]"
@@ -293,8 +297,27 @@ onMounted(() => nextTick(() => {
                 :idioma="idioma"
                 @update:model-value="(v: unknown) => emit('editarValor', row as Item, campo.refId, v)"
               />
-              <div class="mt-3 flex justify-end">
-                <UButton :label="t.confirmar" color="primary" size="xs" @click="fecharEdicao()" />
+              <!--
+                O rodapé responde "o que salva isto?" na própria camada: o
+                botão só aparece onde o valor PRECISA de confirmação. Onde
+                fechar já salva, o texto diz isso e não há botão para caçar.
+              -->
+              <div class="mt-3 flex items-center justify-end gap-2">
+                <UButton
+                  v-if="campo.comoSalva === 'confirmar'"
+                  :label="t.confirmar"
+                  color="primary"
+                  size="xs"
+                  @click="fecharEdicao()"
+                />
+                <UButton
+                  v-else
+                  :label="t.fechar"
+                  color="neutral"
+                  variant="ghost"
+                  size="xs"
+                  @click="fecharEdicao()"
+                />
               </div>
             </div>
           </template>
@@ -312,6 +335,7 @@ onMounted(() => nextTick(() => {
             :t="t"
             :idioma="idioma"
             @editar="abrirEdicao(campo, row as Item)"
+            @alternar="(v: unknown) => emit('editarValor', row as Item, campo.refId, v)"
           />
         </div>
       </template>

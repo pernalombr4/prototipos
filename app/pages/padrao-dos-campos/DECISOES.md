@@ -447,3 +447,124 @@ A chave `pro_rate` da correção monetária está assim no dicionário do produt
 É tradução automática de "Pró-Rata" que virou palavra vulgar em inglês e em
 espanhol. Está no bundle de produção do develop, na interface de correção
 monetária. Não é coisa deste protótipo: é conserto no dicionário do produto.
+
+---
+
+## Rodada 5: as seis observações sobre os campos
+
+Ela mandou nove prints do Figma e uma lista numerada. Cada item abaixo diz o que
+mudou e por quê, e onde eu estava errado eu digo que estava.
+
+### 1. Alternativa binária não é "Sim e Não"
+
+Era. Eu tinha posto o rótulo `Sim`/`Não` ao lado da chave e, na célula, o texto.
+
+- **Formulário e cru:** só a chave, sem rótulo ao lado. O rótulo do campo, em
+  cima, já diz do que se trata.
+- **Célula:** **caixa vazia ou marcada**, e o clique **alterna na hora** — não
+  abre controle nenhum. Vazio é caixa vazia, e essa é a única exceção à regra de
+  "vazio fica vazio": um binário sem valor ainda precisa de caixa para clicar.
+- **É o padrão de mercado?** Ela pediu para eu verificar, e é: Notion (checkbox),
+  ClickUp (Checkbox), Monday (coluna Checkbox) e Twenty CRM (Boolean) todos
+  desenham a célula como caixa e alternam com um clique. Quem usa chave na
+  célula é o Airtable, e mesmo ele alterna com um clique.
+- As opções do campo **Botões de Seleção única** deixaram de ser `Sim`/`Não`
+  (viraram `Equipe interna`/`Terceirizado`): duas opções chamadas Sim e Não do
+  lado do binário embaralhavam justamente a distinção que ela pediu.
+
+### 2. "Intervalo de horas" não existe
+
+O tipo `EnlTimeRange` saiu do catálogo, das células, dos controles e dos mocks.
+O que existe é **Duração**, e ela é **inserção de duração**, não par de pontas:
+campo de texto com `Ex.: "1 dia", "2 semanas", "3 meses", "1 ano" ou "30 min"`,
+medido no develop. Já estava corrigido na rodada 3; agora o tipo fantasma também
+saiu do código.
+
+### 3. O "+" ao lado do relacionamento
+
+Saiu. O atalho de criar registro agora fica **no pé da lista do próprio
+seletor**, com busca no topo, que é onde o develop o põe. Um "+" solto fora do
+controle não diz a que pertence e rouba um alvo de clique. Valendo para
+Relacionamento Simples **e** Múltiplo.
+
+### 4. O que faz salvar cada campo
+
+Isto virou dado do catálogo, `comoSalva`, com cinco valores:
+
+| Valor | O que a interface diz | Exemplos |
+|---|---|---|
+| `imediato` | "Escolher já salva. Não há o que confirmar." | listas, radio, caixas, binário, data, relação simples |
+| `enterOuSair` | "Enter salva. Sair do campo salva. Esc desfaz." | texto, máscara, e-mail, número, tags, duração |
+| `aoFechar` | "Fechar o seletor salva. Esc desfaz." | seleção múltipla, relação múltipla |
+| `confirmar` | "Precisa do botão Confirmar. Esc descarta." | texto longo, HTML, moeda, endereço, grupo, repetidor, pessoa, assinatura |
+| `naoSeAplica` | "O sistema preenche. Não há o que salvar." | código gerado, valor dinâmico, editor de documentos, chat |
+
+Onde a frase aparece: **no formulário**, embaixo do controle; **na célula em
+camada flutuante**, no rodapé, onde o botão **Confirmar** só existe para os
+campos que precisam dele (nos outros o rodapé traz só **Fechar**); **na célula em
+linha**, como etiqueta flutuante, que não empurra a altura da linha; e **na ficha
+do campo**, junto da família e da largura.
+
+### 5. Os campos de anexo: eu tinha deixado quase nada
+
+Ela está certa, e a fonte é o documento do time de produtos, que lista as ações
+de anexo. Eu tinha só o botão de subir arquivo. Agora:
+
+- **anexo é lista**, não arquivo único, nos mocks e nos dois componentes;
+- cada linha tem **renomear no lugar, subir, descer, baixar e remover**, e o pé
+  do campo tem **adicionar arquivo**;
+- a célula mostra o primeiro anexo e **`+N`** para o resto;
+- o relatório .xlsx leva o hyperlink do primeiro com `(+N)` no texto, porque um
+  hyperlink de célula aponta para um destino só.
+
+**Maquete declarada:** o "adicionar" cria um anexo de exemplo em vez de abrir o
+seletor de arquivos do sistema. Daí para frente tudo é real: renomear, reordenar
+e remover mexem no valor. **Reordenar é por botão de subir e descer, e não por
+arrastar** — arrastar dentro de uma camada flutuante sobre a célula é frágil, e o
+que está em discussão é a lista de ações, não a mecânica do arrasto.
+
+### 6. Chat sem interação na célula, e Anotações sem a conversa
+
+- `EnChats` **deixou de ser somente leitura**. Ele não se *preenche* no
+  formulário de criação (a conversa nasce com o item), mas a **célula abre a
+  conversa e recebe mensagem**. Era erro meu.
+- **Anotações deixou de ser caixa de texto e virou conversa também**: histórico
+  com autor, hora e o texto, e o compositor embaixo com o
+  `Comente ou digite "/" para acionar comandos e ações da IA` e a fila de ações
+  (anexar, mencionar, pessoas, ações de IA, gravar vídeo) mais o enviar. É o
+  desenho do exemplo do Figma.
+- Mandar mensagem **funciona de verdade**: entra no histórico e o contador da
+  célula sobe.
+- A saída formatada dos dois é a **última mensagem com o autor**. No .xlsx,
+  **chat não vai** (regra do documento, e ela está certa: é histórico) e
+  **anotação vai inteira**, uma mensagem por linha na célula.
+
+### E o resto da mensagem
+
+| O que ela disse | O que ficou |
+|---|---|
+| "e-mail e url são o campo de texto simples com máscara" | o catálogo já dizia isso em `config.masks`; agora a célula de e-mail também **abre** (`mailto:`), que é o que a máscara acrescenta na leitura. Com máscara de URL, o mesmo ícone abre em outra aba |
+| "seleção única deve ocupar bastante da largura da coluna, pra destacar" | a célula é um **selo colorido da largura da coluna**, com o chevron na ponta; no formulário o selo aparece **dentro** do controle e **dentro** de cada linha da lista |
+| "seleção múltipla: as opções aparecendo, a busca, e vai concatenando num espacinho" | os escolhidos são selos com `x` **dentro** do campo, e a lista fica **aberta embaixo**, com busca e caixa marcada por opção |
+| "tags: igual, mas só uma tag por digitação" | mesmo desenho, sem lista de opções, com o aviso `Digite e aperte Enter para cada tag` |
+| "dado vazio não traz '-', fica vazio de verdade" | a célula vazia não tem texto nenhum, só o alvo de clique e o rótulo para leitor de tela |
+| "não precisa mudar o FORMATO da tabela como no print" | a tabela continua a **nossa tabela nova**, a do Nuxt UI, com a casca do develop |
+
+### O Figma, com nome aos bois
+
+Abri o arquivo no navegador dela. A página **Mockup** é um **quadro de
+referência com imagens colados**: as camadas se chamam `image 12`, `image 13`,
+`Gemini_Generated_Image_…`, e cada moldura é a tabela real de Invoices com **uma
+interação de célula sobreposta**. É exatamente o conjunto de prints que ela
+mandou. Não há componente, variante nem token para herdar: é material de
+referência visual, e foi assim que usei. O modo apresentação do Figma exige
+conta, e conta eu não crio.
+
+### O que segue aberto
+
+- **Matriz de dados** e **ID Personalizado** continuam fora do protótipo: não
+  consegui criar os dois no develop para medir o comportamento.
+- Os quatro tipos **legados** que só existem em dado antigo (Data, Hora,
+  Datetime, Editor de HTML v1) continuam fora da vitrine.
+- A **barra de seleção em massa** ("1 Selecionado / Comparar / Excluir") e o
+  estado de **alterações não salvas** do develop continuam não prototipados.

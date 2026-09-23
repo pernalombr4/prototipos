@@ -241,11 +241,6 @@ export function saidaFormatada(
     case 'EnlCalendar':
       return formatarDataMedia(valor as string, idioma)
 
-    case 'EnlTimeRange': {
-      const v = valor as { start: string, end: string }
-      return `${v.start}${separador}${v.end}`
-    }
-
     case 'EnRel': {
       const v = valor as { display: string, reference: string }
       return v.display?.trim() ? v.display : v.reference
@@ -268,8 +263,15 @@ export function saidaFormatada(
     case 'uploadImage':
     case 'EnPDF':
     case 'EnOnlyoffice': {
-      const v = valor as { filename: string, size?: number }
-      return v.size ? `${v.filename} (${formatarBytes(v.size, idioma)})` : v.filename
+      /*
+       * Anexo é LISTA: o campo aceita vários arquivos, na ordem que a pessoa
+       * definir. Dado antigo, gravado como objeto único, entra como lista de
+       * um e sai igual.
+       */
+      const itens = (Array.isArray(valor) ? valor : [valor]) as { filename: string, size?: number }[]
+      return itens
+        .map(a => (a.size ? `${a.filename} (${formatarBytes(a.size, idioma)})` : a.filename))
+        .join(separador)
     }
 
     case 'EnESign': {
@@ -289,8 +291,14 @@ export function saidaFormatada(
       return Object.values(v).filter(Boolean).join(separador)
     }
 
-    case 'EnChats': {
-      const msgs = valor as { author: string, text: string }[]
+    /*
+     * Anotações e Chat são conversa, e a saída formatada de uma conversa é a
+     * ÚLTIMA mensagem com o autor: é o que cabe numa célula e é o que o
+     * develop mostra na coluna.
+     */
+    case 'EnChats':
+    case 'EnNotes': {
+      const msgs = (Array.isArray(valor) ? valor : []) as { author: string, text: string }[]
       const ultima = msgs[msgs.length - 1]
       return ultima ? `${ultima.author}: ${ultima.text}` : ''
     }
@@ -355,13 +363,33 @@ export function celulaDeExportacao(
     case 'uploadImage':
     case 'EnPDF':
     case 'EnOnlyoffice': {
-      const v = valor as { filename: string, url: string }
-      return { tipo: 'link', texto: v.filename, url: v.url }
+      /*
+       * A lista inteira não caberia num hyperlink só: o link aponta para o
+       * primeiro arquivo e o texto diz quantos vêm atrás. Uma coluna por
+       * arquivo seria largura variável por linha, o que a planilha não tem.
+       */
+      const itens = (Array.isArray(valor) ? valor : [valor]) as { filename: string, url: string }[]
+      const primeiro = itens[0]
+      if (!primeiro) return ''
+      return {
+        tipo: 'link',
+        texto: itens.length > 1 ? `${primeiro.filename} (+${itens.length - 1})` : primeiro.filename,
+        url: primeiro.url,
+      }
     }
 
     case 'EnChats':
       /* Histórico de conversa não vai para a planilha. Regra do documento. */
       return ''
+
+    case 'EnNotes':
+      /*
+       * Anotação, ao contrário do chat, É conteúdo do registro: vai inteira,
+       * uma mensagem por linha dentro da célula.
+       */
+      return (Array.isArray(valor) ? valor : [])
+        .map(m => `${(m as { author: string }).author}: ${(m as { text: string }).text}`)
+        .join('\n')
 
     default:
       /* Vírgula e espaço em lista, e não a barra que a tela usa no tooltip. */

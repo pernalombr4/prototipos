@@ -44,7 +44,12 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   /** Clicar no valor entra em edição, que é o que a demanda pediu. */
-  editar: []
+  'editar': []
+  /**
+   * Tipo que salva no clique (`comoSalva: 'imediato'`) não abre editor: ele
+   * troca o valor na hora. É o caso do booleano.
+   */
+  'alternar': [unknown]
 }>()
 
 const vazio = computed(() => estaVazio(props.valor))
@@ -76,23 +81,25 @@ const relacoes = computed(() => (props.valor as { id: number, display: string, r
 const relacoesVisiveis = computed(() => relacoes.value.slice(0, limite.value))
 const relacoesSobrando = computed(() => Math.max(0, relacoes.value.length - relacoesVisiveis.value.length))
 
-const comoArquivo = computed(() => props.valor as { url: string, filename: string, mime: string, size: number })
+/**
+ * Anexo é LISTA, não um arquivo só: o produto aceita vários, com ordem
+ * definida pela pessoa. Dado antigo, gravado como objeto único, entra aqui
+ * como lista de um.
+ */
+interface Anexo { url: string, filename: string, mime: string, size?: number }
+const comoAnexos = computed<Anexo[]>(() => {
+  const v = props.valor
+  if (Array.isArray(v)) return v as Anexo[]
+  if (v && typeof v === 'object') return [v as Anexo]
+  return []
+})
+const comoArquivo = computed(() => comoAnexos.value[0] ?? ({} as Anexo))
 const comoPessoa = computed(() => props.valor as { name: string, email?: string })
 const comoEndereco = computed(() => props.valor as Record<string, string>)
 const comoGrupo = computed(() => props.valor as Record<string, string>)
 const comoRepetidor = computed(() => (props.valor as Record<string, unknown>[]) ?? [])
-const comoConversa = computed(() => (props.valor as { author: string, text: string }[]) ?? [])
+const comoConversa = computed(() => (Array.isArray(props.valor) ? props.valor : []) as { author: string, at?: string, text: string }[])
 const comoAssinatura = computed(() => props.valor as { signer: string, signedAt: string })
-const comoIntervalo = computed(() => props.valor as { start: string, end: string })
-const comoPeriodo = computed(() => props.valor as { start: string, end: string })
-
-/** Quantos dias o período cobre, contando as duas pontas. */
-const diasDoPeriodo = computed(() => {
-  const p = comoPeriodo.value
-  if (!p?.start || !p?.end) return 0
-  return Math.round((new Date(p.end).getTime() - new Date(p.start).getTime()) / 86400000) + 1
-})
-
 /** Iniciais para o avatar da pessoa. */
 const iniciais = computed(() =>
   comoPessoa.value?.name
@@ -108,6 +115,14 @@ const iniciais = computed(() =>
 const expandido = ref(false)
 
 const copiado = ref(false)
+/**
+ * E-mail e URL são o Texto simples com máscara. O que a máscara acrescenta na
+ * leitura é o atalho de abrir: `mailto:` no e-mail, nova aba na URL.
+ */
+function abrirEmail(endereco: string) {
+  window.open(`mailto:${endereco}`, '_blank', 'noopener')
+}
+
 async function copiar(texto: string) {
   try {
     await navigator.clipboard.writeText(texto)
@@ -138,16 +153,23 @@ async function copiar(texto: string) {
       campo.somenteLeitura ? 'cursor-default' : 'cursor-text hover:bg-elevated hover:ring-1 hover:ring-default',
     ]"
     :aria-label="textoCompleto || t.vazio"
-    @click="emit('editar')"
+    @click="campo.tipo === 'inputSwitch' ? emit('alternar', !valor) : emit('editar')"
   >
-    <!-- ───────────────────────────── vazio ───────────────────────────── -->
-    <span v-if="vazio" class="text-sm text-dimmed">
-      {{ naCelula ? '-' : t.vazio }}
-    </span>
+    <!--
+      ───────────────────────────── vazio ─────────────────────────────
+      Vazio fica VAZIO. O hífen que eu usava não existe na tela nova: as
+      células sem valor ficam em branco mesmo. O que sobra é o alvo de clique,
+      com a altura da linha, e o rótulo para quem usa leitor de tela.
+      A única exceção é o booleano, que sempre tem caixa: vazio é caixa vazia.
+    -->
+    <span
+      v-if="vazio && campo.tipo !== 'inputSwitch'"
+      class="sr-only"
+    >{{ t.vazio }}</span>
 
     <!-- ──────────────────────── texto simples ─────────────────────────── -->
     <span
-      v-else-if="campo.tipo === 'inputText' || campo.tipo === 'EnNotes'"
+      v-else-if="campo.tipo === 'inputText'"
       class="min-w-0 text-sm text-highlighted"
       :class="naCelula ? 'truncate' : ''"
       :title="naCelula ? String(valor) : undefined"
@@ -189,9 +211,21 @@ async function copiar(texto: string) {
         class="min-w-0 truncate text-sm tabular-nums"
         :class="campo.tipo === 'email' ? 'text-primary underline decoration-dotted' : 'text-highlighted'"
       >{{ valor }}</span>
+      <!--
+        E-mail é o Texto simples com máscara de e-mail, e o que a máscara muda
+        na célula é isto: o valor ganha o atalho de abrir. Com máscara de URL
+        o mesmo ícone abre a página em outra aba.
+      -->
+      <UIcon
+        v-if="campo.tipo === 'email'"
+        name="i-lucide-external-link"
+        class="size-3 shrink-0 cursor-pointer text-dimmed opacity-0 transition-opacity group-hover/valor:opacity-100"
+        :aria-label="t.abrir"
+        @click.stop="abrirEmail(String(valor))"
+      />
       <UIcon
         :name="copiado ? 'i-lucide-check' : 'i-lucide-copy'"
-        class="size-3 shrink-0 text-dimmed opacity-0 transition-opacity group-hover/valor:opacity-100"
+        class="size-3 shrink-0 cursor-pointer text-dimmed opacity-0 transition-opacity group-hover/valor:opacity-100"
         :aria-label="t.copiar"
         @click.stop="copiar(String(valor))"
       />
@@ -226,15 +260,27 @@ async function copiar(texto: string) {
     </span>
 
     <!-- ──────────────────────── escolha: os selos ─────────────────────── -->
-    <UBadge
+    <!--
+      ─────────────────────── escolha única: o selo largo ──────────────────
+      Ela pediu que ocupasse boa parte da coluna, para destacar mesmo. Então o
+      selo é um bloco de largura cheia, com o rótulo à esquerda e o chevron à
+      direita, como no exemplo do Figma. O chevron diz que ali se troca.
+    -->
+    <span
       v-else-if="campo.tipo === 'EnlDropdown' || campo.tipo === 'radioButton'"
-      :color="corDaOpcao(lista, String(valor)) as never"
-      variant="subtle"
-      size="sm"
-      class="max-w-full truncate"
+      class="flex w-full min-w-0 items-center justify-between gap-1 rounded-md px-2 py-0.5 text-sm font-medium"
+      :class="{
+        'bg-primary/10 text-primary': corDaOpcao(lista, String(valor)) === 'primary',
+        'bg-info/10 text-info': corDaOpcao(lista, String(valor)) === 'info',
+        'bg-success/10 text-success': corDaOpcao(lista, String(valor)) === 'success',
+        'bg-warning/10 text-warning': corDaOpcao(lista, String(valor)) === 'warning',
+        'bg-error/10 text-error': corDaOpcao(lista, String(valor)) === 'error',
+        'bg-elevated text-toned': corDaOpcao(lista, String(valor)) === 'neutral',
+      }"
     >
-      {{ rotuloDaOpcao(lista, String(valor)) }}
-    </UBadge>
+      <span class="min-w-0 truncate">{{ rotuloDaOpcao(lista, String(valor)) }}</span>
+      <UIcon name="i-lucide-chevron-down" class="size-3.5 shrink-0 opacity-60" />
+    </span>
 
     <span
       v-else-if="campo.tipo === 'multiSelect' || campo.tipo === 'checkbox' || campo.tipo === 'EnlCheckbox'"
@@ -276,13 +322,22 @@ async function copiar(texto: string) {
       </UBadge>
     </UTooltip>
 
-    <!-- ──────────────────────────── booleano ──────────────────────────── -->
-    <span v-else-if="campo.tipo === 'inputSwitch'" class="flex items-center gap-1.5">
+    <!--
+      ──────────────────────────── booleano ────────────────────────────
+      Uma caixa, vazia ou marcada, e clicar alterna na hora. Não é "Sim/Não"
+      em texto: Notion, Airtable, ClickUp e Monday mostram caixa, e é isso que
+      a pessoa reconhece. O clique alterna porque o tipo salva no clique.
+    -->
+    <span v-else-if="campo.tipo === 'inputSwitch'" class="flex items-center">
       <span
-        class="size-1.5 shrink-0 rounded-full"
-        :class="valor ? 'bg-success' : 'bg-muted'"
-      />
-      <span class="text-sm text-highlighted">{{ valor ? t.sim : t.nao }}</span>
+        class="flex size-4 shrink-0 items-center justify-center rounded border transition-colors"
+        :class="valor
+          ? 'border-primary bg-primary text-inverted'
+          : 'border-default bg-default group-hover/valor:border-primary/50'"
+        :aria-label="valor ? t.sim : t.nao"
+      >
+        <UIcon v-if="valor" name="i-lucide-check" class="size-3" />
+      </span>
     </span>
 
     <!-- ──────────────────────────── data/hora ─────────────────────────── -->
@@ -295,12 +350,6 @@ async function copiar(texto: string) {
       </span>
       <span v-if="!naCelula && relativoEmDias(String(valor), idioma)" class="truncate text-xs text-muted">
         {{ relativoEmDias(String(valor), idioma) }}
-      </span>
-    </span>
-
-    <span v-else-if="campo.tipo === 'EnlTimeRange'" class="flex items-baseline gap-1.5">
-      <span class="text-sm tabular-nums text-highlighted">
-        {{ comoIntervalo.start }} {{ '→' }} {{ comoIntervalo.end }}
       </span>
     </span>
 
@@ -378,8 +427,11 @@ async function copiar(texto: string) {
       </span>
       <span class="min-w-0">
         <span class="block truncate text-sm text-highlighted">{{ comoArquivo.filename }}</span>
-        <span v-if="!naCelula" class="block text-xs text-muted">{{ formatarBytes(comoArquivo.size, idioma) }}</span>
+        <span v-if="!naCelula && comoArquivo.size" class="block text-xs text-muted">{{ formatarBytes(comoArquivo.size, idioma) }}</span>
       </span>
+      <UBadge v-if="comoAnexos.length > 1" color="neutral" variant="soft" size="sm">
+        {{ t.maisN(comoAnexos.length - 1) }}
+      </UBadge>
     </span>
 
     <span
@@ -390,15 +442,12 @@ async function copiar(texto: string) {
         <UIcon :name="campo.icone" class="size-3 shrink-0" />
         <span class="truncate">{{ comoArquivo.filename }}</span>
       </UBadge>
-      <span v-if="!naCelula" class="shrink-0 text-xs text-muted">
+      <UBadge v-if="comoAnexos.length > 1" color="neutral" variant="soft" size="sm">
+        {{ t.maisN(comoAnexos.length - 1) }}
+      </UBadge>
+      <span v-if="!naCelula && comoArquivo.size" class="shrink-0 text-xs text-muted">
         {{ formatarBytes(comoArquivo.size, idioma) }}
       </span>
-      <UIcon
-        v-if="!naCelula"
-        name="i-lucide-download"
-        class="size-3.5 shrink-0 text-dimmed opacity-0 transition-opacity group-hover/valor:opacity-100"
-        :aria-label="t.baixar"
-      />
     </span>
 
     <span v-else-if="campo.tipo === 'EnESign'" class="flex min-w-0 items-center gap-1.5">
@@ -431,25 +480,24 @@ async function copiar(texto: string) {
       </span>
     </span>
 
-    <span v-else-if="campo.tipo === 'EnChats'" class="flex min-w-0 items-center gap-1.5">
-      <UIcon name="i-lucide-message-square" class="size-3.5 shrink-0 text-dimmed" />
-      <span class="min-w-0 truncate text-sm text-highlighted">
-        {{ comoConversa.at(-1)?.text }}
-      </span>
-      <UBadge color="neutral" variant="soft" size="sm">{{ comoConversa.length }}</UBadge>
-    </span>
-
     <!--
-      Duração: as duas datas. NÃO é HH:MM:SS, que é o que o documento do time
-      de produtos escreveu. Ver a divergência no DECISOES.md.
+      Conversa na célula: o ícone é o alvo, como no develop (a coluna mostra só
+      um ícone de balão). Clicar abre o compositor sobre a célula. Com
+      mensagem, o ícone vem com o contador e a última linha ao lado.
     -->
-    <span v-else-if="campo.tipo === '__duracao_antigo'" class="flex min-w-0 items-baseline gap-1.5">
-      <span class="shrink-0 text-sm tabular-nums text-highlighted">
-        {{ formatarDataCurta(comoPeriodo.start, idioma) }} {{ naCelula ? '→' : 'a' }}
-        {{ formatarDataCurta(comoPeriodo.end, idioma) }}
-      </span>
-      <span v-if="!naCelula && diasDoPeriodo" class="shrink-0 text-xs text-muted">
-        {{ diasDoPeriodo }}d
+    <span v-else-if="campo.tipo === 'EnChats' || campo.tipo === 'EnNotes'" class="flex min-w-0 items-center gap-1.5">
+      <UChip
+        :show="comoConversa.length > 0"
+        :text="comoConversa.length"
+        size="sm"
+        color="primary"
+      >
+        <span class="flex size-6 items-center justify-center rounded-md bg-primary/10 text-primary">
+          <UIcon name="i-lucide-message-square" class="size-3.5" />
+        </span>
+      </UChip>
+      <span v-if="!naCelula && comoConversa.length" class="min-w-0 truncate text-sm text-highlighted">
+        {{ comoConversa.at(-1)?.text }}
       </span>
     </span>
 

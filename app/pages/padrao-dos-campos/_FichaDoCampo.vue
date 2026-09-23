@@ -126,6 +126,22 @@ const blocos = computed(() => {
           </UBadge>
         </div>
 
+        <!--
+          O que faz salvar. É a pergunta que ela fez sobre todos os campos, e
+          a resposta muda por tipo: por isso ela mora no catálogo, e não num
+          texto genérico de tela.
+        -->
+        <p class="flex items-center gap-1.5 text-xs text-muted">
+          <UIcon
+            :name="campo.comoSalva === 'naoSeAplica' ? 'i-lucide-lock' : 'i-lucide-save'"
+            class="size-3.5 shrink-0"
+          />
+          <span>
+            <span class="font-medium text-toned">{{ t.comoSalva }}:</span>
+            {{ t.comoSalvaTextos[campo.comoSalva] }}
+          </span>
+        </p>
+
         <UAlert
           v-if="campo.disponibilidade === 'legado'"
           color="warning"

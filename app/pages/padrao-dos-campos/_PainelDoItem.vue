@@ -228,6 +228,7 @@ const metadados = computed(() => {
                 :t="t"
                 :idioma="idioma"
                 @editar="cruEmEdicao = campo.somenteLeitura ? null : campo.refId"
+                @alternar="(v: unknown) => { rascunho[campo.refId] = v; emit('editarValor', campo.refId, v) }"
               />
             </div>
           </div>

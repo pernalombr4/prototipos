@@ -8,12 +8,14 @@
  *
  * O que funciona de verdade aqui (regra 5): digitar, escolher, marcar, somar e
  * limpar mexem no objeto em memória e o resultado aparece na tabela na hora.
- * O que é maquete: o seletor de arquivo não carrega arquivo nenhum, o editor
- * de documentos não abre editor e o chat não recebe mensagem. Está declarado
- * no DECISOES.md.
+ * O que é maquete: o seletor de arquivo não sobe arquivo de verdade (o botão
+ * acrescenta um anexo de exemplo, e daí em diante renomear, reordenar e
+ * remover funcionam), e o editor de documentos não abre editor. A conversa,
+ * essa, recebe mensagem. Está declarado no DECISOES.md.
  */
 import type { Campo } from './campos'
 import type { Textos } from './textos'
+import { corDaOpcao, formatarBytes, formatarDataHora, rotuloDaOpcao } from './formatacao'
 import { indicesDeCorrecao, itensRelacionaveis, membros, moedas, opcoes as todasAsOpcoes } from './mocks'
 
 const props = defineProps<{
@@ -131,16 +133,104 @@ function mudarLinha(i: number, chave: string, novo: unknown) {
   )
 }
 
-const arquivo = computed(() => valor.value as { filename: string, size: number } | null)
+/* ------------------------------- os anexos ------------------------------- */
 
-function simularAnexo() {
-  emit('update:modelValue', {
-    url: 'https://exemplo.invalido/anexo-do-prototipo.pdf',
-    filename: 'anexo-do-prototipo.pdf',
-    mime: 'application/pdf',
-    size: 128400,
-  })
+/**
+ * Anexo é LISTA, e o documento do time de produtos é explícito sobre o que a
+ * pessoa faz com ela: **baixar, renomear, deletar e reordenar**. Eu tinha
+ * deixado só um botão de subir arquivo, e ela cobrou com razão.
+ *
+ * Reordenar aqui é por botão de subir e descer, e não por arrastar: arrastar
+ * dentro de uma camada flutuante de célula é frágil, e o que está em discussão
+ * é a lista de ações, não a mecânica do arrasto. Declarado no DECISOES.md.
+ */
+interface Anexo { url: string, filename: string, mime: string, size?: number }
+
+const anexos = computed<Anexo[]>(() => {
+  const v = valor.value
+  if (Array.isArray(v)) return v as Anexo[]
+  if (v && typeof v === 'object') return [v as Anexo]
+  return []
+})
+
+function gravarAnexos(lista: Anexo[]) {
+  emit('update:modelValue', lista)
 }
+
+function acrescentarAnexo() {
+  const n = anexos.value.length + 1
+  gravarAnexos([...anexos.value, {
+    url: `https://exemplo.invalido/anexo-${n}.pdf`,
+    filename: `anexo-${n}.pdf`,
+    mime: 'application/pdf',
+    size: 96000 + n * 1000,
+  }])
+}
+
+function removerAnexo(i: number) {
+  gravarAnexos(anexos.value.filter((_, j) => j !== i))
+}
+
+function moverAnexo(i: number, passo: number) {
+  const destino = i + passo
+  if (destino < 0 || destino >= anexos.value.length) return
+  const lista = [...anexos.value]
+  const [item] = lista.splice(i, 1)
+  lista.splice(destino, 0, item!)
+  gravarAnexos(lista)
+}
+
+/**
+ * Renomear acontece no lugar: o nome vira campo de texto. O rascunho fica
+ * LOCAL até o Enter, e não sobe a cada tecla: quando eu emitia por tecla, o
+ * componente renascia no meio da digitação e comia a seleção do cursor.
+ */
+const renomeando = ref<number | null>(null)
+const rascunhoDoNome = ref('')
+
+function abrirRenomeio(i: number) {
+  renomeando.value = i
+  rascunhoDoNome.value = anexos.value[i]?.filename ?? ''
+}
+
+function confirmarRenomeio() {
+  const i = renomeando.value
+  renomeando.value = null
+  if (i === null) return
+  const nome = rascunhoDoNome.value.trim()
+  if (!nome) return
+  gravarAnexos(anexos.value.map((a, j) => (j === i ? { ...a, filename: nome } : a)))
+}
+
+/* ------------------------------ a conversa ------------------------------- */
+
+/**
+ * Anotações e Chat são conversa, com histórico e compositor. O compositor é o
+ * do exemplo do Figma: a caixa de texto com o atalho de "/" e, embaixo, a fila
+ * de ações (anexar, mencionar, pessoas, IA, vídeo, áudio) e o enviar.
+ */
+interface Mensagem { author: string, at?: string, text: string }
+const conversa = computed<Mensagem[]>(() => (Array.isArray(valor.value) ? valor.value : []) as Mensagem[])
+const rascunhoDaMensagem = ref('')
+
+function enviarMensagem() {
+  const texto = rascunhoDaMensagem.value.trim()
+  if (!texto) return
+  emit('update:modelValue', [...conversa.value, {
+    author: 'Mikaela Jardim',
+    at: new Date().toISOString(),
+    text: texto,
+  }])
+  rascunhoDaMensagem.value = ''
+}
+
+const acoesDoCompositor = computed(() => [
+  { icone: 'i-lucide-paperclip', rotulo: props.t.anexar },
+  { icone: 'i-lucide-at-sign', rotulo: props.t.mencionar },
+  { icone: 'i-lucide-users', rotulo: props.t.pessoas },
+  { icone: 'i-lucide-sparkles', rotulo: props.t.acoesDeIa },
+  { icone: 'i-lucide-video', rotulo: props.t.gravarVideo },
+])
 
 const pessoaEscolhida = computed({
   get: () => (valor.value as { name: string } | null)?.name ?? '',
@@ -207,6 +297,22 @@ const opcoesDeMoeda = computed(() =>
 const calculadoraAberta = ref(false)
 const correcao = ref({ indice: '', inicio: '2026-09-22', fim: '', multiplos: false })
 
+/* --------------------------- escolha múltipla ---------------------------- */
+
+const buscaDeOpcao = ref('')
+
+const opcoesFiltradas = computed(() => {
+  const q = buscaDeOpcao.value.trim().toLowerCase()
+  return lista.value.filter(o => !q || o.label.toLowerCase().includes(q))
+})
+
+const escolhidos = computed<string[]>(() => (valor.value as string[]) ?? [])
+
+function alternarOpcao(v: string) {
+  const atual = escolhidos.value
+  emit('update:modelValue', atual.includes(v) ? atual.filter(x => x !== v) : [...atual, v])
+}
+
 const opcoesDeRelacao = computed(() =>
   itensRelacionaveis.map(i => ({
     /* Display vazio cai para a referência. É a mesma regra da célula. */
@@ -221,7 +327,7 @@ const opcoesDeRelacao = computed(() =>
     O rótulo é um botão: clicar nele abre a ficha do campo. O controle fica
     livre para ser controle, e quem quer entender a regra tem um alvo claro.
   -->
-  <div ref="raizDoCampo" class="min-w-0" @keydown="aoTeclar">
+  <div ref="raizDoCampo" class="relative min-w-0" @keydown="aoTeclar">
     <button
       v-if="!semRotulo"
       type="button"
@@ -256,7 +362,7 @@ const opcoesDeRelacao = computed(() =>
     />
 
     <UTextarea
-      v-else-if="campo.tipo === 'EnTextArea' || campo.tipo === 'EnNotes'"
+      v-else-if="campo.tipo === 'EnTextArea'"
       v-model="comoTexto"
       size="sm"
       class="w-full"
@@ -298,6 +404,12 @@ const opcoesDeRelacao = computed(() =>
       placeholder="00.000.000/0000-00"
     />
 
+    <!--
+      E-mail e URL não são famílias próprias: são o Texto simples com a
+      máscara correspondente (`config.masks`), como ela confirmou. O que muda
+      é a validação e o que a célula faz com o valor: mailto: no e-mail,
+      nova aba na URL.
+    -->
     <UInput
       v-else-if="campo.tipo === 'email'"
       v-model="comoTexto"
@@ -364,15 +476,42 @@ const opcoesDeRelacao = computed(() =>
     </div>
 
     <!-- ───────────────────────────── escolha ────────────────────────────── -->
+    <!--
+      Seleção única: o selo colorido aparece DENTRO do controle, e não como
+      texto solto, tanto no gatilho quanto na lista. É o desenho do exemplo
+      que ela mandou: o status ocupa a largura e destaca de longe.
+    -->
     <USelectMenu
       v-else-if="campo.tipo === 'EnlDropdown' || (campo.tipo === 'radioButton' && radioViraLista)"
       v-model="comoTexto"
-      :items="lista.map(o => ({ label: o.label, value: o.value }))"
+      :items="lista.map(o => ({ label: o.label, value: o.value, cor: o.cor }))"
       value-key="value"
       size="sm"
       class="w-full"
       :search-input="comBusca ? { placeholder: t.pesquisar } : false"
-    />
+    >
+      <template #default>
+        <UBadge
+          v-if="comoTexto"
+          :color="corDaOpcao(lista, comoTexto) as never"
+          variant="subtle"
+          size="sm"
+          class="max-w-full"
+        >
+          <span class="truncate">{{ rotuloDaOpcao(lista, comoTexto) }}</span>
+        </UBadge>
+        <span v-else class="text-sm text-dimmed">{{ t.vazio }}</span>
+      </template>
+      <template #item-label="{ item }">
+        <UBadge
+          :color="((item as { cor?: string }).cor ?? 'neutral') as never"
+          variant="subtle"
+          size="sm"
+        >
+          {{ item.label }}
+        </UBadge>
+      </template>
+    </USelectMenu>
 
     <URadioGroup
       v-else-if="campo.tipo === 'radioButton'"
@@ -381,16 +520,59 @@ const opcoesDeRelacao = computed(() =>
       size="sm"
     />
 
-    <USelectMenu
-      v-else-if="campo.tipo === 'multiSelect'"
-      v-model="comoListaDeTexto"
-      multiple
-      :items="lista.map(o => ({ label: o.label, value: o.value }))"
-      value-key="value"
-      size="sm"
-      class="w-full"
-      :search-input="{ placeholder: t.pesquisar }"
-    />
+    <!--
+      Seleção múltipla: os escolhidos viram selos com x DENTRO do campo e a
+      lista fica aberta embaixo, com busca. Vai concatenando conforme cresce,
+      como no exemplo do Figma. Escolher não fecha nada: o que salva é fechar
+      o seletor.
+    -->
+    <div v-else-if="campo.tipo === 'multiSelect'" class="rounded-md border border-default">
+      <div class="flex flex-wrap items-center gap-1 border-b border-default p-1.5">
+        <UBadge
+          v-for="v in escolhidos"
+          :key="v"
+          :color="corDaOpcao(lista, v) as never"
+          variant="subtle"
+          size="sm"
+        >
+          {{ rotuloDaOpcao(lista, v) }}
+          <UIcon
+            name="i-lucide-x"
+            class="ml-0.5 size-3 cursor-pointer opacity-60 hover:opacity-100"
+            :aria-label="t.remover"
+            @click.stop="alternarOpcao(v)"
+          />
+        </UBadge>
+        <UInput
+          v-model="buscaDeOpcao"
+          variant="none"
+          size="sm"
+          class="min-w-24 flex-1"
+          :placeholder="t.buscarOpcao"
+        />
+      </div>
+      <div class="max-h-44 overflow-y-auto p-1">
+        <button
+          v-for="o in opcoesFiltradas"
+          :key="o.value"
+          type="button"
+          class="flex w-full items-center gap-2 rounded px-1.5 py-1 text-left transition-colors hover:bg-elevated"
+          @click="alternarOpcao(o.value)"
+        >
+          <UIcon
+            :name="escolhidos.includes(o.value) ? 'i-lucide-square-check-big' : 'i-lucide-square'"
+            class="size-4 shrink-0"
+            :class="escolhidos.includes(o.value) ? 'text-primary' : 'text-dimmed'"
+          />
+          <UBadge :color="(o.cor ?? 'neutral') as never" variant="subtle" size="sm">
+            {{ o.label }}
+          </UBadge>
+        </button>
+        <p v-if="!opcoesFiltradas.length" class="px-1.5 py-2 text-sm text-muted">
+          {{ t.semResultado }}
+        </p>
+      </div>
+    </div>
 
     <div v-else-if="campo.tipo === 'checkbox' || campo.tipo === 'EnlCheckbox'" class="space-y-2">
       <UCheckbox
@@ -406,11 +588,16 @@ const opcoesDeRelacao = computed(() =>
       />
     </div>
 
+    <!--
+      Tags: o mesmo desenho da seleção múltipla, sem a lista de opções, porque
+      não existe lista: cada Enter cria uma tag nova. Uma por digitação.
+    -->
     <UInputTags
       v-else-if="campo.tipo === 'EnlChips'"
       v-model="comoListaDeTexto"
       size="sm"
       class="w-full"
+      :placeholder="t.umaTagPorEnter"
     />
 
     <USelectMenu
@@ -426,11 +613,16 @@ const opcoesDeRelacao = computed(() =>
     />
 
     <!-- ──────────────────────────── booleano ────────────────────────────── -->
+    <!--
+      Alternativa binária: só o controle, sem rótulo ao lado. "Sim/Não" não é
+      o nosso par: o campo tem um estado só, ligado ou desligado, e o rótulo
+      de cima já diz de que se trata.
+    -->
     <USwitch
       v-else-if="campo.tipo === 'inputSwitch'"
       v-model="comoBooleano"
-      :label="valor ? t.sim : t.nao"
       size="sm"
+      :aria-label="rotuloDoTipo"
     />
 
     <!-- ──────────────────────────── data/hora ───────────────────────────── -->
@@ -442,22 +634,6 @@ const opcoesDeRelacao = computed(() =>
       class="w-full"
       @update:model-value="(v: string | number) => emit('update:modelValue', v ? `${v}T12:00:00.000Z` : null)"
     />
-
-    <div v-else-if="campo.tipo === 'EnlTimeRange'" class="flex items-center gap-2">
-      <UInput
-        :model-value="(valor as { start?: string })?.start ?? ''"
-        type="time"
-        size="sm"
-        @update:model-value="(v: string | number) => mudarSubcampo('start', String(v))"
-      />
-      <UIcon name="i-lucide-arrow-right" class="size-4 shrink-0 text-dimmed" />
-      <UInput
-        :model-value="(valor as { end?: string })?.end ?? ''"
-        type="time"
-        size="sm"
-        @update:model-value="(v: string | number) => mudarSubcampo('end', String(v))"
-      />
-    </div>
 
     <!--
       Duração: campo de texto, com os exemplos que o produto usa no
@@ -471,22 +647,6 @@ const opcoesDeRelacao = computed(() =>
       placeholder='Ex.: "1 dia", "2 semanas", "3 meses", "1 ano" ou "30 min"'
     />
 
-    <div v-else-if="campo.tipo === '__duracao_antigo'" class="flex items-center gap-2">
-      <UInput
-        :model-value="(valor as { start?: string })?.start?.slice(0, 10) ?? ''"
-        type="date"
-        size="sm"
-        @update:model-value="(v: string | number) => mudarSubcampo('start', v ? `${v}T12:00:00.000Z` : '')"
-      />
-      <UIcon name="i-lucide-arrow-right" class="size-4 shrink-0 text-dimmed" />
-      <UInput
-        :model-value="(valor as { end?: string })?.end?.slice(0, 10) ?? ''"
-        type="date"
-        size="sm"
-        @update:model-value="(v: string | number) => mudarSubcampo('end', v ? `${v}T12:00:00.000Z` : '')"
-      />
-    </div>
-
     <UInput
       v-else-if="campo.tipo === 'valorDinamico'"
       :model-value="comoTexto"
@@ -497,17 +657,35 @@ const opcoesDeRelacao = computed(() =>
     />
 
     <!-- ──────────────────────────── relações ────────────────────────────── -->
-    <div v-else-if="campo.tipo === 'EnRel'" class="flex items-center gap-1.5">
-      <USelectMenu
-        v-model="relacaoEscolhida"
-        :items="opcoesDeRelacao"
-        value-key="value"
-        size="sm"
-        class="min-w-0 flex-1"
-        :search-input="{ placeholder: t.pesquisar }"
-      />
-      <UButton icon="i-lucide-plus" color="neutral" variant="outline" size="sm" :aria-label="t.criar" />
-    </div>
+    <!--
+      Relação simples: busca no topo e o atalho de criar registro no PÉ da
+      lista, dentro do próprio seletor, que é onde ele está no develop. O "+"
+      solto do lado do campo saiu: ele não diz a que pertence e rouba um alvo
+      de clique do controle.
+    -->
+    <USelectMenu
+      v-else-if="campo.tipo === 'EnRel'"
+      v-model="relacaoEscolhida"
+      :items="opcoesDeRelacao"
+      value-key="value"
+      size="sm"
+      class="w-full"
+      :search-input="{ placeholder: t.pesquisar }"
+    >
+      <template #content-bottom>
+        <div class="border-t border-default p-1">
+          <UButton
+            icon="i-lucide-plus"
+            :label="t.criarRegistro"
+            color="primary"
+            variant="ghost"
+            size="xs"
+            block
+            class="justify-start"
+          />
+        </div>
+      </template>
+    </USelectMenu>
 
     <USelectMenu
       v-else-if="campo.tipo === 'EnRelMulti'"
@@ -518,7 +696,21 @@ const opcoesDeRelacao = computed(() =>
       size="sm"
       class="w-full"
       :search-input="{ placeholder: t.pesquisar }"
-    />
+    >
+      <template #content-bottom>
+        <div class="border-t border-default p-1">
+          <UButton
+            icon="i-lucide-plus"
+            :label="t.criarRegistro"
+            color="primary"
+            variant="ghost"
+            size="xs"
+            block
+            class="justify-start"
+          />
+        </div>
+      </template>
+    </USelectMenu>
 
     <!-- ───────────────────────────── pessoa ─────────────────────────────── -->
     <div v-else-if="campo.tipo === 'EnPerson'" class="rounded-md border border-default p-3">
@@ -576,34 +768,172 @@ const opcoesDeRelacao = computed(() =>
     </div>
 
     <!-- ──────────────────────────── arquivos ────────────────────────────── -->
+    <!--
+      ──────────────────────── anexos: o gerenciador ────────────────────────
+      O documento do time de produtos lista o que a pessoa faz com um anexo:
+      baixar, renomear, remover e REORDENAR, mais acrescentar outro. Eu tinha
+      deixado só o botão de subir arquivo, e ela cobrou com razão. Agora cada
+      item tem as cinco ações e a ordem é a que a pessoa definir.
+
+      Reordenar é por subir e descer, e não por arrastar: arrastar dentro de
+      uma camada flutuante sobre a célula é frágil, e o que está em discussão
+      é a lista de ações, não a mecânica do arrasto. Está no DECISOES.md.
+    -->
     <div
       v-else-if="campo.tipo === 'uploadFile' || campo.tipo === 'uploadImage' || campo.tipo === 'EnPDF'"
-      class="rounded-md border border-dashed border-default p-3 text-center"
+      class="rounded-md border border-default"
     >
-      <template v-if="arquivo">
-        <div class="flex items-center justify-center gap-2">
-          <UIcon :name="campo.icone" class="size-4 text-muted" />
-          <span class="truncate text-sm text-highlighted">{{ arquivo.filename }}</span>
-          <UButton
-            icon="i-lucide-x"
-            color="neutral"
-            variant="ghost"
-            size="xs"
-            @click="emit('update:modelValue', null)"
-          />
-        </div>
-      </template>
-      <template v-else>
+      <p v-if="!anexos.length" class="px-3 py-4 text-center text-sm text-muted">
+        {{ t.nenhumAnexo }}
+      </p>
+
+      <div
+        v-for="(a, i) in anexos"
+        :key="a.url + i"
+        class="group/anexo flex items-center gap-1.5 border-b border-default px-2 py-1.5 last:border-b-0"
+      >
+        <span
+          v-if="campo.tipo === 'uploadImage'"
+          class="flex size-8 shrink-0 items-center justify-center rounded bg-elevated"
+        >
+          <UIcon name="i-lucide-image" class="size-4 text-muted" />
+        </span>
+        <span
+          v-else
+          class="flex size-8 shrink-0 items-center justify-center rounded bg-elevated text-[9px] font-semibold uppercase text-muted"
+        >
+          {{ a.filename.split('.').at(-1) }}
+        </span>
+
+        <UInput
+          v-if="renomeando === i"
+          v-model="rascunhoDoNome"
+          size="xs"
+          class="min-w-0 flex-1"
+          autofocus
+          @blur="confirmarRenomeio()"
+          @keydown.enter.stop="confirmarRenomeio()"
+          @keydown.esc.stop="renomeando = null"
+        />
+        <span v-else class="min-w-0 flex-1 truncate text-sm text-highlighted">{{ a.filename }}</span>
+
+        <span v-if="a.size" class="shrink-0 text-xs text-muted">{{ formatarBytes(a.size, idioma) }}</span>
+
+        <span class="flex shrink-0 items-center opacity-0 transition-opacity group-hover/anexo:opacity-100">
+          <UTooltip :text="t.subir">
+            <UButton
+              icon="i-lucide-chevron-up"
+              color="neutral"
+              variant="ghost"
+              size="xs"
+              :disabled="i === 0"
+              :aria-label="t.subir"
+              @click="moverAnexo(i, -1)"
+            />
+          </UTooltip>
+          <UTooltip :text="t.descer">
+            <UButton
+              icon="i-lucide-chevron-down"
+              color="neutral"
+              variant="ghost"
+              size="xs"
+              :disabled="i === anexos.length - 1"
+              :aria-label="t.descer"
+              @click="moverAnexo(i, 1)"
+            />
+          </UTooltip>
+          <UTooltip :text="t.renomear">
+            <UButton
+              icon="i-lucide-pencil"
+              color="neutral"
+              variant="ghost"
+              size="xs"
+              :aria-label="t.renomear"
+              @click="abrirRenomeio(i)"
+            />
+          </UTooltip>
+          <UTooltip :text="t.baixar">
+            <UButton icon="i-lucide-download" color="neutral" variant="ghost" size="xs" :aria-label="t.baixar" />
+          </UTooltip>
+          <UTooltip :text="t.remover">
+            <UButton
+              icon="i-lucide-trash-2"
+              color="error"
+              variant="ghost"
+              size="xs"
+              :aria-label="t.remover"
+              @click="removerAnexo(i)"
+            />
+          </UTooltip>
+        </span>
+      </div>
+
+      <div class="border-t border-default p-1.5">
         <UButton
           icon="i-lucide-upload"
-          :label="t.campos[campo.tipo].rotulo"
+          :label="t.adicionarAnexo"
           color="neutral"
-          variant="outline"
-          size="sm"
-          @click="simularAnexo"
+          variant="ghost"
+          size="xs"
+          @click="acrescentarAnexo"
         />
-        <p class="mt-1.5 text-xs text-muted">{{ t.campos[campo.tipo].formulario }}</p>
-      </template>
+      </div>
+    </div>
+
+    <!--
+      ─────────────────── anotações e chat: a conversa ────────────────────
+      Os dois são conversa, e não caixa de texto: o campo abre o histórico e um
+      compositor embaixo, com a fila de ações do exemplo do Figma. Vale na
+      célula, na sidebar e no formulário, porque é o MESMO componente.
+    -->
+    <div
+      v-else-if="campo.tipo === 'EnNotes' || campo.tipo === 'EnChats'"
+      class="rounded-md border border-default"
+    >
+      <div class="max-h-56 space-y-3 overflow-y-auto p-2.5">
+        <p v-if="!conversa.length" class="py-2 text-center text-sm text-muted">
+          {{ t.semMensagens }}
+        </p>
+        <div v-for="(m, i) in conversa" :key="i" class="flex gap-2">
+          <UAvatar :alt="m.author" size="2xs" class="mt-0.5 shrink-0" />
+          <div class="min-w-0 flex-1">
+            <p class="flex items-baseline gap-1.5">
+              <span class="truncate text-xs font-medium text-highlighted">{{ m.author }}</span>
+              <span v-if="m.at" class="shrink-0 text-xs text-dimmed">
+                {{ formatarDataHora(m.at, idioma) }}
+              </span>
+            </p>
+            <p class="whitespace-pre-line text-sm text-toned">{{ m.text }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-default p-1.5">
+        <UTextarea
+          v-model="rascunhoDaMensagem"
+          variant="none"
+          size="sm"
+          class="w-full"
+          :rows="2"
+          autoresize
+          :placeholder="t.composerPlaceholder"
+          @keydown.enter.exact.prevent="enviarMensagem()"
+        />
+        <div class="mt-1 flex items-center gap-0.5">
+          <UTooltip v-for="a in acoesDoCompositor" :key="a.icone" :text="a.rotulo">
+            <UButton :icon="a.icone" color="neutral" variant="ghost" size="xs" :aria-label="a.rotulo" />
+          </UTooltip>
+          <UButton
+            class="ml-auto"
+            icon="i-lucide-send"
+            color="primary"
+            size="xs"
+            :aria-label="t.enviarMensagem"
+            :disabled="!rascunhoDaMensagem.trim()"
+            @click="enviarMensagem()"
+          />
+        </div>
+      </div>
     </div>
 
     <div
@@ -665,7 +995,28 @@ const opcoesDeRelacao = computed(() =>
       <span>{{ t.campos[campo.tipo].formulario }}</span>
     </div>
 
-    <p v-if="!semRotulo" class="mt-1 text-xs text-muted">{{ t.campos[campo.tipo].descricao }}</p>
+    <!--
+      O que faz salvar. Ela pediu que ficasse claro em TODOS os campos, e é
+      informação que muda por tipo: escolher já salva numa lista, mas um
+      endereço precisa de confirmação. No formulário a dica fica embaixo do
+      controle; na célula ela flutua, para não empurrar a altura da linha.
+    -->
+    <div v-if="!semRotulo" class="mt-1 space-y-0.5">
+      <p class="text-xs text-muted">{{ t.campos[campo.tipo].descricao }}</p>
+      <p class="flex items-center gap-1 text-xs text-dimmed">
+        <UIcon
+          :name="campo.comoSalva === 'naoSeAplica' ? 'i-lucide-lock' : 'i-lucide-save'"
+          class="size-3 shrink-0"
+        />
+        {{ t.comoSalvaTextos[campo.comoSalva] }}
+      </p>
+    </div>
+    <p
+      v-else
+      class="pointer-events-none absolute left-0 top-full z-20 mt-1 whitespace-nowrap rounded bg-inverted px-1.5 py-0.5 text-[10px] text-inverted"
+    >
+      {{ t.comoSalvaTextos[campo.comoSalva] }}
+    </p>
 
     <!--
       A calculadora de correção monetária, copiada do develop: índice

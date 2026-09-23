@@ -23,7 +23,7 @@
  */
 
 /**
- * As 33 chaves de tipo: 31 que existem hoje (entre schema, API e seletor) e 2
+ * As 32 chaves de tipo: 31 que existem hoje (entre schema, API e seletor) e 2
  * que o `Melhoria dos campos.docx` planeja e ainda não existem.
  */
 export type TipoDeCampo =
@@ -43,7 +43,6 @@ export type TipoDeCampo =
   | 'inputSwitch'
   | 'EnlChips'
   | 'EnlCalendar'
-  | 'EnlTimeRange'
   | 'EnRel'
   | 'EnRelMulti'
   | 'EnTreeSelect'
@@ -80,6 +79,22 @@ export type Familia =
   | 'arquivo'
   | 'composto'
 
+/**
+ * Como o valor se salva. Ela pediu que isso ficasse claro em TODOS os campos,
+ * e é o eixo que faltava: sem ele a pessoa digita e não sabe se gravou.
+ */
+export type ComoSalva =
+  /** Escolher já salva. Não há o que confirmar. */
+  | 'imediato'
+  /** Enter salva, sair do campo salva, Esc desfaz. */
+  | 'enterOuSair'
+  /** Fechar o seletor salva. Esc desfaz. */
+  | 'aoFechar'
+  /** Precisa de um botão Confirmar, porque a edição tem mais de um passo. */
+  | 'confirmar'
+  /** O sistema preenche: não há salvamento pela pessoa. */
+  | 'naoSeAplica'
+
 /** Onde o tipo está na vida do produto. */
 export type Disponibilidade =
   /** Aparece no seletor "Tipo de Campo" hoje. */
@@ -109,6 +124,8 @@ export interface Campo {
   tipo: TipoDeCampo
   familia: Familia
   disponibilidade: Disponibilidade
+  /** Como o valor se salva, e é o que a ficha e a dica de edição anunciam. */
+  comoSalva: ComoSalva
   /** A chave do campo no `data` do item, no mock desta tela. */
   refId: string
   icone: string
@@ -164,6 +181,7 @@ export const campos: Campo[] = [
     tipo: 'inputText',
     familia: 'texto',
     disponibilidade: 'ativo',
+    comoSalva: 'enterOuSair',
     refId: 'texto_curto',
     icone: 'i-lucide-type',
     alinhamento: 'inicio',
@@ -179,13 +197,19 @@ export const campos: Campo[] = [
       saida: '"Contrato de manutenção predial"',
       formatada: 'corta em cFormat.t_length e cola cFormat.t_suffix no fim',
       cFormat: ['type: "text"', 't_length', 't_suffix', 'preserve_max_length'],
-      config: ['config.masks', 'config.speechRecognition', 'config.transformValue'],
+      config: [
+        'config.masks  (e-mail e url são ESTE campo com máscara)',
+        'config.mask_validation: cpf | cnpj',
+        'config.speechRecognition',
+        'config.transformValue',
+      ],
     },
   },
   {
     tipo: 'EnTextArea',
     familia: 'texto',
     disponibilidade: 'ativo',
+    comoSalva: 'confirmar',
     refId: 'texto_longo',
     icone: 'i-lucide-align-left',
     alinhamento: 'inicio',
@@ -209,6 +233,7 @@ export const campos: Campo[] = [
     tipo: 'EnHtml',
     familia: 'texto',
     disponibilidade: 'ativo',
+    comoSalva: 'confirmar',
     refId: 'texto_rico',
     icone: 'i-lucide-pilcrow',
     alinhamento: 'inicio',
@@ -228,6 +253,7 @@ export const campos: Campo[] = [
     tipo: 'EnNotes',
     familia: 'texto',
     disponibilidade: 'ativo',
+    comoSalva: 'confirmar',
     refId: 'anotacoes',
     icone: 'i-lucide-sticky-note',
     alinhamento: 'inicio',
@@ -248,6 +274,7 @@ export const campos: Campo[] = [
     tipo: 'EnlMask',
     familia: 'texto',
     disponibilidade: 'legado',
+    comoSalva: 'enterOuSair',
     refId: 'mascara',
     icone: 'i-lucide-hash',
     alinhamento: 'inicio',
@@ -267,6 +294,7 @@ export const campos: Campo[] = [
     tipo: 'email',
     familia: 'texto',
     disponibilidade: 'legado',
+    comoSalva: 'enterOuSair',
     refId: 'email',
     icone: 'i-lucide-at-sign',
     alinhamento: 'inicio',
@@ -284,6 +312,7 @@ export const campos: Campo[] = [
     tipo: 'EnCustomCode',
     familia: 'texto',
     disponibilidade: 'legado',
+    comoSalva: 'naoSeAplica',
     refId: 'codigo',
     icone: 'i-lucide-braces',
     alinhamento: 'inicio',
@@ -306,6 +335,7 @@ export const campos: Campo[] = [
     tipo: 'EnlNumber',
     familia: 'numero',
     disponibilidade: 'ativo',
+    comoSalva: 'enterOuSair',
     refId: 'numero',
     icone: 'i-lucide-hash',
     alinhamento: 'fim',
@@ -336,6 +366,7 @@ export const campos: Campo[] = [
     familia: 'numero',
     /* "Valor Monetário" é tipo ATUAL no seletor do develop, não legado. */
     disponibilidade: 'ativo',
+    comoSalva: 'confirmar',
     refId: 'moeda',
     icone: 'i-lucide-banknote',
     alinhamento: 'fim',
@@ -376,6 +407,7 @@ export const campos: Campo[] = [
     tipo: 'EnlDropdown',
     familia: 'escolha',
     disponibilidade: 'ativo',
+    comoSalva: 'imediato',
     refId: 'selecao_unica',
     icone: 'i-lucide-chevron-down-circle',
     alinhamento: 'inicio',
@@ -404,6 +436,7 @@ export const campos: Campo[] = [
     tipo: 'radioButton',
     familia: 'escolha',
     disponibilidade: 'ativo',
+    comoSalva: 'imediato',
     refId: 'selecao_radio',
     icone: 'i-lucide-circle-dot',
     alinhamento: 'inicio',
@@ -424,6 +457,7 @@ export const campos: Campo[] = [
     tipo: 'multiSelect',
     familia: 'escolha',
     disponibilidade: 'ativo',
+    comoSalva: 'aoFechar',
     refId: 'selecao_multipla',
     icone: 'i-lucide-list-checks',
     alinhamento: 'inicio',
@@ -447,6 +481,7 @@ export const campos: Campo[] = [
     tipo: 'checkbox',
     familia: 'escolha',
     disponibilidade: 'ativo',
+    comoSalva: 'imediato',
     refId: 'caixas',
     icone: 'i-lucide-square-check',
     alinhamento: 'inicio',
@@ -470,6 +505,7 @@ export const campos: Campo[] = [
     tipo: 'EnlCheckbox',
     familia: 'escolha',
     disponibilidade: 'legado',
+    comoSalva: 'imediato',
     refId: 'caixas_legado',
     icone: 'i-lucide-square-check-big',
     alinhamento: 'inicio',
@@ -492,6 +528,7 @@ export const campos: Campo[] = [
     tipo: 'EnlChips',
     familia: 'escolha',
     disponibilidade: 'ativo',
+    comoSalva: 'enterOuSair',
     refId: 'tags',
     icone: 'i-lucide-tags',
     alinhamento: 'inicio',
@@ -510,6 +547,7 @@ export const campos: Campo[] = [
     tipo: 'EnTreeSelect',
     familia: 'escolha',
     disponibilidade: 'legado',
+    comoSalva: 'imediato',
     refId: 'arvore',
     icone: 'i-lucide-list-tree',
     alinhamento: 'inicio',
@@ -529,6 +567,7 @@ export const campos: Campo[] = [
     tipo: 'inputSwitch',
     familia: 'booleano',
     disponibilidade: 'ativo',
+    comoSalva: 'imediato',
     refId: 'binario',
     icone: 'i-lucide-toggle-right',
     alinhamento: 'inicio',
@@ -548,6 +587,7 @@ export const campos: Campo[] = [
     tipo: 'EnlCalendar',
     familia: 'dataHora',
     disponibilidade: 'ativo',
+    comoSalva: 'imediato',
     refId: 'data',
     icone: 'i-lucide-calendar',
     alinhamento: 'inicio',
@@ -571,29 +611,13 @@ export const campos: Campo[] = [
       config: ['config.min', 'config.max'],
     },
   },
-  {
-    tipo: 'EnlTimeRange',
-    familia: 'dataHora',
-    disponibilidade: 'legado',
-    refId: 'intervalo',
-    icone: 'i-lucide-clock',
-    alinhamento: 'inicio',
-    largura: 190,
-    configuracoes: [],
-    backend: {
-      entrada: '{ "start": "08:00", "end": "17:30" }',
-      saida: '{ "start": "08:00", "end": "17:30" }',
-      formatada: 'as duas pontas formatadas e unidas por cFormat.l_separator',
-      cFormat: ['type: "object"', 'locale', 'l_separator'],
-      config: [],
-    },
-  },
 
   /* ---------------------------- família relação --------------------------- */
   {
     tipo: 'EnRel',
     familia: 'relacao',
     disponibilidade: 'ativo',
+    comoSalva: 'imediato',
     refId: 'relacao_simples',
     icone: 'i-lucide-link',
     alinhamento: 'inicio',
@@ -625,6 +649,7 @@ export const campos: Campo[] = [
     tipo: 'EnRelMulti',
     familia: 'relacao',
     disponibilidade: 'ativo',
+    comoSalva: 'aoFechar',
     refId: 'relacao_multipla',
     icone: 'i-lucide-link-2',
     alinhamento: 'inicio',
@@ -655,6 +680,7 @@ export const campos: Campo[] = [
     tipo: 'EnPerson',
     familia: 'pessoa',
     disponibilidade: 'ativo',
+    comoSalva: 'confirmar',
     refId: 'pessoa',
     icone: 'i-lucide-user-round',
     alinhamento: 'inicio',
@@ -679,6 +705,7 @@ export const campos: Campo[] = [
     tipo: 'uploadFile',
     familia: 'arquivo',
     disponibilidade: 'ativo',
+    comoSalva: 'imediato',
     refId: 'arquivo',
     icone: 'i-lucide-paperclip',
     alinhamento: 'inicio',
@@ -701,6 +728,7 @@ export const campos: Campo[] = [
     tipo: 'uploadImage',
     familia: 'arquivo',
     disponibilidade: 'ativo',
+    comoSalva: 'imediato',
     refId: 'imagem',
     icone: 'i-lucide-image',
     alinhamento: 'inicio',
@@ -721,6 +749,7 @@ export const campos: Campo[] = [
     tipo: 'EnPDF',
     familia: 'arquivo',
     disponibilidade: 'ativo',
+    comoSalva: 'imediato',
     refId: 'pdf',
     icone: 'i-lucide-file-text',
     alinhamento: 'inicio',
@@ -747,6 +776,7 @@ export const campos: Campo[] = [
     tipo: 'EnOnlyoffice',
     familia: 'arquivo',
     disponibilidade: 'ativo',
+    comoSalva: 'naoSeAplica',
     refId: 'documento',
     icone: 'i-lucide-file-pen-line',
     alinhamento: 'inicio',
@@ -774,6 +804,7 @@ export const campos: Campo[] = [
     tipo: 'EnESign',
     familia: 'arquivo',
     disponibilidade: 'legado',
+    comoSalva: 'confirmar',
     refId: 'assinatura',
     icone: 'i-lucide-signature',
     alinhamento: 'inicio',
@@ -794,6 +825,7 @@ export const campos: Campo[] = [
     tipo: 'EnAddress',
     familia: 'composto',
     disponibilidade: 'ativo',
+    comoSalva: 'confirmar',
     refId: 'endereco',
     icone: 'i-lucide-map-pin',
     alinhamento: 'inicio',
@@ -816,6 +848,7 @@ export const campos: Campo[] = [
     tipo: 'group',
     familia: 'composto',
     disponibilidade: 'ativo',
+    comoSalva: 'confirmar',
     refId: 'grupo',
     icone: 'i-lucide-group',
     alinhamento: 'inicio',
@@ -839,6 +872,7 @@ export const campos: Campo[] = [
     tipo: 'EnRepeater',
     familia: 'composto',
     disponibilidade: 'ativo',
+    comoSalva: 'confirmar',
     refId: 'repetidor',
     icone: 'i-lucide-rows-3',
     alinhamento: 'inicio',
@@ -868,6 +902,7 @@ export const campos: Campo[] = [
     tipo: 'EnChats',
     familia: 'composto',
     disponibilidade: 'ativo',
+    comoSalva: 'naoSeAplica',
     refId: 'chat',
     icone: 'i-lucide-message-square',
     alinhamento: 'inicio',
@@ -875,7 +910,11 @@ export const campos: Campo[] = [
     larguraCheiaNoFormulario: true,
     foraDaColunaDeResumo: true,
     edicaoEmPopover: true,
-    somenteLeitura: true,
+    /*
+     * NÃO é somente leitura: o campo não se PREENCHE na criação do item, mas a
+     * célula abre a conversa e recebe mensagem. Era um erro meu, que ela
+     * apontou: "o campo chat ta sem interaçao na tabela".
+     */
     configuracoes: [],
     backend: {
       entrada: 'o campo não é preenchido pelo formulário. A conversa é gravada mensagem a mensagem',
@@ -898,6 +937,7 @@ export const campos: Campo[] = [
      */
     familia: 'texto',
     disponibilidade: 'ativo',
+    comoSalva: 'enterOuSair',
     refId: 'duracao',
     icone: 'i-lucide-hourglass',
     alinhamento: 'inicio',
@@ -916,6 +956,7 @@ export const campos: Campo[] = [
     familia: 'texto',
     /* Confirmado no seletor do develop: "Campo virtual (de valor dinâmico)". */
     disponibilidade: 'ativo',
+    comoSalva: 'naoSeAplica',
     refId: 'valor_dinamico',
     icone: 'i-lucide-function-square',
     alinhamento: 'inicio',

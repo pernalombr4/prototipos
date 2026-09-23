@@ -143,6 +143,35 @@ export interface Textos {
   configuracoesOnde: string
   semConfiguracaoPropria: string
 
+  /* ------------------------ como o valor se salva ------------------------ */
+  comoSalva: string
+  comoSalvaTextos: Record<string, string>
+
+  /* --------------------------- anexos e conversa ------------------------- */
+  anexos: string
+  adicionarAnexo: string
+  renomear: string
+  mover: string
+  subir: string
+  descer: string
+  remover: string
+  nenhumAnexo: string
+  semResultado: string
+  umaTagPorEnter: string
+  fechar: string
+  composerPlaceholder: string
+  comentario: string
+  anexar: string
+  mencionar: string
+  pessoas: string
+  acoesDeIa: string
+  gravarVideo: string
+  gravarAudio: string
+  enviarMensagem: string
+  semMensagens: string
+  criarRegistro: string
+  buscarOpcao: string
+
   /* --------------------------- correção monetária ------------------------ */
   correcaoMonetaria: string
   configurarCorrecao: string
@@ -338,6 +367,37 @@ const ptBR: Textos = {
   alinhamentoFim: 'Direita',
   larguraMinima: 'Largura mínima da coluna',
   nenhumaChave: 'Nenhuma',
+  comoSalva: 'Como salva',
+  comoSalvaTextos: {
+    imediato: 'Escolher já salva. Não há o que confirmar.',
+    enterOuSair: 'Enter salva. Sair do campo salva. Esc desfaz.',
+    aoFechar: 'Fechar o seletor salva. Esc desfaz.',
+    confirmar: 'Precisa do botão Confirmar. Esc descarta.',
+    naoSeAplica: 'O sistema preenche. Não há o que salvar.',
+  },
+  anexos: 'Anexos',
+  adicionarAnexo: 'Adicionar arquivo',
+  renomear: 'Renomear',
+  mover: 'Mover',
+  subir: 'Subir',
+  descer: 'Descer',
+  remover: 'Remover',
+  nenhumAnexo: 'Nenhum arquivo ainda.',
+  semResultado: 'Nada encontrado',
+  umaTagPorEnter: 'Digite e aperte Enter para cada tag',
+  fechar: 'Fechar',
+  composerPlaceholder: 'Comente ou digite "/" para acionar comandos e ações da IA',
+  comentario: 'Comentário',
+  anexar: 'Anexar',
+  mencionar: 'Mencionar alguém',
+  pessoas: 'Pessoas',
+  acoesDeIa: 'Ações da IA',
+  gravarVideo: 'Gravar vídeo',
+  gravarAudio: 'Gravar áudio',
+  enviarMensagem: 'Enviar',
+  semMensagens: 'Nenhuma mensagem ainda.',
+  criarRegistro: 'Criar registro',
+  buscarOpcao: 'Buscar opção',
   correcaoMonetaria: 'Correção monetária',
   configurarCorrecao: 'Configurar correção monetária',
   indiceOuAliquota: 'Índice ou alíquota',
@@ -478,9 +538,9 @@ const ptBR: Textos = {
     EnlDropdown: {
       rotulo: 'Lista de Seleção Única',
       descricao: 'Menu suspenso com várias opções, uma escolha só.',
-      celula: 'Um selo com a cor da opção. Sem escolha, o marcador de vazio.',
-      formulario: 'Lista suspensa, com busca a partir de dez opções.',
-      cru: 'O mesmo selo da célula, sem mudar de cor nem de forma.',
+      celula: 'Um selo colorido que ocupa quase a largura da coluna, com o chevron à direita. É o destaque que o status precisa ter.',
+      formulario: 'Lista suspensa com busca, e o selo colorido dentro do controle.',
+      cru: 'O mesmo selo, na largura do resumo.',
     },
     radioButton: {
       rotulo: 'Botões de Seleção única',
@@ -492,9 +552,9 @@ const ptBR: Textos = {
     multiSelect: {
       rotulo: 'Lista de Seleção Múltipla',
       descricao: 'Menu com várias opções e mais de uma escolha.',
-      celula: 'Dois selos e um contador com o que sobrou. O contador abre a lista no hover.',
-      formulario: 'Seletor múltiplo com busca. O escolhido vira selo dentro do próprio campo.',
-      cru: 'Os selos em até duas linhas, com "ver mais".',
+      celula: 'Os selos escolhidos, um do lado do outro, e o contador do que não caber.',
+      formulario: 'Os escolhidos viram selos com x dentro do campo, e a lista de opções fica aberta abaixo com busca. Vai concatenando conforme cresce.',
+      cru: 'Os selos, quebrando em linha.',
     },
     checkbox: {
       rotulo: 'Caixas de Seleção',
@@ -513,15 +573,15 @@ const ptBR: Textos = {
     inputSwitch: {
       rotulo: 'Alternativa Binária',
       descricao: 'Liga ou desliga. Grava verdadeiro ou falso.',
-      celula: 'Sim ou Não em texto, com um ponto de cor. Chave ligada na célula promete edição que a célula não faz.',
-      formulario: 'Hoje o produto usa caixa de seleção. A proposta é a chave, que diz melhor que o estado alterna.',
-      cru: 'Sim ou Não, com o ponto de cor.',
+      celula: 'Uma caixa, vazia ou marcada. Clicar alterna na hora. É o que Notion, Airtable, ClickUp e Monday fazem.',
+      formulario: 'Só o controle, sem rótulo ao lado: o rótulo do campo já está acima.',
+      cru: 'A mesma caixa da célula.',
     },
     EnlChips: {
       rotulo: 'Tags',
       descricao: 'Vários valores livres, cada um virando uma tag.',
       celula: 'Três tags e o contador do que sobrou.',
-      formulario: 'Campo que transforma o que foi digitado em tag a cada Enter.',
+      formulario: 'Igual à seleção múltipla, mas sem lista: cada Enter cria uma tag nova, uma por digitação.',
       cru: 'As tags, quebrando em quantas linhas precisar.',
     },
     EnlCalendar: {
@@ -531,18 +591,11 @@ const ptBR: Textos = {
       formulario: 'Campo com calendário. A digitação aceita o formato do idioma escolhido.',
       cru: 'A data por extenso curta, com o relativo ao lado quando cai nos próximos sete dias.',
     },
-    EnlTimeRange: {
-      rotulo: 'Intervalo de horas',
-      descricao: 'Hora de início e hora de fim, no mesmo campo.',
-      celula: 'As duas pontas na mesma linha, em fonte tabular.',
-      formulario: 'Dois seletores de hora lado a lado, com o fim validado contra o início.',
-      cru: 'As duas pontas, com a duração calculada ao lado.',
-    },
     EnRel: {
       rotulo: 'Relacionamento Simples',
       descricao: 'Liga este item a um item de outra categoria.',
       celula: 'Um selo clicável com o display. Display vazio cai para a referência, nunca para nada.',
-      formulario: 'Busca pelo display, com o botão de criar quando a categoria permite.',
+      formulario: 'Seletor com busca no topo e, no PÉ da lista, o atalho de criar registro. O atalho não fica solto ao lado do campo.',
       cru: 'O selo, que abre o item relacionado na própria sidebar.',
     },
     EnRelMulti: {
@@ -792,6 +845,37 @@ const en: Textos = {
   alinhamentoFim: 'Right',
   larguraMinima: 'Minimum column width',
   nenhumaChave: 'None',
+  comoSalva: 'How it saves',
+  comoSalvaTextos: {
+    imediato: 'Picking saves right away. Nothing to confirm.',
+    enterOuSair: 'Enter saves. Leaving the field saves. Esc undoes.',
+    aoFechar: 'Closing the picker saves. Esc undoes.',
+    confirmar: 'Needs the Confirm button. Esc discards.',
+    naoSeAplica: 'The system fills it in. Nothing to save.',
+  },
+  anexos: 'Attachments',
+  adicionarAnexo: 'Add file',
+  renomear: 'Rename',
+  mover: 'Move',
+  subir: 'Move up',
+  descer: 'Move down',
+  remover: 'Remove',
+  nenhumAnexo: 'No files yet.',
+  semResultado: 'Nothing found',
+  umaTagPorEnter: 'Type and press Enter for each tag',
+  fechar: 'Close',
+  composerPlaceholder: 'Comment or type "/" for commands and AI actions',
+  comentario: 'Comment',
+  anexar: 'Attach',
+  mencionar: 'Mention someone',
+  pessoas: 'People',
+  acoesDeIa: 'AI actions',
+  gravarVideo: 'Record video',
+  gravarAudio: 'Record audio',
+  enviarMensagem: 'Send',
+  semMensagens: 'No messages yet.',
+  criarRegistro: 'Create record',
+  buscarOpcao: 'Search option',
   correcaoMonetaria: 'Monetary correction',
   configurarCorrecao: 'Set up monetary correction',
   indiceOuAliquota: 'Index or rate',
@@ -932,9 +1016,9 @@ const en: Textos = {
     EnlDropdown: {
       rotulo: 'Single Select List',
       descricao: 'Dropdown with several options and a single choice.',
-      celula: 'A tag with the option color. With no choice, the empty marker.',
-      formulario: 'Dropdown, with search from ten options on.',
-      cru: 'The same tag as the cell, same color and same shape.',
+      celula: 'A colored pill taking almost the column width, with the chevron on the right. That is the weight a status needs.',
+      formulario: 'Dropdown with search, and the colored pill inside the control.',
+      cru: 'The same pill, at the summary width.',
     },
     radioButton: {
       rotulo: 'Single Select Buttons',
@@ -946,9 +1030,9 @@ const en: Textos = {
     multiSelect: {
       rotulo: 'Multi Select List',
       descricao: 'Menu with several options and more than one choice.',
-      celula: 'Two tags and a counter for what is left. The counter opens the list on hover.',
-      formulario: 'Multi select with search. Each choice becomes a tag inside the input.',
-      cru: 'The tags on up to two lines, with "show more".',
+      celula: 'The chosen tags side by side, and a counter for what does not fit.',
+      formulario: 'The chosen ones become tags with an x inside the field, and the option list stays open below with search. It concatenates as it grows.',
+      cru: 'The tags, wrapping over lines.',
     },
     checkbox: {
       rotulo: 'Checkboxes',
@@ -967,15 +1051,15 @@ const en: Textos = {
     inputSwitch: {
       rotulo: 'Binary Choice',
       descricao: 'On or off. Stores true or false.',
-      celula: 'Yes or No as text, with a colored dot. A switch in a cell promises an edit the cell does not do.',
-      formulario: 'Today the product uses a checkbox. The proposal is the switch, which says better that the state toggles.',
-      cru: 'Yes or No, with the colored dot.',
+      celula: 'A box, empty or checked. Clicking toggles right away. It is what Notion, Airtable, ClickUp and Monday do.',
+      formulario: 'Just the control, with no label beside it: the field label is already above.',
+      cru: 'The same box as the cell.',
     },
     EnlChips: {
       rotulo: 'Tags',
       descricao: 'Several free values, each one becoming a tag.',
       celula: 'Three tags and a counter for what is left.',
-      formulario: 'Input that turns what was typed into a tag on every Enter.',
+      formulario: 'Like multi select, but with no list: each Enter creates a new tag, one per typing.',
       cru: 'The tags, wrapping over as many lines as needed.',
     },
     EnlCalendar: {
@@ -985,18 +1069,11 @@ const en: Textos = {
       formulario: 'Input with a calendar. Typing accepts the format of the chosen language.',
       cru: 'The short written date, with the relative one beside it within the next seven days.',
     },
-    EnlTimeRange: {
-      rotulo: 'Time range',
-      descricao: 'Start time and end time, in the same field.',
-      celula: 'Both ends on the same line, in tabular figures.',
-      formulario: 'Two time pickers side by side, with the end validated against the start.',
-      cru: 'Both ends, with the duration calculated beside them.',
-    },
     EnRel: {
       rotulo: 'Single Relation',
       descricao: 'Links this item to one item of another category.',
       celula: 'A clickable tag with the display. An empty display falls back to the reference, never to nothing.',
-      formulario: 'Search by display, with a create button when the category allows it.',
+      formulario: 'Picker with search on top and, at the BOTTOM of the list, the create-record shortcut. The shortcut does not sit loose beside the field.',
       cru: 'The tag, which opens the related item in the sidebar itself.',
     },
     EnRelMulti: {
@@ -1246,6 +1323,37 @@ const es: Textos = {
   alinhamentoFim: 'Derecha',
   larguraMinima: 'Ancho mínimo de la columna',
   nenhumaChave: 'Ninguna',
+  comoSalva: 'Cómo guarda',
+  comoSalvaTextos: {
+    imediato: 'Elegir ya guarda. No hay nada que confirmar.',
+    enterOuSair: 'Enter guarda. Salir del campo guarda. Esc deshace.',
+    aoFechar: 'Cerrar el selector guarda. Esc deshace.',
+    confirmar: 'Necesita el botón Confirmar. Esc descarta.',
+    naoSeAplica: 'El sistema lo rellena. No hay nada que guardar.',
+  },
+  anexos: 'Adjuntos',
+  adicionarAnexo: 'Agregar archivo',
+  renomear: 'Renombrar',
+  mover: 'Mover',
+  subir: 'Subir',
+  descer: 'Bajar',
+  remover: 'Quitar',
+  nenhumAnexo: 'Todavía no hay archivos.',
+  semResultado: 'Nada encontrado',
+  umaTagPorEnter: 'Escriba y pulse Enter para cada etiqueta',
+  fechar: 'Cerrar',
+  composerPlaceholder: 'Comenta o escribe "/" para comandos y acciones de IA',
+  comentario: 'Comentario',
+  anexar: 'Adjuntar',
+  mencionar: 'Mencionar a alguien',
+  pessoas: 'Personas',
+  acoesDeIa: 'Acciones de IA',
+  gravarVideo: 'Grabar video',
+  gravarAudio: 'Grabar audio',
+  enviarMensagem: 'Enviar',
+  semMensagens: 'Todavía no hay mensajes.',
+  criarRegistro: 'Crear registro',
+  buscarOpcao: 'Buscar opción',
   correcaoMonetaria: 'Corrección monetaria',
   configurarCorrecao: 'Configurar corrección monetaria',
   indiceOuAliquota: 'Índice o tasa',
@@ -1386,9 +1494,9 @@ const es: Textos = {
     EnlDropdown: {
       rotulo: 'Lista de selección única',
       descricao: 'Menú desplegable con varias opciones y una sola elección.',
-      celula: 'Una etiqueta con el color de la opción. Sin elección, la marca de vacío.',
-      formulario: 'Lista desplegable, con búsqueda a partir de diez opciones.',
-      cru: 'La misma etiqueta de la celda, sin cambiar de color ni de forma.',
+      celula: 'Una píldora de color que ocupa casi el ancho de la columna, con el chevron a la derecha. Es el peso que un estado necesita.',
+      formulario: 'Lista desplegable con búsqueda, y la píldora de color dentro del control.',
+      cru: 'La misma píldora, al ancho del resumen.',
     },
     radioButton: {
       rotulo: 'Botones de selección única',
@@ -1400,9 +1508,9 @@ const es: Textos = {
     multiSelect: {
       rotulo: 'Lista de selección múltiple',
       descricao: 'Menú con varias opciones y más de una elección.',
-      celula: 'Dos etiquetas y un contador con lo que sobra. El contador abre la lista al pasar el cursor.',
-      formulario: 'Selector múltiple con búsqueda. Lo elegido pasa a etiqueta dentro del propio campo.',
-      cru: 'Las etiquetas en hasta dos líneas, con "ver más".',
+      celula: 'Las etiquetas elegidas, una al lado de la otra, y el contador de lo que no cabe.',
+      formulario: 'Las elegidas pasan a etiquetas con x dentro del campo, y la lista de opciones queda abierta abajo con búsqueda. Va concatenando conforme crece.',
+      cru: 'Las etiquetas, saltando de línea.',
     },
     checkbox: {
       rotulo: 'Casillas de selección',
@@ -1421,15 +1529,15 @@ const es: Textos = {
     inputSwitch: {
       rotulo: 'Alternativa binaria',
       descricao: 'Encendido o apagado. Guarda verdadero o falso.',
-      celula: 'Sí o No como texto, con un punto de color. Un interruptor en la celda promete una edición que la celda no hace.',
-      formulario: 'Hoy el producto usa una casilla. La propuesta es el interruptor, que dice mejor que el estado alterna.',
-      cru: 'Sí o No, con el punto de color.',
+      celula: 'Una casilla, vacía o marcada. Hacer clic alterna al instante. Es lo que hacen Notion, Airtable, ClickUp y Monday.',
+      formulario: 'Solo el control, sin etiqueta al lado: la etiqueta del campo ya está arriba.',
+      cru: 'La misma casilla de la celda.',
     },
     EnlChips: {
       rotulo: 'Etiquetas',
       descricao: 'Varios valores libres, cada uno convertido en etiqueta.',
       celula: 'Tres etiquetas y el contador de lo que sobra.',
-      formulario: 'Campo que convierte lo escrito en etiqueta con cada Enter.',
+      formulario: 'Como la selección múltiple, pero sin lista: cada Enter crea una etiqueta nueva, una por escritura.',
       cru: 'Las etiquetas, saltando a las líneas que hagan falta.',
     },
     EnlCalendar: {
@@ -1439,18 +1547,11 @@ const es: Textos = {
       formulario: 'Campo con calendario. Lo escrito acepta el formato del idioma elegido.',
       cru: 'La fecha corta en letras, con la relativa al lado cuando cae en los próximos siete días.',
     },
-    EnlTimeRange: {
-      rotulo: 'Intervalo de horas',
-      descricao: 'Hora de inicio y hora de fin, en el mismo campo.',
-      celula: 'Las dos puntas en la misma línea, en cifras tabulares.',
-      formulario: 'Dos selectores de hora lado a lado, con el fin validado contra el inicio.',
-      cru: 'Las dos puntas, con la duración calculada al lado.',
-    },
     EnRel: {
       rotulo: 'Relación simple',
       descricao: 'Une este elemento a un elemento de otra categoría.',
       celula: 'Una etiqueta clicable con el display. Un display vacío cae a la referencia, nunca a nada.',
-      formulario: 'Búsqueda por display, con botón de crear cuando la categoría lo permite.',
+      formulario: 'Selector con búsqueda arriba y, al PIE de la lista, el atajo de crear registro. El atajo no queda suelto al lado del campo.',
       cru: 'La etiqueta, que abre el elemento relacionado en el propio panel.',
     },
     EnRelMulti: {

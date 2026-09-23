@@ -41,9 +41,15 @@ export const opcoes = {
     { value: 'reprovado', label: 'Reprovado', cor: 'error' },
     { value: 'suspenso', label: 'Suspenso por falta de verba', cor: 'warning' },
   ],
+  /*
+   * Botões de seleção única: as opções NÃO são "Sim" e "Não". Um radio de duas
+   * opções encostado na Alternativa Binária embaralha os dois tipos, e ela
+   * pediu justamente a separação: binário é um controle sem rótulo, radio é
+   * uma escolha entre opções nomeadas.
+   */
   selecao_radio: [
-    { value: 'sim', label: 'Sim', cor: 'success' },
-    { value: 'nao', label: 'Não', cor: 'neutral' },
+    { value: 'sim', label: 'Equipe interna', cor: 'success' },
+    { value: 'nao', label: 'Terceirizado', cor: 'neutral' },
   ],
   selecao_multipla: [
     { value: 'eletrica', label: 'Elétrica', cor: 'warning' },
@@ -96,7 +102,10 @@ export const itens: Item[] = [
         'A manutenção pediu a troca completa das luminárias do corredor central. O modelo atual saiu de linha e a reposição está levando quarenta dias, então vale trocar tudo de uma vez.',
       texto_rico:
         '<p>Laudo com <strong>ressalva</strong>: o quadro de distribuição precisa ser reavaliado antes da troca.</p>',
-      anotacoes: 'Cliente pediu retorno na sexta, antes das 11h.',
+      anotacoes: [
+        { author: 'Marina Toledo', at: '2026-09-17T14:20:00.000Z', text: 'Cliente pediu retorno na sexta, antes das 11h.' },
+        { author: 'Rafael Pimenta', at: '2026-09-17T16:02:00.000Z', text: 'Retorno agendado. Confirmei por e-mail.' },
+      ],
       mascara: '12.345.678/0001-90',
       email: 'compras@nortelux.com.br',
       codigo: 'OS-2026-0481',
@@ -111,7 +120,6 @@ export const itens: Item[] = [
       arvore: 'predial.eletrica',
       binario: true,
       data: '2026-10-03T12:00:00.000Z',
-      intervalo: { start: '08:00', end: '17:30' },
       relacao_simples: { id: 43887, display: 'Nortelux Elétrica', reference: 'FORNC55D9212D9' },
       relacao_multipla: [
         { id: 43891, display: 'OS 2026-0481', reference: 'OSC1F0A2B4' },
@@ -128,33 +136,47 @@ export const itens: Item[] = [
         zip: '01310-100',
         country: 'BRA',
       },
-      arquivo: {
-        url: 'https://exemplo.invalido/laudo-eletrico.pdf',
-        filename: 'laudo-eletrico.pdf',
-        mime: 'application/pdf',
-        mimeType: 'application/pdf',
-        size: 45000,
-      },
-      imagem: {
+      arquivo: [
+        {
+          url: 'https://exemplo.invalido/laudo-eletrico.pdf',
+          filename: 'laudo-eletrico.pdf',
+          mime: 'application/pdf',
+          mimeType: 'application/pdf',
+          size: 45000,
+        },
+        {
+          url: 'https://exemplo.invalido/orcamento-luminarias.xlsx',
+          filename: 'orcamento-luminarias.xlsx',
+          mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          size: 21800,
+        },
+        {
+          url: 'https://exemplo.invalido/foto-corredor.jpg',
+          filename: 'foto-corredor.jpg',
+          mime: 'image/jpeg',
+          size: 512000,
+        },
+      ],
+      imagem: [{
         url: 'https://exemplo.invalido/quadro-distribuicao.jpg',
         filename: 'quadro-distribuicao.jpg',
         mime: 'image/jpeg',
         mimeType: 'image/jpeg',
         size: 220400,
-      },
-      pdf: {
+      }],
+      pdf: [{
         url: 'https://exemplo.invalido/contrato-nortelux.pdf',
         filename: 'contrato-nortelux.pdf',
         mime: 'application/pdf',
         mimeType: 'application/pdf',
         size: 812300,
-      },
-      documento: {
+      }],
+      documento: [{
         url: 'https://exemplo.invalido/proposta-nortelux.docx',
         filename: 'proposta-nortelux.docx',
         mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         size: 64200,
-      },
+      }],
       assinatura: { signer: 'Marina Toledo', signedAt: '2026-09-18T13:10:00.000Z', url: 'https://exemplo.invalido/assinatura.png' },
       repetidor: [
         { item: 'Luminária LED 36W', quantidade: 12 },
@@ -182,7 +204,7 @@ export const itens: Item[] = [
       texto_curto: 'Revisão do sistema de climatização',
       texto_longo: 'Revisão semestral dos quatro splits do andar administrativo.',
       texto_rico: '<p>Sem ressalvas. Equipamento dentro do prazo de garantia.</p>',
-      anotacoes: '',
+      anotacoes: [],
       mascara: '987.654.321-00',
       email: 'manutencao@vegapredial.com.br',
       codigo: 'OS-2026-0502',
@@ -197,7 +219,6 @@ export const itens: Item[] = [
       arvore: 'frota.preventiva',
       binario: false,
       data: '2026-09-30T12:00:00.000Z',
-      intervalo: { start: '09:00', end: '12:00' },
       relacao_simples: { id: 43888, display: 'Vega Predial', reference: 'FORNA11B2C3D4' },
       relacao_multipla: [{ id: 43893, display: 'OS 2026-0511', reference: 'OSC1F0A2C1' }],
       pessoa: { name: 'Rafael Pimenta', email: 'rafael.pimenta@vegapredial.com.br', cpf: '111.111.111-11' },
@@ -211,15 +232,15 @@ export const itens: Item[] = [
         zip: '04530-001',
         country: 'BRA',
       },
-      arquivo: {
+      arquivo: [{
         url: 'https://exemplo.invalido/checklist-climatizacao.xlsx',
         filename: 'checklist-climatizacao.xlsx',
         mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         size: 18200,
-      },
-      imagem: null,
-      pdf: null,
-      documento: null,
+      }],
+      imagem: [],
+      pdf: [],
+      documento: [],
       assinatura: null,
       repetidor: [{ item: 'Filtro de ar', quantidade: 4 }],
       grupo: { login: 'vega.pred', telefone: '+55 11 5555-0240' },
@@ -241,7 +262,7 @@ export const itens: Item[] = [
       texto_curto: 'Rascunho sem título definido',
       texto_longo: '',
       texto_rico: '',
-      anotacoes: '',
+      anotacoes: [],
       mascara: '',
       email: '',
       codigo: 'OS-2026-0519',
@@ -256,15 +277,14 @@ export const itens: Item[] = [
       arvore: '',
       binario: false,
       data: null,
-      intervalo: null,
       relacao_simples: null,
       relacao_multipla: [],
       pessoa: null,
       endereco: null,
-      arquivo: null,
-      imagem: null,
-      pdf: null,
-      documento: null,
+      arquivo: [],
+      imagem: [],
+      pdf: [],
+      documento: [],
       assinatura: null,
       repetidor: [],
       grupo: null,
@@ -288,7 +308,9 @@ export const itens: Item[] = [
       texto_longo:
         'A concessionária apontou seis não conformidades na última vistoria. O prazo para regularizar vence no fim do trimestre e a multa é diária.',
       texto_rico: '<p>Prazo <em>improrrogável</em>. A multa é diária a partir do vencimento.</p>',
-      anotacoes: 'Confirmar se o engenheiro responsável assina a ART antes da visita.',
+      anotacoes: [
+        { author: 'Eduardo Bastos', at: '2026-09-19T08:40:00.000Z', text: 'Confirmar se o engenheiro responsável assina a ART antes da visita.' },
+      ],
       mascara: '45.678.901/0001-23',
       email: 'fiscal@construtorasaomateus.com.br',
       codigo: 'OS-2026-0333',
@@ -303,7 +325,6 @@ export const itens: Item[] = [
       arvore: 'predial.hidraulica',
       binario: true,
       data: '2026-12-31T12:00:00.000Z',
-      intervalo: { start: '07:00', end: '19:00' },
       /* display veio vazio da API. Acontece quando o displayString aponta para
          um campo que o item relacionado não preencheu. Ver BRIEFING.md. */
       relacao_simples: { id: 43889, display: '', reference: 'FORN77C0D1E2F3' },
@@ -324,33 +345,33 @@ export const itens: Item[] = [
         zip: '13213-000',
         country: 'BRA',
       },
-      arquivo: {
+      arquivo: [{
         url: 'https://exemplo.invalido/notificacao-concessionaria.pdf',
         filename: 'notificacao-concessionaria-bloco-b-2026.pdf',
         mime: 'application/pdf',
         mimeType: 'application/pdf',
         size: 3120500,
-      },
-      imagem: {
+      }],
+      imagem: [{
         url: 'https://exemplo.invalido/subestacao.jpg',
         filename: 'subestacao.jpg',
         mime: 'image/jpeg',
         mimeType: 'image/jpeg',
         size: 1840000,
-      },
-      pdf: {
+      }],
+      pdf: [{
         url: 'https://exemplo.invalido/art-assinada.pdf',
         filename: 'art-assinada.pdf',
         mime: 'application/pdf',
         mimeType: 'application/pdf',
         size: 210400,
-      },
-      documento: {
+      }],
+      documento: [{
         url: 'https://exemplo.invalido/plano-de-adequacao.docx',
         filename: 'plano-de-adequacao.docx',
         mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         size: 128900,
-      },
+      }],
       assinatura: { signer: 'Eduardo Bastos', signedAt: '2026-09-20T08:55:00.000Z', url: 'https://exemplo.invalido/art.png' },
       repetidor: [
         { item: 'Disjuntor tripolar 100A', quantidade: 6 },
@@ -379,7 +400,7 @@ export const itens: Item[] = [
       texto_curto: 'Contrato encerrado em 2024',
       texto_longo: 'Mantido apenas para consulta. Não gerar nova ordem a partir deste item.',
       texto_rico: '<p>Arquivado.</p>',
-      anotacoes: '',
+      anotacoes: [],
       mascara: '12.345.678/0001-90',
       email: 'arquivo@nortelux.com.br',
       codigo: 'OS-2024-0012',
@@ -394,15 +415,14 @@ export const itens: Item[] = [
       arvore: 'predial',
       binario: false,
       data: '2024-03-01T12:00:00.000Z',
-      intervalo: null,
       relacao_simples: { id: 43887, display: 'Nortelux Elétrica', reference: 'FORNC55D9212D9' },
       relacao_multipla: [],
       pessoa: { name: 'Marina Toledo', email: 'marina.toledo@nortelux.com.br', cpf: '000.000.000-00' },
       endereco: null,
-      arquivo: null,
-      imagem: null,
-      pdf: null,
-      documento: null,
+      arquivo: [],
+      imagem: [],
+      pdf: [],
+      documento: [],
       assinatura: null,
       repetidor: [],
       grupo: null,
@@ -423,7 +443,9 @@ export const itens: Item[] = [
       texto_curto: 'Laudo de estanqueidade da cobertura',
       texto_longo: 'Infiltração recorrente na laje técnica. Já houve duas tentativas de reparo.',
       texto_rico: '<p>Terceira ocorrência no mesmo ponto.</p>',
-      anotacoes: 'Anexar as fotos da última chuva.',
+      anotacoes: [
+        { author: 'Rafael Pimenta', at: '2026-09-21T20:10:00.000Z', text: 'Anexar as fotos da última chuva.' },
+      ],
       mascara: '987.654.321-00',
       email: 'obras@vegapredial.com.br',
       codigo: 'OS-2026-0527',
@@ -438,7 +460,6 @@ export const itens: Item[] = [
       arvore: 'predial.hidraulica',
       binario: true,
       data: '2026-10-15T12:00:00.000Z',
-      intervalo: { start: '13:00', end: '18:00' },
       relacao_simples: { id: 43888, display: 'Vega Predial', reference: 'FORNA11B2C3D4' },
       relacao_multipla: [{ id: 43898, display: 'OS 2026-0527', reference: 'OSC1F0A2F5' }],
       pessoa: { name: 'Rafael Pimenta', email: 'rafael.pimenta@vegapredial.com.br', cpf: '111.111.111-11' },
@@ -452,22 +473,22 @@ export const itens: Item[] = [
         zip: '13010-200',
         country: 'BRA',
       },
-      arquivo: {
+      arquivo: [{
         url: 'https://exemplo.invalido/laudo-estanqueidade.pdf',
         filename: 'laudo-estanqueidade.pdf',
         mime: 'application/pdf',
         mimeType: 'application/pdf',
         size: 92400,
-      },
-      imagem: {
+      }],
+      imagem: [{
         url: 'https://exemplo.invalido/laje-tecnica.jpg',
         filename: 'laje-tecnica.jpg',
         mime: 'image/jpeg',
         mimeType: 'image/jpeg',
         size: 410800,
-      },
-      pdf: null,
-      documento: null,
+      }],
+      pdf: [],
+      documento: [],
       assinatura: null,
       repetidor: [
         { item: 'Manta asfáltica', quantidade: 30 },
