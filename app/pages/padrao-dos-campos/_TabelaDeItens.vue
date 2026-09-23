@@ -465,7 +465,14 @@ onMounted(() => nextTick(() => {
           </template>
         </div>
 
-        <div v-else class="flex items-center gap-1.5">
+        <!--
+          O botão de ABRIR no hover da célula da referência. É o "OPEN" que o
+          Notion mostra ao passar o mouse na linha (visto no board dela em
+          23/09/2026), e resolve um problema do nosso desenho: abrir o item
+          dependia de duplo clique, que é gesto invisível. O duplo clique
+          continua valendo para quem já sabe.
+        -->
+        <div v-else class="group/ref flex items-center gap-1.5">
           <UBadge color="info" variant="subtle" size="sm" class="font-mono text-[11px]">
             {{ (row as Item).reference }}
           </UBadge>
@@ -476,6 +483,15 @@ onMounted(() => nextTick(() => {
             size="xs"
             :aria-label="t.copiar"
             @click.stop="copiarReferencia((row as Item).reference)"
+          />
+          <UButton
+            icon="i-lucide-maximize-2"
+            :label="t.abrir"
+            color="neutral"
+            variant="subtle"
+            size="xs"
+            class="shrink-0 opacity-0 transition-opacity group-hover/ref:opacity-100"
+            @click.stop="emit('abrirItem', row as Item)"
           />
           <UBadge v-if="(row as Item).isDraft" color="warning" variant="subtle" size="sm">
             {{ t.rascunho }}
