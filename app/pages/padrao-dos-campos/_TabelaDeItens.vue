@@ -61,6 +61,8 @@ const emit = defineEmits<{
   criarNaLinha: [dados: Record<string, unknown>, posicao: number]
   /** Comentário feito a partir de um campo, que vai para a conversa do item. */
   comentarNoCampo: [item: Item, campo: Campo, texto: string]
+  /** O cartão da relação pediu para abrir o registro do outro lado. */
+  abrirRelacionado: [referencia: string]
 }>()
 
 const selecionados = ref<Item[]>([])
@@ -671,6 +673,7 @@ onMounted(() => nextTick(() => {
             :idioma="idioma"
             @editar="(alvo?: HTMLElement) => abrirEdicao(campo, row as Item, alvo)"
             @alternar="(v: unknown) => gravarValor(row as Item, campo.refId, v)"
+            @abrir-relacionado="emit('abrirRelacionado', $event)"
           />
         </div>
       </template>

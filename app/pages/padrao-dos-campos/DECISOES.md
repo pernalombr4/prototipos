@@ -882,3 +882,69 @@ assinatura e repetidor.
 
 Decisão dela: **abrir fica no botão Abrir e no duplo clique**, e mais nada. O
 selo da referência voltou a ser só identificação.
+
+---
+
+## Rodada 10: o ícone, o cartão da relação, e o Pessoa/Empresa em aberto
+
+### O ícone das Anotações
+
+Anotações e Chat estavam com o mesmo símbolo na célula, porque o ícone estava
+escrito no código do componente em vez de vir do catálogo. Agora vem do
+catálogo: **Anotações é bloco de notas, Chat é balão**. Os dois são conversa, mas
+não são a mesma coisa, e com o mesmo símbolo a tabela mentia que eram.
+
+### O cartão do registro relacionado
+
+Ela trouxe do nosso admin: na lista de workspaces, passar o mouse na carteira
+abre um cartão com saldo, referência, id, datas e o botão "Ver detalhes da
+carteira". A ideia entra, e resolve um buraco real: numa relação, o `display`
+sozinho ("Nortelux Elétrica") não responde **que registro é esse**, e hoje a
+única forma de saber é abrir o item e perder o lugar.
+
+**O que mantém isso coerente com o resto** (a preocupação dela de não ficar
+frankenstein) é uma regra de três gestos, que passa a valer para a tabela
+inteira e não só para a relação:
+
+| Gesto | O que acontece | Onde já valia antes |
+|---|---|---|
+| **passar o mouse** | MOSTRA | a bandeja de copiar, e agora o cartão |
+| **clicar** | EDITA | o quadro que salta para fora da tabela |
+| **ação explícita** | ABRE | o botão Abrir da Referência, e o botão do cartão |
+
+O cartão é **só leitura**. Se tivesse controle de edição dentro, brigaria com o
+quadro, que é quem edita. É isso que separa "mais uma ideia" de uma ideia que
+combina com as outras.
+
+**A linha não alarga**, que era a condição dela: o cartão é camada flutuante,
+como o quadro. Medido no protótipo: a linha continua com 42 px de altura com o
+cartão aberto.
+
+**Nos três formatos, mesmo cartão e mesmo conteúdo, gatilho diferente:**
+
+| Formato | Gatilho | Por quê |
+|---|---|---|
+| **célula** | hover no selo, com 400 ms de atraso | na tabela o mouse cruza célula sem querer, e cartão que abre no roçar do mouse é poluição |
+| **cru** (sidebar) | igual à célula | a coluna é estreita, o cartão flutua |
+| **formulário** | **fixo embaixo do seletor** | no formulário existe espaço vertical, e quem escolheu o registro quer conferir a escolha sem fazer mira com o mouse |
+
+**Proposta de contrato que vem junto:** hoje a relação devolve
+`{ id, display, reference }`. O cartão precisa de **categoria, três linhas de
+resumo e as datas**, e isso tem que vir no próprio valor da relação. Sem isso o
+cartão vira uma chamada de rede por linha da tabela. Está no `mocks.ts`, no
+comentário do `itensRelacionaveis`.
+
+### Pessoa/Empresa: ela apontou que o meu não tem relação com o real
+
+E tem razão para desconfiar: o que eu prototipei é um **seletor de membros do
+workspace**, e o nome do tipo e o próprio catálogo dizem outra coisa. O
+`Field` do schema tem **`personConfig`**, e o texto do meu próprio catálogo diz
+"bloco com os subcampos de personConfig, na linha inteira". Ou seja: é um
+**bloco de dados de pessoa ou empresa** (com subcampos configuráveis), e não uma
+lista de gente do workspace.
+
+**Não corrigi ainda, de propósito.** O `personConfig` no schema é um registro
+solto (`Record<string, unknown>`), então ele não diz quais são os subcampos, e
+eu não vou adivinhar duas vezes o mesmo campo. Preciso ver a interação na tela
+do develop, e a janela do Chrome estava minimizada (largura 0) durante esta
+rodada. Fica como o primeiro item da próxima.

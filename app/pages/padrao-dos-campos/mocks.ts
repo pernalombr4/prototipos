@@ -546,10 +546,79 @@ export const membros = [
 ]
 
 /** Os itens que o seletor de relação oferece no formulário. */
+/**
+ * Os registros que a relação alcança.
+ *
+ * Cada um traz um RESUMO, e isso é proposta de contrato: hoje a relação devolve
+ * `{ id, display, reference }`, e o `display` sozinho não responde "que
+ * registro é esse?". O cartão do registro relacionado (rodada 10) precisa de
+ * categoria, três linhas de resumo e as datas, e é isso que o endpoint tem que
+ * mandar junto. Sem isso o cartão vira uma segunda chamada por linha da tabela.
+ */
 export const itensRelacionaveis = [
-  { id: 43887, display: 'Nortelux Elétrica', reference: 'FORNC55D9212D9' },
-  { id: 43888, display: 'Vega Predial', reference: 'FORNA11B2C3D4' },
-  { id: 43889, display: '', reference: 'FORN77C0D1E2F3' },
-  { id: 43891, display: 'OS 2026-0481', reference: 'OSC1F0A2B4' },
-  { id: 43892, display: 'OS 2026-0502', reference: 'OSC1F0A2B7' },
+  {
+    id: 43887,
+    display: 'Nortelux Elétrica',
+    reference: 'FORNC55D9212D9',
+    categoria: 'Fornecedores',
+    resumo: [
+      { rotulo: 'CNPJ', valor: '12.345.678/0001-90' },
+      { rotulo: 'Contato', valor: 'compras@nortelux.com.br' },
+      { rotulo: 'Situação', valor: 'Homologado' },
+    ],
+    criadoEm: '2026-01-23T11:26:26.000Z',
+    atualizadoEm: '2026-09-23T09:46:20.000Z',
+  },
+  {
+    id: 43888,
+    display: 'Vega Predial',
+    reference: 'FORNA11B2C3D4',
+    categoria: 'Fornecedores',
+    resumo: [
+      { rotulo: 'CNPJ', valor: '98.765.432/0001-10' },
+      { rotulo: 'Contato', valor: 'obras@vegapredial.com.br' },
+      { rotulo: 'Situação', valor: 'Em homologação' },
+    ],
+    criadoEm: '2026-03-04T14:02:00.000Z',
+    atualizadoEm: '2026-09-18T08:30:00.000Z',
+  },
+  {
+    id: 43889,
+    display: '',
+    reference: 'FORN77C0D1E2F3',
+    categoria: 'Fornecedores',
+    resumo: [
+      { rotulo: 'CNPJ', valor: '45.221.900/0001-77' },
+      { rotulo: 'Contato', valor: '' },
+      { rotulo: 'Situação', valor: 'Cadastro incompleto' },
+    ],
+    criadoEm: '2026-06-11T10:15:00.000Z',
+    atualizadoEm: '2026-06-11T10:15:00.000Z',
+  },
+  {
+    id: 43891,
+    display: 'OS 2026-0481',
+    reference: 'OSC1F0A2B4',
+    categoria: 'Ordens de serviço',
+    resumo: [
+      { rotulo: 'Status', valor: 'Em análise' },
+      { rotulo: 'Responsável', valor: 'Marina Toledo' },
+      { rotulo: 'Valor', valor: 'R$ 18.400,00' },
+    ],
+    criadoEm: '2026-08-02T09:00:00.000Z',
+    atualizadoEm: '2026-09-20T17:41:00.000Z',
+  },
+  {
+    id: 43892,
+    display: 'OS 2026-0502',
+    reference: 'OSC1F0A2B7',
+    categoria: 'Ordens de serviço',
+    resumo: [
+      { rotulo: 'Status', valor: 'Aprovado' },
+      { rotulo: 'Responsável', valor: 'Rafael Pimenta' },
+      { rotulo: 'Valor', valor: 'US$ 7.250,90' },
+    ],
+    criadoEm: '2026-08-19T13:20:00.000Z',
+    atualizadoEm: '2026-09-21T11:05:00.000Z',
+  },
 ]

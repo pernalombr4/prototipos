@@ -17,6 +17,7 @@ import type { Item } from '@be-enlighten/enspace-sdk-schemas'
 import type { Campo } from './campos'
 import type { Textos } from './textos'
 import { corDaOpcao, formatarBytes, formatarDataHora, rotuloDaOpcao } from './formatacao'
+import CartaoDoRegistro from './_CartaoDoRegistro.vue'
 import { indicesDeCorrecao, itensRelacionaveis, membros, moedas, opcoes as todasAsOpcoes } from './mocks'
 
 const props = defineProps<{
@@ -317,6 +318,17 @@ const relacaoEscolhida = computed({
     emit('update:modelValue', i ?? null)
   },
 })
+
+/**
+ * O registro escolhido, para o cartão FIXO embaixo do seletor.
+ *
+ * No formulário o cartão não é flutuante: existe espaço vertical, e quem está
+ * escolhendo quer conferir a escolha sem fazer mira com o mouse. É o mesmo
+ * cartão da célula, com outro gatilho, e o motivo é espaço, não gosto.
+ */
+const registroEscolhido = computed(
+  () => itensRelacionaveis.find(i => i.reference === relacaoEscolhida.value),
+)
 
 const relacoesEscolhidas = computed({
   get: () => ((valor.value as { reference: string }[]) ?? []).map(v => v.reference),
@@ -894,29 +906,39 @@ const opcoesDeRelacao = computed(() =>
       solto do lado do campo saiu: ele não diz a que pertence e rouba um alvo
       de clique do controle.
     -->
-    <USelectMenu
-      v-else-if="campo.tipo === 'EnRel'"
-      v-model="relacaoEscolhida"
-      :items="opcoesDeRelacao"
-      value-key="value"
-      size="sm"
-      class="w-full"
-      :search-input="{ placeholder: t.pesquisar }"
-    >
-      <template #content-bottom>
-        <div class="border-t border-default p-1">
-          <UButton
-            icon="i-lucide-plus"
-            :label="t.criarRegistro"
-            color="primary"
-            variant="ghost"
-            size="xs"
-            block
-            class="justify-start"
-          />
-        </div>
-      </template>
-    </USelectMenu>
+    <div v-else-if="campo.tipo === 'EnRel'">
+      <USelectMenu
+        v-model="relacaoEscolhida"
+        :items="opcoesDeRelacao"
+        value-key="value"
+        size="sm"
+        class="w-full"
+        :search-input="{ placeholder: t.pesquisar }"
+      >
+        <template #content-bottom>
+          <div class="border-t border-default p-1">
+            <UButton
+              icon="i-lucide-plus"
+              :label="t.criarRegistro"
+              color="primary"
+              variant="ghost"
+              size="xs"
+              block
+              class="justify-start"
+            />
+          </div>
+        </template>
+      </USelectMenu>
+
+      <!--
+        O cartão do registro escolhido, FIXO embaixo do seletor. Mesmo cartão
+        da célula; o que muda é o gatilho, porque aqui há espaço vertical e não
+        faz sentido esconder a conferência atrás de um hover.
+      -->
+      <div v-if="registroEscolhido" class="mt-1.5 rounded-md border border-default">
+        <CartaoDoRegistro :registro="registroEscolhido" :t="t" :idioma="idioma" class="w-full" />
+      </div>
+    </div>
 
     <USelectMenu
       v-else-if="campo.tipo === 'EnRelMulti'"

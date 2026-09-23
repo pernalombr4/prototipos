@@ -16,6 +16,8 @@
  * dois jeitos em duas telas.
  */
 import type { Campo } from './campos'
+import CartaoDoRegistro from './_CartaoDoRegistro.vue'
+import { itensRelacionaveis } from './mocks'
 import type { Textos } from './textos'
 import {
   corDaOpcao,
@@ -51,6 +53,8 @@ const emit = defineEmits<{
    * troca o valor na hora. É o caso do booleano.
    */
   'alternar': [unknown]
+  /** O cartão do registro relacionado pediu para abrir aquele registro. */
+  'abrirRelacionado': [referencia: string]
 }>()
 
 const vazio = computed(() => estaVazio(props.valor))
@@ -171,6 +175,16 @@ const TIPOS_SEM_BANDEJA = [
 const temBandeja = computed(
   () => naCelula.value && !vazio.value && !TIPOS_SEM_BANDEJA.includes(props.campo.tipo),
 )
+
+/**
+ * O registro do outro lado da relação, com o resumo que o cartão mostra. No
+ * produto isso tem que vir no próprio valor da relação: é a proposta de
+ * contrato que está no `mocks.ts`, porque hoje a API devolve só
+ * `{ id, display, reference }` e o cartão precisa de mais.
+ */
+function registroRelacionado(referencia: string) {
+  return itensRelacionaveis.find(i => i.reference === referencia)
+}
 
 async function copiar(texto: string) {
   try {
@@ -384,18 +398,46 @@ async function copiar(texto: string) {
       </span>
     </span>
 
-    <!-- ──────────────────────────── relações ──────────────────────────── -->
-    <UBadge
+    <!--
+      ──────────────────────────── relações ────────────────────────────
+      O selo, e no hover dele o CARTÃO do registro relacionado, que ela trouxe
+      do nosso admin. Ele responde "que registro é esse?" sem sair da linha, e
+      por ser camada flutuante NÃO alarga a linha nem empurra célula. As três
+      regras que mantêm isso coerente estão no `_CartaoDoRegistro.vue`.
+
+      O atraso de 400 ms existe porque na tabela o mouse cruza célula sem
+      querer, e cartão que abre no roçar do mouse vira poluição.
+    -->
+    <UPopover
       v-else-if="campo.tipo === 'EnRel'"
-      color="primary"
-      variant="subtle"
-      size="sm"
-      class="max-w-full truncate"
-      :class="comoRelacao.display?.trim() ? '' : 'font-mono text-[11px]'"
+      as="span"
+      mode="hover"
+      :open-delay="400"
+      :close-delay="120"
+      :content="{ align: 'start', side: 'bottom' }"
+      class="max-w-full"
     >
-      <UIcon name="i-lucide-link" class="size-3 shrink-0" />
-      {{ comoRelacao.display?.trim() ? comoRelacao.display : comoRelacao.reference }}
-    </UBadge>
+      <UBadge
+        color="primary"
+        variant="subtle"
+        size="sm"
+        class="max-w-full truncate"
+        :class="comoRelacao.display?.trim() ? '' : 'font-mono text-[11px]'"
+      >
+        <UIcon name="i-lucide-link" class="size-3 shrink-0" />
+        {{ comoRelacao.display?.trim() ? comoRelacao.display : comoRelacao.reference }}
+      </UBadge>
+
+      <template #content>
+        <CartaoDoRegistro
+          v-if="registroRelacionado(comoRelacao.reference)"
+          :registro="registroRelacionado(comoRelacao.reference)!"
+          :t="t"
+          :idioma="idioma"
+          @abrir="emit('abrirRelacionado', comoRelacao.reference)"
+        />
+      </template>
+    </UPopover>
 
     <span
       v-else-if="campo.tipo === 'EnRelMulti'"
@@ -524,7 +566,12 @@ async function copiar(texto: string) {
         color="primary"
       >
         <span class="flex size-6 items-center justify-center rounded-md bg-primary/10 text-primary">
-          <UIcon name="i-lucide-message-square" class="size-3.5" />
+          <!--
+            O ícone vem do CATÁLOGO, não do código: Anotações e Chat são os
+            dois conversa, mas não são a mesma coisa, e com o mesmo símbolo a
+            tabela mentia que eram. Anotação é bloco de notas, chat é balão.
+          -->
+          <UIcon :name="campo.icone" class="size-3.5" />
         </span>
       </UChip>
       <span v-if="!naCelula && comoConversa.length" class="min-w-0 truncate text-sm text-highlighted">

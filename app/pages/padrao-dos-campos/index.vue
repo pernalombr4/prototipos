@@ -179,6 +179,22 @@ function comentarNoCampo(item: Item, campo: Campo, texto: string) {
   toast.add({ title: t.value.comentarioEnviado, icon: 'i-lucide-message-circle', color: 'success' })
 }
 
+/**
+ * O cartão da relação pediu para abrir o registro do outro lado.
+ *
+ * MAQUETE: aqui o registro relacionado não existe como item desta categoria,
+ * então o que acontece é um aviso. No produto isto abre a visão rápida do
+ * registro relacionado, que é o "Ver detalhes da carteira" do nosso admin.
+ */
+function abrirRelacionado(referencia: string) {
+  toast.add({
+    title: t.value.abrirRegistro,
+    description: referencia,
+    icon: 'i-lucide-link-2',
+    color: 'info',
+  })
+}
+
 function criarItem(dados: Record<string, unknown>, posicao?: number) {
   const agora = new Date()
   const novo = {
@@ -490,6 +506,7 @@ onMounted(() => {
               :pode-configurar="podeConfigurar"
               @criar-na-linha="criarItem"
               @comentar-no-campo="comentarNoCampo"
+              @abrir-relacionado="abrirRelacionado"
             />
           </div>
 

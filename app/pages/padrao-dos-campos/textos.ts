@@ -158,6 +158,7 @@ export interface Textos {
   nenhumAnexo: string
   criarNaLinha: string
   criarAbaixo: string
+  abrirRegistro: string
   totalDaColuna: string
   totalPorMoeda: string
   comentarNoCampo: string
@@ -406,6 +407,7 @@ const ptBR: Textos = {
   nenhumAnexo: 'Nenhum arquivo ainda.',
   criarNaLinha: 'Criar registro aqui',
   criarAbaixo: 'Criar registro abaixo',
+  abrirRegistro: 'Abrir o registro',
   totalDaColuna: 'Total da coluna',
   totalPorMoeda: 'Moedas diferentes nunca somam juntas. O total sai por moeda.',
   comentarNoCampo: 'Comentar neste campo',
@@ -905,6 +907,7 @@ const en: Textos = {
   nenhumAnexo: 'No files yet.',
   criarNaLinha: 'Create a record here',
   criarAbaixo: 'Create a record below',
+  abrirRegistro: 'Open record',
   totalDaColuna: 'Column total',
   totalPorMoeda: 'Different currencies never add up together. The total comes per currency.',
   comentarNoCampo: 'Comment on this field',
@@ -1404,6 +1407,7 @@ const es: Textos = {
   nenhumAnexo: 'Todavía no hay archivos.',
   criarNaLinha: 'Crear registro aquí',
   criarAbaixo: 'Crear registro abajo',
+  abrirRegistro: 'Abrir el registro',
   totalDaColuna: 'Total de la columna',
   totalPorMoeda: 'Monedas distintas nunca se suman juntas. El total sale por moneda.',
   comentarNoCampo: 'Comentar en este campo',
