@@ -82,7 +82,7 @@ O relatório troca de idioma junto com a tela: gerar em espanhol produz as regra
 |---|---|
 | Seletor de arquivo, imagem e PDF | O botão injeta um anexo fictício no estado. Nenhum arquivo é lido ou enviado |
 | Miniatura de imagem | Um bloco de cor com a extensão. O protótipo não carrega imagem de fora (regra 4) |
-| Editor de texto rico (`EnHtml`) | Barra de formatação decorativa sobre um `UTextarea`. O `UEditor` do Nuxt UI existe, mas o que está em discussão é a moldura do campo, não o editor |
+| ~~Editor de texto rico (`EnHtml`)~~ | **Deixou de ser maquete na rodada 18**: é o `UEditor` do Nuxt UI, de verdade. O que estava aqui era uma barra decorativa sobre um `UTextarea` com a marcação crua dentro |
 | `EnESign`, `EnChats`, `EnOnlyoffice` no formulário | Moldura com a regra escrita. Assinar, conversar e editar documento não acontecem |
 | Busca, "Criado em" e "Todo o período" na barra | Não filtram. São casca do develop |
 | Os quatro ícones da barra (Exportar, Colunas, Densidade, Mais opções) | Só o tooltip. O relatório de verdade está no andaime, de propósito, para não se confundir com o Exportar que o produto já tem |
@@ -1350,3 +1350,52 @@ Fica como pedido ao SDK: **`minSize` por coluna no `EnTableColumn`**. A largura
 mínima é característica do CAMPO, e o catálogo deste protótipo já a declara em
 `campo.largura`; hoje não há como informá-la ao `EnTable`, e o piso tem que ser
 aplicado por fora, no estado da tela.
+
+## Rodada 18: o editor de HTML mostrava HTML
+
+Ela abriu o campo de texto rico e viu isto: uma barra com negrito, itálico,
+lista e título, e embaixo `<p>Laudo com <strong>ressalva</strong>: ...</p>` na
+cara de quem escreve. O recado foi curto e certo: **"abrindo o editor de html
+não tem que aparecer html cru né... e sim formatado"**.
+
+### Por que estava assim, e por que a justificativa não valia
+
+Eu tinha declarado o campo como maquete, com o argumento de que o `UEditor` do
+Nuxt UI "carrega o TipTap inteiro" e que o que estava em discussão era a moldura
+do campo, não o editor. Os dois pedaços do argumento estavam errados:
+
+- o TipTap **já está instalado**, como dependência do próprio Nuxt UI. Não havia
+  peso novo nenhum a pagar;
+- e a maquete era **pior do que não ter nada**. Uma barra de formatação é uma
+  promessa: ela diz que ali se escreve com negrito. Entregar marcação crua
+  debaixo dela é quebrar a promessa no lugar mais visível, e é justamente a
+  regra 24 (o que promete edição tem que editar) que eu mesmo escrevi.
+
+A escada da biblioteca também já respondia: o componente existe no Nuxt UI, e
+existir no Nuxt UI é o segundo degrau. Não havia por que descer para marcação
+própria.
+
+### Como ficou
+
+`UEditor` com `v-model` de string, que é o que faz o `contentType` resolver para
+`html` sozinho: o campo lê HTML e devolve HTML, sem conversão nossa no meio. A
+barra é o `UEditorToolbar`, ligada à instância que o slot do editor entrega, com
+negrito, itálico, lista, lista numerada, título 2 e citação, na ordem do
+develop. Os ícones são nossos, porque a biblioteca não põe ícone por tipo.
+
+O ciclo inteiro conferido em tela: o valor abre formatado (`ressalva` em
+negrito, não `<strong>`), selecionar "Laudo" e clicar no negrito grava
+`<strong>Laudo</strong>`, o Confirmar fecha o quadro e a célula volta a mostrar
+o texto sem marcação nenhuma. A leitura já estava certa desde o começo: célula
+com as tags removidas, formulário e cru com o HTML renderizado.
+
+### O botão de link ficou fora, e isso é achado
+
+O handler de link do Nuxt UI chama um `prompt()` do navegador com o texto
+"Enter the URL:" quando não recebe um `href`. Em inglês, fora do nosso
+alternador de idioma e com a cara do sistema operacional em vez da do produto.
+Não entra num protótipo que existe para julgar interface.
+
+Para o dev: inserir link precisa de um popover nosso, com campo de URL, texto do
+link e o botão de remover, como o Notion faz. É o único controle da barra que o
+`UEditorToolbar` não entrega pronto em condições de uso.

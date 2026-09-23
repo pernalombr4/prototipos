@@ -458,6 +458,22 @@ const opcoesDeMoeda = computed(() => {
   return lista.map(m => ({ label: m.codigo, value: m.codigo, suffix: m.nome }))
 })
 
+/**
+ * A barra do editor de texto rico.
+ *
+ * Os `kind` são os que o `UEditorToolbar` conhece, e o ícone é nosso: a
+ * biblioteca não põe ícone por tipo. A ordem é a do develop: negrito, itálico,
+ * lista, título.
+ */
+const ferramentasDoTextoRico = [
+  { kind: 'mark' as const, mark: 'bold', icon: 'i-lucide-bold' },
+  { kind: 'mark' as const, mark: 'italic', icon: 'i-lucide-italic' },
+  { kind: 'bulletList' as const, icon: 'i-lucide-list' },
+  { kind: 'orderedList' as const, icon: 'i-lucide-list-ordered' },
+  { kind: 'heading' as const, level: 2, icon: 'i-lucide-heading-2' },
+  { kind: 'blockquote' as const, icon: 'i-lucide-quote' },
+]
+
 /* A calculadora de correção monetária. É maquete: não calcula nada. */
 const calculadoraAberta = ref(false)
 const correcao = ref({ indice: '', inicio: '2026-09-22', fim: '', multiplos: false })
@@ -621,28 +637,39 @@ const opcoesDeRelacao = computed(() =>
     />
 
     <!--
-      O editor de texto rico do Nuxt UI existe (`UEditor`), mas ele carrega o
-      TipTap inteiro e o que está em discussão aqui é a MOLDURA do campo, não
-      o editor. A barra falsa mostra a altura e o peso que o campo ocupa.
-      Declarado como maquete no DECISOES.md.
+      ──────────────────── EDITOR DE TEXTO HTML, DE VERDADE ────────────────────
+      Era maquete: barra de botões sem função e um `UTextarea` com a marcação
+      crua dentro. Ela pegou: "abrindo o editor de html não tem que aparecer
+      html cru né... e sim formatado". Está certíssima, e a maquete era pior do
+      que não ter nada, porque a barra de formatação PROMETIA edição rica e o
+      conteúdo entregava `<p>` e `<strong>` na cara de quem escreve.
+
+      Agora é o `UEditor` do Nuxt UI, que é o componente certo pela escada da
+      biblioteca: ele existe, o TipTap já vem instalado como dependência dele, e
+      com `v-model` de string ele fala HTML nas duas pontas (`contentType`
+      resolve para `html` sozinho). A barra é o `UEditorToolbar`, ligada à
+      instância que o slot do editor entrega.
+
+      O botão de LINK ficou fora de propósito: o handler do Nuxt UI chama um
+      `prompt()` do navegador com o texto "Enter the URL:", em inglês e fora do
+      nosso alternador de idioma. Fica como achado do handoff, não como controle
+      do protótipo.
     -->
-    <div v-else-if="campo.tipo === 'EnHtml'" class="rounded-md border border-default">
-      <div class="flex items-center gap-0.5 border-b border-default px-1.5 py-1">
-        <UIcon
-          v-for="i in ['i-lucide-bold', 'i-lucide-italic', 'i-lucide-list', 'i-lucide-link', 'i-lucide-heading-2']"
-          :key="i"
-          :name="i"
-          class="size-4 rounded p-0.5 text-muted hover:bg-elevated"
-        />
-      </div>
-      <UTextarea
+    <div v-else-if="campo.tipo === 'EnHtml'" class="overflow-hidden rounded-md border border-default">
+      <UEditor
         v-model="comoTexto"
-        variant="none"
-        size="sm"
-        class="w-full"
-        :rows="3"
-        autoresize
-      />
+        :autofocus="autofoco ? 'end' : false"
+        :placeholder="t.campos[campo.tipo].descricao"
+        :ui="{ base: 'min-h-20 px-2.5 py-2 text-sm focus:outline-none' }"
+      >
+        <template #default="{ editor }">
+          <UEditorToolbar
+            :editor="editor"
+            :items="ferramentasDoTextoRico"
+            class="border-b border-default bg-elevated/40 px-1.5 py-1"
+          />
+        </template>
+      </UEditor>
     </div>
 
     <UInput
