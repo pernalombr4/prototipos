@@ -999,7 +999,8 @@ const opcoesDeRelacao = computed(() =>
       O que faz salvar. Ela pediu que ficasse claro em TODOS os campos, e é
       informação que muda por tipo: escolher já salva numa lista, mas um
       endereço precisa de confirmação. No formulário a dica fica embaixo do
-      controle; na célula ela flutua, para não empurrar a altura da linha.
+      controle. Na célula ela não cabe (a linha tem altura fixa e corta o que
+      passa), então quem a mostra é a barra da tabela, no alto.
     -->
     <div v-if="!semRotulo" class="mt-1 space-y-0.5">
       <p class="text-xs text-muted">{{ t.campos[campo.tipo].descricao }}</p>
@@ -1011,12 +1012,6 @@ const opcoesDeRelacao = computed(() =>
         {{ t.comoSalvaTextos[campo.comoSalva] }}
       </p>
     </div>
-    <p
-      v-else
-      class="pointer-events-none absolute left-0 top-full z-20 mt-1 whitespace-nowrap rounded bg-inverted px-1.5 py-0.5 text-[10px] text-inverted"
-    >
-      {{ t.comoSalvaTextos[campo.comoSalva] }}
-    </p>
 
     <!--
       A calculadora de correção monetária, copiada do develop: índice

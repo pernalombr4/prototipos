@@ -70,6 +70,11 @@ function abrirEdicao(campo: Campo, item: Item) {
   emEdicao.value = { id: item.id, refId: campo.refId }
 }
 
+/** O campo que está em edição agora, para a barra dizer o que o salva. */
+const campoEmEdicao = computed(
+  () => props.campos.find(c => c.refId === emEdicao.value?.refId) ?? null,
+)
+
 function fecharEdicao() {
   emEdicao.value = null
 }
@@ -184,6 +189,22 @@ onMounted(() => nextTick(() => {
     />
     <UButton icon="i-lucide-calendar" :label="t.criadoEm" color="neutral" variant="ghost" size="sm" />
     <UButton icon="i-lucide-filter" :label="t.todoPeriodo" color="neutral" variant="ghost" size="sm" />
+
+    <!--
+      Enquanto uma célula está em edição, a barra diz o que salva AQUELE valor.
+      A dica não cabe dentro da linha, que tem altura fixa e corta o que passa,
+      e a camada flutuante já diz no rodapé. Aqui ela serve a edição em linha.
+    -->
+    <UBadge
+      v-if="campoEmEdicao"
+      :icon="campoEmEdicao.comoSalva === 'naoSeAplica' ? 'i-lucide-lock' : 'i-lucide-save'"
+      color="primary"
+      variant="subtle"
+      size="sm"
+      class="ml-1"
+    >
+      {{ t.comoSalvaTextos[campoEmEdicao.comoSalva] }}
+    </UBadge>
 
     <div class="ml-auto flex items-center gap-0.5">
       <UTooltip :text="t.exportar">
