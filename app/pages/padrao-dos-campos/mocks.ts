@@ -135,8 +135,8 @@ export const itens: Item[] = [
         { id: 43892, display: 'OS 2026-0502', reference: 'OSC1F0A2B7' },
       ],
       pessoa: {
-        type: 'PJ',
-        document: '11222333000181',
+        person_type: 'PJ',
+        cnpj: '11222333000181',
         razao_social: 'NORTELUX INSTALACOES ELETRICAS LTDA',
         nome_fantasia: 'Nortelux Elétrica',
       },
@@ -235,7 +235,7 @@ export const itens: Item[] = [
       data: '2026-09-30T12:00:00.000Z',
       relacao_simples: { id: 43888, display: 'Vega Predial', reference: 'FORNA11B2C3D4' },
       relacao_multipla: [{ id: 43893, display: 'OS 2026-0511', reference: 'OSC1F0A2C1' }],
-      pessoa: { type: 'PF', document: '52998224725', name: 'Rafael Pimenta' },
+      pessoa: { person_type: 'PF', name: 'Rafael Pimenta', cpf: '52998224725' },
       endereco: {
         street: 'Rua Doutor Renato Paes de Barros',
         number: '750',
@@ -297,7 +297,7 @@ export const itens: Item[] = [
        * Caso de canto: o tipo já foi escolhido e o documento não. É o estado em
        * que o bloco fica esperando a consulta, e o dev precisa vê-lo.
        */
-      pessoa: { type: 'PJ' },
+      pessoa: { person_type: 'PJ' },
       endereco: null,
       arquivo: [],
       imagem: [],
@@ -354,8 +354,8 @@ export const itens: Item[] = [
       ],
       /* Caso de canto: PJ com razão social longa e sem nome fantasia. */
       pessoa: {
-        type: 'PJ',
-        document: '45221900000177',
+        person_type: 'PJ',
+        cnpj: '45221900000177',
         razao_social: 'CONSTRUTORA SAO MATEUS EMPREENDIMENTOS E PARTICIPACOES LTDA',
         nome_fantasia: '',
       },
@@ -441,7 +441,7 @@ export const itens: Item[] = [
       data: '2024-03-01T12:00:00.000Z',
       relacao_simples: { id: 43887, display: 'Nortelux Elétrica', reference: 'FORNC55D9212D9' },
       relacao_multipla: [],
-      pessoa: { type: 'PF', document: '52998224725', name: 'Marina Toledo' },
+      pessoa: { person_type: 'PF', name: 'Marina Toledo', cpf: '52998224725' },
       endereco: null,
       arquivo: [],
       imagem: [],
@@ -487,8 +487,8 @@ export const itens: Item[] = [
       relacao_simples: { id: 43888, display: 'Vega Predial', reference: 'FORNA11B2C3D4' },
       relacao_multipla: [{ id: 43898, display: 'OS 2026-0527', reference: 'OSC1F0A2F5' }],
       pessoa: {
-        type: 'PJ',
-        document: '98765432000110',
+        person_type: 'PJ',
+        cnpj: '98765432000110',
         razao_social: 'VEGA PREDIAL SERVICOS DE MANUTENCAO LTDA',
         nome_fantasia: 'Vega Predial',
       },

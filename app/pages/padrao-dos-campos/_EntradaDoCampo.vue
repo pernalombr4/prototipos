@@ -320,10 +320,18 @@ const acoesDoCompositor = computed(() => [
  * espera para o estado "consultando" existir na tela. O que o protótipo tem
  * que provar é o comportamento, não o serviço.
  */
+/*
+ * As chaves são as do produto, lidas na tela: o rótulo do tipo vem com
+ * `for="person_type"` no DOM do develop, e a configuração do campo lista os
+ * subcampos como `cnpj, name, cpf, razao_social, nome_fantasia`. O documento
+ * não é uma chave só: são `cpf` e `cnpj`, separadas, e é por isso que a
+ * máscara troca junto com o tipo.
+ */
 interface Pessoa {
-  type?: 'PF' | 'PJ'
-  document?: string
+  person_type?: 'PF' | 'PJ'
   name?: string
+  cpf?: string
+  cnpj?: string
   razao_social?: string
   nome_fantasia?: string
 }
@@ -334,10 +342,15 @@ function mudarPessoa(troca: Partial<Pessoa>) {
   emit('update:modelValue', { ...pessoa.value, ...troca })
 }
 
-/** Só dígitos, que é como o documento vai gravado. */
-const digitosDoDocumento = computed(() => (pessoa.value.document ?? '').replace(/\D/g, ''))
+/** O documento do tipo escolhido: `cnpj` na PJ, `cpf` na PF. */
+const documentoDaPessoa = computed(
+  () => (pessoa.value.person_type === 'PJ' ? pessoa.value.cnpj : pessoa.value.cpf) ?? '',
+)
 
-const tamanhoDoDocumento = computed(() => (pessoa.value.type === 'PJ' ? 14 : 11))
+/** Só dígitos, que é como o documento vai gravado. */
+const digitosDoDocumento = computed(() => documentoDaPessoa.value.replace(/\D/g, ''))
+
+const tamanhoDoDocumento = computed(() => (pessoa.value.person_type === 'PJ' ? 14 : 11))
 
 const documentoCompleto = computed(
   () => digitosDoDocumento.value.length === tamanhoDoDocumento.value,
@@ -353,7 +366,7 @@ const documentoCompleto = computed(
 const documentoValido = computed(() => {
   const d = digitosDoDocumento.value
   if (!documentoCompleto.value) return true
-  if (pessoa.value.type === 'PJ') return d in cadastroPorDocumento
+  if (pessoa.value.person_type === 'PJ') return d in cadastroPorDocumento
   return d === '52998224725'
 })
 
@@ -361,7 +374,7 @@ const consultando = ref(false)
 
 /** Documento válido consulta o cadastro e preenche o resto. */
 watch(digitosDoDocumento, async (d) => {
-  if (pessoa.value.type !== 'PJ' || d.length !== 14) return
+  if (pessoa.value.person_type !== 'PJ' || d.length !== 14) return
   const achado = cadastroPorDocumento[d]
   if (!achado) return
   consultando.value = true
@@ -1037,7 +1050,7 @@ const opcoesDeRelacao = computed(() =>
       <div>
         <p class="mb-1 text-xs font-medium text-highlighted">{{ t.pessoaTipo }}</p>
         <USelectMenu
-          :model-value="pessoa.type ?? ''"
+          :model-value="pessoa.person_type ?? ''"
           :items="[
             { label: t.pessoaFisica, value: 'PF' },
             { label: t.pessoaJuridica, value: 'PJ' },
@@ -1046,11 +1059,11 @@ const opcoesDeRelacao = computed(() =>
           size="sm"
           class="w-full"
           :placeholder="t.pessoaSelecione"
-          @update:model-value="(v: unknown) => emit('update:modelValue', { type: v as 'PF' | 'PJ' })"
+          @update:model-value="(v: unknown) => emit('update:modelValue', { person_type: v as 'PF' | 'PJ' })"
         />
       </div>
 
-      <template v-if="pessoa.type === 'PF'">
+      <template v-if="pessoa.person_type === 'PF'">
         <div>
           <p class="mb-1 text-xs font-medium text-highlighted">{{ t.pessoaNome }}</p>
           <UInput
@@ -1066,12 +1079,12 @@ const opcoesDeRelacao = computed(() =>
             {{ t.pessoaCpf }}
           </p>
           <UInput
-            :model-value="pessoa.document ?? ''"
+            :model-value="pessoa.cpf ?? ''"
             size="sm"
             class="w-full font-mono tabular-nums"
             placeholder="999.999.999-99"
             :maxlength="11"
-            @update:model-value="(v: string | number) => mudarPessoa({ document: String(v) })"
+            @update:model-value="(v: string | number) => mudarPessoa({ cpf: String(v) })"
           >
             <template #trailing>
               <span class="text-xs text-dimmed">{{ digitosDoDocumento.length }}/11</span>
@@ -1080,19 +1093,19 @@ const opcoesDeRelacao = computed(() =>
         </div>
       </template>
 
-      <template v-else-if="pessoa.type === 'PJ'">
+      <template v-else-if="pessoa.person_type === 'PJ'">
         <div>
           <p class="mb-1 flex items-center gap-1 text-xs font-medium text-highlighted">
             <UIcon name="i-lucide-asterisk" class="size-3 shrink-0 text-error" />
             {{ t.pessoaCnpj }}
           </p>
           <UInput
-            :model-value="pessoa.document ?? ''"
+            :model-value="pessoa.cnpj ?? ''"
             size="sm"
             class="w-full font-mono tabular-nums"
             placeholder="99.999.999/9999-99"
             :maxlength="14"
-            @update:model-value="(v: string | number) => mudarPessoa({ document: String(v) })"
+            @update:model-value="(v: string | number) => mudarPessoa({ cnpj: String(v) })"
           >
             <template #trailing>
               <UIcon v-if="consultando" name="i-lucide-loader-circle" class="size-3.5 animate-spin text-primary" />
@@ -1133,7 +1146,7 @@ const opcoesDeRelacao = computed(() =>
       <p v-else-if="!documentoValido" class="text-xs text-error">
         {{ t.pessoaDocumentoInvalido }}
       </p>
-      <p v-else-if="pessoa.type === 'PJ' && pessoa.razao_social" class="flex items-center gap-1 text-xs text-muted">
+      <p v-else-if="pessoa.person_type === 'PJ' && pessoa.razao_social" class="flex items-center gap-1 text-xs text-muted">
         <UIcon name="i-lucide-badge-check" class="size-3 shrink-0 text-success" />
         {{ t.pessoaVeioDaConsulta }}
       </p>

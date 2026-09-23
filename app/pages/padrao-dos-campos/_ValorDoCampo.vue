@@ -91,12 +91,18 @@ const comoArquivo = computed(() => comoAnexos.value[0] ?? ({} as Anexo))
  * Medido na tela do develop em 23/09/2026; ver o catálogo.
  */
 const comoPessoa = computed(() => props.valor as {
-  type?: 'PF' | 'PJ'
-  document?: string
+  person_type?: 'PF' | 'PJ'
   name?: string
+  cpf?: string
+  cnpj?: string
   razao_social?: string
   nome_fantasia?: string
 })
+
+/** O documento do tipo escolhido: `cnpj` na PJ, `cpf` na PF. */
+const documentoDaPessoa = computed(
+  () => (comoPessoa.value?.person_type === 'PJ' ? comoPessoa.value?.cnpj : comoPessoa.value?.cpf) ?? '',
+)
 
 const nomeDaPessoa = computed(() => {
   const p = comoPessoa.value
@@ -460,24 +466,24 @@ async function copiar(texto: string) {
     -->
     <span v-else-if="campo.tipo === 'EnPerson'" class="flex min-w-0 items-center gap-1.5">
       <UBadge
-        :color="comoPessoa.type === 'PJ' ? 'info' : 'neutral'"
+        :color="comoPessoa.person_type === 'PJ' ? 'info' : 'neutral'"
         variant="subtle"
         size="sm"
         class="shrink-0 font-mono text-[10px]"
       >
-        {{ comoPessoa.type === 'PJ' ? 'PJ' : 'PF' }}
+        {{ comoPessoa.person_type === 'PJ' ? 'PJ' : 'PF' }}
       </UBadge>
       <span class="min-w-0">
         <span class="block truncate text-sm text-highlighted">{{ nomeDaPessoa }}</span>
         <span v-if="!naCelula && comoPessoa.razao_social && comoPessoa.razao_social !== nomeDaPessoa" class="block truncate text-xs text-muted">
           {{ comoPessoa.razao_social }}
         </span>
-        <span v-if="!naCelula && comoPessoa.document" class="block font-mono text-xs tabular-nums text-muted">
-          {{ mascararDocumento(comoPessoa.document) }}
+        <span v-if="!naCelula && documentoDaPessoa" class="block font-mono text-xs tabular-nums text-muted">
+          {{ mascararDocumento(documentoDaPessoa) }}
         </span>
       </span>
-      <span v-if="naCelula && comoPessoa.document" class="shrink-0 font-mono text-xs tabular-nums text-muted">
-        {{ mascararDocumento(comoPessoa.document) }}
+      <span v-if="naCelula && documentoDaPessoa" class="shrink-0 font-mono text-xs tabular-nums text-muted">
+        {{ mascararDocumento(documentoDaPessoa) }}
       </span>
     </span>
 

@@ -271,14 +271,15 @@ export function saidaFormatada(
        * 23/09/2026, ver o catálogo.
        */
       const v = valor as {
-        type?: string
-        document?: string
+        person_type?: string
         name?: string
+        cpf?: string
+        cnpj?: string
         razao_social?: string
         nome_fantasia?: string
       }
       const nome = v.nome_fantasia?.trim() || v.name?.trim() || v.razao_social?.trim() || ''
-      const doc = mascararDocumento(v.document ?? '')
+      const doc = mascararDocumento((v.person_type === 'PJ' ? v.cnpj : v.cpf) ?? '')
       return [nome, doc].filter(Boolean).join(' · ')
     }
 

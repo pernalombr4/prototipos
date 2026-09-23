@@ -732,19 +732,30 @@ export const campos: Campo[] = [
       'Configurações de Pessoa: cnpj, name, cpf, razao_social, nome_fantasia',
     ],
     backend: {
-      entrada: '{ "type": "PJ", "document": "11222333000181", "razao_social": "…", "nome_fantasia": "…" }  (PROPOSTA: ver abaixo)',
-      saida: '{ "type": "PJ", "document": "…", "razao_social": "…", "nome_fantasia": "…" }  ou, em PF, { "type": "PF", "document": "…", "name": "…" }',
+      entrada: '{ "person_type": "PJ", "cnpj": "11222333000181", "razao_social": "…", "nome_fantasia": "…" }',
+      saida: 'em PJ, { "person_type": "PJ", "cnpj": "…", "razao_social": "…", "nome_fantasia": "…" }; em PF, { "person_type": "PF", "name": "…", "cpf": "…" }',
       formatada: 'o nome de exibição (nome fantasia na PJ, nome na PF) e o documento mascarado ao lado',
       cFormat: ['type: "object"', 'display_string', 'value_path'],
       config: ['personConfig.availableFields[]', 'nestedConfig.displayString'],
       /*
-       * A CHAVE DE CADA SUBCAMPO É PROPOSTA, NÃO MEDIDA. O formulário do
-       * develop envia o item como multipart (ele carrega arquivo junto), então
-       * não consegui ler o corpo da requisição para conferir os nomes. Os
-       * rótulos da tela são Tipo, Nome, CPF, CNPJ, Razão Social e Nome
-       * Fantasia, e as chaves acima saem da lista que a própria configuração
-       * do campo mostra: `cnpj, name, cpf, razao_social, nome_fantasia`.
-       * Confirmar com o dev antes de implementar.
+       * AS CHAVES SAÍRAM DA TELA, não de palpite.
+       *
+       * O formulário do develop é FormKit, e o FormKit põe o `for` do rótulo
+       * com a chave do campo. Lendo o DOM do bloco em 23/09/2026:
+       * `<label for="person_type">Tipo</label>`. Daí sai `person_type`, que eu
+       * tinha chamado de `type`.
+       *
+       * O resto vem da configuração do próprio campo, que lista os subcampos
+       * disponíveis com o nome técnico: **`cnpj, name, cpf, razao_social,
+       * nome_fantasia`**. Ou seja, o documento NÃO é uma chave só: são `cpf` e
+       * `cnpj`, separadas, e é por isso que a máscara e o contador mudam junto
+       * com o tipo em vez de se adaptarem ao tamanho.
+       *
+       * O que ainda não vi com os próprios olhos é o `for` dos rótulos de
+       * Nome, CPF, CNPJ, Razão Social e Nome Fantasia, porque eles só existem
+       * depois de escolher o tipo e a aba estava em segundo plano (a lista
+       * virtualizada do develop não desenha em aba oculta). A lista de
+       * subcampos da configuração é evidência do produto, não minha.
        */
     },
   },
