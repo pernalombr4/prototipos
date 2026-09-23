@@ -1224,3 +1224,55 @@ exatamente o botão que ela mandou copiar do print do ClickUp.
 7. **Campo virtual imprimindo `[object Object]`** na célula da tabela de itens.
 8. O quadro de editar componente abre **sobre a tabela, à esquerda do painel**,
    e não centrado nem ancorado no item que se está editando.
+
+## Rodada 16: redimensionar coluna, que era o teste que faltava
+
+Ela pediu para dar para redimensionar coluna na tabela, "pra que seja possível
+entendermos os comportamentos dos campos conforme vai liberando mais ou menos
+espaço". É o teste certo, e é o que faltava: metade das decisões deste
+protótipo só se julga apertando a coluna. O corte com reticências, o `+N` no
+lugar do terceiro selo, o balão com o valor inteiro, a bandeja flutuante que
+não empurra nada, o `Elétrica: Não conforme` da matriz: tudo isso é resposta a
+"e quando não cabe".
+
+### O que estava errado
+
+A alça já existia. O `EnTable` recebia `resizable`, desenhava o puxador na
+direita de cada cabeçalho, com o cursor `col-resize` certo, e arrastar não fazia
+nada. Cinco colunas ou trinta e cinco, o mesmo nada.
+
+O motivo é o `columnSizing` ser prop **controlada**: quem a passa assume o
+estado. Eu passava um `computed` derivado do catálogo, que não tem setter.
+Então o TanStack escrevia a largura nova no `v-model` do `EnTable`, o `EnTable`
+emitia `update:columnSizing` para ninguém, e no desenho seguinte a prop
+devolvia a largura do catálogo. O próprio código do SDK avisa disso num
+comentário, e eu não tinha lido:
+
+> Precisa ser um computed GRAVÁVEL: o resize handler do TanStack escreve direto
+> no `v-model:column-sizing` da UTable a cada drag.
+
+### O conserto
+
+A largura passou a ter dono. O catálogo continua dizendo a largura **inicial**
+de cada coluna (`campo.largura`, que é a mesma que a ficha do campo anuncia como
+largura mínima recomendada), e o que a pessoa arrasta vive num mapa de
+sobreposições que pertence à tela.
+
+Mapa vazio quer dizer "está tudo no tamanho do catálogo". Foi assim de
+propósito, e não com o mapa cheio de larguras iguais às originais, porque é o
+que deixa o botão do andaime saber se há algo para desfazer.
+
+### O botão de voltar ao original
+
+No andaime, ao lado do relatório, e só depois de a primeira coluna ser
+arrastada. Serve para comparar: aperta, vê o campo se comportar, volta ao
+tamanho de referência e aperta de novo, sem recarregar a página e perder o
+resto do estado.
+
+### Onde isso já mostrou serviço
+
+Apertando a coluna de Referência para 60 px, o selo trunca (`VITR8`) e o selo de
+status do item (Rascunho, Inativo) fica do lado dele, disputando os mesmos 60
+px. A bandeja flutuante de copiar e abrir continua encostada na direita, por
+cima do fim do selo, que é exatamente o que ela deveria fazer: foi para isso que
+ela saiu da linha na rodada 13.

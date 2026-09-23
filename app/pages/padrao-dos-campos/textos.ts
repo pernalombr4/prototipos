@@ -189,6 +189,8 @@ export interface Textos {
   moverParaBaixo: string
   arrasteParaReordenar: string
   limparCampo: string
+  /** O andaime devolve as colunas ao tamanho do catálogo. */
+  largurasOriginais: string
   /* Matriz de dados e ID personalizado, os dois tipos medidos na rodada 15. */
   matrizSemResposta: string
   idGeradoPeloSistema: string
@@ -454,6 +456,7 @@ const ptBR: Textos = {
   moverParaBaixo: 'Mover para baixo',
   arrasteParaReordenar: 'Arraste para reordenar',
   limparCampo: 'Limpar o campo',
+  largurasOriginais: 'Larguras originais',
   matrizSemResposta: 'Sem resposta',
   idGeradoPeloSistema: 'O sistema gera este identificador ao salvar.',
   idComposicao: 'Composição',
@@ -983,6 +986,7 @@ const en: Textos = {
   moverParaBaixo: 'Move down',
   arrasteParaReordenar: 'Drag to reorder',
   limparCampo: 'Clear the field',
+  largurasOriginais: 'Original widths',
   matrizSemResposta: 'Not answered',
   idGeradoPeloSistema: 'The system generates this identifier when you save.',
   idComposicao: 'Composition',
@@ -1512,6 +1516,7 @@ const es: Textos = {
   moverParaBaixo: 'Mover hacia abajo',
   arrasteParaReordenar: 'Arrastre para reordenar',
   limparCampo: 'Limpiar el campo',
+  largurasOriginais: 'Anchos originales',
   matrizSemResposta: 'Sin respuesta',
   idGeradoPeloSistema: 'El sistema genera este identificador al guardar.',
   idComposicao: 'Composición',

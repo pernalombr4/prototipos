@@ -49,6 +49,14 @@ const props = defineProps<{
   campoSelecionado?: string | null
   /** Quem pode configurar o campo vê as ações de opção dentro da célula. */
   podeConfigurar?: boolean
+  /**
+   * As larguras que a pessoa arrastou, por `key` de coluna.
+   *
+   * Só o que foi MUDADO mora aqui: o que a pessoa não tocou continua vindo do
+   * catálogo. Mapa vazio quer dizer "está tudo no tamanho original", e é o que
+   * o botão do andaime devolve.
+   */
+  larguras?: Record<string, number>
 }>()
 
 const emit = defineEmits<{
@@ -63,6 +71,8 @@ const emit = defineEmits<{
   comentarNoCampo: [item: Item, campo: Campo, texto: string]
   /** O cartão da relação pediu para abrir o registro do outro lado. */
   abrirRelacionado: [referencia: string]
+  /** Uma coluna foi redimensionada. */
+  'update:larguras': [larguras: Record<string, number>]
 }>()
 
 const selecionados = ref<Item[]>([])
@@ -467,12 +477,43 @@ const colunas = computed<EnTableColumn[]>(() => [
   })),
 ])
 
-const larguras = computed(() =>
+/**
+ * ───────────── AS LARGURAS DE COLUNA, E POR QUE ELAS ESTAVAM MORTAS ─────────
+ *
+ * O `EnTable` aceita `resizable` e desenha a alça na direita de cada cabeçalho,
+ * com o cursor certo. Mas `columnSizing` é prop **controlada**: quem a passa
+ * assume o estado. Eu passava um `computed` do catálogo, que não tem setter,
+ * então o arraste emitia `update:columnSizing` para o vazio e a largura voltava
+ * ao valor do catálogo no próximo desenho. A alça existia, arrastava, e não
+ * acontecia nada.
+ *
+ * Agora a largura tem dono. O catálogo continua dizendo a largura INICIAL de
+ * cada coluna, e o que a pessoa arrasta vive num mapa de sobreposições que
+ * pertence à tela (o `index.vue`), porque é lá que fica o botão do andaime que
+ * devolve as larguras originais.
+ */
+const LARGURA_DA_REFERENCIA = 260
+
+const largurasIniciais = computed(() =>
   Object.fromEntries([
-    ['reference', 260],
+    ['reference', LARGURA_DA_REFERENCIA],
     ...props.campos.map(c => [c.refId, c.largura]),
   ]),
 )
+
+const larguras = computed<Record<string, number>>({
+  get: () => ({ ...largurasIniciais.value, ...props.larguras }),
+  set: (v) => {
+    /*
+     * O `EnTable` emite o mapa inteiro, inclusive na montagem. Sem esta
+     * comparação, abrir a tela já marcaria as colunas como redimensionadas e
+     * acenderia o botão de voltar ao original sem ninguém ter arrastado nada.
+     */
+    const atual = { ...largurasIniciais.value, ...props.larguras }
+    const mudou = Object.keys(v).some(k => v[k] !== atual[k])
+    if (mudou) emit('update:larguras', v)
+  },
+})
 
 const paginacao = computed(() => ({
   page: 1,
@@ -674,7 +715,7 @@ onMounted(() => nextTick(() => {
       :loading="carregando"
       selectable
       resizable
-      :column-sizing="larguras"
+      v-model:column-sizing="larguras"
       :pagination="paginacao"
       :locale="idioma === 'pt-BR' ? 'pt-BR' : idioma === 'es' ? 'es' : 'en'"
     >

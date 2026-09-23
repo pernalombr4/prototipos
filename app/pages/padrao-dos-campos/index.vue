@@ -159,6 +159,30 @@ function navegar(passo: number) {
 const podeConfigurar = ref(true)
 
 /**
+ * ─────────── AS LARGURAS DE COLUNA, QUE AGORA SE ARRASTAM ───────────
+ *
+ * Ela pediu para dar para redimensionar coluna na tabela, "pra que seja
+ * possível entendermos os comportamentos dos campos conforme vai liberando
+ * mais ou menos espaço". É o teste certo: metade das decisões deste protótipo
+ * (o corte com reticências, o `+N` no lugar do terceiro selo, o balão com o
+ * valor inteiro, a bandeja flutuante) só se julga apertando a coluna.
+ *
+ * A alça já existia no `EnTable`, e não funcionava: o `columnSizing` é prop
+ * controlada e eu passava um `computed` sem setter. O estado mora aqui porque
+ * é aqui que fica o andaime, e o andaime precisa poder desfazer.
+ *
+ * Só a sobreposição mora neste mapa. Mapa vazio é "tudo no tamanho do
+ * catálogo", e é isso que o botão devolve.
+ */
+const largurasDasColunas = ref<Record<string, number>>({})
+
+const temLarguraMexida = computed(() => Object.keys(largurasDasColunas.value).length > 0)
+
+function devolverLargurasOriginais() {
+  largurasDasColunas.value = {}
+}
+
+/**
  * Comentário feito a partir de um campo. Ele vai para a conversa do ITEM,
  * citando o campo, em vez de abrir uma caixa de entrada por célula. Decidido
  * na rodada 9, ver o DECISOES.md.
@@ -379,6 +403,21 @@ onMounted(() => {
         :ui="{ label: 'text-xs uppercase tracking-wider text-toned' }"
       />
 
+      <!--
+        O botão só aparece depois de a primeira coluna ser arrastada: antes
+        dele não haver nada para desfazer, ele seria só mais um alvo no
+        andaime.
+      -->
+      <UButton
+        v-if="temLarguraMexida"
+        icon="i-lucide-unfold-horizontal"
+        :label="t.largurasOriginais"
+        color="neutral"
+        variant="outline"
+        size="xs"
+        @click="devolverLargurasOriginais"
+      />
+
       <UButton
         icon="i-lucide-file-spreadsheet"
         :label="gerando ? t.gerandoRelatorio : t.baixarRelatorio"
@@ -504,6 +543,7 @@ onMounted(() => {
               @editar-valor="editarValor"
               @novo-item="irPara('formulario')"
               :pode-configurar="podeConfigurar"
+              v-model:larguras="largurasDasColunas"
               @criar-na-linha="criarItem"
               @comentar-no-campo="comentarNoCampo"
               @abrir-relacionado="abrirRelacionado"
