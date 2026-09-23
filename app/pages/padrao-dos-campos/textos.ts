@@ -157,6 +157,7 @@ export interface Textos {
   remover: string
   nenhumAnexo: string
   criarNaLinha: string
+  criarAbaixo: string
   hoje: string
   amanha: string
   proximaSemana: string
@@ -396,6 +397,7 @@ const ptBR: Textos = {
   remover: 'Remover',
   nenhumAnexo: 'Nenhum arquivo ainda.',
   criarNaLinha: 'Criar registro aqui',
+  criarAbaixo: 'Criar registro abaixo',
   hoje: 'Hoje',
   amanha: 'Amanhã',
   proximaSemana: 'Semana que vem',
@@ -886,6 +888,7 @@ const en: Textos = {
   remover: 'Remove',
   nenhumAnexo: 'No files yet.',
   criarNaLinha: 'Create a record here',
+  criarAbaixo: 'Create a record below',
   hoje: 'Today',
   amanha: 'Tomorrow',
   proximaSemana: 'Next week',
@@ -1376,6 +1379,7 @@ const es: Textos = {
   remover: 'Quitar',
   nenhumAnexo: 'Todavía no hay archivos.',
   criarNaLinha: 'Crear registro aquí',
+  criarAbaixo: 'Crear registro abajo',
   hoje: 'Hoy',
   amanha: 'Mañana',
   proximaSemana: 'La próxima semana',

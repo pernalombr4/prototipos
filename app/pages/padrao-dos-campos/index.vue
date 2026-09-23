@@ -144,20 +144,25 @@ function navegar(passo: number) {
   if (i >= 0 && i < itens.value.length) itemAberto.value = itens.value[i]!
 }
 
-function criarItem(dados: Record<string, unknown>) {
+/**
+ * Nasce um item. `posicao` vem da linha de criação da grade: o item entra
+ * exatamente onde o rascunho estava, que é o que o "+" do vão promete. Sem
+ * posição (o modal de criação), ele entra no topo.
+ */
+function criarItem(dados: Record<string, unknown>, posicao?: number) {
   const agora = new Date()
-  itens.value = [
-    {
-      id: 47700 + itens.value.length,
-      reference: `VITR${Math.random().toString(16).slice(2, 12).toUpperCase()}`,
-      created_at: agora,
-      updated_at: agora,
-      deleted_at: null,
-      status: 'active',
-      data: dados,
-    } as Item,
-    ...itens.value,
-  ]
+  const novo = {
+    id: 47700 + itens.value.length,
+    reference: `VITR${Math.random().toString(16).slice(2, 12).toUpperCase()}`,
+    created_at: agora,
+    updated_at: agora,
+    deleted_at: null,
+    status: 'active',
+    data: dados,
+  } as Item
+  const lista = [...itens.value]
+  lista.splice(posicao ?? 0, 0, novo)
+  itens.value = lista
   toast.add({ title: t.value.salvo, icon: 'i-lucide-check', color: 'success' })
 }
 

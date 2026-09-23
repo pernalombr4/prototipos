@@ -709,3 +709,74 @@ uma decisão de produto: hoje só quem configura o campo cria opção.
 5. **A moeda como configuração do campo** (ClickUp e Notion). O nosso valor
    carrega a moeda, o que é melhor para contrato em dólar e pior para somar a
    coluna. Fica como está, e a soma precisa de conversão declarada.
+
+---
+
+## Rodada 8: criar no fim, porque criar no topo não existe no mercado
+
+Ela desconfiou do que ela mesma tinha pedido na rodada 6 ("escolhemos acima mas
+ninguém faz isso, pode ser estranho") e mandou pesquisar. Ela estava certa.
+
+### Onde cada produto cria pela grade
+
+| Produto | Onde | Como |
+|---|---|---|
+| **Notion** | fim | "+ New page" na última linha, mais um "+" no vão da linha, no hover, que insere logo abaixo dela |
+| **Airtable** | fim | linha "+" no fim, mais "Insert record below" no menu da linha |
+| **ClickUp** | fim do grupo | compositor de uma linha com "Salvar ↵", e ele **fica aberto** depois de criar |
+| **Monday** | fim do grupo | "+ Add item" |
+| **Twenty** | fim | `RecordTableNoRecordGroupAddNew` renderizado **depois** das linhas, e o registro nasce com `position: 'last'`. Li no repositório, em `packages/twenty-front/src/modules/object-record/record-table/components/` |
+
+**Criar no fim é unânime. Criar no topo fixo não existe em nenhum dos cinco.**
+
+### O que o protótipo passou a fazer
+
+A linha fixa no topo saiu. Entraram os dois caminhos que o mercado tem:
+
+1. **"+ Criar registro" na última linha da grade.** É uma linha de verdade da
+   tabela (largura, borda, colspan), teleportada para dentro do `<tbody>` que o
+   `EnTable` monta, porque o SDK não tem slot de rodapé do corpo. Se ganhar um,
+   isto vira uma linha normal;
+2. **"+" no vão da linha, no hover**, que insere o rascunho **logo abaixo** dela.
+   É o gesto do Notion e o "Insert record below" do Airtable. O mesmo gesto
+   também está no menu da linha, que é o caminho de quem usa teclado.
+
+Nos dois casos o rascunho é uma linha de verdade, o quadro de edição é o mesmo
+das outras células, **Enter cria** e o quadro **continua aberto na posição
+seguinte**, como o compositor do ClickUp. Nem a linha de criação nem a de
+rascunho entram na numeração, senão o número mentiria sobre quantos itens há.
+
+### A numeração, a caixa no hover e a caixa do cabeçalho
+
+Ela marcou no print do ClickUp, e é padrão de tabela que edita (Airtable,
+ClickUp e Notion): **o número da linha no vão da esquerda, trocado pela caixa de
+seleção no hover**, e a **caixa do cabeçalho fixa**, marcando todos. O `EnTable`
+desenha a coluna de seleção sozinho, então o número entra por contador de CSS e
+a troca é opacidade. É o único jeito sem reescrever a tabela do SDK.
+
+### "Clicar na linha abre o item" é padrão de mercado? Não.
+
+A pergunta dela. A resposta, medida nos cinco:
+
+| Produto | O que abre o registro |
+|---|---|
+| **Notion** | botão **OPEN** que aparece no hover, ao lado do nome |
+| **Airtable** | botão **⤢** no hover, dentro da célula primária. Ou a barra de espaço com a célula selecionada |
+| **ClickUp** | botão **⤢** ("Tarefa aberta") no hover, ao lado do nome |
+| **Twenty** | o **chip do nome** abre o registro; há também o painel lateral |
+| **Monday** | o **nome do item** é link, mais o botão de expandir |
+
+Ou seja: **em tabela que edita na célula, quem abre o registro é uma ação da
+célula do identificador, e nunca o clique na linha.** O motivo é direto: a linha
+inteira é área de edição de campo, e um clique que abre o item roubaria o clique
+que edita a célula. Clicar na linha para abrir é padrão de lista que **não**
+edita (Linear, caixa de e-mail), onde a linha está livre.
+
+**O que fizemos:** a célula da Referência é a que abre, de três jeitos, e as
+outras células são todas área de edição de campo.
+
+- botão **Abrir** que aparece no hover da célula, como o OPEN do Notion;
+- clique no **selo da referência**, que é gerado pelo sistema e não se edita,
+  então o clique nele fica livre para abrir. É o chip do nome do Twenty;
+- **duplo clique na linha**, que é o gesto que o develop já tem hoje, mantido
+  para quem já aprendeu.

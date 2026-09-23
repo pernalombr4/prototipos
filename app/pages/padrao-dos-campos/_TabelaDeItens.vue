@@ -56,7 +56,7 @@ const emit = defineEmits<{
   editarValor: [item: Item, refId: string, valor: unknown]
   novoItem: []
   /** A linha de criação fechou com valor: nasce um item com esses dados. */
-  criarNaLinha: [dados: Record<string, unknown>]
+  criarNaLinha: [dados: Record<string, unknown>, posicao: number]
 }>()
 
 const selecionados = ref<Item[]>([])
@@ -173,22 +173,41 @@ onMounted(() => {
 })
 
 /* -------------------------------------------------------------------------- *
- *                   A LINHA DE CRIAÇÃO, no TOPO da tabela                    *
+ *                        A LINHA DE CRIAÇÃO, na grade                        *
  * -------------------------------------------------------------------------- *
  *
- * O ClickUp deixa criar tarefa digitando na própria grade, e ela pediu o mesmo
- * aqui com uma diferença: na PRIMEIRA linha, não na última. A razão é boa: numa
- * tabela paginada de 248 itens, a última linha da PÁGINA não é o fim de nada, e
- * o item recém-criado aparece longe de onde se olhou. No topo, o item nasce
- * onde o olho já está.
+ * Na rodada 6 eu botei a linha de criação FIXA no topo, porque ela pediu assim.
+ * Ela mesma desconfiou depois ("ninguém faz isso, pode ser estranho"), e estava
+ * certa. Fui medir, em 23/09/2026:
  *
- * A linha é uma linha de verdade da tabela, com as mesmas colunas e as mesmas
- * larguras, e as células dela abrem o MESMO quadro de edição das outras. O que
- * muda é que o valor vai para um rascunho, e o rascunho só vira item no Enter
- * ou no botão Criar.
+ * | Produto | Onde se cria pela grade |
+ * |---|---|
+ * | Notion | "+ New page" no FIM, mais um "+" no vão da linha, no hover |
+ * | Airtable | linha "+" no FIM, mais "Insert record below" no menu da linha |
+ * | ClickUp | compositor no FIM do grupo |
+ * | Monday | "+ Add item" no FIM do grupo |
+ * | Twenty | `RecordTableNoRecordGroupAddNew` depois das linhas, e o registro
+ *   nasce com `position: 'last'` (li o código no repositório) |
+ *
+ * Ou seja: **criar no fim é unânime, e criar no topo não existe**. O que existe
+ * além do fim é o "+" que aparece no VÃO da linha, no hover, e insere logo
+ * abaixo dela. É o "botão de adicionar em qualquer posição" que ela descreveu.
+ *
+ * Então agora são dois caminhos, os dois do mercado:
+ *
+ * 1. o botão "+ Criar registro" no rodapé da grade, que é o padrão unânime;
+ * 2. o "+" no vão da linha, no hover, que insere o rascunho logo abaixo dela.
+ *
+ * Em qualquer um dos dois, a linha de rascunho é uma linha de verdade da
+ * tabela, com as mesmas colunas e larguras, e as células dela abrem o MESMO
+ * quadro de edição das outras. O valor vai para um rascunho, e o rascunho só
+ * vira item no Enter ou no botão Criar.
  */
 const ID_DA_LINHA_NOVA = -1
 const rascunhoDaLinha = ref<Record<string, unknown>>({})
+
+/** Em que posição a linha de rascunho está. `null` é não ter rascunho aberto. */
+const posicaoDoRascunho = ref<number | null>(null)
 
 const linhaNova = computed(() => ({
   id: ID_DA_LINHA_NOVA,
@@ -199,8 +218,27 @@ const linhaNova = computed(() => ({
   updated_at: '',
 } as unknown as Item))
 
-/** A linha de criação vem antes dos itens, sempre. */
-const linhas = computed<Item[]>(() => [linhaNova.value, ...props.itens])
+const linhas = computed<Item[]>(() => {
+  const i = posicaoDoRascunho.value
+  if (i === null) return props.itens
+  const lista = [...props.itens]
+  lista.splice(Math.min(i, lista.length), 0, linhaNova.value)
+  return lista
+})
+
+/** Abre o rascunho numa posição e põe o primeiro campo em edição. */
+function abrirRascunho(posicao: number, alvo?: HTMLElement) {
+  posicaoDoRascunho.value = posicao
+  rascunhoDaLinha.value = {}
+  const campo = props.campos.find(c => !c.somenteLeitura)
+  if (!campo) return
+  nextTick(() => {
+    /* O alvo é a célula do campo na linha nova, se ela já existir; senão, a
+       célula que a pessoa clicou, que é o botão do rodapé ou o "+" do vão. */
+    const celula = raiz.value?.querySelectorAll('tbody tr')[posicao]?.children[2] as HTMLElement | undefined
+    abrirEdicao(campo, linhaNova.value, celula ?? alvo)
+  })
+}
 
 function ehLinhaNova(item: Item) {
   return item.id === ID_DA_LINHA_NOVA
@@ -231,22 +269,22 @@ function gravarValor(item: Item, refId: string, valor: unknown) {
  */
 function criarDaLinha() {
   if (!temRascunho.value) return
-  emit('criarNaLinha', { ...rascunhoDaLinha.value })
+  const posicao = posicaoDoRascunho.value ?? props.itens.length
+  emit('criarNaLinha', { ...rascunhoDaLinha.value }, posicao)
   rascunhoDaLinha.value = {}
-  /* O alvo continua sendo a célula da linha nova, que segue no mesmo lugar. */
+  /* O item criado ocupa a posição do rascunho, e o rascunho anda uma casa. */
+  posicaoDoRascunho.value = posicao + 1
   nextTick(medirAlvo)
 }
 
-/** O convite da linha nova abre o primeiro campo que a pessoa preenche. */
-function abrirPrimeiroCampo(e: MouseEvent) {
-  const campo = props.campos.find(c => !c.somenteLeitura)
-  if (!campo) return
-  const alvo = e.currentTarget as HTMLElement
-  abrirEdicao(campo, linhaNova.value, alvo.closest('td') ?? alvo)
+/** Onde o item está na lista, para o "+" do vão saber em que posição inserir. */
+function posicaoDoItem(item: Item) {
+  return props.itens.findIndex(i => i.id === item.id)
 }
 
 function descartarRascunho() {
   rascunhoDaLinha.value = {}
+  posicaoDoRascunho.value = null
   fecharEdicao()
 }
 
@@ -329,6 +367,9 @@ function menuDaLinha(item: Item) {
     [
       { label: props.t.verDetalhes, icon: 'i-lucide-eye', onSelect: () => emit('abrirItem', item) },
       { label: props.t.editar, icon: 'i-lucide-pencil', onSelect: () => emit('abrirTelaDoItem', item) },
+      /* "Insert record below" do Airtable: o mesmo gesto do "+" do vão, pelo
+         menu, que é o caminho de quem usa teclado. */
+      { label: props.t.criarAbaixo, icon: 'i-lucide-plus', onSelect: () => abrirRascunho(props.itens.findIndex(i => i.id === item.id) + 1) },
     ],
     [
       { label: props.t.enviarParaLixeira, icon: 'i-lucide-trash-2', color: 'error' as const },
@@ -346,17 +387,20 @@ function menuDaLinha(item: Item) {
  */
 const raiz = ref<HTMLElement | null>(null)
 
+/** O `<tbody>` que o `EnTable` monta, alvo da linha de criação. */
+const corpoDaTabela = ref<HTMLElement | null>(null)
+
 onMounted(() => nextTick(() => {
   const tabela = raiz.value?.querySelector('table')
   if (!tabela) return
+  corpoDaTabela.value = tabela.querySelector('tbody')
 
   tabela.addEventListener('dblclick', (e) => {
     const linha = (e.target as HTMLElement).closest('tbody tr')
     if (!linha) return
     const i = [...(linha.parentElement?.children ?? [])].indexOf(linha)
-    /* A linha 0 é a de criação: os itens começam na 1. */
-    const item = props.itens[i - 1]
-    if (!item) return
+    const item = linhas.value[i]
+    if (!item || ehLinhaNova(item)) return
     /* O primeiro clique do duplo já abriu a célula em edição: ela fecha, para
        a quickview não nascer com um controle aberto atrás dela. */
     fecharEdicao()
@@ -437,21 +481,11 @@ onMounted(() => nextTick(() => {
           rascunho está vazio o texto explica o gesto; com valor, aparece o
           Criar e o descartar.
         -->
-        <div v-if="ehLinhaNova(row as Item)" class="flex items-center gap-1.5">
-          <UIcon name="i-lucide-plus" class="size-4 shrink-0 text-primary" />
-          <!--
-            O convite é clicável: ele abre o quadro do PRIMEIRO campo que se
-            preenche, que é o que o ClickUp faz quando a pessoa clica na linha
-            nova. Sem isso, o convite seria um texto que não faz nada.
-          -->
-          <button
-            v-if="!temRascunho"
-            type="button"
-            class="min-w-0 flex-1 truncate text-left text-sm text-muted hover:text-highlighted"
-            @click.stop="abrirPrimeiroCampo($event)"
-          >
+        <div v-if="ehLinhaNova(row as Item)" class="linha-rascunho flex items-center gap-1.5">
+          <UIcon name="i-lucide-corner-down-right" class="size-4 shrink-0 text-primary" />
+          <span v-if="!temRascunho" class="min-w-0 flex-1 truncate text-sm text-muted">
             {{ t.criarNaLinha }}
-          </button>
+          </span>
           <template v-else>
             <UButton :label="t.criar" color="primary" size="xs" @click.stop="criarDaLinha()" />
             <UButton
@@ -472,8 +506,30 @@ onMounted(() => nextTick(() => {
           dependia de duplo clique, que é gesto invisível. O duplo clique
           continua valendo para quem já sabe.
         -->
-        <div v-else class="group/ref flex items-center gap-1.5">
-          <UBadge color="info" variant="subtle" size="sm" class="font-mono text-[11px]">
+        <!--
+          O "+" no VÃO da linha, que aparece no hover e insere um registro logo
+          abaixo dela. É o gesto do Notion e do Airtable ("Insert record
+          below"), posicionado sobre a coluna da caixa de seleção, que é o vão.
+        -->
+        <div v-else class="group/ref relative flex items-center gap-1.5">
+          <UTooltip :text="t.criarAbaixo">
+            <UButton
+              icon="i-lucide-plus"
+              color="primary"
+              variant="ghost"
+              size="xs"
+              class="absolute -left-8 opacity-0 transition-opacity group-hover/ref:opacity-100"
+              :aria-label="t.criarAbaixo"
+              @click.stop="abrirRascunho(posicaoDoItem(row as Item) + 1, $event.currentTarget as HTMLElement)"
+            />
+          </UTooltip>
+          <UBadge
+            color="info"
+            variant="subtle"
+            size="sm"
+            class="cursor-pointer font-mono text-[11px] hover:ring-1 hover:ring-primary/40"
+            @click.stop="emit('abrirItem', row as Item)"
+          >
             {{ (row as Item).reference }}
           </UBadge>
           <UButton
@@ -579,6 +635,31 @@ onMounted(() => nextTick(() => {
         </UEmpty>
       </template>
     </EnTable>
+
+    <!--
+      A LINHA de criação no fim da grade, que é o padrão unânime: "+ New page"
+      no Notion, linha "+" no Airtable, compositor no ClickUp, "+ Add item" no
+      Monday e "Add New" no Twenty.
+
+      Ela é teleportada para dentro do `<tbody>` que o `EnTable` monta, porque
+      precisa ser uma linha de verdade (largura da tabela, borda da grade) e o
+      `EnTable` não tem slot para isso. Se um dia o SDK ganhar um slot de
+      rodapé do corpo, isto vira uma linha normal.
+    -->
+    <Teleport v-if="corpoDaTabela" :to="corpoDaTabela">
+      <tr class="linha-de-criar">
+        <td :colspan="campos.length + 3" class="border-b border-default p-0">
+          <button
+            type="button"
+            class="flex w-full items-center gap-1.5 px-3 py-2 text-left text-sm text-muted transition-colors hover:bg-elevated hover:text-highlighted"
+            @click="abrirRascunho(itens.length, $event.currentTarget as HTMLElement)"
+          >
+            <UIcon name="i-lucide-plus" class="size-4 shrink-0 text-primary" />
+            {{ t.criarRegistro }}
+          </button>
+        </td>
+      </tr>
+    </Teleport>
   </div>
 
   <!--
@@ -697,6 +778,74 @@ onMounted(() => nextTick(() => {
 </template>
 
 <style scoped>
+/*
+ * ─────────────── A NUMERAÇÃO E A CAIXA DE SELEÇÃO DA LINHA ───────────────
+ *
+ * Ela marcou isso no print do ClickUp, e é padrão de mercado de tabela que
+ * edita: Airtable, ClickUp e Notion todos põem o número da linha no vão da
+ * esquerda e TROCAM o número pela caixa de seleção quando o mouse passa. A
+ * caixa do cabeçalho, que marca todos, fica fixa.
+ *
+ * O `EnTable` desenha a coluna de seleção sozinho, então o número entra por
+ * CSS, com contador, e a troca é opacidade. É o único jeito de fazer sem
+ * reescrever a tabela do SDK, e está declarado no DECISOES.md.
+ */
+:deep(tbody) {
+  counter-reset: linha;
+}
+
+:deep(tbody tr) {
+  counter-increment: linha;
+}
+
+/*
+ * Nem a linha de criação nem a de rascunho são registro: as duas ficam fora da
+ * numeração, senão o número da linha mentiria sobre quantos itens existem.
+ */
+:deep(tbody tr.linha-de-criar),
+:deep(tbody tr:has(.linha-rascunho)) {
+  counter-increment: none;
+}
+
+:deep(tbody tr.linha-de-criar td:first-child)::before,
+:deep(tbody tr:has(.linha-rascunho) td:first-child)::before {
+  content: none;
+}
+
+:deep(tbody tr td:first-child) {
+  position: relative;
+}
+
+:deep(tbody tr td:first-child)::before {
+  content: counter(linha);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-text-dimmed);
+  pointer-events: none;
+  transition: opacity 120ms;
+}
+
+/* A caixa só aparece no hover da linha, ou quando a linha está marcada. */
+:deep(tbody tr td:first-child > *) {
+  opacity: 0;
+  transition: opacity 120ms;
+}
+
+:deep(tbody tr:hover td:first-child > *),
+:deep(tbody tr[data-selected='true'] td:first-child > *) {
+  opacity: 1;
+}
+
+:deep(tbody tr:hover td:first-child)::before,
+:deep(tbody tr[data-selected='true'] td:first-child)::before {
+  opacity: 0;
+}
+
 /*
  * O zoom. O quadro nasce quase do tamanho da célula e cresce a partir do canto
  * superior esquerdo, que é o canto que ficou ancorado. São 140 ms: o suficiente
