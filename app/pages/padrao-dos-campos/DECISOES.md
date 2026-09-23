@@ -568,3 +568,90 @@ conta, e conta eu não crio.
   Datetime, Editor de HTML v1) continuam fora da vitrine.
 - A **barra de seleção em massa** ("1 Selecionado / Comparar / Excluir") e o
   estado de **alterações não salvas** do develop continuam não prototipados.
+
+---
+
+## Rodada 6: a edição salta para fora da tabela, e a criação vem pela linha
+
+### O que ela pediu, e o que eu fiz
+
+| Pedido | Estado |
+|---|---|
+| criar item PELA TABELA, na PRIMEIRA linha e não na última | **feito** |
+| a área de edição "pular pra fora" da tabela quando clicada, como no Notion | **feito**, e virou o único jeito de editar na célula |
+| os popups do ClickUp para campos complexos | **feito**: o mesmo quadro, com quadro largo, cabeçalho e o limpar |
+| explorar o board dela no ClickUp e no Notion, criando os campos e comparando | **bloqueado no login**, ver no fim |
+
+### O salto: por que ele substituiu a edição dentro da célula
+
+Antes eu tinha dois jeitos de editar na célula: controle dentro da linha para o
+que cabia, camada flutuante para o que não cabia. Agora é **um só**: clicar numa
+célula abre um quadro ancorado nela que cresce para fora da tabela, por cima da
+grade. Três razões:
+
+1. **a linha tem altura fixa.** Dentro dela, tudo o que é maior que uma linha ou
+   é cortado ou empurra a tabela. Foi exatamente o que aconteceu na rodada 5 com
+   a dica de "o que salva": ela existia no DOM e a célula cortava;
+2. **o quadro tem cabeçalho e rodapé**, então cabe o nome do campo, o limpar e a
+   frase de o que salva no lugar onde a pessoa está olhando;
+3. **é um caminho só.** Campo simples e campo complexo passam pelo mesmo quadro
+   e pelo mesmo componente de entrada. O dev implementa uma vez.
+
+O detalhe que faz parecer zoom, e não "abriu um popup": o canto superior esquerdo
+do quadro fica 8 px acima e à esquerda do canto da célula, e o quadro tem 8 px de
+respiro por dentro. **O valor continua desenhado no mesmo ponto da tela**, e o
+que muda é a moldura aparecendo em volta, com 140 ms de escala saindo de 0,94.
+Rolar a tabela reancora o quadro; Esc e clique fora fecham.
+
+O sinalizador `edicaoEmPopover` do catálogo virou **`saltoLargo`**: ele não
+decide mais "dentro ou fora", porque agora é sempre fora. Ele decide a largura
+do quadro (420 px para conversa, anexo, repetidor, endereço, texto longo; a
+largura da coluna, com mínimo de 260 px, para o resto).
+
+### A linha de criação, no topo
+
+- é uma linha de verdade da tabela, primeira, com as mesmas colunas e larguras;
+- o convite "Criar registro aqui" abre o quadro do primeiro campo que se
+  preenche, que é o gesto do ClickUp quando se clica na linha nova;
+- qualquer célula da linha aceita valor, e o valor vai para um **rascunho**;
+- **Enter cria**. O botão Criar também, e ele aparece na célula da referência e
+  na coluna de ações assim que o rascunho tem algo. O x descarta;
+- o item nasce **no topo da lista**, com referência gerada e o toast de salvo.
+
+**Por que no topo e não embaixo, além de ela ter pedido:** numa tabela paginada
+de 248 itens, a última linha da PÁGINA não é o fim de nada, e o item recém-criado
+apareceria longe de onde a pessoa estava olhando. No topo ele nasce onde o olho
+já está.
+
+**Detalhe que o dev precisa saber:** a linha de criação é a primeira linha do
+corpo da tabela, então todo índice de linha anda um. O duplo clique que abre a
+visão rápida passou a ler `itens[i - 1]`. Se a tabela ganhar ordenação de
+verdade, a linha de criação precisa ficar **fora da ordenação** (no produto, uma
+linha fixada), ou ela vai para o meio da lista.
+
+### O limpar, que é do ClickUp
+
+O cabeçalho do quadro ganhou o **limpar o campo** quando há valor. Sem ele, tirar
+o valor de um seletor obriga a desmarcar opção por opção, e nas famílias de lista
+o resultado nunca é "vazio" de verdade. Campo de lista volta para lista vazia;
+os outros, para nulo.
+
+### O que ficou bloqueado, e por quê
+
+Ela mandou dois links para eu explorar e comparar: o board do ClickUp e a página
+do Notion. **Os dois pedem login no Chrome dela**, e login eu não faço: digitar
+senha não é coisa que eu faça, e o "Continuar com o Google" abre uma janela
+separada que a extensão não alcança, então ela fica girando sem eu poder tocar.
+
+Então a rodada 6 entregou o que ela **garantiu** que quer (o salto, a criação
+pela linha, o popup de campo complexo), desenhado a partir da descrição dela e do
+comportamento conhecido dos dois produtos, e a comparação campo por campo dentro
+dos boards dela fica para quando ela estiver logada. O que falta conferir lá, na
+ordem:
+
+1. seleção múltipla: ClickUp x Notion, qual concatena melhor conforme cresce;
+2. anexo: qual dos dois dá o melhor gerenciador dentro da célula;
+3. o quadro do Notion: medir o respiro e a duração reais, e ver o que ele faz
+   quando a célula está na última coluna ou na última linha;
+4. os popups do ClickUp: o que eles põem no cabeçalho além do nome do campo;
+5. a linha de criação: se o ClickUp mantém o foco para criar vários em sequência.

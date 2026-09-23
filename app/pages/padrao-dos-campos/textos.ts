@@ -156,6 +156,9 @@ export interface Textos {
   descer: string
   remover: string
   nenhumAnexo: string
+  criarNaLinha: string
+  limparCampo: string
+  enterCria: string
   semResultado: string
   umaTagPorEnter: string
   fechar: string
@@ -383,6 +386,9 @@ const ptBR: Textos = {
   descer: 'Descer',
   remover: 'Remover',
   nenhumAnexo: 'Nenhum arquivo ainda.',
+  criarNaLinha: 'Criar registro aqui',
+  limparCampo: 'Limpar o campo',
+  enterCria: 'Enter cria o registro. Esc descarta.',
   semResultado: 'Nada encontrado',
   umaTagPorEnter: 'Digite e aperte Enter para cada tag',
   fechar: 'Fechar',
@@ -861,6 +867,9 @@ const en: Textos = {
   descer: 'Move down',
   remover: 'Remove',
   nenhumAnexo: 'No files yet.',
+  criarNaLinha: 'Create a record here',
+  limparCampo: 'Clear the field',
+  enterCria: 'Enter creates the record. Esc discards.',
   semResultado: 'Nothing found',
   umaTagPorEnter: 'Type and press Enter for each tag',
   fechar: 'Close',
@@ -1339,6 +1348,9 @@ const es: Textos = {
   descer: 'Bajar',
   remover: 'Quitar',
   nenhumAnexo: 'Todavía no hay archivos.',
+  criarNaLinha: 'Crear registro aquí',
+  limparCampo: 'Limpiar el campo',
+  enterCria: 'Enter crea el registro. Esc descarta.',
   semResultado: 'Nada encontrado',
   umaTagPorEnter: 'Escriba y pulse Enter para cada etiqueta',
   fechar: 'Cerrar',

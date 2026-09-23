@@ -143,11 +143,15 @@ export interface Campo {
   /** O tipo não cabe na coluna 1 da sidebar e por isso fica só na coluna 2. */
   foraDaColunaDeResumo?: boolean
   /**
-   * A edição na célula abre em camada flutuante em vez de acontecer dentro da
-   * linha. Vale para o que não cabe na altura de uma linha: texto longo,
-   * bloco de subcampos, lista de caixas, anexo, repetidor.
+   * O quadro de edição precisa de LARGURA, e não só da largura da coluna.
+   *
+   * Toda edição na célula acontece num quadro que salta para fora da tabela
+   * (é o gesto do Notion, e ela pediu explicitamente). Este sinalizador diz
+   * quais tipos precisam de um quadro largo em vez de um quadro do tamanho da
+   * coluna: texto longo, bloco de subcampos, lista de caixas, anexo,
+   * repetidor, conversa.
    */
-  edicaoEmPopover?: boolean
+  saltoLargo?: boolean
   /** O valor não se edita: o sistema é que preenche. */
   somenteLeitura?: boolean
   /**
@@ -215,7 +219,7 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 280,
     larguraCheiaNoFormulario: true,
-    edicaoEmPopover: true,
+    saltoLargo: true,
     configuracoes: [
       'Transformadores de Texto',
       'Botão de Cópia',
@@ -239,7 +243,7 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 280,
     larguraCheiaNoFormulario: true,
-    edicaoEmPopover: true,
+    saltoLargo: true,
     configuracoes: [],
     backend: {
       entrada: '"<p>Laudo com <strong>ressalva</strong>.</p>"',
@@ -260,7 +264,7 @@ export const campos: Campo[] = [
     largura: 240,
     larguraCheiaNoFormulario: true,
     foraDaColunaDeResumo: true,
-    edicaoEmPopover: true,
+    saltoLargo: true,
     configuracoes: [],
     backend: {
       entrada: '"Cliente pediu retorno na sexta."',
@@ -381,7 +385,7 @@ export const campos: Campo[] = [
      * documento do time de produtos propõe editar os dois na célula, o que
      * funciona sem a calculadora e aperta com ela.
      */
-    edicaoEmPopover: true,
+    saltoLargo: true,
     configuracoes: [
       'Configurar Correção Monetária',
       'Interface e Formatação: Localidade',
@@ -488,7 +492,7 @@ export const campos: Campo[] = [
     largura: 240,
     maximoNaCelula: 2,
     larguraCheiaNoFormulario: true,
-    edicaoEmPopover: true,
+    saltoLargo: true,
     configuracoes: [
       'Origem da Lista',
       'Lista Personalizada (obrigatória)',
@@ -511,7 +515,7 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 200,
     maximoNaCelula: 2,
-    edicaoEmPopover: true,
+    saltoLargo: true,
     configuracoes: [
       'Origem da Lista',
       'Lista Personalizada (obrigatória)',
@@ -686,7 +690,7 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 240,
     larguraCheiaNoFormulario: true,
-    edicaoEmPopover: true,
+    saltoLargo: true,
     configuracoes: [
       'Ativar preenchimento de endereço',
       'Configurações de Pessoa: cnpj, name, cpf, razao_social, nome_fantasia',
@@ -710,7 +714,7 @@ export const campos: Campo[] = [
     icone: 'i-lucide-paperclip',
     alinhamento: 'inicio',
     largura: 240,
-    edicaoEmPopover: true,
+    saltoLargo: true,
     configuracoes: [
       'Tipos Permitidos',
       'Tamanho máximo do arquivo',
@@ -733,7 +737,7 @@ export const campos: Campo[] = [
     icone: 'i-lucide-image',
     alinhamento: 'inicio',
     largura: 200,
-    edicaoEmPopover: true,
+    saltoLargo: true,
     configuracoes: [
       'Tamanho máximo do arquivo',
     ],
@@ -754,7 +758,7 @@ export const campos: Campo[] = [
     icone: 'i-lucide-file-text',
     alinhamento: 'inicio',
     largura: 240,
-    edicaoEmPopover: true,
+    saltoLargo: true,
     configuracoes: [
       'Tamanho máximo do arquivo',
       'Quantidade máxima',
@@ -782,7 +786,7 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 240,
     foraDaColunaDeResumo: true,
-    edicaoEmPopover: true,
+    saltoLargo: true,
     configuracoes: [
       'Permitir Upload de Documento Externo',
       'Permitir upload de PDF',
@@ -809,7 +813,7 @@ export const campos: Campo[] = [
     icone: 'i-lucide-signature',
     alinhamento: 'inicio',
     largura: 220,
-    edicaoEmPopover: true,
+    saltoLargo: true,
     configuracoes: [],
     backend: {
       entrada: '{ "signer": "Marina Toledo", "signedAt": "2026-09-18T13:10:00.000Z" }',
@@ -831,7 +835,7 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 300,
     larguraCheiaNoFormulario: true,
-    edicaoEmPopover: true,
+    saltoLargo: true,
     configuracoes: [
       'País',
       'Aninhado',
@@ -854,7 +858,7 @@ export const campos: Campo[] = [
     alinhamento: 'inicio',
     largura: 260,
     larguraCheiaNoFormulario: true,
-    edicaoEmPopover: true,
+    saltoLargo: true,
     configuracoes: [
       'Escopo das condicionais',
       'Aninhados',
@@ -880,7 +884,7 @@ export const campos: Campo[] = [
     maximoNaCelula: 1,
     larguraCheiaNoFormulario: true,
     foraDaColunaDeResumo: true,
-    edicaoEmPopover: true,
+    saltoLargo: true,
     configuracoes: [
       'Habilitar Aba deste campo na tabela do item',
       'Quantidade predefinida de itens',
@@ -909,7 +913,7 @@ export const campos: Campo[] = [
     largura: 220,
     larguraCheiaNoFormulario: true,
     foraDaColunaDeResumo: true,
-    edicaoEmPopover: true,
+    saltoLargo: true,
     /*
      * NÃO é somente leitura: o campo não se PREENCHE na criação do item, mas a
      * célula abre a conversa e recebe mensagem. Era um erro meu, que ela

@@ -439,6 +439,7 @@ onMounted(() => {
               @abrir-tela-do-item="abrirTelaDoItem"
               @editar-valor="editarValor"
               @novo-item="irPara('formulario')"
+              @criar-na-linha="criarItem"
             />
           </div>
 

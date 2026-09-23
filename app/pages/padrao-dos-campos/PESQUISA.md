@@ -243,3 +243,48 @@ derivada do tipo. Está nas recomendações.
    ENSPACE está sozinho, e o padrão de "o composto não cabe no resumo" é decisão nova.
 4. **Só o Monday devolve o valor formatado junto com o cru.** Os outros sete deixam o cliente
    formatar. Se o ENSPACE adotar o par `value` + `text`, sai na frente de seis dos oito.
+
+## Rodada 6: os dois gestos que ela apontou
+
+Ela nomeou dois comportamentos de concorrente que quer no produto, e os dois
+entraram no protótipo. **Esta seção é o padrão como eu o conheço e como ela o
+descreveu; a conferência campo por campo dentro dos boards dela ficou bloqueada
+no login.** O que precisa ser medido lá está no fim do `DECISOES.md`.
+
+### O "zoom" do Notion na célula
+
+Clicar numa célula da tabela do Notion não monta o controle dentro da célula: abre
+um quadro que fica ancorado nela e **cresce para fora**, por cima da grade, com
+borda e sombra, e cresce em altura conforme o conteúdo pede. O valor não se move
+de lugar quando o quadro aparece, e é isso que faz parecer aproximação em vez de
+"abriu um popup em outro canto".
+
+| Produto | O que faz ao clicar na célula |
+|---|---|
+| **Notion** | quadro ancorado que salta para fora, cresce e ganha sombra |
+| **ClickUp** | popup por tipo, com cabeçalho e ações, para os campos complexos |
+| **Airtable** | edita dentro da célula e expande para fora só no texto longo |
+| **Monday** | popup centrado, longe da célula |
+| **Twenty CRM** | controle dentro da célula, do tamanho dela |
+
+O Notion ganha porque resolve os dois problemas de uma vez: a altura fixa da linha
+deixa de limitar o controle, e a pessoa não perde o lugar onde estava.
+
+### A criação pela grade, do ClickUp
+
+O ClickUp deixa criar tarefa digitando na própria tabela, sem abrir formulário.
+No ClickUp a linha fica **no fim** do grupo; ela pediu **no começo**, e a razão é
+boa: em tabela paginada, o fim da página não é o fim de nada e o item nasce longe
+do olho.
+
+| Produto | Criar pela tabela |
+|---|---|
+| **ClickUp** | linha no fim do grupo, digita o nome e Enter cria |
+| **Notion** | linha no fim, com um "+ New" fixo no rodapé da tabela |
+| **Airtable** | linha vazia permanente no fim |
+| **Monday** | campo "+ Add item" no fim do grupo |
+| **Twenty CRM** | botão no topo que insere uma linha editável no topo |
+
+Quem cria no topo é o Twenty, e é o desenho que ela pediu. O que trouxemos do
+ClickUp é o resto: a linha aceita valor em qualquer coluna antes de criar, e o
+Enter fecha o ciclo sem passar pelo formulário.

@@ -44,7 +44,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   /** Clicar no valor entra em edição, que é o que a demanda pediu. */
-  'editar': []
+  /** O alvo vai no evento: quem abre o salto precisa da posição da célula. */
+  'editar': [alvo?: HTMLElement]
   /**
    * Tipo que salva no clique (`comoSalva: 'imediato'`) não abre editor: ele
    * troca o valor na hora. É o caso do booleano.
@@ -123,6 +124,20 @@ function abrirEmail(endereco: string) {
   window.open(`mailto:${endereco}`, '_blank', 'noopener')
 }
 
+/**
+ * O clique no valor. No binário ele ALTERNA na hora; nos outros ele pede
+ * edição e manda junto a célula que foi clicada, porque é dela que sai a
+ * posição do quadro de edição.
+ */
+function aoClicar(e: MouseEvent) {
+  if (props.campo.tipo === 'inputSwitch') {
+    emit('alternar', !props.valor)
+    return
+  }
+  const alvo = e.currentTarget as HTMLElement
+  emit('editar', alvo.closest('td') ?? alvo)
+}
+
 async function copiar(texto: string) {
   try {
     await navigator.clipboard.writeText(texto)
@@ -153,7 +168,7 @@ async function copiar(texto: string) {
       campo.somenteLeitura ? 'cursor-default' : 'cursor-text hover:bg-elevated hover:ring-1 hover:ring-default',
     ]"
     :aria-label="textoCompleto || t.vazio"
-    @click="campo.tipo === 'inputSwitch' ? emit('alternar', !valor) : emit('editar')"
+    @click="aoClicar"
   >
     <!--
       ───────────────────────────── vazio ─────────────────────────────
