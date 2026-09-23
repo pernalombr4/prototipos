@@ -209,6 +209,13 @@ const documentoDaPessoa = computed(
   () => (comoPessoa.value?.person_type === 'PJ' ? comoPessoa.value?.cnpj : comoPessoa.value?.cpf) ?? '',
 )
 
+/**
+ * O documento só aparece na célula quando a coluna tem largura para ele: o
+ * CNPJ mascarado tem 18 caracteres em fonte monoespaçada, uns 95 px, e ainda
+ * precisam caber o selo PF/PJ e o nome.
+ */
+const cabeODocumento = computed(() => (props.larguraDaColuna ?? 0) >= 240)
+
 const nomeDaPessoa = computed(() => {
   const p = comoPessoa.value
   return p?.nome_fantasia?.trim() || p?.name?.trim() || p?.razao_social?.trim() || ''
@@ -626,7 +633,18 @@ async function copiar(texto: string) {
           {{ mascararDocumento(documentoDaPessoa) }}
         </span>
       </span>
-      <span v-if="naCelula && documentoDaPessoa" class="shrink-0 font-mono text-xs tabular-nums text-muted">
+      <!--
+        O DOCUMENTO SAI DA CÉLULA QUANDO NÃO CABE.
+        Ele era `shrink-0`, então numa coluna apertada ficavam 70 px do CNPJ
+        fora da célula: cortado no meio, o que num documento é pior que
+        ausente (meio CNPJ parece outro CNPJ). Quem identifica a pessoa é o
+        NOME, então é o nome que fica, e o documento continua inteiro no
+        balão, na bandeja de copiar e no formulário.
+      -->
+      <span
+        v-if="naCelula && documentoDaPessoa && cabeODocumento"
+        class="shrink-0 font-mono text-xs tabular-nums text-muted"
+      >
         {{ mascararDocumento(documentoDaPessoa) }}
       </span>
     </span>
@@ -672,11 +690,16 @@ async function copiar(texto: string) {
       v-else-if="campo.tipo === 'uploadFile' || campo.tipo === 'EnPDF' || campo.tipo === 'EnOnlyoffice'"
       class="flex min-w-0 items-center gap-1.5"
     >
-      <UBadge color="neutral" variant="subtle" size="sm" class="max-w-full">
+      <!--
+        `max-w-full` não bastava: ele é 100% da FILA, e ao lado ainda vem o
+        contador. Com `min-w-0` o selo do arquivo cede espaço, e o contador
+        fica `shrink-0` porque é ele que avisa que existe mais anexo.
+      -->
+      <UBadge color="neutral" variant="subtle" size="sm" class="min-w-0">
         <UIcon :name="campo.icone" class="size-3 shrink-0" />
         <span class="truncate">{{ comoArquivo.filename }}</span>
       </UBadge>
-      <UBadge v-if="comoAnexos.length > 1" color="neutral" variant="soft" size="sm">
+      <UBadge v-if="comoAnexos.length > 1" color="neutral" variant="soft" size="sm" class="shrink-0">
         {{ t.maisN(comoAnexos.length - 1) }}
       </UBadge>
       <span v-if="!naCelula && comoArquivo.size" class="shrink-0 text-xs text-muted">
