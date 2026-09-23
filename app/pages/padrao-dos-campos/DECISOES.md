@@ -371,3 +371,79 @@ Rodei `design:design-critique` e `design:accessibility-review` sobre o próprio 
   `EnTable`, não conserto daqui;
 - **o resumo da coluna 1 fica longo** com 27 campos. Numa categoria real não fica. Se ficar, a
   saída é a visibilidade por visão que o Notion tem, e isso é outra demanda.
+
+---
+
+## Rodada 4 — 22/09/2026 — a moeda
+
+### O que ela pediu
+
+> no camop de moeda na tabela, e se eu quiser mudar A MOEDA? ta travado em real,
+> mas na pratica eu posso escolher na hora de preencher o campo, bem como posso
+> configurar correçoes monetarias se estiverem ativadas. teste correçao monetaria
+> ativa pra voce ver como é
+
+Ela está certa e eu estava errado: eu formatava a moeda pelo IDIOMA da interface
+(BRL em português, USD em inglês, EUR em espanhol). Isso não existe no produto.
+
+### O que o develop faz, medido
+
+1. **A moeda é parte do VALOR, escolhida no preenchimento.** O campo tem dois
+   controles ligados: um seletor de moeda e o campo de valor. Trocar a moeda troca
+   a máscara do valor na hora (`BRL` → `R$ 0`, `USD` → `US$ 0`).
+2. **São 179 moedas**, em ordem de país, com caixa de busca no topo, mostrando
+   **só o código ISO 4217**, sem o nome e sem o país. A lista termina em metais
+   (`XAU`, `XPD`, `XPT`, `XAG`).
+3. **O formato de entrada e de saída é um objeto de três chaves.** Interceptei o
+   `PUT /ws/types/leve/items/<ref>` e ele manda:
+   `{ "currency": "USD", "value": 3750.25, "originalValue": 3750.25 }`.
+   O `originalValue` é a âncora da correção monetária: o `value` é o corrigido.
+4. **O PUT manda só os campos que mudaram**, não o `data` inteiro.
+5. **A localidade da formatação é do CAMPO, não de quem lê.** Ela fica na aba
+   **"Interface e Formatação"**, com **Localidade** ("Português Brasil"),
+   **Dígitos da Fração Mínima** (0 a 20, padrão 0) e **Dígitos Máximo da Fração**
+   (0 a 20, padrão 2). **Essa aba só existe ao EDITAR o campo**: na criação ela
+   não aparece, então a formatação só se configura depois de o campo existir.
+6. **Ligar "Configurar Correção Monetária" acrescenta um botão de calculadora**
+   ao lado do valor, no formulário e na tela do item. O modal dele tem:
+   **Índice ou Alíquota** (obrigatório), **Data Inicial** (já preenchida com hoje),
+   **Data Final**, um ícone de trocar as duas datas, o aviso *"Selecione um Índice
+   antes de definir as datas."*, a chave **Múltiplos Períodos** e **Enviar**.
+7. **Os índices são globais**, não do workspace: SELIC, CDI, IPCA, IPCA-15,
+   IPCA-E, INPC e os TJ por estado (TJDF não expurgada, TJSC, TJAC, TJMA, TJSE,
+   TJRS, TJCE, TJTO…), com busca.
+8. **A tela de Correção Monetária da categoria abre em branco.** Em
+   `Estrutura › Categorias › leve › Correção Monetária` o layout renderiza sem
+   conteúdo e sem aviso. É o mesmo padrão de "dependência não comunicada" que o
+   `enspace-ux-research` já catalogou.
+
+### O que mudou no protótipo
+
+| Onde | O que passou a valer |
+|---|---|
+| `mocks.ts` | o valor é `{ currency, value, originalValue }`, e os itens têm moedas diferentes (BRL, USD, EUR) de propósito. Um deles tem `value` diferente de `originalValue`, para o caso corrigido existir |
+| `formatacao.ts` | a moeda sai de `value.currency` e a localidade de `campo.localeDoCampo`. **Trocar o idioma da tela não muda mais o formato do número nem o símbolo** |
+| Célula | o símbolo é o da moeda gravada. Valor corrigido ganha a marca de correção, com tooltip dizendo que o original está em `originalValue` |
+| Cru | além do valor, o **original riscado ao lado**, quando houve correção |
+| Formulário e edição na célula | seletor de moeda com busca, campo de valor com a máscara da moeda escolhida, e o botão da calculadora quando o campo tem correção ligada |
+| Edição na célula | passou a abrir em **camada flutuante**: três controles não cabem em 200 px. O documento propõe editar os dois na célula, o que funciona sem a calculadora e aperta com ela |
+| Ficha | as configurações do tipo agora listam as três chaves de "Interface e Formatação" |
+| Relatório .xlsx | a moeda ganhou **coluna própria com o código ISO** ao lado do valor. É a "dica de estrutura" do documento, e ela está certa: com moeda variando por linha não existe uma máscara só que sirva para todas |
+
+**Maquete declarada:** a calculadora de correção monetária abre, aceita índice e
+datas e fecha no Enviar. Ela **não calcula nada**, porque calcular exige a série
+histórica do índice, que é back-end.
+
+### Um bug de tradução que precisa subir agora
+
+A chave `pro_rate` da correção monetária está assim no dicionário do produto:
+
+| Idioma | String |
+|---|---|
+| pt-BR | `Correção Pró-Rata` ✅ |
+| en | `Pro-Pussy Correction` ❌ |
+| es | `Corrección pro-coño` ❌ |
+
+É tradução automática de "Pró-Rata" que virou palavra vulgar em inglês e em
+espanhol. Está no bundle de produção do develop, na interface de correção
+monetária. Não é coisa deste protótipo: é conserto no dicionário do produto.

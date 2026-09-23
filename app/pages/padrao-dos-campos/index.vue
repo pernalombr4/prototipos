@@ -224,16 +224,36 @@ async function baixarRelatorio() {
    * exportação do documento do time de produtos, e ela está certa: texto em
    * coluna de valor mata a soma no Excel.
    */
+  /*
+   * A moeda ganha uma coluna própria com o código ISO ao lado do valor. É a
+   * "dica de estrutura" do documento do time de produtos, e ela está certa:
+   * quando a moeda varia por linha, não existe uma máscara só que sirva para
+   * todas. Número puro numa coluna, código ISO na outra, e a soma continua
+   * funcionando.
+   */
+  const colunasDaSaida = campos.flatMap(c =>
+    c.tipo === 'EnCurrency'
+      ? [{ campo: c, iso: false }, { campo: c, iso: true }]
+      : [{ campo: c, iso: false }],
+  )
+
   const abaDaSaida: Aba = {
     nome: idioma.value === 'en' ? 'Item output' : idioma.value === 'es' ? 'Salida de items' : 'Saida dos itens',
-    larguras: [34, ...campos.map(c => Math.min(48, Math.round(c.largura / 7)))],
+    larguras: [34, ...colunasDaSaida.map(c => (c.iso ? 10 : Math.min(48, Math.round(c.campo.largura / 7))))],
     linhas: [
-      [t.value.referencia, ...campos.map(c => t.value.campos[c.tipo].rotulo)] as Celula[],
+      [
+        t.value.referencia,
+        ...colunasDaSaida.map(c =>
+          c.iso ? `${t.value.campos[c.campo.tipo].rotulo} (ISO)` : t.value.campos[c.campo.tipo].rotulo,
+        ),
+      ] as Celula[],
       ...itens.value.map(item => [
         item.reference,
-        ...campos.map(c =>
-          celulaDeExportacao(c, (item.data as Record<string, unknown>)?.[c.refId], idioma.value, opcoes as never),
-        ),
+        ...colunasDaSaida.map((c): Celula => {
+          const bruto = (item.data as Record<string, unknown>)?.[c.campo.refId]
+          if (!c.iso) return celulaDeExportacao(c.campo, bruto, idioma.value, opcoes as never)
+          return (bruto as { currency?: string } | null)?.currency ?? ''
+        }),
       ] as Celula[]),
     ],
   }

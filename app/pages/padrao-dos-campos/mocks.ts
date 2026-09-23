@@ -101,7 +101,7 @@ export const itens: Item[] = [
       email: 'compras@nortelux.com.br',
       codigo: 'OS-2026-0481',
       numero: 1480.5,
-      moeda: 18400,
+      moeda: { currency: 'BRL', value: 18400, originalValue: 18400 },
       selecao_unica: 'em_analise',
       selecao_radio: 'sim',
       selecao_multipla: ['eletrica', 'civil'],
@@ -187,7 +187,7 @@ export const itens: Item[] = [
       email: 'manutencao@vegapredial.com.br',
       codigo: 'OS-2026-0502',
       numero: 620,
-      moeda: 7250.9,
+      moeda: { currency: 'USD', value: 7250.9, originalValue: 7250.9 },
       selecao_unica: 'aprovado',
       selecao_radio: 'nao',
       selecao_multipla: ['climatizacao'],
@@ -293,7 +293,7 @@ export const itens: Item[] = [
       email: 'fiscal@construtorasaomateus.com.br',
       codigo: 'OS-2026-0333',
       numero: 128940.75,
-      moeda: 128940.75,
+      moeda: { currency: 'BRL', value: 134187.38, originalValue: 128940.75 },
       selecao_unica: 'suspenso',
       selecao_radio: 'sim',
       selecao_multipla: ['eletrica', 'civil', 'seguranca', 'climatizacao'],
@@ -384,7 +384,7 @@ export const itens: Item[] = [
       email: 'arquivo@nortelux.com.br',
       codigo: 'OS-2024-0012',
       numero: 0,
-      moeda: 0,
+      moeda: { currency: 'BRL', value: 0, originalValue: 0 },
       selecao_unica: 'reprovado',
       selecao_radio: 'nao',
       selecao_multipla: ['civil'],
@@ -428,7 +428,7 @@ export const itens: Item[] = [
       email: 'obras@vegapredial.com.br',
       codigo: 'OS-2026-0527',
       numero: 9820,
-      moeda: 9820,
+      moeda: { currency: 'EUR', value: 9820, originalValue: 9820 },
       selecao_unica: 'triagem',
       selecao_radio: 'sim',
       selecao_multipla: ['civil', 'hidraulica'],
@@ -479,6 +479,33 @@ export const itens: Item[] = [
       chat: [],
     },
   },
+]
+
+/**
+ * As moedas que o seletor oferece. No develop são **179**, em ordem de país,
+ * mostrando só o código ISO 4217 e com caixa de busca no topo (medido em
+ * 22/09/2026). Aqui vai um recorte, o suficiente para o seletor se provar.
+ */
+export const moedas = [
+  { codigo: 'BRL', nome: 'Real brasileiro', simbolo: 'R$' },
+  { codigo: 'USD', nome: 'Dólar americano', simbolo: 'US$' },
+  { codigo: 'EUR', nome: 'Euro', simbolo: '€' },
+  { codigo: 'GBP', nome: 'Libra esterlina', simbolo: '£' },
+  { codigo: 'ARS', nome: 'Peso argentino', simbolo: '$' },
+  { codigo: 'CLP', nome: 'Peso chileno', simbolo: '$' },
+  { codigo: 'MXN', nome: 'Peso mexicano', simbolo: '$' },
+  { codigo: 'JPY', nome: 'Iene', simbolo: '¥' },
+  { codigo: 'CHF', nome: 'Franco suíço', simbolo: 'CHF' },
+  { codigo: 'XAU', nome: 'Ouro', simbolo: 'XAU' },
+]
+
+/**
+ * Os índices de correção monetária que o develop oferece no modal da
+ * calculadora. São globais, não do workspace.
+ */
+export const indicesDeCorrecao = [
+  'SELIC', 'CDI', 'IPCA', 'IPCA-15', 'IPCA-E', 'INPC',
+  'TJDF (não expurgada)', 'TJSC', 'TJAC', 'TJMA', 'TJSE', 'TJRS', 'TJCE', 'TJTO',
 ]
 
 /** Os membros que o seletor de pessoa oferece no formulário. */

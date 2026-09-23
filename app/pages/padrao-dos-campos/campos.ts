@@ -134,6 +134,17 @@ export interface Campo {
   /** O valor não se edita: o sistema é que preenche. */
   somenteLeitura?: boolean
   /**
+   * A localidade da formatação, quando o tipo tem. Ela é do CAMPO, não de quem
+   * lê: no develop fica em "Interface e Formatação", numa aba que só existe ao
+   * EDITAR o campo. Trocar o idioma da interface não muda este formato.
+   */
+  localeDoCampo?: string
+  /**
+   * O campo tem "Configurar Correção Monetária" ligado. Quando tem, o produto
+   * acrescenta um botão de calculadora ao lado do valor.
+   */
+  correcaoMonetaria?: boolean
+  /**
    * As configurações que o tipo oferece no painel de criação de Campo, em
    * "Configurações Específicas" (ou "Configuração de Opções"). Lidas uma a uma
    * no develop em 22/09/2026. Lista vazia quer dizer que o tipo não tem
@@ -299,6 +310,7 @@ export const campos: Campo[] = [
     icone: 'i-lucide-hash',
     alinhamento: 'fim',
     largura: 140,
+    localeDoCampo: 'pt-BR',
     configuracoes: [
       'Mostrar Botões',
       'Valor Mínimo',
@@ -322,25 +334,40 @@ export const campos: Campo[] = [
   {
     tipo: 'EnCurrency',
     familia: 'numero',
-    disponibilidade: 'legado',
+    /* "Valor Monetário" é tipo ATUAL no seletor do develop, não legado. */
+    disponibilidade: 'ativo',
     refId: 'moeda',
     icone: 'i-lucide-banknote',
     alinhamento: 'fim',
-    largura: 160,
+    largura: 200,
+    /* A localidade sai do campo, e o mock a tem em pt-BR. */
+    localeDoCampo: 'pt-BR',
+    /* Ligada de propósito neste mock, para a calculadora aparecer. */
+    correcaoMonetaria: true,
+    /*
+     * Em camada flutuante, e não dentro da linha: com correção ligada são três
+     * controles (moeda, valor e calculadora) e eles não cabem em 200 px. O
+     * documento do time de produtos propõe editar os dois na célula, o que
+     * funciona sem a calculadora e aperta com ela.
+     */
+    edicaoEmPopover: true,
     configuracoes: [
       'Configurar Correção Monetária',
+      'Interface e Formatação: Localidade',
+      'Interface e Formatação: Dígitos da Fração Mínima (0 a 20, padrão 0)',
+      'Interface e Formatação: Dígitos Máximo da Fração (0 a 20, padrão 2)',
     ],
     backend: {
-      entrada: '18400',
-      saida: '18400',
-      formatada: 'Intl.NumberFormat com style currency e o símbolo de n_currencyDisplay',
+      entrada: '{ "currency": "USD", "value": 3750.25, "originalValue": 3750.25 }',
+      saida: '{ "currency": "USD", "value": 3750.25, "originalValue": 3750.25 }',
+      formatada: 'Intl.NumberFormat(cFormat.locale, { style: "currency", currency: value.currency }). A MOEDA vem do valor, a localidade vem do campo',
       cFormat: [
         'type: "currency"',
-        'locale',
-        'n_currencyDisplay: symbol | name | code',
-        'n_minimumFractionDigits',
+        'locale  (do campo, não de quem lê)',
+        'n_minimumFractionDigits  (0 a 20, padrão 0)',
+        'n_maximumFractionDigits  (0 a 20, padrão 2)',
       ],
-      config: [],
+      config: ['Configurar Correção Monetária (liga a calculadora no campo)'],
     },
   },
 
@@ -525,6 +552,7 @@ export const campos: Campo[] = [
     icone: 'i-lucide-calendar',
     alinhamento: 'inicio',
     largura: 170,
+    localeDoCampo: 'pt-BR',
     configuracoes: [
       'Exibir Hora',
       'Preencher com a data atual',

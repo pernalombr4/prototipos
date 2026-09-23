@@ -19,6 +19,8 @@ import type { Campo } from './campos'
 import type { Textos } from './textos'
 import {
   corDaOpcao,
+  foiCorrigido,
+  moedaOriginalFormatada,
   enderecoEmUmaLinha,
   estaVazio,
   estaVencida,
@@ -197,9 +199,31 @@ async function copiar(texto: string) {
 
     <!-- ───────────────────────────── número ───────────────────────────── -->
     <span
-      v-else-if="campo.tipo === 'EnlNumber' || campo.tipo === 'EnCurrency'"
+      v-else-if="campo.tipo === 'EnlNumber'"
       class="text-sm tabular-nums text-highlighted"
     >{{ textoCompleto }}</span>
+
+    <!--
+      Moeda: o símbolo sai da moeda GRAVADA NO VALOR, não do idioma de quem lê.
+      Quando o valor foi corrigido, a célula marca isso, e o cru mostra o
+      valor original ao lado, porque `originalValue` existe justamente para
+      não se perder o que foi digitado.
+    -->
+    <span
+      v-else-if="campo.tipo === 'EnCurrency'"
+      class="flex min-w-0 items-baseline justify-end gap-1.5"
+    >
+      <UTooltip v-if="foiCorrigido(valor)" :text="t.valorCorrigido">
+        <UIcon name="i-lucide-trending-up" class="size-3 shrink-0 text-info" />
+      </UTooltip>
+      <span class="text-sm tabular-nums text-highlighted">{{ textoCompleto }}</span>
+      <span
+        v-if="!naCelula && foiCorrigido(valor)"
+        class="shrink-0 text-xs tabular-nums text-muted line-through"
+      >
+        {{ moedaOriginalFormatada(valor, campo.localeDoCampo ?? 'pt-BR') }}
+      </span>
+    </span>
 
     <!-- ──────────────────────── escolha: os selos ─────────────────────── -->
     <UBadge

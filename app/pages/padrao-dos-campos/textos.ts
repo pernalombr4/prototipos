@@ -143,6 +143,17 @@ export interface Textos {
   configuracoesOnde: string
   semConfiguracaoPropria: string
 
+  /* --------------------------- correção monetária ------------------------ */
+  correcaoMonetaria: string
+  configurarCorrecao: string
+  indiceOuAliquota: string
+  dataInicial: string
+  dataFinal: string
+  selecioneIndice: string
+  multiplosPeriodos: string
+  enviar: string
+  valorCorrigido: string
+
   /* ------------------------------- as facetas ---------------------------- */
   faceta: string
   facetas: Record<string, string>
@@ -327,6 +338,15 @@ const ptBR: Textos = {
   alinhamentoFim: 'Direita',
   larguraMinima: 'Largura mínima da coluna',
   nenhumaChave: 'Nenhuma',
+  correcaoMonetaria: 'Correção monetária',
+  configurarCorrecao: 'Configurar correção monetária',
+  indiceOuAliquota: 'Índice ou alíquota',
+  dataInicial: 'Data inicial',
+  dataFinal: 'Data final',
+  selecioneIndice: 'Selecione um índice antes de definir as datas.',
+  multiplosPeriodos: 'Múltiplos períodos',
+  enviar: 'Enviar',
+  valorCorrigido: 'Valor corrigido. O original está guardado em originalValue.',
   configuracoesDoTipo: 'Configurações do tipo',
   configuracoesOnde: 'no painel de criar campo',
   semConfiguracaoPropria: 'Este tipo não tem configuração própria. Só a base que todos têm: nome, referência, rótulo, formulário, largura, esquema de cores, seção, ordenação, ícone e validações.',
@@ -449,11 +469,11 @@ const ptBR: Textos = {
       cru: 'O número formatado, à esquerda, colado no rótulo.',
     },
     EnCurrency: {
-      rotulo: 'Moeda',
-      descricao: 'Valor monetário, com símbolo e casas decimais fixas.',
-      celula: 'À direita, com o símbolo antes do número e as casas sempre presentes.',
-      formulario: 'Símbolo fixo à esquerda do campo, para a pessoa não digitar.',
-      cru: 'O valor com símbolo, em fonte tabular.',
+      rotulo: 'Valor Monetário',
+      descricao: 'Valor com moeda escolhida no preenchimento, entre as 179 do produto.',
+      celula: 'À direita, com o símbolo da moeda gravada no valor. Valor corrigido ganha a marca de correção.',
+      formulario: 'Seletor de moeda com busca, mais o campo de valor com a máscara da moeda escolhida. Com correção ligada, entra o botão da calculadora.',
+      cru: 'O valor formatado e, quando houve correção, o valor original riscado ao lado.',
     },
     EnlDropdown: {
       rotulo: 'Lista de Seleção Única',
@@ -772,6 +792,15 @@ const en: Textos = {
   alinhamentoFim: 'Right',
   larguraMinima: 'Minimum column width',
   nenhumaChave: 'None',
+  correcaoMonetaria: 'Monetary correction',
+  configurarCorrecao: 'Set up monetary correction',
+  indiceOuAliquota: 'Index or rate',
+  dataInicial: 'Start date',
+  dataFinal: 'End date',
+  selecioneIndice: 'Pick an index before setting the dates.',
+  multiplosPeriodos: 'Multiple periods',
+  enviar: 'Submit',
+  valorCorrigido: 'Corrected value. The original is kept in originalValue.',
   configuracoesDoTipo: 'Type settings',
   configuracoesOnde: 'in the field creation panel',
   semConfiguracaoPropria: 'This type has no settings of its own. Only the base every field has: name, reference, label, form, width, color scheme, section, order, icon and validations.',
@@ -894,11 +923,11 @@ const en: Textos = {
       cru: 'The formatted number, left aligned next to the label.',
     },
     EnCurrency: {
-      rotulo: 'Currency',
-      descricao: 'Monetary value, with symbol and fixed decimals.',
-      celula: 'Right aligned, symbol before the number, decimals always present.',
-      formulario: 'Fixed symbol on the left of the input, so nobody types it.',
-      cru: 'The value with its symbol, in tabular figures.',
+      rotulo: 'Monetary Value',
+      descricao: 'A value whose currency is picked on fill, out of the 179 the product offers.',
+      celula: 'Right aligned, with the symbol of the currency stored in the value. A corrected value gets the correction mark.',
+      formulario: 'Currency picker with search, plus the value input masked by the chosen currency. With correction on, the calculator button appears.',
+      cru: 'The formatted value and, when there was a correction, the original struck through beside it.',
     },
     EnlDropdown: {
       rotulo: 'Single Select List',
@@ -1217,6 +1246,15 @@ const es: Textos = {
   alinhamentoFim: 'Derecha',
   larguraMinima: 'Ancho mínimo de la columna',
   nenhumaChave: 'Ninguna',
+  correcaoMonetaria: 'Corrección monetaria',
+  configurarCorrecao: 'Configurar corrección monetaria',
+  indiceOuAliquota: 'Índice o tasa',
+  dataInicial: 'Fecha inicial',
+  dataFinal: 'Fecha final',
+  selecioneIndice: 'Elige un índice antes de definir las fechas.',
+  multiplosPeriodos: 'Múltiples períodos',
+  enviar: 'Enviar',
+  valorCorrigido: 'Valor corregido. El original queda guardado en originalValue.',
   configuracoesDoTipo: 'Configuración del tipo',
   configuracoesOnde: 'en el panel de crear campo',
   semConfiguracaoPropria: 'Este tipo no tiene configuración propia. Solo la base que todos tienen: nombre, referencia, etiqueta, formulario, ancho, esquema de colores, sección, orden, icono y validaciones.',
@@ -1339,11 +1377,11 @@ const es: Textos = {
       cru: 'El número formateado, a la izquierda, junto a la etiqueta.',
     },
     EnCurrency: {
-      rotulo: 'Moneda',
-      descricao: 'Valor monetario, con símbolo y decimales fijos.',
-      celula: 'A la derecha, con el símbolo antes del número y los decimales siempre presentes.',
-      formulario: 'Símbolo fijo a la izquierda del campo, para que nadie lo escriba.',
-      cru: 'El valor con símbolo, en cifras tabulares.',
+      rotulo: 'Valor Monetario',
+      descricao: 'Valor cuya moneda se elige al rellenar, entre las 179 del producto.',
+      celula: 'A la derecha, con el símbolo de la moneda guardada en el valor. Un valor corregido lleva la marca de corrección.',
+      formulario: 'Selector de moneda con búsqueda, más el campo de valor con la máscara de la moneda elegida. Con la corrección activa, aparece el botón de la calculadora.',
+      cru: 'El valor formateado y, cuando hubo corrección, el valor original tachado al lado.',
     },
     EnlDropdown: {
       rotulo: 'Lista de selección única',

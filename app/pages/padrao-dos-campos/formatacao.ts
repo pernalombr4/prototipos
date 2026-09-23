@@ -126,6 +126,28 @@ export function caminhoDaArvore(
   return partes.length ? partes.join(' / ') : valor
 }
 
+/**
+ * O valor monetário foi corrigido? É quando `value` e `originalValue`
+ * divergem. O produto guarda os dois de propósito.
+ */
+export function foiCorrigido(valor: unknown): boolean {
+  const v = valor as { value?: number, originalValue?: number } | null
+  if (!v || typeof v !== 'object') return false
+  return v.originalValue !== undefined && v.value !== undefined && v.originalValue !== v.value
+}
+
+/** O valor original de uma moeda corrigida, já formatado. */
+export function moedaOriginalFormatada(valor: unknown, locale: string): string {
+  const v = valor as { currency?: string, originalValue?: number } | null
+  if (!v || typeof v !== 'object' || v.originalValue === undefined) return ''
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: v.currency ?? 'BRL',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(v.originalValue)
+}
+
 /** O texto rico sem as tags, que é o que a célula mostra. */
 export function semTags(html: string): string {
   return html
@@ -161,16 +183,38 @@ export function saidaFormatada(
       return semTags(valor as string)
 
     case 'EnlNumber':
-      return new Intl.NumberFormat(localeDe(idioma), {
+      /*
+       * A localidade é do CAMPO (`cFormat.locale`), não de quem lê. Trocar o
+       * idioma da interface não muda o formato do número: isso é configuração
+       * do campo, em "Interface e Formatação". Medido no develop.
+       */
+      return new Intl.NumberFormat(campo.localeDoCampo ?? localeDe(idioma), {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       }).format(valor as number)
 
-    case 'EnCurrency':
-      return new Intl.NumberFormat(localeDe(idioma), {
+    case 'EnCurrency': {
+      /*
+       * A MOEDA vem do VALOR, não da localidade. O produto guarda
+       * `{ currency, value, originalValue }` e o seletor de moeda fica no
+       * próprio campo, com 179 opções. `originalValue` é a âncora da correção
+       * monetária: `value` é o corrigido.
+       */
+      const v = valor as { currency?: string, value?: number, originalValue?: number } | number
+      if (typeof v === 'number') {
+        /* dado antigo, gravado como número puro, sem moeda */
+        return new Intl.NumberFormat(campo.localeDoCampo ?? localeDe(idioma), {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(v)
+      }
+      return new Intl.NumberFormat(campo.localeDoCampo ?? localeDe(idioma), {
         style: 'currency',
-        currency: idioma === 'en' ? 'USD' : idioma === 'es' ? 'EUR' : 'BRL',
-      }).format(valor as number)
+        currency: v.currency ?? 'BRL',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+      }).format(v.value ?? 0)
+    }
 
     case 'EnlDropdown':
     case 'radioButton':
@@ -292,8 +336,16 @@ export function celulaDeExportacao(
     case 'EnlNumber':
       return { tipo: 'numero', valor: Number(valor) }
 
-    case 'EnCurrency':
-      return { tipo: 'moeda', valor: Number(valor) }
+    case 'EnCurrency': {
+      /*
+       * O documento do time de produtos tem razão: se a moeda varia por linha,
+       * o jeito certo é número puro numa coluna e o código ISO em outra. A
+       * máscara do arquivo é uma só, e forçá-la a uma moeda mentiria sobre as
+       * outras. Aqui vai o número; o código sai na coluna ao lado.
+       */
+      const v = valor as { currency?: string, value?: number } | number
+      return { tipo: 'moeda', valor: typeof v === 'number' ? v : (v.value ?? 0) }
+    }
 
     case 'EnlCalendar':
       /* Serial de data, para ordenar e filtrar por mês e ano no Excel. */

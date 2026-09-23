@@ -14,7 +14,7 @@
  */
 import type { Campo } from './campos'
 import type { Textos } from './textos'
-import { itensRelacionaveis, membros, opcoes as todasAsOpcoes } from './mocks'
+import { indicesDeCorrecao, itensRelacionaveis, membros, moedas, opcoes as todasAsOpcoes } from './mocks'
 
 const props = defineProps<{
   campo: Campo
@@ -171,6 +171,42 @@ const relacoesEscolhidas = computed({
   },
 })
 
+/* ------------------------------- a moeda -------------------------------- */
+
+/**
+ * A moeda é parte do VALOR, não do idioma: o produto guarda
+ * `{ currency, value, originalValue }` e oferece 179 moedas num seletor com
+ * busca, mostrando só o código ISO. Aqui são duas portas para o mesmo objeto.
+ */
+const moedaDoValor = computed({
+  get: () => (valor.value as { currency?: string } | null)?.currency ?? 'BRL',
+  set: (c: string) => {
+    const v = (valor.value as Record<string, unknown>) ?? {}
+    emit('update:modelValue', { ...v, currency: c })
+  },
+})
+
+const valorDaMoeda = computed({
+  get: () => (valor.value as { value?: number } | null)?.value ?? 0,
+  set: (n: number) => {
+    const v = (valor.value as Record<string, unknown>) ?? {}
+    /* originalValue nasce igual ao valor: é a âncora da correção. */
+    emit('update:modelValue', { ...v, value: n, originalValue: v.originalValue ?? n })
+  },
+})
+
+const simboloDaMoeda = computed(
+  () => moedas.find(m => m.codigo === moedaDoValor.value)?.simbolo ?? moedaDoValor.value,
+)
+
+const opcoesDeMoeda = computed(() =>
+  moedas.map(m => ({ label: m.codigo, value: m.codigo, suffix: m.nome })),
+)
+
+/* A calculadora de correção monetária. É maquete: não calcula nada. */
+const calculadoraAberta = ref(false)
+const correcao = ref({ indice: '', inicio: '2026-09-22', fim: '', multiplos: false })
+
 const opcoesDeRelacao = computed(() =>
   itensRelacionaveis.map(i => ({
     /* Display vazio cai para a referência. É a mesma regra da célula. */
@@ -289,18 +325,43 @@ const opcoesDeRelacao = computed(() =>
       :step="0.5"
     />
 
-    <UInput
-      v-else-if="campo.tipo === 'EnCurrency'"
-      v-model="comoNumero"
-      type="number"
-      size="sm"
-      class="w-full"
-      :ui="{ base: 'text-right tabular-nums' }"
-    >
-      <template #leading>
-        <span class="text-sm text-muted">{{ idioma === 'en' ? '$' : idioma === 'es' ? '€' : 'R$' }}</span>
-      </template>
-    </UInput>
+    <!--
+      Moeda: dois controles ligados, como no develop. O seletor de moeda tem
+      busca porque a lista do produto tem 179 códigos, e o campo de valor
+      recebe a máscara da moeda escolhida. Quando o campo tem correção
+      monetária ligada, entra o botão da calculadora ao lado.
+    -->
+    <div v-else-if="campo.tipo === 'EnCurrency'" class="flex items-center gap-2">
+      <USelectMenu
+        v-model="moedaDoValor"
+        :items="opcoesDeMoeda"
+        value-key="value"
+        size="sm"
+        class="w-28 shrink-0"
+        :search-input="{ placeholder: t.pesquisar }"
+      />
+      <UInput
+        v-model="valorDaMoeda"
+        type="number"
+        size="sm"
+        class="min-w-0 flex-1"
+        :ui="{ base: 'text-right tabular-nums' }"
+      >
+        <template #leading>
+          <span class="text-sm text-muted">{{ simboloDaMoeda }}</span>
+        </template>
+      </UInput>
+      <UTooltip v-if="campo.correcaoMonetaria" :text="t.configurarCorrecao">
+        <UButton
+          icon="i-lucide-sliders-horizontal"
+          color="neutral"
+          variant="outline"
+          size="sm"
+          :aria-label="t.configurarCorrecao"
+          @click="calculadoraAberta = true"
+        />
+      </UTooltip>
+    </div>
 
     <!-- ───────────────────────────── escolha ────────────────────────────── -->
     <USelectMenu
@@ -605,5 +666,57 @@ const opcoesDeRelacao = computed(() =>
     </div>
 
     <p v-if="!semRotulo" class="mt-1 text-xs text-muted">{{ t.campos[campo.tipo].descricao }}</p>
+
+    <!--
+      A calculadora de correção monetária, copiada do develop: índice
+      obrigatório, data inicial já preenchida com hoje, data final, e a chave
+      de múltiplos períodos. MAQUETE: o Enviar fecha e não calcula nada.
+      Declarado no DECISOES.md.
+    -->
+    <UModal v-model:open="calculadoraAberta" :title="t.correcaoMonetaria">
+      <template #body>
+        <div class="space-y-4">
+          <div>
+            <p class="mb-1 flex items-center gap-1 text-sm font-medium text-highlighted">
+              <span class="text-error">*</span>
+              {{ t.indiceOuAliquota }}
+            </p>
+            <USelectMenu
+              v-model="correcao.indice"
+              :items="indicesDeCorrecao"
+              size="sm"
+              class="w-full"
+              :search-input="{ placeholder: t.pesquisar }"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <p class="mb-1 text-sm font-medium text-highlighted">{{ t.dataInicial }}</p>
+              <UInput v-model="correcao.inicio" type="date" size="sm" class="w-full" />
+            </div>
+            <div>
+              <p class="mb-1 text-sm font-medium text-highlighted">{{ t.dataFinal }}</p>
+              <UInput v-model="correcao.fim" type="date" size="sm" class="w-full" />
+            </div>
+          </div>
+
+          <p v-if="!correcao.indice" class="text-xs text-muted">{{ t.selecioneIndice }}</p>
+
+          <USwitch v-model="correcao.multiplos" :label="t.multiplosPeriodos" size="sm" />
+        </div>
+      </template>
+      <template #footer>
+        <div class="flex w-full justify-end">
+          <UButton
+            :label="t.enviar"
+            color="primary"
+            size="sm"
+            :disabled="!correcao.indice"
+            @click="calculadoraAberta = false"
+          />
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>
