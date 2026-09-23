@@ -518,6 +518,43 @@ const raiz = ref<HTMLElement | null>(null)
 /** O `<tbody>` que o `EnTable` monta, alvo da linha de criação. */
 const corpoDaTabela = ref<HTMLElement | null>(null)
 
+/**
+ * ─────────── A ÂNCORA DO QUADRO, E POR QUE ELA EXISTE ───────────
+ *
+ * O quadro de edição precisa ficar **acima da tabela** e **abaixo de qualquer
+ * camada do Nuxt UI** (lista de seletor, menu de três pontos, balão). As duas
+ * coisas ao mesmo tempo, e nenhum z-index resolve isso:
+ *
+ * - com z-index, o quadro passa na frente das camadas do Nuxt UI, que não têm
+ *   z nenhum. Foi o defeito que ela pegou na rodada 12;
+ * - sem z-index, quem decide é a ordem no DOM. E aí veio a surpresa: o
+ *   `<Teleport to="body">` põe o quadro como **primeiro** filho do `body`,
+ *   ANTES da aplicação. Medi na página publicada: aplicação no índice 1,
+ *   quadro no índice 0. Resultado: a tabela passava na frente do quadro e
+ *   engolia todo clique. É o que ela relatou, "não consigo editar nenhum
+ *   campo": o quadro abria atrás da tabela.
+ *
+ * O conserto é dar ao quadro um lugar no DOM **depois** da aplicação: esta
+ * âncora é criada na montagem e vai para o fim do `body`. Assim:
+ *
+ * | Camada | Onde entra no `body` | Quem fica na frente |
+ * |---|---|---|
+ * | aplicação, com a tabela | primeiro | a tabela perde do quadro |
+ * | **âncora do quadro** | na montagem, no fim | acima da tabela |
+ * | camadas do Nuxt UI | ao abrir, no fim | acima do quadro |
+ *
+ * Sem z-index em nenhuma das três, que é a convenção da biblioteca.
+ */
+const ancoraDoQuadro = ref<HTMLElement | null>(null)
+
+onMounted(() => {
+  const el = document.createElement('div')
+  el.dataset.ancoraDoQuadro = ''
+  document.body.appendChild(el)
+  ancoraDoQuadro.value = el
+  onUnmounted(() => el.remove())
+})
+
 onMounted(() => nextTick(() => {
   const tabela = raiz.value?.querySelector('table')
   if (!tabela) return
@@ -657,26 +694,45 @@ onMounted(() => nextTick(() => {
             vale para a linha: célula é área de campo, e um clique que abre
             rouba o clique que edita. Quem abre é uma ação explícita.
           -->
-          <UBadge color="info" variant="subtle" size="sm" class="font-mono text-[11px]">
+          <UBadge color="info" variant="subtle" size="sm" class="min-w-0 truncate font-mono text-[11px]">
             {{ (row as Item).reference }}
           </UBadge>
-          <UButton
-            :icon="copiado === (row as Item).reference ? 'i-lucide-check' : 'i-lucide-copy'"
-            color="neutral"
-            variant="ghost"
-            size="xs"
-            :aria-label="t.copiar"
-            @click.stop="copiarReferencia((row as Item).reference)"
-          />
-          <UButton
-            icon="i-lucide-maximize-2"
-            :label="t.abrir"
-            color="neutral"
-            variant="subtle"
-            size="xs"
-            class="shrink-0 opacity-0 transition-opacity group-hover/ref:opacity-100"
-            @click.stop="emit('abrirItem', row as Item)"
-          />
+
+          <!--
+            Copiar e abrir entram na MESMA BANDEJA FLUTUANTE das outras
+            células, encostada na borda direita e por cima do fim do selo.
+
+            Antes eles ficavam em linha, depois do selo, e não cabiam: a
+            referência tem 32 caracteres em fonte mono, então o conteúdo somava
+            266 px numa coluna de 260 e o botão de abrir saía cortado pela
+            borda. Era o "botão escondido" do print dela.
+
+            Com a bandeja o problema desaparece por construção, e de quebra a
+            célula da referência passa a se comportar como todas as outras:
+            hover mostra as ações, e elas não empurram nada.
+          -->
+          <span class="absolute right-0 top-1/2 flex -translate-y-1/2 items-center gap-0.5 rounded-md bg-default p-0.5 opacity-0 shadow-sm ring-1 ring-default transition-opacity group-hover/ref:opacity-100">
+            <UTooltip :text="t.copiar">
+              <UButton
+                :icon="copiado === (row as Item).reference ? 'i-lucide-check' : 'i-lucide-copy'"
+                color="neutral"
+                variant="ghost"
+                size="xs"
+                :aria-label="t.copiar"
+                @click.stop="copiarReferencia((row as Item).reference)"
+              />
+            </UTooltip>
+            <UTooltip :text="t.abrir">
+              <UButton
+                icon="i-lucide-maximize-2"
+                color="neutral"
+                variant="ghost"
+                size="xs"
+                :aria-label="t.abrir"
+                @click.stop="emit('abrirItem', row as Item)"
+              />
+            </UTooltip>
+          </span>
           <UBadge v-if="(row as Item).isDraft" color="warning" variant="subtle" size="sm">
             {{ t.rascunho }}
           </UBadge>
@@ -818,7 +874,7 @@ onMounted(() => nextTick(() => {
     tem três faixas: o nome do campo em cima, o controle no meio e, embaixo, a
     frase de o que salva com o botão que fecha.
   -->
-  <Teleport to="body">
+  <Teleport v-if="ancoraDoQuadro" :to="ancoraDoQuadro">
     <div
       v-if="emEdicao && campoEmEdicao && retanguloDoAlvo"
       class="fixed inset-0"
@@ -1040,13 +1096,20 @@ onMounted(() => nextTick(() => {
   transform-origin: top left;
 }
 
+/*
+ * A animação mexe SÓ na escala, e não na opacidade.
+ *
+ * Com opacidade no `from`, uma janela que para de desenhar (minimizada, aba ao
+ * fundo) congela o primeiro quadro da animação e o quadro de edição fica
+ * eternamente a 50%. Já me atrapalhou duas vezes investigando. Escala travada
+ * em 0,94 é um quadro 6% menor; opacidade travada em 0,5 é um quadro que
+ * parece desligado.
+ */
 @keyframes salto {
   from {
-    opacity: 0.5;
     transform: scale(0.94);
   }
   to {
-    opacity: 1;
     transform: none;
   }
 }
