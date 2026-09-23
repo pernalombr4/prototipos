@@ -23,6 +23,11 @@ import { corDaOpcao, enderecoEmUmaLinha, estaVazio, estaVencida, foiCorrigido, f
 import { opcoes as todasAsOpcoes } from './mocks'
 
 const props = defineProps<{
+  /**
+   * A largura da coluna em px, quando este valor está numa célula. É o que
+   * decide quantos selos da fila cabem antes de o resto virar contador.
+   */
+  larguraDaColuna?: number
   campo: Campo
   valor: unknown
   formato: 'celula' | 'cru'
@@ -64,12 +69,112 @@ const textoCompleto = computed(() =>
 /* --------------------------- atalhos por família -------------------------- */
 
 const comoLista = computed<string[]>(() => (Array.isArray(props.valor) ? (props.valor as string[]) : []))
-const visiveis = computed(() => comoLista.value.slice(0, limite.value))
+/* ---------------- quantos selos cabem na largura que existe --------------- *
+ *
+ * O CORTE DA FILA DE SELOS, E POR QUE ELE PRECISA MEDIR.
+ *
+ * Com a coluna redimensionável (rodada 16), ficou visível que a fila de selos
+ * não encolhia: os selos mantinham a largura do conteúdo, a célula cortava no
+ * `overflow: hidden` e o primeiro a desaparecer era justamente o contador
+ * `+N`, que é o único elemento que avisa que existe mais. Apertando a coluna
+ * de Tags, 185 px de selo ficavam fora da célula.
+ *
+ * O `maximoNaCelula` do catálogo continua valendo como TETO (é a decisão de
+ * densidade: três selos numa coluna de 220 px já é ruído). O que entra agora é
+ * o PISO da realidade: dentro desse teto, mostra-se o que cabe, e o resto vai
+ * para o contador. É o que o Notion e o ClickUp fazem, e é o que faz a coluna
+ * responder a abrir e fechar espaço.
+ *
+ * A medição acontece UMA VEZ, na montagem, com a fila inteira desenhada: a
+ * largura natural de um selo não muda quando a coluna muda, só a largura
+ * disponível muda. Por isso não há laço de medir e redesenhar: o
+ * `ResizeObserver` observa a célula, que é dimensionada pela coluna, e nunca
+ * pelo conteúdo.
+ */
+const raizDoValor = ref<HTMLElement | null>(null)
+const largurasNaturais = ref<number[]>([])
+/** No primeiro quadro a fila vai inteira, para poder ser medida. */
+const medindo = ref(true)
+
+/** O que o contador `+N` ocupa, mais o vão antes dele. */
+const RESERVA_DO_CONTADOR = 46
+/** O vão entre dois selos (`gap-1`). */
+const VAO = 4
+/** O recuo da célula mais o do invólucro, que não é espaço de conteúdo. */
+const RECUO_DA_CELULA = 24
+
+/**
+ * A largura útil da célula.
+ *
+ * Vem por PROP, da tabela, e não de um `ResizeObserver` neste componente. A
+ * primeira versão media o próprio invólucro e não funcionou: o observador não
+ * recebia notificação quando a coluna mudava de largura, porque a `UTable`
+ * refaz a marcação das células a cada quadro do arraste e o elemento que o
+ * observador vigiava saía de cena sem o componente ser remontado.
+ *
+ * E não era o caminho certo de qualquer forma: a tabela JÁ sabe a largura de
+ * cada coluna, ela é quem manda nesse estado desde a rodada 16. Perguntar para
+ * quem sabe é mais simples e não depende de o navegador notificar nada.
+ */
+const larguraDaCelula = computed(() => Math.max(0, (props.larguraDaColuna ?? 0) - RECUO_DA_CELULA))
+
+onMounted(async () => {
+  if (!naCelula.value) {
+    medindo.value = false
+    return
+  }
+  await nextTick()
+  const fila = raizDoValor.value?.querySelector('[data-fila]')
+  if (fila) {
+    largurasNaturais.value = [...fila.querySelectorAll('[data-item]')]
+      .map(e => (e as HTMLElement).offsetWidth)
+  }
+  medindo.value = false
+})
+
+/**
+ * Quantos itens da fila cabem. Sempre pelo menos um: um selo cortado com
+ * reticências ainda diz de que valor se trata, e a célula vazia não diz nada.
+ */
+function quantosCabem(candidatos: number, totalDaLista: number): number {
+  if (!naCelula.value || medindo.value) return candidatos
+  if (!larguraDaCelula.value || largurasNaturais.value.length === 0) return candidatos
+  let usado = 0
+  let n = 0
+  for (let i = 0; i < candidatos; i++) {
+    const largura = largurasNaturais.value[i] ?? 0
+    /*
+     * A reserva olha a lista INTEIRA, e não só os candidatos.
+     *
+     * Era o erro da primeira versão: com teto de 3 e lista de 5, o terceiro
+     * selo era medido como se fosse o último e não reservava espaço para o
+     * contador, que aparecia de todo jeito e saía cortado. A pergunta certa é
+     * "vai sobrar alguém depois deste?", e quem responde é o total.
+     */
+    const reserva = totalDaLista - (n + 1) > 0 ? RESERVA_DO_CONTADOR : 0
+    if (usado + largura + reserva > larguraDaCelula.value) break
+    usado += largura + VAO
+    n++
+  }
+  return Math.max(1, n)
+}
+
+const visiveis = computed(() =>
+  comoLista.value.slice(
+    0,
+    quantosCabem(Math.min(limite.value, comoLista.value.length), comoLista.value.length),
+  ),
+)
 const sobrando = computed(() => Math.max(0, comoLista.value.length - visiveis.value.length))
 
 const comoRelacao = computed(() => props.valor as { id: number, display: string, reference: string })
 const relacoes = computed(() => (props.valor as { id: number, display: string, reference: string }[]) ?? [])
-const relacoesVisiveis = computed(() => relacoes.value.slice(0, limite.value))
+const relacoesVisiveis = computed(() =>
+  relacoes.value.slice(
+    0,
+    quantosCabem(Math.min(limite.value, relacoes.value.length), relacoes.value.length),
+  ),
+)
 const relacoesSobrando = computed(() => Math.max(0, relacoes.value.length - relacoesVisiveis.value.length))
 
 /**
@@ -219,6 +324,7 @@ async function copiar(texto: string) {
     é um botão de verdade, com foco por teclado.
   -->
   <button
+    ref="raizDoValor"
     type="button"
     class="group/valor relative -mx-1 flex w-full min-w-0 rounded px-1 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
     :class="[
@@ -342,40 +448,56 @@ async function copiar(texto: string) {
 
     <span
       v-else-if="campo.tipo === 'multiSelect' || campo.tipo === 'checkbox' || campo.tipo === 'EnlCheckbox'"
-      class="flex min-w-0 items-center gap-1"
+      data-fila
+      class="flex min-w-0 items-center gap-1 overflow-hidden"
       :class="naCelula ? '' : 'flex-wrap'"
     >
       <UBadge
         v-for="v in visiveis"
         :key="v"
+        data-item
         :color="corDaOpcao(lista, v) as never"
         variant="subtle"
         size="sm"
-        class="max-w-[12rem] truncate"
+        class="min-w-0 max-w-[12rem] truncate"
       >
         {{ rotuloDaOpcao(lista, v) }}
       </UBadge>
       <UTooltip v-if="sobrando" :text="textoCompleto">
-        <UBadge color="neutral" variant="soft" size="sm">{{ t.maisN(sobrando) }}</UBadge>
+        <UBadge color="neutral" variant="soft" size="sm" class="shrink-0">{{ t.maisN(sobrando) }}</UBadge>
       </UTooltip>
     </span>
 
     <span
       v-else-if="campo.tipo === 'EnlChips'"
-      class="flex min-w-0 items-center gap-1"
+      data-fila
+      class="flex min-w-0 items-center gap-1 overflow-hidden"
       :class="naCelula ? '' : 'flex-wrap'"
     >
-      <UBadge v-for="v in visiveis" :key="v" color="neutral" variant="outline" size="sm">
+      <UBadge
+        v-for="v in visiveis"
+        :key="v"
+        data-item
+        color="neutral"
+        variant="outline"
+        size="sm"
+        class="min-w-0 max-w-[12rem] truncate"
+      >
         {{ v }}
       </UBadge>
       <UTooltip v-if="sobrando" :text="textoCompleto">
-        <UBadge color="neutral" variant="soft" size="sm">{{ t.maisN(sobrando) }}</UBadge>
+        <UBadge color="neutral" variant="soft" size="sm" class="shrink-0">{{ t.maisN(sobrando) }}</UBadge>
       </UTooltip>
     </span>
 
     <!-- árvore: a folha na célula, o caminho inteiro no cru -->
-    <UTooltip v-else-if="campo.tipo === 'EnTreeSelect'" :text="textoCompleto">
-      <UBadge color="neutral" variant="subtle" size="sm">
+    <!--
+      O selo da árvore precisa encolher junto com a coluna. Sem `min-w-0` e
+      `truncate` ele mantinha a largura da folha e a célula cortava o selo no
+      meio, sem reticências: 47 px para fora numa coluna apertada.
+    -->
+    <UTooltip v-else-if="campo.tipo === 'EnTreeSelect'" :text="textoCompleto" class="min-w-0">
+      <UBadge color="neutral" variant="subtle" size="sm" class="min-w-0 max-w-full truncate">
         {{ naCelula ? textoCompleto.split(' / ').at(-1) : textoCompleto }}
       </UBadge>
     </UTooltip>
@@ -400,8 +522,13 @@ async function copiar(texto: string) {
 
     <!-- ──────────────────────────── data/hora ─────────────────────────── -->
     <span v-else-if="campo.tipo === 'EnlCalendar'" class="flex min-w-0 items-baseline gap-1.5">
+      <!--
+        A data era `shrink-0`, e por isso não encolhia nunca: numa coluna
+        apertada saía 58 px para fora da célula. Agora ela corta com
+        reticências como qualquer texto, e o valor inteiro continua no balão.
+      -->
       <span
-        class="shrink-0 text-sm tabular-nums"
+        class="min-w-0 truncate text-sm tabular-nums"
         :class="estaVencida(String(valor)) ? 'text-error' : 'text-highlighted'"
       >
         {{ naCelula ? formatarDataCurta(String(valor), idioma) : formatarDataMedia(String(valor), idioma) }}
@@ -454,16 +581,18 @@ async function copiar(texto: string) {
 
     <span
       v-else-if="campo.tipo === 'EnRelMulti'"
-      class="flex min-w-0 items-center gap-1"
+      data-fila
+      class="flex min-w-0 items-center gap-1 overflow-hidden"
       :class="naCelula ? '' : 'flex-wrap'"
     >
       <UBadge
         v-for="r in relacoesVisiveis"
         :key="r.id"
+        data-item
         color="primary"
         variant="subtle"
         size="sm"
-        class="max-w-[12rem] truncate"
+        class="min-w-0 max-w-[12rem] truncate"
       >
         {{ r.display?.trim() ? r.display : r.reference }}
       </UBadge>

@@ -494,6 +494,20 @@ const colunas = computed<EnTableColumn[]>(() => [
  */
 const LARGURA_DA_REFERENCIA = 260
 
+/**
+ * O PISO DA LARGURA DE COLUNA.
+ *
+ * O `EnTable` não expõe `minSize` por coluna, então o piso do TanStack vale
+ * para todas: 24 px. Em 24 px nenhuma célula diz nada, e nem o contador `+N`
+ * cabe. Como o estado da largura é meu, o piso também: 96 px, que é o que
+ * sustenta um valor cortado com reticências mais o contador ao lado.
+ *
+ * É a mesma ordem de grandeza do Notion (100 px). Fica registrado como pedido
+ * ao SDK: `minSize` por coluna, porque a largura mínima é característica do
+ * CAMPO (o catálogo já a declara em `campo.largura`), não da tela.
+ */
+const PISO_DA_COLUNA = 96
+
 const largurasIniciais = computed(() =>
   Object.fromEntries([
     ['reference', LARGURA_DA_REFERENCIA],
@@ -510,8 +524,11 @@ const larguras = computed<Record<string, number>>({
      * acenderia o botão de voltar ao original sem ninguém ter arrastado nada.
      */
     const atual = { ...largurasIniciais.value, ...props.larguras }
-    const mudou = Object.keys(v).some(k => v[k] !== atual[k])
-    if (mudou) emit('update:larguras', v)
+    const comPiso = Object.fromEntries(
+      Object.entries(v).map(([k, px]) => [k, Math.max(px, PISO_DA_COLUNA)]),
+    )
+    const mudou = Object.keys(comPiso).some(k => comPiso[k] !== atual[k])
+    if (mudou) emit('update:larguras', comPiso)
   },
 })
 
@@ -813,7 +830,12 @@ onMounted(() => nextTick(() => {
               />
             </UTooltip>
           </span>
-          <UBadge v-if="(row as Item).isDraft" color="warning" variant="subtle" size="sm">
+          <!--
+            O selo de estado não encolhe: "Rascu..." não é um estado, é um
+            enigma. Quem cede espaço é a referência, que é hash e não perde
+            sentido ao ser cortada (ela já vive cortada).
+          -->
+          <UBadge v-if="(row as Item).isDraft" color="warning" variant="subtle" size="sm" class="shrink-0">
             {{ t.rascunho }}
           </UBadge>
           <UBadge v-else-if="(row as Item).status === 'inactive'" color="neutral" variant="soft" size="sm">
@@ -847,6 +869,7 @@ onMounted(() => nextTick(() => {
           <ValorDoCampo
             :campo="campo"
             :valor="((row as Item).data as Record<string, unknown>)?.[campo.refId]"
+            :largura-da-coluna="larguras[campo.refId]"
             formato="celula"
             :t="t"
             :idioma="idioma"

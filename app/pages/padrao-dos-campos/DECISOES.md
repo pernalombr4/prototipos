@@ -1276,3 +1276,77 @@ status do item (Rascunho, Inativo) fica do lado dele, disputando os mesmos 60
 px. A bandeja flutuante de copiar e abrir continua encostada na direita, por
 cima do fim do selo, que é exatamente o que ela deveria fazer: foi para isso que
 ela saiu da linha na rodada 13.
+
+## Rodada 17: os campos que quebravam quando a coluna apertava
+
+Com a coluna redimensionável, ela pediu para ajustar o que quebrasse. Auditei as
+35 colunas de dados apertando cada uma até o fim e medindo, para cada célula, o
+quanto do conteúdo saía da caixa. Quatorze colunas vazavam. Nenhuma linha mudava
+de altura, e nada invadia a coluna vizinha (a célula corta em
+`overflow: hidden`), então o defeito não era visual: era **o que desaparecia
+primeiro**.
+
+| Coluna | Saía da célula | Por quê |
+|---|---|---|
+| Tags | 185 px | a fila de selos não encolhia nunca |
+| Referência | 63 px | o selo de estado ao lado da referência não cedia espaço |
+| Data (Calendário) | 58 px | a data era `shrink-0` |
+| Seleção em árvore | 47 px | selo sem `truncate` |
+| Lista de Seleção Múltipla | 43 px | mesma fila de selos |
+| Anotações, Caixas de Seleção | 16 px | ícone e selos sem recuo para encolher |
+| Lista única, Botões de seleção | 14 px | recuo do bloco maior que a célula |
+| Relação simples, Número, Moeda, Binário | 4 a 6 px | arredondamento do recuo |
+
+### O pior deles, e a regra que saiu disso
+
+Na fila de selos, **o primeiro elemento a ser cortado era o contador `+N`**, que
+é justamente o único que avisa que existe mais coisa. A pessoa apertava a
+coluna, perdia a informação de que o campo tem cinco valores, e ficava com três
+selos ilegíveis em vez de um selo legível mais o aviso.
+
+A regra que fica, e que vale para toda família de lista: **o que cabe é
+mostrado, o resto vira contador, e o contador nunca é o que se corta.** Primeiro
+sai o terceiro selo, depois o segundo, e um selo cortado com reticências
+sobrevive sempre, porque ele ainda diz de que valor se trata. É o que o Notion e
+o ClickUp fazem, e é o que faz a coluna responder a abrir e fechar espaço, que
+era o objetivo do redimensionamento.
+
+Em números: a coluna de Tags em 240 px mostra `urgente  multa  concessionaria
++2`; em 96 px mostra `urgente  +4`. O teto do catálogo (`maximoNaCelula`)
+continua valendo como decisão de densidade; o que entrou foi o piso da
+realidade.
+
+### Como a largura chega ao campo
+
+Por prop, da tabela. A primeira versão media o próprio invólucro com um
+`ResizeObserver` e não funcionou: o observador não recebia notificação quando a
+coluna mudava, porque a `UTable` refaz a marcação das células a cada quadro do
+arraste e o elemento vigiado saía de cena sem o componente ser remontado. O
+estado ficava preso na largura da montagem.
+
+E medir não era o caminho certo de todo jeito: desde a rodada 16 a tabela é a
+dona da largura de cada coluna. Perguntar para quem sabe é mais simples e não
+depende de o navegador notificar nada. O que ainda se mede no DOM é só a largura
+NATURAL de cada selo, uma vez, na montagem, porque essa não muda quando a coluna
+muda.
+
+### As outras correções
+
+- **A data encolhe.** Era `shrink-0`, agora corta com reticências como qualquer
+  texto, e o valor inteiro continua no balão.
+- **O selo da árvore encolhe**, com `min-w-0` e `truncate`.
+- **O selo de estado do item não encolhe**, de propósito: "Rascu..." não é um
+  estado, é um enigma. Quem cede espaço é a referência, que é hash e já vive
+  cortada.
+
+### O piso de 96 px
+
+O piso do TanStack é 24 px, e em 24 px nenhuma célula diz nada: nem o contador
+cabe. Como o estado da largura é nosso desde a rodada 16, o piso também passou a
+ser: **96 px**, que sustenta um valor cortado com reticências mais o contador ao
+lado. É a mesma ordem de grandeza do Notion.
+
+Fica como pedido ao SDK: **`minSize` por coluna no `EnTableColumn`**. A largura
+mínima é característica do CAMPO, e o catálogo deste protótipo já a declara em
+`campo.largura`; hoje não há como informá-la ao `EnTable`, e o piso tem que ser
+aplicado por fora, no estado da tela.
