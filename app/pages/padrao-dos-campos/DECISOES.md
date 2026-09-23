@@ -655,3 +655,57 @@ ordem:
    quando a célula está na última coluna ou na última linha;
 4. os popups do ClickUp: o que eles põem no cabeçalho além do nome do campo;
 5. a linha de criação: se o ClickUp mantém o foco para criar vários em sequência.
+
+---
+
+## Rodada 7: o que os boards dela mudaram no protótipo
+
+Entrei no ClickUp e no Notion, criei os campos e medi. As descobertas campo por
+campo estão no `PESQUISA.md`; aqui fica só o que mudou no protótipo e por quê.
+
+| Mudança | De onde veio |
+|---|---|
+| O recuo do quadro caiu de 8 px para **4 px** e a largura mínima subiu de 260 para **300 px** | medição no Notion: célula de 156x33, quadro de 300x104 a 2 px do canto |
+| Campo preenchido abre com o **valor já selecionado** | Notion. Quem abre um campo cheio quase sempre quer trocar o valor, não emendar no fim |
+| O anexo virou **alça de arrasto à esquerda e menu "⋯" à direita** | Notion. Os cinco botões em linha da rodada 5 viravam ruído a cada hover |
+| Arrastar para reordenar anexo **passou a funcionar** | Notion, e voltei atrás na rodada 5: eu tinha declarado o arrasto frágil e resolvido com dois botões. O gesto principal é o arrasto; subir e descer ficaram no menu, que é o caminho do teclado |
+| O pé do quadro ganhou o **atalho para a ficha do campo** | Notion, "Edit property" no pé do editor de célula |
+| O campo de data ganhou **atalhos** (Hoje, Amanhã, Semana que vem, 2 semanas, 4 semanas) | ClickUp, cujo popup de data é o melhor dos dois |
+| A lista de opções ganhou **criar a opção que falta** | Notion ("Select an option or create one") e ClickUp ("Pesquise ou adicione opções") |
+| A linha de criação **continua aberta depois do Enter** | ClickUp: lá o compositor fica pronto para o próximo registro |
+
+**Maquete nova declarada:** criar opção a partir da célula grava a opção no
+VALOR do item, e não no catálogo de opções do campo, porque o catálogo é
+back-end. Na implementação de verdade isso precisa criar a opção no campo, e é
+uma decisão de produto: hoje só quem configura o campo cria opção.
+
+### Onde eu estava errado, e o que ficou confirmado
+
+- **errado:** eu tinha declarado o arrasto de anexo como frágil e substituído por
+  botões. O Notion faz arrasto com alça e é o padrão dos dois;
+- **errado:** eu achava que o quadro precisava de respiro de 8 px. O Notion usa
+  2 px, e com o respiro grande o valor "salta" de lugar em vez de ficar parado;
+- **confirmado:** o quadro ancorado que cresce para fora é o gesto do Notion, e
+  o ClickUp NÃO faz isso (ele abre painel abaixo da célula);
+- **confirmado:** vazio fica vazio no Notion, e o ClickUp é quem usa "–";
+- **confirmado:** selo com × dentro do campo e lista aberta embaixo é o desenho
+  dos dois para seleção múltipla;
+- **confirmado:** as ações de anexo são baixar, renomear, remover e reordenar,
+  exatamente a lista do documento do time de produtos.
+
+### O que vi e NÃO trouxe, para discutirmos
+
+1. **Primeiro clique seleciona, segundo edita** (ClickUp). É bom para navegar de
+   célula em célula pelo teclado e ruim para editar rápido. A tela nova não é
+   planilha, e ela pediu o gesto do Notion.
+2. **"⋯" por opção dentro da célula**, para renomear, trocar a cor ou excluir a
+   opção do campo (Notion). Mexe na configuração do campo a partir do
+   preenchimento. Poderoso e perigoso: quem preenche pode renomear uma opção que
+   está em uso em outros 200 itens.
+3. **Comentário por célula** (Notion mostra o balão no hover de qualquer célula).
+   Nós temos comentário no item, não na célula.
+4. **Date format e Include time dentro da célula** (Notion). No nosso produto
+   isso é `cFormat` do campo, configuração e não dado.
+5. **A moeda como configuração do campo** (ClickUp e Notion). O nosso valor
+   carrega a moeda, o que é melhor para contrato em dólar e pior para somar a
+   coluna. Fica como está, e a soma precisa de conversão declarada.

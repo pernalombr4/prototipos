@@ -120,13 +120,21 @@ const campoEmEdicao = computed(
  * janela, nunca fica mais estreito do que o campo pede e nunca nasce tão
  * embaixo que não sobre altura para o conteúdo.
  */
-const RESPIRO = 8
+/*
+ * Medido no Notion em 23/09/2026, com a célula de seleção múltipla: a célula
+ * tinha 156x33 e o quadro nasceu em 300x104, ancorado a 2 px do canto da
+ * célula. Ou seja: recuo quase nulo e largura mínima de 300. Uso 4 px, que é
+ * o meio do caminho entre o recuo do Notion e o respiro que o nosso quadro
+ * precisa por ter cabeçalho e rodapé.
+ */
+const RESPIRO = 4
+const LARGURA_MINIMA = 300
 const estiloDoSalto = computed(() => {
   const r = retanguloDoAlvo.value
   const campo = campoEmEdicao.value
   if (!r || !campo) return {}
 
-  const larguraMinima = campo.saltoLargo ? 420 : Math.max(campo.largura, 260)
+  const larguraMinima = campo.saltoLargo ? 460 : Math.max(campo.largura, LARGURA_MINIMA)
   const largura = Math.min(
     Math.max(r.width + RESPIRO * 2, larguraMinima),
     window.innerWidth - RESPIRO * 4,
@@ -215,11 +223,18 @@ function gravarValor(item: Item, refId: string, valor: unknown) {
   emit('editarValor', item, refId, valor)
 }
 
+/**
+ * Criar e continuar. Medido no ClickUp em 23/09/2026: o Enter cria a tarefa e
+ * o compositor FICA ABERTO, já pronto para a próxima. Quem está lançando cinco
+ * registros não quer clicar de novo na linha a cada um. Aqui o quadro fica
+ * aberto no mesmo campo, vazio, e só fecha no Esc ou no clique fora.
+ */
 function criarDaLinha() {
   if (!temRascunho.value) return
   emit('criarNaLinha', { ...rascunhoDaLinha.value })
   rascunhoDaLinha.value = {}
-  fecharEdicao()
+  /* O alvo continua sendo a célula da linha nova, que segue no mesmo lugar. */
+  nextTick(medirAlvo)
 }
 
 /** O convite da linha nova abre o primeiro campo que a pessoa preenche. */
@@ -603,7 +618,27 @@ onMounted(() => nextTick(() => {
           />
         </div>
 
+        <!--
+          O rodapé do quadro, com três coisas: o que salva, o atalho para a
+          ficha do campo e o botão que fecha.
+
+          O atalho para a ficha é o "Edit property" que o Notion põe no pé do
+          editor de célula (visto no board dela em 23/09/2026). Faz sentido:
+          quem está preenchendo é quem descobre que a regra do campo está
+          errada, e o caminho até a configuração não devia passar por outra
+          tela.
+        -->
         <div class="mt-1.5 flex items-center gap-2 border-t border-default px-0.5 pt-1.5">
+          <UTooltip :text="t.fichaTitulo">
+            <UButton
+              icon="i-lucide-settings-2"
+              color="neutral"
+              variant="ghost"
+              size="xs"
+              :aria-label="t.fichaTitulo"
+              @click="emit('inspecionar', campoEmEdicao.tipo, emEdicao.item); fecharEdicao()"
+            />
+          </UTooltip>
           <p class="flex min-w-0 items-center gap-1 text-[11px] text-dimmed">
             <UIcon
               :name="campoEmEdicao.comoSalva === 'naoSeAplica' ? 'i-lucide-lock' : 'i-lucide-save'"

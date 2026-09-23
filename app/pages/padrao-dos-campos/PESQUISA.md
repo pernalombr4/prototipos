@@ -288,3 +288,82 @@ do olho.
 Quem cria no topo é o Twenty, e é o desenho que ela pediu. O que trouxemos do
 ClickUp é o resto: a linha aceita valor em qualquer coluna antes de criar, e o
 Enter fecha o ciclo sem passar pelo formulário.
+
+## Rodada 7: dentro dos boards dela, campo por campo
+
+Entrei no ClickUp e no Notion com a conta dela em 23/09/2026 e criei campos nos
+dois para medir o comportamento, em vez de descrever de memória. No ClickUp
+criei, na lista Project 1, os campos **Selecao unica** (Lista suspensa),
+**Selecao multipla** (Rótulos), **Anexos** (Arquivos), **Data calendario**,
+**Texto longo** (Área de texto), **Valor monetario** (Dinheiro), **Endereco**
+(localização) e **Relacionamento**, e usei os nativos Status, Prioridade,
+Responsável e Data de vencimento. No Notion criei a propriedade **Files** e usei
+as que já existiam: Status, Multi-select, Date, Place, URL, Text, Rollup.
+
+### Como cada um abre a célula
+
+| | Notion | ClickUp |
+|---|---|---|
+| gesto | **1 clique abre o editor** | 1º clique SELECIONA, 2º clique (ou Enter) abre. Modelo planilha |
+| onde o editor nasce | **ancorado no canto da célula**, cresce para fora e cobre a grade | **abaixo da célula**, que continua visível |
+| vazio na célula | fica vazio | mostra **"–"** |
+| ao fechar | clique fora salva | clique fora salva |
+
+Medi a geometria do Notion na célula de seleção múltipla: a célula tinha
+**156x33** e o quadro nasceu **300x104**, a 2 px do canto da célula. Sombra
+`rgba(25,25,25,0.05) 0 20px 24px` mais `rgba(25,25,25,0.027) 0 5px 8px`, raio
+6 px, e **sem animação de entrada**: o efeito de aproximação vem da geometria
+(canto ancorado, conteúdo no mesmo lugar), não de movimento.
+
+### Interagir com campo JÁ PREENCHIDO
+
+É a parte que ela pediu para eu olhar com atenção, e é onde os dois mais se
+separam.
+
+| Campo preenchido | Notion | ClickUp |
+|---|---|---|
+| **seleção única** | o selo atual fica no topo do quadro, no lugar exato onde estava na célula; a lista vem **agrupada** (To-do / In progress / Complete); no pé, **"Edit property"** | a célula ganha um **chevron** na borda; a lista traz **"–" no topo para limpar** |
+| **seleção múltipla** | cada selo escolhido tem **×**; digitar filtra e cria; cada opção da lista tem **alça de arrasto** e **"⋯"** (renomear, excluir, cor da opção) | os selos aparecem dentro do campo de busca do painel, com ×; o painel fica **mais largo que a coluna** |
+| **data** | o valor vem **pré-selecionado no campo de texto** (digitar substitui), o dia destacado no calendário, e depois **End date**, **Date format**, **Include time**, **Remind** e **Clear** | a célula mostra o **rótulo relativo** ("Amanhã") e fica **vermelha quando vencida**. O popup tem digitação, **atalhos** (Hoje, Mais tarde, Amanhã, Este final de semana, Semana que vem, 2 semanas, 4 semanas) e calendário |
+| **texto longo** | o quadro **cresce até caber o texto inteiro** e o cursor fica onde a pessoa clicou | painel grande (~650x200) **abaixo** da célula |
+| **anexo** | lista com **alça de arrasto à esquerda** e **"⋯" à direita** por arquivo: *View original, Rename, Delete*, mais "Add a file or image" | só o painel de origens (upload, Dropbox, OneDrive, Google Drive, novo Google Doc) e arrastar e soltar |
+| **qualquer célula** | no hover aparecem **comentário e copiar** dentro da célula; a linha mostra **OPEN** para abrir o registro | a linha mostra **⤢** para abrir a tarefa |
+| **relação** | seletor com busca | a **própria célula tem o botão "Adicionar tarefa"** |
+
+### Criar pela grade
+
+| | Notion | ClickUp |
+|---|---|---|
+| onde | "+ New page" no fim | linha no fim do grupo |
+| como | abre a página do registro | **compositor de uma linha** com botões rápidos (tipo, responsável, data, prioridade, tag) e **"Salvar ↵"** mais Cancelar |
+| depois de criar | a linha nova entra no fim | **o compositor FICA ABERTO**, pronto para o próximo |
+
+### Configuração do campo, para comparar com a nossa ficha
+
+O ClickUp guarda por campo: **Descrição** ("Explique aos outros usuários como
+usar este campo"), **Valor padrão**, **Permissões** com exceções por pessoa,
+**Obrigatório em tarefas**, **Fixado** e **Visível para convidados**. A moeda do
+campo Dinheiro é **configuração do CAMPO** (USD por padrão), e não parte do
+valor: o nosso campo, que guarda `{ currency, value }`, é mais flexível que o
+dele e o do Notion, com o custo de não poder somar a coluna sem converter.
+
+### O que trouxemos para o protótipo, e o que deixamos de fora
+
+| Trouxemos | De onde |
+|---|---|
+| quadro ancorado no canto da célula, crescendo para fora | Notion |
+| recuo de 4 px e largura mínima de 300 px | Notion, medido |
+| valor já selecionado ao abrir um campo preenchido | Notion |
+| alça de arrasto à esquerda e menu "⋯" à direita no anexo | Notion |
+| atalho para a ficha do campo no pé do quadro | Notion ("Edit property") |
+| criar a opção que falta dali mesmo | Notion e ClickUp |
+| atalhos de data (Hoje, Amanhã, Semana que vem, 2 e 4 semanas) | ClickUp |
+| criar e continuar: o quadro fica aberto depois do Enter | ClickUp |
+
+| Deixamos de fora | Por quê |
+|---|---|
+| 1º clique selecionar e 2º abrir | é modelo de planilha. A tela nova não é planilha, e ela pediu o gesto do Notion |
+| painel abaixo da célula | esconde menos, mas perde a ancoragem que dá a sensação de aproximação |
+| "–" na célula vazia | ela decidiu o contrário, e o Notion concorda |
+| "⋯" por opção, para renomear e excluir opção da célula | mexe no catálogo de opções do campo, que é configuração. Fica como proposta |
+| moeda como configuração do campo | o nosso produto já guarda a moeda no valor, e isso é melhor para contrato com moeda estrangeira |

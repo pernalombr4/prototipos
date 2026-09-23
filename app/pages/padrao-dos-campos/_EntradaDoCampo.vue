@@ -43,12 +43,19 @@ const raizDoCampo = ref<HTMLElement | null>(null)
 /**
  * Foco automático quando o campo nasce dentro de uma célula: quem clicou na
  * célula quer digitar, não quer clicar de novo no controle.
+ *
+ * E o valor que já existe nasce SELECIONADO, como no Notion (medido no board
+ * dela em 23/09/2026: ao abrir uma data preenchida, o texto "Aug 13, 2026" vem
+ * destacado). O motivo é o caso comum: quem abre um campo preenchido quase
+ * sempre quer TROCAR o valor, não emendar no fim dele.
  */
 onMounted(() => {
   if (!props.autofoco) return
   nextTick(() => {
     const alvo = raizDoCampo.value?.querySelector<HTMLElement>('input, textarea, [tabindex]')
     alvo?.focus()
+    if (alvo instanceof HTMLInputElement && alvo.type !== 'date') alvo.select()
+    else if (alvo instanceof HTMLTextAreaElement) alvo.select()
   })
 })
 
@@ -202,6 +209,53 @@ function confirmarRenomeio() {
   gravarAnexos(anexos.value.map((a, j) => (j === i ? { ...a, filename: nome } : a)))
 }
 
+/* ----------------------------- a data rápida ----------------------------- */
+
+/**
+ * Atalhos de data, copiados do ClickUp (medido em 23/09/2026). O popup de data
+ * dele tem três coisas que o nosso campo não tem: digitação em linguagem
+ * natural, uma coluna de atalhos (Hoje, Amanhã, 2 semanas, 4 semanas) com a
+ * data resultante do lado, e o calendário. Os atalhos são o pedaço que resolve
+ * o caso mais comum sem abrir calendário nenhum.
+ */
+const atalhosDeData = computed(() => {
+  const emDias = (dias: number) => {
+    const d = new Date()
+    d.setDate(d.getDate() + dias)
+    return `${d.toISOString().slice(0, 10)}T12:00:00.000Z`
+  }
+  return [
+    { rotulo: props.t.hoje, dias: 0 },
+    { rotulo: props.t.amanha, dias: 1 },
+    { rotulo: props.t.proximaSemana, dias: 7 },
+    { rotulo: props.t.duasSemanas, dias: 14 },
+    { rotulo: props.t.quatroSemanas, dias: 28 },
+  ].map(a => ({ ...a, valor: emDias(a.dias) }))
+})
+
+/* ------------------------- o arrasto dos anexos -------------------------- */
+
+/**
+ * Reordenar arrastando, como no Notion: a alça fica na ESQUERDA da linha e a
+ * linha inteira é arrastável. Na rodada 5 eu tinha posto dois botões de subir
+ * e descer, e declarei o arrasto como frágil. Ver o gerenciador do Notion no
+ * board dela mudou isso: é alça na esquerda e menu de três pontos na direita,
+ * e o arrasto é o gesto principal. Os botões continuam existindo, dentro do
+ * menu, porque alça não serve para teclado.
+ */
+const arrastando = ref<number | null>(null)
+
+function comecarArrasto(i: number) {
+  arrastando.value = i
+}
+
+function soltarEm(i: number) {
+  const de = arrastando.value
+  arrastando.value = null
+  if (de === null || de === i) return
+  moverAnexo(de, i - de)
+}
+
 /* ------------------------------ a conversa ------------------------------- */
 
 /**
@@ -311,6 +365,28 @@ const escolhidos = computed<string[]>(() => (valor.value as string[]) ?? [])
 function alternarOpcao(v: string) {
   const atual = escolhidos.value
   emit('update:modelValue', atual.includes(v) ? atual.filter(x => x !== v) : [...atual, v])
+}
+
+/**
+ * Criar a opção dali mesmo. O ClickUp diz "Pesquise ou adicione opções" e o
+ * Notion diz "Select an option or create one": nos dois, a pessoa que está
+ * preenchendo cria a opção que falta sem sair da célula. O nosso campo hoje
+ * exige ir na configuração do campo, e isso é uma diferença real de fluxo.
+ *
+ * MAQUETE: aqui a opção nova entra no valor do item, e não no catálogo de
+ * opções do campo, porque o catálogo é back-end. Declarado no DECISOES.md.
+ */
+const podeCriarOpcao = computed(() => {
+  const q = buscaDeOpcao.value.trim()
+  if (!q) return false
+  return !lista.value.some(o => o.label.toLowerCase() === q.toLowerCase())
+})
+
+function criarOpcaoDaBusca() {
+  const q = buscaDeOpcao.value.trim()
+  if (!q) return
+  emit('update:modelValue', [...escolhidos.value, q])
+  buscaDeOpcao.value = ''
 }
 
 const opcoesDeRelacao = computed(() =>
@@ -549,6 +625,7 @@ const opcoesDeRelacao = computed(() =>
           size="sm"
           class="min-w-24 flex-1"
           :placeholder="t.buscarOpcao"
+          @keydown.enter.prevent="criarOpcaoDaBusca()"
         />
       </div>
       <div class="max-h-44 overflow-y-auto p-1">
@@ -568,7 +645,24 @@ const opcoesDeRelacao = computed(() =>
             {{ o.label }}
           </UBadge>
         </button>
-        <p v-if="!opcoesFiltradas.length" class="px-1.5 py-2 text-sm text-muted">
+        <!--
+          Criar a opção dali mesmo, que é o que o ClickUp e o Notion fazem. No
+          nosso campo isso hoje exige ir na configuração, e é uma diferença de
+          fluxo que vale discutir.
+        -->
+        <UButton
+          v-if="podeCriarOpcao"
+          icon="i-lucide-plus"
+          color="primary"
+          variant="ghost"
+          size="xs"
+          block
+          class="justify-start"
+          @click="criarOpcaoDaBusca()"
+        >
+          {{ t.criarOpcao }}: {{ buscaDeOpcao }}
+        </UButton>
+        <p v-else-if="!opcoesFiltradas.length" class="px-1.5 py-2 text-sm text-muted">
           {{ t.semResultado }}
         </p>
       </div>
@@ -626,14 +720,31 @@ const opcoesDeRelacao = computed(() =>
     />
 
     <!-- ──────────────────────────── data/hora ───────────────────────────── -->
-    <UInput
-      v-else-if="campo.tipo === 'EnlCalendar'"
-      :model-value="valor ? String(valor).slice(0, 10) : ''"
-      type="date"
-      size="sm"
-      class="w-full"
-      @update:model-value="(v: string | number) => emit('update:modelValue', v ? `${v}T12:00:00.000Z` : null)"
-    />
+    <!--
+      Data: o calendário do sistema mais a fila de atalhos do ClickUp. O caso
+      mais comum (hoje, amanhã, duas semanas) se resolve num clique, sem abrir
+      calendário nenhum.
+    -->
+    <div v-else-if="campo.tipo === 'EnlCalendar'" class="space-y-1.5">
+      <UInput
+        :model-value="valor ? String(valor).slice(0, 10) : ''"
+        type="date"
+        size="sm"
+        class="w-full"
+        @update:model-value="(v: string | number) => emit('update:modelValue', v ? `${v}T12:00:00.000Z` : null)"
+      />
+      <div class="flex flex-wrap gap-1">
+        <UButton
+          v-for="a in atalhosDeData"
+          :key="a.rotulo"
+          :label="a.rotulo"
+          color="neutral"
+          variant="subtle"
+          size="xs"
+          @click="emit('update:modelValue', a.valor)"
+        />
+      </div>
+    </div>
 
     <!--
       Duração: campo de texto, com os exemplos que o produto usa no
@@ -787,11 +898,32 @@ const opcoesDeRelacao = computed(() =>
         {{ t.nenhumAnexo }}
       </p>
 
+      <!--
+        O desenho é o do Notion, visto no board dela em 23/09/2026: alça de
+        arrasto na ESQUERDA, nome no meio, menu de três pontos na DIREITA com
+        as ações. Eu tinha cinco botões em linha, que viram ruído a cada hover.
+        O arrasto é o gesto principal; o menu guarda subir e descer, porque
+        alça não serve para teclado.
+      -->
       <div
         v-for="(a, i) in anexos"
         :key="a.url + i"
-        class="group/anexo flex items-center gap-1.5 border-b border-default px-2 py-1.5 last:border-b-0"
+        class="group/anexo flex items-center gap-1.5 border-b border-default px-1.5 py-1.5 last:border-b-0"
+        :class="arrastando === i ? 'opacity-40' : ''"
+        draggable="true"
+        @dragstart="comecarArrasto(i)"
+        @dragover.prevent
+        @drop.prevent="soltarEm(i)"
       >
+        <UTooltip :text="t.arrasteParaReordenar">
+          <span
+            class="flex size-5 shrink-0 cursor-grab items-center justify-center text-dimmed opacity-0 transition-opacity group-hover/anexo:opacity-100"
+            :aria-label="t.arrasteParaReordenar"
+          >
+            <UIcon name="i-lucide-grip-vertical" class="size-4" />
+          </span>
+        </UTooltip>
+
         <span
           v-if="campo.tipo === 'uploadImage'"
           class="flex size-8 shrink-0 items-center justify-center rounded bg-elevated"
@@ -819,53 +951,26 @@ const opcoesDeRelacao = computed(() =>
 
         <span v-if="a.size" class="shrink-0 text-xs text-muted">{{ formatarBytes(a.size, idioma) }}</span>
 
-        <span class="flex shrink-0 items-center opacity-0 transition-opacity group-hover/anexo:opacity-100">
-          <UTooltip :text="t.subir">
-            <UButton
-              icon="i-lucide-chevron-up"
-              color="neutral"
-              variant="ghost"
-              size="xs"
-              :disabled="i === 0"
-              :aria-label="t.subir"
-              @click="moverAnexo(i, -1)"
-            />
-          </UTooltip>
-          <UTooltip :text="t.descer">
-            <UButton
-              icon="i-lucide-chevron-down"
-              color="neutral"
-              variant="ghost"
-              size="xs"
-              :disabled="i === anexos.length - 1"
-              :aria-label="t.descer"
-              @click="moverAnexo(i, 1)"
-            />
-          </UTooltip>
-          <UTooltip :text="t.renomear">
-            <UButton
-              icon="i-lucide-pencil"
-              color="neutral"
-              variant="ghost"
-              size="xs"
-              :aria-label="t.renomear"
-              @click="abrirRenomeio(i)"
-            />
-          </UTooltip>
-          <UTooltip :text="t.baixar">
-            <UButton icon="i-lucide-download" color="neutral" variant="ghost" size="xs" :aria-label="t.baixar" />
-          </UTooltip>
-          <UTooltip :text="t.remover">
-            <UButton
-              icon="i-lucide-trash-2"
-              color="error"
-              variant="ghost"
-              size="xs"
-              :aria-label="t.remover"
-              @click="removerAnexo(i)"
-            />
-          </UTooltip>
-        </span>
+        <UDropdownMenu
+          :items="[[
+            { label: t.baixar, icon: 'i-lucide-download' },
+            { label: t.renomear, icon: 'i-lucide-pencil', onSelect: () => abrirRenomeio(i) },
+          ], [
+            { label: t.moverParaCima, icon: 'i-lucide-chevron-up', disabled: i === 0, onSelect: () => moverAnexo(i, -1) },
+            { label: t.moverParaBaixo, icon: 'i-lucide-chevron-down', disabled: i === anexos.length - 1, onSelect: () => moverAnexo(i, 1) },
+          ], [
+            { label: t.remover, icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => removerAnexo(i) },
+          ]]"
+        >
+          <UButton
+            icon="i-lucide-ellipsis"
+            color="neutral"
+            variant="ghost"
+            size="xs"
+            class="shrink-0 opacity-0 transition-opacity group-hover/anexo:opacity-100"
+            :aria-label="t.acoes"
+          />
+        </UDropdownMenu>
       </div>
 
       <div class="border-t border-default p-1.5">

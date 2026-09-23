@@ -157,6 +157,15 @@ export interface Textos {
   remover: string
   nenhumAnexo: string
   criarNaLinha: string
+  hoje: string
+  amanha: string
+  proximaSemana: string
+  duasSemanas: string
+  quatroSemanas: string
+  criarOpcao: string
+  moverParaCima: string
+  moverParaBaixo: string
+  arrasteParaReordenar: string
   limparCampo: string
   enterCria: string
   semResultado: string
@@ -387,6 +396,15 @@ const ptBR: Textos = {
   remover: 'Remover',
   nenhumAnexo: 'Nenhum arquivo ainda.',
   criarNaLinha: 'Criar registro aqui',
+  hoje: 'Hoje',
+  amanha: 'Amanhã',
+  proximaSemana: 'Semana que vem',
+  duasSemanas: '2 semanas',
+  quatroSemanas: '4 semanas',
+  criarOpcao: 'Criar a opção',
+  moverParaCima: 'Mover para cima',
+  moverParaBaixo: 'Mover para baixo',
+  arrasteParaReordenar: 'Arraste para reordenar',
   limparCampo: 'Limpar o campo',
   enterCria: 'Enter cria o registro. Esc descarta.',
   semResultado: 'Nada encontrado',
@@ -868,6 +886,15 @@ const en: Textos = {
   remover: 'Remove',
   nenhumAnexo: 'No files yet.',
   criarNaLinha: 'Create a record here',
+  hoje: 'Today',
+  amanha: 'Tomorrow',
+  proximaSemana: 'Next week',
+  duasSemanas: '2 weeks',
+  quatroSemanas: '4 weeks',
+  criarOpcao: 'Create option',
+  moverParaCima: 'Move up',
+  moverParaBaixo: 'Move down',
+  arrasteParaReordenar: 'Drag to reorder',
   limparCampo: 'Clear the field',
   enterCria: 'Enter creates the record. Esc discards.',
   semResultado: 'Nothing found',
@@ -1349,6 +1376,15 @@ const es: Textos = {
   remover: 'Quitar',
   nenhumAnexo: 'Todavía no hay archivos.',
   criarNaLinha: 'Crear registro aquí',
+  hoje: 'Hoy',
+  amanha: 'Mañana',
+  proximaSemana: 'La próxima semana',
+  duasSemanas: '2 semanas',
+  quatroSemanas: '4 semanas',
+  criarOpcao: 'Crear la opción',
+  moverParaCima: 'Mover hacia arriba',
+  moverParaBaixo: 'Mover hacia abajo',
+  arrasteParaReordenar: 'Arrastre para reordenar',
   limparCampo: 'Limpiar el campo',
   enterCria: 'Enter crea el registro. Esc descarta.',
   semResultado: 'Nada encontrado',
