@@ -42,6 +42,16 @@ const emit = defineEmits<{
 
 const confirmando = ref(false)
 
+/**
+ * Fecha a confirmação ANTES de emitir. A ação zera a seleção e tira a barra da
+ * tela, e fazer as duas coisas no mesmo instante deixava o modal a meio caminho.
+ */
+async function confirmar() {
+  confirmando.value = false
+  await nextTick()
+  emit('lixeira')
+}
+
 const itensDeRaia = computed(() =>
   props.raias.map(r => ({ label: r.rotulo, onSelect: () => emit('mover', r.valor) })))
 
@@ -126,22 +136,28 @@ const itensDePrioridade = computed(() =>
         />
       </div>
 
-      <UModal v-model:open="confirmando" :title="t.selecao.confirmarTitulo(quantas)">
-        <template #body>
-          <p class="text-sm text-muted">{{ t.selecao.confirmarTexto }}</p>
-        </template>
-        <template #footer>
-          <div class="flex w-full justify-end gap-2">
-            <UButton :label="t.cancelar" color="neutral" variant="ghost" @click="confirmando = false" />
-            <UButton
-              :label="t.selecao.confirmarLixeira"
-              icon="i-lucide-trash-2"
-              color="error"
-              @click="confirmando = false; emit('lixeira')"
-            />
-          </div>
-        </template>
-      </UModal>
     </div>
   </Transition>
+
+  <!--
+    O modal fica FORA do `v-if` da barra, e isso não é estilo: dentro dele, a
+    confirmação some junto com a barra no mesmo instante em que a ação zera a
+    seleção, e o nó da barra fica preso no DOM com a contagem velha.
+  -->
+  <UModal v-model:open="confirmando" :title="t.selecao.confirmarTitulo(quantas)">
+    <template #body>
+      <p class="text-sm text-muted">{{ t.selecao.confirmarTexto }}</p>
+    </template>
+    <template #footer>
+      <div class="flex w-full justify-end gap-2">
+        <UButton :label="t.cancelar" color="neutral" variant="ghost" @click="confirmando = false" />
+        <UButton
+          :label="t.selecao.confirmarLixeira"
+          icon="i-lucide-trash-2"
+          color="error"
+          @click="confirmar"
+        />
+      </div>
+    </template>
+  </UModal>
 </template>

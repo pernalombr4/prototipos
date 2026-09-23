@@ -1584,3 +1584,60 @@ Mudando o tamanho do cartão, o selo e as três ações aparecem. "Voltar ao sal
 "Salvar nesta visualização" salva, o selo some na hora e o aviso diz que a visualização foi
 salva para todo mundo que a usa. Abrindo "Tarefas liderança", o quadro passa a agrupar por
 responsável (que é o que ela guarda) e o botão de salvar por cima não aparece.
+
+---
+
+## Rodada 24 — 23/09/2026
+
+### O que ela pediu, literal
+
+> deve haver forma de deletar em massa os cards de tarefas. pesquise como o mercado faz isso
+> em kanbans. trello, jira, clickup, monday...
+
+A pesquisa dos quatro está no PESQUISA.md. Aqui fica o que virou tela.
+
+### Como se seleciona
+
+**Uma caixinha no canto do cartão**, que só aparece quando o mouse passa por cima e fica de vez
+assim que existe alguma seleção. Enquanto ninguém selecionou nada, ela não ocupa espaço nenhum,
+que é o que ClickUp e monday fazem.
+
+**Shift pega a faixa** desde a última marcada, como no monday e no Jira, **mas só dentro da
+mesma raia**: entre raias não existe "entre", e o que sairia daí ninguém consegue prever.
+
+**O menu da raia ganhou "Selecionar as N desta raia".** É o "arquivar todos os cartões desta
+lista" do Trello, com uma diferença: ele seleciona em vez de agir, e o que fazer com elas vem
+depois. Clicando de novo, desmarca todas.
+
+### A barra, e o que ela oferece
+
+Flutua no pé da tela e começa pela contagem, porque é ela que decide se dá para clicar em algo
+destrutivo com segurança. As ações são **as que o produto já tem no menu do cartão**: mover de
+raia, responsável, prioridade, arquivar e enviar para a lixeira. Ação em massa que não existe
+uma a uma seria invenção, não escala.
+
+**Mover só aparece quando a raia é a situação.** Agrupado por responsável, "mover para" ia
+significar reatribuir, que já é outro botão ali do lado.
+
+### Apagar, com as duas proteções
+
+1. **A lixeira é a única com confirmação**, e o texto dela diz para onde as tarefas vão: "Elas
+   saem do quadro e param na lixeira do workspace, onde podem ser restauradas". É o que o Jira
+   faz, e é a única coisa na tela que uma pessoa dispara sem ver o resultado.
+2. **Toda ação em massa tem desfazer**, e ele desfaz de verdade: guarda o estado anterior das
+   tarefas mexidas e devolve campo por campo. Desfazer que não devolve é pior que não ter.
+
+**Não existe "excluir para sempre" aqui**, de propósito: o produto tem Lixeira, e o menu do
+cartão de hoje diz "Enviar para Lixeira". Apagar de vez é uma decisão da tela da lixeira, não
+de um quadro com dez cartões marcados.
+
+### Conferido na tela
+
+Caixinha marca; Shift levou de 1 para 3; a barra mostra a contagem e as cinco ações; arquivar
+tirou 3 do quadro e o desfazer devolveu; a lixeira abriu a confirmação com o texto certo e o
+quadro caiu de 25 para 23 tarefas; e "Selecionar as 12 desta raia" selecionou as doze.
+
+**Uma coisa não deu para ver com os olhos:** a barra sumindo quando a seleção zera. A janela do
+navegador estava atrás, e página que não pinta não termina transição de saída, então o nó fica
+preso com a contagem velha. O estado zera certo (nenhum cartão fica marcado e a ação acontece),
+e o mesmo fluxo com a janela na frente resolve. Vale um olhar dela.

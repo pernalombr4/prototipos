@@ -407,3 +407,34 @@ função, é exatamente o que gera o pedido de "desligar isso".
 **URLs.** `help.clickup.com/hc/en-us/articles/6310370965911-Save-view-changes`,
 `feedback.clickup.com/feature-requests/p/option-to-disable-this-view-has-unsaved-changes-notification`,
 `linear.app/docs/display-options`
+
+---
+
+## Consulta extra — apagar em massa num kanban (23/09/2026)
+
+| Produto | Como seleciona | Onde ficam as ações | O que oferece |
+|---|---|---|---|
+| **ClickUp** | caixinha no cartão, no Board view | **Bulk Action Toolbar**, flutuando no pé da tela | 18 e tantas ações: situação, datas, etiquetas, mover, copiar, apagar |
+| **monday** | caixinha à esquerda do item, e **Shift** seleciona a faixa entre dois | **barra no pé da tela**, dizendo quantos itens estão selecionados | Duplicar, Exportar, **Arquivar**, **Excluir**, Mover para |
+| **Jira** | **Ctrl** ou **Cmd** para avulsos, **Shift** para adjacentes, e então botão direito ou "..." › **Bulk change** | assistente em etapas | escolher as issues, escolher a operação, preencher, e **uma tela de confirmação antes de aplicar** |
+| **Trello** | **não tem**. A documentação diz que não existe seleção de cartões | menu da lista | **"Arquivar todos os cartões desta lista"**, e o resto por extensão de navegador |
+
+**O padrão, e ele é bem consistente:** caixinha no cartão, Shift para faixa, e uma **barra
+flutuante no pé da tela que começa dizendo quantos estão selecionados**. Arquivar e excluir
+convivem, e são coisas diferentes.
+
+**O que cada um ensina de específico:**
+
+- do **Jira**, a confirmação: mudança em massa é a única coisa numa tela de tarefas que uma
+  pessoa faz sem ver o que aconteceu, então ela passa por uma tela que diz o que vai acontecer;
+- do **monday**, o Shift e a contagem na barra, que é o que deixa clicar em "excluir" com
+  segurança;
+- do **Trello**, o "todos desta lista": mesmo sem seleção, o produto entendeu que esvaziar uma
+  coluna inteira é a ação mais pedida;
+- do **ClickUp**, a barra no pé, que não empurra o quadro nem tapa a raia onde se está
+  selecionando.
+
+**URLs.** `help.clickup.com/hc/en-us/articles/6309768265495-Manage-tasks-with-the-Bulk-Action-Toolbar`,
+`support.monday.com/hc/en-us/articles/115005335049-Batch-Actions`,
+`support.atlassian.com/jira-software-cloud/docs/edit-multiple-issues/`,
+`community.atlassian.com/forums/Trello-articles/How-can-I-select-multiple-cards-in-Trello-and-move-them-to/ba-p/1470796`
