@@ -67,8 +67,6 @@ const emit = defineEmits<{
   novoItem: []
   /** A linha de criação fechou com valor: nasce um item com esses dados. */
   criarNaLinha: [dados: Record<string, unknown>, posicao: number]
-  /** Comentário feito a partir de um campo, que vai para a conversa do item. */
-  comentarNoCampo: [item: Item, campo: Campo, texto: string]
   /** O cartão da relação pediu para abrir o registro do outro lado. */
   abrirRelacionado: [referencia: string]
   /** Uma coluna foi redimensionada. */
@@ -165,9 +163,24 @@ function medirAlvo() {
   const alvo = alvoDaEdicao.value
   if (!alvo) return
   const r = alvo.getBoundingClientRect()
-  const area = (roladorDaTabela.value ?? raiz.value)?.getBoundingClientRect()
+  /*
+   * A ÁREA VISÍVEL, com uma guarda que não é preciosismo.
+   *
+   * O invólucro que a `UTable` monta pode medir **zero** de largura: é o que
+   * acontece com a janela do navegador oculta ou minimizada, quando o
+   * contêiner de flex deixa de ter caixa e só as células, que têm largura
+   * explícita, continuam medindo. Sem esta guarda, toda célula era julgada
+   * "fora da área" e o quadro fechava no instante em que abria. Peguei
+   * exatamente isso testando a rodada 22, e quem paga seria a pessoa com a
+   * janela num segundo monitor desligado.
+   *
+   * Área sem tamanho não é resposta: quando ela vem zerada, ninguém fecha
+   * nada, e o quadro segue ancorado onde estava.
+   */
+  const alvoDaArea = raiz.value ?? roladorDaTabela.value
+  const area = alvoDaArea?.getBoundingClientRect()
 
-  if (area) {
+  if (area && area.width > 0 && area.height > 0) {
     const foraNaHorizontal = r.right < area.left + MINIMO_VISIVEL || r.left > area.right - MINIMO_VISIVEL
     const foraNaVertical = r.bottom < area.top + MINIMO_VISIVEL || r.top > area.bottom - MINIMO_VISIVEL
     if (foraNaHorizontal || foraNaVertical) {
@@ -308,8 +321,6 @@ function fecharEdicao(descartando = false) {
     gravarValor(item, refId, valorAoAbrir.value)
   }
   gestoComecouNoFundo.value = false
-  comentando.value = false
-  rascunhoDoComentario.value = ''
   emEdicao.value = null
   alvoDaEdicao.value = null
   retanguloDoAlvo.value = null
@@ -478,30 +489,18 @@ const temValorNoQuadro = computed(() => {
   return !estaVazio((item.data as Record<string, unknown>)?.[campo.refId])
 })
 
-/**
- * COMENTAR NO CAMPO.
+/*
+ * SEM COMENTÁRIO NO CAMPO.
  *
- * O Notion tem comentário por CÉLULA. A decisão da rodada 9 foi não criar um
- * terceiro lugar de conversa: já temos o Chat e as Anotações no item, e uma
- * caixa de entrada por célula multiplicaria notificação, "resolvido" e
- * histórico por N campos.
+ * O quadro tinha um balão que abria uma caixa para comentar dali mesmo, vindo
+ * do comentário por célula do Notion. Ela cortou com um argumento de
+ * realidade: **o ENSPACE não tem comentário em campo nenhum.** Comentário aqui
+ * é do ITEM, e vive na aba de comentários do registro (vista na tela nova de
+ * itens do develop, ao lado de Visão Geral e Logs de Auditoria).
  *
- * O que ficou: comentar **a partir** do campo, com o comentário indo para a
- * conversa do ITEM, citando o campo. Uma caixa de entrada só, e ainda assim
- * ancorada onde a dúvida nasceu.
+ * Pôr um no campo era inventar recurso dentro de um protótipo que existe para
+ * padronizar o que já existe. Saiu o botão, a caixa, o evento e os textos.
  */
-const comentando = ref(false)
-const rascunhoDoComentario = ref('')
-
-function enviarComentario() {
-  const item = itemEmEdicao.value
-  const campo = campoEmEdicao.value
-  const texto = rascunhoDoComentario.value.trim()
-  if (!item || !campo || !texto) return
-  emit('comentarNoCampo', item, campo, texto)
-  rascunhoDoComentario.value = ''
-  comentando.value = false
-}
 
 /** Enter na linha de criação cria. Nas outras, salva e desce uma linha. */
 function aoSairDoQuadro() {
@@ -1148,61 +1147,32 @@ onMounted(() => nextTick(() => {
           errada, e o caminho até a configuração não devia passar por outra
           tela.
         -->
-        <!--
-          O compositor do comentário. O texto vai para a conversa do ITEM,
-          citando o campo: uma caixa de entrada só, ancorada onde a dúvida
-          nasceu. Ver o comentário do `enviarComentario`.
-        -->
-        <div v-if="comentando" class="mt-1.5 flex items-center gap-1.5 border-t border-default px-0.5 pt-1.5">
-          <UInput
-            v-model="rascunhoDoComentario"
-            size="xs"
-            class="min-w-0 flex-1"
-            autofocus
-            :placeholder="t.comentarNoCampo"
-            @keydown.enter.stop="enviarComentario()"
-            @keydown.esc.stop="comentando = false"
-          />
-          <UButton
-            icon="i-lucide-send"
-            color="primary"
-            size="xs"
-            :disabled="!rascunhoDoComentario.trim()"
-            :aria-label="t.enviarMensagem"
-            @click="enviarComentario()"
-          />
-        </div>
-
         <div class="mt-1.5 flex items-center gap-2 border-t border-default px-0.5 pt-1.5">
-          <UTooltip :text="t.fichaTitulo">
+          <!--
+            ─────────────── O RODAPÉ DEIXOU DE DAR AULA ───────────────
+            Aqui morava a frase de o que salva ("Escolher já salva. Não há o
+            que confirmar."), e ela pediu para tirar: instrução escrita em toda
+            abertura de célula é ruído para quem já sabe, e quem não sabe
+            descobre fazendo. O texto não se perdeu: está na ficha do campo, na
+            linha "Como salva", a um clique daqui.
+
+            O que sobrou é o botão da ficha, e ele é **do andaime**, não do
+            produto. Abre o catálogo deste protótipo, com o contrato de
+            back-end, as três regras de renderização e as configurações do
+            tipo. Por isso vem com a cor do andaime, e o balão diz isso na
+            cara em vez de deixar a pessoa achar que configurou campo no
+            ENSPACE.
+          -->
+          <UTooltip :text="`${t.fichaTitulo} (${t.andaimeTitulo})`">
             <UButton
               icon="i-lucide-settings-2"
-              color="neutral"
-              variant="ghost"
+              color="warning"
+              variant="soft"
               size="xs"
-              :aria-label="t.fichaTitulo"
+              :aria-label="`${t.fichaTitulo} (${t.andaimeTitulo})`"
               @click="emit('inspecionar', campoEmEdicao.tipo, emEdicao.item); fecharEdicao()"
             />
           </UTooltip>
-          <UTooltip v-if="!ehLinhaNova(emEdicao.item)" :text="t.comentarNoCampo">
-            <UButton
-              icon="i-lucide-message-circle"
-              color="neutral"
-              variant="ghost"
-              size="xs"
-              :aria-label="t.comentarNoCampo"
-              @click="comentando = !comentando"
-            />
-          </UTooltip>
-          <p class="flex min-w-0 items-center gap-1 text-[11px] text-dimmed">
-            <UIcon
-              :name="campoEmEdicao.comoSalva === 'naoSeAplica' ? 'i-lucide-lock' : 'i-lucide-save'"
-              class="size-3 shrink-0"
-            />
-            <span class="truncate">
-              {{ ehLinhaNova(emEdicao.item) ? t.enterCria : t.comoSalvaTextos[campoEmEdicao.comoSalva] }}
-            </span>
-          </p>
           <UButton
             v-if="ehLinhaNova(emEdicao.item)"
             class="ml-auto"

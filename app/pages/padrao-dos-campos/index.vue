@@ -182,26 +182,6 @@ function devolverLargurasOriginais() {
   largurasDasColunas.value = {}
 }
 
-/**
- * Comentário feito a partir de um campo. Ele vai para a conversa do ITEM,
- * citando o campo, em vez de abrir uma caixa de entrada por célula. Decidido
- * na rodada 9, ver o DECISOES.md.
- */
-function comentarNoCampo(item: Item, campo: Campo, texto: string) {
-  const rotulo = t.value.campos[campo.tipo].rotulo
-  const mensagem = {
-    author: 'Mikaela Jardim',
-    at: new Date().toISOString(),
-    text: `sobre ${rotulo}: ${texto}`,
-  }
-  itens.value = itens.value.map((i) => {
-    if (i.id !== item.id) return i
-    const dados = { ...(i.data as Record<string, unknown>) }
-    dados.chat = [...((dados.chat as unknown[]) ?? []), mensagem]
-    return { ...i, data: dados, updated_at: new Date() }
-  })
-  toast.add({ title: t.value.comentarioEnviado, icon: 'i-lucide-message-circle', color: 'success' })
-}
 
 /**
  * O cartão da relação pediu para abrir o registro do outro lado.
@@ -547,7 +527,6 @@ onMounted(() => {
               :pode-configurar="podeConfigurar"
               v-model:larguras="largurasDasColunas"
               @criar-na-linha="criarItem"
-              @comentar-no-campo="comentarNoCampo"
               @abrir-relacionado="abrirRelacionado"
             />
           </div>

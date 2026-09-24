@@ -174,7 +174,6 @@ export interface Textos {
   pessoaVeioDaConsulta: string
   totalDaColuna: string
   totalPorMoeda: string
-  comentarNoCampo: string
   comentarioEnviado: string
   opcoesDoCampo: string
   renomearOpcao: string
@@ -485,7 +484,6 @@ const ptBR: Textos = {
   pessoaVeioDaConsulta: 'Preenchido pela consulta ao documento',
   totalDaColuna: 'Total da coluna',
   totalPorMoeda: 'Moedas diferentes nunca somam juntas. O total sai por moeda.',
-  comentarNoCampo: 'Comentar neste campo',
   comentarioEnviado: 'Comentário enviado para a conversa do item',
   opcoesDoCampo: 'Opções do campo',
   renomearOpcao: 'Renomear a opção',
@@ -1074,7 +1072,6 @@ const en: Textos = {
   pessoaVeioDaConsulta: 'Filled in by the document lookup',
   totalDaColuna: 'Column total',
   totalPorMoeda: 'Different currencies never add up together. The total comes per currency.',
-  comentarNoCampo: 'Comment on this field',
   comentarioEnviado: 'Comment sent to the item conversation',
   opcoesDoCampo: 'Field options',
   renomearOpcao: 'Rename option',
@@ -1663,7 +1660,6 @@ const es: Textos = {
   pessoaVeioDaConsulta: 'Rellenado por la consulta al documento',
   totalDaColuna: 'Total de la columna',
   totalPorMoeda: 'Monedas distintas nunca se suman juntas. El total sale por moneda.',
-  comentarNoCampo: 'Comentar en este campo',
   comentarioEnviado: 'Comentario enviado a la conversación del elemento',
   opcoesDoCampo: 'Opciones del campo',
   renomearOpcao: 'Renombrar la opción',

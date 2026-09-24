@@ -1594,3 +1594,52 @@ rodada 17, empurrando a referência para uma letra só.
 
 O estado continua onde pertence, no painel do item. A tabela perdeu um sinal e
 ganhou uma coluna de identificação que só identifica.
+
+## Rodada 22: o quadro parou de dar aula, e o comentário em campo saiu
+
+Três correções dela sobre o rodapé do quadro de edição.
+
+### A instrução saiu
+
+O rodapé escrevia, em toda abertura de célula, o que salva aquele campo
+("Escolher já salva. Não há o que confirmar."). Ela cortou: instrução escrita
+toda vez é ruído para quem já sabe, e quem não sabe descobre fazendo. O texto
+não se perdeu, está na **ficha do campo**, na linha "Como salva", que é o que a
+pessoa abre quando quer o detalhe.
+
+O que ficou no rodapé é só o que AGE: o botão da ficha e o botão que fecha (ou
+o Confirmar, nos campos que pedem confirmação).
+
+### O botão de configuração é do andaime, e agora diz isso
+
+Ele abre o catálogo deste protótipo, com o contrato de back-end, as três regras
+de renderização e as configurações do tipo. Não configura campo no ENSPACE, e
+era razoável alguém achar que sim. Passou a ter a **cor do andaime** e o balão
+diz inteiro: "Ficha do campo (Andaime do protótipo, não é produto)".
+
+### Comentário em campo: não existe, então saiu
+
+O quadro tinha um balão que abria uma caixa para comentar dali mesmo. Vinha do
+comentário por célula do Notion, decidido na rodada 9. Ela cortou com um
+argumento de realidade que encerra a discussão: **o ENSPACE não tem comentário
+em campo nenhum.** Comentário aqui é do ITEM, e vive na aba de comentários do
+registro, que eu mesmo vi na tela nova de itens do develop ao lado de Visão
+Geral e Logs de Auditoria.
+
+Inventar recurso num protótipo que existe para padronizar o que já existe é
+trocar o problema. Saiu o botão, a caixa, o evento `comentarNoCampo`, o
+tratamento no `index.vue` e os textos nos três idiomas.
+
+### E um defeito que este corte fez aparecer
+
+Testando o rodapé novo, o quadro passou a fechar no instante em que abria. A
+causa não era o corte: é a guarda de área visível da rodada 20, que compara a
+célula com o retângulo do contêiner da tabela. Com a **janela do navegador
+oculta ou minimizada**, esse contêiner mede **zero** de largura (o contêiner de
+flex perde a caixa e só as células, que têm largura explícita, continuam
+medindo), e aí toda célula é julgada "fora da área".
+
+Quem pagaria isso não é só o teste automatizado: é a pessoa com a janela num
+segundo monitor desligado, ou o navegador restaurando uma aba. Agora **área sem
+tamanho não é resposta**: quando ela vem zerada, ninguém fecha nada, e o quadro
+segue ancorado onde estava.
