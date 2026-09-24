@@ -1643,3 +1643,69 @@ Quem pagaria isso não é só o teste automatizado: é a pessoa com a janela num
 segundo monitor desligado, ou o navegador restaurando uma aba. Agora **área sem
 tamanho não é resposta**: quando ela vem zerada, ninguém fecha nada, e o quadro
 segue ancorado onde estava.
+
+## Rodada 23: a seleção de itens, com barra flutuante e coluna em dois modos
+
+Ela relatou dois defeitos no mesmo gesto: marcar a caixa de um item não abria
+menu nenhum, e a caixa marcada desaparecia atrás do número da linha quando o
+mouse saía.
+
+### A barra flutuante
+
+É a Bulk Action Toolbar do ClickUp, no mesmo desenho já decidido no protótipo
+`tarefas-rapidas`. Repetir o desenho é de propósito: se as duas telas do produto
+tiverem seleção em massa, ela é a MESMA barra.
+
+Três coisas explicam o formato: **flutua**, então não empurra a tabela nem tapa
+a linha que se está marcando; **começa pela contagem**, que é a informação que
+decide se dá para clicar em algo destrutivo; e **inverte o fundo**, e com isso
+para de competir com a tabela.
+
+As ações são as que a linha JÁ tem no menu de três pontos: **Copiar Link** e
+**Lixeira** (que confirma antes, como no Jira). Ver detalhes e editar não entram
+porque são de um registro por natureza. Ação em massa que não existe sozinha
+seria invenção, e é a mesma regra do protótipo vizinho.
+
+No develop a seleção existe (caixa no cabeçalho e caixa por linha) e eu nunca vi
+barra nenhuma aparecer. Não consegui reconfirmar nesta rodada, porque a tabela
+virtualizada do develop não desenha linha alguma com a janela em segundo plano.
+Então a barra é **proposta**, não cópia.
+
+### A coluna da esquerda tem dois modos, e um de cada vez
+
+| Modo | O que a coluna mostra |
+|---|---|
+| parado | o número da linha, e a caixa só no hover (Airtable, ClickUp, Notion) |
+| selecionando | a caixa em todas as linhas, marcada ou não, **sem hover**, e o número sai |
+
+O segundo modo é o que ela pediu: com seleção em curso, quem está selecionando
+precisa ver de uma vez o que já marcou, e o número não serve para nada nesse
+instante. É o comportamento do ClickUp e do Gmail.
+
+### Três tentativas até a regra ficar em pé, e o que cada uma ensinou
+
+1. **`tr[data-selected='true']`**, que estava no código desde a rodada 8 e nunca
+   valeu: o `EnTable` não escreve esse atributo, porque gerencia a seleção por
+   referência de objeto em vez de usar o `rowSelection` do TanStack. Era a causa
+   do defeito que ela viu;
+2. **classe no contêiner com `:not()`**: `:not(.com-selecao) :deep(...)` casa com
+   QUALQUER elemento do componente que tenha o atributo de escopo e não tenha a
+   classe, e a raiz do `EnTable` é um deles. A regra do modo parado voltava a
+   valer por dentro;
+3. **duas variáveis CSS** no contêiner, herdadas até a célula. É o que ficou:
+   não depende de quem casa com que seletor, e o hover continua sendo uma regra
+   à parte, mais específica.
+
+### O que eu NÃO consegui conferir, e por quê
+
+A barra e o estado da caixa eu verifiquei pelo DOM, que não depende de desenho:
+a barra aparece com "1 registro selecionado", com Copiar Link e Lixeira, e a
+caixa fica `data-state="checked"`.
+
+**A troca visual entre número e caixa ficou sem confirmação minha.** A janela do
+Chrome estava minimizada, e nesse estado o navegador informa viewport 0x0 e
+devolve estilo computado velho: a variável na célula lê `1`, a única regra que
+casa com o elemento é `opacity: var(--caixa-da-linha, 0)`, e o computado insiste
+em `0`. Pela construção está certo, mas quem tem que ver é você, com a janela na
+frente. É a terceira vez hoje que a janela oculta me faz medir errado, e já
+registrei isso na rodada 22.

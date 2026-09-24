@@ -35,6 +35,7 @@ import type { EnTableColumn } from '@be-enlighten/enspace-sdk-ui'
 import type { Item } from '@be-enlighten/enspace-sdk-schemas'
 import type { Campo } from './campos'
 import type { Textos } from './textos'
+import BarraDeSelecao from './_BarraDeSelecao.vue'
 import EntradaDoCampo from './_EntradaDoCampo.vue'
 import ValorDoCampo from './_ValorDoCampo.vue'
 import { estaVazio } from './formatacao'
@@ -71,6 +72,10 @@ const emit = defineEmits<{
   abrirRelacionado: [referencia: string]
   /** Uma coluna foi redimensionada. */
   'update:larguras': [larguras: Record<string, number>]
+  /** A barra da seleção pediu para mandar estes itens para a lixeira. */
+  enviarParaLixeira: [itens: Item[]]
+  /** Um aviso curto para a tela mostrar. */
+  avisar: [mensagem: string]
 }>()
 
 const selecionados = ref<Item[]>([])
@@ -662,6 +667,38 @@ async function copiarReferencia(referencia: string) {
   catch { /* sem área de transferência: silêncio */ }
 }
 
+/* ------------------------- a seleção em massa ---------------------------- *
+ *
+ * A coluna da esquerda tem DOIS trabalhos, e um de cada vez: numerar quando
+ * ninguém está selecionando, e selecionar quando alguém está. Com seleção em
+ * curso o número sai e a caixa fica, sem depender de hover, que é o que ela
+ * pediu nesta rodada. O `EnTable` não marca a linha selecionada no DOM (ele
+ * gerencia a seleção por referência de objeto, e não pelo `rowSelection` do
+ * TanStack), então quem sabe disso é esta tela: por isso a classe entra aqui.
+ */
+const temSelecao = computed(() => selecionados.value.length > 0)
+
+function limparSelecao() {
+  selecionados.value = []
+}
+
+/** Copiar o link dos marcados: é o "Copiar Link" da linha, em massa. */
+async function copiarLinksDaSelecao() {
+  const refs = selecionados.value.map(i => i.reference).join('\n')
+  try {
+    await navigator.clipboard.writeText(refs)
+    emit('avisar', props.t.selecao.linksCopiados(selecionados.value.length))
+  }
+  catch { /* sem área de transferência: silêncio */ }
+  limparSelecao()
+}
+
+/** Lixeira em massa: é o "Enviar para a lixeira" da linha, em massa. */
+function lixeiraDaSelecao() {
+  emit('enviarParaLixeira', [...selecionados.value])
+  limparSelecao()
+}
+
 function menuDaLinha(item: Item) {
   return [
     [
@@ -842,7 +879,16 @@ onMounted(() => nextTick(() => {
   </div>
 
   <!-- ─────────────────────────────── a tabela ─────────────────────────── -->
-  <div ref="raiz" class="min-h-0 flex-1 overflow-auto">
+  <!--
+    As duas variáveis dizem em que MODO a coluna da esquerda está. Elas são
+    herdadas até a célula, o que evita depender de qual ancestral casa com que
+    seletor: ver o comentário do estilo, no fim do arquivo.
+  -->
+  <div
+    ref="raiz"
+    class="min-h-0 flex-1 overflow-auto"
+    :style="{ '--caixa-da-linha': temSelecao ? 1 : 0, '--numero-da-linha': temSelecao ? 0 : 1 }"
+  >
     <EnTable
       v-model:selected="selecionados"
       :columns="colunas"
@@ -1064,6 +1110,14 @@ onMounted(() => nextTick(() => {
     </Teleport>
   </div>
 
+  <BarraDeSelecao
+    :t="t"
+    :quantos="selecionados.length"
+    @limpar="limparSelecao()"
+    @copiar-links="copiarLinksDaSelecao()"
+    @lixeira="lixeiraDaSelecao()"
+  />
+
   <!--
     ══════════════════ O QUADRO QUE SALTA PARA FORA ══════════════════════
     Ele mora em `body` (Teleport) por um motivo prático: dentro da tabela ele
@@ -1256,21 +1310,55 @@ onMounted(() => nextTick(() => {
   color: var(--ui-text-dimmed);
   pointer-events: none;
   transition: opacity 120ms;
+  opacity: var(--numero-da-linha, 1);
 }
 
-/* A caixa só aparece no hover da linha, ou quando a linha está marcada. */
+/*
+ * ─────────── A COLUNA TEM DOIS MODOS, E UM DE CADA VEZ ───────────
+ *
+ * QUEM DIZ O MODO SÃO DUAS VARIÁVEIS CSS, postas no contêiner desta tela e
+ * herdadas até a célula. Não é capricho: seletor de ancestral não serve aqui.
+ * `:not(.com-selecao) :deep(...)` casa com QUALQUER elemento do componente que
+ * tenha o atributo de escopo e não tenha a classe, e a raiz do `EnTable` é um
+ * deles: a regra do modo parado voltava a valer por dentro, e a caixa marcada
+ * continuava invisível. Variável herdada não tem esse problema, porque não
+ * depende de quem casa com o quê.
+ *
+ * **Parado**: o número aparece e a caixa só surge no hover da linha, que é o
+ * que Airtable, ClickUp e Notion fazem.
+ *
+ * **Selecionando** (a classe `com-selecao`, que esta tela põe quando existe
+ * algum marcado): a coluna inteira é de caixas, marcadas ou não, e o número
+ * sai. Sem hover, porque quem está selecionando precisa ver de uma vez o que
+ * já marcou. É o comportamento do ClickUp e do Gmail, e foi o que ela pediu.
+ *
+ * DOIS DEFEITOS QUE ISSO CONSERTOU:
+ *
+ * 1. havia uma regra para `tr[data-selected='true']`, e ela nunca valeu: o
+ *    `EnTable` não escreve esse atributo, porque gerencia a seleção por
+ *    referência de objeto em vez de usar o `rowSelection` do TanStack. A
+ *    pessoa marcava a caixa, tirava o mouse e a caixa marcada desaparecia
+ *    atrás do número;
+ * 2. a primeira tentativa de conserto pôs as duas opacidades brigando no
+ *    mesmo elemento, apostando na especificidade da classe. Aqui os dois
+ *    modos são **mutuamente exclusivos** (`:not(.com-selecao)` de um lado,
+ *    `.com-selecao` do outro), então não há cascata para desempatar.
+ */
 :deep(tbody tr td:first-child > *) {
-  opacity: 0;
+  opacity: var(--caixa-da-linha, 0);
   transition: opacity 120ms;
 }
 
-:deep(tbody tr:hover td:first-child > *),
-:deep(tbody tr[data-selected='true'] td:first-child > *) {
+:deep(tbody tr td:first-child)::before {
+  opacity: var(--numero-da-linha, 1);
+}
+
+/* O hover revela a caixa e esconde o número, no modo parado. */
+:deep(tbody tr:hover td:first-child > *) {
   opacity: 1;
 }
 
-:deep(tbody tr:hover td:first-child)::before,
-:deep(tbody tr[data-selected='true'] td:first-child)::before {
+:deep(tbody tr:hover td:first-child)::before {
   opacity: 0;
 }
 

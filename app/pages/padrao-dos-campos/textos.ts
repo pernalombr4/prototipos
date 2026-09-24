@@ -83,6 +83,15 @@ export interface Textos {
   /* ------------------------------ o formulário --------------------------- */
   tituloNovoItem: string
   cancelar: string
+  /** A barra flutuante da seleção em massa, no formato do ClickUp. */
+  selecao: {
+    selecionados: (n: number) => string
+    limpar: string
+    lixeira: string
+    confirmarTitulo: string
+    confirmarTexto: (n: number) => string
+    linksCopiados: (n: number) => string
+  }
   criar: string
   salvar: string
   salvando: string
@@ -386,6 +395,16 @@ const ptBR: Textos = {
 
   tituloNovoItem: 'Novo registro',
   cancelar: 'Cancelar',
+  selecao: {
+    selecionados: n => (n === 1 ? 'registro selecionado' : 'registros selecionados'),
+    limpar: 'Sair da seleção',
+    lixeira: 'Lixeira',
+    confirmarTitulo: 'Enviar para a lixeira',
+    confirmarTexto: n => (n === 1
+      ? 'O registro vai para a lixeira e sai da lista. Dá para restaurar de lá.'
+      : `Os ${n} registros vão para a lixeira e saem da lista. Dá para restaurar de lá.`),
+    linksCopiados: n => (n === 1 ? 'Link copiado.' : `${n} links copiados.`),
+  },
   criar: 'Criar',
   salvar: 'Salvar',
   salvando: 'Salvando',
@@ -974,6 +993,16 @@ const en: Textos = {
 
   tituloNovoItem: 'New record',
   cancelar: 'Cancel',
+  selecao: {
+    selecionados: n => (n === 1 ? 'record selected' : 'records selected'),
+    limpar: 'Leave selection',
+    lixeira: 'Trash',
+    confirmarTitulo: 'Move to trash',
+    confirmarTexto: n => (n === 1
+      ? 'The record goes to the trash and leaves the list. It can be restored from there.'
+      : `The ${n} records go to the trash and leave the list. They can be restored from there.`),
+    linksCopiados: n => (n === 1 ? 'Link copied.' : `${n} links copied.`),
+  },
   criar: 'Create',
   salvar: 'Save',
   salvando: 'Saving',
@@ -1562,6 +1591,16 @@ const es: Textos = {
 
   tituloNovoItem: 'Nuevo registro',
   cancelar: 'Cancelar',
+  selecao: {
+    selecionados: n => (n === 1 ? 'registro seleccionado' : 'registros seleccionados'),
+    limpar: 'Salir de la selección',
+    lixeira: 'Papelera',
+    confirmarTitulo: 'Enviar a la papelera',
+    confirmarTexto: n => (n === 1
+      ? 'El registro va a la papelera y sale de la lista. Se puede restaurar desde allí.'
+      : `Los ${n} registros van a la papelera y salen de la lista. Se pueden restaurar desde allí.`),
+    linksCopiados: n => (n === 1 ? 'Enlace copiado.' : `${n} enlaces copiados.`),
+  },
   criar: 'Crear',
   salvar: 'Guardar',
   salvando: 'Guardando',

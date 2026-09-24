@@ -184,6 +184,25 @@ function devolverLargurasOriginais() {
 
 
 /**
+ * A LIXEIRA EM MASSA, a partir da barra da seleção.
+ *
+ * Aqui é maquete de front: os registros saem da lista em memória e um aviso
+ * diz quantos foram. No produto isto é uma chamada por item ou uma rota de
+ * lote, e a lixeira é reversível: quem restaura é a tela da lixeira, que não
+ * faz parte deste protótipo.
+ */
+function enviarParaLixeira(paraApagar: Item[]) {
+  const ids = new Set(paraApagar.map(i => i.id))
+  itens.value = itens.value.filter(i => !ids.has(i.id))
+  toast.add({
+    title: t.value.selecao.confirmarTitulo,
+    description: t.value.selecao.selecionados(paraApagar.length),
+    icon: 'i-lucide-trash-2',
+    color: 'warning',
+  })
+}
+
+/**
  * O cartão da relação pediu para abrir o registro do outro lado.
  *
  * MAQUETE: aqui o registro relacionado não existe como item desta categoria,
@@ -526,6 +545,8 @@ onMounted(() => {
               @novo-item="irPara('formulario')"
               :pode-configurar="podeConfigurar"
               v-model:larguras="largurasDasColunas"
+              @enviar-para-lixeira="enviarParaLixeira"
+              @avisar="(m: string) => toast.add({ title: m, icon: 'i-lucide-check', color: 'success' })"
               @criar-na-linha="criarItem"
               @abrir-relacionado="abrirRelacionado"
             />
