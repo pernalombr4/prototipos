@@ -12,17 +12,17 @@ importers:
         specifier: ^0.4.2
         version: 0.4.2(vue@3.5.42(typescript@7.0.2))
       '@be-enlighten/enspace-sdk-core':
-        specifier: ^0.14.0
-        version: 0.14.0
+        specifier: ^0.17.0
+        version: 0.17.0
       '@be-enlighten/enspace-sdk-schemas':
-        specifier: ^0.14.0
-        version: 0.14.0
+        specifier: ^0.17.0
+        version: 0.17.0
       '@be-enlighten/enspace-sdk-ui':
-        specifier: ^0.14.0
-        version: 0.14.0(07f33af11fcb61f7e6cadfaae6bca1b9)
+        specifier: ^0.17.0
+        version: 0.17.0(9c7ba6f38bc8041d6aad05726c5162c7)
       '@be-enlighten/enspace-sdk-vue':
-        specifier: ^0.14.0
-        version: 0.14.0(17f76a1fc27812849bd6c3efea761b6d)
+        specifier: ^0.17.0
+        version: 0.17.0(17f76a1fc27812849bd6c3efea761b6d)
       '@iconify-json/lucide':
         specifier: ^1.2.96
         version: 1.2.132
@@ -183,24 +183,24 @@ packages:
     peerDependencies:
       vue: ^3.5
 
-  '@be-enlighten/enspace-sdk-core@0.14.0':
-    resolution: {integrity: sha512-quyahf121zEm1Ugs+/nYYJSytFbq1ZOdC6KLVZnzeQuWROjh6+uG6uQSgrHB7iUS2lfcKid4ivfZ5wT0sd7ixg==}
+  '@be-enlighten/enspace-sdk-core@0.17.0':
+    resolution: {integrity: sha512-Gmy/01WuEtR/VDIgTqtCeBhq+fnXMtcMfXQES1dyUqxPJjJoHPveOuEjYcHPyRPxqklgpQ8pyn6v0xJLj8zt1w==}
     peerDependencies:
-      pusher-js: ^8.0.0
+      socket.io-client: ^4.8.0
     peerDependenciesMeta:
-      pusher-js:
+      socket.io-client:
         optional: true
 
-  '@be-enlighten/enspace-sdk-schemas@0.14.0':
-    resolution: {integrity: sha512-GWh6/ZA/2UPSET3ZvmF6VscY2lihjBf3VI+lX5iD9JtnqLyEs+t/b3rgFwGRP5o0Z2jSZrFJQ5ykMFTJWq4gdw==}
+  '@be-enlighten/enspace-sdk-schemas@0.17.0':
+    resolution: {integrity: sha512-QkztEahSZePyHCFwmg/yrh6n40MF9ZAv079wZfU+IEFmMlHlRt5kxCB37weZAJv10+kVYRwwxfFvqMIxlxtoAw==}
 
-  '@be-enlighten/enspace-sdk-ui@0.14.0':
-    resolution: {integrity: sha512-rWy/tYyqpERcI6jH7PQKleS8JzafvGnyGYwxxi73sPNrj2nBbTBLqWNTDtQt9WxgErW+KQbRVL1VVXEqxDPB9A==}
+  '@be-enlighten/enspace-sdk-ui@0.17.0':
+    resolution: {integrity: sha512-1RzteURgcUpbdwnTRxOBw2vUACuI3ttjiD80blqGm2bKoIdVDuS9nf/sSRjw1BdioLuWU2qz3TuWZjCLo5b1Ww==}
     peerDependencies:
       '@ai-sdk/vue': ^3.0.0
       '@be-enlighten/beni-avatar': ^0.4.2
-      '@be-enlighten/enspace-sdk-core': ^0.14.0
-      '@be-enlighten/enspace-sdk-vue': ^0.14.0
+      '@be-enlighten/enspace-sdk-core': ^0.17.0
+      '@be-enlighten/enspace-sdk-vue': ^0.17.0
       '@nuxt/kit': ^4.0.0
       '@nuxt/ui': ^4.0.0
       '@pinia/colada': ^1.4.0
@@ -228,8 +228,8 @@ packages:
       streamdown-vue:
         optional: true
 
-  '@be-enlighten/enspace-sdk-vue@0.14.0':
-    resolution: {integrity: sha512-4W9RUA/Oq3rHpiFKk4btJoINJdJFtYuDYccgg9OY6a4u5ADgtrpJFiXW9kRnvkifjr+RbhKb1hqaHAOwPWRGyw==}
+  '@be-enlighten/enspace-sdk-vue@0.17.0':
+    resolution: {integrity: sha512-d4UJgu/nXlWuiD9UfP9yBG4bnSKII5dMvxMevqk5Qz+sX97MtbaLTGmR8BQmDg5f9cgEv8knOBe4BCdfsGijmQ==}
     peerDependencies:
       '@ai-sdk/vue': ^3.0.0
       '@nuxt/kit': ^4.0.0
@@ -5076,21 +5076,21 @@ snapshots:
       gsap: 3.15.0
       vue: 3.5.42(typescript@7.0.2)
 
-  '@be-enlighten/enspace-sdk-core@0.14.0':
+  '@be-enlighten/enspace-sdk-core@0.17.0':
     dependencies:
-      '@be-enlighten/enspace-sdk-schemas': 0.14.0
+      '@be-enlighten/enspace-sdk-schemas': 0.17.0
       ofetch: 1.5.1
       zod: 4.6.5
 
-  '@be-enlighten/enspace-sdk-schemas@0.14.0':
+  '@be-enlighten/enspace-sdk-schemas@0.17.0':
     dependencies:
       zod: 4.6.5
 
-  '@be-enlighten/enspace-sdk-ui@0.14.0(07f33af11fcb61f7e6cadfaae6bca1b9)':
+  '@be-enlighten/enspace-sdk-ui@0.17.0(9c7ba6f38bc8041d6aad05726c5162c7)':
     dependencies:
-      '@be-enlighten/enspace-sdk-core': 0.14.0
-      '@be-enlighten/enspace-sdk-schemas': 0.14.0
-      '@be-enlighten/enspace-sdk-vue': 0.14.0(17f76a1fc27812849bd6c3efea761b6d)
+      '@be-enlighten/enspace-sdk-core': 0.17.0
+      '@be-enlighten/enspace-sdk-schemas': 0.17.0
+      '@be-enlighten/enspace-sdk-vue': 0.17.0(17f76a1fc27812849bd6c3efea761b6d)
       '@nuxt/ui': 4.11.1(dbbeeb919cc800eb497b4dc5bbbfa495)
       '@tanstack/vue-table': 8.21.3(vue@3.5.42(typescript@7.0.2))
       '@vueuse/core': 14.4.0(vue@3.5.42(typescript@7.0.2))
@@ -5103,9 +5103,9 @@ snapshots:
       nuxt: 4.5.2(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7))(@oxc-project/types@0.149.0)(@pinia/colada@1.4.5(pinia@4.0.3(@vue/devtools-api@8.2.1)(typescript@7.0.2)(vue@3.5.42(typescript@7.0.2)))(vue@3.5.42(typescript@7.0.2)))(@vue/compiler-sfc@3.5.42)(db0@0.3.4)(esbuild@0.28.2)(ioredis@5.11.1)(lightningcss@1.33.0)(magicast@0.5.5)(pinia@4.0.3(@vue/devtools-api@8.2.1)(typescript@7.0.2)(vue@3.5.42(typescript@7.0.2)))(rolldown@1.2.8)(rollup-plugin-visualizer@7.1.1(rolldown@1.2.8)(rollup@4.63.3))(rollup@4.63.3)(srvx@0.11.22)(terser@5.51.2)(typescript@7.0.2)(vite@8.3.0(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2))
       pinia: 4.0.3(@vue/devtools-api@8.2.1)(typescript@7.0.2)(vue@3.5.42(typescript@7.0.2))
 
-  '@be-enlighten/enspace-sdk-vue@0.14.0(17f76a1fc27812849bd6c3efea761b6d)':
+  '@be-enlighten/enspace-sdk-vue@0.17.0(17f76a1fc27812849bd6c3efea761b6d)':
     dependencies:
-      '@be-enlighten/enspace-sdk-core': 0.14.0
+      '@be-enlighten/enspace-sdk-core': 0.17.0
       '@pinia/colada-nuxt': 1.2.0(@pinia/colada@1.4.5(pinia@4.0.3(@vue/devtools-api@8.2.1)(typescript@7.0.2)(vue@3.5.42(typescript@7.0.2)))(vue@3.5.42(typescript@7.0.2)))(magic-string@1.4.1)(magicast@0.5.5)(rolldown@1.2.8)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.8)(rollup@4.63.3)(vite@8.3.0(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)))
       '@pinia/nuxt': 1.0.2(magic-string@1.4.1)(magicast@0.5.5)(pinia@4.0.3(@vue/devtools-api@8.2.1)(typescript@7.0.2)(vue@3.5.42(typescript@7.0.2)))(rolldown@1.2.8)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.8)(rollup@4.63.3)(vite@8.3.0(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)))
       keycloak-js: 26.2.4
@@ -5121,8 +5121,8 @@ snapshots:
       - magic-string
       - magicast
       - oxc-parser
-      - pusher-js
       - rolldown
+      - socket.io-client
       - unplugin
 
   '@bomb.sh/tab@0.0.19(citty@0.2.2)':
