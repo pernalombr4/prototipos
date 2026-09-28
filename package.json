@@ -19,13 +19,13 @@
     "@be-enlighten/enspace-sdk-schemas": "^0.17.0",
     "@be-enlighten/enspace-sdk-ui": "^0.17.0",
     "@be-enlighten/enspace-sdk-vue": "^0.17.0",
-    "@iconify-json/lucide": "^1.2.96",
-    "@iconify-json/simple-icons": "^1.2.0",
+    "@iconify-json/lucide": "^1.2.136",
+    "@iconify-json/simple-icons": "^1.2.97",
     "@nuxt/ui": "^4.5.1",
     "@tanstack/vue-table": "^8.21.3",
     "@unovis/ts": "^1.7.0",
     "@unovis/vue": "^1.7.0",
-    "marked": "^18.0.13",
+    "marked": "^18.0.14",
     "nuxt": "^4.4.2"
   },
   "packageManager": "pnpm@10.6.5"
