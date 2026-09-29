@@ -74,13 +74,50 @@ export interface No {
   viraPasta?: boolean
 }
 
-export type Menu = 'hoje' | 'a' | 'b'
-export const menus: Menu[] = ['hoje', 'a', 'b']
+export type Menu = 'hoje' | 'a' | 'b' | 'c'
+export const menus: Menu[] = ['hoje', 'a', 'b', 'c']
+
+/* ------------------------------------------------------------------ *
+ * C · COMBINADA: a ordem da A com o mapa da B                         *
+ *                                                                     *
+ * A barra é a da A. Muda 1 coisa: a página "Seções de menu" sai de    *
+ * "Comece aqui", sobe para a raiz, logo abaixo de Boas-vindas, e vira *
+ * o "Mapa do menu": o menu lateral do ENSPACE desenhado na página,    *
+ * com cada item levando à página dele. É a sugestão do PESQUISA.md    *
+ * ("o espelho do menu como página de índice").                        *
+ * ------------------------------------------------------------------ */
+
+/** A página que vira o mapa. Na A ela é "Seções de menu", dentro de "Comece aqui". */
+export const paginaDoMapa = '5.Workspace/4.Sections/1.index'
+
+function paraC(nos: No[]): No[] {
+  return nos.map(n => ({ ...n, id: n.id.replace(/^a:/, 'c:'), filhos: n.filhos ? paraC(n.filhos) : n.filhos }))
+}
+
+function montarC(): No[] {
+  const base = paraC(arvoreA)
+  const comeceAqui = base.find(n => n.pagina === 'novo:comece-aqui')
+  if (comeceAqui?.filhos) comeceAqui.filhos = comeceAqui.filhos.filter(n => n.pagina !== paginaDoMapa)
+  const mapa: No = {
+    id: 'c:mapa',
+    tipo: 'pasta',
+    pagina: paginaDoMapa,
+    slug: 'menu-map',
+    rotulo: { pt: 'Mapa do menu', en: 'Menu map', es: 'Mapa del menú' },
+    icone: 'i-lucide-map',
+    filhos: [],
+    viraPasta: true,
+  }
+  return [base[0]!, mapa, ...base.slice(1)]
+}
+
+export const arvoreC = montarC()
 
 export const arvores: Record<Menu, No[]> = {
   hoje: arvoreDeHoje,
   a: arvoreA,
   b: arvoreB,
+  c: arvoreC,
 }
 
 export const paginas = new Map(paginasDaDoc.map(p => [p.id, p]))
@@ -184,3 +221,116 @@ export const tarefas: { chave: ChaveDeTarefa, alvo: string }[] = [
 
 /** A página que abre ao entrar e ao começar uma tarefa. */
 export const paginaInicial = '1.home'
+
+/* ------------------------------------------------------------------ *
+ * O MAPA DO MENU (proposta C)                                         *
+ *                                                                     *
+ * O menu lateral do ENSPACE, na ordem e com os ícones de lá (a mesma  *
+ * captura da B: protótipo `menu-lateral`, develop, 16/09/2026, e o    *
+ * print da Mikaela, 29/09/2026). Só os submenus que o produto tem     *
+ * aparecem abertos. O nome de cada item é o título da página na doc,  *
+ * menos "Agendadas" e "Rápidas", que são os nomes do submenu.         *
+ * ------------------------------------------------------------------ */
+
+export interface ItemDoMapa {
+  pagina: string
+  icone?: string
+  rotulo?: PorLingua<string>
+  filhos?: ItemDoMapa[]
+}
+
+export interface BlocoDoMapa {
+  chave: 'membro' | 'configuracoes' | 'ajuda' | 'perfil'
+  itens: ItemDoMapa[]
+}
+
+const EMAILS = `${ST}/07.Emails`
+const INTERFACE = `${ST}/06.Interface`
+
+export const mapaDoMenu: BlocoDoMapa[] = [
+  {
+    chave: 'membro',
+    itens: [
+      { pagina: `${S}/2.Member/2.Home`, icone: 'i-lucide-house' },
+      { pagina: `${S}/2.Member/3.Spaceflows`, icone: 'i-lucide-workflow' },
+      { pagina: `${S}/2.Member/4.Types/1.index`, icone: 'i-lucide-layout-grid' },
+      {
+        pagina: `${S}/2.Member/5.Tasks/1.index`,
+        icone: 'i-lucide-list-checks',
+        filhos: [
+          { pagina: `${S}/2.Member/5.Tasks/3.Scheduled`, rotulo: { pt: 'Agendadas', en: 'Scheduled', es: 'Programadas' } },
+          { pagina: `${S}/2.Member/5.Tasks/2.Quick`, rotulo: { pt: 'Rápidas', en: 'Quick', es: 'Rápidas' } },
+        ],
+      },
+      { pagina: `${S}/2.Member/6.Schedule/1.index`, icone: 'i-lucide-calendar' },
+    ],
+  },
+  {
+    chave: 'configuracoes',
+    itens: [
+      { pagina: `${ST}/02.Overview`, icone: 'i-lucide-gauge' },
+      { pagina: `${ST}/03.System/1.index`, icone: 'i-lucide-settings' },
+      {
+        pagina: `${ST}/04.Structure/1.index`,
+        icone: 'i-lucide-database',
+        filhos: [
+          { pagina: `${TY}/01.index` },
+          { pagina: `${ST}/04.Structure/3.Lists/1.index` },
+          { pagina: `${ST}/04.Structure/4.Spaceflow/1.index` },
+        ],
+      },
+      { pagina: `${ST}/05.Access/1.index`, icone: 'i-lucide-id-card' },
+      {
+        pagina: `${INTERFACE}/1.index`,
+        icone: 'i-lucide-compass',
+        filhos: [{ pagina: `${INTERFACE}/2.Menus` }, { pagina: `${INTERFACE}/3.Screens` }, { pagina: `${INTERFACE}/4.UseCases` }],
+      },
+      {
+        pagina: `${EMAILS}/1.index`,
+        icone: 'i-lucide-mail',
+        filhos: [{ pagina: `${EMAILS}/2.Sent Emails` }, { pagina: `${EMAILS}/3.Email Templates` }, { pagina: `${EMAILS}/4.Email Boxes` }],
+      },
+      { pagina: `${IN}/1.index`, icone: 'i-lucide-link' },
+      { pagina: `${ST}/09.AI Agents`, icone: 'i-lucide-cpu' },
+      { pagina: `${ST}/10.Logs/1.index`, icone: 'i-lucide-activity' },
+      { pagina: `${ST}/11.Credentials`, icone: 'i-lucide-key-round' },
+    ],
+  },
+  {
+    chave: 'ajuda',
+    itens: [
+      { pagina: `${S}/4.Help/2.BENI AI`, icone: 'i-lucide-bot' },
+      { pagina: `${S}/4.Help/3.Releases`, icone: 'i-lucide-copy' },
+      { pagina: `${S}/4.Help/4.Documentation`, icone: 'i-lucide-book-open' },
+      { pagina: `${S}/4.Help/5.Beni Builder`, icone: 'i-lucide-hammer' },
+    ],
+  },
+  {
+    chave: 'perfil',
+    itens: [
+      { pagina: '4.User/2.Profile', icone: 'i-lucide-user-round' },
+      { pagina: '4.User/3.Billing', icone: 'i-lucide-receipt' },
+      { pagina: '4.User/4.Integrations', icone: 'i-lucide-plug' },
+      { pagina: '4.User/5.Developer', icone: 'i-lucide-code' },
+      { pagina: '4.User/6.Lab', icone: 'i-lucide-flask-conical' },
+      { pagina: '4.User/7.Profile Security', icone: 'i-lucide-shield' },
+      { pagina: '4.User/8.Notifications', icone: 'i-lucide-bell' },
+    ],
+  },
+]
+
+const paginasDoMapa = new Set(
+  mapaDoMenu.flatMap(b => b.itens.flatMap(i => [i.pagina, ...(i.filhos ?? []).map(f => f.pagina)])),
+)
+
+/**
+ * O caminho mais curto pelo mapa, na C: 1 clique para abrir o mapa, 1 no item
+ * do mapa que é a página ou a pasta mais funda acima dela, e 1 por nível daí
+ * para baixo, pelos cartões de "Nesta seção". Página fora do mapa devolve null.
+ */
+export function cliquesPeloMapa(paginaId: string): number | null {
+  const caminho = caminhoAte(arvoreC, paginaId)
+  let ultimo = -1
+  caminho.forEach((no, i) => { if (no.pagina && paginasDoMapa.has(no.pagina)) ultimo = i })
+  return ultimo < 0 ? null : 2 + (caminho.length - 1 - ultimo)
+}

@@ -19,15 +19,20 @@
  * vizinho usava 3/6/3; aqui vale a medida, porque o corte dos nomes da barra
  * depende da largura dela.
  *
- * `ladoALado` é andaime: abre espaço para 3 barras juntas e tira o sumário.
+ * `barras` é andaime: com 2 ou 3 barras lado a lado, abre espaço para elas e tira o
+ * sumário.
  */
 import logoEnspace from './enspace.svg'
 import type { Textos } from './textos'
 
-defineProps<{
+const props = defineProps<{
   t: Textos
-  ladoALado?: boolean
+  /** Quantas barras aparecem juntas (andaime do lado a lado). */
+  barras?: 1 | 2 | 3
 }>()
+
+const larguraDaBarra = { 1: 'lg:col-span-2 lg:w-[calc(100%+20px)] lg:pr-5', 2: 'lg:col-span-4', 3: 'lg:col-span-6' } as const
+const larguraDoCentro = { 1: 'lg:col-span-8', 2: 'lg:col-span-6', 3: 'lg:col-span-4' } as const
 
 const tema = useColorMode()
 const idioma = useIdioma()
@@ -182,19 +187,19 @@ const links: { chave: 'docs' | 'dev' | 'blog' | 'releases', icone: string }[] = 
         <div class="flex flex-col pb-40 lg:grid lg:grid-cols-10 lg:gap-10">
           <aside
             class="hidden pt-14 lg:block"
-            :class="ladoALado ? 'lg:col-span-6' : 'lg:col-span-2 lg:w-[calc(100%+20px)] lg:pr-5'"
+            :class="larguraDaBarra[props.barras ?? 1]"
           >
             <div class="lg:sticky lg:top-(--ui-header-height) lg:-ms-4 lg:max-h-[calc(100dvh-var(--ui-header-height))] lg:overflow-y-auto lg:overflow-x-hidden lg:pb-24 lg:ps-4 lg:pe-1">
               <slot name="menu" />
             </div>
           </aside>
 
-          <div :class="ladoALado ? 'lg:col-span-4' : 'lg:col-span-8'">
+          <div :class="larguraDoCentro[props.barras ?? 1]">
             <div class="flex flex-col lg:grid lg:grid-cols-12 lg:gap-8">
-              <div :class="ladoALado ? 'lg:col-span-12' : 'lg:col-span-9'">
+              <div :class="(props.barras ?? 1) > 1 ? 'lg:col-span-12' : 'lg:col-span-9'">
                 <slot />
               </div>
-              <div v-if="!ladoALado" class="hidden lg:col-span-3 lg:block">
+              <div v-if="(props.barras ?? 1) === 1" class="hidden lg:col-span-3 lg:block">
                 <div class="lg:sticky lg:top-[calc(var(--ui-header-height)+23px)] lg:pt-14">
                   <slot name="sumario" />
                 </div>

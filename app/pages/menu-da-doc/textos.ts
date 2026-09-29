@@ -51,9 +51,20 @@ export interface Textos {
     paginaNovaTexto: string
   }
 
+  /** O mapa do menu da proposta C. */
+  mapa: {
+    titulo: string
+    ajuda: string
+    blocos: Record<'membro' | 'configuracoes' | 'ajuda' | 'perfil', string>
+    chamadaTitulo: string
+    chamadaTexto: string
+    chamadaAcao: string
+  }
+
   andaime: {
     menu: string
     ladoALado: string
+    comparar: string
     tarefa: string
     semTarefa: string
     estado: string
@@ -68,6 +79,7 @@ export interface Textos {
     ache: string
     cliques: (n: number) => string
     caminhoMaisCurto: (n: number) => string
+    peloMapa: (n: number) => string
     achou: (n: number) => string
     procurando: string
     recomecar: string
@@ -104,11 +116,12 @@ export const textos: Record<Idioma, Textos> = {
       menuDaDoc: 'Menu da documentação',
       status: { published: 'publicado', updated: 'atualizado', draft: 'rascunho', deprecated: 'descontinuado' },
     },
-    menus: { hoje: 'Hoje', a: 'A · Para leigo', b: 'B · Espelho do ENSPACE' },
+    menus: { hoje: 'Hoje', a: 'A · Para leigo', b: 'B · Espelho do ENSPACE', c: 'C · Combinada' },
     resumos: {
       hoje: 'O menu do site, como está.',
       a: 'Primeiro nível pelo uso, com as palavras da tela.',
       b: 'O menu do ENSPACE, com os mesmos títulos fixos.',
+      c: 'A ordem da A, com o mapa do menu do ENSPACE.',
     },
     proposta: {
       trilha: 'Trilha de navegação',
@@ -120,9 +133,18 @@ export const textos: Record<Idioma, Textos> = {
       paginaNova: 'Página nova',
       paginaNovaTexto: 'Hoje este grupo não tem página própria. A proposta cria o índice abaixo.',
     },
+    mapa: {
+      titulo: 'O menu lateral do ENSPACE',
+      ajuda: 'Clique no item que você vê na tela do ENSPACE para abrir a página dele.',
+      blocos: { membro: 'Membro', configuracoes: 'Configurações', ajuda: 'Ajuda', perfil: 'Menu do perfil' },
+      chamadaTitulo: 'Está numa tela do ENSPACE?',
+      chamadaTexto: 'Abra o mapa do menu e clique no item que você vê na tela.',
+      chamadaAcao: 'Abrir o mapa do menu',
+    },
     andaime: {
       menu: 'Menu',
       ladoALado: 'Lado a lado',
+      comparar: 'Comparar',
       tarefa: 'Tarefa',
       semTarefa: 'Sem tarefa',
       estado: 'Estado',
@@ -143,7 +165,8 @@ export const textos: Record<Idioma, Textos> = {
     teste: {
       ache: 'Ache',
       cliques: n => (n === 1 ? '1 clique' : `${n} cliques`),
-      caminhoMaisCurto: n => `Caminho mais curto: ${n === 1 ? '1 clique' : `${n} cliques`}`,
+      caminhoMaisCurto: n => `Pela barra: ${n === 1 ? '1 clique' : `${n} cliques`}`,
+      peloMapa: n => `Pelo mapa: ${n === 1 ? '1 clique' : `${n} cliques`}`,
       achou: n => `Achou em ${n === 1 ? '1 clique' : `${n} cliques`}`,
       procurando: 'Procurando',
       recomecar: 'Recomeçar',
@@ -178,11 +201,12 @@ export const textos: Record<Idioma, Textos> = {
       menuDaDoc: 'Documentation menu',
       status: { published: 'published', updated: 'updated', draft: 'draft', deprecated: 'deprecated' },
     },
-    menus: { hoje: 'Today', a: 'A · For beginners', b: 'B · ENSPACE mirror' },
+    menus: { hoje: 'Today', a: 'A · For beginners', b: 'B · ENSPACE mirror', c: 'C · Combined' },
     resumos: {
       hoje: 'The site menu, as it is.',
       a: 'First level by use, with the words on screen.',
       b: 'The ENSPACE menu, with the same fixed headings.',
+      c: 'The order of A, with the ENSPACE menu map.',
     },
     proposta: {
       trilha: 'Breadcrumb',
@@ -194,9 +218,18 @@ export const textos: Record<Idioma, Textos> = {
       paginaNova: 'New page',
       paginaNovaTexto: 'Today this group has no page of its own. The proposal creates the index below.',
     },
+    mapa: {
+      titulo: 'The ENSPACE side menu',
+      ajuda: 'Click the item you see on the ENSPACE screen to open its page.',
+      blocos: { membro: 'Member', configuracoes: 'Settings', ajuda: 'Help', perfil: 'Profile menu' },
+      chamadaTitulo: 'Are you on an ENSPACE screen?',
+      chamadaTexto: 'Open the menu map and click the item you see on screen.',
+      chamadaAcao: 'Open the menu map',
+    },
     andaime: {
       menu: 'Menu',
       ladoALado: 'Side by side',
+      comparar: 'Compare',
       tarefa: 'Task',
       semTarefa: 'No task',
       estado: 'State',
@@ -217,7 +250,8 @@ export const textos: Record<Idioma, Textos> = {
     teste: {
       ache: 'Find',
       cliques: n => (n === 1 ? '1 click' : `${n} clicks`),
-      caminhoMaisCurto: n => `Shortest path: ${n === 1 ? '1 click' : `${n} clicks`}`,
+      caminhoMaisCurto: n => `Via the menu: ${n === 1 ? '1 click' : `${n} clicks`}`,
+      peloMapa: n => `Via the map: ${n === 1 ? '1 click' : `${n} clicks`}`,
       achou: n => `Found in ${n === 1 ? '1 click' : `${n} clicks`}`,
       procurando: 'Searching',
       recomecar: 'Start over',
@@ -252,11 +286,12 @@ export const textos: Record<Idioma, Textos> = {
       menuDaDoc: 'Menú de la documentación',
       status: { published: 'publicado', updated: 'actualizado', draft: 'borrador', deprecated: 'descontinuado' },
     },
-    menus: { hoje: 'Hoy', a: 'A · Para principiantes', b: 'B · Espejo de ENSPACE' },
+    menus: { hoje: 'Hoy', a: 'A · Para principiantes', b: 'B · Espejo de ENSPACE', c: 'C · Combinada' },
     resumos: {
       hoje: 'El menú del sitio, tal como está.',
       a: 'Primer nivel por uso, con las palabras de la pantalla.',
       b: 'El menú de ENSPACE, con los mismos títulos fijos.',
+      c: 'El orden de A, con el mapa del menú de ENSPACE.',
     },
     proposta: {
       trilha: 'Ruta de navegación',
@@ -268,9 +303,18 @@ export const textos: Record<Idioma, Textos> = {
       paginaNova: 'Página nueva',
       paginaNovaTexto: 'Hoy este grupo no tiene página propia. La propuesta crea el índice de abajo.',
     },
+    mapa: {
+      titulo: 'El menú lateral de ENSPACE',
+      ajuda: 'Haz clic en el elemento que ves en la pantalla de ENSPACE para abrir su página.',
+      blocos: { membro: 'Miembro', configuracoes: 'Configuración', ajuda: 'Ayuda', perfil: 'Menú del perfil' },
+      chamadaTitulo: '¿Estás en una pantalla de ENSPACE?',
+      chamadaTexto: 'Abre el mapa del menú y haz clic en el elemento que ves en la pantalla.',
+      chamadaAcao: 'Abrir el mapa del menú',
+    },
     andaime: {
       menu: 'Menú',
       ladoALado: 'Lado a lado',
+      comparar: 'Comparar',
       tarefa: 'Tarea',
       semTarefa: 'Sin tarea',
       estado: 'Estado',
@@ -291,7 +335,8 @@ export const textos: Record<Idioma, Textos> = {
     teste: {
       ache: 'Encuentra',
       cliques: n => (n === 1 ? '1 clic' : `${n} clics`),
-      caminhoMaisCurto: n => `Camino más corto: ${n === 1 ? '1 clic' : `${n} clics`}`,
+      caminhoMaisCurto: n => `Por el menú: ${n === 1 ? '1 clic' : `${n} clics`}`,
+      peloMapa: n => `Por el mapa: ${n === 1 ? '1 clic' : `${n} clics`}`,
       achou: n => `Encontrado en ${n === 1 ? '1 clic' : `${n} clics`}`,
       procurando: 'Buscando',
       recomecar: 'Empezar de nuevo',

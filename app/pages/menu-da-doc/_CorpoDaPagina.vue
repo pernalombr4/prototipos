@@ -165,6 +165,9 @@ function larguras(i: number) {
 
     <USeparator class="my-8" />
 
+    <!-- Espaço para o que só uma proposta mostra (o mapa da C, por exemplo). -->
+    <slot name="extra" />
+
     <!-- Página nova: o índice que a proposta cria -->
     <p v-if="pagina.nova" class="mb-6 max-w-prose text-base text-toned">
       {{ t.proposta.paginaNovaTexto }}
