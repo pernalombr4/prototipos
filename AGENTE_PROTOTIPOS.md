@@ -288,6 +288,25 @@ no `DECISOES.md` — inclusive o que você escolheu não corrigir.
 Cada rodada de pedido dela é **uma entrada** no `DECISOES.md`, com data, o que ela pediu (de
 novo, literal), o que mudou, e o que foi descartado com o motivo.
 
+**Formato da entrada, a partir de 2026-09-29** (decisão da redatora: o que ela lê tem de dar para ler
+de passagem). Entrada nova segue este esqueleto, uma ideia por linha; campo sem conteúdo fica fora:
+
+```markdown
+## Rodada <N> · <AAAA-MM-DD>
+- **Pedido (literal):** "<o que ela pediu>"
+- **Mudou:** <uma linha por mudança>
+- **Fronteira:** muda <…>; não muda <…>
+- **Descartado:** <o quê>. Motivo: <motivo>
+- **Não deu:** <o que não foi possível fazer>. Por quê: <…>
+- **Maquete:** <o que é estático ou fica em localStorage nesta rodada>
+- **Crítica e acessibilidade:** <achados das duas skills, inclusive o que ficou sem correção e por quê>
+- **Ver:** <link> · <print>
+```
+
+O histórico da depuração (tentativas, medições intermediárias, "da terceira vez…") não entra no
+`DECISOES.md`: o que ficou decidido entra; como se chegou lá fica no commit. Sem muleta ("na prática",
+"vale notar"), sem figura de linguagem e sem narrar o processo. Entradas antigas ficam como estão.
+
 - **Não apague a versão anterior sem registro.** Mudança grande nasce como tela nova ao lado
   (`index-v2.vue`) até ela escolher; aí a antiga sai num commit só seu.
 - **Um commit por rodada**, mensagem `[PROTO] <slug> — rodada N — <o que mudou>`.
