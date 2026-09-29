@@ -1,0 +1,308 @@
+/**
+ * A copy desta tela nos 3 idiomas.
+ *
+ * Os rótulos da casca (Docs, Dev, Blog, Releases, Entrar, Nesta página, Copiar
+ * texto, os status) são os do `en-docs`, os mesmos que o protótipo
+ * `seletor-de-produto-na-doc` copiou de `i18n/lang/{pt,en,es}.yaml`. O botão de
+ * busca diz "Search…" nos 3 idiomas porque é assim no site hoje.
+ *
+ * Os títulos das páginas NÃO estão aqui: vêm do `paginas.ts`, extraído da
+ * própria documentação.
+ *
+ * Regra 33: nenhum texto de interface leva travessão.
+ */
+import type { Idioma } from '~/composables/useIdioma'
+import type { ChaveDeTarefa, Menu } from './mocks'
+
+export interface Textos {
+  casca: {
+    docs: string
+    dev: string
+    blog: string
+    releases: string
+    entrar: string
+    abrirMenu: string
+    irParaInicio: string
+    alternarTema: string
+    idioma: string
+    nestaPagina: string
+    copiarTexto: string
+    copiado: string
+    perguntarBeni: string
+    abrirNoChatGpt: string
+    busca: string
+    menuDaDoc: string
+    status: Record<'published' | 'updated' | 'draft' | 'deprecated', string>
+  }
+
+  /** O nome curto de cada menu, no alternador e no cabeçalho do lado a lado. */
+  menus: Record<Menu, string>
+  /** Uma linha sobre cada menu, no alternador. */
+  resumos: Record<Menu, string>
+
+  proposta: {
+    trilha: string
+    tambemAparece: string
+    nestaSecao: string
+    abrir: (nome: string) => string
+    fechar: (nome: string) => string
+    semTraducao: string
+    paginaNova: string
+    paginaNovaTexto: string
+  }
+
+  andaime: {
+    menu: string
+    ladoALado: string
+    tarefa: string
+    semTarefa: string
+    estado: string
+    estados: Record<'cheio' | 'carregando' | 'erro', string>
+    endereco: string
+    porTras: string
+  }
+
+  tarefas: Record<ChaveDeTarefa, string>
+
+  teste: {
+    ache: string
+    cliques: (n: number) => string
+    caminhoMaisCurto: (n: number) => string
+    achou: (n: number) => string
+    procurando: string
+    recomecar: string
+    proxima: string
+    fechar: string
+  }
+
+  estados: {
+    carregando: string
+    erroTitulo: string
+    erroTexto: string
+    erroAcao: string
+  }
+}
+
+export const textos: Record<Idioma, Textos> = {
+  'pt-BR': {
+    casca: {
+      docs: 'Docs',
+      dev: 'Dev',
+      blog: 'Blog',
+      releases: 'Releases',
+      entrar: 'Entrar',
+      abrirMenu: 'Abrir o menu',
+      irParaInicio: 'Ir para o início da documentação',
+      alternarTema: 'Alternar o tema',
+      idioma: 'Idioma',
+      nestaPagina: 'Nesta página',
+      copiarTexto: 'Copiar texto',
+      copiado: 'Copiado!',
+      perguntarBeni: 'Perguntar ao BENI (em breve)',
+      abrirNoChatGpt: 'Abrir no ChatGPT',
+      busca: 'Search…',
+      menuDaDoc: 'Menu da documentação',
+      status: { published: 'publicado', updated: 'atualizado', draft: 'rascunho', deprecated: 'descontinuado' },
+    },
+    menus: { hoje: 'Hoje', a: 'A · Para leigo', b: 'B · Espelho do ENSPACE' },
+    resumos: {
+      hoje: 'O menu do site, como está.',
+      a: 'Primeiro nível pelo uso, com as palavras da tela.',
+      b: 'O menu do ENSPACE, com os mesmos títulos fixos.',
+    },
+    proposta: {
+      trilha: 'Trilha de navegação',
+      tambemAparece: 'Este assunto também aparece em',
+      nestaSecao: 'Nesta seção',
+      abrir: nome => `Abrir ${nome}`,
+      fechar: nome => `Fechar ${nome}`,
+      semTraducao: 'Esta página ainda não tem tradução. O texto aparece em português.',
+      paginaNova: 'Página nova',
+      paginaNovaTexto: 'Hoje este grupo não tem página própria. A proposta cria o índice abaixo.',
+    },
+    andaime: {
+      menu: 'Menu',
+      ladoALado: 'Lado a lado',
+      tarefa: 'Tarefa',
+      semTarefa: 'Sem tarefa',
+      estado: 'Estado',
+      estados: { cheio: 'Cheio', carregando: 'Carregando', erro: 'Erro' },
+      endereco: 'Endereço',
+      porTras: 'Por trás',
+    },
+    tarefas: {
+      booleano: 'Configurar um campo de sim ou não',
+      tarefasRapidas: 'Ver as suas tarefas rápidas',
+      ausencia: 'Registrar as férias de um colega',
+      clicksign: 'Conectar a Clicksign ao ENSPACE',
+      credencial: 'Guardar uma chave de API de outro sistema',
+      senha: 'Trocar a sua senha',
+      expressao: 'Escrever uma regra do tipo "se isto, então aquilo"',
+      aprovacao: 'Pedir aprovação dentro de uma automação',
+    },
+    teste: {
+      ache: 'Ache',
+      cliques: n => (n === 1 ? '1 clique' : `${n} cliques`),
+      caminhoMaisCurto: n => `Caminho mais curto: ${n === 1 ? '1 clique' : `${n} cliques`}`,
+      achou: n => `Achou em ${n === 1 ? '1 clique' : `${n} cliques`}`,
+      procurando: 'Procurando',
+      recomecar: 'Recomeçar',
+      proxima: 'Próxima tarefa',
+      fechar: 'Encerrar a tarefa',
+    },
+    estados: {
+      carregando: 'Carregando o menu',
+      erroTitulo: 'O menu não carregou',
+      erroTexto: 'A página continua aqui. Tente carregar o menu de novo.',
+      erroAcao: 'Tentar de novo',
+    },
+  },
+
+  'en': {
+    casca: {
+      docs: 'Docs',
+      dev: 'Dev',
+      blog: 'Blog',
+      releases: 'Releases',
+      entrar: 'Login',
+      abrirMenu: 'Open the menu',
+      irParaInicio: 'Go to the start of the documentation',
+      alternarTema: 'Toggle the theme',
+      idioma: 'Language',
+      nestaPagina: 'On this page',
+      copiarTexto: 'Copy page text',
+      copiado: 'Copied!',
+      perguntarBeni: 'Ask BENI (coming soon)',
+      abrirNoChatGpt: 'Open in ChatGPT',
+      busca: 'Search…',
+      menuDaDoc: 'Documentation menu',
+      status: { published: 'published', updated: 'updated', draft: 'draft', deprecated: 'deprecated' },
+    },
+    menus: { hoje: 'Today', a: 'A · For beginners', b: 'B · ENSPACE mirror' },
+    resumos: {
+      hoje: 'The site menu, as it is.',
+      a: 'First level by use, with the words on screen.',
+      b: 'The ENSPACE menu, with the same fixed headings.',
+    },
+    proposta: {
+      trilha: 'Breadcrumb',
+      tambemAparece: 'This topic also appears in',
+      nestaSecao: 'In this section',
+      abrir: nome => `Open ${nome}`,
+      fechar: nome => `Close ${nome}`,
+      semTraducao: 'This page is not translated yet. The text is shown in Portuguese.',
+      paginaNova: 'New page',
+      paginaNovaTexto: 'Today this group has no page of its own. The proposal creates the index below.',
+    },
+    andaime: {
+      menu: 'Menu',
+      ladoALado: 'Side by side',
+      tarefa: 'Task',
+      semTarefa: 'No task',
+      estado: 'State',
+      estados: { cheio: 'Full', carregando: 'Loading', erro: 'Error' },
+      endereco: 'Address',
+      porTras: 'Behind it',
+    },
+    tarefas: {
+      booleano: 'Set up a yes or no field',
+      tarefasRapidas: 'See your quick tasks',
+      ausencia: 'Record a coworker\'s vacation',
+      clicksign: 'Connect Clicksign to ENSPACE',
+      credencial: 'Store an API key from another system',
+      senha: 'Change your password',
+      expressao: 'Write an "if this, then that" rule',
+      aprovacao: 'Ask for approval inside an automation',
+    },
+    teste: {
+      ache: 'Find',
+      cliques: n => (n === 1 ? '1 click' : `${n} clicks`),
+      caminhoMaisCurto: n => `Shortest path: ${n === 1 ? '1 click' : `${n} clicks`}`,
+      achou: n => `Found in ${n === 1 ? '1 click' : `${n} clicks`}`,
+      procurando: 'Searching',
+      recomecar: 'Start over',
+      proxima: 'Next task',
+      fechar: 'End the task',
+    },
+    estados: {
+      carregando: 'Loading the menu',
+      erroTitulo: 'The menu did not load',
+      erroTexto: 'The page is still here. Try loading the menu again.',
+      erroAcao: 'Try again',
+    },
+  },
+
+  'es': {
+    casca: {
+      docs: 'Docs',
+      dev: 'Dev',
+      blog: 'Blog',
+      releases: 'Releases',
+      entrar: 'Acceso',
+      abrirMenu: 'Abrir el menú',
+      irParaInicio: 'Ir al inicio de la documentación',
+      alternarTema: 'Cambiar el tema',
+      idioma: 'Idioma',
+      nestaPagina: 'En esta página',
+      copiarTexto: 'Copiar texto',
+      copiado: '¡Copiado!',
+      perguntarBeni: 'Preguntar a BENI (muy pronto)',
+      abrirNoChatGpt: 'Abrir en ChatGPT',
+      busca: 'Search…',
+      menuDaDoc: 'Menú de la documentación',
+      status: { published: 'publicado', updated: 'actualizado', draft: 'borrador', deprecated: 'descontinuado' },
+    },
+    menus: { hoje: 'Hoy', a: 'A · Para principiantes', b: 'B · Espejo de ENSPACE' },
+    resumos: {
+      hoje: 'El menú del sitio, tal como está.',
+      a: 'Primer nivel por uso, con las palabras de la pantalla.',
+      b: 'El menú de ENSPACE, con los mismos títulos fijos.',
+    },
+    proposta: {
+      trilha: 'Ruta de navegación',
+      tambemAparece: 'Este tema también aparece en',
+      nestaSecao: 'En esta sección',
+      abrir: nome => `Abrir ${nome}`,
+      fechar: nome => `Cerrar ${nome}`,
+      semTraducao: 'Esta página todavía no tiene traducción. El texto aparece en portugués.',
+      paginaNova: 'Página nueva',
+      paginaNovaTexto: 'Hoy este grupo no tiene página propia. La propuesta crea el índice de abajo.',
+    },
+    andaime: {
+      menu: 'Menú',
+      ladoALado: 'Lado a lado',
+      tarefa: 'Tarea',
+      semTarefa: 'Sin tarea',
+      estado: 'Estado',
+      estados: { cheio: 'Lleno', carregando: 'Cargando', erro: 'Error' },
+      endereco: 'Dirección',
+      porTras: 'Detrás',
+    },
+    tarefas: {
+      booleano: 'Configurar un campo de sí o no',
+      tarefasRapidas: 'Ver tus tareas rápidas',
+      ausencia: 'Registrar las vacaciones de un compañero',
+      clicksign: 'Conectar Clicksign con ENSPACE',
+      credencial: 'Guardar una clave de API de otro sistema',
+      senha: 'Cambiar tu contraseña',
+      expressao: 'Escribir una regla del tipo "si esto, entonces aquello"',
+      aprovacao: 'Pedir aprobación dentro de una automatización',
+    },
+    teste: {
+      ache: 'Encuentra',
+      cliques: n => (n === 1 ? '1 clic' : `${n} clics`),
+      caminhoMaisCurto: n => `Camino más corto: ${n === 1 ? '1 clic' : `${n} clics`}`,
+      achou: n => `Encontrado en ${n === 1 ? '1 clic' : `${n} clics`}`,
+      procurando: 'Buscando',
+      recomecar: 'Empezar de nuevo',
+      proxima: 'Siguiente tarea',
+      fechar: 'Terminar la tarea',
+    },
+    estados: {
+      carregando: 'Cargando el menú',
+      erroTitulo: 'El menú no cargó',
+      erroTexto: 'La página sigue aquí. Intenta cargar el menú de nuevo.',
+      erroAcao: 'Intentar de nuevo',
+    },
+  },
+}
