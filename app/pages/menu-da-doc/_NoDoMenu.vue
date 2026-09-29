@@ -97,10 +97,10 @@ const itemBAtivo = 'bg-primary/10 font-medium text-primary'
   </li>
 
   <!-- ============================================================ -->
-  <!-- A e C: o mesmo componente do site, com as 4 mudanças          -->
+  <!-- A, C e D: o mesmo componente do site, com as 4 mudanças       -->
   <!-- ============================================================ -->
   <li
-    v-else-if="menu === 'a' || menu === 'c'"
+    v-else-if="menu === 'a' || menu === 'c' || menu === 'd'"
     class="flex flex-col"
     :style="entrada"
     :class="[nivel > 0 ? '-ms-px ps-1.5' : '', temFilhos && aberto ? 'mb-1.5' : '']"

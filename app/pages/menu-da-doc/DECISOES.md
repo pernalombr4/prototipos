@@ -1,25 +1,27 @@
 # Decisões: menu da documentação
 
-## As 3 propostas
+## As 4 propostas
 
-As 3 usam as mesmas 242 páginas. Muda onde cada página fica e como a barra se comporta.
+As 4 usam as mesmas páginas da documentação. Muda onde cada página fica e como a barra se comporta.
 
-| | A · Para leigo | B · Espelho do ENSPACE | C · Combinada |
-|---|---|---|---|
-| Primeiro nível | Pelo uso: Boas-vindas, Comece aqui, Membro, Configurações, Ajuda, Painel do Usuário, Workspace, Módulos, Ferramentas de IA, Limitações Conhecidas | Pelo lugar do produto, em títulos fixos: Comece aqui, Antes de entrar, Membro, Configurações, Ajuda, Menu do perfil, Em todas as telas, Referência | O da A, com "Mapa do menu" logo abaixo de Boas-vindas |
-| Seções do menu do produto | Pastas que recolhem | Títulos fixos, como no ENSPACE, com os itens, a ordem e os ícones de lá | Pastas que recolhem, como na A, e o menu do ENSPACE desenhado na página "Mapa do menu" |
-| Cliques até o Booleano | 6 | 5 | 6 pela barra; 5 pelo mapa |
-| Linhas da barra ao abrir | 10 | 48 | 11 |
-| Onde fica o que não está no menu do produto | Workspace (funções gerais), Módulos, Ferramentas de IA | Em títulos com o nome do lugar: Antes de entrar (entrada e workspaces), Menu do perfil, Em todas as telas (Recursos e Navegação), Referência | Como na A |
+| | A · Para leigo | B · Espelho do ENSPACE | C · Combinada | D · Até 4 níveis |
+|---|---|---|---|---|
+| Primeiro nível | Pelo uso: Boas-vindas, Comece aqui, Membro, Configurações, Ajuda, Painel do Usuário, Workspace, Módulos, Ferramentas de IA, Limitações Conhecidas | Pelo lugar do produto, em títulos fixos: Comece aqui, Antes de entrar, Membro, Configurações, Ajuda, Menu do perfil, Em todas as telas, Referência | O da A, com "Mapa do menu" logo abaixo de Boas-vindas | O da C, com "Referência" no lugar de Ferramentas de IA |
+| Seções do menu do produto | Pastas que recolhem | Títulos fixos, como no ENSPACE, com os itens, a ordem e os ícones de lá | Pastas que recolhem, como na A, e o menu do ENSPACE desenhado na página "Mapa do menu" | Como na C. As telas Campos e Spaceflow ficam sem filhos |
+| Nível máximo | 6 | 5 abaixo do título fixo | 6 | 4 |
+| Páginas com 5 níveis ou mais (hoje: 156) | 87 | 51 | 87 | 0 |
+| Cliques até o Booleano (hoje: 9) | 6 | 5 | 6 pela barra; 5 pelo mapa | 4 |
+| Linhas da barra ao abrir | 10 | 48 | 11 | 11 |
+| Onde fica o que não está no menu do produto | Workspace (funções gerais), Módulos, Ferramentas de IA | Em títulos com o nome do lugar: Antes de entrar (entrada e workspaces), Menu do perfil, Em todas as telas (Recursos e Navegação), Referência | Como na A | Como na A, mais os catálogos em Referência |
 
-**O que muda nas 3:**
+**O que muda nas 4:**
 
 1. **A barra abre no ramo da página atual.** No site, isso é a prop `default-open` do `UContentNavigation`, que o `docs.vue` não passa hoje.
 2. **A pasta abre a própria página índice.** A seta ao lado só abre e fecha. O índice deixa de aparecer como 1º filho com o mesmo nome da pasta.
 3. **A pasta que só tem o índice aparece como link**, sem seta.
 4. **O nome longo quebra linha** em vez de ser cortado.
-5. **Nenhuma página solta.** Página que dividia nível com pasta vira pasta com `1.index.md` (a URL não muda). São 34 na A e na C e 31 na B. Pasta que não tinha índice ganha um (17 páginas novas na A e na C e 16 na B, marcadas "Página nova").
-6. **"Opções" sai de Campos.** Seleção Única e Seleção Múltipla viram pastas irmãs, como o índice de Campos já lista. A página "Opções" vira seção do índice de Campos (fica fora das 3 árvores).
+5. **Nenhuma página solta.** Página que dividia nível com pasta vira pasta com `1.index.md` (a URL não muda). São 34 na A e na C e 31 na B; na D, as da C que ficaram. Pasta que não tinha índice ganha um (17 páginas novas na A e na C, 16 na B e 15 na D, marcadas "Página nova").
+6. **"Opções" sai de Campos.** Seleção Única e Seleção Múltipla viram pastas irmãs, como o índice de Campos já lista. A página "Opções" vira seção do índice de Campos (fica fora das 4 árvores).
 7. **Trilha de navegação** acima do título.
 8. **"Este assunto também aparece em"**, com o caminho de cada porta no menu escolhido. As páginas repetidas continuam: são portas de telas diferentes.
 9. **"Nesta seção"** na página índice: as páginas da pasta, 1 linha cada.
@@ -27,6 +29,13 @@ As 3 usam as mesmas 242 páginas. Muda onde cada página fica e como a barra se 
 **Só na B:** os títulos de seção não recolhem, e o clique no título abre o índice da seção. As tarefas de Membro ficam na ordem e com os nomes do submenu do produto: "Agendadas" e "Rápidas".
 
 **Só na C:** a página "Seções de menu" sai de "Comece aqui", sobe para a raiz, logo abaixo de Boas-vindas, e vira "Mapa do menu". A página mostra o menu lateral do ENSPACE (Membro, Configurações, Ajuda e Menu do perfil, com os submenus que o produto tem), e cada item abre a página dele. Boas-vindas ganha uma chamada para o mapa. É a combinação que o `PESQUISA.md` sugere: a ordem da A no primeiro nível e o espelho da B como página de índice.
+
+**Só na D:** a C com um teto de 4 níveis na barra. Página que passaria disso sai do espelho ou sobe:
+
+1. **Tipos de campo e nós do Spaceflow vão para "Referência"**, na raiz, com as famílias e os grupos como pasta. Ferramentas de IA vai junto. Eles não são itens do menu do ENSPACE: são opções dentro de uma tela (a escolha do tipo de campo e o painel "Adicionar Nó"). As telas Campos e Spaceflow ficam no espelho, sem filhos, e levam ao catálogo pela linha "Este assunto também aparece em". Eventos de Campo e Condições Especiais vão para o fim de "Tipos de campo".
+2. **Os grupos de Integrações saem** (Assinadores Digitais, Canais de Mensagem, E-mails, IA). Cada integração fica direto em Integrações.
+3. **Ações em Massa vira irmã de Ações em Itens**, porque é outra tela (o modal "Ações em Lote").
+4. **Etapas, Tarefas, Transições e Gatilhos viram seções da página Fluxos** (1.643 palavras juntas). É a única junção de conteúdo; o "também aparece em" que apontava para elas passa a apontar para Fluxos.
 
 ## Rodada 1 · 2026-09-29
 - **Pedido (literal):** "essa proposta de agora é boa, mas voce pode colocar ao lado outra que seja mais na estrutura do menu do enspace como foco principal mesmo. aí pegue essas 2 propostas e chame o agente /prototipo pra construir no github codando o prototipo desses 2 menus diferentes pelo menos"
@@ -69,4 +78,20 @@ As 3 usam as mesmas 242 páginas. Muda onde cada página fica e como a barra se 
 - **Crítica:** o mapa repete "Categorias" em Membro e em Configurações > Estrutura, como o produto (S1-F3). Aqui os 2 ficam em colunas separadas, sob o título de cada seção
 - **Acessibilidade:** os itens do mapa usam os mesmos tokens da B (`text-toned` e `text-muted`, AA nos 2 temas). A ordem de leitura segue a do produto: Membro, Configurações, Ajuda, Menu do perfil
 - **Maquete:** o que já era maquete na rodada 1 continua
+- **Ver:** https://pernalombr4.github.io/prototipos/menu-da-doc/ · local: `pnpm dev` → http://localhost:3000/menu-da-doc
+
+## Rodada 3 · 2026-09-29
+- **Pedido (literal):** "pode aplicar como rodada 3, mantendo a versão atual, no caso, como uma terceira proposta la nos prototipos. mantenha as outras ai apareendo"
+- **Pedido anterior, que define a regra:** "outra coisa que suas propostas devem evitar é aninhamento extremamente profundo. o user se perde nisso. nao é boa pratica. [...] falo de aninhamentos de 5, 6, 7 niveis. nao é que NAO PODE ter. mas deve ser evitado ao maximo."
+- **Mudou:** proposta D no alternador: a C com no máximo 4 níveis na barra, pelas 4 mudanças descritas em "Só na D"
+- **Mudou:** "Lado a lado" começa com B, C e D
+- **Mudou:** o caminho pelo mapa também conta na D
+- **Fronteira:** muda a barra da D e o corpo das páginas que a D mexe (Campos, Spaceflow, Fluxos, Integrações); não muda Hoje, A, B nem C
+- **Descartado:** aplicar o teto às 4 propostas de uma vez. Motivo: o pedido foi manter as versões atuais e acrescentar uma. A D parte da C porque a C já junta a ordem da A e o mapa da B
+- **Descartado:** fundir os índices das famílias de campo numa página só. Motivo: eles têm até 1.894 palavras; como pasta dentro do catálogo, cabem no 4º nível sem perder conteúdo
+- **Crítica:** medido no módulo de dados, nível máximo e páginas com 5 níveis ou mais: hoje 9 e 156; A e C 6 e 87; B 5 (abaixo do título fixo) e 51; D 4 e 0
+- **Crítica:** caminho mais curto até o Booleano: hoje 9, A 6, B 5, C 6 pela barra e 5 pelo mapa, D 4. Na D, o Booleano sai do mapa: o mapa leva à tela Campos, e de lá o catálogo é mais 1 passo
+- **Crítica:** a D deixa 129 páginas no 4º nível (hoje, 25). O teto concentra a profundidade no limite, e cada pasta do 3º nível passa a ter mais filhos
+- **Crítica:** em relação à C, 119 páginas mudam de endereço (96 vão para Referência, contando as 30 de Ferramentas de IA; 23 sobem 1 nível) e 4 viram seção de Fluxos. As 123 entram na tabela de redirecionamento
+- **Maquete:** o que já era maquete nas rodadas 1 e 2 continua. Na página Fluxos, as 4 seções novas mostram só o título
 - **Ver:** https://pernalombr4.github.io/prototipos/menu-da-doc/ · local: `pnpm dev` → http://localhost:3000/menu-da-doc

@@ -116,12 +116,13 @@ export const textos: Record<Idioma, Textos> = {
       menuDaDoc: 'Menu da documentação',
       status: { published: 'publicado', updated: 'atualizado', draft: 'rascunho', deprecated: 'descontinuado' },
     },
-    menus: { hoje: 'Hoje', a: 'A · Para leigo', b: 'B · Espelho do ENSPACE', c: 'C · Combinada' },
+    menus: { hoje: 'Hoje', a: 'A · Para leigo', b: 'B · Espelho do ENSPACE', c: 'C · Combinada', d: 'D · Até 4 níveis' },
     resumos: {
       hoje: 'O menu do site, como está.',
       a: 'Primeiro nível pelo uso, com as palavras da tela.',
       b: 'O menu do ENSPACE, com os mesmos títulos fixos.',
       c: 'A ordem da A, com o mapa do menu do ENSPACE.',
+      d: 'A C com no máximo 4 níveis. Tipos de campo e nós ficam em Referência.',
     },
     proposta: {
       trilha: 'Trilha de navegação',
@@ -201,12 +202,13 @@ export const textos: Record<Idioma, Textos> = {
       menuDaDoc: 'Documentation menu',
       status: { published: 'published', updated: 'updated', draft: 'draft', deprecated: 'deprecated' },
     },
-    menus: { hoje: 'Today', a: 'A · For beginners', b: 'B · ENSPACE mirror', c: 'C · Combined' },
+    menus: { hoje: 'Today', a: 'A · For beginners', b: 'B · ENSPACE mirror', c: 'C · Combined', d: 'D · Up to 4 levels' },
     resumos: {
       hoje: 'The site menu, as it is.',
       a: 'First level by use, with the words on screen.',
       b: 'The ENSPACE menu, with the same fixed headings.',
       c: 'The order of A, with the ENSPACE menu map.',
+      d: 'C with at most 4 levels. Field types and nodes live in Reference.',
     },
     proposta: {
       trilha: 'Breadcrumb',
@@ -286,12 +288,13 @@ export const textos: Record<Idioma, Textos> = {
       menuDaDoc: 'Menú de la documentación',
       status: { published: 'publicado', updated: 'actualizado', draft: 'borrador', deprecated: 'descontinuado' },
     },
-    menus: { hoje: 'Hoy', a: 'A · Para principiantes', b: 'B · Espejo de ENSPACE', c: 'C · Combinada' },
+    menus: { hoje: 'Hoy', a: 'A · Para principiantes', b: 'B · Espejo de ENSPACE', c: 'C · Combinada', d: 'D · Hasta 4 niveles' },
     resumos: {
       hoje: 'El menú del sitio, tal como está.',
       a: 'Primer nivel por uso, con las palabras de la pantalla.',
       b: 'El menú de ENSPACE, con los mismos títulos fijos.',
       c: 'El orden de A, con el mapa del menú de ENSPACE.',
+      d: 'La C con 4 niveles como máximo. Tipos de campo y nodos quedan en Referencia.',
     },
     proposta: {
       trilha: 'Ruta de navegación',

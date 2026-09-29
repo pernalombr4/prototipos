@@ -28,7 +28,11 @@ const props = defineProps<{
   trilha: { nome: string, pagina?: string }[]
   outras: { id: string, caminho: string }[]
   filhos: { no: No, nome: string, descricao: string }[]
+  /** Na D, as seções que vieram de páginas fundidas nesta (Fluxos). */
+  secoesExtras?: string[]
 }>()
+
+const secoes = computed(() => [...props.pagina.secoes[props.l], ...(props.secoesExtras ?? [])])
 
 const emit = defineEmits<{ abrir: [paginaId: string] }>()
 
@@ -205,7 +209,7 @@ function larguras(i: number) {
 
     <!-- Corpo: os H2 reais do arquivo; o texto é maquete -->
     <div class="flex flex-col">
-      <section v-for="(secao, i) in pagina.secoes[l]" :key="`${pagina.id}-${i}`" class="mb-8">
+      <section v-for="(secao, i) in secoes" :key="`${pagina.id}-${i}`" class="mb-8">
         <h2 :id="`secao-${i}`" class="mb-4 scroll-mt-28 text-2xl font-bold text-highlighted">
           {{ secao }}
         </h2>

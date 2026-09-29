@@ -74,8 +74,17 @@ export interface No {
   viraPasta?: boolean
 }
 
-export type Menu = 'hoje' | 'a' | 'b' | 'c'
-export const menus: Menu[] = ['hoje', 'a', 'b', 'c']
+export type Menu = 'hoje' | 'a' | 'b' | 'c' | 'd'
+export const menus: Menu[] = ['hoje', 'a', 'b', 'c', 'd']
+
+/* Os caminhos que se repetem, a partir de `content/pt/1.docs`. */
+const W = '5.Workspace'
+const S = `${W}/4.Sections`
+const ST = `${S}/3.Settings`
+const TY = `${ST}/04.Structure/2.Types`
+const FI = `${TY}/02.Fields`
+const NO = `${ST}/04.Structure/4.Spaceflow/2.Nodes`
+const IN = `${ST}/08.Integrations`
 
 /* ------------------------------------------------------------------ *
  * C · COMBINADA: a ordem da A com o mapa da B                         *
@@ -113,14 +122,156 @@ function montarC(): No[] {
 
 export const arvoreC = montarC()
 
+/* ------------------------------------------------------------------ *
+ * D · ATÉ 4 NÍVEIS: a C com um teto de 4 níveis na barra              *
+ *                                                                     *
+ * 4 mudanças sobre a C, e só elas:                                    *
+ *   1. tipos de campo e nós do Spaceflow saem do espelho e vão para   *
+ *      "Referência", na raiz, com as famílias e os grupos como pasta. *
+ *      Ferramentas de IA vai junto. As telas Campos e Spaceflow ficam *
+ *      no espelho, sem filhos;                                        *
+ *   2. os grupos de Integrações (Assinadores Digitais, Canais de       *
+ *      Mensagem, E-mails, IA) saem; cada integração fica direto em    *
+ *      Integrações;                                                   *
+ *   3. Ações em Massa vira irmã de Ações em Itens;                    *
+ *   4. Etapas, Tarefas, Transições e Gatilhos viram seções da página  *
+ *      Fluxos. É a única junção de conteúdo.                          *
+ * ------------------------------------------------------------------ */
+
+/** Os índices que a D cria. Valores da proposta, nos 3 idiomas. */
+const paginasNovasD: PaginaDaDoc[] = [
+  {
+    id: 'novo:referencia',
+    url: '',
+    titulo: { pt: 'Referência', en: 'Reference', es: 'Referencia' },
+    descricao: {
+      pt: 'Catálogos para consultar: tipos de campo, nós do Spaceflow e ferramentas do agente de IA.',
+      en: 'Catalogs to look up: field types, Spaceflow nodes and AI agent tools.',
+      es: 'Catálogos para consultar: tipos de campo, nodos de Spaceflow y herramientas del agente de IA.',
+    },
+    secoes: { pt: [], en: [], es: [] },
+    headline: { pt: '', en: '', es: '' },
+    icone: 'i-lucide-library-big',
+    iconeNoMenu: 'i-lucide-library-big',
+    status: 'draft',
+    traduzida: { en: true, es: true },
+    palavras: 0,
+    nova: true,
+  },
+  {
+    id: 'novo:tipos-de-campo',
+    url: '',
+    titulo: { pt: 'Tipos de campo', en: 'Field types', es: 'Tipos de campo' },
+    descricao: {
+      pt: 'Cada tipo de campo que uma categoria pode ter, agrupado por família.',
+      en: 'Each field type a category can have, grouped by family.',
+      es: 'Cada tipo de campo que puede tener una categoría, agrupado por familia.',
+    },
+    secoes: { pt: [], en: [], es: [] },
+    headline: { pt: 'Referência', en: 'Reference', es: 'Referencia' },
+    icone: 'i-lucide-text-cursor-input',
+    status: 'draft',
+    traduzida: { en: true, es: true },
+    palavras: 0,
+    nova: true,
+  },
+]
+
+const paginasDoFluxo = [`${TY}/04.Flow/2.Steps`, `${TY}/04.Flow/3.Tasks`, `${TY}/04.Flow/4.Transitions`, `${TY}/04.Flow/5.Triggers`]
+
+/** Na D, página que virou seção de outra: id da página → id da página que a recebe. */
+export const fundidasNaD: Record<string, string> = Object.fromEntries(
+  paginasDoFluxo.map(id => [id, `${TY}/04.Flow/1.index`]),
+)
+
+function copiar(nos: No[], de: string, para: string): No[] {
+  return nos.map(n => ({ ...n, id: n.id.replace(de, para), filhos: n.filhos ? copiar(n.filhos, de, para) : n.filhos }))
+}
+
+function acharNo(nos: No[], pagina: string): No | undefined {
+  for (const n of nos) {
+    if (n.pagina === pagina) return n
+    const achado = acharNo(n.filhos ?? [], pagina)
+    if (achado) return achado
+  }
+  return undefined
+}
+
+/** Nenhuma página solta: no nível que tem pasta, a página vira pasta com índice. */
+function semPaginaSolta(nos: No[]): No[] {
+  if (nos.some(n => n.tipo === 'pasta' && n.filhos?.length)) {
+    return nos.map(n => (n.tipo === 'pagina' ? { ...n, tipo: 'pasta', filhos: [], viraPasta: true } : n))
+  }
+  return nos
+}
+
+function montarD(): No[] {
+  const base = copiar(arvoreC, 'c:', 'd:')
+
+  // 1. Catálogos para "Referência"
+  const campos = acharNo(base, `${FI}/01.index`)!
+  const eventosECondicoes = (campos.filhos ?? []).filter(n => !n.filhos?.length)
+  const familias = (campos.filhos ?? []).filter(n => n.filhos?.length)
+  campos.filhos = []
+  const tiposDeCampo: No = {
+    id: 'd:tipos-de-campo',
+    tipo: 'pasta',
+    pagina: 'novo:tipos-de-campo',
+    slug: 'field-types',
+    filhos: semPaginaSolta([...familias, ...eventosECondicoes]),
+  }
+
+  const spaceflow = acharNo(base, `${ST}/04.Structure/4.Spaceflow/1.index`)!
+  const nos = spaceflow.filhos!.find(n => n.pagina === `${NO}/1.index`)!
+  spaceflow.filhos = []
+  const nosDoSpaceflow: No = {
+    ...nos,
+    slug: 'spaceflow-nodes',
+    rotulo: { pt: 'Nós do Spaceflow', en: 'Spaceflow nodes', es: 'Nodos de Spaceflow' },
+  }
+
+  const iFerramentas = base.findIndex(n => n.pagina === '7.AI Tools/1.index')
+  const [ferramentas] = base.splice(iFerramentas, 1)
+  const referencia: No = {
+    id: 'd:referencia',
+    tipo: 'pasta',
+    pagina: 'novo:referencia',
+    slug: 'reference',
+    icone: 'i-lucide-library-big',
+    filhos: [tiposDeCampo, nosDoSpaceflow, { ...ferramentas!, icone: undefined }],
+  }
+  base.splice(iFerramentas, 0, referencia)
+
+  // 2. Integrações sem os grupos
+  const integracoes = acharNo(base, `${IN}/1.index`)!
+  integracoes.filhos = semPaginaSolta((integracoes.filhos ?? []).flatMap(g => (g.pagina?.startsWith('novo:') ? g.filhos ?? [] : [g])))
+
+  // 3. Ações em Massa vira irmã de Ações em Itens
+  const categoriasDoMembro = acharNo(base, `${S}/2.Member/4.Types/1.index`)!
+  const acoesEmItens = acharNo(base, `${S}/2.Member/4.Types/3.Items/1.index`)!
+  const emMassa = acoesEmItens.filhos!.find(n => n.pagina === `${S}/2.Member/4.Types/3.Items/6.Mass Actions/1.index`)!
+  acoesEmItens.filhos = acoesEmItens.filhos!.filter(n => n !== emMassa)
+  const i = categoriasDoMembro.filhos!.indexOf(acoesEmItens)
+  categoriasDoMembro.filhos!.splice(i + 1, 0, emMassa)
+
+  // 4. Fluxos recebe as 4 páginas pequenas como seções
+  const fluxos = acharNo(base, `${TY}/04.Flow/1.index`)!
+  fluxos.filhos = []
+
+  return base
+}
+
+export const arvoreD = montarD()
+
 export const arvores: Record<Menu, No[]> = {
   hoje: arvoreDeHoje,
   a: arvoreA,
   b: arvoreB,
   c: arvoreC,
+  d: arvoreD,
 }
 
-export const paginas = new Map(paginasDaDoc.map(p => [p.id, p]))
+export const paginas = new Map([...paginasDaDoc, ...paginasNovasD].map(p => [p.id, p]))
 
 /* ------------------------------------------------------------------ *
  * CAMINHOS                                                            *
@@ -168,13 +319,6 @@ export function nomeDoNo(no: No, l: Lingua): string {
  * diferentes. A proposta é ligar as portas umas às outras.            *
  * ------------------------------------------------------------------ */
 
-const W = '5.Workspace'
-const S = `${W}/4.Sections`
-const ST = `${S}/3.Settings`
-const TY = `${ST}/04.Structure/2.Types`
-const FI = `${TY}/02.Fields`
-const NO = `${ST}/04.Structure/4.Spaceflow/2.Nodes`
-const IN = `${ST}/08.Integrations`
 
 export const assuntosRepetidos: string[][] = [
   [`${ST}/05.Access/2.Members/3.Seal`, `${W}/5.Resources/4.Document Seal`],
@@ -192,9 +336,17 @@ export const assuntosRepetidos: string[][] = [
   [`${ST}/09.AI Agents`, `${NO}/4.AI/AI Agent-Node`],
 ]
 
-export function outrasPortas(paginaId: string): string[] {
-  const grupo = assuntosRepetidos.find(g => g.includes(paginaId))
-  return grupo ? grupo.filter(id => id !== paginaId) : []
+/** Na D, a tela no espelho e o catálogo em Referência são o mesmo assunto. */
+const assuntosDaD: string[][] = [
+  [`${FI}/01.index`, 'novo:tipos-de-campo'],
+  [`${ST}/04.Structure/4.Spaceflow/1.index`, `${NO}/1.index`],
+]
+
+export function outrasPortas(paginaId: string, menu: Menu = 'a'): string[] {
+  const grupos = menu === 'd' ? [...assuntosRepetidos, ...assuntosDaD] : assuntosRepetidos
+  const ids = grupos.filter(g => g.includes(paginaId)).flat()
+    .map(id => (menu === 'd' ? fundidasNaD[id] ?? id : id))
+  return [...new Set(ids)].filter(id => id !== paginaId)
 }
 
 /* ------------------------------------------------------------------ *
@@ -328,8 +480,8 @@ const paginasDoMapa = new Set(
  * do mapa que é a página ou a pasta mais funda acima dela, e 1 por nível daí
  * para baixo, pelos cartões de "Nesta seção". Página fora do mapa devolve null.
  */
-export function cliquesPeloMapa(paginaId: string): number | null {
-  const caminho = caminhoAte(arvoreC, paginaId)
+export function cliquesPeloMapa(paginaId: string, menu: 'c' | 'd' = 'c'): number | null {
+  const caminho = caminhoAte(arvores[menu], paginaId)
   let ultimo = -1
   caminho.forEach((no, i) => { if (no.pagina && paginasDoMapa.has(no.pagina)) ultimo = i })
   return ultimo < 0 ? null : 2 + (caminho.length - 1 - ultimo)

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 /**
  * O menu da documentação: hoje, proposta A (para leigo), proposta B (espelho
- * do menu do ENSPACE) e proposta C (a ordem da A com o mapa da B).
+ * do menu do ENSPACE), proposta C (a ordem da A com o mapa da B) e proposta D
+ * (a C com no máximo 4 níveis na barra).
  *
  * A demanda: os usuários se perdem na doc e não entendem os aninhamentos. As 2
  * propostas usam as MESMAS 242 páginas da documentação real (`paginas.ts`);
@@ -21,7 +22,7 @@ import MapaDoMenu from './_MapaDoMenu.vue'
 import MenuDaDoc from './_MenuDaDoc.vue'
 import {
   arvores, caminhoAte, cliquesMinimos, cliquesPeloMapa, enderecoNo, lingua, mapaDoMenu, menus, nomeDoNo,
-  outrasPortas, paginaDoMapa, paginaInicial, paginas, tarefas,
+  fundidasNaD, outrasPortas, paginaDoMapa, paginaInicial, paginas, tarefas,
   type ChaveDeTarefa, type Menu,
 } from './mocks'
 import { textos } from './textos'
@@ -32,7 +33,7 @@ import pesquisaMd from './PESQUISA.md?raw'
 
 definePageMeta({
   titulo: 'Menu da documentação',
-  descricao: 'Três propostas de menu para a doc, lado a lado com o de hoje, testadas por cliques.',
+  descricao: 'Quatro propostas de menu para a doc, lado a lado com o de hoje, testadas por cliques.',
   status: 'em-revisao',
   atualizado: '2026-09-29',
   tela: 'docs.enspace.io, página de documentação',
@@ -55,13 +56,13 @@ const paginaAtiva = ref(paginaInicial)
 /** De qual menu a página atual foi aberta: é o desenho que o corpo segue. */
 const menuDoCorpo = ref<Menu>('a')
 /** Troca a chave para remontar uma barra fechada (começo de tarefa). */
-const chaves = reactive<Record<Menu, number>>({ hoje: 0, a: 0, b: 0, c: 0 })
+const chaves = reactive<Record<Menu, number>>({ hoje: 0, a: 0, b: 0, c: 0, d: 0 })
 
 /**
  * Lado a lado cabem 3 barras. Com 4 menus, a pessoa escolhe quais comparar;
- * escolher um 4º tira o que entrou primeiro. Começa com as 3 propostas.
+ * escolher mais um tira o que entrou primeiro. Começa com B, C e D.
  */
-const comparados = ref<Menu[]>(['a', 'b', 'c'])
+const comparados = ref<Menu[]>(['b', 'c', 'd'])
 function alternarComparado(m: Menu) {
   const lista = comparados.value
   if (lista.includes(m)) {
@@ -92,8 +93,13 @@ watch(ladoALado, (lado) => {
 
 /* ------------------------------ tarefa de teste ------------------------------ */
 const tarefa = ref<ChaveDeTarefa | null>(null)
-const cliques = reactive<Record<Menu, number>>({ hoje: 0, a: 0, b: 0, c: 0 })
-const achou = reactive<Record<Menu, number | null>>({ hoje: null, a: null, b: null, c: null })
+const cliques = reactive<Record<Menu, number>>({ hoje: 0, a: 0, b: 0, c: 0, d: 0 })
+const achou = reactive<Record<Menu, number | null>>({ hoje: null, a: null, b: null, c: null, d: null })
+
+/** O caminho pelo mapa só existe na C e na D. */
+function peloMapa(m: Menu, id: string) {
+  return m === 'c' || m === 'd' ? cliquesPeloMapa(id, m) : null
+}
 const alvo = computed(() => tarefas.find(x => x.chave === tarefa.value)?.alvo ?? null)
 
 function recomecar(quais: Menu[] = menus) {
@@ -126,7 +132,7 @@ function abrir(m: Menu, id: string, contar = false) {
       title: `${t.value.menus[m]}: ${t.value.teste.achou(cliques[m])}`,
       description: [
         t.value.teste.caminhoMaisCurto(cliquesMinimos(m, id)),
-        m === 'c' && cliquesPeloMapa(id) !== null ? t.value.teste.peloMapa(cliquesPeloMapa(id)!) : '',
+        peloMapa(m, id) !== null ? t.value.teste.peloMapa(peloMapa(m, id)!) : '',
       ].filter(Boolean).join(' · '),
       icon: 'i-lucide-circle-check',
       color: 'success',
@@ -153,10 +159,18 @@ const trilha = computed(() =>
   caminho.value.map(no => ({ nome: nomeDoNo(no, l.value), pagina: no.pagina })))
 
 const outras = computed(() =>
-  outrasPortas(paginaAtiva.value).map(id => ({
-    id,
-    caminho: caminhoAte(arvores[menuDoCorpo.value], id).map(no => nomeDoNo(no, l.value)).join(' › '),
-  })))
+  outrasPortas(paginaAtiva.value, menuDoCorpo.value)
+    .map(id => ({
+      id,
+      caminho: caminhoAte(arvores[menuDoCorpo.value], id).map(no => nomeDoNo(no, l.value)).join(' › '),
+    }))
+    .filter(o => o.caminho))
+
+/** Na D, Fluxos mostra como seções as 4 páginas que recebeu. */
+const secoesExtras = computed(() =>
+  menuDoCorpo.value === 'd'
+    ? Object.entries(fundidasNaD).filter(([, destino]) => destino === paginaAtiva.value).map(([id]) => paginas.get(id)!.titulo[l.value])
+    : [])
 
 const filhos = computed(() =>
   (noAtual.value?.tipo === 'pasta' ? noAtual.value.filhos ?? [] : []).map(no => ({
@@ -166,7 +180,7 @@ const filhos = computed(() =>
   })))
 
 /* ------------------------------ "Nesta página" ------------------------------ */
-const sumario = computed(() => pagina.value.secoes[l.value].map((texto, i) => ({ id: `secao-${i}`, texto })))
+const sumario = computed(() => [...pagina.value.secoes[l.value], ...secoesExtras.value].map((texto, i) => ({ id: `secao-${i}`, texto })))
 const tituloAtivo = ref('')
 let observador: IntersectionObserver | null = null
 
@@ -318,7 +332,7 @@ const tarefaEscolhida = computed({
                 <span class="font-semibold">{{ t.menus[m] }}</span>
                 <span>· {{ achou[m] !== null ? t.teste.achou(achou[m]!) : `${t.teste.procurando} (${t.teste.cliques(cliques[m])})` }}</span>
                 <span class="text-muted">· {{ t.teste.caminhoMaisCurto(cliquesMinimos(m, alvo!)) }}</span>
-                <span v-if="m === 'c' && cliquesPeloMapa(alvo!) !== null" class="text-muted">· {{ t.teste.peloMapa(cliquesPeloMapa(alvo!)!) }}</span>
+                <span v-if="peloMapa(m, alvo!) !== null" class="text-muted">· {{ t.teste.peloMapa(peloMapa(m, alvo!)!) }}</span>
               </UBadge>
             </li>
           </ul>
@@ -335,12 +349,13 @@ const tarefaEscolhida = computed({
           :trilha="trilha"
           :outras="outras"
           :filhos="filhos"
+          :secoes-extras="secoesExtras"
           @abrir="id => abrir(menuDoCorpo, id, true)"
         >
           <template #extra>
-            <!-- ✅ PROPOSTA C: a chamada para o mapa na página de boas-vindas -->
+            <!-- ✅ PROPOSTAS C e D: a chamada para o mapa na página de boas-vindas -->
             <div
-              v-if="menuDoCorpo === 'c' && paginaAtiva === paginaInicial"
+              v-if="(menuDoCorpo === 'c' || menuDoCorpo === 'd') && paginaAtiva === paginaInicial"
               class="mb-10 flex flex-col items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4 sm:flex-row sm:items-center"
             >
               <div class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
@@ -355,17 +370,17 @@ const tarefaEscolhida = computed({
                 trailing-icon="i-lucide-arrow-right"
                 size="sm"
                 class="cursor-pointer"
-                @click="abrir('c', paginaDoMapa, true)"
+                @click="abrir(menuDoCorpo, paginaDoMapa, true)"
               />
             </div>
 
-            <!-- ✅ PROPOSTA C: o mapa do menu -->
+            <!-- ✅ PROPOSTAS C e D: o mapa do menu -->
             <MapaDoMenu
-              v-if="menuDoCorpo === 'c' && paginaAtiva === paginaDoMapa"
+              v-if="(menuDoCorpo === 'c' || menuDoCorpo === 'd') && paginaAtiva === paginaDoMapa"
               :t="t"
               :l="l"
               :blocos="mapaDoMenu"
-              @abrir="id => abrir('c', id, true)"
+              @abrir="id => abrir(menuDoCorpo, id, true)"
             />
           </template>
         </CorpoDaPagina>
