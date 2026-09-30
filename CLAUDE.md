@@ -105,9 +105,10 @@ ls node_modules/@nuxt/ui/dist/runtime/components/ | grep -i badge
 sed -n '1,60p' node_modules/@nuxt/ui/dist/runtime/components/Badge.vue
 ```
 
-Para achar o componente certo antes de conferir: MCP `nuxt-ui` e skill `nuxt-ui`. Como usar e onde elas
-cedem à spec: `AGENTE_PROTOTIPOS.md`, Parte 2, "MCP e skill do Nuxt UI". O `node_modules` continua
-sendo a fonte da verdade.
+**Dúvida de componente (qual usar, prop, slot, variante, aparência): sempre a skill `nuxt-ui` e o MCP
+`nuxt-ui`, antes de escrever qualquer CSS.** CSS próprio é o último degrau e vai para o `DECISOES.md` com o
+motivo. Ordem e conferência: `AGENTE_PROTOTIPOS.md`, Parte 2, "Dúvida de componente", e regra 38. O
+`node_modules` continua sendo a fonte da verdade.
 
 Para conferir o formato real de uma entidade da API:
 

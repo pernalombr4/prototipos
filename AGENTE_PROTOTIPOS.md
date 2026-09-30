@@ -415,9 +415,14 @@ invente. **Prop que não aparece no arquivo não existe** — nem que pareça ó
 O total muda de uma versão para outra (hoje são 124), então conte na pasta em vez de confiar
 em número decorado.
 
-#### MCP e skill do Nuxt UI: para achar e aprender; o disco confirma
+#### Dúvida de componente: sempre a skill e o MCP do Nuxt UI, antes de qualquer CSS
 
-Decisão da redatora em 2026-09-30. 2 ferramentas do próprio Nuxt UI estão ligadas nesta máquina:
+Decisão da redatora em 2026-09-30 (regra 38). Toda dúvida sobre componente (qual usar, prop, slot,
+variante, estado, como mudar a aparência) se tira **sempre** na skill `nuxt-ui` e no MCP `nuxt-ui`,
+antes de escrever qualquer CSS. Inventar CSS para consertar ou ajustar componente é o erro que esta regra
+evita: quase sempre o próprio componente já resolve por prop, variante, slot ou pela prop `ui`.
+
+As 2 ferramentas, ligadas nesta máquina:
 
 - **MCP `nuxt-ui`** (`https://ui.nuxt.com/mcp`; carregue com ToolSearch "nuxt-ui"): `search-components` e
   `search-composables` para achar a peça pela intenção; `get-component`, `get-component-metadata` e
@@ -427,7 +432,24 @@ Decisão da redatora em 2026-09-30. 2 ferramentas do próprio Nuxt UI estão lig
   qual componente (`references/guidelines/component-selection.md`), convenções e formulários. Carregue só a
   referência que a tarefa pede.
 
-As 2 servem para **achar e aprender**; quem decide é esta spec:
+**Para mudar a aparência de um componente, nesta ordem:**
+
+1. **Prop e variante** (`color`, `variant`, `size` e as que o componente tiver), achadas na skill e no MCP
+   (`get-component-metadata`) e conferidas no disco.
+2. **Prop `ui` ou `class`, com token semântico.** Os nomes dos slots estão no tema gerado,
+   `.nuxt/ui/<componente>.ts`. O `app.config.ts` não entra: é cópia do `en-docs`.
+3. **Composição** com outros componentes do Nuxt UI (a escada abaixo).
+4. **Só então CSS próprio** (`<style>`, `:deep()`, `!important`, seletor de classe interna, valor cru),
+   quando a skill e o MCP mostraram que o componente não cobre. Cada um vai para o `DECISOES.md` do
+   protótipo com o motivo e a consulta feita (ferramenta e o que ela respondeu).
+
+Conferência antes de entregar (o que aparecer tem linha no `DECISOES.md`):
+
+```bash
+grep -n "<style\|:deep(\|!important" app/pages/<slug>/*.vue app/components/ux/*.vue
+```
+
+A skill e o MCP ensinam; quem decide é esta spec:
 
 - **O disco confirma.** O MCP descreve a versão mais nova do site, que pode estar à frente da instalada.
   Componente e prop só entram depois de conferidos no `node_modules`, como manda o bloco acima.
@@ -446,10 +468,12 @@ As 2 servem para **achar e aprender**; quem decide é esta spec:
 1. **O ENSPACE já tem?** Confira os quatro base do SDK. Tabela é `EnTable`, board é
    `EnKanbanBoard`, casca de tela é `EnLayout`. Se existe lá, usa-se de lá.
 2. **Não? Procure pelo nome** na pasta de componentes do Nuxt UI.
+   Na dúvida de qual serve, a skill `nuxt-ui` (`component-selection.md`) e o MCP (`search-components`).
 3. **Não achou? Componha** com o que tem: `UCard` + `UButton` + `UInput` + `UBadge`…
    A maioria do que parece faltar é composição.
 4. **Ainda não dá? Crie** em `app/components/ux/Ux<Nome>.vue`, feito só de utilitários
    Tailwind com os tokens semânticos.
+   Antes de criar, a skill e o MCP confirmaram que nada do Nuxt UI cobre. Diga qual consulta foi feita.
 5. **E registre** em `COMPONENTES-CUSTOM.md`: o que é, por que nem o SDK nem o Nuxt UI
    cobriram, de qual primitiva partiu, o que o dev vai ter que construir. Esse arquivo é
    metade do handoff.
@@ -632,7 +656,7 @@ disponível, diga isso na entrega e siga sem ela; nunca finja que usou.**
 | Momento | Skill |
 |---|---|
 | Uma vez, para fixar o mapeamento ENSPACE ↔ Nuxt UI | `design:design-system` |
-| Achar componente, composable, exemplo ou ícone do Nuxt UI | skill `nuxt-ui` e MCP `nuxt-ui` (Parte 2, "MCP e skill do Nuxt UI") |
+| Qualquer dúvida de componente do Nuxt UI (qual usar, prop, slot, variante, aparência), sempre antes de escrever CSS | skill `nuxt-ui` e MCP `nuxt-ui` (Parte 2, "Dúvida de componente"; regra 38) |
 | Rótulo, mensagem, texto de estado vazio | `design:ux-copy` |
 | Autocrítica antes de entregar | `design:design-critique` |
 | Contraste, foco, leitor de tela | `design:accessibility-review` |
@@ -795,3 +819,9 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
 
     **A exceção é a tela que É a casca** (o menu lateral, a tela de login, a barra do topo).
     Aí a casca é o objeto da demanda, e o que se congela é o conteúdo em volta.
+
+38. **⛔ DÚVIDA DE COMPONENTE SE TIRA NA SKILL E NO MCP DO NUXT UI, NÃO NO CSS.** Decisão da
+    redatora em 2026-09-30. Antes de escrever CSS para consertar ou ajustar um componente, consulte a
+    skill `nuxt-ui` e o MCP `nuxt-ui`: prop, variante, slot e a prop `ui` resolvem quase tudo. CSS
+    próprio (`<style>`, `:deep()`, `!important`) é o último degrau e vai para o `DECISOES.md` com o
+    motivo e a consulta feita. Detalhe e ordem na Parte 2, "Dúvida de componente".
