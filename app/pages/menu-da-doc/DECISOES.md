@@ -6,13 +6,13 @@ As 4 usam as mesmas páginas da documentação. Muda onde cada página fica e co
 
 | | A · Para leigo | B · Espelho do ENSPACE | C · Combinada | D · Até 4 níveis |
 |---|---|---|---|---|
-| Primeiro nível | Pelo uso: Boas-vindas, Comece aqui, Membro, Configurações, Ajuda, Painel do Usuário, Workspace, Módulos, Ferramentas de IA, Limitações Conhecidas | Pelo lugar do produto, em títulos fixos: Comece aqui, Antes de entrar, Membro, Configurações, Ajuda, Menu do perfil, Em todas as telas, Referência | O da A, com "Mapa do menu" logo abaixo de Boas-vindas | O da C, com "Referência" no lugar de Ferramentas de IA |
+| Primeiro nível | Pelo uso: Boas-vindas, Comece aqui, Membro, Configurações, Ajuda, Painel do Usuário, Workspace, Módulos, Ferramentas de IA, Limitações Conhecidas | Pelo lugar do produto, em títulos fixos: Primeiros Passos, Acesso, Membro, Configurações, Ajuda, Painel do Usuário, Recursos, Referência (nomes da rodada 5) | O da A, com "Mapa do menu" logo abaixo de Boas-vindas | O da C, com "Referência" no lugar de Ferramentas de IA |
 | Seções do menu do produto | Pastas que recolhem | Títulos fixos, como no ENSPACE, com os itens, a ordem e os ícones de lá | Pastas que recolhem, como na A, e o menu do ENSPACE desenhado na página "Mapa do menu" | Como na C. As telas Campos e Spaceflow ficam sem filhos |
 | Nível máximo | 6 | 5 abaixo do título fixo | 6 | 4 |
 | Páginas com 5 níveis ou mais (hoje: 156) | 87 | 51 | 87 | 0 |
 | Cliques até o Booleano (hoje: 9) | 6 | 5 | 6 pela barra; 5 pelo mapa | 4 |
 | Linhas da barra ao abrir | 10 | 48 | 11 | 11 |
-| Onde fica o que não está no menu do produto | Workspace (funções gerais), Módulos, Ferramentas de IA | Em títulos com o nome do lugar: Antes de entrar (entrada e workspaces), Menu do perfil, Em todas as telas (Recursos e Navegação), Referência | Como na A | Como na A, mais os catálogos em Referência |
+| Onde fica o que não está no menu do produto | Workspace (funções gerais), Módulos, Ferramentas de IA | Em títulos com o nome do lugar: Acesso (entrada e workspaces), Painel do Usuário, Recursos (Recursos e Navegação), Referência | Como na A | Como na A, mais os catálogos em Referência |
 
 **O que muda nas 4:**
 
@@ -110,4 +110,19 @@ As 4 usam as mesmas páginas da documentação. Muda onde cada página fica e co
 - **Crítica:** o Booleano continua a 5 cliques na B. A B abre com 53 linhas (1.758 px), 5 a mais que antes, por causa do "Sobre esta seção" de cada grupo
 - **Crítica:** a B ainda tem 51 páginas no 5º nível abaixo do grupo (Campos, Nós do Spaceflow, Assinadores). A regra de 4 níveis da D ainda não foi aplicada a ela
 - **Crítica:** o botão de busca diz "Pesquisar…", porque o protótipo passa o idioma ao Nuxt UI. No site, que não passa, diz "Search…"
+- **Ver:** https://pernalombr4.github.io/prototipos/menu-da-doc/ · local: `pnpm dev` → http://localhost:3000/menu-da-doc
+
+## Rodada 5 · 2026-09-30
+- **Pedido (literal):** "os titulos dos grandes agrupamentos do formato B do enspace no prototipo estao inconsistentes. um é "comece aqui", outro é "configuraçoes". um ta no imperativo, outro nao... tem que padronizar. Veja as regras de ux writing em /escrita pra analisar como melhoraria esses títulos agrupados."
+- **Regra:** Membro, Configurações e Ajuda são rótulos do menu do ENSPACE e não se reescrevem. Os outros títulos seguem a forma deles: substantivo que nomeia uma área, com o nome que o produto ou a doc já usa (regra do ENSPACE: procurar o nome na interface e na documentação antes de inventar um). Nome de mais de 1 palavra segue a caixa do menu do produto ("Visão Geral", "Gestão de Membros")
+- **Mudou:** "Comece aqui" (imperativo) vira "Primeiros Passos", o mesmo título da página inicial da doc em inglês ("Getting Started") e em espanhol ("Primeros Pasos")
+- **Mudou:** "Antes de entrar" (locução de tempo: diz quando, não o quê) vira "Acesso", da página "Registro e Acesso", que já descreve criar conta, entrar e acessar workspaces
+- **Mudou:** "Menu do perfil" (nome inventado pelo protótipo) vira "Painel do Usuário", o nome que a doc e o produto usam
+- **Mudou:** "Em todas as telas" (locução de lugar) vira "Recursos", o nome que a doc já dá às funções gerais do workspace
+- **Mudou:** o endereço dos 4 grupos acompanha o nome: `getting-started`, `access`, `user-panel` e `resources`
+- **Fronteira:** muda o título de 4 grupos da B; não muda A, C, D nem Hoje. O bloco "Menu do perfil" do mapa da C fica como está
+- **Descartado:** "Recursos Gerais". Motivo: a doc já chama essa área de "Recursos"; inventar outro nome contraria a regra do ENSPACE
+- **Descartado:** "Entrada" para o grupo de acesso. Motivo: "Acesso" já existe na doc ("Registro e Acesso") e diz o que a pessoa vai fazer ali
+- **Crítica:** "Acesso" repete a palavra do 1º item do grupo, "Registro e Acesso"
+- **Crítica:** o índice de cada grupo se chama "Sobre esta seção", uma locução que foge do padrão de substantivo. Fica para decidir
 - **Ver:** https://pernalombr4.github.io/prototipos/menu-da-doc/ · local: `pnpm dev` → http://localhost:3000/menu-da-doc
