@@ -105,6 +105,10 @@ ls node_modules/@nuxt/ui/dist/runtime/components/ | grep -i badge
 sed -n '1,60p' node_modules/@nuxt/ui/dist/runtime/components/Badge.vue
 ```
 
+Para achar o componente certo antes de conferir: MCP `nuxt-ui` e skill `nuxt-ui`. Como usar e onde elas
+cedem à spec: `AGENTE_PROTOTIPOS.md`, Parte 2, "MCP e skill do Nuxt UI". O `node_modules` continua
+sendo a fonte da verdade.
+
 Para conferir o formato real de uma entidade da API:
 
 ```bash

@@ -415,6 +415,32 @@ invente. **Prop que não aparece no arquivo não existe** — nem que pareça ó
 O total muda de uma versão para outra (hoje são 124), então conte na pasta em vez de confiar
 em número decorado.
 
+#### MCP e skill do Nuxt UI: para achar e aprender; o disco confirma
+
+Decisão da redatora em 2026-09-30. 2 ferramentas do próprio Nuxt UI estão ligadas nesta máquina:
+
+- **MCP `nuxt-ui`** (`https://ui.nuxt.com/mcp`; carregue com ToolSearch "nuxt-ui"): `search-components` e
+  `search-composables` para achar a peça pela intenção; `get-component`, `get-component-metadata` e
+  `get-example` para ver API, uso e exemplo; `search-icons` para ícone (coleção `lucide`, a mesma dos
+  protótipos); `get-migration-guide` quando o Nuxt UI subir de versão.
+- **Skill `nuxt-ui`** (`~/.claude/skills/nuxt-ui`, fixa na v4.11.1, a versão instalada aqui): quando usar
+  qual componente (`references/guidelines/component-selection.md`), convenções e formulários. Carregue só a
+  referência que a tarefa pede.
+
+As 2 servem para **achar e aprender**; quem decide é esta spec:
+
+- **O disco confirma.** O MCP descreve a versão mais nova do site, que pode estar à frente da instalada.
+  Componente e prop só entram depois de conferidos no `node_modules`, como manda o bloco acima.
+- **O SDK do ENSPACE vem antes** (regra 21). A receita de tabela da skill não substitui o `EnTable`.
+- **O `EnApp` já envolve o `UApp`** no `app.vue`. Não acrescente outro `UApp`.
+- **Tema, marca e instalação não se mexem.** `app.config.ts`, `main.css` e `nuxt.config.ts` são cópia do
+  `en-docs`. O que a skill ensina sobre personalizar tema e instalar não vale aqui.
+- **Layout pronto não é casca.** Dashboard, landing e docs da skill não substituem a casca copiada do
+  develop (regra 37).
+- **O layout de chat da skill usa o Vercel AI SDK, que precisa de back-end.** Fica fora: o protótipo é 100%
+  front-end (regra 4).
+- MCP ou skill fora do ar: diga isso na entrega e siga pelo `node_modules`.
+
 #### A escada do que falta
 
 1. **O ENSPACE já tem?** Confira os quatro base do SDK. Tabela é `EnTable`, board é
@@ -606,6 +632,7 @@ disponível, diga isso na entrega e siga sem ela; nunca finja que usou.**
 | Momento | Skill |
 |---|---|
 | Uma vez, para fixar o mapeamento ENSPACE ↔ Nuxt UI | `design:design-system` |
+| Achar componente, composable, exemplo ou ícone do Nuxt UI | skill `nuxt-ui` e MCP `nuxt-ui` (Parte 2, "MCP e skill do Nuxt UI") |
 | Rótulo, mensagem, texto de estado vazio | `design:ux-copy` |
 | Autocrítica antes de entregar | `design:design-critique` |
 | Contraste, foco, leitor de tela | `design:accessibility-review` |
