@@ -16,6 +16,7 @@
  *
  * 100% front-end. Nada de rede.
  */
+import BarraDaDoc from './_BarraDaDoc.vue'
 import CascaDaDoc from './_CascaDaDoc.vue'
 import CorpoDaPagina from './_CorpoDaPagina.vue'
 import MapaDoMenu from './_MapaDoMenu.vue'
@@ -126,6 +127,9 @@ function abrir(m: Menu, id: string, contar = false) {
   if (contar) contarClique(m)
   paginaAtiva.value = id
   menuDoCorpo.value = m
+  // A barra da B (UContentNavigation) abre o ramo pelo `defaultOpen` dos itens,
+  // que só vale ao montar. Página aberta pelo corpo remonta a barra no ramo novo.
+  if (contar && m === 'b') chaves.b++
   if (tarefa.value && id === alvo.value && achou[m] === null) {
     achou[m] = cliques[m]
     toast.add({
@@ -244,7 +248,22 @@ const tarefaEscolhida = computed({
             </span>
           </div>
 
+          <BarraDaDoc
+            v-if="m === 'hoje' || m === 'b'"
+            :key="`${m}-${chaves[m]}`"
+            :menu="(m as 'hoje' | 'b')"
+            :arvore="arvores[m]"
+            :pagina-ativa="paginaAtiva"
+            :t="t"
+            :l="l"
+            :carregando="estado === 'carregando'"
+            :erro="estado === 'erro'"
+            @abrir="id => abrir(m, id)"
+            @clique="contarClique(m)"
+            @recarregar="estado = 'cheio'"
+          />
           <MenuDaDoc
+            v-else
             :key="`${m}-${chaves[m]}`"
             :menu="m"
             :arvore="arvores[m]"
@@ -263,7 +282,22 @@ const tarefaEscolhida = computed({
     </template>
 
     <template #menu-celular="{ fechar }">
+      <BarraDaDoc
+        v-if="menuEscolhido === 'hoje' || menuEscolhido === 'b'"
+        :key="`celular-${menuEscolhido}-${chaves[menuEscolhido]}`"
+        :menu="(menuEscolhido as 'hoje' | 'b')"
+        :arvore="arvores[menuEscolhido]"
+        :pagina-ativa="paginaAtiva"
+        :t="t"
+        :l="l"
+        :carregando="estado === 'carregando'"
+        :erro="estado === 'erro'"
+        @abrir="id => { abrir(menuEscolhido, id); fechar() }"
+        @clique="contarClique(menuEscolhido)"
+        @recarregar="estado = 'cheio'"
+      />
       <MenuDaDoc
+        v-else
         :key="`celular-${menuEscolhido}-${chaves[menuEscolhido]}`"
         :menu="menuEscolhido"
         :arvore="arvores[menuEscolhido]"

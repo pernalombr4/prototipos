@@ -44,6 +44,14 @@ export default defineNuxtConfig({
     dataModuleCheck: false,
   },
 
+  // Liga os componentes de conteúdo do Nuxt UI (UContentNavigation,
+  // UContentSearchButton...), os mesmos que o en-docs usa. Sem @nuxt/content:
+  // a árvore de cada protótipo vem do mocks.ts dele. Pedido da Mikaela em
+  // 30/09/2026 (menu-da-doc, rodada 4): o menu da doc com o componente real.
+  ui: {
+    content: true,
+  },
+
   // O site é estático: não existe servidor para servir ícone sob demanda.
   // Então a biblioteca inteira do Lucide vai embutida no bundle do cliente,
   // que é o que permite o seletor de ícones funcionar offline.

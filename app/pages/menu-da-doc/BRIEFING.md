@@ -74,7 +74,7 @@ O que a pessoa encontra na barra, em passos:
 |---|---|
 | Barra do topo | Cópia do `_CascaDaDoc.vue` do protótipo `seletor-de-produto-na-doc` (22/09/2026), sem o seletor de produto, que não existe no site |
 | Grade | Medida no site a 1440 px: grade de 10 colunas, barra em 2 (`lg:col-span-2 lg:w-[calc(100%+20px)]`), centro em 8; no centro, texto em 9 de 12 e "Nesta página" em 3. O protótipo vizinho usava 3/6/3 |
-| Barra lateral | Classes do tema do `UContentNavigation` do Nuxt UI 4.5.1 (a versão do `en-docs`): `list`, `listWithChildren`, `link`, `trigger`, o traço do item ativo e o `truncate` do nome |
+| Barra lateral | Desde a rodada 4, o próprio `UContentNavigation` e o `UContentSearchButton` do Nuxt UI, com as props do `docs.vue` (`type="single"`, `highlight`, `highlight-color="primary"`, `:level="0"`, `ui` com `linkTrailing` e `trigger`, slot `link-title`) e o ajuste do `app.config.ts` do en-docs (`listWithChildren: 'ms-2 border-s border-default'`). Nas rodadas 1 a 3, era uma cópia à mão das classes do tema |
 | Comportamento da barra | `app/layouts/docs.vue`: `type="single"`, `highlight`, `level 0`, sem `default-open` |
 | Cabeçalho da página | Seção acima do título com ícone em quadro, título, descrição, selo de status, "Copiar texto" com o menu ao lado |
 

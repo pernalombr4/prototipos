@@ -51,6 +51,14 @@ export interface Textos {
     paginaNovaTexto: string
   }
 
+  /** A barra com o UContentNavigation (Hoje e B). */
+  barra: {
+    /** O 1º filho de cada pasta: a página índice dela. No en-docs, `navigation.title` do índice. */
+    visaoGeral: string
+    /** O índice de um grupo (Membro, Configurações...). Não é "Visão geral" porque Configurações tem a tela Visão Geral. */
+    sobreASecao: string
+  }
+
   /** O mapa do menu da proposta C. */
   mapa: {
     titulo: string
@@ -134,6 +142,7 @@ export const textos: Record<Idioma, Textos> = {
       paginaNova: 'Página nova',
       paginaNovaTexto: 'Hoje este grupo não tem página própria. A proposta cria o índice abaixo.',
     },
+    barra: { visaoGeral: 'Visão geral', sobreASecao: 'Sobre esta seção' },
     mapa: {
       titulo: 'O menu lateral do ENSPACE',
       ajuda: 'Clique no item que você vê na tela do ENSPACE para abrir a página dele.',
@@ -220,6 +229,7 @@ export const textos: Record<Idioma, Textos> = {
       paginaNova: 'New page',
       paginaNovaTexto: 'Today this group has no page of its own. The proposal creates the index below.',
     },
+    barra: { visaoGeral: 'Overview', sobreASecao: 'About this section' },
     mapa: {
       titulo: 'The ENSPACE side menu',
       ajuda: 'Click the item you see on the ENSPACE screen to open its page.',
@@ -306,6 +316,7 @@ export const textos: Record<Idioma, Textos> = {
       paginaNova: 'Página nueva',
       paginaNovaTexto: 'Hoy este grupo no tiene página propia. La propuesta crea el índice de abajo.',
     },
+    barra: { visaoGeral: 'Descripción general', sobreASecao: 'Acerca de esta sección' },
     mapa: {
       titulo: 'El menú lateral de ENSPACE',
       ajuda: 'Haz clic en el elemento que ves en la pantalla de ENSPACE para abrir su página.',

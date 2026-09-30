@@ -26,7 +26,7 @@ As 4 usam as mesmas páginas da documentação. Muda onde cada página fica e co
 8. **"Este assunto também aparece em"**, com o caminho de cada porta no menu escolhido. As páginas repetidas continuam: são portas de telas diferentes.
 9. **"Nesta seção"** na página índice: as páginas da pasta, 1 linha cada.
 
-**Só na B:** os títulos de seção não recolhem, e o clique no título abre o índice da seção. As tarefas de Membro ficam na ordem e com os nomes do submenu do produto: "Agendadas" e "Rápidas".
+**Só na B:** os títulos de seção não recolhem. As tarefas de Membro ficam na ordem e com os nomes do submenu do produto: "Agendadas" e "Rápidas". Desde a rodada 4, a barra da B é o `UContentNavigation` (ver a rodada 4).
 
 **Só na C:** a página "Seções de menu" sai de "Comece aqui", sobe para a raiz, logo abaixo de Boas-vindas, e vira "Mapa do menu". A página mostra o menu lateral do ENSPACE (Membro, Configurações, Ajuda e Menu do perfil, com os submenus que o produto tem), e cada item abre a página dele. Boas-vindas ganha uma chamada para o mapa. É a combinação que o `PESQUISA.md` sugere: a ordem da A no primeiro nível e o espelho da B como página de índice.
 
@@ -94,4 +94,20 @@ As 4 usam as mesmas páginas da documentação. Muda onde cada página fica e co
 - **Crítica:** a D deixa 129 páginas no 4º nível (hoje, 25). O teto concentra a profundidade no limite, e cada pasta do 3º nível passa a ter mais filhos
 - **Crítica:** em relação à C, 119 páginas mudam de endereço (96 vão para Referência, contando as 30 de Ferramentas de IA; 23 sobem 1 nível) e 4 viram seção de Fluxos. As 123 entram na tabela de redirecionamento
 - **Maquete:** o que já era maquete nas rodadas 1 e 2 continua. Na página Fluxos, as 4 seções novas mostram só o título
+- **Ver:** https://pernalombr4.github.io/prototipos/menu-da-doc/ · local: `pnpm dev` → http://localhost:3000/menu-da-doc
+
+## Rodada 4 · 2026-09-30
+- **Pedido (literal):** "certamente a opçao b é a melhor. vamos trabalhar nela. voce ta usando COMPONENTES do nuxt mesmo pra fazer esse menu? [...] veja de colocar o componente do modo correto aí, sem fazer nada personalizado se nao for estritamente necessario. vá nas docs do nuxt ui e veja o que da pra fazer."
+- **Pedido (literal):** "pode olhar como funciona o código de en-docs tambem, só pra ver como é montado o menu la e usar isso como base"
+- **Mudou:** Hoje e B usam o `UContentNavigation` e o `UContentSearchButton` do Nuxt UI (`_BarraDaDoc.vue`). Nas rodadas 1 a 3, a barra era desenhada à mão, copiando as classes do tema
+- **Mudou:** Hoje recebe as props do `docs.vue` do en-docs e o ajuste de `listWithChildren` do `app.config.ts` de lá, passado pelo `ui` do componente para não mudar o tema dos outros protótipos
+- **Mudou:** na B, o padrão do nuxt.com (`UPageAside` com `UContentNavigation :collapsible="false" highlight`), com níveis dentro dos grupos. Com `:collapsible="false"`, o componente trava todos os níveis; por isso o grupo é um item de 1º nível com `disabled: true`, que o tema desenha igual ao título de grupo do nuxt.com, e os níveis de dentro continuam recolhíveis
+- **Mudou:** na B, o índice de cada pasta é o 1º filho, "Visão geral"; o de cada grupo, "Sobre esta seção". No en-docs, é o `navigation.title` do índice, sem código. O grupo não usa "Visão geral" porque Configurações tem a tela Visão Geral
+- **Mudou:** `nuxt.config.ts` liga `ui.content`, a opção do Nuxt UI que registra os componentes de conteúdo. Sem ela, o `UContentNavigation` não existe no repositório de protótipos
+- **Personalizado, e por quê:** 1) no grupo, `ui.linkTrailingIcon: 'hidden'` e `ui.trigger: 'cursor-default'` no item, porque o componente só esconde a seta quando a barra inteira está travada; 2) `ui.linkTitle: 'whitespace-normal! text-pretty'` na B, para o nome longo quebrar linha em vez de ser cortado; 3) pasta que só tem o índice aparece como link: no en-docs, é um ajuste no mapa da navegação do `app.vue`, como o nuxt.com faz no `asideNavigation`
+- **Só existe por ser protótipo:** o item leva `active` e `onClick` (campos do próprio item), porque a doc do protótipo é uma página só. No en-docs, o item tem `path`, e o componente acha a página ativa pela rota. A classe `barra-ativo` no item ativo só serve para rolar a barra até ele
+- **Fronteira:** muda a barra de Hoje e da B; não muda A, C e D (continuam desenhadas à mão, como nas rodadas 1 a 3), nem o corpo da página
+- **Crítica:** o Booleano continua a 5 cliques na B. A B abre com 53 linhas (1.758 px), 5 a mais que antes, por causa do "Sobre esta seção" de cada grupo
+- **Crítica:** a B ainda tem 51 páginas no 5º nível abaixo do grupo (Campos, Nós do Spaceflow, Assinadores). A regra de 4 níveis da D ainda não foi aplicada a ela
+- **Crítica:** o botão de busca diz "Pesquisar…", porque o protótipo passa o idioma ao Nuxt UI. No site, que não passa, diz "Search…"
 - **Ver:** https://pernalombr4.github.io/prototipos/menu-da-doc/ · local: `pnpm dev` → http://localhost:3000/menu-da-doc

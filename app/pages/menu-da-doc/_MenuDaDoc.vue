@@ -1,5 +1,9 @@
 <script setup lang="ts">
 /**
+ * ⚠️ Desde a rodada 4 (30/09/2026), Hoje e B usam o `_BarraDaDoc.vue`, com o
+ * `UContentNavigation` de verdade. Este desenho à mão fica só para A, C e D,
+ * que são das rodadas 1 a 3; os ramos "hoje" e "b" daqui não são mais usados.
+ *
  * A barra da documentação, nos 3 desenhos.
  *
  * HOJE (casca): a reprodução do `UContentNavigation` do en-docs, com as
