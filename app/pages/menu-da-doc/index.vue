@@ -23,7 +23,7 @@ import MapaDoMenu from './_MapaDoMenu.vue'
 import MenuDaDoc from './_MenuDaDoc.vue'
 import {
   arvores, caminhoAte, cliquesMinimos, cliquesPeloMapa, enderecoNo, lingua, mapaDoMenu, menus, nomeDoNo,
-  fundidasNaD, outrasPortas, paginaDoMapa, paginaInicial, paginas, tarefas,
+  fundidas, outrasPortas, paginaDoMapa, paginaInicial, paginas, tarefas, tituloDaSecaoFundida,
   type ChaveDeTarefa, type Menu,
 } from './mocks'
 import { textos } from './textos'
@@ -170,11 +170,11 @@ const outras = computed(() =>
     }))
     .filter(o => o.caminho))
 
-/** Na D, Fluxos mostra como seções as 4 páginas que recebeu. */
+/** A página que recebeu outras mostra cada uma como seção (D: Fluxos; B: Boas-vindas). */
 const secoesExtras = computed(() =>
-  menuDoCorpo.value === 'd'
-    ? Object.entries(fundidasNaD).filter(([, destino]) => destino === paginaAtiva.value).map(([id]) => paginas.get(id)!.titulo[l.value])
-    : [])
+  Object.entries(fundidas[menuDoCorpo.value] ?? {})
+    .filter(([, destino]) => destino === paginaAtiva.value)
+    .map(([id]) => tituloDaSecaoFundida[id]?.[l.value] ?? paginas.get(id)!.titulo[l.value]))
 
 const filhos = computed(() =>
   (noAtual.value?.tipo === 'pasta' ? noAtual.value.filhos ?? [] : []).map(no => ({

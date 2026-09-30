@@ -184,6 +184,25 @@ export const fundidasNaD: Record<string, string> = Object.fromEntries(
   paginasDoFluxo.map(id => [id, `${TY}/04.Flow/1.index`]),
 )
 
+/**
+ * Na B (rodada 6), "Seções de menu" vira uma seção de Boas-vindas. Os grupos
+ * da barra já são as seções do menu, e o conteúdo dela começa por "Como
+ * utilizar esta documentação", que é assunto de boas-vindas.
+ */
+export const fundidasNaB: Record<string, string> = { '5.Workspace/4.Sections/1.index': '1.home' }
+
+/** Páginas fundidas, por menu. */
+export const fundidas: Partial<Record<Menu, Record<string, string>>> = { b: fundidasNaB, d: fundidasNaD }
+
+/** Nome da seção que a página fundida vira, quando não é o título dela. */
+export const tituloDaSecaoFundida: Record<string, PorLingua<string>> = {
+  '5.Workspace/4.Sections/1.index': {
+    pt: 'Como a documentação se organiza',
+    en: 'How the documentation is organized',
+    es: 'Cómo se organiza la documentación',
+  },
+}
+
 function copiar(nos: No[], de: string, para: string): No[] {
   return nos.map(n => ({ ...n, id: n.id.replace(de, para), filhos: n.filhos ? copiar(n.filhos, de, para) : n.filhos }))
 }
@@ -345,7 +364,7 @@ const assuntosDaD: string[][] = [
 export function outrasPortas(paginaId: string, menu: Menu = 'a'): string[] {
   const grupos = menu === 'd' ? [...assuntosRepetidos, ...assuntosDaD] : assuntosRepetidos
   const ids = grupos.filter(g => g.includes(paginaId)).flat()
-    .map(id => (menu === 'd' ? fundidasNaD[id] ?? id : id))
+    .map(id => fundidas[menu]?.[id] ?? id)
   return [...new Set(ids)].filter(id => id !== paginaId)
 }
 

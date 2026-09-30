@@ -6,7 +6,7 @@ As 4 usam as mesmas páginas da documentação. Muda onde cada página fica e co
 
 | | A · Para leigo | B · Espelho do ENSPACE | C · Combinada | D · Até 4 níveis |
 |---|---|---|---|---|
-| Primeiro nível | Pelo uso: Boas-vindas, Comece aqui, Membro, Configurações, Ajuda, Painel do Usuário, Workspace, Módulos, Ferramentas de IA, Limitações Conhecidas | Pelo lugar do produto, em títulos fixos: Primeiros Passos, Acesso, Membro, Configurações, Ajuda, Painel do Usuário, Recursos, Referência (nomes da rodada 5) | O da A, com "Mapa do menu" logo abaixo de Boas-vindas | O da C, com "Referência" no lugar de Ferramentas de IA |
+| Primeiro nível | Pelo uso: Boas-vindas, Comece aqui, Membro, Configurações, Ajuda, Painel do Usuário, Workspace, Módulos, Ferramentas de IA, Limitações Conhecidas | Pelo lugar do produto, em títulos fixos: Primeiros Passos (Boas-vindas e Conceitos), Acesso, Membro, Configurações, Ajuda, Painel do Usuário, Recursos, Referência (rodadas 5 e 6) | O da A, com "Mapa do menu" logo abaixo de Boas-vindas | O da C, com "Referência" no lugar de Ferramentas de IA |
 | Seções do menu do produto | Pastas que recolhem | Títulos fixos, como no ENSPACE, com os itens, a ordem e os ícones de lá | Pastas que recolhem, como na A, e o menu do ENSPACE desenhado na página "Mapa do menu" | Como na C. As telas Campos e Spaceflow ficam sem filhos |
 | Nível máximo | 6 | 5 abaixo do título fixo | 6 | 4 |
 | Páginas com 5 níveis ou mais (hoje: 156) | 87 | 51 | 87 | 0 |
@@ -125,4 +125,14 @@ As 4 usam as mesmas páginas da documentação. Muda onde cada página fica e co
 - **Descartado:** "Entrada" para o grupo de acesso. Motivo: "Acesso" já existe na doc ("Registro e Acesso") e diz o que a pessoa vai fazer ali
 - **Crítica:** "Acesso" repete a palavra do 1º item do grupo, "Registro e Acesso"
 - **Crítica:** o índice de cada grupo se chama "Sobre esta seção", uma locução que foge do padrão de substantivo. Fica para decidir
+- **Ver:** https://pernalombr4.github.io/prototipos/menu-da-doc/ · local: `pnpm dev` → http://localhost:3000/menu-da-doc
+
+## Rodada 6 · 2026-09-30
+- **Pedido (literal):** "e nao é estranho o inicio da doc ter "Boas-vindas" e outra doc chamada "seçoes de menu"?? nao deveria ser outro título nao? minha sugestao é que agrupe no inicio boas-vindas e conceitos. é o que faz sentido."
+- **Mudou:** na B, o grupo Primeiros Passos passa a ter Boas-vindas e Conceitos. Conceitos sai de Referência
+- **Mudou:** na B, "Seções de menu" deixa de ser página e vira a seção "Como a documentação se organiza", no fim de Boas-vindas. Os grupos da barra já são as seções do menu, e o conteúdo da página começa por "Como utilizar esta documentação", que é assunto de boas-vindas
+- **Fronteira:** muda o grupo Primeiros Passos, o grupo Referência e a página Boas-vindas da B; não muda A, C, D nem Hoje. Na C e na D, "Seções de menu" continua sendo o "Mapa do menu"
+- **Descartado:** manter "Seções de menu" como página com outro título, em Primeiros Passos ou em Referência. Motivo: na B, o assunto dela é a própria barra; como seção de Boas-vindas, quem chega lê isso primeiro, sem uma página a mais
+- **Crítica:** o endereço de "Seções de menu" passa a levar a Boas-vindas, e entra na tabela de redirecionamento
+- **Maquete:** a seção nova de Boas-vindas mostra só o título, como as outras
 - **Ver:** https://pernalombr4.github.io/prototipos/menu-da-doc/ · local: `pnpm dev` → http://localhost:3000/menu-da-doc
