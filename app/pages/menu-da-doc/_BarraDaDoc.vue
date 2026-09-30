@@ -90,7 +90,8 @@ function itemDeB(no: No, nivel: number, noRamo: Set<string>): Item {
     return {
       title,
       disabled: true,
-      ui: { linkTrailingIcon: 'hidden', trigger: 'cursor-default' },
+      // O grupo mantém o negrito do tema (o `ui` do item vence o do componente).
+      ui: { linkTrailingIcon: 'hidden', trigger: 'cursor-default font-semibold' },
       children: [...(no.pagina ? [link(no.pagina, props.t.barra.sobreASecao)] : []), ...filhos],
     }
   }
@@ -108,9 +109,14 @@ const itens = computed<Item[]>(() => {
 
 /* O `ui` do docs.vue e do app.config do en-docs (casca). Na B, o nome quebra linha. */
 const uiDoEnDocs = { linkTrailing: 'after', trigger: 'cursor-pointer', listWithChildren: 'ms-2 border-s border-default' }
+/*
+ * Na B, a pasta perde o negrito que o tema põe em todo `trigger`
+ * (`trigger: "font-semibold"`). Só o título de grupo continua em negrito,
+ * pelo `ui` do próprio item.
+ */
 const ui = computed(() => props.menu === 'hoje'
   ? uiDoEnDocs
-  : { ...uiDoEnDocs, linkTitle: 'whitespace-normal! text-pretty' })
+  : { ...uiDoEnDocs, trigger: 'cursor-pointer font-normal', linkTitle: 'whitespace-normal! text-pretty' })
 
 /** Cada clique na barra conta para a tarefa de teste (andaime). */
 function aoClicar(e: MouseEvent) {

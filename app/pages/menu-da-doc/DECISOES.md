@@ -136,3 +136,12 @@ As 4 usam as mesmas páginas da documentação. Muda onde cada página fica e co
 - **Crítica:** o endereço de "Seções de menu" passa a levar a Boas-vindas, e entra na tabela de redirecionamento
 - **Maquete:** a seção nova de Boas-vindas mostra só o título, como as outras
 - **Ver:** https://pernalombr4.github.io/prototipos/menu-da-doc/ · local: `pnpm dev` → http://localhost:3000/menu-da-doc
+
+## Rodada 7 · 2026-09-30
+- **Pedido (literal):** "perceba que toda vez que tem niveis aninhados automaticamente o componente do nuxt deixa em negrito o titulo. isso ta estragando tudo visualmente. o componente em si permite desativar esse negrito? se sim, faça pr esse caminho. se nao, personalize e me conte como fez"
+- **Causa:** o tema do `UContentNavigation` põe `font-semibold` no slot `trigger`, que é o botão de toda pasta, em qualquer nível
+- **Mudou:** na B, a prop `ui` do componente recebe `trigger: 'cursor-pointer font-normal'`, e toda pasta fica com o peso das páginas (400)
+- **Mudou:** o `ui` de cada título de grupo recebe `trigger: 'cursor-default font-semibold'`, e os 8 grupos continuam em seminegrito (600), como no nuxt.com. O `ui` do item vence o do componente, porque o Nuxt UI junta as classes nessa ordem
+- **Fronteira:** muda o peso das pastas da B; não muda Hoje (cópia do site), A, C nem D
+- **Crítica:** a página ativa continua com `font-medium` (500), a marca de ativo do tema
+- **Ver:** https://pernalombr4.github.io/prototipos/menu-da-doc/ · local: `pnpm dev` → http://localhost:3000/menu-da-doc
