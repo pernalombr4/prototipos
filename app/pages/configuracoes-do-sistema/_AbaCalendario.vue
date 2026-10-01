@@ -6,7 +6,7 @@ import {
   type Feriado,
   type Ocorrencia,
 } from './mocks'
-import { destacar, form } from './estado'
+import { destaque, form } from './estado'
 
 const toast = useToast()
 
@@ -212,6 +212,15 @@ function andarMes(passo: number) {
  */
 const diaAberto = ref<string | null>(null)
 
+/** A lista de feriados e ocorrências, para a pergunta que o mês não responde. */
+const listaAberta = ref(false)
+
+// A busca da tela leva a "feriados" e a "ocorrências": abrir a lista é o que
+// faz o destaque ter o que destacar.
+watch(destaque, (secao) => {
+  if (secao === 'feriados' || secao === 'ocorrencias') listaAberta.value = true
+})
+
 /**
  * Um só ponto de parada no mês inteiro, e as setas andam por dentro. Sem
  * isso, chegar ao fim da tabela custaria 42 tabulações.
@@ -289,11 +298,15 @@ function removerOcorrenciaDoDia(o: Ocorrencia) {
   diaAberto.value = null
 }
 
-/** O fim de semana não se edita pela célula: a regra mora na seção de cima. */
-function irParaDiasUteis() {
+/**
+ * O fim de semana não se edita pela célula: a regra é da coluna.
+ * O popover leva o foco até o cabeçalho dela, e quem decide é a pessoa.
+ */
+function focarColuna(diaDaSemana: number) {
   diaAberto.value = null
-  destacar('dias-uteis')
-  document.getElementById('dias-uteis')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  nextTick(() => {
+    document.querySelector<HTMLElement>(`[data-coluna="${diaDaSemana}"]`)?.focus()
+  })
 }
 
 function formatarData(data: string) {
@@ -310,52 +323,53 @@ function periodoDaOcorrencia(o: Ocorrencia) {
 <template>
   <div class="space-y-5">
     <!--
-      1. EXPEDIENTE: a regra e o mês que ela produz, lado a lado
+      O CALENDÁRIO INTEIRO NUM LUGAR SÓ
 
-      Eram duas seções separadas por meia tela de listas: a pessoa mudava o dia
-      útil lá em cima e precisava rolar até o fim para ver o que mudou. Juntas,
-      o efeito aparece no mesmo olhar, que é a única razão de a prévia existir.
+      Eram quatro seções, depois duas. Agora é uma: tudo o que define o
+      expediente se faz sobre o próprio mês.
+
+        a regra da semana ...... no cabeçalho da coluna
+        feriado e ocorrência ... clicando no dia
+        importar feriados ...... na barra, porque é operação de muitos meses
+        a lista ................ embaixo, para quando a pergunta é "quais são?"
+
+      O que NÃO virou clique no dia: trocar o dia útil da semana. Clicar numa
+      quarta-feira para desligar todas as quartas seria uma data mudando 52.
+      Por isso a regra ficou na coluna, que é a forma dela.
     -->
     <Secao
       id="dias-uteis"
-      titulo="Expediente"
-      resumo="A regra da semana e o mês que ela produz. Mudou de um lado, muda do outro."
+      titulo="Calendário do workspace"
+      resumo="Dias úteis, feriados e ocorrências. Tudo se edita no próprio mês."
       style="animation: entrada .4s ease-out both"
     >
-      <div class="grid gap-6 @4xl:grid-cols-[15rem_minmax(0,1fr)]">
-        <div>
-          <h3 class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
-            Dias úteis da semana
-          </h3>
-        <div class="flex flex-wrap items-center gap-2">
-          <button
-            v-for="d in diasDaSemana"
-            :key="d.chave"
-            type="button"
-            class="group flex h-11 w-16 flex-col items-center justify-center rounded-lg border text-sm transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-            :class="form.calendario.diasUteis.includes(d.chave)
-              ? 'border-primary bg-primary/10 text-primary font-medium'
-              : 'border-default bg-default text-muted hover:border-accented hover:text-highlighted'"
-            :aria-pressed="form.calendario.diasUteis.includes(d.chave)"
-            :aria-label="d.nome"
-            @click="alternarDia(d.chave)"
-          >
-            <span class="text-xs uppercase tracking-wide">{{ d.nome.slice(0, 3) }}</span>
-            <span class="text-[10px]">
-              {{ form.calendario.diasUteis.includes(d.chave) ? 'útil' : 'folga' }}
-            </span>
-          </button>
-        </div>
-
-        <p
-          class="mt-3 text-sm"
-          :class="form.calendario.diasUteis.length === 0 ? 'text-error' : 'text-muted'"
-        >
-          {{ resumoDosDias }}
+      <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <p class="text-sm text-muted">
+          Clique no <strong class="text-toned">dia da semana</strong> para ligar ou desligar o
+          expediente dele, e no <strong class="text-toned">dia do mês</strong> para feriado,
+          ocorrência e exceção.
         </p>
-        </div>
 
-        <div id="mes" class="min-w-0 scroll-mt-40">
+        <div class="flex flex-wrap items-center gap-2">
+          <UButton
+            label="Importar feriados"
+            icon="i-lucide-download"
+            size="xs"
+            color="neutral"
+            variant="subtle"
+            @click="escolhendoFeriados = true"
+          />
+          <UButton
+            :label="listaAberta ? 'Ocultar a lista' : 'Ver em lista'"
+            :icon="listaAberta ? 'i-lucide-calendar-days' : 'i-lucide-list'"
+            size="xs"
+            color="neutral"
+            variant="subtle"
+            @click="listaAberta = !listaAberta"
+          />
+        </div>
+      </div>
+
         <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-2">
             <UButton
@@ -401,15 +415,44 @@ function periodoDaOcorrencia(o: Ocorrencia) {
           </div>
         </div>
 
-        <div class="overflow-hidden rounded-lg border border-default">
+        <div id="mes" class="scroll-mt-40 overflow-hidden rounded-lg border border-default">
+          <!--
+            O cabeçalho da coluna É a regra da semana.
+
+            Clicar num dia muda uma data; clicar numa coluna muda todas as
+            terças do ano, e é por isso que a regra mora aqui e não na célula:
+            a coluna é a forma da regra. O estado fica escrito ("útil" ou
+            "folga") e a coluna inteira muda de fundo junto.
+          -->
           <div class="grid grid-cols-7 border-b border-default bg-elevated">
-            <div
+            <button
               v-for="d in diasDaSemana"
               :key="d.chave"
-              class="px-2 py-1.5 text-center text-[11px] font-medium uppercase tracking-wider text-muted"
+              type="button"
+              :data-coluna="d.chave"
+              class="flex flex-col items-center gap-0.5 px-2 py-2 transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+              :class="form.calendario.diasUteis.includes(d.chave)
+                ? 'hover:bg-accented/40'
+                : 'bg-accented/40 hover:bg-accented/60'"
+              :aria-pressed="form.calendario.diasUteis.includes(d.chave)"
+              :aria-label="`${d.nome}: ${form.calendario.diasUteis.includes(d.chave) ? 'dia útil' : 'folga'}. Vale para todas as semanas.`"
+              @click="alternarDia(d.chave)"
             >
-              {{ d.nome.slice(0, 3) }}
-            </div>
+              <span
+                class="text-[11px] font-medium uppercase tracking-wider"
+                :class="form.calendario.diasUteis.includes(d.chave) ? 'text-highlighted' : 'text-muted'"
+              >
+                {{ d.nome.slice(0, 3) }}
+              </span>
+              <span
+                class="text-[10px]"
+                :class="form.calendario.diasUteis.includes(d.chave)
+                  ? 'text-primary-700 dark:text-primary-300'
+                  : 'text-muted'"
+              >
+                {{ form.calendario.diasUteis.includes(d.chave) ? 'útil' : 'folga' }}
+              </span>
+            </button>
           </div>
 
           <!--
@@ -519,12 +562,12 @@ function periodoDaOcorrencia(o: Ocorrencia) {
                     -->
                     <UButton
                       v-if="!form.calendario.diasUteis.includes(c.diaDaSemana)"
-                      label="Mudar os dias úteis da semana"
+                      label="Ver a regra desta coluna"
                       icon="i-lucide-arrow-up-right"
                       size="xs"
                       color="neutral"
                       variant="ghost"
-                      @click="irParaDiasUteis()"
+                      @click="focarColuna(c.diaDaSemana)"
                     />
                   </div>
                 </div>
@@ -532,25 +575,15 @@ function periodoDaOcorrencia(o: Ocorrencia) {
             </UPopover>
           </div>
         </div>
-        </div>
-      </div>
-    </Secao>
 
-    <!--
-      2. EXCEÇÕES: as duas listas de datas, uma ao lado da outra
 
-      Feriado vem de fora (do país) e ocorrência vem de dentro (da operação),
-      mas as duas fazem a mesma coisa com o mês. Lado a lado, dá para ver as
-      duas sem rolar, e a seção para de ser duas molduras de lista empilhadas.
-    -->
-    <Secao
-      id="feriados"
-      titulo="Exceções do calendário"
-      resumo="Datas que mudam o expediente: os feriados do país e as datas da sua operação."
-      style="animation: entrada .4s ease-out both; animation-delay: 60ms"
-    >
+      <!--
+        A lista responde o que o mês não responde: "quais feriados existem no
+        ano?". Fica fechada, porque a pergunta de todo dia é a outra.
+      -->
+      <div v-if="listaAberta" class="mt-6 border-t border-default pt-5">
       <div class="grid gap-x-10 gap-y-8 @4xl:grid-cols-2">
-        <div class="min-w-0">
+        <div id="feriados" class="min-w-0 scroll-mt-40">
           <h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
             Feriados
           </h3>
@@ -559,15 +592,7 @@ function periodoDaOcorrencia(o: Ocorrencia) {
             {{ contar(form.calendario.feriados.length, 'feriado', 'feriados') }} no calendário deste
             workspace.
           </p>
-          <UButton
-            label="Importar feriados"
-            icon="i-lucide-download"
-            size="sm"
-            color="neutral"
-            variant="subtle"
-            class="transition-transform hover:-translate-y-0.5"
-            @click="escolhendoFeriados = true"
-          />
+
         </div>
 
         <div v-for="[pais, lista] in feriadosPorPais" :key="pais" class="mb-4 last:mb-0">
@@ -666,6 +691,7 @@ function periodoDaOcorrencia(o: Ocorrencia) {
           />
         </div>
         </div>
+      </div>
       </div>
     </Secao>
 

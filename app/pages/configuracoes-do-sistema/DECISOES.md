@@ -1,5 +1,56 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 21 — 01/10/2026 — o calendário inteiro dentro do calendário
+
+**O que ela perguntou, literal:**
+
+> "o calendario na aba, será que dá pra deixar 100% editável NO PROPRIO calendario? na interface
+> de calendario todas as funçoes? o que acha? sem ficar confuso demais. se for ficar confuso a
+> gente mantem separado."
+
+**Dá, e ficou melhor.** A condição que ela mesma pôs é a que decide o desenho: **só não pode ficar
+confuso**. O que confundiria é uma coisa só, e tem solução.
+
+### O que vai para o calendário, e em que forma
+
+| Função | Onde ficou | Por quê |
+|---|---|---|
+| Dia útil da semana | **no cabeçalho da coluna** | a regra é da coluna, não do dia |
+| Feriado: remover | clicando no dia | é uma data |
+| Ocorrência: criar, suspender, remover | clicando no dia | é uma data |
+| Importar feriados | botão na barra | é operação de muitos meses, com prévia |
+| "Quais feriados existem?" | lista embaixo, fechada | o mês não responde isso |
+
+**A regra da semana no cabeçalho da coluna é a chave de tudo.** Clicar numa quarta-feira do mês
+para desligar todas as quartas seria uma data mudando 52 — foi por isso que a rodada 12 recusou.
+Mas a **coluna** é a forma da regra: ela é as quartas todas. Clicar nela muda as quartas, e a
+coluna inteira muda de fundo na hora, o que torna o efeito impossível de confundir com "mudei
+este dia". O estado fica escrito embaixo do nome: `QUA · útil`, `SÁB · folga`.
+
+Medido na tela: ligar o sábado leva o mês de **21 para 25 dias úteis**, e desligar volta para 21.
+
+### O que sobrou fora do mês, e por quê
+
+- **Importar feriados** continua sendo um modal com prévia e país. É bulk, atravessa meses, e a
+  pessoa precisa ver o que vai entrar antes de entrar.
+- **A lista** de feriados e ocorrências fica fechada atrás de "Ver em lista". Calendário é ruim
+  para responder "quais são?" — são doze telas para ver um ano. A lista responde isso, e some
+  quando a pergunta é a outra (que é quase sempre).
+- O popover do fim de semana **não** mudou a regra de dentro dele: ele leva o foco até o
+  cabeçalho da coluna. Quem decide continua vendo o estado antes de clicar.
+
+### De quatro seções para uma
+
+A aba era: dias úteis, feriados, ocorrências, prévia do mês. Virou **uma seção só**, "Calendário
+do workspace", e a frase que abre a tela é o manual inteiro:
+
+> Clique no **dia da semana** para ligar ou desligar o expediente dele, e no **dia do mês** para
+> feriado, ocorrência e exceção.
+
+Saiu junto o botão "Importar feriados" que estava repetido na lista, agora que a barra tem o dele.
+
+---
+
 ## Rodada 20 — 01/10/2026 — menos botão, e um link de documentação por aba
 
 **O que ela pediu, literal:**
