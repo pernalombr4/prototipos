@@ -1,5 +1,15 @@
 # Decisões: painel de tarefas
 
+## Rodada 8 · 2026-10-01
+
+- **Pedido (literal):** "o tarefas por status nao precisa cruzar com informaçoes fora do prazo, a vencer, no prazo e sem prazo. pode botar direto só por status pra ser mais simples por hora"
+- **Mudou:** Tarefas por status virou colunas simples, uma por status, com o total em cima. Saíram as partes pela situação do prazo e a legenda.
+  - Cada coluna tem a cor do status, a mesma de Tarefas por responsável: Pendente em cinza, Em andamento na cor de informação, Bloqueada em amarelo, Concluída em verde.
+  - A dica diz "● Tarefas: 125". A divisão pela situação do prazo continua no resumo da lista, ao clicar na coluna.
+  - Saíram os textos "Fora do prazo", "Abertas, agora" e "No período" do bloco de status, que só a versão dividida usava.
+- **Fronteira:** muda só o desenho de Tarefas por status. Contagem, clique e resumo ficam como estavam.
+- **Ver:** `https://pernalombr4.github.io/prototipos/painel-de-tarefas`. Sem print, a pedido da redatora.
+
 ## Rodada 7 · 2026-10-01
 
 - **Pedido (literal):** "tarefas por prioridade tem que ter cor diferente por coluna"
@@ -116,7 +126,7 @@
 | Tempo até o prazo (saiu na rodada 4) | distribuição em faixas ordenadas | colunas, cor por grupo | cor com significado (vencida, a vencer), em vez de um matiz só |
 | Próximas a vencer | o que fazer primeiro | lista em ordem de prazo | nenhuma |
 | Criadas e concluídas | 2 séries no tempo | linhas, com o nome na ponta | nenhuma |
-| Tarefas por status | poucas categorias com composição | colunas empilhadas | a pesquisa sugeria barras horizontais; colunas por ser 4 status curtos |
+| Tarefas por status | poucas categorias com composição | colunas empilhadas (rodada 8: colunas simples, uma cor por status) | a pesquisa sugeria barras horizontais; colunas por ser 4 status curtos |
 | Tarefas por prioridade | categorias em ordem | colunas, uma cor só (rodada 7: uma cor por prioridade) | a redatora pediu uma cor por coluna |
 | Tarefas por responsável | ranking entre muitas categorias, com composição | barras horizontais empilhadas, top 10, com filtro por parte | nenhuma |
 | Tempo médio de duração | ranking de uma grandeza e onde ela vai | barras horizontais divididas nas partes, da mais lenta à mais rápida | nenhuma |

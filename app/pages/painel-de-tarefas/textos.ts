@@ -150,9 +150,8 @@ export interface Textos {
   }
 
   statusBloco: {
-    foraDoPrazo: string
-    abertasAgora: string
-    noPeriodo: string
+    /** O nome do valor na dica de cada coluna. */
+    tarefas: string
   }
 
   resp: {
@@ -429,7 +428,7 @@ export const textos: Record<Idioma, Textos> = {
       listaVencidas: 'Abertas com o prazo já vencido, da que venceu há menos tempo à mais antiga: a que ainda dá para recuperar vem primeiro. O número Vencidas abre a mesma lista, da mais antiga à mais recente. A lista carrega mais conforme você rola.',
       proximas: 'Abertas com prazo à frente, da que vence primeiro à que vence por último. A lista carrega mais conforme você rola.',
       serie: 'Criadas pela data de criação e concluídas pela data de conclusão, em semanas de segunda a domingo, no horário de Brasília. Quando a linha das criadas fica acima da das concluídas, a fila cresce.',
-      contagemStatus: 'Pendente, Em andamento e Bloqueada: as abertas agora (Pendente e Aguardando contam como Pendente; Trabalhando, como Em andamento). Concluída: as concluídas no período, pela data de conclusão. A cor divide cada coluna pela situação do prazo; "Fora do prazo" é a aberta vencida ou a concluída com atraso. Clique numa coluna para ver a lista.',
+      contagemStatus: 'Pendente, Em andamento e Bloqueada: as abertas agora (Pendente e Aguardando contam como Pendente; Trabalhando, como Em andamento). Concluída: as concluídas no período, pela data de conclusão. Clique numa coluna para ver a lista; o resumo ao lado divide pela situação do prazo.',
       responsaveis: 'Conta pela pessoa ou grupo para quem a tarefa foi feita (responsável da rápida, tipo de responsável da tarefa de etapa). Todos: a barra dividida em vencida, pendente, em andamento, bloqueada e concluída, sem repetir tarefa. Vencida é a aberta com prazo passado, em qualquer status; pendente, em andamento e bloqueada são as outras abertas agora; concluída é do período. Os outros filtros mostram uma parte só. Mostra as 10 maiores filas; "Ver tabela" mostra todas.',
       prioridade: 'Abertas agora, pela prioridade da tarefa rápida e da tarefa do Spaceflow. A tarefa de etapa não tem prioridade e fica de fora: a quickview mostra quantas.',
       tempos: 'Tempo em dias corridos, em 3 níveis ligados: o fluxo, a etapa (só no fluxo da categoria) e a tarefa. O seletor do painel troca o nível e a regra de cada um.',
@@ -495,9 +494,7 @@ export const textos: Record<Idioma, Textos> = {
     },
 
     statusBloco: {
-      foraDoPrazo: 'Fora do prazo',
-      abertasAgora: 'Abertas, agora',
-      noPeriodo: 'No período',
+      tarefas: 'Tarefas',
     },
 
     resp: {
@@ -726,7 +723,7 @@ export const textos: Record<Idioma, Textos> = {
       listaVencidas: 'Open tasks past their due date, from the most recently overdue to the oldest: the ones you can still recover come first. The Overdue number opens the same list, oldest first. The list loads more as you scroll.',
       proximas: 'Open tasks with an upcoming due date, from the first to the last one due. The list loads more as you scroll.',
       serie: 'Created by creation date and done by completion date, in Monday to Sunday weeks, Brasília time. When the created line sits above the done line, the queue grows.',
-      contagemStatus: 'Pending, In progress and Blocked: open tasks right now (Pending and Waiting count as Pending; Working, as In progress). Done: tasks completed in the period, by completion date. Color splits each column by due date situation; "Past due" is an overdue open task or a task done late. Click a column to see the list.',
+      contagemStatus: 'Pending, In progress and Blocked: open tasks right now (Pending and Waiting count as Pending; Working, as In progress). Done: tasks completed in the period, by completion date. Click a column to see the list; the summary next to it splits by due date situation.',
       responsaveis: 'Counts by the person or group the task was made for (quick task assignee, stage task responsibility type). All: the bar split into overdue, pending, in progress, blocked and done, with no task counted twice. Overdue is an open task past its due date, in any status; pending, in progress and blocked are the other open tasks now; done is for the period. The other filters show one part only. Shows the 10 longest queues; "See table" shows them all.',
       prioridade: 'Open now, by the priority of quick tasks and Spaceflow tasks. Stage tasks have no priority and stay out: the quickview shows how many.',
       tempos: 'Time in calendar days, on 3 linked levels: the flow, the stage (category flows only) and the task. The panel selector switches the level and each one has its own rule.',
@@ -792,9 +789,7 @@ export const textos: Record<Idioma, Textos> = {
     },
 
     statusBloco: {
-      foraDoPrazo: 'Past due',
-      abertasAgora: 'Open, now',
-      noPeriodo: 'In the period',
+      tarefas: 'Tasks',
     },
 
     resp: {
@@ -1023,7 +1018,7 @@ export const textos: Record<Idioma, Textos> = {
       listaVencidas: 'Abiertas con el plazo ya vencido, de la que venció hace menos tiempo a la más antigua: la que todavía se puede recuperar viene primero. El número Vencidas abre la misma lista, de la más antigua a la más reciente. La lista carga más a medida que usted se desplaza.',
       proximas: 'Abiertas con plazo por delante, de la que vence primero a la que vence última. La lista carga más a medida que usted se desplaza.',
       serie: 'Creadas por fecha de creación y concluidas por fecha de conclusión, en semanas de lunes a domingo, hora de Brasilia. Cuando la línea de creadas queda por encima de la de concluidas, la fila crece.',
-      contagemStatus: 'Pendiente, En curso y Bloqueada: las abiertas ahora (Pendiente y Esperando cuentan como Pendiente; Trabajando, como En curso). Concluida: las concluidas en el período, por fecha de conclusión. El color divide cada columna por la situación del plazo; "Fuera de plazo" es la abierta vencida o la concluida con atraso. Haga clic en una columna para ver la lista.',
+      contagemStatus: 'Pendiente, En curso y Bloqueada: las abiertas ahora (Pendiente y Esperando cuentan como Pendiente; Trabajando, como En curso). Concluida: las concluidas en el período, por fecha de conclusión. Haga clic en una columna para ver la lista; el resumen al lado divide por la situación del plazo.',
       responsaveis: 'Cuenta por la persona o grupo para quien se hizo la tarea (responsable de la rápida, tipo de responsable de la tarea de etapa). Todos: la barra dividida en vencida, pendiente, en curso, bloqueada y concluida, sin repetir tarea. Vencida es la abierta con plazo pasado, en cualquier estado; pendiente, en curso y bloqueada son las otras abiertas ahora; concluida es del período. Los otros filtros muestran una parte sola. Muestra las 10 filas más largas; "Ver tabla" muestra todas.',
       prioridade: 'Abiertas ahora, por la prioridad de la tarea rápida y de la tarea de Spaceflow. La tarea de etapa no tiene prioridad y queda fuera: la quickview muestra cuántas.',
       tempos: 'Tiempo en días corridos, en 3 niveles ligados: el flujo, la etapa (solo en el flujo de la categoría) y la tarea. El selector del panel cambia el nivel y cada uno tiene su regla.',
@@ -1089,9 +1084,7 @@ export const textos: Record<Idioma, Textos> = {
     },
 
     statusBloco: {
-      foraDoPrazo: 'Fuera de plazo',
-      abertasAgora: 'Abiertas, ahora',
-      noPeriodo: 'En el período',
+      tarefas: 'Tareas',
     },
 
     resp: {
