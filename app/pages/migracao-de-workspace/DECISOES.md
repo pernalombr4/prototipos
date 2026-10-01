@@ -2,7 +2,7 @@
 
 ## A proposta em 1 parágrafo
 
-O botão Importar Workspace continua no mesmo lugar. Em vez de abrir o seletor de arquivos e importar na hora, ele abre uma camada com 3 passos: **Arquivo** (área de arraste), **O que fazer** (3 opções) e **Revisar** (a comparação em árvore). Nada entra no workspace antes do clique em Importar.
+O botão Importar Workspace continua no mesmo lugar. Em vez de abrir o seletor de arquivos e importar na hora, ele abre uma camada com 2 passos: **Arquivo e opção** (área de arraste e, assim que o arquivo é lido, as 3 opções do que fazer com o que já existe) e **Revisar** (a comparação em árvore). Nada entra no workspace antes do clique em Importar.
 
 ## A jornada
 
@@ -10,23 +10,18 @@ O botão Importar Workspace continua no mesmo lugar. Em vez de abrir o seletor d
 Importar Workspace
    │
    ▼
-[1 Arquivo] ── não é .json ──► erro no próprio passo
+[1 Arquivo e opção] ── não é .json ──► erro no próprio passo
    │ lido: resumo do arquivo (de onde veio, quando, quantas categorias)
+   │ workspace com conteúdo: aparecem as 3 opções, cada uma com o efeito
+   │   Adicionar só o que falta (padrão) · Somar com o que existe · Substituir tudo
+   │ workspace vazio: as opções não aparecem
    ▼
-workspace vazio? ── sim ──────────────────────────────┐
-   │ não                                              │
-   ▼                                                  ▼
-[2 O que fazer]                              [3 Revisar: lista do que entra]
-   │ Adicionar só o que falta (padrão)                │
-   │ Somar com o que existe                           │
-   │ Substituir tudo                                  │
-   ▼                                                  │
-[3 Revisar]                                           │
-   ├ nada muda ──► "já tem tudo", sem botão Importar  │
-   ├ nada em comum ──► lista do que entra             │
-   └ há o que comparar ──► contagem + árvore          │
-   │ Substituir com algo saindo: digitar o e-mail     │
-   ▼                                                  ▼
+[2 Revisar]
+   ├ workspace vazio ou nada em comum ──► lista do que entra
+   ├ nada muda ──► "já tem tudo", sem botão Importar
+   └ há o que comparar ──► contagem + árvore ("Trocar" volta ao passo 1)
+   │ Substituir com algo saindo: digitar o e-mail
+   ▼
 Importando (pode fechar; avisa no sino) ──► falha: "nada foi alterado" + Tentar de novo
    ▼
 Importado ──► Desfazer importação · Ver categorias
@@ -79,3 +74,16 @@ Importado ──► Desfazer importação · Ver categorias
   - A contagem do topo soma categorias e outros componentes, sem os campos. Com o filtro desligado, a árvore mostra mais coisas que a contagem. Ficou assim para a contagem falar do que a pessoa reconhece.
   - CSS próprio: nenhum. As mudanças de aparência são pela prop `ui` do `UTree`, `URadioGroup`, `UStepper` e `UModal`, consultadas no MCP `nuxt-ui` (`get-component-metadata` de FileUpload, RadioGroup, Tree e Stepper) e no tema gerado em `.nuxt/ui/`.
 - **Ver:** `http://localhost:3000/migracao-de-workspace` · `evidencias/proposta-1-tela.jpg`, `proposta-2-arraste.jpg`, `proposta-2b-arquivo-lido.jpg`, `proposta-3-o-que-fazer.jpg`, `proposta-4-revisar-somar.jpg`
+
+## Rodada 2 · 2026-10-01
+- **Pedido (literal):** "nao precisa de uma jornada de 3 steps. pode se só 2. coloca o arquivo e seleciona o que fazer, depois tem a revisão. faz sentido? ou acha que sua ideia é melhor?"
+- **Mudou:**
+  - Os passos "Arquivo" e "O que fazer" viraram 1 só: "Arquivo e opção".
+  - As 3 opções aparecem embaixo do arquivo, com entrada suave, assim que ele é lido. Antes disso não aparecem, porque o efeito de cada uma ("4 categorias entram · 1 sai") é calculado sobre o arquivo.
+  - Com o workspace vazio, o passo se chama só "Arquivo" e as opções não aparecem.
+  - "Trocar", na revisão, volta ao passo 1, onde estão as opções.
+  - Os rótulos da árvore "Outros componentes" saíam centralizados. Agora alinham à esquerda (`text-start` na prop `ui` do `UTree`).
+- **Fronteira:** muda a divisão dos passos da camada; não muda o conteúdo de cada um, a tela de Casos de Uso nem a casca.
+- **Descartado:** a versão de 3 passos. Motivo: o passo "O que fazer" só existia para mostrar o efeito depois do arquivo lido, e isso cabe no mesmo passo. A pessoa ganha 1 clique a menos.
+- **Maquete:** a mesma da rodada 1.
+- **Ver:** `http://localhost:3000/migracao-de-workspace` · `evidencias/proposta-r2-1-arquivo-e-opcao.jpg`, `proposta-r2-2-revisar-substituir.jpg`, `proposta-r2-3-confirmar-substituir.jpg`, `proposta-r2-4-importando.jpg`, `proposta-r2-5-importado.jpg`

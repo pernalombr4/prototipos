@@ -4,11 +4,13 @@
  *
  * Hoje o botão abre o seletor de arquivos e a importação começa no instante em
  * que o arquivo é escolhido, sem prévia e sem escolha (evidencias/). Aqui ela
- * tem 3 passos: arquivo, o que fazer com o que já existe, revisar.
+ * tem 2 passos: o arquivo e o que fazer com o que já existe, juntos; depois a
+ * revisão.
  *
- * O passo "O que fazer" some quando o workspace está vazio: não há o que
- * decidir. A comparação em árvore só aparece quando há algo em comum entre os
- * dois lados; sem isso, a revisão é uma lista do que entra.
+ * As opções aparecem embaixo do arquivo assim que ele é lido, porque cada uma
+ * mostra o efeito calculado sobre ele. Com o workspace vazio elas nem aparecem:
+ * não há o que decidir. A comparação em árvore só aparece quando há algo em
+ * comum entre os dois lados; sem isso, a revisão é uma lista do que entra.
  */
 import type { TreeItem } from '@nuxt/ui'
 import type { Textos } from './textos'
@@ -37,7 +39,7 @@ const props = defineProps<{
 const aberto = defineModel<boolean>('open', { default: false })
 const toast = useToast()
 
-type Passo = 'arquivo' | 'modo' | 'revisar'
+type Passo = 'arquivo' | 'revisar'
 type Fase = 'escolhendo' | 'importando' | 'concluido' | 'erro' | 'desfeito'
 
 const passo = ref<Passo>('arquivo')
@@ -152,30 +154,22 @@ const itensDeModo = computed(() =>
  * Navegação entre os passos.
  * ------------------------------------------------------------------ */
 
-const passos = computed(() => {
-  const lista = [
-    { value: 'arquivo', title: props.t.passos.arquivo, icon: 'i-lucide-file-up' },
-    { value: 'modo', title: props.t.passos.modo, icon: 'i-lucide-git-merge' },
-    { value: 'revisar', title: props.t.passos.revisar, icon: 'i-lucide-list-checks' },
-  ]
-  return vazio.value ? lista.filter(p => p.value !== 'modo') : lista
-})
-
-const ordem = computed(() => passos.value.map(p => p.value as Passo))
+const passos = computed(() => [
+  { value: 'arquivo', title: vazio.value ? props.t.passos.soArquivo : props.t.passos.arquivo, icon: 'i-lucide-file-up' },
+  { value: 'revisar', title: props.t.passos.revisar, icon: 'i-lucide-list-checks' },
+])
 
 function avancar() {
-  const i = ordem.value.indexOf(passo.value)
-  passo.value = ordem.value[Math.min(i + 1, ordem.value.length - 1)]!
+  passo.value = 'revisar'
 }
 function voltar() {
-  const i = ordem.value.indexOf(passo.value)
-  passo.value = ordem.value[Math.max(i - 1, 0)]!
+  passo.value = 'arquivo'
 }
 
 const podeAvancar = computed(() => (passo.value === 'arquivo' ? lido.value : true))
 
 /* ------------------------------------------------------------------ *
- * Passo 3: a árvore da comparação.
+ * Passo 2: a árvore da comparação.
  * ------------------------------------------------------------------ */
 
 const corDaSituacao: Record<Situacao, 'success' | 'warning' | 'error' | 'neutral'> = {
@@ -389,7 +383,7 @@ function verCategorias() {
         leave-active-class="transition duration-100 ease-in"
         leave-to-class="opacity-0"
       >
-        <!-- ─────────── ESCOLHENDO: os 3 passos ─────────── -->
+        <!-- ─────────── ESCOLHENDO: os 2 passos ─────────── -->
         <div v-if="fase === 'escolhendo'" key="escolhendo" class="space-y-6">
           <UStepper
             v-model="passo"
@@ -405,7 +399,7 @@ function verCategorias() {
             leave-active-class="transition duration-100 ease-in"
             leave-to-class="opacity-0 -translate-x-3"
           >
-            <!-- Passo 1: arquivo ------------------------------------- -->
+            <!-- Passo 1: arquivo e o que fazer ----------------------- -->
             <section v-if="passo === 'arquivo'" key="arquivo" class="space-y-4">
               <UFileUpload
                 v-if="!lido && !lendo"
@@ -465,45 +459,50 @@ function verCategorias() {
                 variant="subtle"
                 icon="i-lucide-file-x"
               />
-            </section>
 
-            <!-- Passo 2: o que fazer --------------------------------- -->
-            <section v-else-if="passo === 'modo'" key="modo" class="space-y-4">
-              <div>
-                <h3 class="text-base font-semibold text-highlighted">
-                  {{ t.modoPergunta }}
-                </h3>
-                <p class="mt-1 text-sm text-muted">
-                  {{ t.modoAjuda }}
-                </p>
-              </div>
-
-              <URadioGroup
-                v-model="modo"
-                :items="itensDeModo"
-                variant="card"
-                :ui="{ item: 'transition-colors hover:bg-elevated/50', fieldset: 'gap-2' }"
+              <!-- O que fazer: aparece quando o arquivo foi lido e há o que decidir -->
+              <Transition
+                enter-active-class="transition duration-300 ease-out"
+                enter-from-class="opacity-0 translate-y-2"
               >
-                <template #label="{ item }">
-                  <span class="flex flex-wrap items-center gap-2">
-                    {{ item.label }}
-                    <UBadge v-if="item.value === 'adicionar'" :label="t.recomendado" color="success" variant="subtle" size="sm" />
-                  </span>
-                </template>
-                <template #description="{ item }">
-                  <span class="block">{{ item.description }}</span>
-                  <span class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium">
-                    <span class="text-toned">{{ item.efeito }}</span>
-                    <span v-if="item.itensQueSaem" class="inline-flex items-center gap-1 text-error">
-                      <UIcon name="i-lucide-triangle-alert" class="size-3.5" />
-                      {{ t.saiComItens(item.itensQueSaem) }}
-                    </span>
-                  </span>
-                </template>
-              </URadioGroup>
+                <div v-if="lido && !vazio" class="space-y-4 border-t border-default pt-5">
+                  <div>
+                    <h3 class="text-base font-semibold text-highlighted">
+                      {{ t.modoPergunta }}
+                    </h3>
+                    <p class="mt-1 text-sm text-muted">
+                      {{ t.modoAjuda }}
+                    </p>
+                  </div>
+    
+                  <URadioGroup
+                    v-model="modo"
+                    :items="itensDeModo"
+                    variant="card"
+                    :ui="{ item: 'transition-colors hover:bg-elevated/50', fieldset: 'gap-2' }"
+                  >
+                    <template #label="{ item }">
+                      <span class="flex flex-wrap items-center gap-2">
+                        {{ item.label }}
+                        <UBadge v-if="item.value === 'adicionar'" :label="t.recomendado" color="success" variant="subtle" size="sm" />
+                      </span>
+                    </template>
+                    <template #description="{ item }">
+                      <span class="block">{{ item.description }}</span>
+                      <span class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium">
+                        <span class="text-toned">{{ item.efeito }}</span>
+                        <span v-if="item.itensQueSaem" class="inline-flex items-center gap-1 text-error">
+                          <UIcon name="i-lucide-triangle-alert" class="size-3.5" />
+                          {{ t.saiComItens(item.itensQueSaem) }}
+                        </span>
+                      </span>
+                    </template>
+                  </URadioGroup>
+                </div>
+              </Transition>
             </section>
 
-            <!-- Passo 3: revisar ------------------------------------- -->
+            <!-- Passo 2: revisar ------------------------------------- -->
             <section v-else key="revisar" class="space-y-5">
               <!-- Nada a fazer -->
               <UAlert
@@ -547,7 +546,7 @@ function verCategorias() {
                 <div class="flex flex-wrap items-center justify-between gap-2">
                   <p v-if="!vazio" class="text-sm text-muted">
                     {{ t.opcaoEscolhida(t.modos[modo].titulo) }}
-                    <UButton :label="t.trocarOpcao" variant="link" size="sm" class="px-1" @click="passo = 'modo'" />
+                    <UButton :label="t.trocarOpcao" variant="link" size="sm" class="px-1" @click="passo = 'arquivo'" />
                   </p>
                   <USwitch v-model="soOQueMuda" :label="t.soOQueMuda" size="sm" />
                 </div>

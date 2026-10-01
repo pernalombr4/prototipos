@@ -56,7 +56,7 @@ export interface Textos {
   // a camada de importação
   modalTitulo: string
   modalDescricao: string
-  passos: { arquivo: string, modo: string, revisar: string }
+  passos: { arquivo: string, soArquivo: string, revisar: string }
   continuar: string
   voltarPasso: string
   cancelar: string
@@ -206,7 +206,7 @@ const pt: Textos = {
 
   modalTitulo: 'Importar estrutura',
   modalDescricao: 'Traga categorias, campos e formulários de outro workspace.',
-  passos: { arquivo: 'Arquivo', modo: 'O que fazer', revisar: 'Revisar' },
+  passos: { arquivo: 'Arquivo e opção', soArquivo: 'Arquivo', revisar: 'Revisar' },
   continuar: 'Continuar',
   voltarPasso: 'Voltar',
   cancelar: 'Cancelar',
@@ -348,7 +348,7 @@ const en: Textos = {
 
   modalTitulo: 'Import structure',
   modalDescricao: 'Bring categories, fields and forms from another workspace.',
-  passos: { arquivo: 'File', modo: 'What to do', revisar: 'Review' },
+  passos: { arquivo: 'File and option', soArquivo: 'File', revisar: 'Review' },
   continuar: 'Continue',
   voltarPasso: 'Back',
   cancelar: 'Cancel',
@@ -490,7 +490,7 @@ const es: Textos = {
 
   modalTitulo: 'Importar estructura',
   modalDescricao: 'Traiga categorías, campos y formularios de otro workspace.',
-  passos: { arquivo: 'Archivo', modo: 'Qué hacer', revisar: 'Revisar' },
+  passos: { arquivo: 'Archivo y opción', soArquivo: 'Archivo', revisar: 'Revisar' },
   continuar: 'Continuar',
   voltarPasso: 'Volver',
   cancelar: 'Cancelar',
