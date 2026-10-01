@@ -29,7 +29,6 @@ import briefingMd from './BRIEFING.md?raw'
 import pesquisaMd from './PESQUISA.md?raw'
 import decisoesMd from './DECISOES.md?raw'
 import BarraDeFiltros from './_BarraDeFiltros.vue'
-import BlocoPrazos from './_BlocoPrazos.vue'
 import BlocoSla from './_BlocoSla.vue'
 import CartaoNumero from './_CartaoNumero.vue'
 import CascaDoEnspace from './_CascaDoEnspace.vue'
@@ -47,7 +46,7 @@ import type { NivelDoTempo } from './_BlocoTempos.vue'
 import { AGORA } from './mocks'
 import type { DropdownMenuItem } from '@nuxt/ui'
 import {
-  FAIXAS, PRIORIDADES, aplicarFiltros, blocoSla, dentro, estaAberta, execucoesDoFiltro, faixaDe, faixasDePrazo, flowItemsDoFiltro,
+  PRIORIDADES, aplicarFiltros, blocoSla, dentro, estaAberta, execucoesDoFiltro, faixasDePrazo, flowItemsDoFiltro,
   granularidadePadrao, intervaloDo, nomeDoResponsavel, numerosDoTopo, parteDoResponsavel, porPrioridade, porResponsavel, porStatus,
   proximasAVencer, serie, situacao, tempoDeConclusao, temposPorEtapa, temposPorFluxo, temposPorTarefa,
   todasAsTarefas,
@@ -287,7 +286,7 @@ function porOrigem(achadas: TarefaDoPainel[]): LinhaDoResumo[] {
 }
 
 function selosDe(painel: IdDoPainel) {
-  const agora = ['abertas', 'vencidas', 'aVencer', 'prazos', 'proximas', 'prioridade'].includes(painel)
+  const agora = ['abertas', 'vencidas', 'aVencer', 'proximas', 'prioridade'].includes(painel)
   return agora ? [t.value.agora] : [t.value.noPeriodo, t.value.filtros.periodos[filtros.value.periodo]]
 }
 
@@ -370,20 +369,6 @@ function abrirSituacao(s: Situacao, grupo: 'abertas' | 'concluidas') {
   })
   if (grupo === 'abertas') abrir(`${nomeDoGrupo} · ${tt.situacao[s]}`, x => estaAberta(x) && situacao(x) === s, porPrazo, resumo)
   else abrir(`${nomeDoGrupo} · ${tt.situacao[s]}`, x => noPeriodo(x) && situacao(x) === s, maisRecentes, resumo)
-}
-
-function abrirFaixa(f: Faixa) {
-  const tt = t.value
-  abrir(tt.prazos.faixas[f], x => estaAberta(x) && faixaDe(x) === f, porPrazo, () => ({
-    painel: 'prazos',
-    titulo: tt.prazos.faixas[f],
-    valor: n(faixas.value[f]),
-    selos: [tt.agora],
-    linhas: FAIXAS.map(k => ({
-      icone: ICONE_DA_FAIXA[k], rotulo: tt.prazos.faixas[k], valor: n(faixas.value[k]), destaque: k === f,
-      tom: (k === 'vencida_7d_mais' || k === 'vencida_ate_7d') && faixas.value[k] ? 'error' as const : undefined,
-    })),
-  }))
 }
 
 function abrirStatus(s: StatusVirtual) {
@@ -802,7 +787,6 @@ const carregando = computed(() => estado.value === 'carregando' || atualizando.v
                   @abrir="abrirCartao(item.id)"
                 />
                 <BlocoSla v-else-if="item.id === 'sla'" :t="t" :sla="sla" @abrir="abrirSituacao" />
-                <BlocoPrazos v-else-if="item.id === 'prazos'" :t="t" :faixas="faixas" @abrir="abrirFaixa" />
                 <ListaProximas v-else-if="item.id === 'proximas'" :t="t" :tarefas="proximas" @abrir="abrirTarefa" />
                 <GraficoSerie v-else-if="item.id === 'serie'" v-model:granularidade="granularidade" :t="t" :baldes="baldes" :sem-granularidade="mvp" />
                 <GraficoResponsaveis v-else-if="item.id === 'responsaveis'" :t="t" :linhas="linhasPorDesignada" @abrir="abrirResponsavelDoGrafico" />

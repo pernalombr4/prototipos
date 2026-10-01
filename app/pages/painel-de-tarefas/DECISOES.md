@@ -1,5 +1,16 @@
 # Decisões: painel de tarefas
 
+## Rodada 4 · 2026-10-01
+
+- **Pedido (literal):** "o dash de tempo ate o prazo é inutil. pode tirar."
+- **Mudou:** saiu o painel **Tempo até o prazo** (as abertas em 7 faixas, da vencida há mais de 7 dias à de prazo depois de 30 dias). Ficam 13 painéis.
+  - SLA e Próximas a vencer dividem a linha, 6 colunas cada.
+  - A chave do `localStorage` passou a `layout:v5`: quem tinha arranjo salvo volta ao padrão.
+  - As faixas continuam no cálculo: a quickview de Vencidas e de A vencer e os subtítulos de Próximas a vencer ("Em até 24 h", "Em 1 a 7 dias") usam as mesmas faixas.
+- **Mudou:** o MVP ficou com 8 painéis. Criadas e concluídas ocupa 8 colunas ao lado de Tarefas por status; Tarefas por responsável, a linha toda.
+- **Fronteira:** só sai o painel. Não mudam as regras de cálculo, os outros painéis nem a casca.
+- **Ver:** `https://pernalombr4.github.io/prototipos/painel-de-tarefas`. Sem print, a pedido da redatora.
+
 ## Rodada 3 · 2026-09-30
 
 - **Pedido (literal):**
@@ -66,7 +77,7 @@
 |---|---|---|---|
 | Números | valor único | número grande, sem subtexto | sem comparação, por pedido da redatora |
 | SLA | parte de um todo, 3 ou 4 partes | colunas com seletor "Abertas agora" ou "Concluídas no período" | a pesquisa sugeria barra 100%; a redatora pediu colunas e um filtro |
-| Tempo até o prazo | distribuição em faixas ordenadas | colunas, cor por grupo | cor com significado (vencida, a vencer), em vez de um matiz só |
+| Tempo até o prazo (saiu na rodada 4) | distribuição em faixas ordenadas | colunas, cor por grupo | cor com significado (vencida, a vencer), em vez de um matiz só |
 | Próximas a vencer | o que fazer primeiro | lista em ordem de prazo | nenhuma |
 | Criadas e concluídas | 2 séries no tempo | linhas, com o nome na ponta | nenhuma |
 | Tarefas por status | poucas categorias com composição | colunas empilhadas | a pesquisa sugeria barras horizontais; colunas por ser 4 status curtos |
@@ -74,19 +85,19 @@
 | Tarefas por responsável | ranking entre muitas categorias, com composição | barras horizontais empilhadas, top 10, com filtro por parte | nenhuma |
 | Tempo médio de duração | ranking de uma grandeza e onde ela vai | barras horizontais divididas nas partes, da mais lenta à mais rápida | nenhuma |
 
-## Recorte do MVP (rodada 3)
+## Recorte do MVP (rodadas 3 e 4)
 
 Pedido: "como deixaria a funcionalidade no mvp. como enxugaria? tiraria algumas opçoes da tela? reduziria a quantidade de graficos? ambos? faça uma escolha pelo vies de produto mesmo". A resposta é **os 2**. O detalhe está no botão MVP do protótipo e no `mvp.ts`.
 
 - **O trabalho:** "quando abro a semana, quero ver o que venceu ou está para vencer, e com quem, para cobrar antes de virar problema". Em segundo lugar, saber se a equipe entrega no prazo e se a fila cresce.
-- **Fica (9 painéis fixos):**
+- **Fica (8 painéis fixos; 9 na rodada 3, com Tempo até o prazo):**
   - Vencidas, A vencer, Concluídas no prazo e Tempo médio de conclusão;
-  - Tempo até o prazo; Criadas e concluídas; Tarefas por status; Tarefas por responsável;
+  - Criadas e concluídas; Tarefas por status; Tarefas por responsável;
   - Tempo médio de duração, por fluxo, etapa e tarefa (decisão da redatora: "o mvp precisa ter");
   - filtros de período e responsável;
   - a lista com a quickview, que é componente nativo e já existe.
 - **Sai:**
-  - arrastar, redimensionar e o botão Painéis (com 9 painéis, arrumar não muda decisão);
+  - arrastar, redimensionar e o botão Painéis (com 8 painéis, arrumar não muda decisão);
   - SLA e Próximas a vencer (repetem os números);
   - Tarefas por prioridade (a tarefa de etapa não tem prioridade, e em develop quase tudo é normal);
   - Abertas e Concluídas como números;

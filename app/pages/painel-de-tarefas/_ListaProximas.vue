@@ -1,11 +1,12 @@
 <script setup lang="ts">
 /**
  * Próximas a vencer: painel próprio desde a rodada 2 (antes era o rodapé do
- * "Tempo até o prazo"), com rolagem infinita no lugar do corte em 5.
+ * "Tempo até o prazo", que saiu na rodada 4), com rolagem infinita no lugar
+ * do corte em 5.
  *
  * A lista vem inteira de `proximasAVencer` e aparece em lotes. Os subtítulos
- * fixos ("Em até 24 h", "Em 1 a 7 dias"...) repetem as faixas do painel de
- * prazos, e o dia do prazo ganha a cor de alerta, como no Linear e no ClickUp.
+ * fixos ("Em até 24 h", "Em 1 a 7 dias"...) são as faixas de prazo, e o dia do
+ * prazo ganha a cor de alerta, como no Linear e no ClickUp.
  */
 import { AGORA } from './mocks'
 import { DIA, faixaDe, nomeDoResponsavel } from './metricas'

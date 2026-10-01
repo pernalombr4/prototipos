@@ -17,7 +17,7 @@ import type { ItemDaGrade } from '~/components/ux/UxGradeDePaineis.vue'
 import type { IdDoPainel } from './paineis'
 
 /**
- * 9 painéis, arranjo fixo. Os 4 números seguem o `HomeStats` do template (4
+ * 8 painéis, arranjo fixo. Os 4 números seguem o `HomeStats` do template (4
  * por linha). O tempo médio de duração entra por decisão da redatora (rodada
  * 3: "o MVP precisa ter o tempo médio de duração por fluxo, por etapa e por
  * tarefa").
@@ -27,10 +27,9 @@ export const LAYOUT_MVP: ItemDaGrade[] = [
   { id: 'aVencer', w: 3, h: 3 },
   { id: 'noPrazo', w: 3, h: 3 },
   { id: 'tempo', w: 3, h: 3 },
-  { id: 'prazos', w: 5, h: 7 },
-  { id: 'serie', w: 7, h: 7 },
+  { id: 'serie', w: 8, h: 7 },
   { id: 'contagemStatus', w: 4, h: 7 },
-  { id: 'responsaveis', w: 8, h: 7 },
+  { id: 'responsaveis', w: 12, h: 7 },
   { id: 'tempos', w: 12, h: 8 },
 ]
 
@@ -42,12 +41,11 @@ export interface ItemDoRecorte {
 }
 
 export const RECORTE = {
-  resumo: '9 painéis fixos, 2 filtros e a lista com quickview ao clicar. Fica o tempo médio de duração por fluxo, etapa e tarefa. Sai a personalização e sai o que repete outro painel.',
+  resumo: '8 painéis fixos, 2 filtros e a lista com quickview ao clicar. Fica o tempo médio de duração por fluxo, etapa e tarefa. Sai a personalização e sai o que repete outro painel.',
   trabalho: 'Quando abro a semana, quero ver o que venceu ou está para vencer, e com quem, para cobrar antes de virar problema. Em segundo lugar: saber se a equipe entrega no prazo e se a fila cresce.',
   fica: [
     { oQue: 'Tempo médio de duração, por fluxo, por etapa e por tarefa', porque: 'Decisão da redatora: o MVP precisa dizer onde o tempo vai. A barra do fluxo se divide nas etapas, com a mais lenta em amarelo, e a da tarefa em espera e execução. Pede 2 leituras além da agregação (ver "No back").' },
     { oQue: 'Vencidas, A vencer, Concluídas no prazo e Tempo médio de conclusão', porque: 'Os 4 números respondem o que está atrasado, o que vai atrasar, se a equipe entrega no prazo e quanto demora. 4 por linha, como o template do Nuxt UI.' },
-    { oQue: 'Tempo até o prazo (faixas)', porque: 'É o "tempo que falta para vencer" da demanda, e mostra se o atraso é recente ou antigo.' },
     { oQue: 'Criadas e concluídas', porque: 'É a "contagem por período" da demanda e responde se a fila cresce. A granularidade segue o período sozinha.' },
     { oQue: 'Tarefas por responsável, em gráfico', porque: 'É o "com quem" do trabalho principal: a fila de cada pessoa, grupo e "Todo mundo", com o filtro Pendente, Em andamento, Vencida e Concluída. Abre em Vencida. A tabela abre como detalhe.' },
     { oQue: 'Tarefas por status', porque: 'Pendente, em andamento, bloqueada e concluída: o status virtual que a demanda pede, num só vocabulário.' },
@@ -56,7 +54,7 @@ export const RECORTE = {
     { oQue: '"Como calculamos"', porque: 'Custa um texto por painel e dá confiança no número: diz de onde vem cada conta.' },
   ] as ItemDoRecorte[],
   sai: [
-    { oQue: 'Arrastar, redimensionar e o botão Painéis', porque: 'Com 9 painéis, arrumar a tela não muda decisão nenhuma. Pede componente de grade no SDK e preferência por membro no back. Entra quando o catálogo crescer.' },
+    { oQue: 'Arrastar, redimensionar e o botão Painéis', porque: 'Com 8 painéis, arrumar a tela não muda decisão nenhuma. Pede componente de grade no SDK e preferência por membro no back. Entra quando o catálogo crescer.' },
     { oQue: 'SLA', porque: 'Repete os números (vencidas, a vencer, no prazo) com outro desenho.' },
     { oQue: 'Tarefas por prioridade', porque: 'Só a tarefa rápida e a do Spaceflow têm prioridade; a tarefa de etapa grava "0" e fica de fora. Em develop, 145 de 161 tarefas são normais: o painel diria "quase tudo é normal". Entra quando a tarefa de etapa ganhar prioridade.' },
     { oQue: 'Próximas a vencer', porque: 'O número "A vencer" abre a mesma lista, em ordem de prazo.' },

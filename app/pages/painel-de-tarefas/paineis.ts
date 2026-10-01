@@ -12,7 +12,7 @@ import type { ItemDaGrade, LimitesDoPainel } from '~/components/ux/UxGradeDePain
 
 export type IdDoPainel =
   | 'abertas' | 'vencidas' | 'aVencer' | 'concluidas' | 'noPrazo' | 'tempo'
-  | 'sla' | 'prazos' | 'proximas'
+  | 'sla' | 'proximas'
   | 'serie' | 'contagemStatus' | 'prioridade'
   | 'responsaveis'
   | 'tempos'
@@ -36,10 +36,10 @@ export const PAINEIS: DefinicaoDoPainel[] = [
   { id: 'concluidas', grupo: 'numeros', icone: 'i-lucide-circle-check', padrao: { w: 2, h: 3 }, limites: NUMERO },
   { id: 'noPrazo', grupo: 'numeros', icone: 'i-lucide-target', padrao: { w: 2, h: 3 }, limites: NUMERO },
   { id: 'tempo', grupo: 'numeros', icone: 'i-lucide-timer', padrao: { w: 2, h: 3 }, limites: NUMERO },
-  // Rodada 3: os 3 de prazo numa linha; o SLA virou colunas com o seletor "Abertas agora" ou "Concluídas no período".
-  { id: 'sla', grupo: 'prazo', icone: 'i-lucide-chart-column', padrao: { w: 4, h: 7 }, limites: { minW: 3, maxW: 12, minH: 6, maxH: 12 } },
-  { id: 'prazos', grupo: 'prazo', icone: 'i-lucide-hourglass', padrao: { w: 4, h: 7 }, limites: { minW: 3, maxW: 12, minH: 6, maxH: 12 } },
-  { id: 'proximas', grupo: 'prazo', icone: 'i-lucide-calendar-clock', padrao: { w: 4, h: 7 }, limites: { minW: 3, maxW: 12, minH: 4, maxH: 16 } },
+  // Rodada 3: o SLA virou colunas com o seletor "Abertas agora" ou "Concluídas no período".
+  // Rodada 4: "Tempo até o prazo" saiu ("é inútil"); SLA e Próximas a vencer dividem a linha.
+  { id: 'sla', grupo: 'prazo', icone: 'i-lucide-chart-column', padrao: { w: 6, h: 7 }, limites: { minW: 3, maxW: 12, minH: 6, maxH: 12 } },
+  { id: 'proximas', grupo: 'prazo', icone: 'i-lucide-calendar-clock', padrao: { w: 6, h: 7 }, limites: { minW: 3, maxW: 12, minH: 4, maxH: 16 } },
   { id: 'serie', grupo: 'volume', icone: 'i-lucide-chart-line', padrao: { w: 8, h: 7 }, limites: { minW: 4, maxW: 12, minH: 5, maxH: 12 } },
   { id: 'contagemStatus', grupo: 'volume', icone: 'i-lucide-chart-column-stacked', padrao: { w: 4, h: 7 }, limites: { minW: 3, maxW: 12, minH: 5, maxH: 12 } },
   { id: 'responsaveis', grupo: 'pessoas', icone: 'i-lucide-chart-bar', padrao: { w: 8, h: 7 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 16 } },
@@ -62,7 +62,7 @@ export function layoutPadrao(): ItemDaGrade[] {
  * O arranjo de cada pessoa. No protótipo fica no `localStorage` do navegador
  * (declarado no DECISOES.md); no produto, numa preferência por membro.
  */
-const CHAVE = 'enspace-prototipos:painel-de-tarefas:layout:v4'
+const CHAVE = 'enspace-prototipos:painel-de-tarefas:layout:v5'
 
 export function lerLayout(): ItemDaGrade[] | null {
   try {
