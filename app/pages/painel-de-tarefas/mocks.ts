@@ -600,6 +600,18 @@ const nomesDeTarefaAvulsa = [
   'Revisar resposta ao cliente sobre o chamado de acesso',
 ]
 
+/**
+ * Em develop, das 161 tarefas de `/ws/tasks`, 145 são normais, 8 altas, 7
+ * urgentes e 1 baixa. Aqui, 1 em cada 9 normais vira baixa e 1 em cada 13
+ * vira urgente, para as 4 colunas do painel de prioridade terem tarefa aberta.
+ */
+function comBaixa(p: Task['priority'], i: number): Task['priority'] {
+  if (p !== 'normal') return p
+  if (i % 9 === 4) return 'low'
+  if (i % 13 === 6) return 'urgent'
+  return p
+}
+
 function tarefaBase(parcial: Partial<Task> & Pick<Task, 'id' | 'name' | 'status' | 'created_at'>): Task {
   return {
     updated_at: parcial.created_at,
@@ -722,7 +734,8 @@ function tarefaBase(parcial: Partial<Task> & Pick<Task, 'id' | 'name' | 'status'
       id: tarefaId,
       name: escolher(nomesDeTarefaAvulsa),
       status,
-      priority: chance(0.15) ? 'high' : chance(0.05) ? 'urgent' : 'normal',
+      // A baixa sai do resto da divisão e não de `chance`: o sorteio dos outros campos não muda.
+      priority: comBaixa(chance(0.15) ? 'high' : chance(0.05) ? 'urgent' : 'normal', i),
       created_at: new Date(criada),
       updated_at: new Date(feita ? Math.min(concluida, criada + 60 * DIA) : criada),
       due_date: prazo === null ? null : new Date(prazo),
@@ -747,7 +760,7 @@ function tarefaBase(parcial: Partial<Task> & Pick<Task, 'id' | 'name' | 'status'
       id: id++,
       name: escolher(nomesDeTarefaAvulsa),
       status: feita ? 'completed' : chance(0.45) ? 'working' : chance(0.08) ? 'blocked' : 'pending',
-      priority: chance(0.2) ? 'high' : 'normal',
+      priority: comBaixa(chance(0.2) ? 'high' : 'normal', i + 3),
       created_at: new Date(criada),
       updated_at: new Date(feita ? concluida : criada),
       due_date: new Date(prazo),

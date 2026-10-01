@@ -1,22 +1,20 @@
 <script setup lang="ts">
 /**
- * O corpo de um painel de número: valor, variação e detalhe. O corpo inteiro é
- * um botão e abre a lista das tarefas que formam o número (regra 25: uma ação,
- * um alvo). O cabeçalho, com ícone, selo "Agora" ou "No período" e título em
- * caixa alta, é da moldura (`_Painel.vue`, modo `compacto`).
+ * O corpo de um painel de número: o valor, e mais nada (rodada 3: "Abertas 174
+ * já era informação suficiente. Não precisa do subtexto", nem do selo de
+ * variação). O detalhe (o que compõe o número, o período anterior) mora na
+ * quickview da lista, que abre ao clicar.
  *
- * Variação num `UBadge` suave, como o `HomeStats` do template do Nuxt UI e a
- * Home do admin. A cor do texto sobe para o tom 700 (300 no escuro): o tom
- * padrão do badge não passa em contraste (regra do `tema-contraste.ts`).
+ * O corpo inteiro é um botão (regra 25: uma ação, um alvo). A cor do valor
+ * sobe para o tom 700 (300 no escuro): o tom padrão não passa em contraste.
  */
 type Cor = 'neutral' | 'error' | 'warning' | 'success'
 
 const props = defineProps<{
   valor: string
-  detalhe: string
   cor: Cor
-  /** Comparação com o período anterior, quando existe. */
-  variacao?: { texto: string, ajuda: string, tom: 'bom' | 'ruim' | 'neutro', leitor: string } | null
+  /** O nome do número, para o leitor de tela: "Vencidas: 113". */
+  rotulo: string
 }>()
 
 const emit = defineEmits<{ abrir: [] }>()
@@ -27,31 +25,15 @@ const corDoValor = computed(() => ({
   warning: 'text-warning-700 dark:text-warning-300',
   success: 'text-success-700 dark:text-success-300',
 }[props.cor]))
-
-const badge = computed(() => {
-  if (!props.variacao) return null
-  return {
-    bom: { color: 'success' as const, classe: 'text-success-700 dark:text-success-300' },
-    ruim: { color: 'error' as const, classe: 'text-error-700 dark:text-error-300' },
-    neutro: { color: 'neutral' as const, classe: '' },
-  }[props.variacao.tom]
-})
 </script>
 
 <template>
   <button
     type="button"
-    class="group flex min-h-0 w-full flex-1 flex-col items-start gap-1 rounded-b-lg px-4 pb-3 text-left outline-none transition-colors hover:bg-elevated/40 focus-visible:bg-elevated/60 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+    class="flex min-h-0 w-full flex-1 items-end rounded-b-lg px-4 pb-3 text-left outline-none transition-colors hover:bg-elevated/40 focus-visible:bg-elevated/60 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+    :aria-label="`${rotulo}: ${valor}`"
     @click="emit('abrir')"
   >
-    <span class="flex w-full flex-wrap items-center gap-x-2 gap-y-0.5">
-      <span class="text-2xl font-semibold tabular-nums leading-8" :class="corDoValor">{{ valor }}</span>
-      <UTooltip v-if="variacao && badge" :text="variacao.ajuda">
-        <UBadge :color="badge.color" variant="subtle" size="sm" class="tabular-nums" :class="badge.classe">
-          {{ variacao.texto }}<span class="sr-only"> {{ variacao.leitor }}</span>
-        </UBadge>
-      </UTooltip>
-    </span>
-    <span class="line-clamp-2 text-xs leading-snug text-muted">{{ detalhe }}</span>
+    <span class="text-3xl font-semibold tabular-nums leading-9" :class="corDoValor">{{ valor }}</span>
   </button>
 </template>

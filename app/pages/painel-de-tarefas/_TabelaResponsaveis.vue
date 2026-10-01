@@ -22,20 +22,23 @@ import { duracao, numero, porcentagem } from './formatar'
 const props = defineProps<{
   t: Textos
   linhas: LinhaDeResponsavel[]
+  /** Recorte do MVP (andaime): só "Designada para", sem a troca de leitura. */
+  semModo?: boolean
 }>()
 
 const modo = defineModel<ModoDoResponsavel>('modo', { required: true })
 const emit = defineEmits<{ abrir: [chave: string] }>()
 
-const ordem = ref<EnTableSort>({ key: 'abertas', direction: 'desc' })
+const ordem = ref<EnTableSort>({ key: 'vencidas', direction: 'desc' })
 
 const colunas = computed<EnTableColumn[]>(() => [
   { key: 'nome', label: props.t.resp.responsavel, sortable: true },
-  { key: 'abertas', label: props.t.resp.abertas, sortable: true, align: 'right' },
+  { key: 'pendentes', label: props.t.resp.pendentes, sortable: true, align: 'right' },
+  { key: 'emAndamento', label: props.t.resp.emAndamento, sortable: true, align: 'right' },
   { key: 'vencidas', label: props.t.resp.vencidas, sortable: true, align: 'right' },
   { key: 'concluidas', label: props.t.resp.concluidas, sortable: true, align: 'right' },
   { key: 'noPrazoPct', label: props.t.resp.noPrazo, sortable: true, align: 'right' },
-  { key: 'tempoMediano', label: props.t.resp.tempo, sortable: true, align: 'right' },
+  { key: 'tempoMedio', label: props.t.resp.tempo, sortable: true, align: 'right' },
 ])
 
 const linhasOrdenadas = computed(() => {
@@ -59,7 +62,7 @@ const visiveis = ref(LOTE)
 watch([() => props.linhas, ordem, modo], () => { visiveis.value = LOTE })
 
 /** Larguras iniciais: a tabela cabe nas 8 colunas do arranjo padrão sem rolar para o lado. */
-const larguras = ref<Record<string, number>>({ nome: 230, abertas: 96, vencidas: 100, concluidas: 110, noPrazoPct: 96, tempoMediano: 130 })
+const larguras = ref<Record<string, number>>({ nome: 230, pendentes: 110, emAndamento: 130, vencidas: 100, concluidas: 110, noPrazoPct: 96, tempoMedio: 120 })
 
 const iniciais = new Map(responsaveisDisponiveis.pessoas.map(p => [p.chave, p.iniciais]))
 
@@ -79,7 +82,7 @@ const abas = computed(() => [
 
 <template>
   <div class="flex min-h-0 flex-1 flex-col">
-    <div class="flex items-center gap-2 px-4 pb-2">
+    <div v-if="!semModo" class="flex items-center gap-2 px-4 pb-2">
       <span class="text-xs text-muted">{{ t.resp.modo }}</span>
       <UTabs
         v-model="modo"
@@ -123,7 +126,10 @@ const abas = computed(() => [
             </span>
           </span>
         </template>
-        <template #cell-abertas="{ value }">
+        <template #cell-pendentes="{ value }">
+          <span class="tabular-nums">{{ numero(value as number, t) }}</span>
+        </template>
+        <template #cell-emAndamento="{ value }">
           <span class="tabular-nums">{{ numero(value as number, t) }}</span>
         </template>
         <template #cell-vencidas="{ value }">
@@ -138,7 +144,7 @@ const abas = computed(() => [
             :class="value === null ? 'text-muted' : (value as number) < 0.7 ? 'font-medium text-error-700 dark:text-error-300' : (value as number) < 0.85 ? 'text-warning-700 dark:text-warning-300' : 'text-success-700 dark:text-success-300'"
           >{{ porcentagem(value as number | null, t) }}</span>
         </template>
-        <template #cell-tempoMediano="{ value }">
+        <template #cell-tempoMedio="{ value }">
           <span class="tabular-nums text-toned">{{ duracao(value as number | null, t) }}</span>
         </template>
       </EnTable>

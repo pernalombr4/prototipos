@@ -13,9 +13,9 @@ import type { ItemDaGrade, LimitesDoPainel } from '~/components/ux/UxGradeDePain
 export type IdDoPainel =
   | 'abertas' | 'vencidas' | 'aVencer' | 'concluidas' | 'noPrazo' | 'tempo'
   | 'sla' | 'prazos' | 'proximas'
-  | 'serie' | 'status'
+  | 'serie' | 'contagemStatus' | 'prioridade'
   | 'responsaveis'
-  | 'tempoTarefa' | 'tempoEtapa' | 'tempoFluxo'
+  | 'tempos'
 
 export type GrupoDoPainel = 'numeros' | 'prazo' | 'volume' | 'pessoas' | 'tempos'
 
@@ -36,15 +36,16 @@ export const PAINEIS: DefinicaoDoPainel[] = [
   { id: 'concluidas', grupo: 'numeros', icone: 'i-lucide-circle-check', padrao: { w: 2, h: 3 }, limites: NUMERO },
   { id: 'noPrazo', grupo: 'numeros', icone: 'i-lucide-target', padrao: { w: 2, h: 3 }, limites: NUMERO },
   { id: 'tempo', grupo: 'numeros', icone: 'i-lucide-timer', padrao: { w: 2, h: 3 }, limites: NUMERO },
-  { id: 'sla', grupo: 'prazo', icone: 'i-lucide-gauge', padrao: { w: 7, h: 7 }, limites: { minW: 4, maxW: 12, minH: 6, maxH: 12 } },
-  { id: 'prazos', grupo: 'prazo', icone: 'i-lucide-hourglass', padrao: { w: 5, h: 7 }, limites: { minW: 3, maxW: 12, minH: 6, maxH: 12 } },
-  { id: 'serie', grupo: 'volume', icone: 'i-lucide-chart-column', padrao: { w: 8, h: 7 }, limites: { minW: 4, maxW: 12, minH: 5, maxH: 12 } },
+  // Rodada 3: os 3 de prazo numa linha; o SLA virou colunas com o seletor "Abertas agora" ou "Concluídas no período".
+  { id: 'sla', grupo: 'prazo', icone: 'i-lucide-chart-column', padrao: { w: 4, h: 7 }, limites: { minW: 3, maxW: 12, minH: 6, maxH: 12 } },
+  { id: 'prazos', grupo: 'prazo', icone: 'i-lucide-hourglass', padrao: { w: 4, h: 7 }, limites: { minW: 3, maxW: 12, minH: 6, maxH: 12 } },
   { id: 'proximas', grupo: 'prazo', icone: 'i-lucide-calendar-clock', padrao: { w: 4, h: 7 }, limites: { minW: 3, maxW: 12, minH: 4, maxH: 16 } },
-  { id: 'responsaveis', grupo: 'pessoas', icone: 'i-lucide-users', padrao: { w: 8, h: 8 }, limites: { minW: 5, maxW: 12, minH: 4, maxH: 16 } },
-  { id: 'status', grupo: 'volume', icone: 'i-lucide-chart-bar-stacked', padrao: { w: 4, h: 8 }, limites: { minW: 3, maxW: 12, minH: 6, maxH: 12 } },
-  { id: 'tempoTarefa', grupo: 'tempos', icone: 'i-lucide-square-check', padrao: { w: 12, h: 8 }, limites: { minW: 6, maxW: 12, minH: 4, maxH: 16 } },
-  { id: 'tempoEtapa', grupo: 'tempos', icone: 'i-lucide-columns-3', padrao: { w: 7, h: 9 }, limites: { minW: 4, maxW: 12, minH: 5, maxH: 16 } },
-  { id: 'tempoFluxo', grupo: 'tempos', icone: 'i-lucide-workflow', padrao: { w: 5, h: 9 }, limites: { minW: 4, maxW: 12, minH: 5, maxH: 16 } },
+  { id: 'serie', grupo: 'volume', icone: 'i-lucide-chart-line', padrao: { w: 8, h: 7 }, limites: { minW: 4, maxW: 12, minH: 5, maxH: 12 } },
+  { id: 'contagemStatus', grupo: 'volume', icone: 'i-lucide-chart-column-stacked', padrao: { w: 4, h: 7 }, limites: { minW: 3, maxW: 12, minH: 5, maxH: 12 } },
+  { id: 'responsaveis', grupo: 'pessoas', icone: 'i-lucide-chart-bar', padrao: { w: 8, h: 7 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 16 } },
+  { id: 'prioridade', grupo: 'volume', icone: 'i-lucide-flag', padrao: { w: 4, h: 7 }, limites: { minW: 3, maxW: 12, minH: 5, maxH: 12 } },
+  // Rodada 3: tarefa, etapa e fluxo voltam a ser um painel só, com seletor de nível.
+  { id: 'tempos', grupo: 'tempos', icone: 'i-lucide-chart-gantt', padrao: { w: 12, h: 8 }, limites: { minW: 5, maxW: 12, minH: 5, maxH: 16 } },
 ]
 
 export const GRUPOS: GrupoDoPainel[] = ['numeros', 'prazo', 'volume', 'pessoas', 'tempos']
@@ -61,7 +62,7 @@ export function layoutPadrao(): ItemDaGrade[] {
  * O arranjo de cada pessoa. No protótipo fica no `localStorage` do navegador
  * (declarado no DECISOES.md); no produto, numa preferência por membro.
  */
-const CHAVE = 'enspace-prototipos:painel-de-tarefas:layout:v1'
+const CHAVE = 'enspace-prototipos:painel-de-tarefas:layout:v4'
 
 export function lerLayout(): ItemDaGrade[] | null {
   try {
@@ -83,4 +84,30 @@ export function gravarLayout(layout: ItemDaGrade[]) {
   catch {
     // Sem armazenamento (janela anônima, bloqueio): o arranjo vale até o reload.
   }
+}
+
+/* ------------------------------------------------------------------ *
+ * A quickview da lista lateral (rodada 3)                              *
+ * ------------------------------------------------------------------ */
+
+/** Uma linha do resumo: ícone, rótulo e valor, como os "Details" do admin. */
+export interface LinhaDoResumo {
+  icone: string
+  rotulo: string
+  valor: string
+  tom?: 'error' | 'warning' | 'success'
+  /** A parte do painel que a pessoa clicou (a faixa, a situação, o status). */
+  destaque?: boolean
+}
+
+/** O que a quickview mostra: o resumo do painel de onde a lista saiu. */
+export interface ResumoDoRecorte {
+  painel: IdDoPainel
+  /** O recorte aberto: "Vencidas", "SLA · Atrasada", "Carla Nunes". */
+  titulo: string
+  /** O número principal do recorte, quando há um. */
+  valor?: string
+  /** "Agora" ou "No período", e o período. */
+  selos: string[]
+  linhas: LinhaDoResumo[]
 }

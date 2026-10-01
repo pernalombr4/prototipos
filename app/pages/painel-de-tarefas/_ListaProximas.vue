@@ -79,7 +79,7 @@ function tom(x: TarefaDoPainel) {
               <UIcon name="i-lucide-alarm-clock" class="size-4 shrink-0" :class="tom(x).icone" />
               <span class="min-w-0 flex-1">
                 <span class="block truncate text-highlighted">{{ x.nome }}</span>
-                <span class="block truncate text-xs text-muted">{{ responsavel(x) }}<template v-if="x.etapa"> · {{ x.etapa }}</template><template v-else-if="x.fluxo"> · {{ x.fluxo }}</template></span>
+                <span class="block truncate text-xs text-muted">{{ responsavel(x) }}</span>
               </span>
               <span class="shrink-0 text-xs tabular-nums" :class="tom(x).texto">
                 {{ t.proximas.venceEm(duracao(x.prazo! - AGORA, t)) }}

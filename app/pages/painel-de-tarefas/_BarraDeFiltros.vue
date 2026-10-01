@@ -21,7 +21,11 @@ import { categoriasDisponiveis, intervaloDo, responsaveisDisponiveis } from './m
 import type { Textos } from './textos'
 import { dataCurta } from './formatar'
 
-const props = defineProps<{ t: Textos }>()
+const props = defineProps<{
+  t: Textos
+  /** Recorte do MVP (andaime): só período e responsável. */
+  simples?: boolean
+}>()
 const filtros = defineModel<Filtros>({ required: true })
 
 const PERIODOS: ChaveDoPeriodo[] = ['7d', '30d', '90d', 'mes', 'ano', '12m', 'tudo']
@@ -105,6 +109,7 @@ const girar = 'group-data-[state=open]:rotate-180 transition-transform duration-
     </UPopover>
 
     <USelect
+      v-if="!simples"
       v-model="filtros.origem"
       :items="origens"
       variant="ghost"
@@ -134,6 +139,7 @@ const girar = 'group-data-[state=open]:rotate-180 transition-transform duration-
     </USelectMenu>
 
     <USelectMenu
+      v-if="!simples"
       v-model="filtros.categorias"
       :items="opcoesDeCategoria"
       value-key="value"

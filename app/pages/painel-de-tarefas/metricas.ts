@@ -452,6 +452,37 @@ export function proximasAVencer(lista: TarefaDoPainel[], agora = AGORA) {
 }
 
 /* ------------------------------------------------------------------ *
+ * Prioridade                                                           *
+ * ------------------------------------------------------------------ */
+
+export type Prioridade = NonNullable<TarefaDoPainel['prioridade']>
+
+/** Da mais urgente à menos: a ordem das colunas. */
+export const PRIORIDADES: Prioridade[] = ['urgent', 'high', 'normal', 'low']
+
+export interface BlocoPrioridade {
+  abertas: Record<Prioridade, number>
+  /**
+   * Abertas sem prioridade: as tarefas de etapa. `/c-flow-item-tasks` grava
+   * `priority: "0"` em todas (42 de 42, medido em develop); só `/ws/tasks`
+   * (rápida e Spaceflow) tem baixa, normal, alta e urgente.
+   */
+  semPrioridade: number
+}
+
+/** As abertas agora, por prioridade. */
+export function porPrioridade(lista: TarefaDoPainel[]): BlocoPrioridade {
+  const abertas = { urgent: 0, high: 0, normal: 0, low: 0 }
+  let semPrioridade = 0
+  for (const t of lista) {
+    if (!estaAberta(t)) continue
+    if (t.prioridade && t.prioridade in abertas) abertas[t.prioridade]++
+    else semPrioridade++
+  }
+  return { abertas, semPrioridade }
+}
+
+/* ------------------------------------------------------------------ *
  * Criadas e concluídas por período                                     *
  * ------------------------------------------------------------------ */
 
@@ -547,10 +578,37 @@ export interface LinhaDeResponsavel {
   tipo: TipoDeResponsavel
   nome: string
   abertas: number
+  /**
+   * As partes da barra do gráfico (rodada 3), sem sobreposição: vencida é a
+   * aberta de prazo passado, em qualquer status; pendente, em andamento e
+   * bloqueada são as outras abertas, pelo status. As 4 são de agora; a
+   * concluída é do período. Abertas = vencidas + pendentes + em andamento +
+   * bloqueadas.
+   */
   vencidas: number
+  pendentes: number
+  emAndamento: number
+  bloqueadas: number
   concluidas: number
   noPrazoPct: number | null
-  tempoMediano: number | null
+  /** A média, não a mediana (rodada 3: "é a média que tem que ser entregue"). */
+  tempoMedio: number | null
+}
+
+/**
+ * O seletor do gráfico de responsáveis: "Todos" mostra a barra agrupada; os
+ * outros, uma parte só (ordem do pedido da redatora).
+ */
+export type FiltroDoResponsavel = 'todos' | 'pendentes' | 'emAndamento' | 'vencidas' | 'concluidas'
+export const FILTROS_DO_RESPONSAVEL: FiltroDoResponsavel[] = ['todos', 'pendentes', 'emAndamento', 'vencidas', 'concluidas']
+
+/** Em qual parte da barra a tarefa entra (null: concluída fora do período ou removida). */
+export function parteDoResponsavel(t: TarefaDoPainel, i: Intervalo): Exclude<FiltroDoResponsavel, 'todos'> | 'bloqueadas' | null {
+  if (estaAberta(t)) {
+    if (situacao(t) === 'vencida') return 'vencidas'
+    return t.status === 'nao_iniciada' ? 'pendentes' : t.status === 'em_andamento' ? 'emAndamento' : 'bloqueadas'
+  }
+  return t.status === 'concluida' && dentro(t.concluidaEm, i) ? 'concluidas' : null
 }
 
 export function nomeDoResponsavel(chave: string, rotulos: { todos: string, externo: string, sem: string }) {
@@ -589,10 +647,13 @@ export function porResponsavel(
       tipo: chave === 'todos' ? 'todos' : chave === 'externo' ? 'externo' : chave === 'sem' ? 'sem' : chave.startsWith('g:') ? 'grupo' : 'pessoa',
       nome: nomeDoResponsavel(chave, rotulos),
       abertas: ts.filter(estaAberta).length,
-      vencidas: ts.filter(t => estaAberta(t) && situacao(t) === 'vencida').length,
+      vencidas: ts.filter(t => parteDoResponsavel(t, i) === 'vencidas').length,
+      pendentes: ts.filter(t => parteDoResponsavel(t, i) === 'pendentes').length,
+      emAndamento: ts.filter(t => parteDoResponsavel(t, i) === 'emAndamento').length,
+      bloqueadas: ts.filter(t => parteDoResponsavel(t, i) === 'bloqueadas').length,
       concluidas: concluidas.length,
       noPrazoPct: taxa.pct,
-      tempoMediano: tempo?.mediana ?? null,
+      tempoMedio: tempo?.media ?? null,
     } satisfies LinhaDeResponsavel
   })
 }
@@ -605,33 +666,52 @@ export interface TempoDaTarefa {
   nome: string
   origem: Origem
   fluxo: string | null
+  /** Só na tarefa de etapa: a etapa onde ela vive. O Spaceflow não tem etapa. */
+  etapa: string | null
   estat: Estatistica
-  /** Só programadas com "Habilitar Atribuição": criada até assumida. */
+  /**
+   * Só programadas com "Habilitar Atribuição": a média de criada até assumida
+   * e de assumida até concluída. Só quando todas as concluídas do grupo foram
+   * assumidas: aí espera + execução = a média do grupo, e a barra divide.
+   */
   espera: number | null
-  /** Só programadas com "Habilitar Atribuição": assumida até concluída. */
   execucao: number | null
+  /** Abertas agora com o mesmo nome e fluxo, e há quanto tempo (mediana). */
+  emAndamento: number
+  idadeMediana: number | null
 }
 
-export function temposPorTarefa(lista: TarefaDoPainel[], i: Intervalo): TempoDaTarefa[] {
+export function temposPorTarefa(lista: TarefaDoPainel[], i: Intervalo, agora = AGORA): TempoDaTarefa[] {
+  // Tarefa manual não tem "tipo": o nome livre de cada uma não agrupa nada.
+  const chaveDe = (t: TarefaDoPainel) => t.origem === 'manual' ? '__avulsa' : `${t.motor}|${t.fluxo}|${t.nome}`
   const concluidas = concluidasEm(lista, i).filter(t => t.concluidaEm !== null)
   const porNome = new Map<string, TarefaDoPainel[]>()
   for (const t of concluidas) {
-    // Tarefa manual não tem "tipo": o nome livre de cada uma não agrupa nada.
-    const chave = t.origem === 'manual' ? '__avulsa' : `${t.motor}|${t.fluxo}|${t.nome}`
+    const chave = chaveDe(t)
     if (!porNome.has(chave)) porNome.set(chave, [])
     porNome.get(chave)!.push(t)
   }
+  const abertas = new Map<string, number[]>()
+  for (const t of lista) {
+    if (!estaAberta(t)) continue
+    const chave = chaveDe(t)
+    if (!abertas.has(chave)) abertas.set(chave, [])
+    abertas.get(chave)!.push(agora - t.criadaEm)
+  }
   return [...porNome.entries()].map(([chave, ts]) => {
-    const comAssuncao = ts.filter(t => t.assumidaEm !== null)
-    const espera = estatistica(comAssuncao.map(t => t.assumidaEm! - t.criadaEm))
-    const execucao = estatistica(comAssuncao.map(t => t.concluidaEm! - t.assumidaEm!))
+    const todasAssumidas = ts.every(t => t.assumidaEm !== null)
+    const espera = todasAssumidas ? estatistica(ts.map(t => t.assumidaEm! - t.criadaEm)) : null
+    const execucao = todasAssumidas ? estatistica(ts.map(t => t.concluidaEm! - t.assumidaEm!)) : null
     return {
       nome: chave === '__avulsa' ? '__avulsa' : ts[0]!.nome,
       origem: ts[0]!.origem,
       fluxo: chave === '__avulsa' ? null : ts[0]!.fluxo,
+      etapa: chave === '__avulsa' ? null : ts[0]!.etapa,
       estat: estatistica(ts.map(t => t.concluidaEm! - t.criadaEm))!,
-      espera: espera?.mediana ?? null,
-      execucao: execucao?.mediana ?? null,
+      espera: espera?.media ?? null,
+      execucao: execucao?.media ?? null,
+      emAndamento: abertas.get(chave)?.length ?? 0,
+      idadeMediana: estatistica(abertas.get(chave) ?? [])?.mediana ?? null,
     }
   }).sort((a, b) => b.estat.mediana - a.estat.mediana)
 }
@@ -696,8 +776,16 @@ export interface TempoDoFluxo {
   estat: Estatistica | null
   emAndamento: number
   idadeMediana: number | null
-  /** Onde o tempo vai: a mediana de cada etapa, ou de cada tarefa do Spaceflow. */
-  composicao: { rotulo: string, mediana: number }[]
+  /**
+   * Onde o tempo vai, pela média, na mesma população do tempo do fluxo:
+   * - categoria: a média de cada etapa nos itens que concluíram o fluxo
+   *   (etapa que o item pulou conta 0), então a soma das partes é a média do
+   *   fluxo;
+   * - Spaceflow: a média de cada tarefa do fluxo. `entre` é o resto (a
+   *   espera entre um nó e outro), quando há.
+   */
+  composicao: { rotulo: string, media: number }[]
+  entre: number
 }
 
 /** Execuções do Spaceflow no escopo do filtro (`/workflows/executions`). */
@@ -720,27 +808,41 @@ export function execucoesDoFiltro(f: Filtros): WorkflowExecution[] {
 export function temposPorFluxo(
   itens: FlowItem[], execs: WorkflowExecution[], lista: TarefaDoPainel[], i: Intervalo, agora = AGORA,
 ): TempoDoFluxo[] {
-  const etapasPorFluxo = temposPorEtapa(itens, i, agora)
   const daCategoria = fluxos.map((fluxo) => {
     const doFluxo = itens.filter(fi => fi.flow === fluxo.id)
+    const etapasDoFluxo = etapas.filter(e => e.fluxo === fluxo.id).sort((a, b) => a.ordem - b.ordem)
     const duracoes: number[] = []
+    const somaPorEtapa = new Map<number, number>(etapasDoFluxo.map(e => [e.id, 0]))
     for (const fi of doFluxo) {
       if (fi.run_status !== 'complete' || !fi.stages_log.length) continue
       const inicio = Date.parse(fi.stages_log[0]!.created_at)
       const fim = Date.parse(fi.stages_log[fi.stages_log.length - 1]!.created_at)
-      if (dentro(fim, i)) duracoes.push(fim - inicio)
+      if (!dentro(fim, i)) continue
+      duracoes.push(fim - inicio)
+      // Cada passagem de start a complete soma na etapa: quem volta à etapa soma 2 vezes.
+      const aberto = new Map<number, number>()
+      for (const l of fi.stages_log) {
+        if (l.status === 'start') aberto.set(l.stage_id, Date.parse(l.created_at))
+        else if (aberto.has(l.stage_id)) {
+          somaPorEtapa.set(l.stage_id, (somaPorEtapa.get(l.stage_id) ?? 0) + Date.parse(l.created_at) - aberto.get(l.stage_id)!)
+          aberto.delete(l.stage_id)
+        }
+      }
     }
+    const estat = estatistica(duracoes)
+    const composicao = estat
+      ? etapasDoFluxo.map(e => ({ rotulo: e.nome, media: (somaPorEtapa.get(e.id) ?? 0) / duracoes.length })).filter(c => c.media > 0)
+      : []
+    const somaDasPartes = composicao.reduce((a, c) => a + c.media, 0)
     const rodando = doFluxo.filter(fi => fi.run_status === 'running' && fi.stages_log.length)
     return {
       fluxo: fluxo.nome,
       tipo: 'categoria' as const,
-      estat: estatistica(duracoes),
+      estat,
       emAndamento: rodando.length,
       idadeMediana: estatistica(rodando.map(fi => agora - Date.parse(fi.stages_log[0]!.created_at)))?.mediana ?? null,
-      composicao: etapasPorFluxo
-        .filter(e => e.fluxo === fluxo.nome && e.estat)
-        .sort((a, b) => a.ordem - b.ordem)
-        .map(e => ({ rotulo: e.etapa, mediana: e.estat!.mediana })),
+      composicao,
+      entre: estat ? Math.max(0, estat.media - somaDasPartes) : 0,
     }
   })
   const doSpaceflow = [...spaceflows.entries()].map(([id, nome]) => {
@@ -755,15 +857,19 @@ export function temposPorFluxo(
       const e = estatistica(lista
         .filter(t => t.fluxo === nome && t.nome === rotulo && t.status === 'concluida' && dentro(t.concluidaEm, i))
         .map(t => t.concluidaEm! - t.criadaEm))
-      return e ? { rotulo, mediana: e.mediana } : null
-    }).filter((x): x is { rotulo: string, mediana: number } => !!x)
+      return e ? { rotulo, media: e.media } : null
+    }).filter((x): x is { rotulo: string, media: number } => !!x)
+    const estat = estatistica(duracoes)
+    const somaDasPartes = composicao.reduce((a, c) => a + c.media, 0)
     return {
       fluxo: nome,
       tipo: 'spaceflow' as const,
-      estat: estatistica(duracoes),
+      estat,
       emAndamento: rodando.length,
       idadeMediana: estatistica(rodando.map(e => agora - new Date(e.created_at).getTime()))?.mediana ?? null,
-      composicao,
+      // Tarefas em paralelo somariam mais que o fluxo: aí a barra não divide.
+      composicao: estat && somaDasPartes <= estat.media ? composicao : [],
+      entre: estat && somaDasPartes <= estat.media ? estat.media - somaDasPartes : 0,
     }
   })
   return [...daCategoria, ...doSpaceflow].filter(f => f.estat || f.emAndamento)

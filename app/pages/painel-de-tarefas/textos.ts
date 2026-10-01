@@ -5,7 +5,7 @@
  * Número, data e plural saem daqui, nunca concatenados no template.
  */
 import type { Idioma } from '~/composables/useIdioma'
-import type { ChaveDoPeriodo, Faixa, Origem, Situacao, StatusVirtual } from './metricas'
+import type { ChaveDoPeriodo, Faixa, Origem, Prioridade, Situacao, StatusVirtual } from './metricas'
 import type { GrupoDoPainel, IdDoPainel } from './paineis'
 
 type Plural = (n: number) => string
@@ -41,20 +41,20 @@ export interface Textos {
   atualizadoAs: (hora: string) => string
   atualizar: string
 
-  /** Nome e descrição de cada painel: no cabeçalho, no catálogo e no leitor de tela. */
+  /** Nome e descrição de cada painel: no cabeçalho, no botão Painéis e no leitor de tela. */
   paineis: Record<IdDoPainel, { titulo: string, descricao: string }>
 
   grade: {
-    personalizar: string
-    concluir: string
-    adicionar: string
-    desfazer: string
-    restaurarPadrao: string
-    dica: string
+    /** O botão da barra: o editor de visibilidade, como o "Colunas" das tabelas. */
+    paineis: string
+    naTela: (n: number, total: number) => string
     soParaVoce: string
+    mostrarTodos: string
+    restaurarPadrao: string
+    desfazer: string
+    grupos: Record<GrupoDoPainel, string>
+    arrasteParaMover: string
     maisAcoes: (nome: string) => string
-    telaCheia: string
-    fecharTelaCheia: string
     tamanhoPadrao: string
     ocultar: string
     mover: (nome: string) => string
@@ -63,19 +63,6 @@ export interface Textos {
     tamanho: (nome: string, w: number, h: number) => string
     ocultado: (nome: string) => string
     restaurado: string
-    semHistorico: string
-    catalogo: {
-      titulo: string
-      descricao: string
-      buscar: string
-      adicionado: string
-      adicionar: string
-      adicionarPainel: (nome: string) => string
-      ocultarPainel: (nome: string) => string
-      nenhum: string
-      grupos: Record<GrupoDoPainel, string>
-      emTela: (n: number, total: number) => string
-    }
     vazioTitulo: string
     vazioTexto: string
   }
@@ -118,9 +105,12 @@ export interface Textos {
     noPrazoDetalhe: (a: string, b: string) => string
     tempoDetalhe: (mediana: string) => string
   }
-  regras: Record<IdDoPainel, string>
+  /** Uma regra por painel; o painel de tempos usa a do nível escolhido. */
+  regras: Record<IdDoPainel | 'tempoTarefa' | 'tempoEtapa' | 'tempoFluxo', string>
 
   sla: {
+    /** O seletor do painel: "Abertas agora" ou "Concluídas no período". */
+    filtro: string
     abertasAgora: string
     concluidasNoPeriodo: string
     prazoIgualACriacao: Plural
@@ -130,9 +120,12 @@ export interface Textos {
   situacao: Record<Situacao | 'removida', string>
   status: Record<StatusVirtual, string>
   statusOrigem: Record<StatusVirtual, string>
+  /** Os nomes da tela de tarefas (Baixa, Normal, Alta, Urgente). */
+  prioridades: Record<Prioridade, string>
 
   prazos: {
     grupos: { vencidas: string, aVencer: string, depois: string }
+    curtas: Record<Faixa, string>
     faixas: Record<Faixa, string>
   }
 
@@ -156,11 +149,19 @@ export interface Textos {
   }
 
   statusBloco: {
+    foraDoPrazo: string
     abertasAgora: string
     noPeriodo: string
   }
 
   resp: {
+    /** O seletor do gráfico: Todos, Pendente, Em andamento, Vencida, Concluída. */
+    filtro: string
+    todos: string
+    pendentes: string
+    emAndamento: string
+    verTabela: string
+    detalhe: string
     modo: string
     designada: string
     executada: string
@@ -177,6 +178,12 @@ export interface Textos {
   }
 
   tempos: {
+    nivel: string
+    niveis: { fluxo: string, etapa: string, tarefa: string }
+    colunaNome: { fluxo: string, etapa: string, tarefa: string }
+    colunaN: { fluxo: string, etapa: string, tarefa: string }
+    dica: { fluxo: string, etapa: string, tarefa: string }
+    tirarRecorte: (nome: string) => string
     tarefa: string
     avulsa: string
     n: string
@@ -196,6 +203,8 @@ export interface Textos {
     etapaSoCategoria: string
     gargalo: string
     composicao: string
+    /** A legenda das barras divididas. */
+    partes: { doFluxo: string, maisLenta: string, entre: string, espera: string, execucao: string }
     tipoDeFluxo: { categoria: string, spaceflow: string }
     contagemComIdade: (n: string, idade: string) => string
   }
@@ -222,6 +231,25 @@ export interface Textos {
     venceEm: (quanto: string) => string
     mostrando: (de: string, ate: string, total: string) => string
     porPagina: (n: number) => string
+    /** A quickview: a coluna de resumo à esquerda da lista, como no admin. */
+    fechar: string
+    resumo: string
+    expandirResumo: string
+    recolherResumo: string
+    alcaDoResumo: string
+    filtrosDoRecorte: string
+    linhas: {
+      dasAbertas: string
+      criadasNoPeriodo: string
+      periodoAnterior: string
+      comPrazo: string
+      maior: string
+      medidas: string
+      tipo: string
+      fluxo: string
+      naLista: string
+      semPrioridade: string
+    }
   }
 
   estados: {
@@ -312,54 +340,39 @@ export const textos: Record<Idioma, Textos> = {
       abertas: { titulo: 'Abertas', descricao: 'Tarefas abertas agora, por status.' },
       vencidas: { titulo: 'Vencidas', descricao: 'Abertas com o prazo já vencido.' },
       aVencer: { titulo: 'A vencer', descricao: 'Abertas que vencem nos próximos 7 dias.' },
-      concluidas: { titulo: 'Concluídas', descricao: 'Concluídas no período, comparadas ao período anterior.' },
+      concluidas: { titulo: 'Concluídas', descricao: 'Concluídas no período.' },
       noPrazo: { titulo: 'Concluídas no prazo', descricao: 'Parte das concluídas com prazo que terminou até o prazo.' },
-      tempo: { titulo: 'Tempo médio de conclusão', descricao: 'Da criação à conclusão, com a mediana.' },
-      sla: { titulo: 'SLA', descricao: 'Situação do prazo das abertas agora e das concluídas no período.' },
+      tempo: { titulo: 'Tempo médio de conclusão', descricao: 'Da criação à conclusão, em média.' },
+      sla: { titulo: 'SLA', descricao: 'Situação do prazo das abertas agora ou das concluídas no período.' },
       prazos: { titulo: 'Tempo até o prazo', descricao: 'Abertas, pelo tempo que falta para vencer.' },
       proximas: { titulo: 'Próximas a vencer', descricao: 'Abertas com prazo à frente, da mais próxima à mais distante.' },
       serie: { titulo: 'Criadas e concluídas', descricao: 'Quantas entraram e quantas saíram em cada período.' },
-      status: { titulo: 'Status e situação do prazo', descricao: 'Cada status dividido pela situação do prazo.' },
-      responsaveis: { titulo: 'Tarefas por responsável', descricao: 'Pessoas, grupos e as tarefas para todo mundo.' },
-      tempoTarefa: { titulo: 'Tempo por tarefa', descricao: 'Da criação à conclusão, por tarefa do fluxo.' },
-      tempoEtapa: { titulo: 'Tempo por etapa', descricao: 'Quanto o item fica em cada etapa do fluxo da categoria.' },
-      tempoFluxo: { titulo: 'Tempo por fluxo', descricao: 'Do início ao fim de cada fluxo, da categoria e do Spaceflow.' },
+      contagemStatus: { titulo: 'Tarefas por status', descricao: 'Quantas estão pendentes, em andamento, bloqueadas e concluídas.' },
+      responsaveis: { titulo: 'Tarefas por responsável', descricao: 'Pendentes, em andamento, vencidas ou concluídas de cada pessoa e grupo.' },
+      prioridade: { titulo: 'Tarefas por prioridade', descricao: 'Abertas agora, da urgente à baixa.' },
+      tempos: { titulo: 'Tempo médio de duração', descricao: 'Quanto leva cada fluxo, cada etapa e cada tarefa, do começo ao fim.' },
     },
 
     grade: {
-      personalizar: 'Personalizar',
-      concluir: 'Concluir',
-      adicionar: 'Adicionar painel',
-      desfazer: 'Desfazer',
+      paineis: 'Painéis',
+      naTela: (n, total) => `${n} de ${total} na tela`,
+      soParaVoce: 'O arranjo vale só para você',
+      mostrarTodos: 'Mostrar todos',
       restaurarPadrao: 'Restaurar padrão',
-      dica: 'Arraste um painel para mudar de lugar. Puxe o canto inferior direito para mudar o tamanho.',
-      soParaVoce: 'O arranjo vale só para você. Os números são os mesmos para todo o workspace.',
+      desfazer: 'Desfazer',
+      grupos: { numeros: 'Números', prazo: 'Prazo e SLA', volume: 'Volume, status e prioridade', pessoas: 'Responsáveis', tempos: 'Tempos' },
+      arrasteParaMover: 'Arraste o painel para mover',
       maisAcoes: n => `Mais ações: ${n}`,
-      telaCheia: 'Tela cheia',
-      fecharTelaCheia: 'Sair da tela cheia',
       tamanhoPadrao: 'Tamanho padrão',
       ocultar: 'Ocultar painel',
       mover: n => `Mover ${n}. Use as setas.`,
       redimensionar: n => `Mudar o tamanho de ${n}. Use as setas.`,
       movido: (n, p, total) => `${n} na posição ${p} de ${total}.`,
       tamanho: (n, w, h) => `${n}: ${w} colunas por ${h} linhas.`,
-      ocultado: n => `${n} saiu do painel. Ele volta por "Adicionar painel".`,
+      ocultado: n => `${n} saiu da tela. Ele volta pelo botão Painéis.`,
       restaurado: 'Painéis de volta ao arranjo padrão.',
-      semHistorico: 'Nada para desfazer.',
-      catalogo: {
-        titulo: 'Adicionar painel',
-        descricao: 'Os painéis ocultos voltam daqui. Clique num painel adicionado para tirá-lo da tela.',
-        buscar: 'Buscar painel',
-        adicionado: 'Adicionado',
-        adicionar: 'Adicionar',
-        adicionarPainel: n => `Adicionar ${n}`,
-        ocultarPainel: n => `Ocultar ${n}`,
-        nenhum: 'Nenhum painel com esse nome.',
-        grupos: { numeros: 'Números', prazo: 'Prazo e SLA', volume: 'Volume e status', pessoas: 'Responsáveis', tempos: 'Tempos' },
-        emTela: (n, total) => `${n} de ${total} na tela`,
-      },
       vazioTitulo: 'Todos os painéis estão ocultos',
-      vazioTexto: 'Adicione um painel para ver os números de novo.',
+      vazioTexto: 'Marque um painel no botão Painéis para ver os números de novo.',
     },
 
     filtros: {
@@ -396,7 +409,7 @@ export const textos: Record<Idioma, Textos> = {
     fimDaLista: n => n === 1 ? '1 no total' : `${n} no total`,
 
     kpi: {
-      abertasDetalhe: (a, b, c) => `${a} não iniciadas, ${b} em andamento, ${c} bloqueadas`,
+      abertasDetalhe: (a, b, c) => `${a} pendentes, ${b} em andamento, ${c} bloqueadas`,
       vencidasDetalhe: pct => `${pct} das abertas`,
       aVencerDetalhe: n => `Próximos 7 dias, ${n} em até 24 h`,
       concluidasDetalhe: criadas => `${criadas} criadas no mesmo período`,
@@ -413,9 +426,11 @@ export const textos: Record<Idioma, Textos> = {
       sla: 'Aberta: vencida se o prazo passou, a vencer se vence nos próximos 7 dias, no prazo se vence depois disso. Concluída: atrasada se terminou depois do prazo. Na tela de Agendadas, o Status de SLA "Atrasado" junta as vencidas e as concluídas com atraso. Tarefa do Spaceflow com prazo igual à hora de criação conta como sem prazo: é o nó sem prazo configurado.',
       prazos: 'Só tarefas abertas. Tempo entre agora e o prazo. As 2 faixas do meio formam o "a vencer".',
       proximas: 'Abertas com prazo à frente, da que vence primeiro à que vence por último. A lista carrega mais conforme você rola.',
-      serie: 'Criadas pela data de criação e concluídas pela data de conclusão, em semanas de segunda a domingo, no horário de Brasília. Saldo: criadas menos concluídas. Positivo quer dizer que a fila cresceu.',
-      status: 'O status de cada tela traduzido para um vocabulário só. A barra divide cada status pela situação do prazo. Abertas: situação agora. Concluídas: as do período.',
-      responsaveis: 'Designada para: para quem a tarefa foi feita (responsável da rápida, tipo de responsável da tarefa de etapa). Quem assumiu: quem pegou ou concluiu a tarefa.',
+      serie: 'Criadas pela data de criação e concluídas pela data de conclusão, em semanas de segunda a domingo, no horário de Brasília. Quando a linha das criadas fica acima da das concluídas, a fila cresce.',
+      contagemStatus: 'Pendente, Em andamento e Bloqueada: as abertas agora (Pendente e Aguardando contam como Pendente; Trabalhando, como Em andamento). Concluída: as concluídas no período, pela data de conclusão. A cor divide cada coluna pela situação do prazo; "Fora do prazo" é a aberta vencida ou a concluída com atraso. Clique numa coluna para ver a lista.',
+      responsaveis: 'Conta pela pessoa ou grupo para quem a tarefa foi feita (responsável da rápida, tipo de responsável da tarefa de etapa). Todos: a barra dividida em vencida, pendente, em andamento, bloqueada e concluída, sem repetir tarefa. Vencida é a aberta com prazo passado, em qualquer status; pendente, em andamento e bloqueada são as outras abertas agora; concluída é do período. Os outros filtros mostram uma parte só. Mostra as 10 maiores filas; "Ver tabela" mostra todas.',
+      prioridade: 'Abertas agora, pela prioridade da tarefa rápida e da tarefa do Spaceflow. A tarefa de etapa não tem prioridade e fica de fora: a quickview mostra quantas.',
+      tempos: 'Tempo em dias corridos, em 3 níveis ligados: o fluxo, a etapa (só no fluxo da categoria) e a tarefa. O seletor do painel troca o nível e a regra de cada um.',
       tempoTarefa: 'Da criação à conclusão, agrupado pelo nome da tarefa de etapa ou do nó do Spaceflow. As criadas manualmente ficam numa linha só: o nome livre de cada uma não agrupa nada. Nas agendadas com "Habilitar Atribuição", o tempo se divide em espera (até alguém assumir) e execução.',
       tempoEtapa: 'Do registro "start" ao "complete" da mesma etapa no histórico do item no fluxo da categoria (stages_log do flow item).',
       tempoFluxo: 'Fluxo da categoria: do primeiro "start" ao último "complete" do histórico do item, nos itens que concluíram o fluxo no período. Spaceflow: do início ao fim da execução concluída no período.',
@@ -427,13 +442,14 @@ export const textos: Record<Idioma, Textos> = {
       prazoIgualACriacao: n => n === 1 ? '1 tarefa do Spaceflow tem prazo igual à hora de criação e conta como sem prazo.' : `${n} tarefas do Spaceflow têm prazo igual à hora de criação e contam como sem prazo.`,
       semDataDeConclusao: n => n === 1 ? '1 tarefa concluída não tem data de conclusão e fica fora.' : `${n} tarefas concluídas não têm data de conclusão e ficam fora.`,
       semTarefas: 'Nenhuma tarefa aqui.',
+      filtro: 'Abertas ou concluídas',
     },
     situacao: {
       no_prazo: 'No prazo', a_vencer: 'A vencer', vencida: 'Vencida', sem_prazo: 'Sem prazo',
       concluida_no_prazo: 'No prazo', atrasada: 'Atrasada', concluida_sem_prazo: 'Sem prazo', removida: 'Removida',
     },
     status: {
-      nao_iniciada: 'Não iniciada', em_andamento: 'Em andamento', bloqueada: 'Bloqueada', concluida: 'Concluída', removida: 'Removida',
+      nao_iniciada: 'Pendente', em_andamento: 'Em andamento', bloqueada: 'Bloqueada', concluida: 'Concluída', removida: 'Removida',
     },
     statusOrigem: {
       nao_iniciada: 'Pendente em Rápidas, Aguardando em Agendadas',
@@ -442,9 +458,11 @@ export const textos: Record<Idioma, Textos> = {
       concluida: 'Concluída em Rápidas, Completa em Agendadas',
       removida: 'Tarefas de Agendadas cujo item foi excluído',
     },
+    prioridades: { urgent: 'Urgente', high: 'Alta', normal: 'Normal', low: 'Baixa' },
 
     prazos: {
       grupos: { vencidas: 'Vencidas', aVencer: 'A vencer', depois: 'Depois de 7 dias' },
+      curtas: { vencida_7d_mais: '+7 d', vencida_ate_7d: 'Até 7 d', ate_24h: '24 h', de_1_a_7d: '1 a 7 d', de_8_a_30d: '8 a 30 d', mais_30d: '+30 d', sem_prazo: 'Sem prazo' },
       faixas: {
         vencida_7d_mais: 'Há mais de 7 dias',
         vencida_ate_7d: 'Há até 7 dias',
@@ -476,11 +494,18 @@ export const textos: Record<Idioma, Textos> = {
     },
 
     statusBloco: {
+      foraDoPrazo: 'Fora do prazo',
       abertasAgora: 'Abertas, agora',
       noPeriodo: 'No período',
     },
 
     resp: {
+      filtro: 'Contar as tarefas',
+      todos: 'Todos',
+      pendentes: 'Pendentes',
+      emAndamento: 'Em andamento',
+      verTabela: 'Ver tabela',
+      detalhe: 'Pendentes, em andamento, vencidas, concluídas, % no prazo e tempo médio de cada responsável.',
       modo: 'Contar por',
       designada: 'Designada para',
       executada: 'Quem assumiu',
@@ -489,7 +514,7 @@ export const textos: Record<Idioma, Textos> = {
       vencidas: 'Vencidas',
       concluidas: 'Concluídas',
       noPrazo: 'No prazo',
-      tempo: 'Tempo mediano',
+      tempo: 'Tempo médio',
       tipo: { pessoa: 'Pessoa', grupo: 'Grupo', todos: 'Todo mundo', externo: 'E-mail externo', sem: 'Sem responsável' },
       avisoSoma: 'Tarefa designada a 2 pessoas conta para as 2. A soma das linhas pode passar do total.',
       avisoGrupo: 'Tarefa de grupo conta na linha do grupo. Quem do grupo assumiu aparece em "Quem assumiu".',
@@ -497,6 +522,16 @@ export const textos: Record<Idioma, Textos> = {
     },
 
     tempos: {
+      nivel: 'Nível',
+      niveis: { fluxo: 'Por fluxo', etapa: 'Por etapa', tarefa: 'Por tarefa' },
+      colunaNome: { fluxo: 'Fluxo', etapa: 'Etapa', tarefa: 'Tarefa' },
+      colunaN: { fluxo: 'Concluídos', etapa: 'Passagens', tarefa: 'Concluídas' },
+      dica: {
+        fluxo: 'Cada barra se divide nas etapas do fluxo, na ordem, pela média; a mais lenta fica em amarelo. No Spaceflow, que não tem etapa, nas tarefas. Clique num fluxo para ver as etapas dele (no Spaceflow, as tarefas).',
+        etapa: 'Clique numa etapa para ver as tarefas dela. O Spaceflow não tem etapa: veja Por fluxo ou Por tarefa.',
+        tarefa: 'Na tarefa de etapa com "Habilitar Atribuição", a barra se divide em espera (até alguém assumir) e execução, pela média. Clique numa tarefa para ver a lista das tarefas que formam o tempo.',
+      },
+      tirarRecorte: n => `Tirar o recorte ${n}`,
       tarefa: 'Tarefa',
       avulsa: 'Tarefas criadas manualmente',
       n: 'Concluídas',
@@ -515,7 +550,8 @@ export const textos: Record<Idioma, Textos> = {
       vies: 'A média conta só o que terminou. O que ainda está em andamento aparece ao lado, com a idade.',
       etapaSoCategoria: 'O Spaceflow não tem etapas. O tempo dele está em Tempo por fluxo, dividido pelas tarefas que ele cria.',
       gargalo: 'Etapa mais lenta do fluxo',
-      composicao: 'Onde o tempo vai (mediana)',
+      composicao: 'Onde o tempo vai (média)',
+      partes: { doFluxo: 'Etapas e tarefas do fluxo, na ordem', maisLenta: 'A mais lenta do fluxo', entre: 'Espera entre uma e outra', espera: 'Espera até alguém assumir', execucao: 'Execução (sem atribuição, o tempo todo)' },
       tipoDeFluxo: { categoria: 'Categoria', spaceflow: 'Spaceflow' },
       contagemComIdade: (n, idade) => `${n}, há ${idade}`,
     },
@@ -542,6 +578,24 @@ export const textos: Record<Idioma, Textos> = {
       venceEm: q => `vence em ${q}`,
       mostrando: (de, ate, total) => `Mostrando ${de} a ${ate} de ${total}`,
       porPagina: n => `${n} por página`,
+      fechar: 'Fechar a lista',
+      resumo: 'Resumo',
+      expandirResumo: 'Expandir o resumo',
+      recolherResumo: 'Recolher o resumo',
+      alcaDoResumo: 'Clique para expandir ou recolher o resumo. Arraste para mudar a largura.',
+      filtrosDoRecorte: 'Filtros',
+      linhas: {
+        dasAbertas: 'Das abertas',
+        criadasNoPeriodo: 'Criadas no período',
+        periodoAnterior: 'Período anterior',
+        comPrazo: 'Concluídas com prazo',
+        maior: 'Maior',
+        medidas: 'Tarefas medidas',
+        tipo: 'Tipo',
+        fluxo: 'Fluxo',
+        naLista: 'Tarefas na lista',
+        semPrioridade: 'Tarefas de etapa, sem prioridade',
+      },
     },
 
     estados: {
@@ -583,54 +637,39 @@ export const textos: Record<Idioma, Textos> = {
       abertas: { titulo: 'Open', descricao: 'Tasks open right now, by status.' },
       vencidas: { titulo: 'Overdue', descricao: 'Open tasks past their due date.' },
       aVencer: { titulo: 'Due soon', descricao: 'Open tasks due in the next 7 days.' },
-      concluidas: { titulo: 'Done', descricao: 'Done in the period, compared with the previous period.' },
+      concluidas: { titulo: 'Done', descricao: 'Done in the period.' },
       noPrazo: { titulo: 'Done on time', descricao: 'Share of done tasks with a due date that finished by it.' },
-      tempo: { titulo: 'Average time to complete', descricao: 'From creation to completion, with the median.' },
-      sla: { titulo: 'SLA', descricao: 'Due date situation of open tasks now and of tasks done in the period.' },
+      tempo: { titulo: 'Average time to complete', descricao: 'From creation to completion, on average.' },
+      sla: { titulo: 'SLA', descricao: 'Due date situation of open tasks now or of tasks done in the period.' },
       prazos: { titulo: 'Time to due date', descricao: 'Open tasks, by how long until they are due.' },
       proximas: { titulo: 'Due next', descricao: 'Open tasks with an upcoming due date, nearest first.' },
       serie: { titulo: 'Created and done', descricao: 'How many came in and how many went out in each period.' },
-      status: { titulo: 'Status and due date situation', descricao: 'Each status split by due date situation.' },
-      responsaveis: { titulo: 'Tasks by assignee', descricao: 'People, groups and tasks for everybody.' },
-      tempoTarefa: { titulo: 'Time by task', descricao: 'From creation to completion, by flow task.' },
-      tempoEtapa: { titulo: 'Time by stage', descricao: 'How long the item stays in each stage of the category flow.' },
-      tempoFluxo: { titulo: 'Time by flow', descricao: 'From start to finish of each flow, category and Spaceflow.' },
+      contagemStatus: { titulo: 'Tasks by status', descricao: 'How many are pending, in progress, blocked and done.' },
+      responsaveis: { titulo: 'Tasks by assignee', descricao: 'Pending, in progress, overdue or done for each person and group.' },
+      prioridade: { titulo: 'Tasks by priority', descricao: 'Open now, from urgent to low.' },
+      tempos: { titulo: 'Average duration', descricao: 'How long each flow, each stage and each task takes, from start to finish.' },
     },
 
     grade: {
-      personalizar: 'Customize',
-      concluir: 'Done',
-      adicionar: 'Add panel',
-      desfazer: 'Undo',
+      paineis: 'Panels',
+      naTela: (n, total) => `${n} of ${total} on screen`,
+      soParaVoce: 'The layout is yours alone',
+      mostrarTodos: 'Show all',
       restaurarPadrao: 'Restore default',
-      dica: 'Drag a panel to move it. Pull the bottom right corner to resize it.',
-      soParaVoce: 'The layout is yours alone. The numbers are the same for the whole workspace.',
+      desfazer: 'Undo',
+      grupos: { numeros: 'Numbers', prazo: 'Due dates and SLA', volume: 'Volume, status and priority', pessoas: 'Assignees', tempos: 'Durations' },
+      arrasteParaMover: 'Drag the panel to move it',
       maisAcoes: n => `More actions: ${n}`,
-      telaCheia: 'Full screen',
-      fecharTelaCheia: 'Exit full screen',
       tamanhoPadrao: 'Default size',
       ocultar: 'Hide panel',
       mover: n => `Move ${n}. Use the arrow keys.`,
       redimensionar: n => `Resize ${n}. Use the arrow keys.`,
       movido: (n, p, total) => `${n} in position ${p} of ${total}.`,
       tamanho: (n, w, h) => `${n}: ${w} columns by ${h} rows.`,
-      ocultado: n => `${n} left the dashboard. Bring it back with "Add panel".`,
+      ocultado: n => `${n} left the screen. Bring it back with the Panels button.`,
       restaurado: 'Panels back to the default layout.',
-      semHistorico: 'Nothing to undo.',
-      catalogo: {
-        titulo: 'Add panel',
-        descricao: 'Hidden panels come back from here. Click an added panel to take it off the screen.',
-        buscar: 'Search panels',
-        adicionado: 'Added',
-        adicionar: 'Add',
-        adicionarPainel: n => `Add ${n}`,
-        ocultarPainel: n => `Hide ${n}`,
-        nenhum: 'No panel with that name.',
-        grupos: { numeros: 'Numbers', prazo: 'Due dates and SLA', volume: 'Volume and status', pessoas: 'Assignees', tempos: 'Durations' },
-        emTela: (n, total) => `${n} of ${total} on screen`,
-      },
       vazioTitulo: 'All panels are hidden',
-      vazioTexto: 'Add a panel to see the numbers again.',
+      vazioTexto: 'Check a panel under the Panels button to see the numbers again.',
     },
 
     filtros: {
@@ -667,7 +706,7 @@ export const textos: Record<Idioma, Textos> = {
     fimDaLista: n => n === 1 ? '1 in total' : `${n} in total`,
 
     kpi: {
-      abertasDetalhe: (a, b, c) => `${a} not started, ${b} in progress, ${c} blocked`,
+      abertasDetalhe: (a, b, c) => `${a} pending, ${b} in progress, ${c} blocked`,
       vencidasDetalhe: pct => `${pct} of open tasks`,
       aVencerDetalhe: n => `Next 7 days, ${n} within 24 h`,
       concluidasDetalhe: c => `${c} created in the same period`,
@@ -684,9 +723,11 @@ export const textos: Record<Idioma, Textos> = {
       sla: 'Open: overdue if the due date has passed, due soon if it is due in the next 7 days, on time if it is due after that. Done: late if it finished after the due date. On the Scheduled screen, the SLA status "Late" groups overdue tasks and tasks done late. A Spaceflow task whose due date equals its creation time counts as having no due date: the node has no due date set.',
       prazos: 'Open tasks only. Time between now and the due date. The 2 middle bands make up "due soon".',
       proximas: 'Open tasks with an upcoming due date, from the first to the last one due. The list loads more as you scroll.',
-      serie: 'Created by creation date and done by completion date, in Monday to Sunday weeks, Brasília time. Balance: created minus done. Positive means the queue grew.',
-      status: 'Each screen status translated into one vocabulary. The bar splits each status by due date situation. Open: now. Done: in the period.',
-      responsaveis: 'Assigned to: who the task was made for (quick task assignee, stage task responsibility type). Picked up by: who took or completed the task.',
+      serie: 'Created by creation date and done by completion date, in Monday to Sunday weeks, Brasília time. When the created line sits above the done line, the queue grows.',
+      contagemStatus: 'Pending, In progress and Blocked: open tasks right now (Pending and Waiting count as Pending; Working, as In progress). Done: tasks completed in the period, by completion date. Color splits each column by due date situation; "Past due" is an overdue open task or a task done late. Click a column to see the list.',
+      responsaveis: 'Counts by the person or group the task was made for (quick task assignee, stage task responsibility type). All: the bar split into overdue, pending, in progress, blocked and done, with no task counted twice. Overdue is an open task past its due date, in any status; pending, in progress and blocked are the other open tasks now; done is for the period. The other filters show one part only. Shows the 10 longest queues; "See table" shows them all.',
+      prioridade: 'Open now, by the priority of quick tasks and Spaceflow tasks. Stage tasks have no priority and stay out: the quickview shows how many.',
+      tempos: 'Time in calendar days, on 3 linked levels: the flow, the stage (category flows only) and the task. The panel selector switches the level and each one has its own rule.',
       tempoTarefa: 'From creation to completion, grouped by stage task or Spaceflow node name. Tasks created manually share one row: each free name groups nothing. For scheduled tasks with "Enable assignment", time splits into waiting (until someone picks it up) and execution.',
       tempoEtapa: 'From the "start" to the "complete" record of the same stage in the item history of the category flow (flow item stages_log).',
       tempoFluxo: 'Category flow: from the first "start" to the last "complete" of the item history, for items that finished the flow in the period. Spaceflow: from start to end of each execution finished in the period.',
@@ -698,13 +739,14 @@ export const textos: Record<Idioma, Textos> = {
       prazoIgualACriacao: n => n === 1 ? '1 Spaceflow task has its due date equal to its creation time and counts as no due date.' : `${n} Spaceflow tasks have their due date equal to their creation time and count as no due date.`,
       semDataDeConclusao: n => n === 1 ? '1 done task has no completion date and is left out.' : `${n} done tasks have no completion date and are left out.`,
       semTarefas: 'No tasks here.',
+      filtro: 'Open or done',
     },
     situacao: {
       no_prazo: 'On time', a_vencer: 'Due soon', vencida: 'Overdue', sem_prazo: 'No due date',
       concluida_no_prazo: 'On time', atrasada: 'Late', concluida_sem_prazo: 'No due date', removida: 'Removed',
     },
     status: {
-      nao_iniciada: 'Not started', em_andamento: 'In progress', bloqueada: 'Blocked', concluida: 'Done', removida: 'Removed',
+      nao_iniciada: 'Pending', em_andamento: 'In progress', bloqueada: 'Blocked', concluida: 'Done', removida: 'Removed',
     },
     statusOrigem: {
       nao_iniciada: 'Pending in Quick, Waiting in Scheduled',
@@ -713,9 +755,11 @@ export const textos: Record<Idioma, Textos> = {
       concluida: 'Completed in Quick, Complete in Scheduled',
       removida: 'Scheduled tasks whose item was deleted',
     },
+    prioridades: { urgent: 'Urgent', high: 'High', normal: 'Normal', low: 'Low' },
 
     prazos: {
       grupos: { vencidas: 'Overdue', aVencer: 'Due soon', depois: 'After 7 days' },
+      curtas: { vencida_7d_mais: '7+ d', vencida_ate_7d: 'Up to 7 d', ate_24h: '24 h', de_1_a_7d: '1 to 7 d', de_8_a_30d: '8 to 30 d', mais_30d: '30+ d', sem_prazo: 'No due date' },
       faixas: {
         vencida_7d_mais: 'More than 7 days ago',
         vencida_ate_7d: 'Up to 7 days ago',
@@ -747,11 +791,18 @@ export const textos: Record<Idioma, Textos> = {
     },
 
     statusBloco: {
+      foraDoPrazo: 'Past due',
       abertasAgora: 'Open, now',
       noPeriodo: 'In the period',
     },
 
     resp: {
+      filtro: 'Count tasks',
+      todos: 'All',
+      pendentes: 'Pending',
+      emAndamento: 'In progress',
+      verTabela: 'See table',
+      detalhe: 'Pending, in progress, overdue, done, % on time and average time for each assignee.',
       modo: 'Count by',
       designada: 'Assigned to',
       executada: 'Picked up by',
@@ -760,7 +811,7 @@ export const textos: Record<Idioma, Textos> = {
       vencidas: 'Overdue',
       concluidas: 'Done',
       noPrazo: 'On time',
-      tempo: 'Median time',
+      tempo: 'Average time',
       tipo: { pessoa: 'Person', grupo: 'Group', todos: 'Everybody', externo: 'External email', sem: 'Unassigned' },
       avisoSoma: 'A task assigned to 2 people counts for both. Rows may add up to more than the total.',
       avisoGrupo: 'A group task counts on the group row. Who in the group picked it up shows under "Picked up by".',
@@ -768,6 +819,16 @@ export const textos: Record<Idioma, Textos> = {
     },
 
     tempos: {
+      nivel: 'Level',
+      niveis: { fluxo: 'By flow', etapa: 'By stage', tarefa: 'By task' },
+      colunaNome: { fluxo: 'Flow', etapa: 'Stage', tarefa: 'Task' },
+      colunaN: { fluxo: 'Finished', etapa: 'Passes', tarefa: 'Done' },
+      dica: {
+        fluxo: 'Each bar splits into the flow stages, in order, by average; the slowest one is yellow. For Spaceflow, which has no stages, into its tasks. Click a flow to see its stages (for Spaceflow, its tasks).',
+        etapa: 'Click a stage to see its tasks. Spaceflow has no stages: see By flow or By task.',
+        tarefa: 'For stage tasks with "Enable assignment", the bar splits into waiting (until someone picks it up) and execution, by average. Click a task to see the list of tasks behind the time.',
+      },
+      tirarRecorte: n => `Remove the filter ${n}`,
       tarefa: 'Task',
       avulsa: 'Tasks created manually',
       n: 'Done',
@@ -786,7 +847,8 @@ export const textos: Record<Idioma, Textos> = {
       vies: 'The average counts only what finished. What is still in progress shows alongside, with its age.',
       etapaSoCategoria: 'Spaceflow has no stages. Its time is under Time by flow, split by the tasks it creates.',
       gargalo: 'Slowest stage of the flow',
-      composicao: 'Where the time goes (median)',
+      composicao: 'Where the time goes (average)',
+      partes: { doFluxo: 'Flow stages and tasks, in order', maisLenta: 'Slowest in the flow', entre: 'Waiting between them', espera: 'Waiting until picked up', execucao: 'Execution (no assignment: the whole time)' },
       tipoDeFluxo: { categoria: 'Category', spaceflow: 'Spaceflow' },
       contagemComIdade: (n, idade) => `${n}, for ${idade}`,
     },
@@ -813,6 +875,24 @@ export const textos: Record<Idioma, Textos> = {
       venceEm: q => `due in ${q}`,
       mostrando: (de, ate, total) => `Showing ${de} to ${ate} of ${total}`,
       porPagina: n => `${n} per page`,
+      fechar: 'Close the list',
+      resumo: 'Summary',
+      expandirResumo: 'Expand the summary',
+      recolherResumo: 'Collapse the summary',
+      alcaDoResumo: 'Click to expand or collapse the summary. Drag to change its width.',
+      filtrosDoRecorte: 'Filters',
+      linhas: {
+        dasAbertas: 'Of open tasks',
+        criadasNoPeriodo: 'Created in the period',
+        periodoAnterior: 'Previous period',
+        comPrazo: 'Done with a due date',
+        maior: 'Longest',
+        medidas: 'Tasks measured',
+        tipo: 'Type',
+        fluxo: 'Flow',
+        naLista: 'Tasks in the list',
+        semPrioridade: 'Stage tasks, no priority',
+      },
     },
 
     estados: {
@@ -854,54 +934,39 @@ export const textos: Record<Idioma, Textos> = {
       abertas: { titulo: 'Abiertas', descricao: 'Tareas abiertas ahora, por estado.' },
       vencidas: { titulo: 'Vencidas', descricao: 'Abiertas con el plazo ya vencido.' },
       aVencer: { titulo: 'Por vencer', descricao: 'Abiertas que vencen en los próximos 7 días.' },
-      concluidas: { titulo: 'Concluidas', descricao: 'Concluidas en el período, comparadas con el período anterior.' },
+      concluidas: { titulo: 'Concluidas', descricao: 'Concluidas en el período.' },
       noPrazo: { titulo: 'Concluidas en plazo', descricao: 'Parte de las concluidas con plazo que terminó dentro del plazo.' },
-      tempo: { titulo: 'Tiempo medio de conclusión', descricao: 'De la creación a la conclusión, con la mediana.' },
-      sla: { titulo: 'SLA', descricao: 'Situación del plazo de las abiertas ahora y de las concluidas en el período.' },
+      tempo: { titulo: 'Tiempo medio de conclusión', descricao: 'De la creación a la conclusión, en promedio.' },
+      sla: { titulo: 'SLA', descricao: 'Situación del plazo de las abiertas ahora o de las concluidas en el período.' },
       prazos: { titulo: 'Tiempo hasta el plazo', descricao: 'Abiertas, por el tiempo que falta para vencer.' },
       proximas: { titulo: 'Próximas a vencer', descricao: 'Abiertas con plazo por delante, de la más cercana a la más lejana.' },
       serie: { titulo: 'Creadas y concluidas', descricao: 'Cuántas entraron y cuántas salieron en cada período.' },
-      status: { titulo: 'Estado y situación del plazo', descricao: 'Cada estado dividido por la situación del plazo.' },
-      responsaveis: { titulo: 'Tareas por responsable', descricao: 'Personas, grupos y las tareas para todo el mundo.' },
-      tempoTarefa: { titulo: 'Tiempo por tarea', descricao: 'De la creación a la conclusión, por tarea del flujo.' },
-      tempoEtapa: { titulo: 'Tiempo por etapa', descricao: 'Cuánto se queda el ítem en cada etapa del flujo de la categoría.' },
-      tempoFluxo: { titulo: 'Tiempo por flujo', descricao: 'Del inicio al fin de cada flujo, de la categoría y de Spaceflow.' },
+      contagemStatus: { titulo: 'Tareas por estado', descricao: 'Cuántas están pendientes, en curso, bloqueadas y concluidas.' },
+      responsaveis: { titulo: 'Tareas por responsable', descricao: 'Pendientes, en curso, vencidas o concluidas de cada persona y grupo.' },
+      prioridade: { titulo: 'Tareas por prioridad', descricao: 'Abiertas ahora, de la urgente a la baja.' },
+      tempos: { titulo: 'Tiempo medio de duración', descricao: 'Cuánto tarda cada flujo, cada etapa y cada tarea, de principio a fin.' },
     },
 
     grade: {
-      personalizar: 'Personalizar',
-      concluir: 'Listo',
-      adicionar: 'Agregar panel',
-      desfazer: 'Deshacer',
+      paineis: 'Paneles',
+      naTela: (n, total) => `${n} de ${total} en pantalla`,
+      soParaVoce: 'La disposición vale solo para usted',
+      mostrarTodos: 'Mostrar todos',
       restaurarPadrao: 'Restaurar estándar',
-      dica: 'Arrastre un panel para cambiarlo de lugar. Tire de la esquina inferior derecha para cambiar el tamaño.',
-      soParaVoce: 'La disposición vale solo para usted. Los números son los mismos para todo el workspace.',
+      desfazer: 'Deshacer',
+      grupos: { numeros: 'Números', prazo: 'Plazo y SLA', volume: 'Volumen, estado y prioridad', pessoas: 'Responsables', tempos: 'Tiempos' },
+      arrasteParaMover: 'Arrastre el panel para moverlo',
       maisAcoes: n => `Más acciones: ${n}`,
-      telaCheia: 'Pantalla completa',
-      fecharTelaCheia: 'Salir de pantalla completa',
       tamanhoPadrao: 'Tamaño estándar',
       ocultar: 'Ocultar panel',
       mover: n => `Mover ${n}. Use las flechas.`,
       redimensionar: n => `Cambiar el tamaño de ${n}. Use las flechas.`,
       movido: (n, p, total) => `${n} en la posición ${p} de ${total}.`,
       tamanho: (n, w, h) => `${n}: ${w} columnas por ${h} filas.`,
-      ocultado: n => `${n} salió del panel. Vuelve por "Agregar panel".`,
+      ocultado: n => `${n} salió de la pantalla. Vuelve por el botón Paneles.`,
       restaurado: 'Paneles de vuelta a la disposición estándar.',
-      semHistorico: 'Nada para deshacer.',
-      catalogo: {
-        titulo: 'Agregar panel',
-        descricao: 'Los paneles ocultos vuelven desde aquí. Haga clic en un panel agregado para quitarlo de la pantalla.',
-        buscar: 'Buscar panel',
-        adicionado: 'Agregado',
-        adicionar: 'Agregar',
-        adicionarPainel: n => `Agregar ${n}`,
-        ocultarPainel: n => `Ocultar ${n}`,
-        nenhum: 'Ningún panel con ese nombre.',
-        grupos: { numeros: 'Números', prazo: 'Plazo y SLA', volume: 'Volumen y estado', pessoas: 'Responsables', tempos: 'Tiempos' },
-        emTela: (n, total) => `${n} de ${total} en pantalla`,
-      },
       vazioTitulo: 'Todos los paneles están ocultos',
-      vazioTexto: 'Agregue un panel para ver los números de nuevo.',
+      vazioTexto: 'Marque un panel en el botón Paneles para ver los números de nuevo.',
     },
 
     filtros: {
@@ -938,7 +1003,7 @@ export const textos: Record<Idioma, Textos> = {
     fimDaLista: n => n === 1 ? '1 en total' : `${n} en total`,
 
     kpi: {
-      abertasDetalhe: (a, b, c) => `${a} sin iniciar, ${b} en curso, ${c} bloqueadas`,
+      abertasDetalhe: (a, b, c) => `${a} pendientes, ${b} en curso, ${c} bloqueadas`,
       vencidasDetalhe: pct => `${pct} de las abiertas`,
       aVencerDetalhe: n => `Próximos 7 días, ${n} en hasta 24 h`,
       concluidasDetalhe: c => `${c} creadas en el mismo período`,
@@ -955,9 +1020,11 @@ export const textos: Record<Idioma, Textos> = {
       sla: 'Abierta: vencida si el plazo pasó, por vencer si vence en los próximos 7 días, en plazo si vence después. Concluida: atrasada si terminó después del plazo. En la pantalla de Programadas, el Estado de SLA "Atrasado" junta las vencidas y las concluidas con atraso. La tarea de Spaceflow con plazo igual a la hora de creación cuenta como sin plazo: es el nodo sin plazo configurado.',
       prazos: 'Solo tareas abiertas. Tiempo entre ahora y el plazo. Las 2 franjas del medio forman el "por vencer".',
       proximas: 'Abiertas con plazo por delante, de la que vence primero a la que vence última. La lista carga más a medida que usted se desplaza.',
-      serie: 'Creadas por fecha de creación y concluidas por fecha de conclusión, en semanas de lunes a domingo, hora de Brasilia. Saldo: creadas menos concluidas. Positivo quiere decir que la fila creció.',
-      status: 'El estado de cada pantalla traducido a un solo vocabulario. La barra divide cada estado por la situación del plazo. Abiertas: ahora. Concluidas: las del período.',
-      responsaveis: 'Asignada a: para quién se hizo la tarea (responsable de la rápida, tipo de responsable de la tarea de etapa). Quién la tomó: quien la tomó o la concluyó.',
+      serie: 'Creadas por fecha de creación y concluidas por fecha de conclusión, en semanas de lunes a domingo, hora de Brasilia. Cuando la línea de creadas queda por encima de la de concluidas, la fila crece.',
+      contagemStatus: 'Pendiente, En curso y Bloqueada: las abiertas ahora (Pendiente y Esperando cuentan como Pendiente; Trabajando, como En curso). Concluida: las concluidas en el período, por fecha de conclusión. El color divide cada columna por la situación del plazo; "Fuera de plazo" es la abierta vencida o la concluida con atraso. Haga clic en una columna para ver la lista.',
+      responsaveis: 'Cuenta por la persona o grupo para quien se hizo la tarea (responsable de la rápida, tipo de responsable de la tarea de etapa). Todos: la barra dividida en vencida, pendiente, en curso, bloqueada y concluida, sin repetir tarea. Vencida es la abierta con plazo pasado, en cualquier estado; pendiente, en curso y bloqueada son las otras abiertas ahora; concluida es del período. Los otros filtros muestran una parte sola. Muestra las 10 filas más largas; "Ver tabla" muestra todas.',
+      prioridade: 'Abiertas ahora, por la prioridad de la tarea rápida y de la tarea de Spaceflow. La tarea de etapa no tiene prioridad y queda fuera: la quickview muestra cuántas.',
+      tempos: 'Tiempo en días corridos, en 3 niveles ligados: el flujo, la etapa (solo en el flujo de la categoría) y la tarea. El selector del panel cambia el nivel y cada uno tiene su regla.',
       tempoTarefa: 'De la creación a la conclusión, agrupado por el nombre de la tarea de etapa o del nodo de Spaceflow. Las creadas manualmente quedan en una sola fila: el nombre libre de cada una no agrupa nada. En las programadas con "Habilitar asignación", el tiempo se divide en espera (hasta que alguien la toma) y ejecución.',
       tempoEtapa: 'Del registro "start" al "complete" de la misma etapa en el historial del ítem en el flujo de la categoría (stages_log del flow item).',
       tempoFluxo: 'Flujo de la categoría: del primer "start" al último "complete" del historial del ítem, en los ítems que concluyeron el flujo en el período. Spaceflow: del inicio al fin de la ejecución concluida en el período.',
@@ -969,13 +1036,14 @@ export const textos: Record<Idioma, Textos> = {
       prazoIgualACriacao: n => n === 1 ? '1 tarea de Spaceflow tiene el plazo igual a la hora de creación y cuenta como sin plazo.' : `${n} tareas de Spaceflow tienen el plazo igual a la hora de creación y cuentan como sin plazo.`,
       semDataDeConclusao: n => n === 1 ? '1 tarea concluida no tiene fecha de conclusión y queda fuera.' : `${n} tareas concluidas no tienen fecha de conclusión y quedan fuera.`,
       semTarefas: 'Ninguna tarea aquí.',
+      filtro: 'Abiertas o concluidas',
     },
     situacao: {
       no_prazo: 'En plazo', a_vencer: 'Por vencer', vencida: 'Vencida', sem_prazo: 'Sin plazo',
       concluida_no_prazo: 'En plazo', atrasada: 'Atrasada', concluida_sem_prazo: 'Sin plazo', removida: 'Eliminada',
     },
     status: {
-      nao_iniciada: 'Sin iniciar', em_andamento: 'En curso', bloqueada: 'Bloqueada', concluida: 'Concluida', removida: 'Eliminada',
+      nao_iniciada: 'Pendiente', em_andamento: 'En curso', bloqueada: 'Bloqueada', concluida: 'Concluida', removida: 'Eliminada',
     },
     statusOrigem: {
       nao_iniciada: 'Pendiente en Rápidas, Esperando en Programadas',
@@ -984,9 +1052,11 @@ export const textos: Record<Idioma, Textos> = {
       concluida: 'Concluida en Rápidas, Completa en Programadas',
       removida: 'Tareas de Programadas cuyo ítem fue eliminado',
     },
+    prioridades: { urgent: 'Urgente', high: 'Alta', normal: 'Normal', low: 'Baja' },
 
     prazos: {
       grupos: { vencidas: 'Vencidas', aVencer: 'Por vencer', depois: 'Después de 7 días' },
+      curtas: { vencida_7d_mais: '+7 d', vencida_ate_7d: 'Hasta 7 d', ate_24h: '24 h', de_1_a_7d: '1 a 7 d', de_8_a_30d: '8 a 30 d', mais_30d: '+30 d', sem_prazo: 'Sin plazo' },
       faixas: {
         vencida_7d_mais: 'Hace más de 7 días',
         vencida_ate_7d: 'Hace hasta 7 días',
@@ -1018,11 +1088,18 @@ export const textos: Record<Idioma, Textos> = {
     },
 
     statusBloco: {
+      foraDoPrazo: 'Fuera de plazo',
       abertasAgora: 'Abiertas, ahora',
       noPeriodo: 'En el período',
     },
 
     resp: {
+      filtro: 'Contar las tareas',
+      todos: 'Todos',
+      pendentes: 'Pendientes',
+      emAndamento: 'En curso',
+      verTabela: 'Ver tabla',
+      detalhe: 'Pendientes, en curso, vencidas, concluidas, % en plazo y tiempo medio de cada responsable.',
       modo: 'Contar por',
       designada: 'Asignada a',
       executada: 'Quién la tomó',
@@ -1031,7 +1108,7 @@ export const textos: Record<Idioma, Textos> = {
       vencidas: 'Vencidas',
       concluidas: 'Concluidas',
       noPrazo: 'En plazo',
-      tempo: 'Tiempo mediano',
+      tempo: 'Tiempo medio',
       tipo: { pessoa: 'Persona', grupo: 'Grupo', todos: 'Todo el mundo', externo: 'Correo externo', sem: 'Sin responsable' },
       avisoSoma: 'La tarea asignada a 2 personas cuenta para las 2. La suma de las filas puede pasar del total.',
       avisoGrupo: 'La tarea de grupo cuenta en la fila del grupo. Quién del grupo la tomó aparece en "Quién la tomó".',
@@ -1039,6 +1116,16 @@ export const textos: Record<Idioma, Textos> = {
     },
 
     tempos: {
+      nivel: 'Nivel',
+      niveis: { fluxo: 'Por flujo', etapa: 'Por etapa', tarefa: 'Por tarea' },
+      colunaNome: { fluxo: 'Flujo', etapa: 'Etapa', tarefa: 'Tarea' },
+      colunaN: { fluxo: 'Concluidos', etapa: 'Pasos', tarefa: 'Concluidas' },
+      dica: {
+        fluxo: 'Cada barra se divide en las etapas del flujo, en orden, por promedio; la más lenta queda en amarillo. En Spaceflow, que no tiene etapas, en las tareas. Haga clic en un flujo para ver sus etapas (en Spaceflow, sus tareas).',
+        etapa: 'Haga clic en una etapa para ver sus tareas. Spaceflow no tiene etapas: vea Por flujo o Por tarea.',
+        tarefa: 'En la tarea de etapa con "Habilitar asignación", la barra se divide en espera (hasta que alguien la tome) y ejecución, por promedio. Haga clic en una tarea para ver la lista de tareas que forman el tiempo.',
+      },
+      tirarRecorte: n => `Quitar el recorte ${n}`,
       tarefa: 'Tarea',
       avulsa: 'Tareas creadas manualmente',
       n: 'Concluidas',
@@ -1057,7 +1144,8 @@ export const textos: Record<Idioma, Textos> = {
       vies: 'La media cuenta solo lo que terminó. Lo que sigue en curso aparece al lado, con su antigüedad.',
       etapaSoCategoria: 'Spaceflow no tiene etapas. Su tiempo está en Tiempo por flujo, dividido por las tareas que crea.',
       gargalo: 'Etapa más lenta del flujo',
-      composicao: 'Adónde va el tiempo (mediana)',
+      composicao: 'Adónde va el tiempo (promedio)',
+      partes: { doFluxo: 'Etapas y tareas del flujo, en orden', maisLenta: 'La más lenta del flujo', entre: 'Espera entre una y otra', espera: 'Espera hasta que alguien la tome', execucao: 'Ejecución (sin asignación, todo el tiempo)' },
       tipoDeFluxo: { categoria: 'Categoría', spaceflow: 'Spaceflow' },
       contagemComIdade: (n, idade) => `${n}, hace ${idade}`,
     },
@@ -1084,6 +1172,24 @@ export const textos: Record<Idioma, Textos> = {
       venceEm: q => `vence en ${q}`,
       mostrando: (de, ate, total) => `Mostrando ${de} a ${ate} de ${total}`,
       porPagina: n => `${n} por página`,
+      fechar: 'Cerrar la lista',
+      resumo: 'Resumen',
+      expandirResumo: 'Expandir el resumen',
+      recolherResumo: 'Contraer el resumen',
+      alcaDoResumo: 'Haga clic para expandir o contraer el resumen. Arrastre para cambiar el ancho.',
+      filtrosDoRecorte: 'Filtros',
+      linhas: {
+        dasAbertas: 'De las abiertas',
+        criadasNoPeriodo: 'Creadas en el período',
+        periodoAnterior: 'Período anterior',
+        comPrazo: 'Concluidas con plazo',
+        maior: 'Mayor',
+        medidas: 'Tareas medidas',
+        tipo: 'Tipo',
+        fluxo: 'Flujo',
+        naLista: 'Tareas en la lista',
+        semPrioridade: 'Tareas de etapa, sin prioridad',
+      },
     },
 
     estados: {

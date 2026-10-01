@@ -15,9 +15,12 @@
  *   `grid-flow-row-dense` sobe o painel que cabe num buraco (o "auto layout"
  *   do ClickUp);
  * - `w` é a largura em colunas e `h` a altura em linhas;
- * - só com `editavel`: arrastar pelo elemento marcado com
- *   `data-alca-de-arraste` (a partir de 4 px de movimento, para o clique
- *   continuar sendo clique), e redimensionar pelo canto inferior direito;
+ * - arrastar pelo elemento marcado com `data-alca-de-arraste` (o painel
+ *   inteiro, na rodada 3), a partir de 4 px de movimento, para o clique
+ *   continuar sendo clique; e redimensionar
+ *   pelo canto inferior direito, que aparece ao passar o mouse. Rodada 3 do
+ *   painel de tarefas: sempre ligado, sem modo de edição (`editavel: false`
+ *   trava a grade);
  * - teclado: no botão marcado com `data-grip`, as setas movem o painel; no
  *   canto, as setas mudam o tamanho. Esc durante o arraste desfaz o arraste;
  * - fim de cada gesto que mudou algo: evento `alterado` com o layout de antes,
@@ -54,7 +57,7 @@ const props = withDefaults(defineProps<{
   colunas?: number
   alturaDaLinha?: number
   espaco?: number
-}>(), { editavel: false, colunas: 12, alturaDaLinha: 44, espaco: 16 })
+}>(), { editavel: true, colunas: 12, alturaDaLinha: 44, espaco: 16 })
 
 const layout = defineModel<ItemDaGrade[]>({ required: true })
 const emit = defineEmits<{ alterado: [anterior: ItemDaGrade[]] }>()
@@ -78,8 +81,17 @@ let antesDoGesto: ItemDaGrade[] | null = null
 let ultimoAlvo: string | null = null
 let travadoAte = 0
 
-/** O que dentro da alça continua clicável e não começa arraste. */
-const INTERATIVOS = 'a, input, select, textarea, [role="tab"], [role="menuitem"], [role="combobox"], button:not([data-grip])'
+/**
+ * O que nunca começa arraste: campo, link, aba, menu, quem abre camada
+ * (`aria-haspopup`) e o que pedir com `data-sem-arraste`. Botão comum pode:
+ * se a pessoa arrastar, o clique do fim é engolido (`engolirClique`).
+ */
+const INTERATIVOS = 'a, input, select, textarea, [role="tab"], [role="menuitem"], [role="option"], [role="combobox"], [aria-haspopup], [data-sem-arraste]'
+
+/** A barra de rolagem nativa: quem aperta ali quer rolar, não arrastar. */
+function naBarraDeRolagem(e: PointerEvent, el: HTMLElement) {
+  return el.scrollHeight > el.clientHeight && e.offsetX >= el.clientWidth
+}
 
 function aoPressionar(e: PointerEvent) {
   if (!props.editavel || e.button !== 0) return
@@ -87,9 +99,14 @@ function aoPressionar(e: PointerEvent) {
   const alca = alvo.closest('[data-alca-de-arraste]') as HTMLElement | null
   if (!alca || !grade.value?.contains(alca)) return
   if (alvo.closest(INTERATIVOS)) return
+  // Alça de outra coisa (coluna da tabela, canto de redimensionar): deixa passar.
+  if (getComputedStyle(alvo).cursor.includes('resize')) return
+  if (naBarraDeRolagem(e, alvo)) return
   const item = alca.closest('[data-painel]') as HTMLElement | null
   if (!item) return
-  e.preventDefault()
+  // Sem preventDefault aqui: cancelar o pointerdown mata o mousedown, e a tabela
+  // usa mousedown para redimensionar coluna. O padrão só é barrado quando o
+  // arraste começa de fato (4 px).
   pendente = { id: item.dataset.painel!, x: e.clientX, y: e.clientY }
   window.addEventListener('pointermove', aoMover)
   window.addEventListener('pointerup', aoSoltar, { once: true })
@@ -102,8 +119,11 @@ function aoMover(e: PointerEvent) {
     arrastandoId.value = pendente.id
     antesDoGesto = copia(layout.value)
     ultimoAlvo = pendente.id
+    window.getSelection()?.removeAllRanges()
+    document.documentElement.classList.add('select-none')
     window.addEventListener('keydown', aoTeclarNoArraste)
   }
+  e.preventDefault()
   if (!arrastandoId.value) return
   fantasma.value = { x: e.clientX, y: e.clientY }
   if (Date.now() < travadoAte) return
@@ -123,7 +143,17 @@ function aoMover(e: PointerEvent) {
   travadoAte = Date.now() + 220
 }
 
+/** Depois de um arraste, o clique que o navegador solta no fim não abre nada. */
+function engolirClique() {
+  const engolir = (ev: Event) => { ev.stopPropagation(); ev.preventDefault() }
+  window.addEventListener('click', engolir, { capture: true, once: true })
+  // Se não vier clique (soltou fora do painel), o ouvinte não pode ficar esperando.
+  setTimeout(() => window.removeEventListener('click', engolir, { capture: true }), 0)
+}
+
 function encerrarArraste() {
+  if (arrastandoId.value) engolirClique()
+  document.documentElement.classList.remove('select-none')
   pendente = null
   arrastandoId.value = null
   fantasma.value = null
@@ -295,12 +325,12 @@ function variaveis(item: ItemDaGrade) {
             <slot :item="item" :arrastando="arrastandoId === item.id" :redimensionando="redimensionandoId === item.id" />
           </div>
 
-          <!-- O canto de redimensionar: só no modo de edição. -->
+          <!-- O canto de redimensionar: aparece ao passar o mouse e no foco. -->
           <button
             v-if="editavel"
             type="button"
-            class="absolute bottom-0.5 right-0.5 z-20 hidden size-6 cursor-se-resize items-end justify-end rounded-br-lg p-1 text-dimmed transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-primary lg:flex"
-            :class="redimensionandoId === item.id ? 'text-primary' : ''"
+            class="absolute bottom-0.5 right-0.5 z-20 hidden size-6 cursor-se-resize items-end justify-end rounded-br-lg p-1 text-dimmed opacity-0 transition-[opacity,color] hover:text-primary focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-primary group-hover/grade:opacity-100 lg:flex"
+            :class="redimensionandoId === item.id ? 'text-primary opacity-100' : ''"
             :aria-label="textos.redimensionar(rotulos[item.id] ?? item.id)"
             @pointerdown="aoPuxarCanto($event, item)"
             @keydown="aoTeclarNoCanto($event, item)"

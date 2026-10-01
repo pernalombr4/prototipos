@@ -1,13 +1,17 @@
 <script setup lang="ts">
 /**
- * Tempo que falta para vencer, em faixas, agrupadas como o gestor lê:
- * vencidas (vermelho), a vencer nos próximos 7 dias (amarelo) e depois disso
- * (azul). Sem prazo fica à parte, em cinza. As 2 faixas do meio somam o número
- * "A vencer" do topo; "Em até 24 h" é o destaque do dia do prazo.
+ * Tempo até o prazo: as abertas distribuídas em faixas em ordem, da mais
+ * vencida à mais folgada. Categorias em ordem pedem colunas, como um
+ * histograma (rodada 3: as barras finas pareciam "linhas marcadas", não
+ * gráfico). A cor diz o grupo: vencidas, a vencer (os 7 dias), depois de 7
+ * dias e sem prazo. O eixo usa o nome curto; o ponteiro, o nome inteiro.
+ * Clicar numa coluna abre a lista daquela faixa.
  */
 import { FAIXAS } from './metricas'
 import type { Faixa } from './metricas'
 import type { Textos } from './textos'
+import GraficoColunas from './_GraficoColunas.vue'
+import type { Coluna, Pilha } from './_GraficoColunas.vue'
 import { numero } from './formatar'
 
 const props = defineProps<{
@@ -17,53 +21,34 @@ const props = defineProps<{
 
 const emit = defineEmits<{ abrir: [faixa: Faixa] }>()
 
-const maior = computed(() => Math.max(1, ...FAIXAS.map(f => props.faixas[f])))
+const GRUPO: Record<Faixa, number> = {
+  vencida_7d_mais: 0, vencida_ate_7d: 0, ate_24h: 1, de_1_a_7d: 1, de_8_a_30d: 2, mais_30d: 2, sem_prazo: 3,
+}
 
-const grupos = computed(() => [
-  { chave: 'vencidas', titulo: props.t.prazos.grupos.vencidas, cor: 'error', faixas: ['vencida_7d_mais', 'vencida_ate_7d'] as Faixa[] },
-  { chave: 'aVencer', titulo: props.t.prazos.grupos.aVencer, cor: 'warning', faixas: ['ate_24h', 'de_1_a_7d'] as Faixa[] },
-  { chave: 'depois', titulo: props.t.prazos.grupos.depois, cor: 'info', faixas: ['de_8_a_30d', 'mais_30d'] as Faixa[] },
-  // Sem prazo em cinza apagado: o neutral do tema é quase preto.
-  { chave: 'sem', titulo: '', cor: 'var(--ui-text-dimmed)', faixas: ['sem_prazo'] as Faixa[] },
+const pilhas = computed<Pilha[]>(() => [
+  { chave: 'vencidas', rotulo: props.t.prazos.grupos.vencidas, cor: 'var(--ui-error)' },
+  { chave: 'aVencer', rotulo: props.t.prazos.grupos.aVencer, cor: 'var(--ui-warning)' },
+  { chave: 'depois', rotulo: props.t.prazos.grupos.depois, cor: 'var(--ui-info)' },
+  { chave: 'sem', rotulo: props.t.prazos.faixas.sem_prazo, cor: 'var(--ui-text-dimmed)' },
 ])
 
-function soma(lista: Faixa[]) {
-  return lista.reduce((s, f) => s + props.faixas[f], 0)
-}
+/** Cada faixa preenche só a pilha do grupo dela: a cor da coluna é o grupo. */
+const colunas = computed<Coluna[]>(() => FAIXAS.map((f) => {
+  const valores = [0, 0, 0, 0]
+  valores[GRUPO[f]] = props.faixas[f]
+  return { chave: f, rotulo: props.t.prazos.faixas[f], curto: props.t.prazos.curtas[f], valores }
+}))
+
+const rotulo = computed(() => FAIXAS.map(f => `${props.t.prazos.faixas[f]}: ${numero(props.faixas[f], props.t)}`).join('; '))
 </script>
 
 <template>
-  <UScrollArea data-rolagem class="min-h-0 flex-1 px-4 pb-3 pt-1" :ui="{ viewport: 'gap-2.5' }">
-    <section v-for="g in grupos" :key="g.chave" :class="g.chave === 'sem' ? 'border-t border-default pt-2' : ''">
-      <h3 v-if="g.titulo" class="mb-0.5 flex items-baseline justify-between text-xs font-medium uppercase tracking-wide text-muted">
-        <span>{{ g.titulo }}</span>
-        <span class="tabular-nums">{{ numero(soma(g.faixas), t) }}</span>
-      </h3>
-      <ul>
-        <li v-for="f in g.faixas" :key="f">
-          <button
-            type="button"
-            class="-mx-2 block w-[calc(100%+1rem)] rounded-md px-2 py-1 text-left transition-colors hover:bg-elevated focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-default disabled:hover:bg-transparent"
-            :disabled="!faixas[f]"
-            @click="emit('abrir', f)"
-          >
-            <span class="mb-0.5 flex items-baseline justify-between gap-2 text-sm">
-              <span class="flex min-w-0 items-center gap-1.5">
-                <span class="truncate" :class="faixas[f] ? 'text-toned' : 'text-muted'">{{ t.prazos.faixas[f] }}</span>
-              </span>
-              <span class="shrink-0 font-medium tabular-nums" :class="faixas[f] ? 'text-highlighted' : 'text-muted'">{{ numero(faixas[f], t) }}</span>
-            </span>
-            <UProgress
-              :model-value="faixas[f]"
-              :max="maior"
-              size="sm"
-              :color="g.cor"
-              :ui="{ base: 'bg-elevated' }"
-              :get-value-label="() => `${t.prazos.faixas[f]}: ${faixas[f]}`"
-            />
-          </button>
-        </li>
-      </ul>
-    </section>
-  </UScrollArea>
+  <GraficoColunas
+    :t="t"
+    :pilhas="pilhas"
+    :colunas="colunas"
+    :rotulo-acessivel="rotulo"
+    com-legenda
+    @abrir="emit('abrir', $event as Faixa)"
+  />
 </template>

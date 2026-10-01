@@ -747,3 +747,69 @@ O admin do ENSPACE (`control.develop.enspace.io`) é o template de dashboard do 
 - **Usuários (a tabela):** busca à esquerda, filtro de data e "Em todo o período"; "Colunas", ação em massa e "Exportar" à direita; cabeçalho ordenável com filtro por coluna; rodapé com "Mostrando 1 - 25 de N resultado(s)", itens por página e paginação com primeira, anterior, páginas, próxima e última. A linha abre um painel lateral com abas.
 - **No template:** `HomeStats` (os números), `HomeChart` (Unovis, altura fixa), `HomeDateRangePicker` (atalhos à esquerda, `UCalendar` de intervalo à direita), `HomePeriodSelect` (`USelect` fantasma), `customers.vue` (tabela com busca, "Display" para colunas e `UPagination`).
 - **O painel de tarefas pegou:** o número do `HomeStats`, a barra fantasma, o gráfico que ocupa o painel e a tabela do admin na lista lateral. Ficou de fora o calendário de intervalo: precisa do `@internationalized/date`, que este repositório não tem.
+
+---
+
+## Rodada 3: formatos de gráfico e a quickview do admin
+
+Pesquisa de 2026-09-30, a pedido da redatora: "pesquise sobre as melhores praticas de construçao de dashboards de BI pra escolher os melhores formatos de grafico pra cada caso". As páginas de ajuda do ClickUp e do monday.com devolvem HTTP 403 à leitura automática; o que está aqui sobre elas vem do resumo do buscador e das páginas de produto. "Síntese" marca a regra tirada de mais de uma fonte.
+
+### Formatos de gráfico
+
+| Mensagem | Formato | Por quê | Fonte |
+|---|---|---|---|
+| Comparar categorias | barra; horizontal quando o nome é longo; eixo a partir de 0 | o olho compara comprimento com precisão; área e ângulo, não | FT, NN/g, Power BI |
+| Ranking | barra ordenada pelo valor | a posição é a mensagem | FT, Storytelling with Data |
+| Parte de um todo | barra 100% ou barras simples; pizza só com poucas partes | pizza só se lê perto de 25%, 50% e 75% | Few, FT |
+| Distribuição em faixas | colunas na ordem natural das faixas | mostra onde o volume se concentra | FT, Tableau |
+| Mudança no tempo | linha, com o nome da série na ponta | mostra a forma da tendência | Few, Power BI |
+| Composição | barra empilhada, até 4 partes, a parte-chave na base | só a base tem referência comum | Storytelling with Data, FT |
+| Valor único | número com contexto (meta ou período anterior) | número sozinho não diz se está bom | Power BI, Few |
+| Itens que pedem ação | lista ordenada | valor exato e muitos itens | Power BI |
+
+**O que não usar:**
+
+- 2 roscas lado a lado: o leitor compara fatias entre círculos (Few). A rosca lê pior que a pizza (NN/g).
+- Barra empilhada com mais de 4 partes, ou quando a pergunta é sobre uma parte do meio (Storytelling with Data, NN/g).
+- Gauge: ocupa espaço e se lê pior que barra (Few, NN/g).
+- Barra fina tipo "progresso" para comparar categorias: o "battery" do ClickUp e do monday.com serve para 1 proporção, não para ranking (síntese).
+
+**Regras de painel:**
+
+- Linha de números e 2 ou 3 gráficos na primeira tela; o resto numa camada abaixo (Tableau, Few).
+- O mais importante no canto superior esquerdo; leitura em Z (Power BI, Tableau).
+- Repetir o mesmo tipo de gráfico é melhor que variar sem motivo (Few, Power BI).
+- Cor com significado: base neutra, cor forte só no que pede ação, a mesma cor diz a mesma coisa no painel todo (Few, Tableau, Power BI). A cor não é o único sinal (NN/g).
+- Rótulo direto, sem legenda quando dá; top N com "ver todos"; clique leva à lista (Few, Power BI, ClickUp).
+
+**O que ClickUp e monday.com usam:**
+
+| Caso | ClickUp | monday.com |
+|---|---|---|
+| Número | Calculation card | Numbers widget |
+| Status | pizza, battery ou barra; Bar Chart com "group by" empilhado | Battery widget; Chart widget empilhado |
+| Por responsável | Tasks by Assignee; Who's Behind (pessoa × vencidas) | Workload widget; Chart empilhado por pessoa |
+| Tempo | Cycle time, Lead time e Total time in Status | não achei cartão de duração |
+| Gráfico para lista | drill-down em Bar, Battery, Line e Pie | Workload abre as tarefas da pessoa |
+
+**Fontes:**
+
+- FT, Visual Vocabulary: https://github.com/Financial-Times/chart-doctor/tree/main/visual-vocabulary
+- Stephen Few: https://www.perceptualedge.com/articles/visual_business_intelligence/save_the_pies_for_dessert.pdf · https://www.perceptualedge.com/articles/Whitepapers/Common_Pitfalls.pdf · https://www.perceptualedge.com/articles/misc/Bullet_Graph_Design_Spec.pdf
+- Storytelling with Data: https://www.storytellingwithdata.com/blog/stacked-bars · https://www.storytellingwithdata.com/blog/order-in-the-sort · https://www.storytellingwithdata.com/blog/2022/1/21/which-bar-orientation-should-i-use · https://www.storytellingwithdata.com/blog/2020/5/14/what-is-a-pie-chart
+- Power BI: https://learn.microsoft.com/en-us/power-bi/visuals/power-bi-visualization-types-for-reports-and-q-and-a · https://learn.microsoft.com/en-us/power-bi/create-reports/service-dashboards-design-tips · https://learn.microsoft.com/en-us/power-bi/visuals/power-bi-visualization-pie-donut-chart
+- Tableau: https://data.ucop.edu/support-training/tableau-files/which-chart-or-graph-is-right-for-you.pdf · https://help.tableau.com/current/pro/desktop/en-us/dashboards_best_practices.htm · https://help.tableau.com/current/blueprint/en-us/bp_visual_best_practices.htm
+- NN/g: https://www.nngroup.com/articles/dashboards-preattentive/ · https://www.nngroup.com/articles/choosing-chart-types/
+- ClickUp: https://help.clickup.com/hc/en-us/articles/14670260184855-Bar-Chart-cards · https://help.clickup.com/hc/en-us/articles/19157823291159-Who-s-Behind-cards · https://help.clickup.com/hc/en-us/articles/6304185469719-Display-Total-time-in-Status · https://help.clickup.com/hc/en-us/articles/14995002699927-Drill-down-view-for-Dashboard-cards
+- monday.com: https://support.monday.com/hc/en-us/articles/360001262665-The-Chart-Widget · https://support.monday.com/hc/en-us/articles/360010699760-The-Workload-Widget
+
+**O painel do ENSPACE pegou:** a tabela "Formato de cada painel" do `DECISOES.md`, rodada 3, diz o formato de cada painel e onde ele se afasta da pesquisa (sem comparação nos números e SLA em colunas, por pedido da redatora; cores com significado nas faixas de prazo). O "Time in Status" do ClickUp inspirou a barra de tempo dividida nas etapas.
+
+### A quickview do admin
+
+Vista só em leitura no admin (`control.develop.enspace.io`), sem acionar nada, em 30/09/2026.
+
+- Ao abrir uma linha da tabela, a lateral tem uma coluna de resumo à esquerda, com largura ajustável.
+- Recolhida, vira um trilho de ícones; cada ícone mostra rótulo e valor ao passar o mouse.
+- Expandida, mostra o tipo, o avatar, o nome, os selos e os "Details" (ícone, rótulo e valor).
+- **O painel pegou:** o desenho todo, com o resumo do painel clicado no lugar dos "Details".

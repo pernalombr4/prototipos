@@ -10,7 +10,7 @@
  * A pergunta que ele responde é a do "Created vs Resolved" do Jira: a fila
  * cresce ou encolhe? Por isso o saldo aparece no ponteiro de cada barra.
  */
-import { VisAxis, VisCrosshair, VisGroupedBar, VisTooltip, VisXYContainer } from '@unovis/vue'
+import { VisAxis, VisCrosshair, VisLine, VisScatter, VisTooltip, VisXYContainer } from '@unovis/vue'
 import type { Balde, Granularidade } from './metricas'
 import type { Textos } from './textos'
 import { ano, dataCurta, mesCurto, numero } from './formatar'
@@ -18,12 +18,32 @@ import { ano, dataCurta, mesCurto, numero } from './formatar'
 const props = defineProps<{
   t: Textos
   baldes: Balde[]
+  /** Recorte do MVP (andaime): a granularidade segue o período, sem seletor. */
+  semGranularidade?: boolean
 }>()
 
 const granularidade = defineModel<Granularidade>('granularidade', { required: true })
 
 const COR_CRIADAS = 'var(--ui-color-neutral-400)'
 const COR_CONCLUIDAS = 'var(--ui-primary)'
+
+/**
+ * Rodada 3, pela pesquisa de formatos (`PESQUISA.md`): 2 séries no tempo pedem
+ * linha (FT Visual Vocabulary, Power BI, Few). O nome de cada série fica na
+ * ponta da linha (rótulo direto, sem legenda). As colunas agrupadas saíram.
+ */
+const maiorValor = computed(() => Math.max(1, ...props.baldes.map(b => Math.max(b.criadas, b.concluidas))))
+/**
+ * O nome de cada série no último ponto da linha (rótulo direto). Vai no
+ * próprio ponto (`VisScatter` aceita texto): acima da linha que termina mais
+ * alta, abaixo da outra. O último período se acha pela data.
+ */
+const ultimoInicio = computed(() => props.baldes[props.baldes.length - 1]?.inicio)
+const criadasEmCima = computed(() => {
+  const u = props.baldes[props.baldes.length - 1]
+  return !u || u.criadas >= u.concluidas
+})
+const rotuloNaPonta = (nome: string) => (d: Balde) => d.inicio === ultimoInicio.value ? nome : ''
 
 const x = (_: Balde, i: number) => i
 const y = [(d: Balde) => d.criadas, (d: Balde) => d.concluidas]
@@ -86,22 +106,9 @@ const opcoes = computed(() => [
 <template>
   <div class="flex min-h-0 flex-1 flex-col px-4 pb-3">
     <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-      <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1 text-sm">
-        <span class="flex items-center gap-2">
-          <span class="size-2.5 rounded-sm" :style="{ backgroundColor: COR_CRIADAS }" />
-          <span class="text-toned">{{ t.serie.criadas }}</span>
-          <span class="text-lg font-semibold tabular-nums text-highlighted">{{ numero(totalCriadas, t) }}</span>
-        </span>
-        <span class="flex items-center gap-2">
-          <span class="size-2.5 rounded-sm" :style="{ backgroundColor: COR_CONCLUIDAS }" />
-          <span class="text-toned">{{ t.serie.concluidas }}</span>
-          <span class="text-lg font-semibold tabular-nums text-highlighted">{{ numero(totalConcluidas, t) }}</span>
-        </span>
-        <span class="text-xs" :class="totalCriadas - totalConcluidas > 0 ? 'text-warning-700 dark:text-warning-300' : 'text-muted'">
-          {{ t.serie.saldo(sinal(totalCriadas - totalConcluidas)) }}
-        </span>
-      </div>
+      <span />
       <USelect
+        v-if="!semGranularidade"
         v-model="granularidade"
         :items="opcoes"
         variant="ghost"
@@ -121,19 +128,32 @@ const opcoes = computed(() => [
       <VisXYContainer
         :key="`${granularidade}-${baldes.length}`"
         :data="baldes"
-        :margin="{ top: 8, right: 8, bottom: 0, left: 0 }"
+        :margin="{ top: 12, right: 44, bottom: 0, left: 0 }"
         :y-domain-min-constraint="[0, 0]"
         class="h-full w-full"
       >
-        <VisGroupedBar
+        <VisLine :x="x" :y="y" :color="cores" :line-width="2.5" curve-type="linear" />
+        <VisScatter
           :x="x"
-          :y="y"
-          :color="cores"
-          :rounded-corners="3"
-          :group-padding="0.25"
-          :bar-padding="0.08"
-          :group-max-width="48"
+          :y="(d: Balde) => d.criadas"
+          :color="COR_CRIADAS"
+          :size="6"
+          :label="rotuloNaPonta(t.serie.criadas)"
+          :label-color="() => 'var(--ui-text-muted)'"
+          :label-position="criadasEmCima ? 'top' : 'bottom'"
+          :label-hide-overlapping="false"
         />
+        <VisScatter
+          :x="x"
+          :y="(d: Balde) => d.concluidas"
+          :color="COR_CONCLUIDAS"
+          :size="6"
+          :label="rotuloNaPonta(t.serie.concluidas)"
+          :label-color="() => 'var(--ui-primary)'"
+          :label-position="criadasEmCima ? 'bottom' : 'top'"
+          :label-hide-overlapping="false"
+        />
+        <!-- O nome de cada série na ponta da linha, acima ou abaixo do último ponto. -->
         <VisAxis
           type="y"
           :num-ticks="4"
@@ -154,10 +174,6 @@ const opcoes = computed(() => [
         <VisTooltip />
       </VisXYContainer>
     </div>
-    <p v-if="baldes.some(b => b.parcial)" class="mt-1.5 flex gap-2 text-xs text-muted">
-      <UIcon name="i-lucide-info" class="mt-0.5 size-3.5 shrink-0" />
-      <span class="line-clamp-2">{{ t.serie.notaParcial }}</span>
-    </p>
   </div>
 </template>
 

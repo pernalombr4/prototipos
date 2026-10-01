@@ -11,6 +11,11 @@
  * - rodapé: "Mostrando 1 a 20 de N" à esquerda; itens por página e a
  *   paginação com primeira e última página à direita.
  *
+ * Rodada 3: a quickview do admin, à esquerda da tabela, com o resumo do painel
+ * clicado (`_Quickview.vue`). É um `USplitter`: arrastar o limite muda a
+ * largura; estreita, vira o trilho de ícones; clicar no limite expande ou
+ * recolhe. A largura fica guardada no navegador (`autoSaveId`).
+ *
  * No produto, o recorte vira filtro da lista de Agendadas ou de Rápidas, e
  * cada linha abre a tarefa.
  */
@@ -19,14 +24,56 @@ import type { EnTableColumn, EnTableSort } from '@be-enlighten/enspace-sdk-ui/ba
 import { AGORA } from './mocks'
 import type { TarefaDoPainel } from './metricas'
 import { estaAberta, nomeDoResponsavel, situacao } from './metricas'
+import type { ResumoDoRecorte } from './paineis'
 import type { Textos } from './textos'
+import Quickview from './_Quickview.vue'
 import { dataHora, duracao, numero } from './formatar'
 
 const props = defineProps<{
   t: Textos
   titulo: string
   tarefas: TarefaDoPainel[]
+  resumo: ResumoDoRecorte | null
+  filtros: string[]
+  /** Recorte do MVP (andaime): sem "Colunas" e "Exportar". */
+  simples?: boolean
 }>()
+
+/* ------------------------------ a quickview ------------------------------ */
+
+const divisao = useTemplateRef('divisao')
+const recolhido = ref(false)
+/** Arrastar o limite também solta um clique no fim: só alterna se não houve arraste. */
+let arrastando = false
+let arrastou = false
+
+function aoArrastar(_: number, ativo: boolean) {
+  arrastando = ativo
+  if (ativo) arrastou = false
+}
+
+function aoRedimensionar() {
+  if (arrastando) arrastou = true
+}
+
+/**
+ * Tamanhos em porcentagem da lateral (de até 1152 px): em pixels, o Reka
+ * calcula o tamanho antes de a lateral ter largura e a quickview nasce
+ * recolhida. 25% dá uns 290 px; 5%, o trilho de uns 58 px.
+ */
+const PADRAO = 25
+const LISTA = { slot: 'lista', class: 'min-w-0 flex-col' }
+/** Rodada 3: o MVP também tem a quickview ("é nativo nosso, componente está pronto"). */
+const divisoes = [{ slot: 'resumo', defaultSize: PADRAO, minSize: 18, maxSize: 40, collapsible: true, collapsedSize: 5 }, LISTA]
+
+function alternarResumo() {
+  if (arrastou) { arrastou = false; return }
+  const painel = divisao.value?.panelsRef?.[0] as { collapse: () => void, resize: (n: number) => void } | undefined
+  if (!painel) return
+  // Expandir volta ao tamanho padrão, e não ao último tamanho antes de recolher.
+  if (recolhido.value) painel.resize(PADRAO)
+  else painel.collapse()
+}
 
 const aberto = defineModel<boolean>('open', { required: true })
 const toast = useToast()
@@ -138,106 +185,148 @@ function maquete(titulo: string) {
     v-model:open="aberto"
     :title="titulo"
     :description="t.gaveta.contagem(tarefas.length)"
-    :ui="{ content: 'max-w-6xl', body: 'flex min-h-0 flex-col gap-3 p-0 sm:p-0' }"
+    :ui="{ content: 'max-w-6xl' }"
   >
-    <template #body>
-      <!-- Barra de cima, como no admin -->
-      <div class="flex flex-wrap items-center justify-between gap-2 px-4 pt-4 sm:px-6">
-        <UInput
-          v-model="busca"
-          icon="i-lucide-search"
-          :placeholder="t.gaveta.buscar"
-          :aria-label="t.gaveta.buscar"
-          size="sm"
-          class="w-full max-w-64"
-        />
-        <div class="flex flex-wrap items-center gap-1.5">
-          <UButton v-if="temAgendada" :label="t.gaveta.abrirAgendadas" icon="i-lucide-calendar-check" color="neutral" variant="ghost" size="sm" @click="maquete(t.gaveta.maquete)" />
-          <UButton v-if="temRapida" :label="t.gaveta.abrirRapidas" icon="i-lucide-clipboard-list" color="neutral" variant="ghost" size="sm" @click="maquete(t.gaveta.maquete)" />
-          <UDropdownMenu :items="menuDeColunas" :content="{ align: 'end' }">
-            <UButton :label="t.gaveta.colunas" icon="i-lucide-columns-3" color="neutral" variant="outline" size="sm" />
-          </UDropdownMenu>
-          <UButton :label="t.gaveta.exportar" icon="i-lucide-file-down" color="primary" size="sm" @click="maquete(t.gaveta.maqueteExportar)" />
-        </div>
-      </div>
+    <!--
+      Rodada 3: sem a faixa de título (pedido: "senão fica muito cabeçalho").
+      O título e a contagem continuam para o leitor de tela (o Slideover os põe
+      num VisuallyHidden quando o conteúdo vem pelo slot #content); na tela,
+      quem diz o recorte é a quickview, e o "fechar" mora na ponta da barra.
+    -->
+    <template #content="{ close }">
+      <USplitter
+        id="painel-de-tarefas-quickview"
+        ref="divisao"
+        :items="divisoes"
+        auto-save-id="painel-de-tarefas-quickview-v2"
+        class="min-h-0 flex-1"
+        :ui="{ handle: 'w-3 lg:w-4' }"
+        @collapse="recolhido = true"
+        @expand="recolhido = false"
+        @dragging="aoArrastar"
+        @resize="aoRedimensionar"
+      >
+        <template #resumo="{ collapsed }">
+          <Quickview v-if="resumo" :t="t" :resumo="resumo" :recolhido="collapsed" :filtros="filtros" />
+        </template>
 
-      <div class="min-h-0 flex-1 overflow-y-auto border-y border-default">
-        <EnTable
-          :columns="colunas"
-          :rows="linhas"
-          :sort="ordem"
-          resizable
-          v-model:column-sizing="larguras"
-          v-model:column-visibility="visiveis"
-          :empty-state="{ icon: 'i-lucide-list-x', title: t.gaveta.vazio }"
-          @sort-change="ordem = $event"
-          @row-click="maquete(t.gaveta.maquete)"
-        >
-          <template #cell-nome="{ row }">
-            <span class="block min-w-0">
-              <span class="block max-w-72 truncate font-medium text-highlighted">{{ (row as TarefaDoPainel).nome }}</span>
-              <span class="flex items-center gap-1.5 text-xs text-muted">
-                <UBadge :label="t.origemCurta[(row as TarefaDoPainel).origem]" color="neutral" variant="soft" size="sm" />
-                <span class="font-mono">#{{ (row as TarefaDoPainel).id }}</span>
-              </span>
-            </span>
-          </template>
-          <template #cell-status="{ row }">
-            <span class="flex flex-col items-start gap-1">
-              <span class="text-sm text-toned">{{ t.status[(row as TarefaDoPainel).status] }}</span>
-              <UBadge
-                v-if="situacao(row as TarefaDoPainel)"
-                :label="t.situacao[situacao(row as TarefaDoPainel)!]"
-                :color="corDaSituacao[situacao(row as TarefaDoPainel)!]"
-                variant="subtle"
+        <template #resize-handle>
+          <!-- O limite da quickview: a linha do admin, e um clique expande ou recolhe. -->
+          <button
+            type="button"
+            class="group/alca flex h-full w-full items-center justify-center py-4 focus-visible:outline-none"
+            :aria-label="recolhido ? t.gaveta.expandirResumo : t.gaveta.recolherResumo"
+            :aria-expanded="!recolhido"
+            :title="t.gaveta.alcaDoResumo"
+            @click="alternarResumo"
+          >
+            <span class="h-full w-0.5 rounded-full bg-primary/40 transition-colors group-hover/alca:bg-primary group-focus-visible/alca:bg-primary" />
+          </button>
+        </template>
+
+        <template #lista>
+          <div class="flex min-h-0 w-full flex-1 flex-col gap-3">
+            <!-- Barra de cima, como no admin -->
+            <div class="flex flex-wrap items-center justify-between gap-2 px-4 pt-4 sm:px-6">
+              <UInput
+                v-model="busca"
+                icon="i-lucide-search"
+                :placeholder="t.gaveta.buscar"
+                :aria-label="t.gaveta.buscar"
                 size="sm"
+                class="w-full max-w-64"
               />
-            </span>
-          </template>
-          <template #cell-prazo="{ row }">
-            <span
-              class="text-sm tabular-nums"
-              :class="situacao(row as TarefaDoPainel) === 'vencida' ? 'font-medium text-error-700 dark:text-error-300' : 'text-toned'"
-            >{{ prazoRelativo(row as TarefaDoPainel) }}</span>
-          </template>
-          <template #cell-responsavel="{ row }">
-            <span class="block max-w-48 truncate text-sm text-toned">{{ responsavel(row as TarefaDoPainel) }}</span>
-          </template>
-          <template #cell-onde="{ row }">
-            <span v-if="(row as TarefaDoPainel).etapa" class="block max-w-56 truncate text-sm text-toned">
-              {{ (row as TarefaDoPainel).fluxo }} › {{ (row as TarefaDoPainel).etapa }}
-            </span>
-            <span v-else-if="(row as TarefaDoPainel).fluxo" class="block max-w-56 truncate text-sm text-toned">{{ (row as TarefaDoPainel).fluxo }}</span>
-            <span v-else class="text-dimmed">-</span>
-          </template>
-          <template #cell-criadaEm="{ value }">
-            <span class="text-sm tabular-nums text-toned">{{ dataHora(value as number, t) }}</span>
-          </template>
-          <template #cell-concluidaEm="{ value }">
-            <span class="text-sm tabular-nums text-toned">{{ dataHora(value as number | null, t) }}</span>
-          </template>
-        </EnTable>
-      </div>
+              <div class="flex flex-wrap items-center gap-1.5">
+                <UButton v-if="temAgendada" :label="t.gaveta.abrirAgendadas" icon="i-lucide-calendar-check" color="neutral" variant="ghost" size="sm" @click="maquete(t.gaveta.maquete)" />
+                <UButton v-if="temRapida" :label="t.gaveta.abrirRapidas" icon="i-lucide-clipboard-list" color="neutral" variant="ghost" size="sm" @click="maquete(t.gaveta.maquete)" />
+                <UDropdownMenu v-if="!simples" :items="menuDeColunas" :content="{ align: 'end' }">
+                  <UButton :label="t.gaveta.colunas" icon="i-lucide-columns-3" color="neutral" variant="outline" size="sm" />
+                </UDropdownMenu>
+                <UButton v-if="!simples" :label="t.gaveta.exportar" icon="i-lucide-file-down" color="primary" size="sm" @click="maquete(t.gaveta.maqueteExportar)" />
+                <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="sm" class="-mr-2" :aria-label="t.gaveta.fechar" @click="close()" />
+              </div>
+            </div>
 
-      <!-- Rodapé, como no admin: contagem à esquerda, página à direita -->
-      <div class="flex flex-wrap items-center justify-between gap-3 px-4 pb-4 sm:px-6">
-        <span class="text-sm text-muted">{{ faixaMostrada }}</span>
-        <div class="flex flex-wrap items-center gap-2">
-          <USelect
-            v-model="porPagina"
-            :items="opcoesPorPagina"
-            size="sm"
-            class="w-36"
-            :aria-label="t.gaveta.porPagina(porPagina)"
-          />
-          <UPagination
-            v-model:page="pagina"
-            :total="ordenadas.length"
-            :items-per-page="porPagina"
-            size="sm"
-          />
-        </div>
-      </div>
+            <div class="min-h-0 flex-1 overflow-y-auto border-y border-default">
+              <EnTable
+                :columns="colunas"
+                :rows="linhas"
+                :sort="ordem"
+                resizable
+                v-model:column-sizing="larguras"
+                v-model:column-visibility="visiveis"
+                :empty-state="{ icon: 'i-lucide-list-x', title: t.gaveta.vazio }"
+                @sort-change="ordem = $event"
+                @row-click="maquete(t.gaveta.maquete)"
+              >
+                <template #cell-nome="{ row }">
+                  <span class="block min-w-0">
+                    <span class="block max-w-72 truncate font-medium text-highlighted">{{ (row as TarefaDoPainel).nome }}</span>
+                    <span class="flex items-center gap-1.5 text-xs text-muted">
+                      <UBadge :label="t.origemCurta[(row as TarefaDoPainel).origem]" color="neutral" variant="soft" size="sm" />
+                      <span class="font-mono">#{{ (row as TarefaDoPainel).id }}</span>
+                    </span>
+                  </span>
+                </template>
+                <template #cell-status="{ row }">
+                  <span class="flex flex-col items-start gap-1">
+                    <span class="text-sm text-toned">{{ t.status[(row as TarefaDoPainel).status] }}</span>
+                    <UBadge
+                      v-if="situacao(row as TarefaDoPainel)"
+                      :label="t.situacao[situacao(row as TarefaDoPainel)!]"
+                      :color="corDaSituacao[situacao(row as TarefaDoPainel)!]"
+                      variant="subtle"
+                      size="sm"
+                    />
+                  </span>
+                </template>
+                <template #cell-prazo="{ row }">
+                  <span
+                    class="text-sm tabular-nums"
+                    :class="situacao(row as TarefaDoPainel) === 'vencida' ? 'font-medium text-error-700 dark:text-error-300' : 'text-toned'"
+                  >{{ prazoRelativo(row as TarefaDoPainel) }}</span>
+                </template>
+                <template #cell-responsavel="{ row }">
+                  <span class="block max-w-48 truncate text-sm text-toned">{{ responsavel(row as TarefaDoPainel) }}</span>
+                </template>
+                <template #cell-onde="{ row }">
+                  <span v-if="(row as TarefaDoPainel).etapa" class="block max-w-56 truncate text-sm text-toned">
+                    {{ (row as TarefaDoPainel).fluxo }} › {{ (row as TarefaDoPainel).etapa }}
+                  </span>
+                  <span v-else-if="(row as TarefaDoPainel).fluxo" class="block max-w-56 truncate text-sm text-toned">{{ (row as TarefaDoPainel).fluxo }}</span>
+                  <span v-else class="text-dimmed">-</span>
+                </template>
+                <template #cell-criadaEm="{ value }">
+                  <span class="text-sm tabular-nums text-toned">{{ dataHora(value as number, t) }}</span>
+                </template>
+                <template #cell-concluidaEm="{ value }">
+                  <span class="text-sm tabular-nums text-toned">{{ dataHora(value as number | null, t) }}</span>
+                </template>
+              </EnTable>
+            </div>
+
+            <!-- Rodapé, como no admin: contagem à esquerda, página à direita -->
+            <div class="flex flex-wrap items-center justify-between gap-3 px-4 pb-4 sm:px-6">
+              <span class="text-sm text-muted">{{ faixaMostrada }}</span>
+              <div class="flex flex-wrap items-center gap-2">
+                <USelect
+                  v-model="porPagina"
+                  :items="opcoesPorPagina"
+                  size="sm"
+                  class="w-36"
+                  :aria-label="t.gaveta.porPagina(porPagina)"
+                />
+                <UPagination
+                  v-model:page="pagina"
+                  :total="ordenadas.length"
+                  :items-per-page="porPagina"
+                  size="sm"
+                />
+              </div>
+            </div>
+          </div>
+        </template>
+      </USplitter>
     </template>
   </USlideover>
 </template>
