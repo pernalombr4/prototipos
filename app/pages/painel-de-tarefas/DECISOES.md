@@ -1,5 +1,17 @@
 # Decisões: painel de tarefas
 
+## Rodada 5 · 2026-10-01
+
+- **Pedido (literal):** "a interaçao com todos os graficos deve ter popovers. como tem no grafico de linhas, por exemplo. voce nao botou isso em todos."
+- **Mudou:** todo gráfico abre uma dica ao passar o mouse, no desenho da do gráfico de linhas: o nome em cima, cada parte com o ponto da cor e o valor, e o total quando a barra ou a coluna se divide.
+  - Barras horizontais (Tarefas por responsável e Tempo médio de duração): ganharam a dica. Antes, só o `title` do navegador, e só nas partes da barra.
+    - A dica segue o ponteiro, como no gráfico de linhas. No foco do teclado, abre presa à barra.
+    - Em "Todos" dos responsáveis: as 5 partes e o total. No tempo por fluxo: cada etapa e a média. Na barra de uma parte só: o filtro ("Vencida: 18") ou "Média".
+  - Colunas (SLA, Tarefas por status, Tarefas por prioridade): a dica já existia e repetia o nome ("Vencida", "● Vencida: 113"). Agora diz o que o número conta ("● Abertas agora: 113") e, na coluna empilhada, soma o total.
+- **Como:** `UPopover` no modo de passar o mouse (`mode="hover"`), sem gatilho, ancorado num ponto que segue o ponteiro (`reference` com `getBoundingClientRect`). Consulta: MCP `nuxt-ui` (`get-component-metadata Popover`: `mode`, `reference`, `openDelay`) e o código do componente (sem slot padrão, não há gatilho). A dica não recebe o ponteiro (`pointer-events-none` pela prop `ui`), para não piscar.
+- **Fronteira:** muda só o passar do mouse e o foco nos gráficos. Clique, dado e desenho dos painéis ficam como estavam.
+- **Ver:** `https://pernalombr4.github.io/prototipos/painel-de-tarefas`. Sem print, a pedido da redatora.
+
 ## Rodada 4 · 2026-10-01
 
 - **Pedido (literal):** "o dash de tempo ate o prazo é inutil. pode tirar."

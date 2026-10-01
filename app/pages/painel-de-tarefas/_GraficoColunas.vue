@@ -41,6 +41,8 @@ const props = defineProps<{
   rotuloAcessivel: string
   /** Mostra a legenda das pilhas embaixo (desligue quando a cor só repete o eixo). */
   comLegenda?: boolean
+  /** O nome do valor na dica quando a coluna tem uma parte só ("Abertas agora"). */
+  rotuloDoValor?: string
 }>()
 
 const emit = defineEmits<{ abrir: [chave: string] }>()
@@ -62,15 +64,27 @@ const eventos = {
   },
 }
 
+/**
+ * A dica no desenho da do gráfico de linhas: o nome da coluna em cima, cada
+ * parte com a cor e o valor, e o total quando a coluna se divide. Coluna de
+ * uma parte só não repete o nome: diz o que o número conta.
+ */
 function dica(p: Pedaco) {
   const d = p.datum
   if (!d) return ''
-  const linhas = props.pilhas
-    .map((p, k) => ({ p, v: d.valores[k] ?? 0 }))
-    .filter(l => l.v > 0)
-    .map(l => `<p class="text-sm text-highlighted"><span style="color:${l.p.cor}">●</span> ${l.p.rotulo}: <b>${numero(l.v, props.t)}</b></p>`)
-    .join('')
-  return `<div class="px-1 py-0.5 space-y-0.5"><p class="text-[11px] text-muted">${d.rotulo}</p>${linhas}</div>`
+  const linha = (cor: string, rotulo: string, v: number) =>
+    `<p class="text-sm text-highlighted"><span style="color:${cor}">●</span> ${rotulo}: <b>${numero(v, props.t)}</b></p>`
+  const partes = props.pilhas.map((x, k) => ({ x, v: d.valores[k] ?? 0 })).filter(l => l.v > 0)
+  let corpo: string
+  if (partes.length <= 1) {
+    const unica = partes[0] ?? { x: props.pilhas[0]!, v: 0 }
+    corpo = linha(unica.x.cor, props.rotuloDoValor ?? unica.x.rotulo, unica.v)
+  }
+  else {
+    corpo = partes.map(l => linha(l.x.cor, l.x.rotulo, l.v)).join('')
+      + `<p class="text-[11px] text-muted">${props.t.total}: <b>${numero(d.total, props.t)}</b></p>`
+  }
+  return `<div class="px-1 py-0.5 space-y-0.5"><p class="text-[11px] text-muted">${d.rotulo}</p>${corpo}</div>`
 }
 
 const legendaUsada = computed(() => props.pilhas.filter((_, k) => dados.value.some(d => (d.valores[k] ?? 0) > 0)))

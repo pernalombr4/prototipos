@@ -84,6 +84,7 @@ const rotulo = computed(() => {
       :pilhas="pilhas"
       :colunas="colunas"
       :rotulo-acessivel="rotulo"
+      :rotulo-do-valor="grupos.find(g => g.value === grupo)!.label"
       @abrir="emit('abrir', $event as Situacao, grupo)"
     />
   </div>

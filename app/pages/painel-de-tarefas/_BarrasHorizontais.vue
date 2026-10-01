@@ -12,6 +12,10 @@
  *   parte larga o bastante leva o nome dentro, e todas dizem nome e valor no
  *   ponteiro e no leitor de tela;
  * - cada barra é um botão: abre a lista ou desce de nível;
+ * - passar o mouse abre a dica que segue o ponteiro, como no gráfico de
+ *   linhas (rodada 5: "a interação com todos os gráficos deve ter popovers"):
+ *   o nome, cada parte com a cor e o valor, e o total. No foco do teclado, a
+ *   dica abre presa à barra;
  * - rolagem infinita quando a lista é longa (`UScrollArea` + sentinela).
  *
  * Por que HTML e não o Unovis: o gráfico de barras do Unovis não recebe foco
@@ -59,6 +63,10 @@ const props = withDefaults(defineProps<{
   /** Largura da coluna do nome. */
   larguraDoRotulo?: string
   lote?: number
+  /** O nome do valor na dica, quando a barra não se divide ("Vencida", "Média"). */
+  rotuloDoValor?: string
+  /** O nome do total na dica, quando a barra se divide; o padrão é "Total". */
+  rotuloDoTotal?: string
 }>(), { larguraDoRotulo: '12rem', lote: 12 })
 
 const emit = defineEmits<{ abrir: [chave: string] }>()
@@ -81,6 +89,40 @@ function classeDaCor(cor: string) {
 }
 const largura = (b: BarraDoGrafico) => `max(0.25rem, calc(${(b.valor / maior.value) * 100}% - 4.5rem))`
 const partesVisiveis = (b: BarraDoGrafico) => (b.partes ?? []).filter(p => p.valor > 0)
+/* ------------------------------ a dica ------------------------------ */
+
+/**
+ * Uma dica só por gráfico: `UPopover` no modo de passar o mouse, sem gatilho,
+ * ancorado num ponto que segue o ponteiro (`reference` aceita qualquer objeto
+ * com `getBoundingClientRect`). Não recebe o ponteiro, para não piscar.
+ */
+const ativa = ref<BarraDoGrafico | null>(null)
+const ponto = ref<{ x: number, y: number, w: number, h: number }>({ x: 0, y: 0, w: 0, h: 0 })
+const referencia = computed(() => {
+  const { x, y, w, h } = ponto.value
+  return { getBoundingClientRect: () => new DOMRect(x, y, w, h) }
+})
+function seguir(b: BarraDoGrafico, e: PointerEvent) {
+  if (e.pointerType === 'touch') return
+  ativa.value = b
+  ponto.value = { x: e.clientX, y: e.clientY, w: 0, h: 0 }
+}
+function noFoco(b: BarraDoGrafico, e: FocusEvent) {
+  const r = (e.currentTarget as HTMLElement).querySelector('[data-barra]')?.getBoundingClientRect()
+  if (!r) return
+  ativa.value = b
+  ponto.value = { x: r.x, y: r.y, w: r.width, h: r.height }
+}
+function esconder() {
+  ativa.value = null
+}
+
+/** O ponto colorido da dica: classe da paleta ou cor CSS. */
+const TINTA: Record<string, string> = {
+  primary: 'text-primary', secondary: 'text-secondary', success: 'text-success', info: 'text-info',
+  warning: 'text-warning', error: 'text-error', neutral: 'text-highlighted',
+}
+
 function rotuloAcessivel(b: BarraDoGrafico) {
   const partes = partesVisiveis(b)
   if (!partes.length) return `${b.rotulo}: ${b.texto}`
@@ -100,6 +142,10 @@ function rotuloAcessivel(b: BarraDoGrafico) {
         :style="{ gridTemplateColumns: `minmax(0, ${larguraDoRotulo}) 1fr` }"
         :aria-label="rotuloAcessivel(b)"
         @click="emit('abrir', b.chave)"
+        @pointermove="seguir(b, $event)"
+        @pointerleave="esconder"
+        @focus="noFoco(b, $event)"
+        @blur="esconder"
       >
         <span class="flex min-w-0 items-center gap-2 text-sm">
           <UAvatar v-if="b.avatar" :text="b.avatar" size="2xs" />
@@ -112,7 +158,7 @@ function rotuloAcessivel(b: BarraDoGrafico) {
           </span>
         </span>
         <!-- A barra e o valor na ponta. -->
-        <span class="flex min-w-0 items-center gap-2">
+        <span data-barra class="flex min-w-0 items-center gap-2">
           <!-- Empilhada: uma parte por grupo, com o nome dentro quando cabe. -->
           <span
             v-if="partesVisiveis(b).length"
@@ -125,7 +171,6 @@ function rotuloAcessivel(b: BarraDoGrafico) {
               class="flex h-full min-w-0 basis-0 items-center overflow-hidden px-1.5"
               :class="[classeDaCor(p.cor), p.classeDoTexto ?? 'text-highlighted']"
               :style="{ flexGrow: p.valor, backgroundColor: classeDaCor(p.cor) ? undefined : p.cor }"
-              :title="`${p.rotulo}: ${p.texto ?? p.valor}`"
             >
               <span v-if="p.rotuloDentro && p.valor / maior >= 0.16" class="truncate text-[11px] font-medium leading-none">{{ p.rotulo }}</span>
             </span>
@@ -150,6 +195,36 @@ function rotuloAcessivel(b: BarraDoGrafico) {
       </button>
       <Sentinela v-if="barras.length > lote" :t="t" :tem-mais="visiveis < barras.length" :total="barras.length" @mais="visiveis += lote" />
     </UScrollArea>
+    <UPopover
+      mode="hover"
+      :open="!!ativa"
+      :reference="referencia"
+      :content="{ side: 'top', align: 'center', sideOffset: 12, collisionPadding: 8 }"
+      :ui="{ content: 'pointer-events-none max-w-72' }"
+    >
+      <template #content>
+        <div v-if="ativa" class="space-y-0.5 px-3 py-2">
+          <p class="text-[11px] text-muted">
+            {{ ativa.rotulo }}<template v-if="ativa.apoio">
+              · {{ ativa.apoio }}
+            </template>
+          </p>
+          <template v-if="partesVisiveis(ativa).length">
+            <p v-for="(p, k) in partesVisiveis(ativa)" :key="k" class="text-sm text-highlighted">
+              <span :class="TINTA[p.cor]" :style="TINTA[p.cor] ? undefined : { color: p.cor }">●</span>
+              {{ p.rotulo }}: <b class="tabular-nums">{{ p.texto ?? p.valor }}</b>
+            </p>
+            <p class="text-[11px] text-muted">
+              {{ rotuloDoTotal ?? t.total }}: <b class="tabular-nums">{{ ativa.texto }}</b>
+            </p>
+          </template>
+          <p v-else class="text-sm text-highlighted">
+            <span :class="TINTA[ativa.cor ?? 'primary']" :style="TINTA[ativa.cor ?? 'primary'] ? undefined : { color: ativa.cor }">●</span>
+            {{ rotuloDoValor ?? t.total }}: <b class="tabular-nums">{{ ativa.texto }}</b>
+          </p>
+        </div>
+      </template>
+    </UPopover>
     <ul v-if="legenda?.length" class="flex flex-wrap gap-x-4 gap-y-1 border-t border-default px-4 py-2 text-xs text-muted">
       <li v-for="item in legenda" :key="item.rotulo" class="flex items-center gap-1.5">
         <span class="size-2 rounded-sm" :class="classeDaCor(item.cor)" :style="classeDaCor(item.cor) ? undefined : { backgroundColor: item.cor }" />

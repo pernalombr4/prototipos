@@ -89,6 +89,8 @@ export interface Textos {
   origemCurta: Record<Origem, string>
 
   agora: string
+  /** O total na dica dos gráficos. */
+  total: string
   noPeriodo: string
   comoCalculamos: string
   vsAnterior: string
@@ -397,6 +399,7 @@ export const textos: Record<Idioma, Textos> = {
     origemCurta: { manual: 'Manual', fluxo: 'Fluxo' },
 
     agora: 'Agora',
+    total: 'Total',
     noPeriodo: 'No período',
     comoCalculamos: 'Como calculamos',
     vsAnterior: 'vs. anterior',
@@ -690,6 +693,7 @@ export const textos: Record<Idioma, Textos> = {
     origemCurta: { manual: 'Manual', fluxo: 'Flow' },
 
     agora: 'Now',
+    total: 'Total',
     noPeriodo: 'In the period',
     comoCalculamos: 'How we count',
     vsAnterior: 'vs. previous',
@@ -983,6 +987,7 @@ export const textos: Record<Idioma, Textos> = {
     origemCurta: { manual: 'Manual', fluxo: 'Flujo' },
 
     agora: 'Ahora',
+    total: 'Total',
     noPeriodo: 'En el período',
     comoCalculamos: 'Cómo calculamos',
     vsAnterior: 'vs. anterior',

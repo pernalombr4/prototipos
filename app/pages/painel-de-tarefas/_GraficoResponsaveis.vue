@@ -123,6 +123,7 @@ const legenda = computed(() => filtro.value === 'todos'
       :legenda="legenda"
       :vazio="t.resp.vazio"
       :lote="TOP"
+      :rotulo-do-valor="filtro === 'todos' ? t.total : nome[filtro]"
       @abrir="emit('abrir', $event, filtro)"
     />
   </div>

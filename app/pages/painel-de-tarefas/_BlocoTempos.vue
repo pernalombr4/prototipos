@@ -273,6 +273,8 @@ function abrir(chave: string) {
       :legenda="legenda"
       :vazio="t.tempos.semDados"
       largura-do-rotulo="16rem"
+      :rotulo-do-valor="t.tempos.media"
+      :rotulo-do-total="t.tempos.media"
       @abrir="abrir"
     />
 
