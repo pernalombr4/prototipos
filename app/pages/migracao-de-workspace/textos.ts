@@ -1,0 +1,609 @@
+// Os textos desta tela nos três idiomas do ENSPACE (regra 35).
+//
+// A casca copia o rótulo do develop. O resto é a copy proposta: escrita para quem
+// nunca abriu o arquivo .json e não precisa abrir.
+
+import type { Idioma } from '../../composables/useIdioma'
+import type { TipoDeCampo } from './mocks'
+import type { Modo, Situacao } from './comparar'
+import type { TipoDeComponente } from './mocks'
+
+interface Casca {
+  menuLateral: string
+  buscar: string
+  membro: string
+  configuracoes: string
+  ajuda: string
+  trilha: string
+  recolherMenu: string
+  abrirMenu: string
+  voltar: string
+  avancar: string
+  recarregar: string
+  suporte: string
+  notificacoes: string
+  idioma: string
+  tema: string
+  conta: string
+  itens: Record<string, string>
+}
+
+export interface Textos {
+  locale: string
+  casca: Casca
+  trilhaConfiguracoes: string
+  trilhaInterface: string
+  trilhaCasosDeUso: string
+
+  // a tela, como é hoje
+  titulo: string
+  subtitulo: string
+  migracaoTitulo: string
+  migracaoDescricao: string
+  exportarTitulo: string
+  exportarSub: string
+  exportarTexto: string
+  exportarBotao: string
+  importarTitulo: string
+  importarSub: string
+  importarTexto: string
+  importarBotao: string
+  avisoTitulo: string
+  avisoTexto: string
+  exportadoTitulo: string
+  exportadoTexto: string
+
+  // a camada de importação
+  modalTitulo: string
+  modalDescricao: string
+  passos: { arquivo: string, modo: string, revisar: string }
+  continuar: string
+  voltarPasso: string
+  cancelar: string
+  fechar: string
+
+  // passo 1
+  soltarTitulo: string
+  soltarDescricao: string
+  lendoArquivo: string
+  arquivoDe: (workspace: string, data: string) => string
+  trocarArquivo: string
+  resumoArquivo: { categorias: (n: number) => string, campos: (n: number) => string, formularios: (n: number) => string, outros: (n: number) => string }
+  erroArquivoTitulo: string
+  erroArquivoTexto: string
+  usarExemplo: string
+
+  // passo 2
+  modoPergunta: string
+  modoAjuda: string
+  modos: Record<Modo, { titulo: string, descricao: string }>
+  recomendado: string
+  efeitoDoModo: (modo: Modo, entra: number, muda: number, sai: number) => string
+  saiComItens: (n: number) => string
+
+  // passo 3
+  workspaceVazioTitulo: string
+  workspaceVazioTexto: string
+  nadaEmComumTitulo: string
+  nadaEmComumTexto: string
+  nadaAFazerTitulo: string
+  nadaAFazerTexto: string
+  opcaoEscolhida: (modo: string) => string
+  trocarOpcao: string
+  contagem: Record<'nova' | 'alterada' | 'removida' | 'fica', (n: number) => string>
+  soOQueMuda: string
+  grupoCategorias: string
+  grupoOutros: string
+  grupoCampos: (n: number) => string
+  grupoFormularios: (n: number) => string
+  grupoPastas: (n: number) => string
+  componentes: Record<TipoDeComponente, string>
+  situacao: Record<Situacao, string>
+  ganhaOQueFalta: string
+  ignoradaAjuda: string
+  mudancaNome: string
+  mudancaTipo: string
+  mudancaOpcoesNovas: (o: string) => string
+  mudancaOpcoesRemovidas: (o: string) => string
+  itensCadastrados: (n: number) => string
+  tiposDeCampo: Partial<Record<TipoDeCampo, string>>
+  tipoDeCampoOutro: string
+  nenhumaDiferenca: string
+
+  // confirmar
+  copiaAntes: string
+  copiaAntesAjuda: string
+  perigoTitulo: string
+  perigoTexto: (categorias: number, itens: number) => string
+  digiteEmail: string
+  importar: (modo: Modo) => string
+
+  // importando e depois
+  importandoTitulo: string
+  importandoTexto: string
+  etapasImportacao: string[]
+  podeFechar: string
+  sucessoTitulo: string
+  sucessoTexto: (entra: number, muda: number, sai: number) => string
+  copiaBaixada: string
+  desfazer: string
+  desfeitoTitulo: string
+  desfeitoTexto: string
+  verCategorias: string
+  erroTitulo: string
+  erroTexto: (etapa: string) => string
+  tentarDeNovo: string
+}
+
+const casca: Record<Idioma, Casca> = {
+  'pt-BR': {
+    menuLateral: 'Menu do workspace', buscar: 'Buscar...', membro: 'Membro', configuracoes: 'Configurações',
+    ajuda: 'Ajuda', trilha: 'Trilha', recolherMenu: 'Recolher o menu', abrirMenu: 'Abrir o menu',
+    voltar: 'Voltar', avancar: 'Avançar', recarregar: 'Recarregar', suporte: 'Suporte',
+    notificacoes: 'Notificações', idioma: 'Idioma', tema: 'Tema', conta: 'Sua conta',
+    itens: {
+      inicio: 'Início', spaceflows: 'Spaceflows', categorias: 'Categorias', tarefas: 'Tarefas',
+      agenda: 'Agenda', knowledge: 'Knowledge', visaoGeral: 'Visão Geral', sistema: 'Sistema',
+      estrutura: 'Estrutura', gestaoDeMembros: 'Gestão de Membros', interface: 'Interface',
+      menus: 'Menus', telas: 'Telas', casosDeUso: 'Casos de Uso',
+      emails: 'E-mails', integracoes: 'Integrações', agentesDeIa: 'Agentes de IA', logs: 'Logs',
+      credenciais: 'Credenciais', releases: 'Releases', documentacao: 'Documentação',
+    },
+  },
+  'en': {
+    menuLateral: 'Workspace menu', buscar: 'Search...', membro: 'Member', configuracoes: 'Settings',
+    ajuda: 'Help', trilha: 'Breadcrumb', recolherMenu: 'Collapse the menu', abrirMenu: 'Open the menu',
+    voltar: 'Back', avancar: 'Forward', recarregar: 'Reload', suporte: 'Support',
+    notificacoes: 'Notifications', idioma: 'Language', tema: 'Theme', conta: 'Your account',
+    itens: {
+      inicio: 'Home', spaceflows: 'Spaceflows', categorias: 'Categories', tarefas: 'Tasks',
+      agenda: 'Schedule', knowledge: 'Knowledge', visaoGeral: 'Overview', sistema: 'System',
+      estrutura: 'Structure', gestaoDeMembros: 'Member management', interface: 'Interface',
+      menus: 'Menus', telas: 'Screens', casosDeUso: 'Use Cases',
+      emails: 'Emails', integracoes: 'Integrations', agentesDeIa: 'AI agents', logs: 'Logs',
+      credenciais: 'Credentials', releases: 'Releases', documentacao: 'Documentation',
+    },
+  },
+  'es': {
+    menuLateral: 'Menú del workspace', buscar: 'Buscar...', membro: 'Miembro', configuracoes: 'Configuraciones',
+    ajuda: 'Ayuda', trilha: 'Ruta', recolherMenu: 'Contraer el menú', abrirMenu: 'Abrir el menú',
+    voltar: 'Volver', avancar: 'Avanzar', recarregar: 'Recargar', suporte: 'Soporte',
+    notificacoes: 'Notificaciones', idioma: 'Idioma', tema: 'Tema', conta: 'Su cuenta',
+    itens: {
+      inicio: 'Inicio', spaceflows: 'Spaceflows', categorias: 'Categorías', tarefas: 'Tareas',
+      agenda: 'Agenda', knowledge: 'Knowledge', visaoGeral: 'Visión General', sistema: 'Sistema',
+      estrutura: 'Estructura', gestaoDeMembros: 'Gestión de Miembros', interface: 'Interfaz',
+      menus: 'Menús', telas: 'Pantallas', casosDeUso: 'Casos de Uso',
+      emails: 'Correos', integracoes: 'Integraciones', agentesDeIa: 'Agentes de IA', logs: 'Registros',
+      credenciais: 'Credenciales', releases: 'Releases', documentacao: 'Documentación',
+    },
+  },
+}
+
+const pt: Textos = {
+  locale: 'pt-BR',
+  casca: casca['pt-BR'],
+  trilhaConfiguracoes: 'Configurações',
+  trilhaInterface: 'Interface',
+  trilhaCasosDeUso: 'Casos de Uso',
+
+  titulo: 'Casos de Uso',
+  subtitulo: 'A tela de Casos de Uso permite você importar e exportar workspaces, além de consultar todas as categorias disponíveis e entender a finalidade de cada uma a partir de suas descrições.',
+  migracaoTitulo: 'Migração de Workspace',
+  migracaoDescricao: 'Exporte ou importe a estrutura deste workspace.',
+  exportarTitulo: 'Exportar',
+  exportarSub: 'Baixe a estrutura atual',
+  exportarTexto: 'O sistema fará o download de um arquivo com todas as categorias e suas respectivas informações. Esse arquivo pode ser utilizado para a importação em outro workspace.',
+  exportarBotao: 'Exportar Workspace',
+  importarTitulo: 'Importar',
+  importarSub: 'Envie uma estrutura existente',
+  importarTexto: 'Envie o arquivo gerado na exportação. Antes de importar, você escolhe o que fazer com o que já existe e confere o que muda.',
+  importarBotao: 'Importar Workspace',
+  avisoTitulo: 'Nada é duplicado',
+  avisoTexto: 'O sistema reconhece as categorias que já existem neste workspace. Você decide se elas ficam como estão, recebem as mudanças do arquivo ou são substituídas.',
+  exportadoTitulo: 'Estrutura baixada',
+  exportadoTexto: 'O arquivo está na sua pasta de downloads.',
+
+  modalTitulo: 'Importar estrutura',
+  modalDescricao: 'Traga categorias, campos e formulários de outro workspace.',
+  passos: { arquivo: 'Arquivo', modo: 'O que fazer', revisar: 'Revisar' },
+  continuar: 'Continuar',
+  voltarPasso: 'Voltar',
+  cancelar: 'Cancelar',
+  fechar: 'Fechar',
+
+  soltarTitulo: 'Arraste o arquivo da estrutura até aqui',
+  soltarDescricao: 'Ou clique para escolher. Use o arquivo .json baixado em Exportar Workspace.',
+  lendoArquivo: 'Lendo o arquivo...',
+  arquivoDe: (w, d) => `Estrutura de ${w}, exportada em ${d}`,
+  trocarArquivo: 'Trocar arquivo',
+  resumoArquivo: {
+    categorias: n => `${n} ${n === 1 ? 'categoria' : 'categorias'}`,
+    campos: n => `${n} ${n === 1 ? 'campo' : 'campos'}`,
+    formularios: n => `${n} ${n === 1 ? 'formulário' : 'formulários'}`,
+    outros: n => `${n} ${n === 1 ? 'outro componente' : 'outros componentes'}`,
+  },
+  erroArquivoTitulo: 'Esse arquivo não é uma estrutura do ENSPACE',
+  erroArquivoTexto: 'Use o arquivo .json baixado em Exportar Workspace, sem editar.',
+  usarExemplo: 'Protótipo: usar arquivo de exemplo',
+
+  modoPergunta: 'O que fazer com o que já existe neste workspace?',
+  modoAjuda: 'O sistema reconhece o que já existe pelo identificador de cada categoria e campo. Nada é duplicado.',
+  modos: {
+    adicionar: {
+      titulo: 'Adicionar só o que falta',
+      descricao: 'Entra o que este workspace ainda não tem. O que já existe fica exatamente como está.',
+    },
+    somar: {
+      titulo: 'Somar com o que existe',
+      descricao: 'Entra o que falta e o que já existe recebe as mudanças do arquivo. Nada é apagado.',
+    },
+    substituir: {
+      titulo: 'Substituir tudo',
+      descricao: 'O workspace fica igual ao arquivo. O que não está no arquivo é apagado, com os itens cadastrados.',
+    },
+  },
+  recomendado: 'Mais seguro',
+  efeitoDoModo: (modo, e, m, s) => [
+    `${e} ${e === 1 ? 'categoria entra' : 'categorias entram'}`,
+    ...(m ? [modo === 'adicionar' ? `${m} ${m === 1 ? 'ganha' : 'ganham'} o que falta` : `${m} ${m === 1 ? 'muda' : 'mudam'}`] : []),
+    ...(s ? [`${s} ${s === 1 ? 'sai' : 'saem'}`] : []),
+  ].join(' · '),
+  saiComItens: n => `${n} itens cadastrados são apagados`,
+
+  workspaceVazioTitulo: 'Este workspace está vazio',
+  workspaceVazioTexto: 'Não há o que comparar. Tudo o que está no arquivo entra:',
+  nadaEmComumTitulo: 'Nada do arquivo existe aqui ainda',
+  nadaEmComumTexto: 'Nenhuma categoria do arquivo existe neste workspace. Tudo entra e nada do que existe muda:',
+  nadaAFazerTitulo: 'Este workspace já tem tudo o que está no arquivo',
+  nadaAFazerTexto: 'Nenhuma categoria, campo ou formulário muda. Não há o que importar.',
+  opcaoEscolhida: m => `Opção: ${m}`,
+  trocarOpcao: 'Trocar',
+  contagem: {
+    nova: n => `${n} ${n === 1 ? 'entra' : 'entram'}`,
+    alterada: n => `${n} ${n === 1 ? 'muda' : 'mudam'}`,
+    removida: n => `${n} ${n === 1 ? 'sai' : 'saem'}`,
+    fica: n => `${n} ${n === 1 ? 'fica como está' : 'ficam como estão'}`,
+  },
+  soOQueMuda: 'Mostrar só o que muda',
+  grupoCategorias: 'Categorias',
+  grupoOutros: 'Outros componentes',
+  grupoCampos: n => `Campos (${n})`,
+  grupoFormularios: n => `Formulários (${n})`,
+  grupoPastas: n => `Pastas (${n})`,
+  componentes: {
+    listas: 'Listas', telas: 'Telas', grupos: 'Grupos de permissão', emails: 'Modelos de e-mail',
+    relatorios: 'Relatórios', documentos: 'Modelos de documento', menus: 'Itens de menu',
+  },
+  situacao: {
+    nova: 'Entra', alterada: 'Muda', removida: 'Sai', igual: 'Sem mudança', mantida: 'Fica como está', ignorada: 'Fica como está',
+  },
+  ganhaOQueFalta: 'Ganha o que falta',
+  ignoradaAjuda: 'O arquivo traz outra versão. Nesta opção, a versão daqui fica.',
+  mudancaNome: 'Nome',
+  mudancaTipo: 'Tipo',
+  mudancaOpcoesNovas: o => `Opções novas: ${o}`,
+  mudancaOpcoesRemovidas: o => `Opções que saem: ${o}`,
+  itensCadastrados: n => `${n} itens cadastrados`,
+  tiposDeCampo: {
+    inputText: 'Texto curto', EnTextArea: 'Texto longo', EnHtml: 'Texto com formatação', email: 'E-mail',
+    EnlMask: 'Texto com formato', EnlNumber: 'Número', EnCurrency: 'Valor em dinheiro', EnlCalendar: 'Data',
+    EnlDropdown: 'Lista de opções', multiSelect: 'Várias opções', radioButton: 'Escolha única',
+    inputSwitch: 'Sim ou não', EnRel: 'Ligação com outra categoria', EnRelMulti: 'Ligação com vários itens',
+    uploadFile: 'Anexo', EnPerson: 'Pessoa', EnRepeater: 'Grupo que se repete',
+  },
+  tipoDeCampoOutro: 'Outro tipo',
+  nenhumaDiferenca: 'Nada muda aqui com esta opção.',
+
+  copiaAntes: 'Baixar uma cópia deste workspace antes de importar',
+  copiaAntesAjuda: 'É o mesmo arquivo do Exportar Workspace. Com ele, dá para voltar ao que era.',
+  perigoTitulo: 'Essa opção apaga o que não está no arquivo',
+  perigoTexto: (c, i) => `${c} ${c === 1 ? 'categoria sai' : 'categorias saem'} com ${i} itens cadastrados. Para confirmar, digite seu e-mail:`,
+  digiteEmail: 'Digite seu e-mail para confirmar',
+  importar: m => (m === 'substituir' ? 'Substituir workspace' : 'Importar'),
+
+  importandoTitulo: 'Importando a estrutura',
+  importandoTexto: 'Isso leva alguns minutos em workspaces grandes.',
+  etapasImportacao: ['Conferindo o arquivo', 'Criando categorias', 'Criando campos e listas', 'Montando formulários e telas', 'Ajustando permissões e menus'],
+  podeFechar: 'Pode fechar esta janela. Avisamos no sino quando terminar.',
+  sucessoTitulo: 'Estrutura importada',
+  sucessoTexto: (e, m, s) => [
+    `${e} ${e === 1 ? 'categoria entrou' : 'categorias entraram'}`,
+    `${m} ${m === 1 ? 'mudou' : 'mudaram'}`,
+    ...(s ? [`${s} ${s === 1 ? 'saiu' : 'saíram'}`] : []),
+  ].join(', ') + '.',
+  copiaBaixada: 'A cópia de antes da importação está na sua pasta de downloads.',
+  desfazer: 'Desfazer importação',
+  desfeitoTitulo: 'Importação desfeita',
+  desfeitoTexto: 'O workspace voltou a ser como era antes.',
+  verCategorias: 'Ver categorias',
+  erroTitulo: 'A importação parou',
+  erroTexto: e => `Parou em "${e}". Nada foi alterado no workspace.`,
+  tentarDeNovo: 'Tentar de novo',
+}
+
+const en: Textos = {
+  locale: 'en',
+  casca: casca.en,
+  trilhaConfiguracoes: 'Settings',
+  trilhaInterface: 'Interface',
+  trilhaCasosDeUso: 'Use Cases',
+
+  titulo: 'Use Cases',
+  subtitulo: 'The Use Cases screen lets you import and export workspaces, and browse every available category to understand what each one is for from its description.',
+  migracaoTitulo: 'Workspace Migration',
+  migracaoDescricao: 'Export or import the structure of this workspace.',
+  exportarTitulo: 'Export',
+  exportarSub: 'Download the current structure',
+  exportarTexto: 'The system downloads a file with every category and its details. You can use this file to import into another workspace.',
+  exportarBotao: 'Export Workspace',
+  importarTitulo: 'Import',
+  importarSub: 'Upload an existing structure',
+  importarTexto: 'Upload the file created by the export. Before importing, you choose what happens to what already exists and review what changes.',
+  importarBotao: 'Import Workspace',
+  avisoTitulo: 'Nothing is duplicated',
+  avisoTexto: 'The system recognizes the categories that already exist in this workspace. You decide whether they stay as they are, take the changes from the file or are replaced.',
+  exportadoTitulo: 'Structure downloaded',
+  exportadoTexto: 'The file is in your downloads folder.',
+
+  modalTitulo: 'Import structure',
+  modalDescricao: 'Bring categories, fields and forms from another workspace.',
+  passos: { arquivo: 'File', modo: 'What to do', revisar: 'Review' },
+  continuar: 'Continue',
+  voltarPasso: 'Back',
+  cancelar: 'Cancel',
+  fechar: 'Close',
+
+  soltarTitulo: 'Drag the structure file here',
+  soltarDescricao: 'Or click to choose. Use the .json file downloaded from Export Workspace.',
+  lendoArquivo: 'Reading the file...',
+  arquivoDe: (w, d) => `Structure of ${w}, exported on ${d}`,
+  trocarArquivo: 'Change file',
+  resumoArquivo: {
+    categorias: n => `${n} ${n === 1 ? 'category' : 'categories'}`,
+    campos: n => `${n} ${n === 1 ? 'field' : 'fields'}`,
+    formularios: n => `${n} ${n === 1 ? 'form' : 'forms'}`,
+    outros: n => `${n} ${n === 1 ? 'other component' : 'other components'}`,
+  },
+  erroArquivoTitulo: 'This file is not an ENSPACE structure',
+  erroArquivoTexto: 'Use the .json file downloaded from Export Workspace, without editing it.',
+  usarExemplo: 'Prototype: use sample file',
+
+  modoPergunta: 'What should happen to what already exists in this workspace?',
+  modoAjuda: 'The system recognizes what already exists by the identifier of each category and field. Nothing is duplicated.',
+  modos: {
+    adicionar: {
+      titulo: 'Add only what is missing',
+      descricao: 'Whatever this workspace does not have yet comes in. What already exists stays exactly as it is.',
+    },
+    somar: {
+      titulo: 'Merge with what exists',
+      descricao: 'What is missing comes in, and what already exists takes the changes from the file. Nothing is deleted.',
+    },
+    substituir: {
+      titulo: 'Replace everything',
+      descricao: 'The workspace becomes the same as the file. Whatever is not in the file is deleted, with its records.',
+    },
+  },
+  recomendado: 'Safest',
+  efeitoDoModo: (modo, e, m, s) => [
+    `${e} ${e === 1 ? 'category comes in' : 'categories come in'}`,
+    ...(m ? [modo === 'adicionar' ? `${m} ${m === 1 ? 'gets' : 'get'} what is missing` : `${m} ${m === 1 ? 'changes' : 'change'}`] : []),
+    ...(s ? [`${s} ${s === 1 ? 'goes' : 'go'}`] : []),
+  ].join(' · '),
+  saiComItens: n => `${n} records are deleted`,
+
+  workspaceVazioTitulo: 'This workspace is empty',
+  workspaceVazioTexto: 'There is nothing to compare. Everything in the file comes in:',
+  nadaEmComumTitulo: 'Nothing from the file exists here yet',
+  nadaEmComumTexto: 'No category from the file exists in this workspace. Everything comes in and nothing that exists changes:',
+  nadaAFazerTitulo: 'This workspace already has everything in the file',
+  nadaAFazerTexto: 'No category, field or form changes. There is nothing to import.',
+  opcaoEscolhida: m => `Option: ${m}`,
+  trocarOpcao: 'Change',
+  contagem: {
+    nova: n => `${n} ${n === 1 ? 'comes in' : 'come in'}`,
+    alterada: n => `${n} ${n === 1 ? 'changes' : 'change'}`,
+    removida: n => `${n} ${n === 1 ? 'goes' : 'go'}`,
+    fica: n => `${n} ${n === 1 ? 'stays as is' : 'stay as they are'}`,
+  },
+  soOQueMuda: 'Show only what changes',
+  grupoCategorias: 'Categories',
+  grupoOutros: 'Other components',
+  grupoCampos: n => `Fields (${n})`,
+  grupoFormularios: n => `Forms (${n})`,
+  grupoPastas: n => `Folders (${n})`,
+  componentes: {
+    listas: 'Lists', telas: 'Screens', grupos: 'Permission groups', emails: 'Email templates',
+    relatorios: 'Reports', documentos: 'Document templates', menus: 'Menu items',
+  },
+  situacao: {
+    nova: 'Comes in', alterada: 'Changes', removida: 'Goes', igual: 'No change', mantida: 'Stays as is', ignorada: 'Stays as is',
+  },
+  ganhaOQueFalta: 'Gets what is missing',
+  ignoradaAjuda: 'The file has another version. With this option, the version here stays.',
+  mudancaNome: 'Name',
+  mudancaTipo: 'Type',
+  mudancaOpcoesNovas: o => `New options: ${o}`,
+  mudancaOpcoesRemovidas: o => `Options removed: ${o}`,
+  itensCadastrados: n => `${n} records`,
+  tiposDeCampo: {
+    inputText: 'Short text', EnTextArea: 'Long text', EnHtml: 'Formatted text', email: 'Email',
+    EnlMask: 'Formatted input', EnlNumber: 'Number', EnCurrency: 'Money', EnlCalendar: 'Date',
+    EnlDropdown: 'Option list', multiSelect: 'Multiple options', radioButton: 'Single choice',
+    inputSwitch: 'Yes or no', EnRel: 'Link to another category', EnRelMulti: 'Link to many records',
+    uploadFile: 'Attachment', EnPerson: 'Person', EnRepeater: 'Repeating group',
+  },
+  tipoDeCampoOutro: 'Other type',
+  nenhumaDiferenca: 'Nothing changes here with this option.',
+
+  copiaAntes: 'Download a copy of this workspace before importing',
+  copiaAntesAjuda: 'It is the same file as Export Workspace. With it, you can go back to how things were.',
+  perigoTitulo: 'This option deletes whatever is not in the file',
+  perigoTexto: (c, i) => `${c} ${c === 1 ? 'category goes' : 'categories go'} with ${i} records. To confirm, type your email:`,
+  digiteEmail: 'Type your email to confirm',
+  importar: m => (m === 'substituir' ? 'Replace workspace' : 'Import'),
+
+  importandoTitulo: 'Importing the structure',
+  importandoTexto: 'This takes a few minutes in large workspaces.',
+  etapasImportacao: ['Checking the file', 'Creating categories', 'Creating fields and lists', 'Building forms and screens', 'Adjusting permissions and menus'],
+  podeFechar: 'You can close this window. We will let you know in the bell when it is done.',
+  sucessoTitulo: 'Structure imported',
+  sucessoTexto: (e, m, s) => [
+    `${e} ${e === 1 ? 'category came in' : 'categories came in'}`,
+    `${m} changed`,
+    ...(s ? [`${s} ${s === 1 ? 'was removed' : 'were removed'}`] : []),
+  ].join(', ') + '.',
+  copiaBaixada: 'The copy from before the import is in your downloads folder.',
+  desfazer: 'Undo import',
+  desfeitoTitulo: 'Import undone',
+  desfeitoTexto: 'The workspace is back to how it was before.',
+  verCategorias: 'View categories',
+  erroTitulo: 'The import stopped',
+  erroTexto: e => `It stopped at "${e}". Nothing was changed in the workspace.`,
+  tentarDeNovo: 'Try again',
+}
+
+const es: Textos = {
+  locale: 'es',
+  casca: casca.es,
+  trilhaConfiguracoes: 'Configuraciones',
+  trilhaInterface: 'Interfaz',
+  trilhaCasosDeUso: 'Casos de Uso',
+
+  titulo: 'Casos de Uso',
+  subtitulo: 'La pantalla de Casos de Uso le permite importar y exportar workspaces, además de consultar todas las categorías disponibles y entender la finalidad de cada una a partir de sus descripciones.',
+  migracaoTitulo: 'Migración de Workspace',
+  migracaoDescricao: 'Exporte o importe la estructura de este workspace.',
+  exportarTitulo: 'Exportar',
+  exportarSub: 'Descargue la estructura actual',
+  exportarTexto: 'El sistema descargará un archivo con todas las categorías y su información. Ese archivo puede usarse para importar en otro workspace.',
+  exportarBotao: 'Exportar Workspace',
+  importarTitulo: 'Importar',
+  importarSub: 'Envíe una estructura existente',
+  importarTexto: 'Envíe el archivo generado en la exportación. Antes de importar, usted elige qué hacer con lo que ya existe y revisa lo que cambia.',
+  importarBotao: 'Importar Workspace',
+  avisoTitulo: 'Nada se duplica',
+  avisoTexto: 'El sistema reconoce las categorías que ya existen en este workspace. Usted decide si se quedan como están, reciben los cambios del archivo o se reemplazan.',
+  exportadoTitulo: 'Estructura descargada',
+  exportadoTexto: 'El archivo está en su carpeta de descargas.',
+
+  modalTitulo: 'Importar estructura',
+  modalDescricao: 'Traiga categorías, campos y formularios de otro workspace.',
+  passos: { arquivo: 'Archivo', modo: 'Qué hacer', revisar: 'Revisar' },
+  continuar: 'Continuar',
+  voltarPasso: 'Volver',
+  cancelar: 'Cancelar',
+  fechar: 'Cerrar',
+
+  soltarTitulo: 'Arrastre aquí el archivo de la estructura',
+  soltarDescricao: 'O haga clic para elegirlo. Use el archivo .json descargado en Exportar Workspace.',
+  lendoArquivo: 'Leyendo el archivo...',
+  arquivoDe: (w, d) => `Estructura de ${w}, exportada el ${d}`,
+  trocarArquivo: 'Cambiar archivo',
+  resumoArquivo: {
+    categorias: n => `${n} ${n === 1 ? 'categoría' : 'categorías'}`,
+    campos: n => `${n} ${n === 1 ? 'campo' : 'campos'}`,
+    formularios: n => `${n} ${n === 1 ? 'formulario' : 'formularios'}`,
+    outros: n => `${n} ${n === 1 ? 'otro componente' : 'otros componentes'}`,
+  },
+  erroArquivoTitulo: 'Este archivo no es una estructura de ENSPACE',
+  erroArquivoTexto: 'Use el archivo .json descargado en Exportar Workspace, sin editarlo.',
+  usarExemplo: 'Prototipo: usar archivo de ejemplo',
+
+  modoPergunta: '¿Qué hacer con lo que ya existe en este workspace?',
+  modoAjuda: 'El sistema reconoce lo que ya existe por el identificador de cada categoría y campo. Nada se duplica.',
+  modos: {
+    adicionar: {
+      titulo: 'Agregar solo lo que falta',
+      descricao: 'Entra lo que este workspace todavía no tiene. Lo que ya existe se queda exactamente como está.',
+    },
+    somar: {
+      titulo: 'Sumar a lo que existe',
+      descricao: 'Entra lo que falta y lo que ya existe recibe los cambios del archivo. No se borra nada.',
+    },
+    substituir: {
+      titulo: 'Reemplazar todo',
+      descricao: 'El workspace queda igual al archivo. Lo que no está en el archivo se borra, con sus registros.',
+    },
+  },
+  recomendado: 'Más seguro',
+  efeitoDoModo: (modo, e, m, s) => [
+    `${e} ${e === 1 ? 'categoría entra' : 'categorías entran'}`,
+    ...(m ? [modo === 'adicionar' ? `${m} ${m === 1 ? 'recibe' : 'reciben'} lo que falta` : `${m} ${m === 1 ? 'cambia' : 'cambian'}`] : []),
+    ...(s ? [`${s} ${s === 1 ? 'sale' : 'salen'}`] : []),
+  ].join(' · '),
+  saiComItens: n => `Se borran ${n} registros`,
+
+  workspaceVazioTitulo: 'Este workspace está vacío',
+  workspaceVazioTexto: 'No hay nada que comparar. Todo lo que está en el archivo entra:',
+  nadaEmComumTitulo: 'Nada del archivo existe aquí todavía',
+  nadaEmComumTexto: 'Ninguna categoría del archivo existe en este workspace. Todo entra y nada de lo que existe cambia:',
+  nadaAFazerTitulo: 'Este workspace ya tiene todo lo que está en el archivo',
+  nadaAFazerTexto: 'Ninguna categoría, campo o formulario cambia. No hay nada que importar.',
+  opcaoEscolhida: m => `Opción: ${m}`,
+  trocarOpcao: 'Cambiar',
+  contagem: {
+    nova: n => `${n} ${n === 1 ? 'entra' : 'entran'}`,
+    alterada: n => `${n} ${n === 1 ? 'cambia' : 'cambian'}`,
+    removida: n => `${n} ${n === 1 ? 'sale' : 'salen'}`,
+    fica: n => `${n} ${n === 1 ? 'queda como está' : 'quedan como están'}`,
+  },
+  soOQueMuda: 'Mostrar solo lo que cambia',
+  grupoCategorias: 'Categorías',
+  grupoOutros: 'Otros componentes',
+  grupoCampos: n => `Campos (${n})`,
+  grupoFormularios: n => `Formularios (${n})`,
+  grupoPastas: n => `Carpetas (${n})`,
+  componentes: {
+    listas: 'Listas', telas: 'Pantallas', grupos: 'Grupos de permiso', emails: 'Plantillas de correo',
+    relatorios: 'Informes', documentos: 'Plantillas de documento', menus: 'Elementos de menú',
+  },
+  situacao: {
+    nova: 'Entra', alterada: 'Cambia', removida: 'Sale', igual: 'Sin cambios', mantida: 'Queda como está', ignorada: 'Queda como está',
+  },
+  ganhaOQueFalta: 'Recibe lo que falta',
+  ignoradaAjuda: 'El archivo trae otra versión. Con esta opción, se queda la versión de aquí.',
+  mudancaNome: 'Nombre',
+  mudancaTipo: 'Tipo',
+  mudancaOpcoesNovas: o => `Opciones nuevas: ${o}`,
+  mudancaOpcoesRemovidas: o => `Opciones que salen: ${o}`,
+  itensCadastrados: n => `${n} registros`,
+  tiposDeCampo: {
+    inputText: 'Texto corto', EnTextArea: 'Texto largo', EnHtml: 'Texto con formato', email: 'Correo',
+    EnlMask: 'Texto con máscara', EnlNumber: 'Número', EnCurrency: 'Valor monetario', EnlCalendar: 'Fecha',
+    EnlDropdown: 'Lista de opciones', multiSelect: 'Varias opciones', radioButton: 'Opción única',
+    inputSwitch: 'Sí o no', EnRel: 'Vínculo con otra categoría', EnRelMulti: 'Vínculo con varios registros',
+    uploadFile: 'Adjunto', EnPerson: 'Persona', EnRepeater: 'Grupo que se repite',
+  },
+  tipoDeCampoOutro: 'Otro tipo',
+  nenhumaDiferenca: 'Nada cambia aquí con esta opción.',
+
+  copiaAntes: 'Descargar una copia de este workspace antes de importar',
+  copiaAntesAjuda: 'Es el mismo archivo de Exportar Workspace. Con él, se puede volver a como estaba.',
+  perigoTitulo: 'Esta opción borra lo que no está en el archivo',
+  perigoTexto: (c, i) => `${c} ${c === 1 ? 'categoría sale' : 'categorías salen'} con ${i} registros. Para confirmar, escriba su correo:`,
+  digiteEmail: 'Escriba su correo para confirmar',
+  importar: m => (m === 'substituir' ? 'Reemplazar workspace' : 'Importar'),
+
+  importandoTitulo: 'Importando la estructura',
+  importandoTexto: 'Esto tarda unos minutos en workspaces grandes.',
+  etapasImportacao: ['Revisando el archivo', 'Creando categorías', 'Creando campos y listas', 'Armando formularios y pantallas', 'Ajustando permisos y menús'],
+  podeFechar: 'Puede cerrar esta ventana. Le avisamos en la campana cuando termine.',
+  sucessoTitulo: 'Estructura importada',
+  sucessoTexto: (e, m, s) => [
+    `${e} ${e === 1 ? 'categoría entró' : 'categorías entraron'}`,
+    `${m} ${m === 1 ? 'cambió' : 'cambiaron'}`,
+    ...(s ? [`${s} ${s === 1 ? 'salió' : 'salieron'}`] : []),
+  ].join(', ') + '.',
+  copiaBaixada: 'La copia de antes de la importación está en su carpeta de descargas.',
+  desfazer: 'Deshacer importación',
+  desfeitoTitulo: 'Importación deshecha',
+  desfeitoTexto: 'El workspace volvió a como estaba antes.',
+  verCategorias: 'Ver categorías',
+  erroTitulo: 'La importación se detuvo',
+  erroTexto: e => `Se detuvo en "${e}". No se cambió nada en el workspace.`,
+  tentarDeNovo: 'Intentar de nuevo',
+}
+
+export const textos: Record<Idioma, Textos> = { 'pt-BR': pt, en, es }
