@@ -2,7 +2,6 @@
 import Secao from './_Secao.vue'
 import {
   diasDaSemana,
-  documentacao,
   feriadosDisponiveisBR,
   type Feriado,
   type Ocorrencia,
@@ -321,7 +320,6 @@ function periodoDaOcorrencia(o: Ocorrencia) {
       id="dias-uteis"
       titulo="Expediente"
       resumo="A regra da semana e o mês que ela produz. Mudou de um lado, muda do outro."
-      :doc="documentacao.calendario"
       style="animation: entrada .4s ease-out both"
     >
       <div class="grid gap-6 @4xl:grid-cols-[15rem_minmax(0,1fr)]">
@@ -549,7 +547,6 @@ function periodoDaOcorrencia(o: Ocorrencia) {
       id="feriados"
       titulo="Exceções do calendário"
       resumo="Datas que mudam o expediente: os feriados do país e as datas da sua operação."
-      :doc="documentacao.calendario"
       style="animation: entrada .4s ease-out both; animation-delay: 60ms"
     >
       <div class="grid gap-x-10 gap-y-8 @4xl:grid-cols-2">

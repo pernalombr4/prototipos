@@ -3,7 +3,7 @@ import Ajuda from './_Ajuda.vue'
 import Secao from './_Secao.vue'
 import LinhaDeAjuste from './_LinhaDeAjuste.vue'
 import UxSeletorDeIcones from '~/components/ux/UxSeletorDeIcones.vue'
-import { comportamento, modulos, documentacao, fusos, identidade, moedas } from './mocks'
+import { comportamento, modulos, fusos, identidade, moedas } from './mocks'
 import { form } from './estado'
 
 const emit = defineEmits<{ irPara: [aba: string] }>()
@@ -91,7 +91,6 @@ async function excluir() {
       id="identidade"
       titulo="Identidade"
       resumo="Como este workspace se chama e se reconhece nas telas e nos e-mails."
-      :doc="documentacao.basicas"
       style="animation: entrada .4s ease-out both; animation-delay: 0ms"
     >
       <!--
@@ -279,7 +278,6 @@ async function excluir() {
       id="padroes"
       titulo="Padrões do workspace"
       resumo="O que vale quando ninguém escolheu nada: idioma, fuso e moeda."
-      :doc="documentacao.basicas"
       style="animation: entrada .4s ease-out both; animation-delay: 40ms"
     >
       <!--
@@ -347,7 +345,6 @@ async function excluir() {
       id="comportamento"
       titulo="Comportamento da interface"
       resumo="O que os membros veem e o que eles podem fazer nas telas do workspace."
-      :doc="documentacao.basicas"
       style="animation: entrada .4s ease-out both; animation-delay: 60ms"
     >
       <LinhaDeAjuste
@@ -362,7 +359,6 @@ async function excluir() {
       id="modulos"
       titulo="Módulos"
       resumo="Funcionalidades opcionais. Ligar um módulo acrescenta telas e campos ao workspace."
-      :doc="documentacao.basicas"
       style="animation: entrada .4s ease-out both; animation-delay: 120ms"
     >
       <LinhaDeAjuste
@@ -379,7 +375,6 @@ async function excluir() {
       titulo="Zona de perigo"
       resumo="A única ação desta tela que não tem volta."
       perigo
-      :doc="documentacao.basicas"
       style="animation: entrada .4s ease-out both; animation-delay: 180ms"
     >
       <p class="text-sm text-muted">

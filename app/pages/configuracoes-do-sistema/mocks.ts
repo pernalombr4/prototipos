@@ -555,17 +555,54 @@ function gerarChaves(): ChaveDeTraducao[] {
       const doCampo = grupo === 'Formulários' ? `campo.${i}` : undefined
       const espelho = (parte: string) => (doCampo ? `${doCampo}.${parte}` : undefined)
 
-      push(grupo, formulario, rotuloPt, 'Nome', `${chave}.nome`, rotuloPt, rotuloEn, espelho('nome'))
-      push(grupo, formulario, rotuloPt, 'Descrição', `${chave}.descricao`,
-        `Guarda ${rotuloPt.toLowerCase()} do registro.`, `Holds the ${rotuloEn.toLowerCase()} of the record.`,
-        espelho('descricao'))
-      push(grupo, formulario, rotuloPt, 'Rótulo', `${chave}.rotulo`, rotuloPt, rotuloEn, espelho('rotulo'))
-      push(grupo, formulario, rotuloPt, 'Ajuda', `${chave}.ajuda`,
+      /*
+       * O texto do formulário é OUTRO texto, não uma cópia do campo.
+       *
+       * Se o formulário tem texto próprio para o bloco, é porque ele quer
+       * dizer uma coisa diferente ali: "informe antes de anexar o arquivo"
+       * não é "usado para localizar o registro". O mock precisa mostrar isso,
+       * senão a tela parece repetição e a pessoa volta a achar que traduzir um
+       * resolve o outro.
+       */
+      const noForm = grupo === 'Formulários'
+      const comum = (pt: string, en: string, noFormPt: string, noFormEn: string): [string, string] =>
+        (noForm ? [noFormPt, noFormEn] : [pt, en])
+
+      const [nomePt, nomeEn] = comum(
+        rotuloPt, rotuloEn,
+        `${rotuloPt} (${formulario})`, `${rotuloEn} (${formulario})`,
+      )
+      push(grupo, formulario, rotuloPt, 'Nome', `${chave}.nome`, nomePt, nomeEn, espelho('nome'))
+
+      const [descPt, descEn] = comum(
+        `Guarda ${rotuloPt.toLowerCase()} do registro.`,
+        `Holds the ${rotuloEn.toLowerCase()} of the record.`,
+        `O que este formulário espera em ${rotuloPt.toLowerCase()}.`,
+        `What this form expects in ${rotuloEn.toLowerCase()}.`,
+      )
+      push(grupo, formulario, rotuloPt, 'Descrição', `${chave}.descricao`, descPt, descEn, espelho('descricao'))
+
+      const [rotPt, rotEn] = comum(
+        rotuloPt, rotuloEn,
+        `${rotuloPt} do formulário`, `Form ${rotuloEn.toLowerCase()}`,
+      )
+      push(grupo, formulario, rotuloPt, 'Rótulo', `${chave}.rotulo`, rotPt, rotEn, espelho('rotulo'))
+
+      const [ajudaPt, ajudaEn] = comum(
         `Usado para localizar o registro por ${rotuloPt.toLowerCase()}.`,
         `Used to find the record by ${rotuloEn.toLowerCase()}.`,
-        espelho('ajuda'))
+        `Neste formulário, ${rotuloPt.toLowerCase()} vale para o que foi enviado hoje.`,
+        `In this form, ${rotuloEn.toLowerCase()} refers to what was sent today.`,
+      )
+      push(grupo, formulario, rotuloPt, 'Ajuda', `${chave}.ajuda`, ajudaPt, ajudaEn, espelho('ajuda'))
+
       const [instPt, instEn] = INSTRUCOES[i % INSTRUCOES.length]!
-      push(grupo, formulario, rotuloPt, 'Instrução', `${chave}.instrucao`, instPt, instEn, espelho('instrucao'))
+      const [iPt, iEn] = comum(
+        instPt, instEn,
+        `${instPt} Depois disso, anexe o arquivo.`, `${instEn} Then attach the file.`,
+      )
+      push(grupo, formulario, rotuloPt, 'Instrução', `${chave}.instrucao`, iPt, iEn, espelho('instrucao'))
+
       const [phPt, phEn] = PLACEHOLDERS[i % PLACEHOLDERS.length]!
       push(grupo, formulario, rotuloPt, 'Placeholder', `${chave}.placeholder`, phPt, phEn, espelho('placeholder'))
 

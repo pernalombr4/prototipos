@@ -2,7 +2,6 @@
 import Secao from './_Secao.vue'
 import {
   avisosNativos,
-  documentacao,
   modelosDeEmail,
   type Direcao,
   type RegraDeAviso,
@@ -160,7 +159,6 @@ const modelosParaSelect = computed(() =>
       id="nativas"
       titulo="O que o ENSPACE já avisa sozinho"
       resumo="Toda tarefa com prazo recebe estes três e-mails, sem nenhuma configuração."
-      :doc="documentacao.notificacoes"
       style="animation: entrada .4s ease-out both"
     >
       <ul class="grid gap-2 sm:grid-cols-3">
@@ -188,7 +186,6 @@ const modelosParaSelect = computed(() =>
       :key="e.chave"
       :titulo="e.titulo"
       :resumo="e.resumo"
-      :doc="documentacao.notificacoes"
       :style="`animation: entrada .4s ease-out both; animation-delay: ${60 + idx * 60}ms`"
     >
       <div class="flex items-start justify-between gap-6 border-b border-default pb-4">

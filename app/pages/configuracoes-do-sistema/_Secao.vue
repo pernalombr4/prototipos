@@ -4,16 +4,18 @@ import { destaque } from './estado'
 /**
  * O bloco de uma seção de configuração.
  *
- * Três coisas que a tela de hoje não tem, e que moram aqui:
+ * Duas coisas que a tela de hoje não tem, e que moram aqui:
  *  - um título que diz o assunto e uma linha que diz o que ele decide;
- *  - o link para o artigo que explica a seção (a sexta queixa da demanda);
  *  - âncora própria, para a busca conseguir trazer alguém até aqui e piscar.
+ *
+ * O link para a documentação **não** mora mais aqui. Ele era repetido em cada
+ * seção, apontando sempre para o mesmo artigo da aba: cinco botões iguais numa
+ * tela só. Ficou um, no alto da aba, que é onde a pessoa procura.
  */
 const props = defineProps<{
   id: string
   titulo: string
   resumo?: string
-  doc?: string
   perigo?: boolean
 }>()
 
@@ -59,19 +61,6 @@ const aceso = computed(() => destaque.value === props.id)
           {{ resumo }}
         </p>
       </div>
-
-      <UButton
-        v-if="doc"
-        :to="doc"
-        target="_blank"
-        icon="i-lucide-book-open"
-        label="Documentação"
-        trailing-icon="i-lucide-arrow-up-right"
-        size="xs"
-        color="neutral"
-        variant="ghost"
-        class="shrink-0 transition-transform hover:-translate-y-0.5"
-      />
     </header>
 
     <!--

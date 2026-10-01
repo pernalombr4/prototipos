@@ -6,7 +6,6 @@ import {
   consumoDiario,
   consumoPorRecurso,
   definicaoDoCredito,
-  documentacao,
   identidade,
   solicitacoes as solicitacoesBase,
   tiposDeConsumo,
@@ -123,7 +122,6 @@ function dataLonga(iso: string) {
       id="carteira"
       titulo="Sua carteira"
       resumo="O saldo é seu e vale em todos os workspaces de que você participa. Não é do workspace."
-      :doc="documentacao.cobranca"
       style="animation: entrada .4s ease-out both"
     >
       <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
@@ -230,7 +228,6 @@ function dataLonga(iso: string) {
       id="consumo"
       titulo="No que os créditos foram"
       resumo="Últimos 30 dias, por recurso. É o que diz onde mexer para gastar menos."
-      :doc="documentacao.cobranca"
       style="animation: entrada .4s ease-out both; animation-delay: 60ms"
     >
       <ul class="space-y-3.5">
@@ -328,7 +325,6 @@ function dataLonga(iso: string) {
       id="solicitacoes"
       titulo="Pedidos de recarga"
       resumo="Quem aprova é o financeiro do ENSPACE. O pedido some da fila quando é respondido."
-      :doc="documentacao.cobranca"
       style="animation: entrada .4s ease-out both; animation-delay: 120ms"
     >
       <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -387,7 +383,6 @@ function dataLonga(iso: string) {
       id="extrato"
       titulo="Extrato"
       resumo="Toda entrada e toda saída, com o recurso que consumiu e o workspace onde aconteceu."
-      :doc="documentacao.cobranca"
       style="animation: entrada .4s ease-out both; animation-delay: 180ms"
     >
       <div class="mb-3 flex rounded-lg border border-default p-0.5 sm:w-fit">

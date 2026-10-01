@@ -4,7 +4,6 @@ import Secao from './_Secao.vue'
 import {
   chavePorId,
   chavesDeTraducao,
-  documentacao,
   idiomas,
   sobrescritasDoCampo,
   sugestoesDeIa,
@@ -280,81 +279,6 @@ function textoDoCampo(chave: ChaveDeTraducao) {
   return { chave: campo, traducao: traducoes[campo.id] ?? '' }
 }
 
-function copiarDoCampo(chave: ChaveDeTraducao) {
-  const campo = textoDoCampo(chave)
-  if (campo?.traducao) traduzir(chave.id, campo.traducao)
-}
-
-/** Traz de uma vez, para o recorte aberto, o que o campo já tem traduzido. */
-function copiarDoCampoNoRecorte() {
-  let copiadas = 0
-  for (const chave of recorte.value) {
-    if (traducoes[chave.id]) continue
-    const campo = textoDoCampo(chave)
-    if (!campo?.traducao) continue
-    traduzir(chave.id, campo.traducao)
-    copiadas++
-  }
-  toast.add({
-    title: copiadas
-      ? `${copiadas.toLocaleString('pt-BR')} textos copiados do campo`
-      : 'Nada para copiar aqui',
-    description: copiadas
-      ? 'Revise antes de salvar: o formulário costuma pedir texto diferente do campo, senão não teria texto próprio.'
-      : 'Os campos destes textos também estão sem tradução.',
-    icon: 'i-lucide-copy',
-    color: 'neutral',
-  })
-}
-
-/* --------------------------------- a fila ----------------------------- */
-
-const naFila = ref(false)
-const posicao = ref(0)
-const rascunho = ref('')
-
-const fila = computed(() => {
-  const base = universo.value.length ? recorte.value : chavesDeTraducao
-  return base.filter(c => !traducoes[c.id])
-})
-
-const atual = computed(() => fila.value[posicao.value] ?? fila.value[0] ?? null)
-
-function abrirFila() {
-  posicao.value = 0
-  rascunho.value = ''
-  naFila.value = true
-}
-
-function avancar(guardando: boolean) {
-  const chave = atual.value
-  if (!chave) return
-  if (guardando && rascunho.value.trim()) {
-    // A chave sai da fila ao ser traduzida, então a posição não avança:
-    // a próxima pendente já ocupa este lugar.
-    traduzir(chave.id, rascunho.value.trim())
-  }
-  else {
-    posicao.value = Math.min(posicao.value + 1, Math.max(fila.value.length - 1, 0))
-  }
-  rascunho.value = ''
-}
-
-function sugerirNaFila() {
-  const chave = atual.value
-  if (chave) rascunho.value = sugestoesDeIa[chave.original] ?? ''
-}
-
-function usarCampoNaFila() {
-  const chave = atual.value
-  const campo = chave && textoDoCampo(chave)
-  if (campo?.traducao) rascunho.value = campo.traducao
-}
-
-watch(atual, () => {
-  rascunho.value = ''
-})
-
 /* ---------------------------- tradução por IA ------------------------- */
 
 const traduzindo = ref<string | null>(null)
@@ -406,7 +330,6 @@ async function rodarIaEmMassa() {
       id="traducoes"
       titulo="Dicionários de tradução"
       resumo="Os textos que você criou (categorias, campos, formulários) no idioma de quem lê."
-      :doc="documentacao.dicionarios"
       style="animation: entrada .4s ease-out both"
     >
       <div class="flex flex-wrap items-center justify-between gap-4">
@@ -464,14 +387,6 @@ async function rodarIaEmMassa() {
 
       <div class="mt-5 flex flex-wrap items-center gap-2">
         <UButton
-          :label="`Traduzir o que falta (${faltamNoTotal.toLocaleString('pt-BR')})`"
-          icon="i-lucide-list-checks"
-          size="sm"
-          :disabled="!faltamNoTotal"
-          class="transition-transform hover:-translate-y-0.5"
-          @click="abrirFila"
-        />
-        <UButton
           label="Traduzir com IA"
           icon="i-lucide-sparkles"
           size="sm"
@@ -501,7 +416,6 @@ async function rodarIaEmMassa() {
       id="categorias"
       titulo="Onde traduzir"
       resumo="Cada categoria tem dois ramos irmãos: os campos e os formulários. São textos diferentes."
-      :doc="documentacao.dicionarios"
       style="animation: entrada .4s ease-out both; animation-delay: 60ms"
     >
       <div class="grid gap-6 @4xl:grid-cols-[17rem_minmax(0,1fr)]">
@@ -589,26 +503,6 @@ async function rodarIaEmMassa() {
                 />
               </div>
 
-              <div class="flex flex-wrap items-center gap-2">
-                <UButton
-                  v-if="recorteDeFormulario"
-                  label="Copiar o que o campo já tem"
-                  icon="i-lucide-copy"
-                  size="xs"
-                  color="neutral"
-                  variant="subtle"
-                  @click="copiarDoCampoNoRecorte"
-                />
-                <UButton
-                  :label="`Traduzir ${fila.length.toLocaleString('pt-BR')} na fila`"
-                  icon="i-lucide-list-checks"
-                  size="xs"
-                  color="neutral"
-                  variant="subtle"
-                  :disabled="!fila.length"
-                  @click="abrirFila"
-                />
-              </div>
             </div>
 
             <p v-if="recorte.length" class="mb-3 text-sm text-muted">
@@ -708,14 +602,6 @@ async function rodarIaEmMassa() {
                             No campo:
                             <span class="text-toned">{{ textoDoCampo(chave)!.traducao }}</span>
                           </span>
-                          <UButton
-                            v-if="!traducoes[chave.id]"
-                            label="Usar este texto"
-                            size="xs"
-                            variant="link"
-                            class="p-0"
-                            @click="copiarDoCampo(chave)"
-                          />
                         </template>
                         <span v-else>No campo, este texto também está sem tradução.</span>
                       </p>
@@ -747,108 +633,6 @@ async function rodarIaEmMassa() {
         </div>
       </div>
     </Secao>
-
-    <!-- A FILA: uma chave por vez -------------------------------------- -->
-    <UModal
-      v-model:open="naFila"
-      :title="`Traduzir para ${idiomaAtual?.nome}`"
-      :ui="{ content: 'sm:max-w-2xl' }"
-    >
-      <template #body>
-        <div v-if="atual">
-          <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-            <p class="text-sm text-muted">
-              Faltam <strong class="text-highlighted">{{ fila.length.toLocaleString('pt-BR') }}</strong>
-              <template v-if="universo.length"> neste recorte</template>
-            </p>
-            <span class="flex flex-wrap items-center gap-2">
-              <UBadge :label="atual.categoria" size="sm" color="neutral" variant="subtle" />
-              <UBadge
-                v-if="atual.grupo === 'Formulários'"
-                :label="`formulário ${atual.formulario}`"
-                size="sm"
-                color="primary"
-                variant="subtle"
-              />
-            </span>
-          </div>
-
-          <UProgress :model-value="preenchidasNoTotal" :max="totalDeChaves" size="xs" class="mb-5" />
-
-          <p class="text-xs uppercase tracking-wider text-muted">
-            {{ atual.tipo }}<template v-if="atual.campo"> · {{ atual.campo }}</template>
-          </p>
-          <p class="mt-1 text-lg text-highlighted">
-            {{ atual.original }}
-          </p>
-
-          <div v-if="textoDoCampo(atual)?.traducao" class="mt-3 rounded-lg bg-elevated/60 px-3 py-2">
-            <p class="text-xs text-muted">
-              No campo, este texto está traduzido assim:
-            </p>
-            <p class="mt-0.5 text-sm text-toned">
-              {{ textoDoCampo(atual)!.traducao }}
-            </p>
-            <UButton
-              label="Usar este texto"
-              size="xs"
-              variant="link"
-              class="mt-1 p-0"
-              @click="usarCampoNaFila"
-            />
-          </div>
-
-          <div class="mt-4 flex items-center gap-2">
-            <UInput
-              v-model="rascunho"
-              :placeholder="`Escreva em ${idiomaAtual?.nome}`"
-              autofocus
-              size="lg"
-              class="w-full"
-              @keydown.enter.prevent="avancar(true)"
-            />
-            <UTooltip text="Sugerir com IA">
-              <UButton
-                icon="i-lucide-sparkles"
-                size="sm"
-                color="neutral"
-                variant="subtle"
-                aria-label="Sugerir tradução com IA"
-                @click="sugerirNaFila"
-              />
-            </UTooltip>
-          </div>
-
-          <p class="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-muted">
-            <UKbd value="enter" /> salva e vai para a próxima ·
-            <UKbd value="esc" /> sai da fila
-          </p>
-        </div>
-
-        <UEmpty
-          v-else
-          icon="i-lucide-party-popper"
-          title="Fila vazia"
-          :description="`Não falta nenhuma chave em ${idiomaAtual?.nome} neste recorte.`"
-          class="py-8"
-        />
-      </template>
-
-      <template #footer>
-        <div class="flex w-full items-center justify-between gap-2">
-          <UButton label="Sair da fila" color="neutral" variant="ghost" @click="naFila = false" />
-          <span v-if="atual" class="flex gap-2">
-            <UButton label="Pular" color="neutral" variant="subtle" @click="avancar(false)" />
-            <UButton
-              label="Salvar e próxima"
-              trailing-icon="i-lucide-arrow-right"
-              :disabled="!rascunho.trim()"
-              @click="avancar(true)"
-            />
-          </span>
-        </div>
-      </template>
-    </UModal>
 
     <!-- IA em massa: o custo antes do clique --------------------------- -->
     <UModal v-model:open="confirmandoIa" title="Traduzir com inteligência artificial">

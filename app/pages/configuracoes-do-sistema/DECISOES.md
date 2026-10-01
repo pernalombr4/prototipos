@@ -1,5 +1,47 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 20 — 01/10/2026 — menos botão, e um link de documentação por aba
+
+**O que ela pediu, literal:**
+
+> "tem botoes aí desnecessarios. por exemplo. essa jornada do botao traduzir o que falta nao
+> precisa. / 'copiar o que o campo ja tem' nao faz sentido. deixar vazio tem a mesma funçao /
+> 'traduzir x na fila' tambem nao faz sentido. é só a pessoa ir traduzindo na tela ali. nao precisa
+> de jornada uizard. / depois passe pelas abas vendo se não ta com excesso de botoes de
+> documentaçao. talvez precise só do primeiro, o do topo de cada aba. nao?"
+
+### As jornadas que saíram
+
+- **"Traduzir o que falta" e "Traduzir N na fila"** levavam a um modal de uma chave por vez. A
+  tela já tem os campos de tradução à vista, um embaixo do outro, com o filtro "Faltam" ligado: a
+  fila era a mesma coisa, com uma porta no meio do caminho.
+- **"Copiar o que o campo já tem"**, e o "Usar este texto" de cada linha, foram junto. O argumento
+  dela derruba os dois, e o motivo é mais forte do que o excesso de botão: **o texto do formulário
+  é outro texto.** Copiar a tradução do campo para cima dele produz tradução errada, porque a
+  frase de origem é diferente.
+
+**E isso corrigiu o mock, que estava ajudando a confundir.** Os textos do bloco nasciam iguais aos
+do campo, como se o formulário repetisse. Agora são o que são: outra frase.
+
+```
+campo       Ajuda   "Usado para localizar o registro por número."
+formulário  Ajuda   "Neste formulário, número vale para o que foi enviado hoje."
+```
+
+O que ficou é a referência, sem botão: *No campo: Holds the number of the record*. Serve para a
+pessoa ver que as duas frases não são a mesma, que era a lição da rodada 19.
+
+### Um link de documentação por aba
+
+Cada `Secao` trazia o seu botão de Documentação, e **todos apontavam para o mesmo artigo da aba**.
+Em Informações Básicas eram cinco botões iguais; em Cobrança, quatro. Saíram os 15, e o link ficou
+onde a pessoa procura: **no alto da aba**, um por aba, cada um para o seu artigo.
+
+A sexta queixa da demanda ("nada nessas telas linka para a documentação") continua respondida: o
+link existe em toda aba, e some a repetição que ele tinha virado.
+
+---
+
 ## Rodada 19 — 01/10/2026 — campo e formulário são irmãos, não o mesmo campo duas vezes
 
 **O que ela corrigiu, literal:**
