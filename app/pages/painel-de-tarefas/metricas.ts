@@ -444,6 +444,18 @@ export function faixasDePrazo(lista: TarefaDoPainel[]) {
   return contagem
 }
 
+/**
+ * As abertas de prazo passado, da que venceu há menos tempo à mais antiga
+ * (rodada 6). É o espelho de `proximasAVencer`: as 2 listas partem de agora,
+ * uma para trás e outra para frente. A mais antiga, quase sempre esquecida,
+ * fica no fim; a lista do número Vencidas mostra a ordem inversa.
+ */
+export function vencidasRecentes(lista: TarefaDoPainel[], agora = AGORA) {
+  return lista
+    .filter(t => estaAberta(t) && t.prazo !== null && t.prazo < agora)
+    .sort((a, b) => b.prazo! - a.prazo!)
+}
+
 /** Todas as abertas com prazo à frente, da mais próxima à mais distante. O painel carrega em lotes. */
 export function proximasAVencer(lista: TarefaDoPainel[], agora = AGORA) {
   return lista

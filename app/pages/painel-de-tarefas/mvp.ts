@@ -57,7 +57,7 @@ export const RECORTE = {
     { oQue: 'Arrastar, redimensionar e o botão Painéis', porque: 'Com 8 painéis, arrumar a tela não muda decisão nenhuma. Pede componente de grade no SDK e preferência por membro no back. Entra quando o catálogo crescer.' },
     { oQue: 'SLA', porque: 'Repete os números (vencidas, a vencer, no prazo) com outro desenho.' },
     { oQue: 'Tarefas por prioridade', porque: 'Só a tarefa rápida e a do Spaceflow têm prioridade; a tarefa de etapa grava "0" e fica de fora. Em develop, 145 de 161 tarefas são normais: o painel diria "quase tudo é normal". Entra quando a tarefa de etapa ganhar prioridade.' },
-    { oQue: 'Próximas a vencer', porque: 'O número "A vencer" abre a mesma lista, em ordem de prazo.' },
+    { oQue: 'Tarefas vencidas e Próximas a vencer', porque: 'Os números "Vencidas" e "A vencer" abrem as mesmas listas, em ordem de prazo.' },
     { oQue: 'Números Abertas e Concluídas', porque: 'O total aparece no gráfico e na tabela de responsáveis.' },
     { oQue: 'Filtros de origem e de categoria', porque: 'Recorte fino. O responsável já separa as filas; entram com a fase 2.' },
     { oQue: 'Seletor de semana, mês e ano, "Colunas" e "Exportar"', porque: 'Opções que dobram a tela sem mudar a decisão do gestor.' },

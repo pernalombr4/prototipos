@@ -34,7 +34,7 @@ import CartaoNumero from './_CartaoNumero.vue'
 import CascaDoEnspace from './_CascaDoEnspace.vue'
 import GavetaDeTarefas from './_GavetaDeTarefas.vue'
 import GraficoSerie from './_GraficoSerie.vue'
-import ListaProximas from './_ListaProximas.vue'
+import ListaDePrazo from './_ListaDePrazo.vue'
 import Painel from './_Painel.vue'
 import RecorteMvp from './_RecorteMvp.vue'
 import DetalheResponsaveis from './_DetalheResponsaveis.vue'
@@ -48,7 +48,7 @@ import type { DropdownMenuItem } from '@nuxt/ui'
 import {
   PRIORIDADES, aplicarFiltros, blocoSla, dentro, estaAberta, execucoesDoFiltro, faixasDePrazo, flowItemsDoFiltro,
   granularidadePadrao, intervaloDo, nomeDoResponsavel, numerosDoTopo, parteDoResponsavel, porPrioridade, porResponsavel, porStatus,
-  proximasAVencer, serie, situacao, tempoDeConclusao, temposPorEtapa, temposPorFluxo, temposPorTarefa,
+  proximasAVencer, vencidasRecentes, serie, situacao, tempoDeConclusao, temposPorEtapa, temposPorFluxo, temposPorTarefa,
   todasAsTarefas,
 } from './metricas'
 import type {
@@ -130,6 +130,7 @@ const numeros = computed(() => numerosDoTopo(lista.value, intervalo.value))
 const sla = computed(() => blocoSla(lista.value, intervalo.value))
 const faixas = computed(() => faixasDePrazo(lista.value))
 const proximas = computed(() => proximasAVencer(lista.value))
+const vencidasDaLista = computed(() => vencidasRecentes(lista.value))
 const baldes = computed(() => serie(lista.value, intervalo.value, granularidade.value))
 const linhasDeStatus = computed(() => porStatus(lista.value, intervalo.value))
 const prioridades = computed(() => porPrioridade(lista.value))
@@ -286,7 +287,7 @@ function porOrigem(achadas: TarefaDoPainel[]): LinhaDoResumo[] {
 }
 
 function selosDe(painel: IdDoPainel) {
-  const agora = ['abertas', 'vencidas', 'aVencer', 'proximas', 'prioridade'].includes(painel)
+  const agora = ['abertas', 'vencidas', 'aVencer', 'listaVencidas', 'proximas', 'prioridade'].includes(painel)
   return agora ? [t.value.agora] : [t.value.noPeriodo, t.value.filtros.periodos[filtros.value.periodo]]
 }
 
@@ -787,7 +788,8 @@ const carregando = computed(() => estado.value === 'carregando' || atualizando.v
                   @abrir="abrirCartao(item.id)"
                 />
                 <BlocoSla v-else-if="item.id === 'sla'" :t="t" :sla="sla" @abrir="abrirSituacao" />
-                <ListaProximas v-else-if="item.id === 'proximas'" :t="t" :tarefas="proximas" @abrir="abrirTarefa" />
+                <ListaDePrazo v-else-if="item.id === 'listaVencidas'" modo="vencidas" :t="t" :tarefas="vencidasDaLista" @abrir="abrirTarefa" />
+                <ListaDePrazo v-else-if="item.id === 'proximas'" modo="proximas" :t="t" :tarefas="proximas" @abrir="abrirTarefa" />
                 <GraficoSerie v-else-if="item.id === 'serie'" v-model:granularidade="granularidade" :t="t" :baldes="baldes" :sem-granularidade="mvp" />
                 <GraficoResponsaveis v-else-if="item.id === 'responsaveis'" :t="t" :linhas="linhasPorDesignada" @abrir="abrirResponsavelDoGrafico" />
                 <GraficoStatus v-else-if="item.id === 'contagemStatus'" :t="t" :linhas="linhasDeStatus" @abrir="abrirStatus" />

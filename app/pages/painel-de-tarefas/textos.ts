@@ -131,6 +131,7 @@ export interface Textos {
 
   proximas: {
     vazio: string
+    vazioVencidas: string
     venceEm: (quanto: string) => string
   }
 
@@ -344,6 +345,7 @@ export const textos: Record<Idioma, Textos> = {
       noPrazo: { titulo: 'Concluídas no prazo', descricao: 'Parte das concluídas com prazo que terminou até o prazo.' },
       tempo: { titulo: 'Tempo médio de conclusão', descricao: 'Da criação à conclusão, em média.' },
       sla: { titulo: 'SLA', descricao: 'Situação do prazo das abertas agora ou das concluídas no período.' },
+      listaVencidas: { titulo: 'Tarefas vencidas', descricao: 'Abertas com o prazo já vencido, da que venceu há menos tempo à mais antiga.' },
       proximas: { titulo: 'Próximas a vencer', descricao: 'Abertas com prazo à frente, da mais próxima à mais distante.' },
       serie: { titulo: 'Criadas e concluídas', descricao: 'Quantas entraram e quantas saíram em cada período.' },
       contagemStatus: { titulo: 'Tarefas por status', descricao: 'Quantas estão pendentes, em andamento, bloqueadas e concluídas.' },
@@ -424,6 +426,7 @@ export const textos: Record<Idioma, Textos> = {
       noPrazo: 'Das concluídas no período que tinham prazo, quantas terminaram até o prazo. Tarefa sem prazo não entra na conta.',
       tempo: 'Da criação à conclusão, em dias corridos, nas tarefas concluídas no período. A média sente a tarefa que ficou esquecida semanas; a mediana mostra o caso típico.',
       sla: 'Aberta: vencida se o prazo passou, a vencer se vence nos próximos 7 dias, no prazo se vence depois disso. Concluída: atrasada se terminou depois do prazo. Na tela de Agendadas, o Status de SLA "Atrasado" junta as vencidas e as concluídas com atraso. Tarefa do Spaceflow com prazo igual à hora de criação conta como sem prazo: é o nó sem prazo configurado.',
+      listaVencidas: 'Abertas com o prazo já vencido, da que venceu há menos tempo à mais antiga: a que ainda dá para recuperar vem primeiro. O número Vencidas abre a mesma lista, da mais antiga à mais recente. A lista carrega mais conforme você rola.',
       proximas: 'Abertas com prazo à frente, da que vence primeiro à que vence por último. A lista carrega mais conforme você rola.',
       serie: 'Criadas pela data de criação e concluídas pela data de conclusão, em semanas de segunda a domingo, no horário de Brasília. Quando a linha das criadas fica acima da das concluídas, a fila cresce.',
       contagemStatus: 'Pendente, Em andamento e Bloqueada: as abertas agora (Pendente e Aguardando contam como Pendente; Trabalhando, como Em andamento). Concluída: as concluídas no período, pela data de conclusão. A cor divide cada coluna pela situação do prazo; "Fora do prazo" é a aberta vencida ou a concluída com atraso. Clique numa coluna para ver a lista.',
@@ -473,6 +476,7 @@ export const textos: Record<Idioma, Textos> = {
 
     proximas: {
       vazio: 'Nenhuma tarefa aberta com prazo à frente.',
+      vazioVencidas: 'Nenhuma tarefa vencida.',
       venceEm: q => `em ${q}`,
     },
 
@@ -638,6 +642,7 @@ export const textos: Record<Idioma, Textos> = {
       noPrazo: { titulo: 'Done on time', descricao: 'Share of done tasks with a due date that finished by it.' },
       tempo: { titulo: 'Average time to complete', descricao: 'From creation to completion, on average.' },
       sla: { titulo: 'SLA', descricao: 'Due date situation of open tasks now or of tasks done in the period.' },
+      listaVencidas: { titulo: 'Overdue tasks', descricao: 'Open tasks past their due date, most recently overdue first.' },
       proximas: { titulo: 'Due next', descricao: 'Open tasks with an upcoming due date, nearest first.' },
       serie: { titulo: 'Created and done', descricao: 'How many came in and how many went out in each period.' },
       contagemStatus: { titulo: 'Tasks by status', descricao: 'How many are pending, in progress, blocked and done.' },
@@ -718,6 +723,7 @@ export const textos: Record<Idioma, Textos> = {
       noPrazo: 'Of the tasks completed in the period that had a due date, how many finished by it. Tasks with no due date are left out.',
       tempo: 'From creation to completion, in calendar days, for tasks completed in the period. The average feels the task forgotten for weeks; the median shows the typical case.',
       sla: 'Open: overdue if the due date has passed, due soon if it is due in the next 7 days, on time if it is due after that. Done: late if it finished after the due date. On the Scheduled screen, the SLA status "Late" groups overdue tasks and tasks done late. A Spaceflow task whose due date equals its creation time counts as having no due date: the node has no due date set.',
+      listaVencidas: 'Open tasks past their due date, from the most recently overdue to the oldest: the ones you can still recover come first. The Overdue number opens the same list, oldest first. The list loads more as you scroll.',
       proximas: 'Open tasks with an upcoming due date, from the first to the last one due. The list loads more as you scroll.',
       serie: 'Created by creation date and done by completion date, in Monday to Sunday weeks, Brasília time. When the created line sits above the done line, the queue grows.',
       contagemStatus: 'Pending, In progress and Blocked: open tasks right now (Pending and Waiting count as Pending; Working, as In progress). Done: tasks completed in the period, by completion date. Color splits each column by due date situation; "Past due" is an overdue open task or a task done late. Click a column to see the list.',
@@ -767,6 +773,7 @@ export const textos: Record<Idioma, Textos> = {
 
     proximas: {
       vazio: 'No open task with an upcoming due date.',
+      vazioVencidas: 'No overdue tasks.',
       venceEm: q => `in ${q}`,
     },
 
@@ -932,6 +939,7 @@ export const textos: Record<Idioma, Textos> = {
       noPrazo: { titulo: 'Concluidas en plazo', descricao: 'Parte de las concluidas con plazo que terminó dentro del plazo.' },
       tempo: { titulo: 'Tiempo medio de conclusión', descricao: 'De la creación a la conclusión, en promedio.' },
       sla: { titulo: 'SLA', descricao: 'Situación del plazo de las abiertas ahora o de las concluidas en el período.' },
+      listaVencidas: { titulo: 'Tareas vencidas', descricao: 'Abiertas con el plazo ya vencido, de la que venció hace menos tiempo a la más antigua.' },
       proximas: { titulo: 'Próximas a vencer', descricao: 'Abiertas con plazo por delante, de la más cercana a la más lejana.' },
       serie: { titulo: 'Creadas y concluidas', descricao: 'Cuántas entraron y cuántas salieron en cada período.' },
       contagemStatus: { titulo: 'Tareas por estado', descricao: 'Cuántas están pendientes, en curso, bloqueadas y concluidas.' },
@@ -1012,6 +1020,7 @@ export const textos: Record<Idioma, Textos> = {
       noPrazo: 'De las concluidas en el período que tenían plazo, cuántas terminaron dentro del plazo. Las tareas sin plazo no entran en la cuenta.',
       tempo: 'De la creación a la conclusión, en días corridos, en las tareas concluidas en el período. La media siente la tarea olvidada por semanas; la mediana muestra el caso típico.',
       sla: 'Abierta: vencida si el plazo pasó, por vencer si vence en los próximos 7 días, en plazo si vence después. Concluida: atrasada si terminó después del plazo. En la pantalla de Programadas, el Estado de SLA "Atrasado" junta las vencidas y las concluidas con atraso. La tarea de Spaceflow con plazo igual a la hora de creación cuenta como sin plazo: es el nodo sin plazo configurado.',
+      listaVencidas: 'Abiertas con el plazo ya vencido, de la que venció hace menos tiempo a la más antigua: la que todavía se puede recuperar viene primero. El número Vencidas abre la misma lista, de la más antigua a la más reciente. La lista carga más a medida que usted se desplaza.',
       proximas: 'Abiertas con plazo por delante, de la que vence primero a la que vence última. La lista carga más a medida que usted se desplaza.',
       serie: 'Creadas por fecha de creación y concluidas por fecha de conclusión, en semanas de lunes a domingo, hora de Brasilia. Cuando la línea de creadas queda por encima de la de concluidas, la fila crece.',
       contagemStatus: 'Pendiente, En curso y Bloqueada: las abiertas ahora (Pendiente y Esperando cuentan como Pendiente; Trabajando, como En curso). Concluida: las concluidas en el período, por fecha de conclusión. El color divide cada columna por la situación del plazo; "Fuera de plazo" es la abierta vencida o la concluida con atraso. Haga clic en una columna para ver la lista.',
@@ -1061,6 +1070,7 @@ export const textos: Record<Idioma, Textos> = {
 
     proximas: {
       vazio: 'Ninguna tarea abierta con plazo por delante.',
+      vazioVencidas: 'Ninguna tarea vencida.',
       venceEm: q => `en ${q}`,
     },
 

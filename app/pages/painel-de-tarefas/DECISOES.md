@@ -1,5 +1,19 @@
 # Decisões: painel de tarefas
 
+## Rodada 6 · 2026-10-01
+
+- **Pedido (literal):** "tasks a vencer pode manter ok? como lista mesmo e fazer umaseparada pra vencidas". Contexto: a comparação com o painel básico do ClickUp, que tem o cartão "Tasks Due This Week or Overdue".
+- **Mudou:** entrou o painel **Tarefas vencidas**, uma lista no mesmo desenho de Próximas a vencer. Ficam 14 painéis.
+  - Ordem: da que venceu há menos tempo à mais antiga. As 2 listas partem de agora, uma para trás e outra para frente. A mais antiga, quase sempre esquecida, fica no fim; o número Vencidas abre a lista na ordem inversa.
+  - Subtítulos pelas faixas ("Há até 7 dias", "Há mais de 7 dias"), com o total de cada uma. Ícone e prazo em vermelho.
+  - O arranjo padrão põe SLA, Tarefas vencidas e Próximas a vencer na mesma linha, 4 colunas cada: do passado para o futuro. A chave do `localStorage` passou a `layout:v6`.
+- **Mudou:** `_ListaProximas.vue` virou `_ListaDePrazo.vue`, com `modo="vencidas"` ou `modo="proximas"`.
+- **Mudou:** no MVP, o item que sai virou "Tarefas vencidas e Próximas a vencer": os números Vencidas e A vencer abrem as mesmas listas.
+- **Validação:** a lista tem o mesmo total do número Vencidas e fica em ordem, nas 3 origens (377 checagens, 0 falhas).
+- **Fronteira:** muda só a linha de prazo. Próximas a vencer continua lista, como pedido.
+- **Em aberto:** o painel "Tarefas por tipo" (ação da tarefa: aprovação, formulário, confirmação, integração), a única dimensão das referências que o painel não mostra. Espera o sim da redatora.
+- **Ver:** `https://pernalombr4.github.io/prototipos/painel-de-tarefas`. Sem print, a pedido da redatora.
+
 ## Rodada 5 · 2026-10-01
 
 - **Pedido (literal):** "a interaçao com todos os graficos deve ter popovers. como tem no grafico de linhas, por exemplo. voce nao botou isso em todos."
