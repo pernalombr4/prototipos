@@ -1,5 +1,44 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 22 — 01/10/2026 — dois modos de editar, e o clique que não parecia clique
+
+**O que ela pediu, literal:**
+
+> "o botao ver em lista pode ser 'editar em lista' e 'editar em calendario'. e aí muda o modo
+> calendário pra modo lista se a pessoa nao estiver conseguindo usar. / e sobre ser folga ou dia
+> util, o modo de alterar nao ta CLARO que é clicável. e nao ta muito destacado o 'folga' ou 'dia
+> util'. tem que destacar mais. / e vale ter um texto no topo tipo um 'callout' explicando como
+> usar o calendário"
+
+### A lista deixou de ser anexo e virou modo
+
+"Ver em lista" abria um painel embaixo do mês: a lista era um apêndice da prévia. Agora são **dois
+modos da mesma coisa**, e os dois editam. O botão diz para onde se vai: **Editar em lista** /
+**Editar em calendário**.
+
+**Isso cobrou uma dívida:** no modo lista faltava a regra da semana. Sem ela, "editar em lista"
+não editaria tudo, e a pessoa teria de voltar ao calendário justamente para a coisa que ela não
+estava conseguindo fazer lá. A regra agora aparece nos dois modos, e é o **mesmo componente**
+(`_DiasUteis.vue`) em dois formatos: coluna, no cabeçalho da grade; linha, no alto da lista.
+
+### O clique que não parecia clique
+
+O cabeçalho da coluna mudava a semana inteira e parecia rótulo de tabela. Três coisas mudaram:
+
+1. **O estado virou selo**, não letrinha de 10 px: `✓ útil` em cor de marca, `✗ folga` em cinza.
+   É o que a pessoa procura ali, e era o que não se via.
+2. **Contorno tracejado** no selo, que diz "dá para mexer" antes de qualquer hover, e fecha no
+   hover.
+3. **Tooltip explícito**: "Clique para tirar sábado do expediente".
+
+### O callout
+
+Três linhas no alto, uma por gesto, e elas **mudam com o modo**: no calendário explicam o
+cabeçalho da coluna e o dia do mês; na lista explicam que ali se edita a mesma coisa, e para que
+serve ver o ano inteiro. Manual de tela que fala do que não está na tela é ruído.
+
+---
+
 ## Rodada 21 — 01/10/2026 — o calendário inteiro dentro do calendário
 
 **O que ela perguntou, literal:**

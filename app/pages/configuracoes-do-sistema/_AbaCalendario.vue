@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DiasUteis from './_DiasUteis.vue'
 import Secao from './_Secao.vue'
 import {
   diasDaSemana,
@@ -11,12 +12,6 @@ import { destaque, form } from './estado'
 const toast = useToast()
 
 /* ---------------------------- dias úteis --------------------------- */
-
-function alternarDia(chave: number) {
-  const i = form.calendario.diasUteis.indexOf(chave)
-  if (i >= 0) form.calendario.diasUteis.splice(i, 1)
-  else form.calendario.diasUteis.push(chave)
-}
 
 const resumoDosDias = computed(() => {
   const n = form.calendario.diasUteis.length
@@ -212,13 +207,20 @@ function andarMes(passo: number) {
  */
 const diaAberto = ref<string | null>(null)
 
-/** A lista de feriados e ocorrências, para a pergunta que o mês não responde. */
-const listaAberta = ref(false)
+/**
+ * O calendário tem dois modos, e os dois editam.
+ *
+ * Quem pensa em data trabalha no mês; quem pensa em lista (e quem precisa ver
+ * o ano inteiro de uma vez) trabalha na lista. Um não é a prévia do outro: são
+ * duas formas da mesma coisa, e a troca é um botão só.
+ */
+const modoLista = ref(false)
 
-// A busca da tela leva a "feriados" e a "ocorrências": abrir a lista é o que
-// faz o destaque ter o que destacar.
+// A busca da tela leva a "feriados" e a "ocorrências", que só existem na
+// lista: trocar de modo é o que faz o destaque ter o que destacar.
 watch(destaque, (secao) => {
-  if (secao === 'feriados' || secao === 'ocorrencias') listaAberta.value = true
+  if (secao === 'feriados' || secao === 'ocorrencias') modoLista.value = true
+  if (secao === 'mes' || secao === 'dias-uteis') modoLista.value = false
 })
 
 /**
@@ -340,35 +342,73 @@ function periodoDaOcorrencia(o: Ocorrencia) {
     <Secao
       id="dias-uteis"
       titulo="Calendário do workspace"
-      resumo="Dias úteis, feriados e ocorrências. Tudo se edita no próprio mês."
+      resumo="Dias úteis, feriados e ocorrências. Edite no mês, ou em lista se preferir."
       style="animation: entrada .4s ease-out both"
     >
-      <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <p class="text-sm text-muted">
-          Clique no <strong class="text-toned">dia da semana</strong> para ligar ou desligar o
-          expediente dele, e no <strong class="text-toned">dia do mês</strong> para feriado,
-          ocorrência e exceção.
-        </p>
+      <!--
+        O manual da tela, no alto, porque aqui o gesto não é óbvio: clicar no
+        cabeçalho da coluna muda a semana inteira, e clicar no dia muda um dia.
+        Três linhas resolvem, e elas somem da leitura depois da primeira vez.
+      -->
+      <UAlert
+        class="mb-4"
+        color="neutral"
+        variant="subtle"
+        icon="i-lucide-info"
+        title="Como mexer neste calendário"
+      >
+        <template #description>
+          <ul v-if="!modoLista" class="mt-1 space-y-1">
+            <li>
+              <strong class="text-toned">No dia da semana</strong>, no cabeçalho da coluna: liga ou
+              desliga o expediente daquele dia, em todas as semanas.
+            </li>
+            <li>
+              <strong class="text-toned">No dia do mês</strong>: diz por que o dia é assim e abre
+              feriado, ocorrência e exceção.
+            </li>
+            <li>
+              <strong class="text-toned">Editar em lista</strong>: a mesma coisa em forma de lista,
+              para ver o ano inteiro de uma vez.
+            </li>
+          </ul>
+          <ul v-else class="mt-1 space-y-1">
+            <li>
+              A lista edita as mesmas coisas do calendário: a regra da semana, os feriados e as
+              ocorrências.
+            </li>
+            <li>
+              Ela existe para o que o mês não mostra: o <strong class="text-toned">ano inteiro</strong>
+              de uma vez, sem virar doze telas.
+            </li>
+            <li>
+              <strong class="text-toned">Editar em calendário</strong> volta para o mês.
+            </li>
+          </ul>
+        </template>
+      </UAlert>
 
-        <div class="flex flex-wrap items-center gap-2">
-          <UButton
-            label="Importar feriados"
-            icon="i-lucide-download"
-            size="xs"
-            color="neutral"
-            variant="subtle"
-            @click="escolhendoFeriados = true"
-          />
-          <UButton
-            :label="listaAberta ? 'Ocultar a lista' : 'Ver em lista'"
-            :icon="listaAberta ? 'i-lucide-calendar-days' : 'i-lucide-list'"
-            size="xs"
-            color="neutral"
-            variant="subtle"
-            @click="listaAberta = !listaAberta"
-          />
-        </div>
+      <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <UButton
+          :label="modoLista ? 'Editar em calendário' : 'Editar em lista'"
+          :icon="modoLista ? 'i-lucide-calendar-days' : 'i-lucide-list'"
+          size="xs"
+          color="neutral"
+          variant="subtle"
+          @click="modoLista = !modoLista"
+        />
+
+        <UButton
+          label="Importar feriados"
+          icon="i-lucide-download"
+          size="xs"
+          color="neutral"
+          variant="subtle"
+          @click="escolhendoFeriados = true"
+        />
       </div>
+
+      <template v-if="!modoLista">
 
         <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-2">
@@ -425,34 +465,7 @@ function periodoDaOcorrencia(o: Ocorrencia) {
             "folga") e a coluna inteira muda de fundo junto.
           -->
           <div class="grid grid-cols-7 border-b border-default bg-elevated">
-            <button
-              v-for="d in diasDaSemana"
-              :key="d.chave"
-              type="button"
-              :data-coluna="d.chave"
-              class="flex flex-col items-center gap-0.5 px-2 py-2 transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
-              :class="form.calendario.diasUteis.includes(d.chave)
-                ? 'hover:bg-accented/40'
-                : 'bg-accented/40 hover:bg-accented/60'"
-              :aria-pressed="form.calendario.diasUteis.includes(d.chave)"
-              :aria-label="`${d.nome}: ${form.calendario.diasUteis.includes(d.chave) ? 'dia útil' : 'folga'}. Vale para todas as semanas.`"
-              @click="alternarDia(d.chave)"
-            >
-              <span
-                class="text-[11px] font-medium uppercase tracking-wider"
-                :class="form.calendario.diasUteis.includes(d.chave) ? 'text-highlighted' : 'text-muted'"
-              >
-                {{ d.nome.slice(0, 3) }}
-              </span>
-              <span
-                class="text-[10px]"
-                :class="form.calendario.diasUteis.includes(d.chave)
-                  ? 'text-primary-700 dark:text-primary-300'
-                  : 'text-muted'"
-              >
-                {{ form.calendario.diasUteis.includes(d.chave) ? 'útil' : 'folga' }}
-              </span>
-            </button>
+            <DiasUteis formato="coluna" />
           </div>
 
           <!--
@@ -577,11 +590,33 @@ function periodoDaOcorrencia(o: Ocorrencia) {
         </div>
 
 
+      </template>
+
       <!--
-        A lista responde o que o mês não responde: "quais feriados existem no
-        ano?". Fica fechada, porque a pergunta de todo dia é a outra.
+        O modo lista responde o que o mês não responde: "quais feriados existem
+        no ano?". São doze telas de calendário para uma lista só.
       -->
-      <div v-if="listaAberta" class="mt-6 border-t border-default pt-5">
+      <div v-else>
+        <!--
+          No modo lista a regra da semana vem primeiro: sem ela, "editar em
+          lista" não editaria tudo, e a pessoa teria de voltar ao calendário
+          justamente para a coisa que ela não estava conseguindo fazer lá.
+        -->
+        <div class="mb-8">
+          <h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
+            Dias úteis da semana
+          </h3>
+          <div class="flex flex-wrap gap-2">
+            <DiasUteis formato="linha" />
+          </div>
+          <p
+            class="mt-3 text-sm"
+            :class="form.calendario.diasUteis.length === 0 ? 'text-error' : 'text-muted'"
+          >
+            {{ resumoDosDias }}
+          </p>
+        </div>
+
       <div class="grid gap-x-10 gap-y-8 @4xl:grid-cols-2">
         <div id="feriados" class="min-w-0 scroll-mt-40">
           <h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
