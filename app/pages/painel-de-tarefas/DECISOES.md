@@ -1,5 +1,15 @@
 # Decisões: painel de tarefas
 
+## Rodada 7 · 2026-10-01
+
+- **Pedido (literal):** "tarefas por prioridade tem que ter cor diferente por coluna"
+- **Mudou:** cada coluna de Tarefas por prioridade tem a cor da prioridade, a mesma do protótipo de Tarefas Rápidas (`tarefas-rapidas/quadro.ts`): Urgente em vermelho, Alta em amarelo, Normal em cinza, Baixa na cor de informação. Antes, as 4 eram da cor primária.
+  - Normal fica em cinza, e não no neutro do tema (quase preto), para não pesar mais que Urgente: é a coluna mais alta, com 90 de 101 no mock.
+  - Vermelho e amarelo também querem dizer "vencida" e "a vencer" em outros painéis. Fica a cor do protótipo de Tarefas Rápidas, para a mesma prioridade ter a mesma cor nos 2 protótipos (o produto hoje não colore a prioridade).
+  - A dica diz "● Abertas: 2", com o ponto na cor da coluna.
+- **Fronteira:** muda só a cor das colunas de prioridade.
+- **Ver:** `https://pernalombr4.github.io/prototipos/painel-de-tarefas`. Sem print, a pedido da redatora.
+
 ## Rodada 6 · 2026-10-01
 
 - **Pedido (literal):** "tasks a vencer pode manter ok? como lista mesmo e fazer umaseparada pra vencidas". Contexto: a comparação com o painel básico do ClickUp, que tem o cartão "Tasks Due This Week or Overdue".
@@ -107,7 +117,7 @@
 | Próximas a vencer | o que fazer primeiro | lista em ordem de prazo | nenhuma |
 | Criadas e concluídas | 2 séries no tempo | linhas, com o nome na ponta | nenhuma |
 | Tarefas por status | poucas categorias com composição | colunas empilhadas | a pesquisa sugeria barras horizontais; colunas por ser 4 status curtos |
-| Tarefas por prioridade | categorias em ordem | colunas, uma cor só | nenhuma |
+| Tarefas por prioridade | categorias em ordem | colunas, uma cor só (rodada 7: uma cor por prioridade) | a redatora pediu uma cor por coluna |
 | Tarefas por responsável | ranking entre muitas categorias, com composição | barras horizontais empilhadas, top 10, com filtro por parte | nenhuma |
 | Tempo médio de duração | ranking de uma grandeza e onde ela vai | barras horizontais divididas nas partes, da mais lenta à mais rápida | nenhuma |
 
