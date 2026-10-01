@@ -20,7 +20,7 @@ Importar Workspace
 [2 Revisar]
    ├ workspace vazio ou nada em comum ──► lista do que entra
    ├ nada muda ──► "já tem tudo", sem botão Importar
-   └ há o que comparar ──► contagem + árvore ("Trocar" volta ao passo 1)
+   └ há o que comparar ──► contagem + árvore só com as alterações ("Voltar" leva às opções)
    │ Substituir com algo saindo: digitar o e-mail
    ▼
 Importando (pode fechar; avisa no sino) ──► falha: "nada foi alterado" + Tentar de novo
@@ -104,3 +104,13 @@ Importado ──► Desfazer importação · Ver categorias
   - Também reescritos: vazio ("Workspace vazio"), nada a importar, cópia antes de importar, mensagem de sucesso ("4 categorias novas, 2 alteradas, 1 removida") e o aviso abaixo do cartão.
 - **Fronteira:** muda o texto e o tamanho das opções e das marcas; não muda a jornada de 2 passos nem a árvore.
 - **Ver:** `evidencias/proposta-r3-1-opcoes-e-alerta.jpg`, `proposta-r3-2-revisar.jpg`
+
+## Rodada 4 · 2026-10-01
+- **Pedido (literal):** "nem precisa ter o botao de "só alteraçoes". sempre vai mostrar só a diff mesmo. só tem que ter um texto ali dizendo que é só as alteraçoes que estao sendo mostradas. e nao precisa de botao e trocar o subtituir tudo na tela final. a pessoa pode só ir no botao de voltar e resolver isso. ta poluindo a toa."
+- **Mudou:**
+  - A árvore mostra sempre só as alterações. Saiu a chave "Só alterações".
+  - Entrou a frase "A lista mostra só as alterações.", entre a contagem e a árvore.
+  - Saiu a linha "Opção: Substituir tudo · Trocar". Para mudar a opção, a pessoa usa o Voltar.
+  - A contagem de Inalterados continua: é o único lugar que diz quantos ficaram de fora da lista.
+- **Fronteira:** muda só o topo da revisão; não muda as opções, a árvore nem a confirmação.
+- **Ver:** `evidencias/proposta-r4-revisar.jpg`

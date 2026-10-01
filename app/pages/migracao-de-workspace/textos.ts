@@ -86,10 +86,8 @@ export interface Textos {
   nadaEmComumTexto: string
   nadaAFazerTitulo: string
   nadaAFazerTexto: string
-  opcaoEscolhida: (modo: string) => string
-  trocarOpcao: string
   contagem: Record<'nova' | 'alterada' | 'removida' | 'inalterada', string>
-  soOQueMuda: string
+  soAlteracoes: string
   grupoCategorias: string
   grupoOutros: string
   grupoCampos: (n: number) => string
@@ -239,10 +237,8 @@ const pt: Textos = {
   nadaEmComumTexto: 'A importação adiciona tudo e não altera o que já existe:',
   nadaAFazerTitulo: 'Nada a importar',
   nadaAFazerTexto: 'O workspace já tem tudo o que está no arquivo.',
-  opcaoEscolhida: m => `Opção: ${m}`,
-  trocarOpcao: 'Trocar',
   contagem: { nova: 'Novos', alterada: 'Alterados', removida: 'Removidos', inalterada: 'Inalterados' },
-  soOQueMuda: 'Só alterações',
+  soAlteracoes: 'A lista mostra só as alterações.',
   grupoCategorias: 'Categorias',
   grupoOutros: 'Outros componentes',
   grupoCampos: n => `Campos (${n})`,
@@ -364,10 +360,8 @@ const en: Textos = {
   nadaEmComumTexto: 'The import adds everything and changes nothing that already exists:',
   nadaAFazerTitulo: 'Nothing to import',
   nadaAFazerTexto: 'The workspace already has everything in the file.',
-  opcaoEscolhida: m => `Option: ${m}`,
-  trocarOpcao: 'Change',
   contagem: { nova: 'New', alterada: 'Changed', removida: 'Removed', inalterada: 'Unchanged' },
-  soOQueMuda: 'Changes only',
+  soAlteracoes: 'The list shows changes only.',
   grupoCategorias: 'Categories',
   grupoOutros: 'Other components',
   grupoCampos: n => `Fields (${n})`,
@@ -489,10 +483,8 @@ const es: Textos = {
   nadaEmComumTexto: 'La importación agrega todo y no cambia lo que ya existe:',
   nadaAFazerTitulo: 'Nada que importar',
   nadaAFazerTexto: 'El workspace ya tiene todo lo que está en el archivo.',
-  opcaoEscolhida: m => `Opción: ${m}`,
-  trocarOpcao: 'Cambiar',
   contagem: { nova: 'Nuevos', alterada: 'Modificados', removida: 'Eliminados', inalterada: 'Sin cambios' },
-  soOQueMuda: 'Solo cambios',
+  soAlteracoes: 'La lista muestra solo los cambios.',
   grupoCategorias: 'Categorías',
   grupoOutros: 'Otros componentes',
   grupoCampos: n => `Campos (${n})`,

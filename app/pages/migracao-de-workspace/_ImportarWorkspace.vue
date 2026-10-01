@@ -48,7 +48,6 @@ const lendo = ref(false)
 const lido = ref(false)
 const erroArquivo = ref(false)
 const modo = ref<Modo>('adicionar')
-const soOQueMuda = ref(true)
 const copiaAntes = ref(true)
 const email = ref('')
 const etapa = ref(0)
@@ -61,7 +60,6 @@ function recomecar() {
   lendo.value = false
   erroArquivo.value = false
   modo.value = 'adicionar'
-  soOQueMuda.value = true
   copiaAntes.value = true
   email.value = ''
   etapa.value = 0
@@ -244,7 +242,7 @@ interface NoDaArvore extends TreeItem {
 
 function folhas(lista: NoFolha[], prefixo: string, genero: 'f' | 'm', icone?: string): NoDaArvore[] {
   return lista
-    .filter(f => !soOQueMuda.value || mexe(f.situacao))
+    .filter(f => mexe(f.situacao))
     .map(f => ({
       value: `${prefixo}:${f.chave}`,
       label: f.nome,
@@ -270,7 +268,7 @@ function grupo(valor: string, rotulo: string, icone: string, filhos: NoDaArvore[
 
 const arvoreDeCategorias = computed<NoDaArvore[]>(() =>
   comparacao.value.categorias
-    .filter(c => !soOQueMuda.value || mexe(c.situacao))
+    .filter(c => mexe(c.situacao))
     .map((c) => {
       // Categoria que entra ou sai inteira: os filhos vão junto, com a mesma marca.
       const campos = folhas(c.campos, `${c.slug}:campo`, 'm')
@@ -308,8 +306,8 @@ const abertosDeCara = computed(() => [
   ...arvoreDeCategorias.value.filter(c => c.situacao === 'alterada' || c.situacao === 'ignorada').flatMap(c => [c.value, ...(c.children ?? []).map(g => g.value)]),
 ])
 
-/** A árvore renasce quando o filtro ou o modo mudam, para reabrir o que importa. */
-const chaveDaArvore = computed(() => `${modo.value}-${soOQueMuda.value}`)
+/** A árvore mostra só o que muda: o inalterado fica só na contagem. Renasce quando o modo muda. */
+const chaveDaArvore = computed(() => modo.value)
 
 function rotuloDaSituacao(no: NoDaArvore) {
   return props.t.situacao[no.situacao!][no.genero ?? 'm']
@@ -552,14 +550,6 @@ function verCategorias() {
 
               <!-- A comparação -->
               <template v-else>
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <p v-if="!vazio" class="text-sm text-muted">
-                    {{ t.opcaoEscolhida(t.modos[modo].titulo) }}
-                    <UButton :label="t.trocarOpcao" variant="link" size="sm" class="px-1" @click="passo = 'arquivo'" />
-                  </p>
-                  <USwitch v-model="soOQueMuda" :label="t.soOQueMuda" size="sm" />
-                </div>
-
                 <!-- Contagem: o resumo antes do detalhe -->
                 <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   <div
@@ -583,6 +573,11 @@ function verCategorias() {
                     </p>
                   </div>
                 </div>
+
+                <p class="flex items-center gap-1.5 text-sm text-muted">
+                  <UIcon name="i-lucide-info" class="size-4 shrink-0" />
+                  {{ t.soAlteracoes }}
+                </p>
 
                 <!-- Categorias -->
                 <div v-if="arvoreDeCategorias.length" class="space-y-2">
