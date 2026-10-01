@@ -377,11 +377,21 @@ export interface ChaveDeTraducao {
   grupo: 'Geral' | 'Campos' | 'Formulários'
   /** Só em Formulários: a qual formulário a chave pertence. */
   formulario?: string
-  /** O campo dono da chave. Vazio no Geral e no cabeçalho do formulário. */
-  dono: string
+  /** O campo a que o texto se refere. Vazio no Geral e no cabeçalho do formulário. */
+  campo: string
   tipo: TipoDeChave
   original: string
   traducao: string
+  /**
+   * Só em Formulários: a chave equivalente na definição do campo.
+   *
+   * **Não é herança.** O formulário tem texto próprio para o bloco: traduzir a
+   * instrução do campo não traduz a instrução que o formulário escreveu por
+   * cima dela, e vice-versa. O ponteiro existe para a tela poder mostrar o que
+   * o campo diz e oferecer o reaproveitamento com um clique, em vez de deixar
+   * a pessoa achar que já traduziu.
+   */
+  espelhoNoCampo?: string
 }
 
 type Par = [pt: string, en: string]
@@ -490,24 +500,33 @@ function gerarChaves(): ChaveDeTraducao[] {
     const push = (
       grupo: ChaveDeTraducao['grupo'],
       formulario: string | undefined,
-      dono: string,
+      campo: string,
       tipo: TipoDeChave,
       sufixo: string,
       pt: string,
       en: string,
+      espelho?: string,
     ) => {
       traducaoDoOriginal[pt] = en
-      const traduzida = indice % 100 < corte
+      /*
+       * O texto do formulário quase nunca está traduzido, mesmo quando o campo
+       * está. É assim no workspace real, e é justamente a armadilha que esta
+       * tela precisa mostrar: campo 100% traduzido e tela ainda em português,
+       * porque o formulário escreveu por cima.
+       */
+      const alvo = grupo === 'Formulários' ? Math.round(corte * 0.15) : corte
+      const traduzida = indice % 100 < alvo
       indice++
       lista.push({
         id: `${base}.${sufixo}`,
         categoria: catPt,
         grupo,
         formulario,
-        dono,
+        campo,
         tipo,
         original: pt,
         traducao: traduzida ? en : '',
+        espelhoNoCampo: espelho ? `${base}.${espelho}` : undefined,
       })
     }
 
@@ -530,23 +549,30 @@ function gerarChaves(): ChaveDeTraducao[] {
       const rotuloPt = `${subPt} ${qualPt}`.trim()
       const rotuloEn = `${subEn} ${qualEn}`.trim()
       const chave = `${prefixo}.${i}`
+      // Dentro de um formulário, cada texto aponta para o seu equivalente na
+      // definição do campo. São chaves diferentes; o ponteiro só serve para a
+      // tela mostrar uma ao lado da outra.
+      const doCampo = grupo === 'Formulários' ? `campo.${i}` : undefined
+      const espelho = (parte: string) => (doCampo ? `${doCampo}.${parte}` : undefined)
 
-      push(grupo, formulario, rotuloPt, 'Nome', `${chave}.nome`, rotuloPt, rotuloEn)
+      push(grupo, formulario, rotuloPt, 'Nome', `${chave}.nome`, rotuloPt, rotuloEn, espelho('nome'))
       push(grupo, formulario, rotuloPt, 'Descrição', `${chave}.descricao`,
-        `Guarda ${rotuloPt.toLowerCase()} do registro.`, `Holds the ${rotuloEn.toLowerCase()} of the record.`)
-      push(grupo, formulario, rotuloPt, 'Rótulo', `${chave}.rotulo`, rotuloPt, rotuloEn)
+        `Guarda ${rotuloPt.toLowerCase()} do registro.`, `Holds the ${rotuloEn.toLowerCase()} of the record.`,
+        espelho('descricao'))
+      push(grupo, formulario, rotuloPt, 'Rótulo', `${chave}.rotulo`, rotuloPt, rotuloEn, espelho('rotulo'))
       push(grupo, formulario, rotuloPt, 'Ajuda', `${chave}.ajuda`,
         `Usado para localizar o registro por ${rotuloPt.toLowerCase()}.`,
-        `Used to find the record by ${rotuloEn.toLowerCase()}.`)
+        `Used to find the record by ${rotuloEn.toLowerCase()}.`,
+        espelho('ajuda'))
       const [instPt, instEn] = INSTRUCOES[i % INSTRUCOES.length]!
-      push(grupo, formulario, rotuloPt, 'Instrução', `${chave}.instrucao`, instPt, instEn)
+      push(grupo, formulario, rotuloPt, 'Instrução', `${chave}.instrucao`, instPt, instEn, espelho('instrucao'))
       const [phPt, phEn] = PLACEHOLDERS[i % PLACEHOLDERS.length]!
-      push(grupo, formulario, rotuloPt, 'Placeholder', `${chave}.placeholder`, phPt, phEn)
+      push(grupo, formulario, rotuloPt, 'Placeholder', `${chave}.placeholder`, phPt, phEn, espelho('placeholder'))
 
       // Campo de lista também traduz cada opção.
       if (i % 3 === 0) {
         LISTAS_DE_OPCOES[i % LISTAS_DE_OPCOES.length]!.forEach(([pt, en], io) => {
-          push(grupo, formulario, rotuloPt, 'Opção', `${chave}.opcao.${io}`, pt, en)
+          push(grupo, formulario, rotuloPt, 'Opção', `${chave}.opcao.${io}`, pt, en, espelho(`opcao.${io}`))
         })
       }
     }
@@ -579,6 +605,23 @@ function gerarChaves(): ChaveDeTraducao[] {
 }
 
 export const chavesDeTraducao: ChaveDeTraducao[] = gerarChaves()
+
+/** Chave por id, para a tela achar o texto do campo que o formulário espelha. */
+export const chavePorId = new Map(chavesDeTraducao.map(c => [c.id, c]))
+
+/**
+ * Para cada chave de campo, em quais formulários existe texto próprio por cima.
+ *
+ * É o índice que responde a pergunta que a tela de hoje não responde: "traduzi
+ * este campo, acabou?". Quase nunca acabou.
+ */
+export const sobrescritasDoCampo = new Map<string, ChaveDeTraducao[]>()
+for (const chave of chavesDeTraducao) {
+  if (!chave.espelhoNoCampo) continue
+  const lista = sobrescritasDoCampo.get(chave.espelhoNoCampo) ?? []
+  lista.push(chave)
+  sobrescritasDoCampo.set(chave.espelhoNoCampo, lista)
+}
 
 /** O tamanho do problema, que é o que esta aba precisa aguentar. */
 export const totalDeChaves = chavesDeTraducao.length

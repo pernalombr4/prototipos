@@ -1,5 +1,76 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 19 — 01/10/2026 — campo e formulário são irmãos, não o mesmo campo duas vezes
+
+**O que ela corrigiu, literal:**
+
+> "mesmo que existam campos dentro dos formularios, eles estao COMPLETAMENTE desvinculados dos
+> forms no sentido de TRADUÇAO. o nivel é: categoria > campo / categoria > form. se voce traduz um
+> campo x, esse campo tem traduçao nos seus instructions, placeholders etc. contudo, se esse mesmo
+> campo está inserido num bloco de formulário que tem instruction PRÓPRIO, por exemplo, vai
+> continuar sem traduçao se nao corrigir o instruction DO FORMULARIO."
+
+### O erro que eu tinha modelado
+
+Na rodada 9 eu li a árvore do produto e concluí "o campo aparece duas vezes". **Aparece, mas não é
+o mesmo texto.** O formulário escreve **por cima** do campo, com chave própria: traduzir a
+instrução do campo não traduz a instrução que o formulário deu ao bloco, e o contrário também não.
+
+A tela anterior mostrava `Formulários › Cliente › Número` com o mesmo selo e o mesmo desenho de
+`Campos › Número`. Quem traduzia o campo via a mesma linha de novo e concluía que já tinha feito.
+**Induzia ao erro, que é pior do que estar feio.**
+
+### O modelo agora
+
+```
+Categoria
+├── Geral ............ nome, nome singular, descrição
+├── Campos ........... cada campo: Nome · Descrição · Rótulo · Ajuda · Instrução · Placeholder · Opções
+└── Formulários ...... cada formulário: Nome · Descrição
+    └── bloco ........ OS MESMOS SEIS TEXTOS, de novo, próprios do formulário
+```
+
+Os dois ramos são **irmãos**. No dado, cada chave de formulário guarda `espelhoNoCampo`, que
+aponta para a chave equivalente do campo. **O ponteiro não é herança**: serve para a tela mostrar
+uma ao lado da outra.
+
+### O que a tela faz com isso
+
+1. **A estrutura fica à vista.** Uma árvore à esquerda (`UTree`) com categoria › Geral · Campos ·
+   Formulários › cada formulário, e quanto falta em cada ramo. Os dois ramos aparecem sempre, um
+   embaixo do outro: é a hierarquia dita em desenho.
+2. **O cabeçalho conta a armadilha.** "202 textos continuam em português mesmo com o campo
+   traduzido", com um botão que abre exatamente esses textos.
+3. **Cada texto de formulário mostra o que o campo diz**: *No campo: Number* e, quando o
+   formulário está vazio, **Usar este texto**. Copia, não herda. Em lote, "Copiar o que o campo já
+   tem" faz o recorte inteiro, com um aviso de que o formulário costuma pedir texto diferente,
+   senão não teria texto próprio.
+4. **O campo avisa quem escreve por cima dele**: "Este campo também tem texto próprio em Cliente,
+   Eventos, com tradução separada", com link para abrir.
+5. **Selo de ramo em todo grupo**: `campo` ou `bloco no formulário Cliente`. Duas coisas
+   diferentes param de ter a mesma cara.
+
+**E ficou mais arrumado**: os seis textos de um campo andam juntos num grupo só, com o nome do
+campo e o aviso aparecendo uma vez, em vez de seis linhas repetindo a mesma coisa.
+
+### Calendário: a regra e o resultado no mesmo olhar
+
+Eram quatro seções empilhadas, e a prévia do mês era a última. A pessoa mudava o dia útil no topo
+e rolava meia tela de listas para ver o efeito. Agora são duas:
+
+- **Expediente**: a regra da semana à esquerda, o mês à direita. Mudou de um lado, muda do outro.
+- **Exceções do calendário**: feriados e ocorrências lado a lado, porque as duas fazem a mesma
+  coisa com o mês, vindo de lugares diferentes.
+
+### Nuxt UI
+
+Revisado com a skill e o MCP do Nuxt UI, como ela pediu. O que entrou de componente: `UTree` para
+a estrutura, `UBreadcrumb` para o caminho, `UAlert` para a regra do ramo e para a armadilha,
+`UEmpty` para os vazios, `UProgress`, `UPagination`, `UKbd` e `UTooltip`. O `UTree` foi a peça que
+faltava: ele mostra dois ramos irmãos sem pedir que eu invente sanfona.
+
+---
+
 ## Rodada 18 — 21/09/2026 — a régua virou ferramenta, e sobrou só a cor da marca
 
 Medir contraste na mão, elemento por elemento, é como eu vinha fazendo desde a rodada 16. Virou

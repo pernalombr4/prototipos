@@ -310,349 +310,364 @@ function periodoDaOcorrencia(o: Ocorrencia) {
 
 <template>
   <div class="space-y-5">
-    <!-- 1. DIAS ÚTEIS ------------------------------------------------ -->
+    <!--
+      1. EXPEDIENTE: a regra e o mês que ela produz, lado a lado
+
+      Eram duas seções separadas por meia tela de listas: a pessoa mudava o dia
+      útil lá em cima e precisava rolar até o fim para ver o que mudou. Juntas,
+      o efeito aparece no mesmo olhar, que é a única razão de a prévia existir.
+    -->
     <Secao
       id="dias-uteis"
-      titulo="Dias úteis da semana"
-      resumo="É daqui que saem os prazos das tarefas, o SLA e as datas da Agenda."
+      titulo="Expediente"
+      resumo="A regra da semana e o mês que ela produz. Mudou de um lado, muda do outro."
       :doc="documentacao.calendario"
       style="animation: entrada .4s ease-out both"
     >
-      <div class="flex flex-wrap items-center gap-2">
-        <button
-          v-for="d in diasDaSemana"
-          :key="d.chave"
-          type="button"
-          class="group flex h-11 w-16 flex-col items-center justify-center rounded-lg border text-sm transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          :class="form.calendario.diasUteis.includes(d.chave)
-            ? 'border-primary bg-primary/10 text-primary font-medium'
-            : 'border-default bg-default text-muted hover:border-accented hover:text-highlighted'"
-          :aria-pressed="form.calendario.diasUteis.includes(d.chave)"
-          :aria-label="d.nome"
-          @click="alternarDia(d.chave)"
-        >
-          <span class="text-xs uppercase tracking-wide">{{ d.nome.slice(0, 3) }}</span>
-          <span class="text-[10px]">
-            {{ form.calendario.diasUteis.includes(d.chave) ? 'útil' : 'folga' }}
-          </span>
-        </button>
-      </div>
-
-      <p
-        class="mt-3 text-sm"
-        :class="form.calendario.diasUteis.length === 0 ? 'text-error' : 'text-muted'"
-      >
-        {{ resumoDosDias }}
-      </p>
-    </Secao>
-
-    <!-- 2. FERIADOS --------------------------------------------------- -->
-    <Secao
-      id="feriados"
-      titulo="Feriados"
-      resumo="Datas que suspendem o expediente. Cada feriado tem país e pode ser removido."
-      :doc="documentacao.calendario"
-      style="animation: entrada .4s ease-out both; animation-delay: 60ms"
-    >
-      <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <p class="text-sm text-muted">
-          {{ contar(form.calendario.feriados.length, 'feriado', 'feriados') }} no calendário deste
-          workspace.
-        </p>
-        <UButton
-          label="Importar feriados"
-          icon="i-lucide-download"
-          size="sm"
-          color="neutral"
-          variant="subtle"
-          class="transition-transform hover:-translate-y-0.5"
-          @click="escolhendoFeriados = true"
-        />
-      </div>
-
-      <div v-for="[pais, lista] in feriadosPorPais" :key="pais" class="mb-4 last:mb-0">
-        <div class="mb-2 flex items-center gap-2">
-          <h3 class="text-xs font-semibold uppercase tracking-wider text-muted">
-            {{ nomeDoPais[pais] }}
-          </h3>
-          <UBadge :label="String(lista.length)" size="sm" color="neutral" variant="subtle" />
-          <UBadge
-            v-if="pais !== 'BR'"
-            label="fora do país do workspace"
-            size="sm"
-            color="warning"
-            variant="subtle"
-          />
-        </div>
-
-        <ul class="divide-y divide-default">
-          <li
-            v-for="f in lista"
-            :key="f.id"
-            class="group flex items-center gap-3 px-3 py-2 transition-colors hover:bg-elevated"
-          >
-            <span class="w-20 shrink-0 text-sm tabular-nums text-muted">{{ formatarData(f.data) }}</span>
-            <span class="min-w-0 flex-1 truncate text-sm text-highlighted">{{ f.nome }}</span>
-            <span class="hidden text-xs text-muted sm:block">{{ f.abrangencia }}</span>
-            <UButton
-              icon="i-lucide-x"
-              size="xs"
-              color="neutral"
-              variant="ghost"
-              :aria-label="`Remover ${f.nome}`"
-              class="opacity-60 transition-opacity group-hover:opacity-100 focus:opacity-100"
-              @click="removerFeriado(f.id)"
-            />
-          </li>
-        </ul>
-      </div>
-    </Secao>
-
-    <!-- 3. OCORRÊNCIAS ------------------------------------------------ -->
-    <Secao
-      id="ocorrencias"
-      titulo="Ocorrências"
-      resumo="Datas da sua operação: recesso, evento interno, ponto facultativo."
-      :doc="documentacao.calendario"
-      style="animation: entrada .4s ease-out both; animation-delay: 120ms"
-    >
-      <div class="mb-4 flex items-start justify-between gap-6">
+      <div class="grid gap-6 @4xl:grid-cols-[15rem_minmax(0,1fr)]">
         <div>
-          <p class="text-sm font-medium text-highlighted">
-            Registrar ocorrências no calendário
-          </p>
-          <p class="mt-1 text-sm text-muted">
-            Desligado, as datas continuam guardadas, mas deixam de afetar prazo e Agenda.
-          </p>
-        </div>
-        <USwitch v-model="form.calendario.ocorrenciasHabilitadas" aria-label="Registrar ocorrências" />
-      </div>
-
-      <div v-if="form.calendario.ocorrenciasHabilitadas">
-        <ul
-          v-if="form.calendario.ocorrencias.length"
-          class="divide-y divide-default"
-        >
-          <li
-            v-for="o in form.calendario.ocorrencias"
-            :key="o.id"
-            class="group flex items-center gap-3 px-3 py-2 transition-colors hover:bg-elevated"
-          >
-            <span class="shrink-0 text-sm tabular-nums text-muted">{{ periodoDaOcorrencia(o) }}</span>
-            <span class="min-w-0 flex-1 truncate text-sm text-highlighted">{{ o.nome }}</span>
-            <UBadge :label="o.tipo" size="sm" color="neutral" variant="subtle" />
-            <UBadge
-              :label="o.contaComoUtil ? 'expediente normal' : 'suspende o expediente'"
-              size="sm"
-              :color="o.contaComoUtil ? 'neutral' : 'warning'"
-              variant="subtle"
-            />
-            <UButton
-              icon="i-lucide-x"
-              size="xs"
-              color="neutral"
-              variant="ghost"
-              :aria-label="`Remover ${o.nome}`"
-              class="opacity-60 transition-opacity group-hover:opacity-100 focus:opacity-100"
-              @click="removerOcorrencia(o.id)"
-            />
-          </li>
-        </ul>
-
-        <UButton
-          label="Adicionar ocorrência"
-          icon="i-lucide-plus"
-          size="sm"
-          color="neutral"
-          variant="subtle"
-          class="mt-3 transition-transform hover:-translate-y-0.5"
-          @click="criandoOcorrencia = true"
-        />
-      </div>
-    </Secao>
-
-    <!-- 4. O MÊS ------------------------------------------------------ -->
-    <Secao
-      id="mes"
-      titulo="Como o mês fica"
-      resumo="O que as regras acima produzem. Clique num dia para saber por que ele é assim e para abrir exceção."
-      :doc="documentacao.calendario"
-      style="animation: entrada .4s ease-out both; animation-delay: 180ms"
-    >
-      <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-2">
-          <UButton
-            icon="i-lucide-chevron-left"
-            size="xs"
-            color="neutral"
-            variant="ghost"
-            aria-label="Mês anterior"
-            @click="andarMes(-1)"
-          />
-          <span class="min-w-40 text-center text-sm font-medium text-highlighted">
-            {{ nomeDoMes }}
-          </span>
-          <UButton
-            icon="i-lucide-chevron-right"
-            size="xs"
-            color="neutral"
-            variant="ghost"
-            aria-label="Próximo mês"
-            @click="andarMes(1)"
-          />
-        </div>
-
-        <p class="text-sm text-muted">
-          <strong class="text-toned">{{ resumoDoMes.uteis }}</strong> dias úteis ·
-          {{ contar(resumoDoMes.feriados, 'feriado', 'feriados') }} ·
-          {{ contar(resumoDoMes.ocorrencias, 'dia com ocorrência', 'dias com ocorrência') }}
-        </p>
-
-        <div class="flex flex-wrap items-center gap-3 text-xs">
-          <span class="flex items-center gap-1.5">
-            <span class="size-2.5 rounded-sm bg-default ring-1 ring-default" /> Dia útil
-          </span>
-          <span class="flex items-center gap-1.5">
-            <span class="size-2.5 rounded-sm bg-elevated ring-1 ring-default" /> Fora do expediente
-          </span>
-          <span class="flex items-center gap-1.5">
-            <span class="size-2.5 rounded-sm bg-warning/25 ring-1 ring-warning/40" /> Feriado
-          </span>
-          <span class="flex items-center gap-1.5">
-            <span class="size-2.5 rounded-sm bg-primary/20 ring-1 ring-primary/40" /> Ocorrência
-          </span>
-        </div>
-      </div>
-
-      <div class="overflow-hidden rounded-lg border border-default">
-        <div class="grid grid-cols-7 border-b border-default bg-elevated">
-          <div
+          <h3 class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
+            Dias úteis da semana
+          </h3>
+        <div class="flex flex-wrap items-center gap-2">
+          <button
             v-for="d in diasDaSemana"
             :key="d.chave"
-            class="px-2 py-1.5 text-center text-[11px] font-medium uppercase tracking-wider text-muted"
+            type="button"
+            class="group flex h-11 w-16 flex-col items-center justify-center rounded-lg border text-sm transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            :class="form.calendario.diasUteis.includes(d.chave)
+              ? 'border-primary bg-primary/10 text-primary font-medium'
+              : 'border-default bg-default text-muted hover:border-accented hover:text-highlighted'"
+            :aria-pressed="form.calendario.diasUteis.includes(d.chave)"
+            :aria-label="d.nome"
+            @click="alternarDia(d.chave)"
           >
-            {{ d.nome.slice(0, 3) }}
+            <span class="text-xs uppercase tracking-wide">{{ d.nome.slice(0, 3) }}</span>
+            <span class="text-[10px]">
+              {{ form.calendario.diasUteis.includes(d.chave) ? 'útil' : 'folga' }}
+            </span>
+          </button>
+        </div>
+
+        <p
+          class="mt-3 text-sm"
+          :class="form.calendario.diasUteis.length === 0 ? 'text-error' : 'text-muted'"
+        >
+          {{ resumoDosDias }}
+        </p>
+        </div>
+
+        <div id="mes" class="min-w-0 scroll-mt-40">
+        <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <UButton
+              icon="i-lucide-chevron-left"
+              size="xs"
+              color="neutral"
+              variant="ghost"
+              aria-label="Mês anterior"
+              @click="andarMes(-1)"
+            />
+            <span class="min-w-40 text-center text-sm font-medium text-highlighted">
+              {{ nomeDoMes }}
+            </span>
+            <UButton
+              icon="i-lucide-chevron-right"
+              size="xs"
+              color="neutral"
+              variant="ghost"
+              aria-label="Próximo mês"
+              @click="andarMes(1)"
+            />
+          </div>
+
+          <p class="text-sm text-muted">
+            <strong class="text-toned">{{ resumoDoMes.uteis }}</strong> dias úteis ·
+            {{ contar(resumoDoMes.feriados, 'feriado', 'feriados') }} ·
+            {{ contar(resumoDoMes.ocorrencias, 'dia com ocorrência', 'dias com ocorrência') }}
+          </p>
+
+          <div class="flex flex-wrap items-center gap-3 text-xs">
+            <span class="flex items-center gap-1.5">
+              <span class="size-2.5 rounded-sm bg-default ring-1 ring-default" /> Dia útil
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="size-2.5 rounded-sm bg-elevated ring-1 ring-default" /> Fora do expediente
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="size-2.5 rounded-sm bg-warning/25 ring-1 ring-warning/40" /> Feriado
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="size-2.5 rounded-sm bg-primary/20 ring-1 ring-primary/40" /> Ocorrência
+            </span>
           </div>
         </div>
 
-        <!--
-          A grade inteira tem uma parada de tabulação só, e as setas andam por
-          dentro. 42 tabulações para atravessar um mês seria pior que não ter
-          teclado nenhum.
-        -->
-        <div class="grid grid-cols-7" role="grid" @keydown="andarNoTeclado">
-          <UPopover
-            v-for="c in celulas"
-            :key="c.data"
-            :open="diaAberto === c.data"
-            @update:open="(v: boolean) => diaAberto = v ? c.data : null"
-          >
-            <button
-              type="button"
-              :data-dia="c.data"
-              :tabindex="c.data === focoNoDia ? 0 : -1"
-              :aria-label="rotuloDoDia(c)"
-              class="relative flex h-16 w-full flex-col gap-0.5 border-b border-r border-default p-1.5 text-left transition-colors last:border-r-0 hover:ring-1 hover:ring-inset hover:ring-primary/40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
-              :class="[
-                !c.doMes && 'opacity-35',
-                c.feriado
-                  ? 'bg-warning/10'
-                  : c.ocorrencia
-                    ? 'bg-primary/5'
-                    : c.util ? 'bg-default' : 'bg-elevated',
-              ]"
-              @focus="focoNoDia = c.data"
+        <div class="overflow-hidden rounded-lg border border-default">
+          <div class="grid grid-cols-7 border-b border-default bg-elevated">
+            <div
+              v-for="d in diasDaSemana"
+              :key="d.chave"
+              class="px-2 py-1.5 text-center text-[11px] font-medium uppercase tracking-wider text-muted"
             >
-              <span
-                class="text-xs tabular-nums"
-                :class="c.data === HOJE
-                  ? 'flex size-5 items-center justify-center rounded-full bg-primary-700 font-semibold text-white'
-                  : c.util ? 'text-toned' : 'text-muted'"
+              {{ d.nome.slice(0, 3) }}
+            </div>
+          </div>
+
+          <!--
+            A grade inteira tem uma parada de tabulação só, e as setas andam por
+            dentro. 42 tabulações para atravessar um mês seria pior que não ter
+            teclado nenhum.
+          -->
+          <div class="grid grid-cols-7" role="grid" @keydown="andarNoTeclado">
+            <UPopover
+              v-for="c in celulas"
+              :key="c.data"
+              :open="diaAberto === c.data"
+              @update:open="(v: boolean) => diaAberto = v ? c.data : null"
+            >
+              <button
+                type="button"
+                :data-dia="c.data"
+                :tabindex="c.data === focoNoDia ? 0 : -1"
+                :aria-label="rotuloDoDia(c)"
+                class="relative flex h-16 w-full flex-col gap-0.5 border-b border-r border-default p-1.5 text-left transition-colors last:border-r-0 hover:ring-1 hover:ring-inset hover:ring-primary/40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+                :class="[
+                  !c.doMes && 'opacity-35',
+                  c.feriado
+                    ? 'bg-warning/10'
+                    : c.ocorrencia
+                      ? 'bg-primary/5'
+                      : c.util ? 'bg-default' : 'bg-elevated',
+                ]"
+                @focus="focoNoDia = c.data"
               >
-                {{ c.dia }}
-              </span>
+                <span
+                  class="text-xs tabular-nums"
+                  :class="c.data === HOJE
+                    ? 'flex size-5 items-center justify-center rounded-full bg-primary-700 font-semibold text-white'
+                    : c.util ? 'text-toned' : 'text-muted'"
+                >
+                  {{ c.dia }}
+                </span>
 
-              <span
-                v-if="c.feriado"
-                class="line-clamp-2 text-[11px] leading-tight text-warning"
-              >
-                {{ c.feriado.nome }}
-              </span>
-              <span
-                v-else-if="c.ocorrencia"
-                class="line-clamp-2 text-[11px] leading-tight text-primary"
-              >
-                {{ c.ocorrencia.nome }}
-              </span>
-            </button>
+                <span
+                  v-if="c.feriado"
+                  class="line-clamp-2 text-[11px] leading-tight text-warning"
+                >
+                  {{ c.feriado.nome }}
+                </span>
+                <span
+                  v-else-if="c.ocorrencia"
+                  class="line-clamp-2 text-[11px] leading-tight text-primary"
+                >
+                  {{ c.ocorrencia.nome }}
+                </span>
+              </button>
 
-            <template #content>
-              <div class="w-72 space-y-3 p-3">
-                <div>
-                  <p class="text-sm font-medium text-highlighted">{{ diaPorExtenso(c) }}</p>
-                  <p class="mt-0.5 text-sm text-muted">{{ c.motivo }}</p>
-                </div>
+              <template #content>
+                <div class="w-72 space-y-3 p-3">
+                  <div>
+                    <p class="text-sm font-medium text-highlighted">{{ diaPorExtenso(c) }}</p>
+                    <p class="mt-0.5 text-sm text-muted">{{ c.motivo }}</p>
+                  </div>
 
-                <div class="flex flex-col items-start gap-1 border-t border-default pt-2">
-                  <!-- Feriado e ocorrência se resolvem no próprio dia. -->
-                  <UButton
-                    v-if="c.feriado"
-                    :label="`Remover ${c.feriado.nome}`"
-                    icon="i-lucide-x"
-                    size="xs"
-                    color="neutral"
-                    variant="ghost"
-                    @click="c.feriado && removerFeriadoDoDia(c.feriado)"
-                  />
-
-                  <template v-if="c.ocorrencia">
+                  <div class="flex flex-col items-start gap-1 border-t border-default pt-2">
+                    <!-- Feriado e ocorrência se resolvem no próprio dia. -->
                     <UButton
-                      :label="c.ocorrencia.contaComoUtil
-                        ? 'Suspender o expediente neste dia'
-                        : 'Voltar a contar como dia útil'"
-                      :icon="c.ocorrencia.contaComoUtil ? 'i-lucide-alarm-clock-off' : 'i-lucide-alarm-clock'"
-                      size="xs"
-                      color="neutral"
-                      variant="ghost"
-                      @click="c.ocorrencia && alternarOcorrencia(c.ocorrencia)"
-                    />
-                    <UButton
-                      :label="`Remover ${c.ocorrencia.nome}`"
+                      v-if="c.feriado"
+                      :label="`Remover ${c.feriado.nome}`"
                       icon="i-lucide-x"
                       size="xs"
                       color="neutral"
                       variant="ghost"
-                      @click="c.ocorrencia && removerOcorrenciaDoDia(c.ocorrencia)"
+                      @click="c.feriado && removerFeriadoDoDia(c.feriado)"
                     />
-                  </template>
 
-                  <UButton
-                    v-if="!c.feriado && !c.ocorrencia"
-                    label="Marcar como exceção"
-                    icon="i-lucide-calendar-plus"
-                    size="xs"
-                    color="neutral"
-                    variant="ghost"
-                    @click="novaOcorrenciaEm(c)"
-                  />
+                    <template v-if="c.ocorrencia">
+                      <UButton
+                        :label="c.ocorrencia.contaComoUtil
+                          ? 'Suspender o expediente neste dia'
+                          : 'Voltar a contar como dia útil'"
+                        :icon="c.ocorrencia.contaComoUtil ? 'i-lucide-alarm-clock-off' : 'i-lucide-alarm-clock'"
+                        size="xs"
+                        color="neutral"
+                        variant="ghost"
+                        @click="c.ocorrencia && alternarOcorrencia(c.ocorrencia)"
+                      />
+                      <UButton
+                        :label="`Remover ${c.ocorrencia.nome}`"
+                        icon="i-lucide-x"
+                        size="xs"
+                        color="neutral"
+                        variant="ghost"
+                        @click="c.ocorrencia && removerOcorrenciaDoDia(c.ocorrencia)"
+                      />
+                    </template>
 
-                  <!--
-                    Fim de semana não se edita daqui: clicar num sábado mudaria
-                    todos os sábados do ano. A célula leva até a regra.
-                  -->
-                  <UButton
-                    v-if="!form.calendario.diasUteis.includes(c.diaDaSemana)"
-                    label="Mudar os dias úteis da semana"
-                    icon="i-lucide-arrow-up-right"
-                    size="xs"
-                    color="neutral"
-                    variant="ghost"
-                    @click="irParaDiasUteis()"
-                  />
+                    <UButton
+                      v-if="!c.feriado && !c.ocorrencia"
+                      label="Marcar como exceção"
+                      icon="i-lucide-calendar-plus"
+                      size="xs"
+                      color="neutral"
+                      variant="ghost"
+                      @click="novaOcorrenciaEm(c)"
+                    />
+
+                    <!--
+                      Fim de semana não se edita daqui: clicar num sábado mudaria
+                      todos os sábados do ano. A célula leva até a regra.
+                    -->
+                    <UButton
+                      v-if="!form.calendario.diasUteis.includes(c.diaDaSemana)"
+                      label="Mudar os dias úteis da semana"
+                      icon="i-lucide-arrow-up-right"
+                      size="xs"
+                      color="neutral"
+                      variant="ghost"
+                      @click="irParaDiasUteis()"
+                    />
+                  </div>
                 </div>
-              </div>
-            </template>
-          </UPopover>
+              </template>
+            </UPopover>
+          </div>
+        </div>
+        </div>
+      </div>
+    </Secao>
+
+    <!--
+      2. EXCEÇÕES: as duas listas de datas, uma ao lado da outra
+
+      Feriado vem de fora (do país) e ocorrência vem de dentro (da operação),
+      mas as duas fazem a mesma coisa com o mês. Lado a lado, dá para ver as
+      duas sem rolar, e a seção para de ser duas molduras de lista empilhadas.
+    -->
+    <Secao
+      id="feriados"
+      titulo="Exceções do calendário"
+      resumo="Datas que mudam o expediente: os feriados do país e as datas da sua operação."
+      :doc="documentacao.calendario"
+      style="animation: entrada .4s ease-out both; animation-delay: 60ms"
+    >
+      <div class="grid gap-x-10 gap-y-8 @4xl:grid-cols-2">
+        <div class="min-w-0">
+          <h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
+            Feriados
+          </h3>
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <p class="text-sm text-muted">
+            {{ contar(form.calendario.feriados.length, 'feriado', 'feriados') }} no calendário deste
+            workspace.
+          </p>
+          <UButton
+            label="Importar feriados"
+            icon="i-lucide-download"
+            size="sm"
+            color="neutral"
+            variant="subtle"
+            class="transition-transform hover:-translate-y-0.5"
+            @click="escolhendoFeriados = true"
+          />
+        </div>
+
+        <div v-for="[pais, lista] in feriadosPorPais" :key="pais" class="mb-4 last:mb-0">
+          <div class="mb-2 flex items-center gap-2">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-muted">
+              {{ nomeDoPais[pais] }}
+            </h3>
+            <UBadge :label="String(lista.length)" size="sm" color="neutral" variant="subtle" />
+            <UBadge
+              v-if="pais !== 'BR'"
+              label="fora do país do workspace"
+              size="sm"
+              color="warning"
+              variant="subtle"
+            />
+          </div>
+
+          <ul class="divide-y divide-default">
+            <li
+              v-for="f in lista"
+              :key="f.id"
+              class="group flex items-center gap-3 px-3 py-2 transition-colors hover:bg-elevated"
+            >
+              <span class="w-20 shrink-0 text-sm tabular-nums text-muted">{{ formatarData(f.data) }}</span>
+              <span class="min-w-0 flex-1 truncate text-sm text-highlighted">{{ f.nome }}</span>
+              <span class="hidden text-xs text-muted sm:block">{{ f.abrangencia }}</span>
+              <UButton
+                icon="i-lucide-x"
+                size="xs"
+                color="neutral"
+                variant="ghost"
+                :aria-label="`Remover ${f.nome}`"
+                class="opacity-60 transition-opacity group-hover:opacity-100 focus:opacity-100"
+                @click="removerFeriado(f.id)"
+              />
+            </li>
+          </ul>
+        </div>
+        </div>
+
+        <div id="ocorrencias" class="min-w-0 scroll-mt-40">
+          <h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
+            Ocorrências da operação
+          </h3>
+        <div class="mb-4 flex items-start justify-between gap-6">
+          <div>
+            <p class="text-sm font-medium text-highlighted">
+              Registrar ocorrências no calendário
+            </p>
+            <p class="mt-1 text-sm text-muted">
+              Desligado, as datas continuam guardadas, mas deixam de afetar prazo e Agenda.
+            </p>
+          </div>
+          <USwitch v-model="form.calendario.ocorrenciasHabilitadas" aria-label="Registrar ocorrências" />
+        </div>
+
+        <div v-if="form.calendario.ocorrenciasHabilitadas">
+          <ul
+            v-if="form.calendario.ocorrencias.length"
+            class="divide-y divide-default"
+          >
+            <li
+              v-for="o in form.calendario.ocorrencias"
+              :key="o.id"
+              class="group flex items-center gap-3 px-3 py-2 transition-colors hover:bg-elevated"
+            >
+              <span class="shrink-0 text-sm tabular-nums text-muted">{{ periodoDaOcorrencia(o) }}</span>
+              <span class="min-w-0 flex-1 truncate text-sm text-highlighted">{{ o.nome }}</span>
+              <UBadge :label="o.tipo" size="sm" color="neutral" variant="subtle" />
+              <UBadge
+                :label="o.contaComoUtil ? 'expediente normal' : 'suspende o expediente'"
+                size="sm"
+                :color="o.contaComoUtil ? 'neutral' : 'warning'"
+                variant="subtle"
+              />
+              <UButton
+                icon="i-lucide-x"
+                size="xs"
+                color="neutral"
+                variant="ghost"
+                :aria-label="`Remover ${o.nome}`"
+                class="opacity-60 transition-opacity group-hover:opacity-100 focus:opacity-100"
+                @click="removerOcorrencia(o.id)"
+              />
+            </li>
+          </ul>
+
+          <UButton
+            label="Adicionar ocorrência"
+            icon="i-lucide-plus"
+            size="sm"
+            color="neutral"
+            variant="subtle"
+            class="mt-3 transition-transform hover:-translate-y-0.5"
+            @click="criandoOcorrencia = true"
+          />
+        </div>
         </div>
       </div>
     </Secao>

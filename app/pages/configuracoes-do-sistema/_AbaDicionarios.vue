@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { toRaw } from 'vue'
 import Secao from './_Secao.vue'
 import {
+  chavePorId,
   chavesDeTraducao,
   documentacao,
   idiomas,
+  sobrescritasDoCampo,
   sugestoesDeIa,
   totalDeChaves,
   type ChaveDeTraducao,
@@ -11,7 +14,6 @@ import {
 import {
   form,
   preenchidasNoTotal,
-  preenchidasPorCategoria,
   traducoes,
   traduzir,
 } from './estado'
@@ -21,51 +23,135 @@ const emit = defineEmits<{ irPara: [aba: string] }>()
 const toast = useToast()
 
 /* ------------------------------------------------------------------ *
- * 14 mil chaves.
+ * A estrutura que esta tela precisa dizer em voz alta
  *
- * O desenho da rodada 1 listava tudo o que o filtro devolvesse, e isso
- * vira rolagem infinita num workspace de verdade. A pesquisa (PESQUISA.md,
- * rodada 5) mostra que ninguém no mercado renderiza o conjunto inteiro:
+ * Dentro de uma categoria existem DOIS ramos, e eles são irmãos:
  *
- *   Crowdin  navega por arquivo, num painel lateral, e pagina de 50 em 50
- *   Weblate  abre o componente em fatias e transforma a busca em fila
- *   Lokalise pagina por cursor acima de 5 mil e age em massa sobre o filtro
+ *   categoria › campo         o texto que o campo tem por definição
+ *   categoria › formulário    o texto que o formulário escreve POR CIMA
  *
- * Daí os três níveis desta tela:
+ * Traduzir o campo **não** traduz o formulário. Se o bloco daquele campo tem
+ * instrução própria no formulário, ela continua em português até alguém
+ * traduzir a chave do formulário.
  *
- *   1. VISÃO GERAL   as categorias com progresso. Nenhuma chave na tela.
- *   2. RECORTE       as chaves de uma categoria ou de uma busca, 50 por página.
- *   3. FILA          uma chave por vez, teclado, para atravessar o volume.
+ * O desenho anterior mostrava os dois como se fossem o mesmo campo repetido
+ * ("Formulários › Cliente › Número"), e isso induzia ao erro: a pessoa
+ * traduzia o campo e parava, com a tela ainda em português. O que mudou:
+ *
+ *  - a árvore à esquerda mostra os dois ramos lado a lado, sempre visíveis;
+ *  - a chave de formulário mostra o que o campo diz e oferece **copiar**,
+ *    nunca herdar;
+ *  - a chave de campo avisa quando existe texto escrito por cima dela;
+ *  - o cabeçalho conta quantos textos já traduzidos no campo continuam
+ *    aparecendo em português por causa disso.
+ *
+ * O volume continua sendo o outro problema (PESQUISA.md, rodada 5): 7,4 mil
+ * chaves, nada de lista única, tudo em fatias de 50.
  * ------------------------------------------------------------------ */
 
 const POR_PAGINA = 50
 const CUSTO_POR_CHAVE = 0.2
 
-/** Índice por categoria, montado uma vez. Varrer 14 mil a cada tecla, não. */
-const porCategoria = new Map<string, ChaveDeTraducao[]>()
-for (const chave of chavesDeTraducao) {
-  const lista = porCategoria.get(chave.categoria) ?? []
-  lista.push(chave)
-  porCategoria.set(chave.categoria, lista)
+/** Leitura sem rastrear: as contas varrem milhares de chaves de uma vez. */
+const bruto = toRaw(traducoes)
+
+/* ------------------------------ índices ----------------------------- */
+
+interface Galho {
+  label: string
+  value: string
+  icon?: string
+  children?: Galho[]
 }
 
-const categorias = [...porCategoria.entries()].map(([nome, chaves]) => ({ nome, total: chaves.length }))
+const porNo = new Map<string, ChaveDeTraducao[]>()
 
-const categoriaAberta = ref<string | null>(null)
+function indexar(valor: string, chave: ChaveDeTraducao) {
+  const lista = porNo.get(valor) ?? []
+  lista.push(chave)
+  porNo.set(valor, lista)
+}
+
+for (const chave of chavesDeTraducao) {
+  indexar(chave.categoria, chave)
+  indexar(`${chave.categoria}|${chave.grupo}`, chave)
+  if (chave.formulario) indexar(`${chave.categoria}|Formulários|${chave.formulario}`, chave)
+}
+
+const categorias = [...new Set(chavesDeTraducao.map(c => c.categoria))]
+
+const formulariosPorCategoria = new Map<string, string[]>()
+for (const chave of chavesDeTraducao) {
+  if (!chave.formulario) continue
+  const lista = formulariosPorCategoria.get(chave.categoria) ?? []
+  if (!lista.includes(chave.formulario)) lista.push(chave.formulario)
+  formulariosPorCategoria.set(chave.categoria, lista)
+}
+
+/** Quanto falta em cada nó da árvore. Refaz quando alguma tradução muda. */
+const faltamPorNo = computed(() => {
+  void preenchidasNoTotal.value
+  const mapa: Record<string, number> = {}
+  for (const [valor, chaves] of porNo) {
+    let pendentes = 0
+    for (const chave of chaves) if (!bruto[chave.id]) pendentes++
+    mapa[valor] = pendentes
+  }
+  return mapa
+})
+
+function faltamNoNo(valor: string) {
+  return faltamPorNo.value[valor] ?? 0
+}
+
+function totalDoNo(valor: string) {
+  return porNo.get(valor)?.length ?? 0
+}
+
+/* ------------------------------- a árvore ---------------------------- */
+
+const arvore = computed<Galho[]>(() =>
+  categorias.map((categoria) => {
+    const filhos: Galho[] = []
+
+    if (totalDoNo(`${categoria}|Geral`)) {
+      filhos.push({ label: 'Geral', value: `${categoria}|Geral`, icon: 'i-lucide-tag' })
+    }
+    if (totalDoNo(`${categoria}|Campos`)) {
+      filhos.push({ label: 'Campos', value: `${categoria}|Campos`, icon: 'i-lucide-list' })
+    }
+
+    const formularios = formulariosPorCategoria.get(categoria) ?? []
+    if (formularios.length) {
+      filhos.push({
+        label: 'Formulários',
+        value: `${categoria}|Formulários`,
+        icon: 'i-lucide-file-text',
+        children: formularios.map(nome => ({
+          label: nome,
+          value: `${categoria}|Formulários|${nome}`,
+          icon: 'i-lucide-corner-down-right',
+        })),
+      })
+    }
+
+    return {
+      label: categoria,
+      value: categoria,
+      children: filhos.length ? filhos : undefined,
+    }
+  }),
+)
+
+const noSelecionado = ref<Galho | undefined>()
+const expandidos = ref<string[]>([])
+
+/** O recorte vem da árvore, da busca ou do aviso de texto sobrescrito. */
+const modo = ref<'arvore' | 'sobrescritas'>('arvore')
+
 const busca = ref('')
 const filtro = ref<'faltam' | 'traduzidas' | 'todas'>('faltam')
 const pagina = ref(1)
-const ordem = ref<'faltantes' | 'nome'>('faltantes')
-const gruposAtivos = ref<string[]>(['Geral', 'Campos', 'Formulários'])
-
-/**
- * O nível que faltava. No ENSPACE, Formulários não é um grupo raso: dentro
- * dele cada formulário repete os campos da categoria, com textos próprios.
- * Em "Clients", Formulários tem mais chaves que Campos justamente por isso.
- * Aqui o formulário vira o segundo recorte, em vez de virar mais um nível de
- * sanfona.
- */
-const formularioAberto = ref<string | null>(null)
 
 const idiomaAtual = computed(() => idiomas.find(i => i.codigo === form.dicionarios.idioma))
 const faltamNoTotal = computed(() => totalDeChaves - preenchidasNoTotal.value)
@@ -74,43 +160,40 @@ function porcento(parte: number, total: number) {
   return total ? Math.round((parte / total) * 100) : 0
 }
 
-/* ------------------------- nível 1: categorias ------------------------- */
-
-const categoriasComProgresso = computed(() => {
-  const lista = categorias.map(c => ({
-    ...c,
-    prontas: preenchidasPorCategoria[c.nome] ?? 0,
-    faltam: c.total - (preenchidasPorCategoria[c.nome] ?? 0),
-  }))
-  return ordem.value === 'nome'
-    ? lista.sort((a, b) => a.nome.localeCompare(b.nome))
-    : lista.sort((a, b) => b.faltam - a.faltam)
-})
-
-/* --------------------- nível 2: o recorte de trabalho ------------------- */
+/* ----------------- o problema que a tela precisa contar --------------- */
 
 /**
- * O universo é a categoria aberta ou, quando há busca sem categoria, o
- * workspace inteiro. Sem categoria e sem busca o universo é vazio de
- * propósito: a tela não lista 14 mil chaves por acidente.
+ * Textos de formulário sem tradução cujo campo **já está** traduzido.
+ * É o caso que faz a pessoa achar que terminou.
  */
+const sobrescritasPendentes = computed(() => {
+  void preenchidasNoTotal.value
+  const lista: ChaveDeTraducao[] = []
+  for (const [idDoCampo, sobrescritas] of sobrescritasDoCampo) {
+    if (!bruto[idDoCampo]) continue
+    for (const chave of sobrescritas) if (!bruto[chave.id]) lista.push(chave)
+  }
+  return lista
+})
+
+/* ------------------------------- o recorte ---------------------------- */
+
 const universo = computed<ChaveDeTraducao[]>(() => {
-  if (categoriaAberta.value) return porCategoria.get(categoriaAberta.value) ?? []
+  if (modo.value === 'sobrescritas') return sobrescritasPendentes.value
+  if (noSelecionado.value) return porNo.get(noSelecionado.value.value) ?? []
   return busca.value.trim() ? chavesDeTraducao : []
 })
 
 const recorte = computed(() => {
   const termo = busca.value.trim().toLowerCase()
   return universo.value.filter((c) => {
-    if (!gruposAtivos.value.includes(c.grupo)) return false
-    if (formularioAberto.value && c.formulario !== formularioAberto.value) return false
     const preenchida = !!traducoes[c.id]
     if (filtro.value === 'faltam' && preenchida) return false
     if (filtro.value === 'traduzidas' && !preenchida) return false
     if (!termo) return true
     return (
       c.original.toLowerCase().includes(termo)
-      || c.dono.toLowerCase().includes(termo)
+      || c.campo.toLowerCase().includes(termo)
       || (traducoes[c.id] ?? '').toLowerCase().includes(termo)
     )
   })
@@ -120,61 +203,116 @@ const visiveis = computed(() =>
   recorte.value.slice((pagina.value - 1) * POR_PAGINA, pagina.value * POR_PAGINA),
 )
 
-/** Quantas chaves cada grupo tem dentro do universo, para o filtro de grupo. */
-const contagemPorGrupo = computed(() => {
-  const contagem: Record<string, number> = { 'Geral': 0, 'Campos': 0, 'Formulários': 0 }
-  for (const c of universo.value) contagem[c.grupo] = (contagem[c.grupo] ?? 0) + 1
-  return contagem
-})
-
-/** Os formulários da categoria aberta, com quantas chaves cada um carrega. */
-const formulariosDoUniverso = computed(() => {
-  const contagem = new Map<string, number>()
-  for (const c of universo.value) {
-    if (!c.formulario) continue
-    contagem.set(c.formulario, (contagem.get(c.formulario) ?? 0) + 1)
-  }
-  return [...contagem.entries()].map(([nome, total]) => ({ nome, total }))
-})
-
-/** O caminho da chave, como o produto mostra na árvore. */
-function caminhoDaChave(c: ChaveDeTraducao) {
-  return [c.grupo, c.formulario, c.dono].filter(Boolean).join(' › ')
+/**
+ * As chaves de um mesmo campo andam juntas.
+ *
+ * Os seis textos de um campo vinham um embaixo do outro, cada um repetindo o
+ * nome do campo e o aviso de sobrescrita: seis linhas iguais para dizer uma
+ * coisa só. Agrupadas, o nome e o aviso aparecem uma vez, e a lista passa a
+ * ter a forma do que ela é: um campo, os textos dele.
+ */
+interface GrupoDeChaves {
+  id: string
+  titulo: string
+  chaves: ChaveDeTraducao[]
 }
 
-watch([categoriaAberta, filtro, busca, gruposAtivos, formularioAberto], () => {
+const visiveisAgrupadas = computed<GrupoDeChaves[]>(() => {
+  const grupos: GrupoDeChaves[] = []
+  for (const chave of visiveis.value) {
+    const id = `${chave.grupo}|${chave.formulario ?? ''}|${chave.campo}`
+    const titulo = chave.campo
+      || (chave.grupo === 'Formulários' ? `Formulário ${chave.formulario}` : 'A categoria')
+    const ultimo = grupos.at(-1)
+    if (ultimo && ultimo.id === id) ultimo.chaves.push(chave)
+    else grupos.push({ id, titulo, chaves: [chave] })
+  }
+  return grupos
+})
+
+/** Em quais formulários os textos deste campo foram reescritos. */
+function formulariosQueSobrescrevem(grupo: GrupoDeChaves) {
+  const nomes = new Set<string>()
+  for (const chave of grupo.chaves) {
+    for (const sobrescrita of sobrescritasDoCampo.get(chave.id) ?? []) {
+      if (sobrescrita.formulario) nomes.add(sobrescrita.formulario)
+    }
+  }
+  return [...nomes]
+}
+
+watch([noSelecionado, busca, filtro, modo], () => {
   pagina.value = 1
 })
 
-watch([categoriaAberta, gruposAtivos], () => {
-  if (!gruposAtivos.value.includes('Formulários')) formularioAberto.value = null
+watch(noSelecionado, (no) => {
+  if (no) modo.value = 'arvore'
 })
 
-function abrirCategoria(nome: string) {
-  categoriaAberta.value = nome
+/** O caminho do recorte aberto, para o cabeçalho da bancada. */
+const caminho = computed(() => {
+  if (modo.value === 'sobrescritas') return ['Textos de formulário sem tradução']
+  if (noSelecionado.value) return noSelecionado.value.value.split('|')
+  return busca.value.trim() ? ['Busca em todas as chaves'] : []
+})
+
+/** O recorte aberto é de formulário? É quando a regra precisa ser dita. */
+const recorteDeFormulario = computed(() => {
+  if (modo.value === 'sobrescritas') return true
+  return noSelecionado.value?.value.includes('|Formulários') ?? false
+})
+
+function abrirNo(valor: string) {
+  const categoria = valor.split('|')[0]!
+  expandidos.value = [...new Set([...expandidos.value, categoria, `${categoria}|Formulários`])]
+  noSelecionado.value = { label: valor.split('|').at(-1)!, value: valor }
+  modo.value = 'arvore'
   busca.value = ''
-  formularioAberto.value = null
 }
 
-function voltarParaCategorias() {
-  categoriaAberta.value = null
-  busca.value = ''
-  formularioAberto.value = null
+/* ------------------- campo e formulário, lado a lado ------------------ */
+
+/** O que a definição do campo diz para o mesmo texto que o formulário repete. */
+function textoDoCampo(chave: ChaveDeTraducao) {
+  if (!chave.espelhoNoCampo) return undefined
+  const campo = chavePorId.get(chave.espelhoNoCampo)
+  if (!campo) return undefined
+  return { chave: campo, traducao: traducoes[campo.id] ?? '' }
 }
 
-function alternarGrupo(grupo: string) {
-  const i = gruposAtivos.value.indexOf(grupo)
-  if (i >= 0 && gruposAtivos.value.length > 1) gruposAtivos.value.splice(i, 1)
-  else if (i < 0) gruposAtivos.value.push(grupo)
+function copiarDoCampo(chave: ChaveDeTraducao) {
+  const campo = textoDoCampo(chave)
+  if (campo?.traducao) traduzir(chave.id, campo.traducao)
 }
 
-/* ---------------------------- nível 3: a fila --------------------------- */
+/** Traz de uma vez, para o recorte aberto, o que o campo já tem traduzido. */
+function copiarDoCampoNoRecorte() {
+  let copiadas = 0
+  for (const chave of recorte.value) {
+    if (traducoes[chave.id]) continue
+    const campo = textoDoCampo(chave)
+    if (!campo?.traducao) continue
+    traduzir(chave.id, campo.traducao)
+    copiadas++
+  }
+  toast.add({
+    title: copiadas
+      ? `${copiadas.toLocaleString('pt-BR')} textos copiados do campo`
+      : 'Nada para copiar aqui',
+    description: copiadas
+      ? 'Revise antes de salvar: o formulário costuma pedir texto diferente do campo, senão não teria texto próprio.'
+      : 'Os campos destes textos também estão sem tradução.',
+    icon: 'i-lucide-copy',
+    color: 'neutral',
+  })
+}
+
+/* --------------------------------- a fila ----------------------------- */
 
 const naFila = ref(false)
 const posicao = ref(0)
 const rascunho = ref('')
 
-/** A fila é o que falta no recorte atual. A busca vira fila, como no Weblate. */
 const fila = computed(() => {
   const base = universo.value.length ? recorte.value : chavesDeTraducao
   return base.filter(c => !traducoes[c.id])
@@ -207,11 +345,17 @@ function sugerirNaFila() {
   if (chave) rascunho.value = sugestoesDeIa[chave.original] ?? ''
 }
 
+function usarCampoNaFila() {
+  const chave = atual.value
+  const campo = chave && textoDoCampo(chave)
+  if (campo?.traducao) rascunho.value = campo.traducao
+}
+
 watch(atual, () => {
   rascunho.value = ''
 })
 
-/* ------------------------------ tradução por IA ------------------------- */
+/* ---------------------------- tradução por IA ------------------------- */
 
 const traduzindo = ref<string | null>(null)
 const confirmandoIa = ref(false)
@@ -257,7 +401,7 @@ async function rodarIaEmMassa() {
 
 <template>
   <div class="space-y-5">
-    <!-- 1. VISÃO GERAL ---------------------------------------------- -->
+    <!-- 1. O ESTADO DO DICIONÁRIO ------------------------------------- -->
     <Secao
       id="traducoes"
       titulo="Dicionários de tradução"
@@ -275,7 +419,7 @@ async function rodarIaEmMassa() {
               type="button"
               class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               :class="form.dicionarios.idioma === i.codigo
-                ? 'bg-primary text-inverted'
+                ? 'bg-primary-700 text-white'
                 : 'text-muted hover:bg-elevated hover:text-highlighted'"
               :aria-pressed="form.dicionarios.idioma === i.codigo"
               @click="form.dicionarios.idioma = i.codigo"
@@ -292,20 +436,33 @@ async function rodarIaEmMassa() {
               <strong class="text-highlighted">{{ preenchidasNoTotal.toLocaleString('pt-BR') }}</strong>
               de {{ totalDeChaves.toLocaleString('pt-BR') }} traduzidas
             </span>
-            <span class="text-muted">{{ porcento(preenchidasNoTotal, totalDeChaves) }}%</span>
+            <span class="tabular-nums text-muted">{{ porcento(preenchidasNoTotal, totalDeChaves) }}%</span>
           </div>
           <UProgress :model-value="preenchidasNoTotal" :max="totalDeChaves" size="sm" />
         </div>
       </div>
 
-      <div class="mt-5 flex flex-wrap items-center gap-2 border-t border-default pt-4">
-        <UInput
-          v-model="busca"
-          icon="i-lucide-search"
-          :placeholder="categoriaAberta ? `Buscar em ${categoriaAberta}` : 'Buscar em todas as chaves'"
-          class="w-full sm:w-80"
-        />
+      <!--
+        O aviso que a tela não dava, e que é a razão desta rodada: campo
+        traduzido não quer dizer tela traduzida.
+      -->
+      <UAlert
+        v-if="sobrescritasPendentes.length"
+        class="mt-5"
+        color="warning"
+        variant="subtle"
+        icon="i-lucide-triangle-alert"
+        :title="`${sobrescritasPendentes.length.toLocaleString('pt-BR')} textos continuam em português mesmo com o campo traduzido`"
+        description="São blocos de formulário com texto próprio. O formulário escreve por cima do campo, e cada um tem a sua tradução."
+        :actions="[{
+          label: 'Ver estes textos',
+          color: 'neutral',
+          variant: 'subtle',
+          onClick: () => { modo = 'sobrescritas'; noSelecionado = undefined; filtro = 'faltam'; busca = '' },
+        }]"
+      />
 
+      <div class="mt-5 flex flex-wrap items-center gap-2">
         <UButton
           :label="`Traduzir o que falta (${faltamNoTotal.toLocaleString('pt-BR')})`"
           icon="i-lucide-list-checks"
@@ -314,7 +471,6 @@ async function rodarIaEmMassa() {
           class="transition-transform hover:-translate-y-0.5"
           @click="abrirFila"
         />
-
         <UButton
           label="Traduzir com IA"
           icon="i-lucide-sparkles"
@@ -325,276 +481,274 @@ async function rodarIaEmMassa() {
           class="transition-transform hover:-translate-y-0.5"
           @click="confirmandoIa = true"
         />
-
         <div class="ml-auto flex gap-2">
-          <UButton
-            label="Exportar planilha"
-            icon="i-lucide-download"
-            size="sm"
-            color="neutral"
-            variant="ghost"
-          />
-          <UButton
-            label="Importar"
-            icon="i-lucide-upload"
-            size="sm"
-            color="neutral"
-            variant="ghost"
-          />
+          <UButton label="Exportar planilha" icon="i-lucide-download" size="sm" color="neutral" variant="ghost" />
+          <UButton label="Importar" icon="i-lucide-upload" size="sm" color="neutral" variant="ghost" />
         </div>
       </div>
 
       <template #rodape>
         <p class="text-xs text-muted">
-          Este workspace tem {{ totalDeChaves.toLocaleString('pt-BR') }} chaves. Por isso a tela
-          abre nas categorias e não numa lista: nenhuma ferramenta de tradução mostra o conjunto
-          inteiro de uma vez.
+          Este workspace tem {{ totalDeChaves.toLocaleString('pt-BR') }} chaves. Por isso a tela abre
+          na estrutura e não numa lista: nenhuma ferramenta de tradução mostra o conjunto inteiro de
+          uma vez.
         </p>
       </template>
     </Secao>
 
-    <!-- 2a. AS CATEGORIAS -------------------------------------------- -->
+    <!-- 2. A BANCADA --------------------------------------------------- -->
     <Secao
-      v-if="!categoriaAberta && !busca.trim()"
       id="categorias"
-      :titulo="`Categorias em ${idiomaAtual?.nome}`"
-      resumo="Escolha por onde começar. O que tem mais chaves faltando aparece primeiro."
+      titulo="Onde traduzir"
+      resumo="Cada categoria tem dois ramos irmãos: os campos e os formulários. São textos diferentes."
       :doc="documentacao.dicionarios"
       style="animation: entrada .4s ease-out both; animation-delay: 60ms"
     >
-      <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <p class="text-sm text-muted">
-          {{ categorias.length }} categorias
-        </p>
-        <div class="flex rounded-lg border border-default p-0.5">
-          <button
-            v-for="o in ([
-              { v: 'faltantes', r: 'O que falta primeiro' },
-              { v: 'nome', r: 'Por nome' },
-            ] as const)"
-            :key="o.v"
-            type="button"
-            class="rounded-md px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-            :class="ordem === o.v ? 'bg-primary text-inverted' : 'text-muted hover:bg-elevated hover:text-highlighted'"
-            :aria-pressed="ordem === o.v"
-            @click="ordem = o.v"
-          >
-            {{ o.r }}
-          </button>
-        </div>
-      </div>
+      <div class="grid gap-6 @4xl:grid-cols-[17rem_minmax(0,1fr)]">
+        <!-- a estrutura, sempre à vista -->
+        <aside class="min-w-0">
+          <UInput
+            v-model="busca"
+            icon="i-lucide-search"
+            placeholder="Buscar em todas as chaves"
+            size="sm"
+            class="mb-3 w-full"
+          />
 
-      <ul class="grid gap-2 sm:grid-cols-2">
-        <li
-          v-for="(c, i) in categoriasComProgresso"
-          :key="c.nome"
-          :style="`animation: entrada .3s ease-out both; animation-delay: ${Math.min(i * 20, 220)}ms`"
-        >
-          <button
-            type="button"
-            class="w-full rounded-lg bg-elevated/40 px-3 py-2.5 text-left transition-all hover:-translate-y-0.5 hover:bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-            @click="abrirCategoria(c.nome)"
-          >
-            <div class="flex items-baseline justify-between gap-3">
-              <span class="truncate text-sm font-medium text-highlighted">{{ c.nome }}</span>
-              <span class="shrink-0 text-xs tabular-nums text-muted">
-                <template v-if="c.faltam">faltam {{ c.faltam.toLocaleString('pt-BR') }}</template>
-                <template v-else>completa</template>
-              </span>
-            </div>
-            <div class="mt-2 flex items-center gap-2">
-              <UProgress
-                :model-value="c.prontas"
-                :max="c.total"
-                size="xs"
-                :color="c.faltam ? 'primary' : 'success'"
-                class="flex-1"
-              />
-              <span class="shrink-0 text-xs tabular-nums text-muted">
-                {{ c.prontas.toLocaleString('pt-BR') }}/{{ c.total.toLocaleString('pt-BR') }}
-              </span>
-            </div>
-          </button>
-        </li>
-      </ul>
-    </Secao>
+          <p class="mb-1.5 flex items-center justify-between text-xs uppercase tracking-wider text-muted">
+            <span>Estrutura</span>
+            <span>falta</span>
+          </p>
 
-    <!-- 2b. O RECORTE ------------------------------------------------ -->
-    <Secao
-      v-else
-      id="chaves"
-      :titulo="categoriaAberta ?? 'Busca em todas as categorias'"
-      :resumo="categoriaAberta
-        ? 'As chaves desta categoria, 50 por página.'
-        : 'O que a busca encontrou. É também a fila de trabalho.'"
-      :doc="documentacao.dicionarios"
-      style="animation: entrada .4s ease-out both; animation-delay: 60ms"
-    >
-      <div class="mb-4 flex flex-wrap items-center gap-2">
-        <UButton
-          label="Todas as categorias"
-          icon="i-lucide-arrow-left"
-          size="sm"
-          color="neutral"
-          variant="ghost"
-          class="transition-transform hover:-translate-x-0.5"
-          @click="voltarParaCategorias"
-        />
-
-        <div class="flex rounded-lg border border-default p-0.5">
-          <button
-            v-for="f in ([
-              { v: 'faltam', r: 'Faltam' },
-              { v: 'traduzidas', r: 'Traduzidas' },
-              { v: 'todas', r: 'Todas' },
-            ] as const)"
-            :key="f.v"
-            type="button"
-            class="rounded-md px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-            :class="filtro === f.v ? 'bg-primary text-inverted' : 'text-muted hover:bg-elevated hover:text-highlighted'"
-            :aria-pressed="filtro === f.v"
-            @click="filtro = f.v"
-          >
-            {{ f.r }}
-          </button>
-        </div>
-
-        <div class="flex flex-wrap gap-1.5">
-          <button
-            v-for="(quantas, grupo) in contagemPorGrupo"
-            :key="grupo"
-            type="button"
-            class="rounded-full border px-2.5 py-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-            :class="gruposAtivos.includes(grupo)
-              ? 'border-primary bg-primary/10 text-primary'
-              : 'border-default text-muted hover:bg-elevated'"
-            :aria-pressed="gruposAtivos.includes(grupo)"
-            @click="alternarGrupo(grupo)"
-          >
-            {{ grupo }} · {{ quantas.toLocaleString('pt-BR') }}
-          </button>
-        </div>
-
-        <UButton
-          :label="`Traduzir estas ${fila.length.toLocaleString('pt-BR')} na fila`"
-          icon="i-lucide-list-checks"
-          size="sm"
-          color="neutral"
-          variant="subtle"
-          :disabled="!fila.length"
-          class="ml-auto transition-transform hover:-translate-y-0.5"
-          @click="abrirFila"
-        />
-      </div>
-
-      <!--
-        Os formulários da categoria. No produto, cada um deles repete os campos
-        com textos próprios, então escolher o formulário é escolher o trabalho.
-      -->
-      <div
-        v-if="formulariosDoUniverso.length && gruposAtivos.includes('Formulários')"
-        class="mb-3 flex flex-wrap items-center gap-1.5"
-      >
-        <span class="mr-1 text-xs uppercase tracking-wider text-muted">Formulário</span>
-        <button
-          type="button"
-          class="rounded-full border px-2.5 py-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          :class="!formularioAberto
-            ? 'border-primary bg-primary/10 text-primary'
-            : 'border-default text-muted hover:bg-elevated'"
-          :aria-pressed="!formularioAberto"
-          @click="formularioAberto = null"
-        >
-          Todos
-        </button>
-        <button
-          v-for="f in formulariosDoUniverso"
-          :key="f.nome"
-          type="button"
-          class="rounded-full border px-2.5 py-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          :class="formularioAberto === f.nome
-            ? 'border-primary bg-primary/10 text-primary'
-            : 'border-default text-muted hover:bg-elevated'"
-          :aria-pressed="formularioAberto === f.nome"
-          @click="formularioAberto = f.nome"
-        >
-          {{ f.nome }} · {{ f.total.toLocaleString('pt-BR') }}
-        </button>
-      </div>
-
-      <p class="mb-3 text-sm text-muted">
-        <template v-if="recorte.length">
-          Mostrando
-          <strong class="text-highlighted">
-            {{ ((pagina - 1) * POR_PAGINA + 1).toLocaleString('pt-BR') }}
-            a {{ Math.min(pagina * POR_PAGINA, recorte.length).toLocaleString('pt-BR') }}
-          </strong>
-          de {{ recorte.length.toLocaleString('pt-BR') }} chaves.
-        </template>
-        <template v-else>Nenhuma chave neste recorte.</template>
-      </p>
-
-      <ul v-if="visiveis.length" class="divide-y divide-default">
-        <li
-          v-for="chave in visiveis"
-          :key="chave.id"
-          class="flex flex-col gap-2 px-3 py-2.5 transition-colors hover:bg-elevated/60 sm:flex-row sm:items-center sm:gap-4"
-        >
-          <div class="flex min-w-0 flex-1 items-center gap-2">
-            <UBadge :label="chave.tipo" size="sm" color="neutral" variant="subtle" class="shrink-0" />
-            <div class="min-w-0">
-              <p class="truncate text-sm text-highlighted" :title="chave.original">
-                {{ chave.original }}
-              </p>
-              <p class="truncate text-xs text-muted" :title="caminhoDaChave(chave)">
-                {{ caminhoDaChave(chave) }}
-              </p>
-            </div>
+          <div class="max-h-[30rem] overflow-y-auto pe-1">
+            <UTree
+              v-model="noSelecionado"
+              v-model:expanded="expandidos"
+              :items="arvore"
+              :get-key="(i: Galho) => i.value"
+              size="sm"
+            >
+              <template #item-trailing="{ item }">
+                <span
+                  class="ms-auto shrink-0 text-[11px] tabular-nums"
+                  :class="faltamNoNo((item as Galho).value)
+                    ? 'text-muted'
+                    : 'text-success-700 dark:text-success-300'"
+                >
+                  {{ faltamNoNo((item as Galho).value)
+                    ? faltamNoNo((item as Galho).value).toLocaleString('pt-BR')
+                    : 'ok' }}
+                </span>
+              </template>
+            </UTree>
           </div>
+        </aside>
 
-          <div class="flex min-w-0 flex-1 items-center gap-2">
-            <UInput
-              :model-value="traducoes[chave.id]"
-              :placeholder="`Tradução em ${idiomaAtual?.nome}`"
-              class="w-full"
-              @update:model-value="(v: string | number) => traduzir(chave.id, String(v))"
+        <!-- o trabalho -->
+        <div class="min-w-0">
+          <UEmpty
+            v-if="!universo.length"
+            icon="i-lucide-list-tree"
+            title="Escolha por onde começar"
+            :description="`Abra uma categoria ao lado, ou busque pelo texto. São ${totalDeChaves.toLocaleString('pt-BR')} chaves: elas não cabem numa lista só.`"
+            class="py-12"
+          />
+
+          <template v-else>
+            <UBreadcrumb
+              v-if="caminho.length"
+              :items="caminho.map(p => ({ label: p }))"
+              class="mb-3"
             />
-            <UTooltip text="Sugerir tradução com IA">
-              <UButton
-                icon="i-lucide-sparkles"
-                size="xs"
-                color="neutral"
-                variant="ghost"
-                :loading="traduzindo === chave.id"
-                :aria-label="`Sugerir tradução para ${chave.original}`"
-                @click="traduzirUma(chave)"
+
+            <!-- a regra do ramo, dita na hora em que ela importa -->
+            <UAlert
+              v-if="recorteDeFormulario"
+              class="mb-4"
+              color="neutral"
+              variant="subtle"
+              icon="i-lucide-info"
+              title="Estes textos são do formulário, não dos campos"
+              description="O formulário escreve por cima do campo. Traduzir o campo não traduz aqui, e o que você escrever aqui vale só dentro deste formulário."
+            />
+
+            <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex rounded-lg border border-default p-0.5">
+                <UButton
+                  v-for="f in [
+                    { valor: 'faltam', rotulo: 'Faltam' },
+                    { valor: 'traduzidas', rotulo: 'Traduzidas' },
+                    { valor: 'todas', rotulo: 'Todas' },
+                  ]"
+                  :key="f.valor"
+                  :label="f.rotulo"
+                  size="xs"
+                  :color="filtro === f.valor ? 'primary' : 'neutral'"
+                  :variant="filtro === f.valor ? 'soft' : 'ghost'"
+                  @click="filtro = f.valor as typeof filtro.value"
+                />
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2">
+                <UButton
+                  v-if="recorteDeFormulario"
+                  label="Copiar o que o campo já tem"
+                  icon="i-lucide-copy"
+                  size="xs"
+                  color="neutral"
+                  variant="subtle"
+                  @click="copiarDoCampoNoRecorte"
+                />
+                <UButton
+                  :label="`Traduzir ${fila.length.toLocaleString('pt-BR')} na fila`"
+                  icon="i-lucide-list-checks"
+                  size="xs"
+                  color="neutral"
+                  variant="subtle"
+                  :disabled="!fila.length"
+                  @click="abrirFila"
+                />
+              </div>
+            </div>
+
+            <p v-if="recorte.length" class="mb-3 text-sm text-muted">
+              Mostrando {{ ((pagina - 1) * POR_PAGINA + 1).toLocaleString('pt-BR') }}
+              a {{ Math.min(pagina * POR_PAGINA, recorte.length).toLocaleString('pt-BR') }}
+              de {{ recorte.length.toLocaleString('pt-BR') }} chaves.
+            </p>
+
+            <ul v-if="recorte.length" class="divide-y divide-default">
+              <li v-for="grupo in visiveisAgrupadas" :key="grupo.id" class="py-5 first:pt-0">
+                <!-- o campo, uma vez, com o que a tela precisa dizer sobre ele -->
+                <div class="mb-3">
+                  <h3 class="flex flex-wrap items-center gap-2 text-sm font-medium text-highlighted">
+                    {{ grupo.titulo }}
+                    <!-- de qual dos dois ramos este texto é -->
+                    <UBadge
+                      v-if="grupo.chaves[0]!.grupo === 'Campos'"
+                      label="campo"
+                      size="sm"
+                      color="neutral"
+                      variant="subtle"
+                    />
+                    <UBadge
+                      v-else-if="grupo.chaves[0]!.grupo === 'Formulários' && grupo.chaves[0]!.campo"
+                      :label="`bloco no formulário ${grupo.chaves[0]!.formulario}`"
+                      size="sm"
+                      color="primary"
+                      variant="subtle"
+                    />
+                  </h3>
+
+                  <p
+                    v-if="formulariosQueSobrescrevem(grupo).length"
+                    class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted"
+                  >
+                    <UIcon name="i-lucide-corner-down-right" class="size-3.5 shrink-0" />
+                    <span>
+                      Este campo também tem texto próprio em
+                      {{ formulariosQueSobrescrevem(grupo).join(', ') }}, com tradução separada.
+                    </span>
+                    <UButton
+                      v-for="nome in formulariosQueSobrescrevem(grupo)"
+                      :key="nome"
+                      :label="`Abrir ${nome}`"
+                      size="xs"
+                      variant="link"
+                      class="p-0"
+                      @click="abrirNo(`${grupo.chaves[0]!.categoria}|Formulários|${nome}`)"
+                    />
+                  </p>
+                </div>
+
+                <ul class="space-y-3">
+                  <li
+                    v-for="chave in grupo.chaves"
+                    :key="chave.id"
+                    class="grid gap-x-4 gap-y-1 @2xl:grid-cols-[6.5rem_minmax(0,1fr)]"
+                  >
+                    <span class="pt-1.5 text-xs uppercase tracking-wider text-muted">
+                      {{ chave.tipo }}
+                    </span>
+
+                    <div class="min-w-0">
+                      <p class="mb-1 truncate text-sm text-toned" :title="chave.original">
+                        {{ chave.original }}
+                      </p>
+
+                      <div class="flex items-center gap-2">
+                        <UInput
+                          :model-value="traducoes[chave.id]"
+                          :placeholder="`Escreva em ${idiomaAtual?.nome}`"
+                          :aria-label="`Tradução de ${chave.original}`"
+                          size="sm"
+                          class="w-full"
+                          @update:model-value="(v: string | number) => traduzir(chave.id, String(v))"
+                        />
+                        <UTooltip text="Sugerir tradução com IA">
+                          <UButton
+                            icon="i-lucide-sparkles"
+                            size="xs"
+                            color="neutral"
+                            variant="ghost"
+                            :loading="traduzindo === chave.id"
+                            :aria-label="`Sugerir tradução para ${chave.original}`"
+                            @click="traduzirUma(chave)"
+                          />
+                        </UTooltip>
+                      </div>
+
+                      <!-- o que o campo diz, quando a chave é do formulário -->
+                      <p
+                        v-if="textoDoCampo(chave)"
+                        class="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-muted"
+                      >
+                        <template v-if="textoDoCampo(chave)!.traducao">
+                          <span class="truncate">
+                            No campo:
+                            <span class="text-toned">{{ textoDoCampo(chave)!.traducao }}</span>
+                          </span>
+                          <UButton
+                            v-if="!traducoes[chave.id]"
+                            label="Usar este texto"
+                            size="xs"
+                            variant="link"
+                            class="p-0"
+                            @click="copiarDoCampo(chave)"
+                          />
+                        </template>
+                        <span v-else>No campo, este texto também está sem tradução.</span>
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+
+            <UEmpty
+              v-else
+              :icon="filtro === 'faltam' ? 'i-lucide-party-popper' : 'i-lucide-search-x'"
+              :title="filtro === 'faltam' ? 'Nada falta traduzir aqui' : 'Nenhuma chave neste recorte'"
+              :description="filtro === 'faltam'
+                ? `Todo este recorte já tem texto em ${idiomaAtual?.nome}.`
+                : 'Tente outro termo ou outro status.'"
+              class="py-10"
+            />
+
+            <div v-if="recorte.length > POR_PAGINA" class="mt-5 flex justify-center">
+              <UPagination
+                v-model:page="pagina"
+                :total="recorte.length"
+                :items-per-page="POR_PAGINA"
+                :sibling-count="1"
               />
-            </UTooltip>
-          </div>
-        </li>
-      </ul>
-
-      <UEmpty
-        v-else
-        :icon="filtro === 'faltam' ? 'i-lucide-party-popper' : 'i-lucide-search-x'"
-        :title="filtro === 'faltam' ? 'Nada falta traduzir aqui' : 'Nenhuma chave neste recorte'"
-        :description="filtro === 'faltam'
-          ? `Todas as chaves deste recorte já têm texto em ${idiomaAtual?.nome}.`
-          : 'Tente outro termo, outro grupo ou outro status.'"
-        class="py-10"
-      />
-
-      <div v-if="recorte.length > POR_PAGINA" class="mt-4 flex justify-center">
-        <UPagination
-          v-model:page="pagina"
-          :total="recorte.length"
-          :items-per-page="POR_PAGINA"
-          :sibling-count="1"
-        />
+            </div>
+          </template>
+        </div>
       </div>
     </Secao>
 
-    <!-- 3. A FILA ---------------------------------------------------- -->
+    <!-- A FILA: uma chave por vez -------------------------------------- -->
     <UModal
       v-model:open="naFila"
       :title="`Traduzir para ${idiomaAtual?.nome}`"
@@ -605,25 +759,44 @@ async function rodarIaEmMassa() {
           <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
             <p class="text-sm text-muted">
               Faltam <strong class="text-highlighted">{{ fila.length.toLocaleString('pt-BR') }}</strong>
-              <template v-if="categoriaAberta || busca.trim()"> neste recorte</template>
+              <template v-if="universo.length"> neste recorte</template>
             </p>
-            <UBadge
-              :label="atual.categoria"
-              size="sm"
-              color="neutral"
-              variant="subtle"
-            />
+            <span class="flex flex-wrap items-center gap-2">
+              <UBadge :label="atual.categoria" size="sm" color="neutral" variant="subtle" />
+              <UBadge
+                v-if="atual.grupo === 'Formulários'"
+                :label="`formulário ${atual.formulario}`"
+                size="sm"
+                color="primary"
+                variant="subtle"
+              />
+            </span>
           </div>
 
           <UProgress :model-value="preenchidasNoTotal" :max="totalDeChaves" size="xs" class="mb-5" />
 
-          <p class="text-xs text-muted">
-            {{ caminhoDaChave(atual) }}
-            <span class="uppercase tracking-wider"> · {{ atual.tipo }}</span>
+          <p class="text-xs uppercase tracking-wider text-muted">
+            {{ atual.tipo }}<template v-if="atual.campo"> · {{ atual.campo }}</template>
           </p>
           <p class="mt-1 text-lg text-highlighted">
             {{ atual.original }}
           </p>
+
+          <div v-if="textoDoCampo(atual)?.traducao" class="mt-3 rounded-lg bg-elevated/60 px-3 py-2">
+            <p class="text-xs text-muted">
+              No campo, este texto está traduzido assim:
+            </p>
+            <p class="mt-0.5 text-sm text-toned">
+              {{ textoDoCampo(atual)!.traducao }}
+            </p>
+            <UButton
+              label="Usar este texto"
+              size="xs"
+              variant="link"
+              class="mt-1 p-0"
+              @click="usarCampoNaFila"
+            />
+          </div>
 
           <div class="mt-4 flex items-center gap-2">
             <UInput
@@ -677,14 +850,14 @@ async function rodarIaEmMassa() {
       </template>
     </UModal>
 
-    <!-- IA em massa: o custo antes do clique ------------------------- -->
+    <!-- IA em massa: o custo antes do clique --------------------------- -->
     <UModal v-model:open="confirmandoIa" title="Traduzir com inteligência artificial">
       <template #body>
         <p class="text-sm text-muted">
           A IA vai traduzir
           <strong class="text-highlighted">{{ alvoDaIa.length.toLocaleString('pt-BR') }} chaves</strong>
           que faltam
-          <template v-if="categoriaAberta || busca.trim()">neste recorte</template>
+          <template v-if="universo.length">neste recorte</template>
           <template v-else>no workspace inteiro</template>, para {{ idiomaAtual?.nome }}.
         </p>
 
@@ -694,7 +867,7 @@ async function rodarIaEmMassa() {
             <strong class="text-highlighted">{{ custoDaIa.toLocaleString('pt-BR') }} en-credits</strong>.
             <button
               type="button"
-              class="text-primary underline underline-offset-2 hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              class="text-primary-700 underline underline-offset-2 hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:text-primary-300"
               @click="emit('irPara', 'cobranca')"
             >Ver o saldo</button>
           </p>
