@@ -47,12 +47,12 @@ import { AGORA } from './mocks'
 import type { DropdownMenuItem } from '@nuxt/ui'
 import {
   PRIORIDADES, aplicarFiltros, blocoSla, dentro, estaAberta, execucoesDoFiltro, faixasDePrazo, flowItemsDoFiltro,
-  granularidadePadrao, intervaloDo, nomeDoResponsavel, numerosDoTopo, parteDoResponsavel, porPrioridade, porResponsavel, porStatus,
+  granularidadePadrao, intervaloDo, nomeDoResponsavel, daFilaDoGrupo, membrosDoGrupo, numerosDoTopo, parteDoResponsavel, porGrupo, porPrioridade, porResponsavel, porStatus,
   proximasAVencer, vencidasRecentes, serie, situacao, tempoDeConclusao, temposPorEtapa, temposPorFluxo, temposPorTarefa,
   todasAsTarefas,
 } from './metricas'
 import type {
-  Faixa, Filtros, FiltroDoResponsavel, Granularidade, ModoDoResponsavel, Prioridade, Situacao, StatusVirtual, TarefaDoPainel, TempoDaTarefa,
+  Faixa, Filtros, FiltroDoResponsavel, LinhaDeResponsavel, Granularidade, ModoDoResponsavel, Prioridade, Situacao, StatusVirtual, TarefaDoPainel, TempoDaTarefa,
 } from './metricas'
 import type { IdDoPainel, LinhaDoResumo, ResumoDoRecorte } from './paineis'
 import { DEFINICAO, GRUPOS, LIMITES, PAINEIS, gravarLayout, layoutPadrao, lerLayout } from './paineis'
@@ -136,7 +136,9 @@ const linhasDeStatus = computed(() => porStatus(lista.value, intervalo.value))
 const prioridades = computed(() => porPrioridade(lista.value))
 const linhasDeResponsavel = computed(() => porResponsavel(lista.value, intervalo.value, modoResponsavel.value, t.value.rotulos))
 /** O gráfico de responsáveis lê sempre "Designada para": a fila de cada um. */
-const linhasPorDesignada = computed(() => porResponsavel(lista.value, intervalo.value, 'designada', t.value.rotulos))
+const linhasPorDesignada = computed(() => porResponsavel(lista.value, intervalo.value, 'designada', t.value.rotulos).filter(l => l.tipo !== 'grupo'))
+/** Rodada 9: o grupo tem painel próprio, com a fila da equipe; sai do de responsáveis. */
+const linhasPorGrupo = computed(() => porGrupo(lista.value, intervalo.value))
 const detalheResponsaveis = ref(false)
 const temposTarefa = computed(() => temposPorTarefa(lista.value, intervalo.value))
 const itensDoFluxo = computed(() => estado.value === 'vazio' ? [] : flowItemsDoFiltro(filtros.value))
@@ -402,30 +404,44 @@ function abrirResponsavelDoGrafico(chave: string, filtro: FiltroDoResponsavel) {
 /** Da tabela, sem filtro, ou em "Todos": abertas e concluídas no período. Nos outros filtros, só aquela parte da barra. */
 function abrirResponsavel(chave: string, filtro: FiltroDoResponsavel = 'todos') {
   const tt = t.value
-  const linha = linhasDeResponsavel.value.find(l => l.chave === chave)
+  const bate = (x: TarefaDoPainel) => modoResponsavel.value === 'designada'
+    ? x.designados.some(d => d.chave === chave)
+    : (x.executadaPor ? `p:${x.executadaPor}` : 'sem') === chave
+  abrirFila('responsaveis', linhasDeResponsavel.value.find(l => l.chave === chave), chave, bate, filtro,
+    modoResponsavel.value === 'designada' ? tt.resp.designada : tt.resp.executada)
+}
+
+/** A fila do grupo: a tarefa feita para o grupo e a de cada membro. */
+function abrirGrupo(chave: string, filtro: FiltroDoResponsavel) {
+  const id = Number(chave.slice(2))
+  abrirFila('grupos', linhasPorGrupo.value.find(l => l.chave === chave), chave, x => daFilaDoGrupo(x, id), filtro,
+    t.value.gaveta.linhas.membrosN(membrosDoGrupo(id)))
+}
+
+function abrirFila(
+  painel: 'responsaveis' | 'grupos', linha: LinhaDeResponsavel | undefined, chave: string,
+  bate: (x: TarefaDoPainel) => boolean, filtro: FiltroDoResponsavel, selo: string,
+) {
+  const tt = t.value
   const nome = linha?.nome ?? chave
   const nomeDoFiltro: Record<Exclude<FiltroDoResponsavel, 'todos'>, string> = {
     pendentes: tt.status.nao_iniciada, emAndamento: tt.status.em_andamento, vencidas: tt.situacao.vencida, concluidas: tt.status.concluida,
   }
   const titulo = filtro === 'todos' ? nome : `${nome} · ${nomeDoFiltro[filtro]}`
-  const bate = (x: TarefaDoPainel) => modoResponsavel.value === 'designada'
-    ? x.designados.some(d => d.chave === chave)
-    : (x.executadaPor ? `p:${x.executadaPor}` : 'sem') === chave
   const noRecorte = (x: TarefaDoPainel) => {
     const parte = parteDoResponsavel(x, intervalo.value)
     return filtro === 'todos' ? parte !== null : parte === filtro
   }
   const doPeriodo = filtro === 'todos' || filtro === 'concluidas'
-  const modo = modoResponsavel.value === 'designada' ? tt.resp.designada : tt.resp.executada
   const linhaDa = (parte: Exclude<FiltroDoResponsavel, 'todos'> | 'bloqueadas', icone: string, rotulo: string): LinhaDoResumo => ({
     icone, rotulo, valor: n(linha![parte]), destaque: filtro === parte,
     tom: parte === 'vencidas' && linha!.vencidas ? 'error' : undefined,
   })
   abrir(titulo, x => bate(x) && noRecorte(x), filtro === 'concluidas' ? maisRecentes : porPrazo, achadas => ({
-    painel: 'responsaveis',
+    painel,
     titulo,
     valor: linha ? n(filtro === 'todos' ? achadas.length : linha[filtro]) : undefined,
-    selos: doPeriodo ? [modo, tt.filtros.periodos[filtros.value.periodo]] : [modo, tt.agora],
+    selos: doPeriodo ? [selo, tt.filtros.periodos[filtros.value.periodo]] : [selo, tt.agora],
     linhas: linha
       ? [
           { icone: linha.tipo === 'grupo' ? 'i-lucide-users' : 'i-lucide-user', rotulo: tt.gaveta.linhas.tipo, valor: tt.resp.tipo[linha.tipo] },
@@ -792,6 +808,7 @@ const carregando = computed(() => estado.value === 'carregando' || atualizando.v
                 <ListaDePrazo v-else-if="item.id === 'proximas'" modo="proximas" :t="t" :tarefas="proximas" @abrir="abrirTarefa" />
                 <GraficoSerie v-else-if="item.id === 'serie'" v-model:granularidade="granularidade" :t="t" :baldes="baldes" :sem-granularidade="mvp" />
                 <GraficoResponsaveis v-else-if="item.id === 'responsaveis'" :t="t" :linhas="linhasPorDesignada" @abrir="abrirResponsavelDoGrafico" />
+                <GraficoResponsaveis v-else-if="item.id === 'grupos'" :t="t" :linhas="linhasPorGrupo" :top="50" @abrir="abrirGrupo" />
                 <GraficoStatus v-else-if="item.id === 'contagemStatus'" :t="t" :linhas="linhasDeStatus" @abrir="abrirStatus" />
                 <GraficoPrioridade v-else-if="item.id === 'prioridade'" :t="t" :bloco="prioridades" @abrir="abrirPrioridade" />
                 <BlocoTempos
@@ -815,7 +832,7 @@ const carregando = computed(() => estado.value === 'carregando' || atualizando.v
       v-model:open="detalheResponsaveis"
       v-model:modo="modoResponsavel"
       :t="t"
-      :linhas="linhasDeResponsavel"
+      :linhas="linhasDeResponsavel.filter(l => l.tipo !== 'grupo')"
       @abrir="(chave: string) => { detalheResponsaveis = false; abrirResponsavel(chave) }"
     />
     <GavetaDeTarefas

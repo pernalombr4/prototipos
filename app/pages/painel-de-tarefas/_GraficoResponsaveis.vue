@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /**
- * Tarefas por responsável, em gráfico de barras horizontais (rodada 3: "não
+ * Tarefas por responsável e por grupo (rodada 9), em gráfico de barras
+ * horizontais. Responsável (rodada 3: "não
  * deveria ser um gráfico em vez de uma tabela? essa tabela pode abrir como
  * detalhe do gráfico").
  *
@@ -30,10 +31,12 @@ import { numero } from './formatar'
 
 type Parte = 'vencidas' | 'pendentes' | 'emAndamento' | 'bloqueadas' | 'concluidas'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   t: Textos
   linhas: LinhaDeResponsavel[]
-}>()
+  /** Quantas barras: 10 para pessoas (o resto está no "Ver tabela"); todos para grupos. */
+  top?: number
+}>(), { top: 10 })
 
 const emit = defineEmits<{ abrir: [chave: string, filtro: FiltroDoResponsavel] }>()
 
@@ -72,7 +75,7 @@ const iconeDoTipo: Record<LinhaDeResponsavel['tipo'], string> = {
   sem: 'i-lucide-user-x',
 }
 
-const TOP = 10
+const TOP = computed(() => props.top)
 
 const total = (l: LinhaDeResponsavel) => PARTES.reduce((s, p) => s + l[p], 0)
 
@@ -82,7 +85,7 @@ const barras = computed<BarraDoGrafico[]>(() => {
   return [...props.linhas]
     .filter(l => valor(l) > 0)
     .sort((a, b) => (f === 'todos' ? b.vencidas - a.vencidas : 0) || valor(b) - valor(a) || a.nome.localeCompare(b.nome))
-    .slice(0, TOP)
+    .slice(0, TOP.value)
     .map(l => ({
       chave: l.chave,
       rotulo: l.nome,
@@ -122,7 +125,7 @@ const legenda = computed(() => filtro.value === 'todos'
       :barras="barras"
       :legenda="legenda"
       :vazio="t.resp.vazio"
-      :lote="TOP"
+      :lote="Math.min(TOP, 10)"
       :rotulo-do-valor="filtro === 'todos' ? t.total : nome[filtro]"
       @abrir="emit('abrir', $event, filtro)"
     />

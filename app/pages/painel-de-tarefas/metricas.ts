@@ -650,24 +650,54 @@ export function porResponsavel(
     if (modo === 'designada') for (const d of t.designados) incluir(d.chave, t)
     else incluir(t.executadaPor ? `p:${t.executadaPor}` : 'sem', t)
   }
-  return [...baldes.entries()].map(([chave, ts]) => {
-    const concluidas = concluidasEm(ts, i)
-    const taxa = taxaNoPrazo(concluidas)
-    const tempo = estatistica(concluidas.map(tempoDeConclusao).filter((x): x is number => x !== null))
-    return {
-      chave,
-      tipo: chave === 'todos' ? 'todos' : chave === 'externo' ? 'externo' : chave === 'sem' ? 'sem' : chave.startsWith('g:') ? 'grupo' : 'pessoa',
-      nome: nomeDoResponsavel(chave, rotulos),
-      abertas: ts.filter(estaAberta).length,
-      vencidas: ts.filter(t => parteDoResponsavel(t, i) === 'vencidas').length,
-      pendentes: ts.filter(t => parteDoResponsavel(t, i) === 'pendentes').length,
-      emAndamento: ts.filter(t => parteDoResponsavel(t, i) === 'emAndamento').length,
-      bloqueadas: ts.filter(t => parteDoResponsavel(t, i) === 'bloqueadas').length,
-      concluidas: concluidas.length,
-      noPrazoPct: taxa.pct,
-      tempoMedio: tempo?.media ?? null,
-    } satisfies LinhaDeResponsavel
-  })
+  return [...baldes.entries()].map(([chave, ts]) => linhaDaFila(
+    chave,
+    chave === 'todos' ? 'todos' : chave === 'externo' ? 'externo' : chave === 'sem' ? 'sem' : chave.startsWith('g:') ? 'grupo' : 'pessoa',
+    nomeDoResponsavel(chave, rotulos),
+    ts,
+    i,
+  ))
+}
+
+/** Uma linha do gráfico de fila: as partes da barra, o % no prazo e o tempo médio. */
+function linhaDaFila(chave: string, tipo: TipoDeResponsavel, nome: string, ts: TarefaDoPainel[], i: Intervalo): LinhaDeResponsavel {
+  const concluidas = concluidasEm(ts, i)
+  const taxa = taxaNoPrazo(concluidas)
+  const tempo = estatistica(concluidas.map(tempoDeConclusao).filter((x): x is number => x !== null))
+  return {
+    chave,
+    tipo,
+    nome,
+    abertas: ts.filter(estaAberta).length,
+    vencidas: ts.filter(t => parteDoResponsavel(t, i) === 'vencidas').length,
+    pendentes: ts.filter(t => parteDoResponsavel(t, i) === 'pendentes').length,
+    emAndamento: ts.filter(t => parteDoResponsavel(t, i) === 'emAndamento').length,
+    bloqueadas: ts.filter(t => parteDoResponsavel(t, i) === 'bloqueadas').length,
+    concluidas: concluidas.length,
+    noPrazoPct: taxa.pct,
+    tempoMedio: tempo?.media ?? null,
+  }
+}
+
+/**
+ * A fila do grupo (rodada 9: "além de tarefas por responsável tem que botar
+ * um outro painel de tarefas por grupo"): a tarefa feita para o grupo
+ * (`module_groups` na tarefa de etapa) e a de cada membro dele (membros por
+ * `/ws/member-groups`). A tarefa conta uma vez por grupo; a de quem está em 2
+ * grupos conta nos 2. "Todo mundo" não entra em grupo nenhum.
+ */
+export function daFilaDoGrupo(t: TarefaDoPainel, grupoId: number) {
+  const g = grupos.find(x => x.id === grupoId)
+  if (!g) return false
+  return t.designados.some(d => d.chave === `g:${g.id}` || (d.tipo === 'pessoa' && g.membros.includes(d.id!)))
+}
+
+export function membrosDoGrupo(grupoId: number) {
+  return grupos.find(x => x.id === grupoId)?.membros.length ?? 0
+}
+
+export function porGrupo(lista: TarefaDoPainel[], i: Intervalo): LinhaDeResponsavel[] {
+  return grupos.map(g => linhaDaFila(`g:${g.id}`, 'grupo', g.nome, lista.filter(t => daFilaDoGrupo(t, g.id)), i))
 }
 
 /* ------------------------------------------------------------------ *

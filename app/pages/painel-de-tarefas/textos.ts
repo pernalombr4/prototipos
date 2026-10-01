@@ -249,6 +249,7 @@ export interface Textos {
       fluxo: string
       naLista: string
       semPrioridade: string
+      membrosN: (n: number) => string
     }
   }
 
@@ -348,7 +349,8 @@ export const textos: Record<Idioma, Textos> = {
       proximas: { titulo: 'Próximas a vencer', descricao: 'Abertas com prazo à frente, da mais próxima à mais distante.' },
       serie: { titulo: 'Criadas e concluídas', descricao: 'Quantas entraram e quantas saíram em cada período.' },
       contagemStatus: { titulo: 'Tarefas por status', descricao: 'Quantas estão pendentes, em andamento, bloqueadas e concluídas.' },
-      responsaveis: { titulo: 'Tarefas por responsável', descricao: 'Pendentes, em andamento, vencidas ou concluídas de cada pessoa e grupo.' },
+      responsaveis: { titulo: 'Tarefas por responsável', descricao: 'Pendentes, em andamento, vencidas ou concluídas de cada pessoa.' },
+      grupos: { titulo: 'Tarefas por grupo', descricao: 'A fila de cada grupo: a tarefa feita para o grupo e a de cada membro.' },
       prioridade: { titulo: 'Tarefas por prioridade', descricao: 'Abertas agora, da urgente à baixa.' },
       tempos: { titulo: 'Tempo médio de duração', descricao: 'Quanto leva cada fluxo, cada etapa e cada tarefa, do começo ao fim.' },
     },
@@ -429,7 +431,8 @@ export const textos: Record<Idioma, Textos> = {
       proximas: 'Abertas com prazo à frente, da que vence primeiro à que vence por último. A lista carrega mais conforme você rola.',
       serie: 'Criadas pela data de criação e concluídas pela data de conclusão, em semanas de segunda a domingo, no horário de Brasília. Quando a linha das criadas fica acima da das concluídas, a fila cresce.',
       contagemStatus: 'Pendente, Em andamento e Bloqueada: as abertas agora (Pendente e Aguardando contam como Pendente; Trabalhando, como Em andamento). Concluída: as concluídas no período, pela data de conclusão. Clique numa coluna para ver a lista; o resumo ao lado divide pela situação do prazo.',
-      responsaveis: 'Conta pela pessoa ou grupo para quem a tarefa foi feita (responsável da rápida, tipo de responsável da tarefa de etapa). Todos: a barra dividida em vencida, pendente, em andamento, bloqueada e concluída, sem repetir tarefa. Vencida é a aberta com prazo passado, em qualquer status; pendente, em andamento e bloqueada são as outras abertas agora; concluída é do período. Os outros filtros mostram uma parte só. Mostra as 10 maiores filas; "Ver tabela" mostra todas.',
+      grupos: 'A fila de cada grupo de membros: a tarefa feita para o grupo (tipo de responsável Grupo, na tarefa de etapa) e a tarefa de cada membro. A tarefa conta uma vez por grupo; a de quem está em 2 grupos conta nos 2. A tarefa para Todo mundo não entra em grupo. As partes da barra e os filtros seguem as regras de Tarefas por responsável.',
+      responsaveis: 'Conta pela pessoa para quem a tarefa foi feita (responsável da rápida, tipo de responsável da tarefa de etapa). A tarefa feita para um grupo está em Tarefas por grupo. Todos: a barra dividida em vencida, pendente, em andamento, bloqueada e concluída, sem repetir tarefa. Vencida é a aberta com prazo passado, em qualquer status; pendente, em andamento e bloqueada são as outras abertas agora; concluída é do período. Os outros filtros mostram uma parte só. Mostra as 10 maiores filas; "Ver tabela" mostra todas.',
       prioridade: 'Abertas agora, pela prioridade da tarefa rápida e da tarefa do Spaceflow. A tarefa de etapa não tem prioridade e fica de fora: a quickview mostra quantas.',
       tempos: 'Tempo em dias corridos, em 3 níveis ligados: o fluxo, a etapa (só no fluxo da categoria) e a tarefa. O seletor do painel troca o nível e a regra de cada um.',
       tempoTarefa: 'Da criação à conclusão, agrupado pelo nome da tarefa de etapa ou do nó do Spaceflow. As criadas manualmente ficam numa linha só: o nome livre de cada uma não agrupa nada. Nas agendadas com "Habilitar Atribuição", o tempo se divide em espera (até alguém assumir) e execução.',
@@ -515,7 +518,7 @@ export const textos: Record<Idioma, Textos> = {
       tempo: 'Tempo médio',
       tipo: { pessoa: 'Pessoa', grupo: 'Grupo', todos: 'Todo mundo', externo: 'E-mail externo', sem: 'Sem responsável' },
       avisoSoma: 'Tarefa designada a 2 pessoas conta para as 2. A soma das linhas pode passar do total.',
-      avisoGrupo: 'Tarefa de grupo conta na linha do grupo. Quem do grupo assumiu aparece em "Quem assumiu".',
+      avisoGrupo: 'Tarefa de grupo está em Tarefas por grupo. Quem do grupo assumiu aparece aqui, em "Quem assumiu".',
       vazio: 'Nenhuma tarefa com esses filtros.',
     },
 
@@ -593,6 +596,7 @@ export const textos: Record<Idioma, Textos> = {
         fluxo: 'Fluxo',
         naLista: 'Tarefas na lista',
         semPrioridade: 'Tarefas de etapa, sem prioridade',
+        membrosN: n => n === 1 ? '1 membro' : `${n} membros`,
       },
     },
 
@@ -643,7 +647,8 @@ export const textos: Record<Idioma, Textos> = {
       proximas: { titulo: 'Due next', descricao: 'Open tasks with an upcoming due date, nearest first.' },
       serie: { titulo: 'Created and done', descricao: 'How many came in and how many went out in each period.' },
       contagemStatus: { titulo: 'Tasks by status', descricao: 'How many are pending, in progress, blocked and done.' },
-      responsaveis: { titulo: 'Tasks by assignee', descricao: 'Pending, in progress, overdue or done for each person and group.' },
+      responsaveis: { titulo: 'Tasks by assignee', descricao: 'Pending, in progress, overdue or done for each person.' },
+      grupos: { titulo: 'Tasks by group', descricao: 'Each group queue: tasks made for the group and tasks of each member.' },
       prioridade: { titulo: 'Tasks by priority', descricao: 'Open now, from urgent to low.' },
       tempos: { titulo: 'Average duration', descricao: 'How long each flow, each stage and each task takes, from start to finish.' },
     },
@@ -724,7 +729,8 @@ export const textos: Record<Idioma, Textos> = {
       proximas: 'Open tasks with an upcoming due date, from the first to the last one due. The list loads more as you scroll.',
       serie: 'Created by creation date and done by completion date, in Monday to Sunday weeks, Brasília time. When the created line sits above the done line, the queue grows.',
       contagemStatus: 'Pending, In progress and Blocked: open tasks right now (Pending and Waiting count as Pending; Working, as In progress). Done: tasks completed in the period, by completion date. Click a column to see the list; the summary next to it splits by due date situation.',
-      responsaveis: 'Counts by the person or group the task was made for (quick task assignee, stage task responsibility type). All: the bar split into overdue, pending, in progress, blocked and done, with no task counted twice. Overdue is an open task past its due date, in any status; pending, in progress and blocked are the other open tasks now; done is for the period. The other filters show one part only. Shows the 10 longest queues; "See table" shows them all.',
+      grupos: 'Each member group queue: tasks made for the group (Group responsibility type, on stage tasks) and tasks of each member. A task counts once per group; a task of someone in 2 groups counts in both. Tasks for Everybody stay out of groups. Bar parts and filters follow the Tasks by assignee rules.',
+      responsaveis: 'Counts by the person the task was made for (quick task assignee, stage task responsibility type). Tasks made for a group are in Tasks by group. All: the bar split into overdue, pending, in progress, blocked and done, with no task counted twice. Overdue is an open task past its due date, in any status; pending, in progress and blocked are the other open tasks now; done is for the period. The other filters show one part only. Shows the 10 longest queues; "See table" shows them all.',
       prioridade: 'Open now, by the priority of quick tasks and Spaceflow tasks. Stage tasks have no priority and stay out: the quickview shows how many.',
       tempos: 'Time in calendar days, on 3 linked levels: the flow, the stage (category flows only) and the task. The panel selector switches the level and each one has its own rule.',
       tempoTarefa: 'From creation to completion, grouped by stage task or Spaceflow node name. Tasks created manually share one row: each free name groups nothing. For scheduled tasks with "Enable assignment", time splits into waiting (until someone picks it up) and execution.',
@@ -810,7 +816,7 @@ export const textos: Record<Idioma, Textos> = {
       tempo: 'Average time',
       tipo: { pessoa: 'Person', grupo: 'Group', todos: 'Everybody', externo: 'External email', sem: 'Unassigned' },
       avisoSoma: 'A task assigned to 2 people counts for both. Rows may add up to more than the total.',
-      avisoGrupo: 'A group task counts on the group row. Who in the group picked it up shows under "Picked up by".',
+      avisoGrupo: 'Group tasks are in Tasks by group. Who in the group picked it up shows here, under "Picked up by".',
       vazio: 'No tasks with these filters.',
     },
 
@@ -888,6 +894,7 @@ export const textos: Record<Idioma, Textos> = {
         fluxo: 'Flow',
         naLista: 'Tasks in the list',
         semPrioridade: 'Stage tasks, no priority',
+        membrosN: n => n === 1 ? '1 member' : `${n} members`,
       },
     },
 
@@ -938,7 +945,8 @@ export const textos: Record<Idioma, Textos> = {
       proximas: { titulo: 'Próximas a vencer', descricao: 'Abiertas con plazo por delante, de la más cercana a la más lejana.' },
       serie: { titulo: 'Creadas y concluidas', descricao: 'Cuántas entraron y cuántas salieron en cada período.' },
       contagemStatus: { titulo: 'Tareas por estado', descricao: 'Cuántas están pendientes, en curso, bloqueadas y concluidas.' },
-      responsaveis: { titulo: 'Tareas por responsable', descricao: 'Pendientes, en curso, vencidas o concluidas de cada persona y grupo.' },
+      responsaveis: { titulo: 'Tareas por responsable', descricao: 'Pendientes, en curso, vencidas o concluidas de cada persona.' },
+      grupos: { titulo: 'Tareas por grupo', descricao: 'La fila de cada grupo: la tarea hecha para el grupo y la de cada miembro.' },
       prioridade: { titulo: 'Tareas por prioridad', descricao: 'Abiertas ahora, de la urgente a la baja.' },
       tempos: { titulo: 'Tiempo medio de duración', descricao: 'Cuánto tarda cada flujo, cada etapa y cada tarea, de principio a fin.' },
     },
@@ -1019,7 +1027,8 @@ export const textos: Record<Idioma, Textos> = {
       proximas: 'Abiertas con plazo por delante, de la que vence primero a la que vence última. La lista carga más a medida que usted se desplaza.',
       serie: 'Creadas por fecha de creación y concluidas por fecha de conclusión, en semanas de lunes a domingo, hora de Brasilia. Cuando la línea de creadas queda por encima de la de concluidas, la fila crece.',
       contagemStatus: 'Pendiente, En curso y Bloqueada: las abiertas ahora (Pendiente y Esperando cuentan como Pendiente; Trabajando, como En curso). Concluida: las concluidas en el período, por fecha de conclusión. Haga clic en una columna para ver la lista; el resumen al lado divide por la situación del plazo.',
-      responsaveis: 'Cuenta por la persona o grupo para quien se hizo la tarea (responsable de la rápida, tipo de responsable de la tarea de etapa). Todos: la barra dividida en vencida, pendiente, en curso, bloqueada y concluida, sin repetir tarea. Vencida es la abierta con plazo pasado, en cualquier estado; pendiente, en curso y bloqueada son las otras abiertas ahora; concluida es del período. Los otros filtros muestran una parte sola. Muestra las 10 filas más largas; "Ver tabla" muestra todas.',
+      grupos: 'La fila de cada grupo de miembros: la tarea hecha para el grupo (tipo de responsable Grupo, en la tarea de etapa) y la tarea de cada miembro. La tarea cuenta una vez por grupo; la de quien está en 2 grupos cuenta en los 2. La tarea para Todo el mundo no entra en grupo. Las partes de la barra y los filtros siguen las reglas de Tareas por responsable.',
+      responsaveis: 'Cuenta por la persona para quien se hizo la tarea (responsable de la rápida, tipo de responsable de la tarea de etapa). La tarea hecha para un grupo está en Tareas por grupo. Todos: la barra dividida en vencida, pendiente, en curso, bloqueada y concluida, sin repetir tarea. Vencida es la abierta con plazo pasado, en cualquier estado; pendiente, en curso y bloqueada son las otras abiertas ahora; concluida es del período. Los otros filtros muestran una parte sola. Muestra las 10 filas más largas; "Ver tabla" muestra todas.',
       prioridade: 'Abiertas ahora, por la prioridad de la tarea rápida y de la tarea de Spaceflow. La tarea de etapa no tiene prioridad y queda fuera: la quickview muestra cuántas.',
       tempos: 'Tiempo en días corridos, en 3 niveles ligados: el flujo, la etapa (solo en el flujo de la categoría) y la tarea. El selector del panel cambia el nivel y cada uno tiene su regla.',
       tempoTarefa: 'De la creación a la conclusión, agrupado por el nombre de la tarea de etapa o del nodo de Spaceflow. Las creadas manualmente quedan en una sola fila: el nombre libre de cada una no agrupa nada. En las programadas con "Habilitar asignación", el tiempo se divide en espera (hasta que alguien la toma) y ejecución.',
@@ -1105,7 +1114,7 @@ export const textos: Record<Idioma, Textos> = {
       tempo: 'Tiempo medio',
       tipo: { pessoa: 'Persona', grupo: 'Grupo', todos: 'Todo el mundo', externo: 'Correo externo', sem: 'Sin responsable' },
       avisoSoma: 'La tarea asignada a 2 personas cuenta para las 2. La suma de las filas puede pasar del total.',
-      avisoGrupo: 'La tarea de grupo cuenta en la fila del grupo. Quién del grupo la tomó aparece en "Quién la tomó".',
+      avisoGrupo: 'La tarea de grupo está en Tareas por grupo. Quién del grupo la tomó aparece aquí, en "Quién la tomó".',
       vazio: 'Ninguna tarea con estos filtros.',
     },
 
@@ -1183,6 +1192,7 @@ export const textos: Record<Idioma, Textos> = {
         fluxo: 'Flujo',
         naLista: 'Tareas en la lista',
         semPrioridade: 'Tareas de etapa, sin prioridad',
+        membrosN: n => n === 1 ? '1 miembro' : `${n} miembros`,
       },
     },
 

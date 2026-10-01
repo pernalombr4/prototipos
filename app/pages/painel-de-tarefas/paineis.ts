@@ -14,7 +14,7 @@ export type IdDoPainel =
   | 'abertas' | 'vencidas' | 'aVencer' | 'concluidas' | 'noPrazo' | 'tempo'
   | 'sla' | 'listaVencidas' | 'proximas'
   | 'serie' | 'contagemStatus' | 'prioridade'
-  | 'responsaveis'
+  | 'responsaveis' | 'grupos'
   | 'tempos'
 
 export type GrupoDoPainel = 'numeros' | 'prazo' | 'volume' | 'pessoas' | 'tempos'
@@ -44,10 +44,12 @@ export const PAINEIS: DefinicaoDoPainel[] = [
   { id: 'proximas', grupo: 'prazo', icone: 'i-lucide-calendar-clock', padrao: { w: 4, h: 7 }, limites: { minW: 3, maxW: 12, minH: 4, maxH: 16 } },
   { id: 'serie', grupo: 'volume', icone: 'i-lucide-chart-line', padrao: { w: 8, h: 7 }, limites: { minW: 4, maxW: 12, minH: 5, maxH: 12 } },
   { id: 'contagemStatus', grupo: 'volume', icone: 'i-lucide-chart-column-stacked', padrao: { w: 4, h: 7 }, limites: { minW: 3, maxW: 12, minH: 5, maxH: 12 } },
-  { id: 'responsaveis', grupo: 'pessoas', icone: 'i-lucide-chart-bar', padrao: { w: 8, h: 7 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 16 } },
-  { id: 'prioridade', grupo: 'volume', icone: 'i-lucide-flag', padrao: { w: 4, h: 7 }, limites: { minW: 3, maxW: 12, minH: 5, maxH: 12 } },
+  // Rodada 9: responsável e grupo lado a lado; prioridade e tempos dividem a última linha.
+  { id: 'responsaveis', grupo: 'pessoas', icone: 'i-lucide-chart-bar', padrao: { w: 6, h: 7 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 16 } },
+  { id: 'grupos', grupo: 'pessoas', icone: 'i-lucide-users', padrao: { w: 6, h: 7 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 16 } },
+  { id: 'prioridade', grupo: 'volume', icone: 'i-lucide-flag', padrao: { w: 4, h: 8 }, limites: { minW: 3, maxW: 12, minH: 5, maxH: 12 } },
   // Rodada 3: tarefa, etapa e fluxo voltam a ser um painel só, com seletor de nível.
-  { id: 'tempos', grupo: 'tempos', icone: 'i-lucide-chart-gantt', padrao: { w: 12, h: 8 }, limites: { minW: 5, maxW: 12, minH: 5, maxH: 16 } },
+  { id: 'tempos', grupo: 'tempos', icone: 'i-lucide-chart-gantt', padrao: { w: 8, h: 8 }, limites: { minW: 5, maxW: 12, minH: 5, maxH: 16 } },
 ]
 
 export const GRUPOS: GrupoDoPainel[] = ['numeros', 'prazo', 'volume', 'pessoas', 'tempos']
@@ -64,7 +66,7 @@ export function layoutPadrao(): ItemDaGrade[] {
  * O arranjo de cada pessoa. No protótipo fica no `localStorage` do navegador
  * (declarado no DECISOES.md); no produto, numa preferência por membro.
  */
-const CHAVE = 'enspace-prototipos:painel-de-tarefas:layout:v6'
+const CHAVE = 'enspace-prototipos:painel-de-tarefas:layout:v7'
 
 export function lerLayout(): ItemDaGrade[] | null {
   try {

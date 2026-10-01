@@ -1,5 +1,20 @@
 # Decisões: painel de tarefas
 
+## Rodada 9 · 2026-10-01
+
+- **Pedido (literal):** "alem de tarefas por resonsavel tem que botar um outro painel de tarefas por grupo. pode fazer e dar push"
+- **Mudou:** entrou o painel **Tarefas por grupo**, no desenho de Tarefas por responsável: o seletor "Todos, Pendente, Em andamento, Vencida, Concluída", a barra agrupada em "Todos" e a dica ao passar o mouse. Ficam 15 painéis.
+  - A fila do grupo é a da equipe: a tarefa feita para o grupo (tipo de responsável Grupo, na tarefa de etapa) e a tarefa de cada membro (membros por `/ws/member-groups`).
+  - A tarefa conta uma vez por grupo; a de quem está em 2 grupos conta nos 2. A tarefa para Todo mundo não entra em grupo.
+  - Mostra todos os grupos, com rolagem; responsáveis segue com as 10 maiores filas.
+  - O clique abre a lista da fila, e o resumo mostra quantos membros o grupo tem.
+- **Mudou:** os grupos saíram de Tarefas por responsável e da tabela de detalhe. Motivo: o mesmo grupo apareceria com 2 números, só a tarefa feita para ele num painel e a fila da equipe no outro. Responsável fica com pessoas, "Todo mundo", e-mail externo e "Sem responsável". O filtro de responsável do topo continua com os grupos.
+- **Mudou:** o arranjo padrão põe Tarefas por responsável e Tarefas por grupo lado a lado (6 colunas cada), e Tarefas por prioridade (4) ao lado de Tempo médio de duração (8). A chave do `localStorage` passou a `layout:v7`.
+- **Mudou:** o MVP ganhou o painel de grupo, ao lado do de responsável (9 painéis). O back do MVP soma a leitura dos membros em `/ws/member-groups`.
+- **Validação:** em cada grupo, a fila tem a tarefa feita para o grupo e a de cada membro, e nada de Todo mundo; abertas = vencidas + pendentes + em andamento + bloqueadas (387 checagens, 0 falhas).
+- **Fronteira:** muda a linha de pessoas do painel. Regras de cálculo e casca ficam como estavam.
+- **Ver:** `https://pernalombr4.github.io/prototipos/painel-de-tarefas`. Sem print, a pedido da redatora.
+
 ## Rodada 8 · 2026-10-01
 
 - **Pedido (literal):** "o tarefas por status nao precisa cruzar com informaçoes fora do prazo, a vencer, no prazo e sem prazo. pode botar direto só por status pra ser mais simples por hora"
