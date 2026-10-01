@@ -1,5 +1,64 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 24 — 01/10/2026 — a limpeza das outras abas
+
+Ela aprovou as sugestões da revisão (as de Cobrança, Notificações e os segmentados). Aplicadas,
+com os números medidos a 1280 px.
+
+| Aba | Antes | Depois |
+|---|---|---|
+| Cobrança | 2.433 px | **2.130 px** |
+| Notificações | 1.523 px, 3 cartões | **1.068 px, 2 cartões** |
+
+### Cobrança
+
+**As cinco barras viraram uma.** `UProgressGroup`: uma barra com cinco segmentos que somam o
+consumo dos 30 dias, e a legenda do componente **é** a lista. Nada se perdeu: o selo da família, o
+detalhe no ponteiro e a contagem de usos continuam em cada linha. A pergunta da seção é proporção,
+e proporção se lê numa barra, não em cinco paralelas que começam juntas e terminam em lugares
+diferentes.
+
+O quinto segmento não usa `neutral`: no claro ele sai quase preto e parece buraco na barra. Virou
+um tom claro da marca.
+
+**O extrato virou tabela.** `UTable` com cinco colunas (data, lançamento, origem, workspace,
+valor), ordenação por data e por valor, e linha de 2 px de respiro em vez de 10. Era a maior
+economia de altura da tela, e veio com ordenação que a lista não tinha.
+
+**Os pedidos de recarga** perderam o fundo e viraram linhas separadas por fio. Mesma informação,
+~100 px a menos.
+
+### Notificações
+
+**Os dois cartões viraram um.** "Tarefas rápidas" e "Tarefas agendadas" tinham a mesma estrutura
+— chave, linha do tempo, regras, adicionar — e ocupavam meia tela repetindo o desenho. Agora é um
+cartão com um seletor de tipo no cabeçalho, e a tela passou a dizer o que estava implícito: **a
+regra é por tipo de tarefa**.
+
+A busca continua chegando aos dois: quando ela pede "spaceflow" ou "agendadas", o cartão troca de
+escopo sozinho.
+
+**A linha do tempo virou `UTimeline` horizontal**, com o vencimento como um ponto da sequência em
+vez de um chip flutuante no meio de dois `<div>` posicionados à mão.
+
+### Transversal
+
+Os controles segmentados feitos à mão (idioma e filtro dos Dicionários, filtro do extrato) viraram
+`UFieldGroup`.
+
+### Medido depois
+
+Cobrança e Notificações reprovam só nas três de sempre, que são a cor da marca. Uma marginal
+apareceu e foi corrigida: o detalhe dos avisos nativos dava 4,40:1 sobre o fundo tingido, contra
+os 4,5:1 do mínimo.
+
+### O que ficou fora
+
+As duas sugestões de Informações Básicas (juntar Comportamento e Módulos; colapsar a lista da zona
+de perigo) não foram aprovadas nesta rodada.
+
+---
+
 ## Rodada 23 — 01/10/2026 — o manual fora do cartão, e escrito direito
 
 **O que ela pediu, literal:**

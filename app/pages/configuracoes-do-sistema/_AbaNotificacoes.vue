@@ -7,7 +7,7 @@ import {
   type RegraDeAviso,
   type Unidade,
 } from './mocks'
-import { form } from './estado'
+import { destaque, form } from './estado'
 
 const toast = useToast()
 
@@ -67,6 +67,23 @@ const escopos: { chave: Escopo, titulo: string, resumo: string, icone: string }[
   },
 ]
 
+/**
+ * Os dois escopos num cartão só.
+ *
+ * Eram dois cartões com a mesma estrutura: chave, linha do tempo, regras,
+ * adicionar. Empilhados, custavam meia tela e repetiam o desenho inteiro para
+ * dizer a mesma coisa duas vezes. Com o seletor no alto, a tela diz o que
+ * estava implícito: **a regra é por tipo de tarefa**.
+ */
+const escopoAberto = ref<Escopo>('spaceflow')
+const escopoAtual = computed(() => escopos.find(e => e.chave === escopoAberto.value)!)
+
+// A busca da tela leva a "spaceflow" e a "agendadas": trocar o escopo é o que
+// faz o destaque ter o que destacar.
+watch(destaque, (secao) => {
+  if (secao === 'spaceflow' || secao === 'agendadas') escopoAberto.value = secao
+})
+
 function regras(escopo: Escopo): RegraDeAviso[] {
   return escopo === 'spaceflow' ? form.notificacoes.regrasSpaceflow : form.notificacoes.regrasAgendadas
 }
@@ -94,6 +111,30 @@ function marcadores(escopo: Escopo) {
 
 function rotuloCurto(r: RegraDeAviso) {
   return `${r.quantidade} ${plural(r.quantidade, r.unidade)}`
+}
+
+/**
+ * A linha do tempo como sequência, com o vencimento no meio dela.
+ *
+ * Era marcação à mão: duas metades, posicionamento relativo e um chip
+ * flutuante. Como sequência, o vencimento vira só mais um ponto, e é o ponto
+ * que separa o que avisa antes do que avisa depois.
+ */
+function itensDaLinha(escopo: Escopo) {
+  const pontos = marcadores(escopo)
+  return [
+    ...pontos.filter(r => r.direcao === 'antes').map(r => ({
+      value: `antes-${r.id}`,
+      title: `${rotuloCurto(r)} antes`,
+      icon: 'i-lucide-alarm-clock',
+    })),
+    { value: 'vencimento', title: 'Vencimento', icon: 'i-lucide-flag' },
+    ...pontos.filter(r => r.direcao === 'depois').map(r => ({
+      value: `depois-${r.id}`,
+      title: `${rotuloCurto(r)} depois`,
+      icon: 'i-lucide-alarm-clock-off',
+    })),
+  ]
 }
 
 /* --------------------------- editor da regra ----------------------- */
@@ -169,7 +210,7 @@ const modelosParaSelect = computed(() =>
           :style="`animation: entrada .35s ease-out both; animation-delay: ${i * 60}ms`"
         >
           <p class="text-sm font-medium text-highlighted">{{ a.rotulo }}</p>
-          <p class="mt-0.5 text-xs text-muted">{{ a.detalhe }}</p>
+          <p class="mt-0.5 text-xs text-toned">{{ a.detalhe }}</p>
         </li>
       </ul>
 
@@ -181,18 +222,31 @@ const modelosParaSelect = computed(() =>
 
     <!-- 2. OS DOIS ESCOPOS -------------------------------------------- -->
     <Secao
-      v-for="(e, idx) in escopos"
-      :id="e.chave"
-      :key="e.chave"
-      :titulo="e.titulo"
-      :resumo="e.resumo"
-      :style="`animation: entrada .4s ease-out both; animation-delay: ${60 + idx * 60}ms`"
+      :id="escopoAberto"
+      :titulo="escopoAtual.titulo"
+      :resumo="escopoAtual.resumo"
+      style="animation: entrada .4s ease-out both; animation-delay: 60ms"
     >
+      <template #acoes>
+        <UFieldGroup size="xs">
+          <UButton
+            v-for="op in escopos"
+            :key="op.chave"
+            :label="op.titulo.replace(' (Spaceflow)', '')"
+            :icon="op.icone"
+            :color="escopoAberto === op.chave ? 'primary' : 'neutral'"
+            :variant="escopoAberto === op.chave ? 'soft' : 'outline'"
+            :aria-pressed="escopoAberto === op.chave"
+            @click="escopoAberto = op.chave"
+          />
+        </UFieldGroup>
+      </template>
+
       <div class="flex items-start justify-between gap-6 border-b border-default pb-4">
         <div class="min-w-0">
           <p class="text-sm font-medium text-highlighted">Usar as minhas regras</p>
           <p class="mt-1 text-sm text-muted">
-            <template v-if="personalizado(e.chave)">
+            <template v-if="personalizado(escopoAberto)">
               Os três avisos automáticos estão <strong class="text-toned">desligados</strong> para
               este tipo de tarefa.
             </template>
@@ -203,57 +257,29 @@ const modelosParaSelect = computed(() =>
           </p>
         </div>
         <USwitch
-          :model-value="personalizado(e.chave)"
-          :aria-label="`Usar minhas regras em ${e.titulo}`"
-          @update:model-value="(v: boolean) => alternarPersonalizado(e.chave, v)"
+          :model-value="personalizado(escopoAberto)"
+          :aria-label="`Usar minhas regras em ${escopoAtual.titulo}`"
+          @update:model-value="(v: boolean) => alternarPersonalizado(escopoAberto, v)"
         />
       </div>
 
       <!-- linha do tempo: onde cada aviso cai em relação ao vencimento -->
       <div
-        v-if="personalizado(e.chave) && regras(e.chave).length"
-        class="mt-5 rounded-lg bg-elevated/40 px-4 pb-6 pt-5"
+        v-if="personalizado(escopoAberto) && regras(escopoAberto).length"
+        class="mt-5 rounded-lg bg-elevated/40 px-4 py-5"
       >
-        <div class="relative flex items-center">
-          <!-- antes: à esquerda do vencimento, do mais distante ao mais próximo -->
-          <div class="flex flex-1 items-center justify-around border-t border-dashed border-accented">
-            <div
-              v-for="r in marcadores(e.chave).filter(m => m.direcao === 'antes')"
-              :key="r.id"
-              class="relative flex -translate-y-1/2 flex-col items-center"
-            >
-              <span class="size-2.5 rounded-full bg-primary transition-transform duration-300 hover:scale-150" />
-              <span class="absolute top-4 whitespace-nowrap text-[11px] text-muted">
-                {{ rotuloCurto(r) }} antes
-              </span>
-            </div>
-          </div>
-
-          <span
-            class="z-10 shrink-0 rounded-full border border-default bg-default px-2.5 py-1 text-[11px] font-medium text-highlighted"
-          >
-            vencimento
-          </span>
-
-          <!-- depois -->
-          <div class="flex flex-1 items-center justify-around border-t border-dashed border-accented">
-            <div
-              v-for="r in marcadores(e.chave).filter(m => m.direcao === 'depois')"
-              :key="r.id"
-              class="relative flex -translate-y-1/2 flex-col items-center"
-            >
-              <span class="size-2.5 rounded-full bg-warning transition-transform duration-300 hover:scale-150" />
-              <span class="absolute top-4 whitespace-nowrap text-[11px] text-muted">
-                {{ rotuloCurto(r) }} depois
-              </span>
-            </div>
-          </div>
-        </div>
+        <UTimeline
+          orientation="horizontal"
+          size="xs"
+          color="primary"
+          :default-value="'vencimento'"
+          :items="itensDaLinha(escopoAberto)"
+        />
       </div>
 
       <!-- as regras, em português -->
       <TransitionGroup
-        v-if="personalizado(e.chave)"
+        v-if="personalizado(escopoAberto)"
         tag="ul"
         class="mt-4 space-y-2"
         enter-active-class="transition duration-300 ease-out"
@@ -262,7 +288,7 @@ const modelosParaSelect = computed(() =>
         leave-to-class="opacity-0 translate-x-4"
       >
         <li
-          v-for="r in regras(e.chave)"
+          v-for="r in regras(escopoAberto)"
           :key="r.id"
           class="group flex items-center gap-3 rounded-lg bg-elevated/40 px-3 py-2.5 transition-colors hover:bg-elevated"
         >
@@ -285,7 +311,7 @@ const modelosParaSelect = computed(() =>
             color="neutral"
             variant="ghost"
             class="opacity-60 transition-opacity group-hover:opacity-100 focus:opacity-100"
-            @click="abrirEdicao(e.chave, r)"
+            @click="abrirEdicao(escopoAberto, r)"
           />
           <UButton
             icon="i-lucide-trash-2"
@@ -294,14 +320,14 @@ const modelosParaSelect = computed(() =>
             variant="ghost"
             :aria-label="`Remover regra: ${frase(r)}`"
             class="opacity-60 transition-opacity group-hover:opacity-100 focus:opacity-100"
-            @click="removerRegra(e.chave, r.id)"
+            @click="removerRegra(escopoAberto, r.id)"
           />
         </li>
       </TransitionGroup>
 
       <!-- nenhuma regra e o toggle ligado: ninguém é avisado -->
       <UAlert
-        v-if="personalizado(e.chave) && !regras(e.chave).length"
+        v-if="personalizado(escopoAberto) && !regras(escopoAberto).length"
         class="mt-4"
         color="warning"
         variant="subtle"
@@ -311,19 +337,19 @@ const modelosParaSelect = computed(() =>
       />
 
       <UButton
-        v-if="personalizado(e.chave)"
+        v-if="personalizado(escopoAberto)"
         label="Adicionar regra"
         icon="i-lucide-plus"
         size="sm"
         color="neutral"
         variant="subtle"
         class="mt-4 transition-transform hover:-translate-y-0.5"
-        @click="abrirNova(e.chave)"
+        @click="abrirNova(escopoAberto)"
       />
 
       <!-- desligado: mostra o que continua valendo, em vez de esconder -->
       <p v-else class="mt-4 text-sm text-muted">
-        {{ regras(e.chave).length }} regras guardadas, sem efeito enquanto os avisos automáticos
+        {{ regras(escopoAberto).length }} regras guardadas, sem efeito enquanto os avisos automáticos
         estiverem ligados.
       </p>
     </Secao>

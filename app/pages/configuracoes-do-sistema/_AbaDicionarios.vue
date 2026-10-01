@@ -335,22 +335,20 @@ async function rodarIaEmMassa() {
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-2">
           <span class="text-sm text-muted">Traduzir para</span>
-          <div class="flex rounded-lg border border-default p-0.5">
-            <button
+          <!-- Segmentado de verdade, em vez de botões dentro de uma borda. -->
+          <UFieldGroup size="sm">
+            <UButton
               v-for="i in idiomas"
               :key="i.codigo"
-              type="button"
-              class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-              :class="form.dicionarios.idioma === i.codigo
-                ? 'bg-primary-700 text-white'
-                : 'text-muted hover:bg-elevated hover:text-highlighted'"
+              :color="form.dicionarios.idioma === i.codigo ? 'primary' : 'neutral'"
+              :variant="form.dicionarios.idioma === i.codigo ? 'soft' : 'outline'"
               :aria-pressed="form.dicionarios.idioma === i.codigo"
               @click="form.dicionarios.idioma = i.codigo"
             >
               <span aria-hidden="true">{{ i.bandeira }}</span>
               {{ i.nome }}
-            </button>
-          </div>
+            </UButton>
+          </UFieldGroup>
         </div>
 
         <div class="min-w-64 flex-1 sm:max-w-sm">
@@ -487,7 +485,7 @@ async function rodarIaEmMassa() {
             />
 
             <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <div class="flex rounded-lg border border-default p-0.5">
+              <UFieldGroup size="xs">
                 <UButton
                   v-for="f in [
                     { valor: 'faltam', rotulo: 'Faltam' },
@@ -496,12 +494,12 @@ async function rodarIaEmMassa() {
                   ]"
                   :key="f.valor"
                   :label="f.rotulo"
-                  size="xs"
                   :color="filtro === f.valor ? 'primary' : 'neutral'"
-                  :variant="filtro === f.valor ? 'soft' : 'ghost'"
+                  :variant="filtro === f.valor ? 'soft' : 'outline'"
+                  :aria-pressed="filtro === f.valor"
                   @click="filtro = f.valor as typeof filtro.value"
                 />
-              </div>
+              </UFieldGroup>
 
             </div>
 
