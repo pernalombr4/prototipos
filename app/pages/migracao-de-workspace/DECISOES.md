@@ -12,8 +12,9 @@ Importar Workspace
    ▼
 [1 Arquivo e opção] ── não é .json ──► erro no próprio passo
    │ lido: resumo do arquivo (de onde veio, quando, quantas categorias)
-   │ workspace com conteúdo: aparecem as 3 opções, cada uma com o efeito
-   │   Adicionar só o que falta (padrão) · Somar com o que existe · Substituir tudo
+   │ workspace com conteúdo: aparecem as 3 opções
+   │   Adicionar o que falta (padrão) · Atualizar e adicionar · Substituir tudo
+   │   Substituir tudo: alerta de que apaga o que não está no arquivo
    │ workspace vazio: as opções não aparecem
    ▼
 [2 Revisar]
@@ -87,3 +88,19 @@ Importado ──► Desfazer importação · Ver categorias
 - **Descartado:** a versão de 3 passos. Motivo: o passo "O que fazer" só existia para mostrar o efeito depois do arquivo lido, e isso cabe no mesmo passo. A pessoa ganha 1 clique a menos.
 - **Maquete:** a mesma da rodada 1.
 - **Ver:** `http://localhost:3000/migracao-de-workspace` · `evidencias/proposta-r2-1-arquivo-e-opcao.jpg`, `proposta-r2-2-revisar-substituir.jpg`, `proposta-r2-3-confirmar-substituir.jpg`, `proposta-r2-4-importando.jpg`, `proposta-r2-5-importado.jpg`
+
+## Rodada 3 · 2026-10-01
+- **Pedido (literal):** "a pergunta do que fazer com o que ja existe nesse workspace tem opçoes que estao ocupando muito espaço. nao precisa de "4 categorias saem. 2 ganham o que falta"... textos realmente desnecessrios. no substituir tudo deve ter um alerta de que tudo será apagado. nao precisa dizer quantos itens. alem disso, os textos dessas opçoes tambem estao ruins. revise com /escrita" e "os textos da parte da diff tambem estao ruins "entra"/"sai"/"mudam" sao textos ruins. "ficam como estao" é pior ainda. ficam como estao = inalterados. simplesmente isso. "ganha o que falta" ta HORRIVEL tmbem"
+- **Mudou:**
+  - As 3 opções ficam lado a lado, com título e 1 linha. Sai a linha de efeito ("4 categorias entram") e sai o texto de ajuda da pergunta.
+  - Opções reescritas (revisão `escrita`):
+    - Adicionar o que falta: "Mantém o que já existe."
+    - Atualizar e adicionar: "Aplica as alterações do arquivo. Não apaga nada."
+    - Substituir tudo: "Deixa o workspace igual ao arquivo."
+  - Substituir tudo mostra, ao ser escolhida, o alerta "Apaga tudo o que não está no arquivo, inclusive os itens cadastrados." Sem contagem. A revisão repete o alerta e pede o e-mail.
+  - Marcas da comparação: Novo, Alterado, Removido, Inalterado, concordando com o que marcam (Nova categoria, Novo campo). "Ganha o que falta" saiu: a categoria que recebe campos novos é Alterada.
+  - Contagem do topo: Novos, Alterados, Removidos, Inalterados. O ícone de Inalterado é "=", não cadeado.
+  - "Mostrar só o que muda" virou "Só alterações".
+  - Também reescritos: vazio ("Workspace vazio"), nada a importar, cópia antes de importar, mensagem de sucesso ("4 categorias novas, 2 alteradas, 1 removida") e o aviso abaixo do cartão.
+- **Fronteira:** muda o texto e o tamanho das opções e das marcas; não muda a jornada de 2 passos nem a árvore.
+- **Ver:** `evidencias/proposta-r3-1-opcoes-e-alerta.jpg`, `proposta-r3-2-revisar.jpg`

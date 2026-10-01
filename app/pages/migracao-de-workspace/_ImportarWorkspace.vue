@@ -7,9 +7,8 @@
  * tem 2 passos: o arquivo e o que fazer com o que já existe, juntos; depois a
  * revisão.
  *
- * As opções aparecem embaixo do arquivo assim que ele é lido, porque cada uma
- * mostra o efeito calculado sobre ele. Com o workspace vazio elas nem aparecem:
- * não há o que decidir. A comparação em árvore só aparece quando há algo em
+ * As opções aparecem embaixo do arquivo assim que ele é lido. Com o workspace
+ * vazio elas nem aparecem: não há o que decidir. A comparação em árvore só aparece quando há algo em
  * comum entre os dois lados; sem isso, a revisão é uma lista do que entra.
  */
 import type { TreeItem } from '@nuxt/ui'
@@ -106,8 +105,7 @@ const dataDoArquivo = computed(() => {
 })
 
 /* ------------------------------------------------------------------ *
- * Os 3 modos, calculados juntos: o cartão de cada opção mostra o efeito dela
- * antes de a pessoa escolher.
+ * Os 3 modos, calculados juntos: trocar a opção na revisão não recalcula nada.
  * ------------------------------------------------------------------ */
 
 const modos: Modo[] = ['adicionar', 'somar', 'substituir']
@@ -139,13 +137,10 @@ const revisaoSimples = computed(() => vazio.value || (!emComum.value && modo.val
 
 const itensDeModo = computed(() =>
   modos.map((m) => {
-    const c = comparacoes.value[m].totalDeCategorias
     return {
       value: m,
       label: props.t.modos[m].titulo,
       description: props.t.modos[m].descricao,
-      efeito: props.t.efeitoDoModo(m, c.nova, c.alterada, c.removida),
-      itensQueSaem: comparacoes.value[m].itensQueSaem,
     }
   }),
 )
@@ -186,8 +181,8 @@ const sinalDaSituacao: Record<Situacao, { icone: string, cor: string }> = {
   alterada: { icone: 'i-lucide-pencil', cor: 'text-warning' },
   removida: { icone: 'i-lucide-minus', cor: 'text-error' },
   igual: { icone: 'i-lucide-equal', cor: 'text-dimmed' },
-  mantida: { icone: 'i-lucide-lock', cor: 'text-dimmed' },
-  ignorada: { icone: 'i-lucide-lock', cor: 'text-dimmed' },
+  mantida: { icone: 'i-lucide-equal', cor: 'text-dimmed' },
+  ignorada: { icone: 'i-lucide-equal', cor: 'text-dimmed' },
 }
 
 const iconeDoTipo: Partial<Record<TipoDeCampo, string>> = {
@@ -209,6 +204,17 @@ const iconeDoTipo: Partial<Record<TipoDeCampo, string>> = {
   EnPerson: 'i-lucide-user',
 }
 
+/** Lista, tela: feminino. Grupo, modelo, relatório, item: masculino. */
+const generoDoComponente: Record<TipoDeComponente, 'f' | 'm'> = {
+  listas: 'f',
+  telas: 'f',
+  grupos: 'm',
+  emails: 'm',
+  relatorios: 'm',
+  documentos: 'm',
+  menus: 'm',
+}
+
 const iconeDoComponente: Record<TipoDeComponente, string> = {
   listas: 'i-lucide-list',
   telas: 'i-lucide-monitor',
@@ -226,6 +232,8 @@ function mexe(s: Situacao) {
 interface NoDaArvore extends TreeItem {
   value: string
   tipo: 'categoria' | 'grupo' | 'folha'
+  /** Para a marca concordar: "Nova" categoria, "Novo" campo. */
+  genero?: 'f' | 'm'
   situacao?: Situacao
   mudancas?: Mudanca[]
   tipoDeCampo?: TipoDeCampo
@@ -234,7 +242,7 @@ interface NoDaArvore extends TreeItem {
   children?: NoDaArvore[]
 }
 
-function folhas(lista: NoFolha[], prefixo: string, icone?: string): NoDaArvore[] {
+function folhas(lista: NoFolha[], prefixo: string, genero: 'f' | 'm', icone?: string): NoDaArvore[] {
   return lista
     .filter(f => !soOQueMuda.value || mexe(f.situacao))
     .map(f => ({
@@ -242,6 +250,7 @@ function folhas(lista: NoFolha[], prefixo: string, icone?: string): NoDaArvore[]
       label: f.nome,
       icon: icone ?? (f.tipoDeCampo ? iconeDoTipo[f.tipoDeCampo] ?? 'i-lucide-square' : 'i-lucide-square'),
       tipo: 'folha',
+      genero,
       situacao: f.situacao,
       mudancas: f.mudancas,
       tipoDeCampo: f.tipoDeCampo,
@@ -264,14 +273,15 @@ const arvoreDeCategorias = computed<NoDaArvore[]>(() =>
     .filter(c => !soOQueMuda.value || mexe(c.situacao))
     .map((c) => {
       // Categoria que entra ou sai inteira: os filhos vão junto, com a mesma marca.
-      const campos = folhas(c.campos, `${c.slug}:campo`)
-      const formularios = folhas(c.formularios, `${c.slug}:form`, 'i-lucide-file-text')
-      const pastas = folhas(c.pastas, `${c.slug}:pasta`, 'i-lucide-folder')
+      const campos = folhas(c.campos, `${c.slug}:campo`, 'm')
+      const formularios = folhas(c.formularios, `${c.slug}:form`, 'm', 'i-lucide-file-text')
+      const pastas = folhas(c.pastas, `${c.slug}:pasta`, 'f', 'i-lucide-folder')
       return {
         value: c.slug,
         label: c.nome,
         icon: c.icone,
         tipo: 'categoria' as const,
+        genero: 'f' as const,
         situacao: c.situacao,
         mudancas: c.mudancas,
         itens: c.itens,
@@ -288,7 +298,7 @@ const arvoreDeCategorias = computed<NoDaArvore[]>(() =>
 const arvoreDeComponentes = computed<NoDaArvore[]>(() =>
   tiposDeComponente.flatMap((tipo) => {
     const todos = comparacao.value.componentes[tipo]
-    const filhos = folhas(todos, tipo, iconeDoComponente[tipo])
+    const filhos = folhas(todos, tipo, generoDoComponente[tipo], iconeDoComponente[tipo])
     return grupo(tipo, props.t.componentes[tipo], iconeDoComponente[tipo], filhos, todos)
   }),
 )
@@ -302,8 +312,7 @@ const abertosDeCara = computed(() => [
 const chaveDaArvore = computed(() => `${modo.value}-${soOQueMuda.value}`)
 
 function rotuloDaSituacao(no: NoDaArvore) {
-  if (no.tipo === 'categoria' && no.situacao === 'alterada' && modo.value === 'adicionar') return props.t.ganhaOQueFalta
-  return props.t.situacao[no.situacao!]
+  return props.t.situacao[no.situacao!][no.genero ?? 'm']
 }
 
 function nomeDoTipo(tipo?: TipoDeCampo) {
@@ -465,39 +474,39 @@ function verCategorias() {
                 enter-active-class="transition duration-300 ease-out"
                 enter-from-class="opacity-0 translate-y-2"
               >
-                <div v-if="lido && !vazio" class="space-y-4 border-t border-default pt-5">
-                  <div>
-                    <h3 class="text-base font-semibold text-highlighted">
-                      {{ t.modoPergunta }}
-                    </h3>
-                    <p class="mt-1 text-sm text-muted">
-                      {{ t.modoAjuda }}
-                    </p>
-                  </div>
-    
+                <div v-if="lido && !vazio" class="space-y-3 border-t border-default pt-5">
                   <URadioGroup
                     v-model="modo"
+                    :legend="t.modoPergunta"
                     :items="itensDeModo"
                     variant="card"
-                    :ui="{ item: 'transition-colors hover:bg-elevated/50', fieldset: 'gap-2' }"
+                    size="sm"
+                    :ui="{
+                      legend: 'mb-2 text-sm font-semibold text-highlighted',
+                      fieldset: 'grid gap-2 sm:grid-cols-3',
+                      item: 'items-start transition-colors hover:bg-elevated/50',
+                    }"
                   >
                     <template #label="{ item }">
-                      <span class="flex flex-wrap items-center gap-2">
+                      <span class="flex flex-wrap items-center gap-1.5">
                         {{ item.label }}
                         <UBadge v-if="item.value === 'adicionar'" :label="t.recomendado" color="success" variant="subtle" size="sm" />
                       </span>
                     </template>
-                    <template #description="{ item }">
-                      <span class="block">{{ item.description }}</span>
-                      <span class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium">
-                        <span class="text-toned">{{ item.efeito }}</span>
-                        <span v-if="item.itensQueSaem" class="inline-flex items-center gap-1 text-error">
-                          <UIcon name="i-lucide-triangle-alert" class="size-3.5" />
-                          {{ t.saiComItens(item.itensQueSaem) }}
-                        </span>
-                      </span>
-                    </template>
                   </URadioGroup>
+
+                  <Transition
+                    enter-active-class="transition duration-200 ease-out"
+                    enter-from-class="opacity-0 -translate-y-1"
+                  >
+                    <UAlert
+                      v-if="modo === 'substituir'"
+                      :title="t.alertaSubstituir"
+                      color="error"
+                      variant="subtle"
+                      icon="i-lucide-triangle-alert"
+                    />
+                  </Transition>
                 </div>
               </Transition>
             </section>
@@ -558,7 +567,7 @@ function verCategorias() {
                       { chave: 'nova', n: topo.nova, cor: 'text-success', icone: 'i-lucide-plus' },
                       { chave: 'alterada', n: topo.alterada, cor: 'text-warning', icone: 'i-lucide-pencil' },
                       { chave: 'removida', n: topo.removida, cor: 'text-error', icone: 'i-lucide-minus' },
-                      { chave: 'fica', n: topo.igual + topo.mantida + topo.ignorada, cor: 'text-muted', icone: 'i-lucide-lock' },
+                      { chave: 'inalterada', n: topo.igual + topo.mantida + topo.ignorada, cor: 'text-muted', icone: 'i-lucide-equal' },
                     ]"
                     :key="bloco.chave"
                     class="animate-[entrada_0.3s_ease-out_both] rounded-lg border border-default px-3 py-2.5"
@@ -570,7 +579,7 @@ function verCategorias() {
                       {{ bloco.n }}
                     </p>
                     <p class="mt-0.5 text-xs text-muted">
-                      {{ t.contagem[bloco.chave as 'nova'](bloco.n).replace(/^\d+\s/, '') }}
+                      {{ t.contagem[bloco.chave as 'nova'] }}
                     </p>
                   </div>
                 </div>
@@ -730,13 +739,13 @@ function verCategorias() {
                 >
                   <UAlert
                     v-if="destrutivo"
-                    :title="t.perigoTitulo"
+                    :title="t.alertaSubstituir"
                     color="error"
                     variant="subtle"
                     icon="i-lucide-triangle-alert"
                   >
                     <template #description>
-                      <p>{{ t.perigoTexto(comparacao.totalDeCategorias.removida, comparacao.itensQueSaem) }}</p>
+                      <p>{{ t.perigoTexto }}</p>
                       <p class="mt-1">
                         <code class="rounded bg-default px-1.5 py-0.5 text-xs text-highlighted">{{ workspaceAtual.emailDeQuemUsa }}</code>
                       </p>

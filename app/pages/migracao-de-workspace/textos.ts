@@ -75,11 +75,9 @@ export interface Textos {
 
   // passo 2
   modoPergunta: string
-  modoAjuda: string
   modos: Record<Modo, { titulo: string, descricao: string }>
   recomendado: string
-  efeitoDoModo: (modo: Modo, entra: number, muda: number, sai: number) => string
-  saiComItens: (n: number) => string
+  alertaSubstituir: string
 
   // passo 3
   workspaceVazioTitulo: string
@@ -90,7 +88,7 @@ export interface Textos {
   nadaAFazerTexto: string
   opcaoEscolhida: (modo: string) => string
   trocarOpcao: string
-  contagem: Record<'nova' | 'alterada' | 'removida' | 'fica', (n: number) => string>
+  contagem: Record<'nova' | 'alterada' | 'removida' | 'inalterada', string>
   soOQueMuda: string
   grupoCategorias: string
   grupoOutros: string
@@ -98,8 +96,8 @@ export interface Textos {
   grupoFormularios: (n: number) => string
   grupoPastas: (n: number) => string
   componentes: Record<TipoDeComponente, string>
-  situacao: Record<Situacao, string>
-  ganhaOQueFalta: string
+  /** Rótulo da marca, no feminino (categoria, lista, tela, pasta) e no masculino (campo, formulário...). */
+  situacao: Record<Situacao, { f: string, m: string }>
   ignoradaAjuda: string
   mudancaNome: string
   mudancaTipo: string
@@ -113,8 +111,7 @@ export interface Textos {
   // confirmar
   copiaAntes: string
   copiaAntesAjuda: string
-  perigoTitulo: string
-  perigoTexto: (categorias: number, itens: number) => string
+  perigoTexto: string
   digiteEmail: string
   importar: (modo: Modo) => string
 
@@ -197,10 +194,10 @@ const pt: Textos = {
   exportarBotao: 'Exportar Workspace',
   importarTitulo: 'Importar',
   importarSub: 'Envie uma estrutura existente',
-  importarTexto: 'Envie o arquivo gerado na exportação. Antes de importar, você escolhe o que fazer com o que já existe e confere o que muda.',
+  importarTexto: 'Envie o arquivo da exportação. Antes de importar, você escolhe o que fazer com o que já existe e revisa as alterações.',
   importarBotao: 'Importar Workspace',
   avisoTitulo: 'Nada é duplicado',
-  avisoTexto: 'O sistema reconhece as categorias que já existem neste workspace. Você decide se elas ficam como estão, recebem as mudanças do arquivo ou são substituídas.',
+  avisoTexto: 'O sistema reconhece as categorias que já existem. Você escolhe se elas são alteradas ou não.',
   exportadoTitulo: 'Estrutura baixada',
   exportadoTexto: 'O arquivo está na sua pasta de downloads.',
 
@@ -227,45 +224,25 @@ const pt: Textos = {
   erroArquivoTexto: 'Use o arquivo .json baixado em Exportar Workspace, sem editar.',
   usarExemplo: 'Protótipo: usar arquivo de exemplo',
 
-  modoPergunta: 'O que fazer com o que já existe neste workspace?',
-  modoAjuda: 'O sistema reconhece o que já existe pelo identificador de cada categoria e campo. Nada é duplicado.',
+  modoPergunta: 'O que fazer com o que já existe?',
   modos: {
-    adicionar: {
-      titulo: 'Adicionar só o que falta',
-      descricao: 'Entra o que este workspace ainda não tem. O que já existe fica exatamente como está.',
-    },
-    somar: {
-      titulo: 'Somar com o que existe',
-      descricao: 'Entra o que falta e o que já existe recebe as mudanças do arquivo. Nada é apagado.',
-    },
-    substituir: {
-      titulo: 'Substituir tudo',
-      descricao: 'O workspace fica igual ao arquivo. O que não está no arquivo é apagado, com os itens cadastrados.',
-    },
+    adicionar: { titulo: 'Adicionar o que falta', descricao: 'Mantém o que já existe.' },
+    somar: { titulo: 'Atualizar e adicionar', descricao: 'Aplica as alterações do arquivo. Não apaga nada.' },
+    substituir: { titulo: 'Substituir tudo', descricao: 'Deixa o workspace igual ao arquivo.' },
   },
   recomendado: 'Mais seguro',
-  efeitoDoModo: (modo, e, m, s) => [
-    `${e} ${e === 1 ? 'categoria entra' : 'categorias entram'}`,
-    ...(m ? [modo === 'adicionar' ? `${m} ${m === 1 ? 'ganha' : 'ganham'} o que falta` : `${m} ${m === 1 ? 'muda' : 'mudam'}`] : []),
-    ...(s ? [`${s} ${s === 1 ? 'sai' : 'saem'}`] : []),
-  ].join(' · '),
-  saiComItens: n => `${n} itens cadastrados são apagados`,
+  alertaSubstituir: 'Apaga tudo o que não está no arquivo, inclusive os itens cadastrados.',
 
-  workspaceVazioTitulo: 'Este workspace está vazio',
-  workspaceVazioTexto: 'Não há o que comparar. Tudo o que está no arquivo entra:',
-  nadaEmComumTitulo: 'Nada do arquivo existe aqui ainda',
-  nadaEmComumTexto: 'Nenhuma categoria do arquivo existe neste workspace. Tudo entra e nada do que existe muda:',
-  nadaAFazerTitulo: 'Este workspace já tem tudo o que está no arquivo',
-  nadaAFazerTexto: 'Nenhuma categoria, campo ou formulário muda. Não há o que importar.',
+  workspaceVazioTitulo: 'Workspace vazio',
+  workspaceVazioTexto: 'A importação adiciona:',
+  nadaEmComumTitulo: 'Nenhuma categoria do arquivo existe aqui',
+  nadaEmComumTexto: 'A importação adiciona tudo e não altera o que já existe:',
+  nadaAFazerTitulo: 'Nada a importar',
+  nadaAFazerTexto: 'O workspace já tem tudo o que está no arquivo.',
   opcaoEscolhida: m => `Opção: ${m}`,
   trocarOpcao: 'Trocar',
-  contagem: {
-    nova: n => `${n} ${n === 1 ? 'entra' : 'entram'}`,
-    alterada: n => `${n} ${n === 1 ? 'muda' : 'mudam'}`,
-    removida: n => `${n} ${n === 1 ? 'sai' : 'saem'}`,
-    fica: n => `${n} ${n === 1 ? 'fica como está' : 'ficam como estão'}`,
-  },
-  soOQueMuda: 'Mostrar só o que muda',
+  contagem: { nova: 'Novos', alterada: 'Alterados', removida: 'Removidos', inalterada: 'Inalterados' },
+  soOQueMuda: 'Só alterações',
   grupoCategorias: 'Categorias',
   grupoOutros: 'Outros componentes',
   grupoCampos: n => `Campos (${n})`,
@@ -276,14 +253,18 @@ const pt: Textos = {
     relatorios: 'Relatórios', documentos: 'Modelos de documento', menus: 'Itens de menu',
   },
   situacao: {
-    nova: 'Entra', alterada: 'Muda', removida: 'Sai', igual: 'Sem mudança', mantida: 'Fica como está', ignorada: 'Fica como está',
+    nova: { f: 'Nova', m: 'Novo' },
+    alterada: { f: 'Alterada', m: 'Alterado' },
+    removida: { f: 'Removida', m: 'Removido' },
+    igual: { f: 'Inalterada', m: 'Inalterado' },
+    mantida: { f: 'Inalterada', m: 'Inalterado' },
+    ignorada: { f: 'Inalterada', m: 'Inalterado' },
   },
-  ganhaOQueFalta: 'Ganha o que falta',
-  ignoradaAjuda: 'O arquivo traz outra versão. Nesta opção, a versão daqui fica.',
+  ignoradaAjuda: 'O arquivo traz outra versão. Esta opção mantém a atual.',
   mudancaNome: 'Nome',
   mudancaTipo: 'Tipo',
   mudancaOpcoesNovas: o => `Opções novas: ${o}`,
-  mudancaOpcoesRemovidas: o => `Opções que saem: ${o}`,
+  mudancaOpcoesRemovidas: o => `Opções removidas: ${o}`,
   itensCadastrados: n => `${n} itens cadastrados`,
   tiposDeCampo: {
     inputText: 'Texto curto', EnTextArea: 'Texto longo', EnHtml: 'Texto com formatação', email: 'E-mail',
@@ -293,12 +274,11 @@ const pt: Textos = {
     uploadFile: 'Anexo', EnPerson: 'Pessoa', EnRepeater: 'Grupo que se repete',
   },
   tipoDeCampoOutro: 'Outro tipo',
-  nenhumaDiferenca: 'Nada muda aqui com esta opção.',
+  nenhumaDiferenca: 'Nenhuma alteração com esta opção.',
 
-  copiaAntes: 'Baixar uma cópia deste workspace antes de importar',
-  copiaAntesAjuda: 'É o mesmo arquivo do Exportar Workspace. Com ele, dá para voltar ao que era.',
-  perigoTitulo: 'Essa opção apaga o que não está no arquivo',
-  perigoTexto: (c, i) => `${c} ${c === 1 ? 'categoria sai' : 'categorias saem'} com ${i} itens cadastrados. Para confirmar, digite seu e-mail:`,
+  copiaAntes: 'Baixar uma cópia do workspace antes',
+  copiaAntesAjuda: 'Para voltar ao estado atual, se precisar.',
+  perigoTexto: 'Para confirmar, digite seu e-mail:',
   digiteEmail: 'Digite seu e-mail para confirmar',
   importar: m => (m === 'substituir' ? 'Substituir workspace' : 'Importar'),
 
@@ -308,9 +288,9 @@ const pt: Textos = {
   podeFechar: 'Pode fechar esta janela. Avisamos no sino quando terminar.',
   sucessoTitulo: 'Estrutura importada',
   sucessoTexto: (e, m, s) => [
-    `${e} ${e === 1 ? 'categoria entrou' : 'categorias entraram'}`,
-    `${m} ${m === 1 ? 'mudou' : 'mudaram'}`,
-    ...(s ? [`${s} ${s === 1 ? 'saiu' : 'saíram'}`] : []),
+    `${e} ${e === 1 ? 'categoria nova' : 'categorias novas'}`,
+    `${m} ${m === 1 ? 'alterada' : 'alteradas'}`,
+    ...(s ? [`${s} ${s === 1 ? 'removida' : 'removidas'}`] : []),
   ].join(', ') + '.',
   copiaBaixada: 'A cópia de antes da importação está na sua pasta de downloads.',
   desfazer: 'Desfazer importação',
@@ -339,10 +319,10 @@ const en: Textos = {
   exportarBotao: 'Export Workspace',
   importarTitulo: 'Import',
   importarSub: 'Upload an existing structure',
-  importarTexto: 'Upload the file created by the export. Before importing, you choose what happens to what already exists and review what changes.',
+  importarTexto: 'Upload the export file. Before importing, you choose what happens to what already exists and review the changes.',
   importarBotao: 'Import Workspace',
   avisoTitulo: 'Nothing is duplicated',
-  avisoTexto: 'The system recognizes the categories that already exist in this workspace. You decide whether they stay as they are, take the changes from the file or are replaced.',
+  avisoTexto: 'The system recognizes the categories that already exist. You choose whether they change.',
   exportadoTitulo: 'Structure downloaded',
   exportadoTexto: 'The file is in your downloads folder.',
 
@@ -369,45 +349,25 @@ const en: Textos = {
   erroArquivoTexto: 'Use the .json file downloaded from Export Workspace, without editing it.',
   usarExemplo: 'Prototype: use sample file',
 
-  modoPergunta: 'What should happen to what already exists in this workspace?',
-  modoAjuda: 'The system recognizes what already exists by the identifier of each category and field. Nothing is duplicated.',
+  modoPergunta: 'What should happen to what already exists?',
   modos: {
-    adicionar: {
-      titulo: 'Add only what is missing',
-      descricao: 'Whatever this workspace does not have yet comes in. What already exists stays exactly as it is.',
-    },
-    somar: {
-      titulo: 'Merge with what exists',
-      descricao: 'What is missing comes in, and what already exists takes the changes from the file. Nothing is deleted.',
-    },
-    substituir: {
-      titulo: 'Replace everything',
-      descricao: 'The workspace becomes the same as the file. Whatever is not in the file is deleted, with its records.',
-    },
+    adicionar: { titulo: 'Add what is missing', descricao: 'Keeps what already exists.' },
+    somar: { titulo: 'Update and add', descricao: 'Applies the changes in the file. Deletes nothing.' },
+    substituir: { titulo: 'Replace everything', descricao: 'Makes the workspace match the file.' },
   },
   recomendado: 'Safest',
-  efeitoDoModo: (modo, e, m, s) => [
-    `${e} ${e === 1 ? 'category comes in' : 'categories come in'}`,
-    ...(m ? [modo === 'adicionar' ? `${m} ${m === 1 ? 'gets' : 'get'} what is missing` : `${m} ${m === 1 ? 'changes' : 'change'}`] : []),
-    ...(s ? [`${s} ${s === 1 ? 'goes' : 'go'}`] : []),
-  ].join(' · '),
-  saiComItens: n => `${n} records are deleted`,
+  alertaSubstituir: 'Deletes everything that is not in the file, including its records.',
 
-  workspaceVazioTitulo: 'This workspace is empty',
-  workspaceVazioTexto: 'There is nothing to compare. Everything in the file comes in:',
-  nadaEmComumTitulo: 'Nothing from the file exists here yet',
-  nadaEmComumTexto: 'No category from the file exists in this workspace. Everything comes in and nothing that exists changes:',
-  nadaAFazerTitulo: 'This workspace already has everything in the file',
-  nadaAFazerTexto: 'No category, field or form changes. There is nothing to import.',
+  workspaceVazioTitulo: 'Empty workspace',
+  workspaceVazioTexto: 'The import adds:',
+  nadaEmComumTitulo: 'No category from the file exists here',
+  nadaEmComumTexto: 'The import adds everything and changes nothing that already exists:',
+  nadaAFazerTitulo: 'Nothing to import',
+  nadaAFazerTexto: 'The workspace already has everything in the file.',
   opcaoEscolhida: m => `Option: ${m}`,
   trocarOpcao: 'Change',
-  contagem: {
-    nova: n => `${n} ${n === 1 ? 'comes in' : 'come in'}`,
-    alterada: n => `${n} ${n === 1 ? 'changes' : 'change'}`,
-    removida: n => `${n} ${n === 1 ? 'goes' : 'go'}`,
-    fica: n => `${n} ${n === 1 ? 'stays as is' : 'stay as they are'}`,
-  },
-  soOQueMuda: 'Show only what changes',
+  contagem: { nova: 'New', alterada: 'Changed', removida: 'Removed', inalterada: 'Unchanged' },
+  soOQueMuda: 'Changes only',
   grupoCategorias: 'Categories',
   grupoOutros: 'Other components',
   grupoCampos: n => `Fields (${n})`,
@@ -418,10 +378,14 @@ const en: Textos = {
     relatorios: 'Reports', documentos: 'Document templates', menus: 'Menu items',
   },
   situacao: {
-    nova: 'Comes in', alterada: 'Changes', removida: 'Goes', igual: 'No change', mantida: 'Stays as is', ignorada: 'Stays as is',
+    nova: { f: 'New', m: 'New' },
+    alterada: { f: 'Changed', m: 'Changed' },
+    removida: { f: 'Removed', m: 'Removed' },
+    igual: { f: 'Unchanged', m: 'Unchanged' },
+    mantida: { f: 'Unchanged', m: 'Unchanged' },
+    ignorada: { f: 'Unchanged', m: 'Unchanged' },
   },
-  ganhaOQueFalta: 'Gets what is missing',
-  ignoradaAjuda: 'The file has another version. With this option, the version here stays.',
+  ignoradaAjuda: 'The file has another version. This option keeps the current one.',
   mudancaNome: 'Name',
   mudancaTipo: 'Type',
   mudancaOpcoesNovas: o => `New options: ${o}`,
@@ -435,12 +399,11 @@ const en: Textos = {
     uploadFile: 'Attachment', EnPerson: 'Person', EnRepeater: 'Repeating group',
   },
   tipoDeCampoOutro: 'Other type',
-  nenhumaDiferenca: 'Nothing changes here with this option.',
+  nenhumaDiferenca: 'No changes with this option.',
 
-  copiaAntes: 'Download a copy of this workspace before importing',
-  copiaAntesAjuda: 'It is the same file as Export Workspace. With it, you can go back to how things were.',
-  perigoTitulo: 'This option deletes whatever is not in the file',
-  perigoTexto: (c, i) => `${c} ${c === 1 ? 'category goes' : 'categories go'} with ${i} records. To confirm, type your email:`,
+  copiaAntes: 'Download a copy of the workspace first',
+  copiaAntesAjuda: 'To go back to the current state, if you need to.',
+  perigoTexto: 'To confirm, type your email:',
   digiteEmail: 'Type your email to confirm',
   importar: m => (m === 'substituir' ? 'Replace workspace' : 'Import'),
 
@@ -450,9 +413,9 @@ const en: Textos = {
   podeFechar: 'You can close this window. We will let you know in the bell when it is done.',
   sucessoTitulo: 'Structure imported',
   sucessoTexto: (e, m, s) => [
-    `${e} ${e === 1 ? 'category came in' : 'categories came in'}`,
+    `${e} new ${e === 1 ? 'category' : 'categories'}`,
     `${m} changed`,
-    ...(s ? [`${s} ${s === 1 ? 'was removed' : 'were removed'}`] : []),
+    ...(s ? [`${s} removed`] : []),
   ].join(', ') + '.',
   copiaBaixada: 'The copy from before the import is in your downloads folder.',
   desfazer: 'Undo import',
@@ -481,10 +444,10 @@ const es: Textos = {
   exportarBotao: 'Exportar Workspace',
   importarTitulo: 'Importar',
   importarSub: 'Envíe una estructura existente',
-  importarTexto: 'Envíe el archivo generado en la exportación. Antes de importar, usted elige qué hacer con lo que ya existe y revisa lo que cambia.',
+  importarTexto: 'Envíe el archivo de la exportación. Antes de importar, usted elige qué hacer con lo que ya existe y revisa los cambios.',
   importarBotao: 'Importar Workspace',
   avisoTitulo: 'Nada se duplica',
-  avisoTexto: 'El sistema reconoce las categorías que ya existen en este workspace. Usted decide si se quedan como están, reciben los cambios del archivo o se reemplazan.',
+  avisoTexto: 'El sistema reconoce las categorías que ya existen. Usted elige si cambian o no.',
   exportadoTitulo: 'Estructura descargada',
   exportadoTexto: 'El archivo está en su carpeta de descargas.',
 
@@ -511,45 +474,25 @@ const es: Textos = {
   erroArquivoTexto: 'Use el archivo .json descargado en Exportar Workspace, sin editarlo.',
   usarExemplo: 'Prototipo: usar archivo de ejemplo',
 
-  modoPergunta: '¿Qué hacer con lo que ya existe en este workspace?',
-  modoAjuda: 'El sistema reconoce lo que ya existe por el identificador de cada categoría y campo. Nada se duplica.',
+  modoPergunta: '¿Qué hacer con lo que ya existe?',
   modos: {
-    adicionar: {
-      titulo: 'Agregar solo lo que falta',
-      descricao: 'Entra lo que este workspace todavía no tiene. Lo que ya existe se queda exactamente como está.',
-    },
-    somar: {
-      titulo: 'Sumar a lo que existe',
-      descricao: 'Entra lo que falta y lo que ya existe recibe los cambios del archivo. No se borra nada.',
-    },
-    substituir: {
-      titulo: 'Reemplazar todo',
-      descricao: 'El workspace queda igual al archivo. Lo que no está en el archivo se borra, con sus registros.',
-    },
+    adicionar: { titulo: 'Agregar lo que falta', descricao: 'Mantiene lo que ya existe.' },
+    somar: { titulo: 'Actualizar y agregar', descricao: 'Aplica los cambios del archivo. No borra nada.' },
+    substituir: { titulo: 'Reemplazar todo', descricao: 'Deja el workspace igual al archivo.' },
   },
   recomendado: 'Más seguro',
-  efeitoDoModo: (modo, e, m, s) => [
-    `${e} ${e === 1 ? 'categoría entra' : 'categorías entran'}`,
-    ...(m ? [modo === 'adicionar' ? `${m} ${m === 1 ? 'recibe' : 'reciben'} lo que falta` : `${m} ${m === 1 ? 'cambia' : 'cambian'}`] : []),
-    ...(s ? [`${s} ${s === 1 ? 'sale' : 'salen'}`] : []),
-  ].join(' · '),
-  saiComItens: n => `Se borran ${n} registros`,
+  alertaSubstituir: 'Borra todo lo que no está en el archivo, incluidos los registros.',
 
-  workspaceVazioTitulo: 'Este workspace está vacío',
-  workspaceVazioTexto: 'No hay nada que comparar. Todo lo que está en el archivo entra:',
-  nadaEmComumTitulo: 'Nada del archivo existe aquí todavía',
-  nadaEmComumTexto: 'Ninguna categoría del archivo existe en este workspace. Todo entra y nada de lo que existe cambia:',
-  nadaAFazerTitulo: 'Este workspace ya tiene todo lo que está en el archivo',
-  nadaAFazerTexto: 'Ninguna categoría, campo o formulario cambia. No hay nada que importar.',
+  workspaceVazioTitulo: 'Workspace vacío',
+  workspaceVazioTexto: 'La importación agrega:',
+  nadaEmComumTitulo: 'Ninguna categoría del archivo existe aquí',
+  nadaEmComumTexto: 'La importación agrega todo y no cambia lo que ya existe:',
+  nadaAFazerTitulo: 'Nada que importar',
+  nadaAFazerTexto: 'El workspace ya tiene todo lo que está en el archivo.',
   opcaoEscolhida: m => `Opción: ${m}`,
   trocarOpcao: 'Cambiar',
-  contagem: {
-    nova: n => `${n} ${n === 1 ? 'entra' : 'entran'}`,
-    alterada: n => `${n} ${n === 1 ? 'cambia' : 'cambian'}`,
-    removida: n => `${n} ${n === 1 ? 'sale' : 'salen'}`,
-    fica: n => `${n} ${n === 1 ? 'queda como está' : 'quedan como están'}`,
-  },
-  soOQueMuda: 'Mostrar solo lo que cambia',
+  contagem: { nova: 'Nuevos', alterada: 'Modificados', removida: 'Eliminados', inalterada: 'Sin cambios' },
+  soOQueMuda: 'Solo cambios',
   grupoCategorias: 'Categorías',
   grupoOutros: 'Otros componentes',
   grupoCampos: n => `Campos (${n})`,
@@ -560,14 +503,18 @@ const es: Textos = {
     relatorios: 'Informes', documentos: 'Plantillas de documento', menus: 'Elementos de menú',
   },
   situacao: {
-    nova: 'Entra', alterada: 'Cambia', removida: 'Sale', igual: 'Sin cambios', mantida: 'Queda como está', ignorada: 'Queda como está',
+    nova: { f: 'Nueva', m: 'Nuevo' },
+    alterada: { f: 'Modificada', m: 'Modificado' },
+    removida: { f: 'Eliminada', m: 'Eliminado' },
+    igual: { f: 'Sin cambios', m: 'Sin cambios' },
+    mantida: { f: 'Sin cambios', m: 'Sin cambios' },
+    ignorada: { f: 'Sin cambios', m: 'Sin cambios' },
   },
-  ganhaOQueFalta: 'Recibe lo que falta',
-  ignoradaAjuda: 'El archivo trae otra versión. Con esta opción, se queda la versión de aquí.',
+  ignoradaAjuda: 'El archivo trae otra versión. Esta opción mantiene la actual.',
   mudancaNome: 'Nombre',
   mudancaTipo: 'Tipo',
   mudancaOpcoesNovas: o => `Opciones nuevas: ${o}`,
-  mudancaOpcoesRemovidas: o => `Opciones que salen: ${o}`,
+  mudancaOpcoesRemovidas: o => `Opciones eliminadas: ${o}`,
   itensCadastrados: n => `${n} registros`,
   tiposDeCampo: {
     inputText: 'Texto corto', EnTextArea: 'Texto largo', EnHtml: 'Texto con formato', email: 'Correo',
@@ -577,12 +524,11 @@ const es: Textos = {
     uploadFile: 'Adjunto', EnPerson: 'Persona', EnRepeater: 'Grupo que se repite',
   },
   tipoDeCampoOutro: 'Otro tipo',
-  nenhumaDiferenca: 'Nada cambia aquí con esta opción.',
+  nenhumaDiferenca: 'Ningún cambio con esta opción.',
 
-  copiaAntes: 'Descargar una copia de este workspace antes de importar',
-  copiaAntesAjuda: 'Es el mismo archivo de Exportar Workspace. Con él, se puede volver a como estaba.',
-  perigoTitulo: 'Esta opción borra lo que no está en el archivo',
-  perigoTexto: (c, i) => `${c} ${c === 1 ? 'categoría sale' : 'categorías salen'} con ${i} registros. Para confirmar, escriba su correo:`,
+  copiaAntes: 'Descargar una copia del workspace antes',
+  copiaAntesAjuda: 'Para volver al estado actual, si hace falta.',
+  perigoTexto: 'Para confirmar, escriba su correo:',
   digiteEmail: 'Escriba su correo para confirmar',
   importar: m => (m === 'substituir' ? 'Reemplazar workspace' : 'Importar'),
 
@@ -592,9 +538,9 @@ const es: Textos = {
   podeFechar: 'Puede cerrar esta ventana. Le avisamos en la campana cuando termine.',
   sucessoTitulo: 'Estructura importada',
   sucessoTexto: (e, m, s) => [
-    `${e} ${e === 1 ? 'categoría entró' : 'categorías entraron'}`,
-    `${m} ${m === 1 ? 'cambió' : 'cambiaron'}`,
-    ...(s ? [`${s} ${s === 1 ? 'salió' : 'salieron'}`] : []),
+    `${e} ${e === 1 ? 'categoría nueva' : 'categorías nuevas'}`,
+    `${m} ${m === 1 ? 'modificada' : 'modificadas'}`,
+    ...(s ? [`${s} ${s === 1 ? 'eliminada' : 'eliminadas'}`] : []),
   ].join(', ') + '.',
   copiaBaixada: 'La copia de antes de la importación está en su carpeta de descargas.',
   desfazer: 'Deshacer importación',
