@@ -1,5 +1,44 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 23 — 01/10/2026 — o manual fora do cartão, e escrito direito
+
+**O que ela pediu, literal:**
+
+> "texto horrivel e esse callout nao deve estar dentro do card do calendario, como ta hoje. deve
+> ser à parte. um bloco fora. / use a skill pra melhorar sua escrita ali. ta horrivel mesmo / e o
+> botão editar em lista ta numa posição ruim tambem. ta perdido ali."
+
+### O texto
+
+O que estava lá começava pelo caminho, não pelo objetivo, e dizia que a tela "diz" coisas:
+
+> No dia da semana, no cabeçalho da coluna: liga ou desliga o expediente daquele dia, em todas as
+> semanas.
+
+Reescrito pela regra 1 do `escrita.md` (objetivo primeiro, caminho depois) e pela regra 2 (voz
+ativa, diga quem faz):
+
+> Para mudar os dias úteis, clique no **cabeçalho da coluna**. Vale para todas as semanas.
+> Para abrir feriado, ocorrência ou exceção, clique no **dia do mês**.
+> Para ver o ano inteiro, use **Editar em lista**. Você edita as mesmas coisas.
+
+Três linhas paralelas, cada uma com um objetivo e um gesto. E o texto muda com o modo: na lista,
+as mesmas três linhas falam da lista.
+
+### O lugar
+
+**O manual saiu de dentro do cartão.** Instrução sobre a tela não é conteúdo da tela. Agora é um
+bloco acima, com fundo e sem moldura, para não devolver uma caixa à aba que passou três rodadas
+perdendo caixa.
+
+### O botão
+
+"Editar em lista" estava solto numa barra acima da grade, sem vizinho e sem hierarquia. Foi para
+o **cabeçalho do cartão**, à direita do título, que é onde se procura o controle que troca a visão
+de um painel. O `_Secao` ganhou um slot `acoes` para isso, e "Importar feriados" foi junto.
+
+---
+
 ## Rodada 22 — 01/10/2026 — dois modos de editar, e o clique que não parecia clique
 
 **O que ela pediu, literal:**

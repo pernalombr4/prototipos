@@ -61,6 +61,15 @@ const aceso = computed(() => destaque.value === props.id)
           {{ resumo }}
         </p>
       </div>
+
+      <!--
+        O controle que manda na seção inteira fica aqui, no alto e à direita,
+        e não solto no meio do conteúdo: é onde se procura o que troca a
+        visão de um painel.
+      -->
+      <div v-if="$slots.acoes" class="flex shrink-0 flex-wrap items-center gap-2">
+        <slot name="acoes" />
+      </div>
     </header>
 
     <!--

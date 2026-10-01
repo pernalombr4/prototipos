@@ -339,56 +339,54 @@ function periodoDaOcorrencia(o: Ocorrencia) {
       quarta-feira para desligar todas as quartas seria uma data mudando 52.
       Por isso a regra ficou na coluna, que é a forma dela.
     -->
+    <!--
+      O manual fica FORA do cartão, acima dele: é instrução sobre a tela, não
+      conteúdo dela. Sem moldura, para não acrescentar uma caixa à tela que
+      passou três rodadas perdendo caixa.
+    -->
+    <div class="flex items-start gap-3 rounded-lg bg-elevated/50 px-4 py-3">
+      <UIcon name="i-lucide-info" class="mt-0.5 size-4 shrink-0 text-muted" />
+      <div class="min-w-0">
+        <p class="text-sm font-medium text-highlighted">
+          Como editar o calendário
+        </p>
+        <ul v-if="!modoLista" class="mt-1 space-y-0.5 text-sm text-muted">
+          <li>
+            Para mudar os dias úteis, clique no
+            <strong class="text-toned">cabeçalho da coluna</strong>. Vale para todas as semanas.
+          </li>
+          <li>
+            Para abrir feriado, ocorrência ou exceção, clique no
+            <strong class="text-toned">dia do mês</strong>.
+          </li>
+          <li>
+            Para ver o ano inteiro, use <strong class="text-toned">Editar em lista</strong>.
+            Você edita as mesmas coisas.
+          </li>
+        </ul>
+        <ul v-else class="mt-1 space-y-0.5 text-sm text-muted">
+          <li>
+            Para mudar os dias úteis, clique no
+            <strong class="text-toned">dia da semana</strong>. Vale para todas as semanas.
+          </li>
+          <li>
+            Para mudar feriado ou ocorrência, use as listas abaixo.
+          </li>
+          <li>
+            Para ver o mês, use <strong class="text-toned">Editar em calendário</strong>.
+            Você edita as mesmas coisas.
+          </li>
+        </ul>
+      </div>
+    </div>
+
     <Secao
       id="dias-uteis"
       titulo="Calendário do workspace"
       resumo="Dias úteis, feriados e ocorrências. Edite no mês, ou em lista se preferir."
       style="animation: entrada .4s ease-out both"
     >
-      <!--
-        O manual da tela, no alto, porque aqui o gesto não é óbvio: clicar no
-        cabeçalho da coluna muda a semana inteira, e clicar no dia muda um dia.
-        Três linhas resolvem, e elas somem da leitura depois da primeira vez.
-      -->
-      <UAlert
-        class="mb-4"
-        color="neutral"
-        variant="subtle"
-        icon="i-lucide-info"
-        title="Como mexer neste calendário"
-      >
-        <template #description>
-          <ul v-if="!modoLista" class="mt-1 space-y-1">
-            <li>
-              <strong class="text-toned">No dia da semana</strong>, no cabeçalho da coluna: liga ou
-              desliga o expediente daquele dia, em todas as semanas.
-            </li>
-            <li>
-              <strong class="text-toned">No dia do mês</strong>: diz por que o dia é assim e abre
-              feriado, ocorrência e exceção.
-            </li>
-            <li>
-              <strong class="text-toned">Editar em lista</strong>: a mesma coisa em forma de lista,
-              para ver o ano inteiro de uma vez.
-            </li>
-          </ul>
-          <ul v-else class="mt-1 space-y-1">
-            <li>
-              A lista edita as mesmas coisas do calendário: a regra da semana, os feriados e as
-              ocorrências.
-            </li>
-            <li>
-              Ela existe para o que o mês não mostra: o <strong class="text-toned">ano inteiro</strong>
-              de uma vez, sem virar doze telas.
-            </li>
-            <li>
-              <strong class="text-toned">Editar em calendário</strong> volta para o mês.
-            </li>
-          </ul>
-        </template>
-      </UAlert>
-
-      <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+      <template #acoes>
         <UButton
           :label="modoLista ? 'Editar em calendário' : 'Editar em lista'"
           :icon="modoLista ? 'i-lucide-calendar-days' : 'i-lucide-list'"
@@ -397,16 +395,15 @@ function periodoDaOcorrencia(o: Ocorrencia) {
           variant="subtle"
           @click="modoLista = !modoLista"
         />
-
         <UButton
           label="Importar feriados"
           icon="i-lucide-download"
           size="xs"
           color="neutral"
-          variant="subtle"
+          variant="ghost"
           @click="escolhendoFeriados = true"
         />
-      </div>
+      </template>
 
       <template v-if="!modoLista">
 
