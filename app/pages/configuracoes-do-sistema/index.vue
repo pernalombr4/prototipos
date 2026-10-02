@@ -9,6 +9,9 @@ import { documentacao, identidade } from './mocks'
 import {
   abas,
   abasPendentes,
+  agrupamento,
+  agrupamentos,
+  type Agrupamento,
   descartar,
   destacar,
   indiceDeBusca,
@@ -26,7 +29,7 @@ definePageMeta({
   titulo: 'Configurações do Sistema',
   descricao: 'Cinco assuntos diferentes atrás de uma linha de abas: achar, mudar sem medo e aprender sem sair da tela.',
   status: 'em-revisao',
-  atualizado: '2026-09-16',
+  atualizado: '2026-10-02',
   tela: 'Proposta',
 })
 
@@ -157,6 +160,33 @@ function descartarTudo() {
 
 type EstadoDemo = 'normal' | 'lendo' | 'carregando'
 const estado = ref<EstadoDemo>('normal')
+
+/*
+ * Agrupamento (rodada 26): A, B ou C, na URL como a aba, para dar para mandar
+ * o link já aberto na opção que se quer discutir.
+ */
+const valoresDeAgrupamento = agrupamentos.map(g => g.valor)
+agrupamento.value = valoresDeAgrupamento.includes(route.query.agrupamento as Agrupamento)
+  ? route.query.agrupamento as Agrupamento
+  : 'cartao'
+watch(agrupamento, (novo) => {
+  router.replace({ query: { ...route.query, agrupamento: novo === 'cartao' ? undefined : novo } })
+})
+
+/*
+ * A barra de andaime quebra em duas linhas quando a janela estreita, e a
+ * barra de pendência fica logo acima dela. A altura medida é o que impede
+ * uma de cobrir a outra.
+ */
+const andaime = ref<HTMLElement | null>(null)
+const alturaDoAndaime = ref(56)
+let observador: ResizeObserver | undefined
+onMounted(() => {
+  if (!andaime.value) return
+  observador = new ResizeObserver(([e]) => (alturaDoAndaime.value = e!.target.getBoundingClientRect().height))
+  observador.observe(andaime.value)
+})
+onBeforeUnmount(() => observador?.disconnect())
 const estados: { valor: EstadoDemo, rotulo: string }[] = [
   { valor: 'normal', rotulo: 'Proprietária' },
   { valor: 'lendo', rotulo: 'Sem permissão de editar' },
@@ -165,7 +195,7 @@ const estados: { valor: EstadoDemo, rotulo: string }[] = [
 </script>
 
 <template>
-  <div class="min-h-screen bg-default pb-44">
+  <div class="min-h-screen bg-default pb-56">
     <UContainer class="py-8">
       <!-- CABEÇALHO ------------------------------------------------- -->
       <header class="mb-6 flex flex-wrap items-start justify-between gap-4">
@@ -266,7 +296,8 @@ const estados: { valor: EstadoDemo, rotulo: string }[] = [
     >
       <div
         v-if="abasPendentes.length && estado !== 'lendo'"
-        class="fixed inset-x-0 bottom-14 z-40 border-t border-default bg-elevated/95 backdrop-blur"
+        class="fixed inset-x-0 z-40 border-t border-default bg-elevated/95 backdrop-blur"
+        :style="{ bottom: `${alturaDoAndaime}px` }"
       >
         <UContainer class="flex flex-wrap items-center gap-3 py-3">
           <UIcon name="i-lucide-circle-alert" class="size-4 shrink-0 text-warning" />
@@ -304,7 +335,7 @@ const estados: { valor: EstadoDemo, rotulo: string }[] = [
     </UModal>
 
     <!-- ANDAIME DE PROTÓTIPO — não faz parte da proposta -->
-    <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">
+    <div ref="andaime" class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">
       <UContainer class="flex flex-wrap items-center gap-2 py-3">
         <span class="mr-1 text-xs font-semibold uppercase tracking-wider text-toned">
           Protótipo · estado
@@ -319,6 +350,21 @@ const estados: { valor: EstadoDemo, rotulo: string }[] = [
           :variant="estado === e.valor ? 'solid' : 'subtle'"
           @click="estado = e.valor"
         />
+
+        <span class="ml-3 mr-1 text-xs font-semibold uppercase tracking-wider text-toned">
+          Agrupamento
+        </span>
+        <UFieldGroup size="xs">
+          <UButton
+            v-for="g in agrupamentos"
+            :key="g.valor"
+            :label="g.rotulo"
+            :color="agrupamento === g.valor ? 'primary' : 'neutral'"
+            :variant="agrupamento === g.valor ? 'solid' : 'subtle'"
+            :aria-pressed="agrupamento === g.valor"
+            @click="agrupamento = g.valor"
+          />
+        </UFieldGroup>
 
         <ControlesDePrototipo class="ml-auto" />
 

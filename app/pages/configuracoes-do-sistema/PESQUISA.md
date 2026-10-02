@@ -394,6 +394,46 @@ na tela. Deixá-lo mudo era desperdiçar o desenho.
 
 ---
 
+## Rodada 26 — cartão com borda é tendência, ou dá para ser mais limpo?
+
+Pergunta dela: o agrupamento em contêiner com borda, com cara de cartão, é o mais usado e é a
+tendência, ou vale tirar as bordas e distribuir de outro jeito?
+
+**Três padrões consolidados**, todos legítimos:
+
+| Padrão | Como é | Quem usa |
+|---|---|---|
+| **A. Cartão com borda, título dentro** | cada grupo numa caixa com contorno | Shopify ([Polaris, layout anotado](https://polaris-react.shopify.com/components/layout-and-structure/layout?example=layout-annotated)), Vercel |
+| **B. Fundo suave, título fora** | título e descrição soltos; os campos num bloco de fundo tingido com anel discreto | template oficial de dashboard do Nuxt UI (`nuxt-ui-templates/dashboard`, `app/pages/settings/`: `UPageCard variant="naked"` no título, `variant="subtle"` nos campos), Apple (Ajustes do Sistema) |
+| **C. Aberto** | título, fio e espaço; nenhuma caixa | GitHub, Notion, Stripe |
+
+**O que se lê de tendência:** menos moldura, não menos agrupamento. As descrições do estilo que
+se copia hoje (o "Linear-like") falam em "menos contêineres e bordas, apoiando-se em
+espaçamento, tipografia, alinhamento e mudanças sutis de superfície"
+([misfits-web#689](https://github.com/canatac/misfits-web/issues/689),
+[traicr#9](https://github.com/regutierrez/traicr/issues/9),
+[benchcard#142](https://github.com/kylehoehns/benchcard/issues/142)). Não deu para medir o
+Linear por dentro: fica atrás de login.
+
+**Cartão, a rigor, é outra coisa.** Para a [NN/G](https://www.nngroup.com/articles/cards-component/),
+cartão é a prévia curta de algo, com link para o detalhe, e serve para navegar e comparar, não
+para procurar ([vídeo](https://www.nngroup.com/videos/card-view-vs-list-view/)). Seção de
+configuração não é isso: usa a forma do cartão sem a função dele.
+
+**O dado que mais pesa para o ENSPACE:** o template oficial do Nuxt UI, a biblioteca do produto,
+usa B. Implementar B é trocar uma variante; implementar C pede também largura máxima na coluna.
+
+**Onde o nosso A pesa:** o título dentro da caixa engorda a moldura; uma aba de seção única
+(Calendário) tem uma moldura que não separa nada; e a caixa larga incentiva a linha esticada
+(rodadas 2 e 13).
+
+Outras leituras: [Eleken, settings page UI](https://www.eleken.co/blog-posts/settings-page-ui),
+[21st.dev, settings pages](https://21st.dev/blog/react-settings-page-components),
+[Untitled UI, settings pages](https://www.untitledui.com/components/settings-pages),
+[GitLab, padronização de settings](https://gitlab.com/gitlab-org/gitlab/-/issues/275969).
+
+---
+
 ## O padrão que todos seguem
 
 Os cinco obrigatórios fazem igual nestes quatro pontos — divergir aqui custa aprendizado e

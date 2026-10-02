@@ -244,6 +244,28 @@ export const indiceDeBusca: ItemDeBusca[] = [
   { aba: 'cobranca', secao: 'extrato', rotulo: 'Extrato de consumo', sinonimos: ['histórico', 'transação', 'gasto', 'no que foi'] },
 ]
 
+/* ------------------------------------------------------------------ *
+ * Agrupamento das seções: andaime de comparação, rodada 26.
+ *
+ * Três formas de desenhar o mesmo grupo de ajustes, para ela comparar na
+ * tela em vez de no texto (PESQUISA.md, "Rodada 26"):
+ *  - cartao: moldura com borda e título dentro. É a forma de hoje (A);
+ *  - suave:  título fora, conteúdo num bloco de fundo suave. Template de
+ *            dashboard do Nuxt UI (B);
+ *  - aberto: sem caixa. Título, fio e espaço, como GitHub e Notion (C).
+ * O padrão continua sendo A (regra 15): B e C são alternativa.
+ * ------------------------------------------------------------------ */
+
+export type Agrupamento = 'cartao' | 'suave' | 'aberto'
+
+export const agrupamentos: { valor: Agrupamento, rotulo: string }[] = [
+  { valor: 'cartao', rotulo: 'A · Cartão com borda' },
+  { valor: 'suave', rotulo: 'B · Fundo suave' },
+  { valor: 'aberto', rotulo: 'C · Aberto' },
+]
+
+export const agrupamento = ref<Agrupamento>('cartao')
+
 /** Seção que a busca mandou destacar. Some sozinha — é pisca, não seleção. */
 export const destaque = ref<string | null>(null)
 

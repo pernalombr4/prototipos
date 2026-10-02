@@ -5,6 +5,9 @@ O que está aberto neste protótipo. Item resolvido sai daqui e vira entrada no
 
 ## Esperando decisão da Mikaela
 
+- **Agrupamento das seções: A, B ou C** (rodada 26). Os 3 estão na barra de andaime. Escolhido
+  B, os painéis internos de fundo passam a `bg-default`; escolhido C, a coluna ganha largura
+  máxima. Os outros 2 saem num commit próprio (regra 11).
 - **A cor da marca.** `bg-primary` com texto branco dá **3,39:1**, contra os 4,5:1 do WCAG AA
   para texto normal. Vale para todo botão e selo `solid` da cor primária, aqui e no produto.
   Alternativas medidas: `fuchsia-600` com branco (5,08:1), `fuchsia-500` com preto (6,19:1),

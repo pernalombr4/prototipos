@@ -1,5 +1,21 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 26 · 2026-10-02
+- **Pedido (literal):** "pode fazer os modelos B e C como outras opçoes. coloque botao na barra de açoes do prototipo pra vermos a diferença. hoje estamos na opçao a, mas mostre como seria B e C"
+- **Mudou:** a barra de andaime ganhou o grupo **Agrupamento**, com 3 botões: A · Cartão com borda (padrão), B · Fundo suave, C · Aberto.
+- **Mudou:** a escolha vai para a URL (`?agrupamento=suave` ou `?agrupamento=aberto`), para dar para mandar o link já aberto na opção.
+- **Mudou:** só o `_Secao.vue` sabe desenhar os 3. As abas não mudaram, fora a prop `unica` no Calendário.
+- **A:** igual à rodada 25.
+- **B:** título e resumo fora; o conteúdo num `UCard variant="subtle"` (fundo `bg-elevated/50`, anel `ring-default`), como o template de dashboard do Nuxt UI. A zona de perigo leva o gradiente vermelho do mesmo template, com anel vermelho. O Calendário, que é seção única, fica sem bloco.
+- **C:** sem caixa. Título com um fio embaixo e mais espaço entre as seções, como o cabeçalho de seção do GitHub. Só a zona de perigo guarda moldura vermelha, a exceção que o GitHub também faz; nela o fio sob o título sai.
+- **Mudou:** a barra de pendência mede a altura do andaime, que agora quebra em 2 linhas a 1280 px, e para logo acima dele.
+- **Fronteira:** muda o desenho do agrupamento das seções; não muda conteúdo, ordem, rótulo, casca nem molduras internas (grade do mês, tabela do extrato, aviso de saldo, avisos tingidos).
+- **Maquete:** B e C são alternativa de comparação. O padrão continua A (regra 15).
+- **Crítica e acessibilidade:** os botões do grupo levam `aria-pressed`. Em B, os painéis internos de fundo (`bg-elevated/40` e `/60`: o gráfico da carteira, o aviso de saldo, os ladrilhos dos dicionários) quase somem sobre o fundo do bloco, que já é `bg-elevated/50`; se B for o escolhido, esses painéis passam a `bg-default`. Em C, a 1.200 px de largura, a linha de ajuste fica longa entre rótulo e chave, porque nada mais estreita o conteúdo; se C for o escolhido, a coluna precisa de largura máxima. As skills `design:design-critique` e `design:accessibility-review` não rodaram nesta sessão (nuvem); a crítica acima foi feita à mão, sobre os prints.
+- **Ver:** `/configuracoes-do-sistema?agrupamento=suave` · `/configuracoes-do-sistema?agrupamento=aberto`
+
+---
+
 ## Rodada 25 — 01/10/2026 — "Faltam" virou "A traduzir", e nasceu o AFAZERES
 
 **O que ela pediu, literal:**

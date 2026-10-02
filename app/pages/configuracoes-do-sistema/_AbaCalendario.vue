@@ -383,6 +383,7 @@ function periodoDaOcorrencia(o: Ocorrencia) {
     <Secao
       id="dias-uteis"
       titulo="Calendário do workspace"
+      unica
       resumo="Dias úteis, feriados e ocorrências. Edite no mês, ou em lista se preferir."
       style="animation: entrada .4s ease-out both"
     >
