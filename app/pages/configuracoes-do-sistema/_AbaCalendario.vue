@@ -614,7 +614,15 @@ function periodoDaOcorrencia(o: Ocorrencia) {
           </p>
         </div>
 
-      <div class="grid gap-x-10 gap-y-8 @4xl:grid-cols-2">
+      <!--
+        Dois blocos, um embaixo do outro, e não duas colunas.
+
+        Em coluna, cada lista ficava com metade da largura para um conteúdo que
+        é linha inteira: data, nome, abrangência e remover. A de ocorrências
+        ainda truncava o nome. Empilhadas, cada uma usa a largura que o
+        conteúdo pede.
+      -->
+      <div class="space-y-8">
         <div id="feriados" class="min-w-0 scroll-mt-40">
           <h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
             Feriados
