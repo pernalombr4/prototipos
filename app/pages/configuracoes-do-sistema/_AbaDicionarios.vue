@@ -429,7 +429,7 @@ async function rodarIaEmMassa() {
 
           <p class="mb-1.5 flex items-center justify-between text-xs uppercase tracking-wider text-muted">
             <span>Estrutura</span>
-            <span>falta</span>
+            <span>a traduzir</span>
           </p>
 
           <div class="max-h-[30rem] overflow-y-auto pe-1">
@@ -488,7 +488,7 @@ async function rodarIaEmMassa() {
               <UFieldGroup size="xs">
                 <UButton
                   v-for="f in [
-                    { valor: 'faltam', rotulo: 'Faltam' },
+                    { valor: 'faltam', rotulo: 'A traduzir' },
                     { valor: 'traduzidas', rotulo: 'Traduzidas' },
                     { valor: 'todas', rotulo: 'Todas' },
                   ]"
@@ -612,7 +612,7 @@ async function rodarIaEmMassa() {
             <UEmpty
               v-else
               :icon="filtro === 'faltam' ? 'i-lucide-party-popper' : 'i-lucide-search-x'"
-              :title="filtro === 'faltam' ? 'Nada falta traduzir aqui' : 'Nenhuma chave neste recorte'"
+              :title="filtro === 'faltam' ? 'Tudo traduzido aqui' : 'Nenhuma chave neste recorte'"
               :description="filtro === 'faltam'
                 ? `Todo este recorte já tem texto em ${idiomaAtual?.nome}.`
                 : 'Tente outro termo ou outro status.'"

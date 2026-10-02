@@ -1,5 +1,35 @@
 # Decisões — Configurações do Sistema
 
+## Rodada 25 — 01/10/2026 — "Faltam" virou "A traduzir", e nasceu o AFAZERES
+
+**O que ela pediu, literal:**
+
+> "nos dicionarios, as chaves 'faltam, traduzidas, todas' ta ruim. 'faltam' ta ruim. tem que ter um
+> outro termo melhor / adicione isso na lista de afazeres"
+
+Os três rótulos não eram paralelos: um verbo ("Faltam"), um adjetivo ("Traduzidas") e um pronome
+("Todas"). E o primeiro nomeava a ausência, não o trabalho.
+
+| Antes | Depois |
+|---|---|
+| Faltam | **A traduzir** |
+| Traduzidas | Traduzidas |
+| Todas | Todas |
+
+"A traduzir" e "Traduzidas" viram par: o que falta fazer e o que está feito. O cabeçalho da árvore
+acompanhou (`FALTA` virou `A TRADUZIR`), e o vazio do filtro passou a afirmar em vez de negar:
+"Nada falta traduzir aqui" virou **"Tudo traduzido aqui"**.
+
+### AFAZERES.md
+
+Não existia lista de afazeres no protótipo. Agora existe, em
+[`AFAZERES.md`](AFAZERES.md), com o que está aberto: as decisões que são dela (a cor da marca, se
+a correção de contraste sobe para o en-docs, as 2 propostas de Informações Básicas), a pergunta de
+produto que sobrou do dicionário, a dívida desta aba (tradução para inglês e espanhol) e os
+achados do produto para levar adiante.
+
+---
+
 ## Rodada 24 — 01/10/2026 — a limpeza das outras abas
 
 Ela aprovou as sugestões da revisão (as de Cobrança, Notificações e os segmentados). Aplicadas,
