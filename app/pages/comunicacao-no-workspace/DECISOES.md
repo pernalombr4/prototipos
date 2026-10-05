@@ -65,6 +65,66 @@ Nova Mensagem ── De: caixa do workspace   Nova Mensagem ── De: caixa do 
   [compositor e busca](evidencias/prototipo-04-compositor-busca-de-item.jpg),
   [Sistema › Módulos](evidencias/prototipo-05-sistema-modulos.jpg).
 
+## Rodada 2 · 2026-10-05
+
+- **Pedido (literal):**
+  - "saiba que os atalhos de comunicaçao nao devem ser um modulo simplesmente deve existir no
+    enspace. usuario nao precisa ativar. isso existe por padrao. ajuste esse ponto de jornada de
+    configurador", e depois: "calma... o felipe pediu pra ser módulo? se sim, entao mantenha.";
+  - "me diga quais produtos voce pesquisou pra executar esse prototipo. voce deve considerar hubspot
+    na sua lista, alem de apollo. clickup tem que ser considerado, monday, twenty e outros tambem.
+    garanta uma pesquisa mais extensa pra ver se a ux ta interessante e use
+    /nuxt-ui:implement-component-with-props (MCP) /nuxt-ui pra melhorar o que precisar".
+- **O módulo fica.** O documento do Felipe pede: "Todos esses botões devem ter opção nas
+  configurações de aparecerem ou não nas telas, do mesmo modo como foi feito em correções
+  monetárias, comparador". Correção Monetária e Comparador moram no cartão Módulos de Sistema.
+- **Pesquisa:** 20 produtos na rodada 2 (lista e avaliação de cada decisão no `PESQUISA.md`, seção
+  "Rodada 2").
+- **Mudou:**
+  - **E-mail em botão dividido:** o clique escreve pelo ENSPACE, a seta abre o app. Some o clique a
+    mais da rodada 1;
+  - **o aviso do Cc** no menu da seta: a resposta volta ao item quando a pessoa responde a todos;
+  - **canal sem dado** continua no Tab (`aria-disabled`), diz o motivo e leva ao campo:
+    "Cadastrar telefone", "Corrigir telefone", "Cadastrar e-mail";
+  - **telefone com menos de 10 dígitos** dá "Telefone inválido" (o mock da Atlas tem um);
+  - **compositor:** sem camada escura e sem travar a página; Expandir; Minimizar e Esc guardam o
+    rascunho numa barra do rodapé, que continua na troca de tela; "Rascunho salvo" no rodapé;
+  - **foco ao abrir:** no "Para"; vindo do item, no texto;
+  - **atalhos de teclado:** C escreve (fora de campo de texto), Ctrl+Enter envia. As dicas mostram
+    as teclas;
+  - **"De":** com 1 opção vira texto; ganha destaque quando o vínculo troca o remetente;
+  - **"Para":** sugere também os contatos dos itens que a pessoa vê;
+  - **sugestão de item** no bloco "Vincular a item", pelos destinatários;
+  - **E-mails:** "Vincular" na linha do e-mail sem item e sugestão de item pelo remetente na
+    leitura;
+  - **lote de WhatsApp e SMS** vira fila: quem fica de fora antes de começar, "Conversa 1 de N",
+    "Abrir conversa" e "Próxima";
+  - **lembrete da Agenda** leva o local do evento;
+  - **link do editor** em português, espanhol e inglês (`_LinkDoEditor.vue`, cópia traduzida do
+    exemplo `EditorLinkPopover` do Nuxt UI).
+- **Descartado, com o motivo:**
+  - trocar o bloco "Vincular a item" por uma linha junto do Enviar (formato do HubSpot e do
+    Salesforce): o documento pede o vínculo "visualmente separado";
+  - 2 ou 3 textos iniciais por categoria e mais de 1 telefone por contato: ficam para depois, porque
+    mexem na configuração da categoria;
+  - link curto e QR code para o link do formulário: dependem de serviço fora do ENSPACE;
+  - lembrar a última escolha do botão E-mail: precisa de preferência por pessoa.
+- **Maquete:** a mesma da rodada 1. O rascunho e os e-mails somem ao recarregar.
+- **Não deu:**
+  - o `/nuxt-ui:implement-component-with-props` é um prompt do MCP que a pessoa chama no chat; o
+    agente não chama prompt. No lugar, as ferramentas do MCP `nuxt-ui`: metadados de `FieldGroup`,
+    `DropdownMenu`, `Slideover`, `InputMenu` e `Editor`, e os exemplos `FieldGroupDropdownExample` e
+    `EditorLinkPopover`;
+  - Apollo, ClickUp, monday, Salesforce e RD Station: a ajuda bloqueia leitura automática (403 ou
+    página montada por script). O que veio da busca está marcado "só busca" no `PESQUISA.md`.
+- **Ver:** `http://localhost:3000/comunicacao-no-workspace` · prints:
+  [E-mail em botão dividido](evidencias/prototipo-06-email-botao-dividido.jpg),
+  [compositor com sugestão de item](evidencias/prototipo-07-compositor-sugestao-de-item.jpg),
+  [rascunho minimizado](evidencias/prototipo-08-rascunho-minimizado.jpg),
+  [fila de WhatsApp](evidencias/prototipo-09-fila-de-whatsapp.jpg),
+  [E-mails com sugestão pelo remetente](evidencias/prototipo-10-emails-sugestao-pelo-remetente.jpg),
+  [escuro e espanhol](evidencias/prototipo-11-escuro-espanhol.jpg).
+
 ## Por que cada decisão
 
 ### O endereço do item é o remetente
@@ -92,24 +152,34 @@ interna, com o e-mail saindo sempre da mesma caixa?
 
 A "Nova Mensagem" de hoje não diz de onde o e-mail sai. Com o compositor abrindo de qualquer tela,
 o remetente muda conforme o vínculo, e esconder isso faz a pessoa mandar e-mail do endereço errado
-sem saber. HubSpot e Pipefy mostram o From.
+sem saber. HubSpot, Salesforce, Close e Pipefy mostram o From.
 
-### O botão E-mail tem 2 caminhos
+- **1 opção:** o "De" é texto, não lista (Twenty e Pipefy).
+- **Vínculo trocado:** o "De" ganha destaque por 1,6 s. Nenhum produto da pesquisa troca o
+  remetente pelo vínculo, então a troca precisa ser vista.
 
-Com o módulo "E-mail do ENSPACE" ligado, o E-mail dos atalhos abre um menu:
+### O botão E-mail tem 2 caminhos, num botão dividido
 
-- **Escrever pelo ENSPACE:** sai da caixa do item e fica no histórico;
-- **Abrir no meu app de e-mail:** o `mailto:` que o documento pede.
+Com o módulo "E-mail do ENSPACE" ligado, o E-mail dos atalhos é um botão dividido
+(`UFieldGroup` com `UDropdownMenu`, como o exemplo `FieldGroupDropdownExample` do Nuxt UI):
 
-Com o módulo desligado, o botão abre direto o app. É a regra do Twenty (com caixa, compositor
-interno; sem caixa, `mailto:`), só que com a escolha à vista, porque no ENSPACE as 2 coisas existem
-juntas.
+- **o clique no corpo escreve pelo ENSPACE:** sai da caixa do item e fica no histórico;
+- **a seta abre "Abrir no meu app de e-mail":** o `mailto:` que o documento pede.
+
+O caminho do ENSPACE vem primeiro porque é o único em que a resposta sempre volta ao item. Com o
+módulo desligado, o botão abre direto o app. É a regra do Twenty (com caixa, compositor interno; sem
+caixa, `mailto:`), com a escolha à vista, porque no ENSPACE as 2 coisas existem juntas. Agendor
+tem o mesmo desenho no WhatsApp; o Pipedrive troca o método por uma seta. Na coluna de ícones não
+cabe o botão dividido: lá, os 2 caminhos vão num menu.
 
 ### A caixa do item vai em cópia no e-mail do app
 
 Ideia do monday ("CC to pulse"). Quando a pessoa abre o e-mail no Outlook, o `mailto:` leva a
 caixa do item em `cc`. A resposta do cliente volta para a aba Mail Box, e o ENSPACE não enviou
 nada. Liga e desliga em Sistema › Módulos ("Pôr a caixa do item em cópia").
+
+HubSpot e Pipedrive usam Cco. Com Cco, a resposta só volta se alguém a encaminhar; com Cc, volta
+quando o cliente responde a todos. O protótipo fica com o Cc e diz isso na opção do menu.
 
 ### "Não gerar conteúdo" e o texto inicial
 
@@ -132,10 +202,17 @@ lado mostra o link que cada atalho abre com o item de exemplo.
 
 ### Canal sem dado: desabilitado, com o motivo
 
-Pedido do documento ("o respectivo botão deverá ficar indisponível"). Nenhuma das referências diz
-**por quê**. O protótipo diz: tooltip "Sem telefone cadastrado" e, no Contato rápido, uma linha
-visível "Sem telefone: WhatsApp e SMS indisponíveis." (botão desabilitado não recebe foco, e o
-tooltip não chega a quem usa teclado). Canal que o administrador desligou não aparece.
+Pedido do documento ("o respectivo botão deverá ficar indisponível"). O mercado esconde o botão
+(Agendor, Ploomes, Twenty) ou oferece completar o dado (HubSpot "+ Add phone number", Apollo). O
+protótipo junta as 2 coisas:
+
+- **o motivo:** "Sem telefone cadastrado", "Sem e-mail cadastrado" ou "Telefone inválido" (menos
+  de 10 dígitos), na dica e no nome acessível;
+- **o próximo passo,** no Contato rápido: "Cadastrar telefone", "Corrigir telefone" ou "Cadastrar
+  e-mail" abre a Visão Geral com o foco no campo;
+- **`aria-disabled`, não `disabled`:** o botão continua no Tab, e o motivo chega a quem usa teclado.
+
+Canal que o administrador desligou não aparece.
 
 ### Membro sem telefone
 
@@ -157,8 +234,12 @@ SMS funcionar de verdade, o perfil precisa do campo. **É dependência fora dest
 ### Tarefas: lista com aviso em lote, quadro com clique direito
 
 - **Lista:** a coluna Contato (3 ícones) e, com tarefas selecionadas, "Avisar responsáveis por".
-  E-mail abre 1 rascunho para todos. WhatsApp e SMS abrem 1 janela com 1 botão por pessoa: o
-  navegador bloqueia várias abas abertas de uma vez.
+  E-mail abre 1 rascunho para todos. WhatsApp e SMS viram uma fila, porque `wa.me` aceita 1 número
+  e o navegador bloqueia várias abas abertas de uma vez:
+  - antes de começar, a janela diz quem fica de fora por falta de telefone;
+  - "Conversa 1 de N", com barra de progresso, "Abrir conversa" e "Próxima";
+  - no fim, "Todas as conversas abertas." É o modelo do "Call next lead" do Close e do discador
+    em fila do Apollo.
 - **Quadro:** o mockup 5 põe "Notify" em cada cartão. O `EnKanbanBoard` 0.17 não aceita ação extra
   no cartão (sem slot e sem prop). O protótipo usa o clique direito (o board emite
   `context-mouse`) e o painel da tarefa, que abre no clique do cartão. **Pedido ao SDK:** uma prop
@@ -168,21 +249,39 @@ SMS funcionar de verdade, o perfil precisa do campo. **É dependência fora dest
 
 O modal "Evento" de hoje ganha um atalho por participante e "E-mail para todos". Participante do
 Outlook só tem e-mail, então WhatsApp e SMS ficam desabilitados com o motivo. Evento que vem de um
-item (vencimento, assinatura) traz o telefone do contato do item.
+item (vencimento, assinatura) traz o telefone do contato do item. O texto do lembrete leva data,
+hora e local.
 
 ### A área "E-mails" no menu
 
 O documento pede que o e-mail apareça "na área de E-mail do usuário". Essa área existe escondida
 (`/itemEmails`, "Emails Recebidos"; achado S2-F1 da pesquisa de UX: telas nativas que só existem no editor de menus). O protótipo a põe na seção Membro, com
 Recebidos e Enviados, a coluna Item, o filtro "Com item" e "Sem item", e o vínculo depois do envio
-(ideia do Pipedrive). O nome repete o "E-mails" de Configurações, como "Categorias" já se repete
-entre Membro e Estrutura.
+(ideia do Pipedrive):
+
+- **"Vincular" na própria linha** do e-mail sem item (o "Link item" do Pipedrive);
+- **sugestão pelo remetente** na leitura: os itens em que quem escreveu é contato aparecem antes da
+  busca livre.
+
+O nome repete o "E-mails" de Configurações, como "Categorias" já se repete entre Membro e Estrutura.
 
 ### "Novo e-mail" na barra do topo
 
 O documento pede o e-mail "da mesma forma que outras funcionalidades transversais da plataforma".
 As transversais de hoje moram na barra do topo (Suporte, notificações). O botão tem rótulo, não só
-ícone, para ser achado na primeira vez. Com rascunho guardado, ganha um ponto amarelo.
+ícone, para ser achado na primeira vez. Com rascunho guardado, ganha um ponto amarelo. A tecla **C**
+escreve, fora de campo de texto (Gmail `c`, Outlook `N`), e a dica do botão mostra a tecla.
+
+### O compositor não tranca a tela
+
+- **Sem camada escura e sem travar a página** (`overlay` e `modal` desligados): a pessoa consulta o
+  item com o e-mail aberto, como no Salesforce e no Gmail.
+- **Expandir** alarga a gaveta para textos longos.
+- **Minimizar, Esc e o X guardam o rascunho** numa barra do rodapé, que continua na troca de tela
+  (`_RascunhoMinimizado.vue`). Descartar oferece "Desfazer".
+- **Foco ao abrir:** no "Para"; vindo do item, com o destinatário pronto, no texto.
+- **Ctrl+Enter envia**, também dentro do editor. A dica do Enviar mostra as teclas.
+- **"Para"** sugere membros e os contatos dos itens que a pessoa vê.
 
 ### Busca de item
 
@@ -191,6 +290,8 @@ As transversais de hoje moram na barra do topo (Suporte, notificações). O bot�
 - Procura em referência, ID, nome, categoria, contatos e campos de texto (contraparte, CNPJ).
 - Resultado agrupado por categoria, com ID, etapa e contraparte: itens de nome igual se distinguem.
 - Item sem permissão não aparece, nem na contagem. A lista diz isso no rodapé.
+- Antes da busca, **sugestões pelos destinatários:** até 3 itens em que alguém do "Para" é contato
+  (HubSpot, Pipedrive e monday sugerem o registro pelo endereço).
 
 ## O que é do SDK
 
@@ -215,6 +316,15 @@ Classes com valor arbitrário:
 | telas | `animate-[entrada_...]` | Usa o `@keyframes entrada` do `main.css` |
 | `_TelaItem.vue`, `_TelaEmails.vue` | `[&_p]:my-1.5`, `[&_blockquote]:...` | Corpo do e-mail vem em HTML |
 | `_TelaAgenda.vue` | `[&:nth-child(7n)]:border-r-0` | Grade do mês montada à mão: nem o Nuxt UI nem o SDK têm calendário de eventos (MCP: o `UCalendar` escolhe data) |
+| `_CascaDoEnspace.vue` | `text-[9px]` | O selo "BR" da barra do topo do develop, em 24 px |
+| `_BuscaDeItem.vue` | `text-[11px]` no `label` | O rótulo de grupo (nome da categoria) mais baixo que o resultado, como o develop |
+| `_Compositor.vue` | `scale-[.98]` | Entrada do bloco "Vincular a item" ao trocar entre busca e item escolhido |
+| `_TelaItem.vue` | `min-h-[calc(100dvh-4rem)]` | O item ocupa a altura da tela menos a barra do topo, como no develop |
+| `_LinksPublicos.vue` | `w-[22rem]` | Largura do menu de links públicos: cabe o nome do formulário e os 2 botões |
+| `_TelaEmails.vue`, `_TelaTarefas.vue` | `grid-cols-[5rem_1fr]`, `grid-cols-[8rem_1fr]` | Rótulo e valor em 2 colunas na leitura do e-mail e no painel da tarefa |
+| `_TelaCategoria.vue` | `xl:grid-cols-[1fr_24rem]` | Configuração dos atalhos à esquerda, prévia dos links à direita |
+| `_RascunhoMinimizado.vue` | `w-[min(26rem,calc(100vw-2rem))]` | A barra do rascunho cabe na tela estreita sem passar da borda |
+| `_AcoesDeContato.vue` | `itemDescription: 'whitespace-normal'` | O tema do `DropdownMenu` corta a descrição em 1 linha; o aviso do Cc precisa ser lido inteiro |
 
 ## Crítica e acessibilidade
 
@@ -228,17 +338,24 @@ Rodadas `design:design-critique` e `design:accessibility-review` sobre o código
 - "Vinculado porque você começou no item" continuava depois de trocar o item à mão: some na troca;
 - os 3 botões do Contato rápido quebravam linha: dividem a largura do cartão.
 
+**Corrigido na rodada 2:**
+
+- o E-mail com 2 caminhos custava 1 clique a mais: virou botão dividido;
+- o botão sem dado saía do Tab (`disabled`): virou `aria-disabled`, com o motivo no nome acessível;
+- o compositor abria com o foco no Expandir, a dica dele abria e o 1º Esc só fechava a dica: o foco
+  vai para o "Para" ou para o texto;
+- o aviso do Cc saía cortado no menu: quebra linha;
+- a barra do rascunho ficava atrás da barra de andaime quando ela quebra em 2 linhas: subiu;
+- o tema escuro e o espanhol ficaram conferidos ([print](evidencias/prototipo-11-escuro-espanhol.jpg)).
+
 **Fica sem correção, com o motivo:**
 
 - **o clique direito do quadro não chega pelo teclado.** O caminho de teclado é abrir o cartão (o
   painel da tarefa tem os mesmos atalhos). Correção de verdade depende do SDK;
-- **o E-mail com 2 caminhos custa 1 clique a mais** que o `mailto:` direto. Alternativa: botão
-  dividido (clique no corpo escreve pelo ENSPACE, a seta abre o app). Fica para a Mikaela decidir;
 - **WhatsApp e SMS no Início, sem destinatário,** abrem o app vazio. Estão porque o mockup 6 pede;
   o administrador desliga "Tela inicial" em Onde aparecem;
 - **o "Novo e-mail" com rótulo pesa na barra do topo.** Ícone sozinho seria mais leve e mais
   difícil de achar;
-- **o tema escuro e o espanhol ficaram sem conferência visual nesta rodada:** a janela do
-  navegador estava minimizada e não pintava a tela. O texto em espanhol está completo no
-  `textos.ts`;
-- **o aviso com "Ver no item" some em 5 s.** O mesmo caminho existe na tela E-mails.
+- **o aviso com "Ver no item" some em 5 s.** O mesmo caminho existe na tela E-mails;
+- **a tecla C abre o compositor em qualquer tela.** Quem não conhece o atalho pode abrir sem
+  querer; Esc fecha sem perder nada.

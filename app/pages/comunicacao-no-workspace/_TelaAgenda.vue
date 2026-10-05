@@ -53,7 +53,7 @@ const algumTelefone = computed(() => aberto.value?.participantes.some(p => p.tel
 
 function textosDoLembrete(e: EventoDaAgenda, nome?: string) {
   if (!config.value.textoInicial) return { assunto: undefined, mensagem: undefined }
-  const quando = `${dataLonga.value.format(e.inicio)}, ${hora.value.format(e.inicio)}`
+  const quando = [`${dataLonga.value.format(e.inicio)}, ${hora.value.format(e.inicio)}`, e.local].filter(Boolean).join(', ')
   return {
     assunto: props.t.agenda.assuntoDoLembrete(e.titulo, quando),
     mensagem: props.t.agenda.mensagemDoLembrete(nome?.split(' ')[0] ?? '', e.titulo, quando),

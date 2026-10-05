@@ -40,7 +40,7 @@ const props = withDefaults(defineProps<{
   origem: 'item',
 })
 
-const { canaisEm, motivo: motivoDoCanal, abrir, escreverNoEnspace, config } = useAtalhos()
+const { canaisEm, motivo: motivoDoCanal, abrir, escreverNoEnspace, vaiComCopia, config } = useAtalhos()
 
 function motivo(c: 'email' | 'whatsapp' | 'sms', d: Destino | null) {
   return props.semDestinatario ? null : motivoDoCanal(c, d)
@@ -51,22 +51,33 @@ const comEnspace = computed(() => props.permitirEnspace && config.value.emailDoE
 
 const opcoes = computed(() => ({ item: props.item, assunto: props.assunto, mensagem: props.mensagem }))
 
+function escreverAqui() {
+  escreverNoEnspace(props.destino, props.item, props.origem, {
+    ...(props.assunto ? { assunto: props.assunto } : {}),
+    ...(props.corpoEnspace ? { corpo: props.corpoEnspace } : {}),
+  })
+}
+
+const opcaoDoApp = computed<DropdownMenuItem>(() => ({
+  label: props.t.atalho.abrirNoApp,
+  // Com Cc, a resposta só volta ao item se a pessoa responder a todos: o aviso diz isso.
+  description: vaiComCopia(props.item) ? props.t.atalho.abrirNoAppComCopia : props.t.atalho.abrirNoAppDica,
+  icon: 'i-lucide-external-link',
+  // O tema corta a descrição numa linha; o aviso do Cc precisa ser lido inteiro.
+  ui: { itemDescription: 'whitespace-normal' },
+  onSelect: () => abrir('email', props.destino, opcoes.value),
+}))
+
+/** Na coluna de ícones não cabe o botão dividido: os 2 caminhos vão num menu só. */
 const menuDeEmail = computed<DropdownMenuItem[]>(() => [
   {
     label: props.t.atalho.escreverNoEnspace,
     description: props.item ? props.t.atalho.escreverNoEnspaceComItem(props.item.reference) : props.t.atalho.escreverNoEnspaceSemItem,
     icon: 'i-lucide-send',
-    onSelect: () => escreverNoEnspace(props.destino, props.item, props.origem, {
-      ...(props.assunto ? { assunto: props.assunto } : {}),
-      ...(props.corpoEnspace ? { corpo: props.corpoEnspace } : {}),
-    }),
+    ui: { itemDescription: 'whitespace-normal' },
+    onSelect: escreverAqui,
   },
-  {
-    label: props.t.atalho.abrirNoApp,
-    description: props.t.atalho.abrirNoAppDica,
-    icon: 'i-lucide-external-link',
-    onSelect: () => abrir('email', props.destino, opcoes.value),
-  },
+  opcaoDoApp.value,
 ])
 
 function rotulo(c: 'email' | 'whatsapp' | 'sms') {
@@ -80,45 +91,73 @@ function rotulo(c: 'email' | 'whatsapp' | 'sms') {
     :class="bloco ? 'flex gap-1.5' : ['flex flex-wrap items-center', variante === 'icones' ? 'gap-1' : 'gap-2']"
   >
     <template v-for="c in canais" :key="c">
-      <!-- E-mail com 2 caminhos -->
+      <!--
+        E-mail com 2 caminhos, em botão dividido (FieldGroupDropdownExample do
+        Nuxt UI): o clique no corpo escreve pelo ENSPACE, a seta abre o app.
+      -->
+      <UFieldGroup
+        v-if="c === 'email' && comEnspace && !motivo(c, destino) && variante === 'botoes'"
+        :size="tamanho"
+        :class="bloco ? 'flex flex-auto' : ''"
+      >
+        <UTooltip :text="item ? t.atalho.escreverNoEnspaceComItem(item.reference) : t.atalho.escreverNoEnspaceSemItem">
+          <UButton
+            :icon="ICONE_DO_CANAL[c]"
+            :label="rotulo(c)"
+            color="neutral"
+            variant="outline"
+            :class="bloco ? 'flex-auto justify-center' : ''"
+            @click="escreverAqui"
+          />
+        </UTooltip>
+        <UDropdownMenu :items="[opcaoDoApp]" :content="{ align: 'end' }" :ui="{ content: 'w-64' }">
+          <UButton
+            icon="i-lucide-chevron-down"
+            color="neutral"
+            variant="outline"
+            :aria-label="t.atalho.outrasFormasDeEmail"
+          />
+        </UDropdownMenu>
+      </UFieldGroup>
+
       <UTooltip
-        v-if="c === 'email' && comEnspace && !motivo(c, destino)"
-        :text="variante === 'icones' ? rotulo(c) : ''"
-        :disabled="variante !== 'icones'"
+        v-else-if="c === 'email' && comEnspace && !motivo(c, destino)"
+        :text="rotulo(c)"
       >
         <UDropdownMenu :items="menuDeEmail" :content="{ align: 'start' }" :ui="{ content: 'w-72' }">
           <UButton
             :icon="ICONE_DO_CANAL[c]"
-            :label="variante === 'botoes' ? rotulo(c) : undefined"
-            :trailing-icon="variante === 'botoes' ? 'i-lucide-chevron-down' : undefined"
             color="neutral"
             variant="outline"
             :size="tamanho"
-            :block="bloco"
             :aria-label="rotulo(c)"
             class="transition-transform hover:-translate-y-0.5"
-            :class="bloco ? 'flex-auto' : ''"
           />
         </UDropdownMenu>
       </UTooltip>
 
+      <!--
+        Canal sem dado: aria-disabled, não disabled. O botão continua no Tab e o
+        motivo aparece no foco e no hover (achado da revisão de acessibilidade).
+      -->
       <UTooltip v-else :text="motivo(c, destino) ?? (variante === 'icones' ? rotulo(c) : '')" :disabled="!motivo(c, destino) && variante !== 'icones'">
-        <!-- span: botão desabilitado não dispara o tooltip -->
-        <span :class="bloco ? 'flex flex-auto' : 'inline-flex'">
-          <UButton
-            :icon="ICONE_DO_CANAL[c]"
-            :label="variante === 'botoes' ? rotulo(c) : undefined"
-            color="neutral"
-            variant="outline"
-            :size="tamanho"
-            :block="bloco"
-            :disabled="!!motivo(c, destino)"
-            :aria-label="motivo(c, destino) ? `${rotulo(c)}: ${motivo(c, destino)}` : rotulo(c)"
-            class="transition-transform enabled:hover:-translate-y-0.5"
-            :ui="c === 'whatsapp' && !motivo(c, destino) ? { leadingIcon: 'text-success' } : undefined"
-            @click="abrir(c, destino, opcoes)"
-          />
-        </span>
+        <UButton
+          :icon="ICONE_DO_CANAL[c]"
+          :label="variante === 'botoes' ? rotulo(c) : undefined"
+          color="neutral"
+          variant="outline"
+          :size="tamanho"
+          :block="bloco"
+          :aria-disabled="motivo(c, destino) ? 'true' : undefined"
+          :aria-label="motivo(c, destino) ? `${rotulo(c)}: ${motivo(c, destino)}` : rotulo(c)"
+          class="transition-transform"
+          :class="[
+            motivo(c, destino) ? 'cursor-not-allowed opacity-50' : 'hover:-translate-y-0.5',
+            bloco ? 'flex-auto' : '',
+          ]"
+          :ui="c === 'whatsapp' && !motivo(c, destino) ? { leadingIcon: 'text-success' } : undefined"
+          @click="!motivo(c, destino) && abrir(c, destino, opcoes)"
+        />
       </UTooltip>
     </template>
   </div>

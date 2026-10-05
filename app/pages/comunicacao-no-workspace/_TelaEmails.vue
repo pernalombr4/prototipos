@@ -12,13 +12,13 @@
  */
 import type { EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import type { Textos } from './textos'
-import { type Email, itemPorId, membroPorId } from './mocks'
-import { useComunicacao } from './estado'
+import { type Email, itemPorId, itens, membroPorId } from './mocks'
+import { contatosDoItem, useComunicacao } from './estado'
 import BuscaDeItem from './_BuscaDeItem.vue'
 
 const props = defineProps<{ t: Textos }>()
 
-const { emails, abrirCompositor, abrirItem } = useComunicacao()
+const { emails, config, abrirCompositor, abrirItem } = useComunicacao()
 const idioma = useIdioma()
 const toast = useToast()
 
@@ -60,11 +60,24 @@ const aberto = ref<Email | null>(null)
 const leitura = computed({ get: () => !!aberto.value, set: (v) => { if (!v) aberto.value = null } })
 const vinculando = ref(false)
 
-function abrir(e: Email) {
+function abrir(e: Email, vincularAgora = false) {
   aberto.value = e
-  vinculando.value = false
+  vinculando.value = vincularAgora
   if (!e.lido) emails.value = emails.value.map(x => x.id === e.id ? { ...x, lido: true } : x)
 }
+
+/**
+ * Sugestão pelo remetente (ou destinatário, nos enviados): itens em que esse
+ * endereço é contato. Pipedrive, HubSpot e monday sugerem antes da busca.
+ */
+const sugestoes = computed(() => {
+  const e = aberto.value
+  if (!e || e.itemId) return []
+  const enderecos = new Set((e.direcao === 'recebido' ? [e.de] : e.para).map(x => x.toLowerCase()))
+  return itens
+    .filter(i => !i.semAcesso && contatosDoItem(i, config.value).some(c => c.email && enderecos.has(c.email.toLowerCase())))
+    .slice(0, 3)
+})
 
 function vincular(id: number) {
   const e = aberto.value
@@ -157,7 +170,19 @@ function responder(e: Email, encaminhar = false) {
             class="font-mono"
             @click.stop="abrirItem((row as Linha).email.itemId!, 'mailbox')"
           />
-          <span v-else class="text-sm text-dimmed">{{ t.emails.semItem }}</span>
+          <!-- "Link item" no hover, como o Pipedrive: vincula sem abrir a leitura antes -->
+          <span v-else class="group/vinculo flex items-center gap-1.5">
+            <span class="text-sm text-dimmed">{{ t.emails.semItem }}</span>
+            <UButton
+              :label="t.emails.vincular"
+              icon="i-lucide-link-2"
+              color="primary"
+              variant="ghost"
+              size="xs"
+              class="opacity-60 transition-opacity group-hover/vinculo:opacity-100 focus-visible:opacity-100"
+              @click.stop="abrir((row as Linha).email, true)"
+            />
+          </span>
         </template>
         <template #cell-caixa="{ row }">
           <span class="block max-w-56 truncate text-xs text-muted">
@@ -222,6 +247,21 @@ function responder(e: Email, encaminhar = false) {
               <UButton :label="t.compositor.trocar" color="neutral" variant="ghost" size="xs" @click="vinculando = true" />
             </div>
             <div v-else class="mt-2">
+              <div v-if="sugestoes.length" class="mb-2 flex flex-wrap items-center gap-1.5">
+                <span class="text-xs text-muted">{{ t.emails.sugestoesPeloRemetente }}</span>
+                <UButton
+                  v-for="sug in sugestoes"
+                  :key="sug.id"
+                  :label="`${sug.reference} · ${sug.titulo}`"
+                  icon="i-lucide-sparkles"
+                  color="primary"
+                  variant="soft"
+                  size="xs"
+                  class="max-w-64"
+                  :ui="{ label: 'truncate' }"
+                  @click="vincular(sug.id)"
+                />
+              </div>
               <BuscaDeItem :t="t" @escolher="vincular" />
               <p class="mt-1.5 text-xs text-muted">
                 {{ t.emails.vincularDepois }}

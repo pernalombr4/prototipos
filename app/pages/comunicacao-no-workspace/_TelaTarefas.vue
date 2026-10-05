@@ -150,16 +150,39 @@ const responsaveis = computed(() => {
 })
 const semResponsavel = computed(() => selecionadas.value.filter(l => !l.responsavel).length)
 
-/** WhatsApp e SMS em lote: 1 conversa por pessoa, aberta uma de cada vez. */
+/**
+ * WhatsApp e SMS em lote: o wa.me abre 1 número por vez, e o navegador
+ * bloqueia várias abas de uma vez. Vira uma fila, como o "Call next lead" do
+ * Close e o discador do Apollo: "Conversa 1 de 4", Abrir, Próxima. Quem não
+ * tem telefone aparece antes, fora da fila.
+ */
 const lote = ref<Canal | null>(null)
-const abertosNoLote = ref<number[]>([])
+const indiceDoLote = ref(0)
+const abertoNaFila = ref(false)
+const naFila = computed(() => responsaveis.value.filter(m => !motivo(lote.value ?? 'whatsapp', m)))
+const foraDaFila = computed(() => responsaveis.value.filter(m => motivo(lote.value ?? 'whatsapp', m)))
+const atualNaFila = computed(() => naFila.value[indiceDoLote.value] ?? null)
+
+function abrirAtual() {
+  const m = atualNaFila.value
+  if (!m || !lote.value) return
+  const tarefa = selecionadas.value.find(l => l.responsavel?.id === m.id)!.tarefa
+  abrir(lote.value, m, textosDoAviso(tarefa, m))
+  abertoNaFila.value = true
+}
+
+function proxima() {
+  indiceDoLote.value++
+  abertoNaFila.value = false
+}
 
 function avisarEmLote(c: Canal) {
   if (c === 'email') {
     abrir('email', null, { varios: responsaveis.value, assunto: config.value.textoInicial ? props.t.tarefas.assuntoDoLote(selecionadas.value.length) : undefined })
     return
   }
-  abertosNoLote.value = []
+  indiceDoLote.value = 0
+  abertoNaFila.value = false
   lote.value = c
 }
 
@@ -379,27 +402,57 @@ const loteAberto = computed({ get: () => !!lote.value, set: (v) => { if (!v) lot
       </template>
     </USlideover>
 
-    <!-- WhatsApp e SMS em lote -->
+    <!-- WhatsApp e SMS em lote: uma fila -->
     <UModal v-model:open="loteAberto" :title="lote ? t.tarefas.loteTitulo(t.atalho.canal[lote]) : ''" :description="t.tarefas.loteDescricao">
       <template #body>
-        <ul v-if="lote" class="flex flex-col gap-2">
-          <li v-for="m in responsaveis" :key="m.id" class="flex items-center gap-3 rounded-lg border border-default p-3">
-            <UAvatar :text="m.nome.split(' ').map(p => p[0]).join('')" size="sm" />
-            <span class="min-w-0 flex-1">
-              <span class="block truncate text-sm font-medium text-highlighted">{{ m.nome }}</span>
-              <span class="block truncate text-xs text-muted">{{ m.telefone ?? t.atalho.semTelefone }}</span>
-            </span>
-            <UButton
-              :icon="abertosNoLote.includes(m.id) ? 'i-lucide-check' : ICONE_DO_CANAL[lote]"
-              :label="abertosNoLote.includes(m.id) ? t.tarefas.aberta : t.tarefas.abrirConversa"
-              :color="abertosNoLote.includes(m.id) ? 'success' : 'neutral'"
-              variant="outline"
-              size="sm"
-              :disabled="!m.telefone"
-              @click="abrir(lote!, m, textosDoAviso(selecionadas.find(l => l.responsavel?.id === m.id)!.tarefa, m)); abertosNoLote = [...abertosNoLote, m.id]"
-            />
-          </li>
-        </ul>
+        <div v-if="lote" class="flex flex-col gap-4">
+          <UAlert
+            v-if="foraDaFila.length"
+            icon="i-lucide-user-x"
+            color="warning"
+            variant="subtle"
+            :description="t.tarefas.foraSemTelefone(foraDaFila.map(m => m.nome).join(', '))"
+          />
+
+          <template v-if="atualNaFila">
+            <div class="flex items-center justify-between text-sm">
+              <span class="font-medium text-highlighted">{{ t.tarefas.loteProgresso(indiceDoLote + 1, naFila.length) }}</span>
+            </div>
+            <UProgress :model-value="indiceDoLote + (abertoNaFila ? 1 : 0)" :max="naFila.length" size="sm" />
+            <Transition mode="out-in" enter-active-class="transition duration-200 ease-out" enter-from-class="translate-x-2 opacity-0">
+              <div :key="atualNaFila.id" class="flex items-center gap-3 rounded-lg border border-default p-3">
+                <UAvatar :text="atualNaFila.nome.split(' ').map(p => p[0]).join('')" size="md" />
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-sm font-medium text-highlighted">{{ atualNaFila.nome }}</span>
+                  <span class="block truncate text-xs text-muted">{{ atualNaFila.telefone }}</span>
+                </span>
+                <UButton
+                  :icon="abertoNaFila ? 'i-lucide-check' : ICONE_DO_CANAL[lote]"
+                  :label="abertoNaFila ? t.tarefas.aberta : t.tarefas.abrirConversa"
+                  :color="abertoNaFila ? 'success' : 'primary'"
+                  :variant="abertoNaFila ? 'soft' : 'solid'"
+                  size="sm"
+                  @click="abrirAtual"
+                />
+              </div>
+            </Transition>
+            <div class="flex justify-end">
+              <UButton
+                v-if="indiceDoLote < naFila.length - 1"
+                :label="t.tarefas.proxima"
+                trailing-icon="i-lucide-arrow-right"
+                color="neutral"
+                :variant="abertoNaFila ? 'solid' : 'outline'"
+                @click="proxima"
+              />
+              <span v-else class="flex items-center gap-3">
+                <span v-if="abertoNaFila" class="text-sm text-success">{{ t.tarefas.loteConcluido }}</span>
+                <UButton :label="t.tarefas.fechar" color="neutral" :variant="abertoNaFila ? 'solid' : 'outline'" @click="loteAberto = false" />
+              </span>
+            </div>
+          </template>
+          <UEmpty v-else variant="naked" icon="i-lucide-phone-off" :title="t.atalho.semTelefone" size="sm" />
+        </div>
       </template>
     </UModal>
   </div>

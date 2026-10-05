@@ -132,6 +132,11 @@ const grupos = computed(() => [
   { titulo: props.t.casca.ajuda, itens: ajuda },
 ])
 
+/** "C" escreve um e-mail de qualquer tela (Gmail, Notion Mail). Fora de campo de texto. */
+defineShortcuts({
+  c: () => { if (config.value.emailDoEnspace) abrirCompositor() },
+})
+
 const temRascunho = computed(() => !compositorAberto.value && !!(rascunho.value.para.length || rascunho.value.assunto || rascunho.value.corpo.replace(/<[^>]+>/g, '').trim()))
 </script>
 
@@ -265,7 +270,7 @@ const temRascunho = computed(() => !compositorAberto.value && !!(rascunho.value.
       <UButton icon="i-lucide-sun" color="neutral" variant="ghost" size="xs" :aria-label="t.casca.tema" />
 
       <!-- PROPOSTA: escrever um e-mail de qualquer tela, sem entrar num item. -->
-      <UTooltip v-if="config.emailDoEnspace" :text="t.casca.novoEmailDica">
+      <UTooltip v-if="config.emailDoEnspace" :text="t.casca.novoEmailDica" :kbds="['C']">
         <UChip :show="temRascunho" color="warning" size="md" inset>
           <UButton
             icon="i-lucide-mail-plus"

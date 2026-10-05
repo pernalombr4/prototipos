@@ -6,12 +6,19 @@ Consulta em 05/10/2026, nas 3 partes da demanda:
 2. Atalhos de contato por deep link (`mailto:`, `wa.me`, `sms:`).
 3. E-mail de qualquer tela, com vínculo opcional a um item.
 
-Obrigatórias: Notion, Twenty CRM, ClickUp, monday e Pipefy. Extras: HubSpot, Pipedrive, Attio,
-Front, Typeform e Google Forms.
+## Produtos pesquisados
 
-**Sem print nesta rodada.** A pesquisa leu a documentação de cada produto (WebFetch e, onde ele
-recebeu 403, o Chrome: ajudas do ClickUp, do monday e do Typeform). Só estão listadas as URLs
-abertas. Fase declarada no `DECISOES.md`.
+| Rodada | Produtos |
+|---|---|
+| 1 | Obrigatórios: Notion, Twenty CRM, ClickUp, monday, Pipefy. Extras: HubSpot (raso), Pipedrive, Attio, Front, Typeform, Google Forms |
+| 2 (pedido da Mikaela) | HubSpot a fundo, **Apollo.io**, ClickUp, monday (CRM e Emails & Activities), Twenty (código), Pipefy, Notion, Salesforce, Pipedrive, Zoho CRM, Freshsales, Close, **RD Station CRM, Agendor, Ploomes, Kommo** (brasileiros, WhatsApp por `wa.me`), Gmail, Outlook na web, Front, Missive |
+
+A rodada 2 está no fim deste arquivo: "Rodada 2: pesquisa estendida" e "Avaliação da UX do
+protótipo", que diz, decisão por decisão, se o mercado confirma e o que mudou.
+
+**Sem print.** A pesquisa leu a documentação de cada produto e, no Twenty, o código. Algumas
+centrais de ajuda (Apollo, ClickUp, monday, Salesforce) bloqueiam leitura automática: o que veio só
+do buscador está marcado "só busca" e vale como indício. Fase declarada no `DECISOES.md`.
 
 ## Notion
 
@@ -235,3 +242,198 @@ formulário, não de quem atende.
    respeitando permissão. Pipefy chega perto, sem critério documentado.
 6. **Ligar e desligar os atalhos no workspace inteiro**, por canal e por tela. Os outros
    configuram por campo ou por coluna.
+
+---
+
+# Rodada 2: pesquisa estendida
+
+Consulta em 05/10/2026. Por produto, o que muda em relação à rodada 1 ou o que é novo.
+
+## HubSpot (a fundo)
+
+**1. Atalhos.**
+- O registro tem ícones de atividade no alto do painel esquerdo: nota, e-mail, ligação, tarefa e
+  reunião. A ajuda separa criar (Email, Note, Call, Task, Meeting, WhatsApp) de registrar ("Log":
+  Email, Call, Meeting, LinkedIn, SMS, WhatsApp, Postal mail).
+- Ligação: abre uma janela com o número da propriedade "Phone number", com "Call from browser",
+  "Call from phone" ou "Call from HubSpot app". **Sem telefone, o botão continua e oferece "+ Add
+  phone number".**
+- WhatsApp exige conta WhatsApp Business conectada e template aprovado fora da janela de 24 horas.
+  Não há botão `wa.me` nativo.
+
+**2. Link de formulário:** "Review and update" › "Update" › "Copy a share link" › "Copy", no
+editor. Nenhum atalho nas telas de vendas.
+
+**3. E-mail.**
+- O ícone de e-mail do registro abre uma janela pop-up.
+- "From": clicar troca entre o e-mail pessoal e um endereço de equipe.
+- **"Associated with": menu no canto inferior direito, com caixas de seleção.** Atividade de contato
+  também vai para a empresa e os 5 negócios abertos mais recentes; depois do envio, "[x]
+  associations" soma ou tira registros.
+- Rascunho salvo aparece na linha do tempo. Fora do registro: CRM › Inbox › "Compose", sem campo de
+  associação.
+- Sem atalho de teclado nativo.
+
+Fontes:
+- https://knowledge.hubspot.com/records/work-with-records
+- https://knowledge.hubspot.com/records/manually-log-activities-on-records
+- https://knowledge.hubspot.com/one-to-one-email/send-and-reply-to-one-to-one-emails
+- https://knowledge.hubspot.com/one-to-one-email/create-and-manage-one-to-one-email-drafts
+- https://knowledge.hubspot.com/records/associate-activities-with-records
+- https://knowledge.hubspot.com/calling/make-calls-in-the-hubspot-browser
+- https://knowledge.hubspot.com/inbox/connect-whatsapp-to-the-conversations-inbox
+- https://knowledge.hubspot.com/inbox/compose-and-reply-to-emails-in-the-conversations-inbox
+
+**Serve:** "+ Add phone number" como próximo passo do dado que falta; sugerir o vínculo e deixar
+corrigir. **Não serve:** WhatsApp pela API, com template da Meta.
+
+## Apollo.io (só busca: a central de ajuda devolve 403)
+
+- Na lista People, **"Email" e "Call" ficam na própria linha do contato**, com rótulo.
+- Dado ausente vira ação: "Access email", "Access mobile" (gastam crédito), "Request phone number".
+- Status de e-mail: verified, unavailable, user managed, catch-all.
+- Discador com fila ("power dialing"). LinkedIn como tarefa de sequência. Sem WhatsApp nativo.
+- "Emails" no menu, com os e-mails do time. Compositor com "From", "Send Now" e "Schedule".
+
+Fontes:
+- https://docs.apollo.io/docs/retrieve-mobile-phone-numbers-for-contacts
+- Só busca: knowledge.apollo.io, artigos 31969477982221, 4734516058893, 30919852777229, 4423314404621
+
+**Serve:** ação com rótulo na linha; dado ausente com próximo passo; a fila do discador como modelo
+do lote. **Não serve:** revelar dado com crédito (prospecção fria).
+
+## Salesforce (só busca)
+
+- Compositor **acoplado na base da tela**: a pessoa navega com ele aberto; dá para maximizar.
+- "From": o endereço da pessoa ou um da organização. "To" preenchido a partir do contato.
+- **"Related To": campo de busca, pré-preenchido com o registro e trocável.**
+- Einstein Activity Capture liga os endereços a contato, conta e oportunidade, com regra editável.
+
+**Serve:** compositor que continua aberto na navegação; vínculo pré-preenchido e trocável.
+
+## Zoho CRM, Freshsales e Close
+
+- **Zoho:** a seta ao lado de "Send Email" abre "Send WhatsApp Template"; com mais de 1 número, a
+  pessoa escolhe.
+  ([ajuda](https://help.zoho.com/portal/en/kb/crm/connect-with-customers/business-messaging/articles/business-messaging-using-whatsapp-for-business-integration-with-zoho-crm))
+- **Freshsales:** "Send SMS (Mobile)" e "Send SMS (Work)": o canal nomeia o campo de origem; SMS em
+  lote pela lista.
+  ([ajuda](https://crmsupport.freshworks.com/support/solutions/articles/50000002695-how-to-send-sms-messages-))
+- **Close:** atalho por canal (Ctrl+Shift+E e-mail, Ctrl+Shift+D ligar, Ctrl+Shift+K SMS); "Call
+  next lead" no discador; "/" insere snippet.
+  ([atalhos](https://help.close.com/docs/keyboard-shortcuts), [e-mail](https://help.close.com/docs/emailing),
+  [SMS](https://help.close.com/feature-guide/sms-and-mms))
+
+**Serve:** a escolha do número no menu; o atalho de teclado; a fila com "próximo".
+
+## CRMs brasileiros: WhatsApp por `wa.me`
+
+- **Agendor:** "Enviar WhatsApp" abre um menu com 2 caminhos: "WhatsApp" (WhatsApp Web) e "Agendor
+  Chat" (caixa do produto). **É o mesmo desenho do botão E-mail do protótipo.** Sem número, os
+  botões somem.
+  ([ajuda](https://ajuda.agendor.com.br/pt-BR/articles/4450589-como-integrar-o-agendor-ao-whatsapp))
+- **Ploomes:** ícone ao lado do telefone, só com número válido; abre o WhatsApp Web em nova aba; a
+  extensão traz "Modelos de mensagem".
+  ([ajuda](https://suporte.ploomes.com/en/articles/5452131-how-to-start-a-whatsapp-conversation-from-a-customer-record))
+- **RD Station CRM:** ícone nos contatos da oportunidade abre o WhatsApp Web (só busca); a extensão
+  manda mensagem pronta e salva a conversa.
+  ([página](https://www.rdstation.com/produtos/crm/vendas/vender-pelo-whatsapp/))
+- **Kommo:** tudo pela API, com a conversa dentro do cartão do lead.
+  ([blog](https://www.kommo.com/blog/whatsapp-crm/))
+
+**Serve:** `wa.me` como prática do mercado brasileiro; menu de 2 caminhos; modelos de mensagem.
+**Não serve:** esconder o botão sem dizer por quê.
+
+## Gmail e Outlook na web
+
+- **Gmail:** "Compose" em janela flutuante no canto inferior direito, minimizável, várias ao mesmo
+  tempo. Atalhos `c` (escrever) e Ctrl+Enter (enviar). Descartar mostra "Undo".
+  ([atalhos](https://support.google.com/mail/answer/6594))
+- **Outlook:** `N` cria mensagem; Ctrl+Enter envia; o "De" vem escondido ("Show From"); rascunho
+  salvo sozinho.
+  ([atalhos](https://support.microsoft.com/en-us/office/keyboard-shortcuts-for-outlook-3cdeb221-7ae5-4c1d-8c1d-9e63216c1efd))
+
+## Pipedrive, Front e Missive
+
+- **Pipedrive:**
+  - telefone clicável na lista e no detalhe; em Tools and apps › Phone calls, a pessoa escolhe o
+    protocolo (`tel:`, `sms:`, `callto:`, `sip:`). No detalhe, a seta ao lado do telefone troca o
+    método antes de ligar;
+  - WhatsApp pela API, com aba no negócio e na pessoa; conversa nova exige template aprovado;
+  - e-mail: vínculo automático pelo contato, que falha com mais de 1 negócio aberto. Vínculo à mão
+    por **"Link item" ao passar o mouse no assunto**, "Link conversations" em lote e a aba
+    **"Unlinked"**;
+  - Smart BCC vai em Cco, e a resposta só entra se alguém a encaminhar.
+  - [vincular](https://support.pipedrive.com/en/article/link-emails-items),
+    [WhatsApp](https://support.pipedrive.com/en/article/whatsapp-integration),
+    [protocolos](https://support.pipedrive.com/en/article/callto-syntax-make-voip-calls-from-pipedrive),
+    [Smart BCC](https://support.pipedrive.com/en/article/smart-email-bcc)
+- **Front:** o plugin do HubSpot, na barra lateral, acha o registro pelo e-mail ou pelo nome do
+  remetente; o registro manual escolhe contato, empresa ou negócio. A regra "Log message in HubSpot"
+  registra sozinha. ([ajuda](https://help.front.com/en/articles/1995))
+- **Missive** (só busca): a barra lateral casa a conversa pelo e-mail ou telefone; a ação do
+  Pipedrive no menu do e-mail vincula à mão.
+
+**Serve:** "Vincular" na linha do e-mail sem item; a aba de e-mails sem item; sugerir o registro
+pelo remetente.
+
+## O que a rodada 2 acrescenta aos 5 obrigatórios
+
+- **ClickUp** (só busca): "Copy link" na visão do formulário e "Copy public link" no Forms Hub;
+  e-mail só de dentro da tarefa, na caixa de comentário.
+- **monday** (só busca): coluna Phone clicável (exige DDI); WorkForms com "Shorten URL" e QR code;
+  Emails & Activities em pop-up dentro do item; vínculo automático pela coluna Email.
+- **Twenty** (código): o "From" só aparece com mais de 1 remetente; o compositor abre no painel à
+  direita, refeito para não cobrir a página; número inválido não vira link.
+- **Pipefy:** "From" fixo, com o endereço do card na dica; desligar o link público invalida o link
+  na hora.
+- **Notion:** quem quer `mailto:` com assunto monta o link à mão, e o link quebra sem codificar
+  espaço e `:`.
+
+## Avaliação da UX do protótipo
+
+Para cada decisão da rodada 1: o que o mercado diz e o que mudou na rodada 2.
+
+| Decisão | O mercado | O que mudou |
+|---|---|---|
+| Deep link sem envio (`mailto:`, `wa.me`, `sms:`) | Confirma para WhatsApp e SMS (Agendor, Ploomes, RD, Pipedrive). Para e-mail, os CRMs grandes enviam pelo produto | Nada: a parte 3 cobre o envio pelo produto. Número com menos de 10 dígitos dá "Telefone inválido" (Twenty, Ploomes) |
+| Cartão "Contato rápido" no alto do painel do item | Confirma (HubSpot, Close, Freshsales, Agendor) | Nada |
+| Menu "Contatar" na linha da lista de itens | Confirma em parte: Apollo põe "Email" e "Call" na linha; Pipedrive e monday deixam o telefone clicável na célula | Nada: a lista já tem muitas colunas. WhatsApp e SMS mostram o telefone de origem no menu (Freshsales) |
+| Ícone ou botão com rótulo | Dividido: ícone no HubSpot, Close, Ploomes e RD; rótulo no Agendor, Apollo e Freshsales | Nada: rótulo no Contato rápido e nas barras; só ícone na coluna Contato da lista de tarefas, com dica e nome acessível |
+| Canal sem dado desabilitado com o motivo | Contradiz: o mercado esconde o botão ou oferece completar o dado (HubSpot, Apollo) | Fica o motivo e soma o próximo passo: "Cadastrar telefone" e "Corrigir telefone" levam ao campo. O botão usa `aria-disabled` e continua no Tab |
+| E-mail com 2 caminhos num menu | Confirma (Agendor tem o mesmo menu no WhatsApp; Pipedrive troca o método por uma seta e guarda um padrão) | Vira **botão dividido**: o clique escreve pelo ENSPACE, a seta abre o app (exemplo `FieldGroupDropdownExample` do Nuxt UI). Fica para depois: lembrar a última escolha de cada pessoa |
+| Caixa do item em Cc no `mailto:` | Contradiz em parte: o mercado usa Cco e encaminhamento (HubSpot, Pipedrive). Com Cc, a resposta só volta com "responder a todos" | Fica o Cc, e a opção do app avisa: "a resposta volta quando a pessoa responde a todos" |
+| Clique direito no cartão do kanban | Não cobre. Clique direito não aparece e não funciona no toque | Sem mudança: depende do SDK (`cardActions`), pedido no `COMPONENTES-CUSTOM.md` |
+| Lote de WhatsApp e SMS | Não cobre por deep link (`wa.me` aceita 1 número) | Vira **fila** "Conversa 1 de N", com "Próxima" e a lista de quem fica de fora antes de começar (Close "Call next lead", discador do Apollo) |
+| Lembrete da Agenda | Não cobre | O texto leva também o local do evento |
+| Módulos por canal e por tela | Confirma por canal; não cobre por tela | Nada: é pedido do documento do Felipe |
+| Contato por categoria | Confirma (Twenty por objeto, HubSpot, Close, monday) | Nada. Fica para depois: mais de 1 telefone, com escolha no menu (Freshsales, Zoho) |
+| Texto inicial por categoria | Confirma, com modelos (Ploomes, RD) | Nada. Fica para depois: 2 ou 3 textos por categoria |
+| Link público nas telas de uso | Não cobre: o mercado põe no construtor | Nada. Fica para depois: link curto para SMS e WhatsApp (monday) |
+| "Novo e-mail" na barra do topo | Confirma (Gmail, Outlook, Twenty, HubSpot Inbox) | Soma o atalho **C** (na dica do botão) e **Ctrl+Enter** para enviar |
+| Área "E-mails" | Confirma (Apollo, HubSpot Inbox, Pipedrive) | Soma **"Vincular" na linha** do e-mail sem item (Pipedrive "Link item") e **sugestão pelo remetente** |
+| Compositor em gaveta | Dividido (Twenty gaveta; Gmail janela; Salesforce acoplado). Em comum: fica aberto enquanto a pessoa navega | Gaveta **sem camada escura** e sem travar a página; **Expandir**; **Minimizar** (e Esc) vira a barra do rodapé, que continua na troca de tela. Abre com o foco no "Para" ou, vindo do item, no texto |
+| "Para" com sugestões | Confirma (Twenty, HubSpot, ClickUp, monday, Close) | Soma os contatos dos itens que a pessoa vê, além dos membros. Aberto do item, o contato já vem no "Para" |
+| Template | Confirma (HubSpot, Pipedrive, monday, Close, Pipefy, ClickUp) | Nada. Fica para depois: trecho pronto pelo "/" no texto (Close, Twenty) |
+| "De" visível | Confirma (HubSpot, Salesforce, Close; Twenty esconde com 1 opção; Pipefy fixo com dica) | Com 1 opção, o "De" vira texto. Ao trocar o item, o "De" ganha destaque, porque nenhum produto troca o remetente pelo vínculo |
+| Bloco "Vincular a item" | Confirma o vínculo; o mercado usa formato mais compacto (HubSpot "Associated with", Salesforce "Related To") | Fica o bloco (pedido do documento). Soma **sugestões pelos destinatários** (HubSpot, Pipedrive, monday) |
+| Descartar com Desfazer | Confirma (Gmail "Undo") | Soma "Rascunho salvo" no rodapé do compositor (Outlook, HubSpot) |
+
+## O padrão que todos seguem (rodadas 1 e 2)
+
+1. A ação de contato fica no alto do registro.
+2. O destinatário vem de um campo principal do registro.
+3. O compositor mostra o remetente quando há escolha e oferece templates.
+4. O vínculo do e-mail começa automático, pelo endereço, e se corrige à mão.
+5. WhatsApp por link abre o WhatsApp Web e não registra a conversa sozinho.
+6. O link público de formulário se copia no construtor ou na visão do formulário.
+7. Escrever tem atalho de 1 tecla (Gmail `c`, Outlook `N`) e enviar tem Ctrl+Enter.
+
+## O que nenhum deles faz (rodadas 1 e 2)
+
+1. Link de formulário público em tarefa ou num menu da tela inicial, com envio por WhatsApp ou SMS.
+2. Botão indisponível que diz o motivo e leva ao campo para corrigir.
+3. Fila de WhatsApp e SMS por deep link.
+4. Remetente que muda conforme o item escolhido, no compositor aberto de qualquer tela.
+5. Ligar e desligar canal por tela.
+6. Caixa do registro em Cc no `mailto:` em toda tela.

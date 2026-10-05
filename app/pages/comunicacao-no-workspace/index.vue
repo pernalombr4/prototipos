@@ -16,6 +16,7 @@ import { categoriaPorSlug, itemPorId, itens, workspace } from './mocks'
 import { type Cenario, type Tela, useComunicacao } from './estado'
 import CascaDoEnspace from './_CascaDoEnspace.vue'
 import Compositor from './_Compositor.vue'
+import RascunhoMinimizado from './_RascunhoMinimizado.vue'
 import TelaInicio from './_TelaInicio.vue'
 import TelaItens from './_TelaItens.vue'
 import TelaItem from './_TelaItem.vue'
@@ -118,6 +119,7 @@ const cenarios = computed<{ value: Cenario, label: string }[]>(() => [
     </CascaDoEnspace>
 
     <Compositor :t="t" />
+    <RascunhoMinimizado :t="t" />
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">

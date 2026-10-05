@@ -18,7 +18,7 @@ import AcoesDeContato from './_AcoesDeContato.vue'
 const props = defineProps<{ t: Textos }>()
 
 const { itemAberto, abaDoItem, emails, config, ir, abrirCompositor } = useComunicacao()
-const { canaisEm } = useAtalhos()
+const { canaisEm, motivo } = useAtalhos()
 const { copiar, copiado } = useCopiar()
 const marca = useMarcaDeProposta()
 const idioma = useIdioma()
@@ -46,6 +46,35 @@ function iniciais(s: string) {
 }
 
 const mostrarContato = computed(() => canaisEm('item').length > 0)
+
+/** O que falta ou está errado no contato, dito na tela e não só no tooltip. */
+const aviso = computed(() => {
+  const c = contato.value
+  if (!c) return null
+  if (!c.telefone) return { texto: props.t.item.semTelefoneAviso, acao: props.t.item.cadastrarTelefone }
+  if (motivo('whatsapp', c)) return { texto: props.t.item.telefoneInvalidoAviso, acao: props.t.item.corrigirTelefone }
+  if (!c.email) return { texto: props.t.item.semEmailAviso, acao: props.t.item.cadastrarEmail }
+  return null
+})
+
+/** O campo da categoria que guardaria o dado que falta neste contato. */
+const campoQueFalta = computed(() => {
+  const i = item.value
+  if (!i || !contato.value) return null
+  const regra = config.value.porCategoria[i.categoria].contatos.find(c => c.id === contato.value!.id)
+  if (!regra) return null
+  const telefoneComProblema = !contato.value.telefone || !!motivo('whatsapp', contato.value)
+  return telefoneComProblema ? regra.campoTelefone : (regra.campoEmail !== 'request_email' ? regra.campoEmail : null)
+})
+
+async function irParaCampo(campo: string) {
+  abaDoItem.value = 'visao'
+  await nextTick()
+  await new Promise(r => setTimeout(r, 250))
+  const el = document.getElementById(`campo-${campo}`) as HTMLInputElement | null
+  el?.focus()
+  el?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+}
 
 /* ---------- abas ---------- */
 
@@ -150,10 +179,20 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
               {{ [contato.email, contato.telefone].filter(Boolean).join(' · ') }}
             </p>
             <!-- O motivo à vista: botão desabilitado não recebe foco, e o tooltip não chega a quem usa teclado. -->
-            <p v-if="contato && (!contato.email || !contato.telefone)" class="mt-1 flex items-center gap-1 px-1 text-xs text-warning">
+            <div v-if="aviso" class="mt-1 flex flex-wrap items-center gap-x-1 px-1 text-xs text-warning">
               <UIcon name="i-lucide-info" class="size-3.5 shrink-0" />
-              {{ !contato.telefone ? t.item.semTelefoneAviso : t.item.semEmailAviso }}
-            </p>
+              {{ aviso.texto }}
+              <!-- O próximo passo, como o "+ Add phone number" do HubSpot: leva ao campo. -->
+              <UButton
+                v-if="campoQueFalta"
+                :label="aviso.acao"
+                color="primary"
+                variant="link"
+                size="xs"
+                class="p-0"
+                @click="irParaCampo(campoQueFalta)"
+              />
+            </div>
             <AcoesDeContato
               :t="t"
               :destino="contato"
@@ -168,6 +207,7 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
             </p>
           </template>
           <UEmpty
+            variant="naked"
             v-else
             icon="i-lucide-user-x"
             :title="t.item.semContatoTitulo"
@@ -264,7 +304,7 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
       <!-- Visão geral (cópia) -->
       <div v-if="abaDoItem === 'visao'" class="grid max-w-3xl gap-4 p-5 animate-[entrada_.25s_ease-out]">
         <UFormField v-for="c in camposVisiveis" :key="c.chave" :label="c.rotulo">
-          <UInput :model-value="c.valor" class="w-full" />
+          <UInput :id="`campo-${c.chave}`" :model-value="c.valor" class="w-full" />
         </UFormField>
         <div class="flex justify-end gap-2">
           <UButton :label="t.item.sairSemSalvar" icon="i-lucide-undo-2" color="neutral" variant="ghost" />
@@ -335,6 +375,7 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
           </li>
         </ul>
         <UEmpty
+          variant="naked"
           v-else
           icon="i-lucide-inbox"
           :title="t.item.nenhumEmail"
@@ -353,10 +394,11 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
             <UBadge :label="t.status[x.status]" color="neutral" variant="subtle" size="sm" />
           </li>
         </ul>
-        <UEmpty v-else icon="i-lucide-clipboard-list" :title="t.item.semTarefas" size="sm" />
+        <UEmpty v-else variant="naked" icon="i-lucide-clipboard-list" :title="t.item.semTarefas" size="sm" />
       </div>
 
       <UEmpty
+        variant="naked"
         v-else
         icon="i-lucide-folder-open"
         :title="t.item.foraDoEscopo"

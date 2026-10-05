@@ -202,7 +202,7 @@ const contrapartes = [
   ['Cia. Paulista de Limpeza', 'Juliana Freitas', null, '+55 11 98432-6611'],
   ['Norte Sul Logística', 'Otávio Rezende', 'otavio.rezende@example.com', null],
   ['Instituto Horizonte', 'Patrícia Gomes', 'patricia.gomes@example.com', '+55 21 97711-3049'],
-  ['Atlas Segurança Patrimonial', 'Sérgio Batista', 'sergio.batista@example.com', '+55 31 99210-8834'],
+  ['Atlas Segurança Patrimonial', 'Sérgio Batista', 'sergio.batista@example.com', '9210-8834'], // número curto: Telefone inválido,
   ['Prisma Consultoria Tributária', 'Lívia Moura', 'livia.moura@example.com', '+55 11 91234-5567'],
   ['Granja Boa Vista Alimentos', null, null, null],
   ['Ondas Telecom', 'Caio Fernandes', 'caio.fernandes@example.com', '+55 41 98800-2211'],
@@ -569,6 +569,8 @@ export const emails: Email[] = [
   email({ id: 7, direcao: 'recebido', de: 'caio.fernandes@example.com', para: [enderecoDoItem(ctr223)], assunto: 'Visita técnica para o link dedicado', corpo: '<p>Conseguimos agendar a visita técnica para o dia 8, às 14h.</p>', data: dia(2, '09:18'), caixa: enderecoDoItem(ctr223), itemId: ctr223.id }),
   email({ id: 8, direcao: 'enviado', de: caixas[0]!.email, para: ['fornecedor.novo@example.com'], assunto: 'Cadastro de fornecedor', corpo: '<p>Segue o link do formulário de cadastro.</p>', data: dia(1, '15:00'), caixa: caixas[0]!.email, itemId: null, autor: 6 }),
   email({ id: 9, direcao: 'recebido', de: 'natalia.couto@example.com', para: [enderecoDoItem(sol87)], assunto: 'Acesso ao sistema de contratos', corpo: '<p>Preciso de acesso de leitura para a equipe de RH.</p>', data: dia(4, '17:02'), caixa: enderecoDoItem(sol87), itemId: sol87.id }),
+  // Chegou na caixa do workspace, sem item, de quem é contato de 3 contratos: a sugestão pelo remetente aparece.
+  email({ id: 11, direcao: 'recebido', de: 'marina.alves@example.com', para: [caixas[0]!.email], assunto: 'Dúvida sobre a renovação', corpo: '<p>Olá. O contrato de manutenção renova sozinho ou precisamos assinar um aditivo?</p>', data: dia(5, '09:02'), caixa: caixas[0]!.email, itemId: null, lido: false }),
   email({ id: 10, direcao: 'recebido', de: 'boletos@example.com', para: [caixas[1]!.email], assunto: 'Boleto de outubro', corpo: '<p>Segue o boleto com vencimento em 15/10.</p>', data: dia(3, '06:30'), caixa: caixas[1]!.email, itemId: null, anexos: ['boleto-outubro.pdf'] }),
 ]
 

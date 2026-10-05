@@ -59,15 +59,18 @@ watch([categoriaAtual, vista], () => {
   rascunho.value = structuredClone(toRaw(config.value.porCategoria[categoriaAtual.value]))
 })
 
+/** O Select do Reka UI não aceita valor vazio: "Nenhum" tem valor próprio. */
+const NENHUM = '__nenhum'
+
 const camposDaCategoria = computed(() => campos.filter(c => c.categoria === categoriaAtual.value))
-const opcoesDeNome = computed(() => [{ value: '', label: props.t.categoria.nenhum }, ...camposDaCategoria.value.filter(c => c.type === 'inputText').map(c => ({ value: c.refId, label: c.name }))])
+const opcoesDeNome = computed(() => [{ value: NENHUM, label: props.t.categoria.nenhum }, ...camposDaCategoria.value.filter(c => c.type === 'inputText').map(c => ({ value: c.refId, label: c.name }))])
 const opcoesDeEmail = computed(() => [
-  { value: '', label: props.t.categoria.nenhum },
+  { value: NENHUM, label: props.t.categoria.nenhum },
   ...camposDaCategoria.value.filter(c => c.type === 'email').map(c => ({ value: c.refId, label: c.name, description: props.t.categoria.tipoEmail })),
   { value: CAMPO_REQUISITANTE, label: props.t.categoria.emailDoRequisitante, description: props.t.categoria.campoPadrao },
 ])
 const opcoesDeTelefone = computed(() => [
-  { value: '', label: props.t.categoria.nenhum },
+  { value: NENHUM, label: props.t.categoria.nenhum },
   ...camposDaCategoria.value.filter(c => c.type === 'EnlMask').map(c => ({ value: c.refId, label: c.name, description: props.t.categoria.tipoMascara })),
 ])
 
@@ -259,13 +262,13 @@ function menuDoFormulario(f: Formulario): DropdownMenuItem[][] {
               </div>
               <div class="mt-3 grid gap-3 sm:grid-cols-3">
                 <UFormField :label="t.categoria.campoNome">
-                  <USelect :model-value="c.campoNome ?? ''" :items="opcoesDeNome" class="w-full" @update:model-value="c.campoNome = ($event as string) || null" />
+                  <USelect :model-value="c.campoNome ?? NENHUM" :items="opcoesDeNome" class="w-full" @update:model-value="c.campoNome = $event === NENHUM ? null : ($event as string)" />
                 </UFormField>
                 <UFormField :label="t.categoria.campoEmail">
-                  <USelect :model-value="c.campoEmail ?? ''" :items="opcoesDeEmail" class="w-full" @update:model-value="c.campoEmail = ($event as string) || null" />
+                  <USelect :model-value="c.campoEmail ?? NENHUM" :items="opcoesDeEmail" class="w-full" @update:model-value="c.campoEmail = $event === NENHUM ? null : ($event as string)" />
                 </UFormField>
                 <UFormField :label="t.categoria.campoTelefone">
-                  <USelect :model-value="c.campoTelefone ?? ''" :items="opcoesDeTelefone" class="w-full" @update:model-value="c.campoTelefone = ($event as string) || null" />
+                  <USelect :model-value="c.campoTelefone ?? NENHUM" :items="opcoesDeTelefone" class="w-full" @update:model-value="c.campoTelefone = $event === NENHUM ? null : ($event as string)" />
                 </UFormField>
               </div>
             </div>

@@ -43,6 +43,9 @@ export interface Textos {
     escreverNoEnspaceSemItem: string
     abrirNoApp: string
     abrirNoAppDica: string
+    outrasFormasDeEmail: string
+    telefoneInvalido: string
+    abrirNoAppComCopia: string
   }
   inicio: {
     saudacao: (nome: string) => string
@@ -97,6 +100,10 @@ export interface Textos {
     ajudaSemEnspace: string
     semTelefoneAviso: string
     semEmailAviso: string
+    cadastrarTelefone: string
+    telefoneInvalidoAviso: string
+    corrigirTelefone: string
+    cadastrarEmail: string
     semContatoTitulo: string
     semContatoDica: string
     escolherCampos: string
@@ -181,6 +188,11 @@ export interface Textos {
     aberta: string
     dicaDoQuadro: string
     membroSemTelefone: string
+    loteProgresso: (i: number, n: number) => string
+    proxima: string
+    fechar: string
+    loteConcluido: string
+    foraSemTelefone: (nomes: string) => string
     assuntoDoAviso: (tarefa: string, prazo: string | null) => string
     mensagemDoAviso: (nome: string, tarefa: string, prazo: string | null) => string
     assuntoDoLote: (n: number) => string
@@ -227,6 +239,8 @@ export interface Textos {
     vinculadoDescricao: (ref: string) => string
     vincularDepois: string
     encaminhar: string
+    vincular: string
+    sugestoesPeloRemetente: string
   }
   compositor: {
     titulo: string
@@ -267,6 +281,15 @@ export interface Textos {
     vincularUmItem: string
     mensagem: string
     mensagemPlaceholder: string
+    link: { botao: string, colar: string, aplicar: string, abrir: string, remover: string }
+    minimizar: string
+    expandir: string
+    reduzir: string
+    rascunhoSalvo: string
+    rascunho: string
+    abrirRascunho: string
+    sugestoes: string
+    sugestaoMotivo: (nome: string) => string
     anexarArquivo: string
     removerAnexo: (a: string) => string
     descartar: string
@@ -456,6 +479,9 @@ const ptBR: Textos = {
     escreverNoEnspaceSemItem: 'Sai de uma caixa do workspace',
     abrirNoApp: 'Abrir no meu app de e-mail',
     abrirNoAppDica: 'Outlook, Gmail ou o app padrão do computador',
+    outrasFormasDeEmail: 'Outras formas de enviar e-mail',
+    telefoneInvalido: 'Telefone inválido',
+    abrirNoAppComCopia: 'A caixa do item vai em cópia: a resposta volta quando a pessoa responde a todos.',
   },
   inicio: {
     saudacao: nome => `Bom dia, ${nome}!`,
@@ -510,6 +536,10 @@ const ptBR: Textos = {
     ajudaSemEnspace: 'Abre o seu app com o destinatário preenchido. O ENSPACE não envia a mensagem.',
     semTelefoneAviso: 'Sem telefone: WhatsApp e SMS indisponíveis.',
     semEmailAviso: 'Sem e-mail: o atalho de e-mail fica indisponível.',
+    cadastrarTelefone: 'Cadastrar telefone',
+    telefoneInvalidoAviso: 'Telefone inválido: WhatsApp e SMS indisponíveis.',
+    corrigirTelefone: 'Corrigir telefone',
+    cadastrarEmail: 'Cadastrar e-mail',
     semContatoTitulo: 'Nenhum contato neste item',
     semContatoDica: 'Os campos de contato deste item estão vazios.',
     escolherCampos: 'Escolher os campos de contato',
@@ -608,6 +638,11 @@ const ptBR: Textos = {
     aberta: 'Aberta',
     dicaDoQuadro: 'Clique no cartão para abrir a tarefa. Com o botão direito, avise o responsável.',
     membroSemTelefone: 'WhatsApp e SMS pedem o telefone do membro. A tela de perfil ainda não tem esse campo.',
+    loteProgresso: (i, n) => `Conversa ${i} de ${n}`,
+    proxima: 'Próxima',
+    fechar: 'Fechar',
+    loteConcluido: 'Todas as conversas abertas.',
+    foraSemTelefone: nomes => `Ficam de fora, sem telefone: ${nomes}.`,
     assuntoDoAviso: (tarefa, prazo) => prazo ? `Tarefa: ${tarefa} (prazo ${prazo})` : `Tarefa: ${tarefa}`,
     mensagemDoAviso: (nome, tarefa, prazo) => `Olá, ${nome}. Lembrete da tarefa "${tarefa}"${prazo ? `, prazo ${prazo}` : ''}.`,
     assuntoDoLote: n => `${n} tarefas pendentes`,
@@ -654,6 +689,8 @@ const ptBR: Textos = {
     vinculadoDescricao: ref => `Aparece na aba Mail Box de ${ref}.`,
     vincularDepois: 'O e-mail passa a aparecer na aba Mail Box do item.',
     encaminhar: 'Encaminhar',
+    vincular: 'Vincular',
+    sugestoesPeloRemetente: 'Sugestões pelo remetente',
   },
   compositor: {
     titulo: 'Nova Mensagem',
@@ -694,6 +731,15 @@ const ptBR: Textos = {
     vincularUmItem: 'Vincular um item',
     mensagem: 'Mensagem',
     mensagemPlaceholder: 'Escreva ou digite "/" para acessar os comandos...',
+    link: { botao: 'Link', colar: 'Cole um endereço...', aplicar: 'Aplicar link', abrir: 'Abrir numa nova aba', remover: 'Remover link' },
+    minimizar: 'Minimizar',
+    expandir: 'Expandir',
+    reduzir: 'Reduzir',
+    rascunhoSalvo: 'Rascunho salvo',
+    rascunho: 'Rascunho',
+    abrirRascunho: 'Abrir rascunho',
+    sugestoes: 'Sugestões',
+    sugestaoMotivo: nome => `${nome} é contato deste item`,
     anexarArquivo: 'Anexar arquivo',
     removerAnexo: a => `Remover ${a}`,
     descartar: 'Descartar',
@@ -909,6 +955,9 @@ const en: Textos = {
     escreverNoEnspaceSemItem: 'Sent from a workspace mailbox',
     abrirNoApp: 'Open in my email app',
     abrirNoAppDica: 'Outlook, Gmail or the computer default app',
+    outrasFormasDeEmail: 'Other ways to send email',
+    telefoneInvalido: 'Invalid phone',
+    abrirNoAppComCopia: 'The item mailbox goes in Cc: the reply comes back when the person replies to all.',
   },
   inicio: {
     saudacao: nome => `Good morning, ${nome}!`,
@@ -963,6 +1012,10 @@ const en: Textos = {
     ajudaSemEnspace: 'Opens your app with the recipient filled in. ENSPACE does not send the message.',
     semTelefoneAviso: 'No phone: WhatsApp and SMS unavailable.',
     semEmailAviso: 'No email: the email shortcut is unavailable.',
+    cadastrarTelefone: 'Add phone',
+    telefoneInvalidoAviso: 'Invalid phone: WhatsApp and SMS unavailable.',
+    corrigirTelefone: 'Fix phone',
+    cadastrarEmail: 'Add email',
     semContatoTitulo: 'No contact on this item',
     semContatoDica: 'The contact fields of this item are empty.',
     escolherCampos: 'Choose the contact fields',
@@ -1061,6 +1114,11 @@ const en: Textos = {
     aberta: 'Opened',
     dicaDoQuadro: 'Click a card to open the task. Right-click to notify the assignee.',
     membroSemTelefone: 'WhatsApp and SMS need the member phone. The profile screen does not have this field yet.',
+    loteProgresso: (i, n) => `Chat ${i} of ${n}`,
+    proxima: 'Next',
+    fechar: 'Close',
+    loteConcluido: 'All chats opened.',
+    foraSemTelefone: nomes => `Left out, no phone: ${nomes}.`,
     assuntoDoAviso: (tarefa, prazo) => prazo ? `Task: ${tarefa} (due ${prazo})` : `Task: ${tarefa}`,
     mensagemDoAviso: (nome, tarefa, prazo) => `Hi, ${nome}. Reminder about the task "${tarefa}"${prazo ? `, due ${prazo}` : ''}.`,
     assuntoDoLote: n => `${n} pending tasks`,
@@ -1107,6 +1165,8 @@ const en: Textos = {
     vinculadoDescricao: ref => `It shows in the Mail Box tab of ${ref}.`,
     vincularDepois: 'The email shows in the Mail Box tab of the item.',
     encaminhar: 'Forward',
+    vincular: 'Link',
+    sugestoesPeloRemetente: 'Suggestions from the sender',
   },
   compositor: {
     titulo: 'New Message',
@@ -1147,6 +1207,15 @@ const en: Textos = {
     vincularUmItem: 'Link an item',
     mensagem: 'Message',
     mensagemPlaceholder: 'Write or type "/" for commands...',
+    link: { botao: 'Link', colar: 'Paste a link...', aplicar: 'Apply link', abrir: 'Open in a new tab', remover: 'Remove link' },
+    minimizar: 'Minimize',
+    expandir: 'Expand',
+    reduzir: 'Shrink',
+    rascunhoSalvo: 'Draft saved',
+    rascunho: 'Draft',
+    abrirRascunho: 'Open draft',
+    sugestoes: 'Suggestions',
+    sugestaoMotivo: nome => `${nome} is a contact on this item`,
     anexarArquivo: 'Attach file',
     removerAnexo: a => `Remove ${a}`,
     descartar: 'Discard',
@@ -1362,6 +1431,9 @@ const es: Textos = {
     escreverNoEnspaceSemItem: 'Sale de un buzón del workspace',
     abrirNoApp: 'Abrir en mi app de correo',
     abrirNoAppDica: 'Outlook, Gmail o la app predeterminada del equipo',
+    outrasFormasDeEmail: 'Otras formas de enviar correo',
+    telefoneInvalido: 'Teléfono inválido',
+    abrirNoAppComCopia: 'El buzón del ítem va en copia: la respuesta vuelve cuando la persona responde a todos.',
   },
   inicio: {
     saudacao: nome => `¡Buenos días, ${nome}!`,
@@ -1416,6 +1488,10 @@ const es: Textos = {
     ajudaSemEnspace: 'Abre tu app con el destinatario completo. ENSPACE no envía el mensaje.',
     semTelefoneAviso: 'Sin teléfono: WhatsApp y SMS no disponibles.',
     semEmailAviso: 'Sin correo: el atajo de correo no está disponible.',
+    cadastrarTelefone: 'Registrar teléfono',
+    telefoneInvalidoAviso: 'Teléfono inválido: WhatsApp y SMS no disponibles.',
+    corrigirTelefone: 'Corregir teléfono',
+    cadastrarEmail: 'Registrar correo',
     semContatoTitulo: 'Ningún contacto en este ítem',
     semContatoDica: 'Los campos de contacto de este ítem están vacíos.',
     escolherCampos: 'Elegir los campos de contacto',
@@ -1514,6 +1590,11 @@ const es: Textos = {
     aberta: 'Abierta',
     dicaDoQuadro: 'Haz clic en la tarjeta para abrir la tarea. Con el botón derecho, avisa al responsable.',
     membroSemTelefone: 'WhatsApp y SMS necesitan el teléfono del miembro. La pantalla de perfil aún no tiene ese campo.',
+    loteProgresso: (i, n) => `Conversación ${i} de ${n}`,
+    proxima: 'Siguiente',
+    fechar: 'Cerrar',
+    loteConcluido: 'Todas las conversaciones abiertas.',
+    foraSemTelefone: nomes => `Quedan fuera, sin teléfono: ${nomes}.`,
     assuntoDoAviso: (tarefa, prazo) => prazo ? `Tarea: ${tarefa} (plazo ${prazo})` : `Tarea: ${tarefa}`,
     mensagemDoAviso: (nome, tarefa, prazo) => `Hola, ${nome}. Recordatorio de la tarea "${tarefa}"${prazo ? `, plazo ${prazo}` : ''}.`,
     assuntoDoLote: n => `${n} tareas pendientes`,
@@ -1560,6 +1641,8 @@ const es: Textos = {
     vinculadoDescricao: ref => `Aparece en la pestaña Mail Box de ${ref}.`,
     vincularDepois: 'El correo pasa a aparecer en la pestaña Mail Box del ítem.',
     encaminhar: 'Reenviar',
+    vincular: 'Vincular',
+    sugestoesPeloRemetente: 'Sugerencias por el remitente',
   },
   compositor: {
     titulo: 'Nuevo Mensaje',
@@ -1600,6 +1683,15 @@ const es: Textos = {
     vincularUmItem: 'Vincular un ítem',
     mensagem: 'Mensaje',
     mensagemPlaceholder: 'Escribe o teclea "/" para ver los comandos...',
+    link: { botao: 'Enlace', colar: 'Pega una dirección...', aplicar: 'Aplicar enlace', abrir: 'Abrir en una pestaña nueva', remover: 'Quitar enlace' },
+    minimizar: 'Minimizar',
+    expandir: 'Expandir',
+    reduzir: 'Reducir',
+    rascunhoSalvo: 'Borrador guardado',
+    rascunho: 'Borrador',
+    abrirRascunho: 'Abrir borrador',
+    sugestoes: 'Sugerencias',
+    sugestaoMotivo: nome => `${nome} es contacto de este ítem`,
     anexarArquivo: 'Adjuntar archivo',
     removerAnexo: a => `Quitar ${a}`,
     descartar: 'Descartar',

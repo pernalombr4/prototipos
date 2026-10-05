@@ -12,9 +12,10 @@
  */
 import type { EditorToolbarItem } from '@nuxt/ui'
 import type { Textos } from './textos'
-import { type Email, EU, caixas, categoriaPorSlug, enderecoDoItem, itemPorId, membros, modelos } from './mocks'
+import { type Email, EU, caixas, categoriaPorSlug, enderecoDoItem, itemPorId, itens, membros, modelos } from './mocks'
 import { contatosDoItem, preencher, useComunicacao, useMarcaDeProposta } from './estado'
 import BuscaDeItem from './_BuscaDeItem.vue'
+import LinkDoEditor from './_LinkDoEditor.vue'
 
 const props = defineProps<{ t: Textos }>()
 
@@ -34,10 +35,21 @@ const remetentes = computed(() => {
   return lista
 })
 
-/** Trocar o item troca o remetente sugerido. */
+/**
+ * Trocar o item troca o remetente sugerido, e o "De" pisca: nenhum produto da
+ * pesquisa troca o remetente pelo vínculo, então a mudança precisa ser vista.
+ */
+const deMudou = ref(false)
+let timerDoDe: ReturnType<typeof setTimeout> | undefined
 watch(() => rascunho.value.itemId, (id, antes) => {
   if (id === antes) return
-  rascunho.value.de = remetentePadrao(id)
+  const novo = remetentePadrao(id)
+  if (novo !== rascunho.value.de && compositorAberto.value) {
+    deMudou.value = true
+    clearTimeout(timerDoDe)
+    timerDoDe = setTimeout(() => (deMudou.value = false), 1600)
+  }
+  rascunho.value.de = novo
 })
 
 const deEhDoItem = computed(() => !!item.value && rascunho.value.de === enderecoDoItem(item.value))
@@ -45,14 +57,23 @@ const deEhDoItem = computed(() => !!item.value && rascunho.value.de === endereco
 /* ---------- Para ---------- */
 
 const sugestoes = computed(() => {
-  const lista: { value: string, label: string, description: string }[] = []
+  type Sugestao = { value: string, label: string, description: string, avatar: { text: string } }
+  const avatar = (s: string) => ({ text: s.split(/[\s.@]/).filter(Boolean).slice(0, 2).map(p => p[0]!.toUpperCase()).join('') })
+  const lista: Sugestao[] = []
   if (item.value) {
     for (const c of contatosDoItem(item.value, config.value)) {
-      if (c.email) lista.push({ value: c.email, label: c.nome ?? c.email, description: `${c.rotulo} · ${c.email}` })
+      if (c.email) lista.push({ value: c.email, label: c.nome ?? c.email, description: `${c.rotulo} · ${c.email}`, avatar: avatar(c.nome ?? c.email) })
     }
   }
-  for (const m of membros) if (m.email) lista.push({ value: m.email, label: m.nome, description: m.email })
-  const extras = [...rascunho.value.para].filter(e => !lista.some(l => l.value === e)).map(e => ({ value: e, label: e, description: '' }))
+  for (const m of membros) if (m.email && !lista.some(l => l.value === m.email)) lista.push({ value: m.email, label: m.nome, description: m.email, avatar: avatar(m.nome) })
+  // Contatos dos itens que a pessoa vê, como o autocompletar do HubSpot e do Gmail.
+  for (const i of itens) {
+    if (i.semAcesso) continue
+    for (const c of contatosDoItem(i, config.value)) {
+      if (c.email && !lista.some(l => l.value === c.email)) lista.push({ value: c.email, label: c.nome ?? c.email, description: `${c.email} · ${i.reference}`, avatar: avatar(c.nome ?? c.email) })
+    }
+  }
+  const extras = [...rascunho.value.para].filter(e => !lista.some(l => l.value === e)).map(e => ({ value: e, label: e, description: '', avatar: avatar(e) }))
   return [...lista, ...extras]
 })
 
@@ -64,6 +85,22 @@ function adicionarPara(e: string) {
 const valido = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
 
 /* ---------- Vincular a item ---------- */
+
+/**
+ * Itens em que algum destinatário é contato (HubSpot, Pipedrive e monday
+ * sugerem o registro pelo endereço). Item sem permissão não entra.
+ */
+const sugestoesDeItem = computed(() => {
+  if (item.value || !rascunho.value.para.length) return []
+  const para = new Set(rascunho.value.para.map(e => e.toLowerCase()))
+  const achados: { id: number, reference: string, titulo: string, nome: string }[] = []
+  for (const i of itens) {
+    if (i.semAcesso) continue
+    const c = contatosDoItem(i, config.value).find(x => x.email && para.has(x.email.toLowerCase()))
+    if (c) achados.push({ id: i.id, reference: i.reference, titulo: i.titulo, nome: c.nome ?? c.email! })
+  }
+  return achados.slice(0, 3)
+})
 
 const buscaRef = ref<InstanceType<typeof BuscaDeItem> | null>(null)
 const trocando = ref(false)
@@ -100,7 +137,9 @@ const ferramentas: EditorToolbarItem[][] = [
     { kind: 'mark', mark: 'underline', icon: 'i-lucide-underline' },
     { kind: 'mark', mark: 'strike', icon: 'i-lucide-strikethrough' },
   ],
-  [{ kind: 'bulletList', icon: 'i-lucide-list' }, { kind: 'orderedList', icon: 'i-lucide-list-ordered' }, { kind: 'link', icon: 'i-lucide-link' }],
+  [{ kind: 'bulletList', icon: 'i-lucide-list' }, { kind: 'orderedList', icon: 'i-lucide-list-ordered' }],
+  // O link usa o popover do exemplo oficial (`_LinkDoEditor.vue`), não o `prompt()` do `kind: 'link'`.
+  [{ slot: 'link' as const, icon: 'i-lucide-link' }],
 ]
 
 /* ---------- Enviar ---------- */
@@ -185,6 +224,30 @@ watch(compositorAberto, (aberto) => {
   }
 })
 
+const expandido = ref(false)
+
+/**
+ * Foco ao abrir: no "Para" quando está vazio; com destinatário pronto (aberto
+ * do item), no texto. Como o Gmail. Sem isso o foco caía no Expandir, a dica
+ * dele abria e o 1º Esc só fechava a dica.
+ */
+const campoPara = useTemplateRef<{ inputRef: HTMLInputElement | null }>('campoPara')
+const campoTexto = useTemplateRef<{ editor?: { commands: { focus: (p?: string) => void } } }>('campoTexto')
+function focarAoAbrir(e: Event) {
+  e.preventDefault()
+  nextTick(() => {
+    if (rascunho.value.para.length && campoTexto.value?.editor) campoTexto.value.editor.commands.focus('end')
+    else campoPara.value?.inputRef?.focus()
+  })
+}
+
+const temConteudo = computed(() => !!(rascunho.value.para.length || rascunho.value.assunto || rascunho.value.corpo.replace(/<[^>]+>/g, '').trim()))
+
+/** Ctrl+Enter envia, como Gmail, Outlook e Close. Vale dentro do editor. */
+defineShortcuts({
+  meta_enter: { usingInput: true, handler: () => { if (compositorAberto.value && !enviando.value) enviar() } },
+})
+
 const dicaDeOrigem = computed(() => {
   const o = rascunho.value.origem
   if (!item.value) return null
@@ -195,21 +258,56 @@ const dicaDeOrigem = computed(() => {
 </script>
 
 <template>
+  <!--
+    Sem camada escura e sem travar a página (modal=false): o compositor fica
+    aberto enquanto a pessoa consulta o item, como no Salesforce e no Gmail.
+    Fechar não perde nada: o rascunho vira a barra do rodapé (_RascunhoMinimizado).
+  -->
   <USlideover
     v-model:open="compositorAberto"
     :title="t.compositor.titulo"
-    :ui="{ content: 'max-w-2xl', body: 'flex flex-col gap-4', footer: 'justify-between' }"
+    :overlay="false"
+    :modal="false"
+    :content="{ onOpenAutoFocus: focarAoAbrir }"
+    :ui="{ content: expandido ? 'max-w-5xl' : 'max-w-2xl', body: 'flex flex-col gap-4', footer: 'justify-between' }"
   >
+    <template #actions>
+      <UTooltip :text="expandido ? t.compositor.reduzir : t.compositor.expandir">
+        <UButton
+          :icon="expandido ? 'i-lucide-minimize-2' : 'i-lucide-maximize-2'"
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          :aria-label="expandido ? t.compositor.reduzir : t.compositor.expandir"
+          :class="marca"
+          @click="expandido = !expandido"
+        />
+      </UTooltip>
+      <UTooltip :text="t.compositor.minimizar">
+        <UButton icon="i-lucide-minus" color="neutral" variant="ghost" size="sm" :aria-label="t.compositor.minimizar" :class="marca" @click="compositorAberto = false" />
+      </UTooltip>
+    </template>
     <template #body>
       <!-- De (proposta: hoje o remetente existe, mas a tela não mostra) -->
       <UFormField :label="t.compositor.de" :error="erros.de" :class="marca">
+        <!-- 1 opção: texto, como o Twenty e o Pipefy. Mais de 1: lista. -->
+        <div
+          v-if="remetentes.length === 1"
+          class="flex items-center gap-2 rounded-md border border-default px-2.5 py-1.5 text-sm transition-shadow duration-500"
+          :class="deMudou ? 'ring-2 ring-primary' : ''"
+        >
+          <UIcon :name="remetentes[0]!.icon" class="size-4 shrink-0 text-muted" />
+          <span class="truncate text-highlighted">{{ remetentes[0]!.label }}</span>
+          <span class="ml-auto shrink-0 text-xs text-muted">{{ remetentes[0]!.description }}</span>
+        </div>
         <USelectMenu
-          v-if="remetentes.length"
+          v-else-if="remetentes.length"
           v-model="rascunho.de"
           :items="remetentes"
           value-key="value"
           :search-input="false"
-          class="w-full"
+          class="w-full transition-shadow duration-500"
+          :class="deMudou ? 'rounded-md ring-2 ring-primary' : ''"
         />
         <UAlert
           v-else
@@ -228,6 +326,7 @@ const dicaDeOrigem = computed(() => {
       <!-- Para -->
       <UFormField :label="t.compositor.para" required :error="erros.para">
         <UInputMenu
+          ref="campoPara"
           v-model="rascunho.para"
           :items="sugestoes"
           value-key="value"
@@ -299,6 +398,21 @@ const dicaDeOrigem = computed(() => {
 
           <!-- Buscando -->
           <div v-else key="busca" class="mt-2">
+            <div v-if="sugestoesDeItem.length && !trocando" class="mb-2 flex flex-wrap items-center gap-1.5">
+              <span class="text-xs text-muted">{{ t.compositor.sugestoes }}</span>
+              <UTooltip v-for="sug in sugestoesDeItem" :key="sug.id" :text="t.compositor.sugestaoMotivo(sug.nome)">
+                <UButton
+                  :label="`${sug.reference} · ${sug.titulo}`"
+                  icon="i-lucide-sparkles"
+                  color="primary"
+                  variant="soft"
+                  size="xs"
+                  class="max-w-64"
+                  :ui="{ label: 'truncate' }"
+                  @click="vincular(sug.id)"
+                />
+              </UTooltip>
+            </div>
             <BuscaDeItem ref="buscaRef" :t="t" @escolher="vincular" />
             <div class="mt-1.5 flex items-center justify-between gap-2">
               <p class="text-xs text-muted">
@@ -322,6 +436,7 @@ const dicaDeOrigem = computed(() => {
         <div class="overflow-hidden rounded-md border border-default focus-within:border-primary" :class="erros.corpo ? 'border-error' : ''">
           <ClientOnly>
             <UEditor
+              ref="campoTexto"
               v-slot="{ editor }"
               v-model="rascunho.corpo"
               content-type="html"
@@ -329,7 +444,11 @@ const dicaDeOrigem = computed(() => {
               class="min-h-48"
               :ui="{ base: 'min-h-40 px-4 py-3 text-sm' }"
             >
-              <UEditorToolbar :editor="editor" :items="ferramentas" class="border-b border-default bg-elevated/40 px-2 py-1" />
+              <UEditorToolbar :editor="editor" :items="ferramentas" class="border-b border-default bg-elevated/40 px-2 py-1">
+                <template #link>
+                  <LinkDoEditor :editor="editor" :t="t" />
+                </template>
+              </UEditorToolbar>
             </UEditor>
           </ClientOnly>
         </div>
@@ -344,10 +463,17 @@ const dicaDeOrigem = computed(() => {
     </template>
 
     <template #footer>
-      <UButton :label="t.compositor.anexarArquivo" icon="i-lucide-paperclip" color="neutral" variant="ghost" @click="anexar" />
+      <div class="flex items-center gap-3">
+        <UButton :label="t.compositor.anexarArquivo" icon="i-lucide-paperclip" color="neutral" variant="ghost" @click="anexar" />
+        <span v-if="temConteudo" class="flex items-center gap-1 text-xs text-muted">
+          <UIcon name="i-lucide-cloud-check" class="size-3.5" />{{ t.compositor.rascunhoSalvo }}
+        </span>
+      </div>
       <div class="flex items-center gap-2">
         <UButton :label="t.compositor.descartar" color="neutral" variant="outline" @click="descartar" />
-        <UButton :label="t.compositor.enviar" icon="i-lucide-send" :loading="enviando" @click="enviar" />
+        <UTooltip :text="t.compositor.enviar" :kbds="['meta', 'enter']">
+          <UButton :label="t.compositor.enviar" icon="i-lucide-send" :loading="enviando" @click="enviar" />
+        </UTooltip>
       </div>
     </template>
   </USlideover>

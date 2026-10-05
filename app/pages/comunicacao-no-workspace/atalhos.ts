@@ -45,7 +45,9 @@ export function useAtalhos() {
   function motivo(canal: Canal, d: Destino | null): string | null {
     if (!d) return t.value.atalho.semContato
     if (canal === 'email') return d.email ? null : t.value.atalho.semEmail
-    return d.telefone ? null : t.value.atalho.semTelefone
+    if (!d.telefone) return t.value.atalho.semTelefone
+    // Número curto não abre conversa nenhuma (Twenty e Ploomes nem mostram o link).
+    return d.telefone.replace(/\D/g, '').length < 10 ? t.value.atalho.telefoneInvalido : null
   }
 
   function textos_(item: ItemDoProtótipo | null | undefined, d: Destino | null) {
@@ -97,7 +99,12 @@ export function useAtalhos() {
     })
   }
 
-  return { canaisEm, motivo, link, abrir, escreverNoEnspace, config }
+  /** O e-mail aberto no app leva a caixa do item em cópia? */
+  function vaiComCopia(item: ItemDoProtótipo | null | undefined) {
+    return !!item && config.value.copiaParaOItem && categoriaPorSlug(item.categoria).temMailBox
+  }
+
+  return { canaisEm, motivo, link, abrir, escreverNoEnspace, vaiComCopia, config }
 }
 
 /**

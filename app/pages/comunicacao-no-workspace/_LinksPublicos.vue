@@ -70,6 +70,7 @@ function menuDeEnvio(f: Formulario): DropdownMenuItem[][] {
         </p>
 
         <UEmpty
+          variant="naked"
           v-if="!publicos.length"
           icon="i-lucide-link-2-off"
           :title="t.form.nenhumPublico"
