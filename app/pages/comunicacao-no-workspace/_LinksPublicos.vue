@@ -6,7 +6,7 @@
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Formulario, SlugDaCategoria } from './mocks'
 import type { Textos } from './textos'
-import { categoriaPorSlug, linkPublico } from './mocks'
+import { TIPOS_COM_LINK, categoriaPorSlug, linkPublico } from './mocks'
 import { ICONE_DO_CANAL, useAtalhos, useCopiar } from './atalhos'
 import { useComunicacao, useMarcaDeProposta } from './estado'
 
@@ -18,13 +18,13 @@ const props = defineProps<{
   soIcone?: boolean
 }>()
 
-const { formularios, ir } = useComunicacao()
+const { formularios, ir, outlookIntegrado } = useComunicacao()
 const { canaisEm, abrir, escreverNoEnspace, config } = useAtalhos()
 const { copiar, copiado } = useCopiar()
 const marca = useMarcaDeProposta()
 
 const publicos = computed(() => formularios.value.filter(f =>
-  f.visibilidade === 'publico' && (!props.categoria || f.categoria === props.categoria)))
+  f.visibilidade === 'publico' && TIPOS_COM_LINK.includes(f.tipo) && (!props.categoria || f.categoria === props.categoria)))
 
 function menuDeEnvio(f: Formulario): DropdownMenuItem[][] {
   const url = linkPublico(f)
@@ -32,7 +32,7 @@ function menuDeEnvio(f: Formulario): DropdownMenuItem[][] {
   const assunto = props.t.form.assuntoDoLink(f.nome)
   const canais = canaisEm('formularios')
   const itens: DropdownMenuItem[] = []
-  if (canais.includes('email') && config.value.emailDoEnspace) {
+  if (canais.includes('email') && config.value.emailDoEnspace && outlookIntegrado.value) {
     itens.push({
       label: props.t.atalho.escreverNoEnspace,
       icon: 'i-lucide-send',

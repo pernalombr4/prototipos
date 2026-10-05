@@ -4,55 +4,49 @@
  * develop (Para, Adicionar em Cópia, Template, Assunto, Mensagem, Anexar
  * Arquivo, Enviar), na mesma forma (gaveta à direita) e na mesma ordem.
  *
+ * O envio é o da Mail Box de hoje, lido no código do develop em 05/10/2026:
+ * `user-integrations/microsoft/send-email`, da conta do Outlook que a pessoa
+ * integrou. Com item, vão também `replyTo` e `mailBox` (o endereço do item) e
+ * `item_ref` (a referência do item). Sem conta integrada, a gaveta mostra
+ * "Nenhuma conta integrada disponível" e o botão "Integrar contas".
+ *
  * PROPOSTA:
  *  - abre de qualquer tela (barra do topo, tela inicial, item, tarefa, E-mails);
- *  - "De" visível: hoje o remetente é o endereço do item e a tela não diz;
+ *  - "De" visível (hoje a tela não mostra) e "Responder para" quando há item;
  *  - "Vincular a item (opcional)", separado dos campos do e-mail;
  *  - Descartar com Desfazer, e o rascunho sobrevive a fechar a gaveta.
  */
 import type { EditorToolbarItem } from '@nuxt/ui'
 import type { Textos } from './textos'
-import { type Email, EU, caixas, categoriaPorSlug, enderecoDoItem, itemPorId, itens, membros, modelos } from './mocks'
+import { type Email, EU, categoriaPorSlug, itemPorId, itens, membros, modelos } from './mocks'
 import { contatosDoItem, preencher, useComunicacao, useMarcaDeProposta } from './estado'
 import BuscaDeItem from './_BuscaDeItem.vue'
 import LinkDoEditor from './_LinkDoEditor.vue'
 
 const props = defineProps<{ t: Textos }>()
 
-const { compositorAberto, rascunho, emails, config, cenario, remetentePadrao, abrirItem, ir, descartarRascunho } = useComunicacao()
+const { compositorAberto, rascunho, emails, config, cenario, outlookIntegrado, remetentePadrao, responderPara, abrirItem, ir, descartarRascunho } = useComunicacao()
 const marca = useMarcaDeProposta()
 const toast = useToast()
 
 const item = computed(() => itemPorId(rascunho.value.itemId))
 const categoria = computed(() => item.value ? categoriaPorSlug(item.value.categoria) : null)
 
-/* ---------- De ---------- */
+/* ---------- De e Responder para ---------- */
 
-const remetentes = computed(() => {
-  const lista: { value: string, label: string, description: string, icon: string }[] = []
-  if (item.value) lista.push({ value: enderecoDoItem(item.value), label: enderecoDoItem(item.value), description: props.t.compositor.caixaDoItem(item.value.reference), icon: 'i-lucide-file' })
-  if (cenario.value !== 'sem-caixa') for (const c of caixas) lista.push({ value: c.email, label: c.email, description: c.nome, icon: 'i-lucide-inbox' })
-  return lista
-})
+/** O remetente é sempre a conta da pessoa; o item só define o "Responder para". */
+const enderecoDeResposta = computed(() => responderPara(rascunho.value.itemId))
+watch(outlookIntegrado, () => (rascunho.value.de = remetentePadrao()))
 
-/**
- * Trocar o item troca o remetente sugerido, e o "De" pisca: nenhum produto da
- * pesquisa troca o remetente pelo vínculo, então a mudança precisa ser vista.
- */
-const deMudou = ref(false)
-let timerDoDe: ReturnType<typeof setTimeout> | undefined
-watch(() => rascunho.value.itemId, (id, antes) => {
-  if (id === antes) return
-  const novo = remetentePadrao(id)
-  if (novo !== rascunho.value.de && compositorAberto.value) {
-    deMudou.value = true
-    clearTimeout(timerDoDe)
-    timerDoDe = setTimeout(() => (deMudou.value = false), 1600)
-  }
-  rascunho.value.de = novo
-})
+function integrar() {
+  toast.add({ title: props.t.compositor.integrarContas, description: props.t.compositor.integrarMaquete, icon: 'i-lucide-plug', color: 'neutral' })
+}
 
-const deEhDoItem = computed(() => !!item.value && rascunho.value.de === enderecoDoItem(item.value))
+/** "Inserir assinatura": a assinatura da conta do Outlook, como na Mail Box de hoje. */
+function inserirAssinatura() {
+  const assinatura = `<p>--<br>${EU.nome}<br>${props.t.compositor.cargoDaAssinatura}</p>`
+  if (!rascunho.value.corpo.includes(assinatura)) rascunho.value.corpo = `${rascunho.value.corpo}${assinatura}`
+}
 
 /* ---------- Para ---------- */
 
@@ -159,7 +153,7 @@ function validar() {
 }
 
 async function enviar() {
-  if (!validar()) return
+  if (!outlookIntegrado.value || !validar()) return
   enviando.value = true
   await new Promise(r => setTimeout(r, 900))
   enviando.value = false
@@ -179,7 +173,8 @@ async function enviar() {
     assunto: r.assunto || props.t.compositor.semAssunto,
     corpo: r.corpo,
     data: new Date(),
-    caixa: r.de!,
+    // A resposta volta para o endereço do item; sem item, só para o Outlook da pessoa.
+    caixa: enderecoDeResposta.value ?? r.de!,
     itemId: r.itemId,
     anexos: r.anexos,
     lido: true,
@@ -288,38 +283,31 @@ const dicaDeOrigem = computed(() => {
       </UTooltip>
     </template>
     <template #body>
-      <!-- De (proposta: hoje o remetente existe, mas a tela não mostra) -->
+      <!-- Sem conta integrada: o mesmo aviso da Mail Box de hoje -->
+      <UEmpty
+        v-if="!outlookIntegrado"
+        icon="i-lucide-mail-x"
+        :title="t.compositor.semContaTitulo"
+        :description="t.compositor.semContaDescricao"
+        :actions="[{ label: t.compositor.integrarContas, icon: 'i-lucide-plug', onClick: integrar }]"
+        variant="naked"
+        class="flex-1"
+      />
+
+      <template v-else>
+      <!-- De (proposta: a conta existe, mas a tela de hoje não mostra) -->
       <UFormField :label="t.compositor.de" :error="erros.de" :class="marca">
-        <!-- 1 opção: texto, como o Twenty e o Pipefy. Mais de 1: lista. -->
-        <div
-          v-if="remetentes.length === 1"
-          class="flex items-center gap-2 rounded-md border border-default px-2.5 py-1.5 text-sm transition-shadow duration-500"
-          :class="deMudou ? 'ring-2 ring-primary' : ''"
-        >
-          <UIcon :name="remetentes[0]!.icon" class="size-4 shrink-0 text-muted" />
-          <span class="truncate text-highlighted">{{ remetentes[0]!.label }}</span>
-          <span class="ml-auto shrink-0 text-xs text-muted">{{ remetentes[0]!.description }}</span>
+        <div class="flex items-center gap-2 rounded-md border border-default px-2.5 py-1.5 text-sm">
+          <UIcon name="i-lucide-mail" class="size-4 shrink-0 text-muted" />
+          <span class="truncate text-highlighted">{{ rascunho.de }}</span>
+          <span class="ml-auto shrink-0 text-xs text-muted">{{ t.compositor.suaConta }}</span>
         </div>
-        <USelectMenu
-          v-else-if="remetentes.length"
-          v-model="rascunho.de"
-          :items="remetentes"
-          value-key="value"
-          :search-input="false"
-          class="w-full transition-shadow duration-500"
-          :class="deMudou ? 'rounded-md ring-2 ring-primary' : ''"
-        />
-        <UAlert
-          v-else
-          icon="i-lucide-inbox"
-          color="warning"
-          variant="subtle"
-          :title="t.compositor.semCaixaTitulo"
-          :description="t.compositor.semCaixaDescricao"
-          :actions="[{ label: t.compositor.vincularUmItem, color: 'neutral', variant: 'outline', size: 'xs', onClick: () => buscaRef?.focar() }]"
-        />
-        <template v-if="remetentes.length" #help>
-          {{ deEhDoItem ? t.compositor.respostasVoltamParaOItem : t.compositor.respostasVaoParaCaixa }}
+        <template #help>
+          <span v-if="enderecoDeResposta" class="flex flex-col gap-0.5">
+            <span>{{ t.compositor.responderParaItem }}</span>
+            <span class="truncate font-mono text-xs">{{ enderecoDeResposta }}</span>
+          </span>
+          <span v-else>{{ t.compositor.respostasNoSeuOutlook }}</span>
         </template>
       </UFormField>
 
@@ -460,11 +448,13 @@ const dicaDeOrigem = computed(() => {
           <UButton icon="i-lucide-x" color="neutral" variant="link" size="xs" class="-mr-1 p-0" :aria-label="t.compositor.removerAnexo(a)" @click="rascunho.anexos = rascunho.anexos.filter(x => x !== a)" />
         </UBadge>
       </div>
+      </template>
     </template>
 
-    <template #footer>
-      <div class="flex items-center gap-3">
+    <template v-if="outlookIntegrado" #footer>
+      <div class="flex items-center gap-1">
         <UButton :label="t.compositor.anexarArquivo" icon="i-lucide-paperclip" color="neutral" variant="ghost" @click="anexar" />
+        <UButton :label="t.compositor.inserirAssinatura" icon="i-lucide-signature" color="neutral" variant="ghost" @click="inserirAssinatura" />
         <span v-if="temConteudo" class="flex items-center gap-1 text-xs text-muted">
           <UIcon name="i-lucide-cloud-check" class="size-3.5" />{{ t.compositor.rascunhoSalvo }}
         </span>

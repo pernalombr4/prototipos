@@ -8,15 +8,16 @@
  * (pedido literal do documento: "do mesmo modo como foi feito em correções
  * monetárias, comparador"):
  *  - "Atalhos de comunicação", com canais, telas e texto inicial;
- *  - "E-mail do ENSPACE em todas as telas", com a caixa para e-mail sem item.
+ *  - "E-mail do ENSPACE em todas as telas", com de onde o e-mail sai e os
+ *    pré-requisitos (Correio do Outlook de cada pessoa, pasta Mail Box).
  */
 import type { Textos } from './textos'
-import { caixas, categorias, workspace } from './mocks'
+import { categorias, workspace } from './mocks'
 import { CANAIS, type ConfigDeComunicacao, LUGARES, useComunicacao, useMarcaDeProposta } from './estado'
 
 const props = defineProps<{ t: Textos }>()
 
-const { config, cenario, ir } = useComunicacao()
+const { config, ir } = useComunicacao()
 const marca = useMarcaDeProposta()
 const toast = useToast()
 
@@ -44,7 +45,6 @@ async function salvarModulos() {
   toast.add({ title: props.t.sistema.modulosSalvos, icon: 'i-lucide-check', color: 'success' })
 }
 
-const semCaixa = computed(() => cenario.value === 'sem-caixa')
 const comMailBox = categorias.filter(c => c.temMailBox).length
 </script>
 
@@ -181,22 +181,14 @@ const comMailBox = categorias.filter(c => c.temMailBox).length
             {{ t.sistema.emailDoEnspace }}
           </h3>
           <div class="mt-3 grid gap-5 lg:grid-cols-2">
-            <UFormField :label="t.sistema.caixaSemItem" :help="semCaixa ? undefined : t.sistema.caixaSemItemAjuda">
-              <USelect
-                v-if="!semCaixa"
-                v-model="rascunho.caixaSemItem"
-                :items="caixas.map(c => ({ value: c.id, label: `${c.nome} · ${c.email}` }))"
-                class="w-full"
-              />
-              <UAlert
-                v-else
-                icon="i-lucide-inbox"
-                color="warning"
-                variant="subtle"
-                :title="t.sistema.nenhumaCaixa"
-                :description="t.sistema.nenhumaCaixaDica"
-              />
-            </UFormField>
+            <div>
+              <p class="text-sm font-medium text-highlighted">
+                {{ t.sistema.comoSai }}
+              </p>
+              <p class="mt-1 text-sm text-muted">
+                {{ t.sistema.comoSaiDescricao }}
+              </p>
+            </div>
             <div>
               <p class="text-sm font-medium text-highlighted">
                 {{ t.sistema.preRequisito(comMailBox, categorias.length) }}

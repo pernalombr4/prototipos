@@ -9,7 +9,7 @@ import {
   type Formulario,
   type ItemDoProtótipo,
   type SlugDaCategoria,
-  caixas,
+  EU,
   categoriaPorSlug,
   emails as emailsIniciais,
   enderecoDoItem,
@@ -58,10 +58,12 @@ export interface ConfigDeComunicacao {
    * monday, ver PESQUISA.md).
    */
   copiaParaOItem: boolean
-  /** Módulo "E-mail do ENSPACE em todas as telas". */
+  /**
+   * Módulo "E-mail do ENSPACE em todas as telas". O envio é o da pasta Mail Box
+   * de hoje: sai da conta do Outlook que cada pessoa integrou (Perfil ›
+   * Integrações › Correio do Outlook). Não há caixa do workspace a escolher.
+   */
   emailDoEnspace: boolean
-  /** Caixa de onde sai o e-mail sem item vinculado. */
-  caixaSemItem: string | null
   porCategoria: Record<SlugDaCategoria, ConfigDaCategoria>
 }
 
@@ -73,7 +75,6 @@ export function configInicial(): ConfigDeComunicacao {
     textoInicial: true,
     copiaParaOItem: true,
     emailDoEnspace: true,
-    caixaSemItem: 'atendimento',
     porCategoria: {
       contratos: {
         contatos: [
@@ -116,7 +117,10 @@ export interface Contato {
 function valorDoCampo(i: ItemDoProtótipo, campo: string | null): string | null {
   if (!campo) return null
   if (campo === CAMPO_REQUISITANTE) return i.request_email ?? null
-  const v = (i.data as Record<string, unknown>)[campo]
+  // Subcampo de Pessoa/Empresa: "pessoa_empresa.contact_email".
+  const [raiz, sub] = campo.split('.') as [string, string | undefined]
+  const bruto = (i.data as Record<string, unknown>)[raiz]
+  const v = sub ? (bruto as Record<string, unknown> | null | undefined)?.[sub] : bruto
   return typeof v === 'string' && v.trim() ? v : null
 }
 
@@ -205,7 +209,7 @@ export function rascunhoVazio(): Rascunho {
   return { de: null, para: [], cc: [], cco: [], mostrarCopia: false, modelo: null, assunto: '', corpo: '', itemId: null, anexos: [], origem: 'barra' }
 }
 
-export type Cenario = 'normal' | 'sem-caixa' | 'falha'
+export type Cenario = 'normal' | 'sem-outlook' | 'falha'
 
 export function useComunicacao() {
   const config = useState<ConfigDeComunicacao>('cnw-config', configInicial)
@@ -221,17 +225,25 @@ export function useComunicacao() {
   const destacar = useState<boolean>('cnw-destacar', () => false)
   const vistaDaCategoria = useState<'lista' | 'painel' | 'atalhos' | 'formularios'>('cnw-vista-categoria', () => 'painel')
 
-  /** A caixa do workspace usada quando não há item. Nula no cenário sem caixa. */
-  const caixaSemItem = computed(() => {
-    if (cenario.value === 'sem-caixa') return null
-    return caixas.find(c => c.id === config.value.caixaSemItem) ?? null
-  })
+  /**
+   * A pessoa integrou o Correio do Outlook? Sem isso, a gaveta "Nova Mensagem"
+   * da Mail Box mostra "Nenhuma conta integrada disponível" (código do develop,
+   * 05/10/2026). O cenário "Sem Outlook integrado" do andaime mostra esse caso.
+   */
+  const outlookIntegrado = computed(() => cenario.value !== 'sem-outlook')
 
-  /** Remetente que o compositor sugere: o endereço do item, ou a caixa do workspace. */
-  function remetentePadrao(itemId: number | null) {
+  /**
+   * Remetente: a conta do Outlook da pessoa, com ou sem item. O item não muda o
+   * remetente; ele entra em "Responder para" (ver `responderPara`).
+   */
+  function remetentePadrao() {
+    return outlookIntegrado.value ? EU.email ?? null : null
+  }
+
+  /** O endereço do item vai em "Responder para": a resposta volta para a Mail Box. */
+  function responderPara(itemId: number | null) {
     const i = itemPorId(itemId)
-    if (i) return enderecoDoItem(i)
-    return caixaSemItem.value?.email ?? null
+    return i ? enderecoDoItem(i) : null
   }
 
   function ir(t: Tela, extra?: { categoria?: SlugDaCategoria, item?: number, aba?: string, vista?: 'lista' | 'painel' | 'atalhos' | 'formularios' }) {
@@ -262,7 +274,7 @@ export function useComunicacao() {
     // Aberto pela barra do topo sem contexto: o rascunho em andamento continua.
     if (!temConteudo || Object.keys(parcial).length) {
       const base = rascunhoVazio()
-      rascunho.value = { ...base, ...parcial, de: parcial.de ?? remetentePadrao(parcial.itemId ?? null) }
+      rascunho.value = { ...base, ...parcial, de: parcial.de ?? remetentePadrao() }
     }
     compositorAberto.value = true
   }
@@ -284,8 +296,9 @@ export function useComunicacao() {
     rascunho,
     cenario,
     destacar,
-    caixaSemItem,
+    outlookIntegrado,
     remetentePadrao,
+    responderPara,
     ir,
     abrirItem,
     abrirCompositor,

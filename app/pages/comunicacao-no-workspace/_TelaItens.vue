@@ -19,7 +19,7 @@ import LinksPublicos from './_LinksPublicos.vue'
 
 const props = defineProps<{ t: Textos }>()
 
-const { categoriaAtual, abrirItem, formularios, config } = useComunicacao()
+const { categoriaAtual, abrirItem, formularios, config, outlookIntegrado } = useComunicacao()
 const { canaisEm, motivo, abrir, escreverNoEnspace } = useAtalhos()
 const marca = useMarcaDeProposta()
 const idioma = useIdioma()
@@ -101,7 +101,7 @@ function opcoesDeContato(i: ItemDoProtótipo): DropdownMenuItem[] {
     grupo.push({ type: 'label', label: c.nome ? `${c.rotulo} · ${c.nome}` : c.rotulo })
     for (const canal of canais) {
       const m = motivo(canal, c)
-      if (canal === 'email' && config.value.emailDoEnspace) {
+      if (canal === 'email' && config.value.emailDoEnspace && outlookIntegrado.value) {
         grupo.push({
           label: props.t.atalho.escreverNoEnspace,
           icon: 'i-lucide-send',

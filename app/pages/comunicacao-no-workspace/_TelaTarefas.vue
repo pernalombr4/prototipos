@@ -13,7 +13,7 @@ import type { ContextMenuItem } from '@nuxt/ui'
 import type { EnKanbanCardConfig, EnKanbanColumn, EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import type { Textos } from './textos'
 import type { Canal } from './estado'
-import { HOJE, type MembroDoProtótipo, type TarefaDoProtótipo, itemPorId, membroPorId, tarefas } from './mocks'
+import { HOJE, type MembroDoProtótipo, TIPOS_COM_LINK, type TarefaDoProtótipo, categoriaPorSlug, itemPorId, membroPorId, tarefas } from './mocks'
 import { useComunicacao, useMarcaDeProposta } from './estado'
 import { ICONE_DO_CANAL, useAtalhos } from './atalhos'
 import AcoesDeContato from './_AcoesDeContato.vue'
@@ -392,12 +392,17 @@ const loteAberto = computed({ get: () => !!lote.value, set: (v) => { if (!v) lot
           </section>
 
           <!-- PROPOSTA: tarefa de formulário público -->
-          <CompartilharFormulario
-            v-if="formularioDaAberta?.visibilidade === 'publico' && config.atalhos && config.lugares.formularios"
-            :t="t"
-            :formulario="formularioDaAberta"
-            compacto
-          />
+          <!--
+            O link público responde o formulário fora desta tarefa: cria um item
+            novo na categoria do formulário e não conclui a tarefa. Por isso só
+            Criação e Geral, e a linha que diz isso.
+          -->
+          <div v-if="formularioDaAberta && formularioDaAberta.visibilidade === 'publico' && TIPOS_COM_LINK.includes(formularioDaAberta.tipo) && config.atalhos && config.lugares.formularios">
+            <CompartilharFormulario :t="t" :formulario="formularioDaAberta" compacto />
+            <p class="mt-1.5 flex items-start gap-1.5 text-xs text-muted" :class="marca">
+              <UIcon name="i-lucide-info" class="mt-0.5 size-3.5 shrink-0" />{{ t.tarefas.respostaCriaItem(categoriaPorSlug(formularioDaAberta.categoria).name) }}
+            </p>
+          </div>
         </div>
       </template>
     </USlideover>

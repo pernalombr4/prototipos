@@ -63,15 +63,22 @@ watch([categoriaAtual, vista], () => {
 const NENHUM = '__nenhum'
 
 const camposDaCategoria = computed(() => campos.filter(c => c.categoria === categoriaAtual.value))
-const opcoesDeNome = computed(() => [{ value: NENHUM, label: props.t.categoria.nenhum }, ...camposDaCategoria.value.filter(c => c.type === 'inputText').map(c => ({ value: c.refId, label: c.name }))])
+/** Pessoa/Empresa (`EnPerson`) entra pelos subcampos de contato. */
+function deContato(sub: 'contact_name' | 'contact_email' | 'contact_phone') {
+  const rotulo = { contact_name: props.t.categoria.subNome, contact_email: props.t.categoria.subEmail, contact_phone: props.t.categoria.subTelefone }[sub]
+  return camposDaCategoria.value.filter(c => c.type === 'EnPerson').map(c => ({ value: `${c.refId}.${sub}`, label: `${c.name} › ${rotulo}`, description: props.t.categoria.tipoPessoa }))
+}
+const opcoesDeNome = computed(() => [{ value: NENHUM, label: props.t.categoria.nenhum }, ...camposDaCategoria.value.filter(c => c.type === 'inputText').map(c => ({ value: c.refId, label: c.name })), ...deContato('contact_name')])
 const opcoesDeEmail = computed(() => [
   { value: NENHUM, label: props.t.categoria.nenhum },
   ...camposDaCategoria.value.filter(c => c.type === 'email').map(c => ({ value: c.refId, label: c.name, description: props.t.categoria.tipoEmail })),
+  ...deContato('contact_email'),
   { value: CAMPO_REQUISITANTE, label: props.t.categoria.emailDoRequisitante, description: props.t.categoria.campoPadrao },
 ])
 const opcoesDeTelefone = computed(() => [
   { value: NENHUM, label: props.t.categoria.nenhum },
   ...camposDaCategoria.value.filter(c => c.type === 'EnlMask').map(c => ({ value: c.refId, label: c.name, description: props.t.categoria.tipoMascara })),
+  ...deContato('contact_phone'),
 ])
 
 function adicionarContato() {

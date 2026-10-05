@@ -168,7 +168,7 @@ function iniciais(p: { nome?: string, email?: string }) {
 
           <div class="rounded-lg border border-default p-4">
             <h3 class="mb-2 text-lg font-semibold text-highlighted">
-              {{ t.agenda.participantes }}
+              {{ t.agenda.quem[aberto.fonte] }}
             </h3>
             <ul class="flex flex-col gap-2">
               <li v-for="(p, i) in aberto.participantes" :key="i" class="flex items-center gap-3">

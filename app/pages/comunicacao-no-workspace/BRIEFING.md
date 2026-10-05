@@ -275,8 +275,19 @@ do item com o botão de copiar, as abas Recebidos e Enviados e o lápis
 
 **O lápis abre "Nova Mensagem"**, uma gaveta à direita com Para (obrigatório), Adicionar em Cópia,
 Template, Assunto, Mensagem (obrigatória, editor com barra), Anexar Arquivo e Enviar
-([print](evidencias/06-mailbox-nova-mensagem.png)). **Não há campo De:** o e-mail sai do endereço
-do item e a tela não diz. Não enviei e-mail (envio é ação para fora).
+([print](evidencias/06-mailbox-nova-mensagem.png)). **Não há campo De.** Não enviei e-mail (envio é
+ação para fora).
+
+**De onde o e-mail sai** (código da gaveta no develop, lido na rodada 3; a rodada 1 supôs errado
+que saía do endereço do item):
+
+- o envio é `user-integrations/microsoft/send-email`: sai da **conta do Outlook que a pessoa
+  integrou** em Perfil › Integrações › Correio do Outlook;
+- o endereço do item vai em `replyTo` e `mailBox`, e a referência do item em `item_ref`: a resposta
+  volta para a Mail Box e o vínculo fica gravado pela referência;
+- o template troca as variáveis pelos dados do item, e há "Inserir assinatura";
+- sem conta integrada, a gaveta mostra "Nenhuma conta integrada disponível" e "Integrar contas". A
+  conta usada na exploração já tinha o Correio do Outlook integrado, por isso o formulário apareceu.
 
 **O workspace também tem caixas.** Configurações › E-mails tem:
 
@@ -298,9 +309,11 @@ do item e a tela não diz. Não enviei e-mail (envio é ação para fora).
 SendGrid ("usar o domínio de e-mail da sua empresa como remetente") e o gatilho `mailbox` do
 Spaceflow, com a opção `link_item` (schema do SDK).
 
-**Conclusão para o desenho:** e-mail vinculado sai do endereço do item, e a resposta volta para
-ele. Sem item, sai de uma caixa do workspace. Isso contradiz uma frase do documento ("o vínculo
-[...] não interfere no conteúdo ou envio"); a decisão está no `DECISOES.md`.
+**Conclusão para o desenho:** o e-mail sai sempre da conta do Outlook da pessoa. Com item, a
+resposta volta para a Mail Box do item; sem item, chega só no Outlook dela. A caixa do workspace
+recebe e-mail e inicia Spaceflow ("Caixa de Entrada"), e é remetente de notificações e fluxos; não
+é remetente do e-mail que a pessoa escreve. Isso fecha com o documento ("o vínculo [...] não
+interfere no conteúdo ou envio").
 
 ### 7.4 "Do mesmo modo como foi feito em correções monetárias, comparador"
 

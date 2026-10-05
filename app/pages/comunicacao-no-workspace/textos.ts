@@ -188,6 +188,7 @@ export interface Textos {
     aberta: string
     dicaDoQuadro: string
     membroSemTelefone: string
+    respostaCriaItem: (categoria: string) => string
     loteProgresso: (i: number, n: number) => string
     proxima: string
     fechar: string
@@ -209,6 +210,7 @@ export interface Textos {
     mais: (n: number) => string
     evento: string
     participantes: string
+    quem: Record<'outlook' | 'item' | 'tarefa', string>
     fonte: Record<'outlook' | 'item' | 'tarefa', string>
     intervalo: (de: string, ate: string) => string
     enviarLembrete: string
@@ -273,12 +275,15 @@ export interface Textos {
     soPermitidos: string
     nenhumItem: (q: string) => string
     nenhumItemDica: string
-    caixaDoItem: (ref: string) => string
-    respostasVoltamParaOItem: string
-    respostasVaoParaCaixa: string
-    semCaixaTitulo: string
-    semCaixaDescricao: string
-    vincularUmItem: string
+    suaConta: string
+    responderParaItem: string
+    respostasNoSeuOutlook: string
+    semContaTitulo: string
+    semContaDescricao: string
+    integrarContas: string
+    integrarMaquete: string
+    inserirAssinatura: string
+    cargoDaAssinatura: string
     mensagem: string
     mensagemPlaceholder: string
     link: { botao: string, colar: string, aplicar: string, abrir: string, remover: string }
@@ -334,10 +339,8 @@ export interface Textos {
     copiaParaOItem: string
     copiaParaOItemAjuda: string
     irParaCategorias: string
-    caixaSemItem: string
-    caixaSemItemAjuda: string
-    nenhumaCaixa: string
-    nenhumaCaixaDica: string
+    comoSai: string
+    comoSaiDescricao: string
     preRequisito: (n: number, total: number) => string
     semMailBox: string
     modulosSalvos: string
@@ -379,6 +382,10 @@ export interface Textos {
     nenhum: string
     tipoEmail: string
     tipoMascara: string
+    tipoPessoa: string
+    subNome: string
+    subEmail: string
+    subTelefone: string
     emailDoRequisitante: string
     campoPadrao: string
     novoContato: string
@@ -406,7 +413,7 @@ export interface Textos {
     atalhosDaCategoria: string
     formularios: string
     cenario: string
-    cenarios: { normal: string, semCaixa: string, falha: string }
+    cenarios: { normal: string, semOutlook: string, falha: string }
     mostrarOQueMuda: string
     porTras: string
   }
@@ -475,8 +482,8 @@ const ptBR: Textos = {
     semEmail: 'Sem e-mail cadastrado',
     semTelefone: 'Sem telefone cadastrado',
     escreverNoEnspace: 'Escrever pelo ENSPACE',
-    escreverNoEnspaceComItem: ref => `Sai da caixa de ${ref} e fica no histórico do item`,
-    escreverNoEnspaceSemItem: 'Sai de uma caixa do workspace',
+    escreverNoEnspaceComItem: ref => `Sai da sua conta do Outlook e fica na Mail Box de ${ref}`,
+    escreverNoEnspaceSemItem: 'Sai da sua conta do Outlook',
     abrirNoApp: 'Abrir no meu app de e-mail',
     abrirNoAppDica: 'Outlook, Gmail ou o app padrão do computador',
     outrasFormasDeEmail: 'Outras formas de enviar e-mail',
@@ -567,6 +574,7 @@ const ptBR: Textos = {
       area: 'Área',
       cnpj: 'CNPJ',
       contato_whatsapp: 'WhatsApp comercial',
+      pessoa_empresa: 'Pessoa/Empresa',
     },
     sairSemSalvar: 'Sair sem salvar',
     salvar: 'Salvar',
@@ -638,6 +646,7 @@ const ptBR: Textos = {
     aberta: 'Aberta',
     dicaDoQuadro: 'Clique no cartão para abrir a tarefa. Com o botão direito, avise o responsável.',
     membroSemTelefone: 'WhatsApp e SMS pedem o telefone do membro. A tela de perfil ainda não tem esse campo.',
+    respostaCriaItem: categoria => `A resposta pelo link cria um item novo em ${categoria}. Esta tarefa continua aberta até você concluí-la.`,
     loteProgresso: (i, n) => `Conversa ${i} de ${n}`,
     proxima: 'Próxima',
     fechar: 'Fechar',
@@ -659,6 +668,7 @@ const ptBR: Textos = {
     mais: n => `+ ${plural(n, 'evento', 'eventos')}`,
     evento: 'Evento',
     participantes: 'Participantes',
+    quem: { outlook: 'Participantes', item: 'Contatos do item', tarefa: 'Responsável' },
     fonte: { outlook: 'Reunião do Outlook', item: 'Data de um item', tarefa: 'Prazo de uma tarefa' },
     intervalo: (de, ate) => `${de} às ${ate}`,
     enviarLembrete: 'Enviar lembrete',
@@ -723,12 +733,15 @@ const ptBR: Textos = {
     soPermitidos: 'Só aparecem itens que você pode ver.',
     nenhumItem: q => `Nenhum item com "${q}"`,
     nenhumItemDica: 'Procure pela referência (CTR-00231), pelo ID ou pelo nome do contato.',
-    caixaDoItem: ref => `Caixa do item ${ref}`,
-    respostasVoltamParaOItem: 'As respostas voltam para a aba Mail Box do item.',
-    respostasVaoParaCaixa: 'As respostas chegam nesta caixa do workspace.',
-    semCaixaTitulo: 'Sem caixa para enviar',
-    semCaixaDescricao: 'Sem item vinculado, o e-mail sai de uma caixa do workspace, e este workspace não tem nenhuma. Vincule um item ou peça a um administrador para criar uma caixa.',
-    vincularUmItem: 'Vincular um item',
+    suaConta: 'Sua conta do Outlook',
+    responderParaItem: 'Responder para: o endereço do item. A resposta volta para a aba Mail Box.',
+    respostasNoSeuOutlook: 'Sem item vinculado, a resposta chega só no seu Outlook.',
+    semContaTitulo: 'Nenhuma conta integrada disponível.',
+    semContaDescricao: 'O e-mail do ENSPACE sai da sua conta do Outlook. Integre o Correio do Outlook em Perfil › Integrações. Até lá, o botão E-mail abre o seu app de e-mail.',
+    integrarContas: 'Integrar contas',
+    integrarMaquete: 'No produto, abre Perfil › Integrações › Correio do Outlook.',
+    inserirAssinatura: 'Inserir assinatura',
+    cargoDaAssinatura: 'Jurídico · Aurora Serviços',
     mensagem: 'Mensagem',
     mensagemPlaceholder: 'Escreva ou digite "/" para acessar os comandos...',
     link: { botao: 'Link', colar: 'Cole um endereço...', aplicar: 'Aplicar link', abrir: 'Abrir numa nova aba', remover: 'Remover link' },
@@ -747,7 +760,7 @@ const ptBR: Textos = {
     erroPara: 'Informe pelo menos 1 destinatário.',
     erroEmailInvalido: e => `"${e}" não é um e-mail válido.`,
     erroCorpo: 'Escreva a mensagem antes de enviar.',
-    erroDe: 'Escolha de onde o e-mail sai.',
+    erroDe: 'Integre o Correio do Outlook para enviar.',
     falhaTitulo: 'E-mail não enviado',
     falhaDescricao: 'O servidor de e-mail não respondeu. O rascunho continua aberto para tentar de novo.',
     semAssunto: '(sem assunto)',
@@ -784,10 +797,8 @@ const ptBR: Textos = {
     copiaParaOItem: 'Pôr a caixa do item em cópia',
     copiaParaOItemAjuda: 'No e-mail aberto no app da pessoa. A resposta volta para a aba Mail Box do item.',
     irParaCategorias: 'Escolher o contato de cada categoria',
-    caixaSemItem: 'Caixa para e-mail sem item',
-    caixaSemItemAjuda: 'Com item vinculado, o e-mail sai da caixa do item.',
-    nenhumaCaixa: 'Nenhuma caixa de e-mail criada',
-    nenhumaCaixaDica: 'Crie uma em Configurações › E-mails › Caixas de E-mail. Sem caixa, só sai e-mail vinculado a item.',
+    comoSai: 'De onde o e-mail sai',
+    comoSaiDescricao: 'Da conta do Outlook de cada pessoa, como na pasta Mail Box de hoje. Cada pessoa integra a conta em Perfil › Integrações › Correio do Outlook. Com item vinculado, a resposta volta para a Mail Box do item.',
     preRequisito: (n, total) => `Pasta Mail Box: ${n} de ${total} categorias têm`,
     semMailBox: 'Sem a pasta Mail Box, o e-mail vinculado não aparece na tela do item.',
     modulosSalvos: 'Módulos salvos',
@@ -857,6 +868,10 @@ const ptBR: Textos = {
     nenhum: 'Nenhum',
     tipoEmail: 'Campo E-mail',
     tipoMascara: 'Texto com Máscara',
+    tipoPessoa: 'Pessoa/Empresa',
+    subNome: 'Nome de contato',
+    subEmail: 'E-mail de contato',
+    subTelefone: 'Telefone de contato',
     emailDoRequisitante: 'E-mail do Requisitante',
     campoPadrao: 'Campo padrão de toda categoria',
     novoContato: 'Novo contato',
@@ -884,7 +899,7 @@ const ptBR: Textos = {
     atalhosDaCategoria: 'Atalhos da categoria Contratos',
     formularios: 'Formulários de Solicitações',
     cenario: 'Cenário',
-    cenarios: { normal: 'Normal', semCaixa: 'Sem caixa de e-mail', falha: 'Envio falha' },
+    cenarios: { normal: 'Normal', semOutlook: 'Sem Outlook integrado', falha: 'Envio falha' },
     mostrarOQueMuda: 'Mostrar o que muda',
     porTras: 'Por trás',
   },
@@ -951,8 +966,8 @@ const en: Textos = {
     semEmail: 'No email on file',
     semTelefone: 'No phone on file',
     escreverNoEnspace: 'Write in ENSPACE',
-    escreverNoEnspaceComItem: ref => `Sent from the ${ref} mailbox and kept in the item history`,
-    escreverNoEnspaceSemItem: 'Sent from a workspace mailbox',
+    escreverNoEnspaceComItem: ref => `Sent from your Outlook account and kept in the ${ref} Mail Box`,
+    escreverNoEnspaceSemItem: 'Sent from your Outlook account',
     abrirNoApp: 'Open in my email app',
     abrirNoAppDica: 'Outlook, Gmail or the computer default app',
     outrasFormasDeEmail: 'Other ways to send email',
@@ -1043,6 +1058,7 @@ const en: Textos = {
       area: 'Department',
       cnpj: 'Tax ID',
       contato_whatsapp: 'Sales WhatsApp',
+      pessoa_empresa: 'Person/Company',
     },
     sairSemSalvar: 'Leave without saving',
     salvar: 'Save',
@@ -1114,6 +1130,7 @@ const en: Textos = {
     aberta: 'Opened',
     dicaDoQuadro: 'Click a card to open the task. Right-click to notify the assignee.',
     membroSemTelefone: 'WhatsApp and SMS need the member phone. The profile screen does not have this field yet.',
+    respostaCriaItem: categoria => `An answer through the link creates a new item in ${categoria}. This task stays open until you complete it.`,
     loteProgresso: (i, n) => `Chat ${i} of ${n}`,
     proxima: 'Next',
     fechar: 'Close',
@@ -1135,6 +1152,7 @@ const en: Textos = {
     mais: n => `+ ${n} ${n === 1 ? 'event' : 'events'}`,
     evento: 'Event',
     participantes: 'Participants',
+    quem: { outlook: 'Participants', item: 'Item contacts', tarefa: 'Assignee' },
     fonte: { outlook: 'Outlook meeting', item: 'Item date', tarefa: 'Task due date' },
     intervalo: (de, ate) => `${de} to ${ate}`,
     enviarLembrete: 'Send reminder',
@@ -1199,12 +1217,15 @@ const en: Textos = {
     soPermitidos: 'Only items you can see are listed.',
     nenhumItem: q => `No items with "${q}"`,
     nenhumItemDica: 'Search by reference (CTR-00231), ID or contact name.',
-    caixaDoItem: ref => `Item ${ref} mailbox`,
-    respostasVoltamParaOItem: 'Replies come back to the Mail Box tab of the item.',
-    respostasVaoParaCaixa: 'Replies arrive in this workspace mailbox.',
-    semCaixaTitulo: 'No mailbox to send from',
-    semCaixaDescricao: 'Without a linked item, the email goes out from a workspace mailbox, and this workspace has none. Link an item or ask an admin to create a mailbox.',
-    vincularUmItem: 'Link an item',
+    suaConta: 'Your Outlook account',
+    responderParaItem: 'Reply-to: the item address. Replies come back to the Mail Box tab.',
+    respostasNoSeuOutlook: 'With no linked item, replies only reach your Outlook.',
+    semContaTitulo: 'No integrated accounts available.',
+    semContaDescricao: 'ENSPACE email goes out from your Outlook account. Connect Outlook Mail in Profile › Integrations. Until then, the Email button opens your email app.',
+    integrarContas: 'Connect accounts',
+    integrarMaquete: 'In the product, opens Profile › Integrations › Outlook Mail.',
+    inserirAssinatura: 'Insert signature',
+    cargoDaAssinatura: 'Legal · Aurora Serviços',
     mensagem: 'Message',
     mensagemPlaceholder: 'Write or type "/" for commands...',
     link: { botao: 'Link', colar: 'Paste a link...', aplicar: 'Apply link', abrir: 'Open in a new tab', remover: 'Remove link' },
@@ -1223,7 +1244,7 @@ const en: Textos = {
     erroPara: 'Add at least 1 recipient.',
     erroEmailInvalido: e => `"${e}" is not a valid email.`,
     erroCorpo: 'Write the message before sending.',
-    erroDe: 'Choose where the email goes out from.',
+    erroDe: 'Connect Outlook Mail to send.',
     falhaTitulo: 'Email not sent',
     falhaDescricao: 'The email server did not respond. The draft stays open so you can try again.',
     semAssunto: '(no subject)',
@@ -1260,10 +1281,8 @@ const en: Textos = {
     copiaParaOItem: 'Cc the item mailbox',
     copiaParaOItemAjuda: 'On the email opened in the person app. Replies come back to the Mail Box tab of the item.',
     irParaCategorias: 'Choose the contact of each category',
-    caixaSemItem: 'Mailbox for email without item',
-    caixaSemItemAjuda: 'With a linked item, the email goes out from the item mailbox.',
-    nenhumaCaixa: 'No mailbox created',
-    nenhumaCaixaDica: 'Create one in Settings › Emails › Mailboxes. Without one, only emails linked to an item go out.',
+    comoSai: 'Where the email goes out from',
+    comoSaiDescricao: 'From each person\'s Outlook account, as in the Mail Box folder today. Each person connects the account in Profile › Integrations › Outlook Mail. With a linked item, replies come back to the item Mail Box.',
     preRequisito: (n, total) => `Mail Box folder: ${n} of ${total} categories have it`,
     semMailBox: 'Without the Mail Box folder, the linked email does not show on the item screen.',
     modulosSalvos: 'Modules saved',
@@ -1333,6 +1352,10 @@ const en: Textos = {
     nenhum: 'None',
     tipoEmail: 'Email field',
     tipoMascara: 'Masked text',
+    tipoPessoa: 'Person/Company',
+    subNome: 'Contact name',
+    subEmail: 'Contact email',
+    subTelefone: 'Contact phone',
     emailDoRequisitante: 'Requester Email',
     campoPadrao: 'Default field of every category',
     novoContato: 'New contact',
@@ -1360,7 +1383,7 @@ const en: Textos = {
     atalhosDaCategoria: 'Contracts category shortcuts',
     formularios: 'Requests forms',
     cenario: 'Scenario',
-    cenarios: { normal: 'Normal', semCaixa: 'No mailbox', falha: 'Sending fails' },
+    cenarios: { normal: 'Normal', semOutlook: 'No Outlook connected', falha: 'Sending fails' },
     mostrarOQueMuda: 'Show what changes',
     porTras: 'Behind it',
   },
@@ -1427,8 +1450,8 @@ const es: Textos = {
     semEmail: 'Sin correo registrado',
     semTelefone: 'Sin teléfono registrado',
     escreverNoEnspace: 'Escribir en ENSPACE',
-    escreverNoEnspaceComItem: ref => `Sale del buzón de ${ref} y queda en el historial del ítem`,
-    escreverNoEnspaceSemItem: 'Sale de un buzón del workspace',
+    escreverNoEnspaceComItem: ref => `Sale de tu cuenta de Outlook y queda en el Mail Box de ${ref}`,
+    escreverNoEnspaceSemItem: 'Sale de tu cuenta de Outlook',
     abrirNoApp: 'Abrir en mi app de correo',
     abrirNoAppDica: 'Outlook, Gmail o la app predeterminada del equipo',
     outrasFormasDeEmail: 'Otras formas de enviar correo',
@@ -1519,6 +1542,7 @@ const es: Textos = {
       area: 'Área',
       cnpj: 'CNPJ',
       contato_whatsapp: 'WhatsApp comercial',
+      pessoa_empresa: 'Persona/Empresa',
     },
     sairSemSalvar: 'Salir sin guardar',
     salvar: 'Guardar',
@@ -1590,6 +1614,7 @@ const es: Textos = {
     aberta: 'Abierta',
     dicaDoQuadro: 'Haz clic en la tarjeta para abrir la tarea. Con el botón derecho, avisa al responsable.',
     membroSemTelefone: 'WhatsApp y SMS necesitan el teléfono del miembro. La pantalla de perfil aún no tiene ese campo.',
+    respostaCriaItem: categoria => `La respuesta por el enlace crea un ítem nuevo en ${categoria}. Esta tarea sigue abierta hasta que la completes.`,
     loteProgresso: (i, n) => `Conversación ${i} de ${n}`,
     proxima: 'Siguiente',
     fechar: 'Cerrar',
@@ -1611,6 +1636,7 @@ const es: Textos = {
     mais: n => `+ ${n} ${n === 1 ? 'evento' : 'eventos'}`,
     evento: 'Evento',
     participantes: 'Participantes',
+    quem: { outlook: 'Participantes', item: 'Contactos del ítem', tarefa: 'Responsable' },
     fonte: { outlook: 'Reunión de Outlook', item: 'Fecha de un ítem', tarefa: 'Plazo de una tarea' },
     intervalo: (de, ate) => `${de} a ${ate}`,
     enviarLembrete: 'Enviar recordatorio',
@@ -1675,12 +1701,15 @@ const es: Textos = {
     soPermitidos: 'Solo aparecen ítems que puedes ver.',
     nenhumItem: q => `Ningún ítem con "${q}"`,
     nenhumItemDica: 'Busca por referencia (CTR-00231), ID o nombre del contacto.',
-    caixaDoItem: ref => `Buzón del ítem ${ref}`,
-    respostasVoltamParaOItem: 'Las respuestas vuelven a la pestaña Mail Box del ítem.',
-    respostasVaoParaCaixa: 'Las respuestas llegan a este buzón del workspace.',
-    semCaixaTitulo: 'Sin buzón para enviar',
-    semCaixaDescricao: 'Sin ítem vinculado, el correo sale de un buzón del workspace, y este workspace no tiene ninguno. Vincula un ítem o pide a un administrador que cree un buzón.',
-    vincularUmItem: 'Vincular un ítem',
+    suaConta: 'Tu cuenta de Outlook',
+    responderParaItem: 'Responder a: la dirección del ítem. La respuesta vuelve a la pestaña Mail Box.',
+    respostasNoSeuOutlook: 'Sin ítem vinculado, la respuesta llega solo a tu Outlook.',
+    semContaTitulo: 'No hay cuentas integradas disponibles.',
+    semContaDescricao: 'El correo de ENSPACE sale de tu cuenta de Outlook. Integra el Correo de Outlook en Perfil › Integraciones. Mientras tanto, el botón Correo abre tu app de correo.',
+    integrarContas: 'Integrar cuentas',
+    integrarMaquete: 'En el producto, abre Perfil › Integraciones › Correo de Outlook.',
+    inserirAssinatura: 'Insertar firma',
+    cargoDaAssinatura: 'Jurídico · Aurora Serviços',
     mensagem: 'Mensaje',
     mensagemPlaceholder: 'Escribe o teclea "/" para ver los comandos...',
     link: { botao: 'Enlace', colar: 'Pega una dirección...', aplicar: 'Aplicar enlace', abrir: 'Abrir en una pestaña nueva', remover: 'Quitar enlace' },
@@ -1699,7 +1728,7 @@ const es: Textos = {
     erroPara: 'Indica al menos 1 destinatario.',
     erroEmailInvalido: e => `"${e}" no es un correo válido.`,
     erroCorpo: 'Escribe el mensaje antes de enviar.',
-    erroDe: 'Elige desde dónde sale el correo.',
+    erroDe: 'Integra el Correo de Outlook para enviar.',
     falhaTitulo: 'Correo no enviado',
     falhaDescricao: 'El servidor de correo no respondió. El borrador sigue abierto para intentar de nuevo.',
     semAssunto: '(sin asunto)',
@@ -1736,10 +1765,8 @@ const es: Textos = {
     copiaParaOItem: 'Poner el buzón del ítem en copia',
     copiaParaOItemAjuda: 'En el correo abierto en la app de la persona. La respuesta vuelve a la pestaña Mail Box del ítem.',
     irParaCategorias: 'Elegir el contacto de cada categoría',
-    caixaSemItem: 'Buzón para correo sin ítem',
-    caixaSemItemAjuda: 'Con ítem vinculado, el correo sale del buzón del ítem.',
-    nenhumaCaixa: 'Ningún buzón creado',
-    nenhumaCaixaDica: 'Crea uno en Configuración › Correos › Buzones de Correo. Sin buzón, solo sale correo vinculado a un ítem.',
+    comoSai: 'Desde dónde sale el correo',
+    comoSaiDescricao: 'Desde la cuenta de Outlook de cada persona, como en la carpeta Mail Box de hoy. Cada persona integra la cuenta en Perfil › Integraciones › Correo de Outlook. Con ítem vinculado, la respuesta vuelve al Mail Box del ítem.',
     preRequisito: (n, total) => `Carpeta Mail Box: ${n} de ${total} categorías la tienen`,
     semMailBox: 'Sin la carpeta Mail Box, el correo vinculado no aparece en la pantalla del ítem.',
     modulosSalvos: 'Módulos guardados',
@@ -1809,6 +1836,10 @@ const es: Textos = {
     nenhum: 'Ninguno',
     tipoEmail: 'Campo Correo',
     tipoMascara: 'Texto con Máscara',
+    tipoPessoa: 'Persona/Empresa',
+    subNome: 'Nombre de contacto',
+    subEmail: 'Correo de contacto',
+    subTelefone: 'Teléfono de contacto',
     emailDoRequisitante: 'Correo del Solicitante',
     campoPadrao: 'Campo estándar de toda categoría',
     novoContato: 'Nuevo contacto',
@@ -1836,7 +1867,7 @@ const es: Textos = {
     atalhosDaCategoria: 'Atajos de la categoría Contratos',
     formularios: 'Formularios de Solicitudes',
     cenario: 'Escenario',
-    cenarios: { normal: 'Normal', semCaixa: 'Sin buzón de correo', falha: 'El envío falla' },
+    cenarios: { normal: 'Normal', semOutlook: 'Sin Outlook integrado', falha: 'El envío falla' },
     mostrarOQueMuda: 'Mostrar lo que cambia',
     porTras: 'Detrás',
   },

@@ -177,6 +177,8 @@ export const campos: CampoDaCategoria[] = [
   campo('fornecedores', 'contato_nome', 'Contato comercial', 'inputText'),
   campo('fornecedores', 'contato_email', 'E-mail comercial', 'email'),
   campo('fornecedores', 'contato_whatsapp', 'WhatsApp comercial', 'EnlMask'),
+  // Pessoa/Empresa (`EnPerson`): guarda contact_name, contact_email e contact_phone (docs: Dados de campos).
+  campo('fornecedores', 'pessoa_empresa', 'Pessoa/Empresa', 'EnPerson'),
 ]
 
 /** O "E-mail do Requisitante" que o develop lista entre os campos de toda categoria. */
@@ -325,7 +327,7 @@ const fornecedores: ItemDoProtótipo[] = [
   titulo: f[0]!,
   etapa: (['em_minuta', 'vigente'] as StatusDoItem[])[i % 2]!,
   form: 9,
-  data: { titulo: f[0], cnpj: f[1], contato_nome: f[2], contato_email: f[3], contato_whatsapp: f[4] },
+  data: { titulo: f[0], cnpj: f[1], contato_nome: f[2], contato_email: f[3], contato_whatsapp: f[4], pessoa_empresa: { contact_name: f[2], contact_email: f[3], contact_phone: f[4] } },
   criado: new Date(2026, 7, 5 + i, 10),
   atualizado: new Date(2026, 9, 1, 10),
 }))
@@ -391,7 +393,7 @@ export const tarefas: TarefaDoProtótipo[] = [
   tarefa(1042, 'Enviar minuta assinada à contraparte', 'pending', 'high', dia(6, '18:00'), 2, 47231, { description: 'A contraparte pediu a versão com as duas assinaturas.' }),
   tarefa(1043, 'Coletar aprovação do orçamento com a diretoria', 'pending', 'normal', dia(9, '12:00'), 3, 47228),
   tarefa(1044, 'Confirmar data da audiência com o escritório parceiro', 'working', 'urgent', dia(8, '15:00'), 4, 52088),
-  tarefa(1045, 'Pedir ficha de cadastro ao fornecedor novo', 'pending', 'normal', dia(10, '18:00'), 6, 61001, { type: 'form', formulario: 'f-cadastro-fornecedor', description: 'O fornecedor preenche o formulário público; o item nasce em Fornecedores.' }),
+  tarefa(1045, 'Pedir ficha de cadastro ao fornecedor novo', 'pending', 'normal', dia(10, '18:00'), 6, null, { type: 'form', formulario: 'f-cadastro-fornecedor', description: 'Gerada pelo Spaceflow de compras. O fornecedor pode responder pelo link público; a tarefa fecha quando você a concluir.' }),
   tarefa(1046, 'Responder pedido de acesso ao sistema de contratos', 'working', 'normal', dia(7, '10:00'), 5, 52087),
   tarefa(1047, 'Revisar cláusula de reajuste com o financeiro', 'blocked', 'high', dia(3, '18:00'), 7, 47229, { description: 'Bloqueada: falta o índice de reajuste deste ano.' }),
   tarefa(1048, 'Arquivar contrato encerrado de vigilância', 'completed', 'low', dia(1, '18:00'), 8, 47226),
@@ -417,6 +419,13 @@ export interface Formulario {
   respostas: number
   campos: { rotulo: string, tipo: 'texto' | 'email' | 'telefone' | 'longo' }[]
 }
+
+/**
+ * Tipos de formulário cujo link público faz sentido. O link abre o formulário
+ * sem item: Criação e Geral criam um item novo. Editar e Visualizar dependem de
+ * um item que o link não leva (docs: Formulários, tipos e visibilidade).
+ */
+export const TIPOS_COM_LINK: Formulario['tipo'][] = ['criacao', 'geral']
 
 export const formularios: Formulario[] = [
   {
@@ -499,9 +508,11 @@ export function linkPublico(f: Formulario) {
  * ------------------------------------------------------------------ */
 
 /**
- * Caixa do workspace (Configurações › E-mails › Caixas de E-mail, a "Caixa de
- * Triagem"). O formulário pede Nome, a parte antes do @ e o Provedor. Não
- * confirmei se o endereço final leva o workspace; aqui leva, como o do item.
+ * Caixa do workspace (Configurações › E-mails › Caixas de E-mail). Recebe
+ * e-mail e pode iniciar um Spaceflow ("Caixa de Entrada"); é também remetente
+ * de notificações e fluxos. Não é remetente do e-mail que a pessoa escreve:
+ * esse sai da conta do Outlook dela. Aqui as caixas só recebem (e-mails sem
+ * item na área E-mails). Não confirmei se o endereço final leva o workspace.
  */
 export interface CaixaDeEmail {
   id: string
@@ -538,7 +549,11 @@ export interface Email {
   /** HTML simples. */
   corpo: string
   data: Date
-  /** Endereço da caixa: a do item ou uma caixa do workspace. */
+  /**
+   * Recebido: o endereço que recebeu (o do item ou uma caixa do workspace).
+   * Enviado: o "Responder para" (o endereço do item) ou, sem item, a conta de
+   * quem enviou.
+   */
   caixa: string
   /** Item vinculado. Guarda o id, nunca o nome (pedido do documento). */
   itemId: number | null
@@ -561,13 +576,13 @@ const sol87 = itens.find(i => i.reference === 'SOL-00087')!
 
 export const emails: Email[] = [
   email({ id: 1, direcao: 'recebido', de: 'marina.alves@example.com', para: [enderecoDoItem(ctr231)], assunto: 'Re: CTR-00231 · Minuta revisada', corpo: '<p>Olá, Bruno.</p><p>Revisamos a minuta e mandamos de volta com 2 comentários na cláusula 7. Podemos assinar na quinta?</p><p>Marina</p>', data: dia(5, '08:12'), caixa: enderecoDoItem(ctr231), itemId: ctr231.id, lido: false, anexos: ['minuta-v3-comentada.pdf'] }),
-  email({ id: 2, direcao: 'enviado', de: enderecoDoItem(ctr231), para: ['marina.alves@example.com'], assunto: 'CTR-00231 · Minuta revisada', corpo: '<p>Marina, boa tarde.</p><p>Segue a minuta com os ajustes que combinamos na reunião.</p>', data: dia(2, '16:40'), caixa: enderecoDoItem(ctr231), itemId: ctr231.id, autor: 2, anexos: ['minuta-v3.docx'] }),
+  email({ id: 2, direcao: 'enviado', de: 'bruno.teixeira@example.com', para: ['marina.alves@example.com'], assunto: 'CTR-00231 · Minuta revisada', corpo: '<p>Marina, boa tarde.</p><p>Segue a minuta com os ajustes que combinamos na reunião.</p>', data: dia(2, '16:40'), caixa: enderecoDoItem(ctr231), itemId: ctr231.id, autor: 2, anexos: ['minuta-v3.docx'] }),
   email({ id: 3, direcao: 'recebido', de: 'rafael.monteiro@example.com', para: [enderecoDoItem(ctr230)], assunto: 'Licença: quantidade de usuários', corpo: '<p>Bom dia. Precisamos confirmar se são 40 ou 60 usuários antes de emitir a nota.</p>', data: dia(4, '11:05'), caixa: enderecoDoItem(ctr230), itemId: ctr230.id }),
-  email({ id: 4, direcao: 'enviado', de: enderecoDoItem(ctr229), para: ['juliana.freitas@example.com'], cc: ['financeiro@example.com'], assunto: 'CTR-00229 · Índice de reajuste', corpo: '<p>Juliana, qual índice vocês propõem para este ano?</p>', data: dia(1, '10:20'), caixa: enderecoDoItem(ctr229), itemId: ctr229.id, autor: 7 }),
+  email({ id: 4, direcao: 'enviado', de: 'gabriela.lins@example.com', para: ['juliana.freitas@example.com'], cc: ['financeiro@example.com'], assunto: 'CTR-00229 · Índice de reajuste', corpo: '<p>Juliana, qual índice vocês propõem para este ano?</p>', data: dia(1, '10:20'), caixa: enderecoDoItem(ctr229), itemId: ctr229.id, autor: 7 }),
   email({ id: 5, direcao: 'recebido', de: 'lucas.almeida@example.com', para: [enderecoDoItem(sol88)], assunto: 'Cláusula de reajuste do cliente Delta', corpo: '<p>Oi, time. O cliente Delta pediu para trocar o índice. Podem olhar?</p>', data: dia(3, '14:33'), caixa: enderecoDoItem(sol88), itemId: sol88.id }),
   email({ id: 6, direcao: 'recebido', de: 'contato@example.com', para: [caixas[0]!.email], assunto: 'Pedido de cópia de contrato', corpo: '<p>Olá, gostaria de receber a cópia do contrato assinado em agosto.</p>', data: dia(5, '07:50'), caixa: caixas[0]!.email, itemId: null, lido: false }),
   email({ id: 7, direcao: 'recebido', de: 'caio.fernandes@example.com', para: [enderecoDoItem(ctr223)], assunto: 'Visita técnica para o link dedicado', corpo: '<p>Conseguimos agendar a visita técnica para o dia 8, às 14h.</p>', data: dia(2, '09:18'), caixa: enderecoDoItem(ctr223), itemId: ctr223.id }),
-  email({ id: 8, direcao: 'enviado', de: caixas[0]!.email, para: ['fornecedor.novo@example.com'], assunto: 'Cadastro de fornecedor', corpo: '<p>Segue o link do formulário de cadastro.</p>', data: dia(1, '15:00'), caixa: caixas[0]!.email, itemId: null, autor: 6 }),
+  email({ id: 8, direcao: 'enviado', de: 'fabio.castro@example.com', para: ['fornecedor.novo@example.com'], assunto: 'Cadastro de fornecedor', corpo: '<p>Segue o link do formulário de cadastro.</p>', data: dia(1, '15:00'), caixa: 'fabio.castro@example.com', itemId: null, autor: 6 }),
   email({ id: 9, direcao: 'recebido', de: 'natalia.couto@example.com', para: [enderecoDoItem(sol87)], assunto: 'Acesso ao sistema de contratos', corpo: '<p>Preciso de acesso de leitura para a equipe de RH.</p>', data: dia(4, '17:02'), caixa: enderecoDoItem(sol87), itemId: sol87.id }),
   // Chegou na caixa do workspace, sem item, de quem é contato de 3 contratos: a sugestão pelo remetente aparece.
   email({ id: 11, direcao: 'recebido', de: 'marina.alves@example.com', para: [caixas[0]!.email], assunto: 'Dúvida sobre a renovação', corpo: '<p>Olá. O contrato de manutenção renova sozinho ou precisamos assinar um aditivo?</p>', data: dia(5, '09:02'), caixa: caixas[0]!.email, itemId: null, lido: false }),
@@ -583,10 +598,18 @@ export interface EventoDaAgenda {
   titulo: string
   inicio: Date
   fim: Date
-  /** As 3 fontes da Agenda no develop: Tarefas, Itens e Integrações. */
+  /**
+   * As 3 fontes da Agenda (docs: Agenda, Configurações): datas de itens (campo
+   * de data da categoria), tarefas (Fluxo Padrão e Tarefas Rápidas) e reuniões
+   * do Outlook. Só a reunião do Outlook tem local e participantes.
+   */
   fonte: 'outlook' | 'item' | 'tarefa'
   local?: string
-  /** Participantes. Do Outlook vem só o e-mail. */
+  /**
+   * Quem recebe o lembrete. Outlook: os participantes (só e-mail). Item: os
+   * contatos do item (cartão "Atalhos de comunicação" da categoria). Tarefa: o
+   * responsável.
+   */
   participantes: { nome?: string, email?: string, telefone?: string | null }[]
   itemId?: number
 }
@@ -599,7 +622,7 @@ const contatoDe = (i: ItemDoProtótipo) => ({ nome: i.data.contato_nome as strin
 
 export const eventos: EventoDaAgenda[] = [
   evento('e1', 'Alinhamento semanal do jurídico', 5, '09:00', '09:30', 'outlook', [{ email: 'ana.ribeiro@example.com' }, { email: 'bruno.teixeira@example.com' }, { email: 'carla.nogueira@example.com' }], { local: 'Reuniões do Microsoft Teams' }),
-  evento('e2', 'Assinatura da minuta com a Lumen', 8, '14:00', '15:00', 'item', [contatoDe(ctr231), { nome: 'Bruno Teixeira', email: 'bruno.teixeira@example.com', telefone: '+55 11 97240-1187' }], { itemId: ctr231.id, local: 'Escritório da Lumen' }),
+  evento('e2', 'Assinatura: Contrato de manutenção predial', 8, '14:00', '14:30', 'item', [contatoDe(ctr231)], { itemId: ctr231.id }),
   evento('e3', 'Prazo: confirmar data da audiência', 8, '15:00', '15:30', 'tarefa', [{ nome: 'Diego Martins', email: 'diego.martins@example.com', telefone: '+55 21 99318-5520' }]),
   evento('e4', 'Reunião com a Vértice sobre licenças', 6, '11:00', '12:00', 'outlook', [{ email: 'rafael.monteiro@example.com' }, { email: 'elisa.prado@example.com' }], { local: 'Reuniões do Microsoft Teams' }),
   evento('e5', 'Vencimento: Contrato de link de internet dedicado', 14, '09:00', '09:30', 'item', [contatoDe(ctr223)], { itemId: ctr223.id }),

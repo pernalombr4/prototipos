@@ -99,7 +99,7 @@ const irPara = computed<DropdownMenuItem[][]>(() => [
 
 const cenarios = computed<{ value: Cenario, label: string }[]>(() => [
   { value: 'normal', label: t.value.andaime.cenarios.normal },
-  { value: 'sem-caixa', label: t.value.andaime.cenarios.semCaixa },
+  { value: 'sem-outlook', label: t.value.andaime.cenarios.semOutlook },
   { value: 'falha', label: t.value.andaime.cenarios.falha },
 ])
 </script>

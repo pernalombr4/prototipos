@@ -126,9 +126,13 @@ function responder(id: number) {
 const camposVisiveis = computed(() => {
   const i = item.value
   if (!i) return []
+  const sub = { contact_name: props.t.categoria.subNome, contact_email: props.t.categoria.subEmail, contact_phone: props.t.categoria.subTelefone } as Record<string, string>
   return Object.entries(i.data as Record<string, unknown>)
     .filter(([k]) => k !== 'vencimento')
-    .map(([k, v]) => ({ chave: k, rotulo: props.t.item.campos[k] ?? k, valor: v == null ? '' : typeof v === 'number' ? v.toLocaleString(idioma.value, { style: 'currency', currency: 'BRL' }) : String(v) }))
+    .flatMap(([k, v]) => v && typeof v === 'object'
+      // Pessoa/Empresa: um campo por subcampo de contato.
+      ? Object.entries(v as Record<string, unknown>).map(([s2, v2]) => ({ chave: `${k}.${s2}`, rotulo: `${props.t.item.campos[k] ?? k} › ${sub[s2] ?? s2}`, valor: v2 == null ? '' : String(v2) }))
+      : [{ chave: k, rotulo: props.t.item.campos[k] ?? k, valor: v == null ? '' : typeof v === 'number' ? v.toLocaleString(idioma.value, { style: 'currency', currency: 'BRL' }) : String(v) }])
 })
 
 const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.id))

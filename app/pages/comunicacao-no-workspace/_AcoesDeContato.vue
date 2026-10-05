@@ -10,7 +10,7 @@
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { ItemDoProtótipo } from './mocks'
 import type { Textos } from './textos'
-import type { Lugar, Rascunho } from './estado'
+import { type Lugar, type Rascunho, useComunicacao } from './estado'
 import { type Destino, ICONE_DO_CANAL, useAtalhos } from './atalhos'
 
 const props = withDefaults(defineProps<{
@@ -41,13 +41,15 @@ const props = withDefaults(defineProps<{
 })
 
 const { canaisEm, motivo: motivoDoCanal, abrir, escreverNoEnspace, vaiComCopia, config } = useAtalhos()
+const { outlookIntegrado } = useComunicacao()
 
 function motivo(c: 'email' | 'whatsapp' | 'sms', d: Destino | null) {
   return props.semDestinatario ? null : motivoDoCanal(c, d)
 }
 
 const canais = computed(() => canaisEm(props.lugar))
-const comEnspace = computed(() => props.permitirEnspace && config.value.emailDoEnspace)
+// Sem o Correio do Outlook integrado não há envio pelo ENSPACE: o E-mail abre o app da pessoa.
+const comEnspace = computed(() => props.permitirEnspace && config.value.emailDoEnspace && outlookIntegrado.value)
 
 const opcoes = computed(() => ({ item: props.item, assunto: props.assunto, mensagem: props.mensagem }))
 

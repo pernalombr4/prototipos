@@ -11,15 +11,15 @@ botão de E-mail (motivo no `BRIEFING.md`, seção 4).
 | (b) Atalhos de e-mail, WhatsApp e SMS | Início (Atalhos); item (Contato rápido); lista de itens (menu "Contatar"); quadro de itens (clique direito); tarefas (coluna Contato, aviso em lote, clique direito, painel); Agenda (lembrete) |
 | Configuração dos atalhos | Sistema › Módulos ("Atalhos de comunicação": canais, telas, texto inicial, cópia para o item); Categorias › cartão "Atalhos de comunicação" (de quais campos vêm nome, e-mail e telefone) |
 | E-mail do ENSPACE em todas as telas | "Novo e-mail" na barra do topo; "E-mails" no menu (Recebidos e Enviados, com o item); o compositor com "De" e "Vincular a item" |
-| Configuração do e-mail | Sistema › Módulos ("E-mail do ENSPACE em todas as telas": caixa para e-mail sem item; quais categorias têm a pasta Mail Box) |
+| Configuração do e-mail | Sistema › Módulos ("E-mail do ENSPACE em todas as telas": de onde o e-mail sai e quais categorias têm a pasta Mail Box). Cada pessoa integra o Correio do Outlook no próprio perfil |
 
 ## O fluxo do e-mail
 
 ```
 De qualquer tela                     Do item (Contato rápido ou Mail Box)
-   │ Novo e-mail (topo)                 │ E-mail › Escrever pelo ENSPACE
+   │ Novo e-mail (topo)                 │ E-mail (botão dividido)
    ▼                                    ▼
-Nova Mensagem ── De: caixa do workspace   Nova Mensagem ── De: caixa do item
+Nova Mensagem ── De: sua conta do Outlook (a mesma nos 2 casos)
    │                                    │  Vincular a item: já preenchido
    │ Vincular a item (opcional)          │  (troca ou remove)
    │  busca: nome, referência, ID,       │
@@ -27,9 +27,13 @@ Nova Mensagem ── De: caixa do workspace   Nova Mensagem ── De: caixa do 
    ▼                                    ▼
  Enviar ─────────────────────────────────┘
    │
-   ├─ com item: sai do endereço do item; aparece em E-mails e na aba Mail Box do item
-   └─ sem item: sai da caixa do workspace; aparece em E-mails, coluna Item "Sem item"
-                (dá para vincular depois, na leitura do e-mail)
+   ├─ com item: Responder para = endereço do item; a resposta volta para a Mail Box;
+   │            o e-mail aparece em E-mails e na Mail Box do item
+   └─ sem item: sem Responder para; a resposta chega só no Outlook da pessoa;
+                o e-mail aparece em E-mails, coluna Item "Sem item"
+
+Sem o Correio do Outlook integrado: a gaveta mostra "Nenhuma conta integrada
+disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:).
 ```
 
 ## Rodada 1 · 2026-10-05
@@ -125,49 +129,85 @@ Nova Mensagem ── De: caixa do workspace   Nova Mensagem ── De: caixa do 
   [E-mails com sugestão pelo remetente](evidencias/prototipo-10-emails-sugestao-pelo-remetente.jpg),
   [escuro e espanhol](evidencias/prototipo-11-escuro-espanhol.jpg).
 
+## Rodada 3 · 2026-10-05
+
+- **Pedido (literal):** "voce tem certeza que tudo que ta nesse prototipo cabe na estrutura LÓGICA
+  do enspace? quando tiver certeza, me diga: qual a logica pro uso de cada ponto da
+  funcionalidade? isso tem q estar documentado num docx."
+- **Conferido:** o código da Mail Box no develop (gaveta "Nova Mensagem"), os schemas do SDK 0.17,
+  a documentação de suporte (`en-docs`, só leitura) e as telas do workspace de exploração.
+- **Premissa errada, corrigida:** o e-mail da Mail Box **não sai do endereço do item**. Sai da conta
+  do Outlook que a pessoa integrou (Perfil › Integrações › Correio do Outlook), pela rota
+  `user-integrations/microsoft/send-email`. O endereço do item vai em `replyTo` e `mailBox`, e a
+  referência do item em `item_ref`. Sem conta integrada, a gaveta mostra "Nenhuma conta integrada
+  disponível" e "Integrar contas". A pergunta da rodada 1 (o vínculo é o remetente?) acabou: o
+  remetente é sempre a pessoa; o vínculo só define para onde a resposta volta e onde o e-mail fica.
+- **Mudou:**
+  - "De" fixo na conta do Outlook da pessoa; com item, a linha "Responder para" com o endereço do
+    item; sem item, "a resposta chega só no seu Outlook";
+  - saiu a "caixa para e-mail sem item" de Sistema › Módulos: caixa do workspace é remetente de
+    fluxo e porta de entrada de Spaceflow, não do e-mail que a pessoa escreve;
+  - cenário "Sem caixa de e-mail" virou "Sem Outlook integrado": a gaveta mostra o aviso de hoje e o
+    botão E-mail abre o app da pessoa;
+  - "Inserir assinatura" no compositor (existe hoje na Mail Box);
+  - link público só para formulário público de tipo Criação ou Geral (Editar e Visualizar dependem
+    de um item que o link não leva); na tarefa, a linha "a resposta cria um item novo e não conclui
+    a tarefa";
+  - Agenda: evento de item mostra "Contatos do item", sem local; evento de tarefa mostra o
+    "Responsável"; só a reunião do Outlook tem participantes e local;
+  - contato da categoria aceita os subcampos do Pessoa/Empresa (nome, e-mail e telefone de contato);
+  - os e-mails enviados do mock saem da conta de quem enviou, não do endereço do item.
+- **Confirmado, sem mudança:** módulo em Sistema › Módulos (como Correção Monetária e Comparações);
+  cartão na categoria (como Correção Monetária); atalho na tela inicial (como "Acessar
+  Comparações"); tarefa rápida com formulário (vem de Spaceflow); telefone sem tipo próprio (Texto
+  com máscara), por isso o mapeamento por categoria.
+- **Não deu:** a documentação diz que o Correio do Outlook "exibe sua caixa de entrada dentro do
+  ENSPACE e permite vincular e-mails a tarefas e registros", e o código do develop não tem essa tela
+  nem a rota de vínculo. Fica como pergunta ao dev.
+- **Entrega:** `LOGICA-DA-FUNCIONALIDADE.docx`, com o funcionamento, a jornada e a justificativa de
+  cada ponto.
+
 ## Por que cada decisão
 
-### O endereço do item é o remetente
+### O e-mail sai da conta do Outlook da pessoa; o item recebe a resposta
 
-O develop mostra que **cada item tem caixa própria**:
-`<referência>.<workspace>@develop.box.enspace.io`, na aba Mail Box. O e-mail escrito ali sai desse
-endereço, e a resposta volta para o item. O workspace também tem caixas (a "Caixa de Triagem").
+Lido no código da gaveta "Nova Mensagem" da Mail Box (develop, 05/10/2026):
 
-Daí:
+- o envio é `POST user-integrations/microsoft/send-email` com `to`, `cc`, `bcc`, `replyTo`,
+  `subject`, `message`, `attachments` e `item_ref`;
+- o remetente é a conta do Outlook que a pessoa integrou em Perfil › Integrações;
+- no item, `replyTo` e `mailBox` recebem `<referência do item>.<workspace>@<domínio das caixas>`, e
+  `item_ref` recebe a referência do item;
+- sem conta integrada, a gaveta mostra "Nenhuma conta integrada disponível" e "Integrar contas".
 
-- **com item vinculado,** o compositor propõe o endereço do item no "De";
-- **sem item,** propõe a caixa do workspace escolhida em Sistema › Módulos;
-- **sem item e sem caixa** (cenário "Sem caixa de e-mail"), o compositor avisa e oferece "Vincular
-  um item". O documento pede que a falta de item não impeça o envio: para isso o workspace precisa
-  de 1 caixa.
+Daí o compositor global usa o mesmo envio:
 
-**Divergência com o documento:** "O vínculo com o item é uma informação interna do ENSPACE e não
-interfere no conteúdo ou envio do e-mail." No ENSPACE de hoje o vínculo **é** o remetente: é ele
-que faz a resposta voltar para o item. O protótipo mantém isso e deixa o "De" à vista (hoje a tela
-esconde). Quem quiser vincular sem trocar o remetente escolhe outra caixa no "De"; o vínculo
-continua. **Pergunta para a Mikaela e o Felipe:** é isso, ou o vínculo deve virar só uma etiqueta
-interna, com o e-mail saindo sempre da mesma caixa?
+- **com item vinculado:** o mesmo envio de hoje. A resposta volta para a Mail Box do item;
+- **sem item:** o mesmo envio sem `replyTo` e sem `item_ref`. A resposta chega só no Outlook da
+  pessoa. **Pergunta ao dev:** o envio sem `item_ref` fica gravado em `sendmails` para aparecer na
+  área E-mails?
+
+Isso fecha com o documento: "O vínculo com o item é uma informação interna do ENSPACE e não
+interfere no conteúdo ou envio do e-mail". O remetente não muda; o vínculo muda só o "Responder
+para" e onde o e-mail fica guardado.
 
 ### O "De" aparece
 
-A "Nova Mensagem" de hoje não diz de onde o e-mail sai. Com o compositor abrindo de qualquer tela,
-o remetente muda conforme o vínculo, e esconder isso faz a pessoa mandar e-mail do endereço errado
-sem saber. HubSpot, Salesforce, Close e Pipefy mostram o From.
-
-- **1 opção:** o "De" é texto, não lista (Twenty e Pipefy).
-- **Vínculo trocado:** o "De" ganha destaque por 1,6 s. Nenhum produto da pesquisa troca o
-  remetente pelo vínculo, então a troca precisa ser vista.
+A "Nova Mensagem" de hoje não diz de onde o e-mail sai (o texto "De (Contas Integradas)" existe no
+código e não aparece na tela). O protótipo mostra a conta da pessoa e, com item, o "Responder para".
+HubSpot, Salesforce, Close e Pipefy mostram o From.
 
 ### O botão E-mail tem 2 caminhos, num botão dividido
 
 Com o módulo "E-mail do ENSPACE" ligado, o E-mail dos atalhos é um botão dividido
 (`UFieldGroup` com `UDropdownMenu`, como o exemplo `FieldGroupDropdownExample` do Nuxt UI):
 
-- **o clique no corpo escreve pelo ENSPACE:** sai da caixa do item e fica no histórico;
+- **o clique no corpo escreve pelo ENSPACE:** sai da conta do Outlook da pessoa e fica na Mail Box
+  do item;
 - **a seta abre "Abrir no meu app de e-mail":** o `mailto:` que o documento pede.
 
 O caminho do ENSPACE vem primeiro porque é o único em que a resposta sempre volta ao item. Com o
-módulo desligado, o botão abre direto o app. É a regra do Twenty (com caixa, compositor interno; sem
+módulo desligado, ou sem o Correio do Outlook integrado, o botão abre direto o app. É a regra do Twenty (com caixa, compositor interno; sem
 caixa, `mailto:`), com a escolha à vista, porque no ENSPACE as 2 coisas existem juntas. Agendor
 tem o mesmo desenho no WhatsApp; o Pipedrive troca o método por uma seta. Na coluna de ícones não
 cabe o botão dividido: lá, os 2 caminhos vão num menu.
@@ -194,9 +234,12 @@ O documento diz que o ENSPACE "não deverá gerar conteúdo da mensagem" e, no m
 
 ### Quem é o contato: por categoria
 
-O item não tem um campo "telefone do contrato" fixo: cada categoria tem os seus. Por isso o cartão
+O item não tem um campo "telefone do contrato" fixo: cada categoria tem os seus, e o ENSPACE não
+tem tipo de campo telefone (o telefone é um Texto com máscara, como o CNPJ). Por isso o cartão
 novo no painel da categoria (ao lado de Correção Monetária) diz de quais campos vêm o nome, o
-e-mail e o telefone de cada contato. Uma categoria pode ter mais de 1 contato (Contratos tem
+e-mail e o telefone de cada contato. As origens possíveis: campo E-mail, Texto com máscara, o
+"E-mail do Requisitante" (`request_email`) e os subcampos de contato do Pessoa/Empresa
+(`contact_name`, `contact_email`, `contact_phone`). A configuração fica em `ItemType.settings`. Uma categoria pode ter mais de 1 contato (Contratos tem
 "Contato da contraparte" e "Requisitante"); o Contato rápido do item deixa escolher. A prévia ao
 lado mostra o link que cada atalho abre com o item de exemplo.
 
@@ -223,11 +266,16 @@ SMS funcionar de verdade, o perfil precisa do campo. **É dependência fora dest
 
 ### Link público: nas telas de uso, sem tirar da configuração
 
+- **Só formulário público de tipo Criação ou Geral.** O link público abre o formulário sem item, e
+  a resposta cria um item na categoria do formulário. Editar e Visualizar dependem de um item que o
+  link não leva.
 - **Requisições:** o cartão do mockup 1, entre o seletor e o formulário, só com formulário público.
   Formulário privado ganha 1 linha dizendo por que não há link.
 - **Início:** o menu "Link de formulário público", com copiar e enviar por formulário.
 - **Lista de itens:** o mesmo menu, só com os formulários da categoria, ao lado de "Novo registro".
-- **Tarefa de preencher formulário** (`type: form`): o cartão no painel da tarefa.
+- **Tarefa de preencher formulário** (`type: form`, gerada por Spaceflow): o cartão no painel da
+  tarefa, com a linha "a resposta pelo link cria um item novo e não conclui esta tarefa". A tarefa
+  só fecha quando o responsável preenche e conclui.
 - **O Copiar da configuração continua** (regra 20: destaque soma, não substitui). Muda só o aviso: 1 texto em todo lugar, "Link
   copiado", no lugar dos 2 de hoje.
 
@@ -247,10 +295,16 @@ SMS funcionar de verdade, o perfil precisa do campo. **É dependência fora dest
 
 ### Agenda: lembrete por participante
 
-O modal "Evento" de hoje ganha um atalho por participante e "E-mail para todos". Participante do
-Outlook só tem e-mail, então WhatsApp e SMS ficam desabilitados com o motivo. Evento que vem de um
-item (vencimento, assinatura) traz o telefone do contato do item. O texto do lembrete leva data,
-hora e local.
+A Agenda junta 3 fontes: datas de itens (campo de data da categoria), tarefas (Fluxo Padrão e
+Tarefas Rápidas) e reuniões do Outlook. O modal "Evento" ganha um atalho por pessoa e "E-mail para
+todos", e a pessoa muda conforme a fonte:
+
+- **reunião do Outlook:** os participantes. Só têm e-mail, então WhatsApp e SMS ficam
+  desabilitados com o motivo;
+- **data de um item:** os contatos do item (cartão "Atalhos de comunicação" da categoria);
+- **prazo de uma tarefa:** o responsável.
+
+O texto do lembrete leva data, hora e, na reunião do Outlook, o local.
 
 ### A área "E-mails" no menu
 
@@ -285,6 +339,9 @@ escreve, fora de campo de texto (Gmail `c`, Outlook `N`), e a dica do botão mos
 
 ### Busca de item
 
+- **Rota nova.** A busca global (Ctrl K) não procura itens: navega por menus e ações (docs:
+  Navegação). A busca de item entre categorias, filtrada por permissão, precisa ser construída.
+- Só no workspace atual: o endereço do item e as permissões são do workspace.
 - Busca, não lista: vazia, mostra os 5 atualizados por último; com texto, os 8 melhores e quantos
   ficaram de fora (regra 34: o controle se desenha para o volume real, e o workspace tem milhares de itens).
 - Procura em referência, ID, nome, categoria, contatos e campos de texto (contraparte, CNPJ).

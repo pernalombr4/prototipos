@@ -7,7 +7,7 @@
  * entre o seletor e o formulário (imagem 1 do documento).
  */
 import type { Textos } from './textos'
-import { categoriaPorSlug } from './mocks'
+import { TIPOS_COM_LINK, categoriaPorSlug } from './mocks'
 import { useComunicacao, useMarcaDeProposta } from './estado'
 import CompartilharFormulario from './_CompartilharFormulario.vue'
 
@@ -25,7 +25,7 @@ const opcoes = computed(() => formularios.value.map(f => ({
   icon: f.visibilidade === 'publico' ? 'i-lucide-globe' : 'i-lucide-lock',
 })))
 
-const mostrarLink = computed(() => formulario.value?.visibilidade === 'publico' && config.value.atalhos && config.value.lugares.formularios)
+const mostrarLink = computed(() => !!formulario.value && formulario.value.visibilidade === 'publico' && TIPOS_COM_LINK.includes(formulario.value.tipo) && config.value.atalhos && config.value.lugares.formularios)
 const enviando = ref(false)
 async function salvar() {
   enviando.value = true
