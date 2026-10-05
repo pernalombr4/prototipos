@@ -21,7 +21,7 @@
     "@be-enlighten/enspace-sdk-vue": "^0.17.0",
     "@iconify-json/lucide": "^1.2.136",
     "@iconify-json/simple-icons": "^1.2.97",
-    "@nuxt/ui": "^4.5.1",
+    "@nuxt/ui": "^4.11.3",
     "@tanstack/vue-table": "^8.21.3",
     "@unovis/ts": "^1.7.0",
     "@unovis/vue": "^1.7.0",
