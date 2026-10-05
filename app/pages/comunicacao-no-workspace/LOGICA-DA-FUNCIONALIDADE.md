@@ -1,7 +1,7 @@
 # Comunicação no workspace: lógica da funcionalidade
 
 Para dev e produto. Protótipo: https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/
-(05/10/2026, rodada 3).
+(05/10/2026, rodada 4).
 
 ## 1. Resumo
 
@@ -11,7 +11,7 @@ O documento do Felipe pede 3 coisas, e cada uma tem configuração e uso:
 |---|---|---|
 | Atalhos de contato | Abre o e-mail, o WhatsApp ou o SMS dela, já com o destinatário e um texto inicial | Sistema › Módulos e o cartão "Atalhos de comunicação" da categoria |
 | Link de formulário público | Copia ou envia o link do formulário público sem ir à configuração | Formulários da categoria (visibilidade, já existe) |
-| E-mail do ENSPACE em qualquer tela | Escreve o e-mail do ENSPACE de qualquer tela e, se quiser, vincula a um item | Sistema › Módulos e o Correio do Outlook de cada pessoa |
+| E-mail do ENSPACE em qualquer tela | Escreve o e-mail do ENSPACE de qualquer tela e, se quiser, vincula a um item | Sistema › Módulos e o Correio do Outlook no perfil de cada pessoa |
 
 Regras que valem para tudo:
 
@@ -20,21 +20,40 @@ Regras que valem para tudo:
 - **O e-mail do ENSPACE sai da conta do Outlook da pessoa.** É o envio que a pasta Mail Box (a pasta
   de e-mail do item) já usa hoje. O item vinculado não muda o remetente: ele define para onde a
   resposta volta.
+- **O Correio do Outlook é do perfil de cada pessoa, não do workspace.** Cada pessoa integra a
+  própria conta em Perfil › Integrações. O administrador não liga pelos outros.
 - **Dado que falta deixa o botão indisponível, com o motivo** e, no item, o atalho para preencher.
 - **Tudo liga e desliga** em Configurações › Sistema › Módulos, como Correção Monetária e
   Comparações.
 
-## 2. Como a lógica foi conferida
+Cada ponto das seções 3 a 6 tem um bloco **Depende de**: o que precisa existir, onde se resolve e o
+que a pessoa vê quando falta. A seção 2 junta todas as dependências num mapa.
 
-| Fonte | O que confirmou |
-|---|---|
-| Código da gaveta "Nova Mensagem" da Mail Box, no develop | De onde o e-mail sai, o "Responder para" e como o vínculo é gravado |
-| Schemas do SDK do ENSPACE 0.17 (`Item`, `ItemType`, `Field`, `Task`, `Member`, `User`, `Workspace`) | Onde cada dado mora e onde a configuração cabe |
-| Documentação de suporte (docs.enspace.io) | Formulários, Agenda, Tarefas, Caixas de E-mail, Módulos, busca global, logs |
-| Telas do workspace de exploração (develop) | Tarefa rápida, Tarefas Programadas, perfil, Requisições |
+## 2. Mapa de dependências
 
-Correção em relação às rodadas 1 e 2: o e-mail não sai do endereço do item. Sai da conta do Outlook
-da pessoa (6.1). O protótipo já mostra assim.
+| # | Dependência | De quem é | Existe hoje? | Pontos afetados | Se faltar |
+|---|---|---|---|---|---|
+| D1 | Correio do Outlook integrado no perfil da pessoa | Cada pessoa (Perfil › Integrações) | Sim | 4.2, 5.2, 6 inteira | A gaveta mostra "Nenhuma conta integrada disponível"; o botão E-mail abre o app da pessoa |
+| D2 | Conta Microsoft corporativa | TI do cliente | Sim, só Microsoft | Os mesmos de D1 | Quem usa Google fica só com "Abrir no meu app de e-mail" |
+| D3 | Calendário do Outlook integrado no perfil (é outra integração, separada do Correio) | Cada pessoa (Perfil › Integrações) | Sim | 4.7 | As reuniões do Outlook não aparecem na Agenda |
+| D4 | Módulo "Atalhos de comunicação" ligado, com o canal e a tela ligados | Administrador (Sistema › Módulos) | Não: é novo | 4, 5 | O botão não aparece |
+| D5 | Módulo "E-mail do ENSPACE em todas as telas" ligado | Administrador (Sistema › Módulos) | Não: é novo | 4.2, 6 | Sem "Novo e-mail", sem "E-mails" no menu; o botão E-mail abre o app |
+| D6 | Contatos configurados na categoria | Administrador (cartão da categoria) | Não: é novo | 4 | Botões indisponíveis em todos os itens da categoria |
+| D7 | Campos de contato na categoria (E-mail, Texto com máscara, Pessoa/Empresa) | Administrador (Estrutura › Categorias › Campos) | Sim | 3.2, 4 | Não há campo para escolher no cartão |
+| D8 | Dado do contato preenchido no item (e-mail; telefone com 10 dígitos ou mais) | Quem usa (Visão Geral do item) | Sim | 4 | Botão indisponível com o motivo |
+| D9 | Pasta Mail Box na categoria | Administrador (Estrutura › Categorias › Pastas) | Sim | 4.2, 6 | O e-mail sai, mas ele e a resposta não aparecem na tela do item |
+| D10 | Permissão de ver a categoria e o item | Cargo (Gestão de Membros) | Sim | 4, 6.4, 6.6 | O item não aparece na busca nem na área E-mails |
+| D11 | Permissão de editar o campo do contato | Cargo (Gestão de Membros) | Sim | 4.3 | Sem o botão "Cadastrar telefone"; fica só o motivo |
+| D12 | Telefone do membro no perfil | Dev (tela de perfil e `User.meta.phone`) | Não | 4.6, 4.7 | WhatsApp e SMS indisponíveis para o responsável da tarefa |
+| D13 | Formulário com visibilidade Público e tipo Criação ou Geral | Administrador (Editar do formulário) | Sim | 5 | O link não aparece; formulário privado mostra o porquê |
+| D14 | Tela Requisições no menu | Administrador (Interface › Menus) | Sim | 5.2 | Sem o cartão nessa tela; sobram tela inicial, lista e tarefa |
+| D15 | Spaceflow que gera tarefa de formulário (nó Formulário ou Operações de Dados manual) | Administrador (Spaceflow) | Sim | 5.2 | Não há tarefa de formulário |
+| D16 | Configurações da Agenda: categorias com campo de data e tipos de tarefa marcados | Administrador (Agenda › Configurações, vale para o workspace) | Sim | 4.7 | O evento não aparece na Agenda |
+| D17 | Modelos de E-mail cadastrados | Administrador (Configurações › E-mails › Modelos de E-mail) | Sim | 6.3 | Campo Template vazio |
+| D18 | Apps no computador da pessoa: e-mail padrão (`mailto:`), WhatsApp (app ou Web, com login), SMS (`sms:`: no Windows, Vincular ao Celular; no Mac, Mensagens com iPhone) | Cada pessoa ou o TI | Fora do ENSPACE | 4, 5 | O navegador não abre nada ou pergunta qual app usar |
+| D19 | Rota de busca de item entre categorias, filtrada por permissão | Dev (back) | Não | 6.4 | Sem a busca de "Vincular a item" |
+| D20 | Envio sem item gravado em `sendmails` e rota para vincular e-mail sem item a um item | Dev (back) | A confirmar / Não | 6.6 | E-mail sem item fora da área E-mails; sem "Vincular" |
+| D21 | Prop `cardActions` no `EnKanbanBoard` | Dev (SDK) | Não | 4.5 | Atalho só no clique direito, sem botão no cartão |
 
 ## 3. Configuração (quem administra o workspace)
 
@@ -54,6 +73,13 @@ da pessoa (6.1). O protótipo já mostra assim.
 - O Salvar do cartão Módulos grava, como nos outros módulos.
 - Dado: `Workspace.modules` aceita um objeto por chave. Proposta: `modules.atalhos_de_comunicacao`
   com `canais`, `lugares`, `textoInicial` e `copiaParaOItem`.
+
+**Depende de**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Acesso a Configurações › Sistema | Cargo (Gestão de Membros) | Não vê o cartão Módulos |
+| Back aceitar e guardar `modules.atalhos_de_comunicacao` (o campo já existe) | Dev | A configuração não grava |
 
 **Como a pessoa usa**
 
@@ -91,6 +117,14 @@ nesse cartão.
 - Dado: `ItemType.settings` aceita um objeto. Proposta: `settings.atalhos` com `contatos`,
   `assunto` e `mensagem`.
 
+**Depende de**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Módulo 3.1 ligado (D4) | Sistema › Módulos | O cartão mostra "Módulo desligado" e os atalhos não aparecem |
+| Campos de contato na categoria (D7) | Estrutura › Categorias › Campos | Não há campo para escolher; o canal fica indisponível |
+| Back aceitar e guardar `settings.atalhos` (o campo já existe) | Dev | A configuração não grava |
+
 **Como a pessoa usa**
 
 1. Abre a categoria e o cartão "Atalhos de comunicação".
@@ -114,10 +148,18 @@ nesse cartão.
 - Fica no mesmo cartão Módulos. Ligado, mostra "Novo e-mail" na barra do topo, "E-mails" no menu e
   o caminho "Escrever pelo ENSPACE" nos atalhos.
 - Mostra de onde o e-mail sai (a conta do Outlook de cada pessoa) e quais categorias têm a pasta
-  Mail Box. Sem a pasta, o e-mail vinculado não aparece na tela do item.
+  Mail Box.
 - Não tem caixa a escolher. A Caixa de E-mail do workspace (Configurações › E-mails) é remetente de
   notificações e fluxos e porta de entrada de Spaceflow; não é remetente do e-mail que a pessoa
   escreve.
+
+**Depende de**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Correio do Outlook no perfil de cada pessoa (D1). Ligar o módulo não liga a integração de ninguém | Cada pessoa, em Perfil › Integrações | Para essa pessoa: aviso "Nenhuma conta integrada disponível" e o botão E-mail abre o app |
+| Conta Microsoft corporativa (D2) | TI do cliente | Só "Abrir no meu app de e-mail" |
+| Pasta Mail Box em cada categoria que recebe e-mail (D9) | Estrutura › Categorias › Pastas | O e-mail vinculado e a resposta não aparecem na tela do item. O endereço do item existe; falta onde ver |
 
 **Como a pessoa usa**
 
@@ -135,10 +177,19 @@ atuais". O módulo só muda onde o componente aparece.
 
 **Como funciona**
 
-- Perfil › Integrações › Correio do Outlook, com login na conta Microsoft corporativa.
+- Perfil › Integrações › Correio do Outlook, com login na conta Microsoft corporativa (OAuth2).
 - Sem essa integração, a gaveta "Nova Mensagem" mostra "Nenhuma conta integrada disponível" e o
   botão "Integrar contas".
-- Só Microsoft. Quem usa Google só tem o caminho "Abrir no meu app de e-mail".
+- Só Microsoft. Google não tem integração.
+- É diferente do Calendário do Outlook (D3), que traz as reuniões para a Agenda. Uma não liga a
+  outra.
+
+**Depende de**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Conta Microsoft corporativa (D2) | TI do cliente | Não há o que integrar |
+| Autorização do app do ENSPACE na conta Microsoft. A documentação avisa que ele pode aparecer como "não verificado"; onde o TI bloqueia apps assim, o TI precisa liberar | TI do cliente | O login falha |
 
 **Como a pessoa usa**
 
@@ -167,6 +218,17 @@ atuais". O módulo só muda onde o componente aparece.
 - O ENSPACE não registra o clique em WhatsApp e SMS. O Log de Auditoria só registra criação,
   alteração e exclusão de dados. O e-mail enviado pelo ENSPACE fica na Mail Box.
 
+**Depende de**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Módulo 3.1 ligado, com o canal e a tela ligados (D4) | Sistema › Módulos | O botão não aparece |
+| Contatos configurados na categoria (D6) | Cartão "Atalhos de comunicação" da categoria | Botão indisponível |
+| Dado preenchido no item (D8) | Visão Geral do item | Botão indisponível com o motivo |
+| Permissão de ver o item (D10) | Cargo | A pessoa não chega ao item |
+| App registrado no computador para cada link (D18) | Computador da pessoa ou TI | O navegador não abre nada ou pergunta qual app usar |
+| Permissão do navegador para abrir app externo (pergunta na 1ª vez) | Navegador da pessoa | O app não abre até a pessoa permitir |
+
 **Por que assim**
 
 - O documento pede deep link: "O ENSPACE não deverá gerar conteúdo da mensagem, enviar mensagens,
@@ -185,6 +247,15 @@ atuais". O módulo só muda onde o componente aparece.
 - Sem o módulo ou sem a integração, o botão abre direto o app.
 - Onde só cabe ícone (coluna da lista de tarefas), os 2 caminhos vão num menu.
 
+**Depende de**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Tudo de 4.1 | Ver 4.1 | Ver 4.1 |
+| Módulo 3.3 ligado (D5) | Sistema › Módulos | Botão simples, que abre o app |
+| Correio do Outlook no perfil da pessoa (D1, D2) | Perfil › Integrações | Botão simples, que abre o app |
+| Pasta Mail Box na categoria do item (D9) | Estrutura › Categorias › Pastas | O e-mail sai, mas não aparece na tela do item |
+
 **Por que assim**
 
 O caminho do ENSPACE vem primeiro porque só nele a resposta sempre volta para o item. O app da
@@ -198,6 +269,14 @@ pessoa fica a 1 clique para quem prefere o Outlook ou não tem a integração.
 - Seletor do contato (os contatos da categoria, 3.2), a linha com e-mail e telefone e os 3 botões.
 - Quando falta dado, uma linha diz o que falta e oferece "Cadastrar telefone", "Corrigir telefone"
   ou "Cadastrar e-mail". O botão abre a Visão Geral com o cursor no campo.
+
+**Depende de**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Tudo de 4.1 e 4.2, com a tela "Tela do item" ligada | Sistema › Módulos | O cartão não aparece |
+| Permissão de editar o campo do contato (D11) | Cargo | Sem "Cadastrar telefone"; fica só o motivo. Regra para o dev: o protótipo mostra o botão sempre |
+| O campo do contato no formulário da Visão Geral | Formulário Editar ou Geral da categoria | "Cadastrar telefone" leva a um campo que não está na tela |
 
 **Como a pessoa usa**
 
@@ -217,6 +296,12 @@ pessoa fica a 1 clique para quem prefere o Outlook ou não tem a integração.
 - O menu da linha ganha "Contatar", com um grupo por contato e os canais. WhatsApp e SMS mostram o
   telefone; indisponível mostra o motivo.
 
+**Depende de**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Tudo de 4.1, com a tela "Lista e quadro de itens" ligada | Sistema › Módulos | Sem "Contatar" no menu |
+
 **Como a pessoa usa**
 
 1. Abre o menu da linha do item.
@@ -234,10 +319,17 @@ A lista já tem muitas colunas. O menu da linha já existe e recebe a ação sem
 - No quadro de tarefas, o painel da tarefa (abre no clique do cartão) tem os mesmos atalhos. É o
   caminho pelo teclado.
 
+**Depende de**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Tudo de 4.1, com a tela do quadro ligada | Sistema › Módulos | Sem o menu |
+| Para o botão no cartão (o "Notify" do mockup 5): prop `cardActions` no `EnKanbanBoard` (D21) | Dev (SDK) | Fica só o clique direito |
+
 **Por que assim**
 
-O mockup 5 põe "Notify" no cartão. O `EnKanbanBoard` do SDK não aceita ação extra no cartão. O
-clique direito é o que dá para fazer sem mudar o SDK. Pedido ao SDK: uma prop `cardActions`.
+O `EnKanbanBoard` do SDK não aceita ação extra no cartão. O clique direito é o que dá para fazer sem
+mudar o SDK.
 
 ### 4.6 Tarefas: avisar o responsável
 
@@ -249,8 +341,15 @@ clique direito é o que dá para fazer sem mudar o SDK. Pedido ao SDK: uma prop 
   - **E-mail:** 1 rascunho para todos.
   - **WhatsApp e SMS:** uma fila. Antes de começar, a janela diz quem fica de fora por falta de
     telefone. Depois, "Conversa 1 de N", "Abrir conversa" e "Próxima".
-- O membro não tem telefone hoje: o perfil tem só nome e e-mail. O SDK tem `User.meta.phone`, mas
-  nenhuma tela grava. Sem isso, WhatsApp e SMS para o responsável ficam indisponíveis.
+
+**Depende de**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Tudo de 4.1, com a tela "Tarefas" ligada | Sistema › Módulos | Sem a coluna e sem a barra |
+| Tarefa com responsável | Quem cria ou pega a tarefa | Botões indisponíveis: "Sem responsável" |
+| E-mail do membro | Sempre existe: é o login | Não se aplica |
+| Telefone do membro no perfil (D12). Hoje o perfil tem só nome e e-mail; o SDK tem `User.meta.phone`, mas nenhuma tela grava | Dev (tela de perfil e back) | WhatsApp e SMS indisponíveis para todos os responsáveis |
 
 **Como a pessoa usa**
 
@@ -280,6 +379,17 @@ muda conforme a origem do evento:
 
 O texto leva data, hora e, na reunião do Outlook, o local.
 
+**Depende de**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Tudo de 4.1, com a tela "Agenda" ligada | Sistema › Módulos | Sem "Enviar lembrete" |
+| Reunião: Calendário do Outlook no perfil (D3), que não é o Correio do Outlook | Perfil › Integrações | A reunião não aparece na Agenda |
+| Data de item: a categoria marcada nas Configurações da Agenda, com o campo de data, e permissão na categoria (D16, D10) | Agenda › Configurações; cargo | O evento não aparece |
+| Data de item: contatos configurados na categoria (D6) | Cartão da categoria | Sem quem recebe |
+| Prazo de tarefa: "Fluxo Padrão" ou "Tarefas Rápidas" marcados nas Configurações da Agenda (D16) | Agenda › Configurações | A tarefa não aparece |
+| Prazo de tarefa: telefone do membro (D12) | Dev | Só e-mail |
+
 **Como a pessoa usa**
 
 1. Abre a Agenda e clica no evento.
@@ -298,6 +408,14 @@ outras, quem recebe vem do item ou da tarefa.
 - Sem destinatário: o app abre vazio e a pessoa escolhe para quem. O uso esperado é mandar o link de
   um formulário público.
 
+**Depende de**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Módulo 3.1 com a tela "Tela inicial" ligada (D4) | Sistema › Módulos | A linha Atalhos não aparece |
+| Para o menu de link: formulário público de Criação ou Geral (D13) | Editar do formulário | O menu mostra "Nenhum formulário público" e a dica do porquê |
+| Apps no computador (D18) | Computador da pessoa | O app não abre |
+
 **Por que assim**
 
 É o mockup 6. A tela inicial já recebe atalho de módulo: com Comparações ligado, aparece "Acessar
@@ -315,6 +433,15 @@ Comparações" ali.
 - "Copiar link" mostra o aviso "Link copiado", o mesmo texto em todo lugar.
 - "Enviar o link por" usa os atalhos de 4.1, com o link no texto.
 
+**Depende de**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Formulário Público, de tipo Criação ou Geral (D13) | Editar do formulário › Visibilidade | O link não aparece |
+| Tela "Link de formulário público" ligada no módulo 3.1 (D4) | Sistema › Módulos | O link só se copia na configuração, como hoje |
+| Enviar o link por WhatsApp e SMS: apps no computador (D18) | Computador da pessoa | O app não abre |
+| Enviar o link pelo e-mail do ENSPACE: Correio do Outlook (D1) | Perfil › Integrações | O e-mail abre no app da pessoa |
+
 **Por que assim**
 
 - Editar e Visualizar dependem de um item que o link não leva.
@@ -324,12 +451,12 @@ Comparações" ali.
 
 ### 5.2 Onde aparece
 
-| Tela | O que aparece | Jornada |
-|---|---|---|
-| Requisições | Cartão "Compartilhar este formulário" entre o seletor e o formulário | Escolhe o formulário, clica em Copiar link ou em Enviar o link por |
-| Tela inicial e lista de itens | Menu "Link de formulário público" (na lista, só os da categoria) | Abre o menu, copia ou envia |
-| Painel da tarefa de formulário | O mesmo cartão, com a linha "A resposta pelo link cria um item novo em <categoria>. Esta tarefa continua aberta até você concluí-la." | Abre a tarefa, copia ou envia |
-| Formulários da categoria | "Copiar" (já existe) e "Tornar público/privado" no menu da linha | Atalho para o Editar › Visibilidade, que já existe |
+| Tela | O que aparece | Jornada | Depende também de |
+|---|---|---|---|
+| Requisições | Cartão "Compartilhar este formulário" entre o seletor e o formulário | Escolhe o formulário, clica em Copiar link ou em Enviar o link por | A tela Requisições no menu (D14) |
+| Tela inicial e lista de itens | Menu "Link de formulário público" (na lista, só os da categoria) | Abre o menu, copia ou envia | Permissão de ver a categoria (D10) |
+| Painel da tarefa de formulário | O mesmo cartão, com a linha "A resposta pelo link cria um item novo em <categoria>. Esta tarefa continua aberta até você concluí-la." | Abre a tarefa, copia ou envia | Um Spaceflow que gera a tarefa de formulário (D15) |
+| Formulários da categoria | "Copiar" (já existe) e "Tornar público/privado" no menu da linha | Atalho para o Editar › Visibilidade, que já existe | Acesso à configuração da categoria |
 
 Formulário privado mostra 1 linha dizendo por que não há link.
 
@@ -341,13 +468,22 @@ tarefa.
 
 ## 6. E-mail do ENSPACE em qualquer tela
 
+**Depende de, para a seção inteira**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Módulo 3.3 ligado (D5) | Sistema › Módulos | Nada desta seção aparece; fica a Mail Box do item, como hoje |
+| Correio do Outlook no perfil da pessoa (D1), com conta Microsoft (D2) | Cada pessoa, em Perfil › Integrações | A gaveta mostra "Nenhuma conta integrada disponível" e "Integrar contas"; os atalhos de e-mail abrem o app |
+| Pasta Mail Box na categoria do item (D9) | Estrutura › Categorias › Pastas | O e-mail vinculado sai, mas não aparece na tela do item |
+
 ### 6.1 Como o envio funciona hoje (base de tudo)
 
 Lido no código da gaveta "Nova Mensagem" da Mail Box:
 
 - O envio é `POST user-integrations/microsoft/send-email`, com `to`, `cc`, `bcc`, `replyTo`,
   `subject`, `message`, `attachments` e `item_ref`.
-- O remetente é a conta do Outlook que a pessoa integrou.
+- O remetente é a conta do Outlook que a pessoa integrou. **Por isso a Mail Box do item já depende
+  do Correio do Outlook hoje:** sem ele, a gaveta não deixa escrever.
 - No item, `replyTo` e `mailBox` recebem o endereço do item, e `item_ref` recebe a referência do
   item. O endereço do item é `<referência do item em minúsculas>.<referência do
   workspace>@<domínio das caixas>` (no develop, `develop.box.enspace.io`).
@@ -364,6 +500,13 @@ O vínculo fica gravado pela referência do item, não pelo nome. É o que o doc
 
 - Botão com rótulo na barra do topo, ao lado de Suporte. A tecla C abre o compositor fora de campo
   de texto. Com rascunho guardado, o botão ganha um ponto.
+
+**Depende de**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Módulo 3.3 ligado (D5) | Sistema › Módulos | O botão não aparece |
+| Correio do Outlook (D1) | Perfil › Integrações | O botão abre a gaveta com o aviso "Nenhuma conta integrada disponível" |
 
 **Como a pessoa usa**
 
@@ -397,6 +540,15 @@ As transversais de hoje (Suporte, notificações) moram na barra do topo.
   rodapé, que continua na troca de tela. Expandir alarga a gaveta.
 - Ao abrir, o cursor vai para o Para; vindo do item, com destinatário pronto, vai para o texto.
 
+**Depende de**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Correio do Outlook (D1) | Perfil › Integrações | Aviso no lugar do formulário |
+| Modelos de E-mail cadastrados (D17) | Configurações › E-mails › Modelos de E-mail | Campo Template vazio |
+| Assinatura configurada na conta do Outlook | Outlook da pessoa | "Inserir assinatura" não insere nada |
+| Envio sem item: confirmar que o `send-email` sem `item_ref` grava em `sendmails` (D20) | Dev (back) | O e-mail sai, mas não aparece em E-mails › Enviados |
+
 **Por que assim**
 
 - É a mesma gaveta "Nova Mensagem" de hoje, na mesma ordem, como o documento pede.
@@ -418,6 +570,15 @@ As transversais de hoje (Suporte, notificações) moram na barra do topo.
 - Aberto a partir de um item: já vem vinculado, com a linha "Vinculado porque você começou no item".
 - Categoria sem pasta Mail Box: aviso de que o e-mail não aparece na tela do item.
 
+**Depende de**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Rota de busca de item entre categorias, filtrada por permissão (D19). A busca global (Ctrl K) não procura itens: navega por menus e ações | Dev (back) | Sem a busca; o vínculo só vem quando a pessoa começa no item |
+| Permissão de ver a categoria e o item (D10) | Cargo | O item não aparece |
+| Contatos configurados nas categorias (D6), para as sugestões | Cartão da categoria | Sem sugestões; a busca continua |
+| Pasta Mail Box na categoria escolhida (D9) | Estrutura › Categorias › Pastas | Aviso no bloco; o e-mail não aparece na tela do item |
+
 **Como a pessoa usa**
 
 - Do item: clica em E-mail; o item já está vinculado; envia.
@@ -428,8 +589,6 @@ As transversais de hoje (Suporte, notificações) moram na barra do topo.
 
 - O documento pede busca por "nome/titulo do item, ID, Folder, Workspace" e que a pessoa nunca ache
   item sem acesso.
-- A busca global de hoje (Ctrl K) não procura itens: navega por menus e ações. A busca de item entre
-  categorias precisa ser construída.
 - Só o workspace atual porque o endereço do item e as permissões são do workspace.
 
 ### 6.5 Sem o Correio do Outlook integrado
@@ -437,19 +596,29 @@ As transversais de hoje (Suporte, notificações) moram na barra do topo.
 - A gaveta mostra "Nenhuma conta integrada disponível." e "Integrar contas", que abre Perfil ›
   Integrações. É o comportamento de hoje.
 - O botão E-mail dos atalhos abre o app da pessoa (`mailto:`), sem o caminho do ENSPACE.
+- No protótipo: cenário "Sem Outlook integrado", na barra de baixo.
 
 ### 6.6 Área "E-mails" no menu
 
 **Como funciona**
 
-- Entrada "E-mails" na seção Membro do menu. Abas Recebidos e Enviados, busca e o filtro Todos, Com
-  item e Sem item.
+- Entrada "E-mails" na seção Membro do menu, que entra junto com o módulo 3.3. Abas Recebidos e
+  Enviados, busca e o filtro Todos, Com item e Sem item.
 - Recebidos: o que chegou nos endereços dos itens e nas Caixas de E-mail do workspace. A coluna Item
   mostra o item ou "Sem item".
 - Enviados: o que a pessoa enviou pelo ENSPACE, com ou sem item.
 - E-mail sem item tem "Vincular" na linha. Na leitura, aparecem antes os itens em que o remetente é
   contato.
 - Só aparecem e-mails de itens que a pessoa pode ver.
+
+**Depende de**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Listar recebidos e enviados por pessoa e por permissão. Os dados existem (`c-mailbox-messages` e `sendmails`); a tela "Emails Recebidos" (`/itemEmails`) existe sem entrada no menu | Dev (back e front) | Sem a área |
+| Envio sem item gravado e rota de vincular depois (D20) | Dev (back) | E-mail sem item fora da lista; sem "Vincular" |
+| Regra de quem vê o que chega nas Caixas de E-mail do workspace | Produto | A definir; hoje a caixa é porta de entrada de Spaceflow |
+| Permissão de ver o item (D10) | Cargo | O e-mail do item não aparece |
 
 **Como a pessoa usa**
 
@@ -459,15 +628,21 @@ As transversais de hoje (Suporte, notificações) moram na barra do topo.
 
 **Por que assim**
 
-- O documento pede que o e-mail vinculado apareça "na área de E-mail do usuário". Essa área existe
-  escondida: a tela "Emails Recebidos" (`/itemEmails`), sem entrada no menu.
-- Os dados existem: recebidos em `c-mailbox-messages`, enviados em `sendmails`.
+O documento pede que o e-mail vinculado apareça "na área de E-mail do usuário". Essa área existe
+escondida: a tela "Emails Recebidos", sem entrada no menu.
 
 ### 6.7 Mail Box do item (já existe)
 
 - Endereço do item com botão de copiar, abas Recebidos e Enviados, lápis para escrever e Responder
   em cada e-mail.
 - O protótipo só acrescenta: o lápis abre o mesmo compositor de 6.3, já vinculado ao item.
+
+**Depende de**
+
+| Dependência | Onde se resolve | Se faltar |
+|---|---|---|
+| Pasta Mail Box na categoria (D9) | Estrutura › Categorias › Pastas | A aba não aparece no item |
+| Correio do Outlook (D1), para escrever e responder | Perfil › Integrações | A pessoa lê, mas a gaveta não deixa escrever |
 
 ## 7. O que precisa ser construído
 
@@ -494,10 +669,12 @@ As transversais de hoje (Suporte, notificações) moram na barra do topo.
 4. **Correio do Outlook:** a documentação diz que a integração "exibe sua caixa de entrada dentro do
    ENSPACE e permite vincular e-mails a tarefas e registros". O código do develop não tem essa tela
    nem a rota. Existe em outro lugar ou é plano?
-5. **Telefone do membro:** entra no perfil? Sem ele, WhatsApp e SMS para o responsável da tarefa
+5. **Quem não usa Microsoft:** cliente com Google fica só com o `mailto:`. Isso basta, ou a
+   integração com Google entra no roteiro?
+6. **Telefone do membro:** entra no perfil? Sem ele, WhatsApp e SMS para o responsável da tarefa
    não funcionam.
-6. **SDK:** a prop `cardActions` no `EnKanbanBoard` entra no roteiro do SDK?
-7. **Registro do contato:** o mockup do Felipe diz que o contato fica no Log de Auditoria. O log só
+7. **SDK:** a prop `cardActions` no `EnKanbanBoard` entra no roteiro do SDK?
+8. **Registro do contato:** o mockup do Felipe diz que o contato fica no Log de Auditoria. O log só
    registra mudança de dado. Registrar o clique em WhatsApp e SMS pede um tipo de evento novo. Vale?
 
 ## 9. O que o protótipo não faz
@@ -505,6 +682,8 @@ As transversais de hoje (Suporte, notificações) moram na barra do topo.
 - Não abre o app: mostra num aviso o link exato que abriria (`mailto:`, `https://wa.me/...`,
   `sms:`).
 - Não envia e-mail: guarda na memória e some ao recarregar.
+- Não tem cargo nem permissão de edição: "Cadastrar telefone" aparece sempre (no produto, só para
+  quem pode editar o campo).
 - A referência do item aparece curta (ex.: CTR-00231) para leitura. No produto é o código de 32
   caracteres (ex.: LEV4E6DB…), e o endereço do item usa esse código.
 - O andaime (barra de baixo) troca os cenários: Normal, Sem Outlook integrado e Envio falha.

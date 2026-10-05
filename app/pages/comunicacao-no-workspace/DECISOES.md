@@ -167,6 +167,26 @@ disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:)
 - **Entrega:** `LOGICA-DA-FUNCIONALIDADE.docx`, com o funcionamento, a jornada e a justificativa de
   cada ponto.
 
+## Rodada 4 · 2026-10-05
+
+- **Pedido (literal):** "nesse caso voce ja ta notando que, por exemplo, pra funcionar a caixa de
+  email do item depende de a integraçao com outlook estar ativada no workspace/perfil do user. na
+  hora que for descrever os pontos no doc tem q deixar bem explicitas essas dependencias que sejam
+  similares a isso aí".
+- **Mudou no documento:**
+  - seção 2 nova, "Mapa de dependências": 21 dependências (D1 a D21), com de quem é, se existe hoje,
+    os pontos afetados e o que a pessoa vê quando falta;
+  - bloco "Depende de" em cada ponto (18 blocos), com onde se resolve e o que acontece se faltar;
+  - o Correio do Outlook aparece como integração do **perfil de cada pessoa**, não do workspace: o
+    administrador não liga pelos outros;
+  - dependências que não estavam escritas: Calendário do Outlook (separado do Correio) para as
+    reuniões da Agenda; permissão de editar o campo para "Cadastrar telefone"; tela Requisições no
+    menu; Configurações da Agenda; apps no computador da pessoa para `mailto:`, `wa.me` e `sms:`;
+    autorização do app do ENSPACE na conta Microsoft; assinatura no Outlook.
+- **Mudou no protótipo:** a dica do menu de links vazio diz "Público e do tipo Criação ou Geral".
+- **Fica de fora do protótipo:** cargo e permissão de edição. "Cadastrar telefone" aparece sempre;
+  o documento diz a regra para o dev.
+
 ## Por que cada decisão
 
 ### O e-mail sai da conta do Outlook da pessoa; o item recebe a resposta
