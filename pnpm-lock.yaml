@@ -24,11 +24,11 @@ importers:
         specifier: ^0.17.0
         version: 0.17.0(17f76a1fc27812849bd6c3efea761b6d)
       '@iconify-json/lucide':
-        specifier: ^1.2.136
-        version: 1.2.136
+        specifier: ^1.2.138
+        version: 1.2.138
       '@iconify-json/simple-icons':
-        specifier: ^1.2.97
-        version: 1.2.97
+        specifier: ^1.2.98
+        version: 1.2.98
       '@nuxt/ui':
         specifier: ^4.5.1
         version: 4.11.1(9e7c193fa6693f83a5227dcbd4e328f3)
@@ -36,11 +36,11 @@ importers:
         specifier: ^8.21.3
         version: 8.21.3(vue@3.5.42(typescript@7.0.2))
       '@unovis/ts':
-        specifier: ^1.7.0
-        version: 1.7.0
+        specifier: ^1.7.1
+        version: 1.7.1
       '@unovis/vue':
-        specifier: ^1.7.0
-        version: 1.7.0(@unovis/ts@1.7.0)(vue@3.5.42(typescript@7.0.2))
+        specifier: ^1.7.1
+        version: 1.7.1(@unovis/ts@1.7.1)(vue@3.5.42(typescript@7.0.2))
       marked:
         specifier: ^18.0.14
         version: 18.0.14
@@ -141,6 +141,11 @@ packages:
 
   '@babel/parser@7.29.8':
     resolution: {integrity: sha512-E8lTAYNB1KW+FH+VGJuZM1ioAx2E6oVlvQFRrf5P8ZZmsiJXYAD9vTFV7yyEURNzgh1dFqMZuO6tUwcARbqFCA==}
+    engines: {node: '>=6.0.0'}
+    hasBin: true
+
+  '@babel/parser@7.29.9':
+    resolution: {integrity: sha512-CjXrNHTnvqBVqHgdBysY3vk2T8tpJHb5/RMeHJBTyVa9xgugCB0CJTx/3oO8RV2QRQP391RWpB7D6hLjm8V9uA==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -646,11 +651,11 @@ packages:
   '@floating-ui/vue@1.1.11':
     resolution: {integrity: sha512-HzHKCNVxnGS35r9fCHBc3+uCnjw9IWIlCPL683cGgM9Kgj2BiAl8x1mS7vtvP6F9S/e/q4O6MApwSHj8hNLGfw==}
 
-  '@iconify-json/lucide@1.2.136':
-    resolution: {integrity: sha512-Wk+OeDVKkw+1LELZqRR3gXWIy5jNx5XjNMvVc9KoygJYmGqclv36FYqseRuJuxBIKDggdoZWNBxNRrOkiRbtwQ==}
+  '@iconify-json/lucide@1.2.138':
+    resolution: {integrity: sha512-+J5+/6HOZsN6sG5PGNxGLcB0UCJtKrH2TPTNeSeXukRzR1C9QRocHaFjLRhoc14zE+XS2ss1i7QWPfunKpYHaQ==}
 
-  '@iconify-json/simple-icons@1.2.97':
-    resolution: {integrity: sha512-Z6PmM6jvWVU7rmLzqbxCLJA7SeqCnK6lMHXtjyzHPLZebwuoojBEcHHycppahDzEeN9xujRkrV5J8QpOhMyNrg==}
+  '@iconify-json/simple-icons@1.2.98':
+    resolution: {integrity: sha512-35CEBG1H/3nsohVgJaRWtOZ/P5syRTL++ZXTISdQSC76o1mAFXngFoSm9EOnnBiDApKPu8WN/DY+z69yCycL9A==}
 
   '@iconify/collections@1.0.736':
     resolution: {integrity: sha512-6w97vlqn1MSJR/4JhzEzECX2YL9gZNZdk86zBH64V0NO61dn8mxGkv7V3/l8MgEO8o9TMqc/slq6fwBOCdg5Tg==}
@@ -732,11 +737,15 @@ packages:
   '@mapbox/vector-tile@3.0.0':
     resolution: {integrity: sha512-Qf10S1uIHMk20ri/IVBnpS+esUEkVaR5Hftmz88jTInrpmWgPGJfPe3LVjjlE77trLx8tH6qjTG7uWH9hIq/0Q==}
 
-  '@maplibre/geojson-vt@6.1.1':
-    resolution: {integrity: sha512-FVMOcmSP/yqol45t7StApEyTL5/vmqBCuFhH9n+fFuINenhaX+YgHHIt1yJ86S8kln3uJLcMvmEU2cfn6E2eCQ==}
+  '@maplibre/geojson-vt@6.1.2':
+    resolution: {integrity: sha512-2ZYhobdAY+y4/P/z1xe0698165LywD0yDdWugdu3NRUrajgVWut+tLkcz7i/RJguMTURwK7gxwmwYMFJbgbQFw==}
 
   '@maplibre/maplibre-gl-style-spec@26.4.1':
     resolution: {integrity: sha512-I/qcIKVFHFSg1Meu/eqHrkSTjIez0gCsSaK56TNPutM3TkE61aSq6F1cZ4Kg4KiNs3cpViLtubDjfyRcQCdEJQ==}
+    hasBin: true
+
+  '@maplibre/maplibre-gl-style-spec@26.4.4':
+    resolution: {integrity: sha512-hG4RZR4PBd/+6A3ODdZ3AnQRF106ZQk1y3bhwDg8bH/A4Oz2tnRUJVVWs9BZa6gXZ1d3UKe89C+Mm+olGBELvA==}
     hasBin: true
 
   '@maplibre/mlt@1.3.0':
@@ -1701,8 +1710,8 @@ packages:
   '@types/d3-transition@3.0.9':
     resolution: {integrity: sha512-uZS5shfxzO3rGlu0cC3bjmMFKsXv+SmZZcgp0KD22ts4uGXp5EVYGzu/0YdwZeKmddhcAccYtREJKkPfXkZuCg==}
 
-  '@types/d3-zoom@3.0.8':
-    resolution: {integrity: sha512-iqMC4/YlFCSlO8+2Ii1GGGliCAY4XdeG748w5vQUbevlbDu0zSjH/+jojorQVBK/se0j6DUFNPBGSqD3YWYnDw==}
+  '@types/d3-zoom@3.0.9':
+    resolution: {integrity: sha512-0sE1406XBYJGiqD3AusTl9ZqC//2mIXix51tbom25gDCA8ri4xnSZg28CaSE8Srl6FClqABUKfsn0qghgdepMA==}
 
   '@types/d3@7.4.3':
     resolution: {integrity: sha512-lZXZ9ckh5R8uiFVt8ogUNf+pIrK4EsWrx2Np75WvF/eTpJ0FMHNhjXk8CKEx/+gpHbNQyJWehbFaTvqmHWB3ww==}
@@ -1923,13 +1932,13 @@ packages:
   '@unovis/graphlibrary@2.2.0-3':
     resolution: {integrity: sha512-ReEjk/cDih+q+z0U0EluHpPWlfj31v+nIglmfCNUuNuTv5FtGOKTYHbUSISX6SxHR1RZMLfP/kNniPr0H9KRIw==}
 
-  '@unovis/ts@1.7.0':
-    resolution: {integrity: sha512-aEilfV47FNsU8VarSUjUUekhlt/a1dP4XjTLEEPSMgIVHUsyX+xMGFfgXr1r9eAv6NOJIIeTlJiEYz2LOOiUWw==}
+  '@unovis/ts@1.7.1':
+    resolution: {integrity: sha512-QjSbkTU+0PlLubGosCrvgxbtiaZgbSwyYDZQcx/pYYDLKmtlgSuuWkNJI5U496KO8no9mzxuKoM9Ogi2MRQI8Q==}
 
-  '@unovis/vue@1.7.0':
-    resolution: {integrity: sha512-kLFvoaf63bnYEGDTfRfHvaJJjpUo2NrqsGJllK1/2S5S3mqBvz9KsYd1j/272Y56YCXhgiNH6dcIS/RzzqwXsA==}
+  '@unovis/vue@1.7.1':
+    resolution: {integrity: sha512-lkA+97pTGLmcya57EOw1r0Czb4EfymB/UXJWKVOpJVh8lleGiogKcBWBdtpk9QkvXOMapS0GYzjE+m5/BDeEeA==}
     peerDependencies:
-      '@unovis/ts': 1.7.0
+      '@unovis/ts': 1.7.1
       vue: ^3
 
   '@vercel/nft@1.11.0':
@@ -2223,6 +2232,9 @@ packages:
     resolution: {integrity: sha512-hYrgxie335U08WqICoGqKRzV1HFXv6zdxwJE4ekCb80CM9a0SVVsN4QPwT67RraRo+9h8IATk6uxHJw7QSkdOg==}
     engines: {node: '>=6.0.0'}
     hasBin: true
+
+  bidi-js@1.1.0:
+    resolution: {integrity: sha512-fX1Onk0tdVPC7obPWB5EbJ1z7NVhLq4m2xZLq2YXBkxzMXIGRpNMU88n0EPgWseKl12J7zXs7qrDxPK4sRs2fg==}
 
   bindings@1.5.0:
     resolution: {integrity: sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==}
@@ -2699,8 +2711,8 @@ packages:
   duplexer@0.1.2:
     resolution: {integrity: sha512-jtD6YG370ZCIi/9GTaJKQxWTZD045+4R4hTk/x1UyoqadyJ9x9CgSi1RlVDQF8U2sxLLSnFkCaMihqljHIWgMg==}
 
-  earcut@3.2.3:
-    resolution: {integrity: sha512-vnS4AVwp1KHAF13i1vp1/2D5evWy3k5u/iW/B81QVsUZtV8cv2tU0b2VNFlqvh4kYwrFMDdjPCfAmfyJW9y14Q==}
+  earcut@3.2.4:
+    resolution: {integrity: sha512-FHc6yNpnTORB0tM5kmZ03iD2mDuNakDE2lvf4Hw1XkfxtEHIGVi01B/GqUSwx+NcC1WGjidAfpTXzeALtPtfpg==}
 
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
@@ -3101,8 +3113,8 @@ packages:
   is-arrayish@0.2.1:
     resolution: {integrity: sha512-zz06S8t0ozoDXMG+ube26zeCTNXcKIPJZJi8hBrF4idCLms4CG9QtK7qBl1boi5ODzFpjswb5JPmHCbMpjaYzg==}
 
-  is-core-module@2.16.2:
-    resolution: {integrity: sha512-evOr8xfXKxE6qSR0hSXL2r3sd7ALj8+7jQEUvPYcm5sgZFdJ+AYzT6yNmJenvIYQBgIGwfwz08sL8zoL7yq2BA==}
+  is-core-module@2.17.0:
+    resolution: {integrity: sha512-J/vG0zBCbIKOQFfufSwyXdMrsohyJIUNkrnmo6WZGzoM7tr/lsbfW5b2BvisL6zsyMzK9UxV9L6c7AoFbyXHOA==}
     engines: {node: '>= 0.4'}
 
   is-docker@3.0.0:
@@ -3233,8 +3245,8 @@ packages:
   leaflet@1.7.1:
     resolution: {integrity: sha512-/xwPEBidtg69Q3HlqPdU3DnrXQOvQU/CCHA1tcDQVzOwm91YMYaILjNp7L4Eaw5Z4sOYdbBz6koWyibppd8Zqw==}
 
-  lib0@0.2.118:
-    resolution: {integrity: sha512-Ip97lrGhycLAkNrC9/tkORm4yPei9pKuP/Ah1eqCdDx8jnKSs7wY2xvOSlvg/r5UqtgfaC4O3NsFdzwWDDs1Wg==}
+  lib0@0.2.119:
+    resolution: {integrity: sha512-vh+TiejVy8Xm+hCdnRfn9BthGNvNUZdEXltNjVZL3TzRIKP3s1lnQh8pWd/Q0wCgY0FPAGVVjFF4ZiHUV3LFgA==}
     engines: {node: '>=16'}
     hasBin: true
 
@@ -3437,8 +3449,8 @@ packages:
   magicast@0.5.5:
     resolution: {integrity: sha512-UicdXN8zQ3JHlxVq+28afMXPr1z7WNY6+7EJnzTdQWkTAlMLF5fNCCKxJHBQwGaNGR11581EiQmQzx73+MvszA==}
 
-  maplibre-gl@6.7.0:
-    resolution: {integrity: sha512-Y1Q1+UP9WXou0DUrnaFdDsoMqiMCWy6aS968IBUaQ2eZi6H1/kPCfpfZOWXFJZbeKMkX9Wo6OFzY/k48qqPf3Q==}
+  maplibre-gl@6.12.0:
+    resolution: {integrity: sha512-DwgganVi2BhNxOpD7ob3lJC0dQQz4HfJfuQQV3XxCY3XdOzFrMqp9ylMXhRzryRsOnIezdZcklWXIIs/Q8JPjA==}
     engines: {node: '>=16.14.0', npm: '>=8.1.0'}
 
   marked@17.0.6:
@@ -3963,8 +3975,8 @@ packages:
   prosemirror-gapcursor@1.4.1:
     resolution: {integrity: sha512-pMdYaEnjNMSwl11yjEGtgTmLkR08m/Vl+Jj443167p9eB3HVQKhYCc4gmHVDsLPODfZfjr/MmirsdyZziXbQKw==}
 
-  prosemirror-history@1.5.0:
-    resolution: {integrity: sha512-zlzTiH01eKA55UAf1MEjtssJeHnGxO0j4K4Dpx+gnmX9n+SHNlDqI2oO1Kv1iPN5B1dm5fsljCfqKF9nFL6HRg==}
+  prosemirror-history@1.5.1:
+    resolution: {integrity: sha512-onlwnqKvgtFg6srZOmDOAhlAy1FIHQpOExORybX0S+DvJepE5tPALrB9iGet/2sqqqrelSnB10OoiOJqAvu2DA==}
 
   prosemirror-inputrules@1.5.1:
     resolution: {integrity: sha512-7wj4uMjKaXWAQ1CDgxNzNtR9AlsuwzHfdFH1ygEHA2KHF2DOEaXl1CJfNPAKCg9qNEh4rum975QLaCiQPyY6Fw==}
@@ -4042,6 +4054,10 @@ packages:
     resolution: {integrity: sha512-kbS5GAbkHkYj0EVKAg5ZPEPndhBjeUFSa1Aq5m5ftQwyHnB1v5tw8X6fcwfKH/ry3StPXblMWM1DW82MVS71cw==}
     peerDependencies:
       vue: '>= 3.4.0'
+
+  require-from-string@2.0.2:
+    resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==}
+    engines: {node: '>=0.10.0'}
 
   resolve-from@4.0.0:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}
@@ -5028,6 +5044,10 @@ snapshots:
     dependencies:
       '@babel/types': 7.29.8
 
+  '@babel/parser@7.29.9':
+    dependencies:
+      '@babel/types': 7.29.8
+
   '@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7)':
     dependencies:
       '@babel/core': 7.29.7
@@ -5062,7 +5082,7 @@ snapshots:
       '@babel/code-frame': 7.29.7
       '@babel/generator': 7.29.8
       '@babel/helper-globals': 7.29.7
-      '@babel/parser': 7.29.8
+      '@babel/parser': 7.29.9
       '@babel/template': 7.29.7
       '@babel/types': 7.29.8
       debug: 4.4.3
@@ -5408,11 +5428,11 @@ snapshots:
       - '@vue/composition-api'
       - vue
 
-  '@iconify-json/lucide@1.2.136':
+  '@iconify-json/lucide@1.2.138':
     dependencies:
       '@iconify/types': 2.0.0
 
-  '@iconify-json/simple-icons@1.2.97':
+  '@iconify-json/simple-icons@1.2.98':
     dependencies:
       '@iconify/types': 2.0.0
 
@@ -5517,11 +5537,20 @@ snapshots:
       '@types/geojson': 7946.0.16
       pbf: 5.1.2
 
-  '@maplibre/geojson-vt@6.1.1':
+  '@maplibre/geojson-vt@6.1.2':
     dependencies:
       kdbush: 4.1.0
 
   '@maplibre/maplibre-gl-style-spec@26.4.1':
+    dependencies:
+      '@mapbox/jsonlint-lines-primitives': 2.0.3
+      '@mapbox/unitbezier': 1.0.0
+      json-stringify-pretty-compact: 4.0.0
+      minimist: 1.2.8
+      quickselect: 3.0.0
+      tinyqueue: 3.0.0
+
+  '@maplibre/maplibre-gl-style-spec@26.4.4':
     dependencies:
       '@mapbox/jsonlint-lines-primitives': 2.0.3
       '@mapbox/unitbezier': 1.0.0
@@ -6601,7 +6630,7 @@ snapshots:
       prosemirror-commands: 1.7.2
       prosemirror-dropcursor: 1.8.4
       prosemirror-gapcursor: 1.4.1
-      prosemirror-history: 1.5.0
+      prosemirror-history: 1.5.1
       prosemirror-inputrules: 1.5.1
       prosemirror-keymap: 1.2.3
       prosemirror-model: 1.25.12
@@ -6656,7 +6685,7 @@ snapshots:
 
   '@tiptap/y-tiptap@3.0.9(prosemirror-model@1.25.12)(prosemirror-state@1.4.4)(prosemirror-view@1.42.6)(y-protocols@1.0.7(yjs@13.6.32))(yjs@13.6.32)':
     dependencies:
-      lib0: 0.2.118
+      lib0: 0.2.119
       prosemirror-model: 1.25.12
       prosemirror-state: 1.4.4
       prosemirror-view: 1.42.6
@@ -6754,7 +6783,7 @@ snapshots:
     dependencies:
       '@types/d3-selection': 3.0.12
 
-  '@types/d3-zoom@3.0.8':
+  '@types/d3-zoom@3.0.9':
     dependencies:
       '@types/d3-interpolate': 3.0.4
       '@types/d3-selection': 3.0.12
@@ -6790,7 +6819,7 @@ snapshots:
       '@types/d3-time-format': 4.0.3
       '@types/d3-timer': 3.0.2
       '@types/d3-transition': 3.0.9
-      '@types/d3-zoom': 3.0.8
+      '@types/d3-zoom': 3.0.9
 
   '@types/dagre@0.7.54': {}
 
@@ -6956,7 +6985,7 @@ snapshots:
     dependencies:
       lodash-es: 4.18.1
 
-  '@unovis/ts@1.7.0':
+  '@unovis/ts@1.7.1':
     dependencies:
       '@emotion/css': 11.13.5
       '@juggle/resize-observer': 3.4.0
@@ -6981,7 +7010,7 @@ snapshots:
       '@types/d3-shape': 3.1.8
       '@types/d3-timer': 3.0.2
       '@types/d3-transition': 3.0.9
-      '@types/d3-zoom': 3.0.8
+      '@types/d3-zoom': 3.0.9
       '@types/dagre': 0.7.54
       '@types/geojson': 7946.0.16
       '@types/leaflet': 1.7.6
@@ -7020,7 +7049,7 @@ snapshots:
       elkjs: 0.10.2
       geojson: 0.5.0
       leaflet: 1.7.1
-      maplibre-gl: 6.7.0
+      maplibre-gl: 6.12.0
       striptags: 3.2.0
       supercluster: 7.1.5
       three: 0.135.0
@@ -7030,9 +7059,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@unovis/vue@1.7.0(@unovis/ts@1.7.0)(vue@3.5.42(typescript@7.0.2))':
+  '@unovis/vue@1.7.1(@unovis/ts@1.7.1)(vue@3.5.42(typescript@7.0.2))':
     dependencies:
-      '@unovis/ts': 1.7.0
+      '@unovis/ts': 1.7.1
       vue: 3.5.42(typescript@7.0.2)
 
   '@vercel/nft@1.11.0(rollup@4.63.3)':
@@ -7351,6 +7380,10 @@ snapshots:
   base64-js@1.5.1: {}
 
   baseline-browser-mapping@2.11.24: {}
+
+  bidi-js@1.1.0:
+    dependencies:
+      require-from-string: 2.0.2
 
   bindings@1.5.0:
     dependencies:
@@ -7829,7 +7862,7 @@ snapshots:
 
   duplexer@0.1.2: {}
 
-  earcut@3.2.3: {}
+  earcut@3.2.4: {}
 
   eastasianwidth@0.2.0: {}
 
@@ -8286,7 +8319,7 @@ snapshots:
 
   is-arrayish@0.2.1: {}
 
-  is-core-module@2.16.2:
+  is-core-module@2.17.0:
     dependencies:
       hasown: 2.0.4
 
@@ -8380,7 +8413,7 @@ snapshots:
 
   leaflet@1.7.1: {}
 
-  lib0@0.2.118:
+  lib0@0.2.119:
     dependencies:
       isomorphic.js: 0.2.5
 
@@ -8557,18 +8590,19 @@ snapshots:
       '@babel/types': 7.29.8
       source-map-js: 1.2.1
 
-  maplibre-gl@6.7.0:
+  maplibre-gl@6.12.0:
     dependencies:
       '@mapbox/point-geometry': 1.1.0
       '@mapbox/tiny-sdf': 2.2.0
       '@mapbox/unitbezier': 1.0.0
       '@mapbox/vector-tile': 3.0.0
-      '@maplibre/geojson-vt': 6.1.1
-      '@maplibre/maplibre-gl-style-spec': 26.4.1
+      '@maplibre/geojson-vt': 6.1.2
+      '@maplibre/maplibre-gl-style-spec': 26.4.4
       '@maplibre/mlt': 1.3.0
       '@maplibre/vt-pbf': 4.3.2
       '@types/geojson': 7946.0.16
-      earcut: 3.2.3
+      bidi-js: 1.1.0
+      earcut: 3.2.4
       gl-matrix: 3.4.4
       kdbush: 4.1.0
       murmurhash-js: 1.0.0
@@ -9269,7 +9303,7 @@ snapshots:
       prosemirror-state: 1.4.4
       prosemirror-view: 1.42.6
 
-  prosemirror-history@1.5.0:
+  prosemirror-history@1.5.1:
     dependencies:
       prosemirror-state: 1.4.4
       prosemirror-transform: 1.12.2
@@ -9385,6 +9419,8 @@ snapshots:
     transitivePeerDependencies:
       - '@vue/composition-api'
 
+  require-from-string@2.0.2: {}
+
   resolve-from@4.0.0: {}
 
   resolve-from@5.0.0: {}
@@ -9396,7 +9432,7 @@ snapshots:
   resolve@1.22.12:
     dependencies:
       es-errors: 1.3.0
-      is-core-module: 2.16.2
+      is-core-module: 2.17.0
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
 
@@ -10187,7 +10223,7 @@ snapshots:
 
   y-protocols@1.0.7(yjs@13.6.32):
     dependencies:
-      lib0: 0.2.118
+      lib0: 0.2.119
       yjs: 13.6.32
 
   y18n@5.0.8: {}
@@ -10211,7 +10247,7 @@ snapshots:
 
   yjs@13.6.32:
     dependencies:
-      lib0: 0.2.118
+      lib0: 0.2.119
 
   youch-core@0.3.3:
     dependencies:
