@@ -326,7 +326,7 @@ são dezenas de arquivos que ninguém sabe mais de onde vieram.
 
 | | |
 |---|---|
-| **Fica** | O que é entrega: print e GIF movidos para `app/pages/<slug>/evidencias/`, dentro do repositório e versionados |
+| **Fica** | O que é entrega: print e GIF movidos para `app/pages/<slug>/evidencias/`, dentro do repositório e versionados, sem ponteiro do mouse em nenhum quadro (regra da redatora de 2026-10-06: hover no canto `(1567,697)` antes de cada print e depois de cada clique do GIF; `detectar_seta_mouse.py` dá "ok"; regra inteira em `~\.claude\CLAUDE.md`) |
 | **Sai** | Todo o resto: a cópia que sobrou em Downloads, o arquivo intermediário, a captura que não foi usada |
 
 **Apague só o que você mesma criou nesta rodada.** Downloads é pasta de gente, não do agente:
