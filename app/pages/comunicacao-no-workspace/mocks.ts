@@ -18,6 +18,12 @@ import type { Field, Item, ItemType, Member, Task, Workspace } from '@be-enlight
 
 export const HOJE = new Date('2026-10-05T09:30:00-03:00')
 
+/** O instante de um registro novo: o dia do protótipo (05/10) com a hora do relógio. */
+export function agora() {
+  const d = new Date()
+  return new Date(HOJE.getFullYear(), HOJE.getMonth(), HOJE.getDate(), d.getHours(), d.getMinutes(), d.getSeconds())
+}
+
 function dia(d: number, hora = '10:00') {
   return new Date(`2026-10-${String(d).padStart(2, '0')}T${hora}:00-03:00`)
 }
@@ -332,7 +338,11 @@ const fornecedores: ItemDoProtótipo[] = [
   atualizado: new Date(2026, 9, 1, 10),
 }))
 
-export const itens: ItemDoProtótipo[] = [...contratos, ...solicitacoes, ...fornecedores]
+/**
+ * Reativo: a resposta do formulário público cria item, e o Salvar da Visão Geral
+ * grava o campo. Tudo em memória; recarregar volta ao começo.
+ */
+export const itens = reactive<ItemDoProtótipo[]>([...contratos, ...solicitacoes, ...fornecedores])
 
 export function itemPorId(id: number | null | undefined) {
   return itens.find(i => i.id === id) ?? null
@@ -417,7 +427,8 @@ export interface Formulario {
   tipo: 'criacao' | 'editar' | 'geral' | 'visualizar'
   visibilidade: 'publico' | 'privado'
   respostas: number
-  campos: { rotulo: string, tipo: 'texto' | 'email' | 'telefone' | 'longo' }[]
+  /** `chave`: o campo do item que a resposta preenche (PROTÓTIPO: no produto, o refId do campo). */
+  campos: { rotulo: string, tipo: 'texto' | 'email' | 'telefone' | 'longo', chave?: string }[]
 }
 
 /**
@@ -436,10 +447,10 @@ export const formularios: Formulario[] = [
     visibilidade: 'publico',
     respostas: 128,
     campos: [
-      { rotulo: 'Assunto', tipo: 'texto' },
-      { rotulo: 'Seu nome', tipo: 'texto' },
-      { rotulo: 'Seu e-mail', tipo: 'email' },
-      { rotulo: 'Seu telefone', tipo: 'telefone' },
+      { rotulo: 'Assunto', tipo: 'texto', chave: 'titulo' },
+      { rotulo: 'Seu nome', tipo: 'texto', chave: 'solicitante_nome' },
+      { rotulo: 'Seu e-mail', tipo: 'email', chave: 'solicitante_email' },
+      { rotulo: 'Seu telefone', tipo: 'telefone', chave: 'solicitante_telefone' },
       { rotulo: 'Conte o que precisa', tipo: 'longo' },
     ],
   },
@@ -451,10 +462,10 @@ export const formularios: Formulario[] = [
     visibilidade: 'publico',
     respostas: 41,
     campos: [
-      { rotulo: 'Razão social', tipo: 'texto' },
-      { rotulo: 'CNPJ', tipo: 'texto' },
-      { rotulo: 'E-mail comercial', tipo: 'email' },
-      { rotulo: 'WhatsApp comercial', tipo: 'telefone' },
+      { rotulo: 'Razão social', tipo: 'texto', chave: 'titulo' },
+      { rotulo: 'CNPJ', tipo: 'texto', chave: 'cnpj' },
+      { rotulo: 'E-mail comercial', tipo: 'email', chave: 'contato_email' },
+      { rotulo: 'WhatsApp comercial', tipo: 'telefone', chave: 'contato_whatsapp' },
     ],
   },
   {

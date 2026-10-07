@@ -34,7 +34,6 @@ export interface Textos {
   }
   atalho: {
     canal: PorCanal
-    abrindo: PorCanal
     semContato: string
     semEmail: string
     semTelefone: string
@@ -50,7 +49,6 @@ export interface Textos {
   inicio: {
     saudacao: (nome: string) => string
     subtitulo: string
-    atalhos: string
     emAtraso: string
     proximas: string
     rapidas: string
@@ -120,6 +118,7 @@ export interface Textos {
     campos: Record<string, string>
     sairSemSalvar: string
     salvar: string
+    salvo: string
     copiarEndereco: string
     escreverEmail: string
     recebidos: string
@@ -143,7 +142,6 @@ export interface Textos {
     copiarLink: string
     copiado: string
     abrirNovaAba: string
-    abrirNovaAbaMaquete: string
     enviarLinkPor: string
     assuntoDoLink: (nome: string) => string
     mensagemDoLink: (nome: string, url: string) => string
@@ -281,7 +279,6 @@ export interface Textos {
     semContaTitulo: string
     semContaDescricao: string
     integrarContas: string
-    integrarMaquete: string
     inserirAssinatura: string
     cargoDaAssinatura: string
     mensagem: string
@@ -401,6 +398,46 @@ export interface Textos {
     semNome: string
     salvo: string
   }
+  simulador: {
+    selo: string
+    titulo: Record<'whatsapp' | 'sms' | 'email' | 'formulario' | 'outlook', string>
+    noProduto: Record<'whatsapp' | 'sms' | 'email' | 'formulario' | 'outlook', string>
+    voltar: string
+    enviar: string
+    descartar: string
+    digiteMensagem: string
+    escrevaAqui: string
+    paraNumero: string
+    novaConversa: string
+    textoPronto: string
+    naoRegistra: { whatsapp: string, sms: string }
+    enviada: string
+    mensagens: string
+    novaMensagem: string
+    comCopiaAviso: string
+    semCopiaAviso: string
+    emailEnviado: string
+    copiaNaMailBox: (ref: string) => string
+    semCopia: string
+    verNaMailBox: string
+    formPublico: string
+    enviarResposta: string
+    respostaEnviada: string
+    obrigado: string
+    itemCriado: (categoria: string, ref: string) => string
+    itemCriadoDescricao: string
+    abrirItem: string
+    integracoes: string
+    correioOutlook: string
+    correioOutlookDescricao: string
+    sincronizar: string
+    contaMicrosoft: string
+    pedidoDePermissao: string
+    cancelar: string
+    aceitar: string
+    integrado: string
+    integradoDescricao: string
+  }
   andaime: {
     prototipo: string
     irPara: string
@@ -477,7 +514,6 @@ const ptBR: Textos = {
   },
   atalho: {
     canal: { email: 'E-mail', whatsapp: 'WhatsApp', sms: 'SMS' },
-    abrindo: { email: 'Abre o seu app de e-mail', whatsapp: 'Abre o WhatsApp', sms: 'Abre o app de mensagens' },
     semContato: 'Sem contato',
     semEmail: 'Sem e-mail cadastrado',
     semTelefone: 'Sem telefone cadastrado',
@@ -493,7 +529,6 @@ const ptBR: Textos = {
   inicio: {
     saudacao: nome => `Bom dia, ${nome}!`,
     subtitulo: 'Pronto para um dia produtivo? Vamos trabalhar juntos!',
-    atalhos: 'Atalhos',
     emAtraso: 'Tarefas em atraso',
     proximas: 'Tarefas próximas',
     rapidas: 'Tarefas rápidas',
@@ -578,6 +613,7 @@ const ptBR: Textos = {
     },
     sairSemSalvar: 'Sair sem salvar',
     salvar: 'Salvar',
+    salvo: 'Item salvo',
     copiarEndereco: 'Copiar o endereço da caixa',
     escreverEmail: 'Escrever e-mail',
     recebidos: 'Recebidos',
@@ -601,7 +637,6 @@ const ptBR: Textos = {
     copiarLink: 'Copiar link',
     copiado: 'Copiado',
     abrirNovaAba: 'Abrir numa nova aba',
-    abrirNovaAbaMaquete: 'No produto, abre o formulário numa nova aba',
     enviarLinkPor: 'Enviar o link por',
     assuntoDoLink: nome => `Formulário: ${nome}`,
     mensagemDoLink: (nome, url) => `Para preencher o formulário "${nome}", use este link: ${url}`,
@@ -653,7 +688,7 @@ const ptBR: Textos = {
     loteConcluido: 'Todas as conversas abertas.',
     foraSemTelefone: nomes => `Ficam de fora, sem telefone: ${nomes}.`,
     assuntoDoAviso: (tarefa, prazo) => prazo ? `Tarefa: ${tarefa} (prazo ${prazo})` : `Tarefa: ${tarefa}`,
-    mensagemDoAviso: (nome, tarefa, prazo) => `Olá, ${nome}. Lembrete da tarefa "${tarefa}"${prazo ? `, prazo ${prazo}` : ''}.`,
+    mensagemDoAviso: (nome, tarefa, prazo) => `${nome ? `Olá, ${nome}.` : 'Olá.'} Lembrete da tarefa "${tarefa}"${prazo ? `, prazo ${prazo}` : ''}.`,
     assuntoDoLote: n => `${n} tarefas pendentes`,
   },
   agenda: {
@@ -676,7 +711,7 @@ const ptBR: Textos = {
     ajudaComTelefone: 'Data, hora e assunto vão preenchidos. WhatsApp e SMS abrem 1 conversa por participante.',
     ajudaSemTelefone: 'Data, hora e assunto vão preenchidos. Os participantes deste evento não têm telefone no ENSPACE: só o e-mail funciona.',
     assuntoDoLembrete: (evento, quando) => `Lembrete: ${evento} (${quando})`,
-    mensagemDoLembrete: (nome, evento, quando) => `Olá, ${nome}. Lembrete: ${evento}, ${quando}.`,
+    mensagemDoLembrete: (nome, evento, quando) => `${nome ? `Olá, ${nome}.` : 'Olá.'} Lembrete: ${evento}, ${quando}.`,
   },
   emails: {
     titulo: 'E-mails',
@@ -739,7 +774,6 @@ const ptBR: Textos = {
     semContaTitulo: 'Nenhuma conta integrada disponível.',
     semContaDescricao: 'O e-mail do ENSPACE sai da sua conta do Outlook. Integre o Correio do Outlook em Perfil › Integrações. Até lá, o botão E-mail abre o seu app de e-mail.',
     integrarContas: 'Integrar contas',
-    integrarMaquete: 'No produto, abre Perfil › Integrações › Correio do Outlook.',
     inserirAssinatura: 'Inserir assinatura',
     cargoDaAssinatura: 'Jurídico · Aurora Serviços',
     mensagem: 'Mensagem',
@@ -791,7 +825,7 @@ const ptBR: Textos = {
     canais: 'Canais',
     canaisAjuda: 'Canal desligado some de todas as telas.',
     ondeAparecem: 'Onde aparecem',
-    lugares: { inicio: 'Tela inicial', item: 'Tela do item', itens: 'Lista e quadro de itens', tarefas: 'Tarefas', agenda: 'Agenda', formularios: 'Link de formulário público' },
+    lugares: { item: 'Tela do item', itens: 'Lista e quadro de itens', tarefas: 'Tarefas', agenda: 'Agenda', formularios: 'Link de formulário público' },
     textoInicial: 'Preencher assunto e mensagem',
     textoInicialAjuda: 'O texto vem da configuração de cada categoria. Quem envia pode mudar antes de mandar.',
     copiaParaOItem: 'Pôr a caixa do item em cópia',
@@ -887,6 +921,52 @@ const ptBR: Textos = {
     semNome: 'Sem nome',
     salvo: 'Atalhos salvos',
   },
+  simulador: {
+    selo: 'Simulação · fora do ENSPACE',
+    titulo: { whatsapp: 'WhatsApp', sms: 'Mensagens', email: 'Seu app de e-mail', formulario: 'Página pública do formulário', outlook: 'Integrar o Correio do Outlook' },
+    noProduto: {
+      whatsapp: 'No produto, o navegador abre o WhatsApp (app ou Web) com este link. O texto vai pronto; a pessoa muda e envia lá.',
+      sms: 'No produto, o computador abre o app de mensagens registrado para sms: (no Windows, Vincular ao Celular).',
+      email: 'No produto, abre o app de e-mail padrão do computador, já preenchido.',
+      formulario: 'É o que a pessoa de fora vê: o formulário sem login. Responder cria um item no ENSPACE.',
+      outlook: 'No produto: Perfil › Integrações e o login da conta Microsoft corporativa.',
+    },
+    voltar: 'Voltar ao ENSPACE',
+    enviar: 'Enviar',
+    descartar: 'Descartar',
+    digiteMensagem: 'Digite uma mensagem',
+    escrevaAqui: 'Escreva o e-mail',
+    paraNumero: 'Para: número com DDD',
+    novaConversa: 'Nova conversa',
+    textoPronto: 'O texto inicial já está na caixa de mensagem. Mude o que quiser e envie.',
+    naoRegistra: { whatsapp: 'O ENSPACE não registra conversas do WhatsApp.', sms: 'O ENSPACE não registra SMS.' },
+    enviada: 'Enviada',
+    mensagens: 'Mensagens',
+    novaMensagem: 'Nova mensagem',
+    comCopiaAviso: 'O endereço do item está em Cc: a cópia chega na Mail Box do item.',
+    semCopiaAviso: 'Sem o endereço do item em Cc, este e-mail não chega ao ENSPACE.',
+    emailEnviado: 'E-mail enviado pelo seu app',
+    copiaNaMailBox: ref => `A cópia chegou na Mail Box de ${ref}.`,
+    semCopia: 'Este e-mail não fica no ENSPACE.',
+    verNaMailBox: 'Ver na Mail Box',
+    formPublico: 'Formulário público · não precisa de login',
+    enviarResposta: 'Enviar resposta',
+    respostaEnviada: 'Resposta enviada',
+    obrigado: 'Obrigado. Você pode fechar esta página.',
+    itemCriado: (categoria, ref) => `Item novo em ${categoria}: ${ref}`,
+    itemCriadoDescricao: 'Criado pela resposta do formulário público.',
+    abrirItem: 'Abrir item',
+    integracoes: 'Configurações do Usuário › Integrações',
+    correioOutlook: 'Correio do Outlook',
+    correioOutlookDescricao: 'Integre seu e-mail com o Outlook.',
+    sincronizar: 'Sincronizar',
+    contaMicrosoft: 'Conta Microsoft',
+    pedidoDePermissao: 'O ENSPACE pede permissão para enviar e-mail pela sua conta.',
+    cancelar: 'Cancelar',
+    aceitar: 'Aceitar',
+    integrado: 'Integrado',
+    integradoDescricao: 'O e-mail do ENSPACE sai da sua conta do Outlook.',
+  },
   andaime: {
     prototipo: 'Protótipo',
     irPara: 'Ir para',
@@ -961,7 +1041,6 @@ const en: Textos = {
   },
   atalho: {
     canal: { email: 'Email', whatsapp: 'WhatsApp', sms: 'SMS' },
-    abrindo: { email: 'Opens your email app', whatsapp: 'Opens WhatsApp', sms: 'Opens your messaging app' },
     semContato: 'No contact',
     semEmail: 'No email on file',
     semTelefone: 'No phone on file',
@@ -977,7 +1056,6 @@ const en: Textos = {
   inicio: {
     saudacao: nome => `Good morning, ${nome}!`,
     subtitulo: 'Ready for a productive day? Let\'s work together!',
-    atalhos: 'Shortcuts',
     emAtraso: 'Overdue tasks',
     proximas: 'Upcoming tasks',
     rapidas: 'Quick tasks',
@@ -1062,6 +1140,7 @@ const en: Textos = {
     },
     sairSemSalvar: 'Leave without saving',
     salvar: 'Save',
+    salvo: 'Item saved',
     copiarEndereco: 'Copy the mailbox address',
     escreverEmail: 'Write email',
     recebidos: 'Received',
@@ -1085,7 +1164,6 @@ const en: Textos = {
     copiarLink: 'Copy link',
     copiado: 'Copied',
     abrirNovaAba: 'Open in a new tab',
-    abrirNovaAbaMaquete: 'In the product, this opens the form in a new tab',
     enviarLinkPor: 'Send the link by',
     assuntoDoLink: nome => `Form: ${nome}`,
     mensagemDoLink: (nome, url) => `To fill in the form "${nome}", use this link: ${url}`,
@@ -1137,7 +1215,7 @@ const en: Textos = {
     loteConcluido: 'All chats opened.',
     foraSemTelefone: nomes => `Left out, no phone: ${nomes}.`,
     assuntoDoAviso: (tarefa, prazo) => prazo ? `Task: ${tarefa} (due ${prazo})` : `Task: ${tarefa}`,
-    mensagemDoAviso: (nome, tarefa, prazo) => `Hi, ${nome}. Reminder about the task "${tarefa}"${prazo ? `, due ${prazo}` : ''}.`,
+    mensagemDoAviso: (nome, tarefa, prazo) => `${nome ? `Hi, ${nome}.` : 'Hi.'} Reminder about the task "${tarefa}"${prazo ? `, due ${prazo}` : ''}.`,
     assuntoDoLote: n => `${n} pending tasks`,
   },
   agenda: {
@@ -1160,7 +1238,7 @@ const en: Textos = {
     ajudaComTelefone: 'Date, time and subject are prefilled. WhatsApp and SMS open 1 chat per participant.',
     ajudaSemTelefone: 'Date, time and subject are prefilled. These participants have no phone in ENSPACE: only email works.',
     assuntoDoLembrete: (evento, quando) => `Reminder: ${evento} (${quando})`,
-    mensagemDoLembrete: (nome, evento, quando) => `Hi, ${nome}. Reminder: ${evento}, ${quando}.`,
+    mensagemDoLembrete: (nome, evento, quando) => `${nome ? `Hi, ${nome}.` : 'Hi.'} Reminder: ${evento}, ${quando}.`,
   },
   emails: {
     titulo: 'Emails',
@@ -1223,7 +1301,6 @@ const en: Textos = {
     semContaTitulo: 'No integrated accounts available.',
     semContaDescricao: 'ENSPACE email goes out from your Outlook account. Connect Outlook Mail in Profile › Integrations. Until then, the Email button opens your email app.',
     integrarContas: 'Connect accounts',
-    integrarMaquete: 'In the product, opens Profile › Integrations › Outlook Mail.',
     inserirAssinatura: 'Insert signature',
     cargoDaAssinatura: 'Legal · Aurora Serviços',
     mensagem: 'Message',
@@ -1275,7 +1352,7 @@ const en: Textos = {
     canais: 'Channels',
     canaisAjuda: 'A channel turned off disappears from every screen.',
     ondeAparecem: 'Where they show',
-    lugares: { inicio: 'Home', item: 'Item screen', itens: 'Item list and board', tarefas: 'Tasks', agenda: 'Schedule', formularios: 'Public form link' },
+    lugares: { item: 'Item screen', itens: 'Item list and board', tarefas: 'Tasks', agenda: 'Schedule', formularios: 'Public form link' },
     textoInicial: 'Prefill subject and message',
     textoInicialAjuda: 'The text comes from each category settings. The sender can change it before sending.',
     copiaParaOItem: 'Cc the item mailbox',
@@ -1371,6 +1448,52 @@ const en: Textos = {
     semNome: 'No name',
     salvo: 'Shortcuts saved',
   },
+  simulador: {
+    selo: 'Simulation · outside ENSPACE',
+    titulo: { whatsapp: 'WhatsApp', sms: 'Messages', email: 'Your email app', formulario: 'Public form page', outlook: 'Connect Outlook Mail' },
+    noProduto: {
+      whatsapp: 'In the product, the browser opens WhatsApp (app or Web) with this link. The text is ready; the person edits and sends it there.',
+      sms: 'In the product, the computer opens the app registered for sms: (on Windows, Phone Link).',
+      email: 'In the product, the default email app of the computer opens, already filled in.',
+      formulario: 'This is what an outside person sees: the form with no login. Answering creates an item in ENSPACE.',
+      outlook: 'In the product: Profile › Integrations and the corporate Microsoft account login.',
+    },
+    voltar: 'Back to ENSPACE',
+    enviar: 'Send',
+    descartar: 'Discard',
+    digiteMensagem: 'Type a message',
+    escrevaAqui: 'Write the email',
+    paraNumero: 'To: number with area code',
+    novaConversa: 'New chat',
+    textoPronto: 'The starting text is already in the message box. Change what you want and send.',
+    naoRegistra: { whatsapp: 'ENSPACE does not record WhatsApp chats.', sms: 'ENSPACE does not record SMS.' },
+    enviada: 'Delivered',
+    mensagens: 'Messages',
+    novaMensagem: 'New message',
+    comCopiaAviso: 'The item address is in Cc: the copy reaches the item Mail Box.',
+    semCopiaAviso: 'Without the item address in Cc, this email does not reach ENSPACE.',
+    emailEnviado: 'Email sent from your app',
+    copiaNaMailBox: ref => `The copy reached the ${ref} Mail Box.`,
+    semCopia: 'This email does not stay in ENSPACE.',
+    verNaMailBox: 'See in Mail Box',
+    formPublico: 'Public form · no login needed',
+    enviarResposta: 'Send answer',
+    respostaEnviada: 'Answer sent',
+    obrigado: 'Thank you. You can close this page.',
+    itemCriado: (categoria, ref) => `New item in ${categoria}: ${ref}`,
+    itemCriadoDescricao: 'Created by the public form answer.',
+    abrirItem: 'Open item',
+    integracoes: 'User Settings › Integrations',
+    correioOutlook: 'Outlook Mail',
+    correioOutlookDescricao: 'Connect your email with Outlook.',
+    sincronizar: 'Sync',
+    contaMicrosoft: 'Microsoft account',
+    pedidoDePermissao: 'ENSPACE asks for permission to send email from your account.',
+    cancelar: 'Cancel',
+    aceitar: 'Accept',
+    integrado: 'Connected',
+    integradoDescricao: 'ENSPACE email goes out from your Outlook account.',
+  },
   andaime: {
     prototipo: 'Prototype',
     irPara: 'Go to',
@@ -1445,7 +1568,6 @@ const es: Textos = {
   },
   atalho: {
     canal: { email: 'Correo', whatsapp: 'WhatsApp', sms: 'SMS' },
-    abrindo: { email: 'Abre tu app de correo', whatsapp: 'Abre WhatsApp', sms: 'Abre la app de mensajes' },
     semContato: 'Sin contacto',
     semEmail: 'Sin correo registrado',
     semTelefone: 'Sin teléfono registrado',
@@ -1461,7 +1583,6 @@ const es: Textos = {
   inicio: {
     saudacao: nome => `¡Buenos días, ${nome}!`,
     subtitulo: '¿Listo para un día productivo? ¡Trabajemos juntos!',
-    atalhos: 'Atajos',
     emAtraso: 'Tareas atrasadas',
     proximas: 'Próximas tareas',
     rapidas: 'Tareas rápidas',
@@ -1546,6 +1667,7 @@ const es: Textos = {
     },
     sairSemSalvar: 'Salir sin guardar',
     salvar: 'Guardar',
+    salvo: 'Ítem guardado',
     copiarEndereco: 'Copiar la dirección del buzón',
     escreverEmail: 'Escribir correo',
     recebidos: 'Recibidos',
@@ -1569,7 +1691,6 @@ const es: Textos = {
     copiarLink: 'Copiar enlace',
     copiado: 'Copiado',
     abrirNovaAba: 'Abrir en una pestaña nueva',
-    abrirNovaAbaMaquete: 'En el producto, abre el formulario en una pestaña nueva',
     enviarLinkPor: 'Enviar el enlace por',
     assuntoDoLink: nome => `Formulario: ${nome}`,
     mensagemDoLink: (nome, url) => `Para completar el formulario "${nome}", usa este enlace: ${url}`,
@@ -1621,7 +1742,7 @@ const es: Textos = {
     loteConcluido: 'Todas las conversaciones abiertas.',
     foraSemTelefone: nomes => `Quedan fuera, sin teléfono: ${nomes}.`,
     assuntoDoAviso: (tarefa, prazo) => prazo ? `Tarea: ${tarefa} (plazo ${prazo})` : `Tarea: ${tarefa}`,
-    mensagemDoAviso: (nome, tarefa, prazo) => `Hola, ${nome}. Recordatorio de la tarea "${tarefa}"${prazo ? `, plazo ${prazo}` : ''}.`,
+    mensagemDoAviso: (nome, tarefa, prazo) => `${nome ? `Hola, ${nome}.` : 'Hola.'} Recordatorio de la tarea "${tarefa}"${prazo ? `, plazo ${prazo}` : ''}.`,
     assuntoDoLote: n => `${n} tareas pendientes`,
   },
   agenda: {
@@ -1644,7 +1765,7 @@ const es: Textos = {
     ajudaComTelefone: 'Fecha, hora y asunto van completos. WhatsApp y SMS abren 1 conversación por participante.',
     ajudaSemTelefone: 'Fecha, hora y asunto van completos. Estos participantes no tienen teléfono en ENSPACE: solo funciona el correo.',
     assuntoDoLembrete: (evento, quando) => `Recordatorio: ${evento} (${quando})`,
-    mensagemDoLembrete: (nome, evento, quando) => `Hola, ${nome}. Recordatorio: ${evento}, ${quando}.`,
+    mensagemDoLembrete: (nome, evento, quando) => `${nome ? `Hola, ${nome}.` : 'Hola.'} Recordatorio: ${evento}, ${quando}.`,
   },
   emails: {
     titulo: 'Correos',
@@ -1707,7 +1828,6 @@ const es: Textos = {
     semContaTitulo: 'No hay cuentas integradas disponibles.',
     semContaDescricao: 'El correo de ENSPACE sale de tu cuenta de Outlook. Integra el Correo de Outlook en Perfil › Integraciones. Mientras tanto, el botón Correo abre tu app de correo.',
     integrarContas: 'Integrar cuentas',
-    integrarMaquete: 'En el producto, abre Perfil › Integraciones › Correo de Outlook.',
     inserirAssinatura: 'Insertar firma',
     cargoDaAssinatura: 'Jurídico · Aurora Serviços',
     mensagem: 'Mensaje',
@@ -1759,7 +1879,7 @@ const es: Textos = {
     canais: 'Canales',
     canaisAjuda: 'Un canal apagado desaparece de todas las pantallas.',
     ondeAparecem: 'Dónde aparecen',
-    lugares: { inicio: 'Inicio', item: 'Pantalla del ítem', itens: 'Lista y tablero de ítems', tarefas: 'Tareas', agenda: 'Agenda', formularios: 'Enlace de formulario público' },
+    lugares: { item: 'Pantalla del ítem', itens: 'Lista y tablero de ítems', tarefas: 'Tareas', agenda: 'Agenda', formularios: 'Enlace de formulario público' },
     textoInicial: 'Completar asunto y mensaje',
     textoInicialAjuda: 'El texto viene de la configuración de cada categoría. Quien envía puede cambiarlo antes.',
     copiaParaOItem: 'Poner el buzón del ítem en copia',
@@ -1854,6 +1974,52 @@ const es: Textos = {
     previa: 'Vista previa: lo que abre cada atajo',
     semNome: 'Sin nombre',
     salvo: 'Atajos guardados',
+  },
+  simulador: {
+    selo: 'Simulación · fuera de ENSPACE',
+    titulo: { whatsapp: 'WhatsApp', sms: 'Mensajes', email: 'Tu app de correo', formulario: 'Página pública del formulario', outlook: 'Integrar el Correo de Outlook' },
+    noProduto: {
+      whatsapp: 'En el producto, el navegador abre WhatsApp (app o Web) con este enlace. El texto va listo; la persona lo cambia y lo envía allí.',
+      sms: 'En el producto, la computadora abre la app registrada para sms: (en Windows, Enlace Móvil).',
+      email: 'En el producto, se abre la app de correo predeterminada de la computadora, ya completa.',
+      formulario: 'Es lo que ve la persona de afuera: el formulario sin login. Responder crea un ítem en ENSPACE.',
+      outlook: 'En el producto: Perfil › Integraciones y el login de la cuenta Microsoft corporativa.',
+    },
+    voltar: 'Volver a ENSPACE',
+    enviar: 'Enviar',
+    descartar: 'Descartar',
+    digiteMensagem: 'Escribe un mensaje',
+    escrevaAqui: 'Escribe el correo',
+    paraNumero: 'Para: número con código de área',
+    novaConversa: 'Nueva conversación',
+    textoPronto: 'El texto inicial ya está en la caja de mensaje. Cambia lo que quieras y envía.',
+    naoRegistra: { whatsapp: 'ENSPACE no registra conversaciones de WhatsApp.', sms: 'ENSPACE no registra SMS.' },
+    enviada: 'Enviado',
+    mensagens: 'Mensajes',
+    novaMensagem: 'Mensaje nuevo',
+    comCopiaAviso: 'La dirección del ítem está en Cc: la copia llega al Mail Box del ítem.',
+    semCopiaAviso: 'Sin la dirección del ítem en Cc, este correo no llega a ENSPACE.',
+    emailEnviado: 'Correo enviado desde tu app',
+    copiaNaMailBox: ref => `La copia llegó al Mail Box de ${ref}.`,
+    semCopia: 'Este correo no queda en ENSPACE.',
+    verNaMailBox: 'Ver en el Mail Box',
+    formPublico: 'Formulario público · no necesita login',
+    enviarResposta: 'Enviar respuesta',
+    respostaEnviada: 'Respuesta enviada',
+    obrigado: 'Gracias. Puedes cerrar esta página.',
+    itemCriado: (categoria, ref) => `Ítem nuevo en ${categoria}: ${ref}`,
+    itemCriadoDescricao: 'Creado por la respuesta del formulario público.',
+    abrirItem: 'Abrir ítem',
+    integracoes: 'Configuración del Usuario › Integraciones',
+    correioOutlook: 'Correo de Outlook',
+    correioOutlookDescricao: 'Integra tu correo con Outlook.',
+    sincronizar: 'Sincronizar',
+    contaMicrosoft: 'Cuenta Microsoft',
+    pedidoDePermissao: 'ENSPACE pide permiso para enviar correo desde tu cuenta.',
+    cancelar: 'Cancelar',
+    aceitar: 'Aceptar',
+    integrado: 'Integrado',
+    integradoDescricao: 'El correo de ENSPACE sale de tu cuenta de Outlook.',
   },
   andaime: {
     prototipo: 'Prototipo',

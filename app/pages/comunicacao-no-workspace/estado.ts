@@ -25,8 +25,12 @@ export type Canal = 'email' | 'whatsapp' | 'sms'
 export const CANAIS: Canal[] = ['email', 'whatsapp', 'sms']
 
 /** As telas em que os atalhos podem aparecer. Cada uma liga e desliga. */
-export type Lugar = 'inicio' | 'item' | 'itens' | 'tarefas' | 'agenda' | 'formularios'
-export const LUGARES: Lugar[] = ['inicio', 'item', 'itens', 'tarefas', 'agenda', 'formularios']
+/**
+ * A tela inicial saiu (rodada 5): ali não há destinatário, item para vincular
+ * nem formulário certo para o link. O e-mail global fica no "Novo e-mail".
+ */
+export type Lugar = 'item' | 'itens' | 'tarefas' | 'agenda' | 'formularios'
+export const LUGARES: Lugar[] = ['item', 'itens', 'tarefas', 'agenda', 'formularios']
 
 /** Uma pessoa de contato do item: de quais campos vêm nome, e-mail e telefone. */
 export interface ContatoDaCategoria {
@@ -71,7 +75,7 @@ export function configInicial(): ConfigDeComunicacao {
   return {
     atalhos: true,
     canais: { email: true, whatsapp: true, sms: true },
-    lugares: { inicio: true, item: true, itens: true, tarefas: true, agenda: true, formularios: true },
+    lugares: { item: true, itens: true, tarefas: true, agenda: true, formularios: true },
     textoInicial: true,
     copiaParaOItem: true,
     emailDoEnspace: true,
@@ -142,6 +146,8 @@ export function preencher(modelo: string, i: ItemDoProtótipo | null, nome: stri
     .replaceAll('{categoria}', i ? categoriaPorSlug(i.categoria).name : '')
     .replaceAll('{nome}', nome?.split(' ')[0] ?? '')
     .replace(/\s+([,.)])/g, '$1')
+    // Sem nome: "Olá, ." vira "Olá."
+    .replace(/,\./g, '.')
     .replace(/\(\)/g, '')
     .trim()
 }

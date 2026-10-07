@@ -1,7 +1,7 @@
 # Comunicação no workspace: lógica da funcionalidade
 
 Para dev e produto. Protótipo: https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/
-(05/10/2026, rodada 4).
+(07/10/2026, rodada 5).
 
 ## 1. Resumo
 
@@ -46,7 +46,7 @@ que a pessoa vê quando falta. A seção 2 junta todas as dependências num mapa
 | D11 | Permissão de editar o campo do contato | Cargo (Gestão de Membros) | Sim | 4.3 | Sem o botão "Cadastrar telefone"; fica só o motivo |
 | D12 | Telefone do membro no perfil | Dev (tela de perfil e `User.meta.phone`) | Não | 4.6, 4.7 | WhatsApp e SMS indisponíveis para o responsável da tarefa |
 | D13 | Formulário com visibilidade Público e tipo Criação ou Geral | Administrador (Editar do formulário) | Sim | 5 | O link não aparece; formulário privado mostra o porquê |
-| D14 | Tela Requisições no menu | Administrador (Interface › Menus) | Sim | 5.2 | Sem o cartão nessa tela; sobram tela inicial, lista e tarefa |
+| D14 | Tela Requisições no menu | Administrador (Interface › Menus) | Sim | 5.2 | Sem o cartão nessa tela; sobram a lista de itens e a tarefa |
 | D15 | Spaceflow que gera tarefa de formulário (nó Formulário ou Operações de Dados manual) | Administrador (Spaceflow) | Sim | 5.2 | Não há tarefa de formulário |
 | D16 | Configurações da Agenda: categorias com campo de data e tipos de tarefa marcados | Administrador (Agenda › Configurações, vale para o workspace) | Sim | 4.7 | O evento não aparece na Agenda |
 | D17 | Modelos de E-mail cadastrados | Administrador (Configurações › E-mails › Modelos de E-mail) | Sim | 6.3 | Campo Template vazio |
@@ -64,8 +64,8 @@ que a pessoa vê quando falta. A seção 2 junta todas as dependências num mapa
 - Fica em Configurações › Sistema › Informações Básicas, cartão Módulos, ao lado de Correção
   Monetária e Comparações. Ligado, abre um painel com:
   - **Canais:** E-mail, WhatsApp e SMS. Canal desligado some de todas as telas.
-  - **Onde aparecem:** Tela inicial, Tela do item, Lista e quadro de itens, Tarefas, Agenda e Link
-    de formulário público. Cada tela liga e desliga.
+  - **Onde aparecem:** Tela do item, Lista e quadro de itens, Tarefas, Agenda e Link de formulário
+    público. Cada tela liga e desliga. A tela inicial fica de fora (4.8).
   - **Preencher assunto e mensagem:** liga o texto inicial de cada categoria. Desligado, o app abre
     só com o destinatário.
   - **Pôr a caixa do item em cópia:** no e-mail aberto no app da pessoa, o endereço do item vai em
@@ -400,26 +400,19 @@ O texto leva data, hora e, na reunião do Outlook, o local.
 A Agenda junta essas 3 origens (docs: Agenda). Só a reunião do Outlook tem participantes; nas
 outras, quem recebe vem do item ou da tarefa.
 
-### 4.8 Tela inicial: Atalhos
+### 4.8 Tela inicial: sem atalhos
 
-**Como funciona**
+O mockup 6 do Felipe põe E-mail, WhatsApp, SMS e "Link de formulário público" abaixo da saudação. O
+protótipo não põe, porque a tela inicial não tem contexto para nenhum deles:
 
-- Abaixo da saudação: E-mail, WhatsApp, SMS e "Link de formulário público".
-- Sem destinatário: o app abre vazio e a pessoa escolhe para quem. O uso esperado é mandar o link de
-  um formulário público.
+| Atalho | O que faltaria na tela inicial |
+|---|---|
+| WhatsApp e SMS | Destinatário: o app abre vazio, igual a abrir o app direto |
+| E-mail | Item para vincular e contato para o Para. O e-mail sem contexto já existe no "Novo e-mail" da barra do topo (6.2) |
+| Link de formulário público | Qual formulário: o workspace pode ter vários, de categorias diferentes |
 
-**Depende de**
-
-| Dependência | Onde se resolve | Se faltar |
-|---|---|---|
-| Módulo 3.1 com a tela "Tela inicial" ligada (D4) | Sistema › Módulos | A linha Atalhos não aparece |
-| Para o menu de link: formulário público de Criação ou Geral (D13) | Editar do formulário | O menu mostra "Nenhum formulário público" e a dica do porquê |
-| Apps no computador (D18) | Computador da pessoa | O app não abre |
-
-**Por que assim**
-
-É o mockup 6. A tela inicial já recebe atalho de módulo: com Comparações ligado, aparece "Acessar
-Comparações" ali.
+O link público fica onde o formulário está em uso (5.2). O e-mail de qualquer tela fica no "Novo
+e-mail". **Pergunta para produto:** o Felipe concorda em tirar a linha da tela inicial?
 
 ## 5. Link de formulário público
 
@@ -454,7 +447,7 @@ Comparações" ali.
 | Tela | O que aparece | Jornada | Depende também de |
 |---|---|---|---|
 | Requisições | Cartão "Compartilhar este formulário" entre o seletor e o formulário | Escolhe o formulário, clica em Copiar link ou em Enviar o link por | A tela Requisições no menu (D14) |
-| Tela inicial e lista de itens | Menu "Link de formulário público" (na lista, só os da categoria) | Abre o menu, copia ou envia | Permissão de ver a categoria (D10) |
+| Lista de itens | Menu "Link de formulário público", só com os formulários da categoria | Abre o menu, copia ou envia | Permissão de ver a categoria (D10) |
 | Painel da tarefa de formulário | O mesmo cartão, com a linha "A resposta pelo link cria um item novo em <categoria>. Esta tarefa continua aberta até você concluí-la." | Abre a tarefa, copia ou envia | Um Spaceflow que gera a tarefa de formulário (D15) |
 | Formulários da categoria | "Copiar" (já existe) e "Tornar público/privado" no menu da linha | Atalho para o Editar › Visibilidade, que já existe | Acesso à configuração da categoria |
 
@@ -650,7 +643,7 @@ escondida: a tela "Emails Recebidos", sem entrada no menu.
 |---|---|---|
 | Módulo "Atalhos de comunicação" (3.1) | Chave e painel no cartão Módulos | Guardar em `Workspace.modules` |
 | Contato da categoria (3.2) | Cartão no painel da categoria | Guardar em `ItemType.settings` |
-| Atalhos (4.1 a 4.8) | Montar os links, o motivo de indisponível, o botão dividido, a fila | Nada |
+| Atalhos (4.1 a 4.7) | Montar os links, o motivo de indisponível, o botão dividido, a fila | Nada |
 | Telefone do membro (4.6) | Campo telefone no perfil | Gravar em `User.meta.phone` |
 | Clique direito no quadro (4.5) | Menu de contexto | No SDK: prop `cardActions` no `EnKanbanBoard` |
 | Link público (5) | Cartão e menu nas telas de uso | Nada: o link e a visibilidade já existem |
@@ -679,9 +672,18 @@ escondida: a tela "Emails Recebidos", sem entrada no menu.
 
 ## 9. O que o protótipo não faz
 
-- Não abre o app: mostra num aviso o link exato que abriria (`mailto:`, `https://wa.me/...`,
-  `sms:`).
-- Não envia e-mail: guarda na memória e some ao recarregar.
+- Não abre o app de verdade: abre uma simulação dele, com o selo "Simulação · fora do ENSPACE" e o
+  link exato no topo. Ela segue as regras desta especificação:
+  - **WhatsApp e Mensagens (SMS):** o texto inicial vem pronto; a conversa não volta ao ENSPACE;
+  - **app de e-mail:** com o endereço do item em Cc, a cópia chega à Mail Box do item; sem ele, o
+    ENSPACE não fica sabendo;
+  - **página pública do formulário:** a resposta cria um item na categoria do formulário, com o
+    contato preenchido;
+  - **Integrar contas:** Perfil › Integrações e o consentimento da Microsoft; aceitar libera o
+    compositor.
+- Não envia e-mail de verdade nem grava nada fora do navegador: tudo fica na memória e some ao
+  recarregar.
+- O Salvar da Visão Geral grava no item (em memória). É o fim da jornada "Cadastrar telefone".
 - Não tem cargo nem permissão de edição: "Cadastrar telefone" aparece sempre (no produto, só para
   quem pode editar o campo).
 - A referência do item aparece curta (ex.: CTR-00231) para leitura. No produto é o código de 32

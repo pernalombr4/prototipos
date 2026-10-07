@@ -7,8 +7,8 @@ botão de E-mail (motivo no `BRIEFING.md`, seção 4).
 
 | Parte do documento | Onde aparece no protótipo |
 |---|---|
-| (a) Link do formulário público | Requisições (cartão "Compartilhar este formulário"); Início ("Link de formulário público"); lista de itens da categoria; painel da tarefa de preencher formulário |
-| (b) Atalhos de e-mail, WhatsApp e SMS | Início (Atalhos); item (Contato rápido); lista de itens (menu "Contatar"); quadro de itens (clique direito); tarefas (coluna Contato, aviso em lote, clique direito, painel); Agenda (lembrete) |
+| (a) Link do formulário público | Requisições (cartão "Compartilhar este formulário"); lista de itens da categoria; painel da tarefa de preencher formulário |
+| (b) Atalhos de e-mail, WhatsApp e SMS | Item (Contato rápido); lista de itens (menu "Contatar"); quadro de itens (clique direito); tarefas (coluna Contato, aviso em lote, clique direito, painel); Agenda (lembrete) |
 | Configuração dos atalhos | Sistema › Módulos ("Atalhos de comunicação": canais, telas, texto inicial, cópia para o item); Categorias › cartão "Atalhos de comunicação" (de quais campos vêm nome, e-mail e telefone) |
 | E-mail do ENSPACE em todas as telas | "Novo e-mail" na barra do topo; "E-mails" no menu (Recebidos e Enviados, com o item); o compositor com "De" e "Vincular a item" |
 | Configuração do e-mail | Sistema › Módulos ("E-mail do ENSPACE em todas as telas": de onde o e-mail sai e quais categorias têm a pasta Mail Box). Cada pessoa integra o Correio do Outlook no próprio perfil |
@@ -187,6 +187,36 @@ disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:)
 - **Fica de fora do protótipo:** cargo e permissão de edição. "Cadastrar telefone" aparece sempre;
   o documento diz a regra para o dev.
 
+## Rodada 5 · 2026-10-07
+
+- **Pedido (literal):** "atalhos NA HOME fazem sentido? vai pegar link do que ali? vai ter email
+  vinculado a que? nao vejo logica. alem disso, voce tem que de fato simular o comportamento dos
+  botoes. só o botao de email ta com comportamento previsivel".
+- **Saiu a linha "Atalhos" da tela inicial.** Na tela inicial não há destinatário (WhatsApp e SMS
+  abriam vazios), item para vincular ao e-mail nem formulário certo para o link. O e-mail sem
+  contexto já existe no "Novo e-mail"; o link público fica onde o formulário está em uso. "Tela
+  inicial" saiu de "Onde aparecem" em Sistema › Módulos.
+- **Os botões simulam o app de fora** (`_AppExterno.vue`, andaime, não proposta). Cada janela leva o
+  selo "Simulação · fora do ENSPACE", o link exato e a frase do que acontece no produto:
+  - WhatsApp e Mensagens: texto inicial pronto, envio na conversa, "O ENSPACE não registra";
+  - app de e-mail: De, Para, Cc e Assunto preenchidos; com o endereço do item em Cc, a cópia chega à
+    Mail Box do item;
+  - "Abrir numa nova aba" do formulário: a página pública; a resposta cria o item na categoria;
+  - "Integrar contas": Perfil › Integrações, Sincronizar e o consentimento da Microsoft; aceitar
+    libera o compositor;
+  - a fila de WhatsApp e SMS das tarefas e o lembrete da Agenda abrem a mesma simulação.
+- **Outros botões que só davam aviso:**
+  - "Salvar" e "Sair sem salvar" da Visão Geral do item gravam e desfazem: "Corrigir telefone" fecha
+    a jornada e o WhatsApp libera;
+  - "Anexar arquivo" abre o seletor de arquivos do computador (o arquivo não sai do navegador);
+  - "Copiar link" do item copia o endereço do item.
+- **Corrigido no caminho:** o lembrete para todos dizia "Olá, . Lembrete"; sem nome, vira "Olá.". O
+  evento de item na Agenda lê os contatos do item na hora (o que a Visão Geral salvou vale ali).
+- **Registro novo:** a data é o dia do protótipo (05/10) com a hora do relógio.
+- **Ver:** prints [WhatsApp](evidencias/prototipo-13-simulacao-whatsapp.jpg),
+  [app de e-mail](evidencias/prototipo-14-simulacao-app-de-email.jpg),
+  [formulário público](evidencias/prototipo-15-simulacao-formulario-publico.jpg).
+
 ## Por que cada decisão
 
 ### O e-mail sai da conta do Outlook da pessoa; o item recebe a resposta
@@ -291,7 +321,6 @@ SMS funcionar de verdade, o perfil precisa do campo. **É dependência fora dest
   link não leva.
 - **Requisições:** o cartão do mockup 1, entre o seletor e o formulário, só com formulário público.
   Formulário privado ganha 1 linha dizendo por que não há link.
-- **Início:** o menu "Link de formulário público", com copiar e enviar por formulário.
 - **Lista de itens:** o mesmo menu, só com os formulários da categoria, ao lado de "Novo registro".
 - **Tarefa de preencher formulário** (`type: form`, gerada por Spaceflow): o cartão no painel da
   tarefa, com a linha "a resposta pelo link cria um item novo e não conclui esta tarefa". A tarefa
@@ -401,6 +430,7 @@ Classes com valor arbitrário:
 | `_TelaEmails.vue`, `_TelaTarefas.vue` | `grid-cols-[5rem_1fr]`, `grid-cols-[8rem_1fr]` | Rótulo e valor em 2 colunas na leitura do e-mail e no painel da tarefa |
 | `_TelaCategoria.vue` | `xl:grid-cols-[1fr_24rem]` | Configuração dos atalhos à esquerda, prévia dos links à direita |
 | `_RascunhoMinimizado.vue` | `w-[min(26rem,calc(100vw-2rem))]` | A barra do rascunho cabe na tela estreita sem passar da borda |
+| `_AppExterno.vue` | `max-h-[90dvh]` | A simulação cabe na altura da tela e rola por dentro |
 | `_AcoesDeContato.vue` | `itemDescription: 'whitespace-normal'` | O tema do `DropdownMenu` corta a descrição em 1 linha; o aviso do Cc precisa ser lido inteiro |
 
 ## Crítica e acessibilidade
@@ -429,8 +459,8 @@ Rodadas `design:design-critique` e `design:accessibility-review` sobre o código
 
 - **o clique direito do quadro não chega pelo teclado.** O caminho de teclado é abrir o cartão (o
   painel da tarefa tem os mesmos atalhos). Correção de verdade depende do SDK;
-- **WhatsApp e SMS no Início, sem destinatário,** abrem o app vazio. Estão porque o mockup 6 pede;
-  o administrador desliga "Tela inicial" em Onde aparecem;
+- **o mockup 6 (atalhos na tela inicial) ficou de fora** na rodada 5: ali não há destinatário, item
+  nem formulário certo. Falta o Felipe concordar;
 - **o "Novo e-mail" com rótulo pesa na barra do topo.** Ícone sozinho seria mais leve e mais
   difícil de achar;
 - **o aviso com "Ver no item" some em 5 s.** O mesmo caminho existe na tela E-mails;

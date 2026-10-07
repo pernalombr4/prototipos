@@ -12,15 +12,16 @@
 import type { DropdownMenuItem, ContextMenuItem } from '@nuxt/ui'
 import type { EnKanbanCardConfig, EnKanbanColumn, EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import type { Textos } from './textos'
-import { type ItemDoProtótipo, type StatusDoItem, categoriaPorSlug, itens } from './mocks'
+import { type ItemDoProtótipo, type StatusDoItem, categoriaPorSlug, itens, workspace } from './mocks'
 import { type Contato, contatosDoItem, useComunicacao, useMarcaDeProposta } from './estado'
-import { ICONE_DO_CANAL, useAtalhos } from './atalhos'
+import { ICONE_DO_CANAL, useAtalhos, useCopiar } from './atalhos'
 import LinksPublicos from './_LinksPublicos.vue'
 
 const props = defineProps<{ t: Textos }>()
 
 const { categoriaAtual, abrirItem, formularios, config, outlookIntegrado } = useComunicacao()
 const { canaisEm, motivo, abrir, escreverNoEnspace } = useAtalhos()
+const { copiar } = useCopiar()
 const marca = useMarcaDeProposta()
 const idioma = useIdioma()
 const toast = useToast()
@@ -135,7 +136,7 @@ function menuDaLinha(i: ItemDoProtótipo): DropdownMenuItem[][] {
     { label: props.t.itens.verDetalhes, icon: 'i-lucide-eye', onSelect: () => abrirItem(i.id) },
     { label: props.t.itens.editar, icon: 'i-lucide-pencil', onSelect: () => abrirItem(i.id) },
     { label: props.t.itens.enviarParaLixeira, icon: 'i-lucide-trash-2' },
-    { label: props.t.itens.copiarLink, icon: 'i-lucide-link', onSelect: () => toast.add({ title: props.t.form.linkCopiado, description: i.reference, icon: 'i-lucide-check', color: 'success' }) },
+    { label: props.t.itens.copiarLink, icon: 'i-lucide-link', onSelect: () => copiar(`item-${i.id}`, `https://app.enspace.io/workspaces/${workspace.reference}/types/${i.categoria}/${i.id}`, i.reference) },
   ]
   const contatar = opcoesDeContato(i)
   return contatar.length ? [existentes, contatar] : [existentes]

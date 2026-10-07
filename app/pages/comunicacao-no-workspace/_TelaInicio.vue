@@ -1,26 +1,20 @@
 <script setup lang="ts">
 /**
- * Tela inicial. Cópia do develop (saudação e os 3 cartões de tarefas).
- * PROPOSTA: a linha "Atalhos" embaixo da saudação.
+ * Tela inicial. Cópia do develop (saudação e os 3 cartões de tarefas), sem
+ * proposta. A linha "Atalhos" das rodadas 1 a 4 saiu: ali não há destinatário,
+ * item para vincular nem formulário certo para o link (ver DECISOES.md).
  */
 import type { Textos } from './textos'
 import { EU, HOJE, membroPorId, tarefas } from './mocks'
-import { useAtalhos } from './atalhos'
-import { useComunicacao, useMarcaDeProposta } from './estado'
-import AcoesDeContato from './_AcoesDeContato.vue'
-import LinksPublicos from './_LinksPublicos.vue'
+import { useComunicacao } from './estado'
 
 const props = defineProps<{ t: Textos }>()
 
 const { ir } = useComunicacao()
-const { canaisEm, config } = useAtalhos()
-const marca = useMarcaDeProposta()
 
 const abertas = computed(() => tarefas.filter(x => x.status !== 'completed'))
 const atrasadas = computed(() => abertas.value.filter(x => x.due_date && x.due_date < HOJE))
 const proximas = computed(() => abertas.value.filter(x => x.due_date && x.due_date >= HOJE).sort((a, b) => +a.due_date! - +b.due_date!).slice(0, 4))
-
-const mostrarAtalhos = computed(() => canaisEm('inicio').length > 0 || (config.value.atalhos && config.value.lugares.formularios))
 
 function quando(d: Date) {
   const dias = Math.round((+d - +HOJE) / 86400000)
@@ -44,23 +38,6 @@ const cartoes = computed(() => [
     <p class="mt-1 text-sm text-muted">
       {{ t.inicio.subtitulo }}
     </p>
-
-    <!-- PROPOSTA: atalhos de comunicação na tela inicial -->
-    <div
-      v-if="mostrarAtalhos"
-      class="mt-4 flex flex-wrap items-center gap-2 animate-[entrada_.3s_ease-out]"
-      :class="marca"
-    >
-      <span class="mr-1 text-xs font-semibold uppercase tracking-wide text-muted">{{ t.inicio.atalhos }}</span>
-      <AcoesDeContato
-        :t="t"
-        :destino="null"
-        lugar="inicio"
-        sem-destinatario
-        origem="inicio"
-      />
-      <LinksPublicos v-if="config.atalhos && config.lugares.formularios" :t="t" />
-    </div>
 
     <div class="mt-6 grid gap-5 lg:grid-cols-2">
       <UCard

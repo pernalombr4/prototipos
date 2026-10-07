@@ -18,10 +18,11 @@
  */
 import type { EditorToolbarItem } from '@nuxt/ui'
 import type { Textos } from './textos'
-import { type Email, EU, categoriaPorSlug, itemPorId, itens, membros, modelos } from './mocks'
+import { type Email, EU, agora, categoriaPorSlug, itemPorId, itens, membros, modelos } from './mocks'
 import { contatosDoItem, preencher, useComunicacao, useMarcaDeProposta } from './estado'
 import BuscaDeItem from './_BuscaDeItem.vue'
 import LinkDoEditor from './_LinkDoEditor.vue'
+import { useAppExterno } from './simulador'
 
 const props = defineProps<{ t: Textos }>()
 
@@ -38,8 +39,11 @@ const categoria = computed(() => item.value ? categoriaPorSlug(item.value.catego
 const enderecoDeResposta = computed(() => responderPara(rascunho.value.itemId))
 watch(outlookIntegrado, () => (rascunho.value.de = remetentePadrao()))
 
+const { abrirApp } = useAppExterno()
+
+/** "Integrar contas": Perfil › Integrações e o consentimento da Microsoft, simulados. */
 function integrar() {
-  toast.add({ title: props.t.compositor.integrarContas, description: props.t.compositor.integrarMaquete, icon: 'i-lucide-plug', color: 'neutral' })
+  abrirApp({ tipo: 'outlook', url: 'https://app.enspace.io/profile?tab=integrations' })
 }
 
 /** "Inserir assinatura": a assinatura da conta do Outlook, como na Mail Box de hoje. */
@@ -172,7 +176,7 @@ async function enviar() {
     cc: [...r.cc, ...r.cco],
     assunto: r.assunto || props.t.compositor.semAssunto,
     corpo: r.corpo,
-    data: new Date(),
+    data: agora(),
     // A resposta volta para o endereço do item; sem item, só para o Outlook da pessoa.
     caixa: enderecoDeResposta.value ?? r.de!,
     itemId: r.itemId,
@@ -206,10 +210,15 @@ function descartar() {
   })
 }
 
+/** Anexar abre o seletor de arquivos do computador. O arquivo não sai do navegador. */
+const seletorDeArquivo = useTemplateRef<HTMLInputElement>('seletorDeArquivo')
 function anexar() {
-  const nomes = ['proposta-comercial.pdf', 'minuta-v4.docx', 'planilha-de-precos.xlsx']
-  const proximo = nomes.find(n => !rascunho.value.anexos.includes(n))
-  if (proximo) rascunho.value.anexos = [...rascunho.value.anexos, proximo]
+  seletorDeArquivo.value?.click()
+}
+function arquivosEscolhidos(e: Event) {
+  const lista = Array.from((e.target as HTMLInputElement).files ?? []).map(f => f.name)
+  rascunho.value.anexos = [...new Set([...rascunho.value.anexos, ...lista])]
+  ;(e.target as HTMLInputElement).value = ''
 }
 
 watch(compositorAberto, (aberto) => {
@@ -453,6 +462,7 @@ const dicaDeOrigem = computed(() => {
 
     <template v-if="outlookIntegrado" #footer>
       <div class="flex items-center gap-1">
+        <input ref="seletorDeArquivo" type="file" multiple class="hidden" @change="arquivosEscolhidos">
         <UButton :label="t.compositor.anexarArquivo" icon="i-lucide-paperclip" color="neutral" variant="ghost" @click="anexar" />
         <UButton :label="t.compositor.inserirAssinatura" icon="i-lucide-signature" color="neutral" variant="ghost" @click="inserirAssinatura" />
         <span v-if="temConteudo" class="flex items-center gap-1 text-xs text-muted">

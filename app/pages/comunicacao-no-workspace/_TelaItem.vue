@@ -6,11 +6,13 @@
  * PROPOSTA:
  *  - o cartão "Contato rápido" no topo do painel da esquerda;
  *  - na aba Mail Box, o lápis abre o compositor novo, com o item já vinculado.
+ * A Visão Geral edita e o Salvar grava (em memória): é o fim da jornada de
+ * "Cadastrar telefone", e o Contato rápido muda junto.
  * As pastas criadas para a exploração foram as do develop: Tarefas, Anexos,
  * Emails Automáticos, Mail Box, Notas e Campos.
  */
 import type { Textos } from './textos'
-import { categoriaPorSlug, enderecoDoItem, itemPorId, membroPorId, tarefas } from './mocks'
+import { agora, categoriaPorSlug, enderecoDoItem, itemPorId, membroPorId, tarefas } from './mocks'
 import { contatosDoItem, useComunicacao, useMarcaDeProposta } from './estado'
 import { useAtalhos, useCopiar } from './atalhos'
 import AcoesDeContato from './_AcoesDeContato.vue'
@@ -22,6 +24,7 @@ const { canaisEm, motivo } = useAtalhos()
 const { copiar, copiado } = useCopiar()
 const marca = useMarcaDeProposta()
 const idioma = useIdioma()
+const toast = useToast()
 
 const item = computed(() => itemPorId(itemAberto.value))
 const categoria = computed(() => item.value ? categoriaPorSlug(item.value.categoria) : null)
@@ -134,6 +137,32 @@ const camposVisiveis = computed(() => {
       ? Object.entries(v as Record<string, unknown>).map(([s2, v2]) => ({ chave: `${k}.${s2}`, rotulo: `${props.t.item.campos[k] ?? k} › ${sub[s2] ?? s2}`, valor: v2 == null ? '' : String(v2) }))
       : [{ chave: k, rotulo: props.t.item.campos[k] ?? k, valor: v == null ? '' : typeof v === 'number' ? v.toLocaleString(idioma.value, { style: 'currency', currency: 'BRL' }) : String(v) }])
 })
+
+/* ---------- edição da visão geral ---------- */
+
+const edicao = ref<Record<string, string>>({})
+watch(camposVisiveis, cs => (edicao.value = Object.fromEntries(cs.map(c => [c.chave, c.valor]))), { immediate: true })
+
+function salvarItem() {
+  const i = item.value
+  if (!i) return
+  const data = i.data as Record<string, unknown>
+  for (const c of camposVisiveis.value) {
+    const novo = (edicao.value[c.chave] ?? '').trim()
+    if (novo === c.valor) continue
+    const [raiz, sub] = c.chave.split('.') as [string, string | undefined]
+    if (typeof data[raiz] === 'number') continue // valor em moeda: fora do protótipo
+    if (sub) data[raiz] = { ...((data[raiz] as Record<string, unknown> | null) ?? {}), [sub]: novo || null }
+    else data[raiz] = novo || null
+    if (raiz === 'titulo') i.titulo = novo
+  }
+  i.updated_at = agora()
+  toast.add({ title: props.t.item.salvo, icon: 'i-lucide-check', color: 'success' })
+}
+
+function descartarEdicao() {
+  edicao.value = Object.fromEntries(camposVisiveis.value.map(c => [c.chave, c.valor]))
+}
 
 const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.id))
 </script>
@@ -308,11 +337,11 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
       <!-- Visão geral (cópia) -->
       <div v-if="abaDoItem === 'visao'" class="grid max-w-3xl gap-4 p-5 animate-[entrada_.25s_ease-out]">
         <UFormField v-for="c in camposVisiveis" :key="c.chave" :label="c.rotulo">
-          <UInput :id="`campo-${c.chave}`" :model-value="c.valor" class="w-full" />
+          <UInput :id="`campo-${c.chave}`" v-model="edicao[c.chave]" class="w-full" />
         </UFormField>
         <div class="flex justify-end gap-2">
-          <UButton :label="t.item.sairSemSalvar" icon="i-lucide-undo-2" color="neutral" variant="ghost" />
-          <UButton :label="t.item.salvar" icon="i-lucide-save" />
+          <UButton :label="t.item.sairSemSalvar" icon="i-lucide-undo-2" color="neutral" variant="ghost" @click="descartarEdicao" />
+          <UButton :label="t.item.salvar" icon="i-lucide-save" @click="salvarItem" />
         </div>
       </div>
 

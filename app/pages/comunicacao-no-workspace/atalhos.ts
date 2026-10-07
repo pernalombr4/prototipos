@@ -2,11 +2,12 @@
  * Os atalhos de contato, numa peça só para todas as telas.
  *
  * Regra do documento: o ENSPACE só abre o app (deep link). Não envia, não
- * autentica e não se integra à conta de ninguém. No protótipo o atalho
- * também não abre o app de verdade: mostra o link que abriria, para o dev ver
- * o formato exato e para ninguém mandar mensagem para um número inventado.
+ * autentica e não se integra à conta de ninguém. No protótipo o atalho abre a
+ * simulação do app (`_AppExterno.vue`), com o link exato no topo: o dev vê o
+ * formato e ninguém manda mensagem para um número inventado.
  */
 import { type ItemDoProtótipo, categoriaPorSlug, enderecoDoItem } from './mocks'
+import { useAppExterno } from './simulador'
 import { textos } from './textos'
 import {
   type Canal,
@@ -30,9 +31,9 @@ export const ICONE_DO_CANAL: Record<Canal, string> = {
 }
 
 export function useAtalhos() {
-  const toast = useToast()
   const t = useTextos(textos)
   const { config, abrirCompositor } = useComunicacao()
+  const { abrirApp } = useAppExterno()
 
   /** Os canais que o administrador ligou para esta tela. Vazio = atalhos fora. */
   function canaisEm(lugar: Lugar): Canal[] {
@@ -59,32 +60,34 @@ export function useAtalhos() {
     }
   }
 
-  /** O link que o atalho abre. */
-  function link(canal: Canal, d: Destino | null, opcoes: { item?: ItemDoProtótipo | null, assunto?: string, mensagem?: string, varios?: Destino[] } = {}) {
+  type Opcoes = { item?: ItemDoProtótipo | null, assunto?: string, mensagem?: string, varios?: Destino[] }
+
+  /** O que vai no link: destinatários, cópia, assunto e texto. */
+  function partes(canal: Canal, d: Destino | null, opcoes: Opcoes) {
     const padrao = textos_(opcoes.item, d)
     const assunto = opcoes.assunto ?? padrao.assunto
-    const mensagem = opcoes.mensagem ?? padrao.mensagem
-    if (canal === 'email') {
-      const para = (opcoes.varios ?? (d ? [d] : [])).map(x => x.email).filter(Boolean) as string[]
-      const i = opcoes.item
-      const cc = i && config.value.copiaParaOItem && categoriaPorSlug(i.categoria).temMailBox ? enderecoDoItem(i) : undefined
-      return linkDeEmail(para, assunto, opcoes.mensagem, cc)
-    }
-    if (canal === 'whatsapp') return linkDeWhatsapp(d?.telefone ?? null, mensagem)
-    return linkDeSms(d?.telefone ?? null, mensagem)
+    // No e-mail, o corpo só vai quando a tela manda um (o link do formulário, o lembrete).
+    const mensagem = canal === 'email' ? opcoes.mensagem : opcoes.mensagem ?? padrao.mensagem
+    const para = (opcoes.varios ?? (d ? [d] : [])).map(x => x.email).filter(Boolean) as string[]
+    const i = opcoes.item
+    const cc = canal === 'email' && i && config.value.copiaParaOItem && categoriaPorSlug(i.categoria).temMailBox ? enderecoDoItem(i) : undefined
+    return { assunto, mensagem, para, cc }
   }
 
-  /** O clique no atalho. No produto: `window.open(link)`. Aqui: o aviso com o link. */
-  function abrir(canal: Canal, d: Destino | null, opcoes: Parameters<typeof link>[2] = {}) {
+  /** O link que o atalho abre. */
+  function link(canal: Canal, d: Destino | null, opcoes: Opcoes = {}) {
+    const p = partes(canal, d, opcoes)
+    if (canal === 'email') return linkDeEmail(p.para, p.assunto, p.mensagem, p.cc)
+    if (canal === 'whatsapp') return linkDeWhatsapp(d?.telefone ?? null, p.mensagem)
+    return linkDeSms(d?.telefone ?? null, p.mensagem)
+  }
+
+  /** O clique no atalho. No produto: `window.open(link)`. Aqui: a simulação do app. */
+  function abrir(canal: Canal, d: Destino | null, opcoes: Opcoes = {}) {
+    const p = partes(canal, d, opcoes)
     const url = link(canal, d, opcoes)
-    toast.add({
-      title: t.value.atalho.abrindo[canal],
-      description: url,
-      icon: ICONE_DO_CANAL[canal],
-      color: 'neutral',
-      duration: 6000,
-      ui: { description: 'font-mono text-xs break-all' },
-    })
+    if (canal === 'email') abrirApp({ tipo: 'email', url, para: p.para, cc: p.cc ? [p.cc] : [], assunto: p.assunto ?? '', corpo: p.mensagem ?? '' })
+    else abrirApp({ tipo: canal, url, nome: d?.nome ?? null, telefone: d?.telefone ?? null, texto: p.mensagem ?? '' })
   }
 
   /** E-mail pelo ENSPACE, com o item já vinculado quando há item. */

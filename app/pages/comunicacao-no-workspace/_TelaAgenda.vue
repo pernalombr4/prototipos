@@ -10,7 +10,7 @@
  */
 import type { Textos } from './textos'
 import { type EventoDaAgenda, HOJE, eventos, itemPorId } from './mocks'
-import { useComunicacao, useMarcaDeProposta } from './estado'
+import { contatosDoItem, useComunicacao, useMarcaDeProposta } from './estado'
 import { useAtalhos } from './atalhos'
 import AcoesDeContato from './_AcoesDeContato.vue'
 
@@ -48,8 +48,23 @@ const modal = computed({ get: () => !!aberto.value, set: (v) => { if (!v) aberto
 const itemDoEvento = computed(() => itemPorId(aberto.value?.itemId))
 
 const canais = computed(() => canaisEm('agenda'))
-const comEmail = computed(() => aberto.value?.participantes.filter(p => p.email) ?? [])
-const algumTelefone = computed(() => aberto.value?.participantes.some(p => p.telefone) ?? false)
+/**
+ * Quem recebe o lembrete. Reunião do Outlook e prazo de tarefa: os participantes
+ * do evento. Data de item: os contatos do item, lidos agora (o que a Visão Geral
+ * salvou vale aqui também).
+ */
+const pessoas = computed(() => {
+  const e = aberto.value
+  if (!e) return []
+  if (e.fonte === 'item' && itemDoEvento.value) {
+    return contatosDoItem(itemDoEvento.value, config.value)
+      .filter(c => c.email || c.telefone)
+      .map(c => ({ nome: c.nome ?? undefined, email: c.email ?? undefined, telefone: c.telefone }))
+  }
+  return e.participantes
+})
+const comEmail = computed(() => pessoas.value.filter(p => p.email))
+const algumTelefone = computed(() => pessoas.value.some(p => p.telefone))
 
 function textosDoLembrete(e: EventoDaAgenda, nome?: string) {
   if (!config.value.textoInicial) return { assunto: undefined, mensagem: undefined }
@@ -171,7 +186,7 @@ function iniciais(p: { nome?: string, email?: string }) {
               {{ t.agenda.quem[aberto.fonte] }}
             </h3>
             <ul class="flex flex-col gap-2">
-              <li v-for="(p, i) in aberto.participantes" :key="i" class="flex items-center gap-3">
+              <li v-for="(p, i) in pessoas" :key="i" class="flex items-center gap-3">
                 <UAvatar :text="iniciais(p)" size="xs" />
                 <span class="min-w-0 flex-1">
                   <span class="block truncate text-sm text-highlighted">{{ p.nome ?? p.email }}</span>

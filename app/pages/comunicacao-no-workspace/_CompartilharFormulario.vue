@@ -9,6 +9,7 @@ import type { Textos } from './textos'
 import { linkPublico } from './mocks'
 import { useCopiar } from './atalhos'
 import { useMarcaDeProposta } from './estado'
+import { useAppExterno } from './simulador'
 import AcoesDeContato from './_AcoesDeContato.vue'
 
 const props = withDefaults(defineProps<{
@@ -20,12 +21,13 @@ const props = withDefaults(defineProps<{
 
 const { copiar, copiado } = useCopiar()
 const marca = useMarcaDeProposta()
-const toast = useToast()
+const { abrirApp } = useAppExterno()
 
 const url = computed(() => linkPublico(props.formulario))
 
+/** No produto, abre a página pública numa aba nova. Aqui, a simulação dela. */
 function abrirNovaAba() {
-  toast.add({ title: props.t.form.abrirNovaAbaMaquete, description: url.value, icon: 'i-lucide-external-link', color: 'neutral', ui: { description: 'font-mono text-xs break-all' } })
+  abrirApp({ tipo: 'formulario', url: url.value, formularioId: props.formulario.id })
 }
 </script>
 
