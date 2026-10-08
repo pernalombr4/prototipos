@@ -53,7 +53,7 @@
 | RD-04 | A vizinha deve trocar de lugar quando o centro da folder arrastada passar da metade dela, deslizando com transição suave. | A vizinha se mexe antes de a arrastada chegar à borda dela. |
 | RD-05 | A folder arrastada leva o traço embaixo: o forte, se for a aberta; o fraco (RH-02), se for fechada. | O traço anda junto com a folder. |
 | RD-06 | Arrastar não deve abrir a folder, nem o clique que encerra o arrasto. | Arrastar uma fechada e soltar mantém a mesma folder aberta. |
-| RD-07 | Soltar no mesmo lugar não deve fazer nada: sem popup, sem aviso, sem gravação. | Arrastar e voltar ao lugar de origem não mostra nada. |
+| RD-07 | Soltar no mesmo lugar não deve fazer nada: sem popup, sem aviso, sem gravação. Hoje, quem é owner pode arrastar, mexer a folder para lá e para cá e soltar no lugar de origem: mesmo sem mudar a ordem, aparece o popup para salvar a ordem para todos. | Arrastar, mexer e voltar ao lugar de origem não mostra nada, para owner ou não. |
 | RD-08 | Soltar em outro lugar deve salvar a ordem sozinho e mostrar o aviso "Ordem das folders salva." com o botão Desfazer, por alguns segundos. | Desfazer volta a ordem anterior. Não existe popup de confirmação. |
 | RD-09 | A seta ⌄ da folder aberta (RM-01) deve continuar visível no arrasto e acompanhar a aba, quando ela é a arrastada e quando é a vizinha que desliza. | A seta nunca some nem fica no lugar antigo. |
 | RD-10 | Quando a arrastada é a aberta, a seta ⌄ deve ficar por cima dela. Quando outra folder passa por cima da aberta, a seta deve ficar por baixo da arrastada. | Arrastando a aberta, a seta continua visível. Outra folder passando por cima da aberta cobre a seta. |
@@ -114,7 +114,7 @@ Hoje a barra não tem navegação por teclado. Estes requisitos valem para a tel
 
 ## Fora destes requisitos
 
-- **Escopo da ordem:** se a ordem salva vale para a pessoa ou para todos da categoria. O aviso de RD-08 não diz; o time de produto decide.
+- **Escopo da ordem:** hoje, quem é owner salva a ordem para todos, pelo popup. Falta decidir se o salvamento automático do RD-08 vale para todos quando é owner e se quem não é owner reordena só para si. O aviso de RD-08 ainda não diz para quem salvou.
 - **Reexibir folder oculta:** o protótipo só tem o Desfazer; falta definir onde a folder oculta volta.
 - **O que acontece com os campos de uma folder excluída:** o protótipo diz que voltam para a Visão Geral, mas isso não foi conferido no produto.
 - **Rótulo:** a tela diz "folder" em português ("Nova folder"); o termo em português é "pasta".

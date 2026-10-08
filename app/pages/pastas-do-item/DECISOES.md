@@ -78,6 +78,8 @@ A folder vira aba: texto sobre uma linha de base que é a borda de cima do conte
 - **Pedido (literal), na mesma rodada:** "os TAMANHOS que voce ta cravando em px nao precisam ser cravados. o dev vai saber o que fazer. nao precisa citar tamanhos em px nos requisitos. cite tambem nos requisitos que esse tooltip existe"
 - **Mudou:** `REQUISITOS.md` sem medida cravada: px, ms, porcentagem e segundos viraram descrição ("linha fina", "transição suave", "tom mais claro", "alguns segundos")
 - **Mudou:** requisito RV-10 (tooltip da barra: "Arraste para reordenar. Clique com o botão direito para mais opções.") e o tooltip "Nova folder" no RX-01
+- **Pedido (literal), na mesma rodada:** "tem que explicar que hoje se eu arrasto e fico ali brincando com a folder, se soltar no mesmo lugar vem popup de salvamento pra todos (eu sendo owner)"
+- **Mudou:** RD-07 explica o comportamento de hoje (popup para salvar a ordem para todos, para owner, mesmo sem mudança); a pendência "Escopo da ordem" registra que owner salva para todos e o que falta decidir
 - **Descartado:** Aba de navegador. Motivo: ela achou ruim
 - **Ver:** `http://localhost:3000/pastas-do-item` · `REQUISITOS.md`
 

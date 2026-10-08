@@ -62,7 +62,7 @@ Prints: `evidencias/hoje-barra-na-tela-do-item.png` e `evidencias/hoje-barra-na-
 2. **Hover em bloco:** cada folder acende como botão separado.
 3. **Nada liga a barra ao conteúdo:** faixa sem borda, linha solta 45 px abaixo.
 4. **Arrastar não flui** (relato e print dela): a vizinha só se mexe na borda, e a cópia translúcida fica por cima.
-5. **Soltar no mesmo lugar abre popup de salvar** (relato dela). Não reproduzi: o arrasto nativo do HTML não responde a evento simulado pela automação do Chrome.
+5. **Soltar no mesmo lugar abre popup de salvar a ordem para todos** (relato dela: owner arrasta, mexe a folder e solta no lugar de origem; o popup aparece mesmo sem mudança). Não reproduzi: o arrasto nativo do HTML não responde a evento simulado pela automação do Chrome.
 6. **"+ ⌄" com 1 item:** 2 cliques para criar folder.
 7. **Excluir em folder do sistema:** não testei o que acontece, para não mexer em dado do workspace.
 
