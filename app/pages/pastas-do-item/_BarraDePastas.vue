@@ -155,8 +155,13 @@ function aoMover(e: PointerEvent) {
   })
   inicio.alvo = alvo
   const passo = rects[de]!.width + vao.value
+  const iAtiva = visiveis.value.findIndex(p => p.id === ativa.value)
   els.forEach((el, i) => {
     if (i === de) {
+      if (i === iAtiva) {
+        menuSemTransicao.value = true
+        deslocMenu.value = desloc
+      }
       el.style.transition = 'none'
       el.style.transform = `translateX(${desloc}px)`
       el.dataset.arrastando = 'true'
@@ -167,6 +172,10 @@ function aoMover(e: PointerEvent) {
     if (de < alvo && i > de && i <= alvo) mover = -passo
     if (de > alvo && i < de && i >= alvo) mover = passo
     el.style.transform = mover ? `translateX(${mover}px)` : ''
+    if (i === iAtiva) {
+      menuSemTransicao.value = false
+      deslocMenu.value = mover
+    }
   })
 }
 
@@ -185,6 +194,7 @@ function aoSoltar() {
     delete el.dataset.arrastando
   })
   requestAnimationFrame(() => els.forEach((el) => { el.style.transition = '' }))
+  menuSemTransicao.value = true
   arrastando.value = null
   if (alvo !== de) mover(id, visiveis.value[alvo]!.id)
   nextTick(posicionarMenu)
@@ -295,6 +305,9 @@ function abrirEscondida(p: Pasta) {
  * esse espaço (`pr-8`).
  */
 const posMenu = ref<{ left: number, top: number, height: number } | null>(null)
+/** Durante o arrasto, a seta anda junto com a aba aberta (arrastada ou vizinha que desliza). */
+const deslocMenu = ref(0)
+const menuSemTransicao = ref(false)
 
 function posicionarMenu() {
   if (props.estilo === 'hoje' || !barra.value) {
@@ -309,6 +322,8 @@ function posicionarMenu() {
   const base = barra.value.getBoundingClientRect()
   const r = el.getBoundingClientRect()
   posMenu.value = { left: r.right - base.left - 30, top: r.top - base.top, height: r.height }
+  deslocMenu.value = 0
+  requestAnimationFrame(() => { menuSemTransicao.value = false })
 }
 
 watch([ativa, visiveis, () => props.estilo, larguraDisponivel], () => nextTick(() => requestAnimationFrame(posicionarMenu)))
@@ -555,7 +570,7 @@ const aparencia = computed(() => {
       </UContextMenu>
 
       <UDropdownMenu
-        v-if="posMenu && pastaAtivaObj && !arrastando"
+        v-if="posMenu && pastaAtivaObj"
         :items="acoesDe(pastaAtivaObj)"
         :content="{ align: 'start', sideOffset: 4 }"
         :ui="{ content: 'w-60', itemDescription: 'whitespace-normal' }"
@@ -565,8 +580,13 @@ const aparencia = computed(() => {
           color="neutral"
           variant="ghost"
           size="xs"
-          class="absolute z-20 size-6 justify-center p-0 text-muted hover:text-highlighted"
-          :style="{ left: `${posMenu.left}px`, top: `${posMenu.top + posMenu.height / 2 - 12 - (estilo === 'sublinhado' ? 0 : 0)}px` }"
+          class="absolute z-[5] size-6 justify-center p-0 text-muted hover:text-highlighted"
+          :style="{
+            left: `${posMenu.left}px`,
+            top: `${posMenu.top + posMenu.height / 2 - 12}px`,
+            transform: `translateX(${deslocMenu}px)`,
+            transition: menuSemTransicao ? 'none' : 'transform 200ms ease-out',
+          }"
           :aria-label="t.barra.opcoes(nomeDe(pastaAtivaObj))"
           @pointerdown.stop
         />

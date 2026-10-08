@@ -56,7 +56,9 @@ A folder vira aba: texto sobre uma linha de base que é a borda de cima do conte
 
 - **Pedido (literal):** "na hora de arrastar no modelo sublinhado, nao faça parecer um \"quadradinho\" a aba. simplesmente arraste o espaço dela + a barra de baixo, sem \"subir\" e colocar sombra [...] mas mantenha essa logica de \"passou da metade, ja troca de lugar\", como ta hoje, e passando por cima das barras ao lado"
 - **Mudou:** no Sublinhado, a folder arrastada perde a ficha (contorno, sombra, canto e elevação). Desliza só o espaço dela, com o fundo da página para cobrir as vizinhas, e a barra embaixo: rosa forte na aberta, rosa fraco na fechada
-- **Fronteira:** muda só a aparência do arrasto no Sublinhado; a troca na metade, a camada por cima e os outros 2 estilos ficam como na rodada 2
+- **Pedido (literal), na mesma rodada:** "na hora q eu começo a arrastar a aba em que eu to, some a setinha de dropdown. nao pode sumir. fica estranho"
+- **Mudou:** a seta ⌄ da folder aberta fica visível no arrasto e anda junto com ela, quando ela é a arrastada e quando é a vizinha que desliza. Fica numa camada abaixo da folder arrastada, para não parecer dela quando outra passa por cima
+- **Fronteira:** muda só a aparência do arrasto no Sublinhado e a seta durante o arrasto; a troca na metade, a camada por cima e os outros 2 estilos ficam como na rodada 2
 - **Ver:** `http://localhost:3000/pastas-do-item?estilo=sublinhado` · `evidencias/proposta-arrastar.png`, `proposta-arrastar-a-aberta.png`
 
 ### Como a barra foi montada
