@@ -71,6 +71,10 @@ A folder vira aba: texto sobre uma linha de base que é a borda de cima do conte
 - **Mudou:** arrastando a folder aberta, a seta ⌄ fica por cima da aba (antes, o fundo da aba arrastada a cobria). Quando outra folder passa por cima da aberta, a seta continua por baixo. Conferido pelo DOM (`elementFromPoint` no ponto da seta) nos 2 casos
 - **Pedido (literal), na mesma rodada:** "o requisito abrir folder (RA) nem precisa citar. pq ja ta assim hoje no real."
 - **Mudou:** saiu o grupo RA (abrir no clique, botão direito, teclado) do `REQUISITOS.md`, porque o produto já se comporta assim
+- **Pedido (literal), na mesma rodada:** "navegaçao por teclado é algo que nao tem hoje mas tem que ter nos requisitos."
+- **Mudou:** `REQUISITOS.md` ganhou o grupo Teclado (RT-01 a RT-10): entrar pela folder aberta, setas, Home, End, Enter e Espaço, reordenar com Ctrl + Shift + seta, anúncio para leitor de tela, menu e "+N" sem mouse. O endereço ficou num grupo só dele (RE-01)
+- **Mudou:** no protótipo, a barra se remonta quando a ordem muda, para as setas seguirem a ordem da tela (antes seguiam a ordem de quando a barra montou), e o foco volta para a folder movida pelo teclado
+- **Não deu:** testar o Tab real. Por quê: a tecla Tab da automação não move o foco nesta janela; setas, Home, End, Enter, Espaço e Ctrl + Shift + seta foram conferidos por evento de teclado
 - **Descartado:** Aba de navegador. Motivo: ela achou ruim
 - **Ver:** `http://localhost:3000/pastas-do-item` · `REQUISITOS.md`
 

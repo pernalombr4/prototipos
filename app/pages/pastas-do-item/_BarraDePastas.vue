@@ -200,6 +200,7 @@ function aoSoltar() {
 
 /** Move a folder `id` para o lugar onde está `destino`, na lista inteira. */
 function mover(id: string, destino: string) {
+  const tinhaFoco = !!barra.value?.contains(document.activeElement)
   const anterior = pastas.value
   const lista = [...anterior]
   const de = lista.findIndex(p => p.id === id)
@@ -210,6 +211,13 @@ function mover(id: string, destino: string) {
   pastas.value = lista
   anuncio.value = props.t.barra.movida(nomeDe(p!), para + 1)
   emit('reordenada', anterior)
+  // Reordenar pelo teclado: depois de remontar, o foco volta para a folder movida.
+  if (tinhaFoco) {
+    nextTick(() => {
+      const els = gatilhos()
+      els[visiveis.value.findIndex(x => x.id === id)]?.focus()
+    })
+  }
 }
 
 /** Teclado: Ctrl + Shift + seta move a folder ativa. */
@@ -419,7 +427,9 @@ const aparencia = computed(() => {
     >
       <UContextMenu :items="itensDoMenu" :ui="{ content: 'w-60', itemDescription: 'whitespace-normal' }">
         <div @contextmenu.capture="aoBotaoDireito">
+          <!-- A chave remonta a barra quando a ordem muda: o foco do teclado (setas, Home, End) segue a ordem da tela. -->
           <UTabs
+            :key="visiveis.map(p => p.id).join()"
             v-model="ativa"
             :items="itensDasAbas"
             :variant="aparencia.variant"

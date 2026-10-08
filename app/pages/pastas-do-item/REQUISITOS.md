@@ -17,7 +17,8 @@
 | Arrasto (RD) | A folder segue o mouse, troca de lugar na metade da vizinha e salva sozinha, com Desfazer |
 | Menu da folder (RM) | Seta ⌄ visível na aberta, botão direito e clique duplo |
 | Criar e excesso (RX) | "+" cria direto; "+N" só aparece quando sobra folder e tem busca |
-| Endereço e teclado (RE) | Folder aberta no endereço; teclado reordena |
+| Teclado (RT) | Hoje não existe. A barra passa a funcionar inteira pelo teclado: entrar, navegar, abrir, reordenar e abrir o menu |
+| Endereço (RE) | Folder aberta no endereço |
 
 ## Aparência (RV)
 
@@ -79,18 +80,32 @@
 | RX-06 | A folder aberta deve estar sempre na barra; se não couber, ocupa o lugar da última que cabia. | A aberta nunca fica só dentro do "+N". |
 | RX-07 | O cálculo de quantas cabem deve considerar a largura real de cada folder e reservar o espaço da seta ⌄ e dos botões da ponta. | Redimensionar a janela ou abrir na barra lateral recalcula sem cortar folder pela metade. |
 
-## Endereço e teclado (RE)
+## Teclado (RT)
+
+Hoje a barra não tem navegação por teclado. Estes requisitos valem para a tela do item e para a barra lateral.
+
+| ID | Requisito | Critério de aceite |
+|---|---|---|
+| RT-01 | Tab deve entrar na barra pela folder aberta, e Shift + Tab deve sair dela. | Vindo do painel do item, o primeiro Tab para na folder aberta, não na primeira. |
+| RT-02 | Seta para a direita e seta para a esquerda devem mover o foco entre as folders visíveis, sem abri-las. Da última, a seta para a direita volta para a primeira. | O conteúdo não muda enquanto o foco anda. |
+| RT-03 | Home e End devem levar o foco à primeira e à última folder visível. | End para na última antes do "+N". |
+| RT-04 | Enter ou Espaço devem abrir a folder em foco. | O traço forte passa para a folder em foco. |
+| RT-05 | Ctrl + Shift + seta para a esquerda ou para a direita deve mover a folder aberta 1 posição, com o mesmo salvamento de RD-08, e manter o foco nela. | A ordem muda e o foco continua na folder movida. |
+| RT-06 | Depois de reordenar, pelo mouse ou pelo teclado, o foco deve seguir a ordem nova da tela. | Após mover Visão Geral para depois de Comentários, a seta para a esquerda a partir de Visão Geral vai para Comentários. |
+| RT-07 | Toda mudança de posição deve ser anunciada ao leitor de tela (exemplo: "Notas movida para a posição 2."). | O anúncio sai numa região `aria-live`. |
+| RT-08 | A seta ⌄ da folder aberta, o "+N" e o "+" devem ser alcançáveis pelo Tab e abrir com Enter. Esc fecha o menu e devolve o foco ao botão que o abriu. | O menu da folder abre sem mouse. |
+| RT-09 | Na lista do "+N", digitar filtra, as setas para cima e para baixo andam pela lista e Enter abre a folder escolhida (RX-05). | Dá para abrir uma folder escondida só pelo teclado. |
+| RT-10 | A barra deve ter `role="tablist"` e cada folder `role="tab"`, com anel de foco visível em todas as teclas acima. | O anel aparece só na navegação pelo teclado, não no clique. |
+
+## Endereço (RE)
 
 | ID | Requisito | Critério de aceite |
 |---|---|---|
 | RE-01 | A folder aberta deve ir para o endereço da página (exemplo: `?folder=anexos`). | Recarregar mantém a folder; o link leva direto a ela. |
-| RE-02 | Ctrl + Shift + seta para a esquerda ou direita deve mover a folder aberta 1 posição, com o mesmo salvamento de RD-08. | A ordem muda pelo teclado. |
-| RE-03 | Toda mudança de posição deve ser anunciada ao leitor de tela (exemplo: "Notas movida para a posição 2."). | O anúncio sai numa região `aria-live`. |
-| RE-04 | A barra deve manter `role="tablist"` e `role="tab"`, com foco visível. | O anel de foco aparece ao navegar pelo teclado. |
 
 ## Como o protótipo monta, para referência
 
-- Barra: `UTabs` do Nuxt UI, `variant="link"`, ativação manual (`activation-mode="manual"`), aparência só pela prop `ui` com tokens.
+- Barra: `UTabs` do Nuxt UI, `variant="link"`, ativação manual (`activation-mode="manual"`), aparência só pela prop `ui` com tokens. RT-01 a RT-04 e RT-10 vêm prontos do `UTabs` (Reka UI); RT-06 pede remontar a lista quando a ordem muda, porque o Reka guarda a ordem de quando montou.
 - Traço da aberta e do hover: pseudo-elemento `after` do próprio gatilho, no lugar do indicador do `UTabs` (por causa de RV-08).
 - Abrir no clique: a barra segura o mousedown dos gatilhos e abre a folder no `click` (é o que já acontece no produto; garante RD-06).
 - Arrasto: eventos de ponteiro sobre os gatilhos. No produto, o `useSortable` (`@vueuse/integrations` com `sortablejs`) serve, desde que cumpra RD-01 a RD-10.
