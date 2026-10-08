@@ -26,7 +26,7 @@ A folder vira aba: texto sobre uma linha de base que é a borda de cima do conte
 | 2 | Cada folder é um chip com contorno, sombra e 4 px de espaço | Texto e ícone soltos, sem contorno nem sombra | Tirei a caixa de todas. O que separa uma folder da outra é o espaço do texto; no Navegador, um fio vertical entre as inativas, que some ao lado da ativa |
 | 3 | Hover acende o chip inteiro, como botão | Sublinhado: texto mais forte e traço rosa fraco crescendo sobre a linha de base. Navegador: a aba inteira em cinza | Sem fundo no Sublinhado: o hover é uma prévia do traço da ativa, na cor de destaque mais fraca (rodada 2) |
 | 4 | Barra e conteúdo não se tocam: faixa sem borda, linha solta 45 px abaixo | Linha de base contínua de ponta a ponta; o conteúdo começa logo abaixo dela | A linha de base virou a borda de cima do conteúdo. A linha solta da Visão Geral saiu, porque repetia a separação |
-| 5 | Arrasto nativo: cópia translúcida por cima, original parada, vizinha troca só na borda | A própria folder segue o mouse como ficha leve, por cima das vizinhas; a vizinha desliza assim que o centro da arrastada passa da metade dela; a aberta leva o traço junto | Arrasto por ponteiro: depois de 5 px a folder engata, acompanha o mouse e as vizinhas abrem espaço com transição, como as abas do Chrome. Arrastar não abre a folder (rodada 2) |
+| 5 | Arrasto nativo: cópia translúcida por cima, original parada, vizinha troca só na borda | A própria folder segue o mouse por cima das vizinhas (no Sublinhado, só o espaço dela e a barra, sem ficha nem sombra); a vizinha desliza assim que o centro da arrastada passa da metade dela; a aberta leva o traço junto | Arrasto por ponteiro: depois de 5 px a folder engata, acompanha o mouse e as vizinhas abrem espaço com transição, como as abas do Chrome. Arrastar não abre a folder (rodada 2) |
 | 6 | Soltar no mesmo lugar abre popup de salvar | Soltar no mesmo lugar não faz nada; ordem nova salva sozinha, com aviso "Ordem das folders salva." e Desfazer | A barra compara a posição de saída e a de chegada; só avisa quando muda. Sem popup de confirmação: o Desfazer cobre o arrependimento |
 | 7 | "+ ⌄" abre menu com 1 item (Nova folder) | "+" cria a folder direto; "+N ⌄" só aparece quando sobra folder | Separei as 2 ações: criar é 1 clique; ver as escondidas é outro botão, que some quando cabem todas |
 | 8 | Menu "+N" com lista, busca e alça de arrasto | Menu "+N" com busca (CommandPalette), contador e "⋯" na linha em foco | Usei o padrão Popover + CommandPalette do Nuxt UI: busca, teclado e mensagem "Nenhuma folder encontrada." vêm prontos. Escolher uma escondida a traz para a barra e a abre |
@@ -51,6 +51,13 @@ A folder vira aba: texto sobre uma linha de base que é a borda de cima do conte
 - **Fronteira:** muda hover, ativação e arrasto da barra; não muda o resto
 - **Descartado:** traço deslizante entre folders (indicador do `UTabs`). Motivo: ele não acompanha a aba arrastada
 - **Ver:** `http://localhost:3000/pastas-do-item?estilo=sublinhado` · `evidencias/proposta-hover.png`, `proposta-arrastar.png`, `proposta-arrastar-a-aberta.png`
+
+## Rodada 3 · 2026-10-08
+
+- **Pedido (literal):** "na hora de arrastar no modelo sublinhado, nao faça parecer um \"quadradinho\" a aba. simplesmente arraste o espaço dela + a barra de baixo, sem \"subir\" e colocar sombra [...] mas mantenha essa logica de \"passou da metade, ja troca de lugar\", como ta hoje, e passando por cima das barras ao lado"
+- **Mudou:** no Sublinhado, a folder arrastada perde a ficha (contorno, sombra, canto e elevação). Desliza só o espaço dela, com o fundo da página para cobrir as vizinhas, e a barra embaixo: rosa forte na aberta, rosa fraco na fechada
+- **Fronteira:** muda só a aparência do arrasto no Sublinhado; a troca na metade, a camada por cima e os outros 2 estilos ficam como na rodada 2
+- **Ver:** `http://localhost:3000/pastas-do-item?estilo=sublinhado` · `evidencias/proposta-arrastar.png`, `proposta-arrastar-a-aberta.png`
 
 ### Como a barra foi montada
 

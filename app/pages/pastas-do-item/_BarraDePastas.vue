@@ -338,10 +338,11 @@ const aparencia = computed(() => {
             'data-[state=inactive]:after:bg-primary/35 hover:data-[state=inactive]:after:scale-x-100',
             'data-[state=active]:after:bg-primary data-[state=active]:after:scale-x-100',
             'data-[state=active]:font-semibold data-[state=active]:pr-8',
-            // Arrastando: a aba vira uma ficha leve, por cima das vizinhas (como no "Hoje"), e o traço vai junto.
-            'before:absolute before:inset-x-0 before:inset-y-1.5 before:-z-10 before:rounded-md before:transition-[background-color,box-shadow]',
+            // Arrastando: sem ficha, sem sombra, sem subir. Desliza o espaço da aba (fundo da página, que cobre
+            // as vizinhas ao passar por cima) com a barra embaixo: rosa forte na aberta, rosa fraco na fechada.
+            'before:absolute before:inset-0 before:-z-10',
             'data-[arrastando=true]:z-10 data-[arrastando=true]:cursor-grabbing data-[arrastando=true]:text-highlighted',
-            'data-[arrastando=true]:before:bg-default data-[arrastando=true]:before:shadow-md data-[arrastando=true]:before:ring data-[arrastando=true]:before:ring-default',
+            'data-[arrastando=true]:before:bg-default data-[arrastando=true]:after:scale-x-100',
           ].join(' '),
           leadingIcon: 'size-4',
           trailingBadge: 'rounded-full px-1.5 min-w-5 justify-center bg-elevated ring-0 text-muted group-data-[state=active]:bg-primary/10 group-data-[state=active]:text-primary',
