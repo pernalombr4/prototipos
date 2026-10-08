@@ -80,6 +80,8 @@ A folder vira aba: texto sobre uma linha de base que é a borda de cima do conte
 - **Mudou:** requisito RV-10 (tooltip da barra: "Arraste para reordenar. Clique com o botão direito para mais opções.") e o tooltip "Nova folder" no RX-01
 - **Pedido (literal), na mesma rodada:** "tem que explicar que hoje se eu arrasto e fico ali brincando com a folder, se soltar no mesmo lugar vem popup de salvamento pra todos (eu sendo owner)"
 - **Mudou:** RD-07 explica o comportamento de hoje (popup para salvar a ordem para todos, para owner, mesmo sem mudança); a pendência "Escopo da ordem" registra que owner salva para todos e o que falta decidir
+- **Pedido (literal), na mesma rodada:** "RD-10 pode tirar esse requisito"
+- **Mudou:** saiu o RD-10 (camada da seta ⌄ no arrasto) do `REQUISITOS.md`; o protótipo continua igual
 - **Descartado:** Aba de navegador. Motivo: ela achou ruim
 - **Ver:** `http://localhost:3000/pastas-do-item` · `REQUISITOS.md`
 

@@ -56,7 +56,6 @@
 | RD-07 | Soltar no mesmo lugar não deve fazer nada: sem popup, sem aviso, sem gravação. Hoje, quem é owner pode arrastar, mexer a folder para lá e para cá e soltar no lugar de origem: mesmo sem mudar a ordem, aparece o popup para salvar a ordem para todos. | Arrastar, mexer e voltar ao lugar de origem não mostra nada, para owner ou não. |
 | RD-08 | Soltar em outro lugar deve salvar a ordem sozinho e mostrar o aviso "Ordem das folders salva." com o botão Desfazer, por alguns segundos. | Desfazer volta a ordem anterior. Não existe popup de confirmação. |
 | RD-09 | A seta ⌄ da folder aberta (RM-01) deve continuar visível no arrasto e acompanhar a aba, quando ela é a arrastada e quando é a vizinha que desliza. | A seta nunca some nem fica no lugar antigo. |
-| RD-10 | Quando a arrastada é a aberta, a seta ⌄ deve ficar por cima dela. Quando outra folder passa por cima da aberta, a seta deve ficar por baixo da arrastada. | Arrastando a aberta, a seta continua visível. Outra folder passando por cima da aberta cobre a seta. |
 
 ## Menu da folder (RM)
 
@@ -109,7 +108,7 @@ Hoje a barra não tem navegação por teclado. Estes requisitos valem para a tel
 - Barra: `UTabs` do Nuxt UI, `variant="link"`, ativação manual (`activation-mode="manual"`), aparência só pela prop `ui` com tokens. RT-01 a RT-04 e RT-10 vêm prontos do `UTabs` (Reka UI); RT-06 pede remontar a lista quando a ordem muda, porque o Reka guarda a ordem de quando montou.
 - Traço da aberta e do hover: pseudo-elemento `after` do próprio gatilho, no lugar do indicador do `UTabs` (por causa de RV-08).
 - Abrir no clique: a barra segura o mousedown dos gatilhos e abre a folder no `click` (é o que já acontece no produto; garante RD-06).
-- Arrasto: eventos de ponteiro sobre os gatilhos. No produto, o `useSortable` (`@vueuse/integrations` com `sortablejs`) serve, desde que cumpra RD-01 a RD-10.
+- Arrasto: eventos de ponteiro sobre os gatilhos. No produto, o `useSortable` (`@vueuse/integrations` com `sortablejs`) serve, desde que cumpra RD-01 a RD-09.
 - Menus: `UContextMenu` (botão direito), `UDropdownMenu` (seta ⌄ e "⋯"), `UPopover` com `UCommandPalette` ("+N"), `UModal` (Nova, Editar, Excluir) e `useToast` (avisos com Desfazer).
 
 ## Fora destes requisitos
