@@ -38,6 +38,20 @@ A folder vira aba: texto sobre uma linha de base que é a borda de cima do conte
 | 14 | Ativa que não cabe: não conferido | A ativa sempre aparece; entra no lugar da última que cabia | A régua invisível mede cada folder e reserva espaço para a ativa e para a seta dela |
 | 15 | Reordenar pelo teclado: não conferido | Ctrl + Shift + seta move a folder ativa, com aviso para leitor de tela | Mesma lógica do arrasto, pelo teclado |
 
+## Rodada 2 · 2026-10-08
+
+- **Pedido (literal):** "na proposta do sublinhado, o hover ainda ta fazendo parecer um bloco [...] pra mim parece que deveria talvez só acender o texto, sem fazer background, ou isso estar mais integrado com a linha de base"; "ao clicar com botao direito numa folder que nao está aberta, o usuário nao deve ser redirecionado pra ela"; "o modo como voce desenhou o arraste na versao \"hoje\" ta melhor [...] tirando o fato de que ta passando por tras [...] o da versao sublinhada ta estranho pq a linha da base nao vem junto, e parece um destaque muito forte"
+- **Pedido (literal), na mesma rodada:** "pode botar o hover com texto e traço, nem bote a opçao só texto [...] o hover deve aplicar levemente a cor de destaque [...] o hover deve colocar o texto mais forte e a barra num rosa mais fraco"
+- **Mudou:** hover do Sublinhado sem fundo: o texto fica mais forte (`text-highlighted`) e um traço de 2 px na cor de destaque a 35 % (`bg-primary/35`) cresce do centro sobre a linha de base, no lugar onde fica o traço da ativa
+- **Descartado:** hover só no texto. Motivo: escolha dela; o traço mostra que a folder é clicável
+- **Mudou:** a folder abre no clique (soltar sem arrastar), com Enter ou com Espaço. Botão direito e arrasto não trocam a folder. Motivo: o `TabsTrigger` ativa no mousedown; a barra segura o mousedown e ativa no clique
+- **Mudou:** o traço da ativa é da própria aba, não mais o indicador do `UTabs`; ao arrastar a ativa, o traço vai junto. Ao trocar de folder, o traço cresce do centro em vez de deslizar
+- **Mudou:** arrastando, a folder vira uma ficha leve (fundo da página, contorno fino, sombra média) por cima das vizinhas, nos 3 estilos; a fechada continua com o texto neutro, sem a cor da ativa
+- **Mudou:** a troca de folder anima o espaço da seta ⌄ (padding), para as vizinhas deslizarem em vez de pular
+- **Fronteira:** muda hover, ativação e arrasto da barra; não muda o resto
+- **Descartado:** traço deslizante entre folders (indicador do `UTabs`). Motivo: ele não acompanha a aba arrastada
+- **Ver:** `http://localhost:3000/pastas-do-item?estilo=sublinhado`
+
 ### Como a barra foi montada
 
 - Os 3 estilos são o mesmo `UTabs` do Nuxt UI (`variant="link"` nas propostas, `pill` na cópia de hoje), mudando só a prop `ui` com token semântico. Consultas ao MCP `nuxt-ui`: `search-components` ("tabs", "right click menu", "sortable drag reorder"), `get-component-metadata` (Tabs: `variant`, `activationMode`, `content`, slot `list-trailing`), `get-example` (PopoverCommandPalette, TabsRouteQuery, AccordionDragAndDrop), `search-composables` (useToast).

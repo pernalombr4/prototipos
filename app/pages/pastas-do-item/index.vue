@@ -211,7 +211,7 @@ const estilos = computed(() => [
                 v-model:ativa="ativa"
                 :t="t"
                 :estilo="estilo"
-                @editar="editar"
+                    @editar="editar"
                 @ocultar="ocultar"
                 @excluir="pedirExclusao"
                 @nova="nova"

@@ -214,6 +214,23 @@ function aoTeclar(e: KeyboardEvent) {
   mover(ativa.value, pastas.value[j]!.id)
 }
 
+/**
+ * A folder abre no CLIQUE (soltar sem arrastar), não no mousedown.
+ * O `TabsTrigger` ativa no mousedown; aqui o mousedown para na barra, para que
+ * arrastar uma folder fechada não a abra e o botão direito nunca troque de
+ * folder. Enter e Espaço continuam abrindo (ativação manual do UTabs).
+ */
+function segurarAtivacao(e: MouseEvent) {
+  if ((e.target as HTMLElement).closest('[data-slot=trigger]')) e.stopPropagation()
+}
+
+function aoClicar(e: MouseEvent) {
+  if (e.button !== 0) return
+  const el = (e.target as HTMLElement).closest<HTMLElement>('[data-slot=trigger]')
+  const p = el ? visiveis.value[gatilhos().indexOf(el)] : undefined
+  if (p) ativa.value = p.id
+}
+
 /** Clique duplo na folder abre Editar (Notion, Airtable, abas de planilha). Só nos estilos propostos. */
 function aoClicarDuasVezes(e: MouseEvent) {
   if (props.estilo === 'hoje') return
@@ -309,16 +326,22 @@ const aparencia = computed(() => {
         ui: {
           root: 'gap-0',
           list: 'gap-1 px-3 pb-0 pt-1 border-default overflow-x-clip',
-          indicator: 'h-0.5 -bottom-px rounded-full',
+          // O traço não é o indicador do UTabs: é da própria aba (after), para ir junto quando ela é arrastada.
+          indicator: 'hidden',
           trigger: [
-            'px-2.5 py-2.5 my-0 gap-2 text-sm cursor-pointer select-none',
-            'transition-[color,background-color,transform]',
+            'px-2.5 py-2.5 my-0 gap-2 text-sm cursor-pointer select-none isolate',
+            'transition-[color,padding,transform] duration-200 ease-out',
             'data-[state=inactive]:text-muted hover:data-[state=inactive]:text-highlighted',
-            // o fundo do hover fica DENTRO da área do texto, sem tocar a linha de base
-            'before:absolute before:inset-x-0 before:inset-y-1.5 before:-z-10 before:rounded-md before:transition-colors',
-            'hover:data-[state=inactive]:before:bg-elevated isolate',
+            // Hover sem fundo: o texto fica mais forte e um traço rosa fraco cresce sobre a linha de base,
+            // no lugar do traço da ativa (prévia da seleção, na cor de destaque).
+            'after:absolute after:inset-x-1 after:-bottom-px after:h-0.5 after:rounded-full after:scale-x-0 after:transition-all after:duration-200 after:ease-out',
+            'data-[state=inactive]:after:bg-primary/35 hover:data-[state=inactive]:after:scale-x-100',
+            'data-[state=active]:after:bg-primary data-[state=active]:after:scale-x-100',
             'data-[state=active]:font-semibold data-[state=active]:pr-8',
-            'data-[arrastando=true]:z-10 data-[arrastando=true]:cursor-grabbing data-[arrastando=true]:before:bg-default data-[arrastando=true]:before:shadow-lg data-[arrastando=true]:before:ring data-[arrastando=true]:before:ring-default',
+            // Arrastando: a aba vira uma ficha leve, por cima das vizinhas (como no "Hoje"), e o traço vai junto.
+            'before:absolute before:inset-x-0 before:inset-y-1.5 before:-z-10 before:rounded-md before:transition-[background-color,box-shadow]',
+            'data-[arrastando=true]:z-10 data-[arrastando=true]:cursor-grabbing data-[arrastando=true]:text-highlighted',
+            'data-[arrastando=true]:before:bg-default data-[arrastando=true]:before:shadow-md data-[arrastando=true]:before:ring data-[arrastando=true]:before:ring-default',
           ].join(' '),
           leadingIcon: 'size-4',
           trailingBadge: 'rounded-full px-1.5 min-w-5 justify-center bg-elevated ring-0 text-muted group-data-[state=active]:bg-primary/10 group-data-[state=active]:text-primary',
@@ -334,10 +357,10 @@ const aparencia = computed(() => {
           trigger: [
             'relative -mb-px px-3 py-2 gap-2 text-sm cursor-pointer select-none',
             'rounded-t-lg rounded-b-none border border-transparent',
-            'transition-[color,background-color,transform]',
+            'transition-[color,background-color,padding,transform] duration-200 ease-out',
             'data-[state=inactive]:text-muted hover:data-[state=inactive]:text-highlighted hover:data-[state=inactive]:bg-accented/60',
             'data-[state=active]:bg-default data-[state=active]:text-highlighted data-[state=active]:font-semibold data-[state=active]:pr-8',
-            'data-[arrastando=true]:z-10 data-[arrastando=true]:cursor-grabbing data-[arrastando=true]:shadow-lg data-[arrastando=true]:bg-default data-[arrastando=true]:border-default',
+            'data-[arrastando=true]:z-10 data-[arrastando=true]:cursor-grabbing data-[arrastando=true]:shadow-md data-[arrastando=true]:bg-default data-[arrastando=true]:border-default',
             // a borda de baixo transparente deixa o fundo da aba cobrir a linha de base: é aí que ela "funde"
             'data-[state=active]:border-default data-[state=active]:border-b-transparent data-[state=active]:z-[1]',
             // o traço fino de cor no topo da ativa, como a aba do navegador com foco
@@ -361,6 +384,8 @@ const aparencia = computed(() => {
           trigger: [
             'grow-0 h-7 rounded-md px-2 py-0 gap-1.5 text-xs shadow-xs ring ring-inset cursor-grab select-none',
             'transition-[color,background-color,box-shadow,transform]',
+            // o arrasto é do protótipo (a preview usa o arrasto nativo do HTML); aqui a ficha passa por cima
+            'data-[arrastando=true]:z-10 data-[arrastando=true]:shadow-md data-[arrastando=true]:cursor-grabbing',
             'data-[state=inactive]:bg-default data-[state=inactive]:text-muted data-[state=inactive]:ring-0 hover:data-[state=inactive]:bg-accented',
             'data-[state=active]:bg-primary/10 data-[state=active]:font-semibold data-[state=active]:text-primary data-[state=active]:ring-primary/25',
           ].join(' '),
@@ -395,6 +420,8 @@ const aparencia = computed(() => {
       ref="barra"
       class="relative min-w-0"
       @pointerdown="aoPressionar"
+      @mousedown.capture="segurarAtivacao"
+      @click="aoClicar"
       @keydown="aoTeclar"
       @dblclick="aoClicarDuasVezes"
     >
