@@ -54,7 +54,7 @@ watch(() => [config.value.onlyoffice, config.value.word], ([oo, w]) => {
 })
 
 /** Um item sem documento, só para a pré-visualização. */
-const itemDePrevia = computed<ItemDoContrato>(() => ({ ...itens[1]!, data: { ...itens[1]!.data, minuta_do_contrato: null } }))
+const itemDePrevia = computed<ItemDoContrato>(() => ({ ...itens[0]!, data: { ...itens[0]!.data, minuta_do_contrato: null } }))
 
 const salvando = ref(false)
 async function salvar() {

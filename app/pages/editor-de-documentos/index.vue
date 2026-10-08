@@ -28,7 +28,7 @@ import JanelaDoWord from './_JanelaDoWord.vue'
 import PainelDeVersoes from './_PainelDeVersoes.vue'
 import ConfiguracaoDoCampo from './_ConfiguracaoDoCampo.vue'
 import Miniatura from './_Miniatura.vue'
-import { type Editor, type ItemDoContrato, type StatusDoContrato, EU, campoDoDocumento, categoria, workspace } from './mocks'
+import { type Editor, type ItemDoContrato, type StatusDoContrato, EU, campoDoDocumento, categoria, cenarios, workspace } from './mocks'
 import { type EstadoDaTela, hora, nomeCurto, useDocumentos } from './estado'
 import { textos } from './textos'
 import { abrirNoWordDoComputador } from './arquivos'
@@ -209,6 +209,21 @@ const itemDasVersoes = computed(() => (versoesAbertas.value !== null ? itemPorId
             :color="estadoDaTela === e ? 'primary' : 'neutral'"
             :variant="estadoDaTela === e ? 'soft' : 'ghost'"
             @click="estadoDaTela = e"
+          />
+        </div>
+      </span>
+
+      <span class="flex items-center gap-2">
+        <span class="text-xs font-semibold uppercase tracking-wider text-toned">{{ t.andaime.cenario }}</span>
+        <div class="flex flex-wrap rounded-md border border-default p-0.5">
+          <UButton
+            v-for="c in cenarios"
+            :key="c.chave"
+            :label="t.andaime.cenarios[c.chave]"
+            size="xs"
+            :color="itemAbertoId === c.itemId ? 'primary' : 'neutral'"
+            :variant="itemAbertoId === c.itemId ? 'soft' : 'ghost'"
+            @click="itemAbertoId = c.itemId"
           />
         </div>
       </span>

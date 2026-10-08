@@ -152,7 +152,9 @@ const trilho = [
             </UFormField>
 
             <!-- PROPOSTA: o campo Editor de Documentos -->
+            <!-- :key por item: cada contrato começa o campo do zero (aviso, criação em andamento) -->
             <CampoDocumento
+              :key="itemAberto.id"
               :item="itemAberto"
               :t="t"
               :idioma="idioma"

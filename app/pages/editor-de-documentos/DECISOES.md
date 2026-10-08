@@ -72,6 +72,16 @@ flowchart LR
 - **Fronteira:** muda só o texto e o acesso à simulação; não muda o fluxo nem a proposta.
 - **Ver:** `http://localhost:3000/editor-de-documentos` · `evidencias/proto-03-abrir-no-word.jpg`, `proto-04-painel-do-enspace-no-word.jpg`, `proto-08-cartao-com-simulacao-do-plugin.jpg`
 
+## Rodada 3 · 2026-10-08
+- **Pedido (literal):** "voce fez estados diferentes em itens diferentes. deixe os estados como possiveis de mudar na barra de gferramentas do prototipo [...] ou só diminua o número de itens deixando 1 pra cada cenario especifico. essa segunda opçao parece ate melhor"
+- **Mudou:** a lista tem 6 contratos, 1 por cenário: sem documento, DOCX com 1 versão, DOCX com 7 versões, PDF, outra pessoa no Word, editando junto no ENSPACE.
+- **Mudou:** o andaime ganhou o seletor "Cenário", que abre o contrato daquele cenário e marca qual está aberto.
+- **Mudou:** o campo é montado de novo a cada contrato (`:key` por item), para o "Avisar quando liberar" e a criação em andamento não passarem de um contrato para outro.
+- **Mudou:** saíram os contratos CTR-0131, CTR-0128 e CTR-0126 e os .docx deles; o CTR-0142 ficou com 1 versão.
+- **Fronteira:** muda só o mock e o andaime; não muda o campo, os editores nem a casca.
+- **Não deu:** print novo. Por quê: a janela do Chrome estava em segundo plano e o print não sai; conferi os 6 cenários pelo conteúdo da página.
+- **Ver:** `http://localhost:3000/editor-de-documentos`
+
 ## Achados do develop que não são desta demanda
 - Abrir a configuração do campo deu "Ocorreu um erro ao carregar os campos aninhados" até clicar em Recarregar.
 - Salvar o item gravou "R$ 0" num campo Valor Monetário que estava vazio.

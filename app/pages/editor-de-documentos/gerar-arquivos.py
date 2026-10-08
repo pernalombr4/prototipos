@@ -20,14 +20,11 @@ from docx.shared import Pt
 PASTA = Path(__file__).parent / 'arquivos'
 
 CONTRATOS = [
-    ('CTR-0142', 'Aurora Logística Ltda.', 'Consultoria em roteirização de frota', 184500, 12, 4),
+    ('CTR-0142', 'Aurora Logística Ltda.', 'Consultoria em roteirização de frota', 184500, 12, 1),
     ('CTR-0141', 'Vale Verde Alimentos S.A.', 'Fornecimento de embalagens recicláveis', 62000, 24, 1),
     ('CTR-0139', 'Ponto Norte Engenharia', 'Manutenção predial preventiva', 97300, 12, 2),
     ('CTR-0135', 'Grupo Sereno de Hotelaria', 'Licenciamento de software de reservas', 58900, 12, 2),
     ('CTR-0133', 'Cooperativa Agrícola Serra Alta do Sul de Minas Gerais', 'Assessoria contábil e fiscal', 36000, 12, 7),
-    ('CTR-0131', 'Lume Energia Solar', 'Instalação de usinas em telhado', 412000, 18, 1),
-    ('CTR-0128', 'Maré Alta Pescados', 'Transporte refrigerado', 128700, 12, 2),
-    ('CTR-0126', 'Instituto Raiz de Educação', 'Plataforma de ensino a distância', 75400, 24, 2),
 ]
 
 

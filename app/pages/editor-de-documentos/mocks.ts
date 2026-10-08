@@ -147,21 +147,15 @@ function item(id: number, reference: string, dados: DadosDoContrato, criado: Dat
 
 export type ItemDoContrato = ReturnType<typeof item>
 
+/**
+ * 1 contrato por cenário do campo, na ordem do seletor "Cenário" do andaime.
+ * Decisão da rodada 3: menos itens, cada um com um estado só, para quem
+ * revisa não precisar adivinhar qual contrato mostra o quê.
+ */
+export type Cenario = 'vazio' | 'docxPoucas' | 'docxMuitas' | 'pdf' | 'outraNoWord' | 'editandoJunto'
+
 export const itens: ItemDoContrato[] = [
-  item(142, 'CTR-0142', {
-    status: 'em-revisao',
-    contratante: 'Aurora Logística Ltda.',
-    objeto: 'Consultoria em roteirização de frota',
-    valor: 184500,
-    vigencia_meses: 12,
-    responsavel: 2,
-    minuta_do_contrato: arquivo('Minuta Aurora Logística.docx', '.docx', 48_200, [
-      { numero: 1, autor: 1, em: ha(6 * DIA), origem: 'modelo' },
-      { numero: 2, autor: 2, em: ha(5 * DIA + 3 * HORA), origem: 'onlyoffice' },
-      { numero: 3, autor: 4, em: ha(2 * DIA), origem: 'word' },
-      { numero: 4, autor: 2, em: ha(2 * HORA), origem: 'onlyoffice' },
-    ]),
-  }, ha(6 * DIA)),
+  // vazio: sem documento ainda
   item(141, 'CTR-0141', {
     status: 'rascunho',
     contratante: 'Vale Verde Alimentos S.A.',
@@ -171,41 +165,19 @@ export const itens: ItemDoContrato[] = [
     responsavel: 1,
     minuta_do_contrato: null,
   }, ha(3 * HORA)),
-  item(139, 'CTR-0139', {
+  // docxPoucas: .docx com 1 versão, ninguém com ele
+  item(142, 'CTR-0142', {
     status: 'em-revisao',
-    contratante: 'Ponto Norte Engenharia',
-    objeto: 'Manutenção predial preventiva',
-    valor: 97300,
-    vigencia_meses: 12,
-    responsavel: 3,
-    minuta_do_contrato: arquivo('Contrato de manutenção Ponto Norte.docx', '.docx', 71_900, [
-      { numero: 1, autor: 3, em: ha(9 * DIA), origem: 'envio' },
-      { numero: 2, autor: 3, em: ha(1 * DIA), origem: 'word' },
-    ], { editor: 'word-desktop', pessoa: 3, desde: ha(40 * MIN) }),
-  }, ha(9 * DIA)),
-  item(137, 'CTR-0137', {
-    status: 'assinado',
-    contratante: 'Casa Brava Móveis',
-    objeto: 'Locação de galpão em Contagem',
-    valor: 240000,
-    vigencia_meses: 36,
-    responsavel: 4,
-    minuta_do_contrato: arquivo('Contrato assinado Casa Brava.pdf', '.pdf', 312_400, [
-      { numero: 1, autor: 4, em: ha(21 * DIA), origem: 'envio' },
-    ]),
-  }, ha(30 * DIA)),
-  item(135, 'CTR-0135', {
-    status: 'em-revisao',
-    contratante: 'Grupo Sereno de Hotelaria',
-    objeto: 'Licenciamento de software de reservas',
-    valor: 58900,
+    contratante: 'Aurora Logística Ltda.',
+    objeto: 'Consultoria em roteirização de frota',
+    valor: 184500,
     vigencia_meses: 12,
     responsavel: 2,
-    minuta_do_contrato: arquivo('Licenciamento Grupo Sereno.docx', '.docx', 39_800, [
-      { numero: 1, autor: 2, em: ha(4 * DIA), origem: 'modelo' },
-      { numero: 2, autor: 2, em: ha(1 * DIA), origem: 'onlyoffice' },
-    ], { editor: 'onlyoffice', pessoa: 2, desde: ha(8 * MIN) }),
-  }, ha(4 * DIA)),
+    minuta_do_contrato: arquivo('Minuta Aurora Logística.docx', '.docx', 48_200, [
+      { numero: 1, autor: 2, em: ha(2 * HORA), origem: 'modelo' },
+    ]),
+  }, ha(2 * HORA)),
+  // docxMuitas: .docx com 7 versões de origens diferentes, nome longo
   item(133, 'CTR-0133', {
     status: 'aguardando-assinatura',
     contratante: 'Cooperativa Agrícola Serra Alta do Sul de Minas Gerais',
@@ -223,39 +195,54 @@ export const itens: ItemDoContrato[] = [
       { numero: 7, autor: 4, em: ha(7 * DIA), origem: 'onlyoffice' },
     ]),
   }, ha(15 * DIA)),
-  item(131, 'CTR-0131', {
-    status: 'rascunho',
-    contratante: 'Lume Energia Solar',
-    objeto: 'Instalação de usinas em telhado',
-    valor: 412000,
-    vigencia_meses: 18,
-    responsavel: 3,
-    minuta_do_contrato: null,
-  }, ha(1 * DIA)),
-  item(128, 'CTR-0128', {
+  // pdf: arquivo .pdf, só leitura
+  item(137, 'CTR-0137', {
     status: 'assinado',
-    contratante: 'Maré Alta Pescados',
-    objeto: 'Transporte refrigerado',
-    valor: 128700,
-    vigencia_meses: 12,
+    contratante: 'Casa Brava Móveis',
+    objeto: 'Locação de galpão em Contagem',
+    valor: 240000,
+    vigencia_meses: 36,
     responsavel: 4,
-    minuta_do_contrato: arquivo('Transporte refrigerado Maré Alta.docx', '.docx', 44_300, [
-      { numero: 1, autor: 4, em: ha(40 * DIA), origem: 'modelo' },
-      { numero: 2, autor: 1, em: ha(38 * DIA), origem: 'word' },
+    minuta_do_contrato: arquivo('Contrato assinado Casa Brava.pdf', '.pdf', 312_400, [
+      { numero: 1, autor: 4, em: ha(21 * DIA), origem: 'envio' },
     ]),
-  }, ha(40 * DIA)),
-  item(126, 'CTR-0126', {
+  }, ha(30 * DIA)),
+  // outraNoWord: outra pessoa com o documento reservado no Word
+  item(139, 'CTR-0139', {
     status: 'em-revisao',
-    contratante: 'Instituto Raiz de Educação',
-    objeto: 'Plataforma de ensino a distância',
-    valor: 75400,
-    vigencia_meses: 24,
-    responsavel: 1,
-    minuta_do_contrato: arquivo('Minuta Instituto Raiz.docx', '.docx', 41_000, [
-      { numero: 1, autor: 1, em: ha(3 * DIA), origem: 'branco' },
-      { numero: 2, autor: 1, em: ha(2 * DIA + 4 * HORA), origem: 'onlyoffice' },
-    ]),
-  }, ha(3 * DIA)),
+    contratante: 'Ponto Norte Engenharia',
+    objeto: 'Manutenção predial preventiva',
+    valor: 97300,
+    vigencia_meses: 12,
+    responsavel: 3,
+    minuta_do_contrato: arquivo('Contrato de manutenção Ponto Norte.docx', '.docx', 71_900, [
+      { numero: 1, autor: 3, em: ha(9 * DIA), origem: 'envio' },
+      { numero: 2, autor: 3, em: ha(1 * DIA), origem: 'word' },
+    ], { editor: 'word-desktop', pessoa: 3, desde: ha(40 * MIN) }),
+  }, ha(9 * DIA)),
+  // editandoJunto: outra pessoa editando no ENSPACE; dá para colaborar
+  item(135, 'CTR-0135', {
+    status: 'em-revisao',
+    contratante: 'Grupo Sereno de Hotelaria',
+    objeto: 'Licenciamento de software de reservas',
+    valor: 58900,
+    vigencia_meses: 12,
+    responsavel: 2,
+    minuta_do_contrato: arquivo('Licenciamento Grupo Sereno.docx', '.docx', 39_800, [
+      { numero: 1, autor: 2, em: ha(4 * DIA), origem: 'modelo' },
+      { numero: 2, autor: 2, em: ha(1 * DIA), origem: 'onlyoffice' },
+    ], { editor: 'onlyoffice', pessoa: 2, desde: ha(8 * MIN) }),
+  }, ha(4 * DIA)),
+]
+
+/** Qual contrato mostra cada cenário. */
+export const cenarios: { chave: Cenario, itemId: number }[] = [
+  { chave: 'vazio', itemId: 141 },
+  { chave: 'docxPoucas', itemId: 142 },
+  { chave: 'docxMuitas', itemId: 133 },
+  { chave: 'pdf', itemId: 137 },
+  { chave: 'outraNoWord', itemId: 139 },
+  { chave: 'editandoJunto', itemId: 135 },
 ]
 
 /* ------------------------------- modelos -------------------------------- */

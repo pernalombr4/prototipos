@@ -7,7 +7,7 @@
  * Nenhum texto daqui leva travessão. Regra 33.
  */
 import type { Idioma } from '~/composables/useIdioma'
-import type { Editor, OrigemDaVersao, StatusDoContrato } from './mocks'
+import type { Cenario, Editor, OrigemDaVersao, StatusDoContrato } from './mocks'
 
 export type EstadoDaTela = 'normal' | 'carregando' | 'erro' | 'somenteLeitura'
 
@@ -289,6 +289,8 @@ export interface Textos {
     titulo: string
     estado: string
     estados: Record<EstadoDaTela, string>
+    cenario: string
+    cenarios: Record<Cenario, string>
     suplemento: string
     configuracao: string
     wordDeVerdade: string
@@ -653,11 +655,20 @@ const pt: Textos = {
       erro: 'Erro',
       somenteLeitura: 'Só leitura',
     },
+    cenario: 'Cenário',
+    cenarios: {
+      vazio: 'Sem documento',
+      docxPoucas: 'DOCX, 1 versão',
+      docxMuitas: 'DOCX, 7 versões',
+      pdf: 'PDF',
+      outraNoWord: 'Outra pessoa no Word',
+      editandoJunto: 'Editando junto',
+    },
     suplemento: 'Suplemento no Word',
     configuracao: 'Configuração do campo',
     wordDeVerdade: 'Abrir o Word de verdade',
     reiniciar: 'Recomeçar',
-    dica: 'Cada contrato mostra um estado do campo. Para ver o plugin do Word, abra um contrato no Word e clique em Ver simulação do plugin do Word.',
+    dica: 'Cada cenário abre o contrato que mostra aquele estado do campo. Para ver o plugin do Word, abra um documento no Word e clique em Ver simulação do plugin do Word.',
     oQueMuda: 'Mostrar o que muda',
   },
 
@@ -1017,11 +1028,20 @@ const en: Textos = {
       erro: 'Error',
       somenteLeitura: 'Read only',
     },
+    cenario: 'Scenario',
+    cenarios: {
+      vazio: 'No document',
+      docxPoucas: 'DOCX, 1 version',
+      docxMuitas: 'DOCX, 7 versions',
+      pdf: 'PDF',
+      outraNoWord: 'Someone else in Word',
+      editandoJunto: 'Editing together',
+    },
     suplemento: 'Add-in in Word',
     configuracao: 'Field settings',
     wordDeVerdade: 'Open the real Word',
     reiniciar: 'Start over',
-    dica: 'Each contract shows a field state. To see the Word plugin, open a contract in Word and click See Word plugin simulation.',
+    dica: 'Each scenario opens the contract that shows that field state. To see the Word plugin, open a document in Word and click See Word plugin simulation.',
     oQueMuda: 'Show what changes',
   },
 
@@ -1381,11 +1401,20 @@ const es: Textos = {
       erro: 'Error',
       somenteLeitura: 'Solo lectura',
     },
+    cenario: 'Escenario',
+    cenarios: {
+      vazio: 'Sin documento',
+      docxPoucas: 'DOCX, 1 versión',
+      docxMuitas: 'DOCX, 7 versiones',
+      pdf: 'PDF',
+      outraNoWord: 'Otra persona en Word',
+      editandoJunto: 'Editando juntos',
+    },
     suplemento: 'Complemento en Word',
     configuracao: 'Configuración del campo',
     wordDeVerdade: 'Abrir el Word de verdad',
     reiniciar: 'Empezar de nuevo',
-    dica: 'Cada contrato muestra un estado del campo. Para ver el plugin de Word, abre un contrato en Word y haz clic en Ver simulación del plugin de Word.',
+    dica: 'Cada escenario abre el contrato que muestra ese estado del campo. Para ver el plugin de Word, abre un documento en Word y haz clic en Ver simulación del plugin de Word.',
     oQueMuda: 'Mostrar lo que cambia',
   },
 
