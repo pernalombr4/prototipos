@@ -545,7 +545,7 @@ async function tentarDeNovo() {
           <!-- o caso comum: Abrir com a escolha do editor -->
           <UFieldGroup v-else size="sm">
             <UButton :icon="iconeDoBotao" :label="rotuloDoBotao" :disabled="preview" @click="abrirPeloBotao" />
-            <UDropdownMenu v-if="editoresLigados.length > 1" :items="menuDeEditores" :content="{ align: 'end' }" :ui="{ content: 'w-72' }">
+            <UDropdownMenu v-if="editoresLigados.length > 1" :items="menuDeEditores" :content="{ align: 'end' }" :ui="{ content: 'w-80' }">
               <UButton icon="i-lucide-chevron-down" :aria-label="t.escolha.titulo" :disabled="preview" class="border-l border-inverted/20" />
             </UDropdownMenu>
           </UFieldGroup>

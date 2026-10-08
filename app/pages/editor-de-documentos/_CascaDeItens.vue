@@ -83,7 +83,7 @@ const menuRecolhido = ref(false)
 </script>
 
 <template>
-  <div class="flex h-dvh overflow-hidden bg-default">
+  <div class="flex h-full overflow-hidden bg-default">
     <!-- ───────────────── Menu lateral (cópia do develop) ───────────────── -->
     <aside
       class="relative hidden shrink-0 flex-col border-r border-default bg-elevated/40 transition-[width] duration-200 lg:flex"

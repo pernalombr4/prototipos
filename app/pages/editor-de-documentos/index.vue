@@ -194,57 +194,6 @@ const itemDasVersoes = computed(() => (versoesAbertas.value !== null ? itemPorId
 
 <template>
   <div class="flex h-dvh flex-col">
-    <!-- ══════════════════════ ANDAIME (não é produto) ══════════════════════ -->
-    <div class="flex shrink-0 flex-wrap items-center gap-3 border-b border-default bg-elevated/60 px-3 py-2">
-      <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.titulo }}</span>
-
-      <span class="flex items-center gap-2">
-        <span class="text-xs font-semibold uppercase tracking-wider text-toned">{{ t.andaime.estado }}</span>
-        <div class="flex rounded-md border border-default p-0.5">
-          <UButton
-            v-for="e in estadosPossiveis"
-            :key="e"
-            :label="t.andaime.estados[e]"
-            size="xs"
-            :color="estadoDaTela === e ? 'primary' : 'neutral'"
-            :variant="estadoDaTela === e ? 'soft' : 'ghost'"
-            @click="estadoDaTela = e"
-          />
-        </div>
-      </span>
-
-      <span class="flex items-center gap-2">
-        <span class="text-xs font-semibold uppercase tracking-wider text-toned">{{ t.andaime.cenario }}</span>
-        <div class="flex flex-wrap rounded-md border border-default p-0.5">
-          <UButton
-            v-for="c in cenarios"
-            :key="c.chave"
-            :label="t.andaime.cenarios[c.chave]"
-            size="xs"
-            :color="itemAbertoId === c.itemId ? 'primary' : 'neutral'"
-            :variant="itemAbertoId === c.itemId ? 'soft' : 'ghost'"
-            @click="itemAbertoId = c.itemId"
-          />
-        </div>
-      </span>
-
-      <USwitch v-model="wordDeVerdade" :label="t.andaime.wordDeVerdade" size="sm" :ui="{ label: 'text-xs uppercase tracking-wider text-toned' }" />
-      <USwitch v-model="suplementoInstalado" :label="t.andaime.suplemento" size="sm" :ui="{ label: 'text-xs uppercase tracking-wider text-toned' }" />
-
-      <UButton icon="i-lucide-settings-2" :label="t.andaime.configuracao" color="neutral" variant="outline" size="xs" @click="configAberta = true" />
-      <UButton icon="i-lucide-rotate-ccw" :label="t.andaime.reiniciar" color="neutral" variant="ghost" size="xs" @click="reiniciar" />
-
-      <ControlesDePrototipo />
-
-      <span class="ml-auto flex items-center gap-2">
-        <span class="flex items-center gap-1.5 text-xs text-muted">
-          <UIcon name="i-lucide-mouse-pointer-click" class="size-3.5" />
-          {{ t.andaime.dica }}
-        </span>
-        <PainelDeContexto :briefing="briefingMd" :pesquisa="pesquisaMd" :decisoes="decisoesMd" repositorio="https://github.com/pernalombr4/prototipos/tree/main/app/pages/editor-de-documentos" />
-      </span>
-    </div>
-
     <!-- ══════════════════════════ A TELA ══════════════════════════════════ -->
     <div class="min-h-0 flex-1">
       <CascaDeItens :t="t" :workspace="workspace.nome" :slug="workspace.slug" :categoria="categoria.nome">
@@ -320,6 +269,57 @@ const itemDasVersoes = computed(() => (versoesAbertas.value !== null ? itemPorId
           </EnTable>
         </div>
       </CascaDeItens>
+    </div>
+
+    <!-- ════════════ ANDAIME (não é produto), na parte de baixo ════════════ -->
+    <div class="flex shrink-0 flex-wrap items-center gap-3 border-t border-default bg-elevated/60 px-3 py-2">
+      <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.titulo }}</span>
+
+      <span class="flex items-center gap-2">
+        <span class="text-xs font-semibold uppercase tracking-wider text-toned">{{ t.andaime.estado }}</span>
+        <div class="flex rounded-md border border-default p-0.5">
+          <UButton
+            v-for="e in estadosPossiveis"
+            :key="e"
+            :label="t.andaime.estados[e]"
+            size="xs"
+            :color="estadoDaTela === e ? 'primary' : 'neutral'"
+            :variant="estadoDaTela === e ? 'soft' : 'ghost'"
+            @click="estadoDaTela = e"
+          />
+        </div>
+      </span>
+
+      <span class="flex items-center gap-2">
+        <span class="text-xs font-semibold uppercase tracking-wider text-toned">{{ t.andaime.cenario }}</span>
+        <div class="flex flex-wrap rounded-md border border-default p-0.5">
+          <UButton
+            v-for="c in cenarios"
+            :key="c.chave"
+            :label="t.andaime.cenarios[c.chave]"
+            size="xs"
+            :color="itemAbertoId === c.itemId ? 'primary' : 'neutral'"
+            :variant="itemAbertoId === c.itemId ? 'soft' : 'ghost'"
+            @click="itemAbertoId = c.itemId"
+          />
+        </div>
+      </span>
+
+      <USwitch v-model="wordDeVerdade" :label="t.andaime.wordDeVerdade" size="sm" :ui="{ label: 'text-xs uppercase tracking-wider text-toned' }" />
+      <USwitch v-model="suplementoInstalado" :label="t.andaime.suplemento" size="sm" :ui="{ label: 'text-xs uppercase tracking-wider text-toned' }" />
+
+      <UButton icon="i-lucide-settings-2" :label="t.andaime.configuracao" color="neutral" variant="outline" size="xs" @click="configAberta = true" />
+      <UButton icon="i-lucide-rotate-ccw" :label="t.andaime.reiniciar" color="neutral" variant="ghost" size="xs" @click="reiniciar" />
+
+      <ControlesDePrototipo />
+
+      <span class="ml-auto flex items-center gap-2">
+        <span class="flex items-center gap-1.5 text-xs text-muted">
+          <UIcon name="i-lucide-mouse-pointer-click" class="size-3.5" />
+          {{ t.andaime.dica }}
+        </span>
+        <PainelDeContexto :briefing="briefingMd" :pesquisa="pesquisaMd" :decisoes="decisoesMd" repositorio="https://github.com/pernalombr4/prototipos/tree/main/app/pages/editor-de-documentos" />
+      </span>
     </div>
 
     <!-- ══════════════════════════ CAMADAS ═════════════════════════════════ -->

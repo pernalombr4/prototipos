@@ -40,7 +40,7 @@ export interface ConfigDoCampo {
 export const CONFIG_INICIAL: ConfigDoCampo = {
   onlyoffice: true,
   word: true,
-  wordWeb: false,
+  wordWeb: true,
   padrao: null,
   modelos: true,
   branco: true,

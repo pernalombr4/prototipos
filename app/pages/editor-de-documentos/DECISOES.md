@@ -31,7 +31,7 @@ flowchart LR
 
 - **Word instalado (Windows e Mac): caminho principal.** WebDAV com bloqueio + `ms-word:ofe`. Não depende da Microsoft.
 - **Saída de emergência (rodada 4):** se o Word não abrir, baixar o arquivo, editar no Word ou onde a pessoa quiser e enviar de volta; o envio vira versão nova e libera a reserva.
-- **Word para a web: fase 2**, desligado por padrão na configuração. Cópia no OneDrive pelo Microsoft Graph. O CSPP fica de fora: obriga o Office como editor padrão.
+- **Word para a web: fase 2**, ligado por padrão no protótipo para a opção aparecer (rodada 5). Cópia no OneDrive pelo Microsoft Graph. O CSPP fica de fora: obriga o Office como editor padrão.
 - **Painel do suplemento:** ganha a aba "Documento" (item, campo, versão aberta, mudança não salva, Salvar no ENSPACE, Concluir e liberar). Não abre sozinho na versão da loja: a Microsoft só permite isso em implantação centralizada ou sideload.
 - Detalhe e fontes: `PESQUISA.md`, "A limitação técnica".
 
@@ -89,6 +89,14 @@ flowchart LR
 - **Descartado:** a orientação de usar o painel do suplemento na cópia baixada. Motivo: pedido da rodada; baixar e enviar não depende de plugin nenhum.
 - **Fronteira:** muda só a saída de emergência do modal Abrir no Word.
 - **Ver:** `http://localhost:3000/editor-de-documentos`, cenário "DOCX, 1 versão", Abrir no Word, "O Word não abriu?"
+
+## Rodada 5 · 2026-10-08
+- **Pedido (literal):** "por padrao deixe ativado pra aparecer a opçao do word web tambem. e coloque a barra de ferramentas do prototipo na parte inferior, nao superior como ta hj"
+- **Mudou:** a chave "Word para a web (fase 2)" da configuração do campo nasce ligada; a opção aparece na seta do botão Abrir e na pergunta "Onde você quer abrir?".
+- **Mudou:** a barra do protótipo (andaime) passou para a parte de baixo da tela.
+- **Mudou:** a casca passou a ocupar só a altura que sobra (antes usava a tela inteira e cobria o andaime embaixo); o menu da seta ficou mais largo para não cortar "Microsoft 365".
+- **Fronteira:** muda o padrão da configuração e o lugar do andaime; não muda o fluxo.
+- **Ver:** `http://localhost:3000/editor-de-documentos` · `evidencias/proto-09-andaime-embaixo.jpg`
 
 ## Achados do develop que não são desta demanda
 - Abrir a configuração do campo deu "Ocorreu um erro ao carregar os campos aninhados" até clicar em Recarregar.
