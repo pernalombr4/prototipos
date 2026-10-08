@@ -11,11 +11,18 @@
  * - `categorias[id].proprio`: `null` segue o padrão; um objeto é a regra própria;
  * - `categorias[id].campos`: `null` = todos os campos que a ação libera;
  *   um objeto = a lista escolhida campo a campo, por ação;
- * - `categorias[id].formularios[id]`: `null` segue a categoria.
+ * - `categorias[id].formularios[id]`: `null` segue a categoria;
+ * - `categorias[id].alcance`: Ver, Atualizar e Excluir em "todos" os itens ou só
+ *   nos "seus" (os que a pessoa criou). Ausente = todos.
+ *
+ * Dependência: Atualizar e Excluir exigem Ver. Quem marca uma delas marca Ver,
+ * e Ver fica travado enquanto elas estiverem marcadas.
  */
 import {
   type Acao,
+  type AcaoDeAlcance,
   type AcaoDeCampo,
+  type Alcance,
   type CategoriaMock,
   type Cenario,
   type GrupoFixo,
@@ -33,6 +40,7 @@ export interface EstadoDaCategoria {
   proprio: MapaDeAcoes | null
   campos: Record<AcaoDeCampo, string[]> | null
   formularios: Record<number, MapaDeAcoes | null>
+  alcance: Partial<Record<AcaoDeAlcance, Alcance>>
 }
 
 export interface EstadoDoCargo {
@@ -44,16 +52,35 @@ export interface EstadoDoCargo {
 
 export const vazio = (): MapaDeAcoes => ({ criar: false, ver: false, atualizar: false, excluir: false })
 
+/** A ação que exige Ver neste mapa, ou `null`. Atualizar vem antes de Excluir. */
+export function verExigidoPor(m: MapaDeAcoes): Acao | null {
+  if (m.atualizar)
+    return 'atualizar'
+  if (m.excluir)
+    return 'excluir'
+  return null
+}
+
+/** Aplica a dependência: Atualizar ou Excluir marcados ligam Ver. */
+export function comDependencia(m: MapaDeAcoes): MapaDeAcoes {
+  return verExigidoPor(m) ? { ...m, ver: true } : m
+}
+
 /** O cargo como está gravado ao abrir a tela. */
 export function estadoInicial(lista: CategoriaMock[]): EstadoDoCargo {
   const categorias: Record<number, EstadoDaCategoria> = {}
   lista.forEach((c, i) => {
-    const e: EstadoDaCategoria = { proprio: null, campos: null, formularios: {} }
+    const e: EstadoDaCategoria = { proprio: null, campos: null, formularios: {}, alcance: {} }
     c.formularios.forEach(f => (e.formularios[f.id] = null))
 
     // Analista de Contratos: cria e atualiza onde o assunto é contrato.
     if (/Contrato|Aditivo|Procura/.test(c.name))
       e.proprio = { criar: true, ver: true, atualizar: true, excluir: false }
+    // Reembolsos: cria e acompanha só os que ele mesmo abriu.
+    if (/Reembolso/.test(c.name)) {
+      e.proprio = { criar: true, ver: true, atualizar: true, excluir: false }
+      e.alcance = { ver: 'seus', atualizar: 'seus' }
+    }
     // Folha de pagamento e desligamento: não vê.
     if (/Admiss|Desligamento|Avalia/.test(c.name))
       e.proprio = vazio()
@@ -210,6 +237,8 @@ export function mudancas(
       partes.push({ chave: 'tirou', valor: d.tirou.join(',') })
     if (JSON.stringify(a.campos) !== JSON.stringify(b.campos))
       partes.push(b.campos ? { chave: 'camposEscolhidos', valor: resumoDeCampos(atual, c)?.liberados ?? 0 } : { chave: 'todosOsCampos' })
+    if (JSON.stringify(a.alcance) !== JSON.stringify(b.alcance))
+      partes.push({ chave: 'alcance' })
     const fa = c.formularios.filter(f => JSON.stringify(a.formularios[f.id]) !== JSON.stringify(b.formularios[f.id])).length
     if (fa)
       partes.push({ chave: 'formularios', valor: fa })

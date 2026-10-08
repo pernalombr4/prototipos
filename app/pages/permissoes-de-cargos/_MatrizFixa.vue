@@ -6,10 +6,14 @@
  * Hoje são 82 caixas em árvore, uma embaixo da outra (15 em Padrão, 67 em
  * Configurações). Aqui viram 24 linhas, e a mesma ação fica sempre na mesma
  * coluna, o que deixa comparar áreas de relance.
+ *
+ * Rodada 2: ícone por ação no cabeçalho, 1 linha de descrição por área
+ * (ClickUp, Jira) e a dependência Atualizar/Excluir exigem Ver.
  */
 import type { TableColumn } from '@nuxt/ui'
 import type { Textos } from './textos'
-import { type Acao, type GrupoFixo, acoes } from './mocks'
+import CaixaDePermissao from './_CaixaDePermissao.vue'
+import { type Acao, type GrupoFixo, acoes, iconesDeAcao } from './mocks'
 import type { EstadoDoCargo } from './estado'
 
 const props = defineProps<{
@@ -43,9 +47,26 @@ function estadoDe(chaves: string[]): Valor {
   return n === chaves.length ? true : 'indeterminate'
 }
 
+/** Atualizar ou Excluir marcados ligam Ver na mesma área. */
+function comDependencia(fixas: string[]) {
+  const saida = new Set(fixas)
+  for (const l of props.grupos.flatMap(g => g.linhas)) {
+    if (l.acoes.includes('ver') && (saida.has(`${l.chave}:atualizar`) || saida.has(`${l.chave}:excluir`)))
+      saida.add(`${l.chave}:ver`)
+  }
+  return [...saida]
+}
+
 function definir(chaves: string[], ligar: boolean) {
   const resto = props.estado.fixas.filter(c => !chaves.includes(c))
-  props.estado.fixas = ligar ? [...resto, ...chaves] : resto
+  props.estado.fixas = comDependencia(ligar ? [...resto, ...chaves] : resto)
+}
+
+function travadaPor(linha: GrupoFixo['linhas'][number], acao: Acao) {
+  if (acao !== 'ver')
+    return null
+  const quem = marcada(`${linha.chave}:atualizar`) ? 'atualizar' : marcada(`${linha.chave}:excluir`) ? 'excluir' : null
+  return quem ? props.t.exigidoPor(props.t.acoes[quem]) : null
 }
 
 function alternar(chave: string, ligar: boolean) {
@@ -56,7 +77,7 @@ const marcada = (chave: string) => props.estado.fixas.includes(chave)
 const mudou = (chave: string) => marcada(chave) !== props.salvo.fixas.includes(chave)
 
 const colunas = computed<TableColumn<GrupoFixo['linhas'][number]>[]>(() => [
-  { accessorKey: 'chave', header: props.t.colunaArea, meta: { class: { th: 'w-[34%]', td: 'w-[34%]' } } },
+  { accessorKey: 'chave', header: props.t.colunaArea, meta: { class: { th: 'w-[34%]', td: 'w-[34%] whitespace-normal' } } },
   ...acoes.map(a => ({ id: a, header: props.t.acoes[a], meta: { class: { th: 'text-center w-[11%]', td: 'text-center w-[11%]' } } })),
   { id: 'outras', header: props.t.colunaOutras },
 ])
@@ -90,7 +111,12 @@ const colunas = computed<TableColumn<GrupoFixo['linhas'][number]>[]>(() => [
         <!-- Cabeçalho de ação: a caixa marca a coluna inteira do grupo. -->
         <template v-for="a in acoes" :key="a" #[`${a}-header`]>
           <span class="inline-flex flex-col items-center gap-1">
-            <span>{{ t.acoes[a] }}</span>
+            <UTooltip :text="t.dicas[a]">
+              <span class="inline-flex items-center gap-1">
+                <UIcon :name="iconesDeAcao[a]" class="size-3.5 text-muted" />
+                {{ t.acoes[a] }}
+              </span>
+            </UTooltip>
             <UCheckbox
               v-if="chavesDaColuna(g, a).length"
               :model-value="estadoDe(chavesDaColuna(g, a))"
@@ -110,18 +136,22 @@ const colunas = computed<TableColumn<GrupoFixo['linhas'][number]>[]>(() => [
               @update:model-value="v => definir(chavesDaLinha(row.original), v === true)"
             />
             <UIcon :name="row.original.icone" class="size-4 shrink-0 text-muted" />
-            <span class="text-sm text-default">{{ t.linhas[row.original.chave] }}</span>
+            <span class="min-w-0">
+              <span class="block text-sm text-default">{{ t.linhas[row.original.chave] }}</span>
+              <span class="block text-xs text-muted">{{ t.descLinhas[row.original.chave] }}</span>
+            </span>
           </span>
         </template>
 
         <template v-for="a in acoes" :key="a" #[`${a}-cell`]="{ row }">
           <span class="relative inline-flex">
-            <UCheckbox
+            <CaixaDePermissao
               v-if="row.original.acoes.includes(a)"
-              :model-value="marcada(`${row.original.chave}:${a}`)"
-              :disabled="somenteLeitura"
-              :aria-label="`${t.acoes[a]}: ${t.linhas[row.original.chave]}`"
-              @update:model-value="v => alternar(`${row.original.chave}:${a}`, v === true)"
+              :valor="marcada(`${row.original.chave}:${a}`)"
+              :rotulo="`${t.acoes[a]}: ${t.linhas[row.original.chave]}`"
+              :travada-por="travadaPor(row.original, a)"
+              :desabilitada="somenteLeitura"
+              @alterar="v => alternar(`${row.original.chave}:${a}`, v)"
             />
             <span v-else class="text-dimmed" aria-hidden="true">·</span>
             <span

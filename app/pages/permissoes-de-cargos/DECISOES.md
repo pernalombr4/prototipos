@@ -29,18 +29,24 @@ diz o que muda, em palavras, e quantas pessoas sentem.
 
 | Ideia | De onde | No protótipo |
 |---|---|---|
-| Padrão do cargo + exceções, com contador "Diferente em N" | Twenty | Adotado: cartão do padrão e "Diferente em 12 categorias" |
+| Padrão do cargo + exceções, com contador de exceções | Twenty | Adotado. Rodada 2: primeira linha da tabela e contador com direção ("Liberado em 15", "Tirado em 9") |
 | Categoria nova herda o padrão | Todos os 16 | Adotado; pede back-end (abaixo) |
 | Matriz recurso × ação | Directus, Strapi, Zoho | Adotado: categorias e permissões fixas |
 | Caixa de linha e de coluna que marca tudo | Strapi, Twenty, Directus | Adotado, com 3 estados |
-| Estado herdado e "voltar ao padrão" | Twenty, Notion | Adotado: caixa cinza herda; selo "Regra própria" e botão de desfazer |
+| Estado herdado e "voltar ao padrão" | Twenty, Notion | Adotado. Rodada 2: herdado em tom claro da cor primária, diferente em cor cheia, desfazer em cada caixa |
 | Campo num segundo passo, com busca e "todos" | Twenty, Salesforce | Adotado: Ajustar › Campos |
 | Resumo antes de salvar, com pessoas afetadas | Nenhum (oportunidade) | Adotado |
 | Níveis nomeados (Nenhum, Ver, Editar, Total) | Notion, Retool, Pipefy | **Descartado.** A demanda diz que caixa funciona; 4 caixas na linha já dão o nível de relance |
 | Filtro "só alteradas" ligado ao abrir | Twenty | **Descartado como padrão.** Abre em "Todas" para a tela não esconder categoria de quem chega; "Regra própria" fica a 1 clique, com contagem |
 | Selecionar linhas e aplicar | Salesforce | **Adiado.** A caixa de coluna sobre a lista filtrada cobre o caso ("Filial Sul" + Excluir = 40 categorias) |
 | Aba Permissões dentro da categoria | Attio, Notion, Airtable | **Adiado** para outra rodada: é a segunda porta da mesma regra |
-| Escopo "só os meus itens" | HubSpot, Monday, Pipefy | **Fora do escopo.** O modelo tem `rules`, vazio em tudo que a tela marca hoje |
+| Escopo "só os meus itens" | HubSpot, Monday, Pipefy, ClickUp | Rodada 2: sublinha "Quais itens" (Todos ou Os seus) para Ver, Atualizar e Excluir. Pede back-end (abaixo) |
+| Parcial na célula | Directus, Strapi | Rodada 2: traço na caixa e dica "Ver em 76 de 80 campos"; o clique abre Ajustar › Campos |
+| Ícone por ação e o que ela libera | Directus, Twenty, ClickUp, Jira | Rodada 2: ícone no cabeçalho, dica por ação e 1 linha de descrição por área fixa |
+| Filhos na mesma grade | Appsmith, Retool | Rodada 2: a seta da categoria abre Campos, Quais itens e cada formulário na própria tabela |
+| Ver exigido por Atualizar e Excluir | ClickUp, Appsmith, Twenty, Salesforce | Rodada 2: Ver marca sozinho e fica travado, com cadeado e "Exigido por Atualizar" |
+| Quem acessa a categoria e comparar cargos | Salesforce (Object Access), HubSpot | Rodada 2: aba "Quem acessa" no Ajustar, com Tem e Não tem e "Esconder cargos iguais a este" |
+| Pessoas no papel à vista | Strapi, Pipefy, monday | Rodada 2: selo "14 pessoas com este cargo" ao lado do título |
 
 ## O que a implementação precisa além da tela
 
@@ -58,14 +64,20 @@ diz o que muda, em palavras, e quantas pessoas sentem.
    slot `#header-{key}` no `EnTable`.
 5. **Volume.** Acima de algumas centenas de categorias, a tabela precisa de virtualização (o `UTable` e o
    `EnTable` já têm a prop `virtualize`).
+6. **"Os seus" (alcance).** O develop grava `rules: []` em toda permissão. "Só os itens que a pessoa criou"
+   precisa de uma regra ali (por exemplo, criador = pessoa logada) e de o back-end aplicá-la na listagem,
+   na edição e na exclusão.
+7. **Quem acessa.** A aba lista o que cada cargo faz numa categoria: pede uma rota que devolva as
+   permissões de todos os cargos para 1 categoria, ou a tela monta isso lendo `/ws/roles` inteiro.
 
 Sem os itens 1 a 3, a tela ainda funciona: o front escreve a regra em cada categoria e formulário ao
 salvar. Perde-se só a herança para o que for criado depois.
 
 ## Perguntas em aberto
 
-- **Criar sem Ver vale?** Os 16 produtos amarram Ver às outras ações. No ENSPACE, "Criar sem Ver" pode ser o
-  caso de quem só abre chamado. O protótipo não amarra; a decisão é de produto.
+- **Criar sem Ver.** Na rodada 2, Atualizar e Excluir passaram a exigir Ver. Criar continua solto, para o
+  caso de quem só abre chamado sem ver os outros. Confirmar com produto se o back-end aceita Atualizar sem
+  Ver hoje (cargo já gravado assim vira caso a migrar).
 - **Regra igual ao padrão.** O protótipo trata categoria com as mesmas 4 caixas do padrão como "Segue o
   padrão". Quem quiser travar uma categoria para não acompanhar mudança futura do padrão não consegue.
 - **Contagem de mudanças.** "1 alteração" é 1 categoria (ou 1 área fixa), mesmo que mexa em 35 campos. A
@@ -107,3 +119,31 @@ salvar. Perde-se só a herança para o que for criado depois.
   - O print do tema escuro em espanhol saiu com a seta do mouse e foi descartado (regra da redatora de
     2026-10-06). O escuro e o espanhol foram conferidos na tela.
 - **Ver:** `/permissoes-de-cargos` · `evidencias/proposta-01-categorias.jpg`, `proposta-02`, `proposta-03` e `proposta-05`
+
+## Rodada 2 · 2026-10-08
+- **Pedido (literal):** "voce tem que analisar VISUALMENTE se concorrentes apresentam tabelas melhores de ediçao de permissoes. veja isso e analise as oportunidads de melhora" e, depois das 12 propostas no chat, "pode aplicar tudo o que falou. eu avalio em tela se ta funcional"
+- **Mudou:**
+  - Ícone em cada ação (+, olho, lápis, lixeira) no cabeçalho de todas as tabelas, com dica do que a ação libera.
+  - Herdado em tom claro da cor primária; diferente do padrão em cor cheia.
+  - Desfazer em cada caixa que difere do padrão; o desfazer da linha continua.
+  - Parcial na célula: traço e "Ver em 76 de 80 campos"; o clique abre Ajustar › Campos.
+  - Exceção com direção: "Liberado em 15" e "Tirado em 9".
+  - Descrição de 1 linha em cada área das permissões fixas.
+  - Selo "14 pessoas com este cargo" ao lado do título.
+  - Padrão como primeira linha da tabela, alinhado às colunas.
+  - Seta na categoria abre, na mesma grade, Campos (todos, parte ou nenhum por ação), Quais itens e cada formulário (com "Segue a categoria").
+  - Ver exigido por Atualizar e Excluir, em categoria, padrão, formulário, campo e permissões fixas: marca sozinho, fica travado, com cadeado e o motivo.
+  - Quais itens: Todos ou Os seus, para Ver, Atualizar e Excluir; a caixa ganha um ícone de pessoa quando vale só para os seus. Reembolsos vem assim no mock.
+  - Aba "Quem acessa" no Ajustar: os 7 cargos do workspace nesta categoria, com Tem e Não tem, e "Esconder cargos iguais a este".
+  - 22 capturas de referência em `evidencias/ref-*.png` e a análise visual no `PESQUISA.md`.
+- **Fronteira:** muda a tabela de categorias, as matrizes fixas, o Ajustar e o selo no título; não muda a casca, as abas, o aviso de pendências, a confirmação e o lugar do Salvar.
+- **Mantido para comparar:** o padrão em cartão (rodada 1) fica no andaime, em "Padrão › Cartão (rodada 1)". Sai num commit próprio quando a redatora escolher.
+- **Risco registrado:** com o padrão na primeira linha, a grade tem 2 controles de "todas": a linha do padrão (vale para categoria sem regra, inclusive futura) e a caixa do cabeçalho (marca a lista filtrada). A dica de cada um diz o alcance.
+- **Maquete:** "Quem acessa" usa os outros 6 cargos com regra fixa no `mocks.ts`; o "Os seus" não filtra item nenhum, só grava a escolha. Recarregar volta ao começo.
+- **Não deu:** conferir o visual final no servidor local. Por quê: o servidor que estava de pé é de outra conversa e gerou o CSS das classes novas de forma instável (a mesma classe aparecia e sumia entre recargas). Comportamento conferido pelo DOM; visual conferido no build publicado.
+- **Crítica e acessibilidade:**
+  - Toda caixa nova tem rótulo ("Ver: Contratos de Clientes"); o cadeado e a pessoa têm dica em texto, não só cor.
+  - Parcial, herdado e travado não dependem só de cor: traço, tom e cadeado.
+  - Ficou: a linha das categorias abertas fica longa com 12 formulários; a seta recolhe.
+- **CSS próprio:** nenhum. Tom claro pela prop `ui` do `UCheckbox` (`indicator: 'bg-primary/40'`), consultada no tema gerado `.nuxt/ui/checkbox.ts`.
+- **Ver:** `/permissoes-de-cargos` · `evidencias/proposta-r2-*.jpg`

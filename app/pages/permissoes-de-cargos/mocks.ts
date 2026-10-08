@@ -19,6 +19,22 @@ import type { Field, ItemType, Role } from '@be-enlighten/enspace-sdk-schemas'
 export type Acao = 'criar' | 'ver' | 'atualizar' | 'excluir'
 export const acoes: Acao[] = ['criar', 'ver', 'atualizar', 'excluir']
 
+/** Ícone de cada ação no cabeçalho das colunas (padrão de Directus, Twenty e Strapi). */
+export const iconesDeAcao: Record<Acao, string> = {
+  criar: 'i-lucide-plus',
+  ver: 'i-lucide-eye',
+  atualizar: 'i-lucide-pencil',
+  excluir: 'i-lucide-trash-2',
+}
+
+/**
+ * Ações que podem valer só para os itens que a pessoa criou ("Os seus").
+ * Proposta: no develop o campo `rules` existe, mas a tela não grava nada nele.
+ */
+export type AcaoDeAlcance = 'ver' | 'atualizar' | 'excluir'
+export const acoesDeAlcance: AcaoDeAlcance[] = ['ver', 'atualizar', 'excluir']
+export type Alcance = 'todos' | 'seus'
+
 /** As ações que carregam lista de campos no develop. Excluir não carrega. */
 export type AcaoDeCampo = 'criar' | 'ver' | 'atualizar'
 export const acoesDeCampo: AcaoDeCampo[] = ['criar', 'ver', 'atualizar']
@@ -66,6 +82,35 @@ export const cargo: Pick<Role, 'id' | 'name' | 'icon' | 'status'> & {
 }
 
 export const workspace = { nome: 'Aurora Serviços', slug: 'aurora-servicos' }
+
+/**
+ * Os outros cargos do workspace, para "Quem acessa esta categoria".
+ * `pessoas` vem de `/ws/members`, não do Role (invenção do protótipo).
+ */
+export const outrosCargos: (Pick<Role, 'id' | 'name' | 'icon'> & { pessoas: number })[] = [
+  { id: 130, name: 'Gestor Jurídico', icon: 'i-lucide-scale', pessoas: 3 },
+  { id: 131, name: 'Assistente Financeiro', icon: 'i-lucide-wallet', pessoas: 9 },
+  { id: 132, name: 'Analista de RH', icon: 'i-lucide-users', pessoas: 6 },
+  { id: 133, name: 'Comprador', icon: 'i-lucide-shopping-cart', pessoas: 5 },
+  { id: 134, name: 'Diretoria', icon: 'i-lucide-briefcase', pessoas: 4 },
+  { id: 135, name: 'Visitante', icon: 'i-lucide-user-round', pessoas: 22 },
+]
+
+/** O que cada outro cargo faz numa categoria. Regra fixa, para o dado ser verossímil. */
+export function acessoDeOutroCargo(idCargo: number, nomeDaCategoria: string): Record<Acao, boolean> {
+  const tudo = { criar: true, ver: true, atualizar: true, excluir: true }
+  const ver = { criar: false, ver: true, atualizar: false, excluir: false }
+  const nada = { criar: false, ver: false, atualizar: false, excluir: false }
+  const n = nomeDaCategoria
+  switch (idCargo) {
+    case 130: return /Contrat|Aditivo|Procura|Processo|Notifica|Parecer|Marca|Termo/.test(n) ? tudo : ver
+    case 131: return /Nota|Contas|Reembolso|Adiantamento|Orçamento|Centro/.test(n) ? tudo : nada
+    case 132: return /Admiss|Deslig|Férias|Avalia|Treina|Vaga/.test(n) ? tudo : nada
+    case 133: return /Pedido|Cota|Cadastro de Forn|Homologa/.test(n) ? tudo : /Contratos de Forn/.test(n) ? ver : nada
+    case 134: return { criar: false, ver: true, atualizar: true, excluir: false }
+    default: return ver
+  }
+}
 
 /* ------------------------------------------------------------------ *
  * Gerador determinístico. Mesmo cenário, mesmo dado em todo reload.

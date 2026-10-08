@@ -4,8 +4,46 @@
 Salesforce, Jira, Google Workspace, Linear, Directus, Strapi, Retool, HubSpot, Zoho Creator, Attio).
 Feita em 2026-10-08 com a doc oficial de cada produto e, no Twenty, com o código do front lido no GitHub.
 
-**Sem print de referência nesta rodada:** a pesquisa leu doc e código, sem abrir as telas. Cada entrada
-traz a URL da fonte. O que o protótipo adotou de cada um está no `DECISOES.md`.
+Rodada 1: a pesquisa leu doc e código, sem abrir as telas (seções "Obrigatórios" e "Extras" abaixo).
+Rodada 2: análise **visual** de 21 produtos, com 54 capturas da tela real abertas uma a uma. As 22 mais
+úteis estão em `evidencias/ref-<produto>-*.png`. O que o protótipo adotou de cada um está no `DECISOES.md`.
+
+## Análise visual (rodada 2)
+
+Capturas tiradas de central de ajuda, doc oficial, PR e issue no GitHub, fórum oficial e Trailhead. Nenhuma
+conta criada, nenhum login.
+
+### Quem tem a melhor tabela
+
+| Produto | O que se vê na tela | O que faz melhor que o ENSPACE | Print |
+|---|---|---|---|
+| **Directus 10** | Linhas = coleções; colunas = 5 ações só com ícone no cabeçalho; célula com 3 estados por ícone e cor (tudo verde, nada vermelho, personalizado laranja); clique abre "All Access, No Access, Use Custom" | Parcial na própria célula; ícone por ação | `ref-directus-1-matriz-papel-v10.png`, `ref-directus-2-tabela-politica-v11.png` |
+| **Twenty** | "All objects" com 4 ações e a exceção escrita com direção ("Granted for 1 object", "Revoked for 1 object"); objeto com regra própria lista os ícones das ações que mudaram; campos em matriz Ver × Editar, linha "All", tipo com ícone; herdado em azul claro com X para revogar, revogado vazio com seta laranja de desfazer | Herdado e mudado visíveis em cada caixa; desfazer por caixa; direção da exceção | `ref-twenty-1-papel-todos-objetos.png`, `ref-twenty-2-objeto-e-campos.png` |
+| **Strapi** | Abas por tipo; linhas = content types; colunas CREATE, READ, UPDATE, DELETE, PUBLISH; caixa mestre logo abaixo do rótulo da coluna e antes do nome da linha; traço quando os campos estão limitados; "0 users with this role" no topo | Mestre alinhada à grade; parcial propagado para linha e coluna; pessoas no papel à vista | `ref-strapi-1-matriz-papel-admin.png` |
+| **ClickUp** | Matriz permissão × papel (Guest, Member, Admin) com toggle; grupos em caixa alta; cada permissão com 1 linha explicando o que libera e a dependência ("sem Delete Items não apaga"); busca de ação | Consequência escrita na linha; comparar papéis lado a lado | `ref-clickup-1-tabela-de-papeis.png`, `ref-clickup-2-estados-do-toggle.png` |
+| **Salesforce** | Field Permissions: Read Access e Edit Access com caixa de coluna antes do rótulo; campos de sistema em cinza travado. Object Access: quem acessa o objeto, com ✓ e ✗ | Campo de sistema travado; visão invertida por objeto | `ref-salesforce-2-field-permissions.png`, `ref-salesforce-3-object-access.png` |
+| **NocoDB** | Ponto azul antes de cada campo alterado, contador "3/7 fields have custom permissions" e "Reset permissions" por bloco; vermelho só para "Nobody" | Marca de alterado que não depende de cor | `ref-nocodb-2-tabela-e-campos.png` |
+| **Appsmith** | Árvore espaço > app > página na mesma grade; célula vazia onde a ação não existe; View marcado em cinza e travado quando Edit está marcado | Filhos na mesma grade; permissão implícita visível | `ref-appsmith-1-arvore-recursos-app.png` |
+| **Retool** | Barra "Use all, Edit all, Own all"; contador "Assigned 2 apps"; pasta com estado parcial | Resumo do modo numa linha | `ref-retool-2-pastas-estado-parcial.png` |
+| **HubSpot** | Comparar acesso entre usuários, com opção de esconder o que é igual | Comparação que esconde o igual | `ref-hubspot-3-comparar-acesso.png` |
+| **Zoho Creator** | Matriz módulo × Access, View, Edit, Delete; ações raras num "Mais"; campo com selo PII | Ação rara escondida sem alargar a tabela | `ref-zoho-1-matriz-modulos.png` |
+| **Jira** | Linha = permissão com descrição embaixo; selo "Shared by 4 projects" | Descrição e impacto na linha | `ref-jira-1-esquema-permissoes.png` |
+| Notion, Attio, Airtable, Linear, monday, Pipefy, Baserow | Nível num menu por linha, um recurso por vez; sem matriz | Pipefy e monday mostram pessoas afetadas; Baserow avisa a herança | `ref-notion-1-*`, `ref-attio-2-*`, `ref-airtable-1-*`, `ref-linear-1-*`, `ref-monday-2-*`, `ref-pipefy-1-*`, `ref-baserow-2-*` |
+
+### Onde o ENSPACE já ganha de todos
+
+- Filtros por estado (Regra própria, Com acesso, Sem acesso, Alteradas). Nenhum concorrente filtra por estado.
+- Aviso de pendências com confirmação que lista as mudanças em palavras. Directus e NocoDB salvam sozinhos;
+  Strapi e Zoho só têm "Save".
+- Padrão que vale para categoria futura, com as exceções contadas.
+
+### Onde perdia (antes da rodada 2)
+
+- Célula binária: o parcial ia para a coluna Campos, longe da ação que ele limita.
+- Herdado em cinza: nos concorrentes, cinza quer dizer travado (Appsmith, Zoho, Salesforce).
+- Exceção sem direção ("Diferente em 12").
+- Cabeçalho só com texto e sem explicar o que cada ação libera.
+- Campo e formulário só na camada lateral, fora da grade.
 
 ## Resumo para decidir
 

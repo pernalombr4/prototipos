@@ -66,7 +66,36 @@ export interface Textos {
   padraoLinhaDesc: string
   seguePadrao: string
   regraPropria: string
-  diferenteEm: (n: number) => string
+  liberadoEm: (n: number) => string
+  tiradoEm: (n: number) => string
+  liberadoCurto: (n: number) => string
+  tiradoCurto: (n: number) => string
+  dicas: Record<Acao, string>
+  descLinhas: Record<string, string>
+  parcialDica: (acao: string, n: number, total: number) => string
+  voltarAcao: (acao: string, onde: string) => string
+  exigidoPor: (acao: string) => string
+  pessoasNoCargo: (n: number) => string
+  expandir: (categoria: string) => string
+  subCampos: string
+  subCamposTodos: (n: number) => string
+  subCamposEscolhidos: (n: number, total: number) => string
+  escolherCampos: string
+  subAlcance: string
+  subAlcanceDesc: string
+  alcanceTodos: string
+  alcanceSeus: string
+  soOsSeus: (acao: string) => string
+  padraoColunaDica: string
+  abaQuemAcessa: string
+  quemAcessaDesc: string
+  colunaCargo: string
+  colunaPessoas: string
+  esteCargo: string
+  esconderIguais: string
+  semDiferentes: string
+  tem: string
+  naoTem: string
   voltarAoPadrao: string
   camposTodos: string
   camposDe: (n: number, total: number) => string
@@ -134,6 +163,7 @@ export interface Textos {
     camposEscolhidos: (n: number) => string
     todosOsCampos: string
     formularios: (n: number) => string
+    alcance: string
   }
   toastSalvo: string
   toastSalvoDesc: string
@@ -202,7 +232,67 @@ const pt: Textos = {
   padraoLinhaDesc: 'Vale para toda categoria sem regra própria, inclusive as criadas depois.',
   seguePadrao: 'Segue o padrão',
   regraPropria: 'Regra própria',
-  diferenteEm: n => n === 1 ? 'Diferente em 1 categoria' : `Diferente em ${n} categorias`,
+  liberadoEm: n => n === 1 ? 'Liberado em 1 categoria' : `Liberado em ${n} categorias`,
+  tiradoEm: n => n === 1 ? 'Tirado em 1 categoria' : `Tirado em ${n} categorias`,
+  liberadoCurto: n => `Liberado em ${n}`,
+  tiradoCurto: n => `Tirado em ${n}`,
+  dicas: {
+    criar: 'Criar: abrir item novo.',
+    ver: 'Ver: abrir e ler os itens.',
+    atualizar: 'Atualizar: editar itens que já existem. Exige Ver.',
+    excluir: 'Excluir: apagar itens. Exige Ver.',
+  },
+  descLinhas: {
+    agenda: 'Eventos da Agenda do workspace.',
+    ia: 'Conversar com a IA dentro do workspace.',
+    spaceflows: 'Iniciar e acompanhar fluxos de trabalho.',
+    tarefasRapidas: 'Tarefas avulsas, fora de um fluxo.',
+    tarefasProgramadas: 'Tarefas que os fluxos das categorias criam.',
+    calendario: 'Calendário e dias úteis do workspace.',
+    configuracao: 'Configurações gerais do sistema.',
+    dicionario: 'Entradas dos dicionários de tradução.',
+    espacoDeTrabalho: 'Nome, logo e dados do workspace.',
+    modulos: 'Módulos ligados no workspace.',
+    listas: 'Listas de opções usadas nos campos.',
+    spaceflowsConfig: 'Montar e editar fluxos.',
+    tipos: 'Estrutura das categorias: campos e formulários.',
+    cargos: 'Cargos e as permissões de cada um.',
+    grupos: 'Grupos de membros.',
+    membros: 'Convidar, editar e remover membros.',
+    casosDeUso: 'Casos de uso da Interface.',
+    menu: 'Itens do menu lateral.',
+    telas: 'Telas da Interface.',
+    caixas: 'Caixas de e-mail conectadas.',
+    enviados: 'E-mails que o workspace enviou.',
+    modelos: 'Modelos de e-mail.',
+    integracoes: 'Conexões com outros sistemas.',
+    logs: 'Registro do que aconteceu no workspace.',
+    credenciais: 'Chaves e senhas das integrações.',
+  },
+  parcialDica: (a, n, t) => `${a} em ${n} de ${t} campos. Clique para ajustar.`,
+  voltarAcao: (a, o) => `Voltar ${a} ao padrão em ${o}`,
+  exigidoPor: a => `Exigido por ${a}. Desmarque ${a} para tirar Ver.`,
+  pessoasNoCargo: n => n === 1 ? '1 pessoa com este cargo' : `${n} pessoas com este cargo`,
+  expandir: c => `Mostrar campos e formulários de ${c}`,
+  subCampos: 'Campos',
+  subCamposTodos: n => `Todos os ${n} campos`,
+  subCamposEscolhidos: (n, t) => `${n} de ${t} campos escolhidos`,
+  escolherCampos: 'Escolher campos',
+  subAlcance: 'Quais itens',
+  subAlcanceDesc: 'Todos os itens ou só os que a pessoa criou.',
+  alcanceTodos: 'Todos',
+  alcanceSeus: 'Os seus',
+  soOsSeus: a => `${a} só nos itens que a pessoa criou.`,
+  padraoColunaDica: 'Vale para toda categoria sem regra própria.',
+  abaQuemAcessa: 'Quem acessa',
+  quemAcessaDesc: 'O que cada cargo do workspace faz nesta categoria. Para mudar outro cargo, abra a tela dele.',
+  colunaCargo: 'Cargo',
+  colunaPessoas: 'Pessoas',
+  esteCargo: 'Este cargo',
+  esconderIguais: 'Esconder cargos iguais a este',
+  semDiferentes: 'Todos os cargos fazem o mesmo que este.',
+  tem: 'Tem',
+  naoTem: 'Não tem',
   voltarAoPadrao: 'Voltar ao padrão',
   camposTodos: 'Todos',
   camposDe: (n, t) => `${n} de ${t}`,
@@ -292,6 +382,7 @@ const pt: Textos = {
     camposEscolhidos: n => `${n} campos escolhidos`,
     todosOsCampos: 'todos os campos',
     formularios: n => n === 1 ? '1 formulário mudou' : `${n} formulários mudaram`,
+    alcance: 'mudou quais itens',
   },
   toastSalvo: 'Permissões salvas',
   toastSalvoDesc: 'O cargo já vale com as mudanças.',
@@ -359,7 +450,67 @@ const en: Textos = {
   padraoLinhaDesc: 'Applies to every category without its own rule, including the ones created later.',
   seguePadrao: 'Follows default',
   regraPropria: 'Own rule',
-  diferenteEm: n => n === 1 ? 'Differs in 1 category' : `Differs in ${n} categories`,
+  liberadoEm: n => n === 1 ? 'Allowed in 1 category' : `Allowed in ${n} categories`,
+  tiradoEm: n => n === 1 ? 'Removed in 1 category' : `Removed in ${n} categories`,
+  liberadoCurto: n => `Allowed in ${n}`,
+  tiradoCurto: n => `Removed in ${n}`,
+  dicas: {
+    criar: 'Create: open new items.',
+    ver: 'View: open and read items.',
+    atualizar: 'Update: edit existing items. Requires View.',
+    excluir: 'Delete: remove items. Requires View.',
+  },
+  descLinhas: {
+    agenda: 'Workspace calendar events.',
+    ia: 'Chat with AI inside the workspace.',
+    spaceflows: 'Start and follow workflows.',
+    tarefasRapidas: 'Standalone tasks, outside a flow.',
+    tarefasProgramadas: 'Tasks created by category flows.',
+    calendario: 'Workspace calendar and business days.',
+    configuracao: 'General system settings.',
+    dicionario: 'Translation dictionary entries.',
+    espacoDeTrabalho: 'Workspace name, logo and details.',
+    modulos: 'Modules turned on in the workspace.',
+    listas: 'Option lists used by fields.',
+    spaceflowsConfig: 'Build and edit flows.',
+    tipos: 'Category structure: fields and forms.',
+    cargos: 'Roles and their permissions.',
+    grupos: 'Member groups.',
+    membros: 'Invite, edit and remove members.',
+    casosDeUso: 'Interface use cases.',
+    menu: 'Sidebar menu items.',
+    telas: 'Interface screens.',
+    caixas: 'Connected email inboxes.',
+    enviados: 'Emails the workspace sent.',
+    modelos: 'Email templates.',
+    integracoes: 'Connections to other systems.',
+    logs: 'Record of what happened in the workspace.',
+    credenciais: 'Integration keys and passwords.',
+  },
+  parcialDica: (a, n, t) => `${a} on ${n} of ${t} fields. Click to adjust.`,
+  voltarAcao: (a, o) => `Set ${a} back to default in ${o}`,
+  exigidoPor: a => `Required by ${a}. Uncheck ${a} to remove View.`,
+  pessoasNoCargo: n => n === 1 ? '1 person with this role' : `${n} people with this role`,
+  expandir: c => `Show fields and forms of ${c}`,
+  subCampos: 'Fields',
+  subCamposTodos: n => `All ${n} fields`,
+  subCamposEscolhidos: (n, t) => `${n} of ${t} fields chosen`,
+  escolherCampos: 'Choose fields',
+  subAlcance: 'Which items',
+  subAlcanceDesc: 'All items or only the ones the person created.',
+  alcanceTodos: 'All',
+  alcanceSeus: 'Own',
+  soOsSeus: a => `${a} only on items the person created.`,
+  padraoColunaDica: 'Applies to every category without its own rule.',
+  abaQuemAcessa: 'Who has access',
+  quemAcessaDesc: 'What each workspace role does in this category. To change another role, open its screen.',
+  colunaCargo: 'Role',
+  colunaPessoas: 'People',
+  esteCargo: 'This role',
+  esconderIguais: 'Hide roles equal to this one',
+  semDiferentes: 'Every role does the same as this one.',
+  tem: 'Has',
+  naoTem: 'Does not have',
   voltarAoPadrao: 'Back to default',
   camposTodos: 'All',
   camposDe: (n, t) => `${n} of ${t}`,
@@ -449,6 +600,7 @@ const en: Textos = {
     camposEscolhidos: n => `${n} fields chosen`,
     todosOsCampos: 'all fields',
     formularios: n => n === 1 ? '1 form changed' : `${n} forms changed`,
+    alcance: 'changed which items',
   },
   toastSalvo: 'Permissions saved',
   toastSalvoDesc: 'The role already works with the changes.',
@@ -516,7 +668,67 @@ const es: Textos = {
   padraoLinhaDesc: 'Vale para toda categoría sin regla propia, incluso las creadas después.',
   seguePadrao: 'Sigue el predeterminado',
   regraPropria: 'Regla propia',
-  diferenteEm: n => n === 1 ? 'Distinto en 1 categoría' : `Distinto en ${n} categorías`,
+  liberadoEm: n => n === 1 ? 'Permitido en 1 categoría' : `Permitido en ${n} categorías`,
+  tiradoEm: n => n === 1 ? 'Quitado en 1 categoría' : `Quitado en ${n} categorías`,
+  liberadoCurto: n => `Permitido en ${n}`,
+  tiradoCurto: n => `Quitado en ${n}`,
+  dicas: {
+    criar: 'Crear: abrir ítems nuevos.',
+    ver: 'Ver: abrir y leer los ítems.',
+    atualizar: 'Actualizar: editar ítems existentes. Exige Ver.',
+    excluir: 'Eliminar: borrar ítems. Exige Ver.',
+  },
+  descLinhas: {
+    agenda: 'Eventos de la Agenda del workspace.',
+    ia: 'Conversar con la IA dentro del workspace.',
+    spaceflows: 'Iniciar y seguir flujos de trabajo.',
+    tarefasRapidas: 'Tareas sueltas, fuera de un flujo.',
+    tarefasProgramadas: 'Tareas que crean los flujos de las categorías.',
+    calendario: 'Calendario y días hábiles del workspace.',
+    configuracao: 'Configuración general del sistema.',
+    dicionario: 'Entradas de los diccionarios de traducción.',
+    espacoDeTrabalho: 'Nombre, logo y datos del workspace.',
+    modulos: 'Módulos activos en el workspace.',
+    listas: 'Listas de opciones usadas en los campos.',
+    spaceflowsConfig: 'Armar y editar flujos.',
+    tipos: 'Estructura de las categorías: campos y formularios.',
+    cargos: 'Cargos y los permisos de cada uno.',
+    grupos: 'Grupos de miembros.',
+    membros: 'Invitar, editar y quitar miembros.',
+    casosDeUso: 'Casos de uso de la Interfaz.',
+    menu: 'Ítems del menú lateral.',
+    telas: 'Pantallas de la Interfaz.',
+    caixas: 'Bandejas de correo conectadas.',
+    enviados: 'Correos que envió el workspace.',
+    modelos: 'Plantillas de correo.',
+    integracoes: 'Conexiones con otros sistemas.',
+    logs: 'Registro de lo que pasó en el workspace.',
+    credenciais: 'Claves y contraseñas de las integraciones.',
+  },
+  parcialDica: (a, n, t) => `${a} en ${n} de ${t} campos. Haga clic para ajustar.`,
+  voltarAcao: (a, o) => `Volver ${a} al predeterminado en ${o}`,
+  exigidoPor: a => `Exigido por ${a}. Desmarque ${a} para quitar Ver.`,
+  pessoasNoCargo: n => n === 1 ? '1 persona con este cargo' : `${n} personas con este cargo`,
+  expandir: c => `Mostrar campos y formularios de ${c}`,
+  subCampos: 'Campos',
+  subCamposTodos: n => `Todos los ${n} campos`,
+  subCamposEscolhidos: (n, t) => `${n} de ${t} campos elegidos`,
+  escolherCampos: 'Elegir campos',
+  subAlcance: 'Qué ítems',
+  subAlcanceDesc: 'Todos los ítems o solo los que la persona creó.',
+  alcanceTodos: 'Todos',
+  alcanceSeus: 'Los suyos',
+  soOsSeus: a => `${a} solo en los ítems que la persona creó.`,
+  padraoColunaDica: 'Vale para toda categoría sin regla propia.',
+  abaQuemAcessa: 'Quién accede',
+  quemAcessaDesc: 'Lo que cada cargo del workspace hace en esta categoría. Para cambiar otro cargo, abra su pantalla.',
+  colunaCargo: 'Cargo',
+  colunaPessoas: 'Personas',
+  esteCargo: 'Este cargo',
+  esconderIguais: 'Ocultar cargos iguales a este',
+  semDiferentes: 'Todos los cargos hacen lo mismo que este.',
+  tem: 'Tiene',
+  naoTem: 'No tiene',
   voltarAoPadrao: 'Volver al predeterminado',
   camposTodos: 'Todos',
   camposDe: (n, t) => `${n} de ${t}`,
@@ -606,6 +818,7 @@ const es: Textos = {
     camposEscolhidos: n => `${n} campos elegidos`,
     todosOsCampos: 'todos los campos',
     formularios: n => n === 1 ? '1 formulario cambió' : `${n} formularios cambiaron`,
+    alcance: 'cambió qué ítems',
   },
   toastSalvo: 'Permisos guardados',
   toastSalvoDesc: 'El cargo ya funciona con los cambios.',

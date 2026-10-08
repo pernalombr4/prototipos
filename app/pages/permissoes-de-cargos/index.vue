@@ -104,10 +104,15 @@ const itensDeAba = computed(() => [
 
 const categoriaAberta = ref<CategoriaMock | null>(null)
 const detalheAberto = ref(false)
-function ajustar(c: CategoriaMock) {
+const abaDoDetalhe = ref<'campos' | 'formularios' | 'acesso'>('campos')
+function ajustar(c: CategoriaMock, aba: 'campos' | 'formularios' | 'acesso' = 'campos') {
   categoriaAberta.value = c
+  abaDoDetalhe.value = aba
   detalheAberto.value = true
 }
+
+/** Rodada 2: padrão como primeira linha. A forma da rodada 1 (cartão) fica no andaime. */
+const formaDoPadrao = ref<'linha' | 'cartao'>('linha')
 
 const confirmando = ref(false)
 const salvando = ref(false)
@@ -128,6 +133,7 @@ function frase(p: { chave: string, valor?: string | number }) {
     case 'camposEscolhidos': return ps.camposEscolhidos(Number(p.valor))
     case 'todosOsCampos': return ps.todosOsCampos
     case 'formularios': return ps.formularios(Number(p.valor))
+    case 'alcance': return ps.alcance
     default: return p.chave
   }
 }
@@ -170,6 +176,8 @@ const fmt = (n: number) => n.toLocaleString('pt-BR')
           <UIcon :name="cargo.icon ?? 'i-lucide-id-card'" class="size-5" />
         </span>
         <h1 class="text-2xl font-semibold text-highlighted">{{ t.cargo }} {{ cargo.name }}</h1>
+        <!-- Rodada 2: quem sente a mudança, à vista (Strapi e Pipefy mostram no topo do papel). -->
+        <UBadge :label="t.pessoasNoCargo(cargo.pessoas)" icon="i-lucide-users" color="neutral" variant="subtle" class="ml-1" />
       </div>
 
       <div class="mt-6 grid grid-cols-2 gap-6">
@@ -247,6 +255,7 @@ const fmt = (n: number) => n.toLocaleString('pt-BR')
             :salvo="salvo"
             :somente-leitura="somenteLeitura"
             :carregando="carregando"
+            :forma-do-padrao="formaDoPadrao"
             @ajustar="ajustar"
           />
         </div>
@@ -269,6 +278,7 @@ const fmt = (n: number) => n.toLocaleString('pt-BR')
       v-model:open="detalheAberto"
       :t="t"
       :categoria="categoriaAberta"
+      :aba-inicial="abaDoDetalhe"
       :estado="estado"
       :somente-leitura="somenteLeitura"
     />
@@ -318,6 +328,19 @@ const fmt = (n: number) => n.toLocaleString('pt-BR')
           :color="estadoDaTela === e.valor ? 'primary' : 'neutral'"
           :variant="estadoDaTela === e.valor ? 'solid' : 'subtle'"
           @click="estadoDaTela = e.valor"
+        />
+
+        <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
+        <span class="text-xs font-semibold uppercase tracking-wider text-muted">Padrão</span>
+        <UButton
+          v-for="f in [{ valor: 'linha', rotulo: 'Primeira linha (rodada 2)' }, { valor: 'cartao', rotulo: 'Cartão (rodada 1)' }] as const"
+          :key="f.valor"
+          :label="f.rotulo"
+          size="xs"
+          class="transition-transform hover:-translate-y-0.5"
+          :color="formaDoPadrao === f.valor ? 'primary' : 'neutral'"
+          :variant="formaDoPadrao === f.valor ? 'solid' : 'subtle'"
+          @click="formaDoPadrao = f.valor"
         />
 
         <ControlesDePrototipo class="ml-auto" />

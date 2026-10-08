@@ -1,31 +1,44 @@
 <script setup lang="ts">
 /**
- * "Ajustar": campos e formulários de uma categoria, numa camada lateral.
+ * "Ajustar": campos, formulários e quem acessa, numa camada lateral.
  *
  * Hoje o mesmo campo aparece 3 vezes na árvore (sob Criar, sob Ver e sob
  * Atualizar), longe um do outro. Aqui o campo é uma linha e as 3 ações são
  * colunas. E o padrão é "todos os campos": a lista só aparece para quem
  * escolhe esconder ou travar algum.
+ *
+ * Rodada 2:
+ * - ícone por ação no cabeçalho (Directus, Twenty);
+ * - Atualizar num campo exige Ver no mesmo campo (Twenty, Salesforce);
+ * - aba "Quem acessa": todos os cargos nesta categoria, com Tem e Não tem
+ *   (Object Access do Salesforce) e "Esconder cargos iguais a este" (HubSpot).
  */
 import type { TableColumn } from '@nuxt/ui'
 import type { Textos } from './textos'
-import { type Acao, type AcaoDeCampo, type CategoriaMock, acoes, acoesDeCampo } from './mocks'
-import { type EstadoDoCargo, acoesDaCategoria, acoesDoFormulario, temAcesso } from './estado'
+import CaixaDePermissao from './_CaixaDePermissao.vue'
+import { type Acao, type AcaoDeCampo, type CategoriaMock, acessoDeOutroCargo, acoes, acoesDeCampo, cargo, iconesDeAcao, outrosCargos } from './mocks'
+import { type EstadoDoCargo, acoesDaCategoria, acoesDoFormulario, comDependencia, temAcesso, verExigidoPor } from './estado'
+
+type Aba = 'campos' | 'formularios' | 'acesso'
 
 const props = defineProps<{
   t: Textos
   categoria: CategoriaMock | null
   estado: EstadoDoCargo
   somenteLeitura: boolean
+  /** A aba que abre: a célula parcial e a sublinha Campos abrem em Campos. */
+  abaInicial?: Aba
 }>()
 
 const aberto = defineModel<boolean>('open', { default: false })
 
-const aba = ref<'campos' | 'formularios'>('campos')
+const aba = ref<Aba>('campos')
 const busca = ref('')
+const esconderIguais = ref(false)
 
-watch(() => props.categoria?.id, () => {
-  aba.value = 'campos'
+watch([() => props.categoria?.id, aberto], () => {
+  if (aberto.value)
+    aba.value = props.abaInicial ?? 'campos'
   busca.value = ''
 })
 
@@ -90,6 +103,15 @@ function definirCampos(nomes: string[], a: AcaoDeCampo, valor: boolean) {
     return
   const resto = c[a].filter(n => !nomes.includes(n))
   c[a] = valor ? [...resto, ...nomes] : resto
+  // Atualizar num campo exige Ver nele.
+  if (a === 'atualizar' && valor)
+    c.ver = [...new Set([...c.ver, ...nomes])]
+  if (a === 'ver' && !valor)
+    c.ver = [...new Set([...c.ver, ...nomes.filter(n => c.atualizar.includes(n))])]
+}
+
+function verDoCampoTravado(l: LinhaDeCampo) {
+  return !!acoesCat.value?.atualizar && !!ec.value?.campos?.atualizar.includes(l.name) ? props.t.exigidoPor(props.t.acoes.atualizar) : null
 }
 
 type Valor = boolean | 'indeterminate'
@@ -123,8 +145,15 @@ function alternarSegue(idForm: number, seguir: boolean) {
 
 function definirForm(idForm: number, a: Acao, valor: boolean) {
   const f = ec.value?.formularios[idForm]
-  if (f)
-    f[a] = valor
+  if (f && ec.value)
+    ec.value.formularios[idForm] = comDependencia({ ...f, [a]: valor })
+}
+
+function travadaNoForm(idForm: number, a: Acao) {
+  if (a !== 'ver' || segue(idForm) || !props.categoria)
+    return null
+  const quem = verExigidoPor(acoesDoFormulario(props.estado, props.categoria.id, idForm))
+  return quem ? props.t.exigidoPor(props.t.acoes[quem]) : null
 }
 
 const colunasDeForm = computed<TableColumn<{ id: number, nome: string }>[]>(() => [
@@ -133,9 +162,44 @@ const colunasDeForm = computed<TableColumn<{ id: number, nome: string }>[]>(() =
   ...acoes.map(a => ({ id: a, header: props.t.acoes[a], meta: { class: { th: 'text-center w-20', td: 'text-center w-20' } } })),
 ])
 
+/* ------------------------------------------------------------------ *
+ * Quem acessa: este cargo (ao vivo) e os outros do workspace.
+ * ------------------------------------------------------------------ */
+
+interface LinhaDeCargo {
+  id: number
+  nome: string
+  icone: string
+  pessoas: number
+  acesso: Record<Acao, boolean>
+  este?: boolean
+}
+
+const linhasDeCargo = computed<LinhaDeCargo[]>(() => {
+  if (!props.categoria || !acoesCat.value)
+    return []
+  const meu = acoesCat.value
+  const outros = outrosCargos.map(c => ({
+    id: c.id,
+    nome: c.name,
+    icone: c.icon ?? 'i-lucide-id-card',
+    pessoas: c.pessoas,
+    acesso: acessoDeOutroCargo(c.id, props.categoria!.name),
+  }))
+  const visiveis = esconderIguais.value ? outros.filter(o => acoes.some(a => o.acesso[a] !== meu[a])) : outros
+  return [{ id: cargo.id, nome: cargo.name, icone: cargo.icon ?? 'i-lucide-id-card', pessoas: cargo.pessoas, acesso: meu, este: true }, ...visiveis]
+})
+
+const colunasDeCargo = computed<TableColumn<LinhaDeCargo>[]>(() => [
+  { accessorKey: 'nome', header: props.t.colunaCargo },
+  { accessorKey: 'pessoas', header: props.t.colunaPessoas, meta: { class: { th: 'w-24 text-right', td: 'w-24 text-right' } } },
+  ...acoes.map(a => ({ id: a, header: props.t.acoes[a], meta: { class: { th: 'text-center w-20', td: 'text-center w-20' } } })),
+])
+
 const itensDeAba = computed(() => [
   { label: props.t.abaCampos, value: 'campos', icon: 'i-lucide-text-cursor-input', badge: props.categoria?.campos.length },
   { label: props.t.abaFormularios, value: 'formularios', icon: 'i-lucide-file-text', badge: props.categoria?.formularios.length },
+  { label: props.t.abaQuemAcessa, value: 'acesso', icon: 'i-lucide-users', badge: outrosCargos.length + 1 },
 ])
 </script>
 
@@ -150,8 +214,47 @@ const itensDeAba = computed(() => [
       <template v-if="categoria && ec && acoesCat">
         <UTabs v-model="aba" :items="itensDeAba" :content="false" variant="link" />
 
+        <!-- QUEM ACESSA (vale mesmo sem acesso deste cargo) -->
+        <div v-if="aba === 'acesso'" class="space-y-3 animate-[entrada_.25s_ease-out_both]">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <p class="text-sm text-muted">{{ t.quemAcessaDesc }}</p>
+            <USwitch v-model="esconderIguais" :label="t.esconderIguais" size="sm" />
+          </div>
+          <UTable
+            :data="linhasDeCargo"
+            :columns="colunasDeCargo"
+            :meta="{ class: { tr: (r: { original: LinhaDeCargo }) => r.original.este ? 'bg-primary/5' : '' } }"
+            class="rounded-lg border border-default"
+            :ui="{ base: 'w-full min-w-[36rem] table-fixed', th: 'py-2 text-xs', td: 'py-2' }"
+          >
+            <template v-for="a in acoes" :key="a" #[`${a}-header`]>
+              <span class="inline-flex items-center gap-1">
+                <UIcon :name="iconesDeAcao[a]" class="size-3.5 text-muted" />
+                {{ t.acoes[a] }}
+              </span>
+            </template>
+            <template #nome-cell="{ row }">
+              <span class="flex min-w-0 items-center gap-2">
+                <UIcon :name="row.original.icone" class="size-4 shrink-0 text-muted" />
+                <span class="truncate text-sm text-default">{{ row.original.nome }}</span>
+                <UBadge v-if="row.original.este" :label="t.esteCargo" color="primary" variant="subtle" size="sm" class="shrink-0" />
+              </span>
+            </template>
+            <template v-for="a in acoes" :key="a" #[`${a}-cell`]="{ row }">
+              <UIcon
+                :name="row.original.acesso[a] ? 'i-lucide-check' : 'i-lucide-x'"
+                class="size-4"
+                :class="row.original.acesso[a] ? 'text-success' : 'text-error'"
+                :aria-label="row.original.acesso[a] ? t.tem : t.naoTem"
+                role="img"
+              />
+            </template>
+          </UTable>
+          <p v-if="esconderIguais && linhasDeCargo.length === 1" class="text-center text-sm text-muted">{{ t.semDiferentes }}</p>
+        </div>
+
         <UAlert
-          v-if="!comAcesso"
+          v-else-if="!comAcesso"
           icon="i-lucide-lock"
           color="neutral"
           variant="subtle"
@@ -184,10 +287,10 @@ const itensDeAba = computed(() => [
               :ui="{ base: 'w-full table-fixed', th: 'py-2 text-xs bg-default', td: 'py-1.5' }"
             >
               <template v-for="a in acoesDeCampo" :key="a" #[`${a}-header`]>
-                <UTooltip :text="acoesCat[a] ? '' : t.acaoBloqueada(t.acoes[a])" :disabled="acoesCat[a]">
+                <UTooltip :text="acoesCat[a] ? t.dicas[a] : t.acaoBloqueada(t.acoes[a])">
                   <span class="inline-flex flex-col items-center gap-1">
                     <span class="inline-flex items-center gap-1">
-                      <UIcon v-if="!acoesCat[a]" name="i-lucide-lock" class="size-3 text-dimmed" />
+                      <UIcon :name="acoesCat[a] ? iconesDeAcao[a] : 'i-lucide-lock'" class="size-3.5 text-muted" />
                       {{ t.acoes[a] }}
                     </span>
                     <UCheckbox
@@ -203,18 +306,18 @@ const itensDeAba = computed(() => [
               <template #label-cell="{ row }">
                 <span class="flex min-w-0 flex-col">
                   <span class="truncate text-sm text-default">{{ row.original.label }}</span>
-                  <span class="truncate text-xs text-dimmed">{{ row.original.tipo }}</span>
+                  <span class="truncate text-xs text-muted">{{ row.original.tipo }}</span>
                 </span>
               </template>
 
               <template v-for="a in acoesDeCampo" :key="a" #[`${a}-cell`]="{ row }">
-                <UCheckbox
+                <CaixaDePermissao
                   v-if="cabeNaAcao(row.original, a)"
-                  :model-value="acoesCat[a] && marcadoCampo(row.original, a)"
-                  :disabled="somenteLeitura || !acoesCat[a]"
-                  :aria-label="`${t.acoes[a]}: ${row.original.label}`"
-                  class="inline-flex"
-                  @update:model-value="v => definirCampos([row.original.name], a, v === true)"
+                  :valor="acoesCat[a] && marcadoCampo(row.original, a)"
+                  :rotulo="`${t.acoes[a]}: ${row.original.label}`"
+                  :travada-por="a === 'ver' ? verDoCampoTravado(row.original) : null"
+                  :desabilitada="somenteLeitura || !acoesCat[a]"
+                  @alterar="v => definirCampos([row.original.name], a, v)"
                 />
                 <span v-else class="text-dimmed" aria-hidden="true">·</span>
               </template>
@@ -235,6 +338,12 @@ const itensDeAba = computed(() => [
             class="rounded-lg border border-default"
             :ui="{ base: 'w-full min-w-[40rem] table-fixed', th: 'py-2 text-xs', td: 'py-2' }"
           >
+            <template v-for="a in acoes" :key="a" #[`${a}-header`]>
+              <span class="inline-flex items-center gap-1">
+                <UIcon :name="iconesDeAcao[a]" class="size-3.5 text-muted" />
+                {{ t.acoes[a] }}
+              </span>
+            </template>
             <template #nome-cell="{ row }">
               <span class="flex items-center gap-2">
                 <span class="text-sm text-default">{{ row.original.nome }}</span>
@@ -251,13 +360,14 @@ const itensDeAba = computed(() => [
               />
             </template>
             <template v-for="a in acoes" :key="a" #[`${a}-cell`]="{ row }">
-              <UCheckbox
-                :model-value="acoesDoFormulario(estado, categoria.id, row.original.id)[a]"
-                :color="segue(row.original.id) ? 'neutral' : 'primary'"
-                :disabled="somenteLeitura || segue(row.original.id)"
-                :aria-label="`${t.acoes[a]}: ${row.original.nome}`"
-                class="inline-flex"
-                @update:model-value="v => definirForm(row.original.id, a, v === true)"
+              <CaixaDePermissao
+                :valor="acoesDoFormulario(estado, categoria.id, row.original.id)[a]"
+                :rotulo="`${t.acoes[a]}: ${row.original.nome}`"
+                herdada
+                :difere="!segue(row.original.id) && acoesDoFormulario(estado, categoria.id, row.original.id)[a] !== acoesCat[a]"
+                :travada-por="travadaNoForm(row.original.id, a)"
+                :desabilitada="somenteLeitura || segue(row.original.id)"
+                @alterar="v => definirForm(row.original.id, a, v)"
               />
             </template>
           </UTable>
