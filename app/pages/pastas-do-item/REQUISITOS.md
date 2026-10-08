@@ -14,7 +14,6 @@
 |---|---|
 | Aparência (RV) | Folder sem contorno, sombra nem fundo; a aberta ganha um traço na cor de destaque sobre uma linha de base contínua |
 | Hover (RH) | Sem fundo: o texto fica mais forte e um traço fraco na cor de destaque aparece |
-| Abrir folder (RA) | Abre só no clique, com Enter ou com Espaço; botão direito e arrasto não abrem |
 | Arrasto (RD) | A folder segue o mouse, troca de lugar na metade da vizinha e salva sozinha, com Desfazer |
 | Menu da folder (RM) | Seta ⌄ visível na aberta, botão direito e clique duplo |
 | Criar e excesso (RX) | "+" cria direto; "+N" só aparece quando sobra folder e tem busca |
@@ -42,15 +41,6 @@
 | RH-02 | No hover de uma folder fechada, um traço de 2 px na cor de destaque a 35 % deve crescer do centro sobre a linha de base, no mesmo lugar do traço da aberta. | O traço é rosa fraco, mais claro que o da aberta. |
 | RH-03 | O hover não deve acender fundo atrás da folder. | Nenhuma folder vira bloco ao passar o mouse. |
 
-## Abrir folder (RA)
-
-| ID | Requisito | Critério de aceite |
-|---|---|---|
-| RA-01 | A folder deve abrir no clique: botão esquerdo, soltando sem arrastar. | Clicar e soltar sobre a folder abre o conteúdo dela. |
-| RA-02 | A folder não deve abrir ao apertar o botão do mouse (mousedown). | Apertar e arrastar uma folder fechada não troca o conteúdo. |
-| RA-03 | O botão direito não deve abrir a folder. | Botão direito numa folder fechada abre o menu (RM-02) e a folder aberta continua a mesma, também depois de fechar o menu. |
-| RA-04 | Pelo teclado, as setas movem o foco entre as folders e Enter ou Espaço abrem a folder em foco. | Mover o foco com as setas não troca o conteúdo; Enter troca. |
-
 ## Arrasto (RD)
 
 | ID | Requisito | Critério de aceite |
@@ -71,7 +61,7 @@
 | ID | Requisito | Critério de aceite |
 |---|---|---|
 | RM-01 | A folder aberta deve mostrar uma seta ⌄ depois do nome, que abre o menu com Editar, Ocultar e Excluir. | A seta aparece só na aberta. O espaço dela entra na largura da aba, e a troca de folder anima esse espaço, sem salto das vizinhas. |
-| RM-02 | O botão direito em qualquer folder deve abrir o mesmo menu, para aquela folder. | Botão direito numa fechada mostra o menu dela, sem abri-la (RA-03). |
+| RM-02 | O botão direito em qualquer folder deve abrir o mesmo menu, para aquela folder. | Botão direito numa fechada mostra o menu dela, sem abri-la. |
 | RM-03 | O clique duplo numa folder deve abrir Editar, com o campo Nome preenchido. | Clique duplo em Notas abre "Editar folder" com "Notas". |
 | RM-04 | Em folder do sistema (Visão Geral, Comentários, Logs de Auditoria, Spaceflows, Anexos, Notas), Excluir deve aparecer desabilitado, com a explicação "Folder do sistema. Você pode ocultar." | Não abre modal de recusa. |
 | RM-05 | Ocultar deve tirar a folder da barra na hora e mostrar um aviso com Desfazer. | Desfazer devolve a folder ao mesmo lugar. |
@@ -102,7 +92,7 @@
 
 - Barra: `UTabs` do Nuxt UI, `variant="link"`, ativação manual (`activation-mode="manual"`), aparência só pela prop `ui` com tokens.
 - Traço da aberta e do hover: pseudo-elemento `after` do próprio gatilho, no lugar do indicador do `UTabs` (por causa de RV-08).
-- Abrir no clique: a barra segura o mousedown dos gatilhos e abre a folder no `click`.
+- Abrir no clique: a barra segura o mousedown dos gatilhos e abre a folder no `click` (é o que já acontece no produto; garante RD-06).
 - Arrasto: eventos de ponteiro sobre os gatilhos. No produto, o `useSortable` (`@vueuse/integrations` com `sortablejs`) serve, desde que cumpra RD-01 a RD-10.
 - Menus: `UContextMenu` (botão direito), `UDropdownMenu` (seta ⌄ e "⋯"), `UPopover` com `UCommandPalette` ("+N"), `UModal` (Nova, Editar, Excluir) e `useToast` (avisos com Desfazer).
 
