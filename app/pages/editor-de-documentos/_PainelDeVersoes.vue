@@ -74,7 +74,7 @@ function restaurar() {
 }
 
 function baixar(n: number) {
-  toast.add({ title: `${props.t.campo.versaoN(n)} · ${doc.value?.name}`, description: 'Maquete: nada é baixado.', icon: 'i-lucide-download', color: 'neutral' })
+  toast.add({ title: `${props.t.campo.versaoN(n)} · ${doc.value?.name}`, description: props.t.campo.simulacaoBaixar, icon: 'i-lucide-download', color: 'neutral' })
 }
 </script>
 

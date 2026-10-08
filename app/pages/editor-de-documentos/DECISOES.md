@@ -50,7 +50,7 @@ flowchart LR
 - **Não deu:** abrir no Word um arquivo enviado pela pessoa no protótipo. Por quê: ele vive como `blob:` no navegador, que o Word não alcança; o protótipo baixa o arquivo (a saída de emergência).
 - **Não deu:** prints das referências. Por quê: a pesquisa foi por leitura de documentação; as URLs estão no `PESQUISA.md`.
 - **Não deu:** conferir na tela da Mikaela que o Word abriu. Por quê: o acesso à tela foi recusado; conferi que o arquivo responde no endereço e que o link `ms-word:` é montado com ele.
-- **Maquete:** a área do ONLYOFFICE (barra e página desenhadas; dá para digitar e ver o salvamento); a janela do Word (cinza, sem identidade da Microsoft; o painel e o salvamento no item são proposta); a geração por modelo, o envio e o salvamento (simulados em memória); a miniatura (linhas, no lugar da imagem da 1ª página); Baixar como PDF; "Como instalar" o suplemento. Nada usa localStorage; recarregar zera tudo.
+- **Simulação:** a área do ONLYOFFICE (barra e página desenhadas; dá para digitar e ver o salvamento); a janela do Word, chamada na tela de "simulação do plugin do Word" (cinza, sem identidade da Microsoft; o painel e o salvamento no item são proposta); a geração por modelo, o envio e o salvamento (simulados em memória); a miniatura (linhas, no lugar da imagem da 1ª página); Baixar como PDF; "Como instalar" o suplemento. Nada usa localStorage; recarregar zera tudo.
 - **Crítica e acessibilidade:** passada de crítica feita com a skill `design:design-critique`; a de acessibilidade foi feita junto, no mesmo roteiro (contraste, foco, rótulos), sem rodar a skill `design:accessibility-review` à parte.
   - Corrigido: o texto "formatos aceitos" usava `text-dimmed`, baixo contraste; passou a `text-muted`.
   - Corrigido: documento criado em branco mostrava o texto do contrato.
@@ -61,6 +61,16 @@ flowchart LR
   - Ficou: o andaime quebra em 2 linhas em telas de até 1.600 px; é andaime.
   - A conferir à mão: na automação, o 1º clique logo depois de fechar o editor ou um modal foi ignorado algumas vezes. A janela do Chrome estava em segundo plano em parte dos testes, o que também descarta clique; não deu para separar as 2 causas.
 - **Ver:** `http://localhost:3000/editor-de-documentos` · `evidencias/proto-*.jpg`
+
+## Rodada 2 · 2026-10-08
+- **Pedido (literal):** "voce tem que deixar explicado no prototipo que o user tem que clicar em \"maquete\" pra ver como seria a aprencia do plugin. nao é maquete, bote \"simulaçao plugin word\" ou algo assim."
+- **Mudou:** o botão do modal Abrir no Word passou de "Ver o painel do ENSPACE (maquete)" para "Ver simulação do plugin do Word".
+- **Mudou:** o modal explica, depois que o Word abre, que esse botão mostra como o plugin aparece dentro do Word.
+- **Mudou:** o cartão do campo reservado ganhou o botão "Simulação do plugin"; "Voltar ao Word" só chama o Word do computador.
+- **Mudou:** a dica do andaime diz o caminho até a simulação e aparece em qualquer largura de tela.
+- **Mudou:** "maquete" saiu de todo texto de tela (aviso da janela, área do ONLYOFFICE, toasts), nos 3 idiomas; os toasts que estavam fixos em português passaram para o `textos.ts`.
+- **Fronteira:** muda só o texto e o acesso à simulação; não muda o fluxo nem a proposta.
+- **Ver:** `http://localhost:3000/editor-de-documentos` · `evidencias/proto-03-abrir-no-word.jpg`, `proto-04-painel-do-enspace-no-word.jpg`, `proto-08-cartao-com-simulacao-do-plugin.jpg`
 
 ## Achados do develop que não são desta demanda
 - Abrir a configuração do campo deu "Ocorreu um erro ao carregar os campos aninhados" até clicar em Recarregar.

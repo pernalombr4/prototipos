@@ -43,6 +43,7 @@ const emit = defineEmits<{
   ler: []
   versoes: []
   voltarAoWord: []
+  simulacao: []
 }>()
 
 const toast = useToast()
@@ -217,7 +218,7 @@ const menuMais = computed<DropdownMenuItem[][]>(() => [
 function baixar(ext: string) {
   const a = arquivoDoItem(props.item)
   if (a && ext === '.docx') return baixarArquivo(a)
-  toast.add({ title: `${doc.value?.name.replace(/\.(docx|pdf)$/i, '')}${ext}`, description: 'Maquete: nada é baixado.', icon: 'i-lucide-download', color: 'neutral' })
+  toast.add({ title: `${doc.value?.name.replace(/\.(docx|pdf)$/i, '')}${ext}`, description: props.t.campo.simulacaoBaixar, icon: 'i-lucide-download', color: 'neutral' })
 }
 
 const substituir = ref<HTMLInputElement | null>(null)
@@ -522,6 +523,7 @@ async function tentarDeNovo() {
           <!-- minha sessão no Word -->
           <template v-if="minhaNoWord">
             <UButton icon="i-lucide-monitor-up" :label="t.campo.voltarAoWord" size="sm" :disabled="preview" @click="emit('voltarAoWord')" />
+            <UButton icon="i-lucide-app-window" :label="t.word.abrirJanelaCurto" color="primary" variant="soft" size="sm" :disabled="preview" @click="emit('simulacao')" />
             <UButton icon="i-lucide-lock-open" :label="t.campo.liberar" color="neutral" variant="ghost" size="sm" :disabled="preview" @click="liberar" />
           </template>
 

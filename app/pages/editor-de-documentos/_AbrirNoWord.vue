@@ -143,8 +143,22 @@ const real = computed(() => wordDeVerdade.value && props.editor === 'word-deskto
           variant="subtle"
           icon="i-lucide-puzzle"
           :description="t.word.dicaSuplemento"
-          :actions="[{ label: t.word.instalarSuplemento, color: 'neutral', variant: 'link', size: 'xs', trailingIcon: 'i-lucide-arrow-up-right', onClick: () => toast.add({ title: t.word.instalarSuplemento, description: 'Maquete: abre a página de instalação do suplemento.', color: 'neutral' }) }]"
+          :actions="[{ label: t.word.instalarSuplemento, color: 'neutral', variant: 'link', size: 'xs', trailingIcon: 'i-lucide-arrow-up-right', onClick: () => toast.add({ title: t.word.instalarSuplemento, description: t.word.simulacaoInstalar, color: 'neutral' }) }]"
         />
+
+        <Transition
+          enter-active-class="transition duration-300 ease-out"
+          enter-from-class="opacity-0 translate-y-1"
+        >
+          <UAlert
+            v-if="passo >= 4"
+            class="mt-4"
+            color="primary"
+            variant="subtle"
+            icon="i-lucide-app-window"
+            :description="t.word.explicaSimulacao"
+          />
+        </Transition>
 
         <UCollapsible v-if="editor === 'word-desktop'" v-model:open="ajudaAberta" class="mt-4">
           <UButton

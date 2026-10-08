@@ -114,6 +114,7 @@ export interface Textos {
     renomear: string
     remover: string
     pdfSoLeitura: string
+    simulacaoBaixar: string
 
     abertoPorVoceNoWord: (desde: string) => string
     abertoPorVoceNoWordDetalhe: string
@@ -203,6 +204,9 @@ export interface Textos {
     abrindo: string
     abertoToast: string
     abrirJanela: string
+    abrirJanelaCurto: string
+    explicaSimulacao: string
+    simulacaoInstalar: string
     fechar: string
     naoAbriu: string
     naoAbriuDetalhe: string
@@ -441,6 +445,7 @@ const pt: Textos = {
     renomear: 'Renomear',
     remover: 'Remover documento',
     pdfSoLeitura: 'PDF não se edita. Para mudar, substitua o arquivo.',
+    simulacaoBaixar: 'Simulação: nada é baixado.',
 
     abertoPorVoceNoWord: desde => `Você está com este documento aberto no Word desde ${desde}.`,
     abertoPorVoceNoWordDetalhe: 'Cada Salvar do Word vira uma versão aqui. Feche o documento no Word para liberar. Enquanto isso, as outras pessoas só leem.',
@@ -504,7 +509,7 @@ const pt: Textos = {
     concluir: 'Concluir',
     concluindo: 'Salvando',
     versaoSalva: n => `Versão ${n} salva`,
-    areaDoOnlyoffice: 'Área do ONLYOFFICE (maquete): clique no texto e digite para ver o salvamento.',
+    areaDoOnlyoffice: 'Simulação do ONLYOFFICE: clique no texto e digite para ver o salvamento.',
     barra: ['Arquivo', 'Página Inicial', 'Inserir', 'Layout', 'Referências', 'Colaboração'],
     escHint: 'Esc fecha só o que está por cima. O editor fecha pelo Concluir.',
   },
@@ -557,7 +562,10 @@ const pt: Textos = {
     reservado: 'Reservado para você',
     abrindo: 'Abrindo no Word',
     abertoToast: 'Documento aberto no Word',
-    abrirJanela: 'Ver o painel do ENSPACE (maquete)',
+    abrirJanela: 'Ver simulação do plugin do Word',
+    abrirJanelaCurto: 'Simulação do plugin',
+    explicaSimulacao: 'Para ver como o plugin do ENSPACE aparece dentro do Word, clique em Ver simulação do plugin do Word. Depois, o mesmo botão fica no cartão do campo.',
+    simulacaoInstalar: 'Simulação: aqui abriria a página de instalação do plugin.',
     fechar: 'Fechar',
     naoAbriu: 'O Word não abriu?',
     naoAbriuDetalhe: 'Baixe o arquivo ligado ao item. No Word, o painel do ENSPACE reconhece o item e envia o documento de volta.',
@@ -573,7 +581,7 @@ const pt: Textos = {
   },
 
   janela: {
-    aviso: 'Maquete do Word com o painel do ENSPACE. A janela do Word não é proposta; o painel e o salvamento no item são.',
+    aviso: 'Simulação do plugin do Word: é assim que o painel do ENSPACE aparece dentro do Word. A janela cinza só representa o Word; o painel e o salvamento no item são a proposta.',
     tituloDoApp: 'Word',
     salvoNaBarra: hora => `Salvo no ENSPACE às ${hora}`,
     naoSalvoNaBarra: 'Mudanças não salvas',
@@ -649,7 +657,7 @@ const pt: Textos = {
     configuracao: 'Configuração do campo',
     wordDeVerdade: 'Abrir o Word de verdade',
     reiniciar: 'Recomeçar',
-    dica: 'Cada contrato da lista mostra um estado do campo.',
+    dica: 'Cada contrato mostra um estado do campo. Para ver o plugin do Word, abra um contrato no Word e clique em Ver simulação do plugin do Word.',
     oQueMuda: 'Mostrar o que muda',
   },
 
@@ -801,6 +809,7 @@ const en: Textos = {
     renomear: 'Rename',
     remover: 'Remove document',
     pdfSoLeitura: 'PDFs can\'t be edited. To change it, replace the file.',
+    simulacaoBaixar: 'Simulation: nothing is downloaded.',
 
     abertoPorVoceNoWord: desde => `You have this document open in Word since ${desde}.`,
     abertoPorVoceNoWordDetalhe: 'Every Save in Word becomes a version here. Close the document in Word to release it. Meanwhile, other people can only read.',
@@ -864,7 +873,7 @@ const en: Textos = {
     concluir: 'Done',
     concluindo: 'Saving',
     versaoSalva: n => `Version ${n} saved`,
-    areaDoOnlyoffice: 'ONLYOFFICE area (mockup): click the text and type to see saving.',
+    areaDoOnlyoffice: 'ONLYOFFICE simulation: click the text and type to see saving.',
     barra: ['File', 'Home', 'Insert', 'Layout', 'References', 'Collaboration'],
     escHint: 'Esc only closes what is on top. The editor closes with Done.',
   },
@@ -917,7 +926,10 @@ const en: Textos = {
     reservado: 'Reserved for you',
     abrindo: 'Opening in Word',
     abertoToast: 'Document opened in Word',
-    abrirJanela: 'See the ENSPACE pane (mockup)',
+    abrirJanela: 'See Word plugin simulation',
+    abrirJanelaCurto: 'Plugin simulation',
+    explicaSimulacao: 'To see how the ENSPACE plugin looks inside Word, click See Word plugin simulation. Afterwards, the same button stays on the field card.',
+    simulacaoInstalar: 'Simulation: this would open the plugin installation page.',
     fechar: 'Close',
     naoAbriu: 'Word didn\'t open?',
     naoAbriuDetalhe: 'Download the file linked to the item. In Word, the ENSPACE pane recognizes the item and sends the document back.',
@@ -933,7 +945,7 @@ const en: Textos = {
   },
 
   janela: {
-    aviso: 'Mockup of Word with the ENSPACE pane. The Word window is not the proposal; the pane and saving to the item are.',
+    aviso: 'Word plugin simulation: this is how the ENSPACE pane looks inside Word. The gray window only stands for Word; the pane and saving to the item are the proposal.',
     tituloDoApp: 'Word',
     salvoNaBarra: hora => `Saved to ENSPACE at ${hora}`,
     naoSalvoNaBarra: 'Unsaved changes',
@@ -1009,7 +1021,7 @@ const en: Textos = {
     configuracao: 'Field settings',
     wordDeVerdade: 'Open the real Word',
     reiniciar: 'Start over',
-    dica: 'Each contract in the list shows a field state.',
+    dica: 'Each contract shows a field state. To see the Word plugin, open a contract in Word and click See Word plugin simulation.',
     oQueMuda: 'Show what changes',
   },
 
@@ -1161,6 +1173,7 @@ const es: Textos = {
     renomear: 'Renombrar',
     remover: 'Quitar documento',
     pdfSoLeitura: 'Un PDF no se edita. Para cambiarlo, reemplaza el archivo.',
+    simulacaoBaixar: 'Simulación: no se descarga nada.',
 
     abertoPorVoceNoWord: desde => `Tienes este documento abierto en Word desde las ${desde}.`,
     abertoPorVoceNoWordDetalhe: 'Cada Guardar en Word se convierte en una versión aquí. Cierra el documento en Word para liberarlo. Mientras tanto, las demás personas solo leen.',
@@ -1224,7 +1237,7 @@ const es: Textos = {
     concluir: 'Listo',
     concluindo: 'Guardando',
     versaoSalva: n => `Versión ${n} guardada`,
-    areaDoOnlyoffice: 'Área de ONLYOFFICE (maqueta): haz clic en el texto y escribe para ver el guardado.',
+    areaDoOnlyoffice: 'Simulación de ONLYOFFICE: haz clic en el texto y escribe para ver el guardado.',
     barra: ['Archivo', 'Inicio', 'Insertar', 'Diseño', 'Referencias', 'Colaboración'],
     escHint: 'Esc cierra solo lo que está encima. El editor se cierra con Listo.',
   },
@@ -1277,7 +1290,10 @@ const es: Textos = {
     reservado: 'Reservado para ti',
     abrindo: 'Abriendo en Word',
     abertoToast: 'Documento abierto en Word',
-    abrirJanela: 'Ver el panel de ENSPACE (maqueta)',
+    abrirJanela: 'Ver simulación del plugin de Word',
+    abrirJanelaCurto: 'Simulación del plugin',
+    explicaSimulacao: 'Para ver cómo aparece el plugin de ENSPACE dentro de Word, haz clic en Ver simulación del plugin de Word. Después, el mismo botón queda en la tarjeta del campo.',
+    simulacaoInstalar: 'Simulación: aquí se abriría la página de instalación del plugin.',
     fechar: 'Cerrar',
     naoAbriu: '¿Word no se abrió?',
     naoAbriuDetalhe: 'Descarga el archivo vinculado al ítem. En Word, el panel de ENSPACE reconoce el ítem y envía el documento de vuelta.',
@@ -1293,7 +1309,7 @@ const es: Textos = {
   },
 
   janela: {
-    aviso: 'Maqueta de Word con el panel de ENSPACE. La ventana de Word no es propuesta; el panel y el guardado en el ítem sí.',
+    aviso: 'Simulación del plugin de Word: así aparece el panel de ENSPACE dentro de Word. La ventana gris solo representa Word; el panel y el guardado en el ítem son la propuesta.',
     tituloDoApp: 'Word',
     salvoNaBarra: hora => `Guardado en ENSPACE a las ${hora}`,
     naoSalvoNaBarra: 'Cambios sin guardar',
@@ -1369,7 +1385,7 @@ const es: Textos = {
     configuracao: 'Configuración del campo',
     wordDeVerdade: 'Abrir el Word de verdad',
     reiniciar: 'Empezar de nuevo',
-    dica: 'Cada contrato de la lista muestra un estado del campo.',
+    dica: 'Cada contrato muestra un estado del campo. Para ver el plugin de Word, abre un contrato en Word y haz clic en Ver simulación del plugin de Word.',
     oQueMuda: 'Mostrar lo que cambia',
   },
 

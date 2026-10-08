@@ -27,6 +27,7 @@ const emit = defineEmits<{
   ler: [itemId: number]
   versoes: [itemId: number]
   voltarAoWord: [itemId: number]
+  simulacao: [itemId: number]
 }>()
 
 const toast = useToast()
@@ -160,6 +161,7 @@ const trilho = [
               @ler="emit('ler', itemAberto!.id)"
               @versoes="emit('versoes', itemAberto!.id)"
               @voltar-ao-word="emit('voltarAoWord', itemAberto!.id)"
+              @simulacao="emit('simulacao', itemAberto!.id)"
             />
           </div>
 

@@ -135,7 +135,7 @@ const menuBaixar = computed<DropdownMenuItem[]>(() => [
 ])
 
 function baixar(ext: string) {
-  toast.add({ title: `${doc.value?.name.replace(/\.(docx|pdf)$/i, '')}${ext}`, description: 'Maquete: nada é baixado.', icon: 'i-lucide-download', color: 'neutral' })
+  toast.add({ title: `${doc.value?.name.replace(/\.(docx|pdf)$/i, '')}${ext}`, description: props.t.campo.simulacaoBaixar, icon: 'i-lucide-download', color: 'neutral' })
 }
 
 /* ícones decorativos da barra do ONLYOFFICE (maquete) */

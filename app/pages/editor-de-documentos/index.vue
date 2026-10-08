@@ -175,8 +175,13 @@ function verJanela(copia: boolean) {
 }
 
 function voltarAoWord(itemId: number) {
-  copiaBaixada.value = false
   lancarWord(itemId, 'word-desktop')
+  // Sem o Word real ligado, voltar ao Word é voltar à simulação.
+  if (!wordDeVerdade.value) verSimulacao(itemId)
+}
+
+function verSimulacao(itemId: number) {
+  copiaBaixada.value = false
   janelaDoWord.value = itemId
 }
 
@@ -217,7 +222,7 @@ const itemDasVersoes = computed(() => (versoesAbertas.value !== null ? itemPorId
       <ControlesDePrototipo />
 
       <span class="ml-auto flex items-center gap-2">
-        <span class="hidden items-center gap-1.5 text-xs text-muted 2xl:flex">
+        <span class="flex items-center gap-1.5 text-xs text-muted">
           <UIcon name="i-lucide-mouse-pointer-click" class="size-3.5" />
           {{ t.andaime.dica }}
         </span>
@@ -310,6 +315,7 @@ const itemDasVersoes = computed(() => (versoesAbertas.value !== null ? itemPorId
       @ler="(id: number) => ler(id)"
       @versoes="(id: number) => (versoesAbertas = id)"
       @voltar-ao-word="voltarAoWord"
+      @simulacao="verSimulacao"
     />
 
     <EscolhaDeEditor v-model:open="escolhaAberta" :t="t" @escolher="aoEscolher" />
