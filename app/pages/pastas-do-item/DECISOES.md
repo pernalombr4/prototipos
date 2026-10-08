@@ -24,13 +24,13 @@ A folder vira aba: texto sobre uma linha de base que é a borda de cima do conte
 |---|---|---|---|
 | 1 | A ativa parece botão aceso: fundo e contorno azuis | A ativa é aba: traço de 2 px na cor da marca (Sublinhado) ou fundo da página com traço no topo (Navegador) | A marca da ativa saiu da caixa e foi para a borda que encosta no conteúdo. A ativa ganha só negrito e cor no texto |
 | 2 | Cada folder é um chip com contorno, sombra e 4 px de espaço | Texto e ícone soltos, sem contorno nem sombra | Tirei a caixa de todas. O que separa uma folder da outra é o espaço do texto; no Navegador, um fio vertical entre as inativas, que some ao lado da ativa |
-| 3 | Hover acende o chip inteiro, como botão | Hover clareia o texto e mostra um fundo leve só no miolo (Sublinhado) ou a aba inteira em cinza (Navegador) | O hover não muda a forma da folder, só a intensidade, como Twenty e monday |
+| 3 | Hover acende o chip inteiro, como botão | Sublinhado: texto mais forte e traço rosa fraco crescendo sobre a linha de base. Navegador: a aba inteira em cinza | Sem fundo no Sublinhado: o hover é uma prévia do traço da ativa, na cor de destaque mais fraca (rodada 2) |
 | 4 | Barra e conteúdo não se tocam: faixa sem borda, linha solta 45 px abaixo | Linha de base contínua de ponta a ponta; o conteúdo começa logo abaixo dela | A linha de base virou a borda de cima do conteúdo. A linha solta da Visão Geral saiu, porque repetia a separação |
-| 5 | Arrasto nativo: cópia translúcida por cima, original parada, vizinha troca só na borda | A própria folder segue o mouse, levantada com sombra; a vizinha desliza assim que o centro da arrastada passa da metade dela | Arrasto por ponteiro: depois de 5 px a folder engata, acompanha o mouse e as vizinhas abrem espaço com transição, como as abas do Chrome |
+| 5 | Arrasto nativo: cópia translúcida por cima, original parada, vizinha troca só na borda | A própria folder segue o mouse como ficha leve, por cima das vizinhas; a vizinha desliza assim que o centro da arrastada passa da metade dela; a aberta leva o traço junto | Arrasto por ponteiro: depois de 5 px a folder engata, acompanha o mouse e as vizinhas abrem espaço com transição, como as abas do Chrome. Arrastar não abre a folder (rodada 2) |
 | 6 | Soltar no mesmo lugar abre popup de salvar | Soltar no mesmo lugar não faz nada; ordem nova salva sozinha, com aviso "Ordem das folders salva." e Desfazer | A barra compara a posição de saída e a de chegada; só avisa quando muda. Sem popup de confirmação: o Desfazer cobre o arrependimento |
 | 7 | "+ ⌄" abre menu com 1 item (Nova folder) | "+" cria a folder direto; "+N ⌄" só aparece quando sobra folder | Separei as 2 ações: criar é 1 clique; ver as escondidas é outro botão, que some quando cabem todas |
 | 8 | Menu "+N" com lista, busca e alça de arrasto | Menu "+N" com busca (CommandPalette), contador e "⋯" na linha em foco | Usei o padrão Popover + CommandPalette do Nuxt UI: busca, teclado e mensagem "Nenhuma folder encontrada." vêm prontos. Escolher uma escondida a traz para a barra e a abre |
-| 9 | Menu da folder só pelo botão direito (na barra) | Seta ⌄ visível na ativa, botão direito em qualquer uma e clique duplo para renomear | O menu ganhou uma porta à vista, como Notion e Attio. O botão direito não ativa a folder (ativação manual: clique, Enter ou Espaço) |
+| 9 | Menu da folder só pelo botão direito (na barra); o botão direito não troca de folder | Seta ⌄ visível na ativa, botão direito e clique duplo para renomear; o botão direito continua sem trocar de folder | O menu ganhou uma porta à vista, como Notion e Attio. A folder abre só no clique, com Enter ou com Espaço (rodada 2) |
 | 10 | Excluir aparece em folder do sistema | Em folder do sistema, Excluir aparece desabilitado com "Folder do sistema. Você pode ocultar." | O menu explica antes do clique, em vez de abrir um modal que recusa |
 | 11 | Ocultar: não conferido (não ocultei nada no workspace) | Ocultar mostra aviso com Desfazer | O mesmo aviso da ordem: a ação é imediata e reversível por alguns segundos |
 | 12 | Folder aberta não vai para o endereço | `?folder=anexos` no endereço | Dá para mandar o link de uma folder, e recarregar não volta para a Visão Geral (receita "Tabs com query" do Nuxt UI) |
@@ -50,7 +50,7 @@ A folder vira aba: texto sobre uma linha de base que é a borda de cima do conte
 - **Mudou:** a troca de folder anima o espaço da seta ⌄ (padding), para as vizinhas deslizarem em vez de pular
 - **Fronteira:** muda hover, ativação e arrasto da barra; não muda o resto
 - **Descartado:** traço deslizante entre folders (indicador do `UTabs`). Motivo: ele não acompanha a aba arrastada
-- **Ver:** `http://localhost:3000/pastas-do-item?estilo=sublinhado`
+- **Ver:** `http://localhost:3000/pastas-do-item?estilo=sublinhado` · `evidencias/proposta-hover.png`, `proposta-arrastar.png`, `proposta-arrastar-a-aberta.png`
 
 ### Como a barra foi montada
 
