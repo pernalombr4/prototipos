@@ -67,6 +67,8 @@ A folder vira aba: texto sobre uma linha de base que é a borda de cima do conte
 - **Mudou:** o estilo Aba de navegador saiu do protótipo (código, textos e `evidencias/proposta-aba-de-navegador.png`). Ficam Hoje e Sublinhado
 - **Mudou:** Sublinhado aprovado; o selo no andaime diz "aprovada" e o status do protótipo é aprovado
 - **Mudou:** `REQUISITOS.md` com os requisitos da barra no modelo Sublinhado, para o time de front
+- **Pedido (literal), na mesma rodada:** "ainda ta sumindo a setinha de dropdown na hora que seguro a aba selecionada pra arrastar [...] nao pode sumir se eu estiver arrastando a aba emq ue estou no momento"
+- **Mudou:** arrastando a folder aberta, a seta ⌄ fica por cima da aba (antes, o fundo da aba arrastada a cobria). Quando outra folder passa por cima da aberta, a seta continua por baixo. Conferido pelo DOM (`elementFromPoint` no ponto da seta) nos 2 casos
 - **Descartado:** Aba de navegador. Motivo: ela achou ruim
 - **Ver:** `http://localhost:3000/pastas-do-item` · `REQUISITOS.md`
 

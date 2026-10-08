@@ -64,7 +64,7 @@
 | RD-07 | Soltar no mesmo lugar não deve fazer nada: sem popup, sem aviso, sem gravação. | Arrastar e voltar ao lugar de origem não mostra nada. |
 | RD-08 | Soltar em outro lugar deve salvar a ordem sozinho e mostrar o aviso "Ordem das folders salva." com o botão Desfazer, por 4 s. | Desfazer volta a ordem anterior. Não existe popup de confirmação. |
 | RD-09 | A seta ⌄ da folder aberta (RM-01) deve continuar visível no arrasto e acompanhar a aba, quando ela é a arrastada e quando é a vizinha que desliza. | A seta nunca some nem fica no lugar antigo. |
-| RD-10 | A seta ⌄ deve ficar abaixo da folder arrastada. | Outra folder passando por cima da aberta cobre a seta. |
+| RD-10 | Quando a arrastada é a aberta, a seta ⌄ deve ficar por cima dela. Quando outra folder passa por cima da aberta, a seta deve ficar por baixo da arrastada. | Arrastando a aberta, a seta continua visível. Outra folder passando por cima da aberta cobre a seta. |
 
 ## Menu da folder (RM)
 

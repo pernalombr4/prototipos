@@ -303,7 +303,11 @@ function abrirEscondida(p: Pasta) {
  * esse espaço (`pr-8`).
  */
 const posMenu = ref<{ left: number, top: number, height: number } | null>(null)
-/** Durante o arrasto, a seta anda junto com a aba aberta (arrastada ou vizinha que desliza). */
+/**
+ * Durante o arrasto, a seta anda junto com a aba aberta (arrastada ou vizinha que desliza).
+ * Camada: por cima da aba quando a arrastada é a aberta (senão o fundo da aba a cobre);
+ * por baixo quando outra folder passa por cima da aberta (senão parece ser da arrastada).
+ */
 const deslocMenu = ref(0)
 const menuSemTransicao = ref(false)
 
@@ -551,7 +555,8 @@ const aparencia = computed(() => {
           color="neutral"
           variant="ghost"
           size="xs"
-          class="absolute z-[5] size-6 justify-center p-0 text-muted hover:text-highlighted"
+          class="absolute size-6 justify-center p-0 text-muted hover:text-highlighted"
+          :class="arrastando === ativa ? 'z-20' : 'z-[5]'"
           :style="{
             left: `${posMenu.left}px`,
             top: `${posMenu.top + posMenu.height / 2 - 12}px`,
