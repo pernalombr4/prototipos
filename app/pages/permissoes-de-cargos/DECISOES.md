@@ -40,7 +40,7 @@ diz o que muda, em palavras, e quantas pessoas sentem.
 | Filtro "só alteradas" ligado ao abrir | Twenty | **Descartado como padrão.** Abre em "Todas" para a tela não esconder categoria de quem chega; "Regra própria" fica a 1 clique, com contagem |
 | Selecionar linhas e aplicar | Salesforce | **Adiado.** A caixa de coluna sobre a lista filtrada cobre o caso ("Filial Sul" + Excluir = 40 categorias) |
 | Aba Permissões dentro da categoria | Attio, Notion, Airtable | **Adiado** para outra rodada: é a segunda porta da mesma regra |
-| Escopo "só os meus itens" | HubSpot, Monday, Pipefy, ClickUp | Rodada 2: sublinha "Quais itens" (Todos ou Os seus) para Ver, Atualizar e Excluir. Pede back-end (abaixo) |
+| Escopo "só os meus itens" (`is_owner`) | HubSpot, Monday, Pipefy, ClickUp | Rodada 3: sublinha "Só se for o criador", uma caixa por ação (Ver, Atualizar, Excluir). Pede back-end (abaixo) |
 | Parcial na célula | Directus, Strapi | Rodada 2: traço na caixa e dica "Ver em 76 de 80 campos"; o clique abre Ajustar › Campos |
 | Ícone por ação e o que ela libera | Directus, Twenty, ClickUp, Jira | Rodada 2: ícone no cabeçalho, dica por ação e 1 linha de descrição por área fixa |
 | Filhos na mesma grade | Appsmith, Retool | Rodada 2: a seta da categoria abre Campos, Quais itens e cada formulário na própria tabela |
@@ -64,7 +64,7 @@ diz o que muda, em palavras, e quantas pessoas sentem.
    slot `#header-{key}` no `EnTable`.
 5. **Volume.** Acima de algumas centenas de categorias, a tabela precisa de virtualização (o `UTable` e o
    `EnTable` já têm a prop `virtualize`).
-6. **"Os seus" (alcance).** O develop grava `rules: []` em toda permissão. "Só os itens que a pessoa criou"
+6. **Só se for o criador (`is_owner`).** O develop grava `rules: []` em toda permissão. "Só os itens que a pessoa criou"
    precisa de uma regra ali (por exemplo, criador = pessoa logada) e de o back-end aplicá-la na listagem,
    na edição e na exclusão.
 7. **Quem acessa.** A aba lista o que cada cargo faz numa categoria: pede uma rota que devolva as
@@ -146,5 +146,19 @@ salvar. Perde-se só a herança para o que for criado depois.
   - Parcial, herdado e travado não dependem só de cor: traço, tom e cadeado.
   - Ficou: a linha das categorias abertas fica longa com 12 formulários; a seta recolhe.
 - **CSS próprio:** nenhum. Tom claro pela prop `ui` do `UCheckbox` (`indicator: 'bg-primary/40'`), consultada no tema gerado `.nuxt/ui/checkbox.ts`.
-- **Não deu:** print da rodada 2. Por quê: a janela do Chrome estava escondida; o visual foi conferido pelo CSS calculado no site publicado (recuo das sublinhas, tom claro do herdado, desfazer sem sobrepor a caixa).
+- **Não deu:** print da rodada 2. Por quê: a janela do Chrome estava escondida; conferi o visual pelo CSS calculado no site publicado (recuo das sublinhas, tom claro do herdado, desfazer sem sobrepor a caixa).
+- **Ver:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/
+
+## Rodada 3 · 2026-10-08
+- **Pedido (literal):** "ta sem tooltip nos cadeados. nao precisa de icone nos titulos de criar, ver editar e excluir. pode diminuir a distancia entre as colunas, acredito. se uma permissao tiver "outras açoes", sendo mais de uma na mesma linha, como ficaria? é melhor dividir em mais colunas? agora, ainda tem um tipo de permissão que não temos, mas precisamos ter, que é: pode ter essa permissão desde que seja criador daquilo. ex.: pode ver itens na categoria x se tiver criado esse item. como isso seria configurado? seria uma permissao is_owner"
+- **Mudou:**
+  - Cadeado com dica: o motivo ("Exigido por Atualizar. Desmarque Atualizar para tirar Ver.") mora no próprio cadeado, que recebe foco pelo teclado. A caixa travada fica desabilitada e não abre dica.
+  - Títulos Criar, Ver, Atualizar e Excluir sem ícone, nas 3 tabelas. A dica do que a ação libera continua no título.
+  - Colunas de ação com 80 px fixos e sem recuo lateral; a coluna do nome fica com o resto.
+  - Outras ações: até 2 aparecem na linha; a partir da 3ª, um botão "+N ações" abre a lista, e mostra quantas estão marcadas lá dentro.
+  - Simulação no andaime ("Outras ações › Simular 5 na mesma área"): Tarefas rápidas ganha 5 ações inventadas para ver o caso.
+  - Só se for o criador (`is_owner`): a sublinha virou uma caixa por ação (Ver, Atualizar, Excluir), no lugar do seletor "Todos / Os seus".
+- **Descartado:** uma coluna para cada "outra ação". Motivo: cada uma existe numa área só (Usar Chat da IA só em IA, Reenviar só em Enviados), então cada coluna nova teria 1 caixa e 23 linhas vazias, e a tabela alargaria a cada função nova.
+- **Fronteira:** muda o cadeado, os títulos das colunas, as larguras, a coluna Outras ações e a sublinha de criador; não muda o resto.
+- **Maquete:** as 5 ações simuladas não existem no develop e não entram na contagem de Permissões Ativas.
 - **Ver:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/

@@ -19,13 +19,6 @@ import type { Field, ItemType, Role } from '@be-enlighten/enspace-sdk-schemas'
 export type Acao = 'criar' | 'ver' | 'atualizar' | 'excluir'
 export const acoes: Acao[] = ['criar', 'ver', 'atualizar', 'excluir']
 
-/** Ícone de cada ação no cabeçalho das colunas (padrão de Directus, Twenty e Strapi). */
-export const iconesDeAcao: Record<Acao, string> = {
-  criar: 'i-lucide-plus',
-  ver: 'i-lucide-eye',
-  atualizar: 'i-lucide-pencil',
-  excluir: 'i-lucide-trash-2',
-}
 
 /**
  * Ações que podem valer só para os itens que a pessoa criou ("Os seus").
@@ -368,6 +361,21 @@ export const configuracoes: GrupoFixo[] = [
     linhas: [{ chave: 'credenciais', icone: 'i-lucide-key-round', acoes: CRUD }],
   },
 ]
+
+/**
+ * Simulação do andaime: uma área com 5 ações fora do CRUD, para ver como a
+ * coluna "Outras ações" se comporta quando há mais de uma na mesma linha.
+ * Hoje o develop tem no máximo 1 por área (Usar Chat da IA, Iniciar Spaceflow,
+ * Reenviar). Estas 5 são inventadas.
+ */
+export const outrasSimuladas = ['exportar', 'importar', 'arquivar', 'comentar', 'duplicar']
+
+export function padraoComOutrasSimuladas(): GrupoFixo[] {
+  return padrao.map(g => ({
+    ...g,
+    linhas: g.linhas.map(l => l.chave === 'tarefasRapidas' ? { ...l, outras: [...outrasSimuladas] } : l),
+  }))
+}
 
 /** O que o cargo já tem nas permissões fixas, ao abrir a tela. Chave `linha:acao`. */
 export const fixasIniciais: string[] = [

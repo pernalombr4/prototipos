@@ -27,7 +27,6 @@ import {
   acoes,
   acoesDeAlcance,
   acoesDeCampo,
-  iconesDeAcao,
 } from './mocks'
 import {
   type EstadoDoCargo,
@@ -264,11 +263,6 @@ function definirAlcance(c: CategoriaMock, acao: AcaoDeAlcance, valor: 'todos' | 
   e.alcance = novo
 }
 
-const itensDeAlcance = computed(() => [
-  { label: props.t.alcanceTodos, value: 'todos' },
-  { label: props.t.alcanceSeus, value: 'seus' },
-])
-
 function formSegue(c: CategoriaMock, f: FormularioMock) {
   return !props.estado.categorias[c.id]?.formularios[f.id]
 }
@@ -285,7 +279,7 @@ function definirForm(c: CategoriaMock, f: FormularioMock, a: Acao, valor: boolea
 
 const colunas = computed<TableColumn<Linha>[]>(() => [
   { id: 'nome', header: props.t.colunaCategoria, meta: { class: { th: 'w-auto', td: 'w-auto' } } },
-  ...acoes.map(a => ({ id: a, header: props.t.acoes[a], meta: { class: { th: 'text-center w-28 px-1', td: 'text-center w-28 px-1' } } })),
+  ...acoes.map(a => ({ id: a, header: props.t.acoes[a], meta: { class: { th: 'text-center w-20 px-0', td: 'text-center w-20 px-0' } } })),
   { id: 'campos', header: props.t.colunaCampos, meta: { class: { th: 'w-28', td: 'w-28' } } },
   { id: 'formularios', header: props.t.colunaFormularios, meta: { class: { th: 'w-44', td: 'w-44' } } },
   { id: 'ajustar', header: '', meta: { class: { th: 'w-32 pl-0', td: 'w-32 pl-0 text-right' } } },
@@ -334,7 +328,6 @@ const meta = {
               :desabilitada="somenteLeitura"
               @alterar="v => definirPadrao(a, v)"
             />
-            <UIcon :name="iconesDeAcao[a]" class="size-4 text-muted" />
             <span class="text-sm text-default">{{ t.acoes[a] }}</span>
           </span>
           <UButton v-if="excecoes(a)" :label="rotuloExcecao(a)" size="xs" variant="link" color="neutral" class="-ml-1 px-1 text-xs" @click="filtro = 'proprias'" />
@@ -366,16 +359,13 @@ const meta = {
       :get-row-id="(l: Linha) => l.id"
       sticky
       class="max-h-[62dvh] rounded-lg border border-default"
-      :ui="{ base: 'w-full min-w-[64rem] table-fixed', th: 'py-2 text-xs bg-default', td: 'py-2' }"
+      :ui="{ base: 'w-full min-w-[56rem] table-fixed', th: 'py-2 text-xs bg-default', td: 'py-2' }"
     >
       <!-- Cabeçalho: ícone e dica da ação; a caixa marca a coluna da lista filtrada. -->
       <template v-for="a in acoes" :key="a" #[`${a}-header`]>
         <span class="inline-flex flex-col items-center gap-1">
           <UTooltip :text="t.dicas[a]">
-            <span class="inline-flex items-center gap-1">
-              <UIcon :name="iconesDeAcao[a]" class="size-3.5 text-muted" />
-              {{ t.acoes[a] }}
-            </span>
+            <span>{{ t.acoes[a] }}</span>
           </UTooltip>
           <UTooltip :text="estadoDaColuna(a) === true ? t.desmarcarColuna(t.acoes[a], filtradas.length) : t.marcarColuna(t.acoes[a], filtradas.length)">
             <UCheckbox
@@ -449,7 +439,7 @@ const meta = {
 
         <!-- Sublinha: quais itens -->
         <span v-else-if="row.original.tipo === 'alcance'" class="flex min-w-0 items-center gap-2 pl-16">
-          <UIcon name="i-lucide-user-round-check" class="size-4 shrink-0 text-muted" />
+          <UIcon name="i-lucide-user-round-check" class="size-4 shrink-0 text-info" />
           <span class="min-w-0">
             <span class="block text-sm text-default">{{ t.subAlcance }}</span>
             <span class="block truncate text-xs text-muted">{{ t.subAlcanceDesc }}</span>
@@ -517,17 +507,18 @@ const meta = {
           <span v-else class="text-dimmed" aria-hidden="true">·</span>
         </template>
 
-        <!-- Quais itens: Todos ou Os seus, por ação. -->
+        <!--
+          Só se for o criador (is_owner): uma caixa por ação. Marcada, a ação vale só
+          nos itens que a pessoa criou. Criar não tem: quem cria é sempre o criador.
+        -->
         <template v-else-if="row.original.tipo === 'alcance'">
-          <USelect
+          <CaixaDePermissao
             v-if="(acoesDeAlcance as Acao[]).includes(a)"
-            :model-value="alcance(row.original.c, a as AcaoDeAlcance)"
-            :items="itensDeAlcance"
-            size="xs"
-            class="w-full"
-            :disabled="somenteLeitura || !acoesDaCategoria(estado, row.original.c.id)[a]"
-            :aria-label="`${t.subAlcance}: ${t.acoes[a]}`"
-            @update:model-value="v => definirAlcance(row.original.c, a as AcaoDeAlcance, v as 'todos' | 'seus')"
+            :valor="alcance(row.original.c, a as AcaoDeAlcance) === 'seus'"
+            :rotulo="`${t.subAlcance}: ${t.acoes[a]} (${row.original.c.name})`"
+            :dica="acoesDaCategoria(estado, row.original.c.id)[a] ? t.soOsSeus(t.acoes[a]) : t.acaoBloqueada(t.acoes[a])"
+            :desabilitada="somenteLeitura || !acoesDaCategoria(estado, row.original.c.id)[a]"
+            @alterar="v => definirAlcance(row.original.c, a as AcaoDeAlcance, v ? 'seus' : 'todos')"
           />
           <span v-else class="text-dimmed" aria-hidden="true">·</span>
         </template>

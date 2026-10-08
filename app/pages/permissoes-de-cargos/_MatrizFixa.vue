@@ -13,7 +13,7 @@
 import type { TableColumn } from '@nuxt/ui'
 import type { Textos } from './textos'
 import CaixaDePermissao from './_CaixaDePermissao.vue'
-import { type Acao, type GrupoFixo, acoes, iconesDeAcao } from './mocks'
+import { type Acao, type GrupoFixo, acoes } from './mocks'
 import type { EstadoDoCargo } from './estado'
 
 const props = defineProps<{
@@ -77,9 +77,9 @@ const marcada = (chave: string) => props.estado.fixas.includes(chave)
 const mudou = (chave: string) => marcada(chave) !== props.salvo.fixas.includes(chave)
 
 const colunas = computed<TableColumn<GrupoFixo['linhas'][number]>[]>(() => [
-  { accessorKey: 'chave', header: props.t.colunaArea, meta: { class: { th: 'w-[34%]', td: 'w-[34%] whitespace-normal' } } },
-  ...acoes.map(a => ({ id: a, header: props.t.acoes[a], meta: { class: { th: 'text-center w-[11%]', td: 'text-center w-[11%]' } } })),
-  { id: 'outras', header: props.t.colunaOutras },
+  { accessorKey: 'chave', header: props.t.colunaArea, meta: { class: { th: 'w-auto', td: 'w-auto whitespace-normal' } } },
+  ...acoes.map(a => ({ id: a, header: props.t.acoes[a], meta: { class: { th: 'text-center w-20 px-0', td: 'text-center w-20 px-0' } } })),
+  { id: 'outras', header: props.t.colunaOutras, meta: { class: { th: 'w-72', td: 'w-72' } } },
 ])
 </script>
 
@@ -112,10 +112,7 @@ const colunas = computed<TableColumn<GrupoFixo['linhas'][number]>[]>(() => [
         <template v-for="a in acoes" :key="a" #[`${a}-header`]>
           <span class="inline-flex flex-col items-center gap-1">
             <UTooltip :text="t.dicas[a]">
-              <span class="inline-flex items-center gap-1">
-                <UIcon :name="iconesDeAcao[a]" class="size-3.5 text-muted" />
-                {{ t.acoes[a] }}
-              </span>
+              <span>{{ t.acoes[a] }}</span>
             </UTooltip>
             <UCheckbox
               v-if="chavesDaColuna(g, a).length"
@@ -162,10 +159,15 @@ const colunas = computed<TableColumn<GrupoFixo['linhas'][number]>[]>(() => [
           </span>
         </template>
 
+        <!--
+          Outras ações: até 2 aparecem na linha; o resto vai para "+N ações", que abre
+          a lista (como o "More" do Zoho Creator). Assim a coluna não alarga e não
+          nasce uma coluna quase vazia para cada ação que só existe numa área.
+        -->
         <template #outras-cell="{ row }">
-          <span class="flex flex-wrap gap-3">
+          <span class="flex flex-wrap items-center gap-x-3 gap-y-1">
             <UCheckbox
-              v-for="o in row.original.outras ?? []"
+              v-for="o in (row.original.outras ?? []).slice(0, 2)"
               :key="o"
               :model-value="marcada(`${row.original.chave}:${o}`)"
               :label="t.outras[o]"
@@ -173,6 +175,28 @@ const colunas = computed<TableColumn<GrupoFixo['linhas'][number]>[]>(() => [
               size="sm"
               @update:model-value="v => alternar(`${row.original.chave}:${o}`, v === true)"
             />
+            <UPopover v-if="(row.original.outras ?? []).length > 2" :content="{ align: 'start' }">
+              <UButton
+                :label="t.maisAcoes((row.original.outras ?? []).length - 2, (row.original.outras ?? []).slice(2).filter(o => marcada(`${row.original.chave}:${o}`)).length)"
+                size="xs"
+                variant="soft"
+                color="neutral"
+                trailing-icon="i-lucide-chevron-down"
+              />
+              <template #content>
+                <div class="flex flex-col gap-2 p-3">
+                  <UCheckbox
+                    v-for="o in (row.original.outras ?? []).slice(2)"
+                    :key="o"
+                    :model-value="marcada(`${row.original.chave}:${o}`)"
+                    :label="t.outras[o]"
+                    :disabled="somenteLeitura"
+                    size="sm"
+                    @update:model-value="v => alternar(`${row.original.chave}:${o}`, v === true)"
+                  />
+                </div>
+              </template>
+            </UPopover>
           </span>
         </template>
       </UTable>

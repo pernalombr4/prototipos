@@ -57,7 +57,12 @@ const clara = computed(() => props.herdada && !props.difere && props.valor !== '
 
     <!-- Vaga 3: cadeado (travada) ou desfazer (diferente do nível de cima) -->
     <span class="flex w-5 justify-center">
-      <UIcon v-if="travadaPor" name="i-lucide-lock" class="size-3 text-muted" aria-hidden="true" />
+      <!-- A caixa travada fica desabilitada e não abre dica: o motivo mora no cadeado. -->
+      <UTooltip v-if="travadaPor" :text="travadaPor">
+        <button type="button" class="flex cursor-help items-center rounded-sm text-muted transition-colors hover:text-highlighted focus-visible:outline-2 focus-visible:outline-primary" :aria-label="travadaPor">
+          <UIcon name="i-lucide-lock" class="size-3" />
+        </button>
+      </UTooltip>
       <UTooltip v-else-if="difere && rotuloDesfazer && !desabilitada" :text="rotuloDesfazer">
         <UButton
           icon="i-lucide-undo-2"

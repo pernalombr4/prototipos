@@ -16,7 +16,7 @@
 import type { TableColumn } from '@nuxt/ui'
 import type { Textos } from './textos'
 import CaixaDePermissao from './_CaixaDePermissao.vue'
-import { type Acao, type AcaoDeCampo, type CategoriaMock, acessoDeOutroCargo, acoes, acoesDeCampo, cargo, iconesDeAcao, outrosCargos } from './mocks'
+import { type Acao, type AcaoDeCampo, type CategoriaMock, acessoDeOutroCargo, acoes, acoesDeCampo, cargo, outrosCargos } from './mocks'
 import { type EstadoDoCargo, acoesDaCategoria, acoesDoFormulario, comDependencia, temAcesso, verExigidoPor } from './estado'
 
 type Aba = 'campos' | 'formularios' | 'acesso'
@@ -126,7 +126,7 @@ function estadoDaColunaDeCampo(a: AcaoDeCampo): Valor {
 
 const colunasDeCampo = computed<TableColumn<LinhaDeCampo>[]>(() => [
   { accessorKey: 'label', header: props.t.colunaCampo },
-  ...acoesDeCampo.map(a => ({ id: a, header: props.t.acoes[a], meta: { class: { th: 'text-center w-24', td: 'text-center w-24' } } })),
+  ...acoesDeCampo.map(a => ({ id: a, header: props.t.acoes[a], meta: { class: { th: 'text-center w-20 px-0', td: 'text-center w-20 px-0' } } })),
 ])
 
 /* ------------------------------------------------------------------ *
@@ -227,12 +227,6 @@ const itensDeAba = computed(() => [
             class="rounded-lg border border-default"
             :ui="{ base: 'w-full min-w-[36rem] table-fixed', th: 'py-2 text-xs', td: 'py-2' }"
           >
-            <template v-for="a in acoes" :key="a" #[`${a}-header`]>
-              <span class="inline-flex items-center gap-1">
-                <UIcon :name="iconesDeAcao[a]" class="size-3.5 text-muted" />
-                {{ t.acoes[a] }}
-              </span>
-            </template>
             <template #nome-cell="{ row }">
               <span class="flex min-w-0 items-center gap-2">
                 <UIcon :name="row.original.icone" class="size-4 shrink-0 text-muted" />
@@ -290,7 +284,7 @@ const itensDeAba = computed(() => [
                 <UTooltip :text="acoesCat[a] ? t.dicas[a] : t.acaoBloqueada(t.acoes[a])">
                   <span class="inline-flex flex-col items-center gap-1">
                     <span class="inline-flex items-center gap-1">
-                      <UIcon :name="acoesCat[a] ? iconesDeAcao[a] : 'i-lucide-lock'" class="size-3.5 text-muted" />
+                      <UIcon v-if="!acoesCat[a]" name="i-lucide-lock" class="size-3.5 text-muted" />
                       {{ t.acoes[a] }}
                     </span>
                     <UCheckbox
@@ -338,12 +332,6 @@ const itensDeAba = computed(() => [
             class="rounded-lg border border-default"
             :ui="{ base: 'w-full min-w-[40rem] table-fixed', th: 'py-2 text-xs', td: 'py-2' }"
           >
-            <template v-for="a in acoes" :key="a" #[`${a}-header`]>
-              <span class="inline-flex items-center gap-1">
-                <UIcon :name="iconesDeAcao[a]" class="size-3.5 text-muted" />
-                {{ t.acoes[a] }}
-              </span>
-            </template>
             <template #nome-cell="{ row }">
               <span class="flex items-center gap-2">
                 <span class="text-sm text-default">{{ row.original.nome }}</span>

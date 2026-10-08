@@ -4,7 +4,7 @@ import MatrizFixa from './_MatrizFixa.vue'
 import MatrizDeCategorias from './_MatrizDeCategorias.vue'
 import DetalheDaCategoria from './_DetalheDaCategoria.vue'
 
-import { type CategoriaMock, type Cenario, acoes, cargo, configuracoes, padrao, workspace } from './mocks'
+import { type CategoriaMock, type Cenario, acoes, cargo, configuracoes, padrao, padraoComOutrasSimuladas, workspace } from './mocks'
 import {
   caixasNaArvoreDeHoje,
   categoriasDoCenario,
@@ -87,7 +87,7 @@ const contagemDados = computed(() => ({
 }))
 
 const listaDeMudancas = computed(() =>
-  mudancas(salvo.value, estado.value, lista.value, [...padrao, ...configuracoes], c => t.value.linhas[c] ?? c),
+  mudancas(salvo.value, estado.value, lista.value, [...gruposDoPadrao.value, ...configuracoes], c => t.value.linhas[c] ?? c),
 )
 const pendentes = computed(() => listaDeMudancas.value.length)
 
@@ -110,6 +110,10 @@ function ajustar(c: CategoriaMock, aba: 'campos' | 'formularios' | 'acesso' = 'c
   abaDoDetalhe.value = aba
   detalheAberto.value = true
 }
+
+/** Rodada 3: simulação de 5 "outras ações" em Tarefas rápidas, só no andaime. */
+const simularOutras = ref(false)
+const gruposDoPadrao = computed(() => simularOutras.value ? padraoComOutrasSimuladas() : padrao)
 
 /** Rodada 2: padrão como primeira linha. A forma da rodada 1 (cartão) fica no andaime. */
 const formaDoPadrao = ref<'linha' | 'cartao'>('linha')
@@ -245,7 +249,7 @@ const fmt = (n: number) => n.toLocaleString('pt-BR')
               <h3 class="text-sm font-semibold text-highlighted">{{ t.padrao }}</h3>
               <p class="text-sm text-muted">{{ t.padraoDesc }}</p>
             </header>
-            <MatrizFixa :t="t" :grupos="padrao" :estado="estado" :salvo="salvo" :somente-leitura="somenteLeitura" />
+            <MatrizFixa :t="t" :grupos="gruposDoPadrao" :estado="estado" :salvo="salvo" :somente-leitura="somenteLeitura" />
           </section>
 
           <MatrizDeCategorias
@@ -341,6 +345,19 @@ const fmt = (n: number) => n.toLocaleString('pt-BR')
           :color="formaDoPadrao === f.valor ? 'primary' : 'neutral'"
           :variant="formaDoPadrao === f.valor ? 'solid' : 'subtle'"
           @click="formaDoPadrao = f.valor"
+        />
+
+        <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
+        <span class="text-xs font-semibold uppercase tracking-wider text-muted">Outras ações</span>
+        <UButton
+          v-for="f in [{ valor: false, rotulo: 'Como hoje' }, { valor: true, rotulo: 'Simular 5 na mesma área' }] as const"
+          :key="String(f.valor)"
+          :label="f.rotulo"
+          size="xs"
+          class="transition-transform hover:-translate-y-0.5"
+          :color="simularOutras === f.valor ? 'primary' : 'neutral'"
+          :variant="simularOutras === f.valor ? 'solid' : 'subtle'"
+          @click="simularOutras = f.valor"
         />
 
         <ControlesDePrototipo class="ml-auto" />
