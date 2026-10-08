@@ -75,6 +75,9 @@ A folder vira aba: texto sobre uma linha de base que é a borda de cima do conte
 - **Mudou:** `REQUISITOS.md` ganhou o grupo Teclado (RT-01 a RT-10): entrar pela folder aberta, setas, Home, End, Enter e Espaço, reordenar com Ctrl + Shift + seta, anúncio para leitor de tela, menu e "+N" sem mouse. O endereço ficou num grupo só dele (RE-01)
 - **Mudou:** no protótipo, a barra se remonta quando a ordem muda, para as setas seguirem a ordem da tela (antes seguiam a ordem de quando a barra montou), e o foco volta para a folder movida pelo teclado
 - **Não deu:** testar o Tab real. Por quê: a tecla Tab da automação não move o foco nesta janela; setas, Home, End, Enter, Espaço e Ctrl + Shift + seta foram conferidos por evento de teclado
+- **Pedido (literal), na mesma rodada:** "os TAMANHOS que voce ta cravando em px nao precisam ser cravados. o dev vai saber o que fazer. nao precisa citar tamanhos em px nos requisitos. cite tambem nos requisitos que esse tooltip existe"
+- **Mudou:** `REQUISITOS.md` sem medida cravada: px, ms, porcentagem e segundos viraram descrição ("linha fina", "transição suave", "tom mais claro", "alguns segundos")
+- **Mudou:** requisito RV-10 (tooltip da barra: "Arraste para reordenar. Clique com o botão direito para mais opções.") e o tooltip "Nova folder" no RX-01
 - **Descartado:** Aba de navegador. Motivo: ela achou ruim
 - **Ver:** `http://localhost:3000/pastas-do-item` · `REQUISITOS.md`
 

@@ -24,36 +24,37 @@
 
 | ID | Requisito | Critério de aceite |
 |---|---|---|
-| RV-01 | A barra deve ter uma linha de base de 1 px, cor `border-default`, de ponta a ponta, incluindo a área do "+" e do "+N". | A linha atravessa a barra inteira, sem interrupção. |
+| RV-01 | A barra deve ter uma linha de base fina, cor `border-default`, de ponta a ponta, incluindo a área do "+" e do "+N". | A linha atravessa a barra inteira, sem interrupção. |
 | RV-02 | A linha de base deve ser a borda de cima do conteúdo da folder. | O conteúdo começa logo abaixo da linha. A Visão Geral não tem outra linha horizontal no topo. |
 | RV-03 | A folder não deve ter contorno, sombra, fundo nem canto arredondado, aberta ou fechada. | Nenhuma folder parece botão ou ficha em repouso. |
-| RV-04 | Cada folder mostra ícone (16 px) e nome em texto de 14 px, com 4 px entre uma folder e outra. | Ícone e nome alinhados na mesma linha. |
+| RV-04 | Cada folder mostra ícone e nome, com um espaço pequeno entre uma folder e outra. | Ícone e nome alinhados na mesma linha. |
 | RV-05 | A folder fechada deve ter o texto na cor `text-muted`. | Todas as fechadas têm a mesma cor, mais fraca que a aberta. |
-| RV-06 | A folder aberta deve ter texto em negrito (semibold) na cor de destaque e um traço de 2 px, cantos redondos, na cor de destaque, sobre a linha de base. | Só a aberta tem traço forte e texto na cor de destaque. |
-| RV-07 | Ao trocar de folder, o traço da nova aberta deve crescer do centro para as pontas em 200 ms. | A troca anima o traço, sem salto. |
+| RV-06 | A folder aberta deve ter texto em negrito (semibold) na cor de destaque e um traço na cor de destaque, mais grosso que a linha de base e com cantos redondos, sobre ela. | Só a aberta tem traço forte e texto na cor de destaque. |
+| RV-07 | Ao trocar de folder, o traço da nova aberta deve crescer do centro para as pontas, com transição suave. | A troca anima o traço, sem salto. |
 | RV-08 | O traço da aberta deve pertencer à própria aba, não a um indicador separado da barra. | Ao arrastar a folder aberta, o traço vai junto (RD-05). |
 | RV-09 | A folder pode mostrar um contador depois do nome (exemplo: Comentários 3). | Na fechada, o contador é cinza; na aberta, tem fundo e texto na cor de destaque. |
+| RV-10 | Ao parar o mouse sobre a barra de folders, um tooltip deve mostrar "Arraste para reordenar. Clique com o botão direito para mais opções." | O tooltip aparece em qualquer folder, aberta ou fechada, nos 3 idiomas. |
 
 ## Hover (RH)
 
 | ID | Requisito | Critério de aceite |
 |---|---|---|
 | RH-01 | No hover de uma folder fechada, o texto deve passar para `text-highlighted`. | O texto fica mais forte que o das outras fechadas. |
-| RH-02 | No hover de uma folder fechada, um traço de 2 px na cor de destaque a 35 % deve crescer do centro sobre a linha de base, no mesmo lugar do traço da aberta. | O traço é rosa fraco, mais claro que o da aberta. |
+| RH-02 | No hover de uma folder fechada, um traço na cor de destaque, em tom mais claro, deve crescer do centro sobre a linha de base, no mesmo lugar do traço da aberta. | O traço é rosa fraco, mais claro que o da aberta. |
 | RH-03 | O hover não deve acender fundo atrás da folder. | Nenhuma folder vira bloco ao passar o mouse. |
 
 ## Arrasto (RD)
 
 | ID | Requisito | Critério de aceite |
 |---|---|---|
-| RD-01 | O arrasto deve começar depois de 5 px de movimento com o botão apertado. | Um clique com tremida pequena abre a folder em vez de arrastar. |
+| RD-01 | O arrasto deve começar só depois de um movimento pequeno com o botão apertado. | Um clique com tremida pequena abre a folder em vez de arrastar. |
 | RD-02 | A própria folder deve seguir o mouse na horizontal, presa aos limites da barra. Não deve existir cópia translúcida. | A folder sai do lugar junto com o ponteiro. |
 | RD-03 | A folder arrastada deve passar por cima das vizinhas, com o fundo da página, sem contorno, sombra, canto arredondado nem elevação. | O texto da vizinha não aparece misturado ao da arrastada. |
-| RD-04 | A vizinha deve trocar de lugar quando o centro da folder arrastada passar da metade dela, deslizando em 200 ms. | A vizinha se mexe antes de a arrastada chegar à borda dela. |
+| RD-04 | A vizinha deve trocar de lugar quando o centro da folder arrastada passar da metade dela, deslizando com transição suave. | A vizinha se mexe antes de a arrastada chegar à borda dela. |
 | RD-05 | A folder arrastada leva o traço embaixo: o forte, se for a aberta; o fraco (RH-02), se for fechada. | O traço anda junto com a folder. |
 | RD-06 | Arrastar não deve abrir a folder, nem o clique que encerra o arrasto. | Arrastar uma fechada e soltar mantém a mesma folder aberta. |
 | RD-07 | Soltar no mesmo lugar não deve fazer nada: sem popup, sem aviso, sem gravação. | Arrastar e voltar ao lugar de origem não mostra nada. |
-| RD-08 | Soltar em outro lugar deve salvar a ordem sozinho e mostrar o aviso "Ordem das folders salva." com o botão Desfazer, por 4 s. | Desfazer volta a ordem anterior. Não existe popup de confirmação. |
+| RD-08 | Soltar em outro lugar deve salvar a ordem sozinho e mostrar o aviso "Ordem das folders salva." com o botão Desfazer, por alguns segundos. | Desfazer volta a ordem anterior. Não existe popup de confirmação. |
 | RD-09 | A seta ⌄ da folder aberta (RM-01) deve continuar visível no arrasto e acompanhar a aba, quando ela é a arrastada e quando é a vizinha que desliza. | A seta nunca some nem fica no lugar antigo. |
 | RD-10 | Quando a arrastada é a aberta, a seta ⌄ deve ficar por cima dela. Quando outra folder passa por cima da aberta, a seta deve ficar por baixo da arrastada. | Arrastando a aberta, a seta continua visível. Outra folder passando por cima da aberta cobre a seta. |
 
@@ -72,7 +73,7 @@
 
 | ID | Requisito | Critério de aceite |
 |---|---|---|
-| RX-01 | O botão "+" na ponta direita deve abrir direto o modal "Nova folder", com o campo Nome. | Criar uma folder leva 1 clique até o modal, sem menu intermediário. |
+| RX-01 | O botão "+" na ponta direita deve ter o tooltip "Nova folder" e abrir direto o modal "Nova folder", com o campo Nome. | Criar uma folder leva 1 clique até o modal, sem menu intermediário. |
 | RX-02 | A folder criada entra no fim da fila, já aberta, com o aviso de criação. | A nova folder aparece com o traço forte. |
 | RX-03 | O botão "+N ⌄" deve aparecer só quando houver folder que não cabe, com N igual ao número de escondidas. | Com todas visíveis, o botão não existe. |
 | RX-04 | O "+N" deve abrir uma lista com busca ("Pesquisar folder..."), o contador de cada folder e "⋯" na linha em foco, com o menu da folder (RM-01). | Digitar filtra a lista; sem resultado, aparece "Nenhuma folder encontrada." |
