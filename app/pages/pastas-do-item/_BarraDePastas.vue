@@ -3,8 +3,8 @@
  * A barra de folders do item. É o objeto da demanda: tudo aqui é proposta,
  * menos o estilo "hoje", que copia a preview de 08/10/2026 para comparar.
  *
- * Os 3 estilos usam o MESMO `UTabs` (Nuxt UI) e mudam só a prop `ui`, com
- * token semântico. O comportamento é igual nos 3: clicar, arrastar para
+ * Os 2 estilos usam o MESMO `UTabs` (Nuxt UI) e mudam só a prop `ui`, com
+ * token semântico. O comportamento é igual nos 2: clicar, arrastar para
  * reordenar, botão direito (Editar, Ocultar, Excluir), "+N" com as que não
  * cabem e "Nova folder".
  *
@@ -13,8 +13,6 @@
  *   sublinhado  texto sobre uma linha de base contínua; a ativa ganha um
  *               traço de 2 px que desliza até ela. A linha de base é a
  *               borda de cima do conteúdo.
- *   navegador   faixa cinza; a ativa é uma aba com cantos de cima redondos,
- *               fundo da página e sem borda embaixo, fundida ao conteúdo.
  *
  * Arrastar é por ponteiro (não drag-and-drop do HTML): a folder segue o mouse
  * e as vizinhas abrem espaço, como as abas do navegador. O `UTabs` não expõe
@@ -24,7 +22,7 @@ import type { ContextMenuItem } from '@nuxt/ui'
 import type { Pasta } from './mocks'
 import type { Textos } from './textos'
 
-export type Estilo = 'hoje' | 'sublinhado' | 'navegador'
+export type Estilo = 'hoje' | 'sublinhado'
 
 const props = defineProps<{
   t: Textos
@@ -363,32 +361,6 @@ const aparencia = computed(() => {
           trailingBadge: 'rounded-full px-1.5 min-w-5 justify-center bg-elevated ring-0 text-muted group-data-[state=active]:bg-primary/10 group-data-[state=active]:text-primary',
         },
       }
-    case 'navegador':
-      return {
-        variant: 'link' as const,
-        ui: {
-          root: 'gap-0',
-          list: 'gap-0.5 px-2 pb-0 pt-1.5 bg-elevated border-default overflow-x-clip',
-          indicator: 'hidden',
-          trigger: [
-            'relative -mb-px px-3 py-2 gap-2 text-sm cursor-pointer select-none',
-            'rounded-t-lg rounded-b-none border border-transparent',
-            'transition-[color,background-color,padding,transform] duration-200 ease-out',
-            'data-[state=inactive]:text-muted hover:data-[state=inactive]:text-highlighted hover:data-[state=inactive]:bg-accented/60',
-            'data-[state=active]:bg-default data-[state=active]:text-highlighted data-[state=active]:font-semibold data-[state=active]:pr-8',
-            'data-[arrastando=true]:z-10 data-[arrastando=true]:cursor-grabbing data-[arrastando=true]:shadow-md data-[arrastando=true]:bg-default data-[arrastando=true]:border-default',
-            // a borda de baixo transparente deixa o fundo da aba cobrir a linha de base: é aí que ela "funde"
-            'data-[state=active]:border-default data-[state=active]:border-b-transparent data-[state=active]:z-[1]',
-            // o traço fino de cor no topo da ativa, como a aba do navegador com foco
-            'after:absolute after:inset-x-2 after:top-0 after:h-0.5 after:rounded-b-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100',
-            // separador entre inativas, que some ao lado da ativa e no hover
-            'before:absolute before:-left-[2px] before:top-1/2 before:h-4 before:w-px before:-translate-y-1/2 before:bg-accented [[data-slot=indicator]+&]:before:hidden',
-            'data-[state=active]:before:hidden hover:before:hidden [[data-state=active]+&]:before:hidden [&:hover+*]:before:hidden',
-          ].join(' '),
-          leadingIcon: 'size-4',
-          trailingBadge: 'rounded-full px-1.5 min-w-5 justify-center bg-accented/70 ring-0 text-muted group-data-[state=active]:bg-primary/10 group-data-[state=active]:text-primary',
-        },
-      }
     default:
       // Cópia da preview: chip com contorno e sombra, ativo em azul.
       return {
@@ -459,7 +431,6 @@ const aparencia = computed(() => {
             <template #list-trailing>
               <div
                 class="ml-auto flex shrink-0 items-center gap-1 self-center pl-2"
-                :class="estilo === 'navegador' ? 'pb-1' : ''"
                 @pointerdown.stop
               >
                 <!-- HOJE: um botão só. "+N" quando sobra folder, "+" quando não; os dois abrem o mesmo menu. -->

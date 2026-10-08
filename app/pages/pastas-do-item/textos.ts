@@ -120,8 +120,8 @@ const ptBR = {
   andaime: {
     prototipo: 'Protótipo',
     estilo: 'Estilo da barra',
-    estilos: { hoje: 'Hoje', sublinhado: 'Sublinhado', navegador: 'Aba de navegador' },
-    recomendada: 'recomendada',
+    estilos: { hoje: 'Hoje', sublinhado: 'Sublinhado' },
+    recomendada: 'aprovada',
     ondeAbre: 'Onde abre',
     ondes: { tela: 'Tela do item', lateral: 'Barra lateral' },
     porTras: 'Por trás',
@@ -238,8 +238,8 @@ const en: Textos = {
   andaime: {
     prototipo: 'Prototype',
     estilo: 'Bar style',
-    estilos: { hoje: 'Today', sublinhado: 'Underline', navegador: 'Browser tab' },
-    recomendada: 'recommended',
+    estilos: { hoje: 'Today', sublinhado: 'Underline' },
+    recomendada: 'approved',
     ondeAbre: 'Opens in',
     ondes: { tela: 'Item page', lateral: 'Sidebar' },
     porTras: 'Behind it',
@@ -354,8 +354,8 @@ const es: Textos = {
   andaime: {
     prototipo: 'Prototipo',
     estilo: 'Estilo de la barra',
-    estilos: { hoje: 'Hoy', sublinhado: 'Subrayado', navegador: 'Pestaña de navegador' },
-    recomendada: 'recomendada',
+    estilos: { hoje: 'Hoy', sublinhado: 'Subrayado' },
+    recomendada: 'aprobada',
     ondeAbre: 'Dónde se abre',
     ondes: { tela: 'Página del ítem', lateral: 'Barra lateral' },
     porTras: 'Detrás',

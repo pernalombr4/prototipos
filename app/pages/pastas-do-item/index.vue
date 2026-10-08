@@ -2,9 +2,9 @@
 /**
  * Folders do item: o visual da barra de folders reordenáveis.
  *
- * Uma porta: a tela do item, com o alternador de estilo no andaime (hoje,
- * sublinhado, aba de navegador) e o alternador de onde o item abre (tela
- * própria ou barra lateral sobre a lista). O comportamento é o mesmo nos 3
+ * Uma porta: a tela do item, com o alternador de estilo no andaime (hoje e
+ * sublinhado) e o alternador de onde o item abre (tela
+ * própria ou barra lateral sobre a lista). O comportamento é o mesmo nos 2
  * estilos; só o desenho muda.
  */
 import type { Estilo } from './_BarraDePastas.vue'
@@ -22,8 +22,8 @@ import decisoesMd from './DECISOES.md?raw'
 
 definePageMeta({
   titulo: 'Folders do item',
-  descricao: 'A barra de folders reordenáveis com cara de aba: sublinhado ou aba de navegador, lado a lado com a de hoje.',
-  status: 'em-revisao',
+  descricao: 'A barra de folders reordenáveis com cara de aba, no modelo sublinhado, lado a lado com a de hoje.',
+  status: 'aprovado',
   atualizado: '2026-10-08',
   tela: 'Tela do item e barra lateral do item',
 })
@@ -36,7 +36,7 @@ const router = useRouter()
 /* ---------- andaime ---------- */
 /** Estilo e modo vão para o endereço: o link abre na versão escolhida. */
 const estilo = computed<Estilo>({
-  get: () => (['hoje', 'sublinhado', 'navegador'].includes(String(route.query.estilo)) ? route.query.estilo : 'sublinhado') as Estilo,
+  get: () => (['hoje', 'sublinhado'].includes(String(route.query.estilo)) ? route.query.estilo : 'sublinhado') as Estilo,
   set: v => router.replace({ query: { ...route.query, estilo: v } }),
 })
 const onde = computed<'tela' | 'lateral'>({
@@ -149,7 +149,6 @@ const trilha = computed(() => onde.value === 'tela'
 const estilos = computed(() => [
   { value: 'hoje' as const, label: t.value.andaime.estilos.hoje },
   { value: 'sublinhado' as const, label: t.value.andaime.estilos.sublinhado, recomendada: true },
-  { value: 'navegador' as const, label: t.value.andaime.estilos.navegador },
 ])
 </script>
 

@@ -4,7 +4,7 @@
 
 A folder vira aba: texto sobre uma linha de base que é a borda de cima do conteúdo. A ativa ganha um traço de cor (Sublinhado) ou o fundo da página (Aba de navegador). Nenhum dos 2 estilos tem contorno, sombra nem fundo colorido.
 
-**Recomendada: Sublinhado.** É o padrão de página de registro (Twenty, monday, Attio), pesa menos na barra lateral estreita e não briga com a barra do topo. A Aba de navegador fica como alternativa, porque era a ideia inicial do time.
+**Aprovada: Sublinhado** (rodada 4). É o padrão de página de registro (Twenty, monday, Attio), pesa menos na barra lateral estreita e não briga com a barra do topo. A Aba de navegador saiu do protótipo na rodada 4. Os requisitos para implementar estão em `REQUISITOS.md`.
 
 ## Rodada 1 · 2026-10-08
 
@@ -60,6 +60,15 @@ A folder vira aba: texto sobre uma linha de base que é a borda de cima do conte
 - **Mudou:** a seta ⌄ da folder aberta fica visível no arrasto e anda junto com ela, quando ela é a arrastada e quando é a vizinha que desliza. Fica numa camada abaixo da folder arrastada, para não parecer dela quando outra passa por cima
 - **Fronteira:** muda só a aparência do arrasto no Sublinhado e a seta durante o arrasto; a troca na metade, a camada por cima e os outros 2 estilos ficam como na rodada 2
 - **Ver:** `http://localhost:3000/pastas-do-item?estilo=sublinhado` · `evidencias/proposta-arrastar.png`, `proposta-arrastar-a-aberta.png`
+
+## Rodada 4 · 2026-10-08
+
+- **Pedido (literal):** "o estilo aba de navegador pode deletar do prototipo. ta ruim. depois disso, escreva rapidamente num doc .md os requisitos pra deixar a aba no modelo sublinhado que voce criou. ta perfeito. é assim que tem que ser."
+- **Mudou:** o estilo Aba de navegador saiu do protótipo (código, textos e `evidencias/proposta-aba-de-navegador.png`). Ficam Hoje e Sublinhado
+- **Mudou:** Sublinhado aprovado; o selo no andaime diz "aprovada" e o status do protótipo é aprovado
+- **Mudou:** `REQUISITOS.md` com os requisitos da barra no modelo Sublinhado, para o time de front
+- **Descartado:** Aba de navegador. Motivo: ela achou ruim
+- **Ver:** `http://localhost:3000/pastas-do-item` · `REQUISITOS.md`
 
 ### Como a barra foi montada
 
