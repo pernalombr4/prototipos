@@ -146,4 +146,5 @@ salvar. Perde-se só a herança para o que for criado depois.
   - Parcial, herdado e travado não dependem só de cor: traço, tom e cadeado.
   - Ficou: a linha das categorias abertas fica longa com 12 formulários; a seta recolhe.
 - **CSS próprio:** nenhum. Tom claro pela prop `ui` do `UCheckbox` (`indicator: 'bg-primary/40'`), consultada no tema gerado `.nuxt/ui/checkbox.ts`.
-- **Ver:** `/permissoes-de-cargos` · `evidencias/proposta-r2-*.jpg`
+- **Não deu:** print da rodada 2. Por quê: a janela do Chrome estava escondida; o visual foi conferido pelo CSS calculado no site publicado (recuo das sublinhas, tom claro do herdado, desfazer sem sobrepor a caixa).
+- **Ver:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/
