@@ -1,0 +1,68 @@
+# Decisões: editor de documentos
+
+## A proposta, em 6 pontos
+
+1. **O campo vira um cartão que conta o que acontece com o documento.** Miniatura, nome, versão, quem editou por último e quando, e quem está com ele agora (e onde). Substitui o botão sem contorno "Abrir Documento" e o chip genérico do develop.
+2. **O campo vazio é a própria área de começar.** Usar modelo (com prévia preenchida com os dados do item), Em branco e Enviar arquivo, ou arrastar o arquivo para o cartão. Substitui "Subir documento" → gaveta → upload → "Usar modelo" → "Tem certeza?".
+3. **Abrir com escolha de editor, perguntada 1 vez.** "No ENSPACE" (ONLYOFFICE) ou "No Microsoft Word". Com "Lembrar minha escolha", o botão passa a dizer o editor ("Abrir no Word"), e a seta ao lado troca.
+4. **Word de verdade, direto do item.** O Word do computador abre o arquivo pela URL do ENSPACE (`ms-word:ofe|u|...`), sem baixar. O documento fica reservado para quem abriu; o Ctrl+S grava no item e vira versão; fechar libera.
+5. **ONLYOFFICE em tela inteira, com moldura do ENSPACE.** Cabeçalho fixo com item, campo, estado de salvamento sempre visível, quem está editando, Versões ao lado, Baixar, Abrir no Word e Concluir. Esc fecha só o que está por cima.
+6. **Configuração do campo em 3 grupos.** Onde abre (ONLYOFFICE, Word, Word para a web como fase 2, editor padrão), como nasce (modelos, em branco, .docx, .pdf) e o que se faz no editor (editar ligado por padrão).
+
+## A jornada
+
+```mermaid
+flowchart LR
+  V[Campo vazio] -->|Usar modelo + prévia| C[Cartão do documento]
+  V -->|Em branco| C
+  V -->|Enviar ou arrastar| C
+  C -->|Abrir, 1ª vez| E{Onde abrir?}
+  E -->|No ENSPACE| O[ONLYOFFICE em tela inteira]
+  E -->|No Word| W[Word do computador, direto da URL]
+  C -->|Abrir, com escolha lembrada| O
+  C -->|Abrir, com escolha lembrada| W
+  O -->|Concluir| C2[Cartão: versão N+1, editado por você]
+  W -->|Ctrl+S| C2
+  W -->|Fechar o documento| L[Liberado]
+  C -->|Versões| H[Histórico: autor, data, origem, restaurar]
+```
+
+## A limitação técnica, decidida
+
+- **Word instalado (Windows e Mac): caminho principal.** WebDAV com bloqueio + `ms-word:ofe`. Não depende da Microsoft.
+- **Saída de emergência:** baixar o arquivo ligado ao item; o painel do suplemento reconhece o vínculo e oferece "Salvar no ENSPACE".
+- **Word para a web: fase 2**, desligado por padrão na configuração. Cópia no OneDrive pelo Microsoft Graph. O CSPP fica de fora: obriga o Office como editor padrão.
+- **Painel do suplemento:** ganha a aba "Documento" (item, campo, versão aberta, mudança não salva, Salvar no ENSPACE, Concluir e liberar). Não abre sozinho na versão da loja: a Microsoft só permite isso em implantação centralizada ou sideload.
+- Detalhe e fontes: `PESQUISA.md`, "A limitação técnica".
+
+## Rodada 1 · 2026-10-08
+- **Pedido (literal):** "a ideia é permitir que, na interação com o campo, o usuário possa escolher se quer usar o onlyoffice ou o word. e trabalhar no word com o doc dele. [...] prototipe a solução e aproveite para melhorar o VISUAL do campo que hoje é horrível. pode propôr melhorias até no visual da interação com onlyoffice tambem."
+- **Pedido (literal, no meio da rodada):** "olha o botao sem contorno algum depois que sobe documento... tem muito detalhe ruim de ux/ui pra voce prestar atençao e resolver com /nuxt-ui"
+- **Pedido (literal, no meio da rodada):** "voce tem que fazer o comportamento do prototipo simular o real e funcionar na minha maquina, ok? com arquivo que eu nao tenho salvo aqui. como seria o caso do usuario real"
+- **Mudou:** protótipo novo, em `app/pages/editor-de-documentos/`.
+- **Mudou:** o "Abrir no Word" chama o Word do computador de verdade, com um .docx que mora no endereço do protótipo (`arquivos/`, gerado por `gerar-arquivos.py`), não no computador de quem abre.
+- **Mudou:** cada componente saiu da skill e do MCP `nuxt-ui`: UFileUpload (área de soltar), UFieldGroup + UDropdownMenu (botão com seta), URadioGroup card (escolha do editor), UTimeline (versões), UModal fullscreen (editor), USlideover (visão rápida, versões, configuração). Nenhum CSS próprio.
+- **Fronteira:** muda o campo Editor de Documentos (vazio, preenchido, estados), a escolha do editor, a moldura do ONLYOFFICE, o fluxo do Word, o painel do suplemento (aba Documento), as versões, a configuração do campo e a célula do campo na lista. Muda também o aviso "Alterações não salvas" do rodapé da visão rápida, que só aparece com mudança (o documento não passa pelo Salvar do item). Não muda o resto da casca: menu, topo, trilha, abas, lista, trilho de ícones, campos comuns.
+- **Descartado:** "Tela cheia" do navegador. Motivo: o editor já nasce em tela inteira dentro do ENSPACE, com contexto.
+- **Descartado:** CSPP para o Word para a web. Motivo: obriga o Office como editor padrão e exige aprovação, seguros e coautoria.
+- **Descartado:** abrir o painel do suplemento sozinho com o documento. Motivo: a Microsoft não permite para suplemento da loja.
+- **Não deu:** salvar de volta no item a partir do Word real. Por quê: exige o endpoint WebDAV, e o protótipo não tem servidor (regra 4). O Word abre o arquivo em leitura, e isso prova o ponto técnico.
+- **Não deu:** abrir no Word um arquivo enviado pela pessoa no protótipo. Por quê: ele vive como `blob:` no navegador, que o Word não alcança; o protótipo baixa o arquivo (a saída de emergência).
+- **Não deu:** prints das referências. Por quê: a pesquisa foi por leitura de documentação; as URLs estão no `PESQUISA.md`.
+- **Não deu:** conferir na tela da Mikaela que o Word abriu. Por quê: o acesso à tela foi recusado; conferi que o arquivo responde no endereço e que o link `ms-word:` é montado com ele.
+- **Maquete:** a área do ONLYOFFICE (barra e página desenhadas; dá para digitar e ver o salvamento); a janela do Word (cinza, sem identidade da Microsoft; o painel e o salvamento no item são proposta); a geração por modelo, o envio e o salvamento (simulados em memória); a miniatura (linhas, no lugar da imagem da 1ª página); Baixar como PDF; "Como instalar" o suplemento. Nada usa localStorage; recarregar zera tudo.
+- **Crítica e acessibilidade:** passada de crítica feita com a skill `design:design-critique`; a de acessibilidade foi feita junto, no mesmo roteiro (contraste, foco, rótulos), sem rodar a skill `design:accessibility-review` à parte.
+  - Corrigido: o texto "formatos aceitos" usava `text-dimmed`, baixo contraste; passou a `text-muted`.
+  - Corrigido: documento criado em branco mostrava o texto do contrato.
+  - Corrigido: a transição do campo travava porque o UFileUpload não tem raiz única.
+  - Ficou: o botão Salvar da visão rápida desabilitado se diferencia pouco do habilitado (opacidade padrão do Nuxt UI).
+  - Ficou: o "Abrir" do campo e o "Salvar" do rodapé usam a mesma cor primária. A ação do campo precisa de peso; o Salvar só acende com mudança.
+  - Ficou: a miniatura tem rótulo de 8 px ("DOCX"); é decorativa (`aria-hidden`), e o tipo também aparece no texto ao lado.
+  - Ficou: o andaime quebra em 2 linhas em telas de até 1.600 px; é andaime.
+  - A conferir à mão: na automação, o 1º clique logo depois de fechar o editor ou um modal foi ignorado algumas vezes. A janela do Chrome estava em segundo plano em parte dos testes, o que também descarta clique; não deu para separar as 2 causas.
+- **Ver:** `http://localhost:3000/editor-de-documentos` · `evidencias/proto-*.jpg`
+
+## Achados do develop que não são desta demanda
+- Abrir a configuração do campo deu "Ocorreu um erro ao carregar os campos aninhados" até clicar em Recarregar.
+- Salvar o item gravou "R$ 0" num campo Valor Monetário que estava vazio.
+- No workspace de exploração, ativei 4 chaves do campo `vitrine_documento` (categoria `leve`) e subi um .docx fictício num item. Ficaram assim.
