@@ -18,7 +18,8 @@
  *
  * Arquivo enviado pela pessoa no protótipo vira um endereço `blob:` do
  * navegador, que o Word não consegue buscar. Nesse caso o protótipo baixa o
- * arquivo (a saída de emergência).
+ * arquivo, e a pessoa envia de volta pela saída de emergência do modal
+ * (Baixar e Enviar nova versão).
  */
 import type { ItemDoContrato } from './mocks'
 

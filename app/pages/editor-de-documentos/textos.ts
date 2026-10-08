@@ -212,6 +212,8 @@ export interface Textos {
     naoAbriuDetalhe: string
     baixarArquivo: string
     baixadoToast: string
+    enviarNovaVersao: string
+    versaoEnviada: (n: number) => string
     dicaSuplemento: string
     notaPrototipo: string
     abrirDeNovo: string
@@ -570,9 +572,11 @@ const pt: Textos = {
     simulacaoInstalar: 'Simulação: aqui abriria a página de instalação do plugin.',
     fechar: 'Fechar',
     naoAbriu: 'O Word não abriu?',
-    naoAbriuDetalhe: 'Baixe o arquivo ligado ao item. No Word, o painel do ENSPACE reconhece o item e envia o documento de volta.',
-    baixarArquivo: 'Baixar o arquivo ligado ao item',
-    baixadoToast: 'Arquivo baixado. No Word, use Salvar no ENSPACE, no painel.',
+    naoAbriuDetalhe: 'Baixe o arquivo, edite no Word ou onde preferir e envie de volta. O arquivo enviado vira uma nova versão deste item.',
+    baixarArquivo: 'Baixar',
+    baixadoToast: 'Arquivo baixado. Depois de editar, envie aqui como nova versão.',
+    enviarNovaVersao: 'Enviar nova versão',
+    versaoEnviada: n => `Versão ${n} enviada. O documento está livre de novo.`,
     dicaSuplemento: 'Com o suplemento do ENSPACE no Word, o painel mostra a qual item o documento pertence.',
     notaPrototipo: 'Protótipo: o Word do seu computador abriu o arquivo direto do endereço do protótipo, sem baixar. Como aqui não há servidor, ele abre em leitura e não salva de volta. No ENSPACE, o endpoint WebDAV faz o Ctrl+S gravar no item.',
     abrirDeNovo: 'Abrir no Word de novo',
@@ -943,9 +947,11 @@ const en: Textos = {
     simulacaoInstalar: 'Simulation: this would open the plugin installation page.',
     fechar: 'Close',
     naoAbriu: 'Word didn\'t open?',
-    naoAbriuDetalhe: 'Download the file linked to the item. In Word, the ENSPACE pane recognizes the item and sends the document back.',
-    baixarArquivo: 'Download the file linked to the item',
-    baixadoToast: 'File downloaded. In Word, use Save to ENSPACE in the pane.',
+    naoAbriuDetalhe: 'Download the file, edit it in Word or wherever you prefer, and upload it back. The uploaded file becomes a new version of this item.',
+    baixarArquivo: 'Download',
+    baixadoToast: 'File downloaded. After editing, upload it here as a new version.',
+    enviarNovaVersao: 'Upload new version',
+    versaoEnviada: n => `Version ${n} uploaded. The document is free again.`,
     dicaSuplemento: 'With the ENSPACE add-in for Word, the pane shows which item the document belongs to.',
     notaPrototipo: 'Prototype: Word on your computer opened the file straight from the prototype\'s address, without downloading. Since there is no server here, it opens read only and doesn\'t save back. In ENSPACE, the WebDAV endpoint makes Ctrl+S save to the item.',
     abrirDeNovo: 'Open in Word again',
@@ -1316,9 +1322,11 @@ const es: Textos = {
     simulacaoInstalar: 'Simulación: aquí se abriría la página de instalación del plugin.',
     fechar: 'Cerrar',
     naoAbriu: '¿Word no se abrió?',
-    naoAbriuDetalhe: 'Descarga el archivo vinculado al ítem. En Word, el panel de ENSPACE reconoce el ítem y envía el documento de vuelta.',
-    baixarArquivo: 'Descargar el archivo vinculado al ítem',
-    baixadoToast: 'Archivo descargado. En Word, usa Guardar en ENSPACE, en el panel.',
+    naoAbriuDetalhe: 'Descarga el archivo, edítalo en Word o donde prefieras y súbelo de nuevo. El archivo subido se convierte en una nueva versión de este ítem.',
+    baixarArquivo: 'Descargar',
+    baixadoToast: 'Archivo descargado. Después de editarlo, súbelo aquí como nueva versión.',
+    enviarNovaVersao: 'Subir nueva versión',
+    versaoEnviada: n => `Versión ${n} subida. El documento quedó libre de nuevo.`,
     dicaSuplemento: 'Con el complemento de ENSPACE en Word, el panel muestra a qué ítem pertenece el documento.',
     notaPrototipo: 'Prototipo: el Word de tu computadora abrió el archivo directo desde la dirección del prototipo, sin descargarlo. Como aquí no hay servidor, abre en solo lectura y no guarda de vuelta. En ENSPACE, el endpoint WebDAV hace que Ctrl+S guarde en el ítem.',
     abrirDeNovo: 'Abrir en Word de nuevo',

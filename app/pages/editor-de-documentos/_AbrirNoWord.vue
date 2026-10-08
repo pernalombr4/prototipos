@@ -12,9 +12,9 @@
  *      Fechar o documento libera.
  *
  * A saída de emergência, para quando o Word não abre (Mac em só leitura,
- * protocolo bloqueado pela TI): baixar o arquivo LIGADO ao item. O .docx leva
- * dentro o vínculo (item, campo, versão), e o painel do suplemento reconhece e
- * oferece "Salvar no ENSPACE".
+ * protocolo bloqueado pela TI): baixar, editar no Word ou onde a pessoa
+ * quiser e enviar de volta. O envio vira versão nova e libera a reserva
+ * (rodada 4).
  *
  * Word para a web é a fase 2 e só aparece se o configurador ligar: uma cópia
  * vai para o OneDrive de quem edita e volta ao concluir.
@@ -37,7 +37,7 @@ const aberto = defineModel<boolean>('open', { default: false })
 const emit = defineEmits<{ verJanela: [copiaBaixada: boolean], editarJunto: [] }>()
 
 const toast = useToast()
-const { itemPorId, abrirSessao, suplementoInstalado, wordDeVerdade } = useDocumentos()
+const { itemPorId, abrirSessao, fecharSessao, novaVersao, suplementoInstalado, wordDeVerdade } = useDocumentos()
 
 const item = computed(() => (props.itemId !== null ? itemPorId(props.itemId) : null))
 const doc = computed(() => item.value?.data.minuta_do_contrato ?? null)
@@ -72,12 +72,39 @@ const passos = computed(() => [
 
 function verJanela(copia: boolean) {
   aberto.value = false
-  if (copia) {
-    const a = item.value ? arquivoDoItem(item.value) : null
-    if (a) baixarArquivo(a)
-    toast.add({ title: props.t.word.baixadoToast, icon: 'i-lucide-download', color: 'info' })
-  }
   emit('verJanela', copia)
+}
+
+/* ------------------------------------------------------------------ *
+ * Saída de emergência, quando o Word não abre: baixar, editar onde a   *
+ * pessoa quiser e enviar de volta. O envio vira versão nova e libera   *
+ * a reserva (a pessoa não está mais com o documento aberto no Word).   *
+ * ------------------------------------------------------------------ */
+function baixar() {
+  const a = item.value ? arquivoDoItem(item.value) : null
+  if (a) baixarArquivo(a)
+  toast.add({ title: props.t.word.baixadoToast, icon: 'i-lucide-download', color: 'info' })
+}
+
+const entrada = ref<HTMLInputElement | null>(null)
+const enviando = ref(false)
+
+async function aoEnviar(e: Event) {
+  const alvo = e.target as HTMLInputElement
+  const f = alvo.files?.[0]
+  alvo.value = ''
+  if (!f || props.itemId === null) return
+  if (!f.name.toLowerCase().endsWith('.docx')) {
+    toast.add({ title: props.t.campo.arquivoRecusado, description: props.t.campo.arquivoRecusadoDetalhe, icon: 'i-lucide-file-x-2', color: 'error' })
+    return
+  }
+  enviando.value = true
+  await new Promise(r => setTimeout(r, 900))
+  const n = novaVersao(props.itemId, 'envio')
+  fecharSessao(props.itemId)
+  enviando.value = false
+  aberto.value = false
+  toast.add({ title: props.t.word.versaoEnviada(n), icon: 'i-lucide-file-check-2', color: 'success' })
 }
 
 /** O Word real: só de novo, dentro do clique. */
@@ -174,16 +201,11 @@ const real = computed(() => wordDeVerdade.value && props.editor === 'word-deskto
               <p class="text-xs text-muted">
                 {{ t.word.naoAbriuDetalhe }}
               </p>
-              <UButton
-                class="mt-2"
-                icon="i-lucide-download"
-                :label="t.word.baixarArquivo"
-                color="neutral"
-                variant="outline"
-                size="xs"
-                :disabled="passo < 4"
-                @click="verJanela(true)"
-              />
+              <div class="mt-3 flex flex-wrap gap-2">
+                <UButton icon="i-lucide-download" :label="t.word.baixarArquivo" color="neutral" variant="outline" size="sm" @click="baixar" />
+                <UButton icon="i-lucide-upload" :label="t.word.enviarNovaVersao" color="neutral" variant="outline" size="sm" :loading="enviando" @click="entrada?.click()" />
+                <input ref="entrada" type="file" accept=".docx" class="hidden" @change="aoEnviar">
+              </div>
             </div>
           </template>
         </UCollapsible>

@@ -30,7 +30,7 @@ flowchart LR
 ## A limitação técnica, decidida
 
 - **Word instalado (Windows e Mac): caminho principal.** WebDAV com bloqueio + `ms-word:ofe`. Não depende da Microsoft.
-- **Saída de emergência:** baixar o arquivo ligado ao item; o painel do suplemento reconhece o vínculo e oferece "Salvar no ENSPACE".
+- **Saída de emergência (rodada 4):** se o Word não abrir, baixar o arquivo, editar no Word ou onde a pessoa quiser e enviar de volta; o envio vira versão nova e libera a reserva.
 - **Word para a web: fase 2**, desligado por padrão na configuração. Cópia no OneDrive pelo Microsoft Graph. O CSPP fica de fora: obriga o Office como editor padrão.
 - **Painel do suplemento:** ganha a aba "Documento" (item, campo, versão aberta, mudança não salva, Salvar no ENSPACE, Concluir e liberar). Não abre sozinho na versão da loja: a Microsoft só permite isso em implantação centralizada ou sideload.
 - Detalhe e fontes: `PESQUISA.md`, "A limitação técnica".
@@ -81,6 +81,14 @@ flowchart LR
 - **Fronteira:** muda só o mock e o andaime; não muda o campo, os editores nem a casca.
 - **Não deu:** print novo. Por quê: a janela do Chrome estava em segundo plano e o print não sai; conferi os 6 cenários pelo conteúdo da página.
 - **Ver:** `http://localhost:3000/editor-de-documentos`
+
+## Rodada 4 · 2026-10-08
+- **Pedido (literal):** "nesta parte, se o word nao abrir, a orientaçao simplesmente deve ser de a pessoa baixar, editar no word ou onde quiser, e subir de novo. e aí deve ter o botao de baixar e o de fazer upload ao lado. falta isso"
+- **Mudou:** "O Word não abriu?" diz: "Baixe o arquivo, edite no Word ou onde preferir e envie de volta. O arquivo enviado vira uma nova versão deste item."
+- **Mudou:** os botões Baixar e Enviar nova versão ficam lado a lado. Baixar baixa o .docx do item de verdade; Enviar nova versão abre o seletor de arquivo (.docx), cria a versão com origem "Arquivo enviado" e libera a reserva.
+- **Descartado:** a orientação de usar o painel do suplemento na cópia baixada. Motivo: pedido da rodada; baixar e enviar não depende de plugin nenhum.
+- **Fronteira:** muda só a saída de emergência do modal Abrir no Word.
+- **Ver:** `http://localhost:3000/editor-de-documentos`, cenário "DOCX, 1 versão", Abrir no Word, "O Word não abriu?"
 
 ## Achados do develop que não são desta demanda
 - Abrir a configuração do campo deu "Ocorreu um erro ao carregar os campos aninhados" até clicar em Recarregar.
