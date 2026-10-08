@@ -98,6 +98,11 @@ flowchart LR
 - **Fronteira:** muda o padrão da configuração e o lugar do andaime; não muda o fluxo.
 - **Ver:** `http://localhost:3000/editor-de-documentos` · `evidencias/proto-09-andaime-embaixo.jpg`
 
+## Rodada 6 · 2026-10-08
+- **Pedido (literal):** "agora voce deve usar /escrita pra fazer um doc de DEMANDA BASEADA EM REQUISITOS (use template de escrita baseada em requisitos) pra levantar TODOS os requisitos do prototipo pro dev que vai atuar. nao precisa falar em termos de codigo. só um antes x depois e o que voce fez pra alcançar esse depois (a nivel de usabilidade e interface, alem de interaçao funcional), e o que é criaçao de agora (integraçao com plugin, por ex, que esse campo hoje nao tem), quais sao os requisitos funcionais disso."
+- **Mudou:** novo `REQUISITOS.md`, no formato do `pastas-do-item/REQUISITOS.md` (o requisito aprovado deste repositório): resumo antes e depois, 14 grupos marcados como Melhoria ou Criação, cada requisito com critério de aceite, e o que fica fora.
+- **Fronteira:** muda só a documentação; o protótipo não muda.
+
 ## Achados do develop que não são desta demanda
 - Abrir a configuração do campo deu "Ocorreu um erro ao carregar os campos aninhados" até clicar em Recarregar.
 - Salvar o item gravou "R$ 0" num campo Valor Monetário que estava vazio.
