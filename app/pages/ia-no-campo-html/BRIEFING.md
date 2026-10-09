@@ -20,7 +20,7 @@ O campo **Editor de texto HTML** no formulário do item: tela do item, folder Vi
 
 ## O que seria sucesso
 
-Quem escreve no campo HTML pede ajuda à BENI sem sair do campo, pelo "/" ou pelo botão da barra, vê a proposta antes de ela entrar no texto e decide se aceita.
+Quem escreve no campo HTML pede ajuda ao BENI sem sair do campo, pelo "/" ou pelo botão da barra, vê a proposta antes de ela entrar no texto e decide se aceita.
 
 ## O que a pesquisa de UX já dizia
 
@@ -40,7 +40,7 @@ Medido em `padrao-dos-campos` (formulário de criação com 29 campos, uma colun
 | Barra fixa, nesta ordem | desfazer, refazer, título, negrito, itálico, sublinhado, tachado, código, emoji, alinhamento, mais |
 | Placeholder | `Escreva ou digite "/" para acessar os comandos...` |
 | Menu "/" | existe (o placeholder o anuncia) |
-| IA | nenhuma no campo. A IA do produto (BENI) fica em Configurações › Agentes de IA e no "Perguntar à BENI" da documentação |
+| IA | nenhuma no campo. A IA do produto (BENI) fica em Configurações › Agentes de IA e no "Perguntar ao BENI" da documentação |
 
 **O que não foi medido:** os itens do menu "/" de hoje. O protótipo monta os grupos Texto, Listas e Inserir com os blocos que a barra já oferece. **Conferir no develop** quando o DNS voltar.
 

@@ -105,6 +105,37 @@ export default defineNuxtConfig({
   // sem sair da sua pasta e sem virar rota.
   pages: { pattern: ['**/*.vue', '!**/_*.vue'] },
 
+  // O editor (UEditor) e as extensões do TipTap que um protótipo importa
+  // precisam da MESMA cópia do ProseMirror. Sem esta lista, o Vite empacota as
+  // extensões do protótipo à parte e o editor quebra com "Adding different
+  // instances of a keyed plugin". Receita da doc do Nuxt UI (Editor), estendida
+  // aos pacotes do TipTap que o runtime do Nuxt UI importa. Pedido da redatora
+  // em 09/10/2026 (ia-no-campo-html, rodada 2).
+  vite: {
+    optimizeDeps: {
+      include: [
+        '@nuxt/ui > prosemirror-state',
+        '@nuxt/ui > prosemirror-transform',
+        '@nuxt/ui > prosemirror-model',
+        '@nuxt/ui > prosemirror-view',
+        '@nuxt/ui > prosemirror-gapcursor',
+        '@nuxt/ui > @tiptap/core',
+        '@nuxt/ui > @tiptap/pm/state',
+        '@nuxt/ui > @tiptap/vue-3',
+        '@nuxt/ui > @tiptap/vue-3/menus',
+        '@nuxt/ui > @tiptap/starter-kit',
+        '@nuxt/ui > @tiptap/suggestion',
+        '@nuxt/ui > @tiptap/markdown',
+        '@nuxt/ui > @tiptap/extension-code',
+        '@nuxt/ui > @tiptap/extension-drag-handle-vue-3',
+        '@nuxt/ui > @tiptap/extension-horizontal-rule',
+        '@nuxt/ui > @tiptap/extension-image',
+        '@nuxt/ui > @tiptap/extension-mention',
+        '@nuxt/ui > @tiptap/extension-placeholder',
+      ],
+    },
+  },
+
   nitro: {
     prerender: {
       crawlLinks: false,

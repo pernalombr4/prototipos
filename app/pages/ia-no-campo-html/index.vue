@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * IA no campo HTML: a BENI pelo "/" e pelo botão IA da barra do campo.
+ * IA no campo HTML: o BENI pelo "/" e pelo botão IA da barra do campo.
  *
  * Uma porta: a tela do item (Contratos), folder Visão Geral, com 2 campos
  * HTML: Parecer do jurídico (preenchido) e Observações internas (vazio).
@@ -13,14 +13,21 @@ import PainelDoItem from './_PainelDoItem.vue'
 import CampoHtml from './_CampoHtml.vue'
 
 import briefingMd from './BRIEFING.md?raw'
-import pesquisaMd from './PESQUISA.md?raw'
+import pesquisaRodada1 from './PESQUISA.md?raw'
+import pesquisaRodada2 from './PESQUISA-RODADA-2.md?raw'
 import decisoesMd from './DECISOES.md?raw'
+
+const pesquisaMd = `${pesquisaRodada2}
+
+---
+
+${pesquisaRodada1}`
 
 definePageMeta({
   titulo: 'IA no campo HTML',
-  descricao: 'A BENI dentro do editor de texto HTML: pelo "/" enquanto escreve e pelo botão IA da barra.',
+  descricao: 'O campo HTML redesenhado no padrão do Notion, com o BENI: barra da seleção, cor, link com busca, "/", agentes e modelo.',
   status: 'em-revisao',
-  atualizado: '2026-10-08',
+  atualizado: '2026-10-09',
   tela: 'Tela do item, campo Editor de texto HTML',
 })
 
@@ -76,7 +83,7 @@ async function salvar() {
             }"
           />
 
-          <div class="min-h-0 flex-1 overflow-y-auto pb-24">
+          <div class="min-h-0 flex-1 overflow-y-auto pb-96">
             <Transition
               mode="out-in"
               enter-active-class="transition duration-150 ease-out"
@@ -87,16 +94,26 @@ async function salvar() {
               <div v-if="pastaAtiva === 'visao-geral'" key="visao-geral" class="flex max-w-4xl flex-col gap-5 px-5 py-6">
                 <USeparator class="-mt-1 mb-1" />
                 <template v-for="c in campos" :key="c.chave">
-                  <!-- A chave remonta o editor ao ligar ou desligar a IA: o placeholder só se lê na criação. -->
-                  <CampoHtml
-                    v-if="c.tipo === 'html'"
-                    :key="`${c.chave}-${estadoIa === 'desligada'}`"
-                    v-model="valores[c.chave]!"
-                    :t="t"
-                    :rotulo="c.rotulo"
-                    :ia-ligada="estadoIa !== 'desligada'"
-                    :falhar="estadoIa === 'erro'"
-                  />
+                  <!--
+                    Só no navegador: o editor não renderiza no servidor (lá o Nuxt UI e as
+                    extensões carregariam 2 cópias do ProseMirror).
+                    A chave remonta o editor ao ligar ou desligar a IA: o placeholder só se lê na criação.
+                  -->
+                  <ClientOnly v-if="c.tipo === 'html'">
+                    <CampoHtml
+                      :key="`${c.chave}-${estadoIa === 'desligada'}`"
+                      v-model="valores[c.chave]!"
+                      :t="t"
+                      :rotulo="c.rotulo"
+                      :ia-ligada="estadoIa !== 'desligada'"
+                      :falhar="estadoIa === 'erro'"
+                    />
+                    <template #fallback>
+                      <UFormField :label="c.rotulo" :ui="{ label: 'font-semibold text-highlighted' }">
+                        <USkeleton class="h-40 w-full rounded-lg" />
+                      </UFormField>
+                    </template>
+                  </ClientOnly>
                   <UFormField v-else :label="c.rotulo" :ui="{ label: 'font-semibold text-highlighted' }">
                     <USelect
                       v-if="c.tipo === 'relacao'"

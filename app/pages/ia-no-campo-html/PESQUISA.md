@@ -42,7 +42,7 @@ Demanda: abrir a IA (BENI) pelo comando "/" no campo HTML e por um botão na bar
   - ações de IA gastam créditos de workflow conforme a tarefa e o modelo;
   - na nuvem, o workspace escolhe o modelo e não usa chave própria; no self-hosted, o admin liga cada provedor com a chave dele.
 - **Serve para o ENSPACE:**
-  - o chatbot lê o registro aberto, a mesma ideia de a BENI ler os outros campos do item;
+  - o chatbot lê o registro aberto, a mesma ideia de o BENI ler os outros campos do item;
   - o BlockNote já oferece IA no "/" e na barra de formatação (`@blocknote/xl-ai`), um caminho de referência para quem usa TipTap.
   **Não serve:** como referência de interação no editor, porque o Twenty não tem.
 - **Fonte:**
@@ -124,7 +124,7 @@ Demanda: abrir a IA (BENI) pelo comando "/" no campo HTML e por um botão na bar
 - **Serve para o ENSPACE:**
   - escolher os campos do registro que entram como contexto, com limite claro (30 campos);
   - mostrar o saldo de créditos num painel do admin.
-  **Não serve:** como referência de escrita assistida, porque o Pipefy não oferece. O ENSPACE sai na frente no nicho de BPM low-code brasileiro se a BENI ajudar quem escreve no campo.
+  **Não serve:** como referência de escrita assistida, porque o Pipefy não oferece. O ENSPACE sai na frente no nicho de BPM low-code brasileiro se o BENI ajudar quem escreve no campo.
 - **Fonte:**
   - https://help.pipefy.com/en/articles/14537321-general-guide-pipefy-ai-ecosystem
   - https://help.pipefy.com/en/articles/12001177-new-pipefy-ai-models-and-pricing
@@ -213,7 +213,7 @@ Demanda: abrir a IA (BENI) pelo comando "/" no campo HTML e por um botão na bar
   - o Coda hoje pertence à Superhuman; plano e crédito não aparecem na fonte aberta.
 - **Serve para o ENSPACE:**
   - a escolha explícita de contexto (nenhum, este campo, este item);
-  - o bloco que guarda o pedido e se recalcula, ideia para campo HTML preenchido pela BENI a partir de outros campos.
+  - o bloco que guarda o pedido e se recalcula, ideia para campo HTML preenchido pelo BENI a partir de outros campos.
   **Não serve:** Keep sem descartar. A pessoa precisa de saída clara para recusar.
 - **Fonte:**
   - https://zapier.com/blog/how-to-use-coda-ai.md (terceiro)
@@ -235,7 +235,7 @@ Demanda: abrir a IA (BENI) pelo comando "/" no campo HTML e por um botão na bar
   - o admin desliga o Assistant por espaço.
 - **Serve para o ENSPACE:**
   - o desfazer que volta toda a ação da IA num passo;
-  - a separação entre propor e aplicar, que vira a regra "a BENI propõe, a pessoa aplica".
+  - a separação entre propor e aplicar, que vira a regra "o BENI propõe, a pessoa aplica".
   **Não serve:** painel lateral como única porta. A demanda pede IA no ponto em que a pessoa escreve.
 - **Fonte:**
   - https://support.craft.do/en/ai-assistant.md
@@ -258,12 +258,12 @@ Demanda: abrir a IA (BENI) pelo comando "/" no campo HTML e por um botão na bar
 
 Oportunidades para o ENSPACE:
 
-- **Usar os outros campos do item como contexto do editor.** O chatbot do Twenty e o agente do Pipefy leem o registro, mas fora do editor. Nenhum editor de texto rico lê os campos vizinhos (cliente, valor, status, data) para escrever o texto do campo. A BENI pode escrever "a descrição deste chamado" com o que já está preenchido no formulário.
+- **Usar os outros campos do item como contexto do editor.** O chatbot do Twenty e o agente do Pipefy leem o registro, mas fora do editor. Nenhum editor de texto rico lê os campos vizinhos (cliente, valor, status, data) para escrever o texto do campo. O BENI pode escrever "a descrição deste chamado" com o que já está preenchido no formulário.
 - **Mostrar que fontes a IA leu.** Nenhum mostra, junto do resultado, a lista de campos e trechos usados. Um rodapé "Usei: Cliente, Prioridade, Histórico" no resultado deixa a pessoa conferir antes de aceitar.
 - **Comandos prontos definidos pelo admin do workspace.** Os comandos são fixos do produto, salvo o Monday por app de terceiro. O ENSPACE pode deixar o admin da categoria criar comandos como "/parecer técnico" ou "/resposta ao cliente", com o pedido e os campos de contexto já escolhidos.
-- **Respeitar a permissão de campo.** Nenhum diz o que acontece quando o contexto inclui campo que a pessoa não pode ver. A BENI só lê os campos que quem pede pode ver no item.
-- **Aviso honesto quando a IA não está no plano.** Nenhuma fonte descreve a tela de quem não tem a IA liberada; o recurso some ou vira propaganda. O ENSPACE pode mostrar o botão desativado com o motivo ("A BENI não está ativa neste workspace. Fale com o admin") em vez de esconder.
-- **Sugestão marcada dentro de um campo de formulário.** Google mostra a mudança como sugestão no documento inteiro; ninguém faz isso num campo de formulário que se salva junto com o item. A BENI pode marcar o trecho novo e só gravar no item quando a pessoa aceitar.
+- **Respeitar a permissão de campo.** Nenhum diz o que acontece quando o contexto inclui campo que a pessoa não pode ver. O BENI só lê os campos que quem pede pode ver no item.
+- **Aviso honesto quando a IA não está no plano.** Nenhuma fonte descreve a tela de quem não tem a IA liberada; o recurso some ou vira propaganda. O ENSPACE pode mostrar o botão desativado com o motivo ("O BENI não está ativa neste workspace. Fale com o admin") em vez de esconder.
+- **Sugestão marcada dentro de um campo de formulário.** Google mostra a mudança como sugestão no documento inteiro; ninguém faz isso num campo de formulário que se salva junto com o item. O BENI pode marcar o trecho novo e só gravar no item quando a pessoa aceitar.
 
 ## Tabela comparativa
 

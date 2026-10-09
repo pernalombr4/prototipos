@@ -1,27 +1,27 @@
 # Decisões
 
-**Fronteira:** muda o campo Editor de texto HTML (botão IA na barra, grupo da BENI no "/", caixa da BENI, placeholder). Não muda a casca, o painel do item, a barra de folders, os outros campos nem os outros botões da barra.
+**Fronteira:** muda o campo Editor de texto HTML inteiro (barra fixa, barra da seleção, "/", alça do bloco, cor, link, caixa do BENI, proposta dentro do texto, placeholder, contagem de palavras). Não muda a casca, o painel do item, a barra de folders nem os outros campos.
 
 ## Rodada 1 · 2026-10-08
 
 - **Pedido (literal):** "permitir uso de ia durante escrita de texto no campo html por comando com "/"" e "colocar botão pra utilizar IA na barra de ferramentas do campo html"
 - **Mudou:**
-  - **Botão IA** no começo da barra fixa, em rosa suave, com dica "Escrever com a BENI" e Ctrl J.
-    - Sem trecho selecionado: Pedir à BENI, Continuar escrevendo, Resumir o texto, Rascunhar com os dados do item. Continuar e Resumir ficam desativados com o campo vazio.
-    - Com trecho selecionado: Melhorar a escrita, Corrigir ortografia e gramática, Encurtar, Expandir, Mudar o tom (Formal, Amigável, Direto), Traduzir (Português, Inglês, Espanhol), Resumir e Pedir à BENI.
-  - **Grupo BENI (IA)** no topo do menu "/", com descrição em cada item: Pedir à BENI, Continuar escrevendo, Resumir o texto, Rascunhar com os dados do item. "/ia", "/ai" e "/beni" filtram o grupo.
-  - **Caixa da BENI**, logo abaixo do trecho ou da linha do cursor, dentro do campo:
+  - **Botão IA** no começo da barra fixa, em rosa suave, com dica "Escrever com o BENI" e Ctrl J.
+    - Sem trecho selecionado: Pedir ao BENI, Continuar escrevendo, Resumir o texto, Rascunhar com os dados do item. Continuar e Resumir ficam desativados com o campo vazio.
+    - Com trecho selecionado: Melhorar a escrita, Corrigir ortografia e gramática, Encurtar, Expandir, Mudar o tom (Formal, Amigável, Direto), Traduzir (Português, Inglês, Espanhol), Resumir e Pedir ao BENI.
+  - **Grupo BENI (IA)** no topo do menu "/", com descrição em cada item: Pedir ao BENI, Continuar escrevendo, Resumir o texto, Rascunhar com os dados do item. "/ia", "/ai" e "/beni" filtram o grupo.
+  - **Caixa do BENI**, logo abaixo do trecho ou da linha do cursor, dentro do campo:
     - pedido: campo livre com as sugestões embaixo; o que a pessoa digita vira o 1º item ("Seu pedido") e o Enter envia;
-    - gerando: a resposta chega palavra por palavra, com a BENI animada e o botão Parar;
+    - gerando: a resposta chega palavra por palavra, com o BENI animado e o botão Parar;
     - pronto: Substituir a seleção (ou Inserir), Inserir abaixo, Tentar de novo, Descartar e um campo para pedir ajuste ("mais curto", "em lista");
-    - erro: "A BENI não respondeu." com Tentar de novo e Descartar; o campo não muda.
+    - erro: "O BENI não respondeu." com Tentar de novo e Descartar; o campo não muda.
   - **O trecho fica realçado** enquanto a caixa está aberta, e o texto que entra acende e apaga em 2 s.
   - **Toast com Desfazer** depois de aceitar; o Ctrl Z do editor desfaz também.
-  - **Rodapé da caixa:** "Lê este campo e mais 5 campos do item" abre a lista dos campos lidos e uma chave para não usá-los; "A BENI pode errar. Confira antes de salvar."; Esc fecha.
+  - **Rodapé da caixa:** "Lê este campo e mais 5 campos do item" abre a lista dos campos lidos e uma chave para não usá-los; "O BENI pode errar. Confira antes de salvar."; Esc fecha.
   - **Placeholder:** `Escreva ou digite "/" para acessar os comandos e a IA...`. Com a IA desligada, volta ao texto de hoje.
-  - **IA desligada no workspace:** o botão fica no lugar, apagado, com a dica do motivo e de onde ligar (Configurações › Agentes de IA). O grupo da BENI sai do "/".
+  - **IA desligada no workspace:** o botão fica no lugar, apagado, com a dica do motivo e de onde ligar (Configurações › Agentes de IA). O grupo do BENI sai do "/".
 - **Por quê, em 1 linha cada:**
-  - **A BENI propõe, a pessoa aplica.** O campo só muda no Substituir ou no Inserir. O Confluence troca o texto ao vivo; num campo que se salva junto com o item, a pessoa precisa ver antes de o original sumir (PESQUISA, Confluence e Google Docs).
+  - **O BENI propõe, a pessoa aplica.** O campo só muda no Substituir ou no Inserir. O Confluence troca o texto ao vivo; num campo que se salva junto com o item, a pessoa precisa ver antes de o original sumir (PESQUISA, Confluence e Google Docs).
   - **Caixa colada no texto**, não painel lateral: o campo HTML divide a tela com outros campos, e o painel tira o campo de vista (PESQUISA, ClickUp e Craft).
   - **Os campos do item como contexto**, com a lista visível: nenhum dos 9 produtos faz isso dentro do editor (PESQUISA, "O que nenhum deles faz").
   - **Botão apagado com motivo** em vez de sumir: quem não vê o botão não sabe que a IA existe nem a quem pedir.
@@ -34,7 +34,7 @@
   - Conferir o Ctrl J no Chrome com tecla de verdade. Por quê: a automação não entrega a tecla com a janela escondida; testei o atalho por evento. No Chrome, Ctrl J abre Downloads se a página não impedir.
   - Prints. Por quê: a janela do navegador ficou minimizada durante a rodada e a captura não desenha.
 - **Maquete:**
-  - **A BENI é simulada** (`simulador.ts`): os 2 parágrafos do Parecer têm resposta pronta para cada ação; texto escrito pela pessoa recebe resposta de regra (corrigir troca palavras sem acento, encurtar fica com a 1ª frase, expandir acrescenta uma frase). Tradução de texto livre mostra o aviso "Simulação: a tradução está pronta só nos 2 parágrafos do exemplo."
+  - **O BENI é simulado** (`simulador.ts`): os 2 parágrafos do Parecer têm resposta pronta para cada ação; texto escrito pela pessoa recebe resposta de regra (corrigir troca palavras sem acento, encurtar fica com a 1ª frase, expandir acrescenta uma frase). Tradução de texto livre mostra o aviso "Simulação: a tradução está pronta só nos 2 parágrafos do exemplo."
   - A simulação escolhe a resposta do pedido livre por palavra: e-mail, lista ou pendências, resumo, risco; o resto vira o rascunho com os dados do item.
   - O texto gerado fica em português nos 3 idiomas da interface: é dado do workspace, como o conteúdo do campo.
   - Alinhamento não alinha: precisa da extensão TextAlign, que o protótipo não tem.
@@ -42,7 +42,7 @@
   - A barra de folders troca de folder, mas só a Visão Geral tem conteúdo.
 - **CSS fora da prop:** nenhum `<style>`, `:deep()` nem `!important`. Os seletores de Tailwind que restam:
   - `[&_li]`, `[&_p+p]`, `[&_strong]`, `[&_ul]` na resposta da caixa: o texto vem em HTML (`v-html`), sem componente para receber prop;
-  - `[&>*]:size-full` no contêiner da BENI: o `Beni` desenha em 160 px e não tem prop de tamanho (README do `@be-enlighten/beni-avatar`).
+  - `[&>*]:size-full` no contêiner do BENI: o `Beni` desenha em 160 px e não tem prop de tamanho (README do `@be-enlighten/beni-avatar`).
 - **Componentes:** `UEditor`, `UEditorToolbar`, `UEditorSuggestionMenu` (MCP `nuxt-ui`, `get-component` Editor e EditorSuggestionMenu: os comandos de IA são handlers próprios, `kind: 'beni'`, o mesmo item serve à barra e ao "/"), `UCommandPalette` (filtro e submenus de Tom e Traduzir), `UPopover`, `USwitch`, `UAlert`, `UBadge`, `UKbd`. Nenhum componente novo em `app/components/ux/`.
 - **Crítica e acessibilidade** (`design:design-critique`, com a seção de acessibilidade dela; a skill `design:accessibility-review` não rodou nesta rodada):
   - A caixa cobre o texto abaixo do trecho e, no fim do campo, o campo seguinte. Ficou assim, como no Notion: empurrar o formulário para baixo a cada pedido faz a tela pular.
@@ -50,3 +50,60 @@
   - A resposta fica numa região `aria-live="polite"`; a caixa é `role="dialog"` com nome; o foco vai para o campo de pedido ao abrir e para o botão principal quando a resposta fica pronta; Esc fecha e devolve o foco ao trecho.
   - O botão IA desligado usa `aria-disabled` em vez de `disabled`, para a dica com o motivo continuar abrindo no foco e no hover.
 - **Ver:** `pnpm dev` → http://localhost:3000/ia-no-campo-html · publicado: https://pernalombr4.github.io/prototipos/ia-no-campo-html/ · `?ia=desligada` e `?ia=erro` abrem os outros estados
+
+## Rodada 2 · 2026-10-09
+- **Pedido (literal):** "nao somente dev ser possivel ter açoes automaticas da ia, como tambem deve ser possível pedir algo personailzado. e quando selecionar um texto, a mesma barra do topo deve aparecer flutuante só para o texto selecoinado como contexto, podendo escolher IA ali. E nas opçoes de IA, alem de "Pergunte ao beni" a pessoa deve poder usar agentes dela que ela mesma criou no enspace. [...] pesquise o visual dos concorrentes e copie. aproveite até mesmo pra ver se tem oportunidade de melhoria na sua barra do campo. por exemplo, no seu modelo hoje nao da pra trocar a cor ou dar um destaque no texto." Depois: "se der pra copiar todas as funçoes do notion pra barra do campo html, ótimo"; "nosso prototipo do campo html deve melhorar a usabilidade geral dele, nao só pensar as funçoes de ia"; "não é a BEni no feminino e sim O beni"; "a pessoa deve poder, numa pregunta ao beni em si, escolher o modelo tambem. e no agente o modelo é uma pre-seleçao no perfil do agente, mas a pessoa pode mudar. entao tem q ter 2 botoes nisso"; "no camop html nós usamos o tiptap mesmo".
+- **Pesquisa:** `PESQUISA-RODADA-2.md`. Ao vivo: o Notion atual (página particular de rascunho, enviada à lixeira no fim), a demo estilo Notion da Tiptap e a do BlockNote. Texto: Confluence, Notion, ClickUp, Google Docs, Word, monday, Coda, Slack e as barras de formulário de Jira, Pipefy, monday, HubSpot e Zendesk.
+- **Mudou:**
+  - **Barra fixa no padrão do Notion**, na ordem de hoje e com as funções que faltavam:
+    - IA | desfazer, refazer | **Tipo do bloco ▾** (no lugar de "Título": texto, títulos 1 a 3, lista, lista numerada, checklist, citação, código) | negrito, itálico, sublinhado, tachado, código | **cor ▾**, **link**, **limpar formatação** | emoji, alinhamento ▾, mais ▾;
+    - o "Mais" ganha menção (@), tabela, divisor, sobrescrito, subscrito, recuar e avançar recuo; dentro de uma tabela, adicionar e excluir linha e coluna;
+    - a barra fica presa no topo do campo quando o texto é longo.
+  - **Barra da seleção** (a mesma, menor, com a IA primeiro): Perguntar ao BENI | Texto ▾ | B I U S código | link | cor ▾ | ⋯ (sobrescrito, subscrito, alinhamentos, limpar).
+  - **Cor no padrão do Notion:** um botão "A" com "Usadas recentemente", "Cor do texto" e "Cor de fundo", 10 cores cada (Padrão, Cinza, Marrom, Laranja, Amarelo, Verde, Azul, Roxo, Rosa, Vermelho); a Padrão tira a cor; Ctrl Shift H repete a última.
+  - **Link com busca:** um campo só ("Cole um link ou busque um item"); a lista mostra o endereço digitado e os itens do workspace que batem com o nome; setas, Enter e Esc; no link existente, Abrir, Copiar e Remover; Ctrl K abre.
+  - **Alça do bloco** (+ e ⠿, como no Notion): + abre o "/" numa linha nova; ⠿ arrasta o bloco e abre Transformar em, Cor (texto e fundo), Duplicar, Copiar texto, Mover para cima e para baixo, Perguntar ao BENI e Excluir.
+  - **"/" no padrão do Notion:** BENI (IA) no topo, com os pedidos salvos; Blocos básicos com o atalho markdown na descrição (`#`, `-`, `1.`, `[ ]`, `>`, `---`); Inserir (tabela, link, menção, emoji); Cor do texto ("/vermelho").
+  - **Menção (@) e emoji (:)** com menu próprio; **contagem de palavras e caracteres** no pé do campo.
+  - **Caixa do BENI** (botão IA, barra da seleção, Ctrl J, "/", alça do bloco):
+    - pedido livre no topo; o que a pessoa digita vira "Seu pedido" e filtra as ações;
+    - grupos: Seus pedidos salvos; Editar o trecho (melhorar, corrigir, encurtar, expandir, simplificar, explicar, transformar em lista, 8 tons, 6 idiomas, resumir) ou Escrever (continuar, resumir o campo, extrair pendências, rascunhar com os dados do item); Pedir a um agente (5 e "Ver todos");
+    - rodapé: o que a IA lê (trecho ou campo e os 5 campos do item, com chave), **Agente ▾** e **Modelo ▾**.
+  - **Agentes do workspace** (Configurações › Agentes de IA): o seletor lista o BENI (padrão) e só os agentes ativos que a pessoa pode usar, cada um com o BENI dele (cor e acessório do cadastro, `beniTheme`), o tipo (Chat e texto, Revisor) e a descrição.
+  - **Modelo** no formato do "Auto" do Notion: Auto e os 9 modelos do cadastro de agentes, cada um com perfil, velocidade e inteligência de 1 a 5 e consumo de en-credits. Com o BENI, a pessoa escolhe livre; com um agente, o modelo do perfil vem marcado "do agente", e trocar mostra "Só neste pedido. O perfil do agente continua com …".
+  - **Proposta dentro do texto** (Notion e Tiptap): o trecho que sai fica riscado e o texto novo aparece realçado no lugar, sem gravar; a barra embaixo traz Aceitar (Enter), Descartar (Esc), Tentar de novo, Inserir abaixo, ajuste ("mais curto", "em lista"), 👍 👎 e "Salvar pedido" (o pedido livre vira pedido salvo). O Revisor mostra "O que o Revisor mudou". Durante a proposta o campo fica só leitura.
+  - **O BENI no masculino** em toda a interface e nos documentos.
+- **Por quê, em 1 linha cada:**
+  - Pedido livre no topo: Notion, Tiptap e BlockNote fazem igual; na rodada 1 ele ficava atrás de "Pedir ao BENI" e passou despercebido.
+  - Proposta no texto em vez da caixa: a pessoa compara no lugar, como no Notion; nada grava antes do Aceitar.
+  - Agentes no menu do texto: o Notion não faz (agente só na barra lateral); só o Confluence põe agente no menu da seleção. Mostrar o tipo do agente nenhum faz.
+  - 2 seletores separados: o agente decide quem responde e com que regras; o modelo decide com que motor. O agente pré-seleciona, a pessoa troca por pedido (pedido da redatora).
+  - Cor por nome, tom pelo tema: hex fixo não passa de 4,5:1 nos 2 temas; aqui o HTML guarda `var(--cor-texto-vermelho)` e o tom muda com o tema.
+- **Descartado:**
+  - Painel vertical do Notion na seleção (formatação, skills e "Edit with AI" num só painel). Motivo: ela pediu "a mesma barra do topo" flutuante; o painel fica na pesquisa como alternativa.
+  - Agente pelo "@" (Confluence, ClickUp). Motivo: no campo do ENSPACE o "@" é menção de pessoa.
+  - Espaço em linha vazia abre a IA (Notion). Motivo: o mesmo da rodada 1.
+  - Cor livre (hex) e tamanho de fonte. Motivo: nenhum dos editores de referência põe na barra; quebram o padrão do texto do item.
+- **Não deu:**
+  - Medir no develop o menu "/" de hoje. Por quê: DNS fora na rodada 1; a liberação dela foi não acessar.
+  - Comentar e sugerir edição na seleção (Notion). Por quê: o campo HTML do ENSPACE não tem comentário por trecho; é outra demanda.
+- **Maquete:**
+  - O BENI e os agentes são simulados (`simulador.ts`): roteiro para os 2 parágrafos do Parecer, regra para o resto; o agente muda o estilo do rascunho; o Revisor corrige e lista o que mudou; o modelo muda só o tempo de resposta. Notas de velocidade, inteligência e consumo são inventadas.
+  - "Gerenciar agentes" não navega; o endereço do item no link é fictício.
+  - Pedidos salvos, agente e modelo escolhidos vivem só na sessão (`useState`): recarregar zera.
+  - 👍 👎 só agradecem.
+- **Técnico, para o dev:**
+  - Extensões do TipTap acrescentadas, na 3.31.3 (a versão do Nuxt UI): `extension-text-style` (Color e BackgroundColor), `extension-text-align`, `extension-list` (TaskList e TaskItem), `extension-table` (TableKit), `extension-subscript`, `extension-superscript`, `extension-emoji`, mais `@tiptap/core` e `@tiptap/pm` para o plugin da proposta (`proposta.ts`, decorações do ProseMirror). O fundo usa o BackgroundColor, não o Highlight.
+  - `nuxt.config.ts` ganhou `vite.optimizeDeps.include` com os pacotes do ProseMirror e do TipTap que o Nuxt UI usa, com o ok da redatora: sem isso o editor quebra com "Adding different instances of a keyed plugin". Os campos rodam em `<ClientOnly>` pelo mesmo motivo no servidor.
+- **CSS fora da prop:** nenhum `<style>`, `:deep()` nem `!important`. Seletores Tailwind que restam:
+  - na prop `ui.base` do editor, para checklist e tabela (`[&_ul[data-type=taskList]]`, `[&_li[data-type=taskItem]]`, `[&_table]`, `[&_td]`, `[&_th]`, `[&_.selectedCell]`): o tema do Nuxt UI não estiliza os 2 (conferido em `.nuxt/ui/editor.ts`);
+  - na moldura do campo, `[&_.max-w-60]:w-80 [&_.max-w-60]:max-w-80`: o `EditorSuggestionMenu` 4.11.1 ignora `ui.content` (o `useEditorMenu.js`, linha 264, chama `content()` sem a classe da prop), e o "/" cortava os rótulos em 240 px;
+  - no widget da proposta (`proposta.ts`): classes Tailwind no elemento que o plugin cria, porque decoração do ProseMirror não é componente.
+- **Crítica e acessibilidade** (`design:accessibility-review`):
+  - Contraste da cor do texto: no claro, laranja, amarelo, verde e rosa 600 ficavam abaixo de 4,5:1; no escuro, vermelho, azul, roxo e cinza 600. **Corrigido:** tom por tema (700 ou 600 no claro, 400 no escuro).
+  - A proposta pronta não era anunciada ao leitor de tela. **Corrigido:** região `aria-live` com "Proposta pronta. Enter aceita, Esc descarta."
+  - A barra da seleção não recebe foco pelo teclado (igual ao Notion). Ficou: tudo o que ela faz está na barra fixa e no "/".
+  - Mover bloco por teclado não existe. Ficou: Mover para cima e para baixo estão no menu da alça; o atalho fica como sugestão ao dev.
+  - Botões da barra com 28 px, abaixo dos 44 px de toque. Ficou: é a medida da barra de hoje no desktop.
+  - Seletor de cor com nome em cada quadrado ("Texto vermelho") e `aria-pressed`; seletor de modelo com `aria-selected`.
+- **Ver:** `pnpm dev` → http://localhost:3000/ia-no-campo-html · publicado: https://pernalombr4.github.io/prototipos/ia-no-campo-html/ · prints em `evidencias/proto-*.png` (proposta) e `evidencias/ref-*.png` (concorrentes)
