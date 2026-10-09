@@ -3,6 +3,7 @@ import PainelTrabalho from './_PainelTrabalho.vue'
 import PainelConfiguracoes from './_PainelConfiguracoes.vue'
 import ModeloTrilha from './_ModeloTrilha.vue'
 import Conteudo from './_Conteudo.vue'
+import BarraRecolhida from './_BarraRecolhida.vue'
 
 /*
  * ============ O QUE ENTRA DEPOIS (rodada 13) ============
@@ -31,7 +32,8 @@ import {
   type NoDoMenu,
   type Categoria,
 } from './mocks'
-import { useMenuDoWorkspace } from './estado'
+import { useMenuDoWorkspace, useMenuRecolhido } from './estado'
+import { useRenomeando } from './acoes'
 import { textos } from './textos'
 
 // O contexto do protótipo vem dos próprios .md desta pasta, como texto.
@@ -47,7 +49,7 @@ definePageMeta({
   titulo: 'Menu lateral em dois níveis',
   descricao: 'Tirar a administração do caminho do trabalho e dar teto à lista de categorias, sem mudar de endereço.',
   status: 'em-revisao',
-  atualizado: '2026-09-17',
+  atualizado: '2026-10-09',
   tela: 'Menu lateral do workspace',
 })
 
@@ -234,6 +236,10 @@ function alternarFixar(id: number) {
 
 function abrirConfiguracoes() {
   if (!podeConfigurar.value) return
+  levarFocoParaBarra(() => abrirConfiguracoesAgora())
+}
+
+function abrirConfiguracoesAgora() {
   const primeiro = gruposDeConfiguracao[0]?.itens[0]
   if (primeiro) {
     abrirItemDeConfiguracao(primeiro.id, t.value.itens[primeiro.id] ?? primeiro.id)
@@ -244,7 +250,7 @@ function abrirConfiguracoes() {
 }
 
 function voltarParaTrabalho() {
-  painel.value = 'trabalho'
+  levarFocoParaBarra(() => { painel.value = 'trabalho' })
   // O id vem da arvore, onde o destino nativo tem prefixo: com 'inicio' a
   // volta deixava o menu inteiro sem linha ativa.
   destinoAtivo.value = menu.destinos.value[0]?.id ?? 'n-inicio'
@@ -376,9 +382,53 @@ const gruposDaBusca = computed(() => [
   },
 ])
 
+/* ============ RECOLHER E EXPANDIR (rodada 14) ============ */
+
+const recolhido = useMenuRecolhido()
+const aside = ref<HTMLElement | null>(null)
+
+/*
+ * O FOCO NÃO PODE CAIR NO VAZIO. Trocar de painel (trabalho e configurações)
+ * ou recolher a barra desmonta o botão que tinha o foco, e o navegador o
+ * devolve ao <body>: quem usa teclado ou leitor de tela perde o lugar e
+ * recomeça do topo da página. Achado da revisão de acessibilidade desta
+ * rodada (WCAG 2.4.3). Agora o foco vai para o primeiro botão do que entrou.
+ */
+async function levarFocoParaBarra(mudanca: () => void) {
+  const ativo = import.meta.client ? document.activeElement : null
+  const estavaNaBarra = !!ativo && !!aside.value?.contains(ativo)
+  mudanca()
+  if (!estavaNaBarra) return
+  await nextTick()
+  aside.value?.querySelector<HTMLElement>('button:not([disabled]), input')?.focus()
+}
+
+function alternarRecolhido() {
+  levarFocoParaBarra(() => { recolhido.value = !recolhido.value })
+}
+
 defineShortcuts({
   meta_k: () => { buscando.value = !buscando.value },
+  // O atalho do ClickUp para mostrar e esconder a barra.
+  'meta_\\': () => alternarRecolhido(),
 })
+
+/* ============ RENOMEAR, PELO BOTÃO DIREITO (rodada 14) ============ */
+
+const renomeando = useRenomeando()
+const nomeNovo = ref('')
+const abrindoRenomear = computed({
+  get: () => renomeando.value !== null,
+  set: (v) => { if (!v) renomeando.value = null },
+})
+watch(renomeando, (id) => {
+  if (id) nomeNovo.value = menu.acharNo(id)?.rotulo ?? ''
+})
+
+function aplicarNome() {
+  if (renomeando.value) menu.renomear(renomeando.value, nomeNovo.value)
+  renomeando.value = null
+}
 
 /** O menu de ajuda é maquete: os três caminhos saem do produto para fora dele. */
 function avisarAjuda(rotulo: string) {
@@ -477,10 +527,17 @@ function emBreve() {
     <div class="flex min-h-0 flex-1 gap-0 pb-20">
       <div class="flex min-h-0 w-full overflow-hidden border-t border-default bg-default">
         <!-- barra lateral -->
+        <!--
+          A largura anda junto com o recolher (rodada 14), em 200 ms. O
+          prefers-reduced-motion do main.css zera a transição.
+        -->
         <aside
-          class="relative hidden shrink-0 border-r border-default bg-elevated/40 md:block"
-          :class="modelo === 'trilha' ? 'w-[19rem]' : 'w-[17.5rem]'"
-          :aria-label="t.configuracoes"
+          ref="aside"
+          class="relative hidden shrink-0 overflow-hidden border-r border-default bg-elevated/40 transition-[width] duration-200 ease-out md:block"
+          :class="modelo === 'trilha'
+            ? (recolhido ? 'w-[4.5rem]' : 'w-[19rem]')
+            : (recolhido ? 'w-14' : 'w-[17.5rem]')"
+          :aria-label="t.menuLateral"
         >
           <!-- MODELO ALTERNATIVO: trilha de icones mais painel da area. -->
           <ModeloTrilha
@@ -495,6 +552,8 @@ function emBreve() {
             :estado="estadoDoPainel"
             :pode-configurar="podeConfigurar"
             :itens-de-criar="itensDeCriar"
+            :ordem="ordem"
+            :recolhido="recolhido"
             @destino="irParaDestino"
             @categoria="abrirCategoria"
             @alternar-fixar="alternarFixar"
@@ -502,6 +561,32 @@ function emBreve() {
             @busca="buscando = true"
             @item="abrirItemDeConfiguracao"
             @ajuda="avisarAjuda"
+            @ordem="trocarOrdem"
+            @virar-manual="virarOrdemManual"
+            @nova-tela="abrirEditor('item')"
+            @configurar-categoria="configurarCategoriaAtual"
+            @recolher="alternarRecolhido"
+          />
+          <!-- RECOLHIDA (rodada 14): a coluna de ícones, nos dois painéis. -->
+          <BarraRecolhida
+            v-else-if="recolhido"
+            class="animate-[entrada_0.2s_ease-out_both]"
+            :t="t"
+            :favoritas="favoritas"
+            :recorte="recorte"
+            :total-de-categorias="categorias.length"
+            :destino-ativo="painel === 'trabalho' ? destinoAtivo : ''"
+            :categoria-ativa-id="painel === 'trabalho' ? (categoriaAtiva?.id ?? null) : null"
+            :pode-configurar="podeConfigurar"
+            @destino="id => { painel = 'trabalho'; irParaDestino(id) }"
+            @categoria="c => { painel = 'trabalho'; abrirCategoria(c) }"
+            @alternar-fixar="alternarFixar"
+            @ver-todas="vendoTodas = true"
+            @configuracoes="abrirConfiguracoes"
+            @ajuda="avisarAjuda"
+            @expandir="alternarRecolhido"
+            @nova-tela="abrirEditor('item')"
+            @configurar-categoria="configurarCategoriaAtual"
           />
           <template v-else>
           <!--
@@ -534,6 +619,9 @@ function emBreve() {
               @ajuda="avisarAjuda"
               @ordem="trocarOrdem"
               @virar-manual="virarOrdemManual"
+              @nova-tela="abrirEditor('item')"
+              @configurar-categoria="configurarCategoriaAtual"
+              @recolher="alternarRecolhido"
             />
           <PainelConfiguracoes
             v-else
@@ -543,6 +631,7 @@ function emBreve() {
             :item-ativo="itemConfigAtivo"
             @voltar="voltarParaTrabalho"
             @item="abrirItemDeConfiguracao"
+            @recolher="alternarRecolhido"
           />
           </template>
         </aside>
@@ -594,6 +683,21 @@ function emBreve() {
           class="h-80"
           @update:model-value="buscando = false"
         />
+      </template>
+    </UModal>
+
+    <!-- Renomear, aberto pelo botão direito (rodada 14). -->
+    <UModal v-model:open="abrindoRenomear" :title="t.renomearTitulo" :ui="{ content: 'max-w-sm' }">
+      <template #body>
+        <form class="space-y-4" @submit.prevent="aplicarNome">
+          <UFormField :label="t.renomearCampo">
+            <UInput v-model="nomeNovo" class="w-full" autofocus />
+          </UFormField>
+          <div class="flex justify-end gap-2">
+            <UButton :label="t.cancelar" color="neutral" variant="ghost" @click="renomeando = null" />
+            <UButton type="submit" :label="t.renomearAplicar" color="primary" :disabled="!nomeNovo.trim()" />
+          </div>
+        </form>
       </template>
     </UModal>
 

@@ -545,6 +545,12 @@ export interface NoDoMenu {
   origem?: 'nativo' | 'modulo' | 'workspace'
   /** Qual módulo trouxe este item, quando a origem é `modulo`. */
   moduloId?: string
+  /**
+   * Inventado pelo protótipo (rodada 14): "Ocultar" do menu de contexto, como o
+   * Hide do ClickUp. O item sai da barra e continua existindo: a busca acha, o
+   * editor mostra, e "Itens ocultos" no pé da barra traz de volta.
+   */
+  oculto?: boolean
   filhos?: NoDoMenu[]
 }
 

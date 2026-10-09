@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { Acoes } from './acoes'
+
 /**
  * Uma linha do menu lateral.
  *
@@ -43,6 +45,11 @@ const props = withDefaults(defineProps<{
   /** Bolinha amarela: esta linha foi mexida e ainda não foi salva. */
   alterado?: boolean
   dicaAlterado?: string
+  /**
+   * O menu do botão direito (rodada 14). Sem ele a linha não abre menu nenhum
+   * e o botão direito volta a ser o do navegador.
+   */
+  acoes?: Acoes
 }>(), {
   nivel: 1,
   atraso: 0,
@@ -102,6 +109,12 @@ function aoTeclar(e: KeyboardEvent) {
 </script>
 
 <template>
+  <!--
+    O botão direito (rodada 14). O UContextMenu usa a própria linha como
+    gatilho, sem elemento a mais: Shift+F10 e a tecla de menu abrem o mesmo
+    menu na linha com foco, que é o caminho de teclado do ClickUp também.
+  -->
+  <UContextMenu :items="props.acoes" :disabled="!props.acoes?.length">
   <div
     class="group relative animate-[entrada_0.22s_ease-out_both]"
     :class="[
@@ -122,7 +135,7 @@ function aoTeclar(e: KeyboardEvent) {
     <button
       type="button"
       :aria-current="props.ativo ? 'page' : undefined"
-      class="flex w-full items-center gap-2.5 rounded-md py-1.5 pr-9 text-sm transition-colors duration-150"
+      class="flex w-full items-center gap-2.5 rounded-md py-1.5 pr-9 text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
       :class="[
         props.nivel === 2 ? 'pl-8' : 'pl-2.5',
         props.ativo
@@ -196,7 +209,7 @@ function aoTeclar(e: KeyboardEvent) {
     >
       <button
         type="button"
-        class="absolute right-1 top-1/2 z-10 -translate-y-1/2 rounded p-1 transition-all duration-150 hover:bg-accented focus-visible:opacity-100"
+        class="absolute right-1 top-1/2 z-10 -translate-y-1/2 rounded p-1.25 transition-all duration-150 hover:bg-accented focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-primary"
         :class="props.fixada
           ? 'text-warning opacity-100'
           : 'text-toned opacity-0 group-hover:opacity-100 focus-visible:opacity-100'"
@@ -212,4 +225,5 @@ function aoTeclar(e: KeyboardEvent) {
       </button>
     </UTooltip>
   </div>
+  </UContextMenu>
 </template>

@@ -356,3 +356,64 @@ pesquisa, e a spec pede "descrito em passos, não em adjetivo". O que ambos faze
 está coberto pelos padrões 1 e 3 acima, é manter a administração em área separada (o
 `⚙ Settings` do HubSpot é outra navegação inteira) e favoritar o que é usado com frequência
 (`Starred` do Asana).
+
+## Rodada 14: botão direito, arrastar e recolher no ClickUp
+
+Pedido dela: "pesquise como o clickup trabalha com isso pra ter inspiração". A pergunta tem três
+partes: o que se reordena, o que se recolhe e o que se personaliza. Fonte: a central de ajuda
+oficial do ClickUp (versão 4.0). **Não foi possível usar o ClickUp logado:** esta sessão roda
+num contêiner na nuvem, sem o Chrome dela, e entrar pelo navegador do contêiner exigiria digitar
+senha, o que a regra 2 proíbe. A conferência na mão fica para uma sessão no app de desktop.
+
+### O botão direito
+
+- Botão direito em Space, Folder e List abre o **mesmo menu** que o `…` ao lado do nome. As
+  duas portas levam ao mesmo lugar
+  ([Space, Folder, and List settings](https://help.clickup.com/hc/en-us/articles/33777837994775-Space-Folder-and-List-settings)).
+- O conteúdo muda com o nível e com a permissão, **a ordem dos blocos não**:
+  - **Space:** Favorite, Rename, Copy link, Hide Space, Archive;
+  - **Folder:** Favorite, Rename, Copy link, Move, Archive;
+  - **List:** Favorite, Rename, Copy link, Email to List, Move, Archive.
+- `Hide Space` tira o Space da barra **sem tirar o acesso**. A volta é `Show all Spaces`, no `…`
+  da seção Spaces ([Hide or reorder Spaces](https://help.clickup.com/hc/en-us/articles/6309404591895-Hide-or-reorder-Spaces)).
+- O que falta lá, e os usuários pedem: "Open in new window/tab" no botão direito
+  ([pedido público](https://feedback.clickup.com/feature-requests/p/add-open-in-new-window-tab-to-sidebar-right-click-menu)).
+
+### O que se reordena e o que não
+
+- **Spaces:** arrastando, na Home Sidebar ou na Spaces Sidebar.
+- **Seções da Home Sidebar:** arrastando na própria barra, ou num modal `Reorder sections`. As
+  seções padrão **se reordenam mas não se escondem**
+  ([Create custom Home Sidebar sections](https://help.clickup.com/hc/en-us/articles/32855333466903-Create-and-reorder-custom-Home-Sidebar-sections)).
+- **Global Navigation (a trilha):** não se arrasta. Se liga e desliga por caixa de seleção em
+  `More > Customize navigation`, e **Home é o único item que não se mexe**. Arrastar ali é pedido
+  aberto ([Customize & reorder global nav](https://feedback.clickup.com/feature-requests/p/customize-reorder-home-sidebar-global-nav-menus)).
+
+### O que se personaliza 100%
+
+- **Seções próprias na Home Sidebar**, com nome livre, criadas pelo `+` da barra ou pelo `…` de
+  uma seção, e dentro delas Spaces, Lists, Docs e o que mais a pessoa puser. É o equivalente da
+  "seção do workspace" que o ENSPACE já tem em Interface > Menus.
+
+### Recolher e expandir
+
+- `Ctrl + \` (ou `Cmd + \`) mostra e esconde a barra
+  ([Use keyboard shortcuts](https://help.clickup.com/hc/en-us/articles/6309030550167)).
+- Recolhida, a barra volta pelo **ícone de expandir no alto da Global Navigation**
+  ([Default Home Sidebar sections](https://help.clickup.com/hc/en-us/articles/32854720651543-Default-Home-Sidebar-sections-and-settings)).
+- A barra também abre sozinha quando o mouse passa na borda, e esse é um pedido público **contra**
+  o comportamento: "Personal Setting to Disable Sidebar Expand on Hover"
+  ([pedido](https://feedback.clickup.com/feature-requests/p/disable-sidebar-hover-to-show-action)).
+
+### O que serve, e o que não serve
+
+| ClickUp | No ENSPACE | Por quê |
+|---|---|---|
+| Botão direito = menu do `…`, mesmos blocos em todo nível | **Serve.** Três blocos fixos: ir, arrumar, mexer | Quem aprende num lugar acha no outro |
+| `Hide` com `Show all` para voltar | **Serve.** "Ocultar do menu" e "Itens ocultos" no pé | É a resposta direta a "o menu é muito cheio" |
+| Home não se esconde; seções padrão não se escondem | **Serve.** Início e Categorias não se ocultam | Sem Início não há para onde voltar |
+| Global Navigation não se arrasta | **Em parte.** Na trilha, Trabalho, Dados e Configurações ficam; as seções do workspace se arrastam | Ela pediu arraste na trilha, e as seções são do workspace |
+| "Open in new tab" ausente | **O ENSPACE faz.** "Abrir em nova aba" no primeiro bloco | É o pedido dos próprios usuários de lá |
+| `Ctrl + \` e ícone de expandir no alto | **Serve**, igual | Atalho que quem vem do ClickUp já tem na mão |
+| Abrir sozinha no hover da borda | **Não serve** | É o comportamento que os usuários de lá pedem para desligar |
+| `Archive` no botão direito | **Não entra** | Arquivar categoria e seção é decisão de configuração, não de navegação |

@@ -335,6 +335,59 @@ export function useMenuDoWorkspace() {
     marcarTocado(id)
   }
 
+  /*
+   * ============ O MENU DE CONTEXTO (rodada 14) ============
+   *
+   * Tudo o que o botão direito faz passa por aqui, e tudo mexe no RASCUNHO,
+   * como o arraste: acende a bolinha, acende o cartão de salvar, e a pessoa
+   * escolhe se vale para todos ou só para ela. Ocultar com "Salvar só para
+   * mim" é o Hide do ClickUp; com "Salvar para todos", é o administrador
+   * tirando o item do menu de todo mundo.
+   */
+
+  /** Sobe ou desce para a raiz do menu, ao lado da seção onde estava. */
+  function moverParaPrimeiroNivel(id: string) {
+    const onde = localizar(rascunho.value, id)
+    if (!onde?.pai) return { ok: true as const }
+    return soltar(id, onde.pai.id, 'depois')
+  }
+
+  function moverParaSecao(id: string, secaoId: string) {
+    return soltar(id, secaoId, 'dentro')
+  }
+
+  function ocultar(id: string) {
+    const no = acharNo(rascunho.value, id)
+    if (!no) return
+    no.oculto = true
+    marcarTocado(id)
+  }
+
+  function mostrar(id: string) {
+    const no = acharNo(rascunho.value, id)
+    if (!no) return
+    no.oculto = false
+    marcarTocado(id)
+  }
+
+  function renomear(id: string, rotulo: string) {
+    const no = acharNo(rascunho.value, id)
+    const limpo = rotulo.trim()
+    if (!no || !limpo || limpo === no.rotulo) return
+    no.rotulo = limpo
+    marcarTocado(id)
+  }
+
+  /** Trilha ou painel, no modelo de trilha. `painel` diz em qual painel entra. */
+  function mudarLugar(id: string, lugar: 'trilha' | 'painel', painel = 'trabalho') {
+    const no = acharNo(rascunho.value, id)
+    if (!no || no.tipo !== 'secao') return
+    if (no.lugar === lugar && (lugar === 'trilha' || (no.painel ?? 'trabalho') === painel)) return
+    no.lugar = lugar
+    if (lugar === 'painel') no.painel = painel
+    marcarTocado(id)
+  }
+
   function adicionarSecao(no: NoDoMenu) {
     rascunho.value.push(no)
     marcarTocado(no.id)
@@ -366,9 +419,34 @@ export function useMenuDoWorkspace() {
   /** A árvore inteira filtrada, que é o que o editor mostra. */
   const arvoreVisivel = computed(() => rascunho.value.filter(visivel))
 
+  /*
+   * O QUE AS BARRAS DESENHAM (rodada 14): o mesmo de cima, menos o que foi
+   * ocultado. O editor e a busca continuam lendo as listas inteiras: oculto é
+   * "fora do meu caminho", não "apagado".
+   *
+   * São cópias rasas, e os filhos filtrados moram nelas. Quem mexe na árvore
+   * mexe pelo id, nunca pelo objeto desenhado.
+   */
+  function semOcultos(n: NoDoMenu): NoDoMenu {
+    return n.filhos ? { ...n, filhos: n.filhos.filter(f => !f.oculto) } : n
+  }
+  const arvoreDaBarra = computed(() => arvoreVisivel.value.filter(n => !n.oculto).map(semOcultos))
+  const destinosDaBarra = computed(() => destinos.value.filter(n => !n.oculto))
+  const secoesDaBarra = computed(() => secoes.value.filter(n => !n.oculto).map(semOcultos))
+
+  /** Tudo o que está oculto agora, para o "Itens ocultos" do pé da barra. */
+  const ocultos = computed(() => {
+    const lista: NoDoMenu[] = []
+    for (const n of arvoreVisivel.value) {
+      if (n.oculto) lista.push(n)
+      for (const f of n.filhos ?? []) if (f.oculto) lista.push(f)
+    }
+    return lista
+  })
+
   /** No modelo de trilha: as que o administrador mandou para a trilha. */
-  const secoesNaTrilha = computed(() => secoes.value.filter(s => s.lugar === 'trilha'))
-  const secoesNoPainel = computed(() => secoes.value.filter(s => s.lugar !== 'trilha'))
+  const secoesNaTrilha = computed(() => secoesDaBarra.value.filter(s => s.lugar === 'trilha'))
+  const secoesNoPainel = computed(() => secoesDaBarra.value.filter(s => s.lugar !== 'trilha'))
 
   return {
     aoVivo,
@@ -407,7 +485,27 @@ export function useMenuDoWorkspace() {
     modoDoMenu,
     secoesNaTrilha,
     secoesNoPainel,
+    arvoreDaBarra,
+    destinosDaBarra,
+    secoesDaBarra,
+    ocultos,
+    acharNo: (id: string) => acharNo(rascunho.value, id),
+    moverParaPrimeiroNivel,
+    moverParaSecao,
+    ocultar,
+    mostrar,
+    renomear,
+    mudarLugar,
   }
+}
+
+/**
+ * Menu recolhido ou aberto (rodada 14). Um estado só para os dois modelos:
+ * trocar de modelo no andaime não reabre o menu que a pessoa recolheu.
+ * Não sobrevive ao recarregar, como o resto do protótipo.
+ */
+export function useMenuRecolhido() {
+  return useState<boolean>('menu-recolhido', () => false)
 }
 
 /* ==================================================================

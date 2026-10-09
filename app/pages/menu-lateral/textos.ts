@@ -52,6 +52,39 @@ export interface TextosDaTela {
   fixada: (nome: string) => string
   desafixada: (nome: string) => string
 
+  // menu de contexto, recolher e ocultar (rodada 14)
+  ctxAbrir: string
+  ctxNovaAba: string
+  ctxCopiarLink: string
+  ctxRenomear: string
+  ctxMoverPara: string
+  ctxPrimeiroNivel: string
+  ctxSubir: string
+  ctxDescer: string
+  ctxOcultar: string
+  ctxParaTrilha: string
+  ctxParaPainel: (painel: string) => string
+  ctxRecolher: string
+  ctxExpandir: string
+  ctxNovaTela: string
+  ctxConfigurarCategoria: string
+  ctxSoQuemConfigura: string
+  linkCopiado: string
+  novaAbaMaquete: string
+  ocultado: (nome: string) => string
+  ocultadoDica: string
+  itensOcultos: (n: number) => string
+  mostrarNoMenu: string
+  renomearTitulo: string
+  renomearCampo: string
+  renomearAplicar: string
+  recolherMenu: string
+  expandirMenu: string
+  menuLateral: string
+  navegacao: string
+  levadoParaTrilha: (nome: string) => string
+  levadoParaPainel: (nome: string, painel: string) => string
+
   // camada de todas as categorias
   todasTitulo: string
   todasDescricao: (n: number) => string
@@ -265,6 +298,38 @@ const ptBR: TextosDaTela = {
   fixada: nome => `${nome} entrou nos seus favoritos.`,
   desafixada: nome => `${nome} saiu dos seus favoritos.`,
 
+  ctxAbrir: 'Abrir',
+  ctxNovaAba: 'Abrir em nova aba',
+  ctxCopiarLink: 'Copiar link',
+  ctxRenomear: 'Renomear',
+  ctxMoverPara: 'Mover para',
+  ctxPrimeiroNivel: 'Primeiro nível do menu',
+  ctxSubir: 'Mover para cima',
+  ctxDescer: 'Mover para baixo',
+  ctxOcultar: 'Ocultar do menu',
+  ctxParaTrilha: 'Levar para a trilha',
+  ctxParaPainel: painel => `Levar para ${painel}`,
+  ctxRecolher: 'Recolher seção',
+  ctxExpandir: 'Expandir seção',
+  ctxNovaTela: 'Nova tela nesta seção',
+  ctxConfigurarCategoria: 'Configurar categoria',
+  ctxSoQuemConfigura: 'Só quem configura o workspace',
+  linkCopiado: 'Link copiado.',
+  novaAbaMaquete: 'Abriria numa aba nova. Aqui é maquete.',
+  ocultado: nome => `${nome} saiu do menu.`,
+  ocultadoDica: 'Continua na busca. Para trazer de volta, use Itens ocultos no pé do menu.',
+  itensOcultos: n => n === 1 ? '1 item oculto' : `${n} itens ocultos`,
+  mostrarNoMenu: 'Mostrar no menu',
+  renomearTitulo: 'Renomear',
+  renomearCampo: 'Nome no menu',
+  renomearAplicar: 'Renomear',
+  recolherMenu: 'Recolher menu',
+  expandirMenu: 'Expandir menu',
+  menuLateral: 'Menu lateral',
+  navegacao: 'Navegação do workspace',
+  levadoParaTrilha: nome => `${nome} agora tem ícone na trilha.`,
+  levadoParaPainel: (nome, painel) => `${nome} agora fica dentro de ${painel}.`,
+
   todasTitulo: 'Todas as categorias',
   todasDescricao: n => `${n} categorias neste workspace. Fixe as que você usa para elas ficarem no menu.`,
   todasBusca: 'Buscar categoria',
@@ -444,6 +509,8 @@ const ptBR: TextosDaTela = {
     categoriaSoEmCategorias: 'Categoria só entra na seção Categorias.',
     telaNaoEmCategorias: 'A seção Categorias só aceita categoria.',
     secaoDentroDeSecao: 'O menu tem dois níveis. Seção não entra dentro de seção.',
+    areaFixa: 'Trabalho, Dados e Configurações ficam onde estão. Só as seções mudam de lugar na trilha.',
+    soSecaoNaTrilha: 'Na trilha só entram seções. Solte o item dentro de uma delas.',
   },
   tipos: {
     'arquivos': 'Arquivos',
@@ -516,6 +583,38 @@ const en: TextosDaTela = {
   desafixar: 'Remove from favorites',
   fixada: nome => `${nome} is now in your favorites.`,
   desafixada: nome => `${nome} left your favorites.`,
+
+  ctxAbrir: 'Open',
+  ctxNovaAba: 'Open in new tab',
+  ctxCopiarLink: 'Copy link',
+  ctxRenomear: 'Rename',
+  ctxMoverPara: 'Move to',
+  ctxPrimeiroNivel: 'Top level of the menu',
+  ctxSubir: 'Move up',
+  ctxDescer: 'Move down',
+  ctxOcultar: 'Hide from menu',
+  ctxParaTrilha: 'Move to the rail',
+  ctxParaPainel: painel => `Move into ${painel}`,
+  ctxRecolher: 'Collapse section',
+  ctxExpandir: 'Expand section',
+  ctxNovaTela: 'New screen in this section',
+  ctxConfigurarCategoria: 'Category settings',
+  ctxSoQuemConfigura: 'Only workspace admins',
+  linkCopiado: 'Link copied.',
+  novaAbaMaquete: 'This would open a new tab. It is a mockup here.',
+  ocultado: nome => `${nome} left the menu.`,
+  ocultadoDica: 'Search still finds it. To bring it back, use Hidden items at the bottom of the menu.',
+  itensOcultos: n => n === 1 ? '1 hidden item' : `${n} hidden items`,
+  mostrarNoMenu: 'Show in menu',
+  renomearTitulo: 'Rename',
+  renomearCampo: 'Name in the menu',
+  renomearAplicar: 'Rename',
+  recolherMenu: 'Collapse menu',
+  expandirMenu: 'Expand menu',
+  menuLateral: 'Sidebar',
+  navegacao: 'Workspace navigation',
+  levadoParaTrilha: nome => `${nome} now has an icon on the rail.`,
+  levadoParaPainel: (nome, painel) => `${nome} now lives inside ${painel}.`,
 
   todasTitulo: 'All categories',
   todasDescricao: n => `${n} categories in this workspace. Pin the ones you use to keep them in the menu.`,
@@ -696,6 +795,8 @@ const en: TextosDaTela = {
     categoriaSoEmCategorias: 'A category only goes in the Categories section.',
     telaNaoEmCategorias: 'The Categories section only takes categories.',
     secaoDentroDeSecao: 'The menu has two levels. A section does not go inside a section.',
+    areaFixa: 'Work, Data and Settings stay where they are. Only sections move on the rail.',
+    soSecaoNaTrilha: 'Only sections go on the rail. Drop the item inside one of them.',
   },
   tipos: {
     'arquivos': 'Files',
@@ -768,6 +869,38 @@ const es: TextosDaTela = {
   desafixar: 'Quitar de favoritos',
   fixada: nome => `${nome} entró en tus favoritos.`,
   desafixada: nome => `${nome} salió de tus favoritos.`,
+
+  ctxAbrir: 'Abrir',
+  ctxNovaAba: 'Abrir en una pestaña nueva',
+  ctxCopiarLink: 'Copiar enlace',
+  ctxRenomear: 'Renombrar',
+  ctxMoverPara: 'Mover a',
+  ctxPrimeiroNivel: 'Primer nivel del menú',
+  ctxSubir: 'Mover hacia arriba',
+  ctxDescer: 'Mover hacia abajo',
+  ctxOcultar: 'Ocultar del menú',
+  ctxParaTrilha: 'Llevar al riel',
+  ctxParaPainel: painel => `Llevar a ${painel}`,
+  ctxRecolher: 'Contraer sección',
+  ctxExpandir: 'Expandir sección',
+  ctxNovaTela: 'Nueva pantalla en esta sección',
+  ctxConfigurarCategoria: 'Configurar categoría',
+  ctxSoQuemConfigura: 'Solo quien configura el workspace',
+  linkCopiado: 'Enlace copiado.',
+  novaAbaMaquete: 'Se abriría en una pestaña nueva. Aquí es una maqueta.',
+  ocultado: nome => `${nome} salió del menú.`,
+  ocultadoDica: 'La búsqueda lo sigue encontrando. Para traerlo de vuelta, usa Elementos ocultos al pie del menú.',
+  itensOcultos: n => n === 1 ? '1 elemento oculto' : `${n} elementos ocultos`,
+  mostrarNoMenu: 'Mostrar en el menú',
+  renomearTitulo: 'Renombrar',
+  renomearCampo: 'Nombre en el menú',
+  renomearAplicar: 'Renombrar',
+  recolherMenu: 'Contraer menú',
+  expandirMenu: 'Expandir menú',
+  menuLateral: 'Menú lateral',
+  navegacao: 'Navegación del workspace',
+  levadoParaTrilha: nome => `${nome} ahora tiene un ícono en el riel.`,
+  levadoParaPainel: (nome, painel) => `${nome} ahora está dentro de ${painel}.`,
 
   todasTitulo: 'Todas las categorías',
   todasDescricao: n => `${n} categorías en este workspace. Fija las que usas para que queden en el menú.`,
@@ -948,6 +1081,8 @@ const es: TextosDaTela = {
     categoriaSoEmCategorias: 'Una categoría solo entra en la sección Categorías.',
     telaNaoEmCategorias: 'La sección Categorías solo acepta categorías.',
     secaoDentroDeSecao: 'El menú tiene dos niveles. Una sección no entra dentro de otra.',
+    areaFixa: 'Trabajo, Datos y Configuración se quedan donde están. Solo las secciones cambian de lugar en el riel.',
+    soSecaoNaTrilha: 'En el riel solo entran secciones. Suelta el elemento dentro de una de ellas.',
   },
   tipos: {
     'arquivos': 'Archivos',

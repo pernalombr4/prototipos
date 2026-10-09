@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { Acoes } from './acoes'
+
 /**
  * Seção nomeada e recolhível: a unidade de organização do meio da barra.
  *
@@ -27,6 +29,8 @@ const props = withDefaults(defineProps<{
   saindo?: boolean
   marca?: 'antes' | 'depois' | 'dentro' | null
   recusando?: boolean
+  /** O menu do botão direito no cabeçalho da seção (rodada 14). */
+  acoes?: Acoes
 }>(), { marca: null })
 
 const emit = defineEmits<{
@@ -76,6 +80,7 @@ function aoTeclar(e: KeyboardEvent) {
     class="group/secao mt-2 first:mt-0"
     :class="props.saindo ? 'opacity-40' : ''"
   >
+    <UContextMenu :items="props.acoes" :disabled="!props.acoes?.length">
     <div
       class="relative flex items-center gap-1 rounded pr-1"
       :class="[
@@ -93,9 +98,9 @@ function aoTeclar(e: KeyboardEvent) {
     >
       <button
         type="button"
-        class="flex min-w-0 flex-1 items-center gap-1.5 rounded px-2.5 py-1 text-left text-xs font-semibold uppercase tracking-wider text-toned transition-colors hover:text-highlighted"
+        class="flex min-w-0 flex-1 items-center gap-1.5 rounded px-2.5 py-1 text-left text-xs font-semibold uppercase tracking-wider text-toned transition-colors hover:text-highlighted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
         :aria-expanded="props.aberta"
-        :aria-label="props.aberta ? props.textoRecolher : props.textoExpandir"
+        :title="props.aberta ? props.textoRecolher : props.textoExpandir"
         @click="emit('alternar')"
       >
         <!-- A pega troca com a seta no hover, como na linha. Rodada 11. -->
@@ -150,6 +155,7 @@ function aoTeclar(e: KeyboardEvent) {
         <slot name="acoes" />
       </span>
     </div>
+    </UContextMenu>
 
     <div
       v-if="props.aberta"

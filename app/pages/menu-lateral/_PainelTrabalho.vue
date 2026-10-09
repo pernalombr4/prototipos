@@ -2,7 +2,10 @@
 import LinhaDeMenu from './_LinhaDeMenu.vue'
 import SecaoDeMenu from './_SecaoDeMenu.vue'
 import MenuDeAjuda from './_MenuDeAjuda.vue'
+import CartaoDeSalvar from './_CartaoDeSalvar.vue'
+import AvisosDoMenu from './_AvisosDoMenu.vue'
 import { useMenuDoWorkspace, useArraste } from './estado'
+import { useAcoesDoMenu } from './acoes'
 import type { NoDoMenu, Categoria } from './mocks'
 import type { TextosDaTela } from './textos'
 
@@ -59,6 +62,10 @@ const emit = defineEmits<{
   ordem: [valor: 'uso' | 'alfabetica' | 'recentes' | 'manual']
   virarManual: []
   ajuda: [rotulo: string]
+  /** Rodada 14: o botão direito abre o editor e a configuração da categoria. */
+  novaTela: [secaoId: string]
+  configurarCategoria: [c: Categoria]
+  recolher: []
 }>()
 
 const menu = useMenuDoWorkspace()
@@ -158,27 +165,7 @@ function largarCategoria(alvoId: number, posicao: 'antes' | 'depois') {
   menu.reordenarCategoria(Number(quem.slice(4)), alvoId, posicao)
 }
 
-/*
- * ============ SALVAR, E PARA QUEM (rodada 12) ============
- *
- * "o botao flutuante de salvar pra todos os usuarios ou só alterar
- * localmente" (Mikaela).
- *
- * Os dois botões existem porque as duas coisas existem: o menu é configuração
- * do workspace, e ao mesmo tempo cada pessoa quer o seu do seu jeito. Sem a
- * segunda opção, quem não é administrador não poderia arrumar nada; sem a
- * primeira, o administrador não conseguiria consertar o menu de todo mundo.
- *
- * "Salvar para todos" só aparece para quem pode configurar.
- */
-function salvarMenu(alcance: 'todos' | 'local') {
-  menu.salvar(alcance)
-  toast.add({
-    title: alcance === 'todos' ? props.t.salvoParaTodos : props.t.salvoSoParaMim,
-    icon: alcance === 'todos' ? 'i-lucide-users' : 'i-lucide-user',
-    color: 'neutral',
-  })
-}
+/* O Salvar (rodada 12) mora no _CartaoDeSalvar.vue desde a rodada 14. */
 
 /** A bolinha amarela de uma linha: foi mexida e ainda não foi salva. */
 function tocado(id: string) {
@@ -300,7 +287,8 @@ const categoriasVisiveis = computed(() => {
  * categorias, logo acima dela, porque é dela que eles saem.
  */
 const nosVisiveis = computed(() => {
-  const arvore = menu.arvoreVisivel.value
+  // Rodada 14: a árvore DA BARRA, que já vem sem o que foi ocultado.
+  const arvore = menu.arvoreDaBarra.value
   if (!filtrando.value) return arvore
 
   return arvore
@@ -318,17 +306,77 @@ const nosVisiveis = computed(() => {
 })
 
 const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length)
+
+/* ============ O BOTÃO DIREITO (rodada 14) ============ */
+
+const acoes = useAcoesDoMenu({
+  t: () => props.t,
+  podeConfigurar: () => props.podeConfigurar,
+  rotuloDe,
+  abrirDestino: id => emit('destino', id),
+  abrirCategoria: c => emit('categoria', c),
+  alternarFixar: id => emit('alternarFixar', id),
+  configurarCategoria: c => emit('configurarCategoria', c),
+  novaTela: id => emit('novaTela', id),
+  // A seção nativa guarda o aberto em 'categorias', e abrir pelo botão
+  // direito segue a regra do clique: abrir leva à primeira tela (rodada 10).
+  secaoAberta: id => aberta(id === 'n-categorias' ? 'categorias' : id),
+  alternarSecao: (id) => {
+    if (id === 'n-categorias') return abrirCategorias()
+    const no = nosVisiveis.value.find(n => n.id === id)
+    if (no) abrirSecao(no)
+    else alternar(id)
+  },
+})
+
+/** Os irmãos que aparecem agora: é entre eles que "mover para cima" anda. */
+const idsDaRaiz = computed(() => nosVisiveis.value.map(n => n.id))
+const idsDasCategorias = computed(() => categoriasVisiveis.value.map(c => c.id))
+
+/**
+ * Mover uma categoria pelo botão direito é arrastar sem mouse: com critério
+ * automático ligado, liga a personalizada antes, pelo mesmo motivo do arraste.
+ */
+function passoDaCategoria(c: Categoria, passo: -1 | 1) {
+  const lista = idsDasCategorias.value
+  const vizinho = lista[lista.indexOf(c.id) + passo]
+  if (vizinho === undefined) return
+  if (props.ordem !== 'manual') {
+    emit('virarManual')
+    toast.add({ title: props.t.viraPersonalizada, icon: 'i-lucide-grip-vertical', color: 'neutral' })
+  }
+  menu.reordenarCategoria(c.id, vizinho, passo < 0 ? 'antes' : 'depois')
+}
+
+const opcoesDeOrdemPlanas = computed(() => [
+  { label: props.t.ordemMaisUsadas, icon: 'i-lucide-flame', valor: 'uso' },
+  { label: props.t.ordemAlfabetica, icon: 'i-lucide-arrow-down-a-z', valor: 'alfabetica' },
+  { label: props.t.ordemRecentes, icon: 'i-lucide-clock', valor: 'recentes' },
+  { label: props.t.ordemPersonalizada, icon: 'i-lucide-grip-vertical', valor: 'manual' },
+])
+
+/** O cabeçalho de Categorias: o de toda seção, mais ordenar e ver todas. */
+function acoesDeCategorias(no: NoDoMenu) {
+  const base = acoes.daSecao(no, idsDaRaiz.value)
+  // "Nova tela" não cabe em Categorias (regra R4): troca por ordenar e ver todas.
+  base[1] = [
+    acoes.itemDeOrdem(props.ordem, opcoesDeOrdemPlanas.value, v => emit('ordem', v as typeof props.ordem)),
+    { label: props.t.verTodas(props.totalDeCategorias), icon: 'i-lucide-layout-grid', onSelect: () => emit('verTodas') },
+    ...acoes.itensDeMover(no.id, idsDaRaiz.value),
+  ]
+  return base
+}
 </script>
 
 <template>
   <div class="relative flex h-full flex-col">
     <!-- ============ topo: o FILTRO do menu, não a busca global ============ -->
-    <div class="shrink-0 px-2 pb-1 pt-1.5">
+    <div class="flex shrink-0 items-center gap-1 px-2 pb-1 pt-1.5">
       <UInput
         v-model="filtro"
         icon="i-lucide-filter"
         size="sm"
-        class="w-full"
+        class="min-w-0 flex-1"
         :placeholder="props.t.filtroDoMenu"
         :aria-label="props.t.filtroDoMenu"
       >
@@ -343,10 +391,26 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
           />
         </template>
       </UInput>
+      <!--
+        RECOLHER (rodada 14). No alto da barra e com Ctrl+\\, como o ClickUp,
+        que põe o mesmo atalho e o mesmo ícone de painel no topo da navegação.
+      -->
+      <UTooltip :text="props.t.recolherMenu" :kbds="['meta', '\\']">
+        <UButton
+          icon="i-lucide-panel-left-close"
+          size="sm"
+          color="neutral"
+          variant="ghost"
+          class="shrink-0"
+          :aria-label="props.t.recolherMenu"
+          aria-keyshortcuts="Control+Backslash"
+          @click="emit('recolher')"
+        />
+      </UTooltip>
     </div>
 
     <!-- ============ navegação ============ -->
-    <nav class="min-h-0 flex-1 overflow-y-auto px-2" :aria-label="props.t.inicio">
+    <nav class="min-h-0 flex-1 overflow-y-auto px-2" :aria-label="props.t.navegacao">
       <div v-if="props.estado === 'carregando'" class="space-y-2 pt-1">
         <USkeleton v-for="n in 7" :key="n" class="h-7" :class="n % 3 === 0 ? 'w-3/4' : 'w-full'" />
       </div>
@@ -394,6 +458,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             @soltar="p => largar(no.id, p)"
             @arrastar-fim="arraste.terminar()"
             @mover="p => menu.mover(no.id, p)"
+            :acoes="acoes.daLinha(no, idsDaRaiz)"
           />
 
           <!-- ---------- a seção nativa: favoritos mais categorias ---------- -->
@@ -419,6 +484,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
                 :rotulo-desafixar="props.t.desafixar"
                 :ativo="props.categoriaAtivaId === c.id"
                 :atraso="100 + i * 25"
+                :acoes="acoes.daCategoria(c)"
                 @selecionar="emit('categoria', c)"
                 @alternar-estrela="emit('alternarFixar', c.id)"
               />
@@ -432,6 +498,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
               :contador="props.totalDeCategorias || undefined"
               :texto-recolher="props.t.recolherSecao(props.t.categorias)"
               :texto-expandir="props.t.expandirSecao(props.t.categorias)"
+              :acoes="acoesDeCategorias(no)"
               @alternar="abrirCategorias()"
             >
               <template #acoes>
@@ -477,6 +544,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
                   :alterado="tocado(`cat:${c.id}`)"
                   :dica-alterado="props.t.pontoAlterado"
                   :atraso="180 + i * 25"
+                  :acoes="acoes.daCategoria(c, filtrando ? undefined : { visiveis: idsDasCategorias, passo: passoDaCategoria })"
                   :arrastavel="!filtrando"
                   :saindo="arraste.arrastando.value === `cat:${c.id}`"
                   :marca="marcaDe(`cat:${c.id}`) === 'dentro' ? null : marcaDe(`cat:${c.id}`)"
@@ -524,6 +592,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             :saindo="arraste.arrastando.value === no.id"
             :marca="marcaDe(no.id)"
             :recusando="recusandoAgora"
+            :acoes="acoes.daLinha(no, idsDaRaiz, { abrir: () => emit('destino', unicoFilho(no).id) })"
             @selecionar="emit('destino', unicoFilho(no).id)"
             @arrastar-inicio="arraste.comecar(no.id)"
             @arrastar-sobre="p => mirar(no.id, p)"
@@ -546,6 +615,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             :saindo="arraste.arrastando.value === no.id"
             :marca="marcaDe(no.id)"
             :recusando="recusandoAgora"
+            :acoes="acoes.daSecao(no, idsDaRaiz)"
             @alternar="abrirSecao(no)"
             @arrastar-inicio="arraste.comecar(no.id)"
             @arrastar-sobre="p => mirar(no.id, p)"
@@ -564,6 +634,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
               :dica-alterado="props.t.pontoAlterado"
               :ativo="props.destinoAtivo === item.id"
               :atraso="i * 25"
+              :acoes="acoes.daLinha(item, (no.filhos ?? []).map(f => f.id))"
               :arrastavel="podeArrastarMenu"
               :saindo="arraste.arrastando.value === item.id"
               :marca="marcaDe(item.id) === 'dentro' ? null : marcaDe(item.id)"
@@ -579,80 +650,13 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
         </template>
 
 
-        <!--
-          O menu so meu, quando existe (rodada 12). Nao e botao de entrar em
-          modo de edicao: e o aviso de que o que esta na tela nao e mais o que
-          o workspace publicou, com a saida ao lado.
-        -->
-        <div
-          v-if="menu.pessoal.value"
-          class="mt-3 flex items-center gap-1.5 rounded-lg bg-elevated/60 px-2.5 py-1.5 text-xs text-muted"
-        >
-          <UIcon name="i-lucide-user" class="size-3.5 shrink-0" />
-          <span class="min-w-0 flex-1 truncate">{{ props.t.menuSoMeu }}</span>
-          <UTooltip :text="props.t.voltarAoDoWorkspace">
-            <UButton
-              icon="i-lucide-rotate-ccw"
-              size="xs"
-              color="neutral"
-              variant="ghost"
-              :aria-label="props.t.voltarAoDoWorkspace"
-              @click="menu.voltarAoDoWorkspace()"
-            />
-          </UTooltip>
-        </div>
+        <!-- Menu só meu (rodada 12) e itens ocultos (rodada 14). -->
+        <AvisosDoMenu :t="props.t" :rotulo-de="rotuloDe" />
       </template>
     </nav>
 
-    <!--
-      ============ O CARTÃO FLUTUANTE DE SALVAR (rodada 12) ============
-
-      Flutua sobre o fim da lista, em vez de empurrar a barra: enquanto a pessoa
-      arruma o menu, o que ela quer ver é o menu.
-
-      Duas ações, porque são dois alcances de verdade, e o de todos só aparece
-      para quem pode configurar. A terceira, descartar, fica em texto: ela é a
-      saída, não a intenção.
-    -->
-    <div v-if="menu.alterado.value" class="pointer-events-none absolute inset-x-2 bottom-14 z-30">
-      <div class="pointer-events-auto animate-[entrada_0.2s_ease-out_both] rounded-xl border border-default bg-default p-2.5 shadow-lg ring-1 ring-warning/30">
-        <p class="mb-0.5 flex items-center gap-1.5 text-xs font-semibold text-highlighted">
-          <span class="size-2 shrink-0 rounded-full bg-warning" />
-          {{ props.t.naoSalvoTitulo }}
-        </p>
-        <p class="mb-2 text-xs leading-snug text-muted">{{ props.t.naoSalvoDica }}</p>
-
-        <div class="space-y-1.5">
-          <UButton
-            v-if="props.podeConfigurar"
-            :label="props.t.salvarTodos"
-            icon="i-lucide-users"
-            size="xs"
-            color="primary"
-            block
-            @click="salvarMenu('todos')"
-          />
-          <div class="flex items-center gap-1.5">
-            <UButton
-              :label="props.t.salvarLocal"
-              icon="i-lucide-user"
-              size="xs"
-              color="neutral"
-              :variant="props.podeConfigurar ? 'subtle' : 'solid'"
-              class="flex-1 justify-center"
-              @click="salvarMenu('local')"
-            />
-            <UButton
-              :label="props.t.descartar"
-              size="xs"
-              color="neutral"
-              variant="ghost"
-              @click="menu.descartar()"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- O cartão de salvar (rodada 12), peça própria desde a rodada 14. -->
+    <CartaoDeSalvar :t="props.t" :pode-configurar="props.podeConfigurar" />
 
     <!--
       ============ rodapé ============

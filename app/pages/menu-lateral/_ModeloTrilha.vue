@@ -2,7 +2,10 @@
 import LinhaDeMenu from './_LinhaDeMenu.vue'
 import SecaoDeMenu from './_SecaoDeMenu.vue'
 import MenuDeAjuda from './_MenuDeAjuda.vue'
-import { useMenuDoWorkspace } from './estado'
+import CartaoDeSalvar from './_CartaoDeSalvar.vue'
+import AvisosDoMenu from './_AvisosDoMenu.vue'
+import { useMenuDoWorkspace, useArraste } from './estado'
+import { useAcoesDoMenu, type Acoes } from './acoes'
 import { gruposDeConfiguracao, workspace, type NoDoMenu, type Categoria } from './mocks'
 import type { TextosDaTela } from './textos'
 
@@ -21,6 +24,26 @@ import type { TextosDaTela } from './textos'
  *   `painel`  vira uma seção recolhível dentro do painel que o campo apontar.
  *
  * É o "menu grandão e menu pequeno" da demanda, funcionando.
+ *
+ * RODADA 14: a trilha ganhou o que a barra única já tinha.
+ *
+ *   "no modelo de barra unica do menu do prototipo voce fez drag and drop nos
+ *    elementos direto no menu. no de trilha e painel vc nao fez isso. tem que
+ *    fazer, tanto na trilha quanto no painel." (Mikaela)
+ *
+ * Arrastar no PAINEL é o arraste da barra única, com as mesmas regras de
+ * encaixe. Arrastar na TRILHA faz três coisas, conforme onde solta:
+ *
+ *   na borda de cima ou de baixo de um ícone de seção: reordena a trilha (e
+ *   traz para a trilha a seção que estava num painel);
+ *   no meio do ícone de uma seção: põe o item dentro dela;
+ *   no meio de Trabalho ou de Dados: leva a seção para dentro daquele painel.
+ *
+ * Trabalho, Dados e Configurações não se arrastam. É a regra do ClickUp para
+ * o Home ("the only item that can't be edited is Home"), estendida às três
+ * áreas nativas: são a moldura, e as seções do workspace mudam dentro dela.
+ *
+ * E botão direito em tudo, e o painel recolhe, deixando só a trilha.
  */
 const props = defineProps<{
   t: TextosDaTela
@@ -33,6 +56,9 @@ const props = defineProps<{
   estado: 'normal' | 'vazio' | 'carregando' | 'erro'
   podeConfigurar: boolean
   itensDeCriar: { label: string, icon: string, onSelect: () => void }[][]
+  ordem: 'uso' | 'alfabetica' | 'recentes' | 'manual'
+  /** Rodada 14: recolhido, só a trilha aparece. */
+  recolhido: boolean
 }>()
 
 const emit = defineEmits<{
@@ -43,9 +69,16 @@ const emit = defineEmits<{
   busca: []
   item: [id: string, rotulo: string]
   ajuda: [rotulo: string]
+  ordem: [valor: 'uso' | 'alfabetica' | 'recentes' | 'manual']
+  virarManual: []
+  novaTela: [secaoId: string]
+  configurarCategoria: [c: Categoria]
+  recolher: []
 }>()
 
 const menu = useMenuDoWorkspace()
+const arraste = useArraste()
+const toast = useToast()
 const area = ref('trabalho')
 
 function rotuloDe(no: NoDoMenu) {
@@ -98,6 +131,7 @@ function seloDaSecao(no: NoDoMenu) {
 }
 
 /** O contador do Inbox vem do estado das notificações e some no zero. */
+/* (rodada 14: os destinos agora vêm de `destinosDaBarra`, sem os ocultos) */
 function contadorDe(no: NoDoMenu) {
   if (no.chave === 'inbox') return menu.naoLidas.value || undefined
   if (no.chave === 'tarefas') return 3
@@ -208,6 +242,263 @@ function irPara(a: { id: string, bloqueada: boolean }) {
 watch(areas, (lista) => {
   if (!lista.some(a => a.id === area.value)) area.value = 'trabalho'
 })
+
+/* ==================================================================
+   O ARRASTE (rodada 14)
+================================================================== */
+
+/** Quem configura arrasta o menu. As categorias, todo mundo (rodada 6). */
+const podeArrastar = computed(() => props.podeConfigurar)
+
+function marcaDe(id: string) {
+  return arraste.alvo.value?.id === id ? arraste.alvo.value.posicao : null
+}
+
+/** Que painel é o desta área, para a seção que cair nele. */
+function painelDaArea(id: string) {
+  return id === 'dados' ? 'dados' : 'trabalho'
+}
+
+/* ------------------------- no painel ------------------------- */
+
+const recusandoNoPainel = computed(() => {
+  const a = arraste.alvo.value
+  if (!a || a.id.startsWith('area:') || a.id.startsWith('cat:')) return false
+  return !menu.avaliar(arraste.arrastando.value, a.id, a.posicao).ok
+})
+
+/**
+ * Soltar no painel é o soltar da barra única, com um passo a mais: a seção
+ * que vem da trilha e cai no primeiro nível de um painel passa a morar nele.
+ */
+function largarNoPainel(alvoId: string, posicao: 'antes' | 'depois' | 'dentro') {
+  const quem = arraste.arrastando.value
+  arraste.terminar()
+  if (!quem || quem.startsWith('cat:')) return
+  const r = menu.soltar(quem, alvoId, posicao)
+  if (!r.ok) {
+    toast.add({ title: props.t.motivos[r.motivo] ?? '', icon: 'i-lucide-ban', color: 'error' })
+    return
+  }
+  const no = menu.acharNo(quem)
+  if (no?.tipo === 'secao' && no.lugar === 'trilha' && posicao !== 'dentro') {
+    const painel = painelDaArea(area.value)
+    menu.mudarLugar(quem, 'painel', painel)
+    toast.add({ title: props.t.levadoParaPainel(rotuloDe(no), tituloDaArea.value), icon: 'i-lucide-panel-left', color: 'neutral' })
+  }
+}
+
+/** As categorias de Dados: o mesmo gesto e a mesma regra da barra única. */
+function largarCategoria(alvoId: number, posicao: 'antes' | 'depois') {
+  const quem = arraste.arrastando.value
+  arraste.terminar()
+  if (!quem || !quem.startsWith('cat:')) return
+  if (props.ordem !== 'manual') {
+    emit('virarManual')
+    toast.add({ title: props.t.viraPersonalizada, icon: 'i-lucide-grip-vertical', color: 'neutral' })
+  }
+  menu.reordenarCategoria(Number(quem.slice(4)), alvoId, posicao)
+}
+
+/* ------------------------- na trilha ------------------------- */
+
+/**
+ * O que a trilha aceita, sem mexer em nada: pinta a marca de recusa
+ * enquanto o item ainda está no ar, como no painel.
+ */
+function vereditoNaTrilha(arrastadoId: string | null, areaId: string, posicao: 'antes' | 'depois' | 'dentro'): { ok: true } | { ok: false, motivo: string } {
+  if (!arrastadoId) return { ok: true }
+  if (arrastadoId.startsWith('cat:')) return { ok: false, motivo: 'categoriaSoEmCategorias' }
+  const no = menu.acharNo(arrastadoId)
+  if (!no) return { ok: true }
+  if (areaId === 'config') return { ok: false, motivo: 'areaFixa' }
+
+  if (!areaId.startsWith('sec:')) {
+    // Trabalho e Dados: só recebem DENTRO, e só seção.
+    if (posicao !== 'dentro') return { ok: false, motivo: 'areaFixa' }
+    return no.tipo === 'secao' ? { ok: true } : { ok: false, motivo: 'soSecaoNaTrilha' }
+  }
+
+  const secaoId = areaId.slice(4)
+  if (posicao === 'dentro') {
+    if (no.tipo === 'secao') return { ok: false, motivo: 'secaoDentroDeSecao' }
+    return menu.avaliar(arrastadoId, secaoId, 'dentro')
+  }
+  return no.tipo === 'secao' ? { ok: true } : { ok: false, motivo: 'soSecaoNaTrilha' }
+}
+
+const recusandoNaTrilha = computed(() => {
+  const a = arraste.alvo.value
+  if (!a || !a.id.startsWith('area:')) return false
+  return !vereditoNaTrilha(arraste.arrastando.value, a.id.slice(5), a.posicao).ok
+})
+
+/** Terços: as bordas reordenam, o meio põe dentro. Área nativa é só meio. */
+function ondeCaiNaTrilha(e: DragEvent, areaId: string): 'antes' | 'depois' | 'dentro' {
+  if (!areaId.startsWith('sec:')) return 'dentro'
+  const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+  const y = e.clientY - r.top
+  if (y < r.height * 0.3) return 'antes'
+  if (y > r.height * 0.7) return 'depois'
+  return 'dentro'
+}
+
+function passarNaTrilha(e: DragEvent, areaId: string) {
+  if (!arraste.arrastando.value) return
+  e.preventDefault()
+  arraste.mirar(`area:${areaId}`, ondeCaiNaTrilha(e, areaId))
+}
+
+function largarNaTrilha(e: DragEvent, areaId: string) {
+  e.preventDefault()
+  const quem = arraste.arrastando.value
+  const posicao = ondeCaiNaTrilha(e, areaId)
+  arraste.terminar()
+  if (!quem || `sec:${quem}` === areaId) return
+
+  const v = vereditoNaTrilha(quem, areaId, posicao)
+  if (!v.ok) {
+    toast.add({ title: props.t.motivos[v.motivo] ?? '', icon: 'i-lucide-ban', color: 'error' })
+    return
+  }
+  const no = menu.acharNo(quem)
+  if (!no) return
+
+  if (!areaId.startsWith('sec:')) {
+    // Seção solta em Trabalho ou Dados: passa a morar naquele painel.
+    menu.mudarLugar(quem, 'painel', painelDaArea(areaId))
+    const nomeDaArea = areas.value.find(a => a.id === areaId)?.rotulo ?? ''
+    toast.add({ title: props.t.levadoParaPainel(rotuloDe(no), nomeDaArea), icon: 'i-lucide-panel-left', color: 'neutral' })
+    return
+  }
+
+  const secaoId = areaId.slice(4)
+  if (posicao === 'dentro') {
+    menu.moverParaSecao(quem, secaoId)
+    return
+  }
+  // Borda de cima ou de baixo: reordena, e quem vinha de um painel sobe para a trilha.
+  const vinhaDoPainel = no.lugar !== 'trilha'
+  menu.soltar(quem, secaoId, posicao)
+  if (vinhaDoPainel) {
+    menu.mudarLugar(quem, 'trilha')
+    toast.add({ title: props.t.levadoParaTrilha(rotuloDe(no)), icon: 'i-lucide-panel-left', color: 'neutral' })
+  }
+}
+
+/* ==================================================================
+   O BOTÃO DIREITO (rodada 14)
+================================================================== */
+
+const acoes = useAcoesDoMenu({
+  t: () => props.t,
+  podeConfigurar: () => props.podeConfigurar,
+  rotuloDe,
+  abrirDestino: id => emit('destino', id),
+  abrirCategoria: c => emit('categoria', c),
+  alternarFixar: id => emit('alternarFixar', id),
+  configurarCategoria: c => emit('configurarCategoria', c),
+  novaTela: id => emit('novaTela', id),
+  // Abrir pelo botão direito segue a regra do clique (rodada 10).
+  secaoAberta: id => aberta(id),
+  alternarSecao: (id) => {
+    const no = menu.secoesDaBarra.value.find(n => n.id === id)
+    if (no) abrirSecao(no)
+    else alternar(id)
+  },
+})
+
+const idsDosDestinos = computed(() => menu.destinosDaBarra.value.map(d => d.id))
+const idsDaTrilha = computed(() => menu.secoesNaTrilha.value.map(s => s.id))
+const idsDoPainel = (painel: string) => secoesDoPainel(painel).map(s => s.id)
+const idsDasCategorias = computed(() => props.recorte.map(c => c.id))
+
+/** "Levar para a trilha", na seção que está num painel. */
+function paraTrilha(no: NoDoMenu) {
+  const travado = !props.podeConfigurar
+  return [{
+    label: props.t.ctxParaTrilha,
+    icon: 'i-lucide-panel-left',
+    description: travado ? props.t.ctxSoQuemConfigura : undefined,
+    disabled: travado,
+    onSelect: () => {
+      menu.mudarLugar(no.id, 'trilha')
+      toast.add({ title: props.t.levadoParaTrilha(rotuloDe(no)), icon: 'i-lucide-panel-left', color: 'neutral' })
+    },
+  }]
+}
+
+/** "Levar para Trabalho" e "Levar para Dados", na seção que está na trilha. */
+function paraPaineis(no: NoDoMenu) {
+  const travado = !props.podeConfigurar
+  return (['trabalho', 'dados'] as const).map(p => {
+    const nome = p === 'dados' ? props.t.areaDados : props.t.areaTrabalho
+    return {
+      label: props.t.ctxParaPainel(nome),
+      icon: p === 'dados' ? 'i-lucide-database' : 'i-lucide-house',
+      description: travado ? props.t.ctxSoQuemConfigura : undefined,
+      disabled: travado,
+      onSelect: () => {
+        menu.mudarLugar(no.id, 'painel', p)
+        toast.add({ title: props.t.levadoParaPainel(rotuloDe(no), nome), icon: 'i-lucide-panel-left', color: 'neutral' })
+      },
+    }
+  })
+}
+
+const itemRecolher = computed(() => ({
+  label: props.recolhido ? props.t.expandirMenu : props.t.recolherMenu,
+  icon: props.recolhido ? 'i-lucide-panel-left-open' : 'i-lucide-panel-left-close',
+  kbds: ['meta', '\\'],
+  onSelect: () => emit('recolher'),
+}))
+
+/** O botão direito num ícone da trilha. */
+function acoesDaArea(a: { id: string, rotulo: string, bloqueada: boolean }): Acoes {
+  const abrir = { label: props.t.ctxAbrir, icon: 'i-lucide-arrow-up-right', disabled: a.bloqueada, onSelect: () => irPara(a) }
+  if (!a.id.startsWith('sec:')) return [[abrir], [itemRecolher.value]]
+  const no = menu.secoes.value.find(s => s.id === a.id.slice(4))
+  if (!no) return [[abrir], [itemRecolher.value]]
+  return [
+    [abrir, { label: props.t.ctxCopiarLink, icon: 'i-lucide-link', onSelect: () => acoes.copiarLink(no.id) }],
+    [...acoes.itensDeMover(no.id, idsDaTrilha.value), ...paraPaineis(no)],
+    acoes.blocoMexer(no),
+    [itemRecolher.value],
+  ]
+}
+
+const opcoesDeOrdemPlanas = computed(() => [
+  { label: props.t.ordemMaisUsadas, icon: 'i-lucide-flame', valor: 'uso' },
+  { label: props.t.ordemAlfabetica, icon: 'i-lucide-arrow-down-a-z', valor: 'alfabetica' },
+  { label: props.t.ordemRecentes, icon: 'i-lucide-clock', valor: 'recentes' },
+  { label: props.t.ordemPersonalizada, icon: 'i-lucide-grip-vertical', valor: 'manual' },
+])
+
+/** O cabeçalho de Categorias em Dados: abrir, ordenar, ver todas. */
+const acoesDeCategorias = computed<Acoes>(() => {
+  const aberta_ = aberta('categorias')
+  return [[
+    {
+      label: aberta_ ? props.t.ctxRecolher : props.t.ctxExpandir,
+      icon: aberta_ ? 'i-lucide-chevrons-down-up' : 'i-lucide-chevrons-up-down',
+      onSelect: () => abrirCategorias(),
+    },
+  ], [
+    acoes.itemDeOrdem(props.ordem, opcoesDeOrdemPlanas.value, v => emit('ordem', v as typeof props.ordem)),
+    { label: props.t.verTodas(props.totalDeCategorias), icon: 'i-lucide-layout-grid', onSelect: () => emit('verTodas') },
+  ]]
+})
+
+function passoDaCategoria(c: Categoria, passo: -1 | 1) {
+  const lista = idsDasCategorias.value
+  const vizinho = lista[lista.indexOf(c.id) + passo]
+  if (vizinho === undefined) return
+  if (props.ordem !== 'manual') {
+    emit('virarManual')
+    toast.add({ title: props.t.viraPersonalizada, icon: 'i-lucide-grip-vertical', color: 'neutral' })
+  }
+  menu.reordenarCategoria(c.id, vizinho, passo < 0 ? 'antes' : 'depois')
+}
 </script>
 
 <template>
@@ -224,31 +515,94 @@ watch(areas, (lista) => {
         </button>
       </UTooltip>
 
-      <button
-        v-for="a in areas"
-        :key="a.id"
-        type="button"
-        class="flex w-full shrink-0 flex-col items-center gap-0.5 rounded-lg px-1 py-2 transition-colors"
-        :class="[
-          area === a.id
-            ? 'bg-primary/15 text-highlighted'
-            : a.bloqueada
-              ? 'cursor-not-allowed text-muted'
-              : 'text-default hover:bg-elevated',
-        ]"
-        :aria-current="area === a.id ? 'page' : undefined"
-        :disabled="a.bloqueada"
-        @click="irPara(a)"
-      >
-        <UIcon
-          :name="a.bloqueada ? 'i-lucide-lock' : a.icone"
-          class="size-5"
-          :class="area === a.id ? 'text-primary' : ''"
+      <!--
+        EXPANDIR (rodada 14). Recolhido, o painel some e este botão aparece no
+        alto da trilha. É onde o ClickUp põe o dele: "click the expand icon at
+        the top of your Global Navigation".
+      -->
+      <UTooltip v-if="props.recolhido" :text="props.t.expandirMenu" :kbds="['meta', '\\']" :content="{ side: 'right' }">
+        <UButton
+          icon="i-lucide-panel-left-open"
+          size="sm"
+          color="neutral"
+          variant="ghost"
+          class="mb-1 animate-[entrada_0.2s_ease-out_both]"
+          :aria-label="props.t.expandirMenu"
+          aria-expanded="false"
+          aria-keyshortcuts="Control+Backslash"
+          @click="emit('recolher')"
         />
-        <span class="w-full truncate text-center text-[10px] font-medium leading-tight">{{ a.rotulo }}</span>
-      </button>
+      </UTooltip>
+
+      <!--
+        Cada área é alvo de soltar; só as seções se arrastam. A linha da marca
+        e o anel de "dentro" são os mesmos do painel e da barra única.
+      -->
+      <UContextMenu v-for="a in areas" :key="a.id" :items="acoesDaArea(a)">
+        <UTooltip :text="a.rotulo" :content="{ side: 'right' }" :disabled="!props.recolhido">
+          <button
+            type="button"
+            class="relative flex w-full shrink-0 flex-col items-center gap-0.5 rounded-lg px-1 py-2 transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+            :class="[
+              area === a.id
+                ? 'bg-primary/15 text-highlighted'
+                : a.bloqueada
+                  ? 'cursor-not-allowed text-muted'
+                  : 'text-default hover:bg-elevated',
+              arraste.arrastando.value === a.id.slice(4) ? 'opacity-40' : '',
+              marcaDe(`area:${a.id}`) === 'dentro'
+                ? (recusandoNaTrilha ? 'bg-error/10 ring-1 ring-error' : 'bg-primary/10 ring-1 ring-primary')
+                : '',
+              marcaDe(`area:${a.id}`) === 'antes' ? 'before:absolute before:inset-x-1 before:-top-0.5 before:h-0.5 before:rounded-full' : '',
+              marcaDe(`area:${a.id}`) === 'depois' ? 'after:absolute after:inset-x-1 after:-bottom-0.5 after:h-0.5 after:rounded-full' : '',
+              recusandoNaTrilha ? 'before:bg-error after:bg-error' : 'before:bg-primary after:bg-primary',
+            ]"
+            :aria-current="area === a.id ? 'page' : undefined"
+            :aria-disabled="a.bloqueada || undefined"
+            :draggable="podeArrastar && a.id.startsWith('sec:') ? 'true' : undefined"
+            @click="irPara(a)"
+            @dragstart="arraste.comecar(a.id.slice(4))"
+            @dragover="e => passarNaTrilha(e, a.id)"
+            @drop="e => largarNaTrilha(e, a.id)"
+            @dragend="arraste.terminar()"
+            @keydown.alt.up.prevent="a.id.startsWith('sec:') && podeArrastar && acoes.itensDeMover(a.id.slice(4), idsDaTrilha)[0]?.onSelect?.(new Event('select'))"
+            @keydown.alt.down.prevent="a.id.startsWith('sec:') && podeArrastar && acoes.itensDeMover(a.id.slice(4), idsDaTrilha)[1]?.onSelect?.(new Event('select'))"
+          >
+            <UIcon
+              :name="a.bloqueada ? 'i-lucide-lock' : a.icone"
+              class="size-5"
+              :class="area === a.id ? 'text-primary' : ''"
+            />
+            <span class="w-full truncate text-center text-[10px] font-medium leading-tight">{{ a.rotulo }}</span>
+            <!-- Mexida e não salva: a mesma bolinha das linhas. -->
+            <span
+              v-if="a.id.startsWith('sec:') && menu.tocados.value.includes(a.id.slice(4))"
+              class="absolute right-1.5 top-1.5 size-2 rounded-full bg-warning"
+              role="img"
+              :aria-label="props.t.pontoAlterado"
+            />
+          </button>
+        </UTooltip>
+      </UContextMenu>
 
       <div class="min-h-2 flex-1" />
+
+      <!--
+        Recolhido não esconde o que falta salvar (rodada 14): o cartão de salvar
+        mora na barra aberta, então aqui fica o sinal, e o clique abre a barra.
+      -->
+      <UTooltip v-if="props.recolhido && menu.alterado.value" :text="props.t.naoSalvoTitulo" :content="{ side: 'right' }">
+        <button
+          type="button"
+          class="relative flex size-9 shrink-0 animate-[entrada_0.2s_ease-out_both] items-center justify-center rounded-lg text-highlighted ring-1 ring-warning/50 transition-colors hover:bg-elevated focus-visible:outline-2 focus-visible:outline-primary"
+          :aria-label="props.t.naoSalvoTitulo"
+          @click="emit('recolher')"
+        >
+          <UIcon name="i-lucide-save" class="size-5" />
+          <span class="absolute right-1 top-1 size-2 rounded-full bg-warning" aria-hidden="true" />
+        </button>
+      </UTooltip>
+
 
       <!--
         RODADA 8: a lupa e o criar voltaram para a base da trilha, a pedido dela.
@@ -283,11 +637,24 @@ watch(areas, (lista) => {
     </div>
 
     <!-- ==================== O PAINEL DA ÁREA ==================== -->
-    <div class="flex min-w-0 flex-1 flex-col">
-      <div class="flex h-12 shrink-0 items-center gap-2 border-b border-default px-3">
+    <!-- Recolhido (rodada 14), o painel sai e fica só a trilha. -->
+    <div v-if="!props.recolhido" class="relative flex min-w-0 flex-1 animate-[entrada_0.2s_ease-out_both] flex-col">
+      <div class="flex h-12 shrink-0 items-center gap-2 border-b border-default pl-3 pr-1.5">
         <h2 class="min-w-0 truncate text-sm font-bold text-highlighted">{{ tituloDaArea }}</h2>
         <UBadge v-if="seloDaArea" :label="seloDaArea" size="sm" color="neutral" variant="subtle" class="shrink-0" />
         <span class="flex-1" />
+        <UTooltip :text="props.t.recolherMenu" :kbds="['meta', '\\']">
+          <UButton
+            icon="i-lucide-panel-left-close"
+            size="sm"
+            color="neutral"
+            variant="ghost"
+            class="shrink-0"
+            :aria-label="props.t.recolherMenu"
+            aria-keyshortcuts="Control+Backslash"
+            @click="emit('recolher')"
+          />
+        </UTooltip>
       </div>
 
       <nav class="min-h-0 flex-1 overflow-y-auto px-2 py-2" :aria-label="tituloDaArea">
@@ -295,7 +662,7 @@ watch(areas, (lista) => {
         <template v-if="area === 'trabalho'">
           <div class="space-y-0.5">
             <LinhaDeMenu
-              v-for="(d, i) in menu.destinos.value"
+              v-for="(d, i) in menu.destinosDaBarra.value"
               :key="d.id"
               :icone="d.icone"
               :rotulo="rotuloDe(d)"
@@ -303,7 +670,19 @@ watch(areas, (lista) => {
               :selo="d.emBreve ? props.t.emBreve : undefined"
               :ativo="props.destinoAtivo === d.id"
               :atraso="i * 25"
+              :alterado="menu.tocados.value.includes(d.id)"
+              :dica-alterado="props.t.pontoAlterado"
+              :acoes="acoes.daLinha(d, idsDosDestinos)"
+              :arrastavel="podeArrastar"
+              :saindo="arraste.arrastando.value === d.id"
+              :marca="marcaDe(d.id) === 'dentro' ? null : marcaDe(d.id)"
+              :recusando="recusandoNoPainel"
               @selecionar="emit('destino', d.id)"
+              @arrastar-inicio="arraste.comecar(d.id)"
+              @arrastar-sobre="p => arraste.mirar(d.id, p)"
+              @soltar="p => largarNoPainel(d.id, p)"
+              @arrastar-fim="arraste.terminar()"
+              @mover="p => acoes.itensDeMover(d.id, idsDosDestinos)[p < 0 ? 0 : 1]?.onSelect?.(new Event('select'))"
             />
           </div>
 
@@ -315,7 +694,19 @@ watch(areas, (lista) => {
               :rotulo="rotuloDe(s)"
               :selo="seloDaSecao(s)"
               :ativo="props.destinoAtivo === unicoFilho(s).id"
+              :alterado="menu.tocados.value.includes(s.id)"
+              :dica-alterado="props.t.pontoAlterado"
+              :acoes="acoes.daLinha(s, idsDoPainel('trabalho'), { abrir: () => emit('destino', unicoFilho(s).id), lugar: paraTrilha(s) })"
+              :arrastavel="podeArrastar"
+              aceita-dentro
+              :saindo="arraste.arrastando.value === s.id"
+              :marca="marcaDe(s.id)"
+              :recusando="recusandoNoPainel"
               @selecionar="emit('destino', unicoFilho(s).id)"
+              @arrastar-inicio="arraste.comecar(s.id)"
+              @arrastar-sobre="p => arraste.mirar(s.id, p)"
+              @soltar="p => largarNoPainel(s.id, p)"
+              @arrastar-fim="arraste.terminar()"
             />
             <SecaoDeMenu
               v-else
@@ -324,7 +715,19 @@ watch(areas, (lista) => {
               :aberta="aberta(s.id)"
               :texto-recolher="props.t.recolherSecao(rotuloDe(s))"
               :texto-expandir="props.t.expandirSecao(rotuloDe(s))"
+              :alterado="menu.tocados.value.includes(s.id)"
+              :dica-alterado="props.t.pontoAlterado"
+              :acoes="acoes.daSecao(s, idsDoPainel('trabalho'), paraTrilha(s))"
+              :arrastavel="podeArrastar"
+              :saindo="arraste.arrastando.value === s.id"
+              :marca="marcaDe(s.id)"
+              :recusando="recusandoNoPainel"
               @alternar="abrirSecao(s)"
+              @arrastar-inicio="arraste.comecar(s.id)"
+              @arrastar-sobre="p => arraste.mirar(s.id, p)"
+              @soltar="p => largarNoPainel(s.id, p)"
+              @arrastar-fim="arraste.terminar()"
+              @mover="p => acoes.itensDeMover(s.id, idsDoPainel('trabalho'))[p < 0 ? 0 : 1]?.onSelect?.(new Event('select'))"
             >
               <LinhaDeMenu
                 v-for="(item, i) in (s.filhos ?? [])"
@@ -335,7 +738,19 @@ watch(areas, (lista) => {
                 :selo="item.emBreve ? props.t.emBreve : undefined"
                 :ativo="props.destinoAtivo === item.id"
                 :atraso="i * 25"
+                :alterado="menu.tocados.value.includes(item.id)"
+                :dica-alterado="props.t.pontoAlterado"
+                :acoes="acoes.daLinha(item, (s.filhos ?? []).map(f => f.id))"
+                :arrastavel="podeArrastar"
+                :saindo="arraste.arrastando.value === item.id"
+                :marca="marcaDe(item.id) === 'dentro' ? null : marcaDe(item.id)"
+                :recusando="recusandoNoPainel"
                 @selecionar="emit('destino', item.id)"
+                @arrastar-inicio="arraste.comecar(item.id)"
+                @arrastar-sobre="p => arraste.mirar(item.id, p)"
+                @soltar="p => largarNoPainel(item.id, p)"
+                @arrastar-fim="arraste.terminar()"
+                @mover="p => menu.mover(item.id, p)"
               />
             </SecaoDeMenu>
           </template>
@@ -373,6 +788,7 @@ watch(areas, (lista) => {
                 :rotulo-desafixar="props.t.desafixar"
                 :ativo="props.categoriaAtivaId === c.id"
                 :atraso="i * 25"
+                :acoes="acoes.daCategoria(c)"
                 @selecionar="emit('categoria', c)"
                 @alternar-estrela="emit('alternarFixar', c.id)"
               />
@@ -384,6 +800,7 @@ watch(areas, (lista) => {
               :contador="props.totalDeCategorias || undefined"
               :texto-recolher="props.t.recolherSecao(props.t.categorias)"
               :texto-expandir="props.t.expandirSecao(props.t.categorias)"
+              :acoes="acoesDeCategorias"
               @alternar="abrirCategorias()"
             >
               <LinhaDeMenu
@@ -398,8 +815,19 @@ watch(areas, (lista) => {
                 :rotulo-desafixar="props.t.desafixar"
                 :ativo="props.categoriaAtivaId === c.id"
                 :atraso="80 + i * 25"
+                :alterado="menu.tocados.value.includes(`cat:${c.id}`)"
+                :dica-alterado="props.t.pontoAlterado"
+                :acoes="acoes.daCategoria(c, { visiveis: idsDasCategorias, passo: passoDaCategoria })"
+                arrastavel
+                :saindo="arraste.arrastando.value === `cat:${c.id}`"
+                :marca="marcaDe(`cat:${c.id}`) === 'dentro' ? null : marcaDe(`cat:${c.id}`)"
                 @selecionar="emit('categoria', c)"
                 @alternar-estrela="emit('alternarFixar', c.id)"
+                @arrastar-inicio="arraste.comecar(`cat:${c.id}`)"
+                @arrastar-sobre="p => arraste.mirar(`cat:${c.id}`, p)"
+                @soltar="p => largarCategoria(c.id, p === 'dentro' ? 'depois' : p)"
+                @arrastar-fim="arraste.terminar()"
+                @mover="p => passoDaCategoria(c, p)"
               />
               <button
                 type="button"
@@ -420,7 +848,19 @@ watch(areas, (lista) => {
                 :rotulo="rotuloDe(s)"
                 :selo="seloDaSecao(s)"
                 :ativo="props.destinoAtivo === unicoFilho(s).id"
+                :alterado="menu.tocados.value.includes(s.id)"
+                :dica-alterado="props.t.pontoAlterado"
+                :acoes="acoes.daLinha(s, idsDoPainel('dados'), { abrir: () => emit('destino', unicoFilho(s).id), lugar: paraTrilha(s) })"
+                :arrastavel="podeArrastar"
+                aceita-dentro
+                :saindo="arraste.arrastando.value === s.id"
+                :marca="marcaDe(s.id)"
+                :recusando="recusandoNoPainel"
                 @selecionar="emit('destino', unicoFilho(s).id)"
+                @arrastar-inicio="arraste.comecar(s.id)"
+                @arrastar-sobre="p => arraste.mirar(s.id, p)"
+                @soltar="p => largarNoPainel(s.id, p)"
+                @arrastar-fim="arraste.terminar()"
               />
               <SecaoDeMenu
                 v-else
@@ -429,7 +869,18 @@ watch(areas, (lista) => {
                 :aberta="aberta(s.id)"
                 :texto-recolher="props.t.recolherSecao(rotuloDe(s))"
                 :texto-expandir="props.t.expandirSecao(rotuloDe(s))"
+                :alterado="menu.tocados.value.includes(s.id)"
+                :dica-alterado="props.t.pontoAlterado"
+                :acoes="acoes.daSecao(s, idsDoPainel('dados'), paraTrilha(s))"
+                :arrastavel="podeArrastar"
+                :saindo="arraste.arrastando.value === s.id"
+                :marca="marcaDe(s.id)"
+                :recusando="recusandoNoPainel"
                 @alternar="abrirSecao(s)"
+                @arrastar-inicio="arraste.comecar(s.id)"
+                @arrastar-sobre="p => arraste.mirar(s.id, p)"
+                @soltar="p => largarNoPainel(s.id, p)"
+                @arrastar-fim="arraste.terminar()"
               >
                 <LinhaDeMenu
                   v-for="(item, i) in (s.filhos ?? [])"
@@ -440,7 +891,19 @@ watch(areas, (lista) => {
                   :selo="item.emBreve ? props.t.emBreve : undefined"
                   :ativo="props.destinoAtivo === item.id"
                   :atraso="i * 25"
+                  :alterado="menu.tocados.value.includes(item.id)"
+                  :dica-alterado="props.t.pontoAlterado"
+                  :acoes="acoes.daLinha(item, (s.filhos ?? []).map(f => f.id))"
+                  :arrastavel="podeArrastar"
+                  :saindo="arraste.arrastando.value === item.id"
+                  :marca="marcaDe(item.id) === 'dentro' ? null : marcaDe(item.id)"
+                  :recusando="recusandoNoPainel"
                   @selecionar="emit('destino', item.id)"
+                  @arrastar-inicio="arraste.comecar(item.id)"
+                  @arrastar-sobre="p => arraste.mirar(item.id, p)"
+                  @soltar="p => largarNoPainel(item.id, p)"
+                  @arrastar-fim="arraste.terminar()"
+                  @mover="p => menu.mover(item.id, p)"
                 />
               </SecaoDeMenu>
             </template>
@@ -457,7 +920,19 @@ watch(areas, (lista) => {
             :selo="seloDaArea ? undefined : (item.emBreve ? props.t.emBreve : undefined)"
             :ativo="props.destinoAtivo === item.id"
             :atraso="i * 25"
+            :alterado="menu.tocados.value.includes(item.id)"
+            :dica-alterado="props.t.pontoAlterado"
+            :acoes="acoes.daLinha(item, (secaoAtual.filhos ?? []).map(f => f.id))"
+            :arrastavel="podeArrastar"
+            :saindo="arraste.arrastando.value === item.id"
+            :marca="marcaDe(item.id) === 'dentro' ? null : marcaDe(item.id)"
+            :recusando="recusandoNoPainel"
             @selecionar="emit('destino', item.id)"
+            @arrastar-inicio="arraste.comecar(item.id)"
+            @arrastar-sobre="p => arraste.mirar(item.id, p)"
+            @soltar="p => largarNoPainel(item.id, p)"
+            @arrastar-fim="arraste.terminar()"
+            @mover="p => menu.mover(item.id, p)"
           />
         </div>
 
@@ -485,7 +960,12 @@ watch(areas, (lista) => {
           </SecaoDeMenu>
         </template>
 
+        <!-- Menu só meu e itens ocultos, como na barra única. -->
+        <AvisosDoMenu v-if="area !== 'config'" :t="props.t" :rotulo-de="rotuloDe" />
       </nav>
+
+      <!-- O mesmo Salvar da barra única: o que se arruma aqui grava igual. -->
+      <CartaoDeSalvar :t="props.t" :pode-configurar="props.podeConfigurar" rente />
     </div>
   </div>
 </template>
