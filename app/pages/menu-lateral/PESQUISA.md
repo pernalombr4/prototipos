@@ -440,3 +440,47 @@ e-mail de pessoa e o nome dela (regra 13).
 | Hierarquia | Uma seção pode ter um item com filhos (Espaço > Pasta > Lista), que abre e fecha |
 | Botão de Personalizar | No pé do menu Início até o primeiro uso; depois some de lá e fica no cabeçalho |
 | Temas | Claro, escuro, automático, e uma cor de tema entre dez |
+
+## Rodada 18: a Central de modelos do ClickUp, e "Usar" contra "Adicionar"
+
+Ela mandou 9 prints da Central de modelos do ClickUp. O que eles mostram:
+
+- **Lista:** à esquerda, Destaques, Modelos do espaço de trabalho e Modelos da ClickUp, com
+  contagem; filtros de **Tipos de modelo** (Super Agent, Skill, Espaço, Pasta, Lista, Tarefa,
+  Documento, Visualização, Quadro Branco) e **Complexidade** (Intermediário, Avançado,
+  Iniciante). Em cima, a busca e três filtros em botão: **Casos de uso** (lista com busca,
+  "Selecionar tudo" e várias marcadas ao mesmo tempo, com o número de marcadas no botão),
+  Etiquetas e Criado por. Faixa "Crie seu primeiro modelo". Cartões com print, agrupados por
+  área, com "Ver mais N".
+- **Detalhe:** Voltar, ícone, nome, "…" ao lado do nome, Complexidade, **Usar modelo**; galeria
+  com setas e pontos, que amplia em tela cheia com zoom e download; descrição; "Modelo inclui"
+  (grupos de status, campos personalizados, tipos de visualização), cada um abrindo os itens; à
+  direita, "Pela ClickUp" (Verificado), data de criação e quantas vezes foi usado.
+- **"…" do detalhe:** "Adicionar ao espaço de trabalho: adicione este modelo ao seu espaço de
+  trabalho para fazer alterações". Depois disso o modelo aparece em "Modelos baseados em seu
+  espaço de trabalho", e o menu dela **não mudou**.
+
+**A diferença entre os dois botões**, que ela pediu para investigar. A central de ajuda do
+ClickUp não compara os dois lado a lado, mas os dois artigos dizem o bastante:
+
+- "Add a template to your library" (help.clickup.com/hc/en-us/articles/6326023965591): adicionar
+  guarda uma cópia na **biblioteca** do workspace, para achar de novo, renomear, descrever,
+  compartilhar e ajustar. O original continua na Central.
+- "Use Folder templates" (help.clickup.com/hc/en-us/articles/6308752167319): **usar** aplica,
+  depois de deixar escolher nome, lugar e o que vem junto.
+
+Ou seja: **adicionar é guardar, usar é aplicar.** O menu dela não mudou porque ela guardou.
+
+### No ENSPACE
+
+| ClickUp | ENSPACE | Por quê |
+|---|---|---|
+| Modelo | **Caso de uso** | É o nome que o produto já usa (Configurações > Interface > Casos de Uso) |
+| Filtro "Casos de uso" | Filtro **Áreas** (Jurídico, Comercial, Financeiro…) | Aqui "caso de uso" já é a coisa; o filtro é pela área de negócio, com o mesmo desenho |
+| Tipos de modelo | Workspace completo, Menu, Categoria, Tela | São os pacotes que o arquivo de exportação do ENSPACE carrega |
+| "Modelo inclui": status, campos, visualizações | Menus e telas, Categorias e campos, Status | É o que um caso de uso do ENSPACE traz |
+| Usar modelo | **Usar caso de uso**, com somar ou substituir antes | Ela pediu a escolha no Importar; aplicar um caso é a mesma operação |
+| Adicionar ao espaço de trabalho | **Adicionar ao workspace**, dizendo na própria opção que o menu não muda | É justamente o que confundiu ela no ClickUp |
+| Importar (pé do "+") | Importar caso de uso de outro workspace, com área de arraste e prévia | É a tela do protótipo `migracao-de-workspace`, trazida para perto do menu |
+| Etiquetas, Criado por | Não entram | O caso de uso do ENSPACE não tem etiqueta nem autoria hoje |
+| Print do modelo | Miniatura desenhada com o conteúdo do caso | Sem prints de telas que ainda não existem (`COMPONENTES-CUSTOM.md`) |

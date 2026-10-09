@@ -55,3 +55,4 @@ para cá, a cópia de lá sai. Este agente não edita a pasta do outro protótip
   classes de cada parte interna. Ajuste de aparência quase nunca justifica componente novo.
 - **Composto não é custom.** `UCard` com `UTable` dentro e um `UButton` no header continua
   sendo Nuxt UI puro — não entra nesta lista.
+| `_PreviaDoCaso.vue` | menu-lateral (Central de casos de uso, rodada 18) | Não é falta do Nuxt UI: é falta de imagem. A Central do ClickUp mostra prints de cada modelo, e o protótipo não tem prints de telas que ainda não existem | Marcação própria com os tokens do tema, desenhada com o conteúdo do próprio caso (menus e telas, status, campos, gráfico) | **Nada de componente.** No produto, cada caso de uso traz as suas imagens de verdade, e a galeria é um `UCarousel` com ampliação. O que o dev precisa decidir é de onde vêm as imagens: print gerado ao publicar o caso, ou enviado por quem o criou |

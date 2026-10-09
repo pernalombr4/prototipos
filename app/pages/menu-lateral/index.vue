@@ -5,6 +5,10 @@ import PainelConfiguracoes from './_PainelConfiguracoes.vue'
 import ModeloTrilha from './_ModeloTrilha.vue'
 import Conteudo from './_Conteudo.vue'
 import BarraRecolhida from './_BarraRecolhida.vue'
+import CentralDeCasos from './_CentralDeCasos.vue'
+import UsarCaso from './_UsarCaso.vue'
+import ImportarCaso from './_ImportarCaso.vue'
+import CriarCaso from './_CriarCaso.vue'
 
 /*
  * ============ O QUE ENTRA DEPOIS (rodada 13) ============
@@ -36,6 +40,7 @@ import {
 import { useMenuDoWorkspace, useMenuRecolhido } from './estado'
 import { useRenomeando } from './acoes'
 import { useJanelasDaTrilha } from './trilha'
+import { useJanelasDeCasos } from './casos'
 import { textos } from './textos'
 
 // O contexto do protótipo vem dos próprios .md desta pasta, como texto.
@@ -96,6 +101,7 @@ const estadoDoPainel = computed(() => {
 /* ------------------------------ o dado ------------------------------ */
 /* As categorias criadas pelo "+" do Início (rodada 16) somam às do mock. */
 const { categoriasCriadas } = useJanelasDaTrilha()
+const janelasDeCasos = useJanelasDeCasos()
 
 const base = computed<Categoria[]>(() => {
   if (estado.value === 'vazio') return [...categoriasCriadas.value]
@@ -258,6 +264,8 @@ function abrirItemDeConfiguracao(id: string, rotulo: string) {
   // Interface > Menus abre o editor do menu, que é onde o administrador
   // reordena, reagrupa e escolhe o tipo de cada tela.
   if (id === 'menus') abrirEditor(null)
+  // Interface > Casos de uso abre a Central (rodada 18), a mesma do "+" do Início.
+  if (id === 'casos-de-uso') janelasDeCasos.central.value = true
 }
 
 /** "Configurar categoria" leva para Estrutura > Categorias, já na área certa. */
@@ -688,6 +696,16 @@ function emBreve() {
         />
       </template>
     </UModal>
+
+    <!--
+      Casos de uso, importar e exportar (rodada 18). Moram aqui, e não no
+      modelo de trilha, porque Configurações > Interface > Casos de uso também
+      abre a Central, nos dois modelos.
+    -->
+    <CentralDeCasos :t="t" />
+    <UsarCaso :t="t" />
+    <ImportarCaso :t="t" />
+    <CriarCaso :t="t" />
 
     <!-- Renomear, aberto pelo botão direito (rodada 14). -->
     <UModal v-model:open="abrindoRenomear" :title="t.renomearTitulo" :ui="{ content: 'max-w-sm' }">

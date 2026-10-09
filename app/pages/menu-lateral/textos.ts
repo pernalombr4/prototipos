@@ -181,6 +181,86 @@ export interface TextosDaTela {
   criarComIaToast: (texto: string) => string
   criarComIaDica: string
 
+  // casos de uso, importar e exportar (rodada 18)
+  casosDeUso: string
+  importarRotulo: string
+  centralTitulo: string
+  destaques: string
+  doWorkspace: string
+  doEnspace: string
+  tiposDeCaso: string
+  complexidadeRotulo: string
+  tipoCaso: Record<string, string>
+  complexidades: Record<string, string>
+  buscarCasos: string
+  areasRotulo: string
+  buscarAreas: string
+  selecionarTudo: string
+  bannerCriar: string
+  criarCaso: string
+  emDestaque: string
+  verMaisN: (n: number) => string
+  nenhumCaso: string
+  limparFiltros: string
+  voltarCentral: string
+  usarCaso: string
+  adicionarAoWorkspace: string
+  adicionarAoWorkspaceDica: string
+  exportarArquivo: string
+  maisDoCaso: string
+  descricaoDoCaso: string
+  oQueVemJunto: string
+  incluiMenus: string
+  incluiCategorias: string
+  incluiStatus: string
+  nMenusTelas: (m: number, t: number) => string
+  nCategoriasCampos: (c: number, f: number) => string
+  nStatus: (n: number) => string
+  peloEnspace: string
+  peloEnspaceDica: string
+  verificado: string
+  doSeuWorkspace: string
+  doSeuWorkspaceDica: string
+  criadoEmRotulo: string
+  usadoRotulo: string
+  vezes: (n: number) => string
+  adicionadoAoWorkspace: (n: string) => string
+  ampliar: string
+  imagemDe: (i: number, total: number) => string
+  anterior: string
+  proxima: string
+  usarTitulo: (n: string) => string
+  oQueEntra: string
+  comOQueExiste: string
+  modoSomarTitulo: string
+  modoSomarDica: string
+  modoSubstituirTitulo: string
+  modoSubstituirDica: string
+  oQueSai: string
+  nadaSai: string
+  ondeEntram: string
+  aplicarCaso: string
+  casoAplicado: (n: string) => string
+  importarTitulo: string
+  arrasteArquivo: string
+  arquivoDica: string
+  usarExemplo: string
+  arquivoInvalido: string
+  deOnde: (ws: string, data: string) => string
+  trocarArquivo: string
+  importarBotao: string
+  exportarMenu: string
+  exportarDica: string
+  criarCasoTitulo: string
+  nomeDoCaso: string
+  areaDoCaso: string
+  descricaoCampo: string
+  menusDoCaso: string
+  semMenusDoWorkspace: string
+  casoCriado: (n: string) => string
+  casoExportado: (n: string) => string
+  nadaNoWorkspace: string
+
   // camada de todas as categorias
   todasTitulo: string
   todasDescricao: (n: number) => string
@@ -518,6 +598,85 @@ const ptBR: TextosDaTela = {
   criarComIa: 'Criar com IA',
   criarComIaToast: texto => `O BENI montaria "${texto}" e mostraria antes de gravar. Aqui é maquete.`,
   criarComIaDica: 'O BENI monta e mostra antes de gravar',
+
+  casosDeUso: 'Casos de uso',
+  importarRotulo: 'Importar',
+  centralTitulo: 'Central de casos de uso',
+  destaques: 'Destaques',
+  doWorkspace: 'Do seu workspace',
+  doEnspace: 'Do ENSPACE',
+  tiposDeCaso: 'Tipos',
+  complexidadeRotulo: 'Complexidade',
+  tipoCaso: { workspace: 'Workspace completo', menu: 'Menu', categoria: 'Categoria', tela: 'Tela' },
+  complexidades: { iniciante: 'Iniciante', intermediario: 'Intermediário', avancado: 'Avançado' },
+  buscarCasos: 'Pesquisar casos de uso...',
+  areasRotulo: 'Áreas',
+  buscarAreas: 'Pesquisar...',
+  selecionarTudo: 'Selecionar tudo',
+  bannerCriar: 'Transforme o seu menu num caso de uso e use em outros workspaces.',
+  criarCaso: 'Criar caso de uso',
+  emDestaque: 'Em destaque',
+  verMaisN: n => `Ver mais ${n}`,
+  nenhumCaso: 'Nenhum caso de uso com esses filtros.',
+  limparFiltros: 'Limpar filtros',
+  voltarCentral: 'Voltar',
+  usarCaso: 'Usar caso de uso',
+  adicionarAoWorkspace: 'Adicionar ao workspace',
+  adicionarAoWorkspaceDica: 'Guarda uma cópia para você ajustar antes de usar. O menu não muda.',
+  exportarArquivo: 'Exportar arquivo',
+  maisDoCaso: 'Mais ações do caso de uso',
+  descricaoDoCaso: 'Descrição',
+  oQueVemJunto: 'O que vem junto',
+  incluiMenus: 'Menus e telas',
+  incluiCategorias: 'Categorias e campos',
+  incluiStatus: 'Status',
+  nMenusTelas: (m, t) => `${m === 1 ? '1 menu' : `${m} menus`}, ${t === 1 ? '1 tela' : `${t} telas`}`,
+  nCategoriasCampos: (c, f) => `${c === 1 ? '1 categoria' : `${c} categorias`}, ${f === 1 ? '1 campo' : `${f} campos`}`,
+  nStatus: n => n === 1 ? '1 status' : `${n} status`,
+  peloEnspace: 'Pelo ENSPACE',
+  peloEnspaceDica: 'Feito e mantido pela equipe do ENSPACE.',
+  verificado: 'Verificado',
+  doSeuWorkspace: 'Do seu workspace',
+  doSeuWorkspaceDica: 'Criado ou guardado por alguém deste workspace.',
+  criadoEmRotulo: 'Criado em',
+  usadoRotulo: 'Usado',
+  vezes: n => n === 1 ? '1 vez' : `${n.toLocaleString('pt-BR')} vezes`,
+  adicionadoAoWorkspace: n => `${n} foi guardado em Do seu workspace. O menu não mudou.`,
+  ampliar: 'Ampliar imagem',
+  imagemDe: (i, total) => `Imagem ${i} de ${total}`,
+  anterior: 'Anterior',
+  proxima: 'Próxima',
+  usarTitulo: n => `Usar ${n}`,
+  oQueEntra: 'O que entra',
+  comOQueExiste: 'E com o que já existe?',
+  modoSomarTitulo: 'Somar ao menu',
+  modoSomarDica: 'Os menus do caso entram ao lado dos que você já tem.',
+  modoSubstituirTitulo: 'Substituir o menu',
+  modoSubstituirDica: 'Os menus que o workspace criou saem. Os nativos ficam.',
+  oQueSai: 'O que sai',
+  nadaSai: 'Nada sai: o workspace ainda não criou menus.',
+  ondeEntram: 'Onde os menus entram',
+  aplicarCaso: 'Usar',
+  casoAplicado: n => `${n} entrou no menu. Salve para valer para o workspace.`,
+  importarTitulo: 'Importar caso de uso',
+  arrasteArquivo: 'Arraste o arquivo aqui ou clique para escolher',
+  arquivoDica: 'O arquivo .json que o Exportar gera em outro workspace do ENSPACE.',
+  usarExemplo: 'Usar um arquivo de exemplo',
+  arquivoInvalido: 'Este arquivo não é um caso de uso do ENSPACE.',
+  deOnde: (ws, data) => `De ${ws}, exportado em ${data}`,
+  trocarArquivo: 'Trocar arquivo',
+  importarBotao: 'Importar',
+  exportarMenu: 'Exportar o meu menu',
+  exportarDica: 'Para levar os menus deste workspace a outro.',
+  criarCasoTitulo: 'Criar caso de uso',
+  nomeDoCaso: 'Nome',
+  areaDoCaso: 'Área',
+  descricaoCampo: 'Descrição',
+  menusDoCaso: 'Menus que entram',
+  semMenusDoWorkspace: 'O workspace ainda não criou menus. Crie um pelo "+" do Início e volte aqui.',
+  casoCriado: n => `${n} está em Do seu workspace.`,
+  casoExportado: n => `${n} foi baixado.`,
+  nadaNoWorkspace: 'Nenhum caso de uso no workspace ainda. Crie um a partir do seu menu ou guarde um do ENSPACE.',
 
   todasTitulo: 'Todas as categorias',
   todasDescricao: n => `${n} categorias neste workspace. Fixe as que você usa para elas ficarem no menu.`,
@@ -900,6 +1059,85 @@ const en: TextosDaTela = {
   criarComIaToast: texto => `BENI would build "${texto}" and show it before saving. This is a mockup.`,
   criarComIaDica: 'BENI builds it and shows it before saving',
 
+  casosDeUso: 'Use cases',
+  importarRotulo: 'Import',
+  centralTitulo: 'Use case center',
+  destaques: 'Featured',
+  doWorkspace: 'From your workspace',
+  doEnspace: 'From ENSPACE',
+  tiposDeCaso: 'Types',
+  complexidadeRotulo: 'Complexity',
+  tipoCaso: { workspace: 'Full workspace', menu: 'Menu', categoria: 'Category', tela: 'Screen' },
+  complexidades: { iniciante: 'Beginner', intermediario: 'Intermediate', avancado: 'Advanced' },
+  buscarCasos: 'Search use cases...',
+  areasRotulo: 'Areas',
+  buscarAreas: 'Search...',
+  selecionarTudo: 'Select all',
+  bannerCriar: 'Turn your menu into a use case and use it in other workspaces.',
+  criarCaso: 'Create use case',
+  emDestaque: 'Featured',
+  verMaisN: n => `See ${n} more`,
+  nenhumCaso: 'No use case matches these filters.',
+  limparFiltros: 'Clear filters',
+  voltarCentral: 'Back',
+  usarCaso: 'Use this use case',
+  adicionarAoWorkspace: 'Add to workspace',
+  adicionarAoWorkspaceDica: 'Saves a copy for you to adjust before using it. The menu does not change.',
+  exportarArquivo: 'Export file',
+  maisDoCaso: 'More use case actions',
+  descricaoDoCaso: 'Description',
+  oQueVemJunto: 'What comes with it',
+  incluiMenus: 'Menus and screens',
+  incluiCategorias: 'Categories and fields',
+  incluiStatus: 'Statuses',
+  nMenusTelas: (m, t) => `${m === 1 ? '1 menu' : `${m} menus`}, ${t === 1 ? '1 screen' : `${t} screens`}`,
+  nCategoriasCampos: (c, f) => `${c === 1 ? '1 category' : `${c} categories`}, ${f === 1 ? '1 field' : `${f} fields`}`,
+  nStatus: n => n === 1 ? '1 status' : `${n} statuses`,
+  peloEnspace: 'By ENSPACE',
+  peloEnspaceDica: 'Built and maintained by the ENSPACE team.',
+  verificado: 'Verified',
+  doSeuWorkspace: 'From your workspace',
+  doSeuWorkspaceDica: 'Created or saved by someone in this workspace.',
+  criadoEmRotulo: 'Created on',
+  usadoRotulo: 'Used',
+  vezes: n => n === 1 ? '1 time' : `${n.toLocaleString('en')} times`,
+  adicionadoAoWorkspace: n => `${n} was saved to From your workspace. The menu did not change.`,
+  ampliar: 'Enlarge image',
+  imagemDe: (i, total) => `Image ${i} of ${total}`,
+  anterior: 'Previous',
+  proxima: 'Next',
+  usarTitulo: n => `Use ${n}`,
+  oQueEntra: 'What comes in',
+  comOQueExiste: 'And what about what you already have?',
+  modoSomarTitulo: 'Add to the menu',
+  modoSomarDica: 'The menus in the use case go next to the ones you have.',
+  modoSubstituirTitulo: 'Replace the menu',
+  modoSubstituirDica: 'Menus the workspace created go away. Native ones stay.',
+  oQueSai: 'What goes away',
+  nadaSai: 'Nothing goes away: the workspace has not created menus yet.',
+  ondeEntram: 'Where the menus go',
+  aplicarCaso: 'Use',
+  casoAplicado: n => `${n} is now in the menu. Save to apply it to the workspace.`,
+  importarTitulo: 'Import use case',
+  arrasteArquivo: 'Drag the file here or click to choose',
+  arquivoDica: 'The .json file that Export creates in another ENSPACE workspace.',
+  usarExemplo: 'Use a sample file',
+  arquivoInvalido: 'This file is not an ENSPACE use case.',
+  deOnde: (ws, data) => `From ${ws}, exported on ${data}`,
+  trocarArquivo: 'Change file',
+  importarBotao: 'Import',
+  exportarMenu: 'Export my menu',
+  exportarDica: 'To take this workspace menus to another one.',
+  criarCasoTitulo: 'Create use case',
+  nomeDoCaso: 'Name',
+  areaDoCaso: 'Area',
+  descricaoCampo: 'Description',
+  menusDoCaso: 'Menus included',
+  semMenusDoWorkspace: 'The workspace has not created menus yet. Create one from the Home "+" and come back.',
+  casoCriado: n => `${n} is in From your workspace.`,
+  casoExportado: n => `${n} was downloaded.`,
+  nadaNoWorkspace: 'No use cases in the workspace yet. Create one from your menu or save one from ENSPACE.',
+
   todasTitulo: 'All categories',
   todasDescricao: n => `${n} categories in this workspace. Pin the ones you use to keep them in the menu.`,
   todasBusca: 'Search a category',
@@ -1280,6 +1518,85 @@ const es: TextosDaTela = {
   criarComIa: 'Crear con IA',
   criarComIaToast: texto => `BENI armaría "${texto}" y lo mostraría antes de guardar. Aquí es una maqueta.`,
   criarComIaDica: 'BENI lo arma y lo muestra antes de guardar',
+
+  casosDeUso: 'Casos de uso',
+  importarRotulo: 'Importar',
+  centralTitulo: 'Central de casos de uso',
+  destaques: 'Destacados',
+  doWorkspace: 'De tu workspace',
+  doEnspace: 'De ENSPACE',
+  tiposDeCaso: 'Tipos',
+  complexidadeRotulo: 'Complejidad',
+  tipoCaso: { workspace: 'Workspace completo', menu: 'Menú', categoria: 'Categoría', tela: 'Pantalla' },
+  complexidades: { iniciante: 'Principiante', intermediario: 'Intermedio', avancado: 'Avanzado' },
+  buscarCasos: 'Buscar casos de uso...',
+  areasRotulo: 'Áreas',
+  buscarAreas: 'Buscar...',
+  selecionarTudo: 'Seleccionar todo',
+  bannerCriar: 'Convierte tu menú en un caso de uso y úsalo en otros workspaces.',
+  criarCaso: 'Crear caso de uso',
+  emDestaque: 'Destacados',
+  verMaisN: n => `Ver ${n} más`,
+  nenhumCaso: 'Ningún caso de uso con esos filtros.',
+  limparFiltros: 'Limpiar filtros',
+  voltarCentral: 'Volver',
+  usarCaso: 'Usar caso de uso',
+  adicionarAoWorkspace: 'Agregar al workspace',
+  adicionarAoWorkspaceDica: 'Guarda una copia para ajustarla antes de usarla. El menú no cambia.',
+  exportarArquivo: 'Exportar archivo',
+  maisDoCaso: 'Más acciones del caso de uso',
+  descricaoDoCaso: 'Descripción',
+  oQueVemJunto: 'Qué incluye',
+  incluiMenus: 'Menús y pantallas',
+  incluiCategorias: 'Categorías y campos',
+  incluiStatus: 'Estados',
+  nMenusTelas: (m, t) => `${m === 1 ? '1 menú' : `${m} menús`}, ${t === 1 ? '1 pantalla' : `${t} pantallas`}`,
+  nCategoriasCampos: (c, f) => `${c === 1 ? '1 categoría' : `${c} categorías`}, ${f === 1 ? '1 campo' : `${f} campos`}`,
+  nStatus: n => n === 1 ? '1 estado' : `${n} estados`,
+  peloEnspace: 'Por ENSPACE',
+  peloEnspaceDica: 'Hecho y mantenido por el equipo de ENSPACE.',
+  verificado: 'Verificado',
+  doSeuWorkspace: 'De tu workspace',
+  doSeuWorkspaceDica: 'Creado o guardado por alguien de este workspace.',
+  criadoEmRotulo: 'Creado el',
+  usadoRotulo: 'Usado',
+  vezes: n => n === 1 ? '1 vez' : `${n.toLocaleString('es')} veces`,
+  adicionadoAoWorkspace: n => `${n} se guardó en De tu workspace. El menú no cambió.`,
+  ampliar: 'Ampliar imagen',
+  imagemDe: (i, total) => `Imagen ${i} de ${total}`,
+  anterior: 'Anterior',
+  proxima: 'Siguiente',
+  usarTitulo: n => `Usar ${n}`,
+  oQueEntra: 'Qué entra',
+  comOQueExiste: '¿Y con lo que ya existe?',
+  modoSomarTitulo: 'Sumar al menú',
+  modoSomarDica: 'Los menús del caso entran junto a los que ya tienes.',
+  modoSubstituirTitulo: 'Reemplazar el menú',
+  modoSubstituirDica: 'Salen los menús que creó el workspace. Los nativos se quedan.',
+  oQueSai: 'Qué sale',
+  nadaSai: 'No sale nada: el workspace todavía no creó menús.',
+  ondeEntram: 'Dónde entran los menús',
+  aplicarCaso: 'Usar',
+  casoAplicado: n => `${n} entró en el menú. Guarda para aplicarlo al workspace.`,
+  importarTitulo: 'Importar caso de uso',
+  arrasteArquivo: 'Arrastra el archivo aquí o haz clic para elegir',
+  arquivoDica: 'El archivo .json que Exportar genera en otro workspace de ENSPACE.',
+  usarExemplo: 'Usar un archivo de ejemplo',
+  arquivoInvalido: 'Este archivo no es un caso de uso de ENSPACE.',
+  deOnde: (ws, data) => `De ${ws}, exportado el ${data}`,
+  trocarArquivo: 'Cambiar archivo',
+  importarBotao: 'Importar',
+  exportarMenu: 'Exportar mi menú',
+  exportarDica: 'Para llevar los menús de este workspace a otro.',
+  criarCasoTitulo: 'Crear caso de uso',
+  nomeDoCaso: 'Nombre',
+  areaDoCaso: 'Área',
+  descricaoCampo: 'Descripción',
+  menusDoCaso: 'Menús incluidos',
+  semMenusDoWorkspace: 'El workspace todavía no creó menús. Crea uno desde el "+" de Inicio y vuelve aquí.',
+  casoCriado: n => `${n} está en De tu workspace.`,
+  casoExportado: n => `${n} se descargó.`,
+  nadaNoWorkspace: 'Todavía no hay casos de uso en el workspace. Crea uno a partir de tu menú o guarda uno de ENSPACE.',
 
   todasTitulo: 'Todas las categorías',
   todasDescricao: n => `${n} categorías en este workspace. Fija las que usas para que queden en el menú.`,

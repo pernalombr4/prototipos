@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useTrilha } from './trilha'
+import { useJanelasDeCasos } from './casos'
 import type { TextosDaTela } from './textos'
 
 /**
@@ -18,6 +19,11 @@ import type { TextosDaTela } from './textos'
  *
  * As três entidades são as da rodada 16 (seção, menu, categoria), e
  * "Personalizar a barra lateral" fecha a lista.
+ *
+ * RODADA 18: no pé, os dois botões do ClickUp, "Importar" e "Modelos". No
+ * ENSPACE, modelo é CASO DE USO, e a importação traz um caso de uso de outro
+ * workspace. Os dois existem no produto (Configurações > Interface > Casos de
+ * Uso); aqui ficam a um clique de quem está montando o menu.
  */
 const props = defineProps<{
   t: TextosDaTela
@@ -25,6 +31,7 @@ const props = defineProps<{
 }>()
 
 const trilha = useTrilha()
+const casos = useJanelasDeCasos()
 const toast = useToast()
 
 const aberto = ref(false)
@@ -104,7 +111,30 @@ const grupos = computed(() => {
         :placeholder="props.t.descrevaParaCriar"
         icon="i-lucide-pencil-line"
         class="max-h-96 w-80"
-      />
+      >
+        <template #footer>
+          <div class="grid grid-cols-2 gap-2">
+            <UButton
+              :label="props.t.importarRotulo"
+              icon="i-lucide-download"
+              size="sm"
+              color="neutral"
+              variant="outline"
+              class="justify-center"
+              @click="fechar(() => { casos.importando.value = true })"
+            />
+            <UButton
+              :label="props.t.casosDeUso"
+              icon="i-lucide-package"
+              size="sm"
+              color="neutral"
+              variant="outline"
+              class="justify-center"
+              @click="fechar(() => { casos.central.value = true })"
+            />
+          </div>
+        </template>
+      </UCommandPalette>
     </template>
   </UPopover>
 </template>
