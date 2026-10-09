@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { rotuloDoNo as rotuloComum } from './rotulos'
 import PainelTrabalho from './_PainelTrabalho.vue'
 import PainelConfiguracoes from './_PainelConfiguracoes.vue'
 import ModeloTrilha from './_ModeloTrilha.vue'
@@ -34,6 +35,7 @@ import {
 } from './mocks'
 import { useMenuDoWorkspace, useMenuRecolhido } from './estado'
 import { useRenomeando } from './acoes'
+import { useJanelasDaTrilha } from './trilha'
 import { textos } from './textos'
 
 // O contexto do protótipo vem dos próprios .md desta pasta, como texto.
@@ -61,22 +63,8 @@ const menu = useMenuDoWorkspace()
 
 /** Rótulo de um nó: nativo vem do dicionário, do workspace vem do próprio nó. */
 function rotuloDoNo(no: NoDoMenu) {
-  if (no.rotulo) return no.rotulo
-  const mapa: Record<string, string> = {
-    inicio: t.value.inicio,
-    inbox: t.value.inbox,
-    chatIa: t.value.chatIa,
-    tarefas: t.value.tarefas,
-    agenda: t.value.agenda,
-    spaceflows: t.value.spaceflows,
-    documentos: t.value.documentos,
-    categorias: t.value.categorias,
-    // Auditoria reaproveita os rótulos que já existiam nas configurações.
-    auditoria: t.value.grupos.auditoria,
-    logsAuditoria: t.value.itens['logs-auditoria'],
-    logsRequisicao: t.value.itens['logs-requisicao'],
-  }
-  return mapa[no.chave ?? ''] ?? (no.chave ?? '')
+  // Rodada 16: o mapa de nomes mora no rotulos.ts, um só para todas as peças.
+  return rotuloComum(no, t.value)
 }
 
 /** Todos os itens de seção, achatados, para a busca e para o breadcrumb. */
@@ -106,10 +94,13 @@ const estadoDoPainel = computed(() => {
 })
 
 /* ------------------------------ o dado ------------------------------ */
+/* As categorias criadas pelo "+" do Início (rodada 16) somam às do mock. */
+const { categoriasCriadas } = useJanelasDaTrilha()
+
 const base = computed<Categoria[]>(() => {
-  if (estado.value === 'vazio') return []
-  if (estado.value === 'volume') return categoriasVolume
-  return categoriasNormais
+  if (estado.value === 'vazio') return [...categoriasCriadas.value]
+  if (estado.value === 'volume') return [...categoriasVolume, ...categoriasCriadas.value]
+  return [...categoriasNormais, ...categoriasCriadas.value]
 })
 
 /** Favoritar mexe no array em memória. Recarregar a página volta ao começo. */

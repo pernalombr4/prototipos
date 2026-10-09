@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { rotuloDoNo as rotuloComum } from './rotulos'
 import MenuDeAjuda from './_MenuDeAjuda.vue'
 import { useMenuDoWorkspace } from './estado'
 import { useAcoesDoMenu } from './acoes'
@@ -54,21 +55,8 @@ const emit = defineEmits<{
 const menu = useMenuDoWorkspace()
 
 function rotuloDe(no: NoDoMenu) {
-  if (no.rotulo) return no.rotulo
-  const mapa: Record<string, string> = {
-    inicio: props.t.inicio,
-    inbox: props.t.inbox,
-    chatIa: props.t.chatIa,
-    tarefas: props.t.tarefas,
-    agenda: props.t.agenda,
-    spaceflows: props.t.spaceflows,
-    documentos: props.t.documentos,
-    categorias: props.t.categorias,
-    auditoria: props.t.grupos.auditoria,
-    logsAuditoria: props.t.itens['logs-auditoria'],
-    logsRequisicao: props.t.itens['logs-requisicao'],
-  }
-  return mapa[no.chave ?? ''] ?? (no.chave ?? '')
+  // Rodada 16: o mapa de nomes mora no rotulos.ts, um só para todas as peças.
+  return rotuloComum(no, props.t)
 }
 
 function contadorDe(no: NoDoMenu) {
@@ -270,7 +258,7 @@ function classeDoIcone(acesa: boolean) {
           <UIcon :name="props.podeConfigurar ? 'i-lucide-settings' : 'i-lucide-lock'" class="size-5" />
         </button>
       </UTooltip>
-      <MenuDeAjuda :t="props.t" @escolher="r => emit('ajuda', r)" />
+      <MenuDeAjuda :t="props.t" formato="coluna" @escolher="r => emit('ajuda', r)" />
     </div>
   </div>
 </template>

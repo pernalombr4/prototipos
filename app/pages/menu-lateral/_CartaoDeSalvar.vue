@@ -52,7 +52,8 @@ function salvarMenu(alcance: 'todos' | 'local') {
           block
           @click="salvarMenu('todos')"
         />
-        <div class="flex items-center gap-1.5">
+        <!-- Quebra em vez de cortar: o painel da trilha tem 232 px (rodada 16). -->
+        <div class="flex flex-wrap items-center gap-1.5">
           <UButton
             :label="props.t.salvarLocal"
             icon="i-lucide-user"

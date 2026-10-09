@@ -317,14 +317,8 @@ export const gruposDeConfiguracao: GrupoDeConfiguracao[] = [
       { id: 'enviados', icone: 'i-lucide-send' },
     ],
   },
-  {
-    id: 'conexoes',
-    icone: 'i-lucide-plug',
-    itens: [
-      { id: 'integracoes', icone: 'i-lucide-git-merge' },
-      { id: 'credenciais', icone: 'i-lucide-key-round' },
-    ],
-  },
+  // "Conexões" (Integrações e Credenciais) saiu daqui na rodada 16: virou o
+  // menu nativo Integrações, de primeiro nível, como a Auditoria na rodada 10.
   {
     id: 'ia',
     icone: 'i-lucide-bot',
@@ -631,6 +625,30 @@ export const menuDoEditor: NoDoMenu[] = [
     filhos: [
       { id: 'a-logs', tipo: 'tela', chave: 'logsAuditoria', icone: 'i-lucide-scroll-text', tipoDeTela: 'personalizada' },
       { id: 'a-req', tipo: 'tela', chave: 'logsRequisicao', icone: 'i-lucide-activity', tipoDeTela: 'personalizada' },
+    ],
+  },
+  /*
+   * INTEGRAÇÕES, rodada 16. Menu nativo novo do ENSPACE, anunciado pela
+   * Mikaela: "tem um novo menu no enspace: o menu integracoes, e dentro dele
+   * tem apps, credenciais e webhooks como submenus".
+   *
+   * Entra como a Auditoria entrou na rodada 10: menu de primeiro nível, com
+   * ícone próprio na trilha, e o grupo "Conexões" sai de Configurações, porque
+   * Integrações e Credenciais moravam lá. Webhooks é a tela nova. Os ids das
+   * telas são do protótipo.
+   */
+  {
+    id: 's-integracoes',
+    tipo: 'secao',
+    origem: 'nativo',
+    chave: 'integracoes',
+    icone: 'i-lucide-plug',
+    lugar: 'trilha',
+    escopo: [],
+    filhos: [
+      { id: 'i-apps', tipo: 'tela', chave: 'apps', icone: 'i-lucide-blocks', tipoDeTela: 'personalizada' },
+      { id: 'i-credenciais', tipo: 'tela', chave: 'credenciais', icone: 'i-lucide-key-round', tipoDeTela: 'personalizada' },
+      { id: 'i-webhooks', tipo: 'tela', chave: 'webhooks', icone: 'i-lucide-webhook', tipoDeTela: 'personalizada' },
     ],
   },
   {

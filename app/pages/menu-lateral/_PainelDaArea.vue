@@ -269,7 +269,16 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
 </script>
 
 <template>
-  <nav class="min-h-0 flex-1 overflow-y-auto px-2 py-2" :aria-label="props.titulo">
+  <!--
+    Com algo para salvar, o cartão flutua sobre o fim da lista. O respiro
+    embaixo deixa rolar o último item para fora dele (rodada 16: ele cobria o
+    "Personalizar a barra lateral").
+  -->
+  <nav
+    class="min-h-0 flex-1 overflow-y-auto px-2 pt-2 transition-[padding] duration-200"
+    :class="menu.alterado.value && !props.flutuante ? 'pb-40' : 'pb-2'"
+    :aria-label="props.titulo"
+  >
     <!-- ---------- Início: o menu do ClickUp (rodada 15) ---------- -->
     <MenuInicio
       v-if="props.area === 'inicio'"

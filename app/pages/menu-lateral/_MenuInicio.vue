@@ -3,7 +3,7 @@ import LinhaDeMenu from './_LinhaDeMenu.vue'
 import SecaoDeMenu from './_SecaoDeMenu.vue'
 import AvisosDoMenu from './_AvisosDoMenu.vue'
 import AdicionarASecao from './_AdicionarASecao.vue'
-import { INICIO_TRAVADOS, SECOES_OCULTAVEIS, useArraste, useMenuDoWorkspace, type Atalho } from './estado'
+import { useArraste, useMenuDoWorkspace, type Atalho } from './estado'
 import { chaveDoAtalho, useTrilha } from './trilha'
 import { useAcoesDoMenu, type Acoes } from './acoes'
 import { rotuloDoNo } from './rotulos'
@@ -14,9 +14,10 @@ import type { TextosDaTela } from './textos'
  * O MENU INÍCIO (rodada 15). É o "Início" do ClickUp, que a Mikaela pediu
  * para o ENSPACE ter igual, no lugar do antigo "Trabalho":
  *
- *   EM CIMA, os itens nativos, em ORDEM FIXA. Escolhe-se quais aparecem; o
- *   que sai fica em "⋯ Mais", com alfinete para voltar e atalho para
- *   Personalizar. Nada aqui se arrasta.
+ *   EM CIMA, os itens nativos. Escolhe-se quais aparecem; o que sai fica em
+ *   "⋯ Mais", com alfinete para voltar e atalho para Personalizar. No
+ *   ClickUp eles têm ordem fixa; aqui, desde a rodada 16, SE ARRASTAM e todos
+ *   se ocultam, a pedido dela.
  *
  *   EMBAIXO, as SEÇÕES. Elas se reordenam arrastando aqui mesmo, sem abrir
  *   Personalizar. Clicar no nome recolhe e expande (e só isso: no ClickUp
@@ -72,7 +73,10 @@ const nativos = computed<Nativo[]>(() => [
   // A camada "ver todas" vira item nativo opcional, como o "Todos os Espaços" de lá.
   { id: 'todas-categorias', rotulo: props.t.todasTitulo, icone: 'i-lucide-layout-grid' },
 ])
-const nativosVisiveis = computed(() => nativos.value.filter(n => !trilha.prefs.value.inicioOcultos.includes(n.id)))
+const idsDosNativos = computed(() => nativos.value.map(n => n.id))
+const nativosVisiveis = computed(() => trilha.ordemDoInicio(idsDosNativos.value)
+  .map(id => nativos.value.find(n => n.id === id)!)
+  .filter(n => n && !trilha.prefs.value.inicioOcultos.includes(n.id)))
 const nativosNoMais = computed(() => nativos.value.filter(n => trilha.prefs.value.inicioOcultos.includes(n.id)))
 
 function abrirNativo(n: Nativo) {
@@ -99,15 +103,38 @@ const acoes = useAcoesDoMenu({
   alternarSecao: id => trilha.alternarRecolhida(id),
 })
 
-/** O "…" de um nativo: ir, e tirar do Início (menos os travados). */
+/** Sobe ou desce um nativo entre os que aparecem: o arraste sem mouse. */
+function passoDoNativo(n: Nativo, passo: -1 | 1) {
+  const lista = nativosVisiveis.value.map(x => x.id)
+  const vizinho = lista[lista.indexOf(n.id) + passo]
+  if (vizinho) trilha.moverNoInicio(n.id, vizinho, passo < 0 ? 'antes' : 'depois', idsDosNativos.value)
+}
+
+function largarNoNativo(alvo: string, p: 'antes' | 'depois' | 'dentro') {
+  const quem = arraste.arrastando.value
+  arraste.terminar()
+  if (!quem?.startsWith('nativo:')) return
+  const id = quem.slice('nativo:'.length)
+  if (id !== alvo) trilha.moverNoInicio(id, alvo, p === 'antes' ? 'antes' : 'depois', idsDosNativos.value)
+}
+
+/** O "…" de um nativo: ir, mover e tirar do Início. Nenhum é travado (rodada 16). */
 function acoesDoNativo(n: Nativo): Acoes {
   const ir = [
     { label: props.t.ctxAbrir, icon: 'i-lucide-arrow-up-right', onSelect: () => abrirNativo(n) },
     { label: props.t.ctxNovaAba, icon: 'i-lucide-external-link', onSelect: () => toast.add({ title: props.t.novaAbaMaquete, icon: 'i-lucide-hammer', color: 'neutral' as const }) },
     { label: props.t.ctxCopiarLink, icon: 'i-lucide-link', onSelect: () => acoes.copiarLink(n.id) },
   ]
-  if (INICIO_TRAVADOS.includes(n.id)) return [ir]
-  return [ir, [{ label: props.t.ocultarDoInicio, icon: 'i-lucide-pin-off', onSelect: () => trilha.mostrarNoInicio(n.id, false) }]]
+  const lista = nativosVisiveis.value.map(x => x.id)
+  const i = lista.indexOf(n.id)
+  return [
+    ir,
+    [
+      { label: props.t.ctxSubir, icon: 'i-lucide-arrow-up', kbds: ['alt', 'arrowup'], disabled: i <= 0, onSelect: () => passoDoNativo(n, -1) },
+      { label: props.t.ctxDescer, icon: 'i-lucide-arrow-down', kbds: ['alt', 'arrowdown'], disabled: i >= lista.length - 1, onSelect: () => passoDoNativo(n, 1) },
+    ],
+    [{ label: props.t.ocultarDoInicio, icon: 'i-lucide-eye-off', onSelect: () => trilha.mostrarNoInicio(n.id, false) }],
+  ]
 }
 
 /* =============================== as seções =============================== */
@@ -226,6 +253,11 @@ function acoesDoAtalho(secaoId: string, r: Resolvido): Acoes {
 
 /* ------------------------------ o "…" de cada seção ------------------------------ */
 
+/** Rodada 16: toda seção se oculta, nativa também. Volta por Personalizar > Seções. */
+function itemOcultar(s: SecaoDoInicio) {
+  return { label: props.t.ocultarSecao, icon: 'i-lucide-eye-off', onSelect: () => trilha.ocultarSecao(s.id, true) }
+}
+
 function blocoDeSecoes() {
   return [
     { label: props.t.criarSecaoRotulo, icon: 'i-lucide-plus', onSelect: () => { trilha.criandoSecao.value = 'nova' } },
@@ -268,7 +300,7 @@ function acoesDaSecao(s: SecaoDoInicio): Acoes {
         })),
       }],
       blocoDeSecoes(),
-      [{
+      [itemOcultar(s), {
         label: t.excluirSecao,
         icon: 'i-lucide-trash-2',
         color: 'error' as const,
@@ -280,7 +312,7 @@ function acoesDaSecao(s: SecaoDoInicio): Acoes {
     ]
   }
   if (s.tipo === 'favoritos') {
-    return [[recolher], blocoDeSecoes(), [{ label: t.ocultarSecao, icon: 'i-lucide-eye-off', onSelect: () => trilha.ocultarSecao(s.id, true) }]]
+    return [[recolher], blocoDeSecoes(), [itemOcultar(s)]]
   }
   if (s.tipo === 'categorias') {
     return [
@@ -290,10 +322,11 @@ function acoesDaSecao(s: SecaoDoInicio): Acoes {
         { label: t.verTodas(props.totalDeCategorias), icon: 'i-lucide-layout-grid', onSelect: () => emit('verTodas') },
       ],
       blocoDeSecoes(),
+      [itemOcultar(s)],
     ]
   }
   // Seção que o administrador montou: as ações da rodada 14, mais as de seção.
-  return [...acoes.daSecao(s.no!, secoesDoAdmin.value.map(x => x.id)).slice(0, 2), blocoDeSecoes()]
+  return [...acoes.daSecao(s.no!, secoesDoAdmin.value.map(x => x.id)).slice(0, 2), blocoDeSecoes(), [itemOcultar(s)]]
 }
 
 /* ================================== o arraste ================================== */
@@ -312,6 +345,10 @@ function mirarSecao(s: SecaoDoInicio, p: 'antes' | 'depois' | 'dentro') {
 /** O que está sendo arrastado, como atalho, para soltar numa seção pessoal. */
 function comoAtalho(quem: string): Atalho | null {
   if (quem.startsWith('cat:')) return { tipo: 'categoria', id: quem.slice(4) }
+  if (quem.startsWith('nativo:')) {
+    const id = quem.slice('nativo:'.length)
+    return id === 'todas-categorias' ? null : { tipo: 'destino', id }
+  }
   const no = menu.acharNo(quem)
   if (!no) return null
   if (no.tipo === 'destino') return { tipo: 'destino', id: no.id }
@@ -422,7 +459,17 @@ function adicionando(id: string) {
         :acoes="props.flutuante ? undefined : acoesDoNativo(n)"
         :com-reticencias="!props.flutuante"
         :rotulo-reticencias="props.t.maisAcoes(n.rotulo)"
+        :alterado="menu.tocados.value.includes(`inicio:${n.id}`)"
+        :dica-alterado="props.t.pontoAlterado"
+        :arrastavel="podeArrastar"
+        :saindo="arraste.arrastando.value === `nativo:${n.id}`"
+        :marca="marcaDe(`nativo:${n.id}`) === 'dentro' ? null : marcaDe(`nativo:${n.id}`)"
         @selecionar="abrirNativo(n)"
+        @arrastar-inicio="arraste.comecar(`nativo:${n.id}`)"
+        @arrastar-sobre="p => arraste.mirar(`nativo:${n.id}`, p)"
+        @soltar="p => largarNoNativo(n.id, p)"
+        @arrastar-fim="arraste.terminar()"
+        @mover="p => passoDoNativo(n, p)"
       />
 
       <!-- "⋯ Mais": os nativos que saíram, com alfinete e atalho para Personalizar. -->

@@ -14,9 +14,19 @@
  *
  * O arraste passa pelo rascunho e acende o Salvar (regra dela desde a rodada
  * 5); a janela Personalizar e o alfinete valem na hora, como no ClickUp.
+ *
+ * RODADA 16, onde o ENSPACE sai do ClickUp de propósito:
+ *
+ *   "diferente do clickup, permitiremos reordenaçao na trilha e reordenação
+ *    nos menus nativos, nao so nos personalizados!" (Mikaela)
+ *
+ * A trilha e os itens nativos do Início passam a se arrastar, com as mesmas
+ * duas portas das seções: no próprio menu (rascunho e Salvar) e em
+ * Personalizar (vale na hora). E tudo se oculta, nativo também.
  */
 
 import { LIMITE_DA_TRILHA, useMenuDoWorkspace, type Atalho, type PrefsDaTrilha, type SecaoPessoal } from './estado'
+import type { Categoria } from './mocks'
 
 export type AbaDePersonalizar = 'navegacao' | 'inicio' | 'secoes' | 'temas'
 
@@ -31,6 +41,14 @@ export function useJanelasDaTrilha() {
     adicionandoEm: useState<string | null>('trilha-adicionar-em', () => null),
     /** Seções do Início recolhidas: o painel e o popover mostram igual. */
     recolhidas: useState<string[]>('trilha-secoes-recolhidas', () => []),
+    /** Criar menu (rodada 16): `null` fechada, senão onde ele vai morar. */
+    criandoMenu: useState<'inicio' | 'trilha' | null>('trilha-criar-menu', () => null),
+    criandoCategoria: useState<boolean>('trilha-criar-categoria', () => false),
+    /**
+     * As categorias criadas pelo "+" (rodada 16). Moram aqui, e não no
+     * mocks.ts, porque nascem na tela: o index.vue as soma às do mock.
+     */
+    categoriasCriadas: useState<Categoria[]>('trilha-categorias-criadas', () => []),
   }
 }
 
@@ -67,6 +85,31 @@ export function useTrilha() {
     menu.aplicarPrefs((p) => { p.fixadas = p.fixadas.filter(f => f !== id) })
   }
 
+  /**
+   * A ordem da trilha (rodada 16). Início não sai do topo: ele é a âncora, e
+   * cair no meio da trilha seria perder a porta de casa.
+   */
+  function reordenar(lista: string[], quem: string, alvo: string, posicao: 'antes' | 'depois') {
+    const sem = lista.filter(x => x !== quem)
+    const i = sem.indexOf(alvo)
+    if (i < 0) return lista
+    sem.splice(i + (posicao === 'depois' ? 1 : 0), 0, quem)
+    return sem
+  }
+
+  function moverNaTrilha(quem: string, alvo: string, posicao: 'antes' | 'depois', ja = false) {
+    if (quem === 'inicio') return
+    const mudanca = (p: PrefsDaTrilha) => {
+      if (alvo === 'inicio') {
+        p.fixadas = [quem, ...p.fixadas.filter(x => x !== quem)]
+        return
+      }
+      p.fixadas = reordenar(p.fixadas, quem, alvo, posicao)
+    }
+    if (ja) menu.aplicarPrefs(mudanca)
+    else menu.arrastarPrefs(`trilha:${quem}`, mudanca)
+  }
+
   function alternarRotulos(v: boolean) {
     menu.aplicarPrefs((p) => { p.rotulos = v })
   }
@@ -81,20 +124,25 @@ export function useTrilha() {
     })
   }
 
+  /** A ordem dos nativos do Início: a guardada, mais os que nasceram depois. */
+  function ordemDoInicio(existentes: string[]) {
+    const guardada = prefs.value.ordemDoInicio.filter(id => existentes.includes(id))
+    return [...guardada, ...existentes.filter(id => !guardada.includes(id))]
+  }
+
+  function moverNoInicio(quem: string, alvo: string, posicao: 'antes' | 'depois', existentes: string[], ja = false) {
+    const atual = ordemDoInicio(existentes)
+    const mudanca = (p: PrefsDaTrilha) => { p.ordemDoInicio = reordenar(atual, quem, alvo, posicao) }
+    if (ja) menu.aplicarPrefs(mudanca)
+    else menu.arrastarPrefs(`inicio:${quem}`, mudanca)
+  }
+
   /* ------------------------------ as seções ------------------------------ */
 
   /** A ordem das seções do Início: a guardada, mais as que nasceram depois. */
   function ordemDasSecoes(existentes: string[]) {
     const guardada = prefs.value.ordemDasSecoes.filter(id => existentes.includes(id))
     return [...guardada, ...existentes.filter(id => !guardada.includes(id))]
-  }
-
-  function reordenar(lista: string[], quem: string, alvo: string, posicao: 'antes' | 'depois') {
-    const sem = lista.filter(x => x !== quem)
-    const i = sem.indexOf(alvo)
-    if (i < 0) return lista
-    sem.splice(i + (posicao === 'depois' ? 1 : 0), 0, quem)
-    return sem
   }
 
   /** Arrastar seção no menu: rascunho e Salvar. */
@@ -219,6 +267,9 @@ export function useTrilha() {
     prefs,
     fixar,
     desafixar,
+    moverNaTrilha,
+    ordemDoInicio,
+    moverNoInicio,
     alternarRotulos,
     mostrarNoInicio,
     ordemDasSecoes,

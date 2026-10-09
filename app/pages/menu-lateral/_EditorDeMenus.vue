@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { rotuloDoNo as rotuloComum } from './rotulos'
 import FormularioDeMenu from './_FormularioDeMenu.vue'
 import { useMenuDoWorkspace, useArraste } from './estado'
 import { tiposDeTela, type NoDoMenu } from './mocks'
@@ -50,22 +51,8 @@ watch(aberto, (v) => {
 })
 
 function rotuloDe(no: NoDoMenu) {
-  if (no.rotulo) return no.rotulo
-  const mapa: Record<string, string> = {
-    inicio: props.t.inicio,
-    inbox: props.t.inbox,
-    chatIa: props.t.chatIa,
-    tarefas: props.t.tarefas,
-    agenda: props.t.agenda,
-    spaceflows: props.t.spaceflows,
-    documentos: props.t.documentos,
-    categorias: props.t.categorias,
-    // Auditoria reaproveita os rótulos que já existiam nas configurações.
-    auditoria: props.t.grupos.auditoria,
-    logsAuditoria: props.t.itens['logs-auditoria'],
-    logsRequisicao: props.t.itens['logs-requisicao'],
-  }
-  return mapa[no.chave ?? ''] ?? (no.chave ?? '')
+  // Rodada 16: o mapa de nomes mora no rotulos.ts, um só para todas as peças.
+  return rotuloComum(no, props.t)
 }
 
 /** Seções que podem receber um item: só as do workspace (regras R1 e R4). */

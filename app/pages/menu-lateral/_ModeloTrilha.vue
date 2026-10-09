@@ -4,6 +4,8 @@ import CartaoDeSalvar from './_CartaoDeSalvar.vue'
 import PainelDaArea from './_PainelDaArea.vue'
 import Personalizar from './_Personalizar.vue'
 import CriarSecao from './_CriarSecao.vue'
+import CriarMenu from './_CriarMenu.vue'
+import CriarCategoria from './_CriarCategoria.vue'
 import { LIMITE_DA_TRILHA, useMenuDoWorkspace } from './estado'
 import { useTrilha } from './trilha'
 import { rotuloDoNo } from './rotulos'
@@ -40,6 +42,12 @@ import type { TextosDaTela } from './textos'
  *    lateral".
  *
  * O arraste continua DENTRO dos painéis (rodada 14), nas regras de sempre.
+ *
+ * RODADA 16, e aqui o ENSPACE sai do ClickUp de propósito: "diferente do
+ * clickup, permitiremos reordenaçao na trilha". Os ícones fixados se
+ * arrastam (e Alt com as setas faz o mesmo). Início fica no topo: é a
+ * âncora. Arrastar vai para o rascunho e acende o Salvar, como todo arraste;
+ * em Personalizar > Navegação, vale na hora.
  */
 const props = defineProps<{
   t: TextosDaTela
@@ -173,6 +181,51 @@ function comPopover(a: Area) {
   return !a.bloqueada && (props.recolhido || area.value !== a.id)
 }
 
+/* ------------------------------ arrastar na trilha (rodada 16) ------------------------------ */
+
+const arrastandoArea = ref<string | null>(null)
+const miraArea = ref<{ id: string, posicao: 'antes' | 'depois' } | null>(null)
+
+function passarNaArea(e: DragEvent, a: Area) {
+  if (!arrastandoArea.value || arrastandoArea.value === a.id) return
+  e.preventDefault()
+  const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+  // Ninguém passa para cima do Início: soltar nele é soltar logo abaixo.
+  const posicao = a.id === 'inicio' || e.clientY - r.top >= r.height / 2 ? 'depois' : 'antes'
+  miraArea.value = { id: a.id, posicao }
+}
+
+function soltarNaArea(e: DragEvent) {
+  e.preventDefault()
+  if (arrastandoArea.value && miraArea.value) {
+    trilha.moverNaTrilha(arrastandoArea.value, miraArea.value.id, miraArea.value.posicao)
+  }
+  arrastandoArea.value = null
+  miraArea.value = null
+}
+
+/** Alt com as setas: o mesmo arraste, pelo teclado. */
+function teclarNaArea(e: KeyboardEvent, a: Area) {
+  if (!e.altKey || a.id === 'inicio' || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return
+  e.preventDefault()
+  const ids = naTrilha.value.map(x => x.id)
+  const vizinho = ids[ids.indexOf(a.id) + (e.key === 'ArrowUp' ? -1 : 1)]
+  if (vizinho) trilha.moverNaTrilha(a.id, vizinho, e.key === 'ArrowUp' ? 'antes' : 'depois')
+}
+
+function atributosDeArraste(a: Area) {
+  const pode = a.id !== 'inicio'
+  return {
+    draggable: pode ? 'true' : undefined,
+    'aria-keyshortcuts': pode ? 'Alt+ArrowUp Alt+ArrowDown' : undefined,
+    onDragstart: () => { if (pode) arrastandoArea.value = a.id },
+    onDragover: (e: DragEvent) => passarNaArea(e, a),
+    onDrop: soltarNaArea,
+    onDragend: () => { arrastandoArea.value = null; miraArea.value = null },
+    onKeydown: (e: KeyboardEvent) => teclarNaArea(e, a),
+  }
+}
+
 /* ------------------------------ o botão direito na trilha ------------------------------ */
 
 const itemRecolher = computed(() => ({
@@ -188,19 +241,40 @@ function acoesDaArea(a: Area): Acoes {
   const tirar = a.id === 'inicio'
     ? []
     : [{ label: props.t.desafixarDaTrilha, icon: 'i-lucide-pin-off', onSelect: () => trilha.desafixar(a.id) }]
+  const ids = naTrilha.value.map(x => x.id)
+  const i = ids.indexOf(a.id)
+  const mover = a.id === 'inicio' || i < 0
+    ? []
+    : [
+        { label: props.t.ctxSubir, icon: 'i-lucide-arrow-up', kbds: ['alt', 'arrowup'], disabled: i <= 1, onSelect: () => trilha.moverNaTrilha(a.id, ids[i - 1]!, 'antes') },
+        { label: props.t.ctxDescer, icon: 'i-lucide-arrow-down', kbds: ['alt', 'arrowdown'], disabled: i >= ids.length - 1, onSelect: () => trilha.moverNaTrilha(a.id, ids[i + 1]!, 'depois') },
+      ]
   return [
     [abrir],
-    [...tirar, { label: props.t.personalizarNavegacao, icon: 'i-lucide-sliders-horizontal', onSelect: () => trilha.abrirPersonalizar('navegacao') }],
+    [...mover, ...tirar, { label: props.t.personalizarNavegacao, icon: 'i-lucide-sliders-horizontal', onSelect: () => trilha.abrirPersonalizar('navegacao') }],
     [itemRecolher.value],
   ]
 }
 
 /* ------------------------------ o "+" do Início ------------------------------ */
 
-const itensDoMais = computed(() => [
-  ...props.itensDeCriar,
-  [{ label: props.t.inicioPersonalizar, icon: 'i-lucide-sliders-horizontal', onSelect: () => trilha.abrirPersonalizar('navegacao') }],
-])
+/*
+ * RODADA 16: "nossas entidades possiveis de estarem no botao de customizar
+ * é: criar seçao, criar menu [...]. criar categoria tambem é possibilidade."
+ * Seção é pessoal e todo mundo cria; menu e categoria são do workspace, e só
+ * quem configura cria.
+ */
+const itensDoMais = computed(() => {
+  const travado = !props.podeConfigurar
+  const dica = travado ? props.t.ctxSoQuemConfigura : undefined
+  return [[
+    { label: props.t.criarSecaoRotulo, icon: 'i-lucide-rows-3', onSelect: () => { trilha.criandoSecao.value = 'nova' } },
+    { label: props.t.criarMenuRotulo, icon: 'i-lucide-list-tree', description: dica, disabled: travado, onSelect: () => { trilha.criandoMenu.value = 'inicio' } },
+    { label: props.t.criarCategoriaRotulo, icon: 'i-lucide-folder-plus', description: dica, disabled: travado, onSelect: () => { trilha.criandoCategoria.value = true } },
+  ], [
+    { label: props.t.inicioPersonalizar, icon: 'i-lucide-sliders-horizontal', onSelect: () => trilha.abrirPersonalizar('navegacao') },
+  ]]
+})
 
 /* ------------------------------ o que Personalizar mostra ------------------------------ */
 
@@ -256,6 +330,9 @@ function classeDaArea(a: Area) {
     area.value === a.id && !props.recolhido
       ? 'bg-primary/15 text-highlighted'
       : a.bloqueada ? 'cursor-not-allowed text-muted' : 'text-default hover:bg-elevated',
+    arrastandoArea.value === a.id ? 'opacity-40' : '',
+    miraArea.value?.id === a.id && miraArea.value.posicao === 'antes' ? 'before:absolute before:inset-x-1 before:-top-0.5 before:h-0.5 before:rounded-full before:bg-primary' : '',
+    miraArea.value?.id === a.id && miraArea.value.posicao === 'depois' ? 'after:absolute after:inset-x-1 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-primary' : '',
   ]
 }
 </script>
@@ -292,7 +369,7 @@ function classeDaArea(a: Area) {
         </button>
       </UTooltip>
 
-      <!-- As áreas fixadas. Nenhuma se arrasta (rodada 15). -->
+      <!-- As áreas fixadas. Se arrastam desde a rodada 16, menos o Início. -->
       <UContextMenu v-for="a in naTrilha" :key="a.id" :items="acoesDaArea(a)">
         <!-- Com popover: o menu da área aparece no hover, sem sair do que está aberto. -->
         <UPopover
@@ -306,6 +383,7 @@ function classeDaArea(a: Area) {
             type="button"
             :class="classeDaArea(a)"
             :aria-label="trilha.prefs.value.rotulos ? undefined : a.rotulo"
+            v-bind="atributosDeArraste(a)"
             @click="irPara(a)"
           >
             <UIcon :name="a.icone" class="size-5" />
@@ -327,6 +405,7 @@ function classeDaArea(a: Area) {
             :aria-current="area === a.id ? 'page' : undefined"
             :aria-disabled="a.bloqueada || undefined"
             :aria-label="trilha.prefs.value.rotulos ? undefined : a.rotulo"
+            v-bind="atributosDeArraste(a)"
             @click="irPara(a)"
           >
             <UIcon :name="a.bloqueada ? 'i-lucide-lock' : a.icone" class="size-5" :class="area === a.id && !props.recolhido ? 'text-primary' : ''" />
@@ -421,7 +500,7 @@ function classeDaArea(a: Area) {
         </button>
       </UTooltip>
 
-      <MenuDeAjuda :t="props.t" @escolher="r => emit('ajuda', r)" />
+      <MenuDeAjuda :t="props.t" formato="trilha" @escolher="r => emit('ajuda', r)" />
 
       <UDropdownMenu :items="props.itensDeCriar" :content="{ side: 'right', align: 'end' }">
         <UTooltip :text="props.t.criar" :content="{ side: 'right' }">
@@ -492,5 +571,7 @@ function classeDaArea(a: Area) {
 
     <Personalizar :t="props.t" :areas="areas" :itens-do-inicio="itensDoInicio" :secoes="secoesDoInicio" />
     <CriarSecao :t="props.t" />
+    <CriarMenu :t="props.t" />
+    <CriarCategoria :t="props.t" />
   </div>
 </template>

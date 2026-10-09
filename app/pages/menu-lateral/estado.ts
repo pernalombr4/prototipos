@@ -52,11 +52,12 @@ export interface Recusa {
                        A trilha não se arrasta. Fixar com a trilha cheia
                        troca o último, e o último vai para "Mais";
      `rotulos`         "Ícones e rótulos" ou "Somente ícones";
-     `inicioOcultos`   os itens nativos do Início que foram para "⋯ Mais".
-                       A ordem deles é fixa;
+     `inicioOcultos`   os itens nativos do Início que foram para "⋯ Mais";
+     `ordemDoInicio`   a ordem desses itens. Rodada 16: aqui se arrasta,
+                       DIFERENTE do ClickUp, a pedido dela;
      `ordemDasSecoes`  a ordem das seções do Início, que se arrasta no
                        próprio menu ou em Personalizar > Seções;
-     `secoesOcultas`   só Favoritos se oculta, como "Chats com IA" lá;
+     `secoesOcultas`   rodada 16: qualquer seção se oculta, nativa também;
      `pessoais`        as seções que a pessoa criou, com atalhos para telas,
                        menus e categorias que já existem;
      `personalizou`    abriu Personalizar uma vez: o botão sai do pé do menu
@@ -85,27 +86,33 @@ export interface PrefsDaTrilha {
   fixadas: string[]
   rotulos: boolean
   inicioOcultos: string[]
+  ordemDoInicio: string[]
   ordemDasSecoes: string[]
   secoesOcultas: string[]
   pessoais: SecaoPessoal[]
   personalizou: boolean
 }
 
-/** Quantos ícones cabem na trilha, Início incluído, a 900 px de altura. */
-export const LIMITE_DA_TRILHA = 6
+/**
+ * Quantos ícones cabem na trilha, Início incluído, a 900 px de altura. Eram
+ * seis na rodada 15; Integrações (rodada 16) pediu mais espaço, e a base da
+ * trilha ainda sobra.
+ */
+export const LIMITE_DA_TRILHA = 8
 
-/** O Início não se oculta, e o Inbox também não: são as portas do dia. */
-export const INICIO_TRAVADOS = ['n-inicio', 'n-inbox']
-
-/** Só Favoritos se oculta. É pessoal, e nasce vazio para quem nunca favoritou. */
-export const SECOES_OCULTAVEIS = ['favoritos']
+/*
+ * Rodada 16: "deve ser possível o user ocultar nativos também, se quiser".
+ * Nada no Início fica travado, e qualquer seção se oculta. A única âncora
+ * que sobra é o ícone Início na trilha: sem ele não existe este menu.
+ */
 
 function prefsIniciais(): PrefsDaTrilha {
   return {
     // Conhecimento e Comparações começam em "Mais", para a trilha mostrar o mecanismo.
-    fixadas: ['dados', 'sec:s-analise', 'sec:s-auditoria', 'sec:s-comercial', 'config'],
+    fixadas: ['dados', 'sec:s-analise', 'sec:s-auditoria', 'sec:s-comercial', 'sec:s-integracoes', 'config'],
     rotulos: true,
     inicioOcultos: ['n-documentos', 'todas-categorias'],
+    ordemDoInicio: [],
     ordemDasSecoes: ['p-rotina', 'favoritos', 'categorias'],
     secoesOcultas: [],
     /*

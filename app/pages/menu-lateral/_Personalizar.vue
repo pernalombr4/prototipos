@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { INICIO_TRAVADOS, SECOES_OCULTAVEIS } from './estado'
 import { useTrilha, type AbaDePersonalizar } from './trilha'
 import type { TextosDaTela } from './textos'
 
@@ -9,10 +8,12 @@ import type { TextosDaTela } from './textos'
  *
  *   Navegação  o que aparece na trilha (Início travado) e a aparência dela,
  *              "Somente ícones" ou "Ícones e rótulos";
- *   Início     quais itens nativos aparecem no menu Início. A ordem é fixa;
- *              o que sai daqui vai para "⋯ Mais";
- *   Seções     a ordem das seções, arrastando. Só Favoritos se oculta, e
- *              "Criar seção" abre a janela de criar;
+ *   Início     quais itens nativos aparecem no menu Início. O que sai daqui
+ *              vai para "⋯ Mais";
+ *   Seções     a ordem das seções, arrastando, e "Criar seção";
+ *
+ * Rodada 16, onde sai do ClickUp a pedido dela: Navegação e Início também se
+ * ARRASTAM, e tudo se oculta (seção nativa e item nativo do Início também).
  *   Temas      claro, escuro ou automático, e a cor de destaque.
  *
  * Tudo vale na hora, como lá: não há botão de salvar nesta janela.
@@ -73,8 +74,19 @@ function noInicio(id: string) {
 const ocultas = computed(() => props.secoes.filter(s => trilha.prefs.value.secoesOcultas.includes(s.id)))
 const visiveis = computed(() => props.secoes.filter(s => !trilha.prefs.value.secoesOcultas.includes(s.id)))
 
+/*
+ * UM ARRASTE PARA AS TRÊS LISTAS. Cada aba diz como reordena; o gesto, a
+ * marca e o atalho de teclado (Alt com as setas) são os mesmos.
+ */
+type Lista = 'navegacao' | 'inicio' | 'secoes'
 const arrastando = ref<string | null>(null)
 const mira = ref<{ id: string, posicao: 'antes' | 'depois' } | null>(null)
+
+function reordenarEm(lista: Lista, quem: string, alvo: string, posicao: 'antes' | 'depois') {
+  if (lista === 'navegacao') trilha.moverNaTrilha(quem, alvo, posicao, true)
+  else if (lista === 'inicio') trilha.moverNoInicio(quem, alvo, posicao, props.itensDoInicio.map(i => i.id), true)
+  else trilha.reordenarSecoesJa(quem, alvo, posicao, props.secoes.map(s => s.id))
+}
 
 function passar(e: DragEvent, id: string) {
   if (!arrastando.value || arrastando.value === id) return
@@ -83,24 +95,39 @@ function passar(e: DragEvent, id: string) {
   mira.value = { id, posicao: e.clientY - r.top < r.height / 2 ? 'antes' : 'depois' }
 }
 
-function soltar(e: DragEvent) {
+function soltar(e: DragEvent, lista: Lista) {
   e.preventDefault()
-  if (arrastando.value && mira.value) {
-    trilha.reordenarSecoesJa(arrastando.value, mira.value.id, mira.value.posicao, props.secoes.map(s => s.id))
-  }
+  if (arrastando.value && mira.value) reordenarEm(lista, arrastando.value, mira.value.id, mira.value.posicao)
   arrastando.value = null
   mira.value = null
 }
 
-/** O teclado faz o mesmo que o arraste: Alt com as setas. */
-function teclar(e: KeyboardEvent, id: string) {
+function teclar(e: KeyboardEvent, id: string, lista: Lista, ids: string[]) {
   if (!e.altKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return
   e.preventDefault()
-  const lista = visiveis.value.map(s => s.id)
-  const i = lista.indexOf(id)
-  const vizinho = lista[i + (e.key === 'ArrowUp' ? -1 : 1)]
-  if (vizinho) trilha.reordenarSecoesJa(id, vizinho, e.key === 'ArrowUp' ? 'antes' : 'depois', props.secoes.map(s => s.id))
+  const vizinho = ids[ids.indexOf(id) + (e.key === 'ArrowUp' ? -1 : 1)]
+  if (vizinho) reordenarEm(lista, id, vizinho, e.key === 'ArrowUp' ? 'antes' : 'depois')
 }
+
+function classeDaMira(id: string) {
+  return [
+    arrastando.value === id ? 'opacity-40' : '',
+    mira.value?.id === id && mira.value.posicao === 'antes' ? 'before:absolute before:inset-x-1 before:-top-1 before:h-0.5 before:rounded-full before:bg-primary' : '',
+    mira.value?.id === id && mira.value.posicao === 'depois' ? 'after:absolute after:inset-x-1 after:-bottom-1 after:h-0.5 after:rounded-full after:bg-primary' : '',
+  ]
+}
+
+/** Navegação na ordem da trilha: as fixadas primeiro, depois as que estão em "Mais". */
+const areasNaOrdem = computed(() => {
+  const fixadas = trilha.prefs.value.fixadas.filter(id => idsDasAreas.value.includes(id))
+  const resto = idsDasAreas.value.filter(id => id !== 'inicio' && !fixadas.includes(id))
+  return ['inicio', ...fixadas, ...resto].map(id => props.areas.find(a => a.id === id)!)
+})
+
+const inicioNaOrdem = computed(() => {
+  const ordem = trilha.ordemDoInicio(props.itensDoInicio.map(i => i.id))
+  return ordem.map(id => props.itensDoInicio.find(i => i.id === id)!)
+})
 
 /* ------------------------------ Temas ------------------------------ */
 
@@ -134,8 +161,25 @@ function escolherCor(c: string) {
 
       <!-- ==================== Navegação ==================== -->
       <div v-if="aba === 'navegacao'" class="animate-[entrada_0.2s_ease-out_both] space-y-4">
-        <ul class="space-y-2">
-          <li v-for="a in props.areas" :key="a.id">
+        <ul class="space-y-1" @dragover.prevent @drop="e => soltar(e, 'navegacao')">
+          <li
+            v-for="a in areasNaOrdem"
+            :key="a.id"
+            class="group relative flex items-start gap-1.5 rounded-md px-1 py-1 focus-visible:outline-2 focus-visible:outline-primary"
+            :class="classeDaMira(a.id)"
+            :draggable="a.id !== 'inicio' && naTrilha(a.id) ? 'true' : undefined"
+            :tabindex="a.id !== 'inicio' && naTrilha(a.id) ? 0 : undefined"
+            @dragstart="arrastando = a.id"
+            @dragover="e => passar(e, a.id)"
+            @dragend="arrastando = null; mira = null"
+            @keydown="e => teclar(e, a.id, 'navegacao', areasNaOrdem.filter(x => naTrilha(x.id)).map(x => x.id))"
+          >
+            <UIcon
+              name="i-lucide-grip-vertical"
+              class="mt-0.5 size-4 shrink-0 text-toned"
+              :class="a.id !== 'inicio' && naTrilha(a.id) ? 'cursor-grab' : 'opacity-0'"
+              aria-hidden="true"
+            />
             <UCheckbox
               :model-value="naTrilha(a.id)"
               :disabled="a.id === 'inicio'"
@@ -183,12 +227,27 @@ function escolherCor(c: string) {
       </div>
 
       <!-- ==================== Início ==================== -->
-      <ul v-else-if="aba === 'inicio'" class="animate-[entrada_0.2s_ease-out_both] space-y-2">
-        <li v-for="i in props.itensDoInicio" :key="i.id">
+      <ul
+        v-else-if="aba === 'inicio'"
+        class="animate-[entrada_0.2s_ease-out_both] space-y-1"
+        @dragover.prevent
+        @drop="e => soltar(e, 'inicio')"
+      >
+        <li
+          v-for="i in inicioNaOrdem"
+          :key="i.id"
+          class="group relative flex items-center gap-1.5 rounded-md px-1 py-1 focus-visible:outline-2 focus-visible:outline-primary"
+          :class="classeDaMira(i.id)"
+          draggable="true"
+          tabindex="0"
+          @dragstart="arrastando = i.id"
+          @dragover="e => passar(e, i.id)"
+          @dragend="arrastando = null; mira = null"
+          @keydown="e => teclar(e, i.id, 'inicio', inicioNaOrdem.map(x => x.id))"
+        >
+          <UIcon name="i-lucide-grip-vertical" class="size-4 shrink-0 cursor-grab text-toned" aria-hidden="true" />
           <UCheckbox
             :model-value="noInicio(i.id)"
-            :disabled="INICIO_TRAVADOS.includes(i.id)"
-            :description="INICIO_TRAVADOS.includes(i.id) ? props.t.inicioTravado : undefined"
             @update:model-value="v => trilha.mostrarNoInicio(i.id, v === true)"
           >
             <template #label>
@@ -203,27 +262,23 @@ function escolherCor(c: string) {
 
       <!-- ==================== Seções ==================== -->
       <div v-else-if="aba === 'secoes'" class="animate-[entrada_0.2s_ease-out_both]">
-        <ul class="space-y-1.5" @dragover.prevent @drop="soltar">
+        <ul class="space-y-1.5" @dragover.prevent @drop="e => soltar(e, 'secoes')">
           <li
             v-for="s in visiveis"
             :key="s.id"
             class="group relative flex items-center gap-2 rounded-lg border border-default bg-default px-2.5 py-2 text-sm text-default transition-opacity focus-visible:outline-2 focus-visible:outline-primary"
-            :class="[
-              arrastando === s.id ? 'opacity-40' : '',
-              mira?.id === s.id && mira.posicao === 'antes' ? 'before:absolute before:inset-x-1 before:-top-1 before:h-0.5 before:rounded-full before:bg-primary' : '',
-              mira?.id === s.id && mira.posicao === 'depois' ? 'after:absolute after:inset-x-1 after:-bottom-1 after:h-0.5 after:rounded-full after:bg-primary' : '',
-            ]"
+            :class="classeDaMira(s.id)"
             draggable="true"
             tabindex="0"
             @dragstart="arrastando = s.id"
             @dragover="e => passar(e, s.id)"
             @dragend="arrastando = null; mira = null"
-            @keydown="e => teclar(e, s.id)"
+            @keydown="e => teclar(e, s.id, 'secoes', visiveis.map(x => x.id))"
           >
             <UIcon name="i-lucide-grip-vertical" class="size-4 shrink-0 cursor-grab text-toned" aria-hidden="true" />
             <UIcon :name="s.icone" class="size-4 shrink-0 text-toned" />
             <span class="min-w-0 flex-1 truncate">{{ s.rotulo }}</span>
-            <UTooltip v-if="SECOES_OCULTAVEIS.includes(s.id)" :text="props.t.ocultarSecao">
+            <UTooltip :text="props.t.ocultarSecao">
               <UButton
                 icon="i-lucide-eye-off"
                 size="xs"

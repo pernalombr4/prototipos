@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { rotuloDoNo as rotuloComum } from './rotulos'
 import LinhaDeMenu from './_LinhaDeMenu.vue'
 import SecaoDeMenu from './_SecaoDeMenu.vue'
 import MenuDeAjuda from './_MenuDeAjuda.vue'
@@ -74,22 +75,8 @@ const toast = useToast()
 
 /** Rótulo de um nó: nativo vem do dicionário, do workspace vem do próprio nó. */
 function rotuloDe(no: NoDoMenu) {
-  if (no.rotulo) return no.rotulo
-  const mapa: Record<string, string> = {
-    inicio: props.t.inicio,
-    inbox: props.t.inbox,
-    chatIa: props.t.chatIa,
-    tarefas: props.t.tarefas,
-    agenda: props.t.agenda,
-    spaceflows: props.t.spaceflows,
-    documentos: props.t.documentos,
-    categorias: props.t.categorias,
-    // Auditoria reaproveita os rótulos que já existiam nas configurações.
-    auditoria: props.t.grupos.auditoria,
-    logsAuditoria: props.t.itens['logs-auditoria'],
-    logsRequisicao: props.t.itens['logs-requisicao'],
-  }
-  return mapa[no.chave ?? ''] ?? (no.chave ?? '')
+  // Rodada 16: o mapa de nomes mora no rotulos.ts, um só para todas as peças.
+  return rotuloComum(no, props.t)
 }
 
 /**

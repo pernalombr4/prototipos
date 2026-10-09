@@ -141,6 +141,30 @@ export interface TextosDaTela {
   nadaParaAdicionar: string
   criarAlgo: string
 
+  // criar menu e categoria pelo "+" (rodada 16)
+  criarMenuRotulo: string
+  criarCategoriaRotulo: string
+  criarMenuTitulo: string
+  criarMenuPlaceholder: string
+  ondeFica: string
+  noInicio: string
+  naTrilhaRotulo: string
+  telasDoMenu: string
+  telasVazio: string
+  vincularTela: string
+  criarTelaNova: string
+  nomeDaTela: string
+  tipoDaTela: string
+  adicionarTela: string
+  removerTela: (nome: string) => string
+  criarMenuBotao: string
+  menuCriado: (nome: string) => string
+  telaNovaSelo: string
+  criarCategoriaTitulo: string
+  criarCategoriaPlaceholder: string
+  categoriaCriada: (nome: string) => string
+  buscarTelasExistentes: string
+
   // camada de todas as categorias
   todasTitulo: string
   todasDescricao: (n: number) => string
@@ -441,6 +465,29 @@ const ptBR: TextosDaTela = {
   nadaParaAdicionar: 'Tudo o que existe já está nesta seção.',
   criarAlgo: 'Criar',
 
+  criarMenuRotulo: 'Criar menu',
+  criarCategoriaRotulo: 'Criar categoria',
+  criarMenuTitulo: 'Criar menu',
+  criarMenuPlaceholder: 'Ex.: Atendimento, Compras, Contratos',
+  ondeFica: 'Onde ele fica',
+  noInicio: 'No Início',
+  naTrilhaRotulo: 'Na trilha',
+  telasDoMenu: 'Telas deste menu',
+  telasVazio: 'Vincule uma tela que já existe ou crie uma nova. Dá para fazer depois também.',
+  vincularTela: 'Vincular tela existente',
+  criarTelaNova: 'Criar tela nova',
+  nomeDaTela: 'Nome da tela',
+  tipoDaTela: 'Tipo de tela',
+  adicionarTela: 'Adicionar',
+  removerTela: nome => `Tirar ${nome}`,
+  criarMenuBotao: 'Criar menu',
+  menuCriado: nome => `${nome} foi criado. Salve para valer para o workspace.`,
+  telaNovaSelo: 'Nova',
+  criarCategoriaTitulo: 'Criar categoria',
+  criarCategoriaPlaceholder: 'Ex.: Fornecedores, Pedidos, Imóveis',
+  categoriaCriada: nome => `${nome} entrou em Categorias.`,
+  buscarTelasExistentes: 'Pesquisar telas...',
+
   todasTitulo: 'Todas as categorias',
   todasDescricao: n => `${n} categorias neste workspace. Fixe as que você usa para elas ficarem no menu.`,
   todasBusca: 'Buscar categoria',
@@ -489,6 +536,8 @@ const ptBR: TextosDaTela = {
     'enviados': 'E-mails enviados',
     'integracoes': 'Integrações',
     'credenciais': 'Credenciais',
+    'apps': 'Apps',
+    'webhooks': 'Webhooks',
     'agentes': 'Agentes de IA',
     'logs-auditoria': 'Logs de auditoria',
     'logs-requisicao': 'Logs de requisição',
@@ -782,6 +831,29 @@ const en: TextosDaTela = {
   nadaParaAdicionar: 'Everything is already in this section.',
   criarAlgo: 'Create',
 
+  criarMenuRotulo: 'Create menu',
+  criarCategoriaRotulo: 'Create category',
+  criarMenuTitulo: 'Create menu',
+  criarMenuPlaceholder: 'E.g. Support, Purchasing, Contracts',
+  ondeFica: 'Where it lives',
+  noInicio: 'In Home',
+  naTrilhaRotulo: 'On the rail',
+  telasDoMenu: 'Screens in this menu',
+  telasVazio: 'Link a screen that already exists or create a new one. You can also do it later.',
+  vincularTela: 'Link existing screen',
+  criarTelaNova: 'Create new screen',
+  nomeDaTela: 'Screen name',
+  tipoDaTela: 'Screen type',
+  adicionarTela: 'Add',
+  removerTela: nome => `Remove ${nome}`,
+  criarMenuBotao: 'Create menu',
+  menuCriado: nome => `${nome} was created. Save to apply it to the workspace.`,
+  telaNovaSelo: 'New',
+  criarCategoriaTitulo: 'Create category',
+  criarCategoriaPlaceholder: 'E.g. Suppliers, Orders, Properties',
+  categoriaCriada: nome => `${nome} is now in Categories.`,
+  buscarTelasExistentes: 'Search screens...',
+
   todasTitulo: 'All categories',
   todasDescricao: n => `${n} categories in this workspace. Pin the ones you use to keep them in the menu.`,
   todasBusca: 'Search a category',
@@ -830,6 +902,8 @@ const en: TextosDaTela = {
     'enviados': 'Sent emails',
     'integracoes': 'Integrations',
     'credenciais': 'Credentials',
+    'apps': 'Apps',
+    'webhooks': 'Webhooks',
     'agentes': 'AI agents',
     'logs-auditoria': 'Audit logs',
     'logs-requisicao': 'Request logs',
@@ -1123,6 +1197,29 @@ const es: TextosDaTela = {
   nadaParaAdicionar: 'Todo ya está en esta sección.',
   criarAlgo: 'Crear',
 
+  criarMenuRotulo: 'Crear menú',
+  criarCategoriaRotulo: 'Crear categoría',
+  criarMenuTitulo: 'Crear menú',
+  criarMenuPlaceholder: 'Ej.: Atención, Compras, Contratos',
+  ondeFica: 'Dónde queda',
+  noInicio: 'En Inicio',
+  naTrilhaRotulo: 'En el riel',
+  telasDoMenu: 'Pantallas de este menú',
+  telasVazio: 'Vincula una pantalla que ya existe o crea una nueva. También se puede hacer después.',
+  vincularTela: 'Vincular pantalla existente',
+  criarTelaNova: 'Crear pantalla nueva',
+  nomeDaTela: 'Nombre de la pantalla',
+  tipoDaTela: 'Tipo de pantalla',
+  adicionarTela: 'Agregar',
+  removerTela: nome => `Quitar ${nome}`,
+  criarMenuBotao: 'Crear menú',
+  menuCriado: nome => `${nome} fue creado. Guarda para aplicarlo al workspace.`,
+  telaNovaSelo: 'Nueva',
+  criarCategoriaTitulo: 'Crear categoría',
+  criarCategoriaPlaceholder: 'Ej.: Proveedores, Pedidos, Inmuebles',
+  categoriaCriada: nome => `${nome} quedó en Categorías.`,
+  buscarTelasExistentes: 'Buscar pantallas...',
+
   todasTitulo: 'Todas las categorías',
   todasDescricao: n => `${n} categorías en este workspace. Fija las que usas para que queden en el menú.`,
   todasBusca: 'Buscar categoría',
@@ -1171,6 +1268,8 @@ const es: TextosDaTela = {
     'enviados': 'Correos enviados',
     'integracoes': 'Integraciones',
     'credenciais': 'Credenciales',
+    'apps': 'Apps',
+    'webhooks': 'Webhooks',
     'agentes': 'Agentes de IA',
     'logs-auditoria': 'Registros de auditoría',
     'logs-requisicao': 'Registros de solicitud',
