@@ -12,8 +12,10 @@
  * - `categorias[id].campos`: `null` = todos os campos que a ação libera;
  *   um objeto = a lista escolhida campo a campo, por ação;
  * - `categorias[id].formularios[id]`: `null` segue a categoria;
- * - `categorias[id].alcance`: Ver, Atualizar e Excluir em "todos" os itens ou só
- *   nos "seus" (os que a pessoa criou). Ausente = todos.
+ * - `padraoItens` e `categorias[id].itens`: "Quais itens". Por ação (Ver,
+ *   Atualizar, Excluir), só se a pessoa for a criadora e/ou a responsável.
+ *   Na categoria, `null` segue o padrão; `campos` diz quais campos Pessoa
+ *   contam como responsável. No padrão vale qualquer campo Pessoa.
  *
  * Dependência: Atualizar e Excluir exigem Ver. Quem marca uma delas marca Ver,
  * e Ver fica travado enquanto elas estiverem marcadas.
@@ -22,11 +24,13 @@ import {
   type Acao,
   type AcaoDeAlcance,
   type AcaoDeCampo,
-  type Alcance,
   type CategoriaMock,
   type Cenario,
   type GrupoFixo,
+  type RegraDeItens,
   acoes,
+  acoesDeAlcance,
+  camposPessoa,
   acoesDeCampo,
   categoriasDoCenario,
   configuracoes,
@@ -40,11 +44,21 @@ export interface EstadoDaCategoria {
   proprio: MapaDeAcoes | null
   campos: Record<AcaoDeCampo, string[]> | null
   formularios: Record<number, MapaDeAcoes | null>
-  alcance: Partial<Record<AcaoDeAlcance, Alcance>>
+  itens: ItensDaCategoria | null
+}
+
+export type RegrasDeItens = Partial<Record<AcaoDeAlcance, RegraDeItens>>
+
+export interface ItensDaCategoria {
+  regras: RegrasDeItens
+  /** Os campos Pessoa que contam como responsável nesta categoria. */
+  campos: string[]
 }
 
 export interface EstadoDoCargo {
   padrao: MapaDeAcoes
+  /** "Quais itens" do padrão: vale para toda categoria que não tem a sua. */
+  padraoItens: RegrasDeItens
   categorias: Record<number, EstadoDaCategoria>
   /** Permissões fixas marcadas, chave `linha:acao`. */
   fixas: string[]
@@ -70,7 +84,8 @@ export function comDependencia(m: MapaDeAcoes): MapaDeAcoes {
 export function estadoInicial(lista: CategoriaMock[]): EstadoDoCargo {
   const categorias: Record<number, EstadoDaCategoria> = {}
   lista.forEach((c, i) => {
-    const e: EstadoDaCategoria = { proprio: null, campos: null, formularios: {}, alcance: {} }
+    const e: EstadoDaCategoria = { proprio: null, campos: null, formularios: {}, itens: null }
+    const responsavel = camposPessoa(c).find(f => f.label === 'Responsável') ?? camposPessoa(c)[0]
     c.formularios.forEach(f => (e.formularios[f.id] = null))
 
     // Analista de Contratos: cria e atualiza onde o assunto é contrato.
@@ -79,7 +94,12 @@ export function estadoInicial(lista: CategoriaMock[]): EstadoDoCargo {
     // Reembolsos: cria e acompanha só os que ele mesmo abriu.
     if (/Reembolso/.test(c.name)) {
       e.proprio = { criar: true, ver: true, atualizar: true, excluir: false }
-      e.alcance = { ver: 'seus', atualizar: 'seus' }
+      e.itens = { regras: { ver: { criador: true, responsavel: false }, atualizar: { criador: true, responsavel: false } }, campos: responsavel ? [responsavel.name] : [] }
+    }
+    // Chamados de TI: vê os que abriu e os que estão com ele.
+    if (/Chamados de TI/.test(c.name)) {
+      e.proprio = { criar: true, ver: true, atualizar: false, excluir: false }
+      e.itens = { regras: { ver: { criador: true, responsavel: true } }, campos: responsavel ? [responsavel.name] : [] }
     }
     // Folha de pagamento e desligamento: não vê.
     if (/Admiss|Desligamento|Avalia/.test(c.name))
@@ -98,6 +118,7 @@ export function estadoInicial(lista: CategoriaMock[]): EstadoDoCargo {
   })
   return {
     padrao: { criar: false, ver: true, atualizar: false, excluir: false },
+    padraoItens: {},
     categorias,
     fixas: [...fixasIniciais],
   }
@@ -105,6 +126,58 @@ export function estadoInicial(lista: CategoriaMock[]): EstadoDoCargo {
 
 export function clonar<T>(x: T): T {
   return JSON.parse(JSON.stringify(x))
+}
+
+/* ------------------------------------------------------------------ *
+ * Quais itens
+ * ------------------------------------------------------------------ */
+
+/** As regras que valem na categoria: as dela ou, se não tiver, as do padrão. */
+export function itensDaCategoria(e: EstadoDoCargo, id: number): RegrasDeItens {
+  return e.categorias[id]?.itens?.regras ?? e.padraoItens
+}
+
+export function temRegra(r?: RegraDeItens) {
+  return !!r && (r.criador || r.responsavel)
+}
+
+/** O campo Pessoa que conta como responsável quando a categoria cria a regra dela. */
+export function camposPadraoDeResponsavel(c: CategoriaMock) {
+  const p = camposPessoa(c)
+  const r = p.find(f => f.label === 'Responsável') ?? p[0]
+  return r ? [r.name] : []
+}
+
+/**
+ * Marca ou desmarca uma regra (criador ou responsável) numa ação.
+ * `c` nulo = o padrão. Na categoria que segue o padrão, a primeira mudança
+ * copia o padrão e cria a regra dela.
+ */
+export function definirRegra(e: EstadoDoCargo, c: CategoriaMock | null, acao: AcaoDeAlcance, tipo: keyof RegraDeItens, valor: boolean) {
+  const limpar = (r: RegrasDeItens) => {
+    const saida: RegrasDeItens = {}
+    for (const a of acoesDeAlcance) {
+      if (temRegra(r[a]))
+        saida[a] = r[a]
+    }
+    return saida
+  }
+  if (!c) {
+    const atual = e.padraoItens[acao] ?? { criador: false, responsavel: false }
+    e.padraoItens = limpar({ ...e.padraoItens, [acao]: { ...atual, [tipo]: valor } })
+    return
+  }
+  const ec = e.categorias[c.id]!
+  const base = ec.itens ?? { regras: clonar(e.padraoItens), campos: camposPadraoDeResponsavel(c) }
+  const atual = base.regras[acao] ?? { criador: false, responsavel: false }
+  ec.itens = { ...base, regras: limpar({ ...base.regras, [acao]: { ...atual, [tipo]: valor } }) }
+}
+
+/** Alguma ação liberada nesta categoria vale só para parte dos itens? */
+export function temRegraDeItens(e: EstadoDoCargo, c: CategoriaMock) {
+  const a = acoesDaCategoria(e, c.id)
+  const r = itensDaCategoria(e, c.id)
+  return acoesDeAlcance.some(x => a[x] && temRegra(r[x]))
 }
 
 /* ------------------------------------------------------------------ *
@@ -219,6 +292,13 @@ export function mudancas(
     partes.push({ chave: 'segueOPadrao', valor: lista.filter(c => !atual.categorias[c.id]?.proprio).length })
     saida.push({ onde: '__padrao__', partes })
   }
+  if (JSON.stringify(salvo.padraoItens) !== JSON.stringify(atual.padraoItens)) {
+    const ja = saida.find(m => m.onde === '__padrao__')
+    if (ja)
+      ja.partes.push({ chave: 'alcance' })
+    else
+      saida.push({ onde: '__padrao__', partes: [{ chave: 'alcance' }] })
+  }
 
   for (const c of lista) {
     const a = salvo.categorias[c.id]
@@ -237,7 +317,7 @@ export function mudancas(
       partes.push({ chave: 'tirou', valor: d.tirou.join(',') })
     if (JSON.stringify(a.campos) !== JSON.stringify(b.campos))
       partes.push(b.campos ? { chave: 'camposEscolhidos', valor: resumoDeCampos(atual, c)?.liberados ?? 0 } : { chave: 'todosOsCampos' })
-    if (JSON.stringify(a.alcance) !== JSON.stringify(b.alcance))
+    if (JSON.stringify(a.itens) !== JSON.stringify(b.itens))
       partes.push({ chave: 'alcance' })
     const fa = c.formularios.filter(f => JSON.stringify(a.formularios[f.id]) !== JSON.stringify(b.formularios[f.id])).length
     if (fa)

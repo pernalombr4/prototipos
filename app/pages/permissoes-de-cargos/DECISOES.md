@@ -40,7 +40,7 @@ diz o que muda, em palavras, e quantas pessoas sentem.
 | Filtro "só alteradas" ligado ao abrir | Twenty | **Descartado como padrão.** Abre em "Todas" para a tela não esconder categoria de quem chega; "Regra própria" fica a 1 clique, com contagem |
 | Selecionar linhas e aplicar | Salesforce | **Adiado.** A caixa de coluna sobre a lista filtrada cobre o caso ("Filial Sul" + Excluir = 40 categorias) |
 | Aba Permissões dentro da categoria | Attio, Notion, Airtable | **Adiado** para outra rodada: é a segunda porta da mesma regra |
-| Escopo "só os meus itens" (`is_owner`) | HubSpot, Monday, Pipefy, ClickUp | Rodada 3: sublinha "Só se for o criador", uma caixa por ação (Ver, Atualizar, Excluir). Pede back-end (abaixo) |
+| Quais itens: criador (`is_owner`) e responsável | ClickUp ("Only if created"), Pipefy e monday ("atribuído a mim"), HubSpot | Rodada 4: coluna "Quais itens" em toda linha, inclusive no padrão; caixas por ação; campo Pessoa escolhido por categoria. Pede back-end (abaixo) |
 | Parcial na célula | Directus, Strapi | Rodada 2: traço na caixa e dica "Ver em 76 de 80 campos"; o clique abre Ajustar › Campos |
 | Ícone por ação e o que ela libera | Directus, Twenty, ClickUp, Jira | Rodada 2: ícone no cabeçalho, dica por ação e 1 linha de descrição por área fixa |
 | Filhos na mesma grade | Appsmith, Retool | Rodada 2: a seta da categoria abre Campos, Quais itens e cada formulário na própria tabela |
@@ -64,9 +64,11 @@ diz o que muda, em palavras, e quantas pessoas sentem.
    slot `#header-{key}` no `EnTable`.
 5. **Volume.** Acima de algumas centenas de categorias, a tabela precisa de virtualização (o `UTable` e o
    `EnTable` já têm a prop `virtualize`).
-6. **Só se for o criador (`is_owner`).** O develop grava `rules: []` em toda permissão. "Só os itens que a pessoa criou"
+6. **Quais itens (`is_owner` e responsável).** O develop grava `rules: []` em toda permissão. "Só os itens que a pessoa criou"
    precisa de uma regra ali (por exemplo, criador = pessoa logada) e de o back-end aplicá-la na listagem,
-   na edição e na exclusão.
+   na edição e na exclusão. O responsável é outra regra: a pessoa logada está em um dos campos Pessoa
+   escolhidos (na categoria) ou em qualquer campo Pessoa (no padrão). As 2 juntas valem com OU. O padrão
+   também precisa de regra coringa, como no item 1.
 7. **Quem acessa.** A aba lista o que cada cargo faz numa categoria: pede uma rota que devolva as
    permissões de todos os cargos para 1 categoria, ou a tela monta isso lendo `/ws/roles` inteiro.
 
@@ -161,4 +163,22 @@ salvar. Perde-se só a herança para o que for criado depois.
 - **Descartado:** uma coluna para cada "outra ação". Motivo: cada uma existe numa área só (Usar Chat da IA só em IA, Reenviar só em Enviados), então cada coluna nova teria 1 caixa e 23 linhas vazias, e a tabela alargaria a cada função nova.
 - **Fronteira:** muda o cadeado, os títulos das colunas, as larguras, a coluna Outras ações e a sublinha de criador; não muda o resto.
 - **Maquete:** as 5 ações simuladas não existem no develop e não entram na contagem de Permissões Ativas.
+- **Ver:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/
+
+## Rodada 4 · 2026-10-08
+- **Pedido (literal):** "Criador no padrão: levar a caixa "Só se for o criador" também para a linha do padrão, para dizer de uma vez "em todas as categorias, vê só os itens que criou". Responsável, além do criador: uma regra como "é o responsável", que olha o campo Pessoa do item. É o que Pipefy e monday fazem com "atribuído a mim". sao 2 pontos que temos que ter mesmo. e ainda ta ruim pra achar essa permissão aí de só se for o criador." e "na badge do topo de "14 pessoas com este cargo" voce deve permitir clicar ali e ver quais sao, num popup"
+- **Mudou:**
+  - Coluna nova **Quais itens** em toda linha da tabela, inclusive na do padrão: "Todos", "Criador", "Responsável" ou "Criador ou responsável". Na categoria que herda, vem "· do padrão".
+  - O clique na coluna abre o editor: linhas = Só se for o criador e Só se for o responsável; colunas = Ver, Atualizar e Excluir; caixas.
+  - Criador e responsável no padrão: valem para toda categoria sem regra de itens própria. No padrão, conta qualquer campo Pessoa.
+  - Responsável na categoria: escolhe quais campos Pessoa contam (vem marcado o campo "Responsável"). Categoria sem campo Pessoa só aceita a regra de criador.
+  - Herança: a categoria segue o padrão até alguém mudar a regra dela; "Voltar ao padrão" desfaz.
+  - Filtro novo **Só alguns itens**, com contagem.
+  - Aba **Quais itens** no Ajustar, com o mesmo editor.
+  - Sublinhas da categoria aberta: "Só se for o criador" e "Só se for o responsável" (com os campos Pessoa que contam).
+  - Ícone na caixa da ação com regra: pessoa (criador), pessoa com visto (responsável), 2 pessoas (os 2), com dica.
+  - Mock: Reembolsos com criador em Ver e Atualizar; Chamados de TI com criador ou responsável em Ver.
+  - O selo **14 pessoas com este cargo** abre uma janela com as 14 pessoas: nome, e-mail, licença e situação, com busca e "Abrir Gestão de Membros".
+- **Fronteira:** muda a tabela de categorias (coluna, filtro, sublinhas), o Ajustar e o selo do topo; não muda a casca, as abas, o aviso de pendências e o lugar do Salvar.
+- **Maquete:** as regras não filtram item nenhum, só gravam a escolha; "Abrir Gestão de Membros" mostra um aviso; recarregar volta ao começo.
 - **Ver:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/

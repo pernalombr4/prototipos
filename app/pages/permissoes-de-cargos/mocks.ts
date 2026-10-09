@@ -10,7 +10,7 @@
  *
  * Os valores são inventados. Nenhum nome de cliente real.
  */
-import type { Field, ItemType, Role } from '@be-enlighten/enspace-sdk-schemas'
+import type { Field, ItemType, Member, Role } from '@be-enlighten/enspace-sdk-schemas'
 
 /* ------------------------------------------------------------------ *
  * As 4 ações do modelo CRUD, como a árvore do develop chama.
@@ -21,12 +21,23 @@ export const acoes: Acao[] = ['criar', 'ver', 'atualizar', 'excluir']
 
 
 /**
- * Ações que podem valer só para os itens que a pessoa criou ("Os seus").
+ * "Quais itens": ações que podem valer só para parte dos itens.
+ *
+ * - criador (`is_owner`): a pessoa criou o item;
+ * - responsável: a pessoa está num campo Pessoa do item (o "atribuído a mim"
+ *   de Pipefy e monday). Na categoria, escolhe-se quais campos Pessoa contam;
+ *   no padrão, vale qualquer campo Pessoa.
+ *
+ * As 2 marcadas valem com OU: criador ou responsável. Nada marcado = todos.
+ * Criar fica de fora: quem cria é sempre o criador.
  * Proposta: no develop o campo `rules` existe, mas a tela não grava nada nele.
  */
 export type AcaoDeAlcance = 'ver' | 'atualizar' | 'excluir'
 export const acoesDeAlcance: AcaoDeAlcance[] = ['ver', 'atualizar', 'excluir']
-export type Alcance = 'todos' | 'seus'
+export interface RegraDeItens {
+  criador: boolean
+  responsavel: boolean
+}
 
 /** As ações que carregam lista de campos no develop. Excluir não carrega. */
 export type AcaoDeCampo = 'criar' | 'ver' | 'atualizar'
@@ -75,6 +86,45 @@ export const cargo: Pick<Role, 'id' | 'name' | 'icon' | 'status'> & {
 }
 
 export const workspace = { nome: 'Aurora Serviços', slug: 'aurora-servicos' }
+
+/**
+ * As 14 pessoas com o cargo, tipadas pelo `Member` do SDK (`/ws/members`).
+ * Nomes e e-mails inventados, no domínio reservado `.example`.
+ */
+export type MembroDoCargo = Pick<Member, 'id' | 'status' | 'type' | 'email' | 'role'> & {
+  meta: { fname: string, lname: string }
+}
+
+const nomes: [string, string, Member['type'], Member['status']][] = [
+  ['Beatriz', 'Andrade', 'full', 'active'],
+  ['Caio', 'Moreira', 'standard', 'active'],
+  ['Daniela', 'Fontes', 'standard', 'active'],
+  ['Eduardo', 'Rezende', 'standard', 'active'],
+  ['Fernanda', 'Lacerda', 'standard', 'active'],
+  ['Gustavo', 'Paiva', 'full', 'active'],
+  ['Helena', 'Queiroz', 'standard', 'active'],
+  ['Igor', 'Tavares', 'standard', 'active'],
+  ['Juliana', 'Barreto', 'standard', 'active'],
+  ['Leonardo', 'Siqueira', 'standard', 'inactive'],
+  ['Marina', 'Coutinho', 'standard', 'active'],
+  ['Natália', 'Vasconcelos de Albuquerque Prado', 'standard', 'active'],
+  ['Otávio', 'Brandão', 'viewer', 'active'],
+  ['Patrícia', 'Nogueira', 'standard', 'pending'],
+]
+
+export const membrosDoCargo: MembroDoCargo[] = nomes.map(([fname, lname, type, status], i) => ({
+  id: 500 + i,
+  status,
+  type,
+  role: 129,
+  email: `${fname.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()}.${lname.split(' ')[0]!.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()}@aurora.example`,
+  meta: { fname, lname },
+}))
+
+/** Os campos Pessoa de uma categoria: são os que podem definir o responsável. */
+export function camposPessoa(c: { campos: CampoMock[] }) {
+  return c.campos.filter(f => f.type === 'EnPerson')
+}
 
 /**
  * Os outros cargos do workspace, para "Quem acessa esta categoria".

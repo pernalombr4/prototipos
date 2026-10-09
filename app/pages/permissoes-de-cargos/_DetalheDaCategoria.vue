@@ -16,10 +16,11 @@
 import type { TableColumn } from '@nuxt/ui'
 import type { Textos } from './textos'
 import CaixaDePermissao from './_CaixaDePermissao.vue'
+import EditorDeItens from './_EditorDeItens.vue'
 import { type Acao, type AcaoDeCampo, type CategoriaMock, acessoDeOutroCargo, acoes, acoesDeCampo, cargo, outrosCargos } from './mocks'
 import { type EstadoDoCargo, acoesDaCategoria, acoesDoFormulario, comDependencia, temAcesso, verExigidoPor } from './estado'
 
-type Aba = 'campos' | 'formularios' | 'acesso'
+type Aba = 'campos' | 'formularios' | 'itens' | 'acesso'
 
 const props = defineProps<{
   t: Textos
@@ -199,6 +200,7 @@ const colunasDeCargo = computed<TableColumn<LinhaDeCargo>[]>(() => [
 const itensDeAba = computed(() => [
   { label: props.t.abaCampos, value: 'campos', icon: 'i-lucide-text-cursor-input', badge: props.categoria?.campos.length },
   { label: props.t.abaFormularios, value: 'formularios', icon: 'i-lucide-file-text', badge: props.categoria?.formularios.length },
+  { label: props.t.abaItens, value: 'itens', icon: 'i-lucide-user-round-check' },
   { label: props.t.abaQuemAcessa, value: 'acesso', icon: 'i-lucide-users', badge: outrosCargos.length + 1 },
 ])
 </script>
@@ -245,6 +247,11 @@ const itensDeAba = computed(() => [
             </template>
           </UTable>
           <p v-if="esconderIguais && linhasDeCargo.length === 1" class="text-center text-sm text-muted">{{ t.semDiferentes }}</p>
+        </div>
+
+        <!-- QUAIS ITENS: criador e responsável -->
+        <div v-else-if="aba === 'itens'" class="animate-[entrada_.25s_ease-out_both]">
+          <EditorDeItens :t="t" :estado="estado" :categoria="categoria" :somente-leitura="somenteLeitura" />
         </div>
 
         <UAlert

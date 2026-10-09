@@ -3,8 +3,9 @@ import CascaDeAcesso from './_CascaDeAcesso.vue'
 import MatrizFixa from './_MatrizFixa.vue'
 import MatrizDeCategorias from './_MatrizDeCategorias.vue'
 import DetalheDaCategoria from './_DetalheDaCategoria.vue'
+import PessoasDoCargo from './_PessoasDoCargo.vue'
 
-import { type CategoriaMock, type Cenario, acoes, cargo, configuracoes, padrao, padraoComOutrasSimuladas, workspace } from './mocks'
+import { type CategoriaMock, type Cenario, acoes, cargo, configuracoes, padrao, membrosDoCargo, padraoComOutrasSimuladas, workspace } from './mocks'
 import {
   caixasNaArvoreDeHoje,
   categoriasDoCenario,
@@ -104,8 +105,8 @@ const itensDeAba = computed(() => [
 
 const categoriaAberta = ref<CategoriaMock | null>(null)
 const detalheAberto = ref(false)
-const abaDoDetalhe = ref<'campos' | 'formularios' | 'acesso'>('campos')
-function ajustar(c: CategoriaMock, aba: 'campos' | 'formularios' | 'acesso' = 'campos') {
+const abaDoDetalhe = ref<'campos' | 'formularios' | 'itens' | 'acesso'>('campos')
+function ajustar(c: CategoriaMock, aba: 'campos' | 'formularios' | 'itens' | 'acesso' = 'campos') {
   categoriaAberta.value = c
   abaDoDetalhe.value = aba
   detalheAberto.value = true
@@ -180,8 +181,8 @@ const fmt = (n: number) => n.toLocaleString('pt-BR')
           <UIcon :name="cargo.icon ?? 'i-lucide-id-card'" class="size-5" />
         </span>
         <h1 class="text-2xl font-semibold text-highlighted">{{ t.cargo }} {{ cargo.name }}</h1>
-        <!-- Rodada 2: quem sente a mudança, à vista (Strapi e Pipefy mostram no topo do papel). -->
-        <UBadge :label="t.pessoasNoCargo(cargo.pessoas)" icon="i-lucide-users" color="neutral" variant="subtle" class="ml-1" />
+        <!-- Rodada 4: o selo abre a lista de quem tem o cargo (Strapi e Pipefy mostram no topo do papel). -->
+        <PessoasDoCargo :t="t" :membros="membrosDoCargo" />
       </div>
 
       <div class="mt-6 grid grid-cols-2 gap-6">

@@ -18,15 +18,18 @@
 import type { TableColumn } from '@nuxt/ui'
 import type { Textos } from './textos'
 import CaixaDePermissao from './_CaixaDePermissao.vue'
+import QuaisItens from './_QuaisItens.vue'
 import {
   type Acao,
   type AcaoDeAlcance,
   type AcaoDeCampo,
   type CategoriaMock,
   type FormularioMock,
+  type RegraDeItens,
   acoes,
   acoesDeAlcance,
   acoesDeCampo,
+  camposPessoa,
 } from './mocks'
 import {
   type EstadoDoCargo,
@@ -34,9 +37,12 @@ import {
   acoesDaCategoria,
   acoesDoFormulario,
   comDependencia,
+  definirRegra,
   formulariosProprios,
+  itensDaCategoria,
   resumoDeCampos,
   temAcesso,
+  temRegraDeItens,
   verExigidoPor,
 } from './estado'
 
@@ -51,11 +57,11 @@ const props = defineProps<{
   formaDoPadrao: 'linha' | 'cartao'
 }>()
 
-const emit = defineEmits<{ ajustar: [categoria: CategoriaMock, aba?: 'campos' | 'formularios' | 'acesso'] }>()
+const emit = defineEmits<{ ajustar: [categoria: CategoriaMock, aba?: 'campos' | 'formularios' | 'itens' | 'acesso'] }>()
 
 const toast = useToast()
 
-type Filtro = 'todas' | 'proprias' | 'comAcesso' | 'semAcesso' | 'alteradas'
+type Filtro = 'todas' | 'proprias' | 'comAcesso' | 'semAcesso' | 'comItens' | 'alteradas'
 const busca = ref('')
 const filtro = ref<Filtro>('todas')
 const abertas = ref<number[]>([])
@@ -63,6 +69,7 @@ const abertas = ref<number[]>([])
 const alterada = (c: CategoriaMock) =>
   JSON.stringify(props.estado.categorias[c.id]) !== JSON.stringify(props.salvo.categorias[c.id])
   || (!props.estado.categorias[c.id]?.proprio && JSON.stringify(props.estado.padrao) !== JSON.stringify(props.salvo.padrao))
+  || (!props.estado.categorias[c.id]?.itens && JSON.stringify(props.estado.padraoItens) !== JSON.stringify(props.salvo.padraoItens))
 
 const propria = (c: CategoriaMock) => !!props.estado.categorias[c.id]?.proprio
 
@@ -75,6 +82,7 @@ const passaNoFiltro: Record<Filtro, (c: CategoriaMock) => boolean> = {
   proprias: propria,
   comAcesso: c => temAcesso(props.estado, c.id),
   semAcesso: c => !temAcesso(props.estado, c.id),
+  comItens: c => temRegraDeItens(props.estado, c),
   alteradas: alterada,
 }
 
@@ -97,7 +105,8 @@ type Linha =
   | { tipo: 'padrao', id: string }
   | { tipo: 'categoria', id: string, c: CategoriaMock }
   | { tipo: 'campos', id: string, c: CategoriaMock }
-  | { tipo: 'alcance', id: string, c: CategoriaMock }
+  | { tipo: 'criador', id: string, c: CategoriaMock }
+  | { tipo: 'responsavel', id: string, c: CategoriaMock }
   | { tipo: 'formulario', id: string, c: CategoriaMock, f: FormularioMock }
 
 const linhas = computed<Linha[]>(() => {
@@ -108,7 +117,8 @@ const linhas = computed<Linha[]>(() => {
     saida.push({ tipo: 'categoria', id: `c${c.id}`, c })
     if (abertas.value.includes(c.id)) {
       saida.push({ tipo: 'campos', id: `k${c.id}`, c })
-      saida.push({ tipo: 'alcance', id: `a${c.id}`, c })
+      saida.push({ tipo: 'criador', id: `o${c.id}`, c })
+      saida.push({ tipo: 'responsavel', id: `r${c.id}`, c })
       c.formularios.forEach(f => saida.push({ tipo: 'formulario', id: `f${f.id}`, c, f }))
     }
   }
@@ -226,9 +236,18 @@ function travadaPor(m: MapaDeAcoes, acao: Acao) {
   return quem ? props.t.exigidoPor(props.t.acoes[quem]) : null
 }
 
-function soOsSeus(c: CategoriaMock, acao: Acao) {
-  const al = props.estado.categorias[c.id]?.alcance?.[acao as AcaoDeAlcance]
-  return al === 'seus' && acoesDaCategoria(props.estado, c.id)[acao] ? props.t.soOsSeus(props.t.acoes[acao]) : null
+/** Ícone e dica da regra de itens na caixa (criador, responsável ou os 2). `c` nulo = padrão. */
+function regraDaCelula(c: CategoriaMock | null, acao: Acao) {
+  if (!(acoesDeAlcance as Acao[]).includes(acao))
+    return null
+  const ligada = c ? acoesDaCategoria(props.estado, c.id)[acao] : props.estado.padrao[acao]
+  const r = (c ? itensDaCategoria(props.estado, c.id) : props.estado.padraoItens)[acao as AcaoDeAlcance]
+  if (!ligada || !r || !(r.criador || r.responsavel))
+    return null
+  const nome = props.t.acoes[acao]
+  if (r.criador && r.responsavel)
+    return { icone: 'i-lucide-users', dica: props.t.soAmbos(nome) }
+  return r.criador ? { icone: 'i-lucide-user-round', dica: props.t.soOsSeus(nome) } : { icone: 'i-lucide-user-check', dica: props.t.soResponsavel(nome) }
 }
 
 /** Quantas categorias fogem do padrão nesta ação (o "Revoked for N" do Twenty). */
@@ -249,18 +268,15 @@ function valorDeCampos(c: CategoriaMock, acao: AcaoDeCampo): Valor {
   return parcial(c, acao) ? 'indeterminate' : true
 }
 
-function alcance(c: CategoriaMock, acao: AcaoDeAlcance) {
-  return props.estado.categorias[c.id]?.alcance?.[acao] ?? 'todos'
+function regraMarcada(c: CategoriaMock, acao: AcaoDeAlcance, tipo: keyof RegraDeItens) {
+  return !!itensDaCategoria(props.estado, c.id)[acao]?.[tipo]
 }
 
-function definirAlcance(c: CategoriaMock, acao: AcaoDeAlcance, valor: 'todos' | 'seus') {
-  const e = props.estado.categorias[c.id]!
-  const novo = { ...e.alcance }
-  if (valor === 'todos')
-    delete novo[acao]
-  else
-    novo[acao] = valor
-  e.alcance = novo
+function nomesDosResponsaveis(c: CategoriaMock) {
+  const campos = props.estado.categorias[c.id]?.itens?.campos
+  const pessoas = camposPessoa(c)
+  const escolhidos = campos ? pessoas.filter(f => campos.includes(f.name)) : pessoas
+  return escolhidos.map(f => f.label ?? f.name).join(', ')
 }
 
 function formSegue(c: CategoriaMock, f: FormularioMock) {
@@ -280,6 +296,7 @@ function definirForm(c: CategoriaMock, f: FormularioMock, a: Acao, valor: boolea
 const colunas = computed<TableColumn<Linha>[]>(() => [
   { id: 'nome', header: props.t.colunaCategoria, meta: { class: { th: 'w-auto', td: 'w-auto' } } },
   ...acoes.map(a => ({ id: a, header: props.t.acoes[a], meta: { class: { th: 'text-center w-20 px-0', td: 'text-center w-20 px-0' } } })),
+  { id: 'itens', header: props.t.colunaItens, meta: { class: { th: 'w-48', td: 'w-48' } } },
   { id: 'campos', header: props.t.colunaCampos, meta: { class: { th: 'w-28', td: 'w-28' } } },
   { id: 'formularios', header: props.t.colunaFormularios, meta: { class: { th: 'w-44', td: 'w-44' } } },
   { id: 'ajustar', header: '', meta: { class: { th: 'w-32 pl-0', td: 'w-32 pl-0 text-right' } } },
@@ -332,6 +349,10 @@ const meta = {
           </span>
           <UButton v-if="excecoes(a)" :label="rotuloExcecao(a)" size="xs" variant="link" color="neutral" class="-ml-1 px-1 text-xs" @click="filtro = 'proprias'" />
         </div>
+        <div class="flex flex-col items-start gap-0.5">
+          <span class="text-xs text-muted">{{ t.colunaItens }}</span>
+          <QuaisItens :t="t" :estado="estado" :categoria="null" :somente-leitura="somenteLeitura" />
+        </div>
       </div>
     </div>
 
@@ -359,7 +380,7 @@ const meta = {
       :get-row-id="(l: Linha) => l.id"
       sticky
       class="max-h-[62dvh] rounded-lg border border-default"
-      :ui="{ base: 'w-full min-w-[56rem] table-fixed', th: 'py-2 text-xs bg-default', td: 'py-2' }"
+      :ui="{ base: 'w-full min-w-[66rem] table-fixed', th: 'py-2 text-xs bg-default', td: 'py-2' }"
     >
       <!-- Cabeçalho: ícone e dica da ação; a caixa marca a coluna da lista filtrada. -->
       <template v-for="a in acoes" :key="a" #[`${a}-header`]>
@@ -437,12 +458,23 @@ const meta = {
           </span>
         </span>
 
-        <!-- Sublinha: quais itens -->
-        <span v-else-if="row.original.tipo === 'alcance'" class="flex min-w-0 items-center gap-2 pl-16">
-          <UIcon name="i-lucide-user-round-check" class="size-4 shrink-0 text-info" />
+        <!-- Sublinha: só se for o criador (is_owner) -->
+        <span v-else-if="row.original.tipo === 'criador'" class="flex min-w-0 items-center gap-2 pl-16">
+          <UIcon name="i-lucide-user-round" class="size-4 shrink-0 text-info" />
           <span class="min-w-0">
             <span class="block text-sm text-default">{{ t.subAlcance }}</span>
             <span class="block truncate text-xs text-muted">{{ t.subAlcanceDesc }}</span>
+          </span>
+        </span>
+
+        <!-- Sublinha: só se for o responsável -->
+        <span v-else-if="row.original.tipo === 'responsavel'" class="flex min-w-0 items-center gap-2 pl-16">
+          <UIcon name="i-lucide-user-check" class="size-4 shrink-0 text-info" />
+          <span class="min-w-0">
+            <span class="block text-sm text-default">{{ t.subResponsavel }}</span>
+            <span class="block truncate text-xs text-muted">
+              {{ camposPessoa(row.original.c).length ? t.subResponsavelDesc(nomesDosResponsaveis(row.original.c)) : t.semCampoPessoa }}
+            </span>
           </span>
         </span>
 
@@ -464,6 +496,7 @@ const meta = {
             :travada-por="travadaPor(estado.padrao, a)"
             :dica="t.padraoColunaDica"
             :desabilitada="somenteLeitura"
+            :regra="regraDaCelula(null, a)"
             @alterar="v => definirPadrao(a, v)"
           />
           <UTooltip v-if="excecoes(a)" :text="rotuloExcecao(a)">
@@ -489,7 +522,7 @@ const meta = {
           :dica="parcial(row.original.c, a) ? t.parcialDica(t.acoes[a], parcial(row.original.c, a)!.n, parcial(row.original.c, a)!.total) : ''"
           :desabilitada="somenteLeitura"
           :rotulo-desfazer="t.voltarAcao(t.acoes[a], row.original.c.name)"
-          :so-os-seus="soOsSeus(row.original.c, a)"
+          :regra="regraDaCelula(row.original.c, a)"
           @alterar="v => clicarCelula(row.original.c, a, v)"
           @desfazer="definirAcao(row.original.c, a, estado.padrao[a])"
         />
@@ -508,17 +541,19 @@ const meta = {
         </template>
 
         <!--
-          Só se for o criador (is_owner): uma caixa por ação. Marcada, a ação vale só
-          nos itens que a pessoa criou. Criar não tem: quem cria é sempre o criador.
+          Só se for o criador (is_owner) e só se for o responsável: uma caixa por
+          ação. Criar não tem: quem cria é sempre o criador.
         -->
-        <template v-else-if="row.original.tipo === 'alcance'">
+        <template v-else-if="row.original.tipo === 'criador' || row.original.tipo === 'responsavel'">
           <CaixaDePermissao
             v-if="(acoesDeAlcance as Acao[]).includes(a)"
-            :valor="alcance(row.original.c, a as AcaoDeAlcance) === 'seus'"
-            :rotulo="`${t.subAlcance}: ${t.acoes[a]} (${row.original.c.name})`"
-            :dica="acoesDaCategoria(estado, row.original.c.id)[a] ? t.soOsSeus(t.acoes[a]) : t.acaoBloqueada(t.acoes[a])"
-            :desabilitada="somenteLeitura || !acoesDaCategoria(estado, row.original.c.id)[a]"
-            @alterar="v => definirAlcance(row.original.c, a as AcaoDeAlcance, v ? 'seus' : 'todos')"
+            :valor="regraMarcada(row.original.c, a as AcaoDeAlcance, row.original.tipo)"
+            :rotulo="`${row.original.tipo === 'criador' ? t.subAlcance : t.subResponsavel}: ${t.acoes[a]} (${row.original.c.name})`"
+            herdada
+            :difere="!!estado.categorias[row.original.c.id]?.itens"
+            :dica="acoesDaCategoria(estado, row.original.c.id)[a] ? '' : t.acaoBloqueada(t.acoes[a])"
+            :desabilitada="somenteLeitura || !acoesDaCategoria(estado, row.original.c.id)[a] || (row.original.tipo === 'responsavel' && !camposPessoa(row.original.c).length)"
+            @alterar="v => definirRegra(estado, row.original.c, a as AcaoDeAlcance, row.original.tipo as keyof RegraDeItens, v)"
           />
           <span v-else class="text-dimmed" aria-hidden="true">·</span>
         </template>
@@ -533,6 +568,17 @@ const meta = {
           :travada-por="formSegue(row.original.c, row.original.f) ? null : travadaPor(acoesDoFormulario(estado, row.original.c.id, row.original.f.id), a)"
           :desabilitada="somenteLeitura || formSegue(row.original.c, row.original.f)"
           @alterar="v => definirForm(row.original.c, row.original.f, a, v)"
+        />
+      </template>
+
+      <!-- ───────── Quais itens (criador e responsável) ───────── -->
+      <template #itens-cell="{ row }">
+        <QuaisItens
+          v-if="row.original.tipo === 'padrao' || row.original.tipo === 'categoria'"
+          :t="t"
+          :estado="estado"
+          :categoria="row.original.tipo === 'categoria' ? row.original.c : null"
+          :somente-leitura="somenteLeitura"
         />
       </template>
 

@@ -7,8 +7,8 @@
  * - parcial, quando vale só para parte dos campos: traço (Directus, Strapi);
  * - travada, quando outra ação exige esta: marcada, desabilitada, com cadeado
  *   e o motivo na dica (Appsmith, ClickUp);
- * - "só os seus": ícone de pessoa à esquerda, quando a ação vale só para os
- *   itens que a pessoa criou (ClickUp, HubSpot).
+ * - regra de itens: ícone à esquerda quando a ação vale só para os itens que
+ *   a pessoa criou ou em que é responsável (ClickUp, HubSpot, Pipefy).
  *
  * Layout em linha com 3 vagas de largura fixa (pessoa, caixa, desfazer ou
  * cadeado), para a caixa ficar sempre no mesmo lugar da coluna.
@@ -23,7 +23,8 @@ const props = defineProps<{
   dica?: string
   desabilitada?: boolean
   rotuloDesfazer?: string
-  soOsSeus?: string | null
+  /** Ícone e dica da regra de itens (criador, responsável ou os 2). */
+  regra?: { icone: string, dica: string } | null
 }>()
 
 const emit = defineEmits<{ alterar: [valor: boolean], desfazer: [] }>()
@@ -34,10 +35,10 @@ const clara = computed(() => props.herdada && !props.difere && props.valor !== '
 
 <template>
   <span class="inline-flex items-center gap-0.5 align-middle">
-    <!-- Vaga 1: só os seus -->
+    <!-- Vaga 1: regra de itens -->
     <span class="flex w-4 justify-center">
-      <UTooltip v-if="soOsSeus" :text="soOsSeus">
-        <UIcon name="i-lucide-user-round" class="size-3.5 text-info" :aria-label="soOsSeus" role="img" />
+      <UTooltip v-if="regra" :text="regra.dica">
+        <UIcon :name="regra.icone" class="size-3.5 text-info" :aria-label="regra.dica" role="img" />
       </UTooltip>
     </span>
 

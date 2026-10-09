@@ -87,6 +87,34 @@ export interface Textos {
   alcanceTodos: string
   alcanceSeus: string
   soOsSeus: (acao: string) => string
+  soResponsavel: (acao: string) => string
+  soAmbos: (acao: string) => string
+  colunaItens: string
+  itensTodos: string
+  itensCriador: string
+  itensResponsavel: string
+  itensAmbos: string
+  itensDoPadrao: string
+  subResponsavel: string
+  subResponsavelDesc: (campos: string) => string
+  editorTitulo: (onde: string) => string
+  editorDesc: string
+  campoPessoa: string
+  campoPessoaPlaceholder: string
+  qualquerCampoPessoa: string
+  semCampoPessoa: string
+  seguindoPadraoItens: string
+  voltarPadraoItens: string
+  acaoDesligada: (acao: string) => string
+  abaItens: string
+  pessoasTitulo: (n: number) => string
+  pessoasDesc: string
+  buscarPessoa: string
+  nenhumaPessoa: string
+  verPessoas: string
+  abrirGestao: string
+  licencas: Record<string, string>
+  situacoes: Record<string, string>
   padraoColunaDica: string
   abaQuemAcessa: string
   quemAcessaDesc: string
@@ -107,7 +135,7 @@ export interface Textos {
   ajustar: string
   ajustarAria: (categoria: string) => string
   buscar: string
-  filtros: { todas: string, proprias: string, comAcesso: string, semAcesso: string, alteradas: string }
+  filtros: { todas: string, proprias: string, comAcesso: string, semAcesso: string, comItens: string, alteradas: string }
   mostrando: (n: number, total: number) => string
   marcarColuna: (acao: string, n: number) => string
   desmarcarColuna: (acao: string, n: number) => string
@@ -285,6 +313,34 @@ const pt: Textos = {
   alcanceTodos: 'Todos',
   alcanceSeus: 'Os seus',
   soOsSeus: a => `${a} só nos itens que a pessoa criou.`,
+  soResponsavel: a => `${a} só nos itens em que a pessoa é responsável.`,
+  soAmbos: a => `${a} só nos itens que a pessoa criou ou em que é responsável.`,
+  colunaItens: 'Quais itens',
+  itensTodos: 'Todos',
+  itensCriador: 'Criador',
+  itensResponsavel: 'Responsável',
+  itensAmbos: 'Criador ou responsável',
+  itensDoPadrao: 'do padrão',
+  subResponsavel: 'Só se for o responsável',
+  subResponsavelDesc: c => `Conta como responsável: ${c}.`,
+  editorTitulo: o => `Quais itens: ${o}`,
+  editorDesc: 'Sem nada marcado, a ação vale em todos os itens. Com as 2 regras, vale se a pessoa for a criadora ou a responsável.',
+  campoPessoa: 'Campos Pessoa que contam como responsável',
+  campoPessoaPlaceholder: 'Escolha os campos',
+  qualquerCampoPessoa: 'No padrão, conta qualquer campo Pessoa da categoria.',
+  semCampoPessoa: 'Esta categoria não tem campo Pessoa. Só a regra de criador vale aqui.',
+  seguindoPadraoItens: 'Segue o padrão. Mudar aqui cria a regra desta categoria.',
+  voltarPadraoItens: 'Voltar ao padrão',
+  acaoDesligada: a => `Libere ${a} para usar a regra.`,
+  abaItens: 'Quais itens',
+  pessoasTitulo: n => n === 1 ? '1 pessoa com este cargo' : `${n} pessoas com este cargo`,
+  pessoasDesc: 'Quem sente na hora qualquer mudança salva nesta tela.',
+  buscarPessoa: 'Buscar por nome ou e-mail',
+  nenhumaPessoa: 'Ninguém com esse nome ou e-mail.',
+  verPessoas: 'Ver as pessoas com este cargo',
+  abrirGestao: 'Abrir Gestão de Membros',
+  licencas: { owner: 'Proprietário', full: 'Full', standard: 'Standard', viewer: 'Visualizador' },
+  situacoes: { active: 'Ativo', inactive: 'Inativo', pending: 'Convite pendente', blocked: 'Bloqueado' },
   padraoColunaDica: 'Vale para toda categoria sem regra própria.',
   abaQuemAcessa: 'Quem acessa',
   quemAcessaDesc: 'O que cada cargo do workspace faz nesta categoria. Para mudar outro cargo, abra a tela dele.',
@@ -305,7 +361,7 @@ const pt: Textos = {
   ajustar: 'Ajustar',
   ajustarAria: c => `Ajustar campos e formulários de ${c}`,
   buscar: 'Buscar categoria',
-  filtros: { todas: 'Todas', proprias: 'Regra própria', comAcesso: 'Com acesso', semAcesso: 'Sem acesso', alteradas: 'Alteradas' },
+  filtros: { todas: 'Todas', proprias: 'Regra própria', comAcesso: 'Com acesso', semAcesso: 'Sem acesso', comItens: 'Só alguns itens', alteradas: 'Alteradas' },
   mostrando: (n, t) => n === t ? `${t} categorias` : `Mostrando ${n} de ${t} categorias`,
   marcarColuna: (a, n) => `Marcar ${a} nas ${n} categorias da lista`,
   desmarcarColuna: (a, n) => `Desmarcar ${a} nas ${n} categorias da lista`,
@@ -504,6 +560,34 @@ const en: Textos = {
   alcanceTodos: 'All',
   alcanceSeus: 'Own',
   soOsSeus: a => `${a} only on items the person created.`,
+  soResponsavel: a => `${a} only on items the person is responsible for.`,
+  soAmbos: a => `${a} only on items the person created or is responsible for.`,
+  colunaItens: 'Which items',
+  itensTodos: 'All',
+  itensCriador: 'Creator',
+  itensResponsavel: 'Responsible',
+  itensAmbos: 'Creator or responsible',
+  itensDoPadrao: 'from default',
+  subResponsavel: 'Only if responsible',
+  subResponsavelDesc: c => `Counts as responsible: ${c}.`,
+  editorTitulo: o => `Which items: ${o}`,
+  editorDesc: 'With nothing checked, the action applies to all items. With both rules, it applies if the person is the creator or the responsible.',
+  campoPessoa: 'Person fields that count as responsible',
+  campoPessoaPlaceholder: 'Choose the fields',
+  qualquerCampoPessoa: 'In the default, any Person field of the category counts.',
+  semCampoPessoa: 'This category has no Person field. Only the creator rule applies here.',
+  seguindoPadraoItens: 'Follows the default. Changing it here creates this category rule.',
+  voltarPadraoItens: 'Back to default',
+  acaoDesligada: a => `Allow ${a} to use the rule.`,
+  abaItens: 'Which items',
+  pessoasTitulo: n => n === 1 ? '1 person with this role' : `${n} people with this role`,
+  pessoasDesc: 'Who feels any change saved on this screen right away.',
+  buscarPessoa: 'Search by name or email',
+  nenhumaPessoa: 'Nobody with that name or email.',
+  verPessoas: 'See the people with this role',
+  abrirGestao: 'Open Member Management',
+  licencas: { owner: 'Owner', full: 'Full', standard: 'Standard', viewer: 'Viewer' },
+  situacoes: { active: 'Active', inactive: 'Inactive', pending: 'Pending invite', blocked: 'Blocked' },
   padraoColunaDica: 'Applies to every category without its own rule.',
   abaQuemAcessa: 'Who has access',
   quemAcessaDesc: 'What each workspace role does in this category. To change another role, open its screen.',
@@ -524,7 +608,7 @@ const en: Textos = {
   ajustar: 'Adjust',
   ajustarAria: c => `Adjust fields and forms of ${c}`,
   buscar: 'Search category',
-  filtros: { todas: 'All', proprias: 'Own rule', comAcesso: 'With access', semAcesso: 'No access', alteradas: 'Changed' },
+  filtros: { todas: 'All', proprias: 'Own rule', comAcesso: 'With access', semAcesso: 'No access', comItens: 'Some items only', alteradas: 'Changed' },
   mostrando: (n, t) => n === t ? `${t} categories` : `Showing ${n} of ${t} categories`,
   marcarColuna: (a, n) => `Check ${a} in the ${n} listed categories`,
   desmarcarColuna: (a, n) => `Uncheck ${a} in the ${n} listed categories`,
@@ -723,6 +807,34 @@ const es: Textos = {
   alcanceTodos: 'Todos',
   alcanceSeus: 'Los suyos',
   soOsSeus: a => `${a} solo en los ítems que la persona creó.`,
+  soResponsavel: a => `${a} solo en los ítems de los que la persona es responsable.`,
+  soAmbos: a => `${a} solo en los ítems que la persona creó o de los que es responsable.`,
+  colunaItens: 'Qué ítems',
+  itensTodos: 'Todos',
+  itensCriador: 'Creador',
+  itensResponsavel: 'Responsable',
+  itensAmbos: 'Creador o responsable',
+  itensDoPadrao: 'del predeterminado',
+  subResponsavel: 'Solo si es el responsable',
+  subResponsavelDesc: c => `Cuenta como responsable: ${c}.`,
+  editorTitulo: o => `Qué ítems: ${o}`,
+  editorDesc: 'Sin nada marcado, la acción vale en todos los ítems. Con las 2 reglas, vale si la persona es la creadora o la responsable.',
+  campoPessoa: 'Campos Persona que cuentan como responsable',
+  campoPessoaPlaceholder: 'Elija los campos',
+  qualquerCampoPessoa: 'En el predeterminado, cuenta cualquier campo Persona de la categoría.',
+  semCampoPessoa: 'Esta categoría no tiene campo Persona. Aquí solo vale la regla de creador.',
+  seguindoPadraoItens: 'Sigue el predeterminado. Cambiar aquí crea la regla de esta categoría.',
+  voltarPadraoItens: 'Volver al predeterminado',
+  acaoDesligada: a => `Permita ${a} para usar la regla.`,
+  abaItens: 'Qué ítems',
+  pessoasTitulo: n => n === 1 ? '1 persona con este cargo' : `${n} personas con este cargo`,
+  pessoasDesc: 'Quién siente de inmediato cualquier cambio guardado en esta pantalla.',
+  buscarPessoa: 'Buscar por nombre o correo',
+  nenhumaPessoa: 'Nadie con ese nombre o correo.',
+  verPessoas: 'Ver las personas con este cargo',
+  abrirGestao: 'Abrir Gestión de Miembros',
+  licencas: { owner: 'Propietario', full: 'Full', standard: 'Standard', viewer: 'Visualizador' },
+  situacoes: { active: 'Activo', inactive: 'Inactivo', pending: 'Invitación pendiente', blocked: 'Bloqueado' },
   padraoColunaDica: 'Vale para toda categoría sin regla propia.',
   abaQuemAcessa: 'Quién accede',
   quemAcessaDesc: 'Lo que cada cargo del workspace hace en esta categoría. Para cambiar otro cargo, abra su pantalla.',
@@ -743,7 +855,7 @@ const es: Textos = {
   ajustar: 'Ajustar',
   ajustarAria: c => `Ajustar campos y formularios de ${c}`,
   buscar: 'Buscar categoría',
-  filtros: { todas: 'Todas', proprias: 'Regla propia', comAcesso: 'Con acceso', semAcesso: 'Sin acceso', alteradas: 'Modificadas' },
+  filtros: { todas: 'Todas', proprias: 'Regla propia', comAcesso: 'Con acceso', semAcesso: 'Sin acceso', comItens: 'Solo algunos ítems', alteradas: 'Modificadas' },
   mostrando: (n, t) => n === t ? `${t} categorías` : `Mostrando ${n} de ${t} categorías`,
   marcarColuna: (a, n) => `Marcar ${a} en las ${n} categorías de la lista`,
   desmarcarColuna: (a, n) => `Desmarcar ${a} en las ${n} categorías de la lista`,
