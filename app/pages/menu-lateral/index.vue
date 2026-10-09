@@ -302,6 +302,16 @@ const editando = ref(false)
 const formInicial = ref<'secao' | 'item' | null>(null)
 const vendoHoje = ref(false)
 const buscando = ref(false)
+/*
+ * O termo da busca global (rodada 17). Ele chega preenchido quando a busca
+ * nasce de um filtro do menu sem resultado: "Buscar X no workspace" leva o X.
+ */
+const termoDaBusca = ref('')
+function abrirBusca(termo?: string) {
+  termoDaBusca.value = termo ?? ''
+  buscando.value = true
+}
+watch(buscando, (v) => { if (!v) termoDaBusca.value = '' })
 
 /*
  * Cada camada só existe depois da primeira vez que foi aberta, e depois disso
@@ -550,7 +560,7 @@ function emBreve() {
             @categoria="abrirCategoria"
             @alternar-fixar="alternarFixar"
             @ver-todas="vendoTodas = true"
-            @busca="buscando = true"
+            @busca="abrirBusca"
             @item="abrirItemDeConfiguracao"
             @ajuda="avisarAjuda"
             @ordem="trocarOrdem"
@@ -606,7 +616,7 @@ function emBreve() {
               @alternar-fixar="alternarFixar"
               @ver-todas="vendoTodas = true"
               @configuracoes="abrirConfiguracoes"
-              @busca="buscando = true"
+              @busca="abrirBusca"
               @criar="emBreve"
               @ajuda="avisarAjuda"
               @ordem="trocarOrdem"
@@ -669,6 +679,7 @@ function emBreve() {
     <UModal v-model:open="buscando" :ui="{ content: 'max-w-xl' }">
       <template #content>
         <UCommandPalette
+          v-model:search-term="termoDaBusca"
           :groups="gruposDaBusca"
           :placeholder="t.buscarDica"
           :close="{ onClick: () => buscando = false }"

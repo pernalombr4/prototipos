@@ -67,6 +67,8 @@ const emit = defineEmits<{
   novaTela: [secaoId: string]
   configurarCategoria: [c: Categoria]
   recolher: []
+  /** Rodada 17: o filtro sem resultado leva o termo para a busca global. */
+  busca: [termo?: string]
 }>()
 
 const menu = useMenuDoWorkspace()
@@ -237,6 +239,11 @@ const opcoesDeOrdem = computed(() => [[
 /* ------------------------------ o filtro ------------------------------ */
 
 const filtro = ref('')
+const filtroAberto = ref(false)
+function fecharFiltro() {
+  filtro.value = ''
+  filtroAberto.value = false
+}
 const filtrando = computed(() => filtro.value.trim().length > 0)
 
 /*
@@ -356,28 +363,52 @@ function acoesDeCategorias(no: NoDoMenu) {
 </script>
 
 <template>
-  <div class="relative flex h-full flex-col">
+  <div class="group/barra relative flex h-full flex-col">
     <!-- ============ topo: o FILTRO do menu, não a busca global ============ -->
-    <div class="flex shrink-0 items-center gap-1 px-2 pb-1 pt-1.5">
+    <!--
+      RODADA 17: o filtro do menu vem FECHADO. Era um campo sempre aberto,
+      logo abaixo do "Buscar em tudo" do topo, e os dois pareciam a mesma
+      coisa. Agora é a lupa, ao lado do recolher, e os dois aparecem quando o
+      mouse está na barra (ou o foco chega neles), como o cabeçalho do
+      ClickUp. Aberto, o campo ocupa a linha, com o foco dentro; Esc fecha.
+    -->
+    <div class="flex h-10 shrink-0 items-center gap-1 px-2 pt-1">
       <UInput
+        v-if="filtroAberto"
         v-model="filtro"
-        icon="i-lucide-filter"
+        icon="i-lucide-search"
         size="sm"
-        class="min-w-0 flex-1"
+        class="min-w-0 flex-1 animate-[entrada_0.15s_ease-out_both]"
         :placeholder="props.t.filtroDoMenu"
         :aria-label="props.t.filtroDoMenu"
+        autofocus
+        @keydown.esc="fecharFiltro"
       >
-        <template v-if="filtro" #trailing>
+        <template #trailing>
           <UButton
             icon="i-lucide-x"
             size="xs"
             color="neutral"
             variant="link"
-            :aria-label="props.t.todasFechar"
-            @click="filtro = ''"
+            :aria-label="props.t.fecharFiltro"
+            @click="fecharFiltro"
           />
         </template>
       </UInput>
+      <template v-else>
+        <span class="flex-1" />
+        <UTooltip :text="props.t.filtroDoMenu">
+          <UButton
+            icon="i-lucide-search"
+            size="sm"
+            color="neutral"
+            variant="ghost"
+            class="shrink-0 opacity-0 transition-opacity duration-150 group-hover/barra:opacity-100 focus-visible:opacity-100"
+            :aria-label="props.t.filtroDoMenu"
+            @click="filtroAberto = true"
+          />
+        </UTooltip>
+      </template>
       <!--
         RECOLHER (rodada 14). No alto da barra e com Ctrl+\\, como o ClickUp,
         que põe o mesmo atalho e o mesmo ícone de painel no topo da navegação.
@@ -388,7 +419,7 @@ function acoesDeCategorias(no: NoDoMenu) {
           size="sm"
           color="neutral"
           variant="ghost"
-          class="shrink-0"
+          class="shrink-0 opacity-0 transition-opacity duration-150 group-hover/barra:opacity-100 focus-visible:opacity-100"
           :aria-label="props.t.recolherMenu"
           aria-keyshortcuts="Control+Backslash"
           @click="emit('recolher')"
@@ -418,8 +449,8 @@ function acoesDeCategorias(no: NoDoMenu) {
         <UEmpty
           v-if="nadaNoFiltro"
           icon="i-lucide-search-x"
-          :title="props.t.filtroSemResultado"
-          :description="props.t.todasNenhumaDica"
+          :title="props.t.filtroSemResultadoEm(filtro)"
+          :actions="[{ label: props.t.buscarNoWorkspace(filtro.trim()), icon: 'i-lucide-search', color: 'neutral', variant: 'outline', size: 'xs', onClick: () => emit('busca', filtro.trim()) }]"
           class="animate-[entrada_0.25s_ease-out_both]"
         />
 

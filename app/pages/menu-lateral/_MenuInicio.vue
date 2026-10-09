@@ -43,6 +43,10 @@ const props = defineProps<{
   podeConfigurar: boolean
   ordem: 'uso' | 'alfabetica' | 'recentes' | 'manual'
   flutuante?: boolean
+  /** Rodada 17: o texto da lupa do cabeçalho. */
+  termo?: string
+  /** Rodada 17: os tipos marcados no filtro do cabeçalho. */
+  tipos?: string[]
 }>()
 
 const emit = defineEmits<{
@@ -54,6 +58,7 @@ const emit = defineEmits<{
   configurarCategoria: [c: Categoria]
   ordem: [valor: 'uso' | 'alfabetica' | 'recentes' | 'manual']
   virarManual: []
+  buscaGlobal: [termo: string]
 }>()
 
 const menu = useMenuDoWorkspace()
@@ -62,7 +67,37 @@ const arraste = useArraste()
 const toast = useToast()
 
 const rotuloDe = (no: NoDoMenu) => rotuloDoNo(no, props.t)
-const podeArrastar = computed(() => !props.flutuante)
+
+/* ============ FILTRAR O MENU (rodada 17) ============
+ *
+ * Duas coisas filtram, e as duas vêm do cabeçalho, como no ClickUp:
+ *
+ *   a LUPA, que procura pelo nome. Ela procura também no que não está à
+ *   vista: nos itens de "⋯ Mais", nas seções recolhidas e em todas as
+ *   categorias, não só nas cinco do recorte. Quem filtra está procurando
+ *   justamente o que não achou olhando;
+ *   o FILTRO por tipo (o "Espaço, Não lida, DMs" de lá): Categorias, Telas
+ *   e Com pendências, marcados juntos valem como "ou".
+ *
+ * Filtrando, toda seção com resultado abre, as vazias somem e nada se
+ * arrasta. Sem resultado, o aviso leva para a busca do workspace inteiro.
+ */
+function normaliza(texto: string) {
+  return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+const termoLimpo = computed(() => normaliza(props.termo?.trim() ?? ''))
+const tiposAtivos = computed(() => props.tipos ?? [])
+const filtrando = computed(() => termoLimpo.value.length > 0 || tiposAtivos.value.length > 0)
+
+function casa(texto: string) {
+  return !termoLimpo.value || normaliza(texto).includes(termoLimpo.value)
+}
+function passaTipo(tipo: 'categorias' | 'telas', pendente = false) {
+  const t = tiposAtivos.value
+  return !t.length || t.includes(tipo) || (pendente && t.includes('pendencias'))
+}
+
+const podeArrastar = computed(() => !props.flutuante && !filtrando.value)
 
 /* ======================= os itens nativos, em ordem fixa ======================= */
 
@@ -76,7 +111,13 @@ const nativos = computed<Nativo[]>(() => [
 const idsDosNativos = computed(() => nativos.value.map(n => n.id))
 const nativosVisiveis = computed(() => trilha.ordemDoInicio(idsDosNativos.value)
   .map(id => nativos.value.find(n => n.id === id)!)
-  .filter(n => n && !trilha.prefs.value.inicioOcultos.includes(n.id)))
+  .filter((n) => {
+    if (!n) return false
+    // Filtrando, os de "⋯ Mais" entram também.
+    if (!filtrando.value) return !trilha.prefs.value.inicioOcultos.includes(n.id)
+    const tipo = n.id === 'todas-categorias' ? 'categorias' : 'telas'
+    return casa(n.rotulo) && passaTipo(tipo, (contadorDe(n) ?? 0) > 0)
+  }))
 const nativosNoMais = computed(() => nativos.value.filter(n => trilha.prefs.value.inicioOcultos.includes(n.id)))
 
 function abrirNativo(n: Nativo) {
@@ -160,15 +201,40 @@ const todasAsSecoes = computed<SecaoDoInicio[]>(() => {
   return ordem.map(id => lista.find(s => s.id === id)!).filter(Boolean)
 })
 
-/** As que aparecem: menos as ocultas, e Favoritos só depois do primeiro favorito. */
+/* O conteúdo de cada seção, já filtrado. Sem filtro, é o de sempre. */
+const favoritasF = computed(() => props.favoritas.filter(c => !filtrando.value || (casa(c.name) && passaTipo('categorias'))))
+const categoriasF = computed(() => filtrando.value
+  ? props.categorias.filter(c => !c.favorita && casa(c.name) && passaTipo('categorias'))
+  : props.recorte)
+function filhosDoAdmin(s: SecaoDoInicio) {
+  const filhos = s.no?.filhos ?? []
+  if (!filtrando.value) return filhos
+  return passaTipo('telas') ? filhos.filter(f => casa(rotuloDe(f))) : []
+}
+
+function quantosEm(s: SecaoDoInicio) {
+  if (s.tipo === 'favoritos') return favoritasF.value.length
+  if (s.tipo === 'categorias') return categoriasF.value.length
+  if (s.tipo === 'admin') return filhosDoAdmin(s).length
+  return atalhosVisiveis(s.id).length
+}
+
+/**
+ * As que aparecem: menos as ocultas, e Favoritos só depois do primeiro
+ * favorito. Filtrando, só as que têm resultado, mesmo as ocultas: quem
+ * procura não sabe em que seção a coisa mora.
+ */
 const secoes = computed(() => todasAsSecoes.value.filter((s) => {
+  if (filtrando.value) return quantosEm(s) > 0
   if (trilha.prefs.value.secoesOcultas.includes(s.id)) return false
   if (s.tipo === 'favoritos') return props.favoritas.length > 0
   return true
 }))
+
+const nadaNoFiltro = computed(() => filtrando.value && !nativosVisiveis.value.length && !secoes.value.length)
 const idsDasSecoes = computed(() => todasAsSecoes.value.map(s => s.id))
 
-const aberta = (id: string) => !trilha.recolhidas.value.includes(id)
+const aberta = (id: string) => filtrando.value || !trilha.recolhidas.value.includes(id)
 
 /* ------------------------- os atalhos de uma seção pessoal ------------------------- */
 
@@ -203,6 +269,22 @@ function resolver(a: Atalho): Resolvido | null {
     }
   }
   return { chave, atalho: a, rotulo: rotuloDe(no), icone: no.icone, abrir: () => emit('destino', no.id), ativo: props.destinoAtivo === no.id }
+}
+
+/** Os atalhos que aparecem: filtrando, só os que casam, e o menu só com as telas que casam. */
+function atalhosVisiveis(secaoId: string): Resolvido[] {
+  const todos = atalhosDe(secaoId)
+  if (!filtrando.value) return todos
+  return todos.flatMap((r) => {
+    if (r.categoria) return casa(r.rotulo) && passaTipo('categorias') ? [r] : []
+    if (!passaTipo('telas')) return []
+    if (r.filhos) {
+      if (casa(r.rotulo)) return [r]
+      const filhos = r.filhos.filter(f => casa(rotuloDe(f)))
+      return filhos.length ? [{ ...r, filhos }] : []
+    }
+    return casa(r.rotulo) ? [r] : []
+  })
 }
 
 function atalhosDe(secaoId: string): Resolvido[] {
@@ -474,7 +556,7 @@ function adicionando(id: string) {
 
       <!-- "⋯ Mais": os nativos que saíram, com alfinete e atalho para Personalizar. -->
       <UPopover
-        v-if="nativosNoMais.length && !props.flutuante"
+        v-if="nativosNoMais.length && !props.flutuante && !filtrando"
         :content="{ side: 'right', align: 'start', sideOffset: 8 }"
       >
         <button
@@ -523,7 +605,7 @@ function adicionando(id: string) {
       </UPopover>
     </div>
 
-    <USeparator class="my-2.5" />
+    <USeparator v-if="!filtrando || (nativosVisiveis.length && secoes.length)" class="my-2.5" />
 
     <!-- ==================== as seções, que se arrastam aqui ==================== -->
     <SecaoDeMenu
@@ -574,7 +656,7 @@ function adicionando(id: string) {
       <!-- ---------- Favoritos ---------- -->
       <template v-if="s.tipo === 'favoritos'">
         <LinhaDeMenu
-          v-for="(c, i) in props.favoritas"
+          v-for="(c, i) in favoritasF"
           :key="c.id"
           :icone="c.icon ?? 'i-lucide-folder'"
           :rotulo="c.name"
@@ -595,7 +677,7 @@ function adicionando(id: string) {
       <!-- ---------- Categorias ---------- -->
       <template v-else-if="s.tipo === 'categorias'">
         <LinhaDeMenu
-          v-for="(c, i) in props.recorte"
+          v-for="(c, i) in categoriasF"
           :key="c.id"
           :icone="c.icon ?? 'i-lucide-folder'"
           :rotulo="c.name"
@@ -618,6 +700,7 @@ function adicionando(id: string) {
           @mover="p => passoDaCategoria(c, p)"
         />
         <button
+          v-if="!filtrando"
           type="button"
           class="mt-0.5 flex w-full items-center gap-2.5 rounded-md py-1.5 pl-8 pr-2.5 text-sm font-medium text-highlighted transition-colors hover:bg-primary/10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
           @click="emit('verTodas')"
@@ -630,7 +713,7 @@ function adicionando(id: string) {
       <!-- ---------- Seção do administrador ---------- -->
       <template v-else-if="s.tipo === 'admin'">
         <LinhaDeMenu
-          v-for="(item, i) in (s.no?.filhos ?? [])"
+          v-for="(item, i) in filhosDoAdmin(s)"
           :key="item.id"
           :icone="item.icone"
           :rotulo="rotuloDe(item)"
@@ -657,7 +740,7 @@ function adicionando(id: string) {
 
       <!-- ---------- Seção pessoal: atalhos, e menus com submenus ---------- -->
       <template v-else>
-        <template v-for="(r, i) in atalhosDe(s.id)" :key="r.chave">
+        <template v-for="(r, i) in atalhosVisiveis(s.id)" :key="r.chave">
           <LinhaDeMenu
             :icone="r.icone"
             :rotulo="r.rotulo"
@@ -698,7 +781,7 @@ function adicionando(id: string) {
 
         <!-- Seção vazia: o convite do ClickUp, que abre o mesmo "+". -->
         <button
-          v-if="!atalhosDe(s.id).length && !props.flutuante"
+          v-if="!atalhosDe(s.id).length && !props.flutuante && !filtrando"
           type="button"
           class="flex w-full items-center gap-2.5 rounded-md py-1.5 pl-8 pr-2.5 text-sm text-muted transition-colors hover:bg-elevated hover:text-default focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
           @click="trilha.adicionandoEm.value = s.id"
@@ -709,6 +792,22 @@ function adicionando(id: string) {
       </template>
     </SecaoDeMenu>
 
+    <!-- Filtro sem resultado: a ponte para a busca do workspace inteiro (rodada 17). -->
+    <div v-if="nadaNoFiltro" class="animate-[entrada_0.25s_ease-out_both] px-2 py-6 text-center">
+      <UIcon name="i-lucide-search-x" class="mx-auto mb-2 size-6 text-toned" />
+      <p class="text-sm text-default">{{ props.termo?.trim() ? props.t.filtroSemResultadoEm(props.termo) : props.t.filtroSemTipo }}</p>
+      <UButton
+        v-if="props.termo?.trim()"
+        :label="props.t.buscarNoWorkspace(props.termo)"
+        icon="i-lucide-search"
+        size="xs"
+        color="neutral"
+        variant="outline"
+        class="mt-3"
+        @click="emit('buscaGlobal', props.termo ?? '')"
+      />
+    </div>
+
     <!-- Menu só meu e itens ocultos (rodadas 12 e 14). -->
     <AvisosDoMenu v-if="!props.flutuante" :t="props.t" :rotulo-de="rotuloDe" />
 
@@ -717,7 +816,7 @@ function adicionando(id: string) {
       painel e some daqui, como no ClickUp.
     -->
     <UButton
-      v-if="!props.flutuante && !trilha.prefs.value.personalizou"
+      v-if="!props.flutuante && !trilha.prefs.value.personalizou && !filtrando"
       :label="props.t.inicioPersonalizar"
       icon="i-lucide-sliders-horizontal"
       size="sm"

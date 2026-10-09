@@ -6,6 +6,7 @@ import Personalizar from './_Personalizar.vue'
 import CriarSecao from './_CriarSecao.vue'
 import CriarMenu from './_CriarMenu.vue'
 import CriarCategoria from './_CriarCategoria.vue'
+import BotaoCriar from './_BotaoCriar.vue'
 import { LIMITE_DA_TRILHA, useMenuDoWorkspace } from './estado'
 import { useTrilha } from './trilha'
 import { rotuloDoNo } from './rotulos'
@@ -70,7 +71,8 @@ const emit = defineEmits<{
   categoria: [c: Categoria]
   alternarFixar: [id: number]
   verTodas: []
-  busca: []
+  /** Rodada 17: o termo vem quando a busca nasce do filtro sem resultado. */
+  busca: [termo?: string]
   item: [id: string, rotulo: string]
   ajuda: [rotulo: string]
   ordem: [valor: 'uso' | 'alfabetica' | 'recentes' | 'manual']
@@ -258,23 +260,45 @@ function acoesDaArea(a: Area): Acoes {
 
 /* ------------------------------ o "+" do Início ------------------------------ */
 
-/*
- * RODADA 16: "nossas entidades possiveis de estarem no botao de customizar
- * é: criar seçao, criar menu [...]. criar categoria tambem é possibilidade."
- * Seção é pessoal e todo mundo cria; menu e categoria são do workspace, e só
- * quem configura cria.
- */
-const itensDoMais = computed(() => {
-  const travado = !props.podeConfigurar
-  const dica = travado ? props.t.ctxSoQuemConfigura : undefined
-  return [[
-    { label: props.t.criarSecaoRotulo, icon: 'i-lucide-rows-3', onSelect: () => { trilha.criandoSecao.value = 'nova' } },
-    { label: props.t.criarMenuRotulo, icon: 'i-lucide-list-tree', description: dica, disabled: travado, onSelect: () => { trilha.criandoMenu.value = 'inicio' } },
-    { label: props.t.criarCategoriaRotulo, icon: 'i-lucide-folder-plus', description: dica, disabled: travado, onSelect: () => { trilha.criandoCategoria.value = true } },
-  ], [
-    { label: props.t.inicioPersonalizar, icon: 'i-lucide-sliders-horizontal', onSelect: () => trilha.abrirPersonalizar('navegacao') },
-  ]]
+/* O "+" do Início mora no _BotaoCriar.vue desde a rodada 17. */
+
+/* ============ O FILTRO DO MENU E O DE TIPO (rodada 17) ============ */
+
+const filtroAberto = ref(false)
+const termo = ref('')
+const tiposAbertos = ref(false)
+const tipos = ref<string[]>([])
+
+function abrirFiltro() {
+  filtroAberto.value = true
+}
+function fecharFiltro() {
+  filtroAberto.value = false
+  termo.value = ''
+}
+function alternarTipo(v: string) {
+  tipos.value = tipos.value.includes(v) ? tipos.value.filter(x => x !== v) : [...tipos.value, v]
+}
+
+const opcoesDeTipo = computed(() => [
+  { v: 'categorias', r: props.t.tipoCategorias, i: 'i-lucide-database' },
+  { v: 'telas', r: props.t.tipoTelas, i: 'i-lucide-monitor' },
+  { v: 'pendencias', r: props.t.tipoPendencias, i: 'i-lucide-circle-dot' },
+])
+
+/* Trocar de área zera o filtro: o termo de uma área não faz sentido na outra. */
+watch(area, () => {
+  fecharFiltro()
+  tiposAbertos.value = false
+  tipos.value = []
 })
+
+/** Os ícones do cabeçalho aparecem no hover do painel, no foco, ou quando estão ligados. */
+function iconeDoCabecalho(ligado: boolean) {
+  return ligado
+    ? ''
+    : 'opacity-0 transition-opacity duration-150 group-hover/painel:opacity-100 focus-visible:opacity-100'
+}
 
 /* ------------------------------ o que Personalizar mostra ------------------------------ */
 
@@ -488,18 +512,13 @@ function classeDaArea(a: Area) {
         </button>
       </UTooltip>
 
-      <!-- RODADA 8: a lupa, a ajuda e o criar na base da trilha, a pedido dela. -->
-      <UTooltip :text="props.t.buscarEmTudo" :content="{ side: 'right' }">
-        <button
-          type="button"
-          class="flex size-9 shrink-0 items-center justify-center rounded-lg text-default transition-colors hover:bg-elevated"
-          :aria-label="props.t.buscarEmTudo"
-          @click="emit('busca')"
-        >
-          <UIcon name="i-lucide-search" class="size-5" />
-        </button>
-      </UTooltip>
-
+      <!--
+        RODADA 8 pôs a lupa, a ajuda e o criar na base da trilha. A RODADA 17
+        tirou a lupa: ela abria a mesma busca do workspace que a barra do topo
+        (Ctrl+K) já abre, e a lupa do cabeçalho agora filtra o menu. Duas
+        lupas que fazem coisas diferentes confundem; duas que fazem a mesma
+        coisa sobram.
+      -->
       <MenuDeAjuda :t="props.t" formato="trilha" @escolher="r => emit('ajuda', r)" />
 
       <UDropdownMenu :items="props.itensDeCriar" :content="{ side: 'right', align: 'end' }">
@@ -516,54 +535,111 @@ function classeDaArea(a: Area) {
     </div>
 
     <!-- ==================== O PAINEL ENCAIXADO ==================== -->
-    <div v-if="!props.recolhido" class="relative flex min-w-0 flex-1 animate-[entrada_0.2s_ease-out_both] flex-col">
-      <div class="flex h-12 shrink-0 items-center gap-0.5 border-b border-default pl-3 pr-1.5">
+    <!--
+      RODADA 17, o cabeçalho do ClickUp: parado, só o título e o "+". Os
+      ícones (lupa, filtro, Personalizar e recolher) aparecem quando o mouse
+      está em qualquer lugar do painel, e quando o foco chega neles pelo
+      teclado. Lupa aberta ou filtro marcado ficam à vista, porque estão
+      mudando o que a lista mostra.
+    -->
+    <div v-if="!props.recolhido" class="group/painel relative flex min-w-0 flex-1 animate-[entrada_0.2s_ease-out_both] flex-col">
+      <!-- Filtrando: o campo toma o lugar do cabeçalho, com o foco dentro. -->
+      <div v-if="filtroAberto" class="flex h-12 shrink-0 items-center border-b border-default px-2">
+        <UInput
+          ref="campoDoFiltro"
+          v-model="termo"
+          icon="i-lucide-search"
+          size="sm"
+          class="w-full animate-[entrada_0.15s_ease-out_both]"
+          :placeholder="props.t.filtroDoMenu"
+          :aria-label="props.t.filtroDoMenu"
+          autofocus
+          @keydown.esc="fecharFiltro"
+        >
+          <template #trailing>
+            <UButton icon="i-lucide-x" size="xs" color="neutral" variant="link" :aria-label="props.t.fecharFiltro" @click="fecharFiltro" />
+          </template>
+        </UInput>
+      </div>
+
+      <div v-else class="flex h-12 shrink-0 items-center gap-0.5 border-b border-default pl-3 pr-1.5">
         <h2 class="min-w-0 flex-1 truncate text-sm font-bold text-highlighted">{{ tituloDe(area) }}</h2>
 
-        <!-- No Início: busca, Personalizar (depois do primeiro uso), recolher e "+". -->
-        <template v-if="area === 'inicio'">
-          <UTooltip :text="props.t.buscarEmTudo">
-            <UButton icon="i-lucide-search" size="xs" color="neutral" variant="ghost" :aria-label="props.t.buscarEmTudo" @click="emit('busca')" />
-          </UTooltip>
-          <UTooltip v-if="trilha.prefs.value.personalizou" :text="props.t.inicioPersonalizar">
-            <UButton
-              icon="i-lucide-sliders-horizontal"
-              size="xs"
-              color="neutral"
-              variant="ghost"
-              class="animate-[entrada_0.2s_ease-out_both]"
-              :aria-label="props.t.inicioPersonalizar"
-              @click="trilha.abrirPersonalizar('navegacao')"
-            />
-          </UTooltip>
-        </template>
-
+        <UTooltip :text="props.t.filtroDoMenu">
+          <UButton
+            icon="i-lucide-search"
+            size="xs"
+            color="neutral"
+            variant="ghost"
+            :class="iconeDoCabecalho(false)"
+            :aria-label="props.t.filtroDoMenu"
+            @click="abrirFiltro"
+          />
+        </UTooltip>
+        <UTooltip v-if="area === 'inicio'" :text="props.t.filtrarPorTipo">
+          <UButton
+            icon="i-lucide-list-filter"
+            size="xs"
+            color="neutral"
+            :variant="tiposAbertos || tipos.length ? 'soft' : 'ghost'"
+            :class="iconeDoCabecalho(tiposAbertos || tipos.length > 0)"
+            :aria-label="props.t.filtrarPorTipo"
+            :aria-pressed="tiposAbertos"
+            @click="tiposAbertos = !tiposAbertos"
+          />
+        </UTooltip>
+        <UTooltip v-if="area === 'inicio' && trilha.prefs.value.personalizou" :text="props.t.inicioPersonalizar">
+          <UButton
+            icon="i-lucide-sliders-horizontal"
+            size="xs"
+            color="neutral"
+            variant="ghost"
+            :class="iconeDoCabecalho(false)"
+            :aria-label="props.t.inicioPersonalizar"
+            @click="trilha.abrirPersonalizar('navegacao')"
+          />
+        </UTooltip>
         <UTooltip :text="props.t.recolherMenu" :kbds="['meta', '\\']">
           <UButton
             icon="i-lucide-chevrons-left"
             size="xs"
             color="neutral"
             variant="ghost"
+            :class="iconeDoCabecalho(false)"
             :aria-label="props.t.recolherMenu"
             aria-keyshortcuts="Control+Backslash"
             @click="emit('recolher')"
           />
         </UTooltip>
 
-        <UDropdownMenu v-if="area === 'inicio'" :items="itensDoMais" :content="{ align: 'end' }" :ui="{ content: 'min-w-60' }">
-          <UButton
-            icon="i-lucide-plus"
-            trailing-icon="i-lucide-chevron-down"
-            size="xs"
-            color="neutral"
-            variant="outline"
-            class="ml-0.5"
-            :aria-label="props.t.criarAlgo"
-          />
-        </UDropdownMenu>
+        <BotaoCriar v-if="area === 'inicio'" :t="props.t" :pode-configurar="props.podeConfigurar" />
       </div>
 
-      <PainelDaArea v-bind="doPainel" :area="area" :titulo="tituloDe(area)" v-on="eventosDoPainel" />
+      <!-- O filtro por tipo: as pílulas do ClickUp, aqui com os tipos do ENSPACE. -->
+      <div v-if="area === 'inicio' && tiposAbertos" class="flex shrink-0 animate-[entrada_0.15s_ease-out_both] flex-wrap gap-1.5 border-b border-default px-3 py-2">
+        <UButton
+          v-for="op in opcoesDeTipo"
+          :key="op.v"
+          :label="op.r"
+          :icon="op.i"
+          size="xs"
+          class="rounded-full"
+          :color="tipos.includes(op.v) ? 'primary' : 'neutral'"
+          :variant="tipos.includes(op.v) ? 'soft' : 'outline'"
+          :aria-pressed="tipos.includes(op.v)"
+          @click="alternarTipo(op.v)"
+        />
+      </div>
+
+      <PainelDaArea
+        v-bind="doPainel"
+        :area="area"
+        :titulo="tituloDe(area)"
+        :termo="termo"
+        :tipos="area === 'inicio' ? tipos : []"
+        v-on="eventosDoPainel"
+        @busca-global="t => emit('busca', t)"
+      />
 
       <!-- O mesmo Salvar da barra única: o que se arrasta aqui grava igual. -->
       <CartaoDeSalvar :t="props.t" :pode-configurar="props.podeConfigurar" rente />

@@ -165,6 +165,22 @@ export interface TextosDaTela {
   categoriaCriada: (nome: string) => string
   buscarTelasExistentes: string
 
+  // filtro do menu e criar com IA (rodada 17)
+  filtroSemResultadoEm: (termo: string) => string
+  buscarNoWorkspace: (termo: string) => string
+  filtroSemTipo: string
+  filtrarPorTipo: string
+  tipoCategorias: string
+  tipoTelas: string
+  tipoPendencias: string
+  fecharFiltro: string
+  descrevaParaCriar: string
+  grupoCriar: string
+  grupoAtalhosCriar: string
+  criarComIa: string
+  criarComIaToast: (texto: string) => string
+  criarComIaDica: string
+
   // camada de todas as categorias
   todasTitulo: string
   todasDescricao: (n: number) => string
@@ -487,6 +503,21 @@ const ptBR: TextosDaTela = {
   criarCategoriaPlaceholder: 'Ex.: Fornecedores, Pedidos, Imóveis',
   categoriaCriada: nome => `${nome} entrou em Categorias.`,
   buscarTelasExistentes: 'Pesquisar telas...',
+
+  filtroSemResultadoEm: termo => `Nada no menu com "${termo}".`,
+  buscarNoWorkspace: termo => `Buscar "${termo}" no workspace`,
+  filtroSemTipo: 'Nada no menu com esses tipos.',
+  filtrarPorTipo: 'Filtrar por tipo',
+  tipoCategorias: 'Categorias',
+  tipoTelas: 'Telas',
+  tipoPendencias: 'Com pendências',
+  fecharFiltro: 'Fechar filtro',
+  descrevaParaCriar: 'Descreva o que quer criar',
+  grupoCriar: 'Criar',
+  grupoAtalhosCriar: 'Menu',
+  criarComIa: 'Criar com IA',
+  criarComIaToast: texto => `O BENI montaria "${texto}" e mostraria antes de gravar. Aqui é maquete.`,
+  criarComIaDica: 'O BENI monta e mostra antes de gravar',
 
   todasTitulo: 'Todas as categorias',
   todasDescricao: n => `${n} categorias neste workspace. Fixe as que você usa para elas ficarem no menu.`,
@@ -854,6 +885,21 @@ const en: TextosDaTela = {
   categoriaCriada: nome => `${nome} is now in Categories.`,
   buscarTelasExistentes: 'Search screens...',
 
+  filtroSemResultadoEm: termo => `Nothing in the menu matches "${termo}".`,
+  buscarNoWorkspace: termo => `Search "${termo}" in the workspace`,
+  filtroSemTipo: 'Nothing in the menu with these types.',
+  filtrarPorTipo: 'Filter by type',
+  tipoCategorias: 'Categories',
+  tipoTelas: 'Screens',
+  tipoPendencias: 'With pending items',
+  fecharFiltro: 'Close filter',
+  descrevaParaCriar: 'Describe what you want to create',
+  grupoCriar: 'Create',
+  grupoAtalhosCriar: 'Menu',
+  criarComIa: 'Create with AI',
+  criarComIaToast: texto => `BENI would build "${texto}" and show it before saving. This is a mockup.`,
+  criarComIaDica: 'BENI builds it and shows it before saving',
+
   todasTitulo: 'All categories',
   todasDescricao: n => `${n} categories in this workspace. Pin the ones you use to keep them in the menu.`,
   todasBusca: 'Search a category',
@@ -1219,6 +1265,21 @@ const es: TextosDaTela = {
   criarCategoriaPlaceholder: 'Ej.: Proveedores, Pedidos, Inmuebles',
   categoriaCriada: nome => `${nome} quedó en Categorías.`,
   buscarTelasExistentes: 'Buscar pantallas...',
+
+  filtroSemResultadoEm: termo => `Nada en el menú con "${termo}".`,
+  buscarNoWorkspace: termo => `Buscar "${termo}" en el workspace`,
+  filtroSemTipo: 'Nada en el menú con esos tipos.',
+  filtrarPorTipo: 'Filtrar por tipo',
+  tipoCategorias: 'Categorías',
+  tipoTelas: 'Pantallas',
+  tipoPendencias: 'Con pendientes',
+  fecharFiltro: 'Cerrar filtro',
+  descrevaParaCriar: 'Describe lo que quieres crear',
+  grupoCriar: 'Crear',
+  grupoAtalhosCriar: 'Menú',
+  criarComIa: 'Crear con IA',
+  criarComIaToast: texto => `BENI armaría "${texto}" y lo mostraría antes de guardar. Aquí es una maqueta.`,
+  criarComIaDica: 'BENI lo arma y lo muestra antes de guardar',
 
   todasTitulo: 'Todas las categorías',
   todasDescricao: n => `${n} categorías en este workspace. Fija las que usas para que queden en el menú.`,

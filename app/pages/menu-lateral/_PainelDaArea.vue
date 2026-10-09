@@ -38,6 +38,10 @@ const props = defineProps<{
   podeConfigurar: boolean
   ordem: 'uso' | 'alfabetica' | 'recentes' | 'manual'
   flutuante?: boolean
+  /** Rodada 17: o filtro do menu, aberto pela lupa do cabeçalho. */
+  termo?: string
+  /** Rodada 17: os tipos marcados no filtro do cabeçalho (só o Início usa). */
+  tipos?: string[]
 }>()
 
 const emit = defineEmits<{
@@ -50,6 +54,7 @@ const emit = defineEmits<{
   virarManual: []
   novaTela: [secaoId: string]
   configurarCategoria: [c: Categoria]
+  buscaGlobal: [termo: string]
 }>()
 
 const menu = useMenuDoWorkspace()
@@ -57,6 +62,55 @@ const arraste = useArraste()
 const toast = useToast()
 
 const rotuloDe = (no: NoDoMenu) => rotuloDoNo(no, props.t)
+
+/* ============ O FILTRO DO MENU (rodada 17) ============
+ *
+ * A lupa do cabeçalho filtra o menu da área, como o "Pesquisar em sua barra
+ * lateral" do ClickUp. Filtrando, toda seção abre, a lista de categorias
+ * procura em todas e não só nas cinco do recorte, e não se arrasta (soltar
+ * numa lista que está faltando item embaralharia o que não se vê).
+ */
+function normaliza(texto: string) {
+  return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+const termoLimpo = computed(() => normaliza(props.termo?.trim() ?? ''))
+const filtrando = computed(() => termoLimpo.value.length > 0)
+function casa(texto: string) {
+  return normaliza(texto).includes(termoLimpo.value)
+}
+
+const favoritasF = computed(() => filtrando.value ? props.favoritas.filter(c => casa(c.name)) : props.favoritas)
+const recorteF = computed(() => filtrando.value
+  ? props.categorias.filter(c => !c.favorita && casa(c.name))
+  : props.recorte)
+
+/** Uma seção filtrada: se o nome casa, vem inteira; senão, só as telas que casam. */
+function filtrarSecao(s: NoDoMenu): NoDoMenu | null {
+  if (!filtrando.value || casa(rotuloDe(s))) return s
+  const filhos = (s.filhos ?? []).filter(f => casa(rotuloDe(f)))
+  return filhos.length ? { ...s, filhos } : null
+}
+function secoesDoPainelF(painel: string) {
+  return secoesDoPainel(painel).map(filtrarSecao).filter((s): s is NoDoMenu => !!s)
+}
+const filhosDaSecaoAtual = computed(() => {
+  const filhos = secaoAtual.value?.filhos ?? []
+  return filtrando.value ? filhos.filter(f => casa(rotuloDe(f))) : filhos
+})
+const gruposF = computed(() => {
+  if (!filtrando.value) return gruposDeConfiguracao
+  return gruposDeConfiguracao
+    .map(g => casa(props.t.grupos[g.id] ?? g.id) ? g : { ...g, itens: g.itens.filter(i => casa(props.t.itens[i.id] ?? i.id)) })
+    .filter(g => g.itens.length)
+})
+
+/** Nada casou nesta área: o aviso, com a ponte para a busca global. */
+const nadaNaArea = computed(() => {
+  if (!filtrando.value || props.area === 'inicio') return false
+  if (props.area === 'dados') return !favoritasF.value.length && !recorteF.value.length && !secoesDoPainelF('dados').length
+  if (props.area === 'config') return !gruposF.value.length
+  return !filhosDaSecaoAtual.value.length
+})
 
 /** Seção inteira por vir: o selo sobe para o cabeçalho e as linhas ficam limpas. */
 function seloDaSecao(no: NoDoMenu) {
@@ -139,7 +193,8 @@ function abrirCategorias() {
 }
 
 /** Quem configura arrasta o menu. As categorias, todo mundo (rodada 6). */
-const podeArrastar = computed(() => props.podeConfigurar)
+// Filtrando não se arrasta (rodada 17): a lista na tela não é a lista inteira.
+const podeArrastar = computed(() => props.podeConfigurar && !filtrando.value)
 
 function marcaDe(id: string) {
   return arraste.alvo.value?.id === id ? arraste.alvo.value.posicao : null
@@ -292,6 +347,8 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
       :pode-configurar="props.podeConfigurar"
       :ordem="props.ordem"
       :flutuante="props.flutuante"
+      :termo="props.termo"
+      :tipos="props.tipos"
       @destino="id => emit('destino', id)"
       @categoria="c => emit('categoria', c)"
       @alternar-fixar="id => emit('alternarFixar', id)"
@@ -300,6 +357,7 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
       @configurar-categoria="c => emit('configurarCategoria', c)"
       @ordem="v => emit('ordem', v)"
       @virar-manual="emit('virarManual')"
+      @busca-global="t => emit('buscaGlobal', t)"
     />
 
         <!-- ---------- Dados ---------- -->
@@ -315,15 +373,15 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
 
           <template v-else>
             <SecaoDeMenu
-              v-if="props.favoritas.length"
+              v-if="favoritasF.length"
               :rotulo="props.t.favoritos"
-              :aberta="aberta('favoritos')"
+              :aberta="filtrando || aberta('favoritos')"
               :texto-recolher="props.t.recolherSecao(props.t.favoritos)"
               :texto-expandir="props.t.expandirSecao(props.t.favoritos)"
               @alternar="abrirFavoritos()"
             >
               <LinhaDeMenu
-                v-for="(c, i) in props.favoritas"
+                v-for="(c, i) in favoritasF"
                 :key="c.id"
                 :icone="c.icon ?? 'i-lucide-folder'"
                 :rotulo="c.name"
@@ -342,7 +400,7 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
 
             <SecaoDeMenu
               :rotulo="props.t.categorias"
-              :aberta="aberta('categorias')"
+              :aberta="filtrando || aberta('categorias')"
               :contador="props.totalDeCategorias || undefined"
               :texto-recolher="props.t.recolherSecao(props.t.categorias)"
               :texto-expandir="props.t.expandirSecao(props.t.categorias)"
@@ -350,7 +408,7 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
               @alternar="abrirCategorias()"
             >
               <LinhaDeMenu
-                v-for="(c, i) in props.recorte"
+                v-for="(c, i) in recorteF"
                 :key="c.id"
                 :icone="c.icon ?? 'i-lucide-folder'"
                 :rotulo="c.name"
@@ -364,7 +422,7 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
                 :alterado="menu.tocados.value.includes(`cat:${c.id}`)"
                 :dica-alterado="props.t.pontoAlterado"
                 :acoes="props.flutuante ? undefined : acoes.daCategoria(c, { visiveis: idsDasCategorias, passo: passoDaCategoria })"
-                :arrastavel="!props.flutuante"
+                :arrastavel="!props.flutuante && !filtrando"
                 :saindo="arraste.arrastando.value === `cat:${c.id}`"
                 :marca="marcaDe(`cat:${c.id}`) === 'dentro' ? null : marcaDe(`cat:${c.id}`)"
                 @selecionar="emit('categoria', c)"
@@ -376,6 +434,7 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
                 @mover="p => passoDaCategoria(c, p)"
               />
               <button
+                v-if="!filtrando"
                 type="button"
                 class="mt-0.5 flex w-full items-center gap-2.5 rounded-md py-1.5 pl-8 pr-2.5 text-sm font-medium text-highlighted transition-colors hover:bg-primary/10"
                 @click="emit('verTodas')"
@@ -385,7 +444,7 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
               </button>
             </SecaoDeMenu>
 
-            <template v-for="s in secoesDoPainel('dados')" :key="s.id">
+            <template v-for="s in secoesDoPainelF('dados')" :key="s.id">
               <!-- Uma tela só: linha simples que abre direto, sem seta. -->
               <LinhaDeMenu
                 v-if="temUmaSo(s)"
@@ -412,7 +471,7 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
                 v-else
                 :rotulo="rotuloDe(s)"
                 :selo="seloDaSecao(s)"
-                :aberta="aberta(s.id)"
+                :aberta="filtrando || aberta(s.id)"
                 :texto-recolher="props.t.recolherSecao(rotuloDe(s))"
                 :texto-expandir="props.t.expandirSecao(rotuloDe(s))"
                 :alterado="menu.tocados.value.includes(s.id)"
@@ -459,7 +518,7 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
         <!-- ---------- Uma seção que foi para a trilha ---------- -->
         <div v-else-if="secaoAtual" class="space-y-0.5">
           <LinhaDeMenu
-            v-for="(item, i) in (secaoAtual.filhos ?? [])"
+            v-for="(item, i) in filhosDaSecaoAtual"
             :key="item.id"
             :icone="item.icone"
             :rotulo="rotuloDe(item)"
@@ -485,10 +544,10 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
         <!-- ---------- Configurações ---------- -->
         <template v-else-if="props.area === 'config'">
           <SecaoDeMenu
-            v-for="g in gruposDeConfiguracao"
+            v-for="g in gruposF"
             :key="g.id"
             :rotulo="props.t.grupos[g.id] ?? g.id"
-            :aberta="grupoAberto === g.id"
+            :aberta="filtrando || grupoAberto === g.id"
             :texto-recolher="props.t.recolherSecao(props.t.grupos[g.id] ?? g.id)"
             :texto-expandir="props.t.expandirSecao(props.t.grupos[g.id] ?? g.id)"
             @alternar="grupoAberto = grupoAberto === g.id ? '' : g.id"
@@ -506,6 +565,21 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
           </SecaoDeMenu>
         </template>
 
+
+    <!-- Filtro sem resultado: a ponte para a busca do workspace inteiro. -->
+    <div v-if="nadaNaArea" class="animate-[entrada_0.25s_ease-out_both] px-2 py-6 text-center">
+      <UIcon name="i-lucide-search-x" class="mx-auto mb-2 size-6 text-toned" />
+      <p class="text-sm text-default">{{ props.t.filtroSemResultadoEm(props.termo ?? '') }}</p>
+      <UButton
+        :label="props.t.buscarNoWorkspace(props.termo ?? '')"
+        icon="i-lucide-search"
+        size="xs"
+        color="neutral"
+        variant="outline"
+        class="mt-3"
+        @click="emit('buscaGlobal', props.termo ?? '')"
+      />
+    </div>
 
     <!-- Menu só meu e itens ocultos, como na barra única. -->
     <AvisosDoMenu v-if="props.area !== 'config' && props.area !== 'inicio' && !props.flutuante" :t="props.t" :rotulo-de="rotuloDe" />

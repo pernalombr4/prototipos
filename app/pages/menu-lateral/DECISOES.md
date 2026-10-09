@@ -389,6 +389,23 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 17 · 2026-10-09
+- **Pedido (literal):** "sobre sua opiniao anterior: pode aplicar" (a busca do menu fechada atrás da lupa do cabeçalho, nos dois modelos, a global só no topo, e a lupa da base da trilha tirada)
+- **Pedido (literal):** "no clickup, os botoes do topo do menu aparecem com hover. usando a barra de inicio como exemplo: sem passar o mouse no topo vem só inicio e o botao de '+'. se passar o mouse em qualquer lugar do menu ficam os ícones. o botao do meio é filtro, da esquerda é a caixa de busca e da direita é pra fechar o menu. e no botao de criar, ao clicar voce pode descrever o que quer criar e, se nao for encontrada no menu, sobra a opçao de usar a ia pra criar pra voce. esse é um ponto interessante."
+- **Mudou:** a busca do MENU vem fechada, nos dois modelos. É a lupa do cabeçalho: abre um campo no lugar do título, com o foco dentro, e Esc ou o "x" fecha e limpa. A busca do WORKSPACE fica só na barra do topo (Ctrl+K).
+- **Mudou:** o filtro procura no que não está à vista: itens de "⋯ Mais", seções recolhidas e ocultas, todas as categorias (não só as cinco do recorte), e as telas de um menu posto numa seção. Filtrando, as seções com resultado abrem, as vazias somem e nada se arrasta.
+- **Mudou:** sem resultado, o aviso tem "Buscar X no workspace", que abre a busca global já com o termo.
+- **Mudou:** saiu a lupa da base da trilha. Ela abria a mesma busca do topo, e a lupa do cabeçalho agora faz outra coisa.
+- **Mudou:** o cabeçalho do Início parado mostra só o título e o "+". Com o mouse em qualquer lugar do painel (ou o foco do teclado neles) aparecem a lupa, o filtro por tipo, Personalizar e recolher. Ligados, ficam à vista. Nas outras áreas, lupa e recolher; na barra única, lupa e recolher no topo, do mesmo jeito.
+- **Mudou:** o filtro por tipo do Início, as pílulas do ClickUp com os tipos do ENSPACE: Categorias, Telas e Com pendências (Inbox e Tarefas com número). Marcadas juntas valem como "ou".
+- **Mudou:** o "+" do Início abre "Descreva o que quer criar". O texto filtra Criar seção, Criar menu e Criar categoria; quando nada casa, aparece "Criar com IA" com o texto digitado, e o BENI monta e mostra antes de gravar, a regra de `ia-no-campo-html`. "Personalizar a barra lateral" fecha a lista.
+- **Fronteira:** muda a busca do menu nos dois modelos, o cabeçalho e o "+" da trilha. Não muda a busca global, o conteúdo do menu e as regras de arraste.
+- **Descartado:** "Importar" e "Modelos" no pé do "+", que o ClickUp tem. Motivo: o ENSPACE não tem essas portas no menu, e inventá-las seria proposta fora do pedido.
+- **Descartado:** campo do menu sempre aberto, como o do Notion. Motivo: o do Notion é a busca global; aqui a global já mora no topo, e dois campos à vista parecem o mesmo.
+- **Maquete:** "Criar com IA" só mostra o toast.
+- **Crítica e acessibilidade:** os ícones escondidos no hover aparecem também com o foco do teclado (`focus-visible`), têm nome e o filtro por tipo diz se está ligado (`aria-pressed`). Esc fecha o filtro. Fica: na barra única, a linha da lupa ocupa a mesma altura do campo de antes, então o espaço não foi ganho ali, só a ambiguidade saiu.
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral · prints em `evidencias/rodada17-*.png`
+
 ### Rodada 16 · 2026-10-09
 - **Pedido (literal):** "basicamente, te mandei um monte de print do clickup e é assim que precisamos ter nosso menu, mas diferente do clickup, permitiremos reordenaçao na trilha e reordenação nos menus nativos, nao so nos personalizados! e nossas entidades possiveis de estarem no botao de customizar é: criar seçao, criar menu (e na hora de criar menu ja tem que poder vincular uma tela a ele ou criar essa tela, como o clickup tambem faz). criar categoria tambem é possibilidade. e deve ser possível o user ocultar nativos também, se quiser. e saiba que tem um novo menu no enspace: o menu integraçoes, e dentro dele tem apps, credenciais e webhooks como submenus. veja onde vai alocar isso na estrutura prototipada, mas tem q dar conta disso. [...] observe que esse menu aí de ajuda ta pessimo. olha o tamanho do ícone frente aos outros onde ele ta posicionado. muito ruim mesmo. [...] execute essas alteraçoes e pode fazer push pra main"
 - **Mudou:** a trilha SE ARRASTA (diferente do ClickUp, a pedido dela): no próprio ícone, que vai para o rascunho e acende o Salvar; em Personalizar > Navegação, que vale na hora; Alt com as setas e "Mover para cima/baixo" no botão direito. Início fica no topo, é a âncora.
