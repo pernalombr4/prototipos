@@ -110,6 +110,10 @@ sed -n '1,60p' node_modules/@nuxt/ui/dist/runtime/components/Badge.vue
 motivo. Ordem e conferência: `AGENTE_PROTOTIPOS.md`, Parte 2, "Dúvida de componente", e regra 38. O
 `node_modules` continua sendo a fonte da verdade.
 
+**Texto rico (campo HTML) é TipTap, como no produto:** `UEditor` do Nuxt UI, extensões `@tiptap/*` na
+versão exata do Nuxt UI e `<ClientOnly>`. Armadilhas e exemplo: `AGENTE_PROTOTIPOS.md`, Parte 2, "Campo de
+texto rico", e regra 39.
+
 Para conferir o formato real de uma entidade da API:
 
 ```bash

@@ -25,7 +25,7 @@
  * confiável: quando fica vermelha, é porque o SDK mudou mesmo.
  */
 
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, realpathSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -212,6 +212,33 @@ if (!existe(pastaNuxtUi)) {
   console.log(`  ${usados.size} usados, ${naPasta} disponíveis na versão instalada`)
   for (const nome of sumidos) {
     problemas.push(`U${nome} é usado nas telas e não existe no Nuxt UI instalado.`)
+  }
+}
+
+// ------------------------------- 4b. TipTap na mesma versão do Nuxt UI (regra 39)
+
+/*
+ * O UEditor do Nuxt UI é TipTap. Extensão `@tiptap/*` que o protótipo instala
+ * à parte precisa estar na MESMA versão exata que o Nuxt UI usa: versão
+ * diferente traz outra cópia do ProseMirror e o editor quebra com "Adding
+ * different instances of a keyed plugin" (ia-no-campo-html, 2026-10-09).
+ * A versão do Nuxt UI sai do `@tiptap/core` que ELE resolve (pasta irmã no
+ * .pnpm), não do que o protótipo declarou.
+ */
+const tiptapDeclarados = deps.filter(([nome]) => nome.startsWith('@tiptap/'))
+if (tiptapDeclarados.length && existe('node_modules', '@nuxt', 'ui')) {
+  const pastaUi = realpathSync(caminho('node_modules', '@nuxt', 'ui'))
+  const coreDoUi = join(pastaUi, '..', '..', '@tiptap', 'core', 'package.json')
+  if (!existsSync(coreDoUi)) {
+    problemas.push(`Não achei o @tiptap/core que o Nuxt UI usa (${coreDoUi}).`)
+  }
+  else {
+    const versaoDoUi = JSON.parse(readFileSync(coreDoUi, 'utf8')).version
+    for (const [nome, faixa] of tiptapDeclarados) {
+      if (faixa !== versaoDoUi) {
+        problemas.push(`${nome} está em "${faixa}" no package.json; o Nuxt UI usa o TipTap ${versaoDoUi}. Use "${versaoDoUi}", sem ^.`)
+      }
+    }
   }
 }
 

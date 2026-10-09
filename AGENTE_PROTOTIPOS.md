@@ -486,6 +486,23 @@ direto.** O mapeamento das cores da marca está em `app/app.config.ts` e o tema 
 `app/assets/css/main.css`, ambos copiados do `en-docs` — se o tema mudar lá, copie de novo,
 não corrija à mão aqui.
 
+#### Campo de texto rico: TipTap, como no produto
+
+O campo HTML do ENSPACE é TipTap (decisão da redatora em 2026-10-09). Protótipo com texto rico
+usa o `UEditor` do Nuxt UI, que é TipTap, e as extensões oficiais `@tiptap/*`; nada de outro
+editor. Exemplo completo: `app/pages/ia-no-campo-html/` (regra 39).
+
+| O que | Como |
+|---|---|
+| Versão das extensões | `@tiptap/*` entra no `package.json` na versão **exata** que o Nuxt UI instalado usa, sem `^`. O `pnpm conferir` reprova a diferença. Subiu o Nuxt UI, sobe as extensões junto |
+| Uma cópia só do ProseMirror | O `nuxt.config.ts` tem `vite.optimizeDeps.include` com os pacotes do ProseMirror e do TipTap que o Nuxt UI importa. Sem isso o editor quebra com "Adding different instances of a keyed plugin". Extensão nova que o Nuxt UI também importe entra na lista |
+| Só no navegador | Campo com `UEditor` e extensões próprias fica dentro de `<ClientOnly>`, com um `USkeleton` no `#fallback`: no servidor o mesmo erro volta |
+| Estado do editor | Não é reativo. Componente filho que lê o editor (cor ativa, link ativo) assina `editor.on('transaction')` e lê um contador no template |
+| Barra flutuante (`layout="bubble"`) | Popover e menu dentro dela com `portal: false`; o `shouldShow` aceita foco dentro da bolha; a bolha leva `relative z-50`, senão a barra fixa do campo seguinte cobre o menu |
+| Menu "/" | O `UEditorSuggestionMenu` 4.11.1 ignora `ui.content` (`useEditorMenu.js`, linha 264). Largura se ajusta pela moldura do campo, e isso vai para o `DECISOES.md` |
+| Proposta de IA no texto | Plugin de decorações do ProseMirror, sem gravar até o Aceitar: `proposta.ts` |
+| Cor do texto e de fundo | O HTML guarda o nome (`var(--cor-texto-vermelho)`) e o tom sai do tema: hex fixo não passa de 4,5:1 no claro e no escuro. `paleta.ts` |
+
 ### E o protótipo é 100% front-end
 
 > ## 🚫 SEM BACK-END. SEM API. DADO SEMPRE MOCKADO.
@@ -825,3 +842,8 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
     skill `nuxt-ui` e o MCP `nuxt-ui`: prop, variante, slot e a prop `ui` resolvem quase tudo. CSS
     próprio (`<style>`, `:deep()`, `!important`) é o último degrau e vai para o `DECISOES.md` com o
     motivo e a consulta feita. Detalhe e ordem na Parte 2, "Dúvida de componente".
+
+39. **⛔ TEXTO RICO É TIPTAP, COMO NO PRODUTO.** Decisão da redatora em 2026-10-09. Campo HTML
+    usa o `UEditor` do Nuxt UI e as extensões `@tiptap/*` na versão exata do Nuxt UI instalado
+    (o `pnpm conferir` reprova a diferença), com `<ClientOnly>` e a lista do ProseMirror no
+    `nuxt.config.ts`. A tabela completa está na Parte 2, "Campo de texto rico".
