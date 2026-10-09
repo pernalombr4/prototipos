@@ -42,7 +42,112 @@ export interface Recusa {
   motivo: string
 }
 
+/* ==================================================================
+   AS PREFERÊNCIAS DA TRILHA (rodada 15)
+
+   O que a Mikaela mostrou do ClickUp, item por item, e que aqui vira
+   preferência de quem usa:
+
+     `fixadas`         o que aparece na trilha, NA ORDEM em que foi fixado.
+                       A trilha não se arrasta. Fixar com a trilha cheia
+                       troca o último, e o último vai para "Mais";
+     `rotulos`         "Ícones e rótulos" ou "Somente ícones";
+     `inicioOcultos`   os itens nativos do Início que foram para "⋯ Mais".
+                       A ordem deles é fixa;
+     `ordemDasSecoes`  a ordem das seções do Início, que se arrasta no
+                       próprio menu ou em Personalizar > Seções;
+     `secoesOcultas`   só Favoritos se oculta, como "Chats com IA" lá;
+     `pessoais`        as seções que a pessoa criou, com atalhos para telas,
+                       menus e categorias que já existem;
+     `personalizou`    abriu Personalizar uma vez: o botão sai do pé do menu
+                       e vira ícone no cabeçalho.
+
+   Duas cópias, como o menu: o que se ARRASTA no menu vai para o rascunho e
+   espera o Salvar (a regra dela desde a rodada 5); o que se escolhe na
+   janela Personalizar vale na hora, nas duas, como no ClickUp.
+================================================================== */
+
+/** Um atalho dentro de uma seção pessoal. Categoria guarda o id como texto. */
+export interface Atalho {
+  tipo: 'destino' | 'tela' | 'menu' | 'categoria'
+  id: string
+}
+
+export interface SecaoPessoal {
+  id: string
+  rotulo: string
+  icone: string
+  itens: Atalho[]
+  ordem: 'personalizada' | 'alfabetica' | 'recentes'
+}
+
+export interface PrefsDaTrilha {
+  fixadas: string[]
+  rotulos: boolean
+  inicioOcultos: string[]
+  ordemDasSecoes: string[]
+  secoesOcultas: string[]
+  pessoais: SecaoPessoal[]
+  personalizou: boolean
+}
+
+/** Quantos ícones cabem na trilha, Início incluído, a 900 px de altura. */
+export const LIMITE_DA_TRILHA = 6
+
+/** O Início não se oculta, e o Inbox também não: são as portas do dia. */
+export const INICIO_TRAVADOS = ['n-inicio', 'n-inbox']
+
+/** Só Favoritos se oculta. É pessoal, e nasce vazio para quem nunca favoritou. */
+export const SECOES_OCULTAVEIS = ['favoritos']
+
+function prefsIniciais(): PrefsDaTrilha {
+  return {
+    // Conhecimento e Comparações começam em "Mais", para a trilha mostrar o mecanismo.
+    fixadas: ['dados', 'sec:s-analise', 'sec:s-auditoria', 'sec:s-comercial', 'config'],
+    rotulos: true,
+    inicioOcultos: ['n-documentos', 'todas-categorias'],
+    ordemDasSecoes: ['p-rotina', 'favoritos', 'categorias'],
+    secoesOcultas: [],
+    /*
+     * Uma seção pessoal de exemplo, para o protótipo mostrar o que ela
+     * pediu: "uma seção pode ter menus com submenus dentro". Dado do
+     * protótipo; numa conta nova esta lista nasce vazia.
+     */
+    pessoais: [{
+      id: 'p-rotina',
+      rotulo: 'Rotina do jurídico',
+      icone: 'i-lucide-scale',
+      ordem: 'personalizada',
+      itens: [
+        { tipo: 'menu', id: 's-auditoria' },
+        { tipo: 'categoria', id: '1' },
+        { tipo: 'destino', id: 'n-tarefas' },
+      ],
+    }],
+    personalizou: false,
+  }
+}
+
+function clonarPrefs(p: PrefsDaTrilha): PrefsDaTrilha {
+  return JSON.parse(JSON.stringify(p))
+}
+
 export function useMenuDoWorkspace() {
+  const prefsAoVivo = useState<PrefsDaTrilha>('trilha-prefs', prefsIniciais)
+  const prefs = useState<PrefsDaTrilha>('trilha-prefs-rascunho', prefsIniciais)
+
+  /** Vale na hora, nas duas cópias: é o que a janela Personalizar faz. */
+  function aplicarPrefs(mudanca: (p: PrefsDaTrilha) => void) {
+    mudanca(prefs.value)
+    mudanca(prefsAoVivo.value)
+  }
+
+  /** Vai para o rascunho e acende o Salvar: é o que o arraste faz. */
+  function arrastarPrefs(toque: string, mudanca: (p: PrefsDaTrilha) => void) {
+    mudanca(prefs.value)
+    marcarTocado(toque)
+  }
+
   const aoVivo = useState<NoDoMenu[]>('menu-ao-vivo', () => arvoreCompleta())
   const rascunho = useState<NoDoMenu[]>('menu-rascunho', () => arvoreCompleta())
 
@@ -191,6 +296,7 @@ export function useMenuDoWorkspace() {
       pessoal.value = null
     }
     ordemCategorias.value = [...ordemCategoriasRascunho.value]
+    prefsAoVivo.value = clonarPrefs(prefs.value)
     alcanceSalvo.value = alcance
     tocados.value = []
   }
@@ -198,6 +304,7 @@ export function useMenuDoWorkspace() {
   function descartar() {
     rascunho.value = clonar(base.value)
     ordemCategoriasRascunho.value = [...ordemCategorias.value]
+    prefs.value = clonarPrefs(prefsAoVivo.value)
     tocados.value = []
   }
 
@@ -490,6 +597,9 @@ export function useMenuDoWorkspace() {
     secoesDaBarra,
     ocultos,
     acharNo: (id: string) => acharNo(rascunho.value, id),
+    prefs,
+    aplicarPrefs,
+    arrastarPrefs,
     moverParaPrimeiroNivel,
     moverParaSecao,
     ocultar,

@@ -543,6 +543,7 @@ function emBreve() {
           <ModeloTrilha
             v-if="modelo === 'trilha'"
             :t="t"
+            :categorias="categorias"
             :favoritas="favoritas"
             :recorte="recorte"
             :total-de-categorias="categorias.length"

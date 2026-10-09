@@ -417,3 +417,26 @@ senha, o que a regra 2 proíbe. A conferência na mão fica para uma sessão no 
 | `Ctrl + \` e ícone de expandir no alto | **Serve**, igual | Atalho que quem vem do ClickUp já tem na mão |
 | Abrir sozinha no hover da borda | **Não serve** | É o comportamento que os usuários de lá pedem para desligar |
 | `Archive` no botão direito | **Não entra** | Arquivar categoria e seção é decisão de configuração, não de navegação |
+
+## Rodada 15: o ClickUp por dentro, nos prints da Mikaela
+
+Ela usou o ClickUp logado e mandou 21 prints com a explicação. Isto **corrige** a seção da
+rodada 14, que tinha saído da central de ajuda. Os prints não entraram no repositório: têm
+e-mail de pessoa e o nome dela (regra 13).
+
+| O que | Como o ClickUp faz |
+|---|---|
+| Trilha (Global Navigation) | Não se reordena e não se arrasta. Personalizar > Navegação liga e desliga cada item, com Início travado, e escolhe "Somente ícones" ou "Ícones e rótulos" |
+| "Mais" na trilha | Aparece por padrão e guarda o que não está fixado. Alfinete no hover fixa; sem espaço, o novo toma o lugar do último, que vai para "Mais". No pé, "Personalizar navegação" |
+| Hover na trilha | Passar o mouse num ícone que não é o aberto mostra o menu dele em popover. O menu aberto continua no fundo |
+| Recolhido | A trilha fica só; o primeiro ícone vira "»", que reabre. O popover do hover continua valendo |
+| Início | Clicar abre a página inicial e o menu Início. É o único menu com "Personalizar a barra lateral" |
+| Itens nativos do Início | Ordem fixa. Personalizar > Início escolhe quais aparecem (dois travados). Os outros ficam em "⋯ Mais", com alfinete e atalho para Personalizar |
+| Seções do Início | Se reordenam arrastando no próprio menu ou em Personalizar > Seções. Só "Chats com IA" se oculta. Clicar no nome recolhe e expande |
+| Criar seção | Janela com ícone e nome. A seção nova entra no topo |
+| "+" da seção | Busca o que já existe para pôr na seção, com "+" no pé para criar. Seção vazia mostra "+ Adicionar à seção" |
+| "…" da seção | Ícone e nome editáveis no topo, marcar como lido, adicionar à seção, mostrar e ordenar (recentes, alfabética, personalizado), criar seção, reordenar seções, excluir |
+| Itens de uma seção | Se arrastam dentro dela. O "…" do item abre: marcar como não lido, copiar link, favorito, renomear, excluir, notificações, compartilhamento |
+| Hierarquia | Uma seção pode ter um item com filhos (Espaço > Pasta > Lista), que abre e fecha |
+| Botão de Personalizar | No pé do menu Início até o primeiro uso; depois some de lá e fica no cabeçalho |
+| Temas | Claro, escuro, automático, e uma cor de tema entre dez |

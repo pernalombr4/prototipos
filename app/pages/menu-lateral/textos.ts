@@ -85,6 +85,62 @@ export interface TextosDaTela {
   levadoParaTrilha: (nome: string) => string
   levadoParaPainel: (nome: string, painel: string) => string
 
+  // trilha no padrão ClickUp (rodada 15)
+  inicioPersonalizar: string
+  personalizarTitulo: string
+  personalizarDica: string
+  abaNavegacao: string
+  abaInicio: string
+  abaSecoes: string
+  abaTemas: string
+  navInicioDica: string
+  aparencia: string
+  soIcones: string
+  iconesERotulos: string
+  inicioTravado: string
+  secoesOcultasTitulo: string
+  todasSecoesMostradas: string
+  criarSecaoRotulo: string
+  criarSecaoTitulo: string
+  criarSecaoPlaceholder: string
+  criarSecaoBotao: string
+  renomearSecaoTitulo: string
+  salvarSecao: string
+  escolherIcone: string
+  temaClaro: string
+  temaEscuro: string
+  temaAuto: string
+  corDeDestaque: string
+  corDica: string
+  cores: Record<string, string>
+  mais: string
+  personalizarNavegacao: string
+  fixarNaTrilha: string
+  desafixarDaTrilha: string
+  fixarNoInicio: string
+  ocultarDoInicio: string
+  adicionarASecao: string
+  adicionarA: (nome: string) => string
+  buscarTelas: string
+  grupoTelas: string
+  grupoMenus: string
+  grupoCategorias: string
+  novaTelaAqui: string
+  ordenarSecao: string
+  ordemAdicionadas: string
+  reordenarSecoes: string
+  excluirSecao: string
+  ocultarSecao: string
+  removerDaSecao: string
+  secaoExcluida: (nome: string) => string
+  secaoCriada: (nome: string) => string
+  fixadaNaTrilha: (nome: string) => string
+  trocouNaTrilha: (nome: string, saiu: string) => string
+  maisAcoes: (nome: string) => string
+  adicionarEm: (nome: string) => string
+  nadaParaAdicionar: string
+  criarAlgo: string
+
   // camada de todas as categorias
   todasTitulo: string
   todasDescricao: (n: number) => string
@@ -268,7 +324,7 @@ const ptBR: TextosDaTela = {
   criarCategoria: 'Categoria',
   criarSecao: 'Seção de menu',
   criarAberto: o => `Abriria o formulário de ${o}.`,
-  areaTrabalho: 'Trabalho',
+  areaTrabalho: 'Início',
   areaDados: 'Dados',
   areaSecoes: 'Seções',
 
@@ -329,6 +385,61 @@ const ptBR: TextosDaTela = {
   navegacao: 'Navegação do workspace',
   levadoParaTrilha: nome => `${nome} agora tem ícone na trilha.`,
   levadoParaPainel: (nome, painel) => `${nome} agora fica dentro de ${painel}.`,
+
+  inicioPersonalizar: 'Personalizar a barra lateral',
+  personalizarTitulo: 'Personalizar',
+  personalizarDica: 'Escolha o que aparece no menu e em que ordem.',
+  abaNavegacao: 'Navegação',
+  abaInicio: 'Início',
+  abaSecoes: 'Seções',
+  abaTemas: 'Temas',
+  navInicioDica: 'O Início fica sempre na trilha. Clicar nele abre a página inicial e este menu.',
+  aparencia: 'Aparência',
+  soIcones: 'Somente ícones',
+  iconesERotulos: 'Ícones e rótulos',
+  inicioTravado: 'Sempre aparece',
+  secoesOcultasTitulo: 'Seções ocultas',
+  todasSecoesMostradas: 'Todas as seções estão à mostra.',
+  criarSecaoRotulo: 'Criar seção',
+  criarSecaoTitulo: 'Criar seção',
+  criarSecaoPlaceholder: 'Ex.: Comercial, Jurídico, Financeiro',
+  criarSecaoBotao: 'Criar',
+  renomearSecaoTitulo: 'Renomear seção',
+  salvarSecao: 'Salvar',
+  escolherIcone: 'Escolher ícone',
+  temaClaro: 'Claro',
+  temaEscuro: 'Escuro',
+  temaAuto: 'Automático',
+  corDeDestaque: 'Cor de destaque',
+  corDica: 'Vale só para você. A marca do workspace não muda.',
+  cores: { fuchsia: 'Magenta', purple: 'Roxo', cyan: 'Azul', teal: 'Verde-azulado' },
+  mais: 'Mais',
+  personalizarNavegacao: 'Personalizar navegação',
+  fixarNaTrilha: 'Fixar na trilha',
+  desafixarDaTrilha: 'Tirar da trilha',
+  fixarNoInicio: 'Fixar no Início',
+  ocultarDoInicio: 'Tirar do Início',
+  adicionarASecao: 'Adicionar à seção',
+  adicionarA: nome => `Adicionar a ${nome}`,
+  buscarTelas: 'Pesquisar telas, menus e categorias...',
+  grupoTelas: 'Telas',
+  grupoMenus: 'Menus com telas dentro',
+  grupoCategorias: 'Categorias',
+  novaTelaAqui: 'Criar uma tela nova',
+  ordenarSecao: 'Ordenar seção',
+  ordemAdicionadas: 'Adicionadas por último',
+  reordenarSecoes: 'Reordenar seções',
+  excluirSecao: 'Excluir seção',
+  ocultarSecao: 'Ocultar seção',
+  removerDaSecao: 'Remover da seção',
+  secaoExcluida: nome => `${nome} foi excluída.`,
+  secaoCriada: nome => `${nome} entrou no topo do Início.`,
+  fixadaNaTrilha: nome => `${nome} está na trilha.`,
+  trocouNaTrilha: (nome, saiu) => `${nome} entrou na trilha no lugar de ${saiu}, que foi para Mais.`,
+  maisAcoes: nome => `Mais ações de ${nome}`,
+  adicionarEm: nome => `Adicionar em ${nome}`,
+  nadaParaAdicionar: 'Tudo o que existe já está nesta seção.',
+  criarAlgo: 'Criar',
 
   todasTitulo: 'Todas as categorias',
   todasDescricao: n => `${n} categorias neste workspace. Fixe as que você usa para elas ficarem no menu.`,
@@ -554,7 +665,7 @@ const en: TextosDaTela = {
   criarCategoria: 'Category',
   criarSecao: 'Menu section',
   criarAberto: o => `This would open the ${o} form.`,
-  areaTrabalho: 'Work',
+  areaTrabalho: 'Home',
   areaDados: 'Data',
   areaSecoes: 'Sections',
 
@@ -615,6 +726,61 @@ const en: TextosDaTela = {
   navegacao: 'Workspace navigation',
   levadoParaTrilha: nome => `${nome} now has an icon on the rail.`,
   levadoParaPainel: (nome, painel) => `${nome} now lives inside ${painel}.`,
+
+  inicioPersonalizar: 'Customize sidebar',
+  personalizarTitulo: 'Customize',
+  personalizarDica: 'Choose what shows in the menu and in which order.',
+  abaNavegacao: 'Navigation',
+  abaInicio: 'Home',
+  abaSecoes: 'Sections',
+  abaTemas: 'Themes',
+  navInicioDica: 'Home always stays on the rail. Clicking it opens the home page and this menu.',
+  aparencia: 'Appearance',
+  soIcones: 'Icons only',
+  iconesERotulos: 'Icons and labels',
+  inicioTravado: 'Always shown',
+  secoesOcultasTitulo: 'Hidden sections',
+  todasSecoesMostradas: 'All sections are shown.',
+  criarSecaoRotulo: 'Create section',
+  criarSecaoTitulo: 'Create section',
+  criarSecaoPlaceholder: 'E.g. Sales, Legal, Finance',
+  criarSecaoBotao: 'Create',
+  renomearSecaoTitulo: 'Rename section',
+  salvarSecao: 'Save',
+  escolherIcone: 'Choose icon',
+  temaClaro: 'Light',
+  temaEscuro: 'Dark',
+  temaAuto: 'Automatic',
+  corDeDestaque: 'Accent color',
+  corDica: 'Only for you. The workspace brand does not change.',
+  cores: { fuchsia: 'Magenta', purple: 'Purple', cyan: 'Blue', teal: 'Teal' },
+  mais: 'More',
+  personalizarNavegacao: 'Customize navigation',
+  fixarNaTrilha: 'Pin to rail',
+  desafixarDaTrilha: 'Remove from rail',
+  fixarNoInicio: 'Pin to Home',
+  ocultarDoInicio: 'Remove from Home',
+  adicionarASecao: 'Add to section',
+  adicionarA: nome => `Add to ${nome}`,
+  buscarTelas: 'Search screens, menus and categories...',
+  grupoTelas: 'Screens',
+  grupoMenus: 'Menus with screens inside',
+  grupoCategorias: 'Categories',
+  novaTelaAqui: 'Create a new screen',
+  ordenarSecao: 'Sort section',
+  ordemAdicionadas: 'Last added',
+  reordenarSecoes: 'Reorder sections',
+  excluirSecao: 'Delete section',
+  ocultarSecao: 'Hide section',
+  removerDaSecao: 'Remove from section',
+  secaoExcluida: nome => `${nome} was deleted.`,
+  secaoCriada: nome => `${nome} is now at the top of Home.`,
+  fixadaNaTrilha: nome => `${nome} is on the rail.`,
+  trocouNaTrilha: (nome, saiu) => `${nome} took the place of ${saiu} on the rail. ${saiu} moved to More.`,
+  maisAcoes: nome => `More actions for ${nome}`,
+  adicionarEm: nome => `Add to ${nome}`,
+  nadaParaAdicionar: 'Everything is already in this section.',
+  criarAlgo: 'Create',
 
   todasTitulo: 'All categories',
   todasDescricao: n => `${n} categories in this workspace. Pin the ones you use to keep them in the menu.`,
@@ -840,7 +1006,7 @@ const es: TextosDaTela = {
   criarCategoria: 'Categoría',
   criarSecao: 'Sección de menú',
   criarAberto: o => `Abriría el formulario de ${o}.`,
-  areaTrabalho: 'Trabajo',
+  areaTrabalho: 'Inicio',
   areaDados: 'Datos',
   areaSecoes: 'Secciones',
 
@@ -901,6 +1067,61 @@ const es: TextosDaTela = {
   navegacao: 'Navegación del workspace',
   levadoParaTrilha: nome => `${nome} ahora tiene un ícono en el riel.`,
   levadoParaPainel: (nome, painel) => `${nome} ahora está dentro de ${painel}.`,
+
+  inicioPersonalizar: 'Personalizar la barra lateral',
+  personalizarTitulo: 'Personalizar',
+  personalizarDica: 'Elige qué aparece en el menú y en qué orden.',
+  abaNavegacao: 'Navegación',
+  abaInicio: 'Inicio',
+  abaSecoes: 'Secciones',
+  abaTemas: 'Temas',
+  navInicioDica: 'Inicio siempre queda en el riel. Al hacer clic se abren la página inicial y este menú.',
+  aparencia: 'Apariencia',
+  soIcones: 'Solo íconos',
+  iconesERotulos: 'Íconos y etiquetas',
+  inicioTravado: 'Siempre visible',
+  secoesOcultasTitulo: 'Secciones ocultas',
+  todasSecoesMostradas: 'Todas las secciones están visibles.',
+  criarSecaoRotulo: 'Crear sección',
+  criarSecaoTitulo: 'Crear sección',
+  criarSecaoPlaceholder: 'Ej.: Comercial, Jurídico, Finanzas',
+  criarSecaoBotao: 'Crear',
+  renomearSecaoTitulo: 'Renombrar sección',
+  salvarSecao: 'Guardar',
+  escolherIcone: 'Elegir ícono',
+  temaClaro: 'Claro',
+  temaEscuro: 'Oscuro',
+  temaAuto: 'Automático',
+  corDeDestaque: 'Color de acento',
+  corDica: 'Solo para ti. La marca del workspace no cambia.',
+  cores: { fuchsia: 'Magenta', purple: 'Morado', cyan: 'Azul', teal: 'Verde azulado' },
+  mais: 'Más',
+  personalizarNavegacao: 'Personalizar navegación',
+  fixarNaTrilha: 'Fijar en el riel',
+  desafixarDaTrilha: 'Quitar del riel',
+  fixarNoInicio: 'Fijar en Inicio',
+  ocultarDoInicio: 'Quitar de Inicio',
+  adicionarASecao: 'Agregar a la sección',
+  adicionarA: nome => `Agregar a ${nome}`,
+  buscarTelas: 'Buscar pantallas, menús y categorías...',
+  grupoTelas: 'Pantallas',
+  grupoMenus: 'Menús con pantallas',
+  grupoCategorias: 'Categorías',
+  novaTelaAqui: 'Crear una pantalla nueva',
+  ordenarSecao: 'Ordenar sección',
+  ordemAdicionadas: 'Agregadas al final',
+  reordenarSecoes: 'Reordenar secciones',
+  excluirSecao: 'Eliminar sección',
+  ocultarSecao: 'Ocultar sección',
+  removerDaSecao: 'Quitar de la sección',
+  secaoExcluida: nome => `${nome} fue eliminada.`,
+  secaoCriada: nome => `${nome} quedó arriba de todo en Inicio.`,
+  fixadaNaTrilha: nome => `${nome} está en el riel.`,
+  trocouNaTrilha: (nome, saiu) => `${nome} ocupó el lugar de ${saiu} en el riel. ${saiu} pasó a Más.`,
+  maisAcoes: nome => `Más acciones de ${nome}`,
+  adicionarEm: nome => `Agregar a ${nome}`,
+  nadaParaAdicionar: 'Todo ya está en esta sección.',
+  criarAlgo: 'Crear',
 
   todasTitulo: 'Todas las categorías',
   todasDescricao: n => `${n} categorías en este workspace. Fija las que usas para que queden en el menú.`,
