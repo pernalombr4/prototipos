@@ -288,8 +288,9 @@ const itensDeCriar = computed(() => [[
   { label: t.value.formItemTitulo, icon: 'i-lucide-menu', onSelect: () => abrirEditor('item') },
 ]])
 
-function abrirEditor(form: 'secao' | 'item' | null) {
+function abrirEditor(form: 'secao' | 'item' | null, id: string | null = null) {
   formInicial.value = form
+  editarId.value = id
   editando.value = true
 }
 
@@ -312,6 +313,8 @@ function abrirMaquete(modo: 'item' | 'tarefa' | 'categoria') {
 const vendoTodas = ref(false)
 const editando = ref(false)
 const formInicial = ref<'secao' | 'item' | null>(null)
+/* Id do no que o "Renomear" do botao direito mandou editar. Rodada 16. */
+const editarId = ref<string | null>(null)
 const vendoHoje = ref(false)
 const buscando = ref(false)
 
@@ -511,6 +514,8 @@ function emBreve() {
             @busca="buscando = true"
             @item="abrirItemDeConfiguracao"
             @ajuda="avisarAjuda"
+            @renomear="id => abrirEditor(null, id)"
+            @personalizar="abrirEditor(null)"
           />
           <template v-else>
           <!--
@@ -594,6 +599,7 @@ function emBreve() {
       :t="t"
       :modelo="modelo"
       :abrir-formulario="formInicial"
+      :editar-id="editarId"
     />
 
     <UModal v-model:open="buscando" :ui="{ content: 'max-w-xl' }">

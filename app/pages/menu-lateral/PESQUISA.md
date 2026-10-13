@@ -356,3 +356,66 @@ pesquisa, e a spec pede "descrito em passos, não em adjetivo". O que ambos faze
 está coberto pelos padrões 1 e 3 acima, é manter a administração em área separada (o
 `⚙ Settings` do HubSpot é outra navegação inteira) e favoritar o que é usado com frequência
 (`Starred` do Asana).
+
+---
+
+## Botão direito num ícone da trilha: o que os outros põem ali
+
+Pergunta da rodada 16: "clicando com botao direito num icone da trilha, o que acha que deve
+aparecer? implemente com base no que outros sisetmas fazem. pesquise."
+
+### O que cada um faz
+
+**Microsoft Teams**, barra de aplicativos (a trilha de ícones à esquerda). O botão direito num
+ícone abre **Fixar**, **Desafixar**, **Mover para cima**, **Mover para baixo** e **Personalizar
+barra de aplicativos**. Dois detalhes importam para o ENSPACE:
+
+- o que vem de fábrica (Chat, Equipes, Chamadas) **não se exclui**: para esses o menu oferece
+  só desafixar;
+- desafixar **não desinstala**: o aplicativo sai da trilha e continua acessível em "mais".
+
+Fonte: [Microsoft Support](https://support.microsoft.com/topic/10b32523-75ec-4682-813d-852c65da5550)
+e o guia de TI da [UT Dallas](https://atlas.utdallas.edu/TDClient/30/Portal/KB/Article/270/How-to-Pin-Apps-on-Microsoft-Teams-Client),
+que lista os itens do menu.
+
+**VS Code**, barra de atividades. O botão direito traz ação de **layout**, como
+`Move Primary Side Bar Right`, e a lista de visões que se pode **mostrar ou esconder** ali.
+A barra é tratada como configuração de espaço de trabalho, não como conteúdo.
+Fonte: [Custom Layout](https://code.visualstudio.com/docs/configure/custom-layout).
+
+**Slack**, barra lateral. O próprio Slack descreve os menus de botão direito como "as listas de
+ações que aparecem ao clicar com o botão direito nos nomes dos canais", e conta que os
+reagrupou em seções para serem lidos mais rápido e para evitar o clique errado. No espaço
+vazio da barra, o botão direito oferece **criar seção**.
+Fontes: [Slack blog](https://slack.com/intl/en-in/blog/news/simpler-streamlined-sidebar) e
+[TemperStack](https://www.temperstack.com/learn/slack/organize-sidebar/).
+
+**Notion**, página na barra lateral. O menu traz **Renomear**, **Duplicar**, **Copiar link**,
+**Mover para** e **Excluir**, e o favorito sai por **Remove from Favorites** no mesmo menu.
+Fonte: [Notion Help](https://www.notion.com/help/intro-to-workspaces).
+
+### O padrão, em cinco linhas
+
+1. **Renomear vem primeiro.** É o item mais usado em todos.
+2. **Tirar da barra não é excluir.** Teams separa desafixar de desinstalar; Notion separa
+   remover do favorito de excluir a página.
+3. **Mover para cima e para baixo** existe mesmo onde já se arrasta: é o caminho de quem não
+   quer arrastar.
+4. **O que é de fábrica tem menu menor.** Nativo não se exclui.
+5. **A última linha leva para a configuração da barra inteira** ("Personalizar barra de
+   aplicativos", "Criar seção"). O menu de contexto é a porta discreta do editor, e é por isso
+   que nenhum deles precisa de um botão fixo "editar menu" no meio da barra.
+
+### O que virou o menu do ENSPACE
+
+| Item | De onde veio | O que faz aqui |
+|---|---|---|
+| Renomear | Notion, ClickUp | abre a camada do menu com a seção aberta para edição |
+| Tirar da trilha / Pôr na trilha | Teams (fixar e desafixar) | troca o `lugar` da seção entre a trilha e o painel de Dados |
+| Mover para cima / para baixo | Teams | o mesmo que Alt mais as setas |
+| Copiar link | Notion | copia o caminho da área |
+| Personalizar o menu | Teams, Slack | abre a camada do menu na árvore |
+| Excluir | Notion | só para seção do workspace |
+
+Fora: **duplicar** (duas seções iguais no menu confundem mais do que ajudam) e **silenciar
+notificações** (o ENSPACE não notifica por seção de menu).

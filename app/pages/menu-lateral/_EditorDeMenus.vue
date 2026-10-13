@@ -28,6 +28,8 @@ const props = defineProps<{
   modelo: 'barra' | 'trilha'
   /** Quando o editor abre vindo do "+ Criar", já abre o formulário certo. */
   abrirFormulario?: 'secao' | 'item' | null
+  /** Id do nó a editar, quando a camada foi aberta por "Renomear". Rodada 16. */
+  editarId?: string | null
 }>()
 const aberto = defineModel<boolean>('open', { default: false })
 const toast = useToast()
@@ -48,11 +50,35 @@ const secaoDoNovoItem = ref('')
  * E onMounted, e nao `immediate`: com `immediate` o watch roda no meio do setup,
  * antes de `secoesQueRecebem` existir, e o componente inteiro quebra.
  */
+/** O nó que está sendo editado, quando a camada abriu por "Renomear". */
+const noEmEdicao = computed(() => {
+  if (!props.editarId) return null
+  for (const no of menu.rascunho.value) {
+    if (no.id === props.editarId) return no
+    const filho = (no.filhos ?? []).find(f => f.id === props.editarId)
+    if (filho) return filho
+  }
+  return null
+})
+
 function abrirFormInicial() {
-  if (!aberto.value || !props.abrirFormulario) return
+  if (!aberto.value) return
+
+  if (noEmEdicao.value) {
+    modoDoForm.value = noEmEdicao.value.tipo === 'secao' ? 'secao' : 'item'
+    formAberto.value = true
+    return
+  }
+
+  if (!props.abrirFormulario) return
   modoDoForm.value = props.abrirFormulario
   secaoDoNovoItem.value = props.abrirFormulario === 'item' ? (secoesQueRecebem.value[0]?.id ?? '') : ''
   formAberto.value = true
+}
+
+function receberEditado(id: string, dados: Record<string, unknown>) {
+  menu.editarNo(id, dados)
+  toast.add({ title: props.t.menuEditado, icon: 'i-lucide-check', color: 'neutral' })
 }
 
 watch(aberto, abrirFormInicial)
@@ -235,7 +261,11 @@ function classeDaMarca(id: string, comMeio = false) {
 <template>
   <UModal
     v-model:open="aberto"
-    :title="formAberto ? (modoDoForm === 'secao' ? props.t.formSecaoTitulo : props.t.formItemTitulo) : props.t.editorTitulo"
+    :title="formAberto
+      ? (noEmEdicao
+        ? props.t.formEditarTitulo(noEmEdicao.rotulo ?? '')
+        : (modoDoForm === 'secao' ? props.t.formSecaoTitulo : props.t.formItemTitulo))
+      : props.t.editorTitulo"
     :description="formAberto ? (modoDoForm === 'secao' ? props.t.formSecaoDescricao : props.t.formItemDescricao) : props.t.editorDescricao"
     :ui="{ content: 'max-w-3xl' }"
   >
@@ -284,7 +314,9 @@ function classeDaMarca(id: string, comMeio = false) {
         :modo="modoDoForm"
         :modelo="props.modelo"
         :secoes="secoesQueRecebem"
+        :no="noEmEdicao"
         @criado="receberCriado"
+        @editado="receberEditado"
         @fechar="voltarParaArvore"
       />
 

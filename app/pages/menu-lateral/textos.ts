@@ -76,6 +76,18 @@ export interface TextosDaTela {
   // a porta do editor, na busca (rodada 11)
   voltarParaMenu: string
 
+  // botão direito na trilha (rodada 16)
+  formEditarTitulo: (nome: string) => string
+  menuEditado: string
+  renomear: string
+  tirarDaTrilha: string
+  porNaTrilha: string
+  moverCima: string
+  moverBaixo: string
+  copiarLink: string
+  linkCopiado: string
+  personalizarMenu: string
+
   // as três portas do "+" que moram em outras telas (rodada 15)
   maqueteItemDescricao: string
   maqueteTarefaDescricao: string
@@ -340,6 +352,17 @@ const ptBR: TextosDaTela = {
   },
 
   voltarParaMenu: 'Voltar para o menu',
+
+  formEditarTitulo: nome => `Editar ${nome}`,
+  menuEditado: 'Alterado. Salve para valer para todo mundo.',
+  renomear: 'Renomear',
+  tirarDaTrilha: 'Tirar da trilha',
+  porNaTrilha: 'Pôr na trilha',
+  moverCima: 'Mover para cima',
+  moverBaixo: 'Mover para baixo',
+  copiarLink: 'Copiar link',
+  linkCopiado: 'Link copiado.',
+  personalizarMenu: 'Personalizar o menu',
 
   maqueteItemDescricao: 'Abre o formulário da categoria escolhida, com os campos que ela tem.',
   maqueteTarefaDescricao: 'Abre a tarefa rápida, que vive fora de qualquer categoria.',
@@ -613,6 +636,17 @@ const en: TextosDaTela = {
 
   voltarParaMenu: 'Back to the menu',
 
+  formEditarTitulo: nome => `Edit ${nome}`,
+  menuEditado: 'Changed. Save to make it count for everyone.',
+  renomear: 'Rename',
+  tirarDaTrilha: 'Remove from the rail',
+  porNaTrilha: 'Put on the rail',
+  moverCima: 'Move up',
+  moverBaixo: 'Move down',
+  copiarLink: 'Copy link',
+  linkCopiado: 'Link copied.',
+  personalizarMenu: 'Customize the menu',
+
   maqueteItemDescricao: 'Opens the form of the chosen category, with the fields it has.',
   maqueteTarefaDescricao: 'Opens the quick task, which lives outside any category.',
   maqueteCategoriaDescricao: 'Opens category creation, which then shows up in the menu on its own.',
@@ -884,6 +918,17 @@ const es: TextosDaTela = {
   },
 
   voltarParaMenu: 'Volver al menú',
+
+  formEditarTitulo: nome => `Editar ${nome}`,
+  menuEditado: 'Cambiado. Guarda para que valga para todos.',
+  renomear: 'Renombrar',
+  tirarDaTrilha: 'Quitar de la franja',
+  porNaTrilha: 'Poner en la franja',
+  moverCima: 'Mover hacia arriba',
+  moverBaixo: 'Mover hacia abajo',
+  copiarLink: 'Copiar enlace',
+  linkCopiado: 'Enlace copiado.',
+  personalizarMenu: 'Personalizar el menú',
 
   maqueteItemDescricao: 'Abre el formulario de la categoría elegida, con los campos que tiene.',
   maqueteTarefaDescricao: 'Abre la tarea rápida, que vive fuera de cualquier categoría.',

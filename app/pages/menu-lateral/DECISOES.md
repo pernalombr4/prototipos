@@ -389,6 +389,69 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 16 · 13/10/2026
+
+**O que ela pediu**, literal:
+
+> "clicando com botao direito num icone da trilha, o que acha que deve aparecer? implemente
+> com base no que outros sisetmas fazem. pesquise."
+
+A pesquisa está em [PESQUISA.md](PESQUISA.md), seção "Botão direito num ícone da trilha": Teams,
+VS Code, Slack e Notion, com link para cada fonte. O padrão que os quatro repetem:
+
+1. renomear vem primeiro;
+2. tirar da barra não é excluir;
+3. mover para cima e para baixo existe mesmo onde já se arrasta;
+4. o que é de fábrica tem menu menor;
+5. a última linha leva para a configuração da barra inteira.
+
+#### O menu que ficou
+
+| Item | O que faz | Vale para |
+|---|---|---|
+| Renomear | abre a camada do menu com a seção aberta para editar | seção |
+| Tirar da trilha / Pôr na trilha | troca o `lugar` entre a trilha e o painel de Dados | seção |
+| Mover para cima / para baixo | o mesmo que Alt mais as setas | seção |
+| Copiar link | copia o caminho da área | todas |
+| Personalizar o menu | abre a camada do menu na árvore | todas |
+| Excluir | apaga a seção e as telas dela | só do workspace |
+
+**Área nativa tem menu de duas linhas**: copiar link e personalizar o menu. É a regra do Teams,
+onde o que vem de fábrica não se desafixa nem se exclui. Verificado: `Trabalho` mostra duas
+linhas, `Conhecimento` mostra as seis.
+
+**"Tirar da trilha" não apaga nada**, e é a diferença que a pesquisa mais insiste. Verificado:
+o ícone sai da trilha e a seção aparece inteira dentro do painel de Dados. Descartar devolve.
+
+#### O menu de contexto é a porta discreta do editor
+
+Na rodada 12 ela mandou tirar o botão "Editar menu" do meio da barra. A pesquisa explica por
+que nenhum dos quatro tem botão assim: a porta do editor vive no botão direito, na última
+linha. É o "Personalizar barra de aplicativos" do Teams e o "criar seção" do Slack. Agora o
+ENSPACE tem a mesma porta, e ela não ocupa um pixel da barra.
+
+#### Renomear virou edição de verdade
+
+O formulário só sabia criar. Agora ele abre preenchido com o que o nó tem, e salvar grava por
+cima: nome, ícone, escopo, lugar na trilha e, no menu, o tipo. O título da camada vira
+"Editar \<nome\>", e a moldura continua a mesma da rodada 15.
+
+#### Um buraco que a rodada abriu, e fechou
+
+O botão direito mexe no rascunho, e **no modelo de trilha não havia onde salvar**: o cartão
+flutuante só existia na barra única. Dá para tirar da trilha, mover e excluir, e não havia
+como gravar nem desfazer. O cartão passou a existir nos dois modelos, com os dois alcances.
+
+**A evidência:**
+[`evidencias/proposta-botao-direito-trilha.jpg`](evidencias/proposta-botao-direito-trilha.jpg).
+
+#### Fica em aberto
+
+- **O mesmo menu na barra única.** Ali o botão direito ainda abre o menu do navegador. São os
+  mesmos objetos e deveria ser o mesmo menu; é a próxima costura.
+- **Renomear no menu, e não só na seção.** O formulário já edita menu; falta a porta, que no
+  modelo de trilha fica no painel, não na trilha.
+
 ### Rodada 15 · 13/10/2026
 
 **O que ela pediu**, literal:

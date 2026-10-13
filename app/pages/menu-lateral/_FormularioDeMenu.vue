@@ -36,13 +36,18 @@ const props = defineProps<{
   modelo: 'barra' | 'trilha'
   /** Seções que podem receber um item. Só as do workspace: regra R4. */
   secoes: { id: string, rotulo: string, escopo: string[] }[]
+  /** Quando vem preenchido, o formulário EDITA em vez de criar. Rodada 16. */
+  no?: NoDoMenu | null
 }>()
 
 const aberto = defineModel<boolean>('open', { default: false })
 const emit = defineEmits<{
   criado: [no: NoDoMenu & { lugar?: LugarDaSecao, escopo: string[] }]
+  editado: [id: string, dados: Partial<NoDoMenu>]
   fechar: []
 }>()
+
+const editando = computed(() => !!props.no)
 
 const nome = ref('')
 const icone = ref('folder')
@@ -64,6 +69,22 @@ const tentouSalvar = ref(false)
  */
 watch(aberto, (v) => {
   if (!v) return
+  tentouSalvar.value = false
+
+  /* Editando: o formulário nasce com o que o nó tem hoje. */
+  if (props.no) {
+    nome.value = props.no.rotulo ?? ''
+    icone.value = (props.no.icone ?? 'i-lucide-folder').replace('i-lucide-', '')
+    lugar.value = (props.no.lugar ?? 'trilha') as LugarDaSecao
+    painelAlvo.value = props.no.painel ?? 'trabalho'
+    escopo.value = [...(props.no.escopo ?? [])]
+    tipo.value = props.no.tipoDeMenu ?? 'consultas'
+    caminho.value = ''
+    categorias.value = []
+    restringirItem.value = !!props.no.escopo?.length
+    return
+  }
+
   nome.value = ''
   icone.value = props.modo === 'secao' ? 'folder' : 'file-text'
   lugar.value = 'trilha'
@@ -74,7 +95,6 @@ watch(aberto, (v) => {
   caminho.value = ''
   categorias.value = []
   restringirItem.value = false
-  tentouSalvar.value = false
 }, { immediate: true })
 
 const ehSecao = computed(() => props.modo === 'secao')
@@ -126,6 +146,17 @@ function alternarGrupo(id: string) {
 function salvar() {
   tentouSalvar.value = true
   if (erroDeNome.value || erroDeCaminho.value) return
+
+  if (props.no) {
+    emit('editado', props.no.id, {
+      rotulo: nome.value.trim(),
+      icone: `i-lucide-${icone.value}`,
+      escopo: escopoEfetivo.value,
+      ...(ehSecao.value ? { lugar: lugar.value, painel: painelAlvo.value } : { tipoDeMenu: tipo.value }),
+    })
+    emit('fechar')
+    return
+  }
 
   emit('criado', {
     id: `novo-${Date.now()}`,

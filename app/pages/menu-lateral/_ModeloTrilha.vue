@@ -43,9 +43,12 @@ const emit = defineEmits<{
   busca: []
   item: [id: string, rotulo: string]
   ajuda: [rotulo: string]
+  renomear: [id: string]
+  personalizar: []
 }>()
 
 const menu = useMenuDoWorkspace()
+const toast = useToast()
 const area = ref('trabalho')
 
 function rotuloDe(no: NoDoMenu) {
@@ -102,6 +105,89 @@ function contadorDe(no: NoDoMenu) {
   if (no.chave === 'inbox') return menu.naoLidas.value || undefined
   if (no.chave === 'tarefas') return 3
   return undefined
+}
+
+/*
+ * ============ BOTÃO DIREITO NO ÍCONE DA TRILHA (rodada 16) ============
+ *
+ * Os itens e a ordem saem da pesquisa, na seção "Botão direito num ícone da
+ * trilha" do PESQUISA.md: renomear primeiro (Notion), tirar da trilha separado
+ * de excluir (o desafixar do Teams, que não desinstala), mover para cima e
+ * para baixo mesmo havendo arraste (Teams), copiar link (Notion) e, na última
+ * linha, a porta para a configuração da barra inteira (o "Personalizar barra
+ * de aplicativos" do Teams, o "criar seção" do Slack).
+ *
+ * Área nativa tem menu menor, como no Teams: o que vem de fábrica não se tira
+ * da barra nem se exclui.
+ */
+function secaoDaArea(id: string) {
+  if (!id.startsWith('sec:')) return null
+  return menu.secoes.value.find(x => x.id === id.slice(4)) ?? null
+}
+
+/*
+ * O CARTÃO DE SALVAR TAMBÉM AQUI (rodada 16).
+ *
+ * Até agora ele só existia na barra única, e isso virou buraco no momento em
+ * que o botão direito passou a mudar o menu daqui: dá para tirar da trilha,
+ * mover e excluir, e não havia onde salvar nem como desfazer.
+ */
+function salvarMenu(alcance: 'todos' | 'local') {
+  menu.salvar(alcance)
+  toast.add({
+    title: alcance === 'todos' ? props.t.salvoParaTodos : props.t.salvoSoParaMim,
+    icon: alcance === 'todos' ? 'i-lucide-users' : 'i-lucide-user',
+    color: 'neutral',
+  })
+}
+
+async function copiarLink(rotulo: string) {
+  const caminho = `${workspace.nome} / ${rotulo}`
+  try {
+    await navigator.clipboard.writeText(caminho)
+  }
+  catch {
+    /* Sem permissão de área de transferência o aviso continua valendo. */
+  }
+  toast.add({ title: props.t.linkCopiado, icon: 'i-lucide-link', color: 'neutral' })
+}
+
+function itensDeContexto(a: { id: string, rotulo: string }) {
+  const secao = secaoDaArea(a.id)
+  const daCasa = !!secao && menu.origemDe(secao) === 'workspace'
+
+  const doMenu = secao
+    ? [[
+        { label: props.t.renomear, icon: 'i-lucide-pencil', onSelect: () => emit('renomear', secao.id) },
+        {
+          label: secao.lugar === 'trilha' ? props.t.tirarDaTrilha : props.t.porNaTrilha,
+          icon: secao.lugar === 'trilha' ? 'i-lucide-pin-off' : 'i-lucide-pin',
+          onSelect: () => menu.alternarLugar(secao.id),
+        },
+      ], [
+        { label: props.t.moverCima, icon: 'i-lucide-arrow-up', onSelect: () => menu.mover(secao.id, -1) },
+        { label: props.t.moverBaixo, icon: 'i-lucide-arrow-down', onSelect: () => menu.mover(secao.id, 1) },
+      ]]
+    : []
+
+  const fim = [
+    { label: props.t.copiarLink, icon: 'i-lucide-link', onSelect: () => copiarLink(a.rotulo) },
+  ]
+
+  const configurar = [
+    { label: props.t.personalizarMenu, icon: 'i-lucide-list-tree', onSelect: () => emit('personalizar') },
+  ]
+
+  if (daCasa && secao) {
+    configurar.push({
+      label: props.t.excluir,
+      icon: 'i-lucide-trash-2',
+      color: 'error' as const,
+      onSelect: () => menu.excluir(secao.id),
+    } as never)
+  }
+
+  return [...doMenu, fim, configurar]
 }
 
 const tituloDaArea = computed(() => areas.value.find(a => a.id === area.value)?.rotulo ?? '')
@@ -224,9 +310,13 @@ watch(areas, (lista) => {
         </button>
       </UTooltip>
 
-      <button
+      <UContextMenu
         v-for="a in areas"
         :key="a.id"
+        :items="itensDeContexto(a)"
+        class="w-full"
+      >
+      <button
         type="button"
         class="flex w-full shrink-0 flex-col items-center gap-0.5 rounded-lg px-1 py-2 transition-colors"
         :class="[
@@ -247,6 +337,7 @@ watch(areas, (lista) => {
         />
         <span class="w-full truncate text-center text-[10px] font-medium leading-tight">{{ a.rotulo }}</span>
       </button>
+      </UContextMenu>
 
       <div class="min-h-2 flex-1" />
 
@@ -283,7 +374,46 @@ watch(areas, (lista) => {
     </div>
 
     <!-- ==================== O PAINEL DA ÁREA ==================== -->
-    <div class="flex min-w-0 flex-1 flex-col">
+    <div class="relative flex min-w-0 flex-1 flex-col">
+      <div v-if="menu.alterado.value" class="pointer-events-none absolute inset-x-2 bottom-2 z-30">
+        <div class="pointer-events-auto animate-[entrada_0.2s_ease-out_both] rounded-xl border border-default bg-default p-2.5 shadow-lg ring-1 ring-warning/30">
+          <p class="mb-0.5 flex items-center gap-1.5 text-xs font-semibold text-highlighted">
+            <span class="size-2 shrink-0 rounded-full bg-warning" />
+            {{ props.t.naoSalvoTitulo }}
+          </p>
+          <p class="mb-2 text-xs leading-snug text-muted">{{ props.t.naoSalvoDica }}</p>
+
+          <div class="space-y-1.5">
+            <UButton
+              v-if="props.podeConfigurar"
+              :label="props.t.salvarTodos"
+              icon="i-lucide-users"
+              size="xs"
+              color="primary"
+              block
+              @click="salvarMenu('todos')"
+            />
+            <div class="flex items-center gap-1.5">
+              <UButton
+                :label="props.t.salvarLocal"
+                icon="i-lucide-user"
+                size="xs"
+                color="neutral"
+                :variant="props.podeConfigurar ? 'subtle' : 'solid'"
+                class="flex-1 justify-center"
+                @click="salvarMenu('local')"
+              />
+              <UButton
+                :label="props.t.descartar"
+                size="xs"
+                color="neutral"
+                variant="ghost"
+                @click="menu.descartar()"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="flex h-12 shrink-0 items-center gap-2 border-b border-default px-3">
         <h2 class="min-w-0 truncate text-sm font-bold text-highlighted">{{ tituloDaArea }}</h2>
         <UBadge v-if="seloDaArea" :label="seloDaArea" size="sm" color="neutral" variant="subtle" class="shrink-0" />

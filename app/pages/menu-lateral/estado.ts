@@ -350,6 +350,29 @@ export function useMenuDoWorkspace() {
     marcarTocado(id)
   }
 
+  /*
+   * EDITAR UM NÓ QUE JÁ EXISTE (rodada 16).
+   *
+   * Renomear é o primeiro item do menu de botão direito em todos os produtos
+   * que a pesquisa olhou, e até aqui o formulário só sabia criar. Como todo o
+   * resto, isto mexe no rascunho: a bolinha acende e Descartar devolve.
+   */
+  function editarNo(id: string, dados: Partial<NoDoMenu>) {
+    const no = acharNo(rascunho.value, id)
+    if (!no) return
+    Object.assign(no, dados)
+    marcarTocado(id)
+  }
+
+  /** Tirar da trilha ou pôr de volta: o "desafixar" do Teams. */
+  function alternarLugar(id: string) {
+    const no = acharNo(rascunho.value, id)
+    if (!no || no.tipo !== 'secao') return
+    no.lugar = no.lugar === 'trilha' ? 'painel' : 'trilha'
+    if (no.lugar === 'painel') no.painel = no.painel ?? 'dados'
+    marcarTocado(id)
+  }
+
   function adicionarSecao(no: NoDoMenu) {
     rascunho.value.push(no)
     marcarTocado(no.id)
@@ -400,6 +423,8 @@ export function useMenuDoWorkspace() {
     adicionarSecao,
     adicionarItem,
     excluir,
+    editarNo,
+    alternarLugar,
     localizar,
     destinos,
     secaoDeCategorias,
