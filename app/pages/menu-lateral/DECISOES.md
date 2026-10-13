@@ -452,6 +452,10 @@ se exclui daqui, porque não nasceram aqui. `Auditoria`, que é nativa, mostra s
   lugar certo para "o componente nasceu já aberto". Era o que fazia `+ Criar > Novo menu`
   abrir o editor sem o formulário.
 
+**A evidência:** [`evidencias/proposta-menu-e-tela.jpg`](evidencias/proposta-menu-e-tela.jpg).
+O formulário "Novo menu" com o campo Tipo de menu, a frase que diz o que ele é, e a prévia
+mostrando as duas metades: a linha dentro de Análise e, embaixo, o que abre ao clicar.
+
 #### Fica em aberto
 
 - **Tela do workspace dentro de seção nativa não some no modo "Só nativo".** O filtro de
