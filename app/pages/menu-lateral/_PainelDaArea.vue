@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useLimites } from './limites'
+import MaisDaSecao from './_MaisDaSecao.vue'
 import LinhaDeMenu from './_LinhaDeMenu.vue'
 import SecaoDeMenu from './_SecaoDeMenu.vue'
 import MenuInicio from './_MenuInicio.vue'
@@ -250,6 +252,18 @@ function largarCategoria(alvoId: number, posicao: 'antes' | 'depois') {
    O BOTÃO DIREITO (rodada 14)
 ================================================================== */
 
+const limites = useLimites()
+
+/*
+ * O limite da seção (rodada 19): o que passa dele vira "Mais N". Filtrando
+ * não se corta, porque quem filtra quer ver tudo o que casou.
+ */
+function exibidos<T>(id: string, lista: T[]): T[] {
+  return filtrando.value ? lista : limites.cortar(id, lista).visiveis
+}
+function restoDe(id: string, lista: unknown[]) {
+  return filtrando.value ? 0 : limites.cortar(id, lista).resto
+}
 const acoes = useAcoesDoMenu({
   t: () => props.t,
   podeConfigurar: () => props.podeConfigurar,
@@ -307,6 +321,8 @@ const acoesDeCategorias = computed<Acoes>(() => {
     },
   ], [
     acoes.itemDeOrdem(props.ordem, opcoesDeOrdemPlanas.value, v => emit('ordem', v as typeof props.ordem)),
+    // Rodada 19: quantos itens a seção mostra. Em Categorias o padrão é 5.
+    limites.itemMostrar('categorias', props.t),
     { label: props.t.verTodas(props.totalDeCategorias), icon: 'i-lucide-layout-grid', onSelect: () => emit('verTodas') },
   ]]
 })
@@ -378,10 +394,11 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
               :aberta="filtrando || aberta('favoritos')"
               :texto-recolher="props.t.recolherSecao(props.t.favoritos)"
               :texto-expandir="props.t.expandirSecao(props.t.favoritos)"
+              :acoes="props.flutuante ? undefined : [[limites.itemMostrar('favoritos', props.t)]]"
               @alternar="abrirFavoritos()"
             >
               <LinhaDeMenu
-                v-for="(c, i) in favoritasF"
+                v-for="(c, i) in exibidos('favoritos', favoritasF)"
                 :key="c.id"
                 :icone="c.icon ?? 'i-lucide-folder'"
                 :rotulo="c.name"
@@ -396,6 +413,7 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
                 @selecionar="emit('categoria', c)"
                 @alternar-estrela="emit('alternarFixar', c.id)"
               />
+              <MaisDaSecao :t="props.t" :id="'favoritos'" :resto="restoDe('favoritos', favoritasF)" :total="(favoritasF).length" />
             </SecaoDeMenu>
 
             <SecaoDeMenu
@@ -488,7 +506,7 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
                 @arrastar-fim="arraste.terminar()"
               >
                 <LinhaDeMenu
-                  v-for="(item, i) in (s.filhos ?? [])"
+                  v-for="(item, i) in exibidos(s.id, (s.filhos ?? []))"
                   :key="item.id"
                   :icone="item.icone"
                   :rotulo="rotuloDe(item)"
@@ -510,6 +528,7 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
                   @arrastar-fim="arraste.terminar()"
                   @mover="p => menu.mover(item.id, p)"
                 />
+                <MaisDaSecao :t="props.t" :id="s.id" :resto="restoDe(s.id, (s.filhos ?? []))" :total="((s.filhos ?? [])).length" />
               </SecaoDeMenu>
             </template>
           </template>

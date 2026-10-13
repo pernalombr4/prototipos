@@ -40,6 +40,7 @@ import {
 import { useMenuDoWorkspace, useMenuRecolhido } from './estado'
 import { useRenomeando } from './acoes'
 import { useJanelasDaTrilha } from './trilha'
+import { useLimites } from './limites'
 import { useJanelasDeCasos } from './casos'
 import { textos } from './textos'
 
@@ -161,13 +162,20 @@ function trocarOrdem(v: 'uso' | 'alfabetica' | 'recentes' | 'manual') {
 }
 
 /**
- * O TETO da seção. Cinco, para a seção inteira mais os favoritos caberem sem
- * rolagem num notebook. O Attio mostra seis listas por padrão; aqui cinco, porque
+ * O TETO da seção (o padrão, desde a rodada 19). Cinco, para a seção inteira
+ * mais os favoritos caberem sem rolagem num notebook. O Attio mostra seis listas por padrão; aqui cinco, porque
  * acima da seção ainda existem os favoritos, que o Attio põe em outro lugar.
  * O resto vive na camada "ver todas".
  */
-const TETO_DA_SECAO = 5
-const recorte = computed(() => naoFavoritas.value.slice(0, TETO_DA_SECAO))
+/*
+ * Rodada 19: o teto deixou de ser fixo. É o "Mostrar na seção" de
+ * Categorias (5, 10, 15, 30 ou Todos), e 5 continua sendo o padrão.
+ */
+const limites = useLimites()
+const recorte = computed(() => {
+  const l = limites.limite('categorias')
+  return l === 'todos' ? naoFavoritas.value : naoFavoritas.value.slice(0, l)
+})
 
 /* ------------------------------------------------------------------
    ANDAIME: o modelo de navegação. No produto só um dos dois existe; os
@@ -416,6 +424,87 @@ function alternarRecolhido() {
   levarFocoParaBarra(() => { recolhido.value = !recolhido.value })
 }
 
+/* ============ ARRASTAR A BORDA (rodada 19) ============
+ *
+ *   "com o menu aberto, eu devo poder arrastar a lateral, como no clickup,
+ *    expandindo ainda mais ele (até um limite saudável) ou recolhendo. se eu
+ *    recolher passando de um limite mínimo, ele minimiza o menu como se eu
+ *    tivesse clicado já no botão de minimizar" (Mikaela)
+ *
+ * Os limites, em pixels:
+ *   mínimo   o menor em que os rótulos ainda leem ("Solicitações de compra"
+ *            corta, mas "Fornecedores" e os nomes das seções inteiros);
+ *   máximo   pouco mais que o dobro do mínimo: daí em diante a barra rouba
+ *            a tela sem mostrar nada a mais, porque os nomes já cabem;
+ *   recolhe  abaixo disto, soltar recolhe. Entre ele e o mínimo a borda para
+ *            no mínimo e o menu esmaece: é o aviso de "soltando aqui, fecha",
+ *            com a chance de voltar antes de soltar.
+ * A trilha soma os 72 px dela às medidas do painel.
+ */
+const MEDIDAS = {
+  barra: { padrao: 280, min: 220, max: 440, recolhe: 170 },
+  trilha: { padrao: 304, min: 264, max: 480, recolhe: 210 },
+} as const
+const larguras = useState<Record<'barra' | 'trilha', number>>('menu-larguras', () => ({ barra: 280, trilha: 304 }))
+const medidas = computed(() => MEDIDAS[modelo.value])
+const largura = computed(() => larguras.value[modelo.value])
+const redimensionando = ref(false)
+const vaiRecolher = ref(false)
+
+function definirLargura(v: number) {
+  const m = medidas.value
+  larguras.value = { ...larguras.value, [modelo.value]: Math.round(Math.min(m.max, Math.max(m.min, v))) }
+}
+
+function comecarArraste(e: PointerEvent) {
+  if (e.button !== 0) return
+  e.preventDefault()
+  const borda = e.currentTarget as HTMLElement
+  const inicioX = e.clientX
+  const inicioLargura = largura.value
+  borda.setPointerCapture(e.pointerId)
+  redimensionando.value = true
+  document.body.style.cursor = 'col-resize'
+  document.body.style.userSelect = 'none'
+
+  const mover = (ev: PointerEvent) => {
+    const bruto = inicioLargura + ev.clientX - inicioX
+    vaiRecolher.value = bruto < medidas.value.recolhe
+    definirLargura(bruto)
+  }
+  const soltar = () => {
+    borda.removeEventListener('pointermove', mover)
+    borda.removeEventListener('pointerup', soltar)
+    borda.removeEventListener('pointercancel', soltar)
+    document.body.style.cursor = ''
+    document.body.style.userSelect = ''
+    redimensionando.value = false
+    if (vaiRecolher.value) {
+      vaiRecolher.value = false
+      // Reabre do tamanho que tinha antes do gesto, não do mínimo.
+      definirLargura(inicioLargura)
+      alternarRecolhido()
+    }
+  }
+  borda.addEventListener('pointermove', mover)
+  borda.addEventListener('pointerup', soltar)
+  borda.addEventListener('pointercancel', soltar)
+}
+
+/** O mesmo pelo teclado: setas de 16 px; seta para a esquerda no mínimo recolhe. */
+function teclarBorda(e: KeyboardEvent) {
+  const m = medidas.value
+  if (e.key === 'ArrowRight') definirLargura(largura.value + 16)
+  else if (e.key === 'ArrowLeft') {
+    if (largura.value <= m.min) alternarRecolhido()
+    else definirLargura(largura.value - 16)
+  }
+  else if (e.key === 'Home') definirLargura(m.min)
+  else if (e.key === 'End') definirLargura(m.max)
+  else return
+  e.preventDefault()
+}
+
 defineShortcuts({
   meta_k: () => { buscando.value = !buscando.value },
   // O atalho do ClickUp para mostrar e esconder a barra.
@@ -542,10 +631,14 @@ function emBreve() {
         -->
         <aside
           ref="aside"
-          class="relative hidden shrink-0 overflow-hidden border-r border-default bg-elevated/40 transition-[width] duration-200 ease-out md:block"
-          :class="modelo === 'trilha'
-            ? (recolhido ? 'w-[4.5rem]' : 'w-[19rem]')
-            : (recolhido ? 'w-14' : 'w-[17.5rem]')"
+          class="relative hidden shrink-0 overflow-hidden border-r border-default bg-elevated/40 ease-out md:block"
+          :class="[
+            modelo === 'trilha' ? (recolhido ? 'w-[4.5rem]' : '') : (recolhido ? 'w-14' : ''),
+            redimensionando ? 'transition-none' : 'transition-[width] duration-200',
+            // Soltar aqui recolhe: o menu esmaece como aviso.
+            vaiRecolher ? 'opacity-50' : '',
+          ]"
+          :style="recolhido ? undefined : { width: `${largura}px` }"
           :aria-label="t.menuLateral"
         >
           <!-- MODELO ALTERNATIVO: trilha de icones mais painel da area. -->
@@ -644,6 +737,33 @@ function emBreve() {
             @recolher="alternarRecolhido"
           />
           </template>
+          <!--
+            A BORDA QUE SE ARRASTA (rodada 19). Invisível parada; acende no
+            hover, no foco e durante o arraste, e fica amarela quando soltar ali
+            vai recolher o menu.
+          -->
+          <div
+            v-if="!recolhido"
+            role="separator"
+            aria-orientation="vertical"
+            tabindex="0"
+            :aria-label="t.redimensionarMenu"
+            :aria-valuenow="largura"
+            :aria-valuemin="medidas.min"
+            :aria-valuemax="medidas.max"
+            :title="t.redimensionarDica"
+            class="group/borda absolute inset-y-0 right-0 z-40 w-2 cursor-col-resize touch-none outline-none"
+            @pointerdown="comecarArraste"
+            @dblclick="definirLargura(medidas.padrao)"
+            @keydown="teclarBorda"
+          >
+            <span
+              class="absolute inset-y-0 right-0 w-0.5 transition-colors duration-150"
+              :class="redimensionando
+                ? (vaiRecolher ? 'bg-warning' : 'bg-primary')
+                : 'bg-transparent group-hover/borda:bg-primary/50 group-focus-visible/borda:bg-primary'"
+            />
+          </div>
         </aside>
 
         <!-- conteúdo -->

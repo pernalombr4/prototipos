@@ -261,6 +261,15 @@ export interface TextosDaTela {
   casoExportado: (n: string) => string
   nadaNoWorkspace: string
 
+  // limite por seção e largura do menu (rodada 19)
+  mostrarNaSecao: string
+  limiteN: (n: number) => string
+  limiteTodos: string
+  maisN: (n: number) => string
+  mostrarMenos: string
+  redimensionarMenu: string
+  redimensionarDica: string
+
   // camada de todas as categorias
   todasTitulo: string
   todasDescricao: (n: number) => string
@@ -677,6 +686,13 @@ const ptBR: TextosDaTela = {
   casoCriado: n => `${n} está em Do seu workspace.`,
   casoExportado: n => `${n} foi baixado.`,
   nadaNoWorkspace: 'Nenhum caso de uso no workspace ainda. Crie um a partir do seu menu ou guarde um do ENSPACE.',
+  mostrarNaSecao: 'Mostrar na seção',
+  limiteN: n => `${n} itens`,
+  limiteTodos: 'Todos',
+  maisN: n => `Mais ${n}`,
+  mostrarMenos: 'Mostrar menos',
+  redimensionarMenu: 'Redimensionar o menu',
+  redimensionarDica: 'Arraste para alargar ou estreitar. Estreitando além do limite, o menu recolhe. Clique duas vezes para voltar ao tamanho padrão.',
 
   todasTitulo: 'Todas as categorias',
   todasDescricao: n => `${n} categorias neste workspace. Fixe as que você usa para elas ficarem no menu.`,
@@ -1137,6 +1153,13 @@ const en: TextosDaTela = {
   casoCriado: n => `${n} is in From your workspace.`,
   casoExportado: n => `${n} was downloaded.`,
   nadaNoWorkspace: 'No use cases in the workspace yet. Create one from your menu or save one from ENSPACE.',
+  mostrarNaSecao: 'Show in section',
+  limiteN: n => `${n} items`,
+  limiteTodos: 'All',
+  maisN: n => `${n} more`,
+  mostrarMenos: 'Show less',
+  redimensionarMenu: 'Resize the menu',
+  redimensionarDica: 'Drag to widen or narrow it. Narrow it past the limit and the menu collapses. Double-click to go back to the default size.',
 
   todasTitulo: 'All categories',
   todasDescricao: n => `${n} categories in this workspace. Pin the ones you use to keep them in the menu.`,
@@ -1597,6 +1620,13 @@ const es: TextosDaTela = {
   casoCriado: n => `${n} está en De tu workspace.`,
   casoExportado: n => `${n} se descargó.`,
   nadaNoWorkspace: 'Todavía no hay casos de uso en el workspace. Crea uno a partir de tu menú o guarda uno de ENSPACE.',
+  mostrarNaSecao: 'Mostrar en la sección',
+  limiteN: n => `${n} elementos`,
+  limiteTodos: 'Todos',
+  maisN: n => `${n} más`,
+  mostrarMenos: 'Mostrar menos',
+  redimensionarMenu: 'Cambiar el tamaño del menú',
+  redimensionarDica: 'Arrastra para ensanchar o estrechar. Si lo estrechas más allá del límite, el menú se contrae. Haz doble clic para volver al tamaño predeterminado.',
 
   todasTitulo: 'Todas las categorías',
   todasDescricao: n => `${n} categorías en este workspace. Fija las que usas para que queden en el menú.`,

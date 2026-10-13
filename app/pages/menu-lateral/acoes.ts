@@ -29,6 +29,7 @@ import type { ContextMenuItem } from '@nuxt/ui'
 import type { Categoria, NoDoMenu } from './mocks'
 import type { TextosDaTela } from './textos'
 import { useMenuDoWorkspace } from './estado'
+import { useLimites } from './limites'
 
 export type Acoes = ContextMenuItem[][]
 
@@ -50,6 +51,7 @@ export interface Ganchos {
 export function useAcoesDoMenu(g: Ganchos) {
   const menu = useMenuDoWorkspace()
   const toast = useToast()
+  const limites = useLimites()
 
   /* ------------------------------ o bloco "ir" ------------------------------ */
 
@@ -234,6 +236,8 @@ export function useAcoesDoMenu(g: Ganchos) {
         },
         ...itensDeMover(no.id, visiveis),
         ...lugar,
+        // Rodada 19: quantos itens a seção mostra, como no Notion.
+        limites.itemMostrar(no.id, t),
       ],
       blocoMexer(no),
     ]

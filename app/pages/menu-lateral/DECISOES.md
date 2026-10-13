@@ -389,6 +389,23 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 19 · 2026-10-13
+- **Pedido (literal):** "pode mandar pra main o que ja fez e mergear normalmente."
+- **Pedido (literal):** "com o menu aberto (expandido), eu devo poder arrastar a lateral, como no clickup, expandindo ainda mais ele (ate um limite saudavel) ou recolhendo. se eu recolher passando de um limite mininmo, ele minimiza o menu como se eu tivesse clicado ja no botao de minimizar"
+- **Pedido (literal):** "e o botao mais q vc botou imitando o clickup, pode substituir ele por um botao igual do teams. simplesmente 3 pontos como símbolo. pode ter 'Mais' escrito sem problemas"
+- **Pedido (literal):** "esse outro menu que voce botou, tem que ter como ha no notion uma opçao de qual o maximo de menus que mostra dentro de uma seçao. a pessoa pode escolher 5, 10, 15, 30... proponha quantidades factiveis. 'todos' é uma opção também."
+- **Pedido (literal):** "a busca que voce fez no topo do menu, ao clicar tambem abre a busca global. nao pode acontecer isso. tem que abrir a busca local ali dentro do menu, num campo comum de barra de busca."
+- **Mudou:** as rodadas 17 e 18 foram para a `main` (avanço direto, sem conflito).
+- **Mudou:** a borda direita do menu aberto SE ARRASTA, nos dois modelos. Barra única: de 220 a 440 px (padrão 280). Trilha: de 264 a 480 px (padrão 304, com os 72 da trilha). Abaixo de 170 px (210 na trilha) o menu esmaece e a borda fica amarela: soltando ali, ele recolhe, e reabre do tamanho que tinha antes do gesto. Duplo clique volta ao padrão. Pelo teclado, a borda é um `separator` com foco: setas de 16 px, Home no mínimo, End no máximo, e seta para a esquerda no mínimo recolhe.
+- **Mudou:** o "Mais" da trilha tem os três pontos do Teams, com "Mais" escrito embaixo.
+- **Mudou:** "Mostrar na seção", no "…" e no botão direito de toda seção, nos dois modelos: 5, 10, 15, 30 ou Todos. 5 é o padrão de Categorias (o recorte de sempre) e Todos o das outras. Cortada, a seção ganha "Mais N", que abre o resto ali mesmo, e "Mostrar menos" volta. Categorias continua com "Ver todas as N", que abre a camada com busca. Filtrando, nada se corta.
+- **Não mudou, e por quê:** a lupa do cabeçalho já abre o filtro local desde a rodada 17. A que ela viu abrir a busca global era a do site publicado, que ainda estava na rodada 16. Conferido de novo nesta rodada: a lupa abre o campo "Filtrar o menu" dentro do menu, e nenhuma janela se abre.
+- **Descartado:** 20 entre as opções de limite. Motivo: entre 15 e 30 não muda nada que se perceba numa barra lateral.
+- **Descartado:** recolher no meio do arraste, assim que passa do limite. Motivo: soltar é o que confirma; enquanto o botão está apertado dá para voltar, e o esmaecido avisa.
+- **Maquete:** a largura e os limites não sobrevivem ao recarregar.
+- **Crítica e acessibilidade:** a borda tem nome, valor atual, mínimo e máximo para o leitor de tela, e o teclado faz tudo o que o mouse faz. Fica: a borda tem 8 px de alvo, abaixo dos 24 px da WCAG 2.5.8; o recolher e o duplo clique têm caminho próprio (botão, Ctrl+\\ e teclado), então nada depende só dela.
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral · prints em `evidencias/rodada19-*.png`
+
 ### Rodada 18 · 2026-10-09
 - **Pedido (literal):** "os botoes de importar e modelos tambem sao importantes pro enspace, afinal temos importaçao e exportaçao, alem dos nossos casos de uso (modelos). [...] ao clicar em casos de uso posso selecionar varios para filtrar os modelos. o proprio user tambem pode criar um modelo replicavel. tem tipos de modelo e complexidade como filtro tambem. quando clico num modelo (que seria nossos casos de uso do enspace), a visao é detalhada sobre ele [...] eu posso clicar em 'usar modelo' ou ir nos 3 pontos ao lado do titulo do modelo e clicar em adicionar ao espaço de trabalho. nao sei a diferença entre as duas opçoes. veja se encontra em documentaçao do clickup [...] clicando na galeria posso expandir as imagens do modelo [...] e se eu coloco em importar, no caso do enspace, devo poder importar caso de uso extraido de outro workspace pra ja fazer os menus pra mim, e na hora seleciono se quero que sobrescreva ou some com o que ja tem."
 - **Mudou:** o "+" do Início ganhou o pé do ClickUp: **Importar** e **Casos de uso**.

@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { useLimites } from './limites'
 import LinhaDeMenu from './_LinhaDeMenu.vue'
 import SecaoDeMenu from './_SecaoDeMenu.vue'
 import AvisosDoMenu from './_AvisosDoMenu.vue'
 import AdicionarASecao from './_AdicionarASecao.vue'
+import MaisDaSecao from './_MaisDaSecao.vue'
 import { useArraste, useMenuDoWorkspace, type Atalho } from './estado'
 import { chaveDoAtalho, useTrilha } from './trilha'
 import { useAcoesDoMenu, type Acoes } from './acoes'
@@ -129,6 +131,19 @@ function contadorDe(n: Nativo) {
   if (n.no?.chave === 'inbox') return menu.naoLidas.value || undefined
   if (n.no?.chave === 'tarefas') return 3
   return undefined
+}
+
+const limites = useLimites()
+
+/*
+ * O limite da seção (rodada 19): o que passa dele vira "Mais N". Filtrando
+ * não se corta, porque quem filtra quer ver tudo o que casou.
+ */
+function exibidos<T>(id: string, lista: T[]): T[] {
+  return filtrando.value ? lista : limites.cortar(id, lista).visiveis
+}
+function restoDe(id: string, lista: unknown[]) {
+  return filtrando.value ? 0 : limites.cortar(id, lista).resto
 }
 
 const acoes = useAcoesDoMenu({
@@ -369,7 +384,7 @@ function acoesDaSecao(s: SecaoDoInicio): Acoes {
         { label: t.ctxRenomear, icon: 'i-lucide-pencil', onSelect: () => { trilha.criandoSecao.value = s.id } },
         { label: t.adicionarA(s.rotulo), icon: 'i-lucide-list-plus', onSelect: () => { trilha.adicionandoEm.value = s.id } },
       ],
-      [{
+      [limites.itemMostrar(s.id, t), {
         label: t.ordenarSecao,
         icon: 'i-lucide-arrow-down-up',
         children: ([
@@ -394,13 +409,14 @@ function acoesDaSecao(s: SecaoDoInicio): Acoes {
     ]
   }
   if (s.tipo === 'favoritos') {
-    return [[recolher], blocoDeSecoes(), [itemOcultar(s)]]
+    return [[recolher, limites.itemMostrar(s.id, t)], blocoDeSecoes(), [itemOcultar(s)]]
   }
   if (s.tipo === 'categorias') {
     return [
       [recolher],
       [
         acoes.itemDeOrdem(props.ordem, opcoesDeOrdemDaCategoria.value, v => emit('ordem', v as typeof props.ordem)),
+        limites.itemMostrar('categorias', t),
         { label: t.verTodas(props.totalDeCategorias), icon: 'i-lucide-layout-grid', onSelect: () => emit('verTodas') },
       ],
       blocoDeSecoes(),
@@ -656,7 +672,7 @@ function adicionando(id: string) {
       <!-- ---------- Favoritos ---------- -->
       <template v-if="s.tipo === 'favoritos'">
         <LinhaDeMenu
-          v-for="(c, i) in favoritasF"
+          v-for="(c, i) in exibidos('favoritos', favoritasF)"
           :key="c.id"
           :icone="c.icon ?? 'i-lucide-folder'"
           :rotulo="c.name"
@@ -672,6 +688,7 @@ function adicionando(id: string) {
           @arrastar-inicio="arraste.comecar(`cat:${c.id}`)"
           @arrastar-fim="arraste.terminar()"
         />
+        <MaisDaSecao :t="props.t" id="favoritos" :resto="restoDe('favoritos', favoritasF)" :total="favoritasF.length" />
       </template>
 
       <!-- ---------- Categorias ---------- -->
@@ -713,7 +730,7 @@ function adicionando(id: string) {
       <!-- ---------- Seção do administrador ---------- -->
       <template v-else-if="s.tipo === 'admin'">
         <LinhaDeMenu
-          v-for="(item, i) in filhosDoAdmin(s)"
+          v-for="(item, i) in exibidos(s.id, filhosDoAdmin(s))"
           :key="item.id"
           :icone="item.icone"
           :rotulo="rotuloDe(item)"
@@ -736,11 +753,12 @@ function adicionando(id: string) {
           @arrastar-fim="arraste.terminar()"
           @mover="p => menu.mover(item.id, p)"
         />
+        <MaisDaSecao :t="props.t" :id="s.id" :resto="restoDe(s.id, filhosDoAdmin(s))" :total="filhosDoAdmin(s).length" />
       </template>
 
       <!-- ---------- Seção pessoal: atalhos, e menus com submenus ---------- -->
       <template v-else>
-        <template v-for="(r, i) in atalhosVisiveis(s.id)" :key="r.chave">
+        <template v-for="(r, i) in exibidos(s.id, atalhosVisiveis(s.id))" :key="r.chave">
           <LinhaDeMenu
             :icone="r.icone"
             :rotulo="r.rotulo"
@@ -778,6 +796,7 @@ function adicionando(id: string) {
             />
           </template>
         </template>
+        <MaisDaSecao :t="props.t" :id="s.id" :resto="restoDe(s.id, atalhosVisiveis(s.id))" :total="atalhosVisiveis(s.id).length" />
 
         <!-- Seção vazia: o convite do ClickUp, que abre o mesmo "+". -->
         <button

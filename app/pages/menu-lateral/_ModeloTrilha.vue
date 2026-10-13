@@ -449,7 +449,8 @@ function classeDaArea(a: Area) {
           class="flex w-full shrink-0 flex-col items-center gap-0.5 rounded-lg px-1 py-2 text-default transition-colors hover:bg-elevated focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary data-[state=open]:bg-elevated"
           :aria-label="props.t.mais"
         >
-          <UIcon name="i-lucide-grip" class="size-5" />
+          <!-- Rodada 19: os três pontos do Teams, no lugar da grade do ClickUp. -->
+          <UIcon name="i-lucide-ellipsis" class="size-5" />
           <span v-if="trilha.prefs.value.rotulos" class="w-full truncate text-center text-[10px] font-medium leading-tight">{{ props.t.mais }}</span>
         </button>
         <template #content>
