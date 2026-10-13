@@ -39,7 +39,10 @@ const props = defineProps<{
 }>()
 
 const aberto = defineModel<boolean>('open', { default: false })
-const emit = defineEmits<{ criado: [no: NoDoMenu & { lugar?: LugarDaSecao, escopo: string[] }] }>()
+const emit = defineEmits<{
+  criado: [no: NoDoMenu & { lugar?: LugarDaSecao, escopo: string[] }]
+  fechar: []
+}>()
 
 const nome = ref('')
 const icone = ref('folder')
@@ -137,19 +140,21 @@ function salvar() {
     lugar: ehSecao.value && props.modelo === 'trilha' ? lugar.value : undefined,
     escopo: escopoEfetivo.value,
   })
-  aberto.value = false
+  emit('fechar')
 }
+
+/* Quem desenha o rodapé é o editor, então é ele quem manda salvar. */
+defineExpose({ salvar })
 </script>
 
 <template>
-  <UModal
-    v-model:open="aberto"
-    :title="ehSecao ? props.t.formSecaoTitulo : props.t.formItemTitulo"
-    :description="ehSecao ? props.t.formSecaoDescricao : props.t.formItemDescricao"
-    :ui="{ content: 'max-w-2xl' }"
-  >
-    <template #body>
-      <div class="space-y-4">
+  <!--
+    RODADA 15: isto não é mais um modal.
+    O formulário virou o CORPO de uma etapa dentro da camada do menu, e quem
+    desenha moldura, título e rodapé é o editor. Antes eram dois modais
+    empilhados, com dois cabeçalhos e dois rodapés diferentes na mesma tela.
+  -->
+  <div class="space-y-4">
         <!-- ---------------- nome e ícone ---------------- -->
         <div class="flex items-start gap-3">
           <UFormField :label="props.t.campoIcone" class="shrink-0">
@@ -282,7 +287,7 @@ function salvar() {
           </div>
         </UFormField>
 
-        <!-- ---------------- a prévia ---------------- -->
+    <!-- ---------------- a prévia ---------------- -->
         <div class="rounded-lg border border-default bg-elevated/40 p-3">
           <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-toned">
             {{ ehSecao && props.modelo === 'trilha' && lugar === 'trilha' ? props.t.preverNaTrilha : props.t.preverNoPainel }}
@@ -318,15 +323,6 @@ function salvar() {
             <UIcon name="i-lucide-eye" class="size-3.5 shrink-0" />
             {{ resumoDoEscopo }}
           </p>
-        </div>
-      </div>
-    </template>
-
-    <template #footer>
-      <div class="flex w-full justify-end gap-2">
-        <UButton :label="props.t.cancelar" color="neutral" variant="ghost" @click="aberto = false" />
-        <UButton :label="props.t.salvar" color="primary" @click="salvar" />
-      </div>
-    </template>
-  </UModal>
+    </div>
+  </div>
 </template>

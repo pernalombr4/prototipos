@@ -389,6 +389,74 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 15 · 13/10/2026
+
+**O que ela pediu**, literal:
+
+> "voce deve explorar todos os comportamentos do botao '+' na trilha. quando eu clicar deve
+> aparecer o modal representando o que deve ocorrer ali."
+>
+> "ha inconsistencias no modelo de modal que aparece ao botar pra personalizar o menu ou ao
+> botar pra criar seçao ou criar menu/item de menu. unifique a ideia. deixe tudo mais
+> organizado ali. realmente os botoes de criar devem cortar caminho, mas deve haver
+> consistencia entre os modais utilizados."
+
+#### O que estava inconsistente
+
+| | Personalizar o menu | Criar seção ou menu | Criar item, tarefa, categoria |
+|---|---|---|---|
+| Antes | modal largo, cabeçalho próprio, rodapé com contexto e dois botões | **outro** modal, mais estreito, por cima do primeiro, com outro rodapé | nada: um toast dizendo que abriria |
+
+Dois modais empilhados para o mesmo assunto, com duas molduras diferentes na mesma tela. E
+três portas do "+" que prometiam e não entregavam.
+
+#### Uma camada, duas etapas
+
+A criação deixou de ser um modal em cima do outro. Agora é **a mesma camada**, que mostra ou
+a árvore ou o formulário:
+
+- o título e a linha de apoio trocam de texto, não de lugar;
+- a barra de ações do topo é "Nova seção / Novo menu" na árvore e "Voltar para o menu" no
+  formulário, sempre na mesma posição;
+- o rodapé tem a mesma geometria nas duas: contexto à esquerda, saída e ação à direita.
+
+**O atalho continua cortando caminho**: quem escolhe "Novo menu" no "+" cai direto na etapa do
+formulário, e quem quiser ver o menu inteiro clica em "Voltar para o menu". O que mudou é que
+cortar caminho não significa mais abrir outra moldura.
+
+#### As cinco portas do "+", todas com modal
+
+| Opção | O que abre |
+|---|---|
+| Item em uma categoria | camada com os campos que a categoria pede |
+| Tarefa | camada com título, responsável, prazo e descrição |
+| Categoria | camada com nome, ícone, descrição e formulários |
+| Seção de menu | a camada do menu, na etapa do formulário de seção |
+| Novo menu | a camada do menu, na etapa do formulário de menu |
+
+As três primeiras são **maquete declarada**: a camada diz isso num aviso, o rodapé repete que
+a tela é de outro lugar do ENSPACE, e o botão de criar não salva nada. Elas existem porque o
+"+" promete que alguma coisa acontece, e toast não é promessa cumprida. Os campos são os que o
+produto pede, para a camada mostrar o tamanho do caminho que o atalho corta.
+
+Isso vale para o "+" da trilha e para o "+" da barra do topo: é o mesmo menu nos dois.
+
+#### A regra da moldura, agora escrita
+
+Toda camada de trabalho desta tela usa a mesma: `max-w-3xl`, título mais uma linha de
+descrição no cabeçalho, e rodapé com contexto à esquerda e duas ações à direita, saída antes
+da ação. "Todas as categorias" entrou na regra.
+
+**Uma exceção, de propósito:** "o menu nativo de hoje" continua estreito. Ele é uma réplica
+da barra lateral em tamanho real, e numa moldura larga a réplica boiaria no vazio. Moldura
+serve ao conteúdo; igualar por igualar seria o contrário da organização que ela pediu.
+
+**As evidências:**
+[`evidencias/proposta-mais-da-trilha.jpg`](evidencias/proposta-mais-da-trilha.jpg), o "+" da
+trilha com as cinco portas, e
+[`evidencias/proposta-camada-unica.jpg`](evidencias/proposta-camada-unica.jpg), a camada do
+menu na etapa do formulário, com o caminho de volta e o rodapé único.
+
 ### Rodada 14 · 13/10/2026
 
 **O que ela pediu**, literal:

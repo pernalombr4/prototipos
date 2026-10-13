@@ -74,6 +74,24 @@ export interface TextosDaTela {
   itens: Record<string, string>
 
   // a porta do editor, na busca (rodada 11)
+  voltarParaMenu: string
+
+  // as três portas do "+" que moram em outras telas (rodada 15)
+  maqueteItemDescricao: string
+  maqueteTarefaDescricao: string
+  maqueteCategoriaDescricao: string
+  maqueteAviso: string
+  maqueteRodape: string
+  criarAcao: string
+  maqueteCategoria: string
+  maqueteTitulo: string
+  maqueteResponsavel: string
+  maqueteStatus: string
+  maquetePrazo: string
+  maqueteDescricao: string
+  maqueteFormularios: string
+  formSecaoRodape: string
+  formItemRodape: string
   editarMenu: string
   editarMenuDica: string
 
@@ -321,6 +339,23 @@ const ptBR: TextosDaTela = {
     'logs-requisicao': 'Logs de requisição',
   },
 
+  voltarParaMenu: 'Voltar para o menu',
+
+  maqueteItemDescricao: 'Abre o formulário da categoria escolhida, com os campos que ela tem.',
+  maqueteTarefaDescricao: 'Abre a tarefa rápida, que vive fora de qualquer categoria.',
+  maqueteCategoriaDescricao: 'Abre a criação da categoria, que depois aparece sozinha no menu.',
+  maqueteAviso: 'Maquete. Esta tela não faz parte do que está sendo proposto aqui: o desenho dela é o do produto.',
+  maqueteRodape: 'O atalho existe; a tela é de outro lugar do ENSPACE.',
+  criarAcao: 'Criar',
+  maqueteCategoria: 'Categoria',
+  maqueteTitulo: 'Título',
+  maqueteResponsavel: 'Responsável',
+  maqueteStatus: 'Status',
+  maquetePrazo: 'Prazo',
+  maqueteDescricao: 'Descrição',
+  maqueteFormularios: 'Formulários',
+  formSecaoRodape: 'A seção entra no fim do menu. Depois é só arrastar.',
+  formItemRodape: 'O menu entra no fim da seção escolhida. Depois é só arrastar.',
   editarMenu: 'Editar menu',
   editarMenuDica: 'Arraste aqui mesmo para reordenar. No editor você agrupa, cria e escolhe o tipo de cada tela.',
 
@@ -576,6 +611,23 @@ const en: TextosDaTela = {
     'logs-requisicao': 'Request logs',
   },
 
+  voltarParaMenu: 'Back to the menu',
+
+  maqueteItemDescricao: 'Opens the form of the chosen category, with the fields it has.',
+  maqueteTarefaDescricao: 'Opens the quick task, which lives outside any category.',
+  maqueteCategoriaDescricao: 'Opens category creation, which then shows up in the menu on its own.',
+  maqueteAviso: 'Mockup. This screen is not part of what is being proposed here: its design is the one from the product.',
+  maqueteRodape: 'The shortcut exists; the screen belongs to another part of ENSPACE.',
+  criarAcao: 'Create',
+  maqueteCategoria: 'Category',
+  maqueteTitulo: 'Title',
+  maqueteResponsavel: 'Owner',
+  maqueteStatus: 'Status',
+  maquetePrazo: 'Due date',
+  maqueteDescricao: 'Description',
+  maqueteFormularios: 'Forms',
+  formSecaoRodape: 'The section lands at the end of the menu. Drag it from there.',
+  formItemRodape: 'The menu lands at the end of the chosen section. Drag it from there.',
   editarMenu: 'Edit menu',
   editarMenuDica: 'Drag right here to reorder. In the editor you group, create and pick each screen type.',
 
@@ -831,6 +883,23 @@ const es: TextosDaTela = {
     'logs-requisicao': 'Registros de solicitud',
   },
 
+  voltarParaMenu: 'Volver al menú',
+
+  maqueteItemDescricao: 'Abre el formulario de la categoría elegida, con los campos que tiene.',
+  maqueteTarefaDescricao: 'Abre la tarea rápida, que vive fuera de cualquier categoría.',
+  maqueteCategoriaDescricao: 'Abre la creación de la categoría, que luego aparece sola en el menú.',
+  maqueteAviso: 'Maqueta. Esta pantalla no es parte de lo que se propone aquí: su diseño es el del producto.',
+  maqueteRodape: 'El atajo existe; la pantalla es de otro lugar de ENSPACE.',
+  criarAcao: 'Crear',
+  maqueteCategoria: 'Categoría',
+  maqueteTitulo: 'Título',
+  maqueteResponsavel: 'Responsable',
+  maqueteStatus: 'Estado',
+  maquetePrazo: 'Plazo',
+  maqueteDescricao: 'Descripción',
+  maqueteFormularios: 'Formularios',
+  formSecaoRodape: 'La sección entra al final del menú. Después solo arrastra.',
+  formItemRodape: 'El menú entra al final de la sección elegida. Después solo arrastra.',
   editarMenu: 'Editar menú',
   editarMenuDica: 'Arrastra aquí mismo para reordenar. En el editor agrupas, creas y eliges el tipo de cada pantalla.',
 

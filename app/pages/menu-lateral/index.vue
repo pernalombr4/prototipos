@@ -19,6 +19,7 @@ import Conteudo from './_Conteudo.vue'
  * primeiro clique fica pendurado. Em produção seria o contrário; como o
  * protótipo vive rodando em `pnpm dev`, mandou quem manda.
  */
+import CriarMaquete from './_CriarMaquete.vue'
 import EditorDeMenus from './_EditorDeMenus.vue'
 import TodasAsCategorias from './_TodasAsCategorias.vue'
 import MenuDeHoje from './_MenuDeHoje.vue'
@@ -275,10 +276,10 @@ function configurarCategoriaAtual() {
  * cima. Cada opção é maquete e diz isso no toast.
  */
 const itensDeCriar = computed(() => [[
-  { label: t.value.criarItem, icon: 'i-lucide-file-plus', onSelect: () => avisarMaquete(t.value.criarItem) },
-  { label: t.value.criarTarefa, icon: 'i-lucide-square-check-big', onSelect: () => avisarMaquete(t.value.criarTarefa) },
+  { label: t.value.criarItem, icon: 'i-lucide-file-plus', onSelect: () => abrirMaquete('item') },
+  { label: t.value.criarTarefa, icon: 'i-lucide-square-check-big', onSelect: () => abrirMaquete('tarefa') },
 ], [
-  { label: t.value.criarCategoria, icon: 'i-lucide-folder-plus', onSelect: () => avisarMaquete(t.value.criarCategoria) },
+  { label: t.value.criarCategoria, icon: 'i-lucide-folder-plus', onSelect: () => abrirMaquete('categoria') },
 ], [
   // Estes dois abrem o editor de menus com o formulário certo já aberto: criar
   // seção sem ver o menu em volta é decidir no escuro.
@@ -292,12 +293,19 @@ function abrirEditor(form: 'secao' | 'item' | null) {
   editando.value = true
 }
 
-function avisarMaquete(oQue: string) {
-  toast.add({
-    title: t.value.criarAberto(oQue.toLowerCase()),
-    icon: 'i-lucide-hammer',
-    color: 'neutral',
-  })
+/*
+ * As três portas do "+" que não são menu abrem uma camada com a MESMA moldura
+ * das outras, em vez do toast que elas davam antes. Rodada 15: "quando eu
+ * clicar deve aparecer o modal representando o que deve ocorrer ali".
+ */
+const maqueteAberta = ref(false)
+const modoDaMaquete = ref<'item' | 'tarefa' | 'categoria'>('item')
+const usouMaquete = ref(false)
+
+function abrirMaquete(modo: 'item' | 'tarefa' | 'categoria') {
+  modoDaMaquete.value = modo
+  usouMaquete.value = true
+  maqueteAberta.value = true
 }
 
 /* ------------------------------ camadas ------------------------------ */
@@ -577,6 +585,8 @@ function emBreve() {
     />
 
     <MenuDeHoje v-if="usouHoje" v-model:open="vendoHoje" :t="t" />
+
+    <CriarMaquete v-if="usouMaquete" v-model:open="maqueteAberta" :t="t" :modo="modoDaMaquete" />
 
     <EditorDeMenus
       v-if="usouEditor"

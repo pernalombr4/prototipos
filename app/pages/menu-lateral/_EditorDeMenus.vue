@@ -84,10 +84,33 @@ const secoesQueRecebem = computed(() =>
     .map(n => ({ id: n.id, rotulo: rotuloDe(n), escopo: n.escopo ?? [] })),
 )
 
+/*
+ * ============ UMA CAMADA, DUAS ETAPAS (rodada 15) ============
+ *
+ * "ha inconsistencias no modelo de modal que aparece ao botar pra personalizar
+ * o menu ou ao botar pra criar seçao ou criar menu/item de menu. unifique a
+ * ideia" (Mikaela).
+ *
+ * Antes eram dois modais, um por cima do outro: o editor abria e o formulário
+ * subia em cima, com outro cabeçalho, outra largura e outro rodapé. Duas
+ * molduras para o mesmo assunto.
+ *
+ * Agora é uma camada só, com duas etapas: a árvore e o formulário. O título, a
+ * linha de apoio e os dois botões do rodapé ficam sempre no mesmo lugar, e só
+ * mudam de texto. Quem vem do "+" cai direto na etapa do formulário: o atalho
+ * corta o caminho sem inventar outra moldura.
+ */
 function abrirForm(modo: 'secao' | 'item', secaoId = '') {
   modoDoForm.value = modo
   secaoDoNovoItem.value = secaoId
   formAberto.value = true
+}
+
+/** O formulário da etapa, para o rodapé mandar salvar. */
+const formulario = useTemplateRef<{ salvar: () => void }>('formulario')
+
+function voltarParaArvore() {
+  formAberto.value = false
 }
 
 function receberCriado(no: NoDoMenu & { lugar?: string, escopo: string[] }) {
@@ -212,12 +235,24 @@ function classeDaMarca(id: string, comMeio = false) {
 <template>
   <UModal
     v-model:open="aberto"
-    :title="props.t.editorTitulo"
-    :description="props.t.editorDescricao"
+    :title="formAberto ? (modoDoForm === 'secao' ? props.t.formSecaoTitulo : props.t.formItemTitulo) : props.t.editorTitulo"
+    :description="formAberto ? (modoDoForm === 'secao' ? props.t.formSecaoDescricao : props.t.formItemDescricao) : props.t.editorDescricao"
     :ui="{ content: 'max-w-3xl' }"
   >
     <template #body>
-      <div class="mb-3 flex flex-wrap items-center gap-2">
+      <!-- A barra de ações fica no mesmo lugar nas duas etapas. -->
+      <div v-if="formAberto" class="mb-3 flex flex-wrap items-center gap-2">
+        <UButton
+          :label="props.t.voltarParaMenu"
+          icon="i-lucide-arrow-left"
+          size="sm"
+          color="neutral"
+          variant="ghost"
+          @click="voltarParaArvore"
+        />
+      </div>
+
+      <div v-else class="mb-3 flex flex-wrap items-center gap-2">
         <UButton
           :label="props.t.adicionarSecao"
           icon="i-lucide-folder-plus"
@@ -241,7 +276,19 @@ function classeDaMarca(id: string, comMeio = false) {
         </span>
       </div>
 
-      <div class="max-h-[50vh] space-y-1 overflow-y-auto pr-1">
+      <FormularioDeMenu
+        v-if="formAberto"
+        ref="formulario"
+        v-model:open="formAberto"
+        :t="props.t"
+        :modo="modoDoForm"
+        :modelo="props.modelo"
+        :secoes="secoesQueRecebem"
+        @criado="receberCriado"
+        @fechar="voltarParaArvore"
+      />
+
+      <div v-else class="max-h-[50vh] space-y-1 overflow-y-auto pr-1">
         <template v-for="no in menu.arvoreVisivel.value" :key="no.id">
           <div
             class="relative animate-[entrada_0.2s_ease-out_both] rounded-lg border border-default p-2"
@@ -385,40 +432,44 @@ function classeDaMarca(id: string, comMeio = false) {
         </template>
       </div>
 
-      <p class="mt-2 flex items-center gap-1.5 text-xs text-muted">
+      <p v-if="!formAberto" class="mt-2 flex items-center gap-1.5 text-xs text-muted">
         <UIcon name="i-lucide-keyboard" class="size-3.5 shrink-0" />
         {{ props.t.arrastarTeclado }}
       </p>
-
-      <!-- os dois formulários de criação, em camada sobre o editor -->
-      <FormularioDeMenu
-        v-model:open="formAberto"
-        :t="props.t"
-        :modo="modoDoForm"
-        :modelo="props.modelo"
-        :secoes="secoesQueRecebem"
-        @criado="receberCriado"
-      />
     </template>
 
+    <!--
+      O rodapé tem a mesma geometria nas duas etapas: a linha de contexto à
+      esquerda, a saída e a ação à direita. Só o texto muda.
+    -->
     <template #footer>
       <div class="flex w-full flex-wrap items-center gap-2">
-        <p class="min-w-0 flex-1 text-xs" :class="menu.alterado.value ? 'font-medium text-highlighted' : 'text-muted'">
-          {{ menu.alterado.value ? props.t.menuAlterado : props.t.semAlteracao }}
+        <p class="min-w-0 flex-1 text-xs" :class="menu.alterado.value && !formAberto ? 'font-medium text-highlighted' : 'text-muted'">
+          {{ formAberto
+            ? (modoDoForm === 'secao' ? props.t.formSecaoRodape : props.t.formItemRodape)
+            : (menu.alterado.value ? props.t.menuAlterado : props.t.semAlteracao) }}
         </p>
-        <UButton
-          :label="props.t.descartar"
-          color="neutral"
-          variant="ghost"
-          :disabled="!menu.alterado.value"
-          @click="menu.descartar()"
-        />
-        <UButton
-          :label="props.t.salvar"
-          color="primary"
-          :disabled="!menu.alterado.value"
-          @click="salvar"
-        />
+
+        <template v-if="formAberto">
+          <UButton :label="props.t.cancelar" color="neutral" variant="ghost" @click="voltarParaArvore" />
+          <UButton :label="props.t.salvar" color="primary" @click="formulario?.salvar()" />
+        </template>
+
+        <template v-else>
+          <UButton
+            :label="props.t.descartar"
+            color="neutral"
+            variant="ghost"
+            :disabled="!menu.alterado.value"
+            @click="menu.descartar()"
+          />
+          <UButton
+            :label="props.t.salvar"
+            color="primary"
+            :disabled="!menu.alterado.value"
+            @click="salvar"
+          />
+        </template>
       </div>
     </template>
   </UModal>
