@@ -303,8 +303,19 @@ export const gruposDeConfiguracao: GrupoDeConfiguracao[] = [
     id: 'interface',
     icone: 'i-lucide-layout',
     itens: [
+      /*
+       * RODADA 14: `Telas` SAIU daqui.
+       *
+       * No produto de hoje são duas portas: a pessoa cria a tela em
+       * `Interface > Telas` e depois cria o item em `Interface > Menus` para
+       * apontar para ela. A própria documentação avisa as duas pontas soltas
+       * dessa separação: tela que não entra no menu não aparece para ninguém,
+       * e a tela precisa existir antes do item.
+       *
+       * A decisão dela: as duas coisas são uma só. Criar menu é escolher o
+       * tipo, e o tipo é a tela. Então sobra uma porta, `Menus`.
+       */
       { id: 'menus', icone: 'i-lucide-menu' },
-      { id: 'telas', icone: 'i-lucide-monitor' },
       { id: 'casos-de-uso', icone: 'i-lucide-package' },
     ],
   },
@@ -428,7 +439,14 @@ export const usuaria = {
 ================================================================== */
 
 /** Os 13 tipos de tela que o produto oferece hoje, na ordem da documentação. */
-export interface TipoDeTela {
+/**
+ * OS TIPOS DE MENU.
+ *
+ * São os 13 tipos de tela do produto, com o nome que a decisão da rodada 14
+ * lhes deu: **escolher o tipo do menu é escolher a tela**. Não existe criar
+ * tela de um lado e menu do outro; existe criar menu, e o tipo diz o que abre.
+ */
+export interface TipoDeMenu {
   id: string
   /** Precisa escolher categoria na configuração. */
   exigeCategoria?: boolean
@@ -436,7 +454,7 @@ export interface TipoDeTela {
   exigeCaminho?: boolean
 }
 
-export const tiposDeTela: TipoDeTela[] = [
+export const tiposDeMenu: TipoDeMenu[] = [
   { id: 'arquivos' },
   { id: 'consultas', exigeCategoria: true },
   { id: 'consultas-grupo', exigeCategoria: true },
@@ -525,8 +543,8 @@ export interface NoDoMenu {
   rotulo?: string
   chave?: string
   icone: string
-  /** Só para item do tipo tela. */
-  tipoDeTela?: string
+  /** O tipo do menu, que é a tela que ele abre. Só para item. */
+  tipoDeMenu?: string
   categoriasLigadas?: number
   /** Grupos de membros que enxergam. Vazio significa que todos enxergam. */
   escopo?: string[]
@@ -589,9 +607,9 @@ export const menuDoEditor: NoDoMenu[] = [
     lugar: 'trilha',
     escopo: [],
     filhos: [
-      { id: 't-pt', tipo: 'tela', emBreve: true, rotulo: 'Dashboard de tarefas', icone: 'i-lucide-chart-column', tipoDeTela: 'paineis' },
-      { id: 't-pd', tipo: 'tela', emBreve: true, rotulo: 'Dashboard de dados', icone: 'i-lucide-chart-pie', tipoDeTela: 'paineis' },
-      { id: 't-mr', tipo: 'tela', emBreve: true, rotulo: 'Meus relatórios', icone: 'i-lucide-file-chart-column', tipoDeTela: 'personalizada' },
+      { id: 't-pt', tipo: 'tela', emBreve: true, rotulo: 'Dashboard de tarefas', icone: 'i-lucide-chart-column', tipoDeMenu: 'paineis' },
+      { id: 't-pd', tipo: 'tela', emBreve: true, rotulo: 'Dashboard de dados', icone: 'i-lucide-chart-pie', tipoDeMenu: 'paineis' },
+      { id: 't-mr', tipo: 'tela', emBreve: true, rotulo: 'Meus relatórios', icone: 'i-lucide-file-chart-column', tipoDeMenu: 'personalizada' },
     ],
   },
   {
@@ -623,8 +641,8 @@ export const menuDoEditor: NoDoMenu[] = [
     lugar: 'trilha',
     escopo: [],
     filhos: [
-      { id: 'a-logs', tipo: 'tela', chave: 'logsAuditoria', icone: 'i-lucide-scroll-text', tipoDeTela: 'personalizada' },
-      { id: 'a-req', tipo: 'tela', chave: 'logsRequisicao', icone: 'i-lucide-activity', tipoDeTela: 'personalizada' },
+      { id: 'a-logs', tipo: 'tela', chave: 'logsAuditoria', icone: 'i-lucide-scroll-text', tipoDeMenu: 'personalizada' },
+      { id: 'a-req', tipo: 'tela', chave: 'logsRequisicao', icone: 'i-lucide-activity', tipoDeMenu: 'personalizada' },
     ],
   },
   {
@@ -636,8 +654,8 @@ export const menuDoEditor: NoDoMenu[] = [
     lugar: 'trilha',
     escopo: [],
     filhos: [
-      { id: 't-base', tipo: 'tela', rotulo: 'Base de Conhecimento', icone: 'i-lucide-library', tipoDeTela: 'personalizada' },
-      { id: 't-pol', tipo: 'tela', rotulo: 'Políticas internas', icone: 'i-lucide-file-text', tipoDeTela: 'arquivos' },
+      { id: 't-base', tipo: 'tela', rotulo: 'Base de Conhecimento', icone: 'i-lucide-library', tipoDeMenu: 'personalizada' },
+      { id: 't-pol', tipo: 'tela', rotulo: 'Políticas internas', icone: 'i-lucide-file-text', tipoDeMenu: 'arquivos' },
     ],
   },
   {
@@ -649,9 +667,9 @@ export const menuDoEditor: NoDoMenu[] = [
     lugar: 'trilha',
     escopo: ['comercial'],
     filhos: [
-      { id: 't-pv', tipo: 'tela', rotulo: 'Painel de vendas', icone: 'i-lucide-chart-line', tipoDeTela: 'paineis' },
-      { id: 't-tri', tipo: 'tela', rotulo: 'Triagem de propostas', icone: 'i-lucide-list-filter', tipoDeTela: 'triagem', categoriasLigadas: 2 },
-      { id: 't-req', tipo: 'tela', rotulo: 'Minhas requisições', icone: 'i-lucide-inbox', tipoDeTela: 'minhas-requisicoes' },
+      { id: 't-pv', tipo: 'tela', rotulo: 'Painel de vendas', icone: 'i-lucide-chart-line', tipoDeMenu: 'paineis' },
+      { id: 't-tri', tipo: 'tela', rotulo: 'Triagem de propostas', icone: 'i-lucide-list-filter', tipoDeMenu: 'triagem', categoriasLigadas: 2 },
+      { id: 't-req', tipo: 'tela', rotulo: 'Minhas requisições', icone: 'i-lucide-inbox', tipoDeMenu: 'minhas-requisicoes' },
     ],
   },
 ]
@@ -736,9 +754,9 @@ export const secoesDeModulo: NoDoMenu[] = [
     lugar: 'trilha',
     escopo: [],
     filhos: [
-      { id: 'mc-minhas', tipo: 'tela', origem: 'modulo', moduloId: 'comparacoes', rotulo: 'Minhas comparações', icone: 'i-lucide-list-checks', tipoDeTela: 'consultas', categoriasLigadas: 1 },
-      { id: 'mc-aprovar', tipo: 'tela', origem: 'modulo', moduloId: 'comparacoes', rotulo: 'Para aprovar', icone: 'i-lucide-circle-check-big', tipoDeTela: 'triagem', categoriasLigadas: 1 },
-      { id: 'mc-relatorios', tipo: 'tela', origem: 'modulo', moduloId: 'comparacoes', rotulo: 'Relatórios de comparação', icone: 'i-lucide-file-chart-column', tipoDeTela: 'paineis' },
+      { id: 'mc-minhas', tipo: 'tela', origem: 'modulo', moduloId: 'comparacoes', rotulo: 'Minhas comparações', icone: 'i-lucide-list-checks', tipoDeMenu: 'consultas', categoriasLigadas: 1 },
+      { id: 'mc-aprovar', tipo: 'tela', origem: 'modulo', moduloId: 'comparacoes', rotulo: 'Para aprovar', icone: 'i-lucide-circle-check-big', tipoDeMenu: 'triagem', categoriasLigadas: 1 },
+      { id: 'mc-relatorios', tipo: 'tela', origem: 'modulo', moduloId: 'comparacoes', rotulo: 'Relatórios de comparação', icone: 'i-lucide-file-chart-column', tipoDeMenu: 'paineis' },
     ],
   },
   {
@@ -752,7 +770,7 @@ export const secoesDeModulo: NoDoMenu[] = [
     painel: 'dados',
     escopo: [],
     filhos: [
-      { id: 'mm-calc', tipo: 'tela', origem: 'modulo', moduloId: 'correcao-monetaria', rotulo: 'Calculadora avulsa', icone: 'i-lucide-calculator', tipoDeTela: 'personalizada' },
+      { id: 'mm-calc', tipo: 'tela', origem: 'modulo', moduloId: 'correcao-monetaria', rotulo: 'Calculadora avulsa', icone: 'i-lucide-calculator', tipoDeMenu: 'personalizada' },
     ],
   },
 ]

@@ -335,6 +335,21 @@ export function useMenuDoWorkspace() {
     marcarTocado(id)
   }
 
+  /*
+   * EXCLUIR (rodada 14).
+   *
+   * Menu e tela sao a mesma coisa desde esta rodada, entao excluir o menu
+   * leva a tela junto. Nao ha confirmacao, e e de proposito: enquanto nao se
+   * clica em Salvar, isto mexe no RASCUNHO, e Descartar devolve tudo. Pedir
+   * certeza duas vezes para uma acao que ja tem volta e so mais um clique.
+   */
+  function excluir(id: string) {
+    const onde = localizar(rascunho.value, id)
+    if (!onde) return
+    onde.irmaos.splice(onde.indice, 1)
+    marcarTocado(id)
+  }
+
   function adicionarSecao(no: NoDoMenu) {
     rascunho.value.push(no)
     marcarTocado(no.id)
@@ -384,6 +399,7 @@ export function useMenuDoWorkspace() {
     reordenarCategoria,
     adicionarSecao,
     adicionarItem,
+    excluir,
     localizar,
     destinos,
     secaoDeCategorias,

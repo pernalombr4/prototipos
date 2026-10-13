@@ -389,6 +389,78 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 14 · 13/10/2026
+
+**O que ela pediu**, literal:
+
+> "telas nao devem ser apresentadas separadamente de menus. na hora de criar um menu,
+> seleciona-se o tipo de menu ali. esse 'tipo de menu' é justamente a tela. aí já se cria uma
+> tela vinculada a um menu automaticamente. pra facilitar a jornada do usuario. hoje ta muito
+> ruim."
+
+#### O produto de hoje tem duas portas
+
+| Passo | Onde | O que a própria doc avisa |
+|---|---|---|
+| 1. Criar a tela | `Interface > Telas` | tela fora do menu "não aparecerão para os membros do workspace" |
+| 2. Criar a seção e o item | `Interface > Menus` | "As telas precisam ser criadas" antes |
+
+Duas portas, ordem obrigatória e um estado morto no meio: a tela que existe e ninguém vê.
+
+#### O que mudou aqui
+
+| Antes | Agora |
+|---|---|
+| `+ Criar > Novo item de menu` | `+ Criar > Novo menu` |
+| Editor: `Adicionar item` | Editor: `Novo menu` |
+| Campo `Tipo de tela` | Campo **`Tipo de menu`**, com a frase "O tipo é a tela que abre quando alguém clica neste menu" |
+| `Configurações > Interface > Telas` | **saiu**: sobrou `Menus` |
+| "Item é uma tela dentro de uma seção" | "O menu é a tela" |
+
+A prévia do formulário passou a mostrar as duas metades do que está sendo criado: a linha como
+ela fica no menu e, embaixo, o que abre ao clicar.
+
+**A mecânica já estava certa desde a rodada 3**, quando ela pediu que criar menu pedisse o
+tipo de tela. O que faltava era parar de chamar de duas coisas o que é uma só, e fechar a
+porta paralela.
+
+#### As três decisões que ela tomou
+
+1. **`Telas` some de vez** das configurações. Não vira lista de órfãs nem inventário
+   somente-leitura.
+2. **Excluir o menu apaga a tela, sem confirmação.** Palavras dela: "as duas coisas sao
+   unificadas. nao precisa ficar confirmando pq nao vai ter forma de GUARDAR separado".
+3. **Sem reuso**: cada menu tem a sua tela. Duplicar o menu cria outra tela, independente.
+
+#### Por que excluir sem perguntar funciona aqui
+
+Excluir mexe no RASCUNHO, como arrastar: a linha some, a bolinha amarela acende, o cartão
+flutuante aparece e **Descartar devolve**. Perguntar "tem certeza?" para uma ação que já tem
+volta é só mais um clique. Verificado no navegador: excluir "Políticas internas" tira a linha,
+o rodapé do editor passa a "Menu alterado", e Descartar traz de volta.
+
+O botão só aparece onde faz sentido: **seção e tela do workspace**. Nativo e de módulo não
+se exclui daqui, porque não nasceram aqui. `Auditoria`, que é nativa, mostra só o "+";
+`Conhecimento`, que é do workspace, mostra os dois, e as telas dentro dela também.
+
+#### Dois defeitos que esta rodada revelou
+
+- **O menu criado nascia sem origem**, então contava como nativo e não podia ser excluído.
+  Quem nasce no formulário é do workspace.
+- **O editor quebrava inteiro** quando eu pôs `immediate` no watch que abre o formulário: ele
+  roda no meio do `setup`, antes de a lista de seções existir. Virou `onMounted`, que é o
+  lugar certo para "o componente nasceu já aberto". Era o que fazia `+ Criar > Novo menu`
+  abrir o editor sem o formulário.
+
+#### Fica em aberto
+
+- **Tela do workspace dentro de seção nativa não some no modo "Só nativo".** O filtro de
+  origem roda no primeiro nível; o "Painel de contratos" criado dentro de `Análise` continua
+  aparecendo. Conserto maior do que parece: mexer na lista de filhos quebra a identidade dos
+  nós que o arraste e os selects usam.
+- **O que acontece com as telas que os clientes já têm fora do menu**, quando `Telas` sumir.
+  Decisão de migração, não de desenho.
+
 ### Rodada 13 · 20/09/2026
 
 **O que ela disse**, literal:

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import FormularioDeMenu from './_FormularioDeMenu.vue'
 import { useMenuDoWorkspace, useArraste } from './estado'
-import { tiposDeTela, type NoDoMenu } from './mocks'
+import { tiposDeMenu, type NoDoMenu } from './mocks'
 import type { TextosDaTela } from './textos'
 
 /**
@@ -40,14 +40,23 @@ const formAberto = ref(false)
 const modoDoForm = ref<'secao' | 'item'>('secao')
 const secaoDoNovoItem = ref('')
 
-watch(aberto, (v) => {
-  if (!v) return
-  if (props.abrirFormulario) {
-    modoDoForm.value = props.abrirFormulario
-    secaoDoNovoItem.value = props.abrirFormulario === 'item' ? (secoesQueRecebem.value[0]?.id ?? '') : ''
-    formAberto.value = true
-  }
-})
+/*
+ * O editor passou a nascer so quando alguem o abre (rodada 13), entao ele monta
+ * com `aberto` JA true: sem o onMounted abaixo o watch nunca dispara, e quem
+ * pedia "Novo menu" no botao "+" via o editor abrir sem o formulario.
+ *
+ * E onMounted, e nao `immediate`: com `immediate` o watch roda no meio do setup,
+ * antes de `secoesQueRecebem` existir, e o componente inteiro quebra.
+ */
+function abrirFormInicial() {
+  if (!aberto.value || !props.abrirFormulario) return
+  modoDoForm.value = props.abrirFormulario
+  secaoDoNovoItem.value = props.abrirFormulario === 'item' ? (secoesQueRecebem.value[0]?.id ?? '') : ''
+  formAberto.value = true
+}
+
+watch(aberto, abrirFormInicial)
+onMounted(abrirFormInicial)
 
 function rotuloDe(no: NoDoMenu) {
   if (no.rotulo) return no.rotulo
@@ -123,6 +132,22 @@ function passar(e: DragEvent, id: string, comMeio: boolean) {
  */
 const recusa = ref<{ id: string, motivo: string } | null>(null)
 
+/*
+ * EXCLUIR (rodada 14). Só o que o workspace criou: nativo e de módulo não se
+ * exclui daqui, porque não nasceram aqui. Sem confirmação: isto mexe no
+ * rascunho, e Descartar devolve.
+ */
+function excluirNo(no: NoDoMenu) {
+  menu.excluir(no.id)
+  toast.add({ title: props.t.excluido(rotuloDe(no)), icon: 'i-lucide-trash-2', color: 'neutral' })
+}
+
+function podeExcluir(no: NoDoMenu, pai: NoDoMenu | null = null) {
+  if (menu.origemDe(no) === 'workspace') return true
+  // Tela dentro de uma secao do workspace tambem nasceu aqui.
+  return !!pai && menu.origemDe(pai) === 'workspace'
+}
+
 function largar(e: DragEvent, id: string, comMeio: boolean) {
   e.preventDefault()
   const quem = arraste.arrastando.value
@@ -155,11 +180,11 @@ function salvar() {
 }
 
 const opcoesDeTipo = computed(() =>
-  tiposDeTela.map(t => ({ label: props.t.tipos[t.id] ?? t.id, value: t.id })),
+  tiposDeMenu.map(t => ({ label: props.t.tipos[t.id] ?? t.id, value: t.id })),
 )
 
 function exigeCategoria(tipoId?: string) {
-  return tiposDeTela.find(t => t.id === tipoId)?.exigeCategoria ?? false
+  return tiposDeMenu.find(t => t.id === tipoId)?.exigeCategoria ?? false
 }
 
 /*
@@ -252,6 +277,17 @@ function classeDaMarca(id: string, comMeio = false) {
                 :aria-label="props.t.adicionarItem"
                 @click="abrirForm('item', no.id)"
               />
+
+              <UTooltip v-if="podeExcluir(no)" :text="props.t.excluirDica">
+                <UButton
+                  icon="i-lucide-trash-2"
+                  size="xs"
+                  color="neutral"
+                  variant="ghost"
+                  :aria-label="props.t.excluir"
+                  @click="excluirNo(no)"
+                />
+              </UTooltip>
             </div>
 
             <!-- o escopo da seção, que decide quem enxerga -->
@@ -297,11 +333,11 @@ function classeDaMarca(id: string, comMeio = false) {
 
                   <USelect
                     v-if="filho.tipo === 'tela'"
-                    v-model="filho.tipoDeTela"
+                    v-model="filho.tipoDeMenu"
                     :items="opcoesDeTipo"
                     size="xs"
                     class="w-48 shrink-0"
-                    :aria-label="props.t.tipoDeTela"
+                    :aria-label="props.t.tipoDeMenu"
                   />
                   <UBadge
                     v-else
@@ -311,10 +347,22 @@ function classeDaMarca(id: string, comMeio = false) {
                     variant="subtle"
                     class="shrink-0"
                   />
+
+                  <UTooltip v-if="podeExcluir(filho, no)" :text="props.t.excluirDica">
+                    <UButton
+                      icon="i-lucide-trash-2"
+                      size="xs"
+                      color="neutral"
+                      variant="ghost"
+                      class="shrink-0"
+                      :aria-label="props.t.excluir"
+                      @click="excluirNo(filho)"
+                    />
+                  </UTooltip>
                 </div>
 
                 <p
-                  v-if="filho.tipo === 'tela' && exigeCategoria(filho.tipoDeTela) && !filho.categoriasLigadas"
+                  v-if="filho.tipo === 'tela' && exigeCategoria(filho.tipoDeMenu) && !filho.categoriasLigadas"
                   class="mt-1 flex items-center gap-1.5 pl-6 text-xs text-warning"
                 >
                   <UIcon name="i-lucide-triangle-alert" class="size-3.5 shrink-0" />

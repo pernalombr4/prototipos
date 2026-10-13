@@ -283,7 +283,8 @@ const itensDeCriar = computed(() => [[
   // Estes dois abrem o editor de menus com o formulário certo já aberto: criar
   // seção sem ver o menu em volta é decidir no escuro.
   { label: t.value.criarSecao, icon: 'i-lucide-menu', onSelect: () => abrirEditor('secao') },
-  { label: t.value.formItemTitulo, icon: 'i-lucide-file-plus', onSelect: () => abrirEditor('item') },
+  // Rodada 14: "menu", e nao "item de menu" nem "tela". Sao a mesma coisa.
+  { label: t.value.formItemTitulo, icon: 'i-lucide-menu', onSelect: () => abrirEditor('item') },
 ]])
 
 function abrirEditor(form: 'secao' | 'item' | null) {

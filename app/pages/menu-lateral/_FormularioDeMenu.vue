@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
   gruposDeMembros,
-  tiposDeTela,
+  tiposDeMenu,
   paineisQueRecebem,
   type LugarDaSecao,
   type NoDoMenu,
@@ -76,12 +76,12 @@ watch(aberto, (v) => {
 
 const ehSecao = computed(() => props.modo === 'secao')
 
-const tipoEscolhido = computed(() => tiposDeTela.find(x => x.id === tipo.value))
+const tipoEscolhido = computed(() => tiposDeMenu.find(x => x.id === tipo.value))
 const precisaCaminho = computed(() => tipoEscolhido.value?.exigeCaminho ?? false)
 const precisaCategoria = computed(() => tipoEscolhido.value?.exigeCategoria ?? false)
 
 const opcoesDeTipo = computed(() =>
-  tiposDeTela.map(x => ({ label: props.t.tipos[x.id] ?? x.id, value: x.id })),
+  tiposDeMenu.map(x => ({ label: props.t.tipos[x.id] ?? x.id, value: x.id })),
 )
 const opcoesDePainel = computed(() =>
   paineisQueRecebem.map(p => ({
@@ -127,9 +127,11 @@ function salvar() {
   emit('criado', {
     id: `novo-${Date.now()}`,
     tipo: ehSecao.value ? 'secao' : 'tela',
+    // Nasceu aqui, entao e do workspace: e o que permite excluir depois.
+    origem: 'workspace',
     rotulo: nome.value.trim(),
     icone: `i-lucide-${icone.value}`,
-    tipoDeTela: ehSecao.value ? undefined : tipo.value,
+    tipoDeMenu: ehSecao.value ? undefined : tipo.value,
     categoriasLigadas: categorias.value.length || undefined,
     filhos: ehSecao.value ? [] : undefined,
     lugar: ehSecao.value && props.modelo === 'trilha' ? lugar.value : undefined,
@@ -211,7 +213,13 @@ function salvar() {
         <!-- ---------------- só item: tipo, caminho, categorias, seção ---------------- -->
         <template v-if="!ehSecao">
           <div class="grid gap-3 sm:grid-cols-2">
-            <UFormField :label="props.t.tipoDeTela">
+            <!--
+              RODADA 14: o tipo é a tela.
+              A frase embaixo do campo existe porque esta é a troca inteira: no
+              produto de hoje a pessoa cria a tela num lugar e o item do menu em
+              outro. Aqui ela escolhe o tipo e as duas coisas nascem juntas.
+            -->
+            <UFormField :label="props.t.tipoDeMenu" :description="props.t.tipoDeMenuDica">
               <USelect v-model="tipo" :items="opcoesDeTipo" class="w-full" />
             </UFormField>
 
@@ -299,6 +307,12 @@ function salvar() {
               <span class="min-w-0 flex-1 truncate">{{ ehSecao ? props.t.adicionarItem : (nome || props.t.campoNome) }}</span>
             </div>
           </div>
+
+          <!-- O que abre ao clicar: a outra metade do que está sendo criado. -->
+          <p v-if="!ehSecao" class="mt-2 flex items-center gap-1.5 text-xs text-muted">
+            <UIcon name="i-lucide-corner-down-right" class="size-3.5 shrink-0" />
+            {{ props.t.tipos[tipo] ?? tipo }}
+          </p>
 
           <p class="mt-2 flex items-center gap-1.5 text-xs text-muted">
             <UIcon name="i-lucide-eye" class="size-3.5 shrink-0" />
