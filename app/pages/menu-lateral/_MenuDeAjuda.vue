@@ -26,7 +26,21 @@ import type { TextosDaTela } from './textos'
  * `pointerleave` dispararia ao atravessar do ícone para o menu e ele fecharia
  * na cara da pessoa.
  */
-const props = defineProps<{ t: TextosDaTela }>()
+const props = withDefaults(defineProps<{
+  t: TextosDaTela
+  /**
+   * RODADA 16, "esse menu aí de ajuda tá péssimo. olha o tamanho do ícone
+   * frente aos outros onde ele tá posicionado" (Mikaela). Na trilha e na
+   * barra recolhida ele era um botão pequeno (ícone de 16 px) entre a lupa e
+   * o "+", que têm caixa de 36 px e ícone de 20 px. Agora ele toma a forma de
+   * quem está do lado:
+   *
+   *   `linha`     no rodapé da barra aberta, ao lado de Configurações;
+   *   `trilha`    caixa de 36 px, ícone de 20 px, igual à lupa da trilha;
+   *   `coluna`    caixa de 40 px, ícone de 20 px, igual à barra recolhida.
+   */
+  formato?: 'linha' | 'trilha' | 'coluna'
+}>(), { formato: 'linha' })
 
 const emit = defineEmits<{ escolher: [rotulo: string] }>()
 
@@ -59,15 +73,28 @@ const itens = computed(() => [[
       v-model:open="aberto"
       :items="itens"
       :portal="false"
-      :content="{ side: 'top', align: 'end', sideOffset: 6 }"
+      :content="props.formato === 'linha' ? { side: 'top', align: 'end', sideOffset: 6 } : { side: 'right', align: 'end', sideOffset: 10 }"
     >
       <UButton
+        v-if="props.formato === 'linha'"
         icon="i-lucide-circle-question-mark"
         color="neutral"
         :variant="aberto ? 'soft' : 'ghost'"
         size="sm"
         :aria-label="props.t.ajuda"
       />
+      <button
+        v-else
+        type="button"
+        class="flex shrink-0 items-center justify-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+        :class="[
+          props.formato === 'trilha' ? 'size-9 text-default' : 'size-10 text-toned hover:text-highlighted',
+          aberto ? 'bg-elevated' : 'hover:bg-elevated',
+        ]"
+        :aria-label="props.t.ajuda"
+      >
+        <UIcon name="i-lucide-circle-question-mark" class="size-5" />
+      </button>
     </UDropdownMenu>
   </div>
 </template>

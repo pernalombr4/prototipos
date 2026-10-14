@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { rotuloDoNo as rotuloComum } from './rotulos'
 import FormularioDeMenu from './_FormularioDeMenu.vue'
 import { useMenuDoWorkspace, useArraste } from './estado'
-import { tiposDeMenu, type NoDoMenu } from './mocks'
+import { tiposDeTela, type NoDoMenu } from './mocks'
 import type { TextosDaTela } from './textos'
 
 /**
@@ -28,8 +29,6 @@ const props = defineProps<{
   modelo: 'barra' | 'trilha'
   /** Quando o editor abre vindo do "+ Criar", já abre o formulário certo. */
   abrirFormulario?: 'secao' | 'item' | null
-  /** Id do nó a editar, quando a camada foi aberta por "Renomear". Rodada 16. */
-  editarId?: string | null
 }>()
 const aberto = defineModel<boolean>('open', { default: false })
 const toast = useToast()
@@ -42,65 +41,18 @@ const formAberto = ref(false)
 const modoDoForm = ref<'secao' | 'item'>('secao')
 const secaoDoNovoItem = ref('')
 
-/*
- * O editor passou a nascer so quando alguem o abre (rodada 13), entao ele monta
- * com `aberto` JA true: sem o onMounted abaixo o watch nunca dispara, e quem
- * pedia "Novo menu" no botao "+" via o editor abrir sem o formulario.
- *
- * E onMounted, e nao `immediate`: com `immediate` o watch roda no meio do setup,
- * antes de `secoesQueRecebem` existir, e o componente inteiro quebra.
- */
-/** O nó que está sendo editado, quando a camada abriu por "Renomear". */
-const noEmEdicao = computed(() => {
-  if (!props.editarId) return null
-  for (const no of menu.rascunho.value) {
-    if (no.id === props.editarId) return no
-    const filho = (no.filhos ?? []).find(f => f.id === props.editarId)
-    if (filho) return filho
+watch(aberto, (v) => {
+  if (!v) return
+  if (props.abrirFormulario) {
+    modoDoForm.value = props.abrirFormulario
+    secaoDoNovoItem.value = props.abrirFormulario === 'item' ? (secoesQueRecebem.value[0]?.id ?? '') : ''
+    formAberto.value = true
   }
-  return null
 })
 
-function abrirFormInicial() {
-  if (!aberto.value) return
-
-  if (noEmEdicao.value) {
-    modoDoForm.value = noEmEdicao.value.tipo === 'secao' ? 'secao' : 'item'
-    formAberto.value = true
-    return
-  }
-
-  if (!props.abrirFormulario) return
-  modoDoForm.value = props.abrirFormulario
-  secaoDoNovoItem.value = props.abrirFormulario === 'item' ? (secoesQueRecebem.value[0]?.id ?? '') : ''
-  formAberto.value = true
-}
-
-function receberEditado(id: string, dados: Record<string, unknown>) {
-  menu.editarNo(id, dados)
-  toast.add({ title: props.t.menuEditado, icon: 'i-lucide-check', color: 'neutral' })
-}
-
-watch(aberto, abrirFormInicial)
-onMounted(abrirFormInicial)
-
 function rotuloDe(no: NoDoMenu) {
-  if (no.rotulo) return no.rotulo
-  const mapa: Record<string, string> = {
-    inicio: props.t.inicio,
-    inbox: props.t.inbox,
-    chatIa: props.t.chatIa,
-    tarefas: props.t.tarefas,
-    agenda: props.t.agenda,
-    spaceflows: props.t.spaceflows,
-    documentos: props.t.documentos,
-    categorias: props.t.categorias,
-    // Auditoria reaproveita os rótulos que já existiam nas configurações.
-    auditoria: props.t.grupos.auditoria,
-    logsAuditoria: props.t.itens['logs-auditoria'],
-    logsRequisicao: props.t.itens['logs-requisicao'],
-  }
-  return mapa[no.chave ?? ''] ?? (no.chave ?? '')
+  // Rodada 16: o mapa de nomes mora no rotulos.ts, um só para todas as peças.
+  return rotuloComum(no, props.t)
 }
 
 /** Seções que podem receber um item: só as do workspace (regras R1 e R4). */
@@ -110,33 +62,10 @@ const secoesQueRecebem = computed(() =>
     .map(n => ({ id: n.id, rotulo: rotuloDe(n), escopo: n.escopo ?? [] })),
 )
 
-/*
- * ============ UMA CAMADA, DUAS ETAPAS (rodada 15) ============
- *
- * "ha inconsistencias no modelo de modal que aparece ao botar pra personalizar
- * o menu ou ao botar pra criar seçao ou criar menu/item de menu. unifique a
- * ideia" (Mikaela).
- *
- * Antes eram dois modais, um por cima do outro: o editor abria e o formulário
- * subia em cima, com outro cabeçalho, outra largura e outro rodapé. Duas
- * molduras para o mesmo assunto.
- *
- * Agora é uma camada só, com duas etapas: a árvore e o formulário. O título, a
- * linha de apoio e os dois botões do rodapé ficam sempre no mesmo lugar, e só
- * mudam de texto. Quem vem do "+" cai direto na etapa do formulário: o atalho
- * corta o caminho sem inventar outra moldura.
- */
 function abrirForm(modo: 'secao' | 'item', secaoId = '') {
   modoDoForm.value = modo
   secaoDoNovoItem.value = secaoId
   formAberto.value = true
-}
-
-/** O formulário da etapa, para o rodapé mandar salvar. */
-const formulario = useTemplateRef<{ salvar: () => void }>('formulario')
-
-function voltarParaArvore() {
-  formAberto.value = false
 }
 
 function receberCriado(no: NoDoMenu & { lugar?: string, escopo: string[] }) {
@@ -181,22 +110,6 @@ function passar(e: DragEvent, id: string, comMeio: boolean) {
  */
 const recusa = ref<{ id: string, motivo: string } | null>(null)
 
-/*
- * EXCLUIR (rodada 14). Só o que o workspace criou: nativo e de módulo não se
- * exclui daqui, porque não nasceram aqui. Sem confirmação: isto mexe no
- * rascunho, e Descartar devolve.
- */
-function excluirNo(no: NoDoMenu) {
-  menu.excluir(no.id)
-  toast.add({ title: props.t.excluido(rotuloDe(no)), icon: 'i-lucide-trash-2', color: 'neutral' })
-}
-
-function podeExcluir(no: NoDoMenu, pai: NoDoMenu | null = null) {
-  if (menu.origemDe(no) === 'workspace') return true
-  // Tela dentro de uma secao do workspace tambem nasceu aqui.
-  return !!pai && menu.origemDe(pai) === 'workspace'
-}
-
 function largar(e: DragEvent, id: string, comMeio: boolean) {
   e.preventDefault()
   const quem = arraste.arrastando.value
@@ -229,11 +142,11 @@ function salvar() {
 }
 
 const opcoesDeTipo = computed(() =>
-  tiposDeMenu.map(t => ({ label: props.t.tipos[t.id] ?? t.id, value: t.id })),
+  tiposDeTela.map(t => ({ label: props.t.tipos[t.id] ?? t.id, value: t.id })),
 )
 
 function exigeCategoria(tipoId?: string) {
-  return tiposDeMenu.find(t => t.id === tipoId)?.exigeCategoria ?? false
+  return tiposDeTela.find(t => t.id === tipoId)?.exigeCategoria ?? false
 }
 
 /*
@@ -261,28 +174,12 @@ function classeDaMarca(id: string, comMeio = false) {
 <template>
   <UModal
     v-model:open="aberto"
-    :title="formAberto
-      ? (noEmEdicao
-        ? props.t.formEditarTitulo(noEmEdicao.rotulo ?? '')
-        : (modoDoForm === 'secao' ? props.t.formSecaoTitulo : props.t.formItemTitulo))
-      : props.t.editorTitulo"
-    :description="formAberto ? (modoDoForm === 'secao' ? props.t.formSecaoDescricao : props.t.formItemDescricao) : props.t.editorDescricao"
+    :title="props.t.editorTitulo"
+    :description="props.t.editorDescricao"
     :ui="{ content: 'max-w-3xl' }"
   >
     <template #body>
-      <!-- A barra de ações fica no mesmo lugar nas duas etapas. -->
-      <div v-if="formAberto" class="mb-3 flex flex-wrap items-center gap-2">
-        <UButton
-          :label="props.t.voltarParaMenu"
-          icon="i-lucide-arrow-left"
-          size="sm"
-          color="neutral"
-          variant="ghost"
-          @click="voltarParaArvore"
-        />
-      </div>
-
-      <div v-else class="mb-3 flex flex-wrap items-center gap-2">
+      <div class="mb-3 flex flex-wrap items-center gap-2">
         <UButton
           :label="props.t.adicionarSecao"
           icon="i-lucide-folder-plus"
@@ -306,21 +203,7 @@ function classeDaMarca(id: string, comMeio = false) {
         </span>
       </div>
 
-      <FormularioDeMenu
-        v-if="formAberto"
-        ref="formulario"
-        v-model:open="formAberto"
-        :t="props.t"
-        :modo="modoDoForm"
-        :modelo="props.modelo"
-        :secoes="secoesQueRecebem"
-        :no="noEmEdicao"
-        @criado="receberCriado"
-        @editado="receberEditado"
-        @fechar="voltarParaArvore"
-      />
-
-      <div v-else class="max-h-[50vh] space-y-1 overflow-y-auto pr-1">
+      <div class="max-h-[50vh] space-y-1 overflow-y-auto pr-1">
         <template v-for="no in menu.arvoreVisivel.value" :key="no.id">
           <div
             class="relative animate-[entrada_0.2s_ease-out_both] rounded-lg border border-default p-2"
@@ -356,17 +239,6 @@ function classeDaMarca(id: string, comMeio = false) {
                 :aria-label="props.t.adicionarItem"
                 @click="abrirForm('item', no.id)"
               />
-
-              <UTooltip v-if="podeExcluir(no)" :text="props.t.excluirDica">
-                <UButton
-                  icon="i-lucide-trash-2"
-                  size="xs"
-                  color="neutral"
-                  variant="ghost"
-                  :aria-label="props.t.excluir"
-                  @click="excluirNo(no)"
-                />
-              </UTooltip>
             </div>
 
             <!-- o escopo da seção, que decide quem enxerga -->
@@ -412,11 +284,11 @@ function classeDaMarca(id: string, comMeio = false) {
 
                   <USelect
                     v-if="filho.tipo === 'tela'"
-                    v-model="filho.tipoDeMenu"
+                    v-model="filho.tipoDeTela"
                     :items="opcoesDeTipo"
                     size="xs"
                     class="w-48 shrink-0"
-                    :aria-label="props.t.tipoDeMenu"
+                    :aria-label="props.t.tipoDeTela"
                   />
                   <UBadge
                     v-else
@@ -426,22 +298,10 @@ function classeDaMarca(id: string, comMeio = false) {
                     variant="subtle"
                     class="shrink-0"
                   />
-
-                  <UTooltip v-if="podeExcluir(filho, no)" :text="props.t.excluirDica">
-                    <UButton
-                      icon="i-lucide-trash-2"
-                      size="xs"
-                      color="neutral"
-                      variant="ghost"
-                      class="shrink-0"
-                      :aria-label="props.t.excluir"
-                      @click="excluirNo(filho)"
-                    />
-                  </UTooltip>
                 </div>
 
                 <p
-                  v-if="filho.tipo === 'tela' && exigeCategoria(filho.tipoDeMenu) && !filho.categoriasLigadas"
+                  v-if="filho.tipo === 'tela' && exigeCategoria(filho.tipoDeTela) && !filho.categoriasLigadas"
                   class="mt-1 flex items-center gap-1.5 pl-6 text-xs text-warning"
                 >
                   <UIcon name="i-lucide-triangle-alert" class="size-3.5 shrink-0" />
@@ -464,44 +324,40 @@ function classeDaMarca(id: string, comMeio = false) {
         </template>
       </div>
 
-      <p v-if="!formAberto" class="mt-2 flex items-center gap-1.5 text-xs text-muted">
+      <p class="mt-2 flex items-center gap-1.5 text-xs text-muted">
         <UIcon name="i-lucide-keyboard" class="size-3.5 shrink-0" />
         {{ props.t.arrastarTeclado }}
       </p>
+
+      <!-- os dois formulários de criação, em camada sobre o editor -->
+      <FormularioDeMenu
+        v-model:open="formAberto"
+        :t="props.t"
+        :modo="modoDoForm"
+        :modelo="props.modelo"
+        :secoes="secoesQueRecebem"
+        @criado="receberCriado"
+      />
     </template>
 
-    <!--
-      O rodapé tem a mesma geometria nas duas etapas: a linha de contexto à
-      esquerda, a saída e a ação à direita. Só o texto muda.
-    -->
     <template #footer>
       <div class="flex w-full flex-wrap items-center gap-2">
-        <p class="min-w-0 flex-1 text-xs" :class="menu.alterado.value && !formAberto ? 'font-medium text-highlighted' : 'text-muted'">
-          {{ formAberto
-            ? (modoDoForm === 'secao' ? props.t.formSecaoRodape : props.t.formItemRodape)
-            : (menu.alterado.value ? props.t.menuAlterado : props.t.semAlteracao) }}
+        <p class="min-w-0 flex-1 text-xs" :class="menu.alterado.value ? 'font-medium text-highlighted' : 'text-muted'">
+          {{ menu.alterado.value ? props.t.menuAlterado : props.t.semAlteracao }}
         </p>
-
-        <template v-if="formAberto">
-          <UButton :label="props.t.cancelar" color="neutral" variant="ghost" @click="voltarParaArvore" />
-          <UButton :label="props.t.salvar" color="primary" @click="formulario?.salvar()" />
-        </template>
-
-        <template v-else>
-          <UButton
-            :label="props.t.descartar"
-            color="neutral"
-            variant="ghost"
-            :disabled="!menu.alterado.value"
-            @click="menu.descartar()"
-          />
-          <UButton
-            :label="props.t.salvar"
-            color="primary"
-            :disabled="!menu.alterado.value"
-            @click="salvar"
-          />
-        </template>
+        <UButton
+          :label="props.t.descartar"
+          color="neutral"
+          variant="ghost"
+          :disabled="!menu.alterado.value"
+          @click="menu.descartar()"
+        />
+        <UButton
+          :label="props.t.salvar"
+          color="primary"
+          :disabled="!menu.alterado.value"
+          @click="salvar"
+        />
       </div>
     </template>
   </UModal>

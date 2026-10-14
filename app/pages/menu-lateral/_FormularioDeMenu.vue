@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
   gruposDeMembros,
-  tiposDeMenu,
+  tiposDeTela,
   paineisQueRecebem,
   type LugarDaSecao,
   type NoDoMenu,
@@ -36,18 +36,10 @@ const props = defineProps<{
   modelo: 'barra' | 'trilha'
   /** Seções que podem receber um item. Só as do workspace: regra R4. */
   secoes: { id: string, rotulo: string, escopo: string[] }[]
-  /** Quando vem preenchido, o formulário EDITA em vez de criar. Rodada 16. */
-  no?: NoDoMenu | null
 }>()
 
 const aberto = defineModel<boolean>('open', { default: false })
-const emit = defineEmits<{
-  criado: [no: NoDoMenu & { lugar?: LugarDaSecao, escopo: string[] }]
-  editado: [id: string, dados: Partial<NoDoMenu>]
-  fechar: []
-}>()
-
-const editando = computed(() => !!props.no)
+const emit = defineEmits<{ criado: [no: NoDoMenu & { lugar?: LugarDaSecao, escopo: string[] }] }>()
 
 const nome = ref('')
 const icone = ref('folder')
@@ -69,22 +61,6 @@ const tentouSalvar = ref(false)
  */
 watch(aberto, (v) => {
   if (!v) return
-  tentouSalvar.value = false
-
-  /* Editando: o formulário nasce com o que o nó tem hoje. */
-  if (props.no) {
-    nome.value = props.no.rotulo ?? ''
-    icone.value = (props.no.icone ?? 'i-lucide-folder').replace('i-lucide-', '')
-    lugar.value = (props.no.lugar ?? 'trilha') as LugarDaSecao
-    painelAlvo.value = props.no.painel ?? 'trabalho'
-    escopo.value = [...(props.no.escopo ?? [])]
-    tipo.value = props.no.tipoDeMenu ?? 'consultas'
-    caminho.value = ''
-    categorias.value = []
-    restringirItem.value = !!props.no.escopo?.length
-    return
-  }
-
   nome.value = ''
   icone.value = props.modo === 'secao' ? 'folder' : 'file-text'
   lugar.value = 'trilha'
@@ -95,16 +71,17 @@ watch(aberto, (v) => {
   caminho.value = ''
   categorias.value = []
   restringirItem.value = false
+  tentouSalvar.value = false
 }, { immediate: true })
 
 const ehSecao = computed(() => props.modo === 'secao')
 
-const tipoEscolhido = computed(() => tiposDeMenu.find(x => x.id === tipo.value))
+const tipoEscolhido = computed(() => tiposDeTela.find(x => x.id === tipo.value))
 const precisaCaminho = computed(() => tipoEscolhido.value?.exigeCaminho ?? false)
 const precisaCategoria = computed(() => tipoEscolhido.value?.exigeCategoria ?? false)
 
 const opcoesDeTipo = computed(() =>
-  tiposDeMenu.map(x => ({ label: props.t.tipos[x.id] ?? x.id, value: x.id })),
+  tiposDeTela.map(x => ({ label: props.t.tipos[x.id] ?? x.id, value: x.id })),
 )
 const opcoesDePainel = computed(() =>
   paineisQueRecebem.map(p => ({
@@ -147,45 +124,30 @@ function salvar() {
   tentouSalvar.value = true
   if (erroDeNome.value || erroDeCaminho.value) return
 
-  if (props.no) {
-    emit('editado', props.no.id, {
-      rotulo: nome.value.trim(),
-      icone: `i-lucide-${icone.value}`,
-      escopo: escopoEfetivo.value,
-      ...(ehSecao.value ? { lugar: lugar.value, painel: painelAlvo.value } : { tipoDeMenu: tipo.value }),
-    })
-    emit('fechar')
-    return
-  }
-
   emit('criado', {
     id: `novo-${Date.now()}`,
     tipo: ehSecao.value ? 'secao' : 'tela',
-    // Nasceu aqui, entao e do workspace: e o que permite excluir depois.
-    origem: 'workspace',
     rotulo: nome.value.trim(),
     icone: `i-lucide-${icone.value}`,
-    tipoDeMenu: ehSecao.value ? undefined : tipo.value,
+    tipoDeTela: ehSecao.value ? undefined : tipo.value,
     categoriasLigadas: categorias.value.length || undefined,
     filhos: ehSecao.value ? [] : undefined,
     lugar: ehSecao.value && props.modelo === 'trilha' ? lugar.value : undefined,
     escopo: escopoEfetivo.value,
   })
-  emit('fechar')
+  aberto.value = false
 }
-
-/* Quem desenha o rodapé é o editor, então é ele quem manda salvar. */
-defineExpose({ salvar })
 </script>
 
 <template>
-  <!--
-    RODADA 15: isto não é mais um modal.
-    O formulário virou o CORPO de uma etapa dentro da camada do menu, e quem
-    desenha moldura, título e rodapé é o editor. Antes eram dois modais
-    empilhados, com dois cabeçalhos e dois rodapés diferentes na mesma tela.
-  -->
-  <div class="space-y-4">
+  <UModal
+    v-model:open="aberto"
+    :title="ehSecao ? props.t.formSecaoTitulo : props.t.formItemTitulo"
+    :description="ehSecao ? props.t.formSecaoDescricao : props.t.formItemDescricao"
+    :ui="{ content: 'max-w-2xl' }"
+  >
+    <template #body>
+      <div class="space-y-4">
         <!-- ---------------- nome e ícone ---------------- -->
         <div class="flex items-start gap-3">
           <UFormField :label="props.t.campoIcone" class="shrink-0">
@@ -249,13 +211,7 @@ defineExpose({ salvar })
         <!-- ---------------- só item: tipo, caminho, categorias, seção ---------------- -->
         <template v-if="!ehSecao">
           <div class="grid gap-3 sm:grid-cols-2">
-            <!--
-              RODADA 14: o tipo é a tela.
-              A frase embaixo do campo existe porque esta é a troca inteira: no
-              produto de hoje a pessoa cria a tela num lugar e o item do menu em
-              outro. Aqui ela escolhe o tipo e as duas coisas nascem juntas.
-            -->
-            <UFormField :label="props.t.tipoDeMenu" :description="props.t.tipoDeMenuDica">
+            <UFormField :label="props.t.tipoDeTela">
               <USelect v-model="tipo" :items="opcoesDeTipo" class="w-full" />
             </UFormField>
 
@@ -318,7 +274,7 @@ defineExpose({ salvar })
           </div>
         </UFormField>
 
-    <!-- ---------------- a prévia ---------------- -->
+        <!-- ---------------- a prévia ---------------- -->
         <div class="rounded-lg border border-default bg-elevated/40 p-3">
           <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-toned">
             {{ ehSecao && props.modelo === 'trilha' && lugar === 'trilha' ? props.t.preverNaTrilha : props.t.preverNoPainel }}
@@ -344,16 +300,19 @@ defineExpose({ salvar })
             </div>
           </div>
 
-          <!-- O que abre ao clicar: a outra metade do que está sendo criado. -->
-          <p v-if="!ehSecao" class="mt-2 flex items-center gap-1.5 text-xs text-muted">
-            <UIcon name="i-lucide-corner-down-right" class="size-3.5 shrink-0" />
-            {{ props.t.tipos[tipo] ?? tipo }}
-          </p>
-
           <p class="mt-2 flex items-center gap-1.5 text-xs text-muted">
             <UIcon name="i-lucide-eye" class="size-3.5 shrink-0" />
             {{ resumoDoEscopo }}
           </p>
-    </div>
-  </div>
+        </div>
+      </div>
+    </template>
+
+    <template #footer>
+      <div class="flex w-full justify-end gap-2">
+        <UButton :label="props.t.cancelar" color="neutral" variant="ghost" @click="aberto = false" />
+        <UButton :label="props.t.salvar" color="primary" @click="salvar" />
+      </div>
+    </template>
+  </UModal>
 </template>

@@ -26,6 +26,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   voltar: []
   item: [id: string, rotulo: string]
+  recolher: []
 }>()
 
 /*
@@ -66,10 +67,11 @@ const nenhumResultado = computed(() => busca.value.trim() !== '' && gruposVisive
   <div class="flex h-full flex-col">
     <!-- ============ topo: a volta, sempre visível ============ -->
     <div class="flex shrink-0 flex-col gap-2 p-3">
+      <div class="flex items-center gap-1">
       <UButton
         color="neutral"
         variant="outline"
-        class="w-full justify-start"
+        class="min-w-0 flex-1 justify-start"
         :aria-label="props.t.voltarDica"
         @click="emit('voltar')"
       >
@@ -79,6 +81,20 @@ const nenhumResultado = computed(() => busca.value.trim() !== '' && gruposVisive
           <span class="block truncate text-sm font-semibold text-highlighted">{{ workspace.nome }}</span>
         </span>
       </UButton>
+      <!-- Recolher (rodada 14): no alto, como no painel de trabalho. -->
+      <UTooltip :text="props.t.recolherMenu" :kbds="['meta', '\\']">
+        <UButton
+          icon="i-lucide-panel-left-close"
+          size="sm"
+          color="neutral"
+          variant="ghost"
+          class="shrink-0"
+          :aria-label="props.t.recolherMenu"
+          aria-keyshortcuts="Control+Backslash"
+          @click="emit('recolher')"
+        />
+      </UTooltip>
+      </div>
 
       <div class="flex items-center gap-2 px-1 pt-1">
         <UIcon name="i-lucide-settings" class="size-4 shrink-0 text-toned" />

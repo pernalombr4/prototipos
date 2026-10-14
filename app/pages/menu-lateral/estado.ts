@@ -42,7 +42,119 @@ export interface Recusa {
   motivo: string
 }
 
+/* ==================================================================
+   AS PREFERÊNCIAS DA TRILHA (rodada 15)
+
+   O que a Mikaela mostrou do ClickUp, item por item, e que aqui vira
+   preferência de quem usa:
+
+     `fixadas`         o que aparece na trilha, NA ORDEM em que foi fixado.
+                       A trilha não se arrasta. Fixar com a trilha cheia
+                       troca o último, e o último vai para "Mais";
+     `rotulos`         "Ícones e rótulos" ou "Somente ícones";
+     `inicioOcultos`   os itens nativos do Início que foram para "⋯ Mais";
+     `ordemDoInicio`   a ordem desses itens. Rodada 16: aqui se arrasta,
+                       DIFERENTE do ClickUp, a pedido dela;
+     `ordemDasSecoes`  a ordem das seções do Início, que se arrasta no
+                       próprio menu ou em Personalizar > Seções;
+     `secoesOcultas`   rodada 16: qualquer seção se oculta, nativa também;
+     `pessoais`        as seções que a pessoa criou, com atalhos para telas,
+                       menus e categorias que já existem;
+     `personalizou`    abriu Personalizar uma vez: o botão sai do pé do menu
+                       e vira ícone no cabeçalho.
+
+   Duas cópias, como o menu: o que se ARRASTA no menu vai para o rascunho e
+   espera o Salvar (a regra dela desde a rodada 5); o que se escolhe na
+   janela Personalizar vale na hora, nas duas, como no ClickUp.
+================================================================== */
+
+/** Um atalho dentro de uma seção pessoal. Categoria guarda o id como texto. */
+export interface Atalho {
+  tipo: 'destino' | 'tela' | 'menu' | 'categoria'
+  id: string
+}
+
+export interface SecaoPessoal {
+  id: string
+  rotulo: string
+  icone: string
+  itens: Atalho[]
+  ordem: 'personalizada' | 'alfabetica' | 'recentes'
+}
+
+export interface PrefsDaTrilha {
+  fixadas: string[]
+  rotulos: boolean
+  inicioOcultos: string[]
+  ordemDoInicio: string[]
+  ordemDasSecoes: string[]
+  secoesOcultas: string[]
+  pessoais: SecaoPessoal[]
+  personalizou: boolean
+}
+
+/**
+ * Quantos ícones cabem na trilha, Início incluído, a 900 px de altura. Eram
+ * seis na rodada 15; Integrações (rodada 16) pediu mais espaço, e a base da
+ * trilha ainda sobra.
+ */
+export const LIMITE_DA_TRILHA = 8
+
+/*
+ * Rodada 16: "deve ser possível o user ocultar nativos também, se quiser".
+ * Nada no Início fica travado, e qualquer seção se oculta. A única âncora
+ * que sobra é o ícone Início na trilha: sem ele não existe este menu.
+ */
+
+function prefsIniciais(): PrefsDaTrilha {
+  return {
+    // Conhecimento e Comparações começam em "Mais", para a trilha mostrar o mecanismo.
+    fixadas: ['dados', 'sec:s-analise', 'sec:s-auditoria', 'sec:s-comercial', 'sec:s-integracoes', 'config'],
+    rotulos: true,
+    inicioOcultos: ['n-documentos', 'todas-categorias'],
+    ordemDoInicio: [],
+    ordemDasSecoes: ['p-rotina', 'favoritos', 'categorias'],
+    secoesOcultas: [],
+    /*
+     * Uma seção pessoal de exemplo, para o protótipo mostrar o que ela
+     * pediu: "uma seção pode ter menus com submenus dentro". Dado do
+     * protótipo; numa conta nova esta lista nasce vazia.
+     */
+    pessoais: [{
+      id: 'p-rotina',
+      rotulo: 'Rotina do jurídico',
+      icone: 'i-lucide-scale',
+      ordem: 'personalizada',
+      itens: [
+        { tipo: 'menu', id: 's-auditoria' },
+        { tipo: 'categoria', id: '1' },
+        { tipo: 'destino', id: 'n-tarefas' },
+      ],
+    }],
+    personalizou: false,
+  }
+}
+
+function clonarPrefs(p: PrefsDaTrilha): PrefsDaTrilha {
+  return JSON.parse(JSON.stringify(p))
+}
+
 export function useMenuDoWorkspace() {
+  const prefsAoVivo = useState<PrefsDaTrilha>('trilha-prefs', prefsIniciais)
+  const prefs = useState<PrefsDaTrilha>('trilha-prefs-rascunho', prefsIniciais)
+
+  /** Vale na hora, nas duas cópias: é o que a janela Personalizar faz. */
+  function aplicarPrefs(mudanca: (p: PrefsDaTrilha) => void) {
+    mudanca(prefs.value)
+    mudanca(prefsAoVivo.value)
+  }
+
+  /** Vai para o rascunho e acende o Salvar: é o que o arraste faz. */
+  function arrastarPrefs(toque: string, mudanca: (p: PrefsDaTrilha) => void) {
+    mudanca(prefs.value)
+    marcarTocado(toque)
+  }
+
   const aoVivo = useState<NoDoMenu[]>('menu-ao-vivo', () => arvoreCompleta())
   const rascunho = useState<NoDoMenu[]>('menu-rascunho', () => arvoreCompleta())
 
@@ -191,6 +303,7 @@ export function useMenuDoWorkspace() {
       pessoal.value = null
     }
     ordemCategorias.value = [...ordemCategoriasRascunho.value]
+    prefsAoVivo.value = clonarPrefs(prefs.value)
     alcanceSalvo.value = alcance
     tocados.value = []
   }
@@ -198,6 +311,7 @@ export function useMenuDoWorkspace() {
   function descartar() {
     rascunho.value = clonar(base.value)
     ordemCategoriasRascunho.value = [...ordemCategorias.value]
+    prefs.value = clonarPrefs(prefsAoVivo.value)
     tocados.value = []
   }
 
@@ -336,40 +450,55 @@ export function useMenuDoWorkspace() {
   }
 
   /*
-   * EXCLUIR (rodada 14).
+   * ============ O MENU DE CONTEXTO (rodada 14) ============
    *
-   * Menu e tela sao a mesma coisa desde esta rodada, entao excluir o menu
-   * leva a tela junto. Nao ha confirmacao, e e de proposito: enquanto nao se
-   * clica em Salvar, isto mexe no RASCUNHO, e Descartar devolve tudo. Pedir
-   * certeza duas vezes para uma acao que ja tem volta e so mais um clique.
+   * Tudo o que o botão direito faz passa por aqui, e tudo mexe no RASCUNHO,
+   * como o arraste: acende a bolinha, acende o cartão de salvar, e a pessoa
+   * escolhe se vale para todos ou só para ela. Ocultar com "Salvar só para
+   * mim" é o Hide do ClickUp; com "Salvar para todos", é o administrador
+   * tirando o item do menu de todo mundo.
    */
-  function excluir(id: string) {
+
+  /** Sobe ou desce para a raiz do menu, ao lado da seção onde estava. */
+  function moverParaPrimeiroNivel(id: string) {
     const onde = localizar(rascunho.value, id)
-    if (!onde) return
-    onde.irmaos.splice(onde.indice, 1)
-    marcarTocado(id)
+    if (!onde?.pai) return { ok: true as const }
+    return soltar(id, onde.pai.id, 'depois')
   }
 
-  /*
-   * EDITAR UM NÓ QUE JÁ EXISTE (rodada 16).
-   *
-   * Renomear é o primeiro item do menu de botão direito em todos os produtos
-   * que a pesquisa olhou, e até aqui o formulário só sabia criar. Como todo o
-   * resto, isto mexe no rascunho: a bolinha acende e Descartar devolve.
-   */
-  function editarNo(id: string, dados: Partial<NoDoMenu>) {
+  function moverParaSecao(id: string, secaoId: string) {
+    return soltar(id, secaoId, 'dentro')
+  }
+
+  function ocultar(id: string) {
     const no = acharNo(rascunho.value, id)
     if (!no) return
-    Object.assign(no, dados)
+    no.oculto = true
     marcarTocado(id)
   }
 
-  /** Tirar da trilha ou pôr de volta: o "desafixar" do Teams. */
-  function alternarLugar(id: string) {
+  function mostrar(id: string) {
+    const no = acharNo(rascunho.value, id)
+    if (!no) return
+    no.oculto = false
+    marcarTocado(id)
+  }
+
+  function renomear(id: string, rotulo: string) {
+    const no = acharNo(rascunho.value, id)
+    const limpo = rotulo.trim()
+    if (!no || !limpo || limpo === no.rotulo) return
+    no.rotulo = limpo
+    marcarTocado(id)
+  }
+
+  /** Trilha ou painel, no modelo de trilha. `painel` diz em qual painel entra. */
+  function mudarLugar(id: string, lugar: 'trilha' | 'painel', painel = 'trabalho') {
     const no = acharNo(rascunho.value, id)
     if (!no || no.tipo !== 'secao') return
-    no.lugar = no.lugar === 'trilha' ? 'painel' : 'trilha'
-    if (no.lugar === 'painel') no.painel = no.painel ?? 'dados'
+    if (no.lugar === lugar && (lugar === 'trilha' || (no.painel ?? 'trabalho') === painel)) return
+    no.lugar = lugar
+    if (lugar === 'painel') no.painel = painel
     marcarTocado(id)
   }
 
@@ -404,9 +533,34 @@ export function useMenuDoWorkspace() {
   /** A árvore inteira filtrada, que é o que o editor mostra. */
   const arvoreVisivel = computed(() => rascunho.value.filter(visivel))
 
+  /*
+   * O QUE AS BARRAS DESENHAM (rodada 14): o mesmo de cima, menos o que foi
+   * ocultado. O editor e a busca continuam lendo as listas inteiras: oculto é
+   * "fora do meu caminho", não "apagado".
+   *
+   * São cópias rasas, e os filhos filtrados moram nelas. Quem mexe na árvore
+   * mexe pelo id, nunca pelo objeto desenhado.
+   */
+  function semOcultos(n: NoDoMenu): NoDoMenu {
+    return n.filhos ? { ...n, filhos: n.filhos.filter(f => !f.oculto) } : n
+  }
+  const arvoreDaBarra = computed(() => arvoreVisivel.value.filter(n => !n.oculto).map(semOcultos))
+  const destinosDaBarra = computed(() => destinos.value.filter(n => !n.oculto))
+  const secoesDaBarra = computed(() => secoes.value.filter(n => !n.oculto).map(semOcultos))
+
+  /** Tudo o que está oculto agora, para o "Itens ocultos" do pé da barra. */
+  const ocultos = computed(() => {
+    const lista: NoDoMenu[] = []
+    for (const n of arvoreVisivel.value) {
+      if (n.oculto) lista.push(n)
+      for (const f of n.filhos ?? []) if (f.oculto) lista.push(f)
+    }
+    return lista
+  })
+
   /** No modelo de trilha: as que o administrador mandou para a trilha. */
-  const secoesNaTrilha = computed(() => secoes.value.filter(s => s.lugar === 'trilha'))
-  const secoesNoPainel = computed(() => secoes.value.filter(s => s.lugar !== 'trilha'))
+  const secoesNaTrilha = computed(() => secoesDaBarra.value.filter(s => s.lugar === 'trilha'))
+  const secoesNoPainel = computed(() => secoesDaBarra.value.filter(s => s.lugar !== 'trilha'))
 
   return {
     aoVivo,
@@ -422,9 +576,6 @@ export function useMenuDoWorkspace() {
     reordenarCategoria,
     adicionarSecao,
     adicionarItem,
-    excluir,
-    editarNo,
-    alternarLugar,
     localizar,
     destinos,
     secaoDeCategorias,
@@ -448,7 +599,30 @@ export function useMenuDoWorkspace() {
     modoDoMenu,
     secoesNaTrilha,
     secoesNoPainel,
+    arvoreDaBarra,
+    destinosDaBarra,
+    secoesDaBarra,
+    ocultos,
+    acharNo: (id: string) => acharNo(rascunho.value, id),
+    prefs,
+    aplicarPrefs,
+    arrastarPrefs,
+    moverParaPrimeiroNivel,
+    moverParaSecao,
+    ocultar,
+    mostrar,
+    renomear,
+    mudarLugar,
   }
+}
+
+/**
+ * Menu recolhido ou aberto (rodada 14). Um estado só para os dois modelos:
+ * trocar de modelo no andaime não reabre o menu que a pessoa recolheu.
+ * Não sobrevive ao recarregar, como o resto do protótipo.
+ */
+export function useMenuRecolhido() {
+  return useState<boolean>('menu-recolhido', () => false)
 }
 
 /* ==================================================================

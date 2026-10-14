@@ -51,7 +51,7 @@ watch(aberto, (v) => { if (v) busca.value = '' })
     v-model:open="aberto"
     :title="props.t.todasTitulo"
     :description="props.t.todasDescricao(props.categorias.length)"
-    :ui="{ content: 'max-w-3xl' }"
+    :ui="{ content: 'max-w-2xl' }"
   >
     <template #body>
       <div class="flex flex-col gap-3">

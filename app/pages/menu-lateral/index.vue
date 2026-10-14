@@ -1,8 +1,14 @@
 <script setup lang="ts">
+import { rotuloDoNo as rotuloComum } from './rotulos'
 import PainelTrabalho from './_PainelTrabalho.vue'
 import PainelConfiguracoes from './_PainelConfiguracoes.vue'
 import ModeloTrilha from './_ModeloTrilha.vue'
 import Conteudo from './_Conteudo.vue'
+import BarraRecolhida from './_BarraRecolhida.vue'
+import CentralDeCasos from './_CentralDeCasos.vue'
+import UsarCaso from './_UsarCaso.vue'
+import ImportarCaso from './_ImportarCaso.vue'
+import CriarCaso from './_CriarCaso.vue'
 
 /*
  * ============ O QUE ENTRA DEPOIS (rodada 13) ============
@@ -19,7 +25,6 @@ import Conteudo from './_Conteudo.vue'
  * primeiro clique fica pendurado. Em produção seria o contrário; como o
  * protótipo vive rodando em `pnpm dev`, mandou quem manda.
  */
-import CriarMaquete from './_CriarMaquete.vue'
 import EditorDeMenus from './_EditorDeMenus.vue'
 import TodasAsCategorias from './_TodasAsCategorias.vue'
 import MenuDeHoje from './_MenuDeHoje.vue'
@@ -32,7 +37,11 @@ import {
   type NoDoMenu,
   type Categoria,
 } from './mocks'
-import { useMenuDoWorkspace } from './estado'
+import { useMenuDoWorkspace, useMenuRecolhido } from './estado'
+import { useRenomeando } from './acoes'
+import { useJanelasDaTrilha } from './trilha'
+import { useLimites } from './limites'
+import { useJanelasDeCasos } from './casos'
 import { textos } from './textos'
 
 // O contexto do protótipo vem dos próprios .md desta pasta, como texto.
@@ -48,7 +57,7 @@ definePageMeta({
   titulo: 'Menu lateral em dois níveis',
   descricao: 'Tirar a administração do caminho do trabalho e dar teto à lista de categorias, sem mudar de endereço.',
   status: 'em-revisao',
-  atualizado: '2026-09-17',
+  atualizado: '2026-10-09',
   tela: 'Menu lateral do workspace',
 })
 
@@ -60,22 +69,8 @@ const menu = useMenuDoWorkspace()
 
 /** Rótulo de um nó: nativo vem do dicionário, do workspace vem do próprio nó. */
 function rotuloDoNo(no: NoDoMenu) {
-  if (no.rotulo) return no.rotulo
-  const mapa: Record<string, string> = {
-    inicio: t.value.inicio,
-    inbox: t.value.inbox,
-    chatIa: t.value.chatIa,
-    tarefas: t.value.tarefas,
-    agenda: t.value.agenda,
-    spaceflows: t.value.spaceflows,
-    documentos: t.value.documentos,
-    categorias: t.value.categorias,
-    // Auditoria reaproveita os rótulos que já existiam nas configurações.
-    auditoria: t.value.grupos.auditoria,
-    logsAuditoria: t.value.itens['logs-auditoria'],
-    logsRequisicao: t.value.itens['logs-requisicao'],
-  }
-  return mapa[no.chave ?? ''] ?? (no.chave ?? '')
+  // Rodada 16: o mapa de nomes mora no rotulos.ts, um só para todas as peças.
+  return rotuloComum(no, t.value)
 }
 
 /** Todos os itens de seção, achatados, para a busca e para o breadcrumb. */
@@ -105,10 +100,14 @@ const estadoDoPainel = computed(() => {
 })
 
 /* ------------------------------ o dado ------------------------------ */
+/* As categorias criadas pelo "+" do Início (rodada 16) somam às do mock. */
+const { categoriasCriadas } = useJanelasDaTrilha()
+const janelasDeCasos = useJanelasDeCasos()
+
 const base = computed<Categoria[]>(() => {
-  if (estado.value === 'vazio') return []
-  if (estado.value === 'volume') return categoriasVolume
-  return categoriasNormais
+  if (estado.value === 'vazio') return [...categoriasCriadas.value]
+  if (estado.value === 'volume') return [...categoriasVolume, ...categoriasCriadas.value]
+  return [...categoriasNormais, ...categoriasCriadas.value]
 })
 
 /** Favoritar mexe no array em memória. Recarregar a página volta ao começo. */
@@ -163,13 +162,20 @@ function trocarOrdem(v: 'uso' | 'alfabetica' | 'recentes' | 'manual') {
 }
 
 /**
- * O TETO da seção. Cinco, para a seção inteira mais os favoritos caberem sem
- * rolagem num notebook. O Attio mostra seis listas por padrão; aqui cinco, porque
+ * O TETO da seção (o padrão, desde a rodada 19). Cinco, para a seção inteira
+ * mais os favoritos caberem sem rolagem num notebook. O Attio mostra seis listas por padrão; aqui cinco, porque
  * acima da seção ainda existem os favoritos, que o Attio põe em outro lugar.
  * O resto vive na camada "ver todas".
  */
-const TETO_DA_SECAO = 5
-const recorte = computed(() => naoFavoritas.value.slice(0, TETO_DA_SECAO))
+/*
+ * Rodada 19: o teto deixou de ser fixo. É o "Mostrar na seção" de
+ * Categorias (5, 10, 15, 30 ou Todos), e 5 continua sendo o padrão.
+ */
+const limites = useLimites()
+const recorte = computed(() => {
+  const l = limites.limite('categorias')
+  return l === 'todos' ? naoFavoritas.value : naoFavoritas.value.slice(0, l)
+})
 
 /* ------------------------------------------------------------------
    ANDAIME: o modelo de navegação. No produto só um dos dois existe; os
@@ -235,6 +241,10 @@ function alternarFixar(id: number) {
 
 function abrirConfiguracoes() {
   if (!podeConfigurar.value) return
+  levarFocoParaBarra(() => abrirConfiguracoesAgora())
+}
+
+function abrirConfiguracoesAgora() {
   const primeiro = gruposDeConfiguracao[0]?.itens[0]
   if (primeiro) {
     abrirItemDeConfiguracao(primeiro.id, t.value.itens[primeiro.id] ?? primeiro.id)
@@ -245,7 +255,7 @@ function abrirConfiguracoes() {
 }
 
 function voltarParaTrabalho() {
-  painel.value = 'trabalho'
+  levarFocoParaBarra(() => { painel.value = 'trabalho' })
   // O id vem da arvore, onde o destino nativo tem prefixo: com 'inicio' a
   // volta deixava o menu inteiro sem linha ativa.
   destinoAtivo.value = menu.destinos.value[0]?.id ?? 'n-inicio'
@@ -262,6 +272,8 @@ function abrirItemDeConfiguracao(id: string, rotulo: string) {
   // Interface > Menus abre o editor do menu, que é onde o administrador
   // reordena, reagrupa e escolhe o tipo de cada tela.
   if (id === 'menus') abrirEditor(null)
+  // Interface > Casos de uso abre a Central (rodada 18), a mesma do "+" do Início.
+  if (id === 'casos-de-uso') janelasDeCasos.central.value = true
 }
 
 /** "Configurar categoria" leva para Estrutura > Categorias, já na área certa. */
@@ -276,47 +288,46 @@ function configurarCategoriaAtual() {
  * cima. Cada opção é maquete e diz isso no toast.
  */
 const itensDeCriar = computed(() => [[
-  { label: t.value.criarItem, icon: 'i-lucide-file-plus', onSelect: () => abrirMaquete('item') },
-  { label: t.value.criarTarefa, icon: 'i-lucide-square-check-big', onSelect: () => abrirMaquete('tarefa') },
+  { label: t.value.criarItem, icon: 'i-lucide-file-plus', onSelect: () => avisarMaquete(t.value.criarItem) },
+  { label: t.value.criarTarefa, icon: 'i-lucide-square-check-big', onSelect: () => avisarMaquete(t.value.criarTarefa) },
 ], [
-  { label: t.value.criarCategoria, icon: 'i-lucide-folder-plus', onSelect: () => abrirMaquete('categoria') },
+  { label: t.value.criarCategoria, icon: 'i-lucide-folder-plus', onSelect: () => avisarMaquete(t.value.criarCategoria) },
 ], [
   // Estes dois abrem o editor de menus com o formulário certo já aberto: criar
   // seção sem ver o menu em volta é decidir no escuro.
   { label: t.value.criarSecao, icon: 'i-lucide-menu', onSelect: () => abrirEditor('secao') },
-  // Rodada 14: "menu", e nao "item de menu" nem "tela". Sao a mesma coisa.
-  { label: t.value.formItemTitulo, icon: 'i-lucide-menu', onSelect: () => abrirEditor('item') },
+  { label: t.value.formItemTitulo, icon: 'i-lucide-file-plus', onSelect: () => abrirEditor('item') },
 ]])
 
-function abrirEditor(form: 'secao' | 'item' | null, id: string | null = null) {
+function abrirEditor(form: 'secao' | 'item' | null) {
   formInicial.value = form
-  editarId.value = id
   editando.value = true
 }
 
-/*
- * As três portas do "+" que não são menu abrem uma camada com a MESMA moldura
- * das outras, em vez do toast que elas davam antes. Rodada 15: "quando eu
- * clicar deve aparecer o modal representando o que deve ocorrer ali".
- */
-const maqueteAberta = ref(false)
-const modoDaMaquete = ref<'item' | 'tarefa' | 'categoria'>('item')
-const usouMaquete = ref(false)
-
-function abrirMaquete(modo: 'item' | 'tarefa' | 'categoria') {
-  modoDaMaquete.value = modo
-  usouMaquete.value = true
-  maqueteAberta.value = true
+function avisarMaquete(oQue: string) {
+  toast.add({
+    title: t.value.criarAberto(oQue.toLowerCase()),
+    icon: 'i-lucide-hammer',
+    color: 'neutral',
+  })
 }
 
 /* ------------------------------ camadas ------------------------------ */
 const vendoTodas = ref(false)
 const editando = ref(false)
 const formInicial = ref<'secao' | 'item' | null>(null)
-/* Id do no que o "Renomear" do botao direito mandou editar. Rodada 16. */
-const editarId = ref<string | null>(null)
 const vendoHoje = ref(false)
 const buscando = ref(false)
+/*
+ * O termo da busca global (rodada 17). Ele chega preenchido quando a busca
+ * nasce de um filtro do menu sem resultado: "Buscar X no workspace" leva o X.
+ */
+const termoDaBusca = ref('')
+function abrirBusca(termo?: string) {
+  termoDaBusca.value = termo ?? ''
+  buscando.value = true
+}
+watch(buscando, (v) => { if (!v) termoDaBusca.value = '' })
 
 /*
  * Cada camada só existe depois da primeira vez que foi aberta, e depois disso
@@ -388,9 +399,134 @@ const gruposDaBusca = computed(() => [
   },
 ])
 
+/* ============ RECOLHER E EXPANDIR (rodada 14) ============ */
+
+const recolhido = useMenuRecolhido()
+const aside = ref<HTMLElement | null>(null)
+
+/*
+ * O FOCO NÃO PODE CAIR NO VAZIO. Trocar de painel (trabalho e configurações)
+ * ou recolher a barra desmonta o botão que tinha o foco, e o navegador o
+ * devolve ao <body>: quem usa teclado ou leitor de tela perde o lugar e
+ * recomeça do topo da página. Achado da revisão de acessibilidade desta
+ * rodada (WCAG 2.4.3). Agora o foco vai para o primeiro botão do que entrou.
+ */
+async function levarFocoParaBarra(mudanca: () => void) {
+  const ativo = import.meta.client ? document.activeElement : null
+  const estavaNaBarra = !!ativo && !!aside.value?.contains(ativo)
+  mudanca()
+  if (!estavaNaBarra) return
+  await nextTick()
+  aside.value?.querySelector<HTMLElement>('button:not([disabled]), input')?.focus()
+}
+
+function alternarRecolhido() {
+  levarFocoParaBarra(() => { recolhido.value = !recolhido.value })
+}
+
+/* ============ ARRASTAR A BORDA (rodada 19) ============
+ *
+ *   "com o menu aberto, eu devo poder arrastar a lateral, como no clickup,
+ *    expandindo ainda mais ele (até um limite saudável) ou recolhendo. se eu
+ *    recolher passando de um limite mínimo, ele minimiza o menu como se eu
+ *    tivesse clicado já no botão de minimizar" (Mikaela)
+ *
+ * Os limites, em pixels:
+ *   mínimo   o menor em que os rótulos ainda leem ("Solicitações de compra"
+ *            corta, mas "Fornecedores" e os nomes das seções inteiros);
+ *   máximo   pouco mais que o dobro do mínimo: daí em diante a barra rouba
+ *            a tela sem mostrar nada a mais, porque os nomes já cabem;
+ *   recolhe  abaixo disto, soltar recolhe. Entre ele e o mínimo a borda para
+ *            no mínimo e o menu esmaece: é o aviso de "soltando aqui, fecha",
+ *            com a chance de voltar antes de soltar.
+ * A trilha soma os 72 px dela às medidas do painel.
+ */
+const MEDIDAS = {
+  barra: { padrao: 280, min: 220, max: 440, recolhe: 170 },
+  trilha: { padrao: 304, min: 264, max: 480, recolhe: 210 },
+} as const
+const larguras = useState<Record<'barra' | 'trilha', number>>('menu-larguras', () => ({ barra: 280, trilha: 304 }))
+const medidas = computed(() => MEDIDAS[modelo.value])
+const largura = computed(() => larguras.value[modelo.value])
+const redimensionando = ref(false)
+const vaiRecolher = ref(false)
+
+function definirLargura(v: number) {
+  const m = medidas.value
+  larguras.value = { ...larguras.value, [modelo.value]: Math.round(Math.min(m.max, Math.max(m.min, v))) }
+}
+
+function comecarArraste(e: PointerEvent) {
+  if (e.button !== 0) return
+  e.preventDefault()
+  const borda = e.currentTarget as HTMLElement
+  const inicioX = e.clientX
+  const inicioLargura = largura.value
+  borda.setPointerCapture(e.pointerId)
+  redimensionando.value = true
+  document.body.style.cursor = 'col-resize'
+  document.body.style.userSelect = 'none'
+
+  const mover = (ev: PointerEvent) => {
+    const bruto = inicioLargura + ev.clientX - inicioX
+    vaiRecolher.value = bruto < medidas.value.recolhe
+    definirLargura(bruto)
+  }
+  const soltar = () => {
+    borda.removeEventListener('pointermove', mover)
+    borda.removeEventListener('pointerup', soltar)
+    borda.removeEventListener('pointercancel', soltar)
+    document.body.style.cursor = ''
+    document.body.style.userSelect = ''
+    redimensionando.value = false
+    if (vaiRecolher.value) {
+      vaiRecolher.value = false
+      // Reabre do tamanho que tinha antes do gesto, não do mínimo.
+      definirLargura(inicioLargura)
+      alternarRecolhido()
+    }
+  }
+  borda.addEventListener('pointermove', mover)
+  borda.addEventListener('pointerup', soltar)
+  borda.addEventListener('pointercancel', soltar)
+}
+
+/** O mesmo pelo teclado: setas de 16 px; seta para a esquerda no mínimo recolhe. */
+function teclarBorda(e: KeyboardEvent) {
+  const m = medidas.value
+  if (e.key === 'ArrowRight') definirLargura(largura.value + 16)
+  else if (e.key === 'ArrowLeft') {
+    if (largura.value <= m.min) alternarRecolhido()
+    else definirLargura(largura.value - 16)
+  }
+  else if (e.key === 'Home') definirLargura(m.min)
+  else if (e.key === 'End') definirLargura(m.max)
+  else return
+  e.preventDefault()
+}
+
 defineShortcuts({
   meta_k: () => { buscando.value = !buscando.value },
+  // O atalho do ClickUp para mostrar e esconder a barra.
+  'meta_\\': () => alternarRecolhido(),
 })
+
+/* ============ RENOMEAR, PELO BOTÃO DIREITO (rodada 14) ============ */
+
+const renomeando = useRenomeando()
+const nomeNovo = ref('')
+const abrindoRenomear = computed({
+  get: () => renomeando.value !== null,
+  set: (v) => { if (!v) renomeando.value = null },
+})
+watch(renomeando, (id) => {
+  if (id) nomeNovo.value = menu.acharNo(id)?.rotulo ?? ''
+})
+
+function aplicarNome() {
+  if (renomeando.value) menu.renomear(renomeando.value, nomeNovo.value)
+  renomeando.value = null
+}
 
 /** O menu de ajuda é maquete: os três caminhos saem do produto para fora dele. */
 function avisarAjuda(rotulo: string) {
@@ -489,15 +625,27 @@ function emBreve() {
     <div class="flex min-h-0 flex-1 gap-0 pb-20">
       <div class="flex min-h-0 w-full overflow-hidden border-t border-default bg-default">
         <!-- barra lateral -->
+        <!--
+          A largura anda junto com o recolher (rodada 14), em 200 ms. O
+          prefers-reduced-motion do main.css zera a transição.
+        -->
         <aside
-          class="relative hidden shrink-0 border-r border-default bg-elevated/40 md:block"
-          :class="modelo === 'trilha' ? 'w-[19rem]' : 'w-[17.5rem]'"
-          :aria-label="t.configuracoes"
+          ref="aside"
+          class="relative hidden shrink-0 overflow-hidden border-r border-default bg-elevated/40 ease-out md:block"
+          :class="[
+            modelo === 'trilha' ? (recolhido ? 'w-[4.5rem]' : '') : (recolhido ? 'w-14' : ''),
+            redimensionando ? 'transition-none' : 'transition-[width] duration-200',
+            // Soltar aqui recolhe: o menu esmaece como aviso.
+            vaiRecolher ? 'opacity-50' : '',
+          ]"
+          :style="recolhido ? undefined : { width: `${largura}px` }"
+          :aria-label="t.menuLateral"
         >
           <!-- MODELO ALTERNATIVO: trilha de icones mais painel da area. -->
           <ModeloTrilha
             v-if="modelo === 'trilha'"
             :t="t"
+            :categorias="categorias"
             :favoritas="favoritas"
             :recorte="recorte"
             :total-de-categorias="categorias.length"
@@ -507,15 +655,41 @@ function emBreve() {
             :estado="estadoDoPainel"
             :pode-configurar="podeConfigurar"
             :itens-de-criar="itensDeCriar"
+            :ordem="ordem"
+            :recolhido="recolhido"
             @destino="irParaDestino"
             @categoria="abrirCategoria"
             @alternar-fixar="alternarFixar"
             @ver-todas="vendoTodas = true"
-            @busca="buscando = true"
+            @busca="abrirBusca"
             @item="abrirItemDeConfiguracao"
             @ajuda="avisarAjuda"
-            @renomear="id => abrirEditor(null, id)"
-            @personalizar="abrirEditor(null)"
+            @ordem="trocarOrdem"
+            @virar-manual="virarOrdemManual"
+            @nova-tela="abrirEditor('item')"
+            @configurar-categoria="configurarCategoriaAtual"
+            @recolher="alternarRecolhido"
+          />
+          <!-- RECOLHIDA (rodada 14): a coluna de ícones, nos dois painéis. -->
+          <BarraRecolhida
+            v-else-if="recolhido"
+            class="animate-[entrada_0.2s_ease-out_both]"
+            :t="t"
+            :favoritas="favoritas"
+            :recorte="recorte"
+            :total-de-categorias="categorias.length"
+            :destino-ativo="painel === 'trabalho' ? destinoAtivo : ''"
+            :categoria-ativa-id="painel === 'trabalho' ? (categoriaAtiva?.id ?? null) : null"
+            :pode-configurar="podeConfigurar"
+            @destino="id => { painel = 'trabalho'; irParaDestino(id) }"
+            @categoria="c => { painel = 'trabalho'; abrirCategoria(c) }"
+            @alternar-fixar="alternarFixar"
+            @ver-todas="vendoTodas = true"
+            @configuracoes="abrirConfiguracoes"
+            @ajuda="avisarAjuda"
+            @expandir="alternarRecolhido"
+            @nova-tela="abrirEditor('item')"
+            @configurar-categoria="configurarCategoriaAtual"
           />
           <template v-else>
           <!--
@@ -543,14 +717,14 @@ function emBreve() {
               @alternar-fixar="alternarFixar"
               @ver-todas="vendoTodas = true"
               @configuracoes="abrirConfiguracoes"
-              @busca="buscando = true"
+              @busca="abrirBusca"
               @criar="emBreve"
               @ajuda="avisarAjuda"
               @ordem="trocarOrdem"
               @virar-manual="virarOrdemManual"
-              @renomear="id => abrirEditor(null, id)"
-              @personalizar="abrirEditor(null)"
+              @nova-tela="abrirEditor('item')"
               @configurar-categoria="configurarCategoriaAtual"
+              @recolher="alternarRecolhido"
             />
           <PainelConfiguracoes
             v-else
@@ -560,8 +734,36 @@ function emBreve() {
             :item-ativo="itemConfigAtivo"
             @voltar="voltarParaTrabalho"
             @item="abrirItemDeConfiguracao"
+            @recolher="alternarRecolhido"
           />
           </template>
+          <!--
+            A BORDA QUE SE ARRASTA (rodada 19). Invisível parada; acende no
+            hover, no foco e durante o arraste, e fica amarela quando soltar ali
+            vai recolher o menu.
+          -->
+          <div
+            v-if="!recolhido"
+            role="separator"
+            aria-orientation="vertical"
+            tabindex="0"
+            :aria-label="t.redimensionarMenu"
+            :aria-valuenow="largura"
+            :aria-valuemin="medidas.min"
+            :aria-valuemax="medidas.max"
+            :title="t.redimensionarDica"
+            class="group/borda absolute inset-y-0 right-0 z-40 w-2 cursor-col-resize touch-none outline-none"
+            @pointerdown="comecarArraste"
+            @dblclick="definirLargura(medidas.padrao)"
+            @keydown="teclarBorda"
+          >
+            <span
+              class="absolute inset-y-0 right-0 w-0.5 transition-colors duration-150"
+              :class="redimensionando
+                ? (vaiRecolher ? 'bg-warning' : 'bg-primary')
+                : 'bg-transparent group-hover/borda:bg-primary/50 group-focus-visible/borda:bg-primary'"
+            />
+          </div>
         </aside>
 
         <!-- conteúdo -->
@@ -594,26 +796,49 @@ function emBreve() {
 
     <MenuDeHoje v-if="usouHoje" v-model:open="vendoHoje" :t="t" />
 
-    <CriarMaquete v-if="usouMaquete" v-model:open="maqueteAberta" :t="t" :modo="modoDaMaquete" />
-
     <EditorDeMenus
       v-if="usouEditor"
       v-model:open="editando"
       :t="t"
       :modelo="modelo"
       :abrir-formulario="formInicial"
-      :editar-id="editarId"
     />
 
     <UModal v-model:open="buscando" :ui="{ content: 'max-w-xl' }">
       <template #content>
         <UCommandPalette
+          v-model:search-term="termoDaBusca"
           :groups="gruposDaBusca"
           :placeholder="t.buscarDica"
           :close="{ onClick: () => buscando = false }"
           class="h-80"
           @update:model-value="buscando = false"
         />
+      </template>
+    </UModal>
+
+    <!--
+      Casos de uso, importar e exportar (rodada 18). Moram aqui, e não no
+      modelo de trilha, porque Configurações > Interface > Casos de uso também
+      abre a Central, nos dois modelos.
+    -->
+    <CentralDeCasos :t="t" />
+    <UsarCaso :t="t" />
+    <ImportarCaso :t="t" />
+    <CriarCaso :t="t" />
+
+    <!-- Renomear, aberto pelo botão direito (rodada 14). -->
+    <UModal v-model:open="abrindoRenomear" :title="t.renomearTitulo" :ui="{ content: 'max-w-sm' }">
+      <template #body>
+        <form class="space-y-4" @submit.prevent="aplicarNome">
+          <UFormField :label="t.renomearCampo">
+            <UInput v-model="nomeNovo" class="w-full" autofocus />
+          </UFormField>
+          <div class="flex justify-end gap-2">
+            <UButton :label="t.cancelar" color="neutral" variant="ghost" @click="renomeando = null" />
+            <UButton type="submit" :label="t.renomearAplicar" color="primary" :disabled="!nomeNovo.trim()" />
+          </div>
+        </form>
       </template>
     </UModal>
 

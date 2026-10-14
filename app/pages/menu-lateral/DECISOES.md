@@ -389,7 +389,127 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
-### Rodada 17 · 13/10/2026
+### Rodada 19 · 2026-10-13
+- **Pedido (literal):** "pode mandar pra main o que ja fez e mergear normalmente."
+- **Pedido (literal):** "com o menu aberto (expandido), eu devo poder arrastar a lateral, como no clickup, expandindo ainda mais ele (ate um limite saudavel) ou recolhendo. se eu recolher passando de um limite mininmo, ele minimiza o menu como se eu tivesse clicado ja no botao de minimizar"
+- **Pedido (literal):** "e o botao mais q vc botou imitando o clickup, pode substituir ele por um botao igual do teams. simplesmente 3 pontos como símbolo. pode ter 'Mais' escrito sem problemas"
+- **Pedido (literal):** "esse outro menu que voce botou, tem que ter como ha no notion uma opçao de qual o maximo de menus que mostra dentro de uma seçao. a pessoa pode escolher 5, 10, 15, 30... proponha quantidades factiveis. 'todos' é uma opção também."
+- **Pedido (literal):** "a busca que voce fez no topo do menu, ao clicar tambem abre a busca global. nao pode acontecer isso. tem que abrir a busca local ali dentro do menu, num campo comum de barra de busca."
+- **Mudou:** as rodadas 17 e 18 foram para a `main` (avanço direto, sem conflito).
+- **Mudou:** a borda direita do menu aberto SE ARRASTA, nos dois modelos. Barra única: de 220 a 440 px (padrão 280). Trilha: de 264 a 480 px (padrão 304, com os 72 da trilha). Abaixo de 170 px (210 na trilha) o menu esmaece e a borda fica amarela: soltando ali, ele recolhe, e reabre do tamanho que tinha antes do gesto. Duplo clique volta ao padrão. Pelo teclado, a borda é um `separator` com foco: setas de 16 px, Home no mínimo, End no máximo, e seta para a esquerda no mínimo recolhe.
+- **Mudou:** o "Mais" da trilha tem os três pontos do Teams, com "Mais" escrito embaixo.
+- **Mudou:** "Mostrar na seção", no "…" e no botão direito de toda seção, nos dois modelos: 5, 10, 15, 30 ou Todos. 5 é o padrão de Categorias (o recorte de sempre) e Todos o das outras. Cortada, a seção ganha "Mais N", que abre o resto ali mesmo, e "Mostrar menos" volta. Categorias continua com "Ver todas as N", que abre a camada com busca. Filtrando, nada se corta.
+- **Não mudou, e por quê:** a lupa do cabeçalho já abre o filtro local desde a rodada 17. A que ela viu abrir a busca global era a do site publicado, que ainda estava na rodada 16. Conferido de novo nesta rodada: a lupa abre o campo "Filtrar o menu" dentro do menu, e nenhuma janela se abre.
+- **Descartado:** 20 entre as opções de limite. Motivo: entre 15 e 30 não muda nada que se perceba numa barra lateral.
+- **Descartado:** recolher no meio do arraste, assim que passa do limite. Motivo: soltar é o que confirma; enquanto o botão está apertado dá para voltar, e o esmaecido avisa.
+- **Maquete:** a largura e os limites não sobrevivem ao recarregar.
+- **Crítica e acessibilidade:** a borda tem nome, valor atual, mínimo e máximo para o leitor de tela, e o teclado faz tudo o que o mouse faz. Fica: a borda tem 8 px de alvo, abaixo dos 24 px da WCAG 2.5.8; o recolher e o duplo clique têm caminho próprio (botão, Ctrl+\\ e teclado), então nada depende só dela.
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral · prints em `evidencias/rodada19-*.png`
+
+### Rodada 18 · 2026-10-09
+- **Pedido (literal):** "os botoes de importar e modelos tambem sao importantes pro enspace, afinal temos importaçao e exportaçao, alem dos nossos casos de uso (modelos). [...] ao clicar em casos de uso posso selecionar varios para filtrar os modelos. o proprio user tambem pode criar um modelo replicavel. tem tipos de modelo e complexidade como filtro tambem. quando clico num modelo (que seria nossos casos de uso do enspace), a visao é detalhada sobre ele [...] eu posso clicar em 'usar modelo' ou ir nos 3 pontos ao lado do titulo do modelo e clicar em adicionar ao espaço de trabalho. nao sei a diferença entre as duas opçoes. veja se encontra em documentaçao do clickup [...] clicando na galeria posso expandir as imagens do modelo [...] e se eu coloco em importar, no caso do enspace, devo poder importar caso de uso extraido de outro workspace pra ja fazer os menus pra mim, e na hora seleciono se quero que sobrescreva ou some com o que ja tem."
+- **Mudou:** o "+" do Início ganhou o pé do ClickUp: **Importar** e **Casos de uso**.
+- **Mudou:** a **Central de casos de uso**. Destaques, Do seu workspace e Do ENSPACE; filtros de Tipo (workspace completo, menu, categoria, tela) e Complexidade; busca; **Áreas**, com busca, "Selecionar tudo" e várias marcadas; a faixa "Criar caso de uso"; cartões agrupados por área com "Ver mais". Doze casos do ENSPACE, inventados, em oito áreas.
+- **Mudou:** o **detalhe**: ícone, nome, complexidade, área, "Usar caso de uso"; galeria com setas e pontos que amplia em tela cheia; descrição; "O que vem junto" (menus e telas, categorias e campos, status) abrindo item a item; à direita, quem fez, quando e quantas vezes foi usado.
+- **Mudou:** os **dois botões**, com a diferença do ClickUp dita na tela. "Usar caso de uso" APLICA: mostra o que entra, pede somar ou substituir (e, substituindo, mostra o que sai, riscado) e onde os menus entram. "Adicionar ao workspace", no "…", só GUARDA uma cópia em "Do seu workspace", e a própria opção diz "O menu não muda". O toast repete.
+- **Mudou:** **Criar caso de uso** a partir do menu de hoje: nome, área, complexidade, descrição e quais menus entram.
+- **Mudou:** **Importar**: área de arraste (ou clique) para o `.json` de outro workspace, lido no próprio navegador; de onde veio e quando; o que entra; somar ou substituir. "Usar um arquivo de exemplo" para a demonstração. **Exportar** no pé do Importar e no "…" do caso, baixando o arquivo; o arquivo exportado se importa de volta.
+- **Mudou:** Configurações > Interface > Casos de uso abre a mesma Central.
+- **Fronteira:** muda o "+" do Início e cria a Central. Não muda o menu, as regras de encaixe e a tela de migração do protótipo `migracao-de-workspace`.
+- **Descartado:** os filtros "Etiquetas" e "Criado por" do ClickUp. Motivo: caso de uso não tem etiqueta nem autoria no ENSPACE hoje.
+- **Descartado:** as três opções do `migracao-de-workspace` (adicionar o que falta, atualizar e adicionar, substituir tudo). Motivo: aqui ela pediu duas, somar ou substituir. Lá a importação compara categoria por categoria; aqui o pacote entra inteiro. **Para conferir com ela:** se a importação pelo menu e a de Configurações devem ter as mesmas três opções.
+- **Maquete:** os casos, os números de uso e as miniaturas são do protótipo. Usar e importar põem os menus no rascunho (acende o Salvar) e as categorias na lista; campos e status do caso não são criados. Nada sobrevive ao recarregar.
+- **Crítica e acessibilidade:** somar e substituir são `radiogroup`; o botão de usar fica vermelho e troca de ícone quando é substituir; a galeria tem nome em cada ponto e em cada seta; a área de arraste abre com Enter e Espaço. Fica: a ampliação mostra a miniatura maior, sem zoom nem download.
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral, modelo "Trilha e painel", "+" do Início · prints em `evidencias/rodada18-*.png`
+
+### Rodada 17 · 2026-10-09
+- **Pedido (literal):** "sobre sua opiniao anterior: pode aplicar" (a busca do menu fechada atrás da lupa do cabeçalho, nos dois modelos, a global só no topo, e a lupa da base da trilha tirada)
+- **Pedido (literal):** "no clickup, os botoes do topo do menu aparecem com hover. usando a barra de inicio como exemplo: sem passar o mouse no topo vem só inicio e o botao de '+'. se passar o mouse em qualquer lugar do menu ficam os ícones. o botao do meio é filtro, da esquerda é a caixa de busca e da direita é pra fechar o menu. e no botao de criar, ao clicar voce pode descrever o que quer criar e, se nao for encontrada no menu, sobra a opçao de usar a ia pra criar pra voce. esse é um ponto interessante."
+- **Mudou:** a busca do MENU vem fechada, nos dois modelos. É a lupa do cabeçalho: abre um campo no lugar do título, com o foco dentro, e Esc ou o "x" fecha e limpa. A busca do WORKSPACE fica só na barra do topo (Ctrl+K).
+- **Mudou:** o filtro procura no que não está à vista: itens de "⋯ Mais", seções recolhidas e ocultas, todas as categorias (não só as cinco do recorte), e as telas de um menu posto numa seção. Filtrando, as seções com resultado abrem, as vazias somem e nada se arrasta.
+- **Mudou:** sem resultado, o aviso tem "Buscar X no workspace", que abre a busca global já com o termo.
+- **Mudou:** saiu a lupa da base da trilha. Ela abria a mesma busca do topo, e a lupa do cabeçalho agora faz outra coisa.
+- **Mudou:** o cabeçalho do Início parado mostra só o título e o "+". Com o mouse em qualquer lugar do painel (ou o foco do teclado neles) aparecem a lupa, o filtro por tipo, Personalizar e recolher. Ligados, ficam à vista. Nas outras áreas, lupa e recolher; na barra única, lupa e recolher no topo, do mesmo jeito.
+- **Mudou:** o filtro por tipo do Início, as pílulas do ClickUp com os tipos do ENSPACE: Categorias, Telas e Com pendências (Inbox e Tarefas com número). Marcadas juntas valem como "ou".
+- **Mudou:** o "+" do Início abre "Descreva o que quer criar". O texto filtra Criar seção, Criar menu e Criar categoria; quando nada casa, aparece "Criar com IA" com o texto digitado, e o BENI monta e mostra antes de gravar, a regra de `ia-no-campo-html`. "Personalizar a barra lateral" fecha a lista.
+- **Fronteira:** muda a busca do menu nos dois modelos, o cabeçalho e o "+" da trilha. Não muda a busca global, o conteúdo do menu e as regras de arraste.
+- **Descartado:** "Importar" e "Modelos" no pé do "+", que o ClickUp tem. Motivo: o ENSPACE não tem essas portas no menu, e inventá-las seria proposta fora do pedido.
+- **Descartado:** campo do menu sempre aberto, como o do Notion. Motivo: o do Notion é a busca global; aqui a global já mora no topo, e dois campos à vista parecem o mesmo.
+- **Maquete:** "Criar com IA" só mostra o toast.
+- **Crítica e acessibilidade:** os ícones escondidos no hover aparecem também com o foco do teclado (`focus-visible`), têm nome e o filtro por tipo diz se está ligado (`aria-pressed`). Esc fecha o filtro. Fica: na barra única, a linha da lupa ocupa a mesma altura do campo de antes, então o espaço não foi ganho ali, só a ambiguidade saiu.
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral · prints em `evidencias/rodada17-*.png`
+
+### Rodada 16 · 2026-10-09
+- **Pedido (literal):** "basicamente, te mandei um monte de print do clickup e é assim que precisamos ter nosso menu, mas diferente do clickup, permitiremos reordenaçao na trilha e reordenação nos menus nativos, nao so nos personalizados! e nossas entidades possiveis de estarem no botao de customizar é: criar seçao, criar menu (e na hora de criar menu ja tem que poder vincular uma tela a ele ou criar essa tela, como o clickup tambem faz). criar categoria tambem é possibilidade. e deve ser possível o user ocultar nativos também, se quiser. e saiba que tem um novo menu no enspace: o menu integraçoes, e dentro dele tem apps, credenciais e webhooks como submenus. veja onde vai alocar isso na estrutura prototipada, mas tem q dar conta disso. [...] observe que esse menu aí de ajuda ta pessimo. olha o tamanho do ícone frente aos outros onde ele ta posicionado. muito ruim mesmo. [...] execute essas alteraçoes e pode fazer push pra main"
+- **Mudou:** a trilha SE ARRASTA (diferente do ClickUp, a pedido dela): no próprio ícone, que vai para o rascunho e acende o Salvar; em Personalizar > Navegação, que vale na hora; Alt com as setas e "Mover para cima/baixo" no botão direito. Início fica no topo, é a âncora.
+- **Mudou:** os itens nativos do Início SE ARRASTAM, no menu e em Personalizar > Início, com Alt e setas e "Mover" no "…".
+- **Mudou:** tudo se oculta. Nenhum item nativo do Início fica travado (Início e Inbox eram), e qualquer seção se oculta pelo "…" (Categorias, Favoritos, as do administrador e as pessoais). Voltam por Personalizar ou por "⋯ Mais".
+- **Mudou:** o "+ ▾" do Início tem as três entidades que ela pediu: Criar seção, Criar menu e Criar categoria, e depois "Personalizar a barra lateral". Menu e categoria são do workspace, e só quem configura cria (os outros veem o item desligado, com o motivo).
+- **Mudou:** **Criar menu** numa janela só: ícone, nome, onde fica (no Início ou na trilha) e as telas. "Vincular tela existente" busca as telas dos menus que existem; "Criar tela nova" pede nome e tipo de tela, ali mesmo. O menu entra no rascunho e acende o Salvar, como o editor. No Início, entra no topo das seções; na trilha, entra fixado.
+- **Mudou:** **Criar categoria**: ícone e nome. A categoria aparece em Categorias, no topo de "Mais usadas", e na busca.
+- **Mudou:** **Integrações**, menu nativo novo, com Apps, Credenciais e Webhooks. Fica onde a Auditoria ficou na rodada 10: menu de primeiro nível, com ícone na trilha (fixado por padrão) e seção na barra única. O grupo "Conexões" (Integrações e Credenciais) saiu de Configurações, porque virou este menu.
+- **Mudou:** a trilha cabe oito ícones (eram seis), para Integrações entrar sem tirar ninguém.
+- **Mudou:** o ícone de Ajuda na trilha e na barra recolhida tem o tamanho dos vizinhos: caixa de 36 px e ícone de 20 px na trilha (era botão pequeno, ícone de 16 px), 40 e 20 na barra recolhida. Na barra aberta continua ao lado de Configurações, como estava.
+- **Mudou:** o mapa de nomes do menu ficou num arquivo só (`rotulos.ts`). Antes eram cinco cópias, e um menu nativo novo teria que ser lembrado em cada uma.
+- **Mudou:** com algo para salvar, a lista do painel ganha respiro embaixo e o cartão de salvar quebra a linha em vez de cortar "Descartar". O cartão cobria o "Personalizar a barra lateral".
+- **Fronteira:** muda o modelo de trilha, a Ajuda nas colunas de ícones e o lugar das Integrações nos dois modelos. Não muda o resto da barra única nem as regras de encaixe da rodada 5.
+- **Descartado:** Integrações dentro de Configurações, ao lado de Membros e Cargos. Motivo: ela disse que é um menu novo do ENSPACE, com submenus; e a regra desde a rodada 10 é que menu do produto com telas próprias vira primeiro nível.
+- **Maquete:** "Vincular tela existente" cria um item novo com nome, ícone e tipo da tela escolhida (no produto, o item aponta para a mesma tela). A categoria criada só tem nome e ícone; o cadastro completo é em Configurações. Nada sobrevive ao recarregar.
+- **Crítica e acessibilidade:** todo arraste novo tem caminho de teclado (Alt com setas e "Mover" nos menus). Ficam: o popover do hover continua só de mouse, como na rodada 15; o Início não sai do topo da trilha, e isso é decisão minha, para conferir com ela.
+- **Ver:** publicado em https://pernalombr4.github.io/prototipos/menu-lateral/ (modelo "Trilha e painel") · prints em `evidencias/rodada16-*.png`
+
+### Rodada 15 · 2026-10-09
+- **Pedido (literal):** "clickup nao permite reordenar os menus da trilha. nem minimizalos. o estado minimizado, ao passar o mouse no icone, abre um popover trazendo o menu. o mesmo acontece se estou com 'Inicio' selecionado e passo o mouse em outro grande icone, por exemplo. o inicio continua aberto no fundo e o outro menu abre em popover. apenas o menu 'inicio', quando clicado, tem a opçao de personalizar a barra lateral. ele é equivalente ao nosso menu 'trabalho'. pode se chamar inicio inclusive. e na hora que clicamos nele, redireciona pra home e também abre esse menu especifico. [...] somente a seçao de chats com ia pode ser ocultada. o resto nao. só reordenar. [...] ao botar pra criar seçao abre um modal. criada ela aparece no topo da lista. [...] o clickup nao permite reordenar o que aparece no menu início, mas permite reordenar as seçoes entre si ate mesmo direto no menu [...] uma seçao pode ter menus com submenus dentro! entao o enspace passaria a ter suas proprias seçoes pra ficar similar! [...] se pinnar e nao tiver mais espaço, ele substitui o ultimo da trilha [...] ao miniminar o menu, a trilha fica assim com '>>' como primeiro icone"
+- **Pedido (literal):** "tinha 5 mensagens agendadas que foram agora. leia essas mensagens e aplique o que existe no clickup ao nosso modelo tambem."
+- **Mudou:** "Trabalho" virou **Início** (nos três idiomas). Clicar nele abre a página inicial e o menu Início, mesmo se ele já estiver aberto.
+- **Mudou:** a trilha não se arrasta nem se reordena (sai o arraste da trilha da rodada 14). O que fica nela se escolhe em Personalizar > Navegação ou pelo alfinete em "Mais". Cabem seis ícones com o Início; fixar com a trilha cheia troca o último, e ele vai para "Mais", com um toast que diz quem saiu.
+- **Mudou:** "Mais" na trilha: grade com o que não está nela, alfinete no hover e "Personalizar navegação" no pé.
+- **Mudou:** passar o mouse num ícone que não é o aberto mostra o menu dele num popover por cima do painel, e o painel encaixado fica onde estava. Recolhido, todo ícone faz isso, e o primeiro ícone vira "»".
+- **Mudou:** o menu Início, no desenho do ClickUp. Em cima, os itens nativos em ordem fixa; os que saíram ficam em "⋯ Mais", com alfinete e atalho para Personalizar. Embaixo, as seções: arrastam no próprio menu, recolhem pelo nome, e no hover mostram "…" e "+". Os itens ganharam o "…" no hover, que abre as mesmas ações do botão direito.
+- **Mudou:** **seções pessoais**. "Criar seção" abre uma janela com ícone e nome, e a seção entra no topo. O "+" da seção busca o que já existe (menus com telas dentro, telas, categorias) e tem "Criar uma tela nova" no pé. Seção vazia mostra "+ Adicionar à seção". Um menu posto numa seção abre as telas dele como submenus, num terceiro recuo. O "…" da seção tem renomear, adicionar, ordenar (personalizada, alfabética, adicionadas por último), criar seção, reordenar seções e excluir.
+- **Mudou:** **Personalizar**, com as quatro abas do ClickUp. Navegação (o que aparece na trilha, Início travado, "Somente ícones" ou "Ícones e rótulos"); Início (o que aparece, com Início e Inbox travados); Seções (arrastar, Alt com setas, só Favoritos se oculta, seções ocultas embaixo, "Criar seção"); Temas (claro, escuro, automático e cor de destaque). O botão fica no pé do menu Início até o primeiro uso, e depois vira ícone no cabeçalho.
+- **Mudou:** o cabeçalho do Início tem busca, Personalizar (depois do primeiro uso), "«" para recolher e "+ ▾" para criar, que termina em "Personalizar a barra lateral".
+- **Mudou:** o conteúdo de cada área saiu para `_PainelDaArea.vue`, porque agora aparece encaixado e em popover. Novos: `_MenuInicio.vue`, `_Personalizar.vue`, `_CriarSecao.vue`, `_AdicionarASecao.vue`, `trilha.ts` e `rotulos.ts`.
+- **Fronteira:** muda o modelo de trilha. Não muda a barra única (rodada 14 continua como estava), as regras de encaixe da rodada 5 e o miolo da tela.
+- **Descartado:** o arraste na trilha da rodada 14 (reordenar ícones, soltar item dentro de um ícone, levar seção para um painel arrastando). Motivo: o ClickUp não deixa, e ela corrigiu. Levar seção entre trilha e painel continua pelo botão direito.
+- **Descartado:** "Marcar tudo como lido" e "Mostrar na seção: não lida, apenas menções" do "…" da seção. Motivo: são de chat no ClickUp, e o ENSPACE não tem leitura por seção.
+- **Descartado:** renomear dentro do próprio "…" da seção, como o ClickUp. Motivo: campo de texto dentro de menu briga com a busca por letra do menu. Renomear abre a mesma janela de criar.
+- **Não deu:** aplicar o mesmo à barra única. Por quê: entendi "ao nosso modelo" como o de trilha, que é o equivalente do ClickUp. Personalizar, seções pessoais e "Mais" cabem na barra única também, se ela quiser.
+- **Maquete:** as preferências não sobrevivem ao recarregar. A seção "Rotina do jurídico" é exemplo do protótipo (numa conta nova a lista nasce vazia). A cor de destaque troca o `primary` só nesta aba do navegador. O limite de seis ícones é fixo, medido a 900 px de altura, e não acompanha a altura da janela.
+- **Crítica e acessibilidade:** a seção do Início ganhou caminho de teclado (Alt com setas no cabeçalho e na aba Seções); o "…" dos itens tem rótulo próprio ("Mais ações de X"); "Somente ícones" põe o nome no `aria-label` de cada ícone. Ficam: o popover do hover só abre com mouse (no teclado, o ícone abre o menu encaixado, que tem o mesmo conteúdo); as miniaturas de Temas e as amostras de cor usam cor da paleta direto (`bg-fuchsia-500`, `bg-neutral-900`), porque mostram a própria cor, contra a regra de token só (Parte 2); a recusa "Seção não entra dentro de seção" para destino nativo continua da rodada 5.
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral, Modelo "Trilha e painel" · prints em `evidencias/rodada15-*.png` · os prints do ClickUp que ela mandou NÃO entraram no repositório: têm e-mail de pessoa e nome dela, e o repositório é público (regra 13)
+
+### Rodada 14 · 2026-10-09
+- **Pedido (literal):** "perceba que no modelo de barra unica do menu do prototipo voce fez drag and drop nos elementos direto no menu. no de trilha e painel vc nao fez isso. tem que fazer, tanto na trilha quanto no painel. e ao clicar com botao direito em cada menu/trilha tem que ter funcionalidades aparecendo ali. pesquise como o clickup trabalha com iso pra ter inspiraçao. alem disso, falta voce prototipar o comportamento do menu fechado e aberto (minimizado/expandido)"
+- **Pedido (literal, no meio da rodada):** "voce pode abrir mesmo o clickup e me pedir pra logar pra voce usar e entender o funcionamento: o que permite reordenar, o que permite colapsar, o que permite criar de menu 100% personalizado etc"
+- **Mudou:** arrastar no PAINEL da trilha, com as mesmas regras de encaixe e o mesmo cartão de salvar da barra única (Trabalho, Dados e a seção aberta da trilha; as categorias de Dados também).
+- **Mudou:** arrastar na TRILHA. Borda de cima ou de baixo de um ícone de seção reordena (e traz para a trilha a seção que estava num painel); meio do ícone põe o item dentro da seção; meio de Trabalho ou de Dados leva a seção para aquele painel. Recusa pinta vermelho e diz o motivo, como no painel.
+- **Mudou:** botão direito em toda linha, cabeçalho de seção, categoria e ícone da trilha, nos dois modelos. Três blocos fixos, na ordem do ClickUp: ir (abrir, abrir em nova aba, copiar link), arrumar (favoritar, mover para cima e para baixo, mover para outra seção, levar para a trilha ou para um painel), mexer (renomear, ocultar, configurar). Tudo num arquivo só, `acoes.ts`.
+- **Mudou:** "Ocultar do menu" e "Itens ocultos" no pé da barra, que traz de volta. Oculto continua na busca. Ocultar entra no rascunho como o arraste: "Salvar só para mim" é o Hide do ClickUp; "Salvar para todos" é o administrador tirando do menu de todos.
+- **Mudou:** "Renomear" abre uma janela curta e vale só para o que o workspace criou. Nome nativo vem do produto.
+- **Mudou:** recolher e expandir, nos dois modelos. Botão de painel no alto da barra e `Ctrl + \`, como no ClickUp. Barra única recolhida vira coluna de ícones na mesma ordem: destino abre direto, seção abre os itens de lado, Favoritos e Categorias saem do mesmo ícone, contador vira bolinha. Trilha recolhida fica só com a trilha, e o expandir aparece no alto dela.
+- **Mudou:** recolhido não esconde o que falta salvar: um ícone de salvar com a bolinha amarela aparece na coluna e abre a barra.
+- **Mudou:** o cartão de salvar e os avisos do pé viraram peças próprias (`_CartaoDeSalvar.vue`, `_AvisosDoMenu.vue`), usadas pelos dois modelos.
+- **Fronteira:** muda o comportamento do menu lateral (arrastar, botão direito, recolher, ocultar). Não muda a ordem nem os itens do menu, as regras de encaixe da rodada 5, a barra do topo e o miolo da tela.
+- **Descartado:** abrir a barra sozinha quando o mouse passa na borda, como o ClickUp faz. Motivo: é o pedido público contra a navegação de lá ("Disable Sidebar Expand on Hover"); quem recolheu quer a tela.
+- **Descartado:** arrastar Trabalho, Dados e Configurações na trilha. Motivo: o ClickUp não deixa mexer no Home, e as três são a moldura; as seções do workspace mudam dentro dela.
+- **Descartado:** ocultar Início e Categorias. Motivo: as seções padrão do ClickUp se reordenam mas não se escondem; sem Início não há para onde voltar.
+- **Descartado:** "Arquivar" no botão direito, que o ClickUp tem. Motivo: arquivar categoria ou seção é configuração, não navegação.
+- **Não deu:** abrir o ClickUp logado, como ela ofereceu. Por quê: esta sessão roda num contêiner na nuvem, sem o Chrome dela, e entrar pelo navegador do contêiner exigiria digitar senha (regra 2). A pesquisa saiu da central de ajuda oficial (`PESQUISA.md`, "Rodada 14"). A conferência à mão fica para uma sessão no app de desktop.
+- **Não deu:** a verificação desta rodada foi num Chromium sem tela, dentro do contêiner, e não no Chrome dela (regra 2). Os prints saíram dali.
+- **Maquete:** "Abrir em nova aba" (só toast). "Nova tela nesta seção" abre o editor com o formulário de tela, mas sem a seção já escolhida. Recolhido não sobrevive ao recarregar.
+- **Crítica e acessibilidade:** a revisão de acessibilidade (WCAG 2.1 AA) achou e corrigiu: o `<aside>` se chamava "Configurações" e o `<nav>` se chamava "Início" para o leitor de tela (agora "Menu lateral" e "Navegação do workspace"); trocar de painel e recolher jogavam o foco no `<body>` (2.4.3), e agora ele vai para o primeiro botão do que entrou; linha e cabeçalho de seção não tinham anel de foco próprio (2.4.7); a estrela tinha 22 px (agora 24 px); o nome do cabeçalho de seção mudava com o estado ("Recolher X" / "Expandir X") e engolia selo e bolinha (agora o nome é o texto e o estado é o `aria-expanded`); Configurações bloqueada na trilha usava `disabled`, que tira o foco e esconde o motivo (agora `aria-disabled`); mover um item para outra seção não tinha caminho de teclado (2.1.1), e agora Shift+F10 abre o mesmo botão direito com "Mover para".
+- **Crítica e acessibilidade (sem correção, e por quê):** contraste medido sobre o fundo da barra. Rótulo 8,91:1 (escuro 12,29), título de seção 7,96 (7,07), contador da seção 4,72 (4,98), texto apagado 4,53 (5,75): passam. **Não passam no claro:** estrela fixada e bolinha amarela, `warning` (amarelo 500) a 1,82:1 contra 3:1 (1.4.11), e o placeholder do filtro, 2,88:1. São cor do tema (cópia do `en-docs`) e a decisão é dela; o estado não depende só delas (estrela tem `aria-pressed` e preenchimento; bolinha tem rótulo e o cartão de salvar). Ícone ativo em `primary` dá 2,76:1 no claro, mas o ativo também é dito por fundo, peso e `aria-current`. A recusa "Seção não entra dentro de seção" aparece também quando quem é arrastado é um destino nativo: o texto é da rodada 5 e fica para ela decidir a redação. Arrastar continua sem anúncio para leitor de tela (4.1.3); o toast diz quando falha, não quando dá certo.
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral · publicado em https://pernalombr4.github.io/prototipos/menu-lateral/ depois do merge na `main` · prints em `evidencias/rodada14-*.png`
+
+### Linha paralela de 13/10/2026 (rodadas 14P a 17P)
+
+Estas quatro rodadas foram feitas em outra conversa, ao mesmo tempo que as rodadas 14 a 19
+acima, as duas partindo da rodada 13. Ficam registradas com o "P" para os números não
+colidirem. O código delas foi substituído pelo desenho da rodada 19 na junção das duas
+linhas, e as decisões que elas guardam foram reaplicadas por cima dele a partir da rodada 20.
+
+### Rodada 17P · 13/10/2026
 
 **O que ela pediu**, literal:
 
@@ -428,7 +548,7 @@ devolve.
 [`evidencias/proposta-botao-direito-barra.jpg`](evidencias/proposta-botao-direito-barra.jpg),
 a seção do workspace na barra única com as seis linhas.
 
-### Rodada 16 · 13/10/2026
+### Rodada 16P · 13/10/2026
 
 **O que ela pediu**, literal:
 
@@ -490,7 +610,7 @@ como gravar nem desfazer. O cartão passou a existir nos dois modelos, com os do
 - **Renomear no menu, e não só na seção.** O formulário já edita menu; falta a porta, que no
   modelo de trilha fica no painel, não na trilha.
 
-### Rodada 15 · 13/10/2026
+### Rodada 15P · 13/10/2026
 
 **O que ela pediu**, literal:
 
@@ -558,7 +678,7 @@ trilha com as cinco portas, e
 [`evidencias/proposta-camada-unica.jpg`](evidencias/proposta-camada-unica.jpg), a camada do
 menu na etapa do formulário, com o caminho de volta e o rodapé único.
 
-### Rodada 14 · 13/10/2026
+### Rodada 14P · 13/10/2026
 
 **O que ela pediu**, literal:
 
@@ -633,6 +753,7 @@ mostrando as duas metades: a linha dentro de Análise e, embaixo, o que abre ao 
   nós que o arraste e os selects usam.
 - **O que acontece com as telas que os clientes já têm fora do menu**, quando `Telas` sumir.
   Decisão de migração, não de desenho.
+
 
 ### Rodada 13 · 20/09/2026
 

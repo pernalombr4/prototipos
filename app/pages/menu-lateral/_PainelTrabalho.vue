@@ -1,9 +1,15 @@
 <script setup lang="ts">
+import { useLimites } from './limites'
+import MaisDaSecao from './_MaisDaSecao.vue'
+import { rotuloDoNo as rotuloComum } from './rotulos'
 import LinhaDeMenu from './_LinhaDeMenu.vue'
 import SecaoDeMenu from './_SecaoDeMenu.vue'
 import MenuDeAjuda from './_MenuDeAjuda.vue'
+import CartaoDeSalvar from './_CartaoDeSalvar.vue'
+import AvisosDoMenu from './_AvisosDoMenu.vue'
 import { useMenuDoWorkspace, useArraste } from './estado'
-import { workspace, type NoDoMenu, type Categoria } from './mocks'
+import { useAcoesDoMenu } from './acoes'
+import type { NoDoMenu, Categoria } from './mocks'
 import type { TextosDaTela } from './textos'
 
 /**
@@ -59,9 +65,12 @@ const emit = defineEmits<{
   ordem: [valor: 'uso' | 'alfabetica' | 'recentes' | 'manual']
   virarManual: []
   ajuda: [rotulo: string]
-  renomear: [id: string]
-  personalizar: []
-  configurarCategoria: []
+  /** Rodada 14: o botão direito abre o editor e a configuração da categoria. */
+  novaTela: [secaoId: string]
+  configurarCategoria: [c: Categoria]
+  recolher: []
+  /** Rodada 17: o filtro sem resultado leva o termo para a busca global. */
+  busca: [termo?: string]
 }>()
 
 const menu = useMenuDoWorkspace()
@@ -70,22 +79,8 @@ const toast = useToast()
 
 /** Rótulo de um nó: nativo vem do dicionário, do workspace vem do próprio nó. */
 function rotuloDe(no: NoDoMenu) {
-  if (no.rotulo) return no.rotulo
-  const mapa: Record<string, string> = {
-    inicio: props.t.inicio,
-    inbox: props.t.inbox,
-    chatIa: props.t.chatIa,
-    tarefas: props.t.tarefas,
-    agenda: props.t.agenda,
-    spaceflows: props.t.spaceflows,
-    documentos: props.t.documentos,
-    categorias: props.t.categorias,
-    // Auditoria reaproveita os rótulos que já existiam nas configurações.
-    auditoria: props.t.grupos.auditoria,
-    logsAuditoria: props.t.itens['logs-auditoria'],
-    logsRequisicao: props.t.itens['logs-requisicao'],
-  }
-  return mapa[no.chave ?? ''] ?? (no.chave ?? '')
+  // Rodada 16: o mapa de nomes mora no rotulos.ts, um só para todas as peças.
+  return rotuloComum(no, props.t)
 }
 
 /**
@@ -161,103 +156,7 @@ function largarCategoria(alvoId: number, posicao: 'antes' | 'depois') {
   menu.reordenarCategoria(Number(quem.slice(4)), alvoId, posicao)
 }
 
-/*
- * ============ SALVAR, E PARA QUEM (rodada 12) ============
- *
- * "o botao flutuante de salvar pra todos os usuarios ou só alterar
- * localmente" (Mikaela).
- *
- * Os dois botões existem porque as duas coisas existem: o menu é configuração
- * do workspace, e ao mesmo tempo cada pessoa quer o seu do seu jeito. Sem a
- * segunda opção, quem não é administrador não poderia arrumar nada; sem a
- * primeira, o administrador não conseguiria consertar o menu de todo mundo.
- *
- * "Salvar para todos" só aparece para quem pode configurar.
- */
-function salvarMenu(alcance: 'todos' | 'local') {
-  menu.salvar(alcance)
-  toast.add({
-    title: alcance === 'todos' ? props.t.salvoParaTodos : props.t.salvoSoParaMim,
-    icon: alcance === 'todos' ? 'i-lucide-users' : 'i-lucide-user',
-    color: 'neutral',
-  })
-}
-
-/*
- * ============ BOTÃO DIREITO, A MESMA COSTURA DA TRILHA (rodada 17) ============
- *
- * Os itens, a ordem e as regras são os da pesquisa (PESQUISA.md, "Botão direito
- * num ícone da trilha"). Aqui valem para os mesmos objetos, que é o que ela
- * apontou: a barra única mostrava o menu do navegador onde a trilha já mostrava
- * o do produto.
- *
- * Duas diferenças, e as duas vem do modelo:
- *
- * 1. Não existe "tirar da trilha": na barra única existe um lugar só.
- * 2. Destino nativo PODE ser movido, porque aqui ele é um nó da árvore como
- *    qualquer outro. O que ele não ganha é renomear nem excluir, como no Teams.
- */
-async function copiarLink(rotulo: string) {
-  try {
-    await navigator.clipboard.writeText(`${workspace.nome} / ${rotulo}`)
-  }
-  catch {
-    /* Sem permissão de área de transferência o aviso continua valendo. */
-  }
-  toast.add({ title: props.t.linkCopiado, icon: 'i-lucide-link', color: 'neutral' })
-}
-
-function daCasa(no: NoDoMenu, pai: NoDoMenu | null = null) {
-  if (menu.origemDe(no) === 'workspace') return true
-  return !!pai && menu.origemDe(pai) === 'workspace'
-}
-
-function itensDoNo(no: NoDoMenu, pai: NoDoMenu | null = null) {
-  const meu = daCasa(no, pai)
-  const grupos: Record<string, unknown>[][] = []
-
-  if (meu) {
-    grupos.push([
-      { label: props.t.renomear, icon: 'i-lucide-pencil', onSelect: () => emit('renomear', no.id) },
-    ])
-  }
-
-  if (props.podeConfigurar) {
-    grupos.push([
-      { label: props.t.moverCima, icon: 'i-lucide-arrow-up', onSelect: () => menu.mover(no.id, -1) },
-      { label: props.t.moverBaixo, icon: 'i-lucide-arrow-down', onSelect: () => menu.mover(no.id, 1) },
-    ])
-  }
-
-  grupos.push([
-    { label: props.t.copiarLink, icon: 'i-lucide-link', onSelect: () => copiarLink(rotuloDe(no)) },
-  ])
-
-  const fim: Record<string, unknown>[] = [
-    { label: props.t.personalizarMenu, icon: 'i-lucide-list-tree', onSelect: () => emit('personalizar') },
-  ]
-  if (meu) {
-    fim.push({ label: props.t.excluir, icon: 'i-lucide-trash-2', color: 'error', onSelect: () => menu.excluir(no.id) })
-  }
-  grupos.push(fim)
-
-  return grupos
-}
-
-/** Categoria não é nó do menu: o menu dela é o das ações que ela tem. */
-function itensDaCategoria(c: Categoria) {
-  return [[
-    {
-      label: c.favorita ? props.t.desafixar : props.t.fixar,
-      icon: c.favorita ? 'i-lucide-star-off' : 'i-lucide-star',
-      onSelect: () => emit('alternarFixar', c.id),
-    },
-  ], [
-    { label: props.t.copiarLink, icon: 'i-lucide-link', onSelect: () => copiarLink(c.name) },
-  ], [
-    { label: props.t.configurarCategoria, icon: 'i-lucide-settings-2', onSelect: () => emit('configurarCategoria') },
-  ]]
-}
+/* O Salvar (rodada 12) mora no _CartaoDeSalvar.vue desde a rodada 14. */
 
 /** A bolinha amarela de uma linha: foi mexida e ainda não foi salva. */
 function tocado(id: string) {
@@ -342,6 +241,11 @@ const opcoesDeOrdem = computed(() => [[
 /* ------------------------------ o filtro ------------------------------ */
 
 const filtro = ref('')
+const filtroAberto = ref(false)
+function fecharFiltro() {
+  filtro.value = ''
+  filtroAberto.value = false
+}
 const filtrando = computed(() => filtro.value.trim().length > 0)
 
 /*
@@ -379,7 +283,8 @@ const categoriasVisiveis = computed(() => {
  * categorias, logo acima dela, porque é dela que eles saem.
  */
 const nosVisiveis = computed(() => {
-  const arvore = menu.arvoreVisivel.value
+  // Rodada 14: a árvore DA BARRA, que já vem sem o que foi ocultado.
+  const arvore = menu.arvoreDaBarra.value
   if (!filtrando.value) return arvore
 
   return arvore
@@ -397,35 +302,149 @@ const nosVisiveis = computed(() => {
 })
 
 const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length)
+
+/* ============ O BOTÃO DIREITO (rodada 14) ============ */
+
+const limites = useLimites()
+
+/*
+ * O limite da seção (rodada 19): o que passa dele vira "Mais N". Filtrando
+ * não se corta, porque quem filtra quer ver tudo o que casou.
+ */
+function exibidos<T>(id: string, lista: T[]): T[] {
+  return filtrando.value ? lista : limites.cortar(id, lista).visiveis
+}
+function restoDe(id: string, lista: unknown[]) {
+  return filtrando.value ? 0 : limites.cortar(id, lista).resto
+}
+const acoes = useAcoesDoMenu({
+  t: () => props.t,
+  podeConfigurar: () => props.podeConfigurar,
+  rotuloDe,
+  abrirDestino: id => emit('destino', id),
+  abrirCategoria: c => emit('categoria', c),
+  alternarFixar: id => emit('alternarFixar', id),
+  configurarCategoria: c => emit('configurarCategoria', c),
+  novaTela: id => emit('novaTela', id),
+  // A seção nativa guarda o aberto em 'categorias', e abrir pelo botão
+  // direito segue a regra do clique: abrir leva à primeira tela (rodada 10).
+  secaoAberta: id => aberta(id === 'n-categorias' ? 'categorias' : id),
+  alternarSecao: (id) => {
+    if (id === 'n-categorias') return abrirCategorias()
+    const no = nosVisiveis.value.find(n => n.id === id)
+    if (no) abrirSecao(no)
+    else alternar(id)
+  },
+})
+
+/** Os irmãos que aparecem agora: é entre eles que "mover para cima" anda. */
+const idsDaRaiz = computed(() => nosVisiveis.value.map(n => n.id))
+const idsDasCategorias = computed(() => categoriasVisiveis.value.map(c => c.id))
+
+/**
+ * Mover uma categoria pelo botão direito é arrastar sem mouse: com critério
+ * automático ligado, liga a personalizada antes, pelo mesmo motivo do arraste.
+ */
+function passoDaCategoria(c: Categoria, passo: -1 | 1) {
+  const lista = idsDasCategorias.value
+  const vizinho = lista[lista.indexOf(c.id) + passo]
+  if (vizinho === undefined) return
+  if (props.ordem !== 'manual') {
+    emit('virarManual')
+    toast.add({ title: props.t.viraPersonalizada, icon: 'i-lucide-grip-vertical', color: 'neutral' })
+  }
+  menu.reordenarCategoria(c.id, vizinho, passo < 0 ? 'antes' : 'depois')
+}
+
+const opcoesDeOrdemPlanas = computed(() => [
+  { label: props.t.ordemMaisUsadas, icon: 'i-lucide-flame', valor: 'uso' },
+  { label: props.t.ordemAlfabetica, icon: 'i-lucide-arrow-down-a-z', valor: 'alfabetica' },
+  { label: props.t.ordemRecentes, icon: 'i-lucide-clock', valor: 'recentes' },
+  { label: props.t.ordemPersonalizada, icon: 'i-lucide-grip-vertical', valor: 'manual' },
+])
+
+/** O cabeçalho de Categorias: o de toda seção, mais ordenar e ver todas. */
+function acoesDeCategorias(no: NoDoMenu) {
+  const base = acoes.daSecao(no, idsDaRaiz.value)
+  // "Nova tela" não cabe em Categorias (regra R4): troca por ordenar e ver todas.
+  base[1] = [
+    acoes.itemDeOrdem(props.ordem, opcoesDeOrdemPlanas.value, v => emit('ordem', v as typeof props.ordem)),
+    // Rodada 19: quantos itens a seção mostra. Em Categorias o padrão é 5.
+    limites.itemMostrar('categorias', props.t),
+    { label: props.t.verTodas(props.totalDeCategorias), icon: 'i-lucide-layout-grid', onSelect: () => emit('verTodas') },
+    ...acoes.itensDeMover(no.id, idsDaRaiz.value),
+  ]
+  return base
+}
 </script>
 
 <template>
-  <div class="relative flex h-full flex-col">
+  <div class="group/barra relative flex h-full flex-col">
     <!-- ============ topo: o FILTRO do menu, não a busca global ============ -->
-    <div class="shrink-0 px-2 pb-1 pt-1.5">
+    <!--
+      RODADA 17: o filtro do menu vem FECHADO. Era um campo sempre aberto,
+      logo abaixo do "Buscar em tudo" do topo, e os dois pareciam a mesma
+      coisa. Agora é a lupa, ao lado do recolher, e os dois aparecem quando o
+      mouse está na barra (ou o foco chega neles), como o cabeçalho do
+      ClickUp. Aberto, o campo ocupa a linha, com o foco dentro; Esc fecha.
+    -->
+    <div class="flex h-10 shrink-0 items-center gap-1 px-2 pt-1">
       <UInput
+        v-if="filtroAberto"
         v-model="filtro"
-        icon="i-lucide-filter"
+        icon="i-lucide-search"
         size="sm"
-        class="w-full"
+        class="min-w-0 flex-1 animate-[entrada_0.15s_ease-out_both]"
         :placeholder="props.t.filtroDoMenu"
         :aria-label="props.t.filtroDoMenu"
+        autofocus
+        @keydown.esc="fecharFiltro"
       >
-        <template v-if="filtro" #trailing>
+        <template #trailing>
           <UButton
             icon="i-lucide-x"
             size="xs"
             color="neutral"
             variant="link"
-            :aria-label="props.t.todasFechar"
-            @click="filtro = ''"
+            :aria-label="props.t.fecharFiltro"
+            @click="fecharFiltro"
           />
         </template>
       </UInput>
+      <template v-else>
+        <span class="flex-1" />
+        <UTooltip :text="props.t.filtroDoMenu">
+          <UButton
+            icon="i-lucide-search"
+            size="sm"
+            color="neutral"
+            variant="ghost"
+            class="shrink-0 opacity-0 transition-opacity duration-150 group-hover/barra:opacity-100 focus-visible:opacity-100"
+            :aria-label="props.t.filtroDoMenu"
+            @click="filtroAberto = true"
+          />
+        </UTooltip>
+      </template>
+      <!--
+        RECOLHER (rodada 14). No alto da barra e com Ctrl+\\, como o ClickUp,
+        que põe o mesmo atalho e o mesmo ícone de painel no topo da navegação.
+      -->
+      <UTooltip :text="props.t.recolherMenu" :kbds="['meta', '\\']">
+        <UButton
+          icon="i-lucide-panel-left-close"
+          size="sm"
+          color="neutral"
+          variant="ghost"
+          class="shrink-0 opacity-0 transition-opacity duration-150 group-hover/barra:opacity-100 focus-visible:opacity-100"
+          :aria-label="props.t.recolherMenu"
+          aria-keyshortcuts="Control+Backslash"
+          @click="emit('recolher')"
+        />
+      </UTooltip>
     </div>
 
     <!-- ============ navegação ============ -->
-    <nav class="min-h-0 flex-1 overflow-y-auto px-2" :aria-label="props.t.inicio">
+    <nav class="min-h-0 flex-1 overflow-y-auto px-2" :aria-label="props.t.navegacao">
       <div v-if="props.estado === 'carregando'" class="space-y-2 pt-1">
         <USkeleton v-for="n in 7" :key="n" class="h-7" :class="n % 3 === 0 ? 'w-3/4' : 'w-full'" />
       </div>
@@ -446,20 +465,15 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
         <UEmpty
           v-if="nadaNoFiltro"
           icon="i-lucide-search-x"
-          :title="props.t.filtroSemResultado"
-          :description="props.t.todasNenhumaDica"
+          :title="props.t.filtroSemResultadoEm(filtro)"
+          :actions="[{ label: props.t.buscarNoWorkspace(filtro.trim()), icon: 'i-lucide-search', color: 'neutral', variant: 'outline', size: 'xs', onClick: () => emit('busca', filtro.trim()) }]"
           class="animate-[entrada_0.25s_ease-out_both]"
         />
 
         <template v-for="no in nosVisiveis" :key="no.id">
-          <!--
-            ---------- destino nativo: folha, uma linha ----------
-            O `UContextMenu` não acrescenta elemento nenhum: ele usa `as-child`
-            e se funde à própria linha, então o arraste, as margens e o
-            `first:mt-0` continuam valendo.
-          -->
-          <UContextMenu v-if="no.tipo === 'destino'" :items="itensDoNo(no)">
+          <!-- ---------- destino nativo: folha, uma linha ---------- -->
           <LinhaDeMenu
+            v-if="no.tipo === 'destino'"
             class="mt-0.5 first:mt-0"
             :icone="no.icone"
             :rotulo="rotuloDe(no)"
@@ -478,8 +492,8 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             @soltar="p => largar(no.id, p)"
             @arrastar-fim="arraste.terminar()"
             @mover="p => menu.mover(no.id, p)"
+            :acoes="acoes.daLinha(no, idsDaRaiz)"
           />
-          </UContextMenu>
 
           <!-- ---------- a seção nativa: favoritos mais categorias ---------- -->
           <template v-else-if="no.tipo === 'secao-nativa'">
@@ -490,14 +504,12 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
               :aberta="filtrando || aberta('favoritos')"
               :texto-recolher="props.t.recolherSecao(props.t.favoritos)"
               :texto-expandir="props.t.expandirSecao(props.t.favoritos)"
+              :acoes="[[limites.itemMostrar('favoritos', props.t)]]"
               @alternar="abrirFavoritos()"
             >
-              <UContextMenu
-                v-for="(c, i) in favoritasVisiveis"
-                :key="c.id"
-                :items="itensDaCategoria(c)"
-              >
               <LinhaDeMenu
+                v-for="(c, i) in exibidos('favoritos', favoritasVisiveis)"
+                :key="c.id"
                 :icone="c.icon ?? 'i-lucide-folder'"
                 :rotulo="c.name"
                 :nivel="2"
@@ -507,10 +519,11 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
                 :rotulo-desafixar="props.t.desafixar"
                 :ativo="props.categoriaAtivaId === c.id"
                 :atraso="100 + i * 25"
+                :acoes="acoes.daCategoria(c)"
                 @selecionar="emit('categoria', c)"
                 @alternar-estrela="emit('alternarFixar', c.id)"
               />
-              </UContextMenu>
+              <MaisDaSecao :t="props.t" :id="'favoritos'" :resto="restoDe('favoritos', favoritasVisiveis)" :total="(favoritasVisiveis).length" />
             </SecaoDeMenu>
 
             <!-- Categorias: a seção que cresce. Ordenada por critério, não por arraste. -->
@@ -521,6 +534,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
               :contador="props.totalDeCategorias || undefined"
               :texto-recolher="props.t.recolherSecao(props.t.categorias)"
               :texto-expandir="props.t.expandirSecao(props.t.categorias)"
+              :acoes="acoesDeCategorias(no)"
               @alternar="abrirCategorias()"
             >
               <template #acoes>
@@ -552,12 +566,9 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
               </template>
 
               <template v-else>
-                <UContextMenu
+                <LinhaDeMenu
                   v-for="(c, i) in categoriasVisiveis"
                   :key="c.id"
-                  :items="itensDaCategoria(c)"
-                >
-                <LinhaDeMenu
                   :icone="c.icon ?? 'i-lucide-folder'"
                   :rotulo="c.name"
                   :nivel="2"
@@ -569,6 +580,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
                   :alterado="tocado(`cat:${c.id}`)"
                   :dica-alterado="props.t.pontoAlterado"
                   :atraso="180 + i * 25"
+                  :acoes="acoes.daCategoria(c, filtrando ? undefined : { visiveis: idsDasCategorias, passo: passoDaCategoria })"
                   :arrastavel="!filtrando"
                   :saindo="arraste.arrastando.value === `cat:${c.id}`"
                   :marca="marcaDe(`cat:${c.id}`) === 'dentro' ? null : marcaDe(`cat:${c.id}`)"
@@ -579,7 +591,6 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
                   @soltar="p => largarCategoria(c.id, p)"
                   @arrastar-fim="arraste.terminar()"
                 />
-                </UContextMenu>
 
                 <button
                   v-if="!filtrando"
@@ -603,8 +614,8 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             troca. O editor continua tratando a seção como seção: é lá que se
             põe a segunda tela dentro dela.
           -->
-          <UContextMenu v-else-if="temUmaSo(no)" :items="itensDoNo(no)">
           <LinhaDeMenu
+            v-else-if="temUmaSo(no)"
             class="mt-0.5"
             :icone="no.icone"
             :rotulo="rotuloDe(no)"
@@ -617,6 +628,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             :saindo="arraste.arrastando.value === no.id"
             :marca="marcaDe(no.id)"
             :recusando="recusandoAgora"
+            :acoes="acoes.daLinha(no, idsDaRaiz, { abrir: () => emit('destino', unicoFilho(no).id) })"
             @selecionar="emit('destino', unicoFilho(no).id)"
             @arrastar-inicio="arraste.comecar(no.id)"
             @arrastar-sobre="p => mirar(no.id, p)"
@@ -624,11 +636,10 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             @arrastar-fim="arraste.terminar()"
             @mover="p => menu.mover(no.id, p)"
           />
-          </UContextMenu>
 
           <!-- ---------- seção: nativa, de módulo ou do workspace ---------- -->
-          <UContextMenu v-else :items="itensDoNo(no)">
           <SecaoDeMenu
+            v-else
             :rotulo="rotuloDe(no)"
             :selo="seloDaSecao(no)"
             :alterado="tocado(no.id)"
@@ -640,6 +651,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             :saindo="arraste.arrastando.value === no.id"
             :marca="marcaDe(no.id)"
             :recusando="recusandoAgora"
+            :acoes="acoes.daSecao(no, idsDaRaiz)"
             @alternar="abrirSecao(no)"
             @arrastar-inicio="arraste.comecar(no.id)"
             @arrastar-sobre="p => mirar(no.id, p)"
@@ -647,12 +659,9 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             @arrastar-fim="arraste.terminar()"
             @mover="p => menu.mover(no.id, p)"
           >
-            <UContextMenu
-              v-for="(item, i) in (no.filhos ?? [])"
-              :key="item.id"
-              :items="itensDoNo(item, no)"
-            >
             <LinhaDeMenu
+              v-for="(item, i) in exibidos(no.id, (no.filhos ?? []))"
+              :key="item.id"
               :icone="item.icone"
               :rotulo="rotuloDe(item)"
               :nivel="2"
@@ -661,6 +670,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
               :dica-alterado="props.t.pontoAlterado"
               :ativo="props.destinoAtivo === item.id"
               :atraso="i * 25"
+              :acoes="acoes.daLinha(item, (no.filhos ?? []).map(f => f.id))"
               :arrastavel="podeArrastarMenu"
               :saindo="arraste.arrastando.value === item.id"
               :marca="marcaDe(item.id) === 'dentro' ? null : marcaDe(item.id)"
@@ -672,86 +682,18 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
               @arrastar-fim="arraste.terminar()"
               @mover="p => menu.mover(item.id, p)"
             />
-            </UContextMenu>
+            <MaisDaSecao :t="props.t" :id="no.id" :resto="restoDe(no.id, (no.filhos ?? []))" :total="((no.filhos ?? [])).length" />
           </SecaoDeMenu>
-          </UContextMenu>
         </template>
 
 
-        <!--
-          O menu so meu, quando existe (rodada 12). Nao e botao de entrar em
-          modo de edicao: e o aviso de que o que esta na tela nao e mais o que
-          o workspace publicou, com a saida ao lado.
-        -->
-        <div
-          v-if="menu.pessoal.value"
-          class="mt-3 flex items-center gap-1.5 rounded-lg bg-elevated/60 px-2.5 py-1.5 text-xs text-muted"
-        >
-          <UIcon name="i-lucide-user" class="size-3.5 shrink-0" />
-          <span class="min-w-0 flex-1 truncate">{{ props.t.menuSoMeu }}</span>
-          <UTooltip :text="props.t.voltarAoDoWorkspace">
-            <UButton
-              icon="i-lucide-rotate-ccw"
-              size="xs"
-              color="neutral"
-              variant="ghost"
-              :aria-label="props.t.voltarAoDoWorkspace"
-              @click="menu.voltarAoDoWorkspace()"
-            />
-          </UTooltip>
-        </div>
+        <!-- Menu só meu (rodada 12) e itens ocultos (rodada 14). -->
+        <AvisosDoMenu :t="props.t" :rotulo-de="rotuloDe" />
       </template>
     </nav>
 
-    <!--
-      ============ O CARTÃO FLUTUANTE DE SALVAR (rodada 12) ============
-
-      Flutua sobre o fim da lista, em vez de empurrar a barra: enquanto a pessoa
-      arruma o menu, o que ela quer ver é o menu.
-
-      Duas ações, porque são dois alcances de verdade, e o de todos só aparece
-      para quem pode configurar. A terceira, descartar, fica em texto: ela é a
-      saída, não a intenção.
-    -->
-    <div v-if="menu.alterado.value" class="pointer-events-none absolute inset-x-2 bottom-14 z-30">
-      <div class="pointer-events-auto animate-[entrada_0.2s_ease-out_both] rounded-xl border border-default bg-default p-2.5 shadow-lg ring-1 ring-warning/30">
-        <p class="mb-0.5 flex items-center gap-1.5 text-xs font-semibold text-highlighted">
-          <span class="size-2 shrink-0 rounded-full bg-warning" />
-          {{ props.t.naoSalvoTitulo }}
-        </p>
-        <p class="mb-2 text-xs leading-snug text-muted">{{ props.t.naoSalvoDica }}</p>
-
-        <div class="space-y-1.5">
-          <UButton
-            v-if="props.podeConfigurar"
-            :label="props.t.salvarTodos"
-            icon="i-lucide-users"
-            size="xs"
-            color="primary"
-            block
-            @click="salvarMenu('todos')"
-          />
-          <div class="flex items-center gap-1.5">
-            <UButton
-              :label="props.t.salvarLocal"
-              icon="i-lucide-user"
-              size="xs"
-              color="neutral"
-              :variant="props.podeConfigurar ? 'subtle' : 'solid'"
-              class="flex-1 justify-center"
-              @click="salvarMenu('local')"
-            />
-            <UButton
-              :label="props.t.descartar"
-              size="xs"
-              color="neutral"
-              variant="ghost"
-              @click="menu.descartar()"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- O cartão de salvar (rodada 12), peça própria desde a rodada 14. -->
+    <CartaoDeSalvar :t="props.t" :pode-configurar="props.podeConfigurar" />
 
     <!--
       ============ rodapé ============

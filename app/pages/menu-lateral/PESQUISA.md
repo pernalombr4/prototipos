@@ -357,6 +357,134 @@ está coberto pelos padrões 1 e 3 acima, é manter a administração em área s
 `⚙ Settings` do HubSpot é outra navegação inteira) e favoritar o que é usado com frequência
 (`Starred` do Asana).
 
+## Rodada 14: botão direito, arrastar e recolher no ClickUp
+
+Pedido dela: "pesquise como o clickup trabalha com isso pra ter inspiração". A pergunta tem três
+partes: o que se reordena, o que se recolhe e o que se personaliza. Fonte: a central de ajuda
+oficial do ClickUp (versão 4.0). **Não foi possível usar o ClickUp logado:** esta sessão roda
+num contêiner na nuvem, sem o Chrome dela, e entrar pelo navegador do contêiner exigiria digitar
+senha, o que a regra 2 proíbe. A conferência na mão fica para uma sessão no app de desktop.
+
+### O botão direito
+
+- Botão direito em Space, Folder e List abre o **mesmo menu** que o `…` ao lado do nome. As
+  duas portas levam ao mesmo lugar
+  ([Space, Folder, and List settings](https://help.clickup.com/hc/en-us/articles/33777837994775-Space-Folder-and-List-settings)).
+- O conteúdo muda com o nível e com a permissão, **a ordem dos blocos não**:
+  - **Space:** Favorite, Rename, Copy link, Hide Space, Archive;
+  - **Folder:** Favorite, Rename, Copy link, Move, Archive;
+  - **List:** Favorite, Rename, Copy link, Email to List, Move, Archive.
+- `Hide Space` tira o Space da barra **sem tirar o acesso**. A volta é `Show all Spaces`, no `…`
+  da seção Spaces ([Hide or reorder Spaces](https://help.clickup.com/hc/en-us/articles/6309404591895-Hide-or-reorder-Spaces)).
+- O que falta lá, e os usuários pedem: "Open in new window/tab" no botão direito
+  ([pedido público](https://feedback.clickup.com/feature-requests/p/add-open-in-new-window-tab-to-sidebar-right-click-menu)).
+
+### O que se reordena e o que não
+
+- **Spaces:** arrastando, na Home Sidebar ou na Spaces Sidebar.
+- **Seções da Home Sidebar:** arrastando na própria barra, ou num modal `Reorder sections`. As
+  seções padrão **se reordenam mas não se escondem**
+  ([Create custom Home Sidebar sections](https://help.clickup.com/hc/en-us/articles/32855333466903-Create-and-reorder-custom-Home-Sidebar-sections)).
+- **Global Navigation (a trilha):** não se arrasta. Se liga e desliga por caixa de seleção em
+  `More > Customize navigation`, e **Home é o único item que não se mexe**. Arrastar ali é pedido
+  aberto ([Customize & reorder global nav](https://feedback.clickup.com/feature-requests/p/customize-reorder-home-sidebar-global-nav-menus)).
+
+### O que se personaliza 100%
+
+- **Seções próprias na Home Sidebar**, com nome livre, criadas pelo `+` da barra ou pelo `…` de
+  uma seção, e dentro delas Spaces, Lists, Docs e o que mais a pessoa puser. É o equivalente da
+  "seção do workspace" que o ENSPACE já tem em Interface > Menus.
+
+### Recolher e expandir
+
+- `Ctrl + \` (ou `Cmd + \`) mostra e esconde a barra
+  ([Use keyboard shortcuts](https://help.clickup.com/hc/en-us/articles/6309030550167)).
+- Recolhida, a barra volta pelo **ícone de expandir no alto da Global Navigation**
+  ([Default Home Sidebar sections](https://help.clickup.com/hc/en-us/articles/32854720651543-Default-Home-Sidebar-sections-and-settings)).
+- A barra também abre sozinha quando o mouse passa na borda, e esse é um pedido público **contra**
+  o comportamento: "Personal Setting to Disable Sidebar Expand on Hover"
+  ([pedido](https://feedback.clickup.com/feature-requests/p/disable-sidebar-hover-to-show-action)).
+
+### O que serve, e o que não serve
+
+| ClickUp | No ENSPACE | Por quê |
+|---|---|---|
+| Botão direito = menu do `…`, mesmos blocos em todo nível | **Serve.** Três blocos fixos: ir, arrumar, mexer | Quem aprende num lugar acha no outro |
+| `Hide` com `Show all` para voltar | **Serve.** "Ocultar do menu" e "Itens ocultos" no pé | É a resposta direta a "o menu é muito cheio" |
+| Home não se esconde; seções padrão não se escondem | **Serve.** Início e Categorias não se ocultam | Sem Início não há para onde voltar |
+| Global Navigation não se arrasta | **Em parte.** Na trilha, Trabalho, Dados e Configurações ficam; as seções do workspace se arrastam | Ela pediu arraste na trilha, e as seções são do workspace |
+| "Open in new tab" ausente | **O ENSPACE faz.** "Abrir em nova aba" no primeiro bloco | É o pedido dos próprios usuários de lá |
+| `Ctrl + \` e ícone de expandir no alto | **Serve**, igual | Atalho que quem vem do ClickUp já tem na mão |
+| Abrir sozinha no hover da borda | **Não serve** | É o comportamento que os usuários de lá pedem para desligar |
+| `Archive` no botão direito | **Não entra** | Arquivar categoria e seção é decisão de configuração, não de navegação |
+
+## Rodada 15: o ClickUp por dentro, nos prints da Mikaela
+
+Ela usou o ClickUp logado e mandou 21 prints com a explicação. Isto **corrige** a seção da
+rodada 14, que tinha saído da central de ajuda. Os prints não entraram no repositório: têm
+e-mail de pessoa e o nome dela (regra 13).
+
+| O que | Como o ClickUp faz |
+|---|---|
+| Trilha (Global Navigation) | Não se reordena e não se arrasta. Personalizar > Navegação liga e desliga cada item, com Início travado, e escolhe "Somente ícones" ou "Ícones e rótulos" |
+| "Mais" na trilha | Aparece por padrão e guarda o que não está fixado. Alfinete no hover fixa; sem espaço, o novo toma o lugar do último, que vai para "Mais". No pé, "Personalizar navegação" |
+| Hover na trilha | Passar o mouse num ícone que não é o aberto mostra o menu dele em popover. O menu aberto continua no fundo |
+| Recolhido | A trilha fica só; o primeiro ícone vira "»", que reabre. O popover do hover continua valendo |
+| Início | Clicar abre a página inicial e o menu Início. É o único menu com "Personalizar a barra lateral" |
+| Itens nativos do Início | Ordem fixa. Personalizar > Início escolhe quais aparecem (dois travados). Os outros ficam em "⋯ Mais", com alfinete e atalho para Personalizar |
+| Seções do Início | Se reordenam arrastando no próprio menu ou em Personalizar > Seções. Só "Chats com IA" se oculta. Clicar no nome recolhe e expande |
+| Criar seção | Janela com ícone e nome. A seção nova entra no topo |
+| "+" da seção | Busca o que já existe para pôr na seção, com "+" no pé para criar. Seção vazia mostra "+ Adicionar à seção" |
+| "…" da seção | Ícone e nome editáveis no topo, marcar como lido, adicionar à seção, mostrar e ordenar (recentes, alfabética, personalizado), criar seção, reordenar seções, excluir |
+| Itens de uma seção | Se arrastam dentro dela. O "…" do item abre: marcar como não lido, copiar link, favorito, renomear, excluir, notificações, compartilhamento |
+| Hierarquia | Uma seção pode ter um item com filhos (Espaço > Pasta > Lista), que abre e fecha |
+| Botão de Personalizar | No pé do menu Início até o primeiro uso; depois some de lá e fica no cabeçalho |
+| Temas | Claro, escuro, automático, e uma cor de tema entre dez |
+
+## Rodada 18: a Central de modelos do ClickUp, e "Usar" contra "Adicionar"
+
+Ela mandou 9 prints da Central de modelos do ClickUp. O que eles mostram:
+
+- **Lista:** à esquerda, Destaques, Modelos do espaço de trabalho e Modelos da ClickUp, com
+  contagem; filtros de **Tipos de modelo** (Super Agent, Skill, Espaço, Pasta, Lista, Tarefa,
+  Documento, Visualização, Quadro Branco) e **Complexidade** (Intermediário, Avançado,
+  Iniciante). Em cima, a busca e três filtros em botão: **Casos de uso** (lista com busca,
+  "Selecionar tudo" e várias marcadas ao mesmo tempo, com o número de marcadas no botão),
+  Etiquetas e Criado por. Faixa "Crie seu primeiro modelo". Cartões com print, agrupados por
+  área, com "Ver mais N".
+- **Detalhe:** Voltar, ícone, nome, "…" ao lado do nome, Complexidade, **Usar modelo**; galeria
+  com setas e pontos, que amplia em tela cheia com zoom e download; descrição; "Modelo inclui"
+  (grupos de status, campos personalizados, tipos de visualização), cada um abrindo os itens; à
+  direita, "Pela ClickUp" (Verificado), data de criação e quantas vezes foi usado.
+- **"…" do detalhe:** "Adicionar ao espaço de trabalho: adicione este modelo ao seu espaço de
+  trabalho para fazer alterações". Depois disso o modelo aparece em "Modelos baseados em seu
+  espaço de trabalho", e o menu dela **não mudou**.
+
+**A diferença entre os dois botões**, que ela pediu para investigar. A central de ajuda do
+ClickUp não compara os dois lado a lado, mas os dois artigos dizem o bastante:
+
+- "Add a template to your library" (help.clickup.com/hc/en-us/articles/6326023965591): adicionar
+  guarda uma cópia na **biblioteca** do workspace, para achar de novo, renomear, descrever,
+  compartilhar e ajustar. O original continua na Central.
+- "Use Folder templates" (help.clickup.com/hc/en-us/articles/6308752167319): **usar** aplica,
+  depois de deixar escolher nome, lugar e o que vem junto.
+
+Ou seja: **adicionar é guardar, usar é aplicar.** O menu dela não mudou porque ela guardou.
+
+### No ENSPACE
+
+| ClickUp | ENSPACE | Por quê |
+|---|---|---|
+| Modelo | **Caso de uso** | É o nome que o produto já usa (Configurações > Interface > Casos de Uso) |
+| Filtro "Casos de uso" | Filtro **Áreas** (Jurídico, Comercial, Financeiro…) | Aqui "caso de uso" já é a coisa; o filtro é pela área de negócio, com o mesmo desenho |
+| Tipos de modelo | Workspace completo, Menu, Categoria, Tela | São os pacotes que o arquivo de exportação do ENSPACE carrega |
+| "Modelo inclui": status, campos, visualizações | Menus e telas, Categorias e campos, Status | É o que um caso de uso do ENSPACE traz |
+| Usar modelo | **Usar caso de uso**, com somar ou substituir antes | Ela pediu a escolha no Importar; aplicar um caso é a mesma operação |
+| Adicionar ao espaço de trabalho | **Adicionar ao workspace**, dizendo na própria opção que o menu não muda | É justamente o que confundiu ela no ClickUp |
+| Importar (pé do "+") | Importar caso de uso de outro workspace, com área de arraste e prévia | É a tela do protótipo `migracao-de-workspace`, trazida para perto do menu |
+| Etiquetas, Criado por | Não entram | O caso de uso do ENSPACE não tem etiqueta nem autoria hoje |
+| Print do modelo | Miniatura desenhada com o conteúdo do caso | Sem prints de telas que ainda não existem (`COMPONENTES-CUSTOM.md`) |
+
 ---
 
 ## Botão direito num ícone da trilha: o que os outros põem ali

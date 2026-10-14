@@ -303,19 +303,8 @@ export const gruposDeConfiguracao: GrupoDeConfiguracao[] = [
     id: 'interface',
     icone: 'i-lucide-layout',
     itens: [
-      /*
-       * RODADA 14: `Telas` SAIU daqui.
-       *
-       * No produto de hoje são duas portas: a pessoa cria a tela em
-       * `Interface > Telas` e depois cria o item em `Interface > Menus` para
-       * apontar para ela. A própria documentação avisa as duas pontas soltas
-       * dessa separação: tela que não entra no menu não aparece para ninguém,
-       * e a tela precisa existir antes do item.
-       *
-       * A decisão dela: as duas coisas são uma só. Criar menu é escolher o
-       * tipo, e o tipo é a tela. Então sobra uma porta, `Menus`.
-       */
       { id: 'menus', icone: 'i-lucide-menu' },
+      { id: 'telas', icone: 'i-lucide-monitor' },
       { id: 'casos-de-uso', icone: 'i-lucide-package' },
     ],
   },
@@ -328,14 +317,8 @@ export const gruposDeConfiguracao: GrupoDeConfiguracao[] = [
       { id: 'enviados', icone: 'i-lucide-send' },
     ],
   },
-  {
-    id: 'conexoes',
-    icone: 'i-lucide-plug',
-    itens: [
-      { id: 'integracoes', icone: 'i-lucide-git-merge' },
-      { id: 'credenciais', icone: 'i-lucide-key-round' },
-    ],
-  },
+  // "Conexões" (Integrações e Credenciais) saiu daqui na rodada 16: virou o
+  // menu nativo Integrações, de primeiro nível, como a Auditoria na rodada 10.
   {
     id: 'ia',
     icone: 'i-lucide-bot',
@@ -439,14 +422,7 @@ export const usuaria = {
 ================================================================== */
 
 /** Os 13 tipos de tela que o produto oferece hoje, na ordem da documentação. */
-/**
- * OS TIPOS DE MENU.
- *
- * São os 13 tipos de tela do produto, com o nome que a decisão da rodada 14
- * lhes deu: **escolher o tipo do menu é escolher a tela**. Não existe criar
- * tela de um lado e menu do outro; existe criar menu, e o tipo diz o que abre.
- */
-export interface TipoDeMenu {
+export interface TipoDeTela {
   id: string
   /** Precisa escolher categoria na configuração. */
   exigeCategoria?: boolean
@@ -454,7 +430,7 @@ export interface TipoDeMenu {
   exigeCaminho?: boolean
 }
 
-export const tiposDeMenu: TipoDeMenu[] = [
+export const tiposDeTela: TipoDeTela[] = [
   { id: 'arquivos' },
   { id: 'consultas', exigeCategoria: true },
   { id: 'consultas-grupo', exigeCategoria: true },
@@ -543,8 +519,8 @@ export interface NoDoMenu {
   rotulo?: string
   chave?: string
   icone: string
-  /** O tipo do menu, que é a tela que ele abre. Só para item. */
-  tipoDeMenu?: string
+  /** Só para item do tipo tela. */
+  tipoDeTela?: string
   categoriasLigadas?: number
   /** Grupos de membros que enxergam. Vazio significa que todos enxergam. */
   escopo?: string[]
@@ -563,6 +539,12 @@ export interface NoDoMenu {
   origem?: 'nativo' | 'modulo' | 'workspace'
   /** Qual módulo trouxe este item, quando a origem é `modulo`. */
   moduloId?: string
+  /**
+   * Inventado pelo protótipo (rodada 14): "Ocultar" do menu de contexto, como o
+   * Hide do ClickUp. O item sai da barra e continua existindo: a busca acha, o
+   * editor mostra, e "Itens ocultos" no pé da barra traz de volta.
+   */
+  oculto?: boolean
   filhos?: NoDoMenu[]
 }
 
@@ -607,9 +589,9 @@ export const menuDoEditor: NoDoMenu[] = [
     lugar: 'trilha',
     escopo: [],
     filhos: [
-      { id: 't-pt', tipo: 'tela', emBreve: true, rotulo: 'Dashboard de tarefas', icone: 'i-lucide-chart-column', tipoDeMenu: 'paineis' },
-      { id: 't-pd', tipo: 'tela', emBreve: true, rotulo: 'Dashboard de dados', icone: 'i-lucide-chart-pie', tipoDeMenu: 'paineis' },
-      { id: 't-mr', tipo: 'tela', emBreve: true, rotulo: 'Meus relatórios', icone: 'i-lucide-file-chart-column', tipoDeMenu: 'personalizada' },
+      { id: 't-pt', tipo: 'tela', emBreve: true, rotulo: 'Dashboard de tarefas', icone: 'i-lucide-chart-column', tipoDeTela: 'paineis' },
+      { id: 't-pd', tipo: 'tela', emBreve: true, rotulo: 'Dashboard de dados', icone: 'i-lucide-chart-pie', tipoDeTela: 'paineis' },
+      { id: 't-mr', tipo: 'tela', emBreve: true, rotulo: 'Meus relatórios', icone: 'i-lucide-file-chart-column', tipoDeTela: 'personalizada' },
     ],
   },
   {
@@ -641,8 +623,32 @@ export const menuDoEditor: NoDoMenu[] = [
     lugar: 'trilha',
     escopo: [],
     filhos: [
-      { id: 'a-logs', tipo: 'tela', chave: 'logsAuditoria', icone: 'i-lucide-scroll-text', tipoDeMenu: 'personalizada' },
-      { id: 'a-req', tipo: 'tela', chave: 'logsRequisicao', icone: 'i-lucide-activity', tipoDeMenu: 'personalizada' },
+      { id: 'a-logs', tipo: 'tela', chave: 'logsAuditoria', icone: 'i-lucide-scroll-text', tipoDeTela: 'personalizada' },
+      { id: 'a-req', tipo: 'tela', chave: 'logsRequisicao', icone: 'i-lucide-activity', tipoDeTela: 'personalizada' },
+    ],
+  },
+  /*
+   * INTEGRAÇÕES, rodada 16. Menu nativo novo do ENSPACE, anunciado pela
+   * Mikaela: "tem um novo menu no enspace: o menu integracoes, e dentro dele
+   * tem apps, credenciais e webhooks como submenus".
+   *
+   * Entra como a Auditoria entrou na rodada 10: menu de primeiro nível, com
+   * ícone próprio na trilha, e o grupo "Conexões" sai de Configurações, porque
+   * Integrações e Credenciais moravam lá. Webhooks é a tela nova. Os ids das
+   * telas são do protótipo.
+   */
+  {
+    id: 's-integracoes',
+    tipo: 'secao',
+    origem: 'nativo',
+    chave: 'integracoes',
+    icone: 'i-lucide-plug',
+    lugar: 'trilha',
+    escopo: [],
+    filhos: [
+      { id: 'i-apps', tipo: 'tela', chave: 'apps', icone: 'i-lucide-blocks', tipoDeTela: 'personalizada' },
+      { id: 'i-credenciais', tipo: 'tela', chave: 'credenciais', icone: 'i-lucide-key-round', tipoDeTela: 'personalizada' },
+      { id: 'i-webhooks', tipo: 'tela', chave: 'webhooks', icone: 'i-lucide-webhook', tipoDeTela: 'personalizada' },
     ],
   },
   {
@@ -654,8 +660,8 @@ export const menuDoEditor: NoDoMenu[] = [
     lugar: 'trilha',
     escopo: [],
     filhos: [
-      { id: 't-base', tipo: 'tela', rotulo: 'Base de Conhecimento', icone: 'i-lucide-library', tipoDeMenu: 'personalizada' },
-      { id: 't-pol', tipo: 'tela', rotulo: 'Políticas internas', icone: 'i-lucide-file-text', tipoDeMenu: 'arquivos' },
+      { id: 't-base', tipo: 'tela', rotulo: 'Base de Conhecimento', icone: 'i-lucide-library', tipoDeTela: 'personalizada' },
+      { id: 't-pol', tipo: 'tela', rotulo: 'Políticas internas', icone: 'i-lucide-file-text', tipoDeTela: 'arquivos' },
     ],
   },
   {
@@ -667,9 +673,9 @@ export const menuDoEditor: NoDoMenu[] = [
     lugar: 'trilha',
     escopo: ['comercial'],
     filhos: [
-      { id: 't-pv', tipo: 'tela', rotulo: 'Painel de vendas', icone: 'i-lucide-chart-line', tipoDeMenu: 'paineis' },
-      { id: 't-tri', tipo: 'tela', rotulo: 'Triagem de propostas', icone: 'i-lucide-list-filter', tipoDeMenu: 'triagem', categoriasLigadas: 2 },
-      { id: 't-req', tipo: 'tela', rotulo: 'Minhas requisições', icone: 'i-lucide-inbox', tipoDeMenu: 'minhas-requisicoes' },
+      { id: 't-pv', tipo: 'tela', rotulo: 'Painel de vendas', icone: 'i-lucide-chart-line', tipoDeTela: 'paineis' },
+      { id: 't-tri', tipo: 'tela', rotulo: 'Triagem de propostas', icone: 'i-lucide-list-filter', tipoDeTela: 'triagem', categoriasLigadas: 2 },
+      { id: 't-req', tipo: 'tela', rotulo: 'Minhas requisições', icone: 'i-lucide-inbox', tipoDeTela: 'minhas-requisicoes' },
     ],
   },
 ]
@@ -754,9 +760,9 @@ export const secoesDeModulo: NoDoMenu[] = [
     lugar: 'trilha',
     escopo: [],
     filhos: [
-      { id: 'mc-minhas', tipo: 'tela', origem: 'modulo', moduloId: 'comparacoes', rotulo: 'Minhas comparações', icone: 'i-lucide-list-checks', tipoDeMenu: 'consultas', categoriasLigadas: 1 },
-      { id: 'mc-aprovar', tipo: 'tela', origem: 'modulo', moduloId: 'comparacoes', rotulo: 'Para aprovar', icone: 'i-lucide-circle-check-big', tipoDeMenu: 'triagem', categoriasLigadas: 1 },
-      { id: 'mc-relatorios', tipo: 'tela', origem: 'modulo', moduloId: 'comparacoes', rotulo: 'Relatórios de comparação', icone: 'i-lucide-file-chart-column', tipoDeMenu: 'paineis' },
+      { id: 'mc-minhas', tipo: 'tela', origem: 'modulo', moduloId: 'comparacoes', rotulo: 'Minhas comparações', icone: 'i-lucide-list-checks', tipoDeTela: 'consultas', categoriasLigadas: 1 },
+      { id: 'mc-aprovar', tipo: 'tela', origem: 'modulo', moduloId: 'comparacoes', rotulo: 'Para aprovar', icone: 'i-lucide-circle-check-big', tipoDeTela: 'triagem', categoriasLigadas: 1 },
+      { id: 'mc-relatorios', tipo: 'tela', origem: 'modulo', moduloId: 'comparacoes', rotulo: 'Relatórios de comparação', icone: 'i-lucide-file-chart-column', tipoDeTela: 'paineis' },
     ],
   },
   {
@@ -770,7 +776,7 @@ export const secoesDeModulo: NoDoMenu[] = [
     painel: 'dados',
     escopo: [],
     filhos: [
-      { id: 'mm-calc', tipo: 'tela', origem: 'modulo', moduloId: 'correcao-monetaria', rotulo: 'Calculadora avulsa', icone: 'i-lucide-calculator', tipoDeMenu: 'personalizada' },
+      { id: 'mm-calc', tipo: 'tela', origem: 'modulo', moduloId: 'correcao-monetaria', rotulo: 'Calculadora avulsa', icone: 'i-lucide-calculator', tipoDeTela: 'personalizada' },
     ],
   },
 ]

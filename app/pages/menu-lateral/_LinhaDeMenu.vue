@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { Acoes } from './acoes'
+
 /**
  * Uma linha do menu lateral.
  *
@@ -14,8 +16,12 @@ const props = withDefaults(defineProps<{
   rotulo: string
   ativo?: boolean
   contador?: number
-  /** 1 é destino solto, 2 é item dentro de seção. A barra tem só estes dois. */
-  nivel?: 1 | 2
+  /**
+   * 1 é destino solto, 2 é item dentro de seção. O 3 é da rodada 15: a tela de
+   * um MENU que alguém pôs dentro da sua seção do Início ("uma seção pode ter
+   * menus com submenus dentro"). É a hierarquia do ClickUp em Espaços.
+   */
+  nivel?: 1 | 2 | 3
   /** Mostra a estrela de favorito no hover e no foco. */
   comEstrela?: boolean
   fixada?: boolean
@@ -43,10 +49,30 @@ const props = withDefaults(defineProps<{
   /** Bolinha amarela: esta linha foi mexida e ainda não foi salva. */
   alterado?: boolean
   dicaAlterado?: string
+  /**
+   * O menu do botão direito (rodada 14). Sem ele a linha não abre menu nenhum
+   * e o botão direito volta a ser o do navegador.
+   */
+  acoes?: Acoes
+  /**
+   * O "…" que aparece no hover e abre as mesmas ações num popover, como no
+   * ClickUp (rodada 15). O botão direito continua valendo.
+   */
+  comReticencias?: boolean
+  /** Rótulo do "…" para leitor de tela. */
+  rotuloReticencias?: string
+  /**
+   * Linha que abre e fecha os próprios submenus (um menu dentro de uma seção
+   * do Início, rodada 15). `undefined` é linha comum, sem seta.
+   */
+  expandido?: boolean
 }>(), {
   nivel: 1,
   atraso: 0,
   marca: null,
+  // Sem isto o Vue transforma o booleano ausente em `false`, e toda linha
+  // ganharia a seta e o aria-expanded.
+  expandido: undefined,
 })
 
 const emit = defineEmits<{
@@ -102,6 +128,12 @@ function aoTeclar(e: KeyboardEvent) {
 </script>
 
 <template>
+  <!--
+    O botão direito (rodada 14). O UContextMenu usa a própria linha como
+    gatilho, sem elemento a mais: Shift+F10 e a tecla de menu abrem o mesmo
+    menu na linha com foco, que é o caminho de teclado do ClickUp também.
+  -->
+  <UContextMenu :items="props.acoes" :disabled="!props.acoes?.length">
   <div
     class="group relative animate-[entrada_0.22s_ease-out_both]"
     :class="[
@@ -122,9 +154,10 @@ function aoTeclar(e: KeyboardEvent) {
     <button
       type="button"
       :aria-current="props.ativo ? 'page' : undefined"
-      class="flex w-full items-center gap-2.5 rounded-md py-1.5 pr-9 text-sm transition-colors duration-150"
+      :aria-expanded="props.expandido"
+      class="flex w-full items-center gap-2.5 rounded-md py-1.5 pr-9 text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
       :class="[
-        props.nivel === 2 ? 'pl-8' : 'pl-2.5',
+        props.nivel === 3 ? 'pl-14' : props.nivel === 2 ? 'pl-8' : 'pl-2.5',
         props.ativo
           ? 'bg-primary/10 font-semibold text-highlighted'
           : 'text-default hover:bg-elevated',
@@ -159,6 +192,13 @@ function aoTeclar(e: KeyboardEvent) {
       <!-- title para o nome que não cabe: "Solicitações de compra e reembolso" corta
            na largura da barra, e sem isto o nome inteiro não existe em lugar nenhum. -->
       <span class="min-w-0 flex-1 truncate text-left" :title="props.rotulo">{{ props.rotulo }}</span>
+      <UIcon
+        v-if="props.expandido !== undefined"
+        name="i-lucide-chevron-right"
+        class="size-3.5 shrink-0 text-toned transition-transform duration-200"
+        :class="props.expandido ? 'rotate-90' : ''"
+        aria-hidden="true"
+      />
       <!--
         A BOLINHA AMARELA (rodada 12): esta linha foi mexida e ainda não foi
         salva. Fica antes dos selos, na mesma coluna em que o contador já
@@ -189,6 +229,22 @@ function aoTeclar(e: KeyboardEvent) {
       />
     </button>
 
+    <!-- O "…" do ClickUp (rodada 15): irmão do botão principal, como a estrela. -->
+    <UDropdownMenu
+      v-if="props.comReticencias && props.acoes?.length"
+      :items="props.acoes"
+      :content="{ side: 'right', align: 'start' }"
+      :ui="{ content: 'min-w-56' }"
+    >
+      <button
+        type="button"
+        class="absolute right-1 top-1/2 z-10 -translate-y-1/2 rounded p-1.25 text-toned opacity-0 transition-all duration-150 hover:bg-accented group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-primary data-[state=open]:opacity-100"
+        :aria-label="props.rotuloReticencias ?? props.rotulo"
+      >
+        <UIcon name="i-lucide-ellipsis" class="size-3.5" />
+      </button>
+    </UDropdownMenu>
+
     <!-- Irmão do botão principal, não filho. -->
     <UTooltip
       v-if="props.comEstrela"
@@ -196,7 +252,7 @@ function aoTeclar(e: KeyboardEvent) {
     >
       <button
         type="button"
-        class="absolute right-1 top-1/2 z-10 -translate-y-1/2 rounded p-1 transition-all duration-150 hover:bg-accented focus-visible:opacity-100"
+        class="absolute right-1 top-1/2 z-10 -translate-y-1/2 rounded p-1.25 transition-all duration-150 hover:bg-accented focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-primary"
         :class="props.fixada
           ? 'text-warning opacity-100'
           : 'text-toned opacity-0 group-hover:opacity-100 focus-visible:opacity-100'"
@@ -212,4 +268,5 @@ function aoTeclar(e: KeyboardEvent) {
       </button>
     </UTooltip>
   </div>
+  </UContextMenu>
 </template>
