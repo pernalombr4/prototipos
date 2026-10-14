@@ -93,8 +93,10 @@ export interface Textos {
     erroCampo: string
     naoEhData: (variavel: string) => string
     naoReconhecida: string
-    lidaComo: (campo: string, no: string) => string
     soltarAqui: string
+    arrasteADataAqui: string
+    editarVariavel: string
+    limparVariavel: string
     semVariaveis: string
     abrirVariaveis: string
     horario: string
@@ -142,7 +144,6 @@ export interface Textos {
       tipo: string
       quantidade: string
       unidade: string
-      campo: string
       retomar: string
       horario: string
       sePassou: string
@@ -267,8 +268,10 @@ const pt: Textos = {
     erroCampo: 'Arraste uma variável de data para este campo.',
     naoEhData: variavel => `${variavel} não é uma data. Arraste uma variável de data.`,
     naoReconhecida: 'Variável não encontrada entre as que chegam a este nó. Confira o nome ou arraste de Variáveis de Entrada.',
-    lidaComo: (campo, no) => `Usando ${campo}, do nó ${no}.`,
     soltarAqui: 'Solte aqui para usar esta data',
+    arrasteADataAqui: 'Arraste a data aqui',
+    editarVariavel: 'Editar a variável',
+    limparVariavel: 'Remover a variável',
     semVariaveis: 'Nenhuma variável chega até este nó. Ligue um nó antes do Atraso.',
     abrirVariaveis: 'Abrir Variáveis de Entrada',
     horario: 'Horário',
@@ -278,7 +281,7 @@ const pt: Textos = {
     sePassou: 'Quando a data calculada já tiver passado',
     seVazio: 'Quando o campo não estiver preenchido',
     continuarNaHora: 'Avançar para o próximo nó',
-    encerrar: 'Encerrar o fluxo',
+    encerrar: 'Encerrar o fluxo com erro',
     recalcular: 'Recalcular quando o campo for alterado',
     recalcularDescricao: campo => `Se o campo ${campo ?? "de data"} for alterado durante o atraso, a espera passa a usar a nova data.`,
     previa: 'Simulação',
@@ -293,9 +296,9 @@ const pt: Textos = {
     resultado: {
       agendado: (campo, data, continua, hora) => `${campo}: ${data}. Avança para o próximo nó em ${continua}, às ${hora}.`,
       passouContinua: 'A data calculada já passou. O fluxo avança para o próximo nó na hora.',
-      passouEncerra: 'A data calculada já passou. O fluxo é encerrado neste nó.',
+      passouEncerra: 'A data calculada já passou. O fluxo é encerrado com erro neste nó.',
       vazioContinua: campo => `O campo ${campo} não está preenchido. O fluxo avança para o próximo nó na hora.`,
-      vazioEncerra: campo => `O campo ${campo} não está preenchido. O fluxo é encerrado neste nó.`,
+      vazioEncerra: campo => `O campo ${campo} não está preenchido. O fluxo é encerrado com erro neste nó.`,
     },
     linha: { hoje: 'Hoje', continua: 'Avança' },
     verCalculo: 'Ver cálculo',
@@ -329,11 +332,11 @@ const pt: Textos = {
       },
       passou: {
         continue: 'O fluxo não espera: segue na hora para o nó ligado depois do Atraso.',
-        end: 'O fluxo para neste nó. Os nós seguintes não rodam para este item.',
+        end: 'O fluxo para neste nó e a execução fica registrada com erro. Os nós seguintes não rodam para este item.',
       },
       vazio: {
         continue: 'Sem data para calcular, o fluxo segue na hora para o nó ligado depois do Atraso.',
-        end: 'Sem data para calcular, o fluxo para neste nó. Os nós seguintes não rodam para este item.',
+        end: 'Sem data para calcular, o fluxo para neste nó e a execução fica registrada com erro. Os nós seguintes não rodam para este item.',
       },
     },
     instrucoes: {
@@ -341,8 +344,7 @@ const pt: Textos = {
       tipo: 'Define se o fluxo espera um tempo fixo ou até uma data.',
       quantidade: 'Por quanto tempo o fluxo fica parado neste nó.',
       unidade: 'Medida da quantidade de tempo.',
-      campo: 'Arraste aqui a variável com a data de base, a partir de Variáveis de Entrada.',
-      retomar: 'Quanto tempo antes ou depois dessa data o fluxo segue para o próximo nó.',
+      retomar: 'Arraste a variável da data para o fim da frase e diga quanto tempo antes ou depois dela o fluxo segue para o próximo nó.',
       horario: 'Hora do dia em que o fluxo segue para o próximo nó, no fuso do workspace: Brasília (UTC−3).',
       sePassou: 'O que fazer se a data calculada já tiver passado quando o item chegar a este nó.',
       seVazio: 'O que fazer se o item não tiver essa data preenchida.',
@@ -411,8 +413,10 @@ const en: Textos = {
     erroCampo: 'Drag a date variable to this field.',
     naoEhData: variavel => `${variavel} is not a date. Drag a date variable.`,
     naoReconhecida: 'Variable not found among the ones that reach this node. Check the name or drag it from Input Variables.',
-    lidaComo: (campo, no) => `Using ${campo}, from the ${no} node.`,
     soltarAqui: 'Drop here to use this date',
+    arrasteADataAqui: 'Drag the date here',
+    editarVariavel: 'Edit the variable',
+    limparVariavel: 'Remove the variable',
     semVariaveis: 'No variable reaches this node. Connect a node before the Delay.',
     abrirVariaveis: 'Open Input Variables',
     horario: 'Time',
@@ -422,7 +426,7 @@ const en: Textos = {
     sePassou: 'When the calculated date has already passed',
     seVazio: 'When the field is empty',
     continuarNaHora: 'Move to the next node',
-    encerrar: 'End the flow',
+    encerrar: 'End the flow with an error',
     recalcular: 'Recalculate when the field changes',
     recalcularDescricao: campo => `If the ${campo ?? "date"} field changes during the delay, the wait uses the new date.`,
     previa: 'Simulation',
@@ -437,9 +441,9 @@ const en: Textos = {
     resultado: {
       agendado: (campo, data, continua, hora) => `${campo}: ${data}. Moves to the next node on ${continua}, at ${hora}.`,
       passouContinua: 'The calculated date has passed. The flow moves to the next node right away.',
-      passouEncerra: 'The calculated date has passed. The flow ends at this node.',
+      passouEncerra: 'The calculated date has passed. The flow ends with an error at this node.',
       vazioContinua: campo => `The ${campo} field is empty. The flow moves to the next node right away.`,
-      vazioEncerra: campo => `The ${campo} field is empty. The flow ends at this node.`,
+      vazioEncerra: campo => `The ${campo} field is empty. The flow ends with an error at this node.`,
     },
     linha: { hoje: 'Today', continua: 'Moves on' },
     verCalculo: 'View calculation',
@@ -473,11 +477,11 @@ const en: Textos = {
       },
       passou: {
         continue: 'The flow does not wait: it moves right away to the node connected after the Delay.',
-        end: 'The flow stops at this node. The next nodes do not run for this item.',
+        end: 'The flow stops at this node and the execution is logged with an error. The next nodes do not run for this item.',
       },
       vazio: {
         continue: 'With no date to calculate, the flow moves right away to the node connected after the Delay.',
-        end: 'With no date to calculate, the flow stops at this node. The next nodes do not run for this item.',
+        end: 'With no date to calculate, the flow stops at this node and the execution is logged with an error. The next nodes do not run for this item.',
       },
     },
     instrucoes: {
@@ -485,8 +489,7 @@ const en: Textos = {
       tipo: 'Defines whether the flow waits a fixed time or until a date.',
       quantidade: 'How long the flow stays paused at this node.',
       unidade: 'Unit of the amount of time.',
-      campo: 'Drag here the variable with the base date, from Input Variables.',
-      retomar: 'How long before or after that date the flow moves to the next node.',
+      retomar: 'Drag the date variable to the end of the sentence and set how long before or after it the flow moves to the next node.',
       horario: 'Time of day when the flow moves to the next node, in the workspace time zone: Brasília (UTC−3).',
       sePassou: 'What to do if the calculated date has already passed when the item reaches this node.',
       seVazio: 'What to do if the item does not have this date filled in.',
@@ -555,8 +558,10 @@ const es: Textos = {
     erroCampo: 'Arrastre una variable de fecha a este campo.',
     naoEhData: variavel => `${variavel} no es una fecha. Arrastre una variable de fecha.`,
     naoReconhecida: 'Variable no encontrada entre las que llegan a este nodo. Revise el nombre o arrástrela desde Variables de Entrada.',
-    lidaComo: (campo, no) => `Usando ${campo}, del nodo ${no}.`,
     soltarAqui: 'Suelte aquí para usar esta fecha',
+    arrasteADataAqui: 'Arrastre la fecha aquí',
+    editarVariavel: 'Editar la variable',
+    limparVariavel: 'Quitar la variable',
     semVariaveis: 'Ninguna variable llega a este nodo. Conecte un nodo antes del Retraso.',
     abrirVariaveis: 'Abrir Variables de Entrada',
     horario: 'Horario',
@@ -566,7 +571,7 @@ const es: Textos = {
     sePassou: 'Cuando la fecha calculada ya haya pasado',
     seVazio: 'Cuando el campo no esté completado',
     continuarNaHora: 'Avanzar al siguiente nodo',
-    encerrar: 'Terminar el flujo',
+    encerrar: 'Terminar el flujo con error',
     recalcular: 'Recalcular cuando el campo cambie',
     recalcularDescricao: campo => `Si el campo ${campo ?? "de fecha"} cambia durante el retraso, la espera usa la nueva fecha.`,
     previa: 'Simulación',
@@ -581,9 +586,9 @@ const es: Textos = {
     resultado: {
       agendado: (campo, data, continua, hora) => `${campo}: ${data}. Avanza al siguiente nodo el ${continua}, a las ${hora}.`,
       passouContinua: 'La fecha calculada ya pasó. El flujo avanza al siguiente nodo en el momento.',
-      passouEncerra: 'La fecha calculada ya pasó. El flujo termina en este nodo.',
+      passouEncerra: 'La fecha calculada ya pasó. El flujo termina con error en este nodo.',
       vazioContinua: campo => `El campo ${campo} no está completado. El flujo avanza al siguiente nodo en el momento.`,
-      vazioEncerra: campo => `El campo ${campo} no está completado. El flujo termina en este nodo.`,
+      vazioEncerra: campo => `El campo ${campo} no está completado. El flujo termina con error en este nodo.`,
     },
     linha: { hoje: 'Hoy', continua: 'Avanza' },
     verCalculo: 'Ver cálculo',
@@ -617,11 +622,11 @@ const es: Textos = {
       },
       passou: {
         continue: 'El flujo no espera: avanza en el momento al nodo conectado después del Retraso.',
-        end: 'El flujo se detiene en este nodo. Los nodos siguientes no se ejecutan para este ítem.',
+        end: 'El flujo se detiene en este nodo y la ejecución queda registrada con error. Los nodos siguientes no se ejecutan para este ítem.',
       },
       vazio: {
         continue: 'Sin fecha para calcular, el flujo avanza en el momento al nodo conectado después del Retraso.',
-        end: 'Sin fecha para calcular, el flujo se detiene en este nodo. Los nodos siguientes no se ejecutan para este ítem.',
+        end: 'Sin fecha para calcular, el flujo se detiene en este nodo y la ejecución queda registrada con error. Los nodos siguientes no se ejecutan para este ítem.',
       },
     },
     instrucoes: {
@@ -629,8 +634,7 @@ const es: Textos = {
       tipo: 'Define si el flujo espera un tiempo fijo o hasta una fecha.',
       quantidade: 'Cuánto tiempo el flujo queda detenido en este nodo.',
       unidade: 'Medida de la cantidad de tiempo.',
-      campo: 'Arrastre aquí la variable con la fecha base, desde Variables de Entrada.',
-      retomar: 'Cuánto tiempo antes o después de esa fecha el flujo avanza al siguiente nodo.',
+      retomar: 'Arrastre la variable de la fecha al final de la frase e indique cuánto tiempo antes o después de ella el flujo avanza al siguiente nodo.',
       horario: 'Hora del día en que el flujo avanza al siguiente nodo, en la zona horaria del workspace: Brasilia (UTC−3).',
       sePassou: 'Qué hacer si la fecha calculada ya pasó cuando el ítem llega a este nodo.',
       seVazio: 'Qué hacer si el ítem no tiene esta fecha completada.',

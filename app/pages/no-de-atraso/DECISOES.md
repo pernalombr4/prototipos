@@ -235,3 +235,26 @@ proposta; sem ela, a data é calculada uma vez, na entrada do nó, como em todos
 - **Em aberto:** a variável dentro da frase, no lugar do texto "Data de vencimento" (respondido na conversa,
   sem aprovação ainda).
 - **Ver:** `/no-de-atraso` · `evidencias/proposta-07-ajuda-em-cada-opcao.jpg`
+
+## Rodada 6 · 2026-10-14
+
+- **Pedido (literal):** "Antes de publicar, faz a variável dentro da frase, no lugar do texto Data de
+  vencimento." e "e tambem "encerrar o fluxo" pode ser "encerrar o fluxo com erro" a opçao"
+- **Mudou:** o bloco "Campo de data" sai. A regra inteira fica numa frase só, e o fim dela é o lugar de soltar
+  a variável: **Avançar para o próximo nó** [30] [dias] [antes de] [📅 Data de vencimento ×].
+  - Vazio: caixa tracejada "Arraste a data aqui"; o clique abre Variáveis de Entrada.
+  - Arrastando por cima: contorno e "Solte aqui para usar esta data".
+  - Com variável de data: etiqueta com o nome legível; a chave
+    (`{{nodes.trig.data_de_vencimento_contrato}}`) aparece no tooltip. O × remove.
+  - Clique no nome da etiqueta: vira campo de texto com a chave, para quem configura escrevendo.
+  - Texto que não é variável conhecida também aparece como campo de texto, para corrigir.
+  - Variável que não é data: só a etiqueta fica vermelha, e a mensagem vem embaixo da frase.
+- **Mudou:** a instrução da frase passa a cobrir as 2 coisas: "Arraste a variável da data para o fim da frase
+  e diga quanto tempo antes ou depois dela o fluxo segue para o próximo nó." Some a linha verde "Usando…": a
+  etiqueta já diz o nome.
+- **Mudou:** "Encerrar o fluxo" vira **"Encerrar o fluxo com erro"** nas 2 regras. O tooltip diz que a
+  execução fica registrada com erro; a simulação diz "O fluxo é encerrado com erro neste nó."
+- **Componente:** sem `error` no `UFormField` da frase: ele pinta de vermelho todos os controles de dentro. A
+  mensagem é um `<p role="alert">` embaixo da frase.
+- **Ver:** `/no-de-atraso` · `evidencias/proposta-08-variavel-na-frase.jpg`,
+  `evidencias/proposta-09-variavel-que-nao-e-data.jpg`

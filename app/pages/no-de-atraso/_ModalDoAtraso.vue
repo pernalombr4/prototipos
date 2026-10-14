@@ -161,6 +161,18 @@ function arrastar(e: DragEvent, v: Variavel) {
 }
 
 const sobreOCampo = ref(false)
+
+/**
+ * A chave aparece como texto quando a pessoa clica na etiqueta para editar, ou
+ * quando o que está escrito não é uma variável conhecida (para dar para corrigir).
+ */
+const editandoChave = ref(false)
+const campoDaChave = ref<{ inputRef?: HTMLInputElement } | null>(null)
+const mostrarChave = computed(() => editandoChave.value || (!!rascunho.value.date_source?.trim() && !variavelLida.value))
+function editar() {
+  editandoChave.value = true
+  nextTick(() => campoDaChave.value?.inputRef?.focus())
+}
 function soltar(e: DragEvent) {
   sobreOCampo.value = false
   const json = e.dataTransfer?.getData('application/json')
@@ -170,6 +182,7 @@ function soltar(e: DragEvent) {
     catch { /* fica o texto */ }
   }
   if (chave) rascunho.value.date_source = chave
+  editandoChave.value = false
 }
 
 /* ---------- a prévia ---------- */
@@ -338,44 +351,10 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
 
                 <!-- Data de referência -->
                 <div v-else key="data" class="space-y-5">
-                  <UFormField :label="p.campo" required :help="p.instrucoes.campo" :error="erroCampo">
-                    <div
-                      class="rounded-md transition-shadow"
-                      :class="sobreOCampo ? 'ring-2 ring-primary ring-offset-2 ring-offset-(--ui-bg)' : ''"
-                      @dragenter.prevent="sobreOCampo = true"
-                      @dragover.prevent
-                      @dragleave="sobreOCampo = false"
-                      @drop.prevent="soltar"
-                    >
-                      <UInput
-                        v-model="rascunho.date_source as string"
-                        :placeholder="sobreOCampo ? p.soltarAqui : EXEMPLO_DE_VARIAVEL"
-                        icon="i-lucide-braces"
-                        class="w-full"
-                        :ui="{ base: 'font-mono text-xs' }"
-                      >
-                        <template #trailing>
-                          <UButton
-                            icon="i-lucide-arrow-right-to-line"
-                            color="neutral"
-                            variant="link"
-                            size="xs"
-                            :aria-label="p.abrirVariaveis"
-                            @click="painelAberto = true"
-                          />
-                        </template>
-                      </UInput>
-                    </div>
-                    <Transition enter-active-class="transition duration-200" enter-from-class="opacity-0 -translate-y-0.5">
-                      <p v-if="campo" class="mt-1.5 flex items-center gap-1.5 text-xs text-success">
-                        <UIcon name="i-lucide-circle-check" class="size-3.5" />
-                        {{ p.lidaComo(campo.label ?? campo.refId, noDeGatilho.rotulo) }}
-                      </p>
-                    </Transition>
-                  </UFormField>
-
-                  <!-- A regra lida como frase: [30] [dias] [antes de] Data de vencimento -->
-                  <UFormField :label="p.continuar" :help="p.instrucoes.retomar">
+                  <!-- A regra inteira numa frase: [30] [dias] [antes de] [variável da data].
+                       O fim da frase é o lugar de soltar a variável arrastada de Variáveis de Entrada. -->
+                  <!-- Sem :error no UFormField: ele pinta a frase inteira. Só a data fica vermelha, e a mensagem vem embaixo. -->
+                  <UFormField :label="p.continuar" required :help="p.instrucoes.retomar">
                     <div class="flex flex-wrap items-center gap-2">
                       <Transition
                         enter-active-class="transition-all duration-200"
@@ -408,13 +387,62 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                           </UTooltip>
                         </template>
                       </USelect>
-                      <span
-                        class="min-w-0 truncate text-sm font-medium transition-colors"
-                        :class="campo ? 'text-highlighted' : 'text-dimmed'"
+
+                      <!-- O lugar da data: vazio (tracejado), etiqueta legível ou a chave em edição -->
+                      <div
+                        class="min-w-44 flex-1 rounded-md transition-shadow"
+                        :class="sobreOCampo ? 'ring-2 ring-primary ring-offset-2 ring-offset-(--ui-bg)' : ''"
+                        @dragenter.prevent="sobreOCampo = true"
+                        @dragover.prevent
+                        @dragleave="sobreOCampo = false"
+                        @drop.prevent="soltar"
                       >
-                        {{ campo?.label ?? p.campo.toLowerCase() }}
-                      </span>
+                        <UInput
+                          v-if="mostrarChave"
+                          ref="campoDaChave"
+                          v-model="rascunho.date_source as string"
+                          :placeholder="EXEMPLO_DE_VARIAVEL"
+                          icon="i-lucide-braces"
+                          class="w-full"
+                          :color="erroCampo ? 'error' : 'primary'"
+                          :highlight="!!erroCampo"
+                          :ui="{ base: 'font-mono text-xs' }"
+                          @blur="editandoChave = false"
+                          @keydown.enter="editandoChave = false"
+                        />
+                        <UTooltip
+                          v-else-if="variavelLida"
+                          :text="rascunho.date_source ?? ''"
+                          :ui="{ content: 'h-auto', text: 'font-mono whitespace-normal' }"
+                        >
+                          <span
+                            class="flex h-8 w-full items-center gap-1.5 rounded-md px-2 text-sm ring ring-inset transition-colors"
+                            :class="erroCampo ? 'bg-error/10 text-error ring-error/40' : 'bg-primary/10 text-highlighted ring-primary/30'"
+                          >
+                            <UIcon :name="variavelLida.icone" class="size-4 shrink-0" :class="erroCampo ? '' : 'text-primary'" />
+                            <button type="button" class="min-w-0 flex-1 truncate text-left font-medium" :aria-label="p.editarVariavel" @click="editar">
+                              {{ variavelLida.label ?? variavelLida.refId }}
+                            </button>
+                            <UButton icon="i-lucide-x" color="neutral" variant="link" size="xs" :aria-label="p.limparVariavel" @click="rascunho.date_source = null" />
+                          </span>
+                        </UTooltip>
+                        <button
+                          v-else
+                          type="button"
+                          class="flex h-8 w-full items-center gap-1.5 rounded-md border border-dashed px-2 text-left text-sm transition-colors hover:bg-elevated"
+                          :class="[
+                            sobreOCampo ? 'border-primary bg-primary/5 text-primary' : erroCampo ? 'border-error text-error' : 'border-accented text-muted',
+                          ]"
+                          @click="painelAberto = true"
+                        >
+                          <UIcon name="i-lucide-calendar-plus" class="size-4 shrink-0" />
+                          <span class="truncate">{{ sobreOCampo ? p.soltarAqui : p.arrasteADataAqui }}</span>
+                        </button>
+                      </div>
                     </div>
+                    <Transition enter-active-class="transition duration-200" enter-from-class="opacity-0 -translate-y-0.5">
+                      <p v-if="erroCampo" class="mt-2 text-sm text-error" role="alert">{{ erroCampo }}</p>
+                    </Transition>
                   </UFormField>
 
                   <UFormField :label="p.horario" :help="horarioDesligado ? p.horarioEmHoras : p.instrucoes.horario">
