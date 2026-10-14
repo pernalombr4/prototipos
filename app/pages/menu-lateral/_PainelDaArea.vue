@@ -8,6 +8,7 @@ import AvisosDoMenu from './_AvisosDoMenu.vue'
 import { useMenuDoWorkspace, useArraste } from './estado'
 import { useAcoesDoMenu, type Acoes } from './acoes'
 import { rotuloDoNo } from './rotulos'
+import { NO_FLUTUANTE } from './moldura'
 import { gruposDeConfiguracao, type NoDoMenu, type Categoria } from './mocks'
 import type { TextosDaTela } from './textos'
 
@@ -58,6 +59,9 @@ const emit = defineEmits<{
   configurarCategoria: [c: Categoria]
   buscaGlobal: [termo: string]
 }>()
+
+// A linha e a seção de dentro leem isto para caber na largura do texto (rodada 21).
+provide(NO_FLUTUANTE, toRef(() => !!props.flutuante))
 
 const menu = useMenuDoWorkspace()
 const arraste = useArraste()

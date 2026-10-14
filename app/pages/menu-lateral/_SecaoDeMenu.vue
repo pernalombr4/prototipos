@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { NO_FLUTUANTE } from './moldura'
 import type { Acoes } from './acoes'
 
 /**
@@ -32,6 +33,12 @@ const props = withDefaults(defineProps<{
   /** O menu do botão direito no cabeçalho da seção (rodada 14). */
   acoes?: Acoes
 }>(), { marca: null })
+
+/**
+ * No menu que abre de lado, a seção fechada continua ocupando a LARGURA do que
+ * tem dentro (rodada 21): a caixa acompanha o texto e alargava ao abrir um grupo.
+ */
+const noFlutuante = inject(NO_FLUTUANTE, ref(false))
 
 const emit = defineEmits<{
   alternar: []
@@ -160,6 +167,15 @@ function aoTeclar(e: KeyboardEvent) {
     <div
       v-if="props.aberta"
       class="mt-0.5 space-y-0.5"
+    >
+      <slot />
+    </div>
+    <!-- Altura zero e invisível: só a largura conta. Fora da leitura e do Tab. -->
+    <div
+      v-else-if="noFlutuante"
+      class="invisible h-0 overflow-hidden"
+      aria-hidden="true"
+      inert
     >
       <slot />
     </div>

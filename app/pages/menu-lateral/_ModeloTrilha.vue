@@ -8,6 +8,7 @@ import BotaoCriar from './_BotaoCriar.vue'
 import { LIMITE_DA_TRILHA, useMenuDoWorkspace } from './estado'
 import { useTrilha } from './trilha'
 import { rotuloDoNo } from './rotulos'
+import { FLUTUANTE } from './moldura'
 import { gruposDeConfiguracao, workspace, type NoDoMenu, type Categoria } from './mocks'
 import type { Acoes } from './acoes'
 import type { TextosDaTela } from './textos'
@@ -412,7 +413,7 @@ function classeDaArea(a: Area) {
             <span v-if="trilha.prefs.value.rotulos" class="w-full truncate text-center text-[10px] font-medium leading-tight">{{ a.rotulo }}</span>
           </button>
           <template #content>
-            <div class="flex max-h-[70vh] w-72 flex-col">
+            <div class="flex max-h-[70vh] flex-col" :class="FLUTUANTE">
               <p class="shrink-0 border-b border-default px-3 py-2.5 text-sm font-bold text-highlighted">{{ a.rotulo }}</p>
               <PainelDaArea v-bind="doPainel" :area="a.id" :titulo="a.rotulo" flutuante v-on="eventosDoPainel" />
             </div>

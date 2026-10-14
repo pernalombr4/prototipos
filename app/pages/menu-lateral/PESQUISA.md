@@ -547,3 +547,41 @@ Fonte: [Notion Help](https://www.notion.com/help/intro-to-workspaces).
 
 Fora: **duplicar** (duas seções iguais no menu confundem mais do que ajudam) e **silenciar
 notificações** (o ENSPACE não notifica por seção de menu).
+
+---
+
+## Rodada 21: a largura do menu que abre de lado
+
+Pergunta: "repare que o tamanho do menu que se abre num popover ta muito largo pro tamanho do
+texto das opçoes. como o clickup lida com isso? tem um tamanho minimo mais adequado? o tamanho é
+responsivo? o tamanho é fixo, mas menor que o nosso? e o notion? e outros concorrentes?"
+
+O protótipo usava 288px fixos. A Auditoria, com 2 itens curtos, abria uma caixa com metade vazia.
+
+### O que cada um faz (medido no DOM em 13/10/2026)
+
+| Produto | Onde | Largura | Regra |
+|---|---|---|---|
+| **ClickUp** | hover num ícone da barra de ícones (Planejador, Equipes) | 242px | fixa: o flutuante é o próprio painel lateral, desenhado por cima do encaixado, com a mesma largura dele (o painel tem alça de arrastar na borda) |
+| **Notion** | botão direito numa página da barra; menu de Ajuda | 265px e 260px | fixa por menu, com mínimo de 180px; não acompanha o texto |
+| **GitLab** | hover numa seção recolhida da barra ("Plano", 5 itens curtos) | 202px | acompanha o texto: mínimo de 12rem (192px), máximo de 17rem (272px), altura até 70% da tela; o nome longo quebra linha |
+| **Material Design** | guia de menus | do conteúdo | mínimo de 112dp, máximo de 280dp, em passos de 56dp ([Menus, specs](https://m2.material.io/components/menus#specs)) |
+
+GitLab: medido na página pública do projeto `gitlab-org/gitlab`, sem login. ClickUp e Notion:
+medidos nas contas da Mikaela, só a largura dos elementos; nenhum print dessas contas entra aqui.
+
+### As respostas às perguntas dela
+
+- **Tem um mínimo melhor?** Sim: 192px, o do GitLab. Com ele, Integrações (3 itens curtos)
+  abre com 192px, e não com 288px.
+- **É responsivo?** Não em relação à janela: nenhum dos 3 usa largura proporcional à tela. No
+  ClickUp a caixa segue a largura do painel; no GitLab, o texto.
+- **É fixo, mas menor que o nosso?** No ClickUp (242px) e no Notion (260px), sim. Os dois ainda
+  deixam sobra com 2 itens curtos.
+
+### O que virou
+
+A regra do GitLab: a caixa acompanha o texto, entre 192px e 272px, e o nome maior que o teto
+quebra em 2 linhas. Ficou fora o modelo do ClickUp: o flutuante dele é o painel inteiro, com
+cabeçalho e botões, e o nosso é só a lista da área. Uma caixa da largura do painel repetiria a
+sobra que ela apontou.

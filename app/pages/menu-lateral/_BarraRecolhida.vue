@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { rotuloDoNo as rotuloComum } from './rotulos'
 import MenuDeAjuda from './_MenuDeAjuda.vue'
+import { FLUTUANTE_DO_DROPDOWN } from './moldura'
 import { useMenuDoWorkspace } from './estado'
 import { useAcoesDoMenu } from './acoes'
 import type { NoDoMenu, Categoria } from './mocks'
@@ -176,7 +177,7 @@ function classeDoIcone(acesa: boolean) {
 
         <!-- favoritos e categorias: um ícone que abre os dois de lado -->
         <UContextMenu v-else-if="no.tipo === 'secao-nativa'" :items="acoes.daSecao(no, idsDaRaiz)">
-          <UDropdownMenu :items="itensDeCategorias" :content="{ side: 'right', align: 'start' }" :ui="{ content: 'min-w-56' }">
+          <UDropdownMenu :items="itensDeCategorias" :content="{ side: 'right', align: 'start' }" :ui="FLUTUANTE_DO_DROPDOWN">
             <UTooltip :text="rotuloDe(no)" :content="{ side: 'right' }">
               <button
                 type="button"
@@ -213,7 +214,7 @@ function classeDoIcone(acesa: boolean) {
 
         <!-- seção: os itens abrem de lado -->
         <UContextMenu v-else :items="acoes.daSecao(no, idsDaRaiz)">
-          <UDropdownMenu :items="itensDaSecao(no)" :content="{ side: 'right', align: 'start' }" :ui="{ content: 'min-w-56' }">
+          <UDropdownMenu :items="itensDaSecao(no)" :content="{ side: 'right', align: 'start' }" :ui="FLUTUANTE_DO_DROPDOWN">
             <UTooltip :text="rotuloDe(no)" :content="{ side: 'right' }">
               <button
                 type="button"

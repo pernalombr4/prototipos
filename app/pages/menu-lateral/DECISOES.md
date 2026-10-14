@@ -389,6 +389,18 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 21 · 2026-10-13
+- **Pedido (literal):** "repare que o tamanho do menu que se abre num popover ta muito largo pro tamanho do texto das opçoes. como o clickup lida com isso? tem um tamanho minimo mais adequado? o tamanho é responsivo? o tamanho é fixo, mas menor que o nosso? e o notion? e outros concorrentes? pode acessar pra olhar. e pode copiar os bons exemplos."
+- **Pesquisa:** ClickUp (242px, a largura do painel), Notion (260px e 265px fixos), GitLab (acompanha o texto, de 192px a 272px) e Material (do conteúdo, de 112dp a 280dp). Medidas e fontes no `PESQUISA.md`, "Rodada 21".
+- **Mudou:** o menu que abre de lado acompanha o texto, entre 192px e 272px, como no GitLab (`FLUTUANTE`, em `moldura.ts`). Vale para o hover da trilha, os ícones da barra recolhida e o "⋯ Mais" do Início. Antes eram 288px fixos na trilha, 256px no "⋯ Mais" e, na barra recolhida, mínimo de 224px sem teto.
+- **Medido depois, em px:** Auditoria 288 → 195; Análise 197; Comercial 213; Integrações 192 (o mínimo); Configurações 238; Dados 272 (o teto); "⋯ Mais" do Início 256 → 207; Análise na barra recolhida 192.
+- **Mudou:** o nome maior que o teto quebra em 2 linhas, em vez de cortar com reticências. "Solicitações de compra e reembolso" aparece inteiro no hover da trilha e na barra recolhida.
+- **Mudou:** no menu de lado, a linha não guarda mais à direita os 36px do "⋯" e da estrela, que ali não aparecem. Os favoritos mostram a estrela e continuam com a folga.
+- **Mudou:** a caixa não alarga quando a pessoa abre um grupo dentro dela (Configurações). O grupo fechado continua ocupando a largura do que tem dentro, com altura zero e fora do Tab e do leitor de tela.
+- **Não mudou:** o painel encaixado (larguras arrastáveis da rodada 19); a grade do "⋯ Mais" da trilha, que tem ícones em 3 colunas e não lista de texto; os menus de ações (botão direito e "⋯" da linha), que já acompanhavam o texto a partir de 224px.
+- **Limite conhecido:** em janela baixa, quando a lista passa de 70% da altura, a barra de rolagem do Windows soma 15px à caixa. Exemplo: Configurações com "Inteligência artificial" aberta, a 695px de altura, vai de 238px para 253px. O GitLab faz o mesmo.
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral, modelo "Trilha e painel", hover nos ícones · print em `evidencias/rodada21-menu-de-lado-na-largura-do-texto.jpg` (à esquerda, Auditoria com 2 itens; à direita, Dados no teto, com o nome longo em 2 linhas)
+
 ### Rodada 20 · 2026-10-13
 - **Pedido (literal):** "é pra juntar tudo e colocar em main, junta tudo: seu trabalho + p de outra seçao"
 - **Pedido (literal):** "cade o '... mais' nessas opçoes do menu trabalho? cade toda a parte personalizada que tava desenhada? sumiu? nao mandei tirar isso." e "nao tem mais os botoes no topo do menu aberto... muita coisa sumiu ou é bug no meu local?"

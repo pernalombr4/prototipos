@@ -9,6 +9,7 @@ import { useArraste, useMenuDoWorkspace, type Atalho } from './estado'
 import { chaveDoAtalho, useTrilha } from './trilha'
 import { useAcoesDoMenu, type Acoes } from './acoes'
 import { rotuloDoNo } from './rotulos'
+import { FLUTUANTE } from './moldura'
 import type { Categoria, NoDoMenu } from './mocks'
 import type { TextosDaTela } from './textos'
 
@@ -583,7 +584,7 @@ function adicionando(id: string) {
           <span class="min-w-0 flex-1 truncate text-left">{{ props.t.mais }}</span>
         </button>
         <template #content>
-          <div class="w-64 p-1.5">
+          <div class="p-1.5" :class="FLUTUANTE">
             <div v-for="n in nativosNoMais" :key="n.id" class="group flex items-center rounded-md hover:bg-elevated">
               <button
                 type="button"

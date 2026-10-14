@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { NO_FLUTUANTE } from './moldura'
 import type { Acoes } from './acoes'
 
 /**
@@ -86,6 +87,14 @@ const emit = defineEmits<{
 }>()
 
 /**
+ * A folga da direita guarda o lugar do "⋯" e da estrela, que aparecem no
+ * hover. No menu que abre de lado eles não existem (só a estrela dos
+ * favoritos), e a folga vazia alargava a caixa em 36px (rodada 21).
+ */
+const noFlutuante = inject(NO_FLUTUANTE, ref(false))
+const folgaDaDireita = computed(() => noFlutuante.value && !props.comEstrela ? 'pr-2.5' : 'pr-9')
+
+/**
  * Metade de cima solta antes, metade de baixo solta depois.
  *
  * Quando a linha aceita dentro (seção de uma tela só), são TERÇOS, como no
@@ -155,8 +164,9 @@ function aoTeclar(e: KeyboardEvent) {
       type="button"
       :aria-current="props.ativo ? 'page' : undefined"
       :aria-expanded="props.expandido"
-      class="flex w-full items-center gap-2.5 rounded-md py-1.5 pr-9 text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+      class="flex w-full items-center gap-2.5 rounded-md py-1.5 text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
       :class="[
+        folgaDaDireita,
         props.nivel === 3 ? 'pl-14' : props.nivel === 2 ? 'pl-8' : 'pl-2.5',
         props.ativo
           ? 'bg-primary/10 font-semibold text-highlighted'
@@ -191,7 +201,8 @@ function aoTeclar(e: KeyboardEvent) {
       </span>
       <!-- title para o nome que não cabe: "Solicitações de compra e reembolso" corta
            na largura da barra, e sem isto o nome inteiro não existe em lugar nenhum. -->
-      <span class="min-w-0 flex-1 truncate text-left" :title="props.rotulo">{{ props.rotulo }}</span>
+      <!-- No menu que abre de lado o nome longo quebra em duas linhas, como no GitLab (rodada 21). -->
+      <span class="min-w-0 flex-1 text-left" :class="noFlutuante ? 'break-words' : 'truncate'" :title="props.rotulo">{{ props.rotulo }}</span>
       <UIcon
         v-if="props.expandido !== undefined"
         name="i-lucide-chevron-right"
