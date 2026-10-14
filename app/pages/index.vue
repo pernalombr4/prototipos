@@ -44,8 +44,19 @@ const prototipos = computed<Prototipo[]>(() => {
     grupo.telas.push({ path: rota.path, titulo: meta.tela ?? meta.titulo ?? rota.path })
   }
 
-  return [...grupos.values()].sort((a, b) => b.atualizado.localeCompare(a.atualizado))
+  // Primeiro os prontos (aprovado, depois implementado), depois os em revisão e
+  // os rascunhos; os arquivados por último. Dentro de cada status, o mais recente primeiro.
+  return [...grupos.values()].sort((a, b) =>
+    ordemDoStatus[a.status] - ordemDoStatus[b.status] || b.atualizado.localeCompare(a.atualizado))
 })
+
+const ordemDoStatus: Record<Prototipo['status'], number> = {
+  aprovado: 0,
+  implementado: 1,
+  'em-revisao': 2,
+  rascunho: 3,
+  arquivado: 4,
+}
 
 const corDoStatus = {
   rascunho: 'neutral',
