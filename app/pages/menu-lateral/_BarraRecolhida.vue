@@ -181,19 +181,22 @@ function classeDoIcone(acesa: boolean) {
 
         <!-- favoritos e categorias: um ícone que abre os dois de lado -->
         <UContextMenu v-else-if="no.tipo === 'secao-nativa'" :items="acoes.daSecao(no, idsDaRaiz)">
-          <UDropdownMenu :items="itensDeCategorias" :content="{ side: 'right', align: 'start' }" :ui="FLUTUANTE_DO_DROPDOWN">
-            <UTooltip :text="rotuloDe(no)" :content="{ side: 'right' }">
-              <button
-                type="button"
-                :class="classeDoIcone(ativo(no))"
-                class="animate-[entrada_0.2s_ease-out_both]"
-                :style="{ animationDelay: `${i * 20}ms` }"
-                :aria-label="rotuloDe(no)"
-              >
-                <UIcon :name="no.icone" class="size-5" />
-              </button>
-            </UTooltip>
-          </UDropdownMenu>
+          <!-- Rodada 23: o UDropdownMenu não repassa o botão direito; a div recebe. -->
+          <div class="rounded-lg data-[state=open]:bg-elevated">
+            <UDropdownMenu :items="itensDeCategorias" :content="{ side: 'right', align: 'start' }" :ui="FLUTUANTE_DO_DROPDOWN">
+              <UTooltip :text="rotuloDe(no)" :content="{ side: 'right' }">
+                <button
+                  type="button"
+                  :class="classeDoIcone(ativo(no))"
+                  class="animate-[entrada_0.2s_ease-out_both]"
+                  :style="{ animationDelay: `${i * 20}ms` }"
+                  :aria-label="rotuloDe(no)"
+                >
+                  <UIcon :name="no.icone" class="size-5" />
+                </button>
+              </UTooltip>
+            </UDropdownMenu>
+          </div>
         </UContextMenu>
 
         <!-- seção de uma tela só: abre direto, como a linha simples da barra aberta -->
@@ -218,19 +221,22 @@ function classeDoIcone(acesa: boolean) {
 
         <!-- seção: os itens abrem de lado -->
         <UContextMenu v-else :items="acoes.daSecao(no, idsDaRaiz)">
-          <UDropdownMenu :items="itensDaSecao(no)" :content="{ side: 'right', align: 'start' }" :ui="FLUTUANTE_DO_DROPDOWN">
-            <UTooltip :text="rotuloDe(no)" :content="{ side: 'right' }">
-              <button
-                type="button"
-                :class="classeDoIcone(ativo(no))"
-                class="animate-[entrada_0.2s_ease-out_both]"
-                :style="{ animationDelay: `${i * 20}ms` }"
-                :aria-label="rotuloDe(no)"
-              >
-                <UIcon :name="no.icone" class="size-5" />
-              </button>
-            </UTooltip>
-          </UDropdownMenu>
+          <!-- Rodada 23: o UDropdownMenu não repassa o botão direito; a div recebe. -->
+          <div class="rounded-lg data-[state=open]:bg-elevated">
+            <UDropdownMenu :items="itensDaSecao(no)" :content="{ side: 'right', align: 'start' }" :ui="FLUTUANTE_DO_DROPDOWN">
+              <UTooltip :text="rotuloDe(no)" :content="{ side: 'right' }">
+                <button
+                  type="button"
+                  :class="classeDoIcone(ativo(no))"
+                  class="animate-[entrada_0.2s_ease-out_both]"
+                  :style="{ animationDelay: `${i * 20}ms` }"
+                  :aria-label="rotuloDe(no)"
+                >
+                  <UIcon :name="no.icone" class="size-5" />
+                </button>
+              </UTooltip>
+            </UDropdownMenu>
+          </div>
         </UContextMenu>
       </template>
     </nav>

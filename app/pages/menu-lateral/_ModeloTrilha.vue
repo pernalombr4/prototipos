@@ -245,25 +245,65 @@ const itemRecolher = computed(() => ({
   onSelect: () => emit('recolher'),
 }))
 
-/** Na trilha não há mover: só abrir, tirar da trilha e personalizar. */
+function copiarLinkDaArea(a: Area) {
+  // Só o endereço da própria página com uma âncora: nada sai do navegador.
+  navigator.clipboard?.writeText(`${window.location.origin}${window.location.pathname}#${a.id}`).catch(() => {})
+  toast.add({ title: props.t.linkCopiado, icon: 'i-lucide-link', color: 'neutral' })
+}
+
+function ocultarArea(a: Area) {
+  menu.ocultar(a.id.slice(4))
+  toast.add({ title: props.t.ocultado(a.rotulo), description: props.t.ocultadoDica, icon: 'i-lucide-eye-off', color: 'neutral' })
+}
+
+/**
+ * O BOTÃO DIREITO NUM ÍCONE DA TRILHA (rodada 23), na ordem do Teams.
+ *
+ * Ela mandou o print do Teams: "Abrir em nova janela"; "Sobre" e
+ * "Compartilhar aplicativo"; "Mover para cima", "Mover para baixo" e
+ * "Desafixar"; "Desinstalar"; "Personalizar barra de aplicativos". Cada grupo
+ * virou o equivalente do ENSPACE:
+ *
+ *   Abrir em nova janela    Abrir em nova aba (o ENSPACE vive no navegador)
+ *   Compartilhar aplicativo Copiar link
+ *   Mover e Desafixar       Mover para cima, Mover para baixo, Tirar da trilha
+ *   Desinstalar             Ocultar do menu, só em seção: é o que a pessoa
+ *                           consegue tirar para si. Nativo não sai.
+ *   Personalizar            Personalizar navegação, e Recolher o menu, que já
+ *                           estava aqui desde a rodada 14
+ *
+ * Ficou fora "Sobre": no Teams ele mostra a ficha do app (quem fez, versão,
+ * permissões), e área do ENSPACE não tem ficha. Saiu "Abrir", que o clique
+ * já faz e o Teams também não repete.
+ */
 function acoesDaArea(a: Area): Acoes {
-  const abrir = { label: props.t.ctxAbrir, icon: 'i-lucide-arrow-up-right', disabled: a.bloqueada, onSelect: () => irPara(a) }
-  const tirar = a.id === 'inicio'
-    ? []
-    : [{ label: props.t.desafixarDaTrilha, icon: 'i-lucide-pin-off', onSelect: () => trilha.desafixar(a.id) }]
   const ids = naTrilha.value.map(x => x.id)
   const i = ids.indexOf(a.id)
-  const mover = a.id === 'inicio' || i < 0
-    ? []
-    : [
-        { label: props.t.ctxSubir, icon: 'i-lucide-arrow-up', kbds: ['alt', 'arrowup'], disabled: i <= 1, onSelect: () => trilha.moverNaTrilha(a.id, ids[i - 1]!, 'antes') },
-        { label: props.t.ctxDescer, icon: 'i-lucide-arrow-down', kbds: ['alt', 'arrowdown'], disabled: i >= ids.length - 1, onSelect: () => trilha.moverNaTrilha(a.id, ids[i + 1]!, 'depois') },
-      ]
-  return [
-    [abrir],
-    [...mover, ...tirar, { label: props.t.personalizarNavegacao, icon: 'i-lucide-sliders-horizontal', onSelect: () => trilha.abrirPersonalizar('navegacao') }],
-    [itemRecolher.value],
+  const grupos: Acoes = [
+    [{
+      label: props.t.ctxNovaAba,
+      icon: 'i-lucide-external-link',
+      disabled: a.bloqueada,
+      onSelect: () => toast.add({ title: props.t.novaAbaMaquete, icon: 'i-lucide-hammer', color: 'neutral' }),
+    }],
+    [{ label: props.t.ctxCopiarLink, icon: 'i-lucide-link', disabled: a.bloqueada, onSelect: () => copiarLinkDaArea(a) }],
   ]
+  // O Início é a âncora da trilha: não sobe, não desce e não sai.
+  if (a.id !== 'inicio' && i >= 0) {
+    grupos.push([
+      { label: props.t.ctxSubir, icon: 'i-lucide-arrow-up', kbds: ['alt', 'arrowup'], disabled: i <= 1, onSelect: () => trilha.moverNaTrilha(a.id, ids[i - 1]!, 'antes') },
+      { label: props.t.ctxDescer, icon: 'i-lucide-arrow-down', kbds: ['alt', 'arrowdown'], disabled: i >= ids.length - 1, onSelect: () => trilha.moverNaTrilha(a.id, ids[i + 1]!, 'depois') },
+      { label: props.t.desafixarDaTrilha, icon: 'i-lucide-pin-off', onSelect: () => trilha.desafixar(a.id) },
+    ])
+  }
+  if (a.id.startsWith('sec:')) {
+    grupos.push([{ label: props.t.ctxOcultar, icon: 'i-lucide-eye-off', onSelect: () => ocultarArea(a) }])
+  }
+  grupos.push([
+    { label: props.t.personalizarNavegacao, icon: 'i-lucide-sliders-horizontal', onSelect: () => trilha.abrirPersonalizar('navegacao') },
+    itemRecolher.value,
+  ])
+  return grupos
 }
 
 /* ------------------------------ o "+" do Início ------------------------------ */
@@ -403,6 +443,12 @@ function classeDaArea(a: Area) {
 
       <!-- As áreas fixadas. Se arrastam desde a rodada 16, menos o Início. -->
       <UContextMenu v-for="a in naTrilha" :key="a.id" :items="acoesDaArea(a)">
+        <!--
+          Rodada 23: o botão direito precisa de um elemento de verdade aqui. O
+          UPopover não repassa o evento ao botão, e sem esta div o clique
+          direito caía no menu do navegador em todo ícone com popover.
+        -->
+        <div class="w-full rounded-lg data-[state=open]:bg-elevated">
         <!-- Com popover: o menu da área aparece no hover, sem sair do que está aberto. -->
         <UPopover
           v-if="comPopover(a)"
@@ -444,6 +490,7 @@ function classeDaArea(a: Area) {
             <span v-if="trilha.prefs.value.rotulos" class="w-full truncate text-center text-[10px] font-medium leading-tight">{{ a.rotulo }}</span>
           </button>
         </UTooltip>
+        </div>
       </UContextMenu>
 
       <!--

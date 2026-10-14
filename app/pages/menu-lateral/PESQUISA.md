@@ -548,6 +548,20 @@ Fonte: [Notion Help](https://www.notion.com/help/intro-to-workspaces).
 Fora: **duplicar** (duas seções iguais no menu confundem mais do que ajudam) e **silenciar
 notificações** (o ENSPACE não notifica por seção de menu).
 
+### Rodada 23: o menu inteiro do Teams, no print da Mikaela
+
+O print que ela mandou em 14/10/2026 mostra o menu completo do botão direito num ícone da barra
+de aplicativos do Teams, em 5 grupos:
+
+1. **Abrir em nova janela**
+2. **Sobre** e **Compartilhar aplicativo**
+3. **Mover para cima**, **Mover para baixo** e **Desafixar**
+4. **Desinstalar**
+5. **Personalizar barra de aplicativos**
+
+A tradução de cada grupo para o ENSPACE está no `DECISOES.md`, rodada 23. O print não entra no
+repositório: ele mostra conversas da conta dela.
+
 ---
 
 ## Rodada 21: a largura do menu que abre de lado

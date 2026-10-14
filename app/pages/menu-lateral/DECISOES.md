@@ -389,6 +389,27 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 23 · 2026-10-14
+- **Pedido (literal):** "quando clicar com o botao direito em um elemento da trilha o que deve acontecer? porque nao ta acontecendo nada hoje. abre o menu do navegador" e, com um print do Teams, "no teams é assim, por exemplo, ao clicar com botao direito num icone da trilha"
+- **O defeito:** o menu do botão direito da trilha (rodada 14) existia, mas só abria no ícone da área encaixada. Nos outros, o botão direito caía no menu do navegador. O `UContextMenu` do Nuxt UI entrega o evento ao filho, e o filho era o `UPopover` do hover, que não repassa o evento ao botão. O ícone encaixado usa `UTooltip`, que repassa, e por isso funcionava. A barra recolhida tinha o mesmo defeito nos ícones que abrem lista ao lado (`UDropdownMenu`).
+- **Conserto:** uma `div` entre o menu do botão direito e o ícone, nos 2 lugares. Ela recebe o evento, e o hover, o clique e o arraste continuam no botão.
+- **Mudou:** o menu da trilha segue a ordem do Teams, grupo por grupo:
+
+  | Teams | ENSPACE | Em quais ícones |
+  |---|---|---|
+  | Abrir em nova janela | Abrir em nova aba | todos |
+  | Compartilhar aplicativo | Copiar link | todos |
+  | Mover para cima, Mover para baixo, Desafixar | Mover para cima, Mover para baixo, Tirar da trilha | todos, menos Início |
+  | Desinstalar | Ocultar do menu | só seções (Análise, Auditoria, Comercial...) |
+  | Personalizar barra de aplicativos | Personalizar navegação, e Recolher menu | todos |
+
+- **Ficou fora, e por quê:**
+  - "Sobre": no Teams mostra a ficha do app (quem fez, versão, permissões), e área do ENSPACE não tem ficha.
+  - "Desinstalar" virou "Ocultar do menu", e não "Excluir": excluir uma seção vale para o workspace inteiro e mora no editor, com o cartão de salvar. Ocultar é o que cada pessoa tira para si, como o Desinstalar do app que ela mesma instalou.
+  - "Abrir" saiu: o clique já abre, e o Teams também não repete. "Recolher menu" ficou, no último grupo, porque já estava aqui desde a rodada 14.
+- **Não mudou:** o Início não sobe, não desce e não sai da trilha, porque é a âncora dela. Configurações e Dados não se ocultam, porque são nativos.
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral, modelo "Trilha e painel", botão direito em qualquer ícone · print em `evidencias/rodada23-botao-direito-na-trilha.jpg` (o menu de Comercial)
+
 ### Rodada 22 · 2026-10-14
 - **Pedido (literal):** "deve haver no menu uma opçao nativa para 'meus relatorios'. todos os relatorios extraidos no workspace vao pra lá. pode er outro nome esse menu, sem problemas. mas se meus relatorios for bom, ok."
 - **O que o develop tem hoje (medido em 14/10/2026, workspace de exploração):** a tela já existe, em `/myReports`, e nenhum menu leva até ela. Só se chega lá pelo link do aviso que aparece ao extrair um relatório ("O relatório está sendo processado e pode ser acompanhado acessando Meus Relatórios Emitidos. Ao término do processamento, você será notificado por e-mail.") ou digitando o endereço. Conferido com 1 Relatório padrão em Excel, extraído pela tela numa categoria do workspace de exploração.
