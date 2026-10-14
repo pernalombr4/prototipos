@@ -548,6 +548,9 @@ function emBreve() {
               @ajuda="avisarAjuda"
               @ordem="trocarOrdem"
               @virar-manual="virarOrdemManual"
+              @renomear="id => abrirEditor(null, id)"
+              @personalizar="abrirEditor(null)"
+              @configurar-categoria="configurarCategoriaAtual"
             />
           <PainelConfiguracoes
             v-else

@@ -3,7 +3,7 @@ import LinhaDeMenu from './_LinhaDeMenu.vue'
 import SecaoDeMenu from './_SecaoDeMenu.vue'
 import MenuDeAjuda from './_MenuDeAjuda.vue'
 import { useMenuDoWorkspace, useArraste } from './estado'
-import type { NoDoMenu, Categoria } from './mocks'
+import { workspace, type NoDoMenu, type Categoria } from './mocks'
 import type { TextosDaTela } from './textos'
 
 /**
@@ -59,6 +59,9 @@ const emit = defineEmits<{
   ordem: [valor: 'uso' | 'alfabetica' | 'recentes' | 'manual']
   virarManual: []
   ajuda: [rotulo: string]
+  renomear: [id: string]
+  personalizar: []
+  configurarCategoria: []
 }>()
 
 const menu = useMenuDoWorkspace()
@@ -178,6 +181,82 @@ function salvarMenu(alcance: 'todos' | 'local') {
     icon: alcance === 'todos' ? 'i-lucide-users' : 'i-lucide-user',
     color: 'neutral',
   })
+}
+
+/*
+ * ============ BOTÃO DIREITO, A MESMA COSTURA DA TRILHA (rodada 17) ============
+ *
+ * Os itens, a ordem e as regras são os da pesquisa (PESQUISA.md, "Botão direito
+ * num ícone da trilha"). Aqui valem para os mesmos objetos, que é o que ela
+ * apontou: a barra única mostrava o menu do navegador onde a trilha já mostrava
+ * o do produto.
+ *
+ * Duas diferenças, e as duas vem do modelo:
+ *
+ * 1. Não existe "tirar da trilha": na barra única existe um lugar só.
+ * 2. Destino nativo PODE ser movido, porque aqui ele é um nó da árvore como
+ *    qualquer outro. O que ele não ganha é renomear nem excluir, como no Teams.
+ */
+async function copiarLink(rotulo: string) {
+  try {
+    await navigator.clipboard.writeText(`${workspace.nome} / ${rotulo}`)
+  }
+  catch {
+    /* Sem permissão de área de transferência o aviso continua valendo. */
+  }
+  toast.add({ title: props.t.linkCopiado, icon: 'i-lucide-link', color: 'neutral' })
+}
+
+function daCasa(no: NoDoMenu, pai: NoDoMenu | null = null) {
+  if (menu.origemDe(no) === 'workspace') return true
+  return !!pai && menu.origemDe(pai) === 'workspace'
+}
+
+function itensDoNo(no: NoDoMenu, pai: NoDoMenu | null = null) {
+  const meu = daCasa(no, pai)
+  const grupos: Record<string, unknown>[][] = []
+
+  if (meu) {
+    grupos.push([
+      { label: props.t.renomear, icon: 'i-lucide-pencil', onSelect: () => emit('renomear', no.id) },
+    ])
+  }
+
+  if (props.podeConfigurar) {
+    grupos.push([
+      { label: props.t.moverCima, icon: 'i-lucide-arrow-up', onSelect: () => menu.mover(no.id, -1) },
+      { label: props.t.moverBaixo, icon: 'i-lucide-arrow-down', onSelect: () => menu.mover(no.id, 1) },
+    ])
+  }
+
+  grupos.push([
+    { label: props.t.copiarLink, icon: 'i-lucide-link', onSelect: () => copiarLink(rotuloDe(no)) },
+  ])
+
+  const fim: Record<string, unknown>[] = [
+    { label: props.t.personalizarMenu, icon: 'i-lucide-list-tree', onSelect: () => emit('personalizar') },
+  ]
+  if (meu) {
+    fim.push({ label: props.t.excluir, icon: 'i-lucide-trash-2', color: 'error', onSelect: () => menu.excluir(no.id) })
+  }
+  grupos.push(fim)
+
+  return grupos
+}
+
+/** Categoria não é nó do menu: o menu dela é o das ações que ela tem. */
+function itensDaCategoria(c: Categoria) {
+  return [[
+    {
+      label: c.favorita ? props.t.desafixar : props.t.fixar,
+      icon: c.favorita ? 'i-lucide-star-off' : 'i-lucide-star',
+      onSelect: () => emit('alternarFixar', c.id),
+    },
+  ], [
+    { label: props.t.copiarLink, icon: 'i-lucide-link', onSelect: () => copiarLink(c.name) },
+  ], [
+    { label: props.t.configurarCategoria, icon: 'i-lucide-settings-2', onSelect: () => emit('configurarCategoria') },
+  ]]
 }
 
 /** A bolinha amarela de uma linha: foi mexida e ainda não foi salva. */
@@ -373,9 +452,14 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
         />
 
         <template v-for="no in nosVisiveis" :key="no.id">
-          <!-- ---------- destino nativo: folha, uma linha ---------- -->
+          <!--
+            ---------- destino nativo: folha, uma linha ----------
+            O `UContextMenu` não acrescenta elemento nenhum: ele usa `as-child`
+            e se funde à própria linha, então o arraste, as margens e o
+            `first:mt-0` continuam valendo.
+          -->
+          <UContextMenu v-if="no.tipo === 'destino'" :items="itensDoNo(no)">
           <LinhaDeMenu
-            v-if="no.tipo === 'destino'"
             class="mt-0.5 first:mt-0"
             :icone="no.icone"
             :rotulo="rotuloDe(no)"
@@ -395,6 +479,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             @arrastar-fim="arraste.terminar()"
             @mover="p => menu.mover(no.id, p)"
           />
+          </UContextMenu>
 
           <!-- ---------- a seção nativa: favoritos mais categorias ---------- -->
           <template v-else-if="no.tipo === 'secao-nativa'">
@@ -407,9 +492,12 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
               :texto-expandir="props.t.expandirSecao(props.t.favoritos)"
               @alternar="abrirFavoritos()"
             >
-              <LinhaDeMenu
+              <UContextMenu
                 v-for="(c, i) in favoritasVisiveis"
                 :key="c.id"
+                :items="itensDaCategoria(c)"
+              >
+              <LinhaDeMenu
                 :icone="c.icon ?? 'i-lucide-folder'"
                 :rotulo="c.name"
                 :nivel="2"
@@ -422,6 +510,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
                 @selecionar="emit('categoria', c)"
                 @alternar-estrela="emit('alternarFixar', c.id)"
               />
+              </UContextMenu>
             </SecaoDeMenu>
 
             <!-- Categorias: a seção que cresce. Ordenada por critério, não por arraste. -->
@@ -463,9 +552,12 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
               </template>
 
               <template v-else>
-                <LinhaDeMenu
+                <UContextMenu
                   v-for="(c, i) in categoriasVisiveis"
                   :key="c.id"
+                  :items="itensDaCategoria(c)"
+                >
+                <LinhaDeMenu
                   :icone="c.icon ?? 'i-lucide-folder'"
                   :rotulo="c.name"
                   :nivel="2"
@@ -487,6 +579,7 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
                   @soltar="p => largarCategoria(c.id, p)"
                   @arrastar-fim="arraste.terminar()"
                 />
+                </UContextMenu>
 
                 <button
                   v-if="!filtrando"
@@ -510,8 +603,8 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             troca. O editor continua tratando a seção como seção: é lá que se
             põe a segunda tela dentro dela.
           -->
+          <UContextMenu v-else-if="temUmaSo(no)" :items="itensDoNo(no)">
           <LinhaDeMenu
-            v-else-if="temUmaSo(no)"
             class="mt-0.5"
             :icone="no.icone"
             :rotulo="rotuloDe(no)"
@@ -531,10 +624,11 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             @arrastar-fim="arraste.terminar()"
             @mover="p => menu.mover(no.id, p)"
           />
+          </UContextMenu>
 
           <!-- ---------- seção: nativa, de módulo ou do workspace ---------- -->
+          <UContextMenu v-else :items="itensDoNo(no)">
           <SecaoDeMenu
-            v-else
             :rotulo="rotuloDe(no)"
             :selo="seloDaSecao(no)"
             :alterado="tocado(no.id)"
@@ -553,9 +647,12 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
             @arrastar-fim="arraste.terminar()"
             @mover="p => menu.mover(no.id, p)"
           >
-            <LinhaDeMenu
+            <UContextMenu
               v-for="(item, i) in (no.filhos ?? [])"
               :key="item.id"
+              :items="itensDoNo(item, no)"
+            >
+            <LinhaDeMenu
               :icone="item.icone"
               :rotulo="rotuloDe(item)"
               :nivel="2"
@@ -575,7 +672,9 @@ const nadaNoFiltro = computed(() => filtrando.value && !nosVisiveis.value.length
               @arrastar-fim="arraste.terminar()"
               @mover="p => menu.mover(item.id, p)"
             />
+            </UContextMenu>
           </SecaoDeMenu>
+          </UContextMenu>
         </template>
 
 

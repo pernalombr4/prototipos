@@ -389,6 +389,45 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 17 · 13/10/2026
+
+**O que ela pediu**, literal:
+
+> "faça a mesma costura na barra única"
+
+Era a pendência que a rodada 16 deixou escrita: na trilha o botão direito abria o menu do
+produto, e na barra única abria o do navegador, para os mesmos objetos.
+
+#### O mesmo menu, nos mesmos objetos
+
+| Onde | O que o botão direito traz |
+|---|---|
+| Destino nativo (Início, Inbox, Tarefas) | Mover para cima, Mover para baixo, Copiar link, Personalizar o menu |
+| Seção do workspace | Renomear, Mover, Copiar link, Personalizar o menu, Excluir |
+| Tela dentro de seção do workspace | o mesmo da seção |
+| Categoria e favorito | Fixar ou tirar dos favoritos, Copiar link, Configurar categoria |
+
+**Duas diferenças em relação à trilha, e as duas vêm do modelo:**
+
+1. Não existe "tirar da trilha": na barra única existe um lugar só.
+2. **Destino nativo pode ser movido aqui**, porque nesta barra ele é um nó da árvore como
+   qualquer outro, e reordenar o menu nativo é metade da proposta. O que ele continua não
+   tendo é renomear e excluir, que é a regra do Teams.
+
+**Categoria tem menu próprio** porque não é nó do menu: é dado. O que cabe ali é o que ela já
+tem (o favorito, que era só a estrela no hover) mais o caminho para a configuração dela.
+
+#### Sem um elemento a mais no desenho
+
+O `UContextMenu` do Nuxt UI usa `as-child`: ele não embrulha a linha num `div` novo, funde-se
+nela. Importava: um elemento a mais quebraria o `first:mt-0` das seções e as margens entre as
+linhas. Conferido depois: arrastar pelo teclado continua movendo, o cartão acende e Descartar
+devolve.
+
+**A evidência:**
+[`evidencias/proposta-botao-direito-barra.jpg`](evidencias/proposta-botao-direito-barra.jpg),
+a seção do workspace na barra única com as seis linhas.
+
 ### Rodada 16 · 13/10/2026
 
 **O que ela pediu**, literal:
@@ -447,8 +486,7 @@ como gravar nem desfazer. O cartão passou a existir nos dois modelos, com os do
 
 #### Fica em aberto
 
-- **O mesmo menu na barra única.** Ali o botão direito ainda abre o menu do navegador. São os
-  mesmos objetos e deveria ser o mesmo menu; é a próxima costura.
+- ~~**O mesmo menu na barra única.**~~ Feito na rodada 17.
 - **Renomear no menu, e não só na seção.** O formulário já edita menu; falta a porta, que no
   modelo de trilha fica no painel, não na trilha.
 
