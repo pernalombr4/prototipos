@@ -14,8 +14,8 @@
  * 3. "Quando avançar" pergunta antes: na data da variável (só a variável)
  *    ou antes ou depois dela (a frase inteira): Avançar para o próximo nó [30] [dias] [antes de]
  *    Data de vencimento, sem fórmula;
- * 4. horário, data já passada e campo vazio em dropdown, e recalcular quando a
- *    data muda. Todo campo tem uma instrução curta embaixo;
+ * 4. horário, data no passado e data vazia em dropdown. Todo campo tem uma
+ *    instrução curta embaixo;
  *
  * A moldura (ENTRADA e SAÍDA dos lados, cabeçalho, rodapé com "Modificado",
  * Cancelar e Salvar e fechar) é a do develop.
@@ -436,12 +436,6 @@ const uiDaLista = {
                       </USelect>
                     </UFormField>
                   </div>
-
-                  <USwitch
-                    v-model="rascunho.recalculate"
-                    :label="p.recalcular"
-                    :description="p.recalcularDescricao(campo?.label ?? null)"
-                  />
 
                 </div>
               </Transition>

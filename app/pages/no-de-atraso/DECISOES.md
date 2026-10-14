@@ -352,3 +352,11 @@ proposta; sem ela, a data é calculada uma vez, na entrada do nó, como em todos
   passa a gravar"), e no `espera.ts` (`expressaoDayjs`, `dadoGravado`, `calcular`), como referência para o dev.
   O `mocks.ts` mantém os 40 contratos fictícios, que hoje nenhuma tela usa.
 - **Ver:** `/no-de-atraso` · `evidencias/proposta-16-sem-simulacao-e-calculo.jpg`
+
+## Rodada 12 · 2026-10-14
+
+- **Pedido (literal):** "pode tirar tambem a opçao "recalcular se a data mudar", aí commita e publica"
+- **Mudou:** sai a chave **Recalcular se a data mudar**. O modal termina em Data no passado e Data vazia.
+- **Mudou:** o nó deixa de gravar `recalculate`. A data é calculada uma vez, quando o item chega ao nó, como em
+  todos os produtos pesquisados. O JSON da rodada 1 ainda mostra o campo; vale o desta rodada.
+- **Ver:** `/no-de-atraso` · `evidencias/proposta-17-sem-recalcular.jpg`

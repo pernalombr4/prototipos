@@ -53,8 +53,6 @@ export interface EsperaAteData {
   time: string
   if_past: 'continue' | 'end'
   if_empty: 'end' | 'continue'
-  /** Recalcula a espera quando o campo muda durante ela. */
-  recalculate: boolean
 }
 
 export type ConfiguracaoDoAtraso = NoDeAtraso['data'] & EsperaAteData
@@ -70,7 +68,6 @@ export function configuracaoNova(): ConfiguracaoDoAtraso {
     time: '09:00',
     if_past: 'continue',
     if_empty: 'end',
-    recalculate: true,
   }
 }
 

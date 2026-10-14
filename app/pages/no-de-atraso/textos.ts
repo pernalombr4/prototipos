@@ -111,8 +111,6 @@ export interface Textos {
     seVazio: string
     continuarNaHora: string
     encerrar: string
-    recalcular: string
-    recalcularDescricao: (campo: string | null) => string
     resumoTempo: (n: number, unidade: string) => string
     resumoData: (quanto: string, direcao: string, campo: string, hora: string | null) => string
     resumoVazio: string
@@ -276,8 +274,6 @@ const pt: Textos = {
     seVazio: 'Data vazia',
     continuarNaHora: 'Continuar',
     encerrar: 'Encerrar com erro',
-    recalcular: 'Recalcular se a data mudar',
-    recalcularDescricao: campo => `Atualiza a espera quando o valor de ${campo ?? 'data'} muda.`,
     resumoTempo: (n, unidade) => `Por ${n} ${unidade}.`,
     resumoData: (quanto, direcao, campo, hora) => `Até ${quanto ? `${quanto} ${direcao} ` : ''}${campo}${hora ? `, às ${hora}` : ''}.`,
     resumoVazio: 'Não configurado.',
@@ -407,8 +403,6 @@ const en: Textos = {
     seVazio: 'Empty date',
     continuarNaHora: 'Continue',
     encerrar: 'End with error',
-    recalcular: 'Recalculate if the date changes',
-    recalcularDescricao: campo => `Updates the wait when the value of ${campo ?? 'date'} changes.`,
     resumoTempo: (n, unidade) => `For ${n} ${unidade}.`,
     resumoData: (quanto, direcao, campo, hora) => `Until ${quanto ? `${quanto} ${direcao} ` : ''}${campo}${hora ? `, at ${hora}` : ''}.`,
     resumoVazio: 'Not configured.',
@@ -538,8 +532,6 @@ const es: Textos = {
     seVazio: 'Fecha vacía',
     continuarNaHora: 'Continuar',
     encerrar: 'Terminar con error',
-    recalcular: 'Recalcular si la fecha cambia',
-    recalcularDescricao: campo => `Actualiza la espera cuando cambia el valor de ${campo ?? 'fecha'}.`,
     resumoTempo: (n, unidade) => `Por ${n} ${unidade}.`,
     resumoData: (quanto, direcao, campo, hora) => `Hasta ${quanto ? `${quanto} ${direcao} ` : ''}${campo}${hora ? `, a las ${hora}` : ''}.`,
     resumoVazio: 'No configurado.',

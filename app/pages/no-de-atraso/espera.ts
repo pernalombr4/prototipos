@@ -130,8 +130,8 @@ export function dadoGravado(config: ConfiguracaoDoAtraso) {
     const { label, delay, unit } = config
     return { label, mode: 'duration', delay: Number(delay), unit }
   }
-  const { label, mode, date_source, offset_amount, offset_unit, offset_direction, time, if_past, if_empty, recalculate } = config
-  return { label, mode, date_source, offset_amount, offset_unit, offset_direction, time, if_past, if_empty, recalculate }
+  const { label, mode, date_source, offset_amount, offset_unit, offset_direction, time, if_past, if_empty } = config
+  return { label, mode, date_source, offset_amount, offset_unit, offset_direction, time, if_past, if_empty }
 }
 
 /** Os horários que o seletor oferece, de 30 em 30 minutos. */
