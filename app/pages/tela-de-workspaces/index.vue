@@ -83,7 +83,14 @@ const etiquetas = ref<Etiqueta[]>(etiquetasIniciais.map(e => ({ ...e })))
 const etiquetasPorWorkspace = ref<Record<number, string[]>>(
   Object.fromEntries(workspaces.map(w => [w.id, [...w.etiquetas]])),
 )
-const agruparPorEtiqueta = ref(false)
+
+/* Rodada 18: agrupar e ordenar como nas visualizações do ClickUp. */
+type Agrupamento = 'nenhum' | 'etiqueta' | 'papel'
+type Ordem = 'acessoRecente' | 'acessoAntigo' | 'criacaoRecente' | 'criacaoAntiga' | 'nome'
+const agruparPor = ref<Agrupamento>('nenhum')
+const ordenarPor = ref<Ordem>('acessoRecente')
+/** Grupos que a pessoa recolheu, pelo id do grupo. */
+const recolhidos = ref<string[]>([])
 
 const visiveis = computed(() => base.value.filter(w =>
   !convitesRecusados.value.includes(w.id) && !saidos.value.includes(w.id)))
@@ -143,21 +150,56 @@ const listados = computed(() => {
   if (aba.value === 'favoritos') lista = lista.filter(w => ehFavorito(w))
   if (aba.value === 'recentes') lista = lista.filter(w => w.ultimoAcessoMin !== null)
   if (termo) lista = lista.filter(w => textoDeBusca(w).includes(termo))
-  return lista.sort((a, b) => (a.ultimoAcessoMin ?? 9e9) - (b.ultimoAcessoMin ?? 9e9))
+  return lista.sort(comparar)
 })
 
+/** "Nunca acessado" vai para o fim nas duas ordens de acesso: não é um tempo. */
+function comparar(a: Workspace, b: Workspace) {
+  const criado = (w: Workspace) => new Date(w.created_at).getTime()
+  switch (ordenarPor.value) {
+    case 'acessoAntigo':
+      return (b.ultimoAcessoMin ?? -1) - (a.ultimoAcessoMin ?? -1)
+    case 'criacaoRecente':
+      return criado(b) - criado(a)
+    case 'criacaoAntiga':
+      return criado(a) - criado(b)
+    case 'nome':
+      return a.name.localeCompare(b.name, 'pt-BR')
+    default:
+      return (a.ultimoAcessoMin ?? 9e9) - (b.ultimoAcessoMin ?? 9e9)
+  }
+}
+
 /** Agrupado por etiqueta, o workspace com duas etiquetas aparece nos dois grupos. */
-interface Grupo { id: string, nome: string | null, itens: Workspace[] }
+interface Grupo { id: string, nome: string | null, icone?: string, itens: Workspace[] }
+const ordemDosPapeis: Workspace['papel'][] = ['Proprietário', 'Full', 'Membro', 'Leitor']
 const grupos = computed<Grupo[]>(() => {
-  if (!agruparPorEtiqueta.value) return [{ id: 'todos', nome: null, itens: listados.value }]
+  if (agruparPor.value === 'nenhum') return [{ id: 'todos', nome: null, itens: listados.value }]
+  if (agruparPor.value === 'papel') {
+    const convites: Grupo = {
+      id: 'convites',
+      nome: t.value.convitesPendentes,
+      icone: 'i-lucide-mail-open',
+      itens: listados.value.filter(w => estaPendente(w)),
+    }
+    const porPapel = ordemDosPapeis.map(papel => ({
+      id: `papel-${papel}`,
+      nome: t.value.papeis[papel],
+      icone: 'i-lucide-user-round',
+      itens: listados.value.filter(w => !estaPendente(w) && w.papel === papel),
+    }))
+    return [convites, ...porPapel].filter(g => g.itens.length)
+  }
   const porEtiqueta = etiquetas.value.map(e => ({
     id: e.id,
     nome: e.nome,
+    icone: 'i-lucide-tag',
     itens: listados.value.filter(w => (etiquetasPorWorkspace.value[w.id] ?? []).includes(e.id)),
   }))
   porEtiqueta.push({
     id: 'sem-etiqueta',
     nome: t.value.semEtiqueta,
+    icone: 'i-lucide-tag',
     itens: listados.value.filter(w => !etiquetasDe(w).length),
   })
   return porEtiqueta.filter(g => g.itens.length)
@@ -171,6 +213,45 @@ const abas = computed(() => [
 ])
 
 const totalOcultos = computed(() => visiveis.value.filter(w => estaOculto(w)).length)
+
+function alternarGrupo(id: string) {
+  recolhidos.value = recolhidos.value.includes(id)
+    ? recolhidos.value.filter(g => g !== id)
+    : [...recolhidos.value, id]
+}
+
+/* Os menus "Agrupar" e "Ordenar" da barra da lista, como no ClickUp: o botão diz o
+   que está valendo, e o menu marca a opção escolhida. */
+const menuDeAgrupar = computed<DropdownMenuItem[][]>(() => [
+  [{ type: 'label', label: t.value.agruparPor }],
+  (['nenhum', 'etiqueta', 'papel'] as Agrupamento[]).map(opcao => ({
+    type: 'checkbox' as const,
+    label: t.value.agruparOpcoes[opcao],
+    icon: { nenhum: 'i-lucide-ban', etiqueta: 'i-lucide-tag', papel: 'i-lucide-user-round' }[opcao],
+    checked: agruparPor.value === opcao,
+    onUpdateChecked: () => {
+      agruparPor.value = opcao
+      recolhidos.value = []
+    },
+  })),
+])
+
+const menuDeOrdenar = computed<DropdownMenuItem[][]>(() => [
+  [{ type: 'label', label: t.value.ordenarPor }],
+  (['acessoRecente', 'acessoAntigo'] as Ordem[]).map(itemDeOrdem),
+  (['criacaoRecente', 'criacaoAntiga'] as Ordem[]).map(itemDeOrdem),
+  (['nome'] as Ordem[]).map(itemDeOrdem),
+])
+
+function itemDeOrdem(opcao: Ordem): DropdownMenuItem {
+  return {
+    type: 'checkbox',
+    label: t.value.ordenarOpcoes[opcao],
+    icon: opcao.startsWith('acesso') ? 'i-lucide-clock' : opcao === 'nome' ? 'i-lucide-arrow-down-a-z' : 'i-lucide-calendar-plus',
+    checked: ordenarPor.value === opcao,
+    onUpdateChecked: () => (ordenarPor.value = opcao),
+  }
+}
 
 /* ------------------------------- busca ------------------------------- */
 const campoDeBusca = useTemplateRef<{ inputRef: HTMLInputElement | null }>('campoDeBusca')
@@ -228,14 +309,11 @@ const colunasDaLista = computed<EnTableColumn[]>(() => [
   { key: 'acoes', label: '', align: 'right' },
 ])
 
-/** A linha de baixo do card: o que importa para decidir, sem repetir o que já está acima. */
-function metaDe(w: Workspace) {
-  const partes: string[] = []
-  if (padrao.value === w.id) partes.push(t.value.metaPadrao)
-  if (estaOculto(w)) partes.push(t.value.oculto)
-  partes.push(t.value.pessoas(w.members_count ?? 0))
-  if (padrao.value !== w.id) partes.push(tempoRelativo(w.ultimoAcessoMin))
-  return partes.join(' · ')
+/** A linha de baixo do card: uma informação só, com ícone (rodada 18). */
+function metaDe(w: Workspace): { icone: string, texto: string } {
+  if (padrao.value === w.id) return { icone: 'i-lucide-house', texto: t.value.metaPadrao }
+  if (estaOculto(w)) return { icone: 'i-lucide-eye-off', texto: t.value.oculto }
+  return { icone: 'i-lucide-clock', texto: tempoRelativo(w.ultimoAcessoMin) }
 }
 
 /* ---------------------------- ações (maquete) ---------------------------- */
@@ -595,16 +673,17 @@ function workspaceCriado(nome: string) {
             </div>
 
             <!-- Rodada 17: o padrão se escolhe onde ele importa, a um clique.
-                 É o que deixa quem só abre chamado nunca mais ver esta tela. -->
-            <div class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-default pt-3 text-sm">
+                 É o que deixa quem só abre chamado nunca mais ver esta tela.
+                 Rodada 18: vira botão com borda; como link, não parecia clicável. -->
+            <div class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-default pt-4 text-sm">
               <template v-if="padrao === destaque.id">
                 <span class="text-muted">{{ t.proximaVezDireto(destaque.name) }}</span>
                 <UButton
                   :label="t.voltarAEscolher"
+                  icon="i-lucide-undo-2"
                   color="neutral"
-                  variant="link"
+                  variant="outline"
                   size="sm"
-                  class="px-0"
                   @click="alternarPadrao(destaque)"
                 />
               </template>
@@ -613,30 +692,52 @@ function workspaceCriado(nome: string) {
                 :label="t.abrirSempreEste"
                 icon="i-lucide-house"
                 color="neutral"
-                variant="link"
+                variant="outline"
                 size="sm"
-                class="px-0"
                 @click="alternarPadrao(destaque)"
               />
             </div>
           </section>
         </Transition>
 
-        <!-- 4. Abas, agrupar por etiqueta e o alternador card / lista -->
+        <!-- 4. Abas e a barra da lista: Agrupar, Ordenar, Ocultos e card / lista.
+             Rodada 18: a barra copia o padrão das visualizações do ClickUp. -->
         <section v-if="mostrarLista">
           <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <UTabs v-model="aba" :items="abas" :content="false" color="primary" variant="link" size="sm" />
 
-            <div class="flex items-center gap-2">
-              <UTooltip :text="t.etiquetasDescricao">
+            <div class="flex flex-wrap items-center gap-2">
+              <UDropdownMenu :items="menuDeAgrupar" :content="{ align: 'end' }">
                 <UButton
-                  icon="i-lucide-tags"
-                  :label="t.agruparPorEtiqueta"
+                  icon="i-lucide-layers"
+                  trailing-icon="i-lucide-chevron-down"
+                  :label="agruparPor === 'nenhum' ? t.agrupar : `${t.agrupar}: ${t.agruparOpcoes[agruparPor]}`"
                   size="xs"
                   color="neutral"
-                  :variant="agruparPorEtiqueta ? 'soft' : 'ghost'"
-                  :aria-pressed="agruparPorEtiqueta"
-                  @click="agruparPorEtiqueta = !agruparPorEtiqueta"
+                  :variant="agruparPor === 'nenhum' ? 'outline' : 'soft'"
+                />
+              </UDropdownMenu>
+              <UDropdownMenu :items="menuDeOrdenar" :content="{ align: 'end' }">
+                <UButton
+                  icon="i-lucide-arrow-up-down"
+                  trailing-icon="i-lucide-chevron-down"
+                  :label="`${t.ordenar}: ${t.ordenarCurto[ordenarPor]}`"
+                  size="xs"
+                  color="neutral"
+                  :variant="ordenarPor === 'acessoRecente' ? 'outline' : 'soft'"
+                />
+              </UDropdownMenu>
+              <!-- Ocultos à vista na barra, como o "Show closed" do ClickUp; e
+                   ainda no fim da lista, como o "Hidden teams" do Teams. -->
+              <UTooltip v-if="totalOcultos" :text="t.ocultosTooltip">
+                <UButton
+                  icon="i-lucide-eye-off"
+                  :label="t.ocultosBotao(totalOcultos)"
+                  size="xs"
+                  color="neutral"
+                  :variant="mostrarOcultos ? 'soft' : 'outline'"
+                  :aria-pressed="mostrarOcultos"
+                  @click="mostrarOcultos = !mostrarOcultos"
                 />
               </UTooltip>
               <!-- Card é o padrão. Lista é opção, e a troca é visível. -->
@@ -665,18 +766,28 @@ function workspaceCriado(nome: string) {
 
           <template v-if="listados.length">
             <div v-for="grupo in grupos" :key="grupo.id" class="mb-8 last:mb-0">
-              <h3
+              <!-- Grupo recolhível, como no ClickUp -->
+              <button
                 v-if="grupo.nome"
-                class="mb-3 flex animate-[entrada_0.3s_ease-out_both] items-center gap-2 text-sm font-semibold text-highlighted"
+                type="button"
+                class="mb-3 flex animate-[entrada_0.3s_ease-out_both] items-center gap-2 rounded-md text-sm font-semibold text-highlighted outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                :aria-expanded="!recolhidos.includes(grupo.id)"
+                :aria-label="t.recolherGrupo(grupo.nome)"
+                @click="alternarGrupo(grupo.id)"
               >
-                <UIcon name="i-lucide-tag" class="size-4 text-muted" />
+                <UIcon
+                  name="i-lucide-chevron-down"
+                  class="size-4 text-muted transition-transform duration-200"
+                  :class="recolhidos.includes(grupo.id) && '-rotate-90'"
+                />
+                <UIcon :name="grupo.icone ?? 'i-lucide-tag'" class="size-4 text-muted" />
                 {{ grupo.nome }}
                 <span class="font-normal text-muted">{{ grupo.itens.length }}</span>
-              </h3>
+              </button>
 
               <!-- CARDS (padrão) -->
               <TransitionGroup
-                v-if="visual === 'cards'"
+                v-if="visual === 'cards' && !recolhidos.includes(grupo.id)"
                 tag="div"
                 class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
                 enter-active-class="transition duration-300 ease-out"
@@ -794,9 +905,14 @@ function workspaceCriado(nome: string) {
 
                   <!-- rodapé ancorado: meta à esquerda, a ação à direita -->
                   <div class="mt-auto flex items-end justify-between gap-2 pt-4">
-                    <p class="text-xs text-muted">
-                      <template v-if="estaPendente(w)">{{ t.aceiteParaEntrar }}</template>
-                      <template v-else>{{ metaDe(w) }}</template>
+                    <!-- Rodada 18: uma informação só, com ícone. O número de pessoas
+                         saiu: não ajuda a escolher onde entrar. -->
+                    <p v-if="estaPendente(w)" class="text-xs text-muted">
+                      {{ t.aceiteParaEntrar }}
+                    </p>
+                    <p v-else class="flex min-w-0 items-center gap-1.5 text-xs text-muted">
+                      <UIcon :name="metaDe(w).icone" class="size-3.5 shrink-0" />
+                      <span class="truncate">{{ metaDe(w).texto }}</span>
                     </p>
 
                     <!-- Convite tem duas ações de peso igual: aqui botão é o certo -->
@@ -826,7 +942,7 @@ function workspaceCriado(nome: string) {
                    Componente do próprio produto (@be-enlighten/enspace-sdk-ui),
                    em modo dumb: recebe linhas e colunas, navega por emit. -->
               <EnTable
-                v-else
+                v-else-if="visual === 'lista' && !recolhidos.includes(grupo.id)"
                 :columns="colunasDaLista"
                 :rows="grupo.itens"
                 class="animate-[entrada_0.3s_ease-out_both]"

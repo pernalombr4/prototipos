@@ -134,6 +134,46 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 18 · 2026-10-14
+
+- **Pedido (literal):** "no texto da base dos cards nao precisa da quantidade de membros, só do último
+  acesso. pode colocar um símbolo de reloginho e colocar algo como "acessado há..." e o tempo. pro texto
+  ficar mais direto"; "sobre as etiquetas, pode tentar copiar o clickup nos botoes de "agrupar por" e
+  "Ordenar por" (…) ordenar pode ser do tipo: ultimos acessados, primeiros "criados" etc"; "no card de
+  continue de onde parou o botao de abrir sempre este ao entrar nao ta parecendo um botão"; "tem que ser
+  um pouquinho mais facil de achar os ocultos. pense como outros produtos normalmente fazem."
+- **Mudou (rodapé do card):** uma informação só, com ícone: relógio e "Acessado há 2 dias" ("Nunca
+  acessado" quando a pessoa nunca entrou). O número de pessoas saiu. O padrão mostra a casa e "Abre ao
+  entrar"; o oculto, o olho cortado e "Oculto".
+  - O mesmo texto vale na coluna "Último acesso" da lista e no bloco do topo.
+- **Mudou (Agrupar e Ordenar, como no ClickUp):** o botão "Agrupar por etiqueta" vira 2 menus na barra
+  da lista. Cada botão diz o que está valendo ("Agrupar: Papel", "Ordenar: Mais novos") e muda de fundo
+  quando sai do padrão. O menu marca a opção escolhida.
+  - Agrupar por: Nenhum, Etiqueta ou Papel. Por papel, os convites ficam num grupo próprio, no topo.
+  - Ordenar por: Acessados por último (padrão), Acessados há mais tempo, Criados por último, Criados
+    primeiro, Nome de A a Z. "Nunca acessado" vai para o fim nas 2 ordens de acesso.
+  - Os grupos recolhem pela seta do título, como no ClickUp.
+  - A ordem por criação usa o `created_at`, campo real do schema de `Workspace`, agora no mock.
+- **Mudou (bloco do topo):** "Abrir sempre este ao entrar" vira botão com borda e ícone. Como link
+  cinza, não parecia clicável. "Voltar a escolher ao entrar" segue o mesmo formato.
+- **Mudou (ocultos):** botão "Ocultos (1)" na barra da lista, ao lado de Ordenar, que liga e desliga os
+  ocultos na lista. Só aparece quando há oculto.
+  - É o "Show closed" do ClickUp. O aviso no fim da lista continua, como o "Hidden teams" do Teams, que
+    fica no fim da lista de times.
+  - O toast de ocultar diz onde achar: "Para ver de novo, use Ocultos, ao lado de Ordenar."
+- **Fronteira:** muda o rodapé do card, a barra da lista, o botão do bloco do topo e o acesso aos ocultos;
+  não muda a busca, as abas, o menu "⋯", as etiquetas nem a criação.
+- **Descartado:** uma aba "Ocultos" ao lado de Todos, Favoritos e Recentes. Motivo: a barra do ClickUp já
+  tem o lugar desse controle, e aba nova competiria com as 3 que filtram por uso.
+- **Descartado:** ordenar em mais de um nível ("+ Adicionar ordem" do ClickUp). Motivo: com 18 workspaces,
+  1 critério basta.
+- **Maquete:** agrupamento, ordem e grupos recolhidos vivem em memória; o reload volta ao padrão.
+- **Crítica e acessibilidade:** conferência à mão; as skills não rodaram.
+  - O título do grupo é botão com `aria-expanded` e nome "Recolher ou abrir Proprietário".
+  - Os menus usam o item `checkbox` do `UDropdownMenu`, que o leitor de tela anuncia como marcado.
+  - Não conferi a largura de celular: a barra quebra linha (`flex-wrap`), mas não vi a tela a 375px.
+- **Ver:** https://pernalombr4.github.io/prototipos/tela-de-workspaces
+
 ### Rodada 17 · 2026-10-14
 
 - **Pedido (literal):** sobre as 7 oportunidades da pesquisa de mercado: "1. impossivel fazer 2. legal

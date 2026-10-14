@@ -15,7 +15,7 @@ export type Papel = 'Proprietário' | 'Full' | 'Membro' | 'Leitor'
 /** O que a API entrega de verdade sobre um workspace. */
 type CamposDaApi = Pick<
   WorkspaceApi,
-  'id' | 'name' | 'reference' | 'status' | 'description' | 'icon' | 'members_count'
+  'id' | 'created_at' | 'name' | 'reference' | 'status' | 'description' | 'icon' | 'members_count'
 >
 
 export interface Workspace extends CamposDaApi {
@@ -55,6 +55,7 @@ export const usuario = {
 export const workspaces: Workspace[] = [
   {
     id: 1,
+    created_at: new Date('2022-03-14T12:00:00Z'),
     status: 'active',
     name: 'Grupo Aurora',
     reference: 'grupo-aurora',
@@ -68,6 +69,7 @@ export const workspaces: Workspace[] = [
   },
   {
     id: 2,
+    created_at: new Date('2023-08-02T12:00:00Z'),
     status: 'active',
     name: 'Vértice Log',
     reference: 'vertice-log',
@@ -81,6 +83,7 @@ export const workspaces: Workspace[] = [
   },
   {
     id: 3,
+    created_at: new Date('2022-06-20T12:00:00Z'),
     status: 'active',
     name: 'RH Aurora',
     reference: 'rh-aurora',
@@ -95,6 +98,7 @@ export const workspaces: Workspace[] = [
   {
     // caso de canto de propósito: nome longo que estoura a linha
     id: 4,
+    created_at: new Date('2024-02-11T12:00:00Z'),
     status: 'active',
     name: 'Jurídico Correções Monetárias e Acordos Trabalhistas',
     reference: 'juridico-correcoes-monetarias',
@@ -108,6 +112,7 @@ export const workspaces: Workspace[] = [
   },
   {
     id: 5,
+    created_at: new Date('2025-07-30T12:00:00Z'),
     status: 'active',
     name: 'Aurora Saúde Homologação',
     reference: 'aurora-saude-homologacao',
@@ -121,6 +126,7 @@ export const workspaces: Workspace[] = [
   },
   {
     id: 6,
+    created_at: new Date('2024-11-05T12:00:00Z'),
     status: 'active',
     name: 'Lumen Contábil',
     reference: 'lumen-contabil',
@@ -136,6 +142,7 @@ export const workspaces: Workspace[] = [
   },
   {
     id: 7,
+    created_at: new Date('2025-09-01T12:00:00Z'),
     status: 'active',
     name: 'Base de teste de migração',
     reference: 'base-de-teste-migracao',
@@ -149,6 +156,7 @@ export const workspaces: Workspace[] = [
   },
   {
     id: 8,
+    created_at: new Date('2023-01-17T12:00:00Z'),
     status: 'active',
     name: 'Aurora Facilities',
     reference: 'aurora-facilities',
@@ -162,6 +170,7 @@ export const workspaces: Workspace[] = [
   },
   {
     id: 9,
+    created_at: new Date('2023-04-25T12:00:00Z'),
     status: 'active',
     name: 'Aurora Compras',
     reference: 'aurora-compras',
@@ -175,6 +184,7 @@ export const workspaces: Workspace[] = [
   },
   {
     id: 10,
+    created_at: new Date('2025-05-12T12:00:00Z'),
     status: 'active',
     name: 'Vértice Log Homologação',
     reference: 'vertice-log-homologacao',
@@ -188,6 +198,7 @@ export const workspaces: Workspace[] = [
   },
   {
     id: 11,
+    created_at: new Date('2024-06-03T12:00:00Z'),
     status: 'active',
     name: 'Nimbus Seguros',
     reference: 'nimbus-seguros',
@@ -201,6 +212,7 @@ export const workspaces: Workspace[] = [
   },
   {
     id: 12,
+    created_at: new Date('2024-09-19T12:00:00Z'),
     status: 'active',
     name: 'Casa Ipê Imóveis',
     reference: 'casa-ipe-imoveis',
@@ -214,6 +226,7 @@ export const workspaces: Workspace[] = [
   },
   {
     id: 13,
+    created_at: new Date('2025-01-08T12:00:00Z'),
     status: 'active',
     name: 'Clínica Serra Azul',
     reference: 'clinica-serra-azul',
@@ -227,6 +240,7 @@ export const workspaces: Workspace[] = [
   },
   {
     id: 14,
+    created_at: new Date('2024-03-27T12:00:00Z'),
     status: 'active',
     name: 'Orla Energia',
     reference: 'orla-energia',
@@ -241,6 +255,7 @@ export const workspaces: Workspace[] = [
   {
     // caso de canto de propósito: workspace que a pessoa já tirou da lista
     id: 15,
+    created_at: new Date('2025-02-10T12:00:00Z'),
     status: 'active',
     name: 'Treinamento interno 2025',
     reference: 'treinamento-interno-2025',
@@ -255,6 +270,7 @@ export const workspaces: Workspace[] = [
   },
   {
     id: 16,
+    created_at: new Date('2025-03-15T12:00:00Z'),
     status: 'active',
     name: 'Modelo de onboarding',
     reference: 'modelo-de-onboarding',
@@ -268,6 +284,7 @@ export const workspaces: Workspace[] = [
   },
   {
     id: 17,
+    created_at: new Date('2026-08-21T12:00:00Z'),
     status: 'active',
     name: 'Piloto Spaceflow',
     reference: 'piloto-spaceflow',
@@ -281,6 +298,7 @@ export const workspaces: Workspace[] = [
   },
   {
     id: 18,
+    created_at: new Date('2026-09-30T12:00:00Z'),
     status: 'active',
     name: 'Nimbus Seguros Homologação',
     reference: 'nimbus-seguros-homologacao',

@@ -97,6 +97,18 @@ export interface TextosDaTela {
   criarEtiqueta: string
   pronto: string
   agruparPorEtiqueta: string
+  agrupar: string
+  agruparPor: string
+  ordenar: string
+  ordenarPor: string
+  agruparOpcoes: Record<'nenhum' | 'etiqueta' | 'papel', string>
+  ordenarOpcoes: Record<'acessoRecente' | 'acessoAntigo' | 'criacaoRecente' | 'criacaoAntiga' | 'nome', string>
+  ordenarCurto: Record<'acessoRecente' | 'acessoAntigo' | 'criacaoRecente' | 'criacaoAntiga' | 'nome', string>
+  porPapel: string
+  convitesPendentes: string
+  ocultosBotao: (n: number) => string
+  ocultosTooltip: string
+  recolherGrupo: (nome: string) => string
   semEtiqueta: string
   nenhumaEtiqueta: string
 
@@ -244,7 +256,7 @@ export const textos: Record<Idioma, TextosDaTela> = {
     mostrarOcultos: 'Mostrar',
     esconderOcultos: 'Esconder de novo',
     ocultadoToast: n => `${n} saiu da sua lista`,
-    ocultadoDescricao: 'Você continua com acesso, e a busca ainda encontra.',
+    ocultadoDescricao: 'Você continua com acesso. Para ver de novo, use Ocultos, ao lado de Ordenar.',
     desfazer: 'Desfazer',
     sairDoWorkspace: 'Sair do workspace',
     proprietarioNaoSai: 'Quem é proprietário não sai por aqui.',
@@ -261,13 +273,37 @@ export const textos: Record<Idioma, TextosDaTela> = {
     pronto: 'Pronto',
     agruparPorEtiqueta: 'Agrupar por etiqueta',
     semEtiqueta: 'Sem etiqueta',
+    agrupar: 'Agrupar',
+    agruparPor: 'Agrupar por',
+    ordenar: 'Ordenar',
+    ordenarPor: 'Ordenar por',
+    agruparOpcoes: { nenhum: 'Nenhum', etiqueta: 'Etiqueta', papel: 'Papel' },
+    ordenarOpcoes: {
+      acessoRecente: 'Acessados por último',
+      acessoAntigo: 'Acessados há mais tempo',
+      criacaoRecente: 'Criados por último',
+      criacaoAntiga: 'Criados primeiro',
+      nome: 'Nome, de A a Z',
+    },
+    ordenarCurto: {
+      acessoRecente: 'Último acesso',
+      acessoAntigo: 'Acesso mais antigo',
+      criacaoRecente: 'Mais novos',
+      criacaoAntiga: 'Mais antigos',
+      nome: 'Nome',
+    },
+    porPapel: 'Seu papel',
+    convitesPendentes: 'Convites pendentes',
+    ocultosBotao: n => `Ocultos (${n})`,
+    ocultosTooltip: 'Mostrar os workspaces que você tirou da lista',
+    recolherGrupo: n => `Recolher ou abrir ${n}`,
     nenhumaEtiqueta: 'Você ainda não criou etiquetas. Crie a primeira abaixo.',
 
-    nuncaEntrou: 'Você ainda não entrou aqui',
-    haMinutos: n => `Você esteve aqui há ${n} min`,
-    haHoras: n => `Você esteve aqui há ${n} ${n === 1 ? 'hora' : 'horas'}`,
-    haDias: n => `Você esteve aqui há ${n} ${n === 1 ? 'dia' : 'dias'}`,
-    haMeses: n => `Você esteve aqui há ${n} ${n === 1 ? 'mês' : 'meses'}`,
+    nuncaEntrou: 'Nunca acessado',
+    haMinutos: n => `Acessado há ${n} min`,
+    haHoras: n => `Acessado há ${n} ${n === 1 ? 'hora' : 'horas'}`,
+    haDias: n => `Acessado há ${n} ${n === 1 ? 'dia' : 'dias'}`,
+    haMeses: n => `Acessado há ${n} ${n === 1 ? 'mês' : 'meses'}`,
 
     buscaVaziaTitulo: t => `Nenhum workspace com "${t}"`,
     buscaVaziaDescricao: 'Confira o nome. Se ainda não achar, peça acesso a quem administra o ENSPACE na sua empresa.',
@@ -401,7 +437,7 @@ export const textos: Record<Idioma, TextosDaTela> = {
     mostrarOcultos: 'Show',
     esconderOcultos: 'Hide again',
     ocultadoToast: n => `${n} is hidden from your list`,
-    ocultadoDescricao: 'You still have access, and search still finds it.',
+    ocultadoDescricao: 'You still have access. To see it again, use Hidden, next to Sort.',
     desfazer: 'Undo',
     sairDoWorkspace: 'Leave workspace',
     proprietarioNaoSai: 'Owners can\u2019t leave from here.',
@@ -417,14 +453,38 @@ export const textos: Record<Idioma, TextosDaTela> = {
     criarEtiqueta: 'Create',
     pronto: 'Done',
     agruparPorEtiqueta: 'Group by tag',
+    agrupar: 'Group',
+    agruparPor: 'Group by',
+    ordenar: 'Sort',
+    ordenarPor: 'Sort by',
+    agruparOpcoes: { nenhum: 'None', etiqueta: 'Tag', papel: 'Role' },
+    ordenarOpcoes: {
+      acessoRecente: 'Most recently accessed',
+      acessoAntigo: 'Least recently accessed',
+      criacaoRecente: 'Newest first',
+      criacaoAntiga: 'Oldest first',
+      nome: 'Name, A to Z',
+    },
+    ordenarCurto: {
+      acessoRecente: 'Last access',
+      acessoAntigo: 'Oldest access',
+      criacaoRecente: 'Newest',
+      criacaoAntiga: 'Oldest',
+      nome: 'Name',
+    },
+    porPapel: 'Your role',
+    convitesPendentes: 'Pending invites',
+    ocultosBotao: n => `Hidden (${n})`,
+    ocultosTooltip: 'Show the workspaces you removed from your list',
+    recolherGrupo: n => `Collapse or expand ${n}`,
     semEtiqueta: 'No tag',
     nenhumaEtiqueta: 'You haven\u2019t created any tags yet. Create the first one below.',
 
-    nuncaEntrou: 'You haven’t been here yet',
-    haMinutos: n => `You were here ${n} min ago`,
-    haHoras: n => `You were here ${n} ${n === 1 ? 'hour' : 'hours'} ago`,
-    haDias: n => `You were here ${n} ${n === 1 ? 'day' : 'days'} ago`,
-    haMeses: n => `You were here ${n} ${n === 1 ? 'month' : 'months'} ago`,
+    nuncaEntrou: 'Not accessed yet',
+    haMinutos: n => `Accessed ${n} min ago`,
+    haHoras: n => `Accessed ${n} ${n === 1 ? 'hour' : 'hours'} ago`,
+    haDias: n => `Accessed ${n} ${n === 1 ? 'day' : 'days'} ago`,
+    haMeses: n => `Accessed ${n} ${n === 1 ? 'month' : 'months'} ago`,
 
     buscaVaziaTitulo: t => `No workspace matching "${t}"`,
     buscaVaziaDescricao: 'Check the name. If you still can’t find it, ask whoever manages ENSPACE at your company for access.',
@@ -558,7 +618,7 @@ export const textos: Record<Idioma, TextosDaTela> = {
     mostrarOcultos: 'Mostrar',
     esconderOcultos: 'Volver a ocultar',
     ocultadoToast: n => `${n} salió de tu lista`,
-    ocultadoDescricao: 'Sigues con acceso, y la búsqueda aún lo encuentra.',
+    ocultadoDescricao: 'Sigues con acceso. Para verlo de nuevo, usa Ocultos, junto a Ordenar.',
     desfazer: 'Deshacer',
     sairDoWorkspace: 'Salir del workspace',
     proprietarioNaoSai: 'Quien es propietario no sale desde aquí.',
@@ -575,13 +635,37 @@ export const textos: Record<Idioma, TextosDaTela> = {
     pronto: 'Listo',
     agruparPorEtiqueta: 'Agrupar por etiqueta',
     semEtiqueta: 'Sin etiqueta',
+    agrupar: 'Agrupar',
+    agruparPor: 'Agrupar por',
+    ordenar: 'Ordenar',
+    ordenarPor: 'Ordenar por',
+    agruparOpcoes: { nenhum: 'Ninguno', etiqueta: 'Etiqueta', papel: 'Rol' },
+    ordenarOpcoes: {
+      acessoRecente: 'Accedidos más recientemente',
+      acessoAntigo: 'Accedidos hace más tiempo',
+      criacaoRecente: 'Creados más recientemente',
+      criacaoAntiga: 'Creados primero',
+      nome: 'Nombre, de la A a la Z',
+    },
+    ordenarCurto: {
+      acessoRecente: 'Último acceso',
+      acessoAntigo: 'Acceso más antiguo',
+      criacaoRecente: 'Más nuevos',
+      criacaoAntiga: 'Más antiguos',
+      nome: 'Nombre',
+    },
+    porPapel: 'Tu rol',
+    convitesPendentes: 'Invitaciones pendientes',
+    ocultosBotao: n => `Ocultos (${n})`,
+    ocultosTooltip: 'Mostrar los workspaces que quitaste de tu lista',
+    recolherGrupo: n => `Contraer o abrir ${n}`,
     nenhumaEtiqueta: 'Todavía no creaste etiquetas. Crea la primera abajo.',
 
-    nuncaEntrou: 'Todavía no has entrado aquí',
-    haMinutos: n => `Estuviste aquí hace ${n} min`,
-    haHoras: n => `Estuviste aquí hace ${n} ${n === 1 ? 'hora' : 'horas'}`,
-    haDias: n => `Estuviste aquí hace ${n} ${n === 1 ? 'día' : 'días'}`,
-    haMeses: n => `Estuviste aquí hace ${n} ${n === 1 ? 'mes' : 'meses'}`,
+    nuncaEntrou: 'Sin accesos todavía',
+    haMinutos: n => `Accedido hace ${n} min`,
+    haHoras: n => `Accedido hace ${n} ${n === 1 ? 'hora' : 'horas'}`,
+    haDias: n => `Accedido hace ${n} ${n === 1 ? 'día' : 'días'}`,
+    haMeses: n => `Accedido hace ${n} ${n === 1 ? 'mes' : 'meses'}`,
 
     buscaVaziaTitulo: t => `Ningún workspace con "${t}"`,
     buscaVaziaDescricao: 'Revisa el nombre. Si aún no lo encuentras, pide acceso a quien administra ENSPACE en tu empresa.',
