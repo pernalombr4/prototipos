@@ -113,3 +113,13 @@
 - **Mudou:** o botão da IA na barra da seleção passa a se chamar "IA", como na barra fixa; a dica ("Escrever com o BENI", Ctrl J) e o que ele abre continuam iguais.
 - **Fronteira:** muda só o rótulo do botão na barra da seleção; não muda a barra fixa, o "/", a caixa do BENI nem o menu do bloco (que segue com "Perguntar ao BENI").
 - **Ver:** `evidencias/proto-barra-da-selecao.png`
+
+## Rodada 4 · 2026-10-13
+- **Pedido (literal):** "o dropdown que abre nao ta desnecessariamente largo? ou acha que ta ok assim pelo padrao de mercado?" e, depois da proposta, "pode aplicar"
+- **Mudou:**
+  - a caixa do BENI virou 2 peças, como no Notion, na Tiptap e no BlockNote: o cartão do pedido na largura do campo (campo livre e rodapé com contexto, Agente e Modelo) e a lista de ações como menu de 288 px logo abaixo, à esquerda;
+  - setas, Enter e filtro continuam na mesma lista (é a mesma `UCommandPalette`: a raiz virou o cartão, a lista saiu do fluxo e o rodapé entrou pelo slot `#footer`).
+- **Fronteira:** muda só a forma da caixa; as ações, os grupos, os seletores e a barra da proposta continuam iguais.
+- **Não deu:** Tom e Traduzir abrirem submenu ao lado, como na Tiptap. Por quê: a `UCommandPalette` abre filhos no lugar, com o botão de voltar no campo; submenu lateral pediria outro componente e o filtro por digitação deixaria de valer para a lista inteira. Ficou como está.
+- **CSS fora da prop:** nenhum; tudo pela prop `ui` da paleta (`root`, `content`, `footer`).
+- **Ver:** `evidencias/proto-caixa-do-beni.png`
