@@ -134,6 +134,16 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 22 · 2026-10-14
+
+- **Pedido (literal):** "eu preicso de um boitao na base pra simular o caso em que nao ha etiqueta. e o
+  botao só um (caso do chamado) deve se chamar "só um workspce""
+- **Mudou:** o botão do andaime "Só um (caso do chamado)" vira "Só um workspace".
+- **Já existia:** o botão "Sem etiquetas" entrou no andaime na rodada 21. Ele não aparecia no site porque a
+  publicação falhou entre 21h10 e 21h23 (UTC): o build quebrou num commit de outro protótipo (`no-de-atraso`,
+  rodada 11) e voltou no commit seguinte dele. A rodada 21 está publicada desde então.
+- **Fronteira:** muda só o rótulo do andaime, que não é proposta de produto.
+
 ### Rodada 21 · 2026-10-14
 
 - **Pedido (literal):** "simule um caso em que o cara não tem nenhuma etiqueta criada. quando ele poe pra

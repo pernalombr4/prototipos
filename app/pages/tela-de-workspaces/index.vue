@@ -50,7 +50,7 @@ const estado = ref<Estado>('normal')
 const estados: { valor: Estado, rotulo: string }[] = [
   { valor: 'normal', rotulo: 'Vários workspaces' },
   { valor: 'semEtiquetas', rotulo: 'Sem etiquetas' },
-  { valor: 'unico', rotulo: 'Só um (caso do chamado)' },
+  { valor: 'unico', rotulo: 'Só um workspace' },
   { valor: 'carregando', rotulo: 'Carregando' },
   { valor: 'vazio', rotulo: 'Nenhum' },
   { valor: 'erro', rotulo: 'Erro' },
