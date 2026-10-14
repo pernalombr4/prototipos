@@ -149,3 +149,17 @@ proposta; sem ela, a data é calculada uma vez, na entrada do nó, como em todos
   digitada, e a data vem de um campo.
 - **Ver:** `pnpm dev` › `/no-de-atraso` · `evidencias/proposta-01-data-de-referencia.jpg`,
   `proposta-02-simulacao.jpg`, `proposta-03-erro-sem-campo.jpg`, `proposta-04-sem-campo-de-data.png`
+
+## Rodada 3 · 2026-10-14
+
+- **Pedido (literal):** "o campo de tipo de atraso deve ser simplesmente um dropdown com 2 opçoes e as
+  descriçoes nos helps"
+- **Mudou:** "Tipo de atraso" deixa os 2 cartões e vira `USelect` com Duração fixa e Data de referência. A
+  lista mostra só os nomes.
+- **Mudou:** as 2 descrições vão para o "?" do campo, o mesmo ícone de ajuda de "Nome do Nó". O tooltip mostra
+  as duas, com o nome em negrito.
+- **Mudou:** "Abrir o nó" e o clique no card fecham e reabrem o modal. Com a aba aberta em segundo plano, o
+  modal ficava marcado como aberto sem aparecer.
+- **CSS próprio:** nenhum. O tooltip de várias linhas usa a prop `ui.content` (`h-auto max-w-80 flex-col`);
+  o tema dele fixa `h-6`.
+- **Ver:** `/no-de-atraso` · `evidencias/proposta-05-tipo-de-atraso-dropdown.jpg`

@@ -59,6 +59,12 @@ const config = ref<ConfiguracaoDoAtraso>(configuracaoDoCliente())
 const campos = computed(() => cenario.value === 'semCampos' ? [] : camposDeData)
 const modalAberto = ref(false)
 
+/** Reabre do zero: se a aba abriu em segundo plano, o modal pode ter ficado "aberto" sem aparecer. */
+function abrirNo() {
+  modalAberto.value = false
+  nextTick(() => { modalAberto.value = true })
+}
+
 function aplicar() {
   modalAberto.value = false
   config.value = configDoCenario(cenario.value)
@@ -113,7 +119,7 @@ function reiniciar() {
         :descricao-do-atraso="descricaoDoAtraso"
         :resumo-proposto="versao === 'proposta' && configValida"
         :estado-do-atraso="estadoDoAtraso"
-        @abrir-atraso="modalAberto = true"
+        @abrir-atraso="abrirNo"
       />
     </CascaDasConfiguracoes>
 
@@ -157,7 +163,7 @@ function reiniciar() {
           />
         </template>
         <USeparator orientation="vertical" class="mx-1 h-5" />
-        <UButton label="Abrir o nó" icon="i-lucide-mouse-pointer-click" size="xs" color="neutral" variant="outline" @click="modalAberto = true" />
+        <UButton label="Abrir o nó" icon="i-lucide-mouse-pointer-click" size="xs" color="neutral" variant="outline" @click="abrirNo" />
         <UButton label="Reiniciar" icon="i-lucide-rotate-ccw" size="xs" color="neutral" variant="ghost" @click="reiniciar" />
         <ControlesDePrototipo class="ml-auto" />
         <span class="flex flex-wrap items-center gap-2">

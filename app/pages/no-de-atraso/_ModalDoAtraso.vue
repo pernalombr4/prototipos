@@ -6,8 +6,8 @@
  * Tempo (campo de texto que aceita "abc") e Unidade. Não é proposta.
  *
  * `versao="proposta"` é a proposta inteira:
- * 1. "Esperar" com 2 modos: por um tempo (o de hoje, com número validado) ou
- *    até uma data do item;
+ * 1. "Tipo de atraso", um dropdown com 2 opções (Duração fixa, a de hoje com
+ *    número validado, e Data de referência), descritas no help do campo;
  * 2. a espera até a data se monta como frase: Continuar o fluxo [30] [dias]
  *    [antes de] [Data de vencimento], sem fórmula;
  * 3. horário e fuso, o que fazer com data passada e com campo vazio, e
@@ -79,8 +79,8 @@ function salvar() {
 const unidadesDeHoje = computed(() => (['second', 'minute', 'hour', 'day'] as Unidade[]).map(u => ({ value: u, label: props.t.hoje.unidades[u] })))
 
 const modos = computed(() => [
-  { value: 'duration', label: p.value.modos.duration.titulo, description: p.value.modos.duration.descricao },
-  { value: 'until_date', label: p.value.modos.until_date.titulo, description: p.value.modos.until_date.descricao },
+  { value: 'duration' as const, label: p.value.modos.duration.titulo, description: p.value.modos.duration.descricao },
+  { value: 'until_date' as const, label: p.value.modos.until_date.titulo, description: p.value.modos.until_date.descricao },
 ])
 
 const unidadesDoDeslocamento = computed(() => (['day', 'week', 'month', 'hour'] as UnidadeDoDeslocamento[])
@@ -237,13 +237,18 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
             <!-- ============ PROPOSTA ============ -->
             <template v-else>
               <UFormField :label="p.esperar">
-                <URadioGroup
-                  v-model="rascunho.mode"
-                  :items="modos"
-                  variant="card"
-                  orientation="horizontal"
-                  :ui="{ item: 'flex-1 transition-colors' }"
-                />
+                <template #hint>
+                  <!-- O help traz a descrição dos 2 tipos, como os "?" dos outros campos do nó -->
+                  <UTooltip :ui="{ content: 'h-auto max-w-80 flex-col items-start gap-1.5 py-2 text-xs' }">
+                    <UIcon name="i-lucide-circle-help" class="size-4 text-muted" />
+                    <template #content>
+                      <span v-for="m in modos" :key="m.value" class="block">
+                        <strong class="text-highlighted">{{ m.label }}.</strong> {{ m.description }}
+                      </span>
+                    </template>
+                  </UTooltip>
+                </template>
+                <USelect v-model="rascunho.mode" :items="modos.map(({ value, label }) => ({ value, label }))" class="w-full" />
               </UFormField>
 
               <Transition
