@@ -447,3 +447,8 @@ O painel usa só dado que o ENSPACE já grava. Falta uma coisa: **agregar no ser
 - Rodada 3, `_BarrasHorizontais.vue`: a barra empilhada é uma fila de `span` com `flex-grow` pelo valor e cor por `style`, com o nome dentro da parte. Consulta: MCP `nuxt-ui` (`get-component ProgressGroup`) e o tema gerado: o `UProgressGroup` só aceita cor da paleta e não põe texto dentro da parte. A barra de uma cor da paleta segue no `UProgressGroup`. Largura da barra por `style` (`max(0.25rem, calc(…% - 4.5rem))`), pela mesma razão das barras de status.
 - Rodada 3, `_BlocoTempos.vue`: os tons das partes são `color-mix(in oklab, var(--ui-primary) N%, var(--ui-bg))`, cor CSS passada por `style`. O tema não tem tons intermediários da primária como token.
 - Rodada 3, `_GraficoColunas.vue`, `<style scoped>`: as mesmas variáveis do Unovis do `_GraficoSerie.vue`.
+
+## Fechamento · 2026-10-14
+
+- **Pedido (literal):** "painel de tarefas tambem ta aprovado!"
+- **Mudou:** status `aprovado` no `definePageMeta` (selo verde no índice) e no README.

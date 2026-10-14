@@ -466,3 +466,10 @@ pedaço de palavra não é nome. Com o ícone de volta, abaixo de `sm` a pílula
 que é limpo e identifica o produto. Medido: a 380px sobram 12px até a chave de tema; a 700px o
 nome inteiro cabe com 14px de folga. O nome por extenso continua no `title`, no `aria-label`, no
 botão de busca do menu lateral e na peça em linha cheia do menu do hambúrguer.
+
+## Fechamento · 2026-10-14
+
+- **Pedido (literal):** "seletor de produto na doc tambem aprovado, na verdade esse até já foi aplicado no
+  enspace, foi de fato desenvolvido pelos devs. pode ter um status especifico pra isso"
+- **Mudou:** status novo `implementado` (aprovado e já desenvolvido no produto), em azul no índice, e este
+  protótipo marcado com ele no `definePageMeta` e no README.

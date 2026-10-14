@@ -63,7 +63,7 @@ import { LAYOUT_MVP } from './mvp'
 definePageMeta({
   titulo: 'Painel de tarefas',
   descricao: 'Painel nativo das tarefas criadas manualmente e por fluxo: SLA, a vencer, responsáveis, status e tempo de tarefa, etapa e fluxo. Os painéis se arrastam e se redimensionam direto; a lista de cada número tem o resumo ao lado.',
-  status: 'em-revisao',
+  status: 'aprovado',
   atualizado: '2026-09-30',
   tela: 'Tarefas › Painel',
 })

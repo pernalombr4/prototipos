@@ -51,6 +51,7 @@ const corDoStatus = {
   rascunho: 'neutral',
   'em-revisao': 'warning',
   aprovado: 'success',
+  implementado: 'info',
   arquivado: 'neutral',
 } as const
 </script>

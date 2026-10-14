@@ -27,7 +27,7 @@ import pesquisaMd from './PESQUISA.md?raw'
 definePageMeta({
   titulo: 'Seletor de produto na doc',
   descricao: 'Escolher de qual produto é a documentação, sem sair da página que está sendo lida.',
-  status: 'em-revisao',
+  status: 'implementado',
   atualizado: '2026-09-22',
   tela: 'docs.enspace.io, página de documentação',
 })

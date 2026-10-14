@@ -6,8 +6,11 @@ declare module '#app' {
     titulo?: string
     /** Uma frase: que problema essa proposta resolve. */
     descricao?: string
-    /** rascunho | em-revisao | aprovado | arquivado */
-    status?: 'rascunho' | 'em-revisao' | 'aprovado' | 'arquivado'
+    /**
+     * rascunho | em-revisao | aprovado | implementado | arquivado
+     * `implementado`: aprovado e já desenvolvido pelos devs no produto.
+     */
+    status?: 'rascunho' | 'em-revisao' | 'aprovado' | 'implementado' | 'arquivado'
     /** AAAA-MM-DD da última iteração. */
     atualizado?: string
     /** Nome desta tela dentro do protótipo. */
