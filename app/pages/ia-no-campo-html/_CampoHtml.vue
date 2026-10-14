@@ -43,29 +43,28 @@ import { aplicarPaleta, cores } from './paleta'
 import { chaveDaProposta, PropostaDoBeni } from './proposta'
 import CaixaDoBeni from './_CaixaDoBeni.vue'
 import BarraDaProposta from './_BarraDaProposta.vue'
-import AtivarIa from './_AtivarIa.vue'
+import PedirAtivacao from './_PedirAtivacao.vue'
+import type { IdDaIa } from './ias'
+import { iaDoModelo, pedirConexao, useIasConectadas } from './ias'
 import SeletorDeCor from './_SeletorDeCor.vue'
 import PopoverDeLink from './_PopoverDeLink.vue'
 
 const props = defineProps<{
   t: Textos
   rotulo: string
-  iaLigada: boolean
-  /** Andaime: quem está no campo administra o workspace (instala integração) ou é membro. */
+  /** Andaime: quem está no campo administra o workspace (conecta IA) ou é membro. */
   papel: 'admin' | 'membro'
   falhar: boolean
 }>()
 
-const emit = defineEmits<{ ativar: [] }>()
-
 /*
- * IA desligada não bloqueia (rodada 6): o botão, o Ctrl J e o "/" abrem a
- * ativação (_AtivarIa). Ativada aqui, vale na hora, antes de o andaime
- * receber o estado novo.
+ * IA desligada não bloqueia (rodadas 6 e 7): o botão, o Ctrl J e o "/" levam
+ * quem administra ao modal "Conectar uma IA" e quem é membro ao pedido de
+ * ativação (_PedirAtivacao). A IA está ativa quando o workspace tem uma IA
+ * conectada (ias.ts).
  */
-const ativadaAqui = ref(false)
-const iaAtiva = computed(() => props.iaLigada || ativadaAqui.value)
-watch(() => props.iaLigada, (v) => { if (!v) ativadaAqui.value = false })
+const conectadas = useIasConectadas()
+const iaAtiva = computed(() => conectadas.value.length > 0)
 
 const valor = defineModel<string>({ required: true })
 const toast = useToast()
@@ -144,29 +143,45 @@ function topoAbaixoDe(editor: Editor, pos: number) {
 
 /* ------------------------------------------------------- a caixa ---- */
 
-const caixa = ref<(Contexto & { topo: number, chave: number, modo: 'pedido' | 'ativar', pendente?: PedidoDaCaixa }) | null>(null)
+const caixa = ref<(Contexto & { topo: number, chave: number, modo: 'pedido' | 'pedirAtivacao' }) | null>(null)
 let chave = 0
 
 function abrirCaixa(editor: Editor, pendente?: PedidoDaCaixa) {
   if (sessao.value) return
+  if (!iaAtiva.value && props.papel === 'admin') return conectarAntes(editor, null, pendente)
   const ctx = contextoDe(editor)
-  caixa.value = { ...ctx, topo: topoAbaixoDe(editor, ctx.to), chave: ++chave, modo: iaAtiva.value ? 'pedido' : 'ativar', pendente }
+  caixa.value = { ...ctx, topo: topoAbaixoDe(editor, ctx.to), chave: ++chave, modo: iaAtiva.value ? 'pedido' : 'pedirAtivacao' }
   marcar(editor, { foco: ctx.comSelecao ? { from: ctx.from, to: ctx.to } : null })
   rolarAteVer('[data-caixa-do-beni]')
 }
 
-/** A camada nova (caixa ou barra) entra inteira na tela: rola só o que falta. */
-/** Ativou: a mesma caixa vira a do BENI; se a pessoa tinha escolhido uma ação, ela roda. */
-function aoAtivar() {
-  ativadaAqui.value = true
-  emit('ativar')
-  const c = caixa.value
-  const editor = ed()
-  if (!c || !editor) return
-  if (c.pendente) executar(editor, c.pendente, c)
-  else c.modo = 'pedido'
+/*
+ * Conectar antes de seguir (rodada 7): a IA está desligada, ou o modelo
+ * escolhido (ou o do agente) depende de uma IA que o workspace não conectou.
+ * Abre o modal "Conectar uma IA" (_ConectarIa, um só na página). Voltando com
+ * uma IA conectada, o pedido segue: a ação escolhida roda, ou a caixa do
+ * BENI abre. Fechou sem conectar: o cursor volta ao lugar.
+ */
+function conectarAntes(editor: Editor, ia: IdDaIa | null, pendente?: PedidoDaCaixa, ctxDado?: Contexto, motivo?: string) {
+  const ctx = ctxDado ?? caixa.value ?? contextoDe(editor)
+  caixa.value = null
+  marcar(editor, { foco: ctx.comSelecao ? { from: ctx.from, to: ctx.to } : null })
+  pedirConexao({
+    ia,
+    motivo,
+    pendente: pendente?.rotulo,
+    // espera o modal sair para o foco voltar ao campo, e não ao botão que o abriu
+    aoVoltar: conectou => setTimeout(() => {
+      marcar(editor, { foco: null })
+      editor.chain().focus().setTextSelection({ from: ctx.from, to: ctx.to }).run()
+      if (!conectou.length) return
+      if (pendente) executar(editor, pendente, ctx)
+      else abrirCaixa(editor)
+    }, 220),
+  })
 }
 
+/** A camada nova (caixa ou barra) entra inteira na tela: rola só o que falta. */
 function rolarAteVer(seletor: string) {
   setTimeout(() => moldura.value?.querySelector(seletor)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 180)
 }
@@ -262,6 +277,11 @@ async function rodar(editor: Editor) {
 
 function executar(editor: Editor, p: PedidoDaCaixa, ctxDado?: Contexto) {
   if (!iaAtiva.value) return abrirCaixa(editor, p)
+  const falta = iaDoModelo(modelo.value)
+  if (falta && falta.disponivel && !conectadas.value.includes(falta.id)) {
+    const nome = modelos.find(m => m.id === modelo.value)?.nome ?? ''
+    return conectarAntes(editor, falta.id, p, ctxDado, props.t.conectar.paraOModelo(nome, falta.nome))
+  }
   const ctx = ctxDado ?? caixa.value ?? contextoDe(editor)
   caixa.value = null
   const modo: Modo = ctx.campoVazio ? 'vazio'
@@ -882,35 +902,20 @@ const nomeDoModelo = computed(() => modelos.find(m => m.id === modelo.value)?.no
         leave-to-class="opacity-0"
       >
         <div v-if="caixa" :key="caixa.chave" data-caixa-do-beni class="absolute inset-x-2 z-30 origin-top scroll-mb-20" :style="{ top: `${caixa.topo}px` }">
-          <Transition
-            mode="out-in"
-            enter-active-class="transition duration-150 ease-out"
-            enter-from-class="opacity-0 -translate-y-1"
-            leave-active-class="transition duration-100 ease-in"
-            leave-to-class="opacity-0"
-          >
-            <AtivarIa
-              v-if="caixa.modo === 'ativar'"
-              :t="t"
-              :papel="papel"
-              :pendente="caixa.pendente?.rotulo"
-              @ativada="aoAtivar"
-              @fechar="fecharCaixa()"
-            />
-            <CaixaDoBeni
-              v-else
-              v-model:agente="agente"
-              v-model:modelo="modelo"
-              v-model:usar-campos="usarCampos"
-              :t="t"
-              :com-selecao="caixa.comSelecao"
-              :campo-vazio="caixa.campoVazio"
-              :rotulo-do-campo="rotulo"
-              :pedidos-salvos="pedidosSalvos"
-              @pedir="(p) => ed() && executar(ed()!, p)"
-              @fechar="fecharCaixa()"
-            />
-          </Transition>
+          <PedirAtivacao v-if="caixa.modo === 'pedirAtivacao'" :t="t" @fechar="fecharCaixa()" />
+          <CaixaDoBeni
+            v-else
+            v-model:agente="agente"
+            v-model:modelo="modelo"
+            v-model:usar-campos="usarCampos"
+            :t="t"
+            :com-selecao="caixa.comSelecao"
+            :campo-vazio="caixa.campoVazio"
+            :rotulo-do-campo="rotulo"
+            :pedidos-salvos="pedidosSalvos"
+            @pedir="(p) => ed() && executar(ed()!, p)"
+            @fechar="fecharCaixa()"
+          />
         </div>
       </Transition>
 

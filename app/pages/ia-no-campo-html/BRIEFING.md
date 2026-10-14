@@ -75,4 +75,5 @@ Cópia de `pastas-do-item` (`_CascaDoItem.vue` e `_PainelDoItem.vue`), que copio
   - na 1ª instalação, a chave "Alterar Token" já vem ligada, sem token nenhum para alterar;
   - o rótulo "Api Key" fica em inglês na tela em português;
   - nada diz onde pegar a chave nem que a conta OpenAI precisa de créditos.
+- **Modelos de 4 empresas, chave de 1 (rodada 7):** o cadastro de agente (Configurações › Agentes de IA, en-docs "AI Agents") oferece modelos Claude, GPT, Gemini e DeepSeek, mas a IA do campo HTML depende só da chave da OpenAI. Não está claro quem paga e qual chave atende um agente com Claude: perguntar ao time antes de levar o modal adiante.
 - **Alinhamento e emoji precisam de extensão própria** no editor (TextAlign e Emoji do TipTap). O protótipo não as tem: o alinhamento é maquete e o emoji insere o caractere direto.

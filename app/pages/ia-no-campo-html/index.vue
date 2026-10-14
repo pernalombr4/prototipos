@@ -12,6 +12,8 @@ import { campos, categoria, item, pastas, workspace } from './mocks'
 import CascaDoItem from './_CascaDoItem.vue'
 import PainelDoItem from './_PainelDoItem.vue'
 import CampoHtml from './_CampoHtml.vue'
+import ConectarIa from './_ConectarIa.vue'
+import { useIasConectadas } from './ias'
 
 import briefingMd from './BRIEFING.md?raw'
 import pesquisaRodada1 from './PESQUISA.md?raw'
@@ -26,9 +28,9 @@ ${pesquisaRodada1}`
 
 definePageMeta({
   titulo: 'IA no campo HTML',
-  descricao: 'O campo HTML redesenhado no padrão do Notion, com o BENI: barra da seleção, cor, link com busca, "/", agentes e modelo.',
+  descricao: 'O campo HTML redesenhado no padrão do Notion, com o BENI: barra da seleção, cor, link com busca, "/", agentes, modelo e a conexão de ChatGPT, Claude ou Gemini sem sair do campo.',
   status: 'em-revisao',
-  atualizado: '2026-10-09',
+  atualizado: '2026-10-14',
   tela: 'Tela do item, campo Editor de texto HTML',
 })
 
@@ -43,6 +45,26 @@ const estadoIa = computed<EstadoIa>({
   get: () => (['ligada', 'desligada', 'membro', 'erro'].includes(String(route.query.ia)) ? route.query.ia : 'ligada') as EstadoIa,
   set: v => router.replace({ query: { ...route.query, ia: v } }),
 })
+
+/*
+ * Ligada e com erro: o workspace tem a OpenAI conectada, como hoje. Desligada
+ * (quem administra ou membro): nenhuma. Conectar pelo modal leva o andaime a
+ * "Ligada" sem trocar o que foi conectado.
+ */
+const conectadas = useIasConectadas()
+let pelaConexao = false
+watch(estadoIa, (e) => {
+  if (pelaConexao) {
+    pelaConexao = false
+    return
+  }
+  conectadas.value = e === 'ligada' || e === 'erro' ? ['openai'] : []
+}, { immediate: true })
+function aoConectar() {
+  if (estadoIa.value === 'ligada' || estadoIa.value === 'erro') return
+  pelaConexao = true
+  estadoIa.value = 'ligada'
+}
 
 /* ---------- tela ---------- */
 const painelRecolhido = ref(false)
@@ -98,7 +120,7 @@ async function salvar() {
                   <!--
                     Só no navegador: o editor não renderiza no servidor (lá o Nuxt UI e as
                     extensões carregariam 2 cópias do ProseMirror).
-                    Ligar ou desligar a IA não remonta o editor: desligada, a IA abre a ativação (rodada 6).
+                    Ligar ou desligar a IA não remonta o editor: desligada, a IA abre a conexão (rodadas 6 e 7).
                   -->
                   <ClientOnly v-if="c.tipo === 'html'">
                     <CampoHtml
@@ -106,9 +128,7 @@ async function salvar() {
                       v-model="valores[c.chave]!"
                       :t="t"
                       :rotulo="c.rotulo"
-                      :ia-ligada="estadoIa === 'ligada' || estadoIa === 'erro'"
                       :papel="estadoIa === 'membro' ? 'membro' : 'admin'"
-                      @ativar="estadoIa = 'ligada'"
                       :falhar="estadoIa === 'erro'"
                     />
                     <template #fallback>
@@ -151,6 +171,9 @@ async function salvar() {
         </section>
       </div>
     </CascaDoItem>
+
+    <!-- "Conectar uma IA": um modal só na página, aberto pelo campo (rodada 7) -->
+    <ConectarIa :t="t" @conectada="aoConectar" />
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">

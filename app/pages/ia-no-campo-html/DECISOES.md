@@ -148,3 +148,24 @@
 - **CSS fora da prop:** nenhum.
 - **Detector de seta:** `proto-ativar-ia-*.png` saem com "SETA" em x=1565, que é o topo da barra de rolagem da página (recorte ampliado conferido), não o ponteiro.
 - **Ver:** `?ia=desligada` e `?ia=membro` · `evidencias/proto-ativar-ia-admin.png`, `evidencias/proto-ativar-ia-membro-es.png`, `evidencias/hoje-openai-*.png`
+
+## Rodada 7 · 2026-10-14
+- **Pedido (literal):** "o modelo que voce fez ali pro campo, pra quando nao tem ia ativada, nao pod comportar só o chatgpt. hoje temos integraçao só com eles, mas teremos depois com claude, kimi... outras IAs. isso deve ser comportado ali. pode até simular com claude e gemini ali por exemplo. como seria a jornada? pode abrir um modal renderizando a nossa tela de integraçoes, por exemplo, e o cara executa por ali e já volta no campo com tudo ativado, pra facilitar. o quer acha?" e, depois da proposta, "pode aplicar"
+- **Mudou:**
+  - quem administra, com a IA desligada, vai do botão IA, do Ctrl J ou do "/" direto ao modal **"Conectar uma IA"** (`_ConectarIa.vue`), um só na página;
+  - o modal é a seção Inteligência Artificial de Configurações › Integrações, não a tela inteira: 1 cartão por IA, no formato do cartão de hoje (logo, frase, botão);
+    - ChatGPT (OpenAI): a integração que existe hoje;
+    - Claude (Anthropic) e Gemini (Google): simulados;
+    - Kimi (Moonshot AI) e DeepSeek: "Em breve", sem clique;
+  - "Conectar" leva ao passo da chave no mesmo modal: onde pegar a chave de cada empresa, créditos, olho, erro no campo e o formato de cada chave (`sk-`, `sk-ant-`, `AIza`);
+  - conectada: os modelos liberados, "Conectar outra IA" e "Voltar ao campo"; ao voltar, a ação escolhida roda, ou a caixa do BENI abre;
+  - o seletor **Modelo** passa a depender das IAs conectadas (`ias.ts`): liberados primeiro; depois "Precisam de uma IA conectada", com "Conectar"; por último "Em breve". O clique em "Conectar" abre o modal no passo da chave e, conectada, o modelo fica escolhido;
+  - agente com modelo de IA não conectada (o Assistente Jurídico usa Claude Opus 4.6): o pedido abre o modal no Claude, com o motivo, e roda ao voltar;
+  - quem é membro continua com o pedido de ativação na caixa (`_PedirAtivacao.vue`, antes `_AtivarIa.vue`), agora citando ChatGPT, Claude ou Gemini.
+- **Descartado:** a caixa de ativação dentro do campo da rodada 6 (só OpenAI). Motivo: com várias IAs, a lista e o formulário da chave não cabem embaixo do campo.
+- **Não foi a tela inteira de Integrações:** ela tem dezenas de integrações e, hoje, rótulos com chave de tradução e a página de apps em branco (BRIEFING, "Achados").
+- **Andaime:** "Ligada" e "Responde com erro" têm a OpenAI conectada, como hoje; as desligadas, nenhuma. Conectar pelo modal leva o andaime a "Ligada" e mantém o que foi conectado.
+- **Fronteira:** muda o que acontece sem IA conectada e o seletor de Modelo; não mudam a caixa do BENI, a proposta, o seletor de agente nem a tela de Configurações.
+- **Simulação:** a chave não sai do navegador; vale qualquer chave no formato da empresa.
+- **CSS fora da prop:** nenhum.
+- **Ver:** `?ia=desligada` (modal) e `?ia=ligada` com o Assistente Jurídico (modelo sem conexão) · `evidencias/proto-conectar-ia-lista-es.png`, `evidencias/proto-conectar-ia-pelo-modelo.png`, `evidencias/proto-conectar-ia-conectada.png`
