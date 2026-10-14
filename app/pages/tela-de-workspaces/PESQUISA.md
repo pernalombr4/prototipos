@@ -181,3 +181,32 @@ pessoas existe o **"custom initials avatar"**: iniciais digitadas sobre uma cor 
 inglês. O ENSPACE hoje tem o mesmo problema, agravado: o "Busca Avançada" mostra o slug
 (`3d-cursor`, `accessibility-alt`) como se fosse o nome. Manter a busca em português por
 sinônimo — "balança", "chamado", "caminhão" — continua sendo o pedaço original da proposta.
+
+---
+
+## Pesquisa complementar: lista longa de espaços (14/10/2026)
+
+**Pergunta:** como os produtos tratam quem pertence a muitos espaços (a conta medida no develop tem 18),
+depois que a tela já diz o que é. Feita pela documentação oficial e por fóruns dos produtos; sem prints.
+
+| Produto | Como resolve | O que a rodada 17 usou |
+|---|---|---|
+| **HubSpot** | Em "All accounts", a pessoa fixa contas no topo e marca uma com "Set as default": ela abre direto no login. A escolha é da pessoa; o admin não força. | O workspace padrão ("Abrir sempre este ao entrar") |
+| **Microsoft Teams** | Em "Accounts and orgs", dá para ocultar e sair de organizações, para limpar uma lista que cresceu. Mostra também a atividade não lida de cada organização num painel. | Ocultar da lista e sair do workspace |
+| **Slack** | `Ctrl+1` a `9` trocam de workspace, `Ctrl+Shift+S` abre o seletor, e um número no ícone avisa onde há atividade não lida. | O atalho de teclado para a busca |
+| **Shopify** | Num fórum, lojistas com mais de 5 lojas contam que a tela "Select store" não mostrava que rolava, e acharam que a loja tinha sumido. | A busca no topo, alcançável sem rolar |
+| **QuickBooks para contadores** | Lista de clientes com troca rápida de empresa, para quem atende muitos clientes. | Motivou agrupar; o ENSPACE não tem o conceito de cliente, então a rodada fez etiquetas pessoais |
+| **Atlassian Home e Figma** | Mostram itens recentes de todos os sites ou times numa página só. | Descartado pela redatora |
+
+🔗 https://knowledge.hubspot.com/account-management/manage-multiple-hubspot-accounts ·
+https://support.microsoft.com/office/manage-accounts-and-organizations-in-microsoft-teams-7b221128-6643-465c-a317-679e48cd2ce9 ·
+https://slack.com/help/articles/201374536 ·
+https://community.shopify.com/t/shopify-admin-select-store-screen-feedback-complaint/248099 ·
+https://quickbooks.intuit.com/learn-support/en-us/help-articles/how-to-switch-between-companies/00/238972 ·
+https://support.atlassian.com/platform-experiences/docs/what-is-the-new-navigation-in-atlassian-home ·
+https://help.figma.com/hc/en-us/articles/30926159906967-FD4B-Tour-the-file-browser-and-customize-your-profile
+
+### O que nenhum deles faz
+
+**Etiqueta pessoal para agrupar os próprios espaços.** Nos 6 pesquisados, a pessoa fixa, oculta ou ordena, mas
+nenhum deixa a pessoa criar os próprios grupos. É o pedaço original da rodada 17.

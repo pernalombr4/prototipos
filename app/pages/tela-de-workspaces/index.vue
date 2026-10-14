@@ -4,10 +4,13 @@ import {
   workspaceUnico,
   usuario,
   corDoPapel,
+  etiquetasIniciais,
   type Workspace,
+  type Etiqueta,
 } from './mocks'
 import { textos } from './textos'
 import { type EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
+import type { DropdownMenuItem } from '@nuxt/ui'
 import ModalCriarWorkspace from './_ModalCriarWorkspace.vue'
 
 // O contexto do protótipo vem dos próprios .md desta pasta, como texto.
@@ -20,7 +23,7 @@ definePageMeta({
   titulo: 'Tela de entrada (Workspaces)',
   descricao: 'Fazer a pessoa entender que é uma tela de escolha, e não o lugar onde se abre chamado.',
   status: 'em-revisao',
-  atualizado: '2026-09-16',
+  atualizado: '2026-10-14',
   tela: 'Proposta',
 })
 
@@ -67,7 +70,23 @@ const convitesRecusados = ref<number[]>([])
 const convitesAceitos = ref<number[]>([])
 const favoritados = ref<number[]>([])
 
-const visiveis = computed(() => base.value.filter(w => !convitesRecusados.value.includes(w.id)))
+/* Rodada 17: o que a pessoa decide sobre a própria lista. Tudo em memória. */
+/** Workspace que abre direto no login. null = a pessoa escolhe nesta tela. */
+const padrao = ref<number | null>(null)
+/** Tirados da lista pela pessoa. Continuam acessíveis, e a busca acha. */
+const ocultos = ref<number[]>(workspaces.filter(w => w.oculto).map(w => w.id))
+const mostrarOcultos = ref(false)
+/** Workspaces de que a pessoa saiu: deixam de existir para ela. */
+const saidos = ref<number[]>([])
+/** Etiquetas pessoais: a lista dela e quais cada workspace leva. */
+const etiquetas = ref<Etiqueta[]>(etiquetasIniciais.map(e => ({ ...e })))
+const etiquetasPorWorkspace = ref<Record<number, string[]>>(
+  Object.fromEntries(workspaces.map(w => [w.id, [...w.etiquetas]])),
+)
+const agruparPorEtiqueta = ref(false)
+
+const visiveis = computed(() => base.value.filter(w =>
+  !convitesRecusados.value.includes(w.id) && !saidos.value.includes(w.id)))
 
 const pendentes = computed(() =>
   visiveis.value.filter(w => w.convitePendente && !convitesAceitos.value.includes(w.id)))
@@ -79,36 +98,108 @@ function ehFavorito(w: Workspace) {
   return favoritados.value.includes(w.id) ? !w.favorito : w.favorito
 }
 
+function estaOculto(w: Workspace) {
+  return ocultos.value.includes(w.id)
+}
+
+/** Os que aparecem na lista sem busca: tudo o que a pessoa não ocultou. */
+const naLista = computed(() => visiveis.value.filter(w => !estaOculto(w)))
+
 const ultimo = computed(() =>
   [...disponiveis.value]
-    .filter(w => w.ultimoAcessoMin !== null)
+    .filter(w => w.ultimoAcessoMin !== null && !estaOculto(w))
     .sort((a, b) => (a.ultimoAcessoMin ?? 0) - (b.ultimoAcessoMin ?? 0))[0])
 
-/** Convite ainda não respondido — o card entra na lista com outro corpo. */
+/** O bloco do topo: o padrão, se a pessoa escolheu um; senão, o último usado. */
+const destaque = computed(() =>
+  disponiveis.value.find(w => w.id === padrao.value) ?? ultimo.value)
+
+/** Convite ainda não respondido: o card entra na lista com outro corpo. */
 function estaPendente(w: Workspace) {
   return !!w.convitePendente && !convitesAceitos.value.includes(w.id)
 }
 
+function etiquetasDe(w: Workspace): Etiqueta[] {
+  const ids = etiquetasPorWorkspace.value[w.id] ?? []
+  return etiquetas.value.filter(e => ids.includes(e.id))
+}
+
+/** Busca sem acento e sem caixa: "juridico" acha "Jurídico". */
+function normalizar(texto: string) {
+  return texto.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
+}
+
+function textoDeBusca(w: Workspace) {
+  return normalizar([w.name, w.reference, w.description ?? '', ...etiquetasDe(w).map(e => e.nome)].join(' '))
+}
+
 const listados = computed(() => {
-  const termo = busca.value.trim().toLowerCase()
-  // Os pendentes também aparecem aqui: o aviso do topo é atalho, não
-  // substituto do card. É assim que o produto mostra hoje.
-  let lista = visiveis.value.filter(w => w.id !== ultimo.value?.id)
+  const termo = normalizar(busca.value.trim())
+  // O destaque do topo é atalho: o workspace continua na lista (regra 20).
+  // Os pendentes também aparecem aqui, como o produto mostra hoje.
+  // Oculto sai da lista, mas a busca ainda acha, e "Mostrar" traz de volta.
+  let lista = visiveis.value.filter(w => termo || mostrarOcultos.value || !estaOculto(w))
 
   if (aba.value === 'favoritos') lista = lista.filter(w => ehFavorito(w))
   if (aba.value === 'recentes') lista = lista.filter(w => w.ultimoAcessoMin !== null)
-  if (termo) {
-    lista = lista.filter(w =>
-      w.name.toLowerCase().includes(termo) || w.reference.includes(termo))
-  }
+  if (termo) lista = lista.filter(w => textoDeBusca(w).includes(termo))
   return lista.sort((a, b) => (a.ultimoAcessoMin ?? 9e9) - (b.ultimoAcessoMin ?? 9e9))
 })
 
+/** Agrupado por etiqueta, o workspace com duas etiquetas aparece nos dois grupos. */
+interface Grupo { id: string, nome: string | null, itens: Workspace[] }
+const grupos = computed<Grupo[]>(() => {
+  if (!agruparPorEtiqueta.value) return [{ id: 'todos', nome: null, itens: listados.value }]
+  const porEtiqueta = etiquetas.value.map(e => ({
+    id: e.id,
+    nome: e.nome,
+    itens: listados.value.filter(w => (etiquetasPorWorkspace.value[w.id] ?? []).includes(e.id)),
+  }))
+  porEtiqueta.push({
+    id: 'sem-etiqueta',
+    nome: t.value.semEtiqueta,
+    itens: listados.value.filter(w => !etiquetasDe(w).length),
+  })
+  return porEtiqueta.filter(g => g.itens.length)
+})
+
+// Os contadores contam o que a aba mostra sem busca: a lista sem os ocultos.
 const abas = computed(() => [
-  { label: t.value.todos(visiveis.value.length), value: 'todos' },
-  { label: t.value.favoritos(disponiveis.value.filter(w => ehFavorito(w)).length), value: 'favoritos' },
-  { label: t.value.recentes(disponiveis.value.filter(w => w.ultimoAcessoMin !== null).length), value: 'recentes' },
+  { label: t.value.todos(naLista.value.length), value: 'todos' },
+  { label: t.value.favoritos(naLista.value.filter(w => !estaPendente(w) && ehFavorito(w)).length), value: 'favoritos' },
+  { label: t.value.recentes(naLista.value.filter(w => !estaPendente(w) && w.ultimoAcessoMin !== null).length), value: 'recentes' },
 ])
+
+const totalOcultos = computed(() => visiveis.value.filter(w => estaOculto(w)).length)
+
+/* ------------------------------- busca ------------------------------- */
+const campoDeBusca = useTemplateRef<{ inputRef: HTMLInputElement | null }>('campoDeBusca')
+/** Busca só faz sentido com mais de um workspace. */
+const podeBuscar = computed(() => estado.value === 'normal' && visiveis.value.length > 1)
+/** Com um workspace só, o bloco do topo é a única porta: a lista repetiria o mesmo card. */
+const mostrarLista = computed(() => visiveis.value.length > 1)
+
+function focarBusca() {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+  campoDeBusca.value?.inputRef?.focus()
+}
+
+// "/" é o atalho do exemplo do Nuxt UI; Ctrl+K (⌘K no Mac) é o de Slack e Linear.
+defineShortcuts({
+  '/': focarBusca,
+  'meta_k': { handler: focarBusca, usingInput: true },
+})
+
+// Quem busca procura em tudo, não só na aba aberta.
+watch(busca, (agora, antes) => {
+  if (agora && !antes) aba.value = 'todos'
+})
+
+/** Enter entra no primeiro resultado, como o produto faz hoje. */
+function entrarNoPrimeiro() {
+  const primeiro = listados.value.find(w => !estaPendente(w))
+  if (busca.value && primeiro) entrar(primeiro)
+}
 
 /* -------- identidade visual por workspace --------
    Cor derivada do nome, dentro da paleta da marca (main.css). Não é
@@ -136,6 +227,16 @@ const colunasDaLista = computed<EnTableColumn[]>(() => [
   { key: 'ultimoAcessoMin', label: t.value.colunaUltimoAcesso, sortable: true },
   { key: 'acoes', label: '', align: 'right' },
 ])
+
+/** A linha de baixo do card: o que importa para decidir, sem repetir o que já está acima. */
+function metaDe(w: Workspace) {
+  const partes: string[] = []
+  if (padrao.value === w.id) partes.push(t.value.metaPadrao)
+  if (estaOculto(w)) partes.push(t.value.oculto)
+  partes.push(t.value.pessoas(w.members_count ?? 0))
+  if (padrao.value !== w.id) partes.push(tempoRelativo(w.ultimoAcessoMin))
+  return partes.join(' · ')
+}
 
 /* ---------------------------- ações (maquete) ---------------------------- */
 const entrando = ref<number | null>(null)
@@ -167,6 +268,138 @@ function aceitar(w: Workspace) {
 function recusar(w: Workspace) {
   convitesRecusados.value.push(w.id)
   toast.add({ title: t.value.conviteRecusado(w.name), icon: 'i-lucide-x', color: 'neutral' })
+}
+
+/* ------------- rodada 17: padrão, ocultar, sair e etiquetas ------------- */
+function alternarPadrao(w: Workspace) {
+  if (padrao.value === w.id) {
+    padrao.value = null
+    toast.add({ title: t.value.padraoRemovido, icon: 'i-lucide-house', color: 'neutral' })
+    return
+  }
+  padrao.value = w.id
+  toast.add({
+    title: t.value.padraoDefinido(w.name),
+    description: t.value.padraoDefinidoDescricao,
+    icon: 'i-lucide-house',
+    color: 'primary',
+  })
+}
+
+function alternarOculto(w: Workspace) {
+  const i = ocultos.value.indexOf(w.id)
+  if (i !== -1) {
+    ocultos.value.splice(i, 1)
+    return
+  }
+  ocultos.value.push(w.id)
+  // Ocultar o padrão desfaz o padrão: não se abre direto o que se tirou da lista.
+  const eraPadrao = padrao.value === w.id
+  if (eraPadrao) padrao.value = null
+  toast.add({
+    title: t.value.ocultadoToast(w.name),
+    description: t.value.ocultadoDescricao,
+    icon: 'i-lucide-eye-off',
+    color: 'neutral',
+    actions: [{
+      label: t.value.desfazer,
+      color: 'neutral',
+      variant: 'outline',
+      onClick: () => {
+        ocultos.value = ocultos.value.filter(id => id !== w.id)
+        if (eraPadrao) padrao.value = w.id
+      },
+    }],
+  })
+}
+
+/** Sair pede confirmação: é a única ação desta tela que não se desfaz. */
+const saindoDe = ref<Workspace | null>(null)
+const sairAberto = ref(false)
+const saindo = ref(false)
+
+function pedirSaida(w: Workspace) {
+  saindoDe.value = w
+  sairAberto.value = true
+}
+
+function confirmarSaida() {
+  const w = saindoDe.value
+  if (!w) return
+  saindo.value = true
+  setTimeout(() => {
+    saidos.value.push(w.id)
+    if (padrao.value === w.id) padrao.value = null
+    saindo.value = false
+    sairAberto.value = false
+    toast.add({ title: t.value.saiuDe(w.name), icon: 'i-lucide-log-out', color: 'neutral' })
+  }, 600)
+}
+
+const editandoEtiquetasDe = ref<Workspace | null>(null)
+const novaEtiqueta = ref('')
+const etiquetasAberto = ref(false)
+
+function editarEtiquetas(w: Workspace) {
+  editandoEtiquetasDe.value = w
+  novaEtiqueta.value = ''
+  etiquetasAberto.value = true
+}
+
+function temEtiqueta(w: Workspace, id: string) {
+  return (etiquetasPorWorkspace.value[w.id] ?? []).includes(id)
+}
+
+function alternarEtiqueta(w: Workspace, id: string) {
+  const atuais = etiquetasPorWorkspace.value[w.id] ?? []
+  etiquetasPorWorkspace.value[w.id] = atuais.includes(id)
+    ? atuais.filter(e => e !== id)
+    : [...atuais, id]
+}
+
+function criarEtiqueta() {
+  const w = editandoEtiquetasDe.value
+  const nome = novaEtiqueta.value.trim()
+  if (!w || !nome) return
+  const existente = etiquetas.value.find(e => normalizar(e.nome) === normalizar(nome))
+  const id = existente?.id ?? `etiqueta-${Date.now()}`
+  if (!existente) etiquetas.value.push({ id, nome })
+  if (!temEtiqueta(w, id)) alternarEtiqueta(w, id)
+  novaEtiqueta.value = ''
+}
+
+/** O menu "⋯" do card e da linha. Sempre visível, não só no hover (rodada 11). */
+function acoesDe(w: Workspace): DropdownMenuItem[][] {
+  const ehProprietario = w.papel === 'Proprietário'
+  return [
+    [
+      {
+        label: padrao.value === w.id ? t.value.voltarAEscolher : t.value.abrirSempreAoEntrar,
+        icon: 'i-lucide-house',
+        onSelect: () => alternarPadrao(w),
+      },
+      {
+        label: t.value.etiquetas,
+        icon: 'i-lucide-tags',
+        onSelect: () => editarEtiquetas(w),
+      },
+    ],
+    [
+      {
+        label: estaOculto(w) ? t.value.mostrarNaLista : t.value.ocultarDaLista,
+        icon: estaOculto(w) ? 'i-lucide-eye' : 'i-lucide-eye-off',
+        onSelect: () => alternarOculto(w),
+      },
+      {
+        label: t.value.sairDoWorkspace,
+        icon: 'i-lucide-log-out',
+        color: 'error',
+        disabled: ehProprietario,
+        description: ehProprietario ? t.value.proprietarioNaoSai : undefined,
+        onSelect: () => pedirSaida(w),
+      },
+    ],
+  ]
 }
 
 function tentarDeNovo() {
@@ -204,9 +437,9 @@ function workspaceCriado(nome: string) {
     </header>
 
     <UContainer class="max-w-5xl py-10 sm:py-14">
-      <!-- 1. A tela diz o que é — e o atalho de criar continua no topo ---- -->
+      <!-- 1. A tela diz o que é, a busca fica à mão, e o atalho de criar continua no topo -->
       <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div class="animate-[entrada_0.4s_ease-out_both]">
+        <div class="min-w-0 flex-1 animate-[entrada_0.4s_ease-out_both]">
           <p class="text-sm text-muted">
             {{ t.saudacao(usuario.nome.split(' ')[0]!) }}
           </p>
@@ -219,6 +452,42 @@ function workspaceCriado(nome: string) {
               t.explicacaoDepois }}
           </p>
 
+          <!-- Rodada 17: a busca volta para o topo, onde o produto já a tem.
+               "/" e Ctrl+K trazem o foco de qualquer ponto da página. -->
+          <div v-if="podeBuscar" class="mt-5 max-w-md">
+            <UInput
+              ref="campoDeBusca"
+              v-model="busca"
+              icon="i-lucide-search"
+              :placeholder="t.buscarEntre(naLista.length)"
+              size="lg"
+              class="w-full"
+              :ui="{ trailing: 'pe-1.5' }"
+              @keydown.enter="entrarNoPrimeiro"
+              @keydown.esc="busca = ''"
+            >
+              <template #trailing>
+                <UButton
+                  v-if="busca"
+                  color="neutral"
+                  variant="link"
+                  size="sm"
+                  icon="i-lucide-circle-x"
+                  :aria-label="t.limparBusca"
+                  @click="busca = ''"
+                />
+                <UKbd v-else value="/" />
+              </template>
+            </UInput>
+            <Transition
+              enter-active-class="transition duration-200 ease-out"
+              enter-from-class="opacity-0 -translate-y-1"
+            >
+              <p v-if="busca" class="mt-1.5 text-xs text-muted">
+                {{ t.dicaBusca }}
+              </p>
+            </Transition>
+          </div>
         </div>
 
         <!-- Atalho no topo, como sempre esteve. Secundário no peso, não no
@@ -257,7 +526,8 @@ function workspaceCriado(nome: string) {
       </div>
 
       <template v-else>
-        <!-- 2. Convite pendente vira ação -->
+        <!-- 2. Convite pendente vira ação. Sai de cena enquanto se busca:
+             os resultados sobem para logo abaixo do campo. -->
         <TransitionGroup
           enter-active-class="transition duration-300 ease-out"
           enter-from-class="opacity-0 -translate-y-2"
@@ -265,7 +535,7 @@ function workspaceCriado(nome: string) {
           leave-to-class="opacity-0 scale-95"
         >
           <UAlert
-            v-for="convite in pendentes"
+            v-for="convite in (busca ? [] : pendentes)"
             :key="convite.id"
             class="mb-4"
             icon="i-lucide-mail-open"
@@ -281,54 +551,95 @@ function workspaceCriado(nome: string) {
           />
         </TransitionGroup>
 
-        <!-- 3. Continue de onde parou -->
-        <section
-          v-if="ultimo"
-          class="mb-8 animate-[entrada_0.45s_ease-out_both] rounded-xl border border-default bg-elevated/40 p-5 transition-shadow hover:shadow-md sm:p-6"
-          style="animation-delay: 80ms"
+        <!-- 3. Continue de onde parou, ou o padrão que a pessoa escolheu -->
+        <Transition
+          enter-active-class="transition duration-300 ease-out"
+          enter-from-class="opacity-0 -translate-y-2"
+          leave-active-class="transition duration-150 ease-in"
+          leave-to-class="opacity-0 -translate-y-2"
         >
-          <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
-            {{ estado === 'unico' ? t.seuWorkspace : t.continueDeOndeParou }}
-          </p>
-          <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex min-w-0 items-center gap-4">
-              <div class="flex size-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 transition-transform duration-300 hover:scale-105">
-                <UIcon :name="ultimo.icon" class="size-6 text-primary" />
+          <section
+            v-if="destaque && !busca"
+            class="mb-8 animate-[entrada_0.45s_ease-out_both] rounded-xl border bg-elevated/40 p-5 transition-[box-shadow,border-color] duration-300 hover:shadow-md sm:p-6"
+            :class="padrao === destaque.id ? 'border-primary/40' : 'border-default'"
+            style="animation-delay: 80ms"
+          >
+            <p class="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted">
+              <UIcon v-if="padrao === destaque.id" name="i-lucide-house" class="size-3.5" />
+              {{ padrao === destaque.id
+                ? t.abreAoEntrar
+                : estado === 'unico' ? t.seuWorkspace : t.continueDeOndeParou }}
+            </p>
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex min-w-0 items-center gap-4">
+                <div class="flex size-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 transition-transform duration-300 hover:scale-105">
+                  <UIcon :name="destaque.icon!" class="size-6 text-primary" />
+                </div>
+                <div class="min-w-0">
+                  <h2 class="truncate text-lg font-semibold text-highlighted">
+                    {{ destaque.name }}
+                  </h2>
+                  <p class="truncate text-sm text-muted">
+                    {{ destaque.description || tempoRelativo(destaque.ultimoAcessoMin) }}
+                  </p>
+                </div>
               </div>
-              <div class="min-w-0">
-                <h2 class="truncate text-lg font-semibold text-highlighted">
-                  {{ ultimo.name }}
-                </h2>
-                <p class="truncate text-sm text-muted">
-                  {{ ultimo.description || tempoRelativo(ultimo.ultimoAcessoMin) }}
-                </p>
-              </div>
+              <UButton
+                :label="t.entrarEm(destaque.name)"
+                icon="i-lucide-log-in"
+                size="lg"
+                :loading="entrando === destaque.id"
+                class="shrink-0 justify-center transition-transform hover:scale-[1.02]"
+                @click="entrar(destaque)"
+              />
             </div>
-            <UButton
-              :label="t.entrarEm(ultimo.name)"
-              icon="i-lucide-log-in"
-              size="lg"
-              :loading="entrando === ultimo.id"
-              class="shrink-0 justify-center transition-transform hover:scale-[1.02]"
-              @click="entrar(ultimo)"
-            />
-          </div>
-        </section>
 
-        <!-- 4. Filtros, busca e o alternador card / lista -->
-        <section v-if="listados.length || busca">
+            <!-- Rodada 17: o padrão se escolhe onde ele importa, a um clique.
+                 É o que deixa quem só abre chamado nunca mais ver esta tela. -->
+            <div class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-default pt-3 text-sm">
+              <template v-if="padrao === destaque.id">
+                <span class="text-muted">{{ t.proximaVezDireto(destaque.name) }}</span>
+                <UButton
+                  :label="t.voltarAEscolher"
+                  color="neutral"
+                  variant="link"
+                  size="sm"
+                  class="px-0"
+                  @click="alternarPadrao(destaque)"
+                />
+              </template>
+              <UButton
+                v-else
+                :label="t.abrirSempreEste"
+                icon="i-lucide-house"
+                color="neutral"
+                variant="link"
+                size="sm"
+                class="px-0"
+                @click="alternarPadrao(destaque)"
+              />
+            </div>
+          </section>
+        </Transition>
+
+        <!-- 4. Abas, agrupar por etiqueta e o alternador card / lista -->
+        <section v-if="mostrarLista">
           <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <UTabs v-model="aba" :items="abas" :content="false" color="primary" variant="link" size="sm" />
 
             <div class="flex items-center gap-2">
-              <UInput
-                v-model="busca"
-                icon="i-lucide-search"
-                :placeholder="t.buscarWorkspace"
-                size="sm"
-                class="w-full sm:w-56"
-              />
-              <!-- Card é o padrão. Lista é opção — e a troca é visível. -->
+              <UTooltip :text="t.etiquetasDescricao">
+                <UButton
+                  icon="i-lucide-tags"
+                  :label="t.agruparPorEtiqueta"
+                  size="xs"
+                  color="neutral"
+                  :variant="agruparPorEtiqueta ? 'soft' : 'ghost'"
+                  :aria-pressed="agruparPorEtiqueta"
+                  @click="agruparPorEtiqueta = !agruparPorEtiqueta"
+                />
+              </UTooltip>
+              <!-- Card é o padrão. Lista é opção, e a troca é visível. -->
               <div class="flex shrink-0 rounded-md border border-default p-0.5">
                 <UButton
                   icon="i-lucide-layout-grid"
@@ -352,219 +663,317 @@ function workspaceCriado(nome: string) {
             </div>
           </div>
 
-          <!-- CARDS (padrão) -->
-          <TransitionGroup
-            v-if="visual === 'cards'"
-            tag="div"
-            class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-            enter-active-class="transition duration-300 ease-out"
-            enter-from-class="opacity-0 translate-y-3"
-            leave-active-class="transition duration-150 ease-in absolute"
-            leave-to-class="opacity-0 scale-95"
-            move-class="transition-transform duration-300"
-          >
-            <article
-              v-for="(w, i) in listados"
-              :key="w.id"
-              class="group relative flex animate-[entrada_0.4s_ease-out_both] flex-col rounded-xl border bg-elevated/20 p-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg focus-within:-translate-y-1 focus-within:shadow-lg"
-              :class="estaPendente(w)
-                ? 'border-secondary/50 border-dashed hover:border-secondary hover:shadow-secondary/5'
-                : 'border-default hover:border-primary/60 hover:shadow-primary/5 focus-within:border-primary'"
-              :style="{ animationDelay: `${i * 55}ms` }"
-            >
-              <!-- topo: identidade à esquerda, metadado e favorito à direita -->
-              <div class="relative z-10 flex items-start justify-between gap-2">
-                <div
-                  class="flex size-10 items-center justify-center rounded-lg transition-colors"
-                  :class="estaPendente(w) ? 'bg-secondary/10' : corDoWorkspace(w)"
+          <template v-if="listados.length">
+            <div v-for="grupo in grupos" :key="grupo.id" class="mb-8 last:mb-0">
+              <h3
+                v-if="grupo.nome"
+                class="mb-3 flex animate-[entrada_0.3s_ease-out_both] items-center gap-2 text-sm font-semibold text-highlighted"
+              >
+                <UIcon name="i-lucide-tag" class="size-4 text-muted" />
+                {{ grupo.nome }}
+                <span class="font-normal text-muted">{{ grupo.itens.length }}</span>
+              </h3>
+
+              <!-- CARDS (padrão) -->
+              <TransitionGroup
+                v-if="visual === 'cards'"
+                tag="div"
+                class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                enter-active-class="transition duration-300 ease-out"
+                enter-from-class="opacity-0 translate-y-3"
+                leave-active-class="transition duration-150 ease-in absolute"
+                leave-to-class="opacity-0 scale-95"
+                move-class="transition-transform duration-300"
+              >
+                <article
+                  v-for="(w, i) in grupo.itens"
+                  :key="w.id"
+                  class="group relative flex animate-[entrada_0.4s_ease-out_both] flex-col rounded-xl border bg-elevated/20 p-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg focus-within:-translate-y-1 focus-within:shadow-lg"
+                  :class="[
+                    estaPendente(w)
+                      ? 'border-secondary/50 border-dashed hover:border-secondary hover:shadow-secondary/5'
+                      : 'border-default hover:border-primary/60 hover:shadow-primary/5 focus-within:border-primary',
+                    estaOculto(w) && 'opacity-70 hover:opacity-100',
+                  ]"
+                  :style="{ animationDelay: `${i * 55}ms` }"
                 >
-                  <UIcon
-                    :name="estaPendente(w) ? 'i-lucide-mail-open' : w.icon!"
-                    class="size-5"
-                  />
-                </div>
+                  <!-- topo: identidade à esquerda, metadado, favorito e menu à direita -->
+                  <div class="relative z-10 flex items-start justify-between gap-2">
+                    <div
+                      class="flex size-10 items-center justify-center rounded-lg transition-colors"
+                      :class="estaPendente(w) ? 'bg-secondary/10' : corDoWorkspace(w)"
+                    >
+                      <UIcon
+                        :name="estaPendente(w) ? 'i-lucide-mail-open' : w.icon!"
+                        class="size-5"
+                      />
+                    </div>
 
-                <div class="flex items-center gap-1.5">
-                  <UBadge
-                    v-if="estaPendente(w)"
-                    :label="t.convitePendente"
-                    color="secondary"
-                    variant="subtle"
-                    size="sm"
-                  />
-                  <UBadge
-                    v-else
-                    :label="t.papeis[w.papel]"
-                    :color="corDoPapel[w.papel]"
-                    variant="subtle"
-                    size="sm"
-                  />
-                  <UButton
-                    v-if="!estaPendente(w)"
-                    icon="i-lucide-star"
-                    size="xs"
-                    square
-                    variant="ghost"
-                    :color="ehFavorito(w) ? 'warning' : 'neutral'"
-                    :class="ehFavorito(w)
-                      ? 'text-warning'
-                      : 'text-muted transition-colors hover:text-warning'"
-                    :aria-label="ehFavorito(w) ? t.removerDosFavoritos : t.adicionarAosFavoritos"
-                    @click="alternarFavorito(w)"
-                  />
-                </div>
-              </div>
+                    <div class="flex items-center gap-1">
+                      <UBadge
+                        v-if="estaPendente(w)"
+                        :label="t.convitePendente"
+                        color="secondary"
+                        variant="subtle"
+                        size="sm"
+                      />
+                      <UBadge
+                        v-else
+                        :label="t.papeis[w.papel]"
+                        :color="corDoPapel[w.papel]"
+                        variant="subtle"
+                        size="sm"
+                        class="mr-0.5"
+                      />
+                      <UButton
+                        v-if="!estaPendente(w)"
+                        icon="i-lucide-star"
+                        size="xs"
+                        square
+                        variant="ghost"
+                        :color="ehFavorito(w) ? 'warning' : 'neutral'"
+                        :class="ehFavorito(w)
+                          ? 'text-warning'
+                          : 'text-muted transition-colors hover:text-warning'"
+                        :aria-label="ehFavorito(w) ? t.removerDosFavoritos : t.adicionarAosFavoritos"
+                        @click="alternarFavorito(w)"
+                      />
+                      <UDropdownMenu
+                        v-if="!estaPendente(w)"
+                        :items="acoesDe(w)"
+                        :content="{ align: 'end' }"
+                      >
+                        <UButton
+                          icon="i-lucide-ellipsis"
+                          size="xs"
+                          square
+                          color="neutral"
+                          variant="ghost"
+                          class="text-muted"
+                          :aria-label="t.maisAcoes(w.name)"
+                        />
+                      </UDropdownMenu>
+                    </div>
+                  </div>
 
-              <!-- corpo: altura mínima para os cards da grade se alinharem -->
-              <div class="mt-3 min-h-16">
-                <h3 class="line-clamp-2 font-semibold text-highlighted">
-                  <!-- O card inteiro é o alvo: este link se estica por cima dele
-                       (after:inset-0). A estrela fica acima, com z-10. No produto
-                       o href leva ao workspace; aqui o clique é interceptado. -->
-                  <a
-                    v-if="!estaPendente(w)"
-                    :href="`/w/${w.reference}`"
-                    class="outline-none after:absolute after:inset-0 after:rounded-xl focus-visible:after:ring-2 focus-visible:after:ring-primary"
-                    @click.prevent="entrar(w)"
-                  >{{ w.name }}</a>
-                  <template v-else>{{ w.name }}</template>
-                </h3>
-                <!-- Sem descrição não vira linha dizendo "sem descrição": o
-                     espaço vazio já conta isso, e a altura mínima segura a grade. -->
-                <p
-                  v-if="estaPendente(w) || w.description"
-                  class="mt-1 line-clamp-2 text-sm text-muted"
-                >
-                  {{ estaPendente(w) ? t.conviteCurto(w.convidadoPor!) : w.description }}
-                </p>
-              </div>
+                  <!-- corpo: altura mínima para os cards da grade se alinharem -->
+                  <div class="mt-3 min-h-16">
+                    <h3 class="line-clamp-2 font-semibold text-highlighted">
+                      <!-- O card inteiro é o alvo: este link se estica por cima dele
+                           (after:inset-0). Estrela e menu ficam acima, com z-10. No
+                           produto o href leva ao workspace; aqui o clique é interceptado. -->
+                      <a
+                        v-if="!estaPendente(w)"
+                        :href="`/w/${w.reference}`"
+                        class="outline-none after:absolute after:inset-0 after:rounded-xl focus-visible:after:ring-2 focus-visible:after:ring-primary"
+                        @click.prevent="entrar(w)"
+                      >{{ w.name }}</a>
+                      <template v-else>{{ w.name }}</template>
+                    </h3>
+                    <!-- Sem descrição não vira linha dizendo "sem descrição": o
+                         espaço vazio já conta isso, e a altura mínima segura a grade. -->
+                    <p
+                      v-if="estaPendente(w) || w.description"
+                      class="mt-1 line-clamp-2 text-sm text-muted"
+                    >
+                      {{ estaPendente(w) ? t.conviteCurto(w.convidadoPor!) : w.description }}
+                    </p>
+                    <!-- Etiquetas pessoais: só quem criou vê -->
+                    <div v-if="etiquetasDe(w).length" class="mt-2 flex flex-wrap gap-1">
+                      <UBadge
+                        v-for="e in etiquetasDe(w)"
+                        :key="e.id"
+                        :label="e.nome"
+                        icon="i-lucide-tag"
+                        color="neutral"
+                        variant="outline"
+                        size="sm"
+                      />
+                    </div>
+                  </div>
 
-              <!-- rodapé ancorado: meta à esquerda, a ação à direita -->
-              <div class="mt-auto flex items-end justify-between gap-2 pt-4">
-                <p class="text-xs text-muted">
-                  <template v-if="estaPendente(w)">{{ t.aceiteParaEntrar }}</template>
-                  <template v-else>
-                    {{ t.pessoas(w.members_count ?? 0) }} · {{ tempoRelativo(w.ultimoAcessoMin) }}
-                  </template>
-                </p>
+                  <!-- rodapé ancorado: meta à esquerda, a ação à direita -->
+                  <div class="mt-auto flex items-end justify-between gap-2 pt-4">
+                    <p class="text-xs text-muted">
+                      <template v-if="estaPendente(w)">{{ t.aceiteParaEntrar }}</template>
+                      <template v-else>{{ metaDe(w) }}</template>
+                    </p>
 
-                <!-- Convite tem duas ações de peso igual: aqui botão é o certo -->
-                <div v-if="estaPendente(w)" class="relative z-10 flex items-center gap-2">
-                  <UButton :label="t.aceitar" size="sm" color="secondary" @click="aceitar(w)" />
-                  <UButton :label="t.recusar" size="sm" color="neutral" variant="ghost" @click="recusar(w)" />
-                </div>
+                    <!-- Convite tem duas ações de peso igual: aqui botão é o certo -->
+                    <div v-if="estaPendente(w)" class="relative z-10 flex items-center gap-2">
+                      <UButton :label="t.aceitar" size="sm" color="secondary" @click="aceitar(w)" />
+                      <UButton :label="t.recusar" size="sm" color="neutral" variant="ghost" @click="recusar(w)" />
+                    </div>
 
-                <!-- Uma ação principal: vira afordância dentro do próprio alvo -->
-                <span
-                  v-else
-                  class="pointer-events-none flex shrink-0 items-center gap-1 text-sm font-medium transition-colors"
-                  :class="entrando === w.id ? 'text-primary' : 'text-muted group-hover:text-primary'"
-                >
-                  {{ entrando === w.id ? t.entrandoEm('').trim() + '…' : t.entrar }}
-                  <UIcon
-                    :name="entrando === w.id ? 'i-lucide-loader-circle' : 'i-lucide-arrow-right'"
-                    class="size-4 transition-transform duration-200"
-                    :class="entrando === w.id ? 'animate-spin' : 'group-hover:translate-x-1'"
-                  />
-                </span>
-              </div>
-            </article>
-          </TransitionGroup>
+                    <!-- Uma ação principal: vira afordância dentro do próprio alvo -->
+                    <span
+                      v-else
+                      class="pointer-events-none flex shrink-0 items-center gap-1 text-sm font-medium transition-colors"
+                      :class="entrando === w.id ? 'text-primary' : 'text-muted group-hover:text-primary'"
+                    >
+                      {{ entrando === w.id ? t.entrandoEm('').trim() + '…' : t.entrar }}
+                      <UIcon
+                        :name="entrando === w.id ? 'i-lucide-loader-circle' : 'i-lucide-arrow-right'"
+                        class="size-4 transition-transform duration-200"
+                        :class="entrando === w.id ? 'animate-spin' : 'group-hover:translate-x-1'"
+                      />
+                    </span>
+                  </div>
+                </article>
+              </TransitionGroup>
 
-          <!-- LISTA (alternativa) — EnTable, a listagem padrão do ENSPACE.
-               Componente do próprio produto (@be-enlighten/enspace-sdk-ui),
-               em modo dumb: recebe linhas e colunas, navega por emit. -->
-          <EnTable
-            v-else
-            :columns="colunasDaLista"
-            :rows="listados"
-            :empty-state="{
-              icon: 'i-lucide-search-x',
-              title: t.buscaVaziaTitulo(busca),
-              description: t.buscaVaziaDescricao,
-            }"
-            class="animate-[entrada_0.3s_ease-out_both]"
-            @row-click="(row: Workspace) => !estaPendente(row) && entrar(row)"
-          >
-            <template #cell-name="{ row }">
-              <div class="flex min-w-0 items-center gap-3">
-                <div
-                  class="flex size-8 shrink-0 items-center justify-center rounded-md"
-                  :class="estaPendente(row) ? 'bg-secondary/10' : 'bg-elevated'"
-                >
-                  <UIcon
-                    :name="estaPendente(row) ? 'i-lucide-mail-open' : row.icon!"
-                    class="size-4"
-                    :class="estaPendente(row) ? 'text-secondary' : 'text-muted'"
-                  />
-                </div>
-                <span class="truncate font-medium text-highlighted">{{ row.name }}</span>
-                <UIcon
-                  v-if="ehFavorito(row) && !estaPendente(row)"
-                  name="i-lucide-star"
-                  class="size-3.5 shrink-0 text-warning"
-                />
-                <UBadge
-                  v-if="estaPendente(row)"
-                  :label="t.convitePendente"
-                  color="secondary"
-                  variant="subtle"
-                  size="sm"
-                  class="shrink-0"
-                />
-              </div>
-            </template>
-
-            <template #cell-description="{ row }">
-              <span class="text-muted">
-                {{ estaPendente(row)
-                  ? t.conviteCurto(row.convidadoPor!)
-                  : (row.description || t.pessoas(row.members_count ?? 0)) }}
-              </span>
-            </template>
-
-            <template #cell-papel="{ row }">
-              <UBadge
-                v-if="!estaPendente(row)"
-                :label="t.papeis[row.papel]"
-                :color="corDoPapel[row.papel]"
-                variant="subtle"
-                size="sm"
-              />
-            </template>
-
-            <template #cell-ultimoAcessoMin="{ row }">
-              <span class="text-muted">
-                {{ estaPendente(row) ? t.aceiteParaEntrar : tempoRelativo(row.ultimoAcessoMin) }}
-              </span>
-            </template>
-
-            <template #cell-acoes="{ row }">
-              <div class="flex items-center justify-end gap-2">
-                <template v-if="estaPendente(row)">
-                  <UButton :label="t.aceitar" size="sm" color="secondary" @click.stop="aceitar(row)" />
-                  <UButton :label="t.recusar" size="sm" color="neutral" variant="ghost" @click.stop="recusar(row)" />
+              <!-- LISTA (alternativa): EnTable, a listagem padrão do ENSPACE.
+                   Componente do próprio produto (@be-enlighten/enspace-sdk-ui),
+                   em modo dumb: recebe linhas e colunas, navega por emit. -->
+              <EnTable
+                v-else
+                :columns="colunasDaLista"
+                :rows="grupo.itens"
+                class="animate-[entrada_0.3s_ease-out_both]"
+                @row-click="(row: Workspace) => !estaPendente(row) && entrar(row)"
+              >
+                <template #cell-name="{ row }">
+                  <div class="flex min-w-0 items-center gap-3" :class="estaOculto(row) && 'opacity-70'">
+                    <div
+                      class="flex size-8 shrink-0 items-center justify-center rounded-md"
+                      :class="estaPendente(row) ? 'bg-secondary/10' : 'bg-elevated'"
+                    >
+                      <UIcon
+                        :name="estaPendente(row) ? 'i-lucide-mail-open' : row.icon!"
+                        class="size-4"
+                        :class="estaPendente(row) ? 'text-secondary' : 'text-muted'"
+                      />
+                    </div>
+                    <!-- Nome numa linha, selos e etiquetas na de baixo: na mesma
+                         linha eles espremiam o nome até "L…". -->
+                    <div class="min-w-0 sm:min-w-44">
+                      <div class="flex min-w-0 items-center gap-1.5">
+                        <span class="truncate font-medium text-highlighted">{{ row.name }}</span>
+                        <UIcon
+                          v-if="ehFavorito(row) && !estaPendente(row)"
+                          name="i-lucide-star"
+                          class="size-3.5 shrink-0 text-warning"
+                        />
+                        <UIcon
+                          v-if="padrao === row.id"
+                          name="i-lucide-house"
+                          class="size-3.5 shrink-0 text-muted"
+                        />
+                      </div>
+                      <div
+                        v-if="estaPendente(row) || estaOculto(row) || etiquetasDe(row).length"
+                        class="mt-1 flex flex-wrap gap-1"
+                      >
+                        <UBadge
+                          v-if="estaPendente(row)"
+                          :label="t.convitePendente"
+                          color="secondary"
+                          variant="subtle"
+                          size="sm"
+                        />
+                        <UBadge
+                          v-if="estaOculto(row)"
+                          :label="t.oculto"
+                          icon="i-lucide-eye-off"
+                          color="neutral"
+                          variant="outline"
+                          size="sm"
+                        />
+                        <UBadge
+                          v-for="e in etiquetasDe(row)"
+                          :key="e.id"
+                          :label="e.nome"
+                          icon="i-lucide-tag"
+                          color="neutral"
+                          variant="outline"
+                          size="sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </template>
-                <UButton
-                  v-else
-                  :label="t.entrar"
-                  size="sm"
-                  color="neutral"
-                  variant="subtle"
-                  :loading="entrando === row.id"
-                  @click.stop="entrar(row)"
-                />
-              </div>
-            </template>
-          </EnTable>
+
+                <template #cell-description="{ row }">
+                  <span class="text-muted">
+                    {{ estaPendente(row)
+                      ? t.conviteCurto(row.convidadoPor!)
+                      : (row.description || t.pessoas(row.members_count ?? 0)) }}
+                  </span>
+                </template>
+
+                <template #cell-papel="{ row }">
+                  <UBadge
+                    v-if="!estaPendente(row)"
+                    :label="t.papeis[row.papel]"
+                    :color="corDoPapel[row.papel]"
+                    variant="subtle"
+                    size="sm"
+                  />
+                </template>
+
+                <template #cell-ultimoAcessoMin="{ row }">
+                  <span class="text-muted">
+                    {{ estaPendente(row) ? t.aceiteParaEntrar : tempoRelativo(row.ultimoAcessoMin) }}
+                  </span>
+                </template>
+
+                <template #cell-acoes="{ row }">
+                  <div class="flex items-center justify-end gap-1" @click.stop>
+                    <template v-if="estaPendente(row)">
+                      <UButton :label="t.aceitar" size="sm" color="secondary" @click="aceitar(row)" />
+                      <UButton :label="t.recusar" size="sm" color="neutral" variant="ghost" @click="recusar(row)" />
+                    </template>
+                    <template v-else>
+                      <UButton
+                        :label="t.entrar"
+                        size="sm"
+                        color="neutral"
+                        variant="subtle"
+                        :loading="entrando === row.id"
+                        @click="entrar(row)"
+                      />
+                      <UDropdownMenu :items="acoesDe(row)" :content="{ align: 'end' }">
+                        <UButton
+                          icon="i-lucide-ellipsis"
+                          size="sm"
+                          square
+                          color="neutral"
+                          variant="ghost"
+                          class="text-muted"
+                          :aria-label="t.maisAcoes(row.name)"
+                        />
+                      </UDropdownMenu>
+                    </template>
+                  </div>
+                </template>
+              </EnTable>
+            </div>
+          </template>
 
           <UEmpty
-            v-if="!listados.length && busca"
+            v-else-if="busca"
             class="animate-[entrada_0.3s_ease-out_both]"
             icon="i-lucide-search-x"
             :title="t.buscaVaziaTitulo(busca)"
             :description="t.buscaVaziaDescricao"
           />
+
+          <!-- Rodada 17: os ocultos saem da lista, mas não somem da tela -->
+          <div
+            v-if="totalOcultos && !busca"
+            class="mt-8 flex items-center justify-center gap-2 text-sm text-muted"
+          >
+            <UIcon name="i-lucide-eye-off" class="size-4" />
+            {{ t.ocultos(totalOcultos) }}
+            <UButton
+              :label="mostrarOcultos ? t.esconderOcultos : t.mostrarOcultos"
+              color="neutral"
+              variant="link"
+              size="sm"
+              class="px-0 font-medium text-highlighted"
+              @click="mostrarOcultos = !mostrarOcultos"
+            />
+          </div>
         </section>
 
         <!-- Nenhum workspace -->
@@ -581,6 +990,71 @@ function workspaceCriado(nome: string) {
 
     <!-- 5. Criação: mesma tela, em camada. -->
     <ModalCriarWorkspace v-model:open="criando" @criado="workspaceCriado" />
+
+    <!-- Rodada 17: sair pede confirmação, porque não se desfaz -->
+    <UModal
+      v-model:open="sairAberto"
+      :title="saindoDe ? t.sairTitulo(saindoDe.name) : ''"
+      :description="t.sairDescricao"
+    >
+      <template #footer>
+        <div class="flex w-full justify-end gap-2">
+          <UButton :label="t.cancelar" color="neutral" variant="ghost" @click="sairAberto = false" />
+          <UButton
+            :label="t.sairDoWorkspace"
+            icon="i-lucide-log-out"
+            color="error"
+            :loading="saindo"
+            @click="confirmarSaida"
+          />
+        </div>
+      </template>
+    </UModal>
+
+    <!-- Rodada 17: etiquetas pessoais. Marcar e desmarcar vale na hora. -->
+    <UModal
+      v-model:open="etiquetasAberto"
+      :title="editandoEtiquetasDe ? t.etiquetasDe(editandoEtiquetasDe.name) : ''"
+      :description="t.etiquetasDescricao"
+    >
+      <template #body>
+        <div v-if="editandoEtiquetasDe" class="space-y-5">
+          <p v-if="!etiquetas.length" class="text-sm text-muted">
+            {{ t.nenhumaEtiqueta }}
+          </p>
+          <div v-else class="space-y-3">
+            <UCheckbox
+              v-for="e in etiquetas"
+              :key="e.id"
+              :label="e.nome"
+              :model-value="temEtiqueta(editandoEtiquetasDe, e.id)"
+              @update:model-value="alternarEtiqueta(editandoEtiquetasDe!, e.id)"
+            />
+          </div>
+          <form class="flex gap-2" @submit.prevent="criarEtiqueta">
+            <UInput
+              v-model="novaEtiqueta"
+              icon="i-lucide-tag"
+              :placeholder="t.novaEtiqueta"
+              :maxlength="30"
+              class="flex-1"
+            />
+            <UButton
+              type="submit"
+              :label="t.criarEtiqueta"
+              color="neutral"
+              variant="subtle"
+              :disabled="!novaEtiqueta.trim()"
+            />
+          </form>
+        </div>
+      </template>
+      <template #footer>
+        <div class="flex w-full justify-end">
+          <UButton :label="t.pronto" @click="etiquetasAberto = false" />
+        </div>
+      </template>
+    </UModal>
 
     <!-- ANDAIME DE PROTÓTIPO — não faz parte da proposta -->
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">

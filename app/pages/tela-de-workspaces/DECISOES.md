@@ -134,6 +134,74 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 17 · 2026-10-14
+
+- **Pedido (literal):** sobre as 7 oportunidades da pesquisa de mercado: "1. impossivel fazer 2. legal
+  3. impossivel 4. concordo 5. legal 6. impossivel 7. nao tem esse conceito, mas a pessoa poderia ter
+  uma funcionalidade ali de tags pra ela mesma agrupar, talvez?" e "pode corrigir os erros tambem".
+- **Mudou (erro 1):** o workspace do bloco "Continue de onde você parou" volta para a lista. Antes ele
+  saía da grade, e buscar "grupo aurora" respondia "Nenhum workspace". É a regra 20: destaque soma, não
+  substitui.
+- **Mudou (erro 2):** os contadores batem com o que aparece. "Todos (7)" mostrava 6 cards e
+  "Favoritos (2)" mostrava 1. Agora contam a lista sem os ocultos.
+- **Mudou (erro 3, achado nesta rodada):** na lista, sem resultado de busca, o vazio aparecia 2 vezes
+  (o do `EnTable` e o `UEmpty`). Fica só o `UEmpty`.
+- **Mudou (oportunidade 4, busca):** a busca volta para o topo, onde o produto já a tem, logo abaixo da
+  explicação. Ela diz quantos são ("Buscar entre seus 17 workspaces").
+  - `/` e `Ctrl+K` (`⌘K` no Mac) focam a busca de qualquer ponto da página.
+  - Enter entra no primeiro resultado e Esc limpa, como o produto faz hoje. A dica aparece embaixo do
+    campo enquanto se digita.
+  - Busca sem acento e por nome, endereço, descrição e etiqueta: "saude" acha "Aurora Saúde Homologação".
+  - Enquanto se busca, o convite e o bloco do topo saem de cena, e a aba volta para Todos: o resultado
+    sobe para logo abaixo do campo.
+- **Mudou (oportunidade 2, workspace padrão):** "Abrir sempre este ao entrar" no bloco do topo e no menu
+  "⋯" de cada workspace.
+  - Com padrão, o bloco do topo passa a mostrar o padrão, com o rótulo "Abre direto quando você entra" e
+    a frase "Na próxima vez que você entrar no ENSPACE, vai direto para Grupo Aurora."
+  - "Voltar a escolher ao entrar" desfaz. O card do padrão diz "Abre ao entrar" na linha de baixo.
+  - É o caminho para quem só abre chamado nunca mais ver esta tela, sem mudar o roteamento para todo
+    mundo. Referência: HubSpot (fixar e "Set as default").
+- **Mudou (oportunidade 5, ocultar e sair):** o menu "⋯" ganha "Ocultar da lista" e "Sair do workspace".
+  - Oculto sai da lista e dos contadores, mas a busca ainda acha, com o selo "Oculto". No fim da lista,
+    "1 workspace oculto · Mostrar". O toast de ocultar tem Desfazer. Ocultar o padrão desfaz o padrão.
+  - Sair pede confirmação, porque é a única ação da tela que não se desfaz: "Você perde o acesso a tudo
+    o que está lá dentro. Para voltar, alguém do workspace precisa convidar você de novo."
+  - Referência: Teams (ocultar e sair de organização).
+- **Mudou (oportunidade 7, etiquetas pessoais):** "Etiquetas" no menu "⋯" abre um modal com as
+  etiquetas da pessoa para marcar, e um campo para criar outra. "Só você vê."
+  - As etiquetas aparecem no card e na lista.
+  - "Agrupar por etiqueta", ao lado do alternador card/lista, divide a lista em seções (Clientes,
+    Internos, Testes, Sem etiqueta). Workspace com 2 etiquetas aparece nas 2 seções.
+- **Mudou (mock):** de 7 para 18 workspaces, o volume da conta medida no develop (regra 34). Ganharam
+  etiquetas, um workspace já oculto ("Treinamento interno 2025") e 2 de homologação. Campos novos
+  `etiquetas` e `oculto` marcados como invenção do protótipo.
+- **Mudou (lista):** na visualização em lista, selos e etiquetas descem para uma segunda linha da célula
+  do nome; na mesma linha eles espremiam o nome até "L…".
+- **Fronteira:** muda a busca (lugar e atalho), o bloco do topo (padrão), o menu "⋯" do card e da linha,
+  as etiquetas e os ocultos; não muda a casca, o card, as abas, o alternador, o convite nem a criação.
+- **Fronteira, estado "Só um":** com 1 workspace, não há busca nem lista. O bloco do topo é a única porta;
+  a lista repetiria o mesmo card. O "Abrir sempre este ao entrar" continua lá: é o caso da demanda.
+- **Descartado:** oportunidades 1 (pendências por workspace), 3 (selo de ambiente) e 6 (itens recentes
+  de todos os workspaces). Motivo: a redatora avaliou como impossíveis.
+- **Descartado:** renomear e apagar etiqueta. Motivo: o pedido é agrupar; gerenciar etiqueta fica para
+  quando a ideia for aprovada.
+- **Não deu:** a regra de quem pode sair. "Sair do workspace" fica desabilitado para Proprietário, com a
+  explicação "Quem é proprietário não sai por aqui." Por quê: não observei no develop o que acontece
+  quando o dono sai; a trava é suposição e precisa de confirmação de produto.
+- **Maquete:** padrão, ocultos, saídas e etiquetas vivem em memória e o reload zera. No produto, o padrão
+  vale no próximo login; aqui só muda o bloco do topo e mostra um toast.
+- **Crítica e acessibilidade:** as skills `design:design-critique` e `design:accessibility-review` não
+  rodaram nesta rodada; a conferência foi à mão.
+  - O botão "⋯" tem nome acessível ("Mais ações de RH Aurora"); "Agrupar por etiqueta" usa
+    `aria-pressed`; os 2 modais têm título e descrição.
+  - O menu "⋯" fica sempre visível, não só no hover (rodada 11).
+  - Ficou sem correção: a coluna do nome na lista ainda trunca nomes longos. O `EnTable` não aceita
+    largura de coluna; a célula ganhou `sm:min-w-44`.
+- **Verificação:** a janela do Chrome pintava 1 quadro por segundo nesta sessão, então as transições
+  levavam segundos para assentar. Conferi a lógica pelo estado da tela e tirei as capturas depois de a
+  transição terminar.
+- **Ver:** https://pernalombr4.github.io/prototipos/tela-de-workspaces
+
 ### Rodada 16 — 21/09/2026 · contraste medido, e a régua consertada antes
 
 A régua vinha antes da tela. A ferramenta de medir contraste compunha o fundo subindo pela

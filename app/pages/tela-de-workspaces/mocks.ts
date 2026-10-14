@@ -28,7 +28,23 @@ export interface Workspace extends CamposDaApi {
   /** Estado de convite — na tela de hoje é um estado do próprio card. */
   convitePendente?: boolean
   convidadoPor?: string
+  /** Acrescentado pelo protótipo: etiquetas pessoais (ids de `etiquetasIniciais`). Não existe no produto. */
+  etiquetas: string[]
+  /** Acrescentado pelo protótipo: a pessoa tirou este workspace da lista dela. Não existe no produto. */
+  oculto?: boolean
 }
+
+/**
+ * Acrescentado pelo protótipo (rodada 17): etiquetas pessoais. Cada pessoa cria as
+ * dela para agrupar a própria lista; ninguém mais vê. O produto não tem o conceito.
+ */
+export interface Etiqueta { id: string, nome: string }
+
+export const etiquetasIniciais: Etiqueta[] = [
+  { id: 'clientes', nome: 'Clientes' },
+  { id: 'internos', nome: 'Internos' },
+  { id: 'testes', nome: 'Testes' },
+]
 
 export const usuario = {
   nome: 'Mariana Duarte',
@@ -48,6 +64,7 @@ export const workspaces: Workspace[] = [
     favorito: true,
     ultimoAcessoMin: 95,
     members_count: 340,
+    etiquetas: ['internos'],
   },
   {
     id: 2,
@@ -60,6 +77,7 @@ export const workspaces: Workspace[] = [
     favorito: true,
     ultimoAcessoMin: 2 * 24 * 60,
     members_count: 62,
+    etiquetas: ['clientes'],
   },
   {
     id: 3,
@@ -72,6 +90,7 @@ export const workspaces: Workspace[] = [
     favorito: false,
     ultimoAcessoMin: 9 * 24 * 60,
     members_count: 28,
+    etiquetas: ['internos'],
   },
   {
     // caso de canto de propósito: nome longo que estoura a linha
@@ -85,6 +104,7 @@ export const workspaces: Workspace[] = [
     favorito: false,
     ultimoAcessoMin: 41 * 24 * 60,
     members_count: 11,
+    etiquetas: [],
   },
   {
     id: 5,
@@ -97,6 +117,7 @@ export const workspaces: Workspace[] = [
     favorito: false,
     ultimoAcessoMin: null,
     members_count: 4,
+    etiquetas: ['testes'],
   },
   {
     id: 6,
@@ -109,6 +130,7 @@ export const workspaces: Workspace[] = [
     favorito: false,
     ultimoAcessoMin: null,
     members_count: 19,
+    etiquetas: [],
     convitePendente: true,
     convidadoPor: 'Rodrigo Petrone',
   },
@@ -123,6 +145,152 @@ export const workspaces: Workspace[] = [
     favorito: false,
     ultimoAcessoMin: 6 * 24 * 60,
     members_count: 2,
+    etiquetas: ['testes'],
+  },
+  {
+    id: 8,
+    status: 'active',
+    name: 'Aurora Facilities',
+    reference: 'aurora-facilities',
+    description: 'Manutenção predial e reserva de salas',
+    icon: 'i-lucide-building',
+    papel: 'Membro',
+    favorito: false,
+    ultimoAcessoMin: 14 * 24 * 60,
+    members_count: 45,
+    etiquetas: ['internos'],
+  },
+  {
+    id: 9,
+    status: 'active',
+    name: 'Aurora Compras',
+    reference: 'aurora-compras',
+    description: 'Requisições e cotações de compra',
+    icon: 'i-lucide-shopping-cart',
+    papel: 'Full',
+    favorito: false,
+    ultimoAcessoMin: 3 * 24 * 60,
+    members_count: 37,
+    etiquetas: ['internos'],
+  },
+  {
+    id: 10,
+    status: 'active',
+    name: 'Vértice Log Homologação',
+    reference: 'vertice-log-homologacao',
+    description: '',
+    icon: 'i-lucide-flask-conical',
+    papel: 'Proprietário',
+    favorito: false,
+    ultimoAcessoMin: 20 * 24 * 60,
+    members_count: 5,
+    etiquetas: ['testes'],
+  },
+  {
+    id: 11,
+    status: 'active',
+    name: 'Nimbus Seguros',
+    reference: 'nimbus-seguros',
+    description: 'Sinistros, apólices e renovações',
+    icon: 'i-lucide-shield-check',
+    papel: 'Full',
+    favorito: false,
+    ultimoAcessoMin: 5 * 24 * 60,
+    members_count: 88,
+    etiquetas: ['clientes'],
+  },
+  {
+    id: 12,
+    status: 'active',
+    name: 'Casa Ipê Imóveis',
+    reference: 'casa-ipe-imoveis',
+    description: 'Contratos de locação e vistorias',
+    icon: 'i-lucide-house',
+    papel: 'Membro',
+    favorito: false,
+    ultimoAcessoMin: 70 * 24 * 60,
+    members_count: 23,
+    etiquetas: ['clientes'],
+  },
+  {
+    id: 13,
+    status: 'active',
+    name: 'Clínica Serra Azul',
+    reference: 'clinica-serra-azul',
+    description: 'Agenda de exames e prontuário administrativo',
+    icon: 'i-lucide-stethoscope',
+    papel: 'Leitor',
+    favorito: false,
+    ultimoAcessoMin: 26 * 24 * 60,
+    members_count: 14,
+    etiquetas: ['clientes'],
+  },
+  {
+    id: 14,
+    status: 'active',
+    name: 'Orla Energia',
+    reference: 'orla-energia',
+    description: 'Ordens de serviço de campo',
+    icon: 'i-lucide-zap',
+    papel: 'Full',
+    favorito: false,
+    ultimoAcessoMin: 12 * 24 * 60,
+    members_count: 51,
+    etiquetas: ['clientes'],
+  },
+  {
+    // caso de canto de propósito: workspace que a pessoa já tirou da lista
+    id: 15,
+    status: 'active',
+    name: 'Treinamento interno 2025',
+    reference: 'treinamento-interno-2025',
+    description: '',
+    icon: 'i-lucide-graduation-cap',
+    papel: 'Proprietário',
+    favorito: false,
+    ultimoAcessoMin: 300 * 24 * 60,
+    members_count: 9,
+    etiquetas: ['internos'],
+    oculto: true,
+  },
+  {
+    id: 16,
+    status: 'active',
+    name: 'Modelo de onboarding',
+    reference: 'modelo-de-onboarding',
+    description: 'Base para montar o workspace de um cliente novo',
+    icon: 'i-lucide-layout-template',
+    papel: 'Proprietário',
+    favorito: false,
+    ultimoAcessoMin: 120 * 24 * 60,
+    members_count: 3,
+    etiquetas: [],
+  },
+  {
+    id: 17,
+    status: 'active',
+    name: 'Piloto Spaceflow',
+    reference: 'piloto-spaceflow',
+    description: '',
+    icon: 'i-lucide-workflow',
+    papel: 'Full',
+    favorito: false,
+    ultimoAcessoMin: 1 * 24 * 60,
+    members_count: 7,
+    etiquetas: ['testes'],
+  },
+  {
+    id: 18,
+    status: 'active',
+    name: 'Nimbus Seguros Homologação',
+    reference: 'nimbus-seguros-homologacao',
+    description: '',
+    icon: 'i-lucide-flask-conical',
+    papel: 'Full',
+    favorito: false,
+    ultimoAcessoMin: null,
+    members_count: 6,
+    etiquetas: [],
   },
 ]
 

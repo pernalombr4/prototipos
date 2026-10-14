@@ -55,6 +55,51 @@ export interface TextosDaTela {
   colunaPapel: string
   colunaUltimoAcesso: string
 
+  // busca (rodada 17)
+  buscarEntre: (n: number) => string
+  limparBusca: string
+  dicaBusca: string
+
+  // workspace padrão (rodada 17)
+  abreAoEntrar: string
+  proximaVezDireto: (nome: string) => string
+  abrirSempreEste: string
+  abrirSempreAoEntrar: string
+  voltarAEscolher: string
+  metaPadrao: string
+  padraoDefinido: (nome: string) => string
+  padraoDefinidoDescricao: string
+  padraoRemovido: string
+
+  // menu do card, ocultar e sair (rodada 17)
+  maisAcoes: (nome: string) => string
+  ocultarDaLista: string
+  mostrarNaLista: string
+  oculto: string
+  ocultos: (n: number) => string
+  mostrarOcultos: string
+  esconderOcultos: string
+  ocultadoToast: (nome: string) => string
+  ocultadoDescricao: string
+  desfazer: string
+  sairDoWorkspace: string
+  proprietarioNaoSai: string
+  sairTitulo: (nome: string) => string
+  sairDescricao: string
+  saiuDe: (nome: string) => string
+  cancelar: string
+
+  // etiquetas pessoais (rodada 17)
+  etiquetas: string
+  etiquetasDe: (nome: string) => string
+  etiquetasDescricao: string
+  novaEtiqueta: string
+  criarEtiqueta: string
+  pronto: string
+  agruparPorEtiqueta: string
+  semEtiqueta: string
+  nenhumaEtiqueta: string
+
   // tempo relativo
   nuncaEntrou: string
   haMinutos: (n: number) => string
@@ -177,6 +222,47 @@ export const textos: Record<Idioma, TextosDaTela> = {
     colunaPapel: 'Papel',
     colunaUltimoAcesso: 'Último acesso',
 
+    buscarEntre: n => `Buscar entre seus ${n} workspaces`,
+    limparBusca: 'Limpar busca',
+    dicaBusca: 'Enter entra no primeiro resultado. Esc limpa a busca.',
+
+    abreAoEntrar: 'Abre direto quando você entra',
+    proximaVezDireto: n => `Na próxima vez que você entrar no ENSPACE, vai direto para ${n}.`,
+    abrirSempreEste: 'Abrir sempre este ao entrar',
+    abrirSempreAoEntrar: 'Abrir sempre ao entrar',
+    voltarAEscolher: 'Voltar a escolher ao entrar',
+    metaPadrao: 'Abre ao entrar',
+    padraoDefinido: n => `${n} abre direto quando você entrar`,
+    padraoDefinidoDescricao: 'Para trocar, use o menu de qualquer workspace.',
+    padraoRemovido: 'Você volta a escolher o workspace ao entrar.',
+
+    maisAcoes: n => `Mais ações de ${n}`,
+    ocultarDaLista: 'Ocultar da lista',
+    mostrarNaLista: 'Mostrar na lista',
+    oculto: 'Oculto',
+    ocultos: n => n === 1 ? '1 workspace oculto' : `${n} workspaces ocultos`,
+    mostrarOcultos: 'Mostrar',
+    esconderOcultos: 'Esconder de novo',
+    ocultadoToast: n => `${n} saiu da sua lista`,
+    ocultadoDescricao: 'Você continua com acesso, e a busca ainda encontra.',
+    desfazer: 'Desfazer',
+    sairDoWorkspace: 'Sair do workspace',
+    proprietarioNaoSai: 'Quem é proprietário não sai por aqui.',
+    sairTitulo: n => `Sair de ${n}?`,
+    sairDescricao: 'Você perde o acesso a tudo o que está lá dentro. Para voltar, alguém do workspace precisa convidar você de novo.',
+    saiuDe: n => `Você saiu de ${n}`,
+    cancelar: 'Cancelar',
+
+    etiquetas: 'Etiquetas',
+    etiquetasDe: n => `Etiquetas de ${n}`,
+    etiquetasDescricao: 'Só você vê. Use para agrupar seus workspaces do seu jeito.',
+    novaEtiqueta: 'Nova etiqueta',
+    criarEtiqueta: 'Criar',
+    pronto: 'Pronto',
+    agruparPorEtiqueta: 'Agrupar por etiqueta',
+    semEtiqueta: 'Sem etiqueta',
+    nenhumaEtiqueta: 'Você ainda não criou etiquetas. Crie a primeira abaixo.',
+
     nuncaEntrou: 'Você ainda não entrou aqui',
     haMinutos: n => `Você esteve aqui há ${n} min`,
     haHoras: n => `Você esteve aqui há ${n} ${n === 1 ? 'hora' : 'horas'}`,
@@ -293,6 +379,47 @@ export const textos: Record<Idioma, TextosDaTela> = {
     colunaPapel: 'Role',
     colunaUltimoAcesso: 'Last visit',
 
+    buscarEntre: n => `Search your ${n} workspaces`,
+    limparBusca: 'Clear search',
+    dicaBusca: 'Enter opens the first result. Esc clears the search.',
+
+    abreAoEntrar: 'Opens when you sign in',
+    proximaVezDireto: n => `Next time you sign in to ENSPACE, you go straight to ${n}.`,
+    abrirSempreEste: 'Always open this one when I sign in',
+    abrirSempreAoEntrar: 'Always open when I sign in',
+    voltarAEscolher: 'Choose each time I sign in',
+    metaPadrao: 'Opens at sign-in',
+    padraoDefinido: n => `${n} opens when you sign in`,
+    padraoDefinidoDescricao: 'To change it, use the menu on any workspace.',
+    padraoRemovido: 'You choose a workspace each time you sign in.',
+
+    maisAcoes: n => `More actions for ${n}`,
+    ocultarDaLista: 'Hide from list',
+    mostrarNaLista: 'Show in list',
+    oculto: 'Hidden',
+    ocultos: n => n === 1 ? '1 hidden workspace' : `${n} hidden workspaces`,
+    mostrarOcultos: 'Show',
+    esconderOcultos: 'Hide again',
+    ocultadoToast: n => `${n} is hidden from your list`,
+    ocultadoDescricao: 'You still have access, and search still finds it.',
+    desfazer: 'Undo',
+    sairDoWorkspace: 'Leave workspace',
+    proprietarioNaoSai: 'Owners can\u2019t leave from here.',
+    sairTitulo: n => `Leave ${n}?`,
+    sairDescricao: 'You lose access to everything inside it. To come back, someone in the workspace has to invite you again.',
+    saiuDe: n => `You left ${n}`,
+    cancelar: 'Cancel',
+
+    etiquetas: 'Tags',
+    etiquetasDe: n => `Tags for ${n}`,
+    etiquetasDescricao: 'Only you see them. Use them to group your workspaces your way.',
+    novaEtiqueta: 'New tag',
+    criarEtiqueta: 'Create',
+    pronto: 'Done',
+    agruparPorEtiqueta: 'Group by tag',
+    semEtiqueta: 'No tag',
+    nenhumaEtiqueta: 'You haven\u2019t created any tags yet. Create the first one below.',
+
     nuncaEntrou: 'You haven’t been here yet',
     haMinutos: n => `You were here ${n} min ago`,
     haHoras: n => `You were here ${n} ${n === 1 ? 'hour' : 'hours'} ago`,
@@ -408,6 +535,47 @@ export const textos: Record<Idioma, TextosDaTela> = {
     colunaDescricao: 'Descripción',
     colunaPapel: 'Rol',
     colunaUltimoAcesso: 'Último acceso',
+
+    buscarEntre: n => `Buscar entre tus ${n} workspaces`,
+    limparBusca: 'Limpiar búsqueda',
+    dicaBusca: 'Enter entra en el primer resultado. Esc borra la búsqueda.',
+
+    abreAoEntrar: 'Se abre al iniciar sesión',
+    proximaVezDireto: n => `La próxima vez que entres en ENSPACE, irás directo a ${n}.`,
+    abrirSempreEste: 'Abrir siempre este al entrar',
+    abrirSempreAoEntrar: 'Abrir siempre al entrar',
+    voltarAEscolher: 'Volver a elegir al entrar',
+    metaPadrao: 'Se abre al entrar',
+    padraoDefinido: n => `${n} se abre al iniciar sesión`,
+    padraoDefinidoDescricao: 'Para cambiarlo, usa el menú de cualquier workspace.',
+    padraoRemovido: 'Vuelves a elegir el workspace al entrar.',
+
+    maisAcoes: n => `Más acciones de ${n}`,
+    ocultarDaLista: 'Ocultar de la lista',
+    mostrarNaLista: 'Mostrar en la lista',
+    oculto: 'Oculto',
+    ocultos: n => n === 1 ? '1 workspace oculto' : `${n} workspaces ocultos`,
+    mostrarOcultos: 'Mostrar',
+    esconderOcultos: 'Volver a ocultar',
+    ocultadoToast: n => `${n} salió de tu lista`,
+    ocultadoDescricao: 'Sigues con acceso, y la búsqueda aún lo encuentra.',
+    desfazer: 'Deshacer',
+    sairDoWorkspace: 'Salir del workspace',
+    proprietarioNaoSai: 'Quien es propietario no sale desde aquí.',
+    sairTitulo: n => `\u00bfSalir de ${n}?`,
+    sairDescricao: 'Pierdes el acceso a todo lo que hay dentro. Para volver, alguien del workspace tiene que invitarte de nuevo.',
+    saiuDe: n => `Saliste de ${n}`,
+    cancelar: 'Cancelar',
+
+    etiquetas: 'Etiquetas',
+    etiquetasDe: n => `Etiquetas de ${n}`,
+    etiquetasDescricao: 'Solo tú las ves. Úsalas para agrupar tus workspaces a tu manera.',
+    novaEtiqueta: 'Nueva etiqueta',
+    criarEtiqueta: 'Crear',
+    pronto: 'Listo',
+    agruparPorEtiqueta: 'Agrupar por etiqueta',
+    semEtiqueta: 'Sin etiqueta',
+    nenhumaEtiqueta: 'Todavía no creaste etiquetas. Crea la primera abajo.',
 
     nuncaEntrou: 'Todavía no has entrado aquí',
     haMinutos: n => `Estuviste aquí hace ${n} min`,
