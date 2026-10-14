@@ -590,7 +590,7 @@ function itensDaBolha(editor: Editor): ItemDaBarra[][] {
   const tipo = tipoAtual(editor)
   return [
     ...(props.iaLigada
-      ? [[{ icon: 'i-lucide-sparkles', label: tb.value.botaoBolha, color: 'primary', variant: 'soft', tooltip: { text: tb.value.dica, kbds: ['ctrl', 'j'] }, onClick: () => abrirCaixa(editor) } as ItemDaBarra]]
+      ? [[{ icon: 'i-lucide-sparkles', label: tb.value.botao, color: 'primary', variant: 'soft', tooltip: { text: tb.value.dica, kbds: ['ctrl', 'j'] }, onClick: () => abrirCaixa(editor) } as ItemDaBarra]]
       : []),
     [{
       label: tipo.label,

@@ -164,7 +164,6 @@ const ptBR = {
   },
   beni: {
     botao: 'IA',
-    botaoBolha: 'Perguntar ao BENI',
     dica: 'Escrever com o BENI',
     desligada: 'A IA está desligada neste workspace. Quem administra pode ligar em Configurações › Agentes de IA.',
     caixa: 'Caixa do BENI',
@@ -427,7 +426,6 @@ const en: Textos = {
   },
   beni: {
     botao: 'AI',
-    botaoBolha: 'Ask BENI',
     dica: 'Write with BENI',
     desligada: 'AI is turned off in this workspace. An admin can turn it on in Settings › AI Agents.',
     caixa: 'BENI box',
@@ -688,7 +686,6 @@ const es: Textos = {
   },
   beni: {
     botao: 'IA',
-    botaoBolha: 'Preguntar a BENI',
     dica: 'Escribir con BENI',
     desligada: 'La IA está desactivada en este workspace. Quien administra puede activarla en Configuración › Agentes de IA.',
     caixa: 'Caja de BENI',

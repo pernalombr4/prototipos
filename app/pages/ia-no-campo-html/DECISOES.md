@@ -107,3 +107,9 @@
   - Botões da barra com 28 px, abaixo dos 44 px de toque. Ficou: é a medida da barra de hoje no desktop.
   - Seletor de cor com nome em cada quadrado ("Texto vermelho") e `aria-pressed`; seletor de modelo com `aria-selected`.
 - **Ver:** `pnpm dev` → http://localhost:3000/ia-no-campo-html · publicado: https://pernalombr4.github.io/prototipos/ia-no-campo-html/ · prints em `evidencias/proto-*.png` (proposta) e `evidencias/ref-*.png` (concorrentes)
+
+## Rodada 3 · 2026-10-13
+- **Pedido (literal):** "com o texto selecionado o botao ainda deve ser "ia", e nao "pergunte ao beni""
+- **Mudou:** o botão da IA na barra da seleção passa a se chamar "IA", como na barra fixa; a dica ("Escrever com o BENI", Ctrl J) e o que ele abre continuam iguais.
+- **Fronteira:** muda só o rótulo do botão na barra da seleção; não muda a barra fixa, o "/", a caixa do BENI nem o menu do bloco (que segue com "Perguntar ao BENI").
+- **Ver:** `evidencias/proto-barra-da-selecao.png`
