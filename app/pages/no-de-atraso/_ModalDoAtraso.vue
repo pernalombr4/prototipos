@@ -110,21 +110,12 @@ const unidadesDoDeslocamento = computed(() => (['day', 'week', 'month', 'hour'] 
   .map(u => ({ value: u, label: p.value.unidadeDoDeslocamento(u, rascunho.value.offset_amount), ajuda: p.value.ajudas.deslocamento[u] })))
 
 /*
- * "Quando avançar" vem antes da frase: na própria data (só a variável) ou um
- * tempo antes ou depois dela (a frase inteira). Grava em `offset_direction`:
- * 'on' é a data da variável; 'before' e 'after' são o tempo calculado.
+ * "Momento" vem primeiro, como o "On date / Before date / After date" do
+ * HubSpot: na data (só a variável) ou antes ou depois dela (deslocamento e
+ * variável). Grava direto em `offset_direction`: 'on', 'before' ou 'after'.
  */
-type Calculo = 'exata' | 'calculada'
-const ultimaDirecao = ref<'before' | 'after'>('before')
-watch(() => rascunho.value.offset_direction, (d) => { if (d !== 'on') ultimaDirecao.value = d }, { immediate: true })
-const calculo = computed<Calculo>({
-  get: () => rascunho.value.offset_direction === 'on' ? 'exata' : 'calculada',
-  set: (v) => { rascunho.value.offset_direction = v === 'exata' ? 'on' : ultimaDirecao.value },
-})
-const opcoesDeCalculo = computed(() => (['exata', 'calculada'] as Calculo[]).map(c => ({ value: c, label: p.value.calculos[c], ajuda: p.value.ajudas.calculo[c] })))
-
-/** Só antes e depois: "na data de" virou a opção "Na data da variável" de Quando avançar. */
-const direcoes = computed(() => (['before', 'after'] as Direcao[]).map(d => ({ value: d, label: p.value.direcoes[d], ajuda: p.value.ajudas.direcao[d] })))
+const momentos = computed(() => (['on', 'before', 'after'] as Direcao[]).map(d => ({ value: d, label: p.value.momentos[d], ajuda: p.value.ajudas.direcao[d] })))
+const naData = computed(() => rascunho.value.offset_direction === 'on')
 
 const campo = computed(() => campoEscolhido(rascunho.value))
 const nomeDoCampo = computed(() => campo.value?.label ?? p.value.campo.toLowerCase())
@@ -370,8 +361,8 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                   <!-- A regra inteira numa frase: [30] [dias] [antes de] [variável da data].
                        O fim da frase é o lugar de soltar a variável arrastada de Variáveis de Entrada. -->
                   <!-- Sem :error no UFormField: ele pinta a frase inteira. Só a data fica vermelha, e a mensagem vem embaixo. -->
-                  <UFormField :label="p.calculo" :help="p.instrucoes.calculo">
-                    <USelect v-model="calculo" :items="opcoesDeCalculo" class="w-full sm:w-72">
+                  <UFormField :label="p.momento" :help="p.instrucoes.momento">
+                    <USelect v-model="rascunho.offset_direction" :items="momentos" class="w-full sm:w-72">
                       <template #item-trailing="{ item }">
                         <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
                           <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />
@@ -380,11 +371,11 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                     </USelect>
                   </UFormField>
 
-                  <!-- Na data da variável: só o lugar da variável. Antes ou depois: a frase inteira. -->
+                  <!-- Na data: só o lugar da variável. Antes ou depois: [30] [dias] antes de [variável]. -->
                   <UFormField
-                    :label="calculo === 'exata' ? p.dataExata : p.continuar"
+                    :label="naData ? p.dataExata : p.continuar"
                     required
-                    :help="calculo === 'exata' ? p.instrucoes.dataExata : p.instrucoes.retomar"
+                    :help="naData ? p.instrucoes.dataExata : p.instrucoes.retomar"
                   >
                     <div class="flex flex-wrap items-center gap-2">
                       <Transition
@@ -393,7 +384,7 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                         leave-active-class="transition-all duration-150"
                         leave-to-class="opacity-0"
                       >
-                        <div v-if="calculo === 'calculada'" class="flex flex-wrap items-center gap-2">
+                        <div v-if="!naData" class="flex flex-wrap items-center gap-2">
                           <UInputNumber
                             v-model="rascunho.offset_amount"
                             :min="1"
@@ -409,13 +400,7 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                               </UTooltip>
                             </template>
                           </USelect>
-                          <USelect v-model="rascunho.offset_direction" :items="direcoes" class="w-36">
-                            <template #item-trailing="{ item }">
-                              <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
-                                <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />
-                              </UTooltip>
-                            </template>
-                          </USelect>
+                          <span class="text-sm text-default">{{ p.direcoes[rascunho.offset_direction] }}</span>
                         </div>
                       </Transition>
 

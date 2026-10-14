@@ -282,3 +282,36 @@ proposta; sem ela, a data é calculada uma vez, na entrada do nó, como em todos
   iguais nas 2 opções.
 - **Ver:** `/no-de-atraso` · `evidencias/proposta-10-na-data-da-variavel.jpg`,
   `evidencias/proposta-11-antes-ou-depois-da-data.jpg`
+
+## Rodada 8 · 2026-10-14
+
+- **Pedido (literal):** "os textos ainda estao pessimos. o noem do campo "como avançar" é horrivel. os titulos
+  das opçoes tambem sao horriveis... "antes ou depois da data" é o tipo de texto que se coloca num help, nao no
+  nome da opçao. veja como outros produtos nomeiam os nomes dos campos dentro dos nodes. é mais objetivo. mais
+  curto. mais tecnico (sem precisar ser dificil). assim ta só ridicularizando. ajuste isso e pode dar push pra
+  main depois"
+- **Contexto:** a rodada 7 foi feita em outra sessão, a pedido da redatora; esta rodada parte dela.
+- **Referência:** HubSpot ("Delay type", "On date / Before date / After date", "Time of day"), Salesforce
+  ("Time Source", "Offset"), n8n ("Resume", "Wait Amount", "Wait Unit") e Zapier ("Delay Until", "Date/Time").
+  Rótulo de 1 ou 2 palavras; a explicação vai para o help e o tooltip.
+- **Mudou:** "Momento" junta a pergunta da rodada 7 com a direção, como o HubSpot: **Na data**, **Antes da
+  data**, **Depois da data**. Sai o dropdown de direção da frase; no lugar fica o texto fixo "antes de" ou
+  "depois de". Grava o mesmo `offset_direction`.
+- **Mudou:** os rótulos:
+
+| Antes | Agora |
+|---|---|
+| Tipo de atraso: Duração fixa / Data de referência | Tipo de atraso: **Duração** / **Data** |
+| Quando avançar: Na data da variável / Antes ou depois da data | **Momento**: Na data / Antes da data / Depois da data |
+| Data da variável | **Data** |
+| Avançar para o próximo nó [30] [dias] [antes de] [variável] | **Deslocamento** [30] [dias] antes de [variável] |
+| Quando a data calculada já tiver passado | **Data no passado** |
+| Quando o campo não estiver preenchido | **Data vazia** |
+| Avançar para o próximo nó / Encerrar o fluxo com erro | **Continuar** / **Encerrar com erro** |
+| Recalcular quando o campo for alterado | **Recalcular se a data mudar** |
+| Card: Avança 30 dias antes de… | Card: **Até 30 dias antes de Data de vencimento, às 09:00.** |
+
+- **Mudou:** helps e tooltips também ficam curtos ("Identifica o nó no fluxo.", "Tempo de espera.", "Quando o
+  item não tem a data preenchida."). A simulação: "Continua em 13/02/2027, às 09:00."
+- **Ver:** `/no-de-atraso` · `evidencias/proposta-12-rotulos-curtos-antes-da-data.jpg`,
+  `evidencias/proposta-13-rotulos-curtos-na-data.jpg`
