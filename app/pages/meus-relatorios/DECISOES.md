@@ -1,0 +1,159 @@
+# Decisões: Exportações no menu
+
+## Rodada 1 · 2026-10-14
+
+- **Pedido (literal):** a demanda inteira está no `BRIEFING.md`, seção 1.
+- **Fronteira:** muda o menu lateral (1 item novo), o aviso depois de escolher o formato, o sino (aviso de
+  pronto) e a tela `/myReports` inteira. Não muda a tabela de itens, o ícone "Extrair Relatório", o menu
+  "Relatório Padrão" nem o modal "Formato de extração".
+
+### O que a proposta faz
+
+1. **A tela vira destino nativo do menu**, na seção Membro, entre Agenda e Knowledge.
+   - O item mostra o estado: ícone girando enquanto há relatório na fila ou gerando, e um número com os
+     prontos que a pessoa ainda não abriu. Com o menu recolhido, um ponto no ícone.
+   - Ao abrir a tela, o número zera.
+2. **O aviso acompanha a geração** em vez de sumir com o link.
+   - Começa como "Gerando o relatório de Contratos", com o caminho para a tela.
+   - Termina como "Relatório pronto", com o número de registros, o botão **Baixar** e o caminho para a tela.
+   - O caminho abre na mesma aba. Hoje abre outra aba e recarrega o app.
+3. **O sino guarda o pronto e o falhou.** Quem fechou o aviso acha no sino; o clique abre a tela com o
+   painel do relatório.
+4. **A tela passa para a tabela nova**, com a anatomia da tabela nova de itens.
+   - Aba, busca, período "Criado em", filtros de Status, Origem e Formato, colunas, e a faixa "Filtros
+     Rápidos" (Todos, Gerando, Prontos, Falharam, Não baixados), a mesma das Tarefas Rápidas.
+   - Colunas: Relatório (origem e visualização), Status, Modelo, Formato, Registros, Filtros, Tamanho,
+     Criado em (com hora). Relatório, Status e Criado em não se escondem.
+   - **Baixar na própria linha**, sem abrir menu. No relatório que falhou, **Tentar de novo**.
+   - Ponto azul ao lado do nome = pronto e nunca baixado.
+   - Seleção em massa: baixar (vira .zip) e excluir, com Desfazer.
+5. **Clique na linha abre o painel de detalhes**, à direita, com a lista atrás.
+   - Topo: status, nome do arquivo e o botão **Baixar XLSX · 61 KB**, mais Extrair de novo e Mais ações.
+   - Resumo: origem (link para a tela de origem), visualização, modelo, formato, registros, tamanho, pedido
+     em, pronto em (com o tempo que levou), quantas vezes baixou.
+   - Filtros aplicados em frase ("Status é Vigente"), no lugar do JSON de hoje, e a ordenação.
+   - Colunas que foram para o arquivo.
+   - Histórico: pedido, gerado, cada download.
+6. **Nome do arquivo legível:** `contratos_vencendo-em-30-dias_2026-10-14-1520.xlsx`, no lugar de
+   `default_1vo8sbnlud.xlsx`.
+
+### Por que no menu principal, contra o mercado
+
+O mercado põe a tela em Configurações (HubSpot, ClickUp, Linear). No ENSPACE não serve: nenhuma exportação
+baixa direto, então **todo** relatório passa pela tela, e quem exporta é o membro. A posição entre Agenda e
+Knowledge junta a tela às outras telas pessoais.
+
+O protótipo `menu-lateral` pôs "Meus relatórios" numa seção `Análise` recolhida. Aqui o item fica solto
+porque o menu de hoje não tem essa seção; se o `menu-lateral` for aprovado, o item muda de lugar sem mudar
+de comportamento.
+
+### Nome da tela
+
+Recomendação: **Exportações** (motivo na `PESQUISA.md`). O andaime alterna com **Meus relatórios** para
+comparar na tela. O botão de origem continua "Extrair Relatório": trocar para "Exportar" mexe na casca e é
+pergunta, não proposta desta rodada.
+
+### Componentes
+
+- **Do SDK:** `EnTable` na tela de exportações e na tabela de Contratos, com `columnSizing` para as
+  larguras de partida e uma coluna `baixar` sem rótulo (a coluna de ações tem 40 px fixos).
+- **Do Nuxt UI:** `USlideover` (painel), `UDropdownMenu` (filtros, colunas, ações), `UBadge`, `UProgress`,
+  `UTooltip`, `UEmpty`, `UAlert`, `UPopover` (sino), `UModal` (formato), `useToast` com `update` (o aviso
+  que muda de "gerando" para "pronto").
+- **Nenhum componente novo** em `app/components/ux/`.
+- **Sem CSS próprio:** nenhum `<style>`, `:deep()` nem `!important`.
+
+### Maquete
+
+- O download não baixa arquivo: mostra o aviso "Baixando <nome>" e registra o download no histórico.
+- "Copiar link" e "Abrir na origem" (fora de Contratos) só mostram o aviso.
+- A geração é simulada: um relatório por vez, cerca de 3 s, com progresso sorteado.
+- "Tentar de novo" sempre dá certo.
+- Só Contratos leva à jornada de extrair; as outras categorias do menu não abrem.
+- O e-mail de pronto continua existindo no produto e não aparece no protótipo.
+
+### O que o back-end precisaria guardar
+
+O `mocks.ts` marca no bloco `proto` o que a resposta de `/c-report-requests` não tem hoje:
+
+| Campo | Para quê |
+|---|---|
+| Registros no arquivo | Coluna Registros (hoje "-") |
+| Nome da visualização de origem | Segunda linha da coluna Relatório |
+| Colunas exportadas | Seção do painel |
+| Filtros em frase | Coluna Filtros e painel (pode sair de `filters` + schema da categoria) |
+| Quando baixou | Ponto de "não baixado", filtro "Não baixados", histórico |
+| Progresso e mensagem de erro | Status "Gerando 64%" e o motivo da falha |
+
+### Perguntas para a Mikaela
+
+1. **Nome:** Exportações ou Meus relatórios?
+2. **O botão "Extrair Relatório"** passa a "Exportar", para casar com o nome? É mudança na casca.
+3. **Expiração:** o arquivo vale para sempre? O mercado expira entre 1 h e 30 dias. Se expirar, a linha
+   ganha o status "Expirado" e "Extrair de novo" vira a ação principal.
+4. **Administrador vê as exportações de todos?** O HubSpot faz assim. Seria uma segunda aba na tela.
+5. **Modal de formato:** fica como está? Ele pede 2 cliques a mais (menu com 1 opção, depois o modal) e não
+   lembra o último formato. Ficou fora da fronteira.
+
+### A jornada, antes e depois
+
+```mermaid
+flowchart LR
+  A[Tabela de Contratos] -->|Extrair Relatório, Relatório Padrão, formato| B
+  subgraph Hoje
+    B[Aviso verde com link, some em 5 s] -->|clique a tempo| C[Outra aba, app recarrega]
+    C --> D[Tabela antiga, linhas iguais]
+    D -->|menu da linha| E[Download]
+    B -->|perdeu o aviso| F[E-mail ou URL digitada]
+  end
+  subgraph Proposta
+    B2[Aviso: Gerando] --> G[Aviso: Pronto + Baixar]
+    G -->|Baixar| H[Arquivo]
+    G -->|Ver na tela, mesma aba| I[Exportações + painel]
+    J[Menu: item com contador] --> I
+    K[Sino: relatório pronto] --> I
+    I -->|Baixar na linha ou no painel| H
+  end
+  A -.-> B2
+```
+
+### Crítica e acessibilidade
+
+Rodei a skill `design:design-critique` sobre os prints. A skill `design:accessibility-review` não rodou em
+separado; os pontos de acessibilidade abaixo saíram da mesma crítica.
+
+- **Corrigido:** o painel só abria com clique do mouse na linha. Entrou "Ver detalhes" no menu ⋮, o caminho
+  de quem usa o teclado.
+- **Corrigido:** o Baixar não aparecia: a coluna de ações do `EnTable` tem 40 px fixos e só cabe o menu.
+  Baixar ganhou coluna própria, sem rótulo, com `aria-label` e tooltip.
+- **Corrigido:** o nome da origem cortava em 12 letras. As colunas ganharam largura de partida
+  (`columnSizing`).
+- **Sem correção:** a linha aberta no painel não fica marcada na tabela. O `EnTable` não aceita classe por
+  linha. Pedido ao SDK: `rowClass` ou `activeRow`.
+- **Sem correção:** o ponto de "não baixado" tem 6 px. Tem `aria-label` e o filtro "Não baixados" cobre quem
+  não enxerga o ponto.
+- **Sem correção:** o aviso aparece no canto inferior direito, como todo aviso do Nuxt UI neste repositório;
+  no develop o aviso de hoje aparece no topo. A posição é do `UApp`, fora da pasta do protótipo.
+- **Conferido:** claro e escuro, PT, EN e ES. Em espanhol os rótulos cabem na barra e nos Filtros Rápidos.
+
+### Não deu
+
+- **Print do tema escuro.** O detector de ponteiro (`detectar_seta_mouse.py`) marca a seta da barra de
+  rolagem do Chrome no escuro como ponteiro, nas 3 tentativas (com e sem o painel aberto). O print ficou
+  fora, sem recorte; o escuro foi conferido na tela.
+- **Checagem de tipos.** O `vue-tsc` não está instalado no repositório. A tela rodou no `pnpm dev` sem erro
+  no console além dos avisos de hidratação dos ícones de ordenação do `EnTable`, os mesmos do
+  `painel-de-tarefas`.
+- **`pnpm generate`.** Não rodei: o servidor de desenvolvimento de outra sessão usa a mesma pasta `.nuxt`.
+- **Print das referências.** As fontes são páginas de ajuda; ClickUp e monday bloquearam a leitura (403).
+
+### Ver
+
+- `http://localhost:3000/meus-relatorios`
+- [A tela](evidencias/proposta-01-tela-de-exportacoes.jpg) ·
+  [o painel](evidencias/proposta-02-painel-do-relatorio.jpg) ·
+  [aviso gerando](evidencias/proposta-03-aviso-gerando.jpg) ·
+  [aviso pronto e menu](evidencias/proposta-04-aviso-pronto-e-menu.jpg) ·
+  [o sino](evidencias/proposta-05-sino.jpg) ·
+  [do sino ao painel](evidencias/proposta-06-do-sino-ao-painel.jpg) ·
+  [nome alternativo e menu da linha](evidencias/proposta-07-nome-alternativo-e-menu-da-linha.jpg)
