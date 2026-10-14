@@ -77,8 +77,6 @@ export interface TextosDaTela {
   mostrarNaLista: string
   oculto: string
   ocultos: (n: number) => string
-  mostrarOcultos: string
-  esconderOcultos: string
   ocultadoToast: (nome: string) => string
   ocultadoDescricao: string
   desfazer: string
@@ -101,13 +99,17 @@ export interface TextosDaTela {
   agruparPor: string
   ordenar: string
   ordenarPor: string
-  agruparOpcoes: Record<'nenhum' | 'etiqueta' | 'papel', string>
+  agruparOpcoes: Record<'nenhum' | 'etiqueta' | 'licenca', string>
   ordenarOpcoes: Record<'acessoRecente' | 'acessoAntigo' | 'criacaoRecente' | 'criacaoAntiga' | 'nome', string>
   ordenarCurto: Record<'acessoRecente' | 'acessoAntigo' | 'criacaoRecente' | 'criacaoAntiga' | 'nome', string>
-  porPapel: string
   convitesPendentes: string
   ocultosBotao: (n: number) => string
-  ocultosTooltip: string
+  editorTitulo: string
+  editorDescricao: string
+  secaoNaLista: string
+  secaoOcultos: string
+  mostrarTodos: string
+  gerenciarOcultos: string
   recolherGrupo: (nome: string) => string
   semEtiqueta: string
   nenhumaEtiqueta: string
@@ -231,7 +233,7 @@ export const textos: Record<Idioma, TextosDaTela> = {
     pessoas: n => `${n} pessoas`,
     colunaWorkspace: 'Workspace',
     colunaDescricao: 'Descrição',
-    colunaPapel: 'Papel',
+    colunaPapel: 'Licença',
     colunaUltimoAcesso: 'Último acesso',
 
     buscarEntre: n => `Buscar entre seus ${n} workspaces`,
@@ -253,8 +255,6 @@ export const textos: Record<Idioma, TextosDaTela> = {
     mostrarNaLista: 'Mostrar na lista',
     oculto: 'Oculto',
     ocultos: n => n === 1 ? '1 workspace oculto' : `${n} workspaces ocultos`,
-    mostrarOcultos: 'Mostrar',
-    esconderOcultos: 'Esconder de novo',
     ocultadoToast: n => `${n} saiu da sua lista`,
     ocultadoDescricao: 'Você continua com acesso. Para ver de novo, use Ocultos, ao lado de Ordenar.',
     desfazer: 'Desfazer',
@@ -277,7 +277,7 @@ export const textos: Record<Idioma, TextosDaTela> = {
     agruparPor: 'Agrupar por',
     ordenar: 'Ordenar',
     ordenarPor: 'Ordenar por',
-    agruparOpcoes: { nenhum: 'Nenhum', etiqueta: 'Etiqueta', papel: 'Papel' },
+    agruparOpcoes: { nenhum: 'Nenhum', etiqueta: 'Etiqueta', licenca: 'Licença' },
     ordenarOpcoes: {
       acessoRecente: 'Acessados por último',
       acessoAntigo: 'Acessados há mais tempo',
@@ -292,10 +292,14 @@ export const textos: Record<Idioma, TextosDaTela> = {
       criacaoAntiga: 'Mais antigos',
       nome: 'Nome',
     },
-    porPapel: 'Seu papel',
     convitesPendentes: 'Convites pendentes',
     ocultosBotao: n => `Ocultos (${n})`,
-    ocultosTooltip: 'Mostrar os workspaces que você tirou da lista',
+    editorTitulo: 'O que aparece na sua lista',
+    editorDescricao: 'Desmarque para ocultar. Você continua com acesso, e a busca ainda encontra.',
+    secaoNaLista: 'Na lista',
+    secaoOcultos: 'Ocultos',
+    mostrarTodos: 'Mostrar todos',
+    gerenciarOcultos: 'Escolher o que aparece',
     recolherGrupo: n => `Recolher ou abrir ${n}`,
     nenhumaEtiqueta: 'Você ainda não criou etiquetas. Crie a primeira abaixo.',
 
@@ -412,7 +416,7 @@ export const textos: Record<Idioma, TextosDaTela> = {
     pessoas: n => `${n} people`,
     colunaWorkspace: 'Workspace',
     colunaDescricao: 'Description',
-    colunaPapel: 'Role',
+    colunaPapel: 'License',
     colunaUltimoAcesso: 'Last visit',
 
     buscarEntre: n => `Search your ${n} workspaces`,
@@ -434,8 +438,6 @@ export const textos: Record<Idioma, TextosDaTela> = {
     mostrarNaLista: 'Show in list',
     oculto: 'Hidden',
     ocultos: n => n === 1 ? '1 hidden workspace' : `${n} hidden workspaces`,
-    mostrarOcultos: 'Show',
-    esconderOcultos: 'Hide again',
     ocultadoToast: n => `${n} is hidden from your list`,
     ocultadoDescricao: 'You still have access. To see it again, use Hidden, next to Sort.',
     desfazer: 'Undo',
@@ -457,7 +459,7 @@ export const textos: Record<Idioma, TextosDaTela> = {
     agruparPor: 'Group by',
     ordenar: 'Sort',
     ordenarPor: 'Sort by',
-    agruparOpcoes: { nenhum: 'None', etiqueta: 'Tag', papel: 'Role' },
+    agruparOpcoes: { nenhum: 'None', etiqueta: 'Tag', licenca: 'License' },
     ordenarOpcoes: {
       acessoRecente: 'Most recently accessed',
       acessoAntigo: 'Least recently accessed',
@@ -472,10 +474,14 @@ export const textos: Record<Idioma, TextosDaTela> = {
       criacaoAntiga: 'Oldest',
       nome: 'Name',
     },
-    porPapel: 'Your role',
     convitesPendentes: 'Pending invites',
     ocultosBotao: n => `Hidden (${n})`,
-    ocultosTooltip: 'Show the workspaces you removed from your list',
+    editorTitulo: 'What shows in your list',
+    editorDescricao: 'Uncheck to hide. You keep access, and search still finds it.',
+    secaoNaLista: 'In your list',
+    secaoOcultos: 'Hidden',
+    mostrarTodos: 'Show all',
+    gerenciarOcultos: 'Choose what shows',
     recolherGrupo: n => `Collapse or expand ${n}`,
     semEtiqueta: 'No tag',
     nenhumaEtiqueta: 'You haven\u2019t created any tags yet. Create the first one below.',
@@ -593,7 +599,7 @@ export const textos: Record<Idioma, TextosDaTela> = {
     pessoas: n => `${n} personas`,
     colunaWorkspace: 'Workspace',
     colunaDescricao: 'Descripción',
-    colunaPapel: 'Rol',
+    colunaPapel: 'Licencia',
     colunaUltimoAcesso: 'Último acceso',
 
     buscarEntre: n => `Buscar entre tus ${n} workspaces`,
@@ -615,8 +621,6 @@ export const textos: Record<Idioma, TextosDaTela> = {
     mostrarNaLista: 'Mostrar en la lista',
     oculto: 'Oculto',
     ocultos: n => n === 1 ? '1 workspace oculto' : `${n} workspaces ocultos`,
-    mostrarOcultos: 'Mostrar',
-    esconderOcultos: 'Volver a ocultar',
     ocultadoToast: n => `${n} salió de tu lista`,
     ocultadoDescricao: 'Sigues con acceso. Para verlo de nuevo, usa Ocultos, junto a Ordenar.',
     desfazer: 'Deshacer',
@@ -639,7 +643,7 @@ export const textos: Record<Idioma, TextosDaTela> = {
     agruparPor: 'Agrupar por',
     ordenar: 'Ordenar',
     ordenarPor: 'Ordenar por',
-    agruparOpcoes: { nenhum: 'Ninguno', etiqueta: 'Etiqueta', papel: 'Rol' },
+    agruparOpcoes: { nenhum: 'Ninguno', etiqueta: 'Etiqueta', licenca: 'Licencia' },
     ordenarOpcoes: {
       acessoRecente: 'Accedidos más recientemente',
       acessoAntigo: 'Accedidos hace más tiempo',
@@ -654,10 +658,14 @@ export const textos: Record<Idioma, TextosDaTela> = {
       criacaoAntiga: 'Más antiguos',
       nome: 'Nombre',
     },
-    porPapel: 'Tu rol',
     convitesPendentes: 'Invitaciones pendientes',
     ocultosBotao: n => `Ocultos (${n})`,
-    ocultosTooltip: 'Mostrar los workspaces que quitaste de tu lista',
+    editorTitulo: 'Qué aparece en tu lista',
+    editorDescricao: 'Desmarca para ocultar. Sigues con acceso, y la búsqueda aún lo encuentra.',
+    secaoNaLista: 'En la lista',
+    secaoOcultos: 'Ocultos',
+    mostrarTodos: 'Mostrar todos',
+    gerenciarOcultos: 'Elegir qué aparece',
     recolherGrupo: n => `Contraer o abrir ${n}`,
     nenhumaEtiqueta: 'Todavía no creaste etiquetas. Crea la primera abajo.',
 

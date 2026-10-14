@@ -19,7 +19,11 @@ type CamposDaApi = Pick<
 >
 
 export interface Workspace extends CamposDaApi {
-  /** Papel do usuário — vem da listagem por membro, não do modelo Workspace. */
+  /**
+   * Licença do usuário neste workspace: o `type` do membro (owner, full, standard, viewer),
+   * que vem da listagem por membro, não do modelo Workspace. O nome `papel` ficou das
+   * primeiras rodadas; papel no produto é outro campo (`role`).
+   */
   papel: Papel
   /** Acrescentado pelo protótipo: hoje a tela não tem favorito por usuário. */
   favorito: boolean

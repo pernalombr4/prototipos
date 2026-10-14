@@ -134,6 +134,40 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 19 · 2026-10-14
+
+- **Pedido (literal):** "no agrupar por nao bote papel, e sim "licença"" e "nao da pra entender o que ta
+  acontercendo quando clica em ocultos. pode ser um dropdown quando clica em ocultos com uma seleçao como
+  se fosse um editor da visualizaçao, pra vc dar um check nos que vc quer que apareça de novo e em quais
+  voce quer ocultar (…) como um editor de colunas ou visualizaçoes do notion por exemplo."
+- **Mudou (licença):** "Agrupar por: Papel" vira "Licença", com o ícone de crachá. A coluna da lista que
+  dizia "Papel" também vira "Licença".
+  - Motivo: no schema, Proprietário, Full, Membro e Leitor são o `type` do membro (`owner`, `full`,
+    `standard`, `viewer`). Papel é outro campo (`role`). O selo do card sempre mostrou a licença.
+  - O campo do mock continua `papel`, com comentário explicando, para não mexer em 18 registros.
+- **Mudou (editor de ocultos):** "Ocultos" abre um painel, como o de propriedades do Notion.
+  - Título "O que aparece na sua lista" e a frase "Desmarque para ocultar. Você continua com acesso, e a
+    busca ainda encontra."
+  - Cada workspace com uma marcação: marcado aparece na lista, desmarcado fica oculto. Vale na hora, e o
+    item troca de seção.
+  - 2 seções, com contagem: "Ocultos" primeiro, porque quem abre "Ocultos" procura por eles; depois
+    "Na lista". Dentro delas, ordem alfabética.
+  - Busca no topo do painel e "Mostrar todos" quando há oculto.
+  - O botão diz "Ocultos (1)" quando há oculto e "Ocultos" quando não há; antes ele sumia.
+  - Convite pendente não entra no painel: ele se resolve aceitando ou recusando.
+- **Mudou (lista):** os ocultos não aparecem mais misturados na grade com o selo "Oculto"; só a busca os
+  encontra. O aviso do fim da lista ("1 workspace oculto") abre o mesmo painel, pelo botão "Escolher o que
+  aparece".
+- **Fronteira:** muda o rótulo do agrupamento e da coluna, e o controle de ocultos; não muda o menu "⋯"
+  (que continua ocultando um por vez), as etiquetas, a busca nem o card.
+- **Maquete:** o que se marca no painel vive em memória; o reload volta ao mock.
+- **Crítica e acessibilidade:** conferência à mão; as skills não rodaram.
+  - Cada linha é um `UCheckbox` com o nome do workspace como rótulo: o leitor de tela anuncia "marcado"
+    ou "desmarcado".
+  - Ficou sem correção: o painel abre por cima da barra de andaime do protótipo quando a tela é baixa.
+    Isso só acontece no protótipo; o produto não tem essa barra.
+- **Ver:** https://pernalombr4.github.io/prototipos/tela-de-workspaces
+
 ### Rodada 18 · 2026-10-14
 
 - **Pedido (literal):** "no texto da base dos cards nao precisa da quantidade de membros, só do último

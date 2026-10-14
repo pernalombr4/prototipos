@@ -75,7 +75,9 @@ const favoritados = ref<number[]>([])
 const padrao = ref<number | null>(null)
 /** Tirados da lista pela pessoa. Continuam acessíveis, e a busca acha. */
 const ocultos = ref<number[]>(workspaces.filter(w => w.oculto).map(w => w.id))
-const mostrarOcultos = ref(false)
+/** Rodada 19: o editor de "Ocultos", aberto pela barra ou pelo aviso do fim da lista. */
+const editorDeOcultosAberto = ref(false)
+const buscaNoEditor = ref('')
 /** Workspaces de que a pessoa saiu: deixam de existir para ela. */
 const saidos = ref<number[]>([])
 /** Etiquetas pessoais: a lista dela e quais cada workspace leva. */
@@ -85,7 +87,7 @@ const etiquetasPorWorkspace = ref<Record<number, string[]>>(
 )
 
 /* Rodada 18: agrupar e ordenar como nas visualizações do ClickUp. */
-type Agrupamento = 'nenhum' | 'etiqueta' | 'papel'
+type Agrupamento = 'nenhum' | 'etiqueta' | 'licenca'
 type Ordem = 'acessoRecente' | 'acessoAntigo' | 'criacaoRecente' | 'criacaoAntiga' | 'nome'
 const agruparPor = ref<Agrupamento>('nenhum')
 const ordenarPor = ref<Ordem>('acessoRecente')
@@ -145,7 +147,7 @@ const listados = computed(() => {
   // O destaque do topo é atalho: o workspace continua na lista (regra 20).
   // Os pendentes também aparecem aqui, como o produto mostra hoje.
   // Oculto sai da lista, mas a busca ainda acha, e "Mostrar" traz de volta.
-  let lista = visiveis.value.filter(w => termo || mostrarOcultos.value || !estaOculto(w))
+  let lista = visiveis.value.filter(w => termo || !estaOculto(w))
 
   if (aba.value === 'favoritos') lista = lista.filter(w => ehFavorito(w))
   if (aba.value === 'recentes') lista = lista.filter(w => w.ultimoAcessoMin !== null)
@@ -172,23 +174,25 @@ function comparar(a: Workspace, b: Workspace) {
 
 /** Agrupado por etiqueta, o workspace com duas etiquetas aparece nos dois grupos. */
 interface Grupo { id: string, nome: string | null, icone?: string, itens: Workspace[] }
-const ordemDosPapeis: Workspace['papel'][] = ['Proprietário', 'Full', 'Membro', 'Leitor']
+// Rodada 19: o selo do card é a licença do membro (Member.type: owner, full, standard,
+// viewer), não o papel (Member.role, outro campo). O grupo leva o nome certo.
+const ordemDasLicencas: Workspace['papel'][] = ['Proprietário', 'Full', 'Membro', 'Leitor']
 const grupos = computed<Grupo[]>(() => {
   if (agruparPor.value === 'nenhum') return [{ id: 'todos', nome: null, itens: listados.value }]
-  if (agruparPor.value === 'papel') {
+  if (agruparPor.value === 'licenca') {
     const convites: Grupo = {
       id: 'convites',
       nome: t.value.convitesPendentes,
       icone: 'i-lucide-mail-open',
       itens: listados.value.filter(w => estaPendente(w)),
     }
-    const porPapel = ordemDosPapeis.map(papel => ({
-      id: `papel-${papel}`,
+    const porLicenca = ordemDasLicencas.map(papel => ({
+      id: `licenca-${papel}`,
       nome: t.value.papeis[papel],
-      icone: 'i-lucide-user-round',
+      icone: 'i-lucide-id-card',
       itens: listados.value.filter(w => !estaPendente(w) && w.papel === papel),
     }))
-    return [convites, ...porPapel].filter(g => g.itens.length)
+    return [convites, ...porLicenca].filter(g => g.itens.length)
   }
   const porEtiqueta = etiquetas.value.map(e => ({
     id: e.id,
@@ -214,6 +218,40 @@ const abas = computed(() => [
 
 const totalOcultos = computed(() => visiveis.value.filter(w => estaOculto(w)).length)
 
+/* Editor de ocultos, como o painel de propriedades do Notion: cada workspace com
+   uma marcação; marcado aparece na lista, desmarcado fica oculto. Convite pendente
+   não entra: ele se resolve aceitando ou recusando. */
+function definirVisivel(w: Workspace, visivel: boolean) {
+  if (visivel) {
+    ocultos.value = ocultos.value.filter(id => id !== w.id)
+    return
+  }
+  if (!ocultos.value.includes(w.id)) ocultos.value.push(w.id)
+  // Ocultar o padrão desfaz o padrão, como no menu "⋯".
+  if (padrao.value === w.id) padrao.value = null
+}
+
+function mostrarTodos() {
+  ocultos.value = []
+}
+
+const secoesDoEditor = computed(() => {
+  const termo = normalizar(buscaNoEditor.value.trim())
+  const todos = disponiveis.value
+    .filter(w => !termo || normalizar(w.name).includes(termo))
+    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+  // Os ocultos vêm primeiro: quem abre "Ocultos" procura por eles.
+  return [
+    { id: 'ocultos', titulo: t.value.secaoOcultos, itens: todos.filter(w => estaOculto(w)) },
+    { id: 'na-lista', titulo: t.value.secaoNaLista, itens: todos.filter(w => !estaOculto(w)) },
+  ].filter(s => s.itens.length)
+})
+
+function abrirEditorDeOcultos() {
+  document.getElementById('barra-da-lista')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  editorDeOcultosAberto.value = true
+}
+
 function alternarGrupo(id: string) {
   recolhidos.value = recolhidos.value.includes(id)
     ? recolhidos.value.filter(g => g !== id)
@@ -224,10 +262,10 @@ function alternarGrupo(id: string) {
    que está valendo, e o menu marca a opção escolhida. */
 const menuDeAgrupar = computed<DropdownMenuItem[][]>(() => [
   [{ type: 'label', label: t.value.agruparPor }],
-  (['nenhum', 'etiqueta', 'papel'] as Agrupamento[]).map(opcao => ({
+  (['nenhum', 'etiqueta', 'licenca'] as Agrupamento[]).map(opcao => ({
     type: 'checkbox' as const,
     label: t.value.agruparOpcoes[opcao],
-    icon: { nenhum: 'i-lucide-ban', etiqueta: 'i-lucide-tag', papel: 'i-lucide-user-round' }[opcao],
+    icon: { nenhum: 'i-lucide-ban', etiqueta: 'i-lucide-tag', licenca: 'i-lucide-id-card' }[opcao],
     checked: agruparPor.value === opcao,
     onUpdateChecked: () => {
       agruparPor.value = opcao
@@ -703,7 +741,7 @@ function workspaceCriado(nome: string) {
         <!-- 4. Abas e a barra da lista: Agrupar, Ordenar, Ocultos e card / lista.
              Rodada 18: a barra copia o padrão das visualizações do ClickUp. -->
         <section v-if="mostrarLista">
-          <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div id="barra-da-lista" class="mb-4 flex scroll-mt-4 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <UTabs v-model="aba" :items="abas" :content="false" color="primary" variant="link" size="sm" />
 
             <div class="flex flex-wrap items-center gap-2">
@@ -727,19 +765,80 @@ function workspaceCriado(nome: string) {
                   :variant="ordenarPor === 'acessoRecente' ? 'outline' : 'soft'"
                 />
               </UDropdownMenu>
-              <!-- Ocultos à vista na barra, como o "Show closed" do ClickUp; e
-                   ainda no fim da lista, como o "Hidden teams" do Teams. -->
-              <UTooltip v-if="totalOcultos" :text="t.ocultosTooltip">
+              <!-- Rodada 19: "Ocultos" abre um editor, como o painel de propriedades
+                   do Notion. Marcado aparece na lista; desmarcado fica oculto. -->
+              <UPopover
+                v-model:open="editorDeOcultosAberto"
+                :content="{ align: 'end' }"
+                @update:open="(aberto: boolean) => { if (!aberto) buscaNoEditor = '' }"
+              >
                 <UButton
                   icon="i-lucide-eye-off"
-                  :label="t.ocultosBotao(totalOcultos)"
+                  trailing-icon="i-lucide-chevron-down"
+                  :label="totalOcultos ? t.ocultosBotao(totalOcultos) : t.secaoOcultos"
                   size="xs"
                   color="neutral"
-                  :variant="mostrarOcultos ? 'soft' : 'outline'"
-                  :aria-pressed="mostrarOcultos"
-                  @click="mostrarOcultos = !mostrarOcultos"
+                  :variant="totalOcultos ? 'soft' : 'outline'"
                 />
-              </UTooltip>
+
+                <template #content>
+                  <div class="w-80 p-3">
+                    <div class="flex items-center justify-between gap-2">
+                      <p class="text-sm font-semibold text-highlighted">
+                        {{ t.editorTitulo }}
+                      </p>
+                      <UButton
+                        v-if="totalOcultos"
+                        :label="t.mostrarTodos"
+                        color="neutral"
+                        variant="link"
+                        size="xs"
+                        class="px-0"
+                        @click="mostrarTodos"
+                      />
+                    </div>
+                    <p class="mt-0.5 mb-3 text-xs text-muted">
+                      {{ t.editorDescricao }}
+                    </p>
+                    <UInput
+                      v-model="buscaNoEditor"
+                      icon="i-lucide-search"
+                      :placeholder="t.buscarWorkspace"
+                      size="sm"
+                      class="mb-3 w-full"
+                    />
+                    <div class="max-h-72 space-y-3 overflow-y-auto">
+                      <div v-for="secao in secoesDoEditor" :key="secao.id">
+                        <p class="mb-1 px-2 text-xs font-semibold uppercase tracking-wider text-muted">
+                          {{ secao.titulo }} ({{ secao.itens.length }})
+                        </p>
+                        <TransitionGroup
+                          tag="ul"
+                          move-class="transition-transform duration-200"
+                          enter-active-class="transition duration-200 ease-out"
+                          enter-from-class="opacity-0"
+                        >
+                          <li v-for="w in secao.itens" :key="w.id">
+                            <UCheckbox
+                              :model-value="!estaOculto(w)"
+                              :label="w.name"
+                              :ui="{
+                                root: 'items-center rounded-md px-2 py-1.5 transition-colors hover:bg-elevated',
+                                wrapper: 'min-w-0',
+                                label: estaOculto(w) ? 'truncate font-normal text-muted' : 'truncate font-normal',
+                              }"
+                              @update:model-value="(valor: boolean | 'indeterminate') => definirVisivel(w, valor === true)"
+                            />
+                          </li>
+                        </TransitionGroup>
+                      </div>
+                      <p v-if="!secoesDoEditor.length" class="px-2 py-4 text-center text-sm text-muted">
+                        {{ t.buscaVaziaTitulo(buscaNoEditor) }}
+                      </p>
+                    </div>
+                  </div>
+                </template>
+              </UPopover>
               <!-- Card é o padrão. Lista é opção, e a troca é visível. -->
               <div class="flex shrink-0 rounded-md border border-default p-0.5">
                 <UButton
@@ -1082,12 +1181,12 @@ function workspaceCriado(nome: string) {
             <UIcon name="i-lucide-eye-off" class="size-4" />
             {{ t.ocultos(totalOcultos) }}
             <UButton
-              :label="mostrarOcultos ? t.esconderOcultos : t.mostrarOcultos"
+              :label="t.gerenciarOcultos"
               color="neutral"
               variant="link"
               size="sm"
               class="px-0 font-medium text-highlighted"
-              @click="mostrarOcultos = !mostrarOcultos"
+              @click="abrirEditorDeOcultos"
             />
           </div>
         </section>
