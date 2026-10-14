@@ -90,17 +90,25 @@ function salvar() {
 
 /* ---------- opções ---------- */
 
-const unidadesDeHoje = computed(() => (['second', 'minute', 'hour', 'day'] as Unidade[]).map(u => ({ value: u, label: props.t.hoje.unidades[u] })))
+// Toda opção da proposta leva `ajuda`: o "?" com tooltip no fim da linha do dropdown.
+const unidadesDeHoje = computed(() => (['second', 'minute', 'hour', 'day'] as Unidade[]).map(u => ({
+  value: u,
+  label: props.t.hoje.unidades[u],
+  ajuda: props.versao === 'proposta' ? p.value.ajudas.unidade[u] : undefined,
+})))
 
 const modos = computed(() => [
-  { value: 'duration' as const, label: p.value.modos.duration.titulo, description: p.value.modos.duration.descricao },
-  { value: 'until_date' as const, label: p.value.modos.until_date.titulo, description: p.value.modos.until_date.descricao },
+  { value: 'duration' as const, label: p.value.modos.duration.titulo, description: p.value.modos.duration.descricao, ajuda: p.value.ajudas.tipo.duration },
+  { value: 'until_date' as const, label: p.value.modos.until_date.titulo, description: p.value.modos.until_date.descricao, ajuda: p.value.ajudas.tipo.until_date },
 ])
 
-const unidadesDoDeslocamento = computed(() => (['day', 'week', 'month', 'hour'] as UnidadeDoDeslocamento[])
-  .map(u => ({ value: u, label: p.value.unidadeDoDeslocamento(u, rascunho.value.offset_amount) })))
+/** No dropdown vão só nome e ajuda; a descrição longa fica no "?" do campo. */
+const itensDeModo = computed(() => modos.value.map(({ value, label, ajuda }) => ({ value, label, ajuda })))
 
-const direcoes = computed(() => (['before', 'after', 'on'] as Direcao[]).map(d => ({ value: d, label: p.value.direcoes[d] })))
+const unidadesDoDeslocamento = computed(() => (['day', 'week', 'month', 'hour'] as UnidadeDoDeslocamento[])
+  .map(u => ({ value: u, label: p.value.unidadeDoDeslocamento(u, rascunho.value.offset_amount), ajuda: p.value.ajudas.deslocamento[u] })))
+
+const direcoes = computed(() => (['before', 'after', 'on'] as Direcao[]).map(d => ({ value: d, label: p.value.direcoes[d], ajuda: p.value.ajudas.direcao[d] })))
 
 const campo = computed(() => campoEscolhido(rascunho.value))
 const nomeDoCampo = computed(() => campo.value?.label ?? p.value.campo.toLowerCase())
@@ -117,12 +125,12 @@ watch(campo, (c) => {
 })
 
 const opcoesDePassou = computed(() => [
-  { value: 'continue', label: p.value.continuarNaHora },
-  { value: 'end', label: p.value.encerrar },
+  { value: 'continue', label: p.value.continuarNaHora, ajuda: p.value.ajudas.passou.continue },
+  { value: 'end', label: p.value.encerrar, ajuda: p.value.ajudas.passou.end },
 ])
 const opcoesDeVazio = computed(() => [
-  { value: 'end', label: p.value.encerrar },
-  { value: 'continue', label: p.value.continuarNaHora },
+  { value: 'end', label: p.value.encerrar, ajuda: p.value.ajudas.vazio.end },
+  { value: 'continue', label: p.value.continuarNaHora, ajuda: p.value.ajudas.vazio.continue },
 ])
 
 /* ---------- o painel Variáveis de Entrada e o arrasto ---------- */
@@ -266,7 +274,13 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                 <template #hint>
                   <UTooltip :text="t.hoje.ajudaUnidade"><UIcon name="i-lucide-circle-help" class="size-4 text-muted" /></UTooltip>
                 </template>
-                <USelect v-model="rascunho.unit" :items="unidadesDeHoje" class="w-full" />
+                <USelect v-model="rascunho.unit" :items="unidadesDeHoje" class="w-full">
+                  <template #item-trailing="{ item }">
+                    <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
+                      <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />
+                    </UTooltip>
+                  </template>
+                </USelect>
               </UFormField>
             </template>
 
@@ -284,7 +298,13 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                     </template>
                   </UTooltip>
                 </template>
-                <USelect v-model="rascunho.mode" :items="modos.map(({ value, label }) => ({ value, label }))" class="w-full" />
+                <USelect v-model="rascunho.mode" :items="itensDeModo" class="w-full">
+                  <template #item-trailing="{ item }">
+                    <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
+                      <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />
+                    </UTooltip>
+                  </template>
+                </USelect>
               </UFormField>
 
               <Transition
@@ -306,7 +326,13 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                     />
                   </UFormField>
                   <UFormField :label="t.hoje.unidade" :help="p.instrucoes.unidade">
-                    <USelect v-model="rascunho.unit" :items="unidadesDeHoje" class="w-full" />
+                    <USelect v-model="rascunho.unit" :items="unidadesDeHoje" class="w-full">
+                      <template #item-trailing="{ item }">
+                        <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
+                          <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />
+                        </UTooltip>
+                      </template>
+                    </USelect>
                   </UFormField>
                 </div>
 
@@ -366,10 +392,22 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                             :aria-label="p.quanto"
                             class="w-24"
                           />
-                          <USelect v-model="rascunho.offset_unit" :items="unidadesDoDeslocamento" class="w-28" />
+                          <USelect v-model="rascunho.offset_unit" :items="unidadesDoDeslocamento" class="w-28">
+                            <template #item-trailing="{ item }">
+                              <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
+                                <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />
+                              </UTooltip>
+                            </template>
+                          </USelect>
                         </div>
                       </Transition>
-                      <USelect v-model="rascunho.offset_direction" :items="direcoes" class="w-36" />
+                      <USelect v-model="rascunho.offset_direction" :items="direcoes" class="w-36">
+                        <template #item-trailing="{ item }">
+                          <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
+                            <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />
+                          </UTooltip>
+                        </template>
+                      </USelect>
                       <span
                         class="min-w-0 truncate text-sm font-medium transition-colors"
                         :class="campo ? 'text-highlighted' : 'text-dimmed'"
@@ -391,10 +429,22 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
 
                   <div class="grid gap-4 sm:grid-cols-2">
                     <UFormField :label="p.sePassou" :help="p.instrucoes.sePassou">
-                      <USelect v-model="rascunho.if_past" :items="opcoesDePassou" class="w-full" />
+                      <USelect v-model="rascunho.if_past" :items="opcoesDePassou" class="w-full">
+                        <template #item-trailing="{ item }">
+                          <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
+                            <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />
+                          </UTooltip>
+                        </template>
+                      </USelect>
                     </UFormField>
                     <UFormField :label="p.seVazio" :help="p.instrucoes.seVazio">
-                      <USelect v-model="rascunho.if_empty" :items="opcoesDeVazio" class="w-full" />
+                      <USelect v-model="rascunho.if_empty" :items="opcoesDeVazio" class="w-full">
+                        <template #item-trailing="{ item }">
+                          <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
+                            <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />
+                          </UTooltip>
+                        </template>
+                      </USelect>
                     </UFormField>
                   </div>
 

@@ -200,7 +200,38 @@ proposta; sem ela, a data é calculada uma vez, na entrada do nó, como em todos
 - **Achado do develop:** o painel entrega `{{ input.data.vitrine_data }}` (medido em 14/10/2026, arrastando
   "Data (Calendário)"), e não o formato `{{nodes.trig.…}}` do exemplo. O protótipo usa o formato do exemplo e
   aceita os 2; qual vale no produto é decisão do time.
-- **Não deu:** print da rodada. A janela do Chrome ficou minimizada e não renderiza. O arrasto, os erros e o
-  foco foram conferidos pelo DOM: variável de texto dá o erro, variável de data dá "Usando…", o primeiro foco
-  é o X.
-- **Ver:** `/no-de-atraso` · `evidencias/dev-05-variaveis-de-entrada.jpg` (o painel no develop)
+- **Conferido:** o arrasto, os erros e o foco pelo DOM (variável de texto dá o erro, variável de data dá
+  "Usando…", o primeiro foco é o X). O print ficou para a rodada 5, quando o Chrome voltou à tela.
+- **Ver:** `/no-de-atraso` · `evidencias/dev-05-variaveis-de-entrada.jpg` (o painel no develop) ·
+  `evidencias/proposta-06-variaveis-de-entrada.jpg` (o painel na proposta)
+
+## Rodada 5 · 2026-10-14
+
+- **Pedido (literal):** "e o que exatamente significa RETOMAR IMEDIATAMENTE. retomar o que? toda opçao deve ter
+  um help com tooltip."
+- **Mudou:** "retomar" sai do nó inteiro. O nome diz o que acontece:
+
+| Antes | Agora |
+|---|---|
+| Retomar imediatamente (opção) | Avançar para o próximo nó |
+| Retomar a execução (frase) | Avançar para o próximo nó [30] [dias] [antes de] Data de vencimento |
+| Horário de retomada | Horário |
+| Retomada em 13/02/2027 (simulação) | Avança para o próximo nó em 13/02/2027 |
+| A execução é retomada imediatamente | O fluxo avança para o próximo nó na hora |
+| Retoma 30 dias antes de… (card) | Avança 30 dias antes de… |
+
+- **Mudou:** toda opção de dropdown da proposta tem um "?" no fim da linha, com tooltip dizendo o que ela faz:
+  Tipo de atraso, Unidade, a unidade e a direção da frase, e as 2 regras. Exemplos:
+  - Avançar para o próximo nó: "O fluxo não espera: segue na hora para o nó ligado depois do Atraso."
+  - Encerrar o fluxo: "O fluxo para neste nó. Os nós seguintes não rodam para este item."
+  - Meses: "Meses do calendário. 1 mês antes de 31/03 é 28/02."
+- **Fora:** o dropdown de Horário (48 horários de meia em meia hora) e o Item de exemplo da simulação não têm
+  "?" por opção: a opção é o próprio valor, e o campo já tem instrução embaixo.
+- **Componente:** o "?" entra pelo slot `#item-trailing` do `USelect`, antes do ✓ da opção marcada. O tooltip
+  quebra linha pela prop `ui` (`content: 'h-auto max-w-72'`, `text: 'whitespace-normal'`); o tema do Tooltip
+  trunca o texto em 1 linha. Sem CSS próprio.
+- **Acessibilidade:** o "?" dentro da opção abre no hover; pelo teclado o tooltip não abre. A instrução embaixo
+  do campo cobre quem navega por teclado. Fica como achado para o time.
+- **Em aberto:** a variável dentro da frase, no lugar do texto "Data de vencimento" (respondido na conversa,
+  sem aprovação ainda).
+- **Ver:** `/no-de-atraso` · `evidencias/proposta-07-ajuda-em-cada-opcao.jpg`
