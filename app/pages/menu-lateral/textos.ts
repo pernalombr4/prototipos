@@ -145,6 +145,29 @@ export interface TextosDaTela {
   criarMenuRotulo: string
   criarCategoriaRotulo: string
   criarMenuTitulo: string
+  // rodada 20: o tipo do menu é a tela
+  criarMenuDescricao: string
+  criarSecaoDescricao: string
+  criarSecaoContexto: string
+  criarCategoriaContexto: string
+  formSecaoRodape: string
+  criarMenuContexto: string
+  tipoDeMenu: string
+  tipoDeMenuDica: string
+  dentroDeSecao: string
+  comoFica: string
+  // rodada 20: as portas do "+" do topo que moram em outras telas
+  maqueteItemDescricao: string
+  maqueteTarefaDescricao: string
+  maqueteAviso: string
+  maqueteRodape: string
+  criarAcao: string
+  maqueteCategoria: string
+  maqueteTitulo: string
+  maqueteResponsavel: string
+  maqueteStatus: string
+  maquetePrazo: string
+  maqueteDescricao: string
   criarMenuPlaceholder: string
   ondeFica: string
   noInicio: string
@@ -573,6 +596,27 @@ const ptBR: TextosDaTela = {
   criarMenuRotulo: 'Criar menu',
   criarCategoriaRotulo: 'Criar categoria',
   criarMenuTitulo: 'Criar menu',
+  criarMenuDescricao: 'O menu é a tela. Escolha o tipo, e o ENSPACE pede o que aquele tipo precisa.',
+  criarSecaoDescricao: 'Seção agrupa os menus que você usa juntos.',
+  criarSecaoContexto: 'A seção entra no topo do Início.',
+  criarCategoriaContexto: 'A categoria aparece em Categorias e na busca.',
+  formSecaoRodape: 'A seção entra no fim do menu, no rascunho.',
+  criarMenuContexto: 'O menu e a tela dele nascem juntos, no rascunho do menu.',
+  tipoDeMenu: 'Tipo de menu',
+  tipoDeMenuDica: 'O tipo é a tela que abre quando alguém clica neste menu.',
+  dentroDeSecao: 'Dentro de uma seção',
+  comoFica: 'Como fica no menu',
+  maqueteItemDescricao: 'Abre o formulário da categoria escolhida, com os campos que ela tem.',
+  maqueteTarefaDescricao: 'Abre a tarefa rápida, que vive fora de qualquer categoria.',
+  maqueteAviso: 'Maquete. Esta tela não faz parte do que está sendo proposto aqui: o desenho dela é o do produto.',
+  maqueteRodape: 'O atalho existe; a tela é de outro lugar do ENSPACE.',
+  criarAcao: 'Criar',
+  maqueteCategoria: 'Categoria',
+  maqueteTitulo: 'Título',
+  maqueteResponsavel: 'Responsável',
+  maqueteStatus: 'Status',
+  maquetePrazo: 'Prazo',
+  maqueteDescricao: 'Descrição',
   criarMenuPlaceholder: 'Ex.: Atendimento, Compras, Contratos',
   ondeFica: 'Onde ele fica',
   noInicio: 'No Início',
@@ -839,7 +883,7 @@ const ptBR: TextosDaTela = {
   campoCaminhoDica: 'A URL para onde esta tela leva.',
   campoCategorias: 'Categorias',
   adicionarSecao: 'Nova seção',
-  adicionarItem: 'Adicionar item',
+  adicionarItem: 'Novo menu',
   salvar: 'Salvar',
   cancelar: 'Cancelar',
   criada: nome => `${nome} entrou no menu.`,
@@ -1040,6 +1084,27 @@ const en: TextosDaTela = {
   criarMenuRotulo: 'Create menu',
   criarCategoriaRotulo: 'Create category',
   criarMenuTitulo: 'Create menu',
+  criarMenuDescricao: 'The menu is the screen. Pick the type and ENSPACE asks for what that type needs.',
+  criarSecaoDescricao: 'A section groups the menus you use together.',
+  criarSecaoContexto: 'The section lands at the top of Home.',
+  criarCategoriaContexto: 'The category shows up in Categories and in search.',
+  formSecaoRodape: 'The section lands at the end of the menu, in the draft.',
+  criarMenuContexto: 'The menu and its screen are born together, in the menu draft.',
+  tipoDeMenu: 'Menu type',
+  tipoDeMenuDica: 'The type is the screen that opens when someone clicks this menu.',
+  dentroDeSecao: 'Inside a section',
+  comoFica: 'How it looks in the menu',
+  maqueteItemDescricao: 'Opens the form of the chosen category, with the fields it has.',
+  maqueteTarefaDescricao: 'Opens the quick task, which lives outside any category.',
+  maqueteAviso: 'Mockup. This screen is not part of what is being proposed here: its design is the one from the product.',
+  maqueteRodape: 'The shortcut exists; the screen belongs to another part of ENSPACE.',
+  criarAcao: 'Create',
+  maqueteCategoria: 'Category',
+  maqueteTitulo: 'Title',
+  maqueteResponsavel: 'Owner',
+  maqueteStatus: 'Status',
+  maquetePrazo: 'Due date',
+  maqueteDescricao: 'Description',
   criarMenuPlaceholder: 'E.g. Support, Purchasing, Contracts',
   ondeFica: 'Where it lives',
   noInicio: 'In Home',
@@ -1306,7 +1371,7 @@ const en: TextosDaTela = {
   campoCaminhoDica: 'The URL this screen leads to.',
   campoCategorias: 'Categories',
   adicionarSecao: 'New section',
-  adicionarItem: 'Add item',
+  adicionarItem: 'New menu',
   salvar: 'Save',
   cancelar: 'Cancel',
   criada: nome => `${nome} is now in the menu.`,
@@ -1507,6 +1572,27 @@ const es: TextosDaTela = {
   criarMenuRotulo: 'Crear menú',
   criarCategoriaRotulo: 'Crear categoría',
   criarMenuTitulo: 'Crear menú',
+  criarMenuDescricao: 'El menú es la pantalla. Elige el tipo y ENSPACE pide lo que ese tipo necesita.',
+  criarSecaoDescricao: 'Una sección agrupa los menús que usas juntos.',
+  criarSecaoContexto: 'La sección entra arriba del Inicio.',
+  criarCategoriaContexto: 'La categoría aparece en Categorías y en la búsqueda.',
+  formSecaoRodape: 'La sección entra al final del menú, en el borrador.',
+  criarMenuContexto: 'El menú y su pantalla nacen juntos, en el borrador del menú.',
+  tipoDeMenu: 'Tipo de menú',
+  tipoDeMenuDica: 'El tipo es la pantalla que abre cuando alguien hace clic en este menú.',
+  dentroDeSecao: 'Dentro de una sección',
+  comoFica: 'Cómo queda en el menú',
+  maqueteItemDescricao: 'Abre el formulario de la categoría elegida, con los campos que tiene.',
+  maqueteTarefaDescricao: 'Abre la tarea rápida, que vive fuera de cualquier categoría.',
+  maqueteAviso: 'Maqueta. Esta pantalla no es parte de lo que se propone aquí: su diseño es el del producto.',
+  maqueteRodape: 'El atajo existe; la pantalla es de otro lugar de ENSPACE.',
+  criarAcao: 'Crear',
+  maqueteCategoria: 'Categoría',
+  maqueteTitulo: 'Título',
+  maqueteResponsavel: 'Responsable',
+  maqueteStatus: 'Estado',
+  maquetePrazo: 'Plazo',
+  maqueteDescricao: 'Descripción',
   criarMenuPlaceholder: 'Ej.: Atención, Compras, Contratos',
   ondeFica: 'Dónde queda',
   noInicio: 'En Inicio',
@@ -1773,7 +1859,7 @@ const es: TextosDaTela = {
   campoCaminhoDica: 'La URL a la que lleva esta pantalla.',
   campoCategorias: 'Categorías',
   adicionarSecao: 'Nueva sección',
-  adicionarItem: 'Añadir elemento',
+  adicionarItem: 'Nuevo menú',
   salvar: 'Guardar',
   cancelar: 'Cancelar',
   criada: nome => `${nome} entró en el menú.`,

@@ -2,6 +2,8 @@
 import { rotuloDoNo as rotuloComum } from './rotulos'
 import FormularioDeMenu from './_FormularioDeMenu.vue'
 import { useMenuDoWorkspace, useArraste } from './estado'
+import { useTrilha } from './trilha'
+import { MOLDURA } from './moldura'
 import { tiposDeTela, type NoDoMenu } from './mocks'
 import type { TextosDaTela } from './textos'
 
@@ -41,14 +43,20 @@ const formAberto = ref(false)
 const modoDoForm = ref<'secao' | 'item'>('secao')
 const secaoDoNovoItem = ref('')
 
-watch(aberto, (v) => {
-  if (!v) return
-  if (props.abrirFormulario) {
-    modoDoForm.value = props.abrirFormulario
-    secaoDoNovoItem.value = props.abrirFormulario === 'item' ? (secoesQueRecebem.value[0]?.id ?? '') : ''
-    formAberto.value = true
-  }
-})
+const trilha = useTrilha()
+
+/*
+ * O editor nasce só quando alguém o abre (rodada 13), então ele monta com
+ * `aberto` JÁ true e o watch sozinho nunca disparava: "+ > Seção de menu" abria
+ * o editor sem o formulário. O onMounted cobre esse primeiro instante.
+ */
+function abrirFormInicial() {
+  if (!aberto.value || !props.abrirFormulario) return
+  abrirForm(props.abrirFormulario, props.abrirFormulario === 'item' ? (secoesQueRecebem.value[0]?.id ?? '') : '')
+}
+
+watch(aberto, abrirFormInicial)
+onMounted(abrirFormInicial)
 
 function rotuloDe(no: NoDoMenu) {
   // Rodada 16: o mapa de nomes mora no rotulos.ts, um só para todas as peças.
@@ -62,7 +70,18 @@ const secoesQueRecebem = computed(() =>
     .map(n => ({ id: n.id, rotulo: rotuloDe(n), escopo: n.escopo ?? [] })),
 )
 
+/*
+ * Rodada 20: menu se cria num formulário só, o mesmo do "+" (`_CriarMenu`),
+ * aberto já dentro da seção. Antes o editor tinha o seu, com outros campos e
+ * outra largura, e ela apontou a diferença. O formulário antigo ficou só
+ * para a seção de menu, que é configuração do workspace.
+ */
 function abrirForm(modo: 'secao' | 'item', secaoId = '') {
+  if (modo === 'item') {
+    const alvo = secaoId || secoesQueRecebem.value[0]?.id
+    trilha.criandoMenu.value = alvo ? `secao:${alvo}` : 'inicio'
+    return
+  }
   modoDoForm.value = modo
   secaoDoNovoItem.value = secaoId
   formAberto.value = true
@@ -176,7 +195,7 @@ function classeDaMarca(id: string, comMeio = false) {
     v-model:open="aberto"
     :title="props.t.editorTitulo"
     :description="props.t.editorDescricao"
-    :ui="{ content: 'max-w-3xl' }"
+    :ui="{ content: MOLDURA.camada }"
   >
     <template #body>
       <div class="mb-3 flex flex-wrap items-center gap-2">

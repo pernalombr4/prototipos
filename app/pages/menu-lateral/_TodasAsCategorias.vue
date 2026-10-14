@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { MOLDURA } from './moldura'
 import type { Categoria } from './mocks'
 import type { TextosDaTela } from './textos'
 
@@ -51,7 +52,7 @@ watch(aberto, (v) => { if (v) busca.value = '' })
     v-model:open="aberto"
     :title="props.t.todasTitulo"
     :description="props.t.todasDescricao(props.categorias.length)"
-    :ui="{ content: 'max-w-2xl' }"
+    :ui="{ content: MOLDURA.camada }"
   >
     <template #body>
       <div class="flex flex-col gap-3">

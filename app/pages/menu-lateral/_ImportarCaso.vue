@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import RodapeDaJanela from './_RodapeDaJanela.vue'
+import { MOLDURA } from './moldura'
 import EscolhaDeAplicar from './_EscolhaDeAplicar.vue'
 import { arquivoDeExemplo, baixarArquivo, casoDoMenuAtual, lerArquivo, useAplicarCaso, useJanelasDeCasos, type ArquivoDeCaso, type ModoDeAplicar } from './casos'
 import { useMenuDoWorkspace } from './estado'
@@ -79,7 +81,7 @@ function exportarMenu() {
 </script>
 
 <template>
-  <UModal v-model:open="janelas.importando.value" :title="props.t.importarTitulo" :ui="{ content: 'max-w-xl' }">
+  <UModal v-model:open="janelas.importando.value" :title="props.t.importarTitulo" :ui="{ content: MOLDURA.formulario, overlay: MOLDURA.sobreposicao }">
     <template #body>
       <!-- Passo 1: o arquivo -->
       <div v-if="!arquivo">
@@ -130,21 +132,21 @@ function exportarMenu() {
       </div>
     </template>
     <template #footer>
-      <div class="flex w-full flex-wrap items-center justify-between gap-2">
-        <UTooltip :text="props.t.exportarDica">
-          <UButton :label="props.t.exportarMenu" icon="i-lucide-upload" size="sm" color="neutral" variant="ghost" @click="exportarMenu" />
-        </UTooltip>
-        <div class="flex gap-2">
-          <UButton :label="props.t.cancelar" color="neutral" variant="ghost" @click="janelas.importando.value = false" />
-          <UButton
-            :label="props.t.importarBotao"
-            icon="i-lucide-download"
-            :color="modo === 'substituir' ? 'error' : 'primary'"
-            :disabled="!arquivo"
-            @click="importar"
-          />
-        </div>
-      </div>
+      <RodapeDaJanela
+        :cancelar="props.t.cancelar"
+        :acao="props.t.importarBotao"
+        icone-da-acao="i-lucide-download"
+        :perigo="modo === 'substituir'"
+        :desligado="!arquivo"
+        @cancelar="janelas.importando.value = false"
+        @acao="importar"
+      >
+        <template #esquerda>
+          <UTooltip :text="props.t.exportarDica">
+            <UButton :label="props.t.exportarMenu" icon="i-lucide-upload" size="sm" color="neutral" variant="ghost" @click="exportarMenu" />
+          </UTooltip>
+        </template>
+      </RodapeDaJanela>
     </template>
   </UModal>
 </template>

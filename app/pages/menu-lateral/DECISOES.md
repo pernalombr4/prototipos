@@ -389,6 +389,28 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 20 · 2026-10-13
+- **Pedido (literal):** "é pra juntar tudo e colocar em main, junta tudo: seu trabalho + p de outra seçao"
+- **Pedido (literal):** "cade o '... mais' nessas opçoes do menu trabalho? cade toda a parte personalizada que tava desenhada? sumiu? nao mandei tirar isso." e "nao tem mais os botoes no topo do menu aberto... muita coisa sumiu ou é bug no meu local?"
+- **Não sumiu nada:** a pasta local estava na linha 14P a 17P, que nasceu da rodada 13 junto com a linha 14 a 19 e ainda não tinha as rodadas dela. O "⋯ Mais", os botões do topo do menu aberto e as seções pessoais são das rodadas 15, 17 e 19. Conferido depois da junção: estão todos lá.
+- **Mudou:** as duas linhas viraram uma. O código é o da rodada 19; as rodadas 14P a 17P ficaram registradas acima, com o "P", e as decisões delas entraram aqui, por cima desse desenho.
+- **Mudou:** **um formulário só para criar menu**, o `_CriarMenu`, aberto pelo "+" do Início, pelo "+" do topo, pelo "Novo menu" do editor e pelo "+" de cada seção. Antes eram dois, com campos e larguras diferentes: o do "+" (rodada 16) e o do editor (rodada 4).
+- **Mudou:** **o tipo do menu é a tela** (decisão dela de 13/10, rodada 14P). Saíram "Vincular tela existente" e "Criar tela nova": a pessoa escolhe o "Tipo de menu", com a frase "O tipo é a tela que abre quando alguém clica neste menu", e o menu e a tela nascem juntos. Sem reuso: a mesma tela não aparece em dois menus, que foi a resposta dela.
+- **Mudou:** no formulário único voltou o que a rodada 4 pediu e o formulário da rodada 16 tinha perdido: categorias e caminho quando o tipo pede, "Quem enxerga" (os Grupos Permitidos) e a prévia, que mostra a linha no menu e, embaixo, o que abre. Ficou o que a rodada 16 trouxe: onde ele mora, agora com três lugares (no Início, na trilha ou dentro de uma seção).
+- **Mudou:** `Configurações > Interface > Telas` saiu. Sobrou `Menus`.
+- **Mudou:** **a moldura única** (`moldura.ts`). Eram sete larguras de janela e três jeitos de rodapé para o mesmo tipo de tarefa. Agora: todo formulário (criar menu, seção, categoria e caso de uso, importar, usar, renomear, as maquetes) tem a mesma largura e o mesmo rodapé, `_RodapeDaJanela.vue`: contexto à esquerda, saída e ação à direita. Toda camada (editor, todas as categorias) tem a outra largura.
+- **Mudou:** formulário abre **sempre por cima** de camada. O "Criar menu" chamado pelo editor nascia escondido atrás dele, porque as duas janelas tinham a mesma camada e quem foi montado antes fica embaixo.
+- **Mudou:** o "+" do topo tem as mesmas portas do "+" do Início (seção, menu, categoria) e abre as mesmas janelas. Item e tarefa, que só davam um aviso, abrem uma janela de maquete declarada, com os campos que o produto pede (rodada 15P).
+- **Mudou:** as janelas de criar menu e categoria saíram de dentro do modelo de trilha e foram para a página. Na barra única elas não existiam, e o "+" do topo e o editor não abririam nada ali.
+- **Mudou:** "Adicionar item" do editor virou "Novo menu".
+- **Conserto:** "+ > Seção de menu" abria o editor sem o formulário, porque o editor nasce só quando é aberto (rodada 13) e o watch dele não disparava nesse primeiro instante. Era o mesmo defeito que a rodada 14P tinha consertado na outra linha.
+- **Não mudou, e por quê:** o botão direito é o da rodada 14 (padrão ClickUp, em todo item e nos dois modelos), mais completo que o das rodadas 16P e 17P. A pesquisa daquelas rodadas (Teams, VS Code, Slack, Notion) entrou no `PESQUISA.md` e confirma o desenho de lá.
+- **Exceções da moldura, de propósito:** a Central de casos de uso (galeria que ocupa a tela), o menu nativo de hoje (réplica em tamanho real) e a busca (paleta de comandos).
+- **Para conferir com ela:** "seção" quer dizer duas coisas no protótipo. No modelo de trilha, "Criar seção" cria a seção PESSOAL do Início (rodada 15); no editor, "Nova seção" cria a seção de menu do WORKSPACE (rodada 4). O "+" do topo segue o modelo. Os dois nomes iguais para coisas diferentes é a mesma dúvida que ela levantou na rodada 3 ("seções é a melhor ideia?").
+- **Para conferir com ela:** o código ainda chama o tipo de `tipoDeTela` por dentro. O que a pessoa lê é "Tipo de menu"; o nome interno não mudou para não mexer em quinze arquivos da outra linha por uma troca que ninguém vê.
+- **Maquete:** item e tarefa não salvam; menu criado e excluído vivem no rascunho, como o resto.
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral · print em `evidencias/rodada20-criar-menu-unico.jpg` (o editor com o "Criar menu" por cima, já dentro da seção Conhecimento)
+
 ### Rodada 19 · 2026-10-13
 - **Pedido (literal):** "pode mandar pra main o que ja fez e mergear normalmente."
 - **Pedido (literal):** "com o menu aberto (expandido), eu devo poder arrastar a lateral, como no clickup, expandindo ainda mais ele (ate um limite saudavel) ou recolhendo. se eu recolher passando de um limite mininmo, ele minimiza o menu como se eu tivesse clicado ja no botao de minimizar"

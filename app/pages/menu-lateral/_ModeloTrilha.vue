@@ -4,8 +4,6 @@ import CartaoDeSalvar from './_CartaoDeSalvar.vue'
 import PainelDaArea from './_PainelDaArea.vue'
 import Personalizar from './_Personalizar.vue'
 import CriarSecao from './_CriarSecao.vue'
-import CriarMenu from './_CriarMenu.vue'
-import CriarCategoria from './_CriarCategoria.vue'
 import BotaoCriar from './_BotaoCriar.vue'
 import { LIMITE_DA_TRILHA, useMenuDoWorkspace } from './estado'
 import { useTrilha } from './trilha'
@@ -648,7 +646,5 @@ function classeDaArea(a: Area) {
 
     <Personalizar :t="props.t" :areas="areas" :itens-do-inicio="itensDoInicio" :secoes="secoesDoInicio" />
     <CriarSecao :t="props.t" />
-    <CriarMenu :t="props.t" />
-    <CriarCategoria :t="props.t" />
   </div>
 </template>

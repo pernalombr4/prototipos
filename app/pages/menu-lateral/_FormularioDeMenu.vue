@@ -7,6 +7,8 @@ import {
   type NoDoMenu,
 } from './mocks'
 import type { TextosDaTela } from './textos'
+import RodapeDaJanela from './_RodapeDaJanela.vue'
+import { MOLDURA } from './moldura'
 
 /**
  * Os dois formulários de criação do menu, na mesma tela em camada.
@@ -144,7 +146,7 @@ function salvar() {
     v-model:open="aberto"
     :title="ehSecao ? props.t.formSecaoTitulo : props.t.formItemTitulo"
     :description="ehSecao ? props.t.formSecaoDescricao : props.t.formItemDescricao"
-    :ui="{ content: 'max-w-2xl' }"
+    :ui="{ content: MOLDURA.formulario, overlay: MOLDURA.sobreposicao }"
   >
     <template #body>
       <div class="space-y-4">
@@ -309,10 +311,13 @@ function salvar() {
     </template>
 
     <template #footer>
-      <div class="flex w-full justify-end gap-2">
-        <UButton :label="props.t.cancelar" color="neutral" variant="ghost" @click="aberto = false" />
-        <UButton :label="props.t.salvar" color="primary" @click="salvar" />
-      </div>
+      <RodapeDaJanela
+        :cancelar="props.t.cancelar"
+        :acao="props.t.salvar"
+        :contexto="props.t.formSecaoRodape"
+        @cancelar="aberto = false"
+        @acao="salvar"
+      />
     </template>
   </UModal>
 </template>

@@ -304,7 +304,11 @@ export const gruposDeConfiguracao: GrupoDeConfiguracao[] = [
     icone: 'i-lucide-layout',
     itens: [
       { id: 'menus', icone: 'i-lucide-menu' },
-      { id: 'telas', icone: 'i-lucide-monitor' },
+      /*
+       * Rodada 20 (decisão dela de 13/10/2026, rodada 14P): `Telas` SAIU daqui.
+       * No produto são duas portas, criar a tela e depois o item de menu que
+       * aponta para ela. Aqui menu e tela são uma coisa só, e sobra `Menus`.
+       */
       { id: 'casos-de-uso', icone: 'i-lucide-package' },
     ],
   },

@@ -1,27 +1,38 @@
 <script setup lang="ts">
+import RodapeDaJanela from './_RodapeDaJanela.vue'
 import { useMenuDoWorkspace } from './estado'
 import { useTrilha } from './trilha'
 import { rotuloDoNo } from './rotulos'
-import { tiposDeTela, type NoDoMenu } from './mocks'
+import { MOLDURA } from './moldura'
+import { tiposDeTela, gruposDeMembros, type NoDoMenu } from './mocks'
 import type { TextosDaTela } from './textos'
 
 /**
- * CRIAR MENU (rodada 16), pelo "+" do Início.
+ * CRIAR MENU: o único formulário de menu do protótipo (rodada 20).
  *
- *   "na hora de criar menu ja tem que poder vincular uma tela a ele ou criar
- *    essa tela, como o clickup tambem faz" (Mikaela)
+ * Nasceu na rodada 16, pelo "+" do Início, com duas portas para as telas:
+ * "vincular tela existente" e "criar tela nova". Em 13/10/2026 ela decidiu o
+ * contrário, numa conversa paralela (rodada 14P):
  *
- * Um menu do ENSPACE é uma seção da árvore com telas dentro (Interface >
- * Menus). A janela pede o que o ClickUp pede para criar uma lista (ícone e
- * nome) e, na mesma janela, as telas: vincular uma que já existe, pela busca,
- * ou criar uma nova com nome e tipo. Dá para criar vazio e pôr telas depois.
+ *   "telas nao devem ser apresentadas separadamente de menus. na hora de criar
+ *    um menu, seleciona-se o tipo de menu ali. esse 'tipo de menu' é
+ *    justamente a tela. aí já se cria uma tela vinculada a um menu
+ *    automaticamente."
  *
- * "Onde ele fica": no Início, como seção, ou na trilha, com ícone próprio. É
- * o campo `lugar` da rodada 4, sem precisar abrir o editor.
+ * e, perguntada, decidiu que a mesma tela não aparece em dois menus. Então:
  *
- * Menu é configuração do workspace: entra no rascunho e acende o Salvar, como
- * o editor. Vincular uma tela cria um item novo apontando para a mesma tela
- * (no mock, uma cópia do nome, do ícone e do tipo); a original fica onde está.
+ *   - sai "vincular tela existente" (era o reuso que ela recusou);
+ *   - sai "criar tela nova" como passo separado: o TIPO DO MENU é a tela;
+ *   - fica o que a rodada 16 trouxe: onde o menu mora (Início ou trilha);
+ *   - volta o que a rodada 4 pediu e o formulário da rodada 16 tinha perdido:
+ *     categorias e caminho quando o tipo pede, quem enxerga, e a prévia.
+ *
+ * Este é também o formulário do editor ("Novo menu" e o "+" de cada seção):
+ * antes o editor abria outro formulário, com outros campos e outra largura.
+ *
+ * Por baixo, o menu continua sendo o que a árvore entende: no Início ou na
+ * trilha, uma seção com UMA tela (que a barra desenha como linha simples desde
+ * a rodada 10); dentro de uma seção, uma tela nela.
  */
 const props = defineProps<{ t: TextosDaTela }>()
 
@@ -34,108 +45,166 @@ const aberta = computed({
   set: (v) => { if (!v) trilha.criandoMenu.value = null },
 })
 
-const nome = ref('')
-const icone = ref('folder-kanban')
-const escolhendoIcone = ref(false)
-const lugar = ref<'inicio' | 'trilha'>('inicio')
+type Lugar = 'inicio' | 'trilha' | 'secao'
 
-interface TelaEscolhida { id: string, rotulo: string, icone: string, tipoDeTela?: string, nova: boolean, origem?: string }
-const telas = ref<TelaEscolhida[]>([])
+const nome = ref('')
+const icone = ref('file-text')
+const escolhendoIcone = ref(false)
+const tipo = ref('consultas')
+const categorias = ref<string[]>([])
+const caminho = ref('')
+const lugar = ref<Lugar>('inicio')
+const secaoAlvo = ref('')
+const escopo = ref<string[]>([])
+const tentou = ref(false)
+
+/** As seções da árvore que recebem um menu dentro. */
+const secoesQueRecebem = computed(() =>
+  menu.secoes.value.map(s => ({ label: rotuloDoNo(s, props.t), value: s.id })),
+)
 
 watch(() => trilha.criandoMenu.value, (v) => {
   if (!v) return
   nome.value = ''
-  icone.value = 'folder-kanban'
-  lugar.value = v
-  telas.value = []
-  criandoTela.value = false
-})
+  icone.value = 'file-text'
+  tipo.value = 'consultas'
+  categorias.value = []
+  caminho.value = ''
+  escopo.value = []
+  tentou.value = false
+  if (v.startsWith('secao:')) {
+    lugar.value = 'secao'
+    secaoAlvo.value = v.slice(6)
+  }
+  else {
+    lugar.value = v as Lugar
+    secaoAlvo.value = secoesQueRecebem.value[0]?.value ?? ''
+  }
+}, { immediate: true })
 
-/* ------------------------------ vincular ------------------------------ */
-
-const vinculando = ref(false)
-
-const gruposDeTelas = computed(() => {
-  const ja = new Set(telas.value.map(x => x.origem))
-  return menu.secoes.value
-    .map(s => ({
-      id: s.id,
-      label: rotuloDoNo(s, props.t),
-      items: (s.filhos ?? [])
-        .filter(f => !ja.has(f.id))
-        .map(f => ({
-          label: rotuloDoNo(f, props.t),
-          icon: f.icone,
-          suffix: f.tipoDeTela ? props.t.tipos[f.tipoDeTela] : undefined,
-          onSelect: () => {
-            telas.value.push({ id: `t-${Date.now().toString(36)}`, rotulo: rotuloDoNo(f, props.t), icone: f.icone, tipoDeTela: f.tipoDeTela, nova: false, origem: f.id })
-            vinculando.value = false
-          },
-        })),
-    }))
-    .filter(g => g.items.length)
-})
-
-/* ------------------------------ criar uma tela ------------------------------ */
-
-const criandoTela = ref(false)
-const nomeDaTela = ref('')
-const tipoDaTela = ref('personalizada')
 const opcoesDeTipo = computed(() => tiposDeTela.map(x => ({ label: props.t.tipos[x.id] ?? x.id, value: x.id })))
+const tipoEscolhido = computed(() => tiposDeTela.find(x => x.id === tipo.value))
+const pedeCategoria = computed(() => !!tipoEscolhido.value?.exigeCategoria)
+const pedeCaminho = computed(() => !!tipoEscolhido.value?.exigeCaminho)
 
-function adicionarTelaNova() {
-  if (!nomeDaTela.value.trim()) return
-  telas.value.push({ id: `t-${Date.now().toString(36)}`, rotulo: nomeDaTela.value.trim(), icone: 'i-lucide-monitor', tipoDeTela: tipoDaTela.value, nova: true })
-  nomeDaTela.value = ''
-  criandoTela.value = false
+const erroDeNome = computed(() => tentou.value && !nome.value.trim() ? props.t.faltaNome : undefined)
+const erroDeCaminho = computed(() => tentou.value && pedeCaminho.value && !caminho.value.trim() ? props.t.faltaCaminho : undefined)
+
+const lugares = computed(() => [
+  { v: 'inicio' as const, r: props.t.noInicio, i: 'i-lucide-house' },
+  { v: 'trilha' as const, r: props.t.naTrilhaRotulo, i: 'i-lucide-panel-left' },
+  { v: 'secao' as const, r: props.t.dentroDeSecao, i: 'i-lucide-rows-3' },
+])
+
+function alternarGrupo(id: string) {
+  const i = escopo.value.indexOf(id)
+  if (i >= 0) escopo.value.splice(i, 1)
+  else escopo.value.push(id)
 }
 
-/* ------------------------------ criar ------------------------------ */
+const resumoDoEscopo = computed(() =>
+  escopo.value.length ? props.t.escopoResumo(escopo.value.length) : props.t.escopoTodos,
+)
 
 function criar() {
-  if (!nome.value.trim()) return
-  const id = `s-${Date.now().toString(36)}`
-  const no: NoDoMenu = {
-    id,
-    tipo: 'secao',
+  tentou.value = true
+  if (erroDeNome.value || erroDeCaminho.value) return
+
+  const base = Date.now().toString(36)
+  const tela: NoDoMenu = {
+    id: `t-${base}`,
+    tipo: 'tela',
     origem: 'workspace',
     rotulo: nome.value.trim(),
     icone: `i-lucide-${icone.value}`,
-    lugar: lugar.value === 'trilha' ? 'trilha' : 'painel',
-    painel: 'trabalho',
-    escopo: [],
-    filhos: telas.value.map(x => ({ id: x.id, tipo: 'tela' as const, origem: 'workspace' as const, rotulo: x.rotulo, icone: x.icone, tipoDeTela: x.tipoDeTela })),
+    tipoDeTela: tipo.value,
+    categoriasLigadas: categorias.value.length || undefined,
+    escopo: [...escopo.value],
   }
-  menu.adicionarSecao(no)
-  // No Início, como seção criada, entra no topo (rodada 15).
-  if (lugar.value === 'inicio') {
-    menu.aplicarPrefs((p) => { p.ordemDasSecoes = [id, ...p.ordemDasSecoes] })
+
+  if (lugar.value === 'secao' && secaoAlvo.value) {
+    menu.adicionarItem(tela, secaoAlvo.value)
   }
-  toast.add({ title: props.t.menuCriado(no.rotulo!), icon: no.icone, color: 'neutral' })
+  else {
+    const id = `s-${base}`
+    menu.adicionarSecao({
+      id,
+      tipo: 'secao',
+      origem: 'workspace',
+      rotulo: tela.rotulo,
+      icone: tela.icone,
+      lugar: lugar.value === 'trilha' ? 'trilha' : 'painel',
+      painel: 'trabalho',
+      escopo: [...escopo.value],
+      filhos: [tela],
+    })
+    // No Início, como seção criada, entra no topo (rodada 15).
+    if (lugar.value === 'inicio') {
+      menu.aplicarPrefs((p) => { p.ordemDasSecoes = [id, ...p.ordemDasSecoes] })
+    }
+  }
+
+  toast.add({ title: props.t.menuCriado(tela.rotulo!), icon: tela.icone, color: 'neutral' })
   trilha.criandoMenu.value = null
 }
 </script>
 
 <template>
-  <UModal v-model:open="aberta" :title="props.t.criarMenuTitulo" :ui="{ content: 'max-w-lg' }">
+  <UModal
+    v-model:open="aberta"
+    :title="props.t.criarMenuTitulo"
+    :description="props.t.criarMenuDescricao"
+    :ui="{ content: MOLDURA.formulario, overlay: MOLDURA.sobreposicao }"
+  >
     <template #body>
-      <form id="form-criar-menu" class="space-y-5" @submit.prevent="criar">
-        <div class="flex items-center gap-2">
-          <UPopover v-model:open="escolhendoIcone" :content="{ side: 'bottom', align: 'start' }">
-            <UButton :icon="`i-lucide-${icone}`" color="neutral" variant="outline" square :aria-label="props.t.escolherIcone" />
-            <template #content>
-              <div class="w-80 p-2">
-                <UxSeletorDeIcones v-model="icone" :altura="220" @update:model-value="escolhendoIcone = false" />
-              </div>
-            </template>
-          </UPopover>
-          <UInput v-model="nome" class="flex-1" :placeholder="props.t.criarMenuPlaceholder" :aria-label="props.t.criarMenuTitulo" autofocus />
-        </div>
+      <form id="form-criar-menu" class="space-y-4" @submit.prevent="criar">
+        <!-- ícone e nome -->
+        <UFormField :label="props.t.campoNome" :description="props.t.campoNomeDica" :error="erroDeNome">
+          <div class="flex items-center gap-2">
+            <UPopover v-model:open="escolhendoIcone" :content="{ side: 'bottom', align: 'start' }">
+              <UButton :icon="`i-lucide-${icone}`" color="neutral" variant="outline" square :aria-label="props.t.escolherIcone" />
+              <template #content>
+                <div class="w-80 p-2">
+                  <UxSeletorDeIcones v-model="icone" :altura="220" @update:model-value="escolhendoIcone = false" />
+                </div>
+              </template>
+            </UPopover>
+            <UInput v-model="nome" class="flex-1" :placeholder="props.t.criarMenuPlaceholder" :aria-label="props.t.campoNome" autofocus />
+          </div>
+        </UFormField>
 
+        <!-- o tipo É a tela -->
+        <UFormField :label="props.t.tipoDeMenu" :description="props.t.tipoDeMenuDica">
+          <USelect v-model="tipo" :items="opcoesDeTipo" class="w-full" />
+        </UFormField>
+
+        <UFormField v-if="pedeCategoria" :label="props.t.campoCategorias">
+          <USelectMenu
+            v-model="categorias"
+            multiple
+            :items="['Contratos', 'Clientes', 'Chamados', 'Fornecedores']"
+            class="w-full"
+          />
+          <p v-if="!categorias.length" class="mt-1 flex items-center gap-1.5 text-xs text-warning">
+            <UIcon name="i-lucide-triangle-alert" class="size-3.5 shrink-0" />
+            {{ props.t.exigeCategoria }}
+          </p>
+        </UFormField>
+
+        <UFormField
+          v-if="pedeCaminho"
+          :label="props.t.campoCaminho"
+          :description="props.t.campoCaminhoDica"
+          :error="erroDeCaminho"
+        >
+          <UInput v-model="caminho" class="w-full" placeholder="/relatorios/mensal" />
+        </UFormField>
+
+        <!-- onde mora -->
         <UFormField :label="props.t.ondeFica">
-          <div class="flex gap-2">
+          <div class="flex flex-wrap gap-2">
             <UButton
-              v-for="op in [{ v: 'inicio', r: props.t.noInicio, i: 'i-lucide-house' }, { v: 'trilha', r: props.t.naTrilhaRotulo, i: 'i-lucide-panel-left' }]"
+              v-for="op in lugares"
               :key="op.v"
               :label="op.r"
               :icon="op.i"
@@ -143,67 +212,64 @@ function criar() {
               :color="lugar === op.v ? 'primary' : 'neutral'"
               :variant="lugar === op.v ? 'soft' : 'outline'"
               :aria-pressed="lugar === op.v"
-              @click="lugar = op.v as 'inicio' | 'trilha'"
+              :disabled="op.v === 'secao' && !secoesQueRecebem.length"
+              @click="lugar = op.v"
             />
           </div>
+          <USelect
+            v-if="lugar === 'secao'"
+            v-model="secaoAlvo"
+            :items="secoesQueRecebem"
+            class="mt-2 w-full"
+            :aria-label="props.t.campoSecao"
+          />
         </UFormField>
 
-        <UFormField :label="props.t.telasDoMenu">
-          <ul v-if="telas.length" class="mb-2 space-y-1">
-            <li
-              v-for="(x, i) in telas"
-              :key="x.id"
-              class="flex animate-[entrada_0.2s_ease-out_both] items-center gap-2 rounded-md border border-default px-2.5 py-1.5 text-sm"
-            >
-              <UIcon :name="x.icone" class="size-4 shrink-0 text-toned" />
-              <span class="min-w-0 flex-1 truncate text-default">{{ x.rotulo }}</span>
-              <span v-if="x.tipoDeTela" class="shrink-0 text-xs text-muted">{{ props.t.tipos[x.tipoDeTela] }}</span>
-              <UBadge v-if="x.nova" :label="props.t.telaNovaSelo" size="sm" color="primary" variant="subtle" class="shrink-0" />
-              <UButton
-                icon="i-lucide-x"
-                size="xs"
-                color="neutral"
-                variant="ghost"
-                :aria-label="props.t.removerTela(x.rotulo)"
-                @click="telas.splice(i, 1)"
-              />
-            </li>
-          </ul>
-          <p v-else class="mb-2 text-xs text-muted">{{ props.t.telasVazio }}</p>
-
-          <!-- Criar tela nova, na mesma janela. -->
-          <div v-if="criandoTela" class="mb-2 flex animate-[entrada_0.2s_ease-out_both] flex-wrap items-end gap-2 rounded-md bg-elevated/60 p-2">
-            <UFormField :label="props.t.nomeDaTela" class="min-w-40 flex-1">
-              <UInput v-model="nomeDaTela" size="sm" class="w-full" autofocus @keydown.enter.prevent="adicionarTelaNova" />
-            </UFormField>
-            <UFormField :label="props.t.tipoDaTela" class="w-48">
-              <USelect v-model="tipoDaTela" :items="opcoesDeTipo" size="sm" class="w-full" />
-            </UFormField>
-            <UButton :label="props.t.adicionarTela" size="sm" color="primary" variant="soft" :disabled="!nomeDaTela.trim()" @click="adicionarTelaNova" />
-          </div>
-
-          <div class="flex flex-wrap gap-2">
-            <UPopover v-model:open="vinculando" :content="{ side: 'bottom', align: 'start' }">
-              <UButton :label="props.t.vincularTela" icon="i-lucide-link" size="sm" color="neutral" variant="outline" />
-              <template #content>
-                <UCommandPalette :groups="gruposDeTelas" :placeholder="props.t.buscarTelasExistentes" class="h-72 w-80" />
-              </template>
-            </UPopover>
+        <!-- quem enxerga: os Grupos Permitidos do produto (rodada 4) -->
+        <UFormField :label="props.t.campoEscopo" :description="props.t.escopoDica">
+          <div class="flex flex-wrap gap-1.5">
             <UButton
-              v-if="!criandoTela"
-              :label="props.t.criarTelaNova"
-              icon="i-lucide-plus"
-              size="sm"
-              color="neutral"
-              variant="outline"
-              @click="criandoTela = true"
-            />
+              v-for="g in gruposDeMembros"
+              :key="g.id"
+              size="xs"
+              :color="escopo.includes(g.id) ? 'primary' : 'neutral'"
+              :variant="escopo.includes(g.id) ? 'soft' : 'outline'"
+              :aria-pressed="escopo.includes(g.id)"
+              @click="alternarGrupo(g.id)"
+            >
+              {{ g.nome }}
+              <span class="text-muted">{{ g.pessoas }}</span>
+            </UButton>
           </div>
         </UFormField>
+
+        <!-- a prévia: a linha no menu e, embaixo, o que abre -->
+        <div class="rounded-lg border border-default bg-elevated/40 p-3">
+          <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-toned">{{ props.t.comoFica }}</p>
+          <div class="flex items-center gap-2.5 rounded-md py-1.5 pl-2.5 pr-2.5 text-sm text-default">
+            <UIcon :name="`i-lucide-${icone}`" class="size-4 shrink-0 text-toned" />
+            <span class="min-w-0 flex-1 truncate">{{ nome || props.t.campoNome }}</span>
+          </div>
+          <p class="mt-1 flex items-center gap-1.5 pl-2.5 text-xs text-muted">
+            <UIcon name="i-lucide-corner-down-right" class="size-3.5 shrink-0" />
+            {{ props.t.tipos[tipo] ?? tipo }}
+          </p>
+          <p class="mt-1 flex items-center gap-1.5 pl-2.5 text-xs text-muted">
+            <UIcon name="i-lucide-eye" class="size-3.5 shrink-0" />
+            {{ resumoDoEscopo }}
+          </p>
+        </div>
       </form>
     </template>
+
     <template #footer>
-      <UButton type="submit" form="form-criar-menu" block color="primary" :label="props.t.criarMenuBotao" :disabled="!nome.trim()" />
+      <RodapeDaJanela
+        :cancelar="props.t.cancelar"
+        :acao="props.t.criarMenuBotao"
+        :contexto="props.t.criarMenuContexto"
+        form="form-criar-menu"
+        @cancelar="aberta = false"
+      />
     </template>
   </UModal>
 </template>

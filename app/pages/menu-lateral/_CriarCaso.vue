@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import RodapeDaJanela from './_RodapeDaJanela.vue'
+import { MOLDURA } from './moldura'
 import { AREAS, casoDoMenuAtual, useCasosDoWorkspace, useJanelasDeCasos, type Complexidade } from './casos'
 import { useMenuDoWorkspace } from './estado'
 import { rotuloDoNo } from './rotulos'
@@ -55,7 +57,7 @@ function criar() {
 </script>
 
 <template>
-  <UModal v-model:open="janelas.criando.value" :title="props.t.criarCasoTitulo" :ui="{ content: 'max-w-lg' }">
+  <UModal v-model:open="janelas.criando.value" :title="props.t.criarCasoTitulo" :ui="{ content: MOLDURA.formulario, overlay: MOLDURA.sobreposicao }">
     <template #body>
       <form id="form-criar-caso" class="space-y-4" @submit.prevent="criar">
         <UFormField :label="props.t.nomeDoCaso" required>
@@ -97,13 +99,12 @@ function criar() {
       </form>
     </template>
     <template #footer>
-      <UButton
-        type="submit"
+      <RodapeDaJanela
+        :cancelar="props.t.cancelar"
+        :acao="props.t.criarCaso"
         form="form-criar-caso"
-        block
-        color="primary"
-        :label="props.t.criarCaso"
-        :disabled="!nome.trim() || !escolhidos.length"
+        :desligado="!nome.trim() || !escolhidos.length"
+        @cancelar="janelas.criando.value = false"
       />
     </template>
   </UModal>

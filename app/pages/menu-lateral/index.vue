@@ -26,6 +26,11 @@ import CriarCaso from './_CriarCaso.vue'
  * protótipo vive rodando em `pnpm dev`, mandou quem manda.
  */
 import EditorDeMenus from './_EditorDeMenus.vue'
+import CriarMenu from './_CriarMenu.vue'
+import CriarCategoria from './_CriarCategoria.vue'
+import CriarMaquete from './_CriarMaquete.vue'
+import RodapeDaJanela from './_RodapeDaJanela.vue'
+import { MOLDURA } from './moldura'
 import TodasAsCategorias from './_TodasAsCategorias.vue'
 import MenuDeHoje from './_MenuDeHoje.vue'
 import {
@@ -287,29 +292,55 @@ function configurarCategoriaAtual() {
  * Notion, do Asana, do monday e do Jira novo, onde "Create" fica na barra de
  * cima. Cada opção é maquete e diz isso no toast.
  */
+/*
+ * O "+" DO TOPO (rodada 20).
+ *
+ * Seção, menu e categoria abrem as MESMAS janelas do "+" do Início: o atalho
+ * corta o caminho, e a janela que aparece é uma só em qualquer porta. Antes o
+ * topo abria o editor com o formulário antigo, e item, tarefa e categoria só
+ * davam um aviso.
+ *
+ * "Seção" segue o modelo: na trilha é a seção pessoal do Início (rodada
+ * 15); na barra única, que não tem seção pessoal, é a seção de menu do
+ * workspace, no editor.
+ */
+const janelasDaTrilha = useJanelasDaTrilha()
+
 const itensDeCriar = computed(() => [[
-  { label: t.value.criarItem, icon: 'i-lucide-file-plus', onSelect: () => avisarMaquete(t.value.criarItem) },
-  { label: t.value.criarTarefa, icon: 'i-lucide-square-check-big', onSelect: () => avisarMaquete(t.value.criarTarefa) },
+  { label: t.value.criarItem, icon: 'i-lucide-file-plus', onSelect: () => abrirMaquete('item') },
+  { label: t.value.criarTarefa, icon: 'i-lucide-square-check-big', onSelect: () => abrirMaquete('tarefa') },
 ], [
-  { label: t.value.criarCategoria, icon: 'i-lucide-folder-plus', onSelect: () => avisarMaquete(t.value.criarCategoria) },
-], [
-  // Estes dois abrem o editor de menus com o formulário certo já aberto: criar
-  // seção sem ver o menu em volta é decidir no escuro.
-  { label: t.value.criarSecao, icon: 'i-lucide-menu', onSelect: () => abrirEditor('secao') },
-  { label: t.value.formItemTitulo, icon: 'i-lucide-file-plus', onSelect: () => abrirEditor('item') },
+  {
+    label: t.value.criarSecaoTitulo,
+    icon: 'i-lucide-layers',
+    onSelect: () => {
+      if (modelo.value === 'trilha') janelasDaTrilha.criandoSecao.value = 'nova'
+      else abrirEditor('secao')
+    },
+  },
+  { label: t.value.criarMenuTitulo, icon: 'i-lucide-menu', onSelect: () => { janelasDaTrilha.criandoMenu.value = 'inicio' } },
+  { label: t.value.criarCategoriaTitulo, icon: 'i-lucide-folder-plus', onSelect: () => { janelasDaTrilha.criandoCategoria.value = true } },
 ]])
+
+/** "Nova tela" de uma seção: o formulário único de menu, já dentro dela. */
+function criarMenuEm(secaoId?: string) {
+  const daArvore = !!secaoId && menu.secoes.value.some(s => s.id === secaoId)
+  janelasDaTrilha.criandoMenu.value = daArvore ? `secao:${secaoId}` : 'inicio'
+}
 
 function abrirEditor(form: 'secao' | 'item' | null) {
   formInicial.value = form
   editando.value = true
 }
 
-function avisarMaquete(oQue: string) {
-  toast.add({
-    title: t.value.criarAberto(oQue.toLowerCase()),
-    icon: 'i-lucide-hammer',
-    color: 'neutral',
-  })
+const maqueteAberta = ref(false)
+const modoDaMaquete = ref<'item' | 'tarefa'>('item')
+const usouMaquete = ref(false)
+
+function abrirMaquete(modo: 'item' | 'tarefa') {
+  modoDaMaquete.value = modo
+  usouMaquete.value = true
+  maqueteAberta.value = true
 }
 
 /* ------------------------------ camadas ------------------------------ */
@@ -666,7 +697,7 @@ function emBreve() {
             @ajuda="avisarAjuda"
             @ordem="trocarOrdem"
             @virar-manual="virarOrdemManual"
-            @nova-tela="abrirEditor('item')"
+            @nova-tela="criarMenuEm"
             @configurar-categoria="configurarCategoriaAtual"
             @recolher="alternarRecolhido"
           />
@@ -688,7 +719,7 @@ function emBreve() {
             @configuracoes="abrirConfiguracoes"
             @ajuda="avisarAjuda"
             @expandir="alternarRecolhido"
-            @nova-tela="abrirEditor('item')"
+            @nova-tela="criarMenuEm"
             @configurar-categoria="configurarCategoriaAtual"
           />
           <template v-else>
@@ -722,7 +753,7 @@ function emBreve() {
               @ajuda="avisarAjuda"
               @ordem="trocarOrdem"
               @virar-manual="virarOrdemManual"
-              @nova-tela="abrirEditor('item')"
+              @nova-tela="criarMenuEm"
               @configurar-categoria="configurarCategoriaAtual"
               @recolher="alternarRecolhido"
             />
@@ -828,19 +859,33 @@ function emBreve() {
     <CriarCaso :t="t" />
 
     <!-- Renomear, aberto pelo botão direito (rodada 14). -->
-    <UModal v-model:open="abrindoRenomear" :title="t.renomearTitulo" :ui="{ content: 'max-w-sm' }">
+    <UModal v-model:open="abrindoRenomear" :title="t.renomearTitulo" :ui="{ content: MOLDURA.formulario, overlay: MOLDURA.sobreposicao }">
       <template #body>
-        <form class="space-y-4" @submit.prevent="aplicarNome">
+        <form id="form-renomear" class="space-y-4" @submit.prevent="aplicarNome">
           <UFormField :label="t.renomearCampo">
             <UInput v-model="nomeNovo" class="w-full" autofocus />
           </UFormField>
-          <div class="flex justify-end gap-2">
-            <UButton :label="t.cancelar" color="neutral" variant="ghost" @click="renomeando = null" />
-            <UButton type="submit" :label="t.renomearAplicar" color="primary" :disabled="!nomeNovo.trim()" />
-          </div>
         </form>
       </template>
+      <template #footer>
+        <RodapeDaJanela
+          :cancelar="t.cancelar"
+          :acao="t.renomearAplicar"
+          form="form-renomear"
+          :desligado="!nomeNovo.trim()"
+          @cancelar="renomeando = null"
+        />
+      </template>
     </UModal>
+
+    <!--
+      As janelas de criar menu e categoria moram aqui desde a rodada 20, e não
+      dentro do modelo de trilha: o "+" do topo e o editor abrem as duas nos
+      dois modelos.
+    -->
+    <CriarMenu :t="t" />
+    <CriarCategoria :t="t" />
+    <CriarMaquete v-if="usouMaquete" v-model:open="maqueteAberta" :t="t" :modo="modoDaMaquete" />
 
     <!-- ============== ANDAIME, não faz parte da proposta ============== -->
     <!--

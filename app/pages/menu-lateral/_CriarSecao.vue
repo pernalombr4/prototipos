@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import RodapeDaJanela from './_RodapeDaJanela.vue'
+import { MOLDURA } from './moldura'
 import { useTrilha } from './trilha'
 import type { TextosDaTela } from './textos'
 
@@ -54,7 +56,8 @@ function confirmar() {
   <UModal
     v-model:open="aberta"
     :title="editando ? props.t.renomearSecaoTitulo : props.t.criarSecaoTitulo"
-    :ui="{ content: 'max-w-md' }"
+    :description="props.t.criarSecaoDescricao"
+    :ui="{ content: MOLDURA.formulario, overlay: MOLDURA.sobreposicao }"
   >
     <template #body>
       <form id="form-criar-secao" class="flex items-center gap-2" @submit.prevent="confirmar">
@@ -82,13 +85,13 @@ function confirmar() {
       </form>
     </template>
     <template #footer>
-      <UButton
-        type="submit"
+      <RodapeDaJanela
+        :cancelar="props.t.cancelar"
+        :acao="editando ? props.t.salvarSecao : props.t.criarSecaoBotao"
+        :contexto="editando ? undefined : props.t.criarSecaoContexto"
         form="form-criar-secao"
-        block
-        color="primary"
-        :label="editando ? props.t.salvarSecao : props.t.criarSecaoBotao"
-        :disabled="!nome.trim()"
+        :desligado="!nome.trim()"
+        @cancelar="aberta = false"
       />
     </template>
   </UModal>

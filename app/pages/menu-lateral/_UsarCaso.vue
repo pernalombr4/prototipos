@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import RodapeDaJanela from './_RodapeDaJanela.vue'
+import { MOLDURA } from './moldura'
 import EscolhaDeAplicar from './_EscolhaDeAplicar.vue'
 import { useAplicarCaso, useJanelasDeCasos, type ModoDeAplicar } from './casos'
 import type { TextosDaTela } from './textos'
@@ -37,21 +39,20 @@ function usar() {
   <UModal
     v-model:open="aberta"
     :title="janelas.usando.value ? props.t.usarTitulo(janelas.usando.value.nome) : ''"
-    :ui="{ content: 'max-w-xl' }"
+    :ui="{ content: MOLDURA.formulario, overlay: MOLDURA.sobreposicao }"
   >
     <template #body>
       <EscolhaDeAplicar v-if="janelas.usando.value" v-model:modo="modo" v-model:lugar="lugar" :t="props.t" :caso="janelas.usando.value" />
     </template>
     <template #footer>
-      <div class="flex w-full justify-end gap-2">
-        <UButton :label="props.t.cancelar" color="neutral" variant="ghost" @click="janelas.usando.value = null" />
-        <UButton
-          :label="props.t.aplicarCaso"
-          :color="modo === 'substituir' ? 'error' : 'primary'"
-          :icon="modo === 'substituir' ? 'i-lucide-replace' : 'i-lucide-list-plus'"
-          @click="usar"
-        />
-      </div>
+      <RodapeDaJanela
+        :cancelar="props.t.cancelar"
+        :acao="props.t.aplicarCaso"
+        :icone-da-acao="modo === 'substituir' ? 'i-lucide-replace' : 'i-lucide-list-plus'"
+        :perigo="modo === 'substituir'"
+        @cancelar="janelas.usando.value = null"
+        @acao="usar"
+      />
     </template>
   </UModal>
 </template>

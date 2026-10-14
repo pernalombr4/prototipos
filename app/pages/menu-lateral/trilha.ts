@@ -42,7 +42,11 @@ export function useJanelasDaTrilha() {
     /** Seções do Início recolhidas: o painel e o popover mostram igual. */
     recolhidas: useState<string[]>('trilha-secoes-recolhidas', () => []),
     /** Criar menu (rodada 16): `null` fechada, senão onde ele vai morar. */
-    criandoMenu: useState<'inicio' | 'trilha' | null>('trilha-criar-menu', () => null),
+    /*
+     * Rodada 20: também `secao:<id>`, quando o menu nasce dentro de uma seção
+     * (o "Novo menu" e o "+" de cada seção no editor abrem esta mesma janela).
+     */
+    criandoMenu: useState<string | null>('trilha-criar-menu', () => null),
     criandoCategoria: useState<boolean>('trilha-criar-categoria', () => false),
     /**
      * As categorias criadas pelo "+" (rodada 16). Moram aqui, e não no

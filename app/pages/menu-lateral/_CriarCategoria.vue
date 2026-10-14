@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import RodapeDaJanela from './_RodapeDaJanela.vue'
+import { MOLDURA } from './moldura'
 import { useTrilha } from './trilha'
 import { categoriasNormais, type Categoria } from './mocks'
 import type { TextosDaTela } from './textos'
@@ -53,7 +55,7 @@ function criar() {
 </script>
 
 <template>
-  <UModal v-model:open="aberta" :title="props.t.criarCategoriaTitulo" :ui="{ content: 'max-w-md' }">
+  <UModal v-model:open="aberta" :title="props.t.criarCategoriaTitulo" :ui="{ content: MOLDURA.formulario, overlay: MOLDURA.sobreposicao }">
     <template #body>
       <form id="form-criar-categoria" class="flex items-center gap-2" @submit.prevent="criar">
         <UPopover v-model:open="escolhendoIcone" :content="{ side: 'bottom', align: 'start' }">
@@ -68,7 +70,14 @@ function criar() {
       </form>
     </template>
     <template #footer>
-      <UButton type="submit" form="form-criar-categoria" block color="primary" :label="props.t.criarSecaoBotao" :disabled="!nome.trim()" />
+      <RodapeDaJanela
+        :cancelar="props.t.cancelar"
+        :acao="props.t.criarSecaoBotao"
+        :contexto="props.t.criarCategoriaContexto"
+        form="form-criar-categoria"
+        :desligado="!nome.trim()"
+        @cancelar="aberta = false"
+      />
     </template>
   </UModal>
 </template>
