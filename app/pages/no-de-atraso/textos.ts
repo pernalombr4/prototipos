@@ -262,8 +262,8 @@ const pt: Textos = {
   proposta: {
     esperar: 'Tipo de atraso',
     modos: {
-      duration: { titulo: 'Duração', descricao: 'Espera um tempo fixo. Ex.: 3 dias.' },
-      until_date: { titulo: 'Data', descricao: 'Espera até uma data calculada a partir de uma variável de data. Ex.: 30 dias antes do vencimento.' },
+      duration: { titulo: 'Intervalo de tempo', descricao: 'Espera um tempo fixo. Ex.: 3 dias.' },
+      until_date: { titulo: 'Data específica', descricao: 'Espera até uma data calculada a partir de uma variável de data. Ex.: 30 dias antes do vencimento.' },
     },
     erroQuantidade: 'Informe um número inteiro maior que zero.',
     continuar: 'Deslocamento',
@@ -412,8 +412,8 @@ const en: Textos = {
   proposta: {
     esperar: 'Delay type',
     modos: {
-      duration: { titulo: 'Duration', descricao: 'Waits a fixed time. E.g.: 3 days.' },
-      until_date: { titulo: 'Date', descricao: 'Waits until a date calculated from a date variable. E.g.: 30 days before the due date.' },
+      duration: { titulo: 'Time interval', descricao: 'Waits a fixed time. E.g.: 3 days.' },
+      until_date: { titulo: 'Specific date', descricao: 'Waits until a date calculated from a date variable. E.g.: 30 days before the due date.' },
     },
     erroQuantidade: 'Enter a whole number greater than zero.',
     continuar: 'Offset',
@@ -562,8 +562,8 @@ const es: Textos = {
   proposta: {
     esperar: 'Tipo de retraso',
     modos: {
-      duration: { titulo: 'Duración', descricao: 'Espera un tiempo fijo. Ej.: 3 días.' },
-      until_date: { titulo: 'Fecha', descricao: 'Espera hasta una fecha calculada a partir de una variable de fecha. Ej.: 30 días antes del vencimiento.' },
+      duration: { titulo: 'Intervalo de tiempo', descricao: 'Espera un tiempo fijo. Ej.: 3 días.' },
+      until_date: { titulo: 'Fecha específica', descricao: 'Espera hasta una fecha calculada a partir de una variable de fecha. Ej.: 30 días antes del vencimiento.' },
     },
     erroQuantidade: 'Ingrese un número entero mayor que cero.',
     continuar: 'Desplazamiento',

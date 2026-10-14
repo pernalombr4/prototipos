@@ -371,7 +371,7 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                        O fim da frase é o lugar de soltar a variável arrastada de Variáveis de Entrada. -->
                   <!-- Sem :error no UFormField: ele pinta a frase inteira. Só a data fica vermelha, e a mensagem vem embaixo. -->
                   <UFormField :label="p.momento" :help="p.instrucoes.momento">
-                    <USelect v-model="rascunho.offset_direction" :ui="uiDaLista" :items="momentos" class="w-full sm:w-72">
+                    <USelect v-model="rascunho.offset_direction" :ui="uiDaLista" :items="momentos" class="w-full">
                       <template #item-trailing="{ item }">
                         <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
                           <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />
@@ -477,7 +477,7 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                       :items="opcoesDeHorario"
                       :disabled="horarioDesligado"
                       icon="i-lucide-clock-3"
-                      class="w-full sm:w-64"
+                      class="w-full"
                     />
                   </UFormField>
 

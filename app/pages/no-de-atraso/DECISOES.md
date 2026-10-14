@@ -328,3 +328,16 @@ proposta; sem ela, a data é calculada uma vez, na entrada do nó, como em todos
   incluído.
 - **Fronteira:** a versão "Como é hoje" continua com o ✓, como o develop.
 - **Ver:** `/no-de-atraso` · `evidencias/proposta-14-opcao-escolhida-sem-check.jpg`
+
+## Rodada 10 · 2026-10-14
+
+- **Pedido (literal):** "perceba que tem campos pela metade deixando sobrar espaço. fica com uma aparencia meio
+  "quebrada". ajuste isso / e no tipo de atraso, tente elaborar melhor o nome das opçoes, do tipo "data
+  específica" ou "duração", nao sei. algum nome mais intuitivo porque tem espaço no campo pro nome ser um bocado
+  mais longo, mas sem exagero"
+- **Mudou:** Momento e Horário passam à largura total do modal, como Tipo de atraso e Deslocamento. As 2 regras
+  (Data no passado e Data vazia) continuam lado a lado, cada uma com metade, sem sobra.
+- **Mudou:** as opções do Tipo de atraso: **Intervalo de tempo** e **Data específica** (EN: Time interval,
+  Specific date; ES: Intervalo de tiempo, Fecha específica). Os tooltips das opções continuam explicando cada
+  uma.
+- **Ver:** `/no-de-atraso` · `evidencias/proposta-15-largura-total-e-tipos.jpg`
