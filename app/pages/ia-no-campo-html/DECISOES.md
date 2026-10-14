@@ -191,3 +191,7 @@
 - **Fronteira:** mudam o andaime, o seletor de Modelo e o rótulo do modelo na barra da proposta; não mudam a caixa do BENI, o modal, o seletor de agente nem a proposta.
 - **CSS fora da prop:** nenhum.
 - **Ver:** `?ia=varias` · `evidencias/proto-varias-ias-seletor.png`, `evidencias/proto-varias-ias-auto.png`
+
+## Aprovado · 2026-10-14
+- **Pedido (literal):** "pode publicar e deixar na pagina de prototipos nao como em revisao, mas como ja finalizado, ja pronto"
+- **Mudou:** o protótipo passa a **aprovado**, no card do índice (`definePageMeta`) e no `README.md`.

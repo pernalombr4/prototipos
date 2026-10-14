@@ -29,7 +29,7 @@ ${pesquisaRodada1}`
 definePageMeta({
   titulo: 'IA no campo HTML',
   descricao: 'O campo HTML redesenhado no padrão do Notion, com o BENI: barra da seleção, cor, link com busca, "/", agentes, modelo e a conexão de ChatGPT, Claude ou Gemini sem sair do campo.',
-  status: 'em-revisao',
+  status: 'aprovado',
   atualizado: '2026-10-14',
   tela: 'Tela do item, campo Editor de texto HTML',
 })
