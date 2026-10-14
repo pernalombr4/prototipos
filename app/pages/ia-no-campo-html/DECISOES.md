@@ -129,3 +129,22 @@
 - **Mudou:** a caixa do BENI volta a ser um cartão só, na largura do campo, como na rodada 3 (`_CaixaDoBeni.vue` e `_CampoHtml.vue` da rodada 3).
 - **Descartado:** a caixa em 2 peças da rodada 4. Motivo: Notion, Tiptap e BlockNote fazem assim, mas lá o pedido tem a largura de uma coluna de texto; no campo do ENSPACE, mais largo, o contraste entre o pedido enorme e a lista estreita ficou estranho.
 - **Ver:** `evidencias/proto-caixa-do-beni.png` (de volta à da rodada 2)
+
+## Rodada 6 · 2026-10-14
+- **Pedido (literal):** "se o cara ta com a ia desligada, nao deve simplesmente bloquear a açao. isso nao é bom cta. deve ter ali a possibilidade de ele clicar, mas ao clicar redireciona pra ele ativar a ia e renderiza ali mesmo o que hoje ta na nossa tela de integraçao pra ativar o chatgpt. veja como é hoje pra entender como adaptar pra esse contexto"
+- **Hoje (develop):** Configurações › Integrações › OpenAI › "Instalar Integração" › modal com "Api Key" e "Salvar". Detalhe e achados no BRIEFING, "A IA de hoje".
+- **Mudou:**
+  - com a IA desligada, nada fica bloqueado: o botão IA (barra fixa, barra da seleção, menu do bloco), o Ctrl J e as ações do BENI no "/" continuam clicáveis;
+  - o clique abre, no lugar da caixa do BENI, a caixa "Ative a IA para escrever com o BENI" (`_AtivarIa.vue`): a tela de integração de hoje trazida para o campo;
+  - o "/" ganha "Ativar a IA" como 1º item do grupo BENI;
+  - quem administra cola a chave ali mesmo, com o que falta na tela de hoje: "Onde pego a chave?" (página de chaves da OpenAI), o aviso de créditos, olho para mostrar a chave, erro no próprio campo e onde trocar depois;
+  - ao ativar: "IA ativada", e a caixa vira a do BENI ali mesmo; se a pessoa tinha escolhido uma ação (Resumir, Continuar...), ela roda sozinha, e a caixa avisa antes ("Ao ativar, o BENI já faz o que você pediu");
+  - a ativação vale para o workspace: o outro campo da tela também passa a ter IA;
+  - quem não administra vê quem administra e "Pedir para ativar", com aviso de pedido enviado;
+  - o andaime ganha o estado "Desligada (você é membro)".
+- **Mudou também:** "Anexar arquivo" no rodapé da caixa do BENI, porque o "Subir Arquivo" já existe na IA de hoje (maquete: só o nome do arquivo entra).
+- **Fronteira:** muda o que acontece com a IA desligada; não mudam a caixa do BENI, a proposta, os seletores nem a tela de Configurações › Integrações.
+- **Simulação:** a chave não sai do navegador; qualquer chave que começa com `sk-` e tem 20 caracteres ou mais passa.
+- **CSS fora da prop:** nenhum.
+- **Detector de seta:** `proto-ativar-ia-*.png` saem com "SETA" em x=1565, que é o topo da barra de rolagem da página (recorte ampliado conferido), não o ponteiro.
+- **Ver:** `?ia=desligada` e `?ia=membro` · `evidencias/proto-ativar-ia-admin.png`, `evidencias/proto-ativar-ia-membro-es.png`, `evidencias/hoje-openai-*.png`

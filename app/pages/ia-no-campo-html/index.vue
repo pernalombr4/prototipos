@@ -4,7 +4,8 @@
  *
  * Uma porta: a tela do item (Contratos), folder Visão Geral, com 2 campos
  * HTML: Parecer do jurídico (preenchido) e Observações internas (vazio).
- * O andaime troca o estado da IA no workspace: ligada, desligada, com erro.
+ * O andaime troca o estado da IA no workspace: ligada, desligada (quem
+ * administra ou membro) e com erro.
  */
 import { textos } from './textos'
 import { campos, categoria, item, pastas, workspace } from './mocks'
@@ -37,9 +38,9 @@ const route = useRoute()
 const router = useRouter()
 
 /* ---------- andaime: o estado da IA vai para o endereço ---------- */
-type EstadoIa = 'ligada' | 'desligada' | 'erro'
+type EstadoIa = 'ligada' | 'desligada' | 'membro' | 'erro'
 const estadoIa = computed<EstadoIa>({
-  get: () => (['ligada', 'desligada', 'erro'].includes(String(route.query.ia)) ? route.query.ia : 'ligada') as EstadoIa,
+  get: () => (['ligada', 'desligada', 'membro', 'erro'].includes(String(route.query.ia)) ? route.query.ia : 'ligada') as EstadoIa,
   set: v => router.replace({ query: { ...route.query, ia: v } }),
 })
 
@@ -97,15 +98,17 @@ async function salvar() {
                   <!--
                     Só no navegador: o editor não renderiza no servidor (lá o Nuxt UI e as
                     extensões carregariam 2 cópias do ProseMirror).
-                    A chave remonta o editor ao ligar ou desligar a IA: o placeholder só se lê na criação.
+                    Ligar ou desligar a IA não remonta o editor: desligada, a IA abre a ativação (rodada 6).
                   -->
                   <ClientOnly v-if="c.tipo === 'html'">
                     <CampoHtml
-                      :key="`${c.chave}-${estadoIa === 'desligada'}`"
+                      :key="c.chave"
                       v-model="valores[c.chave]!"
                       :t="t"
                       :rotulo="c.rotulo"
-                      :ia-ligada="estadoIa !== 'desligada'"
+                      :ia-ligada="estadoIa === 'ligada' || estadoIa === 'erro'"
+                      :papel="estadoIa === 'membro' ? 'membro' : 'admin'"
+                      @ativar="estadoIa = 'ligada'"
                       :falhar="estadoIa === 'erro'"
                     />
                     <template #fallback>
@@ -155,7 +158,7 @@ async function salvar() {
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.estadoDaIa }}</span>
         <UFieldGroup size="xs">
           <UButton
-            v-for="e in (['ligada', 'desligada', 'erro'] as const)"
+            v-for="e in (['ligada', 'desligada', 'membro', 'erro'] as const)"
             :key="e"
             :label="t.andaime.estados[e]"
             :color="estadoIa === e ? 'primary' : 'neutral'"

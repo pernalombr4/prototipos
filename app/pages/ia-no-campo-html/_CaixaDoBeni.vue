@@ -44,6 +44,18 @@ const modelo = defineModel<string>('modelo', { required: true })
 const usarCampos = defineModel<boolean>('usarCampos', { default: true })
 
 const busca = ref('')
+
+/*
+ * Anexo como contexto: o editor de hoje (integração OpenAI) já tem "Subir
+ * Arquivo" (en-docs, OpenAI). MAQUETE: o arquivo não é lido; só o nome entra
+ * no contexto.
+ */
+const anexo = ref<string | null>(null)
+const entradaDeArquivo = useTemplateRef<HTMLInputElement>('entradaDeArquivo')
+function aoEscolherArquivo(e: Event) {
+  const arquivo = (e.target as HTMLInputElement).files?.[0]
+  if (arquivo) anexo.value = arquivo.name
+}
 const todosOsAgentes = ref(false)
 const raiz = useTemplateRef<HTMLElement>('raiz')
 const tb = computed(() => props.t.beni)
@@ -201,6 +213,16 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', aoClicarFora, 
           </div>
         </template>
       </UPopover>
+
+      <input ref="entradaDeArquivo" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt" class="hidden" @change="aoEscolherArquivo">
+      <UBadge v-if="anexo" color="neutral" variant="subtle" size="sm" class="max-w-44 gap-1">
+        <UIcon name="i-lucide-paperclip" class="size-3 shrink-0" />
+        <span class="truncate">{{ anexo }}</span>
+        <UButton icon="i-lucide-x" color="neutral" variant="link" size="xs" class="-me-1 p-0" :aria-label="tb.removerAnexo(anexo)" @click="anexo = null" />
+      </UBadge>
+      <UTooltip v-else :text="tb.anexarDica">
+        <UButton icon="i-lucide-paperclip" color="neutral" variant="ghost" size="xs" :aria-label="tb.anexar" @click="entradaDeArquivo?.click()" />
+      </UTooltip>
 
       <span class="h-4 w-px bg-accented" aria-hidden="true" />
       <SeletorDeAgente v-model="agente" :t="t" />

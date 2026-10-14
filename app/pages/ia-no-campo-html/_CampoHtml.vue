@@ -43,6 +43,7 @@ import { aplicarPaleta, cores } from './paleta'
 import { chaveDaProposta, PropostaDoBeni } from './proposta'
 import CaixaDoBeni from './_CaixaDoBeni.vue'
 import BarraDaProposta from './_BarraDaProposta.vue'
+import AtivarIa from './_AtivarIa.vue'
 import SeletorDeCor from './_SeletorDeCor.vue'
 import PopoverDeLink from './_PopoverDeLink.vue'
 
@@ -50,8 +51,21 @@ const props = defineProps<{
   t: Textos
   rotulo: string
   iaLigada: boolean
+  /** Andaime: quem está no campo administra o workspace (instala integração) ou é membro. */
+  papel: 'admin' | 'membro'
   falhar: boolean
 }>()
+
+const emit = defineEmits<{ ativar: [] }>()
+
+/*
+ * IA desligada não bloqueia (rodada 6): o botão, o Ctrl J e o "/" abrem a
+ * ativação (_AtivarIa). Ativada aqui, vale na hora, antes de o andaime
+ * receber o estado novo.
+ */
+const ativadaAqui = ref(false)
+const iaAtiva = computed(() => props.iaLigada || ativadaAqui.value)
+watch(() => props.iaLigada, (v) => { if (!v) ativadaAqui.value = false })
 
 const valor = defineModel<string>({ required: true })
 const toast = useToast()
@@ -130,18 +144,29 @@ function topoAbaixoDe(editor: Editor, pos: number) {
 
 /* ------------------------------------------------------- a caixa ---- */
 
-const caixa = ref<(Contexto & { topo: number, chave: number }) | null>(null)
+const caixa = ref<(Contexto & { topo: number, chave: number, modo: 'pedido' | 'ativar', pendente?: PedidoDaCaixa }) | null>(null)
 let chave = 0
 
-function abrirCaixa(editor: Editor) {
-  if (!props.iaLigada || sessao.value) return
+function abrirCaixa(editor: Editor, pendente?: PedidoDaCaixa) {
+  if (sessao.value) return
   const ctx = contextoDe(editor)
-  caixa.value = { ...ctx, topo: topoAbaixoDe(editor, ctx.to), chave: ++chave }
+  caixa.value = { ...ctx, topo: topoAbaixoDe(editor, ctx.to), chave: ++chave, modo: iaAtiva.value ? 'pedido' : 'ativar', pendente }
   marcar(editor, { foco: ctx.comSelecao ? { from: ctx.from, to: ctx.to } : null })
   rolarAteVer('[data-caixa-do-beni]')
 }
 
 /** A camada nova (caixa ou barra) entra inteira na tela: rola só o que falta. */
+/** Ativou: a mesma caixa vira a do BENI; se a pessoa tinha escolhido uma ação, ela roda. */
+function aoAtivar() {
+  ativadaAqui.value = true
+  emit('ativar')
+  const c = caixa.value
+  const editor = ed()
+  if (!c || !editor) return
+  if (c.pendente) executar(editor, c.pendente, c)
+  else c.modo = 'pedido'
+}
+
 function rolarAteVer(seletor: string) {
   setTimeout(() => moldura.value?.querySelector(seletor)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 180)
 }
@@ -236,7 +261,7 @@ async function rodar(editor: Editor) {
 }
 
 function executar(editor: Editor, p: PedidoDaCaixa, ctxDado?: Contexto) {
-  if (!props.iaLigada) return
+  if (!iaAtiva.value) return abrirCaixa(editor, p)
   const ctx = ctxDado ?? caixa.value ?? contextoDe(editor)
   caixa.value = null
   const modo: Modo = ctx.campoVazio ? 'vazio'
@@ -404,7 +429,7 @@ function textoDoBloco(editor: Editor, pos?: number): Intervalo {
 
 const handlers = {
   beni: {
-    canExecute: () => props.iaLigada,
+    canExecute: () => true,
     execute: (editor: Editor, item?: ItemBeni) => {
       // O menu "/" ainda está fechando quando o handler roda: a caixa abre no tique seguinte.
       setTimeout(() => {
@@ -414,17 +439,16 @@ const handlers = {
       return editor.chain()
     },
     isActive: () => false,
-    isDisabled: (editor: Editor, item?: ItemBeni) => !props.iaLigada || (!!item?.precisaTexto && editor.isEmpty),
+    isDisabled: (editor: Editor, item?: ItemBeni) => !!item?.precisaTexto && editor.isEmpty,
   },
   beniBloco: {
-    canExecute: () => props.iaLigada,
+    canExecute: () => true,
     execute: (editor: Editor, item?: { pos?: number }) => {
       const r = textoDoBloco(editor, item?.pos)
       setTimeout(() => { editor.chain().focus().setTextSelection(r).run(); abrirCaixa(editor) })
       return editor.chain()
     },
     isActive: () => false,
-    isDisabled: () => !props.iaLigada,
   },
   corDoBloco: {
     canExecute: () => true,
@@ -517,16 +541,15 @@ const alinhamentos = (): ItemDaBarra[] => [
 /* ---------------------------------------------------- a barra fixa ---- */
 
 function itensDaBarra(editor: Editor): ItemDaBarra[][] {
-  const botaoIa: ItemDaBarra = props.iaLigada
-    ? {
-        icon: 'i-lucide-sparkles',
-        label: tb.value.botao,
-        color: 'primary',
-        variant: 'soft',
-        tooltip: { text: tb.value.dica, kbds: ['ctrl', 'j'] },
-        onClick: () => abrirCaixa(editor),
-      } as ItemDaBarra
-    : { slot: 'iaDesligada' as const }
+  // Ligada ou não, o botão é o mesmo: desligada, ele abre a ativação (rodada 6).
+  const botaoIa = {
+    icon: 'i-lucide-sparkles',
+    label: tb.value.botao,
+    color: 'primary',
+    variant: 'soft',
+    tooltip: { text: iaAtiva.value ? tb.value.dica : props.t.ativar.dica, kbds: ['ctrl', 'j'] },
+    onClick: () => abrirCaixa(editor),
+  } as ItemDaBarra
 
   const tipo = tipoAtual(editor)
   const naTabela = editor.isActive('table')
@@ -589,9 +612,7 @@ function itensDaBarra(editor: Editor): ItemDaBarra[][] {
 function itensDaBolha(editor: Editor): ItemDaBarra[][] {
   const tipo = tipoAtual(editor)
   return [
-    ...(props.iaLigada
-      ? [[{ icon: 'i-lucide-sparkles', label: tb.value.botao, color: 'primary', variant: 'soft', tooltip: { text: tb.value.dica, kbds: ['ctrl', 'j'] }, onClick: () => abrirCaixa(editor) } as ItemDaBarra]]
-      : []),
+    [{ icon: 'i-lucide-sparkles', label: tb.value.botao, color: 'primary', variant: 'soft', tooltip: { text: iaAtiva.value ? tb.value.dica : props.t.ativar.dica, kbds: ['ctrl', 'j'] }, onClick: () => abrirCaixa(editor) } as ItemDaBarra],
     [{
       label: tipo.label,
       trailingIcon: 'i-lucide-chevron-down',
@@ -636,9 +657,11 @@ const itensDoMenu = computed(() => {
   const ia = (acao: Acao | undefined, label: string, description: string, icon: string, extra: Record<string, unknown> = {}) =>
     ({ kind: 'beni', acao, rotuloDaAcao: label, label, description, icon, palavras: 'ia ai beni', ...extra })
   const grupos: unknown[][] = []
-  if (props.iaLigada) {
+  {
+    // Desligada, o grupo continua no "/": "Ativar a IA" vem primeiro e todo item leva à ativação.
     grupos.push([
       { type: 'label', label: tb.value.grupoMenu },
+      ...(iaAtiva.value ? [] : [ia(undefined, props.t.ativar.itemMenu, props.t.ativar.itemMenuDescricao, 'i-lucide-power')]),
       ia(undefined, tb.value.pedir, tb.value.pedirDescricao, 'i-lucide-sparkles'),
       ...pedidosSalvos.value.map(p => ia('pedir', p.nome, p.prompt, 'i-lucide-bookmark', { prompt: p.prompt })),
       ia('continuar', tb.value.continuar, tb.value.continuarDescricao, 'i-lucide-pen-line', { precisaTexto: true }),
@@ -726,7 +749,7 @@ function itensDaAlca(editor: Editor): DropdownMenuItem[][] {
       { kind: 'moveUp', pos, label: tb2.moverAcima, icon: 'i-lucide-arrow-up' },
       { kind: 'moveDown', pos, label: tb2.moverAbaixo, icon: 'i-lucide-arrow-down' },
     ],
-    ...(props.iaLigada ? [[{ kind: 'beniBloco', pos, label: tb2.perguntarAoBeni, icon: 'i-lucide-sparkles', kbds: ['ctrl', 'j'] }]] : []),
+    [{ kind: 'beniBloco', pos, label: tb2.perguntarAoBeni, icon: 'i-lucide-sparkles', kbds: ['ctrl', 'j'] }],
     [{ kind: 'delete', pos, label: tb2.excluir, icon: 'i-lucide-trash-2', color: 'error', kbds: ['del'] }],
   ] as never, handlers) as DropdownMenuItem[][]
 }
@@ -759,7 +782,7 @@ const nomeDoModelo = computed(() => modelos.find(m => m.id === modelo.value)?.no
         content-type="html"
         :extensions="extensoes"
         :handlers="handlers"
-        :placeholder="iaLigada ? te.placeholder : te.placeholderSemIa"
+        :placeholder="te.placeholder"
         :ui="{ base: [
           'min-h-28 ps-11 pe-4 sm:ps-11 sm:pe-4 py-3 text-sm *:my-2 [&_p]:leading-6 focus:outline-none',
           '[&_li_p]:my-0',
@@ -774,11 +797,6 @@ const nomeDoModelo = computed(() => modelos.find(m => m.id === modelo.value)?.no
           size="sm"
           class="sticky top-0 z-10 overflow-x-auto rounded-t-lg border-b border-default bg-default/95 px-1.5 py-1 backdrop-blur"
         >
-          <template #iaDesligada>
-            <UTooltip :text="tb.desligada" :content="{ side: 'top' }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
-              <UButton icon="i-lucide-sparkles" :label="tb.botao" color="neutral" variant="ghost" size="sm" aria-disabled="true" class="cursor-not-allowed text-dimmed hover:bg-transparent" />
-            </UTooltip>
-          </template>
           <template #cor>
             <SeletorDeCor :t="t" :editor="editor" />
           </template>
@@ -864,18 +882,35 @@ const nomeDoModelo = computed(() => modelos.find(m => m.id === modelo.value)?.no
         leave-to-class="opacity-0"
       >
         <div v-if="caixa" :key="caixa.chave" data-caixa-do-beni class="absolute inset-x-2 z-30 origin-top scroll-mb-20" :style="{ top: `${caixa.topo}px` }">
-          <CaixaDoBeni
-            v-model:agente="agente"
-            v-model:modelo="modelo"
-            v-model:usar-campos="usarCampos"
-            :t="t"
-            :com-selecao="caixa.comSelecao"
-            :campo-vazio="caixa.campoVazio"
-            :rotulo-do-campo="rotulo"
-            :pedidos-salvos="pedidosSalvos"
-            @pedir="(p) => ed() && executar(ed()!, p)"
-            @fechar="fecharCaixa()"
-          />
+          <Transition
+            mode="out-in"
+            enter-active-class="transition duration-150 ease-out"
+            enter-from-class="opacity-0 -translate-y-1"
+            leave-active-class="transition duration-100 ease-in"
+            leave-to-class="opacity-0"
+          >
+            <AtivarIa
+              v-if="caixa.modo === 'ativar'"
+              :t="t"
+              :papel="papel"
+              :pendente="caixa.pendente?.rotulo"
+              @ativada="aoAtivar"
+              @fechar="fecharCaixa()"
+            />
+            <CaixaDoBeni
+              v-else
+              v-model:agente="agente"
+              v-model:modelo="modelo"
+              v-model:usar-campos="usarCampos"
+              :t="t"
+              :com-selecao="caixa.comSelecao"
+              :campo-vazio="caixa.campoVazio"
+              :rotulo-do-campo="rotulo"
+              :pedidos-salvos="pedidosSalvos"
+              @pedir="(p) => ed() && executar(ed()!, p)"
+              @fechar="fecharCaixa()"
+            />
+          </Transition>
         </div>
       </Transition>
 

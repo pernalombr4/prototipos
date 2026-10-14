@@ -40,7 +40,19 @@ Medido em `padrao-dos-campos` (formulário de criação com 29 campos, uma colun
 | Barra fixa, nesta ordem | desfazer, refazer, título, negrito, itálico, sublinhado, tachado, código, emoji, alinhamento, mais |
 | Placeholder | `Escreva ou digite "/" para acessar os comandos...` |
 | Menu "/" | existe (o placeholder o anuncia) |
-| IA | nenhuma no campo. A IA do produto (BENI) fica em Configurações › Agentes de IA e no "Perguntar ao BENI" da documentação |
+| IA | ~~nenhuma no campo~~ **Corrigido na rodada 6:** existe, mas só com a integração OpenAI instalada (abaixo) |
+
+### A IA de hoje: integração OpenAI (rodada 6, 2026-10-14)
+
+Segundo o `en-docs` (página da integração OpenAI), com a integração instalada o editor HTML mostra um botão de IA com: Revisar, Traduzir, Resumir, Continuar, Explicar, Subir Arquivo e Personalizado. Sem ela, o botão não aparece.
+
+Como se instala, medido no develop (workspace de exploração, 2026-10-14), só olhando, sem salvar chave:
+
+1. Configurações › Integrações: o cartão OpenAI, na seção "Inteligência Artificial", com "+ Instalar Integração" (`evidencias/hoje-openai-cartao.png`);
+2. a página da OpenAI: logo, "Descrição" e o botão "Instalar Integração" (`evidencias/hoje-openai-pagina.png`);
+3. o modal "OpenAI": chave "Alterar Token" (já ligada), o campo obrigatório "Api Key" com "Por favor digite" e "Salvar" (`evidencias/hoje-openai-modal.png`).
+
+Quem escreve no campo não tem como saber que a IA existe: sem a integração, nada no campo aponta para ela.
 
 **O que não foi medido:** os itens do menu "/" de hoje. O protótipo monta os grupos Texto, Listas e Inserir com os blocos que a barra já oferece. **Conferir no develop** quando o DNS voltar.
 
@@ -56,4 +68,11 @@ Cópia de `pastas-do-item` (`_CascaDoItem.vue` e `_PainelDoItem.vue`), que copio
 
 ## Achados fora da demanda
 
+- **Tela de integração da OpenAI (develop, 2026-10-14):**
+  - o submenu Integrações mostra chaves de tradução cruas no lugar dos rótulos;
+  - `/settings/integrations/apps` abre em branco;
+  - o botão "Instalar Integração" da página tem cor de desabilitado, mas funciona;
+  - na 1ª instalação, a chave "Alterar Token" já vem ligada, sem token nenhum para alterar;
+  - o rótulo "Api Key" fica em inglês na tela em português;
+  - nada diz onde pegar a chave nem que a conta OpenAI precisa de créditos.
 - **Alinhamento e emoji precisam de extensão própria** no editor (TextAlign e Emoji do TipTap). O protótipo não as tem: o alinhamento é maquete e o emoji insere o caractere direto.
