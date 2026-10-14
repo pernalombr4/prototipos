@@ -113,21 +113,6 @@ export interface Textos {
     encerrar: string
     recalcular: string
     recalcularDescricao: (campo: string | null) => string
-    previa: string
-    previaDescricao: (n: number, categoria: string) => string
-    previaSemCampo: string
-    verComOItem: string
-    contagem: { agendado: (n: number) => string, passou: (n: number) => string, vazio: (n: number) => string }
-    resultado: {
-      agendado: (campo: string, data: string, continua: string, hora: string) => string
-      passouContinua: string
-      passouEncerra: string
-      vazioContinua: (campo: string) => string
-      vazioEncerra: (campo: string) => string
-    }
-    linha: { hoje: string, continua: string }
-    verCalculo: string
-    calculoDescricao: string
     resumoTempo: (n: number, unidade: string) => string
     resumoData: (quanto: string, direcao: string, campo: string, hora: string | null) => string
     resumoVazio: string
@@ -293,25 +278,6 @@ const pt: Textos = {
     encerrar: 'Encerrar com erro',
     recalcular: 'Recalcular se a data mudar',
     recalcularDescricao: campo => `Atualiza a espera quando o valor de ${campo ?? 'data'} muda.`,
-    previa: 'Simulação',
-    previaDescricao: (n, categoria) => `${n} itens abertos de ${categoria}.`,
-    previaSemCampo: 'Informe a variável de data para simular.',
-    verComOItem: 'Item de exemplo',
-    contagem: {
-      agendado: n => `${n} aguardando`,
-      passou: n => `${n} com data no passado`,
-      vazio: n => `${n} com data vazia`,
-    },
-    resultado: {
-      agendado: (campo, data, continua, hora) => `${campo}: ${data}. Continua em ${continua}, às ${hora}.`,
-      passouContinua: 'Data calculada no passado. Continua imediatamente.',
-      passouEncerra: 'Data calculada no passado. Encerra com erro.',
-      vazioContinua: campo => `${campo}: vazio. Continua imediatamente.`,
-      vazioEncerra: campo => `${campo}: vazio. Encerra com erro.`,
-    },
-    linha: { hoje: 'Hoje', continua: 'Continua' },
-    verCalculo: 'Ver cálculo',
-    calculoDescricao: 'Configuração gravada no nó e cálculo executado pelo Spaceflow.',
     resumoTempo: (n, unidade) => `Por ${n} ${unidade}.`,
     resumoData: (quanto, direcao, campo, hora) => `Até ${quanto ? `${quanto} ${direcao} ` : ''}${campo}${hora ? `, às ${hora}` : ''}.`,
     resumoVazio: 'Não configurado.',
@@ -443,25 +409,6 @@ const en: Textos = {
     encerrar: 'End with error',
     recalcular: 'Recalculate if the date changes',
     recalcularDescricao: campo => `Updates the wait when the value of ${campo ?? 'date'} changes.`,
-    previa: 'Simulation',
-    previaDescricao: (n, categoria) => `${n} open items in ${categoria}.`,
-    previaSemCampo: 'Set the date variable to simulate.',
-    verComOItem: 'Sample item',
-    contagem: {
-      agendado: n => `${n} waiting`,
-      passou: n => `${n} with a past date`,
-      vazio: n => `${n} with an empty date`,
-    },
-    resultado: {
-      agendado: (campo, data, continua, hora) => `${campo}: ${data}. Continues on ${continua}, at ${hora}.`,
-      passouContinua: 'Calculated date in the past. Continues immediately.',
-      passouEncerra: 'Calculated date in the past. Ends with error.',
-      vazioContinua: campo => `${campo}: empty. Continues immediately.`,
-      vazioEncerra: campo => `${campo}: empty. Ends with error.`,
-    },
-    linha: { hoje: 'Today', continua: 'Continues' },
-    verCalculo: 'View calculation',
-    calculoDescricao: 'Configuration saved in the node and calculation run by Spaceflow.',
     resumoTempo: (n, unidade) => `For ${n} ${unidade}.`,
     resumoData: (quanto, direcao, campo, hora) => `Until ${quanto ? `${quanto} ${direcao} ` : ''}${campo}${hora ? `, at ${hora}` : ''}.`,
     resumoVazio: 'Not configured.',
@@ -593,25 +540,6 @@ const es: Textos = {
     encerrar: 'Terminar con error',
     recalcular: 'Recalcular si la fecha cambia',
     recalcularDescricao: campo => `Actualiza la espera cuando cambia el valor de ${campo ?? 'fecha'}.`,
-    previa: 'Simulación',
-    previaDescricao: (n, categoria) => `${n} ítems abiertos de ${categoria}.`,
-    previaSemCampo: 'Indique la variable de fecha para simular.',
-    verComOItem: 'Ítem de ejemplo',
-    contagem: {
-      agendado: n => `${n} en espera`,
-      passou: n => `${n} con fecha pasada`,
-      vazio: n => `${n} con fecha vacía`,
-    },
-    resultado: {
-      agendado: (campo, data, continua, hora) => `${campo}: ${data}. Continúa el ${continua}, a las ${hora}.`,
-      passouContinua: 'Fecha calculada en el pasado. Continúa de inmediato.',
-      passouEncerra: 'Fecha calculada en el pasado. Termina con error.',
-      vazioContinua: campo => `${campo}: vacío. Continúa de inmediato.`,
-      vazioEncerra: campo => `${campo}: vacío. Termina con error.`,
-    },
-    linha: { hoje: 'Hoy', continua: 'Continúa' },
-    verCalculo: 'Ver cálculo',
-    calculoDescricao: 'Configuración guardada en el nodo y cálculo que ejecuta Spaceflow.',
     resumoTempo: (n, unidade) => `Por ${n} ${unidade}.`,
     resumoData: (quanto, direcao, campo, hora) => `Hasta ${quanto ? `${quanto} ${direcao} ` : ''}${campo}${hora ? `, a las ${hora}` : ''}.`,
     resumoVazio: 'No configurado.',

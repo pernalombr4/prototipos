@@ -16,24 +16,20 @@
  *    Data de vencimento, sem fórmula;
  * 4. horário, data já passada e campo vazio em dropdown, e recalcular quando a
  *    data muda. Todo campo tem uma instrução curta embaixo;
- * 5. a simulação com os itens da categoria, que mostra quando cada um continua e
- *    quantos já passaram da data ou estão sem data;
- * 6. "Ver cálculo", recolhido, com a conta em dayjs e o que o nó grava.
  *
  * A moldura (ENTRADA e SAÍDA dos lados, cabeçalho, rodapé com "Modificado",
  * Cancelar e Salvar e fechar) é a do develop.
  */
-import type { ConfiguracaoDoAtraso, Contrato, Direcao, Unidade, UnidadeDoDeslocamento, Variavel } from './mocks'
+import type { ConfiguracaoDoAtraso, Direcao, Unidade, UnidadeDoDeslocamento, Variavel } from './mocks'
 import type { Textos } from './textos'
-import { AGORA, EXEMPLO_DE_VARIAVEL, chaveDaVariavel, noDeGatilho } from './mocks'
-import { calcular, campoEscolhido, contar, dadoGravado, expressaoDayjs, horarios, lerVariavel } from './espera'
+import { EXEMPLO_DE_VARIAVEL, chaveDaVariavel, noDeGatilho } from './mocks'
+import { campoEscolhido, horarios, lerVariavel } from './espera'
 
 const props = defineProps<{
   t: Textos
   versao: 'hoje' | 'proposta'
   /** A árvore do painel Variáveis de Entrada. Vazia no cenário "sem variável". */
   variaveis: Variavel[]
-  contratos: Contrato[]
   /** Abre já mostrando os erros de validação (estado do andaime). */
   validarAoAbrir?: boolean
 }>()
@@ -55,7 +51,6 @@ watch(aberto, (v) => {
   if (!v) return
   rascunho.value = structuredClone(toRaw(config.value))
   tentouSalvar.value = !!props.validarAoAbrir
-  if (rascunho.value.date_source) itemDaPrevia.value = 'CT-0042'
 }, { immediate: true })
 
 const modificado = computed(() => JSON.stringify(rascunho.value) !== JSON.stringify(config.value))
@@ -118,7 +113,6 @@ const momentos = computed(() => (['on', 'before', 'after'] as Direcao[]).map(d =
 const naData = computed(() => rascunho.value.offset_direction === 'on')
 
 const campo = computed(() => campoEscolhido(rascunho.value))
-const nomeDoCampo = computed(() => campo.value?.label ?? p.value.campo.toLowerCase())
 
 const opcoesDeHorario = computed(() => [
   ...(campo.value?.comHora ? [{ value: 'field', label: p.value.horarioDoCampo }] : []),
@@ -192,63 +186,6 @@ function soltar(e: DragEvent) {
   editandoChave.value = false
 }
 
-/* ---------- a prévia ---------- */
-
-const itemDaPrevia = ref('CT-0042')
-const contratoDaPrevia = computed(() => props.contratos.find(c => c.reference === itemDaPrevia.value) ?? props.contratos[0]!)
-const itensDaPrevia = computed(() => props.contratos.map(c => ({
-  value: c.reference!,
-  label: `${c.reference} · ${c.data.contratante_contrato}`,
-})))
-
-const retomada = computed(() => calcular(rascunho.value, contratoDaPrevia.value))
-const contagem = computed(() => contar(rascunho.value, props.contratos))
-
-function data(d: Date) {
-  return new Intl.DateTimeFormat(props.t.locale, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(d)
-}
-function hora(d: Date) {
-  return new Intl.DateTimeFormat(props.t.locale, { hour: '2-digit', minute: '2-digit', hour12: false }).format(d)
-}
-
-const fraseDaPrevia = computed(() => {
-  const r = retomada.value
-  const nome = nomeDoCampo.value
-  if (r.situacao === 'vazio') return r.encerra ? p.value.resultado.vazioEncerra(nome) : p.value.resultado.vazioContinua(nome)
-  if (r.situacao === 'passou') return r.encerra ? p.value.resultado.passouEncerra : p.value.resultado.passouContinua
-  return p.value.resultado.agendado(nome, data(r.dataDoCampo!), data(r.continuaEm!), hora(r.continuaEm!))
-})
-
-const iconeDaPrevia = computed(() => ({
-  agendado: 'i-lucide-calendar-clock',
-  passou: 'i-lucide-triangle-alert',
-  vazio: 'i-lucide-circle-slash',
-})[retomada.value.situacao])
-
-/** Os pontos da linha do tempo, em porcentagem do trilho. */
-const linha = computed(() => {
-  const r = retomada.value
-  const pontos = [
-    { chave: 'hoje', rotulo: p.value.linha.hoje, data: AGORA },
-    ...(r.situacao === 'agendado' ? [{ chave: 'continua', rotulo: p.value.linha.continua, data: r.continuaEm! }] : []),
-    ...(r.dataDoCampo ? [{ chave: 'campo', rotulo: nomeDoCampo.value, data: r.dataDoCampo }] : []),
-  ]
-  const min = Math.min(...pontos.map(x => x.data.getTime()))
-  const max = Math.max(...pontos.map(x => x.data.getTime()))
-  const largura = Math.max(max - min, 1)
-  return pontos
-    .map(x => ({ ...x, pos: 4 + ((x.data.getTime() - min) / largura) * 92 }))
-    .sort((a, b) => a.pos - b.pos)
-    // rótulos alternam em cima e embaixo, para 2 datas próximas não se cobrirem
-    .map((x, i) => ({ ...x, acima: i % 2 === 1 }))
-})
-
-/** Clicar num número da contagem mostra o primeiro item daquele grupo. */
-function mostrarGrupo(situacao: 'agendado' | 'passou' | 'vazio') {
-  const achado = props.contratos.find(c => calcular(rascunho.value, c).situacao === situacao)
-  if (achado) itemDaPrevia.value = achado.reference!
-}
-
 /**
  * Lista dos dropdowns da proposta: sem o ✓ (ele empurrava o "?" da opção) e
  * com a opção escolhida em fundo e semibold.
@@ -258,8 +195,6 @@ const uiDaLista = {
   item: 'data-[state=checked]:font-semibold data-[state=checked]:text-highlighted data-[state=checked]:before:bg-elevated',
 }
 
-const calculoAberto = ref(false)
-const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2))
 </script>
 
 <template>
@@ -508,123 +443,9 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                     :description="p.recalcularDescricao(campo?.label ?? null)"
                   />
 
-                  <!-- A prévia -->
-                  <section class="rounded-lg border border-default bg-elevated/50 p-4" :aria-label="p.previa">
-                    <div class="flex flex-wrap items-center gap-2">
-                      <UIcon name="i-lucide-eye" class="size-4 text-muted" />
-                      <h3 class="text-sm font-semibold text-highlighted">{{ p.previa }}</h3>
-                    </div>
-
-                    <p v-if="!rascunho.date_source" class="mt-2 text-sm text-muted">{{ p.previaSemCampo }}</p>
-
-                    <template v-else>
-                      <p class="mt-1 text-xs text-muted">{{ p.previaDescricao(contratos.length, t.categoria) }}</p>
-
-                      <div class="mt-3 flex flex-wrap gap-2">
-                        <UButton
-                          :label="p.contagem.agendado(contagem.agendado)"
-                          icon="i-lucide-calendar-clock"
-                          color="primary"
-                          variant="soft"
-                          size="xs"
-                          @click="mostrarGrupo('agendado')"
-                        />
-                        <UButton
-                          v-if="contagem.passou"
-                          :label="p.contagem.passou(contagem.passou)"
-                          icon="i-lucide-triangle-alert"
-                          color="warning"
-                          variant="soft"
-                          size="xs"
-                          @click="mostrarGrupo('passou')"
-                        />
-                        <UButton
-                          v-if="contagem.vazio"
-                          :label="p.contagem.vazio(contagem.vazio)"
-                          icon="i-lucide-circle-slash"
-                          color="neutral"
-                          variant="soft"
-                          size="xs"
-                          @click="mostrarGrupo('vazio')"
-                        />
-                      </div>
-
-                      <UFormField :label="p.verComOItem" class="mt-4">
-                        <USelectMenu v-model="itemDaPrevia" :items="itensDaPrevia" value-key="value" class="w-full" />
-                      </UFormField>
-
-                      <Transition
-                        mode="out-in"
-                        enter-active-class="transition duration-200 ease-out"
-                        enter-from-class="opacity-0 translate-y-0.5"
-                        leave-active-class="transition duration-100"
-                        leave-to-class="opacity-0"
-                      >
-                        <div :key="fraseDaPrevia + itemDaPrevia" class="mt-3">
-                          <p
-                            class="flex items-start gap-2 text-sm"
-                            :class="retomada.situacao === 'agendado' ? 'text-highlighted' : retomada.situacao === 'passou' ? 'text-warning' : 'text-muted'"
-                            role="status"
-                          >
-                            <UIcon :name="iconeDaPrevia" class="mt-0.5 size-4 shrink-0" />
-                            <span><strong>{{ contratoDaPrevia.reference }}</strong>. {{ fraseDaPrevia }}</span>
-                          </p>
-
-                          <!-- linha do tempo -->
-                          <div class="relative mx-1 mb-1 mt-9 h-14" aria-hidden="true">
-                            <div class="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 rounded bg-accented" />
-                            <div
-                              v-for="ponto in linha"
-                              :key="ponto.chave"
-                              class="absolute top-1/2 flex -translate-x-1/2 flex-col items-center transition-[left] duration-300 ease-out"
-                              :style="{ left: `${ponto.pos}%` }"
-                            >
-                              <span
-                                class="size-3 -translate-y-1/2 rounded-full ring-4 ring-(--ui-bg-elevated)"
-                                :class="{
-                                  'bg-primary': ponto.chave === 'continua',
-                                  'bg-inverted': ponto.chave === 'hoje',
-                                  'bg-warning': ponto.chave === 'campo',
-                                }"
-                              />
-                              <span
-                                class="absolute whitespace-nowrap text-[11px] leading-tight"
-                                :class="[
-                                  ponto.acima ? 'bottom-4' : 'top-3',
-                                  ponto.pos > 80 ? 'right-0 text-right' : ponto.pos < 20 ? 'left-0 text-left' : 'text-center',
-                                ]"
-                              >
-                                <span class="block font-medium" :class="ponto.chave === 'continua' ? 'text-primary' : 'text-default'">{{ ponto.rotulo }}</span>
-                                <span class="block text-muted">{{ data(ponto.data) }}</span>
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </Transition>
-                    </template>
-                  </section>
                 </div>
               </Transition>
 
-              <!-- Ver o cálculo: recolhido, para quem configura pela API -->
-              <UCollapsible v-model:open="calculoAberto" class="border-t border-default pt-3">
-                <UButton
-                  :label="p.verCalculo"
-                  icon="i-lucide-code-xml"
-                  :trailing-icon="calculoAberto ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
-                  color="neutral"
-                  variant="link"
-                  size="sm"
-                  class="px-0"
-                />
-                <template #content>
-                  <p class="mt-2 text-xs text-muted">{{ p.calculoDescricao }}</p>
-                  <div class="mt-2 grid gap-2">
-                    <pre class="overflow-x-auto rounded-md bg-elevated p-3 text-xs text-default">{{ expressaoDayjs(rascunho) }}</pre>
-                    <pre class="overflow-x-auto rounded-md bg-elevated p-3 text-xs text-default">{{ json }}</pre>
-                  </div>
-                </template>
-              </UCollapsible>
             </template>
           </div>
 

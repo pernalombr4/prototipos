@@ -341,3 +341,14 @@ proposta; sem ela, a data é calculada uma vez, na entrada do nó, como em todos
   Specific date; ES: Intervalo de tiempo, Fecha específica). Os tooltips das opções continuam explicando cada
   uma.
 - **Ver:** `/no-de-atraso` · `evidencias/proposta-15-largura-total-e-tipos.jpg`
+
+## Rodada 11 · 2026-10-14
+
+- **Pedido (literal):** "pode tirar o "ver calculo" do nó e fazer push pra main" e "pode tirar tambem a parte de
+  simulaçao"
+- **Mudou:** saem do modal a seção **Ver cálculo** (a conta em dayjs e o JSON gravado) e a **Simulação** (a
+  contagem dos itens, o item de exemplo e a linha do tempo). O modal termina em "Recalcular se a data mudar".
+- **Fica:** a conta em dayjs e o formato do que o nó grava continuam nesta página, na rodada 1 ("O que o nó
+  passa a gravar"), e no `espera.ts` (`expressaoDayjs`, `dadoGravado`, `calcular`), como referência para o dev.
+  O `mocks.ts` mantém os 40 contratos fictícios, que hoje nenhuma tela usa.
+- **Ver:** `/no-de-atraso` · `evidencias/proposta-16-sem-simulacao-e-calculo.jpg`

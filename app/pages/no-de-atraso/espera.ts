@@ -5,8 +5,8 @@
  * para não trazer dependência ao protótipo. A regra de mês segue a do dayjs:
  * 31/03 menos 1 mês dá 28/02 (ou 29/02), nunca 03/03.
  *
- * `expressaoDayjs` devolve o cálculo escrito como o back-end faria, para a
- * seção "Ver o cálculo" e para o dev.
+ * `expressaoDayjs` devolve o cálculo escrito como o back-end faria, para o dev
+ * (a seção "Ver cálculo" saiu do modal na rodada 11).
  */
 import type { ConfiguracaoDoAtraso, Contrato, UnidadeDoDeslocamento, Variavel } from './mocks'
 import { AGORA, todasAsVariaveis } from './mocks'
@@ -106,7 +106,7 @@ export function contar(config: ConfiguracaoDoAtraso, lista: Contrato[]): Contage
 
 const unidadeDayjs: Record<UnidadeDoDeslocamento, string> = { hour: 'hour', day: 'day', week: 'week', month: 'month' }
 
-/** O cálculo escrito em dayjs, como o back-end faria. Mostrado em "Ver o cálculo". */
+/** O cálculo escrito em dayjs, como o back-end faria. Referência para o dev. */
 export function expressaoDayjs(config: ConfiguracaoDoAtraso): string {
   if (config.mode === 'duration') {
     return `dayjs().add(${Number(config.delay) || 0}, '${config.unit}')`

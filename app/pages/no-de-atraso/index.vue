@@ -19,7 +19,7 @@ import CascaDasConfiguracoes from './_CascaDasConfiguracoes.vue'
 import EditorDoSpaceflow from './_EditorDoSpaceflow.vue'
 import ModalDoAtraso from './_ModalDoAtraso.vue'
 import type { ConfiguracaoDoAtraso } from './mocks'
-import { configuracaoDoCliente, configuracaoNova, contratos, fluxo, variaveisDoGatilho, workspace } from './mocks'
+import { configuracaoDoCliente, configuracaoNova, fluxo, variaveisDoGatilho, workspace } from './mocks'
 import { campoEscolhido } from './espera'
 import { textos } from './textos'
 
@@ -130,7 +130,6 @@ function reiniciar() {
       :t="t"
       :versao="versao"
       :variaveis="variaveis"
-      :contratos="contratos"
       :validar-ao-abrir="cenario === 'erro'"
     />
 
