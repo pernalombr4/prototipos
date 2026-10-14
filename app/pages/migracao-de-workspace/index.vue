@@ -190,7 +190,7 @@ const final = ref<'sucesso' | 'falha'>('sucesso')
         <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">Importação</span>
         <UButton
-          v-for="f in [{ valor: 'sucesso', rotulo: 'Termina bem' }, { valor: 'falha', rotulo: 'Falha no meio' }] as const"
+          v-for="f in [{ valor: 'sucesso', rotulo: 'Termina bem' }, { valor: 'falha', rotulo: 'Falha' }] as const"
           :key="f.valor"
           :label="f.rotulo"
           size="xs"

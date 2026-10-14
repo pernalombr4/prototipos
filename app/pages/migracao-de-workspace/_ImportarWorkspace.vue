@@ -7,8 +7,8 @@
  * tem 2 passos: o arquivo e o que fazer com o que já existe, juntos; depois a
  * revisão.
  *
- * As opções aparecem embaixo do arquivo assim que ele é lido. Com o workspace
- * vazio elas nem aparecem: não há o que decidir. A comparação em árvore só aparece quando há algo em
+ * O modo de importação aparece embaixo do arquivo assim que ele é lido. Com o
+ * workspace vazio só a inclusão se aplica: ela vem marcada e as outras, travadas. A comparação em árvore só aparece quando há algo em
  * comum entre os dois lados; sem isso, a revisão é uma lista do que entra.
  */
 import type { TreeItem } from '@nuxt/ui'
@@ -39,7 +39,7 @@ const aberto = defineModel<boolean>('open', { default: false })
 const toast = useToast()
 
 type Passo = 'arquivo' | 'revisar'
-type Fase = 'escolhendo' | 'importando' | 'concluido' | 'erro' | 'desfeito'
+type Fase = 'escolhendo' | 'importando' | 'concluido' | 'erro' | 'cancelado'
 
 const passo = ref<Passo>('arquivo')
 const fase = ref<Fase>('escolhendo')
@@ -50,7 +50,6 @@ const erroArquivo = ref(false)
 const modo = ref<Modo>('adicionar')
 const copiaAntes = ref(true)
 const email = ref('')
-const etapa = ref(0)
 
 function recomecar() {
   passo.value = 'arquivo'
@@ -62,7 +61,6 @@ function recomecar() {
   modo.value = 'adicionar'
   copiaAntes.value = true
   email.value = ''
-  etapa.value = 0
 }
 
 watch(aberto, (agora) => {
@@ -117,7 +115,11 @@ const emComum = computed(() => temAlgoEmComum(props.atual, estruturaDoArquivo))
 const comparacoes = computed(() =>
   Object.fromEntries(modos.map(m => [m, comparar(props.atual, estruturaDoArquivo, m)])) as Record<Modo, Comparacao>,
 )
-const comparacao = computed(() => comparacoes.value[vazio.value ? 'somar' : modo.value])
+const comparacao = computed(() => comparacoes.value[modo.value])
+
+watch(vazio, (agora) => {
+  if (agora) modo.value = 'adicionar'
+}, { immediate: true })
 
 /** Contagem do que a pessoa reconhece: categorias e componentes, sem descer aos campos. */
 function contagemDoTopo(c: Comparacao) {
@@ -139,6 +141,8 @@ const itensDeModo = computed(() =>
       value: m,
       label: props.t.modos[m].titulo,
       description: props.t.modos[m].descricao,
+      // Workspace vazio: não há o que atualizar nem remover. Só a inclusão se aplica.
+      disabled: vazio.value && m !== 'adicionar',
     }
   }),
 )
@@ -148,7 +152,7 @@ const itensDeModo = computed(() =>
  * ------------------------------------------------------------------ */
 
 const passos = computed(() => [
-  { value: 'arquivo', title: vazio.value ? props.t.passos.soArquivo : props.t.passos.arquivo, icon: 'i-lucide-file-up' },
+  { value: 'arquivo', title: props.t.passos.arquivo, icon: 'i-lucide-file-up' },
   { value: 'revisar', title: props.t.passos.revisar, icon: 'i-lucide-list-checks' },
 ])
 
@@ -332,37 +336,31 @@ const resultado = computed(() => ({
   sai: comparacao.value.totalDeCategorias.removida,
 }))
 
-let relogio: ReturnType<typeof setInterval> | undefined
+let relogio: ReturnType<typeof setTimeout> | undefined
 
+/**
+ * A migração roda em segundo plano (POST /migration-requests, depois o status
+ * pending, processing). O produto não diz em que ponto ela está: a tela mostra
+ * só que está em andamento. Dá para cancelar enquanto ela não termina. Depois
+ * de concluída, não há volta.
+ */
 function importar() {
   fase.value = 'importando'
-  etapa.value = 0
-  const ultima = props.t.etapasImportacao.length
-  relogio = setInterval(() => {
-    if (props.final === 'falha' && etapa.value === 2) {
-      clearInterval(relogio)
-      fase.value = 'erro'
-      return
-    }
-    etapa.value++
-    if (etapa.value >= ultima) {
-      clearInterval(relogio)
-      fase.value = 'concluido'
-    }
-  }, 750)
+  relogio = setTimeout(() => {
+    fase.value = props.final === 'falha' ? 'erro' : 'concluido'
+  }, 8000)
 }
 
-onBeforeUnmount(() => clearInterval(relogio))
-
-const progresso = computed(() => Math.round((etapa.value / props.t.etapasImportacao.length) * 100))
-
-const desfazendo = ref(false)
-async function desfazer() {
-  desfazendo.value = true
-  await new Promise(r => setTimeout(r, 900))
-  desfazendo.value = false
-  fase.value = 'desfeito'
+const cancelando = ref(false)
+async function cancelar() {
+  cancelando.value = true
+  clearTimeout(relogio)
+  await new Promise(r => setTimeout(r, 700))
+  cancelando.value = false
+  fase.value = 'cancelado'
 }
+
+onBeforeUnmount(() => clearTimeout(relogio))
 
 function verCategorias() {
   aberto.value = false
@@ -467,12 +465,12 @@ function verCategorias() {
                 icon="i-lucide-file-x"
               />
 
-              <!-- O que fazer: aparece quando o arquivo foi lido e há o que decidir -->
+              <!-- Modo de importação: aparece quando o arquivo foi lido -->
               <Transition
                 enter-active-class="transition duration-300 ease-out"
                 enter-from-class="opacity-0 translate-y-2"
               >
-                <div v-if="lido && !vazio" class="space-y-3 border-t border-default pt-5">
+                <div v-if="lido" class="space-y-3 border-t border-default pt-5">
                   <URadioGroup
                     v-model="modo"
                     :legend="t.modoPergunta"
@@ -488,10 +486,15 @@ function verCategorias() {
                     <template #label="{ item }">
                       <span class="flex flex-wrap items-center gap-1.5">
                         {{ item.label }}
-                        <UBadge v-if="item.value === 'adicionar'" :label="t.recomendado" color="success" variant="subtle" size="sm" />
+                        <UBadge v-if="item.value === 'adicionar' && !vazio" :label="t.recomendado" color="success" variant="subtle" size="sm" />
                       </span>
                     </template>
                   </URadioGroup>
+
+                  <p v-if="vazio" class="flex items-center gap-1.5 text-sm text-muted">
+                    <UIcon name="i-lucide-info" class="size-4 shrink-0" />
+                    {{ t.vazioSoInclusao }}
+                  </p>
 
                   <Transition
                     enter-active-class="transition duration-200 ease-out"
@@ -773,17 +776,8 @@ function verCategorias() {
               </p>
             </div>
           </div>
-          <UProgress :model-value="progresso" />
-          <ol class="space-y-2">
-            <li v-for="(nome, i) in t.etapasImportacao" :key="nome" class="flex items-center gap-2 text-sm">
-              <UIcon
-                :name="i < etapa ? 'i-lucide-circle-check' : i === etapa ? 'i-lucide-loader-circle' : 'i-lucide-circle'"
-                class="size-4 shrink-0"
-                :class="i < etapa ? 'text-success' : i === etapa ? 'animate-spin text-primary' : 'text-dimmed'"
-              />
-              <span :class="i <= etapa ? 'text-highlighted' : 'text-muted'">{{ nome }}</span>
-            </li>
-          </ol>
+          <!-- Sem valor: o produto não informa o avanço da migração. -->
+          <UProgress :model-value="null" animation="carousel" />
           <p class="flex items-center gap-1.5 text-xs text-muted">
             <UIcon name="i-lucide-bell" class="size-3.5" />
             {{ t.podeFechar }}
@@ -808,17 +802,17 @@ function verCategorias() {
           </div>
         </div>
 
-        <!-- ─────────── DESFEITO ─────────── -->
-        <div v-else-if="fase === 'desfeito'" key="desfeito" class="space-y-4 py-2 text-center">
+        <!-- ─────────── CANCELADO ─────────── -->
+        <div v-else-if="fase === 'cancelado'" key="cancelado" class="space-y-4 py-2 text-center">
           <span class="mx-auto flex size-12 items-center justify-center rounded-full bg-elevated text-muted">
-            <UIcon name="i-lucide-undo-2" class="size-6" />
+            <UIcon name="i-lucide-circle-slash" class="size-6" />
           </span>
           <div>
             <p class="text-lg font-semibold text-highlighted">
-              {{ t.desfeitoTitulo }}
+              {{ t.canceladoTitulo }}
             </p>
             <p class="mt-1 text-sm text-muted">
-              {{ t.desfeitoTexto }}
+              {{ t.nadaMigrado }}
             </p>
           </div>
         </div>
@@ -827,7 +821,7 @@ function verCategorias() {
         <div v-else key="erro" class="space-y-4 py-2">
           <UAlert
             :title="t.erroTitulo"
-            :description="t.erroTexto(t.etapasImportacao[2]!)"
+            :description="t.nadaMigrado"
             color="error"
             variant="subtle"
             icon="i-lucide-circle-x"
@@ -886,19 +880,19 @@ function verCategorias() {
             />
           </template>
 
-          <UButton v-else-if="fase === 'importando'" :label="t.fechar" color="neutral" variant="subtle" @click="aberto = false" />
-
-          <template v-else-if="fase === 'concluido'">
+          <template v-else-if="fase === 'importando'">
             <UButton
-              :label="t.desfazer"
-              icon="i-lucide-undo-2"
-              color="neutral"
+              :label="t.cancelarMigracao"
+              icon="i-lucide-circle-slash"
+              color="error"
               variant="outline"
-              :loading="desfazendo"
-              @click="desfazer"
+              :loading="cancelando"
+              @click="cancelar"
             />
-            <UButton :label="t.verCategorias" trailing-icon="i-lucide-arrow-right" @click="verCategorias" />
+            <UButton :label="t.fechar" color="neutral" variant="subtle" @click="aberto = false" />
           </template>
+
+          <UButton v-else-if="fase === 'concluido'" :label="t.verCategorias" trailing-icon="i-lucide-arrow-right" @click="verCategorias" />
 
           <template v-else-if="fase === 'erro'">
             <UButton :label="t.fechar" color="neutral" variant="ghost" @click="aberto = false" />

@@ -2,7 +2,7 @@
 
 ## A proposta em 1 parágrafo
 
-O botão Importar Workspace continua no mesmo lugar. Em vez de abrir o seletor de arquivos e importar na hora, ele abre uma camada com 2 passos: **Arquivo e opção** (área de arraste e, assim que o arquivo é lido, as 3 opções do que fazer com o que já existe) e **Revisar** (a comparação em árvore). Nada entra no workspace antes do clique em Importar.
+O botão Importar Workspace continua no mesmo lugar. Em vez de abrir o seletor de arquivos e importar na hora, ele abre uma camada com 2 passos: **Arquivo e modo** (área de arraste e, assim que o arquivo é lido, o modo de importação) e **Revisar** (a comparação em árvore). Nada entra no workspace antes do clique em Importar. Enquanto a migração roda, dá para cancelar; depois de concluída, não há volta.
 
 ## A jornada
 
@@ -10,22 +10,22 @@ O botão Importar Workspace continua no mesmo lugar. Em vez de abrir o seletor d
 Importar Workspace
    │
    ▼
-[1 Arquivo e opção] ── não é .json ──► erro no próprio passo
+[1 Arquivo e modo] ── não é .json ──► erro no próprio passo
    │ lido: resumo do arquivo (de onde veio, quando, quantas categorias)
-   │ workspace com conteúdo: aparecem as 3 opções
-   │   Adicionar o que falta (padrão) · Atualizar e adicionar · Substituir tudo
-   │   Substituir tudo: alerta de que apaga o que não está no arquivo
-   │ workspace vazio: as opções não aparecem
+   │ Modo de importação: Somente inclusão (padrão) · Inclusão e atualização · Substituição total
+   │   Substituição total: alerta de que remove o que não está no arquivo
+   │   workspace vazio: Somente inclusão marcada, as outras travadas
    ▼
 [2 Revisar]
    ├ workspace vazio ou nada em comum ──► lista do que entra
-   ├ nada muda ──► "já tem tudo", sem botão Importar
-   └ há o que comparar ──► contagem + árvore só com as alterações ("Voltar" leva às opções)
-   │ Substituir com algo saindo: digitar o e-mail
+   ├ nada muda ──► "Nada a importar", sem botão Importar
+   └ há o que comparar ──► contagem + árvore só com as alterações ("Voltar" leva ao modo)
+   │ Substituição total com algo saindo: digitar o e-mail
    ▼
-Importando (pode fechar; avisa no sino) ──► falha: "nada foi alterado" + Tentar de novo
+Migração em andamento (sem etapas; pode fechar; avisa no sino) ── Cancelar migração ──► "Migração cancelada. Nada foi migrado."
+   ├ falha ──► "A migração falhou. Nada foi migrado." + Tentar de novo
    ▼
-Importado ──► Desfazer importação · Ver categorias
+Migração concluída ──► Ver categorias (não há como desfazer)
 ```
 
 ## Rodada 1 · 2026-10-01
@@ -114,3 +114,28 @@ Importado ──► Desfazer importação · Ver categorias
   - A contagem de Inalterados continua: é o único lugar que diz quantos ficaram de fora da lista.
 - **Fronteira:** muda só o topo da revisão; não muda as opções, a árvore nem a confirmação.
 - **Ver:** `evidencias/proposta-r4-revisar.jpg`
+
+## Rodada 5 · 2026-10-14
+- **Pedido (literal):** "saiba que nao é possível desfazer uma migraçao, somente cancelar enquanto ela estiver ainda em andamento. ajuste isso. alem disso, se o cara estiver subindo um json com workspace vazio, por padrao a opçao deve ser a de adicionar tudo do arquivo. os textos tambem estao ruins "adicionar o que falta", "atualizar e adicionar"... pode olhar o prototipo do nó de delay como referencia de como os textos devem ser escritos pra melhorar essas opçoes ali. mas basicamente se o workspace ta vazio só tem uma opçao ali possivel. ela deve estar selecionada e as outras desabilitadas. faça os ajustes indicados. alem disso, se der falha no meio, nao da pra saber ONDE a migraçao parou. só da pra dizer que nada foi migrado."
+- **Referência:** `no-de-atraso`, rodadas 8 e 10: rótulo do campo técnico e curto ("Tipo de atraso"), opções em substantivo ("Intervalo de tempo", "Data específica"), explicação curta embaixo.
+- **Mudou:**
+  - A pergunta virou o rótulo **Modo de importação**. O passo 1 se chama **Arquivo e modo**.
+  - As opções:
+
+| Antes | Agora | Descrição |
+|---|---|---|
+| Adicionar o que falta | **Somente inclusão** (Recomendado) | Cria o que não existe no workspace e mantém o restante. |
+| Atualizar e adicionar | **Inclusão e atualização** | Cria o que não existe e atualiza o que já existe. Não remove nada. |
+| Substituir tudo | **Substituição total** | Deixa o workspace igual ao arquivo. |
+
+  - O alerta da Substituição total: "Remove tudo o que não está no arquivo, inclusive os itens cadastrados."
+  - Workspace vazio: o modo aparece, com Somente inclusão marcada e as outras 2 desabilitadas (`disabled` por item do `URadioGroup`), e a linha "Workspace vazio: todo o conteúdo do arquivo é incluído."
+  - Saiu o Desfazer importação. Durante a migração entra **Cancelar migração**; o resultado é "Migração cancelada. Nada foi migrado."
+  - A migração em andamento perdeu as 5 etapas e a porcentagem: o produto não informa o avanço. Fica a barra sem valor (`UProgress` indeterminado).
+  - A falha diz só "A migração falhou. Nada foi migrado.", sem a etapa.
+  - A ajuda da cópia antes de importar: "Depois de concluída, a migração não tem como ser desfeita."
+  - Os estados usam "migração": Migração em andamento, Migração concluída, Migração cancelada, A migração falhou.
+  - A mensagem de sucesso omite o que é zero: "8 categorias novas." em vez de "8 categorias novas, 0 alteradas."
+- **Fronteira:** muda o modo de importação, o estado vazio e os estados da migração; não muda a revisão nem a casca.
+- **Maquete:** a migração leva 8 segundos no protótipo, para dar tempo de cancelar.
+- **Ver:** `evidencias/proposta-r5-1-modo-de-importacao.jpg`, `proposta-r5-2-workspace-vazio.jpg`, `proposta-r5-3-em-andamento.jpg`, `proposta-r5-4-cancelada.jpg`

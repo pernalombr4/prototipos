@@ -56,7 +56,7 @@ export interface Textos {
   // a camada de importação
   modalTitulo: string
   modalDescricao: string
-  passos: { arquivo: string, soArquivo: string, revisar: string }
+  passos: { arquivo: string, revisar: string }
   continuar: string
   voltarPasso: string
   cancelar: string
@@ -78,6 +78,7 @@ export interface Textos {
   modos: Record<Modo, { titulo: string, descricao: string }>
   recomendado: string
   alertaSubstituir: string
+  vazioSoInclusao: string
 
   // passo 3
   workspaceVazioTitulo: string
@@ -116,17 +117,15 @@ export interface Textos {
   // importando e depois
   importandoTitulo: string
   importandoTexto: string
-  etapasImportacao: string[]
   podeFechar: string
   sucessoTitulo: string
   sucessoTexto: (entra: number, muda: number, sai: number) => string
   copiaBaixada: string
-  desfazer: string
-  desfeitoTitulo: string
-  desfeitoTexto: string
+  cancelarMigracao: string
+  canceladoTitulo: string
   verCategorias: string
   erroTitulo: string
-  erroTexto: (etapa: string) => string
+  nadaMigrado: string
   tentarDeNovo: string
 }
 
@@ -201,7 +200,7 @@ const pt: Textos = {
 
   modalTitulo: 'Importar estrutura',
   modalDescricao: 'Traga categorias, campos e formulários de outro workspace.',
-  passos: { arquivo: 'Arquivo e opção', soArquivo: 'Arquivo', revisar: 'Revisar' },
+  passos: { arquivo: 'Arquivo e modo', revisar: 'Revisar' },
   continuar: 'Continuar',
   voltarPasso: 'Voltar',
   cancelar: 'Cancelar',
@@ -222,15 +221,15 @@ const pt: Textos = {
   erroArquivoTexto: 'Use o arquivo .json baixado em Exportar Workspace, sem editar.',
   usarExemplo: 'Protótipo: usar arquivo de exemplo',
 
-  modoPergunta: 'O que fazer com o que já existe?',
+  modoPergunta: 'Modo de importação',
   modos: {
-    adicionar: { titulo: 'Adicionar o que falta', descricao: 'Mantém o que já existe.' },
-    somar: { titulo: 'Atualizar e adicionar', descricao: 'Aplica as alterações do arquivo. Não apaga nada.' },
-    substituir: { titulo: 'Substituir tudo', descricao: 'Deixa o workspace igual ao arquivo.' },
+    adicionar: { titulo: 'Somente inclusão', descricao: 'Cria o que não existe no workspace e mantém o restante.' },
+    somar: { titulo: 'Inclusão e atualização', descricao: 'Cria o que não existe e atualiza o que já existe. Não remove nada.' },
+    substituir: { titulo: 'Substituição total', descricao: 'Deixa o workspace igual ao arquivo.' },
   },
-  recomendado: 'Mais seguro',
-  alertaSubstituir: 'Apaga tudo o que não está no arquivo, inclusive os itens cadastrados.',
-
+  recomendado: 'Recomendado',
+  alertaSubstituir: 'Remove tudo o que não está no arquivo, inclusive os itens cadastrados.',
+  vazioSoInclusao: 'Workspace vazio: todo o conteúdo do arquivo é incluído.',
   workspaceVazioTitulo: 'Workspace vazio',
   workspaceVazioTexto: 'A importação adiciona:',
   nadaEmComumTitulo: 'Nenhuma categoria do arquivo existe aqui',
@@ -273,28 +272,26 @@ const pt: Textos = {
   nenhumaDiferenca: 'Nenhuma alteração com esta opção.',
 
   copiaAntes: 'Baixar uma cópia do workspace antes',
-  copiaAntesAjuda: 'Para voltar ao estado atual, se precisar.',
+  copiaAntesAjuda: 'Depois de concluída, a migração não tem como ser desfeita.',
   perigoTexto: 'Para confirmar, digite seu e-mail:',
   digiteEmail: 'Digite seu e-mail para confirmar',
   importar: m => (m === 'substituir' ? 'Substituir workspace' : 'Importar'),
 
-  importandoTitulo: 'Importando a estrutura',
-  importandoTexto: 'Isso leva alguns minutos em workspaces grandes.',
-  etapasImportacao: ['Conferindo o arquivo', 'Criando categorias', 'Criando campos e listas', 'Montando formulários e telas', 'Ajustando permissões e menus'],
+  importandoTitulo: 'Migração em andamento',
+  importandoTexto: 'Pode levar alguns minutos em workspaces grandes.',
   podeFechar: 'Pode fechar esta janela. Avisamos no sino quando terminar.',
-  sucessoTitulo: 'Estrutura importada',
+  sucessoTitulo: 'Migração concluída',
   sucessoTexto: (e, m, s) => [
-    `${e} ${e === 1 ? 'categoria nova' : 'categorias novas'}`,
-    `${m} ${m === 1 ? 'alterada' : 'alteradas'}`,
-    ...(s ? [`${s} ${s === 1 ? 'removida' : 'removidas'}`] : []),
+    ...(e ? [`${e} ${e === 1 ? 'categoria nova' : 'categorias novas'}`] : []),
+    ...(m ? [`${m} ${m === 1 ? 'categoria alterada' : 'categorias alteradas'}`] : []),
+    ...(s ? [`${s} ${s === 1 ? 'categoria removida' : 'categorias removidas'}`] : []),
   ].join(', ') + '.',
   copiaBaixada: 'A cópia de antes da importação está na sua pasta de downloads.',
-  desfazer: 'Desfazer importação',
-  desfeitoTitulo: 'Importação desfeita',
-  desfeitoTexto: 'O workspace voltou a ser como era antes.',
+  cancelarMigracao: 'Cancelar migração',
+  canceladoTitulo: 'Migração cancelada',
   verCategorias: 'Ver categorias',
-  erroTitulo: 'A importação parou',
-  erroTexto: e => `Parou em "${e}". Nada foi alterado no workspace.`,
+  erroTitulo: 'A migração falhou',
+  nadaMigrado: 'Nada foi migrado.',
   tentarDeNovo: 'Tentar de novo',
 }
 
@@ -324,7 +321,7 @@ const en: Textos = {
 
   modalTitulo: 'Import structure',
   modalDescricao: 'Bring categories, fields and forms from another workspace.',
-  passos: { arquivo: 'File and option', soArquivo: 'File', revisar: 'Review' },
+  passos: { arquivo: 'File and mode', revisar: 'Review' },
   continuar: 'Continue',
   voltarPasso: 'Back',
   cancelar: 'Cancel',
@@ -345,15 +342,15 @@ const en: Textos = {
   erroArquivoTexto: 'Use the .json file downloaded from Export Workspace, without editing it.',
   usarExemplo: 'Prototype: use sample file',
 
-  modoPergunta: 'What should happen to what already exists?',
+  modoPergunta: 'Import mode',
   modos: {
-    adicionar: { titulo: 'Add what is missing', descricao: 'Keeps what already exists.' },
-    somar: { titulo: 'Update and add', descricao: 'Applies the changes in the file. Deletes nothing.' },
-    substituir: { titulo: 'Replace everything', descricao: 'Makes the workspace match the file.' },
+    adicionar: { titulo: 'Insert only', descricao: 'Creates what is missing in the workspace and keeps the rest.' },
+    somar: { titulo: 'Insert and update', descricao: 'Creates what is missing and updates what exists. Removes nothing.' },
+    substituir: { titulo: 'Full replacement', descricao: 'Makes the workspace match the file.' },
   },
-  recomendado: 'Safest',
-  alertaSubstituir: 'Deletes everything that is not in the file, including its records.',
-
+  recomendado: 'Recommended',
+  alertaSubstituir: 'Removes everything that is not in the file, including its records.',
+  vazioSoInclusao: 'Empty workspace: all the content in the file is inserted.',
   workspaceVazioTitulo: 'Empty workspace',
   workspaceVazioTexto: 'The import adds:',
   nadaEmComumTitulo: 'No category from the file exists here',
@@ -396,28 +393,26 @@ const en: Textos = {
   nenhumaDiferenca: 'No changes with this option.',
 
   copiaAntes: 'Download a copy of the workspace first',
-  copiaAntesAjuda: 'To go back to the current state, if you need to.',
+  copiaAntesAjuda: 'A completed migration cannot be undone.',
   perigoTexto: 'To confirm, type your email:',
   digiteEmail: 'Type your email to confirm',
   importar: m => (m === 'substituir' ? 'Replace workspace' : 'Import'),
 
-  importandoTitulo: 'Importing the structure',
-  importandoTexto: 'This takes a few minutes in large workspaces.',
-  etapasImportacao: ['Checking the file', 'Creating categories', 'Creating fields and lists', 'Building forms and screens', 'Adjusting permissions and menus'],
+  importandoTitulo: 'Migration in progress',
+  importandoTexto: 'It can take a few minutes in large workspaces.',
   podeFechar: 'You can close this window. We will let you know in the bell when it is done.',
-  sucessoTitulo: 'Structure imported',
+  sucessoTitulo: 'Migration completed',
   sucessoTexto: (e, m, s) => [
-    `${e} new ${e === 1 ? 'category' : 'categories'}`,
-    `${m} changed`,
-    ...(s ? [`${s} removed`] : []),
+    ...(e ? [`${e} new ${e === 1 ? 'category' : 'categories'}`] : []),
+    ...(m ? [`${m} changed ${m === 1 ? 'category' : 'categories'}`] : []),
+    ...(s ? [`${s} removed ${s === 1 ? 'category' : 'categories'}`] : []),
   ].join(', ') + '.',
   copiaBaixada: 'The copy from before the import is in your downloads folder.',
-  desfazer: 'Undo import',
-  desfeitoTitulo: 'Import undone',
-  desfeitoTexto: 'The workspace is back to how it was before.',
+  cancelarMigracao: 'Cancel migration',
+  canceladoTitulo: 'Migration canceled',
   verCategorias: 'View categories',
-  erroTitulo: 'The import stopped',
-  erroTexto: e => `It stopped at "${e}". Nothing was changed in the workspace.`,
+  erroTitulo: 'The migration failed',
+  nadaMigrado: 'Nothing was migrated.',
   tentarDeNovo: 'Try again',
 }
 
@@ -447,7 +442,7 @@ const es: Textos = {
 
   modalTitulo: 'Importar estructura',
   modalDescricao: 'Traiga categorías, campos y formularios de otro workspace.',
-  passos: { arquivo: 'Archivo y opción', soArquivo: 'Archivo', revisar: 'Revisar' },
+  passos: { arquivo: 'Archivo y modo', revisar: 'Revisar' },
   continuar: 'Continuar',
   voltarPasso: 'Volver',
   cancelar: 'Cancelar',
@@ -468,15 +463,15 @@ const es: Textos = {
   erroArquivoTexto: 'Use el archivo .json descargado en Exportar Workspace, sin editarlo.',
   usarExemplo: 'Prototipo: usar archivo de ejemplo',
 
-  modoPergunta: '¿Qué hacer con lo que ya existe?',
+  modoPergunta: 'Modo de importación',
   modos: {
-    adicionar: { titulo: 'Agregar lo que falta', descricao: 'Mantiene lo que ya existe.' },
-    somar: { titulo: 'Actualizar y agregar', descricao: 'Aplica los cambios del archivo. No borra nada.' },
-    substituir: { titulo: 'Reemplazar todo', descricao: 'Deja el workspace igual al archivo.' },
+    adicionar: { titulo: 'Solo inclusión', descricao: 'Crea lo que no existe en el workspace y mantiene el resto.' },
+    somar: { titulo: 'Inclusión y actualización', descricao: 'Crea lo que no existe y actualiza lo que ya existe. No elimina nada.' },
+    substituir: { titulo: 'Reemplazo total', descricao: 'Deja el workspace igual al archivo.' },
   },
-  recomendado: 'Más seguro',
-  alertaSubstituir: 'Borra todo lo que no está en el archivo, incluidos los registros.',
-
+  recomendado: 'Recomendado',
+  alertaSubstituir: 'Elimina todo lo que no está en el archivo, incluidos los registros.',
+  vazioSoInclusao: 'Workspace vacío: se incluye todo el contenido del archivo.',
   workspaceVazioTitulo: 'Workspace vacío',
   workspaceVazioTexto: 'La importación agrega:',
   nadaEmComumTitulo: 'Ninguna categoría del archivo existe aquí',
@@ -519,28 +514,26 @@ const es: Textos = {
   nenhumaDiferenca: 'Ningún cambio con esta opción.',
 
   copiaAntes: 'Descargar una copia del workspace antes',
-  copiaAntesAjuda: 'Para volver al estado actual, si hace falta.',
+  copiaAntesAjuda: 'Una migración completada no se puede deshacer.',
   perigoTexto: 'Para confirmar, escriba su correo:',
   digiteEmail: 'Escriba su correo para confirmar',
   importar: m => (m === 'substituir' ? 'Reemplazar workspace' : 'Importar'),
 
-  importandoTitulo: 'Importando la estructura',
-  importandoTexto: 'Esto tarda unos minutos en workspaces grandes.',
-  etapasImportacao: ['Revisando el archivo', 'Creando categorías', 'Creando campos y listas', 'Armando formularios y pantallas', 'Ajustando permisos y menús'],
+  importandoTitulo: 'Migración en curso',
+  importandoTexto: 'Puede tardar unos minutos en workspaces grandes.',
   podeFechar: 'Puede cerrar esta ventana. Le avisamos en la campana cuando termine.',
-  sucessoTitulo: 'Estructura importada',
+  sucessoTitulo: 'Migración completada',
   sucessoTexto: (e, m, s) => [
-    `${e} ${e === 1 ? 'categoría nueva' : 'categorías nuevas'}`,
-    `${m} ${m === 1 ? 'modificada' : 'modificadas'}`,
-    ...(s ? [`${s} ${s === 1 ? 'eliminada' : 'eliminadas'}`] : []),
+    ...(e ? [`${e} ${e === 1 ? 'categoría nueva' : 'categorías nuevas'}`] : []),
+    ...(m ? [`${m} ${m === 1 ? 'categoría modificada' : 'categorías modificadas'}`] : []),
+    ...(s ? [`${s} ${s === 1 ? 'categoría eliminada' : 'categorías eliminadas'}`] : []),
   ].join(', ') + '.',
   copiaBaixada: 'La copia de antes de la importación está en su carpeta de descargas.',
-  desfazer: 'Deshacer importación',
-  desfeitoTitulo: 'Importación deshecha',
-  desfeitoTexto: 'El workspace volvió a como estaba antes.',
+  cancelarMigracao: 'Cancelar migración',
+  canceladoTitulo: 'Migración cancelada',
   verCategorias: 'Ver categorías',
-  erroTitulo: 'La importación se detuvo',
-  erroTexto: e => `Se detuvo en "${e}". No se cambió nada en el workspace.`,
+  erroTitulo: 'La migración falló',
+  nadaMigrado: 'No se migró nada.',
   tentarDeNovo: 'Intentar de nuevo',
 }
 
