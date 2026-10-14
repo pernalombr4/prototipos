@@ -154,14 +154,9 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', aoClicarFora, 
     ref="raiz"
     role="dialog"
     :aria-label="tb.caixa"
+    class="overflow-hidden rounded-xl border border-default bg-default shadow-xl ring-1 ring-primary/15"
     @keydown.esc.stop.prevent="emit('fechar')"
   >
-    <!--
-      Rodada 4: o cartão é a raiz da paleta (pedido + rodapé, largura do campo) e a lista
-      sai do fluxo como menu estreito logo abaixo, à esquerda, como no Notion, na Tiptap e
-      no BlockNote. O rodapé entra pelo slot #footer, que vem depois da lista no DOM mas fica
-      no fluxo do cartão porque a lista é absoluta.
-    -->
     <UCommandPalette
       v-model:search-term="busca"
       :groups="grupos"
@@ -170,12 +165,7 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', aoClicarFora, 
       size="sm"
       :fuse="{ resultLimit: 14 }"
       :input="{ ui: { leadingIcon: 'text-primary' } }"
-      :ui="{
-        root: 'relative overflow-visible rounded-xl border border-default bg-default shadow-xl ring-1 ring-primary/15',
-        content: 'absolute start-0 top-full z-10 mt-1.5 max-h-72 w-72 rounded-lg border border-default bg-default shadow-lg',
-        label: 'text-[11px] text-dimmed',
-        footer: 'p-0',
-      }"
+      :ui="{ root: 'max-h-96', label: 'text-[11px] text-dimmed', content: 'max-h-72' }"
     >
       <template #agente-leading="{ item }">
         <AvatarDoAgente :agente="agentesVisiveis.find(a => a.slug === item.slug) ?? null" tamanho="xs" />
@@ -186,43 +176,42 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', aoClicarFora, 
       <template #empty>
         <span class="text-sm text-muted">{{ tb.pedirDescricao }}</span>
       </template>
-      <template #footer>
-        <!-- RODAPÉ: o que a IA lê, Agente, Modelo, aviso -->
-        <div class="flex flex-wrap items-center gap-1 rounded-b-xl bg-elevated/50 px-2 py-1.5 text-xs text-muted">
-          <UPopover :content="{ align: 'start', side: 'top', sideOffset: 6 }">
-            <UButton color="neutral" variant="ghost" size="xs" class="gap-1 px-1.5 text-xs text-muted">
-              <UIcon name="i-lucide-file-search" class="size-3.5" />
-              {{ comSelecao ? tb.contextoTrecho : tb.contextoCampo }}
-              <span v-if="usarCampos" class="text-dimmed">{{ tb.maisCampos(camposDeContexto.length) }}</span>
-            </UButton>
-            <template #content>
-              <div class="w-72 p-3">
-                <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">{{ tb.contextoTitulo }}</p>
-                <ul class="mb-3 flex flex-col gap-1 text-sm">
-                  <li class="flex items-center gap-2 text-highlighted">
-                    <UIcon name="i-lucide-text-cursor-input" class="size-4 text-primary" />{{ comSelecao ? tb.contextoTrecho : tb.contextoCampo }} ({{ rotuloDoCampo }})
-                  </li>
-                  <li v-for="c in camposDeContexto" :key="c.chave" class="flex items-center gap-2 transition-opacity" :class="usarCampos ? 'text-default' : 'text-dimmed line-through'">
-                    <UIcon name="i-lucide-square-dot" class="size-4 text-muted" />{{ c.rotulo }}
-                  </li>
-                </ul>
-                <USwitch v-model="usarCampos" :label="tb.usarCampos" size="sm" />
-              </div>
-            </template>
-          </UPopover>
-
-          <span class="h-4 w-px bg-accented" aria-hidden="true" />
-          <SeletorDeAgente v-model="agente" :t="t" />
-          <SeletorDeModelo v-model="modelo" :t="t" :do-agente="agente?.model ?? null" />
-
-          <span class="ms-auto flex items-center gap-2">
-            <UTooltip :text="tb.aviso">
-              <UIcon name="i-lucide-info" class="size-3.5" :aria-label="tb.aviso" />
-            </UTooltip>
-            <span class="flex items-center gap-1"><UKbd value="Esc" size="sm" /> {{ tb.fechar }}</span>
-          </span>
-        </div>
-      </template>
     </UCommandPalette>
+
+    <!-- RODAPÉ: o que a IA lê, Agente, Modelo, aviso -->
+    <div class="flex flex-wrap items-center gap-1 border-t border-default bg-elevated/50 px-2 py-1.5 text-xs text-muted">
+      <UPopover :content="{ align: 'start', side: 'top', sideOffset: 6 }">
+        <UButton color="neutral" variant="ghost" size="xs" class="gap-1 px-1.5 text-xs text-muted">
+          <UIcon name="i-lucide-file-search" class="size-3.5" />
+          {{ comSelecao ? tb.contextoTrecho : tb.contextoCampo }}
+          <span v-if="usarCampos" class="text-dimmed">{{ tb.maisCampos(camposDeContexto.length) }}</span>
+        </UButton>
+        <template #content>
+          <div class="w-72 p-3">
+            <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">{{ tb.contextoTitulo }}</p>
+            <ul class="mb-3 flex flex-col gap-1 text-sm">
+              <li class="flex items-center gap-2 text-highlighted">
+                <UIcon name="i-lucide-text-cursor-input" class="size-4 text-primary" />{{ comSelecao ? tb.contextoTrecho : tb.contextoCampo }} ({{ rotuloDoCampo }})
+              </li>
+              <li v-for="c in camposDeContexto" :key="c.chave" class="flex items-center gap-2 transition-opacity" :class="usarCampos ? 'text-default' : 'text-dimmed line-through'">
+                <UIcon name="i-lucide-square-dot" class="size-4 text-muted" />{{ c.rotulo }}
+              </li>
+            </ul>
+            <USwitch v-model="usarCampos" :label="tb.usarCampos" size="sm" />
+          </div>
+        </template>
+      </UPopover>
+
+      <span class="h-4 w-px bg-accented" aria-hidden="true" />
+      <SeletorDeAgente v-model="agente" :t="t" />
+      <SeletorDeModelo v-model="modelo" :t="t" :do-agente="agente?.model ?? null" />
+
+      <span class="ms-auto flex items-center gap-2">
+        <UTooltip :text="tb.aviso">
+          <UIcon name="i-lucide-info" class="size-3.5" :aria-label="tb.aviso" />
+        </UTooltip>
+        <span class="flex items-center gap-1"><UKbd value="Esc" size="sm" /> {{ tb.fechar }}</span>
+      </span>
+    </div>
   </div>
 </template>

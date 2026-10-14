@@ -123,3 +123,9 @@
 - **Não deu:** Tom e Traduzir abrirem submenu ao lado, como na Tiptap. Por quê: a `UCommandPalette` abre filhos no lugar, com o botão de voltar no campo; submenu lateral pediria outro componente e o filtro por digitação deixaria de valer para a lista inteira. Ficou como está.
 - **CSS fora da prop:** nenhum; tudo pela prop `ui` da paleta (`root`, `content`, `footer`).
 - **Ver:** `evidencias/proto-caixa-do-beni.png`
+
+## Rodada 5 · 2026-10-13
+- **Pedido (literal):** "ta muito estranho. um campo enorme em cima e um pequeno abaixo ta horrivel. o mercado realmente faz assim? volte pra como tava antes se precisar"
+- **Mudou:** a caixa do BENI volta a ser um cartão só, na largura do campo, como na rodada 3 (`_CaixaDoBeni.vue` e `_CampoHtml.vue` da rodada 3).
+- **Descartado:** a caixa em 2 peças da rodada 4. Motivo: Notion, Tiptap e BlockNote fazem assim, mas lá o pedido tem a largura de uma coluna de texto; no campo do ENSPACE, mais largo, o contraste entre o pedido enorme e a lista estreita ficou estranho.
+- **Ver:** `evidencias/proto-caixa-do-beni.png` (de volta à da rodada 2)

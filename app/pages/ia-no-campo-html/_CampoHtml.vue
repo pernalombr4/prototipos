@@ -863,7 +863,7 @@ const nomeDoModelo = computed(() => modelos.find(m => m.id === modelo.value)?.no
         leave-active-class="transition duration-100 ease-in"
         leave-to-class="opacity-0"
       >
-        <div v-if="caixa" :key="caixa.chave" data-caixa-do-beni class="absolute inset-x-2 z-30 origin-top scroll-mb-80" :style="{ top: `${caixa.topo}px` }">
+        <div v-if="caixa" :key="caixa.chave" data-caixa-do-beni class="absolute inset-x-2 z-30 origin-top scroll-mb-20" :style="{ top: `${caixa.topo}px` }">
           <CaixaDoBeni
             v-model:agente="agente"
             v-model:modelo="modelo"
