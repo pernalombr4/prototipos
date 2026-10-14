@@ -12,8 +12,8 @@
  *   quem pediu (o campo) recebe a lista do que foi conectado e segue o pedido.
  *
  * Um modal só na página: quem abre é `pedirConexao()` (ias.ts).
- * SIMULAÇÃO: Claude e Gemini não existem no ENSPACE de hoje; a chave não sai
- * do navegador.
+ * SIMULAÇÃO: Claude e Gemini não existem no ENSPACE de hoje; qualquer chave
+ * preenchida conecta (rodada 8); a chave não sai do navegador.
  */
 import type { Textos } from './textos'
 import type { IdDaIa } from './ias'
@@ -69,10 +69,6 @@ async function conectar() {
   conectando.value = true
   await new Promise(r => setTimeout(r, 1100))
   conectando.value = false
-  if (!ia.value.formato?.test(c)) {
-    erro.value = tc.value.invalida(ia.value.inicioDaChave ?? '')
-    return
-  }
   chave.value = ''
   if (!conectadas.value.includes(ia.value.id)) conectadas.value = [...conectadas.value, ia.value.id]
   nestaVez.value.push(ia.value.id)

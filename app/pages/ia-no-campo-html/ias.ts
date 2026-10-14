@@ -8,8 +8,9 @@
  * `provedor` é o mesmo texto do campo `provedor` dos modelos (mocks.ts): é por
  * ele que o seletor de Modelo sabe se o modelo está liberado.
  *
- * O formato da chave segue o prefixo público de cada empresa; a chave nunca
- * sai do navegador.
+ * SIMULAÇÃO (rodada 8): qualquer chave preenchida conecta, para mostrar o que
+ * acontece depois de colar a chave. `inicioDaChave` só preenche o exemplo do
+ * campo. A chave nunca sai do navegador.
  */
 import { modelos } from './mocks'
 
@@ -23,15 +24,14 @@ export interface IaConectavel {
   empresa: string
   provedor: string
   disponivel: boolean
-  formato?: RegExp
   inicioDaChave?: string
   urlDaChave?: string
 }
 
 export const ias: IaConectavel[] = [
-  { id: 'openai', nome: 'ChatGPT', empresa: 'OpenAI', provedor: 'OpenAI', disponivel: true, formato: /^sk-(?!ant-)[\w-]{17,}$/, inicioDaChave: 'sk-', urlDaChave: 'https://platform.openai.com/api-keys' },
-  { id: 'anthropic', nome: 'Claude', empresa: 'Anthropic', provedor: 'Anthropic', disponivel: true, formato: /^sk-ant-[\w-]{16,}$/, inicioDaChave: 'sk-ant-', urlDaChave: 'https://console.anthropic.com/settings/keys' },
-  { id: 'google', nome: 'Gemini', empresa: 'Google', provedor: 'Google', disponivel: true, formato: /^AIza[\w-]{20,}$/, inicioDaChave: 'AIza', urlDaChave: 'https://aistudio.google.com/apikey' },
+  { id: 'openai', nome: 'ChatGPT', empresa: 'OpenAI', provedor: 'OpenAI', disponivel: true, inicioDaChave: 'sk-', urlDaChave: 'https://platform.openai.com/api-keys' },
+  { id: 'anthropic', nome: 'Claude', empresa: 'Anthropic', provedor: 'Anthropic', disponivel: true, inicioDaChave: 'sk-ant-', urlDaChave: 'https://console.anthropic.com/settings/keys' },
+  { id: 'google', nome: 'Gemini', empresa: 'Google', provedor: 'Google', disponivel: true, inicioDaChave: 'AIza', urlDaChave: 'https://aistudio.google.com/apikey' },
   { id: 'kimi', nome: 'Kimi', empresa: 'Moonshot AI', provedor: 'Moonshot AI', disponivel: false },
   { id: 'deepseek', nome: 'DeepSeek', empresa: 'DeepSeek', provedor: 'DeepSeek', disponivel: false },
 ]

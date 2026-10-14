@@ -169,3 +169,9 @@
 - **Simulação:** a chave não sai do navegador; vale qualquer chave no formato da empresa.
 - **CSS fora da prop:** nenhum.
 - **Ver:** `?ia=desligada` (modal) e `?ia=ligada` com o Assistente Jurídico (modelo sem conexão) · `evidencias/proto-conectar-ia-lista-es.png`, `evidencias/proto-conectar-ia-pelo-modelo.png`, `evidencias/proto-conectar-ia-conectada.png`
+
+## Rodada 8 · 2026-10-14
+- **Pedido (literal):** "deixei conectar com qualquer chave falsa pra simular o que aconteceria a pessoa colocando a chave ali"
+- **Mudou:** o modal "Conectar uma IA" conecta com qualquer chave preenchida; saiu a conferência do formato de cada empresa (`sk-`, `sk-ant-`, `AIza`) e o erro de chave inválida. O campo vazio continua pedindo a chave. O exemplo do campo ainda mostra o começo da chave de cada empresa.
+- **Fronteira:** muda só a conferência da chave; o resto do modal e da jornada continua como na rodada 7.
+- **Ver:** `?ia=desligada` › IA › Conectar no Claude › qualquer texto › Conectar
