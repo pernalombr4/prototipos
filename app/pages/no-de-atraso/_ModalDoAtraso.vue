@@ -1,0 +1,507 @@
+<script setup lang="ts">
+/**
+ * O modal de configuração do nó Atraso.
+ *
+ * `versao="hoje"` reproduz o develop em 14/10/2026: Nome do Nó, Quantidade de
+ * Tempo (campo de texto que aceita "abc") e Unidade. Não é proposta.
+ *
+ * `versao="proposta"` é a proposta inteira:
+ * 1. "Esperar" com 2 modos: por um tempo (o de hoje, com número validado) ou
+ *    até uma data do item;
+ * 2. a espera até a data se monta como frase: Continuar o fluxo [30] [dias]
+ *    [antes de] [Data de vencimento], sem fórmula;
+ * 3. horário e fuso, o que fazer com data passada e com campo vazio, e
+ *    recalcular quando a data muda;
+ * 4. a prévia com os itens da categoria, que mostra quando cada um continua e
+ *    quantos já passaram da data ou estão sem data;
+ * 5. "Ver o cálculo", recolhido, com a conta em dayjs e o que o nó grava.
+ *
+ * A moldura (ENTRADA e SAÍDA dos lados, cabeçalho, rodapé com "Modificado",
+ * Cancelar e Salvar e fechar) é a do develop.
+ */
+import type { CampoDeData, ConfiguracaoDoAtraso, Contrato, Direcao, Unidade, UnidadeDoDeslocamento } from './mocks'
+import type { Textos } from './textos'
+import { AGORA, chaveDoCampo } from './mocks'
+import { calcular, contar, dadoGravado, expressaoDayjs, horarios } from './espera'
+
+const props = defineProps<{
+  t: Textos
+  versao: 'hoje' | 'proposta'
+  campos: CampoDeData[]
+  contratos: Contrato[]
+  /** Abre já mostrando os erros de validação (estado do andaime). */
+  validarAoAbrir?: boolean
+}>()
+
+const aberto = defineModel<boolean>('open', { required: true })
+const config = defineModel<ConfiguracaoDoAtraso>('config', { required: true })
+const emit = defineEmits<{ salvo: [] }>()
+
+const toast = useToast()
+const p = computed(() => props.t.proposta)
+
+/* ---------- o rascunho, que só vira config no Salvar ---------- */
+
+const rascunho = ref<ConfiguracaoDoAtraso>(structuredClone(toRaw(config.value)))
+const tentouSalvar = ref(false)
+const salvando = ref(false)
+
+watch(aberto, (v) => {
+  if (!v) return
+  rascunho.value = structuredClone(toRaw(config.value))
+  tentouSalvar.value = !!props.validarAoAbrir
+  if (rascunho.value.date_source) itemDaPrevia.value = 'CT-0042'
+}, { immediate: true })
+
+const modificado = computed(() => JSON.stringify(rascunho.value) !== JSON.stringify(config.value))
+
+/* ---------- validação ---------- */
+
+const quantidadeValida = computed(() => Number.isInteger(Number(rascunho.value.delay)) && Number(rascunho.value.delay) >= 1)
+const erroQuantidade = computed(() => tentouSalvar.value && rascunho.value.mode === 'duration' && !quantidadeValida.value)
+const erroCampo = computed(() => tentouSalvar.value && rascunho.value.mode === 'until_date' && !rascunho.value.date_source)
+
+function salvar() {
+  tentouSalvar.value = true
+  if (props.versao === 'proposta' && (erroQuantidade.value || erroCampo.value)) return
+  salvando.value = true
+  setTimeout(() => {
+    config.value = structuredClone(toRaw(rascunho.value))
+    salvando.value = false
+    aberto.value = false
+    emit('salvo')
+    toast.add({ title: p.value.salvo, icon: 'i-lucide-circle-check', color: 'success' })
+  }, 450)
+}
+
+/* ---------- opções ---------- */
+
+const unidadesDeHoje = computed(() => (['second', 'minute', 'hour', 'day'] as Unidade[]).map(u => ({ value: u, label: props.t.hoje.unidades[u] })))
+
+const modos = computed(() => [
+  { value: 'duration', label: p.value.modos.duration.titulo, description: p.value.modos.duration.descricao },
+  { value: 'until_date', label: p.value.modos.until_date.titulo, description: p.value.modos.until_date.descricao },
+])
+
+const unidadesDoDeslocamento = computed(() => (['day', 'week', 'month', 'hour'] as UnidadeDoDeslocamento[])
+  .map(u => ({ value: u, label: p.value.unidadeDoDeslocamento(u, rascunho.value.offset_amount) })))
+
+const direcoes = computed(() => (['before', 'after', 'on'] as Direcao[]).map(d => ({ value: d, label: p.value.direcoes[d] })))
+
+/** Os campos agrupados pelo nó de onde vêm, como a lista de variáveis do CRUD faz. */
+const itensDeCampo = computed(() => {
+  const porNo = new Map<string, CampoDeData[]>()
+  for (const c of props.campos) porNo.set(c.no.rotulo, [...(porNo.get(c.no.rotulo) ?? []), c])
+  return [...porNo.entries()].map(([no, lista]) => [
+    { type: 'label' as const, label: p.value.doNo(no) },
+    ...lista.map(c => ({ value: chaveDoCampo(c), label: c.label ?? c.refId, icon: 'i-lucide-calendar', campo: c })),
+  ])
+})
+
+const campo = computed(() => props.campos.find(c => chaveDoCampo(c) === rascunho.value.date_source) ?? null)
+const nomeDoCampo = computed(() => campo.value?.label ?? p.value.campoPlaceholder)
+
+const opcoesDeHorario = computed(() => [
+  ...(campo.value?.comHora ? [{ value: 'field', label: p.value.horarioDoCampo }] : []),
+  ...horarios.map(h => ({ value: h, label: h })),
+])
+const horarioDesligado = computed(() => rascunho.value.offset_unit === 'hour')
+
+// quem troca para um campo sem hora não pode ficar com "o horário do campo"
+watch(campo, (c) => {
+  if (c && !c.comHora && rascunho.value.time === 'field') rascunho.value.time = '09:00'
+})
+
+const opcoesDePassou = computed(() => [
+  { value: 'continue', label: p.value.continuarNaHora },
+  { value: 'end', label: p.value.encerrar },
+])
+const opcoesDeVazio = computed(() => [
+  { value: 'end', label: p.value.encerrar },
+  { value: 'continue', label: p.value.continuarNaHora },
+])
+
+/* ---------- a prévia ---------- */
+
+const itemDaPrevia = ref('CT-0042')
+const contratoDaPrevia = computed(() => props.contratos.find(c => c.reference === itemDaPrevia.value) ?? props.contratos[0]!)
+const itensDaPrevia = computed(() => props.contratos.map(c => ({
+  value: c.reference!,
+  label: `${c.reference} · ${c.data.contratante}`,
+})))
+
+const retomada = computed(() => calcular(rascunho.value, contratoDaPrevia.value))
+const contagem = computed(() => contar(rascunho.value, props.contratos))
+
+function data(d: Date) {
+  return new Intl.DateTimeFormat(props.t.locale, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(d)
+}
+function hora(d: Date) {
+  return new Intl.DateTimeFormat(props.t.locale, { hour: '2-digit', minute: '2-digit', hour12: false }).format(d)
+}
+
+const fraseDaPrevia = computed(() => {
+  const r = retomada.value
+  const nome = nomeDoCampo.value
+  if (r.situacao === 'vazio') return r.encerra ? p.value.resultado.vazioEncerra(nome) : p.value.resultado.vazioContinua(nome)
+  if (r.situacao === 'passou') return r.encerra ? p.value.resultado.passouEncerra : p.value.resultado.passouContinua
+  return p.value.resultado.agendado(nome, data(r.dataDoCampo!), data(r.continuaEm!), hora(r.continuaEm!))
+})
+
+const iconeDaPrevia = computed(() => ({
+  agendado: 'i-lucide-calendar-clock',
+  passou: 'i-lucide-triangle-alert',
+  vazio: 'i-lucide-circle-slash',
+})[retomada.value.situacao])
+
+/** Os pontos da linha do tempo, em porcentagem do trilho. */
+const linha = computed(() => {
+  const r = retomada.value
+  const pontos = [
+    { chave: 'hoje', rotulo: p.value.linha.hoje, data: AGORA },
+    ...(r.situacao === 'agendado' ? [{ chave: 'continua', rotulo: p.value.linha.continua, data: r.continuaEm! }] : []),
+    ...(r.dataDoCampo ? [{ chave: 'campo', rotulo: nomeDoCampo.value, data: r.dataDoCampo }] : []),
+  ]
+  const min = Math.min(...pontos.map(x => x.data.getTime()))
+  const max = Math.max(...pontos.map(x => x.data.getTime()))
+  const largura = Math.max(max - min, 1)
+  return pontos
+    .map(x => ({ ...x, pos: 4 + ((x.data.getTime() - min) / largura) * 92 }))
+    .sort((a, b) => a.pos - b.pos)
+    // rótulos alternam em cima e embaixo, para 2 datas próximas não se cobrirem
+    .map((x, i) => ({ ...x, acima: i % 2 === 1 }))
+})
+
+/** Clicar num número da contagem mostra o primeiro item daquele grupo. */
+function mostrarGrupo(situacao: 'agendado' | 'passou' | 'vazio') {
+  const achado = props.contratos.find(c => calcular(rascunho.value, c).situacao === situacao)
+  if (achado) itemDaPrevia.value = achado.reference!
+}
+
+const calculoAberto = ref(false)
+const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2))
+</script>
+
+<template>
+  <UModal
+    v-model:open="aberto"
+    :dismissible="!modificado"
+    :ui="{ content: 'max-w-none w-auto bg-transparent shadow-none ring-0 divide-y-0 overflow-visible' }"
+  >
+    <template #content>
+      <div class="flex items-center">
+        <!-- ENTRADA, à esquerda, como no develop -->
+        <div class="-mr-2 hidden h-64 w-12 items-center justify-center rounded-l-xl border border-r-0 border-default bg-default/80 sm:flex">
+          <span class="flex rotate-180 items-center gap-2 text-xs font-semibold tracking-[0.2em] text-primary [writing-mode:vertical-rl]">
+            {{ t.hoje.entrada }}
+          </span>
+        </div>
+
+        <div
+          class="relative z-10 flex max-h-[min(88dvh,820px)] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border border-default bg-default shadow-xl"
+          :class="versao === 'proposta' ? 'sm:w-[640px]' : 'sm:w-[548px]'"
+        >
+          <!-- Cabeçalho -->
+          <div class="flex items-center gap-2 border-b border-default px-5 py-4">
+            <UIcon name="i-lucide-clock" class="size-4 text-muted" />
+            <h2 class="flex-1 text-base font-semibold text-highlighted">{{ t.hoje.titulo }}</h2>
+            <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="sm" :aria-label="t.hoje.fechar" @click="aberto = false" />
+          </div>
+
+          <!-- Corpo -->
+          <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-5">
+            <UFormField :label="t.hoje.nomeDoNo">
+              <template #hint>
+                <UTooltip :text="t.hoje.ajudaNome"><UIcon name="i-lucide-circle-help" class="size-4 text-muted" /></UTooltip>
+              </template>
+              <UInput v-model="rascunho.label" class="w-full" />
+            </UFormField>
+
+            <!-- ============ COMO É HOJE ============ -->
+            <template v-if="versao === 'hoje'">
+              <UFormField :label="t.hoje.quantidade" :required="!rascunho.delay">
+                <template #hint>
+                  <UTooltip :text="t.hoje.ajudaQuantidade"><UIcon name="i-lucide-circle-help" class="size-4 text-muted" /></UTooltip>
+                </template>
+                <!-- Hoje é texto livre: "abc" e "{{" gravam sem erro -->
+                <UInput v-model="rascunho.delay as string" class="w-full" />
+              </UFormField>
+              <UFormField :label="t.hoje.unidade">
+                <template #hint>
+                  <UTooltip :text="t.hoje.ajudaUnidade"><UIcon name="i-lucide-circle-help" class="size-4 text-muted" /></UTooltip>
+                </template>
+                <USelect v-model="rascunho.unit" :items="unidadesDeHoje" class="w-full" />
+              </UFormField>
+            </template>
+
+            <!-- ============ PROPOSTA ============ -->
+            <template v-else>
+              <UFormField :label="p.esperar">
+                <URadioGroup
+                  v-model="rascunho.mode"
+                  :items="modos"
+                  variant="card"
+                  orientation="horizontal"
+                  :ui="{ item: 'flex-1 transition-colors' }"
+                />
+              </UFormField>
+
+              <Transition
+                mode="out-in"
+                enter-active-class="transition duration-200 ease-out"
+                enter-from-class="opacity-0 translate-y-1"
+                leave-active-class="transition duration-100"
+                leave-to-class="opacity-0"
+              >
+                <!-- Por um tempo -->
+                <div v-if="rascunho.mode === 'duration'" key="tempo" class="grid gap-4 sm:grid-cols-2">
+                  <UFormField :label="t.hoje.quantidade" required :error="erroQuantidade ? p.erroQuantidade : undefined">
+                    <UInputNumber
+                      :model-value="Number(rascunho.delay) || undefined"
+                      :min="1"
+                      :step="1"
+                      class="w-full"
+                      @update:model-value="(v) => (rascunho.delay = v ?? '')"
+                    />
+                  </UFormField>
+                  <UFormField :label="t.hoje.unidade">
+                    <USelect v-model="rascunho.unit" :items="unidadesDeHoje" class="w-full" />
+                  </UFormField>
+                </div>
+
+                <!-- Data de referência -->
+                <div v-else key="data" class="space-y-5">
+                  <UFormField :label="p.campo" required :error="erroCampo ? p.erroCampo : undefined">
+                    <USelectMenu
+                      v-model="rascunho.date_source"
+                      :items="itensDeCampo"
+                      value-key="value"
+                      :placeholder="p.campoPlaceholder"
+                      :search-input="{ placeholder: p.campoBusca }"
+                      icon="i-lucide-calendar"
+                      class="w-full"
+                    >
+                      <template #item-trailing="{ item }">
+                        <UBadge
+                          v-if="(item as any).campo?.sistema"
+                          :label="p.dataDeSistema"
+                          color="neutral"
+                          variant="subtle"
+                          size="sm"
+                        />
+                        <UBadge
+                          v-else-if="(item as any).campo?.comHora"
+                          :label="p.comHora"
+                          color="neutral"
+                          variant="subtle"
+                          size="sm"
+                        />
+                      </template>
+                      <template #empty>
+                        <p class="px-2 py-3 text-sm text-muted">{{ p.semCampos }}</p>
+                      </template>
+                    </USelectMenu>
+                  </UFormField>
+
+                  <!-- A regra lida como frase: [30] [dias] [antes de] Data de vencimento -->
+                  <UFormField :label="p.continuar">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <Transition
+                        enter-active-class="transition-all duration-200"
+                        enter-from-class="opacity-0 -translate-x-1"
+                        leave-active-class="transition-all duration-150"
+                        leave-to-class="opacity-0"
+                      >
+                        <div v-if="rascunho.offset_direction !== 'on'" class="flex items-center gap-2">
+                          <UInputNumber
+                            v-model="rascunho.offset_amount"
+                            :min="1"
+                            :max="999"
+                            :step="1"
+                            :aria-label="p.quanto"
+                            class="w-24"
+                          />
+                          <USelect v-model="rascunho.offset_unit" :items="unidadesDoDeslocamento" class="w-28" />
+                        </div>
+                      </Transition>
+                      <USelect v-model="rascunho.offset_direction" :items="direcoes" class="w-36" />
+                      <span
+                        class="min-w-0 truncate text-sm font-medium transition-colors"
+                        :class="campo ? 'text-highlighted' : 'text-dimmed'"
+                      >
+                        {{ campo?.label ?? p.campo.toLowerCase() }}
+                      </span>
+                    </div>
+                  </UFormField>
+
+                  <UFormField :label="p.horario" :help="horarioDesligado ? p.horarioEmHoras : p.fuso">
+                    <USelect
+                      v-model="rascunho.time"
+                      :items="opcoesDeHorario"
+                      :disabled="horarioDesligado"
+                      icon="i-lucide-clock-3"
+                      class="w-full sm:w-64"
+                    />
+                  </UFormField>
+
+                  <div class="grid gap-4 sm:grid-cols-2">
+                    <UFormField :label="p.sePassou">
+                      <URadioGroup v-model="rascunho.if_past" :items="opcoesDePassou" size="sm" />
+                    </UFormField>
+                    <UFormField :label="p.seVazio">
+                      <URadioGroup v-model="rascunho.if_empty" :items="opcoesDeVazio" size="sm" />
+                    </UFormField>
+                  </div>
+
+                  <USwitch
+                    v-model="rascunho.recalculate"
+                    :label="p.recalcular"
+                    :description="p.recalcularDescricao(campo?.label ?? null)"
+                  />
+
+                  <!-- A prévia -->
+                  <section class="rounded-lg border border-default bg-elevated/50 p-4" :aria-label="p.previa">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <UIcon name="i-lucide-eye" class="size-4 text-muted" />
+                      <h3 class="text-sm font-semibold text-highlighted">{{ p.previa }}</h3>
+                    </div>
+
+                    <p v-if="!rascunho.date_source" class="mt-2 text-sm text-muted">{{ p.previaSemCampo }}</p>
+
+                    <template v-else>
+                      <p class="mt-1 text-xs text-muted">{{ p.previaDescricao(contratos.length, t.categoria) }}</p>
+
+                      <div class="mt-3 flex flex-wrap gap-2">
+                        <UButton
+                          :label="p.contagem.agendado(contagem.agendado)"
+                          icon="i-lucide-calendar-clock"
+                          color="primary"
+                          variant="soft"
+                          size="xs"
+                          @click="mostrarGrupo('agendado')"
+                        />
+                        <UButton
+                          v-if="contagem.passou"
+                          :label="p.contagem.passou(contagem.passou)"
+                          icon="i-lucide-triangle-alert"
+                          color="warning"
+                          variant="soft"
+                          size="xs"
+                          @click="mostrarGrupo('passou')"
+                        />
+                        <UButton
+                          v-if="contagem.vazio"
+                          :label="p.contagem.vazio(contagem.vazio)"
+                          icon="i-lucide-circle-slash"
+                          color="neutral"
+                          variant="soft"
+                          size="xs"
+                          @click="mostrarGrupo('vazio')"
+                        />
+                      </div>
+
+                      <UFormField :label="p.verComOItem" class="mt-4">
+                        <USelectMenu v-model="itemDaPrevia" :items="itensDaPrevia" value-key="value" class="w-full" />
+                      </UFormField>
+
+                      <Transition
+                        mode="out-in"
+                        enter-active-class="transition duration-200 ease-out"
+                        enter-from-class="opacity-0 translate-y-0.5"
+                        leave-active-class="transition duration-100"
+                        leave-to-class="opacity-0"
+                      >
+                        <div :key="fraseDaPrevia + itemDaPrevia" class="mt-3">
+                          <p
+                            class="flex items-start gap-2 text-sm"
+                            :class="retomada.situacao === 'agendado' ? 'text-highlighted' : retomada.situacao === 'passou' ? 'text-warning' : 'text-muted'"
+                            role="status"
+                          >
+                            <UIcon :name="iconeDaPrevia" class="mt-0.5 size-4 shrink-0" />
+                            <span><strong>{{ contratoDaPrevia.reference }}</strong>. {{ fraseDaPrevia }}</span>
+                          </p>
+
+                          <!-- linha do tempo -->
+                          <div class="relative mx-1 mb-1 mt-9 h-14" aria-hidden="true">
+                            <div class="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 rounded bg-accented" />
+                            <div
+                              v-for="ponto in linha"
+                              :key="ponto.chave"
+                              class="absolute top-1/2 flex -translate-x-1/2 flex-col items-center transition-[left] duration-300 ease-out"
+                              :style="{ left: `${ponto.pos}%` }"
+                            >
+                              <span
+                                class="size-3 -translate-y-1/2 rounded-full ring-4 ring-(--ui-bg-elevated)"
+                                :class="{
+                                  'bg-primary': ponto.chave === 'continua',
+                                  'bg-inverted': ponto.chave === 'hoje',
+                                  'bg-warning': ponto.chave === 'campo',
+                                }"
+                              />
+                              <span
+                                class="absolute whitespace-nowrap text-[11px] leading-tight"
+                                :class="[
+                                  ponto.acima ? 'bottom-4' : 'top-3',
+                                  ponto.pos > 80 ? 'right-0 text-right' : ponto.pos < 20 ? 'left-0 text-left' : 'text-center',
+                                ]"
+                              >
+                                <span class="block font-medium" :class="ponto.chave === 'continua' ? 'text-primary' : 'text-default'">{{ ponto.rotulo }}</span>
+                                <span class="block text-muted">{{ data(ponto.data) }}</span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </Transition>
+                    </template>
+                  </section>
+                </div>
+              </Transition>
+
+              <!-- Ver o cálculo: recolhido, para quem configura pela API -->
+              <UCollapsible v-model:open="calculoAberto" class="border-t border-default pt-3">
+                <UButton
+                  :label="p.verCalculo"
+                  icon="i-lucide-code-xml"
+                  :trailing-icon="calculoAberto ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+                  color="neutral"
+                  variant="link"
+                  size="sm"
+                  class="px-0"
+                />
+                <template #content>
+                  <p class="mt-2 text-xs text-muted">{{ p.calculoDescricao }}</p>
+                  <div class="mt-2 grid gap-2">
+                    <pre class="overflow-x-auto rounded-md bg-elevated p-3 text-xs text-default">{{ expressaoDayjs(rascunho) }}</pre>
+                    <pre class="overflow-x-auto rounded-md bg-elevated p-3 text-xs text-default">{{ json }}</pre>
+                  </div>
+                </template>
+              </UCollapsible>
+            </template>
+          </div>
+
+          <!-- Rodapé (cópia do develop) -->
+          <div class="flex items-center gap-2 border-t border-default px-5 py-3">
+            <Transition enter-active-class="transition duration-200" enter-from-class="opacity-0" leave-active-class="transition duration-150" leave-to-class="opacity-0">
+              <span v-if="modificado" class="flex items-center gap-1.5 text-xs text-warning">
+                <span class="size-1.5 rounded-full bg-warning" />{{ t.hoje.modificado }}
+              </span>
+            </Transition>
+            <span class="flex-1" />
+            <template v-if="modificado || versao === 'proposta' && tentouSalvar">
+              <UButton :label="t.hoje.cancelar" color="neutral" variant="outline" @click="aberto = false" />
+              <UButton :label="t.hoje.salvarEFechar" icon="i-lucide-check" :loading="salvando" @click="salvar" />
+            </template>
+            <UButton v-else :label="t.hoje.fechar" @click="aberto = false" />
+          </div>
+        </div>
+
+        <!-- SAÍDA, à direita -->
+        <div class="-ml-2 hidden h-64 w-12 items-center justify-center rounded-r-xl border border-l-0 border-default bg-default/80 sm:flex">
+          <span class="flex items-center gap-2 text-xs font-semibold tracking-[0.2em] text-success [writing-mode:vertical-rl] rotate-180">
+            {{ t.hoje.saida }}
+          </span>
+        </div>
+      </div>
+    </template>
+  </UModal>
+</template>
