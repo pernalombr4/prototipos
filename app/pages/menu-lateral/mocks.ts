@@ -475,7 +475,8 @@ export const telasNativas: TelaNativa[] = [
   { id: 'documentos', icone: 'i-lucide-folder-open', lugar: 'destino', emBreve: true },
   { id: 'painel-tarefas', icone: 'i-lucide-chart-column', lugar: 'analise', emBreve: true },
   { id: 'painel-dados', icone: 'i-lucide-chart-pie', lugar: 'analise', emBreve: true },
-  { id: 'meus-relatorios', icone: 'i-lucide-file-chart-column', lugar: 'analise', emBreve: true },
+  // Rodada 22: destino nativo. Já existe no develop, em /myReports, sem item de menu.
+  { id: 'meus-relatorios', icone: 'i-lucide-file-chart-column', lugar: 'destino' },
 ]
 
 /**
@@ -575,6 +576,16 @@ export const menuDoEditor: NoDoMenu[] = [
   { id: 'n-spaceflows', tipo: 'destino', chave: 'spaceflows', icone: 'i-lucide-workflow' },
   { id: 'n-documentos', tipo: 'destino', chave: 'documentos', icone: 'i-lucide-folder-open', emBreve: true },
   /*
+   * RODADA 22. "deve haver no menu uma opçao nativa para 'meus relatorios'.
+   * todos os relatorios extraidos no workspace vao pra lá" (Mikaela).
+   *
+   * A tela já existe no develop (/myReports, medida em 14/10/2026), e hoje só
+   * se chega a ela pelo link do aviso que aparece ao extrair um relatório.
+   * Fica ao lado de Documentos porque as duas guardam arquivo. Sem "Em breve":
+   * o que falta no produto é só a porta.
+   */
+  { id: 'n-relatorios', tipo: 'destino', chave: 'meusRelatorios', icone: 'i-lucide-file-chart-column' },
+  /*
    * RODADA 9. Analise saiu de dentro do painel de Dados e virou menu de
    * primeiro nivel, acima da lista de categorias, com os dashboards dentro.
    * Pedido dela, literal: "analise deve ser um grande menu fora, de primeiro
@@ -595,7 +606,7 @@ export const menuDoEditor: NoDoMenu[] = [
     filhos: [
       { id: 't-pt', tipo: 'tela', emBreve: true, rotulo: 'Dashboard de tarefas', icone: 'i-lucide-chart-column', tipoDeTela: 'paineis' },
       { id: 't-pd', tipo: 'tela', emBreve: true, rotulo: 'Dashboard de dados', icone: 'i-lucide-chart-pie', tipoDeTela: 'paineis' },
-      { id: 't-mr', tipo: 'tela', emBreve: true, rotulo: 'Meus relatórios', icone: 'i-lucide-file-chart-column', tipoDeTela: 'personalizada' },
+      // "Meus relatórios" morou aqui da rodada 3 à 21. Saiu na 22 e virou destino nativo.
     ],
   },
   {
@@ -810,4 +821,55 @@ export const notificacoes: Notificacao[] = [
   { id: 'nt-4', icone: 'i-lucide-message-square', texto: 'Lúcia P. respondeu no chamado que você segue', onde: 'Chamados', quando: { valor: 5, unidade: 'h' } },
   { id: 'nt-5', icone: 'i-lucide-calendar-clock', texto: 'Um prazo que você acompanha vence amanhã', onde: 'Contrato 1301', quando: { valor: 1, unidade: 'd' } },
   { id: 'nt-6', icone: 'i-lucide-workflow', texto: 'O spaceflow de onboarding terminou', onde: 'Spaceflows', quando: { valor: 2, unidade: 'd' } },
+]
+
+/* ==================================================================
+   MEUS RELATÓRIOS
+   Rodada 22. "todos os relatorios extraidos no workspace vao pra lá" (Mikaela).
+
+   A estrutura é a da tela /myReports do develop, medida em 14/10/2026 no
+   workspace de exploração: colunas Ações, Status, Modelo, Tabela, Entidade,
+   Criado em, Registros e Filtros; ações Deletar, Download e Ver modelo; o
+   olho dos filtros com as abas "Visualização Personalizada" e "Visualização
+   Padrão". Valores inventados.
+
+   Medido: o Relatório padrão sai com Modelo, Tabela, Entidade e Registros
+   vazios, e o filtro aparece em IDs ("Form 3235", "Type 100").
+   NÃO medido, inferido do nome da coluna: o que Tabela e Entidade mostram num
+   relatório com modelo. Aqui, "Itens" e o nome da categoria.
+   NÃO medido: o rótulo do status enquanto processa. Só vi "Completa".
+================================================================== */
+
+export type StatusDoRelatorio = 'completa' | 'processando'
+export type FormatoDoRelatorio = 'Excel' | 'CSV' | 'DBF'
+
+export interface RelatorioEmitido {
+  id: number
+  status: StatusDoRelatorio
+  /** null é o Relatório padrão, que não tem modelo. */
+  modelo: string | null
+  tabela: string | null
+  entidade: string | null
+  /** Como o develop mostra, dd/mm/aaaa. */
+  criadoEm: string
+  registros: number | null
+  /** Inventado: o develop não mostra o formato na lista. Serve ao nome do arquivo. */
+  formato: FormatoDoRelatorio
+  /** O que o olho da coluna Filtros mostra, na aba personalizada. */
+  filtros: { campo: string, valor: string }[]
+  /** Pronto e ainda não baixado: é o que o número do menu conta (proposta). */
+  novo?: boolean
+}
+
+const filtrosDePadrao = [
+  { campo: 'Form', valor: '3235' },
+  { campo: 'Type', valor: '100' },
+  { campo: 'Sort', valor: 'Created_at:DESC' },
+]
+
+export const relatoriosEmitidos: RelatorioEmitido[] = [
+  { id: 412, status: 'completa', modelo: 'Contratos a vencer', tabela: 'Itens', entidade: 'Contratos', criadoEm: '14/10/2026', registros: 128, formato: 'Excel', filtros: [{ campo: 'Status', valor: 'Vigente' }, { campo: 'Vencimento', valor: 'Próximos 90 dias' }, { campo: 'Sort', valor: 'Vencimento:ASC' }], novo: true },
+  { id: 405, status: 'completa', modelo: null, tabela: null, entidade: null, criadoEm: '13/10/2026', registros: null, formato: 'CSV', filtros: filtrosDePadrao },
+  { id: 398, status: 'completa', modelo: 'Chamados por responsável', tabela: 'Itens', entidade: 'Chamados', criadoEm: '09/10/2026', registros: 57, formato: 'Excel', filtros: [{ campo: 'Criado em', valor: 'Último mês' }, { campo: 'Sort', valor: 'Responsável:ASC' }] },
+  { id: 377, status: 'completa', modelo: null, tabela: null, entidade: null, criadoEm: '02/10/2026', registros: null, formato: 'DBF', filtros: filtrosDePadrao },
 ]

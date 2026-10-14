@@ -806,6 +806,7 @@ function emBreve() {
           :breadcrumb="breadcrumb"
           :item-config="painel === 'config' ? itemConfigAtivo : undefined"
           @configurar-categoria="configurarCategoriaAtual"
+          @ir-para="irParaDestino"
         />
       </div>
     </div>

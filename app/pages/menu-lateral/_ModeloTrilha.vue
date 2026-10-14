@@ -165,6 +165,15 @@ function abrirPrimeiraDaArea(id: string) {
   }
 }
 
+/*
+ * Ir para um destino nativo por fora do menu (o "Abrir Meus relatórios" do
+ * aviso de extração, rodada 22) encaixa o Início, que é onde ele mora: sem
+ * isso a tela abria e o painel continuava em Dados, sem linha ativa.
+ */
+watch(() => props.destinoAtivo, (d) => {
+  if (area.value !== 'inicio' && menu.destinos.value.some(x => x.id === d)) area.value = 'inicio'
+})
+
 /**
  * Clicar numa área encaixa o menu dela e abre a primeira tela. O Início
  * sempre volta para a página inicial, mesmo já aberto: é o "redireciona pra

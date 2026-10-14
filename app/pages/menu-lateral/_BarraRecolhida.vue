@@ -3,6 +3,7 @@ import { rotuloDoNo as rotuloComum } from './rotulos'
 import MenuDeAjuda from './_MenuDeAjuda.vue'
 import { FLUTUANTE_DO_DROPDOWN } from './moldura'
 import { useMenuDoWorkspace } from './estado'
+import { useMeusRelatorios } from './relatorios'
 import { useAcoesDoMenu } from './acoes'
 import type { NoDoMenu, Categoria } from './mocks'
 import type { TextosDaTela } from './textos'
@@ -54,6 +55,7 @@ const emit = defineEmits<{
 }>()
 
 const menu = useMenuDoWorkspace()
+const relatorios = useMeusRelatorios()
 
 function rotuloDe(no: NoDoMenu) {
   // Rodada 16: o mapa de nomes mora no rotulos.ts, um só para todas as peças.
@@ -62,6 +64,8 @@ function rotuloDe(no: NoDoMenu) {
 
 function contadorDe(no: NoDoMenu) {
   if (no.chave === 'inbox') return menu.naoLidas.value || 0
+  // Rodada 22: relatório pronto e ainda não baixado.
+  if (no.chave === 'meusRelatorios') return relatorios.novos.value || 0
   if (no.chave === 'tarefas') return 3
   return 0
 }

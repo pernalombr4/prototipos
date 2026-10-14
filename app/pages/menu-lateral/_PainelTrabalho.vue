@@ -8,6 +8,7 @@ import MenuDeAjuda from './_MenuDeAjuda.vue'
 import CartaoDeSalvar from './_CartaoDeSalvar.vue'
 import AvisosDoMenu from './_AvisosDoMenu.vue'
 import { useMenuDoWorkspace, useArraste } from './estado'
+import { useMeusRelatorios } from './relatorios'
 import { useAcoesDoMenu } from './acoes'
 import type { NoDoMenu, Categoria } from './mocks'
 import type { TextosDaTela } from './textos'
@@ -74,6 +75,7 @@ const emit = defineEmits<{
 }>()
 
 const menu = useMenuDoWorkspace()
+const relatorios = useMeusRelatorios()
 const arraste = useArraste()
 const toast = useToast()
 
@@ -92,6 +94,8 @@ function rotuloDe(no: NoDoMenu) {
  */
 function contadorDe(no: NoDoMenu) {
   if (no.chave === 'inbox') return menu.naoLidas.value || undefined
+  // Rodada 22: relatório pronto e ainda não baixado.
+  if (no.chave === 'meusRelatorios') return relatorios.novos.value || undefined
   if (no.chave === 'tarefas') return 3
   return undefined
 }

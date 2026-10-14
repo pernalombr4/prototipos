@@ -2,6 +2,9 @@
 import type { EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import TelaDeModulos from './_TelaDeModulos.vue'
 import TelaDeInbox from './_TelaDeInbox.vue'
+import TelaDeRelatorios from './_TelaDeRelatorios.vue'
+import { useMeusRelatorios } from './relatorios'
+import type { FormatoDoRelatorio } from './mocks'
 import type { Categoria } from './mocks'
 import type { TextosDaTela } from './textos'
 
@@ -24,7 +27,41 @@ const props = defineProps<{
   itemConfig?: string
 }>()
 
-const emit = defineEmits<{ configurarCategoria: [] }>()
+const emit = defineEmits<{ configurarCategoria: [], irPara: [destino: string] }>()
+
+/*
+ * EXTRAIR RELATÓRIO (rodada 22). Cópia do develop: o ícone no canto da tabela
+ * abre "Relatório Padrão", que abre a escolha do formato (Excel, CSV, DBF).
+ * O que é proposta é o aviso: no develop ele aponta para "Meus Relatórios
+ * Emitidos", uma tela que não está no menu; aqui ele abre o destino do menu.
+ */
+const relatorios = useMeusRelatorios()
+const toast = useToast()
+const escolhendoFormato = ref(false)
+const formatos: FormatoDoRelatorio[] = ['Excel', 'CSV', 'DBF']
+
+const itensDeExtrair = computed(() => [[
+  { label: props.t.relatorioPadrao, icon: 'i-lucide-file-spreadsheet', onSelect: () => { escolhendoFormato.value = true } },
+]])
+
+function extrair(formato: FormatoDoRelatorio) {
+  escolhendoFormato.value = false
+  relatorios.extrair(formato)
+  toast.add({
+    title: props.t.relatorioEmProcessamento,
+    description: props.t.relatorioEmProcessamentoDescricao,
+    icon: 'i-lucide-file-clock',
+    color: 'neutral',
+    // Aviso com ação precisa de tempo para a ação: os 5 s padrão somem antes do clique.
+    duration: 10000,
+    actions: [{
+      label: props.t.abrirMeusRelatorios,
+      color: 'neutral',
+      variant: 'outline',
+      onClick: () => emit('irPara', 'n-relatorios'),
+    }],
+  })
+}
 
 /** Aba ativa da categoria: "Todos" mais um por formulário. */
 const abaAtiva = ref('todos')
@@ -99,6 +136,9 @@ const linhas = computed(() => {
       -->
       <TelaDeInbox v-else-if="props.destino === 'n-inbox'" :t="props.t" />
 
+      <!-- Meus relatórios, rodada 22: a tela /myReports do develop, com a porta no menu. -->
+      <TelaDeRelatorios v-else-if="props.destino === 'n-relatorios'" :t="props.t" @ver-modelo="emit('configurarCategoria')" />
+
       <!-- ---------------- tela de uma categoria ---------------- -->
       <div v-else-if="props.categoria" :key="props.categoria.id" class="animate-[entrada_0.25s_ease-out_both]">
         <div class="mb-4 flex items-center gap-3">
@@ -132,6 +172,15 @@ const linhas = computed(() => {
             color="neutral"
             variant="link"
           />
+
+          <span class="flex-1" />
+
+          <!-- O ícone do develop, no canto da tabela. -->
+          <UDropdownMenu :items="itensDeExtrair" :content="{ align: 'end' }">
+            <UTooltip :text="props.t.extrairRelatorio">
+              <UButton icon="i-lucide-file-down" size="sm" color="neutral" variant="ghost" :aria-label="props.t.extrairRelatorio" />
+            </UTooltip>
+          </UDropdownMenu>
         </div>
 
         <EnTable :key="abaAtiva" :columns="colunas" :rows="linhas" />
@@ -155,9 +204,18 @@ const linhas = computed(() => {
         </div>
       </div>
 
-      <p v-if="props.itemConfig !== 'modulos' && props.destino !== 'n-inbox'" class="mt-4 text-xs text-muted">
+      <p v-if="props.itemConfig !== 'modulos' && props.destino !== 'n-inbox' && props.destino !== 'n-relatorios'" class="mt-4 text-xs text-muted">
         {{ props.t.conteudoIlustrativo }}
       </p>
     </div>
+
+    <!-- A escolha do formato, como no develop: três botões, sem outro campo. -->
+    <UModal v-model:open="escolhendoFormato" :title="props.t.formatoTitulo" :description="props.t.formatoDescricao" :ui="{ content: 'max-w-sm' }">
+      <template #footer>
+        <div class="flex w-full justify-end gap-2">
+          <UButton v-for="f in formatos" :key="f" :label="f" size="sm" color="neutral" variant="soft" @click="extrair(f)" />
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>

@@ -6,6 +6,7 @@ import SecaoDeMenu from './_SecaoDeMenu.vue'
 import MenuInicio from './_MenuInicio.vue'
 import AvisosDoMenu from './_AvisosDoMenu.vue'
 import { useMenuDoWorkspace, useArraste } from './estado'
+import { useMeusRelatorios } from './relatorios'
 import { useAcoesDoMenu, type Acoes } from './acoes'
 import { rotuloDoNo } from './rotulos'
 import { NO_FLUTUANTE } from './moldura'
@@ -64,6 +65,7 @@ const emit = defineEmits<{
 provide(NO_FLUTUANTE, toRef(() => !!props.flutuante))
 
 const menu = useMenuDoWorkspace()
+const relatorios = useMeusRelatorios()
 const arraste = useArraste()
 const toast = useToast()
 
@@ -129,6 +131,8 @@ function seloDaSecao(no: NoDoMenu) {
 /* (rodada 14: os destinos agora vêm de `destinosDaBarra`, sem os ocultos) */
 function contadorDe(no: NoDoMenu) {
   if (no.chave === 'inbox') return menu.naoLidas.value || undefined
+  // Rodada 22: relatório pronto e ainda não baixado.
+  if (no.chave === 'meusRelatorios') return relatorios.novos.value || undefined
   if (no.chave === 'tarefas') return 3
   return undefined
 }

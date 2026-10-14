@@ -6,6 +6,7 @@ import AvisosDoMenu from './_AvisosDoMenu.vue'
 import AdicionarASecao from './_AdicionarASecao.vue'
 import MaisDaSecao from './_MaisDaSecao.vue'
 import { useArraste, useMenuDoWorkspace, type Atalho } from './estado'
+import { useMeusRelatorios } from './relatorios'
 import { chaveDoAtalho, useTrilha } from './trilha'
 import { useAcoesDoMenu, type Acoes } from './acoes'
 import { rotuloDoNo } from './rotulos'
@@ -65,6 +66,7 @@ const emit = defineEmits<{
 }>()
 
 const menu = useMenuDoWorkspace()
+const relatorios = useMeusRelatorios()
 const trilha = useTrilha()
 const arraste = useArraste()
 const toast = useToast()
@@ -130,6 +132,8 @@ function abrirNativo(n: Nativo) {
 
 function contadorDe(n: Nativo) {
   if (n.no?.chave === 'inbox') return menu.naoLidas.value || undefined
+  // Rodada 22: relatório pronto e ainda não baixado.
+  if (n.no?.chave === 'meusRelatorios') return relatorios.novos.value || undefined
   if (n.no?.chave === 'tarefas') return 3
   return undefined
 }

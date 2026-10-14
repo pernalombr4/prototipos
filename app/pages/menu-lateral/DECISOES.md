@@ -389,6 +389,31 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 22 · 2026-10-14
+- **Pedido (literal):** "deve haver no menu uma opçao nativa para 'meus relatorios'. todos os relatorios extraidos no workspace vao pra lá. pode er outro nome esse menu, sem problemas. mas se meus relatorios for bom, ok."
+- **O que o develop tem hoje (medido em 14/10/2026, workspace de exploração):** a tela já existe, em `/myReports`, e nenhum menu leva até ela. Só se chega lá pelo link do aviso que aparece ao extrair um relatório ("O relatório está sendo processado e pode ser acompanhado acessando Meus Relatórios Emitidos. Ao término do processamento, você será notificado por e-mail.") ou digitando o endereço. Conferido com 1 Relatório padrão em Excel, extraído pela tela numa categoria do workspace de exploração.
+- **Mudou:** "Meus relatórios" virou **destino nativo**, logo depois de Documentos, nos dois modelos e na barra recolhida. Fica ao lado de Documentos porque as duas telas guardam arquivo. Sem selo "Em breve": a tela existe, falta só a porta.
+- **Mudou:** saiu de dentro de Análise, onde morava desde a rodada 3 com "Em breve". Análise ficou com os 2 dashboards. Relatório extraído é arquivo que a pessoa baixa, não painel de análise.
+- **Mudou:** a tela abre no miolo como **cópia da de hoje**: colunas Ações, Status, Modelo, Tabela, Entidade, Criado em, Registros e Filtros; ações Deletar, Download e Ver modelo, nessa ordem; o olho dos filtros com as abas "Visualização Personalizada" e "Visualização Padrão"; rodapé com página, 50 por página e "Mostrando 1 até N de N Relatórios". A tela não é o que está em discussão, então não ganhou melhoria de passagem.
+- **A tela nova mora em outro protótipo:** `app/pages/meus-relatorios/`, de outra sessão, em andamento em 14/10/2026, redesenha a tela em si. Aqui ela fica como é hoje; quando aquele fechar, o miolo daqui pode trocar a cópia pela proposta de lá.
+- **Mudou (proposta):** o título da tela é o nome do menu. Hoje são 3 nomes para a mesma tela: o cabeçalho diz "Relatórios", a trilha diz "Meus Relatórios" e o aviso diz "Meus Relatórios Emitidos".
+- **Mudou (proposta):** o aviso de extração abre o destino do menu ("Abrir Meus relatórios") e fica 10 s na tela, porque com 5 s ele sumia antes do clique.
+- **Mudou (proposta):** o relatório pronto e ainda não baixado tem fundo destacado na lista e conta no **número do menu**, como a notificação não lida do Inbox. Baixar apaga o número. Hoje o único aviso de "ficou pronto" é o e-mail.
+- **Funciona no protótipo:** na tela de uma categoria, o ícone "Extrair relatório" (cópia do develop) abre "Relatório padrão" e a escolha do formato (Excel, CSV, DBF). A linha entra no topo de Meus relatórios como "Processando" e fica "Completa" 5 s depois; aí o menu ganha o número. O download é maquete: nenhum arquivo sai do navegador.
+- **O nome:** ficou **"Meus relatórios"**, e não "Exportações" nem "Relatórios".
+  - É o nome que a trilha do produto já usa, e "relatório" é a palavra do botão que alimenta a tela ("Extrair relatório", "Relatório padrão").
+  - "Exportações" seria uma palavra nova.
+  - "Relatórios" sozinho já nomeia os modelos de relatório da categoria (a tela Relatórios, nas configurações da categoria) e, no protótipo, o módulo "Relatórios de comparação". O "Meus" separa o arquivo que eu extraí do modelo que o administrador monta.
+  - **Custo:** no modelo de trilha, com o painel na largura padrão, o nome mais o número corta em "Meus relatór…". Arrastar a borda do painel (rodada 19) mostra o nome inteiro.
+- **Custo no menu:** 1 linha a mais entre os nativos da barra única.
+- **Não medido, inferido:** o que Tabela e Entidade mostram num relatório com modelo (aqui, "Itens" e o nome da categoria) e o rótulo do status enquanto processa (aqui, "Processando"). No develop só vi "Completa".
+- **Achados na tela de hoje (ficam como estão no protótipo):**
+  1. A linha do Relatório padrão sai com Modelo, Tabela, Entidade e Registros vazios: quem extraiu de 3 categorias não sabe qual arquivo é qual.
+  2. O olho dos filtros mostra IDs internos ("Form 3235", "Type 100", "Sort Created_at:DESC"), e não o nome do formulário e da categoria.
+  3. "Deletar" vem antes de "Download" no menu de ações: a ação que apaga ocupa o lugar da ação mais usada.
+  4. Textos com defeito: o vazio diz "Nenhum(a) Relatório Encontrado." e o rodapé vazio diz "Sem resultados desde.".
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral · abra Contratos, clique no ícone "Extrair relatório", escolha Excel e clique em "Abrir Meus relatórios" no aviso · print em `evidencias/rodada22-meus-relatorios.jpg` (em cima, o aviso na categoria; embaixo, a lista com o relatório processando e o número no menu)
+
 ### Rodada 21 · 2026-10-13
 - **Pedido (literal):** "repare que o tamanho do menu que se abre num popover ta muito largo pro tamanho do texto das opçoes. como o clickup lida com isso? tem um tamanho minimo mais adequado? o tamanho é responsivo? o tamanho é fixo, mas menor que o nosso? e o notion? e outros concorrentes? pode acessar pra olhar. e pode copiar os bons exemplos."
 - **Pesquisa:** ClickUp (242px, a largura do painel), Notion (260px e 265px fixos), GitLab (acompanha o texto, de 192px a 272px) e Material (do conteúdo, de 112dp a 280dp). Medidas e fontes no `PESQUISA.md`, "Rodada 21".

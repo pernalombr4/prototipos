@@ -18,6 +18,8 @@ export function rotuloDoNo(no: NoDoMenu, t: TextosDaTela) {
     agenda: t.agenda,
     spaceflows: t.spaceflows,
     documentos: t.documentos,
+    // Rodada 22: destino nativo, a porta da tela /myReports que já existe.
+    meusRelatorios: t.meusRelatorios,
     categorias: t.categorias,
     auditoria: t.grupos.auditoria ?? '',
     logsAuditoria: t.itens['logs-auditoria'] ?? '',

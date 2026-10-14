@@ -341,6 +341,41 @@ export interface TextosDaTela {
   inboxMarcarTodas: string
   inboxTudoLido: string
   inboxNaoLida: string
+
+  // meus relatórios, rodada 22
+  relatoriosDescricao: string
+  relatoriosNovos: (n: number) => string
+  colAcoes: string
+  colStatus: string
+  colModelo: string
+  colTabela: string
+  colEntidade: string
+  colCriadoEm: string
+  colRegistros: string
+  colFiltros: string
+  statusCompleta: string
+  statusProcessando: string
+  acaoDeletar: string
+  acaoDownload: string
+  acaoVerModelo: string
+  relatoriosMostrando: (n: number) => string
+  relatoriosVazio: string
+  visPersonalizada: string
+  visPadrao: string
+  extrairRelatorio: string
+  relatorioPadrao: string
+  formatoTitulo: string
+  formatoDescricao: string
+  relatorioEmProcessamento: string
+  relatorioEmProcessamentoDescricao: string
+  abrirMeusRelatorios: string
+  relatorioBaixado: (arquivo: string) => string
+  relatorioBaixadoDescricao: string
+  relatorioDeletado: string
+  relatoriosBuscar: string
+  relatoriosFiltrar: string
+  relatoriosAtualizar: string
+  relatoriosOrdenar: string
   haMinutos: (n: number) => string
   haHoras: (n: number) => string
   haDias: (n: number) => string
@@ -816,6 +851,41 @@ const ptBR: TextosDaTela = {
   inboxMarcarTodas: 'Marcar todas como lidas',
   inboxTudoLido: 'Nada por ler',
   inboxNaoLida: 'Não lida',
+
+  // meus relatórios, rodada 22. Rótulos da tela copiados do develop (/myReports).
+  relatoriosDescricao: 'Todo relatório que você extrai no workspace fica aqui. O arquivo não baixa sozinho: baixe quando o status for Completa.',
+  relatoriosNovos: n => (n === 1 ? '1 pronto' : `${n} prontos`),
+  colAcoes: 'Ações',
+  colStatus: 'Status',
+  colModelo: 'Modelo',
+  colTabela: 'Tabela',
+  colEntidade: 'Entidade',
+  colCriadoEm: 'Criado em',
+  colRegistros: 'Registros',
+  colFiltros: 'Filtros',
+  statusCompleta: 'Completa',
+  statusProcessando: 'Processando',
+  acaoDeletar: 'Deletar',
+  acaoDownload: 'Download',
+  acaoVerModelo: 'Ver modelo',
+  relatoriosMostrando: n => (n === 0 ? 'Sem resultados.' : `Mostrando 1 até ${n} de ${n} Relatórios`),
+  relatoriosVazio: 'Nenhum(a) Relatório Encontrado.',
+  visPersonalizada: 'Visualização Personalizada',
+  visPadrao: 'Visualização Padrão',
+  extrairRelatorio: 'Extrair relatório',
+  relatorioPadrao: 'Relatório padrão',
+  formatoTitulo: 'Formato de extração',
+  formatoDescricao: 'Escolha um formato para extrair o relatório.',
+  relatorioEmProcessamento: 'Relatório em processamento',
+  relatorioEmProcessamentoDescricao: 'Acompanhe em Meus relatórios. Quando ficar pronto, o número no menu avisa, e você recebe um e-mail.',
+  abrirMeusRelatorios: 'Abrir Meus relatórios',
+  relatorioBaixado: a => `${a} baixado`,
+  relatorioBaixadoDescricao: 'Na maquete, nenhum arquivo sai do navegador.',
+  relatorioDeletado: 'Relatório tirado da lista.',
+  relatoriosBuscar: 'Buscar',
+  relatoriosFiltrar: 'Filtrar',
+  relatoriosAtualizar: 'Atualizar',
+  relatoriosOrdenar: 'Ordenar por ID',
   haMinutos: n => (n === 1 ? 'há 1 minuto' : `há ${n} minutos`),
   haHoras: n => (n === 1 ? 'há 1 hora' : `há ${n} horas`),
   haDias: n => (n === 1 ? 'há 1 dia' : `há ${n} dias`),
@@ -1304,6 +1374,41 @@ const en: TextosDaTela = {
   inboxMarcarTodas: 'Mark all as read',
   inboxTudoLido: 'Nothing to read',
   inboxNaoLida: 'Unread',
+
+  // my reports, round 22
+  relatoriosDescricao: 'Every report you extract in the workspace lands here. The file does not download by itself: download it when the status is Complete.',
+  relatoriosNovos: n => (n === 1 ? '1 ready' : `${n} ready`),
+  colAcoes: 'Actions',
+  colStatus: 'Status',
+  colModelo: 'Template',
+  colTabela: 'Table',
+  colEntidade: 'Entity',
+  colCriadoEm: 'Created on',
+  colRegistros: 'Records',
+  colFiltros: 'Filters',
+  statusCompleta: 'Complete',
+  statusProcessando: 'Processing',
+  acaoDeletar: 'Delete',
+  acaoDownload: 'Download',
+  acaoVerModelo: 'View template',
+  relatoriosMostrando: n => (n === 0 ? 'No results.' : `Showing 1 to ${n} of ${n} Reports`),
+  relatoriosVazio: 'No report found.',
+  visPersonalizada: 'Custom view',
+  visPadrao: 'Default view',
+  extrairRelatorio: 'Extract report',
+  relatorioPadrao: 'Standard report',
+  formatoTitulo: 'Extraction format',
+  formatoDescricao: 'Choose a format to extract the report.',
+  relatorioEmProcessamento: 'Report processing',
+  relatorioEmProcessamentoDescricao: 'Follow it in My reports. When it is ready, the number in the menu tells you, and you get an email.',
+  abrirMeusRelatorios: 'Open My reports',
+  relatorioBaixado: a => `${a} downloaded`,
+  relatorioBaixadoDescricao: 'In the mockup, no file leaves the browser.',
+  relatorioDeletado: 'Report removed from the list.',
+  relatoriosBuscar: 'Search',
+  relatoriosFiltrar: 'Filter',
+  relatoriosAtualizar: 'Refresh',
+  relatoriosOrdenar: 'Sort by ID',
   haMinutos: n => (n === 1 ? '1 minute ago' : `${n} minutes ago`),
   haHoras: n => (n === 1 ? '1 hour ago' : `${n} hours ago`),
   haDias: n => (n === 1 ? '1 day ago' : `${n} days ago`),
@@ -1792,6 +1897,41 @@ const es: TextosDaTela = {
   inboxMarcarTodas: 'Marcar todas como leídas',
   inboxTudoLido: 'Nada por leer',
   inboxNaoLida: 'Sin leer',
+
+  // mis informes, ronda 22
+  relatoriosDescricao: 'Todo informe que extraes en el workspace queda aquí. El archivo no se descarga solo: descárgalo cuando el estado sea Completo.',
+  relatoriosNovos: n => (n === 1 ? '1 listo' : `${n} listos`),
+  colAcoes: 'Acciones',
+  colStatus: 'Estado',
+  colModelo: 'Plantilla',
+  colTabela: 'Tabla',
+  colEntidade: 'Entidad',
+  colCriadoEm: 'Creado el',
+  colRegistros: 'Registros',
+  colFiltros: 'Filtros',
+  statusCompleta: 'Completo',
+  statusProcessando: 'Procesando',
+  acaoDeletar: 'Eliminar',
+  acaoDownload: 'Descargar',
+  acaoVerModelo: 'Ver plantilla',
+  relatoriosMostrando: n => (n === 0 ? 'Sin resultados.' : `Mostrando 1 a ${n} de ${n} Informes`),
+  relatoriosVazio: 'Ningún informe encontrado.',
+  visPersonalizada: 'Vista personalizada',
+  visPadrao: 'Vista estándar',
+  extrairRelatorio: 'Extraer informe',
+  relatorioPadrao: 'Informe estándar',
+  formatoTitulo: 'Formato de extracción',
+  formatoDescricao: 'Elige un formato para extraer el informe.',
+  relatorioEmProcessamento: 'Informe en proceso',
+  relatorioEmProcessamentoDescricao: 'Síguelo en Mis informes. Cuando esté listo, el número del menú te avisa y recibes un correo.',
+  abrirMeusRelatorios: 'Abrir Mis informes',
+  relatorioBaixado: a => `${a} descargado`,
+  relatorioBaixadoDescricao: 'En la maqueta, ningún archivo sale del navegador.',
+  relatorioDeletado: 'Informe quitado de la lista.',
+  relatoriosBuscar: 'Buscar',
+  relatoriosFiltrar: 'Filtrar',
+  relatoriosAtualizar: 'Actualizar',
+  relatoriosOrdenar: 'Ordenar por ID',
   haMinutos: n => (n === 1 ? 'hace 1 minuto' : `hace ${n} minutos`),
   haHoras: n => (n === 1 ? 'hace 1 hora' : `hace ${n} horas`),
   haDias: n => (n === 1 ? 'hace 1 día' : `hace ${n} días`),
