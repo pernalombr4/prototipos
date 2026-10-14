@@ -40,7 +40,7 @@ import pesquisaMd from './PESQUISA.md?raw'
 definePageMeta({
   titulo: 'Editor de documentos',
   descricao: 'Abrir o documento do item no ONLYOFFICE ou no Word, e um campo que diz quem editou, qual versão e quem está com ele agora.',
-  status: 'em-revisao',
+  status: 'aprovado',
   atualizado: '2026-10-08',
   tela: 'Visão rápida do item, campo Editor de Documentos',
 })

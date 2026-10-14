@@ -107,3 +107,8 @@ flowchart LR
 - Abrir a configuração do campo deu "Ocorreu um erro ao carregar os campos aninhados" até clicar em Recarregar.
 - Salvar o item gravou "R$ 0" num campo Valor Monetário que estava vazio.
 - No workspace de exploração, ativei 4 chaves do campo `vitrine_documento` (categoria `leve`) e subi um .docx fictício num item. Ficaram assim.
+
+## Fechamento · 2026-10-14
+
+- **Pedido (literal):** "editor de documentos tambem ta ja aprovado. pode marcar isso la."
+- **Mudou:** status `aprovado` no `definePageMeta` (selo verde no índice) e no README.
