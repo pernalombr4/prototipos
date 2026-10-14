@@ -181,3 +181,29 @@ separado; os pontos de acessibilidade abaixo saíram da mesma crítica.
 - **Mudou:** o estado de erro ganhou a mesma largura do estado vazio; antes a moldura ia de ponta a ponta.
 - **Ver:** `/meus-relatorios` · `evidencias/rodada2-01-sem-filtros-rapidos.jpg`,
   `evidencias/rodada2-02-vazio-so-o-aviso.jpg`, `evidencias/rodada2-03-erro-ao-carregar.jpg`
+
+## Rodada 3 · 2026-10-14
+
+- **Pedido (literal):** "aqui só dá pra trazer o nome do relatório e talvez a descri~çao que o usuario deu pra
+  ele. nao esse modo como voce botou, do tipo "atrasadas"... enfim" / "e sse o user passar o mouse em
+  "filtros" pra ver melhor, nao deve ser um tooltip, e sim um popover pro cara conseguir detalhar sem precisar
+  abrir a sidebar."
+- **Mudou:** a coluna **Relatório** mostra o nome do relatório e, embaixo, a descrição que quem criou deu.
+  - Nome: o do modelo do construtor de relatórios da categoria, ou "Relatório Padrão".
+  - Descrição: só quando o modelo tem uma. "Relatório Padrão" e "Fornecedores sem avaliação" aparecem só com o
+    nome.
+  - O nome da visualização ("Atrasadas") saiu da tabela. Continua no painel, no Resumo.
+- **Mudou:** a categoria ou lista de onde o relatório saiu ganhou a coluna **Origem**, com o ícone, e dá para
+  ordenar por ela. A coluna **Modelo** saiu: o nome do relatório já é o modelo.
+- **Mudou:** "2 filtros" abre um **popover ao passar o mouse**, no lugar do tooltip: cada filtro em frase, a
+  ordenação e o link "Ver todos os detalhes", que abre o painel.
+- **Mudou:** o painel mostra no topo o nome do relatório e a descrição. O nome do arquivo usa a origem e o
+  nome do modelo: `contratos_vencimentos-do-mes_2026-10-14-1520.xlsx`.
+- **Dado:** a descrição do modelo é suposição do protótipo (`report.description` no `mocks.ts`). O nome existe
+  no develop; falta conferir se o construtor de relatórios guarda uma descrição.
+- **Componente:** `UPopover` com `mode="hover"` (é o `HoverCard` do Reka UI), atraso de 150 ms para abrir e
+  120 ms para fechar.
+- **Sem evidência visual do popover:** ele só fica aberto com o ponteiro em cima, e a regra de captura não
+  aceita o ponteiro no print. Conferido na tela.
+- **Ver:** `/meus-relatorios` · `evidencias/rodada3-01-nome-e-descricao.jpg`,
+  `evidencias/rodada3-02-painel-com-nome.jpg`

@@ -73,8 +73,13 @@ export const COR_DO_STATUS: Record<StatusDoPedido, 'neutral' | 'info' | 'success
   error: 'error',
 }
 
+/** Nome do relatório: o do modelo do construtor, ou Relatório Padrão. */
+export function nomeDoRelatorio(p: PedidoDeRelatorio, t: Textos): string {
+  return p.report?.name ?? t.modeloPadrao
+}
+
 /**
- * Nome do arquivo proposto: origem, visualização, data e hora.
+ * Nome do arquivo proposto: origem, nome do modelo (quando não é o padrão), data e hora.
  * Hoje o arquivo baixa como `default_1vo8sbnlud.xlsx`.
  */
 export function nomeDoArquivo(p: PedidoDeRelatorio, t: Textos): string {
@@ -86,8 +91,8 @@ export function nomeDoArquivo(p: PedidoDeRelatorio, t: Textos): string {
   const dois = (n: number) => String(n).padStart(2, '0')
   const carimbo = `${d.getFullYear()}-${dois(d.getMonth() + 1)}-${dois(d.getDate())}-${dois(d.getHours())}${dois(d.getMinutes())}`
   const origem = limpar(nomeDaOrigem(p, t))
-  const vis = limpar(p.proto.visualizacao)
-  const partes = vis && vis !== origem ? [origem, vis, carimbo] : [origem, carimbo]
+  const modelo = p.report ? limpar(p.report.name) : ''
+  const partes = modelo ? [origem, modelo, carimbo] : [origem, carimbo]
   return `${partes.join('_')}.${p.extraction_format}`
 }
 
@@ -140,12 +145,13 @@ function dentroDoPeriodo(p: PedidoDeRelatorio, periodo: Periodo): boolean {
   return d >= inicio
 }
 
-/** Texto que a busca procura: origem, visualização, modelo, nome do arquivo e filtros. */
+/** Texto que a busca procura: nome e descrição do relatório, origem, visualização, arquivo e filtros. */
 function textoDeBusca(p: PedidoDeRelatorio, t: Textos): string {
   return [
     nomeDaOrigem(p, t),
     p.proto.visualizacao,
     p.report?.name ?? t.modeloPadrao,
+    p.report?.description ?? '',
     nomeDoArquivo(p, t),
     ...p.proto.filtros.map(f => `${f.campo} ${f.valor}`),
   ].join(' ').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()

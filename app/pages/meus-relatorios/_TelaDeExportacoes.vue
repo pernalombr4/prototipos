@@ -7,7 +7,7 @@
  * da mesma família das telas novas e não da tela antiga de hoje.
  *
  * O que muda em relação a `/myReports` de hoje:
- * - cada linha diz o que é: origem, visualização, modelo, formato, registros,
+ * - cada linha diz o que é: nome e descrição do relatório, origem, formato, registros,
  *   filtros, tamanho e data com hora (hoje: "-" em 5 de 8 colunas);
  * - status com 4 estados e o progresso de quem está gerando;
  * - Baixar na própria linha, sem abrir menu;
@@ -21,7 +21,7 @@ import type { Formato, PedidoDeRelatorio, StatusDoPedido } from './mocks'
 import type { FiltrosDaTela, Periodo } from './relatorios'
 import {
   COR_DO_FORMATO, COR_DO_STATUS, ICONE_DO_FORMATO, ICONE_DO_STATUS, dataCurta, filtrar,
-  nomeDaOrigem, origensDaLista, tamanho,
+  iconeDaOrigem, nomeDaOrigem, nomeDoRelatorio, origensDaLista, tamanho,
 } from './relatorios'
 import type { Textos } from './textos'
 
@@ -109,12 +109,12 @@ const opcoesDeFormato = computed<DropdownMenuItem[]>(() => (['xlsx', 'csv', 'dbf
 
 /* ---------- colunas ---------- */
 
-const visiveis = ref<Record<string, boolean>>({ modelo: true, tamanho: true })
+const visiveis = ref<Record<string, boolean>>({ origem: true, tamanho: true })
 
 const colunas = computed<EnTableColumn[]>(() => [
   { key: 'relatorio', label: props.t.colunas.relatorio, sortable: true },
   { key: 'status', label: props.t.colunas.status, sortable: true },
-  { key: 'modelo', label: props.t.colunas.modelo },
+  { key: 'origem', label: props.t.colunas.origem, sortable: true },
   { key: 'formato', label: props.t.colunas.formato },
   { key: 'registros', label: props.t.colunas.registros, sortable: true, align: 'right' },
   { key: 'filtros', label: props.t.colunas.filtros },
@@ -125,7 +125,7 @@ const colunas = computed<EnTableColumn[]>(() => [
 ])
 
 /** Larguras de partida. O EnTable divide igual sem isso, e o nome da origem corta. */
-const larguras = { relatorio: 300, status: 150, modelo: 190, formato: 96, registros: 112, filtros: 130, tamanho: 104, criadoEm: 168, baixar: 64 }
+const larguras = { relatorio: 320, status: 150, origem: 200, formato: 96, registros: 112, filtros: 130, tamanho: 104, criadoEm: 168, baixar: 64 }
 
 /** Relatório, Status e Criado em não se escondem: sem elas a linha não se explica. */
 const FIXAS: string[] = ['relatorio', 'status', 'criadoEm', 'baixar']
@@ -153,7 +153,8 @@ const ordenados = computed(() => {
   const dir = ordem.value.direction === 'asc' ? 1 : -1
   const valor = (p: PedidoDeRelatorio): number | string => {
     switch (ordem.value.key) {
-      case 'relatorio': return nomeDaOrigem(p, props.t).toLowerCase()
+      case 'relatorio': return nomeDoRelatorio(p, props.t).toLowerCase()
+      case 'origem': return nomeDaOrigem(p, props.t).toLowerCase()
       case 'status': return STATUS_ORDEM[p.status]
       case 'registros': return p.proto.registros ?? -1
       case 'tamanho': return p.processed_report?.size ?? -1
@@ -177,9 +178,9 @@ interface Linha extends Record<string, unknown> {
 const linhas = computed<Linha[]>(() => paginaAtual.value.map(p => ({
   id: p.id,
   pedido: p,
-  relatorio: nomeDaOrigem(p, props.t),
+  relatorio: nomeDoRelatorio(p, props.t),
+  origem: nomeDaOrigem(p, props.t),
   status: p.status,
-  modelo: p.report?.name ?? '',
   formato: p.extraction_format,
   registros: p.proto.registros,
   filtros: p.proto.filtros.length,
@@ -213,9 +214,6 @@ function menuDaLinha(p: PedidoDeRelatorio): DropdownMenuItem[][] {
   ]
 }
 
-function textoDoFiltro(p: PedidoDeRelatorio) {
-  return p.proto.filtros.map(f => `${f.campo} ${props.t.operadores[f.operador]}${f.valor ? ` ${f.valor}` : ''}`).join('\n')
-}
 </script>
 
 <template>
@@ -348,7 +346,7 @@ function textoDoFiltro(p: PedidoDeRelatorio) {
             </span>
             <span class="min-w-0">
               <span class="flex items-center gap-1.5">
-                <span class="truncate text-sm font-medium text-highlighted" :title="String(row.relatorio)">{{ row.relatorio }}</span>
+                <span class="truncate text-sm font-medium" :class="(row as Linha).pedido.report ? 'text-highlighted' : 'text-toned'" :title="String(row.relatorio)">{{ row.relatorio }}</span>
                 <span
                   v-if="(row as Linha).pedido.status === 'complete' && !(row as Linha).pedido.proto.baixadoEm.length"
                   class="size-1.5 shrink-0 rounded-full bg-primary"
@@ -356,7 +354,11 @@ function textoDoFiltro(p: PedidoDeRelatorio) {
                   :title="t.naoBaixado"
                 />
               </span>
-              <span class="block truncate text-xs text-muted">{{ (row as Linha).pedido.proto.visualizacao }}</span>
+              <span
+                v-if="(row as Linha).pedido.report?.description"
+                class="block truncate text-xs text-muted"
+                :title="(row as Linha).pedido.report?.description"
+              >{{ (row as Linha).pedido.report?.description }}</span>
             </span>
           </span>
         </template>
@@ -384,9 +386,11 @@ function textoDoFiltro(p: PedidoDeRelatorio) {
           </span>
         </template>
 
-        <template #cell-modelo="{ row }">
-          <span v-if="row.modelo" class="block max-w-48 truncate text-sm text-toned">{{ row.modelo }}</span>
-          <span v-else class="text-sm text-dimmed">{{ t.modeloPadrao }}</span>
+        <template #cell-origem="{ row }">
+          <span class="flex min-w-0 items-center gap-1.5 text-sm text-toned">
+            <UIcon :name="iconeDaOrigem((row as Linha).pedido)" class="size-4 shrink-0 text-muted" />
+            <span class="truncate" :title="String(row.origem)">{{ row.origem }}</span>
+          </span>
         </template>
 
         <template #cell-formato="{ row }">
@@ -400,9 +404,42 @@ function textoDoFiltro(p: PedidoDeRelatorio) {
         </template>
 
         <template #cell-filtros="{ row }">
-          <UTooltip v-if="Number(row.filtros)" :ui="{ content: 'h-auto max-w-xs whitespace-pre-line py-1.5' }" :text="textoDoFiltro((row as Linha).pedido)">
-            <UBadge :label="t.nFiltros(Number(row.filtros))" icon="i-lucide-filter" color="neutral" variant="soft" size="sm" />
-          </UTooltip>
+          <!-- Popover no hover, não tooltip: dá para ler e detalhar sem abrir o painel -->
+          <UPopover
+            v-if="Number(row.filtros)"
+            mode="hover"
+            :open-delay="150"
+            :close-delay="120"
+            :content="{ side: 'bottom', align: 'start', sideOffset: 6 }"
+          >
+            <UBadge :label="t.nFiltros(Number(row.filtros))" icon="i-lucide-filter" color="neutral" variant="soft" size="sm" class="cursor-default" @click.stop />
+            <template #content>
+              <div class="w-80 p-3" @click.stop>
+                <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">{{ t.painel.filtrosAplicados }}</p>
+                <ul class="space-y-1.5">
+                  <li v-for="(f, i) in (row as Linha).pedido.proto.filtros" :key="i" class="flex flex-wrap items-center gap-1.5 text-sm">
+                    <UBadge :label="f.campo" color="neutral" variant="soft" size="sm" />
+                    <span class="text-muted">{{ t.operadores[f.operador] }}</span>
+                    <span v-if="f.valor" class="font-medium text-highlighted">{{ f.valor }}</span>
+                  </li>
+                </ul>
+                <p class="mt-3 flex items-center gap-1.5 text-xs text-muted">
+                  <UIcon name="i-lucide-arrow-down-wide-narrow" class="size-3.5 shrink-0" />
+                  {{ t.painel.ordenacao }}: {{ (row as Linha).pedido.proto.ordenacao }}
+                </p>
+                <USeparator class="my-2.5" />
+                <UButton
+                  :label="t.painel.verNoPainel"
+                  icon="i-lucide-panel-right-open"
+                  color="neutral"
+                  variant="link"
+                  size="xs"
+                  class="px-0"
+                  @click="emit('abrir', (row as Linha).id)"
+                />
+              </div>
+            </template>
+          </UPopover>
           <span v-else class="text-sm text-dimmed">{{ t.semFiltro }}</span>
         </template>
 

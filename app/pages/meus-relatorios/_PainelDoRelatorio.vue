@@ -12,7 +12,7 @@
 import type { PedidoDeRelatorio } from './mocks'
 import {
   COR_DO_FORMATO, COR_DO_STATUS, ICONE_DO_FORMATO, ICONE_DO_STATUS, dataCurta, dataLonga, iconeDaOrigem,
-  nomeDaOrigem, nomeDoArquivo, segundosParaGerar, tamanho,
+  nomeDaOrigem, nomeDoArquivo, nomeDoRelatorio, segundosParaGerar, tamanho,
 } from './relatorios'
 import type { Textos } from './textos'
 
@@ -39,6 +39,7 @@ watch(() => props.pedido.id, () => { todasAsColunas.value = false })
 
 const p = computed(() => props.pedido)
 const origem = computed(() => nomeDaOrigem(p.value, props.t))
+const nome = computed(() => nomeDoRelatorio(p.value, props.t))
 const pronto = computed(() => p.value.status === 'complete')
 const gerando = computed(() => p.value.status === 'processing' || p.value.status === 'pending')
 const arquivo = computed(() => nomeDoArquivo(p.value, props.t))
@@ -90,8 +91,8 @@ const maisAcoes = computed(() => [
       </span>
       <div class="min-w-0 flex-1">
         <p class="text-xs text-muted">{{ t.painel.titulo }}</p>
-        <h2 class="truncate text-base font-semibold text-highlighted" :title="origem">{{ origem }}</h2>
-        <p class="truncate text-sm text-toned">{{ p.proto.visualizacao }}</p>
+        <h2 class="truncate text-base font-semibold text-highlighted" :title="nome">{{ nome }}</h2>
+        <p v-if="p.report?.description" class="line-clamp-2 text-sm text-toned">{{ p.report.description }}</p>
       </div>
       <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="sm" :aria-label="t.acoes.fechar" @click="emit('fechar')" />
     </header>
@@ -169,9 +170,6 @@ const maisAcoes = computed(() => [
 
           <dt class="text-muted">{{ t.painel.visualizacao }}</dt>
           <dd class="truncate text-highlighted">{{ p.proto.visualizacao }}</dd>
-
-          <dt class="text-muted">{{ t.painel.modelo }}</dt>
-          <dd class="truncate" :class="p.report ? 'text-highlighted' : 'text-toned'">{{ p.report?.name ?? t.modeloPadrao }}</dd>
 
           <dt class="text-muted">{{ t.painel.formato }}</dt>
           <dd><UBadge :label="p.extraction_format.toUpperCase()" color="neutral" variant="outline" size="sm" class="font-mono" /></dd>

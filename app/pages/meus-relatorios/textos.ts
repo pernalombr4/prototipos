@@ -63,7 +63,7 @@ export interface Textos {
 
   colunas: {
     relatorio: string
-    modelo: string
+    origem: string
     status: string
     formato: string
     registros: string
@@ -112,6 +112,7 @@ export interface Textos {
     vezes: Plural
     nunca: string
     filtrosAplicados: string
+    verNoPainel: string
     ordenacao: string
     colunasExportadas: Plural
     verTodas: string
@@ -263,7 +264,7 @@ const ptBR: Textos = {
   },
   colunas: {
     relatorio: 'Relatório',
-    modelo: 'Modelo',
+    origem: 'Origem',
     status: 'Status',
     formato: 'Formato',
     registros: 'Registros',
@@ -309,6 +310,7 @@ const ptBR: Textos = {
     vezes: n => n === 1 ? '1 vez' : `${n} vezes`,
     nunca: 'Ainda não',
     filtrosAplicados: 'Filtros aplicados',
+    verNoPainel: 'Ver todos os detalhes',
     ordenacao: 'Ordenação',
     colunasExportadas: n => n === 1 ? '1 coluna no arquivo' : `${n} colunas no arquivo`,
     verTodas: 'Ver todas',
@@ -405,7 +407,7 @@ const en: Textos = {
   },
   colunas: {
     relatorio: 'Report',
-    modelo: 'Template',
+    origem: 'Source',
     status: 'Status',
     formato: 'Format',
     registros: 'Records',
@@ -451,6 +453,7 @@ const en: Textos = {
     vezes: n => n === 1 ? 'once' : `${n} times`,
     nunca: 'Not yet',
     filtrosAplicados: 'Applied filters',
+    verNoPainel: 'See all details',
     ordenacao: 'Sorting',
     colunasExportadas: n => n === 1 ? '1 column in the file' : `${n} columns in the file`,
     verTodas: 'See all',
@@ -547,7 +550,7 @@ const es: Textos = {
   },
   colunas: {
     relatorio: 'Informe',
-    modelo: 'Plantilla',
+    origem: 'Origen',
     status: 'Estado',
     formato: 'Formato',
     registros: 'Registros',
@@ -593,6 +596,7 @@ const es: Textos = {
     vezes: n => n === 1 ? '1 vez' : `${n} veces`,
     nunca: 'Todavía no',
     filtrosAplicados: 'Filtros aplicados',
+    verNoPainel: 'Ver todos los detalles',
     ordenacao: 'Orden',
     colunasExportadas: n => n === 1 ? '1 columna en el archivo' : `${n} columnas en el archivo`,
     verTodas: 'Ver todas',

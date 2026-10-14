@@ -69,8 +69,12 @@ export interface PedidoDeRelatorio {
   created_at: string
   updated_at: string
   processed_report: ArquivoGerado | null
-  /** Modelo do construtor de relatórios da categoria. `null` = Relatório Padrão. */
-  report: { id: number, name: string } | null
+  /**
+   * Modelo do construtor de relatórios da categoria. `null` = Relatório Padrão.
+   * `description` é suposição do protótipo: o nome existe no develop; a
+   * descrição dada por quem criou o modelo está por confirmar no construtor.
+   */
+  report: { id: number, name: string, description?: string } | null
 
   /** ACRÉSCIMOS DO PROTÓTIPO. Nada disto vem na resposta de hoje. */
   proto: {
@@ -128,6 +132,17 @@ const COLUNAS = {
   compras: ['Referência', 'Status', 'Solicitante', 'Equipamento', 'Quantidade', 'Valor estimado', 'Centro de custo', 'Aprovador'],
   rapidas: ['Título', 'Status', 'Prioridade', 'Responsável', 'Prazo', 'Criada em', 'Concluída em'],
   agendadas: ['Tarefa', 'Item', 'Categoria', 'Status', 'Responsável', 'Prazo', 'SLA', 'Concluída em'],
+}
+
+/** Os modelos do construtor de relatórios, com a descrição que quem criou deu. */
+const MODELOS: Record<string, string | undefined> = {
+  'Vencimentos do mês': 'Contratos que vencem nos próximos 30 dias, com o responsável pela renovação.',
+  'Contratos para auditoria': 'Vigentes e renovados, com valores e responsáveis, para a auditoria anual.',
+  'Compras para o comitê': 'Pedidos acima de R$ 50 mil para a reunião mensal do comitê.',
+  'Chamados da semana': 'Abertos nos últimos 7 dias, para a reunião de segunda.',
+  'SLA estourado': 'Chamados fechados fora do prazo, por cliente.',
+  // Caso de canto: modelo sem descrição.
+  'Fornecedores sem avaliação': undefined,
 }
 
 let proximoArquivo = 3200
@@ -197,7 +212,7 @@ function montar(s: Semente): PedidoDeRelatorio {
           created_at: atualizado,
         }
       : null,
-    report: s.modelo ? { id: 40 + s.id % 7, name: s.modelo } : null,
+    report: s.modelo ? { id: 40 + s.id % 7, name: s.modelo, description: MODELOS[s.modelo] } : null,
     proto: {
       visualizacao: s.visualizacao,
       registros: s.registros,
@@ -219,30 +234,30 @@ const F = (campo: string, operador: FiltroAplicado['operador'], valor: string): 
  * um DBF, um com modelo do construtor, um nunca baixado e o nome que estoura.
  */
 const sementes: Semente[] = [
-  { id: 412, chave: 'c_items', categoria: 117, formato: 'xlsx', status: 'processing', dias: 0, hora: '15:38', duracao: 0, registros: null, kb: 0, visualizacao: 'Abertos esta semana', filtros: [F('Status', 'e', 'Aberto, Em atendimento'), F('Aberto em', 'depois', '07/10/2026')], progresso: 64 },
+  { id: 412, chave: 'c_items', categoria: 117, formato: 'xlsx', status: 'processing', dias: 0, hora: '15:38', duracao: 0, registros: null, kb: 0, modelo: 'Chamados da semana', visualizacao: 'Abertos esta semana', filtros: [F('Status', 'e', 'Aberto, Em atendimento'), F('Aberto em', 'depois', '07/10/2026')], progresso: 64 },
   { id: 411, chave: 'tasks', formato: 'csv', status: 'pending', dias: 0, hora: '15:38', duracao: 0, registros: null, kb: 0, visualizacao: 'Tarefas Rápidas', filtros: [] },
-  { id: 410, chave: 'c_items', categoria: 108, formato: 'xlsx', status: 'complete', dias: 0, hora: '15:20', duracao: 2, registros: 248, kb: 61.4, visualizacao: 'Vencendo em 30 dias', filtros: [F('Fim da vigência', 'entre', '14/10/2026 e 13/11/2026'), F('Status', 'e', 'Vigente')], ordenacao: 'Fim da vigência, do mais próximo para o mais distante', baixado: [1] },
+  { id: 410, chave: 'c_items', categoria: 108, formato: 'xlsx', status: 'complete', dias: 0, hora: '15:20', duracao: 2, registros: 248, kb: 61.4, modelo: 'Vencimentos do mês', visualizacao: 'Vencendo em 30 dias', filtros: [F('Fim da vigência', 'entre', '14/10/2026 e 13/11/2026'), F('Status', 'e', 'Vigente')], ordenacao: 'Fim da vigência, do mais próximo para o mais distante', baixado: [1] },
   { id: 409, chave: 'c_items', categoria: 108, formato: 'xlsx', status: 'error', dias: 0, hora: '11:02', duracao: 41, registros: null, kb: 0, visualizacao: 'Todos os contratos', filtros: [], erro: 'O relatório passou de 100.000 registros. Filtre a tabela ou use uma visualização menor e extraia novamente.' },
   { id: 408, chave: 'c_flow_item_tasks', formato: 'xlsx', status: 'complete', dias: 0, hora: '09:47', duracao: 3, registros: 1312, kb: 214.9, visualizacao: 'Atrasadas', filtros: [F('Prazo', 'antes', '14/10/2026'), F('Status', 'e', 'Pendente, Em andamento')] },
-  { id: 407, chave: 'c_items', categoria: 112, formato: 'csv', status: 'complete', dias: 1, hora: '17:31', duracao: 1, registros: 0, kb: 0.4, visualizacao: 'Sem avaliação', filtros: [F('Avaliação', 'vazio', '')], baixado: [3] },
+  { id: 407, chave: 'c_items', categoria: 112, formato: 'csv', status: 'complete', dias: 1, hora: '17:31', duracao: 1, registros: 0, kb: 0.4, modelo: 'Fornecedores sem avaliação', visualizacao: 'Sem avaliação', filtros: [F('Avaliação', 'vazio', '')], baixado: [3] },
   { id: 406, chave: 'c_items', categoria: 121, formato: 'xlsx', status: 'complete', dias: 1, hora: '10:15', duracao: 2, registros: 37, kb: 18.2, visualizacao: 'Aguardando aprovação da diretoria', modelo: 'Compras para o comitê', filtros: [F('Status', 'e', 'Aguardando aprovação'), F('Valor estimado', 'depois', 'R$ 50.000,00')], baixado: [2, 600] },
   { id: 405, chave: 'tasks', formato: 'xlsx', status: 'complete', dias: 2, hora: '16:58', duracao: 1, registros: 86, kb: 12.7, visualizacao: 'Tarefas Rápidas', filtros: [F('Responsável', 'e', 'Ana Ribeiro'), F('Prioridade', 'e', 'Alta, Urgente')], baixado: [0] },
   { id: 404, chave: 'c_items', categoria: 117, formato: 'xlsx', status: 'complete', dias: 3, hora: '08:30', duracao: 58, registros: 118420, kb: 18874.3, visualizacao: 'Todos os chamados', filtros: [F('Aberto em', 'depois', '01/01/2025')], baixado: [4] },
   { id: 403, chave: 'c_items', categoria: 108, formato: 'dbf', status: 'complete', dias: 5, hora: '14:12', duracao: 2, registros: 512, kb: 96.0, visualizacao: 'Para o financeiro', modelo: 'Contratos para auditoria', filtros: [F('Status', 'e', 'Vigente, Renovado')], baixado: [5] },
   { id: 402, chave: 'c_items', categoria: 112, formato: 'xlsx', status: 'complete', dias: 6, hora: '11:40', duracao: 1, registros: 204, kb: 33.1, visualizacao: 'Fornecedores ativos', filtros: [F('Situação', 'e', 'Ativo')] },
   { id: 401, chave: 'c_flow_item_tasks', formato: 'csv', status: 'complete', dias: 8, hora: '09:05', duracao: 2, registros: 940, kb: 88.6, visualizacao: 'Minha fila', filtros: [F('Responsável', 'e', 'Você')], baixado: [1] },
-  { id: 400, chave: 'c_items', categoria: 108, formato: 'xlsx', status: 'complete', dias: 9, hora: '15:44', duracao: 2, registros: 251, kb: 62.0, visualizacao: 'Vencendo em 30 dias', filtros: [F('Fim da vigência', 'entre', '05/10/2026 e 04/11/2026'), F('Status', 'e', 'Vigente')], baixado: [2] },
+  { id: 400, chave: 'c_items', categoria: 108, formato: 'xlsx', status: 'complete', dias: 9, hora: '15:44', duracao: 2, registros: 251, kb: 62.0, modelo: 'Vencimentos do mês', visualizacao: 'Vencendo em 30 dias', filtros: [F('Fim da vigência', 'entre', '05/10/2026 e 04/11/2026'), F('Status', 'e', 'Vigente')], baixado: [2] },
   { id: 399, chave: 'c_items', categoria: 117, formato: 'xlsx', status: 'error', dias: 12, hora: '10:20', duracao: 6, registros: null, kb: 0, visualizacao: 'Por cliente', filtros: [F('Cliente', 'contem', 'Atlântida')], erro: 'A geração parou por uma falha no servidor. Tente novamente. Se o erro continuar, fale com o suporte.' },
   { id: 398, chave: 'tasks', formato: 'csv', status: 'complete', dias: 14, hora: '18:02', duracao: 1, registros: 61, kb: 6.9, visualizacao: 'Tarefas Rápidas', filtros: [F('Status', 'e', 'Concluída')], baixado: [0] },
   { id: 397, chave: 'c_items', categoria: 121, formato: 'xlsx', status: 'complete', dias: 16, hora: '13:27', duracao: 2, registros: 44, kb: 20.4, visualizacao: 'Aguardando aprovação da diretoria', modelo: 'Compras para o comitê', filtros: [F('Status', 'e', 'Aguardando aprovação')], baixado: [8] },
   { id: 396, chave: 'c_items', categoria: 108, formato: 'xlsx', status: 'complete', dias: 21, hora: '09:58', duracao: 3, registros: 1874, kb: 402.5, visualizacao: 'Todos os contratos', filtros: [], baixado: [1, 1440] },
   { id: 395, chave: 'c_items', categoria: 112, formato: 'csv', status: 'complete', dias: 23, hora: '16:16', duracao: 1, registros: 199, kb: 21.8, visualizacao: 'Fornecedores ativos', filtros: [F('Situação', 'e', 'Ativo')] },
   { id: 394, chave: 'c_flow_item_tasks', formato: 'xlsx', status: 'complete', dias: 28, hora: '08:44', duracao: 4, registros: 2210, kb: 361.0, visualizacao: 'Concluídas no mês', filtros: [F('Concluída em', 'entre', '01/09/2026 e 30/09/2026')], baixado: [3] },
-  { id: 393, chave: 'c_items', categoria: 117, formato: 'xlsx', status: 'complete', dias: 35, hora: '11:11', duracao: 2, registros: 302, kb: 74.3, visualizacao: 'Fechados com SLA estourado', filtros: [F('SLA', 'e', 'Estourado'), F('Status', 'e', 'Fechado')], baixado: [6] },
-  { id: 392, chave: 'c_items', categoria: 108, formato: 'csv', status: 'complete', dias: 41, hora: '17:50', duracao: 2, registros: 233, kb: 27.5, visualizacao: 'Vencendo em 30 dias', filtros: [F('Status', 'e', 'Vigente')], baixado: [0] },
+  { id: 393, chave: 'c_items', categoria: 117, formato: 'xlsx', status: 'complete', dias: 35, hora: '11:11', duracao: 2, registros: 302, kb: 74.3, modelo: 'SLA estourado', visualizacao: 'Fechados com SLA estourado', filtros: [F('SLA', 'e', 'Estourado'), F('Status', 'e', 'Fechado')], baixado: [6] },
+  { id: 392, chave: 'c_items', categoria: 108, formato: 'csv', status: 'complete', dias: 41, hora: '17:50', duracao: 2, registros: 233, kb: 27.5, modelo: 'Vencimentos do mês', visualizacao: 'Vencendo em 30 dias', filtros: [F('Status', 'e', 'Vigente')], baixado: [0] },
   { id: 391, chave: 'tasks', formato: 'xlsx', status: 'complete', dias: 47, hora: '10:03', duracao: 1, registros: 52, kb: 9.8, visualizacao: 'Tarefas Rápidas', filtros: [], baixado: [12] },
   { id: 390, chave: 'c_items', categoria: 112, formato: 'dbf', status: 'complete', dias: 55, hora: '15:31', duracao: 2, registros: 187, kb: 41.2, visualizacao: 'Para o financeiro', filtros: [F('Situação', 'e', 'Ativo')], baixado: [2] },
-  { id: 389, chave: 'c_items', categoria: 108, formato: 'xlsx', status: 'complete', dias: 62, hora: '09:20', duracao: 2, registros: 240, kb: 58.9, visualizacao: 'Vencendo em 30 dias', filtros: [F('Status', 'e', 'Vigente')], baixado: [1] },
+  { id: 389, chave: 'c_items', categoria: 108, formato: 'xlsx', status: 'complete', dias: 62, hora: '09:20', duracao: 2, registros: 240, kb: 58.9, modelo: 'Vencimentos do mês', visualizacao: 'Vencendo em 30 dias', filtros: [F('Status', 'e', 'Vigente')], baixado: [1] },
 ]
 
 export function pedidosIniciais(): PedidoDeRelatorio[] {
