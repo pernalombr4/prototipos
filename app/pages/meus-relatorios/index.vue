@@ -354,7 +354,6 @@ function reiniciar() {
           @tentar-de-novo="extrairDeNovo"
           @abrir-origem="abrirOrigem"
           @copiar-link="copiarLink"
-          @ir-para-contratos="ir('contratos')"
           @recarregar="recarregar"
         />
         <TelaDeContratos v-else :t="t" @extrair="extrairDeContratos" />

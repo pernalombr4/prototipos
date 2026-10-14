@@ -10,12 +10,10 @@ import { AGORA, categorias } from './mocks'
 import type { Textos } from './textos'
 
 export type Periodo = 'todo' | 'hoje' | 'd7' | 'd30' | 'd90'
-export type Rapido = 'todos' | 'gerando' | 'prontos' | 'falharam' | 'naoBaixados'
 
 export interface FiltrosDaTela {
   busca: string
   periodo: Periodo
-  rapido: Rapido
   status: StatusDoPedido[]
   origem: string[]
   formato: Formato[]
@@ -142,16 +140,6 @@ function dentroDoPeriodo(p: PedidoDeRelatorio, periodo: Periodo): boolean {
   return d >= inicio
 }
 
-export function casaRapido(p: PedidoDeRelatorio, r: Rapido): boolean {
-  switch (r) {
-    case 'todos': return true
-    case 'gerando': return p.status === 'pending' || p.status === 'processing'
-    case 'prontos': return p.status === 'complete'
-    case 'falharam': return p.status === 'error'
-    case 'naoBaixados': return p.status === 'complete' && !p.proto.baixadoEm.length
-  }
-}
-
 /** Texto que a busca procura: origem, visualização, modelo, nome do arquivo e filtros. */
 function textoDeBusca(p: PedidoDeRelatorio, t: Textos): string {
   return [
@@ -163,12 +151,11 @@ function textoDeBusca(p: PedidoDeRelatorio, t: Textos): string {
   ].join(' ').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 }
 
-export function filtrar(lista: PedidoDeRelatorio[], f: FiltrosDaTela, t: Textos, semRapido = false): PedidoDeRelatorio[] {
+export function filtrar(lista: PedidoDeRelatorio[], f: FiltrosDaTela, t: Textos): PedidoDeRelatorio[] {
   const termo = f.busca.trim().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
   return lista.filter(p =>
     (!termo || textoDeBusca(p, t).includes(termo))
     && dentroDoPeriodo(p, f.periodo)
-    && (semRapido || casaRapido(p, f.rapido))
     && (!f.status.length || f.status.includes(p.status))
     && (!f.origem.length || f.origem.includes(idDaOrigem(p)))
     && (!f.formato.length || f.formato.includes(p.extraction_format)),

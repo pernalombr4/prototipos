@@ -157,3 +157,27 @@ separado; os pontos de acessibilidade abaixo saíram da mesma crítica.
   [o sino](evidencias/proposta-05-sino.jpg) ·
   [do sino ao painel](evidencias/proposta-06-do-sino-ao-painel.jpg) ·
   [nome alternativo e menu da linha](evidencias/proposta-07-nome-alternativo-e-menu-da-linha.jpg)
+
+## Rodada 2 · 2026-10-14
+
+- **Pedido (literal):** "pode tirar da tela os filtros rápidos. nao faz sentido isso." / "no print ai,
+  colocar um botao pra ir pra uma categoria especifica nao tem srentido. só o aviso já ta ok." / ""Não deu
+  para carregar seus relatórios" na mensagem de rro é um texto HORROROSO tambem."
+- **Mudou:** a faixa "Filtros Rápidos" saiu da tela. O filtro de Status da barra cobre Gerando, Pronto e
+  Falhou. O ponto ao lado do nome continua marcando o relatório nunca baixado.
+- **Mudou:** o estado vazio fica só com o aviso; o botão "Ir para Contratos" saiu.
+- **Mudou:** as mensagens de erro passam a dizer o que houve, em registro formal:
+
+| Onde | Antes | Agora |
+|---|---|---|
+| Erro ao carregar a tela | Não deu para carregar seus relatórios | Erro ao carregar os relatórios |
+| Descrição do erro | Seus arquivos continuam guardados. Tente de novo em instantes. | Os arquivos continuam salvos. Tente novamente em alguns instantes. |
+| Painel do relatório que falhou | Não deu para gerar este relatório | Erro ao gerar o relatório |
+| Aviso de falha | O relatório falhou | Erro ao gerar o relatório |
+| Texto do aviso de falha | Não deu para gerar o relatório de Contratos. O motivo está em Exportações. | O relatório de Contratos não foi gerado. O motivo está em Exportações. |
+| Sino | O relatório de Contratos falhou | Erro ao gerar o relatório de Contratos |
+| Botões | Tentar de novo, Extrair de novo | Tentar novamente, Extrair novamente |
+
+- **Mudou:** o estado de erro ganhou a mesma largura do estado vazio; antes a moldura ia de ponta a ponta.
+- **Ver:** `/meus-relatorios` · `evidencias/rodada2-01-sem-filtros-rapidos.jpg`,
+  `evidencias/rodada2-02-vazio-so-o-aviso.jpg`, `evidencias/rodada2-03-erro-ao-carregar.jpg`

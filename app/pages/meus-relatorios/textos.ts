@@ -60,14 +60,6 @@ export interface Textos {
     atualizado: string
   }
 
-  rapidos: {
-    titulo: string
-    todos: string
-    gerando: string
-    prontos: string
-    falharam: string
-    naoBaixados: string
-  }
 
   colunas: {
     relatorio: string
@@ -160,7 +152,6 @@ export interface Textos {
   vazio: {
     titulo: string
     descricao: string
-    acao: string
     buscaTitulo: (busca: string) => string
     buscaDescricao: string
     erroTitulo: string
@@ -270,14 +261,6 @@ const ptBR: Textos = {
     limparFiltros: 'Limpar filtros',
     atualizado: 'Atualiza sozinho',
   },
-  rapidos: {
-    titulo: 'Filtros Rápidos',
-    todos: 'Todos',
-    gerando: 'Gerando',
-    prontos: 'Prontos',
-    falharam: 'Falharam',
-    naoBaixados: 'Não baixados',
-  },
   colunas: {
     relatorio: 'Relatório',
     modelo: 'Modelo',
@@ -302,11 +285,11 @@ const ptBR: Textos = {
     verDetalhes: 'Ver detalhes',
     baixar: 'Baixar',
     baixarArquivo: (f, t) => `Baixar ${f} · ${t}`,
-    extrairDeNovo: 'Extrair de novo',
+    extrairDeNovo: 'Extrair novamente',
     abrirNaOrigem: 'Abrir na origem',
     copiarLink: 'Copiar link',
     excluir: 'Excluir',
-    tentarDeNovo: 'Tentar de novo',
+    tentarDeNovo: 'Tentar novamente',
     maisAcoes: 'Mais ações',
     fechar: 'Fechar',
   },
@@ -334,7 +317,7 @@ const ptBR: Textos = {
     eventos: { pedido: 'Você pediu o relatório', gerado: 'Arquivo gerado', baixado: 'Você baixou', falhou: 'A geração falhou', naFila: 'Na fila para gerar', gerando: 'Gerando o arquivo' },
     naFilaAjuda: 'Começa assim que o relatório da frente terminar. Pode sair desta tela: o menu avisa quando ficar pronto.',
     gerandoAjuda: 'Pode sair desta tela. O menu e o sino avisam quando ficar pronto.',
-    falhouTitulo: 'Não deu para gerar este relatório',
+    falhouTitulo: 'Erro ao gerar o relatório',
     arquivo: 'Arquivo',
     semFiltroAjuda: 'Saíram todos os registros da visualização.',
   },
@@ -350,30 +333,29 @@ const ptBR: Textos = {
     prontoTitulo: 'Relatório pronto',
     prontoDescricao: (o, r) => `${o}, ${r}.`,
     verNaTela: tela => `Ver em ${tela}`,
-    falhouTitulo: 'O relatório falhou',
-    falhouDescricao: (o, tela) => `Não deu para gerar o relatório de ${o}. O motivo está em ${tela}.`,
+    falhouTitulo: 'Erro ao gerar o relatório',
+    falhouDescricao: (o, tela) => `O relatório de ${o} não foi gerado. O motivo está em ${tela}.`,
     download: n => `Baixando ${n}`,
     downloadVarios: n => `Baixando ${n} arquivos num .zip`,
     linkCopiado: 'Link copiado. Ele só abre para quem tem acesso ao workspace.',
     excluidos: n => n === 1 ? 'Relatório excluído' : `${n} relatórios excluídos`,
     desfazer: 'Desfazer',
-    extraindoDeNovo: 'Extraindo de novo, com os mesmos filtros',
+    extraindoDeNovo: 'Extraindo novamente, com os mesmos filtros',
     abrindoOrigem: o => `Abrindo ${o} com os filtros deste relatório`,
   },
   vazio: {
     titulo: 'Nenhum relatório ainda',
     descricao: 'Para ter um relatório, abra uma tabela de itens ou de tarefas e clique em Extrair Relatório. O arquivo aparece aqui.',
-    acao: 'Ir para Contratos',
     buscaTitulo: b => `Nada encontrado para "${b}"`,
     buscaDescricao: 'Procure pelo nome da categoria, da visualização ou do modelo.',
-    erroTitulo: 'Não deu para carregar seus relatórios',
-    erroDescricao: 'Seus arquivos continuam guardados. Tente de novo em instantes.',
+    erroTitulo: 'Erro ao carregar os relatórios',
+    erroDescricao: 'Os arquivos continuam salvos. Tente novamente em alguns instantes.',
   },
   sino: {
     titulo: 'Notificações',
     marcarLidas: 'Marcar todas como lidas',
     pronto: o => `Seu relatório de ${o} está pronto`,
-    falhou: o => `O relatório de ${o} falhou`,
+    falhou: o => `Erro ao gerar o relatório de ${o}`,
     semNotificacao: 'Nenhuma notificação nova',
   },
   itens: {
@@ -420,14 +402,6 @@ const en: Textos = {
     colunas: 'Columns',
     limparFiltros: 'Clear filters',
     atualizado: 'Updates on its own',
-  },
-  rapidos: {
-    titulo: 'Quick Filters',
-    todos: 'All',
-    gerando: 'Generating',
-    prontos: 'Ready',
-    falharam: 'Failed',
-    naoBaixados: 'Not downloaded',
   },
   colunas: {
     relatorio: 'Report',
@@ -485,7 +459,7 @@ const en: Textos = {
     eventos: { pedido: 'You requested the report', gerado: 'File generated', baixado: 'You downloaded', falhou: 'Generation failed', naFila: 'Queued to generate', gerando: 'Generating the file' },
     naFilaAjuda: 'It starts as soon as the report ahead finishes. You can leave this screen: the menu tells you when it is ready.',
     gerandoAjuda: 'You can leave this screen. The menu and the bell tell you when it is ready.',
-    falhouTitulo: 'This report could not be generated',
+    falhouTitulo: 'Error generating the report',
     arquivo: 'File',
     semFiltroAjuda: 'Every record in the view was exported.',
   },
@@ -501,8 +475,8 @@ const en: Textos = {
     prontoTitulo: 'Report ready',
     prontoDescricao: (o, r) => `${o}, ${r}.`,
     verNaTela: tela => `See in ${tela}`,
-    falhouTitulo: 'The report failed',
-    falhouDescricao: (o, tela) => `The ${o} report could not be generated. The reason is in ${tela}.`,
+    falhouTitulo: 'Error generating the report',
+    falhouDescricao: (o, tela) => `The ${o} report was not generated. The reason is in ${tela}.`,
     download: n => `Downloading ${n}`,
     downloadVarios: n => `Downloading ${n} files in a .zip`,
     linkCopiado: 'Link copied. It only opens for people with access to the workspace.',
@@ -514,17 +488,16 @@ const en: Textos = {
   vazio: {
     titulo: 'No reports yet',
     descricao: 'To get a report, open an items or tasks table and click Extract Report. The file shows up here.',
-    acao: 'Go to Contracts',
     buscaTitulo: b => `Nothing found for "${b}"`,
     buscaDescricao: 'Search by category, view or template name.',
-    erroTitulo: 'Your reports could not be loaded',
-    erroDescricao: 'Your files are still saved. Try again in a moment.',
+    erroTitulo: 'Error loading reports',
+    erroDescricao: 'Your files are still saved. Try again in a few moments.',
   },
   sino: {
     titulo: 'Notifications',
     marcarLidas: 'Mark all as read',
     pronto: o => `Your ${o} report is ready`,
-    falhou: o => `The ${o} report failed`,
+    falhou: o => `Error generating the ${o} report`,
     semNotificacao: 'No new notifications',
   },
   itens: {
@@ -571,14 +544,6 @@ const es: Textos = {
     colunas: 'Columnas',
     limparFiltros: 'Limpiar filtros',
     atualizado: 'Se actualiza solo',
-  },
-  rapidos: {
-    titulo: 'Filtros Rápidos',
-    todos: 'Todos',
-    gerando: 'En proceso',
-    prontos: 'Listos',
-    falharam: 'Con error',
-    naoBaixados: 'Sin descargar',
   },
   colunas: {
     relatorio: 'Informe',
@@ -636,7 +601,7 @@ const es: Textos = {
     eventos: { pedido: 'Pediste el informe', gerado: 'Archivo generado', baixado: 'Lo descargaste', falhou: 'La generación falló', naFila: 'En cola para generar', gerando: 'Generando el archivo' },
     naFilaAjuda: 'Empieza en cuanto termine el informe anterior. Puedes salir de esta pantalla: el menú avisa cuando esté listo.',
     gerandoAjuda: 'Puedes salir de esta pantalla. El menú y la campana avisan cuando esté listo.',
-    falhouTitulo: 'No se pudo generar este informe',
+    falhouTitulo: 'Error al generar el informe',
     arquivo: 'Archivo',
     semFiltroAjuda: 'Salieron todos los registros de la vista.',
   },
@@ -652,8 +617,8 @@ const es: Textos = {
     prontoTitulo: 'Informe listo',
     prontoDescricao: (o, r) => `${o}, ${r}.`,
     verNaTela: tela => `Ver en ${tela}`,
-    falhouTitulo: 'El informe falló',
-    falhouDescricao: (o, tela) => `No se pudo generar el informe de ${o}. El motivo está en ${tela}.`,
+    falhouTitulo: 'Error al generar el informe',
+    falhouDescricao: (o, tela) => `El informe de ${o} no se generó. El motivo está en ${tela}.`,
     download: n => `Descargando ${n}`,
     downloadVarios: n => `Descargando ${n} archivos en un .zip`,
     linkCopiado: 'Enlace copiado. Solo abre para quien tiene acceso al workspace.',
@@ -665,17 +630,16 @@ const es: Textos = {
   vazio: {
     titulo: 'Todavía no hay informes',
     descricao: 'Para tener un informe, abre una tabla de ítems o de tareas y haz clic en Extraer Informe. El archivo aparece aquí.',
-    acao: 'Ir a Contratos',
     buscaTitulo: b => `Nada encontrado para "${b}"`,
     buscaDescricao: 'Busca por el nombre de la categoría, de la vista o de la plantilla.',
-    erroTitulo: 'No se pudieron cargar tus informes',
+    erroTitulo: 'Error al cargar los informes',
     erroDescricao: 'Tus archivos siguen guardados. Inténtalo de nuevo en unos instantes.',
   },
   sino: {
     titulo: 'Notificaciones',
     marcarLidas: 'Marcar todas como leídas',
     pronto: o => `Tu informe de ${o} está listo`,
-    falhou: o => `El informe de ${o} falló`,
+    falhou: o => `Error al generar el informe de ${o}`,
     semNotificacao: 'No hay notificaciones nuevas',
   },
   itens: {

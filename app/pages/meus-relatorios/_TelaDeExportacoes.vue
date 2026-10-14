@@ -13,13 +13,14 @@
  * - Baixar na própria linha, sem abrir menu;
  * - clique na linha abre o painel de detalhes (`_PainelDoRelatorio.vue`);
  * - busca, período, filtros por status, origem e formato, e colunas.
+ * Sem a faixa "Filtros Rápidos" (rodada 2): o filtro de Status já cobre.
  */
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { EnTableColumn, EnTableSort } from '@be-enlighten/enspace-sdk-ui/base'
 import type { Formato, PedidoDeRelatorio, StatusDoPedido } from './mocks'
-import type { FiltrosDaTela, Periodo, Rapido } from './relatorios'
+import type { FiltrosDaTela, Periodo } from './relatorios'
 import {
-  COR_DO_FORMATO, COR_DO_STATUS, ICONE_DO_FORMATO, ICONE_DO_STATUS, casaRapido, dataCurta, filtrar,
+  COR_DO_FORMATO, COR_DO_STATUS, ICONE_DO_FORMATO, ICONE_DO_STATUS, dataCurta, filtrar,
   nomeDaOrigem, origensDaLista, tamanho,
 } from './relatorios'
 import type { Textos } from './textos'
@@ -41,7 +42,6 @@ const emit = defineEmits<{
   tentarDeNovo: [id: number]
   abrirOrigem: [id: number]
   copiarLink: [id: number]
-  irParaContratos: []
   recarregar: []
 }>()
 
@@ -52,28 +52,20 @@ const idioma = useIdioma()
 const filtros = reactive<FiltrosDaTela>({
   busca: '',
   periodo: 'todo',
-  rapido: 'todos',
   status: [],
   origem: [],
   formato: [],
 })
 
 const temFiltro = computed(() =>
-  !!filtros.busca || filtros.periodo !== 'todo' || filtros.rapido !== 'todos'
+  !!filtros.busca || filtros.periodo !== 'todo'
   || !!filtros.status.length || !!filtros.origem.length || !!filtros.formato.length)
 
 function limpar() {
-  Object.assign(filtros, { busca: '', periodo: 'todo', rapido: 'todos', status: [], origem: [], formato: [] })
+  Object.assign(filtros, { busca: '', periodo: 'todo', status: [], origem: [], formato: [] })
 }
 
-const semRapido = computed(() => filtrar(props.pedidos, filtros, props.t, true))
-const filtrados = computed(() => semRapido.value.filter(p => casaRapido(p, filtros.rapido)))
-
-const rapidos = computed(() => (['todos', 'gerando', 'prontos', 'falharam', 'naoBaixados'] as Rapido[]).map(r => ({
-  valor: r,
-  rotulo: props.t.rapidos[r],
-  total: semRapido.value.filter(p => casaRapido(p, r)).length,
-})))
+const filtrados = computed(() => filtrar(props.pedidos, filtros, props.t))
 
 const periodos = computed<DropdownMenuItem[]>(() => (Object.keys(props.t.barra.periodos) as Periodo[]).map(p => ({
   label: props.t.barra.periodos[p],
@@ -153,7 +145,7 @@ const menuDeColunas = computed<DropdownMenuItem[]>(() => colunas.value
 const ordem = ref<EnTableSort>({ key: 'criadoEm', direction: 'desc' })
 const pagina = ref(1)
 const POR_PAGINA = 15
-watch(() => [filtros.busca, filtros.periodo, filtros.rapido, filtros.status.length, filtros.origem.length, filtros.formato.length], () => { pagina.value = 1 })
+watch(() => [filtros.busca, filtros.periodo, filtros.status.length, filtros.origem.length, filtros.formato.length], () => { pagina.value = 1 })
 
 const STATUS_ORDEM: Record<StatusDoPedido, number> = { processing: 0, pending: 1, error: 2, complete: 3 }
 
@@ -300,25 +292,6 @@ function textoDoFiltro(p: PedidoDeRelatorio) {
       </div>
     </div>
 
-    <!-- Filtros Rápidos: a mesma faixa das tarefas rápidas do develop -->
-    <div v-if="pedidos.length && estado !== 'erro'" class="flex flex-wrap items-center gap-2 border-b border-default px-4 py-2">
-      <span class="mr-1 text-sm text-toned">{{ t.rapidos.titulo }}</span>
-      <UButton
-        v-for="r in rapidos"
-        :key="r.valor"
-        size="xs"
-        :color="filtros.rapido === r.valor ? 'primary' : 'neutral'"
-        :variant="filtros.rapido === r.valor ? 'soft' : 'outline'"
-        class="rounded-full transition-colors"
-        :aria-pressed="filtros.rapido === r.valor"
-        @click="filtros.rapido = r.valor"
-      >
-        <UIcon v-if="r.valor === 'gerando' && r.total" name="i-lucide-loader-circle" class="size-3.5 animate-spin text-info" />
-        {{ r.rotulo }}
-        <span class="tabular-nums text-muted">{{ r.total }}</span>
-      </UButton>
-    </div>
-
     <!-- ESTADOS -->
     <UEmpty
       v-if="estado === 'erro'"
@@ -326,14 +299,13 @@ function textoDoFiltro(p: PedidoDeRelatorio) {
       :title="t.vazio.erroTitulo"
       :description="t.vazio.erroDescricao"
       :actions="[{ label: t.acoes.tentarDeNovo, icon: 'i-lucide-rotate-cw', color: 'primary', onClick: () => emit('recarregar') }]"
-      class="mt-16"
+      class="mx-auto mt-16 max-w-md"
     />
     <UEmpty
       v-else-if="estado === 'vazio' || (!pedidos.length && estado !== 'carregando')"
       icon="i-lucide-file-down"
       :title="t.vazio.titulo"
       :description="t.vazio.descricao"
-      :actions="[{ label: t.vazio.acao, icon: 'i-lucide-arrow-right', color: 'primary', variant: 'soft', onClick: () => emit('irParaContratos') }]"
       class="mx-auto mt-16 max-w-md"
     />
     <UEmpty
