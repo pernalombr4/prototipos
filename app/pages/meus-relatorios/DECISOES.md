@@ -207,3 +207,13 @@ separado; os pontos de acessibilidade abaixo saíram da mesma crítica.
   aceita o ponteiro no print. Conferido na tela.
 - **Ver:** `/meus-relatorios` · `evidencias/rodada3-01-nome-e-descricao.jpg`,
   `evidencias/rodada3-02-painel-com-nome.jpg`
+
+## Rodada 4 · 2026-10-14
+
+- **Pedido (literal):** "nao precisa ter histórico nos dados do relatorio. isso nao faz sentido. pode tirar e
+  commitar de novo." / "pode deixar ele na pagina de prototipos marcado nao como em revisao, mas como um dos
+  prototipos já prontos!"
+- **Mudou:** a seção Histórico saiu do painel do relatório. O painel termina nas colunas do arquivo; a linha
+  "Baixado" do Resumo continua.
+- **Mudou:** o protótipo passa a **aprovado**, no card do índice (`definePageMeta`) e no `README.md`.
+- **Ver:** `/meus-relatorios` · `evidencias/rodada4-01-painel-sem-historico.jpg`

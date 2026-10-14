@@ -7,7 +7,7 @@
  * se edita, então o painel é estreito e sem rodapé de Salvar.
  *
  * Ordem: o que a pessoa veio fazer (baixar) no topo; o que explica o arquivo
- * (resumo, filtros, colunas) no meio; o histórico no fim.
+ * (resumo, filtros, colunas) embaixo. Sem histórico (rodada 4).
  */
 import type { PedidoDeRelatorio } from './mocks'
 import {
@@ -47,17 +47,6 @@ const peso = computed(() => p.value.processed_report ? tamanho(p.value.processed
 
 const colunasVisiveis = computed(() => todasAsColunas.value ? p.value.proto.colunas : p.value.proto.colunas.slice(0, 6))
 
-interface Evento { icone: string, cor: string, texto: string, quando: string }
-
-const historico = computed<Evento[]>(() => {
-  const e: Evento[] = [{ icone: 'i-lucide-send', cor: 'text-muted', texto: props.t.painel.eventos.pedido, quando: dataLonga(p.value.created_at, idioma.value) }]
-  if (p.value.status === 'pending') e.push({ icone: 'i-lucide-clock', cor: 'text-muted', texto: props.t.painel.eventos.naFila, quando: '' })
-  if (p.value.status === 'processing') e.push({ icone: 'i-lucide-loader-circle', cor: 'text-info animate-spin', texto: props.t.painel.eventos.gerando, quando: '' })
-  if (p.value.status === 'error') e.push({ icone: 'i-lucide-circle-alert', cor: 'text-error', texto: props.t.painel.eventos.falhou, quando: dataLonga(p.value.updated_at, idioma.value) })
-  if (pronto.value) e.push({ icone: 'i-lucide-file-check', cor: 'text-success', texto: props.t.painel.eventos.gerado, quando: dataLonga(p.value.updated_at, idioma.value) })
-  for (const b of p.value.proto.baixadoEm) e.push({ icone: 'i-lucide-download', cor: 'text-primary', texto: props.t.painel.eventos.baixado, quando: dataLonga(b, idioma.value) })
-  return e.reverse()
-})
 
 async function baixar() {
   baixando.value = true
@@ -220,7 +209,7 @@ const maisAcoes = computed(() => [
       </section>
 
       <!-- Colunas exportadas -->
-      <section class="border-b border-default p-4">
+      <section class="p-4">
         <h3 class="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">{{ t.painel.colunasExportadas(p.proto.colunas.length) }}</h3>
         <div class="flex flex-wrap gap-1.5">
           <TransitionGroup
@@ -238,20 +227,6 @@ const maisAcoes = computed(() => [
             @click="todasAsColunas = !todasAsColunas"
           />
         </div>
-      </section>
-
-      <!-- Histórico -->
-      <section class="p-4">
-        <h3 class="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">{{ t.painel.historico }}</h3>
-        <ol class="relative space-y-3 border-l border-default pl-4">
-          <li v-for="(e, i) in historico" :key="i" class="relative">
-            <span class="absolute -left-[1.6rem] flex size-5 items-center justify-center rounded-full bg-default ring-1 ring-default">
-              <UIcon :name="e.icone" class="size-3" :class="e.cor" />
-            </span>
-            <p class="text-sm text-highlighted">{{ e.texto }}</p>
-            <p v-if="e.quando" class="text-xs text-muted">{{ e.quando }}</p>
-          </li>
-        </ol>
       </section>
     </div>
   </div>

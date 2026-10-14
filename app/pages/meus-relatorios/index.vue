@@ -32,7 +32,7 @@ import { textos } from './textos'
 definePageMeta({
   titulo: 'Exportações no menu',
   descricao: 'A tela dos relatórios extraídos vira item fixo do menu lateral, na tabela nova, com painel de detalhes e Baixar. O aviso de extração acompanha a geração e termina com o botão de baixar.',
-  status: 'em-revisao',
+  status: 'aprovado',
   atualizado: '2026-10-14',
   tela: 'Meus Relatórios (/myReports)',
 })
