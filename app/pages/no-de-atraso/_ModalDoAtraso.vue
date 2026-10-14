@@ -249,6 +249,15 @@ function mostrarGrupo(situacao: 'agendado' | 'passou' | 'vazio') {
   if (achado) itemDaPrevia.value = achado.reference!
 }
 
+/**
+ * Lista dos dropdowns da proposta: sem o ✓ (ele empurrava o "?" da opção) e
+ * com a opção escolhida em fundo e semibold.
+ */
+const uiDaLista = {
+  itemTrailingIcon: 'hidden',
+  item: 'data-[state=checked]:font-semibold data-[state=checked]:text-highlighted data-[state=checked]:before:bg-elevated',
+}
+
 const calculoAberto = ref(false)
 const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2))
 </script>
@@ -318,7 +327,7 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                     </template>
                   </UTooltip>
                 </template>
-                <USelect v-model="rascunho.mode" :items="itensDeModo" class="w-full">
+                <USelect v-model="rascunho.mode" :ui="uiDaLista" :items="itensDeModo" class="w-full">
                   <template #item-trailing="{ item }">
                     <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
                       <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />
@@ -346,7 +355,7 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                     />
                   </UFormField>
                   <UFormField :label="t.hoje.unidade" :help="p.instrucoes.unidade">
-                    <USelect v-model="rascunho.unit" :items="unidadesDeHoje" class="w-full">
+                    <USelect v-model="rascunho.unit" :ui="uiDaLista" :items="unidadesDeHoje" class="w-full">
                       <template #item-trailing="{ item }">
                         <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
                           <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />
@@ -362,7 +371,7 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                        O fim da frase é o lugar de soltar a variável arrastada de Variáveis de Entrada. -->
                   <!-- Sem :error no UFormField: ele pinta a frase inteira. Só a data fica vermelha, e a mensagem vem embaixo. -->
                   <UFormField :label="p.momento" :help="p.instrucoes.momento">
-                    <USelect v-model="rascunho.offset_direction" :items="momentos" class="w-full sm:w-72">
+                    <USelect v-model="rascunho.offset_direction" :ui="uiDaLista" :items="momentos" class="w-full sm:w-72">
                       <template #item-trailing="{ item }">
                         <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
                           <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />
@@ -393,7 +402,7 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                             :aria-label="p.quanto"
                             class="w-24"
                           />
-                          <USelect v-model="rascunho.offset_unit" :items="unidadesDoDeslocamento" class="w-28">
+                          <USelect v-model="rascunho.offset_unit" :ui="uiDaLista" :items="unidadesDoDeslocamento" class="w-28">
                             <template #item-trailing="{ item }">
                               <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
                                 <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />
@@ -464,6 +473,7 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                   <UFormField :label="p.horario" :help="horarioDesligado ? p.horarioEmHoras : p.instrucoes.horario">
                     <USelect
                       v-model="rascunho.time"
+                      :ui="uiDaLista"
                       :items="opcoesDeHorario"
                       :disabled="horarioDesligado"
                       icon="i-lucide-clock-3"
@@ -473,7 +483,7 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
 
                   <div class="grid gap-4 sm:grid-cols-2">
                     <UFormField :label="p.sePassou" :help="p.instrucoes.sePassou">
-                      <USelect v-model="rascunho.if_past" :items="opcoesDePassou" class="w-full">
+                      <USelect v-model="rascunho.if_past" :ui="uiDaLista" :items="opcoesDePassou" class="w-full">
                         <template #item-trailing="{ item }">
                           <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
                             <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />
@@ -482,7 +492,7 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                       </USelect>
                     </UFormField>
                     <UFormField :label="p.seVazio" :help="p.instrucoes.seVazio">
-                      <USelect v-model="rascunho.if_empty" :items="opcoesDeVazio" class="w-full">
+                      <USelect v-model="rascunho.if_empty" :ui="uiDaLista" :items="opcoesDeVazio" class="w-full">
                         <template #item-trailing="{ item }">
                           <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
                             <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />

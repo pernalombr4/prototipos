@@ -315,3 +315,16 @@ proposta; sem ela, a data é calculada uma vez, na entrada do nó, como em todos
   item não tem a data preenchida."). A simulação: "Continua em 13/02/2027, às 09:00."
 - **Ver:** `/no-de-atraso` · `evidencias/proposta-12-rotulos-curtos-antes-da-data.jpg`,
   `evidencias/proposta-13-rotulos-curtos-na-data.jpg`
+
+## Rodada 9 · 2026-10-14
+
+- **Pedido (literal):** "nao precisa ter um check ao selecionar, só um destaque de background e a opçao em
+  semibold. pra nao empurrar o simbolo do tooltip"
+- **Mudou:** nos dropdowns da proposta, a opção escolhida não tem mais ✓; fica com fundo (`bg-elevated`) e
+  semibold. O "?" de todas as opções fica na mesma coluna.
+- **Componente:** prop `ui` do `USelect`, sem CSS próprio: `itemTrailingIcon: 'hidden'` e, em `item`,
+  `data-[state=checked]:font-semibold data-[state=checked]:text-highlighted data-[state=checked]:before:bg-elevated`
+  (o fundo do item vem do `before:`, como o hover do tema). Vale para os 8 dropdowns da proposta, Horário
+  incluído.
+- **Fronteira:** a versão "Como é hoje" continua com o ✓, como o develop.
+- **Ver:** `/no-de-atraso` · `evidencias/proposta-14-opcao-escolhida-sem-check.jpg`
