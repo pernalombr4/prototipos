@@ -44,7 +44,7 @@ export type UnidadeDoDeslocamento = 'hour' | 'day' | 'week' | 'month'
 export interface EsperaAteData {
   /** "por um tempo" (o de hoje) ou "até uma data do item". */
   mode: ModoDeEspera
-  /** O campo de data, como `<id do nó>.<refId do campo>`. Nulo até a pessoa escolher. */
+  /** A variável da data, arrastada do painel: `{{nodes.trig.data_de_vencimento_contrato}}`. Nulo até a pessoa preencher. */
   date_source: string | null
   offset_amount: number
   offset_unit: UnidadeDoDeslocamento
@@ -80,7 +80,7 @@ export function configuracaoDoCliente(): ConfiguracaoDoAtraso {
     ...configuracaoNova(),
     label: 'Aguardar 30 dias antes do vencimento',
     mode: 'until_date',
-    date_source: 'start.data_de_vencimento',
+    date_source: EXEMPLO_DE_VARIAVEL,
   }
 }
 
@@ -96,36 +96,63 @@ export const fluxo: Pick<Workflow, 'id' | 'name' | 'status' | 'version'> = {
 }
 
 /* ------------------------------------------------------------------ *
- * Os campos de data que chegam até o Atraso                           *
+ * As variáveis que chegam até o Atraso                                *
  * ------------------------------------------------------------------ */
 
 /**
- * Um campo de data disponível como variável. `rotulo` vem do `label` do
- * campo; `comHora` diz se o campo guarda hora (EnlCalendar com hora, ou as
- * datas de sistema).
+ * Uma variável do painel "Variáveis de Entrada", como o develop mostra em
+ * 14/10/2026: o Start traz ID, Criado em, Editar em, Referência, E-mail do
+ * Requisitante, Display e o grupo "data" com os campos do item. O arrasto do
+ * develop entrega `{ key, label, meta: { dataType, icon } }`; `tipo` aqui é o
+ * `dataType`. A chave segue o exemplo da redatora: `{{nodes.trig.<campo>}}`.
  */
-export interface CampoDeData extends Pick<Field, 'refId' | 'type' | 'label'> {
-  /** Inventado pelo protótipo: o nó de onde a variável vem. */
-  no: { id: string, rotulo: string }
-  comHora: boolean
-  /** Inventado pelo protótipo: data de sistema do item (criado, atualizado). */
+export interface Variavel extends Pick<Field, 'refId' | 'label'> {
+  tipo: 'Date' | 'String' | 'Number' | 'Object'
+  icone: string
+  /** Inventado pelo protótipo: o campo guarda hora além da data. */
+  comHora?: boolean
+  /** Inventado pelo protótipo: data de sistema do item (criado, editado). */
   sistema?: boolean
+  filhos?: Variavel[]
 }
 
-const doInicio = { id: 'start', rotulo: 'Início' }
+/** O nó de gatilho, como a árvore do painel nomeia: "Start - (trigger)". */
+export const noDeGatilho = { id: 'trig', rotulo: 'Start' }
 
-export const camposDeData: CampoDeData[] = [
-  { refId: 'data_de_vencimento', type: 'EnlCalendar', label: 'Data de vencimento', no: doInicio, comHora: false },
-  { refId: 'inicio_da_vigencia', type: 'EnlCalendar', label: 'Início da vigência', no: doInicio, comHora: false },
-  { refId: 'data_de_assinatura', type: 'EnlCalendar', label: 'Data de assinatura', no: doInicio, comHora: false },
-  { refId: 'prazo_para_aviso_de_rescisao', type: 'EnlCalendar', label: 'Prazo para aviso de rescisão', no: doInicio, comHora: false },
-  { refId: 'created_at', type: 'EnlCalendar', label: 'Criado em', no: doInicio, comHora: true, sistema: true },
-  { refId: 'updated_at', type: 'EnlCalendar', label: 'Atualizado em', no: doInicio, comHora: true, sistema: true },
+export function chaveDaVariavel(v: Pick<Variavel, 'refId'>) {
+  return `{{nodes.${noDeGatilho.id}.${v.refId}}}`
+}
+
+const icones = { Number: 'i-lucide-hash', Date: 'i-lucide-calendar', String: 'i-lucide-type', Object: 'i-lucide-braces' } as const
+
+function v(refId: string, label: string, tipo: Variavel['tipo'], extra: Partial<Variavel> = {}): Variavel {
+  return { refId, label, tipo, icone: icones[tipo], ...extra }
+}
+
+export const variaveisDoGatilho: Variavel[] = [
+  v('id', 'ID', 'Number'),
+  v('created_at', 'Criado em', 'Date', { comHora: true, sistema: true }),
+  v('updated_at', 'Editar em', 'Date', { comHora: true, sistema: true }),
+  v('reference', 'Referência (Contratos)', 'String'),
+  v('request_email', 'E-mail do Requisitante', 'String'),
+  v('display', 'Display', 'String'),
+  v('data', 'data', 'Object', {
+    filhos: [
+      v('contratante_contrato', 'Contratante', 'String'),
+      v('valor_contrato', 'Valor do contrato', 'Number'),
+      v('data_de_assinatura_contrato', 'Data de assinatura', 'Date'),
+      v('inicio_da_vigencia_contrato', 'Início da vigência', 'Date'),
+      v('data_de_vencimento_contrato', 'Data de vencimento', 'Date'),
+      v('prazo_aviso_rescisao_contrato', 'Prazo para aviso de rescisão', 'Date'),
+    ],
+  }),
 ]
 
-export function chaveDoCampo(c: CampoDeData) {
-  return `${c.no.id}.${c.refId}`
-}
+/** Todas as variáveis, sem a árvore. */
+export const todasAsVariaveis: Variavel[] = variaveisDoGatilho.flatMap(x => x.filhos ?? [x])
+
+/** O exemplo que o campo mostra vazio e que o caso do cliente usa. */
+export const EXEMPLO_DE_VARIAVEL = '{{nodes.trig.data_de_vencimento_contrato}}'
 
 /* ------------------------------------------------------------------ *
  * Os contratos que a prévia usa                                       *
@@ -135,12 +162,12 @@ export function chaveDoCampo(c: CampoDeData) {
 export type Contrato = Pick<Item, 'id' | 'reference' | 'status'> & {
   data: {
     titulo: string
-    contratante: string
+    contratante_contrato: string
     /** 'AAAA-MM-DD' ou null quando ninguém preencheu. */
-    data_de_vencimento: string | null
-    inicio_da_vigencia: string | null
-    data_de_assinatura: string | null
-    prazo_para_aviso_de_rescisao: string | null
+    data_de_vencimento_contrato: string | null
+    inicio_da_vigencia_contrato: string | null
+    data_de_assinatura_contrato: string | null
+    prazo_aviso_rescisao_contrato: string | null
   }
   created_at: string
   updated_at: string
@@ -191,11 +218,11 @@ export const contratos: Contrato[] = distancias.map((dist, i) => {
     status: 'active',
     data: {
       titulo: `${objetos[i % objetos.length]}`,
-      contratante: empresas[i % empresas.length]!,
-      data_de_vencimento: vencimento ? iso(vencimento) : null,
-      inicio_da_vigencia: iso(diasDepois(assinatura, 5)),
-      data_de_assinatura: iso(assinatura),
-      prazo_para_aviso_de_rescisao: vencimento ? iso(diasDepois(vencimento, -60)) : null,
+      contratante_contrato: empresas[i % empresas.length]!,
+      data_de_vencimento_contrato: vencimento ? iso(vencimento) : null,
+      inicio_da_vigencia_contrato: iso(diasDepois(assinatura, 5)),
+      data_de_assinatura_contrato: iso(assinatura),
+      prazo_aviso_rescisao_contrato: vencimento ? iso(diasDepois(vencimento, -60)) : null,
     },
     created_at: diasDepois(AGORA, -(i % 9)).toISOString(),
     updated_at: diasDepois(AGORA, -(i % 4)).toISOString(),

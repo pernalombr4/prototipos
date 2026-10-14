@@ -163,3 +163,44 @@ proposta; sem ela, a data é calculada uma vez, na entrada do nó, como em todos
 - **CSS próprio:** nenhum. O tooltip de várias linhas usa a prop `ui.content` (`h-auto max-w-80 flex-col`);
   o tema dele fixa `h-6`.
 - **Ver:** `/no-de-atraso` · `evidencias/proposta-05-tipo-de-atraso-dropdown.jpg`
+
+## Rodada 4 · 2026-10-14
+
+- **Pedido (literal):** "todos os campos devem ter um instruction abaixo, curto, explicando pra que ele serve,
+  porque o user é realmente muito leigo / e campos que voce botou como radio buttons pode colocar como dropdown
+  tambem na configuração / o campo de data não é selecionável. é um campo aberto pra arrastar uma variavel pra
+  ele. voce pode botar já essa variável escrita ali num exemplo pra facilitar, do tipo
+  {{nodes.trig.data_de_vencimento_contrato}}"
+- **Mudou:** todo campo da proposta tem uma instrução curta embaixo (o `help` do `UFormField`): Nome do Nó,
+  Tipo de atraso, Quantidade de Tempo, Unidade, Campo de data, Retomar a execução, Horário de retomada e as 2
+  regras. O "?" de Tipo de atraso continua com a descrição dos 2 tipos.
+- **Mudou:** "Quando a data calculada já tiver passado" e "Quando o campo não estiver preenchido" viram
+  dropdown.
+- **Mudou:** o Campo de data deixa de ser lista e vira campo aberto, que recebe a variável arrastada.
+  - Vazio, mostra o exemplo `{{nodes.trig.data_de_vencimento_contrato}}`; no caso do cliente, vem preenchido
+    com ele.
+  - Ao arrastar por cima, o campo ganha contorno e o texto "Solte aqui para usar esta data".
+  - Com variável de data, aparece "Usando Data de vencimento, do nó Start.", em verde.
+  - Com variável que não é data (ex.: Contratante), o erro diz "Contratante não é uma data. Arraste uma
+    variável de data." Texto que não bate com nenhuma variável dá "Variável não encontrada entre as que chegam
+    a este nó."
+  - Aceita também o formato que o painel do develop entrega hoje, `{{ input.data.<campo> }}`.
+- **Mudou:** a faixa ENTRADA abre o painel **Variáveis de Entrada**, cópia do develop: título, "Arraste as
+  variáveis para os campos que você deseja configurar.", "Filtrar por nome ou chave...", a árvore
+  "Start - (trigger)" com ID, Criado em, Editar em, Referência, E-mail do Requisitante, Display e o grupo
+  "data" com os campos do contrato. O arrasto leva o mesmo pacote do develop (`key`, `label`,
+  `meta.dataType`). Proposta sobre a casca: ao escolher "Data de referência" com o campo vazio, o painel abre
+  sozinho; e um botão no fim do campo também abre o painel. Data aparece com ícone em destaque na árvore.
+- **Mudou:** a faixa ENTRADA fica depois do formulário no DOM, com `order-first`, para o primeiro foco do
+  modal continuar no X.
+- **Mudou:** o cenário do andaime "Sem campo de data" vira "Sem variável": o painel abre vazio com "Nenhuma
+  variável chega até este nó."
+- **Fronteira:** muda o modal do Atraso e o comportamento da faixa ENTRADA dentro dele. Não muda o painel de
+  variáveis dos outros nós.
+- **Achado do develop:** o painel entrega `{{ input.data.vitrine_data }}` (medido em 14/10/2026, arrastando
+  "Data (Calendário)"), e não o formato `{{nodes.trig.…}}` do exemplo. O protótipo usa o formato do exemplo e
+  aceita os 2; qual vale no produto é decisão do time.
+- **Não deu:** print da rodada. A janela do Chrome ficou minimizada e não renderiza. O arrasto, os erros e o
+  foco foram conferidos pelo DOM: variável de texto dá o erro, variável de data dá "Usando…", o primeiro foco
+  é o X.
+- **Ver:** `/no-de-atraso` · `evidencias/dev-05-variaveis-de-entrada.jpg` (o painel no develop)

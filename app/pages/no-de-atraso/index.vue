@@ -19,7 +19,7 @@ import CascaDasConfiguracoes from './_CascaDasConfiguracoes.vue'
 import EditorDoSpaceflow from './_EditorDoSpaceflow.vue'
 import ModalDoAtraso from './_ModalDoAtraso.vue'
 import type { ConfiguracaoDoAtraso } from './mocks'
-import { camposDeData, configuracaoDoCliente, configuracaoNova, contratos, fluxo, workspace } from './mocks'
+import { configuracaoDoCliente, configuracaoNova, contratos, fluxo, variaveisDoGatilho, workspace } from './mocks'
 import { campoEscolhido } from './espera'
 import { textos } from './textos'
 
@@ -45,7 +45,7 @@ const cenarios: { valor: Cenario, rotulo: string }[] = [
   { valor: 'cliente', rotulo: 'Caso do cliente' },
   { valor: 'novo', rotulo: 'Nó novo' },
   { valor: 'erro', rotulo: 'Salvar sem campo' },
-  { valor: 'semCampos', rotulo: 'Sem campo de data' },
+  { valor: 'semCampos', rotulo: 'Sem variável' },
 ]
 
 function configDoCenario(c: Cenario): ConfiguracaoDoAtraso {
@@ -56,7 +56,7 @@ function configDoCenario(c: Cenario): ConfiguracaoDoAtraso {
 }
 
 const config = ref<ConfiguracaoDoAtraso>(configuracaoDoCliente())
-const campos = computed(() => cenario.value === 'semCampos' ? [] : camposDeData)
+const variaveis = computed(() => cenario.value === 'semCampos' ? [] : variaveisDoGatilho)
 const modalAberto = ref(false)
 
 /** Reabre do zero: se a aba abriu em segundo plano, o modal pode ter ficado "aberto" sem aparecer. */
@@ -129,7 +129,7 @@ function reiniciar() {
       v-model:config="config"
       :t="t"
       :versao="versao"
-      :campos="campos"
+      :variaveis="variaveis"
       :contratos="contratos"
       :validar-ao-abrir="cenario === 'erro'"
     />

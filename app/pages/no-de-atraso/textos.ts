@@ -73,6 +73,12 @@ export interface Textos {
     modificado: string
     entrada: string
     saida: string
+    /** O painel que a faixa ENTRADA abre, copiado do develop. */
+    variaveisDeEntrada: string
+    arrasteAsVariaveis: string
+    filtrar: string
+    recolher: string
+    gatilho: string
   }
 
   proposta: {
@@ -84,13 +90,13 @@ export interface Textos {
     direcoes: Record<Direcao, string>
     unidadeDoDeslocamento: (u: UnidadeDoDeslocamento, n: number) => string
     campo: string
-    campoPlaceholder: string
-    campoBusca: string
-    doNo: (no: string) => string
-    dataDeSistema: string
-    comHora: string
-    semCampos: string
     erroCampo: string
+    naoEhData: (variavel: string) => string
+    naoReconhecida: string
+    lidaComo: (campo: string, no: string) => string
+    soltarAqui: string
+    semVariaveis: string
+    abrirVariaveis: string
     horario: string
     horarioDoCampo: string
     fuso: string
@@ -120,6 +126,18 @@ export interface Textos {
     resumoData: (quanto: string, direcao: string, campo: string, hora: string | null) => string
     resumoVazio: string
     salvo: string
+    /** A instrução curta embaixo de cada campo. */
+    instrucoes: {
+      nome: string
+      tipo: string
+      quantidade: string
+      unidade: string
+      campo: string
+      retomar: string
+      horario: string
+      sePassou: string
+      seVazio: string
+    }
   }
 }
 
@@ -218,6 +236,11 @@ const pt: Textos = {
     modificado: 'Modificado',
     entrada: 'ENTRADA',
     saida: 'SAÍDA',
+    variaveisDeEntrada: 'Variáveis de Entrada',
+    arrasteAsVariaveis: 'Arraste as variáveis para os campos que você deseja configurar.',
+    filtrar: 'Filtrar por nome ou chave...',
+    recolher: 'Recolher',
+    gatilho: '(trigger)',
   },
   proposta: {
     esperar: 'Tipo de atraso',
@@ -231,13 +254,13 @@ const pt: Textos = {
     direcoes: { before: 'antes de', after: 'depois de', on: 'na data de' },
     unidadeDoDeslocamento: (u, n) => unidadesPt[u][n === 1 ? 0 : 1],
     campo: 'Campo de data',
-    campoPlaceholder: 'Selecione o campo de data',
-    campoBusca: 'Buscar campo...',
-    doNo: no => `Nó ${no}`,
-    dataDeSistema: 'sistema',
-    comHora: 'data e hora',
-    semCampos: 'Nenhum campo de data está disponível neste nó. Configure o nó Início com uma categoria que tenha campo de data.',
-    erroCampo: 'Selecione o campo de data.',
+    erroCampo: 'Arraste uma variável de data para este campo.',
+    naoEhData: variavel => `${variavel} não é uma data. Arraste uma variável de data.`,
+    naoReconhecida: 'Variável não encontrada entre as que chegam a este nó. Confira o nome ou arraste de Variáveis de Entrada.',
+    lidaComo: (campo, no) => `Usando ${campo}, do nó ${no}.`,
+    soltarAqui: 'Solte aqui para usar esta data',
+    semVariaveis: 'Nenhuma variável chega até este nó. Ligue um nó antes do Atraso.',
+    abrirVariaveis: 'Abrir Variáveis de Entrada',
     horario: 'Horário de retomada',
     horarioDoCampo: 'Horário registrado no campo',
     fuso: 'Fuso horário do workspace: Brasília (UTC−3).',
@@ -271,6 +294,17 @@ const pt: Textos = {
     resumoData: (quanto, direcao, campo, hora) => `Retoma ${quanto ? `${quanto} ` : ''}${direcao} ${campo}${hora ? `, às ${hora}` : ''}.`,
     resumoVazio: 'Atraso não configurado.',
     salvo: 'Nó de Atraso salvo',
+    instrucoes: {
+      nome: 'Nome que aparece no card do nó, no fluxo.',
+      tipo: 'Define se o fluxo espera um tempo fixo ou até uma data.',
+      quantidade: 'Por quanto tempo o fluxo fica parado neste nó.',
+      unidade: 'Medida da quantidade de tempo.',
+      campo: 'Arraste aqui a variável com a data de base, a partir de Variáveis de Entrada.',
+      retomar: 'Quanto tempo antes ou depois dessa data o fluxo continua.',
+      horario: 'Hora do dia em que o fluxo continua, no fuso do workspace: Brasília (UTC−3).',
+      sePassou: 'O que fazer se a data calculada já tiver passado quando o item chegar a este nó.',
+      seVazio: 'O que fazer se o item não tiver essa data preenchida.',
+    },
   },
 }
 
@@ -314,6 +348,11 @@ const en: Textos = {
     modificado: 'Modified',
     entrada: 'INPUT',
     saida: 'OUTPUT',
+    variaveisDeEntrada: 'Input Variables',
+    arrasteAsVariaveis: 'Drag the variables to the fields you want to set up.',
+    filtrar: 'Filter by name or key...',
+    recolher: 'Collapse',
+    gatilho: '(trigger)',
   },
   proposta: {
     esperar: 'Delay type',
@@ -327,13 +366,13 @@ const en: Textos = {
     direcoes: { before: 'before', after: 'after', on: 'on' },
     unidadeDoDeslocamento: (u, n) => unidadesEn[u][n === 1 ? 0 : 1],
     campo: 'Date field',
-    campoPlaceholder: 'Select the date field',
-    campoBusca: 'Search field...',
-    doNo: no => `${no} node`,
-    dataDeSistema: 'system',
-    comHora: 'date and time',
-    semCampos: 'No date field is available in this node. Set up the Start node with a category that has a date field.',
-    erroCampo: 'Select the date field.',
+    erroCampo: 'Drag a date variable to this field.',
+    naoEhData: variavel => `${variavel} is not a date. Drag a date variable.`,
+    naoReconhecida: 'Variable not found among the ones that reach this node. Check the name or drag it from Input Variables.',
+    lidaComo: (campo, no) => `Using ${campo}, from the ${no} node.`,
+    soltarAqui: 'Drop here to use this date',
+    semVariaveis: 'No variable reaches this node. Connect a node before the Delay.',
+    abrirVariaveis: 'Open Input Variables',
     horario: 'Resume time',
     horarioDoCampo: 'Time saved in the field',
     fuso: 'Workspace time zone: Brasília (UTC−3).',
@@ -367,6 +406,17 @@ const en: Textos = {
     resumoData: (quanto, direcao, campo, hora) => `Resumes ${quanto ? `${quanto} ` : ''}${direcao} ${campo}${hora ? `, at ${hora}` : ''}.`,
     resumoVazio: 'Delay not configured.',
     salvo: 'Delay node saved',
+    instrucoes: {
+      nome: 'Name shown on the node card, in the flow.',
+      tipo: 'Defines whether the flow waits a fixed time or until a date.',
+      quantidade: 'How long the flow stays paused at this node.',
+      unidade: 'Unit of the amount of time.',
+      campo: 'Drag here the variable with the base date, from Input Variables.',
+      retomar: 'How long before or after that date the flow continues.',
+      horario: 'Time of day when the flow continues, in the workspace time zone: Brasília (UTC−3).',
+      sePassou: 'What to do if the calculated date has already passed when the item reaches this node.',
+      seVazio: 'What to do if the item does not have this date filled in.',
+    },
   },
 }
 
@@ -410,6 +460,11 @@ const es: Textos = {
     modificado: 'Modificado',
     entrada: 'ENTRADA',
     saida: 'SALIDA',
+    variaveisDeEntrada: 'Variables de Entrada',
+    arrasteAsVariaveis: 'Arrastre las variables a los campos que desea configurar.',
+    filtrar: 'Filtrar por nombre o clave...',
+    recolher: 'Contraer',
+    gatilho: '(trigger)',
   },
   proposta: {
     esperar: 'Tipo de retraso',
@@ -423,13 +478,13 @@ const es: Textos = {
     direcoes: { before: 'antes de', after: 'después de', on: 'en la fecha de' },
     unidadeDoDeslocamento: (u, n) => unidadesEs[u][n === 1 ? 0 : 1],
     campo: 'Campo de fecha',
-    campoPlaceholder: 'Seleccione el campo de fecha',
-    campoBusca: 'Buscar campo...',
-    doNo: no => `Nodo ${no}`,
-    dataDeSistema: 'sistema',
-    comHora: 'fecha y hora',
-    semCampos: 'Ningún campo de fecha está disponible en este nodo. Configure el nodo Inicio con una categoría que tenga campo de fecha.',
-    erroCampo: 'Seleccione el campo de fecha.',
+    erroCampo: 'Arrastre una variable de fecha a este campo.',
+    naoEhData: variavel => `${variavel} no es una fecha. Arrastre una variable de fecha.`,
+    naoReconhecida: 'Variable no encontrada entre las que llegan a este nodo. Revise el nombre o arrástrela desde Variables de Entrada.',
+    lidaComo: (campo, no) => `Usando ${campo}, del nodo ${no}.`,
+    soltarAqui: 'Suelte aquí para usar esta fecha',
+    semVariaveis: 'Ninguna variable llega a este nodo. Conecte un nodo antes del Retraso.',
+    abrirVariaveis: 'Abrir Variables de Entrada',
     horario: 'Horario de reanudación',
     horarioDoCampo: 'Horario registrado en el campo',
     fuso: 'Zona horaria del workspace: Brasilia (UTC−3).',
@@ -463,6 +518,17 @@ const es: Textos = {
     resumoData: (quanto, direcao, campo, hora) => `Se reanuda ${quanto ? `${quanto} ` : ''}${direcao} ${campo}${hora ? `, a las ${hora}` : ''}.`,
     resumoVazio: 'Retraso no configurado.',
     salvo: 'Nodo de Retraso guardado',
+    instrucoes: {
+      nome: 'Nombre que aparece en la tarjeta del nodo, en el flujo.',
+      tipo: 'Define si el flujo espera un tiempo fijo o hasta una fecha.',
+      quantidade: 'Cuánto tiempo el flujo queda detenido en este nodo.',
+      unidade: 'Medida de la cantidad de tiempo.',
+      campo: 'Arrastre aquí la variable con la fecha base, desde Variables de Entrada.',
+      retomar: 'Cuánto tiempo antes o después de esa fecha continúa el flujo.',
+      horario: 'Hora del día en que continúa el flujo, en la zona horaria del workspace: Brasilia (UTC−3).',
+      sePassou: 'Qué hacer si la fecha calculada ya pasó cuando el ítem llega a este nodo.',
+      seVazio: 'Qué hacer si el ítem no tiene esta fecha completada.',
+    },
   },
 }
 

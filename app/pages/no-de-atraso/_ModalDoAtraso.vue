@@ -8,26 +8,30 @@
  * `versao="proposta"` é a proposta inteira:
  * 1. "Tipo de atraso", um dropdown com 2 opções (Duração fixa, a de hoje com
  *    número validado, e Data de referência), descritas no help do campo;
- * 2. a espera até a data se monta como frase: Continuar o fluxo [30] [dias]
- *    [antes de] [Data de vencimento], sem fórmula;
- * 3. horário e fuso, o que fazer com data passada e com campo vazio, e
- *    recalcular quando a data muda;
- * 4. a prévia com os itens da categoria, que mostra quando cada um continua e
+ * 2. o campo de data é um campo aberto que recebe a variável arrastada do
+ *    painel Variáveis de Entrada (o mesmo do develop, aberto pela faixa
+ *    ENTRADA). Vazio, mostra o exemplo `{{nodes.trig.data_de_vencimento_contrato}}`;
+ * 3. a regra se lê como frase: Retomar a execução [30] [dias] [antes de]
+ *    Data de vencimento, sem fórmula;
+ * 4. horário, data já passada e campo vazio em dropdown, e recalcular quando a
+ *    data muda. Todo campo tem uma instrução curta embaixo;
+ * 5. a simulação com os itens da categoria, que mostra quando cada um continua e
  *    quantos já passaram da data ou estão sem data;
- * 5. "Ver o cálculo", recolhido, com a conta em dayjs e o que o nó grava.
+ * 6. "Ver cálculo", recolhido, com a conta em dayjs e o que o nó grava.
  *
  * A moldura (ENTRADA e SAÍDA dos lados, cabeçalho, rodapé com "Modificado",
  * Cancelar e Salvar e fechar) é a do develop.
  */
-import type { CampoDeData, ConfiguracaoDoAtraso, Contrato, Direcao, Unidade, UnidadeDoDeslocamento } from './mocks'
+import type { ConfiguracaoDoAtraso, Contrato, Direcao, Unidade, UnidadeDoDeslocamento, Variavel } from './mocks'
 import type { Textos } from './textos'
-import { AGORA, chaveDoCampo } from './mocks'
-import { calcular, contar, dadoGravado, expressaoDayjs, horarios } from './espera'
+import { AGORA, EXEMPLO_DE_VARIAVEL, chaveDaVariavel, noDeGatilho } from './mocks'
+import { calcular, campoEscolhido, contar, dadoGravado, expressaoDayjs, horarios, lerVariavel } from './espera'
 
 const props = defineProps<{
   t: Textos
   versao: 'hoje' | 'proposta'
-  campos: CampoDeData[]
+  /** A árvore do painel Variáveis de Entrada. Vazia no cenário "sem variável". */
+  variaveis: Variavel[]
   contratos: Contrato[]
   /** Abre já mostrando os erros de validação (estado do andaime). */
   validarAoAbrir?: boolean
@@ -59,11 +63,21 @@ const modificado = computed(() => JSON.stringify(rascunho.value) !== JSON.string
 
 const quantidadeValida = computed(() => Number.isInteger(Number(rascunho.value.delay)) && Number(rascunho.value.delay) >= 1)
 const erroQuantidade = computed(() => tentouSalvar.value && rascunho.value.mode === 'duration' && !quantidadeValida.value)
-const erroCampo = computed(() => tentouSalvar.value && rascunho.value.mode === 'until_date' && !rascunho.value.date_source)
+/** O que a pessoa escreveu ou arrastou para o campo de data, lido como variável. */
+const variavelLida = computed(() => lerVariavel(rascunho.value.date_source))
+const erroCampo = computed<string | undefined>(() => {
+  if (rascunho.value.mode !== 'until_date') return undefined
+  const texto = rascunho.value.date_source?.trim()
+  if (!texto) return tentouSalvar.value ? p.value.erroCampo : undefined
+  if (!variavelLida.value) return p.value.naoReconhecida
+  if (variavelLida.value.tipo !== 'Date') return p.value.naoEhData(variavelLida.value.label ?? variavelLida.value.refId)
+  return undefined
+})
 
 function salvar() {
   tentouSalvar.value = true
-  if (props.versao === 'proposta' && (erroQuantidade.value || erroCampo.value)) return
+  const semData = rascunho.value.mode === 'until_date' && !campo.value
+  if (props.versao === 'proposta' && (erroQuantidade.value || erroCampo.value || semData)) return
   salvando.value = true
   setTimeout(() => {
     config.value = structuredClone(toRaw(rascunho.value))
@@ -88,18 +102,8 @@ const unidadesDoDeslocamento = computed(() => (['day', 'week', 'month', 'hour'] 
 
 const direcoes = computed(() => (['before', 'after', 'on'] as Direcao[]).map(d => ({ value: d, label: p.value.direcoes[d] })))
 
-/** Os campos agrupados pelo nó de onde vêm, como a lista de variáveis do CRUD faz. */
-const itensDeCampo = computed(() => {
-  const porNo = new Map<string, CampoDeData[]>()
-  for (const c of props.campos) porNo.set(c.no.rotulo, [...(porNo.get(c.no.rotulo) ?? []), c])
-  return [...porNo.entries()].map(([no, lista]) => [
-    { type: 'label' as const, label: p.value.doNo(no) },
-    ...lista.map(c => ({ value: chaveDoCampo(c), label: c.label ?? c.refId, icon: 'i-lucide-calendar', campo: c })),
-  ])
-})
-
-const campo = computed(() => props.campos.find(c => chaveDoCampo(c) === rascunho.value.date_source) ?? null)
-const nomeDoCampo = computed(() => campo.value?.label ?? p.value.campoPlaceholder)
+const campo = computed(() => campoEscolhido(rascunho.value))
+const nomeDoCampo = computed(() => campo.value?.label ?? p.value.campo.toLowerCase())
 
 const opcoesDeHorario = computed(() => [
   ...(campo.value?.comHora ? [{ value: 'field', label: p.value.horarioDoCampo }] : []),
@@ -121,13 +125,52 @@ const opcoesDeVazio = computed(() => [
   { value: 'continue', label: p.value.continuarNaHora },
 ])
 
+/* ---------- o painel Variáveis de Entrada e o arrasto ---------- */
+
+const painelAberto = ref(false)
+const filtro = ref('')
+const dataAberto = ref(true)
+
+// quem escolhe "Data de referência" com o campo vazio já vê de onde arrastar
+watch(() => rascunho.value.mode, (m) => {
+  if (m === 'until_date' && !rascunho.value.date_source) painelAberto.value = true
+})
+
+function bate(v: Variavel) {
+  const f = filtro.value.trim().toLowerCase()
+  return !f || (v.label ?? '').toLowerCase().includes(f) || v.refId.includes(f)
+}
+const arvore = computed(() => props.variaveis
+  .map(v => v.filhos ? { ...v, filhos: v.filhos.filter(bate) } : v)
+  .filter(v => v.filhos ? v.filhos.length > 0 : bate(v)))
+
+/** O mesmo pacote que o painel do develop põe no arrasto, com a chave no formato do exemplo. */
+function arrastar(e: DragEvent, v: Variavel) {
+  const key = chaveDaVariavel(v)
+  e.dataTransfer?.setData('application/json', JSON.stringify({ key, label: v.label, meta: { dataType: v.tipo } }))
+  e.dataTransfer?.setData('text/plain', key)
+  if (e.dataTransfer) e.dataTransfer.effectAllowed = 'copy'
+}
+
+const sobreOCampo = ref(false)
+function soltar(e: DragEvent) {
+  sobreOCampo.value = false
+  const json = e.dataTransfer?.getData('application/json')
+  let chave = e.dataTransfer?.getData('text/plain') ?? ''
+  if (json) {
+    try { chave = JSON.parse(json).key ?? chave }
+    catch { /* fica o texto */ }
+  }
+  if (chave) rascunho.value.date_source = chave
+}
+
 /* ---------- a prévia ---------- */
 
 const itemDaPrevia = ref('CT-0042')
 const contratoDaPrevia = computed(() => props.contratos.find(c => c.reference === itemDaPrevia.value) ?? props.contratos[0]!)
 const itensDaPrevia = computed(() => props.contratos.map(c => ({
   value: c.reference!,
-  label: `${c.reference} · ${c.data.contratante}`,
+  label: `${c.reference} · ${c.data.contratante_contrato}`,
 })))
 
 const retomada = computed(() => calcular(rascunho.value, contratoDaPrevia.value))
@@ -190,13 +233,6 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
   >
     <template #content>
       <div class="flex items-center">
-        <!-- ENTRADA, à esquerda, como no develop -->
-        <div class="-mr-2 hidden h-64 w-12 items-center justify-center rounded-l-xl border border-r-0 border-default bg-default/80 sm:flex">
-          <span class="flex rotate-180 items-center gap-2 text-xs font-semibold tracking-[0.2em] text-primary [writing-mode:vertical-rl]">
-            {{ t.hoje.entrada }}
-          </span>
-        </div>
-
         <div
           class="relative z-10 flex max-h-[min(88dvh,820px)] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border border-default bg-default shadow-xl"
           :class="versao === 'proposta' ? 'sm:w-[640px]' : 'sm:w-[548px]'"
@@ -210,7 +246,7 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
 
           <!-- Corpo -->
           <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-5">
-            <UFormField :label="t.hoje.nomeDoNo">
+            <UFormField :label="t.hoje.nomeDoNo" :help="versao === 'proposta' ? p.instrucoes.nome : undefined">
               <template #hint>
                 <UTooltip :text="t.hoje.ajudaNome"><UIcon name="i-lucide-circle-help" class="size-4 text-muted" /></UTooltip>
               </template>
@@ -236,7 +272,7 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
 
             <!-- ============ PROPOSTA ============ -->
             <template v-else>
-              <UFormField :label="p.esperar">
+              <UFormField :label="p.esperar" :help="p.instrucoes.tipo">
                 <template #hint>
                   <!-- O help traz a descrição dos 2 tipos, como os "?" dos outros campos do nó -->
                   <UTooltip :ui="{ content: 'h-auto max-w-80 flex-col items-start gap-1.5 py-2 text-xs' }">
@@ -260,7 +296,7 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
               >
                 <!-- Por um tempo -->
                 <div v-if="rascunho.mode === 'duration'" key="tempo" class="grid gap-4 sm:grid-cols-2">
-                  <UFormField :label="t.hoje.quantidade" required :error="erroQuantidade ? p.erroQuantidade : undefined">
+                  <UFormField :label="t.hoje.quantidade" required :help="p.instrucoes.quantidade" :error="erroQuantidade ? p.erroQuantidade : undefined">
                     <UInputNumber
                       :model-value="Number(rascunho.delay) || undefined"
                       :min="1"
@@ -269,47 +305,51 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                       @update:model-value="(v) => (rascunho.delay = v ?? '')"
                     />
                   </UFormField>
-                  <UFormField :label="t.hoje.unidade">
+                  <UFormField :label="t.hoje.unidade" :help="p.instrucoes.unidade">
                     <USelect v-model="rascunho.unit" :items="unidadesDeHoje" class="w-full" />
                   </UFormField>
                 </div>
 
                 <!-- Data de referência -->
                 <div v-else key="data" class="space-y-5">
-                  <UFormField :label="p.campo" required :error="erroCampo ? p.erroCampo : undefined">
-                    <USelectMenu
-                      v-model="rascunho.date_source"
-                      :items="itensDeCampo"
-                      value-key="value"
-                      :placeholder="p.campoPlaceholder"
-                      :search-input="{ placeholder: p.campoBusca }"
-                      icon="i-lucide-calendar"
-                      class="w-full"
+                  <UFormField :label="p.campo" required :help="p.instrucoes.campo" :error="erroCampo">
+                    <div
+                      class="rounded-md transition-shadow"
+                      :class="sobreOCampo ? 'ring-2 ring-primary ring-offset-2 ring-offset-(--ui-bg)' : ''"
+                      @dragenter.prevent="sobreOCampo = true"
+                      @dragover.prevent
+                      @dragleave="sobreOCampo = false"
+                      @drop.prevent="soltar"
                     >
-                      <template #item-trailing="{ item }">
-                        <UBadge
-                          v-if="(item as any).campo?.sistema"
-                          :label="p.dataDeSistema"
-                          color="neutral"
-                          variant="subtle"
-                          size="sm"
-                        />
-                        <UBadge
-                          v-else-if="(item as any).campo?.comHora"
-                          :label="p.comHora"
-                          color="neutral"
-                          variant="subtle"
-                          size="sm"
-                        />
-                      </template>
-                      <template #empty>
-                        <p class="px-2 py-3 text-sm text-muted">{{ p.semCampos }}</p>
-                      </template>
-                    </USelectMenu>
+                      <UInput
+                        v-model="rascunho.date_source as string"
+                        :placeholder="sobreOCampo ? p.soltarAqui : EXEMPLO_DE_VARIAVEL"
+                        icon="i-lucide-braces"
+                        class="w-full"
+                        :ui="{ base: 'font-mono text-xs' }"
+                      >
+                        <template #trailing>
+                          <UButton
+                            icon="i-lucide-arrow-right-to-line"
+                            color="neutral"
+                            variant="link"
+                            size="xs"
+                            :aria-label="p.abrirVariaveis"
+                            @click="painelAberto = true"
+                          />
+                        </template>
+                      </UInput>
+                    </div>
+                    <Transition enter-active-class="transition duration-200" enter-from-class="opacity-0 -translate-y-0.5">
+                      <p v-if="campo" class="mt-1.5 flex items-center gap-1.5 text-xs text-success">
+                        <UIcon name="i-lucide-circle-check" class="size-3.5" />
+                        {{ p.lidaComo(campo.label ?? campo.refId, noDeGatilho.rotulo) }}
+                      </p>
+                    </Transition>
                   </UFormField>
 
                   <!-- A regra lida como frase: [30] [dias] [antes de] Data de vencimento -->
-                  <UFormField :label="p.continuar">
+                  <UFormField :label="p.continuar" :help="p.instrucoes.retomar">
                     <div class="flex flex-wrap items-center gap-2">
                       <Transition
                         enter-active-class="transition-all duration-200"
@@ -339,7 +379,7 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                     </div>
                   </UFormField>
 
-                  <UFormField :label="p.horario" :help="horarioDesligado ? p.horarioEmHoras : p.fuso">
+                  <UFormField :label="p.horario" :help="horarioDesligado ? p.horarioEmHoras : p.instrucoes.horario">
                     <USelect
                       v-model="rascunho.time"
                       :items="opcoesDeHorario"
@@ -350,11 +390,11 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                   </UFormField>
 
                   <div class="grid gap-4 sm:grid-cols-2">
-                    <UFormField :label="p.sePassou">
-                      <URadioGroup v-model="rascunho.if_past" :items="opcoesDePassou" size="sm" />
+                    <UFormField :label="p.sePassou" :help="p.instrucoes.sePassou">
+                      <USelect v-model="rascunho.if_past" :items="opcoesDePassou" class="w-full" />
                     </UFormField>
-                    <UFormField :label="p.seVazio">
-                      <URadioGroup v-model="rascunho.if_empty" :items="opcoesDeVazio" size="sm" />
+                    <UFormField :label="p.seVazio" :help="p.instrucoes.seVazio">
+                      <USelect v-model="rascunho.if_empty" :items="opcoesDeVazio" class="w-full" />
                     </UFormField>
                   </div>
 
@@ -499,6 +539,81 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
             <UButton v-else :label="t.hoje.fechar" @click="aberto = false" />
           </div>
         </div>
+
+        <!-- ENTRADA, à esquerda, como no develop: a faixa abre Variáveis de Entrada.
+             Vem depois do formulário no DOM (order-first a põe à esquerda) para o
+             primeiro foco do modal continuar no X, como no develop. -->
+        <button
+          v-if="!painelAberto"
+          type="button"
+          class="order-first -mr-2 hidden h-64 w-12 items-center justify-center rounded-l-xl border border-r-0 border-default bg-default/80 transition-colors hover:bg-elevated sm:flex"
+          :aria-label="p.abrirVariaveis"
+          @click="painelAberto = true"
+        >
+          <span class="flex rotate-180 items-center gap-2 text-xs font-semibold tracking-[0.2em] text-primary [writing-mode:vertical-rl]">
+            {{ t.hoje.entrada }}
+          </span>
+        </button>
+        <section
+          v-else
+          class="order-first -mr-1 hidden max-h-[min(70dvh,560px)] w-72 flex-col overflow-hidden rounded-l-xl border border-r-0 border-default bg-default shadow-lg sm:flex"
+          :aria-label="t.hoje.variaveisDeEntrada"
+        >
+          <div class="flex items-center gap-2 border-b border-default px-3 py-3">
+            <span class="flex size-7 items-center justify-center rounded-md bg-elevated text-primary">
+              <UIcon name="i-lucide-arrow-right-to-line" class="size-4" />
+            </span>
+            <h3 class="flex-1 text-sm font-semibold text-highlighted">{{ t.hoje.variaveisDeEntrada }}</h3>
+            <UButton icon="i-lucide-panel-left-close" color="neutral" variant="ghost" size="xs" :aria-label="t.hoje.recolher" @click="painelAberto = false" />
+          </div>
+          <div class="space-y-2 px-3 pt-3">
+            <p class="text-xs text-muted">{{ t.hoje.arrasteAsVariaveis }}</p>
+            <UInput v-model="filtro" icon="i-lucide-search" :placeholder="t.hoje.filtrar" size="sm" class="w-full" />
+          </div>
+          <div class="min-h-0 flex-1 overflow-y-auto px-2 pb-3 pt-2 text-sm">
+            <p v-if="!variaveis.length" class="px-2 py-3 text-xs text-muted">{{ p.semVariaveis }}</p>
+            <template v-else>
+              <p class="flex items-center gap-1 px-1 py-1 text-default">
+                <UIcon name="i-lucide-chevron-down" class="size-3.5 text-muted" />
+                {{ noDeGatilho.rotulo }} - {{ t.hoje.gatilho }}
+              </p>
+              <template v-for="v in arvore" :key="v.refId">
+                <template v-if="v.filhos">
+                  <button type="button" class="flex w-full items-center gap-1.5 rounded px-1 py-1 pl-4 text-left text-default hover:bg-elevated" @click="dataAberto = !dataAberto">
+                    <UIcon :name="dataAberto ? 'i-lucide-chevron-down' : 'i-lucide-chevron-right'" class="size-3.5 text-muted" />
+                    <UIcon :name="v.icone" class="size-3.5 text-muted" />
+                    {{ v.label }}
+                  </button>
+                  <template v-if="dataAberto">
+                    <div
+                      v-for="f in v.filhos"
+                      :key="f.refId"
+                      draggable="true"
+                      class="flex cursor-grab items-center gap-1.5 rounded py-1 pl-10 pr-2 transition-colors hover:bg-elevated active:cursor-grabbing"
+                      :class="f.tipo === 'Date' ? 'text-highlighted' : 'text-default'"
+                      :title="chaveDaVariavel(f)"
+                      @dragstart="arrastar($event, f)"
+                    >
+                      <UIcon :name="f.icone" class="size-3.5 shrink-0" :class="f.tipo === 'Date' ? 'text-primary' : 'text-muted'" />
+                      <span class="truncate">{{ f.label }}</span>
+                    </div>
+                  </template>
+                </template>
+                <div
+                  v-else
+                  draggable="true"
+                  class="flex cursor-grab items-center gap-1.5 rounded py-1 pl-6 pr-2 transition-colors hover:bg-elevated active:cursor-grabbing"
+                  :class="v.tipo === 'Date' ? 'text-highlighted' : 'text-default'"
+                  :title="chaveDaVariavel(v)"
+                  @dragstart="arrastar($event, v)"
+                >
+                  <UIcon :name="v.icone" class="size-3.5 shrink-0" :class="v.tipo === 'Date' ? 'text-primary' : 'text-muted'" />
+                  <span class="truncate">{{ v.label }}</span>
+                </div>
+              </template>
+            </template>
+          </div>
+        </section>
 
         <!-- SAÍDA, à direita -->
         <div class="-ml-2 hidden h-64 w-12 items-center justify-center rounded-r-xl border border-l-0 border-default bg-default/80 sm:flex">

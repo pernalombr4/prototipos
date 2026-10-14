@@ -8,8 +8,8 @@
  * `expressaoDayjs` devolve o cálculo escrito como o back-end faria, para a
  * seção "Ver o cálculo" e para o dev.
  */
-import type { CampoDeData, ConfiguracaoDoAtraso, Contrato, UnidadeDoDeslocamento } from './mocks'
-import { AGORA, camposDeData, chaveDoCampo } from './mocks'
+import type { ConfiguracaoDoAtraso, Contrato, UnidadeDoDeslocamento, Variavel } from './mocks'
+import { AGORA, todasAsVariaveis } from './mocks'
 
 export type Situacao = 'agendado' | 'passou' | 'vazio'
 
@@ -23,8 +23,21 @@ export interface Retomada {
   encerra: boolean
 }
 
-export function campoEscolhido(config: ConfiguracaoDoAtraso): CampoDeData | null {
-  return camposDeData.find(c => chaveDoCampo(c) === config.date_source) ?? null
+/**
+ * Lê a variável escrita ou arrastada para o campo. Aceita o formato do exemplo
+ * (`{{nodes.trig.data_de_vencimento_contrato}}`) e o que o painel do develop
+ * entrega hoje (`{{ input.data.data_de_vencimento_contrato }}`).
+ */
+export function lerVariavel(expr: string | null): Variavel | null {
+  const m = expr?.trim().match(/^\{\{\s*(?:nodes\.[\w-]+|input)\.(?:data\.)?(\w+)\s*\}\}$/)
+  if (!m) return null
+  return todasAsVariaveis.find(x => x.refId === m[1]) ?? null
+}
+
+/** A variável de data em uso, ou nulo quando o texto não é uma variável de data conhecida. */
+export function campoEscolhido(config: ConfiguracaoDoAtraso): Variavel | null {
+  const v = lerVariavel(config.date_source)
+  return v?.tipo === 'Date' ? v : null
 }
 
 function lerData(texto: string | null): Date | null {
@@ -37,7 +50,7 @@ function lerData(texto: string | null): Date | null {
   return new Date(texto)
 }
 
-export function valorDoCampo(contrato: Contrato, campo: CampoDeData): Date | null {
+export function valorDoCampo(contrato: Contrato, campo: Variavel): Date | null {
   if (campo.refId === 'created_at') return lerData(contrato.created_at)
   if (campo.refId === 'updated_at') return lerData(contrato.updated_at)
   return lerData(contrato.data[campo.refId as keyof Contrato['data']] as string | null)
@@ -95,12 +108,10 @@ const unidadeDayjs: Record<UnidadeDoDeslocamento, string> = { hour: 'hour', day:
 
 /** O cálculo escrito em dayjs, como o back-end faria. Mostrado em "Ver o cálculo". */
 export function expressaoDayjs(config: ConfiguracaoDoAtraso): string {
-  const campo = campoEscolhido(config)
   if (config.mode === 'duration') {
     return `dayjs().add(${Number(config.delay) || 0}, '${config.unit}')`
   }
-  const origem = campo ? `{{${campo.no.id}.${campo.refId}}}` : '{{?}}'
-  let expr = `dayjs(${origem})`
+  let expr = `dayjs(${config.date_source?.trim() || '{{?}}'})`
   if (config.offset_direction !== 'on') {
     const metodo = config.offset_direction === 'before' ? 'subtract' : 'add'
     expr += `\n  .${metodo}(${config.offset_amount}, '${unidadeDayjs[config.offset_unit]}')`
