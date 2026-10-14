@@ -58,6 +58,15 @@ const ordemDoStatus: Record<Prototipo['status'], number> = {
   arquivado: 4,
 }
 
+// O selo mostra o nome do status, não o valor técnico ("em-revisao").
+const rotuloDoStatus: Record<Prototipo['status'], string> = {
+  rascunho: 'rascunho',
+  'em-revisao': 'em revisão',
+  aprovado: 'aprovado',
+  implementado: 'implementado',
+  arquivado: 'arquivado',
+}
+
 const corDoStatus = {
   rascunho: 'neutral',
   'em-revisao': 'warning',
@@ -102,7 +111,7 @@ const corDoStatus = {
             {{ proto.titulo }}
           </h2>
           <UBadge :color="corDoStatus[proto.status]" variant="subtle" size="sm">
-            {{ proto.status }}
+            {{ rotuloDoStatus[proto.status] }}
           </UBadge>
         </div>
 
