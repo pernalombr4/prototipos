@@ -258,3 +258,27 @@ proposta; sem ela, a data é calculada uma vez, na entrada do nó, como em todos
   mensagem é um `<p role="alert">` embaixo da frase.
 - **Ver:** `/no-de-atraso` · `evidencias/proposta-08-variavel-na-frase.jpg`,
   `evidencias/proposta-09-variavel-que-nao-e-data.jpg`
+
+## Rodada 7 · 2026-10-14
+
+- **Pedido (literal):** "observe que a opção "na data de" faz mudar a disposiçao do campo ali e isso fica
+  estraho na usabilidade. nesse caso deve-se perguntar antes pro user se ele quer, quando o tipo de atraso for
+  data de referencia, usar a data fixa ou um tempo dinamico calculado com base numa vairavel de data / e ai
+  dependendo da opçao aparece só o campo de variavel ou aparece todos os campos dentro de "avançar para o
+  proximo nó""
+- **Mudou:** com Data de referência, o primeiro campo é **Quando avançar**, um dropdown com 2 opções e "?" em
+  cada uma:
+  - **Na data da variável** (a "data fixa" do pedido): aparece só o campo **Data da variável**, com a
+    instrução "Arraste a variável da data. O fluxo segue para o próximo nó nesse dia.";
+  - **Antes ou depois da data** (o "tempo dinâmico"): aparece a frase inteira, **Avançar para o próximo nó**
+    [30] [dias] [antes de] [variável].
+- **Mudou:** "na data de" sai do dropdown de direção, que fica só com "antes de" e "depois de". Quem volta de
+  "Na data da variável" para "Antes ou depois da data" reencontra a direção que tinha escolhido.
+- **Nome das opções:** "data fixa" e "tempo dinâmico" viraram "Na data da variável" e "Antes ou depois da
+  data". Para quem é leigo, "data fixa" sugere digitar uma data, e a data vem da variável de cada item.
+- **Dado gravado:** não muda. "Na data da variável" grava `offset_direction: 'on'`; a outra opção grava
+  `before` ou `after`.
+- **Fronteira:** muda só o bloco da Data de referência. Horário, as 2 regras, recalcular e a simulação seguem
+  iguais nas 2 opções.
+- **Ver:** `/no-de-atraso` · `evidencias/proposta-10-na-data-da-variavel.jpg`,
+  `evidencias/proposta-11-antes-ou-depois-da-data.jpg`

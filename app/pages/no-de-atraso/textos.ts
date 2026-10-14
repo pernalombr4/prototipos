@@ -86,6 +86,10 @@ export interface Textos {
     modos: { duration: { titulo: string, descricao: string }, until_date: { titulo: string, descricao: string } }
     erroQuantidade: string
     continuar: string
+    /** A pergunta que vem antes da frase: na própria data ou antes/depois dela. */
+    calculo: string
+    calculos: Record<'exata' | 'calculada', string>
+    dataExata: string
     quanto: string
     direcoes: Record<Direcao, string>
     unidadeDoDeslocamento: (u: UnidadeDoDeslocamento, n: number) => string
@@ -134,6 +138,7 @@ export interface Textos {
       unidade: Record<Unidade, string>
       deslocamento: Record<UnidadeDoDeslocamento, string>
       direcao: Record<Direcao, string>
+      calculo: Record<'exata' | 'calculada', string>
       passou: Record<'continue' | 'end', string>
       vazio: Record<'continue' | 'end', string>
     }
@@ -144,6 +149,8 @@ export interface Textos {
       tipo: string
       quantidade: string
       unidade: string
+      calculo: string
+      dataExata: string
       retomar: string
       horario: string
       sePassou: string
@@ -261,6 +268,9 @@ const pt: Textos = {
     },
     erroQuantidade: 'Informe um número inteiro maior que zero.',
     continuar: 'Avançar para o próximo nó',
+    calculo: 'Quando avançar',
+    calculos: { exata: 'Na data da variável', calculada: 'Antes ou depois da data' },
+    dataExata: 'Data da variável',
     quanto: 'Quantidade',
     direcoes: { before: 'antes de', after: 'depois de', on: 'na data de' },
     unidadeDoDeslocamento: (u, n) => unidadesPt[u][n === 1 ? 0 : 1],
@@ -330,6 +340,10 @@ const pt: Textos = {
         after: 'O fluxo segue depois da data do campo. Ex.: 5 dias depois da assinatura.',
         on: 'O fluxo segue no próprio dia da data do campo.',
       },
+      calculo: {
+        exata: 'O fluxo segue no próprio dia da data. Ex.: no dia do vencimento.',
+        calculada: 'O fluxo segue um tempo antes ou depois da data. Ex.: 30 dias antes do vencimento.',
+      },
       passou: {
         continue: 'O fluxo não espera: segue na hora para o nó ligado depois do Atraso.',
         end: 'O fluxo para neste nó e a execução fica registrada com erro. Os nós seguintes não rodam para este item.',
@@ -344,6 +358,8 @@ const pt: Textos = {
       tipo: 'Define se o fluxo espera um tempo fixo ou até uma data.',
       quantidade: 'Por quanto tempo o fluxo fica parado neste nó.',
       unidade: 'Medida da quantidade de tempo.',
+      calculo: 'Escolha se o fluxo avança na própria data ou um tempo antes ou depois dela.',
+      dataExata: 'Arraste a variável da data. O fluxo segue para o próximo nó nesse dia.',
       retomar: 'Arraste a variável da data para o fim da frase e diga quanto tempo antes ou depois dela o fluxo segue para o próximo nó.',
       horario: 'Hora do dia em que o fluxo segue para o próximo nó, no fuso do workspace: Brasília (UTC−3).',
       sePassou: 'O que fazer se a data calculada já tiver passado quando o item chegar a este nó.',
@@ -406,6 +422,9 @@ const en: Textos = {
     },
     erroQuantidade: 'Enter a whole number greater than zero.',
     continuar: 'Move to the next node',
+    calculo: 'When to move on',
+    calculos: { exata: 'On the variable date', calculada: 'Before or after the date' },
+    dataExata: 'Date variable',
     quanto: 'Amount',
     direcoes: { before: 'before', after: 'after', on: 'on' },
     unidadeDoDeslocamento: (u, n) => unidadesEn[u][n === 1 ? 0 : 1],
@@ -475,6 +494,10 @@ const en: Textos = {
         after: 'The flow moves on after the field date. E.g.: 5 days after signing.',
         on: 'The flow moves on on the field date itself.',
       },
+      calculo: {
+        exata: 'The flow moves on the day of the date itself. E.g.: on the due date.',
+        calculada: 'The flow moves on some time before or after the date. E.g.: 30 days before the due date.',
+      },
       passou: {
         continue: 'The flow does not wait: it moves right away to the node connected after the Delay.',
         end: 'The flow stops at this node and the execution is logged with an error. The next nodes do not run for this item.',
@@ -489,6 +512,8 @@ const en: Textos = {
       tipo: 'Defines whether the flow waits a fixed time or until a date.',
       quantidade: 'How long the flow stays paused at this node.',
       unidade: 'Unit of the amount of time.',
+      calculo: 'Choose whether the flow moves on the date itself or some time before or after it.',
+      dataExata: 'Drag the date variable. The flow moves to the next node on that day.',
       retomar: 'Drag the date variable to the end of the sentence and set how long before or after it the flow moves to the next node.',
       horario: 'Time of day when the flow moves to the next node, in the workspace time zone: Brasília (UTC−3).',
       sePassou: 'What to do if the calculated date has already passed when the item reaches this node.',
@@ -551,6 +576,9 @@ const es: Textos = {
     },
     erroQuantidade: 'Ingrese un número entero mayor que cero.',
     continuar: 'Avanzar al siguiente nodo',
+    calculo: 'Cuándo avanzar',
+    calculos: { exata: 'En la fecha de la variable', calculada: 'Antes o después de la fecha' },
+    dataExata: 'Fecha de la variable',
     quanto: 'Cantidad',
     direcoes: { before: 'antes de', after: 'después de', on: 'en la fecha de' },
     unidadeDoDeslocamento: (u, n) => unidadesEs[u][n === 1 ? 0 : 1],
@@ -620,6 +648,10 @@ const es: Textos = {
         after: 'El flujo avanza después de la fecha del campo. Ej.: 5 días después de la firma.',
         on: 'El flujo avanza el mismo día de la fecha del campo.',
       },
+      calculo: {
+        exata: 'El flujo avanza el mismo día de la fecha. Ej.: el día del vencimiento.',
+        calculada: 'El flujo avanza un tiempo antes o después de la fecha. Ej.: 30 días antes del vencimiento.',
+      },
       passou: {
         continue: 'El flujo no espera: avanza en el momento al nodo conectado después del Retraso.',
         end: 'El flujo se detiene en este nodo y la ejecución queda registrada con error. Los nodos siguientes no se ejecutan para este ítem.',
@@ -634,6 +666,8 @@ const es: Textos = {
       tipo: 'Define si el flujo espera un tiempo fijo o hasta una fecha.',
       quantidade: 'Cuánto tiempo el flujo queda detenido en este nodo.',
       unidade: 'Medida de la cantidad de tiempo.',
+      calculo: 'Elija si el flujo avanza en la propia fecha o un tiempo antes o después de ella.',
+      dataExata: 'Arrastre la variable de la fecha. El flujo avanza al siguiente nodo ese día.',
       retomar: 'Arrastre la variable de la fecha al final de la frase e indique cuánto tiempo antes o después de ella el flujo avanza al siguiente nodo.',
       horario: 'Hora del día en que el flujo avanza al siguiente nodo, en la zona horaria del workspace: Brasilia (UTC−3).',
       sePassou: 'Qué hacer si la fecha calculada ya pasó cuando el ítem llega a este nodo.',

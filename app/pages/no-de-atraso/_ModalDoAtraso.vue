@@ -11,7 +11,8 @@
  * 2. o campo de data é um campo aberto que recebe a variável arrastada do
  *    painel Variáveis de Entrada (o mesmo do develop, aberto pela faixa
  *    ENTRADA). Vazio, mostra o exemplo `{{nodes.trig.data_de_vencimento_contrato}}`;
- * 3. a regra se lê como frase: Retomar a execução [30] [dias] [antes de]
+ * 3. "Quando avançar" pergunta antes: na data da variável (só a variável)
+ *    ou antes ou depois dela (a frase inteira): Avançar para o próximo nó [30] [dias] [antes de]
  *    Data de vencimento, sem fórmula;
  * 4. horário, data já passada e campo vazio em dropdown, e recalcular quando a
  *    data muda. Todo campo tem uma instrução curta embaixo;
@@ -108,7 +109,22 @@ const itensDeModo = computed(() => modos.value.map(({ value, label, ajuda }) => 
 const unidadesDoDeslocamento = computed(() => (['day', 'week', 'month', 'hour'] as UnidadeDoDeslocamento[])
   .map(u => ({ value: u, label: p.value.unidadeDoDeslocamento(u, rascunho.value.offset_amount), ajuda: p.value.ajudas.deslocamento[u] })))
 
-const direcoes = computed(() => (['before', 'after', 'on'] as Direcao[]).map(d => ({ value: d, label: p.value.direcoes[d], ajuda: p.value.ajudas.direcao[d] })))
+/*
+ * "Quando avançar" vem antes da frase: na própria data (só a variável) ou um
+ * tempo antes ou depois dela (a frase inteira). Grava em `offset_direction`:
+ * 'on' é a data da variável; 'before' e 'after' são o tempo calculado.
+ */
+type Calculo = 'exata' | 'calculada'
+const ultimaDirecao = ref<'before' | 'after'>('before')
+watch(() => rascunho.value.offset_direction, (d) => { if (d !== 'on') ultimaDirecao.value = d }, { immediate: true })
+const calculo = computed<Calculo>({
+  get: () => rascunho.value.offset_direction === 'on' ? 'exata' : 'calculada',
+  set: (v) => { rascunho.value.offset_direction = v === 'exata' ? 'on' : ultimaDirecao.value },
+})
+const opcoesDeCalculo = computed(() => (['exata', 'calculada'] as Calculo[]).map(c => ({ value: c, label: p.value.calculos[c], ajuda: p.value.ajudas.calculo[c] })))
+
+/** Só antes e depois: "na data de" virou a opção "Na data da variável" de Quando avançar. */
+const direcoes = computed(() => (['before', 'after'] as Direcao[]).map(d => ({ value: d, label: p.value.direcoes[d], ajuda: p.value.ajudas.direcao[d] })))
 
 const campo = computed(() => campoEscolhido(rascunho.value))
 const nomeDoCampo = computed(() => campo.value?.label ?? p.value.campo.toLowerCase())
@@ -354,7 +370,22 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                   <!-- A regra inteira numa frase: [30] [dias] [antes de] [variável da data].
                        O fim da frase é o lugar de soltar a variável arrastada de Variáveis de Entrada. -->
                   <!-- Sem :error no UFormField: ele pinta a frase inteira. Só a data fica vermelha, e a mensagem vem embaixo. -->
-                  <UFormField :label="p.continuar" required :help="p.instrucoes.retomar">
+                  <UFormField :label="p.calculo" :help="p.instrucoes.calculo">
+                    <USelect v-model="calculo" :items="opcoesDeCalculo" class="w-full sm:w-72">
+                      <template #item-trailing="{ item }">
+                        <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
+                          <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />
+                        </UTooltip>
+                      </template>
+                    </USelect>
+                  </UFormField>
+
+                  <!-- Na data da variável: só o lugar da variável. Antes ou depois: a frase inteira. -->
+                  <UFormField
+                    :label="calculo === 'exata' ? p.dataExata : p.continuar"
+                    required
+                    :help="calculo === 'exata' ? p.instrucoes.dataExata : p.instrucoes.retomar"
+                  >
                     <div class="flex flex-wrap items-center gap-2">
                       <Transition
                         enter-active-class="transition-all duration-200"
@@ -362,7 +393,7 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                         leave-active-class="transition-all duration-150"
                         leave-to-class="opacity-0"
                       >
-                        <div v-if="rascunho.offset_direction !== 'on'" class="flex items-center gap-2">
+                        <div v-if="calculo === 'calculada'" class="flex flex-wrap items-center gap-2">
                           <UInputNumber
                             v-model="rascunho.offset_amount"
                             :min="1"
@@ -378,15 +409,15 @@ const json = computed(() => JSON.stringify(dadoGravado(rascunho.value), null, 2)
                               </UTooltip>
                             </template>
                           </USelect>
+                          <USelect v-model="rascunho.offset_direction" :items="direcoes" class="w-36">
+                            <template #item-trailing="{ item }">
+                              <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
+                                <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />
+                              </UTooltip>
+                            </template>
+                          </USelect>
                         </div>
                       </Transition>
-                      <USelect v-model="rascunho.offset_direction" :items="direcoes" class="w-36">
-                        <template #item-trailing="{ item }">
-                          <UTooltip v-if="(item as any).ajuda" :text="(item as any).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
-                            <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="p.ajudaDaOpcao" />
-                          </UTooltip>
-                        </template>
-                      </USelect>
 
                       <!-- O lugar da data: vazio (tracejado), etiqueta legível ou a chave em edição -->
                       <div
