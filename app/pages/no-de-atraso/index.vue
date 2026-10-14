@@ -26,7 +26,7 @@ import { textos } from './textos'
 definePageMeta({
   titulo: 'Nó de Atraso com data de referência',
   descricao: 'O nó Atraso do Spaceflow ganha a data de referência: retoma a execução 30 dias antes do vencimento, configurado sem fórmula e com simulação nos itens da categoria.',
-  status: 'em-revisao',
+  status: 'aprovado',
   atualizado: '2026-10-14',
   tela: 'Spaceflow › nó Atraso',
 })

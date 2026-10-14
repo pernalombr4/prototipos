@@ -360,3 +360,9 @@ proposta; sem ela, a data é calculada uma vez, na entrada do nó, como em todos
 - **Mudou:** o nó deixa de gravar `recalculate`. A data é calculada uma vez, quando o item chega ao nó, como em
   todos os produtos pesquisados. O JSON da rodada 1 ainda mostra o campo; vale o desta rodada.
 - **Ver:** `/no-de-atraso` · `evidencias/proposta-17-sem-recalcular.jpg`
+
+## Fechamento · 2026-10-14
+
+- **Pedido (literal):** "o status desse prototipo ta em revisao na tela geral de prototipos / pode colocar que
+  ele ta pronto agora"
+- **Mudou:** status `aprovado` no `definePageMeta` (selo verde no índice) e no README.
