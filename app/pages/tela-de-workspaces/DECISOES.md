@@ -134,6 +134,12 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Aprovado · 2026-10-14
+
+- **Pedido (literal):** "pode publicar com status aprovado na tela de prototipos enspace"
+- **Mudou:** o status do protótipo passa de "em revisão" para "aprovado" (`definePageMeta`); o card do
+  índice mostra o selo verde. A versão aprovada é a da rodada 22.
+
 ### Rodada 22 · 2026-10-14
 
 - **Pedido (literal):** "eu preicso de um boitao na base pra simular o caso em que nao ha etiqueta. e o

@@ -22,7 +22,7 @@ import decisoesMd from './DECISOES.md?raw'
 definePageMeta({
   titulo: 'Tela de entrada (Workspaces)',
   descricao: 'Fazer a pessoa entender que é uma tela de escolha, e não o lugar onde se abre chamado.',
-  status: 'em-revisao',
+  status: 'aprovado',
   atualizado: '2026-10-14',
   tela: 'Proposta',
 })
