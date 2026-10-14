@@ -175,3 +175,19 @@
 - **Mudou:** o modal "Conectar uma IA" conecta com qualquer chave preenchida; saiu a conferência do formato de cada empresa (`sk-`, `sk-ant-`, `AIza`) e o erro de chave inválida. O campo vazio continua pedindo a chave. O exemplo do campo ainda mostra o começo da chave de cada empresa.
 - **Fronteira:** muda só a conferência da chave; o resto do modal e da jornada continua como na rodada 7.
 - **Ver:** `?ia=desligada` › IA › Conectar no Claude › qualquer texto › Conectar
+
+## Rodada 9 · 2026-10-14
+- **Pedido (literal):** "pode colocar outro estado ali tambem, que é quando o cara tem mais de uma ia instalada e ele vai usar ia no campo. ele tem que selecionar o que vai usar, qual integraçao. nao? ou tem modo mais fluido? veja como concorrentes fazem isso." e, depois da proposta, "pode aplicar"
+- **O que os concorrentes fazem:** ninguém pede para escolher a integração antes de usar. Quem administra conecta as chaves nas configurações; quem escreve escolhe o modelo, num seletor só, com "Auto" de padrão (Notion AI; GitHub Copilot, com os modelos das chaves num grupo e "Manage Models" no rodapé do seletor; Raycast; Zed).
+- **Mudou:**
+  - andaime com o estado **"Ligada, 3 IAs"** (ChatGPT, Claude e Gemini conectados);
+  - sem passo extra: o botão IA abre a caixa do BENI direto, com "Auto";
+  - o **Auto escolhe entre as IAs conectadas** (`modeloDoAuto`, em `ias.ts`): pedido curto ou de conferência vai ao modelo rápido, o resto ao de mais qualidade. A barra da proposta diz qual ele usou ("BENI · Auto: Claude Sonnet 4.6"), e a velocidade da escrita simulada segue esse modelo;
+  - o **seletor de Modelo agrupa por IA**, com o logo no título: Auto no topo, as conectadas, as que pedem conexão (com "Conectar" no título) e as "Em breve";
+  - quem administra vê no rodapé do seletor "Conectar outra IA" (ou "Ver as IAs conectadas", quando todas as disponíveis estão conectadas), que abre o modal da rodada 7;
+  - a escolha de modelo continua valendo para os próximos pedidos da sessão; o agente continua trazendo o modelo dele.
+- **Regra do Auto é do protótipo:** a do produto (quais modelos, em que ordem) é decisão do time.
+- **Fica como sugestão ao time:** modelo padrão do workspace, escolhido por quem administra em Integrações; favoritos no seletor, como no Notion.
+- **Fronteira:** mudam o andaime, o seletor de Modelo e o rótulo do modelo na barra da proposta; não mudam a caixa do BENI, o modal, o seletor de agente nem a proposta.
+- **CSS fora da prop:** nenhum.
+- **Ver:** `?ia=varias` · `evidencias/proto-varias-ias-seletor.png`, `evidencias/proto-varias-ias-auto.png`

@@ -40,14 +40,16 @@ const route = useRoute()
 const router = useRouter()
 
 /* ---------- andaime: o estado da IA vai para o endereço ---------- */
-type EstadoIa = 'ligada' | 'desligada' | 'membro' | 'erro'
+type EstadoIa = 'ligada' | 'varias' | 'desligada' | 'membro' | 'erro'
 const estadoIa = computed<EstadoIa>({
-  get: () => (['ligada', 'desligada', 'membro', 'erro'].includes(String(route.query.ia)) ? route.query.ia : 'ligada') as EstadoIa,
+  get: () => (['ligada', 'varias', 'desligada', 'membro', 'erro'].includes(String(route.query.ia)) ? route.query.ia : 'ligada') as EstadoIa,
   set: v => router.replace({ query: { ...route.query, ia: v } }),
 })
 
 /*
- * Ligada e com erro: o workspace tem a OpenAI conectada, como hoje. Desligada
+ * Ligada e com erro: o workspace tem a OpenAI conectada, como hoje. "Ligada,
+ * 3 IAs" (rodada 9): ChatGPT, Claude e Gemini, para ver o seletor de Modelo
+ * agrupado e o Auto escolhendo entre elas. Desligada
  * (quem administra ou membro): nenhuma. Conectar pelo modal leva o andaime a
  * "Ligada" sem trocar o que foi conectado.
  */
@@ -58,10 +60,10 @@ watch(estadoIa, (e) => {
     pelaConexao = false
     return
   }
-  conectadas.value = e === 'ligada' || e === 'erro' ? ['openai'] : []
+  conectadas.value = e === 'varias' ? ['openai', 'anthropic', 'google'] : e === 'ligada' || e === 'erro' ? ['openai'] : []
 }, { immediate: true })
 function aoConectar() {
-  if (estadoIa.value === 'ligada' || estadoIa.value === 'erro') return
+  if (['ligada', 'varias', 'erro'].includes(estadoIa.value)) return
   pelaConexao = true
   estadoIa.value = 'ligada'
 }
@@ -181,7 +183,7 @@ async function salvar() {
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.estadoDaIa }}</span>
         <UFieldGroup size="xs">
           <UButton
-            v-for="e in (['ligada', 'desligada', 'membro', 'erro'] as const)"
+            v-for="e in (['ligada', 'varias', 'desligada', 'membro', 'erro'] as const)"
             :key="e"
             :label="t.andaime.estados[e]"
             :color="estadoIa === e ? 'primary' : 'neutral'"

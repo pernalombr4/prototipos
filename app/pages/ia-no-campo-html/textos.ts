@@ -252,8 +252,11 @@ const ptBR = {
     emBreve: 'Em breve',
     semConexao: (ia: string) => `Conecte ${ia} para usar`,
     precisaConectar: 'Precisam de uma IA conectada',
+    autoUsou: (nome: string) => `Auto: ${nome}`,
+    conectarOutra: 'Conectar outra IA',
+    verConectadas: 'Ver as IAs conectadas',
     descricoes: {
-      'auto': 'Escolhe o modelo pelo pedido. Equilibra velocidade e consumo.',
+      'auto': 'Escolhe, entre as IAs conectadas, o modelo que serve ao pedido.',
       'claude-sonnet-4.6': 'Rápido e equilibrado.',
       'claude-opus-4.6': 'Máxima qualidade de raciocínio.',
       'gpt-5.4': 'A versão mais nova da família GPT.',
@@ -320,7 +323,7 @@ const ptBR = {
   },
   andaime: {
     estadoDaIa: 'IA no workspace',
-    estados: { ligada: 'Ligada', desligada: 'Desligada (você administra)', membro: 'Desligada (você é membro)', erro: 'Responde com erro' } as Record<string, string>,
+    estados: { ligada: 'Ligada', varias: 'Ligada, 3 IAs', desligada: 'Desligada (você administra)', membro: 'Desligada (você é membro)', erro: 'Responde com erro' } as Record<string, string>,
     porTras: 'Por trás',
   },
 }
@@ -567,8 +570,11 @@ const en: Textos = {
     emBreve: 'Coming soon',
     semConexao: (ia: string) => `Connect ${ia} to use it`,
     precisaConectar: 'Need a connected AI',
+    autoUsou: (nome: string) => `Auto: ${nome}`,
+    conectarOutra: 'Connect another AI',
+    verConectadas: 'See connected AIs',
     descricoes: {
-      'auto': 'Picks the model for the request. Balances speed and usage.',
+      'auto': 'Picks, among the connected AIs, the model that fits the request.',
       'claude-sonnet-4.6': 'Fast and balanced.',
       'claude-opus-4.6': 'Top reasoning quality.',
       'gpt-5.4': 'The newest GPT version.',
@@ -635,7 +641,7 @@ const en: Textos = {
   },
   andaime: {
     estadoDaIa: 'AI in the workspace',
-    estados: { ligada: 'On', desligada: 'Off (you are admin)', membro: 'Off (you are a member)', erro: 'Responds with error' },
+    estados: { ligada: 'On', varias: 'On, 3 AIs', desligada: 'Off (you are admin)', membro: 'Off (you are a member)', erro: 'Responds with error' },
     porTras: 'Behind it',
   },
 }
@@ -880,8 +886,11 @@ const es: Textos = {
     emBreve: 'Próximamente',
     semConexao: (ia: string) => `Conecte ${ia} para usarlo`,
     precisaConectar: 'Necesitan una IA conectada',
+    autoUsou: (nome: string) => `Auto: ${nome}`,
+    conectarOutra: 'Conectar otra IA',
+    verConectadas: 'Ver las IA conectadas',
     descricoes: {
-      'auto': 'Elige el modelo según el pedido. Equilibra velocidad y consumo.',
+      'auto': 'Elige, entre las IA conectadas, el modelo que sirve al pedido.',
       'claude-sonnet-4.6': 'Rápido y equilibrado.',
       'claude-opus-4.6': 'Máxima calidad de razonamiento.',
       'gpt-5.4': 'La versión más nueva de GPT.',
@@ -948,7 +957,7 @@ const es: Textos = {
   },
   andaime: {
     estadoDaIa: 'IA en el workspace',
-    estados: { ligada: 'Activada', desligada: 'Desactivada (usted administra)', membro: 'Desactivada (usted es miembro)', erro: 'Responde con error' },
+    estados: { ligada: 'Activada', varias: 'Activada, 3 IA', desligada: 'Desactivada (usted administra)', membro: 'Desactivada (usted es miembro)', erro: 'Responde con error' },
     porTras: 'Detrás',
   },
 }

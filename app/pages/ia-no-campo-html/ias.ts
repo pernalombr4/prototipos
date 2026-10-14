@@ -46,6 +46,22 @@ export function iaDoModelo(modeloId: string): IaConectavel | null {
 
 export const modelosDa = (id: IdDaIa) => modelos.filter(m => m.provedor === iaPorId(id).provedor)
 
+/*
+ * O "Auto" escolhe entre as IAs conectadas (rodada 9): pedido curto e de
+ * conferência vai ao modelo rápido; o resto, ao de mais qualidade. A ordem de
+ * cada fila diz qual IA vem antes quando há mais de uma. Regra inventada para
+ * o protótipo; a do produto é do time.
+ */
+const acoesRapidas = ['corrigir', 'traduzir', 'encurtar', 'simplificar', 'lista']
+const filaRapida = ['gpt-5-mini', 'gemini-3-flash', 'claude-sonnet-4.6']
+const filaDeQualidade = ['claude-sonnet-4.6', 'gpt-5.4', 'gemini-3.1-pro-preview']
+
+export function modeloDoAuto(acao: string, conectadas: IdDaIa[]) {
+  const fila = acoesRapidas.includes(acao) ? filaRapida : filaDeQualidade
+  const id = fila.find(m => conectadas.includes(iaDoModelo(m)!.id))
+  return modelos.find(m => m.id === id) ?? null
+}
+
 /** As IAs conectadas no workspace. O andaime põe a OpenAI quando a IA está ligada. */
 export const useIasConectadas = () => useState<IdDaIa[]>('ias-conectadas', () => [])
 

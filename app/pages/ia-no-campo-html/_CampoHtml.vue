@@ -32,7 +32,7 @@ import { Subscript } from '@tiptap/extension-subscript'
 import { Superscript } from '@tiptap/extension-superscript'
 import { Emoji, gitHubEmojis } from '@tiptap/extension-emoji'
 import type { Textos } from './textos'
-import type { AgenteDoCampo, PedidoSalvo } from './mocks'
+import type { AgenteDoCampo, Modelo, PedidoSalvo } from './mocks'
 import type { PedidoDaCaixa } from './_CaixaDoBeni.vue'
 import type { Acao, Pedido } from './simulador'
 import type { CorUsada } from './paleta'
@@ -45,7 +45,7 @@ import CaixaDoBeni from './_CaixaDoBeni.vue'
 import BarraDaProposta from './_BarraDaProposta.vue'
 import PedirAtivacao from './_PedirAtivacao.vue'
 import type { IdDaIa } from './ias'
-import { iaDoModelo, pedirConexao, useIasConectadas } from './ias'
+import { iaDoModelo, modeloDoAuto, pedirConexao, useIasConectadas } from './ias'
 import SeletorDeCor from './_SeletorDeCor.vue'
 import PopoverDeLink from './_PopoverDeLink.vue'
 
@@ -212,6 +212,8 @@ interface Sessao {
   interrompido?: boolean
   podeSalvar: boolean
   topo: number
+  /** o modelo que respondeu; com "Auto", o que ele escolheu (rodada 9) */
+  modeloUsado: Modelo | null
 }
 const sessao = ref<Sessao | null>(null)
 let sinal = { parar: false }
@@ -240,7 +242,6 @@ function posicionarBarra() {
   s.topo = el ? el.getBoundingClientRect().bottom - base.top + 8 : topoAbaixoDe(editor, s.ctx.to)
 }
 
-const ritmo = computed(() => 1.6 - (modelos.find(m => m.id === modelo.value)?.velocidade ?? 4) * 0.2)
 
 async function rodar(editor: Editor) {
   const s = sessao.value!
@@ -269,7 +270,7 @@ async function rodar(editor: Editor) {
     marcar(editor, { proposta: propostaVisivel(s) })
     await nextTick()
     posicionarBarra()
-  }, meu, ritmo.value)
+  }, meu, 1.6 - (s.modeloUsado?.velocidade ?? 4) * 0.2)
   if (!completa || sessao.value !== s) return
   Object.assign(s, { fase: 'pronto', notas: r.notas, semRoteiro: r.semRoteiro })
   rolarAteVer('[data-barra-da-proposta]')
@@ -300,6 +301,7 @@ function executar(editor: Editor, p: PedidoDaCaixa, ctxDado?: Contexto) {
       agenteRevisor: agente.value?.type === 'reviewer',
     },
     rotulo: p.rotulo,
+    modeloUsado: modelo.value === 'auto' ? modeloDoAuto(p.acao, conectadas.value) : modelos.find(m => m.id === modelo.value) ?? null,
     modo,
     inline: modo === 'substituir' && ctx.mesmoBloco,
     fase: 'gerando',
@@ -785,7 +787,12 @@ const contagem = computed(() => {
   return te.value.palavras(palavras, texto.replace(/\s+/g, ' ').length)
 })
 
-const nomeDoModelo = computed(() => modelos.find(m => m.id === modelo.value)?.nome ?? 'Auto')
+/* Com "Auto", a barra diz qual modelo ele escolheu: "Auto: Claude Sonnet 4.6". */
+const nomeDoModelo = computed(() => {
+  const usado = sessao.value?.modeloUsado
+  if (!usado) return 'Auto'
+  return modelo.value === 'auto' ? props.t.modelo.autoUsou(usado.nome) : usado.nome
+})
 </script>
 
 <template>
@@ -907,6 +914,7 @@ const nomeDoModelo = computed(() => modelos.find(m => m.id === modelo.value)?.no
             v-else
             v-model:agente="agente"
             v-model:modelo="modelo"
+            :pode-conectar="papel === 'admin'"
             v-model:usar-campos="usarCampos"
             :t="t"
             :com-selecao="caixa.comSelecao"
