@@ -134,6 +134,14 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 20 · 2026-10-14
+
+- **Pedido (literal):** "abriu! mas "Mostrar todos" nao parece um botao clicavel. só melhore isso."
+- **Mudou:** "Mostrar todos", no painel de Ocultos, vira botão com borda e ícone de olho. Como link cinza,
+  não parecia clicável; é a mesma correção do "Abrir sempre este ao entrar" na rodada 18.
+- **Fronteira:** muda só esse botão; o resto do painel fica como está.
+- **Ver:** https://pernalombr4.github.io/prototipos/tela-de-workspaces
+
 ### Rodada 19 · 2026-10-14
 
 - **Pedido (literal):** "no agrupar por nao bote papel, e sim "licença"" e "nao da pra entender o que ta

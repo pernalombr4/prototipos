@@ -787,13 +787,15 @@ function workspaceCriado(nome: string) {
                       <p class="text-sm font-semibold text-highlighted">
                         {{ t.editorTitulo }}
                       </p>
+                      <!-- Rodada 20: botão com borda e ícone; como link, não parecia clicável -->
                       <UButton
                         v-if="totalOcultos"
                         :label="t.mostrarTodos"
+                        icon="i-lucide-eye"
                         color="neutral"
-                        variant="link"
+                        variant="outline"
                         size="xs"
-                        class="px-0"
+                        class="shrink-0"
                         @click="mostrarTodos"
                       />
                     </div>
