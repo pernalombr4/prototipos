@@ -45,10 +45,11 @@ function tempoRelativo(minutos: number | null): string {
    Andaime de protótipo: o seletor de estados do rodapé NÃO é parte da
    proposta. Existe para revisar os cinco estados sem back-end.
 ------------------------------------------------------------------ */
-type Estado = 'normal' | 'unico' | 'carregando' | 'vazio' | 'erro'
+type Estado = 'normal' | 'semEtiquetas' | 'unico' | 'carregando' | 'vazio' | 'erro'
 const estado = ref<Estado>('normal')
 const estados: { valor: Estado, rotulo: string }[] = [
   { valor: 'normal', rotulo: 'Vários workspaces' },
+  { valor: 'semEtiquetas', rotulo: 'Sem etiquetas' },
   { valor: 'unico', rotulo: 'Só um (caso do chamado)' },
   { valor: 'carregando', rotulo: 'Carregando' },
   { valor: 'vazio', rotulo: 'Nenhum' },
@@ -85,6 +86,16 @@ const etiquetas = ref<Etiqueta[]>(etiquetasIniciais.map(e => ({ ...e })))
 const etiquetasPorWorkspace = ref<Record<number, string[]>>(
   Object.fromEntries(workspaces.map(w => [w.id, [...w.etiquetas]])),
 )
+
+/* Rodada 21: o estado "Sem etiquetas" do andaime simula quem nunca criou uma.
+   Voltar a "Vários workspaces" devolve as etiquetas do mock. */
+watch(estado, (agora) => {
+  const semNenhuma = agora === 'semEtiquetas'
+  etiquetas.value = semNenhuma ? [] : etiquetasIniciais.map(e => ({ ...e }))
+  etiquetasPorWorkspace.value = Object.fromEntries(
+    workspaces.map(w => [w.id, semNenhuma ? [] : [...w.etiquetas]]),
+  )
+})
 
 /* Rodada 18: agrupar e ordenar como nas visualizações do ClickUp. */
 type Agrupamento = 'nenhum' | 'etiqueta' | 'licenca'
@@ -252,6 +263,52 @@ function abrirEditorDeOcultos() {
   editorDeOcultosAberto.value = true
 }
 
+/* Rodada 21: criar etiqueta sem passar por um workspace. Nome e, de uma vez, os
+   workspaces que a levam. Atalho do aviso "sem etiquetas" e do "+ Nova etiqueta". */
+const criarEtiquetaAberto = ref(false)
+const nomeDaNova = ref('')
+const buscaNaNova = ref('')
+const selecionadosNaNova = ref<number[]>([])
+
+function abrirCriarEtiqueta() {
+  nomeDaNova.value = ''
+  buscaNaNova.value = ''
+  selecionadosNaNova.value = []
+  criarEtiquetaAberto.value = true
+}
+
+const workspacesParaEtiquetar = computed(() => {
+  const termo = normalizar(buscaNaNova.value.trim())
+  return disponiveis.value
+    .filter(w => !termo || normalizar(w.name).includes(termo))
+    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+})
+
+function marcarNaNova(w: Workspace, marcado: boolean) {
+  selecionadosNaNova.value = marcado
+    ? [...selecionadosNaNova.value, w.id]
+    : selecionadosNaNova.value.filter(id => id !== w.id)
+}
+
+const podeCriarEtiqueta = computed(() =>
+  nomeDaNova.value.trim().length > 0 && selecionadosNaNova.value.length > 0)
+
+function confirmarNovaEtiqueta() {
+  if (!podeCriarEtiqueta.value) return
+  const nome = nomeDaNova.value.trim()
+  const existente = etiquetas.value.find(e => normalizar(e.nome) === normalizar(nome))
+  const id = existente?.id ?? `etiqueta-${Date.now()}`
+  if (!existente) etiquetas.value.push({ id, nome })
+  for (const wsId of selecionadosNaNova.value) {
+    const atuais = etiquetasPorWorkspace.value[wsId] ?? []
+    if (!atuais.includes(id)) etiquetasPorWorkspace.value[wsId] = [...atuais, id]
+  }
+  const n = selecionadosNaNova.value.length
+  criarEtiquetaAberto.value = false
+  agruparPor.value = 'etiqueta'
+  toast.add({ title: t.value.etiquetaCriada(nome, n), icon: 'i-lucide-tag', color: 'success' })
+}
+
 function alternarGrupo(id: string) {
   recolhidos.value = recolhidos.value.includes(id)
     ? recolhidos.value.filter(g => g !== id)
@@ -265,6 +322,7 @@ const menuDeAgrupar = computed<DropdownMenuItem[][]>(() => [
   (['nenhum', 'etiqueta', 'licenca'] as Agrupamento[]).map(opcao => ({
     type: 'checkbox' as const,
     label: t.value.agruparOpcoes[opcao],
+    description: opcao === 'etiqueta' && !etiquetas.value.length ? t.value.nenhumaEtiquetaAinda : undefined,
     icon: { nenhum: 'i-lucide-ban', etiqueta: 'i-lucide-tag', licenca: 'i-lucide-id-card' }[opcao],
     checked: agruparPor.value === opcao,
     onUpdateChecked: () => {
@@ -294,7 +352,8 @@ function itemDeOrdem(opcao: Ordem): DropdownMenuItem {
 /* ------------------------------- busca ------------------------------- */
 const campoDeBusca = useTemplateRef<{ inputRef: HTMLInputElement | null }>('campoDeBusca')
 /** Busca só faz sentido com mais de um workspace. */
-const podeBuscar = computed(() => estado.value === 'normal' && visiveis.value.length > 1)
+const podeBuscar = computed(() =>
+  ['normal', 'semEtiquetas'].includes(estado.value) && visiveis.value.length > 1)
 /** Com um workspace só, o bloco do topo é a única porta: a lista repetiria o mesmo card. */
 const mostrarLista = computed(() => visiveis.value.length > 1)
 
@@ -865,6 +924,21 @@ function workspaceCriado(nome: string) {
             </div>
           </div>
 
+          <!-- Rodada 21: agrupar por etiqueta sem nenhuma criada. Tudo fica em
+               "Sem etiqueta", como o "No <propriedade>" do Notion, e o aviso traz o
+               atalho para criar a primeira. -->
+          <UAlert
+            v-if="agruparPor === 'etiqueta' && !etiquetas.length"
+            class="mb-4 animate-[entrada_0.3s_ease-out_both]"
+            icon="i-lucide-tags"
+            color="neutral"
+            variant="subtle"
+            :title="t.semEtiquetasTitulo"
+            :description="t.semEtiquetasDescricao"
+            :ui="{ title: 'font-bold' }"
+            :actions="[{ label: t.criarEtiquetaBotao, icon: 'i-lucide-plus', color: 'neutral', variant: 'outline', onClick: abrirCriarEtiqueta }]"
+          />
+
           <template v-if="listados.length">
             <div v-for="grupo in grupos" :key="grupo.id" class="mb-8 last:mb-0">
               <!-- Grupo recolhível, como no ClickUp -->
@@ -1175,6 +1249,18 @@ function workspaceCriado(nome: string) {
             :description="t.buscaVaziaDescricao"
           />
 
+          <!-- Rodada 21: "+ Nova etiqueta" no fim dos grupos, como o "+ New group" do Notion -->
+          <UButton
+            v-if="agruparPor === 'etiqueta' && etiquetas.length && listados.length && !busca"
+            :label="t.novaEtiqueta"
+            icon="i-lucide-plus"
+            color="neutral"
+            variant="outline"
+            size="sm"
+            class="mt-2"
+            @click="abrirCriarEtiqueta"
+          />
+
           <!-- Rodada 17: os ocultos saem da lista, mas não somem da tela -->
           <div
             v-if="totalOcultos && !busca"
@@ -1182,12 +1268,13 @@ function workspaceCriado(nome: string) {
           >
             <UIcon name="i-lucide-eye-off" class="size-4" />
             {{ t.ocultos(totalOcultos) }}
+            <!-- Rodada 21: botão com borda, como os outros; link cinza não parecia clicável -->
             <UButton
               :label="t.gerenciarOcultos"
+              icon="i-lucide-eye"
               color="neutral"
-              variant="link"
-              size="sm"
-              class="px-0 font-medium text-highlighted"
+              variant="outline"
+              size="xs"
               @click="abrirEditorDeOcultos"
             />
           </div>
@@ -1223,6 +1310,71 @@ function workspaceCriado(nome: string) {
             color="error"
             :loading="saindo"
             @click="confirmarSaida"
+          />
+        </div>
+      </template>
+    </UModal>
+
+    <!-- Rodada 21: criar etiqueta e escolher os workspaces de uma vez -->
+    <UModal
+      v-model:open="criarEtiquetaAberto"
+      :title="t.criarEtiquetaTitulo"
+      :description="t.criarEtiquetaDescricao"
+    >
+      <template #body>
+        <form class="space-y-5" @submit.prevent="confirmarNovaEtiqueta">
+          <UFormField :label="t.nomeDaEtiqueta">
+            <UInput
+              v-model="nomeDaNova"
+              icon="i-lucide-tag"
+              :placeholder="t.nomeDaEtiquetaExemplo"
+              :maxlength="30"
+              autofocus
+              class="w-full"
+            />
+          </UFormField>
+          <div>
+            <p class="mb-2 text-sm font-medium text-default">
+              {{ t.quaisWorkspaces }}
+            </p>
+            <UInput
+              v-model="buscaNaNova"
+              icon="i-lucide-search"
+              :placeholder="t.buscarWorkspace"
+              size="sm"
+              class="mb-2 w-full"
+            />
+            <ul class="max-h-64 overflow-y-auto rounded-md border border-default p-1">
+              <li v-for="w in workspacesParaEtiquetar" :key="w.id">
+                <UCheckbox
+                  :model-value="selecionadosNaNova.includes(w.id)"
+                  :label="w.name"
+                  :ui="{
+                    root: 'items-center rounded-md px-2 py-1.5 transition-colors hover:bg-elevated',
+                    wrapper: 'min-w-0',
+                    label: 'truncate font-normal',
+                  }"
+                  @update:model-value="(valor: boolean | 'indeterminate') => marcarNaNova(w, valor === true)"
+                />
+              </li>
+              <li v-if="!workspacesParaEtiquetar.length" class="px-2 py-4 text-center text-sm text-muted">
+                {{ t.buscaVaziaTitulo(buscaNaNova) }}
+              </li>
+            </ul>
+          </div>
+        </form>
+      </template>
+      <template #footer>
+        <div class="flex w-full flex-wrap items-center justify-end gap-2">
+          <p v-if="!selecionadosNaNova.length" class="mr-auto text-xs text-muted">
+            {{ t.escolhaUmWorkspace }}
+          </p>
+          <UButton :label="t.cancelar" color="neutral" variant="ghost" @click="criarEtiquetaAberto = false" />
+          <UButton
+            :label="t.criarEm(selecionadosNaNova.length)"
+            icon="i-lucide-tag"
+            :disabled="!podeCriarEtiqueta"
+            @click="confirmarNovaEtiqueta"
           />
         </div>
       </template>

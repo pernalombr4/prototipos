@@ -134,6 +134,35 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 21 · 2026-10-14
+
+- **Pedido (literal):** "simule um caso em que o cara não tem nenhuma etiqueta criada. quando ele poe pra
+  agrupar o que aparece? pode tentar ver como outros sistemas lidam com isso tambem, mas normalmente é um
+  "ungrouped" e tudo aparecendo junto. mas vai ter atalho pra criar etiquetas daí? como vai ser?"
+- **Referência:** o Notion, agrupando por uma propriedade sem valor, põe tudo num grupo "No <propriedade>"
+  e oferece "+ New group" no fim dos grupos. O ClickUp não tem grupo para o que não tem etiqueta; usa o
+  filtro "Is not set".
+- **Mudou (andaime):** estado novo, "Sem etiquetas": os mesmos 18 workspaces, sem nenhuma etiqueta criada.
+  Voltar a "Vários workspaces" devolve as etiquetas do mock.
+- **Mudou (agrupar sem etiqueta):** "Agrupar por: Etiqueta" mostra tudo num grupo só, "Sem etiqueta (17)".
+  Acima dele, um aviso: "Você ainda não criou etiquetas. Etiquetas agrupam seus workspaces do seu jeito, e
+  só você vê. Enquanto não houver nenhuma, tudo fica em "Sem etiqueta"", com o botão "Criar etiqueta".
+  - No menu Agrupar, a opção Etiqueta avisa embaixo: "Nenhuma criada ainda".
+- **Mudou (atalho de criar):** "Criar etiqueta" abre um modal com o nome e a lista de workspaces para marcar
+  (com busca). O botão diz quantos levam a etiqueta ("Criar em 3 workspaces") e só libera com nome e pelo
+  menos 1 workspace marcado: etiqueta sem workspace não teria grupo para aparecer.
+  - Ao criar, a lista passa a agrupar por etiqueta e o grupo novo aparece; o aviso some.
+  - Com etiquetas já criadas, "+ Nova etiqueta" fica no fim dos grupos e abre o mesmo modal, como o
+    "+ New group" do Notion.
+- **Mudou (botões):** "+ Nova etiqueta" e "Escolher o que aparece" (no fim da lista) saem com borda e ícone,
+  pelo mesmo motivo das rodadas 18 e 20: como link, não pareciam clicáveis.
+- **Fronteira:** muda o agrupamento quando não há etiqueta, o atalho de criar e os 2 botões; não muda o
+  modal de etiquetas de um workspace (menu "⋯"), que continua igual.
+- **Maquete:** a etiqueta criada vive em memória; trocar o estado do andaime ou recarregar zera.
+- **Crítica e acessibilidade:** conferência à mão; as skills não rodaram. O modal usa `UFormField` com
+  rótulo no nome e `UCheckbox` com o nome do workspace em cada linha.
+- **Ver:** https://pernalombr4.github.io/prototipos/tela-de-workspaces (andaime: "Sem etiquetas")
+
 ### Rodada 20 · 2026-10-14
 
 - **Pedido (literal):** "abriu! mas "Mostrar todos" nao parece um botao clicavel. só melhore isso."

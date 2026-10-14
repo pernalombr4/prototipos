@@ -110,6 +110,18 @@ export interface TextosDaTela {
   secaoOcultos: string
   mostrarTodos: string
   gerenciarOcultos: string
+  semEtiquetasTitulo: string
+  semEtiquetasDescricao: string
+  criarEtiquetaBotao: string
+  nenhumaEtiquetaAinda: string
+  criarEtiquetaTitulo: string
+  criarEtiquetaDescricao: string
+  nomeDaEtiqueta: string
+  nomeDaEtiquetaExemplo: string
+  quaisWorkspaces: string
+  criarEm: (n: number) => string
+  escolhaUmWorkspace: string
+  etiquetaCriada: (nome: string, n: number) => string
   recolherGrupo: (nome: string) => string
   semEtiqueta: string
   nenhumaEtiqueta: string
@@ -300,6 +312,18 @@ export const textos: Record<Idioma, TextosDaTela> = {
     secaoOcultos: 'Ocultos',
     mostrarTodos: 'Mostrar todos',
     gerenciarOcultos: 'Escolher o que aparece',
+    semEtiquetasTitulo: 'Você ainda não criou etiquetas',
+    semEtiquetasDescricao: 'Etiquetas agrupam seus workspaces do seu jeito, e só você vê. Enquanto não houver nenhuma, tudo fica em "Sem etiqueta".',
+    criarEtiquetaBotao: 'Criar etiqueta',
+    nenhumaEtiquetaAinda: 'Nenhuma criada ainda',
+    criarEtiquetaTitulo: 'Criar etiqueta',
+    criarEtiquetaDescricao: 'Dê um nome e marque os workspaces que vão levar a etiqueta. Só você vê.',
+    nomeDaEtiqueta: 'Nome da etiqueta',
+    nomeDaEtiquetaExemplo: 'Ex.: Clientes',
+    quaisWorkspaces: 'Em quais workspaces',
+    criarEm: n => n === 1 ? 'Criar em 1 workspace' : `Criar em ${n} workspaces`,
+    escolhaUmWorkspace: 'Marque pelo menos 1 workspace.',
+    etiquetaCriada: (nome, n) => `Etiqueta "${nome}" criada em ${n} ${n === 1 ? 'workspace' : 'workspaces'}`,
     recolherGrupo: n => `Recolher ou abrir ${n}`,
     nenhumaEtiqueta: 'Você ainda não criou etiquetas. Crie a primeira abaixo.',
 
@@ -482,6 +506,18 @@ export const textos: Record<Idioma, TextosDaTela> = {
     secaoOcultos: 'Hidden',
     mostrarTodos: 'Show all',
     gerenciarOcultos: 'Choose what shows',
+    semEtiquetasTitulo: 'You haven’t created any tags yet',
+    semEtiquetasDescricao: 'Tags group your workspaces your way, and only you see them. Until you create one, everything stays under "No tag".',
+    criarEtiquetaBotao: 'Create tag',
+    nenhumaEtiquetaAinda: 'None created yet',
+    criarEtiquetaTitulo: 'Create tag',
+    criarEtiquetaDescricao: 'Name it and check the workspaces that get the tag. Only you see it.',
+    nomeDaEtiqueta: 'Tag name',
+    nomeDaEtiquetaExemplo: 'E.g.: Clients',
+    quaisWorkspaces: 'Which workspaces',
+    criarEm: n => n === 1 ? 'Create on 1 workspace' : `Create on ${n} workspaces`,
+    escolhaUmWorkspace: 'Check at least 1 workspace.',
+    etiquetaCriada: (nome, n) => `Tag "${nome}" created on ${n} ${n === 1 ? 'workspace' : 'workspaces'}`,
     recolherGrupo: n => `Collapse or expand ${n}`,
     semEtiqueta: 'No tag',
     nenhumaEtiqueta: 'You haven\u2019t created any tags yet. Create the first one below.',
@@ -666,6 +702,18 @@ export const textos: Record<Idioma, TextosDaTela> = {
     secaoOcultos: 'Ocultos',
     mostrarTodos: 'Mostrar todos',
     gerenciarOcultos: 'Elegir qué aparece',
+    semEtiquetasTitulo: 'Todavía no creaste etiquetas',
+    semEtiquetasDescricao: 'Las etiquetas agrupan tus workspaces a tu manera, y solo tú las ves. Mientras no haya ninguna, todo queda en "Sin etiqueta".',
+    criarEtiquetaBotao: 'Crear etiqueta',
+    nenhumaEtiquetaAinda: 'Ninguna creada todavía',
+    criarEtiquetaTitulo: 'Crear etiqueta',
+    criarEtiquetaDescricao: 'Ponle un nombre y marca los workspaces que llevarán la etiqueta. Solo tú la ves.',
+    nomeDaEtiqueta: 'Nombre de la etiqueta',
+    nomeDaEtiquetaExemplo: 'Ej.: Clientes',
+    quaisWorkspaces: 'En qué workspaces',
+    criarEm: n => n === 1 ? 'Crear en 1 workspace' : `Crear en ${n} workspaces`,
+    escolhaUmWorkspace: 'Marca al menos 1 workspace.',
+    etiquetaCriada: (nome, n) => `Etiqueta "${nome}" creada en ${n} ${n === 1 ? 'workspace' : 'workspaces'}`,
     recolherGrupo: n => `Contraer o abrir ${n}`,
     nenhumaEtiqueta: 'Todavía no creaste etiquetas. Crea la primera abajo.',
 
