@@ -336,31 +336,44 @@ const resultado = computed(() => ({
   sai: comparacao.value.totalDeCategorias.removida,
 }))
 
-let relogio: ReturnType<typeof setTimeout> | undefined
+let relogio: ReturnType<typeof setInterval> | undefined
+const etapa = ref(0)
 
 /**
- * A migração roda em segundo plano (POST /migration-requests, depois o status
- * pending, processing). O produto não diz em que ponto ela está: a tela mostra
- * só que está em andamento. Dá para cancelar enquanto ela não termina. Depois
- * de concluída, não há volta.
+ * As etapas são as da rodada 1, a pedido da redatora. A falha não diz em que
+ * etapa parou: só que nada foi migrado. Dá para cancelar enquanto não termina;
+ * depois de concluída, não há volta.
  */
 function importar() {
   fase.value = 'importando'
-  relogio = setTimeout(() => {
-    fase.value = props.final === 'falha' ? 'erro' : 'concluido'
-  }, 8000)
+  etapa.value = 0
+  const ultima = props.t.etapasImportacao.length
+  relogio = setInterval(() => {
+    if (props.final === 'falha' && etapa.value === 2) {
+      clearInterval(relogio)
+      fase.value = 'erro'
+      return
+    }
+    etapa.value++
+    if (etapa.value >= ultima) {
+      clearInterval(relogio)
+      fase.value = 'concluido'
+    }
+  }, 1600)
 }
+
+const progresso = computed(() => Math.round((etapa.value / props.t.etapasImportacao.length) * 100))
 
 const cancelando = ref(false)
 async function cancelar() {
   cancelando.value = true
-  clearTimeout(relogio)
+  clearInterval(relogio)
   await new Promise(r => setTimeout(r, 700))
   cancelando.value = false
   fase.value = 'cancelado'
 }
 
-onBeforeUnmount(() => clearTimeout(relogio))
+onBeforeUnmount(() => clearInterval(relogio))
 
 function verCategorias() {
   aberto.value = false
@@ -776,8 +789,17 @@ function verCategorias() {
               </p>
             </div>
           </div>
-          <!-- Sem valor: o produto não informa o avanço da migração. -->
-          <UProgress :model-value="null" animation="carousel" />
+          <UProgress :model-value="progresso" />
+          <ol class="space-y-2">
+            <li v-for="(nome, i) in t.etapasImportacao" :key="nome" class="flex items-center gap-2 text-sm">
+              <UIcon
+                :name="i < etapa ? 'i-lucide-circle-check' : i === etapa ? 'i-lucide-loader-circle' : 'i-lucide-circle'"
+                class="size-4 shrink-0"
+                :class="i < etapa ? 'text-success' : i === etapa ? 'animate-spin text-primary' : 'text-dimmed'"
+              />
+              <span :class="i <= etapa ? 'text-highlighted' : 'text-muted'">{{ nome }}</span>
+            </li>
+          </ol>
           <p class="flex items-center gap-1.5 text-xs text-muted">
             <UIcon name="i-lucide-bell" class="size-3.5" />
             {{ t.podeFechar }}

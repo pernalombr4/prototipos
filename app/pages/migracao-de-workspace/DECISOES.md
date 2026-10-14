@@ -22,7 +22,7 @@ Importar Workspace
    └ há o que comparar ──► contagem + árvore só com as alterações ("Voltar" leva ao modo)
    │ Substituição total com algo saindo: digitar o e-mail
    ▼
-Migração em andamento (sem etapas; pode fechar; avisa no sino) ── Cancelar migração ──► "Migração cancelada. Nada foi migrado."
+Importando a estrutura (5 etapas; pode fechar; avisa no sino) ── Cancelar migração ──► "Migração cancelada. Nada foi migrado."
    ├ falha ──► "A migração falhou. Nada foi migrado." + Tentar de novo
    ▼
 Migração concluída ──► Ver categorias (não há como desfazer)
@@ -139,3 +139,10 @@ Migração concluída ──► Ver categorias (não há como desfazer)
 - **Fronteira:** muda o modo de importação, o estado vazio e os estados da migração; não muda a revisão nem a casca.
 - **Maquete:** a migração leva 8 segundos no protótipo, para dar tempo de cancelar.
 - **Ver:** `evidencias/proposta-r5-1-modo-de-importacao.jpg`, `proposta-r5-2-workspace-vazio.jpg`, `proposta-r5-3-em-andamento.jpg`, `proposta-r5-4-cancelada.jpg`
+
+## Fechamento · 2026-10-14
+- **Pedido (literal):** "nao precisava mudar o modal de carregamento, ok? esse pode ser como era antes. pode commitar e dar push. e indique como aprovado esse prototipo na tela geral de prototipos"
+- **Mudou:**
+  - O carregamento volta ao da rodada 1: "Importando a estrutura", a barra com porcentagem e as 5 etapas. Fica o "Cancelar migração" da rodada 5.
+  - A falha continua sem dizer a etapa: "A migração falhou. Nada foi migrado."
+  - Status `aprovado` no `definePageMeta` (selo verde no índice) e no README.

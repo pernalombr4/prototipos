@@ -12,8 +12,8 @@ import decisoesMd from './DECISOES.md?raw'
 definePageMeta({
   titulo: 'Migração de Workspace',
   descricao: 'Importar a estrutura de outro workspace sem duplicar: arrastar o arquivo, escolher entre adicionar, somar ou substituir e ver o que muda em estrutura, nunca em JSON.',
-  status: 'em-revisao',
-  atualizado: '2026-10-01',
+  status: 'aprovado',
+  atualizado: '2026-10-14',
   tela: 'Configurações › Interface › Casos de Uso',
 })
 

@@ -117,6 +117,7 @@ export interface Textos {
   // importando e depois
   importandoTitulo: string
   importandoTexto: string
+  etapasImportacao: string[]
   podeFechar: string
   sucessoTitulo: string
   sucessoTexto: (entra: number, muda: number, sai: number) => string
@@ -277,8 +278,9 @@ const pt: Textos = {
   digiteEmail: 'Digite seu e-mail para confirmar',
   importar: m => (m === 'substituir' ? 'Substituir workspace' : 'Importar'),
 
-  importandoTitulo: 'Migração em andamento',
-  importandoTexto: 'Pode levar alguns minutos em workspaces grandes.',
+  importandoTitulo: 'Importando a estrutura',
+  importandoTexto: 'Isso leva alguns minutos em workspaces grandes.',
+  etapasImportacao: ['Conferindo o arquivo', 'Criando categorias', 'Criando campos e listas', 'Montando formulários e telas', 'Ajustando permissões e menus'],
   podeFechar: 'Pode fechar esta janela. Avisamos no sino quando terminar.',
   sucessoTitulo: 'Migração concluída',
   sucessoTexto: (e, m, s) => [
@@ -398,8 +400,9 @@ const en: Textos = {
   digiteEmail: 'Type your email to confirm',
   importar: m => (m === 'substituir' ? 'Replace workspace' : 'Import'),
 
-  importandoTitulo: 'Migration in progress',
-  importandoTexto: 'It can take a few minutes in large workspaces.',
+  importandoTitulo: 'Importing the structure',
+  importandoTexto: 'This takes a few minutes in large workspaces.',
+  etapasImportacao: ['Checking the file', 'Creating categories', 'Creating fields and lists', 'Building forms and screens', 'Adjusting permissions and menus'],
   podeFechar: 'You can close this window. We will let you know in the bell when it is done.',
   sucessoTitulo: 'Migration completed',
   sucessoTexto: (e, m, s) => [
@@ -519,8 +522,9 @@ const es: Textos = {
   digiteEmail: 'Escriba su correo para confirmar',
   importar: m => (m === 'substituir' ? 'Reemplazar workspace' : 'Importar'),
 
-  importandoTitulo: 'Migración en curso',
-  importandoTexto: 'Puede tardar unos minutos en workspaces grandes.',
+  importandoTitulo: 'Importando la estructura',
+  importandoTexto: 'Esto tarda unos minutos en workspaces grandes.',
+  etapasImportacao: ['Revisando el archivo', 'Creando categorías', 'Creando campos y listas', 'Armando formularios y pantallas', 'Ajustando permisos y menús'],
   podeFechar: 'Puede cerrar esta ventana. Le avisamos en la campana cuando termine.',
   sucessoTitulo: 'Migración completada',
   sucessoTexto: (e, m, s) => [
