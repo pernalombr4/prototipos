@@ -146,10 +146,10 @@ async function enviar() {
               class="max-w-[85%] rounded-lg px-3 py-2"
               :class="m.autor === 'denunciante' ? 'bg-primary/10' : m.autor === 'sistema' ? 'bg-elevated' : 'border border-default bg-default'"
             >
-              <p class="flex items-center gap-1.5 text-xs font-medium" :class="m.autor === 'comite' ? 'text-primary' : 'text-toned'">
-                <UIcon :name="m.autor === 'sistema' ? 'i-lucide-bot' : m.autor === 'comite' ? 'i-lucide-shield' : 'i-lucide-user-round'" class="size-3.5" />
+              <p class="flex items-center gap-1.5 text-xs font-medium text-toned">
+                <UIcon :name="m.autor === 'sistema' ? 'i-lucide-bot' : m.autor === 'comite' ? 'i-lucide-shield' : 'i-lucide-user-round'" class="size-3.5" :class="m.autor === 'comite' ? 'text-primary' : ''" />
                 {{ t.acompanhar.autor[m.autor] }}
-                <span class="font-normal text-muted">· {{ formatoHora.format(m.quando) }}</span>
+                <span class="font-normal text-toned">· {{ formatoHora.format(m.quando) }}</span>
               </p>
               <p class="mt-1 whitespace-pre-line text-sm text-highlighted">{{ m.texto }}</p>
             </div>

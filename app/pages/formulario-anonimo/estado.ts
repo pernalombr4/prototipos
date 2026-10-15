@@ -9,9 +9,13 @@ import {
   ANONYMOUS, type Denuncia, type Formulario, HOJE, type Mensagem, type RegistroDeAuditoria,
   auditoria as auditoriaInicial, denuncias as denunciasIniciais, emailsAutomaticos as emailsIniciais,
   formularios as formulariosIniciais, horaCheia, mensagens as mensagensIniciais, novaSenha, novoProtocolo, somarDias,
+  MODELO_DO_CANAL, camposComRisco, pontosForaDoFormulario,
 } from './mocks'
 
-export type Tela = 'formularios' | 'spaceflow' | 'itens' | 'publico' | 'acompanhar'
+export type Tela = 'formularios' | 'construtor' | 'spaceflow' | 'itens' | 'publico' | 'acompanhar' | 'fora'
+export type Jornada = 'configurador' | 'denunciante'
+/** ANDAIME: o que acontece fora do ENSPACE (o cartaz e a caixa de e-mail pessoal). */
+export type CenaDeFora = 'cartaz' | 'email'
 export type Cenario = 'normal' | 'vazio' | 'pico' | 'falha'
 export type AbaDoItem = 'visao' | 'canal' | 'comentarios' | 'auditoria' | 'tarefas' | 'anexos' | 'emails'
 
@@ -52,9 +56,79 @@ export function useFormularioAnonimo() {
   const sessaoDoDenunciante = useState<number | null>('fa-sessao', () => null)
   const tentativas = useState<number>('fa-tentativas', () => 0)
 
+  /* ---------- jornada do configurador ---------- */
+
+  /** O canal existe e está publicado. A jornada do configurador começa sem ele. */
+  const canalCriado = useState<boolean>('fa-canal-criado', () => true)
+  const canalPublicado = useState<boolean>('fa-canal-publicado', () => true)
+  const novoFormularioAberto = useState<boolean>('fa-novo-formulario', () => false)
+  /** Os campos do formulário do canal, na ordem do construtor. */
+  const blocos = useState<string[]>('fa-blocos', () => [...MODELO_DO_CANAL])
+  const revisaoAberta = useState<boolean>('fa-revisao', () => false)
+  const publicadoAberto = useState<boolean>('fa-publicado', () => false)
+  /** Pontos de fora do formulário que o configurador já corrigiu na revisão. */
+  const resolvidos = useState<string[]>('fa-resolvidos', () => [])
+  /** Envio de teste do configurador: vira item marcado "Teste". */
+  const modoTeste = useState<boolean>('fa-modo-teste', () => false)
+
+  const problemasDoFormulario = computed(() => camposComRisco.filter(c => blocos.value.includes(c.refId)))
+  const pontosAbertos = computed(() => pontosForaDoFormulario.filter(p => !resolvidos.value.includes(p.id)))
+  const bloqueiaPublicar = computed(() => problemasDoFormulario.value.some(c => c.risco === 'email' || c.risco === 'membro_logado')
+    || pontosAbertos.value.some(p => p.severidade === 'bloqueia'))
+
+  function criarCanal(nome: string, comModelo: boolean) {
+    const f = formularios.value[0]!
+    f.nome = nome
+    f.visibilidade = 'anonimo'
+    f.tipo = 'criacao'
+    f.criadoEm = agora()
+    inicioDoCanal.value = horaCheia(agora())
+    blocos.value = comModelo ? [...MODELO_DO_CANAL] : []
+    canalCriado.value = true
+    canalPublicado.value = false
+    novoFormularioAberto.value = false
+    tela.value = 'construtor'
+  }
+
+  function publicar() {
+    canalPublicado.value = true
+    revisaoAberta.value = false
+    publicadoAberto.value = true
+  }
+
+  /** Volta o protótipo ao começo da jornada do configurador: categoria sem o canal. */
+  function comecarDoZero() {
+    canalCriado.value = false
+    canalPublicado.value = false
+    resolvidos.value = []
+    blocos.value = []
+    formularioAberto.value = null
+  }
+
+  /* ---------- jornada do denunciante e o guia ---------- */
+
+  const cena = useState<CenaDeFora>('fa-cena', () => 'cartaz')
+  const jornada = useState<Jornada | null>('fa-jornada', () => null)
+  const passo = useState<number>('fa-passo', () => 0)
+
+  /** A denúncia da pessoa: a última enviada pela página pública ou a de exemplo. */
+  const denunciaDoDenunciante = computed(() => {
+    const ultima = ultimoEnvio.value ? denuncias.value.find(d => d.data.protocolo === ultimoEnvio.value!.protocolo) : null
+    return ultima ?? denuncias.value.find(d => d.id === 81202) ?? denuncias.value[0]!
+  })
+
+  function concluir(itemId: number, texto: string, membro: number) {
+    const d = denuncias.value.find(x => x.id === itemId)
+    if (!d) return
+    responder(itemId, 'comite', texto, membro)
+    d.data.situacao = 'concluida'
+  }
+
   const formularioDoCanal = computed(() => formularios.value[0]!)
 
-  const listaDoComite = computed(() => cenario.value === 'vazio' ? [] : denuncias.value)
+  /** Quando o canal foi criado na jornada do configurador: as denúncias de exemplo ficam de fora. */
+  const inicioDoCanal = useState<Date | null>('fa-inicio-canal', () => null)
+  const listaDoComite = computed(() => cenario.value === 'vazio' ? [] : inicioDoCanal.value ? denuncias.value.filter(d => +d.created_at >= +inicioDoCanal.value!) : denuncias.value)
 
   function ir(t: Tela, opcoes?: { item?: number | null, aba?: AbaDoItem, formulario?: number | null, abaDoFormulario?: string, no?: string | null }) {
     tela.value = t
@@ -96,6 +170,7 @@ export function useFormularioAnonimo() {
       data: { ...dados, protocolo, situacao: 'nova', retorno_ate: retornoAte.toISOString().slice(0, 10), responsavel: null },
       senhaDoPrototipo: senha,
       mensagensNovas: 0,
+      teste: modoTeste.value,
     }
     denuncias.value = [nova, ...denuncias.value]
     mensagens.value = [...mensagens.value, { id: id * 100, itemId: id, autor: 'sistema', texto: f.mensagemDeConfirmacao, quando: recebida }]
@@ -137,7 +212,10 @@ export function useFormularioAnonimo() {
     tela, cenario, destacar, formularios, denuncias, mensagens, auditoria, emails,
     vistaDaCategoria, formularioAberto, abaDoFormulario, itemAberto, abaDoItem, noAberto,
     passoPublico, ultimoEnvio, sessaoDoDenunciante, tentativas,
-    formularioDoCanal, listaDoComite,
+    formularioDoCanal, listaDoComite, inicioDoCanal,
+    canalCriado, canalPublicado, novoFormularioAberto, blocos, revisaoAberta, publicadoAberto, resolvidos, modoTeste,
+    problemasDoFormulario, pontosAbertos, bloqueiaPublicar, criarCanal, publicar, comecarDoZero,
+    cena, jornada, passo, denunciaDoDenunciante, concluir,
     ir, registrarDenuncia, responder, entrarComoDenunciante,
   }
 }

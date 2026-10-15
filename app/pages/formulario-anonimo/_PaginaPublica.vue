@@ -16,7 +16,8 @@ import { useFormularioAnonimo } from './estado'
 
 const props = defineProps<{ t: Textos }>()
 
-const { cenario, passoPublico, ultimoEnvio, formularioDoCanal, registrarDenuncia, ir } = useFormularioAnonimo()
+const { cenario, passoPublico, ultimoEnvio, formularioDoCanal, registrarDenuncia, ir, modoTeste, canalPublicado, denuncias } = useFormularioAnonimo()
+const canalPausado = useState<boolean>('fa-canal-pausado', () => false)
 const idioma = useIdioma()
 
 const campo = (refId: string) => campos.find(c => c.refId === refId)!
@@ -41,7 +42,8 @@ onMounted(() => setTimeout(() => (verificacao.value = 'ok'), 1400))
 
 /* ---------- envio ---------- */
 
-const pausado = computed(() => cenario.value === 'pico')
+const fechado = computed(() => !canalPublicado.value && !modoTeste.value)
+const pausado = computed(() => fechado.value || cenario.value === 'pico' || (canalPausado.value && !modoTeste.value))
 const enviando = ref(false)
 const falhou = ref(false)
 
@@ -81,6 +83,13 @@ async function enviar() {
   mostrarSenha.value = false
   passoPublico.value = 'recebida'
   window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+/** Teste do configurador: volta ao ENSPACE com a denúncia de teste aberta. */
+function verTesteNoEnspace() {
+  const d = denuncias.value.find(x => x.data.protocolo === ultimoEnvio.value?.protocolo)
+  modoTeste.value = false
+  ir('itens', { item: d?.id ?? null, aba: 'visao' })
 }
 
 function novaDenuncia() {
@@ -142,8 +151,10 @@ const opcoesDeTestemunha = campo('testemunhas').opcoes!.map(v => ({ value: v, la
         <p class="mt-1 text-sm text-muted">{{ t.publico.de(workspace.name) }}</p>
       </header>
 
+      <UAlert v-if="modoTeste" icon="i-lucide-flask-conical" color="warning" variant="subtle" :title="t.teste.faixa" class="mb-4" />
+      <UAlert v-if="fechado" icon="i-lucide-lock" color="neutral" variant="subtle" :title="t.teste.naoAberto" class="mb-4" />
       <UAlert
-        v-if="pausado"
+        v-else-if="pausado"
         icon="i-lucide-octagon-pause"
         color="warning"
         variant="subtle"
@@ -323,6 +334,7 @@ const opcoesDeTestemunha = campo('testemunhas').opcoes!.map(v => ({ value: v, la
         <UButton icon="i-lucide-download" :label="t.publico.recebida.baixar" color="neutral" variant="outline" block @click="baixarComprovante" />
         <UCheckbox v-model="guardou" :label="t.publico.recebida.guardei" />
         <UButton icon="i-lucide-inbox" :label="t.publico.recebida.acompanhar" block :disabled="!guardou" @click="ir('acompanhar')" />
+        <UButton v-if="ultimoEnvio && denuncias.find(x => x.data.protocolo === ultimoEnvio!.protocolo)?.teste" icon="i-lucide-arrow-left-to-line" :label="t.teste.verNoEnspace" color="warning" variant="soft" block @click="verTesteNoEnspace" />
         <UButton :label="t.publico.recebida.outra" color="neutral" variant="link" size="sm" class="self-center" @click="novaDenuncia" />
       </div>
     </div>

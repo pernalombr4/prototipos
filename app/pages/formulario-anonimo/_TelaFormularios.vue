@@ -15,12 +15,13 @@
 import type { DropdownMenuItem, TabsItem } from '@nuxt/ui'
 import type { EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import type { Textos } from './textos'
-import { ANONYMOUS, type Formulario, LINK_DE_ACOMPANHAMENTO, categoria, linkDoFormulario, volume24h } from './mocks'
+import { ANONYMOUS, type Formulario, LINK_DE_ACOMPANHAMENTO, TIPOS_DE_FORMULARIO, categoria, linkDoFormulario, volume24h } from './mocks'
+import NovoFormulario from './_NovoFormulario.vue'
 import { useFormularioAnonimo, useMarcaDeProposta } from './estado'
 
 const props = defineProps<{ t: Textos }>()
 
-const { formularios, vistaDaCategoria, formularioAberto, abaDoFormulario, ir } = useFormularioAnonimo()
+const { formularios, vistaDaCategoria, formularioAberto, abaDoFormulario, canalCriado, novoFormularioAberto, ir } = useFormularioAnonimo()
 const marca = useMarcaDeProposta()
 const toast = useToast()
 const idioma = useIdioma()
@@ -59,7 +60,8 @@ const colunas = computed<EnTableColumn[]>(() => [
 ])
 
 interface Linha extends Record<string, unknown> { id: number, criadoEm: string, nome: string, icone: string, visibilidade: Formulario['visibilidade'] }
-const linhas = computed<Linha[]>(() => formularios.value.map(f => ({ id: f.id, criadoEm: formatoDia.value.format(f.criadoEm), nome: f.nome, icone: f.icone, visibilidade: f.visibilidade })))
+const visiveis = computed(() => formularios.value.filter(f => f.id !== formularios.value[0]!.id || canalCriado.value))
+const linhas = computed<Linha[]>(() => visiveis.value.map(f => ({ id: f.id, criadoEm: formatoDia.value.format(f.criadoEm), nome: f.nome, icone: f.icone, visibilidade: f.visibilidade })))
 
 async function copiar(texto: string) {
   try {
@@ -78,7 +80,7 @@ function menuDaLinha(id: number): DropdownMenuItem[][] {
     { label: props.t.categoria.menu.duplicar, icon: 'i-lucide-copy', onSelect: fora },
     { label: props.t.categoria.menu.exportar, icon: 'i-lucide-download', onSelect: fora },
     ...(f.visibilidade !== 'privado' ? [{ label: props.t.categoria.menu.copiar, icon: 'i-lucide-link', onSelect: () => copiar(linkDoFormulario(f)) }] : []),
-    { label: props.t.categoria.menu.acessar, icon: 'i-lucide-arrow-right', onSelect: fora },
+    { label: props.t.categoria.menu.acessar, icon: 'i-lucide-arrow-right', onSelect: () => (f.visibilidade === 'anonimo' ? ir('construtor') : fora()) },
   ]]
 }
 
@@ -114,7 +116,7 @@ watch(anonimo, (a) => {
   if (a && rascunho.value) Object.assign(rascunho.value, { rascunhos: false, triagem: false, listaTriagem: false })
 })
 
-const tipos = computed(() => (['criacao', 'edicao', 'visualizacao'] as const).map(v => ({ value: v, label: props.t.formulario.tipos[v] })))
+const tipos = computed(() => TIPOS_DE_FORMULARIO.map(v => ({ value: v, label: props.t.formulario.tipos[v], disabled: anonimo.value && v !== 'criacao' })))
 const visibilidades = computed(() => (['privado', 'publico', 'anonimo'] as const).map(v => ({
   value: v,
   label: props.t.categoria.visibilidades[v],
@@ -228,7 +230,7 @@ function baixarQr() {
         <div class="flex items-center gap-2 border-b border-default px-3 py-2.5">
           <span class="flex size-7 items-center justify-center rounded-md bg-primary/15"><UIcon name="i-lucide-file-spreadsheet" class="size-4 text-primary" /></span>
           <span class="text-sm font-medium text-highlighted">{{ t.categoria.formulario }}</span>
-          <UBadge :label="t.categoria.criar" color="success" variant="soft" size="sm" />
+          <UButton :label="t.categoria.criar" color="success" variant="soft" size="xs" @click="novoFormularioAberto = true" />
           <UIcon name="i-lucide-settings" class="ml-auto size-4 text-muted" />
         </div>
         <div class="flex items-center gap-2 px-3 py-2">
@@ -299,11 +301,7 @@ function baixarQr() {
                   <USelect v-model="rascunho.tipo" :items="tipos" class="w-full" />
                 </UFormField>
                 <UFormField :label="t.formulario.visibilidade" :help="t.formulario.ajudaVisibilidade[rascunho.visibilidade]" :class="marca">
-                  <USelect v-model="rascunho.visibilidade" :items="visibilidades" class="w-full">
-                    <template #leading>
-                      <UIcon v-if="rascunho.visibilidade === 'anonimo'" name="i-lucide-venetian-mask" class="size-4 text-info" />
-                    </template>
-                  </USelect>
+                  <USelect v-model="rascunho.visibilidade" :items="visibilidades" :icon="anonimo ? 'i-lucide-venetian-mask' : undefined" class="w-full" />
                 </UFormField>
                 <p v-if="rascunho.tipo !== 'criacao'" class="-mt-2 flex items-center gap-1.5 text-xs text-muted">
                   <UIcon name="i-lucide-info" class="size-3.5" />{{ t.formulario.soCriacao }}
@@ -468,5 +466,6 @@ function baixarQr() {
         </div>
       </template>
     </USlideover>
+    <NovoFormulario :t="t" />
   </div>
 </template>

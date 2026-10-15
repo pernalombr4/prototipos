@@ -148,7 +148,56 @@ export const campos: Campo[] = [
   { refId: 'anexos', nome: 'Anexos', type: 'uploadFile', obrigatorio: false },
 ]
 
+/**
+ * Outros campos da categoria, que o configurador pode pôr no formulário. Os 4
+ * identificam quem envia: é o que a verificação de anonimato aponta.
+ */
+export interface CampoComRisco {
+  refId: string
+  nome: string
+  /** Rótulo técnico do develop, como aparece em "Adicionar campo": "[tipo] - Nome". */
+  tipoTecnico: string
+  risco: 'email' | 'nome' | 'membro_logado' | 'documento'
+}
+export const camposComRisco: CampoComRisco[] = [
+  { refId: 'email_retorno', nome: 'E-mail para retorno', tipoTecnico: 'email', risco: 'email' },
+  { refId: 'seu_nome', nome: 'Seu nome (opcional)', tipoTecnico: 'inputText', risco: 'nome' },
+  { refId: 'gestor', nome: 'Gestor responsável', tipoTecnico: 'EnlDropdown', risco: 'membro_logado' },
+  { refId: 'matricula', nome: 'Matrícula', tipoTecnico: 'EnlMask', risco: 'documento' },
+]
+
+/** Rótulo técnico dos campos do relato, para a lista "Adicionar campo". */
+export const tipoTecnico: Record<string, string> = {
+  tipo: 'EnlDropdown', area: 'EnlDropdown', quando: 'EnlCalendar', envolvidos: 'inputText',
+  relato: 'EnTextArea', testemunhas: 'radioButton', anexos: 'uploadFile',
+}
+
+/** PROPOSTA: o modelo "Canal de denúncia", oferecido ao criar um formulário anônimo. */
+export const MODELO_DO_CANAL = ['tipo', 'area', 'quando', 'envolvidos', 'relato', 'testemunhas', 'anexos']
+
+/* ------------------------------------------------------------------ *
+ * O que a revisão do canal confere fora do formulário
+ * ------------------------------------------------------------------ */
+
+export type Severidade = 'bloqueia' | 'atencao'
+export interface PontoDaRevisao {
+  id: string
+  grupo: 'fluxos' | 'notificacoes' | 'modelos' | 'acesso'
+  severidade: Severidade
+  /** Onde está, como o configurador acha no ENSPACE. */
+  onde: string
+}
+export const pontosForaDoFormulario: PontoDaRevisao[] = [
+  { id: 'fluxo-gestor', grupo: 'fluxos', severidade: 'atencao', onde: 'Spaceflow "Aviso ao gestor" › nó E-mail' },
+  { id: 'notif-criador', grupo: 'notificacoes', severidade: 'atencao', onde: 'Denúncias › Notificações › "Nova denúncia"' },
+  { id: 'modelo-confirmacao', grupo: 'modelos', severidade: 'atencao', onde: 'E-mails › Modelos › "Confirmação de registro"' },
+  { id: 'cargo-colaborador', grupo: 'acesso', severidade: 'bloqueia', onde: 'Gestão de Membros › Cargos › "Colaborador"' },
+]
+
 export type Visibilidade = 'privado' | 'publico' | 'anonimo'
+/** As 6 opções de Tipo do develop (ev-11), na ordem da lista. */
+export const TIPOS_DE_FORMULARIO = ['editar', 'criacao', 'geral', 'visualizar', 'criacao_item', 'tarefas'] as const
+export type TipoDeFormulario = typeof TIPOS_DE_FORMULARIO[number]
 export type Verificacao = 'enspace' | 'turnstile'
 export type ApagarEmail = 'ao_concluir' | 'trinta_dias'
 
@@ -157,7 +206,7 @@ export interface Formulario {
   id: number
   nome: string
   descricao: string
-  tipo: 'criacao' | 'edicao' | 'visualizacao'
+  tipo: TipoDeFormulario
   visibilidade: Visibilidade
   icone: string
   identification: string
@@ -205,7 +254,7 @@ export const formularios: Formulario[] = [
     id: 3521,
     nome: 'Triagem do comitê',
     descricao: 'Classificação interna da denúncia',
-    tipo: 'edicao',
+    tipo: 'editar',
     visibilidade: 'privado',
     icone: 'i-lucide-list-checks',
     identification: 'Rk2aW8eQz5LmP0vYt7XcN4bU1sJh9GdF',
@@ -259,6 +308,8 @@ export interface Denuncia extends Item {
   /** PROTÓTIPO: a senha nunca fica no item. Aqui ela só existe para o protótipo deixar entrar no acompanhamento. */
   senhaDoPrototipo: string
   mensagensNovas: number
+  /** PROTÓTIPO: envio de teste do configurador; não conta nos limites. */
+  teste?: boolean
 }
 
 export interface Mensagem {

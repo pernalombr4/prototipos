@@ -14,29 +14,35 @@
 - **O retorno é por protocolo e senha.** A confirmação aparece na tela e fica como 1ª mensagem do
   acompanhamento. O comitê responde pela pasta nova "Canal do denunciante" ou pelo nó novo do Spaceflow,
   "Responder ao denunciante".
+- **O configurador não precisa saber onde a identidade vaza:** o construtor aponta os campos que identificam
+  quem envia, e a revisão antes de publicar confere fluxos, notificações, modelos de e-mail e cargos da categoria.
 - **O e-mail de retorno é opcional.** Fica cifrado fora do item, nenhuma tela mostra, o aviso não leva conteúdo
   e o e-mail some quando o caso fecha. A tela avisa que, com e-mail, a denúncia passa a ser sigilosa.
 
-## A jornada
+## As 2 jornadas
 
 ```
-QUEM CONFIGURA                        QUEM DENUNCIA                         COMITÊ DE ÉTICA
-Formulários › Editar                  Link fixo (cartaz, QR, site)
- Visibilidade = Anônimo                 │ sem login, sem Acesso Externo
- aba Anonimato:                         ▼
-  link + QR, robô, limites,           Formulário + "sua denúncia é anônima"
-  mensagem de recebimento,              │ verificação sem clique
-  aviso por e-mail (opcional)           │ e-mail opcional (vira sigilosa)
-        │                               ▼
-Spaceflow do caso                     Enviar ──► item criado por anonymous ──► Lista de denúncias
- Start: Ações de Itens,                 │        (sem e-mail, sem IP,            │
-  formulário Canal de denúncia          │         hora cheia)                    ▼
-  (recebe user = anonymous)             ▼                                   Painel do item
- Responder ao denunciante ──────► Protocolo + senha + comprovante           Canal do denunciante
- Tarefa: Triar denúncia                 │                                    │ resposta
-                                        ▼                                    ▼
-                                      Acompanhar (protocolo + senha) ◄──── mensagem no acompanhamento
-                                       lê e responde                       (+ aviso sem conteúdo, se pediu e-mail)
+CONFIGURADOR                                          DENUNCIANTE
+1 Formulários › Criar +                               1 Cartaz / intranet: QR code e link
+  Visibilidade = Anônimo                                │
+  "o que muda" + modelo Canal de denúncia              2 Abre o link: sem login, sem Acesso Externo
+        │                                               │
+2 Construtor                                          3 Relato + verificação de robô sem clique
+  Verificação de anonimato aponta o campo              │
+  que identifica quem envia e diz como corrigir       4 Aviso por e-mail? opcional (vira sigilosa)
+        │                                               │
+3 Aba Anonimato: link, QR, proteção, retorno          5 Protocolo + senha + comprovante
+        │                                               │
+4 Spaceflow: gatilho sem identidade                   6 Caixa pessoal: aviso sem conteúdo
+  + "Responder ao denunciante" ─────────────────────►  │ (quando o comitê responde)
+        │                                               │
+5 Revisar e publicar: formulário, fluxos,             7 Acompanhar: lê a resposta e complementa
+  notificações, modelos, cargos                         │
+        │                                             8 Caso concluído
+6 Canal publicado: link, QR, envio de teste
+        │
+7 Lista de denúncias: faixa do canal
+  (aceitas, barradas, pausar)        ◄── item criado por anonymous, sem e-mail, sem IP, hora cheia
 ```
 
 ## Rodada 1 · 2026-10-15
@@ -136,3 +142,41 @@ Spaceflow do caso                     Enviar ──► item criado por anonymous
 - **A classificação humana continua existindo, no lugar certo:** a tarefa "Triar denúncia" do Spaceflow, dentro
   do caso, feita pelo comitê, com o relato já registrado.
 - **Ver:** a mesma URL da rodada 1, Ir para › Formulário, aba Anonimato › aba Avançado.
+
+## Rodada 3 · 2026-10-15
+
+- **Pedido (literal):** "voce deve prototipar tambem outro cenario, que é a visao do CONFIGURADOR. a visao final
+  nao diz nada. isso é só um formulário como seria configurado no enspace. hoje ja daria pra reproduzzir esse front
+  seu. nao é isso que preciso somente. preciso da jornada de configurador e da jornada de usuario"
+- **Mudou:** as 2 jornadas, de ponta a ponta, com um guia no andaime que leva o protótipo a cada passo.
+  - Configurador (7 passos):
+    1. "Criar +" com Visibilidade "Anônimo": o painel diz o que muda e oferece o modelo "Canal de denúncia";
+    2. construtor com a "Verificação de anonimato": aponta o campo que identifica quem envia e diz como corrigir;
+       a lista "Adicionar campo" marca esses campos;
+    3. aba Anonimato (rodada 1): link, QR code, proteção e retorno;
+    4. Spaceflow (rodada 1): gatilho sem identidade e "Responder ao denunciante";
+    5. "Revisar e publicar canal": confere a categoria inteira (formulário, fluxos, notificações, modelos de
+       e-mail e cargos) e trava a publicação no que "Impede publicar";
+    6. "Canal publicado": link, QR code e envio de teste, que vira item marcado "Teste";
+    7. faixa do canal na lista de denúncias: aceitas e barradas hoje, "Pausar canal" e "Ver proteção".
+  - Denunciante (8 passos): cartaz na intranet com QR code; formulário sem login; relato com verificação sem
+    clique; aviso por e-mail opcional; protocolo, senha e comprovante; aviso sem conteúdo na caixa pessoal;
+    acompanhamento com a resposta do comitê; caso concluído.
+  - Tipo do formulário corrigido para as 6 opções do develop (Editar, Criação, Geral, Visualizar e 2 obsoletas).
+- **Fronteira:** muda "Criar +" no modo anônimo, o construtor (verificação, selos e 2 botões no topo), a revisão,
+  o aviso de publicado, a faixa do canal e o selo "Teste"; não muda a casca, o construtor nos modos Privado e
+  Público nem o resto da tabela de itens.
+- **Por que a revisão olha fora do formulário:** o formulário sozinho não garante anonimato. Um fluxo com
+  `{{request_email}}`, uma notificação para o criador, um modelo com `{{user.name}}` ou um cargo amplo demais
+  desfazem a proposta, e hoje nenhuma tela junta esses pontos.
+- **Maquete:**
+  - os 4 pontos de fora do formulário (fluxo "Aviso ao gestor", notificação "Nova denúncia", modelo
+    "Confirmação de registro", cargo "Colaborador") são fixos; o botão de cada um só marca "Corrigido";
+  - o guia de jornadas e as cenas de fora do ENSPACE (cartaz, caixa de e-mail) são andaime;
+  - no passo 6 da jornada do denunciante, a resposta do comitê chega sozinha; no 8, o caso é concluído sozinho;
+  - o canal criado na jornada começa sem denúncias e sem envios barrados (as de exemplo ficam de fora).
+- **Crítica e acessibilidade:** contraste medido nas telas novas; corrigidos o tipo "[email]" no bloco marcado
+  (4,4:1) e, no acompanhamento, a hora sobre fundo cinza (4,2:1) e o nome "Comitê de ética" em rosa (3,4:1, agora
+  só o ícone fica rosa). O guia fica no `body` (Teleport) e acima das camadas, para continuar clicável com um
+  painel aberto.
+- **Ver:** a mesma URL; cartão "Jornadas" no canto inferior esquerdo.

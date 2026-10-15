@@ -84,12 +84,12 @@ const ajuda: Entrada[] = [
 const abertos = ref<string[]>([])
 
 watch(tela, (t) => {
-  const secao = t === 'itens' ? 'categorias' : t === 'formularios' || t === 'spaceflow' ? 'estrutura' : null
+  const secao = t === 'itens' ? 'categorias' : t === 'formularios' || t === 'construtor' || t === 'spaceflow' ? 'estrutura' : null
   if (secao && !abertos.value.includes(secao)) abertos.value = [...abertos.value, secao]
 }, { immediate: true })
 
 function ativo(e: Entrada) {
-  return !!e.tela && tela.value === e.tela
+  return !!e.tela && (tela.value === e.tela || (e.tela === 'formularios' && tela.value === 'construtor'))
 }
 
 function clicar(e: Entrada) {

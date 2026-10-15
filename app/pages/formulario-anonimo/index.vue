@@ -22,6 +22,10 @@ import TelaSpaceflow from './_TelaSpaceflow.vue'
 import TelaItens from './_TelaItens.vue'
 import PaginaPublica from './_PaginaPublica.vue'
 import Acompanhar from './_Acompanhar.vue'
+import Construtor from './_Construtor.vue'
+import RevisaoDoCanal from './_RevisaoDoCanal.vue'
+import ForaDoEnspace from './_ForaDoEnspace.vue'
+import Jornada from './_Jornada.vue'
 
 import briefingMd from './BRIEFING.md?raw'
 import pesquisaMd from './PESQUISA.md?raw'
@@ -29,10 +33,10 @@ import decisoesMd from './DECISOES.md?raw'
 
 definePageMeta({
   titulo: 'Formulário anônimo',
-  descricao: 'Canal de denúncia sem login: o item nasce com o usuário genérico anonymous, sem e-mail nem IP, com proteção contra robô e retorno por protocolo e senha.',
+  descricao: 'Canal de denúncia sem login, nas 2 jornadas: quem configura (criar, montar com verificação de anonimato, revisar a categoria, publicar e testar) e quem denuncia (cartaz, envio sem login, protocolo e senha, aviso sem conteúdo, resposta). O item nasce com o usuário genérico anonymous.',
   status: 'em-revisao',
   atualizado: '2026-10-15',
-  tela: 'Formulários, página pública, acompanhamento, lista de denúncias e Spaceflow',
+  tela: 'Formulários, construtor, revisão do canal, Spaceflow, página pública, acompanhamento e lista de denúncias',
 })
 
 const t = useTextos(textos)
@@ -41,6 +45,7 @@ const { tela, cenario, destacar, itemAberto, noAberto, passoPublico, sessaoDoDen
 
 const telasDoEnspace: Partial<Record<Tela, Component>> = {
   formularios: TelaFormularios,
+  construtor: Construtor,
   spaceflow: TelaSpaceflow,
   itens: TelaItens,
 }
@@ -52,6 +57,7 @@ const trilha = computed(() => {
   const ws = workspace.name
   switch (tela.value) {
     case 'formularios': return [ws, c.configuracoes, c.dados, c.itens.estruturaCategorias, categoria.name, t.value.categoria.formulario]
+    case 'construtor': return [ws, c.configuracoes, c.dados, c.itens.estruturaCategorias, categoria.name, t.value.categoria.formulario, '<identificação>', 'builder']
     case 'spaceflow': return [ws, c.configuracoes, c.dados, c.itens.spaceflows, '612']
     case 'itens': return [ws, c.itens.categorias, categoria.name]
   }
@@ -63,6 +69,7 @@ const trilha = computed(() => {
 const irPara = computed<DropdownMenuItem[][]>(() => [
   [{ type: 'label', label: t.value.andaime.quemConfigura }],
   [
+    { label: t.value.construtor.titulo, icon: 'i-lucide-blocks', onSelect: () => ir('construtor') },
     { label: t.value.andaime.formulario, icon: 'i-lucide-file-spreadsheet', onSelect: () => ir('formularios', { formulario: 3520, abaDoFormulario: 'anonimato' }) },
     { label: t.value.andaime.fluxo, icon: 'i-lucide-workflow', onSelect: () => ir('spaceflow', { no: 'start' }) },
   ],
@@ -102,7 +109,11 @@ watch(tela, (nova) => {
       leave-to-class="opacity-0"
     >
       <!-- O div dá um elemento só ao Transition: o EnLayout não tem raiz única e travava o out-in. -->
-      <div v-if="publica" key="publica">
+      <div v-if="tela === 'fora'" key="fora">
+        <ForaDoEnspace :t="t" />
+      </div>
+
+      <div v-else-if="publica" key="publica">
       <CascaPublica :t="t">
         <Transition
           mode="out-in"
@@ -131,6 +142,12 @@ watch(tela, (nova) => {
       </CascaDoEnspace>
       </div>
     </Transition>
+
+    <!-- PROPOSTA: a revisão antes de publicar e o aviso de canal publicado (abrem do construtor e da lista) -->
+    <RevisaoDoCanal :t="t" />
+
+    <!-- ANDAIME: o guia das 2 jornadas -->
+    <Jornada :t="t" />
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">

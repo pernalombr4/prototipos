@@ -256,7 +256,7 @@ const emailsDoItem = computed(() => emails.value.filter(e => e.itemId === itemAb
                       <p class="flex items-center gap-1.5 text-xs font-medium text-toned">
                         <UIcon :name="m.autor === 'sistema' ? 'i-lucide-bot' : m.autor === 'comite' ? 'i-lucide-shield' : 'i-lucide-venetian-mask'" class="size-3.5" />
                         {{ m.autor === 'comite' ? nomeDoMembro(m.membro) : t.item.canal.autor[m.autor] }}
-                        <span class="font-normal text-muted">· {{ m.autor === 'denunciante' ? diaEHoraCheia(m.quando) : formatoMensagem.format(m.quando) }}</span>
+                        <span class="font-normal text-toned">· {{ m.autor === 'denunciante' ? diaEHoraCheia(m.quando) : formatoMensagem.format(m.quando) }}</span>
                       </p>
                       <p class="mt-1 whitespace-pre-line text-sm text-highlighted">{{ m.texto }}</p>
                     </div>

@@ -10,15 +10,29 @@
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import type { Textos } from './textos'
-import { type Denuncia, HOJE, type Situacao } from './mocks'
-import { useFormularioAnonimo } from './estado'
+import { type Denuncia, HOJE, type Situacao, volume24h } from './mocks'
+import { useFormularioAnonimo, useMarcaDeProposta } from './estado'
 import PainelDaDenuncia from './_PainelDaDenuncia.vue'
 
 const props = defineProps<{ t: Textos }>()
 
-const { listaDoComite, itemAberto, abaDoItem, ir } = useFormularioAnonimo()
 const idioma = useIdioma()
+const { listaDoComite, itemAberto, abaDoItem, canalCriado, canalPublicado, revisaoAberta, formularioDoCanal, inicioDoCanal, ir } = useFormularioAnonimo()
+const marca = useMarcaDeProposta()
 
+/* ---------- PROPOSTA: a faixa do canal anônimo ---------- */
+
+const pausado = useState<boolean>('fa-canal-pausado', () => false)
+const aceitasHoje = computed(() => listaDoComite.value.filter(d => !d.teste && +d.created_at >= +new Date(HOJE.getFullYear(), HOJE.getMonth(), HOJE.getDate())).length)
+// Canal criado na jornada do configurador: ainda não houve envio barrado.
+const barradas = computed(() => (inicioDoCanal.value ? 0 : volume24h.reduce((s, h) => s + h.barrados, 0)).toLocaleString(idioma.value))
+function verProtecao() {
+  ir('formularios', { formulario: formularioDoCanal.value.id, abaDoFormulario: 'anonimato' })
+}
+function revisarEPublicar() {
+  ir('construtor')
+  setTimeout(() => (revisaoAberta.value = true), 250)
+}
 const busca = ref('')
 const pagina = ref(1)
 const POR_PAGINA = 15
@@ -47,6 +61,7 @@ interface Linha extends Record<string, unknown> {
   retorno: string
   atrasado: boolean
   mensagens: number
+  teste: boolean
 }
 
 const linhas = computed<Linha[]>(() => daPagina.value.map((d: Denuncia) => {
@@ -62,6 +77,7 @@ const linhas = computed<Linha[]>(() => daPagina.value.map((d: Denuncia) => {
     retorno: formatoDia.value.format(retorno),
     atrasado: !['concluida', 'arquivada'].includes(d.data.situacao) && (+retorno - +HOJE) / 86400000 < 15,
     mensagens: d.mensagensNovas,
+    teste: !!d.teste,
   }
 }))
 
@@ -111,6 +127,20 @@ function menuDaLinha(id: number): DropdownMenuItem[][] {
       </div>
     </div>
 
+    <!-- PROPOSTA: a faixa do canal anônimo -->
+    <div v-if="canalCriado" class="flex flex-wrap items-center gap-3 border-b border-default px-4 py-2 text-sm" :class="[canalPublicado && !pausado ? 'bg-info/5' : 'bg-warning/10', marca]">
+      <UIcon :name="!canalPublicado ? 'i-lucide-circle-dashed' : pausado ? 'i-lucide-circle-pause' : 'i-lucide-venetian-mask'" class="size-4" :class="canalPublicado && !pausado ? 'text-info' : 'text-warning'" />
+      <span class="font-medium text-highlighted">{{ !canalPublicado ? t.monitor.naoPublicado : pausado ? t.monitor.pausado : t.monitor.ativo }}</span>
+      <span v-if="canalPublicado && !pausado" class="text-toned">{{ t.monitor.hoje(aceitasHoje, barradas) }}</span>
+      <span class="ml-auto flex flex-wrap gap-2">
+        <template v-if="canalPublicado">
+          <UButton :icon="pausado ? 'i-lucide-play' : 'i-lucide-pause'" :label="pausado ? t.monitor.retomar : t.monitor.pausar" color="neutral" variant="outline" size="xs" @click="pausado = !pausado" />
+          <UButton icon="i-lucide-shield-check" :label="t.monitor.protecao" color="neutral" variant="outline" size="xs" @click="verProtecao" />
+        </template>
+        <UButton v-else icon="i-lucide-list-checks" :label="t.monitor.publicar" size="xs" @click="revisarEPublicar" />
+      </span>
+    </div>
+
     <!-- Vazio: ainda não chegou denúncia -->
     <UEmpty
       v-if="!listaDoComite.length"
@@ -140,7 +170,10 @@ function menuDaLinha(id: number): DropdownMenuItem[][] {
           </span>
         </template>
         <template #cell-protocolo="{ row }">
-          <span class="font-mono text-xs text-highlighted">{{ (row as Linha).protocolo }}</span>
+          <span class="flex items-center gap-1.5">
+            <span class="font-mono text-xs text-highlighted">{{ (row as Linha).protocolo }}</span>
+            <UBadge v-if="(row as Linha).teste" :label="t.teste.selo" icon="i-lucide-flask-conical" color="warning" variant="subtle" size="sm" :class="marca" />
+          </span>
         </template>
         <template #cell-situacao="{ row }">
           <UBadge :label="t.situacoes[(row as Linha).situacao]" :color="corDaSituacao[(row as Linha).situacao]" variant="subtle" size="sm" />

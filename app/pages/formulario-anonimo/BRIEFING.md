@@ -147,6 +147,17 @@ proposta trata a correção desse achado como pré-requisito.
 - Zoom no canto inferior esquerdo e minimapa no inferior direito.
 - Modal do nó com Entrada à esquerda, Saída à direita, "Modificado", Cancelar e "Salvar e fechar".
 
+### Criar formulário e construtor (rodada 3)
+
+- "Criar +" abre o mesmo painel da edição, com título "Formulário". Tipo tem 6 opções: Editar, Criação, Geral
+  (padrão), Visualizar, Criação de Item (obsoleto) e Tarefas (obsoletas). Visibilidade começa em Privado.
+- O construtor: seta de voltar, nome, selo de visibilidade e engrenagem; Respostas e Blocos; "Atualizado Em";
+  "Construtor de formulário" com Construtor e Preview; "Não Agrupado"; blocos tracejados.
+- "Adicionar Novo Bloco." cria o bloco na hora. O bloco tem "Adicionar campo" (lista "[tipo] - Nome" e "+ Novo"),
+  largura e o menu Remover Bloco, Esconder Campo, Largura, Conteúdo Adicional e Configurações.
+- Notificações da categoria: colunas Nome, Criado em, Usuário, Templates de E-mail, Campo e Próxima Execução.
+- Na exploração, o clique em "Adicionar Novo Bloco." criou um bloco no formulário de teste; removi em seguida.
+
 ### Painel do item
 
 - Trilho de 4 ícones à esquerda e o botão de recolher.
@@ -167,6 +178,8 @@ proposta trata a correção desse achado como pré-requisito.
 | `ev-08-item-log-de-auditoria.jpg` | O log do item com o criador (nome trocado por "Pessoa do Workspace" no DOM antes do print) |
 | `ev-09-spaceflow-editor.jpg` | O editor do Spaceflow |
 | `ev-10-spaceflow-modos-de-inicio.jpg` | Os 5 modos de início |
+| `ev-11-criar-formulario.jpg` | "Criar +": o mesmo painel, Tipo "Geral" e Visibilidade "Privado" por padrão |
+| `ev-12-construtor-de-formulario.jpg` | O construtor (identificação do formulário trocada no DOM antes do print) |
 
 Todas passaram no `detectar_seta_mouse.py` ("ok"). Nenhuma mostra e-mail de pessoa nem a identificação de um
 formulário real.
