@@ -17,7 +17,7 @@ import type { Campo, Dado, Opcao } from './nos'
 import type { No } from './mocks'
 import type { Textos } from './textos'
 import { gravar, ler, operadores, vazio } from './nos'
-import { agentes, caixasDeEmail, categorias, comparacoes, credenciais, ferramentasDoAgente, fluxoInfo, fusos, grupos, cargos, membros, modelosDeEmail, modelosDeIa } from './mocks'
+import { agentes, caixasDeEmail, categorias, comparacoes, credenciais, ferramentasDoAgente, fluxoInfo, fluxos, fusos, grupos, cargos, membros, modelosDeEmail, modelosDeIa } from './mocks'
 import { indiceDeVariaveis } from './apoio'
 import CaixaDeVariavel from './_CaixaDeVariavel.vue'
 import CampoRico from './_CampoRico.vue'
@@ -73,6 +73,13 @@ const itens = computed<Item[]>(() => {
     case 'fusos': return s(fusos)
     case 'formularios': return s(categoria.value?.formularios ?? [])
     case 'camposDaCategoria': return (categoria.value?.campos ?? []).map(x => ({ label: x.rotulo, value: x.chave }))
+    // Só é destino o fluxo Ativo com Início Manual; o resto aparece cinza, com o motivo (hoje some da lista sem explicar).
+    case 'fluxos': return fluxos.map(x => ({
+      label: x.nome,
+      value: x.id,
+      disabled: !x.ativo || x.inicio !== 'manual',
+      selo: x.proprio ? m.value.motivoProprio : !x.ativo ? m.value.motivoInativo : x.inicio !== 'manual' ? m.value.motivoInicio : undefined,
+    }))
     default: return []
   }
 })
@@ -361,7 +368,11 @@ watch(arquivos, (fs) => {
       class="w-full"
       :color="erro ? 'error' : undefined"
       :highlight="erro"
-    />
+    >
+      <template #item-trailing="{ item }">
+        <UBadge v-if="(item as Item).selo" :label="(item as Item).selo" size="sm" color="neutral" variant="subtle" />
+      </template>
+    </USelectMenu>
 
     <!-- liga/desliga: o rótulo é a frase, a instrução vai embaixo -->
     <USwitch v-else-if="c.tipo === 'switch'" v-model="valor" :aria-label="tx(c.rotulo)" />

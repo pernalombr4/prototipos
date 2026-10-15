@@ -164,7 +164,27 @@ Lido na tela em 15/10/2026, com as ajudas do "?" coletadas por hover. "→" sepa
 | **End** | Nome do Nó |
 | **Requisição HTTP** | Nome do Nó · abas Requisição e Resposta · Método · URL · Autenticação › Credencial · Configurações Adicionais › Timeout (ms) · Parâmetros de Consulta · Cabeçalhos · (corpo em POST, PUT, PATCH) · Resposta: Chave do campo, Nome do campo, Tipo, Caminho de origem |
 
-O 18º tipo do schema, `start` ("Iniciar Fluxo", o 2º Início do canvas), não está na paleta e não foi aberto.
+O 18º tipo do schema, `start` ("Iniciar Fluxo" na documentação), foi aberto na rodada 3 (seção abaixo).
+
+## O 2º Início do canvas (develop, 15/10/2026, rodada 3)
+
+Arrastei um 2º "Início" da paleta para o fluxo 524 e abri o modal; saí sem salvar. A interface do develop estava em
+espanhol nesse momento.
+
+- A paleta tem um só "Início". O 2º que entra no canvas vira outro tipo (`start`), sem aviso: o card mostra o mesmo
+  nome e a mesma descrição do gatilho ("Início del flujo. Defina el disparador de ejecución.") e nasce em cima dele.
+- Modal: Nome do Nó · **Tipo** (Manual, Automático) → "Define si el flujo de trabajo se iniciará automáticamente o si
+  se creará una tarea." · **Workflow** (Automático, sem ajuda) ou **Fluxos que podem ser iniciados** (Manual) e o
+  bloco de tarefa inteiro.
+- A lista "Workflow" mostra só os fluxos Ativos com Início Manual, sem dizer por que os outros somem, e **oferece o
+  próprio fluxo** como destino.
+- A documentação diz: dispara e segue, não passa dados, não espera, não devolve nada; no Manual, o fluxo pai espera a
+  tarefa. E avisa: "Este nó não é um subfluxo".
+
+![2 Inícios no canvas](evidencias/dev-12-dois-inicios-no-canvas.jpg)
+![Modo Automático](evidencias/dev-13-iniciar-fluxo-automatico.jpg)
+![A lista oferece o próprio fluxo](evidencias/dev-14-lista-oferece-o-proprio-fluxo.jpg)
+![Modo Manual](evidencias/dev-15-iniciar-fluxo-manual.jpg)
 
 ## A casca da tela, item por item
 

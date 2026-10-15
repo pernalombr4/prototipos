@@ -141,3 +141,48 @@ o protótipo usa um nome provisório, para o time trocar pelo real: `backup_assi
   clique, por "Configurar" ou por "Abrir nó" na barra do protótipo.
 - **Maquete:** a posição dos nós é do protótipo; no produto, quem monta o fluxo decide.
 - **Ver:** `/spaceflow` · `evidencias/proposta-13-fluxo-inteiro-na-tela.jpg`
+
+## Rodada 3 · 2026-10-15
+
+- **Pedido (literal):** "permissoes é interessante agrupar com resopnsaveis, do tipo: responsaveis e permissoes. nao?"
+  e "perceba que faltou uma copisa: quando voce adiciona MAIS um no de inicio no fluxo ele se comporta diferente do
+  nó de início colocado no começo. inclusive vale ver se ele deve se chamar mesmo início ou ter outro nome... talvez
+  subfluxo ou algo assim. sugira e prototipe isso"
+- **Mudou:** no bloco de tarefa (Aprovação, Tarefa, Formulário, CRUD manual e o nó novo), a seção vira
+  **Responsáveis e permissões**: Responsável, Responsável alternativo, Colaboradores, Criador e Quem pode ver. O Item
+  vinculado, que aparece dentro da tarefa, passa para a seção Tarefa. Some a seção "Acesso e item".
+- **Mudou:** o 2º Início do canvas (tipo `start`) vira um nó próprio, **Iniciar outro fluxo**, no grupo Ações da
+  paleta. O "Início" da paleta fica cinza, com "Já está no fluxo" e a frase que aponta o nó novo.
+- **Mudou:** o modal do nó novo:
+  - **Modo**: Automático (inicia o fluxo e segue sem esperar) ou Manual (cria uma tarefa em que a pessoa escolhe;
+    este fluxo espera a conclusão), com "?" por opção;
+  - **Fluxo** (Automático) ou **Fluxos para escolher** (Manual). A lista mostra todos os fluxos do workspace: os que
+    não podem ser destino ficam cinza, com o motivo ("Inativo", "Início não é Manual");
+  - o próprio fluxo aparece com "Este fluxo" e, escolhido, um aviso de laço;
+  - aviso fixo: o fluxo iniciado começa do zero, não recebe as variáveis deste e não devolve nada; para mandar dado,
+    Requisição HTTP para o webhook dele;
+  - no Manual, as seções Tarefa, Responsáveis e permissões e Prazo.
+- **Mudou:** card com tipo "Iniciar outro fluxo" e resumo ("Inicia Cadastro de fornecedor e segue"; no Manual,
+  "Tarefa: escolher entre 3 fluxos"). O fluxo de exemplo ganha o nó, na Rota 2 do nó Rotas.
+
+### O nome: Iniciar outro fluxo, não Subfluxo
+
+| Nome | Onde se usa | Por que sim ou não |
+|---|---|---|
+| **Iniciar outro fluxo** (recomendado) | HubSpot: "Enroll in another workflow" | Diz o que acontece. É o único dos pesquisados que, como o ENSPACE, só dispara e segue |
+| Subfluxo | Salesforce (Subflow), n8n (Execute Sub-workflow), Zapier (Sub-Zap), Make (subscenario), Power Automate (Run a Child Flow) | Nesses 5, o "sub" recebe dados e devolve resultado; quem conhece espera isso. A documentação do ENSPACE avisa: "Este nó não é um subfluxo" |
+| Chamar fluxo | Zapier ("Call a Sub-Zap"), Make ("Call a scenario") | "Chamar" sugere resposta, pelo mesmo motivo |
+| Iniciar Fluxo | Nome atual na documentação do ENSPACE | Na tela, o card diz "Início", igual ao gatilho. "Iniciar outro fluxo" desfaz a confusão com o Início |
+| Disparar fluxo | Nenhum dos pesquisados | Possível, mas "disparar" é o verbo dos gatilhos no produto |
+
+- **Fronteira:** muda o nome, o lugar na paleta e o modal do 2º Início. Não muda o que ele grava (`type`, `workflow`,
+  `workflows` e o bloco de tarefa) nem a regra de quem pode ser destino.
+- **Achado do develop:** a lista "Workflow" oferece o próprio fluxo como destino, sem aviso.
+- **Achado do develop:** o 2º Início nasce em cima do primeiro, com a mesma descrição do gatilho ("Início del flujo.
+  Defina el disparador de ejecución.").
+- **Achado do develop:** o editor tem um lápis no hover do nó, sem texto; o "Configurar" da proposta é o mesmo atalho
+  com rótulo.
+- **Mudou:** o zoom de ajuste desconta a barra do protótipo, que em janela estreita quebra em 2 linhas.
+- **Maquete:** a lista de fluxos do workspace é fictícia.
+- **Ver:** `/spaceflow` · `evidencias/dev-12-dois-inicios-no-canvas.jpg` a `dev-15-iniciar-fluxo-manual.jpg` (develop)
+  · `evidencias/proposta-14-iniciar-outro-fluxo.jpg` a `proposta-17-paleta-inicio-ja-no-fluxo.jpg`

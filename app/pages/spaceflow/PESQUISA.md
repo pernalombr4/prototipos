@@ -67,6 +67,27 @@ corrige com rótulo, ajuda, ordem e destaque, sem função nova.
 - Os 5 obrigatórios (Notion, Twenty CRM, ClickUp, Monday, Pipefy) e 8 extras (n8n, Make, Zapier, Power Automate,
   HubSpot, Salesforce Flow, Retool Workflows, Windmill).
 
+## Rodada 3: como os outros nomeiam "iniciar outro fluxo"
+
+| Produto | Nome do passo | Passa dados? | Espera e devolve? |
+|---|---|---|---|
+| HubSpot | "Enroll in another workflow" | Não (inscreve o registro) | Não: o fluxo de origem segue |
+| n8n | "Execute Sub-workflow" (antes "Execute Workflow") | Sim | Por padrão sim; a opção "Wait for Sub-Workflow Completion" desliga |
+| Zapier | "Call a Sub-Zap" | Sim (entradas do Sub-Zap) | Sim: o Sub-Zap termina em "Return From a Sub-Zap" |
+| Make | "Call a scenario" (subscenario) | Sim (scenario inputs) | Devolve com "Return output" |
+| Power Automate | "Run a Child Flow" | Sim | Sim: o fluxo pai espera o filho |
+| Salesforce Flow | "Subflow" | Sim | Sim: devolve as saídas do fluxo filho |
+
+O nó do ENSPACE só dispara (documentação: "Este nó não é um subfluxo"), como o do HubSpot. Os nomes com "sub" e
+"chamar" prometem passar e receber dado. Daí a recomendação "Iniciar outro fluxo" (detalhe no `DECISOES.md`, rodada 3).
+
+Fontes: [HubSpot Community](https://community.hubspot.com/t5/Lists-Lead-Scoring-Workflows/QUESTION-What-is-the-behaviour-after-Workflow-Action-Enroll-in/m-p/556090) ·
+[n8n docs](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.executeworkflow/) ·
+[Zapier Help](https://help.zapier.com/hc/en-us/articles/8496308527629) ·
+[Make Help](https://help.make.com/scenario-inputs) ·
+[Manuel Gomes, Run a Child Flow](https://manueltgomes.com/reference/power-automate-action-reference/run-child-flow-action/) ·
+[Trailhead, Subflow](https://trailhead.salesforce.com/content/learn/modules/flow-build-logic/run-flow-within-flow)
+
 ## Relatório completo
 
 Os 13 construtores de fluxo convergem em 6 decisões de tela. A configuração do passo abre num painel ancorado ao canvas, com o fluxo à vista. A ajuda que muda o preenchimento fica escrita sob o campo, e não num tooltip. Os campos se dividem em 3 camadas: essencial, opções avançadas e comportamento de execução. O dado de uma etapa anterior entra por um botão no próprio campo e aparece como chip com o nome da etapa e do campo. O passo incompleto ganha marca no nó, e a ativação trava até a pendência sair. O "+" de adicionar etapa fica no próprio fluxo, entre os nós e no fim. Quase tudo isso cabe no Spaceflow só com rótulo, ajuda, disposição e descoberta. Fica de fora o que mexe no motor: teste de etapa isolada, nova tentativa automática, fórmula, favoritos e IA que monta o fluxo. A melhoria de maior retorno é o resumo de 1 linha no cartão do nó ("Esperar 2 dias", "Enviar e-mail para Solicitante"): o n8n e o HubSpot montam esse resumo a partir da configuração, e o Twenty, a referência mais próxima do ENSPACE, não tem. Os produtos divergem em 2 pontos sem resposta definitiva: como marcar obrigatório e opcional, e se o contêiner é modal ou painel (o n8n testa os 2 ao mesmo tempo). Os rótulos de monday e ClickUp vêm de trechos de busca, porque as centrais de ajuda bloquearam a leitura direta, e nenhum dos modelos foi testado com o público do ENSPACE.

@@ -143,7 +143,7 @@ const atrasoModelo = computed({
 let seq = 1
 function adicionar(tipo: string, x: number, y: number) {
   const def = definicoes[tipo]
-  if (!def || def.emBreve) return
+  if (!def || def.emBreve || (tipo === 'trigger' && nos.value.some(n => n.type === 'trigger'))) return
   const id = `${tipo}-${seq++}`
   const data: Record<string, any> = tipo === 'delay'
     ? { ...(fluxoNovo().find(n => n.type === 'delay')!.data as object) }
@@ -273,7 +273,7 @@ const printAberto = ref<{ src: string, legenda: string } | null>(null)
     </UModal>
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->
-    <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">
+    <div data-andaime class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">
       <div class="flex flex-wrap items-center gap-2 px-4 py-3">
         <span class="mr-1 text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.rotulo }} · {{ t.andaime.versao }}</span>
         <UButton

@@ -108,6 +108,21 @@ export const ferramentasDoAgente = [
 export const comparacoes = ['Propostas de fornecedores', 'Cotações de frete']
 export const modelosDeEmail = ['Aviso de rejeição', 'Boas-vindas ao fornecedor', 'Contrato assinado']
 export const caixasDeEmail = ['contratos@aurora.example', 'compras@aurora.example']
+/**
+ * Os Spaceflows do workspace, para o nó Iniciar outro fluxo. Só pode ser
+ * destino o que está Ativo e com Início Manual (documentação do nó); o resto
+ * aparece cinza, com o motivo. "ativo" vem do Workflow; "inicio", do tipo do
+ * nó de início de cada um.
+ */
+export const fluxos = [
+  { id: 'cadastro-de-fornecedor', nome: 'Cadastro de fornecedor', ativo: true, inicio: 'manual' },
+  { id: 'tratamento-juridico', nome: 'Tratamento jurídico', ativo: true, inicio: 'manual' },
+  { id: 'relatorio-mensal', nome: 'Gerar relatório mensal', ativo: true, inicio: 'manual' },
+  { id: 'renovacao-de-contrato', nome: 'Renovação de contrato', ativo: false, inicio: 'manual' },
+  { id: 'aviso-de-vencimento', nome: 'Aviso de vencimento', ativo: true, inicio: 'events' },
+  { id: 'entrada-de-contrato', nome: 'Entrada de contrato', ativo: true, inicio: 'manual', proprio: true },
+]
+
 export const fusos = ['America/Sao_Paulo', 'America/Manaus', 'America/Noronha', 'UTC']
 
 /* ------------------------------------------------------------------ *
@@ -269,7 +284,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'crud', type: 'crud', position: pos(0, 740),
+      id: 'crud', type: 'crud', position: pos(0, 720),
       data: {
         label: 'Marcar como vigente',
         type: 'contratos',
@@ -280,7 +295,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'rotear', type: 'ai_router', position: pos(340, 740),
+      id: 'rotear', type: 'ai_router', position: pos(340, 720),
       data: {
         label: 'Classificar a área',
         model: 'openai/gpt-6-luna',
@@ -293,7 +308,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'form', type: 'form', position: pos(680, 580),
+      id: 'form', type: 'form', position: pos(680, 560),
       data: {
         label: 'Dados do jurídico',
         task_name: 'Complementar o contrato {{nodes.trig.reference}}',
@@ -307,7 +322,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'rotas', type: 'route', position: pos(680, 900),
+      id: 'rotas', type: 'route', position: pos(680, 880),
       data: {
         label: 'Por faixa de valor',
         routes: [
@@ -318,11 +333,19 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'atraso', type: 'delay', position: pos(1020, 580),
+      id: 'iniciar', type: 'start', position: pos(1360, 880),
+      data: {
+        label: 'Cadastrar o fornecedor',
+        type: 'auto',
+        workflow: 'cadastro-de-fornecedor',
+      },
+    },
+    {
+      id: 'atraso', type: 'delay', position: pos(1020, 560),
       data: configuracaoDoCliente() as unknown as Extract<No, { type: 'delay' }>['data'],
     },
     {
-      id: 'notif', type: 'comparison_notification', position: pos(1020, 900),
+      id: 'notif', type: 'comparison_notification', position: pos(1020, 780),
       data: {
         label: 'Enviar comparativo',
         comparison: 'Propostas de fornecedores',
@@ -333,7 +356,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'end', type: 'end', position: pos(1360, 740),
+      id: 'end', type: 'end', position: pos(1700, 720),
       data: { label: 'Fim' },
     },
   ] as No[]
@@ -360,6 +383,8 @@ export const arestas: Aresta[] = [
   { id: 'e18', source: 'notif', target: 'end' },
   { id: 'e19', source: 'email', target: 'end' },
   { id: 'e20', source: 'rotas', target: 'end', sourceHandle: 'fallback' },
+  { id: 'e21', source: 'rotas', target: 'iniciar', sourceHandle: 'rt2' },
+  { id: 'e22', source: 'iniciar', target: 'end' },
 ]
 
 /**
@@ -384,6 +409,7 @@ export function fluxoNovo(): No[] {
     route: { label: 'Rotas', routes: [] },
     comparison_notification: { label: 'Notificação de Comparação', provider: 'enspace', base_layout: 'empty', comparison: '', subject: '', body: '' },
     end: { label: 'End' },
+    start: { label: 'Iniciar outro fluxo', type: 'auto' },
   }
   return fluxoConfigurado().map((n) => {
     if (n.type === 'delay') return { ...n, data: { ...configuracaoDoCliente(), label: 'Atraso', mode: 'duration', delay: '', date_source: null } } as unknown as No

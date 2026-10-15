@@ -8,7 +8,7 @@
  */
 import type { Idioma } from '~/composables/useIdioma'
 import type { Aresta, No } from './mocks'
-import { agentes, categorias, credenciais, membros } from './mocks'
+import { agentes, categorias, credenciais, fluxos, membros } from './mocks'
 import type { Dado, L } from './nos'
 import { definicoes, l, operadores } from './nos'
 
@@ -94,6 +94,14 @@ export function resumir(no: No, i: Idioma, nos: No[]): string {
       return d.routes?.length ? P(`${d.routes.length} rotas e a saída Sempre`, `${d.routes.length} routes plus the Always output`, `${d.routes.length} rutas y la salida Siempre`) : ''
     case 'comparison_notification':
       return d.comparison ? P(`Relatório de ${d.comparison}`, `Report of ${d.comparison}`, `Informe de ${d.comparison}`) : ''
+    case 'start': {
+      if (d.type === 'manual') {
+        const n = d.workflows?.length ?? 0
+        return n ? P(`Tarefa: escolher entre ${n} fluxos`, `Task: choose among ${n} flows`, `Tarea: elegir entre ${n} flujos`) : ''
+      }
+      const f = fluxos.find(x => x.id === d.workflow)?.nome
+      return f ? P(`Inicia ${f} e segue`, `Starts ${f} and moves on`, `Inicia ${f} y sigue`) : ''
+    }
     case 'end':
       return P('Encerra o fluxo.', 'Ends the flow.', 'Termina el flujo.')
     default:

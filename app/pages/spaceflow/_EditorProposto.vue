@@ -53,7 +53,9 @@ function mudarZoom(passo: number) {
 /** O fluxo inteiro na tela: largura e altura. Roda ao abrir o editor. */
 function ajustar() {
   const w = (canvas.value?.clientWidth ?? 1200) - 24
-  const h = (canvas.value?.clientHeight ?? 600) - 24
+  // A barra do andaime (fixa no rodapé, só do protótipo) cobre o fim do canvas.
+  const andaime = (document.querySelector('[data-andaime]') as HTMLElement | null)?.offsetHeight ?? 0
+  const h = (canvas.value?.clientHeight ?? 600) - andaime - 24
   zoom.value = Math.max(0.35, Math.min(1, Math.floor(Math.min(w / largura.value, h / altura.value) * 100) / 100))
   canvas.value?.scrollTo({ left: 0, top: 0, behavior: 'smooth' })
 }
@@ -136,6 +138,10 @@ const gruposAbertos = ref<string[]>(['acoes'])
 watch(busca, (b) => {
   if (b.trim()) gruposAbertos.value = itensDaPaleta.value.map(g => g.value)
 })
+
+/** O fluxo já tem Início: o item da paleta fica cinza e explica onde está o nó que dispara outro fluxo. */
+const temInicio = computed(() => props.nos.some(n => n.type === 'trigger'))
+const bloqueado = (tipo: string) => definicoes[tipo]?.emBreve || (tipo === 'trigger' && temInicio.value)
 
 function arrastarDaPaleta(e: DragEvent, tipo: string) {
   e.dataTransfer?.setData('application/x-spaceflow-no', tipo)
@@ -376,9 +382,10 @@ const rail = computed(() => [
                   <div
                     v-for="d in item.tipos"
                     :key="d.tipo"
-                    :draggable="!d.emBreve"
+                    :draggable="!bloqueado(d.tipo)"
                     class="flex items-start gap-3 rounded-lg p-2.5 transition-colors"
-                    :class="d.emBreve ? 'opacity-60' : 'cursor-grab hover:bg-elevated active:cursor-grabbing'"
+                    :class="bloqueado(d.tipo) ? 'opacity-60' : 'cursor-grab hover:bg-elevated active:cursor-grabbing'"
+                    :title="d.tipo === 'trigger' && temInicio ? t.paleta.jaNoFluxoDica : undefined"
                     @dragstart="arrastarDaPaleta($event, d.tipo)"
                   >
                     <span class="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary"><UIcon :name="d.icone" class="size-4" /></span>
@@ -386,10 +393,11 @@ const rail = computed(() => [
                       <span class="flex items-center gap-2 text-sm font-medium text-highlighted">
                         {{ d.nome[i] }}
                         <UBadge v-if="d.emBreve" :label="t.paleta.emBreve" color="neutral" variant="outline" size="sm" />
+                        <UBadge v-else-if="d.tipo === 'trigger' && temInicio" :label="t.paleta.jaNoFluxo" color="neutral" variant="outline" size="sm" />
                       </span>
-                      <span class="block text-xs leading-snug text-muted">{{ d.descricao[i] }}</span>
+                      <span class="block text-xs leading-snug text-muted">{{ d.tipo === 'trigger' && temInicio ? t.paleta.jaNoFluxoDica : d.descricao[i] }}</span>
                     </span>
-                    <UIcon v-if="!d.emBreve" name="i-lucide-grip-vertical" class="mt-1 size-4 shrink-0 text-dimmed" />
+                    <UIcon v-if="!bloqueado(d.tipo)" name="i-lucide-grip-vertical" class="mt-1 size-4 shrink-0 text-dimmed" />
                   </div>
                 </div>
               </template>

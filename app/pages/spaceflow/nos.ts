@@ -27,7 +27,7 @@ export type TipoDeCampo =
 /** De onde vêm as opções de um select que depende do workspace. */
 export type Fonte =
   | 'categorias' | 'membros' | 'credenciais' | 'modelos' | 'agentes' | 'ferramentas'
-  | 'comparacoes' | 'modelosDeEmail' | 'caixasDeEmail' | 'fusos' | 'formularios' | 'camposDaCategoria'
+  | 'comparacoes' | 'modelosDeEmail' | 'caixasDeEmail' | 'fusos' | 'formularios' | 'camposDaCategoria' | 'fluxos'
 
 export interface Opcao {
   valor: string | number | null
@@ -232,11 +232,23 @@ const secoesDeTarefa = (opcoes: { visivel?: (d: Dado) => boolean, rotuloConteudo
         obrigatorio: true,
         aceitaVariavel: true,
       },
+      {
+        chave: 'task_item',
+        tipo: 'variavel',
+        rotulo: l('Item vinculado', 'Linked item', 'Ítem vinculado'),
+        ajuda: l('Mostra o item dentro da tarefa.', 'Shows the item inside the task.', 'Muestra el ítem dentro de la tarea.'),
+        dica: l(
+          'Só tem item para vincular quando o Início é por Evento em item ou quando uma Operação CRUD de leitura vem antes deste nó.',
+          'An item is only available when the Start is an Item event or a read CRUD operation comes before this node.',
+          'Solo hay ítem para vincular cuando el Inicio es por Evento en ítem o cuando una Operación CRUD de lectura viene antes de este nodo.',
+        ),
+        aceitaVariavel: true,
+      },
     ],
   },
   {
     id: 'responsaveis',
-    titulo: l('Responsáveis', 'Assignees', 'Responsables'),
+    titulo: l('Responsáveis e permissões', 'Assignees and permissions', 'Responsables y permisos'),
     visivel: opcoes.visivel,
     campos: [
       {
@@ -269,6 +281,12 @@ const secoesDeTarefa = (opcoes: { visivel?: (d: Dado) => boolean, rotuloConteudo
         tipo: 'membro',
         rotulo: l('Criador', 'Creator', 'Creador'),
         ajuda: l('Aparece como quem criou a tarefa.', 'Shown as who created the task.', 'Aparece como quien creó la tarea.'),
+      },
+      {
+        chave: 'task_permissions',
+        tipo: 'permissoes',
+        rotulo: l('Quem pode ver', 'Who can see', 'Quién puede ver'),
+        ajuda: l('Vazio: todos do workspace veem a tarefa.', 'Empty: everyone in the workspace sees the task.', 'Vacío: todos en el workspace ven la tarea.'),
       },
     ],
   },
@@ -353,33 +371,6 @@ const secoesDeTarefa = (opcoes: { visivel?: (d: Dado) => boolean, rotuloConteudo
         ajuda: l('Somam na pontuação de quem conclui.', 'Added to the score of who completes it.', 'Suman a la puntuación de quien la completa.'),
         min: 0,
         metade: true,
-      },
-    ],
-  },
-  {
-    id: 'acesso',
-    titulo: l('Acesso e item', 'Access and item', 'Acceso e ítem'),
-    opcional: true,
-    recolhida: true,
-    visivel: opcoes.visivel,
-    campos: [
-      {
-        chave: 'task_item',
-        tipo: 'variavel',
-        rotulo: l('Item vinculado', 'Linked item', 'Ítem vinculado'),
-        ajuda: l('Mostra o item dentro da tarefa.', 'Shows the item inside the task.', 'Muestra el ítem dentro de la tarea.'),
-        dica: l(
-          'Só tem item para vincular quando o Início é por Evento em item ou quando uma Operação CRUD de leitura vem antes deste nó.',
-          'An item is only available when the Start is an Item event or a read CRUD operation comes before this node.',
-          'Solo hay ítem para vincular cuando el Inicio es por Evento en ítem o cuando una Operación CRUD de lectura viene antes de este nodo.',
-        ),
-        aceitaVariavel: true,
-      },
-      {
-        chave: 'task_permissions',
-        tipo: 'permissoes',
-        rotulo: l('Quem pode ver', 'Who can see', 'Quién puede ver'),
-        ajuda: l('Vazio: todos do workspace veem a tarefa.', 'Empty: everyone in the workspace sees the task.', 'Vacío: todos en el workspace ven la tarea.'),
       },
     ],
   },
@@ -818,6 +809,83 @@ export const definicoes: Record<string, DefinicaoDoNo> = {
     ],
   },
 
+  start: {
+    tipo: 'start',
+    grupo: 'acoes',
+    icone: 'i-lucide-square-arrow-out-up-right',
+    nome: l('Iniciar outro fluxo', 'Start another flow', 'Iniciar otro flujo'),
+    descricao: l(
+      'Dispara outro Spaceflow do workspace. Não passa dados e não espera ele terminar.',
+      'Triggers another Spaceflow in the workspace. It passes no data and does not wait for it to finish.',
+      'Dispara otro Spaceflow del workspace. No pasa datos y no espera que termine.',
+    ),
+    secoes: [
+      geral(),
+      {
+        id: 'fluxo',
+        titulo: l('Fluxo a iniciar', 'Flow to start', 'Flujo a iniciar'),
+        campos: [
+          {
+            chave: 'type',
+            tipo: 'select',
+            rotulo: l('Modo', 'Mode', 'Modo'),
+            ajuda: l('Automático inicia na hora. Manual pede para alguém escolher.', 'Automatic starts right away. Manual asks someone to choose.', 'Automático inicia en el momento. Manual pide que alguien elija.'),
+            obrigatorio: true,
+            opcoes: [
+              { valor: 'auto', rotulo: l('Automático', 'Automatic', 'Automático'), ajuda: l('Inicia o fluxo escolhido assim que este nó roda. Este fluxo segue para o próximo nó sem esperar.', 'Starts the chosen flow as soon as this node runs. This flow moves on without waiting.', 'Inicia el flujo elegido en cuanto este nodo corre. Este flujo sigue sin esperar.') },
+              { valor: 'manual', rotulo: l('Manual', 'Manual', 'Manual'), ajuda: l('Cria uma tarefa em que a pessoa escolhe qual fluxo iniciar. Este fluxo espera a tarefa ser concluída.', 'Creates a task where someone picks which flow to start. This flow waits for the task to be completed.', 'Crea una tarea en la que la persona elige qué flujo iniciar. Este flujo espera que se complete la tarea.') },
+            ],
+          },
+          {
+            chave: 'workflow',
+            tipo: 'select',
+            fonte: 'fluxos',
+            rotulo: l('Fluxo', 'Flow', 'Flujo'),
+            ajuda: l('Só dá para escolher fluxo Ativo com Início Manual.', 'Only Active flows with a Manual Start can be chosen.', 'Solo se puede elegir un flujo Activo con Inicio Manual.'),
+            dica: l(
+              'Fluxo com outro tipo de início (evento, webhook, agendamento) ou inativo aparece na lista, cinza, com o motivo. Para ativar, use Detalhes do fluxo, no fluxo de destino.',
+              'Flows with another kind of Start (event, webhook, schedule) or inactive ones show in the list, greyed out, with the reason. To activate, use Flow details in the target flow.',
+              'Los flujos con otro tipo de inicio (evento, webhook, programación) o inactivos aparecen en la lista, en gris, con el motivo. Para activar, use Detalles del flujo en el flujo de destino.',
+            ),
+            obrigatorio: true,
+            visivel: d => d.type !== 'manual',
+          },
+          {
+            chave: 'workflows',
+            tipo: 'multi',
+            fonte: 'fluxos',
+            rotulo: l('Fluxos para escolher', 'Flows to choose from', 'Flujos para elegir'),
+            ajuda: l('A tarefa lista estes fluxos; a pessoa escolhe qual iniciar.', 'The task lists these flows; the person picks which one to start.', 'La tarea lista estos flujos; la persona elige cuál iniciar.'),
+            obrigatorio: true,
+            visivel: d => d.type === 'manual',
+          },
+          {
+            chave: '_aviso_proprio',
+            tipo: 'aviso',
+            cor: 'warning',
+            texto: l(
+              'Este é o próprio fluxo: cada execução vai iniciar outra, sem fim.',
+              'This is the flow itself: every run will start another one, endlessly.',
+              'Es el propio flujo: cada ejecución iniciará otra, sin fin.',
+            ),
+            visivel: d => d.workflow === 'entrada-de-contrato' || (d.workflows ?? []).includes('entrada-de-contrato'),
+          },
+          {
+            chave: '_aviso_dados',
+            tipo: 'aviso',
+            cor: 'info',
+            texto: l(
+              'O fluxo iniciado começa do zero: não recebe as variáveis deste e não devolve nada. Para enviar dados, use uma Requisição HTTP para o webhook dele.',
+              'The started flow begins from scratch: it gets none of this flow\'s variables and returns nothing. To send data, use an HTTP request to its webhook.',
+              'El flujo iniciado empieza de cero: no recibe las variables de este y no devuelve nada. Para enviar datos, use una Solicitud HTTP a su webhook.',
+            ),
+          },
+        ],
+      },
+      ...secoesDeTarefa({ visivel: d => d.type === 'manual' }).slice(0, 3),
+    ],
+  },
+
   /* ---------------- IA ---------------- */
   ai_generate: {
     tipo: 'ai_generate',
@@ -1182,7 +1250,7 @@ export const grupos: { id: Grupo, nome: L, icone: string }[] = [
 /** Ordem da paleta, como no develop: Gatilhos, Ações, IA, Lógica, Documentação, Integrações. */
 export const ordemDaPaleta: string[] = [
   'trigger',
-  'form', 'approval', 'task', 'email', 'crud', 'comparison_notification',
+  'form', 'approval', 'task', 'email', 'crud', 'comparison_notification', 'start',
   'ai_generate', 'ai_agent', 'ai_router', 'ai_extract',
   'conditionals', 'route', 'merge', 'delay', 'end', 'loop', 'iterator', 'aggregator',
   'document',
