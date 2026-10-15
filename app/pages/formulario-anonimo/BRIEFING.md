@@ -31,18 +31,26 @@ Depois da pesquisa:
 >
 > com isso, pode prototipar.
 
+Na rodada 5:
+
+> anonimo é basicamente uma configuraçao avançada que diz algo do tipo "as respostas serao anonimas, sem
+> identificaçao", nao é o TIPO do form. e nao necessariamente vai ser usado pra denuncia. nao pode ser uma
+> funcionalidade de nicho. tem que servir pra qualquer caso em que queiram respostas anonimas, por exemplo:
+> avaliaçao de outrosx profissionais, feedbacks... qualquer coisa do tipo e a config de ter um qr code, link pra
+> acesso sem senha é outra coisa.
+
 ## 2. Telas e jornadas em jogo
 
 | Jornada | Tela do develop |
 |---|---|
 | Quem configura o formulário | Configurações › Estrutura › Categorias › categoria › Formulários › Editar (Definição, Visual, Avançado) |
-| Quem denuncia | O link externo do formulário (`/public/<identificação>/answer`), que hoje cai em "Acesso Externo" |
-| Quem trata o caso | Categorias › categoria (lista de itens) e o painel do item (Ver Detalhes) |
-| O fluxo do caso | Configurações › Estrutura › Spaceflow › editor (gatilho "Ações de Itens") |
+| Quem responde | O link externo do formulário (`/public/<identificação>/answer`), que hoje cai em "Acesso Externo" |
+| Quem trata as respostas | Categorias › categoria (lista de itens) e o painel do item (Ver Detalhes) |
+| O fluxo da categoria | Configurações › Estrutura › Spaceflow › editor (gatilho "Ações de Itens") |
 
 ## 3. O que seria sucesso
 
-Quem denuncia abre o link, envia sem login e acompanha a resposta, e ninguém do workspace descobre quem foi.
+Quem responde a um formulário com respostas anônimas (denúncia, avaliação de gestor, feedback) não é identificado por ninguém do workspace. Quando o formulário é Público e sem login, abre o link sem e-mail nem código, e o link aguenta robô sem virar item.
 
 ## 4. O que a pesquisa de UX já dizia
 

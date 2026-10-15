@@ -2,10 +2,10 @@
 /**
  * ANDAIME DE PROTÓTIPO, não é tela do ENSPACE.
  *
- * O que acontece fora do produto e faz parte da jornada do denunciante:
- *  - o cartaz da intranet, com QR code e o link do canal;
- *  - a caixa de e-mail pessoal, com o aviso que o nó "Responder ao
- *    denunciante" manda: sem o texto, sem o protocolo e sem a senha.
+ * O que acontece fora do produto e faz parte da jornada de quem responde:
+ *  - o cartaz da intranet, com QR code e o link do formulário;
+ *  - a caixa de e-mail pessoal, com o aviso que o acompanhamento manda quando a
+ *    equipe responde: sem o texto, sem o protocolo e sem a senha.
  */
 import type { Textos } from './textos'
 import { linkDoFormulario, workspace } from './mocks'
@@ -14,14 +14,14 @@ import QrCode from './_QrCode.vue'
 
 defineProps<{ t: Textos }>()
 
-const { cena, formularioDoCanal, passoPublico, sessaoDoDenunciante, ir } = useFormularioAnonimo()
+const { cena, formularioDoCanal, passoPublico, sessao, ir } = useFormularioAnonimo()
 
 function abrirCanal() {
   passoPublico.value = 'formulario'
   ir('publico')
 }
 function abrirAcompanhamento() {
-  sessaoDoDenunciante.value = null
+  sessao.value = null
   ir('acompanhar')
 }
 </script>
@@ -50,7 +50,7 @@ function abrirAcompanhamento() {
             <p class="text-sm text-muted">{{ workspace.name }}</p>
           </div>
           <div class="flex flex-col items-center justify-center gap-3 bg-elevated/60 p-6">
-            <QrCode :texto="formularioDoCanal.identification" :rotulo="t.formulario.anonimato.qrCode" class="size-40" />
+            <QrCode :texto="formularioDoCanal.identification" :rotulo="t.formulario.link.qrCode" class="size-40" />
             <p class="text-center text-xs text-toned">{{ t.fora.cartaz.acesse }}</p>
             <p class="break-all text-center font-mono text-[11px] text-highlighted">{{ linkDoFormulario(formularioDoCanal) }}</p>
             <UButton icon="i-lucide-external-link" :label="t.fora.cartaz.abrir" @click="abrirCanal" />

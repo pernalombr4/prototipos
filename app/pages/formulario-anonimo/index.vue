@@ -1,19 +1,21 @@
 <script setup lang="ts">
 /**
- * Formulário anônimo: o canal de denúncia que não guarda quem denunciou.
+ * Respostas anônimas e acesso sem login: 2 configurações independentes do
+ * formulário, mais o acompanhamento opcional por protocolo e senha.
  *
- * Uma porta, 3 jornadas que se navegam por dentro (andaime "Ir para"):
- *   1. quem configura: Formulários (Visibilidade "Anônimo" e a aba Anonimato) e
- *      o Spaceflow do caso (nó "Responder ao denunciante");
- *   2. quem denuncia: a página pública e o acompanhamento com protocolo e senha;
- *   3. o comitê: a lista de denúncias e o painel do item, criado por anonymous.
- * Uma denúncia enviada na página pública aparece na lista do comitê, e a
- * resposta do comitê aparece no acompanhamento. Tudo em memória.
+ * Uma porta, 3 pontos de vista que se navegam por dentro (andaime "Ir para"):
+ *   1. quem configura: Formulários (Definição › Acesso pelo link; Avançado ›
+ *      Respostas anônimas e Proteção do link), o construtor, a conferência de
+ *      anonimato e o Spaceflow (nó "Responder a quem enviou");
+ *   2. quem responde: o link público e o acompanhamento com protocolo e senha;
+ *   3. quem trata: a lista da categoria e o painel do item, criado por anonymous.
+ * Uma resposta enviada pelo link aparece na lista, e a mensagem da equipe
+ * aparece no acompanhamento. Tudo em memória.
  */
 import type { Component } from 'vue'
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { textos } from './textos'
-import { EXEMPLO, categoria, workspace } from './mocks'
+import { EXEMPLO, ID_DO_CANAL, categoria, workspace } from './mocks'
 import { type Cenario, type Tela, useFormularioAnonimo } from './estado'
 import CascaDoEnspace from './_CascaDoEnspace.vue'
 import CascaPublica from './_CascaPublica.vue'
@@ -33,15 +35,15 @@ import decisoesMd from './DECISOES.md?raw'
 
 definePageMeta({
   titulo: 'Formulário anônimo',
-  descricao: 'Canal de denúncia sem login, nas 2 jornadas: quem configura (criar, montar com verificação de anonimato, revisar a categoria, publicar e testar) e quem denuncia (cartaz, envio sem login, protocolo e senha, aviso sem conteúdo, resposta). O item nasce com o usuário genérico anonymous.',
+  descricao: 'Respostas anônimas (Avançado) e acesso sem login (Definição, só com Público) como 2 configurações separadas do formulário, para avaliação de gestor, feedback ou canal de denúncia. Jornadas de quem configura e de quem responde; o item nasce com o usuário genérico anonymous.',
   status: 'em-revisao',
   atualizado: '2026-10-15',
-  tela: 'Formulários, construtor, revisão do canal, Spaceflow, página pública, acompanhamento e lista de denúncias',
+  tela: 'Formulários (Definição e Avançado), construtor, conferência de anonimato, Spaceflow, link público, acompanhamento e lista da categoria',
 })
 
 const t = useTextos(textos)
-useHead({ title: () => t.value.publico.titulo })
-const { tela, cenario, destacar, itemAberto, noAberto, passoPublico, sessaoDoDenunciante, ir } = useFormularioAnonimo()
+useHead({ title: () => t.value.formulario.anonimas.titulo })
+const { tela, cenario, destacar, itemAberto, noAberto, passoPublico, sessao, ir } = useFormularioAnonimo()
 
 const telasDoEnspace: Partial<Record<Tela, Component>> = {
   formularios: TelaFormularios,
@@ -69,19 +71,20 @@ const trilha = computed(() => {
 const irPara = computed<DropdownMenuItem[][]>(() => [
   [{ type: 'label', label: t.value.andaime.quemConfigura }],
   [
-    { label: t.value.construtor.titulo, icon: 'i-lucide-blocks', onSelect: () => ir('construtor') },
-    { label: t.value.andaime.formulario, icon: 'i-lucide-file-spreadsheet', onSelect: () => ir('formularios', { formulario: 3520, abaDoFormulario: 'anonimato' }) },
+    { label: t.value.andaime.definicao, icon: 'i-lucide-file-spreadsheet', onSelect: () => ir('formularios', { formulario: ID_DO_CANAL, abaDoFormulario: 'definicao' }) },
+    { label: t.value.andaime.avancado, icon: 'i-lucide-sliders-horizontal', onSelect: () => ir('formularios', { formulario: ID_DO_CANAL, abaDoFormulario: 'avancado' }) },
+    { label: t.value.andaime.construtor, icon: 'i-lucide-blocks', onSelect: () => ir('construtor') },
     { label: t.value.andaime.fluxo, icon: 'i-lucide-workflow', onSelect: () => ir('spaceflow', { no: 'start' }) },
   ],
-  [{ type: 'label', label: t.value.andaime.denunciante }],
+  [{ type: 'label', label: t.value.andaime.quemResponde }],
   [
     { label: t.value.andaime.paginaPublica, icon: 'i-lucide-globe', onSelect: () => { passoPublico.value = 'formulario'; ir('publico') } },
-    { label: t.value.andaime.acompanhar, icon: 'i-lucide-inbox', onSelect: () => { sessaoDoDenunciante.value = null; ir('acompanhar') } },
+    { label: t.value.andaime.acompanhar, icon: 'i-lucide-inbox', onSelect: () => { sessao.value = null; ir('acompanhar') } },
   ],
-  [{ type: 'label', label: t.value.andaime.comite }],
+  [{ type: 'label', label: t.value.andaime.quemTrata }],
   [
-    { label: t.value.andaime.listaDeDenuncias, icon: 'i-lucide-table', onSelect: () => ir('itens', { item: null }) },
-    { label: t.value.andaime.umaDenuncia(EXEMPLO.data.protocolo), icon: 'i-lucide-shield-alert', onSelect: () => ir('itens', { item: EXEMPLO.id, aba: 'canal' }) },
+    { label: t.value.andaime.lista, icon: 'i-lucide-table', onSelect: () => ir('itens', { item: null }) },
+    { label: t.value.andaime.umaResposta(EXEMPLO.data.protocolo), icon: 'i-lucide-venetian-mask', onSelect: () => ir('itens', { item: EXEMPLO.id, aba: 'conversa' }) },
   ],
 ])
 
@@ -143,7 +146,7 @@ watch(tela, (nova) => {
       </div>
     </Transition>
 
-    <!-- PROPOSTA: a revisão antes de publicar e o aviso de canal publicado (abrem do construtor e da lista) -->
+    <!-- PROPOSTA: a conferência de anonimato e o aviso de anonimato ativo (abrem do formulário e do construtor) -->
     <RevisaoDoCanal :t="t" />
 
     <!-- ANDAIME: o guia das 2 jornadas -->
@@ -153,7 +156,7 @@ watch(tela, (nova) => {
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">
       <div class="flex flex-wrap items-center gap-2 px-4 py-2.5">
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.prototipo }}</span>
-        <UDropdownMenu :items="irPara" :content="{ side: 'top', align: 'start' }" :ui="{ content: 'w-72' }">
+        <UDropdownMenu :items="irPara" :content="{ side: 'top', align: 'start' }" :ui="{ content: 'w-72 z-[110]' }">
           <UButton :label="t.andaime.irPara" icon="i-lucide-map" trailing-icon="i-lucide-chevron-up" size="xs" color="neutral" variant="subtle" />
         </UDropdownMenu>
 
@@ -173,7 +176,7 @@ watch(tela, (nova) => {
         <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
         <USwitch v-model="destacar" :label="t.andaime.mostrarOQueMuda" size="sm" :ui="{ label: 'text-xs' }" />
 
-        <span v-if="tela === 'acompanhar' && !sessaoDoDenunciante" class="font-mono text-[11px] text-muted">
+        <span v-if="tela === 'acompanhar' && !sessao" class="font-mono text-[11px] text-muted">
           {{ t.andaime.senhaDoExemplo(EXEMPLO.data.protocolo, EXEMPLO.senhaDoPrototipo) }}
         </span>
 

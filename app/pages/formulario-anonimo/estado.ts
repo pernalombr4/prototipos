@@ -1,23 +1,26 @@
 /**
  * O estado do protótipo, em memória: recarregar a página volta tudo ao começo.
  *
- * Uma denúncia enviada pela página pública entra na lista do comitê, com o
- * criador "anonymous". A resposta do comitê aparece para o denunciante quando
- * ele entra com protocolo e senha. É o ciclo que a proposta precisa provar.
+ * Uma resposta enviada pelo link público entra na lista da categoria com o
+ * criador "anonymous". A resposta da equipe aparece para quem respondeu quando
+ * a pessoa entra com protocolo e senha. É o ciclo que a proposta precisa provar.
+ *
+ * As 3 configurações da proposta são independentes (ver `Formulario` em mocks):
+ * acesso sem login, respostas anônimas e acompanhamento.
  */
 import {
-  ANONYMOUS, type Denuncia, type Formulario, HOJE, type Mensagem, type RegistroDeAuditoria,
+  ANONYMOUS, type Denuncia, type Formulario, HOJE, ID_DO_CANAL, type Mensagem, type RegistroDeAuditoria,
   auditoria as auditoriaInicial, denuncias as denunciasIniciais, emailsAutomaticos as emailsIniciais,
-  formularios as formulariosIniciais, horaCheia, mensagens as mensagensIniciais, novaSenha, novoProtocolo, somarDias,
-  MODELO_DO_CANAL, camposComRisco, pontosForaDoFormulario,
+  formularioEmBranco, formularios as formulariosIniciais, horaCheia, mensagens as mensagensIniciais,
+  novaSenha, novoProtocolo, somarDias, MODELO_DO_CANAL, camposComRisco, pontosForaDoFormulario,
 } from './mocks'
 
 export type Tela = 'formularios' | 'construtor' | 'spaceflow' | 'itens' | 'publico' | 'acompanhar' | 'fora'
-export type Jornada = 'configurador' | 'denunciante'
+export type Jornada = 'configurador' | 'respondente'
 /** ANDAIME: o que acontece fora do ENSPACE (o cartaz e a caixa de e-mail pessoal). */
 export type CenaDeFora = 'cartaz' | 'email'
 export type Cenario = 'normal' | 'vazio' | 'pico' | 'falha'
-export type AbaDoItem = 'visao' | 'canal' | 'comentarios' | 'auditoria' | 'tarefas' | 'anexos' | 'emails'
+export type AbaDoItem = 'visao' | 'conversa' | 'comentarios' | 'auditoria' | 'tarefas' | 'anexos' | 'emails'
 
 /** O instante de um registro novo: o dia do protótipo com a hora do relógio. */
 export function agora() {
@@ -40,8 +43,10 @@ export function useFormularioAnonimo() {
   const vistaDaCategoria = useState<'painel' | 'formularios'>('fa-vista-categoria', () => 'formularios')
   const formularioAberto = useState<number | null>('fa-formulario-aberto', () => null)
   const abaDoFormulario = useState<string>('fa-aba-formulario', () => 'definicao')
+  /** "Criar +" abre o mesmo painel da edição, com o formulário em branco. */
+  const emCriacao = useState<boolean>('fa-em-criacao', () => false)
 
-  /** Denúncias: o item aberto no painel e a aba. */
+  /** Lista da categoria: o item aberto no painel e a aba. */
   const itemAberto = useState<number | null>('fa-item-aberto', () => null)
   const abaDoItem = useState<AbaDoItem>('fa-aba-item', () => 'visao')
 
@@ -49,70 +54,88 @@ export function useFormularioAnonimo() {
   const noAberto = useState<string | null>('fa-no-aberto', () => null)
 
   /** Página pública: o passo e o comprovante do último envio. */
-  const passoPublico = useState<'formulario' | 'recebida'>('fa-passo-publico', () => 'formulario')
-  const ultimoEnvio = useState<{ protocolo: string, senha: string, retornoAte: Date } | null>('fa-ultimo-envio', () => null)
+  const passoPublico = useState<'formulario' | 'enviada'>('fa-passo-publico', () => 'formulario')
+  const ultimoEnvio = useState<{ protocolo: string, senha: string, retornoAte: Date, acompanhamento: boolean } | null>('fa-ultimo-envio', () => null)
 
   /** Acompanhamento: quem entrou (id do item) e as tentativas erradas. */
-  const sessaoDoDenunciante = useState<number | null>('fa-sessao', () => null)
+  const sessao = useState<number | null>('fa-sessao', () => null)
   const tentativas = useState<number>('fa-tentativas', () => 0)
 
-  /* ---------- jornada do configurador ---------- */
+  /* ---------- o formulário da jornada e a conferência ---------- */
 
-  /** O canal existe e está publicado. A jornada do configurador começa sem ele. */
+  const formularioDoCanal = computed(() => formularios.value.find(f => f.id === ID_DO_CANAL)!)
+
+  /** O formulário existe na lista. A jornada do configurador começa sem ele. */
   const canalCriado = useState<boolean>('fa-canal-criado', () => true)
-  const canalPublicado = useState<boolean>('fa-canal-publicado', () => true)
-  const novoFormularioAberto = useState<boolean>('fa-novo-formulario', () => false)
-  /** Os campos do formulário do canal, na ordem do construtor. */
+  /** Os campos do formulário, na ordem do construtor. */
   const blocos = useState<string[]>('fa-blocos', () => [...MODELO_DO_CANAL])
   const revisaoAberta = useState<boolean>('fa-revisao', () => false)
-  const publicadoAberto = useState<boolean>('fa-publicado', () => false)
-  /** Pontos de fora do formulário que o configurador já corrigiu na revisão. */
+  const ativadoAberto = useState<boolean>('fa-ativado', () => false)
+  /** Pontos de fora do formulário que o configurador já corrigiu na conferência. */
   const resolvidos = useState<string[]>('fa-resolvidos', () => [])
   /** Envio de teste do configurador: vira item marcado "Teste". */
   const modoTeste = useState<boolean>('fa-modo-teste', () => false)
+  /** Pausa do link sem login (faixa da lista). */
+  const linkPausado = useState<boolean>('fa-link-pausado', () => false)
 
-  const problemasDoFormulario = computed(() => camposComRisco.filter(c => blocos.value.includes(c.refId)))
+  /** O formulário em conferência: o que pediu "Conferir anonimato". */
+  const emRevisao = useState<number>('fa-em-revisao', () => ID_DO_CANAL)
+  const formularioEmRevisao = computed(() => formularios.value.find(f => f.id === emRevisao.value) ?? formularioDoCanal.value)
+
+  /** Os blocos montados no protótipo são os do formulário da jornada; os outros chegam sem campo de risco. */
+  const problemasDoFormulario = computed(() => emRevisao.value === ID_DO_CANAL ? camposComRisco.filter(c => blocos.value.includes(c.refId)) : [])
   const pontosAbertos = computed(() => pontosForaDoFormulario.filter(p => !resolvidos.value.includes(p.id)))
-  const bloqueiaPublicar = computed(() => problemasDoFormulario.value.some(c => c.risco === 'email' || c.risco === 'membro_logado')
+  const bloqueiaAtivar = computed(() => problemasDoFormulario.value.some(c => c.risco === 'email' || c.risco === 'membro_logado')
     || pontosAbertos.value.some(p => p.severidade === 'bloqueia'))
 
-  function criarCanal(nome: string, comModelo: boolean) {
-    const f = formularios.value[0]!
-    f.nome = nome
-    f.visibilidade = 'anonimo'
-    f.tipo = 'criacao'
+  /** Quando o formulário foi criado na jornada: as respostas de exemplo ficam de fora. */
+  const inicioDoCanal = useState<Date | null>('fa-inicio-canal', () => null)
+
+  /** "Criar +": painel de edição com o formulário em branco. */
+  function criarFormulario() {
+    emCriacao.value = true
+    abaDoFormulario.value = 'definicao'
+    formularioAberto.value = ID_DO_CANAL
+  }
+
+  /** O primeiro Salvar do formulário novo: entra na lista e o painel continua aberto. */
+  function concluirCriacao(f: Formulario) {
     f.criadoEm = agora()
+    formularios.value = [f, ...formularios.value.filter(x => x.id !== f.id)]
     inicioDoCanal.value = horaCheia(agora())
-    blocos.value = comModelo ? [...MODELO_DO_CANAL] : []
     canalCriado.value = true
-    canalPublicado.value = false
-    novoFormularioAberto.value = false
-    tela.value = 'construtor'
+    emCriacao.value = false
   }
 
-  function publicar() {
-    canalPublicado.value = true
+  function abrirConferencia(id: number) {
+    emRevisao.value = id
+    revisaoAberta.value = true
+  }
+
+  function ativarAnonimato() {
+    formularioEmRevisao.value.anonimatoAtivo = true
     revisaoAberta.value = false
-    publicadoAberto.value = true
+    ativadoAberto.value = true
   }
 
-  /** Volta o protótipo ao começo da jornada do configurador: categoria sem o canal. */
+  /** Volta o protótipo ao começo da jornada do configurador: categoria sem o formulário. */
   function comecarDoZero() {
+    formularios.value = [formularioEmBranco(), ...formularios.value.filter(x => x.id !== ID_DO_CANAL)]
     canalCriado.value = false
-    canalPublicado.value = false
     resolvidos.value = []
     blocos.value = []
     formularioAberto.value = null
+    emCriacao.value = false
   }
 
-  /* ---------- jornada do denunciante e o guia ---------- */
+  /* ---------- retorno a quem respondeu ---------- */
 
-  /** A mensagem do nó "Responder ao denunciante": vale quando o retorno é pelo Spaceflow. */
-  const mensagemDoNo = useState<string>('fa-mensagem-no', () => 'Recebemos sua denúncia e ela já está com o comitê de ética. Protocolo {{protocolo}}. Respondemos até {{responder_ate}}.')
+  /** A mensagem do nó "Responder a quem enviou": vale quando o retorno é pelo Spaceflow. */
+  const mensagemDoNo = useState<string>('fa-mensagem-no', () => 'Recebemos sua resposta e ela já está com a equipe responsável. Protocolo {{protocolo}}. Respondemos até {{responder_ate}}.')
 
-  /** O texto que chega ao denunciante logo depois do envio, venha do formulário ou do fluxo. */
+  /** O texto que chega a quem respondeu logo depois do envio, venha do formulário ou do fluxo. */
   function textoDeRecebimento(protocolo: string, responderAte: Date) {
-    const f = formularios.value[0]!
+    const f = formularioDoCanal.value
     if (f.retorno === 'automatico') return f.mensagemDeConfirmacao
     return mensagemDoNo.value
       .replaceAll('{{protocolo}}', protocolo)
@@ -120,12 +143,14 @@ export function useFormularioAnonimo() {
       .replaceAll('{{data.tipo}}', '')
   }
 
+  /* ---------- guia ---------- */
+
   const cena = useState<CenaDeFora>('fa-cena', () => 'cartaz')
   const jornada = useState<Jornada | null>('fa-jornada', () => null)
   const passo = useState<number>('fa-passo', () => 0)
 
-  /** A denúncia da pessoa: a última enviada pela página pública ou a de exemplo. */
-  const denunciaDoDenunciante = computed(() => {
+  /** A resposta da pessoa: a última enviada pelo link ou a de exemplo. */
+  const respostaDaPessoa = computed(() => {
     const ultima = ultimoEnvio.value ? denuncias.value.find(d => d.data.protocolo === ultimoEnvio.value!.protocolo) : null
     return ultima ?? denuncias.value.find(d => d.id === 81202) ?? denuncias.value[0]!
   })
@@ -133,15 +158,11 @@ export function useFormularioAnonimo() {
   function concluir(itemId: number, texto: string, membro: number) {
     const d = denuncias.value.find(x => x.id === itemId)
     if (!d) return
-    responder(itemId, 'comite', texto, membro)
+    responder(itemId, 'equipe', texto, membro)
     d.data.situacao = 'concluida'
   }
 
-  const formularioDoCanal = computed(() => formularios.value[0]!)
-
-  /** Quando o canal foi criado na jornada do configurador: as denúncias de exemplo ficam de fora. */
-  const inicioDoCanal = useState<Date | null>('fa-inicio-canal', () => null)
-  const listaDoComite = computed(() => cenario.value === 'vazio' ? [] : inicioDoCanal.value ? denuncias.value.filter(d => +d.created_at >= +inicioDoCanal.value!) : denuncias.value)
+  const listaDaCategoria = computed(() => cenario.value === 'vazio' ? [] : inicioDoCanal.value ? denuncias.value.filter(d => +d.created_at >= +inicioDoCanal.value!) : denuncias.value)
 
   function ir(t: Tela, opcoes?: { item?: number | null, aba?: AbaDoItem, formulario?: number | null, abaDoFormulario?: string, no?: string | null }) {
     tela.value = t
@@ -156,12 +177,13 @@ export function useFormularioAnonimo() {
   }
 
   /**
-   * O envio da página pública. O que a proposta grava:
+   * O envio pelo link público. Com respostas anônimas, o que a proposta grava:
    *  - criador = anonymous, sem `request_email`, sem IP;
    *  - hora cheia;
-   *  - do e-mail, só o fato de existir aviso (o endereço iria para o cofre).
+   *  - do e-mail de aviso, só o fato de existir (o endereço iria para o cofre).
+   * Protocolo e senha só existem com acompanhamento.
    */
-  function registrarDenuncia(dados: Omit<Denuncia['data'], 'protocolo' | 'situacao' | 'retorno_ate' | 'responsavel'>) {
+  function registrarResposta(dados: Omit<Denuncia['data'], 'protocolo' | 'situacao' | 'retorno_ate' | 'responsavel'>) {
     const f = formularioDoCanal.value
     const recebida = horaCheia(agora())
     const protocolo = novoProtocolo()
@@ -173,7 +195,7 @@ export function useFormularioAnonimo() {
       created_at: recebida,
       updated_at: recebida,
       deleted_at: null,
-      reference: `DEN${crypto.randomUUID().replace(/-/g, '').slice(0, 29).toUpperCase()}`,
+      reference: `OUV${crypto.randomUUID().replace(/-/g, '').slice(0, 29).toUpperCase()}`,
       user: ANONYMOUS.id,
       form: f.id,
       ignore_triggers: false,
@@ -186,50 +208,52 @@ export function useFormularioAnonimo() {
       teste: modoTeste.value,
     }
     denuncias.value = [nova, ...denuncias.value]
-    mensagens.value = [...mensagens.value, { id: id * 100, itemId: id, autor: 'sistema', texto: textoDeRecebimento(protocolo, retornoAte), quando: recebida }]
+    if (f.acompanhamento) {
+      mensagens.value = [...mensagens.value, { id: id * 100, itemId: id, autor: 'sistema', texto: textoDeRecebimento(protocolo, retornoAte), quando: recebida }]
+    }
     auditoria.value = [{ id: `a${id}`, itemId: id, quem: ANONYMOUS.id, acao: 'criou', quando: recebida }, ...auditoria.value]
     if (dados.aviso_por_email) {
-      emails.value = [{ id: Date.now(), itemId: id, criadoEm: recebida, status: 'enviado', assunto: 'Recebemos sua denúncia' }, ...emails.value]
+      emails.value = [{ id: Date.now(), itemId: id, criadoEm: recebida, status: 'enviado', assunto: 'Recebemos sua resposta' }, ...emails.value]
     }
-    ultimoEnvio.value = { protocolo, senha, retornoAte }
+    ultimoEnvio.value = { protocolo, senha, retornoAte, acompanhamento: f.acompanhamento }
     return nova
   }
 
-  function responder(itemId: number, autor: 'comite' | 'denunciante', texto: string, membro?: number, anexos?: string[]) {
+  function responder(itemId: number, autor: 'equipe' | 'pessoa', texto: string, membro?: number, anexos?: string[]) {
     const d = denuncias.value.find(x => x.id === itemId)
     if (!d) return
-    // A mensagem do denunciante não leva hora exata: só o dia e a hora cheia.
-    const quando = autor === 'denunciante' ? horaCheia(agora()) : agora()
+    // A mensagem de quem respondeu não leva hora exata: só o dia e a hora cheia.
+    const quando = autor === 'pessoa' ? horaCheia(agora()) : agora()
     mensagens.value = [...mensagens.value, { id: Date.now(), itemId, autor, membro, texto, quando, anexos }]
-    if (autor === 'denunciante') d.mensagensNovas += 1
-    if (autor === 'comite') {
+    if (autor === 'pessoa') d.mensagensNovas += 1
+    if (autor === 'equipe') {
       if (d.data.situacao === 'nova') d.data.situacao = 'em_analise'
       if (d.data.aviso_por_email) {
-        emails.value = [{ id: Date.now() + 1, itemId, criadoEm: agora(), status: 'enviado', assunto: 'Há uma atualização na sua denúncia' }, ...emails.value]
+        emails.value = [{ id: Date.now() + 1, itemId, criadoEm: agora(), status: 'enviado', assunto: 'Há uma atualização na sua resposta' }, ...emails.value]
       }
     }
   }
 
-  function entrarComoDenunciante(protocolo: string, senha: string) {
+  function entrarComProtocolo(protocolo: string, senha: string) {
     const d = denuncias.value.find(x => x.data.protocolo === protocolo.trim().toUpperCase() && x.senhaDoPrototipo === senha.trim().toUpperCase())
     if (!d) {
       tentativas.value += 1
       return false
     }
     tentativas.value = 0
-    sessaoDoDenunciante.value = d.id
+    sessao.value = d.id
     return true
   }
 
   return {
     tela, cenario, destacar, formularios, denuncias, mensagens, auditoria, emails,
-    vistaDaCategoria, formularioAberto, abaDoFormulario, itemAberto, abaDoItem, noAberto,
-    passoPublico, ultimoEnvio, sessaoDoDenunciante, tentativas,
-    formularioDoCanal, listaDoComite, inicioDoCanal,
-    canalCriado, canalPublicado, novoFormularioAberto, blocos, revisaoAberta, publicadoAberto, resolvidos, modoTeste,
-    problemasDoFormulario, pontosAbertos, bloqueiaPublicar, criarCanal, publicar, comecarDoZero,
-    cena, jornada, passo, denunciaDoDenunciante, concluir, mensagemDoNo, textoDeRecebimento,
-    ir, registrarDenuncia, responder, entrarComoDenunciante,
+    vistaDaCategoria, formularioAberto, abaDoFormulario, emCriacao, itemAberto, abaDoItem, noAberto,
+    passoPublico, ultimoEnvio, sessao, tentativas,
+    formularioDoCanal, listaDaCategoria, inicioDoCanal,
+    canalCriado, blocos, revisaoAberta, ativadoAberto, resolvidos, modoTeste, linkPausado, emRevisao, formularioEmRevisao,
+    problemasDoFormulario, pontosAbertos, bloqueiaAtivar, criarFormulario, concluirCriacao, abrirConferencia, ativarAnonimato, comecarDoZero,
+    cena, jornada, passo, respostaDaPessoa, concluir, mensagemDoNo, textoDeRecebimento,
+    ir, registrarResposta, responder, entrarComProtocolo,
   }
 }
 

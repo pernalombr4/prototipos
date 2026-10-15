@@ -2,50 +2,56 @@
 
 ## A proposta em 1 minuto
 
-- **Visibilidade ganha a 3ª opção, "Anônimo"**, ao lado de Privado e Público. Público continua como hoje.
-- **O link abre o formulário direto, sem login.** O endereço é o mesmo de hoje e é fixo, para cartaz e QR code.
-  A proteção fica por trás: chave de 30 minutos por visita, verificação de robô sem clique, limite por hora e por
-  dia e pausa automática num pico.
-- **O item nasce com o usuário genérico `anonymous`**, como Airtable, ServiceNow e Pipefy. Sem
-  `request_email`, sem IP e com a hora cheia. O Log de Auditoria diz "anonymous criou um registro".
-- **A proteção contra robô é técnica, na entrada:** rota pública própria e estreita, chave por visita,
-  verificação sem clique, limites, pausa no pico e fila técnica interna. O que é barrado não vira item e não
-  chega a nenhuma pessoa. A Triagem do formulário não faz parte da proteção e fica desligada no modo anônimo.
-- **Quem confirma o recebimento é uma escolha só**, na aba Anonimato: retorno automático (o ENSPACE responde com
-  a mensagem do formulário, sem fluxo) ou pelo Spaceflow (o nó "Responder ao denunciante" no fluxo do caso).
-- **O retorno é por protocolo e senha.** A confirmação aparece na tela e fica como 1ª mensagem do
-  acompanhamento. O comitê responde pela pasta nova "Canal do denunciante" ou pelo nó novo do Spaceflow,
-  "Responder ao denunciante".
-- **O configurador não precisa saber onde a identidade vaza:** o construtor aponta os campos que identificam
-  quem envia, e a revisão antes de publicar confere fluxos, notificações, modelos de e-mail e cargos da categoria.
-- **O e-mail de retorno é opcional.** Fica cifrado fora do item, nenhuma tela mostra, o aviso não leva conteúdo
-  e o e-mail some quando o caso fecha. A tela avisa que, com e-mail, a denúncia passa a ser sigilosa.
+São 3 configurações independentes do formulário, cada uma no lugar dela. Tipo e Visibilidade continuam como
+hoje (Visibilidade: Privado ou Público).
+
+| Configuração | Onde fica | Depende de | Para que serve |
+|---|---|---|---|
+| **Acesso pelo link: Sem login** | Definição, logo abaixo de Visibilidade, com o link e o QR code | Visibilidade Público | abrir o formulário sem e-mail, código ou conta |
+| **Respostas anônimas** | Avançado | nada: vale para Privado e Público, com ou sem login | gravar a resposta sem identificação de quem respondeu |
+| **Acompanhamento por protocolo e senha** | Avançado, dentro de Respostas anônimas | Respostas anônimas | dar retorno a quem respondeu sem saber quem é |
+
+- **Sem login traz a proteção do link**, em Avançado, só quando está ligado: chave de 30 minutos por visita,
+  verificação de robô sem clique, limite por hora e por dia e pausa automática num pico. O que é barrado não
+  vira item e não chega a nenhuma pessoa. A Triagem não faz parte da proteção.
+- **Respostas anônimas criam o item com o usuário genérico `anonymous`**, como Airtable, ServiceNow e Pipefy.
+  Sem `request_email`, sem IP e com a hora cheia. Serve a avaliação de gestor, feedback, pesquisa de clima ou
+  canal de denúncia. Com login, o login controla quem pode responder, mas não fica gravado.
+- **A opção só vale depois de "Conferir anonimato"**: o ENSPACE confere campos, fluxos, notificações, modelos de
+  e-mail e cargos da categoria, e o configurador corrige ali mesmo. O construtor aponta os campos que
+  identificam quem responde enquanto ele monta.
+- **O acompanhamento é opcional.** Com ele, quem respondeu recebe protocolo e senha, o retorno é automático ou
+  pelo Spaceflow (nó "Responder a quem enviou"), nunca os 2, e o e-mail de aviso é opcional, cifrado fora do
+  item e sem conteúdo.
 
 ## As 2 jornadas
 
 ```
-CONFIGURADOR                                          DENUNCIANTE
+CONFIGURADOR                                          QUEM RESPONDE
 1 Formulários › Criar +                               1 Cartaz / intranet: QR code e link
-  Visibilidade = Anônimo                                │
-  "o que muda" + modelo Canal de denúncia              2 Abre o link: sem login, sem Acesso Externo
+  Visibilidade = Público                                │
+        │                                             2 Abre o link: sem login, sem Acesso Externo
+2 Definição › Acesso pelo link = Sem login              │
+  link + QR code                                      3 Responde + verificação de robô sem clique
         │                                               │
-2 Construtor                                          3 Relato + verificação de robô sem clique
-  Verificação de anonimato aponta o campo              │
-  que identifica quem envia e diz como corrigir       4 Aviso por e-mail? opcional (vira sigilosa)
+3 Avançado › Respostas anônimas                       4 Aviso por e-mail? opcional (vira sigilosa)
         │                                               │
-3 Aba Anonimato: link, QR, proteção, retorno          5 Protocolo + senha + comprovante
-        │                                               │
-4 Spaceflow: gatilho sem identidade                   6 Caixa pessoal: aviso sem conteúdo
-  + "Responder ao denunciante" ─────────────────────►  │ (quando o comitê responde)
-        │                                               │
-5 Revisar e publicar: formulário, fluxos,             7 Acompanhar: lê a resposta e complementa
-  notificações, modelos, cargos                         │
-        │                                             8 Caso concluído
-6 Canal publicado: link, QR, envio de teste
+4 Avançado › Acompanhamento + retorno                 5 Protocolo + senha + comprovante
+  (automático OU Spaceflow)                             │
+        │                                             6 Caixa pessoal: aviso sem conteúdo
+5 Avançado › Proteção do link sem login                 │ (quando a equipe responde)
+        │                                             7 Acompanhar: lê o retorno e complementa
+6 Construtor: verificação de anonimato                  │
+        │                                             8 Item concluído
+7 Conferir anonimato: campos, fluxos,
+  notificações, modelos, cargos → Ativar
         │
-7 Lista de denúncias: faixa do canal
-  (aceitas, barradas, pausar)        ◄── item criado por anonymous, sem e-mail, sem IP, hora cheia
+8 Envio de teste + faixa do link na lista
+  (respostas, barrados, pausar)      ◄── item criado por anonymous, sem e-mail, sem IP, hora cheia
 ```
+
+Os passos 2, 3 e 4 são independentes: a "Avaliação do gestor" da lista é Privado, com respostas anônimas e sem
+acompanhamento; ela não tem link, nem proteção, nem protocolo.
 
 ## Rodada 1 · 2026-10-15
 
@@ -202,3 +208,33 @@ CONFIGURADOR                                          DENUNCIANTE
 - **Quem constrói o quê:** o automático é comportamento do produto (o dev implementa); o Spaceflow é
   configuração do cliente, com o nó novo.
 - **Maquete:** a troca de modo no editor do fluxo grava na hora, sem "Salvar".
+
+## Rodada 5 · 2026-10-15
+
+- **Pedido (literal):** "anonimo é basicamente uma configuraçao avançada que diz algo do tipo "as respostas serao
+  anonimas, sem identificaçao", nao é o TIPO do form. e nao necessariamente vai ser usado pra denuncia [...] e a
+  config de ter um qr code, link pra acesso sem senha é outra coisa [...] somente se for publico pode fazer
+  isso. e ai veja em qual aba essa opçao deveria se enquadrar. perceba que sao coisas segregadas que voce juntou
+  "Num mesmo bolo" ajuste isso"
+- **Mudou:**
+  - Visibilidade volta a ter só Privado e Público; a opção "Anônimo" e a aba Anonimato saem;
+  - Definição › "Acesso pelo link" (Com login / Sem login), só com Público, com o link e o QR code;
+  - Avançado › "Respostas anônimas", para qualquer formulário; "Acompanhamento por protocolo e senha" vira
+    sub-opção, desligada por padrão, com o retorno dentro dela;
+  - Avançado › "Proteção do link sem login", só com Sem login;
+  - "Revisar e publicar canal" vira "Conferir anonimato" e "Ativar respostas anônimas";
+  - "Criar +" abre o mesmo painel da edição, em branco (sai o painel com o modelo Canal de denúncia);
+  - copy genérica: "quem respondeu", "Equipe", "Resposta anônima", nó "Responder a quem enviou", pasta
+    "Acompanhamento"; a categoria do exemplo vira "Ouvidoria" e ganha o formulário "Avaliação do gestor".
+- **Por que cada aba:**
+  - acesso sem login em Definição: é uma escolha sobre quem abre o formulário, como a Visibilidade, e o link e
+    o QR code são o que o configurador divulga;
+  - respostas anônimas em Avançado: muda o que se grava, não quem acessa, e fica ao lado de Rascunhos e
+    Triagem, que também mudam o comportamento da resposta;
+  - proteção em Avançado: é ajuste técnico do link e só aparece quando o link existe sem login.
+- **Regras entre as 3:** Sem login some com Privado; Rascunhos fica desligado com respostas anônimas; o link
+  sem login de um formulário com respostas anônimas só recebe depois da conferência. A Triagem continua
+  disponível em todos os casos.
+- **Fronteira:** muda o painel do formulário (Definição e Avançado), os selos da lista, o construtor, a
+  conferência, a página do link e a faixa da lista; não muda Tipo, Visual, a lista de itens nem o resto do
+  Spaceflow.

@@ -5,9 +5,9 @@
  * de Auditoria, Tarefas, Anexos e "+4" com Emails Automáticos e as outras).
  *
  * PROPOSTA (contorno do andaime):
- *  - no topo da Visão Geral, o cartão da denúncia anônima: criador anonymous,
+ *  - no topo da Visão Geral, o cartão da resposta anônima: criador anonymous,
  *    hora cheia, protocolo e se a pessoa pediu aviso por e-mail (sem o endereço);
- *  - a pasta "Canal do denunciante", logo depois de Visão Geral: a conversa
+ *  - a pasta "Acompanhamento", logo depois de Visão Geral: a conversa
  *    com quem denunciou, sem e-mail;
  *  - Logs de Auditoria: "anonymous criou um registro", com a hora cheia;
  *  - Emails Automáticos: o aviso aparece com "Destinatário protegido".
@@ -50,7 +50,7 @@ function haDias(d: Date) {
 
 const abasVisiveis = computed(() => [
   { chave: 'visao' as AbaDoItem, icone: 'i-lucide-layers', proposta: false },
-  { chave: 'canal' as AbaDoItem, icone: 'i-lucide-messages-square', proposta: true },
+  { chave: 'conversa' as AbaDoItem, icone: 'i-lucide-messages-square', proposta: true },
   { chave: 'comentarios' as AbaDoItem, icone: 'i-lucide-message-circle', proposta: false },
   { chave: 'auditoria' as AbaDoItem, icone: 'i-lucide-shield-check', proposta: false },
   { chave: 'tarefas' as AbaDoItem, icone: 'i-lucide-clipboard-check', proposta: false },
@@ -89,11 +89,11 @@ async function salvar() {
   toast.add({ title: props.t.item.salvo, icon: 'i-lucide-circle-check', color: 'success' })
 }
 
-/* ---------- canal do denunciante ---------- */
+/* ---------- acompanhamento: conversa com quem respondeu ---------- */
 
 const conversa = computed(() => mensagens.value.filter(m => m.itemId === itemAberto.value).sort((a, b) => +a.quando - +b.quando))
 watch([itemAberto, abaDoItem], () => {
-  if (abaDoItem.value === 'canal' && denuncia.value) denuncia.value.mensagensNovas = 0
+  if (abaDoItem.value === 'conversa' && denuncia.value) denuncia.value.mensagensNovas = 0
 })
 
 const resposta = ref('')
@@ -103,14 +103,14 @@ async function enviarResposta() {
   if (!d || !resposta.value.trim()) return
   enviando.value = true
   await new Promise(r => setTimeout(r, 700))
-  responder(d.id, 'comite', resposta.value.trim(), comite[0]!.membro.id)
+  responder(d.id, 'equipe', resposta.value.trim(), comite[0]!.membro.id)
   resposta.value = ''
   enviando.value = false
-  toast.add({ title: props.t.item.canal.enviada, icon: 'i-lucide-circle-check', color: 'success' })
+  toast.add({ title: props.t.item.conversa.enviada, icon: 'i-lucide-circle-check', color: 'success' })
 }
 
 function nomeDoMembro(id?: number) {
-  return comite.find(c => c.membro.id === id)?.nome ?? props.t.item.canal.autor.comite
+  return comite.find(c => c.membro.id === id)?.nome ?? props.t.item.conversa.autor.equipe
 }
 
 /* ---------- auditoria e e-mails ---------- */
@@ -136,7 +136,7 @@ const emailsDoItem = computed(() => emails.value.filter(e => e.itemId === itemAb
         </div>
 
         <div class="flex min-w-0 flex-1 flex-col">
-          <!-- Abas (cópia + Canal do denunciante) -->
+          <!-- Abas (cópia + Acompanhamento) -->
           <div class="flex items-center gap-1 overflow-x-auto border-b border-default px-2 py-1.5">
             <UButton
               v-for="a in abasVisiveis"
@@ -150,7 +150,7 @@ const emailsDoItem = computed(() => emails.value.filter(e => e.itemId === itemAb
               :class="a.proposta ? marca : ''"
               @click="abaDoItem = a.chave"
             >
-              <template v-if="a.chave === 'canal' && denuncia.mensagensNovas" #trailing>
+              <template v-if="a.chave === 'conversa' && denuncia.mensagensNovas" #trailing>
                 <UBadge :label="String(denuncia.mensagensNovas)" color="primary" size="xs" />
               </template>
             </UButton>
@@ -169,7 +169,7 @@ const emailsDoItem = computed(() => emails.value.filter(e => e.itemId === itemAb
             >
               <!-- Visão Geral -->
               <div v-if="abaDoItem === 'visao'" key="visao" class="flex flex-col gap-5 p-5">
-                <!-- PROPOSTA: o cartão da denúncia anônima -->
+                <!-- PROPOSTA: o cartão da resposta anônima -->
                 <section class="rounded-lg border border-info/30 bg-info/5 p-4" :class="marca">
                   <div class="flex flex-wrap items-center gap-2">
                     <UBadge :label="t.item.anonima" icon="i-lucide-venetian-mask" color="info" variant="subtle" />
@@ -191,7 +191,7 @@ const emailsDoItem = computed(() => emails.value.filter(e => e.itemId === itemAb
                       </dd>
                     </div>
                     <div>
-                      <dt class="text-xs text-muted">{{ t.item.responderAte }}</dt>
+                      <dt class="text-xs text-muted">{{ t.item.retornoAte }}</dt>
                       <dd class="mt-0.5 text-highlighted">{{ formatoDia.format(new Date(`${denuncia.data.retorno_ate}T12:00:00`)) }}</dd>
                     </div>
                   </dl>
@@ -213,7 +213,7 @@ const emailsDoItem = computed(() => emails.value.filter(e => e.itemId === itemAb
 
                 <!-- O relato, só leitura -->
                 <section>
-                  <h3 class="text-sm font-semibold text-highlighted">{{ t.item.camposDoRelato }}</h3>
+                  <h3 class="text-sm font-semibold text-highlighted">{{ t.item.camposDaResposta }}</h3>
                   <p class="mb-3 text-xs text-muted">{{ t.item.somenteLeitura }}</p>
                   <dl class="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
                     <div><dt class="text-xs text-muted">Tipo de ocorrência</dt><dd class="text-highlighted">{{ denuncia.data.tipo }}</dd></div>
@@ -241,22 +241,22 @@ const emailsDoItem = computed(() => emails.value.filter(e => e.itemId === itemAb
                 </div>
               </div>
 
-              <!-- PROPOSTA: Canal do denunciante -->
-              <div v-else-if="abaDoItem === 'canal'" key="canal" class="flex h-full flex-col p-5">
+              <!-- PROPOSTA: Acompanhamento -->
+              <div v-else-if="abaDoItem === 'conversa'" key="conversa" class="flex h-full flex-col p-5">
                 <p class="flex items-start gap-1.5 text-xs text-muted">
                   <UIcon name="i-lucide-info" class="mt-0.5 size-3.5 shrink-0" />
-                  <span>{{ t.item.canal.ajuda }} {{ denuncia.data.aviso_por_email ? t.item.canal.comEmail : '' }}</span>
+                  <span>{{ t.item.conversa.ajuda }} {{ denuncia.data.aviso_por_email ? t.item.conversa.comEmail : '' }}</span>
                 </p>
                 <TransitionGroup tag="ol" class="mt-4 flex flex-col gap-3" enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0 translate-y-2">
-                  <li v-for="m in conversa" :key="m.id" class="flex" :class="m.autor === 'comite' ? 'justify-end' : 'justify-start'">
+                  <li v-for="m in conversa" :key="m.id" class="flex" :class="m.autor === 'equipe' ? 'justify-end' : 'justify-start'">
                     <div
                       class="max-w-[85%] rounded-lg px-3 py-2"
-                      :class="m.autor === 'comite' ? 'bg-primary/10' : m.autor === 'sistema' ? 'bg-elevated' : 'border border-default bg-default'"
+                      :class="m.autor === 'equipe' ? 'bg-primary/10' : m.autor === 'sistema' ? 'bg-elevated' : 'border border-default bg-default'"
                     >
                       <p class="flex items-center gap-1.5 text-xs font-medium text-toned">
-                        <UIcon :name="m.autor === 'sistema' ? 'i-lucide-bot' : m.autor === 'comite' ? 'i-lucide-shield' : 'i-lucide-venetian-mask'" class="size-3.5" />
-                        {{ m.autor === 'comite' ? nomeDoMembro(m.membro) : t.item.canal.autor[m.autor] }}
-                        <span class="font-normal text-toned">· {{ m.autor === 'denunciante' ? diaEHoraCheia(m.quando) : formatoMensagem.format(m.quando) }}</span>
+                        <UIcon :name="m.autor === 'sistema' ? 'i-lucide-bot' : m.autor === 'equipe' ? 'i-lucide-shield' : 'i-lucide-venetian-mask'" class="size-3.5" />
+                        {{ m.autor === 'equipe' ? nomeDoMembro(m.membro) : t.item.conversa.autor[m.autor] }}
+                        <span class="font-normal text-toned">· {{ m.autor === 'pessoa' ? diaEHoraCheia(m.quando) : formatoMensagem.format(m.quando) }}</span>
                       </p>
                       <p class="mt-1 whitespace-pre-line text-sm text-highlighted">{{ m.texto }}</p>
                     </div>
@@ -264,10 +264,10 @@ const emailsDoItem = computed(() => emails.value.filter(e => e.itemId === itemAb
                 </TransitionGroup>
 
                 <form class="mt-5 flex flex-col gap-2" @submit.prevent="enviarResposta">
-                  <UTextarea v-model="resposta" :placeholder="t.item.canal.escreva" :rows="3" autoresize class="w-full" />
+                  <UTextarea v-model="resposta" :placeholder="t.item.conversa.escreva" :rows="3" autoresize class="w-full" />
                   <div class="flex items-center justify-between gap-3">
-                    <p class="flex items-center gap-1.5 text-xs text-muted"><UIcon name="i-lucide-triangle-alert" class="size-3.5 text-warning" />{{ t.item.canal.dica }}</p>
-                    <UButton type="submit" icon="i-lucide-send" :label="t.item.canal.enviar" :loading="enviando" :disabled="!resposta.trim()" />
+                    <p class="flex items-center gap-1.5 text-xs text-muted"><UIcon name="i-lucide-triangle-alert" class="size-3.5 text-warning" />{{ t.item.conversa.dica }}</p>
+                    <UButton type="submit" icon="i-lucide-send" :label="t.item.conversa.enviar" :loading="enviando" :disabled="!resposta.trim()" />
                   </div>
                 </form>
               </div>

@@ -1,14 +1,13 @@
 <script setup lang="ts">
 /**
- * PROPOSTA: a página do link público no modo Anônimo.
- *
- * Hoje (ev-07) o mesmo link abre "Acesso Externo" e pede e-mail e código. Aqui
- * ele abre o formulário direto, sem login, e:
- *  - diz o que fica gravado e o que não fica;
- *  - verifica robô sem clique (verificação do ENSPACE, sem cookie);
- *  - oferece aviso por e-mail opcional, explicando que vira "sigilosa";
- *  - termina com protocolo, senha e comprovante, sem nada que identifique.
- * Cenários do andaime: "Pico de envios" pausa o canal; "Envio falha" mantém o texto.
+ * PROPOSTA: a página do link público. Cada parte depende de uma configuração do
+ * formulário, e só dela:
+ *  - Acesso pelo link "Com login": o link abre "Acesso Externo", como hoje (ev-07);
+ *    "Sem login": abre o formulário direto, com a verificação de robô sem clique;
+ *  - Respostas anônimas: o aviso do que fica gravado e do que não fica;
+ *  - Acompanhamento: aviso por e-mail opcional e, no fim, protocolo, senha e
+ *    comprovante. Sem acompanhamento, o fim é só o agradecimento.
+ * Cenários do andaime: "Pico de envios" pausa o link; "Envio falha" mantém o texto.
  */
 import type { Textos } from './textos'
 import { AREAS, LINK_DE_ACOMPANHAMENTO, TIPOS, campos, workspace } from './mocks'
@@ -16,8 +15,7 @@ import { useFormularioAnonimo } from './estado'
 
 const props = defineProps<{ t: Textos }>()
 
-const { cenario, passoPublico, ultimoEnvio, formularioDoCanal, registrarDenuncia, ir, modoTeste, canalPublicado, denuncias, textoDeRecebimento } = useFormularioAnonimo()
-const canalPausado = useState<boolean>('fa-canal-pausado', () => false)
+const { cenario, passoPublico, ultimoEnvio, formularioDoCanal: f, registrarResposta, ir, modoTeste, linkPausado, denuncias, textoDeRecebimento } = useFormularioAnonimo()
 const idioma = useIdioma()
 
 const campo = (refId: string) => campos.find(c => c.refId === refId)!
@@ -42,8 +40,13 @@ onMounted(() => setTimeout(() => (verificacao.value = 'ok'), 1400))
 
 /* ---------- envio ---------- */
 
-const fechado = computed(() => !canalPublicado.value && !modoTeste.value)
-const pausado = computed(() => fechado.value || cenario.value === 'pico' || (canalPausado.value && !modoTeste.value))
+const semLogin = computed(() => f.value.visibilidade === 'publico' && f.value.semLogin)
+/** Com respostas anônimas, o link só recebe depois da conferência (o teste do configurador passa). */
+const fechado = computed(() => f.value.respostasAnonimas && !f.value.anonimatoAtivo && !modoTeste.value)
+const pausadoPelaEquipe = computed(() => linkPausado.value && !modoTeste.value)
+const pausado = computed(() => fechado.value || pausadoPelaEquipe.value || cenario.value === 'pico')
+const protegemos = computed(() => props.t.publico.protegemos.filter((_, i) => i < 3 || f.value.acompanhamento))
+const ofereceAviso = computed(() => f.value.acompanhamento && f.value.oferecerAvisoPorEmail)
 const enviando = ref(false)
 const falhou = ref(false)
 
@@ -67,7 +70,7 @@ async function enviar() {
     falhou.value = true
     return
   }
-  registrarDenuncia({
+  registrarResposta({
     tipo: respostas.tipo!,
     area: respostas.area!,
     quando: respostas.quando || null,
@@ -75,24 +78,24 @@ async function enviar() {
     relato: respostas.relato.trim(),
     testemunhas: respostas.testemunhas ?? null,
     anexos: respostas.anexos.map(f => f.name),
-    aviso_por_email: querAviso.value,
+    aviso_por_email: ofereceAviso.value && querAviso.value,
   })
   // O e-mail iria para o cofre, fora do item. O protótipo o descarta aqui.
   email.value = ''
   guardou.value = false
   mostrarSenha.value = false
-  passoPublico.value = 'recebida'
+  passoPublico.value = 'enviada'
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-/** Teste do configurador: volta ao ENSPACE com a denúncia de teste aberta. */
+/** Teste do configurador: volta ao ENSPACE com a resposta de teste aberta. */
 function verTesteNoEnspace() {
   const d = denuncias.value.find(x => x.data.protocolo === ultimoEnvio.value?.protocolo)
   modoTeste.value = false
   ir('itens', { item: d?.id ?? null, aba: 'visao' })
 }
 
-function novaDenuncia() {
+function novaResposta() {
   Object.assign(respostas, { tipo: undefined, area: undefined, quando: '', envolvidos: '', relato: '', testemunhas: undefined, anexos: [] })
   querAviso.value = false
   tentouEnviar.value = false
@@ -105,7 +108,7 @@ const mostrarSenha = ref(false)
 const guardou = ref(false)
 const copiado = ref<'protocolo' | 'senha' | null>(null)
 const avisoPedido = ref(false)
-watch(passoPublico, (p) => { if (p === 'recebida') avisoPedido.value = querAviso.value })
+watch(passoPublico, (p) => { if (p === 'enviada') avisoPedido.value = ofereceAviso.value && querAviso.value })
 
 const formatoData = computed(() => new Intl.DateTimeFormat(idioma.value, { day: '2-digit', month: 'long', year: 'numeric' }))
 const retornoAte = computed(() => ultimoEnvio.value ? formatoData.value.format(ultimoEnvio.value.retornoAte) : '')
@@ -125,7 +128,7 @@ function baixarComprovante() {
   const e = ultimoEnvio.value
   if (!e) return
   const a = document.createElement('a')
-  a.href = URL.createObjectURL(new Blob([props.t.publico.recebida.comprovante(e.protocolo, e.senha, retornoAte.value, LINK_DE_ACOMPANHAMENTO)], { type: 'text/plain' }))
+  a.href = URL.createObjectURL(new Blob([props.t.publico.enviada.comprovante(e.protocolo, e.senha, retornoAte.value, LINK_DE_ACOMPANHAMENTO)], { type: 'text/plain' }))
   a.download = `comprovante-${e.protocolo}.txt`
   a.click()
   URL.revokeObjectURL(a.href)
@@ -144,15 +147,43 @@ const opcoesDeTestemunha = campo('testemunhas').opcoes!.map(v => ({ value: v, la
     leave-active-class="transition duration-150 ease-in"
     leave-to-class="opacity-0"
   >
+    <!-- Com login: o link abre o Acesso Externo de hoje (ev-07) -->
+    <div v-if="!semLogin" key="login" class="w-full max-w-md self-center rounded-xl border border-default bg-default/90 p-6 shadow-lg backdrop-blur">
+      <div class="flex flex-col items-center text-center">
+        <span class="flex size-12 items-center justify-center rounded-full bg-primary/15"><UIcon name="i-lucide-log-in" class="size-6 text-primary" /></span>
+        <h1 class="mt-3 text-2xl font-bold text-highlighted">{{ t.publico.comLogin.titulo }}</h1>
+        <p class="mt-1 text-sm text-toned">{{ t.publico.comLogin.subtitulo }}</p>
+      </div>
+      <div class="mt-5 flex flex-col gap-3">
+        <UFormField :label="t.publico.comLogin.email">
+          <UInput type="email" icon="i-lucide-mail" class="w-full" disabled />
+        </UFormField>
+        <UButton :label="t.publico.comLogin.receber" block disabled />
+        <p class="text-center text-xs text-toned">{{ t.publico.comLogin.termos }}</p>
+      </div>
+      <p class="mt-5 flex items-start gap-2 rounded-md bg-elevated/60 p-2.5 text-xs text-toned">
+        <UIcon name="i-lucide-info" class="mt-0.5 size-3.5 shrink-0" />{{ t.publico.comLogin.nota }}
+      </p>
+    </div>
+
     <!-- Formulário -->
-    <div v-if="passoPublico === 'formulario'" key="formulario" class="w-full rounded-xl border border-default bg-default/90 p-6 shadow-lg backdrop-blur">
+    <div v-else-if="passoPublico === 'formulario'" key="formulario" class="w-full rounded-xl border border-default bg-default/90 p-6 shadow-lg backdrop-blur">
       <header class="mb-5 text-center">
-        <h1 class="text-2xl font-bold text-highlighted">{{ t.publico.titulo }}</h1>
-        <p class="mt-1 text-sm text-muted">{{ t.publico.de(workspace.name) }}</p>
+        <h1 class="text-2xl font-bold text-highlighted">{{ f.nome }}</h1>
+        <p class="mt-1 text-sm text-toned">{{ t.publico.de(workspace.name) }}</p>
       </header>
 
       <UAlert v-if="modoTeste" icon="i-lucide-flask-conical" color="warning" variant="subtle" :title="t.teste.faixa" class="mb-4" />
       <UAlert v-if="fechado" icon="i-lucide-lock" color="neutral" variant="subtle" :title="t.teste.naoAberto" class="mb-4" />
+      <UAlert
+        v-else-if="pausadoPelaEquipe"
+        icon="i-lucide-lock"
+        color="neutral"
+        variant="subtle"
+        :title="t.publico.linkPausadoTitulo"
+        :description="t.publico.linkPausadoTexto"
+        class="mb-4"
+      />
       <UAlert
         v-else-if="pausado"
         icon="i-lucide-octagon-pause"
@@ -163,17 +194,20 @@ const opcoesDeTestemunha = campo('testemunhas').opcoes!.map(v => ({ value: v, la
         class="mb-4"
       />
 
+      <!-- Só com respostas anônimas -->
+      <template v-if="f.respostasAnonimas">
       <UAlert icon="i-lucide-venetian-mask" color="info" variant="subtle" :title="t.publico.anonimoTitulo" :description="t.publico.anonimoTexto" class="mb-2" />
       <UCollapsible class="mb-5">
         <UButton :label="t.publico.comoProtegemos" trailing-icon="i-lucide-chevron-down" color="info" variant="link" size="sm" class="group px-0" :ui="{ trailingIcon: 'transition-transform duration-200 group-data-[state=open]:rotate-180' }" />
         <template #content>
           <ul class="mt-1 flex flex-col gap-1.5 rounded-lg bg-elevated/60 p-3">
-            <li v-for="p in t.publico.protegemos" :key="p" class="flex items-start gap-2 text-xs text-toned">
+            <li v-for="p in protegemos" :key="p" class="flex items-start gap-2 text-xs text-toned">
               <UIcon name="i-lucide-check" class="mt-0.5 size-3.5 shrink-0 text-success" />{{ p }}
             </li>
           </ul>
         </template>
       </UCollapsible>
+      </template>
 
       <form class="flex flex-col gap-4" novalidate @submit.prevent="enviar">
         <div class="grid gap-4 sm:grid-cols-2">
@@ -211,8 +245,8 @@ const opcoesDeTestemunha = campo('testemunhas').opcoes!.map(v => ({ value: v, la
           />
         </UFormField>
 
-        <!-- Aviso por e-mail, opcional -->
-        <div v-if="formularioDoCanal.oferecerAvisoPorEmail" class="rounded-lg border border-default p-3">
+        <!-- Aviso por e-mail, opcional (só com acompanhamento) -->
+        <div v-if="ofereceAviso" class="rounded-lg border border-default p-3">
           <p class="mb-2 text-sm font-medium text-highlighted">{{ t.publico.avisoTitulo }} <span class="font-normal text-muted">{{ t.publico.opcional }}</span></p>
           <UCheckbox v-model="querAviso" :label="t.publico.avisoCheck" :disabled="pausado" />
           <Transition
@@ -267,32 +301,33 @@ const opcoesDeTestemunha = campo('testemunhas').opcoes!.map(v => ({ value: v, la
         />
       </form>
 
-      <p class="mt-5 text-center text-sm text-muted">
-        {{ t.publico.jaFez }}
+      <p v-if="f.acompanhamento" class="mt-5 text-center text-sm text-toned">
+        {{ t.publico.jaRespondeu }}
         <UButton :label="t.publico.acompanhe" variant="link" size="sm" class="px-1" @click="ir('acompanhar')" />
       </p>
     </div>
 
-    <!-- Recebida: protocolo, senha e comprovante -->
-    <div v-else key="recebida" class="w-full rounded-xl border border-default bg-default/90 p-6 shadow-lg backdrop-blur">
+    <!-- Enviada: com acompanhamento, protocolo, senha e comprovante -->
+    <div v-else key="enviada" class="w-full rounded-xl border border-default bg-default/90 p-6 shadow-lg backdrop-blur">
       <div class="flex flex-col items-center text-center">
         <span class="flex size-14 items-center justify-center rounded-full bg-success/15 animate-[entrada_.4s_ease-out]">
           <UIcon name="i-lucide-check" class="size-7 text-success" />
         </span>
-        <h1 class="mt-3 text-2xl font-bold text-highlighted">{{ t.publico.recebida.titulo }}</h1>
+        <h1 class="mt-3 text-2xl font-bold text-highlighted">{{ t.publico.enviada.titulo }}</h1>
         <!-- O texto vem do formulário (retorno automático) ou do nó do fluxo (retorno pelo Spaceflow). -->
-        <p class="mt-2 max-w-md text-sm text-toned">{{ ultimoEnvio ? textoDeRecebimento(ultimoEnvio.protocolo, ultimoEnvio.retornoAte) : formularioDoCanal.mensagemDeConfirmacao }}</p>
-        <p class="mt-1 text-sm font-medium text-highlighted">{{ t.publico.recebida.retornoAte(retornoAte) }}</p>
+        <p class="mt-2 max-w-md text-sm text-toned">{{ ultimoEnvio?.acompanhamento ? textoDeRecebimento(ultimoEnvio.protocolo, ultimoEnvio.retornoAte) : t.publico.enviada.obrigado }}</p>
+        <p v-if="ultimoEnvio?.acompanhamento" class="mt-1 text-sm font-medium text-highlighted">{{ t.publico.enviada.retornoAte(retornoAte) }}</p>
       </div>
 
-      <div v-if="ultimoEnvio" class="mt-5 grid gap-3 sm:grid-cols-2">
+      <template v-if="ultimoEnvio?.acompanhamento">
+      <div class="mt-5 grid gap-3 sm:grid-cols-2">
         <div class="rounded-lg border border-default p-3">
-          <p class="text-xs text-muted">{{ t.publico.recebida.protocolo }}</p>
+          <p class="text-xs text-muted">{{ t.publico.enviada.protocolo }}</p>
           <div class="mt-1 flex items-center justify-between gap-2">
             <span class="font-mono text-lg font-semibold tracking-wide text-highlighted">{{ ultimoEnvio.protocolo }}</span>
             <UButton
               :icon="copiado === 'protocolo' ? 'i-lucide-check' : 'i-lucide-copy'"
-              :label="copiado === 'protocolo' ? t.publico.recebida.copiado : t.publico.recebida.copiar"
+              :label="copiado === 'protocolo' ? t.publico.enviada.copiado : t.publico.enviada.copiar"
               color="neutral"
               variant="outline"
               size="xs"
@@ -301,7 +336,7 @@ const opcoesDeTestemunha = campo('testemunhas').opcoes!.map(v => ({ value: v, la
           </div>
         </div>
         <div class="rounded-lg border border-default p-3">
-          <p class="text-xs text-muted">{{ t.publico.recebida.senha }}</p>
+          <p class="text-xs text-muted">{{ t.publico.enviada.senha }}</p>
           <div class="mt-1 flex items-center justify-between gap-2">
             <span class="font-mono text-lg font-semibold tracking-wide text-highlighted">{{ mostrarSenha ? ultimoEnvio.senha : '••••-••••-••••' }}</span>
             <span class="flex gap-1">
@@ -310,12 +345,12 @@ const opcoesDeTestemunha = campo('testemunhas').opcoes!.map(v => ({ value: v, la
                 color="neutral"
                 variant="ghost"
                 size="xs"
-                :aria-label="mostrarSenha ? t.publico.recebida.ocultar : t.publico.recebida.mostrar"
+                :aria-label="mostrarSenha ? t.publico.enviada.ocultar : t.publico.enviada.mostrar"
                 @click="mostrarSenha = !mostrarSenha"
               />
               <UButton
                 :icon="copiado === 'senha' ? 'i-lucide-check' : 'i-lucide-copy'"
-                :label="copiado === 'senha' ? t.publico.recebida.copiado : t.publico.recebida.copiar"
+                :label="copiado === 'senha' ? t.publico.enviada.copiado : t.publico.enviada.copiar"
                 color="neutral"
                 variant="outline"
                 size="xs"
@@ -326,17 +361,20 @@ const opcoesDeTestemunha = campo('testemunhas').opcoes!.map(v => ({ value: v, la
         </div>
       </div>
 
-      <UAlert icon="i-lucide-key-round" color="warning" variant="subtle" :title="t.publico.recebida.avisoSenha" class="mt-4" />
-      <p v-if="avisoPedido" class="mt-3 flex items-center gap-2 text-xs text-muted">
-        <UIcon name="i-lucide-mail-check" class="size-4 text-success" />{{ t.publico.recebida.emailEnviado }}
+      <UAlert icon="i-lucide-key-round" color="warning" variant="subtle" :title="t.publico.enviada.avisoSenha" class="mt-4" />
+      <p v-if="avisoPedido" class="mt-3 flex items-center gap-2 text-xs text-toned">
+        <UIcon name="i-lucide-mail-check" class="size-4 text-success" />{{ t.publico.enviada.emailEnviado }}
       </p>
+      </template>
 
       <div class="mt-5 flex flex-col gap-3">
-        <UButton icon="i-lucide-download" :label="t.publico.recebida.baixar" color="neutral" variant="outline" block @click="baixarComprovante" />
-        <UCheckbox v-model="guardou" :label="t.publico.recebida.guardei" />
-        <UButton icon="i-lucide-inbox" :label="t.publico.recebida.acompanhar" block :disabled="!guardou" @click="ir('acompanhar')" />
+        <template v-if="ultimoEnvio?.acompanhamento">
+          <UButton icon="i-lucide-download" :label="t.publico.enviada.baixar" color="neutral" variant="outline" block @click="baixarComprovante" />
+          <UCheckbox v-model="guardou" :label="t.publico.enviada.guardei" />
+          <UButton icon="i-lucide-inbox" :label="t.publico.enviada.acompanhar" block :disabled="!guardou" @click="ir('acompanhar')" />
+        </template>
         <UButton v-if="ultimoEnvio && denuncias.find(x => x.data.protocolo === ultimoEnvio!.protocolo)?.teste" icon="i-lucide-arrow-left-to-line" :label="t.teste.verNoEnspace" color="warning" variant="soft" block @click="verTesteNoEnspace" />
-        <UButton :label="t.publico.recebida.outra" color="neutral" variant="link" size="sm" class="self-center" @click="novaDenuncia" />
+        <UButton :label="t.publico.enviada.outra" color="neutral" variant="link" size="sm" class="self-center" @click="novaResposta" />
       </div>
     </div>
   </Transition>

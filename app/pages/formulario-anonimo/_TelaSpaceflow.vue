@@ -1,14 +1,14 @@
 <script setup lang="ts">
 /**
  * Configurações › Estrutura › Spaceflow › editor do fluxo "Tratamento de
- * denúncia". Cópia do editor do develop (ev-09, ev-10): barra Editor,
+ * respostas". Cópia do editor do develop (ev-09, ev-10): barra Editor,
  * Execuções, Versões, Comentários e Logs; trilho à esquerda; grade; nós com
  * status OK; zoom e minimapa; o nó abre num modal com Entrada e Saída.
  *
  * PROPOSTA (contorno do andaime):
  *  - Start em "Ações de Itens" ganha o campo Formulário e o quadro "Dados que
  *    o fluxo recebe": o item chega com user = anonymous e sem request_email;
- *  - o nó novo "Responder ao denunciante" escreve no acompanhamento e, se a
+ *  - o nó novo "Responder a quem enviou" escreve no acompanhamento e, se a
  *    pessoa pediu, manda um aviso por e-mail sem conteúdo.
  * O nó de Tarefa e o End ficam como hoje.
  */
@@ -24,8 +24,9 @@ const marca = useMarcaDeProposta()
 const toast = useToast()
 
 interface No { id: string, icone: string, proposta?: boolean }
-/** O nó "Responder ao denunciante" só existe quando o formulário escolheu o retorno pelo Spaceflow. */
-const peloFluxo = computed(() => formularioDoCanal.value.retorno === 'spaceflow')
+/** O nó "Responder a quem enviou" só existe com acompanhamento e retorno pelo Spaceflow. */
+const peloFluxo = computed(() => formularioDoCanal.value.acompanhamento && formularioDoCanal.value.retorno === 'spaceflow')
+const rotulo = (id: string) => id === 'start' ? props.t.spaceflow.start(formularioDoCanal.value.nome) : props.t.spaceflow.nos[id]!
 const nos = computed<No[]>(() => [
   { id: 'start', icone: 'i-lucide-arrow-right-to-line' },
   ...(peloFluxo.value ? [{ id: 'responder', icone: 'i-lucide-message-square-reply', proposta: true }] : []),
@@ -42,11 +43,11 @@ const aberto = computed({
   set: (v) => { if (!v) noAberto.value = null },
 })
 
-/* ---------- nó Responder ao denunciante ---------- */
+/* ---------- nó Responder a quem enviou ---------- */
 
 const config = reactive({
   nome: props.t.spaceflow.nos.responder![0],
-  // A mensagem fica no estado: é ela que o denunciante recebe quando o retorno é pelo fluxo.
+  // A mensagem fica no estado: é ela que quem respondeu recebe quando o retorno é pelo fluxo.
   mensagem: mensagemDoNo.value,
   avisar: true,
 })
@@ -117,7 +118,7 @@ const saida = computed(() => [
 
         <!-- PROPOSTA: com retorno automático, o fluxo não confirma o recebimento -->
         <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-1" leave-active-class="transition duration-150" leave-to-class="opacity-0">
-          <div v-if="!peloFluxo" class="absolute left-6 right-16 top-4 flex flex-wrap items-center gap-3 rounded-lg border border-info/30 bg-default px-3 py-2 shadow-sm" :class="marca">
+          <div v-if="!peloFluxo && formularioDoCanal.acompanhamento" class="absolute left-6 right-16 top-4 flex flex-wrap items-center gap-3 rounded-lg border border-info/30 bg-default px-3 py-2 shadow-sm" :class="marca">
             <UIcon name="i-lucide-zap" class="size-4 text-info" />
             <p class="min-w-0 flex-1 text-xs text-toned">{{ t.spaceflow.retornoAutomatico }}</p>
             <UButton icon="i-lucide-workflow" :label="t.spaceflow.usarRetornoPeloFluxo" color="neutral" variant="outline" size="xs" @click="usarRetornoPeloFluxo" />
@@ -144,10 +145,10 @@ const saida = computed(() => [
                 </span>
                 <span class="min-w-0">
                   <span class="flex items-center gap-1.5 text-base font-semibold text-highlighted">
-                    {{ t.spaceflow.nos[n.id]![0] }}
+                    {{ rotulo(n.id)[0] }}
                     <UBadge v-if="n.proposta" :label="t.spaceflow.novo" color="info" variant="subtle" size="xs" />
                   </span>
-                  <span class="mt-0.5 line-clamp-2 block text-xs text-muted">{{ t.spaceflow.nos[n.id]![1] }}</span>
+                  <span class="mt-0.5 line-clamp-2 block text-xs text-muted">{{ rotulo(n.id)[1] }}</span>
                 </span>
               </span>
               <span class="mt-3 flex items-center gap-1.5 text-xs text-toned"><span class="size-2 rounded-full bg-success" />{{ t.spaceflow.ok }}</span>
@@ -171,7 +172,7 @@ const saida = computed(() => [
         <div class="flex max-h-[85vh] flex-col">
           <header class="flex items-center gap-2 border-b border-default px-5 py-3.5">
             <UIcon name="i-lucide-zap" class="size-4 text-muted" />
-            <h2 class="text-base font-semibold text-highlighted">{{ noAberto ? t.spaceflow.nos[noAberto]![0] : '' }}</h2>
+            <h2 class="text-base font-semibold text-highlighted">{{ noAberto ? rotulo(noAberto)[0] : '' }}</h2>
             <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="sm" class="ml-auto" :aria-label="t.spaceflow.fechar" @click="aberto = false" />
           </header>
 
@@ -202,10 +203,10 @@ const saida = computed(() => [
                 </section>
               </div>
 
-              <!-- Responder ao denunciante (PROPOSTA) -->
+              <!-- Responder a quem enviou (PROPOSTA) -->
               <div v-else-if="noAberto === 'responder'" class="flex flex-col gap-4" :class="marca">
                 <UFormField :label="t.spaceflow.tipoDoNo">
-                  <UInput :model-value="t.spaceflow.responderAoDenunciante" readonly icon="i-lucide-message-square-reply" class="w-full" />
+                  <UInput :model-value="t.spaceflow.responderAQuemEnviou" readonly icon="i-lucide-message-square-reply" class="w-full" />
                 </UFormField>
                 <p class="-mt-2 text-xs text-toned">{{ t.spaceflow.responderAjuda }}</p>
                 <p class="flex items-start gap-1.5 rounded-md bg-info/5 p-2.5 text-xs text-toned"><UIcon name="i-lucide-link" class="mt-0.5 size-3.5 shrink-0 text-info" />{{ t.spaceflow.retornoPeloFluxo }}</p>
@@ -242,7 +243,7 @@ const saida = computed(() => [
               <div v-else-if="noAberto === 'tarefa'" class="flex flex-col gap-4">
                 <p class="flex items-center gap-1.5 rounded-md bg-elevated/60 p-2.5 text-xs text-muted"><UIcon name="i-lucide-info" class="size-3.5" />{{ t.spaceflow.tarefaExistente }}</p>
                 <UFormField :label="t.spaceflow.nomeDaTarefa"><UInput :model-value="t.spaceflow.nos.tarefa![0]" class="w-full" /></UFormField>
-                <UFormField :label="t.spaceflow.responsaveis"><USelect :model-value="'g'" :items="[{ value: 'g', label: t.spaceflow.grupoComite }]" class="w-full" /></UFormField>
+                <UFormField :label="t.spaceflow.responsaveis"><USelect :model-value="'g'" :items="[{ value: 'g', label: t.spaceflow.grupoResponsavel }]" class="w-full" /></UFormField>
               </div>
             </div>
 

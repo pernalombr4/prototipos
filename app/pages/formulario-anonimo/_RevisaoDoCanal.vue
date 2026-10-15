@@ -1,13 +1,16 @@
 <script setup lang="ts">
 /**
- * PROPOSTA: a revisão antes de publicar o canal anônimo, e o aviso de canal
- * publicado.
+ * PROPOSTA: "Conferir anonimato", antes de ativar as respostas anônimas, e o
+ * aviso de anonimato ativo.
  *
- * O formulário sozinho não garante anonimato: um fluxo que manda e-mail para
+ * Ligar a opção sozinha não garante anonimato: um fluxo que manda e-mail para
  * {{request_email}}, uma notificação para o criador, um modelo com {{user.name}}
- * ou um cargo amplo demais desfazem a proposta. A revisão confere a categoria
- * inteira, diz onde está cada ponto e corrige ali mesmo. O que "Impede
- * publicar" trava o botão; o que é "Atenção" não trava.
+ * ou um cargo amplo demais desfazem a proposta. A conferência olha a categoria
+ * inteira, diz onde está cada ponto e corrige ali mesmo. O que "Impede ativar"
+ * trava o botão; o que é "Atenção" não trava.
+ *
+ * Proteção do link e retorno só entram quando o formulário tem essas opções:
+ * respostas anônimas não dependem de acesso sem login, nem de acompanhamento.
  */
 import type { Textos } from './textos'
 import { linkDoFormulario, pontosForaDoFormulario } from './mocks'
@@ -17,10 +20,13 @@ import QrCode from './_QrCode.vue'
 const props = defineProps<{ t: Textos }>()
 
 const {
-  revisaoAberta, publicadoAberto, formularioDoCanal, problemasDoFormulario, resolvidos, bloqueiaPublicar,
-  publicar, modoTeste, passoPublico, ir,
+  revisaoAberta, ativadoAberto, formularioEmRevisao, problemasDoFormulario, resolvidos, bloqueiaAtivar,
+  ativarAnonimato, modoTeste, passoPublico, ir,
 } = useFormularioAnonimo()
 const toast = useToast()
+
+const f = formularioEmRevisao
+const semLogin = computed(() => f.value.visibilidade === 'publico' && f.value.semLogin)
 
 const grupos = ['fluxos', 'notificacoes', 'modelos', 'acesso'] as const
 function pontosDo(grupo: typeof grupos[number]) {
@@ -34,16 +40,16 @@ const bloqueios = computed(() =>
   problemasDoFormulario.value.filter(c => c.risco === 'email' || c.risco === 'membro_logado').length
   + pontosForaDoFormulario.filter(p => p.severidade === 'bloqueia' && !resolvidos.value.includes(p.id)).length)
 
-const publicando = ref(false)
-async function publicarCanal() {
-  if (bloqueiaPublicar.value) return
-  publicando.value = true
+const ativando = ref(false)
+async function ativar() {
+  if (bloqueiaAtivar.value) return
+  ativando.value = true
   await new Promise(r => setTimeout(r, 900))
-  publicando.value = false
-  publicar()
+  ativando.value = false
+  ativarAnonimato()
 }
 
-const link = computed(() => linkDoFormulario(formularioDoCanal.value))
+const link = computed(() => linkDoFormulario(f.value))
 const qr = ref<InstanceType<typeof QrCode> | null>(null)
 
 async function copiar() {
@@ -55,7 +61,7 @@ async function copiar() {
 }
 
 function envioDeTeste() {
-  publicadoAberto.value = false
+  ativadoAberto.value = false
   modoTeste.value = true
   passoPublico.value = 'formulario'
   ir('publico')
@@ -63,8 +69,8 @@ function envioDeTeste() {
 </script>
 
 <template>
-  <!-- Revisão -->
-  <USlideover v-model:open="revisaoAberta" :title="t.revisao.titulo" :description="t.revisao.subtitulo" side="right" :ui="{ content: 'max-w-2xl' }">
+  <!-- Conferência -->
+  <USlideover v-model:open="revisaoAberta" :title="`${t.revisao.titulo}: ${f.nome}`" :description="t.revisao.subtitulo" side="right" :ui="{ content: 'max-w-2xl' }">
     <template #body>
       <div class="flex flex-col gap-5">
         <!-- Formulário -->
@@ -119,44 +125,48 @@ function envioDeTeste() {
           </TransitionGroup>
         </section>
 
-        <!-- Já configurado -->
+        <!-- O que já está configurado no formulário -->
         <section class="grid gap-2 sm:grid-cols-2">
-          <div class="rounded-md border border-default p-3">
+          <div v-if="semLogin" class="rounded-md border border-default p-3">
             <p class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-toned"><UIcon name="i-lucide-circle-check" class="size-3.5 text-success" />{{ t.revisao.grupos.protecao }}</p>
-            <p class="mt-1 text-xs text-highlighted">{{ t.revisao.protecaoOk(formularioDoCanal.limitePorHora, formularioDoCanal.limitePorDia) }}</p>
+            <p class="mt-1 text-xs text-highlighted">{{ t.revisao.protecaoOk(f.limitePorHora, f.limitePorDia) }}</p>
           </div>
           <div class="rounded-md border border-default p-3">
-            <p class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-toned"><UIcon name="i-lucide-circle-check" class="size-3.5 text-success" />{{ t.revisao.grupos.retorno }}</p>
-            <p class="mt-1 text-xs text-highlighted">{{ formularioDoCanal.retorno === 'automatico' ? t.revisao.retornoOk(formularioDoCanal.prazoDeRetornoDias) : t.revisao.retornoFluxo(formularioDoCanal.prazoDeRetornoDias) }}</p>
+            <p class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-toned"><UIcon :name="f.acompanhamento ? 'i-lucide-circle-check' : 'i-lucide-circle-minus'" class="size-3.5" :class="f.acompanhamento ? 'text-success' : 'text-muted'" />{{ t.revisao.grupos.retorno }}</p>
+            <p class="mt-1 text-xs text-highlighted">{{ !f.acompanhamento ? t.revisao.semAcompanhamento : f.retorno === 'automatico' ? t.revisao.retornoOk(f.prazoDeRetornoDias) : t.revisao.retornoFluxo(f.prazoDeRetornoDias) }}</p>
           </div>
         </section>
       </div>
     </template>
     <template #footer>
       <div class="flex w-full flex-wrap items-center justify-between gap-3">
-        <p class="flex items-center gap-2 text-sm" :class="bloqueiaPublicar ? 'text-highlighted' : 'text-highlighted'">
-          <UIcon :name="bloqueiaPublicar ? 'i-lucide-octagon-x' : 'i-lucide-shield-check'" class="size-4" :class="bloqueiaPublicar ? 'text-error' : 'text-success'" />
-          {{ bloqueiaPublicar ? t.revisao.faltam(bloqueios) : t.revisao.prontos }}
+        <p class="flex items-center gap-2 text-sm text-highlighted">
+          <UIcon :name="bloqueiaAtivar ? 'i-lucide-octagon-x' : 'i-lucide-shield-check'" class="size-4" :class="bloqueiaAtivar ? 'text-error' : 'text-success'" />
+          {{ bloqueiaAtivar ? t.revisao.faltam(bloqueios) : t.revisao.prontos }}
         </p>
-        <UButton icon="i-lucide-rocket" :label="publicando ? t.revisao.publicando : t.revisao.publicar" :loading="publicando" :disabled="bloqueiaPublicar" @click="publicarCanal" />
+        <UButton icon="i-lucide-venetian-mask" :label="ativando ? t.revisao.ativando : t.revisao.ativar" :loading="ativando" :disabled="bloqueiaAtivar" @click="ativar" />
       </div>
     </template>
   </USlideover>
 
-  <!-- Canal publicado -->
-  <UModal v-model:open="publicadoAberto" :title="t.publicado.titulo" :description="t.publicado.texto" :ui="{ content: 'max-w-lg' }">
+  <!-- Anonimato ativo -->
+  <UModal v-model:open="ativadoAberto" :title="t.ativado.titulo" :description="t.ativado.texto" :ui="{ content: 'max-w-lg' }">
     <template #body>
       <div class="flex flex-col items-center gap-4">
-        <span class="flex size-12 items-center justify-center rounded-full bg-success/15 animate-[entrada_.4s_ease-out]"><UIcon name="i-lucide-rocket" class="size-6 text-success" /></span>
-        <QrCode ref="qr" :texto="formularioDoCanal.identification" :rotulo="t.formulario.anonimato.qrCode" class="size-36" />
-        <UInput :model-value="link" readonly class="w-full" :ui="{ base: 'font-mono text-xs' }" />
-        <div class="flex flex-wrap justify-center gap-2">
-          <UButton icon="i-lucide-copy" :label="t.formulario.anonimato.copiarLink" color="neutral" variant="outline" size="sm" @click="copiar" />
-          <UButton icon="i-lucide-download" :label="t.formulario.anonimato.baixarQr" color="neutral" variant="outline" size="sm" @click="qr?.baixar()" />
-        </div>
-        <USeparator />
-        <UButton icon="i-lucide-flask-conical" :label="t.publicado.teste" block @click="envioDeTeste" />
-        <p class="text-center text-xs text-toned">{{ t.publicado.testeAjuda }}</p>
+        <span class="flex size-12 items-center justify-center rounded-full bg-success/15 animate-[entrada_.4s_ease-out]"><UIcon name="i-lucide-shield-check" class="size-6 text-success" /></span>
+        <!-- O link só entra aqui quando o formulário abre sem login. -->
+        <template v-if="semLogin">
+          <QrCode ref="qr" :texto="f.identification" :rotulo="t.formulario.link.qrCode" class="size-36" />
+          <UInput :model-value="link" readonly class="w-full" :ui="{ base: 'font-mono text-xs' }" />
+          <div class="flex flex-wrap justify-center gap-2">
+            <UButton icon="i-lucide-copy" :label="t.formulario.link.copiar" color="neutral" variant="outline" size="sm" @click="copiar" />
+            <UButton icon="i-lucide-download" :label="t.formulario.link.baixarQr" color="neutral" variant="outline" size="sm" @click="qr?.baixar()" />
+          </div>
+          <USeparator />
+          <UButton icon="i-lucide-flask-conical" :label="t.ativado.teste" block @click="envioDeTeste" />
+          <p class="text-center text-xs text-toned">{{ t.ativado.testeAjuda }}</p>
+        </template>
+        <UButton v-else :label="t.ativado.fechar" color="neutral" variant="outline" block @click="ativadoAberto = false" />
       </div>
     </template>
   </UModal>

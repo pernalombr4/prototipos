@@ -59,10 +59,10 @@ export const categoria: ItemType = {
   id: 3101,
   created_at: new Date('2026-08-04T09:00:00-03:00'),
   updated_at: new Date('2026-10-14T16:00:00-03:00'),
-  name: 'Denúncias',
-  slug: 'denuncias',
-  description: 'Relatos recebidos pelo canal de denúncia',
-  icon: 'i-lucide-shield-alert',
+  name: 'Ouvidoria',
+  slug: 'ouvidoria',
+  description: 'Respostas dos canais de escuta: denúncia, avaliação de gestor e feedback',
+  icon: 'i-lucide-ear',
 }
 
 /** As outras categorias do menu lateral (só rótulo: a casca). */
@@ -172,11 +172,11 @@ export const tipoTecnico: Record<string, string> = {
   relato: 'EnTextArea', testemunhas: 'radioButton', anexos: 'uploadFile',
 }
 
-/** PROPOSTA: o modelo "Canal de denúncia", oferecido ao criar um formulário anônimo. */
+/** Os campos do formulário de exemplo, na ordem do construtor. */
 export const MODELO_DO_CANAL = ['tipo', 'area', 'quando', 'envolvidos', 'relato', 'testemunhas', 'anexos']
 
 /* ------------------------------------------------------------------ *
- * O que a revisão do canal confere fora do formulário
+ * O que a conferência de anonimato olha fora do formulário
  * ------------------------------------------------------------------ */
 
 export type Severidade = 'bloqueia' | 'atencao'
@@ -189,12 +189,12 @@ export interface PontoDaRevisao {
 }
 export const pontosForaDoFormulario: PontoDaRevisao[] = [
   { id: 'fluxo-gestor', grupo: 'fluxos', severidade: 'atencao', onde: 'Spaceflow "Aviso ao gestor" › nó E-mail' },
-  { id: 'notif-criador', grupo: 'notificacoes', severidade: 'atencao', onde: 'Denúncias › Notificações › "Nova denúncia"' },
+  { id: 'notif-criador', grupo: 'notificacoes', severidade: 'atencao', onde: 'Ouvidoria › Notificações › "Nova resposta"' },
   { id: 'modelo-confirmacao', grupo: 'modelos', severidade: 'atencao', onde: 'E-mails › Modelos › "Confirmação de registro"' },
   { id: 'cargo-colaborador', grupo: 'acesso', severidade: 'bloqueia', onde: 'Gestão de Membros › Cargos › "Colaborador"' },
 ]
 
-export type Visibilidade = 'privado' | 'publico' | 'anonimo'
+export type Visibilidade = 'privado' | 'publico'
 /** As 6 opções de Tipo do develop (ev-11), na ordem da lista. */
 export const TIPOS_DE_FORMULARIO = ['editar', 'criacao', 'geral', 'visualizar', 'criacao_item', 'tarefas'] as const
 export type TipoDeFormulario = typeof TIPOS_DE_FORMULARIO[number]
@@ -202,7 +202,13 @@ export type Verificacao = 'enspace' | 'turnstile'
 export type ApagarEmail = 'ao_concluir' | 'trinta_dias'
 export type ModoDeRetorno = 'automatico' | 'spaceflow'
 
-/** PROTÓTIPO: forma da tela Formulários do develop + a aba Anonimato (proposta). */
+/**
+ * PROTÓTIPO: forma da tela Formulários do develop (Definição, Visual, Avançado)
+ * mais 3 configurações da proposta, independentes entre si:
+ *  - `semLogin` (Definição, só com Visibilidade Público): o link abre direto;
+ *  - `respostasAnonimas` (Avançado): grava sem identificação de quem respondeu;
+ *  - `acompanhamento` (Avançado, só com respostas anônimas): protocolo e senha.
+ */
 export interface Formulario {
   id: number
   nome: string
@@ -217,12 +223,18 @@ export interface Formulario {
   listaTriagem: boolean
   documentosModelo: boolean
   rascunhos: boolean
-  // Anonimato (PROPOSTA)
+  // PROPOSTA: acesso sem login (Definição) e a proteção do link (Avançado)
+  semLogin: boolean
   verificacao: Verificacao
   limitePorHora: number
   limitePorDia: number
   pausarNoPico: boolean
-  /** PROPOSTA: quem confirma o recebimento. Um ou outro, nunca os 2. */
+  // PROPOSTA: respostas anônimas (Avançado)
+  respostasAnonimas: boolean
+  /** A conferência da categoria passou e o anonimato está valendo. */
+  anonimatoAtivo: boolean
+  acompanhamento: boolean
+  /** Quem confirma o recebimento. Um ou outro, nunca os 2. */
   retorno: ModoDeRetorno
   mensagemDeConfirmacao: string
   prazoDeRetornoDias: 30 | 60 | 90
@@ -230,54 +242,89 @@ export interface Formulario {
   apagarEmail: ApagarEmail
 }
 
+const PADRAO: Omit<Formulario, 'id' | 'nome' | 'descricao' | 'tipo' | 'visibilidade' | 'icone' | 'identification' | 'criadoEm'> = {
+  triagem: false,
+  listaTriagem: false,
+  documentosModelo: false,
+  rascunhos: false,
+  semLogin: false,
+  verificacao: 'enspace',
+  limitePorHora: 30,
+  limitePorDia: 200,
+  pausarNoPico: true,
+  respostasAnonimas: false,
+  anonimatoAtivo: false,
+  acompanhamento: false,
+  retorno: 'automatico',
+  mensagemDeConfirmacao: '',
+  prazoDeRetornoDias: 90,
+  oferecerAvisoPorEmail: false,
+  apagarEmail: 'ao_concluir',
+}
+
+/** O id do formulário que a jornada do configurador cria. */
+export const ID_DO_CANAL = 3520
+
 export const formularios: Formulario[] = [
   {
-    id: 3520,
+    ...PADRAO,
+    id: ID_DO_CANAL,
     nome: 'Canal de denúncia',
-    descricao: 'Relato anônimo de conduta, fraude ou assédio',
+    descricao: 'Relato de conduta, fraude ou assédio',
     tipo: 'criacao',
-    visibilidade: 'anonimo',
+    visibilidade: 'publico',
     icone: 'i-lucide-shield-alert',
     identification: 'Qm7XcT2pLw9RkV4sNa8ZbH3uYe6JdF1g',
     criadoEm: dia('2026-08-04'),
-    triagem: false,
-    listaTriagem: false,
-    documentosModelo: false,
-    rascunhos: false,
-    verificacao: 'enspace',
-    limitePorHora: 30,
-    limitePorDia: 200,
-    pausarNoPico: true,
-    retorno: 'automatico',
+    semLogin: true,
+    respostasAnonimas: true,
+    anonimatoAtivo: true,
+    acompanhamento: true,
     mensagemDeConfirmacao: 'Recebemos sua denúncia. O comitê de ética lê todo relato e responde pela página de acompanhamento. Guarde o protocolo e a senha.',
-    prazoDeRetornoDias: 90,
     oferecerAvisoPorEmail: true,
-    apagarEmail: 'ao_concluir',
   },
   {
+    ...PADRAO,
+    id: 3522,
+    nome: 'Avaliação do gestor',
+    descricao: 'Avaliação semestral do gestor pela equipe',
+    tipo: 'criacao',
+    visibilidade: 'privado',
+    icone: 'i-lucide-message-square-heart',
+    identification: 'Tn5vB8xK2qW7mR4cL9pZ3sD6hF1jG0aE',
+    criadoEm: dia('2026-09-01', 9),
+    respostasAnonimas: true,
+    anonimatoAtivo: true,
+  },
+  {
+    ...PADRAO,
     id: 3521,
     nome: 'Triagem do comitê',
-    descricao: 'Classificação interna da denúncia',
+    descricao: 'Classificação interna',
     tipo: 'editar',
     visibilidade: 'privado',
     icone: 'i-lucide-list-checks',
     identification: 'Rk2aW8eQz5LmP0vYt7XcN4bU1sJh9GdF',
     criadoEm: dia('2026-08-04', 11),
-    triagem: false,
-    listaTriagem: false,
-    documentosModelo: false,
     rascunhos: true,
-    verificacao: 'enspace',
-    limitePorHora: 30,
-    limitePorDia: 200,
-    pausarNoPico: true,
-    retorno: 'automatico',
-    mensagemDeConfirmacao: '',
-    prazoDeRetornoDias: 90,
-    oferecerAvisoPorEmail: false,
-    apagarEmail: 'ao_concluir',
   },
 ]
+
+/** O formulário em branco do "Criar +": Tipo Geral e Visibilidade Privado, como no develop (ev-11). */
+export function formularioEmBranco(): Formulario {
+  return {
+    ...PADRAO,
+    id: ID_DO_CANAL,
+    nome: '',
+    descricao: '',
+    tipo: 'geral',
+    visibilidade: 'privado',
+    icone: 'i-lucide-file-text',
+    identification: 'Qm7XcT2pLw9RkV4sNa8ZbH3uYe6JdF1g',
+    criadoEm: new Date(),
+    mensagemDeConfirmacao: 'Recebemos sua resposta. Guarde o protocolo e a senha para acompanhar o retorno.',
+  }
+}
 
 /** O endereço fixo do formulário: o mesmo de hoje, sem o Acesso Externo na frente. */
 export function linkDoFormulario(f: Formulario) {
@@ -320,8 +367,8 @@ export interface Denuncia extends Item {
 export interface Mensagem {
   id: number
   itemId: number
-  autor: 'sistema' | 'denunciante' | 'comite'
-  /** Membro que respondeu. O denunciante vê só "Comitê de ética". */
+  autor: 'sistema' | 'pessoa' | 'equipe'
+  /** Membro que respondeu. Quem respondeu ao formulário vê só "Equipe". */
   membro?: number
   texto: string
   quando: Date
@@ -333,7 +380,7 @@ const ALFABETO = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
 /** Protocolo curto para citar numa conversa; não abre nada sozinho. */
 export function novoProtocolo(semente = Math.random) {
   const n = () => Math.floor(semente() * 9000 + 1000)
-  return `DEN-${n()}-${n()}`
+  return `OUV-${n()}-${n()}`
 }
 
 /** Senha de 12 caracteres sem letra ambígua (sem I, L, O, 0 e 1). */
@@ -352,7 +399,7 @@ function sementeFixa(s: number) {
 
 function referencia(n: number) {
   const r = sementeFixa(n * 7919)
-  return `DEN${Array.from({ length: 29 }, () => '0123456789ABCDEF'[Math.floor(r() * 16)]).join('')}`
+  return `OUV${Array.from({ length: 29 }, () => '0123456789ABCDEF'[Math.floor(r() * 16)]).join('')}`
 }
 
 interface Semente {
@@ -443,15 +490,15 @@ export const mensagens: Mensagem[] = denuncias.flatMap((d) => {
   const extra: Omit<Mensagem, 'id' | 'itemId'>[] = []
   if (d.id === EXEMPLO.id) {
     extra.push(
-      { autor: 'comite', membro: 62, texto: 'Obrigado pelo relato. Abrimos uma verificação com a manutenção. Você lembra se o pedido de conserto tinha número?', quando: dia('2026-10-13', 11) },
-      { autor: 'denunciante', texto: 'Era o chamado MAN-2291. Fecharam dizendo que estava resolvido, mas o alarme continua sem funcionar.', quando: dia('2026-10-14', 8) },
+      { autor: 'equipe', membro: 62, texto: 'Obrigado pelo relato. Abrimos uma verificação com a manutenção. Você lembra se o pedido de conserto tinha número?', quando: dia('2026-10-13', 11) },
+      { autor: 'pessoa', texto: 'Era o chamado MAN-2291. Fecharam dizendo que estava resolvido, mas o alarme continua sem funcionar.', quando: dia('2026-10-14', 8) },
     )
   }
   if (d.data.situacao === 'aguardando') {
-    extra.push({ autor: 'comite', membro: d.data.responsavel ?? 61, texto: 'Precisamos de mais detalhes para seguir. Você pode dizer em que semana isso aconteceu e se há algum documento?', quando: somarDias(d.created_at, 3) })
+    extra.push({ autor: 'equipe', membro: d.data.responsavel ?? 61, texto: 'Precisamos de mais detalhes para seguir. Você pode dizer em que semana isso aconteceu e se há algum documento?', quando: somarDias(d.created_at, 3) })
   }
   if (d.data.situacao === 'concluida') {
-    extra.push({ autor: 'comite', membro: d.data.responsavel ?? 61, texto: 'Concluímos a apuração e as medidas foram tomadas. Obrigado por ajudar a melhorar a empresa.', quando: somarDias(d.created_at, 20) })
+    extra.push({ autor: 'equipe', membro: d.data.responsavel ?? 61, texto: 'Concluímos a apuração e as medidas foram tomadas. Obrigado por ajudar a melhorar a empresa.', quando: somarDias(d.created_at, 20) })
   }
   return mensagensDe(d, extra)
 })
@@ -495,8 +542,8 @@ export interface EmailAutomatico {
 
 /** O aviso ao denunciante aparece aqui sem o endereço. */
 export const emailsAutomaticos: EmailAutomatico[] = mensagens
-  .filter(m => m.autor !== 'denunciante' && denuncias.find(d => d.id === m.itemId)?.data.aviso_por_email)
-  .map((m, i) => ({ id: 7000 + i, itemId: m.itemId, criadoEm: m.quando, status: 'enviado', assunto: m.autor === 'sistema' ? 'Recebemos sua denúncia' : 'Há uma atualização na sua denúncia' }))
+  .filter(m => m.autor !== 'pessoa' && denuncias.find(d => d.id === m.itemId)?.data.aviso_por_email)
+  .map((m, i) => ({ id: 7000 + i, itemId: m.itemId, criadoEm: m.quando, status: 'enviado', assunto: m.autor === 'sistema' ? 'Recebemos sua resposta' : 'Há uma atualização na sua resposta' }))
 
 /* ------------------------------------------------------------------ *
  * Volume do formulário (painel de proteção)

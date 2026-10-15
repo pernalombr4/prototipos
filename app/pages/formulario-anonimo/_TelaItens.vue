@@ -1,11 +1,12 @@
 <script setup lang="ts">
 /**
- * Categorias › Denúncias. Cópia da "Nova Visualização de Itens" do develop
+ * Categorias › Ouvidoria. Cópia da "Nova Visualização de Itens" do develop
  * (abas Itens/Visualizar, busca, período, ícones, Novo registro) sobre o `EnTable`.
  *
- * O que muda é só o dado: a categoria é de denúncias e toda linha veio do
- * formulário anônimo. A tabela não ganha coluna de criador (o develop já não
- * oferece). Clicar na linha abre o painel do item (`_PainelDaDenuncia`).
+ * O que muda é o dado (as linhas vieram do formulário com respostas anônimas)
+ * e, quando o formulário abre sem login, a faixa do link. A tabela não ganha
+ * coluna de criador (o develop já não oferece). Clicar na linha abre o painel
+ * do item (`_PainelDaDenuncia`).
  */
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
@@ -17,21 +18,17 @@ import PainelDaDenuncia from './_PainelDaDenuncia.vue'
 const props = defineProps<{ t: Textos }>()
 
 const idioma = useIdioma()
-const { listaDoComite, itemAberto, abaDoItem, canalCriado, canalPublicado, revisaoAberta, formularioDoCanal, inicioDoCanal, ir } = useFormularioAnonimo()
+const { listaDaCategoria, itemAberto, abaDoItem, canalCriado, linkPausado: pausado, formularioDoCanal, inicioDoCanal, ir } = useFormularioAnonimo()
 const marca = useMarcaDeProposta()
 
-/* ---------- PROPOSTA: a faixa do canal anônimo ---------- */
+/* ---------- PROPOSTA: a faixa do link sem login ---------- */
 
-const pausado = useState<boolean>('fa-canal-pausado', () => false)
-const aceitasHoje = computed(() => listaDoComite.value.filter(d => !d.teste && +d.created_at >= +new Date(HOJE.getFullYear(), HOJE.getMonth(), HOJE.getDate())).length)
-// Canal criado na jornada do configurador: ainda não houve envio barrado.
+const semLogin = computed(() => canalCriado.value && formularioDoCanal.value.visibilidade === 'publico' && formularioDoCanal.value.semLogin)
+const aceitasHoje = computed(() => listaDaCategoria.value.filter(d => !d.teste && +d.created_at >= +new Date(HOJE.getFullYear(), HOJE.getMonth(), HOJE.getDate())).length)
+// Formulário criado na jornada do configurador: ainda não houve envio barrado.
 const barradas = computed(() => (inicioDoCanal.value ? 0 : volume24h.reduce((s, h) => s + h.barrados, 0)).toLocaleString(idioma.value))
 function verProtecao() {
-  ir('formularios', { formulario: formularioDoCanal.value.id, abaDoFormulario: 'anonimato' })
-}
-function revisarEPublicar() {
-  ir('construtor')
-  setTimeout(() => (revisaoAberta.value = true), 250)
+  ir('formularios', { formulario: formularioDoCanal.value.id, abaDoFormulario: 'avancado' })
 }
 const busca = ref('')
 const pagina = ref(1)
@@ -39,8 +36,8 @@ const POR_PAGINA = 15
 
 const filtrados = computed(() => {
   const q = busca.value.trim().toLowerCase()
-  if (!q) return listaDoComite.value
-  return listaDoComite.value.filter(d => d.reference.toLowerCase().includes(q) || d.data.protocolo.toLowerCase().includes(q) || d.data.relato.toLowerCase().includes(q))
+  if (!q) return listaDaCategoria.value
+  return listaDaCategoria.value.filter(d => d.reference.toLowerCase().includes(q) || d.data.protocolo.toLowerCase().includes(q) || d.data.relato.toLowerCase().includes(q))
 })
 watch(busca, () => (pagina.value = 1))
 const daPagina = computed(() => filtrados.value.slice((pagina.value - 1) * POR_PAGINA, pagina.value * POR_PAGINA))
@@ -92,7 +89,7 @@ const colunas = computed<EnTableColumn[]>(() => [
   { key: 'mensagens', label: props.t.itens.col.mensagens },
 ])
 
-function abrir(id: number, aba: 'visao' | 'canal' = 'visao') {
+function abrir(id: number, aba: 'visao' | 'conversa' = 'visao') {
   abaDoItem.value = aba
   itemAberto.value = id
 }
@@ -100,7 +97,7 @@ function abrir(id: number, aba: 'visao' | 'canal' = 'visao') {
 function menuDaLinha(id: number): DropdownMenuItem[][] {
   return [[
     { label: props.t.itens.verDetalhes, icon: 'i-lucide-eye', onSelect: () => abrir(id) },
-    { label: props.t.item.abas.canal, icon: 'i-lucide-messages-square', onSelect: () => abrir(id, 'canal') },
+    { label: props.t.item.abas.conversa, icon: 'i-lucide-messages-square', onSelect: () => abrir(id, 'conversa') },
   ]]
 }
 </script>
@@ -127,23 +124,21 @@ function menuDaLinha(id: number): DropdownMenuItem[][] {
       </div>
     </div>
 
-    <!-- PROPOSTA: a faixa do canal anônimo -->
-    <div v-if="canalCriado" class="flex flex-wrap items-center gap-3 border-b border-default px-4 py-2 text-sm" :class="[canalPublicado && !pausado ? 'bg-info/5' : 'bg-warning/10', marca]">
-      <UIcon :name="!canalPublicado ? 'i-lucide-circle-dashed' : pausado ? 'i-lucide-circle-pause' : 'i-lucide-venetian-mask'" class="size-4" :class="canalPublicado && !pausado ? 'text-info' : 'text-warning'" />
-      <span class="font-medium text-highlighted">{{ !canalPublicado ? t.monitor.naoPublicado : pausado ? t.monitor.pausado : t.monitor.ativo }}</span>
-      <span v-if="canalPublicado && !pausado" class="text-toned">{{ t.monitor.hoje(aceitasHoje, barradas) }}</span>
+    <!-- PROPOSTA: a faixa do link sem login -->
+    <div v-if="semLogin" class="flex flex-wrap items-center gap-3 border-b border-default px-4 py-2 text-sm" :class="[pausado ? 'bg-warning/10' : 'bg-elevated/50', marca]">
+      <UIcon :name="pausado ? 'i-lucide-circle-pause' : 'i-lucide-link'" class="size-4" :class="pausado ? 'text-warning' : 'text-toned'" />
+      <span class="font-medium text-highlighted">{{ pausado ? t.monitor.pausado : `${t.monitor.link}: ${formularioDoCanal.nome}` }}</span>
+      <UBadge v-if="formularioDoCanal.respostasAnonimas" :label="t.categoria.seloAnonimas" icon="i-lucide-venetian-mask" color="info" variant="subtle" size="sm" />
+      <span v-if="!pausado" class="text-toned">{{ t.monitor.hoje(aceitasHoje, barradas) }}</span>
       <span class="ml-auto flex flex-wrap gap-2">
-        <template v-if="canalPublicado">
-          <UButton :icon="pausado ? 'i-lucide-play' : 'i-lucide-pause'" :label="pausado ? t.monitor.retomar : t.monitor.pausar" color="neutral" variant="outline" size="xs" @click="pausado = !pausado" />
-          <UButton icon="i-lucide-shield-check" :label="t.monitor.protecao" color="neutral" variant="outline" size="xs" @click="verProtecao" />
-        </template>
-        <UButton v-else icon="i-lucide-list-checks" :label="t.monitor.publicar" size="xs" @click="revisarEPublicar" />
+        <UButton :icon="pausado ? 'i-lucide-play' : 'i-lucide-pause'" :label="pausado ? t.monitor.retomar : t.monitor.pausar" color="neutral" variant="outline" size="xs" @click="pausado = !pausado" />
+        <UButton icon="i-lucide-shield-check" :label="t.monitor.protecao" color="neutral" variant="outline" size="xs" @click="verProtecao" />
       </span>
     </div>
 
-    <!-- Vazio: ainda não chegou denúncia -->
+    <!-- Vazio: ainda não chegou resposta -->
     <UEmpty
-      v-if="!listaDoComite.length"
+      v-if="!listaDaCategoria.length"
       icon="i-lucide-shield-alert"
       :title="t.itens.vazioTitulo"
       :description="t.itens.vazioTexto"

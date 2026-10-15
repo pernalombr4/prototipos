@@ -6,19 +6,19 @@
  * tracejados e "Adicionar Novo Bloco.", que abre "Adicionar campo" com a lista
  * "[tipo] - Nome" e "+ Novo".
  *
- * PROPOSTA (contorno do andaime):
+ * PROPOSTA (contorno do andaime), só com "Respostas anônimas" ligada:
  *  - a coluna "Verificação de anonimato", que confere cada bloco enquanto o
  *    configurador monta e diz como corrigir;
- *  - na lista "Adicionar campo", o selo "Identifica quem envia";
- *  - no topo, "Anonimato e proteção" e "Revisar e publicar canal".
+ *  - na lista "Adicionar campo", o selo "Identifica quem responde";
+ *  - no topo, os selos das configurações e "Conferir anonimato".
  */
 import type { Textos } from './textos'
-import { type CampoComRisco, MODELO_DO_CANAL, campos, camposComRisco, categoria, tipoTecnico } from './mocks'
+import { type CampoComRisco, campos, camposComRisco, categoria, tipoTecnico } from './mocks'
 import { useFormularioAnonimo, useMarcaDeProposta } from './estado'
 
 const props = defineProps<{ t: Textos }>()
 
-const { formularioDoCanal, blocos, canalPublicado, problemasDoFormulario, revisaoAberta, listaDoComite, ir } = useFormularioAnonimo()
+const { formularioDoCanal, blocos, emRevisao, listaDaCategoria, abrirConferencia, ir } = useFormularioAnonimo()
 const marca = useMarcaDeProposta()
 const toast = useToast()
 const idioma = useIdioma()
@@ -42,7 +42,7 @@ watch(escolhido, (id) => {
   if (!id) return
   blocos.value = [...blocos.value, id]
   const c = campoPorId(id)
-  if (c.risco) toast.add({ title: props.t.construtor.avisoAoAdicionar(c.nome), icon: 'i-lucide-venetian-mask', color: 'warning' })
+  if (c.risco && anonimas.value) toast.add({ title: props.t.construtor.avisoAoAdicionar(c.nome), icon: 'i-lucide-venetian-mask', color: 'warning' })
   escolhido.value = undefined
   adicionando.value = false
 })
@@ -51,11 +51,21 @@ function remover(id: string) {
   blocos.value = blocos.value.filter(b => b !== id)
 }
 
-const respostas = computed(() => listaDoComite.value.filter(d => d.form === formularioDoCanal.value.id && !d.teste).length)
+const anonimas = computed(() => formularioDoCanal.value.respostasAnonimas)
+const semLogin = computed(() => formularioDoCanal.value.visibilidade === 'publico' && formularioDoCanal.value.semLogin)
+/** A verificação do construtor olha sempre os blocos deste formulário. */
+const problemasDoFormulario = computed(() => anonimas.value ? camposComRisco.filter(c => blocos.value.includes(c.refId)) : [])
+
+const respostas = computed(() => listaDaCategoria.value.filter(d => d.form === formularioDoCanal.value.id && !d.teste).length)
 const formato = computed(() => new Intl.DateTimeFormat(idioma.value, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }))
 
-function abrirAnonimato() {
-  ir('formularios', { formulario: formularioDoCanal.value.id, abaDoFormulario: 'anonimato' })
+function abrirConfiguracoes() {
+  ir('formularios', { formulario: formularioDoCanal.value.id, abaDoFormulario: 'avancado' })
+}
+
+function conferir() {
+  emRevisao.value = formularioDoCanal.value.id
+  abrirConferencia(formularioDoCanal.value.id)
 }
 </script>
 
@@ -71,17 +81,20 @@ function abrirAnonimato() {
       <div class="flex flex-wrap items-center gap-2">
         <UButton icon="i-lucide-arrow-left" color="neutral" variant="ghost" size="xs" :aria-label="t.casca.voltar" @click="ir('formularios')" />
         <h2 class="text-lg font-semibold text-highlighted">{{ formularioDoCanal.nome }}</h2>
-        <UBadge :label="t.categoria.visibilidades.anonimo" icon="i-lucide-venetian-mask" color="info" variant="subtle" size="sm" />
+        <UBadge :label="t.categoria.visibilidades[formularioDoCanal.visibilidade]" :color="formularioDoCanal.visibilidade === 'publico' ? 'warning' : 'success'" variant="subtle" size="sm" />
+        <UBadge v-if="semLogin" :label="t.categoria.seloSemLogin" icon="i-lucide-link" color="neutral" variant="outline" size="sm" :class="marca" />
         <UBadge
-          :label="canalPublicado ? t.construtor.publicado : t.construtor.naoPublicado"
-          :color="canalPublicado ? 'success' : 'neutral'"
-          variant="outline"
+          v-if="anonimas"
+          :label="formularioDoCanal.anonimatoAtivo ? t.construtor.seloAtivo : t.construtor.seloPendente"
+          icon="i-lucide-venetian-mask"
+          :color="formularioDoCanal.anonimatoAtivo ? 'info' : 'warning'"
+          variant="subtle"
           size="sm"
           :class="marca"
         />
         <span class="ml-auto flex flex-wrap items-center gap-2" :class="marca">
-          <UButton icon="i-lucide-shield-check" :label="t.construtor.anonimatoEProtecao" color="neutral" variant="outline" size="sm" @click="abrirAnonimato" />
-          <UButton icon="i-lucide-list-checks" :label="t.construtor.revisarEPublicar" size="sm" @click="revisaoAberta = true" />
+          <UButton icon="i-lucide-sliders-horizontal" :label="t.construtor.configuracoes" color="neutral" variant="outline" size="sm" @click="abrirConfiguracoes" />
+          <UButton v-if="anonimas && !formularioDoCanal.anonimatoAtivo" icon="i-lucide-scan-search" :label="t.construtor.conferir" size="sm" @click="conferir" />
         </span>
         <UIcon name="i-lucide-settings" class="size-4 text-muted" />
       </div>
@@ -92,7 +105,7 @@ function abrirAnonimato() {
       <p class="mt-3 text-xs text-toned">{{ t.construtor.atualizadoEm(formato.format(formularioDoCanal.criadoEm)) }}</p>
     </section>
 
-    <div class="grid gap-4 xl:grid-cols-[1fr_20rem]">
+    <div class="grid gap-4" :class="anonimas ? 'xl:grid-cols-[1fr_20rem]' : ''">
       <!-- Construtor (cópia) -->
       <section class="rounded-lg border border-default bg-default p-4">
         <h2 class="text-lg font-semibold text-highlighted">{{ t.construtor.titulo }}</h2>
@@ -111,21 +124,18 @@ function abrirAnonimato() {
           <div v-if="aba === 'construtor'" key="construtor" class="pt-4">
             <USwitch :model-value="false" :label="t.construtor.naoAgrupado" size="sm" disabled class="mb-4" />
 
-            <div v-if="!blocos.length" class="mb-3 flex flex-wrap items-center gap-3 rounded-lg bg-elevated/60 p-3 text-sm text-toned">
-              {{ t.construtor.vazio }}
-              <UButton icon="i-lucide-layout-template" :label="t.construtor.usarModelo" color="neutral" variant="outline" size="xs" :class="marca" @click="blocos = [...MODELO_DO_CANAL]" />
-            </div>
+            <p v-if="!blocos.length" class="mb-3 rounded-lg bg-elevated/60 p-3 text-sm text-toned">{{ t.construtor.vazio }}</p>
 
             <TransitionGroup tag="div" class="grid gap-3 md:grid-cols-2" move-class="transition duration-200" enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 scale-95" leave-active-class="transition duration-150 ease-in absolute" leave-to-class="opacity-0">
               <div
                 v-for="id in blocos"
                 :key="id"
                 class="group relative flex min-h-24 flex-col justify-center gap-1 rounded-xl border-2 border-dashed px-4 py-3 transition-colors"
-                :class="campoPorId(id).risco ? 'border-error/70 bg-error/5' : 'border-accented hover:border-primary/50'"
+                :class="anonimas && campoPorId(id).risco ? 'border-error/70 bg-error/5' : 'border-accented hover:border-primary/50'"
               >
                 <span class="text-sm font-medium text-highlighted">{{ campoPorId(id).nome }}</span>
                 <span class="font-mono text-[11px] text-toned">[{{ campoPorId(id).tipo }}]</span>
-                <UBadge v-if="campoPorId(id).risco" :label="t.construtor.identifica" icon="i-lucide-venetian-mask" color="error" variant="subtle" size="sm" class="mt-1 self-start" :class="marca" />
+                <UBadge v-if="anonimas && campoPorId(id).risco" :label="t.construtor.identifica" icon="i-lucide-venetian-mask" color="error" variant="subtle" size="sm" class="mt-1 self-start" :class="marca" />
                 <UDropdownMenu :items="[[{ label: t.construtor.removerBloco, icon: 'i-lucide-trash-2', color: 'error', onSelect: () => remover(id) }]]" :content="{ align: 'end' }">
                   <UButton icon="i-lucide-settings-2" color="neutral" variant="ghost" size="xs" class="absolute right-2 top-2 opacity-60 transition-opacity group-hover:opacity-100" :aria-label="t.construtor.removerBloco" />
                 </UDropdownMenu>
@@ -144,7 +154,7 @@ function abrirAnonimato() {
                   @update:open="(o: boolean) => { if (!o && !escolhido) adicionando = false }"
                 >
                   <template #item-trailing="{ item }">
-                    <UBadge v-if="(item as { risco: unknown }).risco" :label="t.construtor.identifica" color="error" variant="subtle" size="xs" :class="marca" />
+                    <UBadge v-if="anonimas && (item as { risco: unknown }).risco" :label="t.construtor.identifica" color="error" variant="subtle" size="xs" :class="marca" />
                   </template>
                   <template #content-bottom>
                     <div class="border-t border-default p-1.5"><UBadge :label="t.construtor.novo" color="success" variant="solid" size="sm" /></div>
@@ -165,13 +175,13 @@ function abrirAnonimato() {
                 <span class="h-8 rounded-md border border-default bg-elevated/40" :class="campoPorId(id).tipo === 'EnTextArea' ? 'h-16' : ''" />
               </div>
             </div>
-            <UButton icon="i-lucide-external-link" :label="t.construtor.abrirComoDenunciante" color="neutral" variant="outline" class="self-center" @click="ir('publico')" />
+            <UButton v-if="formularioDoCanal.visibilidade === 'publico'" icon="i-lucide-external-link" :label="t.construtor.abrirComoRespondente" color="neutral" variant="outline" class="self-center" @click="ir('publico')" />
           </div>
         </Transition>
       </section>
 
       <!-- PROPOSTA: verificação de anonimato -->
-      <aside class="h-fit rounded-lg border p-4 xl:sticky xl:top-3" :class="[problemasDoFormulario.length ? 'border-error/40 bg-error/5' : 'border-success/40 bg-success/5', marca]">
+      <aside v-if="anonimas" class="h-fit rounded-lg border p-4 xl:sticky xl:top-3" :class="[problemasDoFormulario.length ? 'border-error/40 bg-error/5' : 'border-success/40 bg-success/5', marca]">
         <h3 class="flex items-center gap-2 text-sm font-semibold text-highlighted">
           <UIcon :name="problemasDoFormulario.length ? 'i-lucide-shield-alert' : 'i-lucide-shield-check'" class="size-4" :class="problemasDoFormulario.length ? 'text-error' : 'text-success'" />
           {{ t.construtor.verificacaoTitulo }}
