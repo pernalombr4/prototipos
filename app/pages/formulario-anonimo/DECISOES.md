@@ -8,6 +8,9 @@
   dia e pausa automática num pico.
 - **O item nasce com o usuário genérico `anonymous`**, como Airtable, ServiceNow e Pipefy. Sem
   `request_email`, sem IP e com a hora cheia. O Log de Auditoria diz "anonymous criou um registro".
+- **A proteção contra robô é técnica, na entrada:** rota pública própria e estreita, chave por visita,
+  verificação sem clique, limites, pausa no pico e fila técnica interna. O que é barrado não vira item e não
+  chega a nenhuma pessoa. A Triagem do formulário não faz parte da proteção e fica desligada no modo anônimo.
 - **O retorno é por protocolo e senha.** A confirmação aparece na tela e fica como 1ª mensagem do
   acompanhamento. O comitê responde pela pasta nova "Canal do denunciante" ou pelo nó novo do Spaceflow,
   "Responder ao denunciante".
@@ -100,3 +103,36 @@ Spaceflow do caso                     Enviar ──► item criado por anonymous
     `UIcon` e utilitários. "canvas grid background" não achou componente de grade.
 - **Ver:** `pnpm dev` › `http://localhost:3000/formulario-anonimo` · publicado em
   `https://pernalombr4.github.io/prototipos/formulario-anonimo/`.
+
+## Rodada 2 · 2026-10-15
+
+- **Pedido (literal):** "analise se realmente o usuario deveria precisar utilizar a triagem ou se a
+  funcionalidade já deveria abarcar um metodo similar. se vc ta usando a triagem só pra evitar exploit pela api,
+  nao é o caminho certo. deev ser uma soluçao com estrategias de segurança."
+- **Análise:** a proposta do chat da rodada 1 pôs a Triagem como última camada contra robô ("fila na Triagem").
+  Esse uso estava errado:
+  - Triagem é aprovação de uma pessoa antes de o envio virar item. Ela não barra nada: o envio do robô chega ao
+    banco como resultado de formulário e vira fila para alguém limpar;
+  - a rota da API continua aberta; o problema de segurança fica onde estava;
+  - no canal de denúncia, quem aprova a triagem lê o relato antes do comitê e pode ser a pessoa citada;
+  - recusar na triagem apaga a denúncia sem caso nem registro, e o registro de toda denúncia é exigido pela
+    Diretiva (UE) 2019/1937, art. 18;
+  - o Spaceflow e a confirmação só andam depois da aprovação.
+- **Mudou:**
+  - Avançado: no modo anônimo, "Enviar Requisição para Triagem?" e "Mostrar na Lista de Formulários Triagem"
+    ficam desligados, com o motivo na tela;
+  - aba Anonimato: o texto dos limites diz que o envio barrado não vai para nenhuma fila de pessoas;
+  - BRIEFING: a Triagem sai de "o que já existe e serve" e fica como "não entra na proposta".
+- **Fronteira:** muda Avançado no modo anônimo e 2 textos; não muda a Triagem nos formulários Privado e Público.
+- **A proteção que fica no lugar** (camadas do lado do servidor; no protótipo, só a configuração aparece):
+  1. borda: limite por IP e teto de tamanho do envio, sem guardar o IP no item;
+  2. rota pública própria, separada da API interna, que só aceita os campos da versão publicada do formulário e
+     devolve só o protocolo;
+  3. chave assinada por visita (formulário, validade de 30 minutos, uso único), emitida quando a página abre;
+  4. verificação de robô sem clique (do ENSPACE ou Turnstile), conferida no servidor;
+  5. limites por formulário (hora e dia) e por workspace, e pausa automática num pico, com aviso ao comitê;
+  6. fila técnica interna: o envio aceito é processado por uma conta de serviço que só cria item naquela
+     categoria, com dedupe e limpeza de anexo. Nenhuma pessoa vê essa fila.
+- **A classificação humana continua existindo, no lugar certo:** a tarefa "Triar denúncia" do Spaceflow, dentro
+  do caso, feita pelo comitê, com o relato já registrado.
+- **Ver:** a mesma URL da rodada 1, Ir para › Formulário, aba Anonimato › aba Avançado.

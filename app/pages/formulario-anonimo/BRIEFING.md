@@ -105,8 +105,9 @@ proposta trata a correção desse achado como pré-requisito.
 
 ### 5.5 O que já existe e serve
 
-- **Triagem:** o envio pode ficar como "resultado de formulário" antes de virar item (Avançado › "Enviar
-  Requisição para Triagem?").
+- **Triagem (não entra na proposta):** o envio pode ficar como "resultado de formulário" até alguém aprovar
+  (Avançado › "Enviar Requisição para Triagem?"). É aprovação humana de negócio, não proteção: o envio do robô
+  ainda chega ao banco e vira trabalho para uma pessoa. No canal anônimo ela fica desligada (rodada 2).
 - **Ticket:** o fim do envio já mostra a referência do item.
 - **Gatilho de Spaceflow:** "Ações de Itens" com Categoria de Referência, Ação de Gatilho (Criação, Atualização,
   Exclusão), Vincular ao Item, Condicionais e Título Dinâmico. Os modos de início são Manual, Ações de Itens,

@@ -111,7 +111,7 @@ const abas = computed<TabsItem[]>(() => [
 
 watch(anonimo, (a) => {
   if (!a && abaDoFormulario.value === 'anonimato') abaDoFormulario.value = 'definicao'
-  if (a && rascunho.value) rascunho.value.rascunhos = false
+  if (a && rascunho.value) Object.assign(rascunho.value, { rascunhos: false, triagem: false, listaTriagem: false })
 })
 
 const tipos = computed(() => (['criacao', 'edicao', 'visualizacao'] as const).map(v => ({ value: v, label: props.t.formulario.tipos[v] })))
@@ -325,11 +325,16 @@ function baixarQr() {
             <!-- Avançado -->
             <template #avancado>
               <div class="flex flex-col gap-5">
-                <UFormField :label="t.formulario.avancado.triagem" :hint="t.formulario.avancado.triagemAjuda">
-                  <USwitch v-model="rascunho.triagem" />
+                <UFormField
+                  :label="t.formulario.avancado.triagem"
+                  :hint="anonimo ? undefined : t.formulario.avancado.triagemAjuda"
+                  :help="anonimo ? t.formulario.avancado.triagemAnonimo : undefined"
+                  :class="anonimo ? marca : ''"
+                >
+                  <USwitch v-model="rascunho.triagem" :disabled="anonimo" />
                 </UFormField>
                 <UFormField :label="t.formulario.avancado.listaTriagem">
-                  <USwitch v-model="rascunho.listaTriagem" />
+                  <USwitch v-model="rascunho.listaTriagem" :disabled="anonimo" />
                 </UFormField>
                 <UFormField :label="t.formulario.avancado.documentosModelo">
                   <USwitch v-model="rascunho.documentosModelo" />
