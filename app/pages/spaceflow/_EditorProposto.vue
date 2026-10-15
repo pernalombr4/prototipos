@@ -35,22 +35,39 @@ const emit = defineEmits<{ abrir: [id: string, comPendencia: boolean], adicionar
 
 const W = 268
 const H = 136
+/** Margem em volta do desenho: espaço para a barra de hover acima do card e para as arestas que voltam. */
+const M = 56
+const px = (no: No) => (no.position?.x ?? 0) + M
+const py = (no: No) => (no.position?.y ?? 0) + M
 
 /* ---------- zoom e rolagem ---------- */
 
 const canvas = ref<HTMLElement | null>(null)
 const zoom = ref(0.8)
 const minimapa = ref(true)
-const largura = computed(() => Math.max(...props.nos.map(n => (n.position?.x ?? 0) + W)) + 160)
-const altura = computed(() => Math.max(...props.nos.map(n => (n.position?.y ?? 0) + H)) + 140)
+const largura = computed(() => Math.max(...props.nos.map(n => px(n) + W)) + M + 60)
+const altura = computed(() => Math.max(...props.nos.map(n => py(n) + H)) + M)
 function mudarZoom(passo: number) {
   zoom.value = Math.min(1.3, Math.max(0.35, Math.round((zoom.value + passo) * 100) / 100))
 }
+/** O fluxo inteiro na tela: largura e altura. Roda ao abrir o editor. */
 function ajustar() {
-  const w = canvas.value?.clientWidth ?? 1200
-  zoom.value = Math.max(0.35, Math.min(1, Math.floor(((w - 40) / largura.value) * 100) / 100))
+  const w = (canvas.value?.clientWidth ?? 1200) - 24
+  const h = (canvas.value?.clientHeight ?? 600) - 24
+  zoom.value = Math.max(0.35, Math.min(1, Math.floor(Math.min(w / largura.value, h / altura.value) * 100) / 100))
   canvas.value?.scrollTo({ left: 0, top: 0, behavior: 'smooth' })
 }
+// Ajusta assim que o canvas tem tamanho de verdade (na hidratação ele ainda pode estar em 0).
+onMounted(() => {
+  if (!canvas.value) return
+  const ro = new ResizeObserver((entradas) => {
+    if (entradas[0]!.contentRect.width > 0) {
+      ajustar()
+      ro.disconnect()
+    }
+  })
+  ro.observe(canvas.value)
+})
 
 /* ---------- saídas e arestas ---------- */
 
@@ -59,22 +76,39 @@ function saidasDe(no: No) {
 }
 function ySaida(no: No, handle?: string) {
   const s = saidasDe(no)
-  const y0 = no.position?.y ?? 0
+  const y0 = py(no)
   if (!s.length || !handle) return y0 + 52
   const idx = Math.max(0, s.findIndex(x => x.id === handle))
   return y0 + 34 + idx * 26
 }
-const linhas = computed(() => props.arestas.map((a) => {
-  const de = props.nos.find(n => n.id === a.source)
-  const para = props.nos.find(n => n.id === a.target)
-  if (!de || !para) return null
-  const x1 = (de.position?.x ?? 0) + W
-  const y1 = ySaida(de, a.sourceHandle)
-  const x2 = para.position?.x ?? 0
-  const y2 = (para.position?.y ?? 0) + 52
-  const dx = Math.max(60, (x2 - x1) / 2)
-  return { id: a.id, d: `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}` }
-}).filter(Boolean) as { id: string, d: string }[])
+const linhas = computed(() => {
+  let voltas = 0
+  return props.arestas.map((a) => {
+    const de = props.nos.find(n => n.id === a.source)
+    const para = props.nos.find(n => n.id === a.target)
+    if (!de || !para) return null
+    const x1 = px(de) + W
+    const y1 = ySaida(de, a.sourceHandle)
+    const x2 = px(para)
+    const y2 = py(para) + 52
+    if (x2 > x1 + 20) {
+      const dx = Math.max(60, (x2 - x1) / 2)
+      return { id: a.id, d: `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}` }
+    }
+    // Aresta que volta (da faixa de cima para a de baixo): cotovelo pelo corredor entre as faixas.
+    const corredor = M + 520 + (voltas++) * 18
+    const r = 12
+    return {
+      id: a.id,
+      d: [
+        `M ${x1} ${y1}`, `H ${x1 + 24 - r}`, `Q ${x1 + 24} ${y1} ${x1 + 24} ${y1 + r}`,
+        `V ${corredor - r}`, `Q ${x1 + 24} ${corredor} ${x1 + 24 - r} ${corredor}`,
+        `H ${x2 - 24 + r}`, `Q ${x2 - 24} ${corredor} ${x2 - 24} ${corredor + r}`,
+        `V ${y2 - r}`, `Q ${x2 - 24} ${y2} ${x2 - 24 + r} ${y2}`, `H ${x2}`,
+      ].join(' '),
+    }
+  }).filter(Boolean) as { id: string, d: string }[]
+})
 
 /* ---------- estado do card ---------- */
 
@@ -111,8 +145,8 @@ function soltarNoCanvas(e: DragEvent) {
   const tipo = e.dataTransfer?.getData('application/x-spaceflow-no')
   if (!tipo || !canvas.value) return
   const r = canvas.value.getBoundingClientRect()
-  const x = (e.clientX - r.left + canvas.value.scrollLeft) / zoom.value - W / 2
-  const y = (e.clientY - r.top + canvas.value.scrollTop) / zoom.value - 40
+  const x = (e.clientX - r.left + canvas.value.scrollLeft) / zoom.value - W / 2 - M
+  const y = (e.clientY - r.top + canvas.value.scrollTop) / zoom.value - 40 - M
   emit('adicionar', tipo, Math.round(x), Math.round(y))
   paletaAberta.value = false
 }
@@ -182,7 +216,7 @@ const rail = computed(() => [
                 v-for="(no, idx) in nos"
                 :key="no.id"
                 class="group absolute"
-                :style="{ left: `${no.position?.x ?? 0}px`, top: `${no.position?.y ?? 0}px`, width: `${W}px`, animation: `entrada .36s ease-out ${idx * 35}ms backwards` }"
+                :style="{ left: `${px(no)}px`, top: `${py(no)}px`, width: `${W}px`, animation: `entrada .36s ease-out ${idx * 35}ms backwards` }"
               >
                 <!-- Barra do hover: torna visível o que hoje só o duplo clique faz -->
                 <div class="pointer-events-none absolute -top-9 right-0 flex translate-y-1 gap-1 opacity-0 transition duration-150 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
@@ -305,7 +339,7 @@ const rail = computed(() => [
                 :key="no.id"
                 class="absolute h-2 rounded-sm"
                 :class="pendencias[no.id]?.length ? 'bg-error/70' : 'bg-accented'"
-                :style="{ left: `${((no.position?.x ?? 0) / largura) * 100}%`, top: `${((no.position?.y ?? 0) / altura) * 100}%`, width: `${(W / largura) * 100}%` }"
+                :style="{ left: `${(px(no) / largura) * 100}%`, top: `${(py(no) / altura) * 100}%`, width: `${(W / largura) * 100}%` }"
               />
             </div>
           </div>

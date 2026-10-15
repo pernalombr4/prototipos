@@ -131,11 +131,15 @@ export interface Aresta {
 
 const pos = (x: number, y: number) => ({ x, y })
 
-/** O fluxo de exemplo, configurado. Um nó de cada tipo que a paleta oferece. */
+/**
+ * O fluxo de exemplo, configurado. Um nó de cada tipo que a paleta oferece,
+ * em 2 faixas para caber inteiro na tela de quem testa (rodada 2): a de cima
+ * vai do Início ao Mesclar, a de baixo do CRUD ao Fim.
+ */
 export function fluxoConfigurado(): No[] {
   return [
     {
-      id: 'trig', type: 'trigger', position: pos(40, 320),
+      id: 'trig', type: 'trigger', position: pos(0, 170),
       data: {
         label: 'Contrato criado',
         type: 'events',
@@ -148,7 +152,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'extrair', type: 'ai_extract', position: pos(360, 320),
+      id: 'extrair', type: 'ai_extract', position: pos(340, 170),
       data: {
         label: 'Ler o PDF do contrato',
         model: 'openai/gpt-5.2',
@@ -163,7 +167,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'http', type: 'http', position: pos(680, 320),
+      id: 'http', type: 'http', position: pos(680, 170),
       data: {
         label: 'Consultar CNPJ na Receita',
         method: 'GET',
@@ -179,7 +183,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'cond', type: 'conditionals', position: pos(1000, 320),
+      id: 'cond', type: 'conditionals', position: pos(1020, 170),
       data: {
         label: 'Acima de R$ 100 mil?',
         conditionals: {
@@ -189,7 +193,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'aprov', type: 'approval', position: pos(1320, 140),
+      id: 'aprov', type: 'approval', position: pos(1360, 0),
       data: {
         label: 'Aprovação da diretoria',
         task_name: 'Aprovar contrato {{nodes.trig.reference}}',
@@ -206,7 +210,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'gerar', type: 'ai_generate', position: pos(1320, 520),
+      id: 'gerar', type: 'ai_generate', position: pos(1360, 340),
       data: {
         label: 'Resumir o contrato',
         model: 'openai/gpt-6-luna',
@@ -216,7 +220,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'tarefa', type: 'task', position: pos(1640, 40),
+      id: 'tarefa', type: 'task', position: pos(1700, 0),
       data: {
         label: 'Assinar contrato',
         task_name: 'Assinar o contrato {{nodes.trig.reference}}',
@@ -229,7 +233,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'email', type: 'email', position: pos(1640, 300),
+      id: 'email', type: 'email', position: pos(1700, 170),
       data: {
         label: 'Avisar o solicitante',
         provider: 'enspace',
@@ -245,7 +249,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'agente', type: 'ai_agent', position: pos(1640, 520),
+      id: 'agente', type: 'ai_agent', position: pos(1700, 340),
       data: {
         label: 'Revisar cláusulas',
         agent: 'Revisor de cláusulas',
@@ -255,7 +259,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'merge', type: 'merge', position: pos(1960, 300),
+      id: 'merge', type: 'merge', position: pos(2040, 170),
       data: {
         label: 'Juntar os caminhos',
         count_rows: [
@@ -265,7 +269,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'crud', type: 'crud', position: pos(2280, 300),
+      id: 'crud', type: 'crud', position: pos(0, 740),
       data: {
         label: 'Marcar como vigente',
         type: 'contratos',
@@ -276,7 +280,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'rotear', type: 'ai_router', position: pos(2600, 300),
+      id: 'rotear', type: 'ai_router', position: pos(340, 740),
       data: {
         label: 'Classificar a área',
         model: 'openai/gpt-6-luna',
@@ -289,7 +293,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'form', type: 'form', position: pos(2920, 140),
+      id: 'form', type: 'form', position: pos(680, 580),
       data: {
         label: 'Dados do jurídico',
         task_name: 'Complementar o contrato {{nodes.trig.reference}}',
@@ -303,7 +307,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'rotas', type: 'route', position: pos(2920, 460),
+      id: 'rotas', type: 'route', position: pos(680, 900),
       data: {
         label: 'Por faixa de valor',
         routes: [
@@ -314,11 +318,11 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'atraso', type: 'delay', position: pos(3240, 140),
+      id: 'atraso', type: 'delay', position: pos(1020, 580),
       data: configuracaoDoCliente() as unknown as Extract<No, { type: 'delay' }>['data'],
     },
     {
-      id: 'notif', type: 'comparison_notification', position: pos(3240, 460),
+      id: 'notif', type: 'comparison_notification', position: pos(1020, 900),
       data: {
         label: 'Enviar comparativo',
         comparison: 'Propostas de fornecedores',
@@ -329,7 +333,7 @@ export function fluxoConfigurado(): No[] {
       },
     },
     {
-      id: 'end', type: 'end', position: pos(3560, 320),
+      id: 'end', type: 'end', position: pos(1360, 740),
       data: { label: 'Fim' },
     },
   ] as No[]

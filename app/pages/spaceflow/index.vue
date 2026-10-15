@@ -181,7 +181,6 @@ function reiniciar() {
   atrasoAberto.value = false
 }
 
-onMounted(() => setTimeout(() => abrir('aprov'), 600))
 
 /* ---------- Como é hoje: os prints do develop ---------- */
 

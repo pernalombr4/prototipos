@@ -128,3 +128,16 @@ o protótipo usa um nome provisório, para o time trocar pelo real: `backup_assi
 - **Ver:** `/spaceflow` · `evidencias/proposta-01-canvas.jpg` a `proposta-12-escuro-espanhol.jpg` (canvas, variável
   na Aprovação, E-mail, CRUD, Condicional, HTTP, Início por evento, rotas da IA, paleta, pendências no card, Como é
   hoje, escuro em espanhol)
+
+## Rodada 2 · 2026-10-15
+
+- **Pedido (literal):** "ja deixe na tela um fluxo configurado com todos os nós pra facilitar a navegaçao de quem vai testar"
+- **Mudou:** o fluxo de exemplo (os 17 nós, configurados) passa de 1 faixa de 3.800 px para 2 faixas: a de cima vai
+  do Início ao Mesclar, a de baixo do CRUD ao Fim. A aresta que desce de uma faixa para a outra vai em cotovelo, pelo
+  corredor entre as 2.
+- **Mudou:** o editor abre com o zoom que mostra o fluxo inteiro (largura e altura do canvas). O botão "Ajustar à
+  tela" faz a mesma conta.
+- **Mudou:** o modal da Aprovação não abre mais sozinho ao carregar. A tela começa no fluxo; o nó abre pelo duplo
+  clique, por "Configurar" ou por "Abrir nó" na barra do protótipo.
+- **Maquete:** a posição dos nós é do protótipo; no produto, quem monta o fluxo decide.
+- **Ver:** `/spaceflow` · `evidencias/proposta-13-fluxo-inteiro-na-tela.jpg`
