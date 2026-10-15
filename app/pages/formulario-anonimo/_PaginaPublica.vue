@@ -16,7 +16,7 @@ import { useFormularioAnonimo } from './estado'
 
 const props = defineProps<{ t: Textos }>()
 
-const { cenario, passoPublico, ultimoEnvio, formularioDoCanal, registrarDenuncia, ir, modoTeste, canalPublicado, denuncias } = useFormularioAnonimo()
+const { cenario, passoPublico, ultimoEnvio, formularioDoCanal, registrarDenuncia, ir, modoTeste, canalPublicado, denuncias, textoDeRecebimento } = useFormularioAnonimo()
 const canalPausado = useState<boolean>('fa-canal-pausado', () => false)
 const idioma = useIdioma()
 
@@ -280,7 +280,8 @@ const opcoesDeTestemunha = campo('testemunhas').opcoes!.map(v => ({ value: v, la
           <UIcon name="i-lucide-check" class="size-7 text-success" />
         </span>
         <h1 class="mt-3 text-2xl font-bold text-highlighted">{{ t.publico.recebida.titulo }}</h1>
-        <p class="mt-2 max-w-md text-sm text-toned">{{ formularioDoCanal.mensagemDeConfirmacao }}</p>
+        <!-- O texto vem do formulário (retorno automático) ou do nó do fluxo (retorno pelo Spaceflow). -->
+        <p class="mt-2 max-w-md text-sm text-toned">{{ ultimoEnvio ? textoDeRecebimento(ultimoEnvio.protocolo, ultimoEnvio.retornoAte) : formularioDoCanal.mensagemDeConfirmacao }}</p>
         <p class="mt-1 text-sm font-medium text-highlighted">{{ t.publico.recebida.retornoAte(retornoAte) }}</p>
       </div>
 

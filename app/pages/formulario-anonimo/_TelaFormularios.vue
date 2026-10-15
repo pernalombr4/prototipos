@@ -127,6 +127,17 @@ const verificacoes = computed(() => [
   { value: 'enspace', label: props.t.formulario.anonimato.verificacaoEnspace[0], description: props.t.formulario.anonimato.verificacaoEnspace[1] },
   { value: 'turnstile', label: props.t.formulario.anonimato.verificacaoTurnstile[0], description: props.t.formulario.anonimato.verificacaoTurnstile[1] },
 ])
+const modosDeRetorno = computed(() => [
+  { value: 'automatico', label: props.t.formulario.anonimato.retornoAutomatico[0], description: props.t.formulario.anonimato.retornoAutomatico[1] },
+  { value: 'spaceflow', label: props.t.formulario.anonimato.retornoSpaceflow[0], description: props.t.formulario.anonimato.retornoSpaceflow[1] },
+])
+
+/** Grava a escolha antes de sair: o fluxo precisa saber que é ele quem responde. */
+function abrirFluxoDoCaso() {
+  if (rascunho.value) formularios.value = formularios.value.map(f => f.id === rascunho.value!.id ? structuredClone(toRaw(rascunho.value!)) : f)
+  ir('spaceflow', { no: 'responder' })
+}
+
 const prazos = computed(() => ([30, 60, 90] as const).map(v => ({ value: v, label: props.t.formulario.anonimato.dias(v) })))
 const apagarOpcoes = computed(() => (['ao_concluir', 'trinta_dias'] as const).map(v => ({ value: v, label: props.t.formulario.anonimato.apagar[v] })))
 
@@ -433,9 +444,26 @@ function baixarQr() {
                 <!-- Retorno -->
                 <section class="flex flex-col gap-4">
                   <h3 class="flex items-center gap-2 text-sm font-semibold text-highlighted"><UIcon name="i-lucide-message-square-reply" class="size-4 text-muted" />{{ t.formulario.anonimato.retornoTitulo }}</h3>
-                  <UFormField :label="t.formulario.anonimato.mensagemConfirmacao" :help="t.formulario.anonimato.mensagemAjuda">
-                    <UTextarea v-model="rascunho.mensagemDeConfirmacao" :rows="3" autoresize class="w-full" />
+                  <!-- Um ou outro: quem confirma o recebimento -->
+                  <UFormField :label="t.formulario.anonimato.retornoModo">
+                    <URadioGroup v-model="rascunho.retorno" :items="modosDeRetorno" variant="card" :ui="{ description: 'text-toned' }" />
                   </UFormField>
+                  <Transition
+                    mode="out-in"
+                    enter-active-class="transition duration-200 ease-out"
+                    enter-from-class="opacity-0 -translate-y-1"
+                    leave-active-class="transition duration-100 ease-in"
+                    leave-to-class="opacity-0"
+                  >
+                    <UFormField v-if="rascunho.retorno === 'automatico'" key="auto" :label="t.formulario.anonimato.mensagemConfirmacao" :help="t.formulario.anonimato.mensagemAjuda">
+                      <UTextarea v-model="rascunho.mensagemDeConfirmacao" :rows="3" autoresize class="w-full" />
+                    </UFormField>
+                    <div v-else key="fluxo" class="flex flex-wrap items-start gap-3 rounded-lg border border-default bg-elevated/50 p-3">
+                      <UIcon name="i-lucide-workflow" class="mt-0.5 size-4 shrink-0 text-primary" />
+                      <p class="min-w-0 flex-1 text-xs text-toned">{{ t.formulario.anonimato.retornoSpaceflowAviso }}</p>
+                      <UButton icon="i-lucide-arrow-right" :label="t.formulario.anonimato.abrirFluxo" color="neutral" variant="outline" size="xs" @click="abrirFluxoDoCaso" />
+                    </div>
+                  </Transition>
                   <UFormField :label="t.formulario.anonimato.prazoDeRetorno" :help="t.formulario.anonimato.prazoAjuda">
                     <USelect v-model="rascunho.prazoDeRetornoDias" :items="prazos" class="w-48" />
                   </UFormField>

@@ -200,6 +200,7 @@ export const TIPOS_DE_FORMULARIO = ['editar', 'criacao', 'geral', 'visualizar', 
 export type TipoDeFormulario = typeof TIPOS_DE_FORMULARIO[number]
 export type Verificacao = 'enspace' | 'turnstile'
 export type ApagarEmail = 'ao_concluir' | 'trinta_dias'
+export type ModoDeRetorno = 'automatico' | 'spaceflow'
 
 /** PROTÓTIPO: forma da tela Formulários do develop + a aba Anonimato (proposta). */
 export interface Formulario {
@@ -221,6 +222,8 @@ export interface Formulario {
   limitePorHora: number
   limitePorDia: number
   pausarNoPico: boolean
+  /** PROPOSTA: quem confirma o recebimento. Um ou outro, nunca os 2. */
+  retorno: ModoDeRetorno
   mensagemDeConfirmacao: string
   prazoDeRetornoDias: 30 | 60 | 90
   oferecerAvisoPorEmail: boolean
@@ -245,6 +248,7 @@ export const formularios: Formulario[] = [
     limitePorHora: 30,
     limitePorDia: 200,
     pausarNoPico: true,
+    retorno: 'automatico',
     mensagemDeConfirmacao: 'Recebemos sua denúncia. O comitê de ética lê todo relato e responde pela página de acompanhamento. Guarde o protocolo e a senha.',
     prazoDeRetornoDias: 90,
     oferecerAvisoPorEmail: true,
@@ -267,6 +271,7 @@ export const formularios: Formulario[] = [
     limitePorHora: 30,
     limitePorDia: 200,
     pausarNoPico: true,
+    retorno: 'automatico',
     mensagemDeConfirmacao: '',
     prazoDeRetornoDias: 90,
     oferecerAvisoPorEmail: false,

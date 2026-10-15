@@ -107,6 +107,19 @@ export function useFormularioAnonimo() {
 
   /* ---------- jornada do denunciante e o guia ---------- */
 
+  /** A mensagem do nó "Responder ao denunciante": vale quando o retorno é pelo Spaceflow. */
+  const mensagemDoNo = useState<string>('fa-mensagem-no', () => 'Recebemos sua denúncia e ela já está com o comitê de ética. Protocolo {{protocolo}}. Respondemos até {{responder_ate}}.')
+
+  /** O texto que chega ao denunciante logo depois do envio, venha do formulário ou do fluxo. */
+  function textoDeRecebimento(protocolo: string, responderAte: Date) {
+    const f = formularios.value[0]!
+    if (f.retorno === 'automatico') return f.mensagemDeConfirmacao
+    return mensagemDoNo.value
+      .replaceAll('{{protocolo}}', protocolo)
+      .replaceAll('{{responder_ate}}', responderAte.toLocaleDateString('pt-BR'))
+      .replaceAll('{{data.tipo}}', '')
+  }
+
   const cena = useState<CenaDeFora>('fa-cena', () => 'cartaz')
   const jornada = useState<Jornada | null>('fa-jornada', () => null)
   const passo = useState<number>('fa-passo', () => 0)
@@ -173,7 +186,7 @@ export function useFormularioAnonimo() {
       teste: modoTeste.value,
     }
     denuncias.value = [nova, ...denuncias.value]
-    mensagens.value = [...mensagens.value, { id: id * 100, itemId: id, autor: 'sistema', texto: f.mensagemDeConfirmacao, quando: recebida }]
+    mensagens.value = [...mensagens.value, { id: id * 100, itemId: id, autor: 'sistema', texto: textoDeRecebimento(protocolo, retornoAte), quando: recebida }]
     auditoria.value = [{ id: `a${id}`, itemId: id, quem: ANONYMOUS.id, acao: 'criou', quando: recebida }, ...auditoria.value]
     if (dados.aviso_por_email) {
       emails.value = [{ id: Date.now(), itemId: id, criadoEm: recebida, status: 'enviado', assunto: 'Recebemos sua denúncia' }, ...emails.value]
@@ -215,7 +228,7 @@ export function useFormularioAnonimo() {
     formularioDoCanal, listaDoComite, inicioDoCanal,
     canalCriado, canalPublicado, novoFormularioAberto, blocos, revisaoAberta, publicadoAberto, resolvidos, modoTeste,
     problemasDoFormulario, pontosAbertos, bloqueiaPublicar, criarCanal, publicar, comecarDoZero,
-    cena, jornada, passo, denunciaDoDenunciante, concluir,
+    cena, jornada, passo, denunciaDoDenunciante, concluir, mensagemDoNo, textoDeRecebimento,
     ir, registrarDenuncia, responder, entrarComoDenunciante,
   }
 }

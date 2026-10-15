@@ -18,21 +18,27 @@ import { useFormularioAnonimo, useMarcaDeProposta } from './estado'
 
 const props = defineProps<{ t: Textos }>()
 
-const { noAberto } = useFormularioAnonimo()
+const { noAberto, formularioDoCanal, mensagemDoNo } = useFormularioAnonimo()
 const idioma = useIdioma()
 const marca = useMarcaDeProposta()
 const toast = useToast()
 
-interface No { id: string, icone: string, x: number, proposta?: boolean }
-const nos: No[] = [
-  { id: 'start', icone: 'i-lucide-arrow-right-to-line', x: 0 },
-  { id: 'responder', icone: 'i-lucide-message-square-reply', x: 1, proposta: true },
-  { id: 'tarefa', icone: 'i-lucide-clipboard-check', x: 2 },
-  { id: 'end', icone: 'i-lucide-circle-dot', x: 3 },
-]
+interface No { id: string, icone: string, proposta?: boolean }
+/** O nó "Responder ao denunciante" só existe quando o formulário escolheu o retorno pelo Spaceflow. */
+const peloFluxo = computed(() => formularioDoCanal.value.retorno === 'spaceflow')
+const nos = computed<No[]>(() => [
+  { id: 'start', icone: 'i-lucide-arrow-right-to-line' },
+  ...(peloFluxo.value ? [{ id: 'responder', icone: 'i-lucide-message-square-reply', proposta: true }] : []),
+  { id: 'tarefa', icone: 'i-lucide-clipboard-check' },
+  { id: 'end', icone: 'i-lucide-circle-dot' },
+])
+
+function usarRetornoPeloFluxo() {
+  formularioDoCanal.value.retorno = 'spaceflow'
+}
 
 const aberto = computed({
-  get: () => noAberto.value !== null && noAberto.value !== 'end',
+  get: () => noAberto.value !== null && noAberto.value !== 'end' && nos.value.some(n => n.id === noAberto.value),
   set: (v) => { if (!v) noAberto.value = null },
 })
 
@@ -40,7 +46,8 @@ const aberto = computed({
 
 const config = reactive({
   nome: props.t.spaceflow.nos.responder![0],
-  mensagem: formularios[0]!.mensagemDeConfirmacao,
+  // A mensagem fica no estado: é ela que o denunciante recebe quando o retorno é pelo fluxo.
+  mensagem: mensagemDoNo.value,
   avisar: true,
 })
 const variaveis = ['{{protocolo}}', '{{responder_ate}}', '{{data.tipo}}']
@@ -59,6 +66,7 @@ const salvando = ref(false)
 async function salvar() {
   salvando.value = true
   await new Promise(r => setTimeout(r, 600))
+  mensagemDoNo.value = config.mensagem
   salvando.value = false
   modificado.value = false
   noAberto.value = null
@@ -107,6 +115,15 @@ const saida = computed(() => [
       <div class="relative min-w-0 flex-1 overflow-auto bg-[linear-gradient(var(--ui-border)_1px,transparent_1px),linear-gradient(90deg,var(--ui-border)_1px,transparent_1px)] bg-[size:64px_64px]">
         <UButton icon="i-lucide-save" color="neutral" variant="ghost" size="sm" class="absolute right-3 top-3" :aria-label="t.spaceflow.salvarEFechar" />
 
+        <!-- PROPOSTA: com retorno automático, o fluxo não confirma o recebimento -->
+        <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-1" leave-active-class="transition duration-150" leave-to-class="opacity-0">
+          <div v-if="!peloFluxo" class="absolute left-6 right-16 top-4 flex flex-wrap items-center gap-3 rounded-lg border border-info/30 bg-default px-3 py-2 shadow-sm" :class="marca">
+            <UIcon name="i-lucide-zap" class="size-4 text-info" />
+            <p class="min-w-0 flex-1 text-xs text-toned">{{ t.spaceflow.retornoAutomatico }}</p>
+            <UButton icon="i-lucide-workflow" :label="t.spaceflow.usarRetornoPeloFluxo" color="neutral" variant="outline" size="xs" @click="usarRetornoPeloFluxo" />
+          </div>
+        </Transition>
+
         <div class="flex min-w-max items-center gap-0 px-10 py-24">
           <template v-for="(n, i) in nos" :key="n.id">
             <div v-if="i" class="flex items-center">
@@ -143,7 +160,7 @@ const saida = computed(() => [
           <UIcon name="i-lucide-plus" class="size-3.5" /><UIcon name="i-lucide-minus" class="size-3.5" /><UIcon name="i-lucide-maximize" class="size-3.5" />
         </div>
         <div class="absolute bottom-3 right-3 h-20 w-36 rounded-md border border-default bg-elevated/70" aria-hidden="true">
-          <span v-for="k in 4" :key="k" class="absolute top-8 h-3 w-6 rounded-sm bg-accented" :style="{ left: `${8 + (k - 1) * 32}px` }" />
+          <span v-for="k in nos.length" :key="k" class="absolute top-8 h-3 w-6 rounded-sm bg-accented" :style="{ left: `${8 + (k - 1) * 32}px` }" />
         </div>
       </div>
     </div>
@@ -190,7 +207,8 @@ const saida = computed(() => [
                 <UFormField :label="t.spaceflow.tipoDoNo">
                   <UInput :model-value="t.spaceflow.responderAoDenunciante" readonly icon="i-lucide-message-square-reply" class="w-full" />
                 </UFormField>
-                <p class="-mt-2 text-xs text-muted">{{ t.spaceflow.responderAjuda }}</p>
+                <p class="-mt-2 text-xs text-toned">{{ t.spaceflow.responderAjuda }}</p>
+                <p class="flex items-start gap-1.5 rounded-md bg-info/5 p-2.5 text-xs text-toned"><UIcon name="i-lucide-link" class="mt-0.5 size-3.5 shrink-0 text-info" />{{ t.spaceflow.retornoPeloFluxo }}</p>
                 <UFormField :label="t.spaceflow.nomeDoNo"><UInput v-model="config.nome" class="w-full" /></UFormField>
                 <UFormField :label="t.spaceflow.mensagem">
                   <UTextarea v-model="config.mensagem" :rows="4" autoresize class="w-full" />

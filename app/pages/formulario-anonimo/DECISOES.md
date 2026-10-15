@@ -11,6 +11,8 @@
 - **A proteção contra robô é técnica, na entrada:** rota pública própria e estreita, chave por visita,
   verificação sem clique, limites, pausa no pico e fila técnica interna. O que é barrado não vira item e não
   chega a nenhuma pessoa. A Triagem do formulário não faz parte da proteção e fica desligada no modo anônimo.
+- **Quem confirma o recebimento é uma escolha só**, na aba Anonimato: retorno automático (o ENSPACE responde com
+  a mensagem do formulário, sem fluxo) ou pelo Spaceflow (o nó "Responder ao denunciante" no fluxo do caso).
 - **O retorno é por protocolo e senha.** A confirmação aparece na tela e fica como 1ª mensagem do
   acompanhamento. O comitê responde pela pasta nova "Canal do denunciante" ou pelo nó novo do Spaceflow,
   "Responder ao denunciante".
@@ -180,3 +182,23 @@ CONFIGURADOR                                          DENUNCIANTE
   só o ícone fica rosa). O guia fica no `body` (Teleport) e acima das camadas, para continuar clicável com um
   painel aberto.
 - **Ver:** a mesma URL; cartão "Jornadas" no canto inferior esquerdo.
+
+## Rodada 4 · 2026-10-15
+
+- **Pedido (literal):** "se na configuraçao do form a gente configura o retorno pro usuario, por que tem um fluxo
+  pra isso tambem? nao tem sentido. ou é um, ou é outro. voce pode colocar as 2 opçoes la: com retorno automatico
+  (dev cria isso) ou com retorno por spaceflow (o user precisaria configurar)"
+- **Mudou:**
+  - aba Anonimato › Retorno ao denunciante: "Quem confirma o recebimento", com "Automático" e "Pelo Spaceflow";
+  - Automático: a mensagem de recebimento fica no formulário e o fluxo não tem o nó; o editor do fluxo mostra o
+    aviso "O recebimento é confirmado pelo formulário" e o atalho "Responder pelo Spaceflow";
+  - Pelo Spaceflow: a mensagem sai do formulário e aparece o atalho "Abrir o fluxo do caso"; o nó
+    "Responder ao denunciante" entra no fluxo e diz que é ele quem confirma;
+  - a revisão antes de publicar, a tela de denúncia recebida e o guia seguem a escolha.
+- **O que vale nos 2 modos:** o prazo de resposta e o aviso por e-mail continuam no formulário, porque valem para
+  toda resposta ao denunciante, não só a de recebimento.
+- **Fronteira:** muda o bloco de retorno da aba Anonimato e a presença do nó no fluxo; não muda o resto do fluxo
+  nem a pasta "Canal do denunciante" do item.
+- **Quem constrói o quê:** o automático é comportamento do produto (o dev implementa); o Spaceflow é
+  configuração do cliente, com o nó novo.
+- **Maquete:** a troca de modo no editor do fluxo grava na hora, sem "Salvar".

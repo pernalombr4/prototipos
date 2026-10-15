@@ -46,7 +46,7 @@ const acoesDoConfigurador: (() => void)[] = [
     e.ir('construtor')
   },
   () => { if (!e.canalCriado.value) e.criarCanal(props.t.publico.titulo, true); e.ir('formularios', { formulario: e.formularioDoCanal.value.id, abaDoFormulario: 'anonimato' }) },
-  () => { e.ir('spaceflow', { no: 'responder' }) },
+  () => { e.ir('spaceflow', { no: e.formularioDoCanal.value.retorno === 'spaceflow' ? 'responder' : null }) },
   () => { if (!e.canalCriado.value) e.criarCanal(props.t.publico.titulo, true); e.canalPublicado.value = false; e.ir('construtor'); setTimeout(() => (e.revisaoAberta.value = true), 700) },
   () => { garantirCanalPublicado(); e.ir('construtor'); setTimeout(() => (e.publicadoAberto.value = true), 700) },
   () => { garantirCanalPublicado(); e.modoTeste.value = false; e.ir('itens', { item: null }) },

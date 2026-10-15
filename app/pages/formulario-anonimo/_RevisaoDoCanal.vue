@@ -127,7 +127,7 @@ function envioDeTeste() {
           </div>
           <div class="rounded-md border border-default p-3">
             <p class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-toned"><UIcon name="i-lucide-circle-check" class="size-3.5 text-success" />{{ t.revisao.grupos.retorno }}</p>
-            <p class="mt-1 text-xs text-highlighted">{{ t.revisao.retornoOk(formularioDoCanal.prazoDeRetornoDias) }}</p>
+            <p class="mt-1 text-xs text-highlighted">{{ formularioDoCanal.retorno === 'automatico' ? t.revisao.retornoOk(formularioDoCanal.prazoDeRetornoDias) : t.revisao.retornoFluxo(formularioDoCanal.prazoDeRetornoDias) }}</p>
           </div>
         </section>
       </div>
