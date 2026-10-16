@@ -134,6 +134,11 @@ informação; silêncio não é.
   para **ler** dados e esquemas — é assim que se descobre o nome real dos campos — e para
   **preparar cenário em massa**, nos limites da seção "Onde explorar, e como". Se o arquivo não
   existir, **pare e peça à Mikaela** — nunca invente credencial.
+- **ENSPACE pelo MCP, regra absoluta** (decisão da redatora em 2026-10-16): para ler dado e esquema,
+  o primeiro caminho é o MCP do ENSPACE de develop (`enspace-develop`); a tela continua para
+  investigar a interface. O `API_TOKEN` fica para o que o MCP não alcança (outro workspace, ação
+  que ele não tem) e para quando ele falha. Falha do MCP vai na entrega (linha "Falha do MCP") e na
+  lista de falhas do MCP do `agentes-base`. Regra inteira: `regras/mcp-enspace.md` do `agentes-base`.
 - **Nunca digitar senha em formulário.** Se a sessão caiu e apareceu o Keycloak, volte pelo
   botão **Microsoft** — o broker reautentica sem senha. Se nem isso funcionar, pare e peça
   para ela entrar.
