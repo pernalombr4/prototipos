@@ -133,7 +133,7 @@ function parteDe(row: { workspace: string, usado: number }) {
                 :min="0"
                 :step="1000"
                 size="xs"
-                class="w-40"
+                class="w-56"
                 :aria-label="`${tl.col.limite}: ${nomeDoWorkspace((row as any).workspace)}`"
                 @update:model-value="(v: number | null | undefined) => { c.porWs[(row as any).workspace] = v ?? null }"
               />
