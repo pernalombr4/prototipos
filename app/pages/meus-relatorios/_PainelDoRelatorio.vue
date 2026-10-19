@@ -193,14 +193,20 @@ const maisAcoes = computed(() => [
 
       <!-- Filtros aplicados: o JSON de hoje, em frase -->
       <section class="border-b border-default p-4">
-        <h3 class="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">{{ t.painel.filtrosAplicados }}</h3>
-        <ul v-if="p.proto.filtros.length" class="space-y-1.5">
-          <li v-for="(f, i) in p.proto.filtros" :key="i" class="flex flex-wrap items-center gap-1.5 text-sm">
-            <UBadge :label="f.campo" color="neutral" variant="soft" size="sm" />
-            <span class="text-muted">{{ t.operadores[f.operador] }}</span>
-            <span v-if="f.valor" class="font-medium text-highlighted">{{ f.valor }}</span>
-          </li>
-        </ul>
+        <h3 class="mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-muted">
+          {{ t.painel.filtrosAplicados }}
+          <span v-if="p.proto.filtros.length" class="tabular-nums">{{ p.proto.filtros.length }}</span>
+        </h3>
+        <!-- 2 colunas, como o Resumo: o campo à esquerda e a condição inteira à direita, quebrando na própria coluna -->
+        <dl v-if="p.proto.filtros.length" class="grid grid-cols-[9rem_1fr] gap-x-3 gap-y-1.5 text-sm">
+          <template v-for="(f, i) in p.proto.filtros" :key="i">
+            <dt class="truncate text-muted" :title="f.campo">{{ f.campo }}</dt>
+            <dd>
+              <span class="text-muted">{{ t.operadores[f.operador] }}</span>
+              <span v-if="f.valor" class="ml-1 font-medium text-highlighted">{{ f.valor }}</span>
+            </dd>
+          </template>
+        </dl>
         <p v-else class="text-sm text-toned">{{ t.painel.semFiltroAjuda }}</p>
         <p class="mt-3 flex items-center gap-1.5 text-xs text-muted">
           <UIcon name="i-lucide-arrow-down-wide-narrow" class="size-3.5" />

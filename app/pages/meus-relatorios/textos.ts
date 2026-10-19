@@ -80,7 +80,6 @@ export interface Textos {
   semFiltro: string
   registros: Plural
   semRegistros: string
-  naoBaixado: string
   gerandoPct: (n: number) => string
 
   acoes: {
@@ -280,7 +279,6 @@ const ptBR: Textos = {
   semFiltro: 'Sem filtro',
   registros: n => n === 1 ? '1 registro' : `${n.toLocaleString('pt-BR')} registros`,
   semRegistros: 'Nenhum registro',
-  naoBaixado: 'Não baixado',
   gerandoPct: n => `Gerando ${n}%`,
   acoes: {
     verDetalhes: 'Ver detalhes',
@@ -423,7 +421,6 @@ const en: Textos = {
   semFiltro: 'No filter',
   registros: n => n === 1 ? '1 record' : `${n.toLocaleString('en')} records`,
   semRegistros: 'No records',
-  naoBaixado: 'Not downloaded',
   gerandoPct: n => `Generating ${n}%`,
   acoes: {
     verDetalhes: 'See details',
@@ -566,7 +563,6 @@ const es: Textos = {
   semFiltro: 'Sin filtro',
   registros: n => n === 1 ? '1 registro' : `${n.toLocaleString('es')} registros`,
   semRegistros: 'Ningún registro',
-  naoBaixado: 'Sin descargar',
   gerandoPct: n => `En proceso ${n}%`,
   acoes: {
     verDetalhes: 'Ver detalles',

@@ -231,3 +231,26 @@ separado; os pontos de acessibilidade abaixo saíram da mesma crítica.
   da seleção em massa, que continua com Baixar.
 - **Ver:** `/meus-relatorios` · `evidencias/rodada5-01-menu-depois-do-checkbox.jpg`, `rodada5-02-baixar-no-menu.jpg`
 
+## Rodada 6 · 2026-10-19
+
+- **Pedido (literal):** "veja se esse popup de filtros, na coluna de filtros, é sustentavel pra se tivermos 20
+  filtros. vai truncar e botar scroll? como vai ficar? / e pode tirar esses pontinhos rosa de alguns itens da
+  tabela. nao vao ajudar em nada o user."
+- **Medido antes:** com 20 filtros, o popover crescia sem limite, abria para cima e saía da tela (o título
+  sumia), não rolava, e o valor longo quebrava para baixo da etiqueta.
+- **Mudou (popover):**
+  - Altura máxima (24rem ou 70% da tela) e lista que rola por dentro; cabem cerca de 10 filtros à vista.
+  - O título mostra a quantidade ("Filtros aplicados 20").
+  - Cada filtro ocupa 1 linha: o campo trunca em 160 px, a condição fica inteira e o valor trunca; o texto
+    completo aparece no `title`.
+  - A ordenação e o "Ver todos os detalhes" ficam fixos embaixo, fora da rolagem.
+  - `collisionPadding` de 12 px mantém o popover dentro da tela.
+- **Mudou (painel):** os filtros passam a 2 colunas, como o Resumo: o campo à esquerda e a condição inteira à
+  direita, quebrando na própria coluna. O título também mostra a quantidade. O painel é o lugar de ler tudo,
+  então nada trunca lá.
+- **Mudou:** saíram os pontinhos de "não baixado" ao lado do nome do relatório. A linha "Baixado" do Resumo,
+  no painel, continua.
+- **Maquete:** "Contratos para auditoria" ganhou 20 filtros no `mocks.ts`, para provar o volume.
+- **Ver:** `/meus-relatorios` · `evidencias/rodada6-01-popover-com-20-filtros.jpg`,
+  `rodada6-02-painel-com-20-filtros.jpg`
+

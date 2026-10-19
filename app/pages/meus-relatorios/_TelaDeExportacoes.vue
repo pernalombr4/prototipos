@@ -354,15 +354,7 @@ function menuDaLinha(p: PedidoDeRelatorio): DropdownMenuItem[][] {
               <UIcon :name="ICONE_DO_FORMATO[(row as Linha).pedido.extraction_format]" class="size-4" />
             </span>
             <span class="min-w-0">
-              <span class="flex items-center gap-1.5">
-                <span class="truncate text-sm font-medium" :class="(row as Linha).pedido.report ? 'text-highlighted' : 'text-toned'" :title="String(row.relatorio)">{{ row.relatorio }}</span>
-                <span
-                  v-if="(row as Linha).pedido.status === 'complete' && !(row as Linha).pedido.proto.baixadoEm.length"
-                  class="size-1.5 shrink-0 rounded-full bg-primary"
-                  :aria-label="t.naoBaixado"
-                  :title="t.naoBaixado"
-                />
-              </span>
+              <span class="block truncate text-sm font-medium" :class="(row as Linha).pedido.report ? 'text-highlighted' : 'text-toned'" :title="String(row.relatorio)">{{ row.relatorio }}</span>
               <span
                 v-if="(row as Linha).pedido.report?.description"
                 class="block truncate text-xs text-muted"
@@ -419,33 +411,47 @@ function menuDaLinha(p: PedidoDeRelatorio): DropdownMenuItem[][] {
             mode="hover"
             :open-delay="150"
             :close-delay="120"
-            :content="{ side: 'bottom', align: 'start', sideOffset: 6 }"
+            :content="{ side: 'bottom', align: 'start', sideOffset: 6, collisionPadding: 12 }"
           >
             <UBadge :label="t.nFiltros(Number(row.filtros))" icon="i-lucide-filter" color="neutral" variant="soft" size="sm" class="cursor-default" @click.stop />
             <template #content>
-              <div class="w-80 p-3" @click.stop>
-                <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">{{ t.painel.filtrosAplicados }}</p>
-                <ul class="space-y-1.5">
-                  <li v-for="(f, i) in (row as Linha).pedido.proto.filtros" :key="i" class="flex flex-wrap items-center gap-1.5 text-sm">
-                    <UBadge :label="f.campo" color="neutral" variant="soft" size="sm" />
-                    <span class="text-muted">{{ t.operadores[f.operador] }}</span>
-                    <span v-if="f.valor" class="font-medium text-highlighted">{{ f.valor }}</span>
+              <!--
+                Sustenta 20 filtros ou mais: a lista tem altura máxima e rola por dentro
+                (cabem 8 linhas), cada filtro ocupa 1 linha com o valor truncado e o texto
+                inteiro no title, e a ordenação e o atalho para o painel ficam fixos embaixo.
+              -->
+              <div class="flex max-h-[min(24rem,70vh)] w-96 flex-col" @click.stop>
+                <p class="flex items-center justify-between gap-2 px-3 pb-2 pt-3 text-xs font-semibold uppercase tracking-wide text-muted">
+                  {{ t.painel.filtrosAplicados }}
+                  <span class="tabular-nums">{{ (row as Linha).pedido.proto.filtros.length }}</span>
+                </p>
+                <ul class="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 pb-2">
+                  <li
+                    v-for="(f, i) in (row as Linha).pedido.proto.filtros"
+                    :key="i"
+                    class="flex min-w-0 items-center gap-1.5 text-sm"
+                    :title="`${f.campo} ${t.operadores[f.operador]} ${f.valor}`.trim()"
+                  >
+                    <UBadge :label="f.campo" color="neutral" variant="soft" size="sm" class="max-w-40 shrink-0" :ui="{ label: 'truncate' }" />
+                    <span class="shrink-0 text-muted">{{ t.operadores[f.operador] }}</span>
+                    <span v-if="f.valor" class="min-w-0 truncate font-medium text-highlighted">{{ f.valor }}</span>
                   </li>
                 </ul>
-                <p class="mt-3 flex items-center gap-1.5 text-xs text-muted">
-                  <UIcon name="i-lucide-arrow-down-wide-narrow" class="size-3.5 shrink-0" />
-                  {{ t.painel.ordenacao }}: {{ (row as Linha).pedido.proto.ordenacao }}
-                </p>
-                <USeparator class="my-2.5" />
-                <UButton
-                  :label="t.painel.verNoPainel"
-                  icon="i-lucide-panel-right-open"
-                  color="neutral"
-                  variant="link"
-                  size="xs"
-                  class="px-0"
-                  @click="emit('abrir', (row as Linha).id)"
-                />
+                <div class="shrink-0 border-t border-default px-3 py-2.5">
+                  <p class="flex items-start gap-1.5 text-xs text-muted">
+                    <UIcon name="i-lucide-arrow-down-wide-narrow" class="mt-px size-3.5 shrink-0" />
+                    <span class="line-clamp-2">{{ t.painel.ordenacao }}: {{ (row as Linha).pedido.proto.ordenacao }}</span>
+                  </p>
+                  <UButton
+                    :label="t.painel.verNoPainel"
+                    icon="i-lucide-panel-right-open"
+                    color="neutral"
+                    variant="link"
+                    size="xs"
+                    class="mt-1.5 px-0"
+                    @click="emit('abrir', (row as Linha).id)"
+                  />
+                </div>
               </div>
             </template>
           </UPopover>
