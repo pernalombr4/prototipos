@@ -287,3 +287,40 @@ o protótipo usa um nome provisório, para o time trocar pelo real: `backup_assi
   a branch não diz e eu só li a tela. A ajuda descreve só o filtro, que é o que você descreveu.
 - **Ver:** `/spaceflow`, Início › Configurar · `evidencias/proposta-23-item-vincular-execucao.jpg`,
   `proposta-24-tarefa-so-com-item.jpg`, `proposta-25-card-tarefa-com-item.jpg`
+
+## Rodada 6 · 2026-10-19
+
+- **Pedido (literal):** "Vincular a execução ao item e só tarefas com item vinculado voce acabou colocando como 2 campos
+  diferentes. será o mesmo campo. dá pra definir pro dev q vai ser label condicional? mas tem q ter uma segunda opçao
+  pra um nome unico com um help claro."
+- **Mudou:** `link_item` volta a ser **1 campo**, sempre na mesma posição: o último de **O que dispara**, logo depois
+  da Categoria (Item) ou dos filtros de tarefa (Tarefa). Sai da seção Execução.
+- **Mudou:** 2 opções de rótulo, trocadas na barra do protótipo (**Item vinculado: A · B**):
+
+**Opção A: rótulo condicional (para o dev)**
+
+Um componente, um interruptor, uma chave. Rótulo, ajuda e "?" saem de uma tabela pela origem do evento:
+
+| `scope` | Rótulo | Ajuda (sob o campo) | "?" |
+|---|---|---|---|
+| categoria (Item) | Vincular a execução ao item | O item que disparou mostra esta execução, e as tarefas do fluxo mostram o item. | Sem isto, o fluxo roda do mesmo jeito, mas a execução não aparece no item e as tarefas não mostram de onde vieram. |
+| Tarefas | Só tarefas com item vinculado | Tarefa sem item vinculado não dispara o fluxo. | Use quando o fluxo precisa do item da tarefa, por exemplo para ler ou alterar campos dele. |
+| Membros (em breve) | o campo não aparece | | |
+
+**Opção B: nome único**
+
+| Rótulo | Ajuda (sob o campo) | "?" |
+|---|---|---|
+| Item vinculado | Com Item, a execução fica vinculada ao item que disparou. Com Tarefa, só dispara a tarefa que tem item vinculado. | Com Item, sem isto o fluxo roda igual, mas a execução não aparece no item. Com Tarefa, use quando o fluxo precisa do item da tarefa. |
+
+- **Recomendo A.** O rótulo diz o efeito de ligar em cada caso, e a ajuda tem 1 frase. Em B, a pessoa lê as 2 frases
+  para achar a que vale para ela, e "Item vinculado" sozinho não diz se é filtro ou vínculo. B serve se o time
+  preferir um texto fixo por campo.
+- **Mantido da rodada 5:** trocar a origem desliga o campo (nas 2 opções); o card diz "com item" quando é Tarefa.
+- **Descartado:** 2 campos (rodada 5). Motivo: é a mesma chave; ela pediu um campo só.
+- **Fronteira:** muda rótulo, ajuda e posição de `link_item`. Não muda a chave nem o que ela faz em cada origem.
+- **Maquete:** a troca A · B fica na barra do protótipo e vale com o modal fechado (o fundo do modal cobre a barra).
+  No protótipo, as 2 opções são 3 definições de campo que se alternam pela origem e pela opção; nunca aparecem 2 ao
+  mesmo tempo.
+- **Ver:** `/spaceflow`, Início › Configurar · `evidencias/proposta-26-vinculo-a-item.jpg`,
+  `proposta-27-vinculo-a-tarefa.jpg`, `proposta-28-vinculo-b-nome-unico.jpg`, `proposta-29-barra-troca-a-b.jpg`

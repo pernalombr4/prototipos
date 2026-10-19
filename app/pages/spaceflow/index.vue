@@ -23,7 +23,7 @@ import EditorProposto from './_EditorProposto.vue'
 import ModalDoNo from './_ModalDoNo.vue'
 import type { ConfiguracaoDoAtraso, No } from './mocks'
 import { arestas as arestasIniciais, fluxoConfigurado, fluxoInfo, fluxoNovo, variaveisDoGatilho, workspace } from './mocks'
-import { definicoes, l, pendencias as pendenciasDoNo } from './nos'
+import { definicoes, l, modoDoVinculo, pendencias as pendenciasDoNo } from './nos'
 import { resumir } from './apoio'
 import { textos } from './textos'
 import { useIdioma } from '~/composables/useIdioma'
@@ -308,6 +308,19 @@ const printAberto = ref<{ src: string, legenda: string } | null>(null)
             icon="i-lucide-mouse-pointer-click"
             size="xs"
             class="w-56"
+          />
+          <!-- Rodada 6: as 2 opções de rótulo do campo de vínculo com item, no Início por evento -->
+          <USeparator orientation="vertical" class="mx-1 h-5" />
+          <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.vinculo }}</span>
+          <UButton
+            v-for="v in (['porOrigem', 'unico'] as const)"
+            :key="v"
+            :label="v === 'porOrigem' ? t.andaime.vinculoPorOrigem : t.andaime.vinculoUnico"
+            size="xs"
+            class="transition-transform hover:-translate-y-0.5"
+            :color="modoDoVinculo === v ? 'primary' : 'neutral'"
+            :variant="modoDoVinculo === v ? 'solid' : 'subtle'"
+            @click="modoDoVinculo = v"
           />
         </template>
         <UButton :label="t.andaime.reiniciar" icon="i-lucide-rotate-ccw" size="xs" color="neutral" variant="ghost" @click="reiniciar" />

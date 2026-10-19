@@ -178,6 +178,9 @@ const pt = {
     criativo: 'Criativo',
   },
   andaime: {
+    vinculo: 'Item vinculado',
+    vinculoPorOrigem: 'A: rótulo por origem',
+    vinculoUnico: 'B: nome único',
     rotulo: 'Protótipo',
     versao: 'Versão',
     hoje: 'Como é hoje',
@@ -355,6 +358,9 @@ const en: Textos = {
     criativo: 'Creative',
   },
   andaime: {
+    vinculo: 'Linked item',
+    vinculoPorOrigem: 'A: label by source',
+    vinculoUnico: 'B: single name',
     rotulo: 'Prototype',
     versao: 'Version',
     hoje: 'How it is today',
@@ -530,6 +536,9 @@ const es: Textos = {
     criativo: 'Creativo',
   },
   andaime: {
+    vinculo: 'Ítem vinculado',
+    vinculoPorOrigem: 'A: etiqueta por origen',
+    vinculoUnico: 'B: nombre único',
     rotulo: 'Prototipo',
     versao: 'Versión',
     hoje: 'Cómo es hoy',

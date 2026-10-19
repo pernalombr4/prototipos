@@ -11,6 +11,7 @@
  * palavras, instrução de 1 frase sob o campo, explicação longa no "?".
  * Sem travessão em texto de tela (regra 33).
  */
+import { ref } from 'vue'
 import type { Idioma } from '~/composables/useIdioma'
 
 export type L = Record<Idioma, string>
@@ -483,6 +484,8 @@ const modelo = (padrao: number, max = 2): Secao => ({
  * `scope`, na branch do evento de tarefa (PR 2925). O nome é provisório: o
  * time troca pelo real. "Membros (em breve)" grava `members`.
  */
+/** Rodada 6: as 2 opções de rótulo do campo `link_item`, trocadas na barra do protótipo. Não vai para o produto. */
+export const modoDoVinculo = ref<'porOrigem' | 'unico'>('porOrigem')
 export const ESCOPO_TAREFAS = 'tasks'
 export const ESCOPO_MEMBROS = 'members'
 /** Item escolhido e categoria ainda não: estado do protótipo. No produto, `scope` fica vazio até a categoria. */
@@ -547,18 +550,51 @@ export const definicoes: Record<string, DefinicaoDoNo> = {
             obrigatorio: true,
             visivel: d => d.scope === ESCOPO_TAREFAS && !!d.by_workflow,
           },
+          /*
+           * Rodada 6: `link_item` é UM campo. Com Item, vincula a execução ao item; com Tarefa, filtra (tarefa sem
+           * item não dispara). As 3 entradas abaixo são o mesmo campo, na mesma posição, e nunca aparecem juntas:
+           * as 2 primeiras são a opção A (rótulo condicional pela origem); a 3ª é a opção B (nome único). A troca
+           * entre A e B fica na barra do protótipo.
+           */
           {
-            // Mesma chave do Vincular ao Item da branch; com Tarefa ela filtra quais tarefas disparam.
+            chave: 'link_item',
+            tipo: 'switch',
+            rotulo: l('Vincular a execução ao item', 'Link the run to the item', 'Vincular la ejecución al ítem'),
+            ajuda: l('O item que disparou mostra esta execução, e as tarefas do fluxo mostram o item.', 'The item that triggered it shows this run, and the flow\'s tasks show the item.', 'El ítem que lo disparó muestra esta ejecución, y las tareas del flujo muestran el ítem.'),
+            dica: l(
+              'Sem isto, o fluxo roda do mesmo jeito, mas a execução não aparece no item e as tarefas não mostram de onde vieram.',
+              'Without this, the flow runs the same way, but the run does not show on the item and tasks do not show where they came from.',
+              'Sin esto, el flujo corre igual, pero la ejecución no aparece en el ítem y las tareas no muestran de dónde vinieron.',
+            ),
+            visivel: d => modoDoVinculo.value === 'porOrigem' && (ehItem(d) || d.scope === ESCOPO_ITEM_SEM_CATEGORIA),
+          },
+          {
             chave: 'link_item',
             tipo: 'switch',
             rotulo: l('Só tarefas com item vinculado', 'Only tasks with a linked item', 'Solo tareas con ítem vinculado'),
             ajuda: l('Tarefa sem item vinculado não dispara o fluxo.', 'A task with no linked item does not trigger the flow.', 'Una tarea sin ítem vinculado no dispara el flujo.'),
             dica: l(
-              'Na branch, Vincular ao Item. Use quando o fluxo precisa do item da tarefa, por exemplo para ler ou alterar campos dele.',
-              'In the branch, Vincular ao Item. Use it when the flow needs the task\'s item, for example to read or update its fields.',
-              'En la rama, Vincular ao Item. Úselo cuando el flujo necesita el ítem de la tarea, por ejemplo para leer o modificar sus campos.',
+              'Use quando o fluxo precisa do item da tarefa, por exemplo para ler ou alterar campos dele.',
+              'Use it when the flow needs the task\'s item, for example to read or update its fields.',
+              'Úselo cuando el flujo necesita el ítem de la tarea, por ejemplo para leer o modificar sus campos.',
             ),
-            visivel: d => d.scope === ESCOPO_TAREFAS,
+            visivel: d => modoDoVinculo.value === 'porOrigem' && d.scope === ESCOPO_TAREFAS,
+          },
+          {
+            chave: 'link_item',
+            tipo: 'switch',
+            rotulo: l('Item vinculado', 'Linked item', 'Ítem vinculado'),
+            ajuda: l(
+              'Com Item, a execução fica vinculada ao item que disparou. Com Tarefa, só dispara a tarefa que tem item vinculado.',
+              'With Item, the run is linked to the item that triggered it. With Task, only a task that has a linked item triggers it.',
+              'Con Ítem, la ejecución queda vinculada al ítem que lo disparó. Con Tarea, solo dispara la tarea que tiene ítem vinculado.',
+            ),
+            dica: l(
+              'Com Item, sem isto o fluxo roda igual, mas a execução não aparece no item. Com Tarefa, use quando o fluxo precisa do item da tarefa.',
+              'With Item, without this the flow runs the same, but the run does not show on the item. With Task, use it when the flow needs the task\'s item.',
+              'Con Ítem, sin esto el flujo corre igual, pero la ejecución no aparece en el ítem. Con Tarea, úselo cuando el flujo necesita el ítem de la tarea.',
+            ),
+            visivel: d => modoDoVinculo.value === 'unico' && (ehItem(d) || d.scope === ESCOPO_ITEM_SEM_CATEGORIA || d.scope === ESCOPO_TAREFAS),
           },
         ],
       },
@@ -680,18 +716,6 @@ export const definicoes: Record<string, DefinicaoDoNo> = {
         descricao: l('Como cada execução aparece depois.', 'How each run shows up later.', 'Cómo aparece cada ejecución después.'),
         opcional: true,
         campos: [{
-          // Rodada 5: com Item, link_item liga a execução ao item. Com Tarefa, a mesma chave é filtro (em O que dispara).
-          chave: 'link_item',
-          tipo: 'switch',
-          rotulo: l('Vincular a execução ao item', 'Link the run to the item', 'Vincular la ejecución al ítem'),
-          ajuda: l('O item que disparou mostra esta execução, e as tarefas do fluxo mostram o item.', 'The item that triggered it shows this run, and the flow\'s tasks show the item.', 'El ítem que lo disparó muestra esta ejecución, y las tareas del flujo muestran el ítem.'),
-          dica: l(
-            'Sem isto, o fluxo roda do mesmo jeito, mas a execução não aparece no item e as tarefas não mostram de onde vieram.',
-            'Without this, the flow runs the same way, but the run does not show on the item and tasks do not show where they came from.',
-            'Sin esto, el flujo corre igual, pero la ejecución no aparece en el ítem y las tareas no muestran de dónde vinieron.',
-          ),
-          visivel: d => d.type === 'events' && ehItem(d),
-        }, {
           chave: 'title',
           tipo: 'texto',
           rotulo: l('Título da execução', 'Run title', 'Título de la ejecución'),
