@@ -112,6 +112,10 @@ const opcoesDeFormato = computed<DropdownMenuItem[]>(() => (['xlsx', 'csv', 'dbf
 const visiveis = ref<Record<string, boolean>>({ origem: true, tamanho: true })
 
 const colunas = computed<EnTableColumn[]>(() => [
+  // O menu da linha vem logo depois do checkbox (padrão do produto). O slot
+  // #actions do EnTable só desenha a coluna no fim, então o menu é uma coluna
+  // de dados, a primeira, sem rótulo.
+  { key: 'acoes', label: '' },
   { key: 'relatorio', label: props.t.colunas.relatorio, sortable: true },
   { key: 'status', label: props.t.colunas.status, sortable: true },
   { key: 'origem', label: props.t.colunas.origem, sortable: true },
@@ -120,15 +124,13 @@ const colunas = computed<EnTableColumn[]>(() => [
   { key: 'filtros', label: props.t.colunas.filtros },
   { key: 'tamanho', label: props.t.colunas.tamanho, sortable: true, align: 'right' },
   { key: 'criadoEm', label: props.t.colunas.criadoEm, sortable: true },
-  // A coluna de ações do EnTable tem 40 px fixos: só cabe o menu. Baixar ganha coluna própria, sem rótulo.
-  { key: 'baixar', label: '', align: 'right' },
 ])
 
 /** Larguras de partida. O EnTable divide igual sem isso, e o nome da origem corta. */
-const larguras = { relatorio: 320, status: 150, origem: 200, formato: 96, registros: 112, filtros: 130, tamanho: 104, criadoEm: 168, baixar: 64 }
+const larguras = { acoes: 48, relatorio: 320, status: 150, origem: 200, formato: 96, registros: 112, filtros: 130, tamanho: 104, criadoEm: 168 }
 
 /** Relatório, Status e Criado em não se escondem: sem elas a linha não se explica. */
-const FIXAS: string[] = ['relatorio', 'status', 'criadoEm', 'baixar']
+const FIXAS: string[] = ['acoes', 'relatorio', 'status', 'criadoEm']
 
 const menuDeColunas = computed<DropdownMenuItem[]>(() => colunas.value
   .filter(c => !FIXAS.includes(c.key))
@@ -186,7 +188,7 @@ const linhas = computed<Linha[]>(() => paginaAtual.value.map(p => ({
   filtros: p.proto.filtros.length,
   tamanho: p.processed_report?.size ?? null,
   criadoEm: p.created_at,
-  baixar: null,
+  acoes: null,
 })))
 
 /* ---------- seleção ---------- */
@@ -201,12 +203,19 @@ const prontasSelecionadas = computed(() => selecionadas.value.filter(l => l.pedi
 
 function menuDaLinha(p: PedidoDeRelatorio): DropdownMenuItem[][] {
   const pronto = p.status === 'complete'
+  const comErro = p.status === 'error'
+  // A ação principal da linha abre o menu: Baixar quando está pronto, Tentar de novo quando deu erro.
+  const principal: DropdownMenuItem[] = pronto
+    ? [{ label: props.t.acoes.baixar, icon: 'i-lucide-download', onSelect: () => emit('baixar', [p.id]) }]
+    : comErro
+      ? [{ label: props.t.acoes.tentarDeNovo, icon: 'i-lucide-rotate-cw', onSelect: () => emit('tentarDeNovo', p.id) }]
+      : []
   return [
-    // O clique na linha abre o painel; este item é o caminho de quem usa o teclado.
-    [{ label: props.t.acoes.verDetalhes, icon: 'i-lucide-panel-right-open', onSelect: () => emit('abrir', p.id) }],
+    ...(principal.length ? [principal] : []),
     [
-      ...(pronto ? [{ label: props.t.acoes.baixar, icon: 'i-lucide-download', onSelect: () => emit('baixar', [p.id]) }] : []),
-      { label: props.t.acoes.extrairDeNovo, icon: 'i-lucide-refresh-cw', disabled: p.status === 'pending' || p.status === 'processing', onSelect: () => emit('extrairDeNovo', p.id) },
+      // O clique na linha abre o painel; este item é o caminho de quem usa o teclado.
+      { label: props.t.acoes.verDetalhes, icon: 'i-lucide-panel-right-open', onSelect: () => emit('abrir', p.id) },
+      ...(comErro ? [] : [{ label: props.t.acoes.extrairDeNovo, icon: 'i-lucide-refresh-cw', disabled: p.status === 'pending' || p.status === 'processing', onSelect: () => emit('extrairDeNovo', p.id) }]),
       { label: props.t.acoes.abrirNaOrigem, icon: 'i-lucide-square-arrow-out-up-right', onSelect: () => emit('abrirOrigem', p.id) },
       ...(pronto ? [{ label: props.t.acoes.copiarLink, icon: 'i-lucide-link', onSelect: () => emit('copiarLink', p.id) }] : []),
     ],
@@ -453,21 +462,12 @@ function menuDaLinha(p: PedidoDeRelatorio): DropdownMenuItem[][] {
           <span class="whitespace-nowrap text-sm text-toned">{{ dataCurta(String(row.criadoEm), t, idioma) }}</span>
         </template>
 
-        <template #cell-baixar="{ row }">
-          <span class="flex justify-end" @click.stop>
-            <UTooltip v-if="(row as Linha).pedido.status === 'complete'" :text="t.acoes.baixar">
-              <UButton icon="i-lucide-download" color="primary" variant="soft" size="xs" :aria-label="t.acoes.baixar" @click="emit('baixar', [(row as Linha).id])" />
-            </UTooltip>
-            <UTooltip v-else-if="(row as Linha).pedido.status === 'error'" :text="t.acoes.tentarDeNovo">
-              <UButton icon="i-lucide-rotate-cw" color="error" variant="soft" size="xs" :aria-label="t.acoes.tentarDeNovo" @click="emit('tentarDeNovo', (row as Linha).id)" />
-            </UTooltip>
+        <template #cell-acoes="{ row }">
+          <span class="flex" @click.stop>
+            <UDropdownMenu :items="menuDaLinha((row as Linha).pedido)" :content="{ align: 'start' }">
+              <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" size="xs" :aria-label="t.acoes.maisAcoes" />
+            </UDropdownMenu>
           </span>
-        </template>
-
-        <template #actions="{ row }">
-          <UDropdownMenu :items="menuDaLinha((row as Linha).pedido)" :content="{ align: 'end' }">
-            <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" size="xs" :aria-label="t.acoes.maisAcoes" @click.stop />
-          </UDropdownMenu>
         </template>
       </EnTable>
     </div>

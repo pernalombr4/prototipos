@@ -217,3 +217,17 @@ separado; os pontos de acessibilidade abaixo saíram da mesma crítica.
   "Baixado" do Resumo continua.
 - **Mudou:** o protótipo passa a **aprovado**, no card do índice (`definePageMeta`) e no `README.md`.
 - **Ver:** `/meus-relatorios` · `evidencias/rodada4-01-painel-sem-historico.jpg`
+
+## Rodada 5 · 2026-10-19
+
+- **Pedido (literal):** "os 3 pontos do menu de açao sempre vem no inicio, logo à direita do checkbox / e a opçao
+  de download deve estar dentro dsse menu, nao solta na tabela. ajuste isso"
+- **Mudou:** o menu da linha (3 pontos) passa à primeira coluna, logo depois do checkbox. O slot `#actions` do
+  `EnTable` só desenha a coluna no fim, então o menu virou uma coluna de dados (`acoes`, sem rótulo, 48 px), fixa
+  no seletor de colunas.
+- **Mudou:** a coluna solta de Baixar saiu da tabela. **Baixar** é o primeiro item do menu quando o relatório está
+  pronto; quando falhou, o primeiro item é **Tentar novamente** (e Extrair novamente sai, para não repetir a ação).
+- **Fronteira:** muda a posição do menu e onde fica o Baixar da linha; não muda o painel do relatório nem a barra
+  da seleção em massa, que continua com Baixar.
+- **Ver:** `/meus-relatorios` · `evidencias/rodada5-01-menu-depois-do-checkbox.jpg`, `rodada5-02-baixar-no-menu.jpg`
+
