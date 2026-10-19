@@ -9,7 +9,7 @@
  * de inglês e português). O ícone de Cache (octicon) e o de Migrations (eos-icons)
  * não existem na coleção lucide instalada aqui: entram os mais próximos.
  *
- * O que é proposta: o item "Envio ao SIEM" em Logs, os grupos Identidade,
+ * O que é proposta: a tela Audit (selo "Modificada"), o item "Envio ao SIEM" em Logs, os grupos Identidade,
  * Integrações, IA e Proteção de dados, e o chip da organização no topo.
  */
 import type { Textos } from './textos'
@@ -24,7 +24,7 @@ export type Tela =
 const props = defineProps<{ t: Textos, tela: Tela, marcarNovo: boolean, foraAtivo: string, workspaces: number }>()
 const emit = defineEmits<{ navegar: [tela: Tela, rotulo?: string] }>()
 
-interface Item { rotulo: string, icone: string, tela?: Tela, novo?: boolean }
+interface Item { rotulo: string, icone: string, tela?: Tela, novo?: boolean, modificado?: boolean }
 interface Grupo { titulo: string, itens: Item[], novo?: boolean }
 
 const grupos = computed<Grupo[]>(() => {
@@ -38,7 +38,7 @@ const grupos = computed<Grupo[]>(() => {
     {
       titulo: g.logs,
       itens: [
-        { rotulo: 'Audit', icone: 'i-lucide-shield-check', tela: 'auditoria' },
+        { rotulo: 'Audit', icone: 'i-lucide-shield-check', tela: 'auditoria', modificado: true },
         { rotulo: i.siem, icone: 'i-lucide-radio-tower', tela: 'siem', novo: true },
         { rotulo: 'Request', icone: 'i-lucide-network' },
         { rotulo: 'AI Usage', icone: 'i-lucide-bot' },
@@ -176,6 +176,7 @@ watch(() => props.tela, async () => {
               <UIcon :name="item.icone" class="size-4 shrink-0" />
               <span class="flex-1 truncate">{{ item.rotulo }}</span>
               <UBadge v-if="marcarNovo && item.novo" :label="t.casca.novo" size="sm" variant="soft" />
+              <UBadge v-else-if="marcarNovo && item.modificado" :label="t.casca.modificada" color="info" size="sm" variant="soft" />
             </a>
           </div>
         </nav>

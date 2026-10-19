@@ -84,3 +84,8 @@ Ficou sem correção: o cálculo automático de contraste não leu as cores do t
 - **Por quê:** IA tem 2 assuntos que não cabem em Proteção de dados: segurança e gasto. O monday separa "AI governance" e o Notion tem a seção "Notion AI" com controle de modelo e de uso. O admin de hoje já tem as peças soltas: o log "AI Usage", o provedor padrão em Configurações Gerais e os créditos na carteira do workspace.
 - **Maquete:** consumo, projeção e modelos são inventados; os nomes dos modelos seguem o formato provedor/modelo do log "AI Usage".
 - **Ver:** https://pernalombr4.github.io/prototipos/seguranca-no-admin/?tela=ia-limites · [print de Limites de uso](evidencias/proposta-ia-limites.jpg) · [Audit Logs](evidencias/proposta-audit-logs.jpg) · [Tokens](evidencias/proposta-tokens.jpg) · [Destinos de saída](evidencias/proposta-destinos-de-saida.jpg) · [Domínios](evidencias/proposta-dominios.jpg)
+
+## Rodada 3 · 2026-10-19
+- **Pedido (literal):** "na tela de audit voce tem q botar badge pra dizer que foi modificada"
+- **Mudou:** selo "Modificada" (cor info, diferente do "Novo") no título da tela Audit Logs e no item Audit do menu; aparece com "Marcar o que é novo" ligado, como os selos "Novo".
+- **Fronteira:** muda só o selo; a tela Audit e o menu ficam como na rodada 2.

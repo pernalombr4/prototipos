@@ -103,7 +103,7 @@ const iconeDoAtor: Record<TipoDeAtor, string> = { pessoa: 'i-lucide-user-round',
 
 <template>
   <div>
-    <Cabecalho :titulo="ta.titulo">
+    <Cabecalho :titulo="ta.titulo" :novo="marcarNovo" :rotulo-novo="t.casca.modificada" cor-selo="info">
       <template #acoes>
         <div class="flex items-center gap-2 rounded-md border border-default bg-default px-3 py-1.5 text-xs" :class="marcarNovo ? 'ring-2 ring-primary/30' : ''">
           <UIcon name="i-lucide-archive" class="size-4 text-primary" />
