@@ -135,7 +135,7 @@ const host = (u: string) => normalizarUrl(u)?.host ?? u
             </li>
             <li class="flex items-center gap-2 bg-elevated/50 px-4 py-2">
               <UIcon name="i-lucide-lock" class="size-4 text-muted" />
-              <span class="flex-1 text-sm text-toned">{{ td.interna }} <span class="font-mono text-[10px] text-dimmed">10.0.0.0/8 · 172.16.0.0/12 · 192.168.0.0/16 · 127.0.0.1 · 169.254.169.254</span></span>
+              <span class="flex-1 text-sm text-toned">{{ td.interna }} <span class="font-mono text-[10px] text-muted">10.0.0.0/8 · 172.16.0.0/12 · 192.168.0.0/16 · 127.0.0.1 · 169.254.169.254</span></span>
               <UBadge :label="td.internaAjuda" color="neutral" variant="outline" size="sm" />
             </li>
           </ol>
@@ -224,7 +224,7 @@ const host = (u: string) => normalizarUrl(u)?.host ?? u
           color="neutral"
           variant="subtle"
           :description="t.ia.destinosAjuda"
-          :actions="[{ label: t.casca.itens.ia, variant: 'outline', size: 'xs', trailingIcon: 'i-lucide-arrow-right', onClick: () => emit('navegar', 'ia') }]"
+          :actions="[{ label: t.ia.titulo, variant: 'outline', size: 'xs', trailingIcon: 'i-lucide-arrow-right', onClick: () => emit('navegar', 'ia') }]"
         />
       </aside>
     </div>

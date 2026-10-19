@@ -125,7 +125,7 @@ const corDaOperacao = { criar: 'success', atualizar: 'info', desativar: 'error',
           <dl class="divide-y divide-default text-sm">
             <div v-for="[e, n] in tc.attrs" :key="e" class="flex items-center gap-2 py-1.5">
               <dt class="flex-1 font-mono text-xs text-muted">{{ e }}</dt>
-              <UIcon name="i-lucide-arrow-right" class="size-3.5 text-dimmed" />
+              <UIcon name="i-lucide-arrow-right" class="size-3.5 text-muted" />
               <dd class="flex-1 text-highlighted">{{ n }}</dd>
             </div>
           </dl>

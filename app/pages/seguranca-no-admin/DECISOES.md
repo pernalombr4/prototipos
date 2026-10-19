@@ -14,7 +14,7 @@
 | 2 | Tokens | Integrações › Tokens de API | inventário de todos os tokens da organização, resumo clicável (sem validade, expirando, sem uso), revogação em lote; política com validade máxima, proibir sem validade, quem cria, aprovação e aviso antes de expirar; prévia do que o membro vê; ao apertar a política, a tela mostra quantos tokens ficam fora e pergunta o que fazer |
 | 3 | Conta de serviço | Integrações › Contas de serviço | conta sem licença, com responsável, acessos por workspace e papel, credencial com validade limitada pela política de tokens; aba "Onde é usada"; troca de segredo com 24 h de sobreposição; segredo mostrado 1 vez |
 | 4 | Allowlist HTTP | Integrações › Destinos de saída | modo (permitir todos, só registrar, só a lista), regras ordenadas com curinga, "Todo o resto", rede interna sempre bloqueada, teste de endereço, fluxos afetados antes de salvar, prévia do aviso no editor do fluxo |
-| 5 | Prompt injection | Proteção de dados › IA e BENI | ligar e quem usa; busca na web; confirmação antes de acessar endereço externo; a IA segue os Destinos de saída; ler anexos; detectar instrução escondida (3 estados); ações que pedem confirmação; proteções fixas; tentativas detectadas |
+| 5 | Prompt injection | IA › Segurança (e IA › Limites de uso, rodada 2) | ligar e quem usa; busca na web; confirmação antes de acessar endereço externo; a IA segue os Destinos de saída; ler anexos; detectar instrução escondida (3 estados); ações que pedem confirmação; proteções fixas; tentativas detectadas |
 | 6 | SCIM e sessões | Identidade › Provisionamento (SCIM); Identidade › Sessões | URL base e token mostrado 1 vez, atributos, grupos do Entra, o que fazer ao desativar, últimas chamadas; o texto diz que o Entra manda mudanças a cada 40 minutos e leva para Sessões, onde "Encerrar todas" e "Encerrar sessões de uma pessoa" são na hora |
 | 7 | Contas e workspaces fora | Identidade › Domínios | verificação por TXT; "Bloquear contas e workspaces fora desta organização" e "Entrar sem convite" separados; quem cria workspace; contas do domínio fora da organização com "Trazer para a organização"; selo "Vale assim que salvar. Não depende da entrada em produção." |
 | 8 | Exportação e convites | Proteção de dados › Exportação e download; Identidade › Convites | 3 regras (exportar itens, baixar anexos, link público) com modo, cargos e exceção por workspace; prévia "Ver como" com o botão bloqueado e a mensagem; estimativa do que seria barrado; convites só de domínios da lista, com teste de e-mail |
@@ -54,7 +54,17 @@ O protótipo mostra a tela; estas 4 coisas precisam existir por trás para a tel
 
 ### Crítica e acessibilidade
 
-Feitas pelas skills `design:design-critique` e `design:accessibility-review` sobre os prints publicados; os achados estão na entrada abaixo.
+Skills `design:design-critique` (sobre os prints publicados) e `design:accessibility-review` (varredura no navegador). Corrigido nesta rodada:
+
+- rótulos do menu cortados ("Provisionament...", "Exportação e do..."): o menu usa "SCIM" e "Exportação"; o título da página continua completo;
+- item ativo rolava para baixo da barra do protótipo: agora rola para o centro do menu;
+- "Trazer para a organização" cortado na tabela de Domínios: botão de ícone com dica e `aria-label`;
+- Destinos e Exportação abriam com tudo liberado, e a proposta não aparecia: abrem em "Só registrar";
+- Salvar em 3 lugares diferentes (o mesmo problema da S3-F7): todas as telas de configuração salvam no cabeçalho;
+- 11 interruptores sem nome acessível: recebem o título do cartão como `aria-label`;
+- texto legível em `text-dimmed` passou a `text-muted`; a contagem das categorias saiu de 10 px com opacidade baixa.
+
+Ficou sem correção: o cálculo automático de contraste não leu as cores do tema (oklch) no navegador do app, e os tokens são os do tema copiado do en-docs, que já passaram nas rodadas anteriores. Código de evento e de URL seguem em 10 a 11 px, monoespaçado, como no Audit Log de hoje. O Salvar da política de Webhooks fica dentro do aviso, porque confirma uma ação sobre webhooks listados ali.
 
 ### Não deu
 
@@ -62,3 +72,14 @@ Feitas pelas skills `design:design-critique` e `design:accessibility-review` sob
 - **Prints do develop com dado de pessoa** (Audit, Request, Users, Workspaces): não foram commitados, porque mostram e-mails reais. Ficaram os 2 de Configurações Gerais, com o nome da redatora borrado.
 - **Verificação no Chrome:** a extensão não tem acesso ao `localhost` nesta máquina ("Chrome blocked the extension from accessing this page"). A conferência local foi no navegador do app, que não precisa de SSO para o protótipo; o develop foi explorado no Chrome, como manda a regra 2. Os prints da entrega são da versão publicada.
 - **Diagrama de jornada:** não há jornada de mais de 2 telas em sequência; cada pedido é uma tela com atalho próprio.
+
+## Rodada 2 · 2026-10-19
+
+- **Pedido (literal):** "IA nao deeria ter uma sessao propria? pra fazer configuraçoes de segurança/limites de uso de ia talvez. ou realmente fica em proteçao de dados?"
+- **Mudou:**
+  - grupo próprio "IA" no menu, entre Integrações e Proteção de dados, com 2 itens: "Segurança" (a tela da rodada 1, agora "Segurança da IA") e "Limites de uso" (nova);
+  - "Limites de uso": consumo do mês com projeção, limite mensal da organização, o que acontece no limite (avisar, liberar só para administradores, pausar), alertas em 50, 80 e 100%, limite por pessoa por dia, modelos permitidos com filtro "provedor sem retenção de dados" e limite próprio por workspace;
+  - o atalho 5 da barra acende nas 2 telas de IA.
+- **Fronteira:** muda o menu (grupo IA) e acrescenta 1 tela; não muda as outras 13 telas nem o menu de hoje.
+- **Por quê:** IA tem 2 assuntos que não cabem em Proteção de dados: segurança e gasto. O monday separa "AI governance" e o Notion tem a seção "Notion AI" com controle de modelo e de uso. O admin de hoje já tem as peças soltas: o log "AI Usage", o provedor padrão em Configurações Gerais e os créditos na carteira do workspace.
+- **Maquete:** consumo, projeção e modelos são inventados; os nomes dos modelos seguem o formato provedor/modelo do log "AI Usage".

@@ -87,7 +87,9 @@ function trazer(lista: ContaDeFora[]) {
   <div>
     <Cabecalho :titulo="td.titulo" :intro="td.intro" :novo="marcarNovo" :rotulo-novo="t.casca.novo">
       <template #acoes>
-        <UButton :label="td.adicionar" icon="i-lucide-plus" size="sm" @click="novo = true" />
+        <span v-if="alterada" class="text-xs text-warning">{{ t.comum.pendentes(1) }}</span>
+        <UButton :label="t.comum.salvar" size="sm" :disabled="!alterada || !principal" @click="salvar" />
+        <UButton :label="td.adicionar" icon="i-lucide-plus" size="sm" color="neutral" variant="outline" @click="novo = true" />
       </template>
     </Cabecalho>
 
@@ -113,17 +115,13 @@ function trazer(lista: ContaDeFora[]) {
         <div class="flex flex-wrap items-center gap-2">
           <h2 class="text-sm font-semibold text-highlighted">{{ principal ? td.controles(principal.dominio) : td.precisaVerificar }}</h2>
           <UBadge :label="td.vigencia" icon="i-lucide-zap" color="info" variant="soft" size="sm" />
-          <div class="ml-auto flex items-center gap-2">
-            <span v-if="alterada" class="text-xs text-warning">{{ t.comum.pendentes(1) }}</span>
-            <UButton :label="t.comum.salvar" size="sm" :disabled="!alterada || !principal" @click="salvar" />
-          </div>
         </div>
         <div class="grid gap-4 lg:grid-cols-3" :class="principal ? '' : 'pointer-events-none opacity-50'">
           <Regra :titulo="td.bloquear" icone="i-lucide-shield-ban" :descricao="td.bloquearAjuda(principal?.dominio ?? '')" :alterada="rascunho.bloquear !== controles.bloquear">
-            <USwitch v-model="rascunho.bloquear" />
+            <USwitch :aria-label="td.bloquear" v-model="rascunho.bloquear" />
           </Regra>
           <Regra :titulo="td.semConvite" icone="i-lucide-door-open" :descricao="td.semConviteAjuda" :alterada="rascunho.semConvite !== controles.semConvite">
-            <USwitch v-model="rascunho.semConvite" />
+            <USwitch :aria-label="td.semConvite" v-model="rascunho.semConvite" />
           </Regra>
           <Regra :titulo="td.criaWs" icone="i-lucide-briefcase" :alterada="rascunho.criaWs !== controles.criaWs">
             <USelect v-model="rascunho.criaWs" :items="(['org', 'todos'] as const).map(v => ({ label: td.criaWsOpcoes[v], value: v }))" class="w-full" />
@@ -151,7 +149,9 @@ function trazer(lista: ContaDeFora[]) {
           <template #cell-criada="{ row }"><span class="text-sm text-toned">{{ data((row as any).criada, idioma) }}</span></template>
           <template #cell-ultimoAcesso="{ row }"><span class="text-sm text-toned">{{ relativo((row as any).ultimoAcesso, idioma) }}</span></template>
           <template #actions="{ row }">
-            <UButton :label="td.trazer" size="xs" variant="ghost" @click="trazer([row as any])" />
+            <UTooltip :text="td.trazer">
+              <UButton icon="i-lucide-building-2" size="xs" variant="ghost" :aria-label="td.trazer" @click="trazer([row as any])" />
+            </UTooltip>
           </template>
         </EnTable>
       </section>

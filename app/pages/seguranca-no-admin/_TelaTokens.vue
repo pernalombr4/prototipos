@@ -144,7 +144,13 @@ function gravar(tr: PoliticaDeTokens['tratamento']) {
 
 <template>
   <div>
-    <Cabecalho :titulo="tt.titulo" :intro="tt.intro" :novo="marcarNovo" :rotulo-novo="t.casca.novo" />
+    <Cabecalho :titulo="tt.titulo" :intro="tt.intro" :novo="marcarNovo" :rotulo-novo="t.casca.novo">
+      <template v-if="aba === 'politica'" #acoes>
+        <span v-if="alterada" class="text-xs text-warning">{{ t.comum.pendentes(1) }}</span>
+        <UButton :label="t.comum.descartar" size="sm" color="neutral" variant="ghost" :disabled="!alterada" @click="Object.assign(rascunho, structuredClone(toRaw(politica)))" />
+        <UButton :label="tp.aplicar" size="sm" :disabled="!alterada" @click="aplicar" />
+      </template>
+    </Cabecalho>
 
     <div class="px-6 pt-3">
       <UTabs
@@ -196,7 +202,7 @@ function gravar(tr: PoliticaDeTokens['tratamento']) {
         <template #cell-description="{ row }">
           <span class="leading-tight">
             <span class="block text-sm font-medium text-highlighted">{{ (row as any).description }}</span>
-            <span class="block font-mono text-[10px] text-dimmed">{{ (row as any).reference }}</span>
+            <span class="block font-mono text-[10px] text-muted">{{ (row as any).reference }}</span>
           </span>
         </template>
         <template #cell-dono="{ row }">
@@ -216,7 +222,7 @@ function gravar(tr: PoliticaDeTokens['tratamento']) {
           <span class="text-xs text-toned">{{ ((row as any).scope?.global ?? []).map((p: 'read' | 'write' | 'delete') => tt.permissoes[p]).join(', ') }}</span>
         </template>
         <template #cell-ultimo_uso="{ row }">
-          <span class="whitespace-nowrap text-sm" :class="(row as any).ultimo_uso ? 'text-toned' : 'text-dimmed'">{{ (row as any).ultimo_uso ? relativo((row as any).ultimo_uso, idioma) : tt.nuncaUsado }}</span>
+          <span class="whitespace-nowrap text-sm" :class="(row as any).ultimo_uso ? 'text-toned' : 'text-muted'">{{ (row as any).ultimo_uso ? relativo((row as any).ultimo_uso, idioma) : tt.nuncaUsado }}</span>
         </template>
         <template #cell-expires_at="{ row }">
           <span v-if="!(row as any).expires_at" class="flex items-center gap-1 whitespace-nowrap text-sm text-warning"><UIcon name="i-lucide-infinity" class="size-4" />{{ tt.semValidade }}</span>
@@ -243,22 +249,17 @@ function gravar(tr: PoliticaDeTokens['tratamento']) {
           <USelect v-model="rascunho.validadeMax" :items="itensValidade" class="w-48" />
         </Regra>
         <Regra :titulo="tp.semValidade" icone="i-lucide-infinity" :descricao="tp.semValidadeAjuda" :alterada="rascunho.proibirSemValidade !== politica.proibirSemValidade">
-          <USwitch v-model="rascunho.proibirSemValidade" :disabled="!!rascunho.validadeMax" />
+          <USwitch :aria-label="tp.semValidade" v-model="rascunho.proibirSemValidade" :disabled="!!rascunho.validadeMax" />
         </Regra>
         <Regra :titulo="tp.quemCria" icone="i-lucide-user-cog" :alterada="rascunho.quemCria !== politica.quemCria">
           <USelect v-model="rascunho.quemCria" :items="itensQuem" class="w-full max-w-72" />
         </Regra>
         <Regra :titulo="tp.aprovacao" icone="i-lucide-stamp" :descricao="tp.aprovacaoAjuda" :alterada="rascunho.aprovacao !== politica.aprovacao">
-          <USwitch v-model="rascunho.aprovacao" />
+          <USwitch :aria-label="tp.aprovacao" v-model="rascunho.aprovacao" />
         </Regra>
         <Regra :titulo="tp.aviso" icone="i-lucide-bell-ring" :descricao="tp.avisoAjuda" :alterada="JSON.stringify(rascunho.avisos) !== JSON.stringify(politica.avisos)" class="md:col-span-2">
           <UCheckboxGroup v-model="rascunho.avisos" :items="itensAviso" orientation="horizontal" />
         </Regra>
-        <div class="flex items-center justify-end gap-2 md:col-span-2">
-          <span v-if="alterada" class="mr-auto text-xs text-warning">{{ t.comum.pendentes(1) }}</span>
-          <UButton :label="t.comum.descartar" color="neutral" variant="ghost" :disabled="!alterada" @click="Object.assign(rascunho, structuredClone(toRaw(politica)))" />
-          <UButton :label="tp.aplicar" :disabled="!alterada" @click="aplicar" />
-        </div>
       </div>
 
       <!-- Prévia do diálogo de criar token -->

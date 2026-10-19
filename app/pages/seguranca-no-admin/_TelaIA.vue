@@ -71,7 +71,7 @@ const linhas = computed(() => salvo.value.detectar === 'desligado'
         <h2 class="flex items-center gap-2 text-sm font-semibold text-highlighted"><UIcon name="i-lucide-sparkles" class="size-4 text-primary" />{{ ti.secaoUso }}</h2>
         <div class="grid gap-4 lg:grid-cols-2">
           <Regra :titulo="ti.ativar" icone="i-lucide-power" :descricao="ti.ativarAjuda" :alterada="c.ativo !== salvo.ativo">
-            <USwitch v-model="c.ativo" />
+            <USwitch :aria-label="ti.ativar" v-model="c.ativo" />
           </Regra>
           <Regra :titulo="ti.quem" icone="i-lucide-users" :alterada="JSON.stringify(c.quem) !== JSON.stringify(salvo.quem)">
             <USelectMenu v-model="c.quem" :items="[...cargos]" multiple :disabled="!c.ativo" class="w-full" />
@@ -85,10 +85,10 @@ const linhas = computed(() => salvo.value.detectar === 'desligado'
           <h2 class="flex items-center gap-2 text-sm font-semibold text-highlighted"><UIcon name="i-lucide-door-open" class="size-4 text-primary" />{{ ti.secaoSaida }}</h2>
           <div class="grid gap-4 lg:grid-cols-3">
             <Regra :titulo="ti.busca" icone="i-lucide-search" :descricao="ti.buscaAjuda" :alterada="c.busca !== salvo.busca">
-              <USwitch v-model="c.busca" />
+              <USwitch :aria-label="ti.busca" v-model="c.busca" />
             </Regra>
             <Regra :titulo="ti.confirmar" icone="i-lucide-hand" :descricao="ti.confirmarAjuda" :alterada="c.confirmar !== salvo.confirmar">
-              <USwitch v-model="c.confirmar" />
+              <USwitch :aria-label="ti.confirmar" v-model="c.confirmar" />
             </Regra>
             <Regra :titulo="ti.destinos" icone="i-lucide-route" :descricao="ti.destinosAjuda">
               <div class="flex flex-wrap items-center gap-2">
@@ -104,7 +104,7 @@ const linhas = computed(() => salvo.value.detectar === 'desligado'
           <h2 class="flex items-center gap-2 text-sm font-semibold text-highlighted"><UIcon name="i-lucide-file-search" class="size-4 text-primary" />{{ ti.secaoConteudo }}</h2>
           <div class="grid gap-4 lg:grid-cols-[1fr_2fr]">
             <Regra :titulo="ti.anexos" icone="i-lucide-paperclip" :descricao="ti.anexosAjuda" :alterada="c.anexos !== salvo.anexos">
-              <USwitch v-model="c.anexos" />
+              <USwitch :aria-label="ti.anexos" v-model="c.anexos" />
             </Regra>
             <Regra :titulo="ti.detectar" icone="i-lucide-scan-eye" :descricao="ti.detectarAjuda" :alterada="c.detectar !== salvo.detectar">
               <template #selos><UBadge v-if="marcarNovo" :label="t.casca.novo" size="sm" variant="soft" /></template>

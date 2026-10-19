@@ -28,4 +28,4 @@ export const usePoliticaDeTokens = () => useState<PoliticaDeTokens>('sa-politica
 
 export const useTokens = () => useState<TokenDaOrg[]>('sa-tokens', () => structuredClone(tokensIniciais))
 
-export const useDestinos = () => useState<{ modo: ModoDeDestino, regras: RegraDeDestino[] }>('sa-destinos', () => ({ modo: 'todos', regras: structuredClone(regrasIniciais) }))
+export const useDestinos = () => useState<{ modo: ModoDeDestino, regras: RegraDeDestino[] }>('sa-destinos', () => ({ modo: 'registrar', regras: structuredClone(regrasIniciais) }))

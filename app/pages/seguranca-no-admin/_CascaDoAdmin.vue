@@ -10,7 +10,7 @@
  * não existem na coleção lucide instalada aqui: entram os mais próximos.
  *
  * O que é proposta: o item "Envio ao SIEM" em Logs, os grupos Identidade,
- * Integrações e Proteção de dados, e o chip da organização no topo.
+ * Integrações, IA e Proteção de dados, e o chip da organização no topo.
  */
 import type { Textos } from './textos'
 
@@ -18,7 +18,7 @@ export type Tela =
   | 'auditoria' | 'siem'
   | 'dominios' | 'scim' | 'sessoes' | 'convites'
   | 'tokens' | 'contas' | 'webhooks' | 'destinos'
-  | 'exportacao' | 'ia' | 'continuidade'
+  | 'exportacao' | 'ia' | 'ia-limites' | 'continuidade'
   | 'fora'
 
 const props = defineProps<{ t: Textos, tela: Tela, marcarNovo: boolean, foraAtivo: string, workspaces: number }>()
@@ -66,11 +66,18 @@ const grupos = computed<Grupo[]>(() => {
       ],
     },
     {
+      titulo: g.ia,
+      novo: true,
+      itens: [
+        { rotulo: i.ia, icone: 'i-lucide-shield-half', tela: 'ia', novo: true },
+        { rotulo: i.iaLimites, icone: 'i-lucide-gauge', tela: 'ia-limites', novo: true },
+      ],
+    },
+    {
       titulo: g.protecao,
       novo: true,
       itens: [
         { rotulo: i.exportacao, icone: 'i-lucide-file-down', tela: 'exportacao', novo: true },
-        { rotulo: i.ia, icone: 'i-lucide-sparkles', tela: 'ia', novo: true },
         { rotulo: i.continuidade, icone: 'i-lucide-life-buoy', tela: 'continuidade', novo: true },
       ],
     },
@@ -87,7 +94,7 @@ function ativo(item: Item) {
 const menu = ref<HTMLElement>()
 watch(() => props.tela, async () => {
   await nextTick()
-  menu.value?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  menu.value?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: 'center', behavior: 'smooth' })
 })
 </script>
 

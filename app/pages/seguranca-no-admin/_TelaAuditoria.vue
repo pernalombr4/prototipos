@@ -141,7 +141,7 @@ const iconeDoAtor: Record<TipoDeAtor, string> = { pessoa: 'i-lucide-user-round',
         @click="categoria = c"
       >
         {{ ta.categorias[c] }}
-        <span class="font-mono text-[10px] opacity-60">{{ contagem[c] ?? 0 }}</span>
+        <span class="font-mono text-[11px] text-muted">{{ contagem[c] ?? 0 }}</span>
       </UButton>
       <UBadge v-if="marcarNovo" :label="t.casca.novo" size="sm" variant="soft" class="ml-1" />
     </div>
@@ -162,7 +162,7 @@ const iconeDoAtor: Record<TipoDeAtor, string> = { pessoa: 'i-lucide-user-round',
         <template #cell-codigo="{ row }">
           <span class="flex flex-col gap-0.5">
             <UBadge :label="ta.eventos[(row as any)._e.codigo as keyof typeof ta.eventos]" :color="corDaCategoria[categoriaDoEvento[(row as any)._e.codigo as Evento['codigo']]]" variant="soft" size="sm" class="w-fit" />
-            <code class="text-[10px] text-dimmed">{{ (row as any)._e.codigo }}</code>
+            <code class="text-[10px] text-muted">{{ (row as any)._e.codigo }}</code>
           </span>
         </template>
         <template #cell-alvo="{ row }">

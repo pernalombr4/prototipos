@@ -49,10 +49,10 @@ const resultado = computed(() => {
           <USelect v-model="c.quem" :items="(['org', 'ws', 'todos'] as const).map(v => ({ label: tc.quemOpcoes[v], value: v }))" class="w-full" />
         </Regra>
         <Regra :titulo="tc.externos" icone="i-lucide-user-round-x" :descricao="tc.externosAjuda" :alterada="c.externos !== salvo.externos">
-          <USwitch v-model="c.externos" />
+          <USwitch :aria-label="tc.externos" v-model="c.externos" />
         </Regra>
         <Regra :titulo="tc.restringir" icone="i-lucide-at-sign" :descricao="tc.restringirAjuda" :alterada="c.restringir !== salvo.restringir || JSON.stringify(c.dominios) !== JSON.stringify(salvo.dominios)" class="md:col-span-2">
-          <template #selos><USwitch v-model="c.restringir" size="sm" /></template>
+          <template #selos><USwitch :aria-label="tc.restringir" v-model="c.restringir" size="sm" /></template>
           <UInputTags v-model="c.dominios" :placeholder="tc.dominiosPh" :disabled="!c.restringir" class="w-full" />
         </Regra>
         <Transition enter-active-class="transition duration-200" enter-from-class="opacity-0" leave-active-class="transition duration-200" leave-to-class="opacity-0">

@@ -25,7 +25,7 @@ const te = computed(() => props.t.exportacao)
 type Chave = 'exportar' | 'anexos' | 'link'
 interface RegraDeSaida { modo: TipoModo, quem: 'todos' | 'cargos' | 'ninguem', cargos: Cargo[], excecoes: string[] }
 const salvo = useState<Record<Chave, RegraDeSaida>>('sa-exportacao', () => ({
-  exportar: { modo: 'desligado', quem: 'cargos', cargos: ['Administrador do workspace', 'Membro completo'], excecoes: [] },
+  exportar: { modo: 'registrar', quem: 'cargos', cargos: ['Administrador do workspace', 'Membro completo'], excecoes: [] },
   anexos: { modo: 'desligado', quem: 'todos', cargos: [], excecoes: [] },
   link: { modo: 'bloquear', quem: 'ninguem', cargos: [], excecoes: ['comercial-etanol'] },
 }))

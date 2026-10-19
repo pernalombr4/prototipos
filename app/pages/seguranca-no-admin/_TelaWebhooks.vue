@@ -144,7 +144,7 @@ if (!assinaturas.includes(esperado)) recusar()`
       <div class="space-y-4">
         <Regra :titulo="tw.exigir" icone="i-lucide-shield-check" :descricao="tw.exigirAjuda" :alterada="exigirRascunho !== exigir">
           <template #selos><UBadge v-if="marcarNovo" :label="t.casca.novo" size="sm" variant="soft" /></template>
-          <USwitch v-model="exigirRascunho" :disabled="exigir" />
+          <USwitch :aria-label="tw.exigir" v-model="exigirRascunho" :disabled="exigir" />
           <Transition enter-active-class="transition duration-200" enter-from-class="opacity-0 -translate-y-1">
             <div v-if="exigirRascunho && !exigir" class="space-y-3 rounded-lg border border-warning/40 bg-warning/5 p-3">
               <p class="flex items-center gap-2 text-sm font-medium text-highlighted"><UIcon name="i-lucide-shield-alert" class="size-4 text-warning" />{{ tw.semSegredo(semSegredo.length) }}</p>

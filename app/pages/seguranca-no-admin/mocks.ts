@@ -501,3 +501,26 @@ export const continuidade = {
     { quando: ha(203 * MIN), ok: true }, { quando: ha(263 * MIN), ok: false }, { quando: ha(323 * MIN), ok: true },
   ],
 }
+
+/* ------------------------------------------------------------------ *
+ * 5b. Limites de uso da IA                                             *
+ * ------------------------------------------------------------------ */
+
+/** Invenção, com a estrutura do log "AI Usage" do admin (provedor/modelo, custo, tokens). */
+export const consumoIA = [
+  { workspace: 'juridico-contencioso', usado: 18_420, limiteProprio: 20_000 as number | null },
+  { workspace: 'suprimentos', usado: 9_310, limiteProprio: null as number | null },
+  { workspace: 'compliance-riscos', usado: 2_140, limiteProprio: null as number | null },
+  { workspace: 'manutencao-industrial', usado: 6_885, limiteProprio: 8_000 as number | null },
+  { workspace: 'comercial-etanol', usado: 4_002, limiteProprio: null as number | null },
+  { workspace: 'pessoas-cultura', usado: 610, limiteProprio: 1_000 as number | null },
+]
+
+/** Nomes no formato que o log "AI Usage" mostra hoje (provedor/modelo). */
+export const modelosDeIA = [
+  { id: 'anthropic/claude-sonnet-4.5', semRetencao: true },
+  { id: 'anthropic/claude-haiku-4.5', semRetencao: true },
+  { id: 'openai/gpt-5-mini', semRetencao: true },
+  { id: 'google/gemini-2.5-flash', semRetencao: false },
+  { id: 'mistral/mistral-ocr', semRetencao: false },
+]

@@ -72,21 +72,20 @@ function encerrarTodas() {
   <div>
     <Cabecalho :titulo="ts.titulo" :intro="ts.intro" :novo="marcarNovo" :rotulo-novo="t.casca.novo">
       <template #acoes>
+        <span v-if="alterada" class="text-xs text-warning">{{ t.comum.pendentes(1) }}</span>
+        <UButton :label="t.comum.salvar" size="sm" :disabled="!alterada" @click="salvar" />
         <UButton :label="ts.encerrarTodas" icon="i-lucide-log-out" size="sm" color="error" variant="outline" :disabled="!sessoes.length" @click="confirmar = true" />
       </template>
     </Cabecalho>
 
     <div class="space-y-4 p-6">
-      <div class="grid gap-4 lg:grid-cols-[1fr_1fr_auto]">
+      <div class="grid gap-4 lg:grid-cols-2">
         <Regra :titulo="ts.duracao" icone="i-lucide-clock" :descricao="ts.duracaoAjuda" :alterada="rascunho.duracao !== politica.duracao">
           <USelect v-model="rascunho.duracao" :items="Object.entries(ts.duracaoOpcoes).map(([v, l]) => ({ label: l, value: Number(v) }))" class="w-48" />
         </Regra>
         <Regra :titulo="ts.ociosa" icone="i-lucide-coffee" :descricao="ts.ociosaAjuda" :alterada="rascunho.ociosa !== politica.ociosa">
           <USelect v-model="rascunho.ociosa" :items="Object.entries(ts.ociosaOpcoes).map(([v, l]) => ({ label: l, value: Number(v) }))" class="w-48" />
         </Regra>
-        <div class="flex items-end">
-          <UButton :label="t.comum.salvar" :disabled="!alterada" @click="salvar" />
-        </div>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">

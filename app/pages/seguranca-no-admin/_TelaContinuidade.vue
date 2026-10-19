@@ -55,7 +55,7 @@ function baixar(o: string) {
           <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">{{ tc.nivel }}</p>
           <ol class="space-y-1.5">
             <li v-for="n in niveis" :key="n" class="flex items-start gap-2 rounded-md p-2" :class="c.nivel === n ? 'bg-primary/10 ring-1 ring-primary/40' : ''">
-              <UIcon :name="c.nivel === n ? 'i-lucide-circle-check' : 'i-lucide-circle'" class="mt-0.5 size-4 shrink-0" :class="c.nivel === n ? 'text-primary' : 'text-dimmed'" />
+              <UIcon :name="c.nivel === n ? 'i-lucide-circle-check' : 'i-lucide-circle'" class="mt-0.5 size-4 shrink-0" :class="c.nivel === n ? 'text-primary' : 'text-muted'" />
               <div class="min-w-0 flex-1">
                 <p class="text-sm font-medium" :class="c.nivel === n ? 'text-highlighted' : 'text-toned'">{{ tc.niveis[n].nome }}</p>
                 <p class="text-xs text-muted">{{ tc.niveis[n].ajuda }}</p>

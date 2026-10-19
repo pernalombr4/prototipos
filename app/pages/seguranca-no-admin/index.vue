@@ -21,6 +21,7 @@ import TelaTokens from './_TelaTokens.vue'
 import TelaContas from './_TelaContas.vue'
 import TelaDestinos from './_TelaDestinos.vue'
 import TelaIA from './_TelaIA.vue'
+import TelaLimitesIA from './_TelaLimitesIA.vue'
 import TelaScim from './_TelaScim.vue'
 import TelaSessoes from './_TelaSessoes.vue'
 import TelaDominios from './_TelaDominios.vue'
@@ -43,7 +44,7 @@ const t = useTextos(textos)
 const route = useRoute()
 const router = useRouter()
 
-const telas: Tela[] = ['auditoria', 'siem', 'dominios', 'scim', 'sessoes', 'convites', 'tokens', 'contas', 'webhooks', 'destinos', 'exportacao', 'ia', 'continuidade']
+const telas: Tela[] = ['auditoria', 'siem', 'dominios', 'scim', 'sessoes', 'convites', 'tokens', 'contas', 'webhooks', 'destinos', 'exportacao', 'ia', 'ia-limites', 'continuidade']
 const inicial = telas.includes(route.query.tela as Tela) ? route.query.tela as Tela : 'auditoria'
 const tela = useState<Tela>('sa-tela', () => inicial)
 const foraAtivo = ref('')
@@ -67,7 +68,7 @@ const pontos: { tela: Tela, tambem: Tela[] }[] = [
   { tela: 'tokens', tambem: [] },
   { tela: 'contas', tambem: [] },
   { tela: 'destinos', tambem: [] },
-  { tela: 'ia', tambem: [] },
+  { tela: 'ia', tambem: ['ia-limites'] },
   { tela: 'scim', tambem: ['sessoes'] },
   { tela: 'dominios', tambem: [] },
   { tela: 'exportacao', tambem: ['convites'] },
@@ -83,7 +84,7 @@ function reiniciar() {
 }
 
 const componentes: Record<Exclude<Tela, 'fora'>, Component> = {
-  auditoria: TelaAuditoria, siem: TelaSiem, tokens: TelaTokens, contas: TelaContas, destinos: TelaDestinos, ia: TelaIA,
+  auditoria: TelaAuditoria, siem: TelaSiem, tokens: TelaTokens, contas: TelaContas, destinos: TelaDestinos, ia: TelaIA, 'ia-limites': TelaLimitesIA,
   scim: TelaScim, sessoes: TelaSessoes, dominios: TelaDominios, convites: TelaConvites, exportacao: TelaExportacao,
   webhooks: TelaWebhooks, continuidade: TelaContinuidade,
 }
