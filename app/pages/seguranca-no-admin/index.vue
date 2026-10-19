@@ -49,7 +49,8 @@ const inicial = telas.includes(route.query.tela as Tela) ? route.query.tela as T
 const tela = useState<Tela>('sa-tela', () => inicial)
 const foraAtivo = ref('')
 /* No site estático a página é gerada sem query: o link direto (?tela=) só vale no navegador. */
-onMounted(() => {
+/* onNuxtReady: roda depois da hidratação e do payload, que de outro jeito devolve a tela inicial. */
+onNuxtReady(() => {
   /* Na hidratação do site estático a rota ainda é a gerada, sem query: lê da barra de endereço. */
   const q = new URLSearchParams(window.location.search).get('tela') as Tela
   if (telas.includes(q) && q !== tela.value) tela.value = q
