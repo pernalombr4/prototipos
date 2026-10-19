@@ -45,9 +45,11 @@ export function resumir(no: No, i: Idioma, nos: No[]): string {
               ? (fluxos.find(f => f.id === d.source_workflows[0])?.nome ?? '…')
               : P(`${d.source_workflows.length} fluxos`, `${d.source_workflows.length} flows`, `${d.source_workflows.length} flujos`))
           : ''
+        // Com o filtro de item ligado, o card diz "com item".
+        const comItem = d.link_item ? P(' com item', ' with an item', ' con ítem') : ''
         return origem
-          ? P(`Quando uma tarefa de ${origem} for ${acao}`, `When a task from ${origem} is ${acao}`, `Cuando una tarea de ${origem} sea ${acao}`)
-          : P(`Quando uma tarefa for ${acao}`, `When a task is ${acao}`, `Cuando una tarea sea ${acao}`)
+          ? P(`Quando uma tarefa de ${origem}${comItem} for ${acao}`, `When a task from ${origem}${comItem} is ${acao}`, `Cuando una tarea de ${origem}${comItem} sea ${acao}`)
+          : P(`Quando uma tarefa${comItem} for ${acao}`, `When a task${comItem} is ${acao}`, `Cuando una tarea${comItem} sea ${acao}`)
       }
       if (d.type === 'events') {
         const cat = categorias.find(c => c.id === d.scope)?.nome ?? '…'

@@ -256,3 +256,34 @@ o protótipo usa um nome provisório, para o time trocar pelo real: `backup_assi
 - **Ver:** `/spaceflow`, Início › Configurar · `evidencias/dev-16-inicio-categoria-mistura-entidades.jpg` a
   `dev-19-card-tarefa-for-criado.jpg` (branch) · `evidencias/proposta-18-inicio-titulos-e-origem.jpg` a
   `proposta-22-inicio-escuro-espanhol.jpg`
+
+## Rodada 5 · 2026-10-19
+
+- **Pedido (literal):** "tambem nao sei se a opçao vincular ao item deveria ter exatamente esse nome, ou se precisa de
+  um help, enfim... no caso de gatilho por açao de tarefa, esse campo você ativa, caso você queira que a tarefa que vai
+  ativar esse fluxo tenha um item vinculado, e nesse caso serve como um filtro: task sem item vinculado não dispara o
+  fluxo. e no caso de gatilho por açao em categoria, é deixar o item vinculado ao fluxo mesmo. pense nisso e proponha"
+- **Mudou:** a chave `link_item` tem 2 papéis, então vira 2 campos, um por origem, cada um na seção da sua função:
+
+| Origem | Rótulo | Seção | Ajuda (sob o campo) | "?" |
+|---|---|---|---|---|
+| Item | **Vincular a execução ao item** | Execução | O item que disparou mostra esta execução, e as tarefas do fluxo mostram o item. | Sem isto, o fluxo roda do mesmo jeito, mas a execução não aparece no item e as tarefas não mostram de onde vieram. |
+| Tarefa | **Só tarefas com item vinculado** | O que dispara, ao lado de Só tarefas criadas por fluxos | Tarefa sem item vinculado não dispara o fluxo. | Use quando o fluxo precisa do item da tarefa, por exemplo para ler ou alterar campos dele. |
+
+- **Mudou:** trocar a origem do evento desliga `link_item`. O "ligado" de Item (vincular) não vira o "ligado" de
+  Tarefa (filtrar) sem a pessoa ver.
+- **Mudou:** o card diz "com item" quando o filtro está ligado: "Quando uma tarefa com item for criada".
+- **Por que assim:** com Tarefa, o campo decide quais eventos disparam; o lugar é junto do outro filtro de tarefa,
+  com o rótulo no formato "Só tarefas…". Com Item, ele decide o que a execução deixa no item; o lugar é Execução. Um
+  rótulo só ("Vincular ao Item") servia aos 2 e não explicava nenhum: no filtro, não dizia que tarefa sem item fica de
+  fora.
+- **Descartado:** manter "Vincular ao item" nos 2 casos, só com ajuda diferente. Motivo: o rótulo de filtro precisa
+  dizer o efeito; "vincular" sugere uma ação do fluxo, não uma condição para ele começar.
+- **Fronteira:** muda rótulo, ajuda, seção e o desligar na troca de origem. Não muda a chave gravada (`link_item`) nem
+  o que ela faz em cada origem.
+- **Achado da branch:** a mesma chave muda de sentido conforme a origem, e trocar Tarefas por uma categoria mantém o
+  interruptor ligado: o filtro de tarefa vira vínculo de item sem aviso.
+- **Não deu:** confirmar se, com Tarefa e o filtro ligado, o item da tarefa também fica vinculado à execução. Por quê:
+  a branch não diz e eu só li a tela. A ajuda descreve só o filtro, que é o que você descreveu.
+- **Ver:** `/spaceflow`, Início › Configurar · `evidencias/proposta-23-item-vincular-execucao.jpg`,
+  `proposta-24-tarefa-so-com-item.jpg`, `proposta-25-card-tarefa-com-item.jpg`

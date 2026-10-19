@@ -102,8 +102,12 @@ const ultimaCategoria = ref<string | undefined>(ehItem(props.dado) ? props.dado.
 const origem = computed({
   get: () => (props.dado.scope === ESCOPO_TAREFAS ? 'tarefa' : props.dado.scope === ESCOPO_MEMBROS ? 'membro' : props.dado.scope ? 'item' : undefined),
   set: (v) => {
+    if (v === origem.value) return
     if (ehItem(props.dado)) ultimaCategoria.value = props.dado.scope
     props.dado.scope = v === 'tarefa' ? ESCOPO_TAREFAS : (ultimaCategoria.value ?? ESCOPO_ITEM_SEM_CATEGORIA)
+    // link_item muda de sentido com a origem (Item: vincular a execução; Tarefa: filtro). Trocar a origem desliga,
+    // para o "ligado" de um não virar o "ligado" do outro sem a pessoa ver.
+    props.dado.link_item = false
   },
 })
 const opcoesDeOrigem = computed(() => [

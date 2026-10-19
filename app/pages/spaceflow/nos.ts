@@ -547,6 +547,19 @@ export const definicoes: Record<string, DefinicaoDoNo> = {
             obrigatorio: true,
             visivel: d => d.scope === ESCOPO_TAREFAS && !!d.by_workflow,
           },
+          {
+            // Mesma chave do Vincular ao Item da branch; com Tarefa ela filtra quais tarefas disparam.
+            chave: 'link_item',
+            tipo: 'switch',
+            rotulo: l('Só tarefas com item vinculado', 'Only tasks with a linked item', 'Solo tareas con ítem vinculado'),
+            ajuda: l('Tarefa sem item vinculado não dispara o fluxo.', 'A task with no linked item does not trigger the flow.', 'Una tarea sin ítem vinculado no dispara el flujo.'),
+            dica: l(
+              'Na branch, Vincular ao Item. Use quando o fluxo precisa do item da tarefa, por exemplo para ler ou alterar campos dele.',
+              'In the branch, Vincular ao Item. Use it when the flow needs the task\'s item, for example to read or update its fields.',
+              'En la rama, Vincular ao Item. Úselo cuando el flujo necesita el ítem de la tarea, por ejemplo para leer o modificar sus campos.',
+            ),
+            visivel: d => d.scope === ESCOPO_TAREFAS,
+          },
         ],
       },
       {
@@ -667,16 +680,17 @@ export const definicoes: Record<string, DefinicaoDoNo> = {
         descricao: l('Como cada execução aparece depois.', 'How each run shows up later.', 'Cómo aparece cada ejecución después.'),
         opcional: true,
         campos: [{
+          // Rodada 5: com Item, link_item liga a execução ao item. Com Tarefa, a mesma chave é filtro (em O que dispara).
           chave: 'link_item',
           tipo: 'switch',
-          rotulo: l('Vincular o item à execução', 'Link the item to the run', 'Vincular el ítem a la ejecución'),
-          ajuda: l('As tarefas do fluxo mostram o item que disparou.', 'The flow\'s tasks show the item that triggered it.', 'Las tareas del flujo muestran el ítem que lo disparó.'),
+          rotulo: l('Vincular a execução ao item', 'Link the run to the item', 'Vincular la ejecución al ítem'),
+          ajuda: l('O item que disparou mostra esta execução, e as tarefas do fluxo mostram o item.', 'The item that triggered it shows this run, and the flow\'s tasks show the item.', 'El ítem que lo disparó muestra esta ejecución, y las tareas del flujo muestran el ítem.'),
           dica: l(
-            'Com Tarefa como origem, o item é o que está vinculado à tarefa. Confirmar com o time o que acontece com tarefa sem item.',
-            'With Task as the source, the item is the one linked to the task. Confirm with the team what happens with a task that has no item.',
-            'Con Tarea como origen, el ítem es el vinculado a la tarea. Confirmar con el equipo qué pasa con una tarea sin ítem.',
+            'Sem isto, o fluxo roda do mesmo jeito, mas a execução não aparece no item e as tarefas não mostram de onde vieram.',
+            'Without this, the flow runs the same way, but the run does not show on the item and tasks do not show where they came from.',
+            'Sin esto, el flujo corre igual, pero la ejecución no aparece en el ítem y las tareas no muestran de dónde vinieron.',
           ),
-          visivel: d => d.type === 'events',
+          visivel: d => d.type === 'events' && ehItem(d),
         }, {
           chave: 'title',
           tipo: 'texto',
