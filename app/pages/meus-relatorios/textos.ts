@@ -125,7 +125,20 @@ export interface Textos {
     semFiltroAjuda: string
   }
 
+  /** O filtro e a ordenação no cabeçalho de cada coluna. */
+  coluna: {
+    filtrar: (coluna: string) => string
+    ordenar: (coluna: string) => string
+    limpar: string
+    contem: string
+    minimo: string
+    maximo: string
+    comFiltro: string
+    faixas: { ate100k: string, ate1m: string, acima1m: string }
+  }
+
   selecao: {
+    contagem: (n: number, total: number) => string
     selecionados: Plural
     baixar: string
     excluir: string
@@ -321,7 +334,18 @@ const ptBR: Textos = {
     arquivo: 'Arquivo',
     semFiltroAjuda: 'Saíram todos os registros da visualização.',
   },
+  coluna: {
+    filtrar: c => `Filtrar ${c}`,
+    ordenar: c => `Ordenar por ${c}`,
+    limpar: 'Limpar',
+    contem: 'Contém o texto',
+    minimo: 'Mínimo',
+    maximo: 'Máximo',
+    comFiltro: 'Com filtro',
+    faixas: { ate100k: 'Até 100 KB', ate1m: 'De 100 KB a 1 MB', acima1m: 'Acima de 1 MB' },
+  },
   selecao: {
+    contagem: (n, total) => `${n} de ${total} selecionado(s)`,
     selecionados: n => n === 1 ? '1 selecionado' : `${n} selecionados`,
     baixar: 'Baixar',
     excluir: 'Excluir',
@@ -463,7 +487,18 @@ const en: Textos = {
     arquivo: 'File',
     semFiltroAjuda: 'Every record in the view was exported.',
   },
+  coluna: {
+    filtrar: c => `Filter ${c}`,
+    ordenar: c => `Sort by ${c}`,
+    limpar: 'Clear',
+    contem: 'Contains the text',
+    minimo: 'Minimum',
+    maximo: 'Maximum',
+    comFiltro: 'With filter',
+    faixas: { ate100k: 'Up to 100 KB', ate1m: '100 KB to 1 MB', acima1m: 'Over 1 MB' },
+  },
   selecao: {
+    contagem: (n, total) => `${n} of ${total} selected`,
     selecionados: n => `${n} selected`,
     baixar: 'Download',
     excluir: 'Delete',
@@ -605,7 +640,18 @@ const es: Textos = {
     arquivo: 'Archivo',
     semFiltroAjuda: 'Salieron todos los registros de la vista.',
   },
+  coluna: {
+    filtrar: c => `Filtrar ${c}`,
+    ordenar: c => `Ordenar por ${c}`,
+    limpar: 'Limpiar',
+    contem: 'Contiene el texto',
+    minimo: 'Mínimo',
+    maximo: 'Máximo',
+    comFiltro: 'Con filtro',
+    faixas: { ate100k: 'Hasta 100 KB', ate1m: 'De 100 KB a 1 MB', acima1m: 'Más de 1 MB' },
+  },
   selecao: {
+    contagem: (n, total) => `${n} de ${total} seleccionado(s)`,
     selecionados: n => n === 1 ? '1 seleccionado' : `${n} seleccionados`,
     baixar: 'Descargar',
     excluir: 'Eliminar',

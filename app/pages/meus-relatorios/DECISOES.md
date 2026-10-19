@@ -254,3 +254,40 @@ separado; os pontos de acessibilidade abaixo saíram da mesma crítica.
 - **Ver:** `/meus-relatorios` · `evidencias/rodada6-01-popover-com-20-filtros.jpg`,
   `rodada6-02-painel-com-20-filtros.jpg`
 
+
+## Rodada 7 · 2026-10-19
+
+- **Pedido (literal):** "todas as colunas da tabela devem ter filtro da coluna em si, ajuste isso e ja faça push
+  pra main" / "filtro em todas as colunas e ordenar onde fizer sentido ok? (texto e numero)"
+- **Mudou:** toda coluna de dado tem o funil no cabeçalho, ao lado do nome, como na tabela nova de itens do
+  develop. O funil abre o filtro da coluna num popover e fica colorido quando o filtro está ativo; o popover tem
+  "Limpar".
+
+| Coluna | Filtro | Ordena |
+|---|---|---|
+| Relatório | contém o texto (nome ou descrição) | sim, A a Z |
+| Status | Na fila, Gerando, Pronto, Falhou | não: é categoria |
+| Origem | as origens da lista | sim, A a Z |
+| Formato | XLSX, CSV, DBF | não: é categoria |
+| Registros | mínimo e máximo | sim, número |
+| Filtros | com filtro, sem filtro | sim, quantidade de filtros |
+| Tamanho | até 100 KB, de 100 KB a 1 MB, acima de 1 MB | sim, número |
+| Criado em | o período (o mesmo da barra) | sim, data |
+
+- **Mudou:** ordenar por texto ou número vai em 3 cliques: crescente, decrescente, volta ao padrão (Criado em,
+  do mais novo). Criado em começa pelo mais novo.
+- **Mudou:** Status, Origem e Formato saíram da barra, porque viraram filtro de coluna. A barra fica com a
+  busca, o período "Criado em", "Limpar filtros" e Colunas. O período da barra e o filtro da coluna Criado em
+  são o mesmo estado.
+- **Mudou:** filtro sem resultado deixa a tabela na tela, com os cabeçalhos e a mensagem dentro dela, para a
+  pessoa desfazer o filtro onde o pôs.
+- **Componente:** a tabela desta tela passa do `EnTable` para o `UTable` do Nuxt UI, com as classes que o
+  `EnTable` passa ao `UTable` (copiadas do `Table2.vue.js` do enspace-sdk-ui 0.17.0): a aparência não muda. O
+  `EnTable` monta o cabeçalho por dentro, sem slot, e o filtro da coluna precisa morar no cabeçalho.
+  - **Pedido ao SDK:** slot `#header-{key}` no `EnTable` (o mesmo que o `permissoes-de-cargos` registrou), ou
+    filtro e ordenação por coluna nativos. Com isso a tela volta ao `EnTable` sem mudar o desenho.
+  - O cabeçalho é `_CabecalhoDaColuna.vue`: rótulo, ordenar e funil com o popover.
+  - Seleção, paginação e rodapé ("0 de 25 selecionado(s)") passam a ser montados na tela, com `UCheckbox` e
+    `UPagination`, como o `EnTable` mostra.
+- **Ver:** `/meus-relatorios` · `evidencias/rodada7-01-filtro-em-cada-coluna.jpg`,
+  `evidencias/rodada7-02-filtro-de-status.jpg`, `evidencias/rodada7-03-registros-ordenado-e-faixa.jpg`
