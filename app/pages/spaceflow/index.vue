@@ -32,7 +32,7 @@ definePageMeta({
   titulo: 'Spaceflow: configuração dos nós',
   descricao: 'Repaginada de UX do construtor de fluxos: card com resumo e pendência escrita, saídas com rótulo, botões com texto e os modais dos 17 nós com rótulo curto, instrução sob cada campo e ajuda por opção. Sem função nova.',
   status: 'em-revisao',
-  atualizado: '2026-10-15',
+  atualizado: '2026-10-19',
   tela: 'Spaceflow › editor e modais dos nós',
 })
 

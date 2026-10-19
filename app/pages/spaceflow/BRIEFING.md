@@ -186,6 +186,57 @@ espanhol nesse momento.
 ![A lista oferece o próprio fluxo](evidencias/dev-14-lista-oferece-o-proprio-fluxo.jpg)
 ![Modo Manual](evidencias/dev-15-iniciar-fluxo-manual.jpg)
 
+## O Início com evento de tarefa (branch do PR 2925, 19/10/2026, rodada 4)
+
+> **Demanda, como veio:** "observe na branch [link] as coinfiguraçoes do no de inicio deste fluxo do link. ele tem
+> config por evento de tarefa. o front dos campos nao ta comunicando exatamente o que precisa, por exemplo, é
+> "açoes em itens" o nome, mas na verdade é eventos de entidades, e aparece um monte de categoria listada junto das
+> entidades que sao tarefas e membros (em breve). prototipe isso de modo melhorado. melhore a divisao entre os
+> campos e os titulos (revisao de ux) com /nuxt-ui"
+
+- **Onde:** ambiente da branch do PR 2925 (evento de tarefa), fluxo 582, no workspace de QA de releases. O endereço é
+  da branch e fica fora deste repositório público. Só leitura: abri o modal do Start, as 4 listas e as ajudas, e
+  fechei descartando. Nada salvo.
+- **Sucesso:** quem configura entende na primeira leitura que o fluxo pode escutar um item ou uma tarefa, escolhe
+  isso antes da categoria e não procura Tarefas no meio de 73 categorias.
+
+### O modal hoje
+
+| Campo | Ajuda (?) | O que tem |
+|---|---|---|
+| Nome do Nó | "Dê um nome que ajude a identificar esta etapa no seu fluxo…" | Start |
+| Modo de Início | "Escolha como este fluxo será iniciado, manualmente, por um evento da plataforma, por webhook ou em horário programado." | Manual, **Ações de Itens**, Webhook, Timer, Caixa de Entrada |
+| Categoria de Referência | "Escolha qual categoria (ex. Contratos, Requisições) terá seus itens tomados como referência…" | **Membros (em breve)**, **Tarefas** e as 73 categorias, cada uma com o prefixo "(Itens)" |
+| Ação de Gatilho | "Selecione qual tipo de ação de item deve disparar o início do fluxo." | Criação, Atualização, Exclusão |
+| Vincular ao Item | "Ative para que o fluxo fique conectado ao item de origem…" | interruptor |
+| Iniciar por Workflow | "Ative para que o fluxo seja iniciado por tarefas oriundas de um workflow." | interruptor |
+| Workflows de Origem | "Selecione os workflows de origem que poderão iniciar o fluxo." | os 25 Spaceflows do workspace, seleção múltipla |
+| Condicionais · Título Dinâmico | (como no develop) | Ramo Ou, Ramo E, Separar Ramos |
+
+Ajuda das opções da lista: Tarefas, "Eventos relacionados a tarefas, e.g. criação, atualização, exclusão."; Membros,
+"Eventos relacionados a membros, e.g., cadastro, atualização, exclusão."; cada categoria mostra a própria descrição.
+
+![A lista mistura Membros e Tarefas com as categorias](evidencias/dev-16-inicio-categoria-mistura-entidades.jpg)
+![Ação de Gatilho com Tarefas](evidencias/dev-17-inicio-tarefa-acoes.jpg)
+![Workflows de Origem](evidencias/dev-18-inicio-workflows-de-origem.jpg)
+![O card diz "Quando uma tarefa for criado"](evidencias/dev-19-card-tarefa-for-criado.jpg)
+
+### Onde trava
+
+1. **O nome mente.** "Ações de Itens" abre um evento de tarefa. A ajuda do Modo de Início já diz "evento da
+   plataforma"; o rótulo não acompanha.
+2. **Entidade e categoria na mesma lista.** Tarefas e Membros são outro tipo de coisa e aparecem antes de 73
+   categorias, que ganharam o prefixo "(Itens)" para compensar. O rótulo continua "Categoria de Referência" com
+   Tarefas escolhido.
+3. **O texto continua falando de item com Tarefas escolhido:** "Ação de Gatilho" diz "ação de item"; "Vincular ao
+   Item" não diz qual item a tarefa tem.
+4. **"Iniciar por Workflow" parece outro modo de início.** É um filtro: só tarefas criadas por certos fluxos. A ajuda
+   diz "tarefas oriundas de um workflow", com a palavra em inglês, e "Workflows de Origem" lista Spaceflows.
+5. **Gênero no card:** "Quando uma tarefa for criado".
+6. **Fechar sem mexer pede confirmação:** "Tem certeza? As alterações serão perdidas." (o mesmo defeito da rodada 1).
+7. **Título e campo com o mesmo peso:** 8 campos em fila, todos com rótulo em negrito e "?" à direita, sem grupo.
+   Não dá para ver onde acaba o "o que dispara" e começa o "quando".
+
 ## A casca da tela, item por item
 
 A casca é a mesma do protótipo `no-de-atraso`, importada de lá (`../no-de-atraso/_CascaDasConfiguracoes.vue`),

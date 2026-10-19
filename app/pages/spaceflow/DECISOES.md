@@ -186,3 +186,73 @@ o protótipo usa um nome provisório, para o time trocar pelo real: `backup_assi
 - **Maquete:** a lista de fluxos do workspace é fictícia.
 - **Ver:** `/spaceflow` · `evidencias/dev-12-dois-inicios-no-canvas.jpg` a `dev-15-iniciar-fluxo-manual.jpg` (develop)
   · `evidencias/proposta-14-iniciar-outro-fluxo.jpg` a `proposta-17-paleta-inicio-ja-no-fluxo.jpg`
+
+## Rodada 4 · 2026-10-19
+
+- **Pedido (literal):** "observe na branch [link] as coinfiguraçoes do no de inicio deste fluxo do link. ele tem
+  config por evento de tarefa. o front dos campos nao ta comunicando exatamente o que precisa, por exemplo, é
+  "açoes em itens" o nome, mas na verdade é eventos de entidades, e aparece um monte de categoria listada junto das
+  entidades que sao tarefas e membros (em breve). prototipe isso de modo melhorado. melhore a divisao entre os
+  campos e os titulos (revisao de ux) com /nuxt-ui" e, no meio da rodada, "nao bote esses botoes grandes, use
+  simplesmente dropdowns onde tem opçoes assim grandes"
+- **Mudou:** "Evento em item" vira **Evento na plataforma**, com a ajuda "Inicia quando um item ou uma tarefa é
+  criado, alterado ou excluído."
+- **Mudou:** o Início por evento ganha a seção **O que dispara**, com o dropdown **Origem do evento** antes da
+  categoria: **Item**, **Tarefa** e **Membro** (cinza, selo "Em breve"), cada um com ícone e "?". Tarefas e Membros
+  saem da lista de categorias, e o prefixo "(Itens)" some.
+- **Mudou:** a lista **Categoria** só aparece com Item e só tem categorias, com a descrição de cada uma na linha de
+  baixo (na branch, só no hover do "?"), busca e rolagem para o volume real (73 no workspace da branch).
+- **Mudou:** com Tarefa, os rótulos concordam: **Quando a tarefa for** (Criada, Alterada, Excluída), com ajuda por
+  opção. Formulário e Campos alterados, que são de item, não aparecem.
+- **Mudou:** "Iniciar por Workflow" vira **Só tarefas criadas por fluxos**, um filtro dentro de O que dispara; ligado,
+  abre **Fluxos de origem** (antes "Workflows de Origem"), obrigatório.
+- **Mudou:** as seções do Início por evento: Geral · O que dispara · Quando dispara · Condições (opcional) · Execução
+  (opcional). **Vincular o item à execução** passa de Evento para Execução, ao lado do Título da execução.
+- **Mudou:** o card diz "Quando uma tarefa for criada" ou "Quando uma tarefa de Tratamento jurídico for criada" (na
+  branch, "Quando uma tarefa for criado").
+- **Mudou:** o painel SAÍDA do Início com Tarefa mostra os campos da tarefa (Título, Status, Responsável, Prazo, Item
+  vinculado, Fluxo de origem).
+- **Mudou (todos os nós):** título de seção e campo se separam por 3 sinais:
+  - faixa de fundo no cabeçalho da seção (`bg-elevated/50`), com linha embaixo quando aberta;
+  - peso: título em semibold e `text-highlighted`; rótulo do campo no padrão do `UFormField` (medium, `text-default`);
+    antes os 2 usavam `text-highlighted`;
+  - 1 frase sob o título do que a seção decide ("O que precisa acontecer para o fluxo começar."), por ora só nas
+    seções do Início;
+  - mais espaço entre campos (20 px) que entre rótulo, campo e ajuda (6 px).
+- **Fronteira:** muda rótulo, ajuda, ordem e agrupamento do Início por evento e o cabeçalho de seção de todos os
+  modais. Não muda o que o nó grava: a origem lê e grava o mesmo `scope` que a lista "Categoria de Referência" grava
+  hoje; o filtro de fluxos grava as mesmas 2 chaves da branch.
+- **Chaves que o schema não tipa:** `scope = 'tasks'` (Tarefas), `scope = 'members'` (Membros), `by_workflow`
+  (Iniciar por Workflow) e `source_workflows` (Workflows de Origem) são nomes provisórios; o time troca pelos da
+  branch.
+- **Por que assim:** o mercado pede o objeto antes do evento e vai do amplo para o estreito (Twenty: objeto, depois
+  registro, depois campos; `PESQUISA.md`, "Dentro de cada camada"). A opção "Em breve" fica visível e cinza, sem poder
+  ser escolhida (padrão do campo cinza com motivo, `PESQUISA.md`).
+- **Descartado:** 3 cartões lado a lado (`URadioGroup` com `variant="card"`), a 1ª versão desta rodada. Motivo:
+  pedido dela ("nao bote esses botoes grandes, use simplesmente dropdowns"). O dropdown é o mesmo `USelect` com "?"
+  por opção dos outros campos do modal.
+- **Descartado:** abas Item, Tarefa, Membro. Motivo: aba esconde que a escolha muda o que o nó grava.
+- **Descartado:** grupos "Entidades" e "Categorias" dentro da mesma lista. Motivo: continua uma lista só, com 73
+  categorias empurrando Tarefas para fora da vista quando há busca.
+- **Não deu:** saber o valor real que "Tarefas" e "Membros" gravam em `scope` e quais mudanças de tarefa contam como
+  Alterada. Por quê: a branch só se lê pela tela, e eu não salvei nada. As ajudas dizem "confirmar com o time".
+- **Não deu:** pesquisa de referência nova. Por quê: o padrão (objeto antes do evento) já está no `PESQUISA.md`.
+- **Achado da branch:** fechar o modal sem mexer pede "Tem certeza? As alterações serão perdidas." (o mesmo da
+  rodada 1).
+- **Achado da branch:** a ajuda de Atualização e de Exclusão, com Tarefas, repete a de Criação ("O fluxo será iniciado
+  quando um novo item for criado na categoria escolhida."). Leitura pelo hover, a confirmar.
+- **Maquete:** a lista de fluxos de origem é a lista fictícia do protótipo; escolher Item depois de Tarefa volta à
+  última categoria só enquanto o modal está aberto.
+- **CSS próprio:** nenhum `<style>`, `:deep()` ou `!important`. A Origem do evento é `USelect` com `icon` no campo e
+  por item, selo e "?" no slot `item-trailing`. A descrição da categoria é o `description` do item do `USelectMenu`,
+  sem o negrito da opção escolhida (`ui.itemDescription`).
+- **Crítica e acessibilidade:** conferência própria pelo DOM e pelos prints; a skill `design:design-critique` não
+  rodou nesta rodada.
+  - Conferido: Membro aparece cinza e não se escolhe; o "?" de cada opção abre no hover, como nos outros dropdowns
+    (o mesmo limite de teclado da rodada 1).
+  - Conferido: em espanhol e no escuro, rótulos, ajudas e a faixa do título da seção ficam legíveis e sem estourar.
+  - Fica: o card do Início corta "Quando uma tarefa de Tratamento jurídico for…" em 2 linhas, como os outros cards.
+  - Fica: a busca da lista múltipla diz "Pesquisar..." e a da lista simples, "Buscar" (padrão do Nuxt UI).
+- **Ver:** `/spaceflow`, Início › Configurar · `evidencias/dev-16-inicio-categoria-mistura-entidades.jpg` a
+  `dev-19-card-tarefa-for-criado.jpg` (branch) · `evidencias/proposta-18-inicio-titulos-e-origem.jpg` a
+  `proposta-22-inicio-escuro-espanhol.jpg`

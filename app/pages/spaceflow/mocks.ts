@@ -38,10 +38,12 @@ export interface CampoDaCategoria {
   tipo: 'text' | 'number' | 'money' | 'date' | 'select' | 'file' | 'email' | 'relation'
 }
 
+/** `descricao` é a descrição da categoria: o "?" de cada categoria na lista da branch mostra esse texto. Vazia em algumas, de propósito. */
 export const categorias = [
   {
     id: 'contratos',
     nome: 'Contratos',
+    descricao: 'Contratos com clientes e fornecedores, do rascunho à assinatura.',
     formularios: ['Novo contrato', 'Renovação'],
     campos: [
       { chave: 'contratante', rotulo: 'Contratante', tipo: 'text' },
@@ -57,6 +59,7 @@ export const categorias = [
   {
     id: 'fornecedores',
     nome: 'Fornecedores',
+    descricao: 'Cadastro e homologação de fornecedores.',
     formularios: ['Cadastro de fornecedor'],
     campos: [
       { chave: 'razao_social', rotulo: 'Razão social', tipo: 'text' },
@@ -68,12 +71,24 @@ export const categorias = [
   {
     id: 'requisicoes',
     nome: 'Requisições de compra com nome longo para testar a quebra',
+    descricao: 'Pedidos internos de compra, com valor estimado e aprovação.',
     formularios: ['Requisição'],
     campos: [
       { chave: 'descricao', rotulo: 'Descrição', tipo: 'text' },
       { chave: 'valor', rotulo: 'Valor estimado', tipo: 'money' },
     ] as CampoDaCategoria[],
   },
+  // Volume: o workspace de teste da branch tem 73 categorias na lista. Estas só existem para a busca e a rolagem.
+  { id: 'aditivos', nome: 'Aditivos contratuais', descricao: 'Mudanças de prazo, valor ou escopo de um contrato.', formularios: [] as string[], campos: [] as CampoDaCategoria[] },
+  { id: 'notas-fiscais', nome: 'Notas fiscais', descricao: 'Notas recebidas para conferência e pagamento.', formularios: [] as string[], campos: [] as CampoDaCategoria[] },
+  { id: 'chamados-juridicos', nome: 'Chamados jurídicos', descricao: 'Consultas das áreas ao Jurídico.', formularios: [] as string[], campos: [] as CampoDaCategoria[] },
+  { id: 'processos', nome: 'Processos judiciais', descricao: '', formularios: [] as string[], campos: [] as CampoDaCategoria[] },
+  { id: 'procuracoes', nome: 'Procurações', descricao: 'Poderes concedidos e prazos de validade.', formularios: [] as string[], campos: [] as CampoDaCategoria[] },
+  { id: 'reunioes', nome: 'Reuniões de diretoria', descricao: 'Pautas e atas das reuniões.', formularios: [] as string[], campos: [] as CampoDaCategoria[] },
+  { id: 'ativos', nome: 'Ativos de TI', descricao: 'Equipamentos e licenças por pessoa.', formularios: [] as string[], campos: [] as CampoDaCategoria[] },
+  { id: 'treinamentos', nome: 'Treinamentos obrigatórios', descricao: '', formularios: [] as string[], campos: [] as CampoDaCategoria[] },
+  { id: 'ocorrencias', nome: 'Ocorrências de compliance', descricao: 'Relatos do canal de ética.', formularios: [] as string[], campos: [] as CampoDaCategoria[] },
+  { id: 'viagens', nome: 'Solicitações de viagem', descricao: 'Pedidos de viagem e reembolso.', formularios: [] as string[], campos: [] as CampoDaCategoria[] },
 ]
 
 export const membros = [

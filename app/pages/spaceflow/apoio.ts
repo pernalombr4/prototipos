@@ -10,7 +10,7 @@ import type { Idioma } from '~/composables/useIdioma'
 import type { Aresta, No } from './mocks'
 import { agentes, categorias, credenciais, fluxos, membros } from './mocks'
 import type { Dado, L } from './nos'
-import { definicoes, l, operadores } from './nos'
+import { ESCOPO_TAREFAS, definicoes, l, operadores } from './nos'
 
 const t = (x: L, i: Idioma) => x[i]
 
@@ -37,6 +37,18 @@ export function resumir(no: No, i: Idioma, nos: No[]): string {
 
   switch (no.type) {
     case 'trigger': {
+      if (d.type === 'events' && d.scope === ESCOPO_TAREFAS) {
+        // Concordância de gênero: na branch o card diz "Quando uma tarefa for criado".
+        const acao = { create: P('criada', 'created', 'creada'), update: P('alterada', 'updated', 'modificada'), delete: P('excluída', 'deleted', 'eliminada') }[d.action as 'create'] ?? '…'
+        const origem = d.by_workflow && d.source_workflows?.length
+          ? (d.source_workflows.length === 1
+              ? (fluxos.find(f => f.id === d.source_workflows[0])?.nome ?? '…')
+              : P(`${d.source_workflows.length} fluxos`, `${d.source_workflows.length} flows`, `${d.source_workflows.length} flujos`))
+          : ''
+        return origem
+          ? P(`Quando uma tarefa de ${origem} for ${acao}`, `When a task from ${origem} is ${acao}`, `Cuando una tarea de ${origem} sea ${acao}`)
+          : P(`Quando uma tarefa for ${acao}`, `When a task is ${acao}`, `Cuando una tarea sea ${acao}`)
+      }
       if (d.type === 'events') {
         const cat = categorias.find(c => c.id === d.scope)?.nome ?? '…'
         const acao = { create: P('criado', 'created', 'creado'), update: P('alterado', 'updated', 'modificado'), delete: P('excluído', 'deleted', 'eliminado') }[d.action as 'create'] ?? '…'

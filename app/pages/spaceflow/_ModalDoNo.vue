@@ -17,7 +17,7 @@
 import type { Idioma } from '~/composables/useIdioma'
 import type { Aresta, No } from './mocks'
 import type { Textos } from './textos'
-import { definicoes, grupos, pendencias } from './nos'
+import { ESCOPO_ITEM_SEM_CATEGORIA, definicoes, ehItem, grupos, pendencias } from './nos'
 import { variaveisDeEntrada } from './apoio'
 import CampoDoNo from './_CampoDoNo.vue'
 
@@ -67,6 +67,9 @@ const modificado = computed(() => JSON.stringify(rascunho.value) !== original.va
 const secoesVisiveis = computed(() => (def.value?.secoes ?? [])
   .filter(s => !s.visivel || s.visivel(rascunho.value))
   .filter(s => !def.value?.abas || s.aba === aba.value))
+
+/** Item, Tarefa ou Membro: trocar a origem do Início troca as seções, e a troca anima. */
+const origemDoEscopo = computed(() => (props.no?.type === 'trigger' ? (ehItem(rascunho.value) || rascunho.value.scope === ESCOPO_ITEM_SEM_CATEGORIA ? 'item' : String(rascunho.value.scope ?? '')) : ''))
 
 const faltam = computed(() => (def.value ? pendencias(def.value, rascunho.value) : []))
 
@@ -218,26 +221,36 @@ function fechar() {
               leave-active-class="transition duration-100"
               leave-to-class="opacity-0"
             >
-              <div :key="`${aba}-${rascunho.type ?? ''}-${rascunho.action ?? ''}`" class="space-y-3">
+              <div :key="`${aba}-${rascunho.type ?? ''}-${rascunho.action ?? ''}-${origemDoEscopo}`" class="space-y-3">
                 <section
                   v-for="(s, si) in secoesVisiveis"
                   :key="s.id"
-                  class="rounded-xl border border-default"
+                  class="overflow-hidden rounded-xl border border-default"
                   :style="{ animation: `entrada .3s ease-out ${si * 40}ms backwards` }"
                 >
                   <UCollapsible v-model:open="abertas[s.id]" :unmount-on-hide="false">
+                    <!--
+                      Rodada 4: o título da seção se separa dos campos por 3 sinais.
+                      Faixa de fundo (bg-elevated), peso (título semibold e highlighted,
+                      rótulo do campo medium e default) e a frase do que a seção decide.
+                    -->
                     <button
                       type="button"
-                      class="flex w-full items-center gap-2 rounded-xl px-4 py-3 text-left transition-colors hover:bg-elevated/60"
+                      class="flex w-full items-center gap-3 bg-elevated/50 px-4 py-3 text-left transition-colors hover:bg-elevated"
+                      :class="abertas[s.id] ? 'border-b border-default' : ''"
                     >
-                      <span class="text-sm font-semibold text-highlighted">{{ s.titulo[i] }}</span>
-                      <UBadge v-if="s.opcional" :label="m.opcional" color="neutral" variant="outline" size="sm" />
-                      <span class="flex-1" />
-                      <span v-if="!abertas[s.id] && preenchidos(s)" class="text-xs text-muted">{{ m.preenchidos(preenchidos(s)) }}</span>
-                      <UIcon name="i-lucide-chevron-down" class="size-4 text-muted transition-transform duration-200" :class="abertas[s.id] ? 'rotate-180' : ''" />
+                      <span class="min-w-0 flex-1">
+                        <span class="flex flex-wrap items-center gap-2">
+                          <span class="text-sm font-semibold text-highlighted">{{ s.titulo[i] }}</span>
+                          <UBadge v-if="s.opcional" :label="m.opcional" color="neutral" variant="outline" size="sm" />
+                        </span>
+                        <span v-if="s.descricao" class="mt-0.5 block text-xs text-muted">{{ s.descricao[i] }}</span>
+                      </span>
+                      <span v-if="!abertas[s.id] && preenchidos(s)" class="shrink-0 text-xs text-muted">{{ m.preenchidos(preenchidos(s)) }}</span>
+                      <UIcon name="i-lucide-chevron-down" class="size-4 shrink-0 text-muted transition-transform duration-200" :class="abertas[s.id] ? 'rotate-180' : ''" />
                     </button>
                     <template #content>
-                      <div class="grid grid-cols-2 gap-x-3 gap-y-4 border-t border-default px-4 pb-4 pt-3">
+                      <div class="grid grid-cols-2 gap-x-3 gap-y-5 px-4 py-4">
                         <CampoDoNo
                           v-for="c in camposVisiveis(s)"
                           :key="c.chave"

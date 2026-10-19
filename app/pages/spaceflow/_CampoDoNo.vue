@@ -16,7 +16,7 @@ import type { Idioma } from '~/composables/useIdioma'
 import type { Campo, Dado, Opcao } from './nos'
 import type { No } from './mocks'
 import type { Textos } from './textos'
-import { gravar, ler, operadores, vazio } from './nos'
+import { ESCOPO_ITEM_SEM_CATEGORIA, ESCOPO_MEMBROS, ESCOPO_TAREFAS, ehItem, gravar, ler, operadores, vazio } from './nos'
 import { agentes, caixasDeEmail, categorias, comparacoes, credenciais, ferramentasDoAgente, fluxoInfo, fluxos, fusos, grupos, cargos, membros, modelosDeEmail, modelosDeIa } from './mocks'
 import { indiceDeVariaveis } from './apoio'
 import CaixaDeVariavel from './_CaixaDeVariavel.vue'
@@ -39,7 +39,10 @@ const tx = (x?: Record<Idioma, string>) => x?.[props.i]
 const m = computed(() => props.t.modal)
 
 const valor = computed({
-  get: () => ler(props.dado, c.value.chave),
+  get: () => {
+    const v = ler(props.dado, c.value.chave)
+    return v === ESCOPO_ITEM_SEM_CATEGORIA ? undefined : v
+  },
   set: v => gravar(props.dado, c.value.chave, v),
 })
 
@@ -49,7 +52,7 @@ const marcado = computed(() => props.alvo === c.value.chave)
 /* ---------- opções ---------- */
 
 const NULO = '__nulo'
-type Item = { label: string, value: string | number, ajuda?: string, disabled?: boolean, selo?: string, avatar?: { text: string }, descricao?: string }
+type Item = { label: string, value: string | number, ajuda?: string, disabled?: boolean, selo?: string, avatar?: { text: string }, description?: string }
 
 function deOpcoes(op: Opcao[]): Item[] {
   return op.map(o => ({ label: o.rotulo[props.i], value: o.valor ?? NULO, ajuda: tx(o.ajuda), disabled: o.desativado, selo: tx(o.selo) }))
@@ -61,7 +64,9 @@ const itens = computed<Item[]>(() => {
   if (c.value.opcoes) return deOpcoes(c.value.opcoes)
   const s = (lista: string[]) => lista.map(v => ({ label: v, value: v }))
   switch (c.value.fonte) {
-    case 'categorias': return categorias.map(x => ({ label: x.nome, value: x.id }))
+    // Só categorias: Tarefas e Membros saíram da lista e viraram a Origem do evento.
+    // A descrição da categoria vem na linha de baixo (na branch, só no hover do "?").
+    case 'categorias': return categorias.map(x => ({ label: x.nome, value: x.id, description: x.descricao || undefined }))
     case 'membros': return membros.map(x => ({ label: x.nome, value: x.id, avatar: { text: iniciais(x.nome) } }))
     case 'credenciais': return credenciais.map(x => ({ label: x.nome, value: x.id, selo: x.tipo }))
     case 'modelos': return s(modelosDeIa)
@@ -80,9 +85,32 @@ const itens = computed<Item[]>(() => {
       disabled: !x.ativo || x.inicio !== 'manual',
       selo: x.proprio ? m.value.motivoProprio : !x.ativo ? m.value.motivoInativo : x.inicio !== 'manual' ? m.value.motivoInicio : undefined,
     }))
+    // Origem das tarefas: qualquer fluxo do workspace, inclusive este (avisado no selo).
+    case 'fluxosDeOrigem': return fluxos.map(x => ({ label: x.nome, value: x.id, selo: x.proprio ? m.value.motivoProprio : undefined }))
     default: return []
   }
 })
+
+/* ---------- origem do evento (Início) ---------- */
+
+/**
+ * Item, Tarefa ou Membro. Não é campo novo: lê e grava o mesmo `scope` da
+ * lista de categorias. Item guarda a categoria escolhida antes, para a troca
+ * de ida e volta não apagar o que a pessoa já tinha escolhido.
+ */
+const ultimaCategoria = ref<string | undefined>(ehItem(props.dado) ? props.dado.scope : undefined)
+const origem = computed({
+  get: () => (props.dado.scope === ESCOPO_TAREFAS ? 'tarefa' : props.dado.scope === ESCOPO_MEMBROS ? 'membro' : props.dado.scope ? 'item' : undefined),
+  set: (v) => {
+    if (ehItem(props.dado)) ultimaCategoria.value = props.dado.scope
+    props.dado.scope = v === 'tarefa' ? ESCOPO_TAREFAS : (ultimaCategoria.value ?? ESCOPO_ITEM_SEM_CATEGORIA)
+  },
+})
+const opcoesDeOrigem = computed(() => [
+  { value: 'item', label: m.value.origemItem, ajuda: m.value.origemItemAjuda, icon: 'i-lucide-file-text' },
+  { value: 'tarefa', label: m.value.origemTarefa, ajuda: m.value.origemTarefaAjuda, icon: 'i-lucide-square-check-big' },
+  { value: 'membro', label: m.value.origemMembro, ajuda: m.value.origemMembroAjuda, icon: 'i-lucide-user-round', disabled: true, selo: m.value.emBreve },
+])
 
 const valorDoSelect = computed({
   get: () => (valor.value == null ? (c.value.opcoes?.some(o => o.valor === null) ? NULO : undefined) : valor.value),
@@ -96,6 +124,7 @@ const valorDoSelect = computed({
 const uiDaLista = {
   itemTrailingIcon: 'hidden',
   item: 'data-[state=checked]:font-semibold data-[state=checked]:text-highlighted data-[state=checked]:before:bg-elevated',
+  itemDescription: 'font-normal text-muted',
 }
 
 function iniciais(nome: string) {
@@ -237,7 +266,7 @@ watch(arquivos, (fs) => {
     :help="erro ? undefined : tx(c.ajuda)"
     :error="erro ? t.modal.obrigatorio : undefined"
     :data-campo="c.chave"
-    :ui="{ label: 'text-highlighted', help: 'text-muted', container: 'mt-1.5' }"
+    :ui="{ help: 'mt-1.5 text-muted', container: 'mt-1.5' }"
   >
     <template v-if="c.dica" #hint>
       <UTooltip :text="tx(c.dica)" :content="{ side: 'top', align: 'end' }" :ui="{ content: 'h-auto max-w-80 py-1.5', text: 'whitespace-normal' }">
@@ -245,8 +274,28 @@ watch(arquivos, (fs) => {
       </UTooltip>
     </template>
 
+    <!-- origem do evento: dropdown como os outros, com "?" por opção; Membro cinza, "Em breve" -->
+    <USelect
+      v-if="c.tipo === 'origemDoEvento'"
+      v-model="origem"
+      :items="opcoesDeOrigem"
+      :placeholder="t.modal.selecione"
+      :icon="opcoesDeOrigem.find(o => o.value === origem)?.icon"
+      :ui="uiDaLista"
+      class="w-full"
+      :color="erro ? 'error' : undefined"
+      :highlight="erro"
+    >
+      <template #item-trailing="{ item }">
+        <UBadge v-if="(item as Item).selo" :label="(item as Item).selo" size="sm" color="neutral" variant="subtle" />
+        <UTooltip v-if="(item as Item).ajuda" :text="(item as Item).ajuda" :content="{ side: 'right', sideOffset: 12 }" :ui="{ content: 'h-auto max-w-72 py-1.5', text: 'whitespace-normal' }">
+          <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="t.modal.ajudaDaOpcao" />
+        </UTooltip>
+      </template>
+    </USelect>
+
     <!-- texto -->
-    <div v-if="c.tipo === 'texto'">
+    <div v-else-if="c.tipo === 'texto'">
       <UInput
         v-model="valor"
         :placeholder="tx(c.placeholder)"

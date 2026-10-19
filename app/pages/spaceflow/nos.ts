@@ -23,11 +23,12 @@ export type TipoDeCampo =
   | 'emails' | 'slider' | 'chaveValor' | 'condicoes' | 'construtor' | 'rotasIa'
   | 'rotas' | 'entradas' | 'arquivos' | 'listaVariaveis' | 'variavel' | 'membro'
   | 'camposDaAcao' | 'permissoes' | 'aviso' | 'webhook' | 'codigo' | 'respostaHttp'
+  | 'origemDoEvento'
 
 /** De onde vêm as opções de um select que depende do workspace. */
 export type Fonte =
   | 'categorias' | 'membros' | 'credenciais' | 'modelos' | 'agentes' | 'ferramentas'
-  | 'comparacoes' | 'modelosDeEmail' | 'caixasDeEmail' | 'fusos' | 'formularios' | 'camposDaCategoria' | 'fluxos'
+  | 'comparacoes' | 'modelosDeEmail' | 'caixasDeEmail' | 'fusos' | 'formularios' | 'camposDaCategoria' | 'fluxos' | 'fluxosDeOrigem'
 
 export interface Opcao {
   valor: string | number | null
@@ -73,6 +74,8 @@ export interface Campo {
 export interface Secao {
   id: string
   titulo: L
+  /** 1 frase sob o título: o que a seção decide (rodada 4). */
+  descricao?: L
   /** Recolhida ao abrir: só o que é mesmo secundário (regra 28). */
   recolhida?: boolean
   /** Mostra o selo "opcional" no título. */
@@ -418,7 +421,7 @@ const secoesDeTarefa = (opcoes: { visivel?: (d: Dado) => boolean, rotuloConteudo
 
 const modosDeInicio: Opcao[] = [
   { valor: 'manual', rotulo: l('Manual', 'Manual', 'Manual'), ajuda: l('Alguém inicia pelo botão Iniciar, em Spaceflows, e preenche o formulário de início.', 'Someone starts it with the Start button in Spaceflows and fills in the start form.', 'Alguien lo inicia con el botón Iniciar, en Spaceflows, y completa el formulario de inicio.') },
-  { valor: 'events', rotulo: l('Evento em item', 'Item event', 'Evento en ítem'), ajuda: l('Inicia quando um item da categoria é criado, alterado ou excluído.', 'Starts when an item in the category is created, updated or deleted.', 'Inicia cuando un ítem de la categoría se crea, modifica o elimina.') },
+  { valor: 'events', rotulo: l('Evento na plataforma', 'Platform event', 'Evento en la plataforma'), ajuda: l('Inicia quando um item ou uma tarefa é criado, alterado ou excluído.', 'Starts when an item or a task is created, updated or deleted.', 'Inicia cuando un ítem o una tarea se crea, modifica o elimina.') },
   { valor: 'webhook', rotulo: l('Webhook', 'Webhook', 'Webhook'), ajuda: l('Inicia quando outro sistema chama o endereço do fluxo.', 'Starts when another system calls the flow\'s address.', 'Inicia cuando otro sistema llama a la dirección del flujo.') },
   { valor: 'cron', rotulo: l('Agendamento', 'Schedule', 'Programación'), ajuda: l('Inicia sozinho, na frequência e no horário definidos.', 'Starts on its own at the set frequency and time.', 'Inicia solo, en la frecuencia y hora definidas.') },
   { valor: 'mailbox', rotulo: l('E-mail recebido', 'Email received', 'Correo recibido'), ajuda: l('Inicia quando chega um e-mail numa caixa monitorada.', 'Starts when an email arrives in a watched mailbox.', 'Inicia cuando llega un correo a una casilla monitoreada.') },
@@ -475,6 +478,18 @@ const modelo = (padrao: number, max = 2): Secao => ({
   ],
 })
 
+/**
+ * O valor que a opção "Tarefas" da lista Categoria de Referência grava em
+ * `scope`, na branch do evento de tarefa (PR 2925). O nome é provisório: o
+ * time troca pelo real. "Membros (em breve)" grava `members`.
+ */
+export const ESCOPO_TAREFAS = 'tasks'
+export const ESCOPO_MEMBROS = 'members'
+/** Item escolhido e categoria ainda não: estado do protótipo. No produto, `scope` fica vazio até a categoria. */
+export const ESCOPO_ITEM_SEM_CATEGORIA = '__item'
+/** Evento de item: `scope` é o id de uma categoria. */
+export const ehItem = (d: Dado) => !!d.scope && ![ESCOPO_TAREFAS, ESCOPO_MEMBROS, ESCOPO_ITEM_SEM_CATEGORIA].includes(d.scope)
+
 export const definicoes: Record<string, DefinicaoDoNo> = {
   /* ---------------- Gatilhos ---------------- */
   trigger: {
@@ -494,37 +509,92 @@ export const definicoes: Record<string, DefinicaoDoNo> = {
         obrigatorio: true,
       }),
       {
-        id: 'evento',
-        titulo: l('Evento', 'Event', 'Evento'),
+        id: 'origem',
+        titulo: l('O que dispara', 'What triggers it', 'Qué lo dispara'),
+        descricao: l('Escolha se o fluxo escuta itens de uma categoria ou tarefas.', 'Choose whether the flow listens to items in a category or to tasks.', 'Elija si el flujo escucha ítems de una categoría o tareas.'),
         visivel: d => d.type === 'events',
         campos: [
-          { chave: 'scope', tipo: 'select', fonte: 'categorias', rotulo: l('Categoria', 'Category', 'Categoría'), ajuda: l('Os itens desta categoria disparam o fluxo.', 'Items in this category trigger the flow.', 'Los ítems de esta categoría disparan el flujo.'), obrigatorio: true },
+          {
+            chave: 'scope',
+            tipo: 'origemDoEvento',
+            rotulo: l('Origem do evento', 'Event source', 'Origen del evento'),
+            obrigatorio: true,
+            dica: l(
+              'Não grava campo novo: Tarefa grava em scope o mesmo valor que a opção Tarefas da lista de categorias grava hoje.',
+              'It saves no new field: Task saves in scope the same value the Tasks option of the category list saves today.',
+              'No guarda un campo nuevo: Tarea guarda en scope el mismo valor que la opción Tareas de la lista de categorías guarda hoy.',
+            ),
+          },
+          { chave: 'scope', tipo: 'select', fonte: 'categorias', rotulo: l('Categoria', 'Category', 'Categoría'), ajuda: l('Os itens desta categoria disparam o fluxo.', 'Items in this category trigger the flow.', 'Los ítems de esta categoría disparan el flujo.'), obrigatorio: true, visivel: d => ehItem(d) || d.scope === ESCOPO_ITEM_SEM_CATEGORIA },
+          {
+            chave: 'by_workflow',
+            tipo: 'switch',
+            rotulo: l('Só tarefas criadas por fluxos', 'Only tasks created by flows', 'Solo tareas creadas por flujos'),
+            ajuda: l('Sem isto, qualquer tarefa dispara, inclusive a criada à mão.', 'Without this, any task triggers it, including ones created by hand.', 'Sin esto, cualquier tarea lo dispara, incluso la creada a mano.'),
+            dica: l(
+              'A tarefa precisa ter nascido de um nó de tarefa (Tarefa, Aprovação ou Formulário) de um dos fluxos escolhidos.',
+              'The task must come from a task node (Task, Approval or Form) of one of the chosen flows.',
+              'La tarea debe venir de un nodo de tarea (Tarea, Aprobación o Formulario) de uno de los flujos elegidos.',
+            ),
+            visivel: d => d.scope === ESCOPO_TAREFAS,
+          },
+          {
+            chave: 'source_workflows',
+            tipo: 'multi',
+            fonte: 'fluxosDeOrigem',
+            rotulo: l('Fluxos de origem', 'Source flows', 'Flujos de origen'),
+            ajuda: l('Só as tarefas destes fluxos disparam.', 'Only tasks from these flows trigger it.', 'Solo las tareas de estos flujos lo disparan.'),
+            obrigatorio: true,
+            visivel: d => d.scope === ESCOPO_TAREFAS && !!d.by_workflow,
+          },
+        ],
+      },
+      {
+        id: 'evento',
+        titulo: l('Quando dispara', 'When it triggers', 'Cuándo se dispara'),
+        descricao: l('O que precisa acontecer para o fluxo começar.', 'What has to happen for the flow to start.', 'Qué tiene que pasar para que el flujo empiece.'),
+        visivel: d => d.type === 'events' && (ehItem(d) || d.scope === ESCOPO_TAREFAS),
+        campos: [
           {
             chave: 'action',
             tipo: 'select',
             rotulo: l('Quando o item for', 'When the item is', 'Cuando el ítem sea'),
             ajuda: l('Roda 1 vez para cada item afetado.', 'Runs once for each affected item.', 'Se ejecuta 1 vez por cada ítem afectado.'),
             obrigatorio: true,
+            visivel: d => ehItem(d),
             opcoes: [
               { valor: 'create', rotulo: l('Criado', 'Created', 'Creado'), ajuda: l('Inclui item importado. A opção de ignorar fluxos na importação não vale para o Spaceflow.', 'Includes imported items. The import\'s skip-flows option does not apply to Spaceflow.', 'Incluye ítems importados. La opción de ignorar flujos al importar no vale para Spaceflow.') },
               { valor: 'update', rotulo: l('Alterado', 'Updated', 'Modificado'), ajuda: l('Gravar no campo monitorado o mesmo valor também dispara.', 'Saving the same value in a watched field also triggers it.', 'Grabar el mismo valor en el campo monitoreado también dispara.') },
               { valor: 'delete', rotulo: l('Excluído', 'Deleted', 'Eliminado'), ajuda: l('Dispara quando o item vai para a lixeira.', 'Triggers when the item goes to the trash.', 'Dispara cuando el ítem va a la papelera.') },
             ],
           },
-          { chave: 'cForms', tipo: 'select', fonte: 'formularios', rotulo: l('Formulário', 'Form', 'Formulario'), ajuda: l('Só o item salvo por este formulário. Vazio: qualquer um.', 'Only items saved by this form. Empty: any form.', 'Solo el ítem guardado por este formulario. Vacío: cualquiera.'), visivel: d => d.action === 'create' || d.action === 'update' },
-          { chave: 'changed_fields', tipo: 'multi', fonte: 'camposDaCategoria', rotulo: l('Campos alterados', 'Changed fields', 'Campos modificados'), ajuda: l('Só quando um destes campos mudar. Vazio: qualquer campo.', 'Only when one of these fields changes. Empty: any field.', 'Solo cuando cambie uno de estos campos. Vacío: cualquier campo.'), visivel: d => d.action === 'update' },
-          { chave: 'link_item', tipo: 'switch', rotulo: l('Vincular o item à execução', 'Link the item to the run', 'Vincular el ítem a la ejecución'), ajuda: l('As tarefas do fluxo mostram o item que disparou.', 'The flow\'s tasks show the item that triggered it.', 'Las tareas del flujo muestran el ítem que lo disparó.') },
+          {
+            chave: 'action',
+            tipo: 'select',
+            rotulo: l('Quando a tarefa for', 'When the task is', 'Cuando la tarea sea'),
+            ajuda: l('Roda 1 vez para cada tarefa afetada.', 'Runs once for each affected task.', 'Se ejecuta 1 vez por cada tarea afectada.'),
+            obrigatorio: true,
+            visivel: d => d.scope === ESCOPO_TAREFAS,
+            opcoes: [
+              { valor: 'create', rotulo: l('Criada', 'Created', 'Creada'), ajuda: l('Quando a tarefa nasce, à mão ou por um fluxo.', 'When the task is created, by hand or by a flow.', 'Cuando la tarea nace, a mano o por un flujo.') },
+              { valor: 'update', rotulo: l('Alterada', 'Updated', 'Modificada'), ajuda: l('Mudança na tarefa, como status, responsável ou prazo. Confirmar com o time quais mudanças disparam.', 'A change to the task, such as status, assignee or due date. Confirm with the team which changes trigger it.', 'Un cambio en la tarea, como estado, responsable o plazo. Confirmar con el equipo qué cambios lo disparan.') },
+              { valor: 'delete', rotulo: l('Excluída', 'Deleted', 'Eliminada'), ajuda: l('Quando a tarefa é excluída.', 'When the task is deleted.', 'Cuando la tarea se elimina.') },
+            ],
+          },
+          { chave: 'cForms', tipo: 'select', fonte: 'formularios', rotulo: l('Formulário', 'Form', 'Formulario'), ajuda: l('Só o item salvo por este formulário. Vazio: qualquer um.', 'Only items saved by this form. Empty: any form.', 'Solo el ítem guardado por este formulario. Vacío: cualquiera.'), visivel: d => ehItem(d) && (d.action === 'create' || d.action === 'update') },
+          { chave: 'changed_fields', tipo: 'multi', fonte: 'camposDaCategoria', rotulo: l('Campos alterados', 'Changed fields', 'Campos modificados'), ajuda: l('Só quando um destes campos mudar. Vazio: qualquer campo.', 'Only when one of these fields changes. Empty: any field.', 'Solo cuando cambie uno de estos campos. Vacío: cualquier campo.'), visivel: d => ehItem(d) && d.action === 'update' },
         ],
       },
       {
         id: 'condicoes',
         titulo: l('Condições', 'Conditions', 'Condiciones'),
+        descricao: l('Filtro extra: o fluxo só inicia se o evento atender.', 'Extra filter: the flow only starts if the event matches.', 'Filtro extra: el flujo solo inicia si el evento cumple.'),
         opcional: true,
-        visivel: d => d.type === 'events',
+        visivel: d => d.type === 'events' && (ehItem(d) || d.scope === ESCOPO_TAREFAS),
         campos: [{
           chave: 'conditionals',
           tipo: 'condicoes',
-          ajuda: l('O fluxo só inicia se o item atender. Sem condições, inicia sempre.', 'The flow only starts if the item matches. With no conditions, it always starts.', 'El flujo solo inicia si el ítem cumple. Sin condiciones, inicia siempre.'),
+          ajuda: l('Sem condições, inicia sempre.', 'With no conditions, it always starts.', 'Sin condiciones, inicia siempre.'),
           dica: l(
             'Na referência: data.campo é o valor depois da mudança; changes.campo só existe se o campo mudou agora; last_update.data.campo é o valor anterior.',
             'In the reference: data.field is the value after the change; changes.field only exists if the field just changed; last_update.data.field is the previous value.',
@@ -594,8 +664,20 @@ export const definicoes: Record<string, DefinicaoDoNo> = {
       {
         id: 'execucao',
         titulo: l('Execução', 'Run', 'Ejecución'),
+        descricao: l('Como cada execução aparece depois.', 'How each run shows up later.', 'Cómo aparece cada ejecución después.'),
         opcional: true,
         campos: [{
+          chave: 'link_item',
+          tipo: 'switch',
+          rotulo: l('Vincular o item à execução', 'Link the item to the run', 'Vincular el ítem a la ejecución'),
+          ajuda: l('As tarefas do fluxo mostram o item que disparou.', 'The flow\'s tasks show the item that triggered it.', 'Las tareas del flujo muestran el ítem que lo disparó.'),
+          dica: l(
+            'Com Tarefa como origem, o item é o que está vinculado à tarefa. Confirmar com o time o que acontece com tarefa sem item.',
+            'With Task as the source, the item is the one linked to the task. Confirm with the team what happens with a task that has no item.',
+            'Con Tarea como origen, el ítem es el vinculado a la tarea. Confirmar con el equipo qué pasa con una tarea sin ítem.',
+          ),
+          visivel: d => d.type === 'events',
+        }, {
           chave: 'title',
           tipo: 'texto',
           rotulo: l('Título da execução', 'Run title', 'Título de la ejecución'),
@@ -605,7 +687,15 @@ export const definicoes: Record<string, DefinicaoDoNo> = {
         }],
       },
     ],
-    variaveis: () => [
+    // Tarefa como origem: os campos da tarefa. Nomes provisórios, a branch não mostra a lista.
+    variaveis: d => d.scope === ESCOPO_TAREFAS ? [
+      { chave: 'task.name', rotulo: l('Título da tarefa', 'Task title', 'Título de la tarea') },
+      { chave: 'task.status', rotulo: l('Status da tarefa', 'Task status', 'Estado de la tarea') },
+      { chave: 'task.assignee', rotulo: l('Responsável', 'Assignee', 'Responsable') },
+      { chave: 'task.due_date', rotulo: l('Prazo', 'Due date', 'Plazo'), tipo: 'date' },
+      { chave: 'task.item', rotulo: l('Item vinculado', 'Linked item', 'Ítem vinculado') },
+      { chave: 'task.workflow', rotulo: l('Fluxo de origem', 'Source flow', 'Flujo de origen') },
+    ] : [
       { chave: 'reference', rotulo: l('Referência', 'Reference', 'Referencia') },
       { chave: 'data.contratante', rotulo: l('Contratante', 'Contracting party', 'Contratante') },
       { chave: 'data.valor_do_contrato', rotulo: l('Valor do contrato', 'Contract value', 'Valor del contrato'), tipo: 'money' },
@@ -1290,7 +1380,10 @@ export function pendencias(def: DefinicaoDoNo, d: Dado): { chave: string, rotulo
     for (const c of s.campos) {
       if (!c.obrigatorio || (c.visivel && !c.visivel(d))) continue
       if (['construtor', 'rotasIa', 'rotas', 'entradas', 'camposDaAcao', 'condicoes'].includes(c.tipo)) continue
-      if (vazio(ler(d, c.chave))) lista.push({ chave: c.chave, rotulo: c.rotulo ?? s.titulo })
+      const v = ler(d, c.chave)
+      // Item sem categoria: a origem está escolhida, falta a Categoria.
+      const semValor = vazio(v) || (c.tipo !== 'origemDoEvento' && v === ESCOPO_ITEM_SEM_CATEGORIA)
+      if (semValor) lista.push({ chave: c.chave, rotulo: c.rotulo ?? s.titulo })
     }
   }
   for (const p of def.pendenciasExtras?.(d) ?? []) lista.push({ chave: '', rotulo: p })
