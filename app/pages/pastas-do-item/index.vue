@@ -23,8 +23,8 @@ import decisoesMd from './DECISOES.md?raw'
 definePageMeta({
   titulo: 'Folders do item',
   descricao: 'A barra de folders reordenáveis com cara de aba, no modelo sublinhado, lado a lado com a de hoje.',
-  status: 'aprovado',
-  atualizado: '2026-10-08',
+  status: 'implementado',
+  atualizado: '2026-10-19',
   tela: 'Tela do item e barra lateral do item',
 })
 
