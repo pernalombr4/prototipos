@@ -134,6 +134,17 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 23 · 2026-10-19
+
+- **Pedido (literal):** "esse botao na verdade deve ser pra mostrar os que tao ocultos, reverter a
+  ocultaçao. altere isso e pode fazer commit e push pra main"
+- **Mudou:** o botão do aviso no fim da lista ("1 workspace oculto") deixa de abrir o painel e desfaz a
+  ocultação de uma vez: "Mostrar de novo" com 1 oculto, "Mostrar todos de novo" com mais de 1.
+  - O toast confirma ("1 workspace voltou para a lista") e traz Desfazer.
+  - Escolher um a um continua no painel "Ocultos" da barra.
+- **Fronteira:** muda só esse botão; o painel, o menu "⋯" e os contadores ficam como estão.
+- **Maquete:** em memória; o reload volta ao mock.
+
 ### Aprovado · 2026-10-14
 
 - **Pedido (literal):** "pode publicar com status aprovado na tela de prototipos enspace"

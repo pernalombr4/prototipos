@@ -258,9 +258,21 @@ const secoesDoEditor = computed(() => {
   ].filter(s => s.itens.length)
 })
 
-function abrirEditorDeOcultos() {
-  document.getElementById('barra-da-lista')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  editorDeOcultosAberto.value = true
+/** Rodada 23: o aviso do fim da lista desfaz a ocultação de uma vez, com Desfazer no toast. */
+function reverterOcultos() {
+  const antes = [...ocultos.value]
+  ocultos.value = []
+  toast.add({
+    title: t.value.ocultosDeVolta(antes.length),
+    icon: 'i-lucide-eye',
+    color: 'neutral',
+    actions: [{
+      label: t.value.desfazer,
+      color: 'neutral',
+      variant: 'outline',
+      onClick: () => { ocultos.value = antes },
+    }],
+  })
 }
 
 /* Rodada 21: criar etiqueta sem passar por um workspace. Nome e, de uma vez, os
@@ -1268,14 +1280,15 @@ function workspaceCriado(nome: string) {
           >
             <UIcon name="i-lucide-eye-off" class="size-4" />
             {{ t.ocultos(totalOcultos) }}
-            <!-- Rodada 21: botão com borda, como os outros; link cinza não parecia clicável -->
+            <!-- Rodada 23: o botão desfaz a ocultação; escolher um a um fica no
+                 painel "Ocultos" da barra -->
             <UButton
-              :label="t.gerenciarOcultos"
+              :label="t.reverterOcultos(totalOcultos)"
               icon="i-lucide-eye"
               color="neutral"
               variant="outline"
               size="xs"
-              @click="abrirEditorDeOcultos"
+              @click="reverterOcultos"
             />
           </div>
         </section>

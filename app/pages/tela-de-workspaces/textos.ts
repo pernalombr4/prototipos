@@ -109,7 +109,8 @@ export interface TextosDaTela {
   secaoNaLista: string
   secaoOcultos: string
   mostrarTodos: string
-  gerenciarOcultos: string
+  reverterOcultos: (n: number) => string
+  ocultosDeVolta: (n: number) => string
   semEtiquetasTitulo: string
   semEtiquetasDescricao: string
   criarEtiquetaBotao: string
@@ -311,7 +312,8 @@ export const textos: Record<Idioma, TextosDaTela> = {
     secaoNaLista: 'Na lista',
     secaoOcultos: 'Ocultos',
     mostrarTodos: 'Mostrar todos',
-    gerenciarOcultos: 'Escolher o que aparece',
+    reverterOcultos: n => n === 1 ? 'Mostrar de novo' : 'Mostrar todos de novo',
+    ocultosDeVolta: n => n === 1 ? '1 workspace voltou para a lista' : `${n} workspaces voltaram para a lista`,
     semEtiquetasTitulo: 'Você ainda não criou etiquetas',
     semEtiquetasDescricao: 'Etiquetas agrupam seus workspaces do seu jeito, e só você vê. Enquanto não houver nenhuma, tudo fica em "Sem etiqueta".',
     criarEtiquetaBotao: 'Criar etiqueta',
@@ -505,7 +507,8 @@ export const textos: Record<Idioma, TextosDaTela> = {
     secaoNaLista: 'In your list',
     secaoOcultos: 'Hidden',
     mostrarTodos: 'Show all',
-    gerenciarOcultos: 'Choose what shows',
+    reverterOcultos: n => n === 1 ? 'Show again' : 'Show all again',
+    ocultosDeVolta: n => n === 1 ? '1 workspace is back in your list' : `${n} workspaces are back in your list`,
     semEtiquetasTitulo: 'You haven’t created any tags yet',
     semEtiquetasDescricao: 'Tags group your workspaces your way, and only you see them. Until you create one, everything stays under "No tag".',
     criarEtiquetaBotao: 'Create tag',
@@ -701,7 +704,8 @@ export const textos: Record<Idioma, TextosDaTela> = {
     secaoNaLista: 'En la lista',
     secaoOcultos: 'Ocultos',
     mostrarTodos: 'Mostrar todos',
-    gerenciarOcultos: 'Elegir qué aparece',
+    reverterOcultos: n => n === 1 ? 'Mostrar de nuevo' : 'Mostrar todos de nuevo',
+    ocultosDeVolta: n => n === 1 ? '1 workspace volvió a la lista' : `${n} workspaces volvieron a la lista`,
     semEtiquetasTitulo: 'Todavía no creaste etiquetas',
     semEtiquetasDescricao: 'Las etiquetas agrupan tus workspaces a tu manera, y solo tú las ves. Mientras no haya ninguna, todo queda en "Sin etiqueta".',
     criarEtiquetaBotao: 'Crear etiqueta',
