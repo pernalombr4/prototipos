@@ -134,6 +134,16 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Correção · 2026-10-19 · cartões de modelo vazios na criação
+
+- **Pedido:** corrigir o erro achado ao escrever os requisitos para o dev ("sim, quero").
+- **Erro:** desde 2026-09-16 (commit `e5ba1ba`, a passagem para o SDK), o passo 2 da criação mostrava os
+  cartões de modelo sem ícone, sem nome e sem descrição. O mock dos modelos usava `name`, `description` e
+  `icon`; a tela e o tipo `Template` leem `nome`, `descricao` e `icone`.
+- **Mudou:** os 3 modelos do `mocks.ts` voltam a usar `nome`, `descricao` e `icone`. Os cartões, a prévia e o
+  botão "Criar com {modelo}" voltam a mostrar o modelo.
+- **Fronteira:** muda só o dado dos modelos; a tela de criação fica como estava.
+
 ### Rodada 23 · 2026-10-19
 
 - **Pedido (literal):** "esse botao na verdade deve ser pra mostrar os que tao ocultos, reverter a
