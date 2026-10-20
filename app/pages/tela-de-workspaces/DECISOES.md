@@ -134,6 +134,28 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 27 · 2026-10-20
+
+- **Pedido (literal):** "quando for proprietario a opçao aí deve ser de deletar o workspace, aí no prototipo
+  ao clicar deve indicar num toast que vai mostrar o mesmo modal de exclusao de workspace atual (quando tentamos
+  excluir por dentro do workspace), pro dev saber o que fazer"; "os ocultos nao deve ter só um "Mostrar todos"
+  deve ter algo tipo um chevron pra dar pra ver quais estao ocultos ali, abaixo do divider de ocultos, podem
+  estar com aparencia esmaecida e um botao de tirar todos eles do oculto ou a opção de tirrar do oculto no menu
+  especifico (3 pontinhos) do card de cada um dos ocultos (…) tambem atualize os requisitos com base nisso"; "pode
+  ser um chevron mantendo tipo esse padrao os ocultos!"
+- **Mudou (proprietário):** no "⋯", o último item vira "Excluir workspace" (lixeira, vermelho), no lugar do
+  "Sair do workspace" desabilitado. No protótipo, o clique mostra o toast "Excluir {nome}" e "No produto, esta
+  opção abre o mesmo modal de exclusão de workspace usado hoje dentro do workspace."
+- **Mudou (ocultos):** o aviso centralizado do fim da lista vira a seção "Ocultos", depois de um divisor, no
+  mesmo padrão dos grupos: chevron, ícone, nome e contagem, em cinza.
+  - Começa recolhida; aberta, mostra os ocultos esmaecidos, como card ou linha, com "Oculto" no rodapé.
+  - Cada oculto tem "Mostrar na lista" no "⋯"; o botão "Mostrar de novo" (ou "Mostrar todos de novo") fica na
+    linha do divisor, à direita.
+  - É um grupo a mais no fim: vale em cards, em lista e com qualquer agrupamento; some durante a busca.
+- **Decidido:** Q1 do REQUISITOS (o proprietário pode sair?) fecha: não sai; exclui.
+- **Fronteira:** muda o último item do "⋯" e o fim da lista; o painel "Ocultos" da barra continua.
+- **Requisitos:** R59, R60, R61, R68, R69 e Q1.
+
 ### Rodada 26 · 2026-10-20
 
 - **Pedido (literal):** "Endereço do workspace: enspace.io/fdgdf Não dá para mudar depois de criar. O nome,

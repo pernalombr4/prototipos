@@ -28,8 +28,8 @@ entre aspas são os da interface em português; os de inglês e espanhol estão 
 | R36 a R46 | Card | O card inteiro vira o alvo de Entrar; some o "Sem descrição"; o rodapé mostra o último acesso |
 | R47 a R51 | Visualização em lista | Alternativa ao card, com o `EnTable` do produto |
 | R52 a R57 | Grupos | Hoje não existe. Por licença ou por etiqueta, recolhíveis |
-| R58 a R61 | Menu "⋯" | Hoje não existe. Padrão, etiquetas, ocultar e sair |
-| R62 a R70 | Ocultos | Hoje não existe. Tirar da lista sem perder o acesso |
+| R58 a R61 | Menu "⋯" | Hoje não existe. Padrão, etiquetas, ocultar e sair; para o proprietário, excluir |
+| R62 a R70 | Ocultos | Hoje não existe. Tirar da lista sem perder o acesso; os ocultos ficam numa seção recolhível no fim da lista |
 | R71 a R81 | Etiquetas pessoais | Hoje não existe. Etiquetas que só a pessoa vê, para agrupar |
 | R82 a R84 | Sair do workspace | Hoje não existe nesta tela |
 | R85 a R109 | Criar workspace | 1 decisão por vez; só o nome é obrigatório; ícone deixa de ser obrigatório; logo da empresa por upload; o passo 2 vira a Central de casos de uso, como a do protótipo do menu lateral |
@@ -159,9 +159,9 @@ entre aspas são os da interface em português; os de inglês e espanhol estão 
 | ID | Requisito | Critério de aceite |
 |---|---|---|
 | R58 | O menu deve existir no card e na linha, sempre visível, nunca no convite, com o nome acessível "Mais ações de {nome}". | O "⋯" aparece sem passar o mouse. |
-| R59 | Itens, nesta ordem: "Abrir sempre ao entrar" ou "Voltar a escolher ao entrar" (casa); "Etiquetas" (etiquetas); separador; "Ocultar da lista" (olho cortado) ou "Mostrar na lista" (olho); "Sair do workspace" (sair, em vermelho). | O rótulo do 1º e do 3º item muda conforme o estado do workspace. |
-| R60 | Para Proprietário, "Sair do workspace" deve ficar desabilitado, com "Quem é proprietário não sai por aqui." embaixo. | O item não reage ao clique num workspace de Proprietário. |
-| R61 | Cada item deve levar à regra da própria seção: padrão (R24 a R26), etiquetas (R71), ocultar (R62) e sair (R82). | Cada item tem o efeito descrito na seção dele. |
+| R59 | Itens, nesta ordem: "Abrir sempre ao entrar" ou "Voltar a escolher ao entrar" (casa); "Etiquetas" (etiquetas); separador; "Ocultar da lista" (olho cortado) ou "Mostrar na lista" (olho); por último, em vermelho, "Sair do workspace" (sair) ou, para o proprietário, "Excluir workspace" (lixeira). | O rótulo do 1º e do 3º item muda conforme o estado do workspace. |
+| R60 | Para o proprietário, o último item deve ser "Excluir workspace", que abre o mesmo modal de exclusão de workspace que o produto já usa dentro do workspace. No protótipo, um toast avisa isso: "Excluir {nome}" e "No produto, esta opção abre o mesmo modal de exclusão de workspace usado hoje dentro do workspace." | Num workspace de proprietário, o menu não mostra "Sair do workspace". |
+| R61 | Cada item deve levar à regra da própria seção: padrão (R24 a R26), etiquetas (R71), ocultar (R62), sair (R82) e excluir (R60). | Cada item tem o efeito descrito na seção dele. |
 
 ## Ocultos
 
@@ -173,8 +173,8 @@ entre aspas são os da interface em português; os de inglês e espanhol estão 
 | R65 | Com oculto, o painel deve ter, à direita do título, o botão com borda e ícone de olho "Mostrar todos", que devolve todos à lista. | O botão não aparece com 0 ocultos. |
 | R66 | O painel deve ter 2 seções com contagem, "Ocultos ({n})" primeiro e "Na lista ({n})" depois, cada uma em ordem alfabética. As seções rolam a partir de 18rem. | Com 1 oculto, ele aparece no topo do painel. |
 | R67 | Cada workspace deve ser uma caixa de marcar com o nome: marcado aparece na lista; desmarcado fica oculto, com o nome em cinza. A mudança vale na hora e o item troca de seção. Convite pendente não entra no painel. | Desmarcar um workspace tira o card da grade sem fechar o painel. |
-| R68 | Com oculto e sem busca, o fim da lista deve mostrar, centralizado, o ícone de olho cortado e "1 workspace oculto" ou "{n} workspaces ocultos". | O aviso some quando não há oculto. |
-| R69 | O aviso deve ter o botão com borda e ícone de olho "Mostrar de novo" (1 oculto) ou "Mostrar todos de novo" (mais), que devolve todos de uma vez, com o toast "1 workspace voltou para a lista" ou "{n} workspaces voltaram para a lista" e "Desfazer". | O botão não abre o painel: devolve direto. |
+| R68 | Com oculto e sem busca, o fim da lista deve ter a seção "Ocultos", depois de um divisor, no mesmo padrão dos grupos (R56): chevron, ícone de olho cortado, "Ocultos" e a contagem, em cinza. A seção começa recolhida. Aberta, mostra os ocultos como cards (ou linhas, na visualização em lista) esmaecidos, com "Oculto" no rodapé; cada um tem "Mostrar na lista" no "⋯". Vale com e sem agrupamento. | Abrir a seção mostra os ocultos; "Mostrar na lista" num deles devolve só aquele. |
+| R69 | Na linha do divisor, à direita, o botão com borda e ícone de olho "Mostrar de novo" (1 oculto) ou "Mostrar todos de novo" (mais) deve devolver todos de uma vez, com o toast "1 workspace voltou para a lista" ou "{n} workspaces voltaram para a lista" e "Desfazer". | Sem oculto, a seção some. |
 | R70 | Ocultar o padrão deve desfazer o padrão; o "Desfazer" devolve os 2. | Depois do "Desfazer", o bloco do topo volta a dizer "Abre direto quando você entra". |
 
 ## Etiquetas pessoais
@@ -281,5 +281,5 @@ entre aspas são os da interface em português; os de inglês e espanhol estão 
 
 | ID | Questão | Hoje no protótipo |
 |---|---|---|
-| Q1 | O proprietário pode sair do workspace? | bloqueado, por suposição (R60) |
+| Q1 | O proprietário pode sair do workspace? | decidido em 20/10/2026: não sai; o menu oferece "Excluir workspace" (R60) |
 | Q2 | Qual o limite e a validação do nome da etiqueta? | máximo de 30 caracteres, sem outra validação |

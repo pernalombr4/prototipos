@@ -103,7 +103,7 @@ type Ordem = 'acessoRecente' | 'acessoAntigo' | 'criacaoRecente' | 'criacaoAntig
 const agruparPor = ref<Agrupamento>('nenhum')
 const ordenarPor = ref<Ordem>('acessoRecente')
 /** Grupos que a pessoa recolheu, pelo id do grupo. */
-const recolhidos = ref<string[]>([])
+const recolhidos = ref<string[]>(['ocultos'])  // a seção de ocultos começa recolhida
 
 const visiveis = computed(() => base.value.filter(w =>
   !convitesRecusados.value.includes(w.id) && !saidos.value.includes(w.id)))
@@ -184,7 +184,7 @@ function comparar(a: Workspace, b: Workspace) {
 }
 
 /** Agrupado por etiqueta, o workspace com duas etiquetas aparece nos dois grupos. */
-interface Grupo { id: string, nome: string | null, icone?: string, itens: Workspace[] }
+interface Grupo { id: string, nome: string | null, icone?: string, itens: Workspace[], oculto?: boolean }
 // Rodada 19: o selo do card é a licença do membro (Member.type: owner, full, standard,
 // viewer), não o papel (Member.role, outro campo). O grupo leva o nome certo.
 const ordemDasLicencas: Workspace['papel'][] = ['Proprietário', 'Full', 'Membro', 'Leitor']
@@ -228,6 +228,25 @@ const abas = computed(() => [
 ])
 
 const totalOcultos = computed(() => visiveis.value.filter(w => estaOculto(w)).length)
+
+/* Rodada 27: os ocultos ganham uma seção própria no fim da lista, recolhida, com
+   divisor e chevron, como o "Hidden teams" do Teams. Aberta, mostra os cards
+   esmaecidos; cada um tem "Mostrar na lista" no "⋯", e o divisor tem o botão que
+   devolve todos. É um grupo a mais: funciona em cards, em lista e com qualquer
+   agrupamento. Some durante a busca, que já mostra os ocultos nos resultados. */
+const gruposComOcultos = computed<Grupo[]>(() => {
+  if (!totalOcultos.value || busca.value) return grupos.value
+  return [...grupos.value, {
+    id: 'ocultos',
+    nome: t.value.secaoOcultos,
+    icone: 'i-lucide-eye-off',
+    itens: visiveis.value.filter(w => estaOculto(w)).sort(comparar),
+    oculto: true,
+  }]
+})
+
+const podeNovaEtiqueta = computed(() =>
+  agruparPor.value === 'etiqueta' && etiquetas.value.length > 0 && listados.value.length > 0 && !busca.value)
 
 /* Editor de ocultos, como o painel de propriedades do Notion: cada workspace com
    uma marcação; marcado aparece na lista, desmarcado fica oculto. Convite pendente
@@ -339,7 +358,7 @@ const menuDeAgrupar = computed<DropdownMenuItem[][]>(() => [
     checked: agruparPor.value === opcao,
     onUpdateChecked: () => {
       agruparPor.value = opcao
-      recolhidos.value = []
+      recolhidos.value = ['ocultos']
     },
   })),
 ])
@@ -577,16 +596,32 @@ function acoesDe(w: Workspace): DropdownMenuItem[][] {
         icon: estaOculto(w) ? 'i-lucide-eye' : 'i-lucide-eye-off',
         onSelect: () => alternarOculto(w),
       },
-      {
-        label: t.value.sairDoWorkspace,
-        icon: 'i-lucide-log-out',
-        color: 'error',
-        disabled: ehProprietario,
-        description: ehProprietario ? t.value.proprietarioNaoSai : undefined,
-        onSelect: () => pedirSaida(w),
-      },
+      // Rodada 27: o proprietário não sai, exclui. No produto, abre o mesmo modal
+      // de exclusão que já existe dentro do workspace; aqui um toast diz isso ao dev.
+      ehProprietario
+        ? {
+            label: t.value.excluirWorkspace,
+            icon: 'i-lucide-trash-2',
+            color: 'error',
+            onSelect: () => avisarExclusao(w),
+          }
+        : {
+            label: t.value.sairDoWorkspace,
+            icon: 'i-lucide-log-out',
+            color: 'error',
+            onSelect: () => pedirSaida(w),
+          },
     ],
   ]
+}
+
+function avisarExclusao(w: Workspace) {
+  toast.add({
+    title: t.value.excluirToastTitulo(w.name),
+    description: t.value.excluirToastDescricao,
+    icon: 'i-lucide-trash-2',
+    color: 'error',
+  })
 }
 
 function tentarDeNovo() {
@@ -952,25 +987,53 @@ function workspaceCriado(nome: string) {
           />
 
           <template v-if="listados.length">
-            <div v-for="grupo in grupos" :key="grupo.id" class="mb-8 last:mb-0">
-              <!-- Grupo recolhível, como no ClickUp -->
-              <button
-                v-if="grupo.nome"
-                type="button"
-                class="mb-3 flex animate-[entrada_0.3s_ease-out_both] items-center gap-2 rounded-md text-sm font-semibold text-highlighted outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                :aria-expanded="!recolhidos.includes(grupo.id)"
-                :aria-label="t.recolherGrupo(grupo.nome)"
-                @click="alternarGrupo(grupo.id)"
-              >
-                <UIcon
-                  name="i-lucide-chevron-down"
-                  class="size-4 text-muted transition-transform duration-200"
-                  :class="recolhidos.includes(grupo.id) && '-rotate-90'"
+            <template v-for="grupo in gruposComOcultos" :key="grupo.id">
+            <!-- "+ Nova etiqueta" fica antes da seção de ocultos -->
+            <UButton
+              v-if="grupo.oculto && podeNovaEtiqueta"
+              :label="t.novaEtiqueta"
+              icon="i-lucide-plus"
+              color="neutral"
+              variant="outline"
+              size="sm"
+              class="mb-8"
+              @click="abrirCriarEtiqueta"
+            />
+            <div
+              class="mb-8 last:mb-0"
+              :class="grupo.oculto && 'border-t border-default pt-6'"
+            >
+              <div v-if="grupo.nome" class="mb-3 flex flex-wrap items-center gap-3">
+                <!-- Grupo recolhível, como no ClickUp -->
+                <button
+                  type="button"
+                  class="flex animate-[entrada_0.3s_ease-out_both] items-center gap-2 rounded-md text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  :class="grupo.oculto ? 'text-muted' : 'text-highlighted'"
+                  :aria-expanded="!recolhidos.includes(grupo.id)"
+                  :aria-label="t.recolherGrupo(grupo.nome)"
+                  @click="alternarGrupo(grupo.id)"
+                >
+                  <UIcon
+                    name="i-lucide-chevron-down"
+                    class="size-4 text-muted transition-transform duration-200"
+                    :class="recolhidos.includes(grupo.id) && '-rotate-90'"
+                  />
+                  <UIcon :name="grupo.icone ?? 'i-lucide-tag'" class="size-4 text-muted" />
+                  {{ grupo.nome }}
+                  <span class="font-normal text-muted">{{ grupo.itens.length }}</span>
+                </button>
+                <!-- Rodada 27: no divisor dos ocultos, o botão que devolve todos -->
+                <UButton
+                  v-if="grupo.oculto"
+                  :label="t.reverterOcultos(grupo.itens.length)"
+                  icon="i-lucide-eye"
+                  color="neutral"
+                  variant="outline"
+                  size="xs"
+                  class="ml-auto"
+                  @click="reverterOcultos"
                 />
-                <UIcon :name="grupo.icone ?? 'i-lucide-tag'" class="size-4 text-muted" />
-                {{ grupo.nome }}
-                <span class="font-normal text-muted">{{ grupo.itens.length }}</span>
-              </button>
+              </div>
 
               <!-- CARDS (padrão) -->
               <TransitionGroup
@@ -1251,6 +1314,7 @@ function workspaceCriado(nome: string) {
                 </template>
               </EnTable>
             </div>
+            </template>
           </template>
 
           <UEmpty
@@ -1263,7 +1327,7 @@ function workspaceCriado(nome: string) {
 
           <!-- Rodada 21: "+ Nova etiqueta" no fim dos grupos, como o "+ New group" do Notion -->
           <UButton
-            v-if="agruparPor === 'etiqueta' && etiquetas.length && listados.length && !busca"
+            v-if="podeNovaEtiqueta && !gruposComOcultos.some(g => g.oculto)"
             :label="t.novaEtiqueta"
             icon="i-lucide-plus"
             color="neutral"
@@ -1273,24 +1337,6 @@ function workspaceCriado(nome: string) {
             @click="abrirCriarEtiqueta"
           />
 
-          <!-- Rodada 17: os ocultos saem da lista, mas não somem da tela -->
-          <div
-            v-if="totalOcultos && !busca"
-            class="mt-8 flex items-center justify-center gap-2 text-sm text-muted"
-          >
-            <UIcon name="i-lucide-eye-off" class="size-4" />
-            {{ t.ocultos(totalOcultos) }}
-            <!-- Rodada 23: o botão desfaz a ocultação; escolher um a um fica no
-                 painel "Ocultos" da barra -->
-            <UButton
-              :label="t.reverterOcultos(totalOcultos)"
-              icon="i-lucide-eye"
-              color="neutral"
-              variant="outline"
-              size="xs"
-              @click="reverterOcultos"
-            />
-          </div>
         </section>
 
         <!-- Nenhum workspace -->

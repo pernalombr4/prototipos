@@ -76,12 +76,13 @@ export interface TextosDaTela {
   ocultarDaLista: string
   mostrarNaLista: string
   oculto: string
-  ocultos: (n: number) => string
   ocultadoToast: (nome: string) => string
   ocultadoDescricao: string
   desfazer: string
   sairDoWorkspace: string
-  proprietarioNaoSai: string
+  excluirWorkspace: string
+  excluirToastTitulo: (nome: string) => string
+  excluirToastDescricao: string
   sairTitulo: (nome: string) => string
   sairDescricao: string
   saiuDe: (nome: string) => string
@@ -300,12 +301,13 @@ export const textos: Record<Idioma, TextosDaTela> = {
     ocultarDaLista: 'Ocultar da lista',
     mostrarNaLista: 'Mostrar na lista',
     oculto: 'Oculto',
-    ocultos: n => n === 1 ? '1 workspace oculto' : `${n} workspaces ocultos`,
     ocultadoToast: n => `${n} saiu da sua lista`,
     ocultadoDescricao: 'Você continua com acesso. Para ver de novo, use Ocultos, ao lado de Ordenar.',
     desfazer: 'Desfazer',
     sairDoWorkspace: 'Sair do workspace',
-    proprietarioNaoSai: 'Quem é proprietário não sai por aqui.',
+    excluirWorkspace: 'Excluir workspace',
+    excluirToastTitulo: n => `Excluir ${n}`,
+    excluirToastDescricao: 'No produto, esta opção abre o mesmo modal de exclusão de workspace usado hoje dentro do workspace.',
     sairTitulo: n => `Sair de ${n}?`,
     sairDescricao: 'Você perde o acesso a tudo o que está lá dentro. Para voltar, alguém do workspace precisa convidar você de novo.',
     saiuDe: n => `Você saiu de ${n}`,
@@ -529,12 +531,13 @@ export const textos: Record<Idioma, TextosDaTela> = {
     ocultarDaLista: 'Hide from list',
     mostrarNaLista: 'Show in list',
     oculto: 'Hidden',
-    ocultos: n => n === 1 ? '1 hidden workspace' : `${n} hidden workspaces`,
     ocultadoToast: n => `${n} is hidden from your list`,
     ocultadoDescricao: 'You still have access. To see it again, use Hidden, next to Sort.',
     desfazer: 'Undo',
     sairDoWorkspace: 'Leave workspace',
-    proprietarioNaoSai: 'Owners can\u2019t leave from here.',
+    excluirWorkspace: 'Delete workspace',
+    excluirToastTitulo: n => `Delete ${n}`,
+    excluirToastDescricao: 'In the product, this option opens the same workspace deletion modal used today inside the workspace.',
     sairTitulo: n => `Leave ${n}?`,
     sairDescricao: 'You lose access to everything inside it. To come back, someone in the workspace has to invite you again.',
     saiuDe: n => `You left ${n}`,
@@ -758,12 +761,13 @@ export const textos: Record<Idioma, TextosDaTela> = {
     ocultarDaLista: 'Ocultar de la lista',
     mostrarNaLista: 'Mostrar en la lista',
     oculto: 'Oculto',
-    ocultos: n => n === 1 ? '1 workspace oculto' : `${n} workspaces ocultos`,
     ocultadoToast: n => `${n} salió de tu lista`,
     ocultadoDescricao: 'Sigues con acceso. Para verlo de nuevo, usa Ocultos, junto a Ordenar.',
     desfazer: 'Deshacer',
     sairDoWorkspace: 'Salir del workspace',
-    proprietarioNaoSai: 'Quien es propietario no sale desde aquí.',
+    excluirWorkspace: 'Eliminar workspace',
+    excluirToastTitulo: n => `Eliminar ${n}`,
+    excluirToastDescricao: 'En el producto, esta opción abre el mismo modal de eliminación de workspace que se usa hoy dentro del workspace.',
     sairTitulo: n => `\u00bfSalir de ${n}?`,
     sairDescricao: 'Pierdes el acceso a todo lo que hay dentro. Para volver, alguien del workspace tiene que invitarte de nuevo.',
     saiuDe: n => `Saliste de ${n}`,
