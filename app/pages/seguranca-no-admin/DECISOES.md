@@ -89,3 +89,17 @@ Ficou sem correção: o cálculo automático de contraste não leu as cores do t
 - **Pedido (literal):** "na tela de audit voce tem q botar badge pra dizer que foi modificada"
 - **Mudou:** selo "Modificada" (cor info, diferente do "Novo") no título da tela Audit Logs e no item Audit do menu; aparece com "Marcar o que é novo" ligado, como os selos "Novo".
 - **Fronteira:** muda só o selo; a tela Audit e o menu ficam como na rodada 2.
+
+## Rodada 4 · 2026-10-20
+- **Pedido (literal):** "deve haver espaço pra definir quem sao os ADMINISTRADORES DA ORGANIZAÇAO (quem tem acesso ao admin). esse espaço nao existe hoje mas precisa ser desenhado"
+- **Mudou:**
+  - item "Administradores" no topo do grupo Identidade e atalho próprio na barra de baixo, depois dos 10 pedidos;
+  - lista de quem acessa o admin: papel (alterável na linha), alcance, segundo fator, origem (adicionado no admin ou grupo do Entra), último acesso, convite pendente e acesso com prazo;
+  - 5 papéis prontos: Dono da organização, Administrador de segurança, Administrador de pessoas (com alcance por workspace), Auditor (só consulta) e Financeiro; aba "Papéis e permissões" com a matriz Altera, Consulta e Sem acesso por área do menu;
+  - travas: a organização não fica sem dono (remover e rebaixar o último dono ficam bloqueados, com o motivo); aviso quando há só 1 dono e quando alguém está sem segundo fator; quem vem do grupo do Entra muda no Entra;
+  - regras de acesso: exigir segundo fator e acesso do suporte ENSPACE (bloqueado, só com aprovação por até 24 horas, liberado);
+  - "Adicionar administrador": pessoa, papel com "?" por opção, alcance, duração do acesso (sem prazo, 7, 30 ou 90 dias) e convite pelo SSO.
+- **Por quê:** o mercado separa o dono da organização dos papéis delegados (Atlassian, Notion, Slack, GitHub, monday, Google) e recomenda pelo menos 2 donos e poucos donos ao mesmo tempo (Google). Acesso com prazo e acesso do suporte com aprovação respondem a auditor externo e a suporte, os 2 casos que um cliente de segurança costuma perguntar.
+- **Fronteira:** acrescenta 1 item no menu, 1 atalho e 1 tela; não muda as outras telas.
+- **Também:** 2 textos passaram a registro formal ("Esta ação não pode ser desfeita.", "não é possível criá-lo sem ele").
+- **Maquete:** convite, reenvio e "Ver no registro de auditoria" só mostram o aviso; o papel muda na hora, sem confirmação.

@@ -20,6 +20,7 @@ import TelaSiem from './_TelaSiem.vue'
 import TelaTokens from './_TelaTokens.vue'
 import TelaContas from './_TelaContas.vue'
 import TelaDestinos from './_TelaDestinos.vue'
+import TelaAdmins from './_TelaAdmins.vue'
 import TelaIA from './_TelaIA.vue'
 import TelaLimitesIA from './_TelaLimitesIA.vue'
 import TelaScim from './_TelaScim.vue'
@@ -44,7 +45,7 @@ const t = useTextos(textos)
 const route = useRoute()
 const router = useRouter()
 
-const telas: Tela[] = ['auditoria', 'siem', 'dominios', 'scim', 'sessoes', 'convites', 'tokens', 'contas', 'webhooks', 'destinos', 'exportacao', 'ia', 'ia-limites', 'continuidade']
+const telas: Tela[] = ['auditoria', 'siem', 'admins', 'dominios', 'scim', 'sessoes', 'convites', 'tokens', 'contas', 'webhooks', 'destinos', 'exportacao', 'ia', 'ia-limites', 'continuidade']
 const inicial = telas.includes(route.query.tela as Tela) ? route.query.tela as Tela : 'auditoria'
 const tela = useState<Tela>('sa-tela', () => inicial)
 const foraAtivo = ref('')
@@ -86,7 +87,7 @@ function reiniciar() {
 }
 
 const componentes: Record<Exclude<Tela, 'fora'>, Component> = {
-  auditoria: TelaAuditoria, siem: TelaSiem, tokens: TelaTokens, contas: TelaContas, destinos: TelaDestinos, ia: TelaIA, 'ia-limites': TelaLimitesIA,
+  auditoria: TelaAuditoria, siem: TelaSiem, admins: TelaAdmins, tokens: TelaTokens, contas: TelaContas, destinos: TelaDestinos, ia: TelaIA, 'ia-limites': TelaLimitesIA,
   scim: TelaScim, sessoes: TelaSessoes, dominios: TelaDominios, convites: TelaConvites, exportacao: TelaExportacao,
   webhooks: TelaWebhooks, continuidade: TelaContinuidade,
 }
@@ -119,6 +120,17 @@ const componentes: Record<Exclude<Tela, 'fora'>, Component> = {
           <span class="font-mono opacity-70">{{ i + 1 }}</span>
           {{ t.andaime.pontos[i] }}
         </UButton>
+        <span class="mx-1 h-5 w-px bg-accented" />
+        <!-- Fora dos 10 pedidos do cliente: pedido da redatora na rodada 4. -->
+        <UButton
+          :label="t.andaime.admins"
+          icon="i-lucide-user-cog"
+          size="xs"
+          class="transition-transform hover:-translate-y-0.5"
+          :color="tela === 'admins' ? 'primary' : 'neutral'"
+          :variant="tela === 'admins' ? 'solid' : 'outline'"
+          @click="navegar('admins')"
+        />
         <span class="mx-1 h-5 w-px bg-accented" />
         <USwitch v-model="marcarNovo" :label="t.andaime.marcarNovo" size="sm" :ui="{ label: 'text-xs' }" />
         <UButton :label="t.andaime.reiniciar" icon="i-lucide-rotate-ccw" size="xs" color="neutral" variant="ghost" @click="reiniciar" />

@@ -524,3 +524,45 @@ export const modelosDeIA = [
   { id: 'google/gemini-2.5-flash', semRetencao: false },
   { id: 'mistral/mistral-ocr', semRetencao: false },
 ]
+
+/* ------------------------------------------------------------------ *
+ * Administradores da organização (pedido da redatora, rodada 4)       *
+ * ------------------------------------------------------------------ */
+
+/** Invenção: hoje o admin só tem o perfil interno "Admin" da equipe ENSPACE. */
+export type PapelDeAdmin = 'dono' | 'seguranca' | 'pessoas' | 'auditor' | 'financeiro'
+export type AreaDoAdmin = 'admins' | 'identidade' | 'integracoes' | 'ia' | 'protecao' | 'logs' | 'financeiro'
+export type Nivel = 'editar' | 'ver' | 'nenhum'
+
+export const permissoesDoPapel: Record<PapelDeAdmin, Record<AreaDoAdmin, Nivel>> = {
+  dono: { admins: 'editar', identidade: 'editar', integracoes: 'editar', ia: 'editar', protecao: 'editar', logs: 'editar', financeiro: 'editar' },
+  seguranca: { admins: 'ver', identidade: 'editar', integracoes: 'editar', ia: 'editar', protecao: 'editar', logs: 'ver', financeiro: 'nenhum' },
+  pessoas: { admins: 'ver', identidade: 'editar', integracoes: 'nenhum', ia: 'nenhum', protecao: 'nenhum', logs: 'ver', financeiro: 'nenhum' },
+  auditor: { admins: 'ver', identidade: 'ver', integracoes: 'ver', ia: 'ver', protecao: 'ver', logs: 'ver', financeiro: 'nenhum' },
+  financeiro: { admins: 'nenhum', identidade: 'nenhum', integracoes: 'nenhum', ia: 'ver', protecao: 'nenhum', logs: 'nenhum', financeiro: 'editar' },
+}
+
+export interface Administrador {
+  id: string
+  pessoa: Pessoa
+  papel: PapelDeAdmin
+  /** null = toda a organização */
+  alcance: string[] | null
+  origem: 'manual' | 'entra'
+  segundoFator: boolean
+  estado: 'ativo' | 'pendente'
+  ultimoAcesso: Date | null
+  /** Acesso temporário: some sozinho nesta data. */
+  expira: Date | null
+  voce?: boolean
+}
+
+export const administradoresIniciais: Administrador[] = [
+  { id: 'ad1', pessoa: pessoas[0]!, papel: 'dono', alcance: null, origem: 'entra', segundoFator: true, estado: 'ativo', ultimoAcesso: ha(1 * MIN), expira: null, voce: true },
+  { id: 'ad2', pessoa: pessoas[4]!, papel: 'dono', alcance: null, origem: 'manual', segundoFator: true, estado: 'ativo', ultimoAcesso: ha(2 * DIA), expira: null },
+  { id: 'ad3', pessoa: pessoas[3]!, papel: 'seguranca', alcance: null, origem: 'entra', segundoFator: true, estado: 'ativo', ultimoAcesso: ha(5 * HORA), expira: null },
+  { id: 'ad4', pessoa: pessoas[8]!, papel: 'pessoas', alcance: null, origem: 'entra', segundoFator: false, estado: 'ativo', ultimoAcesso: ha(3 * DIA), expira: null },
+  { id: 'ad5', pessoa: pessoas[6]!, papel: 'pessoas', alcance: ['juridico-contencioso'], origem: 'manual', segundoFator: true, estado: 'ativo', ultimoAcesso: ha(9 * DIA), expira: null },
+  { id: 'ad6', pessoa: pessoas[11]!, papel: 'auditor', alcance: null, origem: 'manual', segundoFator: true, estado: 'ativo', ultimoAcesso: ha(6 * HORA), expira: daqui(42 * DIA) },
+  { id: 'ad7', pessoa: pessoas[2]!, papel: 'financeiro', alcance: null, origem: 'manual', segundoFator: false, estado: 'pendente', ultimoAcesso: null, expira: null },
+]

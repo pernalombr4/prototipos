@@ -16,7 +16,7 @@ import type { Textos } from './textos'
 
 export type Tela =
   | 'auditoria' | 'siem'
-  | 'dominios' | 'scim' | 'sessoes' | 'convites'
+  | 'admins' | 'dominios' | 'scim' | 'sessoes' | 'convites'
   | 'tokens' | 'contas' | 'webhooks' | 'destinos'
   | 'exportacao' | 'ia' | 'ia-limites' | 'continuidade'
   | 'fora'
@@ -49,6 +49,7 @@ const grupos = computed<Grupo[]>(() => {
       titulo: g.identidade,
       novo: true,
       itens: [
+        { rotulo: i.admins, icone: 'i-lucide-user-cog', tela: 'admins', novo: true },
         { rotulo: i.dominios, icone: 'i-lucide-globe', tela: 'dominios', novo: true },
         { rotulo: i.scim, icone: 'i-lucide-refresh-cw', tela: 'scim', novo: true },
         { rotulo: i.sessoes, icone: 'i-lucide-monitor-smartphone', tela: 'sessoes', novo: true },
