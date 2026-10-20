@@ -151,3 +151,13 @@ Migração concluída ──► Ver categorias (não há como desfazer)
 - **Pedido (literal):** "escreve e dá push, lembre-se: escrita com base em template de escrita de produtos por requisito"
 - **Mudou:** `REQUISITOS.md` com a versão aprovada, no formato dos outros requisitos do repositório (objetivo, onde vale, referência visual, convenção, resumo, grupos com ID, requisito e critério de aceite, dados, componentes e acessibilidade, em aberto). Grupos: RT, RA, RM, RV, RC, RG, RF, RD e RK.
 
+## Requisitos: fluxo da categoria · 2026-10-20
+- **Pedido (literal):** "respondendo a um requisito: Fluxos do Spaceflow (c-type-flows, c-flow-stages, c-stage-tasks) entram na comparação? No arquivo de referência essas chaves vieram vazias. sim, entra. pode revisar os requisitos com base nisso"
+- **Correção:** as chaves `c-type-flows`, `c-flow-stages` e `c-stage-tasks` são o fluxo da categoria (etapas e tarefas programadas), não o Spaceflow. O Spaceflow não está no arquivo de exportação; a pergunta sobre ele foi para "Em aberto".
+- **Mudou no `REQUISITOS.md`:**
+  - Os 3 modos valem também para etapas e tarefas (RM-02 a RM-04); o resumo do arquivo conta as etapas (RA-05).
+  - A categoria abre também em **Fluxo (N etapas)** (RV-04), e entra a seção "Fluxo da categoria" (RV-15 a RV-21): etapas, tarefas, configurações da etapa, referência quebrada, itens e tarefas abertas na etapa removida, e fluxo novo em categoria existente.
+  - Dados: as 9 chaves do fluxo (RD-01), a chave da etapa e da tarefa (RD-02), itens e tarefas por etapa removida (RD-09) e as referências do fluxo recriadas no destino (RD-10).
+  - Em aberto: Spaceflow, destino dos itens da etapa removida, responsável que não existe no destino e a etapa "Montando fluxos e tarefas" no carregamento.
+- **Não deu:** o protótipo ainda não mostra o grupo Fluxo; o `REQUISITOS.md` diz isso na referência visual.
+
