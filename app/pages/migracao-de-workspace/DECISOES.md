@@ -179,3 +179,7 @@ Migração concluída ──► Ver categorias (não há como desfazer)
 - **Pedido (literal):** "reescreve os requisitos da migração com a skill nova e dá push"
 - **Mudou:** o `REQUISITOS.md` volta ao formato de tabelas (skill `requisitos` enxugada no mesmo dia): cabeçalho com as fontes F1 a F10, Resumo, regras de negócio com a tabela de decisão da RN002, 1 tabela por grupo (ID, requisito, critério de aceite, prioridade, fonte), interfaces, não funcionais e restrições, e "Em aberto" com P1 a P13 e S1 a S4. Os ids não mudaram. De cerca de 700 linhas para 174; a conferência da skill não dá aviso.
 
+## Requisitos sem fontes · 2026-10-20
+- **Pedido (literal):** "pode tirar essa coisa das fontes. e pode tirar a coluna de fontes das tabelas. isso como regra, tire isso das regras. e edite seu doc novamente"
+- **Mudou:** o `REQUISITOS.md` perde a lista de fontes do cabeçalho e a coluna Fonte de todas as tabelas; nada mais muda. A skill `requisitos` passa a ter essa regra.
+
