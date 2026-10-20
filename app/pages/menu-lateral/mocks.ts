@@ -696,7 +696,10 @@ export const menuDoEditor: NoDoMenu[] = [
     lugar: 'trilha',
     escopo: ['comercial'],
     filhos: [
-      { id: 't-pv', tipo: 'tela', rotulo: 'Painel de vendas', icone: 'i-lucide-chart-line', tipoDeTela: 'paineis' },
+      // Rodada 28: um submenu de exemplo, para o 3º nível aparecer no menu do workspace.
+      { id: 't-pv', tipo: 'tela', rotulo: 'Painel de vendas', icone: 'i-lucide-chart-line', tipoDeTela: 'paineis', filhos: [
+        { id: 't-metas', tipo: 'tela', origem: 'workspace', rotulo: 'Metas do trimestre', icone: 'i-lucide-target', tipoDeTela: 'paineis' },
+      ] },
       { id: 't-tri', tipo: 'tela', rotulo: 'Triagem de propostas', icone: 'i-lucide-list-filter', tipoDeTela: 'triagem', categoriasLigadas: 2 },
       { id: 't-req', tipo: 'tela', rotulo: 'Minhas requisições', icone: 'i-lucide-inbox', tipoDeTela: 'minhas-requisicoes' },
     ],

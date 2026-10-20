@@ -68,10 +68,18 @@ export interface Recusa {
    janela Personalizar vale na hora, nas duas, como no ClickUp.
 ================================================================== */
 
-/** Um atalho dentro de uma seção pessoal. Categoria guarda o id como texto. */
+/**
+ * Um menu dentro de uma seção pessoal. Categoria guarda o id como texto.
+ *
+ * Rodada 28: seção > menu > submenu. `filhos` são os submenus, que são
+ * menus que já existem (qualquer um) e não têm filhos: no máximo 3 níveis.
+ * O tipo `menu` (uma seção do workspace inteira, com as telas dela) é das
+ * rodadas 15 a 27; o "+" não o oferece mais, e o resolvedor ainda o lê.
+ */
 export interface Atalho {
   tipo: 'destino' | 'tela' | 'menu' | 'categoria'
   id: string
+  filhos?: Atalho[]
 }
 
 export interface SecaoPessoal {
@@ -116,9 +124,9 @@ function prefsIniciais(): PrefsDaTrilha {
     ordemDasSecoes: ['p-rotina', 'favoritos', 'categorias'],
     secoesOcultas: [],
     /*
-     * Uma seção pessoal de exemplo, para o protótipo mostrar o que ela
-     * pediu: "uma seção pode ter menus com submenus dentro". Dado do
-     * protótipo; numa conta nova esta lista nasce vazia.
+     * Uma seção pessoal de exemplo, para o protótipo mostrar os 3 níveis
+     * (rodada 28): seção > menu > submenu. Dado do protótipo; numa conta nova
+     * esta lista nasce vazia.
      */
     pessoais: [{
       id: 'p-rotina',
@@ -126,7 +134,7 @@ function prefsIniciais(): PrefsDaTrilha {
       icone: 'i-lucide-scale',
       ordem: 'personalizada',
       itens: [
-        { tipo: 'menu', id: 's-auditoria' },
+        { tipo: 'tela', id: 'a-logs', filhos: [{ tipo: 'tela', id: 'a-req' }] },
         { tipo: 'categoria', id: '1' },
         { tipo: 'destino', id: 'n-tarefas' },
       ],
@@ -143,9 +151,22 @@ export function useMenuDoWorkspace() {
   const prefsAoVivo = useState<PrefsDaTrilha>('trilha-prefs', prefsIniciais)
   const prefs = useState<PrefsDaTrilha>('trilha-prefs-rascunho', prefsIniciais)
 
-  /** Vale na hora, nas duas cópias: é o que a janela Personalizar faz. */
+  /*
+   * Rodada 28: "isso deve ser diferenciado só na hora de salvar. só botar um
+   * botão de salvar aí na base desse modal pra qualquer alteraçao feita em
+   * qualquer aba" (Mikaela). Com a janela Personalizar aberta, toda mudança
+   * de preferência vai para o RASCUNHO, como o arraste; quem decide se vale
+   * para todos ou só para a pessoa é o botão Salvar do pé da janela.
+   */
+  const prefsNoRascunho = useState<boolean>('prefs-no-rascunho', () => false)
+
+  /** Fora da janela Personalizar, vale na hora, nas duas cópias. Com ela aberta, vai para o rascunho. */
   function aplicarPrefs(mudanca: (p: PrefsDaTrilha) => void) {
     mudanca(prefs.value)
+    if (prefsNoRascunho.value) {
+      marcarTocado('personalizar')
+      return
+    }
     mudanca(prefsAoVivo.value)
   }
 
@@ -347,14 +368,20 @@ export function useMenuDoWorkspace() {
     marcarTocado(`cat:${arrastadoId}`)
   }
 
+  /*
+   * Rodada 28: a árvore tem até 3 níveis, seção > menu > submenu ("trave o
+   * nivel: nao pode ter um submenu dentro de outro"). Por isso as duas
+   * buscas descem a árvore inteira, e não só um nível.
+   */
+
   /** Onde um nó está dentro de uma árvore: os irmãos, o índice e o pai. */
-  function localizar(arvore: NoDoMenu[], id: string) {
+  function localizar(arvore: NoDoMenu[], id: string, pai: NoDoMenu | null = null): { irmaos: NoDoMenu[], indice: number, pai: NoDoMenu | null } | null {
     const i = arvore.findIndex(n => n.id === id)
-    if (i >= 0) return { irmaos: arvore, indice: i, pai: null as NoDoMenu | null }
-    for (const pai of arvore) {
-      if (!pai.filhos) continue
-      const j = pai.filhos.findIndex(n => n.id === id)
-      if (j >= 0) return { irmaos: pai.filhos, indice: j, pai }
+    if (i >= 0) return { irmaos: arvore, indice: i, pai }
+    for (const n of arvore) {
+      if (!n.filhos) continue
+      const achou = localizar(n.filhos, id, n)
+      if (achou) return achou
     }
     return null
   }
@@ -362,10 +389,20 @@ export function useMenuDoWorkspace() {
   function acharNo(arvore: NoDoMenu[], id: string): NoDoMenu | null {
     for (const n of arvore) {
       if (n.id === id) return n
-      const f = n.filhos?.find(x => x.id === id)
+      const f = n.filhos ? acharNo(n.filhos, id) : null
       if (f) return f
     }
     return null
+  }
+
+  /** Algum ancestral do nó tem ordem fixa (Integrações, rodada 26). */
+  function dentroDeFixa(arvore: NoDoMenu[], id: string): boolean {
+    let onde = localizar(arvore, id)
+    while (onde?.pai) {
+      if (onde.pai.ordemFixa) return true
+      onde = localizar(arvore, onde.pai.id)
+    }
+    return false
   }
 
   /**
@@ -396,8 +433,19 @@ export function useMenuDoWorkspace() {
     const ondeAlvo = localizar(arvore, alvoId)
 
     // Rodada 26: seção de ordem fixa (Integrações) não solta, não recebe e não reordena.
-    const paiFuturo = posicao === 'dentro' ? alvo : ondeAlvo?.pai
-    if (localizar(arvore, arrastadoId)?.pai?.ordemFixa || paiFuturo?.ordemFixa) return { ok: false, motivo: 'ordemFixa' }
+    const paiFuturo = posicao === 'dentro' ? alvo : (ondeAlvo?.pai ?? null)
+    if (dentroDeFixa(arvore, arrastadoId) || paiFuturo?.ordemFixa || (paiFuturo && dentroDeFixa(arvore, paiFuturo.id))) {
+      return { ok: false, motivo: 'ordemFixa' }
+    }
+
+    /*
+     * Rodada 28: no máximo 3 níveis. Um menu só recebe submenu se ele mesmo
+     * não for submenu, e quem já tem submenus não vira submenu de ninguém.
+     */
+    if (paiFuturo?.tipo === 'tela') {
+      const avo = localizar(arvore, paiFuturo.id)?.pai
+      if (avo?.tipo === 'tela' || (arrastado.filhos?.length ?? 0) > 0) return { ok: false, motivo: 'tresNiveis' }
+    }
 
     const tipoDoPaiFuturo: TipoDeNo = posicao === 'dentro'
       ? alvo.tipo
@@ -467,7 +515,41 @@ export function useMenuDoWorkspace() {
   /** Sobe ou desce para a raiz do menu, ao lado da seção onde estava. */
   /** O item mora numa seção de ordem fixa (rodada 26): a tela esconde a alça e o mover. */
   function ordemFixa(id: string) {
-    return !!localizar(rascunho.value, id)?.pai?.ordemFixa
+    return dentroDeFixa(rascunho.value, id)
+  }
+
+  /** 1 na raiz, 2 dentro de uma seção, 3 quando é submenu. */
+  function nivel(id: string) {
+    let n = 1
+    let onde = localizar(rascunho.value, id)
+    while (onde?.pai) {
+      n++
+      onde = localizar(rascunho.value, onde.pai.id)
+    }
+    return n
+  }
+
+  /** Rodada 28: põe um menu que já existe dentro de outro menu, como submenu. */
+  function adicionarSubmenu(id: string, menuId: string) {
+    return soltar(id, menuId, 'dentro')
+  }
+
+  /*
+   * Rodada 28: "tirar da seção é diferente de deletar". Tirar sobe 1 nível e
+   * o menu continua existindo: o submenu volta para a seção, ao lado do menu
+   * de onde saiu; o menu sai da seção e fica no primeiro nível, ao lado dela.
+   */
+  function tirar(id: string) {
+    return moverParaPrimeiroNivel(id)
+  }
+
+  /** Excluir só vale para o que o workspace criou; os submenus sobem 1 nível. */
+  function excluir(id: string) {
+    const onde = localizar(rascunho.value, id)
+    if (!onde) return
+    const [no] = onde.irmaos.splice(onde.indice, 1)
+    if (no?.filhos?.length) onde.irmaos.splice(onde.indice, 0, ...no.filhos)
+    marcarTocado(id)
   }
 
   function moverParaPrimeiroNivel(id: string) {
@@ -552,7 +634,7 @@ export function useMenuDoWorkspace() {
    * mexe pelo id, nunca pelo objeto desenhado.
    */
   function semOcultos(n: NoDoMenu): NoDoMenu {
-    return n.filhos ? { ...n, filhos: n.filhos.filter(f => !f.oculto) } : n
+    return n.filhos ? { ...n, filhos: n.filhos.filter(f => !f.oculto).map(semOcultos) } : n
   }
   const arvoreDaBarra = computed(() => arvoreVisivel.value.filter(n => !n.oculto).map(semOcultos))
   const destinosDaBarra = computed(() => destinos.value.filter(n => !n.oculto))
@@ -563,7 +645,10 @@ export function useMenuDoWorkspace() {
     const lista: NoDoMenu[] = []
     for (const n of arvoreVisivel.value) {
       if (n.oculto) lista.push(n)
-      for (const f of n.filhos ?? []) if (f.oculto) lista.push(f)
+      for (const f of n.filhos ?? []) {
+        if (f.oculto) lista.push(f)
+        for (const g of f.filhos ?? []) if (g.oculto) lista.push(g)
+      }
     }
     return lista
   })
@@ -581,7 +666,12 @@ export function useMenuDoWorkspace() {
     soltar,
     avaliar,
     mover,
+    prefsNoRascunho,
     ordemFixa,
+    nivel,
+    adicionarSubmenu,
+    tirar,
+    excluir,
     ordemCategoriasRascunho,
     semearOrdemDeCategorias,
     reordenarCategoria,

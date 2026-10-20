@@ -47,6 +47,19 @@ export function useJanelasDaTrilha() {
      * (o "Novo menu" e o "+" de cada seção no editor abrem esta mesma janela).
      */
     criandoMenu: useState<string | null>('trilha-criar-menu', () => null),
+    /*
+     * Rodada 28: a janela "Adicionar em", que escolhe um menu que já existe.
+     * `meu` põe na seção pessoal (ou como submenu de um menu dela), na hora;
+     * `workspace` move o menu para a seção (ou para dentro do menu) no
+     * rascunho, porque no workspace a mesma tela não mora em 2 lugares.
+     */
+    escolhendoMenu: useState<{
+      escopo: 'meu' | 'workspace'
+      rotulo: string
+      secaoId?: string
+      menuChave?: string
+      menuId?: string
+    } | null>('trilha-escolher-menu', () => null),
     criandoCategoria: useState<boolean>('trilha-criar-categoria', () => false),
     /**
      * As categorias criadas pelo "+" (rodada 16). Moram aqui, e não no
@@ -217,10 +230,114 @@ export function useTrilha() {
     })
   }
 
+  /**
+   * Tirar da seção (rodada 28): "tirar da seção é diferente de deletar". O
+   * menu continua existindo no workspace e volta pelo "+". Devolve o que saiu
+   * e onde estava, para o "Desfazer" do aviso.
+   */
   function removerAtalho(secaoId: string, chave: string) {
+    let saiu: { atalho: Atalho, indice: number } | null = null
     menu.aplicarPrefs((p) => {
       const s = p.pessoais.find(x => x.id === secaoId)
-      if (s) s.itens = s.itens.filter(i => chaveDoAtalho(i) !== chave)
+      if (!s) return
+      const i = s.itens.findIndex(x => chaveDoAtalho(x) === chave)
+      if (i < 0) return
+      if (!saiu) saiu = { atalho: JSON.parse(JSON.stringify(s.itens[i])), indice: i }
+      s.itens.splice(i, 1)
+    })
+    return saiu as { atalho: Atalho, indice: number } | null
+  }
+
+  /** O "Desfazer" do tirar: o menu volta para o mesmo lugar, com os submenus. */
+  function restaurarAtalho(secaoId: string, a: Atalho, indice: number) {
+    menu.aplicarPrefs((p) => {
+      const s = p.pessoais.find(x => x.id === secaoId)
+      if (!s || s.itens.some(x => chaveDoAtalho(x) === chaveDoAtalho(a))) return
+      s.itens.splice(Math.min(indice, s.itens.length), 0, JSON.parse(JSON.stringify(a)))
+    })
+  }
+
+  /* ------------------- os submenus de um menu pessoal (rodada 28) ------------------- */
+
+  function menuDaSecao(p: PrefsDaTrilha, secaoId: string, menuChave: string) {
+    return p.pessoais.find(x => x.id === secaoId)?.itens.find(x => chaveDoAtalho(x) === menuChave)
+  }
+
+  /**
+   * Submenu é um menu que já existe, sem filhos: no máximo 3 níveis, seção >
+   * menu > submenu. Uma seção do workspace inteira (tipo `menu`) não entra.
+   */
+  function adicionarSubmenu(secaoId: string, menuChave: string, a: Atalho) {
+    if (a.tipo === 'menu') return
+    menu.aplicarPrefs((p) => {
+      const pai = menuDaSecao(p, secaoId, menuChave)
+      if (!pai || pai.tipo === 'menu') return
+      pai.filhos = pai.filhos ?? []
+      if (pai.filhos.some(x => chaveDoAtalho(x) === chaveDoAtalho(a)) || chaveDoAtalho(a) === menuChave) return
+      pai.filhos.push({ tipo: a.tipo, id: a.id })
+    })
+  }
+
+  function tirarSubmenu(secaoId: string, menuChave: string, subChave: string) {
+    let saiu: { atalho: Atalho, indice: number } | null = null
+    menu.aplicarPrefs((p) => {
+      const pai = menuDaSecao(p, secaoId, menuChave)
+      const i = pai?.filhos?.findIndex(x => chaveDoAtalho(x) === subChave) ?? -1
+      if (!pai?.filhos || i < 0) return
+      if (!saiu) saiu = { atalho: { ...pai.filhos[i]! }, indice: i }
+      pai.filhos.splice(i, 1)
+    })
+    return saiu as { atalho: Atalho, indice: number } | null
+  }
+
+  function restaurarSubmenu(secaoId: string, menuChave: string, a: Atalho, indice: number) {
+    menu.aplicarPrefs((p) => {
+      const pai = menuDaSecao(p, secaoId, menuChave)
+      if (!pai) return
+      pai.filhos = pai.filhos ?? []
+      if (pai.filhos.some(x => chaveDoAtalho(x) === chaveDoAtalho(a))) return
+      pai.filhos.splice(Math.min(indice, pai.filhos.length), 0, { ...a })
+    })
+  }
+
+  /** Sobe ou desce um submenu entre os irmãos. Vale na hora, como a seção pessoal. */
+  function moverSubmenu(secaoId: string, menuChave: string, subChave: string, passo: -1 | 1) {
+    menu.aplicarPrefs((p) => {
+      const lista = menuDaSecao(p, secaoId, menuChave)?.filhos
+      if (!lista) return
+      const i = lista.findIndex(x => chaveDoAtalho(x) === subChave)
+      const j = i + passo
+      if (i < 0 || j < 0 || j >= lista.length) return
+      const [item] = lista.splice(i, 1)
+      lista.splice(j, 0, item!)
+    })
+  }
+
+  /** Arrastar um submenu entre os irmãos, no próprio menu: rascunho e Salvar, como o atalho. */
+  function arrastarSubmenu(secaoId: string, menuChave: string, quem: string, alvo: string, posicao: 'antes' | 'depois') {
+    menu.arrastarPrefs(`sub:${secaoId}:${menuChave}:${quem}`, (p) => {
+      const lista = menuDaSecao(p, secaoId, menuChave)?.filhos
+      if (!lista || quem === alvo) return
+      const i = lista.findIndex(x => chaveDoAtalho(x) === quem)
+      if (i < 0) return
+      const [item] = lista.splice(i, 1)
+      const j = lista.findIndex(x => chaveDoAtalho(x) === alvo)
+      if (j < 0) { lista.splice(i, 0, item!); return }
+      lista.splice(j + (posicao === 'depois' ? 1 : 0), 0, item!)
+    })
+  }
+
+  /** Sobe ou desce um menu na seção pessoal, na hora (o caminho da janela Personalizar). */
+  function moverAtalhoJa(secaoId: string, chave: string, passo: -1 | 1) {
+    menu.aplicarPrefs((p) => {
+      const s = p.pessoais.find(x => x.id === secaoId)
+      if (!s) return
+      const i = s.itens.findIndex(x => chaveDoAtalho(x) === chave)
+      const j = i + passo
+      if (i < 0 || j < 0 || j >= s.itens.length) return
+      const [item] = s.itens.splice(i, 1)
+      s.itens.splice(j, 0, item!)
+      s.ordem = 'personalizada'
     })
   }
 
@@ -287,6 +404,13 @@ export function useTrilha() {
     ordenarSecao,
     adicionarAtalho,
     removerAtalho,
+    restaurarAtalho,
+    adicionarSubmenu,
+    tirarSubmenu,
+    restaurarSubmenu,
+    moverSubmenu,
+    moverAtalhoJa,
+    arrastarSubmenu,
     arrastarAtalho,
     soltarNaSecao,
     abrirPersonalizar,

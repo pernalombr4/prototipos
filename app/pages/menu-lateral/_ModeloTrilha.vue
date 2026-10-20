@@ -701,7 +701,7 @@ function classeDaArea(a: Area) {
       <CartaoDeSalvar :t="props.t" :pode-configurar="props.podeConfigurar" rente />
     </div>
 
-    <Personalizar :t="props.t" :areas="areas" :itens-do-inicio="itensDoInicio" :secoes="secoesDoInicio" />
+    <Personalizar :t="props.t" :areas="areas" :itens-do-inicio="itensDoInicio" :secoes="secoesDoInicio" :categorias="props.categorias" :pode-configurar="props.podeConfigurar" />
     <CriarSecao :t="props.t" />
   </div>
 </template>

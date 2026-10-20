@@ -389,6 +389,27 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 28 · 2026-10-20
+- **Pedido (literal):** "se eu excluir um menu de dentro de uma seçao, como vou botar de novo depois? tirar da seçao é diferente de deletar."
+- **Pedido (literal):** "'criar uma tela nova' é um texto que nao deve existir em lugar nenhum, porque isso é criar um MENU novo, simplesmente. o menu vem com um tipo de tela dentro. nao devemos usar tambem o texto 'menu com tela dentro'"
+- **Pedido (literal):** "temos: seçoes, menus, submenus. no menu global de personalizaçao devo ser capaz de fazer a gestao de seçoes, dento das seçoes colocar menus e dentro dos menus colocar submenus. por enquanto isso ta fragmentado. reveja a experiencia."
+- **Pedido (literal):** "trave o nivel: nao pode ter um submenu dentro de outro. no maximo 3 niveis: seçao > menu > submenu."
+- **Pedido (literal):** "nao diferencie 'meu menu' e 'menu do workspace' no modal. isso deve ser diferenciado só na hora de salvar. só botar um botão de salvar aí na base desse modal pra qualquer alteraçao feita em qualquer aba"
+- **Decisões dela, perguntadas:** a estrutura vale para o menu de cada pessoa e para o do workspace; submenu é qualquer menu que já existe.
+- **Mudou:** 3 níveis no máximo, **seção > menu > submenu**, no menu de cada pessoa e no do workspace. Submenu não recebe submenu, e quem já tem submenus não vira submenu. A recusa diz "O menu tem no máximo 3 níveis: seção, menu e submenu. Submenu não recebe submenu.".
+- **Mudou:** **tirar não é excluir.** "Remover da seção", que era vermelho, virou "Tirar da seção", sem vermelho e com "Desfazer" no aviso: o menu continua existindo e volta pelo "+". O submenu sai por "Tirar do menu". No menu do workspace, tirar sobe 1 nível (o submenu volta para a seção; o menu sai para o primeiro nível). "Excluir menu" é outra ação, vermelha, e só aparece no que o workspace criou.
+- **Mudou:** Personalizar > "Seções e menus" (era "Seções") monta os 3 níveis numa árvore só: "No Início" (as seções do Início, com os menus e os submenus) e "Nas áreas da trilha" (as seções do workspace). Cada seção tem "Adicionar menu"; cada menu tem "Adicionar submenu", "Tirar" e mover; Integrações aparece com cadeado. Quem não configura vê as seções das áreas sem as ações de mudar.
+- **Mudou:** **nada vale na hora** dentro da janela. Toda mudança, em qualquer aba (Navegação, Início e Seções e menus), vai para o rascunho, e o pé da janela tem "Descartar" e "Salvar". O "Salvar" pergunta "Salvar para todos" ou "Salvar só para mim"; quem não configura tem só "Salvar só para mim". Antes, a janela valia na hora e não tinha salvar.
+- **Mudou:** "Adicionar em <nome>", uma janela só para escolher um menu que já existe, no "+" da seção, no "Adicionar submenu" e na árvore. O pé tem "Criar menu". No workspace, escolher MOVE o menu, porque a mesma tela não mora em 2 lugares.
+- **Mudou:** o formulário "Criar menu" ganhou "Dentro de um menu, como submenu".
+- **Mudou:** o menu de ações das telas do workspace ganhou "Adicionar submenu", "Tirar da seção" e "Tirar do menu"; o painel da trilha, o menu flutuante e o editor mostram o 3º nível.
+- **Mudou:** saíram os textos "Criar uma tela nova", "Criar tela nova", "Nova tela", "Vincular tela existente" e "Menus com telas dentro". "Nova tela nesta seção" virou "Novo menu nesta seção"; "Tipo de tela" virou "Tipo de menu"; a busca diz "Pesquisar menus e categorias...".
+- **Mudou (exemplo):** "Rotina do jurídico" tem o menu Logs de auditoria com o submenu Logs de requisição; Comercial tem Painel de vendas com o submenu Metas do trimestre.
+- **Substitui:** a rodada 24. Lá, os submenus de um menu na seção pessoal eram as telas da seção do workspace, e reordená-los mudava o menu de todos. Agora o submenu da seção pessoal é escolha da pessoa, e reordenar muda só o menu dela.
+- **Não mudou:** o filtro por tipo do Início ainda mostra "Telas" (rodada 27: o dev propõe o substituto).
+- **Requisitos:** as fases 3, 4 e 5 em `requisitos/` ficaram desatualizadas nesta rodada (Personalizar, tirar e excluir, 3 níveis, salvar). Atualizar depois que o protótipo assentar.
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral, botão direito no Início > "Personalizar navegação" > "Seções e menus" · print em `evidencias/rodada28-secoes-menus-e-submenus.jpg` (à esquerda, o Início com menu e submenu; no meio, as seções das áreas com "Minhas requisições" como submenu de "Triagem de propostas", a bolinha amarela e "Alterações não salvas"; à direita, o "Salvar" com os 2 alcances)
+
 ### Rodada 27 · 2026-10-20
 - **Pedido (literal):** "nao precisa deletar, mas pode esconder do prototipo o 'barra unica', bloqueando o clique nesse botao e fazendo sempre abrir por padrao no modo de trilha."
 - **Pedido (literal):** "divida esse desenvolvimento em fases lógicas de implementaçao, pra ajudar o dev num escopo tao grande. [...] divida e faça o doc de requisitos pra cada uma das fases. nao será lançado para o cliente ate acabar"

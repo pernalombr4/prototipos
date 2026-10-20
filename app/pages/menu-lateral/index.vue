@@ -27,6 +27,7 @@ import CriarCaso from './_CriarCaso.vue'
  */
 import EditorDeMenus from './_EditorDeMenus.vue'
 import CriarMenu from './_CriarMenu.vue'
+import EscolherMenu from './_EscolherMenu.vue'
 import CriarCategoria from './_CriarCategoria.vue'
 import CriarMaquete from './_CriarMaquete.vue'
 import RodapeDaJanela from './_RodapeDaJanela.vue'
@@ -888,6 +889,8 @@ function emBreve() {
       dois modelos.
     -->
     <CriarMenu :t="t" />
+    <!-- Rodada 28: "Adicionar em", a janela de escolher um menu que já existe, nos 2 escopos. -->
+    <EscolherMenu :t="t" :categorias="categorias" :pode-configurar="podeConfigurar" />
     <CriarCategoria :t="t" />
     <CriarMaquete v-if="usouMaquete" v-model:open="maqueteAberta" :t="t" :modo="modoDaMaquete" />
 

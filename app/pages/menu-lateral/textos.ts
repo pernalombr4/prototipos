@@ -116,15 +116,32 @@ export interface TextosDaTela {
   adicionarA: (nome: string) => string
   buscarTelas: string
   grupoTelas: string
-  grupoMenus: string
   grupoCategorias: string
-  novaTelaAqui: string
   ordenarSecao: string
   ordemAdicionadas: string
   reordenarSecoes: string
   excluirSecao: string
   ocultarSecao: string
   removerDaSecao: string
+
+  // seções, menus e submenus, rodada 28
+  tirarDoMenu: string
+  secoesDasAreas: string
+  nadaParaSalvar: string
+  saiuDaSecao: (nome: string) => string
+  saiuDoMenu: (nome: string) => string
+  desfazer: string
+  adicionarMenu: string
+  adicionarSubmenu: string
+  submenuSemSubmenu: string
+  vemDaEstrela: string
+  vemDoWorkspace: string
+  excluirMenu: string
+  menuExcluido: (nome: string) => string
+  escolherMenuEm: (nome: string) => string
+  escolherMenuDica: string
+  nadaNaSecao: string
+  ondeMora: (nome: string) => string
   secaoExcluida: (nome: string) => string
   secaoCriada: (nome: string) => string
   fixadaNaTrilha: (nome: string) => string
@@ -148,6 +165,7 @@ export interface TextosDaTela {
   tipoDeMenu: string
   tipoDeMenuDica: string
   dentroDeSecao: string
+  dentroDeMenu: string
   comoFica: string
   // rodada 20: as portas do "+" do topo que moram em outras telas
   maqueteItemDescricao: string
@@ -165,21 +183,12 @@ export interface TextosDaTela {
   ondeFica: string
   noInicio: string
   naTrilhaRotulo: string
-  telasDoMenu: string
-  telasVazio: string
-  vincularTela: string
-  criarTelaNova: string
-  nomeDaTela: string
-  tipoDaTela: string
-  adicionarTela: string
-  removerTela: (nome: string) => string
   criarMenuBotao: string
   menuCriado: (nome: string) => string
   telaNovaSelo: string
   criarCategoriaTitulo: string
   criarCategoriaPlaceholder: string
   categoriaCriada: (nome: string) => string
-  buscarTelasExistentes: string
 
   // filtro do menu e criar com IA (rodada 17)
   filtroSemResultadoEm: (termo: string) => string
@@ -309,7 +318,6 @@ export interface TextosDaTela {
 
   // a porta do editor, na busca (rodada 11)
   editarMenu: string
-  editarMenuDica: string
 
   // salvar com alcance, e a bolinha (rodada 12)
   naoSalvoTitulo: string
@@ -409,7 +417,6 @@ export interface TextosDaTela {
   exigeCategoria: string
   categoriasLigadas: (n: number) => string
   novaSecao: string
-  novaTela: string
   seloNativo: string
   seloWorkspace: string
 
@@ -548,7 +555,7 @@ const ptBR: TextosDaTela = {
   ctxParaPainel: painel => `Levar para ${painel}`,
   ctxRecolher: 'Recolher seção',
   ctxExpandir: 'Expandir seção',
-  ctxNovaTela: 'Nova tela nesta seção',
+  ctxNovaTela: 'Novo menu nesta seção',
   ctxConfigurarCategoria: 'Configurar categoria',
   ctxSoQuemConfigura: 'Só quem configura o workspace',
   linkCopiado: 'Link copiado.',
@@ -572,7 +579,7 @@ const ptBR: TextosDaTela = {
   personalizarDica: 'Escolha o que aparece no menu e em que ordem.',
   abaNavegacao: 'Navegação',
   abaInicio: 'Início',
-  abaSecoes: 'Seções',
+  abaSecoes: 'Seções e menus',
   navInicioDica: 'O Início fica sempre na trilha. Clicar nele abre a página inicial e este menu.',
   aparencia: 'Aparência',
   soIcones: 'Somente ícones',
@@ -595,17 +602,34 @@ const ptBR: TextosDaTela = {
   ocultarDoInicio: 'Tirar do Início',
   adicionarASecao: 'Adicionar à seção',
   adicionarA: nome => `Adicionar a ${nome}`,
-  buscarTelas: 'Pesquisar telas, menus e categorias...',
-  grupoTelas: 'Telas',
-  grupoMenus: 'Menus com telas dentro',
+  buscarTelas: 'Pesquisar menus e categorias...',
+  grupoTelas: 'Menus',
   grupoCategorias: 'Categorias',
-  novaTelaAqui: 'Criar uma tela nova',
   ordenarSecao: 'Ordenar seção',
   ordemAdicionadas: 'Adicionadas por último',
   reordenarSecoes: 'Reordenar seções',
   excluirSecao: 'Excluir seção',
   ocultarSecao: 'Ocultar seção',
-  removerDaSecao: 'Remover da seção',
+  removerDaSecao: 'Tirar da seção',
+
+  // seções, menus e submenus, rodada 28
+  tirarDoMenu: 'Tirar do menu',
+  secoesDasAreas: 'Nas áreas da trilha',
+  nadaParaSalvar: 'Nada para salvar ainda.',
+  saiuDaSecao: nome => `${nome} saiu da seção. Ele continua existindo e pode voltar pelo "+".`,
+  saiuDoMenu: nome => `${nome} saiu do menu. Ele continua existindo e pode voltar.`,
+  desfazer: 'Desfazer',
+  adicionarMenu: 'Adicionar menu',
+  adicionarSubmenu: 'Adicionar submenu',
+  submenuSemSubmenu: 'Submenu não recebe submenu: o menu tem no máximo 3 níveis.',
+  vemDaEstrela: 'Os favoritos vêm da estrela de cada categoria.',
+  vemDoWorkspace: 'As categorias vêm do workspace.',
+  excluirMenu: 'Excluir menu',
+  menuExcluido: nome => `${nome} foi excluído, com a tela dele.`,
+  escolherMenuEm: nome => `Adicionar em ${nome}`,
+  escolherMenuDica: 'Escolha um menu que já existe.',
+  nadaNaSecao: 'Nenhum menu nesta seção ainda.',
+  ondeMora: nome => `Em ${nome}`,
   secaoExcluida: nome => `${nome} foi excluída.`,
   secaoCriada: nome => `${nome} entrou no topo do Início.`,
   fixadaNaTrilha: nome => `${nome} está na trilha.`,
@@ -623,10 +647,11 @@ const ptBR: TextosDaTela = {
   criarSecaoContexto: 'A seção entra no topo do Início.',
   criarCategoriaContexto: 'A categoria aparece em Categorias e na busca.',
   formSecaoRodape: 'A seção entra no fim do menu, no rascunho.',
-  criarMenuContexto: 'O menu e a tela dele nascem juntos, no rascunho do menu.',
+  criarMenuContexto: 'O menu nasce no rascunho do menu lateral.',
   tipoDeMenu: 'Tipo de menu',
   tipoDeMenuDica: 'O tipo é a tela que abre quando alguém clica neste menu.',
   dentroDeSecao: 'Dentro de uma seção',
+  dentroDeMenu: 'Dentro de um menu, como submenu',
   comoFica: 'Como fica no menu',
   maqueteItemDescricao: 'Abre o formulário da categoria escolhida, com os campos que ela tem.',
   maqueteTarefaDescricao: 'Abre a tarefa rápida, que vive fora de qualquer categoria.',
@@ -643,21 +668,12 @@ const ptBR: TextosDaTela = {
   ondeFica: 'Onde ele fica',
   noInicio: 'No Início',
   naTrilhaRotulo: 'Na trilha',
-  telasDoMenu: 'Telas deste menu',
-  telasVazio: 'Vincule uma tela que já existe ou crie uma nova. Dá para fazer depois também.',
-  vincularTela: 'Vincular tela existente',
-  criarTelaNova: 'Criar tela nova',
-  nomeDaTela: 'Nome da tela',
-  tipoDaTela: 'Tipo de tela',
-  adicionarTela: 'Adicionar',
-  removerTela: nome => `Tirar ${nome}`,
   criarMenuBotao: 'Criar menu',
   menuCriado: nome => `${nome} foi criado. Salve para valer para o workspace.`,
   telaNovaSelo: 'Nova',
   criarCategoriaTitulo: 'Criar categoria',
   criarCategoriaPlaceholder: 'Ex.: Fornecedores, Pedidos, Imóveis',
   categoriaCriada: nome => `${nome} entrou em Categorias.`,
-  buscarTelasExistentes: 'Pesquisar telas...',
 
   filtroSemResultadoEm: termo => `Nada no menu com "${termo}".`,
   buscarNoWorkspace: termo => `Buscar "${termo}" no workspace`,
@@ -702,10 +718,10 @@ const ptBR: TextosDaTela = {
   maisDoCaso: 'Mais ações do caso de uso',
   descricaoDoCaso: 'Descrição',
   oQueVemJunto: 'O que vem junto',
-  incluiMenus: 'Menus e telas',
+  incluiMenus: 'Seções e menus',
   incluiCategorias: 'Categorias e campos',
   incluiStatus: 'Status',
-  nMenusTelas: (m, t) => `${m === 1 ? '1 menu' : `${m} menus`}, ${t === 1 ? '1 tela' : `${t} telas`}`,
+  nMenusTelas: (m, t) => `${m === 1 ? '1 seção' : `${m} seções`}, ${t === 1 ? '1 menu' : `${t} menus`}`,
   nCategoriasCampos: (c, f) => `${c === 1 ? '1 categoria' : `${c} categorias`}, ${f === 1 ? '1 campo' : `${f} campos`}`,
   nStatus: n => n === 1 ? '1 status' : `${n} status`,
   peloEnspace: 'Pelo ENSPACE',
@@ -816,7 +832,6 @@ const ptBR: TextosDaTela = {
   },
 
   editarMenu: 'Editar menu',
-  editarMenuDica: 'Arraste aqui mesmo para reordenar. No editor você agrupa, cria e escolhe o tipo de cada tela.',
 
   naoSalvoTitulo: 'Alterações não salvas',
   naoSalvoDica: 'Arraste o quanto quiser. Nada muda para ninguém até você salvar.',
@@ -901,23 +916,22 @@ const ptBR: TextosDaTela = {
   emBreve: 'Em breve',
   editorAbrir: 'Montar o menu',
   editorTitulo: 'Montar o menu',
-  editorDescricao: 'Reordene, agrupe em seções e escolha o tipo de cada tela. Encaixe que quebra a lógica do ENSPACE é recusado na hora, com o motivo.',
+  editorDescricao: 'Reordene, agrupe em seções e escolha o tipo de cada menu. Encaixe que quebra a lógica do ENSPACE é recusado na hora, com o motivo.',
   moverAcima: 'Mover para cima',
   moverAbaixo: 'Mover para baixo',
   moverPara: 'Mover para',
   foraDeSecao: 'Fora de seção',
-  tipoDeTela: 'Tipo de tela',
+  tipoDeTela: 'Tipo de menu',
   exigeCategoria: 'Este tipo pede ao menos uma categoria',
   categoriasLigadas: n => `${n} categorias ligadas`,
   novaSecao: 'Nova seção',
-  novaTela: 'Nova tela',
   seloNativo: 'Nativo',
   seloWorkspace: 'Do workspace',
 
   formSecaoTitulo: 'Nova seção de menu',
-  formSecaoDescricao: 'Seção é o agrupamento do menu lateral. Ela recebe telas dentro, aparece com o nome e o ícone que você der, e só quem estiver no escopo enxerga.',
+  formSecaoDescricao: 'Seção é o agrupamento do menu lateral. Ela recebe menus dentro, aparece com o nome e o ícone que você der, e só quem estiver no escopo enxerga.',
   formItemTitulo: 'Novo item de menu',
-  formItemDescricao: 'Item é uma tela dentro de uma seção. Escolha o tipo, e o ENSPACE pede o que aquele tipo precisa.',
+  formItemDescricao: 'O menu abre o tipo de tela que você escolher. O ENSPACE pede o que aquele tipo precisa.',
   campoNome: 'Nome',
   campoNomeDica: 'É o que aparece no menu. Use a palavra que a equipe usa.',
   campoIcone: 'Ícone',
@@ -937,7 +951,7 @@ const ptBR: TextosDaTela = {
   escopoRestringir: 'Restringir ainda mais neste item',
   escopoResumo: n => n === 1 ? '1 grupo' : `${n} grupos`,
   campoCaminho: 'Caminho',
-  campoCaminhoDica: 'A URL para onde esta tela leva.',
+  campoCaminhoDica: 'A URL para onde este menu leva.',
   campoCategorias: 'Categorias',
   adicionarSecao: 'Nova seção',
   adicionarItem: 'Novo menu',
@@ -972,10 +986,11 @@ const ptBR: TextosDaTela = {
   preverNoPainel: 'Como fica no painel',
 
   motivos: {
-    destinoEhFolha: 'Tela nativa não recebe item dentro. Solte dentro de uma seção.',
+    destinoEhFolha: 'Menu nativo não recebe submenu. Solte dentro de uma seção.',
     categoriaSoEmCategorias: 'Categoria só entra na seção Categorias.',
     telaNaoEmCategorias: 'A seção Categorias só aceita categoria.',
-    secaoDentroDeSecao: 'O menu tem dois níveis. Seção não entra dentro de seção.',
+    secaoDentroDeSecao: 'Seção não entra dentro de seção nem de menu.',
+    tresNiveis: 'O menu tem no máximo 3 níveis: seção, menu e submenu. Submenu não recebe submenu.',
     areaFixa: 'Trabalho, Dados e Configurações ficam onde estão. Só as seções mudam de lugar na trilha.',
     soSecaoNaTrilha: 'Na trilha só entram seções. Solte o item dentro de uma delas.',
     ordemFixa: 'Integrações tem ordem fixa, como Configurações: nada entra, sai ou muda de lugar.',
@@ -1066,7 +1081,7 @@ const en: TextosDaTela = {
   ctxParaPainel: painel => `Move into ${painel}`,
   ctxRecolher: 'Collapse section',
   ctxExpandir: 'Expand section',
-  ctxNovaTela: 'New screen in this section',
+  ctxNovaTela: 'New menu in this section',
   ctxConfigurarCategoria: 'Category settings',
   ctxSoQuemConfigura: 'Only workspace admins',
   linkCopiado: 'Link copied.',
@@ -1090,7 +1105,7 @@ const en: TextosDaTela = {
   personalizarDica: 'Choose what shows in the menu and in which order.',
   abaNavegacao: 'Navigation',
   abaInicio: 'Home',
-  abaSecoes: 'Sections',
+  abaSecoes: 'Sections and menus',
   navInicioDica: 'Home always stays on the rail. Clicking it opens the home page and this menu.',
   aparencia: 'Appearance',
   soIcones: 'Icons only',
@@ -1113,17 +1128,34 @@ const en: TextosDaTela = {
   ocultarDoInicio: 'Remove from Home',
   adicionarASecao: 'Add to section',
   adicionarA: nome => `Add to ${nome}`,
-  buscarTelas: 'Search screens, menus and categories...',
-  grupoTelas: 'Screens',
-  grupoMenus: 'Menus with screens inside',
+  buscarTelas: 'Search menus and categories...',
+  grupoTelas: 'Menus',
   grupoCategorias: 'Categories',
-  novaTelaAqui: 'Create a new screen',
   ordenarSecao: 'Sort section',
   ordemAdicionadas: 'Last added',
   reordenarSecoes: 'Reorder sections',
   excluirSecao: 'Delete section',
   ocultarSecao: 'Hide section',
   removerDaSecao: 'Remove from section',
+
+  // sections, menus and submenus, round 28
+  tirarDoMenu: 'Remove from menu',
+  secoesDasAreas: 'In the rail areas',
+  nadaParaSalvar: 'Nothing to save yet.',
+  saiuDaSecao: nome => `${nome} left the section. It still exists and can come back through "+".`,
+  saiuDoMenu: nome => `${nome} left the menu. It still exists and can come back.`,
+  desfazer: 'Undo',
+  adicionarMenu: 'Add menu',
+  adicionarSubmenu: 'Add submenu',
+  submenuSemSubmenu: 'A submenu does not take submenus: the menu has at most 3 levels.',
+  vemDaEstrela: 'Favorites come from the star of each category.',
+  vemDoWorkspace: 'Categories come from the workspace.',
+  excluirMenu: 'Delete menu',
+  menuExcluido: nome => `${nome} was deleted, with its screen.`,
+  escolherMenuEm: nome => `Add to ${nome}`,
+  escolherMenuDica: 'Choose a menu that already exists.',
+  nadaNaSecao: 'No menu in this section yet.',
+  ondeMora: nome => `In ${nome}`,
   secaoExcluida: nome => `${nome} was deleted.`,
   secaoCriada: nome => `${nome} is now at the top of Home.`,
   fixadaNaTrilha: nome => `${nome} is on the rail.`,
@@ -1141,10 +1173,11 @@ const en: TextosDaTela = {
   criarSecaoContexto: 'The section lands at the top of Home.',
   criarCategoriaContexto: 'The category shows up in Categories and in search.',
   formSecaoRodape: 'The section lands at the end of the menu, in the draft.',
-  criarMenuContexto: 'The menu and its screen are born together, in the menu draft.',
+  criarMenuContexto: 'The menu is born in the side menu draft.',
   tipoDeMenu: 'Menu type',
   tipoDeMenuDica: 'The type is the screen that opens when someone clicks this menu.',
   dentroDeSecao: 'Inside a section',
+  dentroDeMenu: 'Inside a menu, as a submenu',
   comoFica: 'How it looks in the menu',
   maqueteItemDescricao: 'Opens the form of the chosen category, with the fields it has.',
   maqueteTarefaDescricao: 'Opens the quick task, which lives outside any category.',
@@ -1161,21 +1194,12 @@ const en: TextosDaTela = {
   ondeFica: 'Where it lives',
   noInicio: 'In Home',
   naTrilhaRotulo: 'On the rail',
-  telasDoMenu: 'Screens in this menu',
-  telasVazio: 'Link a screen that already exists or create a new one. You can also do it later.',
-  vincularTela: 'Link existing screen',
-  criarTelaNova: 'Create new screen',
-  nomeDaTela: 'Screen name',
-  tipoDaTela: 'Screen type',
-  adicionarTela: 'Add',
-  removerTela: nome => `Remove ${nome}`,
   criarMenuBotao: 'Create menu',
   menuCriado: nome => `${nome} was created. Save to apply it to the workspace.`,
   telaNovaSelo: 'New',
   criarCategoriaTitulo: 'Create category',
   criarCategoriaPlaceholder: 'E.g. Suppliers, Orders, Properties',
   categoriaCriada: nome => `${nome} is now in Categories.`,
-  buscarTelasExistentes: 'Search screens...',
 
   filtroSemResultadoEm: termo => `Nothing in the menu matches "${termo}".`,
   buscarNoWorkspace: termo => `Search "${termo}" in the workspace`,
@@ -1220,10 +1244,10 @@ const en: TextosDaTela = {
   maisDoCaso: 'More use case actions',
   descricaoDoCaso: 'Description',
   oQueVemJunto: 'What comes with it',
-  incluiMenus: 'Menus and screens',
+  incluiMenus: 'Sections and menus',
   incluiCategorias: 'Categories and fields',
   incluiStatus: 'Statuses',
-  nMenusTelas: (m, t) => `${m === 1 ? '1 menu' : `${m} menus`}, ${t === 1 ? '1 screen' : `${t} screens`}`,
+  nMenusTelas: (m, t) => `${m === 1 ? '1 section' : `${m} sections`}, ${t === 1 ? '1 menu' : `${t} menus`}`,
   nCategoriasCampos: (c, f) => `${c === 1 ? '1 category' : `${c} categories`}, ${f === 1 ? '1 field' : `${f} fields`}`,
   nStatus: n => n === 1 ? '1 status' : `${n} statuses`,
   peloEnspace: 'By ENSPACE',
@@ -1334,7 +1358,6 @@ const en: TextosDaTela = {
   },
 
   editarMenu: 'Edit menu',
-  editarMenuDica: 'Drag right here to reorder. In the editor you group, create and pick each screen type.',
 
   naoSalvoTitulo: 'Unsaved changes',
   naoSalvoDica: 'Drag as much as you want. Nothing changes for anyone until you save.',
@@ -1419,23 +1442,22 @@ const en: TextosDaTela = {
   emBreve: 'Coming soon',
   editorAbrir: 'Build the menu',
   editorTitulo: 'Build the menu',
-  editorDescricao: 'Reorder, group into sections and choose the type of each screen. A placement that breaks the logic of ENSPACE is refused on the spot, with the reason.',
+  editorDescricao: 'Reorder, group into sections and choose the type of each menu. A placement that breaks the ENSPACE logic is refused right away, with the reason.',
   moverAcima: 'Move up',
   moverAbaixo: 'Move down',
   moverPara: 'Move to',
   foraDeSecao: 'Outside a section',
-  tipoDeTela: 'Screen type',
+  tipoDeTela: 'Menu type',
   exigeCategoria: 'This type needs at least one category',
   categoriasLigadas: n => `${n} categories linked`,
   novaSecao: 'New section',
-  novaTela: 'New screen',
   seloNativo: 'Native',
   seloWorkspace: 'Workspace',
 
   formSecaoTitulo: 'New menu section',
-  formSecaoDescricao: 'A section is the grouping in the sidebar. It holds screens, shows up with the name and icon you give it, and only people in its scope see it.',
+  formSecaoDescricao: 'A section groups the side menu. It holds menus, shows the name and icon you give it, and only people in its scope see it.',
   formItemTitulo: 'New menu item',
-  formItemDescricao: 'An item is a screen inside a section. Pick the type and ENSPACE asks for what that type needs.',
+  formItemDescricao: 'The menu opens the screen type you choose. ENSPACE asks for what that type needs.',
   campoNome: 'Name',
   campoNomeDica: 'This is what shows in the menu. Use the word the team uses.',
   campoIcone: 'Icon',
@@ -1455,7 +1477,7 @@ const en: TextosDaTela = {
   escopoRestringir: 'Restrict further on this item',
   escopoResumo: n => n === 1 ? '1 group' : `${n} groups`,
   campoCaminho: 'Path',
-  campoCaminhoDica: 'The URL this screen leads to.',
+  campoCaminhoDica: 'The URL this menu leads to.',
   campoCategorias: 'Categories',
   adicionarSecao: 'New section',
   adicionarItem: 'New menu',
@@ -1490,10 +1512,11 @@ const en: TextosDaTela = {
   preverNoPainel: 'How it looks in the panel',
 
   motivos: {
-    destinoEhFolha: 'A native screen takes no items inside. Drop it into a section.',
+    destinoEhFolha: 'A native menu does not take submenus. Drop it inside a section.',
     categoriaSoEmCategorias: 'A category only goes in the Categories section.',
     telaNaoEmCategorias: 'The Categories section only takes categories.',
-    secaoDentroDeSecao: 'The menu has two levels. A section does not go inside a section.',
+    secaoDentroDeSecao: 'A section does not go inside a section or a menu.',
+    tresNiveis: 'The menu has at most 3 levels: section, menu and submenu. A submenu does not take submenus.',
     areaFixa: 'Work, Data and Settings stay where they are. Only sections move on the rail.',
     soSecaoNaTrilha: 'Only sections go on the rail. Drop the item inside one of them.',
     ordemFixa: 'Integrations has a fixed order, like Settings: nothing comes in, goes out or moves.',
@@ -1584,7 +1607,7 @@ const es: TextosDaTela = {
   ctxParaPainel: painel => `Llevar a ${painel}`,
   ctxRecolher: 'Contraer sección',
   ctxExpandir: 'Expandir sección',
-  ctxNovaTela: 'Nueva pantalla en esta sección',
+  ctxNovaTela: 'Nuevo menú en esta sección',
   ctxConfigurarCategoria: 'Configurar categoría',
   ctxSoQuemConfigura: 'Solo quien configura el workspace',
   linkCopiado: 'Enlace copiado.',
@@ -1608,7 +1631,7 @@ const es: TextosDaTela = {
   personalizarDica: 'Elige qué aparece en el menú y en qué orden.',
   abaNavegacao: 'Navegación',
   abaInicio: 'Inicio',
-  abaSecoes: 'Secciones',
+  abaSecoes: 'Secciones y menús',
   navInicioDica: 'Inicio siempre queda en el riel. Al hacer clic se abren la página inicial y este menú.',
   aparencia: 'Apariencia',
   soIcones: 'Solo íconos',
@@ -1631,17 +1654,34 @@ const es: TextosDaTela = {
   ocultarDoInicio: 'Quitar de Inicio',
   adicionarASecao: 'Agregar a la sección',
   adicionarA: nome => `Agregar a ${nome}`,
-  buscarTelas: 'Buscar pantallas, menús y categorías...',
-  grupoTelas: 'Pantallas',
-  grupoMenus: 'Menús con pantallas',
+  buscarTelas: 'Buscar menús y categorías...',
+  grupoTelas: 'Menús',
   grupoCategorias: 'Categorías',
-  novaTelaAqui: 'Crear una pantalla nueva',
   ordenarSecao: 'Ordenar sección',
   ordemAdicionadas: 'Agregadas al final',
   reordenarSecoes: 'Reordenar secciones',
   excluirSecao: 'Eliminar sección',
   ocultarSecao: 'Ocultar sección',
   removerDaSecao: 'Quitar de la sección',
+
+  // secciones, menús y submenús, ronda 28
+  tirarDoMenu: 'Quitar del menú',
+  secoesDasAreas: 'En las áreas del riel',
+  nadaParaSalvar: 'Nada para guardar todavía.',
+  saiuDaSecao: nome => `${nome} salió de la sección. Sigue existiendo y puede volver por "+".`,
+  saiuDoMenu: nome => `${nome} salió del menú. Sigue existiendo y puede volver.`,
+  desfazer: 'Deshacer',
+  adicionarMenu: 'Agregar menú',
+  adicionarSubmenu: 'Agregar submenú',
+  submenuSemSubmenu: 'Un submenú no recibe submenús: el menú tiene como máximo 3 niveles.',
+  vemDaEstrela: 'Los favoritos vienen de la estrella de cada categoría.',
+  vemDoWorkspace: 'Las categorías vienen del workspace.',
+  excluirMenu: 'Eliminar menú',
+  menuExcluido: nome => `${nome} fue eliminado, con su pantalla.`,
+  escolherMenuEm: nome => `Agregar en ${nome}`,
+  escolherMenuDica: 'Elige un menú que ya existe.',
+  nadaNaSecao: 'Ningún menú en esta sección todavía.',
+  ondeMora: nome => `En ${nome}`,
   secaoExcluida: nome => `${nome} fue eliminada.`,
   secaoCriada: nome => `${nome} quedó arriba de todo en Inicio.`,
   fixadaNaTrilha: nome => `${nome} está en el riel.`,
@@ -1659,10 +1699,11 @@ const es: TextosDaTela = {
   criarSecaoContexto: 'La sección entra arriba del Inicio.',
   criarCategoriaContexto: 'La categoría aparece en Categorías y en la búsqueda.',
   formSecaoRodape: 'La sección entra al final del menú, en el borrador.',
-  criarMenuContexto: 'El menú y su pantalla nacen juntos, en el borrador del menú.',
+  criarMenuContexto: 'El menú nace en el borrador del menú lateral.',
   tipoDeMenu: 'Tipo de menú',
   tipoDeMenuDica: 'El tipo es la pantalla que abre cuando alguien hace clic en este menú.',
   dentroDeSecao: 'Dentro de una sección',
+  dentroDeMenu: 'Dentro de un menú, como submenú',
   comoFica: 'Cómo queda en el menú',
   maqueteItemDescricao: 'Abre el formulario de la categoría elegida, con los campos que tiene.',
   maqueteTarefaDescricao: 'Abre la tarea rápida, que vive fuera de cualquier categoría.',
@@ -1679,21 +1720,12 @@ const es: TextosDaTela = {
   ondeFica: 'Dónde queda',
   noInicio: 'En Inicio',
   naTrilhaRotulo: 'En el riel',
-  telasDoMenu: 'Pantallas de este menú',
-  telasVazio: 'Vincula una pantalla que ya existe o crea una nueva. También se puede hacer después.',
-  vincularTela: 'Vincular pantalla existente',
-  criarTelaNova: 'Crear pantalla nueva',
-  nomeDaTela: 'Nombre de la pantalla',
-  tipoDaTela: 'Tipo de pantalla',
-  adicionarTela: 'Agregar',
-  removerTela: nome => `Quitar ${nome}`,
   criarMenuBotao: 'Crear menú',
   menuCriado: nome => `${nome} fue creado. Guarda para aplicarlo al workspace.`,
   telaNovaSelo: 'Nueva',
   criarCategoriaTitulo: 'Crear categoría',
   criarCategoriaPlaceholder: 'Ej.: Proveedores, Pedidos, Inmuebles',
   categoriaCriada: nome => `${nome} quedó en Categorías.`,
-  buscarTelasExistentes: 'Buscar pantallas...',
 
   filtroSemResultadoEm: termo => `Nada en el menú con "${termo}".`,
   buscarNoWorkspace: termo => `Buscar "${termo}" en el workspace`,
@@ -1738,10 +1770,10 @@ const es: TextosDaTela = {
   maisDoCaso: 'Más acciones del caso de uso',
   descricaoDoCaso: 'Descripción',
   oQueVemJunto: 'Qué incluye',
-  incluiMenus: 'Menús y pantallas',
+  incluiMenus: 'Secciones y menús',
   incluiCategorias: 'Categorías y campos',
   incluiStatus: 'Estados',
-  nMenusTelas: (m, t) => `${m === 1 ? '1 menú' : `${m} menús`}, ${t === 1 ? '1 pantalla' : `${t} pantallas`}`,
+  nMenusTelas: (m, t) => `${m === 1 ? '1 sección' : `${m} secciones`}, ${t === 1 ? '1 menú' : `${t} menús`}`,
   nCategoriasCampos: (c, f) => `${c === 1 ? '1 categoría' : `${c} categorías`}, ${f === 1 ? '1 campo' : `${f} campos`}`,
   nStatus: n => n === 1 ? '1 estado' : `${n} estados`,
   peloEnspace: 'Por ENSPACE',
@@ -1852,7 +1884,6 @@ const es: TextosDaTela = {
   },
 
   editarMenu: 'Editar menú',
-  editarMenuDica: 'Arrastra aquí mismo para reordenar. En el editor agrupas, creas y eliges el tipo de cada pantalla.',
 
   naoSalvoTitulo: 'Cambios sin guardar',
   naoSalvoDica: 'Arrastra lo que quieras. Nada cambia para nadie hasta que guardes.',
@@ -1937,23 +1968,22 @@ const es: TextosDaTela = {
   emBreve: 'Próximamente',
   editorAbrir: 'Armar el menú',
   editorTitulo: 'Armar el menú',
-  editorDescricao: 'Reordena, agrupa en secciones y elige el tipo de cada pantalla. Un encaje que rompe la lógica de ENSPACE se rechaza al momento, con el motivo.',
+  editorDescricao: 'Reordena, agrupa en secciones y elige el tipo de cada menú. Lo que rompe la lógica de ENSPACE se rechaza en el momento, con el motivo.',
   moverAcima: 'Mover arriba',
   moverAbaixo: 'Mover abajo',
   moverPara: 'Mover a',
   foraDeSecao: 'Fuera de sección',
-  tipoDeTela: 'Tipo de pantalla',
+  tipoDeTela: 'Tipo de menú',
   exigeCategoria: 'Este tipo pide al menos una categoría',
   categoriasLigadas: n => `${n} categorías vinculadas`,
   novaSecao: 'Nueva sección',
-  novaTela: 'Nueva pantalla',
   seloNativo: 'Nativo',
   seloWorkspace: 'Del workspace',
 
   formSecaoTitulo: 'Nueva sección de menú',
-  formSecaoDescricao: 'Una sección es la agrupación del menú lateral. Recibe pantallas dentro, aparece con el nombre y el icono que le des, y solo la ve quien esté en el alcance.',
+  formSecaoDescricao: 'La sección agrupa el menú lateral. Recibe menús, aparece con el nombre y el icono que le des, y solo la ve quien esté en el alcance.',
   formItemTitulo: 'Nuevo elemento de menú',
-  formItemDescricao: 'Un elemento es una pantalla dentro de una sección. Elige el tipo y ENSPACE pide lo que ese tipo necesita.',
+  formItemDescricao: 'El menú abre el tipo de pantalla que elijas. ENSPACE pide lo que ese tipo necesita.',
   campoNome: 'Nombre',
   campoNomeDica: 'Es lo que aparece en el menú. Usa la palabra que usa el equipo.',
   campoIcone: 'Icono',
@@ -1973,7 +2003,7 @@ const es: TextosDaTela = {
   escopoRestringir: 'Restringir aún más en este elemento',
   escopoResumo: n => n === 1 ? '1 grupo' : `${n} grupos`,
   campoCaminho: 'Ruta',
-  campoCaminhoDica: 'La URL a la que lleva esta pantalla.',
+  campoCaminhoDica: 'La URL a la que lleva este menú.',
   campoCategorias: 'Categorías',
   adicionarSecao: 'Nueva sección',
   adicionarItem: 'Nuevo menú',
@@ -2008,10 +2038,11 @@ const es: TextosDaTela = {
   preverNoPainel: 'Cómo queda en el panel',
 
   motivos: {
-    destinoEhFolha: 'Una pantalla nativa no recibe elementos dentro. Suéltalo en una sección.',
+    destinoEhFolha: 'Un menú nativo no recibe submenús. Suéltalo dentro de una sección.',
     categoriaSoEmCategorias: 'Una categoría solo entra en la sección Categorías.',
     telaNaoEmCategorias: 'La sección Categorías solo acepta categorías.',
-    secaoDentroDeSecao: 'El menú tiene dos niveles. Una sección no entra dentro de otra.',
+    secaoDentroDeSecao: 'Una sección no entra en una sección ni en un menú.',
+    tresNiveis: 'El menú tiene como máximo 3 niveles: sección, menú y submenú. Un submenú no recibe submenús.',
     areaFixa: 'Trabajo, Datos y Configuración se quedan donde están. Solo las secciones cambian de lugar en el riel.',
     soSecaoNaTrilha: 'En el riel solo entran secciones. Suelta el elemento dentro de una de ellas.',
     ordemFixa: 'Integraciones tiene un orden fijo, como Configuración: nada entra, sale ni cambia de lugar.',

@@ -3,7 +3,6 @@ import { useLimites } from './limites'
 import LinhaDeMenu from './_LinhaDeMenu.vue'
 import SecaoDeMenu from './_SecaoDeMenu.vue'
 import AvisosDoMenu from './_AvisosDoMenu.vue'
-import AdicionarASecao from './_AdicionarASecao.vue'
 import MaisDaSecao from './_MaisDaSecao.vue'
 import { useArraste, useMenuDoWorkspace, type Atalho } from './estado'
 import { useMeusRelatorios } from './relatorios'
@@ -266,11 +265,31 @@ interface Resolvido {
   abrir: () => void
   ativo: boolean
   categoria?: Categoria
-  /** Quando o atalho é um menu: as telas dele, que viram submenus. */
+  /** Tipo `menu`, das rodadas 15 a 27: as telas de uma seção do workspace. */
   filhos?: NoDoMenu[]
+  /** Rodada 28: os submenus que a pessoa pôs neste menu. */
+  subs?: Resolvido[]
 }
 
+/** O nó aparece na árvore de agora, em qualquer dos 3 níveis (módulo desligado não aparece). */
+function naArvore(id: string, lista: NoDoMenu[] = menu.arvoreVisivel.value): boolean {
+  return lista.some(n => n.id === id || (!!n.filhos && naArvore(id, n.filhos)))
+}
+
+/** Rodada 28: o menu e, embaixo, os submenus que a pessoa escolheu. */
 function resolver(a: Atalho): Resolvido | null {
+  const r = resolverUm(a)
+  if (r && a.tipo !== 'menu' && a.filhos?.length) {
+    r.subs = a.filhos.map(resolverUm).filter((x): x is Resolvido => !!x)
+  }
+  return r
+}
+
+function temSubs(r: Resolvido) {
+  return !!r.filhos?.length || !!r.subs?.length
+}
+
+function resolverUm(a: Atalho): Resolvido | null {
   const chave = chaveDoAtalho(a)
   if (a.tipo === 'categoria') {
     const c = props.categorias.find(x => String(x.id) === a.id)
@@ -279,7 +298,7 @@ function resolver(a: Atalho): Resolvido | null {
   }
   const no = menu.acharNo(a.id)
   // Módulo desligado ou item oculto: o atalho fica guardado, mas não aparece.
-  if (!no || no.oculto || !menu.arvoreVisivel.value.some(n => n.id === no.id || n.filhos?.some(f => f.id === no.id))) return null
+  if (!no || no.oculto || !naArvore(no.id)) return null
   if (a.tipo === 'menu') {
     const filhos = (no.filhos ?? []).filter(f => !f.oculto)
     return {
@@ -303,6 +322,11 @@ function atalhosVisiveis(secaoId: string): Resolvido[] {
       const filhos = r.filhos.filter(f => casa(rotuloDe(f)))
       return filhos.length ? [{ ...r, filhos }] : []
     }
+    if (r.subs?.length) {
+      if (casa(r.rotulo)) return [r]
+      const subs = r.subs.filter(x => casa(x.rotulo))
+      return subs.length ? [{ ...r, subs }] : []
+    }
     return casa(r.rotulo) ? [r] : []
   })
 }
@@ -323,8 +347,67 @@ function chaveDoMenu(secaoId: string, chave: string) {
 function alternarMenu(secaoId: string, r: Resolvido) {
   const k = chaveDoMenu(secaoId, r.chave)
   const estavaAberto = aberta(k)
-  trilha.alternarRecolhida(k)
-  if (!estavaAberto) r.abrir()
+  // Rodada 28: aberto e já na tela dele, o clique fecha; senão abre a tela e mostra os submenus.
+  if (estavaAberto && r.ativo) {
+    trilha.alternarRecolhida(k)
+    return
+  }
+  if (!estavaAberto) trilha.alternarRecolhida(k)
+  r.abrir()
+}
+
+/* "Tirar" com "Desfazer" no aviso (rodada 28): tirar não é excluir. */
+function tirarDaSecao(secaoId: string, r: Resolvido) {
+  const saiu = trilha.removerAtalho(secaoId, r.chave)
+  if (!saiu) return
+  toast.add({
+    title: props.t.saiuDaSecao(r.rotulo),
+    icon: 'i-lucide-circle-minus',
+    color: 'neutral',
+    actions: [{ label: props.t.desfazer, color: 'neutral', variant: 'outline', onClick: () => trilha.restaurarAtalho(secaoId, saiu.atalho, saiu.indice) }],
+  })
+}
+
+function tirarDoMenu(secaoId: string, pai: Resolvido, sub: Resolvido) {
+  const saiu = trilha.tirarSubmenu(secaoId, pai.chave, sub.chave)
+  if (!saiu) return
+  toast.add({
+    title: props.t.saiuDoMenu(sub.rotulo),
+    icon: 'i-lucide-circle-minus',
+    color: 'neutral',
+    actions: [{ label: props.t.desfazer, color: 'neutral', variant: 'outline', onClick: () => trilha.restaurarSubmenu(secaoId, pai.chave, saiu.atalho, saiu.indice) }],
+  })
+}
+
+function abrirEscolha(secaoId: string, rotulo: string, menuChave?: string) {
+  trilha.escolhendoMenu.value = { escopo: 'meu', secaoId, rotulo, menuChave }
+}
+
+/** As ações de um submenu: ir, mover entre os irmãos e tirar do menu. */
+function acoesDoSubmenu(secaoId: string, pai: Resolvido, sub: Resolvido): Acoes {
+  const t = props.t
+  const lista = (pai.subs ?? []).map(x => x.chave)
+  const i = lista.indexOf(sub.chave)
+  return [
+    [
+      { label: t.ctxAbrir, icon: 'i-lucide-arrow-up-right', onSelect: sub.abrir },
+      { label: t.ctxNovaAba, icon: 'i-lucide-external-link', onSelect: () => toast.add({ title: t.novaAbaMaquete, icon: 'i-lucide-hammer', color: 'neutral' as const }) },
+      { label: t.ctxCopiarLink, icon: 'i-lucide-link', onSelect: () => acoes.copiarLink(sub.atalho.id) },
+    ],
+    [
+      { label: t.ctxSubir, icon: 'i-lucide-arrow-up', kbds: ['alt', 'arrowup'], disabled: i <= 0, onSelect: () => trilha.moverSubmenu(secaoId, pai.chave, sub.chave, -1) },
+      { label: t.ctxDescer, icon: 'i-lucide-arrow-down', kbds: ['alt', 'arrowdown'], disabled: i >= lista.length - 1, onSelect: () => trilha.moverSubmenu(secaoId, pai.chave, sub.chave, 1) },
+    ],
+    [{ label: t.tirarDoMenu, icon: 'i-lucide-circle-minus', onSelect: () => tirarDoMenu(secaoId, pai, sub) }],
+  ]
+}
+
+function largarNoSubmenu(secaoId: string, menuChave: string, alvo: string, p: 'antes' | 'depois' | 'dentro') {
+  const quem = arraste.arrastando.value
+  arraste.terminar()
+  const prefixo = `sub:${secaoId}:${menuChave}:`
+  if (!quem?.startsWith(prefixo)) return
+  trilha.arrastarSubmenu(secaoId, menuChave, quem.slice(prefixo.length), alvo, p === 'antes' ? 'antes' : 'depois')
 }
 
 function acoesDoAtalho(secaoId: string, r: Resolvido): Acoes {
@@ -348,8 +431,12 @@ function acoesDoAtalho(secaoId: string, r: Resolvido): Acoes {
       { label: t.ctxNovaAba, icon: 'i-lucide-external-link', onSelect: () => toast.add({ title: t.novaAbaMaquete, icon: 'i-lucide-hammer', color: 'neutral' as const }) },
       { label: t.ctxCopiarLink, icon: 'i-lucide-link', onSelect: () => acoes.copiarLink(r.atalho.id) },
     ],
-    meio,
-    [{ label: t.removerDaSecao, icon: 'i-lucide-circle-minus', color: 'error' as const, onSelect: () => trilha.removerAtalho(secaoId, r.chave) }],
+    [
+      ...meio,
+      // Rodada 28: o 3º nível. Seção do workspace inteira (tipo `menu`) não recebe.
+      ...(r.atalho.tipo === 'menu' ? [] : [{ label: t.adicionarSubmenu, icon: 'i-lucide-list-plus', onSelect: () => abrirEscolha(secaoId, r.rotulo, r.chave) }]),
+    ],
+    [{ label: t.removerDaSecao, icon: 'i-lucide-circle-minus', onSelect: () => tirarDaSecao(secaoId, r) }],
   ]
 }
 
@@ -387,7 +474,7 @@ function acoesDaSecao(s: SecaoDoInicio): Acoes {
     return [
       [
         { label: t.ctxRenomear, icon: 'i-lucide-pencil', onSelect: () => { trilha.criandoSecao.value = s.id } },
-        { label: t.adicionarA(s.rotulo), icon: 'i-lucide-list-plus', onSelect: () => { trilha.adicionandoEm.value = s.id } },
+        { label: t.adicionarA(s.rotulo), icon: 'i-lucide-list-plus', onSelect: () => abrirEscolha(s.id, s.rotulo) },
       ],
       [limites.itemMostrar(s.id, t), {
         label: t.ordenarSecao,
@@ -532,18 +619,6 @@ function moverSecao(s: SecaoDoInicio, passo: -1 | 1) {
   if (vizinho) trilha.arrastarSecao(s.id, vizinho, passo < 0 ? 'antes' : 'depois', idsDasSecoes.value)
 }
 
-/* "+" de uma seção: um popover por seção, aberto também pelo "…". */
-function popoverAberto(id: string) {
-  return computed({
-    get: () => trilha.adicionandoEm.value === id,
-    set: (v: boolean) => { trilha.adicionandoEm.value = v ? id : null },
-  })
-}
-const abertos = new Map<string, ReturnType<typeof popoverAberto>>()
-function adicionando(id: string) {
-  if (!abertos.has(id)) abertos.set(id, popoverAberto(id))
-  return abertos.get(id)!
-}
 </script>
 
 <template>
@@ -655,23 +730,15 @@ function adicionando(id: string) {
         <UDropdownMenu :items="acoesDaSecao(s)" :content="{ side: 'right', align: 'start' }" :ui="{ content: 'min-w-56' }">
           <UButton icon="i-lucide-ellipsis" size="xs" color="neutral" variant="ghost" :aria-label="props.t.maisAcoes(s.rotulo)" />
         </UDropdownMenu>
-        <UPopover
+        <UButton
           v-if="s.tipo === 'pessoal'"
-          v-model:open="adicionando(s.id).value"
-          :content="{ side: 'right', align: 'start', sideOffset: 8 }"
-        >
-          <UButton icon="i-lucide-plus" size="xs" color="neutral" variant="ghost" :aria-label="props.t.adicionarEm(s.rotulo)" />
-          <template #content>
-            <AdicionarASecao
-              :t="props.t"
-              :secao-id="s.id"
-              :categorias="props.categorias"
-              :pode-configurar="props.podeConfigurar"
-              @escolhido="trilha.adicionandoEm.value = null"
-              @nova-tela="trilha.adicionandoEm.value = null; emit('novaTela', s.id)"
-            />
-          </template>
-        </UPopover>
+          icon="i-lucide-plus"
+          size="xs"
+          color="neutral"
+          variant="ghost"
+          :aria-label="props.t.adicionarEm(s.rotulo)"
+          @click="abrirEscolha(s.id, s.rotulo)"
+        />
       </template>
 
       <!-- ---------- Favoritos ---------- -->
@@ -770,7 +837,7 @@ function adicionando(id: string) {
             :nivel="2"
             :ativo="r.ativo && !r.filhos"
             :atraso="i * 20"
-            :expandido="r.filhos ? aberta(chaveDoMenu(s.id, r.chave)) : undefined"
+            :expandido="temSubs(r) ? aberta(chaveDoMenu(s.id, r.chave)) : undefined"
             :alterado="menu.tocados.value.includes(`atalho:${s.id}:${r.chave}`)"
             :dica-alterado="props.t.pontoAlterado"
             :acoes="props.flutuante ? undefined : acoesDoAtalho(s.id, r)"
@@ -779,7 +846,7 @@ function adicionando(id: string) {
             :arrastavel="podeArrastar"
             :saindo="arraste.arrastando.value === `atalho:${s.id}:${r.chave}`"
             :marca="marcaDe(`atalho:${s.id}:${r.chave}`) === 'dentro' ? null : marcaDe(`atalho:${s.id}:${r.chave}`)"
-            @selecionar="r.filhos ? alternarMenu(s.id, r) : r.abrir()"
+            @selecionar="temSubs(r) ? alternarMenu(s.id, r) : r.abrir()"
             @arrastar-inicio="arraste.comecar(`atalho:${s.id}:${r.chave}`)"
             @arrastar-sobre="p => arraste.mirar(`atalho:${s.id}:${r.chave}`, p)"
             @soltar="p => largarNoAtalho(s.id, r.chave, p)"
@@ -819,6 +886,32 @@ function adicionando(id: string) {
               @mover="p => menu.mover(f.id, p)"
             />
           </template>
+          <!-- Rodada 28: os submenus que a pessoa escolheu. Saem pelo "Tirar do menu", nunca por excluir. -->
+          <template v-if="r.subs?.length && aberta(chaveDoMenu(s.id, r.chave))">
+            <LinhaDeMenu
+              v-for="(sub, j) in r.subs"
+              :key="sub.chave"
+              :icone="sub.icone"
+              :rotulo="sub.rotulo"
+              :nivel="3"
+              :ativo="sub.ativo"
+              :atraso="j * 20"
+              :alterado="menu.tocados.value.includes(`sub:${s.id}:${r.chave}:${sub.chave}`)"
+              :dica-alterado="props.t.pontoAlterado"
+              :acoes="props.flutuante ? undefined : acoesDoSubmenu(s.id, r, sub)"
+              :com-reticencias="!props.flutuante"
+              :rotulo-reticencias="props.t.maisAcoes(sub.rotulo)"
+              :arrastavel="podeArrastar"
+              :saindo="arraste.arrastando.value === `sub:${s.id}:${r.chave}:${sub.chave}`"
+              :marca="marcaDe(`sub:${s.id}:${r.chave}:${sub.chave}`) === 'dentro' ? null : marcaDe(`sub:${s.id}:${r.chave}:${sub.chave}`)"
+              @selecionar="sub.abrir()"
+              @arrastar-inicio="arraste.comecar(`sub:${s.id}:${r.chave}:${sub.chave}`)"
+              @arrastar-sobre="p => arraste.mirar(`sub:${s.id}:${r.chave}:${sub.chave}`, p)"
+              @soltar="p => largarNoSubmenu(s.id, r.chave, sub.chave, p)"
+              @arrastar-fim="arraste.terminar()"
+              @mover="p => trilha.moverSubmenu(s.id, r.chave, sub.chave, p)"
+            />
+          </template>
         </template>
         <MaisDaSecao :t="props.t" :id="s.id" :resto="restoDe(s.id, atalhosVisiveis(s.id))" :total="atalhosVisiveis(s.id).length" />
 
@@ -827,7 +920,7 @@ function adicionando(id: string) {
           v-if="!atalhosDe(s.id).length && !props.flutuante && !filtrando"
           type="button"
           class="flex w-full items-center gap-2.5 rounded-md py-1.5 pl-8 pr-2.5 text-sm text-muted transition-colors hover:bg-elevated hover:text-default focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
-          @click="trilha.adicionandoEm.value = s.id"
+          @click="abrirEscolha(s.id, s.rotulo)"
         >
           <UIcon name="i-lucide-plus" class="size-4 shrink-0" />
           <span class="min-w-0 flex-1 truncate text-left">{{ props.t.adicionarASecao }}</span>

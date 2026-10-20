@@ -513,29 +513,52 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
                 @soltar="p => largarNoPainel(s.id, p)"
                 @arrastar-fim="arraste.terminar()"
               >
-                <LinhaDeMenu
-                  v-for="(item, i) in exibidos(s.id, (s.filhos ?? []))"
-                  :key="item.id"
-                  :icone="item.icone"
-                  :rotulo="rotuloDe(item)"
-                  :nivel="2"
-                  :selo="item.emBreve ? props.t.emBreve : undefined"
-                  :ativo="props.destinoAtivo === item.id"
-                  :atraso="i * 25"
-                  :alterado="menu.tocados.value.includes(item.id)"
-                  :dica-alterado="props.t.pontoAlterado"
-                  :acoes="props.flutuante ? undefined : acoes.daLinha(item, (s.filhos ?? []).map(f => f.id))"
-                  :arrastavel="podeArrastar && !props.flutuante && !menu.ordemFixa(item.id)"
-                  :saindo="arraste.arrastando.value === item.id"
-                  :marca="marcaDe(item.id) === 'dentro' ? null : marcaDe(item.id)"
-                  :recusando="recusandoNoPainel"
-                  @selecionar="emit('destino', item.id)"
-                  @arrastar-inicio="arraste.comecar(item.id)"
-                  @arrastar-sobre="p => arraste.mirar(item.id, p)"
-                  @soltar="p => largarNoPainel(item.id, p)"
-                  @arrastar-fim="arraste.terminar()"
-                  @mover="p => menu.mover(item.id, p)"
-                />
+                <template v-for="(item, i) in exibidos(s.id, (s.filhos ?? []))" :key="item.id">
+                  <LinhaDeMenu
+                    :icone="item.icone"
+                    :rotulo="rotuloDe(item)"
+                    :nivel="2"
+                    :selo="item.emBreve ? props.t.emBreve : undefined"
+                    :ativo="props.destinoAtivo === item.id"
+                    :atraso="i * 25"
+                    :alterado="menu.tocados.value.includes(item.id)"
+                    :dica-alterado="props.t.pontoAlterado"
+                    :acoes="props.flutuante ? undefined : acoes.daLinha(item, (s.filhos ?? []).map(f => f.id))"
+                    :arrastavel="podeArrastar && !props.flutuante && !menu.ordemFixa(item.id)"
+                    :saindo="arraste.arrastando.value === item.id"
+                    :marca="marcaDe(item.id) === 'dentro' ? null : marcaDe(item.id)"
+                    :recusando="recusandoNoPainel"
+                    @selecionar="emit('destino', item.id)"
+                    @arrastar-inicio="arraste.comecar(item.id)"
+                    @arrastar-sobre="p => arraste.mirar(item.id, p)"
+                    @soltar="p => largarNoPainel(item.id, p)"
+                    @arrastar-fim="arraste.terminar()"
+                    @mover="p => menu.mover(item.id, p)"
+                  />
+                  <!-- Rodada 28: o 3º nível, os submenus deste menu. Submenu não recebe submenu. -->
+                  <LinhaDeMenu
+                    v-for="(sub, j) in (item.filhos ?? [])"
+                    :key="sub.id"
+                    :icone="sub.icone"
+                    :rotulo="rotuloDe(sub)"
+                    :nivel="3"
+                    :ativo="props.destinoAtivo === sub.id"
+                    :atraso="j * 20"
+                    :alterado="menu.tocados.value.includes(sub.id)"
+                    :dica-alterado="props.t.pontoAlterado"
+                    :acoes="props.flutuante ? undefined : acoes.daLinha(sub, (item.filhos ?? []).map(f => f.id))"
+                    :arrastavel="podeArrastar && !props.flutuante && !menu.ordemFixa(sub.id)"
+                    :saindo="arraste.arrastando.value === sub.id"
+                    :marca="marcaDe(sub.id) === 'dentro' ? null : marcaDe(sub.id)"
+                    :recusando="recusandoNoPainel"
+                    @selecionar="emit('destino', sub.id)"
+                    @arrastar-inicio="arraste.comecar(sub.id)"
+                    @arrastar-sobre="p => arraste.mirar(sub.id, p)"
+                    @soltar="p => largarNoPainel(sub.id, p)"
+                    @arrastar-fim="arraste.terminar()"
+                    @mover="p => menu.mover(sub.id, p)"
+                  />
+                </template>
                 <MaisDaSecao :t="props.t" :id="s.id" :resto="restoDe(s.id, (s.filhos ?? []))" :total="((s.filhos ?? [])).length" />
               </SecaoDeMenu>
             </template>
@@ -544,28 +567,51 @@ function passoDaCategoria(c: Categoria, passo: -1 | 1) {
 
         <!-- ---------- Uma seção que foi para a trilha ---------- -->
         <div v-else-if="secaoAtual" class="space-y-0.5">
-          <LinhaDeMenu
-            v-for="(item, i) in filhosDaSecaoAtual"
-            :key="item.id"
-            :icone="item.icone"
-            :rotulo="rotuloDe(item)"
-            :selo="seloDaArea ? undefined : (item.emBreve ? props.t.emBreve : undefined)"
-            :ativo="props.destinoAtivo === item.id"
-            :atraso="i * 25"
-            :alterado="menu.tocados.value.includes(item.id)"
-            :dica-alterado="props.t.pontoAlterado"
-            :acoes="props.flutuante ? undefined : acoes.daLinha(item, (secaoAtual.filhos ?? []).map(f => f.id))"
-            :arrastavel="podeArrastar && !props.flutuante && !menu.ordemFixa(item.id)"
-            :saindo="arraste.arrastando.value === item.id"
-            :marca="marcaDe(item.id) === 'dentro' ? null : marcaDe(item.id)"
-            :recusando="recusandoNoPainel"
-            @selecionar="emit('destino', item.id)"
-            @arrastar-inicio="arraste.comecar(item.id)"
-            @arrastar-sobre="p => arraste.mirar(item.id, p)"
-            @soltar="p => largarNoPainel(item.id, p)"
-            @arrastar-fim="arraste.terminar()"
-            @mover="p => menu.mover(item.id, p)"
-          />
+          <template v-for="(item, i) in filhosDaSecaoAtual" :key="item.id">
+            <LinhaDeMenu
+              :icone="item.icone"
+              :rotulo="rotuloDe(item)"
+              :selo="seloDaArea ? undefined : (item.emBreve ? props.t.emBreve : undefined)"
+              :ativo="props.destinoAtivo === item.id"
+              :atraso="i * 25"
+              :alterado="menu.tocados.value.includes(item.id)"
+              :dica-alterado="props.t.pontoAlterado"
+              :acoes="props.flutuante ? undefined : acoes.daLinha(item, (secaoAtual.filhos ?? []).map(f => f.id))"
+              :arrastavel="podeArrastar && !props.flutuante && !menu.ordemFixa(item.id)"
+              :saindo="arraste.arrastando.value === item.id"
+              :marca="marcaDe(item.id) === 'dentro' ? null : marcaDe(item.id)"
+              :recusando="recusandoNoPainel"
+              @selecionar="emit('destino', item.id)"
+              @arrastar-inicio="arraste.comecar(item.id)"
+              @arrastar-sobre="p => arraste.mirar(item.id, p)"
+              @soltar="p => largarNoPainel(item.id, p)"
+              @arrastar-fim="arraste.terminar()"
+              @mover="p => menu.mover(item.id, p)"
+            />
+            <!-- Rodada 28: o 3º nível, os submenus deste menu. Submenu não recebe submenu. -->
+            <LinhaDeMenu
+              v-for="(sub, j) in (item.filhos ?? [])"
+              :key="sub.id"
+              :icone="sub.icone"
+              :rotulo="rotuloDe(sub)"
+              :nivel="3"
+              :ativo="props.destinoAtivo === sub.id"
+              :atraso="j * 20"
+              :alterado="menu.tocados.value.includes(sub.id)"
+              :dica-alterado="props.t.pontoAlterado"
+              :acoes="props.flutuante ? undefined : acoes.daLinha(sub, (item.filhos ?? []).map(f => f.id))"
+              :arrastavel="podeArrastar && !props.flutuante && !menu.ordemFixa(sub.id)"
+              :saindo="arraste.arrastando.value === sub.id"
+              :marca="marcaDe(sub.id) === 'dentro' ? null : marcaDe(sub.id)"
+              :recusando="recusandoNoPainel"
+              @selecionar="emit('destino', sub.id)"
+              @arrastar-inicio="arraste.comecar(sub.id)"
+              @arrastar-sobre="p => arraste.mirar(sub.id, p)"
+              @soltar="p => largarNoPainel(sub.id, p)"
+              @arrastar-fim="arraste.terminar()"
+              @mover="p => menu.mover(sub.id, p)"
+            />
+          </template>
         </div>
 
         <!-- ---------- Configurações ---------- -->

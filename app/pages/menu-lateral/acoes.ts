@@ -30,6 +30,7 @@ import type { Categoria, NoDoMenu } from './mocks'
 import type { TextosDaTela } from './textos'
 import { useMenuDoWorkspace } from './estado'
 import { useLimites } from './limites'
+import { useJanelasDaTrilha } from './trilha'
 
 export type Acoes = ContextMenuItem[][]
 
@@ -51,6 +52,7 @@ export interface Ganchos {
 export function useAcoesDoMenu(g: Ganchos) {
   const menu = useMenuDoWorkspace()
   const toast = useToast()
+  const janelas = useJanelasDaTrilha()
   const limites = useLimites()
 
   /* ------------------------------ o bloco "ir" ------------------------------ */
@@ -210,8 +212,46 @@ export function useAcoesDoMenu(g: Ganchos) {
     return [
       blocoIr(abrir, no.id),
       [...(fixa ? [] : itensDeMover(no.id, visiveis)), ...(moverPara ? [moverPara] : []), ...(opcoes.lugar ?? [])],
+      ...(fixa || no.tipo !== 'tela' ? [] : [blocoNivel(no)]),
       blocoMexer(no),
     ].filter(b => b.length)
+  }
+
+  /*
+   * Rodada 28: seção > menu > submenu, e "tirar da seção é diferente de
+   * deletar". O menu dentro de uma seção recebe submenu e sai da seção; o
+   * submenu sai do menu e volta para a seção. Nenhum dos dois apaga nada.
+   */
+  function blocoNivel(no: NoDoMenu): ContextMenuItem[] {
+    const t = g.t()
+    const nivel = menu.nivel(no.id)
+    const travado = !g.podeConfigurar()
+    const dica = travado ? t.ctxSoQuemConfigura : undefined
+    const itens: ContextMenuItem[] = []
+    if (nivel === 2) {
+      itens.push({
+        label: t.adicionarSubmenu,
+        icon: 'i-lucide-list-plus',
+        description: dica,
+        disabled: travado,
+        onSelect: () => { janelas.escolhendoMenu.value = { escopo: 'workspace', menuId: no.id, rotulo: g.rotuloDe(no) } },
+      })
+    }
+    // Seção de 1 menu só é o próprio menu na barra (rodada 10): não há de onde tirar.
+    const sozinho = nivel === 2 && (menu.localizar(menu.rascunho.value, no.id)?.pai?.filhos?.length ?? 0) <= 1
+    if (nivel >= 2 && !sozinho) {
+      itens.push({
+        label: nivel === 3 ? t.tirarDoMenu : t.removerDaSecao,
+        icon: 'i-lucide-circle-minus',
+        description: dica,
+        disabled: travado,
+        onSelect: () => {
+          const r = menu.tirar(no.id)
+          if (!r.ok) toast.add({ title: t.motivos[r.motivo] ?? '', icon: 'i-lucide-ban', color: 'error' })
+        },
+      })
+    }
+    return itens
   }
 
   /** O cabeçalho de uma seção recolhível. */

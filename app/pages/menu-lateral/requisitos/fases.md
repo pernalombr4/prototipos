@@ -3,6 +3,9 @@
 **Objetivo:** dividir a construção do menu novo em 6 fases de front-end, na ordem em que o dev deve fazer, para
 cada fase partir de uma base que já funciona.
 
+**Atenção, 20/10/2026:** as fases 3, 4 e 5 estão desatualizadas desde a rodada 28 do protótipo (3 níveis, seção >
+menu > submenu; tirar não é excluir; Personalizar com um "Salvar" só). Ver o `DECISOES.md`, rodada 28.
+
 **Regra de lançamento:** nenhuma fase vai para o cliente sozinha. O menu novo só é liberado depois da fase 6. Até
 lá, cada fase termina num estado que o QA confere em develop.
 

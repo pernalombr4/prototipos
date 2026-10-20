@@ -338,6 +338,26 @@ function classeDaMarca(id: string, comMeio = false) {
                   <UIcon name="i-lucide-ban" class="size-3.5 shrink-0" />
                   {{ recusa.motivo }}
                 </p>
+
+                <!-- Rodada 28: nível 3, os submenus. Submenu não recebe submenu. -->
+                <div v-if="filho.filhos?.length" class="mt-1 space-y-1 border-l border-default pl-3">
+                  <div
+                    v-for="sub in filho.filhos"
+                    :key="sub.id"
+                    class="relative flex items-center gap-2 rounded-md p-1.5"
+                    :class="[arraste.arrastando.value === sub.id ? 'opacity-40' : 'hover:bg-elevated', classeDaMarca(sub.id)]"
+                    :draggable="menu.ordemFixa(sub.id) ? undefined : 'true'"
+                    @dragstart.stop="arraste.comecar(sub.id)"
+                    @dragover.stop="e => passar(e, sub.id, false)"
+                    @drop.stop="e => largar(e, sub.id, false)"
+                    @dragend.stop="arraste.terminar()"
+                    @keydown.stop="e => teclar(e, sub.id)"
+                  >
+                    <UIcon name="i-lucide-grip-vertical" class="size-4 shrink-0 cursor-grab text-muted" />
+                    <UIcon :name="sub.icone" class="size-4 shrink-0 text-toned" />
+                    <span class="min-w-0 flex-1 truncate text-sm text-default">{{ rotuloDe(sub) }}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

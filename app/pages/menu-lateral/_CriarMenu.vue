@@ -45,7 +45,8 @@ const aberta = computed({
   set: (v) => { if (!v) trilha.criandoMenu.value = null },
 })
 
-type Lugar = 'inicio' | 'trilha' | 'secao'
+// Rodada 28: 'menu' é dentro de outro menu, como submenu (o 3º nível).
+type Lugar = 'inicio' | 'trilha' | 'secao' | 'menu'
 
 const nome = ref('')
 const icone = ref('file-text')
@@ -55,6 +56,7 @@ const categorias = ref<string[]>([])
 const caminho = ref('')
 const lugar = ref<Lugar>('inicio')
 const secaoAlvo = ref('')
+const menuAlvo = ref('')
 const escopo = ref<string[]>([])
 const tentou = ref(false)
 
@@ -62,6 +64,16 @@ const tentou = ref(false)
 const secoesQueRecebem = computed(() =>
   // Rodada 26: Integrações tem ordem fixa e não recebe menu novo.
   menu.secoes.value.filter(s => !s.ordemFixa).map(s => ({ label: rotuloDoNo(s, props.t), value: s.id })),
+)
+
+/**
+ * Os menus que recebem submenu (rodada 28): os que estão dentro de uma seção
+ * e ainda não são submenu. Integrações fica de fora (ordem fixa).
+ */
+const menusQueRecebem = computed(() =>
+  menu.secoes.value
+    .filter(s => !s.ordemFixa)
+    .flatMap(s => (s.filhos ?? []).filter(f => f.tipo === 'tela').map(f => ({ label: `${rotuloDoNo(f, props.t)} (${rotuloDoNo(s, props.t)})`, value: f.id }))),
 )
 
 watch(() => trilha.criandoMenu.value, (v) => {
@@ -73,9 +85,15 @@ watch(() => trilha.criandoMenu.value, (v) => {
   caminho.value = ''
   escopo.value = []
   tentou.value = false
+  menuAlvo.value = menusQueRecebem.value[0]?.value ?? ''
   if (v.startsWith('secao:')) {
     lugar.value = 'secao'
     secaoAlvo.value = v.slice(6)
+  }
+  else if (v.startsWith('menu:')) {
+    lugar.value = 'menu'
+    menuAlvo.value = v.slice(5)
+    secaoAlvo.value = secoesQueRecebem.value[0]?.value ?? ''
   }
   else {
     lugar.value = v as Lugar
@@ -95,6 +113,7 @@ const lugares = computed(() => [
   { v: 'inicio' as const, r: props.t.noInicio, i: 'i-lucide-house' },
   { v: 'trilha' as const, r: props.t.naTrilhaRotulo, i: 'i-lucide-panel-left' },
   { v: 'secao' as const, r: props.t.dentroDeSecao, i: 'i-lucide-rows-3' },
+  { v: 'menu' as const, r: props.t.dentroDeMenu, i: 'i-lucide-list-tree' },
 ])
 
 function alternarGrupo(id: string) {
@@ -125,6 +144,12 @@ function criar() {
 
   if (lugar.value === 'secao' && secaoAlvo.value) {
     menu.adicionarItem(tela, secaoAlvo.value)
+  }
+  else if (lugar.value === 'menu' && menuAlvo.value) {
+    // Nasce na seção do menu e entra nele como submenu, pela regra dos 3 níveis.
+    const secao = menu.localizar(menu.rascunho.value, menuAlvo.value)?.pai
+    if (secao) menu.adicionarItem(tela, secao.id)
+    menu.adicionarSubmenu(tela.id, menuAlvo.value)
   }
   else {
     const id = `s-${base}`
@@ -213,7 +238,7 @@ function criar() {
               :color="lugar === op.v ? 'primary' : 'neutral'"
               :variant="lugar === op.v ? 'soft' : 'outline'"
               :aria-pressed="lugar === op.v"
-              :disabled="op.v === 'secao' && !secoesQueRecebem.length"
+              :disabled="(op.v === 'secao' && !secoesQueRecebem.length) || (op.v === 'menu' && !menusQueRecebem.length)"
               @click="lugar = op.v"
             />
           </div>
@@ -223,6 +248,13 @@ function criar() {
             :items="secoesQueRecebem"
             class="mt-2 w-full"
             :aria-label="props.t.campoSecao"
+          />
+          <USelect
+            v-if="lugar === 'menu'"
+            v-model="menuAlvo"
+            :items="menusQueRecebem"
+            class="mt-2 w-full"
+            :aria-label="props.t.dentroDeMenu"
           />
         </UFormField>
 
