@@ -23,6 +23,9 @@ import { idiomas, tons } from './simulador'
 import AvatarDoAgente from './_AvatarDoAgente.vue'
 import SeletorDeAgente from './_SeletorDeAgente.vue'
 import SeletorDeModelo from './_SeletorDeModelo.vue'
+import AvisoSemCreditos from './_AvisoSemCreditos.vue'
+import type { IdDaIa } from './ias'
+import { podeResponder, useIasConectadas, useSemCreditos } from './ias'
 
 export interface PedidoDaCaixa { acao: Acao, parametro?: string, prompt?: string, rotulo: string }
 
@@ -32,11 +35,14 @@ const props = defineProps<{
   campoVazio: boolean
   rotuloDoCampo: string
   pedidosSalvos: PedidoSalvo[]
+  /** a ação que ficou esperando a chave, sem en-credits (rodada 11) */
+  pendente?: string
 }>()
 
 const emit = defineEmits<{
   pedir: [pedido: PedidoDaCaixa]
   fechar: []
+  conectar: [ia: IdDaIa | null]
 }>()
 
 const agente = defineModel<AgenteDoCampo | null>('agente', { default: null })
@@ -44,6 +50,11 @@ const modelo = defineModel<string>('modelo', { required: true })
 const usarCampos = defineModel<boolean>('usarCampos', { default: true })
 
 const busca = ref('')
+
+/* Sem en-credits, o aviso aparece enquanto o modelo escolhido não tiver chave. */
+const conectadas = useIasConectadas()
+const semCreditos = useSemCreditos()
+const mostrarAviso = computed(() => !podeResponder(modelo.value, conectadas.value, semCreditos.value))
 
 /*
  * Anexo como contexto: o editor de hoje (integração OpenAI) já tem "Subir
@@ -169,6 +180,7 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', aoClicarFora, 
     class="overflow-hidden rounded-xl border border-default bg-default shadow-xl ring-1 ring-primary/15"
     @keydown.esc.stop.prevent="emit('fechar')"
   >
+    <AvisoSemCreditos v-if="mostrarAviso" :t="t" :modelo="modelo" :pendente="pendente" @conectar="(ia) => emit('conectar', ia)" />
     <UCommandPalette
       v-model:search-term="busca"
       :groups="grupos"

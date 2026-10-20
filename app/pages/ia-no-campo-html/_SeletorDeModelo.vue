@@ -25,7 +25,7 @@ import type { Textos } from './textos'
 import type { Modelo } from './mocks'
 import type { IaConectavel } from './ias'
 import { modelos } from './mocks'
-import { iaDoModelo, ias, modelosDa, pedirConexao, useIasConectadas } from './ias'
+import { iaDoModelo, ias, modelosDa, pedirConexao, useIasConectadas, useSemCreditos } from './ias'
 import LogoDaIa from './_LogoDaIa.vue'
 
 const props = defineProps<{
@@ -41,6 +41,8 @@ const nomeDoAgente = computed(() => modelos.find(m => m.id === props.doAgente)?.
 const trocado = computed(() => !!props.doAgente && modelo.value !== props.doAgente)
 
 const conectadas = useIasConectadas()
+/* Sem en-credits (rodada 11), o modelo sem chave diz isso no lugar do consumo. */
+const semCreditos = useSemCreditos()
 const naConta = (ia: IaConectavel | null) => !!ia && conectadas.value.includes(ia.id)
 
 /* Auto no topo, sem título; depois um grupo por empresa, na ordem de ias.ts. */
@@ -115,6 +117,9 @@ function verChaves() {
                   </span>
                   <span v-if="naConta(g.ia)" class="flex items-center gap-1 text-primary">
                     <UIcon name="i-lucide-key-round" class="size-3" />{{ t.modelo.cobradoNaConta(g.ia!.empresa) }}
+                  </span>
+                  <span v-else-if="semCreditos" class="flex items-center gap-1 text-warning">
+                    <UIcon name="i-lucide-coins" class="size-3" />{{ t.modelo.semCreditos }}
                   </span>
                   <span v-else>{{ t.modelo.consumo }}: {{ t.modelo.consumos[m.custo] }}</span>
                 </span>

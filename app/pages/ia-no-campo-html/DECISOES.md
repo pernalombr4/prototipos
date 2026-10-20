@@ -217,3 +217,21 @@
 - **Fronteira:** mudam a entrada da IA, o seletor de Modelo, o modal das chaves, o rótulo do modelo na barra da proposta e o andaime; não mudam a caixa do BENI, a proposta, o seletor de agente nem a barra de ferramentas.
 - **CSS fora da prop:** nenhum.
 - **Ver:** `?ia=chave` · `evidencias/proto-chave-seletor.png`, `evidencias/proto-chave-modal.png`, `evidencias/proto-chave-barra.png`. As evidências das rodadas 6, 7 e 9 (`proto-ativar-*`, `proto-conectar-*`, `proto-varias-*`) ficam como histórico.
+
+## Rodada 11 · 2026-10-20
+- **Pedido (literal):** "quando acabar os en-credits, mostre o aviso com a chave própria. e pode colocar um estado aí sem créditos pra usar a ia o que acontece. como se comporta?"
+- **Mudou:**
+  - andaime com o estado **"Sem en-credits"**: os créditos do workspace acabaram e nenhuma chave está conectada;
+  - nada bloqueia o clique: o botão IA, o Ctrl J e o "/" abrem a caixa do BENI como sempre;
+  - enquanto o modelo escolhido depender de en-credits, a caixa mostra no topo o aviso **"Os en-credits do workspace acabaram"** (`_AvisoSemCreditos.vue`):
+    - com "Auto": "Para seguir usando a IA, conecte a chave de uma conta própria. O consumo passa a ser cobrado nessa conta." e o botão "Usar a chave de uma conta própria", que abre o modal das chaves na lista;
+    - com um modelo fixo (escolhido ou do agente): "O GPT-5.4 usa en-credits. Para seguir com ele, conecte a chave da conta OpenAI." e o botão "Conectar a chave da conta OpenAI", que abre o modal direto no passo da chave; se outra conta já tem chave, o aviso lembra que dá para trocar o modelo;
+  - a ação pedida sem créditos não roda nem some: fica esperando, e o aviso diz "Ao conectar, o BENI faz o que você pediu: Resumir o campo.". Conectada a chave certa, a ação roda sozinha ao voltar ao campo;
+  - sem créditos, o Auto escolhe só entre os modelos das contas com chave;
+  - no seletor de Modelo, o modelo sem chave mostra "Sem en-credits" no lugar do consumo.
+- **Não foi inventado:** compra ou recarga de en-credits, data de renovação e aviso antes de acabar. Nada disso foi dito; fica como pergunta ao time.
+- **Contraste:** o botão do aviso começou amarelo sobre o fundo amarelo claro (abaixo de 4,5:1) e passou a neutro com contorno.
+- **Fronteira:** muda o que acontece sem en-credits; não mudam a caixa do BENI, o modal das chaves, a proposta nem os outros estados.
+- **CSS fora da prop:** nenhum.
+- **Ver:** `?ia=semCreditos` · `evidencias/proto-sem-creditos-aviso.png`, `evidencias/proto-sem-creditos-depois-da-chave.png`
+- **Pesquisa das ações rápidas do menu (pedida na mesma mensagem):** resposta no chat de 2026-10-20; a mudança do menu espera a aprovação da redatora.

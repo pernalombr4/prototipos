@@ -43,7 +43,8 @@ import { aplicarPaleta, cores } from './paleta'
 import { chaveDaProposta, PropostaDoBeni } from './proposta'
 import CaixaDoBeni from './_CaixaDoBeni.vue'
 import BarraDaProposta from './_BarraDaProposta.vue'
-import { iaDoModelo, modeloDoAuto, useIasConectadas } from './ias'
+import type { IdDaIa } from './ias'
+import { iaDoModelo, modeloDoAuto, pedirConexao, podeResponder, useIasConectadas, useSemCreditos } from './ias'
 import SeletorDeCor from './_SeletorDeCor.vue'
 import PopoverDeLink from './_PopoverDeLink.vue'
 
@@ -59,6 +60,7 @@ const props = defineProps<{
  * paga o consumo dos modelos daquela empresa: a barra da proposta diz qual.
  */
 const conectadas = useIasConectadas()
+const semCreditos = useSemCreditos()
 
 const valor = defineModel<string>({ required: true })
 const toast = useToast()
@@ -137,15 +139,32 @@ function topoAbaixoDe(editor: Editor, pos: number) {
 
 /* ------------------------------------------------------- a caixa ---- */
 
-const caixa = ref<(Contexto & { topo: number, chave: number }) | null>(null)
+const caixa = ref<(Contexto & { topo: number, chave: number, pendente?: PedidoDaCaixa }) | null>(null)
 let chave = 0
 
-function abrirCaixa(editor: Editor) {
+function abrirCaixa(editor: Editor, pendente?: PedidoDaCaixa) {
   if (sessao.value) return
   const ctx = contextoDe(editor)
-  caixa.value = { ...ctx, topo: topoAbaixoDe(editor, ctx.to), chave: ++chave }
+  caixa.value = { ...ctx, topo: topoAbaixoDe(editor, ctx.to), chave: ++chave, pendente }
   marcar(editor, { foco: ctx.comSelecao ? { from: ctx.from, to: ctx.to } : null })
   rolarAteVer('[data-caixa-do-beni]')
+}
+
+/*
+ * Sem en-credits, o botão do aviso abre o modal das chaves (direto na conta
+ * do modelo, quando ele é de uma empresa só). Voltando com a chave certa, a
+ * ação que esperava na caixa roda.
+ */
+function conectarSemCreditos(ia: IdDaIa | null) {
+  pedirConexao({
+    ia,
+    aoVoltar: () => setTimeout(() => {
+      const c = caixa.value
+      const editor = ed()
+      if (!c?.pendente || !editor) return
+      if (podeResponder(modelo.value, conectadas.value, semCreditos.value)) executar(editor, c.pendente, c)
+    }, 220),
+  })
 }
 
 /** A camada nova (caixa ou barra) entra inteira na tela: rola só o que falta. */
@@ -244,6 +263,12 @@ async function rodar(editor: Editor) {
 }
 
 function executar(editor: Editor, p: PedidoDaCaixa, ctxDado?: Contexto) {
+  // Sem en-credits e sem chave para o modelo (rodada 11): o pedido espera na caixa, com o aviso.
+  if (!podeResponder(modelo.value, conectadas.value, semCreditos.value)) {
+    if (caixa.value) caixa.value.pendente = p
+    else abrirCaixa(editor, p)
+    return
+  }
   const ctx = ctxDado ?? caixa.value ?? contextoDe(editor)
   caixa.value = null
   const modo: Modo = ctx.campoVazio ? 'vazio'
@@ -262,7 +287,7 @@ function executar(editor: Editor, p: PedidoDaCaixa, ctxDado?: Contexto) {
       agenteRevisor: agente.value?.type === 'reviewer',
     },
     rotulo: p.rotulo,
-    modeloUsado: modelo.value === 'auto' ? modeloDoAuto(p.acao) : modelos.find(m => m.id === modelo.value) ?? null,
+    modeloUsado: modelo.value === 'auto' ? modeloDoAuto(p.acao, semCreditos.value ? conectadas.value : undefined) : modelos.find(m => m.id === modelo.value) ?? null,
     modo,
     inline: modo === 'substituir' && ctx.mesmoBloco,
     fase: 'gerando',
@@ -882,7 +907,9 @@ const nomeDoModelo = computed(() => {
             :campo-vazio="caixa.campoVazio"
             :rotulo-do-campo="rotulo"
             :pedidos-salvos="pedidosSalvos"
+            :pendente="caixa.pendente?.rotulo"
             @pedir="(p) => ed() && executar(ed()!, p)"
+            @conectar="conectarSemCreditos"
             @fechar="fecharCaixa()"
           />
         </div>

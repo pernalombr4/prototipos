@@ -254,6 +254,7 @@ const ptBR = {
     cobradoNaConta: (empresa: string) => `Cobrado na conta ${empresa}`,
     usarChave: 'Usar a chave de uma conta própria',
     verChaves: 'Ver as chaves conectadas',
+    semCreditos: 'Sem en-credits',
     descricoes: {
       'auto': 'Escolhe, entre todos os modelos, o que serve ao pedido.',
       'claude-sonnet-4.6': 'Rápido e equilibrado.',
@@ -271,6 +272,15 @@ const ptBR = {
     consumo: 'Consumo de en-credits',
     consumos: { 1: 'baixo', 2: 'médio', 3: 'alto' } as Record<number, string>,
     soNestePedido: (m: string) => `Só neste pedido. O perfil do agente continua com ${m}.`,
+  },
+  creditos: {
+    titulo: 'Os en-credits do workspace acabaram',
+    textoAuto: 'Para seguir usando a IA, conecte a chave de uma conta própria. O consumo passa a ser cobrado nessa conta.',
+    textoModelo: (modelo: string, empresa: string) => `O ${modelo} usa en-credits. Para seguir com ele, conecte a chave da conta ${empresa}.`,
+    outraConta: (contas: string) => `Ou escolha em Modelo um modelo de uma conta com chave: ${contas}.`,
+    emSeguida: (acao: string) => `Ao conectar, o BENI faz o que você pediu: ${acao}.`,
+    usarChave: 'Usar a chave de uma conta própria',
+    conectarA: (empresa: string) => `Conectar a chave da conta ${empresa}`,
   },
   conectar: {
     titulo: 'Chaves de IA do workspace',
@@ -309,7 +319,7 @@ const ptBR = {
   },
   andaime: {
     estadoDaIa: 'IA no workspace',
-    estados: { ligada: 'Sem chave (en-credits)', chave: 'Chave da OpenAI', varias: '3 chaves próprias', erro: 'Responde com erro' } as Record<string, string>,
+    estados: { ligada: 'Sem chave (en-credits)', chave: 'Chave da OpenAI', varias: '3 chaves próprias', semCreditos: 'Sem en-credits', erro: 'Responde com erro' } as Record<string, string>,
     porTras: 'Por trás',
   },
 }
@@ -558,6 +568,7 @@ const en: Textos = {
     cobradoNaConta: (empresa: string) => `Billed to the ${empresa} account`,
     usarChave: 'Use the key of your own account',
     verChaves: 'See connected keys',
+    semCreditos: 'No en-credits left',
     descricoes: {
       'auto': 'Picks, among all models, the one that fits the request.',
       'claude-sonnet-4.6': 'Fast and balanced.',
@@ -575,6 +586,15 @@ const en: Textos = {
     consumo: 'en-credits usage',
     consumos: { 1: 'low', 2: 'medium', 3: 'high' },
     soNestePedido: (m: string) => `This request only. The agent profile keeps ${m}.`,
+  },
+  creditos: {
+    titulo: 'The workspace is out of en-credits',
+    textoAuto: 'To keep using AI, connect the key of your own account. Usage is then billed to that account.',
+    textoModelo: (modelo: string, empresa: string) => `${modelo} uses en-credits. To keep using it, connect the ${empresa} account key.`,
+    outraConta: (contas: string) => `Or pick in Model a model from an account with a key: ${contas}.`,
+    emSeguida: (acao: string) => `Once connected, BENI runs what you asked: ${acao}.`,
+    usarChave: 'Use the key of your own account',
+    conectarA: (empresa: string) => `Connect the ${empresa} account key`,
   },
   conectar: {
     titulo: 'Workspace AI keys',
@@ -613,7 +633,7 @@ const en: Textos = {
   },
   andaime: {
     estadoDaIa: 'AI in the workspace',
-    estados: { ligada: 'No key (en-credits)', chave: 'OpenAI key', varias: '3 own keys', erro: 'Responds with error' },
+    estados: { ligada: 'No key (en-credits)', chave: 'OpenAI key', varias: '3 own keys', semCreditos: 'No en-credits', erro: 'Responds with error' },
     porTras: 'Behind it',
   },
 }
@@ -860,6 +880,7 @@ const es: Textos = {
     cobradoNaConta: (empresa: string) => `Se cobra en la cuenta ${empresa}`,
     usarChave: 'Usar la clave de una cuenta propia',
     verChaves: 'Ver las claves conectadas',
+    semCreditos: 'Sin en-credits',
     descricoes: {
       'auto': 'Elige, entre todos los modelos, el que sirve al pedido.',
       'claude-sonnet-4.6': 'Rápido y equilibrado.',
@@ -877,6 +898,15 @@ const es: Textos = {
     consumo: 'Consumo de en-credits',
     consumos: { 1: 'bajo', 2: 'medio', 3: 'alto' },
     soNestePedido: (m: string) => `Solo en este pedido. El perfil del agente sigue con ${m}.`,
+  },
+  creditos: {
+    titulo: 'Se acabaron los en-credits del workspace',
+    textoAuto: 'Para seguir usando la IA, conecte la clave de una cuenta propia. El consumo pasa a cobrarse en esa cuenta.',
+    textoModelo: (modelo: string, empresa: string) => `${modelo} usa en-credits. Para seguir con él, conecte la clave de la cuenta ${empresa}.`,
+    outraConta: (contas: string) => `O elija en Modelo un modelo de una cuenta con clave: ${contas}.`,
+    emSeguida: (acao: string) => `Al conectar, BENI hace lo que pidió: ${acao}.`,
+    usarChave: 'Usar la clave de una cuenta propia',
+    conectarA: (empresa: string) => `Conectar la clave de la cuenta ${empresa}`,
   },
   conectar: {
     titulo: 'Claves de IA del workspace',
@@ -915,7 +945,7 @@ const es: Textos = {
   },
   andaime: {
     estadoDaIa: 'IA en el workspace',
-    estados: { ligada: 'Sin clave (en-credits)', chave: 'Clave de OpenAI', varias: '3 claves propias', erro: 'Responde con error' },
+    estados: { ligada: 'Sin clave (en-credits)', chave: 'Clave de OpenAI', varias: '3 claves propias', semCreditos: 'Sin en-credits', erro: 'Responde con error' },
     porTras: 'Detrás',
   },
 }

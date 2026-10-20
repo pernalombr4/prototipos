@@ -60,13 +60,30 @@ const acoesRapidas = ['corrigir', 'traduzir', 'encurtar', 'simplificar', 'lista'
 const filaRapida = ['gpt-5-mini', 'gemini-3-flash', 'claude-sonnet-4.6']
 const filaDeQualidade = ['claude-sonnet-4.6', 'gpt-5.4', 'gemini-3.1-pro-preview']
 
-export function modeloDoAuto(acao: string) {
-  const id = (acoesRapidas.includes(acao) ? filaRapida : filaDeQualidade)[0]
-  return modelos.find(m => m.id === id) ?? null
+export function modeloDoAuto(acao: string, so?: IdDaIa[]) {
+  const fila = acoesRapidas.includes(acao) ? filaRapida : filaDeQualidade
+  // Sem en-credits (rodada 11), o Auto só escolhe entre as contas com chave.
+  if (!so) return modelos.find(m => m.id === fila[0]) ?? null
+  const id = fila.find(m => so.includes(iaDoModelo(m)!.id))
+  return modelos.find(m => m.id === id) ?? (so[0] ? modelosDa(so[0])[0] ?? null : null)
 }
 
 /** As contas com chave conectada no workspace. O andaime escolhe quais. */
 export const useIasConectadas = () => useState<IdDaIa[]>('ias-conectadas', () => [])
+
+/**
+ * Os en-credits do workspace acabaram (rodada 11). Sem créditos, só responde
+ * o modelo de uma conta com chave; o resto mostra o aviso com a chave própria.
+ */
+export const useSemCreditos = () => useState<boolean>('ia-sem-creditos', () => false)
+
+/** O modelo escolhido responde agora? Com "Auto", basta uma conta com chave. */
+export function podeResponder(modeloId: string, conectadas: IdDaIa[], semCreditos: boolean) {
+  if (!semCreditos) return true
+  if (modeloId === 'auto') return conectadas.length > 0
+  const ia = iaDoModelo(modeloId)
+  return !!ia && conectadas.includes(ia.id)
+}
 
 /**
  * O pedido para abrir o modal das chaves (_ConectarIa). Um modal só na página

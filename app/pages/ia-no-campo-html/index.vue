@@ -13,7 +13,7 @@ import CascaDoItem from './_CascaDoItem.vue'
 import PainelDoItem from './_PainelDoItem.vue'
 import CampoHtml from './_CampoHtml.vue'
 import ConectarIa from './_ConectarIa.vue'
-import { useIasConectadas } from './ias'
+import { useIasConectadas, useSemCreditos } from './ias'
 
 import briefingMd from './BRIEFING.md?raw'
 import pesquisaRodada1 from './PESQUISA.md?raw'
@@ -40,9 +40,9 @@ const route = useRoute()
 const router = useRouter()
 
 /* ---------- andaime: o estado da IA vai para o endereço ---------- */
-type EstadoIa = 'ligada' | 'chave' | 'varias' | 'erro'
+type EstadoIa = 'ligada' | 'chave' | 'varias' | 'semCreditos' | 'erro'
 const estadoIa = computed<EstadoIa>({
-  get: () => (['ligada', 'chave', 'varias', 'erro'].includes(String(route.query.ia)) ? route.query.ia : 'ligada') as EstadoIa,
+  get: () => (['ligada', 'chave', 'varias', 'semCreditos', 'erro'].includes(String(route.query.ia)) ? route.query.ia : 'ligada') as EstadoIa,
   set: v => router.replace({ query: { ...route.query, ia: v } }),
 })
 
@@ -53,8 +53,11 @@ const estadoIa = computed<EstadoIa>({
  * modal acrescenta a chave sem trocar o estado do andaime.
  */
 const conectadas = useIasConectadas()
+/* "Sem en-credits" (rodada 11): os créditos acabaram e nenhuma chave está conectada. */
+const semCreditos = useSemCreditos()
 watch(estadoIa, (e) => {
   conectadas.value = e === 'varias' ? ['openai', 'anthropic', 'google'] : e === 'chave' ? ['openai'] : []
+  semCreditos.value = e === 'semCreditos'
 }, { immediate: true })
 
 /* ---------- tela ---------- */
@@ -171,7 +174,7 @@ async function salvar() {
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.estadoDaIa }}</span>
         <UFieldGroup size="xs">
           <UButton
-            v-for="e in (['ligada', 'chave', 'varias', 'erro'] as const)"
+            v-for="e in (['ligada', 'chave', 'varias', 'semCreditos', 'erro'] as const)"
             :key="e"
             :label="t.andaime.estados[e]"
             :color="estadoIa === e ? 'primary' : 'neutral'"
