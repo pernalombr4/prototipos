@@ -389,6 +389,20 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 26 · 2026-10-20
+- **Pedido (literal):** "o menu de integraçoes nao deve ser reordenavel, assim como nenhum de configuraçoes"
+- **Mudou:** Integrações tem ordem fixa, como Configurações. Apps, Credenciais e Webhooks não sobem, não descem, não saem para outra seção, e nada entra em Integrações.
+- **Onde vale:** na barra única, no painel da trilha, no Início, no editor de menus e no teclado. A regra mora na árvore do menu (`ordemFixa` em `mocks.ts`, conferida em `estado.ts`), então nenhum caminho novo escapa dela.
+- **O que some da tela:**
+  - a alça de arraste das 3 linhas;
+  - "Mover para cima", "Mover para baixo" e "Mover para" do botão direito e do "⋯";
+  - "Nova tela nesta seção" e o "+" da seção no editor;
+  - Integrações na lista "Dentro de uma seção" do formulário de menu novo.
+- **Soltar algo em Integrações:** a seção fica vermelha, e o aviso diz "Integrações tem ordem fixa, como Configurações: nada entra, sai ou muda de lugar.".
+- **Configurações:** já era assim. Os itens de lá não se arrastam e não têm menu de ações.
+- **Não mudou:** o lugar da própria seção Integrações no menu e o ícone dela na trilha continuam móveis; o pedido foi sobre o que tem dentro. "Abrir", "Abrir em nova aba", "Copiar link" e "Ocultar do menu" continuam nas 3 linhas. Auditoria continua reordenável (rodada 24).
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral, seção Integrações · print em `evidencias/rodada26-integracoes-ordem-fixa.jpg` (o aviso depois de soltar "Logs de auditoria" em Integrações; o item voltou para Auditoria)
+
 ### Rodada 25 · 2026-10-20
 - **Pedido (literal):** "do menu de personalizaçao, tire a aba de temas"
 - **Mudou:** a janela Personalizar ficou com 3 abas: Navegação, Início e Seções. Saiu a aba Temas, da rodada 15, com a aparência (claro, escuro, automático) e a cor de destaque.

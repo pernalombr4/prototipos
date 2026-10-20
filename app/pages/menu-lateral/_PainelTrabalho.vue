@@ -675,7 +675,7 @@ function acoesDeCategorias(no: NoDoMenu) {
               :ativo="props.destinoAtivo === item.id"
               :atraso="i * 25"
               :acoes="acoes.daLinha(item, (no.filhos ?? []).map(f => f.id))"
-              :arrastavel="podeArrastarMenu"
+              :arrastavel="podeArrastarMenu && !menu.ordemFixa(item.id)"
               :saindo="arraste.arrastando.value === item.id"
               :marca="marcaDe(item.id) === 'dentro' ? null : marcaDe(item.id)"
               :recusando="recusandoAgora"

@@ -60,7 +60,8 @@ const tentou = ref(false)
 
 /** As seções da árvore que recebem um menu dentro. */
 const secoesQueRecebem = computed(() =>
-  menu.secoes.value.map(s => ({ label: rotuloDoNo(s, props.t), value: s.id })),
+  // Rodada 26: Integrações tem ordem fixa e não recebe menu novo.
+  menu.secoes.value.filter(s => !s.ordemFixa).map(s => ({ label: rotuloDoNo(s, props.t), value: s.id })),
 )
 
 watch(() => trilha.criandoMenu.value, (v) => {

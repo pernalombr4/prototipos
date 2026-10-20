@@ -977,6 +977,7 @@ const ptBR: TextosDaTela = {
     secaoDentroDeSecao: 'O menu tem dois níveis. Seção não entra dentro de seção.',
     areaFixa: 'Trabalho, Dados e Configurações ficam onde estão. Só as seções mudam de lugar na trilha.',
     soSecaoNaTrilha: 'Na trilha só entram seções. Solte o item dentro de uma delas.',
+    ordemFixa: 'Integrações tem ordem fixa, como Configurações: nada entra, sai ou muda de lugar.',
   },
   tipos: {
     'arquivos': 'Arquivos',
@@ -1493,6 +1494,7 @@ const en: TextosDaTela = {
     secaoDentroDeSecao: 'The menu has two levels. A section does not go inside a section.',
     areaFixa: 'Work, Data and Settings stay where they are. Only sections move on the rail.',
     soSecaoNaTrilha: 'Only sections go on the rail. Drop the item inside one of them.',
+    ordemFixa: 'Integrations has a fixed order, like Settings: nothing comes in, goes out or moves.',
   },
   tipos: {
     'arquivos': 'Files',
@@ -2009,6 +2011,7 @@ const es: TextosDaTela = {
     secaoDentroDeSecao: 'El menú tiene dos niveles. Una sección no entra dentro de otra.',
     areaFixa: 'Trabajo, Datos y Configuración se quedan donde están. Solo las secciones cambian de lugar en el riel.',
     soSecaoNaTrilha: 'En el riel solo entran secciones. Suelta el elemento dentro de una de ellas.',
+    ordemFixa: 'Integraciones tiene un orden fijo, como Configuración: nada entra, sale ni cambia de lugar.',
   },
   tipos: {
     'arquivos': 'Archivos',

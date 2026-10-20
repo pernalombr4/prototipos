@@ -550,6 +550,12 @@ export interface NoDoMenu {
    * editor mostra, e "Itens ocultos" no pé da barra traz de volta.
    */
   oculto?: boolean
+  /**
+   * Rodada 26: "o menu de integraçoes nao deve ser reordenavel, assim como
+   * nenhum de configuraçoes" (Mikaela). A seção continua mudando de lugar no
+   * menu; o que fica parado é o que tem dentro: nada sobe, desce, sai ou entra.
+   */
+  ordemFixa?: boolean
   filhos?: NoDoMenu[]
 }
 
@@ -659,6 +665,8 @@ export const menuDoEditor: NoDoMenu[] = [
     chave: 'integracoes',
     icone: 'i-lucide-plug',
     lugar: 'trilha',
+    // Ordem fixa como Configurações (rodada 26).
+    ordemFixa: true,
     escopo: [],
     filhos: [
       { id: 'i-apps', tipo: 'tela', chave: 'apps', icone: 'i-lucide-blocks', tipoDeTela: 'personalizada' },

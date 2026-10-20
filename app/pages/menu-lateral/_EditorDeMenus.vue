@@ -66,7 +66,8 @@ function rotuloDe(no: NoDoMenu) {
 /** Seções que podem receber um item: só as do workspace (regras R1 e R4). */
 const secoesQueRecebem = computed(() =>
   menu.rascunho.value
-    .filter(n => n.tipo === 'secao')
+    // Rodada 26: Integrações tem ordem fixa e não recebe item.
+    .filter(n => n.tipo === 'secao' && !n.ordemFixa)
     .map(n => ({ id: n.id, rotulo: rotuloDe(n), escopo: n.escopo ?? [] })),
 )
 
@@ -250,7 +251,7 @@ function classeDaMarca(id: string, comMeio = false) {
               />
 
               <UButton
-                v-if="no.tipo === 'secao'"
+                v-if="no.tipo === 'secao' && !no.ordemFixa"
                 icon="i-lucide-plus"
                 size="xs"
                 color="neutral"
@@ -289,7 +290,7 @@ function classeDaMarca(id: string, comMeio = false) {
                 :key="filho.id"
                 class="relative rounded-md p-1.5"
                 :class="[arraste.arrastando.value === filho.id ? 'opacity-40' : 'hover:bg-elevated', classeDaMarca(filho.id)]"
-                draggable="true"
+                :draggable="menu.ordemFixa(filho.id) ? undefined : 'true'"
                 @dragstart="arraste.comecar(filho.id)"
                 @dragover="e => passar(e, filho.id, false)"
                 @drop="e => largar(e, filho.id, false)"

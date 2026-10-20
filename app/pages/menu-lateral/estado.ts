@@ -394,6 +394,11 @@ export function useMenuDoWorkspace() {
     if (arrastado.filhos?.some(f => f.id === alvoId)) return { ok: true }
 
     const ondeAlvo = localizar(arvore, alvoId)
+
+    // Rodada 26: seção de ordem fixa (Integrações) não solta, não recebe e não reordena.
+    const paiFuturo = posicao === 'dentro' ? alvo : ondeAlvo?.pai
+    if (localizar(arvore, arrastadoId)?.pai?.ordemFixa || paiFuturo?.ordemFixa) return { ok: false, motivo: 'ordemFixa' }
+
     const tipoDoPaiFuturo: TipoDeNo = posicao === 'dentro'
       ? alvo.tipo
       : (ondeAlvo?.pai?.tipo ?? 'raiz')
@@ -441,7 +446,7 @@ export function useMenuDoWorkspace() {
   /** O caminho de teclado: move um passo entre os irmãos, sem sair do pai. */
   function mover(id: string, passo: -1 | 1) {
     const onde = localizar(rascunho.value, id)
-    if (!onde) return
+    if (!onde || onde.pai?.ordemFixa) return
     const alvo = onde.indice + passo
     if (alvo < 0 || alvo >= onde.irmaos.length) return
     const [no] = onde.irmaos.splice(onde.indice, 1)
@@ -460,6 +465,11 @@ export function useMenuDoWorkspace() {
    */
 
   /** Sobe ou desce para a raiz do menu, ao lado da seção onde estava. */
+  /** O item mora numa seção de ordem fixa (rodada 26): a tela esconde a alça e o mover. */
+  function ordemFixa(id: string) {
+    return !!localizar(rascunho.value, id)?.pai?.ordemFixa
+  }
+
   function moverParaPrimeiroNivel(id: string) {
     const onde = localizar(rascunho.value, id)
     if (!onde?.pai) return { ok: true as const }
@@ -571,6 +581,7 @@ export function useMenuDoWorkspace() {
     soltar,
     avaliar,
     mover,
+    ordemFixa,
     ordemCategoriasRascunho,
     semearOrdemDeCategorias,
     reordenarCategoria,

@@ -204,10 +204,12 @@ export function useAcoesDoMenu(g: Ganchos) {
    */
   function daLinha(no: NoDoMenu, visiveis: string[], opcoes: { abrir?: () => void, lugar?: ContextMenuItem[] } = {}): Acoes {
     const abrir = opcoes.abrir ?? (() => g.abrirDestino(no.id))
-    const moverPara = itemMoverPara(no)
+    // Rodada 26: dentro de seção de ordem fixa (Integrações) não há mover.
+    const fixa = menu.ordemFixa(no.id)
+    const moverPara = fixa ? null : itemMoverPara(no)
     return [
       blocoIr(abrir, no.id),
-      [...itensDeMover(no.id, visiveis), ...(moverPara ? [moverPara] : []), ...(opcoes.lugar ?? [])],
+      [...(fixa ? [] : itensDeMover(no.id, visiveis)), ...(moverPara ? [moverPara] : []), ...(opcoes.lugar ?? [])],
       blocoMexer(no),
     ].filter(b => b.length)
   }
@@ -227,13 +229,16 @@ export function useAcoesDoMenu(g: Ganchos) {
         { label: t.ctxCopiarLink, icon: 'i-lucide-link', onSelect: () => copiarLink(no.id) },
       ],
       [
-        {
-          label: t.ctxNovaTela,
-          icon: 'i-lucide-file-plus',
-          description: travado ? t.ctxSoQuemConfigura : undefined,
-          disabled: travado,
-          onSelect: () => g.novaTela(no.id),
-        },
+        // Rodada 26: seção de ordem fixa (Integrações) não recebe tela nova.
+        ...(no.ordemFixa
+          ? []
+          : [{
+              label: t.ctxNovaTela,
+              icon: 'i-lucide-file-plus',
+              description: travado ? t.ctxSoQuemConfigura : undefined,
+              disabled: travado,
+              onSelect: () => g.novaTela(no.id),
+            }]),
         ...itensDeMover(no.id, visiveis),
         ...lugar,
         // Rodada 19: quantos itens a seção mostra, como no Notion.
