@@ -389,6 +389,16 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 31 · 2026-10-20
+- **Pedido (literal):** "nao deve ser permitido adicionar submenus a menus que sao NATIVOS. isso seria o equivalente a botar um menu dentro de uma tela nativa. vai contra a logica de como a tela foi feita nesse caso"
+- **Pedido (literal):** "todo menu que veio da ideia do back de uma tela nativa (tipo meus relatorios), nao deve poder ter submenu. só pode ser alocado em alguma seçao. dash de tarefas é um exemplo"
+- **Pedido (literal):** "o botao de personalizar a barra lateral na base deve ser fixado, nao ir embora com o scroll. [...] pode ser mais delicado, sem esse 'contorno' todo, pode ser disfarçado ali na base onde vai ficar fixado"
+- **Regra:** só o menu que o workspace criou recebe submenu. Destino nativo (Meus relatórios, Tarefas), tela nativa (Dashboard de tarefas, Logs de auditoria), tela de módulo e categoria só ficam numa seção, no menu do workspace e no menu de cada pessoa.
+- **Mudou:** "Adicionar submenu" sai desses menus no botão direito, no "⋯" do Personalizar e no Início. O formulário "Criar menu" só lista, em "Dentro de qual menu", os menus que o workspace criou. Arrastar para dentro de um menu nativo é recusado com "Menu nativo não recebe submenu. Solte dentro de uma seção.".
+- **Mudou (exemplo):** a seção pessoal "Rotina do jurídico" tinha Logs de auditoria (nativo) com o submenu Logs de requisição, o que a regra nova proíbe. Agora tem Logs de auditoria sozinho e Políticas internas com o submenu Base de Conhecimento.
+- **Mudou:** "Personalizar a barra lateral" fica fixo no pé do painel do Início, fora da rolagem, em texto cinza sem contorno, com uma linha fina em cima. Antes ele rolava com a lista e, depois do primeiro uso, saía do pé e virava um ícone no cabeçalho; o ícone do cabeçalho saiu. O cartão de salvar abre acima dele.
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral · prints em `evidencias/rodada31-personalizar-fixo-no-pe.jpg` e `evidencias/rodada31-menu-nativo-sem-submenu.jpg` (botão direito em Dashboard de tarefas, sem "Adicionar submenu")
+
 ### Rodada 30 · 2026-10-20
 - **Pedido (literal):** "tudo o que nao é nativo nos menus e trilhas, seçoes etc eu devo poder tambem excluir."
 - **Pedido (literal):** "o botao ocultar seçao deve estar à esquerda do botao adicionar, nao á direita"

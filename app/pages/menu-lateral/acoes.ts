@@ -253,7 +253,7 @@ export function useAcoesDoMenu(g: Ganchos) {
     const travado = !g.podeConfigurar()
     const dica = travado ? t.ctxSoQuemConfigura : undefined
     const itens: ContextMenuItem[] = []
-    if (nivel === 2) {
+    if (nivel === 2 && menu.recebeSubmenu(no.id)) {
       itens.push({
         label: t.adicionarSubmenu,
         icon: 'i-lucide-list-plus',

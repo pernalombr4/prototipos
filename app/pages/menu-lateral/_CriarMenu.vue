@@ -73,7 +73,7 @@ const secoesQueRecebem = computed(() =>
 const menusQueRecebem = computed(() =>
   menu.secoes.value
     .filter(s => !s.ordemFixa)
-    .flatMap(s => (s.filhos ?? []).filter(f => f.tipo === 'tela').map(f => ({ label: `${rotuloDoNo(f, props.t)} (${rotuloDoNo(s, props.t)})`, value: f.id }))),
+    .flatMap(s => (s.filhos ?? []).filter(f => menu.recebeSubmenu(f.id)).map(f => ({ label: `${rotuloDoNo(f, props.t)} (${rotuloDoNo(s, props.t)})`, value: f.id }))),
 )
 
 watch(() => trilha.criandoMenu.value, (v) => {

@@ -134,7 +134,9 @@ function prefsIniciais(): PrefsDaTrilha {
       icone: 'i-lucide-scale',
       ordem: 'personalizada',
       itens: [
-        { tipo: 'tela', id: 'a-logs', filhos: [{ tipo: 'tela', id: 'a-req' }] },
+        // Rodada 31: o submenu mora num menu que o workspace criou; Logs de auditoria é nativo.
+        { tipo: 'tela', id: 'a-logs' },
+        { tipo: 'tela', id: 't-pol', filhos: [{ tipo: 'tela', id: 't-base' }] },
         { tipo: 'categoria', id: '1' },
         { tipo: 'destino', id: 'n-tarefas' },
       ],
@@ -448,6 +450,13 @@ export function useMenuDoWorkspace() {
      * Rodada 28: no máximo 3 níveis. Um menu só recebe submenu se ele mesmo
      * não for submenu, e quem já tem submenus não vira submenu de ninguém.
      */
+    /*
+     * Rodada 31: "nao deve ser permitido adicionar submenus a menus que sao
+     * NATIVOS. isso seria o equivalente a botar um menu dentro de uma tela
+     * nativa". Só o menu que o workspace criou recebe submenu.
+     */
+    if (paiFuturo?.tipo === 'tela' && origemDe(paiFuturo) !== 'workspace') return { ok: false, motivo: 'destinoEhFolha' }
+
     if (paiFuturo?.tipo === 'tela') {
       const avo = localizar(arvore, paiFuturo.id)?.pai
       if (avo?.tipo === 'tela' || (arrastado.filhos?.length ?? 0) > 0) return { ok: false, motivo: 'tresNiveis' }
@@ -536,6 +545,16 @@ export function useMenuDoWorkspace() {
       onde = localizar(rascunho.value, onde.pai.id)
     }
     return n
+  }
+
+  /**
+   * Rodada 31: só o menu que o workspace criou recebe submenu. Destino nativo
+   * (Meus relatórios), tela nativa (Dashboard de tarefas), tela de módulo e
+   * categoria só ficam numa seção.
+   */
+  function recebeSubmenu(id: string) {
+    const no = acharNo(rascunho.value, id)
+    return !!no && no.tipo === 'tela' && origemDe(no) === 'workspace'
   }
 
   /** Rodada 28: põe um menu que já existe dentro de outro menu, como submenu. */
@@ -694,6 +713,7 @@ export function useMenuDoWorkspace() {
     ordemFixa,
     nivel,
     adicionarSubmenu,
+    recebeSubmenu,
     tirar,
     excluir,
     excluivel,

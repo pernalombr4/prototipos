@@ -433,8 +433,8 @@ function acoesDoAtalho(secaoId: string, r: Resolvido): Acoes {
     ],
     [
       ...meio,
-      // Rodada 28: o 3º nível. Seção do workspace inteira (tipo `menu`) não recebe.
-      ...(r.atalho.tipo === 'menu' ? [] : [{ label: t.adicionarSubmenu, icon: 'i-lucide-list-plus', onSelect: () => abrirEscolha(secaoId, r.rotulo, r.chave) }]),
+      // Rodada 28: o 3º nível. Rodada 31: só o menu que o workspace criou recebe.
+      ...(!trilha.atalhoRecebeSubmenu(r.atalho) ? [] : [{ label: t.adicionarSubmenu, icon: 'i-lucide-list-plus', onSelect: () => abrirEscolha(secaoId, r.rotulo, r.chave) }]),
     ],
     [{ label: t.removerDaSecao, icon: 'i-lucide-circle-minus', onSelect: () => tirarDaSecao(secaoId, r) }],
   ]
@@ -947,20 +947,5 @@ function moverSecao(s: SecaoDoInicio, passo: -1 | 1) {
     <!-- Menu só meu e itens ocultos (rodadas 12 e 14). -->
     <AvisosDoMenu v-if="!props.flutuante" :t="props.t" :rotulo-de="rotuloDe" />
 
-    <!--
-      PERSONALIZAR, no pé, até a primeira vez. Depois sobe para o cabeçalho do
-      painel e some daqui, como no ClickUp.
-    -->
-    <UButton
-      v-if="!props.flutuante && !trilha.prefs.value.personalizou && !filtrando"
-      :label="props.t.inicioPersonalizar"
-      icon="i-lucide-sliders-horizontal"
-      size="sm"
-      color="neutral"
-      variant="outline"
-      block
-      class="mt-4 animate-[entrada_0.25s_ease-out_both]"
-      @click="trilha.abrirPersonalizar('navegacao')"
-    />
   </div>
 </template>

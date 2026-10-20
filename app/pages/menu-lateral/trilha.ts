@@ -259,6 +259,11 @@ export function useTrilha() {
 
   /* ------------------- os submenus de um menu pessoal (rodada 28) ------------------- */
 
+  /** Rodada 31: o atalho recebe submenu só quando aponta para um menu que o workspace criou. */
+  function atalhoRecebeSubmenu(a: Atalho) {
+    return a.tipo === 'tela' && menu.recebeSubmenu(a.id)
+  }
+
   function menuDaSecao(p: PrefsDaTrilha, secaoId: string, menuChave: string) {
     return p.pessoais.find(x => x.id === secaoId)?.itens.find(x => chaveDoAtalho(x) === menuChave)
   }
@@ -271,7 +276,8 @@ export function useTrilha() {
     if (a.tipo === 'menu') return
     menu.aplicarPrefs((p) => {
       const pai = menuDaSecao(p, secaoId, menuChave)
-      if (!pai || pai.tipo === 'menu') return
+      // Rodada 31: menu nativo não recebe submenu, nem no menu de cada pessoa.
+      if (!pai || !atalhoRecebeSubmenu(pai)) return
       pai.filhos = pai.filhos ?? []
       if (pai.filhos.some(x => chaveDoAtalho(x) === chaveDoAtalho(a)) || chaveDoAtalho(a) === menuChave) return
       pai.filhos.push({ tipo: a.tipo, id: a.id })
@@ -406,6 +412,7 @@ export function useTrilha() {
     removerAtalho,
     restaurarAtalho,
     adicionarSubmenu,
+    atalhoRecebeSubmenu,
     tirarSubmenu,
     restaurarSubmenu,
     moverSubmenu,

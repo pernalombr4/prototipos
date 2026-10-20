@@ -245,7 +245,7 @@ function acoesDoMenuMeu(s: Opcao, a: Atalho, i: number) {
       { label: t.ctxSubir, icon: 'i-lucide-arrow-up', kbds: ['alt', 'arrowup'], disabled: i <= 0, onSelect: () => trilha.moverAtalhoJa(s.id, chave, -1) },
       { label: t.ctxDescer, icon: 'i-lucide-arrow-down', kbds: ['alt', 'arrowdown'], disabled: i >= total - 1, onSelect: () => trilha.moverAtalhoJa(s.id, chave, 1) },
     ],
-    a.tipo === 'menu' ? [] : [{ label: t.adicionarSubmenu, icon: 'i-lucide-list-plus', onSelect: () => escolherNoMeu(s.id, rotuloDoAtalho(a), chave) }],
+    !trilha.atalhoRecebeSubmenu(a) ? [] : [{ label: t.adicionarSubmenu, icon: 'i-lucide-list-plus', onSelect: () => escolherNoMeu(s.id, rotuloDoAtalho(a), chave) }],
     [{ label: t.removerDaSecao, icon: 'i-lucide-circle-minus', onSelect: () => tirarMenuMeu(s.id, a) }],
     excluivel ? [{ label: t.excluirMenu, icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => excluirMenuMeu(s.id, a, excluivel) }] : [],
   ].filter(b => b.length)
@@ -304,7 +304,7 @@ function acoesDoMenuWs(secao: NoDoMenu, n: NoDoMenu, i: number) {
       { label: t.ctxDescer, icon: 'i-lucide-arrow-down', kbds: ['alt', 'arrowdown'], disabled: i >= total - 1, onSelect: () => menu.mover(n.id, 1) },
     ],
     [
-      { label: t.adicionarSubmenu, icon: 'i-lucide-list-plus', onSelect: () => escolherNoWorkspace(rotuloNo(n), { menuId: n.id }) },
+      ...(menu.recebeSubmenu(n.id) ? [{ label: t.adicionarSubmenu, icon: 'i-lucide-list-plus', onSelect: () => escolherNoWorkspace(rotuloNo(n), { menuId: n.id }) }] : []),
       ...(sozinho ? [] : [{ label: t.removerDaSecao, icon: 'i-lucide-circle-minus', onSelect: () => avisarRecusa(menu.tirar(n.id)) }]),
     ],
     menu.excluivel(n) ? [{ label: t.excluirMenu, icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => excluirNoWorkspace(n) }] : [],

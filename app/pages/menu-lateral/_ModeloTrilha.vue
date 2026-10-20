@@ -659,17 +659,6 @@ function classeDaArea(a: Area) {
             @click="tiposAbertos = !tiposAbertos"
           />
         </UTooltip>
-        <UTooltip v-if="area === 'inicio' && trilha.prefs.value.personalizou" :text="props.t.inicioPersonalizar">
-          <UButton
-            icon="i-lucide-sliders-horizontal"
-            size="xs"
-            color="neutral"
-            variant="ghost"
-            :class="iconeDoCabecalho(false)"
-            :aria-label="props.t.inicioPersonalizar"
-            @click="trilha.abrirPersonalizar('navegacao')"
-          />
-        </UTooltip>
         <UTooltip :text="props.t.recolherMenu" :kbds="['meta', '\\']">
           <UButton
             icon="i-lucide-chevrons-left"
@@ -712,8 +701,28 @@ function classeDaArea(a: Area) {
         @busca-global="t => emit('busca', t)"
       />
 
+      <!--
+        Rodada 31: "o botao de personalizar a barra lateral na base deve ser
+        fixado, nao ir embora com o scroll [...] pode ser mais delicado, sem esse
+        contorno todo". Fica no pé do painel do Início, fora da rolagem, em
+        texto discreto. Antes ele rolava com a lista e, depois do primeiro uso,
+        subia para o cabeçalho.
+      -->
+      <div v-if="area === 'inicio'" class="shrink-0 border-t border-default px-2 py-1">
+        <UButton
+          :label="props.t.inicioPersonalizar"
+          icon="i-lucide-sliders-horizontal"
+          size="xs"
+          color="neutral"
+          variant="ghost"
+          block
+          class="justify-start text-muted hover:text-default"
+          @click="trilha.abrirPersonalizar('navegacao')"
+        />
+      </div>
+
       <!-- O mesmo Salvar da barra única: o que se arrasta aqui grava igual. -->
-      <CartaoDeSalvar :t="props.t" :pode-configurar="props.podeConfigurar" rente />
+      <CartaoDeSalvar :t="props.t" :pode-configurar="props.podeConfigurar" :rente="area !== 'inicio'" :acima-do-pe="area === 'inicio'" />
     </div>
 
     <Personalizar :t="props.t" :areas="areas" :itens-do-inicio="itensDoInicio" :secoes="secoesDoInicio" :categorias="props.categorias" :pode-configurar="props.podeConfigurar" />

@@ -18,6 +18,8 @@ const props = defineProps<{
   podeConfigurar: boolean
   /** Sem rodapé embaixo (o painel da trilha não tem): encosta no fim. */
   rente?: boolean
+  /** Rodada 31: o painel do Início tem o "Personalizar" fixo no pé; o cartão fica acima dele. */
+  acimaDoPe?: boolean
 }>()
 
 const menu = useMenuDoWorkspace()
@@ -34,7 +36,7 @@ function salvarMenu(alcance: 'todos' | 'local') {
 </script>
 
 <template>
-  <div v-if="menu.alterado.value" class="pointer-events-none absolute inset-x-2 z-30" :class="props.rente ? 'bottom-2' : 'bottom-14'">
+  <div v-if="menu.alterado.value" class="pointer-events-none absolute inset-x-2 z-30" :class="props.rente ? 'bottom-2' : props.acimaDoPe ? 'bottom-11' : 'bottom-14'">
     <div class="pointer-events-auto animate-[entrada_0.2s_ease-out_both] rounded-xl border border-default bg-default p-2.5 shadow-lg ring-1 ring-warning/30">
       <p class="mb-0.5 flex items-center gap-1.5 text-xs font-semibold text-highlighted">
         <span class="size-2 shrink-0 rounded-full bg-warning" />
