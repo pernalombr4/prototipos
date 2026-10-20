@@ -544,18 +544,32 @@ function criar(_caso: CasoDeUso | null = null) {
                   />
                 </UFormField>
 
-                <UFormField :label="t.criar.referencia">
+                <UFormField :label="t.criar.referencia" :help="t.criar.referenciaAjuda">
                   <UInput
                     v-model="form.referencia"
                     :placeholder="t.criar.referenciaPlaceholder"
                     class="w-full font-mono text-sm"
                     @update:model-value="referenciaEditada = true"
                   />
-                  <template #help>
-                    {{ t.criar.referenciaAjuda }}
-                    <span class="font-mono">enspace.io/<span class="text-primary-700 dark:text-primary-300">{{ form.referencia || '…' }}</span></span>
-                  </template>
                 </UFormField>
+
+                <!-- Rodada 25: o endereço volta a ser destaque, num callout logo
+                     abaixo da Referência, que é de onde ele vem. O callout diz o que
+                     a pessoa não sabia: o endereço é definitivo; o nome, não. -->
+                <UAlert
+                  icon="i-lucide-lock"
+                  color="info"
+                  variant="subtle"
+                  :ui="{ title: 'font-normal', description: 'mt-0.5' }"
+                >
+                  <template #title>
+                    {{ t.criar.enderecoDoWorkspace }}
+                    <span class="break-all font-mono font-semibold">enspace.io/{{ form.referencia || '…' }}</span>
+                  </template>
+                  <template #description>
+                    {{ t.criar.enderecoDefinitivo }}
+                  </template>
+                </UAlert>
               </div>
             </div>
 

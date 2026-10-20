@@ -134,6 +134,22 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 25 · 2026-10-20
+
+- **Pedido (literal):** "o preview do endereço do workspace deve continuar aparecendo num callout logo abaixo
+  do nome, como era antes, acredito. opine sobre. ou logo abaixo da ref. mas é bom botar em callout pra
+  destacar pro user. o user nao entende que isso é definitivo, nao pode ser alterado depois, é url etc"; depois
+  da opinião, "concordo".
+- **Mudou:** o endereço volta como destaque, num callout logo abaixo da Referência (`UAlert` info suave, ícone
+  de cadeado): "Endereço do workspace: enspace.io/{referência}" e "Não dá para mudar depois de criar. O nome,
+  sim."
+  - Abaixo da Referência, não do nome: o endereço vem da Referência, e o aviso de que é definitivo vale para
+    ela. O texto de apoio do topo já diz que o nome dá para mudar; o callout fecha o contraste.
+  - A ajuda da Referência encolhe para "Vem do nome. Só letras minúsculas, números e hífen." e deixa de
+    repetir o endereço.
+- **Mantido:** a Referência continua sem `*`, como pedido na rodada 24; o callout já chama a atenção.
+- **Fronteira:** muda só o bloco da Referência no passo 1.
+
 ### Rodada 24 · 2026-10-20
 
 - **Pedido (literal):** "essa tela tem o modal de criaçao com "descriçao e endereço". endereço deve se

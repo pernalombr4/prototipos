@@ -183,6 +183,8 @@ export interface TextosDaTela {
     referencia: string
     referenciaPlaceholder: string
     referenciaAjuda: string
+    enderecoDoWorkspace: string
+    enderecoDefinitivo: string
     querModelo: string
     modeloAjuda: string
     centralTitulo: string
@@ -410,7 +412,9 @@ export const textos: Record<Idioma, TextosDaTela> = {
       descricaoPlaceholder: 'Ex.: Chamados, RH e jurídico do Grupo Aurora',
       referencia: 'Referência',
       referenciaPlaceholder: 'grupo-aurora',
-      referenciaAjuda: 'Identifica o workspace no endereço. Vem do nome; mude só se precisar. Endereço:',
+      referenciaAjuda: 'Vem do nome. Só letras minúsculas, números e hífen.',
+      enderecoDoWorkspace: 'Endereço do workspace:',
+      enderecoDefinitivo: 'Não dá para mudar depois de criar. O nome, sim.',
       querModelo: 'Quer começar de um caso de uso?',
       modeloAjuda: 'Um caso de uso já traz menus, categorias e status prontos. Dá para mudar tudo depois.',
       centralTitulo: 'Casos de uso',
@@ -637,7 +641,9 @@ export const textos: Record<Idioma, TextosDaTela> = {
       descricaoPlaceholder: 'E.g.: Tickets, HR and legal for Grupo Aurora',
       referencia: 'Reference',
       referenciaPlaceholder: 'grupo-aurora',
-      referenciaAjuda: 'Identifies the workspace in its address. It comes from the name; change it only if needed. Address:',
+      referenciaAjuda: 'Comes from the name. Lowercase letters, numbers and hyphens only.',
+      enderecoDoWorkspace: 'Workspace address:',
+      enderecoDefinitivo: 'It can’t be changed after the workspace is created. The name can.',
       querModelo: 'Want to start from a use case?',
       modeloAjuda: 'A use case comes with menus, categories and statuses ready. You can change everything later.',
       centralTitulo: 'Use cases',
@@ -864,7 +870,9 @@ export const textos: Record<Idioma, TextosDaTela> = {
       descricaoPlaceholder: 'Ej.: Tickets, RR. HH. y jurídico del Grupo Aurora',
       referencia: 'Referencia',
       referenciaPlaceholder: 'grupo-aurora',
-      referenciaAjuda: 'Identifica el workspace en la dirección. Viene del nombre; cámbiala solo si hace falta. Dirección:',
+      referenciaAjuda: 'Viene del nombre. Solo minúsculas, números y guiones.',
+      enderecoDoWorkspace: 'Dirección del workspace:',
+      enderecoDefinitivo: 'No se puede cambiar después de crearlo. El nombre, sí.',
       querModelo: '\u00bfQuieres empezar con un caso de uso?',
       modeloAjuda: 'Un caso de uso ya trae menús, categorías y estados listos. Se puede cambiar todo después.',
       centralTitulo: 'Casos de uso',
