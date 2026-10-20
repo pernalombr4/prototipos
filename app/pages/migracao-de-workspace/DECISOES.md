@@ -175,3 +175,7 @@ Migração concluída ──► Ver categorias (não há como desfazer)
 - **Maquete:** a referência quebrada vem marcada no `mocks.ts` (`quebrada`); na implementação, o back-end calcula na prévia.
 - **Ver:** `evidencias/proposta-r6-fluxo-da-categoria.jpg`
 
+## Requisitos em tabelas · 2026-10-20
+- **Pedido (literal):** "reescreve os requisitos da migração com a skill nova e dá push"
+- **Mudou:** o `REQUISITOS.md` volta ao formato de tabelas (skill `requisitos` enxugada no mesmo dia): cabeçalho com as fontes F1 a F10, Resumo, regras de negócio com a tabela de decisão da RN002, 1 tabela por grupo (ID, requisito, critério de aceite, prioridade, fonte), interfaces, não funcionais e restrições, e "Em aberto" com P1 a P13 e S1 a S4. Os ids não mudaram. De cerca de 700 linhas para 174; a conferência da skill não dá aviso.
+
