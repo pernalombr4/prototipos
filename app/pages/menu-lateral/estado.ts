@@ -217,9 +217,15 @@ export function useMenuDoWorkspace() {
     lidas.value = notificacoes.map(n => n.id)
   }
 
-  /** Um nó sem origem declarada é nativo: nativo é o padrão do produto. */
-  function origemDe(n: NoDoMenu) {
-    return n.origem ?? 'nativo'
+  /**
+   * Um nó sem origem declarada herda a de quem o contém; na raiz, é nativo.
+   * Rodada 30: o menu dentro de uma seção que o workspace montou é do
+   * workspace, como a seção, e se exclui como ela.
+   */
+  function origemDe(n: NoDoMenu): NonNullable<NoDoMenu['origem']> {
+    if (n.origem) return n.origem
+    const pai = localizar(rascunho.value, n.id)?.pai
+    return pai ? origemDe(pai) : 'nativo'
   }
 
   function visivel(n: NoDoMenu) {
@@ -471,6 +477,9 @@ export function useMenuDoWorkspace() {
     const veredito = avaliar(arrastadoId, alvoId, posicao)
     if (!veredito.ok) return veredito
 
+    // A origem vai junto: o nativo levado para uma seção do workspace continua nativo.
+    arrastado.origem ??= origemDe(arrastado)
+
     // Tira de onde estava.
     const ondeArrastado = localizar(arvore, arrastadoId)
     if (!ondeArrastado) return { ok: true }
@@ -543,12 +552,27 @@ export function useMenuDoWorkspace() {
     return moverParaPrimeiroNivel(id)
   }
 
-  /** Excluir só vale para o que o workspace criou; os submenus sobem 1 nível. */
+  /*
+   * Rodada 30: "tudo o que nao é nativo nos menus e trilhas, seçoes etc eu
+   * devo poder tambem excluir". Nativo e módulo não se excluem. A seção só se
+   * exclui quando tudo dentro dela é do workspace: um nativo levado para lá
+   * não some junto.
+   */
+  function soDoWorkspace(n: NoDoMenu): boolean {
+    return origemDe(n) === 'workspace' && (n.filhos ?? []).every(soDoWorkspace)
+  }
+
+  function excluivel(n: NoDoMenu) {
+    if (origemDe(n) !== 'workspace') return false
+    return n.tipo !== 'secao' || soDoWorkspace(n)
+  }
+
+  /** A seção sai com os menus dela; o menu sai e os submenus sobem 1 nível. */
   function excluir(id: string) {
     const onde = localizar(rascunho.value, id)
     if (!onde) return
     const [no] = onde.irmaos.splice(onde.indice, 1)
-    if (no?.filhos?.length) onde.irmaos.splice(onde.indice, 0, ...no.filhos)
+    if (no?.tipo !== 'secao' && no?.filhos?.length) onde.irmaos.splice(onde.indice, 0, ...no.filhos)
     marcarTocado(id)
   }
 
@@ -672,6 +696,7 @@ export function useMenuDoWorkspace() {
     adicionarSubmenu,
     tirar,
     excluir,
+    excluivel,
     ordemCategoriasRascunho,
     semearOrdemDeCategorias,
     reordenarCategoria,

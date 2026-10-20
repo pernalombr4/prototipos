@@ -198,6 +198,30 @@ export function useAcoesDoMenu(g: Ganchos) {
     return itens
   }
 
+  /*
+   * Rodada 30: excluir, por último e em vermelho, como o Delete do ClickUp.
+   * Só no que não é nativo (estado.excluivel). A seção de 1 menu só é o
+   * próprio menu na barra (rodada 10), então se chama "Excluir menu".
+   */
+  function blocoExcluir(no: NoDoMenu): ContextMenuItem[] {
+    if (!menu.excluivel(no)) return []
+    const t = g.t()
+    const travado = !g.podeConfigurar()
+    const ehSecao = no.tipo === 'secao' && (no.filhos?.length ?? 0) !== 1
+    return [{
+      label: ehSecao ? t.excluirSecao : t.excluirMenu,
+      icon: 'i-lucide-trash-2',
+      color: 'error',
+      description: travado ? t.ctxSoQuemConfigura : undefined,
+      disabled: travado,
+      onSelect: () => {
+        menu.excluir(no.id)
+        const nome = g.rotuloDe(no)
+        toast.add({ title: ehSecao ? t.secaoExcluida(nome) : t.menuExcluido(nome), icon: 'i-lucide-trash-2', color: 'neutral' })
+      },
+    }]
+  }
+
   /* ------------------------------ por tipo de linha ------------------------------ */
 
   /**
@@ -214,6 +238,7 @@ export function useAcoesDoMenu(g: Ganchos) {
       [...(fixa ? [] : itensDeMover(no.id, visiveis)), ...(moverPara ? [moverPara] : []), ...(opcoes.lugar ?? [])],
       ...(fixa || no.tipo !== 'tela' ? [] : [blocoNivel(no)]),
       blocoMexer(no),
+      blocoExcluir(no),
     ].filter(b => b.length)
   }
 
@@ -285,7 +310,8 @@ export function useAcoesDoMenu(g: Ganchos) {
         limites.itemMostrar(no.id, t),
       ],
       blocoMexer(no),
-    ]
+      blocoExcluir(no),
+    ].filter(b => b.length)
   }
 
   /**

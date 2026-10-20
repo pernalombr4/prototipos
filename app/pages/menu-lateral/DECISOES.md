@@ -389,6 +389,20 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 30 · 2026-10-20
+- **Pedido (literal):** "tudo o que nao é nativo nos menus e trilhas, seçoes etc eu devo poder tambem excluir."
+- **Pedido (literal):** "o botao ocultar seçao deve estar à esquerda do botao adicionar, nao á direita"
+- **Mudou:** toda seção, menu e submenu que não é nativo nem de módulo tem "Excluir", em vermelho e por último:
+  - no botão direito da trilha (ícone de seção do workspace), do painel e do menu flutuante;
+  - no Personalizar > "Seções e menus": a lixeira no hover da seção (do Início e das áreas) e "Excluir menu" no "⋯" de cada menu e submenu, também nos menus das seções pessoais.
+- **Mudou:** o menu dentro de uma seção do workspace passa a contar como do workspace, como a seção. Antes, Painel de vendas, Triagem de propostas e os outros menus de Comercial e Conhecimento contavam como nativos e não tinham "Excluir menu".
+- **Regra:** a seção sai com os menus dela; o menu sai e os submenus sobem para a seção. A seção que guarda um menu nativo (levado para lá) não se exclui: o nativo levado para uma seção do workspace continua nativo.
+- **Regra:** excluir é do rascunho, como o resto: acende "Alterações não salvas", e "Descartar" desfaz. A seção pessoal é da pessoa; a seção e o menu do workspace pedem quem configura.
+- **Mudou:** na linha da seção do Início, a ordem dos botões ficou Excluir, Ocultar e "+". Excluir e Ocultar aparecem no hover; o "+" fica sempre à vista, alinhado com o "+" das seções das áreas.
+- **Mudou:** o aviso "<nome> foi excluído, com a tela dele." virou "<nome> foi excluído.".
+- **Não mudou:** os nativos (Análise, Auditoria, Integrações, Favoritos, Categorias, os destinos do Início) e as seções de módulo continuam sem "Excluir"; saem do menu por "Ocultar".
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral · prints em `evidencias/rodada30-excluir-secao-na-trilha.jpg` (botão direito no ícone Comercial) e `evidencias/rodada30-excluir-menu-no-personalizar.jpg` ("⋯" de Painel de vendas no Personalizar)
+
 ### Rodada 29 · 2026-10-20
 - **Pedido (literal):** "esse form ta ruim, baugnçado visualmente. ajuste"
 - **Mudou:** o formulário "Criar menu" ficou em 3 blocos: o que é (ícone e nome, tipo de menu, categorias e caminho quando o tipo pede), depois onde fica e quem enxerga, depois a prévia.

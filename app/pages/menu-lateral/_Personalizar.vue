@@ -206,10 +206,40 @@ function tirarSubMeu(secaoId: string, menuChave: string, sub: Atalho) {
   })
 }
 
+/*
+ * Rodada 30: o que não é nativo se exclui também daqui. A seção pessoal é da
+ * pessoa; a do workspace pede quem configura. Excluir um menu pela seção
+ * pessoal exclui o menu do workspace, no rascunho, como na árvore de baixo.
+ */
+function podeExcluirSecao(id: string) {
+  if (ehPessoal(id)) return true
+  const no = menu.acharNo(id)
+  return !!no && props.podeConfigurar && menu.excluivel(no)
+}
+
+function excluirSecao(id: string, rotulo: string) {
+  if (ehPessoal(id)) trilha.excluirSecao(id)
+  else menu.excluir(id)
+  toast.add({ title: props.t.secaoExcluida(rotulo), icon: 'i-lucide-trash-2', color: 'neutral' })
+}
+
+function menuExcluivel(a: Atalho) {
+  if (a.tipo !== 'tela' || !props.podeConfigurar) return null
+  const no = menu.acharNo(a.id)
+  return no && menu.excluivel(no) ? no : null
+}
+
+function excluirMenuMeu(secaoId: string, a: Atalho, no: NoDoMenu, menuChave?: string) {
+  if (menuChave) trilha.tirarSubmenu(secaoId, menuChave, chaveDoAtalho(a))
+  else trilha.removerAtalho(secaoId, chaveDoAtalho(a))
+  excluirNoWorkspace(no)
+}
+
 function acoesDoMenuMeu(s: Opcao, a: Atalho, i: number) {
   const t = props.t
   const total = itensDe(s.id).length
   const chave = chaveDoAtalho(a)
+  const excluivel = menuExcluivel(a)
   return [
     [
       { label: t.ctxSubir, icon: 'i-lucide-arrow-up', kbds: ['alt', 'arrowup'], disabled: i <= 0, onSelect: () => trilha.moverAtalhoJa(s.id, chave, -1) },
@@ -217,6 +247,7 @@ function acoesDoMenuMeu(s: Opcao, a: Atalho, i: number) {
     ],
     a.tipo === 'menu' ? [] : [{ label: t.adicionarSubmenu, icon: 'i-lucide-list-plus', onSelect: () => escolherNoMeu(s.id, rotuloDoAtalho(a), chave) }],
     [{ label: t.removerDaSecao, icon: 'i-lucide-circle-minus', onSelect: () => tirarMenuMeu(s.id, a) }],
+    excluivel ? [{ label: t.excluirMenu, icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => excluirMenuMeu(s.id, a, excluivel) }] : [],
   ].filter(b => b.length)
 }
 
@@ -225,13 +256,15 @@ function acoesDoSubMeu(s: Opcao, a: Atalho, sub: Atalho, j: number) {
   const total = a.filhos?.length ?? 0
   const menuChave = chaveDoAtalho(a)
   const chave = chaveDoAtalho(sub)
+  const excluivel = menuExcluivel(sub)
   return [
     [
       { label: t.ctxSubir, icon: 'i-lucide-arrow-up', kbds: ['alt', 'arrowup'], disabled: j <= 0, onSelect: () => trilha.moverSubmenu(s.id, menuChave, chave, -1) },
       { label: t.ctxDescer, icon: 'i-lucide-arrow-down', kbds: ['alt', 'arrowdown'], disabled: j >= total - 1, onSelect: () => trilha.moverSubmenu(s.id, menuChave, chave, 1) },
     ],
     [{ label: t.tirarDoMenu, icon: 'i-lucide-circle-minus', onSelect: () => tirarSubMeu(s.id, menuChave, sub) }],
-  ]
+    excluivel ? [{ label: t.excluirMenu, icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => excluirMenuMeu(s.id, sub, excluivel, menuChave) }] : [],
+  ].filter(b => b.length)
 }
 
 /** Alt com as setas, numa linha da árvore com foco. */
@@ -274,7 +307,7 @@ function acoesDoMenuWs(secao: NoDoMenu, n: NoDoMenu, i: number) {
       { label: t.adicionarSubmenu, icon: 'i-lucide-list-plus', onSelect: () => escolherNoWorkspace(rotuloNo(n), { menuId: n.id }) },
       ...(sozinho ? [] : [{ label: t.removerDaSecao, icon: 'i-lucide-circle-minus', onSelect: () => avisarRecusa(menu.tirar(n.id)) }]),
     ],
-    menu.origemDe(n) === 'workspace' ? [{ label: t.excluirMenu, icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => excluirNoWorkspace(n) }] : [],
+    menu.excluivel(n) ? [{ label: t.excluirMenu, icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => excluirNoWorkspace(n) }] : [],
   ].filter(b => b.length)
 }
 
@@ -287,7 +320,7 @@ function acoesDoSubWs(pai: NoDoMenu, sub: NoDoMenu, j: number) {
       { label: t.ctxDescer, icon: 'i-lucide-arrow-down', kbds: ['alt', 'arrowdown'], disabled: j >= total - 1, onSelect: () => menu.mover(sub.id, 1) },
     ],
     [{ label: t.tirarDoMenu, icon: 'i-lucide-circle-minus', onSelect: () => avisarRecusa(menu.tirar(sub.id)) }],
-    menu.origemDe(sub) === 'workspace' ? [{ label: t.excluirMenu, icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => excluirNoWorkspace(sub) }] : [],
+    menu.excluivel(sub) ? [{ label: t.excluirMenu, icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => excluirNoWorkspace(sub) }] : [],
   ].filter(b => b.length)
 }
 
@@ -442,14 +475,16 @@ function teclarWs(e: KeyboardEvent, id: string) {
                 </button>
                 <UIcon :name="s.icone" class="size-4 shrink-0 text-toned" />
                 <span class="min-w-0 flex-1 truncate font-medium">{{ s.rotulo }}</span>
-                <UTooltip v-if="ehPessoal(s.id)" :text="props.t.adicionarMenu">
+                <!-- Rodada 30: Excluir e Ocultar aparecem no hover, à esquerda do "+", que fica sempre à vista. -->
+                <UTooltip v-if="podeExcluirSecao(s.id)" :text="props.t.excluirSecao">
                   <UButton
-                    icon="i-lucide-plus"
+                    icon="i-lucide-trash-2"
                     size="xs"
                     color="neutral"
                     variant="ghost"
-                    :aria-label="props.t.adicionarEm(s.rotulo)"
-                    @click="escolherNoMeu(s.id, s.rotulo)"
+                    class="opacity-0 transition-opacity hover:text-error group-hover:opacity-100 focus-visible:opacity-100"
+                    :aria-label="`${props.t.excluirSecao}: ${s.rotulo}`"
+                    @click="excluirSecao(s.id, s.rotulo)"
                   />
                 </UTooltip>
                 <UTooltip :text="props.t.ocultarSecao">
@@ -461,6 +496,16 @@ function teclarWs(e: KeyboardEvent, id: string) {
                     class="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                     :aria-label="`${props.t.ocultarSecao}: ${s.rotulo}`"
                     @click="trilha.ocultarSecao(s.id, true)"
+                  />
+                </UTooltip>
+                <UTooltip v-if="ehPessoal(s.id)" :text="props.t.adicionarMenu">
+                  <UButton
+                    icon="i-lucide-plus"
+                    size="xs"
+                    color="neutral"
+                    variant="ghost"
+                    :aria-label="props.t.adicionarEm(s.rotulo)"
+                    @click="escolherNoMeu(s.id, s.rotulo)"
                   />
                 </UTooltip>
               </div>
@@ -539,7 +584,7 @@ function teclarWs(e: KeyboardEvent, id: string) {
         <section :aria-label="props.t.secoesDasAreas">
           <p class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-toned">{{ props.t.secoesDasAreas }}</p>
           <ul class="space-y-1.5">
-            <li v-for="s in secoesDoWorkspace" :key="s.id" class="rounded-lg border border-default bg-default text-sm text-default">
+            <li v-for="s in secoesDoWorkspace" :key="s.id" class="group rounded-lg border border-default bg-default text-sm text-default">
               <div class="flex items-center gap-2 px-2.5 py-2">
                 <button
                   type="button"
@@ -552,6 +597,17 @@ function teclarWs(e: KeyboardEvent, id: string) {
                 </button>
                 <UIcon :name="s.icone" class="size-4 shrink-0 text-toned" />
                 <span class="min-w-0 flex-1 truncate font-medium">{{ rotuloNo(s) }}</span>
+                <UTooltip v-if="props.podeConfigurar && menu.excluivel(s)" :text="props.t.excluirSecao">
+                  <UButton
+                    icon="i-lucide-trash-2"
+                    size="xs"
+                    color="neutral"
+                    variant="ghost"
+                    class="opacity-0 transition-opacity hover:text-error group-hover:opacity-100 focus-visible:opacity-100"
+                    :aria-label="`${props.t.excluirSecao}: ${rotuloNo(s)}`"
+                    @click="excluirSecao(s.id, rotuloNo(s))"
+                  />
+                </UTooltip>
                 <UTooltip v-if="s.ordemFixa" :text="props.t.motivos.ordemFixa">
                   <UIcon name="i-lucide-lock" class="size-3.5 shrink-0 text-toned" :aria-label="props.t.motivos.ordemFixa" />
                 </UTooltip>

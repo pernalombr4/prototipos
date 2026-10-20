@@ -298,6 +298,21 @@ function acoesDaArea(a: Area): Acoes {
   }
   if (a.id.startsWith('sec:')) {
     grupos.push([{ label: props.t.ctxOcultar, icon: 'i-lucide-eye-off', onSelect: () => ocultarArea(a) }])
+    // Rodada 30: a seção que o workspace montou também se exclui daqui.
+    const no = menu.acharNo(a.id.slice(4))
+    if (no && menu.excluivel(no)) {
+      grupos.push([{
+        label: props.t.excluirSecao,
+        icon: 'i-lucide-trash-2',
+        color: 'error',
+        description: props.podeConfigurar ? undefined : props.t.ctxSoQuemConfigura,
+        disabled: !props.podeConfigurar,
+        onSelect: () => {
+          menu.excluir(no.id)
+          toast.add({ title: props.t.secaoExcluida(a.rotulo), icon: 'i-lucide-trash-2', color: 'neutral' })
+        },
+      }])
+    }
   }
   grupos.push([
     { label: props.t.personalizarNavegacao, icon: 'i-lucide-sliders-horizontal', onSelect: () => trilha.abrirPersonalizar('navegacao') },
