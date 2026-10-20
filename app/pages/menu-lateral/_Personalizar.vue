@@ -14,7 +14,9 @@ import type { TextosDaTela } from './textos'
  *
  * Rodada 16, onde sai do ClickUp a pedido dela: Navegação e Início também se
  * ARRASTAM, e tudo se oculta (seção nativa e item nativo do Início também).
- *   Temas      claro, escuro ou automático, e a cor de destaque.
+ *
+ * Rodada 25: a aba Temas saiu. "do menu de personalizaçao, tire a aba de
+ * temas" (Mikaela, 20/10/2026).
  *
  * Tudo vale na hora, como lá: não há botão de salvar nesta janela.
  */
@@ -31,8 +33,6 @@ const props = defineProps<{
 }>()
 
 const trilha = useTrilha()
-const colorMode = useColorMode()
-const appConfig = useAppConfig()
 
 const aba = computed({
   get: () => trilha.personalizar.value ?? 'navegacao',
@@ -47,7 +47,6 @@ const abas = computed(() => [
   { label: props.t.abaNavegacao, value: 'navegacao' },
   { label: props.t.abaInicio, value: 'inicio' },
   { label: props.t.abaSecoes, value: 'secoes' },
-  { label: props.t.abaTemas, value: 'temas' },
 ])
 
 /* ------------------------------ Navegação ------------------------------ */
@@ -128,25 +127,6 @@ const inicioNaOrdem = computed(() => {
   const ordem = trilha.ordemDoInicio(props.itensDoInicio.map(i => i.id))
   return ordem.map(id => props.itensDoInicio.find(i => i.id === id)!)
 })
-
-/* ------------------------------ Temas ------------------------------ */
-
-const aparencias = computed(() => [
-  { valor: 'light', rotulo: props.t.temaClaro },
-  { valor: 'dark', rotulo: props.t.temaEscuro },
-  { valor: 'system', rotulo: props.t.temaAuto },
-])
-
-/*
- * A cor de destaque troca o `primary` em tempo de execução, só nesta aba do
- * navegador. As quatro vêm da paleta que o tema do ENSPACE já declara: nada
- * de cor nova. O app.config.ts (cópia do en-docs) não é tocado.
- */
-const cores = ['fuchsia', 'purple', 'cyan', 'teal'] as const
-const corAtual = computed(() => appConfig.ui.colors.primary)
-function escolherCor(c: string) {
-  appConfig.ui.colors.primary = c
-}
 </script>
 
 <template>
@@ -261,7 +241,7 @@ function escolherCor(c: string) {
       </ul>
 
       <!-- ==================== Seções ==================== -->
-      <div v-else-if="aba === 'secoes'" class="animate-[entrada_0.2s_ease-out_both]">
+      <div v-else class="animate-[entrada_0.2s_ease-out_both]">
         <ul class="space-y-1.5" @dragover.prevent @drop="e => soltar(e, 'secoes')">
           <li
             v-for="s in visiveis"
@@ -318,55 +298,6 @@ function escolherCor(c: string) {
             />
           </li>
         </ul>
-      </div>
-
-      <!-- ==================== Temas ==================== -->
-      <div v-else class="animate-[entrada_0.2s_ease-out_both] space-y-5">
-        <div>
-          <p class="mb-2 text-sm font-semibold text-highlighted">{{ props.t.aparencia }}</p>
-          <div class="grid grid-cols-3 gap-3">
-            <button
-              v-for="a in aparencias"
-              :key="a.valor"
-              type="button"
-              class="rounded-lg border p-1.5 transition-colors focus-visible:outline-2 focus-visible:outline-primary"
-              :class="colorMode.preference === a.valor ? 'border-primary ring-1 ring-primary' : 'border-default hover:bg-elevated'"
-              :aria-pressed="colorMode.preference === a.valor"
-              @click="colorMode.preference = a.valor"
-            >
-              <span
-                class="mb-1.5 block h-12 overflow-hidden rounded-md border border-default"
-                :class="a.valor === 'dark' ? 'bg-neutral-900' : a.valor === 'light' ? 'bg-neutral-50' : 'bg-gradient-to-r from-neutral-50 from-50% to-neutral-900 to-50%'"
-                aria-hidden="true"
-              />
-              <span class="text-sm text-default">{{ a.rotulo }}</span>
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <p class="mb-0.5 text-sm font-semibold text-highlighted">{{ props.t.corDeDestaque }}</p>
-          <p class="mb-2 text-xs text-muted">{{ props.t.corDica }}</p>
-          <div class="grid grid-cols-2 gap-2">
-            <button
-              v-for="c in cores"
-              :key="c"
-              type="button"
-              class="flex items-center gap-2 rounded-lg border px-2.5 py-2 text-sm text-default transition-colors focus-visible:outline-2 focus-visible:outline-primary"
-              :class="corAtual === c ? 'border-primary ring-1 ring-primary' : 'border-default hover:bg-elevated'"
-              :aria-pressed="corAtual === c"
-              @click="escolherCor(c)"
-            >
-              <span
-                class="size-4 shrink-0 rounded"
-                :class="{ 'bg-fuchsia-500': c === 'fuchsia', 'bg-purple-500': c === 'purple', 'bg-cyan-500': c === 'cyan', 'bg-teal-500': c === 'teal' }"
-                aria-hidden="true"
-              />
-              {{ props.t.cores[c] }}
-              <UIcon v-if="corAtual === c" name="i-lucide-check" class="ml-auto size-4 text-primary" />
-            </button>
-          </div>
-        </div>
       </div>
     </template>
   </UModal>

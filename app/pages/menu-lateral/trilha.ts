@@ -28,7 +28,7 @@
 import { LIMITE_DA_TRILHA, useMenuDoWorkspace, type Atalho, type PrefsDaTrilha, type SecaoPessoal } from './estado'
 import type { Categoria } from './mocks'
 
-export type AbaDePersonalizar = 'navegacao' | 'inicio' | 'secoes' | 'temas'
+export type AbaDePersonalizar = 'navegacao' | 'inicio' | 'secoes'
 
 /** As janelas e os popovers que mais de um lugar abre. */
 export function useJanelasDaTrilha() {

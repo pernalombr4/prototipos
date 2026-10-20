@@ -92,7 +92,6 @@ export interface TextosDaTela {
   abaNavegacao: string
   abaInicio: string
   abaSecoes: string
-  abaTemas: string
   navInicioDica: string
   aparencia: string
   soIcones: string
@@ -107,12 +106,6 @@ export interface TextosDaTela {
   renomearSecaoTitulo: string
   salvarSecao: string
   escolherIcone: string
-  temaClaro: string
-  temaEscuro: string
-  temaAuto: string
-  corDeDestaque: string
-  corDica: string
-  cores: Record<string, string>
   mais: string
   personalizarNavegacao: string
   fixarNaTrilha: string
@@ -579,7 +572,6 @@ const ptBR: TextosDaTela = {
   abaNavegacao: 'Navegação',
   abaInicio: 'Início',
   abaSecoes: 'Seções',
-  abaTemas: 'Temas',
   navInicioDica: 'O Início fica sempre na trilha. Clicar nele abre a página inicial e este menu.',
   aparencia: 'Aparência',
   soIcones: 'Somente ícones',
@@ -594,12 +586,6 @@ const ptBR: TextosDaTela = {
   renomearSecaoTitulo: 'Renomear seção',
   salvarSecao: 'Salvar',
   escolherIcone: 'Escolher ícone',
-  temaClaro: 'Claro',
-  temaEscuro: 'Escuro',
-  temaAuto: 'Automático',
-  corDeDestaque: 'Cor de destaque',
-  corDica: 'Vale só para você. A marca do workspace não muda.',
-  cores: { fuchsia: 'Magenta', purple: 'Roxo', cyan: 'Azul', teal: 'Verde-azulado' },
   mais: 'Mais',
   personalizarNavegacao: 'Personalizar navegação',
   fixarNaTrilha: 'Fixar na trilha',
@@ -1102,7 +1088,6 @@ const en: TextosDaTela = {
   abaNavegacao: 'Navigation',
   abaInicio: 'Home',
   abaSecoes: 'Sections',
-  abaTemas: 'Themes',
   navInicioDica: 'Home always stays on the rail. Clicking it opens the home page and this menu.',
   aparencia: 'Appearance',
   soIcones: 'Icons only',
@@ -1117,12 +1102,6 @@ const en: TextosDaTela = {
   renomearSecaoTitulo: 'Rename section',
   salvarSecao: 'Save',
   escolherIcone: 'Choose icon',
-  temaClaro: 'Light',
-  temaEscuro: 'Dark',
-  temaAuto: 'Automatic',
-  corDeDestaque: 'Accent color',
-  corDica: 'Only for you. The workspace brand does not change.',
-  cores: { fuchsia: 'Magenta', purple: 'Purple', cyan: 'Blue', teal: 'Teal' },
   mais: 'More',
   personalizarNavegacao: 'Customize navigation',
   fixarNaTrilha: 'Pin to rail',
@@ -1625,7 +1604,6 @@ const es: TextosDaTela = {
   abaNavegacao: 'Navegación',
   abaInicio: 'Inicio',
   abaSecoes: 'Secciones',
-  abaTemas: 'Temas',
   navInicioDica: 'Inicio siempre queda en el riel. Al hacer clic se abren la página inicial y este menú.',
   aparencia: 'Apariencia',
   soIcones: 'Solo íconos',
@@ -1640,12 +1618,6 @@ const es: TextosDaTela = {
   renomearSecaoTitulo: 'Renombrar sección',
   salvarSecao: 'Guardar',
   escolherIcone: 'Elegir ícono',
-  temaClaro: 'Claro',
-  temaEscuro: 'Oscuro',
-  temaAuto: 'Automático',
-  corDeDestaque: 'Color de acento',
-  corDica: 'Solo para ti. La marca del workspace no cambia.',
-  cores: { fuchsia: 'Magenta', purple: 'Morado', cyan: 'Azul', teal: 'Verde azulado' },
   mais: 'Más',
   personalizarNavegacao: 'Personalizar navegación',
   fixarNaTrilha: 'Fijar en el riel',

@@ -389,6 +389,12 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 25 · 2026-10-20
+- **Pedido (literal):** "do menu de personalizaçao, tire a aba de temas"
+- **Mudou:** a janela Personalizar ficou com 3 abas: Navegação, Início e Seções. Saiu a aba Temas, da rodada 15, com a aparência (claro, escuro, automático) e a cor de destaque.
+- **Não mudou:** a "Aparência" da aba Navegação ("Somente ícones" ou "Ícones e rótulos"), que é da trilha, e não do tema. O alternador claro e escuro da barra de andaime também fica: é controle do protótipo, não proposta.
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral, modelo "Trilha e painel", botão direito no Início e "Personalizar navegação" · print em `evidencias/rodada25-personalizar-sem-temas.jpg`
+
 ### Rodada 24 · 2026-10-20
 - **Pedido (literal):** "os submenus tambem devem poder ser reordenados, tipo esses de logs" (print da seção pessoal "Rotina do jurídico", com o menu Auditoria aberto e "Logs de auditoria" e "Logs de requisição" embaixo)
 - **O defeito:** na seção pessoal do Início, as telas de um menu aberto (o terceiro recuo) eram a única linha do menu sem arraste e sem menu de ações. Os outros lugares sem arraste são de propósito: favoritos não têm ordem própria, e os itens de Configurações são fixos.
