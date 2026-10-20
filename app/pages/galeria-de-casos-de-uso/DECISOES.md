@@ -45,3 +45,8 @@
 - **Consulta:** MCP `nuxt-ui`, `search-components` com "multi select dropdown with search and checkboxes": o primeiro resultado é o `SelectMenu`. Slots `default` e `content-bottom` conferidos em `node_modules/@nuxt/ui/dist/runtime/components/SelectMenu.vue`
 - **Fronteira:** muda só o menu de Áreas; não muda o resto da galeria
 - **Ver:** `evidencias/proposta-3-areas-marcadas.jpg`
+
+## Requisitos · 2026-10-20
+- **Pedido (literal):** "pode fazer o doc de requisitos pro dev criar essa galeria de casos de uso aí"
+- **Mudou:** `REQUISITOS.md` com 5 regras de negócio, 40 requisitos funcionais em 4 grupos (galeria, estados, detalhe, usar), 2 interfaces, 2 não funcionais, 3 restrições e 9 itens em aberto
+- **Fronteira:** o documento cobre só o bloco da galeria; cabeçalho, Migração de Workspace e Atenção ficam fora
