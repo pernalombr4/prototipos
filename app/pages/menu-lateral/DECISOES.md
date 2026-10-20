@@ -389,6 +389,14 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 32 · 2026-10-20
+- **Pedido (literal):** "na hora de criar um caso de uso tem que ter espaço pra botar os prints )imagens da galeria). falta isso."
+- **Mudou:** "Criar caso de uso" ganhou o campo "Imagens da galeria": arrastar ou clicar para escolher, várias imagens (PNG, JPG ou GIF), com a miniatura de cada uma e o "x" para tirar.
+- **Mudou:** a galeria do caso mostra os prints que subiram, na ordem; a primeira imagem é a capa do card na Central. Sem imagem, a galeria continua com a prévia montada com os menus do caso (rodada 18).
+- **Mudou:** o ponto da imagem não ativa, embaixo da galeria, ficou visível no tema escuro.
+- **Limite do protótipo:** a imagem fica só no navegador (endereço local) e some no reload; o "Exportar" não leva as imagens, porque o endereço local não abre em outro navegador. No produto, as imagens sobem com o caso e vão no arquivo exportado.
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral, "+" do Início > "Casos de uso" > "Criar caso de uso" · prints em `evidencias/rodada32-imagens-no-criar-caso.jpg` e `evidencias/rodada32-galeria-com-prints.jpg`
+
 ### Rodada 31 · 2026-10-20
 - **Pedido (literal):** "nao deve ser permitido adicionar submenus a menus que sao NATIVOS. isso seria o equivalente a botar um menu dentro de uma tela nativa. vai contra a logica de como a tela foi feita nesse caso"
 - **Pedido (literal):** "todo menu que veio da ideia do back de uma tela nativa (tipo meus relatorios), nao deve poder ter submenu. só pode ser alocado em alguma seçao. dash de tarefas é um exemplo"

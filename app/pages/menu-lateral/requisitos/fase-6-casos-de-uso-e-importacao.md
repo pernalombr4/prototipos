@@ -23,7 +23,7 @@ categoria; os casos de uso, os números de uso e as miniaturas do protótipo sã
 | Central de casos de uso | Galeria com filtros, áreas e busca | RF504 a RF509 |
 | Detalhe do caso | Galeria de imagens, o que vem junto e quem fez | RF510 a RF513 |
 | Usar e guardar | "Usar caso de uso" aplica; "Adicionar ao workspace" só guarda | RF514 a RF519, RF529 e RF530 |
-| Criar caso de uso | A partir do menu de hoje | RF520 a RF521 |
+| Criar caso de uso | A partir do menu de hoje, com os prints da galeria | RF520, RF521 e RF531 a RF534 |
 | Importar e exportar | Arquivo `.json` de outro workspace, somar ou substituir | RF522 a RF528 |
 
 ## Regras de negócio (RN)
@@ -83,6 +83,10 @@ categoria; os casos de uso, os números de uso e as miniaturas do protótipo sã
 |---|---|---|---|
 | RF520 | "Criar caso de uso" deve pedir nome, área, complexidade, descrição e quais menus do workspace entram. | Sem nome, a janela não salva e mostra o erro no campo. | Importante |
 | RF521 | O caso criado deve aparecer em "Do seu workspace". | Criar "Rotina do jurídico" põe o cartão na vista. | Importante |
+| RF531 | "Criar caso de uso" deve ter o campo "Imagens da galeria", que recebe imagens PNG, JPG ou GIF arrastadas ou escolhidas pelo clique, mais de 1 por vez, com a miniatura de cada uma e o botão que tira a imagem. | Soltar 2 prints mostra as 2 miniaturas no campo. | Importante |
+| RF532 | A galeria do detalhe (RF511) deve mostrar os prints do caso na ordem em que subiram. | Caso com 2 prints: a galeria tem 2 pontos. | Importante |
+| RF534 | O cartão do caso na Central deve usar o primeiro print como capa. | Caso com 2 prints: o cartão mostra o primeiro. | Desejável |
+| RF533 | Sem imagem, a galeria deve mostrar a prévia montada com os menus, os status e os campos do caso. | Caso criado sem print: a galeria mostra a prévia dos menus. | Importante |
 
 ## Importar e exportar (RF)
 
@@ -102,8 +106,8 @@ categoria; os casos de uso, os números de uso e as miniaturas do protótipo sã
 |---|---|---|
 | RI501 | Listar casos de uso | Deve devolver os casos do ENSPACE e os do workspace, com tipo, complexidade, área, imagens, o que vem junto, autor, data e número de usos. Rota <a definir>. |
 | RI502 | Aplicar caso de uso | Deve receber o caso, o modo (somar ou substituir) e o lugar dos menus, e devolver o rascunho resultante sem publicar (RN503). Rota <a definir>. |
-| RI503 | Criar e guardar caso de uso | Deve receber os campos de RF520, ou a cópia de um caso do ENSPACE. Rota <a definir>. |
-| RI504 | Exportar e importar | O arquivo deve ter formato e versão próprios (no protótipo, `enspace-caso-de-uso`, versão 1), o workspace de origem e a data. Formato final <a definir>. |
+| RI503 | Criar e guardar caso de uso | Deve receber os campos de RF520 e as imagens de RF531, ou a cópia de um caso do ENSPACE. Rota <a definir>. |
+| RI504 | Exportar e importar | O arquivo deve ter formato e versão próprios (no protótipo, `enspace-caso-de-uso`, versão 1), o workspace de origem, a data e as imagens do caso (no protótipo, as imagens ficam fora do arquivo). Formato final <a definir>. |
 
 ## Não funcionais, restrições e transição (RNF, RS, RT)
 

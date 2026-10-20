@@ -24,6 +24,8 @@ const area = ref<string>('Operações')
 const complexidade = ref<Complexidade>('iniciante')
 const descricao = ref('')
 const escolhidos = ref<string[]>([])
+/* Rodada 32: "tem que ter espaço pra botar os prints (imagens da galeria)". */
+const imagens = ref<File[]>([])
 
 /** Os menus com telas que existem agora; os do workspace já vêm marcados. */
 const menusDisponiveis = computed(() => menu.secoes.value.filter(s => (s.filhos?.length ?? 0) > 0))
@@ -34,6 +36,7 @@ watch(() => janelas.criando.value, (v) => {
   descricao.value = ''
   area.value = 'Operações'
   complexidade.value = 'iniciante'
+  imagens.value = []
   escolhidos.value = menusDisponiveis.value.filter(s => menu.origemDe(s) === 'workspace').map(s => s.id)
 })
 
@@ -49,6 +52,7 @@ function criar() {
     complexidade: complexidade.value,
     descricao: descricao.value.trim(),
     icone: menus[0]?.icone,
+    imagens: imagens.value.map(f => ({ nome: f.name, url: URL.createObjectURL(f) })),
   })
   casos.value = [caso, ...casos.value]
   toast.add({ title: props.t.casoCriado(caso.nome), icon: 'i-lucide-package-plus', color: 'success' })
@@ -77,6 +81,19 @@ function criar() {
         </div>
         <UFormField :label="props.t.descricaoCampo">
           <UTextarea v-model="descricao" :rows="2" autoresize class="w-full" />
+        </UFormField>
+        <UFormField :label="props.t.imagensDoCaso" :help="props.t.imagensDoCasoDica">
+          <UFileUpload
+            v-model="imagens"
+            multiple
+            accept="image/*"
+            icon="i-lucide-image"
+            :label="props.t.imagensArraste"
+            :description="props.t.imagensFormatos"
+            layout="grid"
+            class="w-full"
+            :ui="{ base: 'min-h-28' }"
+          />
         </UFormField>
         <UFormField :label="props.t.menusDoCaso" required>
           <p v-if="!menusDisponiveis.length" class="text-xs text-muted">{{ props.t.semMenusDoWorkspace }}</p>

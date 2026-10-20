@@ -53,6 +53,13 @@ export interface CasoDeUso {
   categorias: CategoriaDoCaso[]
   /** Status que as telas de triagem usam. */
   status: string[]
+  /**
+   * Rodada 32: os prints da galeria, que quem cria o caso sobe. No protótipo,
+   * cada imagem é um endereço local do navegador (URL.createObjectURL): nada
+   * sai pela rede, e o reload zera. Sem imagem, a galeria desenha a prévia
+   * com o conteúdo do caso (_PreviaDoCaso.vue).
+   */
+  imagens?: { nome: string, url: string }[]
 }
 
 export const AREAS = ['Jurídico', 'Comercial', 'Financeiro', 'Pessoas', 'Compras', 'Atendimento', 'TI', 'Operações'] as const
@@ -294,12 +301,15 @@ export function casoDoMenuAtual(nome: string, menus: NoDoMenu[], rotuloDe: (n: N
     })),
     categorias: [],
     status: [],
+    imagens: extra.imagens,
   }
 }
 
 /** Baixa o arquivo pelo próprio navegador: nada sai pela rede. */
 export function baixarArquivo(arquivo: ArquivoDeCaso) {
-  const blob = new Blob([JSON.stringify(arquivo, null, 2)], { type: 'application/json' })
+  // O endereço local das imagens não vale em outro navegador: no protótipo, elas não vão no arquivo.
+  const semImagens = { ...arquivo, caso: { ...arquivo.caso, imagens: undefined } }
+  const blob = new Blob([JSON.stringify(semImagens, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url

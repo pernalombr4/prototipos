@@ -18,7 +18,8 @@ import type { CasoDeUso } from './casos'
  */
 const props = defineProps<{
   caso: CasoDeUso
-  quadro: 'menu' | 'quadro' | 'ficha' | 'painel'
+  /** Rodada 32: `img:<n>` é o print n que quem criou o caso subiu. */
+  quadro: 'menu' | 'quadro' | 'ficha' | 'painel' | `img:${number}`
   /** Grande: na galeria do detalhe e na ampliação. */
   grande?: boolean
 }>()
@@ -28,10 +29,18 @@ const tons = ['bg-primary/20', 'bg-secondary/20', 'bg-warning/25', 'bg-success/2
 const tela = computed(() => props.caso.menus[0]?.telas[0]?.rotulo ?? props.caso.categorias[0]?.nome ?? props.caso.nome)
 const campos = computed(() => props.caso.categorias[0]?.campos ?? [])
 const alturas = [55, 80, 40, 95, 65, 75]
+const imagem = computed(() => props.quadro.startsWith('img:') ? props.caso.imagens?.[Number(props.quadro.slice(4))] : undefined)
 </script>
 
 <template>
+  <img
+    v-if="imagem"
+    :src="imagem.url"
+    :alt="imagem.nome"
+    class="h-full w-full rounded-md border border-default bg-default object-contain"
+  >
   <div
+    v-else
     class="flex h-full w-full overflow-hidden rounded-md border border-default bg-default text-left"
     :class="props.grande ? 'text-sm lg:text-base' : 'text-[7px]'"
     aria-hidden="true"

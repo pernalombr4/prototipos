@@ -280,6 +280,10 @@ export interface TextosDaTela {
   nomeDoCaso: string
   areaDoCaso: string
   descricaoCampo: string
+  imagensDoCaso: string
+  imagensDoCasoDica: string
+  imagensArraste: string
+  imagensFormatos: string
   menusDoCaso: string
   semMenusDoWorkspace: string
   casoCriado: (n: string) => string
@@ -767,6 +771,10 @@ const ptBR: TextosDaTela = {
   nomeDoCaso: 'Nome',
   areaDoCaso: 'Área',
   descricaoCampo: 'Descrição',
+  imagensDoCaso: 'Imagens da galeria',
+  imagensDoCasoDica: 'A primeira imagem é a capa do caso. Sem imagem, a galeria mostra a prévia montada com os menus.',
+  imagensArraste: 'Arraste os prints aqui ou clique para escolher',
+  imagensFormatos: 'PNG, JPG ou GIF',
   menusDoCaso: 'Menus que entram',
   semMenusDoWorkspace: 'O workspace ainda não criou menus. Crie um pelo "+" do Início e volte aqui.',
   casoCriado: n => `${n} está em Do seu workspace.`,
@@ -1297,6 +1305,10 @@ const en: TextosDaTela = {
   nomeDoCaso: 'Name',
   areaDoCaso: 'Area',
   descricaoCampo: 'Description',
+  imagensDoCaso: 'Gallery images',
+  imagensDoCasoDica: 'The first image is the cover of the use case. With no image, the gallery shows a preview built from the menus.',
+  imagensArraste: 'Drop screenshots here or click to choose',
+  imagensFormatos: 'PNG, JPG or GIF',
   menusDoCaso: 'Menus included',
   semMenusDoWorkspace: 'The workspace has not created menus yet. Create one from the Home "+" and come back.',
   casoCriado: n => `${n} is in From your workspace.`,
@@ -1827,6 +1839,10 @@ const es: TextosDaTela = {
   nomeDoCaso: 'Nombre',
   areaDoCaso: 'Área',
   descricaoCampo: 'Descripción',
+  imagensDoCaso: 'Imágenes de la galería',
+  imagensDoCasoDica: 'La primera imagen es la portada del caso. Sin imagen, la galería muestra la vista previa armada con los menús.',
+  imagensArraste: 'Arrastra las capturas aquí o haz clic para elegir',
+  imagensFormatos: 'PNG, JPG o GIF',
   menusDoCaso: 'Menús incluidos',
   semMenusDoWorkspace: 'El workspace todavía no creó menús. Crea uno desde el "+" de Inicio y vuelve aquí.',
   casoCriado: n => `${n} está en De tu workspace.`,

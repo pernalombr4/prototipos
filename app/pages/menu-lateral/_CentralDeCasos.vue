@@ -97,8 +97,12 @@ function limpar() {
 
 /* ------------------------------ o detalhe ------------------------------ */
 
-/** Os quadros da galeria: só os que o caso tem. */
+/**
+ * Os quadros da galeria: os prints que quem criou o caso subiu (rodada 32) ou,
+ * sem print, a prévia montada com o que o caso tem.
+ */
 function quadrosDe(c: CasoDeUso) {
+  if (c.imagens?.length) return c.imagens.map((_, i) => `img:${i}` as const)
   const q: ('menu' | 'quadro' | 'ficha' | 'painel')[] = ['menu']
   if (c.status.length) q.push('quadro')
   if (c.categorias.length) q.push('ficha')
@@ -276,7 +280,7 @@ function data(iso: string) {
                   :style="{ animation: `entrada 0.25s ease-out ${i * 30}ms both` }"
                   @click="aberto = c"
                 >
-                  <div class="h-32 bg-elevated/60 p-2.5"><PreviaDoCaso :caso="c" quadro="menu" /></div>
+                  <div class="h-32 bg-elevated/60 p-2.5"><PreviaDoCaso :caso="c" :quadro="c.imagens?.length ? 'img:0' : 'menu'" /></div>
                   <div class="flex items-center gap-2 border-t border-default px-3 py-2.5">
                     <UIcon :name="c.icone" class="size-4 shrink-0 text-primary" />
                     <span class="min-w-0 flex-1 truncate text-sm font-medium text-highlighted">{{ c.nome }}</span>
@@ -313,7 +317,7 @@ function data(iso: string) {
                   :style="{ animation: `entrada 0.25s ease-out ${i * 30}ms both` }"
                   @click="aberto = c"
                 >
-                  <div class="h-32 bg-elevated/60 p-2.5"><PreviaDoCaso :caso="c" quadro="menu" /></div>
+                  <div class="h-32 bg-elevated/60 p-2.5"><PreviaDoCaso :caso="c" :quadro="c.imagens?.length ? 'img:0' : 'menu'" /></div>
                   <div class="flex items-center gap-2 border-t border-default px-3 py-2.5">
                     <UIcon :name="c.icone" class="size-4 shrink-0 text-primary" />
                     <span class="min-w-0 flex-1 truncate text-sm font-medium text-highlighted">{{ c.nome }}</span>
@@ -378,7 +382,7 @@ function data(iso: string) {
                         :key="q"
                         type="button"
                         class="size-2 rounded-full transition-colors"
-                        :class="i === quadroAtual ? 'bg-highlighted' : 'bg-accented'"
+                        :class="i === quadroAtual ? 'bg-highlighted' : 'bg-inverted/25'"
                         :aria-label="props.t.imagemDe(i + 1, quadrosDe(aberto).length)"
                         :aria-current="i === quadroAtual ? 'true' : undefined"
                         @click="quadroAtual = i"
