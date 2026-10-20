@@ -389,6 +389,16 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 27 · 2026-10-20
+- **Pedido (literal):** "nao precisa deletar, mas pode esconder do prototipo o 'barra unica', bloqueando o clique nesse botao e fazendo sempre abrir por padrao no modo de trilha."
+- **Pedido (literal):** "divida esse desenvolvimento em fases lógicas de implementaçao, pra ajudar o dev num escopo tao grande. [...] divida e faça o doc de requisitos pra cada uma das fases. nao será lançado para o cliente ate acabar"
+- **Pedido (literal):** "filtro no menu por TELA nao faz mais sentido. pode botar pro dev sugerir algo que tenha lógica."
+- **Mudou:** o protótipo abre no modelo "Trilha e painel". O botão "Barra única" do andaime fica à vista, mas desligado, com o tooltip "Fora da proposta. O protótipo segue com a trilha.". O código da barra única continua no repositório.
+- **Mudou:** os requisitos, em 6 fases de front-end, na pasta [`requisitos/`](requisitos/fases.md): 1, trilha e painel; 2, conteúdo do menu; 3, personalização; 4, arrumar o menu do workspace; 5, criar; 6, casos de uso e importação. Cada fase parte da anterior e termina num estado que o QA confere em develop; nada vai para o cliente antes da fase 6.
+- **Mudou:** no requisito do filtro por tipo (fase 3, RF238 e P201), "Telas" saiu. Ficam "Categorias" e "Com pendências", e o dev propõe um terceiro tipo que faça sentido no menu novo. O protótipo continua mostrando a opção antiga até essa resposta.
+- **Não mudou:** nenhuma tela do modelo de trilha.
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral · os requisitos começam em `requisitos/fases.md`
+
 ### Rodada 26 · 2026-10-20
 - **Pedido (literal):** "o menu de integraçoes nao deve ser reordenavel, assim como nenhum de configuraçoes"
 - **Mudou:** Integrações tem ordem fixa, como Configurações. Apps, Credenciais e Webhooks não sobem, não descem, não saem para outra seção, e nada entra em Integrações.

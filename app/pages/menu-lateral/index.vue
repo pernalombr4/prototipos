@@ -187,7 +187,10 @@ const recorte = computed(() => {
    dois convivem aqui para a comparação. A pesquisa que sustenta a escolha
    está no PESQUISA.md, secção "Trilha de icones".
 ------------------------------------------------------------------ */
-const modelo = ref<'barra' | 'trilha'>('barra')
+// Rodada 27: o protótipo abre sempre na trilha. A barra única fica no código,
+// sem apagar, mas o botão dela no andaime está travado: "nao precisa deletar,
+// mas pode esconder do prototipo o 'barra unica'" (Mikaela, 20/10/2026).
+const modelo = ref<'barra' | 'trilha'>('trilha')
 
 /* ---------------------------- navegação ---------------------------- */
 const painel = ref<'trabalho' | 'config'>('trabalho')
@@ -933,16 +936,20 @@ function emBreve() {
         <span class="ml-2 mr-0.5 text-xs font-semibold uppercase tracking-wider text-muted">
           {{ t.modeloRotulo }}
         </span>
-        <UButton
-          v-for="m in [{ v: 'barra', r: t.modeloBarra }, { v: 'trilha', r: t.modeloTrilha }]"
-          :key="m.v"
-          :label="m.r"
-          size="xs"
-          class="transition-transform hover:-translate-y-0.5"
-          :color="modelo === m.v ? 'primary' : 'neutral'"
-          :variant="modelo === m.v ? 'solid' : 'subtle'"
-          @click="modelo = m.v as 'barra' | 'trilha'"
-        />
+        <UTooltip v-for="m in [{ v: 'barra', r: t.modeloBarra }, { v: 'trilha', r: t.modeloTrilha }]" :key="m.v" :text="m.v === 'barra' ? t.modeloBarraTravado : undefined" :disabled="m.v !== 'barra'">
+          <!-- O span segura o tooltip: botão desligado não recebe o hover. -->
+          <span>
+            <UButton
+              :label="m.r"
+              size="xs"
+              class="transition-transform enabled:hover:-translate-y-0.5"
+              :color="modelo === m.v ? 'primary' : 'neutral'"
+              :variant="modelo === m.v ? 'solid' : 'subtle'"
+              :disabled="m.v === 'barra'"
+              @click="modelo = m.v as 'barra' | 'trilha'"
+            />
+          </span>
+        </UTooltip>
 
         <UButton
           :label="vendoHoje ? t.compararFechar : t.compararAbrir"

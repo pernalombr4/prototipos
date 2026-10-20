@@ -483,6 +483,7 @@ export interface TextosDaTela {
   hojeRodape: string
   modeloBarra: string
   modeloTrilha: string
+  modeloBarraTravado: string
   modeloRotulo: string
   propostaTitulo: string
   propostaLegenda: string
@@ -1000,6 +1001,7 @@ const ptBR: TextosDaTela = {
   hojeRodape: 'Cada categoria com menu automático soma mais uma linha, e mais uma por formulário quando expandida. Cada seção do workspace soma uma mais os itens dela.',
   modeloBarra: 'Barra única',
   modeloTrilha: 'Trilha e painel',
+  modeloBarraTravado: 'Fora da proposta. O protótipo segue com a trilha.',
   modeloRotulo: 'Modelo',
   propostaTitulo: 'A proposta',
   propostaLegenda: 'Dois níveis. A administração continua no mesmo endereço, mas abre no lugar do menu em vez de morar dentro dele.',
@@ -1517,6 +1519,7 @@ const en: TextosDaTela = {
   hojeRodape: 'Each category with the automatic menu adds one more row, plus one per form when expanded. Each workspace section adds one plus its items.',
   modeloBarra: 'Single sidebar',
   modeloTrilha: 'Rail and panel',
+  modeloBarraTravado: 'Out of the proposal. The prototype follows the rail.',
   modeloRotulo: 'Model',
   propostaTitulo: 'The proposal',
   propostaLegenda: 'Two levels. Administration keeps the same address, but opens in place of the menu instead of living inside it.',
@@ -2034,6 +2037,7 @@ const es: TextosDaTela = {
   hojeRodape: 'Cada categoría con el menú automático suma una fila más, y otra por formulario cuando se expande. Cada sección del workspace suma una más sus elementos.',
   modeloBarra: 'Barra única',
   modeloTrilha: 'Riel y panel',
+  modeloBarraTravado: 'Fuera de la propuesta. El prototipo sigue con el riel.',
   modeloRotulo: 'Modelo',
   propostaTitulo: 'La propuesta',
   propostaLegenda: 'Dos niveles. La administración mantiene la misma dirección, pero se abre en lugar del menú en vez de vivir dentro de él.',
