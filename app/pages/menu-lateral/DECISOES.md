@@ -389,6 +389,14 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 24 · 2026-10-20
+- **Pedido (literal):** "os submenus tambem devem poder ser reordenados, tipo esses de logs" (print da seção pessoal "Rotina do jurídico", com o menu Auditoria aberto e "Logs de auditoria" e "Logs de requisição" embaixo)
+- **O defeito:** na seção pessoal do Início, as telas de um menu aberto (o terceiro recuo) eram a única linha do menu sem arraste e sem menu de ações. Os outros lugares sem arraste são de propósito: favoritos não têm ordem própria, e os itens de Configurações são fixos.
+- **Mudou:** essas telas agora se reordenam pelos 3 caminhos do resto do menu: arrastar, Alt mais seta, e "Mover para cima" ou "Mover para baixo" no botão direito e no "⋯".
+- **Mudou:** elas também ganharam o menu de ações das outras telas (abrir, abrir em nova aba, copiar link, mover, mover para, ocultar) e a bolinha amarela de alteração não salva.
+- **A regra, igual à das telas de uma seção do administrador:** as telas são as do menu do workspace, então a ordem nova muda a árvore e passa pelo cartão "Salvar para todos" ou "Salvar só para mim". Só quem configura o workspace arrasta, como no resto do menu.
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral, modelo "Trilha e painel", seção "Rotina do jurídico" · print em `evidencias/rodada24-submenus-reordenados.jpg` ("Logs de requisição" subiu, com a bolinha amarela, e o cartão de salvar apareceu)
+
 ### Rodada 23 · 2026-10-14
 - **Pedido (literal):** "quando clicar com o botao direito em um elemento da trilha o que deve acontecer? porque nao ta acontecendo nada hoje. abre o menu do navegador" e, com um print do Teams, "no teams é assim, por exemplo, ao clicar com botao direito num icone da trilha"
 - **O defeito:** o menu do botão direito da trilha (rodada 14) existia, mas só abria no ícone da área encaixada. Nos outros, o botão direito caía no menu do navegador. O `UContextMenu` do Nuxt UI entrega o evento ao filho, e o filho era o `UPopover` do hover, que não repassa o evento ao botão. O ícone encaixado usa `UTooltip`, que repassa, e por isso funcionava. A barra recolhida tinha o mesmo defeito nos ícones que abrem lista ao lado (`UDropdownMenu`).

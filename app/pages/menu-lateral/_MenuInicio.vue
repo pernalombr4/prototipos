@@ -786,7 +786,13 @@ function adicionando(id: string) {
             @arrastar-fim="arraste.terminar()"
             @mover="p => acoesDoAtalho(s.id, r)[1]?.find(x => x.icon === (p < 0 ? 'i-lucide-arrow-up' : 'i-lucide-arrow-down'))?.onSelect?.(new Event('select'))"
           />
-          <!-- O menu aberto: as telas dele, no terceiro recuo. -->
+          <!--
+            O menu aberto: as telas dele, no terceiro recuo.
+            Rodada 24: "os submenus tambem devem poder ser reordenados". As
+            telas são as do menu do workspace, então reordenar aqui é o mesmo
+            gesto das telas de uma seção do administrador: muda a árvore, ganha
+            a bolinha amarela e o cartão de salvar, e só quem configura arrasta.
+          -->
           <template v-if="r.filhos && aberta(chaveDoMenu(s.id, r.chave))">
             <LinhaDeMenu
               v-for="(f, j) in r.filhos"
@@ -797,7 +803,20 @@ function adicionando(id: string) {
               :selo="f.emBreve ? props.t.emBreve : undefined"
               :ativo="props.destinoAtivo === f.id"
               :atraso="j * 20"
+              :alterado="menu.tocados.value.includes(f.id)"
+              :dica-alterado="props.t.pontoAlterado"
+              :acoes="props.flutuante ? undefined : acoes.daLinha(f, r.filhos.map(x => x.id))"
+              :com-reticencias="!props.flutuante"
+              :rotulo-reticencias="props.t.maisAcoes(rotuloDe(f))"
+              :arrastavel="podeArrastar && props.podeConfigurar"
+              :saindo="arraste.arrastando.value === f.id"
+              :marca="marcaDe(f.id) === 'dentro' ? null : marcaDe(f.id)"
               @selecionar="emit('destino', f.id)"
+              @arrastar-inicio="arraste.comecar(f.id)"
+              @arrastar-sobre="p => arraste.mirar(f.id, p)"
+              @soltar="p => largarNaArvore(f.id, p)"
+              @arrastar-fim="arraste.terminar()"
+              @mover="p => menu.mover(f.id, p)"
             />
           </template>
         </template>
