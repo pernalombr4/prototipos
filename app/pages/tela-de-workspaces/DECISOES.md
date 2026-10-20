@@ -134,6 +134,17 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 26 · 2026-10-20
+
+- **Pedido (literal):** "Endereço do workspace: enspace.io/fdgdf Não dá para mudar depois de criar. O nome,
+  sim. TA RIDICULO ESSE TEXTO. ESCREVE DE MODO MAIS FORMAL"
+- **Mudou (registro formal, nos 3 idiomas):**
+  - callout: "Após a criação do workspace, a referência e o endereço não podem ser alterados. O nome pode ser
+    alterado a qualquer momento.";
+  - ajuda da Referência: "Gerada a partir do nome. Aceita apenas letras minúsculas, números e hífens.";
+  - ajuda do nome, no mesmo tom: "É o nome que a sua equipe vai procurar na lista. Pode ser alterado depois."
+- **Fronteira:** muda só o texto; o callout e os campos ficam onde estavam.
+
 ### Rodada 25 · 2026-10-20
 
 - **Pedido (literal):** "o preview do endereço do workspace deve continuar aparecendo num callout logo abaixo
