@@ -103,3 +103,4 @@ Ficou sem correção: o cálculo automático de contraste não leu as cores do t
 - **Fronteira:** acrescenta 1 item no menu, 1 atalho e 1 tela; não muda as outras telas.
 - **Também:** 2 textos passaram a registro formal ("Esta ação não pode ser desfeita.", "não é possível criá-lo sem ele").
 - **Maquete:** convite, reenvio e "Ver no registro de auditoria" só mostram o aviso; o papel muda na hora, sem confirmação.
+- **Ver:** https://pernalombr4.github.io/prototipos/seguranca-no-admin/?tela=admins · [lista](evidencias/proposta-administradores.jpg) · [papéis e permissões](evidencias/proposta-administradores-papeis.jpg)
