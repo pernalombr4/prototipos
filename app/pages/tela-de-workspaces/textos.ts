@@ -159,9 +159,7 @@ export interface TextosDaTela {
     nomePlaceholder: string
     tamanhoNome: string
     nomeCurto: string
-    enderecoDoWorkspace: string
-    detalhesOpcionais: string
-    opcional: string
+    nome: string
     escolherIdentidade: string
     cor: string
     iniciais: string
@@ -182,17 +180,50 @@ export interface TextosDaTela {
     descricao: string
     descricaoAjuda: (n: number) => string
     descricaoPlaceholder: string
-    endereco: string
-    enderecoAjuda: string
+    referencia: string
+    referenciaPlaceholder: string
+    referenciaAjuda: string
     querModelo: string
     modeloAjuda: string
-    modelosDe: string
-    doZero: string
-    doZeroAjuda: string
-    semModelo: string
-    semModeloAjuda: string
+    centralTitulo: string
+    destaques: string
+    doEnspace: string
+    localidade: string
+    localidades: Record<'pt-br' | 'en-us' | 'global', string>
+    complexidade: string
+    complexidades: Record<'iniciante' | 'intermediario' | 'avancado', string>
+    buscarCasos: string
+    areasRotulo: string
+    buscarAreas: string
+    selecionarTudo: string
+    bannerZeroTitulo: string
+    bannerZero: string
+    criarDoZero: string
+    emDestaque: string
+    verMaisN: (n: number) => string
+    verMenos: string
+    nenhumCaso: string
+    nenhumCasoAjuda: string
+    limparFiltros: string
+    anterior: string
+    proxima: string
+    imagemDe: (a: number, b: number) => string
+    descricaoDoCaso: string
+    oQueVemJunto: string
+    incluiMenus: string
+    incluiCategorias: string
+    incluiStatus: string
+    nMenusTelas: (m: number, t: number) => string
+    nCategoriasCampos: (c: number, f: number) => string
+    nStatus: (n: number) => string
+    verificado: string
+    peloEnspace: string
+    peloEnspaceDica: string
+    criadoEmRotulo: string
+    usadoRotulo: string
+    vezes: (n: string) => string
+    rodapeCentral: string
     comoVaiAparecer: string
-    jaVemCom: string
     nomeDoWorkspace: string
     semDescricao: string
     aindaNaoEntrou: string
@@ -356,9 +387,7 @@ export const textos: Record<Idioma, TextosDaTela> = {
       nomePlaceholder: 'Jurídico Aurora, Vértice Log, RH…',
       tamanhoNome: 'De 3 a 50 caracteres.',
       nomeCurto: 'Pelo menos 3 caracteres.',
-      enderecoDoWorkspace: 'Endereço do workspace',
-      detalhesOpcionais: 'Descrição e endereço',
-      opcional: '(opcional)',
+      nome: 'Nome',
       escolherIdentidade: 'Escolher o logo ou o ícone do workspace',
       cor: 'Cor',
       iniciais: 'Iniciais',
@@ -379,17 +408,50 @@ export const textos: Record<Idioma, TextosDaTela> = {
       descricao: 'Descrição',
       descricaoAjuda: n => `Uma frase dizendo para que serve. ${n}/140`,
       descricaoPlaceholder: 'Ex.: Chamados, RH e jurídico do Grupo Aurora',
-      endereco: 'Endereço',
-      enderecoAjuda: 'Vem do nome. Mude só se precisar de um endereço específico.',
-      querModelo: 'Quer começar de um modelo?',
-      modeloAjuda: 'Um modelo já traz categorias, formulários e fluxos prontos. Dá para mudar tudo depois.',
-      modelosDe: 'Modelos de',
-      doZero: 'Começar do zero',
-      doZeroAjuda: 'Um workspace vazio, montado por você. É o caminho mais comum.',
-      semModelo: 'Nenhum modelo para essa localidade',
-      semModeloAjuda: 'Escolha outra acima, ou comece do zero: você não perde nada.',
+      referencia: 'Referência',
+      referenciaPlaceholder: 'grupo-aurora',
+      referenciaAjuda: 'Identifica o workspace no endereço. Vem do nome; mude só se precisar. Endereço:',
+      querModelo: 'Quer começar de um caso de uso?',
+      modeloAjuda: 'Um caso de uso já traz menus, categorias e status prontos. Dá para mudar tudo depois.',
+      centralTitulo: 'Casos de uso',
+      destaques: 'Destaques',
+      doEnspace: 'Do ENSPACE',
+      localidade: 'Localidade',
+      localidades: { 'pt-br': 'Brasil', 'en-us': 'Estados Unidos', 'global': 'Global' },
+      complexidade: 'Complexidade',
+      complexidades: { iniciante: 'Iniciante', intermediario: 'Intermediário', avancado: 'Avançado' },
+      buscarCasos: 'Buscar casos de uso',
+      areasRotulo: 'Áreas',
+      buscarAreas: 'Buscar área',
+      selecionarTudo: 'Selecionar tudo',
+      bannerZeroTitulo: 'Prefere começar do zero?',
+      bannerZero: 'Um workspace vazio, montado por você. É o caminho mais comum.',
+      criarDoZero: 'Criar do zero',
+      emDestaque: 'Em destaque',
+      verMaisN: n => `Ver mais ${n}`,
+      verMenos: 'Ver menos',
+      nenhumCaso: 'Nenhum caso de uso com esses filtros',
+      nenhumCasoAjuda: 'Mude os filtros ou comece do zero: você não perde nada.',
+      limparFiltros: 'Limpar filtros',
+      anterior: 'Imagem anterior',
+      proxima: 'Próxima imagem',
+      imagemDe: (a, b) => `Imagem ${a} de ${b}`,
+      descricaoDoCaso: 'Descrição',
+      oQueVemJunto: 'O que vem junto',
+      incluiMenus: 'Menus e telas',
+      incluiCategorias: 'Categorias e campos',
+      incluiStatus: 'Status',
+      nMenusTelas: (m, tl) => `${m} ${m === 1 ? 'menu' : 'menus'} e ${tl} ${tl === 1 ? 'tela' : 'telas'}`,
+      nCategoriasCampos: (c, f) => `${c} ${c === 1 ? 'categoria' : 'categorias'} e ${f} campos`,
+      nStatus: n => `${n} status`,
+      verificado: 'Verificado',
+      peloEnspace: 'Feito pelo ENSPACE',
+      peloEnspaceDica: 'Revisado pelo time do ENSPACE.',
+      criadoEmRotulo: 'Criado em',
+      usadoRotulo: 'Usado',
+      vezes: n => `${n} vezes`,
+      rodapeCentral: 'Escolha um caso de uso ou comece do zero.',
       comoVaiAparecer: 'Como vai aparecer na sua lista',
-      jaVemCom: 'Já vem com',
       nomeDoWorkspace: 'Nome do workspace',
       semDescricao: 'Sem descrição',
       aindaNaoEntrou: 'Você ainda não entrou aqui',
@@ -552,9 +614,7 @@ export const textos: Record<Idioma, TextosDaTela> = {
       nomePlaceholder: 'Aurora Legal, Vertice Log, HR\u2026',
       tamanhoNome: 'From 3 to 50 characters.',
       nomeCurto: 'At least 3 characters.',
-      enderecoDoWorkspace: 'Workspace address',
-      detalhesOpcionais: 'Description and address',
-      opcional: '(optional)',
+      nome: 'Name',
       escolherIdentidade: 'Choose the workspace logo or icon',
       cor: 'Color',
       iniciais: 'Initials',
@@ -575,17 +635,50 @@ export const textos: Record<Idioma, TextosDaTela> = {
       descricao: 'Description',
       descricaoAjuda: n => `One sentence saying what it is for. ${n}/140`,
       descricaoPlaceholder: 'E.g.: Tickets, HR and legal for Grupo Aurora',
-      endereco: 'Address',
-      enderecoAjuda: 'Comes from the name. Change it only if you need a specific address.',
-      querModelo: 'Want to start from a template?',
-      modeloAjuda: 'A template comes with categories, forms and flows ready. You can change everything later.',
-      modelosDe: 'Templates from',
-      doZero: 'Start from scratch',
-      doZeroAjuda: 'An empty workspace, built by you. This is the most common path.',
-      semModelo: 'No template for this locale',
-      semModeloAjuda: 'Pick another one above, or start from scratch: you lose nothing.',
+      referencia: 'Reference',
+      referenciaPlaceholder: 'grupo-aurora',
+      referenciaAjuda: 'Identifies the workspace in its address. It comes from the name; change it only if needed. Address:',
+      querModelo: 'Want to start from a use case?',
+      modeloAjuda: 'A use case comes with menus, categories and statuses ready. You can change everything later.',
+      centralTitulo: 'Use cases',
+      destaques: 'Featured',
+      doEnspace: 'From ENSPACE',
+      localidade: 'Locale',
+      localidades: { 'pt-br': 'Brazil', 'en-us': 'United States', 'global': 'Global' },
+      complexidade: 'Complexity',
+      complexidades: { iniciante: 'Beginner', intermediario: 'Intermediate', avancado: 'Advanced' },
+      buscarCasos: 'Search use cases',
+      areasRotulo: 'Areas',
+      buscarAreas: 'Search area',
+      selecionarTudo: 'Select all',
+      bannerZeroTitulo: 'Rather start from scratch?',
+      bannerZero: 'An empty workspace, built by you. This is the most common path.',
+      criarDoZero: 'Start from scratch',
+      emDestaque: 'Featured',
+      verMaisN: n => `See ${n} more`,
+      verMenos: 'See less',
+      nenhumCaso: 'No use case matches these filters',
+      nenhumCasoAjuda: 'Change the filters or start from scratch: you lose nothing.',
+      limparFiltros: 'Clear filters',
+      anterior: 'Previous image',
+      proxima: 'Next image',
+      imagemDe: (a, b) => `Image ${a} of ${b}`,
+      descricaoDoCaso: 'Description',
+      oQueVemJunto: 'What comes with it',
+      incluiMenus: 'Menus and screens',
+      incluiCategorias: 'Categories and fields',
+      incluiStatus: 'Statuses',
+      nMenusTelas: (m, tl) => `${m} ${m === 1 ? 'menu' : 'menus'} and ${tl} ${tl === 1 ? 'screen' : 'screens'}`,
+      nCategoriasCampos: (c, f) => `${c} ${c === 1 ? 'category' : 'categories'} and ${f} fields`,
+      nStatus: n => `${n} ${n === 1 ? 'status' : 'statuses'}`,
+      verificado: 'Verified',
+      peloEnspace: 'Made by ENSPACE',
+      peloEnspaceDica: 'Reviewed by the ENSPACE team.',
+      criadoEmRotulo: 'Created on',
+      usadoRotulo: 'Used',
+      vezes: n => `${n} times`,
+      rodapeCentral: 'Pick a use case or start from scratch.',
       comoVaiAparecer: 'How it will look in your list',
-      jaVemCom: 'Comes with',
       nomeDoWorkspace: 'Workspace name',
       semDescricao: 'No description',
       aindaNaoEntrou: 'You haven\u2019t been here yet',
@@ -748,9 +841,7 @@ export const textos: Record<Idioma, TextosDaTela> = {
       nomePlaceholder: 'Jurídico Aurora, Vértice Log, RR. HH.\u2026',
       tamanhoNome: 'De 3 a 50 caracteres.',
       nomeCurto: 'Al menos 3 caracteres.',
-      enderecoDoWorkspace: 'Dirección del workspace',
-      detalhesOpcionais: 'Descripción y dirección',
-      opcional: '(opcional)',
+      nome: 'Nombre',
       escolherIdentidade: 'Elegir el logo o el icono del workspace',
       cor: 'Color',
       iniciais: 'Iniciales',
@@ -771,17 +862,50 @@ export const textos: Record<Idioma, TextosDaTela> = {
       descricao: 'Descripción',
       descricaoAjuda: n => `Una frase que diga para qué sirve. ${n}/140`,
       descricaoPlaceholder: 'Ej.: Tickets, RR. HH. y jurídico del Grupo Aurora',
-      endereco: 'Dirección',
-      enderecoAjuda: 'Viene del nombre. Cámbiala solo si necesitas una dirección específica.',
-      querModelo: '\u00bfQuieres empezar con una plantilla?',
-      modeloAjuda: 'Una plantilla ya trae categorías, formularios y flujos listos. Se puede cambiar todo después.',
-      modelosDe: 'Plantillas de',
-      doZero: 'Empezar desde cero',
-      doZeroAjuda: 'Un workspace vacío, armado por ti. Es el camino más común.',
-      semModelo: 'Ninguna plantilla para esta localidad',
-      semModeloAjuda: 'Elige otra arriba, o empieza desde cero: no pierdes nada.',
+      referencia: 'Referencia',
+      referenciaPlaceholder: 'grupo-aurora',
+      referenciaAjuda: 'Identifica el workspace en la dirección. Viene del nombre; cámbiala solo si hace falta. Dirección:',
+      querModelo: '\u00bfQuieres empezar con un caso de uso?',
+      modeloAjuda: 'Un caso de uso ya trae menús, categorías y estados listos. Se puede cambiar todo después.',
+      centralTitulo: 'Casos de uso',
+      destaques: 'Destacados',
+      doEnspace: 'De ENSPACE',
+      localidade: 'Localidad',
+      localidades: { 'pt-br': 'Brasil', 'en-us': 'Estados Unidos', 'global': 'Global' },
+      complexidade: 'Complejidad',
+      complexidades: { iniciante: 'Principiante', intermediario: 'Intermedio', avancado: 'Avanzado' },
+      buscarCasos: 'Buscar casos de uso',
+      areasRotulo: 'Áreas',
+      buscarAreas: 'Buscar área',
+      selecionarTudo: 'Seleccionar todo',
+      bannerZeroTitulo: '\u00bfPrefieres empezar desde cero?',
+      bannerZero: 'Un workspace vacío, armado por ti. Es el camino más común.',
+      criarDoZero: 'Crear desde cero',
+      emDestaque: 'Destacados',
+      verMaisN: n => `Ver ${n} más`,
+      verMenos: 'Ver menos',
+      nenhumCaso: 'Ningún caso de uso con estos filtros',
+      nenhumCasoAjuda: 'Cambia los filtros o empieza desde cero: no pierdes nada.',
+      limparFiltros: 'Limpiar filtros',
+      anterior: 'Imagen anterior',
+      proxima: 'Imagen siguiente',
+      imagemDe: (a, b) => `Imagen ${a} de ${b}`,
+      descricaoDoCaso: 'Descripción',
+      oQueVemJunto: 'Qué incluye',
+      incluiMenus: 'Menús y pantallas',
+      incluiCategorias: 'Categorías y campos',
+      incluiStatus: 'Estados',
+      nMenusTelas: (m, tl) => `${m} ${m === 1 ? 'menú' : 'menús'} y ${tl} ${tl === 1 ? 'pantalla' : 'pantallas'}`,
+      nCategoriasCampos: (c, f) => `${c} ${c === 1 ? 'categoría' : 'categorías'} y ${f} campos`,
+      nStatus: n => `${n} ${n === 1 ? 'estado' : 'estados'}`,
+      verificado: 'Verificado',
+      peloEnspace: 'Hecho por ENSPACE',
+      peloEnspaceDica: 'Revisado por el equipo de ENSPACE.',
+      criadoEmRotulo: 'Creado el',
+      usadoRotulo: 'Usado',
+      vezes: n => `${n} veces`,
+      rodapeCentral: 'Elige un caso de uso o empieza desde cero.',
       comoVaiAparecer: 'Cómo se verá en tu lista',
-      jaVemCom: 'Ya incluye',
       nomeDoWorkspace: 'Nombre del workspace',
       semDescricao: 'Sin descripción',
       aindaNaoEntrou: 'Todavía no has entrado aquí',

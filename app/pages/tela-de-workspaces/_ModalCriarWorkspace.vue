@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { localidades, templates, type Template } from './mocks'
+import type { CasoDeUso } from './mocks'
+import CentralDeCasos from './_CentralDeCasos.vue'
 import { textos } from './textos'
 import { biblioteca, curadoria, totalDeIcones } from './icones'
 
@@ -31,7 +32,6 @@ const form = reactive({
   /** Logo enviado pela empresa. Ganha do ícone quando existe. */
   logo: null as string | null,
   logoNome: '',
-  template: 'zero',
 })
 
 /** O campo do produto chama "Ícone", mas aceita a identidade da empresa —
@@ -107,19 +107,15 @@ function removerLogo() {
   identidade.value = 'icone'
 }
 const referenciaEditada = ref(false)
-const detalhesAbertos = ref(false)
-const locaisSelecionados = ref<string[]>(['pt-br'])
 const criando = ref(false)
 
 watch(aberto, (v) => {
   if (!v) return
   passo.value = 1
   referenciaEditada.value = false
-  detalhesAbertos.value = false
   buscaIcone.value = ''
-  locaisSelecionados.value = ['pt-br']
   removerLogo()
-  Object.assign(form, { nome: '', referencia: '', descricao: '', icone: '', logo: null, logoNome: '', template: 'zero' })
+  Object.assign(form, { nome: '', referencia: '', descricao: '', icone: '', logo: null, logoNome: '' })
   identidade.value = 'iniciais'
   corEscolhida.value = null
 })
@@ -221,18 +217,12 @@ const iconeSugerido = computed(() => {
 /** O que aparece no card: o escolhido, ou o sugerido pelo nome. */
 const iconeEfetivo = computed(() => form.icone || iconeSugerido.value)
 
-/* ---------------------------- templates ---------------------------- */
-const templatesDisponiveis = computed<Template[]>(() =>
-  templates.filter(t => t.localidades.some(l => locaisSelecionados.value.includes(l))))
-
-const templateEscolhido = computed(() =>
-  templates.find(t => t.id === form.template))
-
 /* ---------------------------- validação ---------------------------- */
 const nomeCurto = computed(() => form.nome.trim().length > 0 && form.nome.trim().length < 3)
 const podeAvancar = computed(() => form.nome.trim().length >= 3)
 
-function criar() {
+/** Rodada 24: cria do zero (caso null) ou com o caso de uso escolhido na central. */
+function criar(_caso: CasoDeUso | null = null) {
   criando.value = true
   setTimeout(() => {
     criando.value = false
@@ -243,9 +233,21 @@ function criar() {
 </script>
 
 <template>
-  <UModal v-model:open="aberto" :ui="{ content: 'max-w-4xl' }">
+  <UModal
+    v-model:open="aberto"
+    :ui="{ content: passo === 2 ? 'max-w-6xl sm:max-w-6xl h-[88vh] overflow-hidden' : 'max-w-4xl' }"
+  >
     <template #content>
-      <div class="grid md:grid-cols-[1fr_20rem]">
+      <!-- Rodada 24: o passo 2 é a Central de casos de uso, com a cara da
+           central do protótipo menu-lateral. -->
+      <CentralDeCasos
+        v-if="passo === 2"
+        :t="t.criar"
+        :criando="criando"
+        @voltar="passo = 1"
+        @criar="criar"
+      />
+      <div v-else class="grid md:grid-cols-[1fr_20rem]">
         <!-- ------------------------- coluna das decisões ------------------------- -->
         <div class="p-6 sm:p-8">
           <!-- progresso: duas decisões, e a pessoa vê onde está -->
@@ -276,8 +278,11 @@ function criar() {
               </p>
 
               <!-- Identidade e nome juntos: é o par que aparece no card, e o
-                   logo deixa de ficar escondido atrás de "opcional". -->
-              <div class="mt-5 flex items-center gap-3">
+                   logo deixa de ficar escondido atrás de "opcional".
+                   Rodada 24: o nome leva o * vermelho de obrigatório do produto
+                   (prop required do UFormField); os outros campos, não. -->
+              <UFormField :label="t.criar.nome" required class="mt-5">
+              <div class="flex items-center gap-3">
                 <UPopover :content="{ align: 'start' }">
                   <button
                     type="button"
@@ -520,201 +525,56 @@ function criar() {
               <p class="mt-2 h-4 text-xs" :class="nomeCurto ? 'text-error' : 'text-muted'">
                 {{ nomeCurto ? t.criar.nomeCurto : t.criar.tamanhoNome }}
               </p>
+              </UFormField>
 
-              <!-- Endereço: consequência do nome, mostrada como endereço mesmo -->
-              <div
-                v-if="form.nome.length >= 3"
-                class="mt-5 animate-[entrada_0.3s_ease-out_both] rounded-lg border border-default bg-elevated/40 px-4 py-3"
-              >
-                <p class="text-xs font-medium text-muted">
-                  {{ t.criar.enderecoDoWorkspace }}
-                </p>
-                <p class="mt-1 font-mono text-sm text-muted">
-                  enspace.io/<span class="text-primary-700 dark:text-primary-300">{{ form.referencia || '…' }}</span>
-                </p>
-              </div>
-
-              <!-- Tudo o que não precisa ser decidido agora fica aqui -->
-              <button
-                type="button"
-                class="mt-6 flex items-center gap-1.5 text-sm font-medium text-muted transition-colors hover:text-highlighted"
-                @click="detalhesAbertos = !detalhesAbertos"
-              >
-                <UIcon
-                  name="i-lucide-chevron-right"
-                  class="size-4 transition-transform duration-200"
-                  :class="detalhesAbertos && 'rotate-90'"
-                />
-                {{ t.criar.detalhesOpcionais }}
-                <span class="font-normal text-muted">{{ t.criar.opcional }}</span>
-              </button>
-
-              <Transition
-                enter-active-class="transition-all duration-300 ease-out overflow-hidden"
-                enter-from-class="opacity-0 max-h-0"
-                enter-to-class="opacity-100 max-h-[40rem]"
-                leave-active-class="transition-all duration-200 ease-in overflow-hidden"
-                leave-from-class="opacity-100 max-h-[40rem]"
-                leave-to-class="opacity-0 max-h-0"
-              >
-                <div v-if="detalhesAbertos" class="space-y-5 pt-5">
-                  <UFormField
-                    :label="t.criar.descricao"
-                    :description="t.criar.descricaoAjuda(form.descricao.length)"
-                  >
-                    <UInput
-                      v-model="form.descricao"
-                      maxlength="140"
-                      :placeholder="t.criar.descricaoPlaceholder"
-                      class="w-full"
-                    />
-                  </UFormField>
-
-                  <UFormField
-                    :label="t.criar.endereco"
-                    :description="t.criar.enderecoAjuda"
-                  >
-                    <UInput
-                      v-model="form.referencia"
-                      class="w-full font-mono text-sm"
-                      @update:model-value="referenciaEditada = true"
-                    />
-                  </UFormField>
-                </div>
-              </Transition>
-            </div>
-
-            <!-- ============ DECISÃO 2: do zero ou de um modelo ============ -->
-            <div v-else key="2">
-              <h2 class="text-xl font-bold tracking-tight text-highlighted">
-                {{ t.criar.querModelo }}
-              </h2>
-              <p class="mt-1.5 text-sm text-muted">
-                {{ t.criar.modeloAjuda }}
-              </p>
-
-              <div class="mt-5 flex flex-wrap items-center gap-2">
-                <span class="text-xs font-medium text-muted">{{ t.criar.modelosDe }}</span>
-                <UButton
-                  v-for="loc in localidades"
-                  :key="loc.id"
-                  :label="loc.nome"
-                  size="xs"
-                  :color="locaisSelecionados.includes(loc.id) ? 'primary' : 'neutral'"
-                  :variant="locaisSelecionados.includes(loc.id) ? 'soft' : 'subtle'"
-                  :icon="locaisSelecionados.includes(loc.id) ? 'i-lucide-check' : undefined"
-                  @click="locaisSelecionados.includes(loc.id)
-                    ? locaisSelecionados = locaisSelecionados.filter(l => l !== loc.id)
-                    : locaisSelecionados.push(loc.id)"
-                />
-              </div>
-
-              <div class="mt-4 space-y-2">
-                <!-- Começar do zero é escolha de primeira classe, não ausência -->
-                <button
-                  type="button"
-                  class="flex w-full items-center gap-3 rounded-xl border p-4 text-left transition-all duration-200 hover:-translate-y-0.5"
-                  :class="form.template === 'zero'
-                    ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
-                    : 'border-default hover:border-primary/40'"
-                  @click="form.template = 'zero'"
+              <!-- Rodada 24: Descrição e Referência ficam à vista, sem recolher.
+                   Não são obrigatórias, por isso não levam o *. "Endereço" passa
+                   a se chamar Referência, o nome do campo no produto, com ajuda
+                   que diz o que é e mostra o endereço que ela forma. -->
+              <div class="mt-6 space-y-5">
+                <UFormField
+                  :label="t.criar.descricao"
+                  :help="t.criar.descricaoAjuda(form.descricao.length)"
                 >
-                  <div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-elevated">
-                    <UIcon name="i-lucide-sparkles" class="size-5 text-muted" />
-                  </div>
-                  <div class="min-w-0">
-                    <span class="block font-medium text-highlighted">{{ t.criar.doZero }}</span>
-                    <span class="block text-sm text-toned">
-                      {{ t.criar.doZeroAjuda }}
-                    </span>
-                  </div>
-                  <UIcon
-                    v-if="form.template === 'zero'"
-                    name="i-lucide-check-circle-2"
-                    class="ml-auto size-5 shrink-0 text-primary"
+                  <UInput
+                    v-model="form.descricao"
+                    maxlength="140"
+                    :placeholder="t.criar.descricaoPlaceholder"
+                    class="w-full"
                   />
-                </button>
+                </UFormField>
 
-                <TransitionGroup
-                  enter-active-class="transition duration-300 ease-out"
-                  enter-from-class="opacity-0 translate-y-2"
-                  leave-active-class="transition duration-150 ease-in absolute"
-                  leave-to-class="opacity-0 scale-95"
-                >
-                  <button
-                    v-for="t in templatesDisponiveis"
-                    :key="t.id"
-                    type="button"
-                    class="flex w-full items-center gap-3 rounded-xl border p-4 text-left transition-all duration-200 hover:-translate-y-0.5"
-                    :class="form.template === t.id
-                      ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
-                      : 'border-default hover:border-primary/40'"
-                    @click="form.template = t.id"
-                  >
-                    <div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                      <UIcon :name="t.icone" class="size-5 text-primary" />
-                    </div>
-                    <div class="min-w-0">
-                      <span class="block font-medium text-highlighted">{{ t.nome }}</span>
-                      <span class="block text-sm text-toned">{{ t.descricao }}</span>
-                    </div>
-                    <UIcon
-                      v-if="form.template === t.id"
-                      name="i-lucide-check-circle-2"
-                      class="ml-auto size-5 shrink-0 text-primary"
-                    />
-                  </button>
-                </TransitionGroup>
-
-                <!-- Vazio que explica, em vez de "Não há dados" -->
-                <div
-                  v-if="!templatesDisponiveis.length"
-                  class="animate-[entrada_0.3s_ease-out_both] rounded-xl border border-dashed border-default p-5 text-center"
-                >
-                  <UIcon name="i-lucide-layout-template" class="mx-auto size-6 text-dimmed" />
-                  <p class="mt-2 text-sm font-medium text-highlighted">
-                    {{ t.criar.semModelo }}
-                  </p>
-                  <p class="mt-1 text-sm text-muted">
-                    {{ t.criar.semModeloAjuda }}
-                  </p>
-                </div>
+                <UFormField :label="t.criar.referencia">
+                  <UInput
+                    v-model="form.referencia"
+                    :placeholder="t.criar.referenciaPlaceholder"
+                    class="w-full font-mono text-sm"
+                    @update:model-value="referenciaEditada = true"
+                  />
+                  <template #help>
+                    {{ t.criar.referenciaAjuda }}
+                    <span class="font-mono">enspace.io/<span class="text-primary-700 dark:text-primary-300">{{ form.referencia || '…' }}</span></span>
+                  </template>
+                </UFormField>
               </div>
             </div>
+
           </Transition>
 
           <!-- ------------------------- ações ------------------------- -->
           <div class="mt-8 flex items-center justify-between gap-3">
             <UButton
-              v-if="passo === 2"
-              :label="t.criar.voltar"
-              icon="i-lucide-arrow-left"
-              color="neutral"
-              variant="ghost"
-              @click="passo = 1"
-            />
-            <UButton
-              v-else
               :label="t.criar.cancelar"
               color="neutral"
               variant="ghost"
               @click="aberto = false"
             />
-
             <UButton
-              v-if="passo === 1"
               :label="t.criar.continuar"
               trailing-icon="i-lucide-arrow-right"
               :disabled="!podeAvancar"
               class="transition-transform hover:translate-x-0.5"
               @click="passo = 2"
-            />
-            <UButton
-              v-else
-              :label="templateEscolhido ? t.criar.criarCom(templateEscolhido.nome) : t.criar.criarWorkspace"
-              icon="i-lucide-check"
-              :loading="criando"
-              @click="criar"
             />
           </div>
         </div>
@@ -746,7 +606,7 @@ function criar() {
               {{ form.nome || t.criar.nomeDoWorkspace }}
             </h3>
             <p class="mt-1 line-clamp-2 text-sm text-muted">
-              {{ form.descricao || (templateEscolhido ? templateEscolhido.descricao : t.criar.semDescricao) }}
+              {{ form.descricao || t.criar.semDescricao }}
             </p>
             <p class="mt-1 text-xs text-muted">
               {{ t.criar.aindaNaoEntrou }}
@@ -757,30 +617,6 @@ function criar() {
             </div>
           </div>
 
-          <!-- O que o modelo traz junto: consequência visível antes de confirmar -->
-          <Transition
-            enter-active-class="transition duration-300 ease-out"
-            enter-from-class="opacity-0 translate-y-2"
-            leave-active-class="transition duration-150 ease-in"
-            leave-to-class="opacity-0"
-          >
-            <div v-if="templateEscolhido" class="mt-6">
-              <p class="text-xs font-semibold uppercase tracking-wider text-muted">
-                {{ t.criar.jaVemCom }}
-              </p>
-              <ul class="mt-3 space-y-2">
-                <li
-                  v-for="(item, i) in templateEscolhido.inclui"
-                  :key="item"
-                  class="flex animate-[entrada_0.3s_ease-out_both] items-center gap-2 text-sm text-muted"
-                  :style="{ animationDelay: `${i * 60}ms` }"
-                >
-                  <UIcon name="i-lucide-check" class="size-4 shrink-0 text-primary" />
-                  {{ item }}
-                </li>
-              </ul>
-            </div>
-          </Transition>
         </aside>
       </div>
     </template>

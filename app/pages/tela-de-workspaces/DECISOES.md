@@ -134,6 +134,41 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 24 · 2026-10-20
+
+- **Pedido (literal):** "essa tela tem o modal de criaçao com "descriçao e endereço". endereço deve se
+  chamar "referencia" com help ou instruction explicando o que é, e os campos nao devem estar ocultos, só nao
+  marcados com * de obrigatório (é o simbolo que usamos, um * vermelho ou um ! padrao nuxt)" e "alem disso,
+  esse modal ta pessimo. olhe o protitpo de menu lateral em 2 niveis. veja como é feita a parte de casos de
+  uso la (com cara de "lojinha"). deve ter essa aparencia. ajuste"
+- **Mudou (passo 1):**
+  - "Nome" ganha rótulo com o `*` vermelho de obrigatório, pela prop `required` do `UFormField`.
+  - "Descrição" e "Referência" saem da seção recolhida "Descrição e endereço (opcional)" e ficam à vista,
+    sem `*`.
+  - "Endereço" passa a se chamar "Referência", o nome do campo no produto, com a ajuda "Identifica o
+    workspace no endereço. Vem do nome; mude só se precisar. Endereço: enspace.io/{referência}". A caixa
+    separada "Endereço do workspace" sai: o endereço agora vive na ajuda do campo.
+- **Mudou (passo 2):** vira a Central de casos de uso, com a cara da central do protótipo `menu-lateral`
+  (rodada 18 de lá, padrão da Central de modelos do ClickUp).
+  - O modal cresce para 72rem e 88% da altura no passo 2; a prévia "Como vai aparecer na sua lista" fica só
+    no passo 1.
+  - Lateral com "Destaques" e "Do ENSPACE" e os filtros "Localidade" (Brasil marcado de início) e
+    "Complexidade"; em cima, a busca e "Áreas".
+  - A faixa "Prefere começar do zero?" com "Criar do zero" substitui o cartão "Começar do zero".
+  - Cartões com a prévia desenhada a partir do conteúdo do caso, "Em destaque" e grupos por área.
+  - O detalhe tem galeria, descrição, "O que vem junto", "Feito pelo ENSPACE", criado em, uso, localidade e
+    o botão "Criar com {caso}".
+  - Os "modelos" (Templates no produto) passam a se chamar "casos de uso", como no `menu-lateral`: são os
+    casos do tipo workspace de lá, copiados para o `mocks.ts` desta pasta com a localidade. A prévia
+    (`_PreviaDoCaso.vue`) também é cópia da de lá: protótipo não importa de outro.
+- **Fronteira:** muda o modal de criação; a tela de entrada fica como estava.
+- **Descartado:** "Do seu workspace" e "Adicionar ao workspace" da central do `menu-lateral`. Motivo: quem cria
+  um workspace ainda não tem workspace de onde trazer caso de uso.
+- **Não deu:** conferir pelo Chrome. Por quê: o Chrome não alcançou o servidor local desta sessão (página de
+  erro); conferi no navegador embutido, que aqui não precisa de login, porque o protótipo não usa o develop.
+- **Maquete:** criar só mostra o toast; nenhum caso é aplicado de verdade.
+- **Ver:** https://pernalombr4.github.io/prototipos/tela-de-workspaces
+
 ### Correção · 2026-10-19 · cartões de modelo vazios na criação
 
 - **Pedido:** corrigir o erro achado ao escrever os requisitos para o dev ("sim, quero").

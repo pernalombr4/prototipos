@@ -32,7 +32,7 @@ entre aspas são os da interface em português; os de inglês e espanhol estão 
 | R62 a R70 | Ocultos | Hoje não existe. Tirar da lista sem perder o acesso |
 | R71 a R81 | Etiquetas pessoais | Hoje não existe. Etiquetas que só a pessoa vê, para agrupar |
 | R82 a R84 | Sair do workspace | Hoje não existe nesta tela |
-| R85 a R109 | Criar workspace | 1 decisão por vez; ícone deixa de ser obrigatório; logo da empresa por upload; passo 2 sem tela branca nem "Não há dados" |
+| R85 a R109 | Criar workspace | 1 decisão por vez; só o nome é obrigatório; ícone deixa de ser obrigatório; logo da empresa por upload; o passo 2 vira a Central de casos de uso, como a do protótipo do menu lateral |
 | R110 a R115 | Estados | Carregando, só um workspace, nenhum, erro e sem etiquetas |
 | R116 a R120 | Dados | O que a API já tem e o que precisa acrescentar |
 | R121 a R126 | Componentes e acessibilidade | Tema, idioma, movimento e teclado |
@@ -207,14 +207,14 @@ entre aspas são os da interface em português; os de inglês e espanhol estão 
 
 | ID | Requisito | Critério de aceite |
 |---|---|---|
-| R85 | A criação deve abrir num modal sobre a própria tela, com 56rem, 2 passos e a prévia ao vivo à direita (20rem), que some em tela estreita. | A URL não muda ao abrir. |
+| R85 | A criação deve abrir num modal sobre a própria tela, com 2 passos: no passo 1, 56rem e a prévia ao vivo à direita (20rem, some em tela estreita); no passo 2, 72rem e 88% da altura da tela. | A URL não muda ao abrir. |
 | R86 | O topo do modal deve ter 2 barras de progresso na cor primária e "1 de 2" ou "2 de 2"; a troca de passo desliza para o lado. | No passo 2, as 2 barras estão preenchidas. |
 | R87 | O passo 1 deve ter o título "Como esse workspace se chama?" e o texto "É o nome que a sua equipe vai procurar na lista. Dá para mudar depois." | |
-| R88 | Identidade e nome devem ficar na mesma linha: quadrado clicável de 44px (lápis no hover) e o campo grande do nome, com foco ao abrir e o placeholder "Jurídico Aurora, Vértice Log, RH…". | Abrir o modal e digitar escreve no nome. |
+| R88 | Identidade e nome devem ficar na mesma linha, sob o rótulo "Nome" com o `*` vermelho de obrigatório (`UFormField` com `required`): quadrado clicável de 44px (lápis no hover) e o campo grande do nome, com foco ao abrir e o placeholder "Jurídico Aurora, Vértice Log, RH…". | O `*` vermelho aparece só no Nome. |
 | R89 | O nome deve ter a ajuda "De 3 a 50 caracteres."; com 1 ou 2 caracteres, ela vira "Pelo menos 3 caracteres." em vermelho. | Com "Ju", aparece o aviso vermelho. |
-| R90 | A partir de 3 caracteres, deve aparecer "Endereço do workspace" com `enspace.io/{referência}` em fonte monoespaçada. | Com "Jurídico Aurora", aparece `enspace.io/juridico-aurora`. |
-| R91 | A referência deve vir do nome (minúsculas, sem acento, só letras, números, espaço e hífen, espaços viram hífen, no máximo 50) e acompanhar o nome até a pessoa editar o campo Endereço. | Editar o Endereço e depois mudar o nome mantém o endereço editado. |
-| R92 | "Descrição e endereço (opcional)" deve vir recolhido, aberto por uma seta, com "Descrição" (ajuda "Uma frase dizendo para que serve. {n}/140", placeholder "Ex.: Chamados, RH e jurídico do Grupo Aurora", no máximo 140) e "Endereço" (ajuda "Vem do nome. Mude só se precisar de um endereço específico.", monoespaçado). | O contador vai de 0/140 a 140/140. |
+| R90 | "Descrição" deve ficar à vista, sem `*`: ajuda "Uma frase dizendo para que serve. {n}/140", placeholder "Ex.: Chamados, RH e jurídico do Grupo Aurora", no máximo 140 caracteres. | O campo aparece sem clicar em nada; o contador vai de 0/140 a 140/140. |
+| R91 | "Referência" deve ficar à vista, sem `*`, em fonte monoespaçada, com o placeholder "grupo-aurora" e a ajuda "Identifica o workspace no endereço. Vem do nome; mude só se precisar. Endereço: enspace.io/{referência}". | Com "Jurídico Aurora", a ajuda mostra `enspace.io/juridico-aurora`. |
+| R92 | A referência deve vir do nome (minúsculas, sem acento, só letras, números, espaço e hífen, espaços viram hífen, no máximo 50) e acompanhar o nome até a pessoa editar o campo Referência. | Editar a Referência e depois mudar o nome mantém a referência editada. |
 | R93 | O passo 1 deve ter "Cancelar" e "Continuar →", ativo só com 3 caracteres ou mais, sem contar espaços nas pontas. | "  ab  " não libera o "Continuar". |
 
 ### Identidade
@@ -231,17 +231,17 @@ entre aspas são os da interface em português; os de inglês e espanhol estão 
 | R101 | Imagem: área tracejada "Arraste o logo aqui" e "ou clique para escolher · PNG, JPG ou SVG", que aceita arrastar e clicar, só imagem. Com imagem: miniatura, nome do arquivo, "Trocar" e "Remover". A imagem tem prioridade sobre ícone e iniciais. | Arrastar um PNG mostra o logo no quadrado e na prévia. |
 | R102 | O campo `icon` deve guardar o ícone ou a URL do logo; a tela nunca deve mostrar o id técnico. | Depois de escolher, não aparece texto como `carbon:scales`. |
 
-### Passo 2 e prévia
+### Passo 2: Central de casos de uso
 
 | ID | Requisito | Critério de aceite |
 |---|---|---|
-| R103 | O passo 2 deve abrir sem tela em branco, com o título "Quer começar de um modelo?" e o texto "Um modelo já traz categorias, formulários e fluxos prontos. Dá para mudar tudo depois." | O conteúdo aparece junto com a transição; se precisar carregar, mostra esqueleto. |
-| R104 | "Modelos de" deve ter os botões de escolha múltipla "Brasil" (marcado de início), "Estados Unidos" e "Global", com check no marcado. | Marcar Global soma os modelos dele. |
-| R105 | "Começar do zero" deve ser uma opção com o mesmo peso dos modelos, já escolhida: "Um workspace vazio, montado por você. É o caminho mais comum." Cada modelo das localidades marcadas é um cartão com ícone, nome e descrição; o escolhido ganha borda primária e check. | Os cartões de modelo mostram ícone, nome e descrição. |
-| R106 | Sem modelo nas localidades marcadas: "Nenhum modelo para essa localidade" e "Escolha outra acima, ou comece do zero: você não perde nada." | Desmarcar todas as localidades mostra o vazio, nunca "Não há dados". |
-| R107 | O passo 2 deve ter "← Voltar" e "Criar workspace" ou, com modelo, "Criar com {modelo}", com carregamento ao clicar. Ao criar, o modal fecha, aparece o toast "Workspace "{nome}" criado" e a pessoa entra no workspace novo. | Escolher "Central de chamados" faz o botão dizer "Criar com Central de chamados". |
-| R108 | A prévia deve ter o título "Como vai aparecer na sua lista" e atualizar a cada tecla: identidade, nome (ou "Nome do workspace"), descrição (a digitada; sem ela, a do modelo; sem modelo, "Sem descrição"), "Você ainda não entrou aqui" e os selos "Proprietário" e "Entrar". | Digitar o nome muda a prévia na hora. |
-| R109 | Com modelo escolhido, a prévia deve mostrar "Já vem com" e a lista do que ele traz, com check, entrando em cascata. | "Central de chamados" lista 4 itens. |
+| R103 | O passo 2 deve ser a Central de casos de uso, com a cara da central do protótipo do menu lateral (padrão da Central de modelos do ClickUp). Cabeçalho: progresso "2 de 2", "Quer começar de um caso de uso?" e "Um caso de uso já traz menus, categorias e status prontos. Dá para mudar tudo depois." | O passo abre sem tela em branco e nunca mostra "Não há dados". |
+| R104 | A lateral esquerda (some em tela estreita) deve ter o título "Casos de uso", as fontes "Destaques" e "Do ENSPACE" com contagem e os filtros em caixas de marcar: "Localidade" ("Brasil" marcado de início, "Estados Unidos", "Global"; nenhuma marcada vale todas) e "Complexidade" ("Iniciante", "Intermediário", "Avançado"). | Desmarcar Brasil e marcar Estados Unidos mostra só os casos dos Estados Unidos. |
+| R105 | Em cima da lista: a busca "Buscar casos de uso" (nome, descrição e área, sem acento) e o botão "Áreas", que abre uma lista com a busca "Buscar área", "Selecionar tudo" e várias marcadas, com a contagem no botão. Antes dos cartões, a faixa "Prefere começar do zero?" e "Um workspace vazio, montado por você. É o caminho mais comum.", com o botão com borda "Criar do zero". | "Criar do zero" cria o workspace vazio sem abrir caso nenhum. |
+| R106 | Cada cartão deve ter a prévia desenhada com os menus, as telas e os status do caso, e embaixo o ícone e o nome. Em Destaques e sem filtro, a seção "Em destaque" (cartões com estrela) vem primeiro; depois, os cartões por área, com a complexidade em selo (Iniciante verde, Intermediário amarelo, Avançado vermelho), 3 por área e "Ver mais {n}" ou "Ver menos". Sem resultado: "Nenhum caso de uso com esses filtros", "Mude os filtros ou comece do zero: você não perde nada." e "Limpar filtros". | Cada prévia mostra o conteúdo do próprio caso, não um desenho genérico. |
+| R107 | Clicar no cartão deve abrir o detalhe: "← Casos de uso"; ícone de 64px, nome, complexidade e área; o botão principal "Criar com {caso}"; a galeria com até 4 quadros (menu, status em colunas, campos da categoria, painel), com setas e pontos; e a "Descrição". | "Criar com Gestão de contratos" cria o workspace com o caso. |
+| R108 | O detalhe deve ter "O que vem junto", com blocos que abrem item a item: "Menus e telas" ("{m} menus e {t} telas"), "Categorias e campos" e "Status". À direita: o cartão "Feito pelo ENSPACE", com o selo "Verificado" e "Revisado pelo time do ENSPACE.", "Criado em", "Usado" ("{n} vezes") e "Localidade". | Abrir "Menus e telas" lista os menus e as telas do caso. |
+| R109 | O rodapé do passo 2 deve ter "← Voltar" (volta ao passo 1 com o que foi preenchido) e "Escolha um caso de uso ou comece do zero." Ao criar, do zero ou com caso, o modal fecha, aparece o toast "Workspace "{nome}" criado" e a pessoa entra no workspace novo. | Voltar ao passo 1 mantém nome, descrição e referência. |
 
 ## Estados
 

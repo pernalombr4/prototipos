@@ -368,43 +368,114 @@ export const localidades: Localidade[] = [
   { id: 'global', nome: 'Global' },
 ]
 
-export interface Template {
+/* ------------------------------------------------------------------
+   Rodada 24: o passo 2 vira a Central de casos de uso, com a cara da
+   central do protótipo menu-lateral (rodada 18 de lá, padrão da Central
+   de modelos do ClickUp). Os "modelos" do produto (Templates) passam a
+   ser casos de uso do tipo workspace: os mesmos de
+   menu-lateral/casos.ts, copiados para cá (protótipo não importa de
+   outro), mais a localidade que o produto pede.
+------------------------------------------------------------------ */
+
+export type Complexidade = 'iniciante' | 'intermediario' | 'avancado'
+
+export interface TelaDoCaso { rotulo: string, icone: string, tipoDeTela: string }
+export interface MenuDoCaso { rotulo: string, icone: string, telas: TelaDoCaso[] }
+export interface CategoriaDoCaso { nome: string, icone: string, campos: string[] }
+
+export interface CasoDeUso {
   id: string
   nome: string
-  descricao: string
   icone: string
+  area: string
+  complexidade: Complexidade
+  descricao: string
+  destaque?: boolean
+  /** Localidades em que o caso existe (ids de `localidades`). */
   localidades: string[]
-  inclui: string[]
+  criadoEm: string
+  usos: number
+  menus: MenuDoCaso[]
+  categorias: CategoriaDoCaso[]
+  status: string[]
 }
 
-/**
- * Templates fictícios. No develop, a Localidade Brasil hoje responde
- * "Não há dados" — o estado vazio é real e está no protótipo como estado.
- * Estes existem para mostrar como o passo se comporta quando houver.
- */
-export const templates: Template[] = [
+export const AREAS = ['Jurídico', 'Comercial', 'Financeiro', 'Pessoas', 'Compras', 'Atendimento'] as const
+
+const tl = (rotulo: string, icone: string, tipoDeTela = 'consultas'): TelaDoCaso => ({ rotulo, icone, tipoDeTela })
+
+export const casosDeUso: CasoDeUso[] = [
   {
-    id: 'chamados',
-    nome: 'Central de chamados',
-    descricao: 'Abertura, triagem e acompanhamento de pedidos internos.',
-    icone: 'i-lucide-life-buoy',
-    localidades: ['pt-br', 'global'],
-    inclui: ['Categoria de chamados', 'Formulário de abertura', 'Fluxo de triagem', 'Painel de SLA'],
+    id: 'cu-chamados', nome: 'Central de chamados', icone: 'i-lucide-life-buoy', area: 'Atendimento',
+    complexidade: 'intermediario', destaque: true, localidades: ['pt-br', 'global'], criadoEm: '2025-03-28', usos: 7220,
+    descricao: 'Chamados com prazo de atendimento, fila por equipe e o painel do que está estourando.',
+    menus: [{ rotulo: 'Atendimento', icone: 'i-lucide-life-buoy', telas: [tl('Fila da equipe', 'i-lucide-inbox', 'triagem'), tl('Meus chamados', 'i-lucide-user', 'meus-itens'), tl('Prazos', 'i-lucide-chart-column', 'paineis')] }],
+    categorias: [{ nome: 'Chamados', icone: 'i-lucide-life-buoy', campos: ['Solicitante', 'Assunto', 'Prioridade', 'Prazo', 'Equipe'] }],
+    status: ['Aberto', 'Em atendimento', 'Aguardando', 'Resolvido'],
   },
   {
-    id: 'rh',
-    nome: 'Jornada do colaborador',
-    descricao: 'Admissão, férias, benefícios e desligamento num lugar só.',
-    icone: 'i-lucide-users',
-    localidades: ['pt-br'],
-    inclui: ['Categoria de pessoas', 'Fluxo de admissão', 'Solicitação de férias'],
+    id: 'cu-contratos', nome: 'Gestão de contratos', icone: 'i-lucide-file-signature', area: 'Jurídico',
+    complexidade: 'intermediario', destaque: true, localidades: ['pt-br', 'global'], criadoEm: '2025-03-12', usos: 4120,
+    descricao: 'Do pedido à assinatura e ao vencimento. Traz a fila de aprovação, o painel do que vence em 30 dias e os aditivos ligados ao contrato.',
+    menus: [
+      { rotulo: 'Contratos', icone: 'i-lucide-file-signature', telas: [tl('Contratos ativos', 'i-lucide-list'), tl('Vencendo em 30 dias', 'i-lucide-calendar-clock'), tl('Para aprovar', 'i-lucide-circle-check-big', 'triagem')] },
+      { rotulo: 'Painel jurídico', icone: 'i-lucide-chart-column', telas: [tl('Visão geral', 'i-lucide-chart-pie', 'paineis')] },
+    ],
+    categorias: [
+      { nome: 'Contratos', icone: 'i-lucide-file-signature', campos: ['Contraparte', 'Valor', 'Início', 'Vencimento', 'Responsável', 'Renovação automática'] },
+      { nome: 'Aditivos', icone: 'i-lucide-file-plus', campos: ['Contrato de origem', 'Motivo', 'Novo valor'] },
+    ],
+    status: ['Rascunho', 'Em aprovação', 'Assinado', 'Vencido'],
   },
   {
-    id: 'juridico',
-    nome: 'Contratos e prazos',
-    descricao: 'Guarda de contratos com alerta de vencimento e reajuste.',
-    icone: 'i-lucide-scale',
-    localidades: ['pt-br', 'global'],
-    inclui: ['Categoria de contratos', 'Alerta de vencimento', 'Correção monetária'],
+    id: 'cu-funil', nome: 'Funil de vendas', icone: 'i-lucide-filter', area: 'Comercial',
+    complexidade: 'iniciante', destaque: true, localidades: ['pt-br', 'en-us', 'global'], criadoEm: '2024-11-20', usos: 9850,
+    descricao: 'Oportunidades em etapas, do primeiro contato ao fechamento, com metas do mês e o painel de conversão.',
+    menus: [{ rotulo: 'Vendas', icone: 'i-lucide-trending-up', telas: [tl('Funil', 'i-lucide-kanban'), tl('Minhas oportunidades', 'i-lucide-user', 'meus-itens'), tl('Conversão', 'i-lucide-chart-column', 'paineis')] }],
+    categorias: [{ nome: 'Oportunidades', icone: 'i-lucide-target', campos: ['Cliente', 'Valor', 'Etapa', 'Previsão de fechamento', 'Origem'] }],
+    status: ['Prospecção', 'Proposta', 'Negociação', 'Ganho', 'Perdido'],
+  },
+  {
+    id: 'cu-pagar', nome: 'Contas a pagar', icone: 'i-lucide-wallet', area: 'Financeiro',
+    complexidade: 'intermediario', destaque: true, localidades: ['pt-br'], criadoEm: '2025-02-17', usos: 5630,
+    descricao: 'Lançamento, aprovação e pagamento, com a agenda da semana e o que está atrasado.',
+    menus: [{ rotulo: 'Financeiro', icone: 'i-lucide-wallet', telas: [tl('Lançamentos', 'i-lucide-list'), tl('Aprovar pagamento', 'i-lucide-circle-check-big', 'triagem'), tl('Agenda de pagamentos', 'i-lucide-calendar-days')] }],
+    categorias: [
+      { nome: 'Contas a pagar', icone: 'i-lucide-receipt', campos: ['Fornecedor', 'Valor', 'Vencimento', 'Centro de custo', 'Nota fiscal'] },
+      { nome: 'Fornecedores', icone: 'i-lucide-truck', campos: ['CNPJ', 'Contato', 'Banco'] },
+    ],
+    status: ['Lançada', 'Aprovada', 'Paga', 'Atrasada'],
+  },
+  {
+    id: 'cu-admissao', nome: 'Admissão de colaboradores', icone: 'i-lucide-user-plus', area: 'Pessoas',
+    complexidade: 'intermediario', destaque: true, localidades: ['pt-br'], criadoEm: '2025-05-14', usos: 2780,
+    descricao: 'Da vaga aprovada ao primeiro dia: documentos, equipamentos e acessos, cada um com responsável.',
+    menus: [{ rotulo: 'Admissões', icone: 'i-lucide-user-plus', telas: [tl('Em andamento', 'i-lucide-list'), tl('Checklist do primeiro dia', 'i-lucide-list-checks', 'tarefas')] }],
+    categorias: [{ nome: 'Admissões', icone: 'i-lucide-user-plus', campos: ['Nome', 'Cargo', 'Data de início', 'Gestor', 'Documentos'] }],
+    status: ['Documentos', 'Equipamento', 'Acessos', 'Concluída'],
+  },
+  {
+    id: 'cu-compras', nome: 'Solicitações de compra', icone: 'i-lucide-shopping-cart', area: 'Compras',
+    complexidade: 'iniciante', destaque: true, localidades: ['pt-br', 'en-us'], criadoEm: '2024-12-03', usos: 6410,
+    descricao: 'Pedido, cotação e aprovação por alçada. Quem pede acompanha sem precisar perguntar.',
+    menus: [{ rotulo: 'Compras', icone: 'i-lucide-shopping-cart', telas: [tl('Minhas solicitações', 'i-lucide-user', 'minhas-requisicoes'), tl('Cotações', 'i-lucide-list'), tl('Aprovar por alçada', 'i-lucide-circle-check-big', 'triagem')] }],
+    categorias: [{ nome: 'Solicitações de compra', icone: 'i-lucide-shopping-cart', campos: ['Item', 'Quantidade', 'Valor estimado', 'Centro de custo', 'Urgência'] }],
+    status: ['Solicitada', 'Em cotação', 'Aprovada', 'Comprada'],
+  },
+  {
+    id: 'cu-contencioso', nome: 'Contencioso', icone: 'i-lucide-scale', area: 'Jurídico',
+    complexidade: 'avancado', localidades: ['pt-br'], criadoEm: '2025-06-02', usos: 870,
+    descricao: 'Processos, prazos e audiências, com a pauta da semana e os prazos que vencem.',
+    menus: [{ rotulo: 'Contencioso', icone: 'i-lucide-scale', telas: [tl('Processos', 'i-lucide-folder-open'), tl('Prazos da semana', 'i-lucide-alarm-clock', 'tarefas'), tl('Audiências', 'i-lucide-calendar-days')] }],
+    categorias: [{ nome: 'Processos', icone: 'i-lucide-gavel', campos: ['Número', 'Vara', 'Parte contrária', 'Valor da causa', 'Fase'] }],
+    status: ['Inicial', 'Instrução', 'Sentença', 'Recurso', 'Encerrado'],
+  },
+  {
+    id: 'cu-reembolso', nome: 'Reembolsos', icone: 'i-lucide-hand-coins', area: 'Financeiro',
+    complexidade: 'iniciante', localidades: ['pt-br', 'global'], criadoEm: '2025-04-30', usos: 3140,
+    descricao: 'Quem pede anexa o comprovante; quem aprova vê a fila; o financeiro paga.',
+    menus: [{ rotulo: 'Reembolsos', icone: 'i-lucide-hand-coins', telas: [tl('Minhas solicitações', 'i-lucide-user', 'minhas-requisicoes'), tl('Fila de aprovação', 'i-lucide-inbox', 'triagem')] }],
+    categorias: [{ nome: 'Reembolsos', icone: 'i-lucide-hand-coins', campos: ['Valor', 'Data da despesa', 'Comprovante', 'Projeto'] }],
+    status: ['Enviado', 'Aprovado', 'Pago', 'Recusado'],
   },
 ]
