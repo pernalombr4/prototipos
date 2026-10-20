@@ -49,13 +49,23 @@ export interface CasoDeUso {
   menus: MenuDoCaso[]
   categorias: CategoriaDoCaso[]
   status: string[]
+  /** Do ENSPACE ou criado neste workspace (rodada 3). */
+  origem: 'enspace' | 'workspace'
+  /** Criado no workspace e publicado na galeria do ENSPACE (rodada 3). */
+  publicado?: boolean
+  /** Workspace que criou, quando `origem` é 'workspace'. */
+  autor?: string
+  /** Imagens enviadas ao criar (rodada 3); sem elas, a prévia é desenhada. */
+  imagens?: { nome: string, url: string }[]
 }
 
 export const AREAS = ['Jurídico', 'Comercial', 'Financeiro', 'Pessoas', 'Compras', 'Atendimento', 'TI', 'Operações'] as const
 
 const tl = (rotulo: string, icone: string, tipoDeTela = 'consultas'): TelaDoCaso => ({ rotulo, icone, tipoDeTela })
 
-export const casosDeUso: CasoDeUso[] = [
+type CasoSemOrigem = Omit<CasoDeUso, 'origem'>
+
+const doEnspace: CasoSemOrigem[] = [
   {
     id: 'cu-chamados', nome: 'Central de chamados', icone: 'i-lucide-life-buoy', area: 'Atendimento',
     complexidade: 'intermediario', destaque: true, localidades: ['pt-br', 'global'], criadoEm: '2025-03-28', usos: 7220,
@@ -214,5 +224,29 @@ export const casosDeUso: CasoDeUso[] = [
   },
 ]
 
+export const casosDeUso: CasoDeUso[] = doEnspace.map(c => ({ ...c, origem: 'enspace' as const }))
+
 /** O develop hoje tem 1 caso só no workspace de exploração: o cenário "Como hoje" mostra 1. */
 export const umCaso: CasoDeUso[] = [casosDeUso.find(c => c.id === 'cu-funil')!]
+
+/* ------------------------------------------------------------------
+   Rodada 3: a estrutura que o workspace tem agora, de onde sai o
+   "Criar caso de uso". Nomes inventados, de uma empresa fictícia.
+------------------------------------------------------------------ */
+
+export interface CategoriaDoWorkspace extends CategoriaDoCaso { id: string, status: string[] }
+export interface MenuDoWorkspace extends MenuDoCaso { id: string }
+
+export const estruturaDoWorkspace: { categorias: CategoriaDoWorkspace[], menus: MenuDoWorkspace[] } = {
+  categorias: [
+    { id: 'c1', nome: 'Pedidos de compra', icone: 'i-lucide-shopping-cart', campos: ['Item', 'Quantidade', 'Centro de custo', 'Aprovador', 'Entrega prevista'], status: ['Rascunho', 'Em aprovação', 'Aprovado', 'Entregue'] },
+    { id: 'c2', nome: 'Fornecedores', icone: 'i-lucide-truck', campos: ['Razão social', 'CNPJ', 'Contato', 'Avaliação'], status: ['Ativo', 'Bloqueado'] },
+    { id: 'c3', nome: 'Contratos de locação', icone: 'i-lucide-building', campos: ['Imóvel', 'Locador', 'Valor mensal', 'Reajuste', 'Fim da vigência'], status: ['Vigente', 'A renovar', 'Encerrado'] },
+    { id: 'c4', nome: 'Chamados internos', icone: 'i-lucide-life-buoy', campos: ['Solicitante', 'Assunto', 'Prioridade'], status: ['Aberto', 'Em atendimento', 'Resolvido'] },
+  ],
+  menus: [
+    { id: 'm1', rotulo: 'Compras', icone: 'i-lucide-shopping-cart', telas: [tl('Pedidos abertos', 'i-lucide-list'), tl('Aprovar pedido', 'i-lucide-circle-check-big', 'triagem'), tl('Fornecedores', 'i-lucide-truck')] },
+    { id: 'm2', rotulo: 'Imóveis', icone: 'i-lucide-building', telas: [tl('Contratos vigentes', 'i-lucide-list'), tl('Reajustes do mês', 'i-lucide-calendar-clock')] },
+    { id: 'm3', rotulo: 'Atendimento interno', icone: 'i-lucide-life-buoy', telas: [tl('Fila', 'i-lucide-inbox', 'triagem')] },
+  ],
+}

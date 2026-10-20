@@ -50,3 +50,21 @@
 - **Pedido (literal):** "pode fazer o doc de requisitos pro dev criar essa galeria de casos de uso aí"
 - **Mudou:** `REQUISITOS.md` com 5 regras de negócio, 40 requisitos funcionais em 4 grupos (galeria, estados, detalhe, usar), 2 interfaces, 2 não funcionais, 3 restrições e 9 itens em aberto
 - **Fronteira:** o documento cobre só o bloco da galeria; cabeçalho, Migração de Workspace e Atenção ficam fora
+
+## Rodada 3 · 2026-10-20
+- **Pedido (literal):** "tem que ter nessa galeria de casos de uso a opção de CRIAR um caso de uso a partir do que ta no workspace naquele momento, com aviso de que vai ficar publico pra todo mundo que utiliza o enspace aquilo ali ou com opção de salvar só no workspace ou publicar na lojinha (opçao 2 é melhor). prototipe a opçao 2 mas coloque nos requisitos essa opçao pro dev, q se nao der pra ter as 2 possibilidades, ter o aviso"
+- **Pedido (literal), na mesma rodada:** "entre os menus "destaque" e "todos do enspace", nas outras telas, tem um "neste workspace" como opçao, é lá que esses criados devem ficar" e "ou algo como "deste workspace" e lá nesse menu, se acessado, ter tambem atalho pra essa criaçao!"
+- **Mudou:** a lateral ganha a vista **Deste workspace**, entre Destaques e Todos do ENSPACE, com os casos criados aqui
+  - dentro dela, a faixa "Transforme este workspace em um caso de uso" com **Criar caso de uso**; sem caso, o estado vazio com o mesmo botão
+  - a janela Criar caso de uso: nome, área, complexidade, localidade, descrição, imagens e "O que entra" (cada categoria e cada menu do workspace, marcados ao abrir)
+  - **Onde o caso de uso fica** (opção 2 do pedido): Só neste workspace (padrão) ou Galeria do ENSPACE, num USelect com "?", como os outros modais de configuração
+  - com a galeria escolhida: o aviso "Este caso de uso fica público" e a caixa de confirmação, obrigatória para publicar; o botão vira "Publicar na galeria"
+  - o caso publicado aparece em Deste workspace e em Todos do ENSPACE; o cartão mostra o globo (publicado) ou o prédio (só no workspace)
+  - o detalhe de caso criado aqui mostra "Por {workspace}", sem "Verificado", e a Visibilidade
+  - sem descrição, o detalhe não mostra o bloco "Descrição" vazio
+- **Requisitos:** grupos "Deste workspace" (RF041 a RF044) e "Criar caso de uso" (RF045 a RF062), RN006 a RN009 e RI003. O plano B que ela pediu está em RF060: se o produto só puder publicar na galeria, o aviso e a confirmação aparecem em cada criação
+- **Fronteira:** muda a galeria (vista nova e janela de criar); não muda a parte de cima nem o Usar caso de uso
+- **Descartado (revisto):** a rodada 1 tinha deixado de fora "Do seu workspace" e "Criar caso de uso". Esta rodada traz os 2 de volta, a pedido dela
+- **Maquete:** o caso criado vive só na memória da página (o reload apaga); a publicação é imediata, sem revisão do ENSPACE (P9 dos requisitos)
+- **Em aberto que pesa:** o nome do workspace que criou ("Por Grupo Aurora") aparece para as outras empresas? Ele identifica o cliente (P10)
+- **Ver:** `evidencias/proposta-10-deste-workspace-vazio.jpg` · `proposta-11-criar.jpg` · `proposta-12-publicar-aviso.jpg` · `proposta-13-criado.jpg` · `proposta-14-detalhe-criado.jpg`

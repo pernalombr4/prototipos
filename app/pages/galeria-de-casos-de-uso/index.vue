@@ -2,6 +2,7 @@
 import CascaDoEnspace from './_CascaDoEnspace.vue'
 import GaleriaDeCasos from './_GaleriaDeCasos.vue'
 import UsarCaso from './_UsarCaso.vue'
+import CriarCaso from './_CriarCaso.vue'
 import { textos } from './textos'
 import { casosDeUso, umCaso, workspaceAtual, type CasoDeUso } from './mocks'
 
@@ -12,7 +13,7 @@ import decisoesMd from './DECISOES.md?raw'
 
 definePageMeta({
   titulo: 'Galeria de casos de uso',
-  descricao: 'Os casos de uso de Configurações > Interface > Casos de Uso numa vitrine com destaques, filtros, áreas, busca e detalhe, abaixo da Migração de Workspace, que não muda.',
+  descricao: 'Os casos de uso de Configurações > Interface > Casos de Uso numa vitrine com destaques, filtros, áreas, busca e detalhe, abaixo da Migração de Workspace, que não muda. Criar um caso a partir do workspace e escolher se ele fica só no workspace ou na galeria do ENSPACE.',
   status: 'em-revisao',
   atualizado: '2026-10-20',
   tela: 'Configurações › Interface › Casos de Uso',
@@ -39,6 +40,22 @@ async function exportar() {
 
 const usando = ref<CasoDeUso | null>(null)
 
+/* Rodada 3: criar caso de uso a partir do workspace. */
+const fonte = ref<'destaques' | 'workspace' | 'enspace'>('destaques')
+const criando = ref(false)
+const criados = ref<CasoDeUso[]>([])
+
+function criado(caso: CasoDeUso) {
+  criados.value = [caso, ...criados.value]
+  fonte.value = 'workspace'
+  toast.add({
+    title: caso.publicado ? t.value.casoPublicado(caso.nome) : t.value.casoSalvo(caso.nome),
+    description: caso.publicado ? t.value.casoPublicadoTexto : t.value.casoSalvoTexto,
+    icon: caso.publicado ? 'i-lucide-globe' : 'i-lucide-package-plus',
+    color: 'success',
+  })
+}
+
 function usado(caso: CasoDeUso) {
   usando.value = null
   toast.add({ title: t.value.usadoTitulo(caso.nome), description: t.value.usadoTexto, icon: 'i-lucide-circle-check', color: 'success' })
@@ -58,7 +75,7 @@ const cenarios: { valor: Cenario, rotulo: string }[] = [
   { valor: 'sem-permissao', rotulo: 'Sem permissão' },
 ]
 
-const casos = computed(() => (cenario.value === 'hoje' ? umCaso : casosDeUso))
+const casos = computed(() => (cenario.value === 'hoje' ? umCaso : [...criados.value, ...casosDeUso]))
 const estado = computed(() => (cenario.value === 'carregando' ? 'carregando' : cenario.value === 'erro' ? 'erro' : 'pronto'))
 
 async function tentarDeNovo() {
@@ -181,11 +198,13 @@ async function tentarDeNovo() {
         <!-- ═══════════ A PROPOSTA: a galeria, no lugar do bloco "General" ═══════════ -->
         <div class="mt-9">
           <GaleriaDeCasos
+            v-model:fonte="fonte"
             :t="t"
             :casos="casos"
             :estado="estado"
             :pode-usar="cenario !== 'sem-permissao'"
             @usar="usando = $event"
+            @criar="criando = true"
             @tentar-de-novo="tentarDeNovo"
           />
         </div>
@@ -193,6 +212,7 @@ async function tentarDeNovo() {
     </div>
 
     <UsarCaso :t="t" :caso="usando" @fechar="usando = null" @usado="usado" />
+    <CriarCaso v-model:open="criando" :t="t" @criado="criado" />
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">

@@ -1,13 +1,14 @@
 # Requisitos: galeria de casos de uso
 
 **Objetivo:** quem configura o workspace acha o caso de uso que serve ao processo, vê o que ele traz antes de usar e
-usa sem abrir caso por caso.
+usa sem abrir caso por caso. Quem configura também cria um caso de uso com a estrutura do workspace e escolhe se ele
+fica só no workspace ou na galeria do ENSPACE.
 
 **Onde vale:** Configurações › Interface › Casos de Uso (`/workspaces/{ws}/settings/interface/usecases`), no bloco
 abaixo do aviso "Atenção", onde hoje fica o bloco "General" com os cartões e o "Saiba Mais".
 
 **Referência visual:** protótipo navegável em https://pernalombr4.github.io/prototipos/galeria-de-casos-de-uso,
-rodadas 1 e 2 de 20/10/2026, em revisão. Código, textos nos 3 idiomas, prints e decisões em
+rodadas 1 a 3 de 20/10/2026, em revisão. Código, textos nos 3 idiomas, prints e decisões em
 https://github.com/pernalombr4/prototipos/tree/main/app/pages/galeria-de-casos-de-uso. A barra inferior do protótipo
 (cenário, tema, idioma, "Por trás") é ferramenta de revisão e não entra no produto.
 
@@ -27,6 +28,8 @@ protótipo `migracao-de-workspace`.
 | Estados da galeria | Hoje não há carregando nem erro na galeria | RF022 e RF023 |
 | Detalhe do caso | A janela do "Saiba Mais" (imagem e descrição) vira o detalhe na própria página, com galeria de imagens, o que vem junto e quem fez | RF024 a RF032 |
 | Usar caso de uso | "Migrar Caso de Uso" vira "Usar caso de uso"; a confirmação passa a mostrar o que entra e os 2 avisos que o produto já dá | RF033 a RF040 |
+| Deste workspace | Hoje não existe. A vista com os casos criados no workspace, entre "Destaques" e "Todos do ENSPACE", com a porta para criar | RF041 a RF044 |
+| Criar caso de uso | Hoje não existe. Cria um caso com as categorias e os menus do workspace e pergunta onde ele fica: só no workspace ou na galeria do ENSPACE (pública). Se o produto só puder publicar na galeria, vale o plano B de RF060 | RF045 a RF062 |
 
 ## Glossário
 
@@ -35,6 +38,8 @@ protótipo `migracao-de-workspace`.
 | Caso de uso | Pacote de estrutura do ENSPACE (categorias com campos, menus com telas, status) que se soma a um workspace | "caso de uso" |
 | Área | O grupo de negócio do caso de uso (Jurídico, Comercial). Hoje o produto chama de "categoria" ("General"), o mesmo nome do tipo de item | "Áreas" (proposta, P5) |
 | Localidade | O país e o idioma para os quais o caso foi feito: Brasil (pt-br), Estados Unidos (en-us) ou Global | "Localidade" |
+| Galeria do ENSPACE | O catálogo de casos de uso que cada empresa que usa o ENSPACE vê: os do ENSPACE e os publicados pelos workspaces | "Galeria do ENSPACE", vista "Todos do ENSPACE" |
+| Visibilidade | Onde um caso criado no workspace fica: só no workspace ou na galeria do ENSPACE | "Visibilidade", "Onde o caso de uso fica" |
 
 ## Regras de negócio (RN)
 
@@ -45,6 +50,10 @@ protótipo `migracao-de-workspace`.
 | RN003 | Usar um caso de uso pode gerar cobrança adicional quando o workspace passa do limite de produtos do plano. | Workspace no limite do plano usa um caso com 2 categorias e passa do limite. |
 | RN004 | O idioma de quem abre define a localidade inicial da galeria: português (pt-BR) é Brasil (pt-br), inglês é Estados Unidos (en-us) e outro idioma é Global. | Quem usa o ENSPACE em espanhol abre a galeria com Global marcado. |
 | RN005 | Um caso de uso entra no resultado da localidade quando a lista de localidades do caso contém ao menos 1 das localidades marcadas; sem localidade marcada, cada caso entra. | "Funil de vendas" (pt-br, en-us, global) aparece com Brasil marcado e com Global marcado. |
+| RN006 | Um caso de uso criado num workspace leva só a estrutura escolhida: categorias com os campos e os status delas, e menus com as telas deles; itens, arquivos e dados de pessoas ficam de fora. | O caso criado com "Pedidos de compra" leva os 5 campos e os 4 status, sem nenhum pedido. |
+| RN007 | Um caso de uso salvo só no workspace é visto e usado só por quem acessa aquele workspace. | Outro workspace da mesma empresa não vê o caso em nenhuma vista. |
+| RN008 | Um caso de uso publicado na galeria do ENSPACE é visto e usado por cada empresa que usa o ENSPACE. | O caso publicado pelo Grupo Aurora aparece em "Todos do ENSPACE" de outra empresa. |
+| RN009 | Um caso de uso só pode ser publicado na galeria do ENSPACE depois que quem cria confirma que o caso fica público. | Sem a confirmação marcada, o caso não é publicado. |
 
 ## Galeria (RF)
 
@@ -106,12 +115,45 @@ protótipo `migracao-de-workspace`.
 | RF039 | Se o envio é recusado, a janela deve continuar aberta e mostrar o erro de hoje do produto (texto da chave `migration_request_error`), com o botão "Usar caso de uso" de volta ao normal. | Com a rota de migração fora do ar, o erro aparece e nada é criado. | Essencial |
 | RF040 | Sem a permissão que libera o uso (P4), "Usar caso de uso" deve aparecer desligado, com o motivo visível abaixo do nome do caso: "Para usar um caso de uso, você precisa da permissão Criar Casos de Uso. Solicite a quem administra o workspace." e ligado ao botão para o leitor de tela. | Membro sem a permissão vê o motivo sem passar o mouse; o leitor de tela lê o motivo no botão. | Essencial |
 
+## Deste workspace (RF)
+
+| ID | Requisito | Critério de aceite | Prioridade |
+|---|---|---|---|
+| RF041 | A lateral da galeria deve ter a vista "Deste workspace", entre "Destaques" e "Todos do ENSPACE", com os casos criados no workspace (salvos e publicados) e o número deles ao lado. | Exemplo: 1 caso salvo e 1 publicado mostram "Deste workspace 2". | Essencial |
+| RF042 | Na vista "Deste workspace" com ao menos 1 caso, a galeria deve mostrar, acima dos cartões, a faixa "Transforme este workspace em um caso de uso", o texto "Escolha as categorias e os menus que entram. Você decide se o caso fica só aqui ou na galeria do ENSPACE." e o botão "Criar caso de uso". | A faixa aparece só nesta vista. | Essencial |
+| RF043 | Na vista "Deste workspace" sem caso, a galeria deve mostrar "Nenhum caso de uso criado neste workspace", "Crie um caso de uso com as categorias e os menus que este workspace já tem." e o botão "Criar caso de uso". | Workspace sem caso criado mostra o estado vazio com o botão. | Essencial |
+| RF044 | Cada cartão de caso criado no workspace deve mostrar o ícone da visibilidade, globo para "Publicado na galeria" e prédio para "Só neste workspace", com o nome da visibilidade no passar do mouse e para o leitor de tela. | O cartão do caso publicado mostra o globo. | Importante |
+
+## Criar caso de uso (RF)
+
+| ID | Requisito | Critério de aceite | Prioridade |
+|---|---|---|---|
+| RF045 | "Criar caso de uso" deve abrir a janela "Criar caso de uso", com a descrição "Monte um caso de uso com a estrutura que este workspace tem agora. Só a estrutura entra: nenhum item, arquivo ou dado de pessoa." (RN006). | A janela abre a partir da faixa e do estado vazio. | Essencial |
+| RF046 | A janela deve pedir "Nome" (obrigatório), "Área", "Complexidade", "Localidade" (mais de 1 ao mesmo tempo, começando pela RN004), "Descrição" e "Imagens da galeria". | Os 6 campos aparecem, e só "Nome" tem a marca de obrigatório entre eles. | Essencial |
+| RF047 | "Imagens da galeria" deve receber 1 ou mais imagens PNG ou JPG, arrastadas ou escolhidas pelo clique. | Exemplo: 3 imagens enviadas; o detalhe passa as 3. | Importante |
+| RF062 | A 1ª imagem enviada em "Imagens da galeria" deve ser a miniatura do cartão do caso. | Exemplo: 3 imagens enviadas; o cartão mostra a 1ª. | Importante |
+| RF048 | "O que entra" deve listar cada categoria do workspace, com o número de campos e de status, e cada menu do workspace, com o número de telas, numa caixa de marcar por linha, cada uma marcada ao abrir a janela. | Exemplo: "Pedidos de compra, 5 campos, 4 status" já marcada. | Essencial |
+| RF049 | Se a pessoa salva sem nome, a janela deve mostrar no campo "Informe o nome do caso de uso." e não salvar. | Nome vazio e "Salvar no workspace" mostram o erro; nada é criado. | Essencial |
+| RF050 | Se a pessoa salva sem categoria e sem menu marcados, a janela deve mostrar "Escolha ao menos 1 categoria ou 1 menu." e não salvar. | Tudo desmarcado mostra o erro em "O que entra". | Essencial |
+| RF051 | "Onde o caso de uso fica" deve ser uma lista de seleção com 2 opções, cada uma com a descrição: "Só neste workspace" ("Aparece em Deste workspace.") e "Galeria do ENSPACE" ("Aparece para todas as empresas que usam o ENSPACE."), com "Só neste workspace" escolhida ao abrir. | A janela abre com "Só neste workspace". | Essencial |
+| RF052 | O rótulo "Onde o caso de uso fica" deve ter o ícone "?", que mostra a diferença entre as 2 opções no passar do mouse e no foco do teclado. | Tab até o "?" mostra a explicação. | Desejável |
+| RF053 | Com "Galeria do ENSPACE" escolhida, a janela deve mostrar o aviso "Este caso de uso fica público" com o texto "Todas as empresas que usam o ENSPACE passam a ver e usar os nomes das categorias, dos campos, dos menus, das telas e dos status escolhidos. Confira se nenhum nome identifica um cliente, uma pessoa ou um projeto interno." (RN008). | Trocar para a galeria mostra o aviso; voltar para o workspace tira o aviso. | Essencial |
+| RF054 | Com "Galeria do ENSPACE" escolhida, a janela deve mostrar a caixa "Entendo que este caso de uso fica visível para todas as empresas que usam o ENSPACE.", desmarcada. | A caixa aparece junto do aviso, desmarcada. | Essencial |
+| RF055 | Se a pessoa publica sem marcar a caixa de RF054, a janela deve mostrar "Marque a confirmação para publicar." e não publicar (RN009). | "Publicar na galeria" com a caixa vazia mostra o erro; nada é publicado. | Essencial |
+| RF056 | Quando a pessoa troca a opção de "Onde o caso de uso fica", a janela deve desmarcar a caixa de RF054. | Galeria, marcar, workspace, galeria: a caixa volta desmarcada. | Importante |
+| RF057 | O botão principal da janela deve dizer "Salvar no workspace" com "Só neste workspace" e "Publicar na galeria" com "Galeria do ENSPACE". | Trocar a opção troca o texto e o ícone do botão. | Importante |
+| RF058 | Quando o caso é salvo ou publicado, o sistema deve fechar a janela, abrir a galeria na vista "Deste workspace" com o cartão novo e mostrar o aviso "Caso de uso {nome} salvo" e "Ele está em Deste workspace.", ou "Caso de uso {nome} publicado" e "Ele está na galeria do ENSPACE e em Deste workspace." | Exemplo: publicar "Compras e imóveis da Aurora" mostra o cartão em "Deste workspace" e em "Todos do ENSPACE". | Essencial |
+| RF059 | No detalhe de um caso criado no workspace, a coluna da direita deve mostrar "Por {workspace}" e "Caso de uso criado neste workspace.", sem o selo "Verificado", e "Visibilidade" com "Só neste workspace" ou "Publicado na galeria". | O detalhe do caso publicado mostra "Por Grupo Aurora" e "Publicado na galeria". | Importante |
+| RF060 | Se o produto só puder publicar o caso na galeria do ENSPACE, sem a opção "Só neste workspace", a janela deve mostrar em cada criação o aviso de RF053 e a caixa de RF054, com o botão "Publicar na galeria" sujeito a RF055. | Sem a lista "Onde o caso de uso fica", a janela abre com o aviso e a caixa, e não publica sem a caixa marcada. | Essencial |
+| RF061 | Sem a permissão "Criar Casos de Uso" (P4), cada botão "Criar caso de uso" deve aparecer desligado, com "Para criar um caso de uso, você precisa da permissão Criar Casos de Uso." escrito ao lado. | Cenário "Sem permissão": a faixa e o estado vazio mostram o botão desligado e o motivo. | Essencial |
+
 ## Interfaces (RI)
 
 | ID | Rota ou evento | O que deve receber ou devolver |
 |---|---|---|
-| RI001 | Listar casos de uso (rota `use-cases`, a que a tela lê hoje) | Deve devolver, por caso: nome, ícone, área, complexidade, localidades, descrição, se é destaque, data de criação, número de usos, o que vem junto (categorias com campos, menus com telas, status) e a lista ordenada de imagens. Os campos que a rota não tem hoje estão em P2. |
+| RI001 | Listar casos de uso (rota `use-cases`, a que a tela lê hoje) | Deve devolver, por caso: nome, ícone, área, complexidade, localidades, descrição, se é destaque, data de criação, número de usos, o que vem junto (categorias com campos, menus com telas, status), a lista ordenada de imagens e, no caso criado num workspace, o workspace que criou e a visibilidade. Os campos que a rota não tem hoje estão em P2. |
 | RI002 | Usar caso de uso (a mesma ação de "Migrar Caso de Uso" de hoje) | Deve receber o caso e criar a solicitação de migração na tabela de Backup/Migração, como hoje. Rota e corpo <a definir> (S1). |
+| RI003 | Criar caso de uso | Deve receber nome, área, complexidade, localidades, descrição, imagens, as categorias e os menus escolhidos do workspace, e a visibilidade (só no workspace ou galeria do ENSPACE), e devolver o caso criado. Rota <a definir>. |
 
 ## Não funcionais, restrições e transição (RNF, RS, RT)
 
@@ -136,3 +178,8 @@ protótipo `migracao-de-workspace`.
 | P7 | O que a pessoa vê quando a migração aceita falha depois, já na tabela de Backup/Migração? O protótipo cobre só a recusa do envio (RF039). | produto | Um RF de aviso de falha da migração. |
 | P8 | O número de usos conta cada migração feita ou cada workspace que usou o caso? | produto | O texto e o cálculo de "{n} vezes" em RF032. |
 | S1 | Usar um caso de uso cria uma solicitação de migração, como a importação: a tela de hoje tem os textos "Os registros estão sendo carregados na tabela de Backup/Migração" e "Erro ao criar solicitações de migração", e a importação chama `POST /migration-requests`. | o dev confere no código da tela de hoje | RI002 ganha a rota e o corpo. |
+| P9 | Um caso publicado na galeria passa pela revisão do ENSPACE antes de aparecer para as outras empresas? O protótipo publica na hora. | produto | Um estado "Em análise" no cartão e na Visibilidade, e o aviso de RF058 muda. |
+| P10 | O nome do workspace que criou ("Por Grupo Aurora") aparece para as outras empresas? Ele identifica o cliente. | produto e jurídico | RF059 mostra o nome só no próprio workspace, e as outras empresas veem outro texto. |
+| P11 | Quem criou pode editar, tirar da galeria ou excluir o caso? E o que acontece com quem já usou um caso que saiu da galeria? | produto | Um grupo de RF para editar, despublicar e excluir. |
+| P12 | O que a janela faz se o salvar ou o publicar falha? O protótipo não trata o caso. | produto e back-end | Um RF de erro em "Criar caso de uso". |
+| P13 | O caso criado guarda a estrutura do momento ou acompanha as mudanças do workspace depois? O protótipo guarda o momento. | produto | RN006 ganha a regra de atualização. |

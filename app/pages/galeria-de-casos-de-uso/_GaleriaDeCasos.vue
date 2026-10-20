@@ -31,13 +31,18 @@ const props = defineProps<{
   estado: 'pronto' | 'carregando' | 'erro'
   podeUsar: boolean
 }>()
-const emit = defineEmits<{ usar: [caso: CasoDeUso], tentarDeNovo: [] }>()
+const emit = defineEmits<{ usar: [caso: CasoDeUso], tentarDeNovo: [], criar: [] }>()
 
 const idioma = useIdioma()
 const raiz = useTemplateRef<HTMLElement>('raiz')
 
-type Fonte = 'destaques' | 'enspace'
-const fonte = ref<Fonte>('destaques')
+/**
+ * As 3 vistas (rodada 3, pedido da Mikaela): "Deste workspace" fica entre
+ * Destaques e Todos do ENSPACE, como no protótipo menu-lateral. Lá moram os
+ * casos criados aqui, publicados ou não, e a porta para criar.
+ */
+type Fonte = 'destaques' | 'workspace' | 'enspace'
+const fonte = defineModel<Fonte>('fonte', { default: 'destaques' })
 const busca = ref('')
 /** A localidade começa pelo idioma de quem abre (o develop faz isso: pt-BR é Brasil). */
 const localDoIdioma: Record<string, Localidade['id']> = { 'pt-BR': 'pt-br', 'en': 'en-us', 'es': 'global' }
@@ -57,8 +62,13 @@ function alternar<T>(lista: T[], v: T) {
 
 const filtrando = computed(() => !!busca.value.trim() || complexidades.value.length > 0 || areas.value.length > 0)
 
+/** A galeria do ENSPACE: os casos do ENSPACE e os publicados pelos workspaces. */
+const daGaleria = computed(() => props.casos.filter(c => c.origem === 'enspace' || c.publicado))
+const desteWorkspace = computed(() => props.casos.filter(c => c.origem === 'workspace'))
+const daFonte = computed(() => (fonte.value === 'workspace' ? desteWorkspace.value : daGaleria.value))
+
 /** Sem localidade marcada, valem todas. */
-const filtrados = computed(() => props.casos.filter((c) => {
+const filtrados = computed(() => daFonte.value.filter((c) => {
   const termo = normaliza(busca.value.trim())
   if (termo && !normaliza(`${c.nome} ${c.descricao} ${c.area}`).includes(termo)) return false
   if (locais.value.length && !c.localidades.some(l => locais.value.includes(l))) return false
@@ -77,9 +87,16 @@ const porArea = computed(() => {
 })
 
 const contagem = computed(() => ({
-  destaques: props.casos.filter(c => c.destaque).length,
-  enspace: props.casos.length,
+  destaques: daGaleria.value.filter(c => c.destaque).length,
+  workspace: desteWorkspace.value.length,
+  enspace: daGaleria.value.length,
 }))
+
+const vistas = computed(() => [
+  { id: 'destaques' as const, rotulo: props.t.destaques, icone: 'i-lucide-star' },
+  { id: 'workspace' as const, rotulo: props.t.doWorkspace, icone: 'i-lucide-building-2' },
+  { id: 'enspace' as const, rotulo: props.t.todos, icone: 'i-lucide-badge-check' },
+])
 
 function limpar() {
   busca.value = ''
@@ -96,6 +113,11 @@ function abrir(c: CasoDeUso | null) {
   aberto.value = c
   // O detalhe abre no lugar da lista: o topo da galeria volta para a vista.
   nextTick(() => raiz.value?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+}
+
+/** Com imagens enviadas, a galeria mostra as imagens; sem elas, a prévia desenhada. */
+function totalDeQuadros(c: CasoDeUso) {
+  return c.imagens?.length || quadrosDe(c).length
 }
 
 function quadrosDe(c: CasoDeUso) {
@@ -115,7 +137,7 @@ watch(aberto, () => {
 
 function passar(passo: number) {
   if (!aberto.value) return
-  const total = quadrosDe(aberto.value).length
+  const total = totalDeQuadros(aberto.value)
   quadroAtual.value = (quadroAtual.value + passo + total) % total
 }
 
@@ -177,17 +199,17 @@ watch(() => props.casos, () => { aberto.value = null })
       <aside class="sticky top-0 hidden w-56 shrink-0 self-start border-r border-default md:block">
         <nav class="space-y-0.5 px-2 pt-3" :aria-label="props.t.galeriaTitulo">
           <button
-            v-for="f in ([['destaques', props.t.destaques, 'i-lucide-star'], ['enspace', props.t.todos, 'i-lucide-badge-check']] as const)"
-            :key="f[0]"
+            v-for="f in vistas"
+            :key="f.id"
             type="button"
             class="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
-            :class="fonte === f[0] ? 'bg-primary/10 font-semibold text-highlighted' : 'text-default hover:bg-elevated'"
-            :aria-current="fonte === f[0] ? 'page' : undefined"
-            @click="fonte = f[0]"
+            :class="fonte === f.id ? 'bg-primary/10 font-semibold text-highlighted' : 'text-default hover:bg-elevated'"
+            :aria-current="fonte === f.id ? 'page' : undefined"
+            @click="fonte = f.id"
           >
-            <UIcon :name="f[2]" class="size-4 shrink-0" :class="fonte === f[0] ? 'text-primary' : 'text-toned'" />
-            <span class="min-w-0 flex-1 truncate text-left">{{ f[1] }}</span>
-            <span class="text-xs text-muted">{{ contagem[f[0]] }}</span>
+            <UIcon :name="f.icone" class="size-4 shrink-0" :class="fonte === f.id ? 'text-primary' : 'text-toned'" />
+            <span class="min-w-0 flex-1 truncate text-left">{{ f.rotulo }}</span>
+            <span class="text-xs text-muted">{{ contagem[f.id] }}</span>
           </button>
         </nav>
 
@@ -280,7 +302,7 @@ watch(() => props.casos, () => { aberto.value = null })
             <UButton :label="props.t.filtros" icon="i-lucide-sliders-horizontal" color="neutral" variant="outline" class="md:hidden" />
             <template #content>
               <div class="w-64 space-y-4 p-3">
-                <URadioGroup v-model="fonte" :items="[{ value: 'destaques', label: props.t.destaques }, { value: 'enspace', label: props.t.todos }]" />
+                <URadioGroup v-model="fonte" :items="vistas.map(v => ({ value: v.id, label: v.rotulo }))" />
                 <fieldset>
                   <legend class="mb-2 text-xs font-semibold text-toned">{{ props.t.localidade }}</legend>
                   <div class="space-y-2">
@@ -301,6 +323,29 @@ watch(() => props.casos, () => { aberto.value = null })
         </div>
 
         <div class="px-5 py-5">
+          <!-- Deste workspace: a porta para criar (rodada 3). -->
+          <div v-if="fonte === 'workspace' && desteWorkspace.length" class="mb-6 flex flex-wrap items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
+            <UIcon name="i-lucide-package-plus" class="size-5 shrink-0 text-primary" />
+            <div class="min-w-48 flex-1">
+              <p class="text-sm font-semibold text-highlighted">{{ props.t.faixaCriarTitulo }}</p>
+              <p class="text-sm text-muted">{{ props.t.faixaCriarTexto }}</p>
+              <p v-if="!props.podeUsar" class="mt-1 flex items-center gap-1.5 text-xs text-muted">
+                <UIcon name="i-lucide-lock" class="size-3.5 shrink-0" />{{ props.t.semPermissaoCriar }}
+              </p>
+            </div>
+            <UButton :label="props.t.criarCaso" icon="i-lucide-plus" size="sm" color="neutral" variant="outline" :disabled="!props.podeUsar" @click="emit('criar')" />
+          </div>
+
+          <div v-if="fonte === 'workspace' && !desteWorkspace.length" class="mx-auto max-w-md py-12 text-center">
+            <span class="mx-auto flex size-11 items-center justify-center rounded-xl bg-primary/10">
+              <UIcon name="i-lucide-package-plus" class="size-6 text-primary" />
+            </span>
+            <p class="mt-3 text-sm font-semibold text-highlighted">{{ props.t.nadaNoWorkspaceTitulo }}</p>
+            <p class="mt-1 text-sm text-muted">{{ props.t.nadaNoWorkspaceAjuda }}</p>
+            <UButton :label="props.t.criarCaso" icon="i-lucide-plus" color="primary" class="mt-4" :disabled="!props.podeUsar" @click="emit('criar')" />
+            <p v-if="!props.podeUsar" class="mt-2 text-xs text-muted">{{ props.t.semPermissaoCriar }}</p>
+          </div>
+
           <!-- Em destaque -->
           <template v-if="emDestaque.length">
             <h3 class="mb-3 text-base font-semibold text-highlighted">{{ props.t.emDestaque }}</h3>
@@ -314,7 +359,10 @@ watch(() => props.casos, () => { aberto.value = null })
                 :aria-label="props.t.abrirCaso(c.nome)"
                 @click="abrir(c)"
               >
-                <div class="h-32 bg-elevated/60 p-2.5"><PreviaDoCaso :caso="c" quadro="menu" /></div>
+                <div class="h-32 bg-elevated/60 p-2.5">
+                  <img v-if="c.imagens?.length" :src="c.imagens[0]!.url" alt="" class="size-full rounded-md object-cover">
+                  <PreviaDoCaso v-else :caso="c" quadro="menu" />
+                </div>
                 <div class="flex items-center gap-2 border-t border-default px-3 py-2.5">
                   <UIcon :name="c.icone" class="size-4 shrink-0 text-primary" />
                   <span class="min-w-0 flex-1 truncate text-sm font-medium text-highlighted">{{ c.nome }}</span>
@@ -325,7 +373,7 @@ watch(() => props.casos, () => { aberto.value = null })
           </template>
 
           <!-- Nada sobrou depois do filtro -->
-          <div v-if="!filtrados.length" class="py-10 text-center">
+          <div v-if="!filtrados.length && !(fonte === 'workspace' && !desteWorkspace.length)" class="py-10 text-center">
             <UIcon name="i-lucide-search-x" class="mx-auto size-6 text-dimmed" />
             <p class="mt-2 text-sm font-medium text-highlighted">{{ props.t.nenhumCaso }}</p>
             <p class="mt-1 text-sm text-muted">{{ props.t.nenhumCasoAjuda }}</p>
@@ -358,10 +406,16 @@ watch(() => props.casos, () => { aberto.value = null })
                 :aria-label="props.t.abrirCaso(c.nome)"
                 @click="abrir(c)"
               >
-                <div class="h-32 bg-elevated/60 p-2.5"><PreviaDoCaso :caso="c" quadro="menu" /></div>
+                <div class="h-32 bg-elevated/60 p-2.5">
+                  <img v-if="c.imagens?.length" :src="c.imagens[0]!.url" alt="" class="size-full rounded-md object-cover">
+                  <PreviaDoCaso v-else :caso="c" quadro="menu" />
+                </div>
                 <div class="flex items-center gap-2 border-t border-default px-3 py-2.5">
                   <UIcon :name="c.icone" class="size-4 shrink-0 text-primary" />
                   <span class="min-w-0 flex-1 truncate text-sm font-medium text-highlighted" :title="c.nome">{{ c.nome }}</span>
+                  <UTooltip v-if="c.origem === 'workspace'" :text="c.publicado ? props.t.publicadoNaGaleria : props.t.soNoWorkspace">
+                    <UIcon :name="c.publicado ? 'i-lucide-globe' : 'i-lucide-building-2'" class="size-4 shrink-0 text-muted" :aria-label="c.publicado ? props.t.publicadoNaGaleria : props.t.soNoWorkspace" />
+                  </UTooltip>
                   <UBadge :label="props.t.complexidades[c.complexidade]" size="sm" :color="corDaComplexidade[c.complexidade]" variant="subtle" class="shrink-0" />
                 </div>
               </button>
@@ -408,15 +462,17 @@ watch(() => props.casos, () => { aberto.value = null })
           </div>
 
           <!-- galeria e descrição -->
-          <div class="mb-6 grid overflow-hidden rounded-xl border border-default md:grid-cols-2">
-            <div class="flex flex-col border-b border-default p-4 md:border-b-0 md:border-r">
+          <!-- Sem descrição, a galeria de imagens ocupa a largura toda: nada de bloco vazio. -->
+          <div class="mb-6 grid overflow-hidden rounded-xl border border-default" :class="aberto.descricao ? 'md:grid-cols-2' : ''">
+            <div class="flex flex-col p-4" :class="aberto.descricao ? 'border-b border-default md:border-b-0 md:border-r' : ''">
               <button
                 type="button"
                 class="group/img relative h-48 w-full cursor-zoom-in rounded-md focus-visible:outline-2 focus-visible:outline-primary"
-                :aria-label="`${props.t.ampliar}. ${props.t.imagemDe(quadroAtual + 1, quadrosDe(aberto).length)}`"
+                :aria-label="`${props.t.ampliar}. ${props.t.imagemDe(quadroAtual + 1, totalDeQuadros(aberto))}`"
                 @click="ampliado = true"
               >
-                <PreviaDoCaso :key="quadroAtual" :caso="aberto" :quadro="quadrosDe(aberto)[quadroAtual]!" grande class="animate-[entrada_0.2s_ease-out_both]" />
+                <img v-if="aberto.imagens?.length" :key="quadroAtual" :src="aberto.imagens[quadroAtual]!.url" alt="" class="size-full animate-[entrada_0.2s_ease-out_both] rounded-md object-contain">
+                <PreviaDoCaso v-else :key="quadroAtual" :caso="aberto" :quadro="quadrosDe(aberto)[quadroAtual]!" grande class="animate-[entrada_0.2s_ease-out_both]" />
                 <span class="absolute right-2 top-2 rounded-md bg-default/90 p-1 opacity-0 shadow transition-opacity group-hover/img:opacity-100">
                   <UIcon name="i-lucide-maximize-2" class="size-4 text-highlighted" />
                 </span>
@@ -425,12 +481,12 @@ watch(() => props.casos, () => { aberto.value = null })
                 <UButton icon="i-lucide-chevron-left" size="xs" color="neutral" variant="ghost" :aria-label="props.t.anterior" @click="passar(-1)" />
                 <div class="flex gap-1.5">
                   <button
-                    v-for="(q, i) in quadrosDe(aberto)"
-                    :key="q"
+                    v-for="i in [...Array(totalDeQuadros(aberto)).keys()]"
+                    :key="i"
                     type="button"
                     class="size-2 rounded-full transition-colors"
                     :class="i === quadroAtual ? 'bg-inverted' : 'bg-accented'"
-                    :aria-label="props.t.imagemDe(i + 1, quadrosDe(aberto).length)"
+                    :aria-label="props.t.imagemDe(i + 1, totalDeQuadros(aberto))"
                     :aria-current="i === quadroAtual ? 'true' : undefined"
                     @click="quadroAtual = i"
                   />
@@ -438,7 +494,7 @@ watch(() => props.casos, () => { aberto.value = null })
                 <UButton icon="i-lucide-chevron-right" size="xs" color="neutral" variant="ghost" :aria-label="props.t.proxima" @click="passar(1)" />
               </div>
             </div>
-            <div class="p-5">
+            <div v-if="aberto.descricao" class="p-5">
               <p class="mb-2 text-sm font-semibold text-highlighted">{{ props.t.descricaoDoCaso }}</p>
               <p class="text-sm leading-relaxed text-muted">{{ aberto.descricao }}</p>
             </div>
@@ -483,12 +539,22 @@ watch(() => props.casos, () => { aberto.value = null })
           <div class="rounded-xl border border-default p-4 shadow-sm">
             <div class="mb-2 flex items-start justify-between">
               <span class="flex size-9 items-center justify-center rounded-lg border border-default">
-                <UIcon name="i-lucide-badge-check" class="size-5 text-primary" />
+                <UIcon :name="aberto.origem === 'enspace' ? 'i-lucide-badge-check' : 'i-lucide-building-2'" class="size-5 text-primary" />
               </span>
-              <UBadge :label="props.t.verificado" size="sm" color="primary" variant="subtle" />
+              <UBadge v-if="aberto.origem === 'enspace'" :label="props.t.verificado" size="sm" color="primary" variant="subtle" />
             </div>
-            <p class="text-sm font-semibold text-highlighted">{{ props.t.peloEnspace }}</p>
-            <p class="mt-0.5 text-xs text-muted">{{ props.t.peloEnspaceDica }}</p>
+            <p class="text-sm font-semibold text-highlighted">{{ aberto.origem === 'enspace' ? props.t.peloEnspace : props.t.porWorkspace(aberto.autor ?? '') }}</p>
+            <p class="mt-0.5 text-xs text-muted">{{ aberto.origem === 'enspace' ? props.t.peloEnspaceDica : props.t.porWorkspaceDica }}</p>
+          </div>
+          <div v-if="aberto.origem === 'workspace'">
+            <p class="text-xs font-semibold uppercase tracking-wider text-toned">{{ props.t.visibilidade }}</p>
+            <UBadge
+              :label="aberto.publicado ? props.t.publicadoNaGaleria : props.t.soNoWorkspace"
+              :icon="aberto.publicado ? 'i-lucide-globe' : 'i-lucide-building-2'"
+              color="neutral"
+              variant="outline"
+              class="mt-1"
+            />
           </div>
           <div>
             <p class="text-xs font-semibold uppercase tracking-wider text-toned">{{ props.t.criadoEmRotulo }}</p>
@@ -513,13 +579,14 @@ watch(() => props.casos, () => { aberto.value = null })
       <template #content>
         <div v-if="aberto" class="flex h-full flex-col" @keydown.left="passar(-1)" @keydown.right="passar(1)">
           <div class="flex shrink-0 items-center justify-between px-6 py-3 text-inverted">
-            <p class="text-sm">{{ props.t.imagemDe(quadroAtual + 1, quadrosDe(aberto).length) }}</p>
+            <p class="text-sm">{{ props.t.imagemDe(quadroAtual + 1, totalDeQuadros(aberto)) }}</p>
             <UButton icon="i-lucide-x" color="neutral" variant="ghost" class="text-inverted" :aria-label="props.t.fechar" @click="ampliado = false" />
           </div>
           <div class="flex min-h-0 flex-1 items-center gap-4 px-6 pb-8">
             <UButton icon="i-lucide-chevron-left" size="xl" color="neutral" variant="ghost" class="text-inverted" :aria-label="props.t.anterior" @click="passar(-1)" />
             <div class="mx-auto aspect-[16/10] h-full max-h-[75vh] min-w-0 flex-1 rounded-lg bg-default p-4">
-              <PreviaDoCaso :key="quadroAtual" :caso="aberto" :quadro="quadrosDe(aberto)[quadroAtual]!" grande class="animate-[entrada_0.2s_ease-out_both]" />
+              <img v-if="aberto.imagens?.length" :key="quadroAtual" :src="aberto.imagens[quadroAtual]!.url" alt="" class="size-full animate-[entrada_0.2s_ease-out_both] object-contain">
+              <PreviaDoCaso v-else :key="quadroAtual" :caso="aberto" :quadro="quadrosDe(aberto)[quadroAtual]!" grande class="animate-[entrada_0.2s_ease-out_both]" />
             </div>
             <UButton icon="i-lucide-chevron-right" size="xl" color="neutral" variant="ghost" class="text-inverted" :aria-label="props.t.proxima" @click="passar(1)" />
           </div>

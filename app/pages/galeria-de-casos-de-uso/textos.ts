@@ -115,6 +115,47 @@ export interface Textos {
   cancelar: string
   usadoTitulo: (nome: string) => string
   usadoTexto: string
+
+  // criar (rodada 3)
+  doWorkspace: string
+  criarCaso: string
+  faixaCriarTitulo: string
+  faixaCriarTexto: string
+  criarCasoDescricao: string
+  nomeDoCaso: string
+  nomeObrigatorio: string
+  areaDoCaso: string
+  descricaoCampo: string
+  imagensDoCaso: string
+  imagensDica: string
+  imagensArraste: string
+  imagensFormatos: string
+  oQueEntraCampo: string
+  oQueEntraDica: string
+  categoriasDoWorkspace: string
+  menusDoWorkspace: string
+  escolhaUmItem: string
+  ondeFica: string
+  ondeFicaDica: string
+  ondeOpcoes: Record<'workspace' | 'galeria', { label: string, description: string }>
+  avisoPublicoTitulo: string
+  avisoPublicoTexto: string
+  confirmoPublico: string
+  confirmoObrigatorio: string
+  salvarNoWorkspace: string
+  publicarNaGaleria: string
+  casoSalvo: (nome: string) => string
+  casoSalvoTexto: string
+  casoPublicado: (nome: string) => string
+  casoPublicadoTexto: string
+  nadaNoWorkspaceTitulo: string
+  nadaNoWorkspaceAjuda: string
+  porWorkspace: (nome: string) => string
+  porWorkspaceDica: string
+  visibilidade: string
+  soNoWorkspace: string
+  publicadoNaGaleria: string
+  semPermissaoCriar: string
 }
 
 const casca: Record<Idioma, Casca> = {
@@ -247,6 +288,48 @@ const pt: Textos = {
   cancelar: 'Cancelar',
   usadoTitulo: nome => `Caso de uso ${nome} enviado`,
   usadoTexto: 'Os registros estão sendo carregados na tabela de Backup/Migração.',
+  doWorkspace: 'Deste workspace',
+  criarCaso: 'Criar caso de uso',
+  faixaCriarTitulo: 'Transforme este workspace em um caso de uso',
+  faixaCriarTexto: 'Escolha as categorias e os menus que entram. Você decide se o caso fica só aqui ou na galeria do ENSPACE.',
+  criarCasoDescricao: 'Monte um caso de uso com a estrutura que este workspace tem agora. Só a estrutura entra: nenhum item, arquivo ou dado de pessoa.',
+  nomeDoCaso: 'Nome',
+  nomeObrigatorio: 'Informe o nome do caso de uso.',
+  areaDoCaso: 'Área',
+  descricaoCampo: 'Descrição',
+  imagensDoCaso: 'Imagens da galeria',
+  imagensDica: 'A primeira imagem é a miniatura do cartão.',
+  imagensArraste: 'Arraste as imagens ou clique para escolher',
+  imagensFormatos: 'PNG ou JPG',
+  oQueEntraCampo: 'O que entra',
+  oQueEntraDica: 'Cada categoria leva os campos e os status dela. Cada menu leva as telas.',
+  categoriasDoWorkspace: 'Categorias',
+  menusDoWorkspace: 'Menus',
+  escolhaUmItem: 'Escolha ao menos 1 categoria ou 1 menu.',
+  ondeFica: 'Onde o caso de uso fica',
+  ondeFicaDica: 'Só neste workspace: apenas quem acessa este workspace vê e usa. Galeria do ENSPACE: todas as empresas que usam o ENSPACE veem e usam.',
+  ondeOpcoes: {
+    workspace: { label: 'Só neste workspace', description: 'Aparece em Deste workspace.' },
+    galeria: { label: 'Galeria do ENSPACE', description: 'Aparece para todas as empresas que usam o ENSPACE.' },
+  },
+  avisoPublicoTitulo: 'Este caso de uso fica público',
+  avisoPublicoTexto: 'Todas as empresas que usam o ENSPACE passam a ver e usar os nomes das categorias, dos campos, dos menus, das telas e dos status escolhidos. Confira se nenhum nome identifica um cliente, uma pessoa ou um projeto interno.',
+  confirmoPublico: 'Entendo que este caso de uso fica visível para todas as empresas que usam o ENSPACE.',
+  confirmoObrigatorio: 'Marque a confirmação para publicar.',
+  salvarNoWorkspace: 'Salvar no workspace',
+  publicarNaGaleria: 'Publicar na galeria',
+  casoSalvo: nome => `Caso de uso ${nome} salvo`,
+  casoSalvoTexto: 'Ele está em Deste workspace.',
+  casoPublicado: nome => `Caso de uso ${nome} publicado`,
+  casoPublicadoTexto: 'Ele está na galeria do ENSPACE e em Deste workspace.',
+  nadaNoWorkspaceTitulo: 'Nenhum caso de uso criado neste workspace',
+  nadaNoWorkspaceAjuda: 'Crie um caso de uso com as categorias e os menus que este workspace já tem.',
+  porWorkspace: nome => `Por ${nome}`,
+  porWorkspaceDica: 'Caso de uso criado neste workspace.',
+  visibilidade: 'Visibilidade',
+  soNoWorkspace: 'Só neste workspace',
+  publicadoNaGaleria: 'Publicado na galeria',
+  semPermissaoCriar: 'Para criar um caso de uso, você precisa da permissão Criar Casos de Uso.',
 }
 
 const en: Textos = {
@@ -334,6 +417,48 @@ const en: Textos = {
   cancelar: 'Cancel',
   usadoTitulo: nome => `Use case ${nome} sent`,
   usadoTexto: 'Records are being loaded into the Backup/Migration table.',
+  doWorkspace: 'From this workspace',
+  criarCaso: 'Create use case',
+  faixaCriarTitulo: 'Turn this workspace into a use case',
+  faixaCriarTexto: 'Choose the categories and menus that go in. You decide whether the use case stays here or goes to the ENSPACE gallery.',
+  criarCasoDescricao: 'Build a use case from the structure this workspace has now. Only the structure goes in: no items, files or personal data.',
+  nomeDoCaso: 'Name',
+  nomeObrigatorio: 'Enter the use case name.',
+  areaDoCaso: 'Area',
+  descricaoCampo: 'Description',
+  imagensDoCaso: 'Gallery images',
+  imagensDica: 'The first image is the card thumbnail.',
+  imagensArraste: 'Drag the images or click to choose',
+  imagensFormatos: 'PNG or JPG',
+  oQueEntraCampo: 'What goes in',
+  oQueEntraDica: 'Each category takes its fields and statuses. Each menu takes its screens.',
+  categoriasDoWorkspace: 'Categories',
+  menusDoWorkspace: 'Menus',
+  escolhaUmItem: 'Choose at least 1 category or 1 menu.',
+  ondeFica: 'Where the use case lives',
+  ondeFicaDica: 'Only this workspace: only people with access to this workspace see and use it. ENSPACE gallery: every company that uses ENSPACE sees and uses it.',
+  ondeOpcoes: {
+    workspace: { label: 'Only this workspace', description: 'Shows in From this workspace.' },
+    galeria: { label: 'ENSPACE gallery', description: 'Shows to every company that uses ENSPACE.' },
+  },
+  avisoPublicoTitulo: 'This use case becomes public',
+  avisoPublicoTexto: 'Every company that uses ENSPACE can see and use the names of the chosen categories, fields, menus, screens and statuses. Check that no name identifies a client, a person or an internal project.',
+  confirmoPublico: 'I understand this use case is visible to every company that uses ENSPACE.',
+  confirmoObrigatorio: 'Check the confirmation to publish.',
+  salvarNoWorkspace: 'Save to workspace',
+  publicarNaGaleria: 'Publish to gallery',
+  casoSalvo: nome => `Use case ${nome} saved`,
+  casoSalvoTexto: 'It is in From this workspace.',
+  casoPublicado: nome => `Use case ${nome} published`,
+  casoPublicadoTexto: 'It is in the ENSPACE gallery and in From this workspace.',
+  nadaNoWorkspaceTitulo: 'No use case created in this workspace',
+  nadaNoWorkspaceAjuda: 'Create a use case with the categories and menus this workspace already has.',
+  porWorkspace: nome => `By ${nome}`,
+  porWorkspaceDica: 'Use case created in this workspace.',
+  visibilidade: 'Visibility',
+  soNoWorkspace: 'Only this workspace',
+  publicadoNaGaleria: 'Published to gallery',
+  semPermissaoCriar: 'To create a use case, you need the Create Use Cases permission.',
 }
 
 const es: Textos = {
@@ -421,6 +546,48 @@ const es: Textos = {
   cancelar: 'Cancelar',
   usadoTitulo: nome => `Caso de uso ${nome} enviado`,
   usadoTexto: 'Los registros se están cargando en la tabla de Respaldo/Migración.',
+  doWorkspace: 'De este espacio de trabajo',
+  criarCaso: 'Crear caso de uso',
+  faixaCriarTitulo: 'Convierta este espacio de trabajo en un caso de uso',
+  faixaCriarTexto: 'Elija las categorías y los menús que entran. Usted decide si el caso queda solo aquí o en la galería de ENSPACE.',
+  criarCasoDescricao: 'Arme un caso de uso con la estructura que este espacio de trabajo tiene ahora. Solo entra la estructura: ningún ítem, archivo ni dato de personas.',
+  nomeDoCaso: 'Nombre',
+  nomeObrigatorio: 'Ingrese el nombre del caso de uso.',
+  areaDoCaso: 'Área',
+  descricaoCampo: 'Descripción',
+  imagensDoCaso: 'Imágenes de la galería',
+  imagensDica: 'La primera imagen es la miniatura de la tarjeta.',
+  imagensArraste: 'Arrastre las imágenes o haga clic para elegir',
+  imagensFormatos: 'PNG o JPG',
+  oQueEntraCampo: 'Qué entra',
+  oQueEntraDica: 'Cada categoría lleva sus campos y estados. Cada menú lleva sus pantallas.',
+  categoriasDoWorkspace: 'Categorías',
+  menusDoWorkspace: 'Menús',
+  escolhaUmItem: 'Elija al menos 1 categoría o 1 menú.',
+  ondeFica: 'Dónde queda el caso de uso',
+  ondeFicaDica: 'Solo en este espacio de trabajo: solo quien accede a este espacio de trabajo lo ve y lo usa. Galería de ENSPACE: todas las empresas que usan ENSPACE lo ven y lo usan.',
+  ondeOpcoes: {
+    workspace: { label: 'Solo en este espacio de trabajo', description: 'Aparece en De este espacio de trabajo.' },
+    galeria: { label: 'Galería de ENSPACE', description: 'Aparece para todas las empresas que usan ENSPACE.' },
+  },
+  avisoPublicoTitulo: 'Este caso de uso queda público',
+  avisoPublicoTexto: 'Todas las empresas que usan ENSPACE pasan a ver y usar los nombres de las categorías, los campos, los menús, las pantallas y los estados elegidos. Verifique que ningún nombre identifique a un cliente, una persona o un proyecto interno.',
+  confirmoPublico: 'Entiendo que este caso de uso queda visible para todas las empresas que usan ENSPACE.',
+  confirmoObrigatorio: 'Marque la confirmación para publicar.',
+  salvarNoWorkspace: 'Guardar en el espacio de trabajo',
+  publicarNaGaleria: 'Publicar en la galería',
+  casoSalvo: nome => `Caso de uso ${nome} guardado`,
+  casoSalvoTexto: 'Está en De este espacio de trabajo.',
+  casoPublicado: nome => `Caso de uso ${nome} publicado`,
+  casoPublicadoTexto: 'Está en la galería de ENSPACE y en De este espacio de trabajo.',
+  nadaNoWorkspaceTitulo: 'Ningún caso de uso creado en este espacio de trabajo',
+  nadaNoWorkspaceAjuda: 'Cree un caso de uso con las categorías y los menús que este espacio de trabajo ya tiene.',
+  porWorkspace: nome => `Por ${nome}`,
+  porWorkspaceDica: 'Caso de uso creado en este espacio de trabajo.',
+  visibilidade: 'Visibilidad',
+  soNoWorkspace: 'Solo en este espacio de trabajo',
+  publicadoNaGaleria: 'Publicado en la galería',
+  semPermissaoCriar: 'Para crear un caso de uso, necesita el permiso Crear Casos de Uso.',
 }
 
 export const textos: Record<Idioma, Textos> = { 'pt-BR': pt, en, es }
