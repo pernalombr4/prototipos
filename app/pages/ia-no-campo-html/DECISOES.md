@@ -195,3 +195,25 @@
 ## Aprovado · 2026-10-14
 - **Pedido (literal):** "pode publicar e deixar na pagina de prototipos nao como em revisao, mas como ja finalizado, ja pronto"
 - **Mudou:** o protótipo passa a **aprovado**, no card do índice (`definePageMeta`) e no `README.md`.
+
+## Rodada 10 · 2026-10-20
+- **Pedido (literal):** "tem um ponto: ao usar ia no enspace o user pode usufruir de todos os modelos que disponibilizamos, sem precisar de conexao nenhuma. ele conectar a ia dele significa só que o custo vai ser absorvido por ele. veja os impactos dessa informaçao na atual jornada e ajuste"
+- **O que a regra derruba:** as rodadas 6 e 7 partiam de "sem integração, sem IA". Com a regra nova:
+  - não existe IA desligada por falta de chave: o botão IA, o Ctrl J e o "/" abrem a caixa do BENI sempre;
+  - nenhum modelo fica bloqueado: o agente com Claude Opus responde sem chave nenhuma;
+  - a chave é opcional e só muda quem paga; o modal deixa de abrir sozinho no meio do pedido.
+- **Mudou:**
+  - saíram o modal que abria ao clicar em IA, o "Ativar a IA" do "/", a conexão exigida pelo modelo do agente e a caixa de pedido de ativação do membro (`_PedirAtivacao.vue`);
+  - o seletor de Modelo libera todos os modelos. O grupo da empresa com chave conectada ganha o selo "Sua conta", com ícone de chave (como o Raycast marca os modelos da chave própria), e cada modelo diz "Cobrado na conta OpenAI" no lugar do consumo de en-credits;
+  - o rodapé do seletor vira "Usar a chave de uma conta própria" (ou "Ver as chaves conectadas"), e é o único caminho até o modal dentro do campo;
+  - o modal vira **"Chaves de IA do workspace"**, com "Opcional" na descrição e o aviso "Todos os modelos já funcionam sem chave, com os en-credits do ENSPACE. A chave só muda quem paga." Os botões viram "Conectar chave"; conectada, o modal lista os modelos que passam a ser cobrados na conta;
+  - a barra da proposta diz em que conta o consumo caiu quando há chave: "Auto: Claude Sonnet 4.6 (conta Anthropic)". Sem chave, fica só o modelo (en-credits é o padrão);
+  - o Auto escolhe entre todos os modelos, com chave ou sem;
+  - o andaime troca "Ligada / Desligada / membro" por **Sem chave (en-credits)**, **Chave da OpenAI** (a única que o ENSPACE aceita hoje) e **3 chaves próprias**, mais "Responde com erro". Endereço antigo (`?ia=desligada`, `?ia=membro`) cai em "Sem chave".
+- **Ficou de fora, como pergunta ao time:**
+  - o que acontece quando os en-credits acabam. Um aviso com "Usar a chave de uma conta própria" seria a saída natural, mas a regra não foi dita;
+  - se quem não administra vê o rodapé das chaves. O protótipo mostra a visão de quem administra;
+  - se o Auto deve preferir os modelos que têm chave própria.
+- **Fronteira:** mudam a entrada da IA, o seletor de Modelo, o modal das chaves, o rótulo do modelo na barra da proposta e o andaime; não mudam a caixa do BENI, a proposta, o seletor de agente nem a barra de ferramentas.
+- **CSS fora da prop:** nenhum.
+- **Ver:** `?ia=chave` · `evidencias/proto-chave-seletor.png`, `evidencias/proto-chave-modal.png`, `evidencias/proto-chave-barra.png`. As evidências das rodadas 6, 7 e 9 (`proto-ativar-*`, `proto-conectar-*`, `proto-varias-*`) ficam como histórico.

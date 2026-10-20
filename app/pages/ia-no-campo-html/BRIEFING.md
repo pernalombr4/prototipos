@@ -40,9 +40,15 @@ Medido em `padrao-dos-campos` (formulário de criação com 29 campos, uma colun
 | Barra fixa, nesta ordem | desfazer, refazer, título, negrito, itálico, sublinhado, tachado, código, emoji, alinhamento, mais |
 | Placeholder | `Escreva ou digite "/" para acessar os comandos...` |
 | Menu "/" | existe (o placeholder o anuncia) |
-| IA | ~~nenhuma no campo~~ **Corrigido na rodada 6:** existe, mas só com a integração OpenAI instalada (abaixo) |
+| IA | ~~nenhuma no campo~~ ~~só com a integração OpenAI instalada (rodada 6)~~ **Corrigido na rodada 10:** funciona sempre, com todos os modelos, em en-credits; a chave de uma conta própria só muda quem paga (abaixo) |
 
-### A IA de hoje: integração OpenAI (rodada 6, 2026-10-14)
+### Como a IA do ENSPACE é cobrada (rodada 10, 2026-10-20)
+
+Fonte: a redatora, em 2026-10-20. Quem usa a IA no ENSPACE usa todos os modelos que o ENSPACE disponibiliza, sem conexão nenhuma, e o consumo sai dos en-credits. Conectar a chave da própria conta de IA só faz o custo ser absorvido por essa conta.
+
+Isso corrige 2 premissas das rodadas 6 e 7: a IA não fica "desligada" sem integração, e a integração não libera modelos. O `en-docs` (página da integração OpenAI) diz que o botão de IA do editor só aparece com a integração instalada; a frase da redatora vence, e a página do `en-docs` pode estar desatualizada (achado abaixo).
+
+### A integração OpenAI de hoje (rodada 6, 2026-10-14)
 
 Segundo o `en-docs` (página da integração OpenAI), com a integração instalada o editor HTML mostra um botão de IA com: Revisar, Traduzir, Resumir, Continuar, Explicar, Subir Arquivo e Personalizado. Sem ela, o botão não aparece.
 
@@ -52,7 +58,7 @@ Como se instala, medido no develop (workspace de exploração, 2026-10-14), só 
 2. a página da OpenAI: logo, "Descrição" e o botão "Instalar Integração" (`evidencias/hoje-openai-pagina.png`);
 3. o modal "OpenAI": chave "Alterar Token" (já ligada), o campo obrigatório "Api Key" com "Por favor digite" e "Salvar" (`evidencias/hoje-openai-modal.png`).
 
-Quem escreve no campo não tem como saber que a IA existe: sem a integração, nada no campo aponta para ela.
+~~Quem escreve no campo não tem como saber que a IA existe: sem a integração, nada no campo aponta para ela.~~ Premissa derrubada na rodada 10: a IA não depende da integração.
 
 **O que não foi medido:** os itens do menu "/" de hoje. O protótipo monta os grupos Texto, Listas e Inserir com os blocos que a barra já oferece. **Conferir no develop** quando o DNS voltar.
 
@@ -75,5 +81,6 @@ Cópia de `pastas-do-item` (`_CascaDoItem.vue` e `_PainelDoItem.vue`), que copio
   - na 1ª instalação, a chave "Alterar Token" já vem ligada, sem token nenhum para alterar;
   - o rótulo "Api Key" fica em inglês na tela em português;
   - nada diz onde pegar a chave nem que a conta OpenAI precisa de créditos.
-- **Modelos de 4 empresas, chave de 1 (rodada 7):** o cadastro de agente (Configurações › Agentes de IA, en-docs "AI Agents") oferece modelos Claude, GPT, Gemini e DeepSeek, mas a IA do campo HTML depende só da chave da OpenAI. Não está claro quem paga e qual chave atende um agente com Claude: perguntar ao time antes de levar o modal adiante.
+- ~~**Modelos de 4 empresas, chave de 1 (rodada 7):** não está claro quem paga e qual chave atende um agente com Claude.~~ **Respondido em 2026-10-20 pela redatora:** todos os modelos funcionam em en-credits; a chave de uma conta só leva o consumo dos modelos daquela empresa para ela.
+- **A página da integração OpenAI no `en-docs` (rodada 10):** diz que o botão de IA do editor HTML só aparece com a integração instalada. Pela regra de 2026-10-20, a IA funciona sem integração. Se a regra vale hoje no produto, a página do `en-docs` está desatualizada; quem confirma é o time. Este agente não escreve no `en-docs`.
 - **Alinhamento e emoji precisam de extensão própria** no editor (TextAlign e Emoji do TipTap). O protótipo não as tem: o alinhamento é maquete e o emoji insere o caractere direto.

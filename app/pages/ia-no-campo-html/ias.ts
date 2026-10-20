@@ -1,12 +1,16 @@
 /**
- * As IAs que o workspace pode conectar. PROPOSTA (rodada 7).
+ * As contas de IA cuja chave o workspace pode conectar. PROPOSTA (rodadas 7 e 10).
  *
- * Hoje o ENSPACE tem uma só: a integração OpenAI (Configurações ›
- * Integrações › OpenAI). Claude e Gemini são SIMULADOS aqui, para mostrar o
- * formato com mais de uma; Kimi e DeepSeek entram como "Em breve".
+ * Todos os modelos funcionam sem chave nenhuma, cobrados em en-credits do
+ * ENSPACE (redatora, 2026-10-20). Conectar a chave de uma conta própria só
+ * muda quem paga: o consumo dos modelos daquela empresa passa a ser cobrado na
+ * conta dela. Hoje o ENSPACE aceita a chave da OpenAI (Configurações ›
+ * Integrações › OpenAI); Anthropic e Google são SIMULADAS aqui, para mostrar o
+ * formato com mais de uma; Moonshot AI (Kimi) e DeepSeek entram como "Em breve".
  *
  * `provedor` é o mesmo texto do campo `provedor` dos modelos (mocks.ts): é por
- * ele que o seletor de Modelo sabe se o modelo está liberado.
+ * ele que o seletor de Modelo e a barra da proposta sabem em que conta o
+ * consumo de cada modelo cai.
  *
  * SIMULAÇÃO (rodada 8): qualquer chave preenchida conecta, para mostrar o que
  * acontece depois de colar a chave. `inicioDaChave` só preenche o exemplo do
@@ -47,35 +51,30 @@ export function iaDoModelo(modeloId: string): IaConectavel | null {
 export const modelosDa = (id: IdDaIa) => modelos.filter(m => m.provedor === iaPorId(id).provedor)
 
 /*
- * O "Auto" escolhe entre as IAs conectadas (rodada 9): pedido curto e de
- * conferência vai ao modelo rápido; o resto, ao de mais qualidade. A ordem de
- * cada fila diz qual IA vem antes quando há mais de uma. Regra inventada para
- * o protótipo; a do produto é do time.
+ * O "Auto" escolhe o modelo pelo pedido (rodadas 9 e 10), entre todos os
+ * modelos, com chave ou sem: pedido curto e de conferência vai ao modelo
+ * rápido; o resto, ao de mais qualidade. Regra inventada para o protótipo; a
+ * do produto é do time.
  */
 const acoesRapidas = ['corrigir', 'traduzir', 'encurtar', 'simplificar', 'lista']
 const filaRapida = ['gpt-5-mini', 'gemini-3-flash', 'claude-sonnet-4.6']
 const filaDeQualidade = ['claude-sonnet-4.6', 'gpt-5.4', 'gemini-3.1-pro-preview']
 
-export function modeloDoAuto(acao: string, conectadas: IdDaIa[]) {
-  const fila = acoesRapidas.includes(acao) ? filaRapida : filaDeQualidade
-  const id = fila.find(m => conectadas.includes(iaDoModelo(m)!.id))
+export function modeloDoAuto(acao: string) {
+  const id = (acoesRapidas.includes(acao) ? filaRapida : filaDeQualidade)[0]
   return modelos.find(m => m.id === id) ?? null
 }
 
-/** As IAs conectadas no workspace. O andaime põe a OpenAI quando a IA está ligada. */
+/** As contas com chave conectada no workspace. O andaime escolhe quais. */
 export const useIasConectadas = () => useState<IdDaIa[]>('ias-conectadas', () => [])
 
 /**
- * O pedido para abrir o modal "Conectar uma IA". Um modal só na página
+ * O pedido para abrir o modal das chaves (_ConectarIa). Um modal só na página
  * (index.vue); quem pede passa o que fazer ao voltar.
  */
 export interface PedidoDeConexao {
-  /** abre direto no passo da chave desta IA */
+  /** abre direto no passo da chave desta conta */
   ia?: IdDaIa | null
-  /** o que a pessoa tinha pedido ao BENI, para dizer que roda ao voltar */
-  pendente?: string
-  /** por que este modal abriu, quando foi por um modelo */
-  motivo?: string
   aoVoltar?: (conectou: IdDaIa[]) => void
 }
 

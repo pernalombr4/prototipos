@@ -4,8 +4,8 @@
  *
  * Uma porta: a tela do item (Contratos), folder Visão Geral, com 2 campos
  * HTML: Parecer do jurídico (preenchido) e Observações internas (vazio).
- * O andaime troca o estado da IA no workspace: ligada, desligada (quem
- * administra ou membro) e com erro.
+ * O andaime troca as chaves de conta própria do workspace (nenhuma, a da
+ * OpenAI ou 3) e liga a resposta com erro.
  */
 import { textos } from './textos'
 import { campos, categoria, item, pastas, workspace } from './mocks'
@@ -28,9 +28,9 @@ ${pesquisaRodada1}`
 
 definePageMeta({
   titulo: 'IA no campo HTML',
-  descricao: 'O campo HTML redesenhado no padrão do Notion, com o BENI: barra da seleção, cor, link com busca, "/", agentes, modelo e a conexão de ChatGPT, Claude ou Gemini sem sair do campo.',
+  descricao: 'O campo HTML redesenhado no padrão do Notion, com o BENI: barra da seleção, cor, link com busca, "/", agentes e todos os modelos, em en-credits ou na chave da conta do workspace.',
   status: 'aprovado',
-  atualizado: '2026-10-14',
+  atualizado: '2026-10-20',
   tela: 'Tela do item, campo Editor de texto HTML',
 })
 
@@ -40,33 +40,22 @@ const route = useRoute()
 const router = useRouter()
 
 /* ---------- andaime: o estado da IA vai para o endereço ---------- */
-type EstadoIa = 'ligada' | 'varias' | 'desligada' | 'membro' | 'erro'
+type EstadoIa = 'ligada' | 'chave' | 'varias' | 'erro'
 const estadoIa = computed<EstadoIa>({
-  get: () => (['ligada', 'varias', 'desligada', 'membro', 'erro'].includes(String(route.query.ia)) ? route.query.ia : 'ligada') as EstadoIa,
+  get: () => (['ligada', 'chave', 'varias', 'erro'].includes(String(route.query.ia)) ? route.query.ia : 'ligada') as EstadoIa,
   set: v => router.replace({ query: { ...route.query, ia: v } }),
 })
 
 /*
- * Ligada e com erro: o workspace tem a OpenAI conectada, como hoje. "Ligada,
- * 3 IAs" (rodada 9): ChatGPT, Claude e Gemini, para ver o seletor de Modelo
- * agrupado e o Auto escolhendo entre elas. Desligada
- * (quem administra ou membro): nenhuma. Conectar pelo modal leva o andaime a
- * "Ligada" sem trocar o que foi conectado.
+ * A IA funciona sempre, com todos os modelos, em en-credits (redatora,
+ * 2026-10-20). O andaime escolhe só as chaves de conta própria já conectadas:
+ * nenhuma, a da OpenAI (a única que o ENSPACE aceita hoje) ou 3. Conectar pelo
+ * modal acrescenta a chave sem trocar o estado do andaime.
  */
 const conectadas = useIasConectadas()
-let pelaConexao = false
 watch(estadoIa, (e) => {
-  if (pelaConexao) {
-    pelaConexao = false
-    return
-  }
-  conectadas.value = e === 'varias' ? ['openai', 'anthropic', 'google'] : e === 'ligada' || e === 'erro' ? ['openai'] : []
+  conectadas.value = e === 'varias' ? ['openai', 'anthropic', 'google'] : e === 'chave' ? ['openai'] : []
 }, { immediate: true })
-function aoConectar() {
-  if (['ligada', 'varias', 'erro'].includes(estadoIa.value)) return
-  pelaConexao = true
-  estadoIa.value = 'ligada'
-}
 
 /* ---------- tela ---------- */
 const painelRecolhido = ref(false)
@@ -122,7 +111,7 @@ async function salvar() {
                   <!--
                     Só no navegador: o editor não renderiza no servidor (lá o Nuxt UI e as
                     extensões carregariam 2 cópias do ProseMirror).
-                    Ligar ou desligar a IA não remonta o editor: desligada, a IA abre a conexão (rodadas 6 e 7).
+                    Trocar o estado do andaime não remonta o editor.
                   -->
                   <ClientOnly v-if="c.tipo === 'html'">
                     <CampoHtml
@@ -130,7 +119,6 @@ async function salvar() {
                       v-model="valores[c.chave]!"
                       :t="t"
                       :rotulo="c.rotulo"
-                      :papel="estadoIa === 'membro' ? 'membro' : 'admin'"
                       :falhar="estadoIa === 'erro'"
                     />
                     <template #fallback>
@@ -174,8 +162,8 @@ async function salvar() {
       </div>
     </CascaDoItem>
 
-    <!-- "Conectar uma IA": um modal só na página, aberto pelo campo (rodada 7) -->
-    <ConectarIa :t="t" @conectada="aoConectar" />
+    <!-- As chaves de IA do workspace: um modal só na página, aberto pelo seletor de Modelo (rodadas 7 e 10) -->
+    <ConectarIa :t="t" />
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">
@@ -183,7 +171,7 @@ async function salvar() {
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.estadoDaIa }}</span>
         <UFieldGroup size="xs">
           <UButton
-            v-for="e in (['ligada', 'varias', 'desligada', 'membro', 'erro'] as const)"
+            v-for="e in (['ligada', 'chave', 'varias', 'erro'] as const)"
             :key="e"
             :label="t.andaime.estados[e]"
             :color="estadoIa === e ? 'primary' : 'neutral'"

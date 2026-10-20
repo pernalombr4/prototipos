@@ -1,18 +1,25 @@
 <script setup lang="ts">
 /**
- * "Conectar uma IA": a seção Inteligência Artificial de Configurações ›
- * Integrações, aberta num modal sobre o campo. PROPOSTA (rodada 7).
+ * "Chaves de IA do workspace": a seção Inteligência Artificial de
+ * Configurações › Integrações, aberta num modal sobre o campo. PROPOSTA
+ * (rodadas 7 e 10).
+ *
+ * Rodada 10: a IA do ENSPACE funciona sem chave nenhuma, com todos os
+ * modelos, cobrada em en-credits (redatora, 2026-10-20). Conectar a chave de
+ * uma conta própria é opcional e só muda quem paga: o consumo dos modelos
+ * daquela empresa passa a ser cobrado na conta dela. Por isso o modal não
+ * abre mais sozinho: quem administra chega a ele pelo rodapé do seletor de
+ * Modelo, quando quer.
  *
  * Hoje (develop, 2026-10-14) a seção tem um cartão só, OpenAI, com
  * "Instalar Integração", uma página e um modal com "Api Key". Aqui:
- * - 1 cartão por IA, no formato do cartão de hoje (logo, frase, botão);
- * - Conectar abre o passo da chave no mesmo modal, com o que falta hoje
- *   (onde pegar a chave, créditos, erro no campo);
- * - conectada, o modal mostra os modelos liberados e "Voltar ao campo";
- *   quem pediu (o campo) recebe a lista do que foi conectado e segue o pedido.
+ * - 1 cartão por conta, no formato do cartão de hoje (logo, frase, botão);
+ * - "Conectar chave" abre o passo da chave no mesmo modal, com o que falta
+ *   hoje (onde pegar a chave, créditos, erro no campo);
+ * - conectada, o modal mostra os modelos que passam a ser cobrados na conta.
  *
  * Um modal só na página: quem abre é `pedirConexao()` (ias.ts).
- * SIMULAÇÃO: Claude e Gemini não existem no ENSPACE de hoje; qualquer chave
+ * SIMULAÇÃO: o ENSPACE de hoje só aceita a chave da OpenAI; qualquer chave
  * preenchida conecta (rodada 8); a chave não sai do navegador.
  */
 import type { Textos } from './textos'
@@ -21,7 +28,6 @@ import { conexao, iaPorId, ias, modelosDa, useIasConectadas } from './ias'
 import LogoDaIa from './_LogoDaIa.vue'
 
 const props = defineProps<{ t: Textos }>()
-const emit = defineEmits<{ conectada: [ia: IdDaIa] }>()
 
 const tc = computed(() => props.t.conectar)
 const conectadas = useIasConectadas()
@@ -72,7 +78,6 @@ async function conectar() {
   chave.value = ''
   if (!conectadas.value.includes(ia.value.id)) conectadas.value = [...conectadas.value, ia.value.id]
   nestaVez.value.push(ia.value.id)
-  emit('conectada', ia.value.id)
   passo.value = 'pronta'
   focar('[data-voltar-ao-campo]')
 }
@@ -108,8 +113,8 @@ const outrasParaConectar = computed(() => ias.some(i => i.disponivel && !conecta
           <p class="flex items-center gap-1.5 text-xs text-muted">
             <UIcon name="i-lucide-plug" class="size-3.5" />{{ tc.trilha }}
           </p>
-          <p v-if="conexao.pedido.pendente" class="flex items-center gap-1.5 rounded-md bg-primary/10 px-3 py-2 text-xs text-primary">
-            <UIcon name="i-lucide-corner-down-right" class="size-3.5 shrink-0" />{{ tc.emSeguida(conexao.pedido.pendente) }}
+          <p class="flex items-start gap-2 rounded-md bg-elevated px-3 py-2 text-xs text-toned">
+            <UIcon name="i-lucide-coins" class="mt-px size-3.5 shrink-0 text-primary" />{{ tc.semChave }}
           </p>
           <ul class="grid gap-3 sm:grid-cols-2">
             <li
@@ -143,7 +148,7 @@ const outrasParaConectar = computed(() => ias.some(i => i.disponivel && !conecta
                   @click="abrirChave(i.id)"
                 />
                 <p v-else-if="conectadas.includes(i.id)" class="text-center text-xs text-muted">
-                  {{ tc.modelosNoBeni(modelosDa(i.id).length) }}
+                  {{ tc.modelosNaConta(modelosDa(i.id).length, i.empresa) }}
                 </p>
                 <p v-else class="text-center text-xs text-dimmed">{{ tc.emBreveDica }}</p>
               </div>
@@ -167,14 +172,8 @@ const outrasParaConectar = computed(() => ias.some(i => i.disponivel && !conecta
               <LogoDaIa :ia="ia.id" class="size-5 text-highlighted" />
             </span>
             <div class="min-w-0">
-              <p class="font-semibold text-highlighted">{{ tc.conectarA(ia.nome) }}</p>
-              <p class="text-sm text-muted">{{ tc.textoChave(ia.empresa) }}</p>
-              <p v-if="conexao.pedido.motivo" class="mt-1.5 flex items-center gap-1.5 text-xs text-warning">
-                <UIcon name="i-lucide-info" class="size-3.5 shrink-0" />{{ conexao.pedido.motivo }}
-              </p>
-              <p v-if="conexao.pedido.pendente" class="mt-1.5 flex items-center gap-1.5 text-xs text-primary">
-                <UIcon name="i-lucide-corner-down-right" class="size-3.5 shrink-0" />{{ tc.emSeguida(conexao.pedido.pendente) }}
-              </p>
+              <p class="font-semibold text-highlighted">{{ tc.conectarA(ia.empresa) }}</p>
+              <p class="text-sm text-muted">{{ tc.textoChave(ia.empresa, ia.nome) }}</p>
             </div>
           </div>
 
@@ -223,7 +222,7 @@ const outrasParaConectar = computed(() => ias.some(i => i.disponivel && !conecta
               <UIcon name="i-lucide-check" class="size-5" />
             </span>
             <div class="min-w-0">
-              <p class="font-semibold text-highlighted">{{ tc.pronta(ia.nome) }}</p>
+              <p class="font-semibold text-highlighted">{{ tc.pronta(ia.empresa) }}</p>
               <p class="text-sm text-muted">{{ tc.valeParaTodos }}</p>
             </div>
           </div>
@@ -233,9 +232,6 @@ const outrasParaConectar = computed(() => ias.some(i => i.disponivel && !conecta
               <UBadge v-for="m in modelosDa(ia.id)" :key="m.id" :label="m.nome" color="neutral" variant="subtle" />
             </div>
           </div>
-          <p v-if="conexao.pedido.pendente" class="flex items-center gap-1.5 text-xs text-primary">
-            <UIcon name="i-lucide-corner-down-right" class="size-3.5 shrink-0" />{{ tc.emSeguida(conexao.pedido.pendente) }}
-          </p>
           <div class="flex flex-wrap items-center justify-end gap-2">
             <UButton v-if="outrasParaConectar" :label="tc.outra" icon="i-lucide-plus" color="neutral" variant="outline" @click="passo = 'lista'" />
             <UButton :label="tc.voltarAoCampo" icon="i-lucide-corner-down-left" data-voltar-ao-campo @click="conexao.aberto = false" />
@@ -246,7 +242,7 @@ const outrasParaConectar = computed(() => ias.some(i => i.disponivel && !conecta
 
     <template #footer>
       <div class="flex w-full flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
-        <span class="flex items-center gap-1.5"><UIcon name="i-lucide-lock" class="size-3.5" />{{ t.ativar.privacidade }}</span>
+        <span class="flex items-center gap-1.5"><UIcon name="i-lucide-lock" class="size-3.5" />{{ tc.privacidade }}</span>
         <span class="ms-auto flex items-center gap-1 text-dimmed"><UIcon name="i-lucide-flask-conical" class="size-3.5" />{{ tc.simulacao }}</span>
       </div>
     </template>

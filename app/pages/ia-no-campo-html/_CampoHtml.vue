@@ -43,28 +43,22 @@ import { aplicarPaleta, cores } from './paleta'
 import { chaveDaProposta, PropostaDoBeni } from './proposta'
 import CaixaDoBeni from './_CaixaDoBeni.vue'
 import BarraDaProposta from './_BarraDaProposta.vue'
-import PedirAtivacao from './_PedirAtivacao.vue'
-import type { IdDaIa } from './ias'
-import { iaDoModelo, modeloDoAuto, pedirConexao, useIasConectadas } from './ias'
+import { iaDoModelo, modeloDoAuto, useIasConectadas } from './ias'
 import SeletorDeCor from './_SeletorDeCor.vue'
 import PopoverDeLink from './_PopoverDeLink.vue'
 
 const props = defineProps<{
   t: Textos
   rotulo: string
-  /** Andaime: quem está no campo administra o workspace (conecta IA) ou é membro. */
-  papel: 'admin' | 'membro'
   falhar: boolean
 }>()
 
 /*
- * IA desligada não bloqueia (rodadas 6 e 7): o botão, o Ctrl J e o "/" levam
- * quem administra ao modal "Conectar uma IA" e quem é membro ao pedido de
- * ativação (_PedirAtivacao). A IA está ativa quando o workspace tem uma IA
- * conectada (ias.ts).
+ * A IA do ENSPACE funciona sempre, com todos os modelos, cobrada em en-credits
+ * (redatora, 2026-10-20). A chave de uma conta própria (ias.ts) só muda quem
+ * paga o consumo dos modelos daquela empresa: a barra da proposta diz qual.
  */
 const conectadas = useIasConectadas()
-const iaAtiva = computed(() => conectadas.value.length > 0)
 
 const valor = defineModel<string>({ required: true })
 const toast = useToast()
@@ -143,42 +137,15 @@ function topoAbaixoDe(editor: Editor, pos: number) {
 
 /* ------------------------------------------------------- a caixa ---- */
 
-const caixa = ref<(Contexto & { topo: number, chave: number, modo: 'pedido' | 'pedirAtivacao' }) | null>(null)
+const caixa = ref<(Contexto & { topo: number, chave: number }) | null>(null)
 let chave = 0
 
-function abrirCaixa(editor: Editor, pendente?: PedidoDaCaixa) {
+function abrirCaixa(editor: Editor) {
   if (sessao.value) return
-  if (!iaAtiva.value && props.papel === 'admin') return conectarAntes(editor, null, pendente)
   const ctx = contextoDe(editor)
-  caixa.value = { ...ctx, topo: topoAbaixoDe(editor, ctx.to), chave: ++chave, modo: iaAtiva.value ? 'pedido' : 'pedirAtivacao' }
+  caixa.value = { ...ctx, topo: topoAbaixoDe(editor, ctx.to), chave: ++chave }
   marcar(editor, { foco: ctx.comSelecao ? { from: ctx.from, to: ctx.to } : null })
   rolarAteVer('[data-caixa-do-beni]')
-}
-
-/*
- * Conectar antes de seguir (rodada 7): a IA está desligada, ou o modelo
- * escolhido (ou o do agente) depende de uma IA que o workspace não conectou.
- * Abre o modal "Conectar uma IA" (_ConectarIa, um só na página). Voltando com
- * uma IA conectada, o pedido segue: a ação escolhida roda, ou a caixa do
- * BENI abre. Fechou sem conectar: o cursor volta ao lugar.
- */
-function conectarAntes(editor: Editor, ia: IdDaIa | null, pendente?: PedidoDaCaixa, ctxDado?: Contexto, motivo?: string) {
-  const ctx = ctxDado ?? caixa.value ?? contextoDe(editor)
-  caixa.value = null
-  marcar(editor, { foco: ctx.comSelecao ? { from: ctx.from, to: ctx.to } : null })
-  pedirConexao({
-    ia,
-    motivo,
-    pendente: pendente?.rotulo,
-    // espera o modal sair para o foco voltar ao campo, e não ao botão que o abriu
-    aoVoltar: conectou => setTimeout(() => {
-      marcar(editor, { foco: null })
-      editor.chain().focus().setTextSelection({ from: ctx.from, to: ctx.to }).run()
-      if (!conectou.length) return
-      if (pendente) executar(editor, pendente, ctx)
-      else abrirCaixa(editor)
-    }, 220),
-  })
 }
 
 /** A camada nova (caixa ou barra) entra inteira na tela: rola só o que falta. */
@@ -277,12 +244,6 @@ async function rodar(editor: Editor) {
 }
 
 function executar(editor: Editor, p: PedidoDaCaixa, ctxDado?: Contexto) {
-  if (!iaAtiva.value) return abrirCaixa(editor, p)
-  const falta = iaDoModelo(modelo.value)
-  if (falta && falta.disponivel && !conectadas.value.includes(falta.id)) {
-    const nome = modelos.find(m => m.id === modelo.value)?.nome ?? ''
-    return conectarAntes(editor, falta.id, p, ctxDado, props.t.conectar.paraOModelo(nome, falta.nome))
-  }
   const ctx = ctxDado ?? caixa.value ?? contextoDe(editor)
   caixa.value = null
   const modo: Modo = ctx.campoVazio ? 'vazio'
@@ -301,7 +262,7 @@ function executar(editor: Editor, p: PedidoDaCaixa, ctxDado?: Contexto) {
       agenteRevisor: agente.value?.type === 'reviewer',
     },
     rotulo: p.rotulo,
-    modeloUsado: modelo.value === 'auto' ? modeloDoAuto(p.acao, conectadas.value) : modelos.find(m => m.id === modelo.value) ?? null,
+    modeloUsado: modelo.value === 'auto' ? modeloDoAuto(p.acao) : modelos.find(m => m.id === modelo.value) ?? null,
     modo,
     inline: modo === 'substituir' && ctx.mesmoBloco,
     fase: 'gerando',
@@ -569,7 +530,7 @@ function itensDaBarra(editor: Editor): ItemDaBarra[][] {
     label: tb.value.botao,
     color: 'primary',
     variant: 'soft',
-    tooltip: { text: iaAtiva.value ? tb.value.dica : props.t.ativar.dica, kbds: ['ctrl', 'j'] },
+    tooltip: { text: tb.value.dica, kbds: ['ctrl', 'j'] },
     onClick: () => abrirCaixa(editor),
   } as ItemDaBarra
 
@@ -634,7 +595,7 @@ function itensDaBarra(editor: Editor): ItemDaBarra[][] {
 function itensDaBolha(editor: Editor): ItemDaBarra[][] {
   const tipo = tipoAtual(editor)
   return [
-    [{ icon: 'i-lucide-sparkles', label: tb.value.botao, color: 'primary', variant: 'soft', tooltip: { text: iaAtiva.value ? tb.value.dica : props.t.ativar.dica, kbds: ['ctrl', 'j'] }, onClick: () => abrirCaixa(editor) } as ItemDaBarra],
+    [{ icon: 'i-lucide-sparkles', label: tb.value.botao, color: 'primary', variant: 'soft', tooltip: { text: tb.value.dica, kbds: ['ctrl', 'j'] }, onClick: () => abrirCaixa(editor) } as ItemDaBarra],
     [{
       label: tipo.label,
       trailingIcon: 'i-lucide-chevron-down',
@@ -680,10 +641,8 @@ const itensDoMenu = computed(() => {
     ({ kind: 'beni', acao, rotuloDaAcao: label, label, description, icon, palavras: 'ia ai beni', ...extra })
   const grupos: unknown[][] = []
   {
-    // Desligada, o grupo continua no "/": "Ativar a IA" vem primeiro e todo item leva à ativação.
     grupos.push([
       { type: 'label', label: tb.value.grupoMenu },
-      ...(iaAtiva.value ? [] : [ia(undefined, props.t.ativar.itemMenu, props.t.ativar.itemMenuDescricao, 'i-lucide-power')]),
       ia(undefined, tb.value.pedir, tb.value.pedirDescricao, 'i-lucide-sparkles'),
       ...pedidosSalvos.value.map(p => ia('pedir', p.nome, p.prompt, 'i-lucide-bookmark', { prompt: p.prompt })),
       ia('continuar', tb.value.continuar, tb.value.continuarDescricao, 'i-lucide-pen-line', { precisaTexto: true }),
@@ -787,11 +746,16 @@ const contagem = computed(() => {
   return te.value.palavras(palavras, texto.replace(/\s+/g, ' ').length)
 })
 
-/* Com "Auto", a barra diz qual modelo ele escolheu: "Auto: Claude Sonnet 4.6". */
+/*
+ * A barra diz qual modelo respondeu ("Auto: Claude Sonnet 4.6") e, quando o
+ * workspace conectou a chave daquela empresa, em que conta o consumo cai.
+ */
 const nomeDoModelo = computed(() => {
   const usado = sessao.value?.modeloUsado
   if (!usado) return 'Auto'
-  return modelo.value === 'auto' ? props.t.modelo.autoUsou(usado.nome) : usado.nome
+  const nome = modelo.value === 'auto' ? props.t.modelo.autoUsou(usado.nome) : usado.nome
+  const ia = iaDoModelo(usado.id)
+  return ia && conectadas.value.includes(ia.id) ? props.t.modelo.naConta(nome, ia.empresa) : nome
 })
 </script>
 
@@ -909,12 +873,9 @@ const nomeDoModelo = computed(() => {
         leave-to-class="opacity-0"
       >
         <div v-if="caixa" :key="caixa.chave" data-caixa-do-beni class="absolute inset-x-2 z-30 origin-top scroll-mb-20" :style="{ top: `${caixa.topo}px` }">
-          <PedirAtivacao v-if="caixa.modo === 'pedirAtivacao'" :t="t" @fechar="fecharCaixa()" />
           <CaixaDoBeni
-            v-else
             v-model:agente="agente"
             v-model:modelo="modelo"
-            :pode-conectar="papel === 'admin'"
             v-model:usar-campos="usarCampos"
             :t="t"
             :com-selecao="caixa.comSelecao"

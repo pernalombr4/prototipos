@@ -32,8 +32,6 @@ const props = defineProps<{
   campoVazio: boolean
   rotuloDoCampo: string
   pedidosSalvos: PedidoSalvo[]
-  /** quem administra vê "Conectar outra IA" no seletor de Modelo */
-  podeConectar?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -228,7 +226,7 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', aoClicarFora, 
 
       <span class="h-4 w-px bg-accented" aria-hidden="true" />
       <SeletorDeAgente v-model="agente" :t="t" />
-      <SeletorDeModelo v-model="modelo" :t="t" :do-agente="agente?.model ?? null" :pode-conectar="podeConectar" />
+      <SeletorDeModelo v-model="modelo" :t="t" :do-agente="agente?.model ?? null" />
 
       <span class="ms-auto flex items-center gap-2">
         <UTooltip :text="tb.aviso">
