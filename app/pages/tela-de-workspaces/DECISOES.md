@@ -134,6 +134,32 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 28 · 2026-10-20
+
+- **Pedido (literal):** "esse botao ta confuso. como a label dele é "ocultos", parece que ao clicar esse "na
+  lista" é uma lista de ocultos. ta contraintuitivo"; depois da sugestão, "e se o nome do botao for
+  "visibilidade"? o resto concordo, pode aplicar"; "no formato lista nao deve ter botao de entrar, so os 3
+  pontinhos de açao. uma das açoes pode ser entrar"; "as tags de workspace devem estar numa coluna separada aí no
+  prototipo, pra ser possivel truncar e colocar popup com hover praa ver todas as etiquetas. imagina uma pessoa
+  que vai criar 30 etiquetas e colocar isso tudo num workspace só?"
+- **Mudou (Visibilidade):**
+  - O botão "Ocultos" vira "Visibilidade", com ícone de olho e um contador de ocultos.
+  - No painel, cada linha tem um botão de olho no lugar da caixa de marcar: aberto, aparece; riscado, oculto.
+  - As seções ficam "Na lista" e depois "Ocultos", e o texto passa a ser "Clique no olho para mostrar ou ocultar
+    um workspace. Você continua com acesso aos ocultos."
+  - O toast de ocultar aponta para Visibilidade e para a seção Ocultos do fim da lista.
+- **Mudou (lista):** sai o botão "Entrar"; "Entrar" vira o 1º item do "⋯" na lista. A linha inteira continua
+  entrando. No card, o "⋯" não ganha "Entrar", porque o card já é todo clicável.
+- **Mudou (etiquetas):**
+  - Na lista, as etiquetas saem da coluna Workspace e ganham coluna própria, com 1 selo e "+N".
+  - No card, até 2 selos e "+N".
+  - Passar o mouse (ou focar) no "+N" abre um popover com todas (`_EtiquetasResumidas.vue`).
+  - Cada selo tem no máximo 8rem, cortado com reticências.
+  - No mock, o Grupo Aurora ganha 4 etiquetas, para mostrar o corte.
+- **Fronteira:** muda o botão e o painel de visibilidade, a coluna de ações e as etiquetas; não muda o resto
+  da lista nem o card.
+- **Requisitos:** R34, R42, R47, R48, R50, R58, R63, R64, R66 e R67.
+
 ### Rodada 27 · 2026-10-20
 
 - **Pedido (literal):** "quando for proprietario a opçao aí deve ser de deletar o workspace, aí no prototipo

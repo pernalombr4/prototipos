@@ -91,6 +91,7 @@ export interface TextosDaTela {
   // etiquetas pessoais (rodada 17)
   etiquetas: string
   etiquetasDe: (nome: string) => string
+  maisEtiquetas: (n: number) => string
   etiquetasDescricao: string
   novaEtiqueta: string
   criarEtiqueta: string
@@ -104,7 +105,10 @@ export interface TextosDaTela {
   ordenarOpcoes: Record<'acessoRecente' | 'acessoAntigo' | 'criacaoRecente' | 'criacaoAntiga' | 'nome', string>
   ordenarCurto: Record<'acessoRecente' | 'acessoAntigo' | 'criacaoRecente' | 'criacaoAntiga' | 'nome', string>
   convitesPendentes: string
-  ocultosBotao: (n: number) => string
+  visibilidade: string
+  visibilidadeComOcultos: (n: number) => string
+  mostrarWorkspace: (nome: string) => string
+  ocultarWorkspace: (nome: string) => string
   editorTitulo: string
   editorDescricao: string
   secaoNaLista: string
@@ -302,7 +306,7 @@ export const textos: Record<Idioma, TextosDaTela> = {
     mostrarNaLista: 'Mostrar na lista',
     oculto: 'Oculto',
     ocultadoToast: n => `${n} saiu da sua lista`,
-    ocultadoDescricao: 'Você continua com acesso. Para ver de novo, use Ocultos, ao lado de Ordenar.',
+    ocultadoDescricao: 'Você continua com acesso. Para exibi-lo novamente, use Visibilidade, ao lado de Ordenar, ou a seção Ocultos, no fim da lista.',
     desfazer: 'Desfazer',
     sairDoWorkspace: 'Sair do workspace',
     excluirWorkspace: 'Excluir workspace',
@@ -315,6 +319,7 @@ export const textos: Record<Idioma, TextosDaTela> = {
 
     etiquetas: 'Etiquetas',
     etiquetasDe: n => `Etiquetas de ${n}`,
+    maisEtiquetas: n => n === 1 ? 'Mais 1 etiqueta' : `Mais ${n} etiquetas`,
     etiquetasDescricao: 'Só você vê. Use para agrupar seus workspaces do seu jeito.',
     novaEtiqueta: 'Nova etiqueta',
     criarEtiqueta: 'Criar',
@@ -341,9 +346,12 @@ export const textos: Record<Idioma, TextosDaTela> = {
       nome: 'Nome',
     },
     convitesPendentes: 'Convites pendentes',
-    ocultosBotao: n => `Ocultos (${n})`,
+    visibilidade: 'Visibilidade',
+    visibilidadeComOcultos: n => n === 1 ? 'Visibilidade, 1 workspace oculto' : `Visibilidade, ${n} workspaces ocultos`,
+    mostrarWorkspace: n => `Mostrar ${n} na lista`,
+    ocultarWorkspace: n => `Ocultar ${n} da lista`,
     editorTitulo: 'O que aparece na sua lista',
-    editorDescricao: 'Desmarque para ocultar. Você continua com acesso, e a busca ainda encontra.',
+    editorDescricao: 'Clique no olho para mostrar ou ocultar um workspace. Você continua com acesso aos ocultos.',
     secaoNaLista: 'Na lista',
     secaoOcultos: 'Ocultos',
     mostrarTodos: 'Mostrar todos',
@@ -532,7 +540,7 @@ export const textos: Record<Idioma, TextosDaTela> = {
     mostrarNaLista: 'Show in list',
     oculto: 'Hidden',
     ocultadoToast: n => `${n} is hidden from your list`,
-    ocultadoDescricao: 'You still have access. To see it again, use Hidden, next to Sort.',
+    ocultadoDescricao: 'You still have access. To show it again, use Visibility, next to Sort, or the Hidden section at the end of the list.',
     desfazer: 'Undo',
     sairDoWorkspace: 'Leave workspace',
     excluirWorkspace: 'Delete workspace',
@@ -545,6 +553,7 @@ export const textos: Record<Idioma, TextosDaTela> = {
 
     etiquetas: 'Tags',
     etiquetasDe: n => `Tags for ${n}`,
+    maisEtiquetas: n => n === 1 ? '1 more tag' : `${n} more tags`,
     etiquetasDescricao: 'Only you see them. Use them to group your workspaces your way.',
     novaEtiqueta: 'New tag',
     criarEtiqueta: 'Create',
@@ -570,9 +579,12 @@ export const textos: Record<Idioma, TextosDaTela> = {
       nome: 'Name',
     },
     convitesPendentes: 'Pending invites',
-    ocultosBotao: n => `Hidden (${n})`,
+    visibilidade: 'Visibility',
+    visibilidadeComOcultos: n => n === 1 ? 'Visibility, 1 hidden workspace' : `Visibility, ${n} hidden workspaces`,
+    mostrarWorkspace: n => `Show ${n} in the list`,
+    ocultarWorkspace: n => `Hide ${n} from the list`,
     editorTitulo: 'What shows in your list',
-    editorDescricao: 'Uncheck to hide. You keep access, and search still finds it.',
+    editorDescricao: 'Click the eye to show or hide a workspace. You keep access to hidden workspaces.',
     secaoNaLista: 'In your list',
     secaoOcultos: 'Hidden',
     mostrarTodos: 'Show all',
@@ -762,7 +774,7 @@ export const textos: Record<Idioma, TextosDaTela> = {
     mostrarNaLista: 'Mostrar en la lista',
     oculto: 'Oculto',
     ocultadoToast: n => `${n} salió de tu lista`,
-    ocultadoDescricao: 'Sigues con acceso. Para verlo de nuevo, usa Ocultos, junto a Ordenar.',
+    ocultadoDescricao: 'Sigues con acceso. Para mostrarlo de nuevo, usa Visibilidad, junto a Ordenar, o la sección Ocultos, al final de la lista.',
     desfazer: 'Deshacer',
     sairDoWorkspace: 'Salir del workspace',
     excluirWorkspace: 'Eliminar workspace',
@@ -775,6 +787,7 @@ export const textos: Record<Idioma, TextosDaTela> = {
 
     etiquetas: 'Etiquetas',
     etiquetasDe: n => `Etiquetas de ${n}`,
+    maisEtiquetas: n => n === 1 ? '1 etiqueta más' : `${n} etiquetas más`,
     etiquetasDescricao: 'Solo tú las ves. Úsalas para agrupar tus workspaces a tu manera.',
     novaEtiqueta: 'Nueva etiqueta',
     criarEtiqueta: 'Crear',
@@ -801,9 +814,12 @@ export const textos: Record<Idioma, TextosDaTela> = {
       nome: 'Nombre',
     },
     convitesPendentes: 'Invitaciones pendientes',
-    ocultosBotao: n => `Ocultos (${n})`,
+    visibilidade: 'Visibilidad',
+    visibilidadeComOcultos: n => n === 1 ? 'Visibilidad, 1 workspace oculto' : `Visibilidad, ${n} workspaces ocultos`,
+    mostrarWorkspace: n => `Mostrar ${n} en la lista`,
+    ocultarWorkspace: n => `Ocultar ${n} de la lista`,
     editorTitulo: 'Qué aparece en tu lista',
-    editorDescricao: 'Desmarca para ocultar. Sigues con acceso, y la búsqueda aún lo encuentra.',
+    editorDescricao: 'Haz clic en el ojo para mostrar u ocultar un workspace. Sigues con acceso a los ocultos.',
     secaoNaLista: 'En la lista',
     secaoOcultos: 'Ocultos',
     mostrarTodos: 'Mostrar todos',

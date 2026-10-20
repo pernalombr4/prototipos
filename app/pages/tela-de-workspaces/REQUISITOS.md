@@ -24,7 +24,7 @@ entre aspas são os da interface em português; os de inglês e espanhol estão 
 | R6 a R13 | Busca | Atalho de teclado, busca sem acento e por etiqueta; os resultados sobem para logo abaixo do campo |
 | R14 a R18 | Convite pendente | Hoje é um card apagado, sem ação visível. Passa a ter aviso no topo e card com Aceitar e Recusar |
 | R19 a R26 | Bloco do topo e padrão | Hoje não existe. Mostra o último acessado com o botão "Entrar em {nome}" e permite abrir direto no login |
-| R27 a R35 | Barra da lista | Abas com contagem certa, Agrupar e Ordenar como no ClickUp, Ocultos e o alternador cards/lista |
+| R27 a R35 | Barra da lista | Abas com contagem certa, Agrupar e Ordenar como no ClickUp, Visibilidade e o alternador cards/lista |
 | R36 a R46 | Card | O card inteiro vira o alvo de Entrar; some o "Sem descrição"; o rodapé mostra o último acesso |
 | R47 a R51 | Visualização em lista | Alternativa ao card, com o `EnTable` do produto |
 | R52 a R57 | Grupos | Hoje não existe. Por licença ou por etiqueta, recolhíveis |
@@ -94,7 +94,7 @@ entre aspas são os da interface em português; os de inglês e espanhol estão 
 | R31 | Trocar o agrupamento deve abrir de novo os grupos recolhidos. | Recolher um grupo e trocar o agrupamento mostra todos abertos. |
 | R32 | Ordenar deve ser um menu suspenso com ícone de setas: "Ordenar: {critério curto}", com borda no padrão e com fundo nos outros. O menu tem o título "Ordenar por" e os critérios da tabela abaixo, em 3 blocos. | Escolher "Criados por último" faz o botão dizer "Ordenar: Mais novos". |
 | R33 | A ordem deve valer dentro de cada grupo; "Nunca acessado" vai para o fim nas 2 ordens de acesso. | Em "Acessados há mais tempo", os nunca acessados ficam no fim. |
-| R34 | O botão Ocultos deve ficar sempre visível, com ícone de olho cortado e seta: "Ocultos ({n})", com fundo, quando há oculto; "Ocultos", com borda, quando não há. Abre o painel de R64. | Com 0 ocultos, o botão continua na barra. |
+| R34 | O botão "Visibilidade" deve ficar sempre visível, com ícone de olho e seta. Com oculto, ganha fundo e um contador com o número de ocultos (nome acessível "Visibilidade, {n} workspaces ocultos"); sem oculto, fica com borda. Abre o painel de R64. | O rótulo nunca diz "Ocultos": o botão abre os 2 lados, o que aparece e o que está oculto. |
 | R35 | O alternador deve ter 2 botões de ícone, "Ver em cards" (padrão) e "Ver em lista"; o ativo na cor primária suave. | A tela abre em cards. |
 
 **Critérios de ordenação (R32)**
@@ -117,7 +117,7 @@ entre aspas são os da interface em português; os de inglês e espanhol estão 
 | R39 | A cor de identidade deve vir da soma dos códigos dos caracteres de `reference`, resto da divisão por 5: fúcsia, ciano, roxo, verde-azulado ou `space`. Fundo a 10%, ícone no tom 600 (400 no escuro; `space` 300). | O mesmo workspace tem sempre a mesma cor; nenhuma é vermelho, verde de sucesso ou amarelo de alerta. |
 | R40 | O selo da licença deve ser suave: "Proprietário" em primária, "Full" em secundária, "Membro" e "Leitor" em neutro. | Cada licença tem a cor da regra. |
 | R41 | A estrela deve ficar sempre visível: amarela no favorito; cinza-fraca nos outros, amarela no hover. Nome acessível: "Adicionar aos favoritos" ou "Remover dos favoritos". | Favoritar atualiza a aba Favoritos na hora. |
-| R42 | O corpo deve ter altura mínima de 64px, nome em até 2 linhas, descrição em até 2 linhas e as etiquetas como selos neutros com borda e ícone de etiqueta. Sem descrição, a linha não existe. | Nenhum card mostra "Sem descrição". |
+| R42 | O corpo deve ter altura mínima de 64px, nome em até 2 linhas, descrição em até 2 linhas e as etiquetas: até 2 selos neutros com borda e ícone de etiqueta (cada um com no máximo 8rem, cortado com reticências) e, se houver mais, o selo "+{n}". Passar o mouse ou focar no "+{n}" abre um popover com todas as etiquetas; nome acessível "Mais {n} etiquetas". Sem descrição, a linha não existe. | Um workspace com 30 etiquetas mostra 2 e "+28", e o card não cresce. |
 | R43 | O rodapé deve ter uma informação só, com ícone de 14px: padrão, casa e "Abre ao entrar"; oculto (só pela busca), olho cortado e "Oculto"; os demais, relógio e o tempo de R44. | Nenhum card mostra o número de pessoas. |
 | R44 | O tempo deve seguir a escala da tabela abaixo. | Acesso de 2 dias atrás mostra "Acessado há 2 dias". |
 | R45 | À direita do rodapé, "Entrar →" em cinza; ao clicar, "Entrando…" com um ícone girando. | Clicar no card mostra o carregamento antes de entrar. |
@@ -137,10 +137,10 @@ entre aspas são os da interface em português; os de inglês e espanhol estão 
 
 | ID | Requisito | Critério de aceite |
 |---|---|---|
-| R47 | A lista deve usar o `EnTable` do `@be-enlighten/enspace-sdk-ui`, com as colunas "Workspace", "Descrição", "Licença", "Último acesso" (ordenável) e a de ações, sem título. | A coluna "Último acesso" ordena ao clicar no cabeçalho. |
-| R48 | Coluna Workspace: ícone em 32px; na 1ª linha, o nome com reticências, a estrela se favorito e a casa se padrão; na 2ª linha, os selos "Convite pendente", "Oculto" e as etiquetas. Largura mínima de 11rem. | Os selos não espremem o nome. |
+| R47 | A lista deve usar o `EnTable` do `@be-enlighten/enspace-sdk-ui`, com as colunas "Workspace", "Descrição", "Licença", "Etiquetas", "Último acesso" (ordenável) e a de ações, sem título. | A coluna "Último acesso" ordena ao clicar no cabeçalho. |
+| R48 | Coluna Workspace: ícone em 32px; na 1ª linha, o nome com reticências, a estrela se favorito e a casa se padrão; na 2ª linha, só os selos "Convite pendente" e "Oculto". Largura mínima de 11rem. Coluna Etiquetas: 1 selo e "+{n}", com o mesmo popover de R42. | As etiquetas nunca aparecem dentro da coluna Workspace. |
 | R49 | Coluna Descrição: a descrição; sem ela, "{n} pessoas"; no convite, "{quem} convidou você". Coluna Último acesso: o tempo de R44; no convite, "Aceite para entrar". | Nenhuma célula fica vazia, menos a Licença do convite. |
-| R50 | Coluna de ações: "Entrar" e o "⋯"; no convite, "Aceitar" e "Recusar". Clicar na linha entra, menos no convite. | Clicar no "⋯" abre o menu sem entrar no workspace. |
+| R50 | Coluna de ações: só o "⋯", sem botão "Entrar"; no convite, "Aceitar" e "Recusar". Clicar na linha entra, menos no convite; enquanto entra, um ícone girando aparece ao lado do "⋯". | Clicar no "⋯" abre o menu sem entrar no workspace. |
 | R51 | Com agrupamento, cada grupo deve ter a própria tabela. | Agrupar por licença mostra uma tabela por licença. |
 
 ## Grupos
@@ -158,7 +158,7 @@ entre aspas são os da interface em português; os de inglês e espanhol estão 
 
 | ID | Requisito | Critério de aceite |
 |---|---|---|
-| R58 | O menu deve existir no card e na linha, sempre visível, nunca no convite, com o nome acessível "Mais ações de {nome}". | O "⋯" aparece sem passar o mouse. |
+| R58 | O menu deve existir no card e na linha, sempre visível, nunca no convite, com o nome acessível "Mais ações de {nome}". Na lista, o 1º item é "Entrar" (ícone de entrar), que entra direto; no card não, porque o card inteiro já entra. | O "⋯" aparece sem passar o mouse. |
 | R59 | Itens, nesta ordem: "Abrir sempre ao entrar" ou "Voltar a escolher ao entrar" (casa); "Etiquetas" (etiquetas); separador; "Ocultar da lista" (olho cortado) ou "Mostrar na lista" (olho); por último, em vermelho, "Sair do workspace" (sair) ou, para o proprietário, "Excluir workspace" (lixeira). | O rótulo do 1º e do 3º item muda conforme o estado do workspace. |
 | R60 | Para o proprietário, o último item deve ser "Excluir workspace", que abre o mesmo modal de exclusão de workspace que o produto já usa dentro do workspace. No protótipo, um toast avisa isso: "Excluir {nome}" e "No produto, esta opção abre o mesmo modal de exclusão de workspace usado hoje dentro do workspace." | Num workspace de proprietário, o menu não mostra "Sair do workspace". |
 | R61 | Cada item deve levar à regra da própria seção: padrão (R24 a R26), etiquetas (R71), ocultar (R62), sair (R82) e excluir (R60). | Cada item tem o efeito descrito na seção dele. |
@@ -168,11 +168,11 @@ entre aspas são os da interface em português; os de inglês e espanhol estão 
 | ID | Requisito | Critério de aceite |
 |---|---|---|
 | R62 | O oculto deve sair da lista e de todos os contadores; a pessoa continua com acesso e a busca o encontra. | Ocultar um workspace tira 1 da aba Todos. |
-| R63 | Ocultar pelo "⋯" deve mostrar o toast "{nome} saiu da sua lista", com "Você continua com acesso. Para ver de novo, use Ocultos, ao lado de Ordenar." e "Desfazer". | "Desfazer" devolve o workspace ao lugar. |
-| R64 | O botão Ocultos deve abrir um painel de 20rem, como o editor de propriedades do Notion: título "O que aparece na sua lista", texto "Desmarque para ocultar. Você continua com acesso, e a busca ainda encontra." e busca "Buscar workspace", por nome e sem acento. | O painel abre logo abaixo do botão, ou acima, se faltar espaço. |
+| R63 | Ocultar pelo "⋯" deve mostrar o toast "{nome} saiu da sua lista", com "Você continua com acesso. Para exibi-lo novamente, use Visibilidade, ao lado de Ordenar, ou a seção Ocultos, no fim da lista." e "Desfazer". | "Desfazer" devolve o workspace ao lugar. |
+| R64 | O botão Visibilidade deve abrir um painel de 20rem, como o editor de propriedades do Notion: título "O que aparece na sua lista", texto "Clique no olho para mostrar ou ocultar um workspace. Você continua com acesso aos ocultos." e busca "Buscar workspace", por nome e sem acento. | O painel abre logo abaixo do botão, ou acima, se faltar espaço. |
 | R65 | Com oculto, o painel deve ter, à direita do título, o botão com borda e ícone de olho "Mostrar todos", que devolve todos à lista. | O botão não aparece com 0 ocultos. |
-| R66 | O painel deve ter 2 seções com contagem, "Ocultos ({n})" primeiro e "Na lista ({n})" depois, cada uma em ordem alfabética. As seções rolam a partir de 18rem. | Com 1 oculto, ele aparece no topo do painel. |
-| R67 | Cada workspace deve ser uma caixa de marcar com o nome: marcado aparece na lista; desmarcado fica oculto, com o nome em cinza. A mudança vale na hora e o item troca de seção. Convite pendente não entra no painel. | Desmarcar um workspace tira o card da grade sem fechar o painel. |
+| R66 | O painel deve ter 2 seções com contagem, "Na lista ({n})" primeiro e "Ocultos ({n})" depois, cada uma em ordem alfabética. As seções rolam a partir de 18rem. | Os nomes das seções se opõem: o que aparece e o que está oculto. |
+| R67 | Cada linha deve ter o nome do workspace e, à direita, um botão de olho: olho aberto, aparece na lista; olho riscado, oculto, com o nome em cinza. Um clique alterna, vale na hora e o item troca de seção. Nome acessível: "Ocultar {nome} da lista" ou "Mostrar {nome} na lista". Convite pendente não entra no painel. | Clicar no olho de um workspace tira o card da grade sem fechar o painel. |
 | R68 | Com oculto e sem busca, o fim da lista deve ter a seção "Ocultos", depois de um divisor, no mesmo padrão dos grupos (R56): chevron, ícone de olho cortado, "Ocultos" e a contagem, em cinza. A seção começa recolhida. Aberta, mostra os ocultos como cards (ou linhas, na visualização em lista) esmaecidos, com "Oculto" no rodapé; cada um tem "Mostrar na lista" no "⋯". Vale com e sem agrupamento. | Abrir a seção mostra os ocultos; "Mostrar na lista" num deles devolve só aquele. |
 | R69 | Na linha do divisor, à direita, o botão com borda e ícone de olho "Mostrar de novo" (1 oculto) ou "Mostrar todos de novo" (mais) deve devolver todos de uma vez, com o toast "1 workspace voltou para a lista" ou "{n} workspaces voltaram para a lista" e "Desfazer". | Sem oculto, a seção some. |
 | R70 | Ocultar o padrão deve desfazer o padrão; o "Desfazer" devolve os 2. | Depois do "Desfazer", o bloco do topo volta a dizer "Abre direto quando você entra". |

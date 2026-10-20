@@ -48,6 +48,10 @@ export const etiquetasIniciais: Etiqueta[] = [
   { id: 'clientes', nome: 'Clientes' },
   { id: 'internos', nome: 'Internos' },
   { id: 'testes', nome: 'Testes' },
+  // Rodada 28: mais etiquetas, para o Grupo Aurora ter mais do que cabe e mostrar o "+N"
+  { id: 'prioritarios', nome: 'Prioritários' },
+  { id: 'diretoria', nome: 'Diretoria' },
+  { id: 'contratos', nome: 'Contratos' },
 ]
 
 export const usuario = {
@@ -69,7 +73,7 @@ export const workspaces: Workspace[] = [
     favorito: true,
     ultimoAcessoMin: 95,
     members_count: 340,
-    etiquetas: ['internos'],
+    etiquetas: ['internos', 'prioritarios', 'diretoria', 'contratos'],
   },
   {
     id: 2,

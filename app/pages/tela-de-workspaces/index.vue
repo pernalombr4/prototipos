@@ -12,6 +12,7 @@ import { textos } from './textos'
 import { type EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import type { DropdownMenuItem } from '@nuxt/ui'
 import ModalCriarWorkspace from './_ModalCriarWorkspace.vue'
+import EtiquetasResumidas from './_EtiquetasResumidas.vue'
 
 // O contexto do protótipo vem dos próprios .md desta pasta, como texto.
 // Fonte única: editar o .md muda o painel, sem duplicar conteúdo.
@@ -270,10 +271,11 @@ const secoesDoEditor = computed(() => {
   const todos = disponiveis.value
     .filter(w => !termo || normalizar(w.name).includes(termo))
     .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
-  // Os ocultos vêm primeiro: quem abre "Ocultos" procura por eles.
+  // Rodada 28: "Na lista" primeiro e "Ocultos" depois, nomes que se opõem. O
+  // botão agora se chama Visibilidade e abre os 2 lados.
   return [
-    { id: 'ocultos', titulo: t.value.secaoOcultos, itens: todos.filter(w => estaOculto(w)) },
     { id: 'na-lista', titulo: t.value.secaoNaLista, itens: todos.filter(w => !estaOculto(w)) },
+    { id: 'ocultos', titulo: t.value.secaoOcultos, itens: todos.filter(w => estaOculto(w)) },
   ].filter(s => s.itens.length)
 })
 
@@ -433,6 +435,8 @@ const colunasDaLista = computed<EnTableColumn[]>(() => [
   { key: 'name', label: t.value.colunaWorkspace },
   { key: 'description', label: t.value.colunaDescricao },
   { key: 'papel', label: t.value.colunaPapel },
+  // Rodada 28: etiquetas em coluna própria, cortadas com "+N" (podem ser muitas)
+  { key: 'etiquetas', label: t.value.etiquetas },
   { key: 'ultimoAcessoMin', label: t.value.colunaUltimoAcesso, sortable: true },
   { key: 'acoes', label: '', align: 'right' },
 ])
@@ -575,9 +579,11 @@ function criarEtiqueta() {
 }
 
 /** O menu "⋯" do card e da linha. Sempre visível, não só no hover (rodada 11). */
-function acoesDe(w: Workspace): DropdownMenuItem[][] {
+function acoesDe(w: Workspace, comEntrar = false): DropdownMenuItem[][] {
   const ehProprietario = w.papel === 'Proprietário'
   return [
+    // Rodada 28: na lista, "Entrar" é o 1º item (o card já é todo clicável).
+    ...(comEntrar ? [[{ label: t.value.entrar, icon: 'i-lucide-log-in', onSelect: () => entrar(w) }]] : []),
     [
       {
         label: padrao.value === w.id ? t.value.voltarAEscolher : t.value.abrirSempreAoEntrar,
@@ -871,21 +877,26 @@ function workspaceCriado(nome: string) {
                   :variant="ordenarPor === 'acessoRecente' ? 'outline' : 'soft'"
                 />
               </UDropdownMenu>
-              <!-- Rodada 19: "Ocultos" abre um editor, como o painel de propriedades
-                   do Notion. Marcado aparece na lista; desmarcado fica oculto. -->
+              <!-- Rodada 19: abre um editor, como o painel de propriedades do Notion.
+                   Rodada 28: o botão se chama "Visibilidade" (o rótulo "Ocultos"
+                   prometia só um lado) e cada linha tem um olho em vez da caixa de
+                   marcar: olho aberto aparece na lista, olho riscado fica oculto. -->
               <UPopover
                 v-model:open="editorDeOcultosAberto"
                 :content="{ align: 'end' }"
                 @update:open="(aberto: boolean) => { if (!aberto) buscaNoEditor = '' }"
               >
-                <UButton
-                  icon="i-lucide-eye-off"
-                  trailing-icon="i-lucide-chevron-down"
-                  :label="totalOcultos ? t.ocultosBotao(totalOcultos) : t.secaoOcultos"
-                  size="xs"
-                  color="neutral"
-                  :variant="totalOcultos ? 'soft' : 'outline'"
-                />
+                <UChip :show="totalOcultos > 0" :text="totalOcultos" size="xl" color="neutral">
+                  <UButton
+                    icon="i-lucide-eye"
+                    trailing-icon="i-lucide-chevron-down"
+                    :label="t.visibilidade"
+                    :aria-label="totalOcultos ? t.visibilidadeComOcultos(totalOcultos) : t.visibilidade"
+                    size="xs"
+                    color="neutral"
+                    :variant="totalOcultos ? 'soft' : 'outline'"
+                  />
+                </UChip>
 
                 <template #content>
                   <div class="w-80 p-3">
@@ -926,16 +937,24 @@ function workspaceCriado(nome: string) {
                           enter-active-class="transition duration-200 ease-out"
                           enter-from-class="opacity-0"
                         >
-                          <li v-for="w in secao.itens" :key="w.id">
-                            <UCheckbox
-                              :model-value="!estaOculto(w)"
-                              :label="w.name"
-                              :ui="{
-                                root: 'items-center rounded-md px-2 py-1.5 transition-colors hover:bg-elevated',
-                                wrapper: 'min-w-0',
-                                label: estaOculto(w) ? 'truncate font-normal text-muted' : 'truncate font-normal',
-                              }"
-                              @update:model-value="(valor: boolean | 'indeterminate') => definirVisivel(w, valor === true)"
+                          <li
+                            v-for="w in secao.itens"
+                            :key="w.id"
+                            class="flex items-center gap-2 rounded-md py-0.5 pl-2 pr-0.5 transition-colors hover:bg-elevated"
+                          >
+                            <span class="min-w-0 flex-1 truncate text-sm" :class="estaOculto(w) ? 'text-muted' : 'text-default'">
+                              {{ w.name }}
+                            </span>
+                            <UButton
+                              :icon="estaOculto(w) ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                              size="xs"
+                              square
+                              color="neutral"
+                              variant="ghost"
+                              :class="estaOculto(w) ? 'text-muted' : 'text-highlighted'"
+                              :aria-label="estaOculto(w) ? t.mostrarWorkspace(w.name) : t.ocultarWorkspace(w.name)"
+                              :aria-pressed="!estaOculto(w)"
+                              @click="definirVisivel(w, estaOculto(w))"
                             />
                           </li>
                         </TransitionGroup>
@@ -1139,18 +1158,14 @@ function workspaceCriado(nome: string) {
                     >
                       {{ estaPendente(w) ? t.conviteCurto(w.convidadoPor!) : w.description }}
                     </p>
-                    <!-- Etiquetas pessoais: só quem criou vê -->
-                    <div v-if="etiquetasDe(w).length" class="mt-2 flex flex-wrap gap-1">
-                      <UBadge
-                        v-for="e in etiquetasDe(w)"
-                        :key="e.id"
-                        :label="e.nome"
-                        icon="i-lucide-tag"
-                        color="neutral"
-                        variant="outline"
-                        size="sm"
-                      />
-                    </div>
+                    <!-- Etiquetas pessoais: só quem criou vê. Rodada 28: até 2 e "+N"
+                         com popover; acima do link do card, para o hover funcionar. -->
+                    <EtiquetasResumidas
+                      v-if="etiquetasDe(w).length"
+                      :etiquetas="etiquetasDe(w)"
+                      :rotulo-mais="t.maisEtiquetas"
+                      class="relative z-10 mt-2 w-fit max-w-full"
+                    />
                   </div>
 
                   <!-- rodapé ancorado: meta à esquerda, a ação à direita -->
@@ -1227,7 +1242,7 @@ function workspaceCriado(nome: string) {
                         />
                       </div>
                       <div
-                        v-if="estaPendente(row) || estaOculto(row) || etiquetasDe(row).length"
+                        v-if="estaPendente(row) || estaOculto(row)"
                         class="mt-1 flex flex-wrap gap-1"
                       >
                         <UBadge
@@ -1241,15 +1256,6 @@ function workspaceCriado(nome: string) {
                           v-if="estaOculto(row)"
                           :label="t.oculto"
                           icon="i-lucide-eye-off"
-                          color="neutral"
-                          variant="outline"
-                          size="sm"
-                        />
-                        <UBadge
-                          v-for="e in etiquetasDe(row)"
-                          :key="e.id"
-                          :label="e.nome"
-                          icon="i-lucide-tag"
                           color="neutral"
                           variant="outline"
                           size="sm"
@@ -1277,6 +1283,11 @@ function workspaceCriado(nome: string) {
                   />
                 </template>
 
+                <template #cell-etiquetas="{ row }">
+                  <!-- Na lista, 1 etiqueta e "+N": a coluna não alarga sozinha -->
+                  <EtiquetasResumidas :etiquetas="etiquetasDe(row)" :max="1" :rotulo-mais="t.maisEtiquetas" @click.stop />
+                </template>
+
                 <template #cell-ultimoAcessoMin="{ row }">
                   <span class="text-muted">
                     {{ estaPendente(row) ? t.aceiteParaEntrar : tempoRelativo(row.ultimoAcessoMin) }}
@@ -1289,16 +1300,15 @@ function workspaceCriado(nome: string) {
                       <UButton :label="t.aceitar" size="sm" color="secondary" @click="aceitar(row)" />
                       <UButton :label="t.recusar" size="sm" color="neutral" variant="ghost" @click="recusar(row)" />
                     </template>
+                    <!-- Rodada 28: na lista, sem botão "Entrar". A linha inteira
+                         entra, e "Entrar" é o 1º item do "⋯". -->
                     <template v-else>
-                      <UButton
-                        :label="t.entrar"
-                        size="sm"
-                        color="neutral"
-                        variant="subtle"
-                        :loading="entrando === row.id"
-                        @click="entrar(row)"
+                      <UIcon
+                        v-if="entrando === row.id"
+                        name="i-lucide-loader-circle"
+                        class="size-4 animate-spin text-primary"
                       />
-                      <UDropdownMenu :items="acoesDe(row)" :content="{ align: 'end' }">
+                      <UDropdownMenu :items="acoesDe(row, true)" :content="{ align: 'end' }">
                         <UButton
                           icon="i-lucide-ellipsis"
                           size="sm"
