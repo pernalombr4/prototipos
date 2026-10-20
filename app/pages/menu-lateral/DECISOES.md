@@ -389,6 +389,15 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 33 · 2026-10-20
+- **Pedido (literal):** "aplica o mesmo menu de áreas no menu-lateral e tela-de-workspaces e poed commitar e dar push nesses 2"
+- **Mudou:** o filtro "Áreas" da Central deixa de ser um popover montado à mão e passa a ser o `USelectMenu` múltiplo, igual ao da `galeria-de-casos-de-uso` (rodada 2 de lá, onde ela achou o "Selecionar tudo" "um botao aleatorio no meio de algo que é um dropdown")
+  - a busca é a do próprio componente; cada área marcada ganha a marca de seleção na linha
+  - "Selecionar tudo" e "Limpar" viram links no pé da lista, com a contagem ("2 de 8"); cada um se desliga quando não tem o que fazer
+  - o botão mostra a quantidade marcada num selo; a lista continua aberta enquanto a pessoa marca
+- **Fronteira:** muda só o menu de Áreas; não muda o resto da Central
+- **Ver:** `evidencias/rodada33-areas-no-select-menu.jpg`
+
 ### Rodada 32 · 2026-10-20
 - **Pedido (literal):** "na hora de criar um caso de uso tem que ter espaço pra botar os prints )imagens da galeria). falta isso."
 - **Mudou:** "Criar caso de uso" ganhou o campo "Imagens da galeria": arrastar ou clicar para escolher, várias imagens (PNG, JPG ou GIF), com a miniatura de cada uma e o "x" para tirar.

@@ -203,6 +203,8 @@ export interface TextosDaTela {
     areasRotulo: string
     buscarAreas: string
     selecionarTudo: string
+    limparSelecao: string
+    nDeM: (n: number, m: number) => string
     bannerZeroTitulo: string
     bannerZero: string
     criarDoZero: string
@@ -438,6 +440,8 @@ export const textos: Record<Idioma, TextosDaTela> = {
       areasRotulo: 'Áreas',
       buscarAreas: 'Buscar área',
       selecionarTudo: 'Selecionar tudo',
+      limparSelecao: 'Limpar',
+      nDeM: (n, m) => `${n} de ${m}`,
       bannerZeroTitulo: 'Prefere começar do zero?',
       bannerZero: 'Um workspace vazio, montado por você. É o caminho mais comum.',
       criarDoZero: 'Criar do zero',
@@ -672,6 +676,8 @@ export const textos: Record<Idioma, TextosDaTela> = {
       areasRotulo: 'Areas',
       buscarAreas: 'Search area',
       selecionarTudo: 'Select all',
+      limparSelecao: 'Clear',
+      nDeM: (n, m) => `${n} of ${m}`,
       bannerZeroTitulo: 'Rather start from scratch?',
       bannerZero: 'An empty workspace, built by you. This is the most common path.',
       criarDoZero: 'Start from scratch',
@@ -906,6 +912,8 @@ export const textos: Record<Idioma, TextosDaTela> = {
       areasRotulo: 'Áreas',
       buscarAreas: 'Buscar área',
       selecionarTudo: 'Seleccionar todo',
+      limparSelecao: 'Borrar',
+      nDeM: (n, m) => `${n} de ${m}`,
       bannerZeroTitulo: '\u00bfPrefieres empezar desde cero?',
       bannerZero: 'Un workspace vacío, armado por ti. Es el camino más común.',
       criarDoZero: 'Crear desde cero',

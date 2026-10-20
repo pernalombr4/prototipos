@@ -36,7 +36,6 @@ const busca = ref('')
 const tipos = ref<TipoDeCaso[]>([])
 const complexidades = ref<Complexidade[]>([])
 const areas = ref<string[]>([])
-const buscaDeArea = ref('')
 const expandidas = ref<string[]>([])
 const aberto = ref<CasoDeUso | null>(null)
 
@@ -81,8 +80,6 @@ const contagem = computed(() => ({
   workspace: doWorkspace.value.length,
   enspace: casosDoEnspace.length,
 }))
-
-const areasNaBusca = computed(() => AREAS.filter(a => normaliza(a).includes(normaliza(buscaDeArea.value))))
 
 function alternar<T>(lista: T[], v: T) {
   return lista.includes(v) ? lista.filter(x => x !== v) : [...lista, v]
@@ -228,34 +225,52 @@ function data(iso: string) {
               </template>
             </UInput>
 
-            <!-- Áreas: várias de uma vez, com busca e "Selecionar tudo". -->
-            <UPopover :content="{ align: 'end', sideOffset: 6 }">
-              <UChip :show="areas.length > 0" :text="areas.length" size="xl" color="neutral">
-                <UButton :label="props.t.areasRotulo" icon="i-lucide-layers" color="neutral" variant="outline" />
-              </UChip>
-              <template #content>
-                <div class="w-64 p-2">
-                  <UInput v-model="buscaDeArea" :placeholder="props.t.buscarAreas" size="sm" class="mb-1 w-full" autofocus />
-                  <div class="flex justify-end px-1 py-1">
-                    <UButton
-                      :label="props.t.selecionarTudo"
-                      size="xs"
-                      color="neutral"
-                      variant="link"
-                      @click="areas = areas.length === AREAS.length ? [] : [...AREAS]"
-                    />
-                  </div>
-                  <ul class="max-h-64 overflow-y-auto">
-                    <li v-for="a in areasNaBusca" :key="a">
-                      <label class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5 text-sm text-default hover:bg-elevated">
-                        {{ a }}
-                        <UCheckbox :model-value="areas.includes(a)" :aria-label="a" @update:model-value="areas = alternar(areas, a)" />
-                      </label>
-                    </li>
-                  </ul>
+            <!--
+              Áreas: o USelectMenu múltiplo, como na galeria-de-casos-de-uso (rodada 2 de lá,
+              pedido da Mikaela: "esse botao selecionar tudo ta super estranho ai dentro").
+              Busca embutida, marca de seleção na linha, e "Selecionar tudo" e "Limpar" como
+              links no pé da lista, com a contagem.
+            -->
+            <USelectMenu
+              v-model="areas"
+              :items="[...AREAS]"
+              multiple
+              :search-input="{ placeholder: props.t.buscarAreas, icon: 'i-lucide-search' }"
+              color="neutral"
+              variant="outline"
+              icon="i-lucide-layers"
+              :content="{ align: 'end', sideOffset: 6 }"
+              :ui="{ content: 'min-w-60' }"
+              class="w-auto"
+              :aria-label="props.t.areasRotulo"
+            >
+              <span class="flex items-center gap-1.5">
+                {{ props.t.areasRotulo }}
+                <UBadge v-if="areas.length" :label="String(areas.length)" size="sm" color="primary" variant="subtle" />
+              </span>
+              <template #content-bottom>
+                <div class="flex items-center gap-1 border-t border-default px-2 py-1.5">
+                  <UButton
+                    :label="props.t.selecionarTudo"
+                    size="xs"
+                    color="primary"
+                    variant="link"
+                    :disabled="areas.length === AREAS.length"
+                    @click="areas = [...AREAS]"
+                  />
+                  <span class="text-dimmed" aria-hidden="true">·</span>
+                  <UButton
+                    :label="props.t.limparSelecao"
+                    size="xs"
+                    color="neutral"
+                    variant="link"
+                    :disabled="!areas.length"
+                    @click="areas = []"
+                  />
+                  <span class="ml-auto text-xs text-muted">{{ props.t.nDeM(areas.length, AREAS.length) }}</span>
                 </div>
               </template>
-            </UPopover>
+            </USelectMenu>
 
             <UButton icon="i-lucide-x" color="neutral" variant="ghost" :aria-label="props.t.voltarCentral" @click="janelas.central.value = false" />
           </div>

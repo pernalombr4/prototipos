@@ -221,6 +221,8 @@ export interface TextosDaTela {
   areasRotulo: string
   buscarAreas: string
   selecionarTudo: string
+  limparSelecao: string
+  nDeM: (n: number, m: number) => string
   bannerCriar: string
   criarCaso: string
   emDestaque: string
@@ -712,6 +714,8 @@ const ptBR: TextosDaTela = {
   areasRotulo: 'Áreas',
   buscarAreas: 'Pesquisar...',
   selecionarTudo: 'Selecionar tudo',
+  limparSelecao: 'Limpar',
+  nDeM: (n, m) => `${n} de ${m}`,
   bannerCriar: 'Transforme o seu menu num caso de uso e use em outros workspaces.',
   criarCaso: 'Criar caso de uso',
   emDestaque: 'Em destaque',
@@ -1246,6 +1250,8 @@ const en: TextosDaTela = {
   areasRotulo: 'Areas',
   buscarAreas: 'Search...',
   selecionarTudo: 'Select all',
+  limparSelecao: 'Clear',
+  nDeM: (n, m) => `${n} of ${m}`,
   bannerCriar: 'Turn your menu into a use case and use it in other workspaces.',
   criarCaso: 'Create use case',
   emDestaque: 'Featured',
@@ -1780,6 +1786,8 @@ const es: TextosDaTela = {
   areasRotulo: 'Áreas',
   buscarAreas: 'Buscar...',
   selecionarTudo: 'Seleccionar todo',
+  limparSelecao: 'Borrar',
+  nDeM: (n, m) => `${n} de ${m}`,
   bannerCriar: 'Convierte tu menú en un caso de uso y úsalo en otros workspaces.',
   criarCaso: 'Crear caso de uso',
   emDestaque: 'Destacados',
