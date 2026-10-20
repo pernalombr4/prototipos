@@ -68,3 +68,16 @@
 - **Maquete:** o caso criado vive só na memória da página (o reload apaga); a publicação é imediata, sem revisão do ENSPACE (P9 dos requisitos)
 - **Em aberto que pesa:** o nome do workspace que criou ("Por Grupo Aurora") aparece para as outras empresas? Ele identifica o cliente (P10)
 - **Ver:** `evidencias/proposta-10-deste-workspace-vazio.jpg` · `proposta-11-criar.jpg` · `proposta-12-publicar-aviso.jpg` · `proposta-13-criado.jpg` · `proposta-14-detalhe-criado.jpg`
+
+## Rodada 4 · 2026-10-20
+- **Pedido (literal):** "o criar nao é só com categorias e menus que o workspace ja tem, é com todas as entidades que o workspace tem (pode botar fluxo, pode botar menu, pode botar muita coisa)" e "tem que indicar pro dev pra disponibilizar tudo no seletor, e voce ja deve fazer um texto mais abrangente pra botar aí nos requisitos e no prototipo"
+- **Mudou:** "O que entra" vira um seletor de cada tipo de entidade do workspace, num grupo por tipo
+  - os 10 tipos do protótipo saem das chaves do arquivo de exportação de hoje: Categorias, Menus e telas, Formulários, Pastas, Listas, Fluxos da categoria, Spaceflows, Modelos de e-mail, Modelos de documento, Relatórios
+  - cada grupo tem a caixa do grupo (marca e desmarca tudo, parcial quando parte está marcada), "{marcadas}/{total}" e abre e fecha; Categorias abre aberto
+  - a busca "Buscar no workspace" procura em todos os tipos e abre só os grupos com resultado; o topo mostra "{n} de {total} selecionados"
+  - o detalhe ("O que vem junto") e a confirmação de uso mostram 1 bloco por tipo que o caso traz; 2 casos do ENSPACE ganharam formulários, Spaceflows, listas, fluxos, modelos e relatório
+  - textos mais abrangentes: descrição da janela, faixa, estado vazio, dica de "O que entra", erro e aviso de público (que agora cita o texto dos modelos)
+- **Requisitos:** RN006, RF030, RF034, RF042, RF043, RF045, RF048, RF050, RF053, RI001 e RI003 reescritos; RF063 (o seletor oferece cada tipo que a exportação leva, e os do protótipo são exemplo), RF064 a RF068 (grupo, contagens, busca); perguntas P14 (dependência entre entidades), P15 (a exportação leva Spaceflows?) e P16 (texto dos modelos)
+- **Fronteira:** muda o "O que entra" e os textos do criar; não muda o resto da janela nem a galeria
+- **Maquete:** a dependência entre entidades não existe no protótipo: desmarcar a categoria de um fluxo não avisa (P14)
+- **Ver:** `evidencias/proposta-15-o-que-entra.jpg` · `proposta-14-detalhe-criado.jpg`

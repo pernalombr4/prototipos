@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import PreviaDoCaso from './_PreviaDoCaso.vue'
-import { AREAS, localidades, type CasoDeUso, type Complexidade, type Localidade } from './mocks'
+import { AREAS, ICONE_DO_TIPO, TIPOS_EXTRAS, localidades, type CasoDeUso, type Complexidade, type Localidade, type TipoExtra } from './mocks'
 import type { Textos } from './textos'
 
 /**
@@ -146,6 +146,12 @@ function totalDeTelas(c: CasoDeUso) {
 }
 function totalDeCampos(c: CasoDeUso) {
   return c.categorias.reduce((n, x) => n + x.campos.length, 0)
+}
+
+/** Rodada 4: o resumo de cada tipo de entidade, com o plural do dicionário. */
+function nDoTipo(tp: TipoExtra, n: number) {
+  const x = props.t.tipos[tp]
+  return `${n} ${n === 1 ? x.um : x.varios}`
 }
 
 function data(iso: string) {
@@ -508,6 +514,7 @@ watch(() => props.casos, () => { aberto.value = null })
                 { id: 'categorias', icone: 'i-lucide-database', titulo: props.t.incluiCategorias, resumo: props.t.nCategoriasCampos(aberto.categorias.length, totalDeCampos(aberto)), itens: aberto.categorias.flatMap(c => [c.nome, ...c.campos]), mostrar: aberto.categorias.length > 0 },
                 { id: 'menus', icone: 'i-lucide-list-tree', titulo: props.t.incluiMenus, resumo: props.t.nMenusTelas(aberto.menus.length, totalDeTelas(aberto)), itens: aberto.menus.flatMap(m => [m.rotulo, ...m.telas.map(x => x.rotulo)]), mostrar: aberto.menus.length > 0 },
                 { id: 'status', icone: 'i-lucide-circle-dot', titulo: props.t.incluiStatus, resumo: props.t.nStatus(aberto.status.length), itens: aberto.status, mostrar: aberto.status.length > 0 },
+                ...TIPOS_EXTRAS.filter(tp => aberto!.extras?.[tp]?.length).map(tp => ({ id: tp, icone: ICONE_DO_TIPO[tp], titulo: props.t.tipos[tp].rotulo, resumo: nDoTipo(tp, aberto!.extras![tp]!.length), itens: aberto!.extras![tp]!, mostrar: true })),
               ].filter(b => b.mostrar)"
               :key="bloco.id"
               class="overflow-hidden rounded-xl border border-default"

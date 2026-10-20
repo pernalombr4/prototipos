@@ -57,6 +57,29 @@ export interface CasoDeUso {
   autor?: string
   /** Imagens enviadas ao criar (rodada 3); sem elas, a prévia é desenhada. */
   imagens?: { nome: string, url: string }[]
+  /** Rodada 4: as outras entidades da estrutura que o caso leva, por tipo. */
+  extras?: Partial<Record<TipoExtra, string[]>>
+}
+
+/**
+ * Rodada 4: os outros tipos de entidade da estrutura de um workspace, além de
+ * categorias (com campos e status) e menus (com telas). Saem das chaves do
+ * arquivo de exportação de hoje (protótipo migracao-de-workspace, BRIEFING):
+ * c-forms, c-folders, c-lists, c-type-flows, c-type-reports,
+ * group-email-templates, c-document-templates. Spaceflows é a tela do menu
+ * Membro. A lista é exemplo: o dev completa com cada tipo que a exportação leva.
+ */
+export type TipoExtra = 'formularios' | 'pastas' | 'listas' | 'fluxosDaCategoria' | 'spaceflows' | 'emails' | 'documentos' | 'relatorios'
+export const TIPOS_EXTRAS: TipoExtra[] = ['formularios', 'pastas', 'listas', 'fluxosDaCategoria', 'spaceflows', 'emails', 'documentos', 'relatorios']
+export const ICONE_DO_TIPO: Record<TipoExtra, string> = {
+  formularios: 'i-lucide-file-pen-line',
+  pastas: 'i-lucide-folder',
+  listas: 'i-lucide-list',
+  fluxosDaCategoria: 'i-lucide-git-branch',
+  spaceflows: 'i-lucide-workflow',
+  emails: 'i-lucide-mail',
+  documentos: 'i-lucide-file-text',
+  relatorios: 'i-lucide-chart-column',
 }
 
 export const AREAS = ['Jurídico', 'Comercial', 'Financeiro', 'Pessoas', 'Compras', 'Atendimento', 'TI', 'Operações'] as const
@@ -98,6 +121,7 @@ const doEnspace: CasoSemOrigem[] = [
       { nome: 'Aditivos', icone: 'i-lucide-file-plus', campos: ['Contrato de origem', 'Motivo', 'Novo valor'] },
     ],
     status: ['Rascunho', 'Em aprovação', 'Assinado', 'Vencido'],
+    extras: { formularios: ['Pedido de contrato'], spaceflows: ['Aviso de vencimento em 30 dias', 'Coleta de assinaturas'], documentos: ['Contrato de prestação de serviços'], emails: ['Contrato assinado'] },
   },
   {
     id: 'cu-contencioso', nome: 'Contencioso', icone: 'i-lucide-scale', area: 'Jurídico',
@@ -189,6 +213,7 @@ const doEnspace: CasoSemOrigem[] = [
     menus: [{ rotulo: 'Compras', icone: 'i-lucide-shopping-cart', telas: [tl('Minhas solicitações', 'i-lucide-user', 'minhas-requisicoes'), tl('Cotações', 'i-lucide-list'), tl('Aprovar por alçada', 'i-lucide-circle-check-big', 'triagem')] }],
     categorias: [{ nome: 'Solicitações de compra', icone: 'i-lucide-shopping-cart', campos: ['Item', 'Quantidade', 'Valor estimado', 'Centro de custo', 'Urgência'] }],
     status: ['Solicitada', 'Em cotação', 'Aprovada', 'Comprada'],
+    extras: { formularios: ['Nova solicitação'], listas: ['Centros de custo', 'Urgências'], fluxosDaCategoria: ['Aprovação por alçada'], relatorios: ['Compras do mês'] },
   },
   {
     id: 'cu-fornecedores', nome: 'Homologação de fornecedores', icone: 'i-lucide-truck', area: 'Compras',
@@ -237,7 +262,9 @@ export const umCaso: CasoDeUso[] = [casosDeUso.find(c => c.id === 'cu-funil')!]
 export interface CategoriaDoWorkspace extends CategoriaDoCaso { id: string, status: string[] }
 export interface MenuDoWorkspace extends MenuDoCaso { id: string }
 
-export const estruturaDoWorkspace: { categorias: CategoriaDoWorkspace[], menus: MenuDoWorkspace[] } = {
+export interface EntidadeDoWorkspace { id: string, nome: string }
+
+export const estruturaDoWorkspace: { categorias: CategoriaDoWorkspace[], menus: MenuDoWorkspace[], outros: { tipo: TipoExtra, itens: EntidadeDoWorkspace[] }[] } = {
   categorias: [
     { id: 'c1', nome: 'Pedidos de compra', icone: 'i-lucide-shopping-cart', campos: ['Item', 'Quantidade', 'Centro de custo', 'Aprovador', 'Entrega prevista'], status: ['Rascunho', 'Em aprovação', 'Aprovado', 'Entregue'] },
     { id: 'c2', nome: 'Fornecedores', icone: 'i-lucide-truck', campos: ['Razão social', 'CNPJ', 'Contato', 'Avaliação'], status: ['Ativo', 'Bloqueado'] },
@@ -248,5 +275,16 @@ export const estruturaDoWorkspace: { categorias: CategoriaDoWorkspace[], menus: 
     { id: 'm1', rotulo: 'Compras', icone: 'i-lucide-shopping-cart', telas: [tl('Pedidos abertos', 'i-lucide-list'), tl('Aprovar pedido', 'i-lucide-circle-check-big', 'triagem'), tl('Fornecedores', 'i-lucide-truck')] },
     { id: 'm2', rotulo: 'Imóveis', icone: 'i-lucide-building', telas: [tl('Contratos vigentes', 'i-lucide-list'), tl('Reajustes do mês', 'i-lucide-calendar-clock')] },
     { id: 'm3', rotulo: 'Atendimento interno', icone: 'i-lucide-life-buoy', telas: [tl('Fila', 'i-lucide-inbox', 'triagem')] },
+  ],
+  /* Rodada 4: o resto da estrutura. */
+  outros: [
+    { tipo: 'formularios', itens: [{ id: 'f1', nome: 'Novo pedido de compra' }, { id: 'f2', nome: 'Cadastro de fornecedor' }, { id: 'f3', nome: 'Abrir chamado interno' }] },
+    { tipo: 'pastas', itens: [{ id: 'p1', nome: 'Notas fiscais' }, { id: 'p2', nome: 'Contratos assinados' }] },
+    { tipo: 'listas', itens: [{ id: 'l1', nome: 'Centros de custo' }, { id: 'l2', nome: 'Tipos de imóvel' }, { id: 'l3', nome: 'Prioridades' }] },
+    { tipo: 'fluxosDaCategoria', itens: [{ id: 'fc1', nome: 'Aprovação de pedido por alçada' }, { id: 'fc2', nome: 'Renovação de locação' }] },
+    { tipo: 'spaceflows', itens: [{ id: 's1', nome: 'Aviso de reajuste 60 dias antes' }, { id: 's2', nome: 'Encerrar chamado sem resposta em 5 dias' }, { id: 's3', nome: 'Pedido aprovado vai para o fornecedor' }] },
+    { tipo: 'emails', itens: [{ id: 'e1', nome: 'Pedido aprovado' }, { id: 'e2', nome: 'Chamado resolvido' }] },
+    { tipo: 'documentos', itens: [{ id: 'd1', nome: 'Ordem de compra' }, { id: 'd2', nome: 'Termo aditivo de locação' }] },
+    { tipo: 'relatorios', itens: [{ id: 'r1', nome: 'Compras por centro de custo' }] },
   ],
 }

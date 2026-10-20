@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CasoDeUso } from './mocks'
+import { ICONE_DO_TIPO, TIPOS_EXTRAS, type CasoDeUso } from './mocks'
 import type { Textos } from './textos'
 
 /**
@@ -39,6 +39,8 @@ const grupos = computed(() => {
     { titulo: props.t.incluiCategorias, linhas: c.categorias.map(x => ({ icone: x.icone, rotulo: x.nome, detalhe: props.t.nCampos(x.campos.length) })) },
     { titulo: props.t.incluiMenus, linhas: c.menus.map(m => ({ icone: m.icone, rotulo: m.rotulo, detalhe: props.t.nTelas(m.telas.length) })) },
     { titulo: props.t.incluiStatus, linhas: c.status.length ? [{ icone: 'i-lucide-circle-dot', rotulo: c.status.join(', '), detalhe: props.t.nStatus(c.status.length) }] : [] },
+    // Rodada 4: os outros tipos de entidade que o caso leva.
+    ...TIPOS_EXTRAS.map(tp => ({ titulo: props.t.tipos[tp].rotulo, linhas: (c.extras?.[tp] ?? []).map(nome => ({ icone: ICONE_DO_TIPO[tp], rotulo: nome, detalhe: '' })) })),
   ].filter(g => g.linhas.length)
 })
 </script>

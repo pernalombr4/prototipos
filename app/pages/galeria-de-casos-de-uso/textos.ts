@@ -4,7 +4,7 @@
 // develop, conferido no bundle da tela em 2026-10-20. A galeria é a copy proposta.
 
 import type { Idioma } from '../../composables/useIdioma'
-import type { Complexidade, Localidade } from './mocks'
+import type { Complexidade, Localidade, TipoExtra } from './mocks'
 
 interface Casca {
   menuLateral: string
@@ -156,6 +156,14 @@ export interface Textos {
   soNoWorkspace: string
   publicadoNaGaleria: string
   semPermissaoCriar: string
+
+  // o seletor de tudo o que o workspace tem (rodada 4)
+  tipos: Record<TipoExtra, { rotulo: string, um: string, varios: string }>
+  menusETelas: string
+  buscarNoWorkspace: string
+  selecionados: (n: number, total: number) => string
+  marcarGrupo: (grupo: string) => string
+  nadaNaBusca: string
 }
 
 const casca: Record<Idioma, Casca> = {
@@ -291,8 +299,8 @@ const pt: Textos = {
   doWorkspace: 'Deste workspace',
   criarCaso: 'Criar caso de uso',
   faixaCriarTitulo: 'Transforme este workspace em um caso de uso',
-  faixaCriarTexto: 'Escolha as categorias e os menus que entram. Você decide se o caso fica só aqui ou na galeria do ENSPACE.',
-  criarCasoDescricao: 'Monte um caso de uso com a estrutura que este workspace tem agora. Só a estrutura entra: nenhum item, arquivo ou dado de pessoa.',
+  faixaCriarTexto: 'Escolha o que entra: categorias, formulários, fluxos, Spaceflows, menus, telas, modelos e o resto da estrutura. Você decide se o caso fica só aqui ou na galeria do ENSPACE.',
+  criarCasoDescricao: 'Monte um caso de uso com a estrutura que este workspace tem agora: categorias, campos, formulários, pastas, listas, fluxos, Spaceflows, menus, telas, modelos de e-mail e de documento, relatórios. Só a estrutura entra: nenhum item, arquivo anexado ou dado de pessoa.',
   nomeDoCaso: 'Nome',
   nomeObrigatorio: 'Informe o nome do caso de uso.',
   areaDoCaso: 'Área',
@@ -302,10 +310,10 @@ const pt: Textos = {
   imagensArraste: 'Arraste as imagens ou clique para escolher',
   imagensFormatos: 'PNG ou JPG',
   oQueEntraCampo: 'O que entra',
-  oQueEntraDica: 'Cada categoria leva os campos e os status dela. Cada menu leva as telas.',
+  oQueEntraDica: 'A lista mostra tudo o que este workspace tem, por tipo. Cada categoria leva os campos e os status dela; cada menu leva as telas.',
   categoriasDoWorkspace: 'Categorias',
   menusDoWorkspace: 'Menus',
-  escolhaUmItem: 'Escolha ao menos 1 categoria ou 1 menu.',
+  escolhaUmItem: 'Escolha ao menos 1 parte da estrutura.',
   ondeFica: 'Onde o caso de uso fica',
   ondeFicaDica: 'Só neste workspace: apenas quem acessa este workspace vê e usa. Galeria do ENSPACE: todas as empresas que usam o ENSPACE veem e usam.',
   ondeOpcoes: {
@@ -313,7 +321,7 @@ const pt: Textos = {
     galeria: { label: 'Galeria do ENSPACE', description: 'Aparece para todas as empresas que usam o ENSPACE.' },
   },
   avisoPublicoTitulo: 'Este caso de uso fica público',
-  avisoPublicoTexto: 'Todas as empresas que usam o ENSPACE passam a ver e usar os nomes das categorias, dos campos, dos menus, das telas e dos status escolhidos. Confira se nenhum nome identifica um cliente, uma pessoa ou um projeto interno.',
+  avisoPublicoTexto: 'Todas as empresas que usam o ENSPACE passam a ver e usar tudo o que você escolheu: nomes de categorias, campos, status, formulários, fluxos, Spaceflows, menus e telas, e o texto dos modelos de e-mail e de documento. Confira se nenhum nome ou texto identifica um cliente, uma pessoa ou um projeto interno.',
   confirmoPublico: 'Entendo que este caso de uso fica visível para todas as empresas que usam o ENSPACE.',
   confirmoObrigatorio: 'Marque a confirmação para publicar.',
   salvarNoWorkspace: 'Salvar no workspace',
@@ -323,13 +331,28 @@ const pt: Textos = {
   casoPublicado: nome => `Caso de uso ${nome} publicado`,
   casoPublicadoTexto: 'Ele está na galeria do ENSPACE e em Deste workspace.',
   nadaNoWorkspaceTitulo: 'Nenhum caso de uso criado neste workspace',
-  nadaNoWorkspaceAjuda: 'Crie um caso de uso com as categorias e os menus que este workspace já tem.',
+  nadaNoWorkspaceAjuda: 'Crie um caso de uso com a estrutura que este workspace já tem: categorias, fluxos, menus, modelos e o resto.',
   porWorkspace: nome => `Por ${nome}`,
   porWorkspaceDica: 'Caso de uso criado neste workspace.',
   visibilidade: 'Visibilidade',
   soNoWorkspace: 'Só neste workspace',
   publicadoNaGaleria: 'Publicado na galeria',
   semPermissaoCriar: 'Para criar um caso de uso, você precisa da permissão Criar Casos de Uso.',
+  tipos: {
+    formularios: { rotulo: 'Formulários', um: 'formulário', varios: 'formulários' },
+    pastas: { rotulo: 'Pastas', um: 'pasta', varios: 'pastas' },
+    listas: { rotulo: 'Listas', um: 'lista', varios: 'listas' },
+    fluxosDaCategoria: { rotulo: 'Fluxos da categoria', um: 'fluxo', varios: 'fluxos' },
+    spaceflows: { rotulo: 'Spaceflows', um: 'Spaceflow', varios: 'Spaceflows' },
+    emails: { rotulo: 'Modelos de e-mail', um: 'modelo de e-mail', varios: 'modelos de e-mail' },
+    documentos: { rotulo: 'Modelos de documento', um: 'modelo de documento', varios: 'modelos de documento' },
+    relatorios: { rotulo: 'Relatórios', um: 'relatório', varios: 'relatórios' },
+  },
+  menusETelas: 'Menus e telas',
+  buscarNoWorkspace: 'Buscar no workspace',
+  selecionados: (n, total) => `${n} de ${total} selecionados`,
+  marcarGrupo: grupo => `Marcar tudo em ${grupo}`,
+  nadaNaBusca: 'Nada deste workspace tem esse nome.',
 }
 
 const en: Textos = {
@@ -420,8 +443,8 @@ const en: Textos = {
   doWorkspace: 'From this workspace',
   criarCaso: 'Create use case',
   faixaCriarTitulo: 'Turn this workspace into a use case',
-  faixaCriarTexto: 'Choose the categories and menus that go in. You decide whether the use case stays here or goes to the ENSPACE gallery.',
-  criarCasoDescricao: 'Build a use case from the structure this workspace has now. Only the structure goes in: no items, files or personal data.',
+  faixaCriarTexto: 'Choose what goes in: categories, forms, flows, Spaceflows, menus, screens, templates and the rest of the structure. You decide whether the use case stays here or goes to the ENSPACE gallery.',
+  criarCasoDescricao: 'Build a use case from the structure this workspace has now: categories, fields, forms, folders, lists, flows, Spaceflows, menus, screens, email and document templates, reports. Only the structure goes in: no items, attached files or personal data.',
   nomeDoCaso: 'Name',
   nomeObrigatorio: 'Enter the use case name.',
   areaDoCaso: 'Area',
@@ -431,10 +454,10 @@ const en: Textos = {
   imagensArraste: 'Drag the images or click to choose',
   imagensFormatos: 'PNG or JPG',
   oQueEntraCampo: 'What goes in',
-  oQueEntraDica: 'Each category takes its fields and statuses. Each menu takes its screens.',
+  oQueEntraDica: 'The list shows everything this workspace has, by type. Each category takes its fields and statuses; each menu takes its screens.',
   categoriasDoWorkspace: 'Categories',
   menusDoWorkspace: 'Menus',
-  escolhaUmItem: 'Choose at least 1 category or 1 menu.',
+  escolhaUmItem: 'Choose at least 1 part of the structure.',
   ondeFica: 'Where the use case lives',
   ondeFicaDica: 'Only this workspace: only people with access to this workspace see and use it. ENSPACE gallery: every company that uses ENSPACE sees and uses it.',
   ondeOpcoes: {
@@ -442,7 +465,7 @@ const en: Textos = {
     galeria: { label: 'ENSPACE gallery', description: 'Shows to every company that uses ENSPACE.' },
   },
   avisoPublicoTitulo: 'This use case becomes public',
-  avisoPublicoTexto: 'Every company that uses ENSPACE can see and use the names of the chosen categories, fields, menus, screens and statuses. Check that no name identifies a client, a person or an internal project.',
+  avisoPublicoTexto: 'Every company that uses ENSPACE can see and use everything you chose: names of categories, fields, statuses, forms, flows, Spaceflows, menus and screens, and the text of email and document templates. Check that no name or text identifies a client, a person or an internal project.',
   confirmoPublico: 'I understand this use case is visible to every company that uses ENSPACE.',
   confirmoObrigatorio: 'Check the confirmation to publish.',
   salvarNoWorkspace: 'Save to workspace',
@@ -452,13 +475,28 @@ const en: Textos = {
   casoPublicado: nome => `Use case ${nome} published`,
   casoPublicadoTexto: 'It is in the ENSPACE gallery and in From this workspace.',
   nadaNoWorkspaceTitulo: 'No use case created in this workspace',
-  nadaNoWorkspaceAjuda: 'Create a use case with the categories and menus this workspace already has.',
+  nadaNoWorkspaceAjuda: 'Create a use case with the structure this workspace already has: categories, flows, menus, templates and the rest.',
   porWorkspace: nome => `By ${nome}`,
   porWorkspaceDica: 'Use case created in this workspace.',
   visibilidade: 'Visibility',
   soNoWorkspace: 'Only this workspace',
   publicadoNaGaleria: 'Published to gallery',
   semPermissaoCriar: 'To create a use case, you need the Create Use Cases permission.',
+  tipos: {
+    formularios: { rotulo: 'Forms', um: 'form', varios: 'forms' },
+    pastas: { rotulo: 'Folders', um: 'folder', varios: 'folders' },
+    listas: { rotulo: 'Lists', um: 'list', varios: 'lists' },
+    fluxosDaCategoria: { rotulo: 'Category flows', um: 'flow', varios: 'flows' },
+    spaceflows: { rotulo: 'Spaceflows', um: 'Spaceflow', varios: 'Spaceflows' },
+    emails: { rotulo: 'Email templates', um: 'email template', varios: 'email templates' },
+    documentos: { rotulo: 'Document templates', um: 'document template', varios: 'document templates' },
+    relatorios: { rotulo: 'Reports', um: 'report', varios: 'reports' },
+  },
+  menusETelas: 'Menus and screens',
+  buscarNoWorkspace: 'Search this workspace',
+  selecionados: (n, total) => `${n} of ${total} selected`,
+  marcarGrupo: grupo => `Select all in ${grupo}`,
+  nadaNaBusca: 'Nothing in this workspace has that name.',
 }
 
 const es: Textos = {
@@ -549,8 +587,8 @@ const es: Textos = {
   doWorkspace: 'De este espacio de trabajo',
   criarCaso: 'Crear caso de uso',
   faixaCriarTitulo: 'Convierta este espacio de trabajo en un caso de uso',
-  faixaCriarTexto: 'Elija las categorías y los menús que entran. Usted decide si el caso queda solo aquí o en la galería de ENSPACE.',
-  criarCasoDescricao: 'Arme un caso de uso con la estructura que este espacio de trabajo tiene ahora. Solo entra la estructura: ningún ítem, archivo ni dato de personas.',
+  faixaCriarTexto: 'Elija qué entra: categorías, formularios, flujos, Spaceflows, menús, pantallas, plantillas y el resto de la estructura. Usted decide si el caso queda solo aquí o en la galería de ENSPACE.',
+  criarCasoDescricao: 'Arme un caso de uso con la estructura que este espacio de trabajo tiene ahora: categorías, campos, formularios, carpetas, listas, flujos, Spaceflows, menús, pantallas, plantillas de correo y de documento, informes. Solo entra la estructura: ningún ítem, archivo adjunto ni dato de personas.',
   nomeDoCaso: 'Nombre',
   nomeObrigatorio: 'Ingrese el nombre del caso de uso.',
   areaDoCaso: 'Área',
@@ -560,10 +598,10 @@ const es: Textos = {
   imagensArraste: 'Arrastre las imágenes o haga clic para elegir',
   imagensFormatos: 'PNG o JPG',
   oQueEntraCampo: 'Qué entra',
-  oQueEntraDica: 'Cada categoría lleva sus campos y estados. Cada menú lleva sus pantallas.',
+  oQueEntraDica: 'La lista muestra todo lo que este espacio de trabajo tiene, por tipo. Cada categoría lleva sus campos y estados; cada menú lleva sus pantallas.',
   categoriasDoWorkspace: 'Categorías',
   menusDoWorkspace: 'Menús',
-  escolhaUmItem: 'Elija al menos 1 categoría o 1 menú.',
+  escolhaUmItem: 'Elija al menos 1 parte de la estructura.',
   ondeFica: 'Dónde queda el caso de uso',
   ondeFicaDica: 'Solo en este espacio de trabajo: solo quien accede a este espacio de trabajo lo ve y lo usa. Galería de ENSPACE: todas las empresas que usan ENSPACE lo ven y lo usan.',
   ondeOpcoes: {
@@ -571,7 +609,7 @@ const es: Textos = {
     galeria: { label: 'Galería de ENSPACE', description: 'Aparece para todas las empresas que usan ENSPACE.' },
   },
   avisoPublicoTitulo: 'Este caso de uso queda público',
-  avisoPublicoTexto: 'Todas las empresas que usan ENSPACE pasan a ver y usar los nombres de las categorías, los campos, los menús, las pantallas y los estados elegidos. Verifique que ningún nombre identifique a un cliente, una persona o un proyecto interno.',
+  avisoPublicoTexto: 'Todas las empresas que usan ENSPACE pasan a ver y usar todo lo que usted eligió: nombres de categorías, campos, estados, formularios, flujos, Spaceflows, menús y pantallas, y el texto de las plantillas de correo y de documento. Verifique que ningún nombre o texto identifique a un cliente, una persona o un proyecto interno.',
   confirmoPublico: 'Entiendo que este caso de uso queda visible para todas las empresas que usan ENSPACE.',
   confirmoObrigatorio: 'Marque la confirmación para publicar.',
   salvarNoWorkspace: 'Guardar en el espacio de trabajo',
@@ -581,13 +619,28 @@ const es: Textos = {
   casoPublicado: nome => `Caso de uso ${nome} publicado`,
   casoPublicadoTexto: 'Está en la galería de ENSPACE y en De este espacio de trabajo.',
   nadaNoWorkspaceTitulo: 'Ningún caso de uso creado en este espacio de trabajo',
-  nadaNoWorkspaceAjuda: 'Cree un caso de uso con las categorías y los menús que este espacio de trabajo ya tiene.',
+  nadaNoWorkspaceAjuda: 'Cree un caso de uso con la estructura que este espacio de trabajo ya tiene: categorías, flujos, menús, plantillas y el resto.',
   porWorkspace: nome => `Por ${nome}`,
   porWorkspaceDica: 'Caso de uso creado en este espacio de trabajo.',
   visibilidade: 'Visibilidad',
   soNoWorkspace: 'Solo en este espacio de trabajo',
   publicadoNaGaleria: 'Publicado en la galería',
   semPermissaoCriar: 'Para crear un caso de uso, necesita el permiso Crear Casos de Uso.',
+  tipos: {
+    formularios: { rotulo: 'Formularios', um: 'formulario', varios: 'formularios' },
+    pastas: { rotulo: 'Carpetas', um: 'carpeta', varios: 'carpetas' },
+    listas: { rotulo: 'Listas', um: 'lista', varios: 'listas' },
+    fluxosDaCategoria: { rotulo: 'Flujos de la categoría', um: 'flujo', varios: 'flujos' },
+    spaceflows: { rotulo: 'Spaceflows', um: 'Spaceflow', varios: 'Spaceflows' },
+    emails: { rotulo: 'Plantillas de correo', um: 'plantilla de correo', varios: 'plantillas de correo' },
+    documentos: { rotulo: 'Plantillas de documento', um: 'plantilla de documento', varios: 'plantillas de documento' },
+    relatorios: { rotulo: 'Informes', um: 'informe', varios: 'informes' },
+  },
+  menusETelas: 'Menús y pantallas',
+  buscarNoWorkspace: 'Buscar en el espacio de trabajo',
+  selecionados: (n, total) => `${n} de ${total} seleccionados`,
+  marcarGrupo: grupo => `Marcar todo en ${grupo}`,
+  nadaNaBusca: 'Nada en este espacio de trabajo tiene ese nombre.',
 }
 
 export const textos: Record<Idioma, Textos> = { 'pt-BR': pt, en, es }
