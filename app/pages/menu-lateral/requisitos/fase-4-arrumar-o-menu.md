@@ -12,8 +12,8 @@ fases está em [fases.md](fases.md).
 **Convenção:** "deve" é obrigatório. Cada requisito tem um critério de aceite que se confere na tela. Os textos entre
 aspas são os da interface em português; os de inglês e espanhol estão no `textos.ts` da pasta do protótipo.
 
-**Fora do escopo:** criar menu, seção ou categoria e o editor de menus (fase 5). As preferências de cada pessoa da
-fase 3 não passam pelo rascunho.
+**Fora do escopo:** criar e excluir menu, seção ou categoria e o editor de menus (fase 5). As preferências de cada
+pessoa da fase 3 não passam pelo rascunho do workspace.
 
 ## Resumo
 
@@ -22,8 +22,10 @@ fase 3 não passam pelo rascunho.
 | Arrastar | Hoje o menu só muda em Configurações > Interface > Menus. Passa a mudar na própria barra | RF301 a RF308 |
 | Regras de encaixe | A recusa aparece no lugar, com o motivo | RF309 a RF311 |
 | Botão direito e "…" | Toda linha e todo título de seção têm um menu de ações | RF312 a RF320 e RF334 |
+| Seção, menu e submenu | O menu do workspace ganha o 3º nível: o submenu entra pela ação, e tirar não exclui | RF335 a RF337 e RF341 |
 | Ocultar | Qualquer pessoa tira um item do próprio menu | RF321 a RF323 |
 | Rascunho e salvar | Nada muda para ninguém até salvar; salvar para todos ou só para mim | RF324 a RF333 |
+| Personalizar com o menu do workspace | A janela da fase 3 mostra as seções do workspace e salva para todos | RF338 a RF340 |
 
 ## Regras de negócio (RN)
 
@@ -36,17 +38,18 @@ fase 3 não passam pelo rascunho.
 | RN305 | Início, Dados e Configurações ficam onde estão na trilha; só as seções mudam de lugar na trilha. | Arrastar Dados para baixo de Comercial é recusado. |
 | RN306 | Nome nativo vem do produto: só o que o workspace criou se renomeia. | Comercial se renomeia; Auditoria, não. |
 | RN307 | Início e Categorias não se ocultam. | O "…" de Categorias não tem "Ocultar do menu". |
-| RN308 | A tabela a seguir define onde cada tipo de linha pode ser solto. Política: Única, a primeira linha que casa decide. | Linha 3: Contratos solto dentro de Comercial é recusado. |
+| RN308 | A tabela a seguir define onde cada tipo de linha pode ser solto ou posto. Política: Única, a primeira linha que casa decide. | Linha 5: Contratos (categoria) solto dentro de Comercial é recusado. |
 
 | Linha | O que é solto | Onde | Resultado | Motivo na tela |
 |---|---|---|---|---|
 | 1 | qualquer | dentro de Integrações, ou um item de Integrações em qualquer lugar | recusado | "Integrações tem ordem fixa, como Configurações: nada entra, sai ou muda de lugar." |
-| 2 | qualquer | dentro de um destino nativo | recusado | "Tela nativa não recebe item dentro. Solte dentro de uma seção." |
-| 3 | seção ou destino nativo | dentro de uma seção | recusado | "O menu tem dois níveis. Seção não entra dentro de seção." |
-| 4 | categoria | fora da seção Categorias | recusado | "Categoria só entra na seção Categorias." |
-| 5 | tela | dentro da seção Categorias | recusado | "A seção Categorias só aceita categoria." |
-| 6 | Início, Dados ou Configurações | outro lugar da trilha | recusado | "Trabalho, Dados e Configurações ficam onde estão. Só as seções mudam de lugar na trilha." |
-| 7 | qualquer outro caso | qualquer outro lugar | aceito | (sem aviso) |
+| 2 | qualquer | dentro de um menu nativo: destino nativo, tela nativa ou tela de módulo (RN207 da fase 3) | recusado | "Menu nativo não recebe submenu. Solte dentro de uma seção." |
+| 3 | qualquer | dentro de um submenu; ou um menu que tem submenus, dentro de outro menu (RN206 da fase 3) | recusado | "O menu tem no máximo 3 níveis: seção, menu e submenu. Submenu não recebe submenu." |
+| 4 | seção ou destino nativo | dentro de uma seção ou de um menu | recusado | "Seção não entra dentro de seção nem de menu." |
+| 5 | categoria | fora da seção Categorias | recusado | "Categoria só entra na seção Categorias." |
+| 6 | tela | dentro da seção Categorias | recusado | "A seção Categorias só aceita categoria." |
+| 7 | Início, Dados ou Configurações | outro lugar da trilha | recusado | "Trabalho, Dados e Configurações ficam onde estão. Só as seções mudam de lugar na trilha." |
+| 8 | qualquer outro caso | qualquer outro lugar | aceito | (sem aviso) |
 
 ## Arrastar (RF)
 
@@ -58,7 +61,7 @@ fase 3 não passam pelo rascunho.
 | RF304 | Arrastar um título de seção deve mover a seção inteira. | Arrastar Comercial acima de Análise move as 3 telas juntas. | Essencial |
 | RF305 | Enquanto a linha está no ar, o sistema deve mostrar a marca do lugar onde a linha vai cair. | A linha de 2 px aparece entre as linhas de destino. | Importante |
 | RF306 | Alt com a seta para cima ou para baixo, numa linha ou num título com foco, deve mover 1 lugar entre os vizinhos. | Alt+↓ em Logs de auditoria a põe depois de Logs de requisição. | Essencial |
-| RF307 | As telas de um menu posto numa seção pessoal (o terceiro recuo) devem se reordenar como as telas da seção do workspace, e a ordem nova vale para o menu do workspace. | Reordenar Logs de requisição dentro de "Rotina do jurídico" muda a ordem também no painel de Auditoria. | Importante |
+| RF307 (removido) | Substituído pelo RF254 da fase 3: os submenus de uma seção pessoal são escolha da pessoa, e a ordem deles vale só para ela. | | |
 | RF308 | Só deve haver alça de arraste e mover no menu do workspace para quem tem licença Owner ou Full (RN301). | Estado sem permissão: nenhuma linha do menu do workspace mostra a alça; as categorias continuam arrastáveis (RN205 da fase 3). | Essencial |
 
 ## Regras de encaixe (RF)
@@ -75,14 +78,23 @@ fase 3 não passam pelo rascunho.
 |---|---|---|---|
 | RF312 | O botão direito numa linha do menu deve abrir o menu de ações da linha. | Botão direito em Contratos abre o menu. | Essencial |
 | RF334 | O botão "…" que aparece no hover da linha deve abrir o menu de ações de RF312, com os itens de RF313. | O "…" e o botão direito mostram os itens de RF313. | Essencial |
-| RF313 | O menu de ações de uma linha deve ter 3 blocos, nesta ordem: ir ("Abrir", "Abrir em nova aba", "Copiar link"); arrumar ("Mover para cima", "Mover para baixo", "Mover para"); mexer ("Renomear", "Ocultar do menu"). | Botão direito em Painel de vendas mostra os 3 blocos. | Essencial |
+| RF313 | O menu de ações de uma linha deve ter estes blocos, nesta ordem: ir ("Abrir", "Abrir em nova aba", "Copiar link"); arrumar ("Mover para cima", "Mover para baixo", "Mover para"); nível (RF335 e RF337); mexer ("Renomear", "Ocultar do menu"); e, na fase 5, excluir (RF436 da fase 5). | Botão direito em Painel de vendas mostra os blocos ir, arrumar, nível e mexer. | Essencial |
 | RF314 | "Mover para" deve listar só as seções que aceitam a linha pela RN308 e, para quem está dentro de uma seção, "Primeiro nível do menu". | Em Painel de vendas, a lista não tem Categorias nem Integrações. | Importante |
 | RF315 | "Renomear" só deve aparecer no que o workspace criou (RN306) e abrir uma janela curta com o nome. | Botão direito em Auditoria não tem "Renomear". | Importante |
 | RF316 | Numa linha de Integrações, o menu de ações não deve ter "Mover para cima", "Mover para baixo" nem "Mover para" (RN304). | Botão direito em Credenciais: "Abrir", "Abrir em nova aba", "Copiar link" e "Ocultar do menu". | Essencial |
-| RF317 | O menu de ações de um título de seção deve ter recolher ou expandir, "Copiar link", "Nova tela nesta seção", mover, "Mostrar na seção" e o bloco mexer. | Botão direito no título Comercial mostra os itens. | Importante |
-| RF318 | O título de Integrações não deve ter "Nova tela nesta seção" (RN304). | Botão direito no título Integrações não tem o item. | Importante |
+| RF317 | O menu de ações de um título de seção deve ter recolher ou expandir, "Copiar link", "Novo menu nesta seção", mover, "Mostrar na seção" e o bloco mexer. | Botão direito no título Comercial mostra os itens. | Importante |
+| RF318 | O título de Integrações não deve ter "Novo menu nesta seção" (RN304). | Botão direito no título Integrações não tem o item. | Importante |
 | RF319 | Item que a pessoa não pode usar pela RN301 deve aparecer desligado, com a explicação "Só quem configura o workspace". | Estado sem permissão: "Mover para cima" aparece desligado, com a explicação. | Importante |
 | RF320 | Shift+F10 numa linha com foco deve abrir o menu de ações de RF312. | Pelo teclado, Shift+F10 em Contratos abre o menu. | Importante |
+
+## Seção, menu e submenu (RF)
+
+| ID | Requisito | Critério de aceite | Prioridade |
+|---|---|---|---|
+| RF335 | No menu que está dentro de uma seção, o bloco de nível deve ter "Adicionar submenu" só quando o workspace criou o menu (RN207 da fase 3); a ação abre a janela "Adicionar em <nome>", com os menus que a RN308 aceita ali. | Painel de vendas tem a ação; Dashboard de tarefas e Logs de auditoria, não. | Essencial |
+| RF336 | Escolher um menu em "Adicionar em <nome>" deve movê-lo para dentro do menu, no rascunho: uma tela não mora em 2 lugares (RN402 da fase 5). | Escolher Minhas requisições em Triagem de propostas: o menu vira submenu, com a bolinha amarela. | Essencial |
+| RF337 | "Tirar da seção" deve levar o menu para o primeiro nível, ao lado da seção (RN208 da fase 3). A seção com 1 menu só não tem "Tirar da seção". | Tirar Triagem de propostas de Comercial: a linha vai para o primeiro nível, depois de Comercial. | Essencial |
+| RF341 | "Tirar do menu" deve devolver o submenu à seção, ao lado do menu de onde saiu (RN208 da fase 3). | Tirar Metas do trimestre: a linha volta para Comercial, depois de Painel de vendas. | Essencial |
 
 ## Ocultar (RF)
 
@@ -107,6 +119,14 @@ fase 3 não passam pelo rascunho.
 | RF332 | "Descartar" deve devolver o menu ao estado de antes do rascunho e apagar as bolinhas. | Mover 2 linhas e Descartar: a ordem volta. | Essencial |
 | RF333 | Com a barra recolhida e o rascunho aberto, a trilha deve mostrar o ícone de salvar com a bolinha amarela, que abre o painel. | Recolher com o rascunho aberto: o ícone aparece na trilha. | Importante |
 
+## Personalizar com o menu do workspace (RF)
+
+| ID | Requisito | Critério de aceite | Prioridade |
+|---|---|---|---|
+| RF338 | A aba "Seções e menus" da janela Personalizar (RF207 da fase 3) deve listar também, em "Nas áreas da trilha", as seções do workspace com os menus e os submenus. Integrações aparece com o cadeado; "+", "Adicionar menu" e o "⋯" de cada menu só aparecem para quem cumpre a RN301. | Estado sem permissão: as seções das áreas aparecem sem "+" e sem "⋯". | Essencial |
+| RF339 | O "Salvar" do pé da janela Personalizar (RF209 da fase 3) deve perguntar "Salvar para todos" ou "Salvar só para mim"; quem não cumpre a RN301 tem só "Salvar só para mim". | Estado sem permissão: o pé mostra "Salvar só para mim". | Essencial |
+| RF340 | A mudança do menu do workspace feita na janela deve entrar no rascunho de RF324, com a bolinha amarela na linha mexida. | Mover um menu na janela acende a bolinha na linha e "Alterações não salvas" no pé. | Essencial |
+
 ## Interfaces (RI)
 
 | ID | Rota ou evento | O que deve receber ou devolver |
@@ -127,8 +147,8 @@ fase 3 não passam pelo rascunho.
 
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
-| P301 | O motivo da linha 6 da RN308 ainda diz "Trabalho", nome antigo do Início. O texto passa a "Início, Dados e Configurações ficam onde estão..."? | produto | O texto do aviso. |
-| P302 | A linha 3 da RN308 recusa também destino nativo dentro de seção, com o texto de seção. Ganha texto próprio? | produto | Um motivo novo na tabela. |
+| P301 | O motivo da linha 7 da RN308 ainda diz "Trabalho", nome antigo do Início. O texto passa a "Início, Dados e Configurações ficam onde estão..."? | produto | O texto do aviso. |
+| P302 | A linha 4 da RN308 recusa também destino nativo dentro de seção, com o texto de seção. Ganha texto próprio? | produto | Um motivo novo na tabela. |
 | P303 | Quem salvou para todos fica registrado em algum lugar (log de auditoria)? | produto | Um RI de registro na Auditoria. |
 | P304 | Se 2 administradores salvam para todos ao mesmo tempo, qual rascunho vale? | dev | Um RF de conflito ao salvar. |
 | P305 | A ordem personalizada das categorias é só da pessoa ou o administrador pode fixar uma ordem para todos? | produto | RN205 da fase 3 ganha a exceção. |

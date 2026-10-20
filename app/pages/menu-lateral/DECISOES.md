@@ -397,6 +397,7 @@ Precisam de resposta antes da rodada 2.
 - **Mudou:** "Adicionar submenu" sai desses menus no botão direito, no "⋯" do Personalizar e no Início. O formulário "Criar menu" só lista, em "Dentro de qual menu", os menus que o workspace criou. Arrastar para dentro de um menu nativo é recusado com "Menu nativo não recebe submenu. Solte dentro de uma seção.".
 - **Mudou (exemplo):** a seção pessoal "Rotina do jurídico" tinha Logs de auditoria (nativo) com o submenu Logs de requisição, o que a regra nova proíbe. Agora tem Logs de auditoria sozinho e Políticas internas com o submenu Base de Conhecimento.
 - **Mudou:** "Personalizar a barra lateral" fica fixo no pé do painel do Início, fora da rolagem, em texto cinza sem contorno, com uma linha fina em cima. Antes ele rolava com a lista e, depois do primeiro uso, saía do pé e virava um ícone no cabeçalho; o ícone do cabeçalho saiu. O cartão de salvar abre acima dele.
+- **Requisitos:** as fases 3, 4 e 5 em `requisitos/` foram atualizadas com as rodadas 28 a 31, e o aviso de desatualizadas saiu do `fases.md`.
 - **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral · prints em `evidencias/rodada31-personalizar-fixo-no-pe.jpg` e `evidencias/rodada31-menu-nativo-sem-submenu.jpg` (botão direito em Dashboard de tarefas, sem "Adicionar submenu")
 
 ### Rodada 30 · 2026-10-20

@@ -1,7 +1,8 @@
 # Requisitos: fase 5, criar
 
 **Objetivo:** criar menu, seção e categoria a partir do menu, por atalhos que cortam caminho, com 1 formulário só
-para menu. O menu é a tela: criar o menu cria a tela junto, e Configurações > Interface > Telas sai.
+para menu, e excluir no próprio menu tudo o que não é nativo. O menu é a tela: criar o menu cria a tela junto, e
+Configurações > Interface > Telas sai.
 
 **Onde vale:** o "+" do Início, o "+" da barra do topo, o "+" de cada seção, o editor de menus (Configurações >
 Interface > Menus) e as janelas que eles abrem.
@@ -20,10 +21,11 @@ aspas são os da interface em português; os de inglês e espanhol estão no `te
 |---|---|---|
 | O "+" do Início | Hoje não existe. Busca o que criar e oferece criar com IA | RF401 a RF405 |
 | O "+" do topo | As mesmas portas, mais item e tarefa | RF406 a RF407 |
-| Criar menu | Hoje são 2 portas (Telas e Menus) em ordem obrigatória. Passa a ser 1 formulário | RF408 a RF419 |
+| Criar menu | Hoje são 2 portas (Telas e Menus) em ordem obrigatória. Passa a ser 1 formulário | RF408 a RF419, RF433 a RF435 e RF442 |
 | Criar categoria | Atalho com ícone e nome | RF420 a RF421 |
 | Editor de menus | Configurações > Interface > Menus abre a árvore inteira | RF422 a RF428 |
-| Moldura das janelas | Todo formulário com a mesma largura e o mesmo rodapé | RF429 a RF432 |
+| Moldura das janelas | Todo formulário com a mesma largura e o mesmo rodapé | RF429 a RF432 e RF441 |
+| Excluir | Hoje só se exclui em Configurações. Passa a excluir no botão direito, no "⋯" e no Personalizar | RF436 a RF440 e RF443 |
 
 ## Regras de negócio (RN)
 
@@ -33,8 +35,9 @@ aspas são os da interface em português; os de inglês e espanhol estão no `te
 | RN402 | Uma tela não pode aparecer em 2 menus. Duplicar um menu cria outra tela. | Não existe "vincular tela existente". |
 | RN403 | Excluir um menu exclui a tela dele. | Excluir "Políticas internas" apaga a tela junto. |
 | RN404 | Só quem tem licença Owner ou Full pode criar menu, seção do workspace e categoria. | Membro com licença Basic vê "Criar menu" desligado. |
-| RN405 | Só o que o workspace criou se exclui; nativo e de módulo, não. | Auditoria não tem excluir; Conhecimento tem. |
+| RN405 | Só o que não é nativo nem de módulo se exclui. O menu dentro de uma seção do workspace é do workspace, como a seção; o nativo levado para uma seção do workspace continua nativo. | Painel de vendas tem "Excluir menu"; Auditoria e Dashboard de tarefas, não. |
 | RN406 | Integrações não recebe menu novo (RN304 da fase 4). | Integrações não aparece em "Dentro de uma seção". |
+| RN407 | Excluir uma seção exclui os menus dela; excluir um menu leva os submenus dele para a seção. A seção que guarda um menu nativo não se exclui. | Excluir Painel de vendas deixa Metas do trimestre em Comercial. |
 
 ## O "+" do Início (RF)
 
@@ -57,18 +60,22 @@ aspas são os da interface em português; os de inglês e espanhol estão no `te
 
 | ID | Requisito | Critério de aceite | Prioridade |
 |---|---|---|---|
-| RF408 | O "+" do Início, o "+" do topo, o "Novo menu" do editor e o "+" de cada seção devem abrir a janela "Criar menu", com os campos de RF409 a RF415. | As 4 portas abrem a janela com os campos de RF409 a RF415. | Essencial |
-| RF409 | A janela deve pedir ícone e nome. | Salvar sem nome mostra o erro no campo e não cria nada. | Essencial |
+| RF408 | O "+" do Início, o "+" do topo, o "Novo menu" do editor, o "+" de cada seção e o "Criar menu" do pé da janela "Adicionar em <nome>" devem abrir a janela "Criar menu", com os campos de RF409 a RF415. | As 5 portas abrem a janela com os campos de RF409 a RF415. | Essencial |
+| RF409 | A janela deve pedir ícone e nome. | Clicar em "Criar menu" sem nome mostra "Dê um nome ao menu." no campo e não cria nada. | Essencial |
 | RF410 | A janela deve ter o campo "Tipo de menu", com a dica "O tipo é a tela que abre quando alguém clica neste menu." e os tipos de tela do produto (RN401). | A lista mostra os tipos que hoje ficam em Interface > Telas. | Essencial |
 | RF411 | Quando o tipo escolhido pede categorias ou caminho, a janela deve mostrar esses campos. | Escolher um tipo que lista itens mostra o campo de categorias. | Essencial |
 | RF412 | Se falta o caminho num tipo que o pede, a janela deve mostrar o erro no campo e não criar o menu. | Tipo com caminho, campo vazio: a janela não fecha. | Importante |
-| RF413 | O campo "Onde ele fica" deve oferecer "No Início", "Na trilha" e "Dentro de uma seção", com a lista das seções do workspace (RN406). | Escolher "Dentro de uma seção" mostra a lista; Integrações não está nela. | Essencial |
-| RF414 | O campo "Quem enxerga" deve oferecer os grupos de membros do workspace. | Escolher o grupo Jurídico restringe o menu a ele. | Essencial |
-| RF415 | A janela deve mostrar a prévia: a linha como fica no menu e, embaixo, a tela que a linha abre. | Mudar o nome e o tipo muda a prévia na hora. | Importante |
-| RF416 | Aberta pelo "+" de uma seção, a janela deve vir com "Dentro de uma seção" e essa seção escolhidos. | "+" de Conhecimento: a janela vem dentro de Conhecimento. | Importante |
+| RF413 | O campo "Onde ele fica" deve ser uma lista de seleção com "No Início", "Na trilha", "Dentro de uma seção" e "Dentro de um menu"; os 2 últimos abrem o campo "Dentro de qual seção" ou "Dentro de qual menu" (RN406). | Escolher "Dentro de uma seção" mostra a lista de seções; Integrações não está nela. | Essencial |
+| RF414 | O campo "Quem enxerga" deve ser uma lista de seleção múltipla com os grupos de membros do workspace; vazia, mostra "Todo o workspace". | Escolher o grupo Jurídico restringe o menu a ele, e a prévia diz "1 grupo". | Essencial |
+| RF415 | A janela deve mostrar a prévia: a linha como fica no menu e, embaixo, o tipo e quem enxerga. | Mudar o nome e o tipo muda a prévia na hora. | Importante |
+| RF416 | Aberta pelo "+" de uma seção, a janela deve vir com "Dentro de uma seção" e essa seção escolhidos; aberta pelo "Criar menu" de "Adicionar em <menu>", com "Dentro de um menu" e esse menu. | "+" de Conhecimento: a janela vem dentro de Conhecimento. | Importante |
 | RF417 | Criar deve pôr o menu e a tela no rascunho da fase 4, com a bolinha amarela, e não publicar. | O cartão "Alterações não salvas" aparece depois de criar. | Essencial |
 | RF418 | Excluir um menu deve tirá-lo do rascunho sem pedir confirmação (RN403); "Descartar" o devolve. | Excluir e Descartar: o menu volta. | Essencial |
 | RF419 | Configurações > Interface > Telas deve sair; Interface fica com Menus e Casos de uso. | O grupo Interface não lista Telas. | Essencial |
+| RF433 | Num tipo que pede categoria, o campo de categorias deve mostrar a dica "Este tipo pede ao menos uma categoria", sem cor de erro. | Antes de clicar em "Criar menu", nada fica vermelho. | Importante |
+| RF442 | Se falta categoria num tipo que a pede, clicar em "Criar menu" deve mostrar "Escolha ao menos uma categoria para este tipo." no campo e não criar o menu. | A janela continua aberta, com o campo em vermelho. | Importante |
+| RF434 | "Dentro de qual menu" deve listar só os menus que o workspace criou e que estão dentro de uma seção, fora de Integrações (RN206 e RN207 da fase 3, RN406). | Dashboard de tarefas não aparece; Painel de vendas aparece. | Essencial |
+| RF435 | Em "Onde ele fica", o lugar sem destino possível deve aparecer desligado. | Workspace sem menu do workspace: "Dentro de um menu" aparece desligado. | Desejável |
 
 ## Criar categoria (RF)
 
@@ -96,7 +103,19 @@ aspas são os da interface em português; os de inglês e espanhol estão no `te
 | RF429 | Os formulários de criar, editar e renomear devem ter 1 largura comum. | Criar menu, criar seção e criar categoria abrem com a largura comum. | Importante |
 | RF430 | Os formulários devem ter 1 rodapé comum: contexto à esquerda, "Cancelar" e a ação à direita, nessa ordem. | O rodapé das 3 janelas tem a geometria comum. | Importante |
 | RF431 | As camadas (editor, "Ver todas as categorias") devem ter 1 largura comum, maior que a dos formulários. | O editor e "Ver todas" abrem com a largura comum das camadas. | Importante |
+| RF441 | A janela "Criar menu" deve agrupar os campos em 3 blocos: o que é (ícone e nome, tipo, categorias ou caminho); onde fica e quem enxerga, lado a lado; e a prévia. | A janela abre sem rolagem numa tela de 698 px de altura. | Desejável |
 | RF432 | Se a pessoa não cumpre a RN404, as opções de criar menu e categoria devem aparecer desligadas, com "Só quem configura o workspace". | Estado sem permissão: "Criar menu" desligado, com a explicação. | Essencial |
+
+## Excluir (RF)
+
+| ID | Requisito | Critério de aceite | Prioridade |
+|---|---|---|---|
+| RF436 | O menu de ações (botão direito e "…") de seção, menu e submenu que se excluem (RN405) deve terminar com "Excluir seção" ou "Excluir menu", em vermelho, num bloco próprio. A seção de 1 menu só, que a barra mostra como linha, usa "Excluir menu". | Botão direito em Painel de vendas termina com "Excluir menu"; em Auditoria, não há excluir. | Essencial |
+| RF437 | O botão direito no ícone de uma seção do workspace na trilha deve ter "Excluir seção", depois de "Ocultar do menu". | Botão direito no ícone Comercial mostra "Excluir seção". | Essencial |
+| RF438 | Na aba "Seções e menus" do Personalizar, a linha de cada seção que se exclui deve mostrar a lixeira no hover, à esquerda de "Ocultar seção" e do "+" (RF250 da fase 3). | Passar o mouse em Comercial mostra a lixeira; em Análise, não. | Importante |
+| RF443 | Na aba "Seções e menus" do Personalizar, o "⋯" de cada menu e submenu que se exclui deve ter "Excluir menu", também nas seções pessoais. | O "⋯" de Painel de vendas termina com "Excluir menu". | Importante |
+| RF439 | Excluir deve ir para o rascunho (RF418) e avisar "<nome> foi excluído." ou "<nome> foi excluída." | Excluir Comercial: o aviso aparece, e Comercial some da trilha até "Descartar". | Essencial |
+| RF440 | Quem não cumpre a RN404 deve ver "Excluir" desligado no menu de ações, com "Só quem configura o workspace"; no Personalizar, a lixeira e o "Excluir menu" do workspace não aparecem. A licença não limita excluir a seção pessoal. | Estado sem permissão: "Excluir seção" aparece desligado no botão direito de Comercial. | Essencial |
 
 ## Interfaces (RI)
 
