@@ -437,6 +437,10 @@ export interface TextosDaTela {
   campoPainel: string
   campoOrdem: string
   campoSecao: string
+  campoMenuPai: string
+  faltaNomeMenu: string
+  faltaCategoria: string
+  escolherCategorias: string
   campoEscopo: string
   escopoTodos: string
   escopoDica: string
@@ -651,7 +655,7 @@ const ptBR: TextosDaTela = {
   tipoDeMenu: 'Tipo de menu',
   tipoDeMenuDica: 'O tipo é a tela que abre quando alguém clica neste menu.',
   dentroDeSecao: 'Dentro de uma seção',
-  dentroDeMenu: 'Dentro de um menu, como submenu',
+  dentroDeMenu: 'Dentro de um menu',
   comoFica: 'Como fica no menu',
   maqueteItemDescricao: 'Abre o formulário da categoria escolhida, com os campos que ela tem.',
   maqueteTarefaDescricao: 'Abre a tarefa rápida, que vive fora de qualquer categoria.',
@@ -944,9 +948,13 @@ const ptBR: TextosDaTela = {
   campoPainel: 'Em qual painel',
   campoOrdem: 'Ordem',
   campoSecao: 'Dentro de qual seção',
+  campoMenuPai: 'Dentro de qual menu',
+  faltaNomeMenu: 'Dê um nome ao menu.',
+  faltaCategoria: 'Escolha ao menos uma categoria para este tipo.',
+  escolherCategorias: 'Escolha as categorias',
   campoEscopo: 'Quem enxerga',
   escopoTodos: 'Todo o workspace',
-  escopoDica: 'Sem nenhum grupo marcado, todos enxergam. Marcando, só quem está nos grupos.',
+  escopoDica: 'Sem grupo escolhido, todo o workspace enxerga. Com grupos escolhidos, só quem está neles.',
   escopoHerdado: secao => `Herda o escopo de ${secao}`,
   escopoRestringir: 'Restringir ainda mais neste item',
   escopoResumo: n => n === 1 ? '1 grupo' : `${n} grupos`,
@@ -1177,7 +1185,7 @@ const en: TextosDaTela = {
   tipoDeMenu: 'Menu type',
   tipoDeMenuDica: 'The type is the screen that opens when someone clicks this menu.',
   dentroDeSecao: 'Inside a section',
-  dentroDeMenu: 'Inside a menu, as a submenu',
+  dentroDeMenu: 'Inside a menu',
   comoFica: 'How it looks in the menu',
   maqueteItemDescricao: 'Opens the form of the chosen category, with the fields it has.',
   maqueteTarefaDescricao: 'Opens the quick task, which lives outside any category.',
@@ -1470,9 +1478,13 @@ const en: TextosDaTela = {
   campoPainel: 'In which panel',
   campoOrdem: 'Order',
   campoSecao: 'Inside which section',
+  campoMenuPai: 'Inside which menu',
+  faltaNomeMenu: 'Give the menu a name.',
+  faltaCategoria: 'Choose at least one category for this type.',
+  escolherCategorias: 'Choose the categories',
   campoEscopo: 'Who sees it',
   escopoTodos: 'The whole workspace',
-  escopoDica: 'With no group ticked, everyone sees it. Tick groups and only they do.',
+  escopoDica: 'With no group chosen, the whole workspace sees it. With groups chosen, only their members do.',
   escopoHerdado: secao => `Inherits the scope of ${secao}`,
   escopoRestringir: 'Restrict further on this item',
   escopoResumo: n => n === 1 ? '1 group' : `${n} groups`,
@@ -1703,7 +1715,7 @@ const es: TextosDaTela = {
   tipoDeMenu: 'Tipo de menú',
   tipoDeMenuDica: 'El tipo es la pantalla que abre cuando alguien hace clic en este menú.',
   dentroDeSecao: 'Dentro de una sección',
-  dentroDeMenu: 'Dentro de un menú, como submenú',
+  dentroDeMenu: 'Dentro de un menú',
   comoFica: 'Cómo queda en el menú',
   maqueteItemDescricao: 'Abre el formulario de la categoría elegida, con los campos que tiene.',
   maqueteTarefaDescricao: 'Abre la tarea rápida, que vive fuera de cualquier categoría.',
@@ -1996,9 +2008,13 @@ const es: TextosDaTela = {
   campoPainel: 'En qué panel',
   campoOrdem: 'Orden',
   campoSecao: 'Dentro de qué sección',
+  campoMenuPai: 'Dentro de qué menú',
+  faltaNomeMenu: 'Ponle un nombre al menú.',
+  faltaCategoria: 'Elige al menos una categoría para este tipo.',
+  escolherCategorias: 'Elige las categorías',
   campoEscopo: 'Quién la ve',
   escopoTodos: 'Todo el workspace',
-  escopoDica: 'Sin ningún grupo marcado, todos la ven. Al marcar, solo quien está en los grupos.',
+  escopoDica: 'Sin grupo elegido, todo el workspace lo ve. Con grupos elegidos, solo quien está en ellos.',
   escopoHerdado: secao => `Hereda el alcance de ${secao}`,
   escopoRestringir: 'Restringir aún más en este elemento',
   escopoResumo: n => n === 1 ? '1 grupo' : `${n} grupos`,

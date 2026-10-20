@@ -389,6 +389,17 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 29 · 2026-10-20
+- **Pedido (literal):** "esse form ta ruim, baugnçado visualmente. ajuste"
+- **Mudou:** o formulário "Criar menu" ficou em 3 blocos: o que é (ícone e nome, tipo de menu, categorias e caminho quando o tipo pede), depois onde fica e quem enxerga, depois a prévia.
+- **Mudou:** "Onde ele fica" saiu dos 4 botões que quebravam em 2 linhas e virou lista de seleção, com ícone por lugar. "Dentro de uma seção" e "Dentro de um menu" abrem um segundo campo logo abaixo ("Dentro de qual seção" ou "Dentro de qual menu"). O lugar sem destino possível fica desligado.
+- **Mudou:** "Quem enxerga" saiu dos chips de grupo e virou lista de seleção múltipla ao lado de "Onde ele fica". Vazia, mostra "Todo o workspace". A dica longa embaixo saiu: a lista e a prévia já dizem quem enxerga.
+- **Mudou:** o aviso amarelo "Este tipo pede ao menos uma categoria", que aparecia antes de qualquer tentativa, virou dica cinza. Só ao clicar em "Criar menu" sem categoria o campo fica vermelho, com "Escolha ao menos uma categoria para este tipo.", e o menu não é criado. O nome vazio mostra "Dê um nome ao menu.".
+- **Mudou:** "Dentro de um menu, como submenu" virou "Dentro de um menu".
+- **Corrigido:** as listas de seleção do formulário abriam por baixo da janela (camada z-[60]) e a escolha não pegava. Agora abrem por cima (`MOLDURA.dentroDoFormulario`).
+- **Não mudou:** os campos, as regras de cada tipo, o rodapé e onde o menu nasce.
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral, "+" do Início > "Criar menu" · print em `evidencias/rodada29-formulario-criar-menu.jpg` (submenu "Metas por região", tipo Consultas, categoria Contratos, só o grupo Comercial)
+
 ### Rodada 28 · 2026-10-20
 - **Pedido (literal):** "se eu excluir um menu de dentro de uma seçao, como vou botar de novo depois? tirar da seçao é diferente de deletar."
 - **Pedido (literal):** "'criar uma tela nova' é um texto que nao deve existir em lugar nenhum, porque isso é criar um MENU novo, simplesmente. o menu vem com um tipo de tela dentro. nao devemos usar tambem o texto 'menu com tela dentro'"

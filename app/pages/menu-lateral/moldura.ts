@@ -30,6 +30,12 @@ export const MOLDURA = {
    */
   formulario: 'max-w-lg z-[60]',
   sobreposicao: 'z-[60]',
+  /*
+   * O que abre DENTRO do formulario (lista de selecao, popover do icone) vai
+   * para o body, que fica abaixo da camada z-[60]: sem isto, a lista abria
+   * por baixo do formulario e a escolha nao pegava (rodada 29).
+   */
+  dentroDoFormulario: 'z-[70]',
   camada: 'max-w-3xl',
 } as const
 

@@ -106,21 +106,23 @@ const tipoEscolhido = computed(() => tiposDeTela.find(x => x.id === tipo.value))
 const pedeCategoria = computed(() => !!tipoEscolhido.value?.exigeCategoria)
 const pedeCaminho = computed(() => !!tipoEscolhido.value?.exigeCaminho)
 
-const erroDeNome = computed(() => tentou.value && !nome.value.trim() ? props.t.faltaNome : undefined)
+const erroDeNome = computed(() => tentou.value && !nome.value.trim() ? props.t.faltaNomeMenu : undefined)
+const erroDeCategoria = computed(() => tentou.value && pedeCategoria.value && !categorias.value.length ? props.t.faltaCategoria : undefined)
 const erroDeCaminho = computed(() => tentou.value && pedeCaminho.value && !caminho.value.trim() ? props.t.faltaCaminho : undefined)
 
+/*
+ * Rodada 29: "esse form ta ruim, baugnçado visualmente". Os 4 botões de
+ * lugar quebravam em 2 linhas e os grupos eram 5 chips soltos: viraram
+ * listas de seleção, como os outros formulários do protótipo.
+ */
 const lugares = computed(() => [
-  { v: 'inicio' as const, r: props.t.noInicio, i: 'i-lucide-house' },
-  { v: 'trilha' as const, r: props.t.naTrilhaRotulo, i: 'i-lucide-panel-left' },
-  { v: 'secao' as const, r: props.t.dentroDeSecao, i: 'i-lucide-rows-3' },
-  { v: 'menu' as const, r: props.t.dentroDeMenu, i: 'i-lucide-list-tree' },
+  { value: 'inicio', label: props.t.noInicio, icon: 'i-lucide-house' },
+  { value: 'trilha', label: props.t.naTrilhaRotulo, icon: 'i-lucide-panel-left' },
+  { value: 'secao', label: props.t.dentroDeSecao, icon: 'i-lucide-rows-3', disabled: !secoesQueRecebem.value.length },
+  { value: 'menu', label: props.t.dentroDeMenu, icon: 'i-lucide-list-tree', disabled: !menusQueRecebem.value.length },
 ])
 
-function alternarGrupo(id: string) {
-  const i = escopo.value.indexOf(id)
-  if (i >= 0) escopo.value.splice(i, 1)
-  else escopo.value.push(id)
-}
+const opcoesDeGrupo = computed(() => gruposDeMembros.map(g => ({ value: g.id, label: g.nome, suffix: String(g.pessoas) })))
 
 const resumoDoEscopo = computed(() =>
   escopo.value.length ? props.t.escopoResumo(escopo.value.length) : props.t.escopoTodos,
@@ -128,7 +130,7 @@ const resumoDoEscopo = computed(() =>
 
 function criar() {
   tentou.value = true
-  if (erroDeNome.value || erroDeCaminho.value) return
+  if (erroDeNome.value || erroDeCaminho.value || erroDeCategoria.value) return
 
   const base = Date.now().toString(36)
   const tela: NoDoMenu = {
@@ -183,11 +185,11 @@ function criar() {
     :ui="{ content: MOLDURA.formulario, overlay: MOLDURA.sobreposicao }"
   >
     <template #body>
-      <form id="form-criar-menu" class="space-y-4" @submit.prevent="criar">
-        <!-- ícone e nome -->
-        <UFormField :label="props.t.campoNome" :description="props.t.campoNomeDica" :error="erroDeNome">
+      <form id="form-criar-menu" class="space-y-5" @submit.prevent="criar">
+        <!-- 1. o que é: ícone, nome e o tipo, que é a tela -->
+        <UFormField :label="props.t.campoNome" :error="erroDeNome" required>
           <div class="flex items-center gap-2">
-            <UPopover v-model:open="escolhendoIcone" :content="{ side: 'bottom', align: 'start' }">
+            <UPopover v-model:open="escolhendoIcone" :content="{ side: 'bottom', align: 'start' }" :ui="{ content: MOLDURA.dentroDoFormulario }">
               <UButton :icon="`i-lucide-${icone}`" color="neutral" variant="outline" square :aria-label="props.t.escolherIcone" />
               <template #content>
                 <div class="w-80 p-2">
@@ -199,97 +201,73 @@ function criar() {
           </div>
         </UFormField>
 
-        <!-- o tipo É a tela -->
-        <UFormField :label="props.t.tipoDeMenu" :description="props.t.tipoDeMenuDica">
-          <USelect v-model="tipo" :items="opcoesDeTipo" class="w-full" />
+        <UFormField :label="props.t.tipoDeMenu" :help="props.t.tipoDeMenuDica">
+          <USelect :ui="{ content: MOLDURA.dentroDoFormulario }" v-model="tipo" :items="opcoesDeTipo" class="w-full" />
         </UFormField>
 
-        <UFormField v-if="pedeCategoria" :label="props.t.campoCategorias">
-          <USelectMenu
+        <UFormField v-if="pedeCategoria" :label="props.t.campoCategorias" :help="erroDeCategoria ? undefined : props.t.exigeCategoria" :error="erroDeCategoria" required>
+          <USelectMenu :ui="{ content: MOLDURA.dentroDoFormulario }"
             v-model="categorias"
             multiple
             :items="['Contratos', 'Clientes', 'Chamados', 'Fornecedores']"
+            :placeholder="props.t.escolherCategorias"
             class="w-full"
           />
-          <p v-if="!categorias.length" class="mt-1 flex items-center gap-1.5 text-xs text-warning">
-            <UIcon name="i-lucide-triangle-alert" class="size-3.5 shrink-0" />
-            {{ props.t.exigeCategoria }}
-          </p>
         </UFormField>
 
         <UFormField
           v-if="pedeCaminho"
           :label="props.t.campoCaminho"
-          :description="props.t.campoCaminhoDica"
+          :help="props.t.campoCaminhoDica"
           :error="erroDeCaminho"
+          required
         >
           <UInput v-model="caminho" class="w-full" placeholder="/relatorios/mensal" />
         </UFormField>
 
-        <!-- onde mora -->
-        <UFormField :label="props.t.ondeFica">
-          <div class="flex flex-wrap gap-2">
-            <UButton
-              v-for="op in lugares"
-              :key="op.v"
-              :label="op.r"
-              :icon="op.i"
-              size="sm"
-              :color="lugar === op.v ? 'primary' : 'neutral'"
-              :variant="lugar === op.v ? 'soft' : 'outline'"
-              :aria-pressed="lugar === op.v"
-              :disabled="(op.v === 'secao' && !secoesQueRecebem.length) || (op.v === 'menu' && !menusQueRecebem.length)"
-              @click="lugar = op.v"
+        <USeparator />
+
+        <!-- 2. onde ele fica e quem enxerga -->
+        <div class="grid gap-4 sm:grid-cols-2">
+          <UFormField :label="props.t.ondeFica">
+            <USelect :ui="{ content: MOLDURA.dentroDoFormulario }" v-model="lugar" :items="lugares" class="w-full" />
+          </UFormField>
+          <UFormField :label="props.t.campoEscopo">
+            <USelectMenu :ui="{ content: MOLDURA.dentroDoFormulario }"
+              v-model="escopo"
+              multiple
+              value-key="value"
+              :items="opcoesDeGrupo"
+              :placeholder="props.t.escopoTodos"
+              icon="i-lucide-users-round"
+              class="w-full"
             />
-          </div>
-          <USelect
-            v-if="lugar === 'secao'"
-            v-model="secaoAlvo"
-            :items="secoesQueRecebem"
-            class="mt-2 w-full"
-            :aria-label="props.t.campoSecao"
-          />
-          <USelect
-            v-if="lugar === 'menu'"
-            v-model="menuAlvo"
-            :items="menusQueRecebem"
-            class="mt-2 w-full"
-            :aria-label="props.t.dentroDeMenu"
-          />
+          </UFormField>
+        </div>
+
+        <UFormField v-if="lugar === 'secao'" :label="props.t.campoSecao">
+          <USelect :ui="{ content: MOLDURA.dentroDoFormulario }" v-model="secaoAlvo" :items="secoesQueRecebem" class="w-full" />
+        </UFormField>
+        <UFormField v-if="lugar === 'menu'" :label="props.t.campoMenuPai">
+          <USelect :ui="{ content: MOLDURA.dentroDoFormulario }" v-model="menuAlvo" :items="menusQueRecebem" class="w-full" />
         </UFormField>
 
-        <!-- quem enxerga: os Grupos Permitidos do produto (rodada 4) -->
-        <UFormField :label="props.t.campoEscopo" :description="props.t.escopoDica">
-          <div class="flex flex-wrap gap-1.5">
-            <UButton
-              v-for="g in gruposDeMembros"
-              :key="g.id"
-              size="xs"
-              :color="escopo.includes(g.id) ? 'primary' : 'neutral'"
-              :variant="escopo.includes(g.id) ? 'soft' : 'outline'"
-              :aria-pressed="escopo.includes(g.id)"
-              @click="alternarGrupo(g.id)"
-            >
-              {{ g.nome }}
-              <span class="text-muted">{{ g.pessoas }}</span>
-            </UButton>
-          </div>
-        </UFormField>
-
-        <!-- a prévia: a linha no menu e, embaixo, o que abre -->
-        <div class="rounded-lg border border-default bg-elevated/40 p-3">
+        <!-- 3. a prévia: a linha como fica no menu, e o que ela abre -->
+        <div class="rounded-lg border border-dashed border-default p-3">
           <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-toned">{{ props.t.comoFica }}</p>
-          <div class="flex items-center gap-2.5 rounded-md py-1.5 pl-2.5 pr-2.5 text-sm text-default">
+          <div class="flex items-center gap-2.5 rounded-md bg-elevated/60 px-2.5 py-1.5 text-sm text-default">
             <UIcon :name="`i-lucide-${icone}`" class="size-4 shrink-0 text-toned" />
-            <span class="min-w-0 flex-1 truncate">{{ nome || props.t.campoNome }}</span>
+            <span class="min-w-0 flex-1 truncate" :class="nome ? '' : 'text-muted'">{{ nome || props.t.campoNome }}</span>
           </div>
-          <p class="mt-1 flex items-center gap-1.5 pl-2.5 text-xs text-muted">
-            <UIcon name="i-lucide-corner-down-right" class="size-3.5 shrink-0" />
-            {{ props.t.tipos[tipo] ?? tipo }}
-          </p>
-          <p class="mt-1 flex items-center gap-1.5 pl-2.5 text-xs text-muted">
-            <UIcon name="i-lucide-eye" class="size-3.5 shrink-0" />
-            {{ resumoDoEscopo }}
+          <p class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-xs text-muted">
+            <span class="flex items-center gap-1.5">
+              <UIcon name="i-lucide-corner-down-right" class="size-3.5 shrink-0" />
+              {{ props.t.tipos[tipo] ?? tipo }}
+            </span>
+            <span class="flex items-center gap-1.5">
+              <UIcon name="i-lucide-eye" class="size-3.5 shrink-0" />
+              {{ resumoDoEscopo }}
+            </span>
           </p>
         </div>
       </form>
