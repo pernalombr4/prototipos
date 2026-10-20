@@ -161,3 +161,17 @@ Migração concluída ──► Ver categorias (não há como desfazer)
   - Em aberto: Spaceflow, destino dos itens da etapa removida, responsável que não existe no destino e a etapa "Montando fluxos e tarefas" no carregamento.
 - **Não deu:** o protótipo ainda não mostra o grupo Fluxo; o `REQUISITOS.md` diz isso na referência visual.
 
+## Rodada 6 · 2026-10-20
+- **Pedido (literal):** "faz o push ja com o fluxo da categoria no prototipo" e "nos requisitos temos q dizer simplesmente, se nessa lista aí aparecem todas as entidades que sao migradas, q o dev tem q listar todas. nao precisa ir citando uma a uma nos requisitos pq sao muitas. o dev sabe que tem que citar todas"
+- **Mudou (protótipo):**
+  - A categoria abre também em **Fluxo (N etapas)**, com as etapas que mudam na ordem do fluxo; cada etapa abre nas tarefas e nas configurações (status, rota, gatilho, notificação, regra de responsável, condicional) que mudam.
+  - A mudança da etapa e da tarefa aparece em estrutura: "Nome: Análise → Análise de mérito", "Responsável: Advogado responsável → Coordenação jurídica".
+  - A etapa removida mostra "12 itens nesta etapa" e "4 tarefas abertas".
+  - A configuração que cita algo que não existe no destino mostra "Aponta para Carla Mendes, que não existe neste workspace."
+  - A categoria sem fluxo no workspace recebe o fluxo inteiro como novo (Audiências).
+  - As etapas que mudam abrem expandidas, para o aviso de referência quebrada ficar à vista.
+  - O resumo do arquivo conta as etapas de fluxo.
+- **Mudou (requisitos):** o `REQUISITOS.md` foi reescrito no molde da skill `requisitos`: perguntas e suposições no topo, fontes com id, glossário, RN no molde RuleSpeak (a situação por modo em tabela de decisão), RF no molde EARS com critério de aceite e valores reais, RI, RNF, RS e rastreabilidade. A abrangência vira a RN009: toda entidade que o arquivo leva entra na migração e na prévia, sem lista nos requisitos.
+- **Maquete:** a referência quebrada vem marcada no `mocks.ts` (`quebrada`); na implementação, o back-end calcula na prévia.
+- **Ver:** `evidencias/proposta-r6-fluxo-da-categoria.jpg`
+

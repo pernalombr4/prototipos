@@ -23,6 +23,46 @@ export type CampoDaEstrutura = Pick<Field, 'refId' | 'type'> & {
   options?: string[]
 }
 
+/** Tipo de ação da tarefa programada da etapa (`c-stage-tasks`). Nomes do protótipo. */
+export type TipoDeAcao = 'formulario' | 'aprovacao' | 'checklist' | 'anexo'
+
+/** Configuração da etapa: `c-stage-statuses`, `c-stage-routes`, `c-stage-triggers`, `c-type-notifications`, `c-responsible-rules` e `c-type-conditionals`. */
+export type TipoDeConfiguracao = 'status' | 'rota' | 'gatilho' | 'notificacao' | 'responsavel' | 'condicional'
+
+/** Tarefa programada da etapa (`c-stage-tasks`). */
+export interface TarefaDaEstrutura {
+  ref: string
+  nome: string
+  acao: TipoDeAcao
+  /** Quem recebe a tarefa: grupo, papel ou campo de pessoa. */
+  responsavel: string
+}
+
+export interface ConfiguracaoDaEtapa {
+  ref: string
+  tipo: TipoDeConfiguracao
+  nome: string
+  /**
+   * Invenção do protótipo: o nome de algo que a configuração cita e que não existe no workspace de destino
+   * (membro, etapa, campo). Na implementação, o back-end calcula isso na prévia (RV-19).
+   */
+  quebrada?: string
+}
+
+/** Etapa do fluxo da categoria (`c-flow-stages`), com as tarefas e as configurações dela. */
+export interface EtapaDaEstrutura {
+  ref: string
+  nome: string
+  /** Ordem da etapa no fluxo, a partir de 1. */
+  posicao: number
+  tarefas: TarefaDaEstrutura[]
+  configuracoes: ConfiguracaoDaEtapa[]
+  /** Só no workspace atual: itens parados na etapa agora. Não vem do arquivo. */
+  itens?: number
+  /** Só no workspace atual: tarefas abertas da etapa agora. Não vem do arquivo. */
+  tarefasAbertas?: number
+}
+
 /** Categoria (`ItemType`) com o que pertence a ela no arquivo. */
 export type CategoriaDaEstrutura = Pick<ItemType, 'slug' | 'name'> & {
   icon: string
@@ -32,6 +72,8 @@ export type CategoriaDaEstrutura = Pick<ItemType, 'slug' | 'name'> & {
   formularios: string[]
   /** `c-folders[].name`. */
   pastas: string[]
+  /** O fluxo da categoria (`c-type-flows`), em etapas. Sem fluxo, vazio ou ausente. */
+  fluxo?: EtapaDaEstrutura[]
   /**
    * Quantos itens a categoria tem cadastrados. NÃO vem do arquivo de exportação
    * (ele só leva estrutura): vem da contagem de itens do workspace atual. É o que
@@ -94,6 +136,28 @@ export const estruturaAtual: Estrutura = {
       ],
       formularios: ['Cadastro de processo', 'Avaliar necessidade de audiência'],
       pastas: ['Dados do processo', 'Anexos'],
+      fluxo: [
+        {
+          ref: 'triagem', nome: 'Triagem', posicao: 1,
+          tarefas: [{ ref: 'classificar', nome: 'Classificar o processo', acao: 'formulario', responsavel: 'Equipe jurídica' }],
+          configuracoes: [{ ref: 'status_triagem', tipo: 'status', nome: 'Em triagem' }],
+        },
+        {
+          ref: 'analise', nome: 'Análise', posicao: 2,
+          tarefas: [{ ref: 'parecer', nome: 'Emitir parecer', acao: 'formulario', responsavel: 'Advogado responsável' }],
+          configuracoes: [{ ref: 'rota_audiencia', tipo: 'rota', nome: 'Rota para Audiência' }],
+        },
+        {
+          ref: 'revisao_juridica', nome: 'Revisão jurídica', posicao: 3, itens: 12, tarefasAbertas: 4,
+          tarefas: [{ ref: 'revisar_minuta', nome: 'Revisar minuta', acao: 'aprovacao', responsavel: 'Coordenação jurídica' }],
+          configuracoes: [],
+        },
+        {
+          ref: 'encerramento', nome: 'Encerramento', posicao: 4,
+          tarefas: [{ ref: 'arquivar', nome: 'Arquivar processo', acao: 'checklist', responsavel: 'Equipe jurídica' }],
+          configuracoes: [{ ref: 'aviso_cliente', tipo: 'notificacao', nome: 'Notificação ao cliente' }],
+        },
+      ],
     },
     {
       slug: 'partes',
@@ -211,6 +275,37 @@ export const estruturaDoArquivo: Estrutura = {
       ],
       formularios: ['Cadastro de processo', 'Avaliar necessidade de audiência', 'Subsídios trabalhistas'],
       pastas: ['Dados do processo', 'Anexos', 'Fluxos'],
+      fluxo: [
+        {
+          ref: 'triagem', nome: 'Triagem', posicao: 1,
+          tarefas: [{ ref: 'classificar', nome: 'Classificar o processo', acao: 'formulario', responsavel: 'Equipe jurídica' }],
+          configuracoes: [{ ref: 'status_triagem', tipo: 'status', nome: 'Em triagem' }],
+        },
+        {
+          // renomeada; a tarefa troca de responsável e ganha uma tarefa e uma notificação
+          ref: 'analise', nome: 'Análise de mérito', posicao: 2,
+          tarefas: [
+            { ref: 'parecer', nome: 'Emitir parecer', acao: 'formulario', responsavel: 'Coordenação jurídica' },
+            { ref: 'subsidios', nome: 'Solicitar subsídios', acao: 'formulario', responsavel: 'Área demandante' },
+          ],
+          configuracoes: [
+            { ref: 'rota_audiencia', tipo: 'rota', nome: 'Rota para Audiência' },
+            { ref: 'aviso_prazo', tipo: 'notificacao', nome: 'Notificação de prazo' },
+          ],
+        },
+        {
+          // nova; a regra de responsável cita um membro que só existe no workspace de origem
+          ref: 'aprovacao_diretoria', nome: 'Aprovação da diretoria', posicao: 3,
+          tarefas: [{ ref: 'aprovar_acordo', nome: 'Aprovar acordo', acao: 'aprovacao', responsavel: 'Diretoria' }],
+          configuracoes: [{ ref: 'regra_diretoria', tipo: 'responsavel', nome: 'Diretoria aprova acima de R$ 100 mil', quebrada: 'Carla Mendes' }],
+        },
+        {
+          ref: 'encerramento', nome: 'Encerramento', posicao: 4,
+          tarefas: [{ ref: 'arquivar', nome: 'Arquivar processo', acao: 'checklist', responsavel: 'Equipe jurídica' }],
+          configuracoes: [{ ref: 'aviso_cliente', tipo: 'notificacao', nome: 'Notificação ao cliente' }],
+        },
+        // "Revisão jurídica" não está no arquivo
+      ],
     },
     {
       slug: 'partes',
@@ -237,6 +332,19 @@ export const estruturaDoArquivo: Estrutura = {
       ],
       formularios: ['Cadastro de audiência', 'Juntada de documentos de representação'],
       pastas: ['Dados da audiência'],
+      // No workspace, Audiências não tem fluxo: o fluxo inteiro entra (RV-21).
+      fluxo: [
+        {
+          ref: 'agendada', nome: 'Agendada', posicao: 1,
+          tarefas: [{ ref: 'confirmar_presenca', nome: 'Confirmar presença das partes', acao: 'checklist', responsavel: 'Secretaria' }],
+          configuracoes: [{ ref: 'lembrete', tipo: 'gatilho', nome: 'Lembrete 2 dias antes da data' }],
+        },
+        {
+          ref: 'realizada', nome: 'Realizada', posicao: 2,
+          tarefas: [{ ref: 'anexar_ata', nome: 'Anexar ata', acao: 'anexo', responsavel: 'Advogado responsável' }],
+          configuracoes: [{ ref: 'sem_ata', tipo: 'condicional', nome: 'Só avança com a ata anexada' }],
+        },
+      ],
     },
     {
       slug: 'pagamentos',
@@ -286,6 +394,18 @@ export const estruturaDoArquivo: Estrutura = {
       ],
       formularios: ['Triagem de publicações', 'Providência', 'Aprovação de providência'],
       pastas: ['Tarefas'],
+      fluxo: [
+        {
+          ref: 'triagem_publicacao', nome: 'Triagem', posicao: 1,
+          tarefas: [{ ref: 'definir_providencia', nome: 'Definir providência', acao: 'formulario', responsavel: 'Equipe jurídica' }],
+          configuracoes: [],
+        },
+        {
+          ref: 'providencia', nome: 'Providência', posicao: 2,
+          tarefas: [{ ref: 'aprovar_providencia', nome: 'Aprovar providência', acao: 'aprovacao', responsavel: 'Coordenação jurídica' }],
+          configuracoes: [],
+        },
+      ],
     },
     {
       slug: 'multas',

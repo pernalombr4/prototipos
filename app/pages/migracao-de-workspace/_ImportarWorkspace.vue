@@ -13,7 +13,7 @@
  */
 import type { TreeItem } from '@nuxt/ui'
 import type { Textos } from './textos'
-import type { Estrutura, TipoDeCampo, TipoDeComponente } from './mocks'
+import type { Estrutura, TipoDeAcao, TipoDeCampo, TipoDeComponente, TipoDeConfiguracao } from './mocks'
 import { arquivoDeExemplo, estruturaDoArquivo, workspaceAtual } from './mocks'
 import {
   comparar,
@@ -23,6 +23,7 @@ import {
   type Comparacao,
   type Modo,
   type Mudanca,
+  type NoEtapa,
   type NoFolha,
   type Situacao,
 } from './comparar'
@@ -231,17 +232,54 @@ function mexe(s: Situacao) {
   return s === 'nova' || s === 'alterada' || s === 'removida'
 }
 
+const iconeDaAcao: Record<TipoDeAcao, string> = {
+  formulario: 'i-lucide-clipboard-list',
+  aprovacao: 'i-lucide-badge-check',
+  checklist: 'i-lucide-list-checks',
+  anexo: 'i-lucide-paperclip',
+}
+
+const iconeDaConfiguracao: Record<TipoDeConfiguracao, string> = {
+  status: 'i-lucide-circle-dot',
+  rota: 'i-lucide-git-fork',
+  gatilho: 'i-lucide-zap',
+  notificacao: 'i-lucide-bell',
+  responsavel: 'i-lucide-user-check',
+  condicional: 'i-lucide-split',
+}
+
+/** Status, gatilho: masculino. Rota, notificação, regra de responsável, condicional: feminino. */
+const generoDaConfiguracao: Record<TipoDeConfiguracao, 'f' | 'm'> = {
+  status: 'm',
+  rota: 'f',
+  gatilho: 'm',
+  notificacao: 'f',
+  responsavel: 'f',
+  condicional: 'f',
+}
+
 interface NoDaArvore extends TreeItem {
   value: string
-  tipo: 'categoria' | 'grupo' | 'folha'
+  tipo: 'categoria' | 'grupo' | 'etapa' | 'folha'
   /** Para a marca concordar: "Nova" categoria, "Novo" campo. */
   genero?: 'f' | 'm'
   situacao?: Situacao
   mudancas?: Mudanca[]
   tipoDeCampo?: TipoDeCampo
+  acao?: TipoDeAcao
+  tipoDeConfiguracao?: TipoDeConfiguracao
+  quebrada?: string
   itens?: number
+  tarefasAbertas?: number
   contagem?: Record<Situacao, number>
   children?: NoDaArvore[]
+}
+
+function iconeDaFolha(f: NoFolha) {
+  if (f.acao) return iconeDaAcao[f.acao]
+  if (f.tipoDeConfiguracao) return iconeDaConfiguracao[f.tipoDeConfiguracao]
+  if (f.tipoDeCampo) return iconeDoTipo[f.tipoDeCampo] ?? 'i-lucide-square'
+  return 'i-lucide-square'
 }
 
 function folhas(lista: NoFolha[], prefixo: string, genero: 'f' | 'm', icone?: string): NoDaArvore[] {
@@ -250,22 +288,46 @@ function folhas(lista: NoFolha[], prefixo: string, genero: 'f' | 'm', icone?: st
     .map(f => ({
       value: `${prefixo}:${f.chave}`,
       label: f.nome,
-      icon: icone ?? (f.tipoDeCampo ? iconeDoTipo[f.tipoDeCampo] ?? 'i-lucide-square' : 'i-lucide-square'),
+      icon: icone ?? iconeDaFolha(f),
       tipo: 'folha',
-      genero,
+      genero: f.tipoDeConfiguracao ? generoDaConfiguracao[f.tipoDeConfiguracao] : genero,
       situacao: f.situacao,
       mudancas: f.mudancas,
       tipoDeCampo: f.tipoDeCampo,
+      acao: f.acao,
+      tipoDeConfiguracao: f.tipoDeConfiguracao,
+      quebrada: f.quebrada,
     }))
 }
 
-function contar(lista: NoFolha[]) {
+/** Etapas do fluxo que mudam, na ordem do fluxo, com as tarefas e as configurações embaixo. */
+function etapas(lista: NoEtapa[], prefixo: string): NoDaArvore[] {
+  return lista
+    .filter(e => mexe(e.situacao))
+    .map(e => ({
+      value: `${prefixo}:${e.chave}`,
+      label: e.nome,
+      icon: 'i-lucide-milestone',
+      tipo: 'etapa' as const,
+      genero: 'f' as const,
+      situacao: e.situacao,
+      mudancas: e.mudancas,
+      itens: e.itens,
+      tarefasAbertas: e.tarefasAbertas,
+      children: [
+        ...folhas(e.tarefas, `${prefixo}:${e.chave}:tarefa`, 'f'),
+        ...folhas(e.configuracoes, `${prefixo}:${e.chave}:config`, 'f'),
+      ],
+    }))
+}
+
+function contar(lista: { situacao: Situacao }[]) {
   const conta: Record<Situacao, number> = { nova: 0, alterada: 0, removida: 0, igual: 0, mantida: 0, ignorada: 0 }
   for (const f of lista) conta[f.situacao]++
   return conta
 }
 
-function grupo(valor: string, rotulo: string, icone: string, filhos: NoDaArvore[], todos: NoFolha[]): NoDaArvore[] {
+function grupo(valor: string, rotulo: string, icone: string, filhos: NoDaArvore[], todos: { situacao: Situacao }[]): NoDaArvore[] {
   if (!filhos.length) return []
   return [{ value: valor, label: rotulo, icon: icone, tipo: 'grupo', children: filhos, contagem: contar(todos) }]
 }
@@ -278,6 +340,7 @@ const arvoreDeCategorias = computed<NoDaArvore[]>(() =>
       const campos = folhas(c.campos, `${c.slug}:campo`, 'm')
       const formularios = folhas(c.formularios, `${c.slug}:form`, 'm', 'i-lucide-file-text')
       const pastas = folhas(c.pastas, `${c.slug}:pasta`, 'f', 'i-lucide-folder')
+      const fluxo = etapas(c.fluxo, `${c.slug}:etapa`)
       return {
         value: c.slug,
         label: c.nome,
@@ -287,11 +350,12 @@ const arvoreDeCategorias = computed<NoDaArvore[]>(() =>
         situacao: c.situacao,
         mudancas: c.mudancas,
         itens: c.itens,
-        contagem: contar([...c.campos, ...c.formularios, ...c.pastas]),
+        contagem: contar([...c.campos, ...c.formularios, ...c.pastas, ...c.fluxo]),
         children: [
           ...grupo(`${c.slug}:campos`, props.t.grupoCampos(c.campos.length), 'i-lucide-text-cursor-input', campos, c.campos),
           ...grupo(`${c.slug}:forms`, props.t.grupoFormularios(c.formularios.length), 'i-lucide-files', formularios, c.formularios),
           ...grupo(`${c.slug}:pastas`, props.t.grupoPastas(c.pastas.length), 'i-lucide-folders', pastas, c.pastas),
+          ...grupo(`${c.slug}:fluxo`, props.t.grupoFluxo(c.fluxo.length), 'i-lucide-workflow', fluxo, c.fluxo),
         ],
       }
     }),
@@ -307,7 +371,13 @@ const arvoreDeComponentes = computed<NoDaArvore[]>(() =>
 
 /** Abre de cara só o que muda por dentro. O que entra ou sai inteiro fica fechado. */
 const abertosDeCara = computed(() => [
-  ...arvoreDeCategorias.value.filter(c => c.situacao === 'alterada' || c.situacao === 'ignorada').flatMap(c => [c.value, ...(c.children ?? []).map(g => g.value)]),
+  ...arvoreDeCategorias.value
+    .filter(c => c.situacao === 'alterada' || c.situacao === 'ignorada')
+    .flatMap(c => [
+      c.value,
+      // As etapas que mudam abrem todas: o aviso de referência quebrada (RV-19) fica dentro delas.
+      ...(c.children ?? []).flatMap(g => [g.value, ...(g.children ?? []).filter(e => e.tipo === 'etapa').map(e => e.value)]),
+    ]),
 ])
 
 /** A árvore mostra só o que muda: o inalterado fica só na contagem. Renasce quando o modo muda. */
@@ -315,6 +385,24 @@ const chaveDaArvore = computed(() => modo.value)
 
 function rotuloDaSituacao(no: NoDaArvore) {
   return props.t.situacao[no.situacao!][no.genero ?? 'm']
+}
+
+function rotuloDaMudanca(m: Mudanca) {
+  if (m.tipo === 'nome') return props.t.mudancaNome
+  if (m.tipo === 'tipoDeCampo') return props.t.mudancaTipo
+  if (m.tipo === 'propriedade') return props.t.propriedades[m.rotulo]
+  return ''
+}
+
+function valorDaMudanca(m: Mudanca, lado: 'antes' | 'depois') {
+  if (m.tipo === 'nome') return m[lado]
+  if (m.tipo === 'tipoDeCampo') return nomeDoTipo(m[lado])
+  if (m.tipo === 'propriedade') {
+    if (m.rotulo === 'acao') return props.t.acoesDaTarefa[m[lado] as TipoDeAcao]
+    if (m.rotulo === 'posicao') return props.t.posicao(Number(m[lado]))
+    return m[lado]
+  }
+  return ''
 }
 
 function nomeDoTipo(tipo?: TipoDeCampo) {
@@ -454,6 +542,7 @@ function verCategorias() {
                       <UBadge :label="t.resumoArquivo.categorias(resumoDoArquivo.categorias)" color="neutral" variant="soft" icon="i-lucide-layout-grid" />
                       <UBadge :label="t.resumoArquivo.campos(resumoDoArquivo.campos)" color="neutral" variant="soft" icon="i-lucide-text-cursor-input" />
                       <UBadge :label="t.resumoArquivo.formularios(resumoDoArquivo.formularios)" color="neutral" variant="soft" icon="i-lucide-files" />
+                      <UBadge v-if="resumoDoArquivo.etapas" :label="t.resumoArquivo.etapas(resumoDoArquivo.etapas)" color="neutral" variant="soft" icon="i-lucide-workflow" />
                       <UBadge :label="t.resumoArquivo.outros(resumoDoArquivo.outros)" color="neutral" variant="soft" icon="i-lucide-blocks" />
                     </div>
                   </template>
@@ -624,6 +713,12 @@ function verCategorias() {
                             ]"
                           >{{ item.label }}</span>
                           <span v-if="item.tipoDeCampo" class="text-xs text-muted">{{ nomeDoTipo(item.tipoDeCampo) }}</span>
+                          <span v-else-if="item.acao" class="text-xs text-muted">{{ t.acoesDaTarefa[item.acao] }}</span>
+                          <span v-else-if="item.tipoDeConfiguracao" class="text-xs text-muted">{{ t.configuracoesDaEtapa[item.tipoDeConfiguracao] }}</span>
+                          <template v-if="item.tipo === 'etapa' && item.situacao === 'removida'">
+                            <span v-if="item.itens" class="text-xs font-medium text-error">{{ t.itensNaEtapa(item.itens) }}</span>
+                            <span v-if="item.tarefasAbertas" class="text-xs font-medium text-error">{{ t.tarefasAbertas(item.tarefasAbertas) }}</span>
+                          </template>
                           <span v-if="item.tipo === 'categoria' && item.situacao === 'removida' && item.itens" class="text-xs font-medium text-error">
                             {{ t.itensCadastrados(item.itens) }}
                           </span>
@@ -632,11 +727,11 @@ function verCategorias() {
                         <!-- O que muda, em estrutura: antes e depois -->
                         <span v-if="item.mudancas?.length" class="mt-1 block space-y-0.5 text-xs" :class="item.situacao === 'ignorada' ? 'text-dimmed' : 'text-toned'">
                           <span v-for="(m, i) in item.mudancas" :key="i" class="flex flex-wrap items-center gap-1">
-                            <template v-if="m.tipo === 'nome' || m.tipo === 'tipoDeCampo'">
-                              <span class="text-muted">{{ m.tipo === 'nome' ? t.mudancaNome : t.mudancaTipo }}:</span>
-                              <span class="line-through decoration-error/60">{{ m.tipo === 'nome' ? m.antes : nomeDoTipo(m.antes) }}</span>
+                            <template v-if="m.tipo === 'nome' || m.tipo === 'tipoDeCampo' || m.tipo === 'propriedade'">
+                              <span class="text-muted">{{ rotuloDaMudanca(m) }}:</span>
+                              <span class="line-through decoration-error/60">{{ valorDaMudanca(m, 'antes') }}</span>
                               <UIcon name="i-lucide-arrow-right" class="size-3 text-dimmed" />
-                              <span class="font-medium" :class="item.situacao === 'ignorada' ? '' : 'text-highlighted'">{{ m.tipo === 'nome' ? m.depois : nomeDoTipo(m.depois) }}</span>
+                              <span class="font-medium" :class="item.situacao === 'ignorada' ? '' : 'text-highlighted'">{{ valorDaMudanca(m, 'depois') }}</span>
                             </template>
                             <span v-else-if="m.tipo === 'opcoesNovas'">{{ t.mudancaOpcoesNovas(m.opcoes.join(', ')) }}</span>
                             <span v-else>{{ t.mudancaOpcoesRemovidas(m.opcoes.join(', ')) }}</span>
@@ -645,6 +740,12 @@ function verCategorias() {
                             <UIcon name="i-lucide-info" class="size-3" />
                             {{ t.ignoradaAjuda }}
                           </span>
+                        </span>
+
+                        <!-- Configuração que cita algo que não existe neste workspace (RV-19) -->
+                        <span v-if="item.quebrada" class="mt-1 flex items-center gap-1 text-xs font-medium text-warning">
+                          <UIcon name="i-lucide-triangle-alert" class="size-3.5 shrink-0" />
+                          {{ t.apontaPara(item.quebrada) }}
                         </span>
                       </template>
 

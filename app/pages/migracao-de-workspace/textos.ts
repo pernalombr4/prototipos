@@ -4,7 +4,7 @@
 // nunca abriu o arquivo .json e não precisa abrir.
 
 import type { Idioma } from '../../composables/useIdioma'
-import type { TipoDeCampo } from './mocks'
+import type { TipoDeAcao, TipoDeCampo, TipoDeConfiguracao } from './mocks'
 import type { Modo, Situacao } from './comparar'
 import type { TipoDeComponente } from './mocks'
 
@@ -68,7 +68,7 @@ export interface Textos {
   lendoArquivo: string
   arquivoDe: (workspace: string, data: string) => string
   trocarArquivo: string
-  resumoArquivo: { categorias: (n: number) => string, campos: (n: number) => string, formularios: (n: number) => string, outros: (n: number) => string }
+  resumoArquivo: { categorias: (n: number) => string, campos: (n: number) => string, formularios: (n: number) => string, etapas: (n: number) => string, outros: (n: number) => string }
   erroArquivoTitulo: string
   erroArquivoTexto: string
   usarExemplo: string
@@ -94,6 +94,14 @@ export interface Textos {
   grupoCampos: (n: number) => string
   grupoFormularios: (n: number) => string
   grupoPastas: (n: number) => string
+  grupoFluxo: (n: number) => string
+  acoesDaTarefa: Record<TipoDeAcao, string>
+  configuracoesDaEtapa: Record<TipoDeConfiguracao, string>
+  propriedades: Record<'posicao' | 'responsavel' | 'acao', string>
+  posicao: (n: number) => string
+  itensNaEtapa: (n: number) => string
+  tarefasAbertas: (n: number) => string
+  apontaPara: (nome: string) => string
   componentes: Record<TipoDeComponente, string>
   /** Rótulo da marca, no feminino (categoria, lista, tela, pasta) e no masculino (campo, formulário...). */
   situacao: Record<Situacao, { f: string, m: string }>
@@ -216,6 +224,7 @@ const pt: Textos = {
     categorias: n => `${n} ${n === 1 ? 'categoria' : 'categorias'}`,
     campos: n => `${n} ${n === 1 ? 'campo' : 'campos'}`,
     formularios: n => `${n} ${n === 1 ? 'formulário' : 'formulários'}`,
+    etapas: n => `${n} ${n === 1 ? 'etapa de fluxo' : 'etapas de fluxo'}`,
     outros: n => `${n} ${n === 1 ? 'outro componente' : 'outros componentes'}`,
   },
   erroArquivoTitulo: 'Esse arquivo não é uma estrutura do ENSPACE',
@@ -244,6 +253,14 @@ const pt: Textos = {
   grupoCampos: n => `Campos (${n})`,
   grupoFormularios: n => `Formulários (${n})`,
   grupoPastas: n => `Pastas (${n})`,
+  grupoFluxo: n => `Fluxo (${n} ${n === 1 ? 'etapa' : 'etapas'})`,
+  acoesDaTarefa: { formulario: 'Preencher formulário', aprovacao: 'Aprovação', checklist: 'Checklist', anexo: 'Anexar arquivo' },
+  configuracoesDaEtapa: { status: 'Status', rota: 'Rota', gatilho: 'Gatilho', notificacao: 'Notificação', responsavel: 'Regra de responsável', condicional: 'Condicional' },
+  propriedades: { posicao: 'Posição', responsavel: 'Responsável', acao: 'Ação' },
+  posicao: n => `${n}ª etapa`,
+  itensNaEtapa: n => `${n} ${n === 1 ? 'item nesta etapa' : 'itens nesta etapa'}`,
+  tarefasAbertas: n => `${n} ${n === 1 ? 'tarefa aberta' : 'tarefas abertas'}`,
+  apontaPara: nome => `Aponta para ${nome}, que não existe neste workspace.`,
   componentes: {
     listas: 'Listas', telas: 'Telas', grupos: 'Grupos de permissão', emails: 'Modelos de e-mail',
     relatorios: 'Relatórios', documentos: 'Modelos de documento', menus: 'Itens de menu',
@@ -338,6 +355,7 @@ const en: Textos = {
     categorias: n => `${n} ${n === 1 ? 'category' : 'categories'}`,
     campos: n => `${n} ${n === 1 ? 'field' : 'fields'}`,
     formularios: n => `${n} ${n === 1 ? 'form' : 'forms'}`,
+    etapas: n => `${n} flow ${n === 1 ? 'stage' : 'stages'}`,
     outros: n => `${n} ${n === 1 ? 'other component' : 'other components'}`,
   },
   erroArquivoTitulo: 'This file is not an ENSPACE structure',
@@ -366,6 +384,14 @@ const en: Textos = {
   grupoCampos: n => `Fields (${n})`,
   grupoFormularios: n => `Forms (${n})`,
   grupoPastas: n => `Folders (${n})`,
+  grupoFluxo: n => `Flow (${n} ${n === 1 ? 'stage' : 'stages'})`,
+  acoesDaTarefa: { formulario: 'Fill in form', aprovacao: 'Approval', checklist: 'Checklist', anexo: 'Attach file' },
+  configuracoesDaEtapa: { status: 'Status', rota: 'Route', gatilho: 'Trigger', notificacao: 'Notification', responsavel: 'Assignee rule', condicional: 'Condition' },
+  propriedades: { posicao: 'Position', responsavel: 'Assignee', acao: 'Action' },
+  posicao: n => `Stage ${n}`,
+  itensNaEtapa: n => `${n} ${n === 1 ? 'record in this stage' : 'records in this stage'}`,
+  tarefasAbertas: n => `${n} open ${n === 1 ? 'task' : 'tasks'}`,
+  apontaPara: nome => `Points to ${nome}, which does not exist in this workspace.`,
   componentes: {
     listas: 'Lists', telas: 'Screens', grupos: 'Permission groups', emails: 'Email templates',
     relatorios: 'Reports', documentos: 'Document templates', menus: 'Menu items',
@@ -460,6 +486,7 @@ const es: Textos = {
     categorias: n => `${n} ${n === 1 ? 'categoría' : 'categorías'}`,
     campos: n => `${n} ${n === 1 ? 'campo' : 'campos'}`,
     formularios: n => `${n} ${n === 1 ? 'formulario' : 'formularios'}`,
+    etapas: n => `${n} ${n === 1 ? 'etapa de flujo' : 'etapas de flujo'}`,
     outros: n => `${n} ${n === 1 ? 'otro componente' : 'otros componentes'}`,
   },
   erroArquivoTitulo: 'Este archivo no es una estructura de ENSPACE',
@@ -488,6 +515,14 @@ const es: Textos = {
   grupoCampos: n => `Campos (${n})`,
   grupoFormularios: n => `Formularios (${n})`,
   grupoPastas: n => `Carpetas (${n})`,
+  grupoFluxo: n => `Flujo (${n} ${n === 1 ? 'etapa' : 'etapas'})`,
+  acoesDaTarefa: { formulario: 'Completar formulario', aprovacao: 'Aprobación', checklist: 'Lista de verificación', anexo: 'Adjuntar archivo' },
+  configuracoesDaEtapa: { status: 'Estado', rota: 'Ruta', gatilho: 'Disparador', notificacao: 'Notificación', responsavel: 'Regla de responsable', condicional: 'Condición' },
+  propriedades: { posicao: 'Posición', responsavel: 'Responsable', acao: 'Acción' },
+  posicao: n => `Etapa ${n}`,
+  itensNaEtapa: n => `${n} ${n === 1 ? 'registro en esta etapa' : 'registros en esta etapa'}`,
+  tarefasAbertas: n => `${n} ${n === 1 ? 'tarea abierta' : 'tareas abiertas'}`,
+  apontaPara: nome => `Apunta a ${nome}, que no existe en este workspace.`,
   componentes: {
     listas: 'Listas', telas: 'Pantallas', grupos: 'Grupos de permiso', emails: 'Plantillas de correo',
     relatorios: 'Informes', documentos: 'Plantillas de documento', menus: 'Elementos de menú',

@@ -19,9 +19,14 @@ import type {
   CampoDaEstrutura,
   CategoriaDaEstrutura,
   ComponenteDaEstrutura,
+  ConfiguracaoDaEtapa,
+  EtapaDaEstrutura,
   Estrutura,
+  TarefaDaEstrutura,
+  TipoDeAcao,
   TipoDeCampo,
   TipoDeComponente,
+  TipoDeConfiguracao,
 } from './mocks'
 
 export type Modo = 'adicionar' | 'somar' | 'substituir'
@@ -41,6 +46,8 @@ export type Mudanca =
   | { tipo: 'tipoDeCampo', antes: TipoDeCampo, depois: TipoDeCampo }
   | { tipo: 'opcoesNovas', opcoes: string[] }
   | { tipo: 'opcoesRemovidas', opcoes: string[] }
+  /** Propriedade da etapa ou da tarefa: posição, responsável, ação. */
+  | { tipo: 'propriedade', rotulo: 'posicao' | 'responsavel' | 'acao', antes: string, depois: string }
 
 export interface NoFolha {
   chave: string
@@ -49,6 +56,24 @@ export interface NoFolha {
   mudancas: Mudanca[]
   /** Só para campo: o tipo, para a pessoa reconhecer o campo. */
   tipoDeCampo?: TipoDeCampo
+  /** Só para tarefa da etapa. */
+  acao?: TipoDeAcao
+  /** Só para configuração da etapa. */
+  tipoDeConfiguracao?: TipoDeConfiguracao
+  /** Configuração que cita algo que não existe no destino (RV-19). */
+  quebrada?: string
+}
+
+/** Etapa do fluxo da categoria, com as tarefas e as configurações dela. */
+export interface NoEtapa {
+  chave: string
+  nome: string
+  situacao: Situacao
+  mudancas: Mudanca[]
+  tarefas: NoFolha[]
+  configuracoes: NoFolha[]
+  itens?: number
+  tarefasAbertas?: number
 }
 
 export interface NoCategoria {
@@ -61,6 +86,7 @@ export interface NoCategoria {
   campos: NoFolha[]
   formularios: NoFolha[]
   pastas: NoFolha[]
+  fluxo: NoEtapa[]
   itens?: number
 }
 
@@ -139,7 +165,7 @@ function compararLista<T>(
 }
 
 /** A categoria herda a situação mais forte dos filhos. */
-function situacaoDaCategoria(filhos: NoFolha[], mudancasProprias: Mudanca[], modo: Modo): Situacao {
+function situacaoDaCategoria(filhos: { situacao: Situacao }[], mudancasProprias: Mudanca[], modo: Modo): Situacao {
   const mexe = filhos.some(f => f.situacao === 'nova' || f.situacao === 'alterada' || f.situacao === 'removida')
   if (mexe) return 'alterada'
   if (mudancasProprias.length) return situacaoDeQuemEstaNosDois(true, modo)
@@ -147,11 +173,83 @@ function situacaoDaCategoria(filhos: NoFolha[], mudancasProprias: Mudanca[], mod
   return 'igual'
 }
 
+function folhaDeTarefa(t: TarefaDaEstrutura, situacao: Situacao, mudancas: Mudanca[] = []): NoFolha {
+  return { chave: t.ref, nome: t.nome, situacao, mudancas, acao: t.acao }
+}
+
+function folhaDeConfiguracao(c: ConfiguracaoDaEtapa, situacao: Situacao, mudancas: Mudanca[] = []): NoFolha {
+  // A referência quebrada só pesa no que o arquivo leva para o workspace.
+  const leva = situacao === 'nova' || situacao === 'alterada'
+  return { chave: c.ref, nome: c.nome, situacao, mudancas, tipoDeConfiguracao: c.tipo, quebrada: leva ? c.quebrada : undefined }
+}
+
+function etapaSozinha(e: EtapaDaEstrutura, situacao: Situacao): NoEtapa {
+  return {
+    chave: e.ref,
+    nome: e.nome,
+    situacao,
+    mudancas: [],
+    tarefas: e.tarefas.map(t => folhaDeTarefa(t, situacao)),
+    configuracoes: e.configuracoes.map(c => folhaDeConfiguracao(c, situacao)),
+    itens: e.itens,
+    tarefasAbertas: e.tarefasAbertas,
+  }
+}
+
+/** Compara 2 listas pela chave e devolve a situação de cada par, como `compararLista`, mas com o objeto inteiro. */
+function parear<T extends { ref: string }>(atual: T[], arquivo: T[]) {
+  const pares: { a?: T, b?: T }[] = arquivo.map(b => ({ a: atual.find(x => x.ref === b.ref), b }))
+  for (const a of atual) if (!arquivo.some(b => b.ref === a.ref)) pares.push({ a })
+  return pares
+}
+
+function compararFluxo(atual: EtapaDaEstrutura[] = [], arquivo: EtapaDaEstrutura[] = [], modo: Modo): NoEtapa[] {
+  const resultado: NoEtapa[] = []
+  for (const { a, b } of parear(atual, arquivo)) {
+    if (!a) { resultado.push(etapaSozinha(b!, 'nova')); continue }
+    if (!b) { resultado.push(etapaSozinha(a, situacaoDeQuemSoEstaNoWorkspace(modo))); continue }
+
+    const proprias: Mudanca[] = []
+    if (a.nome !== b.nome) proprias.push({ tipo: 'nome', antes: a.nome, depois: b.nome })
+    if (a.posicao !== b.posicao) proprias.push({ tipo: 'propriedade', rotulo: 'posicao', antes: String(a.posicao), depois: String(b.posicao) })
+
+    const tarefas = parear(a.tarefas, b.tarefas).map(({ a: ta, b: tb }) => {
+      if (!ta) return folhaDeTarefa(tb!, 'nova')
+      if (!tb) return folhaDeTarefa(ta, situacaoDeQuemSoEstaNoWorkspace(modo))
+      const m: Mudanca[] = []
+      if (ta.nome !== tb.nome) m.push({ tipo: 'nome', antes: ta.nome, depois: tb.nome })
+      if (ta.acao !== tb.acao) m.push({ tipo: 'propriedade', rotulo: 'acao', antes: ta.acao, depois: tb.acao })
+      if (ta.responsavel !== tb.responsavel) m.push({ tipo: 'propriedade', rotulo: 'responsavel', antes: ta.responsavel, depois: tb.responsavel })
+      return folhaDeTarefa(ta, situacaoDeQuemEstaNosDois(m.length > 0, modo), m)
+    })
+
+    const configuracoes = parear(a.configuracoes, b.configuracoes).map(({ a: ca, b: cb }) => {
+      if (!ca) return folhaDeConfiguracao(cb!, 'nova')
+      if (!cb) return folhaDeConfiguracao(ca, situacaoDeQuemSoEstaNoWorkspace(modo))
+      const m: Mudanca[] = ca.nome !== cb.nome ? [{ tipo: 'nome', antes: ca.nome, depois: cb.nome }] : []
+      return folhaDeConfiguracao(cb, situacaoDeQuemEstaNosDois(m.length > 0, modo), m)
+    })
+
+    resultado.push({
+      chave: a.ref,
+      nome: a.nome,
+      situacao: situacaoDaCategoria([...tarefas, ...configuracoes], proprias, modo),
+      mudancas: proprias,
+      tarefas,
+      configuracoes,
+      itens: a.itens,
+      tarefasAbertas: a.tarefasAbertas,
+    })
+  }
+  return resultado
+}
+
 function folhasDaCategoriaSozinha(c: CategoriaDaEstrutura, situacao: Situacao) {
   return {
     campos: c.campos.map(f => ({ chave: f.refId, nome: f.label, situacao, mudancas: [], tipoDeCampo: f.type })),
     formularios: c.formularios.map(n => ({ chave: n, nome: n, situacao, mudancas: [] })),
     pastas: c.pastas.map(n => ({ chave: n, nome: n, situacao, mudancas: [] })),
+    fluxo: (c.fluxo ?? []).map(e => etapaSozinha(e, situacao)),
   }
 }
 
@@ -167,16 +265,18 @@ export function comparar(atual: Estrutura, arquivo: Estrutura, modo: Modo): Comp
     const campos = compararLista(a.campos, b.campos, modo, f => f.refId, f => f.label, (x, y) => compararCampo(x, y, modo), f => f.type)
     const formularios = compararLista(a.formularios, b.formularios, modo, n => n, n => n)
     const pastas = compararLista(a.pastas, b.pastas, modo, n => n, n => n)
+    const fluxo = compararFluxo(a.fluxo, b.fluxo, modo)
     const proprias: Mudanca[] = a.name !== b.name ? [{ tipo: 'nome', antes: a.name, depois: b.name }] : []
     categorias.push({
       slug: a.slug,
       nome: a.name,
       icone: a.icon,
-      situacao: situacaoDaCategoria([...campos, ...formularios, ...pastas], proprias, modo),
+      situacao: situacaoDaCategoria([...campos, ...formularios, ...pastas, ...fluxo], proprias, modo),
       mudancas: proprias,
       campos,
       formularios,
       pastas,
+      fluxo,
       itens: a.itens,
     })
   }
@@ -213,7 +313,7 @@ export function comparar(atual: Estrutura, arquivo: Estrutura, modo: Modo): Comp
     if (c.situacao === 'removida') itensQueSaem += c.itens ?? 0
     // Categoria nova ou removida conta como 1 coisa: os filhos vão junto.
     if (c.situacao === 'nova' || c.situacao === 'removida') continue
-    for (const f of [...c.campos, ...c.formularios, ...c.pastas]) total[f.situacao]++
+    for (const f of [...c.campos, ...c.formularios, ...c.pastas, ...c.fluxo]) total[f.situacao]++
   }
   for (const tipo of tiposDeComponente) {
     for (const f of componentes[tipo]) total[f.situacao]++
@@ -228,6 +328,7 @@ export function contarEstrutura(e: Estrutura) {
     categorias: e.categorias.length,
     campos: e.categorias.reduce((s, c) => s + c.campos.length, 0),
     formularios: e.categorias.reduce((s, c) => s + c.formularios.length, 0),
+    etapas: e.categorias.reduce((s, c) => s + (c.fluxo?.length ?? 0), 0),
     outros: tiposDeComponente.reduce((s, t) => s + e.componentes[t].length, 0),
   }
 }
