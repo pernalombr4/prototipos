@@ -100,8 +100,8 @@ const grupos = computed<CommandPaletteGroup[]>(() => {
       id: 'editar',
       label: tb.value.grupoEditar,
       items: [
-        acao('melhorar', tb.value.melhorar, 'i-lucide-wand-sparkles'),
         acao('corrigir', tb.value.corrigir, 'i-lucide-spell-check'),
+        acao('melhorar', tb.value.melhorar, 'i-lucide-wand-sparkles'),
         acao('encurtar', tb.value.encurtar, 'i-lucide-fold-vertical'),
         acao('expandir', tb.value.expandir, 'i-lucide-unfold-vertical'),
         acao('simplificar', tb.value.simplificar, 'i-lucide-feather'),
@@ -124,13 +124,40 @@ const grupos = computed<CommandPaletteGroup[]>(() => {
     })
   }
   else {
+    /*
+     * Sem seleção (rodada 12): as ações de edição valem para o campo inteiro,
+     * como no Tiptap e na IA de hoje do ENSPACE ("Revisar"). "Extrair
+     * pendências" saiu: só o Notion tem, e lá é bloco do "/".
+     */
+    g.push({
+      id: 'editarCampo',
+      label: tb.value.grupoEditarCampo,
+      items: [
+        acao('corrigir', tb.value.corrigir, 'i-lucide-spell-check', { description: tb.value.corrigirDescricao, disabled: props.campoVazio }),
+        acao('melhorar', tb.value.melhorar, 'i-lucide-wand-sparkles', { description: tb.value.melhorarDescricao, disabled: props.campoVazio }),
+        {
+          label: tb.value.tom,
+          icon: 'i-lucide-mic-vocal',
+          placeholder: tb.value.tom,
+          disabled: props.campoVazio,
+          children: tons.map(k => ({ label: tb.value.tons[k]!, onSelect: () => emit('pedir', { acao: 'tom', parametro: k, rotulo: tb.value.paraTom(tb.value.tons[k]!) }) })),
+        },
+        {
+          label: tb.value.traduzir,
+          icon: 'i-lucide-languages',
+          placeholder: tb.value.traduzir,
+          disabled: props.campoVazio,
+          children: idiomas.map(k => ({ label: tb.value.idiomas[k]!, onSelect: () => emit('pedir', { acao: 'traduzir', parametro: k, rotulo: tb.value.paraIdioma(tb.value.idiomas[k]!) }) })),
+        },
+        acao('encurtar', tb.value.encurtar, 'i-lucide-fold-vertical', { description: tb.value.encurtarDescricao, disabled: props.campoVazio }),
+      ],
+    })
     g.push({
       id: 'escrever',
       label: tb.value.grupoEscrever,
       items: [
         acao('continuar', tb.value.continuar, 'i-lucide-pen-line', { description: tb.value.continuarDescricao, disabled: props.campoVazio }),
         acao('resumir', tb.value.resumir, 'i-lucide-text-quote', { description: tb.value.resumirDescricao, disabled: props.campoVazio }),
-        acao('pendencias', tb.value.pendencias, 'i-lucide-list-checks', { description: tb.value.pendenciasDescricao, disabled: props.campoVazio }),
         acao('rascunhar', tb.value.rascunhar, 'i-lucide-file-pen-line', { description: tb.value.rascunharDescricao }),
       ],
     })

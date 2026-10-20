@@ -262,6 +262,16 @@ async function rodar(editor: Editor) {
   rolarAteVer('[data-barra-da-proposta]')
 }
 
+/*
+ * Sem seleção, as ações de edição valem para o campo inteiro (rodada 12): a
+ * proposta risca o campo todo e o Aceitar substitui tudo, como no campo vazio.
+ */
+const editamOCampo: Acao[] = ['corrigir', 'melhorar', 'encurtar', 'tom', 'traduzir']
+function contextoDoCampo(editor: Editor): Contexto {
+  const doc = editor.state.doc
+  return { comSelecao: true, mesmoBloco: false, texto: doc.textBetween(0, doc.content.size, '\n'), campoVazio: false, from: 0, to: doc.content.size, abaixo: doc.content.size, linhaVazia: null }
+}
+
 function executar(editor: Editor, p: PedidoDaCaixa, ctxDado?: Contexto) {
   // Sem en-credits e sem chave para o modelo (rodada 11): o pedido espera na caixa, com o aviso.
   if (!podeResponder(modelo.value, conectadas.value, semCreditos.value)) {
@@ -269,7 +279,8 @@ function executar(editor: Editor, p: PedidoDaCaixa, ctxDado?: Contexto) {
     else abrirCaixa(editor, p)
     return
   }
-  const ctx = ctxDado ?? caixa.value ?? contextoDe(editor)
+  let ctx = ctxDado ?? caixa.value ?? contextoDe(editor)
+  if (!ctx.comSelecao && !ctx.campoVazio && editamOCampo.includes(p.acao)) ctx = contextoDoCampo(editor)
   caixa.value = null
   const modo: Modo = ctx.campoVazio ? 'vazio'
     : ctx.comSelecao ? (entraAbaixo.includes(p.acao) ? 'abaixo' : 'substituir')
@@ -670,9 +681,12 @@ const itensDoMenu = computed(() => {
       { type: 'label', label: tb.value.grupoMenu },
       ia(undefined, tb.value.pedir, tb.value.pedirDescricao, 'i-lucide-sparkles'),
       ...pedidosSalvos.value.map(p => ia('pedir', p.nome, p.prompt, 'i-lucide-bookmark', { prompt: p.prompt })),
+      // Rodada 12: as edições do campo inteiro primeiro, depois a escrita. Tom e Traduzir ficam na caixa do BENI.
+      ia('corrigir', tb.value.corrigir, tb.value.corrigirDescricao, 'i-lucide-spell-check', { precisaTexto: true }),
+      ia('melhorar', tb.value.melhorar, tb.value.melhorarDescricao, 'i-lucide-wand-sparkles', { precisaTexto: true }),
+      ia('encurtar', tb.value.encurtar, tb.value.encurtarDescricao, 'i-lucide-fold-vertical', { precisaTexto: true }),
       ia('continuar', tb.value.continuar, tb.value.continuarDescricao, 'i-lucide-pen-line', { precisaTexto: true }),
       ia('resumir', tb.value.resumir, tb.value.resumirDescricao, 'i-lucide-text-quote', { precisaTexto: true }),
-      ia('pendencias', tb.value.pendencias, tb.value.pendenciasDescricao, 'i-lucide-list-checks', { precisaTexto: true }),
       ia('rascunhar', tb.value.rascunhar, tb.value.rascunharDescricao, 'i-lucide-file-pen-line'),
     ])
   }

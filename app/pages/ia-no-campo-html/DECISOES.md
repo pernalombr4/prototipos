@@ -234,4 +234,20 @@
 - **Fronteira:** muda o que acontece sem en-credits; não mudam a caixa do BENI, o modal das chaves, a proposta nem os outros estados.
 - **CSS fora da prop:** nenhum.
 - **Ver:** `?ia=semCreditos` · `evidencias/proto-sem-creditos-aviso.png`, `evidencias/proto-sem-creditos-depois-da-chave.png`
-- **Pesquisa das ações rápidas do menu (pedida na mesma mensagem):** resposta no chat de 2026-10-20; a mudança do menu espera a aprovação da redatora.
+- **Pesquisa das ações rápidas do menu (pedida na mesma mensagem):** resposta no chat de 2026-10-20; aplicada na rodada 12.
+
+## Rodada 12 · 2026-10-20
+- **Pedido (literal):** "pode aplicar e publicar. publique junto um doc de requisitos pra um dev trabalhar nisso" e, em seguida, "coloque outro doc de requisitos junto, que é como fazer as barras do campo html, o comportamento dele, o que aparece ao colocar /, como é a barra de ferramentas etc. isso porque o campo não é assim hoje. seria algo meio 2 em 1, entao vou abrir 2 demandas usando um mesmo prototipo"
+- **Pesquisa (rodada 11, no chat):** as ações rápidas que se repetem nos editores com IA são melhorar a escrita, revisar ortografia e gramática, encurtar ou expandir, mudar o tom, traduzir, resumir e continuar escrevendo (Tiptap, Confluence Rovo, Notion, Google Docs, Word, BlockNote e a IA de hoje do ENSPACE, que tem "Revisar").
+- **Mudou:**
+  - sem texto selecionado, a caixa do BENI ganha o grupo **"Editar o campo"** ("Revisar ortografia e gramática", "Melhorar a escrita", "Mudar o tom ›", "Traduzir ›", "Encurtar"), antes de "Escrever";
+  - essas ações valem para o campo inteiro: a proposta risca o campo todo e o Aceitar substitui tudo;
+  - "Extrair pendências" saiu da caixa e do "/": só o Notion tem, e lá é bloco do "/";
+  - "Corrigir ortografia e gramática" virou **"Revisar ortografia e gramática"**, como a IA de hoje do ENSPACE, e passou a vir em 1º lugar também com seleção;
+  - o "/" segue a mesma ordem: "Revisar", "Melhorar", "Encurtar", "Continuar", "Resumir", "Rascunhar" (Tom e Traduzir ficam na caixa, que tem os submenus).
+- **2 documentos de requisitos, para 2 demandas com o mesmo protótipo:**
+  - `REQUISITOS-EDITOR.md`: o campo Editor de texto HTML sem a IA (barra fixa, barra da seleção, cor, link, "/", atalhos, alça do bloco, menção, emoji, tabela, pé), com o lugar da IA reservado;
+  - `REQUISITOS-IA.md`: o BENI no campo (entradas, caixa, ações, proposta, agente e modelo, chaves de conta própria, sem en-credits), que depende do primeiro.
+- **Fronteira:** mudam as ações da caixa e do "/"; não mudam a proposta, os seletores, o modal das chaves nem o aviso de en-credits.
+- **CSS fora da prop:** nenhum.
+- **Ver:** `evidencias/proto-menu-sem-selecao.png`, `evidencias/proto-revisar-campo-inteiro.png`
