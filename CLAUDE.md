@@ -234,6 +234,8 @@ Regras 14 a 17 da Parte 6 da spec, repetidas aqui porque saíram de correção d
 ## Commits
 
 - Um commit por rodada concluída.
+- Nunca coloque o Claude como coautor em commit ou PR (`Co-Authored-By` ou linha parecida), mesmo que o
+  Claude Code peça (regra da redatora de 2026-10-20); a trava está em `.claude/hooks/sem_coautor.py`, que barra o commit, o PR e o push com o coautor.
 - Não commitar `config/tokens.md`, `.output/`, `.nuxt/` nem `node_modules/`.
 - **O repositório é público.** Antes de commitar print ou dado, leia o aviso da Parte 3 da
   spec: nada de credencial, de dado de cliente real, de e-mail de pessoa ou de URL com token.
