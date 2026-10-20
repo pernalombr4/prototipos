@@ -146,3 +146,8 @@ Migração concluída ──► Ver categorias (não há como desfazer)
   - O carregamento volta ao da rodada 1: "Importando a estrutura", a barra com porcentagem e as 5 etapas. Fica o "Cancelar migração" da rodada 5.
   - A falha continua sem dizer a etapa: "A migração falhou. Nada foi migrado."
   - Status `aprovado` no `definePageMeta` (selo verde no índice) e no README.
+
+## Requisitos · 2026-10-20
+- **Pedido (literal):** "escreve e dá push, lembre-se: escrita com base em template de escrita de produtos por requisito"
+- **Mudou:** `REQUISITOS.md` com a versão aprovada, no formato dos outros requisitos do repositório (objetivo, onde vale, referência visual, convenção, resumo, grupos com ID, requisito e critério de aceite, dados, componentes e acessibilidade, em aberto). Grupos: RT, RA, RM, RV, RC, RG, RF, RD e RK.
+
