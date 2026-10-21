@@ -81,3 +81,17 @@
 - **Fronteira:** muda o "O que entra" e os textos do criar; não muda o resto da janela nem a galeria
 - **Maquete:** a dependência entre entidades não existe no protótipo: desmarcar a categoria de um fluxo não avisa (P14)
 - **Ver:** `evidencias/proposta-15-o-que-entra.jpg` · `proposta-14-detalhe-criado.jpg`
+
+## Rodada 5 · 2026-10-21
+- **Pedido (literal):** "perceba que com a nova galeria de casos de uso ta com uma diferença desconfortavel de largura entre a parte inicial da tela e a galeria? como unificar melhor essas duas coisas? pense ux/ui"
+- **Diagnóstico:** eram 2 grades. A parte de cima numa coluna de 768 px, centralizada; a galeria na área inteira (cerca de 1.670 px numa tela de 1.915 px). As bordas esquerdas ficavam a cerca de 460 px uma da outra, e os cabeçalhos das 2 seções tinham estilos diferentes
+- **Mudou:** a página inteira passa a ser uma coluna só, centralizada, de até 1.152 px (`max-w-6xl`)
+  - cabeçalho, Migração de Workspace, Atenção e galeria com as bordas alinhadas
+  - o cabeçalho da galeria copia o molde do cartão de migração: ícone em quadrado cinza, título no mesmo tamanho e peso, descrição embaixo, mesmo raio de canto
+  - a galeria mantém 3 colunas de cartões e a lateral de filtros
+- **Por que 1.152 px e não 768 px:** com 768 px, sobram cerca de 500 px para os cartões ao lado da lateral, e a vitrine cai para 1 ou 2 colunas. Com 1.152 px, cabem 3 colunas e o cartão de migração continua legível
+- **Fronteira:** muda a largura da coluna e o cabeçalho da galeria; não muda o conteúdo da parte de cima
+- **Andaime:** "Largura" alterna entre Unificada (padrão) e Como na rodada 1, para comparar
+- **Requisitos:** RF069 (uma coluna só, largura <proposta: 1.152 px>) e RF070 (cabeçalho no mesmo molde)
+- **Ver:** `evidencias/proposta-16-largura-unificada.jpg` · `evidencias/proposta-17-largura-unificada-cartoes.jpg`
+

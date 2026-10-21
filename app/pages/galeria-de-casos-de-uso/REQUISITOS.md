@@ -8,7 +8,7 @@ fica só no workspace ou na galeria do ENSPACE.
 abaixo do aviso "Atenção", onde hoje fica o bloco "General" com os cartões e o "Saiba Mais".
 
 **Referência visual:** protótipo navegável em https://pernalombr4.github.io/prototipos/galeria-de-casos-de-uso,
-rodadas 1 a 4 de 20/10/2026, em revisão. Código, textos nos 3 idiomas, prints e decisões em
+rodadas 1 a 5 de 20 e 21/10/2026, em revisão. Código, textos nos 3 idiomas, prints e decisões em
 https://github.com/pernalombr4/prototipos/tree/main/app/pages/galeria-de-casos-de-uso. A barra inferior do protótipo
 (cenário, tema, idioma, "Por trás") é ferramenta de revisão e não entra no produto.
 
@@ -17,14 +17,15 @@ entre aspas são os da interface em português; os de inglês e espanhol estão 
 {chaves} são valores variáveis.
 
 **Fora do escopo:** o menu lateral, a barra do topo, o cabeçalho da tela ("Casos de Uso" e a descrição), o cartão
-"Migração de Workspace" (Exportar e Importar) e o aviso "Atenção" continuam como estão. A importação por arquivo é o
+"Migração de Workspace" (Exportar e Importar) e o aviso "Atenção" continuam com o mesmo conteúdo; muda só a largura
+da coluna onde eles ficam (RF069). A importação por arquivo é o
 protótipo `migracao-de-workspace`.
 
 ## Resumo
 
 | Grupo | O que muda em relação ao develop de 20/10/2026 | Requisitos |
 |---|---|---|
-| Galeria | O bloco "General" vira uma vitrine com lateral de filtros, busca, Áreas, destaques e cartões com miniatura agrupados por área | RF001 a RF021 |
+| Galeria | O bloco "General" vira uma vitrine com lateral de filtros, busca, Áreas, destaques e cartões com miniatura agrupados por área, na mesma coluna da parte de cima | RF001 a RF021, RF069 e RF070 |
 | Estados da galeria | Hoje não há carregando nem erro na galeria | RF022 e RF023 |
 | Detalhe do caso | A janela do "Saiba Mais" (imagem e descrição) vira o detalhe na própria página, com galeria de imagens, o que vem junto e quem fez | RF024 a RF032 |
 | Usar caso de uso | "Migrar Caso de Uso" vira "Usar caso de uso"; a confirmação passa a mostrar o que entra e os 2 avisos que o produto já dá | RF033 a RF040 |
@@ -61,6 +62,8 @@ protótipo `migracao-de-workspace`.
 | ID | Requisito | Critério de aceite | Prioridade |
 |---|---|---|---|
 | RF001 | O bloco da galeria deve ocupar o lugar do bloco "General", abaixo do aviso "Atenção", com o título "Galeria de casos de uso" e a descrição "Estruturas prontas do ENSPACE para começar um processo sem montar tudo do zero." | A tela mostra, de cima para baixo: cabeçalho, Migração de Workspace, Atenção e a galeria. | Essencial |
+| RF069 | O cabeçalho da tela, o cartão "Migração de Workspace", o aviso "Atenção" e a galeria devem ocupar uma coluna só, centralizada, com as bordas esquerda e direita alinhadas e largura máxima de <proposta: 1.152 px, sem medição>. | Numa tela de 1.915 px, a borda esquerda do cartão de migração e a da galeria ficam na mesma linha vertical. | Importante |
+| RF070 | O cabeçalho da galeria deve seguir o molde do cabeçalho do cartão "Migração de Workspace": ícone em quadrado cinza, título no mesmo tamanho e peso e descrição embaixo. | Os 2 cabeçalhos têm o ícone, o título e a descrição com o mesmo tamanho e a mesma cor. | Desejável |
 | RF002 | A lateral da galeria deve ter 2 vistas, "Destaques" e "Todos do ENSPACE", cada uma com o número de casos ao lado, e a vista ativa em destaque. | Exemplo: 18 casos, 6 destaques: "Destaques 6" e "Todos do ENSPACE 18". | Importante |
 | RF003 | A lateral deve ter o filtro "Localidade", com caixas de marcar para Brasil (pt-br), Estados Unidos (en-us) e Global, e mais de 1 marcada ao mesmo tempo (RN005). | Marcar Brasil e Global mostra os casos de uma ou de outra. | Essencial |
 | RF004 | Quando a galeria abre, o filtro "Localidade" deve vir marcado conforme a RN004. | Exemplo: idioma inglês; a galeria abre com Estados Unidos (en-us) marcado. | Essencial |

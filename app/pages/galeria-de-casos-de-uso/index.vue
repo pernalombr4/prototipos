@@ -75,6 +75,13 @@ const cenarios: { valor: Cenario, rotulo: string }[] = [
   { valor: 'sem-permissao', rotulo: 'Sem permissão' },
 ]
 
+/*
+ * Rodada 5: "uma diferença desconfortavel de largura entre a parte inicial da
+ * tela e a galeria". Unificada: a página inteira numa coluna só (max-w-6xl),
+ * com as 2 seções no mesmo molde de cartão. Separada: a rodada 1, para comparar.
+ */
+const largura = ref<'unificada' | 'separada'>('unificada')
+
 const casos = computed(() => (cenario.value === 'hoje' ? umCaso : [...criados.value, ...casosDeUso]))
 const estado = computed(() => (cenario.value === 'carregando' ? 'carregando' : cenario.value === 'erro' ? 'erro' : 'pronto'))
 
@@ -88,8 +95,8 @@ async function tentarDeNovo() {
 <template>
   <CascaDoEnspace :t="t" :workspace="workspaceAtual.nome" :slug="workspaceAtual.slug">
     <div class="min-h-0 flex-1 overflow-y-auto pb-28">
-      <div class="px-3 py-8 sm:px-3">
-        <div class="mx-auto max-w-3xl px-1">
+      <div class="py-8" :class="largura === 'unificada' ? 'mx-auto max-w-6xl px-4 sm:px-6' : 'px-3'">
+        <div :class="largura === 'unificada' ? '' : 'mx-auto max-w-3xl px-1'">
           <!-- Cabeçalho: cópia do develop. O logo é texto no protótipo. -->
           <header class="text-center">
             <p class="text-6xl font-black tracking-tight text-primary" aria-hidden="true">
@@ -196,13 +203,14 @@ async function tentarDeNovo() {
         </div>
 
         <!-- ═══════════ A PROPOSTA: a galeria, no lugar do bloco "General" ═══════════ -->
-        <div class="mt-9">
+        <div :class="largura === 'unificada' ? 'mt-8' : 'mt-9'">
           <GaleriaDeCasos
             v-model:fonte="fonte"
             :t="t"
             :casos="casos"
             :estado="estado"
             :pode-usar="cenario !== 'sem-permissao'"
+            :secao-igual="largura === 'unificada'"
             @usar="usando = $event"
             @criar="criando = true"
             @tentar-de-novo="tentarDeNovo"
@@ -229,6 +237,19 @@ async function tentarDeNovo() {
           :color="cenario === c.valor ? 'primary' : 'neutral'"
           :variant="cenario === c.valor ? 'solid' : 'subtle'"
           @click="cenario = c.valor"
+        />
+
+        <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
+        <span class="text-xs font-semibold uppercase tracking-wider text-muted">Largura</span>
+        <UButton
+          v-for="l in [{ valor: 'unificada', rotulo: 'Unificada' }, { valor: 'separada', rotulo: 'Como na rodada 1' }] as const"
+          :key="l.valor"
+          :label="l.rotulo"
+          size="xs"
+          class="transition-transform hover:-translate-y-0.5"
+          :color="largura === l.valor ? 'primary' : 'neutral'"
+          :variant="largura === l.valor ? 'solid' : 'subtle'"
+          @click="largura = l.valor"
         />
 
         <ControlesDePrototipo class="ml-auto" />
