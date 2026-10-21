@@ -788,7 +788,7 @@ const pt: Textos = {
     fases: { 1: 'Word em breve', 2: 'Word liberado' },
     editorDeModelos: 'Editor de modelos',
     reiniciar: 'Recomeçar',
-    dica: 'Cada cenário abre o contrato que mostra aquele estado do campo. Para ver o plugin do Word, abra um documento no Word e clique em Ver simulação do plugin do Word.',
+    dica: 'Cada cenário abre o contrato que mostra aquele estado do campo. Para ver o plugin do Word, abra um documento no Word e clique em Ver simulação do plugin do Word. Para inserir campos, condições e repetições num modelo, clique em Editor de modelos, aqui na barra, ou em Usar modelo › Editar modelos no CTR-0141.',
     oQueMuda: 'Mostrar o que muda',
   },
 
@@ -1221,7 +1221,7 @@ const en: Textos = {
     fases: { 1: 'Word coming soon', 2: 'Word released' },
     editorDeModelos: 'Template editor',
     reiniciar: 'Start over',
-    dica: 'Each scenario opens the contract that shows that field state. To see the Word plugin, open a document in Word and click See Word plugin simulation.',
+    dica: 'Each scenario opens the contract that shows that field state. To see the Word plugin, open a document in Word and click See Word plugin simulation. To insert fields, conditions and repetitions in a template, click Template editor, here on the bar, or Use template › Edit templates on CTR-0141.',
     oQueMuda: 'Show what changes',
   },
 
@@ -1654,7 +1654,7 @@ const es: Textos = {
     fases: { 1: 'Word próximamente', 2: 'Word liberado' },
     editorDeModelos: 'Editor de plantillas',
     reiniciar: 'Empezar de nuevo',
-    dica: 'Cada escenario abre el contrato que muestra ese estado del campo. Para ver el plugin de Word, abre un documento en Word y haz clic en Ver simulación del plugin de Word.',
+    dica: 'Cada escenario abre el contrato que muestra ese estado del campo. Para ver el plugin de Word, abre un documento en Word y haz clic en Ver simulación del plugin de Word. Para insertar campos, condiciones y repeticiones en una plantilla, haz clic en Editor de plantillas, aquí en la barra, o en Usar plantilla › Editar plantillas en el CTR-0141.',
     oQueMuda: 'Mostrar lo que cambia',
   },
 
