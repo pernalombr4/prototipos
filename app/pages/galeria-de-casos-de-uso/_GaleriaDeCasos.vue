@@ -32,6 +32,8 @@ const props = defineProps<{
   podeUsar: boolean
   /** Rodada 5: o cabeçalho e a moldura no mesmo molde do cartão "Migração de Workspace". */
   secaoIgual?: boolean
+  /** Rodada 6 (mudança total): a galeria é a página. Sem moldura e sem cabeçalho próprio; o título da página faz o papel. */
+  solta?: boolean
 }>()
 const emit = defineEmits<{ usar: [caso: CasoDeUso], tentarDeNovo: [], criar: [] }>()
 
@@ -165,10 +167,10 @@ watch(() => props.casos, () => { aberto.value = null })
 </script>
 
 <template>
-  <section ref="raiz" class="scroll-mt-4 overflow-clip border border-default bg-default" :class="props.secaoIgual ? 'rounded-lg' : 'rounded-xl'" :aria-label="props.t.galeriaTitulo">
+  <section ref="raiz" class="scroll-mt-4 overflow-clip bg-default" :class="props.solta ? 'border-t border-default' : ['border border-default', props.secaoIgual ? 'rounded-lg' : 'rounded-xl']" :aria-label="props.t.galeriaTitulo">
     <!-- ==================== cabeçalho da galeria ==================== -->
     <!-- Na largura unificada, o mesmo molde do cabeçalho da Migração de Workspace (cópia do develop). -->
-    <header v-if="!aberto" class="flex flex-wrap items-center gap-3 border-b border-default" :class="props.secaoIgual ? 'px-4 py-3 sm:px-6' : 'px-5 py-4'">
+    <header v-if="!aberto && !props.solta" class="flex flex-wrap items-center gap-3 border-b border-default" :class="props.secaoIgual ? 'px-4 py-3 sm:px-6' : 'px-5 py-4'">
       <span class="flex size-9 shrink-0 items-center justify-center" :class="props.secaoIgual ? 'rounded-md bg-elevated text-toned' : 'rounded-lg bg-primary/10 text-primary'">
         <UIcon name="i-lucide-package" class="size-5" />
       </span>

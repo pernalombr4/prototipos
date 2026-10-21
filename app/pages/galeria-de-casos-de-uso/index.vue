@@ -3,6 +3,7 @@ import CascaDoEnspace from './_CascaDoEnspace.vue'
 import GaleriaDeCasos from './_GaleriaDeCasos.vue'
 import UsarCaso from './_UsarCaso.vue'
 import CriarCaso from './_CriarCaso.vue'
+import TopoMudancaTotal from './_TopoMudancaTotal.vue'
 import { textos } from './textos'
 import { casosDeUso, umCaso, workspaceAtual, type CasoDeUso } from './mocks'
 
@@ -82,6 +83,20 @@ const cenarios: { valor: Cenario, rotulo: string }[] = [
  */
 const largura = ref<'unificada' | 'separada'>('unificada')
 
+/*
+ * Rodada 6: "proponha uma melhoria, mas num outro modo do protótipo". A
+ * mudança total troca só a parte de cima (TopoMudancaTotal) e solta a galeria
+ * da moldura. A lógica de exportar, importar e da galeria é a mesma.
+ */
+const mudancaTotal = ref(false)
+const importando = ref(false)
+async function importar(arquivo: string) {
+  importando.value = true
+  await new Promise(r => setTimeout(r, 900))
+  importando.value = false
+  toast.add({ title: t.value.importacaoIniciadaTitulo, description: t.value.importacaoIniciadaTexto(arquivo), icon: 'i-lucide-upload', color: 'success' })
+}
+
 const casos = computed(() => (cenario.value === 'hoje' ? umCaso : [...criados.value, ...casosDeUso]))
 const estado = computed(() => (cenario.value === 'carregando' ? 'carregando' : cenario.value === 'erro' ? 'erro' : 'pronto'))
 
@@ -95,8 +110,11 @@ async function tentarDeNovo() {
 <template>
   <CascaDoEnspace :t="t" :workspace="workspaceAtual.nome" :slug="workspaceAtual.slug">
     <div class="min-h-0 flex-1 overflow-y-auto pb-28">
-      <div class="py-8" :class="largura === 'unificada' ? 'mx-auto max-w-6xl px-4 sm:px-6' : 'px-3'">
-        <div :class="largura === 'unificada' ? '' : 'mx-auto max-w-3xl px-1'">
+      <div class="py-8" :class="largura === 'unificada' || mudancaTotal ? 'mx-auto max-w-6xl px-4 sm:px-6' : 'px-3'">
+        <!-- Rodada 6: a opção de mudança total troca só esta parte de cima. -->
+        <TopoMudancaTotal v-if="mudancaTotal" :t="t" :exportando="exportando" @exportar="exportar" @importar="importar" />
+
+        <div v-else :class="largura === 'unificada' ? '' : 'mx-auto max-w-3xl px-1'">
           <!-- Cabeçalho: cópia do develop. O logo é texto no protótipo. -->
           <header class="text-center">
             <p class="text-6xl font-black tracking-tight text-primary" aria-hidden="true">
@@ -203,7 +221,7 @@ async function tentarDeNovo() {
         </div>
 
         <!-- ═══════════ A PROPOSTA: a galeria, no lugar do bloco "General" ═══════════ -->
-        <div :class="largura === 'unificada' ? 'mt-8' : 'mt-9'">
+        <div :class="mudancaTotal ? 'mt-6' : largura === 'unificada' ? 'mt-8' : 'mt-9'">
           <GaleriaDeCasos
             v-model:fonte="fonte"
             :t="t"
@@ -211,6 +229,7 @@ async function tentarDeNovo() {
             :estado="estado"
             :pode-usar="cenario !== 'sem-permissao'"
             :secao-igual="largura === 'unificada'"
+            :solta="mudancaTotal"
             @usar="usando = $event"
             @criar="criando = true"
             @tentar-de-novo="tentarDeNovo"
@@ -225,6 +244,16 @@ async function tentarDeNovo() {
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">
       <div class="flex flex-wrap items-center gap-2 px-4 py-3">
+        <UButton
+          :label="mudancaTotal ? 'Voltar à proposta atual' : 'Opção de mudança total'"
+          :icon="mudancaTotal ? 'i-lucide-undo-2' : 'i-lucide-sparkles'"
+          size="xs"
+          :color="mudancaTotal ? 'neutral' : 'primary'"
+          :variant="mudancaTotal ? 'outline' : 'soft'"
+          class="transition-transform hover:-translate-y-0.5"
+          @click="mudancaTotal = !mudancaTotal"
+        />
+        <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
         <span class="mr-1 text-xs font-semibold uppercase tracking-wider text-muted">
           Protótipo · cenário
         </span>

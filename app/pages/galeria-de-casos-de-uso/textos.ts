@@ -164,6 +164,12 @@ export interface Textos {
   selecionados: (n: number, total: number) => string
   marcarGrupo: (grupo: string) => string
   nadaNaBusca: string
+
+  // opção de mudança total (rodada 6)
+  subtituloTotal: string
+  escolherArquivo: string
+  importacaoIniciadaTitulo: string
+  importacaoIniciadaTexto: (arquivo: string) => string
 }
 
 const casca: Record<Idioma, Casca> = {
@@ -353,6 +359,10 @@ const pt: Textos = {
   selecionados: (n, total) => `${n} de ${total} selecionados`,
   marcarGrupo: grupo => `Marcar tudo em ${grupo}`,
   nadaNaBusca: 'Nada deste workspace tem esse nome.',
+  subtituloTotal: 'Estruturas prontas do ENSPACE e as criadas neste workspace, para começar um processo sem montar tudo do zero.',
+  escolherArquivo: 'Escolher arquivo',
+  importacaoIniciadaTitulo: 'Importação iniciada',
+  importacaoIniciadaTexto: arquivo => `${arquivo}: os registros estão sendo carregados na tabela de Backup/Migração.`,
 }
 
 const en: Textos = {
@@ -497,6 +507,10 @@ const en: Textos = {
   selecionados: (n, total) => `${n} of ${total} selected`,
   marcarGrupo: grupo => `Select all in ${grupo}`,
   nadaNaBusca: 'Nothing in this workspace has that name.',
+  subtituloTotal: 'Ready-made ENSPACE structures and the ones created in this workspace, to start a process without building everything from scratch.',
+  escolherArquivo: 'Choose file',
+  importacaoIniciadaTitulo: 'Import started',
+  importacaoIniciadaTexto: arquivo => `${arquivo}: records are being loaded into the Backup/Migration table.`,
 }
 
 const es: Textos = {
@@ -641,6 +655,10 @@ const es: Textos = {
   selecionados: (n, total) => `${n} de ${total} seleccionados`,
   marcarGrupo: grupo => `Marcar todo en ${grupo}`,
   nadaNaBusca: 'Nada en este espacio de trabajo tiene ese nombre.',
+  subtituloTotal: 'Estructuras listas de ENSPACE y las creadas en este espacio de trabajo, para empezar un proceso sin armarlo todo desde cero.',
+  escolherArquivo: 'Elegir archivo',
+  importacaoIniciadaTitulo: 'Importación iniciada',
+  importacaoIniciadaTexto: arquivo => `${arquivo}: los registros se están cargando en la tabla de Respaldo/Migración.`,
 }
 
 export const textos: Record<Idioma, Textos> = { 'pt-BR': pt, en, es }

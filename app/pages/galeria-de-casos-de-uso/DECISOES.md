@@ -95,3 +95,20 @@
 - **Requisitos:** RF069 (uma coluna só, largura <proposta: 1.152 px>) e RF070 (cabeçalho no mesmo molde)
 - **Ver:** `evidencias/proposta-16-largura-unificada.jpg` · `evidencias/proposta-17-largura-unificada-cartoes.jpg`
 
+## Rodada 6 · 2026-10-21
+- **Pedido (literal):** "analise este prototipo. é a ideia da nossa tela só que um pouco melhorada. deixando a tela com cara de galeria nela toda e o botao de exportar/importar mais disfarçado, mas ele nao pode perder tanto o destaque. nao COPIE esse prototipo. [...] proponha uma melhoria, mas num outro modo do protótipo, num botão dizendo "opção de mudança total" ou algo do tipo"
+- **Pedido (literal), na mesma rodada:** "adpate sem mudar nossa logica ok? nao é pra importa ra logica do link. só adaptar pra nossa, beleza? é pra focar mais na parte superior da tela mesmo"
+- **Mudou (só no modo "Opção de mudança total", botão no começo do andaime):**
+  - a parte de cima vira um cabeçalho de página: "Casos de Uso" e a descrição à esquerda, sem o logo EN grande
+  - à direita, o grupo "Migração de Workspace" com "?", Exportar (discreto) e Importar (em cor), numa moldura com rótulo, para não sumir
+  - Exportar continua 1 clique; o texto de hoje vai para o tooltip
+  - Importar abre uma camada com o texto de hoje e o aviso "Atenção" (categorias duplicadas), e só então "Escolher arquivo"; escolhido, a importação começa, como hoje
+  - a galeria perde a moldura e o cabeçalho próprio: o título da página faz o papel, e a página inteira é a galeria
+  - no celular, o rótulo "Migração de Workspace" sai e ficam o ícone, o "?" e os 2 botões
+- **Fronteira:** muda a parte de cima e a moldura da galeria; não muda a lógica de exportar, importar, usar, criar nem os filtros
+- **Não copiado da referência:** o destaque "Comece por aqui", os chips de categoria no lugar de Áreas, o "Adicionar" no cartão e o tema escuro. A galeria segue a nossa
+- **Pesquisa:** `PESQUISA.md`, "Rodada 6": nenhum dos 5 produtos põe importar e exportar como bloco principal da galeria
+- **Maquete:** "Escolher arquivo" abre o seletor do sistema e mostra o aviso de importação iniciada; nada é importado
+- **Requisitos:** não mudaram. Se ela escolher este modo, entram linhas novas para o cabeçalho e para a camada do Importar
+- **Ver:** `evidencias/proposta-18-mudanca-total.jpg` · `proposta-19-mudanca-total-importar.jpg` · `proposta-20-mudanca-total-galeria.jpg` · `proposta-21-mudanca-total-celular.jpg`
+
