@@ -389,6 +389,17 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 34 · 2026-10-21
+- **Pedido (literal):** "pode botar a confirmaçao no painel do menu, mas nao mexa em mais nada naquele prototipo."
+- **Mudou:** excluir um menu do tipo Painéis, ou uma seção que leva um painel junto, abre a janela "Excluir o painel <nome>?"
+  - o texto diz o que sai (o painel com os widgets e filtros configurados) e que, depois de salvar o menu, não é possível recuperar
+  - vale nos 3 caminhos de excluir: botão direito (`acoes.ts`), Personalizar e o menu da trilha
+  - o menu comum continua saindo na hora, com o aviso, como na rodada 30
+  - a regra mora em `confirmacao.ts`; a janela, em `_ConfirmarExclusao.vue`
+- **Fronteira:** muda só o gesto de excluir painel; não muda nada mais do protótipo
+- **Motivo:** o relatório das Telas (protótipo `tipos-de-tela`): uma lista se refaz em 1 minuto; um painel com 20 widgets configurados, não
+- **Ver:** `evidencias/rodada34-confirmar-exclusao-do-painel.jpg`
+
 ### Rodada 33 · 2026-10-20
 - **Pedido (literal):** "aplica o mesmo menu de áreas no menu-lateral e tela-de-workspaces e poed commitar e dar push nesses 2"
 - **Mudou:** o filtro "Áreas" da Central deixa de ser um popover montado à mão e passa a ser o `USelectMenu` múltiplo, igual ao da `galeria-de-casos-de-uso` (rodada 2 de lá, onde ela achou o "Selecionar tudo" "um botao aleatorio no meio de algo que é um dropdown")

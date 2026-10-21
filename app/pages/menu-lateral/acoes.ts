@@ -31,6 +31,7 @@ import type { TextosDaTela } from './textos'
 import { useMenuDoWorkspace } from './estado'
 import { useLimites } from './limites'
 import { useJanelasDaTrilha } from './trilha'
+import { useConfirmarExclusao } from './confirmacao'
 
 export type Acoes = ContextMenuItem[][]
 
@@ -52,6 +53,7 @@ export interface Ganchos {
 export function useAcoesDoMenu(g: Ganchos) {
   const menu = useMenuDoWorkspace()
   const toast = useToast()
+  const confirmacao = useConfirmarExclusao()
   const janelas = useJanelasDaTrilha()
   const limites = useLimites()
 
@@ -215,9 +217,12 @@ export function useAcoesDoMenu(g: Ganchos) {
       description: travado ? t.ctxSoQuemConfigura : undefined,
       disabled: travado,
       onSelect: () => {
-        menu.excluir(no.id)
         const nome = g.rotuloDe(no)
-        toast.add({ title: ehSecao ? t.secaoExcluida(nome) : t.menuExcluido(nome), icon: 'i-lucide-trash-2', color: 'neutral' })
+        // Rodada 34: com painel junto, pergunta antes.
+        confirmacao.pedir(no, nome, () => {
+          menu.excluir(no.id)
+          toast.add({ title: ehSecao ? t.secaoExcluida(nome) : t.menuExcluido(nome), icon: 'i-lucide-trash-2', color: 'neutral' })
+        })
       },
     }]
   }

@@ -29,6 +29,7 @@ import EditorDeMenus from './_EditorDeMenus.vue'
 import CriarMenu from './_CriarMenu.vue'
 import EscolherMenu from './_EscolherMenu.vue'
 import CriarCategoria from './_CriarCategoria.vue'
+import ConfirmarExclusao from './_ConfirmarExclusao.vue'
 import CriarMaquete from './_CriarMaquete.vue'
 import RodapeDaJanela from './_RodapeDaJanela.vue'
 import { MOLDURA } from './moldura'
@@ -892,6 +893,8 @@ function emBreve() {
     <!-- Rodada 28: "Adicionar em", a janela de escolher um menu que já existe, nos 2 escopos. -->
     <EscolherMenu :t="t" :categorias="categorias" :pode-configurar="podeConfigurar" />
     <CriarCategoria :t="t" />
+    <!-- Rodada 34: excluir painel, ou seção com painel, pergunta antes. -->
+    <ConfirmarExclusao :t="t" />
     <CriarMaquete v-if="usouMaquete" v-model:open="maqueteAberta" :t="t" :modo="modoDaMaquete" />
 
     <!-- ============== ANDAIME, não faz parte da proposta ============== -->

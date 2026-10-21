@@ -7,6 +7,7 @@ import CriarSecao from './_CriarSecao.vue'
 import BotaoCriar from './_BotaoCriar.vue'
 import { LIMITE_DA_TRILHA, useMenuDoWorkspace } from './estado'
 import { useTrilha } from './trilha'
+import { useConfirmarExclusao } from './confirmacao'
 import { rotuloDoNo } from './rotulos'
 import { FLUTUANTE } from './moldura'
 import { gruposDeConfiguracao, workspace, type NoDoMenu, type Categoria } from './mocks'
@@ -84,6 +85,7 @@ const emit = defineEmits<{
 const menu = useMenuDoWorkspace()
 const trilha = useTrilha()
 const toast = useToast()
+const confirmacao = useConfirmarExclusao()
 const area = ref('inicio')
 
 const rotuloDe = (no: NoDoMenu) => rotuloDoNo(no, props.t)
@@ -307,10 +309,10 @@ function acoesDaArea(a: Area): Acoes {
         color: 'error',
         description: props.podeConfigurar ? undefined : props.t.ctxSoQuemConfigura,
         disabled: !props.podeConfigurar,
-        onSelect: () => {
+        onSelect: () => confirmacao.pedir(no, a.rotulo, () => {
           menu.excluir(no.id)
           toast.add({ title: props.t.secaoExcluida(a.rotulo), icon: 'i-lucide-trash-2', color: 'neutral' })
-        },
+        }),
       }])
     }
   }

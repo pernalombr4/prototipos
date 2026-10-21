@@ -138,6 +138,12 @@ export interface TextosDaTela {
   vemDoWorkspace: string
   excluirMenu: string
   menuExcluido: (nome: string) => string
+  /* Rodada 34: confirmação antes de excluir um painel, ou uma seção que leva painel. */
+  confirmarExclusaoMenu: (nome: string) => string
+  confirmarExclusaoSecao: (nome: string) => string
+  confirmarExclusaoPainel: (paineis: number) => string
+  confirmarExclusaoContexto: string
+  confirmarExclusaoBotao: string
   escolherMenuEm: (nome: string) => string
   escolherMenuDica: string
   nadaNaSecao: string
@@ -636,6 +642,13 @@ const ptBR: TextosDaTela = {
   vemDoWorkspace: 'As categorias vêm do workspace.',
   excluirMenu: 'Excluir menu',
   menuExcluido: nome => `${nome} foi excluído.`,
+  confirmarExclusaoMenu: nome => `Excluir o painel ${nome}?`,
+  confirmarExclusaoSecao: nome => `Excluir a seção ${nome}?`,
+  confirmarExclusaoPainel: n => n === 1
+    ? 'O painel sai do menu com todos os widgets e filtros configurados.'
+    : `${n} painéis saem do menu com todos os widgets e filtros configurados.`,
+  confirmarExclusaoContexto: 'Depois de salvar o menu, não é possível recuperar o painel.',
+  confirmarExclusaoBotao: 'Excluir',
   escolherMenuEm: nome => `Adicionar em ${nome}`,
   escolherMenuDica: 'Escolha um menu que já existe.',
   nadaNaSecao: 'Nenhum menu nesta seção ainda.',
@@ -1172,6 +1185,13 @@ const en: TextosDaTela = {
   vemDoWorkspace: 'Categories come from the workspace.',
   excluirMenu: 'Delete menu',
   menuExcluido: nome => `${nome} was deleted.`,
+  confirmarExclusaoMenu: nome => `Delete the dashboard ${nome}?`,
+  confirmarExclusaoSecao: nome => `Delete the section ${nome}?`,
+  confirmarExclusaoPainel: n => n === 1
+    ? 'The dashboard leaves the menu with all its configured widgets and filters.'
+    : `${n} dashboards leave the menu with all their configured widgets and filters.`,
+  confirmarExclusaoContexto: 'After you save the menu, the dashboard cannot be recovered.',
+  confirmarExclusaoBotao: 'Delete',
   escolherMenuEm: nome => `Add to ${nome}`,
   escolherMenuDica: 'Choose a menu that already exists.',
   nadaNaSecao: 'No menu in this section yet.',
@@ -1708,6 +1728,13 @@ const es: TextosDaTela = {
   vemDoWorkspace: 'Las categorías vienen del workspace.',
   excluirMenu: 'Eliminar menú',
   menuExcluido: nome => `${nome} fue eliminado.`,
+  confirmarExclusaoMenu: nome => `¿Eliminar el panel ${nome}?`,
+  confirmarExclusaoSecao: nome => `¿Eliminar la sección ${nome}?`,
+  confirmarExclusaoPainel: n => n === 1
+    ? 'El panel sale del menú con todos los widgets y filtros configurados.'
+    : `${n} paneles salen del menú con todos los widgets y filtros configurados.`,
+  confirmarExclusaoContexto: 'Después de guardar el menú, no es posible recuperar el panel.',
+  confirmarExclusaoBotao: 'Eliminar',
   escolherMenuEm: nome => `Agregar en ${nome}`,
   escolherMenuDica: 'Elige un menú que ya existe.',
   nadaNaSecao: 'Ningún menú en esta sección todavía.',

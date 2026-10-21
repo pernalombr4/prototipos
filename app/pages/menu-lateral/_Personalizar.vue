@@ -4,6 +4,7 @@ import { useMenuDoWorkspace, type Atalho } from './estado'
 import { rotuloDoNo } from './rotulos'
 import type { Categoria, NoDoMenu } from './mocks'
 import type { TextosDaTela } from './textos'
+import { useConfirmarExclusao } from './confirmacao'
 
 /**
  * PERSONALIZAR (rodada 15). A janela do ClickUp, aba por aba, como a
@@ -144,6 +145,7 @@ const inicioNaOrdem = computed(() => {
 
 const menu = useMenuDoWorkspace()
 const toast = useToast()
+const confirmacao = useConfirmarExclusao()
 
 /* Com a janela aberta, o que muda vai para o rascunho (estado.ts, `prefsNoRascunho`). */
 watch(aberta, (v) => { menu.prefsNoRascunho.value = v }, { immediate: true })
@@ -218,9 +220,19 @@ function podeExcluirSecao(id: string) {
 }
 
 function excluirSecao(id: string, rotulo: string) {
-  if (ehPessoal(id)) trilha.excluirSecao(id)
-  else menu.excluir(id)
-  toast.add({ title: props.t.secaoExcluida(rotulo), icon: 'i-lucide-trash-2', color: 'neutral' })
+  const avisar = () => toast.add({ title: props.t.secaoExcluida(rotulo), icon: 'i-lucide-trash-2', color: 'neutral' })
+  if (ehPessoal(id)) {
+    trilha.excluirSecao(id)
+    avisar()
+    return
+  }
+  const no = menu.acharNo(id)
+  if (!no) return
+  // Rodada 34: a seção que leva painel pergunta antes.
+  confirmacao.pedir(no, rotulo, () => {
+    menu.excluir(id)
+    avisar()
+  })
 }
 
 function menuExcluivel(a: Atalho) {
@@ -230,9 +242,12 @@ function menuExcluivel(a: Atalho) {
 }
 
 function excluirMenuMeu(secaoId: string, a: Atalho, no: NoDoMenu, menuChave?: string) {
-  if (menuChave) trilha.tirarSubmenu(secaoId, menuChave, chaveDoAtalho(a))
-  else trilha.removerAtalho(secaoId, chaveDoAtalho(a))
-  excluirNoWorkspace(no)
+  confirmacao.pedir(no, rotuloNo(no), () => {
+    if (menuChave) trilha.tirarSubmenu(secaoId, menuChave, chaveDoAtalho(a))
+    else trilha.removerAtalho(secaoId, chaveDoAtalho(a))
+    menu.excluir(no.id)
+    toast.add({ title: props.t.menuExcluido(rotuloNo(no)), icon: 'i-lucide-trash-2', color: 'neutral' })
+  })
 }
 
 function acoesDoMenuMeu(s: Opcao, a: Atalho, i: number) {
@@ -290,8 +305,11 @@ function avisarRecusa(r: { ok: boolean, motivo?: string }) {
 }
 
 function excluirNoWorkspace(n: NoDoMenu) {
-  menu.excluir(n.id)
-  toast.add({ title: props.t.menuExcluido(rotuloNo(n)), icon: 'i-lucide-trash-2', color: 'neutral' })
+  // Rodada 34: o painel pergunta antes; o menu comum sai na hora.
+  confirmacao.pedir(n, rotuloNo(n), () => {
+    menu.excluir(n.id)
+    toast.add({ title: props.t.menuExcluido(rotuloNo(n)), icon: 'i-lucide-trash-2', color: 'neutral' })
+  })
 }
 
 function acoesDoMenuWs(secao: NoDoMenu, n: NoDoMenu, i: number) {
