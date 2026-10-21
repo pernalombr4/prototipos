@@ -112,3 +112,12 @@
 - **Requisitos:** não mudaram. Se ela escolher este modo, entram linhas novas para o cabeçalho e para a camada do Importar
 - **Ver:** `evidencias/proposta-18-mudanca-total.jpg` · `proposta-19-mudanca-total-importar.jpg` · `proposta-20-mudanca-total-galeria.jpg` · `proposta-21-mudanca-total-celular.jpg`
 
+## Rodada 7 · 2026-10-21
+- **Pedido (literal):** "nesse caso, pode aumentar a largura (no mudança total), de modo confortável. e as informaçoes dessa parte estao muito apertadas. (print)"
+- **Mudou (só na mudança total):**
+  - a página vai até 1.280 px (`max-w-7xl`), com margem lateral maior; a galeria continua com 3 colunas, agora com cartões mais largos
+  - o grupo "Migração de Workspace" ganha respiro: mais espaço entre os itens, mais margem interna, divisória maior e os botões Exportar e Importar no tamanho padrão
+  - a descrição da página cabe numa linha só em tela larga
+- **Fronteira:** muda a largura e o espaçamento da mudança total; a proposta atual (rodada 5) fica igual
+- **Ver:** `evidencias/proposta-18-mudanca-total.jpg` · `proposta-21-mudanca-total-celular.jpg`
+

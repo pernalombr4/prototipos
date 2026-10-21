@@ -41,26 +41,26 @@ function escolheu(e: Event) {
   <header class="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
     <div class="min-w-0 flex-1">
       <h1 class="text-2xl font-semibold text-highlighted">{{ props.t.titulo }}</h1>
-      <p class="mt-1 max-w-2xl text-sm text-muted">{{ props.t.subtituloTotal }}</p>
+      <p class="mt-1 max-w-3xl text-sm text-muted">{{ props.t.subtituloTotal }}</p>
     </div>
 
     <!-- Migração de Workspace: discreto, mas com moldura, rótulo e o Importar em cor. -->
-    <div role="group" :aria-label="props.t.migracaoTitulo" class="flex w-full shrink-0 items-center gap-1 rounded-lg border border-default bg-elevated/40 py-1 pl-3 pr-1 sm:w-auto">
+    <div role="group" :aria-label="props.t.migracaoTitulo" class="flex w-full shrink-0 items-center gap-2 rounded-lg border border-default bg-elevated/40 py-1.5 pl-4 pr-1.5 sm:w-auto">
       <UIcon name="i-lucide-folder-sync" class="size-4 shrink-0 text-toned" />
       <!-- No celular, o rótulo longo sai; o ícone e o "?" ficam. -->
       <span class="hidden text-sm font-medium text-highlighted sm:inline">{{ props.t.migracaoTitulo }}</span>
       <UTooltip :text="props.t.migracaoDescricao">
         <UIcon name="i-lucide-circle-help" class="size-3.5 shrink-0 text-muted" tabindex="0" :aria-label="props.t.migracaoDescricao" />
       </UTooltip>
-      <span class="mx-1.5 h-5 w-px bg-accented" aria-hidden="true" />
+      <span class="mx-2 h-6 w-px bg-accented" aria-hidden="true" />
       <span class="flex-1 sm:hidden" aria-hidden="true" />
 
       <UTooltip :text="props.t.exportarTexto" :content="{ side: 'bottom' }" :ui="{ content: 'max-w-72 h-auto whitespace-normal py-1.5' }">
-        <UButton :label="props.t.exportarTitulo" icon="i-lucide-download" color="neutral" variant="ghost" size="sm" :loading="props.exportando" @click="emit('exportar')" />
+        <UButton :label="props.t.exportarTitulo" icon="i-lucide-download" color="neutral" variant="ghost" size="md" :loading="props.exportando" @click="emit('exportar')" />
       </UTooltip>
 
       <UPopover v-model:open="importarAberto" :content="{ align: 'end', sideOffset: 8 }">
-        <UButton :label="props.t.importarTitulo" icon="i-lucide-upload" color="primary" variant="soft" size="sm" />
+        <UButton :label="props.t.importarTitulo" icon="i-lucide-upload" color="primary" variant="soft" size="md" />
         <template #content>
           <div class="w-80 space-y-3 p-4">
             <div>

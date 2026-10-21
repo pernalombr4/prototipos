@@ -110,7 +110,8 @@ async function tentarDeNovo() {
 <template>
   <CascaDoEnspace :t="t" :workspace="workspaceAtual.nome" :slug="workspaceAtual.slug">
     <div class="min-h-0 flex-1 overflow-y-auto pb-28">
-      <div class="py-8" :class="largura === 'unificada' || mudancaTotal ? 'mx-auto max-w-6xl px-4 sm:px-6' : 'px-3'">
+      <!-- Rodada 7: na mudança total, a página fica mais larga (até 1.280 px). -->
+      <div class="py-8" :class="mudancaTotal ? 'mx-auto max-w-7xl px-4 sm:px-8' : largura === 'unificada' ? 'mx-auto max-w-6xl px-4 sm:px-6' : 'px-3'">
         <!-- Rodada 6: a opção de mudança total troca só esta parte de cima. -->
         <TopoMudancaTotal v-if="mudancaTotal" :t="t" :exportando="exportando" @exportar="exportar" @importar="importar" />
 
