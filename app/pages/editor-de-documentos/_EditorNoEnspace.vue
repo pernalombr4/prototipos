@@ -44,7 +44,7 @@ const props = defineProps<{
 const emit = defineEmits<{ trocarParaWord: [] }>()
 
 const toast = useToast()
-const { editorAberto, itemPorId, novaVersao, config } = useDocumentos()
+const { editorAberto, itemPorId, novaVersao, config, fase } = useDocumentos()
 
 const aberto = computed({
   get: () => editorAberto.value !== null,
@@ -239,7 +239,7 @@ const ferramentas = [
               <UButton icon="i-lucide-download" :label="t.editor.baixar" color="neutral" variant="ghost" size="sm" />
             </UDropdownMenu>
             <UButton
-              v-if="config.word && !somenteLeitura && !outros.length"
+              v-if="fase === 2 && config.word && !somenteLeitura && !outros.length"
               icon="i-lucide-monitor"
               :label="t.editor.abrirNoWord"
               color="neutral"
@@ -247,6 +247,15 @@ const ferramentas = [
               size="sm"
               @click="irParaWord"
             />
+            <UTooltip v-if="fase === 1" :text="t.campo.wordEmBreve">
+              <span>
+                <UButton icon="i-lucide-monitor" :label="t.editor.abrirNoWord" color="neutral" variant="outline" size="sm" disabled>
+                  <template #trailing>
+                    <UBadge :label="t.campo.emBreve" color="neutral" variant="subtle" size="sm" />
+                  </template>
+                </UButton>
+              </span>
+            </UTooltip>
             <UButton
               icon="i-lucide-check"
               :label="concluindo ? t.editor.concluindo : t.editor.concluir"

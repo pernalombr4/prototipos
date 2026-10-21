@@ -114,6 +114,8 @@ export interface Textos {
     renomear: string
     remover: string
     pdfSoLeitura: string
+    emBreve: string
+    wordEmBreve: string
     simulacaoBaixar: string
 
     abertoPorVoceNoWord: (desde: string) => string
@@ -287,6 +289,59 @@ export interface Textos {
     salvo: string
   }
 
+  modelo: {
+    titulo: string
+    contexto: (categoria: string) => string
+    voltar: string
+    modelo: string
+    editar: string
+    previa: string
+    previaCom: string
+    verMarcacao: string
+    marcacaoTitulo: string
+    marcacaoAjuda: string
+    concluir: string
+    salvo: string
+    simulacao: string
+    abas: { campos: string, condicao: string, repeticao: string }
+    buscarCampo: string
+    camposDaCategoria: string
+    dadosDoItem: string
+    formatado: string
+    formatadoAjuda: string
+    inserirDica: string
+    nenhumCampo: string
+    campo: string
+    operador: string
+    valor: string
+    precisaValer: string
+    conector: { E: string, OU: string }
+    adicionarCondicao: string
+    removerCondicao: string
+    ops: { igual: string, diferente: string, maior: string, menor: string, maiorIgual: string, menorIgual: string }
+    juntaE: string
+    juntaOU: string
+    resumoCondicao: (frase: string) => string
+    inserirCondicao: string
+    atualizarCondicao: string
+    selecaoVaiParaDentro: string
+    cabecalhoSe: (frase: string) => string
+    fimSe: string
+    textoPadraoSe: string
+    clicarParaEditar: string
+    lista: string
+    colunas: string
+    semColuna: string
+    inserirRepeticao: string
+    cabecalhoRepetir: (lista: string) => string
+    fimRepetir: string
+    resumoRepeticao: (n: number, lista: string) => string
+    verificacaoOk: string
+    verificacaoErro: (n: number) => string
+    naoReconhecida: (m: string) => string
+    editarModelos: string
+  }
+
   andaime: {
     titulo: string
     estado: string
@@ -296,6 +351,9 @@ export interface Textos {
     suplemento: string
     configuracao: string
     wordDeVerdade: string
+    fase: string
+    fases: { 1: string, 2: string }
+    editorDeModelos: string
     reiniciar: string
     dica: string
     oQueMuda: string
@@ -450,6 +508,8 @@ const pt: Textos = {
     remover: 'Remover documento',
     pdfSoLeitura: 'PDF não se edita. Para mudar, substitua o arquivo.',
     simulacaoBaixar: 'Simulação: nada é baixado.',
+    emBreve: 'Em breve',
+    wordEmBreve: 'A edição no Microsoft Word estará disponível em breve.',
 
     abertoPorVoceNoWord: desde => `Você está com este documento aberto no Word desde ${desde}.`,
     abertoPorVoceNoWordDetalhe: 'Cada Salvar do Word vira uma versão aqui. Feche o documento no Word para liberar. Enquanto isso, as outras pessoas só leem.',
@@ -650,6 +710,59 @@ const pt: Textos = {
     salvo: 'Campo salvo',
   },
 
+  modelo: {
+    titulo: 'Editor de modelos',
+    contexto: categoria => `Modelo da categoria ${categoria}`,
+    voltar: 'Voltar',
+    modelo: 'Modelo',
+    editar: 'Editar',
+    previa: 'Prévia',
+    previaCom: 'Prévia com os dados de',
+    verMarcacao: 'Ver a marcação',
+    marcacaoTitulo: 'Como o modelo fica gravado',
+    marcacaoAjuda: 'O editor gera a marcação. Não é necessário digitá-la.',
+    concluir: 'Concluir',
+    salvo: 'Modelo salvo',
+    simulacao: 'Simulação do ONLYOFFICE: clique no texto, digite e insira os campos pela lateral.',
+    abas: { campos: 'Campos', condicao: 'Condição', repeticao: 'Repetição' },
+    buscarCampo: 'Buscar campo',
+    camposDaCategoria: 'Campos da categoria',
+    dadosDoItem: 'Dados do item',
+    formatado: 'Inserir com formatação',
+    formatadoAjuda: 'Com formatação, o valor sai como R$ 184.500,00 e 10/11/2026. Sem formatação, sai como 184500 e 2026-11-10.',
+    inserirDica: 'Clique no documento onde o campo deve entrar e escolha o campo abaixo.',
+    nenhumCampo: 'Nenhum campo encontrado.',
+    campo: 'Campo',
+    operador: 'Condição',
+    valor: 'Valor',
+    precisaValer: 'Precisa valer',
+    conector: { E: 'Todas as condições', OU: 'Qualquer uma das condições' },
+    adicionarCondicao: 'Adicionar condição',
+    removerCondicao: 'Remover condição',
+    ops: { igual: 'é igual a', diferente: 'é diferente de', maior: 'é maior que', menor: 'é menor que', maiorIgual: 'é maior ou igual a', menorIgual: 'é menor ou igual a' },
+    juntaE: 'e',
+    juntaOU: 'ou',
+    resumoCondicao: frase => `O trecho aparece quando ${frase}.`,
+    inserirCondicao: 'Inserir condição',
+    atualizarCondicao: 'Atualizar condição',
+    selecaoVaiParaDentro: 'O texto selecionado no documento passa para dentro da condição.',
+    cabecalhoSe: frase => `Mostrar somente se ${frase}`,
+    fimSe: 'Fim da condição',
+    textoPadraoSe: 'Escreva aqui o texto que aparece quando a condição for atendida.',
+    clicarParaEditar: 'Clique para editar',
+    lista: 'Lista',
+    colunas: 'Informações de cada linha',
+    semColuna: 'Escolha ao menos 1 informação.',
+    inserirRepeticao: 'Inserir repetição',
+    cabecalhoRepetir: lista => `Repetir para cada linha de ${lista}`,
+    fimRepetir: 'Fim da repetição',
+    resumoRepeticao: (n, lista) => `Com o contrato da prévia, o trecho se repete ${n} vezes, 1 para cada linha de ${lista}.`,
+    verificacaoOk: 'Todas as marcações são válidas.',
+    verificacaoErro: n => n === 1 ? '1 marcação digitada à mão não foi reconhecida.' : `${n} marcações digitadas à mão não foram reconhecidas.`,
+    naoReconhecida: m => `Não reconhecida: ${m}. Insira o campo pela aba Campos.`,
+    editarModelos: 'Editar modelos',
+  },
+
   andaime: {
     titulo: 'Protótipo',
     estado: 'Estado',
@@ -671,6 +784,9 @@ const pt: Textos = {
     suplemento: 'Suplemento no Word',
     configuracao: 'Configuração do campo',
     wordDeVerdade: 'Abrir o Word de verdade',
+    fase: 'Fase',
+    fases: { 1: 'Word em breve', 2: 'Word liberado' },
+    editorDeModelos: 'Editor de modelos',
     reiniciar: 'Recomeçar',
     dica: 'Cada cenário abre o contrato que mostra aquele estado do campo. Para ver o plugin do Word, abra um documento no Word e clique em Ver simulação do plugin do Word.',
     oQueMuda: 'Mostrar o que muda',
@@ -825,6 +941,8 @@ const en: Textos = {
     remover: 'Remove document',
     pdfSoLeitura: 'PDFs can\'t be edited. To change it, replace the file.',
     simulacaoBaixar: 'Simulation: nothing is downloaded.',
+    emBreve: 'Coming soon',
+    wordEmBreve: 'Editing in Microsoft Word will be available soon.',
 
     abertoPorVoceNoWord: desde => `You have this document open in Word since ${desde}.`,
     abertoPorVoceNoWordDetalhe: 'Every Save in Word becomes a version here. Close the document in Word to release it. Meanwhile, other people can only read.',
@@ -1025,6 +1143,59 @@ const en: Textos = {
     salvo: 'Field saved',
   },
 
+  modelo: {
+    titulo: 'Template editor',
+    contexto: categoria => `Template of the ${categoria} category`,
+    voltar: 'Back',
+    modelo: 'Template',
+    editar: 'Edit',
+    previa: 'Preview',
+    previaCom: 'Preview with the data of',
+    verMarcacao: 'See the markup',
+    marcacaoTitulo: 'How the template is stored',
+    marcacaoAjuda: 'The editor generates the markup. There is no need to type it.',
+    concluir: 'Done',
+    salvo: 'Template saved',
+    simulacao: 'ONLYOFFICE simulation: click the text, type and insert fields from the side panel.',
+    abas: { campos: 'Fields', condicao: 'Condition', repeticao: 'Repetition' },
+    buscarCampo: 'Search field',
+    camposDaCategoria: 'Category fields',
+    dadosDoItem: 'Item data',
+    formatado: 'Insert with formatting',
+    formatadoAjuda: 'With formatting, the value comes out as R$ 184.500,00 and 10/11/2026. Without formatting, as 184500 and 2026-11-10.',
+    inserirDica: 'Click the document where the field should go and choose the field below.',
+    nenhumCampo: 'No field found.',
+    campo: 'Field',
+    operador: 'Condition',
+    valor: 'Value',
+    precisaValer: 'Must match',
+    conector: { E: 'All conditions', OU: 'Any of the conditions' },
+    adicionarCondicao: 'Add condition',
+    removerCondicao: 'Remove condition',
+    ops: { igual: 'is equal to', diferente: 'is different from', maior: 'is greater than', menor: 'is less than', maiorIgual: 'is greater than or equal to', menorIgual: 'is less than or equal to' },
+    juntaE: 'and',
+    juntaOU: 'or',
+    resumoCondicao: frase => `The passage appears when ${frase}.`,
+    inserirCondicao: 'Insert condition',
+    atualizarCondicao: 'Update condition',
+    selecaoVaiParaDentro: 'The text selected in the document moves inside the condition.',
+    cabecalhoSe: frase => `Show only if ${frase}`,
+    fimSe: 'End of condition',
+    textoPadraoSe: 'Write here the text that appears when the condition is met.',
+    clicarParaEditar: 'Click to edit',
+    lista: 'List',
+    colunas: 'Information of each row',
+    semColuna: 'Choose at least 1 piece of information.',
+    inserirRepeticao: 'Insert repetition',
+    cabecalhoRepetir: lista => `Repeat for each row of ${lista}`,
+    fimRepetir: 'End of repetition',
+    resumoRepeticao: (n, lista) => `With the preview contract, the passage repeats ${n} times, 1 for each row of ${lista}.`,
+    verificacaoOk: 'All markups are valid.',
+    verificacaoErro: n => n === 1 ? '1 hand-typed markup was not recognized.' : `${n} hand-typed markups were not recognized.`,
+    naoReconhecida: m => `Not recognized: ${m}. Insert the field from the Fields tab.`,
+    editarModelos: 'Edit templates',
+  },
+
   andaime: {
     titulo: 'Prototype',
     estado: 'State',
@@ -1046,6 +1217,9 @@ const en: Textos = {
     suplemento: 'Add-in in Word',
     configuracao: 'Field settings',
     wordDeVerdade: 'Open the real Word',
+    fase: 'Phase',
+    fases: { 1: 'Word coming soon', 2: 'Word released' },
+    editorDeModelos: 'Template editor',
     reiniciar: 'Start over',
     dica: 'Each scenario opens the contract that shows that field state. To see the Word plugin, open a document in Word and click See Word plugin simulation.',
     oQueMuda: 'Show what changes',
@@ -1200,6 +1374,8 @@ const es: Textos = {
     remover: 'Quitar documento',
     pdfSoLeitura: 'Un PDF no se edita. Para cambiarlo, reemplaza el archivo.',
     simulacaoBaixar: 'Simulación: no se descarga nada.',
+    emBreve: 'Próximamente',
+    wordEmBreve: 'La edición en Microsoft Word estará disponible próximamente.',
 
     abertoPorVoceNoWord: desde => `Tienes este documento abierto en Word desde las ${desde}.`,
     abertoPorVoceNoWordDetalhe: 'Cada Guardar en Word se convierte en una versión aquí. Cierra el documento en Word para liberarlo. Mientras tanto, las demás personas solo leen.',
@@ -1400,6 +1576,59 @@ const es: Textos = {
     salvo: 'Campo guardado',
   },
 
+  modelo: {
+    titulo: 'Editor de plantillas',
+    contexto: categoria => `Plantilla de la categoría ${categoria}`,
+    voltar: 'Volver',
+    modelo: 'Plantilla',
+    editar: 'Editar',
+    previa: 'Vista previa',
+    previaCom: 'Vista previa con los datos de',
+    verMarcacao: 'Ver el marcado',
+    marcacaoTitulo: 'Cómo se guarda la plantilla',
+    marcacaoAjuda: 'El editor genera el marcado. No es necesario escribirlo.',
+    concluir: 'Listo',
+    salvo: 'Plantilla guardada',
+    simulacao: 'Simulación de ONLYOFFICE: haz clic en el texto, escribe e inserta los campos desde el panel lateral.',
+    abas: { campos: 'Campos', condicao: 'Condición', repeticao: 'Repetición' },
+    buscarCampo: 'Buscar campo',
+    camposDaCategoria: 'Campos de la categoría',
+    dadosDoItem: 'Datos del ítem',
+    formatado: 'Insertar con formato',
+    formatadoAjuda: 'Con formato, el valor sale como R$ 184.500,00 y 10/11/2026. Sin formato, sale como 184500 y 2026-11-10.',
+    inserirDica: 'Haz clic en el documento donde debe ir el campo y elige el campo abajo.',
+    nenhumCampo: 'No se encontró ningún campo.',
+    campo: 'Campo',
+    operador: 'Condición',
+    valor: 'Valor',
+    precisaValer: 'Debe cumplirse',
+    conector: { E: 'Todas las condiciones', OU: 'Cualquiera de las condiciones' },
+    adicionarCondicao: 'Agregar condición',
+    removerCondicao: 'Quitar condición',
+    ops: { igual: 'es igual a', diferente: 'es diferente de', maior: 'es mayor que', menor: 'es menor que', maiorIgual: 'es mayor o igual a', menorIgual: 'es menor o igual a' },
+    juntaE: 'y',
+    juntaOU: 'o',
+    resumoCondicao: frase => `El fragmento aparece cuando ${frase}.`,
+    inserirCondicao: 'Insertar condición',
+    atualizarCondicao: 'Actualizar condición',
+    selecaoVaiParaDentro: 'El texto seleccionado en el documento pasa a estar dentro de la condición.',
+    cabecalhoSe: frase => `Mostrar solo si ${frase}`,
+    fimSe: 'Fin de la condición',
+    textoPadraoSe: 'Escribe aquí el texto que aparece cuando se cumple la condición.',
+    clicarParaEditar: 'Haz clic para editar',
+    lista: 'Lista',
+    colunas: 'Información de cada fila',
+    semColuna: 'Elige al menos 1 información.',
+    inserirRepeticao: 'Insertar repetición',
+    cabecalhoRepetir: lista => `Repetir para cada fila de ${lista}`,
+    fimRepetir: 'Fin de la repetición',
+    resumoRepeticao: (n, lista) => `Con el contrato de la vista previa, el fragmento se repite ${n} veces, 1 por cada fila de ${lista}.`,
+    verificacaoOk: 'Todos los marcados son válidos.',
+    verificacaoErro: n => n === 1 ? '1 marcado escrito a mano no fue reconocido.' : `${n} marcados escritos a mano no fueron reconocidos.`,
+    naoReconhecida: m => `No reconocido: ${m}. Inserta el campo desde la pestaña Campos.`,
+    editarModelos: 'Editar plantillas',
+  },
+
   andaime: {
     titulo: 'Prototipo',
     estado: 'Estado',
@@ -1421,6 +1650,9 @@ const es: Textos = {
     suplemento: 'Complemento en Word',
     configuracao: 'Configuración del campo',
     wordDeVerdade: 'Abrir el Word de verdad',
+    fase: 'Fase',
+    fases: { 1: 'Word próximamente', 2: 'Word liberado' },
+    editorDeModelos: 'Editor de plantillas',
     reiniciar: 'Empezar de nuevo',
     dica: 'Cada escenario abre el contrato que muestra ese estado del campo. Para ver el plugin de Word, abre un documento en Word y haz clic en Ver simulación del plugin de Word.',
     oQueMuda: 'Mostrar lo que cambia',

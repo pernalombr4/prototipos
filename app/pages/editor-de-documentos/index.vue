@@ -27,6 +27,7 @@ import AbrirNoWord from './_AbrirNoWord.vue'
 import JanelaDoWord from './_JanelaDoWord.vue'
 import PainelDeVersoes from './_PainelDeVersoes.vue'
 import ConfiguracaoDoCampo from './_ConfiguracaoDoCampo.vue'
+import EditorDeModelo from './_EditorDeModelo.vue'
 import Miniatura from './_Miniatura.vue'
 import { type Editor, type ItemDoContrato, type StatusDoContrato, EU, campoDoDocumento, categoria, cenarios, workspace } from './mocks'
 import { type EstadoDaTela, hora, nomeCurto, useDocumentos } from './estado'
@@ -49,7 +50,7 @@ const t = useTextos(textos)
 const idioma = useIdioma()
 
 const {
-  itens, itemAbertoId, estadoDaTela, suplementoInstalado, wordDeVerdade, preferencia, config,
+  itensVisiveis, fase, editorDeModeloAberto, itemAbertoId, estadoDaTela, suplementoInstalado, wordDeVerdade, preferencia, config,
   editorAberto, janelaDoWord, versoesAbertas, itemPorId, reiniciar,
 } = useDocumentos()
 
@@ -63,8 +64,8 @@ const configAberta = ref(false)
 const busca = ref('')
 const filtrados = computed(() => {
   const q = busca.value.trim().toLowerCase()
-  if (!q) return itens.value
-  return itens.value.filter(i => `${i.reference} ${i.data.contratante} ${i.data.minuta_do_contrato?.name ?? ''}`.toLowerCase().includes(q))
+  if (!q) return itensVisiveis.value
+  return itensVisiveis.value.filter(i => `${i.reference} ${i.data.contratante} ${i.data.minuta_do_contrato?.name ?? ''}`.toLowerCase().includes(q))
 })
 
 type Linha = { id: number, reference: string, status: StatusDoContrato, contratante: string, valor: number, minuta: string, item: ItemDoContrato }
@@ -276,6 +277,21 @@ const itemDasVersoes = computed(() => (versoesAbertas.value !== null ? itemPorId
       <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.titulo }}</span>
 
       <span class="flex items-center gap-2">
+        <span class="text-xs font-semibold uppercase tracking-wider text-toned">{{ t.andaime.fase }}</span>
+        <div class="flex rounded-md border border-default p-0.5">
+          <UButton
+            v-for="f in ([1, 2] as const)"
+            :key="f"
+            :label="`${f}. ${t.andaime.fases[f]}`"
+            size="xs"
+            :color="fase === f ? 'primary' : 'neutral'"
+            :variant="fase === f ? 'soft' : 'ghost'"
+            @click="fase = f"
+          />
+        </div>
+      </span>
+
+      <span class="flex items-center gap-2">
         <span class="text-xs font-semibold uppercase tracking-wider text-toned">{{ t.andaime.estado }}</span>
         <div class="flex rounded-md border border-default p-0.5">
           <UButton
@@ -294,7 +310,7 @@ const itemDasVersoes = computed(() => (versoesAbertas.value !== null ? itemPorId
         <span class="text-xs font-semibold uppercase tracking-wider text-toned">{{ t.andaime.cenario }}</span>
         <div class="flex flex-wrap rounded-md border border-default p-0.5">
           <UButton
-            v-for="c in cenarios"
+            v-for="c in cenarios.filter(x => fase === 2 || x.chave !== 'outraNoWord')"
             :key="c.chave"
             :label="t.andaime.cenarios[c.chave]"
             size="xs"
@@ -305,9 +321,10 @@ const itemDasVersoes = computed(() => (versoesAbertas.value !== null ? itemPorId
         </div>
       </span>
 
-      <USwitch v-model="wordDeVerdade" :label="t.andaime.wordDeVerdade" size="sm" :ui="{ label: 'text-xs uppercase tracking-wider text-toned' }" />
-      <USwitch v-model="suplementoInstalado" :label="t.andaime.suplemento" size="sm" :ui="{ label: 'text-xs uppercase tracking-wider text-toned' }" />
+      <USwitch v-if="fase === 2" v-model="wordDeVerdade" :label="t.andaime.wordDeVerdade" size="sm" :ui="{ label: 'text-xs uppercase tracking-wider text-toned' }" />
+      <USwitch v-if="fase === 2" v-model="suplementoInstalado" :label="t.andaime.suplemento" size="sm" :ui="{ label: 'text-xs uppercase tracking-wider text-toned' }" />
 
+      <UButton icon="i-lucide-pencil-ruler" :label="t.andaime.editorDeModelos" color="neutral" variant="outline" size="xs" @click="editorDeModeloAberto = true" />
       <UButton icon="i-lucide-settings-2" :label="t.andaime.configuracao" color="neutral" variant="outline" size="xs" @click="configAberta = true" />
       <UButton icon="i-lucide-rotate-ccw" :label="t.andaime.reiniciar" color="neutral" variant="ghost" size="xs" @click="reiniciar" />
 
@@ -370,5 +387,7 @@ const itemDasVersoes = computed(() => (versoesAbertas.value !== null ? itemPorId
     </USlideover>
 
     <ConfiguracaoDoCampo v-model:open="configAberta" :t="t" :idioma="idioma" />
+
+    <EditorDeModelo :t="t" :idioma="idioma" :categoria="categoria.nome" />
   </div>
 </template>

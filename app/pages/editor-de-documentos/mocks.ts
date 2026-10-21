@@ -289,3 +289,58 @@ export function corpoDaMinuta(d: DadosDoContrato, idioma: string): { titulo: str
     ],
   }
 }
+
+/* -------------------- campos que os modelos enxergam -------------------- */
+
+/**
+ * Os campos da categoria, como o editor de modelos mostra. Estrutura do develop
+ * (08/10 e 21/10/2026): hoje a lista do botão "#" traz cada campo 2 vezes
+ * ("Formatado" e "Não formatado") e os dados do item (ID, Criado em,
+ * Referência, E-mail do Requisitante). Rótulos e valores são do mock.
+ *
+ * "Parcelas" é um Repetidor INVENTADO para o protótipo mostrar a repetição.
+ */
+export type TipoNoModelo = 'texto' | 'opcao' | 'numero' | 'moeda' | 'pessoa' | 'data'
+
+export interface ColunaDoModelo { ref: string, rotulo: string, tipo: TipoNoModelo }
+
+export interface CampoDoModelo {
+  ref: string
+  rotulo: string
+  tipo: TipoNoModelo | 'lista'
+  /** Dado do item (sem o prefixo `data.` na marcação). */
+  doItem?: boolean
+  colunas?: ColunaDoModelo[]
+}
+
+export const camposDoModelo: CampoDoModelo[] = [
+  { ref: 'contratante', rotulo: 'Contratante', tipo: 'texto' },
+  { ref: 'objeto', rotulo: 'Objeto', tipo: 'texto' },
+  { ref: 'status', rotulo: 'Status', tipo: 'opcao' },
+  { ref: 'valor', rotulo: 'Valor', tipo: 'moeda' },
+  { ref: 'vigencia_meses', rotulo: 'Vigência (meses)', tipo: 'numero' },
+  { ref: 'responsavel', rotulo: 'Responsável', tipo: 'pessoa' },
+  {
+    ref: 'parcelas',
+    rotulo: 'Parcelas',
+    tipo: 'lista',
+    colunas: [
+      { ref: 'numero', rotulo: 'Número', tipo: 'numero' },
+      { ref: 'vencimento', rotulo: 'Vencimento', tipo: 'data' },
+      { ref: 'valor', rotulo: 'Valor da parcela', tipo: 'moeda' },
+    ],
+  },
+  { ref: 'reference', rotulo: 'Referência', tipo: 'texto', doItem: true },
+  { ref: 'created_at', rotulo: 'Criado em', tipo: 'data', doItem: true },
+  { ref: 'request_email', rotulo: 'E-mail do requisitante', tipo: 'texto', doItem: true },
+]
+
+/** As 3 parcelas do contrato, calculadas do valor (mock do Repetidor). */
+export function parcelasDoContrato(d: DadosDoContrato, criado: Date) {
+  const base = new Date(criado)
+  return [1, 2, 3].map(n => ({
+    numero: n,
+    vencimento: new Date(base.getFullYear(), base.getMonth() + n, 10),
+    valor: Math.round((d.valor / 3) * 100) / 100,
+  }))
+}

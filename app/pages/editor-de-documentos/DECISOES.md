@@ -112,3 +112,34 @@ flowchart LR
 
 - **Pedido (literal):** "editor de documentos tambem ta ja aprovado. pode marcar isso la."
 - **Mudou:** status `aprovado` no `definePageMeta` (selo verde no índice) e no README.
+
+## Rodada 7 · 2026-10-21
+
+- **Pedido (literal):** "tem mais um doc de requisito que esse prototipo precisa ter, pq ele vai ser usado pra 2 coisas: * o primeiro pra mudar a aparencia e usabilidade do campo de editor de documento em si, adicionando tudo do word como "em breve" * o outro pra liberar a função do word mesmo. e garanta que no protótipo tambem foi melhorada a usabilidade da criação de variaveis e expressoes, em comparaçao a como funciona hoje"
+- **Mudou:** o andaime ganhou o seletor **Fase**:
+  - "1. Word em breve": o campo novo com o ONLYOFFICE; as opções do Word aparecem com o selo "Em breve" e desabilitadas na seta do botão, no cabeçalho do editor e na configuração; o cenário "outra pessoa no Word" sai da lista;
+  - "2. Word liberado": o protótipo das rodadas 1 a 6.
+  - A fase 1 abre por padrão.
+- **Mudou:** novo **editor de modelos** (`_EditorDeModelo.vue`), aberto por "Editar modelos" no popover "Usar modelo", na configuração do campo e no andaime. Comparado ao develop:
+
+  | Ponto | Develop hoje | Protótipo |
+  |---|---|---|
+  | Inserir campo | "#" abre uma lista estreita, cada campo 2 vezes (Formatado e Não formatado); a escolha vai para a área de transferência e a pessoa cola com Ctrl+V | lista lateral com busca, ícone do tipo e valor de exemplo; clicar insere no cursor; 1 chave "Inserir com formatação" no lugar da duplicação |
+  | Condição | a ferramenta copia o esqueleto `{{}}{{IF ...}}...{{END-IF}}` e a pessoa digita a expressão | formulário: campo, operador conforme o tipo, valor da lista; "Precisa valer" E ou OU; a frase da regra em português; envolve o texto selecionado; clicar no cabeçalho do bloco edita a condição |
+  | Repetição | esqueleto `{{FOR}}` copiado, colunas digitadas à mão | escolhe a lista e marca as colunas |
+  | Conferir o resultado | sem prévia | "Prévia com os dados de" um item real da categoria; condição avaliada e linhas repetidas |
+  | Marcação | só a marcação, sem outra vista | "Ver a marcação" mostra o que o ENSPACE grava |
+  | Erro de digitação | nada avisa | verificação aponta `{{...}}` digitado à mão que não casa com um campo |
+
+- **Mudou:** "Editor padrão" da configuração virou lista (USelect), só na fase 2, conforme a memória do repositório (dropdown em vez de cartões).
+- **Mudou:** o `REQUISITOS.md` único deu lugar a 2 documentos, no formato da skill `requisitos`:
+  - `REQUISITOS-CAMPO.md` (entrega 1): aparência e usabilidade do campo, Word "Em breve" e editor de modelos (114 requisitos);
+  - `REQUISITOS-WORD.md` (entrega 2): liberação do Word, reserva, saída de emergência, plugin e Word para a web (70 requisitos).
+- **Simulação:** o editor de modelos guarda os modelos em memória; a prévia usa o `mocks.ts`; a lista "parcelas" é inventada (comentada no mock).
+- **Fronteira:** muda o andaime, a fase 1 e o editor de modelos; o fluxo do Word (fase 2) não muda.
+- **Ver:** `evidencias/develop-13` a `develop-20` (o editor de modelos do develop) · `evidencias/proto-10` a `proto-15`.
+- **No develop:** criei o modelo "Modelo de teste UX" na categoria `leve` do workspace de exploração, para ver o editor de modelos. Ficou lá.
+- **Achados do develop, fora da demanda:**
+  - o editor de modelos abre com o título "The Enlighten Co." no lugar do nome do modelo;
+  - o modelo em branco abre a caixa "Choose TXT options", em inglês, e começa em Courier New 10;
+  - o campo Saída sugere campos ao digitar `{{`, mas troca o "_" do nome do campo por espaço.

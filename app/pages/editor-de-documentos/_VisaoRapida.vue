@@ -31,16 +31,16 @@ const emit = defineEmits<{
 }>()
 
 const toast = useToast()
-const { itens, itemAbertoId, itemAberto, estadoDaTela } = useDocumentos()
+const { itens, itensVisiveis, itemAbertoId, itemAberto, estadoDaTela } = useDocumentos()
 
 const aberto = computed({
   get: () => itemAbertoId.value !== null,
   set: (v) => { if (!v) itemAbertoId.value = null },
 })
 
-const indice = computed(() => itens.value.findIndex(i => i.id === itemAbertoId.value))
+const indice = computed(() => itensVisiveis.value.findIndex(i => i.id === itemAbertoId.value))
 function navegar(passo: number) {
-  const alvo = itens.value[indice.value + passo]
+  const alvo = itensVisiveis.value[indice.value + passo]
   if (alvo) itemAbertoId.value = alvo.id
 }
 
@@ -112,8 +112,8 @@ const trilho = [
             <span class="ml-auto flex items-center gap-0.5">
               <UButton icon="i-lucide-paperclip" color="neutral" variant="ghost" size="xs" :aria-label="t.item.anexos" />
               <UButton icon="i-lucide-chevron-left" color="neutral" variant="ghost" size="xs" :disabled="indice <= 0" :aria-label="t.casca.voltar" @click="navegar(-1)" />
-              <span class="text-xs tabular-nums text-muted">{{ indice + 1 }}/{{ itens.length }}</span>
-              <UButton icon="i-lucide-chevron-right" color="neutral" variant="ghost" size="xs" :disabled="indice >= itens.length - 1" :aria-label="t.casca.avancar" @click="navegar(1)" />
+              <span class="text-xs tabular-nums text-muted">{{ indice + 1 }}/{{ itensVisiveis.length }}</span>
+              <UButton icon="i-lucide-chevron-right" color="neutral" variant="ghost" size="xs" :disabled="indice >= itensVisiveis.length - 1" :aria-label="t.casca.avancar" @click="navegar(1)" />
             </span>
           </div>
 

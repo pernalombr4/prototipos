@@ -48,7 +48,7 @@ const emit = defineEmits<{
 
 const toast = useToast()
 const {
-  estadoDaTela, config, editoresLigados, editorDoBotao, preferencia,
+  estadoDaTela, config, editoresLigados, editorDoBotao, preferencia, fase, editorDeModeloAberto,
   criarDocumento, removerDocumento, fecharSessao, nomeDoModelo,
 } = useDocumentos()
 
@@ -180,6 +180,14 @@ function abrirPeloBotao() {
 
 /** A seta ao lado do Abrir: cada editor ligado, com o atual marcado. */
 const menuDeEditores = computed<DropdownMenuItem[][]>(() => {
+  // Fase 1: o Word aparece, desabilitado, com o selo "Em breve".
+  if (fase.value === 1) {
+    return [[
+      { label: props.t.campo.abrirNo.onlyoffice, description: props.t.campo.descricaoDoEditor.onlyoffice, icon: ICONE_DO_EDITOR.onlyoffice, trailingIcon: 'i-lucide-check', onSelect: () => emit('abrir', 'onlyoffice') },
+      { label: props.t.campo.abrirNo['word-desktop'], description: props.t.campo.descricaoDoEditor['word-desktop'], icon: ICONE_DO_EDITOR['word-desktop'], disabled: true, slot: 'emBreve' as const },
+      { label: props.t.campo.abrirNo['word-web'], description: props.t.campo.descricaoDoEditor['word-web'], icon: ICONE_DO_EDITOR['word-web'], disabled: true, slot: 'emBreve' as const },
+    ]]
+  }
   const grupo: DropdownMenuItem[] = editoresLigados.value.map(e => ({
     label: props.t.campo.abrirNo[e],
     description: props.t.campo.descricaoDoEditor[e],
@@ -392,6 +400,17 @@ async function tentarDeNovo() {
                     </span>
                     <UIcon name="i-lucide-chevron-right" class="mt-0.5 size-4 shrink-0 text-dimmed transition-transform group-hover:translate-x-0.5" />
                   </button>
+                  <div class="mt-1 border-t border-default px-1 pt-2">
+                    <UButton
+                      icon="i-lucide-pencil-ruler"
+                      :label="t.modelo.editarModelos"
+                      color="neutral"
+                      variant="outline"
+                      size="xs"
+                      block
+                      @click="popoverModelos = false; editorDeModeloAberto = true"
+                    />
+                  </div>
                 </div>
 
                 <div v-else key="previa" class="w-96 p-3">
@@ -545,8 +564,11 @@ async function tentarDeNovo() {
           <!-- o caso comum: Abrir com a escolha do editor -->
           <UFieldGroup v-else size="sm">
             <UButton :icon="iconeDoBotao" :label="rotuloDoBotao" :disabled="preview" @click="abrirPeloBotao" />
-            <UDropdownMenu v-if="editoresLigados.length > 1" :items="menuDeEditores" :content="{ align: 'end' }" :ui="{ content: 'w-80' }">
+            <UDropdownMenu v-if="editoresLigados.length > 1 || fase === 1" :items="menuDeEditores" :content="{ align: 'end' }" :ui="{ content: 'w-96' }">
               <UButton icon="i-lucide-chevron-down" :aria-label="t.escolha.titulo" :disabled="preview" class="border-l border-inverted/20" />
+              <template #emBreve-trailing>
+                <UBadge :label="t.campo.emBreve" color="neutral" variant="subtle" size="sm" />
+              </template>
             </UDropdownMenu>
           </UFieldGroup>
 

@@ -19,7 +19,7 @@
  *
  * USwitch e URadioGroup (variante card), consultados no MCP `nuxt-ui`.
  */
-import type { RadioGroupItem } from '@nuxt/ui'
+import type { SelectItem } from '@nuxt/ui'
 import type { Textos } from './textos'
 import { type ItemDoContrato, campoDoDocumento, itens, modelos } from './mocks'
 import { useDocumentos } from './estado'
@@ -29,7 +29,7 @@ const props = defineProps<{ t: Textos, idioma: string }>()
 const aberto = defineModel<boolean>('open', { default: false })
 
 const toast = useToast()
-const { config } = useDocumentos()
+const { config, fase, editorDeModeloAberto } = useDocumentos()
 
 const aba = ref('0')
 const abas = computed(() => props.t.config.abas.map((label, i) => ({ label, value: String(i), disabled: i > 0 })))
@@ -39,10 +39,11 @@ const padrao = computed({
   set: (v: string) => { config.value.padrao = v === 'perguntar' ? null : (v as 'onlyoffice' | 'word') },
 })
 
-const opcoesDePadrao = computed<RadioGroupItem[]>(() => [
-  { value: 'perguntar', label: props.t.config.cadaPessoaEscolhe },
-  { value: 'onlyoffice', label: props.t.config.onlyoffice, disabled: !config.value.onlyoffice },
-  { value: 'word', label: props.t.config.word, disabled: !config.value.word },
+/** Editor padrão em dropdown (padrão dos modais de configuração; memória da redatora de 2026-10-19). */
+const opcoesDePadrao = computed<SelectItem[]>(() => [
+  { value: 'perguntar', label: props.t.config.cadaPessoaEscolhe, icon: 'i-lucide-messages-square' },
+  { value: 'onlyoffice', label: props.t.config.onlyoffice, icon: 'i-lucide-file-pen-line', disabled: !config.value.onlyoffice },
+  { value: 'word', label: fase.value === 1 ? `${props.t.config.word} (${props.t.campo.emBreve})` : props.t.config.word, icon: 'i-lucide-monitor', disabled: fase.value === 1 || !config.value.word },
 ])
 
 /* nenhum editor desligado deixa o campo sem saída */
@@ -96,11 +97,23 @@ type Chave = 'onlyoffice' | 'word' | 'wordWeb' | 'modelos' | 'branco' | 'docx' |
         </header>
         <div class="space-y-4 p-4">
           <USwitch v-model="config.onlyoffice" :label="t.config.onlyoffice" :description="t.config.onlyofficeAjuda" />
-          <USwitch v-model="config.word" :label="t.config.word" :description="t.config.wordAjuda" />
-          <USwitch v-model="config.wordWeb" :label="t.config.wordWeb" :description="t.config.wordWebAjuda" :disabled="!config.word" class="ml-11" />
-          <USeparator />
-          <UFormField :label="t.config.editorPadrao" :description="t.config.editorPadraoAjuda">
-            <URadioGroup v-model="padrao" :items="opcoesDePadrao" orientation="horizontal" variant="card" size="sm" class="mt-2" />
+          <USwitch v-if="fase === 2" v-model="config.word" :label="t.config.word" :description="t.config.wordAjuda" />
+          <USwitch v-if="fase === 2" v-model="config.wordWeb" :label="t.config.wordWeb" :description="t.config.wordWebAjuda" :disabled="!config.word" class="ml-11" />
+          <template v-else>
+            <USwitch :model-value="false" disabled :description="t.config.wordAjuda">
+              <template #label>
+                <span class="inline-flex items-center gap-2">{{ t.config.word }} <UBadge :label="t.campo.emBreve" color="neutral" variant="subtle" size="sm" /></span>
+              </template>
+            </USwitch>
+            <USwitch :model-value="false" disabled :description="t.config.wordWebAjuda" class="ml-11">
+              <template #label>
+                <span class="inline-flex items-center gap-2">{{ t.config.wordWeb }} <UBadge :label="t.campo.emBreve" color="neutral" variant="subtle" size="sm" /></span>
+              </template>
+            </USwitch>
+          </template>
+          <USeparator v-if="fase === 2" />
+          <UFormField v-if="fase === 2" :label="t.config.editorPadrao" :description="t.config.editorPadraoAjuda">
+            <USelect v-model="padrao" :items="opcoesDePadrao" size="sm" class="mt-2 w-full sm:w-80" />
           </UFormField>
         </div>
       </section>
@@ -112,7 +125,10 @@ type Chave = 'onlyoffice' | 'word' | 'wordWeb' | 'modelos' | 'branco' | 'docx' |
           <p class="text-xs text-muted">{{ t.config.secaoCriarAjuda }}</p>
         </header>
         <div class="grid gap-4 p-4 sm:grid-cols-2">
-          <USwitch v-model="config.modelos" :label="t.config.modelos" :description="t.config.modelosAjuda(modelos.length)" />
+          <div class="space-y-2">
+            <USwitch v-model="config.modelos" :label="t.config.modelos" :description="t.config.modelosAjuda(modelos.length)" />
+            <UButton icon="i-lucide-pencil-ruler" :label="t.modelo.editarModelos" color="neutral" variant="outline" size="xs" class="ml-11" @click="editorDeModeloAberto = true" />
+          </div>
           <USwitch v-model="config.branco" :label="t.config.branco" />
           <USwitch v-model="config.docx" :label="t.config.enviarDocx" />
           <USwitch v-model="config.pdf" :label="t.config.enviarPdf" />

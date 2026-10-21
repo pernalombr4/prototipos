@@ -77,13 +77,24 @@ export function useDocumentos() {
   const janelaDoWord = useState<number | null>('ed-janela-word', () => null)
   const versoesAbertas = useState<number | null>('ed-versoes', () => null)
 
+  /**
+   * ANDAIME: a fase da entrega. 1 = o campo novo com o Word marcado "Em breve";
+   * 2 = o Word liberado (o segundo documento de requisitos).
+   */
+  const fase = useState<1 | 2>('ed-fase', () => 1)
+  /** O editor de modelos (Templates de Documentos da categoria). */
+  const editorDeModeloAberto = useState<boolean>('ed-modelo', () => false)
+
   /** A configuração do campo (proposta da tela de configuração). */
   const config = useState<ConfigDoCampo>('ed-config', () => ({ ...CONFIG_INICIAL }))
 
   const itemAberto = computed(() => itens.value.find(i => i.id === itemAbertoId.value) ?? null)
 
+  /** Na fase 1 não existe Word: o contrato reservado no Word (CTR-0139) sai da lista. */
+  const itensVisiveis = computed(() => (fase.value === 1 ? itens.value.filter(i => i.id !== 139) : itens.value))
+
   /** Os editores que o configurador ligou, na ordem do menu. */
-  const editoresLigados = computed<Editor[]>(() => [
+  const editoresLigados = computed<Editor[]>(() => fase.value === 1 ? ['onlyoffice'] : [
     ...(config.value.onlyoffice ? ['onlyoffice' as const] : []),
     ...(config.value.word ? ['word-desktop' as const] : []),
     ...(config.value.word && config.value.wordWeb ? ['word-web' as const] : []),
@@ -91,6 +102,7 @@ export function useDocumentos() {
 
   /** O editor que o botão Abrir usa: a escolha da pessoa, senão o padrão do campo. */
   const editorDoBotao = computed<Editor | null>(() => {
+    if (fase.value === 1) return 'onlyoffice'
     const ligados = editoresLigados.value
     if (ligados.length === 1 || (config.value.onlyoffice && !config.value.word)) return ligados[0] ?? null
     if (preferencia.value && ligados.includes(preferencia.value)) return preferencia.value
@@ -178,6 +190,9 @@ export function useDocumentos() {
   }
 
   return {
+    fase,
+    itensVisiveis,
+    editorDeModeloAberto,
     config,
     editoresLigados,
     editorDoBotao,
