@@ -170,3 +170,11 @@ flowchart LR
 - **Simulação:** a lista Parcelas e a coluna Situação são inventadas no `mocks.ts`. A marcação de "Senão, se", filtro, ordem, número e total usa JavaScript dentro do IF e do FOR; isso pede confirmação do time técnico (P8 e S3 do `REQUISITOS-CAMPO.md`).
 - **Fronteira:** muda a lateral do editor de modelos e os blocos no documento; não muda o campo, o editor no ENSPACE nem a fase 2.
 - **Ver:** `evidencias/proto-16` a `proto-19`.
+
+## Rodada 9 · 2026-10-21
+
+- **Pedido (literal):** "esse campo ta confuso. o user realmente precisa disso? ou é só a falta de um campo de texto pra definir que texto é esse de fallback?" (sobre a chave "Nos demais casos, mostrar outro texto")
+- **Decidido:** o recurso fica, porque a cláusula padrão de contrato é caso comum ("Fica dispensada a apresentação de garantia"). A chave sai, e nenhum campo de texto entra na lateral: o texto de cada parte é cláusula do documento, com formatação e campos, e só esse caso ficaria fora dele.
+- **Mudou:** "Nos demais casos" virou botão ao lado de "Senão, se…" e cria uma parte no montador, igual às outras, com lixeira e a ajuda que diz onde o texto fica. O montador ganhou, abaixo do título, "Aqui se define quando cada texto aparece. O texto de cada parte se escreve no documento, dentro do bloco.".
+- **Fronteira:** muda só o fim do montador de condição.
+- **Ver:** `evidencias/proto-20-parte-nos-demais-casos.jpg`.

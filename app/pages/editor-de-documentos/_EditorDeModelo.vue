@@ -1310,8 +1310,11 @@ const ferramentas = [
                     {{ edicaoSe.id ? t.modelo.editarCondicao : t.modelo.novaCondicao }}
                   </p>
                 </div>
-                <p v-if="edicaoSe.comSelecao" class="text-xs text-muted">
-                  {{ t.modelo.selecaoVaiParaDentro }}
+                <p class="text-xs text-muted">
+                  {{ t.modelo.textoNoDocumento }}
+                  <template v-if="edicaoSe.comSelecao">
+                    {{ t.modelo.selecaoVaiParaDentro }}
+                  </template>
                 </p>
 
                 <TransitionGroup
@@ -1336,14 +1339,27 @@ const ferramentas = [
                   </section>
                 </TransitionGroup>
 
-                <div class="space-y-3">
+                <Transition
+                  enter-active-class="transition duration-200 ease-out"
+                  enter-from-class="opacity-0 -translate-y-1"
+                  leave-active-class="transition duration-100 ease-in"
+                  leave-to-class="opacity-0"
+                >
+                  <section v-if="edicaoSe.cond.senao" class="space-y-2 rounded-md border border-default p-3">
+                    <div class="flex items-center gap-2">
+                      <UBadge :label="t.modelo.parteSenao" color="warning" variant="subtle" size="md" class="font-semibold" />
+                      <span class="flex-1" />
+                      <UButton icon="i-lucide-trash-2" color="neutral" variant="ghost" size="xs" :aria-label="t.modelo.removerSenao" @click="edicaoSe.cond.senao = false" />
+                    </div>
+                    <p class="text-xs text-muted">
+                      {{ t.modelo.senaoAjuda }}
+                    </p>
+                  </section>
+                </Transition>
+
+                <div class="flex flex-wrap gap-2">
                   <UButton icon="i-lucide-git-branch-plus" :label="t.modelo.adicionarSenaoSe" color="neutral" variant="outline" size="sm" @click="adicionarSenaoSe" />
-                  <div class="flex items-center justify-between gap-2">
-                    <USwitch v-model="edicaoSe.cond.senao" :label="t.modelo.senaoLigado" size="sm" />
-                    <UTooltip :text="t.modelo.senaoAjuda">
-                      <UButton icon="i-lucide-circle-help" color="neutral" variant="ghost" size="xs" :aria-label="t.modelo.senaoAjuda" />
-                    </UTooltip>
-                  </div>
+                  <UButton v-if="!edicaoSe.cond.senao" icon="i-lucide-corner-down-right" :label="t.modelo.adicionarSenao" color="neutral" variant="outline" size="sm" @click="edicaoSe.cond.senao = true" />
                 </div>
 
                 <UAlert

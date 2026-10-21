@@ -331,8 +331,10 @@ export interface Textos {
     parteSenao: string
     adicionarSenaoSe: string
     removerParte: string
-    senaoLigado: string
+    adicionarSenao: string
+    removerSenao: string
     senaoAjuda: string
+    textoNoDocumento: string
     incompleta: string
     condicoesNoModelo: (n: number) => string
     semCondicoes: string
@@ -827,8 +829,10 @@ const pt: Textos = {
     parteSenao: 'Nos demais casos',
     adicionarSenaoSe: 'Senão, se…',
     removerParte: 'Remover esta parte',
-    senaoLigado: 'Nos demais casos, mostrar outro texto',
-    senaoAjuda: 'O texto aparece quando nenhuma das partes acima vale.',
+    adicionarSenao: 'Nos demais casos',
+    removerSenao: 'Remover "Nos demais casos"',
+    senaoAjuda: 'Aparece quando nenhuma parte acima vale. O texto fica no documento, na parte "Nos demais casos" do bloco.',
+    textoNoDocumento: 'Aqui se define quando cada texto aparece. O texto de cada parte se escreve no documento, dentro do bloco.',
     incompleta: 'Complete o campo, a condição e o valor de cada linha.',
     condicoesNoModelo: n => `Neste modelo (${n})`,
     semCondicoes: 'Este modelo ainda não tem condições.',
@@ -1337,8 +1341,10 @@ const en: Textos = {
     parteSenao: 'In all other cases',
     adicionarSenaoSe: 'Otherwise, if…',
     removerParte: 'Remove this part',
-    senaoLigado: 'In all other cases, show another text',
-    senaoAjuda: 'The text appears when none of the parts above is met.',
+    adicionarSenao: 'In all other cases',
+    removerSenao: 'Remove "In all other cases"',
+    senaoAjuda: 'Appears when none of the parts above is met. The text stays in the document, in the "In all other cases" part of the block.',
+    textoNoDocumento: 'Here you define when each text appears. The text of each part is written in the document, inside the block.',
     incompleta: 'Fill in the field, the condition and the value of each row.',
     condicoesNoModelo: n => `In this template (${n})`,
     semCondicoes: 'This template has no conditions yet.',
@@ -1847,8 +1853,10 @@ const es: Textos = {
     parteSenao: 'En los demás casos',
     adicionarSenaoSe: 'Si no, si…',
     removerParte: 'Quitar esta parte',
-    senaoLigado: 'En los demás casos, mostrar otro texto',
-    senaoAjuda: 'El texto aparece cuando ninguna de las partes anteriores se cumple.',
+    adicionarSenao: 'En los demás casos',
+    removerSenao: 'Quitar "En los demás casos"',
+    senaoAjuda: 'Aparece cuando ninguna de las partes anteriores se cumple. El texto queda en el documento, en la parte "En los demás casos" del bloque.',
+    textoNoDocumento: 'Aquí se define cuándo aparece cada texto. El texto de cada parte se escribe en el documento, dentro del bloque.',
     incompleta: 'Completa el campo, la condición y el valor de cada fila.',
     condicoesNoModelo: n => `En esta plantilla (${n})`,
     semCondicoes: 'Esta plantilla aún no tiene condiciones.',
