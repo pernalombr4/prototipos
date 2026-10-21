@@ -143,3 +143,30 @@ flowchart LR
   - o editor de modelos abre com o título "The Enlighten Co." no lugar do nome do modelo;
   - o modelo em branco abre a caixa "Choose TXT options", em inglês, e começa em Courier New 10;
   - o campo Saída sugere campos ao digitar `{{`, mas troca o "_" do nome do campo por espaço.
+
+## Rodada 8 · 2026-10-21
+
+- **Pedido (literal):** "o montador de condiçoes ainda ta um pouco ruim, e de each tambem, eu acredito. pesquise. veja como outros produtos fazem e volte pra sugerir melhorias. pipefy é uma boa pesquisa a fazer, alem de clickup e monday"; depois das sugestões: "isso nao funcionaria no onlyoffice. teria que ser do lado de fora mesmo a montagem. dentro do doc nao da pra puxar variavel alguma. digitar livremente deve ser possível no corpo do doc, sem problemas. outras variantes tipo senao, se... devem ser possiveis. o resto voce decide e pode aplicar no prototipo"
+- **Pesquisa:** `PESQUISA.md`, "Condição e repetição no modelo (2026-10-21)".
+- **Mudou:** tudo se monta na lateral, fora do documento. O clique no cabeçalho do bloco não edita mais nada; as abas viraram "Condições" e "Repetições", com a lista "Neste modelo", e cada item tem Localizar, Editar e Mais ações.
+- **Mudou, condição:**
+  - linha com Campo e Condição lado a lado e Valor abaixo, nascendo vazia;
+  - "Precisa valer" só com 2 ou mais linhas, e o conectivo repetido em cinza em cada linha;
+  - grupo de 1 nível;
+  - operadores pelo tipo, com "é" e "não é" de várias opções, "contém", "está vazio", "está preenchido", "é antes de" e "é depois de";
+  - "Senão, se…" e "Nos demais casos";
+  - resultado ao vivo para o item da prévia e selo "Aparece" ou "Não aparece" na lista;
+  - "Tirar a condição e manter o texto";
+  - a seleção leva parágrafos inteiros e não corta o bloco vizinho.
+- **Mudou, repetição:**
+  - formato Tabela, Lista numerada, Lista com marcadores ou Texto corrido;
+  - colunas em ordem, com subir e descer;
+  - "Numerar as linhas" e "Somar … no fim";
+  - filtro com o mesmo montador da condição e ordem crescente ou decrescente;
+  - texto da lista vazia e resumo "saem N linhas".
+- **Mudou:** a marcação digitada à mão vale quando aponta para um campo que existe, e a prévia mostra o valor dela. A verificação aponta só o que não existe.
+- **Decidido por mim:** grupo de 1 nível, "é um destes" no lugar de grupo OU de 1 campo, "Tabela" como formato padrão, a lateral com 28rem.
+- **Descartado:** digitar "{" ou "#" dentro do documento para abrir a lista de campos. Motivo: o ONLYOFFICE não deixa puxar variável de dentro do documento.
+- **Simulação:** a lista Parcelas e a coluna Situação são inventadas no `mocks.ts`. A marcação de "Senão, se", filtro, ordem, número e total usa JavaScript dentro do IF e do FOR; isso pede confirmação do time técnico (P8 e S3 do `REQUISITOS-CAMPO.md`).
+- **Fronteira:** muda a lateral do editor de modelos e os blocos no documento; não muda o campo, o editor no ENSPACE nem a fase 2.
+- **Ver:** `evidencias/proto-16` a `proto-19`.

@@ -300,6 +300,8 @@ export function corpoDaMinuta(d: DadosDoContrato, idioma: string): { titulo: str
  *
  * "Parcelas" é um Repetidor INVENTADO para o protótipo mostrar a repetição.
  */
+export type SituacaoDaParcela = 'aberta' | 'paga'
+
 export type TipoNoModelo = 'texto' | 'opcao' | 'numero' | 'moeda' | 'pessoa' | 'data'
 
 export interface ColunaDoModelo { ref: string, rotulo: string, tipo: TipoNoModelo }
@@ -328,6 +330,8 @@ export const camposDoModelo: CampoDoModelo[] = [
       { ref: 'numero', rotulo: 'Número', tipo: 'numero' },
       { ref: 'vencimento', rotulo: 'Vencimento', tipo: 'data' },
       { ref: 'valor', rotulo: 'Valor da parcela', tipo: 'moeda' },
+      // INVENTADO: a situação da parcela, para mostrar o filtro da repetição.
+      { ref: 'situacao', rotulo: 'Situação', tipo: 'opcao' },
     ],
   },
   { ref: 'reference', rotulo: 'Referência', tipo: 'texto', doItem: true },
@@ -342,5 +346,6 @@ export function parcelasDoContrato(d: DadosDoContrato, criado: Date) {
     numero: n,
     vencimento: new Date(base.getFullYear(), base.getMonth() + n, 10),
     valor: Math.round((d.valor / 3) * 100) / 100,
+    situacao: (n === 1 ? 'paga' : 'aberta') as SituacaoDaParcela,
   }))
 }

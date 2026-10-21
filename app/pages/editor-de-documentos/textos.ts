@@ -312,30 +312,91 @@ export interface Textos {
     inserirDica: string
     nenhumCampo: string
     campo: string
+    escolhaCampo: string
     operador: string
     valor: string
+    escolhaValor: string
     precisaValer: string
     conector: { E: string, OU: string }
-    adicionarCondicao: string
-    removerCondicao: string
-    ops: { igual: string, diferente: string, maior: string, menor: string, maiorIgual: string, menorIgual: string }
+    ops: Record<'igual' | 'diferente' | 'maior' | 'menor' | 'maiorIgual' | 'menorIgual' | 'umDe' | 'nenhumDe' | 'contem' | 'vazio' | 'preenchido' | 'antes' | 'depois', string>
     juntaE: string
     juntaOU: string
-    resumoCondicao: (frase: string) => string
-    inserirCondicao: string
-    atualizarCondicao: string
+    adicionarRegra: string
+    adicionarGrupo: string
+    removerRegra: string
+    removerGrupo: string
+    grupo: string
+    parteSe: string
+    parteSenaoSe: string
+    parteSenao: string
+    adicionarSenaoSe: string
+    removerParte: string
+    senaoLigado: string
+    senaoAjuda: string
+    incompleta: string
+    condicoesNoModelo: (n: number) => string
+    semCondicoes: string
+    dicaNovaCondicao: string
     selecaoVaiParaDentro: string
+    novaCondicao: string
+    editarCondicao: string
+    inserirCondicao: string
+    salvarCondicao: string
+    cancelar: string
+    voltarALista: string
+    resultadoParte: (ref: string, parte: string) => string
+    resultadoNada: (ref: string) => string
+    seloParte: (parte: string) => string
+    seloNada: string
+    localizar: string
+    editarBloco: string
+    maisAcoes: string
+    tirarCondicao: string
+    excluirCondicao: string
+    condicaoTirada: string
+    condicaoExcluida: string
+    cursorAqui: string
     cabecalhoSe: (frase: string) => string
+    cabecalhoSenaoSe: (frase: string) => string
+    cabecalhoSenao: string
     fimSe: string
     textoPadraoSe: string
-    clicarParaEditar: string
+    textoPadraoSenao: string
+    repeticoesNoModelo: (n: number) => string
+    semRepeticoes: string
+    dicaNovaRepeticao: string
+    novaRepeticao: string
+    editarRepeticao: string
+    inserirRepeticao: string
+    salvarRepeticao: string
+    excluirRepeticao: string
+    repeticaoExcluida: string
     lista: string
+    formato: string
+    formatos: { tabela: string, numerada: string, marcadores: string, texto: string }
     colunas: string
     semColuna: string
-    inserirRepeticao: string
+    moverAcima: string
+    moverAbaixo: string
+    numerar: string
+    colunaNumero: string
+    somarNoFim: (coluna: string) => string
+    rotuloTotal: string
+    filtrar: string
+    filtroTitulo: string
+    tirarFiltro: string
+    ordenarPor: string
+    semOrdem: string
+    sentido: { asc: string, desc: string }
+    seVazia: string
+    vazioPadrao: (lista: string) => string
+    resumoRepeticao: (ref: string, n: number) => string
+    seloLinhas: (n: number) => string
     cabecalhoRepetir: (lista: string) => string
-    fimRepetir: string
-    resumoRepeticao: (n: number, lista: string) => string
+    cabecalhoFiltro: (frase: string) => string
+    cabecalhoOrdem: (coluna: string) => string
+    fimRepetir: (vazio: string) => string
+    situacaoDaParcela: { aberta: string, paga: string }
     verificacaoOk: string
     verificacaoErro: (n: number) => string
     naoReconhecida: (m: string) => string
@@ -720,11 +781,11 @@ const pt: Textos = {
     previaCom: 'Prévia com os dados de',
     verMarcacao: 'Ver a marcação',
     marcacaoTitulo: 'Como o modelo fica gravado',
-    marcacaoAjuda: 'O editor gera a marcação. Não é necessário digitá-la.',
+    marcacaoAjuda: 'O editor gera a marcação. Você também pode digitá-la no documento.',
     concluir: 'Concluir',
     salvo: 'Modelo salvo',
-    simulacao: 'Simulação do ONLYOFFICE: clique no texto, digite e insira os campos pela lateral.',
-    abas: { campos: 'Campos', condicao: 'Condição', repeticao: 'Repetição' },
+    simulacao: 'Simulação do ONLYOFFICE: digite livremente no documento. Campos, condições e repetições entram pela lateral.',
+    abas: { campos: 'Campos', condicao: 'Condições', repeticao: 'Repetições' },
     buscarCampo: 'Buscar campo',
     camposDaCategoria: 'Campos da categoria',
     dadosDoItem: 'Dados do item',
@@ -733,33 +794,110 @@ const pt: Textos = {
     inserirDica: 'Clique no documento onde o campo deve entrar e escolha o campo abaixo.',
     nenhumCampo: 'Nenhum campo encontrado.',
     campo: 'Campo',
+    escolhaCampo: 'Escolha o campo',
     operador: 'Condição',
     valor: 'Valor',
+    escolhaValor: 'Escolha',
     precisaValer: 'Precisa valer',
-    conector: { E: 'Todas as condições', OU: 'Qualquer uma das condições' },
-    adicionarCondicao: 'Adicionar condição',
-    removerCondicao: 'Remover condição',
-    ops: { igual: 'é igual a', diferente: 'é diferente de', maior: 'é maior que', menor: 'é menor que', maiorIgual: 'é maior ou igual a', menorIgual: 'é menor ou igual a' },
+    conector: { E: 'Todas as condições', OU: 'Qualquer uma' },
+    ops: {
+      igual: 'é igual a',
+      diferente: 'é diferente de',
+      maior: 'é maior que',
+      menor: 'é menor que',
+      maiorIgual: 'é maior ou igual a',
+      menorIgual: 'é menor ou igual a',
+      umDe: 'é',
+      nenhumDe: 'não é',
+      contem: 'contém',
+      vazio: 'está vazio',
+      preenchido: 'está preenchido',
+      antes: 'é antes de',
+      depois: 'é depois de',
+    },
     juntaE: 'e',
     juntaOU: 'ou',
-    resumoCondicao: frase => `O trecho aparece quando ${frase}.`,
+    adicionarRegra: 'Condição',
+    adicionarGrupo: 'Grupo',
+    removerRegra: 'Remover a condição',
+    removerGrupo: 'Remover o grupo',
+    grupo: 'Grupo',
+    parteSe: 'Se',
+    parteSenaoSe: 'Senão, se',
+    parteSenao: 'Nos demais casos',
+    adicionarSenaoSe: 'Senão, se…',
+    removerParte: 'Remover esta parte',
+    senaoLigado: 'Nos demais casos, mostrar outro texto',
+    senaoAjuda: 'O texto aparece quando nenhuma das partes acima vale.',
+    incompleta: 'Complete o campo, a condição e o valor de cada linha.',
+    condicoesNoModelo: n => `Neste modelo (${n})`,
+    semCondicoes: 'Este modelo ainda não tem condições.',
+    dicaNovaCondicao: 'Selecione no documento o trecho que depende de uma condição e clique em Nova condição. Sem seleção, a condição entra no cursor com um texto para você trocar.',
+    selecaoVaiParaDentro: 'Os parágrafos do trecho selecionado passam para dentro da condição.',
+    novaCondicao: 'Nova condição',
+    editarCondicao: 'Editar condição',
     inserirCondicao: 'Inserir condição',
-    atualizarCondicao: 'Atualizar condição',
-    selecaoVaiParaDentro: 'O texto selecionado no documento passa para dentro da condição.',
-    cabecalhoSe: frase => `Mostrar somente se ${frase}`,
+    salvarCondicao: 'Salvar condição',
+    cancelar: 'Cancelar',
+    voltarALista: 'Voltar à lista',
+    resultadoParte: (ref, parte) => `Com o ${ref}, aparece o texto de "${parte}".`,
+    resultadoNada: ref => `Com o ${ref}, nenhum texto desta condição aparece.`,
+    seloParte: parte => `Aparece: ${parte}`,
+    seloNada: 'Não aparece',
+    localizar: 'Localizar no documento',
+    editarBloco: 'Editar',
+    maisAcoes: 'Mais ações',
+    tirarCondicao: 'Tirar a condição e manter o texto',
+    excluirCondicao: 'Excluir a condição e o texto',
+    condicaoTirada: 'Condição tirada. O texto continua no documento.',
+    condicaoExcluida: 'Condição e texto excluídos.',
+    cursorAqui: 'O cursor está aqui',
+    cabecalhoSe: frase => `Se ${frase}`,
+    cabecalhoSenaoSe: frase => `Senão, se ${frase}`,
+    cabecalhoSenao: 'Nos demais casos',
     fimSe: 'Fim da condição',
-    textoPadraoSe: 'Escreva aqui o texto que aparece quando a condição for atendida.',
-    clicarParaEditar: 'Clique para editar',
+    textoPadraoSe: 'Escreva aqui o texto que aparece quando a condição vale.',
+    textoPadraoSenao: 'Escreva aqui o texto dos demais casos.',
+    repeticoesNoModelo: n => `Neste modelo (${n})`,
+    semRepeticoes: 'Este modelo ainda não tem repetições.',
+    dicaNovaRepeticao: 'Clique no documento onde a repetição deve entrar e clique em Nova repetição.',
+    novaRepeticao: 'Nova repetição',
+    editarRepeticao: 'Editar repetição',
+    inserirRepeticao: 'Inserir repetição',
+    salvarRepeticao: 'Salvar repetição',
+    excluirRepeticao: 'Excluir a repetição',
+    repeticaoExcluida: 'Repetição excluída.',
     lista: 'Lista',
+    formato: 'Formato',
+    formatos: { tabela: 'Tabela', numerada: 'Lista numerada', marcadores: 'Lista com marcadores', texto: 'Texto corrido' },
     colunas: 'Informações de cada linha',
     semColuna: 'Escolha ao menos 1 informação.',
-    inserirRepeticao: 'Inserir repetição',
-    cabecalhoRepetir: lista => `Repetir para cada linha de ${lista}`,
-    fimRepetir: 'Fim da repetição',
-    resumoRepeticao: (n, lista) => `Com o contrato da prévia, o trecho se repete ${n} vezes, 1 para cada linha de ${lista}.`,
+    moverAcima: 'Mover para cima',
+    moverAbaixo: 'Mover para baixo',
+    numerar: 'Numerar as linhas',
+    colunaNumero: 'Nº',
+    somarNoFim: coluna => `Somar ${coluna} no fim`,
+    rotuloTotal: 'Total',
+    filtrar: 'Filtrar as linhas',
+    filtroTitulo: 'Só as linhas em que',
+    tirarFiltro: 'Tirar o filtro',
+    ordenarPor: 'Ordenar por',
+    semOrdem: 'Na ordem da lista',
+    sentido: { asc: 'Crescente', desc: 'Decrescente' },
+    seVazia: 'Se a lista estiver vazia, escrever',
+    vazioPadrao: lista => `Não há ${lista.toLowerCase()}.`,
+    resumoRepeticao: (ref, n) => n === 0
+      ? `Com o ${ref}, a lista fica vazia, e sai o texto da lista vazia.`
+      : n === 1 ? `Com o ${ref}, sai 1 linha.` : `Com o ${ref}, saem ${n} linhas.`,
+    seloLinhas: n => n === 0 ? 'Lista vazia' : n === 1 ? '1 linha' : `${n} linhas`,
+    cabecalhoRepetir: lista => `Para cada linha de ${lista}`,
+    cabecalhoFiltro: frase => `só onde ${frase}`,
+    cabecalhoOrdem: coluna => `por ${coluna}`,
+    fimRepetir: vazio => `Fim da repetição. Lista vazia: "${vazio}"`,
+    situacaoDaParcela: { aberta: 'Em aberto', paga: 'Paga' },
     verificacaoOk: 'Todas as marcações são válidas.',
     verificacaoErro: n => n === 1 ? '1 marcação digitada à mão não foi reconhecida.' : `${n} marcações digitadas à mão não foram reconhecidas.`,
-    naoReconhecida: m => `Não reconhecida: ${m}. Insira o campo pela aba Campos.`,
+    naoReconhecida: m => `Não reconhecida: ${m}. Confira o nome do campo ou insira pela aba Campos.`,
     editarModelos: 'Editar modelos',
   },
 
@@ -1153,11 +1291,11 @@ const en: Textos = {
     previaCom: 'Preview with the data of',
     verMarcacao: 'See the markup',
     marcacaoTitulo: 'How the template is stored',
-    marcacaoAjuda: 'The editor generates the markup. There is no need to type it.',
+    marcacaoAjuda: 'The editor generates the markup. You can also type it in the document.',
     concluir: 'Done',
     salvo: 'Template saved',
-    simulacao: 'ONLYOFFICE simulation: click the text, type and insert fields from the side panel.',
-    abas: { campos: 'Fields', condicao: 'Condition', repeticao: 'Repetition' },
+    simulacao: 'ONLYOFFICE simulation: type freely in the document. Fields, conditions and repetitions come in from the side panel.',
+    abas: { campos: 'Fields', condicao: 'Conditions', repeticao: 'Repetitions' },
     buscarCampo: 'Search field',
     camposDaCategoria: 'Category fields',
     dadosDoItem: 'Item data',
@@ -1166,33 +1304,110 @@ const en: Textos = {
     inserirDica: 'Click the document where the field should go and choose the field below.',
     nenhumCampo: 'No field found.',
     campo: 'Field',
+    escolhaCampo: 'Choose the field',
     operador: 'Condition',
     valor: 'Value',
+    escolhaValor: 'Choose',
     precisaValer: 'Must match',
-    conector: { E: 'All conditions', OU: 'Any of the conditions' },
-    adicionarCondicao: 'Add condition',
-    removerCondicao: 'Remove condition',
-    ops: { igual: 'is equal to', diferente: 'is different from', maior: 'is greater than', menor: 'is less than', maiorIgual: 'is greater than or equal to', menorIgual: 'is less than or equal to' },
+    conector: { E: 'All conditions', OU: 'Any of them' },
+    ops: {
+      igual: 'is equal to',
+      diferente: 'is different from',
+      maior: 'is greater than',
+      menor: 'is less than',
+      maiorIgual: 'is greater than or equal to',
+      menorIgual: 'is less than or equal to',
+      umDe: 'is',
+      nenhumDe: 'is not',
+      contem: 'contains',
+      vazio: 'is empty',
+      preenchido: 'is filled in',
+      antes: 'is before',
+      depois: 'is after',
+    },
     juntaE: 'and',
     juntaOU: 'or',
-    resumoCondicao: frase => `The passage appears when ${frase}.`,
+    adicionarRegra: 'Condition',
+    adicionarGrupo: 'Group',
+    removerRegra: 'Remove the condition',
+    removerGrupo: 'Remove the group',
+    grupo: 'Group',
+    parteSe: 'If',
+    parteSenaoSe: 'Otherwise, if',
+    parteSenao: 'In all other cases',
+    adicionarSenaoSe: 'Otherwise, if…',
+    removerParte: 'Remove this part',
+    senaoLigado: 'In all other cases, show another text',
+    senaoAjuda: 'The text appears when none of the parts above is met.',
+    incompleta: 'Fill in the field, the condition and the value of each row.',
+    condicoesNoModelo: n => `In this template (${n})`,
+    semCondicoes: 'This template has no conditions yet.',
+    dicaNovaCondicao: 'Select in the document the passage that depends on a condition and click New condition. With no selection, the condition goes in at the cursor with a text for you to replace.',
+    selecaoVaiParaDentro: 'The paragraphs of the selected passage move inside the condition.',
+    novaCondicao: 'New condition',
+    editarCondicao: 'Edit condition',
     inserirCondicao: 'Insert condition',
-    atualizarCondicao: 'Update condition',
-    selecaoVaiParaDentro: 'The text selected in the document moves inside the condition.',
-    cabecalhoSe: frase => `Show only if ${frase}`,
+    salvarCondicao: 'Save condition',
+    cancelar: 'Cancel',
+    voltarALista: 'Back to the list',
+    resultadoParte: (ref, parte) => `With ${ref}, the text of "${parte}" appears.`,
+    resultadoNada: ref => `With ${ref}, no text of this condition appears.`,
+    seloParte: parte => `Shows: ${parte}`,
+    seloNada: 'Does not show',
+    localizar: 'Find in the document',
+    editarBloco: 'Edit',
+    maisAcoes: 'More actions',
+    tirarCondicao: 'Remove the condition and keep the text',
+    excluirCondicao: 'Delete the condition and the text',
+    condicaoTirada: 'Condition removed. The text stays in the document.',
+    condicaoExcluida: 'Condition and text deleted.',
+    cursorAqui: 'The cursor is here',
+    cabecalhoSe: frase => `If ${frase}`,
+    cabecalhoSenaoSe: frase => `Otherwise, if ${frase}`,
+    cabecalhoSenao: 'In all other cases',
     fimSe: 'End of condition',
     textoPadraoSe: 'Write here the text that appears when the condition is met.',
-    clicarParaEditar: 'Click to edit',
+    textoPadraoSenao: 'Write here the text for all other cases.',
+    repeticoesNoModelo: n => `In this template (${n})`,
+    semRepeticoes: 'This template has no repetitions yet.',
+    dicaNovaRepeticao: 'Click the document where the repetition should go and click New repetition.',
+    novaRepeticao: 'New repetition',
+    editarRepeticao: 'Edit repetition',
+    inserirRepeticao: 'Insert repetition',
+    salvarRepeticao: 'Save repetition',
+    excluirRepeticao: 'Delete the repetition',
+    repeticaoExcluida: 'Repetition deleted.',
     lista: 'List',
+    formato: 'Format',
+    formatos: { tabela: 'Table', numerada: 'Numbered list', marcadores: 'Bulleted list', texto: 'Running text' },
     colunas: 'Information of each row',
     semColuna: 'Choose at least 1 piece of information.',
-    inserirRepeticao: 'Insert repetition',
-    cabecalhoRepetir: lista => `Repeat for each row of ${lista}`,
-    fimRepetir: 'End of repetition',
-    resumoRepeticao: (n, lista) => `With the preview contract, the passage repeats ${n} times, 1 for each row of ${lista}.`,
+    moverAcima: 'Move up',
+    moverAbaixo: 'Move down',
+    numerar: 'Number the rows',
+    colunaNumero: 'No.',
+    somarNoFim: coluna => `Add up ${coluna} at the end`,
+    rotuloTotal: 'Total',
+    filtrar: 'Filter the rows',
+    filtroTitulo: 'Only the rows where',
+    tirarFiltro: 'Remove the filter',
+    ordenarPor: 'Sort by',
+    semOrdem: 'In list order',
+    sentido: { asc: 'Ascending', desc: 'Descending' },
+    seVazia: 'If the list is empty, write',
+    vazioPadrao: lista => `There are no ${lista.toLowerCase()}.`,
+    resumoRepeticao: (ref, n) => n === 0
+      ? `With ${ref}, the list is empty, and the empty-list text comes out.`
+      : n === 1 ? `With ${ref}, 1 row comes out.` : `With ${ref}, ${n} rows come out.`,
+    seloLinhas: n => n === 0 ? 'Empty list' : n === 1 ? '1 row' : `${n} rows`,
+    cabecalhoRepetir: lista => `For each row of ${lista}`,
+    cabecalhoFiltro: frase => `only where ${frase}`,
+    cabecalhoOrdem: coluna => `by ${coluna}`,
+    fimRepetir: vazio => `End of repetition. Empty list: "${vazio}"`,
+    situacaoDaParcela: { aberta: 'Open', paga: 'Paid' },
     verificacaoOk: 'All markups are valid.',
     verificacaoErro: n => n === 1 ? '1 hand-typed markup was not recognized.' : `${n} hand-typed markups were not recognized.`,
-    naoReconhecida: m => `Not recognized: ${m}. Insert the field from the Fields tab.`,
+    naoReconhecida: m => `Not recognized: ${m}. Check the field name or insert it from the Fields tab.`,
     editarModelos: 'Edit templates',
   },
 
@@ -1586,11 +1801,11 @@ const es: Textos = {
     previaCom: 'Vista previa con los datos de',
     verMarcacao: 'Ver el marcado',
     marcacaoTitulo: 'Cómo se guarda la plantilla',
-    marcacaoAjuda: 'El editor genera el marcado. No es necesario escribirlo.',
+    marcacaoAjuda: 'El editor genera el marcado. También puedes escribirlo en el documento.',
     concluir: 'Listo',
     salvo: 'Plantilla guardada',
-    simulacao: 'Simulación de ONLYOFFICE: haz clic en el texto, escribe e inserta los campos desde el panel lateral.',
-    abas: { campos: 'Campos', condicao: 'Condición', repeticao: 'Repetición' },
+    simulacao: 'Simulación de ONLYOFFICE: escribe libremente en el documento. Campos, condiciones y repeticiones entran desde el panel lateral.',
+    abas: { campos: 'Campos', condicao: 'Condiciones', repeticao: 'Repeticiones' },
     buscarCampo: 'Buscar campo',
     camposDaCategoria: 'Campos de la categoría',
     dadosDoItem: 'Datos del ítem',
@@ -1599,33 +1814,110 @@ const es: Textos = {
     inserirDica: 'Haz clic en el documento donde debe ir el campo y elige el campo abajo.',
     nenhumCampo: 'No se encontró ningún campo.',
     campo: 'Campo',
+    escolhaCampo: 'Elige el campo',
     operador: 'Condición',
     valor: 'Valor',
+    escolhaValor: 'Elige',
     precisaValer: 'Debe cumplirse',
-    conector: { E: 'Todas las condiciones', OU: 'Cualquiera de las condiciones' },
-    adicionarCondicao: 'Agregar condición',
-    removerCondicao: 'Quitar condición',
-    ops: { igual: 'es igual a', diferente: 'es diferente de', maior: 'es mayor que', menor: 'es menor que', maiorIgual: 'es mayor o igual a', menorIgual: 'es menor o igual a' },
+    conector: { E: 'Todas las condiciones', OU: 'Cualquiera' },
+    ops: {
+      igual: 'es igual a',
+      diferente: 'es diferente de',
+      maior: 'es mayor que',
+      menor: 'es menor que',
+      maiorIgual: 'es mayor o igual a',
+      menorIgual: 'es menor o igual a',
+      umDe: 'es',
+      nenhumDe: 'no es',
+      contem: 'contiene',
+      vazio: 'está vacío',
+      preenchido: 'está completo',
+      antes: 'es anterior a',
+      depois: 'es posterior a',
+    },
     juntaE: 'y',
     juntaOU: 'o',
-    resumoCondicao: frase => `El fragmento aparece cuando ${frase}.`,
+    adicionarRegra: 'Condición',
+    adicionarGrupo: 'Grupo',
+    removerRegra: 'Quitar la condición',
+    removerGrupo: 'Quitar el grupo',
+    grupo: 'Grupo',
+    parteSe: 'Si',
+    parteSenaoSe: 'Si no, si',
+    parteSenao: 'En los demás casos',
+    adicionarSenaoSe: 'Si no, si…',
+    removerParte: 'Quitar esta parte',
+    senaoLigado: 'En los demás casos, mostrar otro texto',
+    senaoAjuda: 'El texto aparece cuando ninguna de las partes anteriores se cumple.',
+    incompleta: 'Completa el campo, la condición y el valor de cada fila.',
+    condicoesNoModelo: n => `En esta plantilla (${n})`,
+    semCondicoes: 'Esta plantilla aún no tiene condiciones.',
+    dicaNovaCondicao: 'Selecciona en el documento el fragmento que depende de una condición y haz clic en Nueva condición. Sin selección, la condición entra en el cursor con un texto para que lo reemplaces.',
+    selecaoVaiParaDentro: 'Los párrafos del fragmento seleccionado pasan a estar dentro de la condición.',
+    novaCondicao: 'Nueva condición',
+    editarCondicao: 'Editar condición',
     inserirCondicao: 'Insertar condición',
-    atualizarCondicao: 'Actualizar condición',
-    selecaoVaiParaDentro: 'El texto seleccionado en el documento pasa a estar dentro de la condición.',
-    cabecalhoSe: frase => `Mostrar solo si ${frase}`,
+    salvarCondicao: 'Guardar condición',
+    cancelar: 'Cancelar',
+    voltarALista: 'Volver a la lista',
+    resultadoParte: (ref, parte) => `Con ${ref}, aparece el texto de "${parte}".`,
+    resultadoNada: ref => `Con ${ref}, no aparece ningún texto de esta condición.`,
+    seloParte: parte => `Aparece: ${parte}`,
+    seloNada: 'No aparece',
+    localizar: 'Ubicar en el documento',
+    editarBloco: 'Editar',
+    maisAcoes: 'Más acciones',
+    tirarCondicao: 'Quitar la condición y mantener el texto',
+    excluirCondicao: 'Eliminar la condición y el texto',
+    condicaoTirada: 'Condición quitada. El texto sigue en el documento.',
+    condicaoExcluida: 'Condición y texto eliminados.',
+    cursorAqui: 'El cursor está aquí',
+    cabecalhoSe: frase => `Si ${frase}`,
+    cabecalhoSenaoSe: frase => `Si no, si ${frase}`,
+    cabecalhoSenao: 'En los demás casos',
     fimSe: 'Fin de la condición',
     textoPadraoSe: 'Escribe aquí el texto que aparece cuando se cumple la condición.',
-    clicarParaEditar: 'Haz clic para editar',
+    textoPadraoSenao: 'Escribe aquí el texto de los demás casos.',
+    repeticoesNoModelo: n => `En esta plantilla (${n})`,
+    semRepeticoes: 'Esta plantilla aún no tiene repeticiones.',
+    dicaNovaRepeticao: 'Haz clic en el documento donde debe ir la repetición y haz clic en Nueva repetición.',
+    novaRepeticao: 'Nueva repetición',
+    editarRepeticao: 'Editar repetición',
+    inserirRepeticao: 'Insertar repetición',
+    salvarRepeticao: 'Guardar repetición',
+    excluirRepeticao: 'Eliminar la repetición',
+    repeticaoExcluida: 'Repetición eliminada.',
     lista: 'Lista',
+    formato: 'Formato',
+    formatos: { tabela: 'Tabla', numerada: 'Lista numerada', marcadores: 'Lista con viñetas', texto: 'Texto corrido' },
     colunas: 'Información de cada fila',
     semColuna: 'Elige al menos 1 información.',
-    inserirRepeticao: 'Insertar repetición',
-    cabecalhoRepetir: lista => `Repetir para cada fila de ${lista}`,
-    fimRepetir: 'Fin de la repetición',
-    resumoRepeticao: (n, lista) => `Con el contrato de la vista previa, el fragmento se repite ${n} veces, 1 por cada fila de ${lista}.`,
+    moverAcima: 'Mover hacia arriba',
+    moverAbaixo: 'Mover hacia abajo',
+    numerar: 'Numerar las filas',
+    colunaNumero: 'N.º',
+    somarNoFim: coluna => `Sumar ${coluna} al final`,
+    rotuloTotal: 'Total',
+    filtrar: 'Filtrar las filas',
+    filtroTitulo: 'Solo las filas en que',
+    tirarFiltro: 'Quitar el filtro',
+    ordenarPor: 'Ordenar por',
+    semOrdem: 'En el orden de la lista',
+    sentido: { asc: 'Ascendente', desc: 'Descendente' },
+    seVazia: 'Si la lista está vacía, escribir',
+    vazioPadrao: lista => `No hay ${lista.toLowerCase()}.`,
+    resumoRepeticao: (ref, n) => n === 0
+      ? `Con ${ref}, la lista queda vacía y sale el texto de lista vacía.`
+      : n === 1 ? `Con ${ref}, sale 1 fila.` : `Con ${ref}, salen ${n} filas.`,
+    seloLinhas: n => n === 0 ? 'Lista vacía' : n === 1 ? '1 fila' : `${n} filas`,
+    cabecalhoRepetir: lista => `Para cada fila de ${lista}`,
+    cabecalhoFiltro: frase => `solo donde ${frase}`,
+    cabecalhoOrdem: coluna => `por ${coluna}`,
+    fimRepetir: vazio => `Fin de la repetición. Lista vacía: "${vazio}"`,
+    situacaoDaParcela: { aberta: 'Pendiente', paga: 'Pagada' },
     verificacaoOk: 'Todos los marcados son válidos.',
     verificacaoErro: n => n === 1 ? '1 marcado escrito a mano no fue reconocido.' : `${n} marcados escritos a mano no fueron reconocidos.`,
-    naoReconhecida: m => `No reconocido: ${m}. Inserta el campo desde la pestaña Campos.`,
+    naoReconhecida: m => `No reconocido: ${m}. Revisa el nombre del campo o insértalo desde la pestaña Campos.`,
     editarModelos: 'Editar plantillas',
   },
 

@@ -138,3 +138,51 @@ O develop hoje não tem nenhuma das 7.
 4. **Versão com a origem** (modelo, em branco, enviado, editado no ENSPACE, editado no Word, restaurado). Nenhum histórico diz por onde a versão foi salva.
 5. **O mesmo estado de salvamento nos 2 editores** ("Salvando", "Salvo agora", "Salvo no ENSPACE às 14:22").
 6. **Criar, em branco ou por modelo, e enviar no mesmo lugar**, sem gaveta intermediária.
+
+## Condição e repetição no modelo (2026-10-21)
+
+Pesquisa feita a pedido da redatora ("o montador de condiçoes ainda ta um pouco ruim, e de each tambem"), em 3 frentes: Pipefy, ClickUp e monday; geradores de documento e ferramentas de contrato; padrões de montador de regras e estudos com leigos. Só documentação, central de ajuda e comunidade; nenhuma conta aberta. Ironclad, Formstack e Clio Draft deram 403: o que vem deles é o trecho da busca.
+
+### Pipefy, ClickUp e monday
+
+| Produto | Condição | Documento com dados |
+|---|---|---|
+| Pipefy | Automação: E dentro do grupo, OU entre grupos, 2 níveis ([781403](https://help.pipefy.com/en/articles/781403-how-to-set-up-automation-conditions)); operador pelo tipo ([API](https://developers.pipefy.com/reference/conditions)); filtro de cards com até 5 condições no total ([2371316](https://help.pipefy.com/en/articles/2371316-card-filter-search)) | O PDF não aceita condição nem dado de card conectado; o suporte responde "not available" ([comunidade](https://community.pipefy.com/ask-the-community-43/generating-pdfs-best-practice-for-dealing-with-limitations-4101)) |
+| ClickUp | Filtro em 1 linha: conector, campo, operador, valor e lixeira; só a 2ª linha tem o seletor E/OU, as seguintes repetem em cinza; "+ Nested filter" cria grupo ([filtros](https://help.clickup.com/hc/en-us/articles/6308875427223-Use-filters-to-search-tasks)); automação só com E, pedido de OU fechado ([pedido](https://feedback.clickup.com/feature-requests/p/please-support-or-for-the-trigger)) | Docs sem campo dinâmico nativo ([pedido](https://feedback.clickup.com/feature-requests/p/dynamic-task-field-variables-in-clickup-docs)) |
+| monday | Automação em frase com lacunas ("When status changes to something…"), "+ add condition" ([custom](https://support.monday.com/hc/en-us/articles/360012254440-Build-your-own-custom-automation)); filtro avançado com grupo em caixa cinza ([filtros](https://support.monday.com/hc/en-us/articles/25722908508946-Advanced-board-filters)); WorkForms com ícone na pergunta que tem lógica e ícone vermelho na regra quebrada ([WorkForms](https://support.monday.com/hc/en-us/articles/27989721912722-Using-conditional-logic-in-WorkForms)) | Workdocs insere coluna com "{" ([Workdocs](https://support.monday.com/hc/en-us/articles/24108289323282-Integrate-workdocs-into-your-workflow)); sem condição no documento. O app DocuGen repete subitens numa tabela com 1 linha modelo ([placeholders](https://support.docugen.io/hc/en-us/articles/360018605599-List-of-DocuGen-placeholders)) |
+
+Nenhum dos 3 tem condição dentro de documento gerado. O que serve deles é o montador de filtro e de automação.
+
+### Geradores de documento e contrato
+
+| Produto | Condição | Repetição |
+|---|---|---|
+| Juro | Seleciona o texto e clica em "Add rules"; operador pelo tipo; E ou OU; modo Viewing mostra o resultado ao vivo ([regras](https://intercom.help/juro/en/articles/5653125-adding-and-managing-rules)) | Não encontrado |
+| DocuSign | Seleciona o texto; "Add Rule" na margem direita abre o Rule Builder ([dica](https://community.docusign.com/tips-from-docusign-155/docusign-trainer-tip-create-a-dynamic-document-template-with-conditional-logic-25709)); E e OU não se misturam, e a comunidade pede ([pedido](https://community.docusign.com/ideas/allow-compound-conditional-logic-in-document-rules-doc-gen-24011)) | Tabela dinâmica: escolhe o campo de cada coluna ([blog](https://www.docusign.com/blog/developers/generate-and-send-agreements-dynamic-tables-using-document-generation-esignature)) |
+| PandaDoc | "Add conditional rule" num bloco; vale a 1ª regra que bate; conteúdo padrão quando nenhuma bate ([regras](https://support.pandadoc.com/hc/en-us/articles/4423209193367-Conditional-content-for-senders-)) | Tabela de preços com subtotal por seção ([tabela](https://support.pandadoc.com/en/articles/9714705-pricing-table-optional-items-and-editable-quantity)) |
+| Ironclad | Destaca o texto e escolhe a condição; condição global com nome, reutilizável ([global](https://support.ironcladapp.com/hc/en-us/articles/42434042849815-Create-a-Global-Condition)) | Não encontrado |
+| S-Docs | "All conditions are met / Any condition is met"; condição com nome; sem aninhar ([condição](https://help.sdocs.com/sdocs/enhanced-template-editor/conditional-logic-in-the-enhanced-editor)) | Não aceita condição em lista |
+| Word | Regras de mala direta: Se, Então, Senão, com "em branco" e "não em branco" ([regras](https://support.microsoft.com/en-us/word/set-the-rules-for-a-mail-merge)) | Seção repetível ([content control](https://msdn.microsoft.com/en-us/library/jj889465)) |
+| Zoho Writer | Seção com ícone de condição no Navigator ([seção](https://help.zoho.com/portal/en/kb/writer/automation-guide/merge-configuration/articles/how-to-use-conditional-sections-in-document-merge)) | Repeat de parágrafo, linha, coluna ou célula; escolhe a lista e os campos; número da linha por campo Auto-number; Preview Merge ([repeat](https://help.zoho.com/portal/en/kb/writer/automation-guide/merge-configuration/articles/writer-mail-merge-documents-repeat-data-blocks)) |
+| HotDocs | "Create a Conditional Region" no texto selecionado; comparações pelo tipo; ELSE IF e ELSE; opção de não deixar parágrafo vazio ([região](https://help.hotdocs.com/author/current/Field_Editor_Conditional_Region.htm)) | Região repetida ([visão geral](https://help.hotdocs.com/author/current/Repeated_Region_Overview.htm)) |
+| PDFMonkey | O painel da condição fica verde quando o trecho aparece e vermelho quando some, com os dados de teste ([lógica](https://pdfmonkey.io/docs/builder-templates/conditions-and-loops/)) | Nome do item sugerido no singular da lista; testes de primeiro e último |
+| docxtemplater | `{#cond}` | `{#loop}` na 1ª célula repete a linha; `{^lista}` é o texto da lista vazia ([tags](https://docxtemplater.com/docs/tag-types/)) |
+
+### Padrões de montador e estudos
+
+- **Frase:** Zapier ("Only continue if {campo} {lógica} {valor}"), Typeform, Jotform e Carbon mostram a regra como frase ([Zapier](https://help.zapier.com/hc/en-us/articles/8495925071757), [Carbon](https://raw.githubusercontent.com/carbon-design-system/ibm-products/main/packages/ibm-products/src/components/ConditionBuilder/ConditionBuilder.mdx)).
+- **Todas ou qualquer uma:** Salesforce Flow ("All Conditions Are Met", "Any Condition Is Met") e SLDS, que começa em "todas" sem mostrar o seletor ([Trailhead](https://trailhead.salesforce.com/content/learn/modules/flow-build-logic/define-multiple-paths-in-a-flow), [SLDS](http://spring-21.lightningdesignsystem.com/guidelines/rules-filters-logic/)).
+- **1 conectivo por grupo**, e aninhamento até o 3º nível no Airtable e no Notion ([Airtable](https://support.airtable.com/docs/filtering-records-using-conditions), [Notion](https://notion.com/help/views-filters-and-sorts)).
+- **"É qualquer um de"** troca o OU mais comum por 1 condição com vários valores ([Linear](https://linear.app/docs/filters.md)).
+- **Teste contra um registro:** o Zapier responde "the Zap would have continued" ([teste](https://help.zapier.com/hc/en-us/articles/8496276332557)).
+- **Leigos e E/OU:** no estudo de Pane, "E" foi usado como sequência ("e então") em 29% dos casos; 95% das operações sobre vários objetos foram ditas como conjunto ("todos os…"), não como laço; formulário em tabela (valores do mesmo formulário = E, formulário ao lado = OU) venceu o texto ([slides](https://cseweb.ucsd.edu/~mcoblenz/teaching/291P_winter2026/slides/11_natural_programming.pdf), [IEEE](https://ieeexplore.ieee.org/document/874379)).
+- **Regras simples bastam:** 78% dos comportamentos desejados cabiam em 1 gatilho e 1 ação (Ur et al., CHI 2014, [Brown](https://archive2.news.brown.edu/2007-2015/articles/2014/04/smarthome.html)).
+- **Repetição:** tabela com cabeçalho fixo e 1 linha modelo (HotDocs, Nintex, Gavel); 3 formatos de saída (tabela, lista, texto corrido) no Page Designer do Airtable ([Page Designer](https://support.airtable.com/articles/6125406684-editing-a-page-designer-extension)); texto para lista vazia, filtro e "último item" no Gavel ([Gavel](https://helpdocs.gavel.io/workflows/repeating-items)).
+
+### Armadilhas encontradas
+
+- Parágrafo vazio onde o trecho sumiu (DocuSign recomenda tag extra; HotDocs tem opção).
+- 1 regra por trecho, que obriga a duplicar texto (Juro, PandaDoc).
+- E e OU trocados sem a pessoa perceber (comunidade do Pipefy, [post](https://community.pipefy.com/automations-150/conditions-in-automations-and-and-or-in-practice-5374)).
+- Limite escondido (Pipefy: 5 condições no filtro).
+- Lista vazia que quebra a condição em volta (Conga).
