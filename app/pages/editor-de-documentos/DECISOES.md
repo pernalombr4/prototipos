@@ -188,3 +188,17 @@ flowchart LR
 - **Mudou:** com 0 linhas, a tabela inteira (títulos e total) some e fica só o texto da lista vazia; a marcação envolve a tabela num IF, para o documento gerado fazer o mesmo que a prévia.
 - **Fronteira:** muda só o montador de repetição e o bloco de repetição.
 - **Ver:** `evidencias/proto-21-repeticao-em-secoes-e-lista-vazia.jpg`.
+
+## Rodada 11 · 2026-10-21
+
+- **Pedido (literal):** "e depois disso pode revisar os requisitos (os 2 docs de requisitos) pra eu passar pros devs, primeiro o front e depois as funçoes de word"
+- **Como:** 2 leituras independentes, 1 por documento, compararam cada linha com o código e os textos do protótipo e com o checklist da skill `requisitos`.
+- **Mudou no protótipo (defeitos achados na revisão):**
+  - a chave "Word para a web (fase 2)" virou "Word para a web";
+  - na coluna de versões do editor, "Ver" abre a versão em leitura (antes só fechava a coluna);
+  - na coluna de versões do editor, Restaurar some com outra pessoa no documento, como no histórico do cartão;
+  - "Enviar nova versão" no "O Word não abriu?" recusa o que não é .docx com "A nova versão de um documento editado no Word precisa ser .docx." (antes pedia ".docx ou .pdf");
+  - o filtro da repetição mostra "Complete o campo, a condição e o valor de cada linha." com uma linha incompleta.
+- **Mudou no `REQUISITOS-CAMPO.md`:** exemplos atualizados para os contratos do protótipo; textos de tela conferidos; lacunas cobertas (Esc, Cancelar, Excluir, estados vazios, modo Prévia, padrões da repetição nova, campo vazio em leitura, PDF sem .docx); linhas com 2 comportamentos separadas; seções do editor de modelos em ordem de leitura; RF030 e RF052 removidos para P10 e P11; perguntas novas P9 a P15.
+- **Mudou no `REQUISITOS-WORD.md`:** a tabela de decisão do cartão virou RF155 (o RN108 descrevia tela); RF116 removido para P112; RT102 diz o que a entrega 2 desliga da entrega 1; textos da pergunta, da janela e do Word para a web completados; perguntas novas P109 a P119 e S103.
+- **Fronteira:** muda a documentação e 5 detalhes do protótipo; o fluxo não muda.

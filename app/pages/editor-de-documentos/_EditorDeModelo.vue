@@ -1535,6 +1535,9 @@ const ferramentas = [
                       <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="xs" :aria-label="t.modelo.tirarFiltro" @click="edicaoRep.rep.filtro = null" />
                     </div>
                     <EditorDeRegras :teste="edicaoRep.rep.filtro" :campos="colunasDaEdicao" :opcoes-de="opcoesDe" :grupos="false" :t="t" :idioma="idioma" />
+                    <p v-if="!testeCompleto(edicaoRep.rep.filtro)" class="text-xs text-muted">
+                      {{ t.modelo.incompleta }}
+                    </p>
                   </div>
                   <UFormField :label="t.modelo.ordenarPor">
                     <div class="grid grid-cols-2 gap-2">

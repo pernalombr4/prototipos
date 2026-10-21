@@ -41,7 +41,7 @@ const props = defineProps<{
   versao: number | null
 }>()
 
-const emit = defineEmits<{ trocarParaWord: [] }>()
+const emit = defineEmits<{ trocarParaWord: [], verVersao: [numero: number] }>()
 
 const toast = useToast()
 const { editorAberto, itemPorId, novaVersao, config, fase } = useDocumentos()
@@ -336,7 +336,7 @@ const ferramentas = [
                   <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="xs" :aria-label="t.item.fechar" @click="painelDeVersoes = false" />
                 </div>
                 <div class="min-h-0 flex-1 overflow-y-auto p-4">
-                  <PainelDeVersoes :item="item" :t="t" :idioma="idioma" :somente-leitura="somenteLeitura" @ver="painelDeVersoes = false" />
+                  <PainelDeVersoes :item="item" :t="t" :idioma="idioma" :somente-leitura="somenteLeitura || outros.length > 0" @ver="(n: number) => { painelDeVersoes = false; emit('verVersao', n) }" />
                 </div>
               </div>
             </aside>

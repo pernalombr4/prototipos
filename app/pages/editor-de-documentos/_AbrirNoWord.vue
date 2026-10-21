@@ -95,7 +95,7 @@ async function aoEnviar(e: Event) {
   alvo.value = ''
   if (!f || props.itemId === null) return
   if (!f.name.toLowerCase().endsWith('.docx')) {
-    toast.add({ title: props.t.campo.arquivoRecusado, description: props.t.campo.arquivoRecusadoDetalhe, icon: 'i-lucide-file-x-2', color: 'error' })
+    toast.add({ title: props.t.campo.arquivoRecusado, description: props.t.campo.somenteDocxDetalhe, icon: 'i-lucide-file-x-2', color: 'error' })
     return
   }
   enviando.value = true

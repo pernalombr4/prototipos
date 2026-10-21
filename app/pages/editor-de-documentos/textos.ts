@@ -97,6 +97,7 @@ export interface Textos {
     criadoDescricao: (origem: string) => string
     arquivoRecusado: string
     arquivoRecusadoDetalhe: string
+    somenteDocxDetalhe: string
 
     versaoN: (n: number) => string
     editadoPor: (quem: string, quando: string) => string
@@ -552,6 +553,7 @@ const pt: Textos = {
     criadoDescricao: origem => `Versão 1, ${origem}.`,
     arquivoRecusado: 'Este arquivo não pode ser usado',
     arquivoRecusadoDetalhe: 'Envie um arquivo .docx ou .pdf.',
+    somenteDocxDetalhe: 'A nova versão de um documento editado no Word precisa ser .docx.',
 
     versaoN: n => `Versão ${n}`,
     editadoPor: (quem, quando) => `${quem}, ${quando}`,
@@ -755,7 +757,7 @@ const pt: Textos = {
     onlyofficeAjuda: 'No navegador, sem instalar nada. Permite editar junto.',
     word: 'Microsoft Word',
     wordAjuda: 'O Word instalado no computador (Windows ou Mac) abre o arquivo do item. Uma pessoa edita por vez.',
-    wordWeb: 'Word para a web (fase 2)',
+    wordWeb: 'Word para a web',
     wordWebAjuda: 'Precisa de Microsoft 365 da empresa. Uma cópia fica no OneDrive de quem edita até concluir.',
     editorPadrao: 'Editor padrão',
     editorPadraoAjuda: 'O que o botão Abrir usa para quem ainda não escolheu.',
@@ -1071,6 +1073,7 @@ const en: Textos = {
     criadoDescricao: origem => `Version 1, ${origem}.`,
     arquivoRecusado: 'This file can\'t be used',
     arquivoRecusadoDetalhe: 'Upload a .docx or .pdf file.',
+    somenteDocxDetalhe: 'The new version of a document edited in Word must be a .docx file.',
 
     versaoN: n => `Version ${n}`,
     editadoPor: (quem, quando) => `${quem}, ${quando}`,
@@ -1274,7 +1277,7 @@ const en: Textos = {
     onlyofficeAjuda: 'In the browser, nothing to install. Allows editing together.',
     word: 'Microsoft Word',
     wordAjuda: 'Word installed on the computer (Windows or Mac) opens the item\'s file. One person edits at a time.',
-    wordWeb: 'Word for the web (phase 2)',
+    wordWeb: 'Word for the web',
     wordWebAjuda: 'Needs the company\'s Microsoft 365. A copy stays in the editor\'s OneDrive until they finish.',
     editorPadrao: 'Default editor',
     editorPadraoAjuda: 'What the Open button uses for people who haven\'t chosen yet.',
@@ -1590,6 +1593,7 @@ const es: Textos = {
     criadoDescricao: origem => `Versión 1, ${origem}.`,
     arquivoRecusado: 'Este archivo no se puede usar',
     arquivoRecusadoDetalhe: 'Sube un archivo .docx o .pdf.',
+    somenteDocxDetalhe: 'La nueva versión de un documento editado en Word debe ser .docx.',
 
     versaoN: n => `Versión ${n}`,
     editadoPor: (quem, quando) => `${quem}, ${quando}`,
@@ -1793,7 +1797,7 @@ const es: Textos = {
     onlyofficeAjuda: 'En el navegador, sin instalar nada. Permite editar juntos.',
     word: 'Microsoft Word',
     wordAjuda: 'El Word instalado en la computadora (Windows o Mac) abre el archivo del ítem. Edita una persona a la vez.',
-    wordWeb: 'Word para la web (fase 2)',
+    wordWeb: 'Word para la web',
     wordWebAjuda: 'Requiere Microsoft 365 de la empresa. Una copia queda en el OneDrive de quien edita hasta terminar.',
     editorPadrao: 'Editor predeterminado',
     editorPadraoAjuda: 'El que usa el botón Abrir para quien todavía no eligió.',

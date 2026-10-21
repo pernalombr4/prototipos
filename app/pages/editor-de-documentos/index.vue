@@ -360,6 +360,7 @@ const itemDasVersoes = computed(() => (versoesAbertas.value !== null ? itemPorId
       :somente-leitura="editorSomenteLeitura"
       :versao="versaoEmLeitura"
       @trocar-para-word="itemDoEditor ? abrir(itemDoEditor.id, 'word-desktop') : (wordPara !== null && abrir(wordPara, 'word-desktop'))"
+      @ver-versao="(n: number) => itemDoEditor && ler(itemDoEditor.id, n)"
     />
 
     <AbrirNoWord
