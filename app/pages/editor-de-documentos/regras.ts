@@ -28,7 +28,8 @@ export interface Repeticao {
   total: string | null
   filtro: Teste | null
   ordem: { coluna: string, sentido: 'asc' | 'desc' } | null
-  vazio: string
+  /** Tem a parte "Se a lista estiver vazia" no bloco (o texto fica no documento). */
+  vazio: boolean
 }
 
 /** O que a linha de regra precisa saber de um campo. */

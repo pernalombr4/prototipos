@@ -178,3 +178,13 @@ flowchart LR
 - **Mudou:** "Nos demais casos" virou botão ao lado de "Senão, se…" e cria uma parte no montador, igual às outras, com lixeira e a ajuda que diz onde o texto fica. O montador ganhou, abaixo do título, "Aqui se define quando cada texto aparece. O texto de cada parte se escreve no documento, dentro do bloco.".
 - **Fronteira:** muda só o fim do montador de condição.
 - **Ver:** `evidencias/proto-20-parte-nos-demais-casos.jpg`.
+
+## Rodada 10 · 2026-10-21
+
+- **Pedido (literal):** "agora revise o montador de repetição também, se precisar"
+- **Mudou:** o texto da lista vazia saiu do campo da lateral e virou a parte "Se a lista estiver vazia" do bloco, com o texto no documento, como "Nos demais casos" na condição (rodada 9). A parte nasce ligada, tem lixeira, e o botão volta quando ela sai.
+- **Mudou:** o montador ganhou a ajuda do topo e 3 seções: "O que repete", "Como aparece" e "Quais linhas saem".
+- **Mudou:** "Ordenar por" e o sentido ficam na mesma linha, sem rótulo vazio; as linhas de "Informações de cada linha" têm a mesma altura, com ou sem as setas.
+- **Mudou:** com 0 linhas, a tabela inteira (títulos e total) some e fica só o texto da lista vazia; a marcação envolve a tabela num IF, para o documento gerado fazer o mesmo que a prévia.
+- **Fronteira:** muda só o montador de repetição e o bloco de repetição.
+- **Ver:** `evidencias/proto-21-repeticao-em-secoes-e-lista-vazia.jpg`.

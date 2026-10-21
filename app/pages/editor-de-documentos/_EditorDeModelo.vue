@@ -73,6 +73,7 @@ const CLASSE_COLUNA = 'mx-px inline-flex items-center rounded-sm bg-info/10 px-1
 const CLASSE_BLOCO_SE = 'my-3 rounded-md border border-dashed border-warning/60 bg-warning/5 px-3 py-2'
 const CLASSE_PARTE = 'mb-2 border-l-2 border-warning/40 pl-2.5'
 const CLASSE_BLOCO_REP = 'my-3 rounded-md border border-dashed border-info/60 bg-info/5 px-3 py-2'
+const CLASSE_PARTE_VAZIA = 'mt-1 border-l-2 border-info/40 pl-2.5'
 const CLASSE_CABECALHO = 'mb-1 select-none font-sans text-[11px] font-semibold'
 const CLASSE_FIM = 'mt-1 select-none font-sans text-[10.5px] text-muted'
 const CLASSE_TABELA = 'mb-2 w-full border-collapse text-[12.5px]'
@@ -233,15 +234,24 @@ function corpoDaRepeticao(r: Repeticao, titulos: Record<string, string> = {}) {
   return `<p data-linha-modelo="1" class="mb-2">${r.numerar ? `${etiquetaDeNumero(r.campo)}. ` : ''}${partes}</p>`
 }
 
-function blocoRepetir(r: Repeticao, corpo: string, id = novoId('r')) {
+/** A parte "Se a lista estiver vazia": o texto fica no documento, como nas partes da condição. */
+function htmlDaParteVazia(miolo: string) {
+  return `<div data-vazia="1" class="${CLASSE_PARTE_VAZIA}">`
+    + `<div contenteditable="false" data-ui="vazia" class="${CLASSE_CABECALHO} text-info">◇ ${esc(props.t.modelo.parteVazia)}</div>`
+    + miolo
+    + '</div>'
+}
+
+function blocoRepetir(r: Repeticao, corpo: string, id = novoId('r'), mioloVazio: string | null = null) {
+  const lista = campoPorRef(r.campo)
   return `<div data-repetir="${codificar(r)}" data-id="${id}" class="${CLASSE_BLOCO_REP}">`
     + `<div contenteditable="false" data-ui="repetir" class="${CLASSE_CABECALHO} text-info">↻ ${esc(cabecalhoDaRepeticao(r))}</div>`
     + corpo
-    + `<div contenteditable="false" data-ui="fim" class="${CLASSE_FIM}">${esc(props.t.modelo.fimRepetir(r.vazio))}</div></div>`
+    + (r.vazio ? htmlDaParteVazia(mioloVazio ?? p(esc(props.t.modelo.vazioPadrao(lista?.rotulo ?? r.campo)))) : '')
+    + `<div contenteditable="false" data-ui="fim" class="${CLASSE_FIM}">${esc(props.t.modelo.fimRepetir)}</div></div>`
 }
 
 function repeticaoPadrao(): Repeticao {
-  const lista = campoPorRef('parcelas')!
   return {
     campo: 'parcelas',
     formato: 'tabela',
@@ -250,7 +260,7 @@ function repeticaoPadrao(): Repeticao {
     total: 'valor',
     filtro: null,
     ordem: null,
-    vazio: props.t.modelo.vazioPadrao(lista.rotulo),
+    vazio: true,
   }
 }
 
@@ -706,7 +716,6 @@ function trocarLista(ref: string) {
   r.filtro = null
   r.ordem = null
   r.total = null
-  r.vazio = props.t.modelo.vazioPadrao(campoPorRef(ref)?.rotulo ?? ref)
 }
 
 function marcarColuna(ref: string, sim: boolean) {
@@ -779,9 +788,11 @@ function salvarRepeticao() {
     if (!el) return
     const a = e.antes
     const mesmoCorpo = a && a.campo === rep.campo && a.formato === rep.formato && a.numerar === rep.numerar && a.total === rep.total && a.colunas.join() === rep.colunas.join()
+    const parteVazia = el.querySelector<HTMLElement>(':scope > [data-vazia]')
+    const mioloVazio = parteVazia ? [...parteVazia.childNodes].filter(n => !(n as HTMLElement).dataset?.ui).map(htmlDoNo).join('') : null
     let corpo: string
     if (mesmoCorpo) {
-      corpo = [...el.childNodes].filter(n => !(n as HTMLElement).dataset?.ui).map(htmlDoNo).join('')
+      corpo = [...el.childNodes].filter(n => !(n as HTMLElement).dataset?.ui && !(n as HTMLElement).dataset?.vazia).map(htmlDoNo).join('')
     }
     else {
       // Os títulos que a pessoa escreveu nas colunas da tabela ficam.
@@ -789,7 +800,7 @@ function salvarRepeticao() {
       el.querySelectorAll<HTMLElement>('th[data-coluna]').forEach((th) => { titulos[th.dataset.coluna!] = th.textContent ?? '' })
       corpo = corpoDaRepeticao(rep, titulos)
     }
-    const novo = htmlParaNo(blocoRepetir(rep, corpo, e.id))
+    const novo = htmlParaNo(blocoRepetir(rep, corpo, e.id, mioloVazio))
     el.replaceWith(novo)
     destacar(novo)
   }
@@ -861,7 +872,10 @@ function renderizarRepeticao(el: HTMLElement): string {
   const r = decodificar<Repeticao>(el.dataset.repetir)
   if (!r) return ''
   const linhas = linhasDe(r)
-  if (!linhas.length) return `<p class="mb-3 italic">${esc(r.vazio)}</p>`
+  if (!linhas.length) {
+    const parteVazia = el.querySelector(':scope > [data-vazia]')
+    return parteVazia ? renderizar([...parteVazia.childNodes]) : ''
+  }
   const modeloDaLinha = el.querySelector<HTMLElement>('[data-linha-modelo]')
   if (!modeloDaLinha) return ''
   const ctxDe = (l: Record<string, unknown>, i: number): Contexto => ({ linha: l, n: i + 1, linhas })
@@ -972,6 +986,8 @@ function marcarRepeticao(el: HTMLElement): string {
   if (tabela && modeloDaLinha) {
     const cabeca = tabela.querySelector('thead tr')
     const pe = tabela.querySelector('tfoot tr')
+    // A tabela inteira (títulos e total) só sai quando ao menos 1 linha sai.
+    s += `{{}}{{IF ${origem}.length}}\n`
     if (cabeca) s += marcar([cabeca], r)
     const celulas = [...modeloDaLinha.children].map(td => marcar([...td.childNodes], r).trim())
     // O motor repete a linha da tabela quando o FOR abre na 1ª célula e fecha na última.
@@ -979,11 +995,13 @@ function marcarRepeticao(el: HTMLElement): string {
     celulas[celulas.length - 1] = `${celulas[celulas.length - 1]}{{END-FOR ${ap}}}`
     s += `| ${celulas.join(' | ')} |\n`
     if (pe) s += marcar([pe], r)
+    s += '{{END-IF}}\n'
   }
   else if (modeloDaLinha) {
     s += `{{}}{{FOR ${ap} IN ${origem}}}\n${marcar([...modeloDaLinha.childNodes], r).trim()}\n{{END-FOR ${ap}}}\n`
   }
-  s += `{{}}{{IF !${origem}.length}}${r.vazio}{{END-IF}}\n`
+  const parteVazia = el.querySelector<HTMLElement>(':scope > [data-vazia]')
+  if (parteVazia) s += `{{}}{{IF !${origem}.length}}\n${marcar([...parteVazia.childNodes], r)}{{END-IF}}\n`
   return s
 }
 
@@ -1445,76 +1463,114 @@ const ferramentas = [
                   </p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
+                <p class="text-xs text-muted">
+                  {{ t.modelo.textoNoDocumentoRep }}
+                </p>
+
+                <!-- O que repete -->
+                <section class="space-y-3">
+                  <p class="text-xs font-medium uppercase tracking-wide text-muted">
+                    {{ t.modelo.secaoOQueRepete }}
+                  </p>
                   <UFormField :label="t.modelo.lista">
                     <USelect :model-value="edicaoRep.rep.campo" :items="opcoesDeLista" size="sm" class="w-full" @update:model-value="trocarLista($event as string)" />
                   </UFormField>
+                </section>
+
+                <USeparator />
+
+                <!-- Como aparece -->
+                <section class="space-y-3">
+                  <p class="text-xs font-medium uppercase tracking-wide text-muted">
+                    {{ t.modelo.secaoComoAparece }}
+                  </p>
                   <UFormField :label="t.modelo.formato">
                     <USelect v-model="edicaoRep.rep.formato" :items="opcoesDeFormato" size="sm" class="w-full" />
                   </UFormField>
-                </div>
-
-                <UFormField :label="t.modelo.colunas" :error="!edicaoRep.rep.colunas.length ? t.modelo.semColuna : undefined">
-                  <TransitionGroup tag="ul" class="mt-1 space-y-1" move-class="transition-transform duration-200">
-                    <li v-for="col in colunasEmOrdem" :key="col.ref" class="flex items-center gap-2 rounded-md px-1.5 py-1 hover:bg-elevated/60">
-                      <UCheckbox
-                        :model-value="edicaoRep.rep.colunas.includes(col.ref)"
-                        :label="col.rotulo"
-                        size="sm"
-                        class="flex-1"
-                        @update:model-value="marcarColuna(col.ref, !!$event)"
-                      />
-                      <template v-if="edicaoRep.rep.colunas.includes(col.ref)">
-                        <UButton icon="i-lucide-chevron-up" color="neutral" variant="ghost" size="xs" :disabled="edicaoRep.rep.colunas.indexOf(col.ref) === 0" :aria-label="t.modelo.moverAcima" @click="moverColuna(col.ref, -1)" />
-                        <UButton icon="i-lucide-chevron-down" color="neutral" variant="ghost" size="xs" :disabled="edicaoRep.rep.colunas.indexOf(col.ref) === edicaoRep.rep.colunas.length - 1" :aria-label="t.modelo.moverAbaixo" @click="moverColuna(col.ref, 1)" />
-                      </template>
-                    </li>
-                  </TransitionGroup>
-                </UFormField>
-
-                <div class="space-y-2.5">
-                  <USwitch v-if="edicaoRep.rep.formato === 'tabela' || edicaoRep.rep.formato === 'texto'" v-model="edicaoRep.rep.numerar" :label="t.modelo.numerar" size="sm" />
-                  <USwitch
-                    v-if="colunaSomavel"
-                    :model-value="edicaoRep.rep.total === colunaSomavel.ref"
-                    :label="t.modelo.somarNoFim(colunaSomavel.rotulo)"
-                    size="sm"
-                    @update:model-value="edicaoRep.rep.total = $event ? colunaSomavel.ref : null"
-                  />
-                </div>
-
-                <div v-if="!edicaoRep.rep.filtro">
-                  <UButton icon="i-lucide-filter" :label="t.modelo.filtrar" color="neutral" variant="outline" size="sm" @click="edicaoRep.rep.filtro = novoTeste()" />
-                </div>
-                <section v-else class="space-y-2.5 rounded-md border border-default p-3">
-                  <div class="flex items-center gap-2">
-                    <UIcon name="i-lucide-filter" class="size-4 text-info" />
-                    <p class="flex-1 text-sm font-medium text-highlighted">
-                      {{ t.modelo.filtroTitulo }}
-                    </p>
-                    <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="xs" :aria-label="t.modelo.tirarFiltro" @click="edicaoRep.rep.filtro = null" />
+                  <UFormField :label="t.modelo.colunas" :error="!edicaoRep.rep.colunas.length ? t.modelo.semColuna : undefined">
+                    <TransitionGroup tag="ul" class="mt-1 space-y-0.5" move-class="transition-transform duration-200">
+                      <li v-for="col in colunasEmOrdem" :key="col.ref" class="flex h-8 items-center gap-1 rounded-md pl-1.5 hover:bg-elevated/60">
+                        <UCheckbox
+                          :model-value="edicaoRep.rep.colunas.includes(col.ref)"
+                          :label="col.rotulo"
+                          size="sm"
+                          class="flex-1"
+                          @update:model-value="marcarColuna(col.ref, !!$event)"
+                        />
+                        <span class="flex" :class="edicaoRep.rep.colunas.includes(col.ref) ? '' : 'invisible'">
+                          <UButton icon="i-lucide-chevron-up" color="neutral" variant="ghost" size="xs" :disabled="edicaoRep.rep.colunas.indexOf(col.ref) <= 0" :aria-label="t.modelo.moverAcima" @click="moverColuna(col.ref, -1)" />
+                          <UButton icon="i-lucide-chevron-down" color="neutral" variant="ghost" size="xs" :disabled="edicaoRep.rep.colunas.indexOf(col.ref) === edicaoRep.rep.colunas.length - 1" :aria-label="t.modelo.moverAbaixo" @click="moverColuna(col.ref, 1)" />
+                        </span>
+                      </li>
+                    </TransitionGroup>
+                  </UFormField>
+                  <div class="space-y-2.5">
+                    <USwitch v-if="edicaoRep.rep.formato === 'tabela' || edicaoRep.rep.formato === 'texto'" v-model="edicaoRep.rep.numerar" :label="t.modelo.numerar" size="sm" />
+                    <USwitch
+                      v-if="colunaSomavel"
+                      :model-value="edicaoRep.rep.total === colunaSomavel.ref"
+                      :label="t.modelo.somarNoFim(colunaSomavel.rotulo)"
+                      size="sm"
+                      @update:model-value="edicaoRep.rep.total = $event ? colunaSomavel.ref : null"
+                    />
                   </div>
-                  <EditorDeRegras :teste="edicaoRep.rep.filtro" :campos="colunasDaEdicao" :opcoes-de="opcoesDe" :grupos="false" :t="t" :idioma="idioma" />
                 </section>
 
-                <div class="grid grid-cols-2 gap-3">
-                  <UFormField :label="t.modelo.ordenarPor">
-                    <USelect :model-value="edicaoRep.rep.ordem?.coluna ?? '_'" :items="opcoesDeOrdem" size="sm" class="w-full" @update:model-value="trocarOrdem($event as string)" />
-                  </UFormField>
-                  <UFormField v-if="edicaoRep.rep.ordem" label=" ">
-                    <USelect v-model="edicaoRep.rep.ordem.sentido" :items="opcoesDeSentido" size="sm" class="w-full" :aria-label="t.modelo.ordenarPor" />
-                  </UFormField>
-                </div>
+                <USeparator />
 
-                <UFormField :label="t.modelo.seVazia">
-                  <UInput v-model="edicaoRep.rep.vazio" size="sm" class="w-full" />
-                </UFormField>
+                <!-- Quais linhas saem -->
+                <section class="space-y-3">
+                  <p class="text-xs font-medium uppercase tracking-wide text-muted">
+                    {{ t.modelo.secaoQuaisLinhas }}
+                  </p>
+                  <div v-if="!edicaoRep.rep.filtro">
+                    <UButton icon="i-lucide-filter" :label="t.modelo.filtrar" color="neutral" variant="outline" size="sm" @click="edicaoRep.rep.filtro = novoTeste()" />
+                  </div>
+                  <div v-else class="space-y-2.5 rounded-md border border-default p-3">
+                    <div class="flex items-center gap-2">
+                      <UIcon name="i-lucide-filter" class="size-4 text-info" />
+                      <p class="flex-1 text-sm font-medium text-highlighted">
+                        {{ t.modelo.filtroTitulo }}
+                      </p>
+                      <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="xs" :aria-label="t.modelo.tirarFiltro" @click="edicaoRep.rep.filtro = null" />
+                    </div>
+                    <EditorDeRegras :teste="edicaoRep.rep.filtro" :campos="colunasDaEdicao" :opcoes-de="opcoesDe" :grupos="false" :t="t" :idioma="idioma" />
+                  </div>
+                  <UFormField :label="t.modelo.ordenarPor">
+                    <div class="grid grid-cols-2 gap-2">
+                      <USelect :model-value="edicaoRep.rep.ordem?.coluna ?? '_'" :items="opcoesDeOrdem" size="sm" class="w-full" :aria-label="t.modelo.ordenarPor" @update:model-value="trocarOrdem($event as string)" />
+                      <USelect v-if="edicaoRep.rep.ordem" v-model="edicaoRep.rep.ordem.sentido" :items="opcoesDeSentido" size="sm" class="w-full" :aria-label="t.modelo.sentidoDaOrdem" />
+                    </div>
+                  </UFormField>
+                </section>
+
+                <USeparator />
+
+                <!-- Se a lista estiver vazia: parte do bloco, como "Nos demais casos" na condição -->
+                <Transition
+                  enter-active-class="transition duration-200 ease-out"
+                  enter-from-class="opacity-0 -translate-y-1"
+                  leave-active-class="transition duration-100 ease-in"
+                  leave-to-class="opacity-0"
+                >
+                  <div v-if="edicaoRep.rep.vazio" class="space-y-2 rounded-md border border-default p-3">
+                    <div class="flex items-center gap-2">
+                      <UBadge :label="t.modelo.parteVazia" color="info" variant="subtle" size="md" class="font-semibold" />
+                      <span class="flex-1" />
+                      <UButton icon="i-lucide-trash-2" color="neutral" variant="ghost" size="xs" :aria-label="t.modelo.removerVazia" @click="edicaoRep.rep.vazio = false" />
+                    </div>
+                    <p class="text-xs text-muted">
+                      {{ t.modelo.vaziaAjuda }}
+                    </p>
+                  </div>
+                </Transition>
+                <UButton v-if="!edicaoRep.rep.vazio" icon="i-lucide-corner-down-right" :label="t.modelo.parteVazia" color="neutral" variant="outline" size="sm" @click="edicaoRep.rep.vazio = true" />
 
                 <UAlert
                   color="info"
                   variant="subtle"
                   icon="i-lucide-repeat"
-                  :description="t.modelo.resumoRepeticao(item.reference, linhasDe(edicaoRep.rep).length)"
+                  :description="t.modelo.resumoRepeticao(item.reference, linhasDe(edicaoRep.rep).length, edicaoRep.rep.vazio)"
                 />
 
                 <div class="flex gap-2">

@@ -390,14 +390,21 @@ export interface Textos {
     ordenarPor: string
     semOrdem: string
     sentido: { asc: string, desc: string }
-    seVazia: string
+    parteVazia: string
+    removerVazia: string
+    vaziaAjuda: string
+    textoNoDocumentoRep: string
+    secaoOQueRepete: string
+    secaoComoAparece: string
+    secaoQuaisLinhas: string
+    sentidoDaOrdem: string
     vazioPadrao: (lista: string) => string
-    resumoRepeticao: (ref: string, n: number) => string
+    resumoRepeticao: (ref: string, n: number, temVazia: boolean) => string
     seloLinhas: (n: number) => string
     cabecalhoRepetir: (lista: string) => string
     cabecalhoFiltro: (frase: string) => string
     cabecalhoOrdem: (coluna: string) => string
-    fimRepetir: (vazio: string) => string
+    fimRepetir: string
     situacaoDaParcela: { aberta: string, paga: string }
     verificacaoOk: string
     verificacaoErro: (n: number) => string
@@ -888,16 +895,23 @@ const pt: Textos = {
     ordenarPor: 'Ordenar por',
     semOrdem: 'Na ordem da lista',
     sentido: { asc: 'Crescente', desc: 'Decrescente' },
-    seVazia: 'Se a lista estiver vazia, escrever',
+    parteVazia: 'Se a lista estiver vazia',
+    removerVazia: 'Remover "Se a lista estiver vazia"',
+    vaziaAjuda: 'Aparece quando nenhuma linha sai. O texto fica no documento, na parte "Se a lista estiver vazia" do bloco.',
+    textoNoDocumentoRep: 'Aqui se define o que repete, como aparece e quais linhas saem. Títulos e textos se escrevem no documento, dentro do bloco.',
+    secaoOQueRepete: 'O que repete',
+    secaoComoAparece: 'Como aparece',
+    secaoQuaisLinhas: 'Quais linhas saem',
+    sentidoDaOrdem: 'Sentido da ordem',
     vazioPadrao: lista => `Não há ${lista.toLowerCase()}.`,
-    resumoRepeticao: (ref, n) => n === 0
-      ? `Com o ${ref}, a lista fica vazia, e sai o texto da lista vazia.`
+    resumoRepeticao: (ref, n, temVazia) => n === 0
+      ? (temVazia ? `Com o ${ref}, nenhuma linha sai, e aparece o texto de "Se a lista estiver vazia".` : `Com o ${ref}, nenhuma linha sai, e nada aparece no lugar.`)
       : n === 1 ? `Com o ${ref}, sai 1 linha.` : `Com o ${ref}, saem ${n} linhas.`,
     seloLinhas: n => n === 0 ? 'Lista vazia' : n === 1 ? '1 linha' : `${n} linhas`,
     cabecalhoRepetir: lista => `Para cada linha de ${lista}`,
     cabecalhoFiltro: frase => `só onde ${frase}`,
     cabecalhoOrdem: coluna => `por ${coluna}`,
-    fimRepetir: vazio => `Fim da repetição. Lista vazia: "${vazio}"`,
+    fimRepetir: 'Fim da repetição',
     situacaoDaParcela: { aberta: 'Em aberto', paga: 'Paga' },
     verificacaoOk: 'Todas as marcações são válidas.',
     verificacaoErro: n => n === 1 ? '1 marcação digitada à mão não foi reconhecida.' : `${n} marcações digitadas à mão não foram reconhecidas.`,
@@ -1400,16 +1414,23 @@ const en: Textos = {
     ordenarPor: 'Sort by',
     semOrdem: 'In list order',
     sentido: { asc: 'Ascending', desc: 'Descending' },
-    seVazia: 'If the list is empty, write',
+    parteVazia: 'If the list is empty',
+    removerVazia: 'Remove "If the list is empty"',
+    vaziaAjuda: 'Appears when no row comes out. The text stays in the document, in the "If the list is empty" part of the block.',
+    textoNoDocumentoRep: 'Here you define what repeats, how it looks and which rows come out. Titles and texts are written in the document, inside the block.',
+    secaoOQueRepete: 'What repeats',
+    secaoComoAparece: 'How it looks',
+    secaoQuaisLinhas: 'Which rows come out',
+    sentidoDaOrdem: 'Sort direction',
     vazioPadrao: lista => `There are no ${lista.toLowerCase()}.`,
-    resumoRepeticao: (ref, n) => n === 0
-      ? `With ${ref}, the list is empty, and the empty-list text comes out.`
+    resumoRepeticao: (ref, n, temVazia) => n === 0
+      ? (temVazia ? `With ${ref}, no row comes out, and the text of "If the list is empty" appears.` : `With ${ref}, no row comes out, and nothing appears in its place.`)
       : n === 1 ? `With ${ref}, 1 row comes out.` : `With ${ref}, ${n} rows come out.`,
     seloLinhas: n => n === 0 ? 'Empty list' : n === 1 ? '1 row' : `${n} rows`,
     cabecalhoRepetir: lista => `For each row of ${lista}`,
     cabecalhoFiltro: frase => `only where ${frase}`,
     cabecalhoOrdem: coluna => `by ${coluna}`,
-    fimRepetir: vazio => `End of repetition. Empty list: "${vazio}"`,
+    fimRepetir: 'End of repetition',
     situacaoDaParcela: { aberta: 'Open', paga: 'Paid' },
     verificacaoOk: 'All markups are valid.',
     verificacaoErro: n => n === 1 ? '1 hand-typed markup was not recognized.' : `${n} hand-typed markups were not recognized.`,
@@ -1912,16 +1933,23 @@ const es: Textos = {
     ordenarPor: 'Ordenar por',
     semOrdem: 'En el orden de la lista',
     sentido: { asc: 'Ascendente', desc: 'Descendente' },
-    seVazia: 'Si la lista está vacía, escribir',
+    parteVazia: 'Si la lista está vacía',
+    removerVazia: 'Quitar "Si la lista está vacía"',
+    vaziaAjuda: 'Aparece cuando no sale ninguna fila. El texto queda en el documento, en la parte "Si la lista está vacía" del bloque.',
+    textoNoDocumentoRep: 'Aquí se define qué se repite, cómo aparece y qué filas salen. Los títulos y textos se escriben en el documento, dentro del bloque.',
+    secaoOQueRepete: 'Qué se repite',
+    secaoComoAparece: 'Cómo aparece',
+    secaoQuaisLinhas: 'Qué filas salen',
+    sentidoDaOrdem: 'Sentido del orden',
     vazioPadrao: lista => `No hay ${lista.toLowerCase()}.`,
-    resumoRepeticao: (ref, n) => n === 0
-      ? `Con ${ref}, la lista queda vacía y sale el texto de lista vacía.`
+    resumoRepeticao: (ref, n, temVazia) => n === 0
+      ? (temVazia ? `Con ${ref}, no sale ninguna fila y aparece el texto de "Si la lista está vacía".` : `Con ${ref}, no sale ninguna fila y no aparece nada en su lugar.`)
       : n === 1 ? `Con ${ref}, sale 1 fila.` : `Con ${ref}, salen ${n} filas.`,
     seloLinhas: n => n === 0 ? 'Lista vacía' : n === 1 ? '1 fila' : `${n} filas`,
     cabecalhoRepetir: lista => `Para cada fila de ${lista}`,
     cabecalhoFiltro: frase => `solo donde ${frase}`,
     cabecalhoOrdem: coluna => `por ${coluna}`,
-    fimRepetir: vazio => `Fin de la repetición. Lista vacía: "${vazio}"`,
+    fimRepetir: 'Fin de la repetición',
     situacaoDaParcela: { aberta: 'Pendiente', paga: 'Pagada' },
     verificacaoOk: 'Todos los marcados son válidos.',
     verificacaoErro: n => n === 1 ? '1 marcado escrito a mano no fue reconocido.' : `${n} marcados escritos a mano no fueron reconocidos.`,
