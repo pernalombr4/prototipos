@@ -15,6 +15,12 @@ defineProps<{
   substitui: string[]
   /** Andaime: onde a tela mora no menu. */
   onde: string
+  /**
+   * Andaime: `todos` é menu nativo, fixo para todo membro; `quem-responde` é
+   * nativo, mas só para quem responde pela triagem; sem a prop, é tipo de
+   * menu que o admin cria.
+   */
+  nativo?: 'todos' | 'quem-responde'
 }>()
 </script>
 
@@ -36,6 +42,15 @@ defineProps<{
     <!-- ANDAIME, não faz parte da proposta -->
     <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-dashed border-accented px-3 py-1.5 text-xs text-muted">
       <span class="font-semibold uppercase tracking-wider">Protótipo</span>
+      <UBadge
+        v-if="nativo"
+        :label="nativo === 'todos' ? 'Menu nativo: fixo para todo membro' : 'Menu nativo: fixo para quem responde'"
+        icon="i-lucide-pin"
+        color="primary"
+        variant="solid"
+        size="sm"
+      />
+      <UBadge v-else label="Tipo de menu: criado pelo admin" icon="i-lucide-settings-2" color="neutral" variant="outline" size="sm" />
       <span>{{ onde }}</span>
       <span class="text-dimmed" aria-hidden="true">·</span>
       <span>

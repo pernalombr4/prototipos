@@ -38,6 +38,17 @@ flowchart LR
 
 ## Rodadas
 
+### Rodada 2 · 2026-10-22
+- **Pedido (literal):** "voce deve indicar no prototipo quais viram fixas do menu lateral pra todo e qualquer usuario (menu nativo do enspace) com uma badge pra ser facil de identificar"
+- **Mudou:** a badge de andaime "Nativo" marca o que vira menu nativo do ENSPACE, fixo no menu de todo membro
+  - no menu lateral, na linha Requisições: as 3 telas do módulo são nativas; o tooltip diz que Abrir requisição e Minhas requisições são para todo membro e a Triagem para quem responde por um formulário com triagem
+  - a seção "Tipos de menu" ganha a badge "Criado pelo admin", para o contraste
+  - no topo de cada tela, a faixa de andaime abre com "Menu nativo: fixo para todo membro", "Menu nativo: fixo para quem responde" ou "Tipo de menu: criado pelo admin"
+  - o mapa "De onde veio cada tela" mostra a mesma badge em cada tipo legado
+- **Fronteira:** muda só o andaime; não muda nenhuma tela
+- **Maquete:** o menu lateral passou de 56 para 64 de largura só para caber a badge; no produto a largura é a do develop
+- **Ver:** `evidencias/rodada2-badge-nativo-no-menu.jpg` · `evidencias/rodada2-mapa-com-nativo.jpg`
+
 ### Rodada 1 · 2026-10-21
 - **Pedido (literal):** "voce deve prototipar agora os tipos de tela. só fazer um menuzinho do enspace simulando os tipos de tela com seus nomes mesmo (tela de requisiçoes), dai o dev consegue entrar e ver como seria na realidade."
 - **Mudou:** protótipo novo, 8 telas navegáveis pelo menu lateral, cada uma com a faixa de andaime "Substitui os tipos legados"

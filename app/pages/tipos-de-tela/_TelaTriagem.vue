@@ -211,6 +211,7 @@ function prazoSla(r: Requisicao) {
       :titulo="t.triagem.titulo"
       :descricao="t.triagem.descricao"
       :substitui="['Triagem', 'telas nativas escondidas Screening e Received Emails']"
+      nativo="quem-responde"
       onde="Módulo Requisições: aparece para quem responde por um formulário com triagem."
     />
 

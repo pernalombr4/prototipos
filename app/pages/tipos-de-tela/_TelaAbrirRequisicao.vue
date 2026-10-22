@@ -129,6 +129,7 @@ function acompanhar() {
       :titulo="t.abrir.titulo"
       :descricao="t.abrir.descricao"
       :substitui="['Requisições', 'tela nativa escondida Requests']"
+      nativo="todos"
       onde="Módulo Requisições: fixo no menu de todo membro. O admin monta o catálogo em Configurações."
     />
 

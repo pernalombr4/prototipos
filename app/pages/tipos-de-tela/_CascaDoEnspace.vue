@@ -10,6 +10,9 @@
  * em 20/10/2026 (`/workspaces/<ws>/settings/interface/usecases`). Item por
  * item no BRIEFING.md.
  *
+ * A largura passou de 52 para 64 (rodada 2) só para caber a badge de
+ * andaime "Nativo"; no produto ela continua a do develop.
+ *
  * As 3 mudanças, que são o objeto desta demanda:
  *   1. o módulo Requisições entra fixo na seção Membro, com 3 telas;
  *   2. a seção "Tipos de menu" mostra 1 menu de cada tipo que sobra;
@@ -100,6 +103,10 @@ function alternar(chave: string) {
 
 const menuRecolhido = ref(false)
 
+/* Andaime: o que cada badge quer dizer, para o dev. */
+const DICA_NATIVO = 'Menu nativo do ENSPACE: aparece fixo no menu de todo e qualquer membro, sem cadastro do admin. Abrir requisição e Minhas requisições são para todos; a Triagem aparece para quem responde por um formulário com triagem.'
+const DICA_CONFIGURAVEL = 'Tipos de menu: o admin cria em Interface > Menus e escolhe quem vê. Não aparecem sozinhos.'
+
 const ehRequisicao = computed(() => ['abrir', 'minhas', 'triagem'].includes(props.ativo))
 const secaoDaTrilha = computed(() => (ehRequisicao.value ? props.t.casca.itens.requisicoes : props.t.casca.tiposDeMenu))
 
@@ -115,7 +122,7 @@ function classeDoItem(chave: Tela) {
     <!-- ───────────────── Menu lateral (cópia do develop) ───────────────── -->
     <aside
       class="relative hidden shrink-0 flex-col border-r border-default bg-elevated/40 transition-[width] duration-200 lg:flex"
-      :class="menuRecolhido ? 'w-14' : 'w-56'"
+      :class="menuRecolhido ? 'w-14' : 'w-64'"
       :aria-label="t.casca.menuLateral"
     >
       <!-- Workspace -->
@@ -162,6 +169,10 @@ function classeDoItem(chave: Tela) {
             <UIcon :name="item.icone" class="size-4 shrink-0" :class="item.proposta && ehRequisicao ? 'text-primary' : 'text-toned'" />
             <template v-if="!menuRecolhido">
               <span class="flex-1 truncate text-sm" :class="item.proposta && ehRequisicao ? 'font-medium text-highlighted' : 'text-toned'">{{ t.casca.itens[item.chave] }}</span>
+              <!-- ANDAIME: marca o que vira menu nativo, fixo para todo membro. Não vai para o produto. -->
+              <UTooltip v-if="item.proposta" :text="DICA_NATIVO">
+                <UBadge label="Nativo" icon="i-lucide-pin" color="primary" variant="solid" size="xs" class="shrink-0" />
+              </UTooltip>
               <UIcon
                 v-if="item.expansivel"
                 :name="abertos.includes(item.chave) ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
@@ -188,7 +199,13 @@ function classeDoItem(chave: Tela) {
         </template>
 
         <!-- PROPOSTA: a seção com 1 menu de cada tipo -->
-        <p v-if="!menuRecolhido" class="px-4 pb-1 pt-4 text-xs font-medium text-muted">{{ t.casca.tiposDeMenu }}</p>
+        <p v-if="!menuRecolhido" class="flex items-center gap-2 whitespace-nowrap px-4 pb-1 pt-4 text-xs font-medium text-muted">
+          {{ t.casca.tiposDeMenu }}
+          <!-- ANDAIME: o contraste com o "Nativo" de cima. -->
+          <UTooltip :text="DICA_CONFIGURAVEL">
+            <UBadge label="Criado pelo admin" icon="i-lucide-settings-2" color="neutral" variant="outline" size="xs" class="shrink-0" />
+          </UTooltip>
+        </p>
         <div v-else class="mx-3 my-3 border-t border-default" />
         <button
           v-for="item in tiposDeMenu"

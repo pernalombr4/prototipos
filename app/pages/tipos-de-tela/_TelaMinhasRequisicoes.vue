@@ -176,6 +176,7 @@ function cancelar() {
       :titulo="t.minhas.titulo"
       :descricao="t.minhas.descricao"
       :substitui="['Minhas Requisições']"
+      nativo="todos"
       onde="Módulo Requisições: fixo no menu de todo membro, sem cadastro do admin."
     >
       <template #acoes>

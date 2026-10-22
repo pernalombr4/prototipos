@@ -87,20 +87,20 @@ const modosExterna: { valor: ModoDaPaginaExterna, rotulo: string }[] = [
 ]
 
 /** O mapa que o dev mais pergunta: para onde foi cada tipo legado. */
-const mapa: { legado: string, destino: string, tela: Tela | null }[] = [
+const mapa: { legado: string, destino: string, tela: Tela | null, nativo?: boolean }[] = [
   { legado: 'Arquivos', destino: 'Documentos (funde com a nativa Documents)', tela: 'documentos' },
   { legado: 'Consultas', destino: 'Lista de itens, recorte Todos', tela: 'lista' },
   { legado: 'Consultas (Grupo de Membros)', destino: 'Lista de itens, recorte Do meu grupo', tela: 'lista' },
   { legado: 'Conteúdo Embutido', destino: 'Página externa', tela: 'externa' },
   { legado: 'Customizado', destino: 'Deixa de existir. O atalho externo vai para Página externa', tela: null },
   { legado: 'Meus Itens', destino: 'Lista de itens, recorte Só os meus', tela: 'lista' },
-  { legado: 'Minhas Requisições', destino: 'Módulo Requisições, Minhas requisições', tela: 'minhas' },
+  { legado: 'Minhas Requisições', destino: 'Módulo Requisições, Minhas requisições', tela: 'minhas', nativo: true },
   { legado: 'Painéis', destino: 'Painel', tela: 'painel' },
-  { legado: 'Requisições', destino: 'Módulo Requisições, Abrir requisição', tela: 'abrir' },
+  { legado: 'Requisições', destino: 'Módulo Requisições, Abrir requisição', tela: 'abrir', nativo: true },
   { legado: 'Tarefas', destino: 'Fila de tarefas', tela: 'fila' },
   { legado: 'Tarefas Geral', destino: 'Fila de tarefas, recorte Todas', tela: 'fila' },
   { legado: 'Telas Personalizadas', destino: 'Lista de itens (visualização salva e coluna de expressão)', tela: 'lista' },
-  { legado: 'Triagem', destino: 'Módulo Requisições, Triagem', tela: 'triagem' },
+  { legado: 'Triagem', destino: 'Módulo Requisições, Triagem', tela: 'triagem', nativo: true },
 ]
 const mapaAberto = ref(false)
 </script>
@@ -141,7 +141,7 @@ const mapaAberto = ref(false)
         <UPopover v-model:open="mapaAberto" :content="{ side: 'top', align: 'start' }">
           <UButton label="De onde veio cada tela" icon="i-lucide-map" size="xs" color="neutral" variant="subtle" />
           <template #content>
-            <div class="w-[34rem] max-w-[90vw] p-3">
+            <div class="w-[40rem] max-w-[90vw] p-3">
               <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Os 13 tipos legados de Interface &gt; Telas</p>
               <ul class="divide-y divide-default text-sm">
                 <li v-for="m in mapa" :key="m.legado" class="flex items-center gap-3 py-1.5">
@@ -157,6 +157,8 @@ const mapaAberto = ref(false)
                     @click="abrir(m.tela!); mapaAberto = false"
                   />
                   <span v-else class="text-xs text-error">{{ m.destino }}</span>
+                  <UBadge v-if="m.nativo" label="Nativo" icon="i-lucide-pin" color="primary" variant="solid" size="xs" class="ml-auto shrink-0" />
+                  <UBadge v-else-if="m.tela" label="Criado pelo admin" color="neutral" variant="outline" size="xs" class="ml-auto shrink-0" />
                 </li>
               </ul>
             </div>
