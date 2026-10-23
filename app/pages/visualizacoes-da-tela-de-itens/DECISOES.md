@@ -172,3 +172,16 @@
 - **Ver:** `http://localhost:3000/visualizacoes-da-tela-de-itens` · `REQUISITOS.md` (RF007, RF123)
   - tela larga com 4 visualizações: `evidencias/r5-botoes-junto-poucas.jpg`;
   - tela estreita com 18, lista aberta: `evidencias/r5-botoes-junto-estreita.jpg`.
+
+## Rodada 7 · 2026-10-23
+- **Pedido (literal):** "pode adicionar as opçoes de ocultar visualização e de minimizar tambem (minimizar deixa so o icone). pode fazer com que o dropdown q é o editor apareça somente se tiver quantidade que nao da pra mostrar em tela. sem isso, se todas as views estao cabendo na tela, só o "+ visualizaçao" deve aparecer"
+- **Mudou:** o grupo "Só para mim" do menu ganhou "Minimizar" (a pílula fica só com o ícone; o nome continua no tooltip e no nome acessível) e "Ocultar da barra" (a visualização sai da barra e fica na lista do "+N", em cinza, com o ícone de oculta). Os 2 têm o caminho de volta: "Mostrar o nome" e "Mostrar na barra". Ocultar avisa com Desfazer.
+- **Mudou:** o "+N" só aparece quando alguma visualização fica fora da barra, porque não cabe ou porque foi ocultada. Quando tudo cabe, a barra termina em "+ Visualização". Isso desfaz o botão "⌄" sozinho da rodada 5.
+- **Mudou:** a visualização oculta, aberta pela lista, aparece na barra enquanto está aberta (a mesma regra da ativa que não cabe).
+- **Regra:** "Itens" pode ser minimizada e não pode ser ocultada. Ocultar e minimizar são de cada pessoa, como a ordem e as fixadas (RN002).
+- **Suposição:** "Recuperar a ordem padrão" não mostra as ocultas nem tira a minimização (S004).
+- **Fronteira:** muda o menu da pílula, a barra e a lista do "+N".
+- **Ver:** `http://localhost:3000/visualizacoes-da-tela-de-itens` · `REQUISITOS.md` (RN002, RF005, RF021, RF119, RF125 a RF129, S004)
+  - menu com Minimizar e Ocultar da barra: `evidencias/r7-menu-ocultar-minimizar.jpg`;
+  - barra com "Quadro por status" minimizada e "Vencendo em 30 dias" oculta ("+1"): `evidencias/r7-barra-minimizada-e-oculta.jpg`;
+  - lista do "+N" com a oculta em cinza: `evidencias/r7-lista-com-oculta.jpg`.

@@ -4,7 +4,7 @@
 
 **Onde vale:** na tela nova de itens de cada categoria (`/workspaces/<ws>/types/<categoria>`) e, com a mesma lógica, nas visualizações de Tarefas Rápidas (`/tasks/quick`) e de Tarefas Agendadas (`/tasks/scheduled`, título "Tarefas Programadas"). As diferenças de parâmetro estão no grupo "Tarefas Rápidas e Agendadas".
 
-**Referência visual:** protótipo `visualizacoes-da-tela-de-itens`, estilo Proposta, rodadas 1 a 6 de 23/10/2026. Prints em `evidencias/proposta-*.jpg`, `r2-*.jpg`, `r3-*.jpg`, `r4-*.jpg` e `r5-*.jpg` (a rodada 6 está em `r5-botoes-junto-*.jpg`); as referências do ClickUp e do Notion em `evidencias/ref-clickup-*.jpg` e `ref-notion-*.jpg`; a tela de hoje em `evidencias/develop-*.jpg`.
+**Referência visual:** protótipo `visualizacoes-da-tela-de-itens`, estilo Proposta, rodadas 1 a 7 de 23/10/2026. Prints em `evidencias/proposta-*.jpg`, `r2-*.jpg`, `r3-*.jpg`, `r4-*.jpg` e `r5-*.jpg` (a rodada 6 está em `r5-botoes-junto-*.jpg`; a 7, em `r7-*.jpg`); as referências do ClickUp e do Notion em `evidencias/ref-clickup-*.jpg` e `ref-notion-*.jpg`; a tela de hoje em `evidencias/develop-*.jpg`.
 
 **Convenção:** "deve" é obrigatório. Cada requisito tem um critério de aceite que se confere na tela. Os textos entre aspas são os da interface em português. Medidas ficam a cargo do front; o requisito descreve o comportamento.
 
@@ -15,7 +15,7 @@
 | Grupo | O que muda em relação à branch do PR 2936 (23/10/2026) | Requisitos |
 |---|---|---|
 | Regras de negócio | Perfis, versão só minha, ordem pessoal e ordem padrão, visualização do sistema | RN001 a RN006 |
-| Barra | Pílula com corte pela largura, tooltip organizado em partes e sem contagem, "+N" com a ativa sempre na barra, "+ Visualização" | RF001 a RF010, RF111 |
+| Barra | Pílula com corte pela largura, tooltip organizado em partes e sem contagem, "+N" só quando algo fica fora da barra, "+ Visualização", minimizar e ocultar | RF001 a RF010, RF111, RF125 a RF129 |
 | Arrastar e fixar | Arrastar na barra e no "+N", fixadas juntas no começo | RF011 a RF017, RF077, RF078 |
 | Menu da visualização | Seta ⌄ na ativa, botão direito, grupos "Só para mim" e "Para todos" | RF018 a RF024 |
 | Renomear | Na própria pílula e na linha do "+N" | RF025 a RF028, RF079, RF122 |
@@ -33,7 +33,7 @@
 | ID | Regra | Exemplo |
 |---|---|---|
 | RN001 | A visualização do sistema de cada tela (Itens, Tarefas Rápidas, Tarefas Programadas) não pode ser excluída, renomeada nem alterada para todos. | Em Itens, o menu mostra Excluir desligado com a explicação; salvar oferece só "Salvar só para mim" e "Salvar como nova visualização". |
-| RN002 | A ordem da barra e as fixadas são de cada pessoa. | Mikaela arrasta "Vencidos" para o começo; os outros membros continuam vendo a ordem padrão. |
+| RN002 | A ordem da barra, as fixadas, as ocultas e as minimizadas são de cada pessoa. | Mikaela arrasta "Vencidos" para o começo; os outros membros continuam vendo a ordem padrão. |
 | RN003 | A ordem padrão é a ordem que vale para quem não mudou a própria ordem. Só Owner ou Full pode mudar a ordem padrão. | Owner aplica a ordem dele para todos; quem nunca reordenou passa a ver essa ordem. |
 | RN004 | A tabela a seguir define o que cada perfil pode fazer. Política: Única. | Linha 3: Standard ou Viewer salva só para si. |
 | RN005 | Uma versão "só para mim" vale só para quem a salvou, por cima da versão de todos da mesma visualização. | Mikaela salva "Em análise" só para ela com o filtro "Área é Financeiro"; os outros veem "Em análise" sem esse filtro. |
@@ -61,12 +61,17 @@
 | RF003 | O nome da pílula deve ser cortado pela largura máxima da pílula, com reticências, e não por número de letras. | "Revisão trimestral dos contratos de fornecedores estratégicos" aparece como "Revisão trimestral do..." | Essencial |
 | RF004 | O tooltip da pílula deve mostrar, nesta ordem: o nome inteiro e a descrição; o tipo e quem vê em etiquetas (mais "Versão só sua" e "Alterações não salvas" quando valem); "Agrupado por" no Kanban; "Filtros" com 1 etiqueta por filtro; "Ordenação" com 1 etiqueta por nível e a seta da direção; no rodapé, "Arraste para reordenar" e "Clique duas vezes para renomear", menos na visualização do sistema (RF012). O tooltip não mostra contagem de itens. | "Vencendo em 30 dias" mostra Tabela, Todos veem, as etiquetas "Vencimento nos próximos 30 dias" e "Status não é Vencido" e a etiqueta "Vencimento" com a seta para cima. | Importante |
 | RF111 | No tooltip, o filtro avançado com "E" deve entrar parte por parte, como filtros a mais; com "Ou", as partes ficam separadas por "ou". O grupo de dentro vai numa etiqueta, entre parênteses. | "Revisão trimestral" mostra "Valor do contrato maior ou igual a R$ 60.000" e "(Status é Aprovado ou Assinado ou Prioridade é Alta)". | Importante |
-| RF005 | Quando as pílulas não couberem na largura da barra, o botão "+N ⌄" deve mostrar N igual ao número de visualizações que ficam fora da barra. | Com todas visíveis, o botão mostra só a seta "⌄" (RF119). | Essencial |
+| RF005 | O botão "+N ⌄" deve mostrar N igual ao número de visualizações fora da barra: as que não cabem na largura e as ocultas (RF126), menos a aberta. | Com 18 visualizações na tela estreita, o botão mostra "+15". | Essencial |
 | RF006 | Em cada largura de tela, a visualização ativa deve aparecer na barra, no lugar da última pílula que cabia quando a ativa estiver depois do corte. | Abrir pela lista do "+N" uma visualização que não cabe a traz para a barra. | Essencial |
-| RF007 | O botão da lista ("+N ⌄" ou "⌄") e o "+ Visualização" devem vir logo depois da última pílula visível, sem rolagem horizontal, como no Notion e no ClickUp. | Com 4 visualizações na tela larga, os 2 botões ficam colados em "Vencendo em 30 dias"; com a tela estreita, os 2 continuam visíveis. | Essencial |
+| RF007 | O botão da lista ("+N ⌄", quando existe) e o "+ Visualização" devem vir logo depois da última pílula visível, sem rolagem horizontal, como no Notion e no ClickUp. | Com 4 visualizações na tela larga, os 2 botões ficam colados em "Vencendo em 30 dias"; com a tela estreita, os 2 continuam visíveis. | Essencial |
 | RF008 | O botão de criar deve mostrar "+ Visualização" com o tooltip "Nova visualização". | O tooltip aparece ao parar o mouse no botão. | Importante |
 | RF009 | A visualização ativa deve ir para o endereço da página (`?view=<referência>`). | Recarregar mantém a visualização; o link leva direto a ela. | Importante |
 | RF010 | A pílula que tem versão "só para mim" (RN005) deve mostrar um ícone de pessoa depois do nome. | O tooltip da pílula diz "Você usa a sua versão. Os outros veem a de todos." | Importante |
+| RF125 | "Minimizar" deve deixar a pílula só com o ícone, com o nome no tooltip e no nome acessível; "Mostrar o nome" desfaz. A pílula minimizada ocupa menos lugar, e o cálculo de quantas cabem usa a largura dela. | "Quadro por status" minimizada mostra só o ícone, e o tooltip continua com o nome. | Importante |
+| RF126 | "Ocultar da barra" deve tirar a visualização da barra e deixá-la na lista do "+N", com o nome em cinza e o ícone de oculta; "Mostrar na barra" devolve a visualização ao lugar dela na ordem. | Ocultar "Vencendo em 30 dias" mostra "+1"; a lista mostra a linha em cinza. | Importante |
+| RF127 | Ocultar e mostrar devem avisar "<nome> saiu da barra. Ela continua na lista do +N." ou "<nome> voltou para a barra.", com Desfazer. | Desfazer devolve a visualização à barra. | Importante |
+| RF128 | A visualização oculta que a pessoa abre pela lista deve aparecer na barra enquanto estiver aberta, e sair quando a pessoa abrir outra. | Abrir "Vencendo em 30 dias" pela lista põe a pílula na barra; abrir "Itens" tira a pílula. | Importante |
+| RF129 | A visualização do sistema (RN001) não deve oferecer "Ocultar da barra"; pode ser minimizada. | O menu de "Itens" tem Minimizar e não tem Ocultar da barra. | Importante |
 
 ## Arrastar e fixar (RF)
 
@@ -89,7 +94,7 @@
 | RF018 | A pílula ativa deve mostrar uma seta ⌄ depois do nome, que abre o menu da visualização. | A seta aparece só na ativa e acompanha a pílula no arrasto. | Essencial |
 | RF019 | O botão direito em cada pílula deve abrir o menu de RF018 para aquela visualização, sem trocar a visualização ativa. | Botão direito numa pílula não ativa mostra o menu dela. | Essencial |
 | RF020 | O 1º grupo do menu deve ter Renomear (com o atalho F2), Configurar, Duplicar e Copiar link, conforme RN004. | Standard ou Viewer não vê Renomear numa visualização de todos. | Essencial |
-| RF021 | O grupo "Só para mim" deve ter Fixar no início ou Desafixar, "Voltar à versão de todos" (quando existe versão só minha) e, para Owner ou Full, "Recuperar a ordem padrão". | Standard ou Viewer vê só Fixar no início. | Essencial |
+| RF021 | O grupo "Só para mim" deve ter Fixar no início ou Desafixar, "Minimizar" ou "Mostrar o nome" (RF125), "Ocultar da barra" ou "Mostrar na barra" (RF126), "Voltar à versão de todos" (quando existe versão só minha) e, para Owner ou Full, "Recuperar a ordem padrão". | Standard ou Viewer vê Fixar no início, Minimizar e Ocultar da barra. | Essencial |
 | RF022 | O grupo "Para todos" deve aparecer só para Owner ou Full, com "Abrir primeiro para todos", "Aplicar minha ordem para todos" e Excluir. | Standard ou Viewer não vê o grupo. | Essencial |
 | RF023 | Na visualização do sistema e na que abre primeiro, Excluir deve aparecer desligado com a explicação, conforme RN001. | Não abre modal de recusa. | Importante |
 | RF024 | Excluir deve pedir confirmação num modal com o título "Excluir a visualização <nome>?", o texto "A visualização sai da barra de todos os membros. Os itens continuam na categoria." e o botão "Excluir visualização" em vermelho. | Cancelar mantém a visualização. | Essencial |
@@ -113,8 +118,8 @@
 | RF072 | Arrastar uma linha da lista deve mudar a ordem, com linha-guia no ponto de queda e a gravação de RF013. | Arrastar "Pessoas" para logo depois de "Itens" põe "Pessoas" na 2ª posição da barra. | Essencial |
 | RF080 | Com a busca da lista preenchida, as linhas não devem arrastar. | Com "jur" na busca, a alça some. | Importante |
 | RF073 | Para Owner ou Full, o rodapé da lista deve ter "Aplicar minha ordem para todos" e "Recuperar a ordem padrão" (RF036 a RF039). | Standard ou Viewer não vê o rodapé. | Essencial |
-| RF119 | O botão da lista deve existir mesmo sem visualização fora da barra, só com a seta "⌄" e o nome acessível "Todas as visualizações". | Com 4 visualizações na tela larga, a seta abre a lista com as 4. | Essencial |
-| RF120 | Sem busca, a lista deve mostrar a divisória "Não cabem na barra" antes da 1ª visualização que não cabe. Arrastar uma linha para cima da divisória leva a visualização para a barra. | Arrastar "Jurídico" para antes de "Quadro por status" mostra "Jurídico" na barra. | Essencial |
+| RF119 | O botão da lista deve aparecer só quando ao menos 1 visualização fica fora da barra (RF005). Quando cada visualização cabe, a barra termina em "+ Visualização". | Com 4 visualizações na tela larga, só "+ Visualização" aparece; ocultar 1 delas mostra "+1". | Essencial |
+| RF120 | Sem busca, a lista deve mostrar a divisória "Não cabem na barra" antes da 1ª visualização que não cabe e não está oculta. Arrastar uma linha para cima da divisória leva a visualização para a barra. | Arrastar "Jurídico" para antes de "Quadro por status" mostra "Jurídico" na barra. | Essencial |
 | RF121 | A linha da visualização aberta deve aparecer destacada, com o ícone na cor primária e a marca de aberta; a linha da visualização do sistema não arrasta. | "Itens" fica sem alça, sempre na 1ª linha. | Importante |
 | RF122 | O clique duplo no nome de uma linha, ou "Renomear" no "⋯" da linha, deve abrir o campo de renomear na própria linha, com a lista aberta e a gravação de RF025 a RF028. | Renomear "Vencidos" para "Contratos vencidos" muda a linha e a pílula e mostra "Desfazer". | Importante |
 | RF123 | O fim da lista deve ter "Nova visualização", que fecha a lista e abre o catálogo de RF040. | Clicar em "Nova visualização" mostra Tabela e Kanban. | Importante |
@@ -204,7 +209,7 @@
 | RF067 | Na lista do "+N", as setas para cima e para baixo devem andar entre as linhas, e Enter abre a visualização da linha em foco. | Dá para abrir qualquer visualização da lista só pelo teclado. | Importante |
 | RF085 | Na lista do "+N", Ctrl + Shift + seta para cima ou para baixo deve mover a linha em foco 1 posição. | Dá para reordenar a lista só pelo teclado. | Importante |
 | RF068 | Toda mudança de posição deve ser anunciada numa região `aria-live` ("<nome> movida para a posição <N>."). | O anúncio sai ao arrastar, fixar e mover pelo teclado. | Importante |
-| RF069 | O ponto de mudança não salva e o ícone de versão só minha devem ter nome acessível ("Alterações não salvas", "Versão só sua"). | O leitor de tela lê os 2. | Importante |
+| RF069 | O ponto de mudança não salva e os ícones de versão só minha, de oculta e de minimizada devem ter nome acessível ("Alterações não salvas", "Versão só sua", "Oculta da barra", "Minimizada"). | O leitor de tela lê os 4. | Importante |
 
 ## Filtros (RF)
 
@@ -243,7 +248,7 @@ A barra e o construtor dessas 2 telas são os mesmos da tela de itens (conferido
 
 | ID | Requisito | Critério de aceite | Prioridade |
 |---|---|---|---|
-| RF074 | As telas Tarefas Rápidas e Tarefas Agendadas devem seguir RN001 a RN007, RF001 a RF124, RI001 a RI006 e RNF001 a RNF002, com os parâmetros da tabela a seguir. | Os prints e critérios de aceite deste documento valem trocando os parâmetros. | Essencial |
+| RF074 | As telas Tarefas Rápidas e Tarefas Agendadas devem seguir RN001 a RN007, RF001 a RF129, RI001 a RI006 e RNF001 a RNF002, com os parâmetros da tabela a seguir. | Os prints e critérios de aceite deste documento valem trocando os parâmetros. | Essencial |
 | RF075 | Os filtros automáticos das tarefas devem aparecer como chaves com os nomes que a tela já usa: "Minhas Tarefas", "Aberto", "Atrasado", "Atribuídos", "Tarefas Externas", "Tarefas Internas". | Nenhum filtro automático abre 2º modal. | Essencial |
 | RF076 | Os campos das tarefas devem aparecer pelo rótulo e pelo ícone do tipo, sem o nome técnico (hoje: "EnlNumber", "radioButton", "EnAssignees", "EnHtml", "inputSwitch", "hidden"), conforme RF055. | Nenhum nome técnico aparece no painel. | Essencial |
 
@@ -289,3 +294,4 @@ A barra e o construtor dessas 2 telas são os mesmos da tela de itens (conferido
 | S001 | Standard ou Viewer pode criar, renomear e excluir visualização que é só sua (RN004, linhas 2 e 5). | Mikaela confirma | Se não puder, o "+ Visualização" some para esse perfil. |
 | S002 | Recuperar a ordem padrão também desafixa, porque fixar faz parte da ordem pessoal (RF037). | Mikaela confirma | Se não, as fixadas ficam no começo depois de recuperar. |
 | S003 | O filtro avançado tem grupo dentro de grupo em só 1 nível; o Notion aceita mais. 1 nível cobre "A e (B ou C)" e mantém o filtro legível. | Mikaela confirma | Com mais níveis, "Transformar em grupo" e "Adicionar grupo" passam a valer dentro do grupo. |
+| S004 | "Recuperar a ordem padrão" desafixa (S002), mas não mostra as ocultas nem tira a minimização: as 2 são escolhas de aparência de cada pessoa, não de ordem. | Mikaela confirma | Se não, recuperar a ordem também devolve as ocultas e os nomes. |

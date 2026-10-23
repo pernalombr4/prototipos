@@ -507,6 +507,15 @@ function definirPadrao(id: string) {
   toast.add({ title: t.value.avisos.padrao(nomeDe(id)), icon: 'i-lucide-house', color: 'success', duration: 3500 })
 }
 
+function aoOcultar(id: string, oculta: boolean) {
+  toast.add({
+    title: oculta ? t.value.avisos.ocultada(nomeDe(id)) : t.value.avisos.mostrada(nomeDe(id)),
+    icon: oculta ? 'i-lucide-eye-off' : 'i-lucide-eye',
+    duration: 4000,
+    actions: [{ label: t.value.avisos.desfazer, color: 'neutral', variant: 'outline', onClick: () => { salvas.value = salvas.value.map(v => v.reference === id ? { ...v, oculta: !oculta } : v) } }],
+  })
+}
+
 function aoRenomear(id: string, anterior: string) {
   rascunhos.value = rascunhos.value[id] ? { ...rascunhos.value, [id]: { ...rascunhos.value[id]!, name: nomeDe(id) } } : rascunhos.value
   toast.add({
@@ -655,6 +664,7 @@ const opcoesDoAndaime = computed(() => [
               @excluir="(id: string) => (aExcluir = id)"
               @renomeada="aoRenomear"
               @fixada="aoFixar"
+              @ocultada="aoOcultar"
               @reordenada="aoReordenar"
               @nome-repetido="(n: string) => toast.add({ title: t.avisos.nomeRepetido(n), icon: 'i-lucide-circle-alert', color: 'warning', duration: 3500 })"
               @descartar-nova="cancelarCriacao"

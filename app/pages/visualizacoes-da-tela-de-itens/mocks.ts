@@ -189,6 +189,10 @@ export type Visualizacao = Omit<ModelView, 'id' | 'created_at' | 'updated_at' | 
   }
   /** INVENTADO: fixada no começo da barra, só para quem fixou. */
   fixada?: boolean
+  /** INVENTADO (rodada 7): fora da barra, só para quem ocultou; continua na lista do "+N". */
+  oculta?: boolean
+  /** INVENTADO (rodada 7): a pílula mostra só o ícone, só para quem minimizou. */
+  minimizada?: boolean
   /** SÓ DO PROTÓTIPO: visualização em criação, com o painel aberto, ainda não gravada. */
   novo?: boolean
 }

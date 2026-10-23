@@ -54,6 +54,8 @@ const emit = defineEmits<{
   excluir: [ref: string]
   renomeada: [ref: string, anterior: string]
   fixada: [ref: string, fixou: boolean]
+  /** Rodada 7: ocultar da barra e mostrar de novo; quem usa avisa e oferece Desfazer. */
+  ocultada: [ref: string, oculta: boolean]
   nomeRepetido: [nome: string]
   descartarNova: [ref: string]
   restaurarVersao: [ref: string]
@@ -99,7 +101,7 @@ onMounted(() => {
   nextTick(medir)
 })
 onBeforeUnmount(() => observador?.disconnect())
-watch(() => [props.t, visualizacoes.value.map(v => v.reference + nomeDe(v) + v.icon + v.fixada).join()], () => nextTick(medir))
+watch(() => [props.t, visualizacoes.value.map(v => v.reference + nomeDe(v) + v.icon + v.fixada + v.minimizada + v.oculta).join()], () => nextTick(medir))
 
 /**
  * As que cabem, na ordem. A ativa sempre aparece: se ela estiver depois do
@@ -111,7 +113,8 @@ const visiveis = computed(() => {
   const larguraDe = (v: Visualizacao) => (larguras.value[v.reference] ?? 120) + VAO + (v.reference === ativa.value ? EXTRA_DA_ATIVA : 0)
   const cabem: Visualizacao[] = []
   let soma = 0
-  for (const v of visualizacoes.value) {
+  // Rodada 7: a oculta não disputa lugar na barra; aberta, ela aparece até a pessoa trocar de visualização.
+  for (const v of visualizacoes.value.filter(x => !x.oculta || x.reference === ativa.value)) {
     const w = larguraDe(v)
     if (soma + w > limite) break
     cabem.push(v)
@@ -360,6 +363,19 @@ function fixar(v: Visualizacao) {
   emit('fixada', v.reference, fixou)
 }
 
+/*
+ * Rodada 7: ocultar e minimizar mudam só a barra de quem fez, como fixar.
+ * Oculta: sai da barra e fica na lista do "+N". Minimizada: a pílula mostra só o ícone, e o nome fica no tooltip.
+ */
+function alternarOculta(v: Visualizacao) {
+  const oculta = !v.oculta
+  visualizacoes.value = visualizacoes.value.map(x => x.reference === v.reference ? { ...x, oculta } : x)
+  emit('ocultada', v.reference, oculta)
+}
+function alternarMinimizada(v: Visualizacao) {
+  visualizacoes.value = visualizacoes.value.map(x => x.reference === v.reference ? { ...x, minimizada: !x.minimizada } : x)
+}
+
 /** Renomeia quem é Owner ou Full, ou quem é dono da visualização só dele. Itens não se renomeia. */
 function podeRenomear(v?: Visualizacao) {
   return !!v && v.reference !== SISTEMA && (props.ehOwner || v.user === EU.id || !!v.novo)
@@ -382,6 +398,14 @@ function acoesDe(v: Visualizacao, naLista = false): ContextMenuItem[][] {
   // Só para mim: o que muda só a barra e a versão desta pessoa.
   const soMinhas: ContextMenuItem[] = [{ type: 'label', label: t.soParaMim }]
   if (!sistema) soMinhas.push({ label: v.fixada ? t.desafixar : t.fixar, icon: v.fixada ? 'i-lucide-pin-off' : 'i-lucide-pin', onSelect: () => fixar(v) })
+  soMinhas.push(v.minimizada
+    ? { label: t.mostrarNome, icon: 'i-lucide-maximize-2', onSelect: () => alternarMinimizada(v) }
+    : { label: t.minimizar, icon: 'i-lucide-minimize-2', description: t.minimizarAjuda, onSelect: () => alternarMinimizada(v) })
+  if (!sistema) {
+    soMinhas.push(v.oculta
+      ? { label: t.mostrarNaBarra, icon: 'i-lucide-eye', onSelect: () => alternarOculta(v) }
+      : { label: t.ocultar, icon: 'i-lucide-eye-off', description: t.ocultarAjuda, onSelect: () => alternarOculta(v) })
+  }
   if (props.pessoais.includes(v.reference)) soMinhas.push({ label: t.versaoDeTodos, icon: 'i-lucide-users', description: t.versaoDeTodosAjuda, onSelect: () => emit('restaurarVersao', v.reference) })
   if (props.ehOwner) soMinhas.push({ label: t.recuperarOrdem, icon: 'i-lucide-rotate-ccw', disabled: props.ordemEhPadrao, onSelect: () => emit('recuperarOrdem') })
   if (minha && !props.ehOwner) soMinhas.push({ label: t.excluir, icon: 'i-lucide-trash-2', color: 'error', onSelect: () => emit('excluir', v.reference) })
@@ -421,7 +445,7 @@ const filtradas = computed(() => {
 })
 
 /** A 1ª que não cabe na barra: a linha divisória aparece antes dela (sem busca). */
-const primeiraFora = computed(() => busca.value ? null : visualizacoes.value.find(v => !visiveis.value.includes(v))?.reference ?? null)
+const primeiraFora = computed(() => busca.value ? null : visualizacoes.value.find(v => !visiveis.value.includes(v) && !v.oculta)?.reference ?? null)
 
 function abrirDaLista(v: Visualizacao) {
   ativa.value = v.reference
@@ -626,7 +650,7 @@ const ui = {
           class="inline-flex items-center gap-1.5 px-2.5 text-sm font-semibold"
         >
           <UIcon :name="v.icon ?? 'i-lucide-table'" class="size-4" />
-          <span class="max-w-40 truncate">{{ nomeDe(v) }}</span>
+          <span v-if="!v.minimizada" class="max-w-40 truncate">{{ nomeDe(v) }}</span>
           <UIcon v-if="v.fixada" name="i-lucide-pin" class="size-3" />
           <UIcon v-if="pessoais.includes(v.reference)" name="i-lucide-user-round" class="size-3" />
         </span>
@@ -669,7 +693,8 @@ const ui = {
                 :content="{ side: 'bottom', align: 'start', sideOffset: 6 }"
                 :ui="{ content: 'h-auto w-80 max-w-80 flex-col items-stretch gap-0 p-0' }"
               >
-                <span class="max-w-40 truncate">{{ item.label }}</span>
+                <span v-if="item.vis.minimizada" class="sr-only">{{ item.label }}</span>
+                <span v-else class="max-w-40 truncate">{{ item.label }}</span>
                 <template #content>
                   <div class="space-y-2.5 p-3 text-left">
                     <div class="space-y-1.5">
@@ -752,14 +777,15 @@ const ui = {
             <template #list-trailing>
               <!-- Rodada 5: o "+N" e o "+ Visualização" vêm logo depois da última pílula, como no Notion e no ClickUp. Presos na ponta direita, com poucas visualizações, ficavam longe de onde a pessoa olha. -->
               <div class="flex shrink-0 items-center gap-0.5 self-center pl-1" @pointerdown.stop>
-                <UPopover v-model:open="listaAberta" :content="{ align: 'end', sideOffset: 6, onCloseAutoFocus: aoDevolverFoco }">
+                <!-- Rodada 7: o "+N" só existe quando alguma visualização fica fora da barra (não cabe ou foi ocultada). -->
+                <UPopover v-if="escondidas.length" v-model:open="listaAberta" :content="{ align: 'end', sideOffset: 6, onCloseAutoFocus: aoDevolverFoco }">
                   <UButton
-                    :label="escondidas.length ? `+${escondidas.length}` : undefined"
+                    :label="`+${escondidas.length}`"
                     trailing-icon="i-lucide-chevron-down"
                     color="neutral"
                     variant="ghost"
                     size="sm"
-                    :aria-label="escondidas.length ? t.barra.maisVisualizacoes(escondidas.length) : t.barra.todas"
+                    :aria-label="t.barra.maisVisualizacoes(escondidas.length)"
                     class="text-muted"
                   />
                   <template #content>
@@ -830,8 +856,10 @@ const ui = {
                                 @keydown.enter.prevent="abrirDaLista(v)"
                               >
                                 <UIcon :name="v.icon ?? 'i-lucide-table'" class="size-4 shrink-0" :class="v.reference === ativa ? 'text-primary' : 'text-muted'" />
-                                <span class="truncate">{{ nomeDe(v) }}</span>
+                                <span class="truncate" :class="v.oculta ? 'text-muted' : ''">{{ nomeDe(v) }}</span>
                                 <UIcon v-if="v.fixada" name="i-lucide-pin" class="size-3 shrink-0 text-dimmed" :aria-label="t.barra.fixadaRotulo" />
+                                <UIcon v-if="v.oculta" name="i-lucide-eye-off" class="size-3 shrink-0 text-dimmed" :aria-label="t.barra.ocultaRotulo" />
+                                <UIcon v-if="v.minimizada" name="i-lucide-minimize-2" class="size-3 shrink-0 text-dimmed" :aria-label="t.barra.minimizadaRotulo" />
                                 <UIcon v-if="pessoais.includes(v.reference)" name="i-lucide-user-round" class="size-3 shrink-0 text-dimmed" :aria-label="t.barra.versaoSua" />
                                 <span v-if="modificadas.includes(v.reference)" class="size-2 shrink-0 rounded-full bg-warning" role="img" :aria-label="t.barra.naoSalva" />
                                 <UIcon v-if="v.reference === ativa" name="i-lucide-check" class="ml-auto size-4 shrink-0 text-primary" :aria-label="t.barra.ativaRotulo" />
