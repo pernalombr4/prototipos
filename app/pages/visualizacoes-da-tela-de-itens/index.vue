@@ -547,10 +547,25 @@ const colunasDoQuadro = computed<EnKanbanColumn[]>(() => (campoPorPath(efetiva.v
 const cartoes = computed(() => itensDaVisualizacao.value.map(i => ({
   ...i,
   id: i.reference,
-  descricao: `${i.reference} · ${nomeDaPessoa(i.responsavel) ?? t.value.itens.semResponsavel}`,
+  responsavelNome: nomeDaPessoa(i.responsavel) ?? t.value.itens.semResponsavel,
+  valor: moeda(i.valor),
 })))
 
-const cartao: EnKanbanCardConfig = { header: 'fornecedor', content: 'descricao' }
+/** O cartão segue o `config.cardConfig` da visualização (seção Cartão do painel). */
+const cartao = computed<EnKanbanCardConfig>(() => {
+  const cc = efetiva.value.config.cardConfig ?? {}
+  const ref = (path?: string) => {
+    const c = path ? campoPorPath(path) : undefined
+    return c ? { refId: c.tipo === 'usuario' ? 'responsavelNome' : c.path, name: c.label, options: c.opcoes?.map(o => ({ label: o, value: o, colorScheme: COR[o] === 'primary' ? 'info' : COR[o] })) } : undefined
+  }
+  return {
+    header: cc.header ?? 'fornecedor',
+    content: cc.content ?? 'reference',
+    tags: (cc.tags ?? []).map(t => ref(t.field)).filter(Boolean) as EnKanbanCardConfig['tags'],
+    userField: ref(cc.userField),
+    dueDateField: ref(cc.dueDateField),
+  }
+})
 
 /* ---------- casca ---------- */
 
@@ -696,17 +711,6 @@ const opcoesDoAndaime = computed(() => [
                 </template>
               </UPopover>
 
-              <!-- Com o painel aberto, salvar e descartar ficam só no rodapé dele: um lugar só para a mesma ação. -->
-              <span v-if="modificada && !painelAberto" class="ml-auto flex items-center gap-2">
-                <span class="flex items-center gap-1.5 text-xs text-muted"><span class="size-2 rounded-full bg-warning" />{{ t.linha.naoSalva }}</span>
-                <UButton :label="t.linha.descartar" color="neutral" variant="ghost" size="xs" @click="descartar" />
-                <UFieldGroup size="xs">
-                  <UButton :label="opcoesDeSalvar.principal.label" :loading="salvando" @click="salvar(opcoesDeSalvar.principal.escopo)" />
-                  <UDropdownMenu :items="[opcoesDeSalvar.extras.map(o => ({ label: o.label, icon: o.icon, onSelect: () => salvar(o.escopo) }))]" :content="{ align: 'end' }">
-                    <UButton icon="i-lucide-chevron-down" :aria-label="t.linha.maisSalvar" />
-                  </UDropdownMenu>
-                </UFieldGroup>
-              </span>
             </div>
           </Transition>
 
@@ -811,6 +815,41 @@ const opcoesDoAndaime = computed(() => [
         </section>
       </div>
     </CascaDaLista>
+
+    <!--
+      PROPOSTA (rodada 3): mexeu na visualização (filtro, ordenação, coluna) e não salvou, aparece esta barra
+      flutuante na base, com a opção de tornar aquilo o padrão. Twenty ("Update view"), ClickUp ("Save view")
+      e Notion ("Save for everyone") oferecem o mesmo assim que o filtro muda. Com o painel aberto, quem salva
+      é o rodapé dele: a barra some, para a ação não aparecer em 2 lugares.
+    -->
+    <Transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="translate-y-3 opacity-0"
+      leave-active-class="transition duration-150 ease-in"
+      leave-to-class="translate-y-3 opacity-0"
+    >
+      <div
+        v-if="estilo === 'proposta' && modificada && !painelAberto"
+        role="region"
+        :aria-label="t.flutuante.rotulo"
+        class="fixed bottom-16 left-1/2 z-30 flex -translate-x-1/2 items-center gap-3 rounded-xl bg-default py-2 pl-4 pr-2 shadow-lg ring ring-default"
+      >
+        <span class="size-2 shrink-0 rounded-full bg-warning" />
+        <span class="min-w-0">
+          <span class="block text-sm font-medium text-highlighted">{{ t.flutuante.titulo(efetiva.name ?? '') }}</span>
+          <span class="block text-xs text-muted">{{ opcoesDeSalvar.principal.escopo === 'eu' ? t.flutuante.ajudaSoMinha : t.flutuante.ajuda }}</span>
+        </span>
+        <span class="flex shrink-0 items-center gap-1.5 pl-2">
+          <UButton :label="t.linha.descartar" color="neutral" variant="ghost" size="sm" @click="descartar" />
+          <UFieldGroup size="sm">
+            <UButton :label="opcoesDeSalvar.principal.label" :loading="salvando" @click="salvar(opcoesDeSalvar.principal.escopo)" />
+            <UDropdownMenu :items="[opcoesDeSalvar.extras.map(o => ({ label: o.label, icon: o.icon, onSelect: () => salvar(o.escopo) }))]" :content="{ align: 'end', side: 'top' }">
+              <UButton icon="i-lucide-chevron-down" :aria-label="t.linha.maisSalvar" />
+            </UDropdownMenu>
+          </UFieldGroup>
+        </span>
+      </div>
+    </Transition>
 
     <!-- Salvar como nova -->
     <UModal v-model:open="salvarComo.aberto" :title="t.salvarComo.titulo" :description="t.salvarComo.texto" :ui="{ content: 'max-w-sm' }">

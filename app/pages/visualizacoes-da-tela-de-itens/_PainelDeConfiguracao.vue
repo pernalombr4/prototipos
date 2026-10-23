@@ -88,6 +88,24 @@ const iconeSemPrefixo = computed({
 
 const camposDeAgrupar = computed(() => CAMPOS.filter(c => c.tipo === 'selecao').map(c => ({ label: c.label, value: c.path })))
 
+/*
+ * Cartão do kanban (rodada 3): o construtor de hoje tem "Construtor visual de cartão" com cabeçalho, conteúdo,
+ * tags, utilizador e data. Aqui são 5 campos com nome de gente, gravados no `config.cardConfig` do schema.
+ */
+const NENHUM = '__nenhum'
+const opcoesDe = (tipos: string[], comNenhum = true) => [
+  ...(comNenhum ? [{ label: props.t.painel.cartaoNenhum, value: NENHUM }] : []),
+  ...CAMPOS.filter(c => tipos.includes(c.tipo)).map(c => ({ label: c.label, value: c.path, icon: ICONE_DO_TIPO[c.tipo] })),
+]
+const cartao = computed(() => rascunho.value.config.cardConfig ?? {})
+function mudarCartao(chave: 'header' | 'content' | 'userField' | 'dueDateField', valor: string) {
+  mudar((x) => { x.config.cardConfig = { ...(x.config.cardConfig ?? {}), [chave]: valor === NENHUM ? undefined : valor } })
+}
+const etiquetas = computed({
+  get: () => (cartao.value.tags ?? []).map(t => t.field),
+  set: (v: string[]) => mudar((x) => { x.config.cardConfig = { ...(x.config.cardConfig ?? {}), tags: v.map(field => ({ field })) } }),
+})
+
 /* ---------- colunas ---------- */
 
 const visiveis = computed(() => (rascunho.value.config.columns ?? []).map(c => c.path))
@@ -339,6 +357,28 @@ const funcoes = computed({
         </UFormField>
       </section>
 
+      <!-- Cartão do kanban: o que cada cartão mostra (no lugar das colunas da tabela). -->
+      <section v-if="rascunho.model_type === 'kanban'" class="space-y-3 p-4">
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.painel.cartao }}</h3>
+        <UFormField :label="t.painel.cartaoTitulo">
+          <USelect :model-value="cartao.header ?? 'fornecedor'" :items="opcoesDe(['texto'], false)" class="w-full" @update:model-value="(v: string) => mudarCartao('header', v)" />
+        </UFormField>
+        <UFormField :label="t.painel.cartaoApoio">
+          <USelect :model-value="cartao.content ?? 'reference'" :items="opcoesDe(['texto', 'moeda', 'selecao'])" class="w-full" @update:model-value="(v: string) => mudarCartao('content', v)" />
+        </UFormField>
+        <UFormField :label="t.painel.cartaoEtiquetas" :hint="t.comum.opcional">
+          <USelectMenu v-model="etiquetas" multiple value-key="value" :items="opcoesDe(['selecao'], false)" :placeholder="t.painel.cartaoEtiquetasExemplo" class="w-full" />
+        </UFormField>
+        <div class="grid grid-cols-2 gap-3">
+          <UFormField :label="t.painel.cartaoPessoa">
+            <USelect :model-value="cartao.userField ?? NENHUM" :items="opcoesDe(['usuario'])" class="w-full" @update:model-value="(v: string) => mudarCartao('userField', v)" />
+          </UFormField>
+          <UFormField :label="t.painel.cartaoData">
+            <USelect :model-value="cartao.dueDateField ?? NENHUM" :items="opcoesDe(['data'])" class="w-full" @update:model-value="(v: string) => mudarCartao('dueDateField', v)" />
+          </UFormField>
+        </div>
+      </section>
+
       <!-- Colunas: as visíveis em cima, na ordem da tabela; as ocultas embaixo. Todas as linhas com o mesmo desenho. -->
       <section v-if="rascunho.model_type === 'table'" class="space-y-3 p-4">
         <div class="flex items-center justify-between">
@@ -504,7 +544,7 @@ const funcoes = computed({
 
       <!-- Ordenação: o mesmo cartão dos filtros, numa linha só: campo, direção e retirar. -->
       <section class="space-y-3 p-4">
-        <h3 class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.painel.ordenacao }}</h3>
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-muted">{{ rascunho.model_type === 'kanban' ? t.painel.ordenacaoKanban : t.painel.ordenacao }}</h3>
         <p v-if="!ordenacoes.length" class="text-xs text-muted">{{ t.painel.semOrdenacao }}</p>
         <div class="space-y-1.5">
           <div v-for="(o, i) in ordenacoes" :key="i">

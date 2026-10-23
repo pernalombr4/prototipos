@@ -341,15 +341,16 @@ function aoBotaoDireito(e: MouseEvent) {
 }
 
 /**
- * Fixar leva a visualização o mais para a esquerda possível: logo depois de Itens, antes das outras fixadas.
- * Desafixar a leva para logo depois das que continuam fixadas.
+ * Regra do protótipo (rodada 3): as fixadas ficam juntas, logo depois de Itens, na ordem em que foram fixadas.
+ * A 1ª fixada fica na posição 1; cada nova fixada entra à direita da última fixada.
+ * Desafixar leva a visualização para logo depois das que continuam fixadas.
  * A lista nova sai numa gravação só: com o `defineModel`, a 2ª gravação seguida leria a lista antiga.
  */
 function fixar(v: Visualizacao) {
   const fixou = !v.fixada
   const resto = visualizacoes.value.filter(x => x.reference !== v.reference)
   const atualizada = { ...v, fixada: fixou }
-  const para = fixou ? 1 : resto.filter(x => x.fixada).length + 1
+  const para = resto.filter(x => x.fixada).length + 1
   visualizacoes.value = [...resto.slice(0, para), atualizada, ...resto.slice(para)]
   anuncio.value = props.t.barra.movida(nomeDe(v), para + 1)
   if (!visiveis.value.some(x => x.reference === v.reference)) ativa.value = v.reference
@@ -684,7 +685,7 @@ const ui = {
                             <UIcon
                               name="i-lucide-grip-vertical"
                               class="size-4 shrink-0 text-dimmed"
-                              :class="busca ? 'invisible' : 'cursor-grab opacity-0 transition-opacity group-hover/linha:opacity-100'"
+                              :class="busca ? 'invisible' : 'cursor-grab'"
                             />
                             <button
                               type="button"

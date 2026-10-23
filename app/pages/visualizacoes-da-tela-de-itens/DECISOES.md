@@ -99,3 +99,22 @@
   - salvar do Owner ou Full: `evidencias/r2-salvar-owner.jpg`;
   - menu do Owner ou Full, com a versão só sua: `evidencias/r2-menu-owner.jpg`;
   - menu do Standard ou Viewer: `evidencias/r2-menu-standard.jpg`.
+
+## Rodada 3 · 2026-10-23
+- **Pedido (literal):** "no dropdown do +N deve por padrao aparecer o simbolo de arraste em todos, nao so com hover. o menu de 3 pontos sim deve seguir aparecendo só com hover"
+- **Mudou:** a alça de arrastar aparece em todas as linhas do "+N" sem hover; o "⋯" continua só no hover ou no foco.
+- **Pedido (literal), na mesma rodada:** "na hora que o user colocar um filtro ali na tela, no uso dele mesmo, deve aparecer pra ele a opçao de tornar aquilo padrao se quiser, num menui flutuante na base inferior. isso acontece em outros produtos"
+- **Mudou:** mexeu em filtro, ordenação ou coluna, aparece uma barra flutuante centrada na base da tela: "Você alterou <nome>", a ajuda ("Salve para tornar esta versão o padrão desta visualização." para quem salva para todos; "Salve para manter esta versão como a sua." para quem salva só para si), Descartar e o botão de salvar com a seta. Saiu o salvar da linha de filtros. Com o painel aberto, a barra some e quem salva é o rodapé do painel.
+- **Pedido (literal), na mesma rodada:** "uma view que fixei primeiro sempre fica na posiçao 1 de fixo. se eu fixar outra depois ela vai pra depois da primeira fixada, à direita da primeira fixada. arrume isso. é regra do protótipo"
+- **Mudou:** as fixadas ficam juntas depois de Itens, na ordem em que foram fixadas: a nova fixada entra à direita da última fixada. Conferido: fixar "Vencendo em 30 dias" e depois "Alta prioridade" deixa Itens, Meus contratos, Vencendo em 30 dias, Alta prioridade.
+- **Pedido (literal), na mesma rodada:** "esse sistema de views personalizdas existe tambem pras telas de tarefas rápidas e agendadas [...] veja se batem os mesmos requisitos da tela de itens ou tem configuraçoes que sejam substancialmente diferentes [...] se nao for substancialmente diferente, basta no doc de requisitos escrever pro dev que ele precisa usar a mesma logica"
+- **Mudou:** `REQUISITOS.md` novo, com os requisitos das rodadas 1 a 3 e o grupo "Tarefas Rápidas e Agendadas". Conferido na branch do PR 2936: as 2 telas têm a mesma barra e o mesmo construtor. Diferem só os parâmetros: os campos (fixos da tarefa), o "Agrupar por" do Kanban (Rápidas: Status, Responsável, Prioridade; Agendadas: Status da Tarefa) e os filtros automáticos ("Minhas Tarefas", "Aberto", "Atrasado", "Atribuídos", "Tarefas Externas", "Tarefas Internas", já com nome legível). Conclusão: a mesma lógica, com uma tabela de parâmetros.
+- **Mudou:** o painel ganhou, no tipo Kanban, a seção Cartão ("Título do cartão", "Texto de apoio", "Etiquetas", "Pessoa", "Data"), gravada no `config.cardConfig` do schema, e a Ordenação passa a se chamar "Ordem dos cartões em cada coluna". Achado da comparação: o construtor de hoje tem o "Construtor visual de cartão" e o "Ordenar cartões em cada coluna por" no Kanban, inclusive na tela de itens; o protótipo não tinha porque a rodada 1 não abriu o Kanban do construtor.
+- **Fronteira:** muda o "+N", o salvar, o fixar e o Kanban do painel; não muda a casca, a barra de ferramentas, a tabela nem o cartão do `EnKanbanBoard`.
+- **Não deu:** mostrar o texto de apoio inteiro no cartão do quadro. Por quê: o cartão do `EnKanbanBoard` corta a linha do conteúdo; é do SDK, fora da fronteira.
+- **Não deu:** print da barra flutuante no perfil Standard. Por quê: a janela do Chrome ficou em segundo plano e o print estourou o tempo; a página respondeu e mostrou "Salvar só para mim" com a ajuda certa (conferido pelo DOM).
+- **Crítica e acessibilidade:** a barra flutuante é uma região com nome ("Alterações não salvas"); o ponto de alerta repete o texto, não depende só da cor.
+- **Ver:** `http://localhost:3000/visualizacoes-da-tela-de-itens` · `REQUISITOS.md`
+  - barra flutuante de salvar: `evidencias/r3-barra-flutuante.jpg`;
+  - "+N" com a alça em repouso: `evidencias/r3-mais-com-alca.jpg`;
+  - cartão do Kanban no painel: `evidencias/r3-cartao-kanban.jpg`.

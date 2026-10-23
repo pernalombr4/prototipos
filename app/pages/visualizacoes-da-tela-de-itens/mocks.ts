@@ -224,7 +224,7 @@ const POUCAS: Visualizacao[] = [
     name: 'Quadro por status',
     model_type: 'kanban',
     icon: 'i-lucide-square-kanban',
-    config: { hide: false, groupBy: 'status', columns: TODAS },
+    config: { hide: false, groupBy: 'status', columns: TODAS, cardConfig: { header: 'fornecedor', content: 'valor', tags: [{ field: 'prioridade' }], userField: 'responsavel', dueDateField: 'vencimento' } },
   }),
   vis({
     reference: 'vencendo-30-dias',
@@ -240,7 +240,7 @@ const MAIS: Visualizacao[] = [
   vis({ reference: 'alta-prioridade', name: 'Alta prioridade', icon: 'i-lucide-flame', filters: { field_filters: [{ field: 'prioridade', op: 'eq', value: 'Alta' }] }, config: { hide: false, columns: TODAS, sorts: [{ field: 'vencimento', direction: 'asc' }, { field: 'valor', direction: 'desc' }] } }),
   vis({ reference: 'aprovados-financeiro', name: 'Aprovados do financeiro', icon: 'i-lucide-badge-check', module_groups: [2], filters: { field_filters: [{ field: 'status', op: 'eq', value: 'Aprovado' }, { field: 'area', op: 'eq', value: 'Financeiro' }] } }),
   vis({ reference: 'acima-100-mil', name: 'Acima de R$ 100 mil', icon: 'i-lucide-banknote', filters: { field_filters: [{ field: 'valor', op: 'gte', value: 100000 }] }, config: { hide: false, columns: TODAS, sorts: [{ field: 'valor', direction: 'desc' }] } }),
-  vis({ reference: 'kanban-por-area', name: 'Quadro por área', model_type: 'kanban', icon: 'i-lucide-square-kanban', config: { hide: false, groupBy: 'area', columns: TODAS } }),
+  vis({ reference: 'kanban-por-area', name: 'Quadro por área', model_type: 'kanban', icon: 'i-lucide-square-kanban', config: { hide: false, groupBy: 'area', columns: TODAS, cardConfig: { header: 'fornecedor', content: 'valor', tags: [{ field: 'prioridade' }], userField: 'responsavel', dueDateField: 'vencimento' } } }),
   vis({ reference: 'vencidos', name: 'Vencidos', icon: 'i-lucide-calendar-x', filters: { field_filters: [{ field: 'status', op: 'eq', value: 'Vencido' }] } }),
   vis({ reference: 'sem-responsavel', name: 'Sem responsável', icon: 'i-lucide-user-x', filters: { field_filters: [{ field: 'responsavel', op: 'empty', value: null }] } }),
   vis({ reference: 'juridico', name: 'Jurídico', icon: 'i-lucide-scale', filters: { field_filters: [{ field: 'area', op: 'eq', value: 'Jurídico' }] } }),
