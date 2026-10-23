@@ -185,3 +185,13 @@
   - menu com Minimizar e Ocultar da barra: `evidencias/r7-menu-ocultar-minimizar.jpg`;
   - barra com "Quadro por status" minimizada e "Vencendo em 30 dias" oculta ("+1"): `evidencias/r7-barra-minimizada-e-oculta.jpg`;
   - lista do "+N" com a oculta em cinza: `evidencias/r7-lista-com-oculta.jpg`.
+
+## Requisitos em 2 documentos · 2026-10-23
+- **Pedido (literal):** "separe 2 requisitos: um é um pedido de mudança na estrutura do construtor de filtros da tela (os filtros rapidos sao diferenets e os compelxos sao regras, com um construtor diferente...) tudo o que muda na logica e no front tem que ser relatada. a outra parte é se ater 100% às mudanças pertinentes ao próprio construtor de visualizaçoes ali"
+- **Mudou:** `REQUISITOS-FILTROS.md` (novo) é o pedido de mudança dos filtros: como é hoje (H1 a H9, conferidos na branch), o que muda na lógica, o que muda no front, os requisitos, as interfaces e o que está em aberto. `REQUISITOS.md` ficou só com o construtor de visualizações. Os requisitos que mudaram de documento mantêm o ID.
+- **Achado na conferência:** a tabela da branch já tem, no título de cada coluna, ordenar, funil de filtro e alfinete de fixar; o ícone de filtros da barra de ferramentas abre a gaveta "Filtros por campo"; o construtor já oferece "Inclui um dos" e "Não inclui nenhum dos". O RI006 foi reescrito: falta slot de cabeçalho no `EnTable` do SDK, não na tabela da branch.
+- **Novos:** RF130 a RF134 (funil abre o chip, ordenar e alfinete ficam, a gaveta sai, os 2º modais saem, rótulo no lugar do nome técnico), RI007 (data relativa), RNF003 e P010 a P013.
+- **Ver:** `REQUISITOS-FILTROS.md` · `REQUISITOS.md`
+  - funil da coluna, hoje: `evidencias/develop-06-funil-da-coluna.jpg`;
+  - gaveta "Filtros por campo", hoje: `evidencias/develop-07-gaveta-de-filtros.jpg`;
+  - 2º modal "Adicionar Filtro" do construtor, hoje: `evidencias/develop-08-filtro-da-visualizacao.jpg`.
