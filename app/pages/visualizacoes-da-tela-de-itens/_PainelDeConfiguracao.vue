@@ -14,11 +14,14 @@
  * `sidebar-right`). Aqui é uma coluna dentro do conteúdo, para o protótipo
  * controlar abrir e fechar.
  */
-import type { FiltroDeCampo, Ordenacao, Visualizacao } from './mocks'
+import type { FiltroDeCampo, GrupoDeRegras, Ordenacao, Visualizacao } from './mocks'
 import type { Textos } from './textos'
 
 type Escopo = 'todos' | 'eu' | 'propria' | 'nova'
-import { CAMPOS, FUNCOES, GRUPOS, ICONE_DO_TIPO, PESSOAS, campoPorPath, clonar } from './mocks'
+import { CAMPOS, FUNCOES, GRUPOS, ICONE_DO_TIPO, campoPorPath, clonar } from './mocks'
+import { campoLivre, regraNova } from './filtros'
+import RegraDeFiltro from './_RegraDeFiltro.vue'
+import ConstrutorDeRegras from './_ConstrutorDeRegras.vue'
 
 const props = defineProps<{
   t: Textos
@@ -157,53 +160,23 @@ function alternarRapido(filtro: 'isOwner' | 'inGroups', ligado: boolean) {
   })
 }
 
-const OPERADORES: Record<string, string[]> = {
-  texto: ['contains', 'eq', 'empty', 'not_empty'],
-  selecao: ['eq', 'neq', 'empty', 'not_empty'],
-  usuario: ['eq', 'empty', 'not_empty'],
-  moeda: ['gte', 'lte', 'eq'],
-  data: ['next_days', 'gte', 'lte', 'empty'],
-}
-
-const camposDeFiltro = computed(() => CAMPOS.map(c => ({ label: c.label, value: c.path, icon: ICONE_DO_TIPO[c.tipo] })))
-
-function operadoresDe(field: string) {
-  const tipo = campoPorPath(field)?.tipo ?? 'texto'
-  return OPERADORES[tipo]!.map(op => ({ label: props.t.operadores[tipo === 'data' ? `data_${op}` : op] ?? op, value: op }))
-}
-
-const semValor = (op: string) => op === 'empty' || op === 'not_empty'
-
-/** O filtro novo nasce num campo de seleção ainda sem filtro: repetir o campo zera a tabela ("Status é Em análise" e "Status é Aprovado"). */
+/* Rodada 5: a regra usa o operador e o valor do tipo do campo (`filtros.ts`), o mesmo da linha de filtros. */
 function novoFiltro() {
   const usados = (rascunho.value.filters.field_filters ?? []).map(f => f.field)
-  const campo = CAMPOS.find(c => c.tipo === 'selecao' && !usados.includes(c.path)) ?? CAMPOS.find(c => c.tipo === 'texto')!
-  mudar((x) => {
-    x.filters.field_filters = [...(x.filters.field_filters ?? []), campo.tipo === 'selecao'
-      ? { field: campo.path, op: 'eq', value: campo.opcoes![0] }
-      : { field: campo.path, op: 'contains', value: '' }]
-  })
+  mudar((x) => { x.filters.field_filters = [...(x.filters.field_filters ?? []), regraNova(campoLivre(usados).path)] })
 }
 
-function mudarFiltro(i: number, parte: Partial<FiltroDeCampo>) {
-  mudar((x) => {
-    const lista = [...(x.filters.field_filters ?? [])]
-    const atual = { ...lista[i]!, ...parte }
-    if (parte.field) {
-      const campo = campoPorPath(parte.field)!
-      atual.op = OPERADORES[campo.tipo]![0]!
-      atual.value = campo.opcoes?.[0] ?? (campo.tipo === 'moeda' ? 50000 : campo.tipo === 'data' ? 30 : campo.tipo === 'usuario' ? PESSOAS[0]!.id : '')
-    }
-    if (parte.op && campoPorPath(atual.field)?.tipo === 'data') {
-      atual.value = parte.op === 'next_days' ? 30 : '2026-12-31'
-    }
-    lista[i] = atual
-    x.filters.field_filters = lista
-  })
+function mudarFiltro(i: number, r: FiltroDeCampo) {
+  mudar((x) => { x.filters.field_filters = (x.filters.field_filters ?? []).map((f, j) => j === i ? r : f) })
 }
 
 function tirarFiltro(i: number) {
   mudar((x) => { x.filters.field_filters = (x.filters.field_filters ?? []).filter((_, j) => j !== i) })
+}
+
+function novoAvancado() {
+  const usados = (rascunho.value.filters.field_filters ?? []).map(f => f.field)
+  mudar((x) => { x.filters.avancado = { conector: 'and', regras: [regraNova(campoLivre(usados).path)] } })
 }
 
 /* ---------- ordenação ---------- */
@@ -417,7 +390,7 @@ const funcoes = computed({
         </ul>
       </section>
 
-      <!-- Filtros: os 2 automáticos como chaves; cada condição num cartão com campo em cima e operador e valor lado a lado. -->
+      <!-- Filtros (rodada 5): os 2 automáticos como chaves; os filtros por campo; o filtro avançado, com o mesmo construtor do chip "N regras". -->
       <section class="space-y-3 p-4">
         <h3 class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.painel.filtros }}</h3>
         <div class="space-y-3">
@@ -439,93 +412,43 @@ const funcoes = computed({
           />
         </div>
 
-        <TransitionGroup
-          tag="div"
-          class="space-y-1.5"
-          enter-active-class="transition duration-150 ease-out"
-          enter-from-class="opacity-0 -translate-y-1"
-          leave-active-class="transition duration-100 ease-in"
-          leave-to-class="opacity-0"
-        >
-          <div v-for="(f, i) in (rascunho.filters.field_filters ?? [])" :key="i">
-            <p v-if="i > 0" class="pb-1.5 pl-1 text-xs text-muted">{{ t.painel.e }}</p>
-            <div class="space-y-2 rounded-lg bg-elevated/60 p-2.5">
-              <div class="flex items-center gap-1.5">
-                <USelect
-                  :model-value="f.field"
-                  :items="camposDeFiltro"
-                  size="sm"
-                  class="min-w-0 flex-1"
-                  :aria-label="t.painel.campo"
-                  @update:model-value="(v: string) => mudarFiltro(i, { field: v })"
-                />
-                <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="xs" :aria-label="t.painel.tirarFiltro" @click="tirarFiltro(i)" />
-              </div>
-              <div class="grid grid-cols-2 gap-1.5 pr-7">
-                <USelect
-                  :model-value="f.op"
-                  :items="operadoresDe(f.field)"
-                  size="sm"
-                  class="min-w-0"
-                  :class="semValor(f.op) ? 'col-span-2' : ''"
-                  :aria-label="t.painel.operador"
-                  @update:model-value="(v: string) => mudarFiltro(i, { op: v })"
-                />
-                <template v-if="!semValor(f.op)">
-                  <USelect
-                    v-if="campoPorPath(f.field)?.tipo === 'selecao'"
-                    :model-value="String(f.value)"
-                    :items="campoPorPath(f.field)!.opcoes!"
-                    size="sm"
-                    class="min-w-0"
-                    :aria-label="t.painel.valor"
-                    @update:model-value="(v: string) => mudarFiltro(i, { value: v })"
-                  />
-                  <USelect
-                    v-else-if="campoPorPath(f.field)?.tipo === 'usuario'"
-                    :model-value="Number(f.value)"
-                    :items="PESSOAS.map(p => ({ label: p.nome, value: p.id }))"
-                    size="sm"
-                    class="min-w-0"
-                    :aria-label="t.painel.valor"
-                    @update:model-value="(v: number) => mudarFiltro(i, { value: v })"
-                  />
-                  <UInput
-                    v-else-if="campoPorPath(f.field)?.tipo === 'data' && f.op === 'next_days'"
-                    :model-value="Number(f.value)"
-                    type="number"
-                    size="sm"
-                    class="min-w-0"
-                    :aria-label="t.painel.valor"
-                    :ui="{ trailing: 'pointer-events-none' }"
-                    @update:model-value="(v: string | number) => mudarFiltro(i, { value: Number(v) })"
-                  >
-                    <template #trailing><span class="text-xs text-muted">{{ t.painel.dias }}</span></template>
-                  </UInput>
-                  <UInput
-                    v-else-if="campoPorPath(f.field)?.tipo === 'data'"
-                    :model-value="String(f.value)"
-                    type="date"
-                    size="sm"
-                    class="min-w-0"
-                    :aria-label="t.painel.valor"
-                    @update:model-value="(v: string) => mudarFiltro(i, { value: v })"
-                  />
-                  <UInput
-                    v-else
-                    :model-value="String(f.value ?? '')"
-                    :type="campoPorPath(f.field)?.tipo === 'moeda' ? 'number' : 'text'"
-                    size="sm"
-                    class="min-w-0"
-                    :aria-label="t.painel.valor"
-                    @update:model-value="(v: string | number) => mudarFiltro(i, { value: campoPorPath(f.field)?.tipo === 'moeda' ? Number(v) : v })"
-                  />
-                </template>
-              </div>
-            </div>
+        <div class="space-y-2">
+          <div>
+            <p class="text-sm font-medium text-highlighted">{{ t.filtro.simples }}</p>
+            <p class="text-xs text-muted">{{ t.filtro.simplesAjuda }}</p>
           </div>
-        </TransitionGroup>
-        <UButton :label="t.painel.adicionarFiltro" icon="i-lucide-plus" color="neutral" variant="outline" size="sm" @click="novoFiltro" />
+          <TransitionGroup
+            tag="div"
+            class="space-y-1.5"
+            enter-active-class="transition duration-150 ease-out"
+            enter-from-class="opacity-0 -translate-y-1"
+            leave-active-class="transition duration-100 ease-in"
+            leave-to-class="opacity-0"
+          >
+            <div v-for="(f, i) in (rascunho.filters.field_filters ?? [])" :key="`${f.field}-${i}`" class="flex items-start gap-1.5 rounded-lg bg-elevated/60 p-2">
+              <RegraDeFiltro :model-value="f" :t="t" empilhado class="flex-1" @update:model-value="(r: FiltroDeCampo) => mudarFiltro(i, r)" />
+              <UButton icon="i-lucide-trash-2" color="neutral" variant="ghost" size="sm" :aria-label="t.filtro.excluirFiltro" @click="tirarFiltro(i)" />
+            </div>
+          </TransitionGroup>
+          <UButton :label="t.filtro.adicionarFiltro" icon="i-lucide-plus" color="neutral" variant="ghost" size="sm" @click="novoFiltro" />
+        </div>
+
+        <div class="space-y-2 border-t border-default pt-3">
+          <div>
+            <p class="text-sm font-medium text-highlighted">{{ t.filtro.avancado }}</p>
+            <p class="text-xs text-muted">{{ t.filtro.avancadoAjuda }}</p>
+          </div>
+          <template v-if="rascunho.filters.avancado">
+            <ConstrutorDeRegras
+              :model-value="rascunho.filters.avancado"
+              :t="t"
+              empilhado
+              @update:model-value="(g: GrupoDeRegras) => mudar(x => { x.filters.avancado = g })"
+            />
+            <UButton :label="t.filtro.excluirAvancado" icon="i-lucide-trash-2" color="neutral" variant="ghost" size="sm" @click="mudar(x => { delete x.filters.avancado })" />
+          </template>
+          <UButton v-else :label="t.filtro.adicionarAvancado" icon="i-lucide-list-filter" color="neutral" variant="outline" size="sm" @click="novoAvancado" />
+        </div>
       </section>
 
       <!-- Ordenação: o mesmo cartão dos filtros, numa linha só: campo, direção e retirar. -->

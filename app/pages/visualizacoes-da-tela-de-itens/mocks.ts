@@ -159,9 +159,18 @@ export const ITENS: Item[] = Array.from({ length: 48 }, (_, i) => {
 
 /* ---------- visualizações ---------- */
 
-export type Operador = 'eq' | 'neq' | 'contains' | 'gte' | 'lte' | 'empty' | 'not_empty' | 'next_days'
+export type Operador = 'eq' | 'neq' | 'in' | 'nin' | 'contains' | 'gte' | 'lte' | 'empty' | 'not_empty' | 'next_days'
 
+/** `in` e `nin` levam uma lista: "Status é Aprovado ou Assinado". Lista vazia não filtra (Notion faz igual). */
 export interface FiltroDeCampo { field: string, op: Operador | string, value: unknown }
+
+/**
+ * INVENTADO (rodada 5): o filtro avançado. O schema guarda só `field_filters`, uma lista em que tudo vale junto (E).
+ * A busca da API já aceita grupos (`_where` com `_and`, `_or`, `_nor`); falta a visualização guardar a árvore.
+ * Grupo dentro de grupo só 1 nível: o grupo de dentro só tem regras.
+ */
+export interface GrupoDeRegras { conector: 'and' | 'or', regras: (FiltroDeCampo | GrupoDeRegras)[] }
+export const ehGrupo = (x: FiltroDeCampo | GrupoDeRegras): x is GrupoDeRegras => 'regras' in x
 export interface Ordenacao { field: string, direction: 'asc' | 'desc' }
 
 /**
@@ -175,6 +184,8 @@ export type Visualizacao = Omit<ModelView, 'id' | 'created_at' | 'updated_at' | 
   filters: {
     field_filters?: FiltroDeCampo[]
     quick_filters?: { filter: 'isOwner' | 'inGroups' | string, required?: boolean }[]
+    /** INVENTADO: o filtro avançado, que vale junto (E) com os filtros simples de `field_filters`. */
+    avancado?: GrupoDeRegras
   }
   /** INVENTADO: fixada no começo da barra, só para quem fixou. */
   fixada?: boolean
@@ -217,7 +228,7 @@ const POUCAS: Visualizacao[] = [
     name: 'Em análise',
     icon: 'i-lucide-search-check',
     config: { hide: false, columns: cols('reference', 'fornecedor', 'responsavel', 'valor', 'vencimento'), sorts: [{ field: 'vencimento', direction: 'asc' }] },
-    filters: { field_filters: [{ field: 'status', op: 'eq', value: 'Em análise' }] },
+    filters: { field_filters: [{ field: 'status', op: 'in', value: ['Em análise'] }] },
   }),
   vis({
     reference: 'quadro-por-status',
@@ -231,25 +242,25 @@ const POUCAS: Visualizacao[] = [
     name: 'Vencendo em 30 dias',
     icon: 'i-lucide-alarm-clock',
     config: { hide: false, columns: cols('reference', 'fornecedor', 'status', 'responsavel', 'vencimento'), sorts: [{ field: 'vencimento', direction: 'asc' }] },
-    filters: { field_filters: [{ field: 'vencimento', op: 'next_days', value: 30 }, { field: 'status', op: 'neq', value: 'Vencido' }] },
+    filters: { field_filters: [{ field: 'vencimento', op: 'next_days', value: 30 }, { field: 'status', op: 'nin', value: ['Vencido'] }] },
   }),
 ]
 
 const MAIS: Visualizacao[] = [
   vis({ reference: 'meus-contratos', name: 'Meus contratos', icon: 'i-lucide-user-round', user: EU.id, fixada: true, filters: { quick_filters: [{ filter: 'isOwner', required: true }] } }),
-  vis({ reference: 'alta-prioridade', name: 'Alta prioridade', icon: 'i-lucide-flame', filters: { field_filters: [{ field: 'prioridade', op: 'eq', value: 'Alta' }] }, config: { hide: false, columns: TODAS, sorts: [{ field: 'vencimento', direction: 'asc' }, { field: 'valor', direction: 'desc' }] } }),
-  vis({ reference: 'aprovados-financeiro', name: 'Aprovados do financeiro', icon: 'i-lucide-badge-check', module_groups: [2], filters: { field_filters: [{ field: 'status', op: 'eq', value: 'Aprovado' }, { field: 'area', op: 'eq', value: 'Financeiro' }] } }),
+  vis({ reference: 'alta-prioridade', name: 'Alta prioridade', icon: 'i-lucide-flame', filters: { field_filters: [{ field: 'prioridade', op: 'in', value: ['Alta'] }] }, config: { hide: false, columns: TODAS, sorts: [{ field: 'vencimento', direction: 'asc' }, { field: 'valor', direction: 'desc' }] } }),
+  vis({ reference: 'aprovados-financeiro', name: 'Aprovados do financeiro', icon: 'i-lucide-badge-check', module_groups: [2], filters: { field_filters: [{ field: 'status', op: 'in', value: ['Aprovado'] }, { field: 'area', op: 'in', value: ['Financeiro'] }] } }),
   vis({ reference: 'acima-100-mil', name: 'Acima de R$ 100 mil', icon: 'i-lucide-banknote', filters: { field_filters: [{ field: 'valor', op: 'gte', value: 100000 }] }, config: { hide: false, columns: TODAS, sorts: [{ field: 'valor', direction: 'desc' }] } }),
   vis({ reference: 'kanban-por-area', name: 'Quadro por área', model_type: 'kanban', icon: 'i-lucide-square-kanban', config: { hide: false, groupBy: 'area', columns: TODAS, cardConfig: { header: 'fornecedor', content: 'valor', tags: [{ field: 'prioridade' }], userField: 'responsavel', dueDateField: 'vencimento' } } }),
-  vis({ reference: 'vencidos', name: 'Vencidos', icon: 'i-lucide-calendar-x', filters: { field_filters: [{ field: 'status', op: 'eq', value: 'Vencido' }] } }),
+  vis({ reference: 'vencidos', name: 'Vencidos', icon: 'i-lucide-calendar-x', filters: { field_filters: [{ field: 'status', op: 'in', value: ['Vencido'] }] } }),
   vis({ reference: 'sem-responsavel', name: 'Sem responsável', icon: 'i-lucide-user-x', filters: { field_filters: [{ field: 'responsavel', op: 'empty', value: null }] } }),
-  vis({ reference: 'juridico', name: 'Jurídico', icon: 'i-lucide-scale', filters: { field_filters: [{ field: 'area', op: 'eq', value: 'Jurídico' }] } }),
-  vis({ reference: 'compras', name: 'Compras', icon: 'i-lucide-shopping-cart', filters: { field_filters: [{ field: 'area', op: 'eq', value: 'Compras' }] } }),
-  vis({ reference: 'tecnologia', name: 'Tecnologia', icon: 'i-lucide-cpu', filters: { field_filters: [{ field: 'area', op: 'eq', value: 'Tecnologia' }] } }),
-  vis({ reference: 'rascunhos', name: 'Rascunhos parados', icon: 'i-lucide-file-pen-line', user: EU.id, filters: { field_filters: [{ field: 'status', op: 'eq', value: 'Rascunho' }] } }),
-  vis({ reference: 'revisao-trimestral', name: 'Revisão trimestral dos contratos de fornecedores estratégicos', icon: 'i-lucide-clipboard-list', description: 'Contratos que o comitê revisa a cada trimestre.', filters: { field_filters: [{ field: 'valor', op: 'gte', value: 60000 }, { field: 'status', op: 'neq', value: 'Rascunho' }] } }),
+  vis({ reference: 'juridico', name: 'Jurídico', icon: 'i-lucide-scale', filters: { field_filters: [{ field: 'area', op: 'in', value: ['Jurídico'] }] } }),
+  vis({ reference: 'compras', name: 'Compras', icon: 'i-lucide-shopping-cart', filters: { field_filters: [{ field: 'area', op: 'in', value: ['Compras'] }] } }),
+  vis({ reference: 'tecnologia', name: 'Tecnologia', icon: 'i-lucide-cpu', filters: { field_filters: [{ field: 'area', op: 'in', value: ['Tecnologia'] }] } }),
+  vis({ reference: 'rascunhos', name: 'Rascunhos parados', icon: 'i-lucide-file-pen-line', user: EU.id, filters: { field_filters: [{ field: 'status', op: 'in', value: ['Rascunho'] }] } }),
+  vis({ reference: 'revisao-trimestral', name: 'Revisão trimestral dos contratos de fornecedores estratégicos', icon: 'i-lucide-clipboard-list', description: 'Contratos que o comitê revisa a cada trimestre.', filters: { avancado: { conector: 'and', regras: [{ field: 'valor', op: 'gte', value: 60000 }, { conector: 'or', regras: [{ field: 'status', op: 'in', value: ['Aprovado', 'Assinado'] }, { field: 'prioridade', op: 'in', value: ['Alta'] }] }] } } }),
   vis({ reference: 'meus-grupos', name: 'Dos meus grupos', icon: 'i-lucide-users', filters: { quick_filters: [{ filter: 'inGroups', required: true }] } }),
-  vis({ reference: 'pessoas', name: 'Pessoas', icon: 'i-lucide-heart-handshake', filters: { field_filters: [{ field: 'area', op: 'eq', value: 'Pessoas' }] } }),
+  vis({ reference: 'pessoas', name: 'Pessoas', icon: 'i-lucide-heart-handshake', filters: { field_filters: [{ field: 'area', op: 'in', value: ['Pessoas'] }] } }),
 ]
 
 export type Volume = 'nenhuma' | 'poucas' | 'muitas'
@@ -267,6 +278,8 @@ function passa(item: Item, f: FiltroDeCampo): boolean {
   switch (f.op) {
     case 'eq': return v === f.value
     case 'neq': return v !== f.value
+    case 'in': return !Array.isArray(f.value) || !f.value.length || f.value.includes(v)
+    case 'nin': return !Array.isArray(f.value) || !f.value.includes(v)
     case 'contains': return String(v ?? '').toLowerCase().includes(String(f.value ?? '').toLowerCase())
     case 'gte': return typeof v === 'number' ? v >= Number(f.value) : String(v) >= String(f.value)
     case 'lte': return typeof v === 'number' ? v <= Number(f.value) : String(v) <= String(f.value)
@@ -282,10 +295,23 @@ function passa(item: Item, f: FiltroDeCampo): boolean {
   }
 }
 
+/* A regra ainda sem valor (lista vazia, texto vazio) não conta: num grupo "Ou", ela deixaria passar tudo. */
+const semEfeito = (r: FiltroDeCampo | GrupoDeRegras): boolean => ehGrupo(r)
+  ? r.regras.every(semEfeito)
+  : (Array.isArray(r.value) && !r.value.length && (r.op === 'in' || r.op === 'nin')) || (r.op === 'contains' && !String(r.value ?? '').trim())
+
+function passaNoGrupo(item: Item, g: GrupoDeRegras): boolean {
+  const regras = g.regras.filter(r => !semEfeito(r))
+  if (!regras.length) return true
+  const vale = (r: FiltroDeCampo | GrupoDeRegras) => ehGrupo(r) ? passaNoGrupo(item, r) : passa(item, r)
+  return g.conector === 'or' ? regras.some(vale) : regras.every(vale)
+}
+
 export function aplicar(v: Visualizacao, itens: Item[] = ITENS): Item[] {
   const filtros = v.filters.field_filters ?? []
   const rapidos = v.filters.quick_filters ?? []
-  let lista = itens.filter(i => filtros.every(f => passa(i, f)))
+  const avancado = v.filters.avancado
+  let lista = itens.filter(i => filtros.every(f => passa(i, f)) && (!avancado || passaNoGrupo(i, avancado)))
   if (rapidos.some(r => r.filter === 'isOwner')) lista = lista.filter(i => i.responsavel === EU.id)
   if (rapidos.some(r => r.filter === 'inGroups')) lista = lista.filter(i => EU.grupos.includes(i.grupo))
   const sorts = v.config.sorts ?? []

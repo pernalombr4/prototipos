@@ -23,6 +23,7 @@
  */
 import type { ContextMenuItem } from '@nuxt/ui'
 import type { Visualizacao } from './mocks'
+import type { ResumoDaVisualizacao } from './filtros'
 import { EU } from './mocks'
 import type { Textos } from './textos'
 
@@ -38,8 +39,8 @@ const props = defineProps<{
   modificada: boolean
   /** Todas as que têm mudança não salva: a ativa mostra o ponto na seta; as outras, depois do nome. */
   modificadas: string[]
-  contagens: Record<string, number>
-  resumoDe: (v: Visualizacao) => string
+  /** O que a dica da pílula mostra: tipo, quem vê, filtros e ordenação (ver `resumoDe` no index). */
+  resumoDe: (v: Visualizacao) => ResumoDaVisualizacao
 }>()
 
 const visualizacoes = defineModel<Visualizacao[]>('visualizacoes', { required: true })
@@ -362,7 +363,7 @@ function podeRenomear(v?: Visualizacao) {
   return !!v && v.reference !== SISTEMA && (props.ehOwner || v.user === EU.id || !!v.novo)
 }
 
-function acoesDe(v: Visualizacao): ContextMenuItem[][] {
+function acoesDe(v: Visualizacao, naLista = false): ContextMenuItem[][] {
   const t = props.t.menu
   const sistema = v.reference === SISTEMA
   // Em criação: ainda não existe para os outros; o único caminho além do painel é desistir.
@@ -370,7 +371,7 @@ function acoesDe(v: Visualizacao): ContextMenuItem[][] {
   const grupos: ContextMenuItem[][] = []
   const minha = v.user === EU.id
   const gerais: ContextMenuItem[] = []
-  if (podeRenomear(v)) gerais.push({ label: t.renomear, icon: 'i-lucide-pencil', kbds: ['f2'], onSelect: () => comecarARenomear(v.reference) })
+  if (podeRenomear(v)) gerais.push({ label: t.renomear, icon: 'i-lucide-pencil', kbds: ['f2'], onSelect: () => naLista ? renomearNaLista(v.reference) : comecarARenomear(v.reference) })
   gerais.push({ label: t.configurar, icon: 'i-lucide-sliders-horizontal', onSelect: () => emit('configurar', v.reference) })
   gerais.push({ label: t.duplicar, icon: 'i-lucide-copy', onSelect: () => emit('duplicar', v.reference) })
   gerais.push({ label: t.copiarLink, icon: 'i-lucide-link', onSelect: () => emit('copiarLink', v.reference) })
@@ -407,15 +408,45 @@ const itensDoMenu = computed<ContextMenuItem[][]>(() => doMenu.value ? acoesDe(d
 const listaAberta = ref(false)
 const busca = ref('')
 
+/*
+ * Rodada 5: o "+N" é o editor de todas as visualizações, não só o depósito das que não cabem.
+ * A lista mostra todas, na ordem da barra; uma linha divide as que estão na barra das que não cabem.
+ * Cada linha arrasta, abre, renomeia no lugar (clique duplo) e tem o "⋯" com as ações da pílula.
+ */
 const filtradas = computed(() => {
   const q = busca.value.trim().toLowerCase()
-  return q ? escondidas.value.filter(v => nomeDe(v).toLowerCase().includes(q)) : escondidas.value
+  return q ? visualizacoes.value.filter(v => nomeDe(v).toLowerCase().includes(q)) : visualizacoes.value
 })
 
-function abrirEscondida(v: Visualizacao) {
+/** A 1ª que não cabe na barra: a linha divisória aparece antes dela (sem busca). */
+const primeiraFora = computed(() => busca.value ? null : visualizacoes.value.find(v => !visiveis.value.includes(v))?.reference ?? null)
+
+function abrirDaLista(v: Visualizacao) {
   ativa.value = v.reference
   listaAberta.value = false
   busca.value = ''
+}
+
+/* O clique abre depois de 250 ms: se vier o 2º clique, é renomear, e a lista fica aberta. */
+let cliqueNaLista: ReturnType<typeof setTimeout> | null = null
+function aoClicarNaLinha(v: Visualizacao, e: MouseEvent) {
+  if (cliqueNaLista) clearTimeout(cliqueNaLista)
+  if (e.detail > 1) {
+    cliqueNaLista = null
+    renomearNaLista(v.reference)
+    return
+  }
+  cliqueNaLista = setTimeout(() => { cliqueNaLista = null; abrirDaLista(v) }, 250)
+}
+
+/* Renomear na lista: o campo aparece na própria linha e grava pelo mesmo caminho da pílula. */
+function renomearNaLista(id: string) {
+  const v = visualizacoes.value.find(x => x.reference === id)
+  if (!v || !podeRenomear(v)) return
+  posRenomear.value = null
+  nomeNovo.value = nomeDe(v)
+  renomeando.value = id
+  nextTick(() => lista.value?.querySelector<HTMLInputElement>('[data-renomear] input')?.select())
 }
 
 /*
@@ -455,7 +486,7 @@ function soltarNaLista() {
 let inicioNaLista: { id: string, y: number, engatou: boolean } | null = null
 
 function aoPressionarLinha(e: PointerEvent, v: Visualizacao) {
-  if (e.button !== 0 || busca.value) return
+  if (e.button !== 0 || busca.value || v.reference === 'default' || renomeando.value) return
   inicioNaLista = { id: v.reference, y: e.clientY, engatou: false }
   window.addEventListener('pointermove', aoMoverLinha)
   window.addEventListener('pointerup', aoSoltarLinha, { once: true })
@@ -491,11 +522,13 @@ function linhas(): HTMLElement[] {
 
 function aoTeclarNaLista(e: KeyboardEvent) {
   if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
+  if (renomeando.value) return
   const els = linhas()
   const i = els.indexOf(document.activeElement as HTMLElement)
   e.preventDefault()
   if (e.ctrlKey && e.shiftKey && i >= 0 && !busca.value) {
     const id = filtradas.value[i]!.reference
+    if (id === 'default') return
     const alvo = e.key === 'ArrowUp' ? i - 1 : i + 2
     if (alvo < 0 || alvo > filtradas.value.length) return
     moverNaLista(id, alvo)
@@ -611,19 +644,82 @@ const ui = {
             :class="arrastando ? '[&_[data-slot=trigger]]:cursor-grabbing' : ''"
           >
             <template #default="{ item }">
+              <!--
+                Rodada 5: a dica organizada em partes. Nome e descrição; o tipo e quem vê em etiquetas;
+                filtros e ordenação em 2 colunas, cada filtro numa etiqueta; o atalho no rodapé. Sem a contagem de itens.
+              -->
               <UTooltip
                 :delay-duration="500"
                 :disabled="!!arrastando"
-                :content="{ side: 'bottom', align: 'start' }"
-                :ui="{ content: 'h-auto max-w-80 flex-col items-start gap-0.5 py-1.5' }"
+                :content="{ side: 'bottom', align: 'start', sideOffset: 6 }"
+                :ui="{ content: 'h-auto w-80 max-w-80 flex-col items-stretch gap-0 p-0' }"
               >
                 <span class="max-w-40 truncate">{{ item.label }}</span>
                 <template #content>
-                  <span class="block whitespace-normal font-semibold text-highlighted">{{ item.label }}</span>
-                  <span class="block whitespace-normal text-muted">{{ resumoDe(item.vis) }}</span>
-                  <span class="block text-muted">{{ t.barra.itens(contagens[item.value] ?? 0) }}</span>
-                  <span v-if="pessoais.includes(item.value)" class="block whitespace-normal text-muted">{{ t.barra.versaoSuaAjuda }}</span>
-                  <span v-if="item.value !== 'default'" class="block text-dimmed">{{ t.barra.dicaArrastar }}</span>
+                  <div class="space-y-2.5 p-3 text-left">
+                    <div class="space-y-1.5">
+                      <p class="whitespace-normal text-sm font-semibold text-highlighted">{{ item.label }}</p>
+                      <p v-if="resumoDe(item.vis).descricao" class="whitespace-normal text-xs text-muted">{{ resumoDe(item.vis).descricao }}</p>
+                      <div class="flex flex-wrap gap-1">
+                        <UBadge
+                          :label="resumoDe(item.vis).tipo === 'kanban' ? t.catalogo.kanban : t.catalogo.tabela"
+                          :icon="resumoDe(item.vis).tipo === 'kanban' ? 'i-lucide-square-kanban' : 'i-lucide-table'"
+                          color="neutral"
+                          variant="soft"
+                          size="sm"
+                        />
+                        <UBadge
+                          :label="resumoDe(item.vis).quemVe === 'eu' ? t.resumo.soVoce : resumoDe(item.vis).quemVe === 'grupos' ? t.resumo.grupos(resumoDe(item.vis).grupos ?? '') : t.resumo.todosVeem"
+                          :icon="resumoDe(item.vis).quemVe === 'eu' ? 'i-lucide-lock' : resumoDe(item.vis).quemVe === 'grupos' ? 'i-lucide-users' : 'i-lucide-globe'"
+                          color="neutral"
+                          variant="soft"
+                          size="sm"
+                          :ui="{ label: 'whitespace-normal' }"
+                        />
+                        <UBadge v-if="pessoais.includes(item.value)" :label="t.barra.versaoSua" icon="i-lucide-user-round" color="info" variant="soft" size="sm" />
+                        <UBadge v-if="resumoDe(item.vis).naoSalva" :label="t.resumo.naoSalva" color="warning" variant="soft" size="sm" />
+                      </div>
+                    </div>
+
+                    <dl class="grid grid-cols-[5.5rem_1fr] items-start gap-x-2 gap-y-2 border-t border-default pt-2.5 text-xs">
+                      <template v-if="resumoDe(item.vis).agrupadoPor">
+                        <dt class="pt-0.5 text-muted">{{ t.dica.agrupado }}</dt>
+                        <dd><UBadge :label="resumoDe(item.vis).agrupadoPor" color="neutral" variant="outline" size="sm" /></dd>
+                      </template>
+                      <dt class="pt-0.5 text-muted">{{ t.dica.filtros }}</dt>
+                      <dd class="flex flex-wrap gap-1">
+                        <template v-for="f in resumoDe(item.vis).filtros" :key="f.texto">
+                          <span v-if="f.ou" class="pt-0.5 text-dimmed">{{ t.dica.ou }}</span>
+                          <UBadge
+                            :label="f.texto"
+                            color="neutral"
+                            variant="outline"
+                            size="sm"
+                            :ui="{ label: 'whitespace-normal text-left' }"
+                          />
+                        </template>
+                        <span v-if="!resumoDe(item.vis).filtros.length" class="pt-0.5 text-dimmed">{{ t.dica.semFiltro }}</span>
+                      </dd>
+                      <template v-if="resumoDe(item.vis).ordenacao.length">
+                        <dt class="pt-0.5 text-muted">{{ t.dica.ordenacao }}</dt>
+                        <dd class="flex flex-wrap gap-1">
+                          <UBadge
+                            v-for="o in resumoDe(item.vis).ordenacao"
+                            :key="o.campo"
+                            :label="o.campo"
+                            :icon="o.crescente ? 'i-lucide-arrow-up-narrow-wide' : 'i-lucide-arrow-down-wide-narrow'"
+                            color="neutral"
+                            variant="outline"
+                            size="sm"
+                          />
+                        </dd>
+                      </template>
+                    </dl>
+                  </div>
+                  <div v-if="item.value !== 'default'" class="flex flex-wrap gap-x-3 gap-y-1 border-t border-default bg-elevated/50 px-3 py-2 text-xs text-dimmed">
+                    <span class="flex items-center gap-1"><UIcon name="i-lucide-grip-vertical" class="size-3.5" />{{ t.dica.arrastar }}</span>
+                    <span class="flex items-center gap-1"><UIcon name="i-lucide-mouse-pointer-click" class="size-3.5" />{{ t.dica.renomear }}</span>
+                  </div>
                 </template>
               </UTooltip>
             </template>
@@ -640,14 +736,14 @@ const ui = {
 
             <template #list-trailing>
               <div class="ml-auto flex shrink-0 items-center gap-0.5 self-center pl-2" @pointerdown.stop>
-                <UPopover v-if="escondidas.length" v-model:open="listaAberta" :content="{ align: 'end', sideOffset: 6 }">
+                <UPopover v-model:open="listaAberta" :content="{ align: 'end', sideOffset: 6 }">
                   <UButton
-                    :label="`+${escondidas.length}`"
+                    :label="escondidas.length ? `+${escondidas.length}` : undefined"
                     trailing-icon="i-lucide-chevron-down"
                     color="neutral"
                     variant="ghost"
                     size="sm"
-                    :aria-label="t.barra.maisVisualizacoes(escondidas.length)"
+                    :aria-label="escondidas.length ? t.barra.maisVisualizacoes(escondidas.length) : t.barra.todas"
                     class="text-muted"
                   />
                   <template #content>
@@ -655,7 +751,7 @@ const ui = {
                       Lista própria, não o UCommandPalette: o CommandPalette não reordena.
                       Busca em cima, linhas com alça de arrastar, menu "⋯" por linha.
                     -->
-                    <div class="w-72" @keydown="aoTeclarNaLista">
+                    <div class="w-80" @keydown="aoTeclarNaLista">
                       <UInput
                         v-model="busca"
                         icon="i-lucide-search"
@@ -669,35 +765,62 @@ const ui = {
                       <ul
                         v-else
                         ref="lista"
-                        class="max-h-80 overflow-y-auto p-1"
-                        :aria-label="t.barra.escondidasRotulo"
+                        class="max-h-[min(30rem,62vh)] overflow-y-auto p-1"
+                        :aria-label="t.barra.todas"
                       >
                         <TransitionGroup move-class="transition-transform duration-200 ease-out">
                           <li
                             v-for="(v, i) in filtradas"
                             :key="v.reference"
-                            class="group/linha relative flex select-none items-center gap-1.5 rounded-md py-0.5 pl-1 pr-0.5 text-sm text-default hover:bg-elevated focus-within:bg-elevated"
-                            :class="arrastandoNaLista === v.reference ? 'opacity-40' : (busca ? '' : 'cursor-grab')"
+                            class="relative"
                             @pointerdown="(e: PointerEvent) => aoPressionarLinha(e, v)"
                           >
-                            <span v-if="arrastandoNaLista && alvoNaLista === i" class="absolute inset-x-1 -top-px h-0.5 rounded-full bg-primary" />
-                            <span v-if="arrastandoNaLista && alvoNaLista === i + 1 && i === filtradas.length - 1" class="absolute inset-x-1 -bottom-px h-0.5 rounded-full bg-primary" />
-                            <UIcon
-                              name="i-lucide-grip-vertical"
-                              class="size-4 shrink-0 text-dimmed"
-                              :class="busca ? 'invisible' : 'cursor-grab'"
-                            />
-                            <button
-                              type="button"
-                              data-linha
-                              class="flex min-w-0 flex-1 items-center gap-2 rounded py-1 text-left outline-none"
-                              @click="abrirEscondida(v)"
+                            <!-- Divisória: daqui para baixo, as que não cabem na barra -->
+                            <p v-if="v.reference === primeiraFora" class="mx-1 mb-1 mt-1.5 border-t border-default px-1 pt-2 text-xs font-medium text-muted">
+                              {{ t.barra.foraDaBarra }}
+                            </p>
+                            <div
+                              class="group/linha relative flex select-none items-center gap-1.5 rounded-md py-0.5 pl-1 pr-0.5 text-sm hover:bg-elevated focus-within:bg-elevated"
+                              :class="[
+                                arrastandoNaLista === v.reference ? 'opacity-40' : (busca || v.reference === 'default' ? '' : 'cursor-grab'),
+                                v.reference === ativa ? 'bg-elevated/60 font-medium text-highlighted' : 'text-default',
+                              ]"
                             >
-                              <UIcon :name="v.icon ?? 'i-lucide-table'" class="size-4 shrink-0 text-muted" />
-                              <span class="truncate">{{ nomeDe(v) }}</span>
-                              <span v-if="modificadas.includes(v.reference)" class="size-2 shrink-0 rounded-full bg-warning" role="img" :aria-label="t.barra.naoSalva" />
-                            </button>
-                            <UDropdownMenu :items="acoesDe(v)" :content="{ align: 'start', side: 'right' }" :ui="{ content: 'w-64', itemDescription: 'whitespace-normal' }">
+                              <span v-if="arrastandoNaLista && alvoNaLista === i" class="absolute inset-x-1 -top-px h-0.5 rounded-full bg-primary" />
+                              <span v-if="arrastandoNaLista && alvoNaLista === i + 1 && i === filtradas.length - 1" class="absolute inset-x-1 -bottom-px h-0.5 rounded-full bg-primary" />
+                              <UIcon
+                                name="i-lucide-grip-vertical"
+                                class="size-4 shrink-0 text-dimmed"
+                                :class="busca || v.reference === 'default' ? 'invisible' : 'cursor-grab'"
+                              />
+                              <div v-if="renomeando === v.reference && !posRenomear" data-renomear class="min-w-0 flex-1 py-0.5" @pointerdown.stop>
+                                <UInput
+                                  v-model="nomeNovo"
+                                  size="xs"
+                                  autofocus
+                                  :aria-label="t.barra.novoNome"
+                                  class="w-full"
+                                  @keydown.enter.prevent="concluirRenomear(true)"
+                                  @keydown.esc.prevent.stop="concluirRenomear(false)"
+                                  @blur="concluirRenomear(true)"
+                                />
+                              </div>
+                              <button
+                                v-else
+                                type="button"
+                                data-linha
+                                class="flex min-w-0 flex-1 items-center gap-2 rounded py-1 text-left outline-none"
+                                @click="(e: MouseEvent) => aoClicarNaLinha(v, e)"
+                                @keydown.enter.prevent="abrirDaLista(v)"
+                              >
+                                <UIcon :name="v.icon ?? 'i-lucide-table'" class="size-4 shrink-0" :class="v.reference === ativa ? 'text-primary' : 'text-muted'" />
+                                <span class="truncate">{{ nomeDe(v) }}</span>
+                                <UIcon v-if="v.fixada" name="i-lucide-pin" class="size-3 shrink-0 text-dimmed" :aria-label="t.barra.fixadaRotulo" />
+                                <UIcon v-if="pessoais.includes(v.reference)" name="i-lucide-user-round" class="size-3 shrink-0 text-dimmed" :aria-label="t.barra.versaoSua" />
+                                <span v-if="modificadas.includes(v.reference)" class="size-2 shrink-0 rounded-full bg-warning" role="img" :aria-label="t.barra.naoSalva" />
+                                <UIcon v-if="v.reference === ativa" name="i-lucide-check" class="ml-auto size-4 shrink-0 text-primary" :aria-label="t.barra.ativaRotulo" />
+                              </button>
+                              <UDropdownMenu :items="acoesDe(v, true)" :content="{ align: 'start', side: 'right' }" :ui="{ content: 'w-64', itemDescription: 'whitespace-normal' }">
                               <UButton
                                 icon="i-lucide-ellipsis"
                                 color="neutral"
@@ -708,6 +831,7 @@ const ui = {
                                 @pointerdown.stop
                               />
                             </UDropdownMenu>
+                            </div>
                           </li>
                         </TransitionGroup>
                       </ul>

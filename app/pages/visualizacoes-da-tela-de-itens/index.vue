@@ -12,7 +12,8 @@
  * período, ícones, Novo registro), a tabela nem o quadro.
  */
 import type { EnKanbanCardConfig, EnKanbanColumn, EnTableColumn, EnTableSort } from '@be-enlighten/enspace-sdk-ui/base'
-import type { FiltroDeCampo, Item, Visualizacao, Volume } from './mocks'
+import type { Item, Visualizacao, Volume } from './mocks'
+import type { ResumoDaVisualizacao } from './filtros'
 import { textos } from './textos'
 import { CAMPOS, EU, GRUPOS, ITENS, aplicar, campoPorPath, clonar, categoria, nomeDaPessoa, visualizacoesIniciais, workspace } from './mocks'
 import CascaDaLista from './_CascaDaLista.vue'
@@ -21,6 +22,8 @@ import BarraDeHoje from './_BarraDeHoje.vue'
 import PainelDeConfiguracao from './_PainelDeConfiguracao.vue'
 import CatalogoDeTipos from './_CatalogoDeTipos.vue'
 import ModalDeHoje from './_ModalDeHoje.vue'
+import LinhaDeFiltros from './_LinhaDeFiltros.vue'
+import { contarRegras, useDescricaoDeFiltro, vazia } from './filtros'
 
 import briefingMd from './BRIEFING.md?raw'
 import pesquisaMd from './PESQUISA.md?raw'
@@ -28,7 +31,7 @@ import decisoesMd from './DECISOES.md?raw'
 
 definePageMeta({
   titulo: 'Visualizações da tela de itens',
-  descricao: 'Barra de visualizações com arrastar, "+N" e nome cortado com tooltip; criar escolhendo Tabela ou Kanban e configurar num painel com a tabela à vista; salvar para todos ou só para mim.',
+  descricao: 'Barra de visualizações com arrastar, "+N" e nome cortado com tooltip; criar escolhendo Tabela ou Kanban, filtrar por chip ou com o filtro avançado (E, Ou e grupos); salvar para todos ou só para mim.',
   status: 'em-revisao',
   atualizado: '2026-10-23',
   tela: 'Tela nova de itens (lista da categoria)',
@@ -162,62 +165,84 @@ const itensDaVisualizacao = computed(() => {
   return q ? lista.filter(i => `${i.reference} ${i.fornecedor}`.toLowerCase().includes(q)) : lista
 })
 
-const contagens = computed(() => Object.fromEntries(salvas.value.map(v => [v.reference, aplicar(rascunhos.value[v.reference] ?? baseDe(v.reference)).length])))
+/* ---------- descrever a visualização (a dica da pílula) ---------- */
 
-/* ---------- descrever filtro e visualização (tooltip, linha de filtros) ---------- */
+const { descrever, partesDoGrupo, moeda, data } = useDescricaoDeFiltro(t, idioma)
 
-const moeda = (n: number) => new Intl.NumberFormat(idioma.value, { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(n)
-const data = (s: string) => new Intl.DateTimeFormat(idioma.value, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(`${s}T12:00:00`))
-
-function valorLegivel(f: FiltroDeCampo) {
-  const tipo = campoPorPath(f.field)?.tipo
-  if (tipo === 'moeda') return moeda(Number(f.value))
-  if (tipo === 'usuario') return nomeDaPessoa(Number(f.value)) ?? ''
-  if (tipo === 'data' && f.op === 'next_days') return t.value.painel.diasN(Number(f.value))
-  if (tipo === 'data') return data(String(f.value))
-  return String(f.value ?? '')
-}
-
-function descreverFiltro(f: FiltroDeCampo) {
-  const campo = campoPorPath(f.field)
-  const op = t.value.operadores[campo?.tipo === 'data' ? `data_${f.op}` : f.op] ?? f.op
-  const semValor = f.op === 'empty' || f.op === 'not_empty'
-  return `${campo?.label ?? f.field} ${op.toLowerCase()}${semValor ? '' : ` ${valorLegivel(f)}`}`
-}
-
-function resumoDe(v: Visualizacao) {
+function resumoDe(v: Visualizacao): ResumoDaVisualizacao {
   const r = t.value.resumo
-  const partes: string[] = [v.model_type === 'kanban' ? r.kanban(campoPorPath(v.config.groupBy ?? 'status')?.label ?? '') : r.tabela]
-  const filtros = [
-    ...(v.filters.quick_filters ?? []).map(q => q.filter === 'isOwner' ? r.meus : r.meusGrupos),
-    ...(v.filters.field_filters ?? []).map(descreverFiltro),
+  const filtros: ResumoDaVisualizacao['filtros'] = [
+    ...(v.filters.quick_filters ?? []).map(q => ({ texto: q.filter === 'isOwner' ? r.meus : r.meusGrupos })),
+    ...(v.filters.field_filters ?? []).filter(f => !vazia(f)).map(f => ({ texto: descrever(f) })),
   ]
-  partes.push(filtros.length ? filtros.join(r.e) : r.semFiltro)
-  const s = v.config.sorts?.[0]
-  if (s) partes.push(r.ordenadoPor(campoPorPath(s.field)?.label ?? s.field, s.direction === 'asc' ? r.crescente : r.decrescente))
-  partes.push(v.user ? r.soVoce : v.module_groups?.length ? r.grupos(v.module_groups.map(g => GRUPOS.find(x => x.id === g)?.nome).join(', ')) : r.todosVeem)
-  if (rascunhos.value[v.reference] && modificadas.value.includes(v.reference)) partes.push(r.naoSalva)
-  return partes.join(' · ')
+  // O filtro avançado em partes: com E, cada parte vale como mais um filtro; com Ou, as partes levam "ou" entre elas.
+  const avancado = v.filters.avancado
+  if (avancado && contarRegras(avancado)) {
+    partesDoGrupo(avancado).forEach((texto, i) => filtros.push({ texto, ou: avancado.conector === 'or' && i > 0 }))
+  }
+  return {
+    tipo: v.model_type === 'kanban' ? 'kanban' : 'tabela',
+    agrupadoPor: v.model_type === 'kanban' ? campoPorPath(v.config.groupBy ?? 'status')?.label : undefined,
+    filtros,
+    ordenacao: (v.config.sorts ?? []).map(s => ({ campo: campoPorPath(s.field)?.label ?? s.field, crescente: s.direction === 'asc' })),
+    quemVe: v.user ? 'eu' : v.module_groups?.length ? 'grupos' : 'todos',
+    grupos: v.module_groups?.map(g => GRUPOS.find(x => x.id === g)?.nome).join(', '),
+    descricao: v.description ?? undefined,
+    naoSalva: !!rascunhos.value[v.reference] && modificadas.value.includes(v.reference),
+  }
 }
 
 /* ---------- linha de filtros da visualização (proposta) ---------- */
 
-const filtrosAtivos = computed(() => efetiva.value.filters.field_filters ?? [])
-const rapidosAtivos = computed(() => efetiva.value.filters.quick_filters ?? [])
+const linhaRef = ref<InstanceType<typeof LinhaDeFiltros> | null>(null)
+/* O botão Filtros da barra de ferramentas mostra a linha mesmo sem filtro, já com "+ Filtro" aberto. */
+const linhaPedida = ref(false)
+const temFiltro = computed(() => {
+  const f = efetiva.value.filters
+  return !!(f.field_filters?.length || f.quick_filters?.length || f.avancado)
+})
+watch(ativa, () => { linhaPedida.value = false })
 
-function tirarFiltro(i: number) {
-  mexer((v) => { v.filters.field_filters = (v.filters.field_filters ?? []).filter((_, j) => j !== i) })
+async function abrirFiltros() {
+  linhaPedida.value = true
+  await nextTick()
+  linhaRef.value?.abrirMais()
 }
-function tirarRapido(filtro: string) {
-  mexer((v) => { v.filters.quick_filters = (v.filters.quick_filters ?? []).filter(q => q.filter !== filtro) })
+function mudarFiltros(f: Visualizacao['filters']) {
+  mexer((v) => { v.filters = clonar(f) })
 }
 
-/* Filtro rápido pela linha: escolher campo e valor de seleção, sem abrir o painel. */
-const filtroRapidoAberto = ref(false)
-const camposDeSelecao = CAMPOS.filter(c => c.tipo === 'selecao')
-function filtrarPor(field: string, value: string) {
-  mexer((v) => { v.filters.field_filters = [...(v.filters.field_filters ?? []), { field, op: 'eq', value }] })
-  filtroRapidoAberto.value = false
+/* ---------- menu da coluna (proposta): botão direito no título ---------- */
+
+/*
+ * O `EnTable` não tem slot de cabeçalho; o menu abre no botão direito (ou Shift + F10) sobre o título,
+ * ancorado nele. No produto, o pedido ao SDK é um slot `header-{key}` com a seta do menu visível.
+ */
+const menuDaColuna = ref<{ aberto: boolean, ancora: HTMLElement | null, chave: string }>({ aberto: false, ancora: null, chave: '' })
+
+function abrirMenuDaColuna(e: Event) {
+  if (estilo.value !== 'proposta') return
+  if (e instanceof KeyboardEvent && !(e.key === 'ContextMenu' || (e.shiftKey && e.key === 'F10'))) return
+  const th = (e.target as HTMLElement).closest('th')
+  const col = th && colunasDaTabela.value.find(c => th.textContent?.trim() === c.label)
+  if (!th || !col) return
+  e.preventDefault()
+  e.stopPropagation()
+  menuDaColuna.value = { aberto: true, ancora: th, chave: col.key }
+}
+
+const rotuloDaColuna = computed(() => campoPorPath(menuDaColuna.value.chave)?.label ?? '')
+
+async function acaoDaColuna(acao: 'asc' | 'desc' | 'filtrar' | 'ocultar') {
+  const chave = menuDaColuna.value.chave
+  menuDaColuna.value.aberto = false
+  if (acao === 'asc' || acao === 'desc') aoOrdenar({ key: chave, direction: acao })
+  else if (acao === 'ocultar') mexer((v) => { v.config.columns = (v.config.columns ?? []).filter(c => c.path !== chave) })
+  else {
+    linhaPedida.value = true
+    await nextTick()
+    linhaRef.value?.filtrarPor(chave)
+  }
 }
 
 /* Ordenar pelo cabeçalho da tabela também mexe na visualização. */
@@ -617,7 +642,6 @@ const opcoesDoAndaime = computed(() => [
               :ordem-eh-padrao="ordemEhPadrao"
               :modificada="modificada"
               :modificadas="modificadas"
-              :contagens="contagens"
               :resumo-de="resumoDe"
               @configurar="configurar"
               @duplicar="duplicar"
@@ -665,75 +689,27 @@ const opcoesDoAndaime = computed(() => [
             <span class="ml-auto flex items-center gap-1">
               <UButton icon="i-lucide-file-down" size="xs" color="neutral" variant="ghost" :aria-label="t.itens.exportar" />
               <UButton icon="i-lucide-columns-2" size="xs" color="neutral" variant="ghost" :aria-label="t.itens.colunas" />
-              <UButton icon="i-lucide-sliders-horizontal" size="xs" color="neutral" variant="ghost" :aria-label="t.itens.filtros" />
+              <UButton icon="i-lucide-sliders-horizontal" size="xs" color="neutral" variant="ghost" :aria-label="t.itens.filtros" @click="estilo === 'proposta' && abrirFiltros()" />
               <UButton icon="i-lucide-settings" size="xs" color="neutral" variant="ghost" :aria-label="t.itens.configurar" />
               <UButton :label="t.itens.novoRegistro" icon="i-lucide-plus" size="xs" color="primary" variant="outline" />
             </span>
           </div>
 
-          <!-- PROPOSTA: a linha do que a visualização filtra, e salvar ou descartar quando ela foi mexida -->
+          <!-- PROPOSTA (rodada 5): a linha de filtros, com chip por campo e filtro avançado (Notion) -->
           <Transition
             enter-active-class="transition-all duration-200 ease-out"
             enter-from-class="opacity-0 -translate-y-1"
             leave-active-class="transition-all duration-150 ease-in"
             leave-to-class="opacity-0"
           >
-            <div
-              v-if="estilo === 'proposta' && (filtrosAtivos.length || rapidosAtivos.length || modificada)"
-              class="flex flex-wrap items-center gap-1.5 border-b border-default bg-elevated/40 px-4 py-1.5"
-            >
-              <UIcon name="i-lucide-filter" class="size-3.5 text-muted" />
-              <TransitionGroup
-                enter-active-class="transition duration-150 ease-out"
-                enter-from-class="opacity-0 scale-95"
-                leave-active-class="transition duration-100 ease-in"
-                leave-to-class="opacity-0 scale-95"
-              >
-                <UBadge
-                  v-for="q in rapidosAtivos"
-                  :key="q.filter"
-                  :label="q.filter === 'isOwner' ? t.resumo.meus : t.resumo.meusGrupos"
-                  color="neutral"
-                  variant="outline"
-                  size="md"
-                  class="gap-1 pr-1"
-                >
-                  <template #trailing>
-                    <UButton icon="i-lucide-x" color="neutral" variant="link" size="xs" class="p-0" :aria-label="t.linha.tirar(q.filter === 'isOwner' ? t.resumo.meus : t.resumo.meusGrupos)" @click="tirarRapido(q.filter)" />
-                  </template>
-                </UBadge>
-                <UBadge
-                  v-for="(f, i) in filtrosAtivos"
-                  :key="`${f.field}-${i}`"
-                  :label="descreverFiltro(f)"
-                  color="neutral"
-                  variant="outline"
-                  size="md"
-                  class="max-w-72 gap-1 pr-1"
-                  :ui="{ label: 'truncate' }"
-                >
-                  <template #trailing>
-                    <UButton icon="i-lucide-x" color="neutral" variant="link" size="xs" class="p-0" :aria-label="t.linha.tirar(descreverFiltro(f))" @click="tirarFiltro(i)" />
-                  </template>
-                </UBadge>
-              </TransitionGroup>
-              <UPopover v-model:open="filtroRapidoAberto" :content="{ align: 'start' }">
-                <UButton :label="t.linha.filtro" icon="i-lucide-plus" color="neutral" variant="ghost" size="xs" />
-                <template #content>
-                  <div class="w-60 p-1">
-                    <div v-for="c in camposDeSelecao" :key="c.path" class="p-1">
-                      <p class="px-1 pb-1 text-xs font-medium text-muted">{{ c.label }}</p>
-                      <div class="flex flex-wrap gap-1">
-                        <UButton v-for="o in c.opcoes" :key="o" :label="o" size="xs" color="neutral" variant="soft" @click="filtrarPor(c.path, o)" />
-                      </div>
-                    </div>
-                    <USeparator class="my-1" />
-                    <UButton :label="t.linha.maisOpcoes" icon="i-lucide-sliders-horizontal" color="neutral" variant="ghost" size="xs" block class="justify-start" @click="filtroRapidoAberto = false; painelAberto = true" />
-                  </div>
-                </template>
-              </UPopover>
-
-            </div>
+            <LinhaDeFiltros
+              v-if="estilo === 'proposta' && (temFiltro || modificada || linhaPedida)"
+              ref="linhaRef"
+              :model-value="efetiva.filters"
+              :t="t"
+              :idioma="idioma"
+              @update:model-value="mudarFiltros"
+            />
           </Transition>
 
           <!-- Tabela ou quadro: CÓPIA da tela nova, com o dado da visualização -->
@@ -759,7 +735,7 @@ const opcoesDoAndaime = computed(() => [
                     />
                   </ClientOnly>
                 </div>
-                <div v-else :key="`t-${ativa}`">
+                <div v-else :key="`t-${ativa}`" @contextmenu="abrirMenuDaColuna" @keydown="abrirMenuDaColuna">
                   <EnTable
                     :columns="colunasDaTabela"
                     :rows="linhas"
@@ -802,6 +778,19 @@ const opcoesDoAndaime = computed(() => [
                       <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" size="xs" :aria-label="t.itens.acoes" />
                     </template>
                   </EnTable>
+                  <!-- PROPOSTA (rodada 5): o menu da coluna, ancorado no título clicado com o botão direito -->
+                  <UPopover v-model:open="menuDaColuna.aberto" :reference="menuDaColuna.ancora ?? undefined" :content="{ align: 'start', side: 'bottom', sideOffset: 4 }">
+                    <template #content>
+                      <div class="w-56 p-1" role="menu" :aria-label="t.coluna.menu(rotuloDaColuna)">
+                        <p class="px-2 pb-1 pt-1.5 text-xs font-medium text-muted">{{ rotuloDaColuna }}</p>
+                        <UButton :label="t.coluna.crescente" icon="i-lucide-arrow-up-narrow-wide" color="neutral" variant="ghost" size="sm" block class="justify-start" role="menuitem" @click="acaoDaColuna('asc')" />
+                        <UButton :label="t.coluna.decrescente" icon="i-lucide-arrow-down-wide-narrow" color="neutral" variant="ghost" size="sm" block class="justify-start" role="menuitem" @click="acaoDaColuna('desc')" />
+                        <USeparator class="my-1" />
+                        <UButton :label="t.coluna.filtrar" icon="i-lucide-filter" color="neutral" variant="ghost" size="sm" block class="justify-start" role="menuitem" @click="acaoDaColuna('filtrar')" />
+                        <UButton :label="t.coluna.ocultar" icon="i-lucide-eye-off" color="neutral" variant="ghost" size="sm" block class="justify-start" role="menuitem" @click="acaoDaColuna('ocultar')" />
+                      </div>
+                    </template>
+                  </UPopover>
                   <p class="mt-3 text-xs text-muted">{{ t.itens.mostrando(linhas.length, ITENS.length) }}</p>
                 </div>
               </Transition>

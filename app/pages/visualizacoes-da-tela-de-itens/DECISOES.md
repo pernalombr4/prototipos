@@ -136,3 +136,29 @@
   - catálogo de tipos: `evidencias/r4-catalogo.jpg`;
   - Kanban genérico criado, com o painel e o nome selecionado: `evidencias/r4-kanban-criado.jpg`;
   - barra flutuante com o X e a seta de salvar: `evidencias/r4-barra-flutuante.jpg`.
+
+## Rodada 5 · 2026-10-23
+- **Pedido (literal):** "agora va nessa tela do notion, clique no botao de filtro destacado no print e coloque pra criar regra avançada. explore o construtor de filtros e regras do notion e do clickup. pegue como inspiraçao pro nosso caso de construção de views e de filtragem no botao direto de filtro na tabela tambem, e nas colunas."
+- **Referência (Notion e ClickUp, explorados na conta dela em 23/10/2026):** o Notion tem 2 camadas: o chip por campo (opções em caixas, "Add to advanced filter") e o filtro avançado ("Where", "And" ou "Or" por grupo, "Add filter group", "Turn into group"). O ClickUp tem 1 caixa "Filtros" com "Adicionar filtro agrupado" em cada regra. O menu da coluna do Notion tem "Filter"; o do ClickUp não. Prints: `evidencias/ref-notion-1-filtro-avancado.jpg`, `ref-notion-2-filtro-simples.jpg`, `ref-notion-3-menu-da-coluna.jpg`, `ref-clickup-4-filtros.jpg`. O filtro de teste no Notion e no ClickUp foi desfeito: a página dela ficou com as 2 regras que já tinha.
+- **Pedido (literal), com o aceite da proposta:** "pode aplicar suas sugestoes. e esse popover do print ta horrivel. totalmente mal organizado. e nao precisa dizer qtd de itens. da pra elaborar melhor visualmente isso aí, com umas badges e tudo mais, mas sem exageros"
+- **Mudou:** a dica da pílula ganhou partes: nome e descrição; o tipo e quem vê em etiquetas; "Filtros" e "Ordenação" em 2 colunas, 1 etiqueta por filtro e por nível; os atalhos no rodapé. Saiu a contagem de itens. O filtro avançado entra parte por parte, com "ou" entre as partes quando o conector é Ou.
+- **Mudou:** a linha de filtros segue o Notion. Cada filtro por campo é um chip ("Status: Em análise, Aprovado") com as opções em caixas, "Limpar seleção" e o "⋯" com "Excluir filtro" e "Levar para o filtro avançado". O chip sem valor não filtra e fica tracejado.
+- **Mudou:** o filtro avançado (chip "N regras") tem "Onde", "E" ou "Ou" na 2ª linha, grupo de 1 nível num fundo próprio, "Duplicar", "Transformar em grupo" e "Desfazer o grupo". Ele vale junto com os chips e os filtros automáticos. A regra sem valor não conta, nem num grupo "Ou".
+- **Mudou:** "+ Filtro" lista os campos com busca e termina em "Filtro avançado". O botão Filtros da barra de ferramentas, que hoje não faz nada no protótipo, abre essa lista.
+- **Mudou:** o painel Configurar usa o mesmo construtor: "Por campo" e "Filtro avançado". No painel, que é estreito, o conector vai em cima da regra.
+- **Mudou:** o título da coluna abre um menu no botão direito (ou Shift + F10): "Ordenar crescente", "Ordenar decrescente", "Filtrar" (abre o chip do campo) e "Ocultar coluna".
+- **Mudou:** "é" e "não é" num campo de seleção ou de pessoa aceitam várias opções. Nos mocks, os filtros de seleção passaram de `eq` para `in` com lista.
+- **Pedido (literal), na mesma rodada:** "no momento em que o user clicar no +N, nao devem aparecer so os que estao ocultos, mas os que ja estao na barra tambem. nao é simplesmente um lugar onde se armazena o que nao ta cabendo. é um editor completo ali."
+- **Mudou:** o "+N" lista todas as visualizações, na ordem da barra, com a divisória "Não cabem na barra". Arrastar uma linha para cima da divisória leva a visualização para a barra. A linha aberta tem destaque e a marca de aberta. O clique duplo no nome renomeia na própria linha. O botão existe mesmo sem visualização fora da barra, só com a seta.
+- **Fronteira:** muda a dica da pílula, o "+N", a linha de filtros, a seção Filtros do painel e o menu da coluna; não muda a casca, a barra de ferramentas (o botão Filtros só ganhou ação), a tabela nem o cartão do `EnKanbanBoard`.
+- **Achado:** o `EnTable` não tem slot de cabeçalho, só `cell-{key}`, `actions`, `empty` e `pagination`. O menu da coluna abre no botão direito porque não há onde pôr a seta no título. Ficou em RI006 e P009 do `REQUISITOS.md`.
+- **Achado:** o `ModelView` guarda os filtros numa lista em que tudo vale junto (`field_filters`). A busca da API já aceita grupos (`_where` com `_and` e `_or`). O filtro avançado pede um formato novo na visualização (RI005).
+- **Suposição:** grupo dentro de grupo em 1 nível (S003). O Notion aceita mais; 1 nível cobre "A e (B ou C)".
+- **Sem evidência visual:** a dica da pílula. Ela só abre com o mouse parado sobre a pílula, e o print levaria o ponteiro. Conferida na tela em "Vencendo em 30 dias" e "Revisão trimestral".
+- **Ver:** `http://localhost:3000/visualizacoes-da-tela-de-itens` · `REQUISITOS.md` (RF004, RF034, RF056, RF057, RF070, RF094 a RF122, RI005, RI006)
+  - chip por campo, com 2 opções marcadas: `evidencias/r5-chip-simples.jpg`;
+  - filtro avançado com grupo: `evidencias/r5-filtro-avancado.jpg`;
+  - "+ Filtro" aberto pelo botão Filtros: `evidencias/r5-botao-filtros.jpg`;
+  - menu da coluna Área: `evidencias/r5-menu-da-coluna.jpg`;
+  - seção Filtros do painel: `evidencias/r5-painel-filtros.jpg`;
+  - "+N" como editor de todas, depois de renomear na linha: `evidencias/r5-mais-editor.jpg`.
