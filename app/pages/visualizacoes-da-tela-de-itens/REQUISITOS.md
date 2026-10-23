@@ -19,7 +19,7 @@
 | Arrastar e fixar | Arrastar na barra e no "+N", fixadas juntas no começo | RF011 a RF017, RF077, RF078 |
 | Menu da visualização | Seta ⌄ na ativa, botão direito, grupos "Só para mim" e "Para todos" | RF018 a RF024 |
 | Renomear | Na própria pílula | RF025 a RF028, RF079 |
-| Lista do "+N" | Editor de todas as visualizações: busca, divisória das que não cabem, arrastar, renomear na linha, sem contagem | RF070 a RF073, RF080, RF119 a RF122 |
+| Lista do "+N" | Editor de todas as visualizações: busca, divisória das que não cabem, arrastar, renomear na linha, sem contagem | RF070 a RF073, RF080, RF119 a RF123 |
 | Mudança não salva | Ponto na pílula e barra flutuante na base com salvar e X | RF029 a RF035, RF086, RF087 |
 | Ordem padrão | "Aplicar minha ordem para todos" e "Recuperar a ordem padrão" | RF036 a RF039 |
 | Criar | "+ Visualização" abre o catálogo de tipos; o tipo escolhido cria uma visualização genérica com o painel aberto | RF040, RF041, RF043 a RF047, RF081, RF082, RF088 a RF093 |
@@ -63,7 +63,7 @@
 | RF111 | No tooltip, o filtro avançado com "E" deve entrar parte por parte, como filtros a mais; com "Ou", as partes ficam separadas por "ou". O grupo de dentro vai numa etiqueta, entre parênteses. | "Revisão trimestral" mostra "Valor do contrato maior ou igual a R$ 60.000" e "(Status é Aprovado ou Assinado ou Prioridade é Alta)". | Importante |
 | RF005 | Quando as pílulas não couberem na largura da barra, o botão "+N ⌄" deve mostrar N igual ao número de visualizações que ficam fora da barra. | Com todas visíveis, o botão mostra só a seta "⌄" (RF119). | Essencial |
 | RF006 | Em cada largura de tela, a visualização ativa deve aparecer na barra, no lugar da última pílula que cabia quando a ativa estiver depois do corte. | Abrir pela lista do "+N" uma visualização que não cabe a traz para a barra. | Essencial |
-| RF007 | O "+N" e o "+ Visualização" devem ficar presos na ponta direita da barra, sem rolagem horizontal. | Com a tela estreita, os 2 continuam visíveis. | Essencial |
+| RF007 | O botão da lista ("+N ⌄" ou "⌄") e o "+ Visualização" devem vir logo depois da última pílula visível, sem rolagem horizontal, como no Notion e no ClickUp. | Com 4 visualizações na tela larga, os 2 botões ficam colados em "Vencendo em 30 dias"; com a tela estreita, os 2 continuam visíveis. | Essencial |
 | RF008 | O botão de criar deve mostrar "+ Visualização" com o tooltip "Nova visualização". | O tooltip aparece ao parar o mouse no botão. | Importante |
 | RF009 | A visualização ativa deve ir para o endereço da página (`?view=<referência>`). | Recarregar mantém a visualização; o link leva direto a ela. | Importante |
 | RF010 | A pílula que tem versão "só para mim" (RN005) deve mostrar um ícone de pessoa depois do nome. | O tooltip da pílula diz "Você usa a sua versão. Os outros veem a de todos." | Importante |
@@ -117,6 +117,7 @@
 | RF120 | Sem busca, a lista deve mostrar a divisória "Não cabem na barra" antes da 1ª visualização que não cabe. Arrastar uma linha para cima da divisória leva a visualização para a barra. | Arrastar "Jurídico" para antes de "Quadro por status" mostra "Jurídico" na barra. | Essencial |
 | RF121 | A linha da visualização aberta deve aparecer destacada, com o ícone na cor primária e a marca de aberta; a linha da visualização do sistema não arrasta. | "Itens" fica sem alça, sempre na 1ª linha. | Importante |
 | RF122 | O clique duplo no nome de uma linha, ou "Renomear" no "⋯" da linha, deve abrir o campo de renomear na própria linha, com a lista aberta e a gravação de RF025 a RF028. | Renomear "Vencidos" para "Contratos vencidos" muda a linha e a pílula e mostra "Desfazer". | Importante |
+| RF123 | O fim da lista deve ter "Nova visualização", que fecha a lista e abre o catálogo de RF040. | Clicar em "Nova visualização" mostra Tabela e Kanban. | Importante |
 
 ## Mudança não salva (RF)
 
@@ -241,7 +242,7 @@ A barra e o construtor dessas 2 telas são os mesmos da tela de itens (conferido
 
 | ID | Requisito | Critério de aceite | Prioridade |
 |---|---|---|---|
-| RF074 | As telas Tarefas Rápidas e Tarefas Agendadas devem seguir RN001 a RN007, RF001 a RF122, RI001 a RI006 e RNF001 a RNF002, com os parâmetros da tabela a seguir. | Os prints e critérios de aceite deste documento valem trocando os parâmetros. | Essencial |
+| RF074 | As telas Tarefas Rápidas e Tarefas Agendadas devem seguir RN001 a RN007, RF001 a RF123, RI001 a RI006 e RNF001 a RNF002, com os parâmetros da tabela a seguir. | Os prints e critérios de aceite deste documento valem trocando os parâmetros. | Essencial |
 | RF075 | Os filtros automáticos das tarefas devem aparecer como chaves com os nomes que a tela já usa: "Minhas Tarefas", "Aberto", "Atrasado", "Atribuídos", "Tarefas Externas", "Tarefas Internas". | Nenhum filtro automático abre 2º modal. | Essencial |
 | RF076 | Os campos das tarefas devem aparecer pelo rótulo e pelo ícone do tipo, sem o nome técnico (hoje: "EnlNumber", "radioButton", "EnAssignees", "EnHtml", "inputSwitch", "hidden"), conforme RF055. | Nenhum nome técnico aparece no painel. | Essencial |
 

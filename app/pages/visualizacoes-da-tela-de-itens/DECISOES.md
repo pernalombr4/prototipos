@@ -162,3 +162,13 @@
   - menu da coluna Área: `evidencias/r5-menu-da-coluna.jpg`;
   - seção Filtros do painel: `evidencias/r5-painel-filtros.jpg`;
   - "+N" como editor de todas, depois de renomear na linha: `evidencias/r5-mais-editor.jpg`.
+
+## Rodada 6 · 2026-10-23
+- **Pedido (literal):** "perceba que o botao travado na extrema direita nao faz bem ao ux. se temos poucas pastas, o user demora pra perceber. por padrao notion e clickup deixam ao lado, como nos prints"
+- **Mudou:** o botão da lista ("+N ⌄", ou só "⌄" quando tudo cabe) e o "+ Visualização" vêm logo depois da última pílula visível, na tela larga e na estreita. Antes ficavam presos na ponta direita da barra.
+- **Mudou:** o fim da lista do "+N" ganhou "Nova visualização", como o "New view" do Notion. Ela fecha a lista e abre o catálogo de tipos no "+ Visualização".
+- **Corrigido na rodada:** o catálogo aberto pela lista fechava sozinho, porque o foco voltava para o botão "+N". A lista não devolve o foco quando a ação é "Nova visualização".
+- **Fronteira:** muda só o lugar dos 2 botões e o fim da lista do "+N".
+- **Ver:** `http://localhost:3000/visualizacoes-da-tela-de-itens` · `REQUISITOS.md` (RF007, RF123)
+  - tela larga com 4 visualizações: `evidencias/r5-botoes-junto-poucas.jpg`;
+  - tela estreita com 18, lista aberta: `evidencias/r5-botoes-junto-estreita.jpg`.

@@ -434,6 +434,10 @@ function novaVisualizacao(d: { tipo: 'table' | 'kanban', soEu: boolean, fixar: b
 }
 
 const catalogoAberto = ref(false)
+/* "Nova visualização" no fim do "+N": o catálogo abre ancorado no "+ Visualização", depois que a lista fecha. */
+function abrirCatalogo() {
+  setTimeout(() => { catalogoAberto.value = true }, 150)
+}
 const criando = ref(false)
 async function concluirCriacao() {
   criando.value = true
@@ -634,6 +638,7 @@ const opcoesDoAndaime = computed(() => [
             <BarraDeVisualizacoes
               v-if="estilo === 'proposta'"
               ref="barraRef"
+              @nova="abrirCatalogo"
               v-model:visualizacoes="salvas"
               v-model:ativa="ativa"
               :t="t"

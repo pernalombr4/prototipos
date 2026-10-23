@@ -59,6 +59,8 @@ const emit = defineEmits<{
   restaurarVersao: [ref: string]
   aplicarOrdem: []
   recuperarOrdem: []
+  /** "Nova visualização" no fim da lista do "+N" (Notion): abre o catálogo do "+ Visualização". */
+  nova: []
   /** A ordem mudou: quem usa avisa e oferece Desfazer com a ordem anterior. */
   reordenada: [anterior: Visualizacao[]]
 }>()
@@ -439,6 +441,19 @@ function aoClicarNaLinha(v: Visualizacao, e: MouseEvent) {
   cliqueNaLista = setTimeout(() => { cliqueNaLista = null; abrirDaLista(v) }, 250)
 }
 
+/* "Nova visualização" no fim da lista: o foco não volta para o "+N", senão fecharia o catálogo que abre em seguida. */
+let indoParaNova = false
+function novaPelaLista() {
+  indoParaNova = true
+  listaAberta.value = false
+  emit('nova')
+}
+function aoDevolverFoco(e: Event) {
+  if (!indoParaNova) return
+  indoParaNova = false
+  e.preventDefault()
+}
+
 /* Renomear na lista: o campo aparece na própria linha e grava pelo mesmo caminho da pílula. */
 function renomearNaLista(id: string) {
   const v = visualizacoes.value.find(x => x.reference === id)
@@ -735,8 +750,9 @@ const ui = {
             </template>
 
             <template #list-trailing>
-              <div class="ml-auto flex shrink-0 items-center gap-0.5 self-center pl-2" @pointerdown.stop>
-                <UPopover v-model:open="listaAberta" :content="{ align: 'end', sideOffset: 6 }">
+              <!-- Rodada 5: o "+N" e o "+ Visualização" vêm logo depois da última pílula, como no Notion e no ClickUp. Presos na ponta direita, com poucas visualizações, ficavam longe de onde a pessoa olha. -->
+              <div class="flex shrink-0 items-center gap-0.5 self-center pl-1" @pointerdown.stop>
+                <UPopover v-model:open="listaAberta" :content="{ align: 'end', sideOffset: 6, onCloseAutoFocus: aoDevolverFoco }">
                   <UButton
                     :label="escondidas.length ? `+${escondidas.length}` : undefined"
                     trailing-icon="i-lucide-chevron-down"
@@ -836,6 +852,18 @@ const ui = {
                         </TransitionGroup>
                       </ul>
                       <p v-if="filtradas.length > 1 && !busca" class="px-3 pb-1.5 text-xs text-muted">{{ t.barra.dicaLista }}</p>
+                      <div class="border-t border-default p-1">
+                        <UButton
+                          :label="t.catalogo.titulo"
+                          icon="i-lucide-plus"
+                          color="neutral"
+                          variant="ghost"
+                          size="sm"
+                          block
+                          class="justify-start"
+                          @click="novaPelaLista"
+                        />
+                      </div>
                       <!-- Owner ou Full: a ordem da barra, a dele e a de todos (as mesmas 2 ações das folders). -->
                       <div v-if="ehOwner" class="border-t border-default p-1">
                         <UButton
