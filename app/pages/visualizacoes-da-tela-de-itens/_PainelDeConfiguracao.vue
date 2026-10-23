@@ -28,10 +28,8 @@ const props = defineProps<{
   opcoesSalvar: { principal: { escopo: Escopo, label: string }, extras: { escopo: Escopo, label: string, icon: string }[] }
   /** Owner ou Full: muda quem vê. Standard ou Viewer cria e salva só para si. */
   ehOwner: boolean
-  /** Modo de criação (a visualização tem `novo`): de onde ela começou e o botão Criar. */
+  /** Modo de criação (a visualização tem `novo`): o botão Concluir e os nomes que já existem. */
   criando: boolean
-  origem: 'atual' | 'zero'
-  nomeDaOrigem: string
   nomesExistentes: string[]
 }>()
 
@@ -43,7 +41,6 @@ const emit = defineEmits<{
   fechar: []
   criar: []
   cancelarCriacao: []
-  'update:origem': [modo: 'atual' | 'zero']
 }>()
 
 const emCriacao = computed(() => !!rascunho.value.novo)
@@ -58,6 +55,10 @@ const erroDoNome = computed(() => {
   return props.nomesExistentes.some(n => n.toLowerCase() === nome.toLowerCase()) ? props.t.criar.nomeRepetido : undefined
 })
 const campoNome = ref<{ inputRef: HTMLInputElement } | null>(null)
+/* Ao criar, o nome do tipo vem selecionado, como no ClickUp: digitar já troca. */
+watch([() => rascunho.value.reference, emCriacao], () => {
+  if (emCriacao.value) nextTick(() => { campoNome.value?.inputRef?.focus(); campoNome.value?.inputRef?.select() })
+}, { immediate: true })
 
 function criar() {
   tentouCriar.value = true
@@ -271,7 +272,8 @@ const funcoes = computed({
         <p class="text-sm font-semibold text-highlighted">{{ emCriacao ? t.painel.tituloCriar : t.painel.titulo }}</p>
         <p class="text-xs text-muted">{{ emCriacao ? t.painel.subtituloCriar : t.painel.subtitulo }}</p>
       </div>
-      <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="sm" :aria-label="t.comum.fechar" @click="emit('fechar')" />
+      <!-- Ao criar, fechar conclui (a visualização já existe), depois de conferir o nome. -->
+      <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="sm" :aria-label="t.comum.fechar" @click="emCriacao ? criar() : emit('fechar')" />
     </header>
 
     <!-- Uma seção por bloco, separadas por linha; rótulo sempre em cima do campo. -->
@@ -301,22 +303,6 @@ const funcoes = computed({
               class="flex-1"
               @update:model-value="(v: string) => mudar(x => { x.name = v })"
               @keydown.enter.prevent="emCriacao && criar()"
-            />
-          </UFieldGroup>
-        </UFormField>
-        <!-- Só ao criar: de onde a visualização começa. Trocar refaz colunas, filtros e ordenação, e a tabela mostra na hora. -->
-        <UFormField v-if="emCriacao" :label="t.painel.comecarDe" :help="origem === 'atual' ? t.painel.comecarDeAtualAjuda(nomeDaOrigem) : t.painel.comecarDeZeroAjuda">
-          <UFieldGroup class="w-full">
-            <UButton
-              v-for="o in [{ v: 'atual' as const, l: t.painel.comecarDeAtual, i: 'i-lucide-copy' }, { v: 'zero' as const, l: t.painel.comecarDeZero, i: 'i-lucide-file' }]"
-              :key="o.v"
-              :label="o.l"
-              :icon="o.i"
-              :color="origem === o.v ? 'primary' : 'neutral'"
-              :variant="origem === o.v ? 'soft' : 'outline'"
-              :aria-pressed="origem === o.v"
-              class="flex-1 justify-center"
-              @click="emit('update:origem', o.v)"
             />
           </UFieldGroup>
         </UFormField>
@@ -588,10 +574,10 @@ const funcoes = computed({
     </div>
 
     <!-- Salvar mora só aqui enquanto o painel está aberto; a linha de filtros esconde o dela. -->
-    <!-- Ao criar: Cancelar desiste; Criar grava. Nada existe para os outros antes disso. -->
-    <footer v-if="emCriacao" class="flex items-center justify-end gap-2 border-t border-default px-4 py-3">
-      <UButton :label="t.comum.cancelar" color="neutral" variant="ghost" size="sm" @click="emit('cancelarCriacao')" />
-      <UButton :label="t.criar.criar" size="sm" :loading="criando" @click="criar" />
+    <!-- Ao criar: cada ajuste já entra na visualização nova. Concluir fecha; Descartar apaga e volta. -->
+    <footer v-if="emCriacao" class="flex items-center gap-2 border-t border-default px-4 py-3">
+      <UButton :label="t.painel.descartarNova" icon="i-lucide-trash-2" color="error" variant="ghost" size="sm" @click="emit('cancelarCriacao')" />
+      <UButton :label="t.painel.concluir" size="sm" class="ml-auto" :loading="criando" @click="criar" />
     </footer>
     <footer v-else class="flex items-center gap-2 border-t border-default px-4 py-3">
       <p class="min-w-0 flex-1 text-xs text-muted">

@@ -118,3 +118,21 @@
   - barra flutuante de salvar: `evidencias/r3-barra-flutuante.jpg`;
   - "+N" com a alça em repouso: `evidencias/r3-mais-com-alca.jpg`;
   - cartão do Kanban no painel: `evidencias/r3-cartao-kanban.jpg`.
+
+## Rodada 4 · 2026-10-23
+- **Pedido (literal):** "o processo de criaçao de nova view ainda ta ruim. veja como é no clickup. entre la e explore. pode copiar o fluxo de usabilidade deles na criaçao de uma nova view. o nosso ainda ta perguntando se copia "a atual", sendo q o user ta numa nova, nem sabe mais qual é atual... [...] a logica de selecionar antes se é tabela ou kanban e entrar com uma visualizaçao "generalizada" ali pode ser interessante."
+- **Referência (ClickUp, explorado na conta dela em 23/10/2026):** "+ Visualização" abre um catálogo de tipos (ícone, nome e 1 linha de descrição) com as caixas "Visualização privada" e "Fixar visualização" no rodapé. Escolher o tipo cria na hora uma visualização com o nome do tipo e configuração genérica, abre-a e abre o painel "Personalizar visualização" com o nome selecionado. Prints: `evidencias/ref-clickup-1-tipos.jpg`, `ref-clickup-2-painel.jpg`, `ref-clickup-3-filtro.jpg`.
+- **Mudou:** "+ Visualização" abre o catálogo "Nova visualização" (`_CatalogoDeTipos.vue`) com Tabela e Kanban e as caixas "Só para mim" e "Fixar no início". Para Standard ou Viewer, "Só para mim" vem marcado e travado.
+- **Mudou:** o tipo escolhido cria a visualização genérica com o nome do tipo ("Tabela", "Tabela 2"): Tabela com cada coluna, sem filtro e sem ordenação; Kanban agrupado por Status, com o cartão sem etiqueta. O painel abre com o nome selecionado: digitar já troca.
+- **Mudou:** no modo de criação, cada ajuste entra direto na visualização nova. O rodapé tem só "Descartar visualização" e "Concluir"; Enter no nome e o X do painel também concluem.
+- **Pedido (literal), na mesma rodada:** "quando o user editar algum filtro de visualizaçao ou alguma outra coisa q se aplique (tipo ordenaçao), deve haver uma logica tipo essa do notion (print) aparecendo num menu contextual flutuante na base. [...] se a pessoa nao mexer ali, o filtro simplesmente aplica pra ela naquele momento. [...] pode ser um "x" pra ela fechar esse contextual"
+- **Mudou:** a barra flutuante da rodada 3 já tinha Descartar e "Salvar para todos" com "Salvar como nova visualização" na seta (o "Reset" e o "Save for everyone" do Notion). Ganhou o X: fecha sem salvar, o ajuste continua aplicado e o ponto continua na pílula. Outra mudança na mesma visualização traz a barra de volta.
+- **Fronteira:** muda o "+ Visualização", o modo de criação do painel e a barra flutuante; não muda a casca, a barra de ferramentas, a tabela nem o cartão do `EnKanbanBoard`.
+- **Descartado:** "Começar de" com "Visualização atual" e "Do zero" (rodadas 2 e 3). Motivo: dentro da visualização nova, "atual" já não diz qual era; o tipo escolhido antes resolve o ponto de partida.
+- **Achado:** o cartão do `EnKanbanBoard` tem altura fixa (`h-48` no `EnKanbanCard`). Com título, texto de apoio, etiqueta, pessoa e data, o texto de apoio fica com 7 px e some (já aparecia em `r3-cartao-kanban.jpg`). O Kanban genérico nasce sem etiqueta para o cartão abrir legível; a regra de escolha dos campos ficou em P008 no `REQUISITOS.md`.
+- **Corrigido na rodada:** o nome selecionado ao criar perdia o texto a cada tecla (o `watch` disparava a cada mudança do rascunho e selecionava o campo de novo).
+- **Atenção:** a visualização "Quadro" criada no ClickUp durante a exploração ficou no "Project 1" da conta dela.
+- **Ver:** `http://localhost:3000/visualizacoes-da-tela-de-itens` · `REQUISITOS.md` (grupo Criar, RF086 e RF087)
+  - catálogo de tipos: `evidencias/r4-catalogo.jpg`;
+  - Kanban genérico criado, com o painel e o nome selecionado: `evidencias/r4-kanban-criado.jpg`;
+  - barra flutuante com o X e a seta de salvar: `evidencias/r4-barra-flutuante.jpg`.

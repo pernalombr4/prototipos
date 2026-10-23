@@ -19,6 +19,7 @@ import CascaDaLista from './_CascaDaLista.vue'
 import BarraDeVisualizacoes from './_BarraDeVisualizacoes.vue'
 import BarraDeHoje from './_BarraDeHoje.vue'
 import PainelDeConfiguracao from './_PainelDeConfiguracao.vue'
+import CatalogoDeTipos from './_CatalogoDeTipos.vue'
 import ModalDeHoje from './_ModalDeHoje.vue'
 
 import briefingMd from './BRIEFING.md?raw'
@@ -27,7 +28,7 @@ import decisoesMd from './DECISOES.md?raw'
 
 definePageMeta({
   titulo: 'Visualizações da tela de itens',
-  descricao: 'Barra de visualizações com arrastar, "+N" e nome cortado com tooltip; criar e configurar num painel com a tabela à vista; salvar para todos ou só para mim.',
+  descricao: 'Barra de visualizações com arrastar, "+N" e nome cortado com tooltip; criar escolhendo Tabela ou Kanban e configurar num painel com a tabela à vista; salvar para todos ou só para mim.',
   status: 'em-revisao',
   atualizado: '2026-10-23',
   tela: 'Tela nova de itens (lista da categoria)',
@@ -109,6 +110,15 @@ const modificadas = computed(() => Object.keys(rascunhos.value).filter((r) => {
   return s && !mesmo(baseDe(r), rascunhos.value[r]!)
 }))
 const modificada = computed(() => modificadas.value.includes(ativa.value))
+/*
+ * O X da barra flutuante fecha sem salvar: o ajuste continua aplicado para a pessoa naquele momento.
+ * Guarda o rascunho do instante em que ela fechou; outro ajuste muda o rascunho e a barra volta.
+ */
+const flutuanteFechada = ref<Record<string, string>>({})
+const flutuanteVisivel = computed(() => modificada.value && flutuanteFechada.value[ativa.value] !== JSON.stringify(efetiva.value))
+function fecharFlutuante() {
+  flutuanteFechada.value = { ...flutuanteFechada.value, [ativa.value]: JSON.stringify(efetiva.value) }
+}
 
 /**
  * O painel mexe no rascunho da ativa; o primeiro ajuste cria o rascunho.
@@ -353,56 +363,56 @@ const barraRef = ref<InstanceType<typeof BarraDeVisualizacoes> | null>(null)
 const painelAberto = ref(false)
 
 /*
- * Criar (rodada 2): "+ Visualização" cria a visualização na hora e abre o painel em modo de criação,
- * com o nome em foco. Ela começa com os filtros e colunas da visualização de onde a pessoa saiu
- * ("Começar de"), e a tabela mostra o resultado enquanto ela monta. Nada grava antes de
- * "Criar visualização"; Cancelar (ou fechar o painel) desiste e volta para a visualização de origem.
+ * Criar (rodada 4, no fluxo do ClickUp): "+ Visualização" abre o catálogo de tipos (Tabela ou Kanban, com
+ * "Só para mim" e "Fixar no início"). Escolher o tipo já cria uma visualização GENÉRICA com o nome do tipo
+ * (todas as colunas, sem filtro; ou o quadro agrupado por Status) e abre o painel com o nome selecionado.
+ * Enquanto o painel da criação está aberto, cada ajuste entra direto na visualização nova (ninguém a usa
+ * ainda). "Concluir" ou fechar o painel termina a criação; "Descartar visualização" apaga e volta para a
+ * visualização de onde a pessoa saiu.
  */
-const origem = ref<{ ref: string, modo: 'atual' | 'zero' }>({ ref: 'default', modo: 'atual' })
+const deOndeSaiu = ref('default')
 
-function configDeOrigem(modo: 'atual' | 'zero'): Pick<Visualizacao, 'config' | 'filters' | 'model_type'> {
-  if (modo === 'zero') {
-    const zero = visualizacoesIniciais('nenhuma')[0]!
-    return { config: { ...zero.config, sorts: [] }, filters: {}, model_type: 'table' }
-  }
-  const v = rascunhos.value[origem.value.ref] ?? salvas.value.find(x => x.reference === origem.value.ref) ?? salvas.value[0]!
-  const c = clonar(v)
-  return { config: c.config, filters: c.filters, model_type: c.model_type }
+function nomeLivre(base: string) {
+  const usados = salvas.value.map(v => (v.name ?? '').toLowerCase())
+  if (!usados.includes(base.toLowerCase())) return base
+  let n = 2
+  while (usados.includes(`${base} ${n}`.toLowerCase())) n++
+  return `${base} ${n}`
 }
 
-function novaVisualizacao() {
-  if (salvaAtiva.value.novo) {
-    painelAberto.value = true
-    return
-  }
-  origem.value = { ref: ativa.value, modo: 'atual' }
-  const base = configDeOrigem('atual')
+function novaVisualizacao(d: { tipo: 'table' | 'kanban', soEu: boolean, fixar: boolean }) {
+  catalogoAberto.value = false
+  deOndeSaiu.value = ativa.value
+  const base = visualizacoesIniciais('nenhuma')[0]!
   const nova: Visualizacao = {
-    ...visualizacoesIniciais('nenhuma')[0]!,
     ...base,
     reference: `vis-${Date.now()}`,
-    name: '',
-    icon: base.model_type === 'kanban' ? 'i-lucide-square-kanban' : 'i-lucide-table',
+    name: nomeLivre(d.tipo === 'kanban' ? t.value.criar.kanban : t.value.criar.tabela),
+    icon: d.tipo === 'kanban' ? 'i-lucide-square-kanban' : 'i-lucide-table',
+    model_type: d.tipo,
     default: false,
+    fixada: d.fixar,
     // Standard ou Viewer cria só para si.
-    user: ehOwner.value ? null : EU.id,
+    user: d.soEu || !ehOwner.value ? EU.id : null,
+    filters: {},
+    // Kanban genérico sem etiqueta: o cartão do SDK tem altura fixa (h-48) e, com as 5 partes, o texto de apoio some.
+    config: d.tipo === 'kanban'
+      ? { hide: false, columns: base.config.columns, groupBy: 'status', cardConfig: { header: 'fornecedor', content: 'valor', userField: 'responsavel', dueDateField: 'vencimento' } }
+      : { hide: false, columns: base.config.columns, sorts: [] },
     novo: true,
   }
-  salvas.value = [...salvas.value, nova]
+  const lista = salvas.value.filter(v => !v.novo)
+  const para = d.fixar ? lista.filter(v => v.fixada).length + 1 : lista.length
+  salvas.value = [...lista.slice(0, para), nova, ...lista.slice(para)]
   ativa.value = nova.reference
   painelAberto.value = true
 }
 
-function trocarOrigem(modo: 'atual' | 'zero') {
-  origem.value = { ...origem.value, modo }
-  const base = configDeOrigem(modo)
-  salvas.value = salvas.value.map(x => x.reference === ativa.value ? { ...x, ...base, icon: base.model_type === 'kanban' ? 'i-lucide-square-kanban' : 'i-lucide-table' } : x)
-}
-
+const catalogoAberto = ref(false)
 const criando = ref(false)
-async function confirmarCriacao() {
+async function concluirCriacao() {
   criando.value = true
-  await new Promise(r => setTimeout(r, 400))
+  await new Promise(r => setTimeout(r, 300))
   const v = salvaAtiva.value
   salvas.value = salvas.value.map(x => x.reference === v.reference ? { ...x, novo: false } : x)
   criando.value = false
@@ -413,13 +423,20 @@ async function confirmarCriacao() {
 function cancelarCriacao(id = ativa.value) {
   salvas.value = salvas.value.filter(x => x.reference !== id)
   painelAberto.value = false
-  ativa.value = salvas.value.some(x => x.reference === origem.value.ref) ? origem.value.ref : 'default'
+  ativa.value = salvas.value.some(x => x.reference === deOndeSaiu.value) ? deOndeSaiu.value : 'default'
 }
 
+/** Fechar o painel da criação conclui, como no ClickUp: a visualização já existe. A validação do nome fica no painel. */
 function fecharPainel() {
-  if (salvaAtiva.value.novo) cancelarCriacao()
-  else painelAberto.value = false
+  painelAberto.value = false
 }
+
+/* Trocar de visualização no meio da criação também conclui: a nova fica, com o nome que tem. */
+watch(ativa, (_, anterior) => {
+  if (salvas.value.some(v => v.reference === anterior && v.novo)) {
+    salvas.value = salvas.value.map(v => v.reference === anterior ? { ...v, novo: false } : v)
+  }
+})
 
 /* ---------- ações do menu ---------- */
 
@@ -618,9 +635,14 @@ const opcoesDoAndaime = computed(() => [
             >
               <template #criar>
                 <!-- Como hoje ("+ Visualizar" com tooltip "Nova visualização"), no padrão "+ View" do ClickUp. Cria e abre o painel. -->
-                <UTooltip :text="t.barra.nova">
-                  <UButton icon="i-lucide-plus" :label="t.barra.botaoNova" color="neutral" variant="ghost" size="sm" @click="novaVisualizacao" />
-                </UTooltip>
+                <UPopover v-model:open="catalogoAberto" :content="{ align: 'end', sideOffset: 6 }">
+                  <UTooltip :text="t.barra.nova">
+                    <UButton icon="i-lucide-plus" :label="t.barra.botaoNova" color="neutral" variant="ghost" size="sm" />
+                  </UTooltip>
+                  <template #content>
+                    <CatalogoDeTipos :t="t" :eh-owner="ehOwner" @escolher="novaVisualizacao" />
+                  </template>
+                </UPopover>
               </template>
             </BarraDeVisualizacoes>
             <BarraDeHoje
@@ -800,14 +822,11 @@ const opcoesDoAndaime = computed(() => [
                 :opcoes-salvar="opcoesDeSalvar"
                 :eh-owner="ehOwner"
                 :criando="criando"
-                :origem="origem.modo"
-                :nome-da-origem="salvas.find(v => v.reference === origem.ref)?.name ?? ''"
                 :nomes-existentes="salvas.filter(v => v.reference !== ativa).map(v => v.name ?? '')"
                 @salvar="salvar"
                 @descartar="descartar"
-                @criar="confirmarCriacao"
+                @criar="concluirCriacao"
                 @cancelar-criacao="cancelarCriacao()"
-                @update:origem="trocarOrigem"
                 @fechar="fecharPainel"
               />
             </Transition>
@@ -829,7 +848,7 @@ const opcoesDoAndaime = computed(() => [
       leave-to-class="translate-y-3 opacity-0"
     >
       <div
-        v-if="estilo === 'proposta' && modificada && !painelAberto"
+        v-if="estilo === 'proposta' && flutuanteVisivel && !painelAberto"
         role="region"
         :aria-label="t.flutuante.rotulo"
         class="fixed bottom-16 left-1/2 z-30 flex -translate-x-1/2 items-center gap-3 rounded-xl bg-default py-2 pl-4 pr-2 shadow-lg ring ring-default"
@@ -847,6 +866,9 @@ const opcoesDoAndaime = computed(() => [
               <UButton icon="i-lucide-chevron-down" :aria-label="t.linha.maisSalvar" />
             </UDropdownMenu>
           </UFieldGroup>
+          <UTooltip :text="t.flutuante.fechar">
+            <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="sm" :aria-label="t.flutuante.fechar" @click="fecharFlutuante" />
+          </UTooltip>
         </span>
       </div>
     </Transition>

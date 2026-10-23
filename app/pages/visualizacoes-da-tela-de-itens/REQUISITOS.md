@@ -4,7 +4,7 @@
 
 **Onde vale:** na tela nova de itens de cada categoria (`/workspaces/<ws>/types/<categoria>`) e, com a mesma lógica, nas visualizações de Tarefas Rápidas (`/tasks/quick`) e de Tarefas Agendadas (`/tasks/scheduled`, título "Tarefas Programadas"). As diferenças de parâmetro estão no grupo "Tarefas Rápidas e Agendadas".
 
-**Referência visual:** protótipo `visualizacoes-da-tela-de-itens`, estilo Proposta, rodadas 1 a 3 de 23/10/2026. Prints em `evidencias/proposta-*.jpg` e `evidencias/r2-*.jpg` e `r3-*.jpg`; a tela de hoje em `evidencias/develop-*.jpg`.
+**Referência visual:** protótipo `visualizacoes-da-tela-de-itens`, estilo Proposta, rodadas 1 a 4 de 23/10/2026. Prints em `evidencias/proposta-*.jpg`, `r2-*.jpg`, `r3-*.jpg` e `r4-*.jpg`; a referência do ClickUp em `evidencias/ref-clickup-*.jpg`; a tela de hoje em `evidencias/develop-*.jpg`.
 
 **Convenção:** "deve" é obrigatório. Cada requisito tem um critério de aceite que se confere na tela. Os textos entre aspas são os da interface em português. Medidas ficam a cargo do front; o requisito descreve o comportamento.
 
@@ -20,9 +20,9 @@
 | Menu da visualização | Seta ⌄ na ativa, botão direito, grupos "Só para mim" e "Para todos" | RF018 a RF024 |
 | Renomear | Na própria pílula | RF025 a RF028, RF079 |
 | Lista do "+N" | Busca, alça visível em repouso, arrastar, sem contagem | RF070 a RF073, RF080 |
-| Mudança não salva | Ponto na pílula e barra flutuante na base com salvar | RF029 a RF035 |
+| Mudança não salva | Ponto na pílula e barra flutuante na base com salvar e X | RF029 a RF035, RF086, RF087 |
 | Ordem padrão | "Aplicar minha ordem para todos" e "Recuperar a ordem padrão" | RF036 a RF039 |
-| Criar | "+ Visualização" cria e abre o painel em modo de criação | RF040 a RF047, RF081, RF082 |
+| Criar | "+ Visualização" abre o catálogo de tipos; o tipo escolhido cria uma visualização genérica com o painel aberto | RF040, RF041, RF043 a RF047, RF081, RF082, RF088 a RF093 |
 | Painel Configurar | Painel ao lado da tabela, ao vivo, sem 2º modal, rótulos legíveis | RF048 a RF062, RF083 |
 | Teclado e acessibilidade | Setas, F2, Shift + F10, Ctrl + Shift + seta, anúncio ao leitor de tela | RF063 a RF069, RF084, RF085 |
 | Tarefas Rápidas e Agendadas | A mesma lógica, com campos, agrupamento e filtros automáticos próprios | RF074 a RF076 |
@@ -122,6 +122,8 @@
 | RF033 | Com o painel aberto, a barra flutuante não deve aparecer: salvar e descartar ficam só no rodapé do painel, com a seta de RF032. | A ação de salvar nunca aparece em 2 lugares. | Essencial |
 | RF034 | A linha de filtros abaixo da barra de ferramentas deve mostrar cada filtro da visualização em chip removível e "+ Filtro". | Retirar um chip cria rascunho (RF029). | Importante |
 | RF035 | Descartar deve voltar a visualização ao que estava salvo e mostrar "Alterações descartadas." | O ponto e a barra flutuante somem. | Essencial |
+| RF086 | A barra flutuante deve ter um X com o tooltip "Fechar sem salvar. O ajuste continua aplicado para você.", que fecha a barra e mantém o rascunho aplicado. | Fechar a barra depois de retirar "Status é Em análise" mantém os 48 itens na tabela e o ponto na pílula. | Essencial |
+| RF087 | Depois do X, a barra flutuante deve voltar quando a pessoa fizer outra mudança na mesma visualização. | Ordenar por Fornecedor depois do X mostra a barra de novo. | Importante |
 
 | Linha | Visualização ativa | Perfil | Botão principal | Na seta | Ajuda da barra flutuante |
 |---|---|---|---|---|---|
@@ -143,16 +145,22 @@
 
 | ID | Requisito | Critério de aceite | Prioridade |
 |---|---|---|---|
-| RF040 | "+ Visualização" deve criar a visualização na hora, abri-la e abrir o painel em modo de criação, com o título "Nova visualização". | A pílula "Nova visualização" aparece ativa no fim da barra. | Essencial |
-| RF041 | A visualização em criação deve começar com as colunas, os filtros e a ordenação da visualização de onde a pessoa saiu. | Criar a partir de "Em análise" traz o filtro "Status é Em análise". | Essencial |
-| RF042 | O painel em modo de criação deve ter "Começar de" com "Visualização atual" e "Do zero". | "Visualização atual" vem marcado. | Importante |
-| RF081 | "Do zero" deve trocar a configuração em criação para cada coluna da categoria, sem filtro e sem ordenação. | A tabela mostra os 48 itens e cada coluna. | Importante |
-| RF043 | O campo Nome do modo de criação deve vir em foco e obrigatório. | O cursor aparece no campo ao abrir. | Essencial |
-| RF082 | A pílula em criação deve mostrar o nome enquanto a pessoa digita. | Digitar "Em análise do financeiro" muda a pílula na hora. | Importante |
-| RF044 | Se a pessoa clicar em "Criar visualização" sem nome, o sistema deve mostrar "Informe um nome." no campo e devolver o foco ao campo Nome. | A visualização não é criada. | Essencial |
-| RF045 | Se o nome já existir na categoria, o sistema deve mostrar "Já existe uma visualização com este nome." no campo. | A visualização não é criada. | Essencial |
-| RF046 | "Criar visualização" deve gravar a visualização, fechar o painel e mostrar "Visualização <nome> criada." | A pílula fica com o nome dado e sem ponto. | Essencial |
-| RF047 | Cancelar, fechar o painel no X ou "Descartar visualização" no menu da pílula em criação deve apagar a visualização em criação e voltar para a visualização de origem. | Nada fica gravado. | Essencial |
+| RF040 | "+ Visualização" deve abrir o catálogo "Nova visualização" com os tipos Tabela e Kanban, cada um com ícone, nome e 1 linha de descrição, e as caixas "Só para mim" e "Fixar no início". | Abrir o catálogo não cria nada; fechar o catálogo deixa a barra como estava. | Essencial |
+| RF041 | Escolher o tipo deve criar a visualização na hora, com o nome do tipo, abri-la e abrir o painel em modo de criação, com o título "Nova visualização". | Escolher Kanban mostra a pílula "Kanban" ativa e o quadro agrupado por Status. | Essencial |
+| RF042 | (removido na rodada 4: "Começar de" saiu; a visualização nova nasce genérica, RF081 e RF088) | | |
+| RF081 | A Tabela nova deve começar com cada coluna da categoria, sem filtro e sem ordenação. | A tabela mostra os 48 itens e cada coluna. | Essencial |
+| RF088 | O Kanban novo deve começar agrupado por Status, sem filtro e sem ordenação, com o cartão sem etiqueta (P008). | O texto de apoio aparece inteiro em cada cartão. | Essencial |
+| RF089 | Se o nome do tipo já existir na categoria, a visualização nova deve receber o nome do tipo com o próximo número livre. | Criar 2 Tabelas seguidas dá "Tabela" e "Tabela 2". | Importante |
+| RF090 | Com "Só para mim" marcado, a visualização nova deve nascer com "Só eu" em Quem vê; desmarcado, com "Todos do workspace". | Owner que cria sem marcar vê "Todos do workspace" no painel. | Essencial |
+| RF091 | Para Standard ou Viewer, "Só para mim" deve vir marcado e desligado, com o tooltip "Seu perfil cria visualizações só para você." (RN004, linha 2). | Standard vê a caixa marcada e não consegue desmarcar. | Essencial |
+| RF092 | Com "Fixar no início" marcado, a visualização nova deve nascer fixada, depois da última fixada (RF016). | Com Itens e Meus contratos fixadas, o Kanban novo fica na 3ª posição. | Importante |
+| RF043 | O campo Nome do modo de criação deve vir em foco, com o nome do tipo selecionado, e ser obrigatório. | Digitar troca o nome inteiro. | Essencial |
+| RF082 | A pílula em criação deve mostrar o nome enquanto a pessoa digita. | Digitar "Contratos por etapa" muda a pílula na hora. | Importante |
+| RF093 | No modo de criação, cada ajuste do painel deve entrar direto na visualização nova, sem rascunho, sem o estado "Alterações não salvas" e sem o botão de salvar. | O rodapé mostra só "Descartar visualização" e "Concluir". | Essencial |
+| RF044 | Se a pessoa concluir com o Nome vazio, o sistema deve mostrar "Informe um nome." no campo e devolver o foco ao campo Nome. | O painel continua aberto. | Essencial |
+| RF045 | Se o nome já existir na categoria, o sistema deve mostrar "Já existe uma visualização com este nome." no campo. | O painel continua aberto. | Essencial |
+| RF046 | "Concluir", Enter no campo Nome ou o X do painel deve manter a visualização, fechar o painel e mostrar "Visualização <nome> criada." | A pílula fica com o nome dado. | Essencial |
+| RF047 | "Descartar visualização", no rodapé do painel ou no menu da pílula em criação, deve apagar a visualização em criação e voltar para a visualização de onde a pessoa saiu. | Nada fica gravado e a pílula de origem volta ativa. | Essencial |
 
 ## Painel Configurar (RF)
 
@@ -173,7 +181,7 @@
 | RF083 | No Kanban, o título da seção Ordenação deve ser "Ordem dos cartões em cada coluna". | Trocar para Kanban troca o título. | Desejável |
 | RF060 | Quem vê deve ter "Todos do workspace", "Só eu" e "Grupos e funções"; com "Grupos e funções", a escolha de grupos e de funções. | Escolher "Só eu" grava a visualização como só minha. | Essencial |
 | RF061 | Para Standard ou Viewer, "Todos do workspace" e "Grupos e funções" devem aparecer desligados, com a nota "Só Owner e Full mudam quem vê uma visualização de todos. As suas alterações ficam só para você." | Ao criar, "Só eu" vem marcado. | Essencial |
-| RF062 | O rodapé do painel deve ter o estado ("Alterações não salvas" ou "Tudo salvo"), Descartar e o botão de salvar de RF032; no modo de criação, Cancelar e "Criar visualização". | Sem rascunho, Descartar e salvar ficam desligados. | Essencial |
+| RF062 | O rodapé do painel deve ter o estado ("Alterações não salvas" ou "Tudo salvo"), Descartar e o botão de salvar de RF032; no modo de criação, "Descartar visualização" e "Concluir" (RF093). | Sem rascunho, Descartar e salvar ficam desligados. | Essencial |
 
 ## Teclado e acessibilidade (RF)
 
@@ -234,5 +242,6 @@ A barra e o construtor dessas 2 telas são os mesmos da tela de itens (conferido
 | P005 | Duplicar, na tela de hoje, mostrou "(copy)", a coluna "reference" e o aviso "Visualização editada com sucesso", e depois de 2 Duplicar seguidos a 1ª cópia sumiu. Hipótese, sem contraprova: o 2º Duplicar grava por cima da cópia anterior. | QA da tela de itens | Se confirmado, é defeito a corrigir antes desta entrega. |
 | P006 | O rascunho (RF029) deve sobreviver a recarregar a página? O protótipo zera. | Mikaela | Muda RF029 e RI002. |
 | P007 | O menu chama a tela de "Agendadas" e o título dela diz "Tarefas Programadas". Qual nome fica? | Mikaela | Muda o nome da visualização do sistema na tabela de parâmetros. |
+| P008 | Quais campos o cartão do Kanban novo mostra em cada categoria? O protótipo usa Fornecedor, Valor do contrato, Responsável e Vencimento, escolhidos à mão. O cartão do `EnKanbanBoard` tem altura fixa: com título, texto de apoio, etiqueta, pessoa e data, o texto de apoio some (já visível em `r3-cartao-kanban.jpg`). | Mikaela e time de front | Define a regra de escolha dos campos e se o cartão cresce com o conteúdo. |
 | S001 | Standard ou Viewer pode criar, renomear e excluir visualização que é só sua (RN004, linhas 2 e 5). | Mikaela confirma | Se não puder, o "+ Visualização" some para esse perfil. |
 | S002 | Recuperar a ordem padrão também desafixa, porque fixar faz parte da ordem pessoal (RF037). | Mikaela confirma | Se não, as fixadas ficam no começo depois de recuperar. |
