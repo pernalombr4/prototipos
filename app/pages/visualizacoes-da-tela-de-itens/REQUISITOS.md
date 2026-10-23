@@ -4,11 +4,11 @@
 
 **Onde vale:** na tela nova de itens de cada categoria (`/workspaces/<ws>/types/<categoria>`) e, com a mesma lógica, nas visualizações de Tarefas Rápidas (`/tasks/quick`) e de Tarefas Agendadas (`/tasks/scheduled`, título "Tarefas Programadas"). As diferenças de parâmetro estão no grupo "Tarefas Rápidas e Agendadas".
 
-**Referência visual:** protótipo `visualizacoes-da-tela-de-itens`, estilo Proposta, rodadas 1 a 5 de 23/10/2026. Prints em `evidencias/proposta-*.jpg`, `r2-*.jpg`, `r3-*.jpg`, `r4-*.jpg` e `r5-*.jpg`; as referências do ClickUp e do Notion em `evidencias/ref-clickup-*.jpg` e `ref-notion-*.jpg`; a tela de hoje em `evidencias/develop-*.jpg`.
+**Referência visual:** protótipo `visualizacoes-da-tela-de-itens`, estilo Proposta, rodadas 1 a 6 de 23/10/2026. Prints em `evidencias/proposta-*.jpg`, `r2-*.jpg`, `r3-*.jpg`, `r4-*.jpg` e `r5-*.jpg` (a rodada 6 está em `r5-botoes-junto-*.jpg`); as referências do ClickUp e do Notion em `evidencias/ref-clickup-*.jpg` e `ref-notion-*.jpg`; a tela de hoje em `evidencias/develop-*.jpg`.
 
 **Convenção:** "deve" é obrigatório. Cada requisito tem um critério de aceite que se confere na tela. Os textos entre aspas são os da interface em português. Medidas ficam a cargo do front; o requisito descreve o comportamento.
 
-**Fora do escopo:** a casca da tela, a barra de ferramentas (busca, período, ícones, "Novo registro"), a tabela e o cartão do quadro do `EnKanbanBoard`.
+**Fora do escopo:** a casca da tela; a barra de ferramentas (busca, período, ícones, "Novo registro"), menos a ação do botão Filtros (RF106); a tabela, menos o menu do título da coluna (RF107); e o cartão do quadro do `EnKanbanBoard`.
 
 ## Resumo
 
@@ -18,9 +18,9 @@
 | Barra | Pílula com corte pela largura, tooltip organizado em partes e sem contagem, "+N" com a ativa sempre na barra, "+ Visualização" | RF001 a RF010, RF111 |
 | Arrastar e fixar | Arrastar na barra e no "+N", fixadas juntas no começo | RF011 a RF017, RF077, RF078 |
 | Menu da visualização | Seta ⌄ na ativa, botão direito, grupos "Só para mim" e "Para todos" | RF018 a RF024 |
-| Renomear | Na própria pílula | RF025 a RF028, RF079 |
+| Renomear | Na própria pílula e na linha do "+N" | RF025 a RF028, RF079, RF122 |
 | Lista do "+N" | Editor de todas as visualizações: busca, divisória das que não cabem, arrastar, renomear na linha, sem contagem | RF070 a RF073, RF080, RF119 a RF123 |
-| Mudança não salva | Ponto na pílula e barra flutuante na base com salvar e X | RF029 a RF035, RF086, RF087 |
+| Mudança não salva | Ponto na pílula e barra flutuante na base com salvar e X | RF029 a RF035, RF086, RF087, RF124 |
 | Ordem padrão | "Aplicar minha ordem para todos" e "Recuperar a ordem padrão" | RF036 a RF039 |
 | Criar | "+ Visualização" abre o catálogo de tipos; o tipo escolhido cria uma visualização genérica com o painel aberto | RF040, RF041, RF043 a RF047, RF081, RF082, RF088 a RF093 |
 | Painel Configurar | Painel ao lado da tabela, ao vivo, sem 2º modal, rótulos legíveis | RF048 a RF062, RF083 |
@@ -59,7 +59,7 @@
 | RF001 | Cada visualização deve aparecer como pílula com o ícone e o nome, sem traço embaixo (o traço é a marca das folders). | Barra de visualizações e barra de folders não se confundem lado a lado. | Essencial |
 | RF002 | A pílula ativa deve ter fundo suave na cor de destaque, texto em negrito na cor de texto forte e o ícone na cor de destaque. | O texto da ativa passa de 4,5:1 sobre o fundo dela (RNF001). | Essencial |
 | RF003 | O nome da pílula deve ser cortado pela largura máxima da pílula, com reticências, e não por número de letras. | "Revisão trimestral dos contratos de fornecedores estratégicos" aparece como "Revisão trimestral do..." | Essencial |
-| RF004 | O tooltip da pílula deve mostrar, nesta ordem: o nome inteiro e a descrição; o tipo e quem vê em etiquetas (mais "Versão só sua" e "Alterações não salvas" quando valem); "Agrupado por" no Kanban; "Filtros" com 1 etiqueta por filtro; "Ordenação" com 1 etiqueta por nível e a seta da direção; no rodapé, "Arraste para reordenar" e "Clique duas vezes para renomear". O tooltip não mostra contagem de itens. | "Vencendo em 30 dias" mostra Tabela, Todos veem, as etiquetas "Vencimento nos próximos 30 dias" e "Status não é Vencido" e a etiqueta "Vencimento" com a seta para cima. | Importante |
+| RF004 | O tooltip da pílula deve mostrar, nesta ordem: o nome inteiro e a descrição; o tipo e quem vê em etiquetas (mais "Versão só sua" e "Alterações não salvas" quando valem); "Agrupado por" no Kanban; "Filtros" com 1 etiqueta por filtro; "Ordenação" com 1 etiqueta por nível e a seta da direção; no rodapé, "Arraste para reordenar" e "Clique duas vezes para renomear", menos na visualização do sistema (RF012). O tooltip não mostra contagem de itens. | "Vencendo em 30 dias" mostra Tabela, Todos veem, as etiquetas "Vencimento nos próximos 30 dias" e "Status não é Vencido" e a etiqueta "Vencimento" com a seta para cima. | Importante |
 | RF111 | No tooltip, o filtro avançado com "E" deve entrar parte por parte, como filtros a mais; com "Ou", as partes ficam separadas por "ou". O grupo de dentro vai numa etiqueta, entre parênteses. | "Revisão trimestral" mostra "Valor do contrato maior ou igual a R$ 60.000" e "(Status é Aprovado ou Assinado ou Prioridade é Alta)". | Importante |
 | RF005 | Quando as pílulas não couberem na largura da barra, o botão "+N ⌄" deve mostrar N igual ao número de visualizações que ficam fora da barra. | Com todas visíveis, o botão mostra só a seta "⌄" (RF119). | Essencial |
 | RF006 | Em cada largura de tela, a visualização ativa deve aparecer na barra, no lugar da última pílula que cabia quando a ativa estiver depois do corte. | Abrir pela lista do "+N" uma visualização que não cabe a traz para a barra. | Essencial |
@@ -110,7 +110,7 @@
 |---|---|---|---|
 | RF070 | A lista do "+N" deve ter busca ("Pesquisar visualização...") e, na ordem da barra, o ícone e o nome inteiro de cada visualização da tela, as da barra e as que não cabem, sem contagem de itens. | Digitar filtra; sem resultado, aparece "Nenhuma visualização encontrada." | Essencial |
 | RF071 | Cada linha da lista deve mostrar a alça de arrastar em repouso e o "⋯" do menu só no hover ou no foco da linha. | Sem passar o mouse, as alças aparecem e os "⋯" não. | Essencial |
-| RF072 | Arrastar uma linha da lista deve mudar a ordem, com linha-guia no ponto de queda e a gravação de RF013. | Arrastar "Pessoas" para o topo da lista a põe antes de "Jurídico". | Essencial |
+| RF072 | Arrastar uma linha da lista deve mudar a ordem, com linha-guia no ponto de queda e a gravação de RF013. | Arrastar "Pessoas" para logo depois de "Itens" põe "Pessoas" na 2ª posição da barra. | Essencial |
 | RF080 | Com a busca da lista preenchida, as linhas não devem arrastar. | Com "jur" na busca, a alça some. | Importante |
 | RF073 | Para Owner ou Full, o rodapé da lista deve ter "Aplicar minha ordem para todos" e "Recuperar a ordem padrão" (RF036 a RF039). | Standard ou Viewer não vê o rodapé. | Essencial |
 | RF119 | O botão da lista deve existir mesmo sem visualização fora da barra, só com a seta "⌄" e o nome acessível "Todas as visualizações". | Com 4 visualizações na tela larga, a seta abre a lista com as 4. | Essencial |
@@ -129,6 +129,7 @@
 | RF032 | O botão de salvar deve seguir a tabela a seguir; as outras opções da linha ficam na seta. | Owner ou Full em "Em análise" vê "Salvar para todos", com "Salvar só para mim" e "Salvar como nova visualização" na seta. | Essencial |
 | RF033 | Com o painel aberto, a barra flutuante não deve aparecer: salvar e descartar ficam só no rodapé do painel, com a seta de RF032. | A ação de salvar nunca aparece em 2 lugares. | Essencial |
 | RF034 | A linha de filtros abaixo da barra de ferramentas deve mostrar, nesta ordem: os filtros automáticos em etiqueta com X, 1 chip por filtro por campo (RF096), o chip "N regras" do filtro avançado (RF100) e "+ Filtro" (RF094). | Mudar qualquer um cria rascunho (RF029). | Importante |
+| RF124 | A linha de filtros deve aparecer quando a visualização ativa tem filtro, quando tem rascunho ou depois do botão Filtros (RF106), na Tabela e no Kanban. | Em "Itens", sem filtro, a linha não aparece até o botão Filtros. | Importante |
 | RF035 | Descartar deve voltar a visualização ao que estava salvo e mostrar "Alterações descartadas." | O ponto e a barra flutuante somem. | Essencial |
 | RF086 | A barra flutuante deve ter um X com o tooltip "Fechar sem salvar. O ajuste continua aplicado para você.", que fecha a barra e mantém o rascunho aplicado. | Fechar a barra depois de retirar "Status é Em análise" mantém os 48 itens na tabela e o ponto na pílula. | Essencial |
 | RF087 | Depois do X, a barra flutuante deve voltar quando a pessoa fizer outra mudança na mesma visualização. | Ordenar por Fornecedor depois do X mostra a barra de novo. | Importante |
@@ -200,7 +201,7 @@
 | RF065 | Ctrl + Shift + seta para a esquerda ou para a direita deve mover a pílula ativa 1 posição, com a gravação de RF013. | O foco continua na pílula movida. | Importante |
 | RF066 | F2 deve renomear a pílula ativa (RF025). | O campo de renomear abre sem mouse. | Importante |
 | RF084 | Shift + F10 deve abrir o menu da pílula ativa. | O menu abre sem mouse. | Importante |
-| RF067 | Na lista do "+N", as setas para cima e para baixo devem andar entre as linhas, e Enter abre a visualização da linha em foco. | Dá para abrir uma visualização escondida só pelo teclado. | Importante |
+| RF067 | Na lista do "+N", as setas para cima e para baixo devem andar entre as linhas, e Enter abre a visualização da linha em foco. | Dá para abrir qualquer visualização da lista só pelo teclado. | Importante |
 | RF085 | Na lista do "+N", Ctrl + Shift + seta para cima ou para baixo deve mover a linha em foco 1 posição. | Dá para reordenar a lista só pelo teclado. | Importante |
 | RF068 | Toda mudança de posição deve ser anunciada numa região `aria-live` ("<nome> movida para a posição <N>."). | O anúncio sai ao arrastar, fixar e mover pelo teclado. | Importante |
 | RF069 | O ponto de mudança não salva e o ícone de versão só minha devem ter nome acessível ("Alterações não salvas", "Versão só sua"). | O leitor de tela lê os 2. | Importante |
@@ -230,7 +231,7 @@ Referência: o filtro do Notion (chip por campo e filtro avançado, `evidencias/
 | RF105 | Trocar o campo de uma regra deve recomeçar a condição e o valor. | Trocar "Status" por "Valor do contrato" troca a condição para "Maior ou igual a". | Importante |
 | RF117 | Trocar a condição entre "É" e "Não é" deve manter as opções marcadas. | "Status é Aprovado" vira "Status não é Aprovado". | Importante |
 | RF106 | O botão Filtros da barra de ferramentas deve mostrar a linha de filtros, mesmo sem filtro, com "+ Filtro" aberto. | Em "Itens", o botão abre a lista de campos. | Importante |
-| RF107 | O botão direito ou Shift + F10 no título de uma coluna deve abrir o menu da coluna, ancorado no título, com "Ordenar crescente", "Ordenar decrescente", "Filtrar" e "Ocultar coluna" (P009). | O menu de "Área" abre logo abaixo do título "Área". | Importante |
+| RF107 | Na Tabela, o botão direito ou Shift + F10 no título de uma coluna deve abrir o menu da coluna, ancorado no título, com "Ordenar crescente", "Ordenar decrescente", "Filtrar" e "Ocultar coluna" (P009). | O menu de "Área" abre logo abaixo do título "Área". | Importante |
 | RF108 | "Filtrar" no menu da coluna deve abrir o chip do campo da coluna (RF095). | "Filtrar" em "Área" abre o chip "Área" com as 5 áreas. | Importante |
 | RF109 | "Ocultar coluna" deve tirar a coluna da visualização. | Ocultar "Área" tira a coluna e a mostra entre as ocultas no painel. | Importante |
 | RF118 | "Ordenar crescente" e "Ordenar decrescente" devem ordenar a tabela pela coluna do menu. | "Ordenar decrescente" em "Valor do contrato" põe o maior valor em cima. | Importante |
@@ -242,7 +243,7 @@ A barra e o construtor dessas 2 telas são os mesmos da tela de itens (conferido
 
 | ID | Requisito | Critério de aceite | Prioridade |
 |---|---|---|---|
-| RF074 | As telas Tarefas Rápidas e Tarefas Agendadas devem seguir RN001 a RN007, RF001 a RF123, RI001 a RI006 e RNF001 a RNF002, com os parâmetros da tabela a seguir. | Os prints e critérios de aceite deste documento valem trocando os parâmetros. | Essencial |
+| RF074 | As telas Tarefas Rápidas e Tarefas Agendadas devem seguir RN001 a RN007, RF001 a RF124, RI001 a RI006 e RNF001 a RNF002, com os parâmetros da tabela a seguir. | Os prints e critérios de aceite deste documento valem trocando os parâmetros. | Essencial |
 | RF075 | Os filtros automáticos das tarefas devem aparecer como chaves com os nomes que a tela já usa: "Minhas Tarefas", "Aberto", "Atrasado", "Atribuídos", "Tarefas Externas", "Tarefas Internas". | Nenhum filtro automático abre 2º modal. | Essencial |
 | RF076 | Os campos das tarefas devem aparecer pelo rótulo e pelo ícone do tipo, sem o nome técnico (hoje: "EnlNumber", "radioButton", "EnAssignees", "EnHtml", "inputSwitch", "hidden"), conforme RF055. | Nenhum nome técnico aparece no painel. | Essencial |
 
@@ -270,7 +271,7 @@ A barra e o construtor dessas 2 telas são os mesmos da tela de itens (conferido
 | ID | Requisito | Como medir ou conferir | Prioridade |
 |---|---|---|---|
 | RNF001 | O texto da pílula ativa deve ter contraste de pelo menos 4,5:1 sobre o fundo dela (WCAG 2.2, critério 1.4.3), nos temas claro e escuro. | No protótipo, o texto escuro dá 16,65:1; o rosa sobre rosa claro dava 2,88:1 e foi trocado. | Essencial |
-| RNF002 | A barra, o painel e a barra flutuante devem funcionar em português, inglês e espanhol sem texto cortado nos botões. | Conferir os 3 idiomas no andaime do protótipo. | Importante |
+| RNF002 | A barra, a lista do "+N", o painel, a linha de filtros, o filtro avançado e a barra flutuante devem funcionar em português, inglês e espanhol sem texto cortado nos botões. | Conferir os 3 idiomas no andaime do protótipo. | Importante |
 
 ## Em aberto
 
@@ -286,5 +287,5 @@ A barra e o construtor dessas 2 telas são os mesmos da tela de itens (conferido
 | P008 | Quais campos o cartão do Kanban novo mostra em cada categoria? O protótipo usa Fornecedor, Valor do contrato, Responsável e Vencimento, escolhidos à mão. O cartão do `EnKanbanBoard` tem altura fixa: com título, texto de apoio, etiqueta, pessoa e data, o texto de apoio some (já visível em `r3-cartao-kanban.jpg`). | Mikaela e time de front | Define a regra de escolha dos campos e se o cartão cresce com o conteúdo. |
 | P009 | O menu da coluna precisa de um gatilho visível (a seta no título ao passar o mouse, como no Notion)? O protótipo usa só botão direito e Shift + F10, porque o `EnTable` não tem slot de cabeçalho (RI006). | Mikaela e time de front | Com gatilho visível, o SDK ganha o slot de RI006. |
 | S001 | Standard ou Viewer pode criar, renomear e excluir visualização que é só sua (RN004, linhas 2 e 5). | Mikaela confirma | Se não puder, o "+ Visualização" some para esse perfil. |
-| S003 | O filtro avançado tem grupo dentro de grupo em só 1 nível; o Notion aceita mais. 1 nível cobre "A e (B ou C)" e mantém o filtro legível. | Mikaela confirma | Com mais níveis, "Transformar em grupo" e "Adicionar grupo" passam a valer dentro do grupo. |
 | S002 | Recuperar a ordem padrão também desafixa, porque fixar faz parte da ordem pessoal (RF037). | Mikaela confirma | Se não, as fixadas ficam no começo depois de recuperar. |
+| S003 | O filtro avançado tem grupo dentro de grupo em só 1 nível; o Notion aceita mais. 1 nível cobre "A e (B ou C)" e mantém o filtro legível. | Mikaela confirma | Com mais níveis, "Transformar em grupo" e "Adicionar grupo" passam a valer dentro do grupo. |
