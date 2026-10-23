@@ -14,11 +14,10 @@
 import type { EnKanbanCardConfig, EnKanbanColumn, EnTableColumn, EnTableSort } from '@be-enlighten/enspace-sdk-ui/base'
 import type { FiltroDeCampo, Item, Visualizacao, Volume } from './mocks'
 import { textos } from './textos'
-import { CAMPOS, EU, GRUPOS, ITENS, aplicar, campoPorPath, categoria, nomeDaPessoa, visualizacoesIniciais, workspace } from './mocks'
+import { CAMPOS, EU, GRUPOS, ITENS, aplicar, campoPorPath, clonar, categoria, nomeDaPessoa, visualizacoesIniciais, workspace } from './mocks'
 import CascaDaLista from './_CascaDaLista.vue'
 import BarraDeVisualizacoes from './_BarraDeVisualizacoes.vue'
 import BarraDeHoje from './_BarraDeHoje.vue'
-import CriarVisualizacao from './_CriarVisualizacao.vue'
 import PainelDeConfiguracao from './_PainelDeConfiguracao.vue'
 import ModalDeHoje from './_ModalDeHoje.vue'
 
@@ -28,7 +27,7 @@ import decisoesMd from './DECISOES.md?raw'
 
 definePageMeta({
   titulo: 'Visualizações da tela de itens',
-  descricao: 'Barra de visualizações com arrastar, "+N" e nome cortado com tooltip; criar em 1 passo e configurar num painel com a tabela à vista.',
+  descricao: 'Barra de visualizações com arrastar, "+N" e nome cortado com tooltip; criar e configurar num painel com a tabela à vista; salvar para todos ou só para mim.',
   status: 'em-revisao',
   atualizado: '2026-10-23',
   tela: 'Tela nova de itens (lista da categoria)',
@@ -51,18 +50,29 @@ function daQuery<T extends string>(chave: string, valores: readonly T[], padrao:
 
 const estilo = daQuery('estilo', ['hoje', 'proposta'] as const, 'proposta')
 const volume = daQuery<Volume>('volume', ['nenhuma', 'poucas', 'muitas'] as const, 'muitas')
-const permissao = daQuery('permissao', ['editar', 'leitura'] as const, 'editar')
+/**
+ * Perfil (rodada 2): Owner ou Full salva para todos ou só para si, e aplica a ordem dele para todos.
+ * Standard ou Viewer salva só para si, cria visualização só para si e não mexe na ordem de todos.
+ */
+const perfil = daQuery('perfil', ['owner', 'standard'] as const, 'owner')
 const largura = daQuery('largura', ['cheia', 'estreita'] as const, 'cheia')
-const podeEditar = computed(() => permissao.value === 'editar')
+const ehOwner = computed(() => perfil.value === 'owner')
 
-/* ---------- visualizações: as salvas e os rascunhos ---------- */
+/* ---------- visualizações: as de todos, a versão de cada um e os rascunhos ---------- */
 
+/** As visualizações, na ORDEM DESTA PESSOA (arrastar e fixar mudam só para ela). */
 const salvas = ref<Visualizacao[]>(visualizacoesIniciais(volume.value))
+/** A ordem de todos. "Aplicar minha ordem para todos" grava aqui; "Recuperar a ordem padrão" volta a ela. */
+const ordemPadrao = ref<string[]>(salvas.value.map(v => v.reference))
+/** "Salvar só para mim": a versão desta pessoa por cima da de todos. Os outros continuam vendo a de todos. */
+const pessoais = ref<Record<string, Visualizacao>>({})
 /** Mudança ainda não salva, por visualização. Fica até Salvar ou Descartar (GitHub Projects faz igual). */
 const rascunhos = ref<Record<string, Visualizacao>>({})
 
 watch(volume, (v) => {
   salvas.value = visualizacoesIniciais(v)
+  ordemPadrao.value = salvas.value.map(x => x.reference)
+  pessoais.value = {}
   rascunhos.value = {}
   painelAberto.value = false
   ativaLocal.value = 'default'
@@ -71,6 +81,7 @@ watch(volume, (v) => {
 /* Hoje não existe rascunho nem painel: trocar de estilo começa limpo. */
 watch(estilo, () => {
   rascunhos.value = {}
+  salvas.value = salvas.value.filter(v => !v.novo)
   painelAberto.value = false
 })
 
@@ -87,20 +98,30 @@ const ativa = computed({
 })
 
 const salvaAtiva = computed(() => salvas.value.find(v => v.reference === ativa.value) ?? salvas.value[0]!)
-const efetiva = computed(() => rascunhos.value[ativa.value] ?? salvaAtiva.value)
+/** O que esta pessoa tem salvo: a versão dela, se existe; senão, a de todos. */
+const baseDe = (ref: string) => pessoais.value[ref] ?? salvas.value.find(v => v.reference === ref)!
+const baseAtiva = computed(() => baseDe(ativa.value))
+const efetiva = computed(() => rascunhos.value[ativa.value] ?? baseAtiva.value)
 
 const mesmo = (a: Visualizacao, b: Visualizacao) => JSON.stringify(a) === JSON.stringify(b)
 const modificadas = computed(() => Object.keys(rascunhos.value).filter((r) => {
   const s = salvas.value.find(v => v.reference === r)
-  return s && !mesmo(s, rascunhos.value[r]!)
+  return s && !mesmo(baseDe(r), rascunhos.value[r]!)
 }))
 const modificada = computed(() => modificadas.value.includes(ativa.value))
 
-/** O painel mexe no rascunho da ativa; o primeiro ajuste cria o rascunho. */
+/**
+ * O painel mexe no rascunho da ativa; o primeiro ajuste cria o rascunho.
+ * A visualização em criação ainda não existe para ninguém: o ajuste vai direto nela, e a pílula acompanha o nome.
+ */
 const rascunhoDaAtiva = computed<Visualizacao>({
   get: () => efetiva.value,
   set: (v) => {
-    if (mesmo(v, salvaAtiva.value)) {
+    if (salvaAtiva.value.novo) {
+      salvas.value = salvas.value.map(x => x.reference === ativa.value ? v : x)
+      return
+    }
+    if (mesmo(v, baseAtiva.value)) {
       const { [ativa.value]: _, ...resto } = rascunhos.value
       rascunhos.value = resto
     }
@@ -111,7 +132,7 @@ const rascunhoDaAtiva = computed<Visualizacao>({
 })
 
 function mexer(fn: (v: Visualizacao) => void) {
-  const copia = structuredClone(toRaw(efetiva.value))
+  const copia = clonar(efetiva.value)
   fn(copia)
   rascunhoDaAtiva.value = copia
 }
@@ -131,7 +152,7 @@ const itensDaVisualizacao = computed(() => {
   return q ? lista.filter(i => `${i.reference} ${i.fornecedor}`.toLowerCase().includes(q)) : lista
 })
 
-const contagens = computed(() => Object.fromEntries(salvas.value.map(v => [v.reference, aplicar(rascunhos.value[v.reference] ?? v).length])))
+const contagens = computed(() => Object.fromEntries(salvas.value.map(v => [v.reference, aplicar(rascunhos.value[v.reference] ?? baseDe(v.reference)).length])))
 
 /* ---------- descrever filtro e visualização (tooltip, linha de filtros) ---------- */
 
@@ -202,24 +223,105 @@ function aoOrdenar(s: EnTableSort) {
 
 const salvando = ref(false)
 const ePadraoDoSistema = computed(() => ativa.value === 'default')
-/** Só leitura, ou a "Itens" do sistema: o caminho é salvar como nova. */
-const soSalvarComoNova = computed(() => !podeEditar.value || ePadraoDoSistema.value)
 
-async function salvar() {
-  if (soSalvarComoNova.value) {
+type Escopo = 'todos' | 'eu' | 'propria' | 'nova'
+/**
+ * O que salvar oferece (rodada 2), no rodapé do painel e na linha de filtros:
+ * - visualização só minha: "Salvar" (ela só existe para mim);
+ * - Owner ou Full, numa visualização de todos: "Salvar para todos", com "Salvar só para mim" e "Salvar como nova" na seta;
+ * - Standard ou Viewer, e a Itens do sistema: "Salvar só para mim", com "Salvar como nova" na seta.
+ */
+const opcoesDeSalvar = computed<{ principal: { escopo: Escopo, label: string }, extras: { escopo: Escopo, label: string, icon: string }[] }>(() => {
+  const s = t.value.linha
+  const nova = { escopo: 'nova' as const, label: s.salvarComoNova, icon: 'i-lucide-copy-plus' }
+  if (salvaAtiva.value.user === EU.id) return { principal: { escopo: 'propria', label: s.salvar }, extras: [nova] }
+  if (ehOwner.value && !ePadraoDoSistema.value) {
+    return { principal: { escopo: 'todos', label: s.salvarParaTodos }, extras: [{ escopo: 'eu', label: s.salvarParaMim, icon: 'i-lucide-user-round' }, nova] }
+  }
+  return { principal: { escopo: 'eu', label: s.salvarParaMim }, extras: [nova] }
+})
+
+async function salvar(escopo: Escopo) {
+  if (escopo === 'nova') {
     abrirSalvarComo()
     return
   }
+  const v = rascunhos.value[ativa.value]
+  if (!v) return
   salvando.value = true
   await new Promise(r => setTimeout(r, 400))
-  const v = rascunhos.value[ativa.value]
-  if (v) {
-    salvas.value = salvas.value.map(x => x.reference === ativa.value ? v : x)
-    const { [ativa.value]: _, ...resto } = rascunhos.value
-    rascunhos.value = resto
-    toast.add({ title: v.user ? t.value.avisos.salvaSoEu(v.name ?? '') : t.value.avisos.salvaTodos(v.name ?? ''), icon: 'i-lucide-check', color: 'success', duration: 3000 })
+  const ref = ativa.value
+  if (escopo === 'eu') {
+    pessoais.value = { ...pessoais.value, [ref]: v }
   }
+  else {
+    salvas.value = salvas.value.map(x => x.reference === ref ? v : x)
+    const { [ref]: _, ...semPessoal } = pessoais.value
+    pessoais.value = semPessoal
+  }
+  const { [ref]: _, ...resto } = rascunhos.value
+  rascunhos.value = resto
+  const nome = v.name ?? ''
+  toast.add({
+    title: escopo === 'todos' ? t.value.avisos.salvaTodos(nome) : escopo === 'eu' ? t.value.avisos.salvaParaMim(nome) : t.value.avisos.salvaSoEu(nome),
+    description: escopo === 'eu' ? t.value.avisos.salvaParaMimAjuda : undefined,
+    icon: 'i-lucide-check',
+    color: 'success',
+    duration: 3500,
+  })
   salvando.value = false
+}
+
+/** "Voltar à versão de todos": tira a versão desta pessoa, com Desfazer. */
+function restaurarVersao(ref: string) {
+  const minha = pessoais.value[ref]
+  if (!minha) return
+  const { [ref]: _, ...resto } = pessoais.value
+  pessoais.value = resto
+  toast.add({
+    title: t.value.avisos.versaoDeTodos(nomeDe(ref)),
+    icon: 'i-lucide-users',
+    duration: 4000,
+    actions: [{ label: t.value.avisos.desfazer, color: 'neutral', variant: 'outline', onClick: () => { pessoais.value = { ...pessoais.value, [ref]: minha } } }],
+  })
+}
+
+/* ---------- ordem: a minha e a de todos (rodada 2, como as folders) ---------- */
+
+const minhaOrdem = computed(() => salvas.value.filter(v => !v.novo).map(v => v.reference))
+const ordemEhPadrao = computed(() => {
+  const padrao = ordemPadrao.value.filter(r => minhaOrdem.value.includes(r))
+  const minha = minhaOrdem.value.filter(r => ordemPadrao.value.includes(r))
+  return padrao.join() === minha.join()
+})
+
+function aplicarOrdemParaTodos() {
+  const anterior = ordemPadrao.value
+  ordemPadrao.value = [...minhaOrdem.value]
+  toast.add({
+    title: t.value.avisos.ordemAplicada,
+    description: t.value.avisos.ordemAplicadaAjuda,
+    icon: 'i-lucide-users',
+    color: 'success',
+    duration: 4500,
+    actions: [{ label: t.value.avisos.desfazer, color: 'neutral', variant: 'outline', onClick: () => { ordemPadrao.value = anterior } }],
+  })
+}
+
+/** Volta à ordem de todos e desafixa: fixar é parte da ordem pessoal. */
+function recuperarOrdemPadrao() {
+  const anterior = salvas.value
+  const pos = (r: string) => {
+    const i = ordemPadrao.value.indexOf(r)
+    return i < 0 ? Number.MAX_SAFE_INTEGER : i
+  }
+  salvas.value = [...salvas.value].map(v => ({ ...v, fixada: false })).sort((a, b) => pos(a.reference) - pos(b.reference))
+  toast.add({
+    title: t.value.avisos.ordemRecuperada,
+    icon: 'i-lucide-rotate-ccw',
+    duration: 4500,
+    actions: [{ label: t.value.avisos.desfazer, color: 'neutral', variant: 'outline', onClick: () => { salvas.value = anterior } }],
+  })
 }
 
 function descartar() {
@@ -235,8 +337,8 @@ function abrirSalvarComo() {
 function confirmarSalvarComo() {
   const nome = salvarComo.value.nome.trim()
   if (!nome) return
-  const base = structuredClone(toRaw(efetiva.value))
-  const nova: Visualizacao = { ...base, reference: `vis-${Date.now()}`, name: nome, default: false, fixada: false, user: podeEditar.value ? base.user : EU.id }
+  const base = clonar(efetiva.value)
+  const nova: Visualizacao = { ...base, reference: `vis-${Date.now()}`, name: nome, default: false, fixada: false, user: ehOwner.value ? base.user : EU.id }
   const { [ativa.value]: _, ...resto } = rascunhos.value
   rascunhos.value = resto
   salvas.value = [...salvas.value, nova]
@@ -247,35 +349,76 @@ function confirmarSalvarComo() {
 
 /* ---------- criar ---------- */
 
-const criarAberto = ref(false)
 const barraRef = ref<InstanceType<typeof BarraDeVisualizacoes> | null>(null)
 const painelAberto = ref(false)
 
-function criar(d: { nome: string, tipo: 'table' | 'kanban', agruparPor: string, herdar: boolean, soEu: boolean }) {
-  const base = d.herdar ? structuredClone(toRaw(efetiva.value)) : visualizacoesIniciais('nenhuma')[0]!
+/*
+ * Criar (rodada 2): "+ Visualização" cria a visualização na hora e abre o painel em modo de criação,
+ * com o nome em foco. Ela começa com os filtros e colunas da visualização de onde a pessoa saiu
+ * ("Começar de"), e a tabela mostra o resultado enquanto ela monta. Nada grava antes de
+ * "Criar visualização"; Cancelar (ou fechar o painel) desiste e volta para a visualização de origem.
+ */
+const origem = ref<{ ref: string, modo: 'atual' | 'zero' }>({ ref: 'default', modo: 'atual' })
+
+function configDeOrigem(modo: 'atual' | 'zero'): Pick<Visualizacao, 'config' | 'filters' | 'model_type'> {
+  if (modo === 'zero') {
+    const zero = visualizacoesIniciais('nenhuma')[0]!
+    return { config: { ...zero.config, sorts: [] }, filters: {}, model_type: 'table' }
+  }
+  const v = rascunhos.value[origem.value.ref] ?? salvas.value.find(x => x.reference === origem.value.ref) ?? salvas.value[0]!
+  const c = clonar(v)
+  return { config: c.config, filters: c.filters, model_type: c.model_type }
+}
+
+function novaVisualizacao() {
+  if (salvaAtiva.value.novo) {
+    painelAberto.value = true
+    return
+  }
+  origem.value = { ref: ativa.value, modo: 'atual' }
+  const base = configDeOrigem('atual')
   const nova: Visualizacao = {
+    ...visualizacoesIniciais('nenhuma')[0]!,
     ...base,
     reference: `vis-${Date.now()}`,
-    name: d.nome,
-    icon: d.tipo === 'kanban' ? 'i-lucide-square-kanban' : 'i-lucide-table',
-    model_type: d.tipo,
+    name: '',
+    icon: base.model_type === 'kanban' ? 'i-lucide-square-kanban' : 'i-lucide-table',
     default: false,
-    fixada: false,
-    user: d.soEu ? EU.id : null,
-    module_groups: null,
-    roles: null,
-    config: { ...base.config, groupBy: d.tipo === 'kanban' ? d.agruparPor : undefined },
+    // Standard ou Viewer cria só para si.
+    user: ehOwner.value ? null : EU.id,
+    novo: true,
   }
   salvas.value = [...salvas.value, nova]
   ativa.value = nova.reference
-  criarAberto.value = false
-  toast.add({
-    title: t.value.avisos.criada(d.nome),
-    icon: 'i-lucide-check',
-    color: 'success',
-    duration: 5000,
-    actions: podeEditar.value ? [{ label: t.value.avisos.configurar, color: 'neutral', variant: 'outline', onClick: () => { painelAberto.value = true } }] : undefined,
-  })
+  painelAberto.value = true
+}
+
+function trocarOrigem(modo: 'atual' | 'zero') {
+  origem.value = { ...origem.value, modo }
+  const base = configDeOrigem(modo)
+  salvas.value = salvas.value.map(x => x.reference === ativa.value ? { ...x, ...base, icon: base.model_type === 'kanban' ? 'i-lucide-square-kanban' : 'i-lucide-table' } : x)
+}
+
+const criando = ref(false)
+async function confirmarCriacao() {
+  criando.value = true
+  await new Promise(r => setTimeout(r, 400))
+  const v = salvaAtiva.value
+  salvas.value = salvas.value.map(x => x.reference === v.reference ? { ...x, novo: false } : x)
+  criando.value = false
+  painelAberto.value = false
+  toast.add({ title: t.value.avisos.criada(v.name ?? ''), icon: 'i-lucide-check', color: 'success', duration: 3500 })
+}
+
+function cancelarCriacao(id = ativa.value) {
+  salvas.value = salvas.value.filter(x => x.reference !== id)
+  painelAberto.value = false
+  ativa.value = salvas.value.some(x => x.reference === origem.value.ref) ? origem.value.ref : 'default'
+}
+
+function fecharPainel() {
+  if (salvaAtiva.value.novo) cancelarCriacao()
+  else painelAberto.value = false
 }
 
 /* ---------- ações do menu ---------- */
@@ -289,7 +432,7 @@ function configurar(id: string) {
 
 function duplicar(id: string) {
   const original = salvas.value.find(v => v.reference === id)!
-  const copia: Visualizacao = { ...structuredClone(toRaw(rascunhos.value[id] ?? original)), reference: `vis-${Date.now()}`, name: t.value.avisos.nomeDaCopia(original.name ?? ''), default: false, fixada: false }
+  const copia: Visualizacao = { ...clonar(rascunhos.value[id] ?? baseDe(id)), reference: `vis-${Date.now()}`, name: t.value.avisos.nomeDaCopia(original.name ?? ''), default: false, fixada: false, user: ehOwner.value ? original.user : EU.id }
   const i = salvas.value.findIndex(v => v.reference === id)
   const lista = [...salvas.value]
   lista.splice(i + 1, 0, copia)
@@ -416,7 +559,7 @@ const trilha = computed(() => [workspace.name, t.value.casca.itens.categorias, c
 const opcoesDoAndaime = computed(() => [
   { chave: 'estilo', titulo: t.value.andaime.estilo, modelo: estilo, opcoes: (['hoje', 'proposta'] as const).map(v => ({ v, l: t.value.andaime.estilos[v], recomendada: v === 'proposta' })) },
   { chave: 'volume', titulo: t.value.andaime.volume, modelo: volume, opcoes: (['nenhuma', 'poucas', 'muitas'] as const).map(v => ({ v, l: t.value.andaime.volumes[v] })) },
-  { chave: 'permissao', titulo: t.value.andaime.permissao, modelo: permissao, opcoes: (['editar', 'leitura'] as const).map(v => ({ v, l: t.value.andaime.permissoes[v] })) },
+  { chave: 'perfil', titulo: t.value.andaime.perfil, modelo: perfil, opcoes: (['owner', 'standard'] as const).map(v => ({ v, l: t.value.andaime.perfis[v] })) },
   { chave: 'largura', titulo: t.value.andaime.largura, modelo: largura, opcoes: (['cheia', 'estreita'] as const).map(v => ({ v, l: t.value.andaime.larguras[v] })) },
 ])
 </script>
@@ -437,7 +580,9 @@ const opcoesDoAndaime = computed(() => [
               v-model:visualizacoes="salvas"
               v-model:ativa="ativa"
               :t="t"
-              :pode-editar="podeEditar"
+              :eh-owner="ehOwner"
+              :pessoais="Object.keys(pessoais)"
+              :ordem-eh-padrao="ordemEhPadrao"
               :modificada="modificada"
               :modificadas="modificadas"
               :contagens="contagens"
@@ -451,30 +596,16 @@ const opcoesDoAndaime = computed(() => [
               @fixada="aoFixar"
               @reordenada="aoReordenar"
               @nome-repetido="(n: string) => toast.add({ title: t.avisos.nomeRepetido(n), icon: 'i-lucide-circle-alert', color: 'warning', duration: 3500 })"
+              @descartar-nova="cancelarCriacao"
+              @restaurar-versao="restaurarVersao"
+              @aplicar-ordem="aplicarOrdemParaTodos"
+              @recuperar-ordem="recuperarOrdemPadrao"
             >
               <template #criar>
-                <UPopover v-if="podeEditar" v-model:open="criarAberto" :content="{ align: 'end', sideOffset: 6 }">
-                  <UTooltip :text="t.barra.nova" :disabled="salvas.length === 1">
-                    <UButton
-                      icon="i-lucide-plus"
-                      :label="salvas.length === 1 ? t.barra.nova : undefined"
-                      color="neutral"
-                      :variant="salvas.length === 1 ? 'outline' : 'ghost'"
-                      size="sm"
-                      :class="salvas.length === 1 ? '' : 'text-muted'"
-                      :aria-label="t.barra.nova"
-                    />
-                  </UTooltip>
-                  <template #content>
-                    <CriarVisualizacao
-                      :t="t"
-                      :nome-da-ativa="efetiva.name ?? ''"
-                      :nomes-existentes="salvas.map(v => v.name ?? '')"
-                      @criar="criar"
-                      @cancelar="criarAberto = false"
-                    />
-                  </template>
-                </UPopover>
+                <!-- Como hoje ("+ Visualizar" com tooltip "Nova visualização"), no padrão "+ View" do ClickUp. Cria e abre o painel. -->
+                <UTooltip :text="t.barra.nova">
+                  <UButton icon="i-lucide-plus" :label="t.barra.botaoNova" color="neutral" variant="ghost" size="sm" @click="novaVisualizacao" />
+                </UTooltip>
               </template>
             </BarraDeVisualizacoes>
             <BarraDeHoje
@@ -560,21 +691,21 @@ const opcoesDoAndaime = computed(() => [
                       </div>
                     </div>
                     <USeparator class="my-1" />
-                    <UButton v-if="podeEditar" :label="t.linha.maisOpcoes" icon="i-lucide-sliders-horizontal" color="neutral" variant="ghost" size="xs" block class="justify-start" @click="filtroRapidoAberto = false; painelAberto = true" />
+                    <UButton :label="t.linha.maisOpcoes" icon="i-lucide-sliders-horizontal" color="neutral" variant="ghost" size="xs" block class="justify-start" @click="filtroRapidoAberto = false; painelAberto = true" />
                   </div>
                 </template>
               </UPopover>
 
-              <span v-if="modificada" class="ml-auto flex items-center gap-2">
+              <!-- Com o painel aberto, salvar e descartar ficam só no rodapé dele: um lugar só para a mesma ação. -->
+              <span v-if="modificada && !painelAberto" class="ml-auto flex items-center gap-2">
                 <span class="flex items-center gap-1.5 text-xs text-muted"><span class="size-2 rounded-full bg-warning" />{{ t.linha.naoSalva }}</span>
                 <UButton :label="t.linha.descartar" color="neutral" variant="ghost" size="xs" @click="descartar" />
-                <UFieldGroup v-if="!soSalvarComoNova" size="xs">
-                  <UButton :label="t.linha.salvar" :loading="salvando" @click="salvar" />
-                  <UDropdownMenu :items="[[{ label: t.linha.salvarComoNova, icon: 'i-lucide-copy-plus', onSelect: abrirSalvarComo }]]" :content="{ align: 'end' }">
+                <UFieldGroup size="xs">
+                  <UButton :label="opcoesDeSalvar.principal.label" :loading="salvando" @click="salvar(opcoesDeSalvar.principal.escopo)" />
+                  <UDropdownMenu :items="[opcoesDeSalvar.extras.map(o => ({ label: o.label, icon: o.icon, onSelect: () => salvar(o.escopo) }))]" :content="{ align: 'end' }">
                     <UButton icon="i-lucide-chevron-down" :aria-label="t.linha.maisSalvar" />
                   </UDropdownMenu>
                 </UFieldGroup>
-                <UButton v-else :label="t.linha.salvarComoNova" size="xs" @click="abrirSalvarComo" />
               </span>
             </div>
           </Transition>
@@ -657,15 +788,23 @@ const opcoesDoAndaime = computed(() => [
               leave-to-class="opacity-0 translate-x-4"
             >
               <PainelDeConfiguracao
-                v-if="estilo === 'proposta' && painelAberto && podeEditar"
+                v-if="estilo === 'proposta' && painelAberto"
                 v-model="rascunhoDaAtiva"
                 :t="t"
                 :modificada="modificada"
                 :salvando="salvando"
-                :so-como-nova="soSalvarComoNova"
+                :opcoes-salvar="opcoesDeSalvar"
+                :eh-owner="ehOwner"
+                :criando="criando"
+                :origem="origem.modo"
+                :nome-da-origem="salvas.find(v => v.reference === origem.ref)?.name ?? ''"
+                :nomes-existentes="salvas.filter(v => v.reference !== ativa).map(v => v.name ?? '')"
                 @salvar="salvar"
                 @descartar="descartar"
-                @fechar="painelAberto = false"
+                @criar="confirmarCriacao"
+                @cancelar-criacao="cancelarCriacao()"
+                @update:origem="trocarOrigem"
+                @fechar="fecharPainel"
               />
             </Transition>
           </div>

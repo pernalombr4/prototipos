@@ -60,3 +60,42 @@
 - Peças: `UTabs`, `UContextMenu`, `UDropdownMenu`, `UPopover` + `UCommandPalette`, `UTooltip`, `UInput`, `USelect`, `USelectMenu`, `USwitch`, `URadioGroup`, `UFieldGroup`, `UModal`, `useToast`, `EnTable`, `EnKanbanBoard`, `EnLayout`.
 - Sem CSS próprio: nenhum `<style>`, `:deep()` nem `!important`.
 - O `ModelView` do `enspace-sdk-schemas` tipa o mock. Invenções marcadas no `mocks.ts`: ordenação em vários níveis (`config.sorts`), `fixada` e a contagem.
+
+## Rodada 2 · 2026-10-23
+- **Pedido (literal):** "pode tirar as opçoes de mover pra esquerda ou pra direita"; "esse form do print ta visualmente bagunçado"; "alteraçoes nao salvas e o botao de salvar estao aparecendo no topo e na base ao mesmo tempo, mas na base faltando a opçao do dropdown ao lado do botao de salvar"; "uma view fixada deve ir o mais pra esquerda possivel. hoje isso nao ta ocorrendo."; "deve haver arraste dentro do dropdown do print e esses numeros nao fazem sentido aí."
+- **Mudou:** saíram "Mover para a esquerda" e "Mover para a direita" do menu.
+- **Mudou:** fixar leva a visualização logo depois de Itens, antes das outras fixadas. A causa de não ir: a função gravava a lista 2 vezes seguidas, e a 2ª lia a lista antiga.
+- **Mudou:** a lista do "+N" arrasta para mudar a ordem (o mesmo arrasto por ponteiro da barra, com linha-guia), sem os números de itens, com a dica "Arraste para mudar a ordem."; com busca preenchida não arrasta.
+- **Mudou:** com o painel aberto, salvar e descartar ficam só no rodapé dele; o rodapé ganhou a seta com as outras formas de salvar.
+- **Mudou:** formulário do painel refeito: seções separadas por linha, rótulo sempre em cima, ícone e nome no mesmo grupo, cada filtro num cartão com o campo em cima e condição e valor lado a lado (sem a coluna "Onde/e" que empurrava os campos), ordenação no mesmo cartão em 1 linha, colunas visíveis e ocultas com o mesmo desenho de linha.
+- **Mudou:** depois de soltar um arrasto, o clique seguinte não é mais engolido (antes, o 1º clique no "+N" depois de arrastar não abria a lista).
+- **Pedido (literal), na mesma rodada:** "o botao de criar pode deixar mais ou menos como ta hoje em dia [...] pode deixar como \"+ Visualização\" o texto ou algo do tipo e o texto como \"criar visualização\" ou \"Nova visualização\""
+- **Mudou:** botão "+ Visualização" com tooltip "Nova visualização", como o "+ View" do ClickUp.
+- **Pedido (literal), na mesma rodada:** "a experiencia de criar ta ruim. tem um atalho (popoover) no botao de criar, mas rcia com qualquer configuraçao basica e depois o user tem que descobrir que ele pode editar [...] talvez a view ja deva ser criada com o drawer de configuraçao aberto"
+- **Mudou:** "+ Visualização" cria e abre o painel em modo de criação: título "Nova visualização", nome em foco e obrigatório, "Começar de" (visualização atual ou do zero), colunas, filtros, ordenação e quem vê, com a tabela mostrando o resultado. A pílula "Nova visualização" acompanha o nome digitado. Rodapé: Cancelar e Criar visualização. Nada grava antes de criar; cancelar (ou fechar o painel) volta para a visualização de origem.
+- **Pedido (literal), na mesma rodada:** "pro user que é owner/full tudo oq ele faz deve ser possivel salvar pra todos ou só pra ele mesmo"; "a reordenaçao deve ter botao de aplicar minha ordem para todos la no menu geral (no +N) e nos menus contextuais das views tambem [...] recuperar a ordem padrão [...] se for outro tipo de user essas opçoes nao existem. tem q prototipar as 2 coisas (full/owner e standard/viewer)"
+- **Mudou:** andaime "Perfil": Owner ou Full; Standard ou Viewer (no lugar de "Permissão").
+- **Mudou:** salvar conforme o perfil:
+  - Owner ou Full, visualização de todos: "Salvar para todos", com "Salvar só para mim" e "Salvar como nova visualização" na seta;
+  - Standard ou Viewer, e a Itens do sistema: "Salvar só para mim", com "Salvar como nova visualização" na seta;
+  - visualização que só a pessoa vê: "Salvar".
+- **Mudou:** "Salvar só para mim" grava a versão da pessoa por cima da de todos. A pílula ganha um ícone de pessoa, o tooltip explica, e o menu oferece "Voltar à versão de todos" (com Desfazer).
+- **Mudou:** só para Owner ou Full, no rodapé do "+N" e no menu de cada visualização: "Aplicar minha ordem para todos" (grupo "Para todos") e "Recuperar a ordem padrão" (grupo "Só para mim"), desligados quando a ordem da pessoa já é a padrão. Recuperar também desafixa, porque fixar faz parte da ordem pessoal.
+- **Mudou:** Standard ou Viewer não renomeia nem exclui visualização de todos, não vê o grupo "Para todos" e cria visualização só para si: no painel, "Só eu" vem marcado, as outras opções aparecem desligadas e uma nota explica que só Owner e Full mudam quem vê.
+- **Mudou:** o mock deixou de usar `structuredClone` (falhava com objetos reativos aninhados depois de recuperar a ordem) e passou a copiar por JSON.
+- **Fronteira:** muda a barra, o "+N", o menu, o criar, o painel e o salvar; não muda a casca, a barra de ferramentas, a tabela nem o quadro.
+- **Descartado:** o popover de criar (rodada 1) e o `_CriarVisualizacao.vue`. Motivo: criava com o mínimo e escondia que a visualização se configura depois; ela pediu o painel aberto na criação. O print `evidencias/proposta-criar.jpg` fica como registro da rodada 1.
+- **Descartado:** contagem de itens no "+N". Motivo: pedido dela. A contagem continua no tooltip da pílula.
+- **Descartado:** arrasto nativo do navegador na lista do "+N". Motivo: não roda pela automação de teste; o arrasto por ponteiro dá o mesmo comportamento da barra.
+- **Não deu:** reproduzir 1 sumiço da visualização em criação. Por quê: aconteceu 1 vez, ao clicar em "+ Visualização" enquanto um menu de contexto fechava; nas tentativas seguintes não repetiu.
+- **Maquete:** a versão "só para mim" e a ordem de todos vivem na memória da página; trocar de perfil não troca de pessoa (a mesma pessoa vê as 2 permissões).
+- **Crítica e acessibilidade:**
+  - sem "Mover para a esquerda/direita", o arrasto da barra e do "+N" fica sem o caminho de 1 clique que a WCAG 2.2 pede (critério 2.5.7). Continuam Ctrl + Shift + seta na barra e na lista do "+N"; o requisito do 1 clique fica para ela decidir;
+  - as colunas do painel ainda usam o arrasto nativo, mantêm os botões de subir e descer, e a automação não as testou.
+- **Ver:** `http://localhost:3000/visualizacoes-da-tela-de-itens`
+  - criar com o painel aberto: `evidencias/r2-criar-painel.jpg`;
+  - criar como Standard ou Viewer: `evidencias/r2-criar-standard.jpg`;
+  - "+N" com arrastar e as ações de ordem: `evidencias/r2-mais-com-ordem.jpg`;
+  - salvar do Owner ou Full: `evidencias/r2-salvar-owner.jpg`;
+  - menu do Owner ou Full, com a versão só sua: `evidencias/r2-menu-owner.jpg`;
+  - menu do Standard ou Viewer: `evidencias/r2-menu-standard.jpg`.

@@ -178,6 +178,8 @@ export type Visualizacao = Omit<ModelView, 'id' | 'created_at' | 'updated_at' | 
   }
   /** INVENTADO: fixada no começo da barra, só para quem fixou. */
   fixada?: boolean
+  /** SÓ DO PROTÓTIPO: visualização em criação, com o painel aberto, ainda não gravada. */
+  novo?: boolean
 }
 
 const cols = (...paths: string[]) => paths.map(path => ({ path, label: campoPorPath(path)!.label }))
@@ -305,3 +307,9 @@ export function aplicar(v: Visualizacao, itens: Item[] = ITENS): Item[] {
 }
 
 export const nomeDaPessoa = (id: number | null) => PESSOAS.find(p => p.id === id)?.nome ?? null
+
+/**
+ * Cópia funda do dado do protótipo. Não é `structuredClone`: ele falha quando a visualização
+ * traz objetos reativos do Vue aninhados (o `toRaw` só desembrulha o 1º nível). O dado é todo JSON.
+ */
+export const clonar = <T>(v: T): T => JSON.parse(JSON.stringify(v))

@@ -16,27 +16,61 @@
  */
 import type { FiltroDeCampo, Ordenacao, Visualizacao } from './mocks'
 import type { Textos } from './textos'
-import { CAMPOS, FUNCOES, GRUPOS, ICONE_DO_TIPO, PESSOAS, campoPorPath } from './mocks'
+
+type Escopo = 'todos' | 'eu' | 'propria' | 'nova'
+import { CAMPOS, FUNCOES, GRUPOS, ICONE_DO_TIPO, PESSOAS, campoPorPath, clonar } from './mocks'
 
 const props = defineProps<{
   t: Textos
   modificada: boolean
   salvando: boolean
-  /** Itens (do sistema) não se altera: o caminho é salvar como nova (Polaris e SAP fazem igual). */
-  soComoNova: boolean
+  /** O que salvar oferece para esta pessoa e esta visualização (ver `opcoesDeSalvar` no index). */
+  opcoesSalvar: { principal: { escopo: Escopo, label: string }, extras: { escopo: Escopo, label: string, icon: string }[] }
+  /** Owner ou Full: muda quem vê. Standard ou Viewer cria e salva só para si. */
+  ehOwner: boolean
+  /** Modo de criação (a visualização tem `novo`): de onde ela começou e o botão Criar. */
+  criando: boolean
+  origem: 'atual' | 'zero'
+  nomeDaOrigem: string
+  nomesExistentes: string[]
 }>()
 
 const rascunho = defineModel<Visualizacao>({ required: true })
 
 const emit = defineEmits<{
-  salvar: []
+  salvar: [escopo: Escopo]
   descartar: []
   fechar: []
+  criar: []
+  cancelarCriacao: []
+  'update:origem': [modo: 'atual' | 'zero']
 }>()
+
+const emCriacao = computed(() => !!rascunho.value.novo)
+
+/* Criar só com nome, e nome que ainda não existe na categoria. O erro aparece depois da 1ª tentativa. */
+const tentouCriar = ref(false)
+watch(() => rascunho.value.reference, () => { tentouCriar.value = false })
+const erroDoNome = computed(() => {
+  if (!emCriacao.value || !tentouCriar.value) return undefined
+  const nome = (rascunho.value.name ?? '').trim()
+  if (!nome) return props.t.criar.nomeObrigatorio
+  return props.nomesExistentes.some(n => n.toLowerCase() === nome.toLowerCase()) ? props.t.criar.nomeRepetido : undefined
+})
+const campoNome = ref<{ inputRef: HTMLInputElement } | null>(null)
+
+function criar() {
+  tentouCriar.value = true
+  if (erroDoNome.value) {
+    campoNome.value?.inputRef?.focus()
+    return
+  }
+  emit('criar')
+}
 
 /** Atualiza o rascunho sem mutar o objeto (o pai compara com o salvo). */
 function mudar(fn: (v: Visualizacao) => void) {
-  const copia = structuredClone(toRaw(rascunho.value))
+  const copia = clonar(rascunho.value)
   fn(copia)
   rascunho.value = copia
 }
@@ -192,11 +226,14 @@ const quemVe = computed({
   }),
 })
 
+/** Standard ou Viewer: só "Só eu"; as outras opções aparecem desligadas, para mostrar que existem. */
 const opcoesQuemVe = computed(() => [
-  { value: 'todos', label: props.t.painel.quemVeTodos, description: props.t.painel.quemVeTodosAjuda },
+  { value: 'todos', label: props.t.painel.quemVeTodos, description: props.t.painel.quemVeTodosAjuda, disabled: !props.ehOwner },
   { value: 'eu', label: props.t.painel.quemVeEu, description: props.t.painel.quemVeEuAjuda },
-  { value: 'grupos', label: props.t.painel.quemVeGrupos, description: props.t.painel.quemVeGruposAjuda },
+  { value: 'grupos', label: props.t.painel.quemVeGrupos, description: props.t.painel.quemVeGruposAjuda, disabled: !props.ehOwner },
 ])
+/** Quem não é Owner ou Full só muda quem vê na visualização que é dele. */
+const quemVeTravado = computed(() => !props.ehOwner && rascunho.value.user !== 7)
 
 const grupos = computed({
   get: () => rascunho.value.module_groups ?? [],
@@ -208,38 +245,63 @@ const funcoes = computed({
 })
 </script>
 
+
 <template>
-  <aside class="flex h-full w-[22.5rem] shrink-0 flex-col border-l border-default bg-default" :aria-label="t.painel.titulo">
+  <aside class="flex h-full w-96 shrink-0 flex-col border-l border-default bg-default" :aria-label="t.painel.titulo">
     <header class="flex items-start gap-2 border-b border-default px-4 py-3">
       <div class="min-w-0 flex-1">
-        <p class="text-sm font-semibold text-highlighted">{{ t.painel.titulo }}</p>
-        <p class="text-xs text-muted">{{ t.painel.subtitulo }}</p>
+        <p class="text-sm font-semibold text-highlighted">{{ emCriacao ? t.painel.tituloCriar : t.painel.titulo }}</p>
+        <p class="text-xs text-muted">{{ emCriacao ? t.painel.subtituloCriar : t.painel.subtitulo }}</p>
       </div>
       <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="sm" :aria-label="t.comum.fechar" @click="emit('fechar')" />
     </header>
 
-    <div class="min-h-0 flex-1 space-y-6 overflow-y-auto px-4 py-4">
-      <!-- Nome, ícone, descrição -->
-      <section class="space-y-3">
-        <div class="flex items-end gap-2">
-          <UPopover v-model:open="iconeAberto" :content="{ align: 'start' }">
-            <UButton
-              :icon="rascunho.icon ?? 'i-lucide-table'"
-              color="neutral"
-              variant="outline"
-              class="size-8 justify-center"
-              :aria-label="t.painel.trocarIcone"
+    <!-- Uma seção por bloco, separadas por linha; rótulo sempre em cima do campo. -->
+    <div class="min-h-0 flex-1 divide-y divide-default overflow-y-auto">
+      <!-- Nome, ícone e descrição -->
+      <section class="space-y-3 p-4">
+        <UFormField :label="t.painel.nome" :error="erroDoNome" :required="emCriacao">
+          <UFieldGroup class="w-full">
+            <UPopover v-model:open="iconeAberto" :content="{ align: 'start' }">
+              <UButton
+                :icon="rascunho.icon ?? 'i-lucide-table'"
+                color="neutral"
+                variant="outline"
+                :aria-label="t.painel.trocarIcone"
+              />
+              <template #content>
+                <div class="w-80 p-3">
+                  <UxSeletorDeIcones v-model="iconeSemPrefixo" :altura="220" />
+                </div>
+              </template>
+            </UPopover>
+            <UInput
+              ref="campoNome"
+              :model-value="rascunho.name ?? ''"
+              :placeholder="emCriacao ? t.criar.nomeExemplo : undefined"
+              :autofocus="emCriacao"
+              class="flex-1"
+              @update:model-value="(v: string) => mudar(x => { x.name = v })"
+              @keydown.enter.prevent="emCriacao && criar()"
             />
-            <template #content>
-              <div class="w-80 p-3">
-                <UxSeletorDeIcones v-model="iconeSemPrefixo" :altura="220" />
-              </div>
-            </template>
-          </UPopover>
-          <UFormField :label="t.painel.nome" class="flex-1">
-            <UInput :model-value="rascunho.name ?? ''" class="w-full" @update:model-value="(v: string) => mudar(x => { x.name = v })" />
-          </UFormField>
-        </div>
+          </UFieldGroup>
+        </UFormField>
+        <!-- Só ao criar: de onde a visualização começa. Trocar refaz colunas, filtros e ordenação, e a tabela mostra na hora. -->
+        <UFormField v-if="emCriacao" :label="t.painel.comecarDe" :help="origem === 'atual' ? t.painel.comecarDeAtualAjuda(nomeDaOrigem) : t.painel.comecarDeZeroAjuda">
+          <UFieldGroup class="w-full">
+            <UButton
+              v-for="o in [{ v: 'atual' as const, l: t.painel.comecarDeAtual, i: 'i-lucide-copy' }, { v: 'zero' as const, l: t.painel.comecarDeZero, i: 'i-lucide-file' }]"
+              :key="o.v"
+              :label="o.l"
+              :icon="o.i"
+              :color="origem === o.v ? 'primary' : 'neutral'"
+              :variant="origem === o.v ? 'soft' : 'outline'"
+              :aria-pressed="origem === o.v"
+              class="flex-1 justify-center"
+              @click="emit('update:origem', o.v)"
+            />
+          </UFieldGroup>
+        </UFormField>
         <UFormField :label="t.painel.descricao" :hint="t.comum.opcional">
           <UTextarea
             :model-value="rascunho.description ?? ''"
@@ -251,8 +313,8 @@ const funcoes = computed({
         </UFormField>
       </section>
 
-      <!-- Tipo -->
-      <section class="space-y-3">
+      <!-- Exibição -->
+      <section class="space-y-3 p-4">
         <h3 class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.painel.exibicao }}</h3>
         <UFieldGroup class="w-full">
           <UButton
@@ -277,16 +339,15 @@ const funcoes = computed({
         </UFormField>
       </section>
 
-      <!-- Colunas -->
-      <section v-if="rascunho.model_type === 'table'" class="space-y-2">
+      <!-- Colunas: as visíveis em cima, na ordem da tabela; as ocultas embaixo. Todas as linhas com o mesmo desenho. -->
+      <section v-if="rascunho.model_type === 'table'" class="space-y-3 p-4">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.painel.colunas }}</h3>
           <span class="text-xs text-muted">{{ t.painel.colunasContagem(visiveis.length, CAMPOS.length) }}</span>
         </div>
         <UInput v-model="buscaColuna" icon="i-lucide-search" :placeholder="t.painel.buscarCampo" size="sm" class="w-full" />
-        <p class="text-xs text-muted">{{ t.painel.colunasAjuda }}</p>
 
-        <ul class="space-y-0.5" @dragover.prevent @drop.prevent="soltarColuna">
+        <ul class="-mx-1.5" @dragover.prevent @drop.prevent="soltarColuna">
           <TransitionGroup
             move-class="transition-transform duration-200 ease-out"
             enter-active-class="transition duration-150 ease-out"
@@ -297,7 +358,7 @@ const funcoes = computed({
               v-show="casaBusca(path)"
               :key="path"
               draggable="true"
-              class="group/col relative flex items-center gap-2 rounded-md px-1.5 py-1 text-sm text-default hover:bg-elevated"
+              class="group/col relative flex h-8 items-center gap-2 rounded-md px-1.5 text-sm text-default hover:bg-elevated"
               :class="arrastandoColuna === i ? 'opacity-40' : ''"
               @dragstart="arrastandoColuna = i"
               @dragend="arrastandoColuna = null; alvoColuna = null"
@@ -305,7 +366,7 @@ const funcoes = computed({
             >
               <span v-if="alvoColuna === i && arrastandoColuna !== null" class="absolute inset-x-1 -top-px h-0.5 rounded-full bg-primary" />
               <span v-if="alvoColuna === i + 1 && i === visiveis.length - 1 && arrastandoColuna !== null" class="absolute inset-x-1 -bottom-px h-0.5 rounded-full bg-primary" />
-              <UIcon name="i-lucide-grip-vertical" class="size-4 shrink-0 cursor-grab text-dimmed" />
+              <UIcon name="i-lucide-grip-vertical" class="size-4 shrink-0 cursor-grab text-dimmed" :title="t.painel.arrastarColuna" />
               <UIcon :name="ICONE_DO_TIPO[campoPorPath(path)!.tipo]" class="size-4 shrink-0 text-muted" />
               <span class="flex-1 truncate">{{ campoPorPath(path)!.label }}</span>
               <span class="flex items-center opacity-0 transition-opacity group-hover/col:opacity-100 group-focus-within/col:opacity-100">
@@ -315,30 +376,25 @@ const funcoes = computed({
               <UButton icon="i-lucide-eye" color="neutral" variant="ghost" size="xs" :aria-label="t.painel.ocultarColuna(campoPorPath(path)!.label)" @click="alternarColuna(path)" />
             </li>
           </TransitionGroup>
+          <li v-if="ocultas.length" class="px-1.5 pb-1 pt-3 text-xs font-medium text-muted">{{ t.painel.ocultas }}</li>
+          <li
+            v-for="path in ocultas"
+            v-show="casaBusca(path)"
+            :key="path"
+            class="flex h-8 items-center gap-2 rounded-md px-1.5 text-sm text-muted hover:bg-elevated"
+          >
+            <span class="size-4 shrink-0" />
+            <UIcon :name="ICONE_DO_TIPO[campoPorPath(path)!.tipo]" class="size-4 shrink-0 text-dimmed" />
+            <span class="flex-1 truncate">{{ campoPorPath(path)!.label }}</span>
+            <UButton icon="i-lucide-eye-off" color="neutral" variant="ghost" size="xs" :aria-label="t.painel.mostrarColuna(campoPorPath(path)!.label)" @click="alternarColuna(path)" />
+          </li>
         </ul>
-
-        <template v-if="ocultas.length">
-          <p class="pt-2 text-xs font-medium text-muted">{{ t.painel.ocultas }}</p>
-          <ul class="space-y-0.5">
-            <li
-              v-for="path in ocultas"
-              v-show="casaBusca(path)"
-              :key="path"
-              class="flex items-center gap-2 rounded-md px-1.5 py-1 text-sm text-muted hover:bg-elevated"
-            >
-              <span class="size-4 shrink-0" />
-              <UIcon :name="ICONE_DO_TIPO[campoPorPath(path)!.tipo]" class="size-4 shrink-0 text-dimmed" />
-              <span class="flex-1 truncate">{{ campoPorPath(path)!.label }}</span>
-              <UButton icon="i-lucide-eye-off" color="neutral" variant="ghost" size="xs" :aria-label="t.painel.mostrarColuna(campoPorPath(path)!.label)" @click="alternarColuna(path)" />
-            </li>
-          </ul>
-        </template>
       </section>
 
-      <!-- Filtros -->
-      <section class="space-y-3">
+      <!-- Filtros: os 2 automáticos como chaves; cada condição num cartão com campo em cima e operador e valor lado a lado. -->
+      <section class="space-y-3 p-4">
         <h3 class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.painel.filtros }}</h3>
-        <div class="space-y-2 rounded-md bg-elevated/50 p-3">
+        <div class="space-y-3">
           <USwitch
             :model-value="rapidos.includes('isOwner')"
             :label="t.painel.soMeus"
@@ -359,116 +415,131 @@ const funcoes = computed({
 
         <TransitionGroup
           tag="div"
-          class="space-y-2"
+          class="space-y-1.5"
           enter-active-class="transition duration-150 ease-out"
           enter-from-class="opacity-0 -translate-y-1"
           leave-active-class="transition duration-100 ease-in"
           leave-to-class="opacity-0"
         >
-          <div
-            v-for="(f, i) in (rascunho.filters.field_filters ?? [])"
-            :key="i"
-            class="space-y-1.5 rounded-md border border-default p-2"
-          >
-            <div class="flex items-center gap-1.5">
-              <span class="w-8 shrink-0 text-xs text-muted">{{ i === 0 ? t.painel.onde : t.painel.e }}</span>
-              <USelect
-                :model-value="f.field"
-                :items="camposDeFiltro"
-                size="sm"
-                class="min-w-0 flex-1"
-                @update:model-value="(v: string) => mudarFiltro(i, { field: v })"
-              />
-              <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="xs" :aria-label="t.painel.tirarFiltro" @click="tirarFiltro(i)" />
-            </div>
-            <div class="flex items-center gap-1.5 pl-9.5">
-              <USelect
-                :model-value="f.op"
-                :items="operadoresDe(f.field)"
-                size="sm"
-                class="w-36 shrink-0"
-                @update:model-value="(v: string) => mudarFiltro(i, { op: v })"
-              />
-              <template v-if="!semValor(f.op)">
+          <div v-for="(f, i) in (rascunho.filters.field_filters ?? [])" :key="i">
+            <p v-if="i > 0" class="pb-1.5 pl-1 text-xs text-muted">{{ t.painel.e }}</p>
+            <div class="space-y-2 rounded-lg bg-elevated/60 p-2.5">
+              <div class="flex items-center gap-1.5">
                 <USelect
-                  v-if="campoPorPath(f.field)?.tipo === 'selecao'"
-                  :model-value="String(f.value)"
-                  :items="campoPorPath(f.field)!.opcoes!"
+                  :model-value="f.field"
+                  :items="camposDeFiltro"
                   size="sm"
                   class="min-w-0 flex-1"
-                  @update:model-value="(v: string) => mudarFiltro(i, { value: v })"
+                  :aria-label="t.painel.campo"
+                  @update:model-value="(v: string) => mudarFiltro(i, { field: v })"
                 />
+                <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="xs" :aria-label="t.painel.tirarFiltro" @click="tirarFiltro(i)" />
+              </div>
+              <div class="grid grid-cols-2 gap-1.5 pr-7">
                 <USelect
-                  v-else-if="campoPorPath(f.field)?.tipo === 'usuario'"
-                  :model-value="Number(f.value)"
-                  :items="PESSOAS.map(p => ({ label: p.nome, value: p.id }))"
+                  :model-value="f.op"
+                  :items="operadoresDe(f.field)"
                   size="sm"
-                  class="min-w-0 flex-1"
-                  @update:model-value="(v: number) => mudarFiltro(i, { value: v })"
+                  class="min-w-0"
+                  :class="semValor(f.op) ? 'col-span-2' : ''"
+                  :aria-label="t.painel.operador"
+                  @update:model-value="(v: string) => mudarFiltro(i, { op: v })"
                 />
-                <UInput
-                  v-else-if="campoPorPath(f.field)?.tipo === 'data' && f.op === 'next_days'"
-                  :model-value="Number(f.value)"
-                  type="number"
-                  size="sm"
-                  class="min-w-0 flex-1"
-                  :ui="{ trailing: 'pointer-events-none' }"
-                  @update:model-value="(v: string | number) => mudarFiltro(i, { value: Number(v) })"
-                >
-                  <template #trailing><span class="text-xs text-muted">{{ t.painel.dias }}</span></template>
-                </UInput>
-                <UInput
-                  v-else-if="campoPorPath(f.field)?.tipo === 'data'"
-                  :model-value="String(f.value)"
-                  type="date"
-                  size="sm"
-                  class="min-w-0 flex-1"
-                  @update:model-value="(v: string) => mudarFiltro(i, { value: v })"
-                />
-                <UInput
-                  v-else
-                  :model-value="String(f.value ?? '')"
-                  :type="campoPorPath(f.field)?.tipo === 'moeda' ? 'number' : 'text'"
-                  size="sm"
-                  class="min-w-0 flex-1"
-                  @update:model-value="(v: string | number) => mudarFiltro(i, { value: campoPorPath(f.field)?.tipo === 'moeda' ? Number(v) : v })"
-                />
-              </template>
+                <template v-if="!semValor(f.op)">
+                  <USelect
+                    v-if="campoPorPath(f.field)?.tipo === 'selecao'"
+                    :model-value="String(f.value)"
+                    :items="campoPorPath(f.field)!.opcoes!"
+                    size="sm"
+                    class="min-w-0"
+                    :aria-label="t.painel.valor"
+                    @update:model-value="(v: string) => mudarFiltro(i, { value: v })"
+                  />
+                  <USelect
+                    v-else-if="campoPorPath(f.field)?.tipo === 'usuario'"
+                    :model-value="Number(f.value)"
+                    :items="PESSOAS.map(p => ({ label: p.nome, value: p.id }))"
+                    size="sm"
+                    class="min-w-0"
+                    :aria-label="t.painel.valor"
+                    @update:model-value="(v: number) => mudarFiltro(i, { value: v })"
+                  />
+                  <UInput
+                    v-else-if="campoPorPath(f.field)?.tipo === 'data' && f.op === 'next_days'"
+                    :model-value="Number(f.value)"
+                    type="number"
+                    size="sm"
+                    class="min-w-0"
+                    :aria-label="t.painel.valor"
+                    :ui="{ trailing: 'pointer-events-none' }"
+                    @update:model-value="(v: string | number) => mudarFiltro(i, { value: Number(v) })"
+                  >
+                    <template #trailing><span class="text-xs text-muted">{{ t.painel.dias }}</span></template>
+                  </UInput>
+                  <UInput
+                    v-else-if="campoPorPath(f.field)?.tipo === 'data'"
+                    :model-value="String(f.value)"
+                    type="date"
+                    size="sm"
+                    class="min-w-0"
+                    :aria-label="t.painel.valor"
+                    @update:model-value="(v: string) => mudarFiltro(i, { value: v })"
+                  />
+                  <UInput
+                    v-else
+                    :model-value="String(f.value ?? '')"
+                    :type="campoPorPath(f.field)?.tipo === 'moeda' ? 'number' : 'text'"
+                    size="sm"
+                    class="min-w-0"
+                    :aria-label="t.painel.valor"
+                    @update:model-value="(v: string | number) => mudarFiltro(i, { value: campoPorPath(f.field)?.tipo === 'moeda' ? Number(v) : v })"
+                  />
+                </template>
+              </div>
             </div>
           </div>
         </TransitionGroup>
         <UButton :label="t.painel.adicionarFiltro" icon="i-lucide-plus" color="neutral" variant="outline" size="sm" @click="novoFiltro" />
       </section>
 
-      <!-- Ordenação -->
-      <section class="space-y-3">
+      <!-- Ordenação: o mesmo cartão dos filtros, numa linha só: campo, direção e retirar. -->
+      <section class="space-y-3 p-4">
         <h3 class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.painel.ordenacao }}</h3>
         <p v-if="!ordenacoes.length" class="text-xs text-muted">{{ t.painel.semOrdenacao }}</p>
-        <div v-for="(o, i) in ordenacoes" :key="i" class="flex items-center gap-1.5">
-          <span class="w-14 shrink-0 text-xs text-muted">{{ i === 0 ? t.painel.ordenarPor : t.painel.depoisPor }}</span>
-          <USelect
-            :model-value="o.field"
-            :items="camposDeFiltro"
-            size="sm"
-            class="min-w-0 flex-1"
-            @update:model-value="(v: string) => mudarOrdenacao(i, { field: v })"
-          />
-          <USelect
-            :model-value="o.direction"
-            :items="[{ label: t.painel.crescente, value: 'asc' }, { label: t.painel.decrescente, value: 'desc' }]"
-            size="sm"
-            class="w-32 shrink-0"
-            @update:model-value="(v: 'asc' | 'desc') => mudarOrdenacao(i, { direction: v })"
-          />
-          <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="xs" :aria-label="t.painel.tirarOrdenacao" @click="tirarOrdenacao(i)" />
+        <div class="space-y-1.5">
+          <div v-for="(o, i) in ordenacoes" :key="i">
+            <p class="pb-1.5 pl-1 text-xs text-muted">{{ i === 0 ? t.painel.ordenarPor : t.painel.depoisPor }}</p>
+            <div class="flex items-center gap-1.5 rounded-lg bg-elevated/60 p-2.5">
+              <USelect
+                :model-value="o.field"
+                :items="camposDeFiltro"
+                size="sm"
+                class="min-w-0 flex-1"
+                :aria-label="t.painel.campo"
+                @update:model-value="(v: string) => mudarOrdenacao(i, { field: v })"
+              />
+              <USelect
+                :model-value="o.direction"
+                :items="[{ label: t.painel.crescente, value: 'asc' }, { label: t.painel.decrescente, value: 'desc' }]"
+                size="sm"
+                class="w-32 shrink-0"
+                :aria-label="t.painel.direcao"
+                @update:model-value="(v: 'asc' | 'desc') => mudarOrdenacao(i, { direction: v })"
+              />
+              <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="xs" :aria-label="t.painel.tirarOrdenacao" @click="tirarOrdenacao(i)" />
+            </div>
+          </div>
         </div>
         <UButton :label="t.painel.adicionarOrdenacao" icon="i-lucide-plus" color="neutral" variant="outline" size="sm" @click="novaOrdenacao" />
       </section>
 
       <!-- Quem vê -->
-      <section class="space-y-3">
+      <section class="space-y-3 p-4">
         <h3 class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.painel.quemVe }}</h3>
-        <URadioGroup v-model="quemVe" :items="opcoesQuemVe" size="sm" :ui="{ description: 'text-xs' }" />
+        <URadioGroup v-model="quemVe" :items="opcoesQuemVe" size="sm" :disabled="quemVeTravado" :ui="{ fieldset: 'gap-y-2.5', description: 'text-xs' }" />
+        <p v-if="!ehOwner" class="flex items-start gap-1.5 text-xs text-muted">
+          <UIcon name="i-lucide-info" class="mt-px size-3.5 shrink-0" />{{ t.painel.quemVeSoOwner }}
+        </p>
         <div v-if="quemVe === 'grupos'" class="space-y-2 pl-6">
           <USelectMenu v-model="grupos" multiple :items="GRUPOS.map(g => ({ label: g.nome, value: g.id }))" value-key="value" :placeholder="t.painel.escolherGrupos" size="sm" class="w-full" />
           <USelectMenu v-model="funcoes" multiple :items="FUNCOES.map(f => ({ label: f.nome, value: f.id }))" value-key="value" :placeholder="t.painel.escolherFuncoes" size="sm" class="w-full" />
@@ -476,13 +547,24 @@ const funcoes = computed({
       </section>
     </div>
 
-    <footer class="flex items-center gap-2 border-t border-default px-4 py-3">
+    <!-- Salvar mora só aqui enquanto o painel está aberto; a linha de filtros esconde o dela. -->
+    <!-- Ao criar: Cancelar desiste; Criar grava. Nada existe para os outros antes disso. -->
+    <footer v-if="emCriacao" class="flex items-center justify-end gap-2 border-t border-default px-4 py-3">
+      <UButton :label="t.comum.cancelar" color="neutral" variant="ghost" size="sm" @click="emit('cancelarCriacao')" />
+      <UButton :label="t.criar.criar" size="sm" :loading="criando" @click="criar" />
+    </footer>
+    <footer v-else class="flex items-center gap-2 border-t border-default px-4 py-3">
       <p class="min-w-0 flex-1 text-xs text-muted">
         <span v-if="modificada" class="flex items-center gap-1.5"><span class="size-2 shrink-0 rounded-full bg-warning" />{{ t.painel.naoSalvas }}</span>
         <span v-else>{{ t.painel.tudoSalvo }}</span>
       </p>
       <UButton :label="t.painel.descartar" color="neutral" variant="ghost" size="sm" :disabled="!modificada" @click="emit('descartar')" />
-      <UButton :label="soComoNova ? t.painel.salvarComoNova : t.painel.salvar" size="sm" :disabled="!modificada" :loading="salvando" @click="emit('salvar')" />
+      <UFieldGroup size="sm">
+        <UButton :label="opcoesSalvar.principal.label" :disabled="!modificada" :loading="salvando" @click="emit('salvar', opcoesSalvar.principal.escopo)" />
+        <UDropdownMenu :items="[opcoesSalvar.extras.map(o => ({ label: o.label, icon: o.icon, onSelect: () => emit('salvar', o.escopo) }))]" :content="{ align: 'end', side: 'top' }">
+          <UButton icon="i-lucide-chevron-down" :disabled="!modificada" :aria-label="t.linha.maisSalvar" />
+        </UDropdownMenu>
+      </UFieldGroup>
     </footer>
   </aside>
 </template>

@@ -23,11 +23,17 @@
  */
 import type { ContextMenuItem } from '@nuxt/ui'
 import type { Visualizacao } from './mocks'
+import { EU } from './mocks'
 import type { Textos } from './textos'
 
 const props = defineProps<{
   t: Textos
-  podeEditar: boolean
+  /** Owner ou Full: renomeia, exclui, abre primeiro para todos e aplica a própria ordem para todos. */
+  ehOwner: boolean
+  /** As que têm versão desta pessoa ("Salvar só para mim"). */
+  pessoais: string[]
+  /** A ordem desta pessoa é a de todos: "Aplicar" e "Recuperar" ficam desligados. */
+  ordemEhPadrao: boolean
   /** A visualização ativa tem filtro, ordenação ou coluna mexidos e não salvos. */
   modificada: boolean
   /** Todas as que têm mudança não salva: a ativa mostra o ponto na seta; as outras, depois do nome. */
@@ -48,12 +54,17 @@ const emit = defineEmits<{
   renomeada: [ref: string, anterior: string]
   fixada: [ref: string, fixou: boolean]
   nomeRepetido: [nome: string]
+  descartarNova: [ref: string]
+  restaurarVersao: [ref: string]
+  aplicarOrdem: []
+  recuperarOrdem: []
   /** A ordem mudou: quem usa avisa e oferece Desfazer com a ordem anterior. */
   reordenada: [anterior: Visualizacao[]]
 }>()
 
 const SISTEMA = 'default'
-const nomeDe = (v: Visualizacao) => v.name ?? ''
+/** A visualização em criação ainda sem nome aparece como "Nova visualização". */
+const nomeDe = (v: Visualizacao) => v.name || (v.novo ? props.t.barra.nova : '')
 
 /* ---------- quantas cabem ---------- */
 
@@ -63,7 +74,7 @@ const larguraDisponivel = ref(0)
 const larguras = ref<Record<string, number>>({})
 
 /** Espaço da ponta direita ("+N" e "+") e o espaço entre pílulas. */
-const RESERVA = 112
+const RESERVA = 190
 const VAO = 4
 /** A ativa ganha a seta ⌄ (e o ponto, quando modificada). */
 const EXTRA_DA_ATIVA = 26
@@ -202,8 +213,11 @@ function aoSoltar() {
   const { els, de, alvo, id } = inicio
   inicio = null
   if (!engatou) return
-  // O clique que fecha o arrasto não troca de visualização.
-  window.addEventListener('click', ev => ev.stopPropagation(), { capture: true, once: true })
+  // O clique que fecha o arrasto não troca de visualização. O bloqueio dura só este instante:
+  // sem o prazo, quando o soltar não gera clique, o próximo clique (no "+N", por exemplo) era engolido.
+  const engolir = (ev: MouseEvent) => ev.stopPropagation()
+  window.addEventListener('click', engolir, { capture: true, once: true })
+  setTimeout(() => window.removeEventListener('click', engolir, { capture: true }), 0)
   els.forEach((el) => {
     el.style.transition = 'none'
     el.style.transform = ''
@@ -244,7 +258,7 @@ function aoTeclar(e: KeyboardEvent) {
     menuAberto.value = true
     return
   }
-  if (e.key === 'F2' && props.podeEditar && ativa.value !== SISTEMA) {
+  if (e.key === 'F2' && podeRenomear(ativaObj.value) ) {
     e.preventDefault()
     comecarARenomear(ativa.value)
     return
@@ -271,7 +285,7 @@ function aoClicar(e: MouseEvent) {
 function aoClicarDuasVezes(e: MouseEvent) {
   const el = (e.target as HTMLElement).closest<HTMLElement>('[data-slot=trigger]')
   const v = el ? visiveis.value[gatilhos().indexOf(el)] : undefined
-  if (v && props.podeEditar && v.reference !== SISTEMA) comecarARenomear(v.reference)
+  if (v && podeRenomear(v)) comecarARenomear(v.reference)
 }
 
 /* ---------- renomear na própria pílula ---------- */
@@ -326,40 +340,57 @@ function aoBotaoDireito(e: MouseEvent) {
   doMenu.value = el ? visiveis.value[gatilhos().indexOf(el)] ?? null : null
 }
 
+/**
+ * Fixar leva a visualização o mais para a esquerda possível: logo depois de Itens, antes das outras fixadas.
+ * Desafixar a leva para logo depois das que continuam fixadas.
+ * A lista nova sai numa gravação só: com o `defineModel`, a 2ª gravação seguida leria a lista antiga.
+ */
 function fixar(v: Visualizacao) {
   const fixou = !v.fixada
-  const ultimaFixada = visualizacoes.value.reduce((n, x, i) => (x.fixada && x.reference !== v.reference ? i : n), 0)
-  visualizacoes.value = visualizacoes.value.map(x => x.reference === v.reference ? { ...x, fixada: fixou } : x)
-  // Fixar leva para logo depois das fixadas; desafixar leva para logo depois delas também, no começo das outras.
-  mover(v.reference, fixou ? ultimaFixada + 1 : ultimaFixada, true)
+  const resto = visualizacoes.value.filter(x => x.reference !== v.reference)
+  const atualizada = { ...v, fixada: fixou }
+  const para = fixou ? 1 : resto.filter(x => x.fixada).length + 1
+  visualizacoes.value = [...resto.slice(0, para), atualizada, ...resto.slice(para)]
+  anuncio.value = props.t.barra.movida(nomeDe(v), para + 1)
+  if (!visiveis.value.some(x => x.reference === v.reference)) ativa.value = v.reference
   emit('fixada', v.reference, fixou)
+}
+
+/** Renomeia quem é Owner ou Full, ou quem é dono da visualização só dele. Itens não se renomeia. */
+function podeRenomear(v?: Visualizacao) {
+  return !!v && v.reference !== SISTEMA && (props.ehOwner || v.user === EU.id || !!v.novo)
 }
 
 function acoesDe(v: Visualizacao): ContextMenuItem[][] {
   const t = props.t.menu
   const sistema = v.reference === SISTEMA
-  const i = posicao(v.reference)
+  // Em criação: ainda não existe para os outros; o único caminho além do painel é desistir.
+  if (v.novo) return [[{ label: t.descartarNova, icon: 'i-lucide-x', onSelect: () => emit('descartarNova', v.reference) }]]
   const grupos: ContextMenuItem[][] = []
+  const minha = v.user === EU.id
   const gerais: ContextMenuItem[] = []
-  if (props.podeEditar && !sistema) gerais.push({ label: t.renomear, icon: 'i-lucide-pencil', kbds: ['f2'], onSelect: () => comecarARenomear(v.reference) })
-  if (props.podeEditar) gerais.push({ label: t.configurar, icon: 'i-lucide-sliders-horizontal', onSelect: () => emit('configurar', v.reference) })
-  if (props.podeEditar) gerais.push({ label: t.duplicar, icon: 'i-lucide-copy', onSelect: () => emit('duplicar', v.reference) })
+  if (podeRenomear(v)) gerais.push({ label: t.renomear, icon: 'i-lucide-pencil', kbds: ['f2'], onSelect: () => comecarARenomear(v.reference) })
+  gerais.push({ label: t.configurar, icon: 'i-lucide-sliders-horizontal', onSelect: () => emit('configurar', v.reference) })
+  gerais.push({ label: t.duplicar, icon: 'i-lucide-copy', onSelect: () => emit('duplicar', v.reference) })
   gerais.push({ label: t.copiarLink, icon: 'i-lucide-link', onSelect: () => emit('copiarLink', v.reference) })
   grupos.push(gerais)
-  if (!sistema) {
-    grupos.push([
-      { type: 'label', label: t.soParaMim },
-      { label: v.fixada ? t.desafixar : t.fixar, icon: v.fixada ? 'i-lucide-pin-off' : 'i-lucide-pin', onSelect: () => fixar(v) },
-      { label: t.moverEsquerda, icon: 'i-lucide-arrow-left', disabled: i <= 1, onSelect: () => mover(v.reference, i - 1) },
-      { label: t.moverDireita, icon: 'i-lucide-arrow-right', disabled: i >= visualizacoes.value.length - 1, onSelect: () => mover(v.reference, i + 1) },
-    ])
-  }
-  if (props.podeEditar) {
+
+  // Só para mim: o que muda só a barra e a versão desta pessoa.
+  const soMinhas: ContextMenuItem[] = [{ type: 'label', label: t.soParaMim }]
+  if (!sistema) soMinhas.push({ label: v.fixada ? t.desafixar : t.fixar, icon: v.fixada ? 'i-lucide-pin-off' : 'i-lucide-pin', onSelect: () => fixar(v) })
+  if (props.pessoais.includes(v.reference)) soMinhas.push({ label: t.versaoDeTodos, icon: 'i-lucide-users', description: t.versaoDeTodosAjuda, onSelect: () => emit('restaurarVersao', v.reference) })
+  if (props.ehOwner) soMinhas.push({ label: t.recuperarOrdem, icon: 'i-lucide-rotate-ccw', disabled: props.ordemEhPadrao, onSelect: () => emit('recuperarOrdem') })
+  if (minha && !props.ehOwner) soMinhas.push({ label: t.excluir, icon: 'i-lucide-trash-2', color: 'error', onSelect: () => emit('excluir', v.reference) })
+  if (soMinhas.length > 1) grupos.push(soMinhas)
+
+  // Para todos: só Owner ou Full.
+  if (props.ehOwner) {
     grupos.push([
       { type: 'label', label: t.paraTodos },
       v.default
         ? { label: t.padrao, icon: 'i-lucide-house', disabled: true, description: t.jaEPadrao }
         : { label: t.definirPadrao, icon: 'i-lucide-house', onSelect: () => emit('definirPadrao', v.reference) },
+      { label: t.aplicarOrdem, icon: 'i-lucide-list-ordered', disabled: props.ordemEhPadrao, onSelect: () => emit('aplicarOrdem') },
       sistema || v.default
         ? { label: t.excluir, icon: 'i-lucide-trash-2', disabled: true, description: sistema ? t.naoExcluiSistema : t.naoExcluiPadrao }
         : { label: t.excluir, icon: 'i-lucide-trash-2', color: 'error', onSelect: () => emit('excluir', v.reference) },
@@ -375,17 +406,103 @@ const itensDoMenu = computed<ContextMenuItem[][]>(() => doMenu.value ? acoesDe(d
 const listaAberta = ref(false)
 const busca = ref('')
 
-const itensEscondidos = computed(() => escondidas.value.map(v => ({
-  id: v.reference,
-  label: nomeDe(v),
-  icon: v.icon ?? 'i-lucide-table',
-  vis: v,
-})))
+const filtradas = computed(() => {
+  const q = busca.value.trim().toLowerCase()
+  return q ? escondidas.value.filter(v => nomeDe(v).toLowerCase().includes(q)) : escondidas.value
+})
 
 function abrirEscondida(v: Visualizacao) {
   ativa.value = v.reference
   listaAberta.value = false
   busca.value = ''
+}
+
+/*
+ * Arrastar dentro do "+N": drag and drop nativo, com a linha-guia onde a visualização vai cair.
+ * Com busca preenchida não arrasta (a lista filtrada não mostra a ordem inteira).
+ * Teclado: setas andam entre as linhas; Ctrl + Shift + seta para cima ou para baixo move a linha em foco.
+ */
+const lista = ref<HTMLElement>()
+const arrastandoNaLista = ref<string | null>(null)
+const alvoNaLista = ref<number | null>(null)
+
+/** Põe `id` antes da escondida da posição `alvo` (ou depois da última), na lista inteira. */
+function moverNaLista(id: string, alvo: number) {
+  const anterior = visualizacoes.value
+  const v = anterior.find(x => x.reference === id)!
+  const destino = filtradas.value[alvo]?.reference
+  const resto = anterior.filter(x => x.reference !== id)
+  let para = destino && destino !== id
+    ? resto.findIndex(x => x.reference === destino)
+    : resto.findIndex(x => x.reference === filtradas.value.filter(e => e.reference !== id).at(-1)?.reference) + 1
+  if (destino === id) return
+  para = Math.max(1, para)
+  const nova = [...resto.slice(0, para), v, ...resto.slice(para)]
+  if (nova.every((x, i) => x.reference === anterior[i]!.reference)) return
+  visualizacoes.value = nova
+  anuncio.value = props.t.barra.movida(nomeDe(v), para + 1)
+  emit('reordenada', anterior)
+}
+
+function soltarNaLista() {
+  if (arrastandoNaLista.value && alvoNaLista.value !== null) moverNaLista(arrastandoNaLista.value, alvoNaLista.value)
+  arrastandoNaLista.value = null
+  alvoNaLista.value = null
+}
+
+/* Arrasto por ponteiro, como na barra: engata depois de um movimento pequeno; a linha-guia mostra onde cai. */
+let inicioNaLista: { id: string, y: number, engatou: boolean } | null = null
+
+function aoPressionarLinha(e: PointerEvent, v: Visualizacao) {
+  if (e.button !== 0 || busca.value) return
+  inicioNaLista = { id: v.reference, y: e.clientY, engatou: false }
+  window.addEventListener('pointermove', aoMoverLinha)
+  window.addEventListener('pointerup', aoSoltarLinha, { once: true })
+}
+
+function aoMoverLinha(e: PointerEvent) {
+  if (!inicioNaLista || !lista.value) return
+  if (!inicioNaLista.engatou && Math.abs(e.clientY - inicioNaLista.y) < 4) return
+  inicioNaLista.engatou = true
+  arrastandoNaLista.value = inicioNaLista.id
+  const linhasEl = [...lista.value.querySelectorAll<HTMLElement>('li')]
+  const i = linhasEl.findIndex((li) => {
+    const r = li.getBoundingClientRect()
+    return e.clientY < r.top + r.height / 2
+  })
+  alvoNaLista.value = i < 0 ? linhasEl.length : i
+}
+
+function aoSoltarLinha() {
+  window.removeEventListener('pointermove', aoMoverLinha)
+  const engatou = inicioNaLista?.engatou
+  inicioNaLista = null
+  if (!engatou) return
+  const engolir = (ev: MouseEvent) => ev.stopPropagation()
+  window.addEventListener('click', engolir, { capture: true, once: true })
+  setTimeout(() => window.removeEventListener('click', engolir, { capture: true }), 0)
+  soltarNaLista()
+}
+
+function linhas(): HTMLElement[] {
+  return lista.value ? [...lista.value.querySelectorAll<HTMLElement>('[data-linha]')] : []
+}
+
+function aoTeclarNaLista(e: KeyboardEvent) {
+  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
+  const els = linhas()
+  const i = els.indexOf(document.activeElement as HTMLElement)
+  e.preventDefault()
+  if (e.ctrlKey && e.shiftKey && i >= 0 && !busca.value) {
+    const id = filtradas.value[i]!.reference
+    const alvo = e.key === 'ArrowUp' ? i - 1 : i + 2
+    if (alvo < 0 || alvo > filtradas.value.length) return
+    moverNaLista(id, alvo)
+    nextTick(() => linhas()[filtradas.value.findIndex(x => x.reference === id)]?.focus())
+    return
+  }
+  const j = i < 0 ? 0 : (e.key === 'ArrowDown' ? Math.min(els.length - 1, i + 1) : Math.max(0, i - 1))
+  els[j]?.focus()
 }
 
 /* ---------- seta ⌄ na ativa ---------- */
@@ -462,6 +579,7 @@ const ui = {
           <UIcon :name="v.icon ?? 'i-lucide-table'" class="size-4" />
           <span class="max-w-40 truncate">{{ nomeDe(v) }}</span>
           <UIcon v-if="v.fixada" name="i-lucide-pin" class="size-3" />
+          <UIcon v-if="pessoais.includes(v.reference)" name="i-lucide-user-round" class="size-3" />
         </span>
       </div>
     </div>
@@ -503,12 +621,14 @@ const ui = {
                   <span class="block whitespace-normal font-semibold text-highlighted">{{ item.label }}</span>
                   <span class="block whitespace-normal text-muted">{{ resumoDe(item.vis) }}</span>
                   <span class="block text-muted">{{ t.barra.itens(contagens[item.value] ?? 0) }}</span>
+                  <span v-if="pessoais.includes(item.value)" class="block whitespace-normal text-muted">{{ t.barra.versaoSuaAjuda }}</span>
                   <span v-if="item.value !== 'default'" class="block text-dimmed">{{ t.barra.dicaArrastar }}</span>
                 </template>
               </UTooltip>
             </template>
             <template #trailing="{ item }">
               <UIcon v-if="item.vis.fixada" name="i-lucide-pin" class="size-3 shrink-0 text-dimmed" :aria-label="t.barra.fixadaRotulo" />
+              <UIcon v-if="pessoais.includes(item.value)" name="i-lucide-user-round" class="size-3 shrink-0 text-dimmed" :aria-label="t.barra.versaoSua" />
               <span
                 v-if="item.value !== ativa && modificadas.includes(item.value)"
                 class="size-2 shrink-0 rounded-full bg-warning"
@@ -530,34 +650,93 @@ const ui = {
                     class="text-muted"
                   />
                   <template #content>
-                    <!-- Popover + CommandPalette: o padrão do Nuxt UI para lista com busca, o mesmo do "+N" das folders. -->
-                    <UCommandPalette
-                      v-model:search-term="busca"
-                      :groups="[{ id: 'escondidas', items: itensEscondidos }]"
-                      :placeholder="t.barra.pesquisar"
-                      class="w-72"
-                      :ui="{ input: '[&>input]:h-9 [&>input]:text-sm', item: 'group/linha', itemLabel: 'truncate' }"
-                      @update:model-value="(i: any) => i && abrirEscondida(i.vis)"
-                    >
-                      <template #empty>
-                        <p class="py-4 text-center text-sm text-muted">{{ t.barra.nenhumaEncontrada }}</p>
-                      </template>
-                      <template #item-trailing="{ item }">
-                        <span class="text-xs tabular-nums text-muted">{{ contagens[item.id] ?? 0 }}</span>
-                        <UDropdownMenu :items="acoesDe(item.vis)" :content="{ align: 'start', side: 'right' }" :ui="{ content: 'w-64', itemDescription: 'whitespace-normal' }">
-                          <UButton
-                            icon="i-lucide-ellipsis"
-                            color="neutral"
-                            variant="ghost"
-                            size="xs"
-                            class="-my-1 opacity-0 transition-opacity group-hover/linha:opacity-100 group-data-highlighted/linha:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100"
-                            :aria-label="t.barra.opcoes(item.label)"
-                            @click.stop
-                            @pointerdown.stop
-                          />
-                        </UDropdownMenu>
-                      </template>
-                    </UCommandPalette>
+                    <!--
+                      Lista própria, não o UCommandPalette: o CommandPalette não reordena.
+                      Busca em cima, linhas com alça de arrastar, menu "⋯" por linha.
+                    -->
+                    <div class="w-72" @keydown="aoTeclarNaLista">
+                      <UInput
+                        v-model="busca"
+                        icon="i-lucide-search"
+                        :placeholder="t.barra.pesquisar"
+                        variant="none"
+                        autofocus
+                        class="w-full border-b border-default"
+                        :ui="{ base: 'h-10 text-sm' }"
+                      />
+                      <p v-if="!filtradas.length" class="py-4 text-center text-sm text-muted">{{ t.barra.nenhumaEncontrada }}</p>
+                      <ul
+                        v-else
+                        ref="lista"
+                        class="max-h-80 overflow-y-auto p-1"
+                        :aria-label="t.barra.escondidasRotulo"
+                      >
+                        <TransitionGroup move-class="transition-transform duration-200 ease-out">
+                          <li
+                            v-for="(v, i) in filtradas"
+                            :key="v.reference"
+                            class="group/linha relative flex select-none items-center gap-1.5 rounded-md py-0.5 pl-1 pr-0.5 text-sm text-default hover:bg-elevated focus-within:bg-elevated"
+                            :class="arrastandoNaLista === v.reference ? 'opacity-40' : (busca ? '' : 'cursor-grab')"
+                            @pointerdown="(e: PointerEvent) => aoPressionarLinha(e, v)"
+                          >
+                            <span v-if="arrastandoNaLista && alvoNaLista === i" class="absolute inset-x-1 -top-px h-0.5 rounded-full bg-primary" />
+                            <span v-if="arrastandoNaLista && alvoNaLista === i + 1 && i === filtradas.length - 1" class="absolute inset-x-1 -bottom-px h-0.5 rounded-full bg-primary" />
+                            <UIcon
+                              name="i-lucide-grip-vertical"
+                              class="size-4 shrink-0 text-dimmed"
+                              :class="busca ? 'invisible' : 'cursor-grab opacity-0 transition-opacity group-hover/linha:opacity-100'"
+                            />
+                            <button
+                              type="button"
+                              data-linha
+                              class="flex min-w-0 flex-1 items-center gap-2 rounded py-1 text-left outline-none"
+                              @click="abrirEscondida(v)"
+                            >
+                              <UIcon :name="v.icon ?? 'i-lucide-table'" class="size-4 shrink-0 text-muted" />
+                              <span class="truncate">{{ nomeDe(v) }}</span>
+                              <span v-if="modificadas.includes(v.reference)" class="size-2 shrink-0 rounded-full bg-warning" role="img" :aria-label="t.barra.naoSalva" />
+                            </button>
+                            <UDropdownMenu :items="acoesDe(v)" :content="{ align: 'start', side: 'right' }" :ui="{ content: 'w-64', itemDescription: 'whitespace-normal' }">
+                              <UButton
+                                icon="i-lucide-ellipsis"
+                                color="neutral"
+                                variant="ghost"
+                                size="xs"
+                                class="opacity-0 transition-opacity group-hover/linha:opacity-100 group-focus-within/linha:opacity-100 data-[state=open]:opacity-100"
+                                :aria-label="t.barra.opcoes(nomeDe(v))"
+                                @pointerdown.stop
+                              />
+                            </UDropdownMenu>
+                          </li>
+                        </TransitionGroup>
+                      </ul>
+                      <p v-if="filtradas.length > 1 && !busca" class="px-3 pb-1.5 text-xs text-muted">{{ t.barra.dicaLista }}</p>
+                      <!-- Owner ou Full: a ordem da barra, a dele e a de todos (as mesmas 2 ações das folders). -->
+                      <div v-if="ehOwner" class="border-t border-default p-1">
+                        <UButton
+                          :label="t.menu.aplicarOrdem"
+                          icon="i-lucide-list-ordered"
+                          color="neutral"
+                          variant="ghost"
+                          size="sm"
+                          block
+                          class="justify-start"
+                          :disabled="ordemEhPadrao"
+                          @click="emit('aplicarOrdem'); listaAberta = false"
+                        />
+                        <UButton
+                          :label="t.menu.recuperarOrdem"
+                          icon="i-lucide-rotate-ccw"
+                          color="neutral"
+                          variant="ghost"
+                          size="sm"
+                          block
+                          class="justify-start"
+                          :disabled="ordemEhPadrao"
+                          @click="emit('recuperarOrdem'); listaAberta = false"
+                        />
+                      </div>
+                    </div>
                   </template>
                 </UPopover>
 
