@@ -196,6 +196,8 @@ function reiniciar() {
         </Transition>
 
         <Transition mode="out-in" enter-active-class="transition-opacity duration-150" enter-from-class="opacity-0" leave-active-class="transition-opacity duration-100" leave-to-class="opacity-0">
+          <!-- KeepAlive: a alteração não salva da aba Proteções continua ao trocar de aba -->
+          <KeepAlive :max="6">
           <Canvas v-if="aba === 'editor'" key="editor" :t="t" :gatilho="gatilho" :ciclo="cicloNoCanvas" :destacar="destacarCiclo" />
           <AbaExecucoes v-else-if="aba === 'execucoes'" key="execucoes" v-model:execucoes="execucoes" v-model:filtro="filtro" :t="t" :versao="versao" />
           <AbaProtecoes
@@ -216,6 +218,7 @@ function reiniciar() {
           <div v-else key="fora" class="flex flex-1 items-center justify-center p-8">
             <UEmpty icon="i-lucide-construction" title="Fora do escopo deste protótipo" description="Versões, Comentários e Logs ficam como estão no develop." variant="naked" />
           </div>
+          </KeepAlive>
         </Transition>
       </div>
     </CascaDasConfiguracoes>

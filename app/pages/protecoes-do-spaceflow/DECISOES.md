@@ -86,6 +86,8 @@ flowchart LR
   - corrigido: o valor fixo do MVP usava cadeado, que se confunde com "sem permissão"; passou ao ícone de informação;
   - corrigido: o índice lateral não acompanhava a rolagem e cortava o nome longo sem dica; agora acompanha, marca
     `aria-current` e mostra o nome inteiro no `title`;
+  - corrigido: trocar de aba com alteração não salva descartava a alteração sem aviso; agora a alteração e a barra de
+    salvar continuam ao voltar (RF085);
   - sem correção: a coluna de ações da aba Execuções fica no fim da linha, porque o `EnTable` põe o slot `#actions`
     na ponta direita; no develop ela é a primeira coluna. Decisão do front na implementação;
   - sem correção: no celular, a barra de abas do editor passa da largura da tela. É casca: o editor do develop não é
@@ -94,4 +96,13 @@ flowchart LR
   - toda regra tem rótulo visível ligado à chave; os campos numéricos têm `aria-label` e a mensagem de erro com
     `role="alert"`.
 - **CSS próprio:** nenhum (`<style>`, `:deep()` e `!important` não aparecem nos arquivos da pasta).
-- **Ver:** `/protecoes-do-spaceflow` · prints em `evidencias/proposta-*.jpg`.
+- **Ver:** https://pernalombr4.github.io/prototipos/protecoes-do-spaceflow/ · prints em `evidencias/`:
+  - `proposta-01-aba-protecoes.jpg`: a aba Completa com o resumo das 24 horas;
+  - `proposta-02-ciclo-encontrado.jpg` e `proposta-03-ciclo-resolvido-e-salvar.jpg`: o ciclo antes e depois de ligar a
+    regra, com a barra de salvar;
+  - `proposta-04-canvas-aviso-de-ciclo.jpg`: o aviso no card "Marcar para revisão";
+  - `proposta-05-execucoes-status-novos.jpg` e `proposta-06-retidas.jpg`: os status novos e a decisão das retidas;
+  - `proposta-07-fluxo-pausado.jpg`: a faixa do fluxo pausado;
+  - `proposta-08-mvp.jpg`: o MVP;
+  - `proposta-09-escuro-espanhol.png`: tema escuro em espanhol. Capturado sem os 20 px da direita: o detector de
+    ponteiro lia a barra de rolagem clara do tema escuro como seta.

@@ -28,7 +28,7 @@ en-credits da conta.
 | Grupo | O que muda em relação ao develop de 24/10/2026 | MVP | Completa |
 |---|---|---|---|
 | Regras de negócio | Proteção por fluxo, fora das versões; disparo segurado vira execução; espera por pessoa não ocupa vaga; cadeia; valores iniciais; status novos | RN001 a RN009 | RN010 |
-| Aba Proteções | Aba nova depois de Execuções, com resumo das 24 horas, índice, salvar e descartar | RF001 a RF014 | RF015 a RF017 |
+| Aba Proteções | Aba nova depois de Execuções, com resumo das 24 horas, índice, salvar e descartar | RF001 a RF014, RF085 | RF015 a RF017 |
 | Volume de disparos | Limite por minuto; limite por dia, destino do excesso e janela de horário na completa | RF018 a RF020 | RF021 a RF027 |
 | Execuções ao mesmo tempo | Limite de execuções em andamento; destino quando lota, vaga por item, prazo na fila e Timer na completa | RF028 a RF031 | RF032 a RF037 |
 | Disparos repetidos | Não existe no MVP | | RF038 a RF043 |
@@ -113,6 +113,7 @@ en-credits da conta.
 | RF012 | Se um número de regra ligada está vazio ou fora da faixa da regra, o sistema deve mostrar sob o campo "Informe um número inteiro de <mínimo> a <máximo>." e desabilitar "Salvar proteções". | Exemplo: limite por minuto vazio mostra a mensagem, e a barra diz "Corrija 1 campo para salvar". | Essencial |
 | RF013 | Se a gravação falha, o sistema deve manter os campos como estão e mostrar o aviso "Não foi possível salvar as proteções" com "Suas alterações continuam na tela. Tente de novo." | Com a gravação recusada, os valores digitados continuam na tela. | Essencial |
 | RF014 | Enquanto o membro não tiver permissão de editar o fluxo (RN008), a aba deve mostrar "Somente leitura" com "Somente quem pode editar este fluxo altera as proteções." e cada campo desabilitado. | Membro com acesso de leitura não consegue mudar nenhuma chave nem número. | Essencial |
+| RF085 | Enquanto houver alteração não salva na aba Proteções, trocar para outra aba do editor e voltar deve manter a alteração e a barra de salvar. | Mudar 60 para 30, abrir Execuções e voltar: o campo mostra 30 e a barra "1 alteração não salva". | Essencial |
 | RF015 | A aba deve mostrar, à esquerda dos cartões, o índice "Nesta página" com cada grupo e um ponto que diz se o grupo tem regra ligada. | Clicar em "Custo de IA" no índice rola até o cartão; o ponto fica verde com uma regra ligada. | Desejável |
 | RF016 | Cada cartão deve mostrar o selo "Agiu <N> vezes hoje" quando as regras do grupo seguraram execuções no dia. | Volume de disparos com 4 execuções na fila por limite mostra "Agiu 4 vezes hoje". | Desejável |
 | RF017 | Quando o membro clica em "Restaurar recomendadas", o sistema deve preencher os campos com os valores de fluxo novo da RN006, sem salvar. | Depois de restaurar, a barra mostra as alterações e nada vale até salvar. | Desejável |
@@ -261,6 +262,7 @@ en-credits da conta.
 | P9 | Como o sistema sabe, antes do nó de IA, que a execução vai passar do teto (RF065)? Pelo gasto acumulado da execução ou por estimativa do nó? | líder dos devs | O momento em que a execução fica Retida. |
 | P10 | Quanto tempo uma execução Retida espera por decisão antes de expirar? | produto | Novo RF de expiração das retidas. |
 | P11 | A importação de planilha com "ignorar fluxos" passa a ignorar também os Spaceflows de Ações de Itens? | produto | Fora deste documento; reduz a rajada que RF019 segura. |
+| P12 | Sair do editor com alteração não salva na aba Proteções mostra o mesmo aviso que o editor já mostra para o canvas? | produto | Novo RF de aviso ao sair da página. |
 | S1 | As proteções são guardadas em `Workflow.settings`, que já existe como objeto livre no schema do SDK. | líder dos devs confirma o lugar | RI001. |
 | S2 | A mudança das proteções é registrada nos Logs do workspace, como as outras mudanças de configuração. | líder dos devs confirma | Novo RF de auditoria. |
 | S3 | "Mudanças feitas por fluxos" (RF045) e "E-mails enviados por fluxos" (RF084) dependem de a gravação e o envio saberem que vieram de um Spaceflow. A documentação mostra que a execução sabe quem disparou o fluxo, mas não mostra a origem da gravação nem a do e-mail. | líder dos devs confirma | RF045 e RF084 podem pedir trabalho no motor de gatilho, junto do cache de RS001. |
