@@ -134,3 +134,7 @@ flowchart LR
   - `r2-02-tempo-com-unidade.jpg`: "Tempo máximo de uma execução" com número e unidade, e o topo com "1 alteração não salva" e "Descartar";
   - `r2-03-ia-e-avisos.jpg`: Custo de IA só com os tetos, e Avisos com os 3 menus;
   - `r2-04-mvp.jpg`: o MVP com os valores fixos em selo.
+
+## Fechamento · 2026-10-24
+- **Pedido (literal):** "Ficou bom. Marque o protótipo como aprovado."
+- **Mudou:** status `aprovado` no `definePageMeta` (selo verde no índice) e linha nova na tabela de protótipos do README.

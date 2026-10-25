@@ -30,7 +30,7 @@ import { textos } from './textos'
 definePageMeta({
   titulo: 'Proteções do Spaceflow',
   descricao: 'Uma aba no editor do fluxo para limitar execuções por minuto e ao mesmo tempo, evitar repetição sem fim, pausar depois de erros e avisar quem cuida. Com a versão completa e o MVP.',
-  status: 'em-revisao',
+  status: 'aprovado',
   atualizado: '2026-10-24',
   tela: 'Spaceflow › aba Proteções',
 })
