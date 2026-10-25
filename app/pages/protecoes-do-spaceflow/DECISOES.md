@@ -128,4 +128,9 @@ flowchart LR
   - o estado "N alterações não salvas" usa texto neutro com o ponto em amarelo: o texto em amarelo não passava de 4,5:1 no claro;
   - no celular, a frase do topo some para o "Salvar" caber sem ocupar meia tela;
   - CSS próprio: nenhum.
-- **Ver:** https://pernalombr4.github.io/prototipos/protecoes-do-spaceflow/ · prints em `evidencias/r2-*.jpg`.
+- **Ajuste depois dos prints:** os menus de escolha passaram de 256 para 288 px; "Pausa e pede aprovação (recomendado)" cortava.
+- **Ver:** https://pernalombr4.github.io/prototipos/protecoes-do-spaceflow/ · prints em `evidencias/`:
+  - `r2-01-aba-em-linhas.jpg`: o topo fixo com "Salvar" e os grupos em linhas;
+  - `r2-02-tempo-com-unidade.jpg`: "Tempo máximo de uma execução" com número e unidade, e o topo com "1 alteração não salva" e "Descartar";
+  - `r2-03-ia-e-avisos.jpg`: Custo de IA só com os tetos, e Avisos com os 3 menus;
+  - `r2-04-mvp.jpg`: o MVP com os valores fixos em selo.
