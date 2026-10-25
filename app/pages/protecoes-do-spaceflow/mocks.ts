@@ -61,9 +61,6 @@ export const destinatariosPossiveis = [
 /** Os campos do formulário do Webhook, para escolher a chave que identifica a requisição repetida. */
 export const camposDoWebhook = ['id', 'numero_do_pedido', 'cnpj', 'email_do_cliente']
 
-/** O gasto de IA do fluxo, para o teto não ser um número solto (achado S3-F5 da pesquisa de UX). */
-export const gastoDeIa = { mediaPorExecucao: 18, maiorExecucao: 41, hoje: 214 }
-
 /* ------------------------------------------------------------------ *
  * As execuções                                                        *
  * ------------------------------------------------------------------ */
@@ -203,41 +200,4 @@ export function execucoesDoCenario(cenario: Cenario, gatilho: Gatilho, mvp: bool
     }
   }
   return lista
-}
-
-/* ------------------------------------------------------------------ *
- * O que a proteção segurou nas últimas 24 horas                       *
- * ------------------------------------------------------------------ */
-
-export interface Resumo24h {
-  execucoes: number
-  naFila: number
-  ignoradas: number
-  retidas: number
-  interrompidas: number
-  pausas: number
-  /** Quantas vezes cada seção agiu, para o selo do cartão. */
-  porSecao: Partial<Record<'volume' | 'simultaneas' | 'repetidos' | 'cadeia' | 'erros' | 'ia', number>>
-}
-
-export function resumoDoCenario(execucoes: Execucao[], cenario: Cenario): Resumo24h {
-  const conta = (s: StatusDaExecucao) => execucoes.filter(e => e.status === s).length
-  const motivo = (...m: MotivoDaProtecao[]) => execucoes.filter(e => e.protection_reason && m.includes(e.protection_reason)).length
-  return {
-    // o total das 24 h inclui as execuções que já saíram da lista paginada
-    execucoes: cenario === 'novo' ? 0 : execucoes.length + (cenario === 'emUso' ? 1201 : 86),
-    naFila: conta('queued'),
-    ignoradas: conta('skipped'),
-    retidas: conta('held'),
-    interrompidas: conta('stopped'),
-    pausas: cenario === 'pausado' ? 1 : 0,
-    porSecao: {
-      volume: motivo('limitePorMinuto', 'limitePorDia', 'janela'),
-      simultaneas: motivo('semVaga', 'mesmoItem', 'canceladaPelaNova', 'expirouNaFila'),
-      repetidos: motivo('repetida', 'edicoesJuntas'),
-      cadeia: motivo('cadeia'),
-      erros: cenario === 'pausado' ? 1 : motivo('tempoMaximo'),
-      ia: motivo('tetoIa'),
-    },
-  }
 }

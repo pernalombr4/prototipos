@@ -22,7 +22,7 @@ import Canvas from './_Canvas.vue'
 import AbaExecucoes from './_AbaExecucoes.vue'
 import AbaProtecoes from './_AbaProtecoes.vue'
 import type { Cenario, Execucao, StatusDaExecucao } from './mocks'
-import { execucoesDoCenario, fluxoDeExemplo, resumoDoCenario, workspace } from './mocks'
+import { execucoesDoCenario, fluxoDeExemplo, workspace } from './mocks'
 import type { Gatilho, Protecoes } from './protecoes'
 import { protecoesDeFluxoExistente, protecoesRecomendadas } from './protecoes'
 import { textos } from './textos'
@@ -74,7 +74,6 @@ function protecoesDoCenario(c: Cenario, g: Gatilho): Protecoes {
   if (c === 'emUso') {
     // o fluxo em uso ainda não ligou "Mudanças feitas por fluxos não disparam": o ciclo aparece aberto
     p.cadeia.ignorarFluxos = false
-    p.volume.porDia.ativo = true
     // a regra de repetição que gerou as execuções Ignoradas da lista
     p.repetidos.webhook.ativo = g === 'webhook'
     p.repetidos.juntarEdicoes.ativo = g === 'itens'
@@ -106,7 +105,6 @@ aplicar()
 watch([versao, cenario, gatilho], aplicar)
 
 const fluxo = computed(() => fluxoDeExemplo(protecoes.value))
-const resumo = computed(() => resumoDoCenario(execucoes.value, cenario.value))
 
 /** O ciclo do canvas segue o que está salvo; o MVP e a tela de hoje não analisam o desenho. */
 const cicloNoCanvas = computed<'nenhum' | 'aberto' | 'resolvido'>(() => {
@@ -208,10 +206,8 @@ function reiniciar() {
             :versao="versao"
             :gatilho="gatilho"
             :cenario="cenario"
-            :resumo="resumo"
             :pausado="pausado"
             :hora-da-pausa="HORA_DA_PAUSA"
-            @ir-para-execucoes="irParaExecucoes"
             @ver-no-editor="verNoEditor"
             @retomar="retomar"
           />

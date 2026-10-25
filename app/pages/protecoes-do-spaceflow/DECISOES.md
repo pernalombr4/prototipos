@@ -2,10 +2,10 @@
 
 ## A proposta em 1 parágrafo
 
-Uma aba **Proteções** no editor do fluxo, depois de Execuções. Ela mostra no topo o que as proteções seguraram nas
-últimas 24 horas e organiza as regras em cartões: Volume de disparos, Execuções ao mesmo tempo, Disparos repetidos,
-Repetição sem fim, Tempo e erros, Custo de IA e Avisos. Cada regra tem chave, rótulo pelo efeito e o valor
-recomendado escrito. O que passa do limite espera na fila por padrão; ignorar e reter são escolhas explícitas.
+Uma aba **Proteções** no editor do fluxo, depois de Execuções, só de configuração. O topo fica fixo com "Salvar".
+As regras ficam em grupos (Volume de disparos, Execuções ao mesmo tempo, Disparos repetidos, Repetição sem fim, Tempo
+e erros, Custo de IA e Avisos), uma por linha: rótulo e 1 frase à esquerda, controle à direita, com unidade de tempo
+escolhida pela pessoa (rodada 2). O que passa do limite espera na fila por padrão; ignorar e reter são escolhas explícitas.
 Salvar não cria versão do fluxo: vale a partir da próxima execução. A aba Execuções ganha 4 status (Na fila, Ignorada,
 Retida, Interrompida) com o motivo escrito, filtro por status e a decisão em lote das retidas.
 
@@ -14,7 +14,6 @@ Retida, Interrompida) com o motivo escrito, filtro por status e a decisão em lo
 ```mermaid
 flowchart LR
     A["Editor do fluxo"] --> B["Aba Proteções"]
-    B -->|"número do resumo"| C["Execuções filtradas pelo status"]
     B -->|"Ver no editor"| D["Canvas com o nó do ciclo destacado"]
     E["Disparo chega"] --> F{"Proteção"}
     F -->|"dentro do limite"| G["Execução roda"]
@@ -106,3 +105,27 @@ flowchart LR
   - `proposta-08-mvp.jpg`: o MVP;
   - `proposta-09-escuro-espanhol.png`: tema escuro em espanhol. Capturado sem os 20 px da direita: o detector de
     ponteiro lia a barra de rolagem clara do tema escuro como seta.
+
+## Rodada 2 · 2026-10-24
+- **Pedido (literal):** "pense em ux. nesse setido o painel ta passando uma sensaçao de bagunça. nao ta legal. poe exemplo no print, mta informaçao junta / no print 2 ta feio e muito pequeno... revise pontos do genero, vendo ux. / lembre-se de usar somente /nuxt-ui / print 3: o tempo nao necessariamente vai ser em hora. pode ser minuto, segundo.... tem que deixar o user definir a unidade tambem. / teto por execuçao de ia... nao faz sentido oferecermos as informaçoes de quanto gastou mais etc. tem alguns dados aí que nem conseguimos dar. tem que simplificar um pouco a ideia em pontos similares a esse tambem. / alem disso, os cartoes de dados que voce colocou no topo nao funcionam bem tambem. eles sao informaçao de execuçao, nao de proteçao. pode tirar daí. aí é só configuraçao. / e falta botao de salvar."
+- **Mudou:**
+  - cada regra virou uma linha no padrão de página de configurações do Nuxt UI: rótulo e 1 frase à esquerda, controle à direita (`UFormField` horizontal dentro de `UPageCard`, uma divisória por linha). Os campos da regra ficam ao lado da chave e só aparecem com ela ligada;
+  - as frases de ajuda encolheram para 1 linha, e as linhas "Recomendado: 60 por minuto" saíram (o "Restaurar recomendadas" cobre o caso);
+  - os botões de mais e menos dos números saíram; o número é um campo curto;
+  - todo tempo tem unidade escolhida pela pessoa (segundos, minutos, horas, dias), num `UFieldGroup` de número e unidade (`_CampoDeDuracao.vue`);
+  - o limite de volume ganhou o período segundo, minuto, hora ou dia, e o limite por dia separado saiu;
+  - "Limitar disparos por item" com as 2 opções de rádio virou o menu "Disparar de novo pelo mesmo item" (Sempre, Depois que a anterior terminar, Nunca);
+  - Custo de IA ficou só com o teto por execução, o teto por dia e o que fazer no teto. A média, a maior execução e o gasto do dia saíram;
+  - Avisos: "O que gera aviso" virou um menu de escolha múltipla; o evento "fila passou de N" saiu;
+  - os números das últimas 24 horas e o selo "Agiu N vezes hoje" saíram da aba: são dado de execução;
+  - "Salvar" ficou fixo no topo da aba, sempre à vista e desabilitado sem alteração, com o estado ao lado ("Tudo salvo", "N alterações não salvas") e "Descartar" só com alteração. A barra de salvar do rodapé saiu;
+  - no MVP, o que não se escolhe aparece como selo com o valor fixo ("Espera na fila", "A nova espera a vez", "Ficam guardados").
+- **Fronteira:** muda só a aba Proteções; a aba Execuções, o canvas e a faixa de fluxo pausado ficam como na rodada 1.
+- **Descartado:** manter o resumo das 24 horas em outro lugar da aba. Motivo: ela pediu a aba só de configuração; o que a proteção segurou já aparece na aba Execuções, com o filtro por status.
+- **Maquete:** igual à rodada 1.
+- **Crítica e acessibilidade:**
+  - o rótulo de cada linha aponta para a chave da regra (`for`), e o número e a unidade têm `id` e `aria-label` próprios, sem id repetido;
+  - o estado "N alterações não salvas" usa texto neutro com o ponto em amarelo: o texto em amarelo não passava de 4,5:1 no claro;
+  - no celular, a frase do topo some para o "Salvar" caber sem ocupar meia tela;
+  - CSS próprio: nenhum.
+- **Ver:** https://pernalombr4.github.io/prototipos/protecoes-do-spaceflow/ · prints em `evidencias/r2-*.jpg`.

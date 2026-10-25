@@ -8,29 +8,37 @@
  *
  * O MVP usa o mesmo modelo: ele esconde campos e fixa o valor deles (ver
  * `valoresFixosDoMvp`).
+ *
+ * Rodada 2: todo tempo tem unidade escolhida pela pessoa (`Duracao`), o limite
+ * por dia virou uma das unidades do limite por período, "Limitar disparos por
+ * item" virou um menu de 3 opções e o aviso "fila acima de N" saiu.
  */
 
 /** O modo do nó de Início, como o develop chama (Manual, Ações de Itens, Webhook, E-mail recebido, Timer). */
 export type Gatilho = 'itens' | 'webhook' | 'email' | 'timer' | 'manual'
 
+export type UnidadeDeTempo = 'segundos' | 'minutos' | 'horas' | 'dias'
+export interface Duracao { ativo: boolean, valor: number, unidade: UnidadeDeTempo }
+
+/** O período do limite de volume. */
+export type PeriodoDoLimite = 'segundo' | 'minuto' | 'hora' | 'dia'
 /** O que fazer com o disparo que passa do limite de volume. */
 export type Excedente = 'fila' | 'ignorar' | 'reter'
 /** O que fazer quando todas as vagas de execução estão ocupadas. */
 export type Lotado = 'esperar' | 'ignorar' | 'cancelarAnterior'
 /** Timer: o horário chega com a execução anterior ainda em andamento. */
 export type Sobreposicao = 'junto' | 'pular' | 'esperar'
+/** Quando o mesmo item pode disparar o fluxo outra vez. */
+export type RedisparoPorItem = 'sempre' | 'depoisDeTerminar' | 'nunca'
 export type DuranteAPausa = 'guardar' | 'ignorar'
 export type NoTetoDeIa = 'aprovar' | 'encerrar'
 export type FrequenciaDeAviso = 'naHora' | 'porHora' | 'diario'
-export type EventoDeAviso = 'segurou' | 'pausou' | 'cadeia' | 'tetoIa' | 'fila'
-export type PeriodoDoLimite = 'minuto' | 'hora'
+export type EventoDeAviso = 'segurou' | 'pausou' | 'cadeia' | 'tetoIa'
 export type ModoDaJanela = 'comercial' | 'personalizado'
-export type UmaVezPorItem = 'nunca' | 'depoisDeTerminar'
 
 export interface Protecoes {
   volume: {
-    porPeriodo: { ativo: boolean, limite: number, periodo: PeriodoDoLimite }
-    porDia: { ativo: boolean, limite: number }
+    limite: { ativo: boolean, maximo: number, periodo: PeriodoDoLimite }
     excedente: Excedente
     janela: { ativo: boolean, modo: ModoDaJanela, dias: number[], inicio: string, fim: string }
   }
@@ -40,14 +48,14 @@ export interface Protecoes {
     lotado: Lotado
     /** Ações de Itens: no máximo 1 execução em andamento por item. */
     porItem: boolean
-    tempoNaFila: { ativo: boolean, horas: number }
+    tempoNaFila: Duracao
     sobreposicao: Sobreposicao
   }
   repetidos: {
-    webhook: { ativo: boolean, chave: string, horas: number }
-    juntarEdicoes: { ativo: boolean, minutos: number }
-    umaVezPorItem: { ativo: boolean, modo: UmaVezPorItem }
-    emailRepetido: { ativo: boolean, minutos: number }
+    webhook: Duracao & { chave: string }
+    juntarEdicoes: Duracao
+    redisparoPorItem: RedisparoPorItem
+    emailRepetido: Duracao
   }
   cadeia: {
     /** Ações de Itens: mudança gravada por um fluxo não dispara este. E-mail: mensagem enviada por um fluxo do workspace não dispara este. */
@@ -55,7 +63,7 @@ export interface Protecoes {
     limite: { ativo: boolean, niveis: number }
   }
   erros: {
-    tempoMaximo: { ativo: boolean, horas: number }
+    tempoMaximo: Duracao
     pausarAposErros: { ativo: boolean, erros: number }
     duranteAPausa: DuranteAPausa
   }
@@ -70,7 +78,6 @@ export interface Protecoes {
     destinatarios: string[]
     frequencia: FrequenciaDeAviso
     eventos: EventoDeAviso[]
-    filaAcimaDe: number
   }
 }
 
@@ -81,8 +88,7 @@ export interface Protecoes {
 export function protecoesRecomendadas(): Protecoes {
   return {
     volume: {
-      porPeriodo: { ativo: true, limite: 60, periodo: 'minuto' },
-      porDia: { ativo: false, limite: 5000 },
+      limite: { ativo: true, maximo: 60, periodo: 'minuto' },
       excedente: 'fila',
       janela: { ativo: false, modo: 'comercial', dias: [1, 2, 3, 4, 5], inicio: '08:00', fim: '18:00' },
     },
@@ -91,21 +97,21 @@ export function protecoesRecomendadas(): Protecoes {
       limite: 10,
       lotado: 'esperar',
       porItem: true,
-      tempoNaFila: { ativo: true, horas: 24 },
+      tempoNaFila: { ativo: true, valor: 24, unidade: 'horas' },
       sobreposicao: 'pular',
     },
     repetidos: {
-      webhook: { ativo: false, chave: 'id', horas: 24 },
-      juntarEdicoes: { ativo: false, minutos: 2 },
-      umaVezPorItem: { ativo: false, modo: 'depoisDeTerminar' },
-      emailRepetido: { ativo: false, minutos: 10 },
+      webhook: { ativo: false, chave: 'id', valor: 24, unidade: 'horas' },
+      juntarEdicoes: { ativo: false, valor: 2, unidade: 'minutos' },
+      redisparoPorItem: 'sempre',
+      emailRepetido: { ativo: false, valor: 10, unidade: 'minutos' },
     },
     cadeia: {
       ignorarFluxos: true,
       limite: { ativo: true, niveis: 10 },
     },
     erros: {
-      tempoMaximo: { ativo: false, horas: 2 },
+      tempoMaximo: { ativo: false, valor: 2, unidade: 'horas' },
       pausarAposErros: { ativo: true, erros: 3 },
       duranteAPausa: 'guardar',
     },
@@ -119,7 +125,6 @@ export function protecoesRecomendadas(): Protecoes {
       destinatarios: ['dono'],
       frequencia: 'naHora',
       eventos: ['segurou', 'pausou', 'cadeia', 'tetoIa'],
-      filaAcimaDe: 100,
     },
   }
 }
@@ -132,7 +137,7 @@ export function protecoesRecomendadas(): Protecoes {
  */
 export function protecoesDeFluxoExistente(): Protecoes {
   const p = protecoesRecomendadas()
-  p.volume.porPeriodo.ativo = false
+  p.volume.limite.ativo = false
   p.simultaneas.ativo = false
   p.simultaneas.porItem = false
   p.simultaneas.sobreposicao = 'junto'
@@ -146,8 +151,6 @@ export const valoresFixosDoMvp = {
   excedente: 'fila' as Excedente,
   lotado: 'esperar' as Lotado,
   duranteAPausa: 'guardar' as DuranteAPausa,
-  frequencia: 'naHora' as FrequenciaDeAviso,
-  destinatarios: ['dono'],
 }
 
 export type Secao = 'volume' | 'simultaneas' | 'repetidos' | 'cadeia' | 'erros' | 'ia' | 'avisos'
@@ -167,11 +170,11 @@ export const secaoIcone: Record<Secao, string> = {
 /** A seção tem alguma regra ligada? Alimenta o ponto do índice lateral. */
 export function secaoLigada(p: Protecoes, s: Secao, gatilho: Gatilho): boolean {
   switch (s) {
-    case 'volume': return p.volume.porPeriodo.ativo || p.volume.porDia.ativo || p.volume.janela.ativo
+    case 'volume': return p.volume.limite.ativo || p.volume.janela.ativo
     case 'simultaneas': return p.simultaneas.ativo || (gatilho === 'itens' && p.simultaneas.porItem) || (gatilho === 'timer' && p.simultaneas.sobreposicao !== 'junto')
     case 'repetidos':
       if (gatilho === 'webhook') return p.repetidos.webhook.ativo
-      if (gatilho === 'itens') return p.repetidos.juntarEdicoes.ativo || p.repetidos.umaVezPorItem.ativo
+      if (gatilho === 'itens') return p.repetidos.juntarEdicoes.ativo || p.repetidos.redisparoPorItem !== 'sempre'
       if (gatilho === 'email') return p.repetidos.emailRepetido.ativo
       return false
     case 'cadeia': return p.cadeia.limite.ativo || ((gatilho === 'itens' || gatilho === 'email') && p.cadeia.ignorarFluxos)
@@ -193,29 +196,42 @@ export function contarDiferencas(a: unknown, b: unknown): number {
   return a === b ? 0 : 1
 }
 
+/** As faixas de cada número. Proposta do protótipo, sem medição (pergunta P2 dos requisitos). */
+export const FAIXAS = {
+  maximo: [1, 10000],
+  simultaneas: [1, 500],
+  duracao: [1, 999],
+  niveis: [2, 50],
+  erros: [1, 100],
+  creditos: [1, 100000],
+} as const
+
 /** Número inteiro dentro dos limites do campo. Vazio ou fora dos limites é inválido. */
-export function numeroValido(n: unknown, min: number, max: number): boolean {
+export function numeroValido(n: unknown, [min, max]: readonly [number, number]): boolean {
   return typeof n === 'number' && Number.isInteger(n) && n >= min && n <= max
 }
 
-export interface CampoInvalido { secao: Secao, campo: string }
+export type Campo =
+  | 'limite' | 'simultaneas' | 'tempoNaFila' | 'webhook' | 'juntarEdicoes' | 'emailRepetido'
+  | 'niveis' | 'tempoMaximo' | 'erros' | 'iaExecucao' | 'iaDia' | 'destinatarios'
+
+export interface CampoInvalido { secao: Secao, campo: Campo }
 
 /** Confere os números das regras ligadas. O salvar fica bloqueado enquanto houver um inválido. */
 export function validar(p: Protecoes): CampoInvalido[] {
   const erros: CampoInvalido[] = []
-  const conf = (ok: boolean, secao: Secao, campo: string) => { if (!ok) erros.push({ secao, campo }) }
-  if (p.volume.porPeriodo.ativo) conf(numeroValido(p.volume.porPeriodo.limite, 1, 10000), 'volume', 'porPeriodo')
-  if (p.volume.porDia.ativo) conf(numeroValido(p.volume.porDia.limite, 1, 1000000), 'volume', 'porDia')
-  if (p.simultaneas.ativo) conf(numeroValido(p.simultaneas.limite, 1, 500), 'simultaneas', 'limite')
-  if (p.simultaneas.tempoNaFila.ativo) conf(numeroValido(p.simultaneas.tempoNaFila.horas, 1, 168), 'simultaneas', 'tempoNaFila')
-  if (p.repetidos.webhook.ativo) conf(numeroValido(p.repetidos.webhook.horas, 1, 720), 'repetidos', 'webhook')
-  if (p.repetidos.juntarEdicoes.ativo) conf(numeroValido(p.repetidos.juntarEdicoes.minutos, 1, 60), 'repetidos', 'juntarEdicoes')
-  if (p.repetidos.emailRepetido.ativo) conf(numeroValido(p.repetidos.emailRepetido.minutos, 1, 1440), 'repetidos', 'emailRepetido')
-  if (p.cadeia.limite.ativo) conf(numeroValido(p.cadeia.limite.niveis, 2, 50), 'cadeia', 'niveis')
-  if (p.erros.tempoMaximo.ativo) conf(numeroValido(p.erros.tempoMaximo.horas, 1, 720), 'erros', 'tempoMaximo')
-  if (p.erros.pausarAposErros.ativo) conf(numeroValido(p.erros.pausarAposErros.erros, 1, 100), 'erros', 'pausarAposErros')
-  if (p.ia.porExecucao.ativo) conf(numeroValido(p.ia.porExecucao.creditos, 1, 100000), 'ia', 'porExecucao')
-  if (p.ia.porDia.ativo) conf(numeroValido(p.ia.porDia.creditos, 1, 1000000), 'ia', 'porDia')
+  const conf = (ok: boolean, secao: Secao, campo: Campo) => { if (!ok) erros.push({ secao, campo }) }
+  if (p.volume.limite.ativo) conf(numeroValido(p.volume.limite.maximo, FAIXAS.maximo), 'volume', 'limite')
+  if (p.simultaneas.ativo) conf(numeroValido(p.simultaneas.limite, FAIXAS.simultaneas), 'simultaneas', 'simultaneas')
+  if (p.simultaneas.tempoNaFila.ativo) conf(numeroValido(p.simultaneas.tempoNaFila.valor, FAIXAS.duracao), 'simultaneas', 'tempoNaFila')
+  if (p.repetidos.webhook.ativo) conf(numeroValido(p.repetidos.webhook.valor, FAIXAS.duracao), 'repetidos', 'webhook')
+  if (p.repetidos.juntarEdicoes.ativo) conf(numeroValido(p.repetidos.juntarEdicoes.valor, FAIXAS.duracao), 'repetidos', 'juntarEdicoes')
+  if (p.repetidos.emailRepetido.ativo) conf(numeroValido(p.repetidos.emailRepetido.valor, FAIXAS.duracao), 'repetidos', 'emailRepetido')
+  if (p.cadeia.limite.ativo) conf(numeroValido(p.cadeia.limite.niveis, FAIXAS.niveis), 'cadeia', 'niveis')
+  if (p.erros.tempoMaximo.ativo) conf(numeroValido(p.erros.tempoMaximo.valor, FAIXAS.duracao), 'erros', 'tempoMaximo')
+  if (p.erros.pausarAposErros.ativo) conf(numeroValido(p.erros.pausarAposErros.erros, FAIXAS.erros), 'erros', 'erros')
+  if (p.ia.porExecucao.ativo) conf(numeroValido(p.ia.porExecucao.creditos, FAIXAS.creditos), 'ia', 'iaExecucao')
+  if (p.ia.porDia.ativo) conf(numeroValido(p.ia.porDia.creditos, FAIXAS.creditos), 'ia', 'iaDia')
   if (p.avisos.ativo) conf(p.avisos.destinatarios.length > 0, 'avisos', 'destinatarios')
   return erros
 }
