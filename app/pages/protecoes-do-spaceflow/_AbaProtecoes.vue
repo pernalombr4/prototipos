@@ -156,8 +156,8 @@ const ciclo = computed<'nenhum' | 'aberto' | 'resolvido'>(() => {
 })
 
 /** Largura dos menus de escolha: a mesma em todas as linhas, para os controles alinharem. */
-const LARGURA_DO_MENU = 'w-64'
-const MENU = { content: 'min-w-72' }
+const LARGURA_DO_MENU = 'w-72'
+const MENU = { content: 'min-w-80' }
 </script>
 
 <template>
