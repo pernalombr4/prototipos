@@ -11,9 +11,11 @@
  * - com o Jurídico salvo como ligado, o botão Configurar, que abre a página do módulo.
  * - rodada 3: com o Jurídico ligado, a lista de submódulos, ligados um a um. Hoje só Capturas; o próximo entra
  *   como mais uma linha. Sem submódulo ligado, o menu Jurídico não aparece.
+ * - rodada 4: ligar Capturas pede a categoria que guarda os processos e a ligação dos campos (`_LigarCapturas.vue`).
  */
 import type { Textos } from './textos'
 import { textosCapturas } from './textos-capturas'
+import LigarCapturas from './_LigarCapturas.vue'
 
 const props = defineProps<{ t: Textos, moduloLigado: boolean, capturasLigado: boolean }>()
 const emit = defineEmits<{ 'update:moduloLigado': [boolean], 'update:capturasLigado': [boolean], configurar: [aba?: 'fontes'] }>()
@@ -25,7 +27,11 @@ watch(() => props.moduloLigado, (v) => { rascunho.value.juridico = v })
 watch(() => props.capturasLigado, (v) => { rascunho.value.capturas = v })
 
 const salvando = ref(false)
+const modalLigar = ref(false)
 async function salvar() {
+  // Rodada 4: Capturas passa a valer só depois de escolher a categoria dos processos.
+  const vaiLigarCapturas = rascunho.value.juridico && rascunho.value.capturas && !(props.moduloLigado && props.capturasLigado)
+  if (vaiLigarCapturas) return (modalLigar.value = true)
   salvando.value = true
   await new Promise(r => setTimeout(r, 600))
   salvando.value = false
@@ -40,6 +46,11 @@ async function salvar() {
   else if (mudouCapturas && !rascunho.value.capturas) {
     toast.add({ title: tc.value.sistema.desligado.titulo, description: tc.value.sistema.desligado.desc, icon: 'i-lucide-power-off', color: 'neutral' })
   }
+}
+
+function ligado() {
+  emit('update:moduloLigado', true)
+  emit('update:capturasLigado', true)
 }
 
 const modulos = computed(() => [
@@ -120,5 +131,6 @@ const modulos = computed(() => [
         </div>
       </section>
     </div>
+    <LigarCapturas v-model:open="modalLigar" :t="t" @ligado="ligado" />
   </div>
 </template>

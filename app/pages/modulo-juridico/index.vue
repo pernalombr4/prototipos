@@ -9,6 +9,10 @@
  * Casos de uso ficam no código e saem da tela até serem liberados (`submodulos.ts`). A caixa Intimações virou a caixa
  * Capturas, com intimação, citação, distribuição e andamento.
  *
+ * Rodada 4: o escopo do submódulo Capturas fecha. A citação ganha a visualização própria e a regra de contagem lida da
+ * audiência; a audiência vai para a Agenda; ligar o submódulo pede a categoria dos processos; o andamento vira a aba
+ * Andamentos do processo; e o submódulo entrega eventos ao Spaceflow, de onde partem os casos de uso do contencioso.
+ *
  * A triagem (BRIEFING.md) deixou 3 funcionalidades no módulo, todas do contencioso:
  * - Intimações: a captura do DJEN e do Domicílio, revisada por uma pessoa antes de virar prazo;
  * - Prazos: o motor que calcula o prazo fatal e o interno pela regra do rito e pelo calendário do tribunal, com a
@@ -40,10 +44,10 @@ import { LIBERADO } from './submodulos'
 
 definePageMeta({
   titulo: 'Módulo Jurídico',
-  descricao: 'Módulo Jurídico com submódulos ligados um a um. O primeiro é Capturas: publicações, intimações, citações, distribuições e andamentos de várias fontes numa caixa só, com a saúde de cada fonte, os termos monitorados e o prazo calculado.',
+  descricao: 'Módulo Jurídico com submódulos ligados um a um. O primeiro é Capturas: publicações, intimações, citações, distribuições e andamentos de várias fontes numa caixa só, com o prazo calculado, a audiência na Agenda, a linha do tempo do processo e eventos para o Spaceflow.',
   status: 'em-revisao',
   atualizado: '2026-10-26',
-  tela: 'Jurídico › Capturas e Prazos; Agenda; Sistema › Módulos e submódulos',
+  tela: 'Jurídico › Capturas e Prazos; Agenda; Processo › Andamentos; Sistema › Módulos e submódulos',
 })
 
 const t = useTextos(textos)
@@ -135,10 +139,11 @@ function reiniciar() {
 }
 
 const atalhos = [
+  { rotulo: 'Ligar o submódulo', acao: () => { estado.capturasLigado = false; tela.value = { tipo: 'sistema' } } },
   { rotulo: 'Processo com prazo digitado', acao: () => abrirProcesso(4100) },
   { rotulo: 'Fontes da captura', acao: () => irModulo('fontes') },
   { rotulo: 'Termos monitorados', acao: () => irModulo('termos') },
-  { rotulo: 'Submódulos', acao: () => { tela.value = { tipo: 'sistema' } } },
+  { rotulo: 'Eventos para o Spaceflow', acao: () => irModulo('eventos') },
   { rotulo: 'Prazos na Agenda', acao: () => { tela.value = { tipo: 'agenda' } } },
 ]
 </script>
@@ -164,6 +169,7 @@ const atalhos = [
             @ir-prazos="tela = { tipo: 'prazos' }"
             @ir-fontes="irModulo('fontes')"
             @ir-termos="irModulo('termos')"
+            @ir-agenda="tela = { tipo: 'agenda' }"
           />
           <Prazos
             v-else-if="tela.tipo === 'prazos'"

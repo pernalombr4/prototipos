@@ -101,7 +101,7 @@ const pt = {
         texto: (d: string) => `Confirme até ${d}, 3 dias úteis depois do envio. Sem confirmação, a citação se refaz por outro meio, e a empresa pode pagar multa de até 5% do valor da causa (CPC, art. 246, § 1º-C).`,
         confirmar: 'Confirmar a citação',
         modalTitulo: 'Confirmar a citação agora?',
-        modalTexto: 'A confirmação fica registrada no Domicílio com a data de hoje. O prazo de resposta começa depois do 5º dia útil seguinte. Não é possível desfazer.',
+        modalTexto: 'A confirmação fica registrada no Domicílio com a data de hoje. O teor abre em seguida, e a contagem da resposta depende dele: da citação, da audiência ou na própria audiência. Não é possível desfazer.',
         confirmada: 'Citação confirmada no Domicílio',
       },
       portal: {
@@ -266,7 +266,7 @@ const pt = {
     linhas: {
       intimacao: { captura: 'Intimação e citação', vaiPara: 'Tarefa de prazo no processo, na categoria Processos', revisao: 'Sempre: uma pessoa confere a regra e o cálculo' },
       distribuicao: { captura: 'Distribuição', vaiPara: 'Item novo em Processos, pelo formulário Cadastro de processo', revisao: 'Sempre: uma pessoa confere se a empresa é parte' },
-      andamento: { captura: 'Andamento', vaiPara: 'Item novo em Andamentos, relacionado ao processo', revisao: 'Só quando o movimento cita data ou prazo' },
+      andamento: { captura: 'Andamento', vaiPara: 'Linha do tempo do processo, na aba Andamentos', revisao: 'Só quando o movimento cita data ou prazo' },
     } as Record<Destino, { captura: string, vaiPara: string, revisao: string }>,
     andamentosDireto: 'Registrar direto os andamentos que não citam data nem prazo',
     andamentosDiretoAjuda: 'Os outros vão para a caixa Capturas.',
@@ -372,7 +372,7 @@ const en: TextosCapturas = {
         texto: (d: string) => `Confirm by ${d}, 3 business days after it was sent. Without confirmation, service is redone by another means, and the company may pay a fine of up to 5% of the claim amount (CPC, art. 246, § 1-C).`,
         confirmar: 'Confirm service',
         modalTitulo: 'Confirm service now?',
-        modalTexto: 'The confirmation is recorded on the Domicílio with today\'s date. The response deadline starts after the 5th business day that follows. This cannot be undone.',
+        modalTexto: 'The confirmation is recorded on the Domicílio with today\'s date. The content opens next, and the answer period depends on it: from the service, from the hearing, or at the hearing itself. This cannot be undone.',
         confirmada: 'Service confirmed on the Domicílio',
       },
       portal: {
@@ -534,7 +534,7 @@ const en: TextosCapturas = {
     linhas: {
       intimacao: { captura: 'Court notice and service of process', vaiPara: 'Deadline task in the case, in the Processos category', revisao: 'Always: a person checks the rule and the calculation' },
       distribuicao: { captura: 'New lawsuit', vaiPara: 'New item in Processos, through the Cadastro de processo form', revisao: 'Always: a person checks whether the company is a party' },
-      andamento: { captura: 'Case update', vaiPara: 'New item in Andamentos, related to the case', revisao: 'Only when the update mentions a date or deadline' },
+      andamento: { captura: 'Case update', vaiPara: 'Case timeline, in the Updates tab', revisao: 'Only when the update mentions a date or deadline' },
     },
     andamentosDireto: 'Record case updates that mention no date or deadline directly',
     andamentosDiretoAjuda: 'The others go to the Captures inbox.',
@@ -637,7 +637,7 @@ const es: TextosCapturas = {
         texto: (d: string) => `Confirme hasta el ${d}, 3 días hábiles después del envío. Sin confirmación, la citación se rehace por otro medio, y la empresa puede pagar una multa de hasta el 5% del valor de la causa (CPC, art. 246, § 1º-C).`,
         confirmar: 'Confirmar la citación',
         modalTitulo: '¿Confirmar la citación ahora?',
-        modalTexto: 'La confirmación queda registrada en el Domicílio con la fecha de hoy. El plazo de respuesta empieza después del 5.º día hábil siguiente. No se puede deshacer.',
+        modalTexto: 'La confirmación queda registrada en el Domicílio con la fecha de hoy. El contenido se abre a continuación, y el conteo de la respuesta depende de él: desde la citación, desde la audiencia o en la propia audiencia. No se puede deshacer.',
         confirmada: 'Citación confirmada en el Domicílio',
       },
       portal: {
@@ -799,7 +799,7 @@ const es: TextosCapturas = {
     linhas: {
       intimacao: { captura: 'Notificación y citación', vaiPara: 'Tarea de plazo en el proceso, en la categoría Processos', revisao: 'Siempre: una persona revisa la regla y el cálculo' },
       distribuicao: { captura: 'Demanda nueva', vaiPara: 'Ítem nuevo en Processos, por el formulario Cadastro de processo', revisao: 'Siempre: una persona revisa si la empresa es parte' },
-      andamento: { captura: 'Movimiento', vaiPara: 'Ítem nuevo en Andamentos, relacionado con el proceso', revisao: 'Solo cuando el movimiento cita fecha o plazo' },
+      andamento: { captura: 'Movimiento', vaiPara: 'Línea de tiempo del proceso, en la pestaña Movimientos', revisao: 'Solo cuando el movimiento cita fecha o plazo' },
     },
     andamentosDireto: 'Registrar directamente los movimientos que no citan fecha ni plazo',
     andamentosDiretoAjuda: 'Los demás van a la bandeja Capturas.',

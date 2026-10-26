@@ -7,6 +7,8 @@
  * monitorados e Destino) no lugar da antiga aba Captura. A estrutura do jurídico (categorias, campos, fluxos) não mora aqui: chega pelos
  * casos de uso, e a aba "Casos de uso" diz qual área é módulo e qual é só configuração.
  *
+ * Rodada 4: a aba Eventos, com o que o submódulo entrega ao Spaceflow (`_EventosDoSpaceflow.vue`).
+ *
  * Salvar fica fixo no topo, como no protótipo `protecoes-do-spaceflow` (rodada 2).
  */
 import type { EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
@@ -21,14 +23,17 @@ import { textosCapturas } from './textos-capturas'
 import FontesDaCaptura from './_FontesDaCaptura.vue'
 import TermosMonitorados from './_TermosMonitorados.vue'
 import DestinoDaCaptura from './_DestinoDaCaptura.vue'
+import EventosDoSpaceflow from './_EventosDoSpaceflow.vue'
+import { textosTratamento } from './textos-tratamento'
 
-export type Aba = 'geral' | 'fontes' | 'termos' | 'destino' | 'regras' | 'calendario' | 'provisao' | 'casos'
+export type Aba = 'geral' | 'fontes' | 'termos' | 'destino' | 'eventos' | 'regras' | 'calendario' | 'provisao' | 'casos'
 
 const props = defineProps<{ t: Textos, erroCaptura?: boolean, abaInicial?: Aba }>()
 const emit = defineEmits<{ voltar: [] }>()
 const toast = useToast()
 const idioma = useIdioma()
 const tc = useTextos(textosCapturas)
+const tt = useTextos(textosTratamento)
 
 const aba = ref<Aba>(props.abaInicial ?? 'geral')
 // Rodada 3: Provisão e Casos de uso ficam no código, fora da tela, até serem liberados (`submodulos.ts`).
@@ -36,7 +41,7 @@ const oculta = (a: Aba) => (a === 'provisao' && !LIBERADO.provisao) || (a === 'c
 const abas = computed(() => {
   const c = props.t.config.abas
   const todas: [Aba, string][] = [
-    ['geral', c.geral], ['fontes', tc.value.config.abas.fontes], ['termos', tc.value.config.abas.termos], ['destino', tc.value.config.abas.destino],
+    ['geral', c.geral], ['fontes', tc.value.config.abas.fontes], ['termos', tc.value.config.abas.termos], ['destino', tc.value.config.abas.destino], ['eventos', tt.value.eventos.aba],
     ['regras', c.regras], ['calendario', c.calendario], ['provisao', c.provisao], ['casos', c.casos],
   ]
   return todas.filter(([a]) => !oculta(a)).map(([value, label]) => ({ value, label }))
@@ -142,7 +147,7 @@ const corDoComo: Record<ComoChega, 'primary' | 'neutral' | 'warning'> = { modulo
           <h1 class="flex items-center gap-2 text-lg font-semibold text-highlighted">
             <UIcon name="i-lucide-scale" class="size-5 text-primary" />{{ t.config.titulo }}
           </h1>
-          <p class="text-sm text-muted">{{ tc.config.subtitulo }}</p>
+          <p class="text-sm text-muted">{{ tt.config.subtitulo }}</p>
         </div>
         <UButton :label="t.geral.salvar" icon="i-lucide-save" :loading="salvando" :disabled="!mudou" @click="salvar" />
       </div>
@@ -230,6 +235,7 @@ const corDoComo: Record<ComoChega, 'primary' | 'neutral' | 'warning'> = { modulo
         <FontesDaCaptura v-else-if="aba === 'fontes'" key="fontes" v-model:leitura="rascunho.leitura" :t="t" :erro-captura="erroCaptura" @ir-termos="aba = 'termos'" />
         <TermosMonitorados v-else-if="aba === 'termos'" key="termos" :t="t" />
         <DestinoDaCaptura v-else-if="aba === 'destino'" key="destino" v-model="rascunho.destino" :t="t" />
+        <EventosDoSpaceflow v-else-if="aba === 'eventos'" key="eventos" :t="t" />
 
         <!-- Provisão -->
         <div v-else-if="aba === 'provisao'" key="provisao" class="flex max-w-3xl flex-col gap-5">

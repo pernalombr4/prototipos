@@ -14,6 +14,9 @@
  * - "Próximo prazo" vira o prazo calculado, com o ato;
  * - as abas Prazos, Intimações e Risco e provisão, depois de Tarefas;
  * - a mudança de risco avisa que entra na data-base em aberto.
+ * - rodada 4: a aba Andamentos, a linha do tempo do processo. O andamento deixa de ser categoria: é o que aconteceu
+ *   no processo, em ordem, com o tipo do movimento. A aba Capturas fica com intimação, citação e distribuição. A
+ *   Visão Geral mostra a próxima audiência registrada.
  */
 import type { Risco } from './mocks'
 import { categorias, pessoaPorId, processoPorId, regraPorId, tribunais } from './mocks'
@@ -23,6 +26,7 @@ import { dia, dinheiro } from './formato'
 import MemoriaDoCalculo from './_MemoriaDoCalculo.vue'
 import { LIBERADO } from './submodulos'
 import { textosCapturas } from './textos-capturas'
+import { textosTratamento } from './textos-tratamento'
 
 const props = defineProps<{ t: Textos, processo: number, moduloLigado: boolean }>()
 const emit = defineEmits<{ ir: ['intimacoes' | 'prazos' | 'provisao'] }>()
@@ -31,9 +35,9 @@ const p = computed(() => processoPorId.get(props.processo)!)
 const categoria = categorias.find(c => c.id === 'processos')!
 const tribunal = computed(() => tribunais[p.value.data.tribunal])
 
-type Aba = 'visaoGeral' | 'comentarios' | 'logs' | 'tarefas' | 'prazos' | 'intimacoes' | 'provisao' | 'anexos' | 'emails' | 'mailbox' | 'notas' | 'campos'
+type Aba = 'visaoGeral' | 'comentarios' | 'logs' | 'tarefas' | 'prazos' | 'intimacoes' | 'andamentos' | 'provisao' | 'anexos' | 'emails' | 'mailbox' | 'notas' | 'campos'
 const aba = ref<Aba>('visaoGeral')
-watch(() => props.moduloLigado, (l) => { if (!l && ['prazos', 'intimacoes', 'provisao'].includes(aba.value)) aba.value = 'visaoGeral' })
+watch(() => props.moduloLigado, (l) => { if (!l && ['prazos', 'intimacoes', 'andamentos', 'provisao'].includes(aba.value)) aba.value = 'visaoGeral' })
 watch(() => props.processo, () => { aba.value = 'visaoGeral' })
 
 /* ---------- o que o módulo traz para este processo ---------- */
@@ -43,8 +47,18 @@ const prazos = computed(() => estado.prazos
   .sort((a, b) => (a.c.fatal < b.c.fatal ? -1 : 1)))
 const proximo = computed(() => prazos.value.find(x => x.x.status !== 'completed'))
 // Rodada 3: a aba mostra toda captura do processo (intimação, citação e andamento), também as vinculadas à mão.
-const intimacoes = computed(() => estado.intimacoes.filter(i => processoDaCaptura(i)?.id === p.value.id))
+// Rodada 4: o andamento sai desta aba e vai para a aba Andamentos.
+const capturas = computed(() => estado.intimacoes.filter(i => processoDaCaptura(i)?.id === p.value.id))
+const intimacoes = computed(() => capturas.value.filter(i => i.tipo !== 'andamento'))
+const andamentos = computed(() => capturas.value
+  .filter(i => i.tipo === 'andamento' && i.status === 'confirmada')
+  .sort((a, b) => (a.dia < b.dia ? 1 : -1)))
+const andamentosNaCaixa = computed(() => capturas.value.filter(i => i.tipo === 'andamento' && i.status === 'revisar').length)
+const proximaAudiencia = computed(() => estado.audiencias
+  .filter(a => a.processo === props.processo)
+  .sort((a, b) => (a.dia < b.dia ? -1 : 1))[0])
 const tc = useTextos(textosCapturas)
+const tt = useTextos(textosTratamento)
 const aRevisar = computed(() => intimacoes.value.filter(i => i.status === 'revisar').length)
 
 const abas = computed(() => {
@@ -61,6 +75,7 @@ const abas = computed(() => {
     lista.push(
       { value: 'prazos', label: a.prazos, icon: 'i-lucide-alarm-clock', badge: abertos ? String(abertos) : undefined },
       { value: 'intimacoes', label: a.intimacoes, icon: 'i-lucide-inbox', badge: revisar ? String(revisar) : undefined },
+      { value: 'andamentos', label: tt.value.processo.andamentos, icon: 'i-lucide-list-checks' },
     )
     if (LIBERADO.provisao) lista.push({ value: 'provisao', label: a.provisao, icon: 'i-lucide-landmark' })
   }
@@ -187,6 +202,14 @@ const corDaIntimacao = { revisar: 'warning', confirmada: 'success', descartada: 
                     </UButton>
                   </template>
                 </UFormField>
+                <!-- PROPOSTA (rodada 4): a audiência registrada a partir da captura -->
+                <UFormField v-if="moduloLigado && proximaAudiencia" :label="tt.processo.proximaAudiencia">
+                  <p class="flex flex-wrap items-center gap-2 text-sm text-highlighted">
+                    <UIcon name="i-lucide-calendar-clock" class="size-4 text-primary" />
+                    <span class="tabular-nums">{{ dia(proximaAudiencia.dia, t.locale) }}, {{ proximaAudiencia.hora }}</span>
+                    <span class="text-xs text-muted">{{ tt.audiencia.tipos[proximaAudiencia.tipo] }}<template v-if="proximaAudiencia.local"> · {{ proximaAudiencia.local }}</template></span>
+                  </p>
+                </UFormField>
               </section>
 
               <!-- Risco -->
@@ -258,6 +281,38 @@ const corDaIntimacao = { revisar: 'warning', confirmada: 'success', descartada: 
               <p class="line-clamp-2 text-sm text-toned">{{ (i.meio === 'domicilio' || i.meio === 'portal') && !i.ciencia ? t.intimacoes.teorFechado : i.teor }}</p>
             </article>
             <UButton :label="t.casca.itens.intimacoes" icon="i-lucide-arrow-up-right" color="neutral" variant="ghost" size="sm" class="self-start" @click="emit('ir', 'intimacoes')" />
+          </div>
+
+          <!-- PROPOSTA (rodada 4): a aba Andamentos, a linha do tempo do processo -->
+          <div v-else-if="aba === 'andamentos'" key="andamentos" class="mx-auto flex max-w-4xl flex-col gap-4 p-5">
+            <div v-if="andamentosNaCaixa" class="flex flex-wrap items-center gap-3 rounded-md border border-default bg-elevated/40 px-3 py-2">
+              <UIcon name="i-lucide-inbox" class="size-4 text-warning" />
+              <span class="flex-1 text-sm text-toned">{{ tt.processo.naCaixa(andamentosNaCaixa) }}</span>
+              <UButton :label="tt.processo.irCaixa" icon="i-lucide-arrow-up-right" size="xs" color="neutral" variant="outline" @click="emit('ir', 'intimacoes')" />
+            </div>
+            <UEmpty v-if="!andamentos.length" icon="i-lucide-list-checks" :title="tt.processo.vazio" variant="naked" class="py-10" />
+            <ol v-else class="relative flex flex-col">
+              <li
+                v-for="(i, n) in andamentos"
+                :key="i.id"
+                class="relative grid animate-[entrada_.3s_ease-out_both] grid-cols-[1.75rem_minmax(0,1fr)] gap-3 pb-4 last:pb-0"
+                :style="{ animationDelay: `${n * 50}ms` }"
+              >
+                <span v-if="n < andamentos.length - 1" class="absolute left-[0.8125rem] top-7 h-[calc(100%-1.5rem)] w-px bg-(--ui-border)" aria-hidden="true" />
+                <span class="relative z-10 flex size-6.5 items-center justify-center rounded-full border border-default bg-default text-muted">
+                  <UIcon name="i-lucide-list-checks" class="size-3.5" />
+                </span>
+                <div class="min-w-0 rounded-lg border border-default p-3">
+                  <div class="mb-1.5 flex flex-wrap items-center gap-2">
+                    <span class="text-sm font-medium tabular-nums text-highlighted">{{ dia(i.dia, t.locale) }}</span>
+                    <UBadge v-if="i.movimento" :label="tt.andamento.movimentos[i.movimento]" color="neutral" variant="subtle" size="sm" />
+                    <UBadge v-if="i.tratadaPor === 'automatico'" :label="tt.processo.entradaDireta" icon="i-lucide-zap" color="neutral" variant="outline" size="sm" />
+                    <span class="ml-auto text-xs text-muted">{{ i.orgao }}</span>
+                  </div>
+                  <p class="text-sm text-toned">{{ i.teor }}</p>
+                </div>
+              </li>
+            </ol>
           </div>
 
           <!-- PROPOSTA: a aba Risco e provisão -->

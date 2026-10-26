@@ -7,8 +7,9 @@
  * abrindo o modal "Evento" de hoje, que fica fora do escopo.
  */
 import { eventosDoWorkspace } from './mocks'
-import { eventosDosPrazos, prazoDoEvento } from './agenda'
+import { audienciaDoEvento, eventosDasAudiencias, eventosDosPrazos, prazoDoEvento } from './agenda'
 import type { Textos } from './textos'
+import { textosTratamento } from './textos-tratamento'
 import type { Evento } from './_Calendario.vue'
 import Calendario from './_Calendario.vue'
 import PainelDoPrazo from './_PainelDoPrazo.vue'
@@ -16,16 +17,21 @@ import PainelDoPrazo from './_PainelDoPrazo.vue'
 const props = defineProps<{ t: Textos, moduloLigado: boolean }>()
 const emit = defineEmits<{ abrirProcesso: [number] }>()
 const toast = useToast()
+const tt = useTextos(textosTratamento)
 
+// Rodada 4: a audiência lida no teor de uma captura entra como as audiências que já estão na Agenda.
 const eventos = computed<Evento[]>(() => [
   ...eventosDoWorkspace.map(e => ({ id: e.id, dia: e.dia, hora: e.hora, titulo: e.titulo, tom: 'neutro' as const })),
   ...(props.moduloLigado ? eventosDosPrazos(props.t) : []),
+  ...(props.moduloLigado ? eventosDasAudiencias(a => tt.value.audiencia.tipos[a.tipo]) : []),
 ])
 
 const prazoAberto = ref<number | undefined>()
 function abrir(e: Evento) {
   const id = prazoDoEvento(e)
   if (id !== undefined) return (prazoAberto.value = id)
+  const audiencia = audienciaDoEvento(e)
+  if (audiencia) return emit('abrirProcesso', audiencia.processo)
   toast.add({ title: props.t.geral.foraDoEscopo, description: props.t.geral.foraDoEscopoDesc, icon: 'i-lucide-construction', color: 'neutral' })
 }
 </script>

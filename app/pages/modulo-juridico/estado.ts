@@ -5,7 +5,7 @@
  * lista de prazos e na tela do processo.
  */
 import { reactive } from 'vue'
-import type { DataBase, Intimacao, Prazo, Processo, RegraId, Risco, Suspensao } from './mocks'
+import type { AudienciaNoTeor, DataBase, Intimacao, MarcoDaResposta, Prazo, Processo, RegraId, Risco, Suspensao } from './mocks'
 import {
   AGORA, DATA_BASE_ABERTA, EU, HOJE, datasBaseFechadas, motivosIniciais, pessoaPorId, prazosIniciais,
   processoPorCnj, processoPorId, processos, regraPorId, suspensoesIniciais,
@@ -14,6 +14,8 @@ import type { Calculo } from './prazos'
 import { calcular, somarDias } from './prazos'
 import type { Termo } from './capturas'
 import { capturasIniciais, termosIniciais } from './capturas'
+import type { Audiencia, Disparo, EventoId, LigacaoDaCategoria } from './tratamento'
+import { disparosIniciais, fluxos, ligacaoInicial } from './tratamento'
 
 const copia = <T>(x: T): T => JSON.parse(JSON.stringify(x), (_k, v) => (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(v) ? new Date(v) : v))
 
@@ -45,6 +47,13 @@ function inicial() {
     riscos: Object.fromEntries(processos.map(p => [p.id, { risco: p.data.risco, estimado: p.data.estimado }])) as Record<number, { risco: Risco, estimado: number }>,
     motivos: { ...motivosIniciais } as Record<number, string>,
     proximoId: 7100,
+    /* ---------- rodada 4 ---------- */
+    /** A categoria que guarda os processos e os campos ligados a ela, escolhidos ao ligar Capturas. */
+    ligacao: copia(ligacaoInicial) as LigacaoDaCategoria,
+    /** Audiências registradas a partir de uma captura. Entram na Agenda. */
+    audiencias: [] as Audiencia[],
+    /** Eventos entregues ao Spaceflow, com os fluxos que cada um disparou. */
+    disparos: copia(disparosIniciais) as Disparo[],
   }
 }
 
@@ -72,6 +81,9 @@ export function calcularPrazo(p: Pick<Prazo, 'processo' | 'entrada'>): Calculo {
     meio: p.entrada.meio,
     dia: p.entrada.dia,
     citacao: p.entrada.citacao,
+    marco: p.entrada.marco,
+    audiencia: p.entrada.audiencia,
+    hora: p.entrada.hora,
     regra: regraPorId.get(p.entrada.regra)!,
     tribunal: proc.data.tribunal,
     suspensoes: estado.suspensoes,
@@ -112,21 +124,46 @@ export function responsavelDa(i: Intimacao): number {
   return estado.atribuicao.semProcesso
 }
 
+/* ---------- rodada 4: eventos e audiências ---------- */
+
+/** Entrega o evento ao Spaceflow e guarda quais fluxos ele disparou. */
+export function disparar(evento: EventoId, i?: Intimacao, processo?: number) {
+  const disparados = fluxos.filter(f => f.evento === evento && (!f.filtro || f.filtro === i?.movimento)).map(f => f.id)
+  estado.disparos.unshift({ id: estado.proximoId++, quando: new Date(AGORA), evento, captura: i?.id, processo: processo ?? (i ? processoDaCaptura(i)?.id : undefined), fluxos: disparados })
+}
+
+/** A audiência lida no teor vira item da categoria Audiências e entra na Agenda. Sem cálculo: a data vem do juízo. */
+export function registrarAudiencia(i: Intimacao, a: AudienciaNoTeor) {
+  const p = processoDaCaptura(i)
+  if (!p) return undefined
+  const nova: Audiencia = { id: estado.proximoId++, processo: p.id, captura: i.id, ...a }
+  estado.audiencias.push(nova)
+  disparar('audienciaRegistrada', i, p.id)
+  return nova
+}
+
+export const audienciaDaCaptura = (i: Intimacao) => estado.audiencias.find(a => a.captura === i.id)
+
 export function tratar(i: Intimacao) {
   i.status = 'confirmada'
   i.tratadaPor = EU
+  disparar(i.tipo === 'andamento' ? 'andamentoRegistrado' : 'capturaTratada', i)
 }
 
 export function vincular(i: Intimacao, processo: number) {
   estado.vinculos[i.id] = processo
 }
 
-/** Cadastra o processo a partir da distribuição: o item nasce na categoria Processos, com os dados da captura. */
+/**
+ * Cadastra o processo a partir da distribuição ou da citação: o item nasce na categoria ligada ao submódulo, com os
+ * dados da captura. As outras capturas com o mesmo número CNJ passam a apontar para ele.
+ */
 export function cadastrarProcesso(i: Intimacao): Processo | undefined {
   const d = i.distribuicao
   if (!d) return undefined
   const id = 4100 + processos.length
   const trabalhista = i.tribunal.startsWith('trt')
+  const juizado = i.orgao.includes('Juizado')
   const p: Processo = {
     id,
     reference: `PROC-${String(312 + processos.length).padStart(4, '0')}`,
@@ -134,7 +171,7 @@ export function cadastrarProcesso(i: Intimacao): Processo | undefined {
     status: 'active',
     titulo: `${d.autor} x ${d.reu.replace(/ (S\.A\.|Ltda\.)$/, '')}`,
     data: {
-      numeroCnj: i.numeroCnj, tribunal: i.tribunal, orgao: i.orgao, rito: trabalhista ? 'clt' : 'cpc',
+      numeroCnj: i.numeroCnj, tribunal: i.tribunal, orgao: i.orgao, rito: trabalhista ? 'clt' : juizado ? 'jec' : 'cpc',
       area: trabalhista ? 'Trabalhista' : 'Cível', polo: 'Réu', parteContraria: d.autor, valorDaCausa: d.valor,
       responsavel: responsavelDa(i), escritorio: 'Interno', fase: 'Conhecimento', risco: 'possivel', estimado: 0,
     },
@@ -145,12 +182,17 @@ export function cadastrarProcesso(i: Intimacao): Processo | undefined {
   estado.riscos[p.id] = { risco: 'possivel', estimado: 0 }
   estado.criados.push(p.id)
   // O vínculo no estado reativo faz a caixa e o painel verem o processo novo (os mapas de `mocks.ts` não são reativos).
-  estado.vinculos[i.id] = p.id
-  tratar(i)
+  for (const x of estado.intimacoes) if (x.numeroCnj === i.numeroCnj) estado.vinculos[x.id] = p.id
+  disparar('processoCadastrado', i, p.id)
+  // A citação continua na caixa: o prazo de resposta ainda precisa de conferência.
+  if (i.tipo === 'distribuicao') tratar(i)
   return p
 }
 
-export function confirmar(i: Intimacao, regra: RegraId, responsavel: number) {
+/** A resposta à citação: o marco e, quando ele depende da audiência, o dia e a hora dela. */
+export interface Resposta { marco: MarcoDaResposta, audiencia?: string, hora?: string }
+
+export function confirmar(i: Intimacao, regra: RegraId, responsavel: number, resposta?: Resposta, audiencia?: AudienciaNoTeor) {
   const proc = processoDaCaptura(i)
   const entrada = entradaDa(i)
   if (!proc || !entrada) return
@@ -162,7 +204,7 @@ export function confirmar(i: Intimacao, regra: RegraId, responsavel: number) {
     assigned_to: responsavel,
     processo: proc.id,
     intimacao: i.id,
-    entrada: { ...entrada, regra },
+    entrada: { ...entrada, regra, ...resposta },
     confirmadoPor: EU,
     confirmadoEm: new Date(AGORA),
     historico: [],
@@ -170,6 +212,8 @@ export function confirmar(i: Intimacao, regra: RegraId, responsavel: number) {
   i.status = 'confirmada'
   i.tratadaPor = EU
   i.regraSugerida = regra
+  disparar('capturaTratada', i, proc.id)
+  if (audiencia) registrarAudiencia(i, audiencia)
 }
 
 export function descartar(i: Intimacao, motivo: string) {
@@ -183,11 +227,13 @@ export function voltarParaRevisao(i: Intimacao) {
   i.tratadaPor = undefined
   i.motivoDoDescarte = undefined
   estado.prazos = estado.prazos.filter(p => p.intimacao !== i.id)
+  estado.audiencias = estado.audiencias.filter(a => a.captura !== i.id)
 }
 
-/** Abrir o teor de uma intimação do Domicílio registra a ciência hoje. */
+/** Abrir o teor de uma intimação do Domicílio registra a ciência hoje. Na citação, avisa o Spaceflow. */
 export function registrarCiencia(i: Intimacao) {
   i.ciencia = HOJE
+  if (i.tipo === 'citacao') disparar('citacaoConfirmada', i)
 }
 
 export function cumprir(p: Prazo) {

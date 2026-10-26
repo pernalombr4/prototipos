@@ -9,6 +9,7 @@ import type { Regra, Tribunal } from './mocks'
 import type { Calculo } from './prazos'
 import type { Textos } from './textos'
 import { dia, diaComSemana } from './formato'
+import { textosTratamento } from './textos-tratamento'
 
 const props = defineProps<{
   t: Textos
@@ -18,9 +19,10 @@ const props = defineProps<{
   compacto?: boolean
 }>()
 
+const tt = useTextos(textosTratamento)
 const destaque = (chave: string) => chave === 'fatal' || chave === 'interno'
 const icone: Record<string, string> = {
-  disponibilizacao: 'i-lucide-newspaper', publicacao: 'i-lucide-book-open', ciencia: 'i-lucide-mail-open', confirmacao: 'i-lucide-mail-check', quintoDia: 'i-lucide-calendar-check',
+  disponibilizacao: 'i-lucide-newspaper', publicacao: 'i-lucide-book-open', ciencia: 'i-lucide-mail-open', confirmacao: 'i-lucide-mail-check', quintoDia: 'i-lucide-calendar-check', audiencia: 'i-lucide-calendar-clock',
   inicio: 'i-lucide-play', contagem: 'i-lucide-calculator', prorrogacao: 'i-lucide-calendar-plus',
   fatal: 'i-lucide-flag', interno: 'i-lucide-alarm-clock',
 }
@@ -50,7 +52,7 @@ const passos = computed(() => props.calculo.passos.filter(p => p.chave !== 'cont
         <span class="min-w-0 pt-0.5">
           <span class="block text-sm" :class="destaque(p.chave) ? 'font-semibold text-highlighted' : 'text-toned'">{{ t.memoria.passos[p.chave] }}</span>
           <span v-if="p.fundamento && !compacto" class="block text-xs text-muted">{{ p.fundamento }}</span>
-          <span v-if="p.chave === 'fatal'" class="block text-xs text-muted">{{ t.memoria.ate(t.geral.fuso(calculo.fuso)) }}</span>
+          <span v-if="p.chave === 'fatal'" class="block text-xs text-muted">{{ calculo.hora ? tt.memoria.ateHora(calculo.hora, t.geral.fuso(calculo.fuso)) : t.memoria.ate(t.geral.fuso(calculo.fuso)) }}</span>
         </span>
         <span class="pt-0.5 text-right text-sm tabular-nums" :class="destaque(p.chave) ? 'font-semibold text-highlighted' : 'text-toned'">
           {{ compacto ? dia(p.dia, t.locale) : diaComSemana(p.dia, t.locale) }}

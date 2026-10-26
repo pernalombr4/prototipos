@@ -42,11 +42,11 @@ export const EU = 11
  * Categorias (vêm dos casos de uso jurídicos, não do módulo)          *
  * ------------------------------------------------------------------ */
 
-export type CategoriaId = 'processos' | 'andamentos' | 'audiencias' | 'contratos' | 'procuracoes' | 'consultas' | 'societario' | 'pagamentos'
+// Rodada 4: Andamentos saiu do menu. O andamento é uma linha do tempo dentro do processo, não uma categoria.
+export type CategoriaId = 'processos' | 'audiencias' | 'contratos' | 'procuracoes' | 'consultas' | 'societario' | 'pagamentos'
 
 export const categorias: { id: CategoriaId, nome: string, icone: string }[] = [
   { id: 'processos', nome: 'Processos', icone: 'i-lucide-gavel' },
-  { id: 'andamentos', nome: 'Andamentos', icone: 'i-lucide-list-checks' },
   { id: 'audiencias', nome: 'Audiências', icone: 'i-lucide-calendar-clock' },
   { id: 'contratos', nome: 'Contratos', icone: 'i-lucide-file-signature' },
   { id: 'procuracoes', nome: 'Procurações', icone: 'i-lucide-stamp' },
@@ -62,7 +62,7 @@ export const categorias: { id: CategoriaId, nome: string, icone: string }[] = [
 export type Rito = 'cpc' | 'clt' | 'jec' | 'cpp' | 'adm'
 export type RegraId =
   | 'cpc-contestacao' | 'cpc-manifestacao' | 'cpc-embargos' | 'cpc-apelacao' | 'cpc-contrarrazoes' | 'cpc-pagamento'
-  | 'clt-ro' | 'clt-embargos' | 'clt-manifestacao' | 'jec-recurso' | 'cpp-resposta' | 'adm-alegacoes'
+  | 'clt-ro' | 'clt-embargos' | 'clt-manifestacao' | 'clt-defesa' | 'jec-contestacao' | 'jec-recurso' | 'cpp-resposta' | 'adm-alegacoes'
 
 /** PROPOSTA: a regra declarada. Dado do pacote do país, versionado. */
 export interface Regra {
@@ -84,6 +84,9 @@ export const regras: Regra[] = [
   { id: 'clt-ro', rito: 'clt', ato: 'Recurso ordinário', dias: 8, unidade: 'uteis', fundamento: 'CLT, art. 895' },
   { id: 'clt-embargos', rito: 'clt', ato: 'Embargos de declaração', dias: 5, unidade: 'uteis', fundamento: 'CLT, art. 897-A' },
   { id: 'clt-manifestacao', rito: 'clt', ato: 'Manifestação', dias: 5, unidade: 'uteis', fundamento: 'CLT, art. 775' },
+  // Rodada 4: a defesa que se entrega na audiência. Sem contagem: o prazo fatal é o dia e a hora da audiência.
+  { id: 'clt-defesa', rito: 'clt', ato: 'Defesa', dias: 0, unidade: 'uteis', fundamento: 'CLT, art. 847' },
+  { id: 'jec-contestacao', rito: 'jec', ato: 'Contestação', dias: 0, unidade: 'uteis', fundamento: 'Lei 9.099/1995, art. 30' },
   { id: 'jec-recurso', rito: 'jec', ato: 'Recurso inominado', dias: 10, unidade: 'uteis', fundamento: 'Lei 9.099/1995, arts. 12-A e 42' },
   { id: 'cpp-resposta', rito: 'cpp', ato: 'Resposta à acusação', dias: 10, unidade: 'corridos', fundamento: 'CPP, arts. 396 e 798' },
   { id: 'adm-alegacoes', rito: 'adm', ato: 'Alegações finais', dias: 10, unidade: 'corridos', fundamento: 'Lei 9.784/1999, arts. 44 e 66' },
@@ -311,12 +314,37 @@ export interface Intimacao {
   /** Quem tratou: uma pessoa ou a regra de entrada direta dos andamentos. */
   tratadaPor?: number | 'automatico'
   distribuicao?: { classe: string, assunto: string, autor: string, reu: string, valor: number, distribuidaEm: string }
+  /* ---------- rodada 4: o que vem depois da captura ---------- */
+  /** A audiência que o teor designa, lida pelo pacote. A pessoa confere antes de ir para a Agenda. */
+  audiencia?: AudienciaNoTeor
+  /** Citação: de onde conta a resposta, sugerido pelo rito e pelo teor. */
+  marcoSugerido?: MarcoDaResposta
+  /** Andamento: o tipo do movimento, que o Spaceflow usa como filtro do gatilho. */
+  movimento?: TipoDeMovimento
+  /** A petição inicial que o robô obteve no sistema do tribunal, com a distribuição ou a citação. */
+  inicial?: { paginas: number, sistema: string, obtidaEm: Date }
 }
+
+/** PROPOSTA (rodada 4): a audiência lida no teor da captura. */
+export type TipoDeAudiencia = 'conciliacao' | 'una' | 'instrucao'
+export interface AudienciaNoTeor { tipo: TipoDeAudiencia, dia: string, hora: string, local?: string }
+
+/**
+ * PROPOSTA (rodada 4): de onde conta a resposta à citação. O marco muda com o rito e com a audiência:
+ * - `citacao`: sem audiência designada, 15 dias úteis depois do 5º dia útil da confirmação (CPC, art. 335, III);
+ * - `conciliacao`: com audiência de conciliação, 15 dias úteis depois dela (CPC, art. 335, I);
+ * - `juizado`: a contestação se entrega na audiência (Lei 9.099/1995, art. 30);
+ * - `trabalho`: a defesa vai até a audiência (CLT, art. 847).
+ */
+export type MarcoDaResposta = 'citacao' | 'conciliacao' | 'juizado' | 'trabalho'
+
+/** PROPOSTA (rodada 4): o tipo do movimento do andamento. */
+export type TipoDeMovimento = 'audiencia' | 'sentenca' | 'juntada' | 'conclusao' | 'remessa'
 
 export const intimacoesIniciais: Intimacao[] = [
   { id: 901, meio: 'djen', tipo: 'intimacao', tribunal: 'tjsp', orgao: '12ª Vara Cível do Foro Central', numeroCnj: '1023456-12.2025.8.26.0100', dia: '2026-10-22', teor: 'Fica a parte ré intimada para, no prazo legal, apresentar contestação, sob pena de revelia. Advogado(s): Bruno Tavares (OAB/SP 000.000, exemplo).', regraSugerida: 'cpc-contestacao', status: 'revisar' },
   { id: 902, meio: 'djen', tipo: 'intimacao', tribunal: 'trt2', orgao: '45ª Vara do Trabalho de São Paulo', numeroCnj: '0008812-45.2025.5.02.0045', dia: '2026-10-23', teor: 'Publicada a sentença. Ficam as partes intimadas. Julgo parcialmente procedentes os pedidos para condenar a reclamada ao pagamento de horas extras e reflexos.', regraSugerida: 'clt-ro', status: 'revisar' },
-  { id: 903, meio: 'domicilio', tipo: 'citacao', tribunal: 'tjmg', orgao: '5ª Vara Cível de Belo Horizonte', numeroCnj: '5009871-66.2025.8.13.0024', dia: '2026-10-21', teor: 'Cite-se a requerida para, querendo, contestar a ação no prazo de 15 dias úteis, com as advertências legais.', regraSugerida: 'cpc-contestacao', status: 'revisar' },
+  { id: 903, meio: 'domicilio', tipo: 'citacao', tribunal: 'tjmg', orgao: '5ª Vara Cível de Belo Horizonte', numeroCnj: '5009871-66.2025.8.13.0024', dia: '2026-10-21', teor: 'Deixo de designar a audiência de conciliação, pela natureza do direito discutido. Cite-se a requerida para, querendo, contestar a ação no prazo de 15 dias úteis, com as advertências legais.', regraSugerida: 'cpc-contestacao', marcoSugerido: 'citacao', status: 'revisar' },
   { id: 904, meio: 'djen', tipo: 'intimacao', tribunal: 'tjam', orgao: '4ª Vara Cível de Manaus', numeroCnj: '0623451-88.2025.8.04.0001', dia: '2026-10-23', teor: 'Intime-se a requerida para se manifestar sobre o laudo pericial juntado aos autos.', regraSugerida: 'cpc-manifestacao', status: 'revisar' },
   { id: 905, meio: 'djen', tipo: 'intimacao', tribunal: 'tjsp', orgao: '1º Juizado Especial Cível', numeroCnj: '1002871-20.2025.8.26.0016', dia: '2026-10-20', teor: 'Sentença publicada. Intimem-se. Julgo procedente o pedido para condenar a ré ao pagamento de R$ 4.800,00 a título de danos morais.', regraSugerida: 'jec-recurso', status: 'revisar' },
   { id: 906, meio: 'djen', tipo: 'intimacao', tribunal: 'tjrj', orgao: '7ª Vara Cível da Capital', numeroCnj: '0801233-56.2025.8.19.0001', dia: '2026-10-22', teor: 'Digam as partes, em provas, especificando-as e justificando sua pertinência.', regraSugerida: 'cpc-manifestacao', status: 'revisar' },
@@ -341,7 +369,7 @@ export type Prazo = Pick<Task, 'id' | 'reference' | 'status' | 'assigned_to'> & 
   processo: number
   intimacao?: number
   /** PROPOSTA: a entrada do cálculo, guardada para recalcular. */
-  entrada: { meio: 'djen' | 'domicilio' | 'portal', dia: string, regra: RegraId, citacao?: boolean }
+  entrada: { meio: 'djen' | 'domicilio' | 'portal', dia: string, regra: RegraId, citacao?: boolean, marco?: MarcoDaResposta, audiencia?: string, hora?: string }
   confirmadoPor: number
   confirmadoEm: Date
   historico: HistoricoDoPrazo[]

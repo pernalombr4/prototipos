@@ -3,14 +3,20 @@
 ## A proposta em 1 parágrafo
 
 O módulo Jurídico é feito de submódulos, ligados um a um em Configurações › Sistema › Módulos. O primeiro é
-**Capturas**, que cobre captura e prazo. Ligado, ele acrescenta o menu **Jurídico** (Capturas e Prazos) e a aba
-Capturas ao processo. A caixa **Capturas** recebe intimação, citação, distribuição de ação nova e andamento, vindos do
+**Capturas**, que cobre captura e prazo. Ligar Capturas pede a categoria que guarda os processos e a ligação de 5
+campos (número CNJ, tribunal, órgão, responsável e polo); o campo que falta é criado e os ligados ficam travados.
+Ligado, ele acrescenta o menu **Jurídico** (Capturas e Prazos) e as abas Capturas e Andamentos ao processo. A caixa **Capturas** recebe intimação, citação, distribuição de ação nova e andamento, vindos do
 DJEN, do Domicílio Judicial Eletrônico, dos robôs ENSPACE que o cliente já contrata (portais, andamentos, distribuição)
 e do fornecedor de recortes do cliente. Cada captura diz de onde veio, qual termo casou e quando chegou, com o hash do
 DJEN como prova. A mesma comunicação vinda de 2 fontes fica numa linha só; a vinda por 2 meios mostra as 2 datas e qual
-vale. Da caixa, a intimação vira prazo calculado (memória do cálculo, revisão humana), a citação pede confirmação em 3
-dias úteis, a distribuição vira processo ou sai como homônimo e o andamento vai para a categoria Andamentos, um a um ou
-em lote. A página do módulo ganha Fontes (estado e histórico de execuções de cada fonte), Termos monitorados e Destino.
+vale. Da caixa, a intimação vira prazo calculado (memória do cálculo, revisão humana). A citação tem visualização
+própria, ordenada pelo que vence antes: pede confirmação em 3 dias úteis, cadastra o processo com os dados da
+distribuição e a petição inicial, lê a audiência no teor e escolhe de onde conta a resposta (da citação, da audiência de
+conciliação, na audiência do Juizado ou até a audiência trabalhista). A audiência vai para a Agenda, sem cálculo. A
+distribuição vira processo ou sai como homônimo, e o andamento entra na linha do tempo do processo, um a um ou em lote.
+Cada passo entrega um evento ao Spaceflow, de onde partem subsídios, escritório externo e preposto, que continuam
+configuração. A página do módulo ganha Fontes (estado e histórico de execuções de cada fonte), Termos monitorados,
+Destino e Eventos.
 Provisão e Casos de uso, das rodadas 1 e 2, ficam no código e saem da tela até serem liberados (`submodulos.ts`).
 
 ## A jornada
@@ -22,10 +28,13 @@ flowchart LR
     I -->|"intimação: Confirmar prazo"| P["Prazos<br/>fatal e interno"]
     I -->|"citação: confirmar"| P
     I -->|"distribuição: Cadastrar processo"| T["Processo<br/>abas Prazos e Capturas"]
-    I -->|"andamento: Registrar"| N["Categoria Andamentos"]
+    I -->|"andamento: Registrar"| N["Processo<br/>aba Andamentos"]
+    I -->|"citação: audiência no teor"| A
+    I -->|"eventos"| F["Spaceflow<br/>subsídios, escritório, preposto"]
     I -->|"botão de saúde"| C
     P -->|"linha ou dia do calendário"| M["Memória do cálculo<br/>e histórico"]
-    A["Agenda<br/>interno e fatal"] -->|"evento do prazo"| M
+    A["Agenda<br/>interno, fatal e audiência"] -->|"evento do prazo"| M
+    A -->|"audiência"| T
 ```
 
 ## Rodada 1 · 2026-10-26
@@ -296,6 +305,93 @@ flowchart LR
   - `r3-13-fonte-domicilio-parada.jpg`: o painel da fonte Domicílio parada;
   - `r3-14-es-dois-meios.jpg`: o painel dos 2 meios em espanhol.
 
+## Rodada 4 · 2026-10-26
+
+- **Pedido (literal):** "sua recomendaçao faz todo sentido --- no mais, pode fechar o escopo do submódulo de capturas
+  e lidar com ]esses pontos que trouxe tambem de recomendaçao". Os pontos e as 2 perguntas que vieram antes estão no
+  `BRIEFING.md`, "Rodada 4".
+- **Pesquisa:** sem pesquisa nova. As regras de contagem vêm da lei: CPC, art. 335, I a III, e art. 231, IX; CPC, art.
+  246, § 1º-A; Lei 9.099/1995, art. 30; CLT, art. 847.
+- **Mudou:**
+  - Capturas: a visualização **Citações**, ordenada pelo que vence antes ("Confirmar até" enquanto a citação não foi
+    confirmada, depois o prazo fatal);
+  - o painel da citação:
+    - **Audiência no teor**: tipo, data, hora e local lidos do teor, editáveis, e "Levar a audiência para a Agenda";
+    - **Resposta à citação**: "De onde conta a resposta", com 4 marcos e a ajuda de cada um. O marco vem sugerido pelo
+      rito e pelo teor;
+    - na audiência do Juizado e na trabalhista, "Defesa até" mostra o dia e a hora da audiência, e a memória do cálculo
+      ganha o passo "Audiência designada";
+    - na audiência de conciliação, a contagem começa no dia útil seguinte à audiência (CPC, art. 335, I), com o aviso do
+      acordo e do pedido de cancelamento;
+    - a citação de ação nova mostra os dados da distribuição e cadastra o processo. A distribuição da mesma ação avisa
+      que o processo já existe e oferece "Registrar no processo";
+    - **Documentos da ação**: a petição inicial obtida no tribunal, que vai para os anexos do processo;
+    - **Eventos para o Spaceflow**: o que a captura entregou e o fluxo que cada evento disparou;
+  - o andamento mostra o tipo do movimento. O andamento que designa audiência leva a audiência para a Agenda;
+  - a ação em lote "Registrar andamentos" deixa de fora o andamento com audiência, que pede conferência;
+  - Agenda: a audiência registrada entra como os eventos de hoje; o clique abre o processo;
+  - processo: a aba **Andamentos** (linha do tempo, com tipo do movimento e "Entrada direta") e a próxima audiência na
+    Visão Geral. A aba Capturas fica com intimação, citação e distribuição;
+  - Sistema › Módulos: ligar Capturas abre "Ligar o submódulo Capturas", com a categoria dos processos (ou "Criar a
+    categoria Processos pelo caso de uso Contencioso") e a ligação dos 5 campos;
+  - página do módulo: Destino mostra a categoria ligada e os campos travados, e ganha a linha Audiência; a aba nova
+    **Eventos** lista os 5 eventos, os dados que cada um leva, os fluxos que usam cada um e os últimos entregues;
+  - a categoria Andamentos saiu do menu.
+- **Fronteira:** muda a caixa (visualização Citações e o painel), a Agenda (só os eventos novos), a tela do processo
+  (aba e linha novas), o cartão Módulos (o modal) e a página do módulo (Destino e Eventos). Não muda a casca, a barra da
+  lista, o `EnTable`, Prazos nem a grade da Agenda.
+- **Por que assim:**
+  - o processo continua item de categoria: as telas de lista, item, filtro e permissão já existem. O submódulo pede a
+    categoria e trava os campos de que depende, em vez de criar uma tela própria;
+  - a citação é visualização, e não tela: ela é captura, com a mesma barra e o mesmo painel;
+  - a regra de contagem depende da audiência, então o painel lê a audiência antes de calcular. O marco é escolha da
+    pessoa, sugerida pelo teor, porque a leitura automática erra;
+  - o andamento não tem prazo nem dono: é histórico do processo. Como categoria, ele duplicava o processo;
+  - subsídios, escritório externo e preposto mudam de empresa para empresa. O submódulo entrega o evento, e o caso de uso
+    Contencioso traz o fluxo pronto;
+  - o filtro por tipo do movimento fica no fluxo ("quando o movimento for Sentença"), e não num evento por tipo.
+- **Descartado:**
+  - tela própria de processos e de citações. Motivo: repetiria lista, item e filtro, que a categoria já tem;
+  - categoria Andamentos. Motivo: andamento é histórico de um processo, sem ciclo próprio;
+  - calcular a data da audiência. Motivo: ela vem do juízo, só se lê;
+  - um evento por tipo de movimento. Motivo: 1 evento com o tipo nos dados cobre todos, e o fluxo filtra;
+  - a aba Destino ligar cada fonte a outra categoria (o diário administrativo para a propriedade intelectual, por
+    exemplo). Motivo: nenhum cliente pediu ainda; a aba fica pronta para receber a escolha por fonte no primeiro.
+- **Não deu:**
+  - o prazo do recurso da sentença registrada como andamento. Por quê: o prazo nasce da intimação da sentença, que chega
+    pelo DJEN e entra como intimação;
+  - o `nuxi typecheck`. Por quê: o projeto não tem o `vue-tsc`. O comportamento foi conferido no navegador.
+- **Maquete:** "Abrir a petição inicial" e "Criar fluxo no Spaceflow" mostram só o aviso. "Criar a categoria Processos
+  pelo caso de uso Contencioso" grava a ligação, mas não cria a categoria.
+- **Testado** (Chrome, em português e espanhol):
+  - a citação 929: confirmar, cadastrar o processo (PROC-0332), marco "Da audiência de conciliação" sugerido; a
+    contestação começa em 26/11 e vence em 17/12, com 08/12 (Dia da Justiça) fora da contagem; a audiência de 25/11
+    entra na Agenda;
+  - a citação 930 (TRT-15): defesa até 03/12/2026, 09:30, sem contagem;
+  - a citação 931 (Juizado): cadastrar o processo dá rito do Juizado e defesa até 19/11/2026, 10:00;
+  - o andamento 923: registrar leva a audiência de 18/11 para a Agenda e para a Visão Geral do PROC-0317; a aba
+    Andamentos mostra os 3 movimentos;
+  - o andamento 932 (sentença) dispara "Avisar a controladoria";
+  - ligar Capturas: o polo falta na categoria Processos, e "Ligar Capturas" só libera depois de escolher um campo.
+- **Crítica e acessibilidade** (revisão própria; as skills `design:design-critique` e `design:accessibility-review`
+  não rodaram):
+  - corrigido: o processo cortava em "PROC-" no cabeçalho do painel da citação; o botão "Abrir processo" agora quebra
+    para a linha de baixo;
+  - corrigido: a lista de campos oferecia um campo já ligado a outro campo do submódulo;
+  - corrigido: o modal de confirmação da citação dizia que a resposta conta sempre depois do 5º dia útil.
+- **CSS próprio:** nenhum.
+- **Ver:** prints em `evidencias/`, prefixo `r4-`:
+  - `r4-01-citacao-conta-da-audiencia.jpg`: a citação 929 com a audiência e a resposta contada da conciliação;
+  - `r4-02-audiencia-na-agenda.jpg`: a audiência de 25/11 na Agenda;
+  - `r4-03-processo-proxima-audiencia.jpg`: a próxima audiência na Visão Geral do processo;
+  - `r4-04-aba-andamentos.jpg`: a aba Andamentos;
+  - `r4-05-citacao-trabalhista.jpg`: a defesa até a audiência una do TRT-15;
+  - `r4-06-citacao-juizado.jpg`: a contestação na audiência do Juizado;
+  - `r4-07-ligar-capturas.jpg`: o modal "Ligar o submódulo Capturas";
+  - `r4-08-eventos-spaceflow.jpg`: a aba Eventos;
+  - `r4-09-destino-categoria.jpg`: Destino com a categoria ligada;
+  - `r4-10-es-citacao-trabalhista.jpg`: o painel da citação trabalhista em espanhol.
+
 ## Perguntas para o time de dev
 
 - **P1.** Ligar o módulo instala o caso de uso Contencioso junto, ou são 2 gestos? Nenhuma plataforma no-code liga
@@ -331,3 +427,10 @@ flowchart LR
   da empresa, ou o ENSPACE só registra o que a pessoa fez no site oficial?
 - **P17.** A cobrança da captura de hoje é por termo, por processo ou por fonte? O limite de termos na tela
   ("N de 10 termos do contrato") supõe cobrança por termo.
+- **P18.** A trava dos campos ligados: a plataforma tem como impedir que se apague ou mude o tipo de um campo que um
+  módulo usa, ou a trava é só aviso?
+- **P19.** Os eventos do submódulo entram no Spaceflow como gatilho novo, ao lado de "item criado" e "campo alterado",
+  ou o submódulo grava um item e o fluxo usa o gatilho que já existe?
+- **P20.** A petição inicial: o robô de distribuição já baixa o documento, ou só lê os dados da capa? Em processo com
+  segredo de justiça, o download pede o certificado da empresa.
+- **P21.** A audiência registrada é item da categoria Audiências (caso de uso) ou evento da Agenda sem categoria?

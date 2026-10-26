@@ -179,7 +179,7 @@ const pt = {
 
   /* ---------- Regras e ritos ---------- */
   ritos: { cpc: 'Processo civil', clt: 'Processo do trabalho', jec: 'Juizado Especial Cível', cpp: 'Processo penal', adm: 'Processo administrativo federal' } as Record<Rito, string>,
-  prazoDaRegra: (r: Pick<Regra, 'dias' | 'unidade'>) => `${r.dias} ${r.unidade === 'uteis' ? plural(r.dias, 'dia útil', 'dias úteis') : plural(r.dias, 'dia corrido', 'dias corridos')}`,
+  prazoDaRegra: (r: Pick<Regra, 'dias' | 'unidade'>) => (r.dias === 0 ? 'Na audiência' : `${r.dias} ${r.unidade === 'uteis' ? plural(r.dias, 'dia útil', 'dias úteis') : plural(r.dias, 'dia corrido', 'dias corridos')}`),
   riscos: { provavel: 'Provável', possivel: 'Possível', remota: 'Remota' } as Record<Risco, string>,
 
   /* ---------- Memória do cálculo ---------- */
@@ -193,6 +193,7 @@ const pt = {
       ciencia: 'Ciência',
       confirmacao: 'Citação confirmada no Domicílio',
       quintoDia: '5º dia útil depois da confirmação',
+      audiencia: 'Audiência designada',
       inicio: 'Início da contagem',
       contagem: 'Último dia da contagem',
       prorrogacao: 'Prorrogado para o 1º dia útil',
@@ -522,7 +523,7 @@ const en: Textos = {
   },
 
   ritos: { cpc: 'Civil procedure', clt: 'Labor procedure', jec: 'Small claims court', cpp: 'Criminal procedure', adm: 'Federal administrative procedure' },
-  prazoDaRegra: (r: Pick<Regra, 'dias' | 'unidade'>) => `${r.dias} ${r.unidade === 'uteis' ? plural(r.dias, 'business day', 'business days') : plural(r.dias, 'calendar day', 'calendar days')}`,
+  prazoDaRegra: (r: Pick<Regra, 'dias' | 'unidade'>) => (r.dias === 0 ? 'At the hearing' : `${r.dias} ${r.unidade === 'uteis' ? plural(r.dias, 'business day', 'business days') : plural(r.dias, 'calendar day', 'calendar days')}`),
   riscos: { provavel: 'Probable', possivel: 'Possible', remota: 'Remote' },
 
   memoria: {
@@ -535,6 +536,7 @@ const en: Textos = {
       ciencia: 'Acknowledgment',
       confirmacao: 'Service confirmed on the Domicile',
       quintoDia: '5th business day after confirmation',
+      audiencia: 'Scheduled hearing',
       inicio: 'Count starts',
       contagem: 'Last day of the count',
       prorrogacao: 'Moved to the 1st business day',
@@ -858,7 +860,7 @@ const es: Textos = {
   },
 
   ritos: { cpc: 'Proceso civil', clt: 'Proceso laboral', jec: 'Juzgado Especial Civil', cpp: 'Proceso penal', adm: 'Proceso administrativo federal' },
-  prazoDaRegra: (r: Pick<Regra, 'dias' | 'unidade'>) => `${r.dias} ${r.unidade === 'uteis' ? plural(r.dias, 'día hábil', 'días hábiles') : plural(r.dias, 'día corrido', 'días corridos')}`,
+  prazoDaRegra: (r: Pick<Regra, 'dias' | 'unidade'>) => (r.dias === 0 ? 'En la audiencia' : `${r.dias} ${r.unidade === 'uteis' ? plural(r.dias, 'día hábil', 'días hábiles') : plural(r.dias, 'día corrido', 'días corridos')}`),
   riscos: { provavel: 'Probable', possivel: 'Posible', remota: 'Remota' },
 
   memoria: {
@@ -871,6 +873,7 @@ const es: Textos = {
       ciencia: 'Conocimiento',
       confirmacao: 'Citación confirmada en el Domicilio',
       quintoDia: '5.º día hábil después de la confirmación',
+      audiencia: 'Audiencia designada',
       inicio: 'Inicio del cómputo',
       contagem: 'Último día del cómputo',
       prorrogacao: 'Prorrogado al 1.er día hábil',

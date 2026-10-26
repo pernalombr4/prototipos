@@ -35,6 +35,47 @@
 - **Sucesso:** tudo o que o robô de captura traz hoje, e o que o fornecedor do cliente manda, chega numa caixa só, com
   a fonte, o termo e a prova de chegada; quem trata vê se alguma fonte parou, e o prazo sai calculado pela data certa.
 
+### Rodada 4: o escopo de Capturas fechado
+
+Antes do pedido, 2 perguntas:
+
+> a captura cita processos e citações. o proprio modulo nao deveria ter uma tela entao propria de processos e
+> citações? ou acha que processos de fato deve ser uma categoria, nesse caso, configurada automaticamente quando ativa
+> o modulo? nao tenda a concordar. responda analiticamente. --- depois, responda: após a captura, como sao tratadas as
+> citaçoes? e apos a captura, qual o restante do processo operacional? pra pensar quais seriam os proximos submodulos ou
+> mesmo qual o escopo final do modulo de capturas
+
+> nesse caso, nao faria mais sentido entao fazermos um MÓDULO contencioso? e ja trazer ali todas as funcionalidades que
+> um contencioso precisa? ou capturas serve a outras areas do juridico tambem e deveria seguir separada?
+
+A resposta, em resumo:
+- o processo continua item de categoria, ligada ao ligar o submódulo; a citação é uma visualização da caixa, e o
+  andamento vira aba do processo;
+- o que liga é o módulo Jurídico com submódulos; o que se vende é o pacote Contencioso. A aba Destino fica como a porta
+  para a fonte que alimenta outra categoria.
+
+O pedido:
+
+> sua recomendaçao faz todo sentido --- no mais, pode fechar o escopo do submódulo de capturas e lidar com esses
+> pontos que trouxe tambem de recomendaçao
+
+Os pontos colados com ele:
+- a visualização Citações, ordenada por "Confirmar até";
+- a citação que lê a audiência e escolhe a regra de contagem: art. 335, Juizado Especial ou CLT;
+- a audiência como compromisso que nasce da captura e entra na Agenda, sem cálculo;
+- a ligação com a categoria de processos, feita ao ligar o submódulo;
+- o andamento como aba do processo, no lugar da categoria;
+- os eventos para o Spaceflow: captura tratada, citação confirmada, processo cadastrado e andamento por tipo;
+- opcional: obter a petição inicial junto com a distribuição ou a citação.
+
+(Redatora, 2026-10-26.)
+
+- **Tela ou jornada em jogo:** Jurídico › Capturas (visualização Citações e o painel da citação), a Agenda, a tela do
+  processo (aba Andamentos e a próxima audiência), Sistema › Módulos (ligar Capturas) e a página do módulo (Destino e
+  Eventos).
+- **Sucesso:** a citação sai da caixa com a regra certa de contagem, a audiência na Agenda e o processo cadastrado; o
+  que vem depois (subsídios, escritório, preposto) começa por evento, como configuração.
+
 ## A fonte: a pesquisa de mercado de 2026-10-24
 
 Relatório `pesquisa-de-mercado/runs/2026-10-24-modulo-juridico-brasil-eua/RELATORIO.md` e a nota

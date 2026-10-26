@@ -16,7 +16,7 @@
  * As datas são texto `AAAA-MM-DD`, sem hora e sem fuso: o dia é o do tribunal. O fuso só entra na hora do fim do
  * prazo ("23:59 no horário de Manaus"), que é o defeito de hoje (prazo de tarefa calculado em UTC).
  */
-import type { Regra, Suspensao, Tribunal, TribunalId } from './mocks'
+import type { MarcoDaResposta, Regra, Suspensao, Tribunal, TribunalId } from './mocks'
 import { feriadosNacionais, tribunais } from './mocks'
 
 export type Dia = string
@@ -90,6 +90,11 @@ export interface Entrada {
   dia: Dia
   /** Citação pelo Domicílio: o prazo começa depois do 5º dia útil seguinte à confirmação (CPC, art. 231, IX). */
   citacao?: boolean
+  /** Rodada 4: na citação, de onde conta a resposta. Com audiência, o dia dela entra no cálculo. */
+  marco?: MarcoDaResposta
+  audiencia?: Dia
+  /** A hora da audiência: quando a defesa se entrega nela, o prazo acaba nessa hora, não às 23:59. */
+  hora?: string
   regra: Regra
   tribunal: TribunalId
   suspensoes: Suspensao[]
@@ -97,7 +102,7 @@ export interface Entrada {
   antecedencia: number
 }
 
-export type ChaveDoPasso = 'disponibilizacao' | 'publicacao' | 'ciencia' | 'confirmacao' | 'quintoDia' | 'inicio' | 'contagem' | 'prorrogacao' | 'fatal' | 'interno'
+export type ChaveDoPasso = 'disponibilizacao' | 'publicacao' | 'ciencia' | 'confirmacao' | 'quintoDia' | 'audiencia' | 'inicio' | 'contagem' | 'prorrogacao' | 'fatal' | 'interno'
 
 export interface Passo {
   chave: ChaveDoPasso
@@ -116,6 +121,8 @@ export interface Calculo {
   finsDeSemana: number
   /** O fim do prazo no relógio do tribunal. */
   fuso: string
+  /** Rodada 4: a hora em que o prazo acaba, quando a defesa se entrega na audiência. Sem ela, 23:59. */
+  hora?: string
   /** Assinatura do cálculo: muda quando qualquer entrada muda. Serve para o histórico de recálculo. */
   assinatura: string
 }
@@ -126,12 +133,35 @@ export function calcular(e: Entrada): Calculo {
   const pulados: DiaSemExpediente[] = []
   const passos: Passo[] = []
 
+  // Rodada 4: no Juizado e na Justiça do Trabalho, a defesa se entrega na audiência. Não há contagem.
+  if (e.citacao && (e.marco === 'juizado' || e.marco === 'trabalho') && e.audiencia) {
+    passos.push({ chave: 'confirmacao', dia: e.dia, fundamento: 'CPC, art. 246, § 1º-A' })
+    passos.push({ chave: 'audiencia', dia: e.audiencia, fundamento: e.marco === 'trabalho' ? 'CLT, art. 847' : 'Lei 9.099/1995, art. 30' })
+    passos.push({ chave: 'fatal', dia: e.audiencia, fundamento: '' })
+    let interno = e.audiencia
+    for (let i = 0; i < e.antecedencia;) {
+      interno = somarDias(interno, -1)
+      if (!semExpediente(interno, tribunal, e.suspensoes, comRecesso)) i++
+    }
+    if (interno < e.dia) interno = e.dia
+    passos.push({ chave: 'interno', dia: interno, fundamento: '' })
+    return { passos, inicio: e.dia, fatal: e.audiencia, interno, pulados: [], finsDeSemana: 0, fuso: tribunal.fuso, hora: e.hora, assinatura: `${e.audiencia}|${interno}` }
+  }
+
   let inicio: Dia
+  let fundamentoDoInicio = 'CPC, art. 224, § 3º'
   if (e.meio === 'djen') {
     passos.push({ chave: 'disponibilizacao', dia: e.dia, fundamento: 'Res. CNJ 455/2022, art. 11' })
     const publicacao = proximoUtil(e.dia, tribunal, e.suspensoes, comRecesso, [])
     passos.push({ chave: 'publicacao', dia: publicacao, fundamento: 'Lei 11.419/2006, art. 4º, § 3º' })
     inicio = proximoUtil(publicacao, tribunal, e.suspensoes, comRecesso, [])
+  }
+  else if (e.citacao && e.marco === 'conciliacao' && e.audiencia) {
+    // Rodada 4: com audiência de conciliação, a contestação conta da audiência, não da citação (CPC, art. 335, I).
+    passos.push({ chave: 'confirmacao', dia: e.dia, fundamento: 'CPC, art. 246, § 1º-A' })
+    passos.push({ chave: 'audiencia', dia: e.audiencia, fundamento: 'CPC, art. 334' })
+    inicio = proximoUtil(e.audiencia, tribunal, e.suspensoes, comRecesso, [])
+    fundamentoDoInicio = 'CPC, art. 335, I'
   }
   else if (e.citacao) {
     // O 5º dia útil depois da confirmação é o dia do começo e fica fora da contagem (Consulta CNJ 0008391-94.2025).
@@ -145,7 +175,7 @@ export function calcular(e: Entrada): Calculo {
     passos.push({ chave: 'ciencia', dia: e.dia, fundamento: e.meio === 'portal' ? 'Lei 11.419/2006, art. 5º' : 'Res. CNJ 455/2022, art. 20' })
     inicio = proximoUtil(e.dia, tribunal, e.suspensoes, comRecesso, [])
   }
-  passos.push({ chave: 'inicio', dia: inicio, fundamento: 'CPC, art. 224, § 3º' })
+  passos.push({ chave: 'inicio', dia: inicio, fundamento: fundamentoDoInicio })
 
   let fatal = inicio
   let finsDeSemana = 0

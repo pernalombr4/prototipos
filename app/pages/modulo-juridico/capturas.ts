@@ -143,12 +143,14 @@ const novas: Intimacao[] = [
     teor: 'Ação de indenização por danos materiais e morais. Distribuída por sorteio. Ainda sem citação.',
     status: 'revisar', recebidaEm: new Date(2026, 9, 26, 7, 4), fonte: 'distribuicao', termo: 1, idNaFonte: 'DIST-TJSP-88213',
     distribuicao: { classe: 'Procedimento Comum Cível', assunto: 'Indenização por dano moral', autor: 'Rogério Lima Prado', reu: 'Grupo Aurora Participações S.A.', valor: 42_000, distribuidaEm: '2026-10-23' },
+    inicial: { paginas: 18, sistema: 'e-SAJ', obtidaEm: new Date(2026, 9, 26, 7, 5) },
   },
   {
     id: 921, meio: 'distribuidor', tipo: 'distribuicao', tribunal: 'trt2', orgao: '31ª Vara do Trabalho de São Paulo', numeroCnj: '1001876-22.2026.5.02.0031', dia: '2026-10-26',
     teor: 'Reclamação trabalhista. Pedidos de horas extras, adicional noturno e reflexos. Ainda sem notificação.',
     status: 'revisar', recebidaEm: new Date(2026, 9, 26, 7, 5), fonte: 'distribuicao', termo: 2, idNaFonte: 'DIST-TRT2-40177',
     distribuicao: { classe: 'Ação Trabalhista, Rito Ordinário', assunto: 'Horas extras', autor: 'Patrícia Gomes Lacerda', reu: 'Aurora Logística Ltda.', valor: 128_000, distribuidaEm: '2026-10-22' },
+    inicial: { paginas: 32, sistema: 'PJe', obtidaEm: new Date(2026, 9, 26, 7, 6) },
   },
   {
     id: 922, meio: 'distribuidor', tipo: 'distribuicao', tribunal: 'tjmg', orgao: '3ª Vara Cível de Uberlândia', numeroCnj: '5031122-07.2026.8.13.0702', dia: '2026-10-26',
@@ -157,13 +159,41 @@ const novas: Intimacao[] = [
     distribuicao: { classe: 'Execução de Título Extrajudicial', assunto: 'Duplicata', autor: 'Banco Cerrado S.A.', reu: 'Grupo Aurora Transportes Ltda.', valor: 18_500, distribuidaEm: '2026-10-21' },
   },
   // Andamentos: lidos no processo pelo número CNJ
-  { id: 923, meio: 'consulta', tipo: 'andamento', tribunal: 'tjrj', orgao: '7ª Vara Cível da Capital', numeroCnj: '0801233-56.2025.8.19.0001', dia: '2026-10-23', teor: 'Audiência de conciliação designada para 18/11/2026, às 14:00, na sala 4.', status: 'revisar', recebidaEm: new Date(2026, 9, 26, 6, 31), fonte: 'andamentos', idNaFonte: 'MOV-0801233-118' },
-  { id: 924, meio: 'consulta', tipo: 'andamento', tribunal: 'trt2', orgao: '12ª Vara do Trabalho de São Paulo', numeroCnj: '0007654-31.2025.5.02.0012', dia: '2026-10-23', teor: 'Juntada de laudo pericial complementar.', status: 'revisar', recebidaEm: new Date(2026, 9, 26, 6, 32), fonte: 'andamentos', idNaFonte: 'MOV-0007654-77' },
-  { id: 925, meio: 'consulta', tipo: 'andamento', tribunal: 'tjsp', orgao: '3ª Vara Empresarial', numeroCnj: '1104587-33.2024.8.26.0100', dia: '2026-10-22', teor: 'Conclusos para decisão.', status: 'confirmada', tratadaPor: 'automatico', recebidaEm: new Date(2026, 9, 23, 6, 30), fonte: 'andamentos', idNaFonte: 'MOV-1104587-302' },
-  { id: 926, meio: 'consulta', tipo: 'andamento', tribunal: 'tjrj', orgao: '15ª Vara Cível da Capital', numeroCnj: '0819877-23.2024.8.19.0001', dia: '2026-10-21', teor: 'Remetidos os autos ao Tribunal de Justiça para julgamento da apelação.', status: 'confirmada', tratadaPor: 'automatico', recebidaEm: new Date(2026, 9, 22, 6, 30), fonte: 'andamentos', idNaFonte: 'MOV-0819877-95' },
+  { id: 923, meio: 'consulta', tipo: 'andamento', tribunal: 'tjrj', orgao: '7ª Vara Cível da Capital', numeroCnj: '0801233-56.2025.8.19.0001', dia: '2026-10-23', teor: 'Audiência de conciliação designada para 18/11/2026, às 14:00, na sala 4.', status: 'revisar', recebidaEm: new Date(2026, 9, 26, 6, 31), fonte: 'andamentos', idNaFonte: 'MOV-0801233-118', movimento: 'audiencia', audiencia: { tipo: 'conciliacao', dia: '2026-11-18', hora: '14:00', local: 'Sala 4' } },
+  { id: 924, meio: 'consulta', tipo: 'andamento', tribunal: 'trt2', orgao: '12ª Vara do Trabalho de São Paulo', numeroCnj: '0007654-31.2025.5.02.0012', dia: '2026-10-23', teor: 'Juntada de laudo pericial complementar.', status: 'revisar', recebidaEm: new Date(2026, 9, 26, 6, 32), fonte: 'andamentos', idNaFonte: 'MOV-0007654-77', movimento: 'juntada' },
+  { id: 925, meio: 'consulta', tipo: 'andamento', tribunal: 'tjsp', orgao: '3ª Vara Empresarial', numeroCnj: '1104587-33.2024.8.26.0100', dia: '2026-10-22', teor: 'Conclusos para decisão.', status: 'confirmada', tratadaPor: 'automatico', recebidaEm: new Date(2026, 9, 23, 6, 30), fonte: 'andamentos', idNaFonte: 'MOV-1104587-302', movimento: 'conclusao' },
+  { id: 926, meio: 'consulta', tipo: 'andamento', tribunal: 'tjrj', orgao: '15ª Vara Cível da Capital', numeroCnj: '0819877-23.2024.8.19.0001', dia: '2026-10-21', teor: 'Remetidos os autos ao Tribunal de Justiça para julgamento da apelação.', status: 'confirmada', tratadaPor: 'automatico', recebidaEm: new Date(2026, 9, 22, 6, 30), fonte: 'andamentos', idNaFonte: 'MOV-0819877-95', movimento: 'remessa' },
+  // Rodada 4: andamentos antigos do mesmo processo, registrados pela entrada direta. Formam a linha do tempo da aba Andamentos.
+  { id: 933, meio: 'consulta', tipo: 'andamento', tribunal: 'tjrj', orgao: '7ª Vara Cível da Capital', numeroCnj: '0801233-56.2025.8.19.0001', dia: '2026-09-29', teor: 'Juntada de réplica pela parte autora.', status: 'confirmada', tratadaPor: 'automatico', recebidaEm: new Date(2026, 8, 30, 6, 30), fonte: 'andamentos', idNaFonte: 'MOV-0801233-104', movimento: 'juntada' },
+  { id: 934, meio: 'consulta', tipo: 'andamento', tribunal: 'tjrj', orgao: '7ª Vara Cível da Capital', numeroCnj: '0801233-56.2025.8.19.0001', dia: '2026-10-08', teor: 'Conclusos para despacho.', status: 'confirmada', tratadaPor: 'automatico', recebidaEm: new Date(2026, 9, 9, 6, 30), fonte: 'andamentos', idNaFonte: 'MOV-0801233-111', movimento: 'conclusao' },
+  // Rodada 4: a sentença também chega como andamento. O tipo do movimento dispara o fluxo da controladoria.
+  { id: 932, meio: 'consulta', tipo: 'andamento', tribunal: 'trt2', orgao: '45ª Vara do Trabalho de São Paulo', numeroCnj: '0008812-45.2025.5.02.0045', dia: '2026-10-23', teor: 'Sentença de parcial procedência publicada.', status: 'revisar', recebidaEm: new Date(2026, 9, 26, 6, 33), fonte: 'andamentos', idNaFonte: 'MOV-0008812-61', movimento: 'sentenca' },
   // Intimação no portal do tribunal, ainda sem ciência
   { id: 927, meio: 'portal', tipo: 'intimacao', tribunal: 'trt15', orgao: '2ª Vara do Trabalho de Ribeirão Preto', numeroCnj: '0012003-19.2024.5.15.0093', dia: '2026-10-20', teor: 'Intimação da executada para ciência da decisão dos embargos à execução e manifestação.', regraSugerida: 'clt-manifestacao', status: 'revisar', recebidaEm: new Date(2026, 9, 20, 19, 3), fonte: 'portais', termo: 5, idNaFonte: 'PJE-TRT15-552190' },
   // Só o fornecedor externo trouxe: a redundância cobriu a fonte oficial
+  // Rodada 4: citações com audiência. O marco da resposta muda com o rito (CPC, art. 335; Lei 9.099/1995; CLT).
+  {
+    id: 929, meio: 'domicilio', tipo: 'citacao', tribunal: 'tjsp', orgao: '5ª Vara Cível de Santo André', numeroCnj: '1009934-51.2026.8.26.0554', dia: '2026-10-26',
+    teor: 'Cite-se a requerida para comparecer à audiência de conciliação de 25/11/2026, às 14:00, no CEJUSC de Santo André. Não havendo acordo, o prazo para contestar conta da audiência (CPC, art. 335, I).',
+    regraSugerida: 'cpc-contestacao', marcoSugerido: 'conciliacao', status: 'revisar', recebidaEm: new Date(2026, 9, 26, 6, 4), fonte: 'domicilio', termo: 1, idNaFonte: 'DJE-929-2026',
+    audiencia: { tipo: 'conciliacao', dia: '2026-11-25', hora: '14:00', local: 'CEJUSC de Santo André' },
+    distribuicao: { classe: 'Procedimento Comum Cível', assunto: 'Indenização por dano moral', autor: 'Rogério Lima Prado', reu: 'Grupo Aurora Participações S.A.', valor: 42_000, distribuidaEm: '2026-10-23' },
+    inicial: { paginas: 18, sistema: 'e-SAJ', obtidaEm: new Date(2026, 9, 26, 7, 5) },
+  },
+  {
+    id: 930, meio: 'domicilio', tipo: 'citacao', tribunal: 'trt15', orgao: '1ª Vara do Trabalho de Jundiaí', numeroCnj: '0001278-15.2025.5.15.0001', dia: '2026-10-22', ciencia: '2026-10-23',
+    teor: 'Notifique-se a reclamada para comparecer à audiência una de 03/12/2026, às 09:30, quando deverá apresentar defesa, sob pena de revelia e confissão quanto à matéria de fato (CLT, art. 844).',
+    regraSugerida: 'clt-defesa', marcoSugerido: 'trabalho', status: 'revisar', recebidaEm: new Date(2026, 9, 22, 6, 3), fonte: 'domicilio', termo: 2, idNaFonte: 'DJE-930-2026',
+    audiencia: { tipo: 'una', dia: '2026-12-03', hora: '09:30', local: 'Sala 2' },
+  },
+  {
+    id: 931, meio: 'domicilio', tipo: 'citacao', tribunal: 'tjsp', orgao: '2º Juizado Especial Cível', numeroCnj: '1004410-77.2026.8.26.0016', dia: '2026-10-23',
+    teor: 'Cite-se a ré para a audiência una de conciliação, instrução e julgamento de 19/11/2026, às 10:00, quando deverá apresentar contestação (Lei 9.099/1995, art. 30).',
+    regraSugerida: 'jec-contestacao', marcoSugerido: 'juizado', status: 'revisar', recebidaEm: new Date(2026, 9, 23, 6, 5), fonte: 'domicilio', termo: 1, idNaFonte: 'DJE-931-2026',
+    audiencia: { tipo: 'una', dia: '2026-11-19', hora: '10:00' },
+    distribuicao: { classe: 'Procedimento do Juizado Especial Cível', assunto: 'Cobrança indevida', autor: 'Sérgio Almeida Costa', reu: 'Grupo Aurora Participações S.A.', valor: 12_400, distribuidaEm: '2026-10-15' },
+    inicial: { paginas: 6, sistema: 'e-SAJ', obtidaEm: new Date(2026, 9, 23, 7, 2) },
+  },
   { id: 928, meio: 'djen', tipo: 'intimacao', tribunal: 'tjsp', orgao: '3ª Vara Cível de Guarulhos', numeroCnj: '1018834-45.2025.8.26.0224', dia: '2026-10-23', teor: 'Manifeste-se a requerida sobre a réplica no prazo legal.', regraSugerida: 'cpc-manifestacao', status: 'revisar', recebidaEm: new Date(2026, 9, 23, 8, 41), fonte: 'externo', termo: 3, idNaFonte: 'EXT-77120', hash: h(928) },
 ]
 

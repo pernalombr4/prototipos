@@ -11,18 +11,30 @@
  * - andamento vai para a categoria Andamentos, um por um ou em lote;
  * - o botão de saúde na barra mostra as fontes sem sair da caixa.
  *
+ * Rodada 4 (o que vem depois da captura):
+ * - a visualização Citações, ordenada pelo que vence primeiro ("Confirmar até", depois a resposta);
+ * - a citação escolhe de onde conta a resposta: da citação, da audiência de conciliação, na audiência do Juizado ou
+ *   até a audiência trabalhista (CPC, art. 335; Lei 9.099/1995, art. 30; CLT, art. 847);
+ * - a audiência lida no teor vai para a Agenda, sem cálculo;
+ * - o andamento vai para a linha do tempo do processo, não para uma categoria;
+ * - a citação de ação nova cadastra o processo, e a petição inicial vem junto;
+ * - cada captura mostra os eventos que entregou ao Spaceflow e os fluxos que eles dispararam.
+ *
  * A tela é a lista de registros do ENSPACE: a mesma barra, o `EnTable` com seleção e o painel à direita.
  * Fontes de mercado: `pesquisa/reports/Captura em softwares jurídicos.md`, seção "O que o submódulo Capturas precisa ter".
  */
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
-import type { Intimacao, RegraId } from './mocks'
+import type { AudienciaNoTeor, Intimacao, MarcoDaResposta, RegraId } from './mocks'
 import { HOJE, pessoaPorId, pessoas, processos, regraPorId, regras, tribunais } from './mocks'
 import { calcular, cienciaTacita, diferencaEmDias, limiteDaCitacao } from './prazos'
+import type { Resposta } from './estado'
 import {
-  cadastrarProcesso, calcularPrazo, confirmar, descartar, entradaDa, estado, processoDaCaptura, registrarCiencia,
-  responsavelDa, tratar, vincular, voltarParaRevisao,
+  audienciaDaCaptura, cadastrarProcesso, calcularPrazo, confirmar, descartar, entradaDa, estado, processoDaCaptura,
+  registrarAudiencia, registrarCiencia, responsavelDa, tratar, vincular, voltarParaRevisao,
 } from './estado'
+import { fluxoPorId } from './tratamento'
+import { textosTratamento } from './textos-tratamento'
 import { fontePorId, fontes, saudeAtual } from './capturas'
 import type { Textos } from './textos'
 import { textosCapturas } from './textos-capturas'
@@ -34,12 +46,13 @@ const props = defineProps<{
   t: Textos
   cenario: 'normal' | 'vazio' | 'erroCaptura' | 'carregando'
 }>()
-const emit = defineEmits<{ abrirProcesso: [number], irPrazos: [], irFontes: [], irTermos: [] }>()
+const emit = defineEmits<{ abrirProcesso: [number], irPrazos: [], irFontes: [], irTermos: [], irAgenda: [] }>()
 const tc = useTextos(textosCapturas)
+const tt = useTextos(textosTratamento)
 const toast = useToast()
 const idioma = useIdioma()
 
-type Vista = 'tratar' | 'distribuicoes' | 'andamentos' | 'tratadas' | 'descartadas'
+type Vista = 'tratar' | 'citacoes' | 'distribuicoes' | 'andamentos' | 'tratadas' | 'descartadas'
 const vista = ref<Vista>('tratar')
 const busca = ref('')
 
@@ -48,6 +61,7 @@ const naVista = (i: Intimacao, v: Vista) => {
   if (v === 'tratadas') return i.status === 'confirmada'
   if (v === 'descartadas') return i.status === 'descartada'
   if (i.status !== 'revisar') return false
+  if (v === 'citacoes') return i.tipo === 'citacao'
   if (v === 'distribuicoes') return i.tipo === 'distribuicao'
   if (v === 'andamentos') return i.tipo === 'andamento'
   return true
@@ -62,14 +76,16 @@ const lista = computed(() => {
       const p = processoDaCaptura(i)
       return [i.numeroCnj, i.orgao, i.teor, p?.data.parteContraria, p?.reference, i.distribuicao?.autor].some(x => x?.toLowerCase().includes(q))
     })
-    .sort((a, b) => (b.recebidaEm?.getTime() ?? 0) - (a.recebidaEm?.getTime() ?? 0))
+    .sort((a, b) => (vista.value === 'citacoes'
+      ? (urgencia(a) < urgencia(b) ? -1 : 1)
+      : (b.recebidaEm?.getTime() ?? 0) - (a.recebidaEm?.getTime() ?? 0)))
 })
 
-const vistas = computed(() => (['tratar', 'distribuicoes', 'andamentos', 'tratadas', 'descartadas'] as Vista[]).map(v => ({
+const vistas = computed(() => (['tratar', 'citacoes', 'distribuicoes', 'andamentos', 'tratadas', 'descartadas'] as Vista[]).map(v => ({
   chave: v,
-  rotulo: tc.value.caixa.vistas[v],
+  rotulo: v === 'citacoes' ? tt.value.caixa.vistaCitacoes : tc.value.caixa.vistas[v],
   icone: 'i-lucide-table',
-  contagem: ['tratar', 'distribuicoes', 'andamentos'].includes(v) ? visiveis.value.filter(i => naVista(i, v)).length : undefined,
+  contagem: ['tratar', 'citacoes', 'distribuicoes', 'andamentos'].includes(v) ? visiveis.value.filter(i => naVista(i, v)).length : undefined,
 })))
 const vistaAtiva = computed({ get: () => vista.value as string, set: (v: string) => { vista.value = v as Vista; selecionadas.value = [] } })
 
@@ -94,14 +110,22 @@ const corDaSaude = { ok: 'success', atencao: 'warning', falha: 'error' } as cons
 const termoDa = (i: Intimacao) => estado.termos.find(x => x.id === i.termo)
 const corDoTipo = { intimacao: 'primary', citacao: 'warning', distribuicao: 'info', andamento: 'neutral' } as const
 
+/** Rodada 4: na citação, a resposta sugerida pelo rito e pelo teor (marco e audiência). */
+const respostaSugerida = (i: Intimacao): Resposta | undefined => (i.tipo === 'citacao' && i.marcoSugerido
+  ? { marco: i.marcoSugerido, audiencia: i.audiencia?.dia, hora: i.audiencia?.hora }
+  : undefined)
+
 /** O prazo fatal pela regra sugerida, para a coluna. Sem ciência, ainda não há prazo. */
 function fatalDaLinha(i: Intimacao) {
   const p = processoDaCaptura(i)
   const regra = i.regraSugerida ? regraPorId.get(i.regraSugerida) : undefined
   const e = entradaDa(i)
   if (!p || !regra || !e) return undefined
-  return calcular({ ...e, regra, tribunal: p.data.tribunal, suspensoes: estado.suspensoes, antecedencia: estado.antecedencia }).fatal
+  return calcular({ ...e, ...respostaSugerida(i), regra, tribunal: p.data.tribunal, suspensoes: estado.suspensoes, antecedencia: estado.antecedencia }).fatal
 }
+/** A ordem da visualização Citações: o que vence primeiro, a confirmação ou a resposta. */
+const urgencia = (i: Intimacao) => (i.tipo === 'citacao' && !i.ciencia && i.meio === 'domicilio' ? limiteDaCitacao(i.dia, i.tribunal) : fatalDaLinha(i) ?? '9999')
+const defesaNaAudiencia = (i: Intimacao) => i.tipo === 'citacao' && (i.marcoSugerido === 'juizado' || i.marcoSugerido === 'trabalho') && !!i.audiencia
 const fatalConfirmado = (i: Intimacao) => {
   const p = estado.prazos.find(x => x.intimacao === i.id)
   return p ? calcularPrazo(p).fatal : undefined
@@ -119,7 +143,8 @@ function menuDaLinha(i: Intimacao): DropdownMenuItem[][] {
 
 /* ---------- seleção e ações em lote ---------- */
 const selecionadas = ref<Intimacao[]>([])
-const soAndamentos = computed(() => selecionadas.value.length > 0 && selecionadas.value.every(i => i.tipo === 'andamento' && i.status === 'revisar' && processoDaCaptura(i)))
+// Rodada 4: andamento com audiência pede conferência da data, um por um.
+const soAndamentos = computed(() => selecionadas.value.length > 0 && selecionadas.value.every(i => i.tipo === 'andamento' && i.status === 'revisar' && !i.audiencia && processoDaCaptura(i)))
 const itensAtribuir = computed<DropdownMenuItem[][]>(() => [pessoas.map(p => ({
   label: p.nome,
   avatar: { text: p.iniciais },
@@ -133,7 +158,7 @@ function registrarEmLote() {
   const n = selecionadas.value.length
   for (const i of selecionadas.value) tratar(i)
   selecionadas.value = []
-  toast.add({ title: tc.value.caixa.lote.registrados(n), icon: 'i-lucide-list-checks', color: 'success' })
+  toast.add({ title: tt.value.andamento.registrados(n), icon: 'i-lucide-list-checks', color: 'success' })
 }
 
 /* ---------- a captura aberta ---------- */
@@ -146,13 +171,41 @@ const ehPrazo = computed(() => sel.value?.tipo === 'intimacao' || sel.value?.tip
 
 const regraEscolhida = ref<RegraId | undefined>()
 const responsavel = ref<number>(12)
+/* Rodada 4: a resposta à citação e a audiência lida no teor */
+const ehCitacao = computed(() => sel.value?.tipo === 'citacao')
+const marco = ref<MarcoDaResposta>('citacao')
+const diaDaAudiencia = ref('')
+const horaDaAudiencia = ref('')
+const levarAudiencia = ref(true)
+const regraDoMarco: Record<MarcoDaResposta, RegraId> = { citacao: 'cpc-contestacao', conciliacao: 'cpc-contestacao', juizado: 'jec-contestacao', trabalho: 'clt-defesa' }
 watch(sel, (i) => {
   regraEscolhida.value = i?.regraSugerida
   responsavel.value = i ? responsavelDa(i) : 12
+  // Citação já confirmada: o painel mostra a resposta como ela foi gravada no prazo.
+  const gravada = i ? estado.prazos.find(x => x.intimacao === i.id)?.entrada : undefined
+  marco.value = gravada?.marco ?? i?.marcoSugerido ?? 'citacao'
+  diaDaAudiencia.value = gravada?.audiencia ?? i?.audiencia?.dia ?? ''
+  horaDaAudiencia.value = gravada?.hora ?? i?.audiencia?.hora ?? ''
+  levarAudiencia.value = true
 }, { immediate: true })
+watch(marco, (m) => { if (ehCitacao.value) regraEscolhida.value = regraDoMarco[m] })
+const precisaAudiencia = computed(() => marco.value !== 'citacao')
+const itensDeMarco = computed(() => (['citacao', 'conciliacao', 'juizado', 'trabalho'] as MarcoDaResposta[]).map(m => ({ value: m, label: tt.value.resposta.marcos[m] })))
+/** A resposta que entra no cálculo: o marco e, quando ele depende da audiência, o dia e a hora conferidos. */
+const resposta = computed<Resposta | undefined>(() => (ehCitacao.value
+  ? { marco: marco.value, audiencia: precisaAudiencia.value ? diaDaAudiencia.value || undefined : undefined, hora: horaDaAudiencia.value || undefined }
+  : undefined))
+/** A audiência como ela vai para a Agenda, com a data e a hora conferidas na tela. */
+const audienciaConferida = computed<AudienciaNoTeor | undefined>(() => (sel.value?.audiencia && diaDaAudiencia.value
+  ? { ...sel.value.audiencia, dia: diaDaAudiencia.value, hora: horaDaAudiencia.value || sel.value.audiencia.hora }
+  : undefined))
+const audienciaRegistrada = computed(() => (sel.value ? audienciaDaCaptura(sel.value) : undefined))
+const disparosDaSel = computed(() => estado.disparos.filter(d => d.captura === sel.value?.id))
+const nomesDosFluxos = (ids: number[]) => ids.map(id => fluxoPorId.get(id)?.nome).join(', ')
 
+// A defesa na audiência (rodada 4) só vale para a citação, que escolhe o marco.
 const regrasDoRito = computed(() => regras
-  .filter(r => !processo.value || r.rito === processo.value.data.rito)
+  .filter(r => r.dias > 0 && (!processo.value || r.rito === processo.value.data.rito))
   .map(r => ({ label: `${r.ato} (${props.t.prazoDaRegra(r)})`, value: r.id })))
 const itensResponsavel = computed(() => pessoas.map(p => ({ label: p.nome, value: p.id, avatar: { text: p.iniciais } })))
 const itensProcesso = computed(() => processos.map(p => ({ label: `${p.reference} · ${p.titulo}`, value: p.id })))
@@ -163,7 +216,8 @@ const calculo = computed(() => {
   const regra = regraEscolhida.value ? regraPorId.get(regraEscolhida.value) : undefined
   const e = i ? entradaDa(i) : undefined
   if (!i || !p || !regra || !e) return undefined
-  return calcular({ ...e, regra, tribunal: p.data.tribunal, suspensoes: estado.suspensoes, antecedencia: estado.antecedencia })
+  if (ehCitacao.value && precisaAudiencia.value && !diaDaAudiencia.value) return undefined
+  return calcular({ ...e, ...resposta.value, regra, tribunal: p.data.tribunal, suspensoes: estado.suspensoes, antecedencia: estado.antecedencia })
 })
 
 /** A mesma intimação por 2 meios: o prazo por cada data, para comparar. */
@@ -182,7 +236,6 @@ const doisMeios = computed(() => {
 
 const pronta = computed(() => sel.value?.status === 'revisar' && ehPrazo.value && !!processo.value && !semCiencia(sel.value!))
 const prazoConfirmado = computed(() => estado.prazos.find(p => p.intimacao === sel.value?.id))
-const citaData = computed(() => sel.value?.tipo === 'andamento' && /\d{2}\/\d{2}\/\d{4}/.test(sel.value.teor))
 const quemTratou = (i: Intimacao) => (typeof i.tratadaPor === 'number' ? pessoaPorId.get(i.tratadaPor)?.nome ?? '' : '')
 
 /* ---------- ações ---------- */
@@ -193,13 +246,24 @@ async function confirmarPrazo() {
   confirmando.value = true
   await new Promise(r => setTimeout(r, 650))
   const interno = calculo.value.interno
-  confirmar(i, regraEscolhida.value, responsavel.value)
+  const aud = levarAudiencia.value ? audienciaConferida.value : undefined
+  confirmar(i, regraEscolhida.value, responsavel.value, resposta.value, aud)
   confirmando.value = false
   toast.add({
     title: props.t.intimacoes.confirmadoToast(processo.value?.reference ?? ''),
     description: props.t.intimacoes.confirmadoDesc(pessoaPorId.get(responsavel.value)?.nome ?? '', dia(interno, props.t.locale)),
     icon: 'i-lucide-circle-check',
     color: 'success',
+  })
+  if (aud) avisarAudiencia(aud)
+}
+
+function avisarAudiencia(a: AudienciaNoTeor) {
+  toast.add({
+    title: tt.value.audiencia.toast(dia(a.dia, props.t.locale), a.hora),
+    icon: 'i-lucide-calendar-clock',
+    color: 'success',
+    actions: [{ label: tt.value.audiencia.verAgenda, color: 'neutral', variant: 'outline', onClick: () => emit('irAgenda') }],
   })
 }
 
@@ -238,7 +302,7 @@ async function cadastrar() {
   const d = tc.value.caixa.painel.distribuicao
   toast.add({
     title: d.cadastradoToast(p.reference),
-    description: d.cadastradoDesc(pessoaPorId.get(p.data.responsavel)?.nome ?? ''),
+    description: i.tipo === 'citacao' ? undefined : d.cadastradoDesc(pessoaPorId.get(p.data.responsavel)?.nome ?? ''),
     icon: 'i-lucide-file-plus-2',
     color: 'success',
     actions: [{ label: d.abrirProcesso, color: 'neutral', variant: 'outline', onClick: () => emit('abrirProcesso', p.id) }],
@@ -269,9 +333,20 @@ function naoEDaEmpresa() {
 }
 
 function registrarAndamento() {
-  if (!sel.value) return
+  const i = sel.value
+  if (!i) return
+  const aud = levarAudiencia.value ? audienciaConferida.value : undefined
+  tratar(i)
+  if (aud) registrarAudiencia(i, aud)
+  toast.add({ title: tt.value.andamento.registrado(processo.value?.reference ?? ''), icon: 'i-lucide-list-checks', color: 'success' })
+  if (aud) avisarAudiencia(aud)
+}
+
+/** A distribuição de uma ação que a citação já cadastrou: só registra no processo. */
+function registrarDistribuicao() {
+  if (!sel.value || !processo.value) return
   tratar(sel.value)
-  toast.add({ title: tc.value.caixa.painel.andamento.registradoToast, icon: 'i-lucide-list-checks', color: 'success' })
+  toast.add({ title: tt.value.distribuicao.registrada(processo.value.reference), icon: 'i-lucide-check', color: 'success' })
 }
 
 /* Descartar: uma captura (painel) ou várias (lote) */
@@ -345,7 +420,7 @@ function maquete() {
         <UDropdownMenu :items="itensAtribuir" :content="{ align: 'start' }">
           <UButton :label="tc.caixa.lote.atribuir" icon="i-lucide-user-plus" trailing-icon="i-lucide-chevron-down" size="xs" color="neutral" variant="outline" />
         </UDropdownMenu>
-        <UTooltip :text="tc.caixa.lote.tratarAjuda" :disabled="soAndamentos">
+        <UTooltip :text="tt.caixa.loteAjuda" :disabled="soAndamentos">
           <UButton :label="tc.caixa.lote.tratar" icon="i-lucide-list-checks" size="xs" color="neutral" variant="outline" :disabled="!soAndamentos" @click="registrarEmLote" />
         </UTooltip>
         <UButton :label="tc.caixa.lote.descartar" icon="i-lucide-archive" size="xs" color="neutral" variant="outline" @click="modalDescarte = 'lote'" />
@@ -438,9 +513,10 @@ function maquete() {
             />
             <span v-else-if="(row as Intimacao).tipo === 'distribuicao'" class="text-sm text-toned">{{ tc.caixa.situacao.semCitacao }}</span>
             <span v-else-if="(row as Intimacao).tipo === 'andamento'" class="text-sm text-toned">{{ tc.caixa.situacao.paraRegistrar }}</span>
+            <span v-else-if="(row as Intimacao).tipo === 'citacao' && !processoDaCaptura(row as Intimacao)" class="text-sm text-warning">{{ tt.caixa.situacao.cadastrarProcesso }}</span>
             <span v-else-if="fatalDaLinha(row as Intimacao)" class="flex flex-col">
-              <span class="text-sm font-medium tabular-nums text-highlighted">{{ dia(fatalDaLinha(row as Intimacao)!, t.locale) }}</span>
-              <span class="text-xs text-muted">{{ regraPorId.get((row as Intimacao).regraSugerida!)?.ato }}</span>
+              <span class="text-sm font-medium tabular-nums text-highlighted">{{ dia(fatalDaLinha(row as Intimacao)!, t.locale) }}<template v-if="defesaNaAudiencia(row as Intimacao)">, {{ (row as Intimacao).audiencia!.hora }}</template></span>
+              <span class="text-xs text-muted">{{ (row as Intimacao).tipo === 'citacao' && (row as Intimacao).marcoSugerido ? tt.resposta.marcos[(row as Intimacao).marcoSugerido!] : regraPorId.get((row as Intimacao).regraSugerida!)?.ato }}</span>
             </span>
             <UBadge v-else-if="processoDaCaptura(row as Intimacao)" :label="tc.caixa.situacao.semRegra" icon="i-lucide-circle-help" color="warning" variant="outline" size="sm" />
             <span v-else class="text-sm text-toned">{{ t.intimacoes.semProcessoBloco.vincular }}</span>
@@ -491,8 +567,8 @@ function maquete() {
             </div>
             <div :class="!(sel.meio === 'domicilio' || sel.meio === 'portal') && 'sm:col-span-2'">
               <dt class="text-xs text-muted">{{ t.intimacoes.processo }}</dt>
-              <dd v-if="processo" class="flex items-center gap-2">
-                <span class="truncate text-highlighted">{{ processo.reference }} · {{ processo.titulo }}</span>
+              <dd v-if="processo" class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span class="max-w-full truncate text-highlighted" :title="processo.titulo">{{ processo.reference }} · {{ processo.titulo }}</span>
                 <UButton :label="t.intimacoes.abrirProcesso" icon="i-lucide-arrow-up-right" size="xs" color="neutral" variant="outline" class="shrink-0" @click="emit('abrirProcesso', processo.id)" />
               </dd>
               <dd v-else class="text-warning">{{ tc.caixa.semProcesso }}</dd>
@@ -536,8 +612,9 @@ function maquete() {
           </div>
 
           <!-- Distribuição: os dados da ação nova -->
-          <template v-if="sel.tipo === 'distribuicao' && sel.distribuicao">
-            <UAlert v-if="sel.status === 'revisar'" :title="tc.caixa.painel.distribuicao.titulo" :description="tc.caixa.painel.distribuicao.texto" icon="i-lucide-file-plus-2" color="info" variant="subtle" />
+          <template v-if="(sel.tipo === 'distribuicao' || (ehCitacao && !processo)) && sel.distribuicao">
+            <UAlert v-if="sel.tipo === 'distribuicao' && sel.status === 'revisar' && !processo" :title="tc.caixa.painel.distribuicao.titulo" :description="tc.caixa.painel.distribuicao.texto" icon="i-lucide-file-plus-2" color="info" variant="subtle" />
+            <UAlert v-else-if="sel.tipo === 'distribuicao' && sel.status === 'revisar' && processo" :description="tt.distribuicao.jaCadastrado(processo.reference)" icon="i-lucide-link" color="info" variant="subtle" />
             <div class="rounded-lg border border-default">
               <p class="border-b border-default px-4 py-2 text-xs font-medium text-muted">{{ tc.caixa.painel.distribuicao.dados }}</p>
               <dl class="grid grid-cols-1 gap-3 px-4 py-3 text-sm sm:grid-cols-2">
@@ -550,16 +627,35 @@ function maquete() {
                 <div class="sm:col-span-2"><dt class="text-xs text-muted">{{ tc.caixa.painel.distribuicao.orgao }}</dt><dd class="text-highlighted">{{ sel.orgao }} · {{ tribunais[sel.tribunal].sigla }}</dd></div>
               </dl>
             </div>
-            <div v-if="sel.status === 'confirmada' && processo" class="flex flex-wrap items-center gap-3 rounded-lg border border-success/30 bg-success/5 p-4">
+            <div v-if="sel.tipo === 'distribuicao' && sel.status === 'confirmada' && processo" class="flex flex-wrap items-center gap-3 rounded-lg border border-success/30 bg-success/5 p-4">
               <UIcon name="i-lucide-circle-check" class="size-4 text-success" />
               <p class="min-w-0 flex-1 text-sm text-highlighted">{{ tc.caixa.painel.distribuicao.cadastradoComo(processo.reference) }}</p>
               <UButton :label="tc.caixa.painel.distribuicao.abrirProcesso" icon="i-lucide-arrow-up-right" size="sm" color="neutral" variant="outline" @click="emit('abrirProcesso', processo.id)" />
             </div>
           </template>
 
+          <!-- Rodada 4: a petição inicial, obtida com a distribuição ou a citação -->
+          <div v-if="sel.inicial && (sel.tipo === 'distribuicao' || ehCitacao)" class="rounded-lg border border-default">
+            <p class="border-b border-default px-4 py-2 text-xs font-medium text-muted">{{ tt.inicial.titulo }}</p>
+            <div class="flex items-center gap-3 px-4 py-3">
+              <UIcon name="i-lucide-file-text" class="size-5 shrink-0 text-muted" />
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium text-highlighted">{{ tt.inicial.peticao }}</p>
+                <p class="text-xs text-muted">{{ tt.inicial.detalhe(sel.inicial.paginas, sel.inicial.sistema, dataHora(sel.inicial.obtidaEm, t.locale)) }}</p>
+              </div>
+              <UTooltip :text="tt.inicial.abrir">
+                <UButton icon="i-lucide-external-link" size="xs" color="neutral" variant="outline" :aria-label="tt.inicial.abrir" @click="maquete" />
+              </UTooltip>
+            </div>
+            <p class="border-t border-default px-4 py-2 text-xs text-toned">{{ processo ? tt.inicial.noProcesso : tt.inicial.vaiPara }}</p>
+          </div>
+
           <!-- Andamento -->
           <template v-if="sel.tipo === 'andamento'">
-            <UAlert v-if="citaData && sel.status === 'revisar'" :description="tc.caixa.painel.andamento.comData" icon="i-lucide-calendar-clock" color="info" variant="subtle" />
+            <p v-if="sel.movimento" class="flex items-center gap-2">
+              <span class="text-xs text-muted">{{ tt.andamento.movimento }}</span>
+              <UBadge :label="tt.andamento.movimentos[sel.movimento]" color="neutral" variant="subtle" size="sm" />
+            </p>
             <p v-if="sel.status === 'confirmada'" class="flex items-center gap-2 rounded-lg border border-success/30 bg-success/5 p-4 text-sm text-highlighted">
               <UIcon name="i-lucide-circle-check" class="size-4 shrink-0 text-success" />
               {{ sel.tratadaPor === 'automatico' ? tc.caixa.painel.tratadaAutomatico : tc.caixa.painel.tratadaPor(quemTratou(sel)) }}
@@ -572,15 +668,38 @@ function maquete() {
               <UIcon name="i-lucide-link-2-off" class="mt-0.5 size-5 shrink-0 text-warning" />
               <div class="min-w-0 flex-1">
                 <p class="text-sm font-medium text-highlighted">{{ t.intimacoes.semProcessoBloco.titulo }}</p>
-                <p class="text-sm text-muted">{{ t.intimacoes.semProcessoBloco.texto }}</p>
+                <p class="text-sm text-muted">{{ ehCitacao && sel.distribuicao ? tt.resposta.semProcesso : t.intimacoes.semProcessoBloco.texto }}</p>
               </div>
             </div>
             <div class="flex flex-wrap items-end gap-2">
               <UFormField :label="tc.caixa.painel.vincular.rotulo" class="min-w-0 flex-1">
                 <USelectMenu :items="itensProcesso" value-key="value" :placeholder="tc.caixa.painel.vincular.ph" class="w-full" @update:model-value="(v: number) => escolherProcesso(v)" />
               </UFormField>
-              <UButton :label="t.intimacoes.semProcessoBloco.criar" icon="i-lucide-plus" size="md" color="neutral" variant="outline" @click="maquete" />
+              <UButton v-if="ehCitacao && sel.distribuicao" :label="tc.caixa.painel.distribuicao.cadastrar" icon="i-lucide-file-plus-2" size="md" :loading="cadastrando" @click="cadastrar" />
+              <UButton v-else :label="t.intimacoes.semProcessoBloco.criar" icon="i-lucide-plus" size="md" color="neutral" variant="outline" @click="maquete" />
             </div>
+          </div>
+
+          <!-- Rodada 4: a audiência lida no teor. Vai para a Agenda sem cálculo: a data vem do juízo. -->
+          <div v-if="sel.audiencia && sel.status === 'revisar'" class="flex flex-col gap-3 rounded-lg border border-info/40 bg-info/5 p-4">
+            <div class="flex flex-wrap items-center gap-2">
+              <UIcon name="i-lucide-calendar-clock" class="size-4 text-info" />
+              <p class="text-sm font-semibold text-highlighted">{{ tt.audiencia.titulo }}</p>
+              <UBadge :label="tt.audiencia.tipos[sel.audiencia.tipo]" color="info" variant="subtle" size="sm" />
+            </div>
+            <div class="grid gap-3 sm:grid-cols-3">
+              <UFormField :label="tt.resposta.dia">
+                <UInput v-model="diaDaAudiencia" type="date" class="w-full" />
+              </UFormField>
+              <UFormField :label="tt.resposta.hora">
+                <UInput v-model="horaDaAudiencia" type="time" class="w-full" />
+              </UFormField>
+              <UFormField v-if="sel.audiencia.local" :label="tt.audiencia.local">
+                <p class="py-1.5 text-sm text-highlighted">{{ sel.audiencia.local }}</p>
+              </UFormField>
+            </div>
+            <p class="text-xs text-muted">{{ tt.resposta.lida }}</p>
+            <UCheckbox v-model="levarAudiencia" :label="tt.audiencia.levar" :description="tt.audiencia.levarAjuda" />
           </div>
 
           <!-- 2 meios: as 2 datas e qual vale -->
@@ -608,9 +727,26 @@ function maquete() {
 
           <!-- Prazo: para revisar -->
           <div v-if="pronta" class="flex flex-col gap-4 rounded-lg border border-default p-4">
-            <p class="text-sm font-semibold text-highlighted">{{ t.intimacoes.prazo.titulo }}</p>
+            <p class="text-sm font-semibold text-highlighted">{{ ehCitacao ? tt.resposta.titulo : t.intimacoes.prazo.titulo }}</p>
             <div class="grid gap-3 sm:grid-cols-2">
-              <UFormField :label="t.intimacoes.prazo.regra" :hint="sel.regraSugerida && regraEscolhida === sel.regraSugerida ? t.intimacoes.prazo.sugerida : undefined">
+              <UFormField
+                v-if="ehCitacao"
+                :label="tt.resposta.marco"
+                :hint="marco === sel.marcoSugerido ? tt.resposta.sugerido : undefined"
+                :help="tt.resposta.ajudas[marco]"
+                class="sm:col-span-2"
+              >
+                <USelect v-model="marco" :items="itensDeMarco" class="w-full" />
+              </UFormField>
+              <template v-if="ehCitacao && precisaAudiencia && !sel.audiencia">
+                <UFormField :label="tt.resposta.dia">
+                  <UInput v-model="diaDaAudiencia" type="date" class="w-full" />
+                </UFormField>
+                <UFormField :label="tt.resposta.hora">
+                  <UInput v-model="horaDaAudiencia" type="time" class="w-full" />
+                </UFormField>
+              </template>
+              <UFormField v-if="!ehCitacao" :label="t.intimacoes.prazo.regra" :hint="sel.regraSugerida && regraEscolhida === sel.regraSugerida ? t.intimacoes.prazo.sugerida : undefined">
                 <USelect v-model="regraEscolhida" :items="regrasDoRito" :placeholder="t.intimacoes.prazo.regraPh" class="w-full" />
               </UFormField>
               <UFormField :label="t.intimacoes.prazo.responsavel">
@@ -618,11 +754,13 @@ function maquete() {
               </UFormField>
             </div>
             <UAlert v-if="!regraEscolhida" :description="t.intimacoes.prazo.semSugestao" icon="i-lucide-circle-help" color="warning" variant="subtle" />
+            <UAlert v-if="ehCitacao && precisaAudiencia && !diaDaAudiencia" :description="tt.resposta.semData" icon="i-lucide-calendar-x" color="warning" variant="subtle" />
+            <UAlert v-if="ehCitacao && marco === 'conciliacao'" :description="tt.resposta.acordo" icon="i-lucide-handshake" color="neutral" variant="subtle" />
             <template v-if="calculo && regraEscolhida && processo">
               <div class="grid grid-cols-2 gap-3">
                 <div class="rounded-md border border-error/30 bg-error/5 p-3">
-                  <p class="text-xs text-muted">{{ t.intimacoes.prazo.fatal }}</p>
-                  <p class="text-xl font-semibold tabular-nums text-highlighted">{{ dia(calculo.fatal, t.locale) }}</p>
+                  <p class="text-xs text-muted">{{ calculo.hora ? tt.resposta.defesa : t.intimacoes.prazo.fatal }}</p>
+                  <p class="text-xl font-semibold tabular-nums text-highlighted">{{ dia(calculo.fatal, t.locale) }}<template v-if="calculo.hora">, {{ calculo.hora }}</template></p>
                   <p class="text-xs text-muted">{{ t.geral.emDias(diferencaEmDias(HOJE, calculo.fatal)) }}</p>
                 </div>
                 <div class="rounded-md border border-primary/30 bg-primary/5 p-3">
@@ -665,6 +803,13 @@ function maquete() {
             <UButton :label="t.intimacoes.voltarParaRevisao" icon="i-lucide-undo-2" size="sm" color="neutral" variant="outline" @click="voltarParaRevisao(sel)" />
           </div>
 
+          <!-- Rodada 4: a audiência que foi para a Agenda -->
+          <div v-if="audienciaRegistrada" class="flex flex-wrap items-center gap-3 rounded-lg border border-info/30 bg-info/5 p-4">
+            <UIcon name="i-lucide-calendar-check" class="size-4 text-info" />
+            <p class="min-w-0 flex-1 text-sm text-highlighted">{{ tt.audiencia.naAgenda(dia(audienciaRegistrada.dia, t.locale), audienciaRegistrada.hora) }}</p>
+            <UButton :label="tt.audiencia.verAgenda" icon="i-lucide-calendar" size="sm" color="neutral" variant="outline" @click="emit('irAgenda')" />
+          </div>
+
           <!-- Dados da captura: a prova de chegada -->
           <div class="rounded-lg border border-default">
             <p class="flex items-center gap-2 border-b border-default px-4 py-2 text-xs font-medium text-muted">
@@ -700,13 +845,29 @@ function maquete() {
               {{ tc.caixa.painel.tambem(sel.tambemPor.map(f => tc.fontes.curtos[f]).join(', ')) }}
             </p>
             <p v-if="typeof sel.tratadaPor === 'number' && sel.tipo !== 'andamento'" class="border-t border-default px-4 py-2.5 text-xs text-muted">{{ tc.caixa.painel.tratadaPor(quemTratou(sel)) }}</p>
+            <!-- Rodada 4: os eventos que a captura entregou ao Spaceflow -->
+            <div v-if="disparosDaSel.length" class="border-t border-default px-4 py-2.5">
+              <p class="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted">
+                <UIcon name="i-lucide-workflow" class="size-3.5" />{{ tt.eventos.naCaptura }}
+              </p>
+              <ul class="flex flex-col gap-1">
+                <li v-for="d in disparosDaSel" :key="d.id" class="flex flex-wrap items-baseline gap-x-2 text-xs">
+                  <span class="tabular-nums text-muted">{{ diaHoraCurto(d.quando, t.locale) }}</span>
+                  <span class="font-medium text-highlighted">{{ tt.eventos.nomes[d.evento] }}</span>
+                  <span class="text-toned">{{ d.fluxos.length ? tt.eventos.disparou(nomesDosFluxos(d.fluxos)) : tt.eventos.nenhumFluxo }}</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </template>
 
       <template v-if="sel && sel.status === 'revisar'" #footer>
         <div class="flex w-full justify-end gap-2">
-          <template v-if="sel.tipo === 'distribuicao'">
+          <template v-if="sel.tipo === 'distribuicao' && processo">
+            <UButton :label="tt.distribuicao.registrar" icon="i-lucide-check" @click="registrarDistribuicao" />
+          </template>
+          <template v-else-if="sel.tipo === 'distribuicao'">
             <UButton :label="tc.caixa.painel.distribuicao.naoEDaEmpresa" icon="i-lucide-user-x" color="neutral" variant="outline" @click="naoEDaEmpresa" />
             <UButton :label="tc.caixa.painel.distribuicao.cadastrar" icon="i-lucide-file-plus-2" :loading="cadastrando" @click="cadastrar" />
           </template>
