@@ -40,7 +40,7 @@ const iniciais: Operacao[] = [
   {
     id: 'contratos', nome: 'Gestão de contratos', dono: 'Ana Souza',
     descricao: 'Do contrato criado ao encerramento: andamentos, minuta, assinatura, aditivos e pagamentos.',
-    regra: { categorias: ['contratos', 'andamentos', 'documentos', 'aditivos', 'pagamentos'], peloGatilho: true, pelaGravacao: true, incluir: [524], excluir: [] },
+    regra: { categorias: ['contratos', 'andamentos', 'documentos', 'aditivos', 'pagamentos'], peloGatilho: true, pelaGravacao: true, incluir: [524, 520], excluir: [] },
   },
   {
     id: 'compras', nome: 'Compras', dono: 'Diego Rocha',

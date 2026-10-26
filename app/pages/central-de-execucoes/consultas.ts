@@ -9,7 +9,9 @@
 import type { CausaId, Evento, Execucao, Fluxo, ItemDoMock } from './mocks'
 import { AGORA, categorias, fluxos, responsavelDaTarefa, todasAsExecucoes, todosOsItens } from './mocks'
 import { fluxosDaOperacao, operacoes } from './operacoes'
-import type { EstadoDoProblema, GrupoDeStatus, Textos, TipoDeDisparo } from './textos'
+import type { LigacaoManual } from './ligacoes'
+import { ajusteDe, manuais } from './ligacoes'
+import type { GrupoDeStatus, Textos, TipoDeDisparo } from './textos'
 
 export type Fase = 1 | 2
 export type Periodo = 'h24' | 'd7'
@@ -340,7 +342,6 @@ export function problemas(execs: Execucao[], p: Periodo): Problema[] {
   }).sort((a, b) => b.ultima.created_at.getTime() - a.ultima.created_at.getTime())
 }
 
-export const estadoInicialDosProblemas = (): Record<number, EstadoDoProblema> => ({})
 
 /* ------------------------------------------------------------------ *
  * Operações                                                           *
@@ -436,6 +437,14 @@ export interface NoDoMapa {
   altura: number
 }
 
+/**
+ * - certa: a configuração garante (o nó grava sempre, o gatilho escuta);
+ * - possivel: o nó que grava depende de uma condição;
+ * - foraDaConfiguracao: as execuções gravaram e a configuração não mostra (fase 2);
+ * - manual: alguém ligou à mão, com motivo.
+ */
+export type CertezaDaLigacao = 'certa' | 'possivel' | 'foraDaConfiguracao' | 'manual'
+
 export interface LigacaoDoMapa {
   id: string
   de: string
@@ -445,6 +454,14 @@ export interface LigacaoDoMapa {
   ciclo: boolean
   /** Ligação que volta para uma camada anterior. */
   volta: boolean
+  certeza: CertezaDaLigacao
+  /** O fluxo da ponta e o evento, para o painel. Na chamada direta, o fluxo que chama. */
+  fluxo: number
+  evento?: Evento
+  condicao?: string
+  /** Quem confirmou a ligação incerta: a pessoa, ou as execuções do período (fase 2). */
+  confirmadaPor?: 'pessoa' | 'execucoes'
+  manual?: LigacaoManual
 }
 
 const chaveDoEvento = (ev: Evento) => `ev:${ev.categoria}:${ev.acao}`
@@ -467,7 +484,12 @@ export function mapaDaOperacao(op: string | undefined, d: Dados, p: Periodo, fas
       nos.set(id, { id, tipo, camada: 0, ordem: 0, x: 0, y: 0, largura: tipo === 'fluxo' ? LARG_FLUXO : LARG_EVENTO, altura: tipo === 'fluxo' ? ALT_FLUXO : ALT_EVENTO, ...extra })
     }
   }
+  const descartadas: LigacaoDoMapa[] = []
   const execs = noPeriodo(d.execucoes, p)
+  // O que as execuções do fluxo gravaram de um evento (fase 2).
+  const gravadas = (f: number, ev: Evento) => fase === 2
+    ? execs.filter(e => e.workflow === f).reduce((s, e) => s + e.gravou.filter(g => g.acao === ev.acao && itemPorId.get(g.item)?.categoria === ev.categoria).length, 0)
+    : 0
 
   for (const f of fs) {
     novoNo(chaveDoFluxo(f.id), 'fluxo', { fluxo: f })
@@ -475,15 +497,64 @@ export function mapaDaOperacao(op: string | undefined, d: Dados, p: Periodo, fas
       const ev = { categoria: f.gatilho.categoria, acao: f.gatilho.acao }
       novoNo(chaveDoEvento(ev), 'evento', { evento: ev })
       const n = fase === 2 ? execs.filter(e => e.workflow === f.id && e.disparo.tipo === 'evento').length : 0
-      ligacoes.push({ id: `${chaveDoEvento(ev)}>${f.id}`, de: chaveDoEvento(ev), para: chaveDoFluxo(f.id), observadas: n, ciclo: false, volta: false })
+      ligacoes.push({ id: `${chaveDoEvento(ev)}>${f.id}`, de: chaveDoEvento(ev), para: chaveDoFluxo(f.id), observadas: n, ciclo: false, volta: false, certeza: 'certa', fluxo: f.id, evento: ev })
     }
-    for (const ev of f.grava) {
-      novoNo(chaveDoEvento(ev), 'evento', { evento: ev })
-      const n = fase === 2
-        ? execs.filter(e => e.workflow === f.id).reduce((s, e) => s + e.gravou.filter(g => g.acao === ev.acao && itemPorId.get(g.item)?.categoria === ev.categoria).length, 0)
-        : 0
+    const configurados = new Set<string>()
+    for (const g of f.grava) {
+      const ev = { categoria: g.categoria, acao: g.acao }
+      configurados.add(chaveDoEvento(ev))
+      const id = `${f.id}>${chaveDoEvento(ev)}`
+      const n = gravadas(f.id, ev)
       const ciclo = f.gatilho.tipo === 'events' && f.gatilho.categoria === ev.categoria && f.gatilho.acao === ev.acao
-      ligacoes.push({ id: `${f.id}>${chaveDoEvento(ev)}`, de: chaveDoFluxo(f.id), para: chaveDoEvento(ev), observadas: n, ciclo, volta: false })
+      const ajuste = ajusteDe(id)
+      const l: LigacaoDoMapa = {
+        id, de: chaveDoFluxo(f.id), para: chaveDoEvento(ev), observadas: n, ciclo, volta: false,
+        certeza: g.condicao ? 'possivel' : 'certa', fluxo: f.id, evento: ev, condicao: g.condicao,
+        confirmadaPor: ajuste?.tipo === 'confirmada' ? 'pessoa' : g.condicao && n ? 'execucoes' : undefined,
+      }
+      // O descarte vale enquanto as execuções não mostram a gravação. Na fase 2, o que gravou volta ao desenho.
+      if (ajuste?.tipo === 'descartada' && !n) { descartadas.push(l); continue }
+      novoNo(chaveDoEvento(ev), 'evento', { evento: ev })
+      ligacoes.push(l)
+    }
+    // Fase 2: o que as execuções gravaram e a configuração não mostra.
+    if (fase === 2) {
+      const vistos = new Map<string, Evento>()
+      for (const e of execs) {
+        if (e.workflow !== f.id) continue
+        for (const g of e.gravou) {
+          const cat = itemPorId.get(g.item)?.categoria
+          if (cat) vistos.set(chaveDoEvento({ categoria: cat, acao: g.acao }), { categoria: cat, acao: g.acao })
+        }
+      }
+      for (const [chave, ev] of vistos) {
+        if (configurados.has(chave)) continue
+        const id = `${f.id}>${chave}`
+        novoNo(chave, 'evento', { evento: ev })
+        ligacoes.push({
+          id, de: chaveDoFluxo(f.id), para: chave, observadas: gravadas(f.id, ev), ciclo: false, volta: false,
+          certeza: 'foraDaConfiguracao', fluxo: f.id, evento: ev, confirmadaPor: ajusteDe(id)?.tipo === 'confirmada' ? 'pessoa' : undefined,
+        })
+      }
+    }
+  }
+
+  // As ligações manuais entre fluxos desta operação.
+  const ids = new Set(fs.map(f => f.id))
+  for (const m of manuais.value) {
+    if (!ids.has(m.de) || !ids.has(m.para)) continue
+    if (m.evento) {
+      const chave = chaveDoEvento(m.evento)
+      const id = `${m.de}>${chave}`
+      const existente = ligacoes.find(l => l.id === id)
+      if (existente) { existente.certeza = 'manual'; existente.manual = m; continue }
+      novoNo(chave, 'evento', { evento: m.evento })
+      ligacoes.push({ id, de: chaveDoFluxo(m.de), para: chave, observadas: gravadas(m.de, m.evento), ciclo: false, volta: false, certeza: 'manual', fluxo: m.de, evento: m.evento, manual: m })
+    }
+    else {
+      const daOrigem = new Set(execs.filter(e => e.workflow === m.de).map(e => e.id))
+      const n = fase === 2 ? execs.filter(e => e.workflow === m.para && daOrigem.has(e.input.workflow_timeline.lineage.at(-1) ?? -1)).length : 0
+      ligacoes.push({ id: `${m.de}>>${m.para}`, de: chaveDoFluxo(m.de), para: chaveDoFluxo(m.para), observadas: n, ciclo: false, volta: false, certeza: 'manual', fluxo: m.de, manual: m })
     }
   }
 
@@ -569,6 +640,7 @@ export function mapaDaOperacao(op: string | undefined, d: Dados, p: Periodo, fas
   return {
     nos: [...nos.values()],
     ligacoes,
+    descartadas,
     saude,
     largura: 24 * 2 + (maxCamada + 1) * COLUNA - (COLUNA - LARG_FLUXO),
     altura: 24 * 2 + alturaTotal * LINHA,
@@ -581,4 +653,33 @@ export function vizinhosDoEvento(ev: Evento, fs: Fluxo[]) {
     gravam: fs.filter(f => f.grava.some(g => g.categoria === ev.categoria && g.acao === ev.acao)),
     escutam: fs.filter(f => f.gatilho.tipo === 'events' && f.gatilho.categoria === ev.categoria && f.gatilho.acao === ev.acao),
   }
+}
+
+/* ------------------------------------------------------------------ *
+ * Ligações a conferir                                                 *
+ * ------------------------------------------------------------------ */
+
+export type Pendencia =
+  | { tipo: 'possivel' | 'foraDaConfiguracao', chave: string, fluxo: Fluxo, ligacao: LigacaoDoMapa }
+  | { tipo: 'porVariavel' | 'externa', chave: string, fluxo: Fluxo }
+
+/**
+ * O que o ENSPACE não sabe sobre as ligações da operação e pede a quem administra:
+ * - a gravação condicional que ninguém confirmou e que nenhuma execução do período confirmou;
+ * - a gravação que as execuções mostram e a configuração não (fase 2);
+ * - o nó que grava numa categoria definida por campo, sem ligação manual que o explique;
+ * - o fluxo que começa por chamada externa, sem origem indicada.
+ */
+export function pendenciasDoMapa(m: ReturnType<typeof mapaDaOperacao>, fs: Fluxo[]): Pendencia[] {
+  const lista: Pendencia[] = []
+  for (const l of m.ligacoes) {
+    const fluxo = fluxoPorId.get(l.fluxo)!
+    if ((l.certeza === 'possivel' || l.certeza === 'foraDaConfiguracao') && !l.confirmadaPor) lista.push({ tipo: l.certeza, chave: l.id, fluxo, ligacao: l })
+  }
+  for (const f of fs) {
+    const explicado = manuais.value.some(x => x.de === f.id) || m.ligacoes.some(l => l.fluxo === f.id && l.certeza === 'foraDaConfiguracao')
+    if (f.gravaPorVariavel && !ajusteDe(`var:${f.id}`) && !explicado) lista.push({ tipo: 'porVariavel', chave: `var:${f.id}`, fluxo: f })
+    if (f.gatilho.tipo === 'webhook' && !ajusteDe(`ext:${f.id}`) && !manuais.value.some(x => x.para === f.id)) lista.push({ tipo: 'externa', chave: `ext:${f.id}`, fluxo: f })
+  }
+  return lista
 }

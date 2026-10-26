@@ -91,6 +91,9 @@ type TipoDeNo = NonNullable<WorkflowExecution['nodes']>[number]['type']
 export type CausaId = 'credencial' | 'tempo' | 'ia' | 'email' | 'permissao'
 export type Espera = 'tarefa' | 'atraso'
 
+/** O que a configuração diz que o fluxo grava. Com `condicao`, só grava quando ela bate. */
+export interface Gravado extends Evento { condicao?: string }
+
 /** O que o fluxo grava. Vem dos nós de criar e editar item (`crud`) da definição do fluxo. */
 interface Gravacao extends Evento {
   /** Em qual item: um novo, o mesmo do gatilho ou o item "pai" (relação). */
@@ -98,6 +101,10 @@ interface Gravacao extends Evento {
   quantos?: number
   /** A condição do nó, quando ele não grava sempre. */
   quando?: (item: ItemDoMock, ctx: Contexto) => boolean
+  /** O rótulo da condição, como no canvas. Com ela, a ligação no mapa é "possível". */
+  condicao?: string
+  /** O campo que decide a categoria, quando o nó não tem categoria fixa. O mapa não sabe qual é. */
+  porVariavel?: string
   /** O que muda no item gravado, para a simulação seguir. */
   efeito?: (alvo: ItemDoMock, ctx: Contexto) => void
   titulo?: (pai: ItemDoMock, k: number) => string
@@ -110,7 +117,9 @@ export interface Fluxo extends Pick<Workflow, 'id' | 'name' | 'description' | 's
   /** Os nós do fluxo, na ordem do caminho principal (rótulos como no canvas). */
   nos: { tipo: TipoDeNo, rotulo: string }[]
   /** Ligações configuradas: o que os nós de criar e editar gravam. Base do mapa. */
-  grava: Evento[]
+  grava: Gravado[]
+  /** O nó que grava numa categoria definida por um campo: a configuração não diz qual. */
+  gravaPorVariavel?: { no: string, campo: string }
   /** Pausa até uma pessoa concluir uma tarefa, ou por tempo. */
   espera?: Espera
   /** Quem não tem permissão neste fluxo, no cenário "Acesso parcial". */
@@ -226,7 +235,8 @@ function definicao(f: Omit<DefinicaoDoFluxo, 'grava' | 'status' | 'version' | 'r
     version: f.version ?? '1.0.0',
     reference: `wf-${f.id}`,
     created_at: new Date(2026, 6, 1 + (f.id % 60)),
-    grava: f.gravacoes.map(({ categoria, acao }) => ({ categoria, acao })),
+    grava: f.gravacoes.filter(g => !g.porVariavel).map(({ categoria, acao, condicao }) => (condicao ? { categoria, acao, condicao } : { categoria, acao })),
+    gravaPorVariavel: f.gravacoes.filter(g => g.porVariavel).map(g => ({ no: f.nos.find(n => n.tipo === 'crud' && n.rotulo.startsWith('Criar item'))?.rotulo ?? '', campo: g.porVariavel! }))[0],
   }
 }
 
@@ -254,6 +264,7 @@ const definicoes: DefinicaoDoFluxo[] = [
     gravacoes: [{
       categoria: 'contratos', acao: 'update', alvo: 'pai',
       quando: i => !tem(i, 'notificado'),
+      condicao: 'Contrato ainda sem aviso?',
       efeito: (_c, ctx) => { if (ctx.exec.item) marca(porId.get(ctx.exec.item)!, 'notificado') },
     }],
   }),
@@ -262,7 +273,7 @@ const definicoes: DefinicaoDoFluxo[] = [
     description: 'Recalcula o prazo quando o andamento muda.',
     gatilho: { tipo: 'events', categoria: 'andamentos', acao: 'update' },
     nos: [{ tipo: 'conditionals', rotulo: 'Prazo mudou?' }, { tipo: 'crud', rotulo: 'Atualizar prazo' }],
-    gravacoes: [{ categoria: 'andamentos', acao: 'update', alvo: 'mesmo', quando: (_i, ctx) => ctx.forcas?.[515] === 'repetir' || rnd() < 0.04 }],
+    gravacoes: [{ categoria: 'andamentos', acao: 'update', alvo: 'mesmo', condicao: 'Prazo mudou?', quando: (_i, ctx) => ctx.forcas?.[515] === 'repetir' || rnd() < 0.04 }],
   }),
   definicao({
     id: 516, name: 'Atualizar situação do contrato', dono: 'Ana Souza',
@@ -314,9 +325,9 @@ const definicoes: DefinicaoDoFluxo[] = [
     id: 520, name: 'Renovação automática', dono: 'Ana Souza',
     description: 'Todo dia, cria o aditivo dos contratos com renovação automática.',
     gatilho: { tipo: 'cron', rotulo: '08:05' },
-    nos: [{ tipo: 'crud', rotulo: 'Buscar contratos' }, { tipo: 'crud', rotulo: 'Criar aditivo' }],
+    nos: [{ tipo: 'crud', rotulo: 'Buscar contratos' }, { tipo: 'crud', rotulo: 'Criar item' }],
     atua: i => !!i,
-    gravacoes: [{ categoria: 'aditivos', acao: 'create', alvo: 'novo', titulo: p => `Aditivo de renovação do ${p.reference}` }],
+    gravacoes: [{ categoria: 'aditivos', acao: 'create', alvo: 'novo', porVariavel: 'Tipo de renovação', titulo: p => `Aditivo de renovação do ${p.reference}` }],
   }),
   definicao({
     id: 521, name: 'Aprovar aditivo', dono: 'Fábio Nunes', espera: 'tarefa',
@@ -332,7 +343,7 @@ const definicoes: DefinicaoDoFluxo[] = [
     nos: [{ tipo: 'conditionals', rotulo: 'Contrato assinado?' }, { tipo: 'crud', rotulo: 'Criar parcelas' }],
     atua: i => i?._fase === 'assinado' && !tem(i, 'pagamentos'),
     gravacoes: [{
-      categoria: 'pagamentos', acao: 'create', alvo: 'novo', quantos: 3, titulo: (p, k) => `Parcela ${k} do ${p.reference}`,
+      categoria: 'pagamentos', acao: 'create', alvo: 'novo', quantos: 3, condicao: 'Contrato assinado?', titulo: (p, k) => `Parcela ${k} do ${p.reference}`,
       efeito: (_p, ctx) => { if (ctx.exec.item) marca(porId.get(ctx.exec.item)!, 'pagamentos') },
     }],
   }),
@@ -415,7 +426,7 @@ const definicoes: DefinicaoDoFluxo[] = [
     description: 'Confere a nota com o pedido aprovado e fecha a compra.',
     gatilho: { tipo: 'events', categoria: 'notas', acao: 'create' },
     nos: [{ tipo: 'ai_extract', rotulo: 'Comparar valores' }, { tipo: 'crud', rotulo: 'Fechar pedido' }],
-    gravacoes: [{ categoria: 'pedidos', acao: 'update', alvo: 'pai', quando: i => !!i.pai }],
+    gravacoes: [{ categoria: 'pedidos', acao: 'update', alvo: 'pai', condicao: 'Nota tem pedido vinculado?', quando: i => !!i.pai }],
     falha: { taxa: 0.1, causa: 'ia', no: 0 },
   }),
   definicao({
@@ -529,7 +540,7 @@ const definicoes: DefinicaoDoFluxo[] = [
     gatilho: { tipo: 'events', categoria: 'acessos', acao: 'create' },
     nos: [{ tipo: 'http', rotulo: 'Pedir acesso' }, { tipo: 'crud', rotulo: 'Atualizar admissão' }],
     gravacoes: [{
-      categoria: 'admissoes', acao: 'update', alvo: 'pai',
+      categoria: 'admissoes', acao: 'update', alvo: 'pai', condicao: 'Todos os acessos liberados?',
       quando: (i) => { marca(i, 'liberado'); const a = paiDe(i); return !!a && filhos(a, 'acessos').every(x => tem(x, 'liberado')) },
       efeito: a => { a._fase = 'pronta' },
     }],

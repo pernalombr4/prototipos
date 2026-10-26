@@ -4,16 +4,16 @@
  *
  * - 5 números: Rodando agora e Esperando (o momento) e Com erro, Concluídas e Paradas pela
  *   plataforma (o período, comparado ao anterior). Cada número abre a lista com o filtro;
- * - "Precisa de atenção": uma linha por fluxo, com a causa em palavras, o que fazer, o dono, o
- *   último item e a situação (Precisa de revisão, Resolvido, Ignorado, Adiado). Reprocessar as
- *   falhas mostra antes os itens afetados;
+ * - "Precisa de atenção": uma linha por fluxo, com a causa em palavras, o que fazer, o dono e o
+ *   último item. Reprocessar as falhas mostra antes os itens afetados; o fluxo reprocessado sai da
+ *   lista. Não há situação marcada à mão: a linha fica enquanto o fluxo falhar no período;
  * - execuções por dia (ou por hora) e os fluxos com mais falhas, em barras;
  * - a saúde de cada operação, com o atalho para o mapa.
  */
 import { categorias } from './mocks'
 import type { Dados, Fase, FiltroDaLista, Periodo, Problema } from './consultas'
 import { AGORA_MS, filtroVazio, fluxosComMaisFalhas, itemPorId, numeros, problemas, saudeDasOperacoes, serie } from './consultas'
-import type { EstadoDoProblema, Textos } from './textos'
+import type { Textos } from './textos'
 
 const props = defineProps<{
   t: Textos
@@ -23,7 +23,8 @@ const props = defineProps<{
 }>()
 
 const periodo = defineModel<Periodo>('periodo', { required: true })
-const estados = defineModel<Record<number, EstadoDoProblema>>('estados', { required: true })
+/** Os fluxos cujas falhas foram reprocessadas: saem da lista. */
+const reprocessados = defineModel<number[]>('reprocessados', { required: true })
 const emit = defineEmits<{
   filtrar: [FiltroDaLista]
   abrirExecucao: [number]
@@ -37,10 +38,7 @@ const toast = useToast()
 
 const n = computed(() => numeros(props.dados.execucoes, periodo.value))
 const lista = computed(() => problemas(props.dados.execucoes, periodo.value))
-const estadoDe = (p: Problema) => estados.value[p.fluxo.id] ?? 'revisar'
-const abertos = computed(() => lista.value.filter(p => estadoDe(p) === 'revisar'))
-const tratados = computed(() => lista.value.filter(p => estadoDe(p) !== 'revisar'))
-const mostrarTratados = ref(false)
+const abertos = computed(() => lista.value.filter(p => !reprocessados.value.includes(p.fluxo.id)))
 const barras = computed(() => serie(props.dados.execucoes, periodo.value, props.t.locale))
 const maxBarra = computed(() => Math.max(1, ...barras.value.map(b => b.concluidas + b.erro + b.outras)))
 const falhas = computed(() => fluxosComMaisFalhas(props.dados.execucoes, periodo.value))
@@ -89,17 +87,11 @@ async function confirmarReprocesso() {
   await new Promise(r => setTimeout(r, 800))
   const p = reprocessando.value
   confirmando.value = false
-  estados.value = { ...estados.value, [p.fluxo.id]: 'resolvido' }
+  reprocessados.value = [...reprocessados.value, p.fluxo.id]
   reprocessando.value = null
   toast.add({ title: props.t.atencao.modal.feito(p.falhas.length), description: props.t.atencao.modal.feitoDesc, icon: 'i-lucide-rotate-ccw', color: 'success' })
 }
 
-function mudarEstado(p: Problema, e: EstadoDoProblema) {
-  estados.value = { ...estados.value, [p.fluxo.id]: e }
-}
-const opcoesDeEstado = (p: Problema) => (['revisar', 'resolvido', 'ignorado', 'adiado'] as EstadoDoProblema[])
-  .map(e => ({ label: props.t.atencao.estados[e], icon: e === estadoDe(p) ? 'i-lucide-check' : undefined, onSelect: () => mudarEstado(p, e) }))
-const corDoEstado: Record<EstadoDoProblema, 'error' | 'success' | 'neutral' | 'warning'> = { revisar: 'error', resolvido: 'success', ignorado: 'neutral', adiado: 'warning' }
 
 const formatoHora = computed(() => new Intl.DateTimeFormat(props.t.locale, { hour: '2-digit', minute: '2-digit' }))
 const formatoDia = computed(() => new Intl.DateTimeFormat(props.t.locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }))
@@ -176,7 +168,7 @@ const seloDaOperacao = { ok: { cor: 'success', icone: 'i-lucide-circle-check' },
           <li
             v-for="(p, i) in abertos"
             :key="p.fluxo.id"
-            class="grid animate-[entrada_.3s_ease-out_both] gap-3 px-4 py-3 transition-colors hover:bg-elevated/40 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)_8.5rem_24rem]"
+            class="grid animate-[entrada_.3s_ease-out_both] gap-3 px-4 py-3 transition-colors hover:bg-elevated/40 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)_8.5rem_17rem]"
             :style="{ animationDelay: `${i * 40}ms` }"
           >
             <!-- Fluxo -->
@@ -210,9 +202,6 @@ const seloDaOperacao = { ok: { cor: 'success', icone: 'i-lucide-circle-check' },
             </div>
             <!-- Ações -->
             <div class="flex flex-wrap items-center gap-1.5 lg:justify-end">
-              <UDropdownMenu :items="opcoesDeEstado(p)" :ui="{ content: 'w-48' }">
-                <UButton :label="t.atencao.estados[estadoDe(p)]" trailing-icon="i-lucide-chevron-down" size="xs" :color="corDoEstado[estadoDe(p)]" variant="subtle" :aria-label="`${t.atencao.colunas.estado}: ${t.atencao.estados[estadoDe(p)]}`" />
-              </UDropdownMenu>
               <UButton
                 v-if="p.causa === 'cadeia'"
                 :label="t.atencao.verCadeia"
@@ -242,27 +231,6 @@ const seloDaOperacao = { ok: { cor: 'success', icone: 'i-lucide-circle-check' },
             </div>
           </li>
         </ul>
-
-        <!-- Os tratados ficam escondidos e voltam se o fluxo falhar de novo -->
-        <div v-if="tratados.length && !carregando" class="border-t border-default px-4 py-2">
-          <UButton
-            :label="mostrarTratados ? t.atencao.esconderTratados : t.atencao.mostrarTratados(tratados.length)"
-            :trailing-icon="mostrarTratados ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
-            size="xs"
-            color="neutral"
-            variant="ghost"
-            @click="mostrarTratados = !mostrarTratados"
-          />
-          <ul v-if="mostrarTratados" class="mt-1 flex flex-col gap-1 pb-1">
-            <li v-for="p in tratados" :key="p.fluxo.id" class="flex flex-wrap items-center gap-2 rounded-md px-2 py-1.5 text-sm text-toned">
-              <UBadge :label="t.atencao.estados[estadoDe(p)]" :color="corDoEstado[estadoDe(p)]" variant="subtle" size="sm" />
-              <span class="font-medium">{{ p.fluxo.name }}</span>
-              <span class="text-muted">{{ t.causas[p.causa].titulo }}</span>
-              <span class="text-xs text-dimmed">{{ t.atencao.reabre }}</span>
-              <UButton :label="t.atencao.estados.revisar" size="xs" color="neutral" variant="link" class="ml-auto" @click="mudarEstado(p, 'revisar')" />
-            </li>
-          </ul>
-        </div>
       </section>
 
       <!-- Gráficos -->

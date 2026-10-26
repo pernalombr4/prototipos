@@ -37,7 +37,8 @@ flowchart LR
 - **Mudou:**
   - pasta nova `central-de-execucoes`, com a casca copiada do `protecoes-do-spaceflow` e conferida no develop;
   - Visão geral: período (últimas 24 horas ou últimos 7 dias) comparado ao anterior, 5 números clicáveis, "Precisa de
-    atenção" com estado do problema (Precisa de revisão, Resolvido, Ignorado, Adiado) e "Reprocessar falhas" com a
+    atenção" com estado do problema (Precisa de revisão, Resolvido, Ignorado, Adiado; removido na rodada 3) e
+    "Reprocessar falhas" com a
     prévia dos itens afetados, barras empilhadas por dia, "Fluxos com mais falhas" e a saúde de cada operação;
   - Execuções: 1 lista para os 38 fluxos, com Status (ícone, palavra e motivo), Item, Disparada por, Duração e
     Cadeia; filtros por grupo de status, fluxo, operação e origem; "Só a origem de cada cadeia"; visões salvas; a
@@ -93,7 +94,7 @@ flowchart LR
     item dispara os fluxos que o escutam, com a cadeia gravada em `input.workflow_timeline.lineage` (campo do schema
     usado como proposta, ver P1);
   - "agora" é fixo em 24/10/2026 16:40; "Atualizar" espera e devolve os mesmos dados;
-  - reprocessar, mudar o estado do problema e as visões salvas mexem só na memória; o reload zera;
+  - reprocessar, mudar o estado do problema (removido na rodada 3) e as visões salvas mexem só na memória; o reload zera;
   - os cenários do andaime: Operação com falhas, Tudo em dia, Acesso parcial, Sem execuções, Carregando e Erro ao
     carregar; os exemplos abrem 3 contratos (com falha, com repetição sem fim, esperando pessoa).
 - **Crítica e acessibilidade:**
@@ -193,6 +194,76 @@ flowchart LR
   - `r2-05-sem-operacao.jpg`: o aviso dos 8 fluxos que nenhuma regra alcança;
   - `r2-06-editor-escuro-es.jpg`: o editor no tema escuro, em espanhol.
 
+## Rodada 3 · 2026-10-26
+
+- **Pedido (literal):** "mas se nao reconhecer a ligaçao ou nao tiver ctz da regra o usuario deve poder ajustar" e
+  "pode tirar isso que copiou do hubspot. esse campo pode sumir. o resto concordo, pode aplicar"
+- **Mudou:**
+  - Visão geral: saiu o estado do problema (Precisa de revisão, Resolvido, Ignorado, Adiado) e não entrou nada no
+    lugar. A linha some de "Precisa de atenção" quando as falhas do fluxo são reprocessadas;
+  - o mapa continua desenhado pelo ENSPACE, pela configuração de cada fluxo (gatilho e nós que gravam item) e, na
+    fase 2, pelas execuções. O que ele não consegue garantir vira uma ligação a conferir, de 4 tipos:
+    - **possível**: o nó que grava fica depois de uma condição ("Contrato ainda sem aviso?"). Linha pontilhada com
+      "?". Ações: Confirmar ou Descartar;
+    - **fora da configuração** (fase 2): as execuções gravaram um evento que a configuração não mostra. Selo "? N".
+      Ação: Confirmar;
+    - **categoria por campo**: o nó grava na categoria que um campo indica (Renovação automática, nó "Criar item",
+      campo "Tipo de renovação"). Ações: Ligar a um fluxo ou Não liga a esta operação;
+    - **chamada externa**: o fluxo começa por webhook e nenhum fluxo da operação aparece antes dele. Ações: Indicar o
+      fluxo de origem ou Vem de fora do ENSPACE;
+  - botão "Conferir ligações (N)" na barra do mapa, em amarelo enquanto houver pendência, e um ícone de aviso no fluxo
+    que tem pendência;
+  - painel "Ligações a conferir": as pendências com as ações e, embaixo, "Ajustes feitos", com Desfazer em cada ajuste
+    e Remover na ligação manual;
+  - ligação manual: modal "Ligar fluxos" com De, Para (só fluxos da operação), como o destino começa (pelo evento do
+    gatilho ou por chamada direta) e Motivo obrigatório. No mapa, linha tracejada azul com o selo "manual". Na fase 2,
+    o painel diz se as execuções confirmam a ligação ou se nenhuma execução do período a confirma;
+  - no painel do fluxo: a seção "Ligações deste fluxo" e o botão "Ligar a um fluxo";
+  - na fase 2, a ligação possível que as execuções gravaram se confirma sozinha. O descarte também cede: se as
+    execuções gravaram, a ligação volta ao desenho e o ajuste avisa quantas vezes.
+- **Fronteira:** muda o mapa (ligações incertas, conferência, ligação manual) e a "Precisa de atenção" da Visão
+  geral (sem o estado). Não muda a casca, a regra da operação, a lista de execuções nem a cadeia.
+- **Por que assim:**
+  - o desenho continua automático, como ela concordou: o ajuste é a exceção e cobre só o que a configuração não diz;
+  - cada tipo de incerteza tem a sua ação, porque a pergunta muda: "isso acontece?", "de onde vem?", "para onde vai?";
+  - o ajuste muda só o desenho. Não mexe no fluxo nem na regra da operação, e se desfaz;
+  - o motivo obrigatório na ligação manual explica a linha para quem abrir o mapa depois;
+  - a execução vence a declaração: o que gravou aparece, mesmo descartado, e a ligação manual sem execução avisa.
+- **Descartado:**
+  - o estado do problema, copiado do HubSpot. Motivo: ela pediu para tirar;
+  - a resolução automática da linha e o "Silenciar", propostos no lugar do estado. Motivo: ela pediu que o campo
+    sumisse, sem substituto;
+  - desenhar a operação à mão, ligando fluxo por fluxo. Motivo: ela concordou com o desenho automático, com ajuste
+    só onde ele não tem certeza.
+- **Maquete:**
+  - ligações possíveis: Notificar responsável do andamento, Recalcular prazo do andamento e Programar pagamentos em
+    contratos, e 1 fluxo em compras e 1 em admissão;
+  - categoria por campo: Renovação automática, que entrou em "Sempre incluir" de Gestão de contratos;
+  - chamada externa: Registrar assinatura em contratos, ligada à mão a Enviar para assinatura no teste; em
+    atendimento, Registrar interação do cliente;
+  - os ajustes ficam em memória (`ligacoes.ts`); "Reiniciar" e o reload zeram.
+- **Crítica e acessibilidade:**
+  - corrigido: o "Ajustar zoom" do mapa tinha o mesmo nome da função que grava o ajuste; Confirmar mostrava o aviso e
+    não gravava, e o zoom virava "NaN%". A função do zoom virou `caberNaTela`;
+  - corrigido: a dica do mapa colava "1 ligação descartada" na frase anterior, sem espaço;
+  - corrigido: "Ligar fluxos" ficava desabilitado sem dizer o que faltava. O botão passou a validar e cada campo vazio
+    mostra o erro; De e Para ganharam "Escolha o fluxo";
+  - corrigido: a lista De oferecia o próprio fluxo de destino;
+  - o ícone de aviso no fluxo entra no `aria-label` do nó; cada ação da pendência é botão com texto;
+  - a ligação manual entre fluxos vizinhos fica curta no desenho: o selo "manual" aparece, o tracejado quase não.
+- **CSS próprio:** nenhum.
+- **Ver:** prints em `evidencias/`:
+  - `r3-01-conferir-ligacoes.jpg`: Gestão de contratos na fase 1, com as ligações possíveis pontilhadas e o painel
+    "Ligações a conferir";
+  - `r3-02-ligar-fluxos-modal.jpg`: o modal "Ligar fluxos" de Enviar para assinatura até Registrar assinatura, por
+    chamada direta, com o motivo;
+  - `r3-03-ligacao-manual-no-mapa.jpg`: a ligação manual no mapa, com o selo, e o painel do fluxo com "Ligações deste
+    fluxo";
+  - `r3-04-vem-de-fora-escuro-en.jpg`: Atendimento ao cliente sem pendências depois de "Vem de fora do ENSPACE", no
+    tema escuro, em inglês;
+  - `r3-05-visao-geral-sem-estado.jpg`: "Precisa de atenção" sem o estado, com 6 linhas depois de reprocessar Enviar
+    para assinatura.
+
 ## Perguntas para o time de dev
 
 As 11 perguntas (P1 a P11) estão no relatório, em "Perguntas para o time de dev". As que decidem a fase 2 são P1
@@ -204,3 +275,11 @@ A rodada 2 acrescenta:
 - **P12.** A operação vira entidade do workspace? Onde fica guardada, quem pode criar e editar (só administrador ou
   também o responsável), e a regra é avaliada no backend a cada mudança de fluxo ou na tela, a cada leitura? A regra
   precisa do gatilho e das categorias que os nós de cada fluxo gravam, que é a P9.
+
+A rodada 3 acrescenta:
+
+- **P13.** O backend consegue ler, da definição do fluxo, se o nó que grava item fica depois de uma condição e se a
+  categoria do "Criar item" vem de um campo? Sem isso, toda gravação parece certa e a conferência não acha as
+  ligações possíveis.
+- **P14.** Onde ficam os ajustes de ligação (confirmada, descartada, vem de fora, manual com motivo), quem pode
+  fazer e se eles valem para todos os membros do workspace.

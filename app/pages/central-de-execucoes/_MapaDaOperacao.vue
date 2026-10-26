@@ -13,14 +13,21 @@
  * - escolher um item mostra a jornada dele: os fluxos por onde passou, numerados, e o resto apagado.
  *
  * Os fluxos de cada operação vêm da regra dela (`operacoes.ts`). "Editar regra" abre o editor.
+ *
+ * As ligações o ENSPACE desenha sozinho. Quando ele não tem certeza, a ligação fica pontilhada
+ * com "?" e entra em "Conferir ligações": quem administra confirma, descarta ou liga à mão
+ * (`ligacoes.ts`). A ligação manual tem traço próprio e o selo "manual".
  */
-import type { CategoriaId, Execucao } from './mocks'
+import type { CategoriaId, Evento, Execucao } from './mocks'
 import { categorias } from './mocks'
 import { fluxosDaOperacao, operacaoDaCategoria, operacoes, operacoesDoFluxo } from './operacoes'
-import type { Dados, Fase, FiltroDaLista, NoDoMapa, Periodo, Saude } from './consultas'
-import { buscarItens, chaveDoFluxo, filtroVazio, grupoDe, itemPorId, jornadaDoItem, mapaDaOperacao, textoDoEvento, vizinhosDoEvento, fluxoPorId } from './consultas'
+import type { Dados, Fase, FiltroDaLista, LigacaoDoMapa, NoDoMapa, Pendencia, Periodo, Saude } from './consultas'
+import { buscarItens, chaveDoFluxo, filtroVazio, grupoDe, itemPorId, jornadaDoItem, mapaDaOperacao, pendenciasDoMapa, textoDoEvento, vizinhosDoEvento, fluxoPorId } from './consultas'
+import type { AjusteDeLigacao, TipoDeAjuste } from './ligacoes'
+import { ajustar, ajustes, desfazerAjuste, desligar, ligar, manuais } from './ligacoes'
 import type { Textos } from './textos'
 import StatusDaExecucao from './_StatusDaExecucao.vue'
+import PendenciaDeLigacao from './_PendenciaDeLigacao.vue'
 
 const props = defineProps<{
   t: Textos
@@ -141,13 +148,13 @@ function meioDaLigacao(de: NoDoMapa, para: NoDoMapa, volta: boolean) {
 const area = ref<HTMLElement | null>(null)
 const zoom = ref(0.9)
 /** Cabe o desenho inteiro. Ao abrir, não passa de 70% para baixo: abaixo disso o nome do fluxo não se lê. */
-function ajustar(minimo = 0.35) {
+function caberNaTela(minimo = 0.35) {
   const el = area.value
   if (!el) return
   zoom.value = Math.max(minimo, Math.min(1, (el.clientWidth - 16) / mapa.value.largura, (el.clientHeight - 16) / (mapa.value.altura + 40)))
 }
-watch(operacao, () => nextTick(() => ajustar(0.7)))
-onMounted(() => nextTick(() => ajustar(0.7)))
+watch(operacao, () => nextTick(() => caberNaTela(0.7)))
+onMounted(() => nextTick(() => caberNaTela(0.7)))
 const mudarZoom = (d: number) => { zoom.value = Math.max(0.35, Math.min(1.4, +(zoom.value + d).toFixed(2))) }
 
 let arrasto: { x: number, y: number, l: number, t: number } | null = null
@@ -186,6 +193,84 @@ function textoDoGatilho(n: NoDoMapa) {
   return props.t.mapa.gatilhos[g.tipo]
 }
 
+/* ---------- ligações a conferir ---------- */
+const conferindo = ref(false)
+const pendencias = computed(() => pendenciasDoMapa(mapa.value, fluxosDoMapa.value))
+const pendenciasDoFluxo = (id: number) => pendencias.value.filter(p => p.fluxo.id === id)
+const idsDoMapa = computed(() => new Set(fluxosDoMapa.value.map(f => f.id)))
+const ajustesDaOperacao = computed(() => ajustes.value.filter(a => idsDoMapa.value.has(a.fluxo)))
+const manuaisDaOperacao = computed(() => manuais.value.filter(m => idsDoMapa.value.has(m.de) && idsDoMapa.value.has(m.para)))
+const manuaisDoFluxo = (id: number) => manuaisDaOperacao.value.filter(m => m.de === id || m.para === id)
+const ligacaoManual = (id: string) => mapa.value.ligacoes.find(l => l.manual?.id === id)
+
+function abrirConferencia() {
+  conferindo.value = true
+  selecionado.value = null
+}
+function registrar(p: Pendencia, tipo: TipoDeAjuste) {
+  ajustar({ chave: p.chave, tipo, fluxo: p.fluxo.id, evento: 'ligacao' in p ? p.ligacao.evento : undefined })
+  toast.add({ title: props.t.ligacoes.avisos[tipo], icon: tipo === 'confirmada' ? 'i-lucide-check' : tipo === 'externa' ? 'i-lucide-globe' : 'i-lucide-x', color: 'neutral' })
+}
+function desfazer(a: AjusteDeLigacao) {
+  desfazerAjuste(a.chave)
+  toast.add({ title: props.t.ligacoes.avisos.desfeito, icon: 'i-lucide-undo-2', color: 'neutral' })
+}
+/** Quantas vezes as execuções gravaram o que a pessoa descartou (fase 2). */
+const descarteContrariado = (a: AjusteDeLigacao) => mapa.value.ligacoes.find(l => l.id === a.chave)?.observadas ?? 0
+function rotuloDoAjuste(a: AjusteDeLigacao) {
+  const nome = fluxoPorId.get(a.fluxo)?.name ?? ''
+  if (a.chave.startsWith('var:')) return props.t.ligacoes.rotulo.var(nome)
+  if (a.chave.startsWith('ext:')) return props.t.ligacoes.rotulo.ext(nome)
+  return props.t.ligacoes.rotulo.ligacao(nome, a.evento ? textoDoEvento(a.evento, props.t) : '')
+}
+
+/* ---------- ligar à mão ---------- */
+const ligando = ref(false)
+const ligacaoNova = ref<{ de?: number, para?: number, motivo: string }>({ motivo: '' })
+const tentouLigar = ref(false)
+const opcoesDeFluxo = computed(() => fluxosDoMapa.value.map(f => ({ label: f.name, value: f.id })))
+/** O destino que começa por evento recebe a ligação pelo evento; os outros, por chamada direta. */
+const eventoDoDestino = computed<Evento | undefined>(() => {
+  const g = ligacaoNova.value.para ? fluxoPorId.get(ligacaoNova.value.para)?.gatilho : undefined
+  return g?.tipo === 'events' ? { categoria: g.categoria, acao: g.acao } : undefined
+})
+const erroDoMotivo = computed(() => (tentouLigar.value && !ligacaoNova.value.motivo.trim() ? props.t.ligacoes.modal.motivoObrigatorio : undefined))
+const repetida = computed(() => manuais.value.some(m => m.de === ligacaoNova.value.de && m.para === ligacaoNova.value.para))
+function abrirLigacao(de?: number, para?: number) {
+  ligacaoNova.value = { de, para, motivo: '' }
+  tentouLigar.value = false
+  ligando.value = true
+}
+function salvarLigacao() {
+  tentouLigar.value = true
+  const { de, para, motivo } = ligacaoNova.value
+  if (!de || !para || de === para || !motivo.trim() || repetida.value) return
+  ligar({ de, para, evento: eventoDoDestino.value, motivo: motivo.trim() })
+  ligando.value = false
+  toast.add({ title: props.t.ligacoes.modal.feita, description: props.t.ligacoes.modal.feitaDesc, icon: 'i-lucide-link', color: 'success' })
+}
+function remover(id: string) {
+  desligar(id)
+  toast.add({ title: props.t.ligacoes.avisos.desfeito, icon: 'i-lucide-undo-2', color: 'neutral' })
+}
+
+/* ---------- traço de cada ligação ---------- */
+const incerta = (l: LigacaoDoMapa) => (l.certeza === 'possivel' || l.certeza === 'foraDaConfiguracao') && !l.confirmadaPor
+function traco(l: LigacaoDoMapa) {
+  if (l.ciclo) return { classe: 'stroke-(--ui-warning)', dash: l.observadas ? undefined : '5 4', seta: 'seta-ciclo' }
+  if (l.certeza === 'manual') return { classe: 'stroke-(--ui-info)', dash: l.observadas ? undefined : '8 4', seta: 'seta-manual' }
+  if (l.certeza === 'possivel' && !l.confirmadaPor) return { classe: 'stroke-(--ui-border-accented)', dash: '1.5 4', seta: 'seta' }
+  if (l.observadas) return { classe: 'stroke-(--ui-primary)', dash: undefined, seta: 'seta-cheia' }
+  return { classe: 'stroke-(--ui-border-accented)', dash: '5 4', seta: 'seta' }
+}
+/** O selo no meio da ligação: a contagem, o "?" da incerta ou "manual". */
+function selo(l: LigacaoDoMapa) {
+  if (l.certeza === 'manual') return { texto: props.t.ligacoes.manualCurto, largura: 48, cor: 'info' }
+  if (incerta(l)) return { texto: l.observadas ? `? ${l.observadas}` : '?', largura: l.observadas ? 38 : 20, cor: 'warning' }
+  if (l.observadas) return { texto: String(l.observadas), largura: 32, cor: 'neutral' }
+  return undefined
+}
+
 const foraDoEscopo = () => toast.add({ title: props.t.mapa.foraDoEscopo, icon: 'i-lucide-construction', color: 'neutral' })
 const iconeDaCategoria = (c: CategoriaId) => categorias[c].icone
 </script>
@@ -196,6 +281,16 @@ const iconeDaCategoria = (c: CategoriaId) => categorias[c].icone
     <div class="flex flex-wrap items-center gap-2 border-b border-default px-4 py-2">
       <USelect v-model="operacao" :items="opcoesDeOperacao" icon="i-lucide-boxes" size="sm" class="w-56" :aria-label="t.mapa.operacao" :disabled="!opcoesDeOperacao.length" />
       <UButton v-if="operacao" :label="t.gestao.editarRegra" icon="i-lucide-pencil" size="sm" color="neutral" variant="outline" @click="emit('editarOperacao', operacao)" />
+      <UButton
+        v-if="operacao"
+        :label="t.ligacoes.conferir(pendencias.length)"
+        icon="i-lucide-list-checks"
+        size="sm"
+        :color="pendencias.length ? 'warning' : 'neutral'"
+        variant="outline"
+        :aria-pressed="conferindo"
+        @click="conferindo && !selecionado ? (conferindo = false) : abrirConferencia()"
+      />
       <div class="relative">
         <UInput
           v-if="!item"
@@ -236,6 +331,14 @@ const iconeDaCategoria = (c: CategoriaId) => categorias[c].icone
           {{ t.mapa.legenda.observada }}
         </span>
         <span class="flex items-center gap-1.5">
+          <svg width="26" height="8" aria-hidden="true"><line x1="0" y1="4" x2="26" y2="4" class="stroke-(--ui-border-accented)" stroke-width="2" stroke-dasharray="1.5 4" stroke-linecap="round" /></svg>
+          {{ t.ligacoes.legenda.possivel }}
+        </span>
+        <span class="flex items-center gap-1.5">
+          <svg width="26" height="8" aria-hidden="true"><line x1="0" y1="4" x2="26" y2="4" class="stroke-(--ui-info)" stroke-width="2" stroke-dasharray="8 4" /></svg>
+          {{ t.ligacoes.legenda.manual }}
+        </span>
+        <span class="flex items-center gap-1.5">
           <span class="h-3 w-6 rounded-full border border-default bg-elevated" />
           {{ t.mapa.legenda.evento }}
         </span>
@@ -246,7 +349,7 @@ const iconeDaCategoria = (c: CategoriaId) => categorias[c].icone
           <UButton icon="i-lucide-minus" size="xs" color="neutral" variant="ghost" :aria-label="t.mapa.zoom.menos" @click="mudarZoom(-0.1)" />
           <span class="w-9 text-center tabular-nums text-muted">{{ Math.round(zoom * 100) }}%</span>
           <UButton icon="i-lucide-plus" size="xs" color="neutral" variant="ghost" :aria-label="t.mapa.zoom.mais" @click="mudarZoom(0.1)" />
-          <UButton icon="i-lucide-maximize" size="xs" color="neutral" variant="ghost" :aria-label="t.mapa.zoom.ajustar" @click="ajustar()" />
+          <UButton icon="i-lucide-maximize" size="xs" color="neutral" variant="ghost" :aria-label="t.mapa.zoom.ajustar" @click="caberNaTela()" />
         </span>
       </div>
     </div>
@@ -293,7 +396,9 @@ const iconeDaCategoria = (c: CategoriaId) => categorias[c].icone
         @pointercancel="soltar"
         @click="clicarFundo"
       >
-        <p class="pointer-events-none absolute left-3 top-2 z-10 text-xs text-muted">{{ t.mapa.dica }}</p>
+        <p class="pointer-events-none absolute left-3 top-2 z-10 text-xs text-muted">
+          {{ t.mapa.dica }}<template v-if="mapa.descartadas.length">{{ ` ${t.ligacoes.descartadas(mapa.descartadas.length)}.` }}</template>
+        </p>
         <div :style="{ width: `${mapa.largura * zoom}px`, height: `${(mapa.altura + 60) * zoom}px` }">
           <div
             :key="operacao"
@@ -311,20 +416,36 @@ const iconeDaCategoria = (c: CategoriaId) => categorias[c].icone
                 <marker id="seta-ciclo" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
                   <path d="M 0 0 L 10 5 L 0 10 z" class="fill-(--ui-warning)" />
                 </marker>
+                <marker id="seta-manual" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" class="fill-(--ui-info)" />
+                </marker>
               </defs>
               <g transform="translate(0 40)">
                 <g v-for="l in mapa.ligacoes" :key="l.id" class="transition-opacity duration-200" :class="aceso && !ligacaoAcesa(l.de, l.para) ? 'opacity-15' : 'opacity-100'">
                   <path
                     :d="caminho(noPorId.get(l.de)!, noPorId.get(l.para)!, l.volta)"
                     fill="none"
+                    stroke-linecap="round"
                     :stroke-width="l.observadas ? Math.min(4, 1.5 + Math.log10(l.observadas + 1)) : 1.5"
-                    :stroke-dasharray="l.observadas ? undefined : '5 4'"
-                    :class="l.ciclo ? 'stroke-(--ui-warning)' : l.observadas ? 'stroke-(--ui-primary)' : 'stroke-(--ui-border-accented)'"
-                    :marker-end="`url(#${l.ciclo ? 'seta-ciclo' : l.observadas ? 'seta-cheia' : 'seta'})`"
+                    :stroke-dasharray="traco(l).dash"
+                    :class="traco(l).classe"
+                    :marker-end="`url(#${traco(l).seta})`"
                   />
-                  <g v-if="l.observadas" :transform="`translate(${meioDaLigacao(noPorId.get(l.de)!, noPorId.get(l.para)!, l.volta).x} ${meioDaLigacao(noPorId.get(l.de)!, noPorId.get(l.para)!, l.volta).y})`">
-                    <rect x="-16" y="-9" width="32" height="18" rx="9" class="fill-(--ui-bg) stroke-(--ui-border)" />
-                    <text text-anchor="middle" dominant-baseline="central" class="fill-(--ui-text-toned) text-[10px] tabular-nums">{{ l.observadas }}</text>
+                  <g v-if="selo(l)" :transform="`translate(${meioDaLigacao(noPorId.get(l.de)!, noPorId.get(l.para)!, l.volta).x} ${meioDaLigacao(noPorId.get(l.de)!, noPorId.get(l.para)!, l.volta).y})`">
+                    <rect
+                      :x="-selo(l)!.largura / 2"
+                      y="-9"
+                      :width="selo(l)!.largura"
+                      height="18"
+                      rx="9"
+                      :class="selo(l)!.cor === 'warning' ? 'fill-(--ui-bg) stroke-(--ui-warning)' : selo(l)!.cor === 'info' ? 'fill-(--ui-bg) stroke-(--ui-info)' : 'fill-(--ui-bg) stroke-(--ui-border)'"
+                    />
+                    <text
+                      text-anchor="middle"
+                      dominant-baseline="central"
+                      class="text-[10px] tabular-nums"
+                      :class="selo(l)!.cor === 'warning' ? 'fill-(--ui-warning) font-semibold' : selo(l)!.cor === 'info' ? 'fill-(--ui-info)' : 'fill-(--ui-text-toned)'"
+                    >{{ selo(l)!.texto }}</text>
                   </g>
                 </g>
               </g>
@@ -361,7 +482,7 @@ const iconeDaCategoria = (c: CategoriaId) => categorias[c].icone
                   ]"
                   :style="{ left: `${n.x}px`, top: `${n.y}px`, width: `${n.largura}px`, height: `${n.altura}px` }"
                   :aria-pressed="selecionado === n.id"
-                  :aria-label="`${n.fluxo!.name}. ${t.mapa.saude[mapa.saude.get(n.fluxo!.id)!.saude]}. ${t.mapa.execs(mapa.saude.get(n.fluxo!.id)!.execs)}`"
+                  :aria-label="`${n.fluxo!.name}. ${t.mapa.saude[mapa.saude.get(n.fluxo!.id)!.saude]}. ${t.mapa.execs(mapa.saude.get(n.fluxo!.id)!.execs)}${pendenciasDoFluxo(n.fluxo!.id).length ? `. ${t.ligacoes.titulo}: ${pendenciasDoFluxo(n.fluxo!.id).length}` : ''}`"
                   @click.stop="selecionado = selecionado === n.id ? null : n.id"
                 >
                   <span class="w-1 shrink-0" :class="estiloDaSaude[mapa.saude.get(n.fluxo!.id)!.saude].faixa" />
@@ -381,6 +502,7 @@ const iconeDaCategoria = (c: CategoriaId) => categorias[c].icone
                         <span v-if="passosDoFluxo.get(n.fluxo!.id)!.length > 3" class="text-[9px] font-semibold text-primary">+{{ passosDoFluxo.get(n.fluxo!.id)!.length - 3 }}</span>
                       </span>
                       <UIcon v-if="n.fluxo!.gatilho.tipo !== 'events'" :name="iconeDoGatilho[n.fluxo!.gatilho.tipo]" class="size-3 shrink-0" :class="passosDoFluxo.get(n.fluxo!.id) ? '' : 'ml-auto'" />
+                      <UIcon v-if="pendenciasDoFluxo(n.fluxo!.id).length" name="i-lucide-circle-help" class="size-3 shrink-0 text-warning" :class="passosDoFluxo.get(n.fluxo!.id) || n.fluxo!.gatilho.tipo !== 'events' ? '' : 'ml-auto'" />
                     </span>
                   </span>
                 </button>
@@ -392,9 +514,72 @@ const iconeDaCategoria = (c: CategoriaId) => categorias[c].icone
 
       <!-- Painel: o nó escolhido, ou a jornada do item -->
       <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 translate-x-4" leave-active-class="transition duration-150 ease-in" leave-to-class="opacity-0 translate-x-4">
-        <aside v-if="noSelecionado || item" class="flex w-80 shrink-0 flex-col overflow-y-auto border-l border-default bg-default">
+        <aside v-if="noSelecionado || item || conferindo" class="flex w-80 shrink-0 flex-col overflow-y-auto border-l border-default bg-default">
+          <!-- Ligações a conferir -->
+          <template v-if="conferindo && !noSelecionado">
+            <header class="flex items-start gap-2 border-b border-default p-4">
+              <div class="min-w-0 flex-1">
+                <h3 class="text-sm font-semibold text-highlighted">{{ t.ligacoes.titulo }}</h3>
+                <p class="mt-1 text-xs text-toned">{{ t.ligacoes.descricao }}</p>
+              </div>
+              <UButton icon="i-lucide-x" size="xs" color="neutral" variant="ghost" :aria-label="t.mapa.painel.fechar" @click="conferindo = false" />
+            </header>
+            <div class="flex flex-col gap-2 p-4">
+              <div v-if="!pendencias.length" class="rounded-md border border-dashed border-accented p-4 text-center">
+                <UIcon name="i-lucide-circle-check" class="size-5 text-success" />
+                <p class="mt-1 text-sm text-highlighted">{{ t.ligacoes.nada }}</p>
+                <p class="text-xs text-muted">{{ t.ligacoes.nadaDesc }}</p>
+              </div>
+              <PendenciaDeLigacao
+                v-for="(p, k) in pendencias"
+                :key="p.chave"
+                :t="t"
+                :p="p"
+                :fase="fase"
+                class="animate-[entrada_.25s_ease-out_both]"
+                :style="{ animationDelay: `${k * 40}ms` }"
+                @confirmar="registrar(p, 'confirmada')"
+                @descartar="registrar(p, 'descartada')"
+                @externa="registrar(p, 'externa')"
+                @ligar="p.tipo === 'externa' ? abrirLigacao(undefined, p.fluxo.id) : abrirLigacao(p.fluxo.id)"
+              />
+            </div>
+            <section v-if="ajustesDaOperacao.length || manuaisDaOperacao.length" class="border-t border-default p-4">
+              <h4 class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">{{ t.ligacoes.feitos(ajustesDaOperacao.length + manuaisDaOperacao.length) }}</h4>
+              <ul class="flex flex-col gap-2">
+                <li v-for="m in manuaisDaOperacao" :key="m.id" class="rounded-md border border-default p-2.5">
+                  <div class="flex items-start gap-2">
+                    <UBadge :label="t.ligacoes.tipos.manual" color="info" variant="subtle" size="sm" />
+                    <p class="min-w-0 flex-1 text-sm text-highlighted">{{ t.ligacoes.rotulo.manual(fluxoPorId.get(m.de)?.name ?? '', fluxoPorId.get(m.para)?.name ?? '') }}</p>
+                  </div>
+                  <p class="mt-1 text-xs text-toned">{{ m.motivo }}</p>
+                  <p v-if="fase === 2" class="mt-1 text-xs" :class="ligacaoManual(m.id)?.observadas ? 'text-success' : 'text-muted'">
+                    {{ ligacaoManual(m.id)?.observadas ? t.ligacoes.confirmadaPorExecucoes(ligacaoManual(m.id)!.observadas) : t.ligacoes.manualSemExecucao }}
+                  </p>
+                  <div class="mt-1 flex items-center justify-between gap-2">
+                    <span class="text-xs text-dimmed">{{ t.ligacoes.porVoce }}</span>
+                    <UButton :label="t.ligacoes.remover" icon="i-lucide-trash-2" size="xs" color="neutral" variant="ghost" @click="remover(m.id)" />
+                  </div>
+                </li>
+                <li v-for="a in ajustesDaOperacao" :key="a.chave" class="rounded-md border border-default p-2.5">
+                  <div class="flex items-start gap-2">
+                    <UBadge :label="t.ligacoes.tipos[a.tipo]" :color="a.tipo === 'confirmada' ? 'success' : 'neutral'" variant="subtle" size="sm" />
+                    <p class="min-w-0 flex-1 text-sm text-highlighted">{{ rotuloDoAjuste(a) }}</p>
+                  </div>
+                  <p v-if="a.tipo === 'descartada' && descarteContrariado(a)" class="mt-1 text-xs text-warning">
+                    {{ t.ligacoes.descarteContrariado(descarteContrariado(a)) }}
+                  </p>
+                  <div class="mt-1 flex items-center justify-between gap-2">
+                    <span class="text-xs text-dimmed">{{ t.ligacoes.porVoce }}</span>
+                    <UButton :label="t.ligacoes.desfazer" icon="i-lucide-undo-2" size="xs" color="neutral" variant="ghost" @click="desfazer(a)" />
+                  </div>
+                </li>
+              </ul>
+            </section>
+          </template>
+
           <!-- Jornada -->
-          <template v-if="item && !noSelecionado">
+          <template v-else-if="item && !noSelecionado">
             <header class="border-b border-default p-4">
               <p class="text-xs text-muted">{{ categorias[item.categoria].singular }}</p>
               <p class="text-sm font-semibold text-highlighted">{{ item.reference }}</p>
@@ -437,8 +622,18 @@ const iconeDaCategoria = (c: CategoriaId) => categorias[c].icone
               </div>
               <div>
                 <dt class="text-xs text-muted">{{ t.mapa.painel.grava }}</dt>
-                <dd v-if="noSelecionado.fluxo.grava.length" class="flex flex-wrap gap-1 pt-0.5">
-                  <UBadge v-for="g in noSelecionado.fluxo.grava" :key="`${g.categoria}${g.acao}`" :label="textoDoEvento(g, t)" :icon="iconeDaCategoria(g.categoria)" color="neutral" variant="outline" size="sm" />
+                <dd v-if="noSelecionado.fluxo.grava.length || noSelecionado.fluxo.gravaPorVariavel" class="flex flex-wrap gap-1 pt-0.5">
+                  <UBadge
+                    v-for="g in noSelecionado.fluxo.grava"
+                    :key="`${g.categoria}${g.acao}`"
+                    :label="g.condicao ? `${textoDoEvento(g, t)} ?` : textoDoEvento(g, t)"
+                    :icon="iconeDaCategoria(g.categoria)"
+                    color="neutral"
+                    variant="outline"
+                    size="sm"
+                    :title="g.condicao ? t.ligacoes.possivel.detalhe(g.condicao) : undefined"
+                  />
+                  <UBadge v-if="noSelecionado.fluxo.gravaPorVariavel" :label="`${noSelecionado.fluxo.gravaPorVariavel.campo} ?`" icon="i-lucide-variable" color="warning" variant="outline" size="sm" />
                 </dd>
                 <dd v-else class="text-muted">{{ t.mapa.painel.gravaNada }}</dd>
               </div>
@@ -469,8 +664,31 @@ const iconeDaCategoria = (c: CategoriaId) => categorias[c].icone
               variant="subtle"
               :ui="{ description: 'text-xs' }"
             />
+            <!-- As ligações deste fluxo que pedem ajuste, e as manuais -->
+            <section v-if="pendenciasDoFluxo(noSelecionado.fluxo.id).length || manuaisDoFluxo(noSelecionado.fluxo.id).length" class="flex flex-col gap-2 p-4">
+              <h4 class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.ligacoes.doFluxo }}</h4>
+              <PendenciaDeLigacao
+                v-for="p in pendenciasDoFluxo(noSelecionado.fluxo.id)"
+                :key="p.chave"
+                :t="t"
+                :p="p"
+                :fase="fase"
+                @confirmar="registrar(p, 'confirmada')"
+                @descartar="registrar(p, 'descartada')"
+                @externa="registrar(p, 'externa')"
+                @ligar="p.tipo === 'externa' ? abrirLigacao(undefined, p.fluxo.id) : abrirLigacao(p.fluxo.id)"
+              />
+              <div v-for="m in manuaisDoFluxo(noSelecionado.fluxo.id)" :key="m.id" class="rounded-md border border-info/40 p-2.5">
+                <div class="flex items-start gap-2">
+                  <UBadge :label="t.ligacoes.tipos.manual" color="info" variant="subtle" size="sm" />
+                  <p class="min-w-0 flex-1 text-sm text-highlighted">{{ t.ligacoes.rotulo.manual(fluxoPorId.get(m.de)?.name ?? '', fluxoPorId.get(m.para)?.name ?? '') }}</p>
+                </div>
+                <p class="mt-1 text-xs text-toned">{{ m.motivo }}</p>
+              </div>
+            </section>
             <div class="mt-auto flex flex-wrap gap-1.5 border-t border-default p-4">
               <UButton :label="t.mapa.painel.verExecucoes" icon="i-lucide-list" size="xs" color="primary" variant="outline" @click="emit('filtrar', { ...filtroVazio(), fluxos: [noSelecionado.fluxo.id], soOrigem: false, periodo })" />
+              <UButton :label="t.ligacoes.ligarFluxo" icon="i-lucide-link" size="xs" color="neutral" variant="outline" @click="abrirLigacao(noSelecionado.fluxo.id)" />
               <UButton :label="t.mapa.painel.abrirEditor" icon="i-lucide-pencil" size="xs" color="neutral" variant="ghost" @click="foraDoEscopo" />
             </div>
           </template>
@@ -498,5 +716,35 @@ const iconeDaCategoria = (c: CategoriaId) => categorias[c].icone
         </aside>
       </Transition>
     </div>
+
+    <!-- Ligar dois fluxos à mão -->
+    <UModal v-model:open="ligando" :title="t.ligacoes.modal.titulo" :description="t.ligacoes.modal.descricao">
+      <template #body>
+        <div class="flex flex-col gap-4">
+          <UFormField :label="t.ligacoes.modal.de" required name="de" :error="tentouLigar && !ligacaoNova.de ? t.ligacoes.modal.fluxoObrigatorio : undefined">
+            <USelectMenu v-model="ligacaoNova.de" :items="opcoesDeFluxo.filter(o => o.value !== ligacaoNova.para)" value-key="value" icon="i-lucide-workflow" :placeholder="t.ligacoes.modal.escolha" class="w-full" />
+          </UFormField>
+          <UFormField :label="t.ligacoes.modal.para" :help="t.ligacoes.modal.paraAjuda" required name="para" :error="tentouLigar && !ligacaoNova.para ? t.ligacoes.modal.fluxoObrigatorio : tentouLigar && repetida ? t.ligacoes.modal.repetida : undefined">
+            <USelectMenu v-model="ligacaoNova.para" :items="opcoesDeFluxo.filter(o => o.value !== ligacaoNova.de)" value-key="value" icon="i-lucide-workflow" :placeholder="t.ligacoes.modal.escolha" class="w-full" />
+          </UFormField>
+          <div v-if="ligacaoNova.para">
+            <p class="text-sm font-medium text-highlighted">{{ t.ligacoes.modal.por }}</p>
+            <p class="mt-0.5 flex items-center gap-1.5 text-sm text-toned">
+              <UIcon :name="eventoDoDestino ? iconeDaCategoria(eventoDoDestino.categoria) : 'i-lucide-webhook'" class="size-4 shrink-0 text-muted" />
+              {{ eventoDoDestino ? t.ligacoes.modal.peloEvento(textoDoEvento(eventoDoDestino, t)) : t.ligacoes.modal.direta }}
+            </p>
+          </div>
+          <UFormField :label="t.ligacoes.modal.motivo" required name="motivo" :error="erroDoMotivo">
+            <UTextarea v-model="ligacaoNova.motivo" :placeholder="t.ligacoes.modal.motivoPlaceholder" :rows="2" autoresize class="w-full" />
+          </UFormField>
+        </div>
+      </template>
+      <template #footer>
+        <div class="flex w-full justify-end gap-2">
+          <UButton :label="t.ligacoes.modal.cancelar" color="neutral" variant="ghost" @click="ligando = false" />
+          <UButton :label="t.ligacoes.modal.ligar" icon="i-lucide-link" @click="salvarLigacao" />
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>

@@ -20,7 +20,7 @@ import { categorias, exemplos, workspace } from './mocks'
 import type { Cenario, Fase, FiltroDaLista, Periodo } from './consultas'
 import { dadosDoCenario, execPorId, filtroVazio, fluxoPorId, itemPorId, problemas } from './consultas'
 import { operacaoDaCategoria, reiniciarOperacoes } from './operacoes'
-import type { EstadoDoProblema } from './textos'
+import { reiniciarLigacoes } from './ligacoes'
 import { textos } from './textos'
 import CascaDoSpaceflow from './_CascaDoSpaceflow.vue'
 import CartoesDeFluxos from './_CartoesDeFluxos.vue'
@@ -90,7 +90,7 @@ const abaDaExecucao = ref<'fluxo' | 'cadeia' | 'detalhes' | 'comentarios' | 'log
 
 const filtro = ref<FiltroDaLista>(filtroVazio())
 const periodo = ref<Periodo>('d7')
-const estados = ref<Record<number, EstadoDoProblema>>({})
+const reprocessados = ref<number[]>([])
 const operacaoDoMapa = ref<string | undefined>('contratos')
 const itemDoMapa = ref<number | undefined>()
 
@@ -166,7 +166,7 @@ const trilha = computed(() => {
   return [...base, t.value.trilha.spaceflows]
 })
 
-const problemasAbertos = computed(() => problemas(dados.value.execucoes, periodo.value).filter(p => (estados.value[p.fluxo.id] ?? 'revisar') === 'revisar').length)
+const problemasAbertos = computed(() => problemas(dados.value.execucoes, periodo.value).filter(p => !reprocessados.value.includes(p.fluxo.id)).length)
 const abas = computed(() => [
   { value: 'visao', label: t.value.abas.visao, icon: 'i-lucide-layout-dashboard', badge: problemasAbertos.value && !carregando.value ? { label: String(problemasAbertos.value), color: 'error' as const, variant: 'subtle' as const } : undefined },
   { value: 'execucoes', label: t.value.abas.execucoes, icon: 'i-lucide-list' },
@@ -207,11 +207,12 @@ function reiniciar() {
   aba.value = 'visao'
   filtro.value = filtroVazio()
   periodo.value = 'd7'
-  estados.value = {}
+  reprocessados.value = []
   operacaoDoMapa.value = 'contratos'
   itemDoMapa.value = undefined
   editorAberto.value = false
   reiniciarOperacoes()
+  reiniciarLigacoes()
 }
 
 const exemplosDoAndaime = [
@@ -314,7 +315,7 @@ const exemplosDoAndaime = [
             <VisaoGeral
               v-else-if="aba === 'visao'"
               v-model:periodo="periodo"
-              v-model:estados="estados"
+              v-model:reprocessados="reprocessados"
               :t="t"
               :dados="dados"
               :fase="fase"

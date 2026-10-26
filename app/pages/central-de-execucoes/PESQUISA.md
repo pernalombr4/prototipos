@@ -19,7 +19,7 @@ backend, então gravar a causa no momento do disparo custa pouco.
 
 | Frente | Produtos | O que trouxe para a central | Notas |
 |---|---|---|---|
-| Ferramentas de trabalho, CRM e BPM | Notion, Twenty, ClickUp, monday.com, Pipefy, HubSpot, Salesforce, Jira, Airtable, ServiceNow, Bizagi | linha do tempo na tela do registro (aba Fluxos do item); "Health" com causa em palavras (Precisa de atenção); estado do problema (HubSpot) | [`business_tools.md`](pesquisa/research_notes/business_tools.md) |
+| Ferramentas de trabalho, CRM e BPM | Notion, Twenty, ClickUp, monday.com, Pipefy, HubSpot, Salesforce, Jira, Airtable, ServiceNow, Bizagi | linha do tempo na tela do registro (aba Fluxos do item); "Health" com causa em palavras (Precisa de atenção); estado do problema (HubSpot; removido na rodada 3) | [`business_tools.md`](pesquisa/research_notes/business_tools.md) |
 | Automação no-code | n8n, Zapier, Make, Power Automate, Workato, Pipedream, Windmill, Activepieces, Retool, Tray | números no topo com clique para a lista; janela de 7 dias comparada à anterior; "Need your attention" (Make); filhas escondidas por padrão | [`ipaas_no_code.md`](pesquisa/research_notes/ipaas_no_code.md) |
 | Motores para desenvolvedores | Temporal, Camunda, Airflow, Prefect, Dagster, Step Functions, Inngest, Trigger.dev, Conductor, Hatchet | 5 grupos de status com espera nomeada; "Ir para a origem" (Trigger.dev); visões salvas com link (Temporal); reprocessar com prévia (Inngest) | [`dev_engines.md`](pesquisa/research_notes/dev_engines.md) |
 | Mineração de processos e observabilidade | Celonis, Power Automate Process Mining, Datadog, X-Ray, Grafana Tempo, Confluent, OpenTelemetry, Honeycomb, NN/g, Google SRE | cascata da cadeia (Honeycomb); evento como nó entre produtor e consumidor (Confluent); mapa gerado sozinho com clique para a lista (X-Ray); painel que abre no que pede ação | [`patterns_observability.md`](pesquisa/research_notes/patterns_observability.md) |
@@ -45,6 +45,6 @@ mapa). O item 4 reaproveita o aviso de ciclo do `protecoes-do-spaceflow`.
 | 3. Mapa da operação | aba Mapa da operação |
 | 4. Lista global | aba Execuções |
 | 5. Números no topo | Visão geral, 5 números e gráfico por dia |
-| 6. Precisa de atenção | Visão geral, com estado do problema e reprocessar em lote |
+| 6. Precisa de atenção | Visão geral, com reprocessar em lote (o estado do problema saiu na rodada 3) |
 | 7. Aba de fluxos no item | tela do item, aba Fluxos |
 | 8. Avisos da operação | fora desta rodada |
