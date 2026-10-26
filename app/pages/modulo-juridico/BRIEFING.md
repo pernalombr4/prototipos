@@ -1,0 +1,147 @@
+# Módulo Jurídico: briefing
+
+## A demanda como ela veio
+
+> na minha maquina, em pesquisas, ha uma pesquisa feita sobre modulo juridico eua/brasil
+>
+> com pesquisa de mercado de como trabalhar com um modulo juridico.
+>
+> faça um prototipo de um modulo juridico pro enspace a partir do que está pesquisado ali.
+>
+> mas cuidado: deve haver diferença entre modulo e caso de uso. se ele simplesmente for um caso de uso e nao trouxer
+> ganho como modulo, nao ha funcionalidades a criar. apenas uma configuraçao do enspace a salvar e permitir ser
+> replicada.
+
+(Redatora, 2026-10-26.)
+
+- **Tela ou jornada em jogo:** Configurações › Sistema › Módulos (a chave "Juridico") e o que ela liga: o menu do
+  membro, a tela do item de processo e as telas próprias do módulo.
+- **Sucesso:** quem cuida do contencioso recebe a intimação, confere o prazo que o ENSPACE calculou pela regra do rito
+  e do tribunal, e não digita data nenhuma; o resto do jurídico chega como caso de uso, sem funcionalidade nova.
+
+## A fonte: a pesquisa de mercado de 2026-10-24
+
+Relatório `pesquisa-de-mercado/runs/2026-10-24-modulo-juridico-brasil-eua/RELATORIO.md` e a nota
+`evidencias/enspace-modulos-e-casos-de-uso.md` (só leitura, repositório vizinho). O que este protótipo usa:
+
+- **Módulo e caso de uso já são 2 coisas no ENSPACE.** Módulo é uma chave do workspace (`modules`:
+  `monetary_correction`, `comparisons`, `en-legal`) que liga comportamento em telas que existem. Caso de uso é um
+  pacote de estrutura (categorias, campos, formulários, fluxos, menus) que se exporta e se importa. Um não liga o outro
+  (nota ENS §1).
+- **O módulo leva os motores; o pacote do país leva dado.** "O módulo traz os motores, iguais nos 2 países: prazos com
+  regra declarada, correção com séries de índices versionadas, validação de fatura, conta fiduciária e trilha de
+  auditoria só de acréscimo" (Recomendação 1). O pacote Brasil traz regras de rito, calendário por tribunal, DJEN e
+  Domicílio, provisão pelo CPC 25 (Recomendação 5).
+- **Tabela 1 (8 áreas):** consultivo é núcleo comum; contratos, procurações, societário, marcas e canal de denúncias
+  são parâmetro por país; contencioso e pagamentos jurídicos são pacote por país.
+- **Tabela 3 (exigências brasileiras):** contagem por rito, calendário por órgão, DJEN e Domicílio e provisão pelo CPC
+  25 são "antes" da venda, porque sem elas "o produto erra um resultado com efeito jurídico (prazo, cálculo,
+  assinatura)".
+- **Sigilo, barreira, MFA, trilha, canal anônimo** são "o que a plataforma garante (vale em todo país)", na coluna da
+  plataforma, não na do pacote.
+- **Defeitos de plataforma que o módulo herda:** prazo de tarefa em UTC mostra o dia anterior em Brasília; C44 (o achado
+  de QA em que o prazo em dias úteis cai no fim de semana); S3-F3 e S3-F2 (feriados de Brasil e EUA misturados e
+  calendário sem dia útil); importação que duplica categoria (RN002).
+
+## O que a pesquisa de UX já dizia
+
+Busca em `enspace-ux-research` (temas, `UX_REPORT.md`) por jurídico, módulo, prazo, intimação e feriado:
+
+- **S3-F3 (P1):** "Sincronizar Feriados" grava feriados do Brasil e dos EUA misturados, em 2 idiomas, sem escolher
+  país, sem listar o que gravou e sem desfazer. Bloqueia dias úteis brasileiros. É a base de qualquer prazo em dias
+  úteis.
+- **S3-F2 (P2):** o Calendário nasce sem dia útil e pinta o mês inteiro de "Dia Não Útil".
+- **Auditoria de Configurações › Sistema:** os 3 toggles de Módulos foram vistos, sem fricção própria registrada.
+- Nada sobre intimação, prazo processual ou provisão: o tema jurídico nunca foi auditado.
+
+## O que o develop faz hoje
+
+Workspace de exploração, pela tela, em 2026-10-26.
+
+| Passo | URL | O que acontece |
+|---|---|---|
+| 1 | `/workspaces/<exploração>/settings/system` | Cartão **Módulos** com 3 chaves: "Correção Monetária", "Comparações" e "Juridico" (sem acento), todas desligadas. Nenhuma tem texto de ajuda; as chaves de cima, em Configurações Adicionais, têm o "?" ([print](evidencias/dev-01-modulos-desligados.jpg)) |
+| 2 | mesma | Ligar "Juridico" e clicar em **Salvar**: grava com `PUT /workspaces/{id}` (200). Nenhum aviso diz o que mudou |
+| 3 | menu lateral | Igual ao de antes: Membro (Início, Spaceflows, Categorias, Tarefas, Agenda, Knowledge) e Configurações (Estrutura: Categorias, Listas, Spaceflow; Interface: Menus, Telas, Casos de Uso). Nenhum item novo |
+| 4 | `/settings/interface/usecases` | Igual: Migração de Workspace e o bloco "General" com 1 caso, "QA Comercial - Brasil (pt-br)". Nenhum caso jurídico, nenhum aviso do módulo ([print](evidencias/dev-02-casos-de-uso-com-juridico-ligado.jpg)) |
+| 5 | código da tela | Nos 226 arquivos de script carregados, a chave `en-legal` não aparece. O único efeito medido do módulo segue sendo o da pesquisa: as 5 ferramentas jurídicas dos agentes de IA (`legalLookupCase` e outras), que consultam processo pelo número CNJ |
+| 6 | mesma do passo 1 | Chave desligada de novo e salva (`PUT` 200): o workspace ficou como estava |
+
+### O que já existe e funciona
+
+- A chave `en-legal`, gravada no workspace.
+- Categorias, campos (máscara Nº CNJ, Valor Monetário, Pessoa/Empresa com CNPJ), formulários, Spaceflow com gatilho por
+  agenda, tarefas com prazo, modelos de documento, 5 assinadores (3 com ICP-Brasil): tudo o que um caso de uso jurídico
+  precisa para contratos, consultivo, procurações, societário e pagamentos.
+- O módulo Correção Monetária (12 índices, tabelas dos tribunais) e o módulo Comparações (circularização com
+  escritórios), que o contencioso já usa.
+- Casos de uso e Migração de Workspace: exportar e importar a estrutura.
+
+### Onde trava
+
+- Ligar o Jurídico não muda nada na tela. O nome sai sem acento e sem ajuda.
+- Prazo processual não existe: o prazo é uma data que alguém digita num campo ou na tarefa. A tarefa calcula em UTC
+  (mostra o dia anterior em Brasília) e o C44 deixa prazo em dias úteis cair no fim de semana.
+- O calendário é 1 só por workspace, sem tribunal, e a sincronização mistura feriados de 2 países (S3-F3).
+- Nenhuma captura de publicação ou intimação. O site vende captura de DJe; a doc não cita.
+- Risco e provisão são campos soltos: não há data-base, histórico nem fechamento.
+
+## Módulo ou caso de uso: o critério
+
+Uma área vira funcionalidade do módulo só quando as 3 condições valem juntas:
+
+1. ela produz um resultado com **efeito jurídico** (prazo, ciência de intimação, provisão contábil);
+2. a **configuração de hoje não produz esse resultado certo** (categorias, campos, formulários, Spaceflow, telas,
+   assinadores e os módulos que já existem);
+3. o **motor é igual para todo cliente**; só o dado muda por país (regra, calendário, conector).
+
+Se a área para na condição 2, ela é **caso de uso**: uma configuração salva e replicada pela galeria de casos de uso, sem
+tela nova. Se ela vale para todo workspace, jurídico ou não, ela é **plataforma** e vai para o protótipo da plataforma.
+
+| Área | Resultado com efeito jurídico? | A configuração de hoje resolve? | Fica como |
+|---|---|---|---|
+| Contencioso: estrutura do processo (partes, foro, valor, fase, audiências) | não | sim | **caso de uso** |
+| Contencioso: prazo processual | sim (prazo perdido) | não: data digitada, UTC, sem rito nem tribunal | **módulo: Prazos** |
+| Contencioso: publicações e intimações | sim (ciência abre prazo) | não: não há captura | **módulo: Intimações** |
+| Contencioso: risco e provisão | sim (balanço, CPC 25) | não: campo solto, sem data-base nem histórico | **módulo: Provisão** |
+| Contratos | só na assinatura, que já existe | sim: modelos, assinadores, Spaceflow de aprovação e renovação | **caso de uso** |
+| Consultivo | não | sim: formulário de entrada, triagem, prazo de atendimento | **caso de uso** |
+| Procurações | não | sim: vigência e aviso por gatilho de agenda | **caso de uso** |
+| Societário | não | sim: calendário de obrigações como itens com gatilho | **caso de uso** |
+| Pagamentos jurídicos (Brasil) | não | sim: categoria, aprovação, centro de custo | **caso de uso** |
+| Marcas | não, sem conector | sim: prazos de 10 anos e 60 dias como gatilho | **caso de uso** (leitura da RPI fica para depois) |
+| Canal de denúncias | sim (anonimato) | não, mas o que falta vale para todo workspace | **caso de uso + plataforma** (formulário anônimo, protótipo `formulario-anonimo`) |
+| Sigilo e barreira por caso | sim | não | **plataforma** (tabela 3 da pesquisa) |
+
+O protótipo desenha só as 3 linhas "módulo". As outras ficam listadas na configuração do módulo, como casos de uso
+que se usam pela galeria, para mostrar onde cada uma mora.
+
+## A casca da tela, item por item
+
+Copiada de `central-de-execucoes/_CascaDoSpaceflow.vue` (cópia do develop de 2026-10-24), conferida contra o develop
+em 2026-10-26 (passo 3 da tabela acima):
+
+- **Menu lateral, topo:** avatar com as iniciais, nome e referência do workspace, seta; "Buscar..." com CTRL K.
+- **Membro:** Início, Spaceflows, Categorias (abre as categorias), Tarefas, Agenda, Knowledge.
+- **Configurações:** Visão Geral, Sistema, Estrutura (Categorias, Listas, Spaceflow), Gestão de Membros, Interface
+  (Menus, Telas, Casos de Uso), E-mails, Integrações, Agentes de IA, Logs.
+- **Ajuda:** Releases, Documentação (com seta de link externo).
+- **Barra do topo:** recolher menu, voltar, avançar, recarregar, início; trilha com CTRL B e estrela; bandeira do
+  idioma, sol, Suporte, sino, avatar.
+- **Configurações › Sistema:** título "Configurações Gerais", abas Informações Básicas, Calendário, Notificações,
+  Dicionários, Cobrança; cartão Módulos com Salvar próprio.
+- **Tela do item:** painel da esquerda (ícone, referência, categoria, Identificação, Origem, Histórico), abas Visão
+  Geral, Comentários, Logs de Auditoria, Tarefas, Anexos, Emails Automáticos, Mail Box, Notas e Campos; rodapé
+  "Alterações não salvas", "Sair sem salvar" e "Salvar".
+
+Achados de passagem na casca (ficam como estão):
+
+- "Juridico" sem acento, e os 3 módulos sem texto de ajuda.
+- A tela de Casos de Uso abre com o logo e um texto que fala em "consultar todas as categorias", mas a galeria mostra
+  casos de uso, não categorias.
+
+## Dado do protótipo
+
+Empresa, pessoas, processos, números CNJ, valores e teores de publicação são inventados. Os feriados nacionais de 2026
+são os do calendário oficial; os feriados locais dos tribunais são exemplo, marcados como tal no mock. Nada foi
+preparado por API.
