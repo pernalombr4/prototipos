@@ -14,7 +14,8 @@
  * - Detalhes com os campos nomeados e o JSON atrás de "Ver dados técnicos".
  */
 import type { Execucao } from './mocks'
-import { categorias, operacoes } from './mocks'
+import { categorias } from './mocks'
+import { operacoesDoFluxo } from './operacoes'
 import type { Dados, Fase } from './consultas'
 import { cadeiaDe, descreverDisparo, execPorId, fluxoPorId, grupoDe, itemPorId, textoDoEvento } from './consultas'
 import type { Textos } from './textos'
@@ -117,7 +118,7 @@ const iconeDoNo = (tipo: string) => tipo === 'start' ? 'i-lucide-play' : tipo ==
       <div class="min-w-0 flex-1">
         <h1 class="truncate text-base font-semibold text-highlighted">{{ hoje ? e.reference : fluxo.name }}</h1>
         <p class="truncate text-xs text-muted">
-          <template v-if="!hoje">{{ operacoes.find(o => o.id === fluxo.operacao)?.nome }} · </template>{{ hoje ? fluxo.name : e.reference }} · v{{ e.version }}
+          <template v-if="!hoje && operacoesDoFluxo(fluxo).length">{{ operacoesDoFluxo(fluxo).map(o => o.nome).join(', ') }} · </template>{{ hoje ? fluxo.name : e.reference }} · v{{ e.version }}
         </p>
       </div>
       <StatusDaExecucao :e="e" :t="t" :hoje="hoje" sem-motivo />

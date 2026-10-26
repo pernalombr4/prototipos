@@ -6,8 +6,9 @@
  * já guarda: sem cadeia, sem o que cada execução gravou, e a busca por item só acha as execuções
  * com o item ligado direto (`link_item`).
  */
-import type { CausaId, Evento, Execucao, Fluxo, ItemDoMock, OperacaoId } from './mocks'
-import { AGORA, categorias, fluxos, operacoes, responsavelDaTarefa, todasAsExecucoes, todosOsItens } from './mocks'
+import type { CausaId, Evento, Execucao, Fluxo, ItemDoMock } from './mocks'
+import { AGORA, categorias, fluxos, responsavelDaTarefa, todasAsExecucoes, todosOsItens } from './mocks'
+import { fluxosDaOperacao, operacoes } from './operacoes'
 import type { EstadoDoProblema, GrupoDeStatus, Textos, TipoDeDisparo } from './textos'
 
 export type Fase = 1 | 2
@@ -70,7 +71,8 @@ export function grupoDe(e: Execucao): GrupoDeStatus {
 export interface FiltroDaLista {
   grupos: GrupoDeStatus[]
   fluxos: number[]
-  operacao?: OperacaoId
+  /** O id da operação (`operacoes.ts`). */
+  operacao?: string
   disparo?: TipoDeDisparo
   item?: number
   comCadeia: boolean
@@ -113,7 +115,8 @@ export function aplicarFiltro(execs: Execucao[], f: FiltroDaLista, fase: Fase, b
   if (f.grupos.length) lista = lista.filter(e => (membros(e) ? [...membros(e)!.grupos].some(g => f.grupos.includes(g)) : f.grupos.includes(grupoDe(e))))
   if (f.fluxos.length) lista = lista.filter(e => (membros(e) ? [...membros(e)!.fluxos].some(id => f.fluxos.includes(id)) : f.fluxos.includes(e.workflow as number)))
   if (f.operacao) {
-    const daOperacao = (id: number) => fluxoPorId.get(id)?.operacao === f.operacao
+    const ids = new Set(fluxosDaOperacao(f.operacao, fluxos).map(x => x.id))
+    const daOperacao = (id: number) => ids.has(id)
     lista = lista.filter(e => (membros(e) ? [...membros(e)!.fluxos].some(daOperacao) : daOperacao(e.workflow as number)))
   }
   if (f.disparo) lista = lista.filter(e => tipoDoDisparo(e) === f.disparo)
@@ -345,8 +348,8 @@ export const estadoInicialDosProblemas = (): Record<number, EstadoDoProblema> =>
 
 export function saudeDasOperacoes(d: Dados, p: Periodo) {
   const lista = problemas(d.execucoes, p)
-  return operacoes.map((op) => {
-    const fs = d.fluxos.filter(f => f.operacao === op.id)
+  return operacoes.value.map((op) => {
+    const fs = fluxosDaOperacao(op.id, d.fluxos)
     const ids = new Set(fs.map(f => f.id))
     const execs = noPeriodo(d.execucoes, p).filter(e => ids.has(e.workflow as number))
     const comProblema = lista.filter(x => ids.has(x.fluxo.id))
@@ -455,8 +458,8 @@ const COLUNA = 236
 const LINHA = 92
 
 /** Monta os nós e as ligações de uma operação, em camadas da esquerda para a direita. */
-export function mapaDaOperacao(op: OperacaoId, d: Dados, p: Periodo, fase: Fase) {
-  const fs = d.fluxos.filter(f => f.operacao === op)
+export function mapaDaOperacao(op: string | undefined, d: Dados, p: Periodo, fase: Fase) {
+  const fs = fluxosDaOperacao(op, d.fluxos)
   const nos = new Map<string, NoDoMapa>()
   const ligacoes: LigacaoDoMapa[] = []
   const novoNo = (id: string, tipo: NoDoMapa['tipo'], extra: Partial<NoDoMapa>) => {
@@ -579,5 +582,3 @@ export function vizinhosDoEvento(ev: Evento, fs: Fluxo[]) {
     escutam: fs.filter(f => f.gatilho.tipo === 'events' && f.gatilho.categoria === ev.categoria && f.gatilho.acao === ev.acao),
   }
 }
-
-export const operacaoDaCategoria = (c: ItemDoMock['categoria']) => operacoes.find(o => o.categorias.includes(c))!

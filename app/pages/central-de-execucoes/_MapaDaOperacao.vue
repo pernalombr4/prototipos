@@ -11,9 +11,12 @@
  * - o ciclo (o fluxo grava o evento que o dispara) ganha o aviso e o atalho para as proteções;
  * - clicar num fluxo ou evento destaca os vizinhos e abre o painel ao lado;
  * - escolher um item mostra a jornada dele: os fluxos por onde passou, numerados, e o resto apagado.
+ *
+ * Os fluxos de cada operação vêm da regra dela (`operacoes.ts`). "Editar regra" abre o editor.
  */
-import type { CategoriaId, Execucao, OperacaoId } from './mocks'
-import { categorias, operacoes } from './mocks'
+import type { CategoriaId, Execucao } from './mocks'
+import { categorias } from './mocks'
+import { fluxosDaOperacao, operacaoDaCategoria, operacoes, operacoesDoFluxo } from './operacoes'
 import type { Dados, Fase, FiltroDaLista, NoDoMapa, Periodo, Saude } from './consultas'
 import { buscarItens, chaveDoFluxo, filtroVazio, grupoDe, itemPorId, jornadaDoItem, mapaDaOperacao, textoDoEvento, vizinhosDoEvento, fluxoPorId } from './consultas'
 import type { Textos } from './textos'
@@ -26,15 +29,19 @@ const props = defineProps<{
   periodo: Periodo
 }>()
 
-const operacao = defineModel<OperacaoId>('operacao', { required: true })
+const operacao = defineModel<string | undefined>('operacao', { required: true })
 const itemDaJornada = defineModel<number | undefined>('item')
-const emit = defineEmits<{ filtrar: [FiltroDaLista], abrirExecucao: [number], abrirItem: [number] }>()
+const emit = defineEmits<{ filtrar: [FiltroDaLista], abrirExecucao: [number], abrirItem: [number], editarOperacao: [string], novaOperacao: [] }>()
 
 const toast = useToast()
 
-const opcoesDeOperacao = computed(() => operacoes
-  .filter(o => props.dados.fluxos.some(f => f.operacao === o.id))
+const opcoesDeOperacao = computed(() => operacoes.value
+  .filter(o => fluxosDaOperacao(o.id, props.dados.fluxos).length)
   .map(o => ({ label: o.nome, value: o.id })))
+/* A operação aberta foi excluída ou ficou sem fluxos: abre a primeira que sobrou. */
+watch(opcoesDeOperacao, (ops) => {
+  if (!ops.some(o => o.value === operacao.value)) operacao.value = ops[0]?.value
+}, { immediate: true })
 
 const mapa = computed(() => mapaDaOperacao(operacao.value, props.dados, props.periodo, props.fase))
 const noPorId = computed(() => new Map(mapa.value.nos.map(n => [n.id, n])))
@@ -64,7 +71,7 @@ const item = computed(() => (itemDaJornada.value ? itemPorId.get(itemDaJornada.v
 watch(item, (i) => {
   if (!i) return
   selecionado.value = null
-  const op = operacoes.find(o => o.categorias.includes(i.categoria))
+  const op = operacaoDaCategoria(i.categoria)
   if (op && op.id !== operacao.value) operacao.value = op.id
 }, { immediate: true })
 
@@ -161,7 +168,7 @@ function clicarFundo(ev: MouseEvent) {
 }
 
 /* ---------- painel ---------- */
-const fluxosDaOperacao = computed(() => props.dados.fluxos.filter(f => f.operacao === operacao.value))
+const fluxosDoMapa = computed(() => fluxosDaOperacao(operacao.value, props.dados.fluxos))
 const saudeDoSelecionado = computed(() => noSelecionado.value?.fluxo ? mapa.value.saude.get(noSelecionado.value.fluxo.id) : undefined)
 const cicloDoSelecionado = computed(() => {
   const f = noSelecionado.value?.fluxo
@@ -187,7 +194,8 @@ const iconeDaCategoria = (c: CategoriaId) => categorias[c].icone
   <div class="flex min-h-0 flex-1 flex-col">
     <!-- Barra do mapa -->
     <div class="flex flex-wrap items-center gap-2 border-b border-default px-4 py-2">
-      <USelect v-model="operacao" :items="opcoesDeOperacao" icon="i-lucide-boxes" size="sm" class="w-56" :aria-label="t.mapa.operacao" />
+      <USelect v-model="operacao" :items="opcoesDeOperacao" icon="i-lucide-boxes" size="sm" class="w-56" :aria-label="t.mapa.operacao" :disabled="!opcoesDeOperacao.length" />
+      <UButton v-if="operacao" :label="t.gestao.editarRegra" icon="i-lucide-pencil" size="sm" color="neutral" variant="outline" @click="emit('editarOperacao', operacao)" />
       <div class="relative">
         <UInput
           v-if="!item"
@@ -265,7 +273,16 @@ const iconeDaCategoria = (c: CategoriaId) => categorias[c].icone
       </template>
     </div>
 
-    <div class="flex min-h-0 flex-1">
+    <div v-if="!opcoesDeOperacao.length" class="flex flex-1 items-center justify-center p-8">
+      <UEmpty
+        icon="i-lucide-boxes"
+        :title="t.gestao.vazioTitulo"
+        :description="t.gestao.vazioDesc"
+        :actions="[{ label: t.gestao.nova, icon: 'i-lucide-plus', onClick: () => emit('novaOperacao') }]"
+        variant="naked"
+      />
+    </div>
+    <div v-else class="flex min-h-0 flex-1">
       <!-- O desenho -->
       <div
         ref="area"
@@ -403,7 +420,7 @@ const iconeDaCategoria = (c: CategoriaId) => categorias[c].icone
           <template v-else-if="noSelecionado?.fluxo">
             <header class="flex items-start gap-2 border-b border-default p-4">
               <div class="min-w-0 flex-1">
-                <p class="text-xs text-muted">{{ operacoes.find(o => o.id === noSelecionado!.fluxo!.operacao)?.nome }} · v{{ noSelecionado.fluxo.version }}</p>
+                <p class="text-xs text-muted">{{ operacoesDoFluxo(noSelecionado.fluxo).map(o => o.nome).join(', ') }} · v{{ noSelecionado.fluxo.version }}</p>
                 <h3 class="text-sm font-semibold text-highlighted">{{ noSelecionado.fluxo.name }}</h3>
                 <p class="mt-1 text-xs text-toned">{{ noSelecionado.fluxo.description }}</p>
               </div>
@@ -467,8 +484,8 @@ const iconeDaCategoria = (c: CategoriaId) => categorias[c].icone
             </header>
             <div v-for="lado in (['gravam', 'escutam'] as const)" :key="lado" class="p-4 pb-0">
               <p class="mb-1 text-xs text-muted">{{ lado === 'gravam' ? t.mapa.painel.quemGrava : t.mapa.painel.quemEscuta }}</p>
-              <ul v-if="vizinhosDoEvento(noSelecionado.evento, fluxosDaOperacao)[lado].length" class="flex flex-col gap-1">
-                <li v-for="f in vizinhosDoEvento(noSelecionado.evento, fluxosDaOperacao)[lado]" :key="f.id">
+              <ul v-if="vizinhosDoEvento(noSelecionado.evento, fluxosDoMapa)[lado].length" class="flex flex-col gap-1">
+                <li v-for="f in vizinhosDoEvento(noSelecionado.evento, fluxosDoMapa)[lado]" :key="f.id">
                   <button type="button" class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-toned transition-colors hover:bg-elevated" @click="selecionado = chaveDoFluxo(f.id)">
                     <UIcon name="i-lucide-workflow" class="size-4 shrink-0 text-muted" />
                     <span class="truncate">{{ f.name }}</span>

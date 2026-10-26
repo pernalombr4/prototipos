@@ -10,7 +10,6 @@
  * - execuções por dia (ou por hora) e os fluxos com mais falhas, em barras;
  * - a saúde de cada operação, com o atalho para o mapa.
  */
-import type { OperacaoId } from './mocks'
 import { categorias } from './mocks'
 import type { Dados, Fase, FiltroDaLista, Periodo, Problema } from './consultas'
 import { AGORA_MS, filtroVazio, fluxosComMaisFalhas, itemPorId, numeros, problemas, saudeDasOperacoes, serie } from './consultas'
@@ -29,7 +28,9 @@ const emit = defineEmits<{
   filtrar: [FiltroDaLista]
   abrirExecucao: [number]
   abrirItem: [number]
-  verMapa: [OperacaoId]
+  verMapa: [string]
+  /** PROPOSTA: abre a aba Operações, onde se cria e edita a regra de cada uma. */
+  gerenciarOperacoes: []
 }>()
 
 const toast = useToast()
@@ -328,11 +329,23 @@ const seloDaOperacao = { ok: { cor: 'success', icone: 'i-lucide-circle-check' },
 
       <!-- Saúde das operações -->
       <section aria-labelledby="titulo-operacoes">
-        <header class="mb-3">
-          <h2 id="titulo-operacoes" class="text-sm font-semibold text-highlighted">{{ t.operacoes.titulo }}</h2>
-          <p class="text-xs text-muted">{{ t.operacoes.descricao }}</p>
+        <header class="mb-3 flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 id="titulo-operacoes" class="text-sm font-semibold text-highlighted">{{ t.operacoes.titulo }}</h2>
+            <p class="text-xs text-muted">{{ t.operacoes.descricao }}</p>
+          </div>
+          <UButton :label="t.gestao.gerenciar" icon="i-lucide-settings-2" size="xs" color="neutral" variant="outline" @click="emit('gerenciarOperacoes')" />
         </header>
-        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <UEmpty
+          v-if="!carregando && !operacoesComSaude.length"
+          icon="i-lucide-boxes"
+          :title="t.gestao.vazioTitulo"
+          :description="t.gestao.vazioDesc"
+          :actions="[{ label: t.gestao.nova, icon: 'i-lucide-plus', onClick: () => emit('gerenciarOperacoes') }]"
+          variant="outline"
+          size="sm"
+        />
+        <div v-else class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <template v-if="carregando">
             <USkeleton v-for="k in 4" :key="k" class="h-32 rounded-lg" />
           </template>

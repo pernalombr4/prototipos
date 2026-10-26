@@ -8,18 +8,18 @@
  *
  * A jornada: menu do membro › Spaceflows. Hoje a tela tem só os cartões; cada fluxo tem a própria
  * lista de execuções. A proposta acrescenta, na mesma tela, as abas Visão geral, Execuções (a
- * lista global, com a busca por item) e Mapa da operação; no detalhe da execução, a faixa e a aba
- * Cadeia; no item, a aba Fluxos.
+ * lista global, com a busca por item), Mapa da operação e Operações (criar, editar e excluir a
+ * operação e a regra dela); no detalhe da execução, a faixa e a aba Cadeia; no item, a aba Fluxos.
  *
  * Tudo em memória. Recarregar volta ao começo.
  */
 import briefingMd from './BRIEFING.md?raw'
 import pesquisaMd from './PESQUISA.md?raw'
 import decisoesMd from './DECISOES.md?raw'
-import type { OperacaoId } from './mocks'
 import { categorias, exemplos, workspace } from './mocks'
 import type { Cenario, Fase, FiltroDaLista, Periodo } from './consultas'
-import { dadosDoCenario, execPorId, filtroVazio, fluxoPorId, itemPorId, operacaoDaCategoria, problemas } from './consultas'
+import { dadosDoCenario, execPorId, filtroVazio, fluxoPorId, itemPorId, problemas } from './consultas'
+import { operacaoDaCategoria, reiniciarOperacoes } from './operacoes'
 import type { EstadoDoProblema } from './textos'
 import { textos } from './textos'
 import CascaDoSpaceflow from './_CascaDoSpaceflow.vue'
@@ -27,16 +27,18 @@ import CartoesDeFluxos from './_CartoesDeFluxos.vue'
 import VisaoGeral from './_VisaoGeral.vue'
 import ListaDeExecucoes from './_ListaDeExecucoes.vue'
 import MapaDaOperacao from './_MapaDaOperacao.vue'
+import Operacoes from './_Operacoes.vue'
+import EditorDeOperacao from './_EditorDeOperacao.vue'
 import TelaDoFluxo from './_TelaDoFluxo.vue'
 import DetalheDaExecucao from './_DetalheDaExecucao.vue'
 import TelaDoItem from './_TelaDoItem.vue'
 
 definePageMeta({
   titulo: 'Central de execuções do Spaceflow',
-  descricao: 'Uma visão de todos os fluxos juntos: números, o que precisa de atenção, a lista global, a busca por item, a cadeia de cada execução, a aba Fluxos no item e o mapa da operação.',
+  descricao: 'Uma visão de todos os fluxos juntos: números, o que precisa de atenção, a lista global, a busca por item, a cadeia de cada execução, a aba Fluxos no item, o mapa da operação e as operações definidas por regra lógica.',
   status: 'em-revisao',
-  atualizado: '2026-10-24',
-  tela: 'Spaceflows › Visão geral, Execuções e Mapa',
+  atualizado: '2026-10-26',
+  tela: 'Spaceflows › Visão geral, Execuções, Mapa e Operações',
 })
 
 const t = useTextos(textos)
@@ -74,7 +76,7 @@ const hoje = computed(() => versao.value === 'hoje')
 const dados = computed(() => dadosDoCenario(cenario.value))
 const carregando = computed(() => cenario.value === 'carregando')
 
-type Aba = 'fluxos' | 'visao' | 'execucoes' | 'mapa'
+type Aba = 'fluxos' | 'visao' | 'execucoes' | 'mapa' | 'gestao'
 type Tela =
   | { tipo: 'spaceflows' }
   | { tipo: 'fluxo', id: number }
@@ -89,7 +91,7 @@ const abaDaExecucao = ref<'fluxo' | 'cadeia' | 'detalhes' | 'comentarios' | 'log
 const filtro = ref<FiltroDaLista>(filtroVazio())
 const periodo = ref<Periodo>('d7')
 const estados = ref<Record<number, EstadoDoProblema>>({})
-const operacaoDoMapa = ref<OperacaoId>('contratos')
+const operacaoDoMapa = ref<string | undefined>('contratos')
 const itemDoMapa = ref<number | undefined>()
 
 function ir(nova: Tela) {
@@ -112,7 +114,7 @@ function filtrar(f: FiltroDaLista) {
   filtro.value = f
   irParaSpaceflows('execucoes')
 }
-function verMapa(op: OperacaoId) {
+function verMapa(op: string) {
   operacaoDoMapa.value = op
   itemDoMapa.value = undefined
   irParaSpaceflows('mapa')
@@ -120,11 +122,24 @@ function verMapa(op: OperacaoId) {
 function verJornada(itemId: number | undefined) {
   if (itemId) {
     const i = itemPorId.get(itemId)
-    if (i) operacaoDoMapa.value = operacaoDaCategoria(i.categoria).id
+    const op = i && operacaoDaCategoria(i.categoria)
+    if (op) operacaoDoMapa.value = op.id
   }
   itemDoMapa.value = itemId
   irParaSpaceflows('mapa')
 }
+/* ---------- criar e editar operação ---------- */
+const editorAberto = ref(false)
+const operacaoEmEdicao = ref<string | null>(null)
+function abrirEditor(id: string | null) {
+  operacaoEmEdicao.value = id
+  editorAberto.value = true
+}
+/* Criada a operação a partir do mapa, o mapa passa a mostrá-la. */
+function aoSalvar(id: string) {
+  if (tela.value.tipo === 'spaceflows' && aba.value === 'mapa') operacaoDoMapa.value = id
+}
+
 function executar(id: number) {
   toast.add({ title: t.value.fluxos.executar, description: `${fluxoPorId.get(id)?.name}. ${t.value.detalhe.foraDoEscopo}`, icon: 'i-lucide-construction', color: 'neutral' })
 }
@@ -156,6 +171,7 @@ const abas = computed(() => [
   { value: 'visao', label: t.value.abas.visao, icon: 'i-lucide-layout-dashboard', badge: problemasAbertos.value && !carregando.value ? { label: String(problemasAbertos.value), color: 'error' as const, variant: 'subtle' as const } : undefined },
   { value: 'execucoes', label: t.value.abas.execucoes, icon: 'i-lucide-list' },
   { value: 'mapa', label: t.value.abas.mapa, icon: 'i-lucide-map' },
+  { value: 'gestao', label: t.value.abas.gestao, icon: 'i-lucide-boxes' },
   { value: 'fluxos', label: t.value.abas.fluxos, icon: 'i-lucide-workflow' },
 ])
 
@@ -194,6 +210,8 @@ function reiniciar() {
   estados.value = {}
   operacaoDoMapa.value = 'contratos'
   itemDoMapa.value = undefined
+  editorAberto.value = false
+  reiniciarOperacoes()
 }
 
 const exemplosDoAndaime = [
@@ -290,7 +308,7 @@ const exemplosDoAndaime = [
               @abrir="abrirFluxo"
               @executar="executar"
             />
-            <div v-else-if="cenario === 'vazio' && aba !== 'mapa'" class="flex flex-1 items-center justify-center p-8">
+            <div v-else-if="cenario === 'vazio' && aba !== 'mapa' && aba !== 'gestao'" class="flex flex-1 items-center justify-center p-8">
               <UEmpty icon="i-lucide-circle-play" :title="t.estados.vazioTitulo" :description="t.estados.vazioDesc" variant="naked" />
             </div>
             <VisaoGeral
@@ -305,6 +323,7 @@ const exemplosDoAndaime = [
               @abrir-execucao="abrirExecucao"
               @abrir-item="abrirItem"
               @ver-mapa="verMapa"
+              @gerenciar-operacoes="aba = 'gestao'"
             />
             <ListaDeExecucoes
               v-else-if="aba === 'execucoes'"
@@ -328,11 +347,25 @@ const exemplosDoAndaime = [
               @filtrar="filtrar"
               @abrir-execucao="abrirExecucao"
               @abrir-item="abrirItem"
+              @editar-operacao="abrirEditor"
+              @nova-operacao="abrirEditor(null)"
+            />
+            <Operacoes
+              v-else-if="aba === 'gestao'"
+              :t="t"
+              :dados="dados"
+              :periodo="periodo"
+              :carregando="carregando"
+              @nova="abrirEditor(null)"
+              @editar="abrirEditor"
+              @ver-mapa="verMapa"
             />
           </div>
         </Transition>
       </div>
     </CascaDoSpaceflow>
+
+    <EditorDeOperacao v-model:open="editorAberto" :t="t" :dados="dados" :operacao-id="operacaoEmEdicao" @salvo="aoSalvar" />
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->
     <div ref="andaime" class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">

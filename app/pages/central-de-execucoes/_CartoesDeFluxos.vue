@@ -7,11 +7,12 @@
  * descrição informada"), o gatilho em texto técnico (`manual::wf-...::create`), a data e os botões
  * Abrir e Executar.
  *
- * PROPOSTA: os cartões agrupados por operação, o gatilho em palavras, o selo traduzido e, embaixo,
+ * PROPOSTA: os cartões agrupados por operação (pela regra de cada uma, `operacoes.ts`; o fluxo que
+ * nenhuma regra alcança fica em "Sem operação"), o gatilho em palavras, o selo traduzido e, embaixo,
  * as execuções dos últimos 7 dias e as que falharam. A forma continua cartão.
  */
 import type { Fluxo } from './mocks'
-import { operacoes } from './mocks'
+import { fluxosPelaRegra, fluxosSemOperacao, operacoes } from './operacoes'
 import type { Dados } from './consultas'
 import { noPeriodo, textoDoEvento } from './consultas'
 import type { Textos } from './textos'
@@ -26,7 +27,10 @@ const visiveis = computed(() => {
 })
 const grupos = computed(() => props.hoje
   ? [{ id: 'todos', nome: '', fluxos: visiveis.value }]
-  : operacoes.map(o => ({ id: o.id, nome: o.nome, fluxos: visiveis.value.filter(f => f.operacao === o.id) })).filter(g => g.fluxos.length))
+  : [
+      ...operacoes.value.map(o => ({ id: o.id, nome: o.nome, fluxos: fluxosPelaRegra(o.regra, visiveis.value) })),
+      { id: 'sem', nome: props.t.operacoes.semOperacao, fluxos: fluxosSemOperacao(visiveis.value) },
+    ].filter(g => g.fluxos.length))
 
 const ultimos7 = computed(() => noPeriodo(props.dados.execucoes, 'd7'))
 const uso = (f: Fluxo) => {

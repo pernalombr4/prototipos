@@ -4,7 +4,7 @@
  * Estrutura tirada do develop em 24/10/2026 (workspace de exploração, fluxo 524) e do
  * `enspace-sdk-schemas`: o fluxo é um `Workflow`, a execução é um `WorkflowExecution`, o item é
  * um `Item`. O que a proposta acrescenta vai marcado com PROPOSTA:
- * - `Fluxo.operacao` e `Fluxo.dono`: o grupo de fluxos com nome e dono não existe;
+ * - `Fluxo.dono`: hoje o fluxo tem criador, não dono. A operação mora em `operacoes.ts`;
  * - `Execucao.input.workflow_timeline.lineage`: o campo existe e vem vazio na execução manual.
  *   Aqui ele leva os ids das execuções que causaram esta, da origem para a mais próxima
  *   (formato proposto, pergunta P1 do relatório);
@@ -35,7 +35,7 @@ const AGORA_MS = AGORA.getTime()
 export const DIAS_SIMULADOS = 15
 
 /* ------------------------------------------------------------------ *
- * Categorias e operações                                              *
+ * Categorias                                              *
  * ------------------------------------------------------------------ */
 
 export type CategoriaId =
@@ -69,18 +69,6 @@ export const categorias: Record<CategoriaId, Categoria> = {
   docPessoais: { id: 'docPessoais', nome: 'Documentos pessoais', singular: 'Documento pessoal', genero: 'm', prefixo: 'DPS', icone: 'i-lucide-id-card' },
   acessos: { id: 'acessos', nome: 'Acessos', singular: 'Acesso', genero: 'm', prefixo: 'ACE', icone: 'i-lucide-key-round' },
 }
-
-export type OperacaoId = 'contratos' | 'compras' | 'atendimento' | 'admissao'
-
-/** PROPOSTA: a operação é um grupo de fluxos com nome e dono. Hoje não existe. */
-export interface Operacao { id: OperacaoId, nome: string, dono: string, categorias: CategoriaId[] }
-
-export const operacoes: Operacao[] = [
-  { id: 'contratos', nome: 'Gestão de contratos', dono: 'Ana Souza', categorias: ['contratos', 'andamentos', 'documentos', 'aditivos', 'pagamentos'] },
-  { id: 'compras', nome: 'Compras', dono: 'Diego Rocha', categorias: ['pedidos', 'cotacoes', 'notas'] },
-  { id: 'atendimento', nome: 'Atendimento ao cliente', dono: 'Carla Mendes', categorias: ['chamados', 'interacoes'] },
-  { id: 'admissao', nome: 'Admissão de pessoas', dono: 'Elisa Prado', categorias: ['admissoes', 'docPessoais', 'acessos'] },
-]
 
 export const pessoas = ['Ana Souza', 'Bruno Lima', 'Carla Mendes', 'Diego Rocha', 'Elisa Prado', 'Fábio Nunes', 'Gabriela Torres']
 
@@ -116,8 +104,6 @@ interface Gravacao extends Evento {
 }
 
 export interface Fluxo extends Pick<Workflow, 'id' | 'name' | 'description' | 'status' | 'version' | 'reference' | 'created_at'> {
-  /** PROPOSTA: a operação a que o fluxo pertence. */
-  operacao: OperacaoId
   /** PROPOSTA: hoje o fluxo tem criador, não dono. */
   dono: string
   gatilho: Gatilho
@@ -222,7 +208,7 @@ const assuntos = ['Segunda via de boleto', 'Erro ao acessar o portal', 'Alteraç
 const nomesDeAdmissao = ['Lucas Andrade', 'Marina Couto', 'Otávio Reis', 'Paula Siqueira', 'Renan Duarte', 'Sofia Bastos', 'Tales Moura', 'Vitória Leme']
 
 /* ------------------------------------------------------------------ *
- * As 4 operações, com os 38 fluxos                                    *
+ * Os 38 fluxos, nas 4 áreas do workspace                              *
  * ------------------------------------------------------------------ */
 
 const marca = (i: ItemDoMock, m: string) => { (i._marcas ??= new Set()).add(m) }
@@ -247,21 +233,21 @@ function definicao(f: Omit<DefinicaoDoFluxo, 'grava' | 'status' | 'version' | 'r
 const definicoes: DefinicaoDoFluxo[] = [
   /* ---------------- Gestão de contratos (14) ---------------- */
   definicao({
-    id: 512, name: 'Registrar andamento inicial', operacao: 'contratos', dono: 'Ana Souza',
+    id: 512, name: 'Registrar andamento inicial', dono: 'Ana Souza',
     description: 'Cria o primeiro andamento de todo contrato novo.',
     gatilho: { tipo: 'events', categoria: 'contratos', acao: 'create' },
     nos: [{ tipo: 'crud', rotulo: 'Criar andamento' }],
     gravacoes: [{ categoria: 'andamentos', acao: 'create', alvo: 'novo', titulo: p => `Andamento inicial do ${p.reference}` }],
   }),
   definicao({
-    id: 513, name: 'Classificar andamento', operacao: 'contratos', dono: 'Ana Souza',
+    id: 513, name: 'Classificar andamento', dono: 'Ana Souza',
     description: 'Define o tipo e o prazo do andamento.',
     gatilho: { tipo: 'events', categoria: 'andamentos', acao: 'create' },
     nos: [{ tipo: 'conditionals', rotulo: 'Tipo do contrato' }, { tipo: 'crud', rotulo: 'Atualizar andamento' }],
     gravacoes: [{ categoria: 'andamentos', acao: 'update', alvo: 'mesmo' }],
   }),
   definicao({
-    id: 514, name: 'Notificar responsável do andamento', operacao: 'contratos', dono: 'Bruno Lima',
+    id: 514, name: 'Notificar responsável do andamento', dono: 'Bruno Lima',
     description: 'Avisa o responsável e registra a última movimentação no contrato.',
     gatilho: { tipo: 'events', categoria: 'andamentos', acao: 'update' },
     nos: [{ tipo: 'email', rotulo: 'Avisar responsável' }, { tipo: 'crud', rotulo: 'Atualizar contrato' }],
@@ -272,14 +258,14 @@ const definicoes: DefinicaoDoFluxo[] = [
     }],
   }),
   definicao({
-    id: 515, name: 'Recalcular prazo do andamento', operacao: 'contratos', dono: 'Bruno Lima',
+    id: 515, name: 'Recalcular prazo do andamento', dono: 'Bruno Lima',
     description: 'Recalcula o prazo quando o andamento muda.',
     gatilho: { tipo: 'events', categoria: 'andamentos', acao: 'update' },
     nos: [{ tipo: 'conditionals', rotulo: 'Prazo mudou?' }, { tipo: 'crud', rotulo: 'Atualizar prazo' }],
     gravacoes: [{ categoria: 'andamentos', acao: 'update', alvo: 'mesmo', quando: (_i, ctx) => ctx.forcas?.[515] === 'repetir' || rnd() < 0.04 }],
   }),
   definicao({
-    id: 516, name: 'Atualizar situação do contrato', operacao: 'contratos', dono: 'Ana Souza',
+    id: 516, name: 'Atualizar situação do contrato', dono: 'Ana Souza',
     description: 'Move o contrato de fase e pede a minuta quando ele é novo.',
     gatilho: { tipo: 'events', categoria: 'contratos', acao: 'update' },
     nos: [{ tipo: 'conditionals', rotulo: 'Fase do contrato' }, { tipo: 'crud', rotulo: 'Criar documento' }],
@@ -290,14 +276,14 @@ const definicoes: DefinicaoDoFluxo[] = [
     }],
   }),
   definicao({
-    id: 517, name: 'Gerar minuta', operacao: 'contratos', dono: 'Gabriela Torres', espera: 'tarefa',
+    id: 517, name: 'Gerar minuta', dono: 'Gabriela Torres', espera: 'tarefa',
     description: 'Escreve a minuta com IA e pede a revisão do jurídico.',
     gatilho: { tipo: 'events', categoria: 'documentos', acao: 'create' },
     nos: [{ tipo: 'ai_generate', rotulo: 'Escrever minuta' }, { tipo: 'task', rotulo: 'Revisar minuta' }, { tipo: 'crud', rotulo: 'Marcar como revisada' }],
     gravacoes: [{ categoria: 'documentos', acao: 'update', alvo: 'mesmo' }],
   }),
   definicao({
-    id: 518, name: 'Enviar para assinatura', operacao: 'contratos', dono: 'Gabriela Torres',
+    id: 518, name: 'Enviar para assinatura', dono: 'Gabriela Torres',
     description: 'Envia a minuta revisada ao assinador digital.',
     gatilho: { tipo: 'events', categoria: 'documentos', acao: 'update' },
     nos: [{ tipo: 'http', rotulo: 'Enviar ao assinador' }, { tipo: 'email', rotulo: 'Avisar signatários' }],
@@ -311,21 +297,21 @@ const definicoes: DefinicaoDoFluxo[] = [
     },
   }),
   definicao({
-    id: 519, name: 'Registrar assinatura', operacao: 'contratos', dono: 'Gabriela Torres',
+    id: 519, name: 'Registrar assinatura', dono: 'Gabriela Torres',
     description: 'Recebe o aviso do assinador e marca o contrato como assinado.',
     gatilho: { tipo: 'webhook' },
     nos: [{ tipo: 'crud', rotulo: 'Marcar contrato assinado' }],
     gravacoes: [{ categoria: 'contratos', acao: 'update', alvo: 'mesmo', efeito: c => { c._fase = 'assinado' } }],
   }),
   definicao({
-    id: 524, name: 'Aviso de vencimento de contrato', operacao: 'contratos', dono: 'Ana Souza',
+    id: 524, name: 'Aviso de vencimento de contrato', dono: 'Ana Souza',
     description: 'Todo dia, avisa os contratos que vencem em 30 dias.',
     gatilho: { tipo: 'cron', rotulo: '08:00' },
     nos: [{ tipo: 'crud', rotulo: 'Buscar contratos' }, { tipo: 'email', rotulo: 'Avisar gestores' }],
     gravacoes: [],
   }),
   definicao({
-    id: 520, name: 'Renovação automática', operacao: 'contratos', dono: 'Ana Souza',
+    id: 520, name: 'Renovação automática', dono: 'Ana Souza',
     description: 'Todo dia, cria o aditivo dos contratos com renovação automática.',
     gatilho: { tipo: 'cron', rotulo: '08:05' },
     nos: [{ tipo: 'crud', rotulo: 'Buscar contratos' }, { tipo: 'crud', rotulo: 'Criar aditivo' }],
@@ -333,14 +319,14 @@ const definicoes: DefinicaoDoFluxo[] = [
     gravacoes: [{ categoria: 'aditivos', acao: 'create', alvo: 'novo', titulo: p => `Aditivo de renovação do ${p.reference}` }],
   }),
   definicao({
-    id: 521, name: 'Aprovar aditivo', operacao: 'contratos', dono: 'Fábio Nunes', espera: 'tarefa',
+    id: 521, name: 'Aprovar aditivo', dono: 'Fábio Nunes', espera: 'tarefa',
     description: 'Pede a aprovação do gestor e atualiza o contrato.',
     gatilho: { tipo: 'events', categoria: 'aditivos', acao: 'create' },
     nos: [{ tipo: 'approval', rotulo: 'Aprovação do gestor' }, { tipo: 'crud', rotulo: 'Atualizar contrato' }],
     gravacoes: [{ categoria: 'contratos', acao: 'update', alvo: 'pai' }],
   }),
   definicao({
-    id: 522, name: 'Programar pagamentos', operacao: 'contratos', dono: 'Fábio Nunes',
+    id: 522, name: 'Programar pagamentos', dono: 'Fábio Nunes',
     description: 'Cria as parcelas quando o contrato é assinado.',
     gatilho: { tipo: 'events', categoria: 'contratos', acao: 'update' },
     nos: [{ tipo: 'conditionals', rotulo: 'Contrato assinado?' }, { tipo: 'crud', rotulo: 'Criar parcelas' }],
@@ -351,7 +337,7 @@ const definicoes: DefinicaoDoFluxo[] = [
     }],
   }),
   definicao({
-    id: 523, name: 'Conferir pagamento', operacao: 'contratos', dono: 'Fábio Nunes',
+    id: 523, name: 'Conferir pagamento', dono: 'Fábio Nunes',
     description: 'Lê o boleto com IA e confere o valor com o contrato.',
     gatilho: { tipo: 'events', categoria: 'pagamentos', acao: 'create' },
     nos: [{ tipo: 'ai_extract', rotulo: 'Ler boleto' }, { tipo: 'crud', rotulo: 'Atualizar parcela' }],
@@ -359,7 +345,7 @@ const definicoes: DefinicaoDoFluxo[] = [
     falha: { taxa: 0.08, causa: 'ia', no: 0 },
   }),
   definicao({
-    id: 525, name: 'Encerrar contrato', operacao: 'contratos', dono: 'Ana Souza',
+    id: 525, name: 'Encerrar contrato', dono: 'Ana Souza',
     description: 'Encerra o contrato a pedido do gestor.',
     gatilho: { tipo: 'manual' },
     nos: [{ tipo: 'form', rotulo: 'Motivo do encerramento' }, { tipo: 'crud', rotulo: 'Encerrar contrato' }],
@@ -368,14 +354,14 @@ const definicoes: DefinicaoDoFluxo[] = [
 
   /* ---------------- Compras (9) ---------------- */
   definicao({
-    id: 530, name: 'Abrir cotações do pedido', operacao: 'compras', dono: 'Diego Rocha',
+    id: 530, name: 'Abrir cotações do pedido', dono: 'Diego Rocha',
     description: 'Cria 3 cotações para todo pedido de compra novo.',
     gatilho: { tipo: 'events', categoria: 'pedidos', acao: 'create' },
     nos: [{ tipo: 'crud', rotulo: 'Criar cotações' }],
     gravacoes: [{ categoria: 'cotacoes', acao: 'create', alvo: 'novo', quantos: 3, titulo: (p, k) => `Cotação ${k} do ${p.reference}` }],
   }),
   definicao({
-    id: 531, name: 'Pedir preço ao fornecedor', operacao: 'compras', dono: 'Diego Rocha',
+    id: 531, name: 'Pedir preço ao fornecedor', dono: 'Diego Rocha',
     description: 'Envia a cotação ao portal do fornecedor.',
     gatilho: { tipo: 'events', categoria: 'cotacoes', acao: 'create' },
     nos: [{ tipo: 'http', rotulo: 'Enviar ao portal' }, { tipo: 'email', rotulo: 'Avisar fornecedor' }],
@@ -387,14 +373,14 @@ const definicoes: DefinicaoDoFluxo[] = [
     },
   }),
   definicao({
-    id: 532, name: 'Receber resposta do fornecedor', operacao: 'compras', dono: 'Diego Rocha',
+    id: 532, name: 'Receber resposta do fornecedor', dono: 'Diego Rocha',
     description: 'Grava o preço que o fornecedor respondeu pelo portal.',
     gatilho: { tipo: 'webhook' },
     nos: [{ tipo: 'crud', rotulo: 'Gravar preço' }],
     gravacoes: [{ categoria: 'cotacoes', acao: 'update', alvo: 'mesmo', efeito: c => marca(c, 'respondida') }],
   }),
   definicao({
-    id: 533, name: 'Comparar cotações', operacao: 'compras', dono: 'Diego Rocha',
+    id: 533, name: 'Comparar cotações', dono: 'Diego Rocha',
     description: 'Quando as 3 cotações chegam, escolhe a melhor e manda para aprovação.',
     gatilho: { tipo: 'events', categoria: 'cotacoes', acao: 'update' },
     nos: [{ tipo: 'conditionals', rotulo: 'Todas responderam?' }, { tipo: 'ai_generate', rotulo: 'Resumo da comparação' }, { tipo: 'crud', rotulo: 'Atualizar pedido' }],
@@ -402,7 +388,7 @@ const definicoes: DefinicaoDoFluxo[] = [
     gravacoes: [{ categoria: 'pedidos', acao: 'update', alvo: 'pai', efeito: p => { marca(p, 'comparado'); p._fase = 'aprovacao' } }],
   }),
   definicao({
-    id: 534, name: 'Aprovar compra', operacao: 'compras', dono: 'Fábio Nunes', espera: 'tarefa',
+    id: 534, name: 'Aprovar compra', dono: 'Fábio Nunes', espera: 'tarefa',
     description: 'Pede a aprovação do gestor da área.',
     gatilho: { tipo: 'events', categoria: 'pedidos', acao: 'update' },
     nos: [{ tipo: 'approval', rotulo: 'Aprovação do gestor' }, { tipo: 'crud', rotulo: 'Marcar como aprovado' }],
@@ -410,7 +396,7 @@ const definicoes: DefinicaoDoFluxo[] = [
     gravacoes: [{ categoria: 'pedidos', acao: 'update', alvo: 'mesmo', efeito: p => { p._fase = 'aprovado' } }],
   }),
   definicao({
-    id: 535, name: 'Emitir pedido ao fornecedor', operacao: 'compras', dono: 'Diego Rocha',
+    id: 535, name: 'Emitir pedido ao fornecedor', dono: 'Diego Rocha',
     description: 'Envia o pedido aprovado ao fornecedor escolhido.',
     gatilho: { tipo: 'events', categoria: 'pedidos', acao: 'update' },
     nos: [{ tipo: 'conditionals', rotulo: 'Aprovado?' }, { tipo: 'email', rotulo: 'Enviar pedido' }],
@@ -418,14 +404,14 @@ const definicoes: DefinicaoDoFluxo[] = [
     gravacoes: [],
   }),
   definicao({
-    id: 536, name: 'Lançar nota fiscal', operacao: 'compras', dono: 'Diego Rocha',
+    id: 536, name: 'Lançar nota fiscal', dono: 'Diego Rocha',
     description: 'Cria a nota fiscal a partir do e-mail do fornecedor.',
     gatilho: { tipo: 'mailbox' },
     nos: [{ tipo: 'ai_extract', rotulo: 'Ler anexo' }, { tipo: 'crud', rotulo: 'Criar nota fiscal' }],
     gravacoes: [{ categoria: 'notas', acao: 'create', alvo: 'novo', titulo: () => `NF ${Math.floor(entre(10000, 99999))} ${sorteia(empresas)}` }],
   }),
   definicao({
-    id: 537, name: 'Conferir nota com o pedido', operacao: 'compras', dono: 'Diego Rocha',
+    id: 537, name: 'Conferir nota com o pedido', dono: 'Diego Rocha',
     description: 'Confere a nota com o pedido aprovado e fecha a compra.',
     gatilho: { tipo: 'events', categoria: 'notas', acao: 'create' },
     nos: [{ tipo: 'ai_extract', rotulo: 'Comparar valores' }, { tipo: 'crud', rotulo: 'Fechar pedido' }],
@@ -433,7 +419,7 @@ const definicoes: DefinicaoDoFluxo[] = [
     falha: { taxa: 0.1, causa: 'ia', no: 0 },
   }),
   definicao({
-    id: 538, name: 'Relatório semanal de compras', operacao: 'compras', dono: 'Diego Rocha',
+    id: 538, name: 'Relatório semanal de compras', dono: 'Diego Rocha',
     description: 'Toda segunda, envia o resumo das compras da semana.',
     gatilho: { tipo: 'cron', rotulo: 'segunda, 07:00' },
     nos: [{ tipo: 'crud', rotulo: 'Buscar pedidos' }, { tipo: 'email', rotulo: 'Enviar resumo' }],
@@ -442,14 +428,14 @@ const definicoes: DefinicaoDoFluxo[] = [
 
   /* ---------------- Atendimento ao cliente (8) ---------------- */
   definicao({
-    id: 540, name: 'Abrir chamado pelo e-mail', operacao: 'atendimento', dono: 'Carla Mendes',
+    id: 540, name: 'Abrir chamado pelo e-mail', dono: 'Carla Mendes',
     description: 'Cria um chamado para cada e-mail que chega no suporte.',
     gatilho: { tipo: 'mailbox' },
     nos: [{ tipo: 'crud', rotulo: 'Criar chamado' }],
     gravacoes: [{ categoria: 'chamados', acao: 'create', alvo: 'novo', titulo: () => sorteia(assuntos) }],
   }),
   definicao({
-    id: 541, name: 'Classificar chamado com IA', operacao: 'atendimento', dono: 'Carla Mendes',
+    id: 541, name: 'Classificar chamado com IA', dono: 'Carla Mendes',
     description: 'Lê o chamado, define a área e a prioridade.',
     gatilho: { tipo: 'events', categoria: 'chamados', acao: 'create' },
     nos: [{ tipo: 'ai_router', rotulo: 'Escolher área' }, { tipo: 'crud', rotulo: 'Atualizar chamado' }],
@@ -457,7 +443,7 @@ const definicoes: DefinicaoDoFluxo[] = [
     falha: { taxa: 0.03, causa: 'ia', no: 0 },
   }),
   definicao({
-    id: 542, name: 'Atribuir responsável', operacao: 'atendimento', dono: 'Carla Mendes', espera: 'tarefa',
+    id: 542, name: 'Atribuir responsável', dono: 'Carla Mendes', espera: 'tarefa',
     description: 'Cria a tarefa de atendimento para a área escolhida.',
     gatilho: { tipo: 'events', categoria: 'chamados', acao: 'update' },
     nos: [{ tipo: 'task', rotulo: 'Atender chamado' }, { tipo: 'crud', rotulo: 'Registrar resposta' }],
@@ -468,7 +454,7 @@ const definicoes: DefinicaoDoFluxo[] = [
     }],
   }),
   definicao({
-    id: 543, name: 'Responder cliente', operacao: 'atendimento', dono: 'Carla Mendes',
+    id: 543, name: 'Responder cliente', dono: 'Carla Mendes',
     description: 'Envia a resposta da interação ao cliente.',
     gatilho: { tipo: 'events', categoria: 'interacoes', acao: 'create' },
     nos: [{ tipo: 'email', rotulo: 'Enviar resposta' }],
@@ -476,28 +462,28 @@ const definicoes: DefinicaoDoFluxo[] = [
     falha: { taxa: 0.05, causa: 'email', no: 0 },
   }),
   definicao({
-    id: 544, name: 'Escalar chamado parado', operacao: 'atendimento', dono: 'Carla Mendes',
+    id: 544, name: 'Escalar chamado parado', dono: 'Carla Mendes',
     description: 'A cada 4 horas, escala os chamados sem resposta há mais de 1 dia.',
     gatilho: { tipo: 'cron', rotulo: 'a cada 4 horas' },
     nos: [{ tipo: 'crud', rotulo: 'Buscar chamados' }, { tipo: 'crud', rotulo: 'Escalar chamado' }],
     gravacoes: [{ categoria: 'chamados', acao: 'update', alvo: 'mesmo' }],
   }),
   definicao({
-    id: 545, name: 'Registrar interação do cliente', operacao: 'atendimento', dono: 'Carla Mendes',
+    id: 545, name: 'Registrar interação do cliente', dono: 'Carla Mendes',
     description: 'Grava a mensagem que o cliente mandou pelo chat.',
     gatilho: { tipo: 'webhook' },
     nos: [{ tipo: 'crud', rotulo: 'Criar interação' }],
     gravacoes: [{ categoria: 'interacoes', acao: 'create', alvo: 'novo', titulo: p => `Mensagem no ${p.reference}` }],
   }),
   definicao({
-    id: 546, name: 'Encerrar chamado', operacao: 'atendimento', dono: 'Carla Mendes',
+    id: 546, name: 'Encerrar chamado', dono: 'Carla Mendes',
     description: 'Encerra o chamado resolvido.',
     gatilho: { tipo: 'manual' },
     nos: [{ tipo: 'form', rotulo: 'Solução aplicada' }, { tipo: 'crud', rotulo: 'Encerrar chamado' }],
     gravacoes: [{ categoria: 'chamados', acao: 'update', alvo: 'mesmo', efeito: c => { c._fase = 'encerrado' } }],
   }),
   definicao({
-    id: 547, name: 'Enviar pesquisa de satisfação', operacao: 'atendimento', dono: 'Carla Mendes',
+    id: 547, name: 'Enviar pesquisa de satisfação', dono: 'Carla Mendes',
     description: 'Envia a pesquisa quando o chamado é encerrado.',
     gatilho: { tipo: 'events', categoria: 'chamados', acao: 'update' },
     nos: [{ tipo: 'conditionals', rotulo: 'Encerrado?' }, { tipo: 'email', rotulo: 'Enviar pesquisa' }],
@@ -507,14 +493,14 @@ const definicoes: DefinicaoDoFluxo[] = [
 
   /* ---------------- Admissão de pessoas (7) ---------------- */
   definicao({
-    id: 550, name: 'Iniciar admissão', operacao: 'admissao', dono: 'Elisa Prado', restrito: true,
+    id: 550, name: 'Iniciar admissão', dono: 'Elisa Prado', restrito: true,
     description: 'Cria a lista de documentos da pessoa admitida.',
     gatilho: { tipo: 'events', categoria: 'admissoes', acao: 'create' },
     nos: [{ tipo: 'crud', rotulo: 'Criar documentos' }],
     gravacoes: [{ categoria: 'docPessoais', acao: 'create', alvo: 'novo', quantos: 4, titulo: (p, k) => `${['RG', 'CPF', 'Comprovante de residência', 'Carteira de trabalho'][k - 1]} (${p.titulo.replace('Admissão de ', '')})` }],
   }),
   definicao({
-    id: 551, name: 'Validar documento com IA', operacao: 'admissao', dono: 'Elisa Prado', restrito: true,
+    id: 551, name: 'Validar documento com IA', dono: 'Elisa Prado', restrito: true,
     description: 'Lê o documento enviado e confere os dados.',
     gatilho: { tipo: 'events', categoria: 'docPessoais', acao: 'create' },
     nos: [{ tipo: 'ai_extract', rotulo: 'Ler documento' }, { tipo: 'crud', rotulo: 'Marcar como válido' }],
@@ -522,7 +508,7 @@ const definicoes: DefinicaoDoFluxo[] = [
     falha: { taxa: 0.06, causa: 'ia', no: 0 },
   }),
   definicao({
-    id: 552, name: 'Conferir documentos da admissão', operacao: 'admissao', dono: 'Elisa Prado', restrito: true,
+    id: 552, name: 'Conferir documentos da admissão', dono: 'Elisa Prado', restrito: true,
     description: 'Quando todos os documentos são válidos, libera a criação dos acessos.',
     gatilho: { tipo: 'events', categoria: 'docPessoais', acao: 'update' },
     nos: [{ tipo: 'conditionals', rotulo: 'Todos válidos?' }, { tipo: 'crud', rotulo: 'Atualizar admissão' }],
@@ -530,7 +516,7 @@ const definicoes: DefinicaoDoFluxo[] = [
     gravacoes: [{ categoria: 'admissoes', acao: 'update', alvo: 'pai', efeito: a => { marca(a, 'conferida'); a._fase = 'documentos' } }],
   }),
   definicao({
-    id: 553, name: 'Criar acessos', operacao: 'admissao', dono: 'Elisa Prado', restrito: true,
+    id: 553, name: 'Criar acessos', dono: 'Elisa Prado', restrito: true,
     description: 'Cria os pedidos de e-mail e de acesso aos sistemas.',
     gatilho: { tipo: 'events', categoria: 'admissoes', acao: 'update' },
     nos: [{ tipo: 'crud', rotulo: 'Criar acessos' }],
@@ -538,7 +524,7 @@ const definicoes: DefinicaoDoFluxo[] = [
     gravacoes: [{ categoria: 'acessos', acao: 'create', alvo: 'novo', quantos: 2, titulo: (_p, k) => (k === 1 ? 'E-mail corporativo' : 'Sistema financeiro') }],
   }),
   definicao({
-    id: 554, name: 'Solicitar acesso ao sistema', operacao: 'admissao', dono: 'Elisa Prado', restrito: true,
+    id: 554, name: 'Solicitar acesso ao sistema', dono: 'Elisa Prado', restrito: true,
     description: 'Pede o acesso ao sistema de identidade.',
     gatilho: { tipo: 'events', categoria: 'acessos', acao: 'create' },
     nos: [{ tipo: 'http', rotulo: 'Pedir acesso' }, { tipo: 'crud', rotulo: 'Atualizar admissão' }],
@@ -550,7 +536,7 @@ const definicoes: DefinicaoDoFluxo[] = [
     falha: { taxa: 0.5, desdeHoras: 96, causa: 'permissao', no: 0 },
   }),
   definicao({
-    id: 555, name: 'Boas-vindas ao novo colaborador', operacao: 'admissao', dono: 'Elisa Prado', restrito: true,
+    id: 555, name: 'Boas-vindas ao novo colaborador', dono: 'Elisa Prado', restrito: true,
     description: 'Envia as boas-vindas com os acessos prontos.',
     gatilho: { tipo: 'events', categoria: 'admissoes', acao: 'update' },
     nos: [{ tipo: 'conditionals', rotulo: 'Acessos prontos?' }, { tipo: 'email', rotulo: 'Enviar boas-vindas' }],
@@ -558,7 +544,7 @@ const definicoes: DefinicaoDoFluxo[] = [
     gravacoes: [],
   }),
   definicao({
-    id: 556, name: 'Lembrete de documentos pendentes', operacao: 'admissao', dono: 'Elisa Prado', restrito: true,
+    id: 556, name: 'Lembrete de documentos pendentes', dono: 'Elisa Prado', restrito: true,
     description: 'Todo dia, lembra quem ainda não enviou os documentos.',
     gatilho: { tipo: 'cron', rotulo: '09:00' },
     nos: [{ tipo: 'crud', rotulo: 'Buscar pendências' }, { tipo: 'email', rotulo: 'Enviar lembrete' }],

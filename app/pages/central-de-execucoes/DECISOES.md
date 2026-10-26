@@ -2,8 +2,10 @@
 
 ## A proposta em 1 parágrafo
 
-A lista de Spaceflows do menu do membro ganha 4 abas: **Visão geral**, **Execuções**, **Mapa da operação** e
-**Fluxos** (os cartões de hoje, agrupados por operação). A Visão geral abre no que pede ação: 5 números do período
+A lista de Spaceflows do menu do membro ganha 5 abas: **Visão geral**, **Execuções**, **Mapa da operação**,
+**Operações** e **Fluxos** (os cartões de hoje, agrupados por operação). A operação é um grupo de fluxos com nome,
+responsável e uma regra lógica que lê a configuração de cada fluxo; quem administra cria, edita e exclui na aba
+Operações, e a prévia mostra quais fluxos entram e por quê. A Visão geral abre no que pede ação: 5 números do período
 (Rodando agora, Esperando, Com erro, Paradas pela plataforma, Concluídas), cada um levando à lista filtrada, e o
 bloco "Precisa de atenção", com 1 linha por fluxo com problema, a causa em palavras e o reprocessamento em lote.
 Execuções é a lista de todos os fluxos, com a busca por item: "CTR-2026-0142 passou por 8 fluxos em 8 execuções".
@@ -24,6 +26,8 @@ flowchart LR
     I -->|"Abrir execução"| D
     D -->|"Ver no mapa"| M
     M -->|"passo do painel"| D
+    M -->|"Editar regra"| O["Operações › editor da regra"]
+    O -->|"Salvar"| M
 ```
 
 ## Rodada 1 · 2026-10-26
@@ -116,8 +120,87 @@ flowchart LR
   - `proposta-04-cadeia-da-execucao.jpg`: a aba Cadeia da execução parada pela repetição sem fim;
   - `proposta-05-mapa-com-jornada.jpg`: o mapa da operação com a jornada do CTR-2026-0139.
 
+## Rodada 2 · 2026-10-26
+
+- **Pedido (literal):** "como o usuario define o que é uma operaçao? ha esse conceito, mas nao sabemos como as
+  entidades estao se relacionando ali / tem que ter crud pra fazer sentido, isso mostrado no sistema mesmo / hoje os
+  agrupamentos estao na tela mas nao tem como isso ser 100% automatico. nao faz sentido. só se estivéssemos usando ia
+  por tras. e nao pode ser. tem que ser programatico. regra logica."
+- **Mudou:**
+  - a operação deixou de ser um campo fixo de cada fluxo no `mocks.ts` e virou entidade própria em `operacoes.ts`:
+    nome, descrição, responsável e regra;
+  - a regra tem 3 partes:
+    - as categorias da operação;
+    - 2 critérios, que se ligam e desligam: "o gatilho dele é um evento destas categorias" e "ele cria, edita ou
+      exclui itens destas categorias";
+    - 2 listas de exceção: "Sempre incluir" (o fluxo que a regra não alcança) e "Nunca incluir" (vence o "Sempre
+      incluir");
+  - aba nova **Operações**: 1 linha por operação, com a regra em palavras, os fluxos, o responsável, as execuções do
+    período e a saúde; "Ver no mapa", "Editar" e, no menu da linha, "Excluir" com confirmação;
+  - quando algum fluxo fica fora de toda regra, um aviso no topo da aba lista os nomes, com "Nova operação";
+  - editor em painel lateral, com a regra à esquerda e a prévia ao vivo à direita:
+    - cada fluxo que entra mostra o motivo ("Gatilho: Contrato criado", "Grava: Andamento criado", "Incluído à mão")
+      e as outras operações em que também está, com "Tirar";
+    - "Ligados, mas fora da operação": o fluxo de fora que grava o evento que dispara um de dentro, ou escuta o que
+      um de dentro grava, com "Incluir";
+    - "Fora por exceção", com "Desfazer";
+    - validação: nome obrigatório e único, e a regra precisa alcançar ao menos 1 fluxo;
+  - o mapa ganhou "Editar regra" ao lado da escolha da operação; a Visão geral ganhou "Gerenciar operações";
+  - mapa, Visão geral, filtro de operação da lista, cabeçalho da execução e cartões da aba Fluxos passaram a calcular a
+    operação pela regra. Fluxo fora de toda regra vai para o grupo "Sem operação" nos cartões.
+- **Fronteira:** muda a origem do agrupamento e ganha a aba Operações com o editor. Não muda a casca, as outras abas
+  nem o desenho do mapa.
+- **Por que assim:**
+  - a regra lê só o que o fluxo já tem configurado (o gatilho e os nós que gravam item). Com a mesma configuração, o
+    resultado é o mesmo: não há IA nem inferência pelas execuções, como ela pediu;
+  - a categoria é a peça que o membro já conhece: a operação "Gestão de contratos" é o que acontece com contratos,
+    andamentos, documentos, aditivos e pagamentos;
+  - a prévia com o motivo de cada fluxo responde "como as entidades estão se relacionando": quem dispara quem, e por
+    qual evento, antes de salvar;
+  - as 2 listas de exceção existem porque a regra não alcança tudo. Nos dados do protótipo, 3 fluxos agendados que
+    não gravam item (Aviso de vencimento de contrato, Relatório semanal de compras e Lembrete de documentos
+    pendentes) só entram pelo "Sempre incluir";
+  - um fluxo pode estar em 2 operações (Programar pagamentos está em "Gestão de contratos" e numa operação
+    "Cobrança", se alguém a criar). A prévia avisa com "Também em";
+  - "Ligados, mas fora" mostra o que a regra deixou de fora e que faria o mapa mostrar a cadeia pela metade.
+- **Descartado:**
+  - o agrupamento automático da rodada 1 (a categoria escutada decidia o grupo). Motivo: o usuário não via nem mudava
+    a regra;
+  - sugerir a operação por IA ou pelas execuções observadas. Motivo: ela pediu regra lógica e programática;
+  - montar a operação escolhendo fluxo por fluxo, sem regra. Motivo: o fluxo novo de contratos ficaria fora até
+    alguém lembrar de incluir; com a regra, ele entra sozinho porque grava ou escuta uma categoria da operação;
+  - uma árvore de condições (E/OU) na regra. Motivo: 2 critérios e 2 listas de exceção cobrem os 38 fluxos; construtor
+    de blocos reprovado no `construtor-de-expressoes`.
+- **Maquete:**
+  - as 4 operações iniciais reproduzem os grupos da rodada 1 (14, 9, 8 e 7 fluxos), cada uma com os 2 critérios
+    ligados; contratos, compras e admissão têm 1 fluxo em "Sempre incluir";
+  - criar, editar e excluir mexem na lista em memória; "Reiniciar" e o reload voltam às 4.
+- **Crítica e acessibilidade:**
+  - corrigido: a regra em palavras saía com espaço antes do ponto ("Pagamentos . 1 fluxo"); a frase passou a ser
+    montada inteira;
+  - corrigido: em espanhol, o nome do responsável quebrava a coluna da linha; a coluna ficou mais larga;
+  - corrigido: a prévia contava as categorias que os fluxos tocavam fora da regra; passou a contar só as da operação;
+  - a prévia tem `aria-live` no resumo e cada "Tirar" e "Incluir" tem `aria-label` com o nome do fluxo;
+  - o detector de seta marcou o print `r2-06` em (1565, 92): é a seta da barra de rolagem nativa do painel no tema
+    escuro, não o ponteiro. Todo print do editor no escuro tem a mesma barra.
+- **CSS próprio:** nenhum.
+- **Ver:** prints em `evidencias/`:
+  - `r2-01-operacoes.jpg`: a aba Operações com as 4 operações e a regra de cada uma;
+  - `r2-02-editor-regra.jpg`: uma operação nova com a categoria Pagamentos, os 2 fluxos que entram, o "Também em" e os
+    4 ligados de fora;
+  - `r2-03-ligados-fora.jpg`: "Gestão de contratos" só pelo gatilho, com os 3 fluxos ligados que ficaram fora;
+  - `r2-04-excluir.jpg`: a confirmação de exclusão, que diz que os fluxos continuam rodando;
+  - `r2-05-sem-operacao.jpg`: o aviso dos 8 fluxos que nenhuma regra alcança;
+  - `r2-06-editor-escuro-es.jpg`: o editor no tema escuro, em espanhol.
+
 ## Perguntas para o time de dev
 
 As 11 perguntas (P1 a P11) estão no relatório, em "Perguntas para o time de dev". As que decidem a fase 2 são P1
 (o que preenche `workflow_timeline.lineage`), P2 (quando `parent` é preenchido) e P4 (o ENSPACE grava qual execução
 criou ou editou um item?).
+
+A rodada 2 acrescenta:
+
+- **P12.** A operação vira entidade do workspace? Onde fica guardada, quem pode criar e editar (só administrador ou
+  também o responsável), e a regra é avaliada no backend a cada mudança de fluxo ou na tela, a cada leitura? A regra
+  precisa do gatilho e das categorias que os nós de cada fluxo gravam, que é a P9.

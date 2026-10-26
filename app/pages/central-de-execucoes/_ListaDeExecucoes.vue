@@ -19,7 +19,8 @@
 import type { DropdownMenuItem, SelectItem } from '@nuxt/ui'
 import type { EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import type { Execucao, Fluxo } from './mocks'
-import { categorias, operacoes } from './mocks'
+import { categorias } from './mocks'
+import { fluxosDaOperacao, operacoes, operacoesDoFluxo } from './operacoes'
 import type { Dados, Fase, FiltroDaLista } from './consultas'
 import { aplicarFiltro, buscarItens, descreverDisparo, filtroVazio, fluxoPorId, grupoDe, itemPorId, jornadaDoItem, ordemDosGrupos, passoDe, resumoDasCadeias, estiloDoGrupo } from './consultas'
 import type { GrupoDeStatus, Textos, TipoDeDisparo } from './textos'
@@ -80,7 +81,7 @@ function alternarGrupo(g: GrupoDeStatus) {
 const opcoesDeFluxo = computed(() => props.dados.fluxos.map(f => ({ label: f.name, value: f.id })))
 const opcoesDeOperacao = computed<SelectItem[]>(() => [
   { label: props.t.execucoes.filtros.todasAsOperacoes, value: 'todas' },
-  ...operacoes.filter(o => props.dados.fluxos.some(f => f.operacao === o.id)).map(o => ({ label: o.nome, value: o.id })),
+  ...operacoes.value.filter(o => fluxosDaOperacao(o.id, props.dados.fluxos).length).map(o => ({ label: o.nome, value: o.id })),
 ])
 const opcoesDeDisparo = computed<SelectItem[]>(() => [
   { label: props.t.disparo.qualquer, value: 'qualquer' },
@@ -323,7 +324,7 @@ const iconeDoItem = (id: number) => categorias[itemPorId.get(id)!.categoria].ico
           <span class="flex min-w-0 flex-col py-1">
             <span class="max-w-72 truncate text-sm font-medium text-highlighted">{{ fluxoPorId.get((row as Linha).e.workflow as number)?.name }}</span>
             <span class="flex items-center gap-1.5 text-xs text-muted">
-              <span v-if="!fluxo" class="truncate">{{ operacoes.find(o => o.id === fluxoPorId.get((row as Linha).e.workflow as number)?.operacao)?.nome }}</span>
+              <span v-if="!fluxo" class="truncate">{{ operacoesDoFluxo(fluxoPorId.get((row as Linha).e.workflow as number)!).map(o => o.nome).join(', ') }}</span>
               <span class="font-mono text-[11px] text-dimmed">{{ (row as Linha).e.reference }}</span>
             </span>
           </span>
