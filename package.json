@@ -21,7 +21,7 @@
     "@be-enlighten/enspace-sdk-vue": "^0.17.0",
     "@iconify-json/lucide": "^1.2.136",
     "@iconify-json/simple-icons": "^1.2.97",
-    "@nuxt/ui": "^4.5.1",
+    "@nuxt/ui": "^4.12.0",
     "@tanstack/vue-table": "^8.21.3",
     "@tiptap/core": "3.31.3",
     "@tiptap/extension-emoji": "3.31.3",
@@ -38,7 +38,7 @@
     "handlebars": "4.7.9",
     "marked": "^18.0.14",
     "mathjs": "15.2.0",
-    "nuxt": "^4.4.2"
+    "nuxt": "^4.6.2"
   },
   "packageManager": "pnpm@10.6.5"
 }
