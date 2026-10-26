@@ -66,6 +66,7 @@ Workspace de exploração, pela tela, em 2026-10-26.
 | 4 | `/settings/interface/usecases` | Igual: Migração de Workspace e o bloco "General" com 1 caso, "QA Comercial - Brasil (pt-br)". Nenhum caso jurídico, nenhum aviso do módulo ([print](evidencias/dev-02-casos-de-uso-com-juridico-ligado.jpg)) |
 | 5 | código da tela | Nos 226 arquivos de script carregados, a chave `en-legal` não aparece. O único efeito medido do módulo segue sendo o da pesquisa: as 5 ferramentas jurídicas dos agentes de IA (`legalLookupCase` e outras), que consultam processo pelo número CNJ |
 | 6 | mesma do passo 1 | Chave desligada de novo e salva (`PUT` 200): o workspace ficou como estava |
+| 7 | `/workspaces/<exploração>/schedule` | Agenda (rodada 2): Hoje, Período anterior, Período seguinte, "outubro 2026", Visualização (abre em "Dia"), Data, Dia Útil, Dia Não Útil e configurações. Eventos de reunião com hora. Nenhum prazo processual |
 
 ### O que já existe e funciona
 
@@ -139,6 +140,18 @@ Achados de passagem na casca (ficam como estão):
 - "Juridico" sem acento, e os 3 módulos sem texto de ajuda.
 - A tela de Casos de Uso abre com o logo e um texto que fala em "consultar todas as categorias", mas a galeria mostra
   casos de uso, não categorias.
+
+### A tela de lista, item por item (rodada 2)
+
+Copiada de `comunicacao-no-workspace/_TelaItens.vue` e do print `15-lista-de-itens.jpg` (develop, 05/10/2026):
+
+- **Visualizações:** botão por visualização (a ativa em rosa claro), separador e "+ Visualizar".
+- **Barra de ferramentas:** Pesquisar registros, Criado em, Todo o período; à direita, os ícones Exportar, Colunas,
+  Filtros e Configurações, e Novo registro.
+- **Tabela:** caixa de seleção, coluna Ações com o menu da linha, as colunas da visualização, "0 de N selecionado(s)" e a
+  paginação. No develop, cada cabeçalho tem o funil de filtro e a seta de ordenação; o `EnTable` não tem o funil.
+- **Agenda:** grade do mês da cópia de `comunicacao-no-workspace/_TelaAgenda.vue`, conferida contra o cabeçalho lido no
+  develop em 26/10 (passo 7).
 
 ## Dado do protótipo
 

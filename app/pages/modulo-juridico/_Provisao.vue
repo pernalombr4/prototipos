@@ -7,6 +7,10 @@
  * - a movimentação entre 2 datas-base (constituição, reversão e atualização monetária);
  * - o motivo obrigatório para cada mudança, antes de fechar.
  * Sem o módulo, mudar o risco apaga o valor anterior, e a controladoria refaz a conta numa planilha.
+ *
+ * Rodada 2: a tela é a lista de registros do ENSPACE. A barra de visualizações e de ferramentas é a mesma; a
+ * data-base ocupa o lugar de "Criado em" e "Todo o período", porque é o recorte de data desta lista. Os totais e a
+ * movimentação viram uma faixa de resumo acima da tabela, em vez de cartões de painel.
  */
 import type { EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import type { Risco } from './mocks'
@@ -14,6 +18,7 @@ import { ATUALIZACAO_DO_MES, pessoaPorId, processos, tribunais } from './mocks'
 import { estado, fecharDataBase, provisionado } from './estado'
 import type { Textos } from './textos'
 import { dataHora, dia, dinheiro } from './formato'
+import BarraDaLista from './_BarraDaLista.vue'
 
 const props = defineProps<{ t: Textos, carregando?: boolean }>()
 const emit = defineEmits<{ abrirProcesso: [number] }>()
@@ -46,8 +51,15 @@ const todas = computed<Linha[]>(() => processos.map((p) => {
 }))
 
 const soMudancas = ref(false)
+const busca = ref('')
+const vista = ref('posicao')
 const linhas = computed(() => todas.value
   .filter(l => !soMudancas.value || l.mudou)
+  .filter((l) => {
+    const q = busca.value.trim().toLowerCase()
+    const p = processos.find(x => x.id === l.id)
+    return !q || [p?.titulo, p?.reference].some(x => x?.toLowerCase().includes(q))
+  })
   .sort((a, b) => Number(b.mudou) - Number(a.mudou) || provisionado(b.risco, b.estimado) - provisionado(a.risco, a.estimado) || b.estimado - a.estimado))
 
 const mudancas = computed(() => todas.value.filter(l => l.mudou))
@@ -120,21 +132,21 @@ async function exportar() {
 </script>
 
 <template>
-  <div class="flex min-h-0 flex-1 flex-col overflow-y-auto">
-    <div class="mx-auto flex w-full max-w-7xl flex-col gap-4 p-5">
-      <div class="flex flex-wrap items-end gap-3">
-        <div class="min-w-0 flex-1">
-          <h1 class="text-lg font-semibold text-highlighted">{{ t.provisao.titulo }}</h1>
-          <p class="text-sm text-muted">{{ t.provisao.descricao }}</p>
-        </div>
-        <UFormField :label="t.provisao.dataBase" class="w-60">
-          <USelect v-model="escolhida" :items="opcoes" class="w-full" icon="i-lucide-calendar-check" />
-        </UFormField>
-        <UButton :label="t.provisao.exportar" icon="i-lucide-download" color="neutral" variant="outline" :loading="exportando" @click="exportar" />
-      </div>
+  <div class="flex min-h-0 flex-1 flex-col">
+    <BarraDaLista v-model:ativa="vista" v-model:busca="busca" :t="t" :vistas="[{ chave: 'posicao', rotulo: t.provisao.vista, icone: 'i-lucide-table' }]">
+      <template #periodo>
+        <USelect v-model="escolhida" :items="opcoes" size="sm" variant="ghost" icon="i-lucide-calendar-check" class="w-60" :aria-label="t.provisao.dataBase" />
+        <USwitch v-model="soMudancas" :label="t.provisao.soMudancas" size="sm" />
+      </template>
+      <template #antes-dos-icones>
+        <UButton :label="t.provisao.exportar" icon="i-lucide-file-spreadsheet" color="neutral" variant="outline" size="sm" class="mr-1" :loading="exportando" @click="exportar" />
+      </template>
+    </BarraDaLista>
 
+    <div class="min-h-0 flex-1 overflow-y-auto">
       <UAlert
         v-if="fechada"
+        class="mx-4 mt-3 w-auto"
         icon="i-lucide-lock"
         color="neutral"
         variant="subtle"
@@ -142,60 +154,35 @@ async function exportar() {
         :description="t.provisao.fechadaPor(pessoaPorId.get(fechada.fechadaPor)?.nome ?? '', dataHora(fechada.fechadaEm, t.locale))"
       />
 
-      <!-- Cartões por risco -->
-      <div class="grid gap-3 sm:grid-cols-3">
-        <div
-          v-for="(c, i) in cartoes"
-          :key="c.r"
-          class="animate-[entrada_.3s_ease-out_both] rounded-lg border border-default bg-default p-4"
-          :style="{ animationDelay: `${i * 50}ms` }"
-        >
-          <div class="flex items-center justify-between gap-2">
-            <p class="text-sm font-medium text-toned">{{ t.provisao.cartoes[c.r] }}</p>
-            <UBadge :label="t.provisao.processos(c.n)" :color="corDoRisco[c.r]" variant="subtle" size="sm" />
-          </div>
-          <p class="mt-1 text-2xl font-semibold tabular-nums text-highlighted">{{ dinheiro(c.valor, t.locale) }}</p>
-          <p class="text-xs text-muted">
-            {{ t.provisao.cartoesAjuda[c.r] }}
-            <template v-if="c.antes !== undefined && anterior">
-              {{ dinheiro(c.antes, t.locale, true) }} {{ t.provisao.contraAnterior(dia(anterior.dia, t.locale)) }}.
-            </template>
-          </p>
+      <!-- Resumo da data-base: totais por risco e a movimentação -->
+      <dl class="flex flex-wrap items-stretch gap-x-6 gap-y-2 border-b border-default px-4 py-3 text-sm">
+        <div v-for="c in cartoes" :key="c.r" class="min-w-32">
+          <dt class="flex items-center gap-1.5 text-xs text-muted">
+            <span class="size-2 rounded-full" :class="{ provavel: 'bg-error', possivel: 'bg-warning', remota: 'bg-(--ui-text-dimmed)' }[c.r]" />
+            {{ t.provisao.cartoes[c.r] }} · {{ t.provisao.processos(c.n) }}
+          </dt>
+          <dd class="font-semibold tabular-nums text-highlighted">{{ dinheiro(c.valor, t.locale) }}</dd>
         </div>
-      </div>
-
-      <!-- Movimentação -->
-      <div v-if="movimento && anterior" class="rounded-lg border border-default p-4">
-        <p class="mb-3 text-sm font-medium text-highlighted">{{ t.provisao.movimento.titulo(dia(anterior.dia, t.locale)) }}</p>
-        <dl class="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+        <template v-if="movimento && anterior">
+          <USeparator orientation="vertical" class="h-auto" />
           <div>
-            <dt class="text-xs text-muted">{{ t.provisao.movimento.constituicao }}</dt>
-            <dd class="font-medium tabular-nums text-error">+ {{ dinheiro(movimento.constituicao, t.locale) }}</dd>
+            <dt class="text-xs text-muted">{{ t.provisao.movimento.titulo(dia(anterior.dia, t.locale)) }}</dt>
+            <dd class="flex flex-wrap gap-x-3 tabular-nums">
+              <span class="text-error">{{ t.provisao.movimento.constituicao }} + {{ dinheiro(movimento.constituicao, t.locale) }}</span>
+              <span class="text-success">{{ t.provisao.movimento.reversao }} {{ dinheiro(movimento.reversao, t.locale) }}</span>
+              <span class="text-toned">{{ t.provisao.movimento.atualizacao }} + {{ dinheiro(movimento.atualizacao, t.locale) }}</span>
+            </dd>
           </div>
-          <div>
-            <dt class="text-xs text-muted">{{ t.provisao.movimento.reversao }}</dt>
-            <dd class="font-medium tabular-nums text-success">{{ dinheiro(movimento.reversao, t.locale) }}</dd>
-          </div>
-          <div>
-            <dt class="text-xs text-muted">{{ t.provisao.movimento.atualizacao }}</dt>
-            <dd class="font-medium tabular-nums text-toned">+ {{ dinheiro(movimento.atualizacao, t.locale) }}</dd>
-          </div>
-          <div>
-            <dt class="text-xs text-muted">{{ t.provisao.movimento.saldo }}</dt>
-            <dd class="font-semibold tabular-nums text-highlighted">{{ dinheiro(movimento.saldo, t.locale) }}</dd>
-          </div>
-        </dl>
-      </div>
-
-      <div class="flex flex-wrap items-center gap-3">
-        <USwitch v-model="soMudancas" :label="t.provisao.soMudancas" />
-        <span v-if="anterior" class="text-sm text-muted">{{ t.provisao.mudancas(mudancas.length) }}</span>
-      </div>
+          <span v-if="anterior" class="ml-auto self-end text-xs text-muted">{{ t.provisao.mudancas(mudancas.length) }}</span>
+        </template>
+      </dl>
 
       <EnTable
         :columns="colunas"
         :rows="linhas"
         :loading="carregando"
+        selectable
+        :pagination="{ page: 1, pageCount: 1, total: linhas.length }"
         :locale="idioma"
         class="[&_tbody_tr]:cursor-pointer"
         @row-click="(r: Linha) => emit('abrirProcesso', r.id)"
@@ -261,8 +248,8 @@ async function exportar() {
     </div>
 
     <!-- Fechar a data-base: fixo no pé, só na data-base em aberto -->
-    <div v-if="aberta" class="sticky bottom-0 border-t border-default bg-default/95 backdrop-blur">
-      <div class="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-end gap-3 px-5 py-3">
+    <div v-if="aberta" class="shrink-0 border-t border-default bg-default">
+      <div class="flex w-full flex-wrap items-center justify-end gap-3 px-4 py-3">
         <p v-if="semMotivo.length" class="flex items-center gap-1.5 text-sm text-warning">
           <UIcon name="i-lucide-triangle-alert" class="size-4" />
           {{ t.provisao.faltaMotivo(semMotivo.length) }}

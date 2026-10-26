@@ -11,7 +11,8 @@ com o fundamento e cada dia que não contou, com o motivo e a fonte) e guarda o 
 tribunal muda. A provisão fecha o risco e o valor de cada processo por data-base, com motivo para cada mudança, e a
 data-base fechada não se edita. O resto do jurídico (contratos, consultivo, procurações, societário, pagamentos,
 marcas, denúncias) é caso de uso: configuração salva e replicada pela galeria, listada na página do módulo para mostrar
-onde cada área mora.
+onde cada área mora. As telas do módulo são a listagem de registros de qualquer categoria (mesma barra, mesma tabela,
+mesma troca de visualização), e o prazo aparece na Agenda e na visualização Calendário de Prazos.
 
 ## A jornada
 
@@ -21,7 +22,8 @@ flowchart LR
     S -->|"menu Jurídico"| I["Intimações<br/>Para revisar"]
     I -->|"confere regra e responsável<br/>Confirmar prazo"| P["Prazos<br/>fatal e interno"]
     I -->|"Abrir processo"| T["Processo<br/>abas Prazos, Intimações,<br/>Risco e provisão"]
-    P -->|"linha"| M["Memória do cálculo<br/>e histórico"]
+    P -->|"linha ou dia do calendário"| M["Memória do cálculo<br/>e histórico"]
+    A["Agenda<br/>interno e fatal"] -->|"evento do prazo"| M
     C -->|"Adicionar suspensão"| R["Recálculo<br/>antes e depois no histórico"]
     R --> P
     T -->|"muda o risco"| V["Provisão<br/>motivo e fechar a data-base"]
@@ -134,6 +136,71 @@ flowchart LR
   - `proposta-08-triagem.jpg`: a triagem módulo ou caso de uso, no andaime;
   - `hoje-01-processo-com-data-digitada.jpg`: o PROC-0312 sem o módulo, com 16/11 digitado (o cálculo dá 17/11).
 
+## Rodada 2 · 2026-10-26
+
+- **Pedido (literal):** "calma. sem modulo entao tem somente intimaçoes, prazos e provisoes? os prazos nao deveriam
+  aparecer numa agenda? ou 2 visoes: lista ou calendario pra pessoa escolher. e esteja atento ao fato de que as telas nao
+  podem ser radicalmente diferentes do restante do enspace pra usarmos os mesmos componentes: mesma tabela, mesmo kanban,
+  mesmo sistema de filtros etc. senao vai ficar esquizofrenico. cuidado com isso, tem que manter a consistencia com as
+  proprias telas de categoria que ja existem hoje dentre outras."
+- **Resposta à pergunta:** no pacote Brasil, o módulo tem 3 funcionalidades. A releitura do relatório de 2026-10-24
+  (Recomendação 1 e tabela 3) não acrescenta nenhuma:
+  - correção com séries de índices versionadas: já é o módulo Correção Monetária; a melhoria é dele;
+  - trilha só de acréscimo, sigilo, barreira e temporalidade: plataforma, valem para todo workspace;
+  - conta fiduciária (IOLTA) e fatura LEDES: pacote EUA, perfil escritório. Ficam para o 1º cliente jurídico nos EUA
+    (Recomendação 2);
+  - zona cinza, para decidir (P8): andamentos pelo DataJud, custas e depósitos judiciais, audiências.
+- **Mudou:**
+  - Intimações, Prazos, Provisão e a lista de Processos usam a barra da listagem de registros de toda categoria
+    (`_BarraDaLista.vue`, cópia do develop): visualizações em botão com "+ Visualizar", Pesquisar, período, os ícones
+    Exportar, Colunas, Filtros e Configurações; e o `EnTable` com seleção, menu de ações por linha e paginação;
+  - Intimações: saiu a caixa de entrada com lista e detalhe lado a lado. Para revisar, Confirmadas e Descartadas são 3
+    visualizações que o módulo instala. O filtro de origem saiu: a origem virou coluna e passa pelo filtro padrão. A
+    revisão abre num painel à direita, como o painel da tarefa em Tarefas, com Descartar e Confirmar prazo no rodapé;
+  - Prazos: 3 visualizações, Em aberto (tabela), Calendário (a grade da Agenda) e Cumpridos (tabela). Saíram os chips de
+    faixa e o "Meus prazos / Todos"; a faixa virou a coluna Situação;
+  - Agenda: com o módulo ligado, cada prazo aparece em 2 dias, no interno e no fatal, ao lado das audiências e reuniões.
+    Clicar no prazo abre o mesmo painel da tela de Prazos;
+  - Provisão: a data-base ocupa o lugar de "Criado em" e "Todo o período"; os cartões e a movimentação viraram uma faixa
+    de resumo acima da tabela; "Só o que mudou" e "Exportar para o auditor" foram para a barra.
+- **Fronteira:** muda o conteúdo das 3 telas do módulo, a lista de Processos (que era simplificada) e os eventos de prazo
+  na Agenda. Não muda a barra da lista, o `EnTable`, a grade da Agenda, a casca, a página do módulo nem a tela do
+  processo.
+- **Por que assim:**
+  - a regra da redatora: mesma tabela, mesmo filtro, mesma troca de visão. O módulo instala visualizações, como um caso
+    de uso instala numa categoria, e não ganha controle próprio;
+  - lista ou calendário é escolha de visualização, como Itens e Quadro na categoria;
+  - o calendário é a grade da Agenda, não um componente novo. O Nuxt UI e o SDK não têm calendário de eventos;
+  - o prazo já é tarefa: aparecer na Agenda é o que se espera de toda tarefa com data.
+- **Descartado:**
+  - Quadro (kanban) em Prazos. Motivo: a coluna seria a situação, que o motor calcula; arrastar um prazo de "Interno
+    vencido" para "Próximo" não muda a data;
+  - Quadro em Intimações. Motivo: arrastar para Confirmadas pularia a revisão;
+  - cartões de painel na Provisão. Motivo: a listagem de categoria não tem cartão. Painel com gráfico é tela da
+    Interface (Telas), se o cliente quiser.
+- **Não deu:**
+  - abrir o seletor de Visualização da Agenda no develop. Por quê: a janela do Chrome estava oculta e o menu não abre. A
+    leitura de 26/10 confirma Hoje, Período anterior, Período seguinte, Visualização (abre em "Dia"), Data, Dia Útil e
+    Dia Não Útil; a grade do mês vem da cópia de 05/10 (`comunicacao-no-workspace`);
+  - o funil de filtro no cabeçalho de cada coluna, que a listagem do develop tem. Por quê: o `EnTable` do SDK não tem.
+    O ícone Filtros da barra fica como entrada (P11).
+- **Maquete:** "+ Visualizar", Exportar, Colunas, Filtros, Configurações e Novo registro mostram só o aviso; a Agenda só
+  tem a visualização Mês; a seleção de linhas não tem ação em lote; o evento comum da Agenda não abre o modal "Evento".
+- **Crítica e acessibilidade** (revisão própria em Chrome headless, em português e espanhol; as skills
+  `design:design-critique` e `design:accessibility-review` não rodaram):
+  - corrigido: o evento da Agenda colava a hora no título ("09:00Reunião");
+  - corrigido: o rótulo do prazo no calendário cortava a referência do processo; a referência veio antes do ato;
+  - os botões de visualização têm `aria-pressed`; o prazo no calendário diz "Interno" ou "Fatal" por extenso, além da
+    cor.
+- **CSS próprio:** nenhum.
+- **Ver:** prints em `evidencias/` (os 4 primeiros substituem os da rodada 1):
+  - `proposta-01-intimacao-com-prazo.jpg`: a lista de Intimações com a revisão do PROC-0312 no painel;
+  - `proposta-02-prazos.jpg`: Prazos na visualização Em aberto;
+  - `proposta-04-memoria-e-historico.jpg`: o PROC-0318 recalculado, aberto pela lista;
+  - `proposta-05-provisao.jpg`: a Provisão na barra da lista, com a faixa de resumo;
+  - `proposta-09-prazos-calendario.jpg`: Prazos na visualização Calendário;
+  - `proposta-10-agenda-com-prazos.jpg`: a Agenda com prazos, audiências e reuniões.
+
 ## Perguntas para o time de dev
 
 - **P1.** Ligar o módulo instala o caso de uso Contencioso junto, ou são 2 gestos? Nenhuma plataforma no-code liga
@@ -150,3 +217,11 @@ flowchart LR
   com motivo, ou reabre a fechada?
 - **P7.** O `EnTable` escreve um travessão na célula vazia. A regra de texto de interface pede célula vazia sem
   travessão: o SDK pode aceitar um texto de vazio por coluna?
+- **P8.** Zona cinza do módulo. Andamentos pelo DataJud: conector sem efeito jurídico próprio (a intimação é o que abre
+  prazo). Custas e depósitos judiciais: guia por tribunal e levantamento, "depois" na tabela 3 do relatório. Audiências:
+  a data vem do juízo, sem cálculo. A proposta deixa os 3 como caso de uso; algum deles tem regra que a configuração não
+  cobre?
+- **P9.** A visualização Calendário vira tipo de visualização da plataforma, para qualquer categoria com campo de data,
+  ou fica só no módulo?
+- **P10.** Na Agenda, o clique num prazo abre o painel do prazo (como no protótipo) ou o modal "Evento" de hoje?
+- **P11.** O `EnTable` pode ganhar o funil de filtro no cabeçalho da coluna, como a listagem do develop?

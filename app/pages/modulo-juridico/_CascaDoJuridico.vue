@@ -19,7 +19,7 @@ import type { CategoriaId } from './mocks'
 import { categorias, workspace } from './mocks'
 import type { Textos } from './textos'
 
-export type Destino = 'intimacoes' | 'prazos' | 'provisao' | 'sistema' | `categoria:${CategoriaId}`
+export type Destino = 'intimacoes' | 'prazos' | 'provisao' | 'sistema' | 'agenda' | `categoria:${CategoriaId}`
 
 const props = defineProps<{
   t: Textos
@@ -41,7 +41,7 @@ const membro = computed<ItemDeMenu[]>(() => [
   ...(props.moduloLigado ? [{ chave: 'juridico', icone: 'i-lucide-scale', expansivel: true }] : []),
   { chave: 'categorias', icone: 'i-lucide-layout-grid', expansivel: true },
   { chave: 'tarefas', icone: 'i-lucide-file-text', expansivel: true },
-  { chave: 'agenda', icone: 'i-lucide-calendar-days' },
+  { chave: 'agenda', icone: 'i-lucide-calendar-days', destino: 'agenda' },
   { chave: 'knowledge', icone: 'i-lucide-table-2', expansivel: true },
 ])
 
@@ -120,10 +120,10 @@ const menuRecolhido = ref(false)
               type="button"
               class="flex w-full items-center gap-2.5 px-4 py-1.5 text-left transition-colors"
               :class="[
-                item.chave === 'sistema' && ativoNaConfig ? 'bg-primary/10 font-medium text-primary' : 'text-toned hover:bg-elevated',
+                (item.chave === 'sistema' && ativoNaConfig) || (item.chave === 'agenda' && ativo === 'agenda') ? 'bg-primary/10 font-medium text-primary' : 'text-toned hover:bg-elevated',
                 item.chave === 'juridico' && 'animate-[entrada_.3s_ease-out_both]',
               ]"
-              :aria-current="item.chave === 'sistema' && ativoNaConfig ? 'page' : undefined"
+              :aria-current="(item.chave === 'sistema' && ativoNaConfig) || (item.chave === 'agenda' && ativo === 'agenda') ? 'page' : undefined"
               :aria-expanded="item.expansivel ? abertos.includes(item.chave) : undefined"
               @click="clicar(item)"
             >

@@ -358,3 +358,21 @@ export const motivosIniciais: Record<number, string> = {
 }
 /** A atualização monetária do mês, calculada pelo módulo Correção Monetária (IPCA-E de exemplo). */
 export const ATUALIZACAO_DO_MES = 0.0041
+
+/* ------------------------------------------------------------------ *
+ * Agenda: o que ela já mostra hoje, sem o módulo                      *
+ * ------------------------------------------------------------------ */
+
+/** Datas de item (a categoria Audiências vem do caso de uso Contencioso) e reuniões. Dado do workspace. */
+export interface EventoDoWorkspace { id: string, dia: string, hora: string, titulo: string, processo?: number }
+export const eventosDoWorkspace: EventoDoWorkspace[] = [
+  { id: 'w1', dia: '2026-10-27', hora: '09:00', titulo: 'Reunião semanal do contencioso' },
+  { id: 'w2', dia: '2026-10-28', hora: '14:00', titulo: 'Audiência de conciliação · PROC-0317', processo: 4105 },
+  { id: 'w3', dia: '2026-10-29', hora: '10:30', titulo: 'Audiência de instrução · PROC-0314', processo: 4102 },
+  { id: 'w4', dia: '2026-11-03', hora: '09:00', titulo: 'Reunião semanal do contencioso' },
+  { id: 'w5', dia: '2026-11-05', hora: '15:00', titulo: 'Audiência una · PROC-0321', processo: 4109 },
+  { id: 'w6', dia: '2026-11-10', hora: '09:00', titulo: 'Reunião semanal do contencioso' },
+  { id: 'w7', dia: '2026-11-12', hora: '11:00', titulo: 'Sustentação oral · PROC-0313', processo: 4101 },
+  { id: 'w8', dia: '2026-10-20', hora: '09:00', titulo: 'Reunião semanal do contencioso' },
+  { id: 'w9', dia: '2026-10-22', hora: '16:00', titulo: 'Audiência de conciliação · PROC-0326', processo: 4114 },
+]

@@ -25,6 +25,7 @@ import CascaDoJuridico from './_CascaDoJuridico.vue'
 import Intimacoes from './_Intimacoes.vue'
 import Prazos from './_Prazos.vue'
 import Provisao from './_Provisao.vue'
+import Agenda from './_Agenda.vue'
 import Sistema from './_Sistema.vue'
 import type { Aba as AbaDoModulo } from './_ConfiguracaoDoModulo.vue'
 import ConfiguracaoDoModulo from './_ConfiguracaoDoModulo.vue'
@@ -34,10 +35,10 @@ import Triagem from './_Triagem.vue'
 
 definePageMeta({
   titulo: 'Módulo Jurídico',
-  descricao: 'O que é módulo e o que é caso de uso no jurídico: intimações do DJEN e do Domicílio, prazos calculados com a memória do cálculo, provisão por data-base e os casos de uso que ficam como configuração.',
+  descricao: 'O que é módulo e o que é caso de uso no jurídico: intimações do DJEN e do Domicílio, prazos calculados em lista, calendário e na Agenda, provisão por data-base e os casos de uso que ficam como configuração.',
   status: 'em-revisao',
   atualizado: '2026-10-26',
-  tela: 'Jurídico › Intimações, Prazos e Provisão; Sistema › Módulos',
+  tela: 'Jurídico › Intimações, Prazos e Provisão; Agenda; Sistema › Módulos',
 })
 
 const t = useTextos(textos)
@@ -60,7 +61,7 @@ const triagemAberta = ref(false)
  * Navegação                                                           *
  * ------------------------------------------------------------------ */
 type Tela =
-  | { tipo: 'intimacoes' | 'prazos' | 'provisao' | 'sistema' | 'processos' }
+  | { tipo: 'intimacoes' | 'prazos' | 'provisao' | 'sistema' | 'processos' | 'agenda' }
   | { tipo: 'modulo', aba?: AbaDoModulo }
   | { tipo: 'processo', id: number }
 const tela = ref<Tela>({ tipo: 'intimacoes' })
@@ -68,7 +69,7 @@ const tela = ref<Tela>({ tipo: 'intimacoes' })
 function ir(d: Destino) {
   if (d === 'categoria:processos') return (tela.value = { tipo: 'processos' })
   if (d.startsWith('categoria:')) return toast.add({ title: t.value.geral.foraDoEscopo, description: t.value.geral.foraDoEscopoDesc, icon: 'i-lucide-construction', color: 'neutral' })
-  tela.value = { tipo: d as 'intimacoes' | 'prazos' | 'provisao' | 'sistema' }
+  tela.value = { tipo: d as 'intimacoes' | 'prazos' | 'provisao' | 'sistema' | 'agenda' }
 }
 const abrirProcesso = (id: number) => { tela.value = { tipo: 'processo', id } }
 
@@ -88,6 +89,7 @@ const trilha = computed(() => {
   const x = tela.value
   const casca = t.value.casca.itens
   if (x.tipo === 'sistema') return [workspace.nome, tr.configuracoes, tr.sistema]
+  if (x.tipo === 'agenda') return [workspace.nome, casca.agenda!]
   if (x.tipo === 'modulo') return [workspace.nome, tr.configuracoes, tr.sistema, tr.modulo]
   if (x.tipo === 'processos') return [workspace.nome, tr.categorias, categorias[0]!.nome]
   if (x.tipo === 'processo') return [workspace.nome, tr.categorias, categorias[0]!.nome, processoPorId.get(x.id)?.reference ?? '']
@@ -124,6 +126,7 @@ function reiniciar() {
 
 const atalhos = [
   { rotulo: 'Processo com prazo digitado', acao: () => abrirProcesso(4100) },
+  { rotulo: 'Prazos na Agenda', acao: () => { tela.value = { tipo: 'agenda' } } },
   { rotulo: 'Calendário do TJMG', acao: () => { if (estado.moduloLigado) tela.value = { tipo: 'modulo', aba: 'calendario' } } },
 ]
 </script>
@@ -162,6 +165,13 @@ const atalhos = [
             key="provisao"
             :t="t"
             :carregando="cenario === 'carregando'"
+            @abrir-processo="abrirProcesso"
+          />
+          <Agenda
+            v-else-if="tela.tipo === 'agenda'"
+            key="agenda"
+            :t="t"
+            :modulo-ligado="estado.moduloLigado"
             @abrir-processo="abrirProcesso"
           />
           <Sistema

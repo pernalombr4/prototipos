@@ -8,14 +8,21 @@
  * - Domicílio: o teor fica fechado até alguém escolher abrir, porque abrir registra a ciência e começa o prazo.
  *
  * Referência de mercado: a fila de conferência do Legal One e do Projuris (PESQUISA.md).
+ *
+ * A tela é a lista de registros do ENSPACE (rodada 2): a mesma barra de visualizações e de ferramentas, o `EnTable`
+ * com seleção, ações e paginação. O módulo instala 3 visualizações: Para revisar, Confirmadas e Descartadas. A
+ * revisão abre num painel à direita, como o painel da tarefa em Tarefas.
  */
+import type { DropdownMenuItem } from '@nuxt/ui'
+import type { EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import type { Intimacao, RegraId } from './mocks'
 import { HOJE, pessoaPorId, pessoas, processoPorCnj, regraPorId, regras, tribunais } from './mocks'
 import { calcular, cienciaTacita, diferencaEmDias } from './prazos'
-import { confirmar, descartar, diaDeEntrada, estado, registrarCiencia, voltarParaRevisao } from './estado'
+import { calcularPrazo, confirmar, descartar, diaDeEntrada, estado, registrarCiencia, voltarParaRevisao } from './estado'
 import type { Textos } from './textos'
 import { dataHora, dia } from './formato'
 import MemoriaDoCalculo from './_MemoriaDoCalculo.vue'
+import BarraDaLista from './_BarraDaLista.vue'
 
 const props = defineProps<{
   t: Textos
@@ -23,10 +30,10 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ abrirProcesso: [number], irPrazos: [], irCaptura: [] }>()
 const toast = useToast()
+const idioma = useIdioma()
 
 type Filtro = Intimacao['status']
 const filtro = ref<Filtro>('revisar')
-const origem = ref<'todas' | 'djen' | 'domicilio'>('todas')
 const busca = ref('')
 
 const visiveis = computed(() => (props.cenario === 'vazio' ? estado.intimacoes.filter(i => i.status !== 'revisar') : estado.intimacoes))
@@ -36,7 +43,6 @@ const lista = computed(() => {
   const q = busca.value.trim().toLowerCase()
   return visiveis.value
     .filter(i => i.status === filtro.value)
-    .filter(i => origem.value === 'todas' || i.meio === origem.value)
     .filter((i) => {
       if (!q) return true
       const p = processoPorCnj.get(i.numeroCnj)
@@ -46,9 +52,7 @@ const lista = computed(() => {
 })
 
 const selecionadaId = ref<number | undefined>()
-watch(lista, (l) => {
-  if (!l.some(i => i.id === selecionadaId.value)) selecionadaId.value = l[0]?.id
-}, { immediate: true })
+const painelAberto = computed({ get: () => selecionadaId.value !== undefined, set: (v) => { if (!v) selecionadaId.value = undefined } })
 const sel = computed(() => estado.intimacoes.find(i => i.id === selecionadaId.value))
 const processo = computed(() => (sel.value ? processoPorCnj.get(sel.value.numeroCnj) : undefined))
 
@@ -118,34 +122,58 @@ function maquete() {
   toast.add({ title: props.t.geral.foraDoEscopo, icon: 'i-lucide-construction', color: 'neutral' })
 }
 
-const filtros = computed(() => (['revisar', 'confirmada', 'descartada'] as Filtro[]).map(f => ({
-  value: f,
-  label: props.t.intimacoes.filtros[f],
-  badge: f === 'revisar' && contagem(f) ? { label: String(contagem(f)), color: 'primary' as const, variant: 'soft' as const } : undefined,
+/* ---------- a lista ---------- */
+const vistas = computed(() => (['revisar', 'confirmada', 'descartada'] as Filtro[]).map(f => ({
+  chave: f,
+  rotulo: props.t.intimacoes.filtros[f],
+  icone: 'i-lucide-table',
+  contagem: f === 'revisar' ? contagem(f) : undefined,
 })))
-const origens = computed(() => (['todas', 'djen', 'domicilio'] as const).map(o => ({ value: o, label: props.t.intimacoes.origens[o] })))
+const vista = computed({ get: () => filtro.value as string, set: (v: string) => { filtro.value = v as Filtro } })
+
+const colunas = computed<EnTableColumn[]>(() => {
+  const c = props.t.intimacoes.colunas
+  return [
+    { key: 'dia', label: c.dia },
+    { key: 'origem', label: c.origem },
+    { key: 'processo', label: c.processo },
+    { key: 'orgao', label: c.orgao },
+    { key: 'prazo', label: c.prazo },
+  ]
+})
+
+/** O prazo fatal pela regra sugerida, para a coluna. Domicílio fechado não tem prazo ainda. */
+function fatalDaLinha(i: Intimacao) {
+  const p = processoPorCnj.get(i.numeroCnj)
+  const regra = i.regraSugerida ? regraPorId.get(i.regraSugerida) : undefined
+  const d = diaDeEntrada(i)
+  if (!p || !regra || !d) return undefined
+  return calcular({ meio: i.meio, dia: d, regra, tribunal: p.data.tribunal, suspensoes: estado.suspensoes, antecedencia: estado.antecedencia }).fatal
+}
+
+function menuDaLinha(i: Intimacao): DropdownMenuItem[][] {
+  const p = processoPorCnj.get(i.numeroCnj)
+  return [[
+    { label: i.status === 'revisar' ? props.t.intimacoes.revisar : props.t.lista.verDetalhes, icon: 'i-lucide-eye', onSelect: () => { selecionadaId.value = i.id } },
+    ...(p ? [{ label: props.t.intimacoes.abrirProcesso, icon: 'i-lucide-arrow-up-right', onSelect: () => emit('abrirProcesso', p.id) }] : []),
+  ]]
+}
 
 const diasAteATacita = (i: Intimacao) => diferencaEmDias(HOJE, cienciaTacita(i.dia))
+
+const fatalConfirmado = (i: Intimacao) => {
+  const p = estado.prazos.find(x => x.intimacao === i.id)
+  return p ? calcularPrazo(p).fatal : undefined
+}
 </script>
 
 <template>
   <div class="flex min-h-0 flex-1 flex-col">
-    <!-- Cabeçalho -->
-    <div class="flex flex-wrap items-end gap-3 border-b border-default px-5 pb-0 pt-4">
-      <div class="min-w-0 flex-1">
-        <h1 class="text-lg font-semibold text-highlighted">{{ t.intimacoes.titulo }}</h1>
-        <p class="max-w-3xl text-sm text-muted">{{ t.intimacoes.descricao }}</p>
-        <UTabs v-model="filtro" :items="filtros" :content="false" variant="link" size="sm" class="mt-2" />
-      </div>
-      <div class="mb-2 flex flex-wrap items-center gap-2">
-        <UInput v-model="busca" icon="i-lucide-search" :placeholder="t.intimacoes.buscar" size="sm" class="w-64" />
-        <USelect v-model="origem" :items="origens" size="sm" class="w-40" :aria-label="t.intimacoes.origens.todas" />
-      </div>
-    </div>
+    <BarraDaLista v-model:ativa="vista" v-model:busca="busca" :t="t" :vistas="vistas" :pesquisar="t.intimacoes.pesquisar" />
 
     <UAlert
       v-if="cenario === 'erroCaptura'"
-      class="mx-5 mt-3 w-auto"
+      class="mx-4 mt-3 w-auto"
       :title="t.intimacoes.erroCaptura.titulo"
       :description="t.intimacoes.erroCaptura.desc"
       icon="i-lucide-plug-zap"
@@ -154,66 +182,87 @@ const diasAteATacita = (i: Intimacao) => diferencaEmDias(HOJE, cienciaTacita(i.d
       :actions="[{ label: t.config.captura.revisar, color: 'error', variant: 'outline', size: 'xs', onClick: () => emit('irCaptura') }]"
     />
 
-    <!-- Carregando -->
-    <div v-if="cenario === 'carregando'" class="flex min-h-0 flex-1">
-      <div class="flex w-96 shrink-0 flex-col gap-3 border-r border-default p-4">
-        <USkeleton v-for="n in 6" :key="n" class="h-16 w-full" />
-      </div>
-      <div class="flex flex-1 flex-col gap-3 p-6">
-        <USkeleton class="h-6 w-1/3" />
-        <USkeleton class="h-24 w-full" />
-        <USkeleton class="h-48 w-2/3" />
+    <div class="min-h-0 flex-1 overflow-y-auto">
+      <div :key="filtro" class="animate-[entrada_.25s_ease-out]">
+        <EnTable
+          :columns="colunas"
+          :rows="lista"
+          :loading="cenario === 'carregando'"
+          selectable
+          :pagination="{ page: 1, pageCount: 1, total: lista.length }"
+          :locale="idioma"
+          :empty-state="filtro === 'revisar' && !busca
+            ? { icon: 'i-lucide-inbox', title: t.intimacoes.vazio.titulo, description: t.intimacoes.vazio.desc }
+            : { icon: 'i-lucide-search-x', title: t.intimacoes.vazioFiltro.titulo, description: t.intimacoes.vazioFiltro.desc }"
+          class="[&_tbody_tr]:cursor-pointer"
+          @row-click="(r) => { selecionadaId = (r as Intimacao).id }"
+        >
+          <template #cell-dia="{ row }">
+            <span class="flex flex-col py-1">
+              <span class="text-sm tabular-nums text-highlighted">{{ dia((row as Intimacao).dia, t.locale) }}</span>
+              <span class="text-xs text-muted">{{ t.intimacoes.tipos[(row as Intimacao).tipo] }}</span>
+            </span>
+          </template>
+          <template #cell-origem="{ row }">
+            <UBadge :label="(row as Intimacao).meio === 'djen' ? 'DJEN' : t.intimacoes.origens.domicilio" :color="(row as Intimacao).meio === 'djen' ? 'neutral' : 'info'" variant="subtle" size="sm" />
+          </template>
+          <template #cell-processo="{ row }">
+            <span v-if="processoPorCnj.get((row as Intimacao).numeroCnj)" class="flex min-w-0 flex-col py-1">
+              <span class="max-w-72 truncate text-sm text-highlighted">{{ processoPorCnj.get((row as Intimacao).numeroCnj)?.titulo }}</span>
+              <span class="text-xs text-muted">{{ processoPorCnj.get((row as Intimacao).numeroCnj)?.reference }}</span>
+            </span>
+            <span v-else class="flex flex-col gap-1 py-1">
+              <span class="font-mono text-xs text-toned">{{ (row as Intimacao).numeroCnj }}</span>
+              <UBadge :label="t.intimacoes.semProcesso" icon="i-lucide-link-2-off" color="warning" variant="outline" size="sm" class="self-start" />
+            </span>
+          </template>
+          <template #cell-orgao="{ row }">
+            <span class="flex min-w-0 flex-col">
+              <span class="max-w-60 truncate text-sm text-toned">{{ (row as Intimacao).orgao }}</span>
+              <span class="text-xs text-muted">{{ tribunais[(row as Intimacao).tribunal].sigla }}</span>
+            </span>
+          </template>
+          <template #cell-prazo="{ row }">
+            <template v-if="(row as Intimacao).status === 'confirmada' && fatalConfirmado(row as Intimacao)">
+              <span class="flex items-center gap-1.5 text-sm tabular-nums text-highlighted">
+                <UIcon name="i-lucide-circle-check" class="size-4 text-success" />
+                {{ dia(fatalConfirmado(row as Intimacao)!, t.locale) }}
+              </span>
+            </template>
+            <span v-else-if="(row as Intimacao).status === 'descartada'" class="text-sm text-muted">{{ (row as Intimacao).motivoDoDescarte }}</span>
+            <UBadge
+              v-else-if="(row as Intimacao).meio === 'domicilio' && !(row as Intimacao).ciencia"
+              :label="t.intimacoes.tacitaEm(dia(cienciaTacita((row as Intimacao).dia), t.locale))"
+              icon="i-lucide-hourglass"
+              :color="diasAteATacita(row as Intimacao) <= 2 ? 'error' : 'neutral'"
+              variant="outline"
+              size="sm"
+            />
+            <span v-else-if="fatalDaLinha(row as Intimacao)" class="flex flex-col">
+              <span class="text-sm font-medium tabular-nums text-highlighted">{{ dia(fatalDaLinha(row as Intimacao)!, t.locale) }}</span>
+              <span class="text-xs text-muted">{{ regraPorId.get((row as Intimacao).regraSugerida!)?.ato }}</span>
+            </span>
+            <UBadge v-else-if="processoPorCnj.get((row as Intimacao).numeroCnj)" :label="t.intimacoes.semRegra" icon="i-lucide-circle-help" color="warning" variant="outline" size="sm" />
+            <span v-else />
+          </template>
+          <template #actions="{ row }">
+            <UDropdownMenu :items="menuDaLinha(row as Intimacao)" :content="{ align: 'start' }" :ui="{ content: 'w-60' }">
+              <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" size="xs" :aria-label="t.lista.acoes" @click.stop />
+            </UDropdownMenu>
+          </template>
+        </EnTable>
       </div>
     </div>
 
-    <div v-else class="flex min-h-0 flex-1">
-      <!-- Lista -->
-      <ul class="w-full shrink-0 overflow-y-auto border-r border-default md:w-96" role="listbox" :aria-label="t.intimacoes.titulo">
-        <li v-if="!lista.length" class="p-6">
-          <UEmpty
-            :icon="filtro === 'revisar' && !busca && origem === 'todas' ? 'i-lucide-inbox' : 'i-lucide-search-x'"
-            :title="filtro === 'revisar' && !busca && origem === 'todas' ? t.intimacoes.vazio.titulo : t.intimacoes.vazioFiltro.titulo"
-            :description="filtro === 'revisar' && !busca && origem === 'todas' ? t.intimacoes.vazio.desc : t.intimacoes.vazioFiltro.desc"
-            variant="naked"
-          />
-        </li>
-        <li
-          v-for="(i, n) in lista"
-          :key="i.id"
-          role="option"
-          :aria-selected="i.id === selecionadaId"
-          tabindex="0"
-          class="animate-[entrada_.25s_ease-out_both] cursor-pointer border-b border-default px-4 py-3 transition-colors"
-          :class="i.id === selecionadaId ? 'bg-primary/8 shadow-[inset_3px_0_0_var(--ui-primary)]' : 'hover:bg-elevated/60'"
-          :style="{ animationDelay: `${n * 30}ms` }"
-          @click="selecionadaId = i.id"
-          @keydown.enter="selecionadaId = i.id"
-        >
-          <div class="flex items-center gap-2 text-xs text-muted">
-            <UBadge :label="i.meio === 'djen' ? 'DJEN' : t.intimacoes.origens.domicilio" :color="i.meio === 'djen' ? 'neutral' : 'info'" variant="subtle" size="sm" />
-            <span>{{ t.intimacoes.tipos[i.tipo] }}</span>
-            <span class="ml-auto tabular-nums">{{ dia(i.dia, t.locale) }}</span>
-          </div>
-          <p class="mt-1 truncate text-sm font-medium text-highlighted">
-            {{ processoPorCnj.get(i.numeroCnj)?.titulo ?? i.numeroCnj }}
-          </p>
-          <p class="truncate text-xs text-toned">{{ tribunais[i.tribunal].sigla }} · {{ i.orgao }}</p>
-          <div class="mt-1.5 flex flex-wrap gap-1.5">
-            <UBadge v-if="!processoPorCnj.get(i.numeroCnj)" :label="t.intimacoes.semProcesso" icon="i-lucide-link-2-off" color="warning" variant="outline" size="sm" />
-            <UBadge v-else-if="i.status === 'revisar' && !i.regraSugerida" :label="t.intimacoes.semRegra" icon="i-lucide-circle-help" color="warning" variant="outline" size="sm" />
-            <UBadge v-if="i.meio === 'domicilio' && !i.ciencia && i.status === 'revisar'" :label="t.intimacoes.tacitaEm(dia(cienciaTacita(i.dia), t.locale))" icon="i-lucide-hourglass" :color="diasAteATacita(i) <= 2 ? 'error' : 'neutral'" variant="outline" size="sm" />
-          </div>
-        </li>
-      </ul>
-
-      <!-- Detalhe -->
-      <section class="hidden min-w-0 flex-1 overflow-y-auto md:block">
-        <Transition mode="out-in" enter-active-class="transition-[opacity,transform] duration-200 ease-out" enter-from-class="opacity-0 translate-y-1" leave-active-class="transition-opacity duration-100" leave-to-class="opacity-0">
-          <div v-if="!sel" key="nada" class="flex h-full items-center justify-center p-10">
-            <UEmpty icon="i-lucide-mouse-pointer-click" :title="t.intimacoes.escolha" variant="naked" />
-          </div>
-
-          <div v-else :key="sel.id" class="mx-auto flex max-w-4xl flex-col gap-4 p-6">
+    <!-- A revisão, no painel à direita -->
+    <USlideover
+      v-model:open="painelAberto"
+      :title="sel ? `${t.intimacoes.tipos[sel.tipo]} · ${processo?.reference ?? sel.numeroCnj}` : ''"
+      :description="sel ? (processo?.titulo ?? sel.orgao) : ''"
+      :ui="{ content: 'max-w-2xl' }"
+    >
+      <template #body>
+        <div v-if="sel" class="flex flex-col gap-4">
             <!-- Identificação -->
             <div class="flex flex-col gap-1.5">
               <div class="flex flex-wrap items-center gap-2 text-xs text-muted">
@@ -305,10 +354,7 @@ const diasAteATacita = (i: Intimacao) => diferencaEmDias(HOJE, cienciaTacita(i.d
                 </div>
               </template>
 
-              <div class="flex flex-wrap justify-end gap-2 border-t border-default pt-3">
-                <UButton :label="t.intimacoes.prazo.descartar" icon="i-lucide-archive" color="neutral" variant="outline" @click="modalDescarte = true" />
-                <UButton :label="t.intimacoes.prazo.confirmar" icon="i-lucide-check" :loading="confirmando" :disabled="!calculo" @click="confirmarPrazo" />
-              </div>
+
             </div>
 
             <!-- Prazo: confirmado -->
@@ -337,10 +383,15 @@ const diasAteATacita = (i: Intimacao) => diferencaEmDias(HOJE, cienciaTacita(i.d
               <p class="min-w-0 flex-1 text-sm text-toned">{{ t.intimacoes.descartadaPor(sel.motivoDoDescarte ?? '') }}</p>
               <UButton :label="t.intimacoes.voltarParaRevisao" icon="i-lucide-undo-2" size="sm" color="neutral" variant="outline" @click="voltarParaRevisao(sel)" />
             </div>
-          </div>
-        </Transition>
-      </section>
-    </div>
+                  </div>
+      </template>
+      <template v-if="sel && processo && sel.status === 'revisar' && !teorFechado" #footer>
+        <div class="flex w-full justify-end gap-2">
+          <UButton :label="t.intimacoes.prazo.descartar" icon="i-lucide-archive" color="neutral" variant="outline" @click="modalDescarte = true" />
+          <UButton :label="t.intimacoes.prazo.confirmar" icon="i-lucide-check" :loading="confirmando" :disabled="!calculo" @click="confirmarPrazo" />
+        </div>
+      </template>
+    </USlideover>
 
     <!-- Abrir o teor do Domicílio -->
     <UModal v-model:open="modalCiencia" :title="t.intimacoes.modalCiencia.titulo" :description="t.intimacoes.modalCiencia.texto">

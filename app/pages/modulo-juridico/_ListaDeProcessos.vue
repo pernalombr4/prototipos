@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
- * Categorias › Processos: a lista de itens da categoria. Fora do escopo: está aqui só como porta para a tela do
- * processo, num `EnTable` simplificado (sem busca, filtro, período e ações da tabela de itens do develop).
+ * Categorias › Processos: a lista de itens da categoria, como no develop (barra de visualizações, barra de
+ * ferramentas, `EnTable` com seleção, ações e paginação). Fora do escopo: está aqui como porta para a tela do processo.
  *
  * A coluna "Próximo prazo" mostra o que muda com o módulo: sem ele, a data digitada; com ele, o prazo calculado.
  */
@@ -11,10 +11,17 @@ import { pessoaPorId, processos, tribunais } from './mocks'
 import { calcularPrazo, estado } from './estado'
 import type { Textos } from './textos'
 import { dia } from './formato'
+import BarraDaLista from './_BarraDaLista.vue'
 
 const props = defineProps<{ t: Textos, moduloLigado: boolean }>()
 const emit = defineEmits<{ abrir: [number] }>()
 const idioma = useIdioma()
+const vista = ref('itens')
+const busca = ref('')
+const linhas = computed(() => {
+  const q = busca.value.trim().toLowerCase()
+  return processos.filter(p => !q || [p.titulo, p.reference, p.data.numeroCnj].some(x => x.toLowerCase().includes(q)))
+})
 
 const colunas = computed<EnTableColumn[]>(() => {
   const c = props.t.processo.campos
@@ -39,15 +46,23 @@ const corDoRisco: Record<Risco, 'error' | 'warning' | 'neutral'> = { provavel: '
 </script>
 
 <template>
-  <div class="flex min-h-0 flex-1 flex-col overflow-y-auto">
-    <div class="mx-auto flex w-full max-w-6xl flex-col gap-4 p-5">
-      <div class="flex items-center gap-2">
-        <UIcon name="i-lucide-gavel" class="size-5 text-primary" />
-        <h1 class="text-lg font-semibold text-highlighted">Processos</h1>
-      </div>
-      <EnTable :columns="colunas" :rows="processos" :locale="idioma" class="[&_tbody_tr]:cursor-pointer" @row-click="(r: Processo) => emit('abrir', r.id)">
+  <div class="flex min-h-0 flex-1 flex-col">
+    <BarraDaLista v-model:ativa="vista" v-model:busca="busca" :t="t" :vistas="[{ chave: 'itens', rotulo: t.lista.itens, icone: 'i-lucide-table' }]" :novo="t.lista.novoRegistro" />
+    <div class="min-h-0 flex-1 overflow-y-auto">
+      <EnTable
+        :columns="colunas"
+        :rows="linhas"
+        selectable
+        :pagination="{ page: 1, pageCount: 1, total: linhas.length }"
+        :locale="idioma"
+        class="[&_tbody_tr]:cursor-pointer"
+        @row-click="(r) => emit('abrir', (r as Processo).id)"
+      >
         <template #cell-reference="{ row }">
-          <span class="font-mono text-xs text-toned">{{ (row as Processo).reference }}</span>
+          <span class="flex items-center gap-1.5">
+            <UBadge color="info" variant="subtle" size="sm" class="font-mono text-[11px]">{{ (row as Processo).reference }}</UBadge>
+            <UIcon name="i-lucide-copy" class="size-3.5 text-dimmed" />
+          </span>
         </template>
         <template #cell-titulo="{ row }">
           <span class="block max-w-80 truncate text-sm text-highlighted">{{ (row as Processo).titulo }}</span>
@@ -66,7 +81,12 @@ const corDoRisco: Record<Risco, 'error' | 'warning' | 'neutral'> = { provavel: '
             <UIcon :name="moduloLigado ? 'i-lucide-calculator' : 'i-lucide-pencil'" class="size-3.5" :class="moduloLigado ? 'text-primary' : 'text-dimmed'" />
             {{ dia(proximo(row as Processo)!, t.locale) }}
           </span>
-          <span v-else />
+          <span v-else class="text-sm text-dimmed">-</span>
+        </template>
+        <template #actions="{ row }">
+          <UDropdownMenu :items="[[{ label: t.lista.verDetalhes, icon: 'i-lucide-eye', onSelect: () => emit('abrir', (row as Processo).id) }]]" :content="{ align: 'start' }">
+            <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" size="xs" :aria-label="t.lista.acoes" @click.stop />
+          </UDropdownMenu>
         </template>
       </EnTable>
     </div>
