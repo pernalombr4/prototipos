@@ -2,31 +2,30 @@
 
 ## A proposta em 1 parágrafo
 
-O módulo Jurídico ganha 3 funcionalidades, todas do contencioso, e nada mais: **Intimações**, **Prazos** e
-**Provisão**. Ligado em Configurações › Sistema › Módulos, ele acrescenta o menu **Jurídico** ao membro e 3 abas ao
-item da categoria Processos. A intimação capturada do DJEN ou do Domicílio Judicial Eletrônico chega com o prazo já
-calculado pela regra do rito e pelo calendário do tribunal; uma pessoa confere a regra e o responsável e confirma, e o
-prazo vira a tarefa que já existe, com vencimento no prazo interno. Cada prazo mostra a memória do cálculo (cada passo
-com o fundamento e cada dia que não contou, com o motivo e a fonte) e guarda o antes e o depois quando o calendário do
-tribunal muda. A provisão fecha o risco e o valor de cada processo por data-base, com motivo para cada mudança, e a
-data-base fechada não se edita. O resto do jurídico (contratos, consultivo, procurações, societário, pagamentos,
-marcas, denúncias) é caso de uso: configuração salva e replicada pela galeria, listada na página do módulo para mostrar
-onde cada área mora. As telas do módulo são a listagem de registros de qualquer categoria (mesma barra, mesma tabela,
-mesma troca de visualização), e o prazo aparece na Agenda e na visualização Calendário de Prazos.
+O módulo Jurídico é feito de submódulos, ligados um a um em Configurações › Sistema › Módulos. O primeiro é
+**Capturas**, que cobre captura e prazo. Ligado, ele acrescenta o menu **Jurídico** (Capturas e Prazos) e a aba
+Capturas ao processo. A caixa **Capturas** recebe intimação, citação, distribuição de ação nova e andamento, vindos do
+DJEN, do Domicílio Judicial Eletrônico, dos robôs ENSPACE que o cliente já contrata (portais, andamentos, distribuição)
+e do fornecedor de recortes do cliente. Cada captura diz de onde veio, qual termo casou e quando chegou, com o hash do
+DJEN como prova. A mesma comunicação vinda de 2 fontes fica numa linha só; a vinda por 2 meios mostra as 2 datas e qual
+vale. Da caixa, a intimação vira prazo calculado (memória do cálculo, revisão humana), a citação pede confirmação em 3
+dias úteis, a distribuição vira processo ou sai como homônimo e o andamento vai para a categoria Andamentos, um a um ou
+em lote. A página do módulo ganha Fontes (estado e histórico de execuções de cada fonte), Termos monitorados e Destino.
+Provisão e Casos de uso, das rodadas 1 e 2, ficam no código e saem da tela até serem liberados (`submodulos.ts`).
 
 ## A jornada
 
 ```mermaid
 flowchart LR
-    S["Sistema › Módulos<br/>liga o Jurídico"] -->|"Configurar"| C["Módulo Jurídico<br/>pacote, regras, calendário,<br/>captura, provisão, casos de uso"]
-    S -->|"menu Jurídico"| I["Intimações<br/>Para revisar"]
-    I -->|"confere regra e responsável<br/>Confirmar prazo"| P["Prazos<br/>fatal e interno"]
-    I -->|"Abrir processo"| T["Processo<br/>abas Prazos, Intimações,<br/>Risco e provisão"]
+    S["Sistema › Módulos<br/>Jurídico e o submódulo Capturas"] -->|"Configurar"| C["Módulo Jurídico<br/>Fontes, Termos monitorados,<br/>Destino, regras, calendário"]
+    S -->|"menu Jurídico"| I["Capturas<br/>Para tratar"]
+    I -->|"intimação: Confirmar prazo"| P["Prazos<br/>fatal e interno"]
+    I -->|"citação: confirmar"| P
+    I -->|"distribuição: Cadastrar processo"| T["Processo<br/>abas Prazos e Capturas"]
+    I -->|"andamento: Registrar"| N["Categoria Andamentos"]
+    I -->|"botão de saúde"| C
     P -->|"linha ou dia do calendário"| M["Memória do cálculo<br/>e histórico"]
     A["Agenda<br/>interno e fatal"] -->|"evento do prazo"| M
-    C -->|"Adicionar suspensão"| R["Recálculo<br/>antes e depois no histórico"]
-    R --> P
-    T -->|"muda o risco"| V["Provisão<br/>motivo e fechar a data-base"]
 ```
 
 ## Rodada 1 · 2026-10-26
@@ -201,6 +200,102 @@ flowchart LR
   - `proposta-09-prazos-calendario.jpg`: Prazos na visualização Calendário;
   - `proposta-10-agenda-com-prazos.jpg`: a Agenda com prazos, audiências e reuniões.
 
+## Rodada 3 · 2026-10-26
+
+- **Pedido (literal):** "acredito que o módulo do enspace juridico, primeiro falando só em brasil, precisa ter
+  "submodulos" a serem ativados. o primeiro deles é o de capturas. e capturas precisa tratar capturas + prazos. vamos nos
+  ater a esse escopo primeiro (nao precisa deletar nada que botou ali, só ocultar por enquanto e vamos liberando aos
+  poucos construindo o prototipo) primeiro faça um submodulo pra dar conta de TUDO o que seja preciso em capturas,
+  sabendo que hoje ja temos uma automaçao de capturas que os clientes contratam. se precisar pesquisa /deep-research
+  sobre capturas em sistemas (softwares) juridicos"
+- **Pesquisa:** pesquisa profunda sobre captura em softwares jurídicos brasileiros
+  ([relatório](pesquisa/reports/Captura%20em%20softwares%20jur%C3%ADdicos.md)), resumida em `PESQUISA.md`, "Rodada 3". O
+  serviço de captura de hoje está no `BRIEFING.md`, "A captura que os clientes contratam hoje".
+- **Oculto, sem apagar** (`submodulos.ts`, objeto `LIBERADO`):
+  - Provisão: o item do menu, a aba do processo, o aviso de risco na visão geral e a aba da página do módulo;
+  - Casos de uso: a aba da página do módulo e o andaime "Módulo ou caso de uso";
+  - para liberar, troque a chave para `true`. O código e os textos das rodadas 1 e 2 continuam no repositório.
+- **Mudou:**
+  - Sistema › Módulos: com o Jurídico ligado, aparece a lista **Submódulos**, hoje só com Capturas, com interruptor e
+    Configurar. Sem submódulo ligado, o menu Jurídico some;
+  - Jurídico › Intimações virou **Capturas**:
+    - 4 tipos: intimação, citação, distribuição e andamento;
+    - visualizações Para tratar, Distribuições, Andamentos, Tratadas e Descartadas;
+    - colunas Recebida em, Tipo, Origem, Processo, Termo, Prazo ou situação e Responsável;
+    - na barra, o botão de saúde ("1 fonte com problema") abre as 6 fontes e leva à página delas;
+    - seleção em lote: Atribuir a, Registrar andamentos (só andamento) e Descartar;
+  - o painel da captura muda por tipo:
+    - intimação vinda por 2 meios: as 2 datas, o prazo fatal por cada uma, a data que entra no cálculo e o aviso do
+      Tema 1.180;
+    - citação no Domicílio: "Confirmar até", o modal da confirmação e o prazo contado depois do 5º dia útil (2 passos
+      novos na memória do cálculo);
+    - intimação no portal: ciência tácita em 10 dias corridos e o modal para abrir o teor;
+    - distribuição: os dados da ação nova, "Cadastrar processo" (o item nasce em Processos) e "Não é da empresa", que
+      descarta como homônimo e oferece a exceção no termo;
+    - andamento: "Registrar no processo";
+    - sem processo: vincular a um processo existente ou cadastrar;
+    - em todos, "Dados da captura": recebida em, fonte, termo, id na fonte, hash e certidão do DJEN, outras fontes;
+  - página do módulo: a aba Captura deu lugar a **Fontes**, **Termos monitorados** e **Destino**. A leitura do
+    Domicílio passou para o painel da fonte Domicílio;
+  - tela do processo: a aba Intimações virou Capturas e mostra também os andamentos e as capturas vinculadas à mão.
+- **Fronteira:** muda a caixa, a página do módulo, o cartão Módulos e a aba do processo. Não muda a barra da lista, o
+  `EnTable`, a casca, Prazos, a Agenda nem o motor de prazo, que só ganhou a regra da citação.
+- **Por que assim:**
+  - submódulo é linha no cartão Módulos: o mesmo gesto de hoje (interruptor e Salvar), sem tela nova de instalação;
+  - a caixa continua sendo a listagem de categoria (regra da rodada 2). Tipo e situação são colunas; o recorte é
+    visualização;
+  - o robô ENSPACE aparece como fonte, ao lado das oficiais: o cliente vê o serviço que paga e quando ele falhou;
+  - o histórico de execuções mostra "Sem resultado": prova que a captura rodou num dia sem publicação. Nenhum produto
+    pesquisado mostra isso;
+  - 2 meios: a regra padrão é a data oficial com aviso, porque é o que a Res. CNJ 569/2024 manda. Contar pela data mais
+    cedo fica como opção enquanto o Tema 1.180 não é julgado;
+  - o homônimo vira exceção no termo no momento do descarte, para a próxima captura igual não chegar.
+- **Descartado:**
+  - tela própria de instalação do submódulo, como a de integração. Motivo: há 1 submódulo só, e o cartão Módulos já tem
+    Configurar;
+  - cartões para escolher a regra de duplicidade e o tipo da fonte. Motivo: escolha em configuração é `USelect` com
+    ajuda por opção;
+  - quadro (kanban) na caixa. Motivo: arrastar para Tratadas pularia a conferência, como na rodada 2;
+  - IA que classifica e grava o prazo sozinha. Motivo: o relatório recomenda sugestão com confirmação, e a regra
+    sugerida pelo teor já cobre isso.
+- **Não deu:**
+  - abrir a Triagem do develop nesta rodada. Por quê: a rodada ficou no desenho da caixa. A Triagem aparece pelos
+    chamados e pela auditoria de UX (C3, U2), não pela tela;
+  - ler a API dos fornecedores de recortes. Por quê: o relatório registra que ela só sai sob pedido;
+  - o `nuxi typecheck`. Por quê: o projeto não tem o `vue-tsc`. O comportamento foi conferido no navegador.
+- **Maquete:** "Criar processo" na intimação sem processo, a certidão do DJEN, o recibo do dia, "Revisar a credencial",
+  a renovação do certificado e "Adicionar fonte" mostram só o aviso. O interruptor "Registrar direto os andamentos"
+  grava, mas a caixa não muda com ele.
+- **Testado** (navegador do app e Chrome headless, em português e espanhol):
+  - confirmar a citação 903 dá início em 05/11 e fatal em 26/11, com Finados fora da contagem do 5º dia útil;
+  - cadastrar a distribuição 920 cria o processo, e o painel passa a mostrá-lo;
+  - descartar a 922 como homônimo e aceitar a exceção acrescenta "1 exceção" ao termo;
+  - desligar Capturas e salvar tira o menu Jurídico; religar devolve;
+  - no cenário "captura do Domicílio parada", a caixa mostra o alerta e "2 fontes com problema".
+- **Crítica e acessibilidade** (revisão própria; as skills `design:design-critique` e `design:accessibility-review`
+  não rodaram):
+  - corrigido: o processo cadastrado não aparecia no painel, porque o mapa de processos do `mocks.ts` não é reativo. O
+    vínculo agora fica no estado;
+  - corrigido: o botão "Ver execuções" cortava o texto na tabela de fontes. Ele virou ícone com tooltip e `aria-label`,
+    como o botão de renovar o certificado;
+  - corrigido: o histórico do Domicílio mostrava a mensagem de falha do DJEN.
+- **CSS próprio:** nenhum.
+- **Ver:** prints em `evidencias/`, prefixo `r3-`:
+  - `r3-01-caixa-capturas.jpg`: a caixa na visualização Para tratar;
+  - `r3-02-dois-meios.jpg`: a intimação vinda pelo DJEN e pelo portal;
+  - `r3-03-citacao.jpg`: a citação do Domicílio com "Confirmar até";
+  - `r3-04-distribuicao.jpg`: a ação nova com os dados da distribuição;
+  - `r3-05-saude-das-fontes.jpg`: o botão de saúde aberto;
+  - `r3-06-andamentos-em-lote.jpg`: andamentos selecionados e a faixa de ações em lote;
+  - `r3-07-fontes.jpg`: as 6 fontes da captura;
+  - `r3-08-fonte-portais.jpg`: o painel dos portais, com o certificado vencido;
+  - `r3-09-termos.jpg`: Termos monitorados;
+  - `r3-10-destino.jpg`: Destino;
+  - `r3-11-submodulos.jpg`: o cartão Módulos com o submódulo Capturas;
+  - `r3-12-erro-captura.jpg`: a caixa com a captura do Domicílio parada;
+  - `r3-13-fonte-domicilio-parada.jpg`: o painel da fonte Domicílio parada;
+  - `r3-14-es-dois-meios.jpg`: o painel dos 2 meios em espanhol.
+
 ## Perguntas para o time de dev
 
 - **P1.** Ligar o módulo instala o caso de uso Contencioso junto, ou são 2 gestos? Nenhuma plataforma no-code liga
@@ -225,3 +320,14 @@ flowchart LR
   ou fica só no módulo?
 - **P10.** Na Agenda, o clique num prazo abre o painel do prazo (como no protótipo) ou o modal "Evento" de hoje?
 - **P11.** O `EnTable` pode ganhar o funil de filtro no cabeçalho da coluna, como a listagem do develop?
+- **P12.** A caixa Capturas substitui a Triagem para o que vem da captura, ou a captura continua criando requisição na
+  Triagem e a caixa lê de lá? A user story do Módulo de Triagem está em "To Do".
+- **P13.** Onde moram a fonte, a execução e a prova de chegada (hash, id na fonte, hora): numa entidade do submódulo ou
+  em campos do item capturado?
+- **P14.** O conector do fornecedor de recortes: quem pede o manual da API, que os fornecedores só entregam sob pedido?
+- **P15.** A regra de duplicidade padrão é a data oficial, com aviso. Enquanto o STJ não julga o Tema 1.180, a escolha
+  vale para o workspace todo ou por tipo de comunicação?
+- **P16.** A confirmação da citação no Domicílio e a abertura do teor no portal acontecem pelo ENSPACE, com a credencial
+  da empresa, ou o ENSPACE só registra o que a pessoa fez no site oficial?
+- **P17.** A cobrança da captura de hoje é por termo, por processo ou por fonte? O limite de termos na tela
+  ("N de 10 termos do contrato") supõe cobrança por termo.

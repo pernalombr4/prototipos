@@ -9,15 +9,20 @@
  * PROPOSTA:
  * - uma linha de ajuda em cada módulo, que diz o que ele muda;
  * - com o Jurídico salvo como ligado, o botão Configurar, que abre a página do módulo.
+ * - rodada 3: com o Jurídico ligado, a lista de submódulos, ligados um a um. Hoje só Capturas; o próximo entra
+ *   como mais uma linha. Sem submódulo ligado, o menu Jurídico não aparece.
  */
 import type { Textos } from './textos'
+import { textosCapturas } from './textos-capturas'
 
-const props = defineProps<{ t: Textos, moduloLigado: boolean }>()
-const emit = defineEmits<{ 'update:moduloLigado': [boolean], configurar: [] }>()
+const props = defineProps<{ t: Textos, moduloLigado: boolean, capturasLigado: boolean }>()
+const emit = defineEmits<{ 'update:moduloLigado': [boolean], 'update:capturasLigado': [boolean], configurar: [aba?: 'fontes'] }>()
 const toast = useToast()
+const tc = useTextos(textosCapturas)
 
-const rascunho = ref({ correcao: true, comparacoes: false, juridico: props.moduloLigado })
+const rascunho = ref({ correcao: true, comparacoes: false, juridico: props.moduloLigado, capturas: props.capturasLigado })
 watch(() => props.moduloLigado, (v) => { rascunho.value.juridico = v })
+watch(() => props.capturasLigado, (v) => { rascunho.value.capturas = v })
 
 const salvando = ref(false)
 async function salvar() {
@@ -25,10 +30,15 @@ async function salvar() {
   await new Promise(r => setTimeout(r, 600))
   salvando.value = false
   const mudou = rascunho.value.juridico !== props.moduloLigado
+  const mudouCapturas = rascunho.value.capturas !== props.capturasLigado
   emit('update:moduloLigado', rascunho.value.juridico)
+  emit('update:capturasLigado', rascunho.value.capturas)
   if (mudou) {
     const m = rascunho.value.juridico ? props.t.sistema.ligado : props.t.sistema.desligado
     toast.add({ title: m.titulo, description: m.desc, icon: rascunho.value.juridico ? 'i-lucide-scale' : 'i-lucide-power-off', color: rascunho.value.juridico ? 'success' : 'neutral' })
+  }
+  else if (mudouCapturas && !rascunho.value.capturas) {
+    toast.add({ title: tc.value.sistema.desligado.titulo, description: tc.value.sistema.desligado.desc, icon: 'i-lucide-power-off', color: 'neutral' })
   }
 }
 
@@ -79,6 +89,30 @@ const modulos = computed(() => [
                 />
               </Transition>
             </div>
+
+            <!-- PROPOSTA (rodada 3): os submódulos do Jurídico -->
+            <Transition enter-active-class="transition-[opacity,transform] duration-200" enter-from-class="opacity-0 -translate-y-1" leave-active-class="transition-opacity duration-100" leave-to-class="opacity-0">
+              <div v-if="m.chave === 'juridico' && rascunho.juridico" class="mt-2 flex flex-col gap-2 border-l-2 border-default pl-4">
+                <p class="text-xs font-semibold uppercase tracking-wider text-muted">{{ tc.sistema.submodulos }}</p>
+                <div class="flex items-start gap-3">
+                  <USwitch v-model="rascunho.capturas" :aria-label="tc.sistema.capturas.nome" class="mt-0.5" />
+                  <div class="min-w-0 flex-1">
+                    <p class="text-sm font-medium text-highlighted">{{ tc.sistema.capturas.nome }}</p>
+                    <p class="text-xs text-muted">{{ tc.sistema.capturas.ajuda }}</p>
+                  </div>
+                  <UButton
+                    v-if="moduloLigado && capturasLigado"
+                    :label="t.sistema.configurar"
+                    icon="i-lucide-settings-2"
+                    size="xs"
+                    color="neutral"
+                    variant="outline"
+                    @click="emit('configurar', 'fontes')"
+                  />
+                </div>
+                <p v-if="!rascunho.capturas" class="text-xs text-warning">{{ tc.sistema.nenhum }}</p>
+              </div>
+            </Transition>
           </div>
         </div>
         <div class="mt-4 flex justify-end">

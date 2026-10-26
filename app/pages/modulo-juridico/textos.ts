@@ -35,7 +35,7 @@ const pt = {
       estrutura: 'Estrutura', gestaoDeMembros: 'Gestão de Membros', interface: 'Interface',
       emails: 'E-mails', integracoes: 'Integrações', agentesDeIa: 'Agentes de IA', logs: 'Logs',
       releases: 'Releases', documentacao: 'Documentação',
-      intimacoes: 'Intimações', prazos: 'Prazos', provisao: 'Provisão',
+      intimacoes: 'Capturas', prazos: 'Prazos', provisao: 'Provisão',
     } as Record<string, string>,
   },
   trilha: { configuracoes: 'Configurações', sistema: 'Sistema', modulo: 'Módulo Jurídico', juridico: 'Jurídico', categorias: 'Categorias' },
@@ -72,7 +72,7 @@ const pt = {
     modulos: {
       correcao: { nome: 'Correção Monetária', ajuda: 'Atualiza valores monetários por índice oficial, no campo, no item e na categoria.' },
       comparacoes: { nome: 'Comparações', ajuda: 'Compara a mesma informação vinda de 2 fontes, como o jurídico interno e o escritório externo.' },
-      juridico: { nome: 'Jurídico', ajuda: 'Calcula prazos processuais pela regra do rito e pelo calendário do tribunal, recebe intimações do DJEN e do Domicílio Judicial Eletrônico e fecha a provisão por data-base.' },
+      juridico: { nome: 'Jurídico', ajuda: 'Liga os submódulos do jurídico, um a um. Cada submódulo traz as telas e as regras de uma parte do trabalho.' },
     },
     configurar: 'Configurar',
     ligado: { titulo: 'Módulo Jurídico ligado', desc: 'O menu Jurídico aparece para quem tem acesso. Configure o pacote do país antes de receber intimações.' },
@@ -190,7 +190,9 @@ const pt = {
     passos: {
       disponibilizacao: 'Disponibilização no DJEN',
       publicacao: 'Publicação',
-      ciencia: 'Ciência no Domicílio',
+      ciencia: 'Ciência',
+      confirmacao: 'Citação confirmada no Domicílio',
+      quintoDia: '5º dia útil depois da confirmação',
       inicio: 'Início da contagem',
       contagem: 'Último dia da contagem',
       prorrogacao: 'Prorrogado para o 1º dia útil',
@@ -336,7 +338,7 @@ const pt = {
   /* ---------- Tela do processo ---------- */
   processo: {
     painel: { identificacao: 'Identificação', id: 'ID', origem: 'Origem', status: 'Status', ativo: 'Ativo', solicitante: 'Solicitante', historico: 'Histórico', criado: 'Criado em', atualizado: 'Atualizado em' },
-    abas: { visaoGeral: 'Visão Geral', comentarios: 'Comentários', logs: 'Logs de Auditoria', tarefas: 'Tarefas', prazos: 'Prazos', intimacoes: 'Intimações', provisao: 'Risco e provisão', anexos: 'Anexos', emails: 'Emails Automáticos', mailbox: 'Mail Box', notas: 'Notas', campos: 'Campos' },
+    abas: { visaoGeral: 'Visão Geral', comentarios: 'Comentários', logs: 'Logs de Auditoria', tarefas: 'Tarefas', prazos: 'Prazos', intimacoes: 'Capturas', provisao: 'Risco e provisão', anexos: 'Anexos', emails: 'Emails Automáticos', mailbox: 'Mail Box', notas: 'Notas', campos: 'Campos' },
     campos: {
       numeroCnj: 'Número CNJ', tribunal: 'Tribunal', orgao: 'Órgão', rito: 'Rito', area: 'Área', polo: 'Polo',
       parteContraria: 'Parte contrária', valorDaCausa: 'Valor da causa', responsavel: 'Responsável', escritorio: 'Escritório',
@@ -379,7 +381,7 @@ const en: Textos = {
       estrutura: 'Structure', gestaoDeMembros: 'Member Management', interface: 'Interface',
       emails: 'E-mails', integracoes: 'Integrations', agentesDeIa: 'AI Agents', logs: 'Logs',
       releases: 'Releases', documentacao: 'Documentation',
-      intimacoes: 'Court notices', prazos: 'Deadlines', provisao: 'Provisions',
+      intimacoes: 'Captures', prazos: 'Deadlines', provisao: 'Provisions',
     },
   },
   trilha: { configuracoes: 'Settings', sistema: 'System', modulo: 'Legal Module', juridico: 'Legal', categorias: 'Categories' },
@@ -415,7 +417,7 @@ const en: Textos = {
     modulos: {
       correcao: { nome: 'Monetary Correction', ajuda: 'Updates monetary values by official index, in the field, the item and the category.' },
       comparacoes: { nome: 'Comparisons', ajuda: 'Compares the same information from 2 sources, such as the in-house legal team and the outside law firm.' },
-      juridico: { nome: 'Legal', ajuda: 'Calculates court deadlines from the procedural rule and the court calendar, receives notices from DJEN and the Electronic Judicial Domicile, and closes provisions by reporting date.' },
+      juridico: { nome: 'Legal', ajuda: 'Turns on the legal submodules, one at a time. Each submodule brings the screens and rules for one part of the work.' },
     },
     configurar: 'Configure',
     ligado: { titulo: 'Legal Module turned on', desc: 'The Legal menu appears for members with access. Configure the country package before receiving notices.' },
@@ -530,7 +532,9 @@ const en: Textos = {
     passos: {
       disponibilizacao: 'Made available on DJEN',
       publicacao: 'Publication',
-      ciencia: 'Awareness on the Domicile',
+      ciencia: 'Acknowledgment',
+      confirmacao: 'Service confirmed on the Domicile',
+      quintoDia: '5th business day after confirmation',
       inicio: 'Count starts',
       contagem: 'Last day of the count',
       prorrogacao: 'Moved to the 1st business day',
@@ -672,7 +676,7 @@ const en: Textos = {
 
   processo: {
     painel: { identificacao: 'Identification', id: 'ID', origem: 'Origin', status: 'Status', ativo: 'Active', solicitante: 'Requester', historico: 'History', criado: 'Created at', atualizado: 'Updated at' },
-    abas: { visaoGeral: 'Overview', comentarios: 'Comments', logs: 'Audit Logs', tarefas: 'Tasks', prazos: 'Deadlines', intimacoes: 'Court notices', provisao: 'Risk and provisions', anexos: 'Attachments', emails: 'Automatic Emails', mailbox: 'Mail Box', notas: 'Notes', campos: 'Fields' },
+    abas: { visaoGeral: 'Overview', comentarios: 'Comments', logs: 'Audit Logs', tarefas: 'Tasks', prazos: 'Deadlines', intimacoes: 'Captures', provisao: 'Risk and provisions', anexos: 'Attachments', emails: 'Automatic Emails', mailbox: 'Mail Box', notas: 'Notes', campos: 'Fields' },
     campos: {
       numeroCnj: 'CNJ number', tribunal: 'Court', orgao: 'Court division', rito: 'Procedure', area: 'Area', polo: 'Side',
       parteContraria: 'Opposing party', valorDaCausa: 'Amount in dispute', responsavel: 'Owner', escritorio: 'Law firm',
@@ -713,7 +717,7 @@ const es: Textos = {
       estrutura: 'Estructura', gestaoDeMembros: 'Gestión de Miembros', interface: 'Interfaz',
       emails: 'E-mails', integracoes: 'Integraciones', agentesDeIa: 'Agentes de IA', logs: 'Logs',
       releases: 'Releases', documentacao: 'Documentación',
-      intimacoes: 'Notificaciones judiciales', prazos: 'Plazos', provisao: 'Provisión',
+      intimacoes: 'Capturas', prazos: 'Plazos', provisao: 'Provisión',
     },
   },
   trilha: { configuracoes: 'Configuración', sistema: 'Sistema', modulo: 'Módulo Jurídico', juridico: 'Jurídico', categorias: 'Categorías' },
@@ -749,7 +753,7 @@ const es: Textos = {
     modulos: {
       correcao: { nome: 'Corrección Monetaria', ajuda: 'Actualiza valores monetarios por índice oficial, en el campo, en el ítem y en la categoría.' },
       comparacoes: { nome: 'Comparaciones', ajuda: 'Compara la misma información de 2 fuentes, como el jurídico interno y el despacho externo.' },
-      juridico: { nome: 'Jurídico', ajuda: 'Calcula plazos procesales según la regla del procedimiento y el calendario del tribunal, recibe notificaciones del DJEN y del Domicilio Judicial Electrónico y cierra la provisión por fecha de corte.' },
+      juridico: { nome: 'Jurídico', ajuda: 'Activa los submódulos jurídicos, uno a uno. Cada submódulo trae las pantallas y las reglas de una parte del trabajo.' },
     },
     configurar: 'Configurar',
     ligado: { titulo: 'Módulo Jurídico activado', desc: 'El menú Jurídico aparece para quien tiene acceso. Configure el paquete del país antes de recibir notificaciones.' },
@@ -864,7 +868,9 @@ const es: Textos = {
     passos: {
       disponibilizacao: 'Puesta a disposición en el DJEN',
       publicacao: 'Publicación',
-      ciencia: 'Conocimiento en el Domicilio',
+      ciencia: 'Conocimiento',
+      confirmacao: 'Citación confirmada en el Domicilio',
+      quintoDia: '5.º día hábil después de la confirmación',
       inicio: 'Inicio del cómputo',
       contagem: 'Último día del cómputo',
       prorrogacao: 'Prorrogado al 1.er día hábil',
@@ -1006,7 +1012,7 @@ const es: Textos = {
 
   processo: {
     painel: { identificacao: 'Identificación', id: 'ID', origem: 'Origen', status: 'Estado', ativo: 'Activo', solicitante: 'Solicitante', historico: 'Historial', criado: 'Creado el', atualizado: 'Actualizado el' },
-    abas: { visaoGeral: 'Visión General', comentarios: 'Comentarios', logs: 'Logs de Auditoría', tarefas: 'Tareas', prazos: 'Plazos', intimacoes: 'Notificaciones', provisao: 'Riesgo y provisión', anexos: 'Anexos', emails: 'Emails Automáticos', mailbox: 'Mail Box', notas: 'Notas', campos: 'Campos' },
+    abas: { visaoGeral: 'Visión General', comentarios: 'Comentarios', logs: 'Logs de Auditoría', tarefas: 'Tareas', prazos: 'Plazos', intimacoes: 'Capturas', provisao: 'Riesgo y provisión', anexos: 'Anexos', emails: 'Emails Automáticos', mailbox: 'Mail Box', notas: 'Notas', campos: 'Campos' },
     campos: {
       numeroCnj: 'Número CNJ', tribunal: 'Tribunal', orgao: 'Órgano', rito: 'Procedimiento', area: 'Área', polo: 'Posición',
       parteContraria: 'Parte contraria', valorDaCausa: 'Valor de la causa', responsavel: 'Responsable', escritorio: 'Despacho',

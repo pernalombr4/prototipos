@@ -3,7 +3,8 @@
  * PROPOSTA: Configurações › Sistema › Módulo Jurídico. Abre pelo botão Configurar do cartão Módulos.
  *
  * O que se configura aqui é só o que o módulo faz: o pacote do país, as regras de prazo, o calendário de cada
- * tribunal, a captura e a provisão. A estrutura do jurídico (categorias, campos, fluxos) não mora aqui: chega pelos
+ * tribunal, a captura e a provisão. Rodada 3: a captura virou o submódulo Capturas, com 3 abas (Fontes, Termos
+ * monitorados e Destino) no lugar da antiga aba Captura. A estrutura do jurídico (categorias, campos, fluxos) não mora aqui: chega pelos
  * casos de uso, e a aba "Casos de uso" diz qual área é módulo e qual é só configuração.
  *
  * Salvar fica fixo no topo, como no protótipo `protecoes-do-spaceflow` (rodada 2).
@@ -15,21 +16,42 @@ import type { TipoDeDiaSemExpediente } from './prazos'
 import { adicionarSuspensao, estado, removerSuspensao } from './estado'
 import type { AreaJuridica, ComoChega, Textos } from './textos'
 import { dia, semana } from './formato'
+import { LIBERADO } from './submodulos'
+import { textosCapturas } from './textos-capturas'
+import FontesDaCaptura from './_FontesDaCaptura.vue'
+import TermosMonitorados from './_TermosMonitorados.vue'
+import DestinoDaCaptura from './_DestinoDaCaptura.vue'
 
-export type Aba = 'geral' | 'regras' | 'calendario' | 'captura' | 'provisao' | 'casos'
+export type Aba = 'geral' | 'fontes' | 'termos' | 'destino' | 'regras' | 'calendario' | 'provisao' | 'casos'
 
 const props = defineProps<{ t: Textos, erroCaptura?: boolean, abaInicial?: Aba }>()
 const emit = defineEmits<{ voltar: [] }>()
 const toast = useToast()
 const idioma = useIdioma()
+const tc = useTextos(textosCapturas)
 
 const aba = ref<Aba>(props.abaInicial ?? 'geral')
-const abas = computed(() => (Object.entries(props.t.config.abas) as [Aba, string][]).map(([value, label]) => ({ value, label })))
+// Rodada 3: Provisão e Casos de uso ficam no código, fora da tela, até serem liberados (`submodulos.ts`).
+const oculta = (a: Aba) => (a === 'provisao' && !LIBERADO.provisao) || (a === 'casos' && !LIBERADO.casosDeUso)
+const abas = computed(() => {
+  const c = props.t.config.abas
+  const todas: [Aba, string][] = [
+    ['geral', c.geral], ['fontes', tc.value.config.abas.fontes], ['termos', tc.value.config.abas.termos], ['destino', tc.value.config.abas.destino],
+    ['regras', c.regras], ['calendario', c.calendario], ['provisao', c.provisao], ['casos', c.casos],
+  ]
+  return todas.filter(([a]) => !oculta(a)).map(([value, label]) => ({ value, label }))
+})
 
 /* ---------- Geral ---------- */
 const pais = ref<'brasil' | 'eua' | 'global'>('brasil')
-const rascunho = ref({ antecedencia: estado.antecedencia, revisao: estado.revisaoObrigatoria, leitura: estado.leituraDoDomicilio })
-const mudou = computed(() => rascunho.value.antecedencia !== estado.antecedencia || rascunho.value.revisao !== estado.revisaoObrigatoria || rascunho.value.leitura !== estado.leituraDoDomicilio)
+const doEstado = () => ({
+  antecedencia: estado.antecedencia,
+  revisao: estado.revisaoObrigatoria,
+  leitura: estado.leituraDoDomicilio,
+  destino: { andamentosDireto: estado.andamentosDireto, atribuicao: { ...estado.atribuicao }, duplicidade: estado.duplicidade },
+})
+const rascunho = ref(doEstado())
+const mudou = computed(() => JSON.stringify(rascunho.value) !== JSON.stringify(doEstado()))
 const salvando = ref(false)
 async function salvar() {
   salvando.value = true
@@ -37,6 +59,9 @@ async function salvar() {
   estado.antecedencia = rascunho.value.antecedencia
   estado.revisaoObrigatoria = rascunho.value.revisao
   estado.leituraDoDomicilio = rascunho.value.leitura
+  estado.andamentosDireto = rascunho.value.destino.andamentosDireto
+  estado.atribuicao = { ...rascunho.value.destino.atribuicao }
+  estado.duplicidade = rascunho.value.destino.duplicidade
   salvando.value = false
   toast.add({ title: props.t.config.geral.salvo, icon: 'i-lucide-check', color: 'success' })
 }
@@ -117,7 +142,7 @@ const corDoComo: Record<ComoChega, 'primary' | 'neutral' | 'warning'> = { modulo
           <h1 class="flex items-center gap-2 text-lg font-semibold text-highlighted">
             <UIcon name="i-lucide-scale" class="size-5 text-primary" />{{ t.config.titulo }}
           </h1>
-          <p class="text-sm text-muted">{{ t.config.subtitulo }}</p>
+          <p class="text-sm text-muted">{{ tc.config.subtitulo }}</p>
         </div>
         <UButton :label="t.geral.salvar" icon="i-lucide-save" :loading="salvando" :disabled="!mudou" @click="salvar" />
       </div>
@@ -201,60 +226,10 @@ const corDoComo: Record<ComoChega, 'primary' | 'neutral' | 'warning'> = { modulo
           </EnTable>
         </div>
 
-        <!-- Captura -->
-        <div v-else-if="aba === 'captura'" key="captura" class="grid gap-4 lg:grid-cols-2">
-          <section class="flex flex-col gap-3 rounded-lg border border-default p-4">
-            <div class="flex items-start gap-2">
-              <UIcon name="i-lucide-newspaper" class="mt-0.5 size-5 shrink-0 text-primary" />
-              <div class="min-w-0 flex-1">
-                <h2 class="text-sm font-semibold text-highlighted">{{ t.config.captura.djen.titulo }}</h2>
-                <p class="text-xs text-muted">{{ t.config.captura.djen.descricao }}</p>
-              </div>
-              <UBadge :label="t.config.captura.conectado" icon="i-lucide-circle-check" color="success" variant="subtle" size="sm" />
-            </div>
-            <dl class="text-sm">
-              <dt class="text-xs text-muted">{{ t.config.captura.djen.monitorados }}</dt>
-              <dd class="text-highlighted">{{ t.config.captura.djen.oab(4) }} · {{ t.config.captura.djen.nomes(3) }}</dd>
-            </dl>
-            <p class="text-xs text-dimmed">{{ t.config.captura.ultima('09:00') }}</p>
-          </section>
-
-          <section class="flex flex-col gap-3 rounded-lg border p-4" :class="erroCaptura ? 'border-error/40' : 'border-default'">
-            <div class="flex items-start gap-2">
-              <UIcon name="i-lucide-mail-open" class="mt-0.5 size-5 shrink-0 text-primary" />
-              <div class="min-w-0 flex-1">
-                <h2 class="text-sm font-semibold text-highlighted">{{ t.config.captura.domicilio.titulo }}</h2>
-                <p class="text-xs text-muted">{{ t.config.captura.domicilio.descricao }}</p>
-              </div>
-              <UBadge
-                :label="erroCaptura ? t.config.captura.recusada : t.config.captura.conectado"
-                :icon="erroCaptura ? 'i-lucide-circle-x' : 'i-lucide-circle-check'"
-                :color="erroCaptura ? 'error' : 'success'"
-                variant="subtle"
-                size="sm"
-              />
-            </div>
-            <dl class="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <dt class="text-xs text-muted">{{ t.config.captura.domicilio.credencial }}</dt>
-                <dd class="font-mono text-xs text-highlighted">••••••••3f2a</dd>
-              </div>
-              <div>
-                <dt class="text-xs text-muted">CNPJ</dt>
-                <dd class="text-highlighted">{{ t.config.captura.domicilio.cnpjs(2) }}</dd>
-              </div>
-            </dl>
-            <UButton v-if="erroCaptura" :label="t.config.captura.revisar" icon="i-lucide-key-round" color="error" variant="outline" size="sm" class="self-start" />
-            <UFormField :label="t.config.captura.domicilio.leitura" :help="t.config.captura.domicilio.leituraAjuda">
-              <URadioGroup
-                v-model="rascunho.leitura"
-                :items="[{ value: 'aviso', label: t.config.captura.domicilio.leituraAviso }, { value: 'ciencia', label: t.config.captura.domicilio.leituraCiencia }]"
-                class="mt-1"
-              />
-            </UFormField>
-            <p class="text-xs text-dimmed">{{ erroCaptura ? t.intimacoes.erroCaptura.desc : t.config.captura.ultima('09:00') }}</p>
-          </section>
-        </div>
+        <!-- Fontes, Termos monitorados e Destino: o submódulo Capturas (rodada 3) -->
+        <FontesDaCaptura v-else-if="aba === 'fontes'" key="fontes" v-model:leitura="rascunho.leitura" :t="t" :erro-captura="erroCaptura" @ir-termos="aba = 'termos'" />
+        <TermosMonitorados v-else-if="aba === 'termos'" key="termos" :t="t" />
+        <DestinoDaCaptura v-else-if="aba === 'destino'" key="destino" v-model="rascunho.destino" :t="t" />
 
         <!-- Provisão -->
         <div v-else-if="aba === 'provisao'" key="provisao" class="flex max-w-3xl flex-col gap-5">

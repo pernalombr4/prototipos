@@ -81,12 +81,15 @@ function proximoUtil(d: Dia, tribunal: Tribunal, suspensoes: Suspensao[], comRec
   return x
 }
 
-export type Meio = 'djen' | 'domicilio'
+/** Por onde o tribunal comunicou. `portal`: intimação no sistema do tribunal, que também se aperfeiçoa pela ciência. */
+export type Meio = 'djen' | 'domicilio' | 'portal'
 
 export interface Entrada {
   meio: Meio
-  /** DJEN: a data da disponibilização. Domicílio: a data da ciência. */
+  /** DJEN: a data da disponibilização. Domicílio e portal: a data da ciência (na citação, a da confirmação). */
   dia: Dia
+  /** Citação pelo Domicílio: o prazo começa depois do 5º dia útil seguinte à confirmação (CPC, art. 231, IX). */
+  citacao?: boolean
   regra: Regra
   tribunal: TribunalId
   suspensoes: Suspensao[]
@@ -94,7 +97,7 @@ export interface Entrada {
   antecedencia: number
 }
 
-export type ChaveDoPasso = 'disponibilizacao' | 'publicacao' | 'ciencia' | 'inicio' | 'contagem' | 'prorrogacao' | 'fatal' | 'interno'
+export type ChaveDoPasso = 'disponibilizacao' | 'publicacao' | 'ciencia' | 'confirmacao' | 'quintoDia' | 'inicio' | 'contagem' | 'prorrogacao' | 'fatal' | 'interno'
 
 export interface Passo {
   chave: ChaveDoPasso
@@ -130,8 +133,16 @@ export function calcular(e: Entrada): Calculo {
     passos.push({ chave: 'publicacao', dia: publicacao, fundamento: 'Lei 11.419/2006, art. 4º, § 3º' })
     inicio = proximoUtil(publicacao, tribunal, e.suspensoes, comRecesso, [])
   }
+  else if (e.citacao) {
+    // O 5º dia útil depois da confirmação é o dia do começo e fica fora da contagem (Consulta CNJ 0008391-94.2025).
+    passos.push({ chave: 'confirmacao', dia: e.dia, fundamento: 'CPC, art. 246, § 1º-A' })
+    let quinto = e.dia
+    for (let i = 0; i < 5; i++) quinto = proximoUtil(quinto, tribunal, e.suspensoes, comRecesso, [])
+    passos.push({ chave: 'quintoDia', dia: quinto, fundamento: 'CPC, art. 231, IX' })
+    inicio = proximoUtil(quinto, tribunal, e.suspensoes, comRecesso, [])
+  }
   else {
-    passos.push({ chave: 'ciencia', dia: e.dia, fundamento: 'CPC, art. 231, IX' })
+    passos.push({ chave: 'ciencia', dia: e.dia, fundamento: e.meio === 'portal' ? 'Lei 11.419/2006, art. 5º' : 'Res. CNJ 455/2022, art. 20' })
     inicio = proximoUtil(e.dia, tribunal, e.suspensoes, comRecesso, [])
   }
   passos.push({ chave: 'inicio', dia: inicio, fundamento: 'CPC, art. 224, § 3º' })
@@ -184,7 +195,14 @@ export function calcular(e: Entrada): Calculo {
   }
 }
 
-/** A ciência tácita do Domicílio: 10 dias corridos depois do envio, sem leitura. */
+/** A ciência tácita do Domicílio e do portal: 10 dias corridos depois do envio, sem leitura. */
 export function cienciaTacita(envio: Dia) {
   return somarDias(envio, 10)
+}
+
+/** O limite para confirmar a citação no Domicílio: 3 dias úteis depois do envio (CPC, art. 246, § 1º-A). */
+export function limiteDaCitacao(envio: Dia, tribunal: TribunalId) {
+  let d = envio
+  for (let i = 0; i < 3; i++) d = proximoUtil(d, tribunais[tribunal], [], true, [])
+  return d
 }

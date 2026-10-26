@@ -17,10 +17,12 @@
  */
 import type { Risco } from './mocks'
 import { categorias, pessoaPorId, processoPorId, regraPorId, tribunais } from './mocks'
-import { calcularPrazo, estado, provisionado } from './estado'
+import { calcularPrazo, estado, processoDaCaptura, provisionado } from './estado'
 import type { Textos } from './textos'
 import { dia, dinheiro } from './formato'
 import MemoriaDoCalculo from './_MemoriaDoCalculo.vue'
+import { LIBERADO } from './submodulos'
+import { textosCapturas } from './textos-capturas'
 
 const props = defineProps<{ t: Textos, processo: number, moduloLigado: boolean }>()
 const emit = defineEmits<{ ir: ['intimacoes' | 'prazos' | 'provisao'] }>()
@@ -40,7 +42,9 @@ const prazos = computed(() => estado.prazos
   .map(x => ({ x, c: calcularPrazo(x) }))
   .sort((a, b) => (a.c.fatal < b.c.fatal ? -1 : 1)))
 const proximo = computed(() => prazos.value.find(x => x.x.status !== 'completed'))
-const intimacoes = computed(() => estado.intimacoes.filter(i => i.numeroCnj === p.value.data.numeroCnj))
+// Rodada 3: a aba mostra toda captura do processo (intimação, citação e andamento), também as vinculadas à mão.
+const intimacoes = computed(() => estado.intimacoes.filter(i => processoDaCaptura(i)?.id === p.value.id))
+const tc = useTextos(textosCapturas)
 const aRevisar = computed(() => intimacoes.value.filter(i => i.status === 'revisar').length)
 
 const abas = computed(() => {
@@ -57,8 +61,8 @@ const abas = computed(() => {
     lista.push(
       { value: 'prazos', label: a.prazos, icon: 'i-lucide-alarm-clock', badge: abertos ? String(abertos) : undefined },
       { value: 'intimacoes', label: a.intimacoes, icon: 'i-lucide-inbox', badge: revisar ? String(revisar) : undefined },
-      { value: 'provisao', label: a.provisao, icon: 'i-lucide-landmark' },
     )
+    if (LIBERADO.provisao) lista.push({ value: 'provisao', label: a.provisao, icon: 'i-lucide-landmark' })
   }
   lista.push({ value: 'anexos', label: a.anexos }, { value: 'emails', label: a.emails }, { value: 'mailbox', label: a.mailbox }, { value: 'notas', label: a.notas }, { value: 'campos', label: a.campos })
   return lista
@@ -199,7 +203,7 @@ const corDaIntimacao = { revisar: 'warning', confirmada: 'success', descartada: 
                 <p v-if="!moduloLigado" class="flex items-start gap-1.5 text-xs text-muted">
                   <UIcon name="i-lucide-info" class="mt-px size-3.5 shrink-0" />{{ t.processo.riscoDoCasoDeUso }}
                 </p>
-                <p v-else class="flex items-start gap-1.5 text-xs text-toned">
+                <p v-else-if="LIBERADO.provisao" class="flex items-start gap-1.5 text-xs text-toned">
                   <UIcon name="i-lucide-landmark" class="mt-px size-3.5 shrink-0 text-primary" />{{ t.processo.riscoComModulo(dia(estado.dataBaseAberta, t.locale)) }}
                 </p>
               </section>
@@ -238,7 +242,7 @@ const corDaIntimacao = { revisar: 'warning', confirmada: 'success', descartada: 
 
           <!-- PROPOSTA: a aba Intimações -->
           <div v-else-if="aba === 'intimacoes'" key="intimacoes" class="mx-auto flex max-w-4xl flex-col gap-3 p-5">
-            <UEmpty v-if="!intimacoes.length" icon="i-lucide-inbox" :title="t.processo.intimacoesVazio" variant="naked" class="py-10" />
+            <UEmpty v-if="!intimacoes.length" icon="i-lucide-inbox" :title="tc.processo.vazio" variant="naked" class="py-10" />
             <article
               v-for="(i, n) in intimacoes"
               :key="i.id"
@@ -246,12 +250,12 @@ const corDaIntimacao = { revisar: 'warning', confirmada: 'success', descartada: 
               :style="{ animationDelay: `${n * 50}ms` }"
             >
               <div class="mb-2 flex flex-wrap items-center gap-2">
-                <UBadge :label="t.intimacoes.origens[i.meio]" color="neutral" variant="outline" size="sm" />
-                <UBadge :label="t.intimacoes.tipos[i.tipo]" color="neutral" variant="subtle" size="sm" />
+                <UBadge :label="tc.caixa.canais[i.meio]" color="neutral" variant="outline" size="sm" />
+                <UBadge :label="tc.caixa.tipos[i.tipo]" color="neutral" variant="subtle" size="sm" />
                 <UBadge :label="t.intimacoes.filtros[i.status]" :color="corDaIntimacao[i.status]" variant="subtle" size="sm" />
-                <span class="ml-auto text-xs tabular-nums text-muted">{{ i.meio === 'djen' ? t.intimacoes.disponibilizada : t.intimacoes.enviada }} {{ dia(i.dia, t.locale) }}</span>
+                <span class="ml-auto text-xs tabular-nums text-muted">{{ i.tipo === 'andamento' ? tc.caixa.painel.dataDoMovimento : i.meio === 'djen' ? t.intimacoes.disponibilizada : t.intimacoes.enviada }} {{ dia(i.dia, t.locale) }}</span>
               </div>
-              <p class="line-clamp-2 text-sm text-toned">{{ i.meio === 'domicilio' && !i.ciencia ? t.intimacoes.teorFechado : i.teor }}</p>
+              <p class="line-clamp-2 text-sm text-toned">{{ (i.meio === 'domicilio' || i.meio === 'portal') && !i.ciencia ? t.intimacoes.teorFechado : i.teor }}</p>
             </article>
             <UButton :label="t.casca.itens.intimacoes" icon="i-lucide-arrow-up-right" color="neutral" variant="ghost" size="sm" class="self-start" @click="emit('ir', 'intimacoes')" />
           </div>

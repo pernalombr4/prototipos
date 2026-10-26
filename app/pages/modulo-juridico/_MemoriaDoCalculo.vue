@@ -20,7 +20,7 @@ const props = defineProps<{
 
 const destaque = (chave: string) => chave === 'fatal' || chave === 'interno'
 const icone: Record<string, string> = {
-  disponibilizacao: 'i-lucide-newspaper', publicacao: 'i-lucide-book-open', ciencia: 'i-lucide-mail-open',
+  disponibilizacao: 'i-lucide-newspaper', publicacao: 'i-lucide-book-open', ciencia: 'i-lucide-mail-open', confirmacao: 'i-lucide-mail-check', quintoDia: 'i-lucide-calendar-check',
   inicio: 'i-lucide-play', contagem: 'i-lucide-calculator', prorrogacao: 'i-lucide-calendar-plus',
   fatal: 'i-lucide-flag', interno: 'i-lucide-alarm-clock',
 }

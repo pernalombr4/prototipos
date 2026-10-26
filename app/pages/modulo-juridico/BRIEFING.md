@@ -19,6 +19,22 @@
 - **Sucesso:** quem cuida do contencioso recebe a intimação, confere o prazo que o ENSPACE calculou pela regra do rito
   e do tribunal, e não digita data nenhuma; o resto do jurídico chega como caso de uso, sem funcionalidade nova.
 
+### Rodada 3: submódulos, começando por Capturas
+
+> acredito que o módulo do enspace juridico, primeiro falando só em brasil, precisa ter "submodulos" a serem
+> ativados. o primeiro deles é o de capturas. e capturas precisa tratar capturas + prazos. vamos nos ater a esse escopo
+> primeiro (nao precisa deletar nada que botou ali, só ocultar por enquanto e vamos liberando aos poucos construindo o
+> prototipo) primeiro faça um submodulo pra dar conta de TUDO o que seja preciso em capturas, sabendo que hoje ja temos
+> uma automaçao de capturas que os clientes contratam. se precisar pesquisa /deep-research sobre capturas em sistemas
+> (softwares) juridicos
+
+(Redatora, 2026-10-26.)
+
+- **Tela ou jornada em jogo:** Sistema › Módulos (os submódulos do Jurídico), Jurídico › Capturas, a página do módulo
+  (Fontes, Termos monitorados, Destino) e a aba Capturas do processo.
+- **Sucesso:** tudo o que o robô de captura traz hoje, e o que o fornecedor do cliente manda, chega numa caixa só, com
+  a fonte, o termo e a prova de chegada; quem trata vê se alguma fonte parou, e o prazo sai calculado pela data certa.
+
 ## A fonte: a pesquisa de mercado de 2026-10-24
 
 Relatório `pesquisa-de-mercado/runs/2026-10-24-modulo-juridico-brasil-eua/RELATORIO.md` e a nota
@@ -53,6 +69,12 @@ Busca em `enspace-ux-research` (temas, `UX_REPORT.md`) por jurídico, módulo, p
 - **S3-F2 (P2):** o Calendário nasce sem dia útil e pinta o mês inteiro de "Dia Não Útil".
 - **Auditoria de Configurações › Sistema:** os 3 toggles de Módulos foram vistos, sem fricção própria registrada.
 - Nada sobre intimação, prazo processual ou provisão: o tema jurídico nunca foi auditado.
+- **Rodada 3**, busca por captura, publicação, intimação e triagem:
+  - **C3 (P1)** da auditoria do construtor de telas: o tooltip do campo Tipo não explica nenhum dos 13 tipos; ninguém
+    diz o que a tela Triagem faz;
+  - **U2 (P1)**, mesma auditoria: Triagem e Minhas Requisições renderizam a mesma tela ("Respostas de Formulários",
+    as mesmas 7 colunas). É nessa tela que a captura de hoje cai;
+  - nada sobre fonte de captura, termo monitorado ou saúde da captura.
 
 ## O que o develop faz hoje
 
@@ -86,6 +108,25 @@ Workspace de exploração, pela tela, em 2026-10-26.
 - O calendário é 1 só por workspace, sem tribunal, e a sincronização mistura feriados de 2 países (S3-F3).
 - Nenhuma captura de publicação ou intimação. O site vende captura de DJe; a doc não cita.
 - Risco e provisão são campos soltos: não há data-base, histórico nem fechamento.
+
+## A captura que os clientes contratam hoje (rodada 3)
+
+Lido nos chamados e nas user stories do time de produto (espelho de `analises-dados`, 2026-09), sem nome de cliente:
+
+- **Robôs sob medida da Enlighten:** cada cliente contrata a captura como serviço. O robô cria itens nas categorias do
+  cliente (processos, andamentos, publicações), e os itens passam pela **Triagem**: a opção "Enviar Requisição para
+  Triagem" do formulário e a tela do tipo Triagem;
+- **Processo novo por termo:** 1 pedido lista empresas e CNPJs para capturar ações novas todo dia, no primeiro horário,
+  entregues por e-mail em planilha até o cliente ter uma caixa própria;
+- **Fornecedor do cliente:** 2 pedidos de integração com centrais de recortes que o cliente já paga (Alerte e
+  "Intelix", que a pesquisa achou como Intelivix). Um deles pede que cada captura entre como item de triagem, vá para a
+  categoria ligada ao processo e diga a fonte (fornecedor ou ENSPACE), com um robô ENSPACE de redundância;
+- **Andamento sem processo:** chamado de andamentos que perderam o vínculo com o processo;
+- **Módulo de Triagem:** a user story de aprovar, reprovar e revisar requisições está em "To Do". Ela cria o menu de
+  módulos que o protótipo usa.
+
+O que isso pede do submódulo: receber o robô ENSPACE e o fornecedor do cliente na mesma caixa, dizer a fonte de cada
+captura, juntar a mesma comunicação vinda de 2 fontes, mostrar quando uma fonte parou e ligar a captura ao processo.
 
 ## Módulo ou caso de uso: o critério
 
@@ -153,8 +194,19 @@ Copiada de `comunicacao-no-workspace/_TelaItens.vue` e do print `15-lista-de-ite
 - **Agenda:** grade do mês da cópia de `comunicacao-no-workspace/_TelaAgenda.vue`, conferida contra o cabeçalho lido no
   develop em 26/10 (passo 7).
 
+### A caixa Capturas, item por item (rodada 3)
+
+A caixa usa a mesma barra e o mesmo `EnTable` da rodada 2. Nada da casca mudou: o menu Jurídico continua no mesmo
+lugar, com Capturas (antes Intimações) e Prazos; Provisão saiu da tela por `submodulos.ts`. A categoria Andamentos entrou
+no menu Categorias, porque é o destino do andamento tratado.
+
 ## Dado do protótipo
 
 Empresa, pessoas, processos, números CNJ, valores e teores de publicação são inventados. Os feriados nacionais de 2026
 são os do calendário oficial; os feriados locais dos tribunais são exemplo, marcados como tal no mock. Nada foi
 preparado por API.
+
+Rodada 3 (`capturas.ts`): CNPJs, inscrições na OAB, hashes, ids de fonte, execuções e logins de tribunal são
+inventados e não correspondem a empresas nem a pessoas reais. Os nomes dos canais oficiais (DJEN, Domicílio Judicial
+Eletrônico, e-SAJ, PJe, eproc) são reais; o fornecedor externo aparece como tipo ("Fornecedor de recortes do cliente"),
+sem nome comercial. Nada foi preparado por API.

@@ -18,6 +18,7 @@
 import type { CategoriaId } from './mocks'
 import { categorias, workspace } from './mocks'
 import type { Textos } from './textos'
+import { LIBERADO } from './submodulos'
 
 export type Destino = 'intimacoes' | 'prazos' | 'provisao' | 'sistema' | 'agenda' | `categoria:${CategoriaId}`
 
@@ -62,10 +63,11 @@ const ajuda: ItemDeMenu[] = [
   { chave: 'documentacao', icone: 'i-lucide-book-marked', externo: true },
 ]
 
+// Rodada 3: só o que o submódulo Capturas liga. A Provisão fica no código, fora do menu (`submodulos.ts`).
 const doModulo: { chave: Destino, icone: string }[] = [
   { chave: 'intimacoes', icone: 'i-lucide-inbox' },
   { chave: 'prazos', icone: 'i-lucide-alarm-clock' },
-  { chave: 'provisao', icone: 'i-lucide-landmark' },
+  ...(LIBERADO.provisao ? [{ chave: 'provisao' as const, icone: 'i-lucide-landmark' }] : []),
 ]
 
 const abertos = ref<string[]>(['juridico', 'categorias'])

@@ -5,6 +5,10 @@
  * A demanda: prototipar um módulo jurídico a partir da pesquisa de mercado Brasil e EUA, separando módulo de caso de
  * uso. Área que não ganha nada como módulo não vira funcionalidade: fica como configuração salva e replicada.
  *
+ * Rodada 3: o módulo passa a ter submódulos, ligados um a um. O primeiro é Capturas (captura e prazo); Provisão e
+ * Casos de uso ficam no código e saem da tela até serem liberados (`submodulos.ts`). A caixa Intimações virou a caixa
+ * Capturas, com intimação, citação, distribuição e andamento.
+ *
  * A triagem (BRIEFING.md) deixou 3 funcionalidades no módulo, todas do contencioso:
  * - Intimações: a captura do DJEN e do Domicílio, revisada por uma pessoa antes de virar prazo;
  * - Prazos: o motor que calcula o prazo fatal e o interno pela regra do rito e pelo calendário do tribunal, com a
@@ -22,7 +26,7 @@ import { estado, reiniciarEstado } from './estado'
 import { textos } from './textos'
 import type { Destino } from './_CascaDoJuridico.vue'
 import CascaDoJuridico from './_CascaDoJuridico.vue'
-import Intimacoes from './_Intimacoes.vue'
+import Capturas from './_Capturas.vue'
 import Prazos from './_Prazos.vue'
 import Provisao from './_Provisao.vue'
 import Agenda from './_Agenda.vue'
@@ -32,13 +36,14 @@ import ConfiguracaoDoModulo from './_ConfiguracaoDoModulo.vue'
 import ListaDeProcessos from './_ListaDeProcessos.vue'
 import TelaDoProcesso from './_TelaDoProcesso.vue'
 import Triagem from './_Triagem.vue'
+import { LIBERADO } from './submodulos'
 
 definePageMeta({
   titulo: 'Módulo Jurídico',
-  descricao: 'O que é módulo e o que é caso de uso no jurídico: intimações do DJEN e do Domicílio, prazos calculados em lista, calendário e na Agenda, provisão por data-base e os casos de uso que ficam como configuração.',
+  descricao: 'Módulo Jurídico com submódulos ligados um a um. O primeiro é Capturas: publicações, intimações, citações, distribuições e andamentos de várias fontes numa caixa só, com a saúde de cada fonte, os termos monitorados e o prazo calculado.',
   status: 'em-revisao',
   atualizado: '2026-10-26',
-  tela: 'Jurídico › Intimações, Prazos e Provisão; Agenda; Sistema › Módulos',
+  tela: 'Jurídico › Capturas e Prazos; Agenda; Sistema › Módulos e submódulos',
 })
 
 const t = useTextos(textos)
@@ -57,6 +62,9 @@ const cenarios: { value: Cenario, label: string }[] = [
 ]
 const triagemAberta = ref(false)
 
+/** O que o usuário vê do Jurídico: o módulo ligado e pelo menos 1 submódulo. Hoje só existe Capturas. */
+const juridico = computed(() => estado.moduloLigado && estado.capturasLigado)
+
 /* ------------------------------------------------------------------ *
  * Navegação                                                           *
  * ------------------------------------------------------------------ */
@@ -73,8 +81,8 @@ function ir(d: Destino) {
 }
 const abrirProcesso = (id: number) => { tela.value = { tipo: 'processo', id } }
 
-// Desligar o módulo tira as telas dele do caminho.
-watch(() => estado.moduloLigado, (ligado) => {
+// Desligar o módulo, ou o último submódulo, tira as telas dele do caminho.
+watch(juridico, (ligado) => {
   if (!ligado && ['intimacoes', 'prazos', 'provisao', 'modulo'].includes(tela.value.tipo)) tela.value = { tipo: 'sistema' }
 })
 
@@ -97,10 +105,12 @@ const trilha = computed(() => {
 })
 
 const pendentes = computed(() => (cenario.value === 'vazio' ? 0 : estado.intimacoes.filter(i => i.status === 'revisar').length))
+const irModulo = (aba?: AbaDoModulo) => { if (juridico.value) tela.value = { tipo: 'modulo', aba } }
 
 /* ---------- versão: sem e com o módulo ---------- */
 function versao(ligado: boolean) {
   estado.moduloLigado = ligado
+  estado.capturasLigado = true
   tela.value = ligado ? { tipo: 'intimacoes' } : { tipo: 'processo', id: 4100 }
 }
 
@@ -126,8 +136,10 @@ function reiniciar() {
 
 const atalhos = [
   { rotulo: 'Processo com prazo digitado', acao: () => abrirProcesso(4100) },
+  { rotulo: 'Fontes da captura', acao: () => irModulo('fontes') },
+  { rotulo: 'Termos monitorados', acao: () => irModulo('termos') },
+  { rotulo: 'Submódulos', acao: () => { tela.value = { tipo: 'sistema' } } },
   { rotulo: 'Prazos na Agenda', acao: () => { tela.value = { tipo: 'agenda' } } },
-  { rotulo: 'Calendário do TJMG', acao: () => { if (estado.moduloLigado) tela.value = { tipo: 'modulo', aba: 'calendario' } } },
 ]
 </script>
 
@@ -137,20 +149,21 @@ const atalhos = [
       :t="t"
       :ativo="ativo"
       :trilha="trilha"
-      :modulo-ligado="estado.moduloLigado"
+      :modulo-ligado="juridico"
       :pendentes="pendentes"
       @ir="ir"
     >
       <div class="flex min-h-0 flex-1 flex-col pb-(--altura-do-andaime)">
         <Transition mode="out-in" enter-active-class="transition-[opacity,transform] duration-200 ease-out" enter-from-class="opacity-0 translate-y-1" leave-active-class="transition-opacity duration-100" leave-to-class="opacity-0">
-          <Intimacoes
+          <Capturas
             v-if="tela.tipo === 'intimacoes'"
             key="intimacoes"
             :t="t"
             :cenario="cenario"
             @abrir-processo="abrirProcesso"
             @ir-prazos="tela = { tipo: 'prazos' }"
-            @ir-captura="tela = { tipo: 'modulo', aba: 'captura' }"
+            @ir-fontes="irModulo('fontes')"
+            @ir-termos="irModulo('termos')"
           />
           <Prazos
             v-else-if="tela.tipo === 'prazos'"
@@ -171,15 +184,16 @@ const atalhos = [
             v-else-if="tela.tipo === 'agenda'"
             key="agenda"
             :t="t"
-            :modulo-ligado="estado.moduloLigado"
+            :modulo-ligado="juridico"
             @abrir-processo="abrirProcesso"
           />
           <Sistema
             v-else-if="tela.tipo === 'sistema'"
             key="sistema"
             v-model:modulo-ligado="estado.moduloLigado"
+            v-model:capturas-ligado="estado.capturasLigado"
             :t="t"
-            @configurar="tela = { tipo: 'modulo' }"
+            @configurar="(aba) => tela = { tipo: 'modulo', aba }"
           />
           <ConfiguracaoDoModulo
             v-else-if="tela.tipo === 'modulo'"
@@ -193,7 +207,7 @@ const atalhos = [
             v-else-if="tela.tipo === 'processos'"
             key="processos"
             :t="t"
-            :modulo-ligado="estado.moduloLigado"
+            :modulo-ligado="juridico"
             @abrir="abrirProcesso"
           />
           <TelaDoProcesso
@@ -201,7 +215,7 @@ const atalhos = [
             :key="`processo-${tela.id}`"
             :t="t"
             :processo="tela.id"
-            :modulo-ligado="estado.moduloLigado"
+            :modulo-ligado="juridico"
             @ir="(d) => tela = { tipo: d }"
           />
         </Transition>
@@ -226,7 +240,7 @@ const atalhos = [
         />
         <USeparator orientation="vertical" class="mx-1 h-5" />
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">Cenário</span>
-        <USelect v-model="cenario" :items="cenarios" size="xs" class="w-52" aria-label="Cenário" :disabled="!estado.moduloLigado" />
+        <USelect v-model="cenario" :items="cenarios" size="xs" class="w-52" aria-label="Cenário" :disabled="!juridico" />
         <USeparator orientation="vertical" class="mx-1 h-5" />
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">Atalhos</span>
         <UButton
@@ -239,7 +253,7 @@ const atalhos = [
           class="transition-transform hover:-translate-y-0.5"
           @click="a.acao"
         />
-        <UButton label="Módulo ou caso de uso" icon="i-lucide-split" size="xs" color="neutral" variant="subtle" class="transition-transform hover:-translate-y-0.5" @click="triagemAberta = true" />
+        <UButton v-if="LIBERADO.casosDeUso" label="Módulo ou caso de uso" icon="i-lucide-split" size="xs" color="neutral" variant="subtle" class="transition-transform hover:-translate-y-0.5" @click="triagemAberta = true" />
         <UButton label="Reiniciar" icon="i-lucide-rotate-ccw" size="xs" color="neutral" variant="ghost" @click="reiniciar" />
         <ControlesDePrototipo class="ml-auto" />
         <span class="flex flex-wrap items-center gap-2">

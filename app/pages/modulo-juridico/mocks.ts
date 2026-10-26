@@ -42,10 +42,11 @@ export const EU = 11
  * Categorias (vêm dos casos de uso jurídicos, não do módulo)          *
  * ------------------------------------------------------------------ */
 
-export type CategoriaId = 'processos' | 'audiencias' | 'contratos' | 'procuracoes' | 'consultas' | 'societario' | 'pagamentos'
+export type CategoriaId = 'processos' | 'andamentos' | 'audiencias' | 'contratos' | 'procuracoes' | 'consultas' | 'societario' | 'pagamentos'
 
 export const categorias: { id: CategoriaId, nome: string, icone: string }[] = [
   { id: 'processos', nome: 'Processos', icone: 'i-lucide-gavel' },
+  { id: 'andamentos', nome: 'Andamentos', icone: 'i-lucide-list-checks' },
   { id: 'audiencias', nome: 'Audiências', icone: 'i-lucide-calendar-clock' },
   { id: 'contratos', nome: 'Contratos', icone: 'i-lucide-file-signature' },
   { id: 'procuracoes', nome: 'Procurações', icone: 'i-lucide-stamp' },
@@ -270,11 +271,18 @@ export const processoPorCnj = new Map(processos.map(p => [p.data.numeroCnj, p]))
  * Intimações capturadas (DJEN e Domicílio)                            *
  * ------------------------------------------------------------------ */
 
+/** O que a captura trouxe. Rodada 3: além de intimação e citação, a distribuição de ação nova e o andamento. */
+export type TipoDeCaptura = 'intimacao' | 'citacao' | 'distribuicao' | 'andamento'
+/** Por onde a informação saiu do tribunal. `consulta`: andamento lido no processo; `distribuidor`: ação nova. */
+export type Canal = 'djen' | 'domicilio' | 'portal' | 'consulta' | 'distribuidor'
+/** A fonte configurada que trouxe a captura (`capturas.ts`). */
+export type FonteId = 'djen' | 'domicilio' | 'portais' | 'andamentos' | 'distribuicao' | 'externo'
+
 /** PROPOSTA: a comunicação capturada. */
 export interface Intimacao {
   id: number
-  meio: 'djen' | 'domicilio'
-  tipo: 'intimacao' | 'citacao'
+  meio: Canal
+  tipo: TipoDeCaptura
   tribunal: TribunalId
   orgao: string
   numeroCnj: string
@@ -287,6 +295,22 @@ export interface Intimacao {
   regraSugerida?: RegraId
   status: 'revisar' | 'confirmada' | 'descartada'
   motivoDoDescarte?: string
+  /* ---------- rodada 3: o submódulo Capturas ---------- */
+  /** Quando a captura chegou ao ENSPACE. É a prova de chegada, com o id e o hash da fonte. */
+  recebidaEm?: Date
+  fonte?: FonteId
+  /** O termo monitorado que casou (`capturas.ts`). Andamento não tem termo: vem do número CNJ do processo. */
+  termo?: number
+  idNaFonte?: string
+  /** O hash da comunicação no DJEN. Junta a mesma comunicação vinda de 2 fontes. */
+  hash?: string
+  /** Outras fontes que trouxeram a mesma comunicação (mesmo hash). Ficam juntas numa linha só. */
+  tambemPor?: FonteId[]
+  /** A mesma comunicação feita por outro meio (o portal do tribunal), com outra data. */
+  outroMeio?: { meio: 'portal', dia: string, ciencia: string, fonte: FonteId }
+  /** Quem tratou: uma pessoa ou a regra de entrada direta dos andamentos. */
+  tratadaPor?: number | 'automatico'
+  distribuicao?: { classe: string, assunto: string, autor: string, reu: string, valor: number, distribuidaEm: string }
 }
 
 export const intimacoesIniciais: Intimacao[] = [
@@ -317,7 +341,7 @@ export type Prazo = Pick<Task, 'id' | 'reference' | 'status' | 'assigned_to'> & 
   processo: number
   intimacao?: number
   /** PROPOSTA: a entrada do cálculo, guardada para recalcular. */
-  entrada: { meio: 'djen' | 'domicilio', dia: string, regra: RegraId }
+  entrada: { meio: 'djen' | 'domicilio' | 'portal', dia: string, regra: RegraId, citacao?: boolean }
   confirmadoPor: number
   confirmadoEm: Date
   historico: HistoricoDoPrazo[]

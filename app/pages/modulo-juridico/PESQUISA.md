@@ -78,3 +78,50 @@ Ausência na documentação pública lida, não prova de que o produto não faz.
 | Captura, prazo e provisão no mesmo item (item 4) | Tela do processo: abas Prazos, Intimações e Risco e provisão |
 | Template para o resto (as 5 obrigatórias) | Módulo Jurídico › Casos de uso: 7 áreas que ficam como configuração |
 | Ligar o módulo e instalar o caso de uso (Twenty; item 6) | Fora desta rodada: pergunta P1 do `DECISOES.md` |
+
+## Rodada 3: captura em softwares jurídicos
+
+Pesquisa profunda de 2026-10-26, com fonte e data em cada afirmação:
+[relatório](pesquisa/reports/Captura%20em%20softwares%20jur%C3%ADdicos.md) e as 4 notas em
+`pesquisa/research_notes/Captura em softwares jurídicos/` (fontes oficiais e datas, suítes corporativas, software de
+escritório, fornecedores e APIs).
+
+### O que muda a tela
+
+- **2 canais fixam o prazo.** Desde 16/05/2025, o DJEN é o meio oficial da intimação do advogado (Res. CNJ 569/2024), e
+  o Domicílio Judicial Eletrônico é o da empresa. Portal do tribunal e central de recortes viram meio de alerta.
+- **A data depende do meio.**
+  - DJEN: a publicação é o 1º dia útil depois da disponibilização, e o prazo começa no dia útil seguinte;
+  - Domicílio: abrir o teor pela API conta como ciência (Res. CNJ 455/2022, art. 20); sem leitura, a ciência é tácita
+    em 10 dias corridos;
+  - citação no Domicílio: confirmar em 3 dias úteis, sob multa de até 5% (CPC, art. 246, § 1º-C); o prazo começa depois
+    do 5º dia útil seguinte à confirmação;
+  - meio contra meio: o STJ ainda julga o conflito no Tema 1.180.
+- **Configurar pede 3 cadastros:** a fonte (com credencial e estado), o termo (CNPJ, nome com variações e exceções, OAB
+  com UF) e a abrangência. O mercado cobra por termo.
+- **A fila segue 2 modelos:** abas por estado (Legal One, Themis, Astrea) ou caixa com classificação por IA (EasyJur,
+  Projuris ADV). Todos têm "processo não encontrado" com 2 saídas: vincular ou cadastrar.
+- **A saúde aparece por credencial** (status do login no tribunal, aviso de certificado vencido), nunca por execução.
+
+### O que nenhum deles mostra
+
+Ausência na documentação pública lida, não prova de que o produto não faz.
+
+1. A mesma comunicação vinda de 2 meios agrupada, com as 2 datas e qual vale.
+2. O histórico de execuções da fonte, inclusive a que rodou e não achou nada.
+3. A prova de chegada de cada captura: hora, fonte, id na fonte, hash do DJEN e certidão.
+
+### Do relatório para o protótipo (rodada 3)
+
+| Achado | Onde está no protótipo |
+|---|---|
+| Fonte como cadastro com estado (seção 7, item 1) | Módulo Jurídico › Fontes: 6 fontes, quem roda, frequência, última execução, situação |
+| Termo com variações, exceções e abrangência (item 2) | Módulo Jurídico › Termos monitorados, com o consumo do contrato |
+| Entrada única para robô e fornecedor (item 3) | Fonte "Fornecedor de recortes do cliente" por webhook; "Adicionar fonte" com webhook, API ou e-mail |
+| Fila com estados e "processo não encontrado" (item 4) | Jurídico › Capturas: visualizações Para tratar, Distribuições, Andamentos, Tratadas, Descartadas; vincular ou cadastrar |
+| Duplicidade agrupada (item 5) | Coluna Origem com "+1 fonte"; o painel diz por onde mais chegou |
+| Data oficial e data de alerta (item 6) | Bloco "A mesma intimação chegou por 2 meios" e a regra em Destino |
+| Domicílio com a decisão de ciência explícita (item 7) | Modal antes de abrir o teor; confirmação da citação com o prazo de 3 dias úteis |
+| Saúde por fonte, com o silêncio confirmado (item 9) | Botão de saúde na barra da caixa; execuções com "Sem resultado" e "Falhou" no painel da fonte |
+| Prova de cada captura (item 10) | Bloco "Dados da captura" no painel, com hash e certidão |
+| IA que sugere e espera confirmação (item 8) | A regra sugerida pelo teor, que já existia; nada novo nesta rodada |

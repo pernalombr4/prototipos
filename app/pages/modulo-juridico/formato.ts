@@ -22,3 +22,7 @@ export function dataHora(d: Date, locale: string) {
 export function dinheiro(v: number, locale: string, compacto = false) {
   return new Intl.NumberFormat(locale, { style: 'currency', currency: 'BRL', maximumFractionDigits: compacto ? 1 : 0, notation: compacto ? 'compact' : 'standard' }).format(v)
 }
+/** "26/10 09:02": a hora em que a captura chegou ou a fonte rodou. */
+export function diaHoraCurto(d: Date, locale: string) {
+  return new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }).format(d)
+}
