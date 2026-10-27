@@ -6,7 +6,8 @@ O módulo Jurídico é feito de submódulos, ligados um a um em Configurações 
 **Capturas**, que cobre captura e prazo. Ligar Capturas pede a categoria que guarda os processos e a ligação de 6
 campos, cada um com a chave nativa (número CNJ, tribunal, órgão, polo, responsável e o opcional assunto principal); o
 campo que falta é criado e os ligados ficam travados.
-Ligado, ele acrescenta o menu **Jurídico** (Capturas e Prazos) e as abas Capturas e Andamentos ao processo. A caixa **Capturas** recebe intimação, citação, distribuição de ação nova e andamento, vindos do
+Ligado, ele acrescenta o menu **Jurídico**, com tudo o que o módulo usa: Capturas, Prazos e, com a badge de categoria,
+os atalhos para as categorias dos processos, de Assuntos e de Audiências. Ele também acrescenta as abas Capturas e Andamentos ao processo. A caixa **Capturas** recebe intimação, citação, distribuição de ação nova e andamento, vindos do
 DJEN, do Domicílio Judicial Eletrônico, dos robôs ENSPACE que o cliente já contrata (portais, andamentos, distribuição)
 e do fornecedor de recortes do cliente. Cada captura diz de onde veio, qual termo casou e quando chegou, com o hash do
 DJEN como prova. A mesma comunicação vinda de 2 fontes fica numa linha só; a vinda por 2 meios mostra as 2 datas e qual
@@ -462,6 +463,41 @@ flowchart LR
   - `r5-06-assuntos-es-escuro.jpg`: a lista de Assuntos em espanhol, no tema escuro;
   - `r5-07-assunto-es-escuro.jpg`: o ASS-0042 em espanhol, no tema escuro.
 
+## Rodada 6 · 2026-10-27
+
+- **Pedido (literal):** "tudo junto do menu juridico, tudo dentro dele, q aparece com o modulo ativado"; o pedido
+  inteiro está no `BRIEFING.md`, "Rodada 6".
+- **Pesquisa:** sem pesquisa nova.
+- **Assunto continua categoria.** Motivos:
+  - no ENSPACE todo registro é item de categoria. Como categoria, o assunto ganha de graça campos, formulário,
+    visualizações, permissões, Spaceflow, relatórios, API e MCP, e a relação com o processo é o campo de relação que já
+    existe;
+  - fora de categoria, o módulo teria de refazer cada uma dessas peças só para o assunto;
+  - o que o assunto precisa a mais é proteção, e ela cabe na categoria: os campos com chave nativa não se apagam (o
+    rótulo muda), e a categoria não se apaga com o módulo ligado (P27).
+- **Mudou:**
+  - com o módulo ligado, o menu **Jurídico** lista Capturas e Prazos e, logo abaixo, as categorias que o módulo usa: a
+    categoria ligada aos processos, Assuntos (só com o campo Assunto principal ligado) e Audiências;
+  - cada uma leva a badge de categoria, com o ícone de Categorias e o tooltip "Categoria do workspace. O atalho abre a
+    mesma tela de Categorias.";
+  - o atalho nasce quando o módulo liga e abre a rota da tela de categoria; a trilha continua "Categorias › <nome>";
+  - essas categorias saem do grupo Categorias enquanto o módulo está ligado. Desligado, voltam para lá.
+- **Fronteira:** muda o menu lateral (os grupos Jurídico e Categorias). Não muda nenhuma tela, a trilha nem a rota.
+- **Descartado:**
+  - a palavra "Categoria" na badge. Motivo: o menu do develop tem 208 px, e a palavra cortava os nomes em "Proc...",
+    "Assu..." e "Audi...";
+  - deixar as categorias nos 2 grupos. Motivo: o pedido é tudo dentro de Jurídico, e o mesmo nome em 2 lugares do menu
+    confunde qual dos 2 está aceso.
+- **Testado** (Chrome, em português, em espanhol, nos temas claro e escuro):
+  - Jurídico › Assuntos abre a lista de Assuntos, com a trilha "Categorias › Assuntos" e o item aceso em Jurídico;
+  - Jurídico › Processos abre a lista de Processos, com a trilha "Categorias › Processos";
+  - "Sem o módulo (hoje)": Processos, Assuntos e Audiências voltam para Categorias, e o grupo Jurídico some;
+  - o tooltip da badge aparece no hover. Sem evidência visual: o tooltip só abre com o ponteiro em cima da badge, e a
+    regra de captura proíbe o ponteiro no print.
+- **Ver:** prints em `evidencias/`, prefixo `r6-`:
+  - `r6-01-categorias-no-menu-juridico.jpg`: o menu Jurídico com as 3 categorias e a lista de Assuntos, no tema escuro;
+  - `r6-02-menu-juridico-es-claro.jpg`: o mesmo em espanhol, no tema claro.
+
 ## Perguntas para o time de dev
 
 - **P1.** Ligar o módulo instala o caso de uso Contencioso junto, ou são 2 gestos? Nenhuma plataforma no-code liga
@@ -513,3 +549,6 @@ flowchart LR
 - **P25.** O registro de campos ganha `litigation.br.rito` e `litigation.br.comarca`? O motor de prazo usa os 2 (regra
   de contagem e feriado municipal), e a proposta de modelo de dados lista tribunal, vara, comarca e instância, sem o rito.
 - **P26.** O `EnTableColumn` pode ganhar largura? Hoje o `EnTable` divide a largura por igual entre as colunas.
+- **P27.** O menu do módulo é gravado no workspace quando o módulo liga, ou montado na hora a partir das categorias que
+  o módulo usa? E a categoria do módulo fica protegida (não se apaga com o módulo ligado; campo com chave nativa não se
+  apaga, só muda de rótulo)?

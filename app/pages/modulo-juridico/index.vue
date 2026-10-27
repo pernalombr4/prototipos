@@ -17,6 +17,9 @@
  * item; ligar Capturas mostra a chave nativa de cada campo, separada em campos de processo e de assunto. O campo
  * opcional "Assunto principal" agrupa processos num item da categoria Assuntos, que mostra os processos dele.
  *
+ * Rodada 6: tudo do módulo fica no menu Jurídico, também as categorias que ele usa, com a badge "Categoria". O atalho
+ * nasce quando o módulo liga e abre a mesma rota da tela de categoria.
+ *
  * A triagem (BRIEFING.md) deixou 3 funcionalidades no módulo, todas do contencioso:
  * - Intimações: a captura do DJEN e do Domicílio, revisada por uma pessoa antes de virar prazo;
  * - Prazos: o motor que calcula o prazo fatal e o interno pela regra do rito e pelo calendário do tribunal, com a
@@ -86,7 +89,8 @@ type Tela =
 const tela = ref<Tela>({ tipo: 'intimacoes' })
 
 function ir(d: Destino) {
-  if (d === 'categoria:processos') return (tela.value = { tipo: 'processos' })
+  // Rodada 6: a categoria ligada ao módulo abre a lista de processos, venha do menu Jurídico ou de Categorias.
+  if (d === 'categoria:processos' || d === `categoria:${estado.ligacao.categoria}`) return (tela.value = { tipo: 'processos' })
   if (d === 'categoria:assuntos') return (tela.value = { tipo: 'assuntos' })
   if (d.startsWith('categoria:')) return toast.add({ title: t.value.geral.foraDoEscopo, description: t.value.geral.foraDoEscopoDesc, icon: 'i-lucide-construction', color: 'neutral' })
   tela.value = { tipo: d as 'intimacoes' | 'prazos' | 'provisao' | 'sistema' | 'agenda' }
@@ -101,7 +105,7 @@ watch(juridico, (ligado) => {
 
 const ativo = computed<Destino | 'modulo'>(() => {
   const x = tela.value.tipo
-  if (x === 'processo' || x === 'processos') return 'categoria:processos'
+  if (x === 'processo' || x === 'processos') return `categoria:${estado.ligacao.categoria}`
   if (x === 'assunto' || x === 'assuntos') return 'categoria:assuntos'
   return x
 })
@@ -113,8 +117,9 @@ const trilha = computed(() => {
   if (x.tipo === 'sistema') return [workspace.nome, tr.configuracoes, tr.sistema]
   if (x.tipo === 'agenda') return [workspace.nome, casca.agenda!]
   if (x.tipo === 'modulo') return [workspace.nome, tr.configuracoes, tr.sistema, tr.modulo]
-  if (x.tipo === 'processos') return [workspace.nome, tr.categorias, categorias[0]!.nome]
-  if (x.tipo === 'processo') return [workspace.nome, tr.categorias, categorias[0]!.nome, processoPorId.get(x.id)?.reference ?? '']
+  const nomeDosProcessos = categorias.find(c => c.id === estado.ligacao.categoria)!.nome
+  if (x.tipo === 'processos') return [workspace.nome, tr.categorias, nomeDosProcessos]
+  if (x.tipo === 'processo') return [workspace.nome, tr.categorias, nomeDosProcessos, processoPorId.get(x.id)?.reference ?? '']
   if (x.tipo === 'assuntos') return [workspace.nome, tr.categorias, categorias[1]!.nome]
   if (x.tipo === 'assunto') return [workspace.nome, tr.categorias, categorias[1]!.nome, assuntoPorId.get(x.id)?.reference ?? '']
   return [workspace.nome, tr.juridico, casca[x.tipo]!]

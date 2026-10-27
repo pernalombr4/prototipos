@@ -37,6 +37,8 @@ const pt = {
       releases: 'Releases', documentacao: 'Documentação',
       intimacoes: 'Capturas', prazos: 'Prazos', provisao: 'Provisão',
     } as Record<string, string>,
+    categoria: 'Categoria',
+    categoriaAjuda: 'Categoria do workspace. O atalho abre a mesma tela de Categorias.',
   },
   trilha: { configuracoes: 'Configurações', sistema: 'Sistema', modulo: 'Módulo Jurídico', juridico: 'Jurídico', categorias: 'Categorias' },
   lista: {
@@ -384,6 +386,8 @@ const en: Textos = {
       releases: 'Releases', documentacao: 'Documentation',
       intimacoes: 'Captures', prazos: 'Deadlines', provisao: 'Provisions',
     },
+    categoria: 'Category',
+    categoriaAjuda: 'Workspace category. The shortcut opens the same Categories screen.',
   },
   trilha: { configuracoes: 'Settings', sistema: 'System', modulo: 'Legal Module', juridico: 'Legal', categorias: 'Categories' },
   lista: {
@@ -721,6 +725,8 @@ const es: Textos = {
       releases: 'Releases', documentacao: 'Documentación',
       intimacoes: 'Capturas', prazos: 'Plazos', provisao: 'Provisión',
     },
+    categoria: 'Categoría',
+    categoriaAjuda: 'Categoría del workspace. El acceso directo abre la misma pantalla de Categorías.',
   },
   trilha: { configuracoes: 'Configuración', sistema: 'Sistema', modulo: 'Módulo Jurídico', juridico: 'Jurídico', categorias: 'Categorías' },
   lista: {

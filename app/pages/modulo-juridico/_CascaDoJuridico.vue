@@ -12,6 +12,10 @@
  * A EXCEÇÃO (PROPOSTA): com o módulo ligado, o menu do membro ganha "Jurídico", uma tela de módulo (menu nativo, como
  * no protótipo `menu-lateral`), com Intimações, Prazos e Provisão. Desligado, o menu é o de hoje.
  *
+ * Rodada 6 (PROPOSTA): tudo o que o módulo usa fica dentro de "Jurídico", também o que é categoria (a categoria dos
+ * processos, Assuntos e Audiências). O atalho é criado sozinho quando o módulo liga, abre a mesma rota da tela de
+ * categoria e leva a badge de categoria (o ícone de Categorias, com o tooltip). Essas categorias saem da lista de "Categorias" enquanto o módulo está ligado.
+ *
  * Na implementação isto é o `EnLayout` com os slots `sidebar-header`, `sidebar-default`, `navbar-leading`,
  * `navbar-title` e `navbar-trailing`.
  */
@@ -19,6 +23,7 @@ import type { CategoriaId } from './mocks'
 import { categorias, workspace } from './mocks'
 import type { Textos } from './textos'
 import { LIBERADO } from './submodulos'
+import { estado } from './estado'
 
 export type Destino = 'intimacoes' | 'prazos' | 'provisao' | 'sistema' | 'agenda' | `categoria:${CategoriaId}`
 
@@ -69,6 +74,16 @@ const doModulo: { chave: Destino, icone: string }[] = [
   { chave: 'prazos', icone: 'i-lucide-alarm-clock' },
   ...(LIBERADO.provisao ? [{ chave: 'provisao' as const, icone: 'i-lucide-landmark' }] : []),
 ]
+
+// Rodada 6: as categorias que o módulo usa, na ordem do trabalho. Assuntos só existe com o campo Assunto principal ligado.
+const categoriasDoModulo = computed(() => {
+  if (!props.moduloLigado) return []
+  const ids: CategoriaId[] = [estado.ligacao.categoria]
+  if (estado.ligacao.campos.assuntoPrincipal) ids.push('assuntos')
+  ids.push('audiencias')
+  return [...new Set(ids)].map(id => categorias.find(c => c.id === id)!)
+})
+const categoriasDoWorkspace = computed(() => categorias.filter(c => !categoriasDoModulo.value.some(m => m.id === c.id)))
 
 const abertos = ref<string[]>(['juridico', 'categorias'])
 
@@ -156,12 +171,29 @@ const menuRecolhido = ref(false)
                 <span class="flex-1 truncate text-sm">{{ t.casca.itens[m.chave] }}</span>
                 <UBadge v-if="m.chave === 'intimacoes' && pendentes" :label="String(pendentes)" color="primary" variant="soft" size="sm" class="tabular-nums" />
               </button>
+              <!-- Rodada 6: as categorias do módulo, com a rota da tela de categoria -->
+              <button
+                v-for="c in categoriasDoModulo"
+                :key="c.id"
+                type="button"
+                class="flex w-full items-center gap-2.5 py-1.5 pl-10 pr-3 text-left transition-colors"
+                :class="ativo === `categoria:${c.id}` ? 'bg-primary/10 font-medium text-primary' : 'text-toned hover:bg-elevated'"
+                :aria-current="ativo === `categoria:${c.id}` ? 'page' : undefined"
+                @click="emit('ir', `categoria:${c.id}`)"
+              >
+                <UIcon :name="c.icone" class="size-4 shrink-0" />
+                <span class="min-w-0 flex-1 truncate text-sm">{{ c.nome }}</span>
+                <!-- A badge leva o ícone de Categorias e não a palavra: no menu de 208 px, a palavra corta o nome -->
+                <UTooltip :text="t.casca.categoriaAjuda">
+                  <UBadge icon="i-lucide-layout-grid" color="neutral" variant="outline" size="sm" square class="shrink-0" :aria-label="t.casca.categoria" />
+                </UTooltip>
+              </button>
             </template>
 
             <!-- As categorias do workspace, quando "Categorias" está aberto -->
             <template v-if="!menuRecolhido && item.chave === 'categorias' && abertos.includes('categorias')">
               <button
-                v-for="c in categorias"
+                v-for="c in categoriasDoWorkspace"
                 :key="c.id"
                 type="button"
                 class="flex w-full items-center gap-2.5 py-1.5 pl-10 pr-4 text-left transition-colors"

@@ -118,6 +118,25 @@ O pedido:
   ELM americano agrupa os processos de uma disputa num assunto e vê a soma deles; o dev lê no modal qual chave nativa
   cada campo ocupa.
 
+### Rodada 6: as categorias do módulo no menu Jurídico
+
+O pedido:
+
+> matter realmente deveria ser uma categoria?
+>
+> quando ativar o modulo, mesmo o que for uma CATEGORIA, deve aparecer dentro do menu do módulo, mas pode botar uma
+> badge indicando q é catgoria pra gente saber se orientar
+>
+> mas vai ser um menu criado com o caminho da tela de categoria,automaticamente
+
+> tudo junto do menu juridico, tudo dentro dele, q aparece com o modulo ativado
+
+(Redatora, 2026-10-27.)
+
+- **Tela ou jornada em jogo:** o menu lateral do membro, grupos Jurídico e Categorias.
+- **Sucesso:** com o módulo ligado, quem trabalha no jurídico acha tudo dentro de Jurídico, sabe o que é categoria e
+  cai na mesma tela de categoria que já conhece; com o módulo desligado, o menu é o de hoje.
+
 ## A fonte: a pesquisa de mercado de 2026-10-24
 
 Relatório `pesquisa-de-mercado/runs/2026-10-24-modulo-juridico-brasil-eua/RELATORIO.md` e a nota
