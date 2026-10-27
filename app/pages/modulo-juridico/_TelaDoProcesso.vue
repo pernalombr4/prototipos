@@ -17,9 +17,11 @@
  * - rodada 4: a aba Andamentos, a linha do tempo do processo. O andamento deixa de ser categoria: é o que aconteceu
  *   no processo, em ordem, com o tipo do movimento. A aba Capturas fica com intimação, citação e distribuição. A
  *   Visão Geral mostra a próxima audiência registrada.
+ * - rodada 5: o processo é um assunto do tipo processo. O campo opcional "Assunto principal" (`matter.parent_matter`)
+ *   liga o processo a um item de Assuntos, que mostra os processos dele. Só aparece quando o campo está ligado.
  */
 import type { Risco } from './mocks'
-import { categorias, pessoaPorId, processoPorId, regraPorId, tribunais } from './mocks'
+import { assuntoPorId, assuntos, categorias, pessoaPorId, processoPorId, regraPorId, tribunais } from './mocks'
 import { calcularPrazo, estado, processoDaCaptura, provisionado } from './estado'
 import type { Textos } from './textos'
 import { dia, dinheiro } from './formato'
@@ -27,9 +29,10 @@ import MemoriaDoCalculo from './_MemoriaDoCalculo.vue'
 import { LIBERADO } from './submodulos'
 import { textosCapturas } from './textos-capturas'
 import { textosTratamento } from './textos-tratamento'
+import { textosAssuntos } from './textos-assuntos'
 
 const props = defineProps<{ t: Textos, processo: number, moduloLigado: boolean }>()
-const emit = defineEmits<{ ir: ['intimacoes' | 'prazos' | 'provisao'] }>()
+const emit = defineEmits<{ ir: ['intimacoes' | 'prazos' | 'provisao'], abrirAssunto: [number] }>()
 
 const p = computed(() => processoPorId.get(props.processo)!)
 const categoria = categorias.find(c => c.id === 'processos')!
@@ -60,6 +63,18 @@ const proximaAudiencia = computed(() => estado.audiencias
 const tc = useTextos(textosCapturas)
 const tt = useTextos(textosTratamento)
 const aRevisar = computed(() => intimacoes.value.filter(i => i.status === 'revisar').length)
+
+/* ---------- rodada 5: o assunto principal ---------- */
+const ta = useTextos(textosAssuntos)
+const comAssunto = computed(() => !!estado.ligacao.campos.assuntoPrincipal)
+const assuntoPrincipal = computed({
+  get: () => estado.assuntoPrincipal[props.processo] ?? 0,
+  set: (v: number) => { estado.assuntoPrincipal[props.processo] = v || undefined },
+})
+const opcoesDeAssunto = computed(() => [
+  { label: ta.value.processo.semAssunto, value: 0 },
+  ...assuntos.map(a => ({ label: a.titulo, value: a.id, description: `${a.reference} · ${a.data.tipo}` })),
+])
 
 const abas = computed(() => {
   const a = props.t.processo.abas
@@ -153,6 +168,22 @@ const corDaIntimacao = { revisar: 'warning', confirmada: 'success', descartada: 
           <div v-if="aba === 'visaoGeral'" key="visaoGeral" class="mx-auto flex max-w-5xl flex-col gap-5 p-5">
             <section class="rounded-lg border border-default p-4">
               <h2 class="mb-3 text-sm font-semibold text-highlighted">{{ t.processo.secoes.dados }}</h2>
+              <!-- PROPOSTA (rodada 5): o assunto principal, campo opcional de relação com Assuntos -->
+              <UFormField v-if="comAssunto" :label="ta.processo.assuntoPrincipal" class="mb-4 border-b border-default pb-4">
+                <div class="flex flex-wrap items-center gap-2">
+                  <USelect v-model="assuntoPrincipal" :items="opcoesDeAssunto" icon="i-lucide-briefcase" class="w-80 max-w-full" :ui="{ content: 'min-w-(--reka-select-trigger-width)' }" />
+                  <UButton
+                    v-if="assuntoPorId.get(assuntoPrincipal)"
+                    :label="ta.processo.abrir"
+                    icon="i-lucide-arrow-up-right"
+                    trailing
+                    size="sm"
+                    color="neutral"
+                    variant="outline"
+                    @click="emit('abrirAssunto', assuntoPrincipal)"
+                  />
+                </div>
+              </UFormField>
               <dl class="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
                 <div v-for="d in dados" :key="d.rotulo" class="min-w-0">
                   <dt class="text-xs text-muted">{{ d.rotulo }}</dt>

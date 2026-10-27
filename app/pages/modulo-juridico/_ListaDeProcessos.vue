@@ -4,18 +4,21 @@
  * ferramentas, `EnTable` com seleção, ações e paginação). Fora do escopo: está aqui como porta para a tela do processo.
  *
  * A coluna "Próximo prazo" mostra o que muda com o módulo: sem ele, a data digitada; com ele, o prazo calculado.
+ * Rodada 5: a coluna "Assunto principal", quando o campo está ligado.
  */
 import type { EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import type { Processo, Risco } from './mocks'
-import { pessoaPorId, processos, tribunais } from './mocks'
+import { assuntoPorId, pessoaPorId, processos, tribunais } from './mocks'
 import { calcularPrazo, estado } from './estado'
 import type { Textos } from './textos'
 import { dia } from './formato'
 import BarraDaLista from './_BarraDaLista.vue'
+import { textosAssuntos } from './textos-assuntos'
 
 const props = defineProps<{ t: Textos, moduloLigado: boolean }>()
 const emit = defineEmits<{ abrir: [number] }>()
 const idioma = useIdioma()
+const ta = useTextos(textosAssuntos)
 const vista = ref('itens')
 const busca = ref('')
 const linhas = computed(() => {
@@ -32,6 +35,7 @@ const colunas = computed<EnTableColumn[]>(() => {
     { key: 'responsavel', label: c.responsavel },
     { key: 'risco', label: c.risco },
     { key: 'prazo', label: c.proximoPrazo },
+    ...(estado.ligacao.campos.assuntoPrincipal ? [{ key: 'assunto', label: ta.value.processo.assuntoPrincipal }] : []),
   ]
 })
 
@@ -81,6 +85,10 @@ const corDoRisco: Record<Risco, 'error' | 'warning' | 'neutral'> = { provavel: '
             <UIcon :name="moduloLigado ? 'i-lucide-calculator' : 'i-lucide-pencil'" class="size-3.5" :class="moduloLigado ? 'text-primary' : 'text-dimmed'" />
             {{ dia(proximo(row as Processo)!, t.locale) }}
           </span>
+          <span v-else class="text-sm text-dimmed">-</span>
+        </template>
+        <template #cell-assunto="{ row }">
+          <span v-if="assuntoPorId.get(estado.assuntoPrincipal[(row as Processo).id] ?? 0)" class="block max-w-56 truncate text-sm text-toned">{{ assuntoPorId.get(estado.assuntoPrincipal[(row as Processo).id]!)!.titulo }}</span>
           <span v-else class="text-sm text-dimmed">-</span>
         </template>
         <template #actions="{ row }">

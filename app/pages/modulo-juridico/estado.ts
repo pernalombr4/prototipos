@@ -7,7 +7,7 @@
 import { reactive } from 'vue'
 import type { AudienciaNoTeor, DataBase, Intimacao, MarcoDaResposta, Prazo, Processo, RegraId, Risco, Suspensao } from './mocks'
 import {
-  AGORA, DATA_BASE_ABERTA, EU, HOJE, datasBaseFechadas, motivosIniciais, pessoaPorId, prazosIniciais,
+  AGORA, DATA_BASE_ABERTA, EU, HOJE, assuntoPrincipalInicial, datasBaseFechadas, motivosIniciais, pessoaPorId, prazosIniciais,
   processoPorCnj, processoPorId, processos, regraPorId, suspensoesIniciais,
 } from './mocks'
 import type { Calculo } from './prazos'
@@ -54,6 +54,9 @@ function inicial() {
     audiencias: [] as Audiencia[],
     /** Eventos entregues ao Spaceflow, com os fluxos que cada um disparou. */
     disparos: copia(disparosIniciais) as Disparo[],
+    /* ---------- rodada 5 ---------- */
+    /** O assunto principal de cada processo (`matter.parent_matter`). Sem chave: o processo não tem assunto principal. */
+    assuntoPrincipal: { ...assuntoPrincipalInicial } as Record<number, number | undefined>,
   }
 }
 
@@ -305,3 +308,10 @@ export function fecharDataBase() {
   const d = new Date(`${somarDias(estado.dataBaseAberta, 1)}T00:00:00Z`)
   estado.dataBaseAberta = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).toISOString().slice(0, 10)
 }
+
+/* ------------------------------------------------------------------ *
+ * Assuntos (rodada 5)                                                 *
+ * ------------------------------------------------------------------ */
+
+/** A relação inversa de "Assunto principal": os processos que apontam para o assunto. */
+export const processosDoAssunto = (assunto: number) => processos.filter(p => estado.assuntoPrincipal[p.id] === assunto)

@@ -13,6 +13,10 @@
  * audiência; a audiência vai para a Agenda; ligar o submódulo pede a categoria dos processos; o andamento vira a aba
  * Andamentos do processo; e o submódulo entrega eventos ao Spaceflow, de onde partem os casos de uso do contencioso.
  *
+ * Rodada 5: o modelo de dados nativo. O processo é um assunto do tipo processo e herda os campos de assunto no mesmo
+ * item; ligar Capturas mostra a chave nativa de cada campo, separada em campos de processo e de assunto. O campo
+ * opcional "Assunto principal" agrupa processos num item da categoria Assuntos, que mostra os processos dele.
+ *
  * A triagem (BRIEFING.md) deixou 3 funcionalidades no módulo, todas do contencioso:
  * - Intimações: a captura do DJEN e do Domicílio, revisada por uma pessoa antes de virar prazo;
  * - Prazos: o motor que calcula o prazo fatal e o interno pela regra do rito e pelo calendário do tribunal, com a
@@ -25,7 +29,7 @@
 import briefingMd from './BRIEFING.md?raw'
 import pesquisaMd from './PESQUISA.md?raw'
 import decisoesMd from './DECISOES.md?raw'
-import { categorias, processoPorId, workspace } from './mocks'
+import { assuntoPorId, categorias, processoPorId, workspace } from './mocks'
 import { estado, reiniciarEstado } from './estado'
 import { textos } from './textos'
 import type { Destino } from './_CascaDoJuridico.vue'
@@ -39,15 +43,17 @@ import type { Aba as AbaDoModulo } from './_ConfiguracaoDoModulo.vue'
 import ConfiguracaoDoModulo from './_ConfiguracaoDoModulo.vue'
 import ListaDeProcessos from './_ListaDeProcessos.vue'
 import TelaDoProcesso from './_TelaDoProcesso.vue'
+import ListaDeAssuntos from './_ListaDeAssuntos.vue'
+import TelaDoAssunto from './_TelaDoAssunto.vue'
 import Triagem from './_Triagem.vue'
 import { LIBERADO } from './submodulos'
 
 definePageMeta({
   titulo: 'Módulo Jurídico',
-  descricao: 'Módulo Jurídico com submódulos ligados um a um. O primeiro é Capturas: publicações, intimações, citações, distribuições e andamentos de várias fontes numa caixa só, com o prazo calculado, a audiência na Agenda, a linha do tempo do processo e eventos para o Spaceflow.',
+  descricao: 'Módulo Jurídico com submódulos ligados um a um. O primeiro é Capturas: publicações, intimações, citações, distribuições e andamentos de várias fontes numa caixa só, com o prazo calculado, a audiência na Agenda, a linha do tempo do processo e eventos para o Spaceflow. O processo é um assunto do tipo processo e pode ser agrupado num assunto principal.',
   status: 'em-revisao',
-  atualizado: '2026-10-26',
-  tela: 'Jurídico › Capturas e Prazos; Agenda; Processo › Andamentos; Sistema › Módulos e submódulos',
+  atualizado: '2026-10-27',
+  tela: 'Jurídico › Capturas e Prazos; Agenda; Processo › Andamentos; Categorias › Assuntos; Sistema › Módulos e submódulos',
 })
 
 const t = useTextos(textos)
@@ -73,17 +79,20 @@ const juridico = computed(() => estado.moduloLigado && estado.capturasLigado)
  * Navegação                                                           *
  * ------------------------------------------------------------------ */
 type Tela =
-  | { tipo: 'intimacoes' | 'prazos' | 'provisao' | 'sistema' | 'processos' | 'agenda' }
+  | { tipo: 'intimacoes' | 'prazos' | 'provisao' | 'sistema' | 'processos' | 'assuntos' | 'agenda' }
   | { tipo: 'modulo', aba?: AbaDoModulo }
   | { tipo: 'processo', id: number }
+  | { tipo: 'assunto', id: number }
 const tela = ref<Tela>({ tipo: 'intimacoes' })
 
 function ir(d: Destino) {
   if (d === 'categoria:processos') return (tela.value = { tipo: 'processos' })
+  if (d === 'categoria:assuntos') return (tela.value = { tipo: 'assuntos' })
   if (d.startsWith('categoria:')) return toast.add({ title: t.value.geral.foraDoEscopo, description: t.value.geral.foraDoEscopoDesc, icon: 'i-lucide-construction', color: 'neutral' })
   tela.value = { tipo: d as 'intimacoes' | 'prazos' | 'provisao' | 'sistema' | 'agenda' }
 }
 const abrirProcesso = (id: number) => { tela.value = { tipo: 'processo', id } }
+const abrirAssunto = (id: number) => { tela.value = { tipo: 'assunto', id } }
 
 // Desligar o módulo, ou o último submódulo, tira as telas dele do caminho.
 watch(juridico, (ligado) => {
@@ -93,6 +102,7 @@ watch(juridico, (ligado) => {
 const ativo = computed<Destino | 'modulo'>(() => {
   const x = tela.value.tipo
   if (x === 'processo' || x === 'processos') return 'categoria:processos'
+  if (x === 'assunto' || x === 'assuntos') return 'categoria:assuntos'
   return x
 })
 
@@ -105,6 +115,8 @@ const trilha = computed(() => {
   if (x.tipo === 'modulo') return [workspace.nome, tr.configuracoes, tr.sistema, tr.modulo]
   if (x.tipo === 'processos') return [workspace.nome, tr.categorias, categorias[0]!.nome]
   if (x.tipo === 'processo') return [workspace.nome, tr.categorias, categorias[0]!.nome, processoPorId.get(x.id)?.reference ?? '']
+  if (x.tipo === 'assuntos') return [workspace.nome, tr.categorias, categorias[1]!.nome]
+  if (x.tipo === 'assunto') return [workspace.nome, tr.categorias, categorias[1]!.nome, assuntoPorId.get(x.id)?.reference ?? '']
   return [workspace.nome, tr.juridico, casca[x.tipo]!]
 })
 
@@ -144,6 +156,7 @@ const atalhos = [
   { rotulo: 'Fontes da captura', acao: () => irModulo('fontes') },
   { rotulo: 'Termos monitorados', acao: () => irModulo('termos') },
   { rotulo: 'Eventos para o Spaceflow', acao: () => irModulo('eventos') },
+  { rotulo: 'Assunto com processos', acao: () => abrirAssunto(5201) },
   { rotulo: 'Prazos na Agenda', acao: () => { tela.value = { tipo: 'agenda' } } },
 ]
 </script>
@@ -223,6 +236,20 @@ const atalhos = [
             :processo="tela.id"
             :modulo-ligado="juridico"
             @ir="(d) => tela = { tipo: d }"
+            @abrir-assunto="abrirAssunto"
+          />
+          <ListaDeAssuntos
+            v-else-if="tela.tipo === 'assuntos'"
+            key="assuntos"
+            :t="t"
+            @abrir="abrirAssunto"
+          />
+          <TelaDoAssunto
+            v-else-if="tela.tipo === 'assunto'"
+            :key="`assunto-${tela.id}`"
+            :t="t"
+            :assunto="tela.id"
+            @abrir-processo="abrirProcesso"
           />
         </Transition>
       </div>

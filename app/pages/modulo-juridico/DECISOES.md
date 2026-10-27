@@ -3,8 +3,9 @@
 ## A proposta em 1 parágrafo
 
 O módulo Jurídico é feito de submódulos, ligados um a um em Configurações › Sistema › Módulos. O primeiro é
-**Capturas**, que cobre captura e prazo. Ligar Capturas pede a categoria que guarda os processos e a ligação de 5
-campos (número CNJ, tribunal, órgão, responsável e polo); o campo que falta é criado e os ligados ficam travados.
+**Capturas**, que cobre captura e prazo. Ligar Capturas pede a categoria que guarda os processos e a ligação de 6
+campos, cada um com a chave nativa (número CNJ, tribunal, órgão, polo, responsável e o opcional assunto principal); o
+campo que falta é criado e os ligados ficam travados.
 Ligado, ele acrescenta o menu **Jurídico** (Capturas e Prazos) e as abas Capturas e Andamentos ao processo. A caixa **Capturas** recebe intimação, citação, distribuição de ação nova e andamento, vindos do
 DJEN, do Domicílio Judicial Eletrônico, dos robôs ENSPACE que o cliente já contrata (portais, andamentos, distribuição)
 e do fornecedor de recortes do cliente. Cada captura diz de onde veio, qual termo casou e quando chegou, com o hash do
@@ -18,6 +19,8 @@ Cada passo entrega um evento ao Spaceflow, de onde partem subsídios, escritóri
 configuração. A página do módulo ganha Fontes (estado e histórico de execuções de cada fonte), Termos monitorados,
 Destino e Eventos.
 Provisão e Casos de uso, das rodadas 1 e 2, ficam no código e saem da tela até serem liberados (`submodulos.ts`).
+O processo é um assunto do tipo processo: herda os campos de assunto no mesmo item. O campo opcional Assunto principal
+agrupa processos num item da categoria **Assuntos**, que mostra os processos dele e a soma do valor e do estimado.
 
 ## A jornada
 
@@ -35,6 +38,7 @@ flowchart LR
     P -->|"linha ou dia do calendário"| M["Memória do cálculo<br/>e histórico"]
     A["Agenda<br/>interno, fatal e audiência"] -->|"evento do prazo"| M
     A -->|"audiência"| T
+    T <-->|"Assunto principal"| AS["Assunto<br/>processos agrupados e totais"]
 ```
 
 ## Rodada 1 · 2026-10-26
@@ -392,6 +396,72 @@ flowchart LR
   - `r4-09-destino-categoria.jpg`: Destino com a categoria ligada;
   - `r4-10-es-citacao-trabalhista.jpg`: o painel da citação trabalhista em espanhol.
 
+## Rodada 5 · 2026-10-27
+
+- **Pedido (literal):** "pode fazer a 1". O "1" é a herança com assunto pai opcional, o primeiro dos 3 caminhos da
+  resposta; a comparação com a proposta de modelo de dados nativo e as perguntas estão no `BRIEFING.md`, "Rodada 5".
+- **Pesquisa:** sem pesquisa nova. O que o protótipo mantém da comparação se apoia no `PESQUISA.md` da rodada 1.
+- **Mudou:**
+  - o modal "Ligar o submódulo Capturas":
+    - um aviso diz que a categoria escolhida passa a ser do tipo Processo, um tipo de Assunto;
+    - a grade separa **Campos de processo** (número CNJ, tribunal, órgão julgador, polo) de **Campos de assunto**
+      (responsável, assunto principal), com a nota "Valem também para a categoria Assuntos";
+    - cada campo mostra a chave nativa (`litigation.br.cnj_number`, `matter.internal_counsel` etc.), com a ajuda "Não
+      muda quando o rótulo do campo muda";
+    - o campo novo **Assunto principal** (`matter.parent_matter`, relação, opcional) e a opção **Não usar** nos campos
+      opcionais;
+  - processo, Visão Geral: o campo **Assunto principal** no topo de "Dados do processo", com a escolha do assunto e
+    "Abrir o assunto". Só aparece quando o campo está ligado;
+  - Categorias › Processos: a coluna **Assunto principal**, também só com o campo ligado;
+  - Categorias › **Assuntos**, categoria nova no menu:
+    - a lista, com as colunas Processos e Estimado somado;
+    - o item, com "Dados do assunto" (`matter.*`) e **Processos deste assunto**: a relação inversa, com o número de
+      processos, o valor da causa somado, o estimado somado, o próximo prazo, "Adicionar processo" e "Tirar do assunto".
+- **Fronteira:** muda o modal de ligação, a Visão Geral do processo (1 campo), a lista de Processos (1 coluna) e a
+  categoria Assuntos (nova). Não muda a casca, a barra da lista, o `EnTable`, a caixa Capturas, Prazos, a Agenda, Destino
+  nem Eventos.
+- **Por que assim:**
+  - no contencioso de massa a unidade é o processo. O processo herda os campos de assunto no mesmo item, e nada se
+    configura a mais para quem não agrupa;
+  - quem trabalha como o ELM americano agrupa a mesma disputa num assunto: o recurso com outro número, a ação paralela
+    noutra vara, a crise com dezenas de ações. O assunto soma os processos dele;
+  - o assunto pai é uma relação comum, que o modelo de dados já exige entre quaisquer objetos. Não pede código novo além
+    da herança no registro de campos;
+  - a chave nativa aparece onde se configura (o modal), e não onde se trabalha (o item).
+- **Descartado:**
+  - um assunto pai para cada processo. Motivo: dobra o número de itens no contencioso de massa e põe um nível a mais
+    entre a pessoa e o processo;
+  - uma chave por workspace que centraliza no processo ou no assunto. Motivo: migração nos 2 sentidos, 2 caminhos em
+    relatório, filtro, Spaceflow, API e MCP, e a chave nativa mudando de lugar conforme o workspace;
+  - mostrar a chave nativa na tela do item. Motivo: serve a quem configura e integra, não a quem trata o processo;
+  - nesta rodada, as outras mudanças da comparação (parte contrária e escritório como organização, eventos com a chave
+    nativa, comarca, instância e rito no registro). Motivo: fora do pedido; ficam para a próxima.
+- **Não deu:** o `vue-tsc` (erro `ERR_PACKAGE_PATH_NOT_EXPORTED`). O comportamento foi conferido no navegador.
+- **Maquete:** "Novo registro" em Assuntos mostra só o aviso. A categoria Assuntos já existe no workspace fictício; quem
+  a cria (o submódulo, o caso de uso ou a pessoa) é a pergunta P23.
+- **Testado** (Chrome, em português, em espanhol e no tema escuro):
+  - ASS-0041 mostra 4 processos, R$ 638.800 de valor da causa, R$ 221.000 de estimado e o próximo prazo 29/10/2026;
+  - "Adicionar processo": a busca por "Sindicato" não acha nada (o processo já está no assunto); a busca por "Juliana"
+    acha o PROC-0314, que entra no assunto, e os totais vão a 5 processos e R$ 313.000;
+  - o PROC-0314 passa a mostrar "Reestruturação da logística 2024" em Assunto principal, e "Abrir o assunto" volta ao
+    ASS-0041;
+  - "Tirar do assunto" no ASS-0042 tira o PROC-0329, e os totais caem para 1 processo;
+  - ligar Capturas com "Não usar" no Assunto principal: a coluna some da lista de Processos e o campo some do processo.
+- **Crítica e acessibilidade** (revisão própria; as skills `design:design-critique` e `design:accessibility-review`
+  não rodaram):
+  - corrigido: a tabela do assunto cortava o nome do processo. O tribunal e o número CNJ foram para a 2ª linha da célula;
+  - corrigido: o menu "Adicionar processo" ficava com o id do processo escolhido, e agora volta ao rótulo.
+- **CSS próprio:** `[&_thead_th:nth-child(2)]:w-2/5` no `EnTable` da tela do assunto. Motivo: o `EnTable` monta a tabela
+  com largura fixa e colunas iguais, e o `EnTableColumn` não tem largura (P26).
+- **Ver:** prints em `evidencias/`, prefixo `r5-`:
+  - `r5-01-assunto-com-processos.jpg`: o ASS-0041 com os 4 processos e os totais;
+  - `r5-02-adicionar-processo.jpg`: a busca de "Adicionar processo";
+  - `r5-03-processo-com-assunto-principal.jpg`: o PROC-0314 com o Assunto principal;
+  - `r5-04-ligacao-com-chaves-nativas.jpg`: o modal com os 2 grupos e as chaves nativas;
+  - `r5-05-lista-de-processos.jpg`: a coluna Assunto principal;
+  - `r5-06-assuntos-es-escuro.jpg`: a lista de Assuntos em espanhol, no tema escuro;
+  - `r5-07-assunto-es-escuro.jpg`: o ASS-0042 em espanhol, no tema escuro.
+
 ## Perguntas para o time de dev
 
 - **P1.** Ligar o módulo instala o caso de uso Contencioso junto, ou são 2 gestos? Nenhuma plataforma no-code liga
@@ -434,3 +504,12 @@ flowchart LR
 - **P20.** A petição inicial: o robô de distribuição já baixa o documento, ou só lê os dados da capa? Em processo com
   segredo de justiça, o download pede o certificado da empresa.
 - **P21.** A audiência registrada é item da categoria Audiências (caso de uso) ou evento da Agenda sem categoria?
+- **P22.** O Object Framework aceita herança, com Litigation estendendo Matter no registro de campos? Sem herança, o
+  caminho é a composição 1 para 1 (2 registros que a tela mostra como 1), e toda lista passa a juntar 2 registros.
+- **P23.** Quem cria a categoria Assuntos: o submódulo, ao ligar o campo Assunto principal, o caso de uso Contencioso ou
+  a pessoa?
+- **P24.** O Assunto principal aponta só para itens de Assuntos, ou também para outro processo (o recurso com outro
+  número, como nos EUA)?
+- **P25.** O registro de campos ganha `litigation.br.rito` e `litigation.br.comarca`? O motor de prazo usa os 2 (regra
+  de contagem e feriado municipal), e a proposta de modelo de dados lista tribunal, vara, comarca e instância, sem o rito.
+- **P26.** O `EnTableColumn` pode ganhar largura? Hoje o `EnTable` divide a largura por igual entre as colunas.

@@ -43,10 +43,12 @@ export const EU = 11
  * ------------------------------------------------------------------ */
 
 // Rodada 4: Andamentos saiu do menu. O andamento é uma linha do tempo dentro do processo, não uma categoria.
-export type CategoriaId = 'processos' | 'audiencias' | 'contratos' | 'procuracoes' | 'consultas' | 'societario' | 'pagamentos'
+// Rodada 5: Assuntos, a categoria do assunto que agrupa processos (matter pai, opcional).
+export type CategoriaId = 'processos' | 'assuntos' | 'audiencias' | 'contratos' | 'procuracoes' | 'consultas' | 'societario' | 'pagamentos'
 
 export const categorias: { id: CategoriaId, nome: string, icone: string }[] = [
   { id: 'processos', nome: 'Processos', icone: 'i-lucide-gavel' },
+  { id: 'assuntos', nome: 'Assuntos', icone: 'i-lucide-briefcase' },
   { id: 'audiencias', nome: 'Audiências', icone: 'i-lucide-calendar-clock' },
   { id: 'contratos', nome: 'Contratos', icone: 'i-lucide-file-signature' },
   { id: 'procuracoes', nome: 'Procurações', icone: 'i-lucide-stamp' },
@@ -269,6 +271,56 @@ processos[7]!.data.proximoPrazoDigitado = '2026-11-02'
 
 export const processoPorId = new Map(processos.map(p => [p.id, p]))
 export const processoPorCnj = new Map(processos.map(p => [p.data.numeroCnj, p]))
+
+/* ------------------------------------------------------------------ *
+ * Assuntos (rodada 5)                                                 *
+ * ------------------------------------------------------------------ */
+
+/**
+ * PROPOSTA: o assunto (matter) do modelo de dados nativo. O processo é um assunto do tipo processo: herda os campos
+ * de assunto no mesmo item (responsável, área, risco, estimado, escritório) e não ganha um registro pai. O assunto
+ * desta categoria é o que agrupa processos quando a empresa quer: a mesma disputa em várias varas, o recurso com outro
+ * número, uma crise com dezenas de ações. O campo "Assunto principal" do processo é opcional (`matter.parent_matter`).
+ */
+export interface CamposDoAssunto {
+  tipo: 'Disputa' | 'Regulatório' | 'Consultivo'
+  area: string
+  responsavel: number
+  /** `matter.department`: a área da empresa que responde pelo assunto. */
+  areaDaEmpresa: string
+  /** `matter.entity`: a empresa do grupo envolvida. */
+  entidade: string
+  /** `matter.cost_center` */
+  centroDeCusto: string
+  abertura: string
+}
+
+export type Assunto = Pick<Item, 'id' | 'reference' | 'created_at' | 'status'> & { titulo: string, data: CamposDoAssunto }
+
+export const assuntos: Assunto[] = [
+  {
+    id: 5201, reference: 'ASS-0041', created_at: new Date(2024, 7, 12), status: 'active',
+    titulo: 'Reestruturação da logística 2024',
+    data: { tipo: 'Disputa', area: 'Trabalhista', responsavel: 13, areaDaEmpresa: 'Operações e logística', entidade: 'Grupo Aurora Logística Ltda.', centroDeCusto: 'CC-4120 Logística', abertura: '2024-08-12' },
+  },
+  {
+    id: 5202, reference: 'ASS-0042', created_at: new Date(2025, 2, 4), status: 'active',
+    titulo: 'Barragem do Vale do Rio das Velhas',
+    data: { tipo: 'Disputa', area: 'Ambiental', responsavel: 11, areaDaEmpresa: 'Mineração', entidade: 'Grupo Aurora Mineração S.A.', centroDeCusto: 'CC-2210 Sustentabilidade', abertura: '2025-03-04' },
+  },
+  {
+    id: 5203, reference: 'ASS-0043', created_at: new Date(2026, 5, 18), status: 'active',
+    titulo: 'Revisão do contrato de energia com a distribuidora',
+    data: { tipo: 'Regulatório', area: 'Regulatório', responsavel: 12, areaDaEmpresa: 'Suprimentos', entidade: 'Grupo Aurora Participações S.A.', centroDeCusto: 'CC-1300 Jurídico', abertura: '2026-06-18' },
+  },
+]
+export const assuntoPorId = new Map(assuntos.map(a => [a.id, a]))
+
+/** O processo e o assunto principal dele. Os processos fora da lista não têm assunto principal. */
+export const assuntoPrincipalInicial: Record<number, number> = {
+  4103: 5201, 4111: 5201, 4115: 5201, 4119: 5201,
+  4106: 5202, 4117: 5202,
+}
 
 /* ------------------------------------------------------------------ *
  * Intimações capturadas (DJEN e Domicílio)                            *

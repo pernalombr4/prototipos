@@ -76,6 +76,48 @@ Os pontos colados com ele:
 - **Sucesso:** a citação sai da caixa com a regra certa de contagem, a audiência na Agenda e o processo cadastrado; o
   que vem depois (subsídios, escritório, preposto) começa por evento, como configuração.
 
+### Rodada 5: o processo como assunto
+
+A redatora trouxe a proposta de modelo de dados nativo do ENSPACE (documento interno de 2026-10-27: camadas de
+objetos nativos, campos com chave nativa estável, `Matter` como assunto e `Litigation` como especialização dele):
+
+> agora observe este documento ele é uma proposta modular pra modulo juridico. comparando o que voce ja fez com isso, o
+> que mudaria e o que incluiria?
+
+> nao precisa seguir a risca o documento. se tiver coisa que no seu ta melhor, com base em pesquisas etc, só defender
+> que mantenhamos
+
+A resposta, em resumo:
+- fica o que a pesquisa da rodada 1 sustenta: o prazo com regra e memória, a caixa de revisão, a provisão por
+  data-base, a categoria que o cliente liga, os campos obrigatórios só para ligar e os casos de uso como modelo;
+- muda o modal de ligação (chave nativa por campo), a parte contrária e o escritório (relação com organização) e os
+  dados dos eventos (chave nativa);
+- um ajuste: o processo herda os campos de assunto no mesmo item, sem um assunto pai para cada processo.
+
+Sobre o ajuste:
+
+> nao acha que isso prejudica o modo de registro em ELM americano? fica fora de logica pra eles, nao? ou a gente teria
+> que ter uma chave que muda essa estrutura centralizando o processo? ou isso fica mais dificil ainda, tecnicamente
+> falando? no codigo
+
+A resposta trouxe 3 caminhos, do mais barato ao mais caro:
+1. herança com assunto pai opcional: o processo é um assunto do tipo processo, e o campo "Assunto principal" agrupa
+   processos quando a empresa quer;
+2. composição 1 para 1: 2 registros que a tela mostra como 1;
+3. uma chave por workspace que muda a estrutura: migração nos 2 sentidos e 2 caminhos em todo código que lê o dado.
+
+O pedido:
+
+> pode fazer a 1
+
+(Redatora, 2026-10-27.)
+
+- **Tela ou jornada em jogo:** Sistema › Módulos (o modal "Ligar o submódulo Capturas"), a Visão Geral do processo, a
+  lista de Processos e a categoria nova Assuntos (lista e item).
+- **Sucesso:** o contencioso de massa continua com 1 item por processo, sem configurar nada a mais; quem trabalha como o
+  ELM americano agrupa os processos de uma disputa num assunto e vê a soma deles; o dev lê no modal qual chave nativa
+  cada campo ocupa.
+
 ## A fonte: a pesquisa de mercado de 2026-10-24
 
 Relatório `pesquisa-de-mercado/runs/2026-10-24-modulo-juridico-brasil-eua/RELATORIO.md` e a nota

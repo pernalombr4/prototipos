@@ -16,15 +16,22 @@ import type { CategoriaId, TipoDeAudiencia, TipoDeMovimento } from './mocks'
  * ------------------------------------------------------------------ */
 
 /** Os campos de que o submódulo precisa para ligar a captura ao processo e calcular o prazo. */
-export type CampoExigido = 'numeroCnj' | 'tribunal' | 'orgao' | 'responsavel' | 'polo'
-export type TipoDeCampo = 'texto' | 'lista' | 'pessoa' | 'moeda' | 'data'
+export type CampoExigido = 'numeroCnj' | 'tribunal' | 'orgao' | 'responsavel' | 'polo' | 'assuntoPrincipal'
+export type TipoDeCampo = 'texto' | 'lista' | 'pessoa' | 'moeda' | 'data' | 'relacao'
 
-export const camposExigidos: { id: CampoExigido, tipo: TipoDeCampo, obrigatorio: boolean }[] = [
-  { id: 'numeroCnj', tipo: 'texto', obrigatorio: true },
-  { id: 'tribunal', tipo: 'lista', obrigatorio: true },
-  { id: 'orgao', tipo: 'texto', obrigatorio: false },
-  { id: 'responsavel', tipo: 'pessoa', obrigatorio: true },
-  { id: 'polo', tipo: 'lista', obrigatorio: true },
+/**
+ * Rodada 5: cada campo tem a chave nativa do modelo de dados (`chave`), estável mesmo quando o cliente muda o rótulo.
+ * O processo é um assunto do tipo processo: os campos `matter.*` são do assunto e valem também na categoria Assuntos;
+ * os `litigation.*` são só do processo. Obrigatório quer dizer obrigatório para ligar, não para preencher: quem
+ * preenche é a captura.
+ */
+export const camposExigidos: { id: CampoExigido, tipo: TipoDeCampo, obrigatorio: boolean, grupo: 'processo' | 'assunto', chave: string }[] = [
+  { id: 'numeroCnj', tipo: 'texto', obrigatorio: true, grupo: 'processo', chave: 'litigation.br.cnj_number' },
+  { id: 'tribunal', tipo: 'lista', obrigatorio: true, grupo: 'processo', chave: 'litigation.br.tribunal' },
+  { id: 'orgao', tipo: 'texto', obrigatorio: false, grupo: 'processo', chave: 'litigation.br.vara' },
+  { id: 'polo', tipo: 'lista', obrigatorio: true, grupo: 'processo', chave: 'litigation.party_role' },
+  { id: 'responsavel', tipo: 'pessoa', obrigatorio: true, grupo: 'assunto', chave: 'matter.internal_counsel' },
+  { id: 'assuntoPrincipal', tipo: 'relacao', obrigatorio: false, grupo: 'assunto', chave: 'matter.parent_matter' },
 ]
 
 export interface CampoDaCategoria { nome: string, tipo: TipoDeCampo }
@@ -59,6 +66,7 @@ export const itensPorCategoria: Partial<Record<CategoriaId, number>> = {
 /** O campo que o submódulo cria quando a categoria não tem um que sirva. */
 export const campoNovo: Record<CampoExigido, string> = {
   numeroCnj: 'Número CNJ', tribunal: 'Tribunal', orgao: 'Órgão julgador', responsavel: 'Responsável', polo: 'Polo da empresa',
+  assuntoPrincipal: 'Assunto principal',
 }
 
 /** A ligação sugerida: o campo da categoria com o mesmo tipo e o nome mais parecido. */
@@ -71,6 +79,7 @@ export function sugerirLigacao(categoria: CategoriaId): Record<CampoExigido, str
     orgao: achar('texto', 'vara', 'órgão'),
     responsavel: achar('pessoa', 'responsável'),
     polo: achar('lista', 'polo'),
+    assuntoPrincipal: achar('relacao', 'assunto'),
   }
 }
 
@@ -85,8 +94,8 @@ export interface LigacaoDaCategoria {
 export const ligacaoInicial: LigacaoDaCategoria = {
   categoria: 'processos',
   origem: 'existente',
-  campos: { numeroCnj: 'Número do processo', tribunal: 'Tribunal', orgao: 'Vara', responsavel: 'Advogado responsável', polo: 'Polo da empresa' },
-  criados: ['polo'],
+  campos: { numeroCnj: 'Número do processo', tribunal: 'Tribunal', orgao: 'Vara', responsavel: 'Advogado responsável', polo: 'Polo da empresa', assuntoPrincipal: 'Assunto principal' },
+  criados: ['polo', 'assuntoPrincipal'],
 }
 
 /* ------------------------------------------------------------------ *

@@ -7,6 +7,10 @@
  * caso de uso Contencioso) e liga os campos de que a captura precisa: o número CNJ para achar o processo, o tribunal
  * para o calendário, o responsável para o prazo e o polo para saber se a empresa é ré. O campo que falta é criado.
  * Os campos ligados ficam travados enquanto o submódulo estiver ligado.
+ *
+ * Rodada 5: a categoria escolhida passa a ser do tipo Processo, um tipo de Assunto. A grade separa os campos de
+ * processo dos campos de assunto e mostra a chave nativa de cada um. O campo opcional "Assunto principal" agrupa
+ * processos num item de Assuntos; quem não agrupa escolhe "Não usar".
  */
 import type { CategoriaId } from './mocks'
 import { categorias, processos } from './mocks'
@@ -14,15 +18,18 @@ import { estado } from './estado'
 import type { CampoExigido, LigacaoDaCategoria } from './tratamento'
 import { camposDaCategoria, camposExigidos, campoNovo, itensPorCategoria, sugerirLigacao } from './tratamento'
 import { textosTratamento } from './textos-tratamento'
+import { textosAssuntos } from './textos-assuntos'
 import type { Textos } from './textos'
 
 defineProps<{ t: Textos }>()
 const open = defineModel<boolean>('open', { default: false })
 const emit = defineEmits<{ ligado: [] }>()
 const tt = useTextos(textosTratamento)
+const ta = useTextos(textosAssuntos)
 const toast = useToast()
 
 const CRIAR = '__criar'
+const NAO_USAR = '__nao'
 type Escolha = CategoriaId | 'casoDeUso'
 
 const escolha = ref<Escolha>(estado.ligacao.origem === 'casoDeUso' ? 'casoDeUso' : estado.ligacao.categoria)
@@ -36,7 +43,7 @@ function criarTodos() {
 
 const itensDeCategoria = computed(() => [
   ...categorias
-    .filter(c => c.id !== 'audiencias')
+    .filter(c => c.id !== 'audiencias' && c.id !== 'assuntos')
     .map(c => ({
       label: c.nome,
       value: c.id as Escolha,
@@ -50,14 +57,22 @@ const doCasoDeUso = computed(() => escolha.value === 'casoDeUso')
 const camposDisponiveis = computed(() => (doCasoDeUso.value ? [] : camposDaCategoria[escolha.value as CategoriaId] ?? []))
 
 function opcoes(id: CampoExigido) {
-  const tipo = camposExigidos.find(c => c.id === id)!.tipo
+  const exigido = camposExigidos.find(c => c.id === id)!
   // Um campo da categoria serve a um campo do submódulo só.
   const usados = new Set(camposExigidos.filter(c => c.id !== id).map(c => campos.value[c.id]))
   return [
-    ...camposDisponiveis.value.filter(c => c.tipo === tipo && !usados.has(c.nome)).map(c => ({ label: c.nome, value: c.nome })),
+    ...camposDisponiveis.value.filter(c => c.tipo === exigido.tipo && !usados.has(c.nome)).map(c => ({ label: c.nome, value: c.nome })),
     { label: tt.value.ligacao.criar(campoNovo[id]), value: CRIAR, icon: 'i-lucide-plus' },
+    ...(exigido.obrigatorio ? [] : [{ label: ta.value.ligacao.naoUsar, value: NAO_USAR, icon: 'i-lucide-minus' }]),
   ]
 }
+
+const grupos = computed(() => (['processo', 'assunto'] as const).map(g => ({
+  id: g,
+  titulo: ta.value.ligacao.grupos[g],
+  ajuda: g === 'assunto' ? ta.value.ligacao.grupoAssunto : undefined,
+  campos: camposExigidos.filter(c => c.grupo === g),
+})))
 
 const faltam = computed(() => camposExigidos.filter(c => c.obrigatorio && !campos.value[c.id]).length)
 
@@ -67,10 +82,11 @@ async function ligar() {
   await new Promise(r => setTimeout(r, 700))
   ligando.value = false
   const criados = camposExigidos.filter(c => campos.value[c.id] === CRIAR).map(c => c.id)
+  const valor = (id: CampoExigido) => (campos.value[id] === CRIAR ? campoNovo[id] : campos.value[id] === NAO_USAR ? undefined : campos.value[id])
   const ligacao: LigacaoDaCategoria = {
     categoria: doCasoDeUso.value ? 'processos' : escolha.value as CategoriaId,
     origem: doCasoDeUso.value ? 'casoDeUso' : 'existente',
-    campos: Object.fromEntries(camposExigidos.map(c => [c.id, campos.value[c.id] === CRIAR ? campoNovo[c.id] : campos.value[c.id]])) as LigacaoDaCategoria['campos'],
+    campos: Object.fromEntries(camposExigidos.map(c => [c.id, valor(c.id)])) as LigacaoDaCategoria['campos'],
     criados,
   }
   estado.ligacao = ligacao
@@ -99,20 +115,32 @@ async function ligar() {
 
         <div class="flex flex-col gap-2">
           <p class="text-sm font-medium text-highlighted">{{ tt.ligacao.campos }}</p>
-          <div class="overflow-hidden rounded-md border border-default">
+          <!-- PROPOSTA (rodada 5): a categoria vira do tipo Processo, que herda os campos de Assunto -->
+          <UAlert :description="ta.ligacao.heranca" icon="i-lucide-git-fork" color="neutral" variant="subtle" />
+          <div class="overflow-hidden rounded-md border border-default [&>div:last-child]:border-b-0">
             <div class="grid grid-cols-[minmax(0,1fr)_6rem_minmax(0,1.4fr)] gap-3 border-b border-default bg-elevated/50 px-3 py-2 text-xs font-medium text-muted">
               <span>{{ tt.ligacao.colunas.campo }}</span>
               <span>{{ tt.ligacao.colunas.tipo }}</span>
               <span>{{ tt.ligacao.colunas.daCategoria }}</span>
             </div>
+            <template v-for="g in grupos" :key="g.id">
+            <div class="flex flex-wrap items-baseline gap-x-2 border-b border-default bg-elevated/25 px-3 py-1.5">
+              <span class="text-xs font-semibold text-toned">{{ g.titulo }}</span>
+              <span v-if="g.ajuda" class="text-xs text-muted">{{ g.ajuda }}</span>
+            </div>
             <div
-              v-for="c in camposExigidos"
+              v-for="c in g.campos"
               :key="c.id"
-              class="grid grid-cols-[minmax(0,1fr)_6rem_minmax(0,1.4fr)] items-center gap-3 border-b border-default px-3 py-2 last:border-b-0"
+              class="grid grid-cols-[minmax(0,1fr)_6rem_minmax(0,1.4fr)] items-center gap-3 border-b border-default px-3 py-2"
             >
-              <span class="flex flex-wrap items-center gap-1.5 text-sm text-highlighted">
-                {{ tt.ligacao.nomes[c.id] }}
-                <UBadge v-if="!c.obrigatorio" :label="tt.ligacao.opcional" color="neutral" variant="outline" size="sm" />
+              <span class="flex min-w-0 flex-col gap-0.5">
+                <span class="flex flex-wrap items-center gap-1.5 text-sm text-highlighted">
+                  {{ tt.ligacao.nomes[c.id] }}
+                  <UBadge v-if="!c.obrigatorio" :label="tt.ligacao.opcional" color="neutral" variant="outline" size="sm" />
+                </span>
+                <UTooltip :text="ta.ligacao.chave">
+                  <code class="w-fit max-w-full truncate font-mono text-[11px] text-muted">{{ c.chave }}</code>
+                </UTooltip>
               </span>
               <span class="text-sm text-toned">{{ tt.ligacao.tipos[c.tipo] }}</span>
               <USelect
@@ -127,7 +155,11 @@ async function ligar() {
                 :aria-label="tt.ligacao.nomes[c.id]"
               />
             </div>
+            </template>
           </div>
+          <p class="flex items-start gap-1.5 text-xs text-muted">
+            <UIcon name="i-lucide-briefcase" class="mt-0.5 size-3.5 shrink-0" />{{ ta.ligacao.assuntoAjuda }}
+          </p>
           <p v-if="faltam" class="flex items-center gap-1.5 text-xs text-warning">
             <UIcon name="i-lucide-circle-alert" class="size-3.5" />{{ tt.ligacao.faltam(faltam) }}
           </p>
