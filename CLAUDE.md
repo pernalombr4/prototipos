@@ -33,8 +33,9 @@ se quebram. Este arquivo só cobre a operação neste repositório — em qualqu
    a demanda é grande, em épico (regra 40 da spec). Parece haver mais de 1 épico: apontar à
    redatora e só dividir com a confirmação dela.
 7. No fim, **confirmar com a redatora** se cria o card no ENSPACE: o card `user_story` é o
-   épico, com todos os requisitos por extenso na descrição, e cada parte vira uma tarefa do
-   card (regra 41 da spec). Com mais de 1 épico, 1 card por épico.
+   épico, com o documento do épico na descrição, e cada parte vira uma tarefa "<n>. <nome>",
+   com todos os requisitos dela, sem remeter à descrição (regra 41 da spec). O padrão de
+   qualidade fica só no épico. Com mais de 1 épico, 1 card por épico.
 
 ## Antes de desenhar: o que já foi pesquisado
 

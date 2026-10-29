@@ -324,6 +324,9 @@ Decisão da redatora em 2026-10-29. Quando ela aprova o protótipo (`status: 'ap
 entrega leva o documento de requisitos, escrito pela skill `requisitos` no formato dela.
 Protótipo em revisão ainda não leva.
 
+- **O texto que o dev lê:** só o que o dev usa para construir, na skill `requisitos`, seção "O
+  texto que o dev lê" (decisão da redatora em 2026-10-29, a partir do retorno do dev). O que
+  vale para toda tela é o bloco "Padrão de qualidade" do épico, e não requisito de parte.
 - **Relevância em toda tabela de requisito** (RF, RN, RI, RNF, RS e RT), ao lado da Prioridade,
   que continua:
   - **Obrigatório:** o dev faz.
@@ -360,29 +363,45 @@ a redatora** se cria o card. Sem o sim dela, nada vai para o ENSPACE.
 
 - **O card é o épico:** 1 card na categoria `user_story` do workspace de desenvolvimento do
   produto (servidor MCP `enspace-desenvolvimento-enlighten2`).
-  - A descrição traz **todos os requisitos por extenso, de uma vez**, como requisitos do
-    desenvolvimento completo: o épico e cada parte inteira.
-  - A descrição nunca é só o resumo do épico com o link para os documentos do GitHub.
-- **As tarefas do card são as partes:** 1 tarefa por parte, na aba Tarefas do card, com os
-  requisitos daquela parte.
+  - A descrição é o documento do épico, na estrutura fixa da skill `requisitos` (decisão da
+    redatora em 2026-10-29, a partir do retorno do dev): o que é o desenvolvimento, em 2 ou 3
+    frases diretas; onde vale; o link do protótipo; fora do escopo; a tabela do que é cada
+    parte; as regras de negócio comuns; o bloco "Padrão de qualidade"; e o que está em aberto
+    entre as partes.
+  - A descrição nunca é só o link para os documentos do GitHub.
+- **As tarefas do card são as partes:** 1 tarefa por parte, na aba Tarefas do card, com o nome
+  "<n>. <nome>" ("1. Escolher e entrar").
+  - **Cada tarefa traz todos os requisitos da parte, com as tabelas, e se basta:** nada de
+    remeter à descrição, a outro documento ou a ID de outra parte. A regra de negócio comum que
+    a parte cita entra na tabela de RN da tarefa (decisão da redatora em 2026-10-29).
+  - **O padrão de qualidade não vai às tarefas:** idiomas, temas, animação, carregamento,
+    esqueleto, toast, recarregar, acessibilidade e visual do protótipo ficam só no épico, e a
+    redatora confere ao validar o épico.
   - Demanda de 1 documento só: o card leva o documento inteiro, sem tarefas.
+- **O texto que o dev lê** (skill `requisitos`, mesma seção): campo sem valor não se escreve
+  ("Depende de: nada"); o que a estrutura já mostra não se repete ("Parte 4 de 8", "o épico é
+  esta user story"); convenção, legenda repetida, nota para a redatora, Resumo e "Fora do
+  escopo" na parte ficam de fora; comportamento repetido vira 1 regra; medida, cor e texto
+  longo ficam no protótipo.
 - **Mais de 1 épico, 1 card por épico:** com 2 épicos, 2 cards `user_story`. Cada card traz na
-  descrição todos os requisitos do seu épico, e as tarefas dele são as partes daquele épico.
+  descrição o documento do seu épico, e as tarefas dele são as partes daquele épico.
 - **Na confirmação, a redatora diz** o título, o tipo, a prioridade e os outros campos do card,
   ou qual card que já existe recebe as tarefas.
   - Card que já existe: a descrição dele só muda com o ok dela.
 - **Como fazer**, com o `bin/requisitos_para_enspace.py` do `agentes-base`:
   1. `html <pasta requisitos/ ou REQUISITOS.md> <rascunho da sessão>`: gera a descrição do card e
-     a de cada tarefa, no HTML do editor da tela.
+     a de cada tarefa, no HTML do editor da tela, e confere o texto. Aviso se corrige no `.md`
+     antes de subir.
   2. O card pelo MCP (`smartCreateItem` na `user_story`), com a descrição gerada.
   3. As tarefas pela REST, com o mesmo script (`tarefas --item <id do card>`, chave pelo
      `chave_enspace.py`): a descrição de cada parte não passa pela conversa (decisão da redatora
      em 2026-10-29). O comportamento da rota está no `en-api-docs`,
-     `kanban-tarefas/kanban-tarefas-tarefas-api.md`, "Criar tarefa ligada a um item".
+     `kanban-tarefas/kanban-tarefas-tarefas-api.md`, "Criar tarefa ligada a um item". Tarefa que já
+     existe se reescreve com `atualizar --tarefa <n>=<id>`.
 - **Conferir na tela, pelo Chrome:** a aba Tarefas do card mostra as partes, e uma tarefa aberta
   mostra as tabelas. A entrega leva o link do card e o print da aba.
 - É a única escrita em produção deste agente (exceção da regra 1). Modelo: `tela-de-workspaces`,
-  `DECISOES.md`, rodada 31.
+  `DECISOES.md`, rodadas 31 e 32.
 
 ---
 
@@ -932,6 +951,7 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
 
 41. **⛔ PROTÓTIPO APROVADO VIRA CARD NO ENSPACE SÓ COM O SIM DA REDATORA.** Decisão da
     redatora em 2026-10-29. No fim do trabalho, o agente pergunta se cria o card. Com o sim, o
-    card `user_story` é o épico, com todos os requisitos por extenso na descrição (nunca só o
-    link para o GitHub), e cada parte vira uma tarefa do card. Com mais de 1 épico, 1 card por
-    épico. Detalhe na Fase 5, "Protótipo aprovado: o card no ENSPACE".
+    card `user_story` é o épico: a descrição é o documento do épico (o que é, as partes, o
+    protótipo e o padrão de qualidade; nunca só o link para o GitHub), e cada parte vira uma
+    tarefa "<n>. <nome>" que traz todos os requisitos dela e se basta. Com mais de 1 épico, 1
+    card por épico. Detalhe na Fase 5, "Protótipo aprovado: o card no ENSPACE".
