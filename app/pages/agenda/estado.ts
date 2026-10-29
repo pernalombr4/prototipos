@@ -11,9 +11,13 @@
  * Rodada 2 (29/10/2026): a permissão decide o que aparece (a Agenda não oferece o gesto que vai falhar), o fluxo no
  * campo de data pede confirmação e perde o Desfazer, a criação leva ao formulário quando faltam obrigatórios, e o
  * vínculo pode falhar (`falharVinculo`, do andaime) para mostrar o "Ligar de novo".
+ *
+ * Ajuste da rodada 2: as tarefas atribuídas a cada pessoa entram na Agenda pelo prazo, por uma configuração do
+ * workspace (`tarefasNaAgenda`, ligada por padrão). O painel "Para agendar" virou "Sem data": só as tarefas que não têm
+ * prazo e por isso não aparecem na grade.
  */
 import type { CorDoCalendario, EventoDoCalendario, Lugar } from '~/components/ux/geometriaDoCalendario'
-import { AGORA, HOJE, hora, inicioDaSemana, somarDias } from './datas'
+import { AGORA, HOJE, hora, somarDias } from './datas'
 import type { Cor, ItemDaAgenda, Reuniao, SlugDaCategoria, TarefaDaAgenda } from './mocks'
 import { blocosIniciais, categoriaPorSlug, EU, itens, reunioesIniciais, tarefasIniciais } from './mocks'
 
@@ -51,6 +55,8 @@ const inicial = () => ({
   fontes: fontesIniciais(),
   camadas: { tarefas: true, rapidas: true, contratos: true, processos: true, clientes: false, chamados: false, meu: true, juridico: true } as Record<Camada, boolean>,
   responsaveis: [EU.id] as number[],
+  /** Configuração do workspace: as tarefas atribuídas a cada pessoa entram na Agenda dela pelo prazo. */
+  tarefasNaAgenda: true,
   /** "Agendar reunião" no painel do item: a próxima criação já nasce ligada a este item. */
   agendandoPara: null as number | null,
   /** Andaime: a próxima reunião criada já ligada a um item perde o vínculo (a 2ª chamada falha). */
@@ -134,7 +140,7 @@ export const eventos = computed<EventoDoCalendario[]>(() => {
   const c = estado.camadas
   const lista: EventoDoCalendario[] = []
 
-  for (const t of estado.tarefas) {
+  for (const t of estado.tarefasNaAgenda ? estado.tarefas : []) {
     const camada = t.origem === 'fluxo' ? 'tarefas' : 'rapidas'
     if (!t.due_date || !c[camada] || !visivel(t.assigned_to)) continue
     const s = situacao(t)
@@ -153,7 +159,7 @@ export const eventos = computed<EventoDoCalendario[]>(() => {
     })
   }
 
-  if (c.tarefas) {
+  if (c.tarefas && estado.tarefasNaAgenda) {
     for (const b of estado.blocos) {
       const t = tarefa(b.tarefaId)
       if (!t || !visivel(t.assigned_to)) continue
@@ -182,18 +188,11 @@ export const eventos = computed<EventoDoCalendario[]>(() => {
   return lista
 })
 
-/* ---------------- o que falta agendar ---------------- */
-export const paraAgendar = computed(() => {
-  if (estado.cenario === 'vazia') return { atrasadas: [], semData: [], semTempo: [] }
-  const minhas = estado.tarefas.filter(t => visivel(t.assigned_to) && t.status !== 'completed')
-  const ini = inicioDaSemana(estado.data)
-  const fim = somarDias(ini, 6)
-  return {
-    atrasadas: minhas.filter(t => situacao(t) === 'atrasada'),
-    semData: minhas.filter(t => !t.due_date),
-    semTempo: minhas.filter(t => temSla(t) && situacao(t) !== 'atrasada' && diaDe(t.due_date!) >= ini && diaDe(t.due_date!) <= fim && !blocosDa(t.id).length),
-  }
-})
+/* ---------------- tarefas sem data ---------------- */
+/** As tarefas da pessoa sem prazo: não têm lugar na grade, então ficam no painel "Sem data". */
+export const semData = computed(() => estado.cenario === 'vazia' || !estado.tarefasNaAgenda
+  ? []
+  : estado.tarefas.filter(t => !t.due_date && t.status !== 'completed' && visivel(t.assigned_to)))
 
 /* ---------------- gestos ---------------- */
 let sequencia = 9000

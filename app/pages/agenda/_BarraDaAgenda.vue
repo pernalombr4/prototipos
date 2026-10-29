@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /**
- * Barra do topo da Agenda: Hoje, setas e período à esquerda; vista, Para agendar, Configurar e Novo à direita.
+ * Barra do topo da Agenda: Hoje, setas e período à esquerda; vista, Sem data, Configurar e Novo à direita. "Sem data"
+ * só aparece com as tarefas na Agenda e mostra quantas tarefas da pessoa não têm prazo.
  * É o esqueleto do Outlook, do Google e do ClickUp (PESQUISA.md). "Novo" sai do "+" que o BENI cobria e vai para o
  * topo; "Configurar" continua no topo, onde o develop já tem os botões de configuração.
  */
@@ -49,9 +50,9 @@ const temHoje = computed(() => {
           @click="estado.vista = v"
         />
       </UFieldGroup>
-      <UChip :text="pendentes" :show="pendentes > 0" color="error" size="2xl">
+      <UChip v-if="estado.tarefasNaAgenda" :text="pendentes" :show="pendentes > 0" color="neutral" size="2xl">
         <UButton
-          icon="i-lucide-list-todo"
+          icon="i-lucide-calendar-off"
           :label="t.barra.paraAgendar"
           color="neutral"
           :variant="painel ? 'subtle' : 'outline'"

@@ -250,6 +250,28 @@ categoria some da criação. Onde a pessoa espera a ação e ela não está, uma
 | Privacidade | Evento particular do Outlook não se liga a item e não entra na sugestão. Ao ligar, a nota diz o que quem tem acesso ao item passa a ver |
 | Outlook desconectado | Reunião some da criação; no item, as reuniões ligadas continuam à vista e um aviso leva a Conectar |
 
+### Mudou: tarefas na Agenda pelo prazo, e o painel "Para agendar" virou "Sem data"
+
+Pedido da redatora: "tem como configurar pra automaticamente toda TAREFA aparecer na agenda ja? uma config global, no
+caso, usando a due date da tarefa? no caso \"toda tarefa atribuida a mim\"". Ela também perguntou se o painel "Para
+agendar" fazia sentido.
+
+| O que | Antes | Agora |
+|---|---|---|
+| Configuração | Só categorias, Outlook e horário | Bloco **Tarefas** no topo: "Mostrar as tarefas atribuídas a cada pessoa", ligado por padrão, para o workspace inteiro. Tarefas do fluxo e tarefas rápidas entram na Agenda de quem as recebeu, no dia e na hora do prazo |
+| Desligado | Não existia | Somem da grade as tarefas e os blocos, as camadas Tarefas e Tarefas rápidas da lateral e o botão "Sem data" |
+| Cada pessoa | Camadas na lateral | Continua: oculta Tarefas ou Tarefas rápidas na lateral, sem mudar a configuração |
+| Painel | "Para agendar", aberto, com Atrasadas, "Vencem nesta semana, sem tempo reservado" e Sem data | **"Tarefas sem data"**, fechado por padrão. O botão "Sem data" da barra mostra quantas são e abre o painel. Arrastar o cartão para a grade dá o prazo |
+
+Por que o painel encolheu:
+- ele saiu da pesquisa de mercado (ClickUp, Jira, Airtable), não da demanda;
+- Atrasadas repetia a grade: a tarefa atrasada já aparece no dia do prazo, com o alerta;
+- "sem tempo reservado" cobrava reservar tempo, que é opção da tarefa (aba Agenda do painel), não pendência;
+- sobra o que a grade não mostra: a tarefa sem prazo.
+
+Os prints `criacao-com-obrigatorios.png` e `reuniao-de-outra-pessoa.png` são de antes do ajuste e mostram o painel
+antigo aberto; o que eles provam não muda.
+
 ### Fronteira
 
 - **Muda:** a pasta Agenda na tela do item, a aba Agenda no painel da tarefa, o formulário completo na criação, os
@@ -285,6 +307,8 @@ vínculo". O atalho mostra todas as pessoas quando o filtro esconde o evento.
 - Ligar a reunião sem sair do Outlook pede um suplemento do Outlook (o caminho do HubSpot e do Salesforce, fora da
   pesquisa): entra no roteiro?
 - O fluxo com gatilho em campo de data roda quando a data muda pela Agenda, ou só pelo formulário do item?
+- A configuração Tarefas leva só as tarefas atribuídas à pessoa. A tarefa atribuída a um grupo de que ela faz parte, ou
+  compartilhada com ela, também entra na Agenda dela?
 
 ### Ver
 
@@ -296,3 +320,5 @@ vínculo". O atalho mostra todas as pessoas quando o filtro esconde o evento.
 | ![](evidencias/formulario-do-item.png) | O formulário completo, com a data vinda da Agenda e os obrigatórios cobrados |
 | ![](evidencias/fluxo-na-data.png) | A confirmação antes de mudar a data que dispara o fluxo |
 | ![](evidencias/reuniao-de-outra-pessoa.png) | Reunião de outra pessoa: sem mudar o horário, com a resposta ao convite |
+| ![](evidencias/configuracao-tarefas.png) | O bloco Tarefas no topo da Configuração, ligado por padrão |
+| ![](evidencias/painel-sem-data.png) | O painel Tarefas sem data, aberto pelo botão da barra, com as 3 tarefas sem prazo |

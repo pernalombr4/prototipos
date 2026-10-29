@@ -18,7 +18,7 @@ import type { Lugar } from '~/components/ux/geometriaDoCalendario'
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { textos } from './textos'
 import { AGORA, HOJE, diaCurto, diaDaSemana, hora } from './datas'
-import { type Cenario, type Criado, type Rascunho, type TipoDeCriacao, aplicar, diaDe, escolherCenario, estado, eventos, fluxoDoCampo, foto, item, minutoDe, paraAgendar, reiniciar, restaurar, reuniao } from './estado'
+import { type Cenario, type Criado, type Rascunho, type TipoDeCriacao, aplicar, diaDe, escolherCenario, estado, eventos, fluxoDoCampo, foto, item, minutoDe, reiniciar, restaurar, reuniao, semData } from './estado'
 import { HORARIO, categoriaPorSlug, feriados } from './mocks'
 import { avisarReuniao } from './avisos'
 import CascaDaAgenda from './_CascaDaAgenda.vue'
@@ -55,7 +55,7 @@ const toast = useToast()
 const naoUtil = (d: string) => diaDaSemana(d) === 0 || diaDaSemana(d) === 6 || feriados.includes(d)
 const rotuloDoDia = (d: string) => feriados.includes(d) ? t.value.grade.feriado : null
 const rotulos = computed(() => ({ diaInteiro: t.value.grade.diaInteiro, mais: t.value.grade.mais, novo: t.value.grade.novo, intervalo: t.value.grade.intervalo }))
-const pendentes = computed(() => paraAgendar.value.atrasadas.length + paraAgendar.value.semData.length + paraAgendar.value.semTempo.length)
+const pendentes = computed(() => semData.value.length)
 const vazio = computed(() => !eventos.value.length && estado.cenario !== 'carregando' && estado.vista !== 'lista')
 
 /* ---------- popovers: detalhe e criação, ancorados no evento ou no horário ---------- */
@@ -171,7 +171,7 @@ function irParaDia(dia: string) {
   Object.assign(estado, { data: dia, vista: estado.vista === 'dia' ? 'dia' : 'semana' })
 }
 const configAberta = ref(false)
-const paraAgendarAberto = ref(true)
+const paraAgendarAberto = ref(false)
 
 function abrirItem(id: number, aba: typeof painel.aba) {
   detalhe.value = null
@@ -345,7 +345,7 @@ const atalhos = computed<DropdownMenuItem[][]>(() => {
           </div>
 
           <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="translate-x-4 opacity-0" leave-active-class="transition duration-150 ease-in" leave-to-class="translate-x-4 opacity-0">
-            <ParaAgendar v-if="paraAgendarAberto" :t="t" :locale="locale" class="hidden lg:flex" @abrir="(chave, el) => abrir(chave, { getBoundingClientRect: () => el.getBoundingClientRect() })" @fechar="paraAgendarAberto = false" />
+            <ParaAgendar v-if="paraAgendarAberto && estado.tarefasNaAgenda" :t="t" :locale="locale" class="hidden lg:flex" @abrir="(chave, el) => abrir(chave, { getBoundingClientRect: () => el.getBoundingClientRect() })" @fechar="paraAgendarAberto = false" />
           </Transition>
         </div>
       </div>

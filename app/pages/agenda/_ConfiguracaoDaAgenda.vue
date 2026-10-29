@@ -3,6 +3,9 @@
  * Configuração da Agenda, legível para quem não conhece o modelo de dados (A5 da síntese, T8 do briefing): a
  * categoria pelo nome, o campo pelo rótulo, hora de início e de fim opcionais e a cor numa paleta do tema, no lugar
  * de "Tipo ID: 1314 - created_at - display" e do hexadecimal. Salvar atualiza a grade sem recarregar a tela.
+ *
+ * Ajuste da rodada 2: o bloco Tarefas liga, para o workspace inteiro, as tarefas atribuídas a cada pessoa na Agenda
+ * dela, pelo prazo. Vem ligado.
  */
 import type { CorDoCalendario } from '~/components/ux/geometriaDoCalendario'
 import { barra } from '~/components/ux/geometriaDoCalendario'
@@ -18,8 +21,11 @@ const SEM = 'sem-hora'
 const PALETA: Cor[] = ['primary', 'info', 'success', 'warning', 'neutral']
 
 const rascunho = ref<Fonte[]>([])
+const tarefas = ref(true)
 watch(aberto, (a) => {
-  if (a) rascunho.value = structuredClone(toRaw(estado.fontes))
+  if (!a) return
+  rascunho.value = structuredClone(toRaw(estado.fontes))
+  tarefas.value = estado.tarefasNaAgenda
 })
 
 const linhas = computed(() => categorias.map(c => ({
@@ -43,6 +49,8 @@ function salvar() {
       if (f.ativa && !antes?.ativa) estado.camadas[f.slug] = true
     }
     estado.fontes = rascunho.value
+    if (tarefas.value && !estado.tarefasNaAgenda) Object.assign(estado.camadas, { tarefas: true, rapidas: true })
+    estado.tarefasNaAgenda = tarefas.value
     salvando.value = false
     aberto.value = false
     emit('salvo')
@@ -56,6 +64,19 @@ const corDe = (c: CorDoCalendario) => barra[c]
   <USlideover v-model:open="aberto" :title="t.config.titulo" :description="t.config.descricao" :ui="{ content: 'max-w-lg', footer: 'justify-end' }">
     <template #body>
       <div class="flex flex-col gap-6">
+        <!-- Tarefas -->
+        <section class="flex flex-col gap-3">
+          <h3 class="text-sm font-semibold text-highlighted">{{ t.config.tarefas }}</h3>
+          <div class="flex items-start gap-3 rounded-lg border border-default p-3 transition-colors" :class="tarefas && 'bg-elevated/40'">
+            <UIcon name="i-lucide-flag" class="mt-0.5 size-4 text-muted" />
+            <div class="flex-1">
+              <p class="text-sm font-medium text-highlighted">{{ t.config.tarefasLigadas }}</p>
+              <p class="text-xs text-muted">{{ t.config.tarefasTexto }}</p>
+            </div>
+            <USwitch v-model="tarefas" :aria-label="t.config.tarefasLigadas" />
+          </div>
+        </section>
+
         <!-- Fontes do ENSPACE -->
         <section class="flex flex-col gap-3">
           <div>

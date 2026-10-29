@@ -25,8 +25,9 @@ const naSelecao = (d: string) => {
 
 /* ---------- camadas ---------- */
 const enspace = computed<{ id: Camada, rotulo: string, cor: CorDoCalendario }[]>(() => [
-  { id: 'tarefas', rotulo: props.t.lateral.minhasTarefas, cor: 'primary' },
-  { id: 'rapidas', rotulo: props.t.lateral.rapidas, cor: 'neutral' },
+  ...(estado.tarefasNaAgenda
+    ? [{ id: 'tarefas', rotulo: props.t.lateral.minhasTarefas, cor: 'primary' }, { id: 'rapidas', rotulo: props.t.lateral.rapidas, cor: 'neutral' }] as const
+    : []),
   ...fontesAtivas.value.map(f => ({ id: f.slug, rotulo: categoriaPorSlug(f.slug).name, cor: f.cor })),
 ])
 const outlook = computed(() => (['meu', 'juridico'] as const).map(id => ({ id, rotulo: props.t.lateral.calendariosDoOutlook[id], cor: CORES_DO_OUTLOOK[id] })))
