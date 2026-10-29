@@ -134,6 +134,29 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 32 · 2026-10-29
+- **Pedido (literal):** "o que ta em vermelho nao precisa ser escrito. só enche o texto e dificulda a leitura do dev";
+  "o texto da tarefa deve carregar todos os requisitos em si proprio"; "a story vai ser o doc de epico mesmo"; "o
+  titulo da task o dev acha que "parte 1 de 8" fica muito grande. pode ser "1.", "2.", "3."" (retorno do dev sobre as
+  tarefas da rodada 31)
+- **Mudou (requisitos):** o épico e as 8 partes reescritos no formato novo da skill `requisitos`
+  - cada parte abre por Objetivo, Depende de (só quando depende), Onde vale e Protótipo; título "<n>. <nome>"
+  - saíram da parte: convenção, legenda da Relevância, link para o épico, Fora do escopo, Resumo e as tabelas de RI
+    que só repetiam o RF ("a API deve guardar..."); a licença pelo `type` virou RF031, e o nome de quem convidou, P004
+  - saiu o que o padrão de qualidade cobre: toast, carregamento, esqueleto, erro com "Tentar de novo", animação,
+    nome acessível, medida e cor (RF009, RF023, RF027, RF029, RF034, RF035, RF041, RF042, RF044, RF219, RF305, RF306,
+    RF604, RF701; RNF901 a RNF908 e RS901 a RS905 do épico; RS001 entrou no RF036). A numeração fica com o buraco
+  - nenhum requisito cita ID de outra parte: a coisa se diz pelo nome
+  - o épico: o que é, as partes (com a ordem), RN comuns, o bloco "Padrão de qualidade" e o que está em aberto; saíram
+    a convenção dos IDs, a nota "proposta do agente" e a correspondência R1 a R126 (fica no git, commit `33d8a60`)
+- **Mudou (ENSPACE):** a descrição do card `USEDB9945FD15ED4FA29BECA30882A4E` (`descricao_da_user_story`) é o épico, de
+  45 KB para 9,6 KB; as 8 tarefas (24373 a 24380) ganham o nome "<n>. <nome>" e o texto novo, com as RN comuns que
+  citam. A descrição anterior está guardada fora do repositório, na cópia de origem da manutenção
+- **Fronteira:** muda a documentação e o ENSPACE; não muda nenhuma tela do protótipo
+- **Virou regra:** skill `requisitos`, "O texto que o dev lê" e "Padrão de qualidade"; regra 41 da spec
+- **Ver:** `evidencias/rodada32-tarefas-com-nome-novo.png`, `evidencias/rodada32-tarefa-4-se-basta.png`,
+  `evidencias/rodada32-descricao-do-card.png`
+
 ### Rodada 31 · 2026-10-29
 - **Pedido (literal):** "busque esse card no enspace e insira na aba de tarefas dessa user story os seus fragmentos. é
   como se a propria user_story fosse o epico e as tarefas dentro dela fossem as stories, as partes a fazer"
