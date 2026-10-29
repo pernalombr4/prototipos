@@ -163,6 +163,11 @@ Rodada antes de entregar, e o que ficou de fora:
   identificação") e 24389 ("10. Criar com caso de uso") do card `USEDB9945FD15ED4FA29BECA30882A4E` foram reescritas
   pelo `requisitos_para_enspace.py atualizar`; a leitura pelo MCP confere o nome e as tabelas novas. A descrição do
   card não mudou: ainda tem o texto antigo das linhas 9 e 10.
+- **Mudou (ENSPACE, depois):** a pedido da redatora ("atualize o card no enspace e as tarefas do item com base na ultima
+  atualização dos documentos de requisitos"), a descrição do card ganhou o `epico.md` desta rodada (o modal em 2
+  passos e as linhas 9 e 10), pelo MCP; as tarefas 24388 e 24389 foram gravadas de novo com o mesmo texto. As 10
+  tarefas conferem com os documentos.
+- **Ver:** `evidencias/rodada35-tarefa-10-no-card.png`
 
 ### Rodada 34 · 2026-10-29
 - **Pedido (literal):** "Dividir a parte 7"
