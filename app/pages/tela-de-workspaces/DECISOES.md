@@ -134,6 +134,30 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 33 · 2026-10-29
+- **Pedido (literal):** "aplica a divisao, mas a regra de corte é menos sobre tamanho e mais sobre logica. tem que
+  levar em consideraçao o tamanho, mas o corte deve continuar sendo, em primeiro lugar, funcional/logico"
+- **Por que dividir a parte 1:** 37 linhas de requisito contra a mediana de 16,5, em 7 seções; o objetivo dizia "Usa só
+  o que a API já tem", e a P004 (o nome de quem convidou) pode pedir obra no back-end, segurando a base de que as partes
+  2 a 6 dependiam
+- **Mudou (requisitos):**
+  - "1. Escolher e entrar" fica com cabeçalho, barra, card, lista e a tela sem workspace (19 linhas)
+  - "2. Buscar e aceitar convite" nasce com a busca, o convite no topo, no card e na lista, e a P004 (21 linhas); busca
+    e convite ficam juntos porque o RF021 os liga
+  - o convite que estava na lista da parte 1 foi para a parte 2: RF039 inteiro, o selo (RF045, saído do RF037), a
+    descrição "{quem} convidou você" (RF046, saída do RF038) e o clique na linha (RF047, saído do critério do RF040)
+  - a contagem da aba "Todos" (RF024) perdeu as 2 condições que dependem da parte 2: "sem o filtro da busca" virou
+    RF048, e "com os convites", RF049
+  - as partes 2 a 8 viraram 3 a 9; dependem da nova parte 2 as de recentes, ocultos e agrupar, que usam a busca. Os IDs
+    não mudaram
+- **Mudou (ENSPACE):** as tarefas 24373 a 24380 seguem a nova ordem (1 a 8), a 24388 é a "9. Criar com caso de uso", e
+  a descrição do card ganhou a tabela das partes nova
+- **Fronteira:** muda a documentação e o ENSPACE; não muda nenhuma tela do protótipo
+- **Virou regra:** skill `requisitos`, "Corte das partes": primeiro a lógica (1 funcionalidade por parte, base mínima,
+  risco isolado), e o tamanho só pede outra leitura (sinal do `conferir_requisitos.py`)
+- **Ficou para a redatora:** o sinal acusa a parte 7, Agrupar e etiquetas (29 linhas, mediana 17)
+- **Ver:** `evidencias/rodada33-tarefas-renumeradas.png`, `evidencias/rodada33-tarefa-2-buscar-e-aceitar-convite.png`
+
 ### Rodada 32 · 2026-10-29
 - **Pedido (literal):** "o que ta em vermelho nao precisa ser escrito. só enche o texto e dificulda a leitura do dev";
   "o texto da tarefa deve carregar todos os requisitos em si proprio"; "a story vai ser o doc de epico mesmo"; "o

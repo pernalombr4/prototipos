@@ -1,4 +1,4 @@
-# 7. Criar workspace, passo 1
+# 8. Criar workspace, passo 1
 
 **Objetivo:** a pessoa cria um workspace decidindo 1 coisa por vez: só o nome é obrigatório, o ícone deixa de ser
 obrigatório, e o logo da empresa entra por upload.
@@ -49,4 +49,4 @@ um workspace" da tela sem workspace.
 
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
-| P601 | Se esta parte sair antes de "8. Criar com caso de uso", o modal tem 1 passo só, com o botão de criar no lugar de "Continuar →" e sem o progresso? | produto | Muda RF603 e RF612 |
+| P601 | Se esta parte sair antes de "9. Criar com caso de uso", o modal tem 1 passo só, com o botão de criar no lugar de "Continuar →" e sem o progresso? | produto | Muda RF603 e RF612 |

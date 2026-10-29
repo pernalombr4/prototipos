@@ -1,9 +1,9 @@
-# 3. Recentes e favoritos
+# 4. Recentes e favoritos
 
 **Objetivo:** a pessoa volta ao workspace de sempre sem procurar: o bloco do topo mostra o último acessado, e as abas
 "Favoritos" e "Recentes" e a ordem por acesso levam ao que ela usa.
 
-**Depende de:** 1. Escolher e entrar.
+**Depende de:** 1. Escolher e entrar; 2. Buscar e aceitar convite.
 
 **Onde vale:** a tela `/workspaces`.
 

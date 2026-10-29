@@ -1,4 +1,4 @@
-# 2. Menu "⋯", sair e excluir
+# 3. Menu "⋯", sair e excluir
 
 **Objetivo:** cada workspace da lista ganha o menu "⋯", com sair do workspace e, para o proprietário, excluir o
 workspace, sem a pessoa precisar entrar nele.

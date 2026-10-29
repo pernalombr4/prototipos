@@ -1,9 +1,9 @@
-# 6. Agrupar e etiquetas
+# 7. Agrupar e etiquetas
 
 **Objetivo:** a pessoa com muitos workspaces os agrupa por licença ou por etiquetas que só ela vê, e recolhe o grupo
 que não está usando.
 
-**Depende de:** 2. Menu "⋯", sair e excluir.
+**Depende de:** 2. Buscar e aceitar convite; 3. Menu "⋯", sair e excluir.
 
 **Onde vale:** a barra da lista, o card, a lista e o menu "⋯" da tela `/workspaces`, e os modais de etiqueta.
 

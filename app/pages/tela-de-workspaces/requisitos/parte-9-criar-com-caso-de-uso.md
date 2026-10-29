@@ -1,9 +1,9 @@
-# 8. Criar com caso de uso
+# 9. Criar com caso de uso
 
 **Objetivo:** ao criar o workspace, a pessoa começa de um caso de uso que já traz menus, categorias e status, ou
 escolhe começar do zero.
 
-**Depende de:** 7. Criar workspace, passo 1; o catálogo de casos de uso com prints.
+**Depende de:** 8. Criar workspace, passo 1; o catálogo de casos de uso com prints.
 
 **Onde vale:** o passo 2 do modal "Criar workspace".
 

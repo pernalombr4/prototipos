@@ -1,9 +1,9 @@
-# 4. Workspace padrão
+# 5. Workspace padrão
 
 **Objetivo:** a pessoa que trabalha num workspace só escolhe esse workspace como padrão e passa a cair nele direto
 depois do login, sem passar pela tela de workspaces.
 
-**Depende de:** 2. Menu "⋯", sair e excluir; 3. Recentes e favoritos.
+**Depende de:** 3. Menu "⋯", sair e excluir; 4. Recentes e favoritos.
 
 **Onde vale:** o bloco do topo e o menu "⋯" da tela `/workspaces`, e o login.
 

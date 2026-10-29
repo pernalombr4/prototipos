@@ -1,8 +1,8 @@
-# 5. Ocultos
+# 6. Ocultos
 
 **Objetivo:** a pessoa tira da lista o workspace que não usa sem perder o acesso, e o devolve quando quiser.
 
-**Depende de:** 2. Menu "⋯", sair e excluir.
+**Depende de:** 2. Buscar e aceitar convite; 3. Menu "⋯", sair e excluir.
 
 **Onde vale:** o menu "⋯", a barra da lista e o fim da lista da tela `/workspaces`.
 
