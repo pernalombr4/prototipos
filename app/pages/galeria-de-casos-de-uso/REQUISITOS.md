@@ -173,7 +173,7 @@ protótipo `migracao-de-workspace`.
 | RNF002 | Cada controle sem texto visível (setas, pontos da galeria de imagens, fechar) deve ter nome para o leitor de tela. | O leitor de tela lê "Imagem 2 de 4" no 2º ponto. | Importante |
 | RS001 | Cada texto da galeria deve existir em português, inglês e espanhol. Imposta por: spec dos protótipos, regra 35. | Trocar o idioma troca todos os textos da galeria. | Essencial |
 | RS002 | O menu de Áreas deve ser o `USelectMenu` do Nuxt UI em modo múltiplo, com "Selecionar tudo" e "Limpar" no slot `content-bottom`. Imposta por: Mikaela, rodada 2 de 20/10/2026. | A lista de Áreas é o componente do Nuxt UI, sem botão solto entre a busca e as opções. | Importante |
-| RS003 | O detalhe e os cartões devem usar as imagens cadastradas com cada caso, e não as miniaturas desenhadas do protótipo. Imposta por: protótipo `tela-de-workspaces`, requisito R107a. | Nenhum cartão mostra o desenho do protótipo. | Essencial |
+| RS003 | O detalhe e os cartões devem usar as imagens cadastradas com cada caso, e não as miniaturas desenhadas do protótipo. Imposta por: protótipo `tela-de-workspaces`, requisito RF710 (antes R107a). | Nenhum cartão mostra o desenho do protótipo. | Essencial |
 
 ## Em aberto
 

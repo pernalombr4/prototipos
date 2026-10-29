@@ -134,6 +134,18 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 30 · 2026-10-29
+- **Pedido (literal):** "como voce fragmentaria se fosse escrever como um épico?"; depois da análise, "Pode reescrever"
+- **Mudou:** o `REQUISITOS.md` (R1 a R126) vira o épico `requisitos/epico.md`, com 8 partes
+  - partes: escolher e entrar; menu, sair e excluir; recentes e favoritos; workspace padrão; ocultos; agrupar e
+    etiquetas; criar (passo 1); criar com caso de uso
+  - cada tabela ganha Prioridade e Relevância, as 2 propostas pelo agente
+  - o épico guarda as regras comuns, os requisitos da tela inteira e a correspondência de cada R antigo com o ID novo
+  - o filtro "Áreas" da Central segue a rodada 29 (RF704 e RF716), que o documento antigo não tinha
+- **Fronteira:** muda só a documentação; não muda nenhuma tela do protótipo
+- **Não deu:** juntar num lugar só os requisitos da Central de casos de uso, que se repetem em 3 protótipos. Por quê:
+  pede decisão de produto (P902 do épico)
+
 ### Rodada 29 · 2026-10-20
 - **Pedido (literal):** "aplica o mesmo menu de áreas no menu-lateral e tela-de-workspaces e poed commitar e dar push nesses 2"
 - **Mudou:** o filtro "Áreas" da Central deixa de ser um popover montado à mão e passa a ser o `USelectMenu` múltiplo, igual ao da `galeria-de-casos-de-uso` (rodada 2 de lá, onde ela achou o "Selecionar tudo" "um botao aleatorio no meio de algo que é um dropdown")

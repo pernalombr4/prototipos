@@ -105,7 +105,7 @@ receita, não a fonte: a rotina mora fora do repositório, e editar o arquivo n�
 
 | Protótipo | Demanda | Status |
 |---|---|---|
-| [Tela de entrada (Workspaces)](app/pages/tela-de-workspaces/) | Fazer a pessoa entender que é uma tela de escolha, e não o lugar onde se abre chamado | em revisão |
+| [Tela de entrada (Workspaces)](app/pages/tela-de-workspaces/) | Fazer a pessoa entender que é uma tela de escolha, e não o lugar onde se abre chamado. Requisitos em épico de 8 partes, em `requisitos/epico.md` | aprovado |
 | [Configurações do Sistema](app/pages/configuracoes-do-sistema/) | "Não consigo me encontrar em /settings/system" — abas desorganizadas, calendário em MVP, notificações que ninguém entende, cobrança pobre e nenhuma ligação com a documentação | em revisão |
 | [Menu lateral em dois níveis](app/pages/menu-lateral/) | "O menu do enspace na lateral esquerda é muito cheio e confuso. Se eu tiver muitas categorias então piorou" — 36 linhas em 3 níveis medidas no develop, 19 delas de administração | em revisão |
 | [Seletor de produto na doc](app/pages/seletor-de-produto-na-doc/) | "como temos subprodutos, ela tem que ter um dropdown pra selecionar o produto que ta querendo ver naquela doc" — ENSPACE, Word Plugin e Beni App, no desenho do seletor de versão do Nuxt docs | implementado |
