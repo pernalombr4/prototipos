@@ -149,7 +149,13 @@ Rodada antes de entregar, e o que ficou de fora:
   - a relevância diferente de Obrigatório fica no fim, entre parênteses: "(desejável)";
   - regra de negócio e pergunta em aberto: `<ID> <texto>`, sem caixa; a pergunta leva "(quem responde: …)";
   - as 3 tabelas de decisão (opções de ordenar e texto do último acesso) continuam tabela;
-  - os títulos das seções perdem o "(RF)", e o texto de cada tarefa cai para cerca de metade.
+  - os títulos das seções perdem o "(RF)", e o texto de cada tarefa cai para cerca de metade;
+  - 2 parágrafos seguidos levam 1 linha em branco entre eles, o parágrafo vazio `<p></p>` do editor (regra da
+    redatora, com print: "tem que pular uma linhazinha quando tiver fazendo quebra de paragrafo, sempre"). Os textos
+    das 10 partes passam no lint de escrita sem aviso.
+- **Fora deste repositório, pendente:** a regra da linha em branco no `agentes-base` (skill `manutencao-estrutural`)
+  e o formato da lista de marcar no `en-api-docs`. Este agente não escreve lá, e a sessão aberta para isso foi
+  barrada pela permissão do modo automático.
 - **Não mudou:** os `.md` de `requisitos/` continuam em tabela; a descrição do card também.
 - **Em teste:** vira regra só se a redatora aprovar o resultado. A conversão é um script da sessão sobre o HTML do
   `requisitos_para_enspace.py html`.
