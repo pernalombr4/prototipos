@@ -31,6 +31,9 @@ se quebram. Este arquivo só cobre a operação neste repositório — em qualqu
 5. Commitar: `[PROTO] <slug> — rodada N — <o que mudou>`.
 6. Aprovado: o documento de requisitos pela skill `requisitos`, com a coluna Relevância e, se
    a demanda é grande, em épico (regra 40 da spec).
+7. No fim, **confirmar com a redatora** se cria o card no ENSPACE: o card `user_story` é o
+   épico, com todos os requisitos por extenso na descrição, e cada parte vira uma tarefa do
+   card (regra 41 da spec).
 
 ## Antes de desenhar: o que já foi pesquisado
 
@@ -71,6 +74,7 @@ Isso não tem exceção nem versão temporária. A regra inteira está na **Part
   de `config/tokens.example.md`, que diz de onde vem cada valor. **Nunca commitar credencial:
   este repositório é público.**
 - **Ambiente do produto: develop, sempre** (`BASE_URL` do `config/tokens.md`). Nunca produção.
+  Exceção única: o card do protótipo aprovado, com o sim da redatora (regra 41 da spec).
 - **Exploração: só no workspace de exploração** (`WORKSPACE_EXPLORACAO` / `URL_EXPLORACAO`),
   entrando pela tela de configurações do sistema. Nunca em outro workspace — os demais têm dado
   de gente de verdade.
