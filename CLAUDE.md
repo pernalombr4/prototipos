@@ -29,6 +29,8 @@ se quebram. Este arquivo só cobre a operação neste repositório — em qualqu
 3. Rodar as cinco fases na ordem: demanda → develop → pesquisa → protótipo → iteração.
 4. Subir o protótipo, mandar o link e o print.
 5. Commitar: `[PROTO] <slug> — rodada N — <o que mudou>`.
+6. Aprovado: o documento de requisitos pela skill `requisitos`, com a coluna Relevância e, se
+   a demanda é grande, em épico (regra 40 da spec).
 
 ## Antes de desenhar: o que já foi pesquisado
 

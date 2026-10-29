@@ -318,6 +318,34 @@ O histórico da depuração (tentativas, medições intermediárias, "da terceir
 - **Toda entrega termina com o link para ver e um print.** Entrega sem lugar para renderizar
   não é entrega.
 
+#### Protótipo aprovado: o documento de requisitos
+
+Decisão da redatora em 2026-10-29. Quando ela aprova o protótipo (`status: 'aprovado'`), a
+entrega leva o documento de requisitos, escrito pela skill `requisitos` no formato dela.
+Protótipo em revisão ainda não leva.
+
+- **Relevância em toda tabela de requisito** (RF, RN, RI, RNF, RS e RT), ao lado da Prioridade,
+  que continua:
+  - **Obrigatório:** o dev faz.
+  - **Desejável:** o dev faz; se achar melhor não fazer, conversa com produtos antes.
+  - **Opcional:** o dev pode não fazer quando o esforço é grande para o ganho.
+
+  A relevância que a redatora não disse é proposta do agente: a entrega lista as linhas
+  Desejável e Opcional para ela confirmar.
+- **Épico, quando cabe:** funcionalidade nova ou melhoria muito grande, que se divide em partes
+  que o dev entrega e o QA confere em separado.
+  - O documento do épico explica o épico e linka o documento de cada parte.
+  - Cada funcionalidade, ou agrupamento de funcionalidades que faz sentido junto, é 1 documento
+    de requisitos completo.
+  - Demanda de 1 parte tem 1 documento só, sem épico.
+- **Onde:** na pasta do protótipo.
+  - 1 documento: `REQUISITOS.md`.
+  - Épico: `requisitos/epico.md` e 1 arquivo por parte, na mesma pasta `requisitos/`.
+- **Antes de entregar:** a conferência da skill `requisitos` (passo 5) em cada documento; no
+  épico, também no `epico.md`, que confere os links das partes e o ID repetido entre elas.
+- Os documentos de antes de 2026-10-29 ficam como estão. O `menu-lateral/requisitos/` é o
+  modelo de épico anterior à regra (o `fases.md` faz o papel do `epico.md`).
+
 ---
 
 ### Antes de encerrar: limpeza do que ficou na máquina
@@ -616,6 +644,8 @@ app/pages/<slug>/
 ├── BRIEFING.md          demanda + o que o develop faz hoje (Fases 1 e 2)
 ├── PESQUISA.md          as 5 referências + as extras (Fase 3)
 ├── DECISOES.md          o que foi proposto, por quê, o que é maquete, as iterações
+├── REQUISITOS.md        requisitos do protótipo aprovado (Fase 5)
+├── requisitos/          no lugar do REQUISITOS.md, quando é épico: epico.md + 1 por parte
 └── evidencias/          prints do develop e das referências
 ```
 
@@ -685,6 +715,7 @@ disponível, diga isso na entrega e siga sem ela; nunca finja que usou.**
 | Diagrama de jornada ou de fluxo | `artifact-diagramming` |
 | Demanda que é feature nova, não ajuste | `product-management:write-spec` |
 | Protótipo aprovado virando pedido de implementação | `design:design-handoff` |
+| Protótipo aprovado: documento de requisitos, com relevância e épico (Fase 5; regra 40) | `requisitos` |
 | Subir e mostrar o protótipo | `run` |
 
 Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
@@ -852,3 +883,8 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
     usa o `UEditor` do Nuxt UI e as extensões `@tiptap/*` na versão exata do Nuxt UI instalado
     (o `pnpm conferir` reprova a diferença), com `<ClientOnly>` e a lista do ProseMirror no
     `nuxt.config.ts`. A tabela completa está na Parte 2, "Campo de texto rico".
+
+40. **⛔ PROTÓTIPO APROVADO SAI COM O DOCUMENTO DE REQUISITOS.** Decisão da redatora em
+    2026-10-29. Skill `requisitos`, com a coluna Relevância (Obrigatório, Desejável, Opcional)
+    em toda tabela de requisito e, quando a demanda é grande, em épico: o `epico.md` linka o
+    documento de cada parte. Detalhe na Fase 5, "Protótipo aprovado: o documento de requisitos".
