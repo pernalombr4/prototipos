@@ -11,8 +11,9 @@
  *
  * O que é proposta (rodada 2):
  *  - aba Agenda, depois de Comentários: o prazo (trancado quando vem do SLA, editável quando não vem), o tempo
- *    reservado com "Reservar tempo" e a opção de ocupar o horário no Outlook, as reuniões do item e "Agendar reunião
- *    sobre a tarefa";
+ *    reservado com "Reservar tempo" e a opção de ocupar o horário no Outlook, as reuniões da tarefa e "Agendar reunião
+ *    sobre a tarefa". A reunião agendada aqui se liga à tarefa, não ao item (correção da redatora em 29/10/2026): o
+ *    item a vê pela tarefa. O colaborador reserva o próprio horário e agenda reunião; quem conclui é o responsável;
  *  - a ação da aba Tarefa segue a permissão: só o responsável conclui; a tarefa de aprovação tem Aprovar e Reprovar;
  *    a de formulário pede o campo antes do "Concluir Etapa". No develop, o botão desligado "Você não é o responsável
  *    pela tarefa" aparece até para o responsável (achado no BRIEFING); aqui, quem não pode não vê o botão, e uma linha
@@ -21,7 +22,7 @@
 import type { Lugar } from '~/components/ux/geometriaDoCalendario'
 import type { Textos } from './textos'
 import { HOJE, diaCurto, diaLongo, diaNumerico, hora, paraMinutos, somarDias } from './datas'
-import { blocosDa, conflitos, diaDe, ehMinha, estado, item, minutoDe, removerBloco, reservar, reunioesDo, tarefa, temSla } from './estado'
+import { blocosDa, colaboro, conflitos, diaDe, ehMinha, estado, item, meuBloco, minutoDe, participo, removerBloco, reservar, reunioesDaTarefa, tarefa, temSla } from './estado'
 import { categoriaPorSlug, pessoaPorId } from './mocks'
 import { avisarReuniao } from './avisos'
 import AgendarReuniao from './_AgendarReuniao.vue'
@@ -38,6 +39,7 @@ const tf = computed(() => tarefa(props.tarefaId ?? 0) ?? null)
 const it = computed(() => item(tf.value?.item))
 const cat = computed(() => it.value ? categoriaPorSlug(it.value.categoria) : null)
 const minha = computed(() => !!tf.value && ehMinha(tf.value))
+const participa = computed(() => !!tf.value && participo(tf.value))
 const sla = computed(() => !!tf.value && temSla(tf.value))
 const chave = computed(() => tf.value ? `${tf.value.origem === 'fluxo' ? 't' : 'q'}:${tf.value.id}` : '')
 const responsavel = computed(() => pessoaPorId(tf.value?.assigned_to))
@@ -89,10 +91,10 @@ function confirmarReserva() {
 }
 
 const agendando = ref(false)
-const reunioes = computed(() => it.value ? reunioesDo(it.value.id).filter(r => r.dia >= HOJE) : [])
+const reunioes = computed(() => tf.value ? reunioesDaTarefa(tf.value.id).filter(r => r.dia >= HOJE && !r.cancelada) : [])
 function criado(c: Parameters<typeof avisarReuniao>[2]) {
   agendando.value = false
-  avisarReuniao(toast, props.t, c, it.value ? [it.value.id] : [])
+  avisarReuniao(toast, props.t, c)
 }
 
 /* ---------- histórico (recorte) ---------- */
@@ -142,7 +144,7 @@ const rotulo = 'text-sm font-semibold text-highlighted'
                   <dt class="text-muted">{{ t.tarefa.vencimentoEm }}:</dt>
                   <dd class="flex items-center gap-1.5 text-highlighted">{{ dataHora(tf.due_date) }}<UIcon v-if="sla" name="i-lucide-lock" class="size-3.5 text-muted" /></dd>
                 </div>
-                <div class="flex gap-2"><dt class="text-muted">{{ t.tarefa.compartilhadoCom }}:</dt><dd class="text-highlighted">{{ t.tarefa.ninguem }}</dd></div>
+                <div class="flex gap-2"><dt class="text-muted">{{ t.tarefa.compartilhadoCom }}:</dt><dd class="text-highlighted">{{ tf.collaborators?.length ? tf.collaborators.map(c => pessoaPorId(c)?.nome).join(', ') : t.tarefa.ninguem }}</dd></div>
                 <div class="flex gap-2"><dt class="text-muted">{{ t.tarefa.responsavel }}:</dt><dd class="break-all text-highlighted">{{ responsavel?.email }}</dd></div>
               </dl>
 
@@ -159,7 +161,7 @@ const rotulo = 'text-sm font-semibold text-highlighted'
                 </span>
                 <dl class="flex flex-col gap-2.5 text-sm">
                   <div class="flex gap-2"><dt class="text-muted">{{ t.tarefa.referencia }}:</dt><dd class="break-all text-highlighted">{{ it.reference }}</dd></div>
-                  <div class="flex gap-2"><dt class="text-muted">{{ t.tarefa.criadoEm }}:</dt><dd class="font-mono text-xs leading-5 text-highlighted">{{ t.tarefa.criadoPor(diaNumerico(String(it.data.created_at), locale), pessoaPorId(it.responsavel)?.nome ?? '--') }}</dd></div>
+                  <div class="flex gap-2"><dt class="text-muted">{{ t.tarefa.criadoEm }}:</dt><dd class="font-mono text-xs leading-5 text-highlighted">{{ t.tarefa.criadoPor(diaNumerico(String(it.data.created_at), locale), pessoaPorId(it.criador)?.nome ?? '--') }}</dd></div>
                   <div class="flex gap-2"><dt class="text-muted">{{ t.tarefa.categoria }}:</dt><dd class="text-highlighted">{{ cat?.name }}</dd></div>
                   <div class="flex gap-2"><dt class="text-muted">{{ t.tarefa.formulario }}:</dt><dd class="text-highlighted">{{ cat?.name }}</dd></div>
                 </dl>
@@ -186,23 +188,23 @@ const rotulo = 'text-sm font-semibold text-highlighted'
                 </div>
                 <p v-else class="text-sm text-highlighted first-letter:uppercase">{{ tf.due_date ? t.quando(diaLongo(diaDe(tf.due_date), locale), hora(minutoDe(tf.due_date))) : t.situacao['sem-prazo'] }}</p>
                 <p v-if="sla" class="flex gap-2 rounded-md bg-elevated p-2.5 text-xs text-toned"><UIcon name="i-lucide-lock" class="mt-0.5 size-3.5 shrink-0 text-muted" />{{ t.tarefa.prazoDoSla }}</p>
-                <p v-if="!minha" class="flex gap-2 text-xs text-muted"><UIcon name="i-lucide-user-round" class="mt-0.5 size-3.5 shrink-0" />{{ t.regras.tarefaDeOutro(responsavel?.nome ?? '--') }}</p>
+                <p v-if="!minha" class="flex gap-2 text-xs text-muted"><UIcon :name="colaboro(tf) ? 'i-lucide-users' : 'i-lucide-user-round'" class="mt-0.5 size-3.5 shrink-0" />{{ colaboro(tf) ? t.modelo.colabora(responsavel?.nome ?? '--') : t.regras.tarefaDeOutro(responsavel?.nome ?? '--') }}</p>
                 <UButton v-if="tf.due_date" :label="t.agendaTarefa.verNaAgenda" icon="i-lucide-calendar-search" color="neutral" variant="outline" size="xs" class="self-start" @click="emit('irParaDia', diaDe(tf.due_date))" />
               </section>
 
               <section v-if="sla" class="flex flex-col gap-2">
                 <p class="text-xs font-medium uppercase tracking-wide text-muted">{{ t.agendaTarefa.tempo }}</p>
                 <p class="text-xs text-muted">{{ t.agendaTarefa.tempoTexto }}</p>
-                <div v-for="b in blocosDa(tf.id)" :key="b.id" class="flex items-center gap-2 rounded-md border border-dashed border-primary/50 p-2 text-sm">
+                <div v-for="b in blocosDa(tf.id).filter(meuBloco)" :key="b.id" class="flex items-center gap-2 rounded-md border border-dashed border-primary/50 p-2 text-sm">
                   <UIcon name="i-lucide-timer" class="size-4 shrink-0 text-primary" />
                   <span class="min-w-0 flex-1">
                     <span class="block text-highlighted first-letter:uppercase">{{ diaCurto(b.dia, locale) }} · {{ t.grade.intervalo(hora(b.inicio), hora(b.fim)) }}</span>
                     <span v-if="b.outlook" class="block text-xs text-muted">{{ t.regras.ocupadoNoOutlook }}</span>
                   </span>
-                  <UButton v-if="minha" icon="i-lucide-trash-2" color="neutral" variant="ghost" size="xs" :aria-label="t.detalhe.removerBloco" @click="removerBloco(b.id)" />
+                  <UButton icon="i-lucide-trash-2" color="neutral" variant="ghost" size="xs" :aria-label="t.detalhe.removerBloco" @click="removerBloco(b.id)" />
                 </div>
 
-                <template v-if="minha && !feita">
+                <template v-if="participa && !feita">
                   <UButton v-if="!reserva.aberta" :label="t.agendaTarefa.reservar" icon="i-lucide-timer" color="neutral" variant="outline" size="sm" class="self-start" @click="abrirReserva" />
                   <form v-else class="flex animate-[entrada_.25s_ease-out_both] flex-col gap-3 rounded-lg border border-default p-3" :aria-label="t.agendaTarefa.reservar" @submit.prevent="confirmarReserva">
                     <div class="grid grid-cols-[1fr_6rem_6rem] gap-2">
@@ -223,8 +225,8 @@ const rotulo = 'text-sm font-semibold text-highlighted'
                 </template>
               </section>
 
-              <section v-if="it" class="flex flex-col gap-2">
-                <p class="text-xs font-medium uppercase tracking-wide text-muted">{{ t.agendaTarefa.reunioes(it.reference) }}</p>
+              <section class="flex flex-col gap-2">
+                <p class="text-xs font-medium uppercase tracking-wide text-muted">{{ t.modelo.reunioesDaTarefa }}</p>
                 <button
                   v-for="r in reunioes"
                   :key="r.id"
@@ -237,11 +239,12 @@ const rotulo = 'text-sm font-semibold text-highlighted'
                   <span class="shrink-0 text-xs text-muted first-letter:uppercase">{{ diaCurto(r.dia, locale) }}</span>
                 </button>
                 <p v-if="!reunioes.length" class="text-xs text-muted">{{ t.painel.semReunioes }}.</p>
+                <p v-if="it" class="flex gap-1.5 text-xs text-muted"><UIcon name="i-lucide-info" class="mt-0.5 size-3.5 shrink-0" />{{ t.modelo.reunioesNoItem(it.reference) }}</p>
               </section>
 
-              <template v-if="estado.outlook === 'conectado' && minha">
+              <template v-if="estado.outlook === 'conectado' && participa && !feita">
                 <UButton v-if="!agendando" :label="t.agendaTarefa.agendar" icon="i-lucide-calendar-plus" size="sm" class="self-start" @click="agendando = true" />
-                <AgendarReuniao v-else :t="t" :item-id="it?.id ?? null" :titulo="t.agendaTarefa.sobre(tf.name)" @criado="criado" @cancelar="agendando = false" />
+                <AgendarReuniao v-else :t="t" :item-id="null" :tarefa-id="tf.id" :contato-do-item="it?.id ?? null" :titulo="t.agendaTarefa.sobre(tf.name)" @criado="criado" @cancelar="agendando = false" />
               </template>
             </div>
           </div>

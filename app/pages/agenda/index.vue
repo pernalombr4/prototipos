@@ -18,8 +18,8 @@ import type { Lugar } from '~/components/ux/geometriaDoCalendario'
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { textos } from './textos'
 import { AGORA, HOJE, diaCurto, diaDaSemana, hora } from './datas'
-import { type Cenario, type Criado, type Rascunho, type TipoDeCriacao, aplicar, diaDe, escolherCenario, estado, eventos, fluxoDoCampo, fonte, foto, item, minutoDe, reiniciar, restaurar, reuniao, semData, tarefa } from './estado'
-import { HORARIO, categoriaPorSlug, feriados } from './mocks'
+import { type Cenario, type Criado, type Rascunho, type Semente, type TipoDeCriacao, aplicar, bloco, diaDe, escolherCenario, estado, eventos, fluxoDoCampo, fonteDoEvento, foto, item, lerChave, minutoDe, reiniciar, restaurar, reuniao, rotuloDoCampo, semData, tarefa } from './estado'
+import { type Alvo, HORARIO, feriados } from './mocks'
 import { avisarReuniao } from './avisos'
 import { menuDoEvento } from './menuDoEvento'
 import CascaDaAgenda from './_CascaDaAgenda.vue'
@@ -80,8 +80,8 @@ function abrir(chave: string, ref: Referencia) {
   detalhe.value = chave
 }
 const tipoInicial = ref<TipoDeCriacao | undefined>()
-const semente = ref<{ titulo: string, itens: number[] }>()
-function criarEm(lugar: Lugar, ref: Referencia, tipo?: TipoDeCriacao, s?: { titulo: string, itens: number[] }) {
+const semente = ref<Semente>()
+function criarEm(lugar: Lugar, ref: Referencia, tipo?: TipoDeCriacao, s?: Semente) {
   detalhe.value = null
   referencia.value = ref
   tipoInicial.value = tipo
@@ -97,23 +97,29 @@ function pegarAlvo(ev: MouseEvent) {
   if (!chave) return ev.stopPropagation()
   alvo.value = chave
 }
-/** A reunião sobre a tarefa ou o item: no dia dela (ou hoje, se já passou), no próximo horário livre do dia. */
-function agendarSobre(chave: string, titulo: string, itemId: number | null) {
-  const tf = chave.startsWith('i:') ? null : tarefa(Number(chave.slice(2))) ?? tarefa(Number(estado.blocos.find(b => `b:${b.id}` === chave)?.tarefaId))
-  const it = item(itemId)
-  const data = tf?.due_date ? diaDe(tf.due_date) : it ? String(it.data[fonte(it.categoria)!.campo]) : HOJE
+/**
+ * A reunião sobre a tarefa ou o item: no dia dela (ou hoje, se já passou), no próximo horário livre do dia. Sobre a
+ * tarefa, a reunião se liga à tarefa; sobre o item, ao item.
+ */
+function agendarSobre(chave: string, titulo: string, alvo: Alvo) {
+  const { tipo, id, campo } = lerChave(chave)
+  const tf = alvo.tipo === 'tarefa' ? tarefa(alvo.id) : undefined
+  const it = alvo.tipo === 'item' ? item(alvo.id) : null
+  const f = it ? fonteDoEvento(it, campo) : undefined
+  const data = tipo === 'b' ? bloco(id)!.dia : tf?.due_date ? diaDe(tf.due_date) : it && f ? String(it.data[f.campo]) : HOJE
   const dia = data > HOJE ? data : HOJE
   const inicio = dia === HOJE ? Math.ceil((AGORA + 1) / 15) * 15 : 9 * 60
-  setTimeout(() => criarEm({ dia, inicio, fim: inicio + 60 }, pelo(`[data-evento="${chave}"]`), 'reuniao', { titulo, itens: itemId ? [itemId] : [] }), 50)
+  const s: Semente = alvo.tipo === 'tarefa' ? { titulo, itens: [], tarefa: alvo.id } : { titulo, itens: [alvo.id] }
+  setTimeout(() => criarEm({ dia, inicio, fim: inicio + 60 }, pelo(`[data-evento="${chave}"]`), 'reuniao', s), 300)
 }
 const menu = computed(() => alvo.value
   ? menuDoEvento(alvo.value, t.value, {
-      abrir: c => setTimeout(() => abrir(c, pelo(`[data-evento="${c}"]`)), 50),
+      abrir: c => setTimeout(() => abrir(c, pelo(`[data-evento="${c}"]`)), 300),
       cumprir,
       irParaTarefa: (id, aba) => abrirTarefa(id, aba),
       acessarItem: acessar,
       agendarReuniao: agendarSobre,
-      avisar: (title, desfazer) => toast.add({ title, icon: 'i-lucide-circle-check', color: 'success', actions: desfazer ? [{ label: t.value.avisos.desfazer, color: 'neutral', variant: 'outline', onClick: desfazer }] : undefined }),
+      avisar: (title, desfazer, description) => toast.add({ title, description, icon: 'i-lucide-circle-check', color: 'success', actions: desfazer ? [{ label: t.value.avisos.desfazer, color: 'neutral', variant: 'outline', onClick: desfazer }] : undefined }),
     })
   : [])
 function novo(el: HTMLElement) {
@@ -126,14 +132,19 @@ const quando = (dia: string, inicio?: number) => t.value.quando(diaCurto(dia, lo
 
 /** A data com fluxo do Spaceflow pede confirmação antes: o fluxo roda e não se desfaz pela Agenda. */
 const confirmacao = reactive({ aberta: false, chave: '', lugar: null as Lugar | null })
+/** O item da chave e o fluxo do campo arrastado (uma categoria tem várias fontes; só a do campo do fluxo roda). */
+function fluxoDaChave(chave: string) {
+  const { tipo, id, campo } = lerChave(chave)
+  const i = tipo === 'i' ? item(Number(id)) : null
+  const f = i ? fluxoDoCampo(i, fonteDoEvento(i, campo)?.campo) : null
+  return i && f ? { i, f } : null
+}
 const aConfirmar = computed(() => {
-  const i = confirmacao.chave.startsWith('i:') ? item(Number(confirmacao.chave.slice(2))) : null
-  const f = i ? fluxoDoCampo(i) : null
-  return i && f ? { ref: i.reference, fluxo: f, campo: categoriaPorSlug(i.categoria).campos.find(c => c.chave === f.campo)!.rotulo } : null
+  const x = fluxoDaChave(confirmacao.chave)
+  return x ? { ref: x.i.reference, fluxo: x.f, campo: rotuloDoCampo(x.i.categoria, x.f.campo)! } : null
 })
 function mover(chave: string, l: Lugar) {
-  const i = chave.startsWith('i:') ? item(Number(chave.slice(2))) : null
-  if (i && fluxoDoCampo(i)) return Object.assign(confirmacao, { aberta: true, chave, lugar: l })
+  if (fluxoDaChave(chave)) return Object.assign(confirmacao, { aberta: true, chave, lugar: l })
   executar(chave, l)
 }
 function confirmar() {
@@ -153,16 +164,16 @@ function executar(chave: string, l: Lugar) {
   }
   if (e.tipo === 'sla') return toast.add({ title: a.sla, description: a.slaTexto, color: 'warning', icon: 'i-lucide-lock' })
   if (e.tipo === 'reuniao') return toast.add({ title: a.reuniao(quando(e.dia, e.inicio)), description: a.reuniaoTexto, icon: 'i-lucide-calendar-clock', actions: desfazer })
-  if (e.tipo === 'bloco') return toast.add({ title: a.bloco(quando(e.dia, e.inicio)), icon: 'i-lucide-timer', actions: desfazer })
+  if (e.tipo === 'bloco') return toast.add({ title: a.bloco(quando(e.dia, e.inicio)), description: e.outlook ? t.value.modelo.noOutlook : undefined, icon: 'i-lucide-timer', actions: desfazer })
   if (e.tipo === 'reservado') return toast.add({ title: a.reservado, description: t.value.detalhe.prazoNaoMuda(quando(diaDe(e.prazo), minutoDe(e.prazo))), icon: 'i-lucide-timer', color: 'success', actions: desfazer })
   if (e.tipo === 'prazo') return toast.add({ title: a.prazo(quando(diaDe(e.prazo), minutoDe(e.prazo))), icon: 'i-lucide-calendar-check', actions: desfazer })
   toast.add({ title: a.item(e.campo, e.referencia, quando(e.dia, e.inicio)), icon: 'i-lucide-calendar-check', actions: desfazer })
 }
 
-function criado(c: Criado, tipo: TipoDeCriacao, itens: number[]) {
+function criado(c: Criado, tipo: TipoDeCriacao) {
   rascunho.value = null
   estado.agendandoPara = null
-  if (tipo === 'reuniao') return avisarReuniao(toast, t.value, c, itens)
+  if (tipo === 'reuniao') return avisarReuniao(toast, t.value, c)
   toast.add({ title: t.value.avisos.criado[tipo], icon: 'i-lucide-circle-check', color: 'success' })
 }
 
@@ -233,12 +244,19 @@ function irAoEvento(chave: string) {
   painel.aberto = false
   painelTarefa.aberto = false
   tela.qual = 'agenda'
-  const r = reuniao(chave.slice(2))
+  const r = reuniao(lerChave(chave).id)
   if (!r) return
   Object.assign(estado, { data: r.dia, vista: estado.vista === 'lista' || estado.vista === 'mes' ? 'semana' : estado.vista })
   setTimeout(() => abrir(chave, pelo(`[data-evento="${chave}"]`)), 350)
 }
 const agendandoRef = computed(() => item(estado.agendandoPara)?.reference)
+/** "Nova tarefa rápida" na pasta Agenda do item: volta à Agenda com a criação aberta, já no item. */
+function novaTarefa(id: number) {
+  fecharTudo()
+  if (estado.vista === 'lista') estado.vista = 'semana'
+  const centro = { getBoundingClientRect: () => new DOMRect(window.innerWidth / 2, 220, 0, 0) }
+  setTimeout(() => criarEm({ dia: estado.vista === 'dia' ? estado.data : HOJE }, centro, 'rapida', { titulo: '', itens: [id] }), 300)
+}
 
 /* ---------- andaime ---------- */
 const andaime = ref<HTMLElement | null>(null)
@@ -272,6 +290,8 @@ function noGrid(chave: string, dia = HOJE) {
   Object.assign(estado, { vista: 'semana', data: dia })
   // O filtro de responsável pode esconder o evento do atalho (o item de outra pessoa): mostra todos.
   if (!eventos.value.some(e => e.id === chave)) estado.responsaveis = []
+  const alvo = lerChave(chave)
+  if (alvo.tipo === 'i') estado.camadas[fonteDoEvento(item(Number(alvo.id))!, alvo.campo)!.id] = true
   // Depois de o menu fechar e devolver o foco ao "Ir para"; antes disso, o popover nasce e já se fecha.
   setTimeout(() => abrir(chave, pelo(`[data-evento="${chave}"]`)), 300)
 }
@@ -289,6 +309,7 @@ function armarFalha() {
 const atalhos = computed<DropdownMenuItem[][]>(() => {
   const a = t.value.andaime.atalhos
   const b = t.value.atalhos2
+  const m = t.value.atalhos3
   return [
     [
       { label: a.sugestao, icon: 'i-lucide-sparkles', onSelect: () => noGrid('r:r-vertice') },
@@ -302,12 +323,25 @@ const atalhos = computed<DropdownMenuItem[][]>(() => {
       { label: b.telaDoItem, icon: 'i-lucide-folder-open', onSelect: () => acessar(47233) },
       { label: b.painelDaTarefa, icon: 'i-lucide-panel-right-open', onSelect: () => abrirTarefa(273512, 'agenda') },
       { label: b.criarComObrigatorios, icon: 'i-lucide-file-plus', onSelect: criarComObrigatorios },
-      { label: b.itemComFluxo, icon: 'i-lucide-zap', onSelect: () => noGrid('i:47231') },
-      { label: b.itemLeitura, icon: 'i-lucide-eye', onSelect: () => noGrid('i:52094', '2026-11-10') },
+      { label: b.itemComFluxo, icon: 'i-lucide-zap', onSelect: () => noGrid('i:47231:fim_vigencia') },
+      { label: b.itemLeitura, icon: 'i-lucide-eye', onSelect: () => noGrid('i:52094:audiencia', '2026-11-10') },
       { label: b.reuniaoDeOutro, icon: 'i-lucide-lock', onSelect: () => noGrid('r:r-riscos') },
       { label: b.tarefaAprovacao, icon: 'i-lucide-stamp', onSelect: () => noGrid('t:273541') },
       { label: b.particular, icon: 'i-lucide-eye-off', onSelect: () => noGrid('r:r-particular') },
       { label: b.falharVinculo, icon: 'i-lucide-unlink', onSelect: armarFalha },
+    ],
+    [
+      { type: 'label', label: m.grupo },
+      { label: m.pelaTarefa, icon: 'i-lucide-flag', onSelect: () => acessar(47233) },
+      { label: m.porOutro, icon: 'i-lucide-users', onSelect: () => noGrid('r:r-vertice') },
+      { label: m.semAcesso, icon: 'i-lucide-eye-off', onSelect: () => noGrid('r:r-fin') },
+      { label: m.serie, icon: 'i-lucide-repeat', onSelect: () => noGrid('r:r-solaris-2', '2026-11-04') },
+      { label: m.particular, icon: 'i-lucide-lock', onSelect: () => acessar(47232) },
+      { label: m.oferecido, icon: 'i-lucide-user-plus', onSelect: () => noGrid('b:b-4', '2026-10-30') },
+      { label: m.colabora, icon: 'i-lucide-users', onSelect: () => noGrid('t:273594', '2026-10-30') },
+      { label: m.fuso, icon: 'i-lucide-globe', onSelect: () => noGrid('r:r-lisboa', '2026-10-30') },
+      { label: m.variosDias, icon: 'i-lucide-calendar-range', onSelect: () => noGrid('r:r-congresso@2026-11-04', '2026-11-04') },
+      { label: m.campoSumiu, icon: 'i-lucide-triangle-alert', onSelect: () => { fecharTudo(); configAberta.value = true } },
     ],
   ]
 })
@@ -328,6 +362,7 @@ const atalhos = computed<DropdownMenuItem[][]>(() => {
       @abrir-tarefa="id => abrirTarefa(id, 'agenda')"
       @ir-para-dia="irParaDia"
       @conectar="conectar"
+      @nova-tarefa="novaTarefa"
     />
     <CascaDaAgenda v-else :t="t">
       <div class="flex h-full min-h-0 flex-col pb-(--altura-do-andaime)">
@@ -362,7 +397,8 @@ const atalhos = computed<DropdownMenuItem[][]>(() => {
             <ListaDaAgenda v-if="estado.vista === 'lista'" :t="t" :locale="locale" :eventos="eventos" :selecionado="detalhe" @abrir="abrir" />
             <!-- O botão direito no evento abre as ações dele (menuDoEvento.ts) -->
             <div v-else class="flex min-h-0 flex-1 flex-col" @contextmenu.capture="pegarAlvo">
-              <UContextMenu :items="menu" :content="{ class: 'min-w-60' }">
+              <!-- Ao fechar, o menu não devolve o foco ao evento: o foco de volta fecharia o popover que a ação acabou de abrir. -->
+              <UContextMenu :items="menu" :content="{ class: 'min-w-60', onCloseAutoFocus: (e: Event) => e.preventDefault() }">
                 <div class="flex min-h-0 flex-1 flex-col">
             <UxCalendario
               :eventos="eventos"
@@ -424,6 +460,7 @@ const atalhos = computed<DropdownMenuItem[][]>(() => {
       :item-id="painel.itemId"
       :conectando="conectando"
       @agendar="agendar"
+      @nova-tarefa="novaTarefa"
       @abrir-evento="irAoEvento"
       @abrir-tarefa="abrirTarefa"
       @acessar="acessar"
@@ -464,7 +501,7 @@ const atalhos = computed<DropdownMenuItem[][]>(() => {
     <div ref="andaime" class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">
       <div class="flex flex-wrap items-center gap-2 px-4 py-2.5">
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.prototipo }}</span>
-        <UDropdownMenu :items="atalhos" :content="{ side: 'top', align: 'start', onCloseAutoFocus: (e: Event) => e.preventDefault() }" :ui="{ content: 'w-64' }">
+        <UDropdownMenu :items="atalhos" :content="{ side: 'top', align: 'start', onCloseAutoFocus: (e: Event) => e.preventDefault() }" :ui="{ content: 'w-72 max-h-[70vh]' }">
           <UButton :label="t.andaime.irPara" icon="i-lucide-map" trailing-icon="i-lucide-chevron-up" size="xs" color="neutral" variant="subtle" />
         </UDropdownMenu>
 

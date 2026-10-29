@@ -21,7 +21,7 @@ import AgendaDoItem from './_AgendaDoItem.vue'
 
 const props = defineProps<{ t: Textos, locale: string, itemId: number, conectando?: boolean }>()
 const pasta = defineModel<string>('pasta', { default: 'agenda' })
-const emit = defineEmits<{ voltar: [], abrirEvento: [chave: string], abrirTarefa: [id: number], irParaDia: [dia: string], conectar: [] }>()
+const emit = defineEmits<{ voltar: [], abrirEvento: [chave: string], abrirTarefa: [id: number], irParaDia: [dia: string], conectar: [], novaTarefa: [id: number] }>()
 
 const it = computed(() => item(props.itemId)!)
 const cat = computed(() => categoriaPorSlug(it.value.categoria))
@@ -51,7 +51,7 @@ const grupos = computed(() => [
   { titulo: props.t.telaItem.identificacao, linhas: [{ icone: 'i-lucide-hash', rotulo: props.t.telaItem.id, valor: String(it.value.id) }] },
   { titulo: props.t.telaItem.origem, linhas: [
     { icone: 'i-lucide-activity', rotulo: props.t.telaItem.status, valor: props.t.telaItem.ativo },
-    { icone: 'i-lucide-mail', rotulo: props.t.telaItem.emailSolicitante, valor: pessoaPorId(it.value.responsavel)?.email ?? '--' },
+    { icone: 'i-lucide-mail', rotulo: props.t.telaItem.emailSolicitante, valor: pessoaPorId(it.value.criador)?.email ?? '--' },
   ] },
   { titulo: props.t.telaItem.historico, linhas: [
     { icone: 'i-lucide-calendar', rotulo: props.t.telaItem.criadoEm, valor: `${diaNumerico(String(it.value.data.created_at), props.locale)}, 09:12:40` },
@@ -132,6 +132,7 @@ const grupos = computed(() => [
               @abrir-tarefa="emit('abrirTarefa', $event)"
               @ir-para-dia="emit('irParaDia', $event)"
               @conectar="emit('conectar')"
+              @nova-tarefa="emit('novaTarefa', $event)"
             />
           </div>
           <div v-else-if="pasta === 'visaoGeral'" class="flex flex-col gap-5">

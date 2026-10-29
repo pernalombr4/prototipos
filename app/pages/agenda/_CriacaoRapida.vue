@@ -13,16 +13,18 @@
  * "Dia inteiro" devolve ao alto. Na tarefa rápida, o horário é o tempo reservado para fazer: a tarefa fica no alto,
  * no dia do prazo, e o horário entra na grade. Item só ganha horário quando a categoria tem campo de hora. A reunião
  * se liga a mais de um item; a tarefa rápida, a 1.
+ *
+ * Correção da redatora em 29/10/2026: a reunião agendada sobre uma tarefa se liga à tarefa (`semente.tarefa`), e o
+ * item a vê pela tarefa. A sugestão lê o domínio dos campos de e-mail do item, fora o e-mail pessoal e o da empresa.
  */
 import type { Lugar } from '~/components/ux/geometriaDoCalendario'
 import type { Textos } from './textos'
 import { AGORA, HOJE, duracao, hora } from './datas'
-import { type Criacao, type Criado, type Rascunho, type TipoDeCriacao, categoriasParaCriar, criar, estado, faltam, fonte, podeEditarItem } from './estado'
+import { type Criacao, type Criado, type Rascunho, type Semente, type TipoDeCriacao, categoriasParaCriar, criar, estado, faltam, fonte, itemDoDominio, podeEditarItem, tarefa } from './estado'
 import { categoriaPorSlug } from './mocks'
 
-/** `semente`: o título e os itens que já chegam preenchidos, do "Agendar reunião sobre isto" do botão direito. */
-const props = defineProps<{ t: Textos, locale: string, lugar: Lugar, tipoInicial?: TipoDeCriacao, semente?: { titulo: string, itens: number[] } }>()
-const emit = defineEmits<{ criado: [c: Criado, tipo: TipoDeCriacao, itens: number[]], cancelar: [], conectar: [], formulario: [r: Rascunho], lugar: [l: Lugar] }>()
+const props = defineProps<{ t: Textos, locale: string, lugar: Lugar, tipoInicial?: TipoDeCriacao, semente?: Semente }>()
+const emit = defineEmits<{ criado: [c: Criado, tipo: TipoDeCriacao], cancelar: [], conectar: [], formulario: [r: Rascunho], lugar: [l: Lugar] }>()
 
 const podeReuniao = computed(() => estado.outlook === 'conectado')
 const forma = reactive<Criacao>({
@@ -32,6 +34,7 @@ const forma = reactive<Criacao>({
   participantes: [],
   teams: true,
   itens: props.semente?.itens ?? (estado.agendandoPara ? [estado.agendandoPara] : []),
+  tarefa: props.semente?.tarefa,
   categoria: categoriasParaCriar.value[0]?.slug ?? 'contratos',
 })
 watch(() => props.lugar, l => (forma.lugar = l))
@@ -68,10 +71,8 @@ const tipos = computed(() => (['reuniao', 'rapida', 'item'] as const)
   .map(v => ({ label: props.t.criacao.tipos[v], value: v, icon: { reuniao: 'i-lucide-video', rapida: 'i-lucide-clipboard-check', item: 'i-lucide-file-plus' }[v] })))
 
 const opcoesDeItem = computed(() => estado.itens.filter(podeEditarItem).map(i => ({ label: `${i.reference} · ${i.titulo}`, value: i.id, icon: categoriaPorSlug(i.categoria).icon ?? undefined })))
-const sugerido = computed(() => {
-  const dominios = forma.participantes.map(e => e.split('@')[1])
-  return estado.itens.find(i => i.dominio && dominios.includes(i.dominio) && !forma.itens.includes(i.id)) ?? null
-})
+const sugerido = computed(() => itemDoDominio(forma.participantes, i => forma.itens.includes(i.id)))
+const tarefaLigada = computed(() => forma.tarefa ? tarefa(forma.tarefa) ?? null : null)
 /** A tarefa rápida se liga a 1 item só. */
 const itemDaTarefa = computed({ get: () => forma.itens[0], set: (v?: number) => (forma.itens = v ? [v] : []) })
 const categorias = computed(() => categoriasParaCriar.value.map(f => ({ label: categoriaPorSlug(f.slug).name, value: f.slug })))
@@ -88,7 +89,7 @@ function enviar() {
   if (pendentes.value.length) return noFormulario()
   enviando.value = true
   setTimeout(() => {
-    emit('criado', criar({ ...forma, titulo: forma.titulo.trim() }), forma.tipo, forma.tipo === 'reuniao' ? forma.itens : [])
+    emit('criado', criar({ ...forma, titulo: forma.titulo.trim(), tarefa: forma.tipo === 'reuniao' ? forma.tarefa : undefined }), forma.tipo)
     enviando.value = false
   }, 400)
 }
@@ -141,6 +142,12 @@ function enviar() {
     </template>
 
     <UFormField v-else :label="t.criacao.ligadoA" size="xs">
+      <!-- A reunião sobre uma tarefa se liga à tarefa -->
+      <p v-if="forma.tipo === 'reuniao' && tarefaLigada" class="mb-1.5 flex animate-[entrada_.2s_ease-out_both] items-center gap-2 rounded-md bg-primary/10 py-0.5 pr-0.5 pl-2 text-xs">
+        <UIcon name="i-lucide-flag" class="size-3.5 shrink-0 text-primary" />
+        <span class="min-w-0 flex-1 truncate text-highlighted">{{ t.modelo.tarefa }} · {{ tarefaLigada.name }}</span>
+        <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="xs" :aria-label="`${t.detalhe.desligar}: ${tarefaLigada.name}`" @click="forma.tarefa = undefined" />
+      </p>
       <!-- A reunião se liga a vários itens: cada um numa linha, e o campo abaixo só acrescenta -->
       <ul v-if="forma.tipo === 'reuniao' && forma.itens.length" class="mb-1.5 flex flex-col gap-1">
         <li v-for="o in opcoesDeItem.filter(x => forma.itens.includes(x.value))" :key="o.value" class="flex animate-[entrada_.2s_ease-out_both] items-center gap-2 rounded-md bg-elevated py-0.5 pr-0.5 pl-2 text-xs">
@@ -160,7 +167,7 @@ function enviar() {
         :search-input="{ placeholder: t.detalhe.buscarItem }"
         class="w-full"
       >
-        <span class="truncate text-dimmed">{{ forma.itens.length ? t.detalhe.ligarOutro : t.criacao.semVinculo }}</span>
+        <span class="truncate text-dimmed">{{ forma.itens.length || tarefaLigada ? t.detalhe.ligarOutro : t.criacao.semVinculo }}</span>
       </USelectMenu>
       <USelectMenu
         v-else

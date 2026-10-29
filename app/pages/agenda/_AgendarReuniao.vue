@@ -6,17 +6,20 @@
  *
  * Na Agenda, "Escolher o horário na grade" volta ao caminho da rodada 1 (o próximo horário clicado cria a reunião
  * ligada).
+ *
+ * Da tarefa, a reunião se liga à tarefa (`tarefaId`), não ao item; o contato do item da tarefa entra como participante.
  */
 import type { Textos } from './textos'
 import { HOJE, hora, paraMinutos, somarDias } from './datas'
-import { type Criado, conflitos, criar, item } from './estado'
+import { type Criado, conflitos, criar, item, tarefa } from './estado'
 
-const props = defineProps<{ t: Textos, itemId: number | null, titulo: string, naAgenda?: boolean }>()
+const props = defineProps<{ t: Textos, itemId: number | null, tarefaId?: number, contatoDoItem?: number | null, titulo: string, naAgenda?: boolean }>()
 const emit = defineEmits<{ criado: [c: Criado], cancelar: [], naGrade: [] }>()
 
 const it = computed(() => item(props.itemId))
+const tf = computed(() => props.tarefaId ? tarefa(props.tarefaId) ?? null : null)
 const contato = computed(() => {
-  const v = it.value?.data.contato
+  const v = (it.value ?? item(props.contatoDoItem))?.data.contato
   return typeof v === 'string' && v.includes('@') ? v : null
 })
 
@@ -52,6 +55,7 @@ function enviar() {
       participantes: forma.participantes,
       teams: forma.teams,
       itens: props.itemId ? [props.itemId] : [],
+      tarefa: props.tarefaId,
       categoria: it.value?.categoria ?? 'contratos',
     }))
   }, 500)
@@ -84,7 +88,8 @@ function enviar() {
     <p v-if="contato" class="-mt-1.5 text-xs text-muted">{{ t.reuniaoForm.contato }}</p>
     <USwitch v-model="forma.teams" :label="t.criacao.teams" size="sm" />
 
-    <p v-if="it" class="flex items-center gap-1.5 text-xs text-toned"><UIcon name="i-lucide-link-2" class="size-3.5 text-info" />{{ t.reuniaoForm.ligadaA(it.reference) }}</p>
+    <p v-if="tf" class="flex items-center gap-1.5 text-xs text-toned"><UIcon name="i-lucide-flag" class="size-3.5 text-primary" />{{ t.modelo.nasceNaTarefa(tf.name) }}</p>
+    <p v-else-if="it" class="flex items-center gap-1.5 text-xs text-toned"><UIcon name="i-lucide-link-2" class="size-3.5 text-info" />{{ t.reuniaoForm.ligadaA(it.reference) }}</p>
     <p class="text-xs text-muted">{{ t.criacao.noOutlook }}</p>
 
     <div class="flex flex-wrap items-center justify-end gap-2 border-t border-default pt-3">

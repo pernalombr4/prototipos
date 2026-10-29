@@ -369,9 +369,65 @@ resposta ao convite, participar, excluir e a cor.
   - **tempo reservado:** as ações da tarefa e "Remover tempo reservado", com Desfazer;
   - **item:** abrir os detalhes, abrir o item, copiar a referência.
 - **"Agendar reunião sobre isto"**, na tarefa e no item, vem do Outlook, que marca uma reunião no Meet a partir de um
-  evento. Aqui, a criação de reunião abre com o título e o item já ligados, no dia do prazo (ou hoje, se já passou).
+  evento. Aqui, a criação de reunião abre com o título já preenchido e o vínculo feito, no dia do prazo (ou hoje, se já
+  passou). Sobre a tarefa, a reunião se liga à tarefa; sobre o item, ao item (ver "Mudou: modelagem").
+- Ao fechar, o menu não devolve o foco ao evento: o foco de volta fechava o popover que a ação acabava de abrir.
 - Do Teams, ficou de fora o que o ENSPACE não guarda: encaminhar, mostrar como, categorizar, salvar .ics e duplicar. A
   cor é a da fonte, na Configuração; trocar por evento quebraria a leitura por fonte.
+
+### Mudou: modelagem
+
+A análise de entidades e relações da rodada 2 apontou 17 lacunas (B1 a B17). Pedido da redatora: "se vc ta agendando
+reuniao pra tarefa, é pra tarefa, nao pro item. o item fica com a tarefa vinculada a ele e ela, por sua vez, tem uma
+reuniao", e "pode aplicar todas as correçoes, nao só as de alta prioridade. apique todas as decisoes recomendadas".
+
+**As 3 decisões recomendadas, aplicadas:**
+
+1. O vínculo é do workspace, não da pessoa. Quem tem acesso ao item vê a reunião ligada, com quem ligou e quando.
+2. Ligar uma reunião recorrente liga a série inteira. "Só esta" liga só aquela ocorrência.
+3. Trocar o responsável da tarefa oferece ao novo responsável os horários reservados que ainda não começaram. Eles
+   passam para a Agenda dele só se ele aceitar; recusou, saem.
+
+**A reunião e o que ela liga:**
+
+| Id | Lacuna | No protótipo |
+|---|---|---|
+| B1 | "Agendar reunião" na tarefa ligava ao item | A reunião agendada sobre a tarefa se liga à tarefa. O item chega a ela pela tarefa: a pasta Agenda mostra "Pela tarefa ...", e o painel da tarefa tem "Reuniões da tarefa" |
+| B2 | O vínculo era uma lista dentro da reunião | O vínculo é uma entidade própria: reunião, alvo (item ou tarefa), série, situação (ligado ou recusado), origem (criação, manual ou sugestão), quem ligou e quando |
+| B3 | O vínculo dependia do id do evento na agenda de cada pessoa | A chave é o identificador do evento no Outlook, igual para todos os participantes. O mesmo workshop em 2 calendários aparece 1 vez |
+| B4 | A reunião mostrava todo item ligado | O item sem permissão de leitura vira "1 item sem acesso", sem título nem referência |
+| B10 | A reunião recorrente não existia como série | A série tem id próprio. Ligar oferece "Toda a série" ou "Só esta"; a série aparece 1 vez em "Ligar reunião existente" |
+| B11 | Cancelar apagava a reunião | Cancelar tira a reunião da grade e a deixa no histórico do item, riscada e marcada "Cancelada" |
+| B15 | O domínio da sugestão era um campo fixo no item | O domínio sai dos campos de e-mail do item. Domínio público (gmail.com e afins) e o da própria empresa ficam fora |
+| B16 | Reunião particular ligada mostrava o título | O vínculo fica; quem não participa vê "Evento particular", com data e hora |
+| B17 | A reunião não tinha fuso | A reunião de quem organiza em outro fuso mostra, no detalhe, a hora de lá com o nome do fuso no idioma da tela |
+
+**A tarefa e o tempo reservado:**
+
+| Id | Lacuna | No protótipo |
+|---|---|---|
+| B5 | O tempo reservado não tinha dono | Cada horário reservado tem dono. O oferecido traz "Aceitar o horário" e "Recusar"; quem ofereceu vê "aguardando" |
+| B6 | O tempo reservado não ia ao Outlook | O horário reservado vira evento no Outlook. Remover ou mover avisa que o Outlook também muda |
+| B13 | A tarefa só aparecia para o responsável | Quem colabora também vê a tarefa, com o ícone de pessoas e "Você colabora", e reserva o próprio horário. Quem conclui é o responsável |
+| B14 | A tarefa rápida não dizia a que item pertence | O detalhe da tarefa rápida tem "Item da tarefa", com "Sem item". A tarefa de fluxo sempre tem item |
+
+**O item e as datas:**
+
+| Id | Lacuna | No protótipo |
+|---|---|---|
+| B7 | Os calendários do Outlook eram uma lista fixa | Os calendários vêm da conexão: o da pessoa e os compartilhados, cada um com nome e cor |
+| B8 | A categoria entrava na Agenda por 1 data só | A categoria entra por mais de uma data ("Adicionar outra data"); a lateral mostra "Contratos · Fim da vigência" e "Contratos · Data de assinatura" |
+| B9 | O evento durava 1 dia | A data pode ter data de fim, e o item ocupa os dias entre as 2. A reunião também pode durar vários dias |
+| B12 | O responsável do item era fixo | A data escolhe o campo de pessoa que diz de quem é o item. Sem campo, todas as pessoas veem |
+
+**Regras de dependência:**
+
+- Concluir a tarefa tira os horários reservados que ainda não começaram e diz quantos saíram.
+- Atribuir a tarefa a outra pessoa, pelo botão direito ("Atribuir a"), oferece os horários futuros a ela, com Desfazer.
+- "Não é este" recusa a sugestão, e o mesmo item não volta a ser sugerido para aquela reunião.
+- O campo de data que sai do formulário da categoria deixa a data fora da Agenda, com o aviso na Configuração, até a
+  troca do campo.
+- Criar o item pela Agenda grava quem criou e, com o campo de pessoa configurado, o responsável.
 
 ### Julgado: criar no alto à moda do Outlook
 
@@ -408,6 +464,8 @@ reunião entra no calendário. **Recomendação: não construir agora.**
 
 - **Muda:** a pasta Agenda na tela do item, a aba Agenda no painel da tarefa, o formulário completo na criação, os
   avisos de permissão e de risco, o bloco Quando da criação, a reunião com vários itens, o menu do botão direito e as linhas do Google.
+  Na modelagem: o "Ligado a" do detalhe, a lista de reuniões da pasta Agenda e do painel da tarefa, a Configuração por
+  data, os rótulos das camadas na lateral e o horário oferecido.
 - **Não muda:** a tela do item e o painel da tarefa fora dessas partes. As 2 cascas foram copiadas de novo do develop em
   29/10 (`_TelaDoItem.vue`, `_PainelDaTarefa.vue`): abas sublinhadas, painel do item em caixas, trilho de ícones do
   painel da tarefa, "Detalhes da Tarefa" e "Concluir Etapa". As outras pastas e a aba Comentários mostram só "não muda".
@@ -434,6 +492,10 @@ O menu "Ir para" ganhou o grupo Rodada 2: tela do item, painel da tarefa, criar 
 data, item só para leitura, reunião de outra pessoa, tarefa de aprovação, evento particular e "Simular falha no próximo
 vínculo". O atalho mostra todas as pessoas quando o filtro esconde o evento.
 
+O grupo Modelagem leva a cada caso novo: reunião ligada pela tarefa, vínculo feito por outra pessoa, reunião com item
+sem acesso, série ligada, item com reunião particular de outra pessoa, horário oferecido, tarefa em que se colabora,
+reunião em outro fuso, evento de vários dias e data com campo removido.
+
 ### Perguntas em aberto
 
 - A pergunta da rodada 1 "o bloco vai para o Outlook como ocupado?" virou opção por bloco, ligada por padrão. Confirmar
@@ -442,9 +504,12 @@ vínculo". O atalho mostra todas as pessoas quando o filtro esconde o evento.
   pesquisa): entra no roteiro?
 - O fluxo com gatilho em campo de data roda quando a data muda pela Agenda, ou só pelo formulário do item?
 - O horário reservado tem duração padrão de 1 hora. Fica fixo ou vira configuração da pessoa (30 min, 1 h, 2 h)?
-- A reunião ligada a 2 itens aparece no histórico dos 2? E o e-mail da reunião, quando houver, também?
-- A configuração Tarefas leva só as tarefas atribuídas à pessoa. A tarefa atribuída a um grupo de que ela faz parte, ou
-  compartilhada com ela, também entra na Agenda dela?
+- Respondida na modelagem: a reunião ligada a 2 itens aparece no histórico dos 2, porque cada vínculo é um registro
+  próprio. Fica a outra metade: o e-mail da reunião, quando houver, também vai aos 2?
+- Respondida na modelagem: a tarefa compartilhada com a pessoa (quem colabora) entra na Agenda dela. Fica a outra
+  metade: a tarefa atribuída a um grupo de que ela faz parte também entra?
+- O vínculo feito por outra pessoa pode ser desfeito por quem edita o item. Desfazer pede aviso a quem ligou?
+- Quem recusa o horário oferecido devolve o horário a quem tinha, ou ele some? O protótipo tira.
 
 ### Ver
 
@@ -467,3 +532,17 @@ vínculo". O atalho mostra todas as pessoas quando o filtro esconde o evento.
 | ![](evidencias/menu-da-tarefa.png) | O botão direito na tarefa: cumprir, ir para a tarefa, reservar horário, abrir o item, agendar reunião |
 | ![](evidencias/menu-da-reuniao.png) | O botão direito na reunião que organizo: detalhes, os 2 itens ligados e cancelar |
 | ![](evidencias/integracoes-google-em-breve.png) | A tela de integrações com o Google Agenda em breve, com o Conectar desligado |
+| ![](evidencias/modelagem-12-reuniao-sobre-a-tarefa.png) | B1: "Agendar reunião sobre isto" na tarefa abre a criação com "Ligado a: Tarefa · Protocolar contestação" |
+| ![](evidencias/modelagem-13-reuniao-ligada-a-tarefa.png) | B1: a reunião criada mostra a tarefa em "Ligado a", com quem ligou e "Ir para a tarefa" |
+| ![](evidencias/modelagem-14-reunioes-da-tarefa.png) | B1: o painel da tarefa lista "Reuniões da tarefa" e diz que as do item ficam na pasta do item |
+| ![](evidencias/modelagem-01-reuniao-pela-tarefa.png) | B1: a pasta Agenda do CT-2047 mostra a reunião "Pela tarefa Conferir o cálculo de reajuste..." |
+| ![](evidencias/modelagem-02-ligada-por-outra-pessoa.png) | B2 e B3: "Ligada por Tomás Arantes em 26/10/2026", com a sugestão pelo e-mail do participante |
+| ![](evidencias/modelagem-03-item-sem-acesso.png) | B4: a reunião com um chamado ligado mostra "1 item sem acesso" |
+| ![](evidencias/modelagem-04-serie-ligada.png) | B10: a série ligada ao CL-124, com "Toda a série" e "Só esta" |
+| ![](evidencias/modelagem-05-particular-e-cancelada.png) | B11 e B16: o evento particular de Paulo sem título e a visita cancelada, riscada, nas anteriores |
+| ![](evidencias/modelagem-06-horario-oferecido.png) | B5: o horário reservado por Diego oferecido a Lia, com Aceitar e Recusar |
+| ![](evidencias/modelagem-07-tarefa-em-que-colabora.png) | B13: a tarefa de Tomás em que Lia colabora, com o próprio horário a reservar |
+| ![](evidencias/modelagem-08-outro-fuso.png) | B17: a reunião de Lisboa com "13:00 às 13:45 no fuso de quem organizou (Horário da Europa Ocidental)" |
+| ![](evidencias/modelagem-09-varias-datas-e-campo-removido.png) | B8, B9 e B12: Clientes com 2 datas, data de fim, responsável e o aviso do campo removido |
+| ![](evidencias/modelagem-10-tarefa-atribuida.png) | "Atribuir a" no botão direito: a tarefa sai da Agenda, com Desfazer |
+| ![](evidencias/modelagem-11-horario-oferecido-ao-novo-responsavel.png) | Decisão 3: o horário futuro da tarefa atribuída fica oferecido a Diego Salles |

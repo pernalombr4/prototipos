@@ -13,7 +13,7 @@ import AgendaDoItem from './_AgendaDoItem.vue'
 const props = defineProps<{ t: Textos, locale: string, itemId: number | null, conectando?: boolean }>()
 const aba = defineModel<'item' | 'tarefas' | 'agenda'>('aba', { default: 'agenda' })
 const aberto = defineModel<boolean>('open', { default: false })
-const emit = defineEmits<{ agendar: [id: number], abrirEvento: [chave: string], abrirTarefa: [id: number], acessar: [id: number], irParaDia: [dia: string], conectar: [] }>()
+const emit = defineEmits<{ agendar: [id: number], abrirEvento: [chave: string], abrirTarefa: [id: number], acessar: [id: number], irParaDia: [dia: string], conectar: [], novaTarefa: [id: number] }>()
 
 const it = computed(() => item(props.itemId))
 const cat = computed(() => it.value ? categoriaPorSlug(it.value.categoria) : null)
@@ -31,6 +31,7 @@ const valor = (chave: string, tipo: string) => {
   if (v === undefined || v === '') return '--'
   if (tipo === 'data') return diaNumerico(String(v), props.locale)
   if (tipo === 'hora') return hora(Number(v))
+  if (tipo === 'pessoa') return pessoaPorId(Number(v))?.nome ?? '--'
   return String(v)
 }
 const corDaSituacao = { 'concluida': 'success', 'atrasada': 'error', 'hoje': 'warning', 'no-prazo': 'neutral', 'sem-prazo': 'neutral' } as const
@@ -49,8 +50,6 @@ const corDaSituacao = { 'concluida': 'success', 'atrasada': 'error', 'hoje': 'wa
               <dt class="text-muted">{{ c.rotulo }}</dt>
               <dd class="break-words text-highlighted">{{ valor(c.chave, c.tipo) }}</dd>
             </template>
-            <dt class="text-muted">{{ t.painel.responsavel }}</dt>
-            <dd class="flex items-center gap-1.5 text-highlighted"><UAvatar :text="pessoaPorId(it.responsavel)?.iniciais" size="3xs" />{{ pessoaPorId(it.responsavel)?.nome }}</dd>
           </dl>
           <UButton :label="t.tarefa.acessarItem" icon="i-lucide-arrow-up-right" color="neutral" variant="outline" size="sm" class="self-start" @click="emit('acessar', it.id)" />
         </template>
@@ -83,6 +82,7 @@ const corDaSituacao = { 'concluida': 'success', 'atrasada': 'error', 'hoje': 'wa
           @ir-para-dia="emit('irParaDia', $event)"
           @conectar="emit('conectar')"
           @agendar-na-grade="emit('agendar', $event)"
+          @nova-tarefa="emit('novaTarefa', $event)"
         />
       </div>
     </template>

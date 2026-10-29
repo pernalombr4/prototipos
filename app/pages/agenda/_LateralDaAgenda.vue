@@ -6,8 +6,8 @@
 import type { CorDoCalendario } from '~/components/ux/geometriaDoCalendario'
 import type { Textos } from './textos'
 import { HOJE, diasDoMes, inicioDaSemana, nomeDoMes, somarMeses } from './datas'
-import { CORES_DO_OUTLOOK, estado, eventos, fontesAtivas, provedoresEmBreve, type Camada } from './estado'
-import { categoriaPorSlug, EU, pessoas } from './mocks'
+import { campoSumiu, estado, eventos, fontesAtivas, provedoresEmBreve, rotuloDoCampo, type Camada } from './estado'
+import { calendarios, categoriaPorSlug, EU, pessoas } from './mocks'
 
 const props = defineProps<{ t: Textos, locale: string, conectando: boolean }>()
 const emit = defineEmits<{ configurar: [], conectar: [] }>()
@@ -28,9 +28,15 @@ const enspace = computed<{ id: Camada, rotulo: string, cor: CorDoCalendario }[]>
   ...(estado.tarefasNaAgenda
     ? [{ id: 'tarefas', rotulo: props.t.lateral.minhasTarefas, cor: 'primary' }, { id: 'rapidas', rotulo: props.t.lateral.rapidas, cor: 'neutral' }] as const
     : []),
-  ...fontesAtivas.value.map(f => ({ id: f.slug, rotulo: categoriaPorSlug(f.slug).name, cor: f.cor })),
+  // A categoria que entra por mais de uma data mostra o campo de cada camada.
+  ...fontesAtivas.value.filter(f => !campoSumiu(f)).map((f, _, l) => ({
+    id: f.id,
+    rotulo: l.filter(x => x.slug === f.slug).length > 1 ? `${categoriaPorSlug(f.slug).name} · ${rotuloDoCampo(f.slug, f.campo)}` : categoriaPorSlug(f.slug).name,
+    cor: f.cor,
+  })),
 ])
-const outlook = computed(() => (['meu', 'juridico'] as const).map(id => ({ id, rotulo: props.t.lateral.calendariosDoOutlook[id], cor: CORES_DO_OUTLOOK[id] })))
+/** Os calendários que a conexão com o Outlook traz: o da pessoa e os compartilhados. */
+const outlook = computed(() => calendarios.filter(c => c.provedor === 'outlook').map(c => ({ id: c.id, rotulo: props.t.lateral.calendariosDoOutlook[c.id], cor: c.cor })))
 
 const opcoesDePessoa = pessoas.map(p => ({ label: p.nome, value: p.id, avatar: { text: p.iniciais, alt: p.nome } }))
 </script>

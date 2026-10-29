@@ -11,17 +11,20 @@
  *  - as datas do item, cada uma com "Ver na Agenda".
  *
  * Sem permissão de editar o item, agendar e ligar não aparecem: uma linha diz o motivo.
-
+ *
+ * Modelagem da rodada 2: as reuniões vêm de 2 caminhos, as ligadas ao item e as das tarefas dele ("Pela tarefa X");
+ * cada uma diz quem ligou; a cancelada fica riscada; a particular de quem não convidou a pessoa aparece sem o título.
+ * A reunião ligada ao item desliga daqui, e "Nova tarefa rápida" cria a tarefa já no item.
  */
 import type { Textos } from './textos'
 import { HOJE, diaCurto, diaNumerico, hora } from './datas'
-import { blocosDa, diaDe, estado, item, ligar, minutoDe, podeEditarItem, reunioesDo, reunioesParaLigar, situacao, souParticipante, temSla } from './estado'
-import { categoriaPorSlug } from './mocks'
+import { type ReuniaoLigada, blocosDa, desligar, diaDe, estado, item, ligar, meuBloco, minutoDe, podeEditarItem, reunioesDo, reunioesParaLigar, situacao, souParticipante, temSla, tituloOculto } from './estado'
+import { EU, categoriaPorSlug, pessoaPorId } from './mocks'
 import { avisarReuniao } from './avisos'
 import AgendarReuniao from './_AgendarReuniao.vue'
 
 const props = defineProps<{ t: Textos, locale: string, itemId: number, naAgenda?: boolean, conectando?: boolean }>()
-const emit = defineEmits<{ abrirEvento: [chave: string], abrirTarefa: [id: number], irParaDia: [dia: string], conectar: [], agendarNaGrade: [id: number] }>()
+const emit = defineEmits<{ abrirEvento: [chave: string], abrirTarefa: [id: number], irParaDia: [dia: string], conectar: [], agendarNaGrade: [id: number], novaTarefa: [id: number] }>()
 const toast = useToast()
 
 const it = computed(() => item(props.itemId)!)
@@ -30,8 +33,8 @@ const conectado = computed(() => estado.outlook === 'conectado')
 const editar = computed(() => podeEditarItem(it.value))
 const reunioes = computed(() => reunioesDo(props.itemId))
 const grupos = computed(() => [
-  { id: 'proximas', titulo: props.t.painel.proximas, lista: reunioes.value.filter(r => r.dia >= HOJE) },
-  { id: 'anteriores', titulo: props.t.painel.anteriores, lista: reunioes.value.filter(r => r.dia < HOJE).reverse() },
+  { id: 'proximas', titulo: props.t.painel.proximas, lista: reunioes.value.filter(x => x.r.dia >= HOJE) },
+  { id: 'anteriores', titulo: props.t.painel.anteriores, lista: reunioes.value.filter(x => x.r.dia < HOJE).reverse() },
 ].filter(g => g.lista.length))
 const tarefas = computed(() => estado.tarefas.filter(x => x.item === props.itemId && x.status !== 'completed'))
 const datas = computed(() => cat.value.campos.filter(c => c.tipo === 'data' && c.chave !== 'created_at' && it.value.data[c.chave]))
@@ -40,20 +43,27 @@ const agendando = ref(false)
 const opcoesParaLigar = computed(() => reunioesParaLigar(props.itemId).map(r => ({
   label: r.titulo,
   value: r.id,
-  suffix: `${diaCurto(r.dia, props.locale)}${r.inicio === undefined ? '' : ` · ${hora(r.inicio)}`}`,
-  icon: r.teams ? 'i-lucide-video' : 'i-lucide-users',
+  suffix: `${r.serie ? `${props.t.modelo.serie} · ` : ''}${diaCurto(r.dia, props.locale)}${r.inicio === undefined ? '' : ` · ${hora(r.inicio)}`}`,
+  icon: r.serie ? 'i-lucide-repeat' : r.teams ? 'i-lucide-video' : 'i-lucide-users',
 })))
 
 function ligarExistente(id: string) {
   const r = estado.reunioes.find(x => x.id === id)
   if (!r) return
-  ligar(r, props.itemId)
+  ligar(r, { tipo: 'item', id: props.itemId })
   toast.add({ title: props.t.avisos.ligada(it.value.reference), icon: 'i-lucide-link-2', color: 'success' })
+}
+function desligarDoItem(x: ReuniaoLigada) {
+  desligar(x.v)
+  toast.add({ title: props.t.avisos.desligada, icon: 'i-lucide-unlink', color: 'success' })
 }
 function criado(c: Parameters<typeof avisarReuniao>[2]) {
   agendando.value = false
-  avisarReuniao(toast, props.t, c, [props.itemId])
+  avisarReuniao(toast, props.t, c)
 }
+const quemLigou = (x: ReuniaoLigada) => props.t.modelo.ligadaPor(x.v.por === EU.id ? EU.nome : pessoaPorId(x.v.por)?.nome ?? '--', diaNumerico(x.v.em, props.locale))
+/** A reunião que não está na Agenda da pessoa (de outro calendário ou cancelada) não abre na grade. */
+const naGrade = (x: ReuniaoLigada) => !!x.r.calendario && !x.r.cancelada
 const corDaSituacao = { 'concluida': 'success', 'atrasada': 'error', 'hoje': 'warning', 'no-prazo': 'neutral', 'sem-prazo': 'neutral' } as const
 </script>
 
@@ -75,6 +85,7 @@ const corDaSituacao = { 'concluida': 'success', 'atrasada': 'error', 'hoje': 'wa
     <template v-else>
       <div v-if="!agendando" class="flex flex-wrap items-center gap-2">
         <UButton :label="t.painel.agendar" icon="i-lucide-calendar-plus" size="sm" @click="agendando = true" />
+        <UButton :label="t.modelo.novaTarefa" icon="i-lucide-clipboard-plus" color="neutral" variant="outline" size="sm" @click="emit('novaTarefa', itemId)" />
         <USelectMenu
           v-if="opcoesParaLigar.length"
           :model-value="undefined"
@@ -107,26 +118,36 @@ const corDaSituacao = { 'concluida': 'success', 'atrasada': 'error', 'hoje': 'wa
     <section v-for="g in grupos" :key="g.id" class="flex flex-col gap-1.5">
       <p class="text-xs font-medium uppercase tracking-wide text-muted">{{ g.titulo }}</p>
       <div
-        v-for="r in g.lista"
-        :key="r.id"
-        class="flex items-center gap-3 rounded-md border border-default p-2.5 transition-colors hover:bg-elevated"
-        :class="g.id === 'anteriores' && 'opacity-70'"
+        v-for="x in g.lista"
+        :key="x.r.uid"
+        class="flex items-center gap-3 rounded-md border border-default p-2.5 transition-colors"
+        :class="[g.id === 'anteriores' && 'opacity-70', naGrade(x) && 'hover:bg-elevated']"
       >
-        <button type="button" class="flex min-w-0 flex-1 items-center gap-3 text-left" @click="emit('abrirEvento', `r:${r.id}`)">
-          <span class="flex w-12 shrink-0 flex-col items-center rounded-md bg-info/10 py-1 text-info">
-            <span class="text-[10px] uppercase">{{ diaCurto(r.dia, locale).split(',')[0] }}</span>
-            <span class="text-base font-semibold leading-none">{{ Number(r.dia.slice(8)) }}</span>
+        <component :is="naGrade(x) ? 'button' : 'div'" :type="naGrade(x) ? 'button' : undefined" class="flex min-w-0 flex-1 items-center gap-3 text-left" @click="naGrade(x) && emit('abrirEvento', `r:${x.r.id}`)">
+          <span class="flex w-12 shrink-0 flex-col items-center rounded-md py-1" :class="x.r.cancelada ? 'bg-elevated text-muted' : 'bg-info/10 text-info'">
+            <span class="text-[10px] uppercase">{{ diaCurto(x.r.dia, locale).split(',')[0] }}</span>
+            <span class="text-base font-semibold leading-none">{{ Number(x.r.dia.slice(8)) }}</span>
           </span>
           <span class="min-w-0 flex-1">
-            <span class="block truncate text-sm font-medium text-highlighted">{{ r.titulo }}</span>
-            <span class="flex items-center gap-1.5 text-xs text-muted">
-              <UIcon :name="r.teams ? 'i-lucide-video' : 'i-lucide-map-pin'" class="size-3" />
-              {{ r.inicio === undefined ? t.detalhe.diaInteiro : t.grade.intervalo(hora(r.inicio), hora(r.fim ?? r.inicio + 60)) }}
-              · {{ t.detalhe.participantes(r.participantes.length) }}
+            <span class="flex items-center gap-1.5">
+              <UIcon v-if="tituloOculto(x.r)" name="i-lucide-lock" class="size-3.5 shrink-0 text-muted" />
+              <span class="truncate text-sm font-medium" :class="x.r.cancelada ? 'text-muted line-through' : 'text-highlighted'">{{ tituloOculto(x.r) ? t.modelo.particular : x.r.titulo }}</span>
+              <UBadge v-if="x.r.cancelada" :label="t.modelo.cancelada" color="neutral" variant="subtle" size="xs" />
+              <UIcon v-if="x.v.serie" name="i-lucide-repeat" class="size-3 shrink-0 text-muted" :aria-label="t.modelo.serie" />
             </span>
+            <span class="flex items-center gap-1.5 text-xs text-muted">
+              <UIcon :name="x.r.teams ? 'i-lucide-video' : 'i-lucide-map-pin'" class="size-3" />
+              {{ x.r.inicio === undefined ? t.detalhe.diaInteiro : t.grade.intervalo(hora(x.r.inicio), hora(x.r.fim ?? x.r.inicio + 60)) }}
+              <template v-if="!tituloOculto(x.r)">· {{ t.detalhe.participantes(x.r.participantes.length) }}</template>
+            </span>
+            <span v-if="x.pela" class="flex items-center gap-1 text-xs text-primary"><UIcon name="i-lucide-flag" class="size-3" />{{ t.modelo.pelaTarefa(x.pela.name) }}</span>
+            <span class="block text-[11px] text-dimmed">{{ quemLigou(x) }}</span>
           </span>
-        </button>
-        <UButton v-if="g.id === 'proximas' && r.teams && conectado && souParticipante(r)" :label="t.detalhe.entrar" icon="i-lucide-video" color="info" variant="soft" size="xs" />
+        </component>
+        <UButton v-if="g.id === 'proximas' && x.r.teams && conectado && souParticipante(x.r) && !x.r.cancelada" :label="t.detalhe.entrar" icon="i-lucide-video" color="info" variant="soft" size="xs" />
+        <UTooltip v-if="editar && !x.pela" :text="t.modelo.desligarDoItem">
+          <UButton icon="i-lucide-unlink" color="neutral" variant="ghost" size="xs" :aria-label="`${t.modelo.desligarDoItem}: ${tituloOculto(x.r) ? t.modelo.particular : x.r.titulo}`" @click="desligarDoItem(x)" />
+        </UTooltip>
       </div>
     </section>
     <UEmpty v-if="!reunioes.length" icon="i-lucide-calendar-x" :title="t.painel.semReunioes" :description="t.painel.semReunioesTexto" variant="naked" size="sm" />
@@ -147,7 +168,7 @@ const corDaSituacao = { 'concluida': 'success', 'atrasada': 'error', 'hoje': 'wa
           <span class="flex flex-wrap items-center gap-x-1.5 text-xs text-muted">
             <UIcon v-if="temSla(x)" name="i-lucide-lock" class="size-3" />
             <span v-if="x.due_date" class="first-letter:uppercase">{{ t.quando(diaCurto(diaDe(x.due_date), locale), hora(minutoDe(x.due_date))) }}</span>
-            <span v-if="temSla(x)">· {{ t.agendaItem.blocos(blocosDa(x.id).length) }}</span>
+            <span v-if="temSla(x)">· {{ t.agendaItem.blocos(blocosDa(x.id).filter(meuBloco).length) }}</span>
           </span>
         </span>
         <UBadge :label="t.situacao[situacao(x)]" :color="corDaSituacao[situacao(x)]" variant="soft" size="sm" />

@@ -1,16 +1,20 @@
 /**
- * O aviso depois de criar uma reunião ligada a um item, igual na grade, no item e na tarefa. A reunião nasce no
- * Outlook (1ª chamada) e o vínculo é a 2ª: quando a 2ª falha, o aviso diz que a reunião existe e oferece ligar de
- * novo, em vez de um erro genérico. A reunião pode nascer ligada a mais de um item.
+ * O aviso depois de criar uma reunião ligada, igual na grade, no item e na tarefa. A reunião nasce no Outlook (1ª
+ * chamada) e o vínculo é a 2ª: quando a 2ª falha, o aviso diz que a reunião existe e oferece ligar de novo, em vez de
+ * um erro genérico. A reunião pode nascer ligada a mais de um item, ou à tarefa de onde foi agendada.
  */
 import type { Textos } from './textos'
-import { type Criado, item, ligar, reuniao } from './estado'
+import type { Alvo } from './mocks'
+import { type Criado, item, ligar, reuniao, tarefa } from './estado'
 
-const referencias = (itens: number[]) => itens.map(i => item(i)?.reference).filter(Boolean).join(', ')
+/** Como o alvo aparece no aviso: o item pela referência, a tarefa pelo nome. */
+export const nomeDoAlvo = (a: Alvo) => a.tipo === 'item' ? item(a.id)?.reference : tarefa(a.id)?.name
 
-export function avisarReuniao(toast: ReturnType<typeof useToast>, t: Textos, c: Criado, itens: number[]) {
-  const ref = referencias(itens)
-  if (!c.vinculoFalhou || !ref) return toast.add({ title: t.avisos.criado.reuniao, description: ref ? t.avisos.ligada(ref) : undefined, icon: 'i-lucide-circle-check', color: 'success' })
+export function avisarReuniao(toast: ReturnType<typeof useToast>, t: Textos, c: Criado) {
+  const tarefaAlvo = c.alvos.find(a => a.tipo === 'tarefa')
+  const ref = c.alvos.map(nomeDoAlvo).filter(Boolean).join(', ')
+  const ligada = tarefaAlvo && c.alvos.length === 1 ? t.modelo.ligadaATarefa(nomeDoAlvo(tarefaAlvo)!) : ref ? t.avisos.ligada(ref) : undefined
+  if (!c.vinculoFalhou || !ref) return toast.add({ title: t.avisos.criado.reuniao, description: ligada, icon: 'i-lucide-circle-check', color: 'success' })
   toast.add({
     title: t.vinculo.falhouTitulo,
     description: t.vinculo.falhouTexto(ref),
@@ -24,8 +28,8 @@ export function avisarReuniao(toast: ReturnType<typeof useToast>, t: Textos, c: 
       onClick: () => {
         const r = reuniao(c.chave.slice(2))
         if (!r) return
-        itens.forEach(i => ligar(r, i))
-        toast.add({ title: t.avisos.ligada(ref), icon: 'i-lucide-link-2', color: 'success' })
+        c.alvos.forEach(a => ligar(r, a, 'criacao'))
+        toast.add({ title: ligada ?? t.avisos.ligada(ref), icon: 'i-lucide-link-2', color: 'success' })
       },
     }],
   })
