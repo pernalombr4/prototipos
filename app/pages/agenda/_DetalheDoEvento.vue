@@ -7,17 +7,20 @@
  * Rodada 2: o popover só oferece o que a pessoa pode fazer, e diz o motivo numa linha quando tira algo. Reunião de
  * outra pessoa não muda de horário e ganha a resposta ao convite; evento particular não se liga a item; item só para
  * leitura não muda de data; data com fluxo avisa que o fluxo roda; tarefa de outra pessoa não conclui nem muda de
- * prazo; tarefa de aprovação ou formulário leva ao painel da tarefa.
+ * prazo.
+ *
+ * Pedido da redatora em 29/10/2026: "Cumprir tarefa" abre o modal da tarefa sobre a grade, com a ação de cada tipo
+ * (concluir, aprovar ou reprovar, preencher o formulário); "Ir para a tarefa" continua, para a tarefa inteira.
  */
 import type { Lugar } from '~/components/ux/geometriaDoCalendario'
 import { fundoCheio, textoDaCor } from '~/components/ux/geometriaDoCalendario'
 import type { Textos } from './textos'
 import { AGORA, HOJE, diaCurto, diaLongo, duracao, hora, paraMinutos } from './datas'
-import { CORES_DO_OUTLOOK, bloco, estado, blocosDa, concluir, diaDe, ehMinha, ehOrganizador, fluxoDoCampo, fonte, item, ligar, minutoDe, organizador, podeConcluir, podeEditarItem, removerBloco, responder, reuniao, situacao, souParticipante, sugestao, tarefa, temSla } from './estado'
+import { CORES_DO_OUTLOOK, bloco, estado, blocosDa, concluir, diaDe, ehMinha, ehOrganizador, fluxoDoCampo, fonte, item, ligar, minutoDe, organizador, podeEditarItem, removerBloco, responder, reuniao, situacao, souParticipante, sugestao, tarefa, temSla } from './estado'
 import { EU, categoriaPorSlug, pessoaPorId } from './mocks'
 
 const props = defineProps<{ t: Textos, locale: string, chave: string }>()
-const emit = defineEmits<{ fechar: [], mover: [chave: string, lugar: Lugar], abrirItem: [id: number, aba: 'item' | 'tarefas' | 'agenda'], abrirTarefa: [id: number] }>()
+const emit = defineEmits<{ fechar: [], mover: [chave: string, lugar: Lugar], abrirItem: [id: number, aba: 'item' | 'tarefas' | 'agenda'], abrirTarefa: [id: number], cumprir: [id: number] }>()
 const toast = useToast()
 
 const tipo = computed(() => props.chave.slice(0, 1))
@@ -286,14 +289,15 @@ function tirarBloco() {
     <!-- Ações -->
     <div v-if="tf || (tipo === 'i' && it)" class="flex flex-wrap gap-2 border-t border-default pt-3">
       <template v-if="tf">
-        <UButton v-if="podeConcluir(tf)" :label="tf.status === 'completed' ? t.detalhe.reabrir : t.detalhe.concluir" :icon="tf.status === 'completed' ? 'i-lucide-rotate-ccw' : 'i-lucide-check'" :color="tf.status === 'completed' ? 'neutral' : 'success'" variant="outline" size="xs" @click="alternarConclusao" />
+        <UButton v-if="ehMinha(tf) && tf.status !== 'completed'" :label="t.detalhe.cumprir" icon="i-lucide-check" size="xs" @click="emit('cumprir', tf.id)" />
+        <UButton v-else-if="ehMinha(tf)" :label="t.detalhe.reabrir" icon="i-lucide-rotate-ccw" color="neutral" variant="outline" size="xs" @click="alternarConclusao" />
         <UButton v-if="tipo === 't' && temSla(tf) && ehMinha(tf) && tf.status !== 'completed'" :label="t.detalhe.reservarTempo" icon="i-lucide-timer" color="neutral" variant="outline" size="xs" @click="reservar" />
         <UButton v-if="b && ehMinha(tf)" :label="t.detalhe.removerBloco" icon="i-lucide-timer-off" color="neutral" variant="outline" size="xs" @click="tirarBloco" />
         <UButton
           :label="t.detalhe.abrirTarefa"
           icon="i-lucide-arrow-up-right"
-          :color="ehMinha(tf) && tf.acao && tf.status !== 'completed' ? 'primary' : 'neutral'"
-          :variant="ehMinha(tf) && tf.acao && tf.status !== 'completed' ? 'solid' : 'outline'"
+          color="neutral"
+          variant="outline"
           size="xs"
           @click="emit('abrirTarefa', tf.id)"
         />

@@ -245,7 +245,7 @@ categoria some da criação. Onde a pessoa espera a ação e ela não está, uma
 | Item sem permissão de editar | Não se arrasta; a data some do popover e uma linha diz o motivo. Agendar e ligar reunião somem da Agenda do item |
 | Categoria sem permissão de criar | Some da aba Item da criação; sem nenhuma categoria, a aba Item some |
 | Tarefa de outra pessoa | Não se arrasta, não conclui; uma linha diz quem é o responsável |
-| Tarefa de aprovação ou com formulário | Não conclui com 1 clique: "Abrir tarefa" vira o botão primário; no painel, Aprovar e Reprovar, ou o campo do formulário antes de "Concluir Etapa" |
+| Tarefa de aprovação ou com formulário | Não conclui com 1 clique: "Cumprir tarefa" abre o modal com Aprovar e Reprovar, ou com o campo do formulário antes de "Concluir Etapa" |
 | Falha no vínculo | Toast de aviso que fica: "Reunião criada no Outlook, sem o vínculo", com "Ligar de novo" |
 | Privacidade | Evento particular do Outlook não se liga a item e não entra na sugestão. Ao ligar, a nota diz o que quem tem acesso ao item passa a ver |
 | Outlook desconectado | Reunião some da criação; no item, as reuniões ligadas continuam à vista e um aviso leva a Conectar |
@@ -271,6 +271,23 @@ Por que o painel encolheu:
 
 Os prints `criacao-com-obrigatorios.png` e `reuniao-de-outra-pessoa.png` são de antes do ajuste e mostram o painel
 antigo aberto; o que eles provam não muda.
+
+### Mudou: cumprir a tarefa sem sair da Agenda
+
+Pedido da redatora: "deve ser possível o usuário cumprir a tarefa diretamente pela agenda, renderizando o modal da
+tarefa ali na agenda. o botao de \"Ir pra tarefa\" nao deve sumir".
+
+- O popover da tarefa troca "Concluir" por **Cumprir tarefa**, no primário, para a tarefa aberta da pessoa.
+- Cumprir tarefa abre o **modal da tarefa** sobre a grade: item, vencimento (com o cadeado do SLA), responsável e a ação
+  de cada tipo:
+  - tarefa comum: "Concluir Etapa";
+  - aprovação: Aprovar e Reprovar;
+  - formulário: o campo obrigatório, e "Concluir Etapa" liberado depois do preenchimento.
+- Concluiu, o modal fecha, o toast confirma e a grade risca a tarefa.
+- **Ir para a tarefa** fica no popover e no rodapé do modal. Abre a tarefa inteira (abas Tarefa, Item, Histórico,
+  Comentários e Agenda), para quem prefere a tela completa. No develop, a Agenda abre direto o painel, sem esse passo.
+- A ação é 1 componente só (`_CumprirTarefa.vue`), usado no modal e na aba Tarefa do painel.
+- Tarefa de outra pessoa: o popover mostra só "Ir para a tarefa", como antes.
 
 ### Fronteira
 
@@ -321,4 +338,5 @@ vínculo". O atalho mostra todas as pessoas quando o filtro esconde o evento.
 | ![](evidencias/fluxo-na-data.png) | A confirmação antes de mudar a data que dispara o fluxo |
 | ![](evidencias/reuniao-de-outra-pessoa.png) | Reunião de outra pessoa: sem mudar o horário, com a resposta ao convite |
 | ![](evidencias/configuracao-tarefas.png) | O bloco Tarefas no topo da Configuração, ligado por padrão |
+| ![](evidencias/cumprir-tarefa-na-agenda.png) | O modal da tarefa sobre a grade: Concluir Etapa e, no rodapé, Ir para a tarefa |
 | ![](evidencias/painel-sem-data.png) | O painel Tarefas sem data, aberto pelo botão da barra, com as 3 tarefas sem prazo |

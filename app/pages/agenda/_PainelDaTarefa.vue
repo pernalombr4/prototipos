@@ -21,10 +21,11 @@
 import type { Lugar } from '~/components/ux/geometriaDoCalendario'
 import type { Textos } from './textos'
 import { HOJE, diaCurto, diaLongo, diaNumerico, hora, paraMinutos, somarDias } from './datas'
-import { blocosDa, concluir, conflitos, diaDe, ehMinha, estado, item, minutoDe, removerBloco, reservar, reunioesDo, tarefa, temSla } from './estado'
+import { blocosDa, conflitos, diaDe, ehMinha, estado, item, minutoDe, removerBloco, reservar, reunioesDo, tarefa, temSla } from './estado'
 import { categoriaPorSlug, pessoaPorId } from './mocks'
 import { avisarReuniao } from './avisos'
 import AgendarReuniao from './_AgendarReuniao.vue'
+import CumprirTarefa from './_CumprirTarefa.vue'
 
 type Aba = 'tarefa' | 'item' | 'historico' | 'comentarios' | 'agenda'
 const props = defineProps<{ t: Textos, locale: string, tarefaId: number | null }>()
@@ -65,14 +66,7 @@ const trilho = computed(() => {
 
 const dataHora = (d: Date | null) => d ? `${diaNumerico(diaDe(d), props.locale)}, ${hora(minutoDe(d))}:00` : '--'
 
-/* ---------- ação da tarefa ---------- */
-const protocolo = ref('')
-watch(() => props.tarefaId, () => { protocolo.value = ''; reserva.aberta = false; agendando.value = false })
-function alternar(aviso?: string) {
-  if (!tf.value) return
-  concluir(tf.value)
-  toast.add({ title: aviso ?? (feita.value ? props.t.avisos.concluida : props.t.avisos.reaberta), icon: 'i-lucide-circle-check', color: 'success' })
-}
+watch(() => props.tarefaId, () => { reserva.aberta = false; agendando.value = false })
 
 /* ---------- agenda: prazo, tempo reservado e reuniões ---------- */
 function mudarPrazo(campo: 'dia' | 'hora', v: string) {
@@ -152,23 +146,7 @@ const rotulo = 'text-sm font-semibold text-highlighted'
                 <div class="flex gap-2"><dt class="text-muted">{{ t.tarefa.responsavel }}:</dt><dd class="break-all text-highlighted">{{ responsavel?.email }}</dd></div>
               </dl>
 
-              <div class="flex flex-col gap-2 border-t border-default pt-4">
-                <p v-if="!minha" class="flex gap-2 rounded-md bg-elevated p-2.5 text-xs text-toned">
-                  <UIcon name="i-lucide-user-round" class="mt-0.5 size-3.5 shrink-0 text-muted" />{{ t.regras.tarefaDeOutro(responsavel?.nome ?? '--') }}
-                </p>
-                <span v-else-if="tf.acao === 'aprovar' && !feita" class="grid grid-cols-2 gap-2">
-                  <UButton :label="t.tarefa.aprovar" icon="i-lucide-check" color="success" block @click="alternar(t.tarefa.aprovada)" />
-                  <UButton :label="t.tarefa.reprovar" icon="i-lucide-x" color="error" variant="outline" block @click="alternar(t.tarefa.reprovada)" />
-                </span>
-                <template v-else-if="tf.acao === 'formulario' && !feita">
-                  <UFormField :label="t.tarefa.protocolo" :help="t.tarefa.protocoloAjuda" required size="sm">
-                    <UInput v-model="protocolo" size="sm" class="w-full" />
-                  </UFormField>
-                  <UButton :label="t.tarefa.concluirEtapa" block :disabled="!protocolo.trim()" @click="alternar()" />
-                </template>
-                <UButton v-else-if="feita" :label="t.detalhe.reabrir" icon="i-lucide-rotate-ccw" color="neutral" variant="outline" block @click="alternar()" />
-                <UButton v-else :label="t.tarefa.concluirEtapa" block @click="alternar()" />
-              </div>
+              <CumprirTarefa :t="t" :tarefa-id="tf.id" class="border-t border-default pt-4" />
             </div>
 
             <!-- Item (cópia do develop) -->

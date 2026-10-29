@@ -31,6 +31,7 @@ import CriacaoRapida from './_CriacaoRapida.vue'
 import PainelDoItem from './_PainelDoItem.vue'
 import ConfiguracaoDaAgenda from './_ConfiguracaoDaAgenda.vue'
 import PainelDaTarefa from './_PainelDaTarefa.vue'
+import ModalDaTarefa from './_ModalDaTarefa.vue'
 import TelaDoItem from './_TelaDoItem.vue'
 import FormularioDoItem from './_FormularioDoItem.vue'
 
@@ -161,6 +162,12 @@ function abrirTarefa(id: number, aba: typeof painelTarefa.aba = 'tarefa') {
   detalhe.value = null
   painel.aberto = false
   Object.assign(painelTarefa, { aberto: true, id, aba })
+}
+/** Cumprir a tarefa sem sair da Agenda; "Ir para a tarefa" leva ao painel inteiro. */
+const modalTarefa = reactive({ aberto: false, id: null as number | null })
+function cumprir(id: number) {
+  detalhe.value = null
+  Object.assign(modalTarefa, { aberto: true, id })
 }
 function acessar(id: number) {
   fecharTudo()
@@ -353,7 +360,7 @@ const atalhos = computed<DropdownMenuItem[][]>(() => {
 
     <UPopover :open="!!detalhe" :reference="referencia" :content="{ side: 'right', align: 'start', sideOffset: 8 }" @update:open="v => !v && (detalhe = null)">
       <template #content>
-        <DetalheDoEvento v-if="detalhe" :key="detalhe" :t="t" :locale="locale" :chave="detalhe" @fechar="detalhe = null" @mover="mover" @abrir-item="abrirItem" @abrir-tarefa="abrirTarefa" />
+        <DetalheDoEvento v-if="detalhe" :key="detalhe" :t="t" :locale="locale" :chave="detalhe" @fechar="detalhe = null" @mover="mover" @abrir-item="abrirItem" @abrir-tarefa="abrirTarefa" @cumprir="cumprir" />
       </template>
     </UPopover>
     <UPopover :open="!!rascunho" :reference="referencia" :content="{ side: 'right', align: 'start', sideOffset: 8 }" @update:open="v => !v && (rascunho = null)">
@@ -387,6 +394,7 @@ const atalhos = computed<DropdownMenuItem[][]>(() => {
       @ir-para-dia="irParaDia"
       @abrir-evento="irAoEvento"
     />
+    <ModalDaTarefa v-model:open="modalTarefa.aberto" :t="t" :locale="locale" :tarefa-id="modalTarefa.id" @ir-para-tarefa="id => { modalTarefa.aberto = false; abrirTarefa(id) }" />
     <FormularioDoItem v-model:open="formulario.aberto" :t="t" :rascunho="formulario.rascunho" @criado="toast.add({ title: t.avisos.criado.item, icon: 'i-lucide-circle-check', color: 'success' })" />
     <UModal v-model:open="confirmacao.aberta" :title="aConfirmar ? t.fluxo.titulo(aConfirmar.campo, aConfirmar.ref) : ''" :ui="{ content: 'max-w-md' }">
       <template #body>

@@ -107,7 +107,6 @@ export function situacao(t: TarefaDaAgenda): Situacao {
  * categoria some da criação. O popover diz o motivo numa linha. */
 export const ehMinha = (t: TarefaDaAgenda) => t.assigned_to === EU.id
 /** Concluir com 1 clique: só o responsável, e só a tarefa que não pede aprovação nem formulário. */
-export const podeConcluir = (t: TarefaDaAgenda) => ehMinha(t) && !t.acao
 export const podeEditarItem = (i: ItemDaAgenda) => categoriaPorSlug(i.categoria).permissao.editar && !i.somenteLeitura
 export const podeCriarEm = (slug: SlugDaCategoria) => categoriaPorSlug(slug).permissao.criar
 /** O Outlook só deixa o organizador mudar o horário. */
