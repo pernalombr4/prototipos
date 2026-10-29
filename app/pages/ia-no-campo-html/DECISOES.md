@@ -251,3 +251,16 @@
 - **Fronteira:** mudam as ações da caixa e do "/"; não mudam a proposta, os seletores, o modal das chaves nem o aviso de en-credits.
 - **CSS fora da prop:** nenhum.
 - **Ver:** `evidencias/proto-menu-sem-selecao.png`, `evidencias/proto-revisar-campo-inteiro.png`
+
+## Rodada 13 · 2026-10-29
+- **Pedido (literal):** "agora, com base nas regras definidas de escrita neste chat, ajuste a escrita deste card aqui https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE73DAC51A14FE4F9180A53D70F3C34 colocando no novo padrao com divisao em tasks" e "atualie tambem os docs de requisito desse item de campo html com ia no github".
+- **Mudou (só os requisitos da IA; o protótipo não mudou):**
+  - `REQUISITOS-IA.md` virou o épico `requisitos/epico.md`, em 9 partes, cada uma a tarefa do card: 1. Pedir ao BENI e aceitar a proposta; 2. Editar o campo inteiro; 3. O que a IA lê e anexo; 4. Pedidos salvos; 5. Outras entradas; 6. Modelo; 7. Agentes; 8. Chaves de IA do workspace; 9. Sem en-credits;
+  - os IDs ficaram; entraram RI007 a RI010 (o que a geração recebe e devolve: campos do item e anexo, modelo, agente, conta cobrada);
+  - RNF001 (contraste) e RS001 (idiomas) saíram para o padrão de qualidade do épico; o texto gerado no idioma do workspace e o BENI no masculino foram para a linha "Exceção deste épico";
+  - RF005 e RF033 foram reescritos sem citar outra parte; o "(xxxx)" da dependência saiu, porque o card da demanda do front não foi achado no ENSPACE;
+  - cada requisito ganhou a coluna Relevância (Desejável onde a prioridade é Desejável, Obrigatório no resto: proposta do agente);
+  - `REQUISITOS-EDITOR.md` aponta para o épico.
+- **Prints (regra 42):** 66 em `evidencias/requisitos/`, 1 por requisito com tela; 14 sem tela (interface, atributo de acessibilidade, tempo): RI001 a RI010, RNF002 a RNF004 e RS002. Detector de seta: 0 de 66.
+- **Ferramenta:** `ferramentas/prints-de-requisito.mjs` ganhou o campo `antes` (troca o estado do andaime antes de a cena abrir a caixa) e as teclas Ctrl J e Ctrl Z.
+- **Fronteira:** mudam os documentos de requisitos; não muda nenhuma tela.

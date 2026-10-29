@@ -15,14 +15,15 @@
  *     "url": "https://pernalombr4.github.io/prototipos/<slug>",
  *     "andaime": "Protótipo · estado",          // texto da barra de revisão, escondida no print
  *     "cenas": { "<nome>": [passo, ...] },       // passos que vários requisitos repetem
- *     "requisitos": { "<ID>": { "cena": "<nome>", "passos": [passo, ...], "destacar": alvo | [alvo, ...] } }
+ *     "requisitos": { "<ID>": { "antes": [passo, ...], "cena": "<nome>", "passos": [passo, ...], "destacar": alvo | [alvo, ...] } }
  *   }
+ * A ordem é antes, cena, passos: "antes" serve para trocar o estado do andaime antes de a cena abrir a caixa.
  * alvo: "texto" (rótulo, aria-label, placeholder ou texto visível; o mais interno que casa),
  *       { "texto": "...", "n": 1 } (a 2ª ocorrência), { "regex": "^\\d+ de \\d+$" } ou { "css": "seletor", "n": 0 };
  *       "ancestral": "article" sobe até o card; "exato": true contorna o próprio elemento, sem subir ao botão.
  * requisito sem tela no protótipo: { "sem": "<motivo>" }, e a tarefa diz o motivo no lugar do print.
  * passo: { "estado": "<rótulo do andaime>" } | { "clicar": alvo } | { "pairar": alvo } | { "focar": alvo }
- *      | { "digitar": "texto" } | { "tecla": "Enter" | "Escape" | "/" | "ctrl+k" } | { "rolar": alvo }
+ *      | { "digitar": "texto" } | { "tecla": "Enter" | "Escape" | "/" | "ctrl+k" | "ctrl+j" | "ctrl+z" } | { "rolar": alvo }
  *      | { "arquivo": "<caminho de imagem>" } (põe no input de arquivo visível ou não) | { "esperar": ms }
  *      | { "js": "código" } | { "largura": 390 }
  */
@@ -153,6 +154,8 @@ const TECLAS = {
   Escape: { key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 },
   '/': { key: '/', code: 'Slash', windowsVirtualKeyCode: 191, text: '/' },
   'ctrl+k': { key: 'k', code: 'KeyK', windowsVirtualKeyCode: 75, modifiers: 2 },
+  'ctrl+j': { key: 'j', code: 'KeyJ', windowsVirtualKeyCode: 74, modifiers: 2 },
+  'ctrl+z': { key: 'z', code: 'KeyZ', windowsVirtualKeyCode: 90, modifiers: 2 },
   ArrowDown: { key: 'ArrowDown', code: 'ArrowDown', windowsVirtualKeyCode: 40 },
   Tab: { key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 },
 }
@@ -229,7 +232,7 @@ for (const id of ids) {
   if (r.sem) { console.log(`${id}: sem print (${r.sem})`); continue }
   try {
     await preparar()
-    const passos = [...(r.cena ? conf.cenas[r.cena] : []), ...(r.passos ?? [])]
+    const passos = [...(r.antes ?? []), ...(r.cena ? conf.cenas[r.cena] : []), ...(r.passos ?? [])]
     for (const p of passos) await passo(p)
     // O hover do último clique sai, salvo quando o requisito é o próprio hover (tooltip, "+N").
     if (!passos.some(p => p.pairar)) await mouse(LARGURA - 1, ALTURA - 1, false)

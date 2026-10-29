@@ -8,7 +8,7 @@ transformar cada bloco, cor de texto e de fundo, link com busca de item, mençã
 
 **Referência visual:** protótipo navegável em https://pernalombr4.github.io/prototipos/ia-no-campo-html/, aprovado em
 14/10/2026 e revisado até a rodada 12 (20/10/2026). O mesmo protótipo mostra a IA do campo, que é outra demanda
-(`REQUISITOS-IA.md`, nesta pasta). Código, textos nos 3 idiomas, decisões e prints em
+(o épico em `requisitos/`, nesta pasta). Código, textos nos 3 idiomas, decisões e prints em
 https://github.com/pernalombr4/prototipos/tree/main/app/pages/ia-no-campo-html. A barra inferior do protótipo
 (estado, tema, idioma) é ferramenta de revisão e não entra no produto.
 
@@ -17,7 +17,7 @@ entre aspas são os da interface em português; os de inglês e espanhol estão 
 Os exemplos usam o item de demonstração do protótipo (contrato da Tecnoverde, campo "Parecer do jurídico").
 
 **Fora do escopo:** a casca da tela do item, os outros tipos de campo e a IA (botão "IA", Ctrl J, grupo do BENI no
-"/", "Perguntar ao BENI" na alça e tudo o que eles abrem), que estão no `REQUISITOS-IA.md`. Este documento reserva o
+"/", "Perguntar ao BENI" na alça e tudo o que eles abrem), que estão no épico de `requisitos/`. Este documento reserva o
 lugar da IA nas barras, no "/" e na alça; sem a demanda da IA, esses lugares ficam vazios.
 
 ## Resumo
@@ -133,7 +133,7 @@ lugar da IA nas barras, no "/" e na alça; sem a demanda da IA, esses lugares fi
 | ID | Requisito | Critério de aceite | Prioridade |
 |---|---|---|---|
 | RF047 | O pé do campo deve mostrar a contagem de palavras e de caracteres do conteúdo, no formato "61 palavras · 351 caracteres" (singular com 1). | O "Parecer do jurídico" de exemplo mostra "61 palavras · 351 caracteres"; o campo vazio mostra "0 palavras · 0 caracteres". | Desejável |
-| RF048 | O placeholder do campo vazio deve citar o "/": "Escreva ou digite "/" para comandos...". Com a demanda da IA, o texto muda conforme o `REQUISITOS-IA.md` (RF007). | O campo "Observações internas" vazio mostra o placeholder. | Importante |
+| RF048 | O placeholder do campo vazio deve citar o "/": "Escreva ou digite "/" para comandos...". Com a demanda da IA, o texto muda conforme a parte "5. Outras entradas" do épico de `requisitos/` (RF007). | O campo "Observações internas" vazio mostra o placeholder. | Importante |
 
 ## Interfaces (RI)
 

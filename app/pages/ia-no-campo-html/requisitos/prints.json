@@ -1,0 +1,1064 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/ia-no-campo-html/",
+  "andaime": "IA no workspace",
+  "cenas": {
+    "cursor": [
+      {
+        "js": "new Promise(r => { const f = () => document.querySelectorAll('.ProseMirror').length > 1 ? r(true) : setTimeout(f, 100); f() })"
+      },
+      {
+        "js": "(() => { const ed = document.querySelectorAll('.ProseMirror')[0]; ed.scrollIntoView({ block: 'center' }); ed.focus(); const t = ed.querySelector('p').lastChild; const r = document.createRange(); r.setStart(t, t.textContent.length); r.collapse(true); const s = getSelection(); s.removeAllRanges(); s.addRange(r) })()",
+        "esperar": 600
+      }
+    ],
+    "selecao": [
+      {
+        "js": "new Promise(r => { const f = () => document.querySelectorAll('.ProseMirror').length > 1 ? r(true) : setTimeout(f, 100); f() })"
+      },
+      {
+        "js": "(() => { const ed = document.querySelectorAll('.ProseMirror')[0]; ed.scrollIntoView({ block: 'center' }); ed.focus(); const t = ed.querySelector('p').firstChild; const r = document.createRange(); r.setStart(t, 0); r.setEnd(t, t.textContent.indexOf('.') + 1); const s = getSelection(); s.removeAllRanges(); s.addRange(r) })()",
+        "esperar": 600
+      }
+    ],
+    "cursorVazio": [
+      {
+        "js": "new Promise(r => { const f = () => document.querySelectorAll('.ProseMirror').length > 1 ? r(true) : setTimeout(f, 100); f() })"
+      },
+      {
+        "js": "(() => { const ed = document.querySelectorAll('.ProseMirror')[1]; ed.scrollIntoView({ block: 'center' }); ed.focus() })()",
+        "esperar": 600
+      }
+    ],
+    "caixa": [
+      {
+        "js": "new Promise(r => { const f = () => document.querySelectorAll('.ProseMirror').length > 1 ? r(true) : setTimeout(f, 100); f() })"
+      },
+      {
+        "js": "(() => { const ed = document.querySelectorAll('.ProseMirror')[0]; ed.scrollIntoView({ block: 'start' }); ed.focus(); const t = ed.querySelector('p').lastChild; const r = document.createRange(); r.setStart(t, t.textContent.length); r.collapse(true); const s = getSelection(); s.removeAllRanges(); s.addRange(r) })()",
+        "esperar": 600
+      },
+      {
+        "tecla": "ctrl+j",
+        "esperar": 700
+      }
+    ],
+    "caixaSel": [
+      {
+        "js": "new Promise(r => { const f = () => document.querySelectorAll('.ProseMirror').length > 1 ? r(true) : setTimeout(f, 100); f() })"
+      },
+      {
+        "js": "(() => { const ed = document.querySelectorAll('.ProseMirror')[0]; ed.scrollIntoView({ block: 'start' }); ed.focus(); const t = ed.querySelector('p').firstChild; const r = document.createRange(); r.setStart(t, 0); r.setEnd(t, t.textContent.indexOf('.') + 1); const s = getSelection(); s.removeAllRanges(); s.addRange(r) })()",
+        "esperar": 600
+      },
+      {
+        "tecla": "ctrl+j",
+        "esperar": 700
+      }
+    ],
+    "modelo": [
+      {
+        "js": "new Promise(r => { const f = () => document.querySelectorAll('.ProseMirror').length > 1 ? r(true) : setTimeout(f, 100); f() })"
+      },
+      {
+        "js": "(() => { const ed = document.querySelectorAll('.ProseMirror')[0]; ed.scrollIntoView({ block: 'start' }); ed.focus(); const t = ed.querySelector('p').lastChild; const r = document.createRange(); r.setStart(t, t.textContent.length); r.collapse(true); const s = getSelection(); s.removeAllRanges(); s.addRange(r) })()",
+        "esperar": 600
+      },
+      {
+        "tecla": "ctrl+j",
+        "esperar": 700
+      },
+      {
+        "clicar": {
+          "regex": "^modelo: "
+        },
+        "esperar": 700
+      }
+    ],
+    "modal": [
+      {
+        "js": "new Promise(r => { const f = () => document.querySelectorAll('.ProseMirror').length > 1 ? r(true) : setTimeout(f, 100); f() })"
+      },
+      {
+        "js": "(() => { const ed = document.querySelectorAll('.ProseMirror')[0]; ed.scrollIntoView({ block: 'start' }); ed.focus(); const t = ed.querySelector('p').lastChild; const r = document.createRange(); r.setStart(t, t.textContent.length); r.collapse(true); const s = getSelection(); s.removeAllRanges(); s.addRange(r) })()",
+        "esperar": 600
+      },
+      {
+        "tecla": "ctrl+j",
+        "esperar": 700
+      },
+      {
+        "clicar": {
+          "regex": "^modelo: "
+        },
+        "esperar": 700
+      },
+      {
+        "clicar": {
+          "regex": "^(usar a chave de uma conta própria|ver as chaves conectadas)$"
+        },
+        "esperar": 900
+      }
+    ],
+    "proposta": [
+      {
+        "js": "new Promise(r => { const f = () => document.querySelectorAll('.ProseMirror').length > 1 ? r(true) : setTimeout(f, 100); f() })"
+      },
+      {
+        "js": "(() => { const ed = document.querySelectorAll('.ProseMirror')[0]; ed.scrollIntoView({ block: 'start' }); ed.focus(); const t = ed.querySelector('p').firstChild; const r = document.createRange(); r.setStart(t, 0); r.setEnd(t, t.textContent.indexOf('.') + 1); const s = getSelection(); s.removeAllRanges(); s.addRange(r) })()",
+        "esperar": 600
+      },
+      {
+        "tecla": "ctrl+j",
+        "esperar": 700
+      },
+      {
+        "clicar": "Encurtar",
+        "esperar": 5000
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "cena": "cursor",
+      "passos": [
+        {
+          "pairar": "IA",
+          "esperar": 900
+        }
+      ],
+      "destacar": "IA"
+    },
+    "RF002": {
+      "cena": "cursor",
+      "passos": [
+        {
+          "clicar": "IA",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog]"
+      }
+    },
+    "RF004": {
+      "cena": "selecao",
+      "destacar": "IA"
+    },
+    "RF008": {
+      "cena": "caixa",
+      "destacar": "Peça ao BENI ou escolha uma ação..."
+    },
+    "RF009": {
+      "cena": "caixa",
+      "passos": [
+        {
+          "digitar": "resum"
+        }
+      ],
+      "destacar": "Seu pedido"
+    },
+    "RF011": {
+      "cena": "caixaSel",
+      "destacar": {
+        "css": "[role=dialog]"
+      }
+    },
+    "RF012": {
+      "cena": "caixa",
+      "passos": [
+        {
+          "clicar": "Mudar o tom",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog]"
+      }
+    },
+    "RF019": {
+      "cena": "caixa",
+      "passos": [
+        {
+          "pairar": "O BENI pode errar. Confira antes de aceitar.",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        "O BENI pode errar. Confira antes de aceitar.",
+        {
+          "texto": "fecha",
+          "exato": true
+        }
+      ]
+    },
+    "RF020": {
+      "cena": "caixaSel",
+      "passos": [
+        {
+          "tecla": "Escape"
+        }
+      ],
+      "destacar": {
+        "css": ".ProseMirror",
+        "n": 0
+      }
+    },
+    "RF024": {
+      "cena": "caixaSel",
+      "passos": [
+        {
+          "clicar": "Expandir",
+          "esperar": 700
+        }
+      ],
+      "destacar": "Parar"
+    },
+    "RF025": {
+      "cena": "proposta",
+      "destacar": {
+        "css": "[data-proposta-do-beni]"
+      }
+    },
+    "RF026": {
+      "cena": "caixaSel",
+      "passos": [
+        {
+          "clicar": "Explicar",
+          "esperar": 5000
+        }
+      ],
+      "destacar": {
+        "css": "[data-proposta-do-beni]"
+      }
+    },
+    "RF027": {
+      "cena": "proposta",
+      "passos": [
+        {
+          "js": "document.querySelectorAll('.ProseMirror')[0].focus()"
+        },
+        {
+          "digitar": "teste"
+        }
+      ],
+      "destacar": {
+        "css": ".ProseMirror",
+        "n": 0
+      }
+    },
+    "RF028": {
+      "cena": "proposta",
+      "destacar": {
+        "css": "[data-barra-da-proposta]"
+      }
+    },
+    "RF029": {
+      "cena": "proposta",
+      "passos": [
+        {
+          "clicar": "Aceitar",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "css": ".ProseMirror",
+        "n": 0
+      }
+    },
+    "RF030": {
+      "cena": "proposta",
+      "passos": [
+        {
+          "clicar": "Descartar",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "css": ".ProseMirror",
+        "n": 0
+      }
+    },
+    "RF031": {
+      "cena": "proposta",
+      "passos": [
+        {
+          "focar": "Peça um ajuste: mais curto, em lista..."
+        },
+        {
+          "digitar": "em lista"
+        },
+        {
+          "tecla": "Enter",
+          "esperar": 5000
+        }
+      ],
+      "destacar": {
+        "css": "[data-proposta-do-beni]"
+      }
+    },
+    "RF032": {
+      "cena": "proposta",
+      "passos": [
+        {
+          "clicar": "Aceitar",
+          "esperar": 1800
+        },
+        {
+          "js": "document.querySelectorAll('.ProseMirror')[0].focus()"
+        },
+        {
+          "tecla": "ctrl+z",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "css": ".ProseMirror",
+        "n": 0
+      }
+    },
+    "RF036": {
+      "antes": [
+        {
+          "estado": "Responde com erro"
+        },
+        {
+          "js": "new Promise(r => { const f = () => document.querySelectorAll('.ProseMirror').length > 1 ? r(true) : setTimeout(f, 100); f() })"
+        },
+        {
+          "js": "(() => { const ed = document.querySelectorAll('.ProseMirror')[0]; ed.scrollIntoView({ block: 'start' }); ed.focus(); const t = ed.querySelector('p').firstChild; const r = document.createRange(); r.setStart(t, 0); r.setEnd(t, t.textContent.indexOf('.') + 1); const s = getSelection(); s.removeAllRanges(); s.addRange(r) })()",
+          "esperar": 600
+        },
+        {
+          "tecla": "ctrl+j",
+          "esperar": 700
+        },
+        {
+          "clicar": "Encurtar",
+          "esperar": 2000
+        }
+      ],
+      "destacar": {
+        "texto": "Sem resposta.",
+        "ancestral": "[data-barra-da-proposta]"
+      }
+    },
+    "RI001": {
+      "sem": "interface, sem tela"
+    },
+    "RI006": {
+      "sem": "interface, sem tela"
+    },
+    "RNF002": {
+      "sem": "anúncio do leitor de tela, que não aparece na imagem"
+    },
+    "RNF003": {
+      "sem": "atributo de acessibilidade, que não aparece na imagem"
+    },
+    "RS002": {
+      "sem": "restrição de implementação, sem tela"
+    },
+    "RF013": {
+      "cena": "caixa",
+      "destacar": [
+        {
+          "texto": "Editar o campo",
+          "exato": true
+        },
+        {
+          "texto": "Escrever",
+          "exato": true
+        }
+      ]
+    },
+    "RF021": {
+      "cena": "caixa",
+      "destacar": {
+        "css": "[role=dialog]"
+      }
+    },
+    "RF022": {
+      "cena": "caixa",
+      "passos": [
+        {
+          "clicar": "Revisar ortografia e gramática",
+          "esperar": 7000
+        }
+      ],
+      "destacar": {
+        "css": "[data-proposta-do-beni]"
+      }
+    },
+    "RF023": {
+      "cena": "cursorVazio",
+      "passos": [
+        {
+          "tecla": "ctrl+j",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog]"
+      }
+    },
+    "RF016": {
+      "cena": "caixa",
+      "destacar": "Este campo"
+    },
+    "RF017": {
+      "cena": "caixa",
+      "passos": [
+        {
+          "clicar": "Este campo",
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        "O que a IA lê",
+        "Usar os campos do item"
+      ]
+    },
+    "RF018": {
+      "cena": "caixa",
+      "passos": [
+        {
+          "js": "(() => { const i = document.querySelector('[role=dialog] input[type=file]'); const d = new DataTransfer(); d.items.add(new File(['x'], 'aditivo.pdf', { type: 'application/pdf' })); i.files = d.files; i.dispatchEvent(new Event('change', { bubbles: true })) })()"
+        }
+      ],
+      "destacar": "aditivo.pdf"
+    },
+    "RI007": {
+      "sem": "interface, sem tela"
+    },
+    "RF010": {
+      "cena": "caixa",
+      "destacar": {
+        "texto": "Seus pedidos salvos",
+        "exato": true
+      }
+    },
+    "RF033": {
+      "cena": "caixaSel",
+      "passos": [
+        {
+          "digitar": "resuma para a diretoria"
+        },
+        {
+          "tecla": "Enter",
+          "esperar": 5000
+        },
+        {
+          "clicar": "Salvar pedido"
+        }
+      ],
+      "destacar": "Salvar pedido"
+    },
+    "RF003": {
+      "cena": "cursor",
+      "passos": [
+        {
+          "tecla": "ctrl+j",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog]"
+      }
+    },
+    "RF005": {
+      "cena": "cursorVazio",
+      "passos": [
+        {
+          "tecla": "/",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "BENI (IA)",
+          "exato": true
+        },
+        "Perguntar ao BENI"
+      ]
+    },
+    "RF006": {
+      "cena": "cursor",
+      "passos": [
+        {
+          "pairar": {
+            "css": ".ProseMirror p",
+            "n": 1
+          },
+          "esperar": 600
+        },
+        {
+          "clicar": "Arraste para mover. Clique para abrir o menu.",
+          "esperar": 700
+        }
+      ],
+      "destacar": "Perguntar ao BENI"
+    },
+    "RF007": {
+      "cena": "cursor",
+      "passos": [
+        {
+          "js": "document.querySelectorAll('.ProseMirror')[1].scrollIntoView({ block: 'center' })"
+        }
+      ],
+      "destacar": {
+        "css": ".ProseMirror",
+        "n": 1
+      }
+    },
+    "RF041": {
+      "cena": "modelo",
+      "destacar": {
+        "css": "[role=listbox][aria-label=Modelo]"
+      }
+    },
+    "RF042": {
+      "cena": "modelo",
+      "passos": [
+        {
+          "rolar": "GPT-5-mini"
+        }
+      ],
+      "destacar": {
+        "texto": "GPT-5-mini",
+        "ancestral": "[role=option]"
+      }
+    },
+    "RF043": {
+      "cena": "modelo",
+      "passos": [
+        {
+          "clicar": "Claude Opus 4.6"
+        },
+        {
+          "clicar": "Encurtar",
+          "esperar": 6000
+        }
+      ],
+      "destacar": {
+        "regex": "claude opus 4\\.6",
+        "ancestral": "[data-barra-da-proposta]"
+      }
+    },
+    "RF034": {
+      "cena": "proposta",
+      "destacar": {
+        "regex": "^beni · auto: |^auto: "
+      }
+    },
+    "RI003": {
+      "sem": "interface, sem tela"
+    },
+    "RI008": {
+      "sem": "interface, sem tela"
+    },
+    "RF014": {
+      "cena": "caixa",
+      "passos": [
+        {
+          "rolar": "Pedir a um agente"
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Pedir a um agente",
+          "exato": true
+        },
+        {
+          "regex": "^ver todos os agentes"
+        }
+      ]
+    },
+    "RF015": {
+      "cena": "caixa",
+      "passos": [
+        {
+          "rolar": "Assistente Jurídico"
+        }
+      ],
+      "destacar": "Assistente Jurídico"
+    },
+    "RF037": {
+      "cena": "caixa",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^agente: "
+          }
+        }
+      ],
+      "destacar": {
+        "regex": "^agente: beni$"
+      }
+    },
+    "RF038": {
+      "cena": "caixa",
+      "passos": [
+        {
+          "clicar": "Assistente Jurídico"
+        }
+      ],
+      "destacar": [
+        "Escreva o pedido para Assistente Jurídico...",
+        {
+          "regex": "^modelo: "
+        }
+      ]
+    },
+    "RF039": {
+      "cena": "caixa",
+      "passos": [
+        {
+          "clicar": "Assistente Jurídico"
+        },
+        {
+          "clicar": {
+            "regex": "^modelo: "
+          }
+        },
+        {
+          "clicar": "GPT-5.4"
+        },
+        {
+          "clicar": {
+            "regex": "^modelo: "
+          }
+        }
+      ],
+      "destacar": {
+        "regex": "^só neste pedido"
+      }
+    },
+    "RF040": {
+      "cena": "caixa",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^agente: "
+          },
+          "esperar": 500
+        },
+        {
+          "clicar": {
+            "texto": "Revisor de Contratos",
+            "n": 1
+          },
+          "esperar": 500
+        },
+        {
+          "clicar": "Revisar ortografia e gramática",
+          "esperar": 6000
+        }
+      ],
+      "destacar": "O que o Revisor mudou"
+    },
+    "RF046": {
+      "cena": "modelo",
+      "passos": [
+        {
+          "clicar": "GPT-5.4"
+        },
+        {
+          "tecla": "Escape"
+        },
+        {
+          "js": "(() => { const ed = document.querySelectorAll('.ProseMirror')[1]; ed.scrollIntoView({ block: 'start' }); ed.focus() })()",
+          "esperar": 500
+        },
+        {
+          "tecla": "ctrl+j",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "regex": "^modelo: gpt-5\\.4"
+      }
+    },
+    "RI002": {
+      "sem": "interface, sem tela"
+    },
+    "RI009": {
+      "sem": "interface, sem tela"
+    },
+    "RF044": {
+      "antes": [
+        {
+          "estado": "Chave da OpenAI"
+        }
+      ],
+      "cena": "modelo",
+      "destacar": "Sua conta"
+    },
+    "RF065": {
+      "antes": [
+        {
+          "estado": "Chave da OpenAI"
+        }
+      ],
+      "cena": "modelo",
+      "destacar": "Cobrado na conta OpenAI"
+    },
+    "RF045": {
+      "cena": "modelo",
+      "destacar": "Usar a chave de uma conta própria"
+    },
+    "RF035": {
+      "antes": [
+        {
+          "estado": "Chave da OpenAI"
+        }
+      ],
+      "cena": "modelo",
+      "passos": [
+        {
+          "clicar": "GPT-5.4"
+        },
+        {
+          "clicar": "Encurtar",
+          "esperar": 7000
+        }
+      ],
+      "destacar": {
+        "regex": "conta openai\\)",
+        "ancestral": "[data-barra-da-proposta]"
+      }
+    },
+    "RF047": {
+      "cena": "modal",
+      "destacar": {
+        "texto": "Chaves de IA do workspace",
+        "ancestral": "[role=dialog]"
+      }
+    },
+    "RF048": {
+      "cena": "modal",
+      "destacar": "Todos os modelos já funcionam sem chave, com os en-credits do ENSPACE. A chave só muda quem paga."
+    },
+    "RF049": {
+      "cena": "modal",
+      "destacar": {
+        "texto": "Chaves de IA do workspace",
+        "ancestral": "[role=dialog]"
+      }
+    },
+    "RF050": {
+      "cena": "modal",
+      "destacar": {
+        "texto": "Conectar chave",
+        "n": 1
+      }
+    },
+    "RF066": {
+      "antes": [
+        {
+          "estado": "Chave da OpenAI"
+        }
+      ],
+      "cena": "modal",
+      "destacar": [
+        "Chave conectada",
+        {
+          "regex": "^3 modelos cobrados na conta openai$"
+        }
+      ]
+    },
+    "RF051": {
+      "cena": "modal",
+      "destacar": [
+        {
+          "texto": "Em breve",
+          "n": 0
+        },
+        {
+          "texto": "Em breve",
+          "n": 1
+        }
+      ]
+    },
+    "RF052": {
+      "cena": "modal",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Conectar chave",
+            "n": 1
+          }
+        }
+      ],
+      "destacar": {
+        "css": "[data-chave-da-ia]"
+      }
+    },
+    "RF053": {
+      "cena": "modal",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Conectar chave",
+            "n": 1
+          }
+        }
+      ],
+      "destacar": [
+        "Onde pego a chave?",
+        "Mostrar chave",
+        {
+          "regex": "^o consumo é cobrado na conta anthropic"
+        }
+      ]
+    },
+    "RF054": {
+      "cena": "modal",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Conectar chave",
+            "n": 1
+          }
+        },
+        {
+          "clicar": "Conectar chave"
+        }
+      ],
+      "destacar": "Cole a chave para conectar."
+    },
+    "RF055": {
+      "cena": "modal",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Conectar chave",
+            "n": 1
+          }
+        },
+        {
+          "focar": {
+            "css": "[data-chave-da-ia] input"
+          }
+        },
+        {
+          "digitar": "chave-de-teste"
+        },
+        {
+          "clicar": "Conectar chave",
+          "esperar": 1500
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^chave da conta anthropic conectada$"
+        },
+        "Voltar ao campo"
+      ]
+    },
+    "RF056": {
+      "cena": "modal",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Conectar chave",
+            "n": 1
+          }
+        },
+        {
+          "focar": {
+            "css": "[data-chave-da-ia] input"
+          }
+        },
+        {
+          "digitar": "chave-de-teste"
+        },
+        {
+          "clicar": "Conectar chave",
+          "esperar": 1500
+        },
+        {
+          "clicar": "Voltar ao campo",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog]"
+      }
+    },
+    "RF057": {
+      "cena": "modal",
+      "destacar": "A IA só lê o que você selecionar ou enviar."
+    },
+    "RI004": {
+      "sem": "interface, sem tela"
+    },
+    "RI010": {
+      "sem": "interface, sem tela"
+    },
+    "RF058": {
+      "antes": [
+        {
+          "estado": "Sem en-credits"
+        }
+      ],
+      "cena": "caixa",
+      "destacar": "Os en-credits do workspace acabaram"
+    },
+    "RF059": {
+      "antes": [
+        {
+          "estado": "Sem en-credits"
+        }
+      ],
+      "cena": "caixa",
+      "destacar": {
+        "texto": "Usar a chave de uma conta própria",
+        "ancestral": "[role=alert]"
+      }
+    },
+    "RF060": {
+      "antes": [
+        {
+          "estado": "Sem en-credits"
+        }
+      ],
+      "cena": "caixa",
+      "passos": [
+        {
+          "clicar": "Revisor de Contratos"
+        }
+      ],
+      "destacar": {
+        "regex": "^conectar a chave da conta openai$"
+      }
+    },
+    "RF061": {
+      "antes": [
+        {
+          "estado": "Sem en-credits"
+        }
+      ],
+      "cena": "caixa",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^usar a chave de uma conta própria$"
+          },
+          "esperar": 900
+        },
+        {
+          "clicar": {
+            "texto": "Conectar chave",
+            "n": 1
+          }
+        },
+        {
+          "focar": {
+            "css": "[data-chave-da-ia] input"
+          }
+        },
+        {
+          "digitar": "chave-de-teste"
+        },
+        {
+          "clicar": "Conectar chave",
+          "esperar": 1500
+        },
+        {
+          "clicar": "Voltar ao campo",
+          "esperar": 900
+        },
+        {
+          "clicar": {
+            "regex": "^modelo: "
+          }
+        },
+        {
+          "clicar": "GPT-5.4",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "regex": "^ou escolha em modelo"
+      }
+    },
+    "RF062": {
+      "antes": [
+        {
+          "estado": "Sem en-credits"
+        }
+      ],
+      "cena": "caixa",
+      "passos": [
+        {
+          "clicar": "Resumir o campo"
+        }
+      ],
+      "destacar": {
+        "regex": "^ao conectar, o beni faz"
+      }
+    },
+    "RF063": {
+      "antes": [
+        {
+          "estado": "Sem en-credits"
+        }
+      ],
+      "cena": "caixa",
+      "passos": [
+        {
+          "clicar": "Resumir o campo"
+        },
+        {
+          "clicar": {
+            "regex": "^usar a chave de uma conta própria$"
+          },
+          "esperar": 900
+        },
+        {
+          "clicar": {
+            "texto": "Conectar chave",
+            "n": 1
+          }
+        },
+        {
+          "focar": {
+            "css": "[data-chave-da-ia] input"
+          }
+        },
+        {
+          "digitar": "chave-de-teste"
+        },
+        {
+          "clicar": "Conectar chave",
+          "esperar": 1500
+        },
+        {
+          "clicar": "Voltar ao campo",
+          "esperar": 7000
+        }
+      ],
+      "destacar": {
+        "regex": "conta anthropic\\)",
+        "ancestral": "[data-barra-da-proposta]"
+      }
+    },
+    "RF064": {
+      "antes": [
+        {
+          "estado": "Sem en-credits"
+        }
+      ],
+      "cena": "modelo",
+      "destacar": {
+        "texto": "GPT-5.4",
+        "ancestral": "[role=option]"
+      }
+    },
+    "RI005": {
+      "sem": "interface, sem tela"
+    },
+    "RNF004": {
+      "sem": "atributo de acessibilidade, que não aparece na imagem"
+    }
+  }
+}
