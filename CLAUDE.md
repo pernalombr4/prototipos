@@ -36,6 +36,11 @@ se quebram. Este arquivo só cobre a operação neste repositório — em qualqu
    épico, com o documento do épico na descrição, e cada parte vira uma tarefa "<n>. <nome>",
    com todos os requisitos dela, sem remeter à descrição (regra 41 da spec). O padrão de
    qualidade fica só no épico. Com mais de 1 épico, 1 card por épico.
+8. Na tarefa, cada requisito é uma caixa de marcar com o print dele no protótipo logo abaixo, e o
+   link do protótipo abre cada tarefa e a descrição do card. Os prints saem de
+   `node ferramentas/prints-de-requisito.mjs app/pages/<slug>`, ficam em
+   `app/pages/<slug>/evidencias/requisitos/<ID>.jpg` e sobem ao GitHub antes de a tarefa ser
+   escrita (regra 42 da spec).
 
 ## Antes de desenhar: o que já foi pesquisado
 
