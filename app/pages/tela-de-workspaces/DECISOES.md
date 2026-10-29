@@ -134,6 +134,24 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 34 · 2026-10-29
+- **Pedido (literal):** "Dividir a parte 7"
+- **Por que:** pelo corte das partes da skill `requisitos`, a parte 7 juntava 2 funcionalidades (agrupar por licença,
+  que funciona sozinho, e as etiquetas) e acendia o sinal de corte (29 linhas, mediana 17); o campo "Dependências" do
+  card propõe avaliar um sistema de etiquetas reutilizável, e essa decisão não pode segurar o agrupar
+- **Mudou (requisitos):**
+  - "7. Agrupar" fica com o botão, a opção "Licença", os grupos recolhíveis, a tabela por grupo e a seção "Ocultos" no
+    fim (11 linhas); depende de "2. Buscar e aceitar convite" (o grupo de convites) e de "6. Ocultos"
+  - "8. Etiquetas" nasce com RN501, agrupar por etiqueta, a etiqueta no card, na lista e na busca, o item do "⋯" e os 2
+    modais (19 linhas); depende das partes 2, 3 e 7
+  - RF502 e RF503 deixam de citar a etiqueta, e a opção "Etiqueta" do menu Agrupar virou RF530, na parte 8
+  - P502 nova na parte 8: sistema de etiquetas reutilizável ou modelo só desta tela
+  - as partes 8 e 9 viraram 9 e 10. Os IDs não mudaram
+- **Mudou (ENSPACE):** as tarefas 24379, 24380 e 24388 viraram 7, 8 e 9; a 24389 é a "10. Criar com caso de uso"; a
+  descrição do card ganhou a tabela das partes nova
+- **Fronteira:** muda a documentação e o ENSPACE; não muda nenhuma tela do protótipo
+- **Ver:** `evidencias/rodada34-10-tarefas.png`, `evidencias/rodada34-tarefa-8-etiquetas.png`
+
 ### Rodada 33 · 2026-10-29
 - **Pedido (literal):** "aplica a divisao, mas a regra de corte é menos sobre tamanho e mais sobre logica. tem que
   levar em consideraçao o tamanho, mas o corte deve continuar sendo, em primeiro lugar, funcional/logico"

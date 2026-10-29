@@ -1,11 +1,10 @@
-# 7. Agrupar e etiquetas
+# 8. Etiquetas
 
-**Objetivo:** a pessoa com muitos workspaces os agrupa por licença ou por etiquetas que só ela vê, e recolhe o grupo
-que não está usando.
+**Objetivo:** a pessoa marca os workspaces com etiquetas que só ela vê, agrupa a lista por elas e as acha pela busca.
 
-**Depende de:** 2. Buscar e aceitar convite; 3. Menu "⋯", sair e excluir.
+**Depende de:** 2. Buscar e aceitar convite; 3. Menu "⋯", sair e excluir; 7. Agrupar.
 
-**Onde vale:** a barra da lista, o card, a lista e o menu "⋯" da tela `/workspaces`, e os modais de etiqueta.
+**Onde vale:** o card, a lista, a busca e o menu "⋯" da tela `/workspaces`, o menu Agrupar e os modais de etiqueta.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/tela-de-workspaces.
 
@@ -15,29 +14,16 @@ que não está usando.
 |---|---|---|---|
 | RN501 | As etiquetas de uma pessoa são vistas só por essa pessoa. | Outro membro do mesmo workspace não vê as etiquetas de Mariana. | Obrigatório |
 
-## Agrupar (RF)
+## Agrupar por etiqueta (RF)
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF501 | A barra deve ter o botão Agrupar à direita, antes de Ordenar. | Agrupar fica à esquerda de Ordenar. | Essencial | Obrigatório |
-| RF502 | Agrupar deve ser um menu suspenso, com o rótulo "Agrupar" sem agrupamento e "Agrupar: Etiqueta" ou "Agrupar: Licença" quando agrupa. | O botão diz o agrupamento ativo. | Essencial | Obrigatório |
-| RF503 | O menu Agrupar deve ter as opções "Nenhum", "Etiqueta" e "Licença", com a ativa marcada; sem etiqueta criada, "Etiqueta" mostra "Nenhuma criada ainda". | Sem etiquetas, a opção mostra o aviso. | Essencial | Obrigatório |
-| RF504 | Trocar o agrupamento deve abrir de novo os grupos recolhidos. | Recolher um grupo e trocar o agrupamento mostra cada grupo aberto. | Desejável | Desejável |
-| RF505 | A ordem do menu Ordenar deve valer dentro de cada grupo. | Agrupado por licença e em "Nome, de A a Z", cada grupo fica em ordem alfabética. | Importante | Obrigatório |
-
-## Grupos (RF)
-
-| ID | Requisito | Critério de aceite | Prioridade | Relevância |
-|---|---|---|---|---|
-| RF506 | Sem agrupamento, a lista deve ser uma só, sem título. | Nenhum título de grupo aparece. | Essencial | Obrigatório |
-| RF507 | Agrupado por licença, os grupos devem seguir a ordem "Convites pendentes", "Proprietário", "Full", "Membro" e "Leitor". | O convite fica no grupo próprio, no topo. | Essencial | Obrigatório |
+| RF530 | O menu Agrupar deve ganhar a opção "Etiqueta", entre "Nenhum" e "Licença"; sem etiqueta criada, a opção mostra "Nenhuma criada ainda". | Sem etiquetas, a opção mostra o aviso. | Essencial | Obrigatório |
 | RF508 | Agrupado por etiqueta, a lista deve ter 1 grupo por etiqueta, na ordem de criação, e depois "Sem etiqueta". | A etiqueta criada primeiro é o 1º grupo. | Essencial | Obrigatório |
 | RF509 | Agrupado por etiqueta, o workspace com 2 etiquetas deve aparecer nos 2 grupos. | Marcar 2 etiquetas num workspace faz o card aparecer 2 vezes. | Importante | Obrigatório |
-| RF510 | A lista deve mostrar só os grupos com pelo menos 1 workspace. | Sem nenhum Leitor, não há grupo "Leitor". | Importante | Obrigatório |
-| RF511 | O título do grupo deve mostrar o nome e a contagem e recolher ou abrir o grupo ao clicar. | Recolher esconde os cards do grupo e mantém o título. | Essencial | Obrigatório |
 | RF512 | Agrupado por etiqueta, com etiqueta criada e sem busca, o fim dos grupos deve ter o botão "+ Nova etiqueta", que abre o modal "Criar etiqueta". | O botão some com texto na busca. | Desejável | Desejável |
-| RF513 | Na visualização em lista, com agrupamento, cada grupo deve ter a própria tabela. | Agrupar por licença mostra uma tabela por licença. | Importante | Obrigatório |
-| RF514 | Com agrupamento, a seção "Ocultos" deve ficar no fim da lista, depois do último grupo. | Agrupado por licença, a seção "Ocultos" fica abaixo do grupo "Leitor". | Importante | Obrigatório |
+| RF528 | Sem etiqueta criada, agrupar por etiqueta deve pôr os workspaces no grupo "Sem etiqueta", com o aviso "Você ainda não criou etiquetas" e o botão "+ Criar etiqueta". | Sem etiquetas, a lista mostra 1 grupo e o aviso. | Importante | Obrigatório |
+| RF529 | O aviso sem etiquetas deve sumir quando a primeira etiqueta for criada. | Criar a primeira etiqueta tira o aviso. | Importante | Obrigatório |
 
 ## Etiquetas no card, na lista e na busca (RF)
 
@@ -48,7 +34,7 @@ que não está usando.
 | RF518 | A busca deve procurar também nas etiquetas. | Buscar "clientes" mostra os workspaces com a etiqueta "Clientes". | Importante | Obrigatório |
 | RF519 | O menu "⋯" deve ter o item "Etiquetas", logo depois do 1º item. | O item abre o modal "Etiquetas de {nome}". | Essencial | Obrigatório |
 
-## Etiquetas pessoais (RF)
+## Modais de etiqueta (RF)
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
@@ -60,11 +46,10 @@ que não está usando.
 | RF525 | O campo "Nome da etiqueta" deve receber o foco ao abrir o modal e aceitar até 30 caracteres. | Abrir o modal e digitar escreve no nome. | Importante | Obrigatório |
 | RF526 | "Em quais workspaces" deve listar os workspaces da pessoa, sem os convites, em ordem alfabética, com caixa de marcar e a busca "Buscar workspace". | Buscar "aurora" filtra a lista do modal. | Essencial | Obrigatório |
 | RF527 | O botão "Criar em {n} workspaces" deve ficar desabilitado sem nome ou sem workspace marcado; ao criar, a lista passa a agrupar por etiqueta. | Criar "Clientes" em 3 workspaces mostra o grupo "Clientes 3". | Essencial | Obrigatório |
-| RF528 | Sem etiqueta criada, agrupar por etiqueta deve pôr os workspaces no grupo "Sem etiqueta", com o aviso "Você ainda não criou etiquetas" e o botão "+ Criar etiqueta". | Sem etiquetas, a lista mostra 1 grupo e o aviso. | Importante | Obrigatório |
-| RF529 | O aviso sem etiquetas deve sumir quando a primeira etiqueta for criada. | Criar a primeira etiqueta tira o aviso. | Importante | Obrigatório |
 
 ## Em aberto
 
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
 | P501 | Qual o limite e a validação do nome da etiqueta? Hoje, no protótipo: no máximo 30 caracteres, sem outra validação. | produto | RF521 e RF525 ganham a validação |
+| P502 | As etiquetas usam um sistema de etiquetas reutilizável do produto ou um modelo só desta tela? A nota do campo "Dependências" do card propõe avaliar o sistema reutilizável. | dev que escreveu a nota e produto | Com o sistema reutilizável, esta parte espera esse sistema; as outras partes seguem sem ela |

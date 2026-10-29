@@ -22,14 +22,15 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 | Parte | O que entrega | Depende de | Por que nesta ordem |
 |---|---|---|---|
 | [1. Escolher e entrar](parte-1-escolher-e-entrar.md) | Cabeçalho, card, lista, aba "Todos", ordem por criação e por nome e a tela sem workspace. Usa só o que a API já tem | | Substitui a tela de hoje sem mudar a API; é a base das outras |
-| [2. Buscar e aceitar convite](parte-2-buscar-e-aceitar-convite.md) | A busca com os atalhos e o convite pendente no topo, no card e na lista | 1 | Fica fora da base porque o nome de quem convidou pode pedir mudança na API; as partes 4, 6 e 7 usam a busca |
+| [2. Buscar e aceitar convite](parte-2-buscar-e-aceitar-convite.md) | A busca com os atalhos e o convite pendente no topo, no card e na lista | 1 | Fica fora da base porque o nome de quem convidou pode pedir mudança na API; as partes 4, 6, 7 e 8 usam a busca ou o convite |
 | [3. Menu "⋯", sair e excluir](parte-3-menu-sair-e-excluir.md) | O menu "⋯" do card e da linha, com "Sair do workspace" e, para o proprietário, "Excluir workspace" | 1 | O menu é a porta do padrão, dos ocultos e das etiquetas |
 | [4. Recentes e favoritos](parte-4-recentes-e-favoritos.md) | Último acesso, abas "Favoritos" e "Recentes", estrela, ordem por acesso e o bloco do topo "Continue de onde você parou" | 1 e 2 | O bloco do topo nasce aqui; a parte 5 só troca o que ele mostra |
 | [5. Workspace padrão](parte-5-workspace-padrao.md) | "Abrir sempre ao entrar", o padrão no bloco do topo e o login direto no workspace | 3 e 4 | Precisa do menu e do bloco do topo |
 | [6. Ocultos](parte-6-ocultos.md) | Ocultar pelo menu, o botão "Visibilidade" e a seção "Ocultos" no fim da lista | 2 e 3 | Vem depois da 5: ocultar o padrão desfaz o padrão |
-| [7. Agrupar e etiquetas](parte-7-agrupar-e-etiquetas.md) | Agrupar por licença e por etiqueta, grupos recolhíveis, os 2 modais de etiqueta e a busca por etiqueta | 2 e 3 | Agrupar respeita a ordem e a seção "Ocultos" das partes anteriores |
-| [8. Criar workspace, passo 1](parte-8-criar-passo-1.md) | O modal "Criar workspace" com nome, descrição, referência e identidade (cor, iniciais, ícone e imagem) | | Abre pelo botão "Criar workspace", que já existe; corre em paralelo com as partes 2 a 7 |
-| [9. Criar com caso de uso](parte-9-criar-com-caso-de-uso.md) | O passo 2 do modal: a Central de casos de uso, "Criar do zero" e "Criar com {caso}" | 8 e o catálogo de casos de uso | O catálogo de casos de uso com prints ainda não existe |
+| [7. Agrupar](parte-7-agrupar.md) | O botão Agrupar, agrupar por licença e os grupos recolhíveis, em cards e em lista | 2 e 6 | Agrupar respeita a ordem, o grupo de convites e a seção "Ocultos" das partes anteriores |
+| [8. Etiquetas](parte-8-etiquetas.md) | Etiquetas pessoais: os 2 modais, a etiqueta no card e na lista, agrupar por etiqueta e a busca por etiqueta | 2, 3 e 7 | Fica fora do agrupar porque pode depender de um sistema de etiquetas reutilizável, ainda em decisão |
+| [9. Criar workspace, passo 1](parte-9-criar-passo-1.md) | O modal "Criar workspace" com nome, descrição, referência e identidade (cor, iniciais, ícone e imagem) | | Abre pelo botão "Criar workspace", que já existe; corre em paralelo com as partes 2 a 8 |
+| [10. Criar com caso de uso](parte-10-criar-com-caso-de-uso.md) | O passo 2 do modal: a Central de casos de uso, "Criar do zero" e "Criar com {caso}" | 9 e o catálogo de casos de uso | O catálogo de casos de uso com prints ainda não existe |
 
 ## Regras de negócio comuns (RN)
 
@@ -69,7 +70,7 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
-| P901 | Cada parte pode ir ao cliente quando fica pronta, ou o épico sai inteiro? Hoje cada parte deixa a tela usável. | produto | Saindo por parte, as partes 1 e 8 respondem às perguntas de lançamento parcial delas; saindo inteiro, essas perguntas caem |
-| P902 | A Central de casos de uso aparece em 3 protótipos: este (parte 9), o `menu-lateral` e a `galeria-de-casos-de-uso`. Os requisitos dela passam a morar num lugar só? | produto | A parte 9 passa a usar o documento único da Central |
+| P901 | Cada parte pode ir ao cliente quando fica pronta, ou o épico sai inteiro? Hoje cada parte deixa a tela usável. | produto | Saindo por parte, as partes 1 e 9 respondem às perguntas de lançamento parcial delas; saindo inteiro, essas perguntas caem |
+| P902 | A Central de casos de uso aparece em 3 protótipos: este (parte 10), o `menu-lateral` e a `galeria-de-casos-de-uso`. Os requisitos dela passam a morar num lugar só? | produto | A parte 10 passa a usar o documento único da Central |
 | P903 | O aviso de convite (parte 2) tem "Aceitar convite" de cor cheia, e o bloco do topo (parte 4) pede "Entrar em {nome}" como o único botão de cor cheia fora dos estados vazio e de erro. Qual vale com os 2 na tela? | redatora | Muda a variante de "Aceitar convite" ou a do botão do bloco do topo |
-| P904 | A cor escolhida na criação (parte 8) fica guardada e vale no card, ou o card recalcula a cor pela `reference` (RN901)? Hoje o campo `icon` guarda só o ícone ou o logo. | produto e dev | Se fica guardada, o workspace passa a guardar a cor, e o card lê a cor guardada |
+| P904 | A cor escolhida na criação (parte 9) fica guardada e vale no card, ou o card recalcula a cor pela `reference` (RN901)? Hoje o campo `icon` guarda só o ícone ou o logo. | produto e dev | Se fica guardada, o workspace passa a guardar a cor, e o card lê a cor guardada |
