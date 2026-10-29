@@ -159,6 +159,10 @@ Rodada antes de entregar, e o que ficou de fora:
     criam; RF714 volta à Central; nascem RF717 (Cancelar), RF718 (ponto de partida com Trocar) e RF719 (o caso traz o
     que mostra). RF715 saiu: o criar e entrar virou RF623.
   - O `epico.md` ganhou o texto novo do modal e das linhas 9 e 10.
+- **Mudou (ENSPACE):** com o ok da redatora ("Atualizar e subir"), as tarefas 24388 ("9. Criar workspace,
+  identificação") e 24389 ("10. Criar com caso de uso") do card `USEDB9945FD15ED4FA29BECA30882A4E` foram reescritas
+  pelo `requisitos_para_enspace.py atualizar`; a leitura pelo MCP confere o nome e as tabelas novas. A descrição do
+  card não mudou: ainda tem o texto antigo das linhas 9 e 10.
 
 ### Rodada 34 · 2026-10-29
 - **Pedido (literal):** "Dividir a parte 7"
