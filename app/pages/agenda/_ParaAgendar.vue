@@ -6,7 +6,7 @@
  */
 import type { Textos } from './textos'
 import { HOJE, diaCurto, diasEntre, hora } from './datas'
-import { diaDe, item, minutoDe, paraAgendar } from './estado'
+import { diaDe, ehMinha, item, minutoDe, paraAgendar } from './estado'
 import type { TarefaDaAgenda } from './mocks'
 
 const props = defineProps<{ t: Textos, locale: string }>()
@@ -50,7 +50,7 @@ function pegar(ev: DragEvent, t: TarefaDaAgenda) {
           v-for="(tarefa, k) in g.tarefas"
           :key="tarefa.id"
           type="button"
-          draggable="true"
+          :draggable="ehMinha(tarefa)"
           class="group flex animate-[entrada_.3s_ease-out_both] cursor-grab items-start gap-2 rounded-md border border-default bg-default p-2 text-left transition hover:-translate-y-0.5 hover:border-accented hover:shadow-sm active:cursor-grabbing"
           :style="{ animationDelay: `${k * 40}ms` }"
           @dragstart="pegar($event, tarefa)"

@@ -7,6 +7,10 @@
  *  1. tarefa com SLA não muda de prazo ao arrastar: ganha um bloco de trabalho; item e tarefa sem SLA mudam de data;
  *  2. a agenda da equipe fica para a rodada 2 (aqui o filtro de responsável só lê tarefas e itens);
  *  3. a agenda do item é uma aba do painel lateral que abre na própria Agenda.
+ *
+ * Rodada 2 (29/10/2026): a permissão decide o que aparece (a Agenda não oferece o gesto que vai falhar), o fluxo no
+ * campo de data pede confirmação e perde o Desfazer, a criação leva ao formulário quando faltam obrigatórios, e o
+ * vínculo pode falhar (`falharVinculo`, do andaime) para mostrar o "Ligar de novo".
  */
 import type { CorDoCalendario, EventoDoCalendario, Lugar } from '~/components/ux/geometriaDoCalendario'
 import { AGORA, HOJE, hora, inicioDaSemana, somarDias } from './datas'
@@ -49,6 +53,8 @@ const inicial = () => ({
   responsaveis: [EU.id] as number[],
   /** "Agendar reunião" no painel do item: a próxima criação já nasce ligada a este item. */
   agendandoPara: null as number | null,
+  /** Andaime: a próxima reunião criada já ligada a um item perde o vínculo (a 2ª chamada falha). */
+  falharVinculo: false,
 })
 
 export const estado = reactive(inicial())
@@ -90,13 +96,36 @@ export function situacao(t: TarefaDaAgenda): Situacao {
   return d === HOJE ? 'hoje' : 'no-prazo'
 }
 
+/* ---------------- o que a pessoa pode fazer ----------------
+ * A Agenda não oferece o gesto que vai falhar: sem permissão, o evento não se arrasta, o botão não aparece e a
+ * categoria some da criação. O popover diz o motivo numa linha. */
+export const ehMinha = (t: TarefaDaAgenda) => t.assigned_to === EU.id
+/** Concluir com 1 clique: só o responsável, e só a tarefa que não pede aprovação nem formulário. */
+export const podeConcluir = (t: TarefaDaAgenda) => ehMinha(t) && !t.acao
+export const podeEditarItem = (i: ItemDaAgenda) => categoriaPorSlug(i.categoria).permissao.editar && !i.somenteLeitura
+export const podeCriarEm = (slug: SlugDaCategoria) => categoriaPorSlug(slug).permissao.criar
+/** O Outlook só deixa o organizador mudar o horário. */
+export const ehOrganizador = (r: Reuniao) => r.organizador === EU.email
+export const organizador = (r: Reuniao) => r.participantes.find(p => p.email === r.organizador)?.nome ?? r.organizador
+export const souParticipante = (r: Reuniao) => r.participantes.some(p => p.email === EU.email)
+/** O fluxo que roda quando a data da fonte muda: o gesto pede confirmação e perde o Desfazer. */
+export const fluxoDoCampo = (i: ItemDaAgenda) => {
+  const c = categoriaPorSlug(i.categoria)
+  return c.fluxo && c.fluxo.campo === fonte(i.categoria)?.campo ? c.fluxo : null
+}
+/**
+ * O endereço do Mail Box do item (no develop, `<referência>.<workspace>@develop.box.enspace.io`). Convidar esse
+ * endereço é a forma de ligar pelo Outlook: o convite chega ao item e a reunião se liga a ele.
+ */
+export const caixaDoItem = (i: ItemDaAgenda) => `${i.reference.toLowerCase()}.escritorio@box.enspace.example`
+
 const visivel = (responsavel: number) => !estado.responsaveis.length || estado.responsaveis.includes(responsavel)
 export const fontesAtivas = computed(() => estado.fontes.filter(f => f.ativa))
 export const outlookNaTela = computed(() => estado.outlook === 'conectado')
 
 /** A sugestão de vínculo: um participante de fora com o mesmo domínio do contato de um item. */
 export function sugestao(r: Reuniao): ItemDaAgenda | null {
-  if (r.itemId || r.sugestaoRecusada) return null
+  if (r.itemId || r.sugestaoRecusada || r.particular) return null
   const dominios = r.participantes.map(p => p.email.split('@')[1]).filter(d => d !== 'aurora.example')
   return estado.itens.find(i => i.dominio && dominios.includes(i.dominio)) ?? null
 }
@@ -124,7 +153,7 @@ export const eventos = computed<EventoDoCalendario[]>(() => {
       rotuloHora: hora(minutoDe(t.due_date)),
       riscado: s === 'concluida',
       alerta: s === 'atrasada' ? 'atrasado' : s === 'hoje' ? 'risco' : undefined,
-      arrastavel: s !== 'concluida',
+      arrastavel: s !== 'concluida' && ehMinha(t),
       vaiParaAGrade: true,
     })
   }
@@ -133,7 +162,7 @@ export const eventos = computed<EventoDoCalendario[]>(() => {
     for (const b of estado.blocos) {
       const t = tarefa(b.tarefaId)
       if (!t || !visivel(t.assigned_to)) continue
-      lista.push({ id: `b:${b.id}`, titulo: t.name, dia: b.dia, inicio: b.inicio, fim: b.fim, cor: 'primary', estilo: 'contorno', icone: 'i-lucide-timer', riscado: t.status === 'completed', passado: jaPassou(b.dia, b.fim), arrastavel: true, redimensionavel: true })
+      lista.push({ id: `b:${b.id}`, titulo: t.name, dia: b.dia, inicio: b.inicio, fim: b.fim, cor: 'primary', estilo: 'contorno', icone: 'i-lucide-timer', riscado: t.status === 'completed', passado: jaPassou(b.dia, b.fim), arrastavel: ehMinha(t), redimensionavel: ehMinha(t) })
     }
   }
 
@@ -145,14 +174,14 @@ export const eventos = computed<EventoDoCalendario[]>(() => {
       if (i.categoria !== f.slug || typeof dia !== 'string' || !visivel(i.responsavel)) continue
       const ini = f.horaInicio ? i.data[f.horaInicio] as number | undefined : undefined
       const fim = f.horaFim ? i.data[f.horaFim] as number | undefined : undefined
-      lista.push({ id: `i:${i.id}`, titulo: `${i.reference} · ${i.titulo}`, dia, inicio: ini, fim: ini === undefined ? undefined : fim ?? ini + 60, cor: f.cor, icone: cat.icon ?? undefined, passado: jaPassou(dia, fim ?? 1440), arrastavel: true, redimensionavel: ini !== undefined })
+      lista.push({ id: `i:${i.id}`, titulo: `${i.reference} · ${i.titulo}`, dia, inicio: ini, fim: ini === undefined ? undefined : fim ?? ini + 60, cor: f.cor, icone: cat.icon ?? undefined, passado: jaPassou(dia, fim ?? 1440), arrastavel: podeEditarItem(i), redimensionavel: ini !== undefined && podeEditarItem(i) })
     }
   }
 
   if (outlookNaTela.value) {
     for (const r of estado.reunioes) {
       if (!c[r.calendario]) continue
-      lista.push({ id: `r:${r.id}`, titulo: r.titulo, dia: r.dia, inicio: r.inicio, fim: r.fim, cor: CORES_DO_OUTLOOK[r.calendario], icone: r.itemId ? 'i-lucide-link-2' : undefined, passado: jaPassou(r.dia, r.fim ?? 1440), arrastavel: true, redimensionavel: r.inicio !== undefined })
+      lista.push({ id: `r:${r.id}`, titulo: r.titulo, dia: r.dia, inicio: r.inicio, fim: r.fim, cor: CORES_DO_OUTLOOK[r.calendario], icone: r.particular ? 'i-lucide-lock' : r.itemId ? 'i-lucide-link-2' : undefined, passado: jaPassou(r.dia, r.fim ?? 1440), arrastavel: ehOrganizador(r), redimensionavel: r.inicio !== undefined && ehOrganizador(r) })
     }
   }
   return lista
@@ -172,11 +201,13 @@ export const paraAgendar = computed(() => {
 })
 
 /* ---------------- gestos ---------------- */
+let sequencia = 9000
+
 export type Efeito =
   | { tipo: 'reuniao' | 'bloco', titulo: string, dia: string, inicio?: number }
   | { tipo: 'reservado', titulo: string, prazo: Date }
   | { tipo: 'prazo', titulo: string, prazo: Date }
-  | { tipo: 'item', referencia: string, campo: string, dia: string, inicio?: number }
+  | { tipo: 'item', referencia: string, campo: string, dia: string, inicio?: number, fluxo?: string }
   | { tipo: 'sla', titulo: string }
 
 /** Aplica um arraste (de dentro da grade ou do painel Para agendar). A chave é `<fonte>:<id>`. */
@@ -185,16 +216,19 @@ export function aplicar(chave: string, l: Lugar): Efeito | null {
 
   if (tipo === 'r') {
     const r = reuniao(id)!
+    if (!ehOrganizador(r)) return null
     Object.assign(r, { dia: l.dia, inicio: l.inicio, fim: l.fim })
     return { tipo: 'reuniao', titulo: r.titulo, dia: l.dia, inicio: l.inicio }
   }
   if (tipo === 'b') {
     const b = bloco(id)!
+    if (!ehMinha(tarefa(b.tarefaId)!)) return null
     Object.assign(b, { dia: l.dia, inicio: l.inicio ?? b.inicio, fim: l.fim ?? b.fim })
     return { tipo: 'bloco', titulo: tarefa(b.tarefaId)!.name, dia: b.dia, inicio: b.inicio }
   }
   if (tipo === 't' || tipo === 'q') {
     const t = tarefa(Number(id))!
+    if (!ehMinha(t) || t.status === 'completed') return null
     if (temSla(t)) {
       if (l.inicio === undefined) return { tipo: 'sla', titulo: t.name }
       estado.blocos.push({ id: `b-${Date.now()}`, tarefaId: t.id, dia: l.dia, inicio: l.inicio, fim: l.fim ?? l.inicio + 60 })
@@ -205,6 +239,7 @@ export function aplicar(chave: string, l: Lugar): Efeito | null {
   }
   if (tipo === 'i') {
     const i = item(Number(id))!
+    if (!podeEditarItem(i)) return null
     const f = fonte(i.categoria)!
     i.data[f.campo] = l.dia
     if (f.horaInicio && l.inicio !== undefined) {
@@ -212,7 +247,10 @@ export function aplicar(chave: string, l: Lugar): Efeito | null {
       if (f.horaFim) i.data[f.horaFim] = l.fim ?? l.inicio + 60
     }
     const rotulo = categoriaPorSlug(i.categoria).campos.find(c => c.chave === f.campo)!.rotulo
-    return { tipo: 'item', referencia: i.reference, campo: rotulo, dia: l.dia, inicio: f.horaInicio ? l.inicio : undefined }
+    const fluxo = fluxoDoCampo(i)
+    // O fluxo "Aviso de renovação" do mock: cria a tarefa de revisão 5 dias antes da nova data.
+    if (fluxo) estado.tarefas.push({ ...structuredClone(toRaw(estado.tarefas[0]!)), id: ++sequencia, reference: `#${sequencia}`, name: 'Revisar renovação', status: 'pending', due_date: quando(somarDias(l.dia, -5), 18 * 60), item: i.id, assigned_to: EU.id, completed_at: null, completed_by: null, acao: undefined })
+    return { tipo: 'item', referencia: i.reference, campo: rotulo, dia: l.dia, inicio: f.horaInicio ? l.inicio : undefined, fluxo: fluxo?.nome }
   }
   return null
 }
@@ -234,10 +272,33 @@ export function removerBloco(id: string) {
   estado.blocos = estado.blocos.filter(b => b.id !== id)
 }
 
+/** Reservar tempo pelo painel da tarefa: o mesmo bloco que o arraste cria, com a opção de ir ao Outlook. */
+export function reservar(tarefaId: number, dia: string, inicio: number, fim: number, outlook: boolean) {
+  estado.blocos.push({ id: `b-${++sequencia}`, tarefaId, dia, inicio, fim, outlook: outlook && estado.outlook === 'conectado' })
+}
+
+/** A resposta da pessoa ao convite, que vai ao Outlook (aceitar, talvez, recusar do Graph). */
+export function responder(r: Reuniao, resposta: 'sim' | 'talvez' | 'nao') {
+  const eu = r.participantes.find(p => p.email === EU.email)
+  if (eu) eu.resposta = resposta
+}
+
 export function ligar(r: Reuniao, itemId: number | null) {
   r.itemId = itemId
   if (itemId === null) r.sugestaoRecusada = true
 }
+
+/** O que a pessoa já tem no horário: reuniões em que é participante e os próprios blocos. Serve aos formulários. */
+export function conflitos(dia: string, inicio: number, fim: number) {
+  const cruza = (a?: number, b?: number) => a !== undefined && a < fim && (b ?? a + 60) > inicio
+  return [
+    ...(outlookNaTela.value ? estado.reunioes.filter(r => r.dia === dia && souParticipante(r) && cruza(r.inicio, r.fim)).map(r => r.particular ? null : r.titulo) : []),
+    ...estado.blocos.filter(b => b.dia === dia && cruza(b.inicio, b.fim) && ehMinha(tarefa(b.tarefaId)!)).map(b => tarefa(b.tarefaId)!.name),
+  ].filter((x): x is string => !!x)
+}
+
+/** Reuniões do Outlook da pessoa, sem vínculo e não particulares, dos próximos 14 dias: o "Ligar reunião existente". */
+export const reunioesParaLigar = computed(() => estado.reunioes.filter(r => !r.itemId && !r.particular && souParticipante(r) && r.dia >= HOJE && r.dia <= somarDias(HOJE, 14) && !r.id.startsWith('daily')))
 
 /* ---------------- criação rápida ---------------- */
 export type TipoDeCriacao = 'reuniao' | 'rapida' | 'item'
@@ -250,14 +311,33 @@ export interface Criacao {
   teams: boolean
   itemId: number | null
   categoria: SlugDaCategoria
+  /** Os outros campos do formulário completo da categoria ("Mais campos"). */
+  campos?: Record<string, string | number>
 }
 
-let sequencia = 9000
-export function criar(c: Criacao): string {
+/** As categorias em que a pessoa pode criar item pela Agenda: fonte ligada e permissão de criar. */
+export const categoriasParaCriar = computed(() => fontesAtivas.value.filter(f => podeCriarEm(f.slug)))
+
+/** Os obrigatórios que a criação rápida não cobre: o título e a data da fonte vêm do popover; o resto, do formulário. */
+export function faltam(c: Criacao) {
+  const f = fonte(c.categoria)
+  const cat = categoriaPorSlug(c.categoria)
+  return cat.campos.filter(x => x.obrigatorio && x.chave !== 'titulo' && x.chave !== f?.campo && !c.campos?.[x.chave])
+}
+
+/** O que a criação rápida leva ao formulário completo da categoria. */
+export interface Rascunho { categoria: SlugDaCategoria, titulo: string, lugar: Lugar }
+
+export interface Criado { chave: string, vinculoFalhou: boolean }
+
+export function criar(c: Criacao): Criado {
   const { dia, inicio, fim } = c.lugar
   sequencia++
   if (c.tipo === 'reuniao') {
     const id = `r-novo-${sequencia}`
+    // A reunião nasce no Outlook (1ª chamada); o vínculo é a 2ª. Se a 2ª falha, a reunião fica sem vínculo.
+    const vinculoFalhou = !!c.itemId && estado.falharVinculo
+    estado.falharVinculo = false
     estado.reunioes.push({
       id,
       titulo: c.titulo,
@@ -267,21 +347,23 @@ export function criar(c: Criacao): string {
       calendario: 'meu',
       teams: c.teams,
       participantes: [{ nome: EU.nome, email: EU.email!, resposta: 'sim' }, ...c.participantes.map(email => ({ nome: email.split('@')[0]!, email, resposta: 'pendente' as const }))],
-      itemId: c.itemId,
+      itemId: vinculoFalhou ? null : c.itemId,
+      organizador: EU.email!,
     })
-    return `r:${id}`
+    return { chave: `r:${id}`, vinculoFalhou }
   }
   if (c.tipo === 'rapida') {
     const modelo = structuredClone(toRaw(estado.tarefas.find(t => t.origem === 'rapida')!))
     estado.tarefas.push({ ...modelo, id: sequencia, reference: `#${sequencia}`, name: c.titulo, status: 'pending', due_date: quando(dia, inicio ?? 18 * 60), item: c.itemId, assigned_to: EU.id, completed_at: null, completed_by: null })
-    return `q:${sequencia}`
+    return { chave: `q:${sequencia}`, vinculoFalhou: false }
   }
   const f = fonte(c.categoria)!
   const prefixo = { contratos: 'CT', processos: 'PR', clientes: 'CL', chamados: 'CH' }[c.categoria]
-  const data: Record<string, string | number> = { titulo: c.titulo, created_at: HOJE, [f.campo]: dia }
+  const data: Record<string, string | number> = { ...c.campos, titulo: c.titulo, created_at: HOJE, [f.campo]: dia }
   if (f.horaInicio && inicio !== undefined) data[f.horaInicio] = inicio
   if (f.horaFim && fim !== undefined) data[f.horaFim] = fim
-  estado.itens.push({ id: sequencia, reference: `${prefixo}-${sequencia}`, categoria: c.categoria, titulo: c.titulo, responsavel: EU.id, data })
+  const contato = typeof data.contato === 'string' ? data.contato : undefined
+  estado.itens.push({ id: sequencia, reference: `${prefixo}-${sequencia}`, categoria: c.categoria, titulo: c.titulo, responsavel: EU.id, data, dominio: contato?.split('@')[1] })
   estado.camadas[c.categoria] = true
-  return `i:${sequencia}`
+  return { chave: `i:${sequencia}`, vinculoFalhou: false }
 }

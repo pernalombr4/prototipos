@@ -184,3 +184,53 @@ novo.
 - o BENI flutuante, como nas outras cascas deste repositório;
 - o botão flutuante "+" ("Criar Evento"): é proposta, não casca. A criação passa para o "Novo" da barra da Agenda e
   para o clique no horário (T5).
+
+## Rodada 2: o item e a tarefa no develop (29/10/2026)
+
+Observado pela tela, no workspace de exploração, no Chrome da redatora. Os prints mostram dado de cliente e e-mail de
+gente e ficam fora de `evidencias/`.
+
+### Tela do item
+
+Endereço `/types/<categoria>/<referência>?folder=<pasta>`: a pasta aberta vai para a URL.
+
+- **Painel da esquerda:** ícone de arquivo num círculo, a referência (quebra em linhas quando é longa), a categoria em
+  fonte mono, o selo da categoria e 3 grupos com rótulo em caixa alta (Identificação, Origem, Histórico). Cada grupo é
+  uma caixa com borda; cada linha tem ícone, rótulo pequeno em caixa alta e o valor em negrito (ID, Status, E-mail
+  solicitante, Criado em, Atualizado em). Botão « para recolher.
+- **Pastas:** abas sublinhadas com ícone: Visão Geral, Comentários, Logs de Auditoria, Tarefas, Anexos, Emails
+  Automáticos, Mail Box, Notas, Campos; ícone de nova pasta na ponta. A ativa fica no primário, com sublinhado e seta.
+- **Visão Geral:** o formulário do item, editável; Salvar no canto de baixo.
+- **Tarefas:** sub-aba "Tarefas Rápidas", "+ Visualizar", um quadro (Pendente, Em andamento, Bloqueada, Concluída) e
+  "+ Nova tarefa".
+- **Mail Box:** o endereço próprio do item (`<referência>.<workspace>@develop.box.enspace.io`) com botão de copiar, e
+  Recebidos e Enviados.
+- **Nada sobre agenda:** o item não mostra reunião, prazo de tarefa nem as datas dele num calendário.
+
+### Painel da tarefa em Tarefas › Agendadas
+
+- **Trilho de ícones à esquerda**, cada um com dica: painel, ID (#273511), Tarefa, Referência do item, Nome do Fluxo,
+  Etapa do Fluxo, Status.
+- **Abas:** Tarefa, Item, Histórico, Comentários.
+- **Tarefa:** "Detalhes da Tarefa" com ícone de atualizar; Criado em, Vencimento em ("02/10/2026, 18:02:48 BRT") e
+  Compartilhado com; divisória; "Concluir Etapa" no primário, na largura toda.
+- **Item:** "Detalhes do Item", "Acessar Item" no primário e o ícone de ocultar; Referência, "Criado em: 30/09/2026
+  por <pessoa>" em mono, Categoria e Formulário.
+
+### Onde trava, na volta
+
+| # | Onde | O que acontece |
+|---|---|---|
+| T10 | Item | Não há como ver nem marcar nada na agenda a partir do item |
+| T11 | Tarefa | O painel não leva à Agenda e não reserva tempo; o prazo só muda fora dele |
+| T12 | Painel da tarefa | São 2 painéis diferentes: o da Agenda (abas Tarefa, Item, Histórico) e o de Tarefas (trilho de ícones e Comentários) |
+| T13 | Outlook | O Mail Box do item já tem endereço próprio, mas nada liga um convite do Outlook ao item |
+
+### A casca, item por item (rodada 2)
+
+- `_TelaDoItem.vue`: painel da esquerda e barra de pastas como acima; a pasta Agenda entra depois de Tarefas. As
+  outras pastas, menos a Visão Geral, mostram só "não muda".
+- `_PainelDaTarefa.vue`: trilho de ícones, abas, "Detalhes da Tarefa", "Concluir Etapa" e "Detalhes do Item" como
+  acima; a aba Agenda entra depois de Comentários, que mostra só "não muda".
+- O menu lateral continua o da rodada 1, com Credenciais. Em 29/10 o develop não mostrou Credenciais para esta conta e
+  mostrou seta em Integrações; a casca não mudou nesta rodada.

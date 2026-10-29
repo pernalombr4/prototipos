@@ -4,10 +4,12 @@
 // interface leva travessão (regra 33).
 
 import type { Idioma } from '../../composables/useIdioma'
+import { textosDasLigacoes } from './textos-ligacoes'
 
 const dias = (n: number, um: string, varios: string) => `${n} ${n === 1 ? um : varios}`
 
 const ptBR = {
+  ...textosDasLigacoes['pt-BR'],
   casca: {
     menuLateral: 'Menu lateral',
     buscar: 'Buscar...',
@@ -221,6 +223,7 @@ const ptBR = {
 export type Textos = typeof ptBR
 
 const en: Textos = {
+  ...textosDasLigacoes.en,
   casca: {
     menuLateral: 'Side menu',
     buscar: 'Search...',
@@ -432,6 +435,7 @@ const en: Textos = {
 }
 
 const es: Textos = {
+  ...textosDasLigacoes.es,
   casca: {
     menuLateral: 'Menú lateral',
     buscar: 'Buscar...',

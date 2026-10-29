@@ -9,7 +9,9 @@
  * O que não existe no produto e é invenção do protótipo vai marcado com PROTÓTIPO:
  *  - o vínculo de reunião do Outlook com item (`itemId`) e a sugestão pelo domínio do e-mail;
  *  - o bloco de trabalho (tempo reservado para uma tarefa, sem mexer no prazo);
- *  - o campo de fim nas categorias (hoje a Agenda lê 1 data por fonte).
+ *  - o campo de fim nas categorias (hoje a Agenda lê 1 data por fonte);
+ *  - rodada 2: a permissão da pessoa por categoria e por item, o fluxo ligado a um campo de data, o organizador e o
+ *    evento particular do Outlook, a tarefa que pede aprovação ou formulário e o bloco que vai ao Outlook.
  */
 import type { Item, ItemType, Member, Task, Workspace } from '@be-enlighten/enspace-sdk-schemas'
 import { HOJE, somarDias } from './datas'
@@ -51,11 +53,20 @@ export interface CampoDaCategoria {
   chave: string
   rotulo: string
   tipo: 'data' | 'hora' | 'email' | 'texto'
+  obrigatorio?: boolean
 }
+
+/** PROTÓTIPO: o que a pessoa logada pode fazer na categoria. Ver é pressuposto: sem ver, a categoria nem chega. */
+export interface Permissao { criar: boolean, editar: boolean }
+
+/** PROTÓTIPO: um fluxo do Spaceflow com gatilho "campo alterado" num campo de data. */
+export interface FluxoNoCampo { campo: string, nome: string, efeito: string }
 
 export interface Categoria extends Pick<ItemType, 'id' | 'name' | 'icon'> {
   slug: SlugDaCategoria
   campos: CampoDaCategoria[]
+  permissao: Permissao
+  fluxo?: FluxoNoCampo
 }
 
 const criadoEm: CampoDaCategoria = { chave: 'created_at', rotulo: 'Criado em', tipo: 'data' }
@@ -66,28 +77,42 @@ export const categorias: Categoria[] = [
     name: 'Contratos',
     slug: 'contratos',
     icon: 'i-lucide-file-signature',
-    campos: [criadoEm, { chave: 'inicio_vigencia', rotulo: 'Início da vigência', tipo: 'data' }, { chave: 'fim_vigencia', rotulo: 'Fim da vigência', tipo: 'data' }, { chave: 'assinatura', rotulo: 'Data de assinatura', tipo: 'data' }, { chave: 'contato', rotulo: 'E-mail do contato', tipo: 'email' }, { chave: 'titulo', rotulo: 'Título', tipo: 'texto' }],
+    campos: [
+      criadoEm,
+      { chave: 'titulo', rotulo: 'Título', tipo: 'texto', obrigatorio: true },
+      { chave: 'contato', rotulo: 'E-mail do contato', tipo: 'email', obrigatorio: true },
+      { chave: 'inicio_vigencia', rotulo: 'Início da vigência', tipo: 'data', obrigatorio: true },
+      { chave: 'fim_vigencia', rotulo: 'Fim da vigência', tipo: 'data', obrigatorio: true },
+      { chave: 'assinatura', rotulo: 'Data de assinatura', tipo: 'data' },
+      { chave: 'valor', rotulo: 'Valor mensal', tipo: 'texto' },
+    ],
+    permissao: { criar: true, editar: true },
+    fluxo: { campo: 'fim_vigencia', nome: 'Aviso de renovação', efeito: 'Envia e-mail ao contato do contrato e cria a tarefa Revisar renovação.' },
   },
   {
     id: 1320,
     name: 'Processos',
     slug: 'processos',
     icon: 'i-lucide-gavel',
-    campos: [criadoEm, { chave: 'audiencia', rotulo: 'Data da audiência', tipo: 'data' }, { chave: 'audiencia_inicio', rotulo: 'Início da audiência', tipo: 'hora' }, { chave: 'audiencia_fim', rotulo: 'Fim da audiência', tipo: 'hora' }, { chave: 'prazo_fatal', rotulo: 'Prazo fatal', tipo: 'data' }, { chave: 'titulo', rotulo: 'Título', tipo: 'texto' }],
+    campos: [criadoEm, { chave: 'titulo', rotulo: 'Título', tipo: 'texto', obrigatorio: true }, { chave: 'audiencia', rotulo: 'Data da audiência', tipo: 'data' }, { chave: 'audiencia_inicio', rotulo: 'Início da audiência', tipo: 'hora' }, { chave: 'audiencia_fim', rotulo: 'Fim da audiência', tipo: 'hora' }, { chave: 'prazo_fatal', rotulo: 'Prazo fatal', tipo: 'data' }],
+    /** A pessoa edita os processos, mas quem abre processo é o cadastro do Jurídico. */
+    permissao: { criar: false, editar: true },
   },
   {
     id: 1322,
     name: 'Clientes',
     slug: 'clientes',
     icon: 'i-lucide-building-2',
-    campos: [criadoEm, { chave: 'proxima_visita', rotulo: 'Próxima visita', tipo: 'data' }, { chave: 'contato', rotulo: 'E-mail de contato', tipo: 'email' }, { chave: 'titulo', rotulo: 'Nome', tipo: 'texto' }],
+    campos: [criadoEm, { chave: 'titulo', rotulo: 'Nome', tipo: 'texto', obrigatorio: true }, { chave: 'proxima_visita', rotulo: 'Próxima visita', tipo: 'data' }, { chave: 'contato', rotulo: 'E-mail de contato', tipo: 'email' }],
+    permissao: { criar: true, editar: true },
   },
   {
     id: 1330,
     name: 'Chamados',
     slug: 'chamados',
     icon: 'i-lucide-life-buoy',
-    campos: [criadoEm, { chave: 'titulo', rotulo: 'Assunto', tipo: 'texto' }],
+    campos: [criadoEm, { chave: 'titulo', rotulo: 'Assunto', tipo: 'texto', obrigatorio: true }],
+    permissao: { criar: false, editar: false },
   },
 ]
 export const categoriaPorSlug = (s: string) => categorias.find(c => c.slug === s)!
@@ -103,10 +128,12 @@ export interface ItemDaAgenda extends Pick<Item, 'id' | 'reference'> {
   data: Record<string, string | number>
   /** PROTÓTIPO: o domínio do e-mail do contato, usado para sugerir o vínculo da reunião. */
   dominio?: string
+  /** PROTÓTIPO: o item foi compartilhado com a pessoa só para leitura. */
+  somenteLeitura?: boolean
 }
 
-const item = (id: number, reference: string, categoria: SlugDaCategoria, titulo: string, responsavel: number, data: Record<string, string | number>, dominio?: string): ItemDaAgenda =>
-  ({ id, reference, categoria, titulo, responsavel, data: { titulo, created_at: '2026-09-14', ...data }, dominio })
+const item = (id: number, reference: string, categoria: SlugDaCategoria, titulo: string, responsavel: number, data: Record<string, string | number>, dominio?: string, somenteLeitura?: boolean): ItemDaAgenda =>
+  ({ id, reference, categoria, titulo, responsavel, data: { titulo, created_at: '2026-09-14', ...data }, dominio, somenteLeitura })
 
 export const itens: ItemDaAgenda[] = [
   item(47231, 'CT-2041', 'contratos', 'Ondas Telecom · Link dedicado 2026', 1, { fim_vigencia: '2026-10-30', inicio_vigencia: '2025-10-31', contato: 'ana.lopes@ondastelecom.example' }, 'ondastelecom.example'),
@@ -115,7 +142,7 @@ export const itens: ItemDaAgenda[] = [
   item(47234, 'CT-2050', 'contratos', 'Gráfica Ponto Final · Impressos', 3, { fim_vigencia: '2026-10-26', inicio_vigencia: '2025-10-27', contato: 'pedidos@pontofinal.example' }, 'pontofinal.example'),
   item(52088, 'PR-0318', 'processos', 'Ação de cobrança · Grupo Solaris', 1, { audiencia: '2026-10-29', audiencia_inicio: 840, audiencia_fim: 930, prazo_fatal: '2026-11-06' }, 'pradolima.example'),
   item(52091, 'PR-0322', 'processos', 'Reclamação trabalhista · ex-colaborador da manutenção', 1, { audiencia: '2026-11-04', audiencia_inicio: 570, audiencia_fim: 630, prazo_fatal: '2026-11-03' }),
-  item(52094, 'PR-0325', 'processos', 'Revisão contratual · Vértice Engenharia', 4, { audiencia: '2026-11-10', audiencia_inicio: 960, audiencia_fim: 1020 }, 'vertice.example'),
+  item(52094, 'PR-0325', 'processos', 'Revisão contratual · Vértice Engenharia', 4, { audiencia: '2026-11-10', audiencia_inicio: 960, audiencia_fim: 1020 }, 'vertice.example', true),
   item(61118, 'CL-118', 'clientes', 'Ondas Telecom', 2, { proxima_visita: '2026-11-09', contato: 'ana.lopes@ondastelecom.example' }, 'ondastelecom.example'),
   item(61121, 'CL-121', 'clientes', 'Vértice Engenharia', 2, { proxima_visita: '2026-11-18', contato: 'compras@vertice.example' }, 'vertice.example'),
   item(61124, 'CL-124', 'clientes', 'Grupo Solaris', 2, { contato: 'marcos.teles@solaris.example' }, 'solaris.example'),
@@ -132,6 +159,8 @@ export interface TarefaDaAgenda extends Task {
    * Tarefas Rápidas (sem SLA). É o que decide o arrastar: a de SLA ganha bloco; a rápida muda de data.
    */
   origem: 'fluxo' | 'rapida'
+  /** PROTÓTIPO: a tarefa do fluxo que não conclui com 1 clique (aprovação, ou formulário a preencher). */
+  acao?: 'aprovar' | 'formulario'
 }
 
 const quando = (dia: string, h: string) => new Date(`${dia}T${h}:00Z`)
@@ -172,8 +201,8 @@ function tarefa(id: number, origem: TarefaDaAgenda['origem'], name: string, stat
 export const tarefasIniciais = (): TarefaDaAgenda[] => [
   tarefa(273512, 'fluxo', 'Executar pedido', 'working', quando('2026-10-28', '18:00'), 1, 47231),
   tarefa(273530, 'fluxo', 'Revisar minuta do aditivo', 'pending', quando('2026-10-30', '12:00'), 1, 47232),
-  tarefa(273541, 'fluxo', 'Aprovar orçamento de impressos', 'pending', quando('2026-10-26', '18:00'), 1, 47234),
-  tarefa(273555, 'fluxo', 'Protocolar contestação', 'pending', quando('2026-10-29', '18:00'), 1, 52091),
+  tarefa(273541, 'fluxo', 'Aprovar orçamento de impressos', 'pending', quando('2026-10-26', '18:00'), 1, 47234, { acao: 'aprovar' }),
+  tarefa(273555, 'fluxo', 'Protocolar contestação', 'pending', quando('2026-10-29', '18:00'), 1, 52091, { acao: 'formulario' }),
   tarefa(273560, 'fluxo', 'Conferir o cálculo de reajuste pelo IPCA antes da renovação do contrato de licenciamento', 'pending', quando('2026-11-03', '18:00'), 1, 47233),
   tarefa(273566, 'fluxo', 'Enviar notificação de não renovação', 'completed', quando('2026-10-27', '12:00'), 1, 47234),
   tarefa(273570, 'fluxo', 'Preparar memoriais da audiência', 'working', quando('2026-10-29', '12:00'), 1, 52088),
@@ -211,6 +240,10 @@ export interface Reuniao {
   itemId: number | null
   /** PROTÓTIPO: a pessoa recusou a sugestão de vínculo; ela não volta. */
   sugestaoRecusada?: boolean
+  /** E-mail de quem organizou. Só o organizador muda o horário no Outlook (`isOrganizer` do Graph). */
+  organizador: string
+  /** Marcado como particular no Outlook (`sensitivity = private`): não se liga a item. */
+  particular?: boolean
 }
 
 const eu = (r: Participante['resposta'] = 'sim'): Participante => ({ nome: EU.nome, email: EU.email!, resposta: r })
@@ -224,21 +257,21 @@ function dailies(): Reuniao[] {
     const dia = somarDias(HOJE, i)
     const semana = new Date(`${dia}T00:00:00Z`).getUTCDay()
     if (semana === 0 || semana === 6 || dia === '2026-11-02') continue
-    lista.push({ id: `daily-${dia}`, titulo: 'Daily do Jurídico', dia, inicio: 540, fim: 555, calendario: 'juridico', teams: true, participantes: [eu(), interno(4), interno(5)], itemId: null })
+    lista.push({ id: `daily-${dia}`, titulo: 'Daily do Jurídico', dia, inicio: 540, fim: 555, calendario: 'juridico', teams: true, participantes: [eu(), interno(4), interno(5)], itemId: null, organizador: pessoaPorId(4)!.email! })
   }
   return lista
 }
 
 export const reunioesIniciais = (): Reuniao[] => [
   ...dailies(),
-  { id: 'r-ondas-1', titulo: 'Primeira conversa com a Ondas Telecom', dia: '2026-10-20', inicio: 600, fim: 660, calendario: 'meu', teams: true, participantes: [eu(), interno(2), externo('Ana Lopes', 'ana.lopes@ondastelecom.example', 'sim')], itemId: 61118 },
-  { id: 'r-solaris-0', titulo: 'Proposta comercial do Grupo Solaris', dia: '2026-10-22', inicio: 840, fim: 900, calendario: 'meu', teams: true, participantes: [eu(), interno(2), externo('Marcos Teles', 'marcos.teles@solaris.example', 'sim')], itemId: 47233 },
-  { id: 'r-prep', titulo: 'Preparação da audiência de cobrança', dia: '2026-10-26', inicio: 900, fim: 960, calendario: 'meu', teams: false, local: 'Sala Ipê', participantes: [eu(), interno(6)], itemId: 52088 },
-  { id: 'r-1a1', titulo: '1:1 com o Paulo', dia: '2026-10-27', inicio: 660, fim: 720, calendario: 'meu', teams: true, participantes: [eu(), interno(6)], itemId: null },
-  { id: 'r-ondas-2', titulo: 'Alinhamento do link dedicado com a Ondas Telecom', dia: '2026-10-27', inicio: 840, fim: 900, calendario: 'meu', teams: true, participantes: [eu(), interno(2), externo('Ana Lopes', 'ana.lopes@ondastelecom.example', 'sim'), externo('Caio Ventura', 'caio.ventura@ondastelecom.example', 'talvez')], itemId: null },
-  { id: 'r-solaris-1', titulo: 'Revisão das cláusulas de reajuste com o Grupo Solaris', dia: '2026-10-28', inicio: 600, fim: 660, calendario: 'meu', teams: true, participantes: [eu(), interno(3), externo('Marcos Teles', 'marcos.teles@solaris.example', 'sim')], itemId: 47233 },
-  { id: 'r-riscos', titulo: 'Comitê de riscos', dia: '2026-10-28', inicio: 630, fim: 690, calendario: 'juridico', teams: false, local: 'Sala Jacarandá', participantes: [eu('talvez'), interno(6), interno(3), interno(4)], itemId: null },
-  { id: 'r-fin', titulo: 'Ligação rápida com o financeiro', dia: '2026-10-28', inicio: 630, fim: 660, calendario: 'meu', teams: true, participantes: [eu(), interno(3)], itemId: null },
+  { id: 'r-ondas-1', titulo: 'Primeira conversa com a Ondas Telecom', dia: '2026-10-20', inicio: 600, fim: 660, calendario: 'meu', teams: true, participantes: [eu(), interno(2), externo('Ana Lopes', 'ana.lopes@ondastelecom.example', 'sim')], itemId: 61118, organizador: EU.email! },
+  { id: 'r-solaris-0', titulo: 'Proposta comercial do Grupo Solaris', dia: '2026-10-22', inicio: 840, fim: 900, calendario: 'meu', teams: true, participantes: [eu(), interno(2), externo('Marcos Teles', 'marcos.teles@solaris.example', 'sim')], itemId: 47233, organizador: EU.email! },
+  { id: 'r-prep', titulo: 'Preparação da audiência de cobrança', dia: '2026-10-26', inicio: 900, fim: 960, calendario: 'meu', teams: false, local: 'Sala Ipê', participantes: [eu(), interno(6)], itemId: 52088, organizador: EU.email! },
+  { id: 'r-1a1', titulo: '1:1 com o Paulo', dia: '2026-10-27', inicio: 660, fim: 720, calendario: 'meu', teams: true, participantes: [eu(), interno(6)], itemId: null, organizador: EU.email! },
+  { id: 'r-ondas-2', titulo: 'Alinhamento do link dedicado com a Ondas Telecom', dia: '2026-10-27', inicio: 840, fim: 900, calendario: 'meu', teams: true, participantes: [eu(), interno(2), externo('Ana Lopes', 'ana.lopes@ondastelecom.example', 'sim'), externo('Caio Ventura', 'caio.ventura@ondastelecom.example', 'talvez')], itemId: null, organizador: EU.email! },
+  { id: 'r-solaris-1', titulo: 'Revisão das cláusulas de reajuste com o Grupo Solaris', dia: '2026-10-28', inicio: 600, fim: 660, calendario: 'meu', teams: true, participantes: [eu(), interno(3), externo('Marcos Teles', 'marcos.teles@solaris.example', 'sim')], itemId: 47233, organizador: EU.email! },
+  { id: 'r-riscos', titulo: 'Comitê de riscos', dia: '2026-10-28', inicio: 630, fim: 690, calendario: 'juridico', teams: false, local: 'Sala Jacarandá', participantes: [eu('talvez'), interno(6), interno(3), interno(4)], itemId: null, organizador: pessoaPorId(6)!.email! },
+  { id: 'r-fin', titulo: 'Ligação rápida com o financeiro', dia: '2026-10-28', inicio: 630, fim: 660, calendario: 'meu', teams: true, participantes: [eu(), interno(3)], itemId: null, organizador: EU.email! },
   {
     id: 'r-vertice',
     titulo: 'Kick-off da manutenção predial com a Vértice Engenharia',
@@ -248,23 +281,32 @@ export const reunioesIniciais = (): Reuniao[] => [
     calendario: 'meu',
     teams: true,
     participantes: [eu(), interno(2), interno(4), interno(5), externo('Rui Campos', 'rui.campos@vertice.example', 'sim'), externo('Bia Torres', 'bia.torres@vertice.example', 'sim'), externo('Ivo Lemos', 'ivo.lemos@vertice.example'), externo('Sara Duarte', 'sara.duarte@vertice.example'), externo('Leo Faria', 'leo.faria@vertice.example', 'nao'), externo('Compras Vértice', 'compras@vertice.example'), externo('Otto Reis', 'otto.reis@vertice.example', 'talvez'), interno(6, 'pendente')],
-    itemId: null,
+    itemId: null, organizador: pessoaPorId(2)!.email!,
   },
-  { id: 'r-prado', titulo: 'Café com o escritório Prado e Lima', dia: '2026-10-29', inicio: 450, fim: 480, calendario: 'meu', teams: false, local: 'Café da esquina', participantes: [eu(), externo('Helena Prado', 'helena.prado@pradolima.example', 'sim')], itemId: 52088 },
-  { id: 'r-lgpd', titulo: 'Treinamento de LGPD', dia: '2026-10-30', calendario: 'juridico', teams: true, participantes: [eu(), interno(4), interno(5), interno(3)], itemId: null },
-  { id: 'r-ondas-3', titulo: 'Negociação da renovação com a Ondas Telecom', dia: '2026-10-30', inicio: 900, fim: 990, calendario: 'meu', teams: true, participantes: [eu(), interno(2), externo('Ana Lopes', 'ana.lopes@ondastelecom.example', 'sim')], itemId: 47231 },
-  { id: 'r-vertice-2', titulo: 'Assinatura do aditivo com a Vértice', dia: '2026-11-03', inicio: 600, fim: 660, calendario: 'meu', teams: true, participantes: [eu(), externo('Rui Campos', 'rui.campos@vertice.example', 'sim')], itemId: 47232 },
-  { id: 'r-solaris-2', titulo: 'Reunião mensal com o Grupo Solaris', dia: '2026-11-04', inicio: 840, fim: 900, calendario: 'meu', teams: true, participantes: [eu(), interno(2), externo('Marcos Teles', 'marcos.teles@solaris.example')], itemId: null },
-  { id: 'r-workshop', titulo: 'Workshop de contratos padrão', dia: '2026-11-06', inicio: 540, fim: 720, calendario: 'juridico', teams: false, local: 'Auditório', participantes: [eu(), interno(2), interno(3), interno(4), interno(5), interno(6)], itemId: null },
+  { id: 'r-prado', titulo: 'Café com o escritório Prado e Lima', dia: '2026-10-29', inicio: 450, fim: 480, calendario: 'meu', teams: false, local: 'Café da esquina', participantes: [eu(), externo('Helena Prado', 'helena.prado@pradolima.example', 'sim')], itemId: 52088, organizador: EU.email! },
+  { id: 'r-particular', titulo: 'Consulta médica', dia: '2026-10-29', inicio: 720, fim: 780, calendario: 'meu', teams: false, participantes: [eu()], itemId: null, organizador: EU.email!, particular: true },
+  { id: 'r-lgpd', titulo: 'Treinamento de LGPD', dia: '2026-10-30', calendario: 'juridico', teams: true, participantes: [eu(), interno(4), interno(5), interno(3)], itemId: null, organizador: pessoaPorId(3)!.email! },
+  { id: 'r-ondas-3', titulo: 'Negociação da renovação com a Ondas Telecom', dia: '2026-10-30', inicio: 900, fim: 990, calendario: 'meu', teams: true, participantes: [eu(), interno(2), externo('Ana Lopes', 'ana.lopes@ondastelecom.example', 'sim')], itemId: 47231, organizador: EU.email! },
+  { id: 'r-vertice-2', titulo: 'Assinatura do aditivo com a Vértice', dia: '2026-11-03', inicio: 600, fim: 660, calendario: 'meu', teams: true, participantes: [eu(), externo('Rui Campos', 'rui.campos@vertice.example', 'sim')], itemId: 47232, organizador: EU.email! },
+  { id: 'r-solaris-2', titulo: 'Reunião mensal com o Grupo Solaris', dia: '2026-11-04', inicio: 840, fim: 900, calendario: 'meu', teams: true, participantes: [eu(), interno(2), externo('Marcos Teles', 'marcos.teles@solaris.example')], itemId: null, organizador: 'marcos.teles@solaris.example' },
+  { id: 'r-workshop', titulo: 'Workshop de contratos padrão', dia: '2026-11-06', inicio: 540, fim: 720, calendario: 'juridico', teams: false, local: 'Auditório', participantes: [eu(), interno(2), interno(3), interno(4), interno(5), interno(6)], itemId: null, organizador: pessoaPorId(2)!.email! },
 ]
 
 /* ------------------------------------------------------------------ *
  * PROTÓTIPO: blocos de trabalho (tempo reservado para uma tarefa)
  * ------------------------------------------------------------------ */
-export interface Bloco { id: string, tarefaId: number, dia: string, inicio: number, fim: number }
+export interface Bloco {
+  id: string
+  tarefaId: number
+  dia: string
+  inicio: number
+  fim: number
+  /** PROTÓTIPO: o bloco também está no Outlook, como "ocupado", para quem marca reunião ver o horário tomado. */
+  outlook?: boolean
+}
 
 export const blocosIniciais = (): Bloco[] => [
-  { id: 'b-1', tarefaId: 273512, dia: '2026-10-28', inicio: 480, fim: 570 },
+  { id: 'b-1', tarefaId: 273512, dia: '2026-10-28', inicio: 480, fim: 570, outlook: true },
   { id: 'b-2', tarefaId: 273570, dia: '2026-10-28', inicio: 840, fim: 930 },
   { id: 'b-3', tarefaId: 273530, dia: '2026-10-29', inicio: 570, fim: 660 },
 ]

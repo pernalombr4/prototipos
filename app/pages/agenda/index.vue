@@ -8,13 +8,19 @@
  *      e-mail), aba Agenda no painel do item, painel Para agendar e tempo reservado para tarefa com SLA.
  *
  * Uma porta: o painel do item e a configuração abrem por cima da própria Agenda.
+ *
+ * Rodada 2 (29/10/2026): a volta da ligação. O item tem a pasta Agenda na tela dele ("Acessar Item"), a tarefa tem
+ * o painel com a aba Agenda, a criação de item leva ao formulário completo da categoria, e cada gesto respeita a
+ * permissão da pessoa, com um aviso quando o efeito não se desfaz (fluxo no campo) ou quando a 2ª chamada falha
+ * (vínculo da reunião).
  */
 import type { Lugar } from '~/components/ux/geometriaDoCalendario'
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { textos } from './textos'
 import { AGORA, HOJE, diaCurto, diaDaSemana, hora } from './datas'
-import { type Cenario, type TipoDeCriacao, aplicar, diaDe, escolherCenario, estado, eventos, foto, item, minutoDe, paraAgendar, reiniciar, restaurar, reuniao } from './estado'
-import { HORARIO, feriados } from './mocks'
+import { type Cenario, type Criado, type Rascunho, type TipoDeCriacao, aplicar, diaDe, escolherCenario, estado, eventos, fluxoDoCampo, foto, item, minutoDe, paraAgendar, reiniciar, restaurar, reuniao } from './estado'
+import { HORARIO, categoriaPorSlug, feriados } from './mocks'
+import { avisarReuniao } from './avisos'
 import CascaDaAgenda from './_CascaDaAgenda.vue'
 import BarraDaAgenda from './_BarraDaAgenda.vue'
 import LateralDaAgenda from './_LateralDaAgenda.vue'
@@ -24,6 +30,9 @@ import DetalheDoEvento from './_DetalheDoEvento.vue'
 import CriacaoRapida from './_CriacaoRapida.vue'
 import PainelDoItem from './_PainelDoItem.vue'
 import ConfiguracaoDaAgenda from './_ConfiguracaoDaAgenda.vue'
+import PainelDaTarefa from './_PainelDaTarefa.vue'
+import TelaDoItem from './_TelaDoItem.vue'
+import FormularioDoItem from './_FormularioDoItem.vue'
 
 import briefingMd from './BRIEFING.md?raw'
 import pesquisaMd from './PESQUISA.md?raw'
@@ -33,7 +42,7 @@ definePageMeta({
   titulo: 'Agenda',
   descricao: 'A Agenda como lugar de ação: grade convencional e calma, camadas por fonte, reunião do Outlook ligada a item, arrastar para agendar, painel Para agendar e tempo reservado para tarefa com SLA.',
   status: 'em-revisao',
-  atualizado: '2026-10-28',
+  atualizado: '2026-10-29',
   tela: 'Membro › Agenda',
 })
 
@@ -67,9 +76,11 @@ function abrir(chave: string, ref: Referencia) {
   referencia.value = ref
   detalhe.value = chave
 }
-function criarEm(lugar: Lugar, ref: Referencia) {
+const tipoInicial = ref<TipoDeCriacao | undefined>()
+function criarEm(lugar: Lugar, ref: Referencia, tipo?: TipoDeCriacao) {
   detalhe.value = null
   referencia.value = ref
+  tipoInicial.value = tipo
   rascunho.value = lugar
 }
 function novo(el: HTMLElement) {
@@ -80,12 +91,33 @@ function novo(el: HTMLElement) {
 /* ---------- um gesto, um aviso com Desfazer ---------- */
 const quando = (dia: string, inicio?: number) => t.value.quando(diaCurto(dia, locale.value), inicio === undefined ? undefined : hora(inicio))
 
+/** A data com fluxo do Spaceflow pede confirmação antes: o fluxo roda e não se desfaz pela Agenda. */
+const confirmacao = reactive({ aberta: false, chave: '', lugar: null as Lugar | null })
+const aConfirmar = computed(() => {
+  const i = confirmacao.chave.startsWith('i:') ? item(Number(confirmacao.chave.slice(2))) : null
+  const f = i ? fluxoDoCampo(i) : null
+  return i && f ? { ref: i.reference, fluxo: f, campo: categoriaPorSlug(i.categoria).campos.find(c => c.chave === f.campo)!.rotulo } : null
+})
 function mover(chave: string, l: Lugar) {
+  const i = chave.startsWith('i:') ? item(Number(chave.slice(2))) : null
+  if (i && fluxoDoCampo(i)) return Object.assign(confirmacao, { aberta: true, chave, lugar: l })
+  executar(chave, l)
+}
+function confirmar() {
+  confirmacao.aberta = false
+  if (confirmacao.lugar) executar(confirmacao.chave, confirmacao.lugar)
+}
+
+function executar(chave: string, l: Lugar) {
   const antes = foto()
   const e = aplicar(chave, l)
   if (!e) return
   const a = t.value.avisos
   const desfazer = [{ label: a.desfazer, color: 'neutral' as const, variant: 'outline' as const, onClick: () => restaurar(antes) }]
+  if (e.tipo === 'item' && e.fluxo) {
+    toast.add({ title: a.item(e.campo, e.referencia, quando(e.dia, e.inicio)), icon: 'i-lucide-calendar-check', color: 'success' })
+    return toast.add({ title: t.value.fluxo.rodou(e.fluxo), description: t.value.fluxo.rodouTexto, icon: 'i-lucide-zap', color: 'warning' })
+  }
   if (e.tipo === 'sla') return toast.add({ title: a.sla, description: a.slaTexto, color: 'warning', icon: 'i-lucide-lock' })
   if (e.tipo === 'reuniao') return toast.add({ title: a.reuniao(quando(e.dia, e.inicio)), description: a.reuniaoTexto, icon: 'i-lucide-calendar-clock', actions: desfazer })
   if (e.tipo === 'bloco') return toast.add({ title: a.bloco(quando(e.dia, e.inicio)), icon: 'i-lucide-timer', actions: desfazer })
@@ -94,10 +126,18 @@ function mover(chave: string, l: Lugar) {
   toast.add({ title: a.item(e.campo, e.referencia, quando(e.dia, e.inicio)), icon: 'i-lucide-calendar-check', actions: desfazer })
 }
 
-function criado(_chave: string, tipo: TipoDeCriacao) {
+function criado(c: Criado, tipo: TipoDeCriacao, itemId: number | null) {
   rascunho.value = null
   estado.agendandoPara = null
+  if (tipo === 'reuniao') return avisarReuniao(toast, t.value, c, itemId)
   toast.add({ title: t.value.avisos.criado[tipo], icon: 'i-lucide-circle-check', color: 'success' })
+}
+
+/* ---------- formulário completo da categoria ("Mais campos") ---------- */
+const formulario = reactive({ aberto: false, rascunho: null as Rascunho | null })
+function abrirFormulario(r: Rascunho) {
+  rascunho.value = null
+  Object.assign(formulario, { aberto: true, rascunho: r })
 }
 
 /* ---------- Outlook ---------- */
@@ -112,8 +152,24 @@ function conectar() {
   }, 1200)
 }
 
-/* ---------- painel do item e configuração ---------- */
+/* ---------- painel do item, painel da tarefa, tela do item e configuração ---------- */
 const painel = reactive({ aberto: false, itemId: null as number | null, aba: 'agenda' as 'item' | 'tarefas' | 'agenda' })
+const painelTarefa = reactive({ aberto: false, id: null as number | null, aba: 'tarefa' as 'tarefa' | 'item' | 'historico' | 'comentarios' | 'agenda' })
+const tela = reactive({ qual: 'agenda' as 'agenda' | 'item', itemId: 47233, pasta: 'agenda' })
+
+function abrirTarefa(id: number, aba: typeof painelTarefa.aba = 'tarefa') {
+  detalhe.value = null
+  painel.aberto = false
+  Object.assign(painelTarefa, { aberto: true, id, aba })
+}
+function acessar(id: number) {
+  fecharTudo()
+  Object.assign(tela, { qual: 'item', itemId: id, pasta: 'agenda' })
+}
+function irParaDia(dia: string) {
+  fecharTudo()
+  Object.assign(estado, { data: dia, vista: estado.vista === 'dia' ? 'dia' : 'semana' })
+}
 const configAberta = ref(false)
 const paraAgendarAberto = ref(true)
 
@@ -128,9 +184,11 @@ function agendar(id: number) {
 }
 function irAoEvento(chave: string) {
   painel.aberto = false
+  painelTarefa.aberto = false
+  tela.qual = 'agenda'
   const r = reuniao(chave.slice(2))
   if (!r) return
-  Object.assign(estado, { data: r.dia, vista: estado.vista === 'lista' ? 'semana' : estado.vista })
+  Object.assign(estado, { data: r.dia, vista: estado.vista === 'lista' || estado.vista === 'mes' ? 'semana' : estado.vista })
   setTimeout(() => abrir(chave, pelo(`[data-evento="${chave}"]`)), 350)
 }
 const agendandoRef = computed(() => item(estado.agendandoPara)?.reference)
@@ -153,31 +211,77 @@ function fecharTudo() {
   detalhe.value = null
   rascunho.value = null
   painel.aberto = false
+  painelTarefa.aberto = false
+  formulario.aberto = false
   configAberta.value = false
+  tela.qual = 'agenda'
 }
 function cenario(c: Cenario) {
   fecharTudo()
   escolherCenario(c)
 }
-function noGrid(chave: string) {
+function noGrid(chave: string, dia = HOJE) {
   fecharTudo()
-  Object.assign(estado, { vista: 'semana', data: HOJE })
+  Object.assign(estado, { vista: 'semana', data: dia })
+  // O filtro de responsável pode esconder o evento do atalho (o item de outra pessoa): mostra todos.
+  if (!eventos.value.some(e => e.id === chave)) estado.responsaveis = []
   // Depois de o menu fechar e devolver o foco ao "Ir para"; antes disso, o popover nasce e já se fecha.
   setTimeout(() => abrir(chave, pelo(`[data-evento="${chave}"]`)), 300)
 }
 const cenarios: Cenario[] = ['normal', 'primeiro', 'falha', 'vazia', 'carregando']
-const atalhos = computed<DropdownMenuItem[]>(() => [
-  { label: t.value.andaime.atalhos.sugestao, icon: 'i-lucide-sparkles', onSelect: () => noGrid('r:r-vertice') },
-  { label: t.value.andaime.atalhos.sla, icon: 'i-lucide-flag', onSelect: () => noGrid('t:273512') },
-  { label: t.value.andaime.atalhos.item, icon: 'i-lucide-panel-right', onSelect: () => abrirItem(47233, 'agenda') },
-  { label: t.value.andaime.atalhos.configuracao, icon: 'i-lucide-settings-2', onSelect: () => (configAberta.value = true) },
-  { label: t.value.andaime.atalhos.mes, icon: 'i-lucide-calendar', onSelect: () => (estado.vista = 'mes') },
-])
+function criarComObrigatorios() {
+  fecharTudo()
+  Object.assign(estado, { vista: 'semana', data: HOJE })
+  const centro = { getBoundingClientRect: () => new DOMRect(window.innerWidth / 2, 220, 0, 0) }
+  setTimeout(() => criarEm({ dia: '2026-10-30', inicio: 600, fim: 660 }, centro, 'item'), 300)
+}
+function armarFalha() {
+  estado.falharVinculo = true
+  toast.add({ title: t.value.atalhos2.falharVinculo, description: t.value.atalhos2.falhaArmada, icon: 'i-lucide-unlink', color: 'neutral' })
+}
+const atalhos = computed<DropdownMenuItem[][]>(() => {
+  const a = t.value.andaime.atalhos
+  const b = t.value.atalhos2
+  return [
+    [
+      { label: a.sugestao, icon: 'i-lucide-sparkles', onSelect: () => noGrid('r:r-vertice') },
+      { label: a.sla, icon: 'i-lucide-flag', onSelect: () => noGrid('t:273512') },
+      { label: a.item, icon: 'i-lucide-panel-right', onSelect: () => abrirItem(47233, 'agenda') },
+      { label: a.configuracao, icon: 'i-lucide-settings-2', onSelect: () => (configAberta.value = true) },
+      { label: a.mes, icon: 'i-lucide-calendar', onSelect: () => (estado.vista = 'mes') },
+    ],
+    [
+      { type: 'label', label: b.grupoRodada2 },
+      { label: b.telaDoItem, icon: 'i-lucide-folder-open', onSelect: () => acessar(47233) },
+      { label: b.painelDaTarefa, icon: 'i-lucide-panel-right-open', onSelect: () => abrirTarefa(273512, 'agenda') },
+      { label: b.criarComObrigatorios, icon: 'i-lucide-file-plus', onSelect: criarComObrigatorios },
+      { label: b.itemComFluxo, icon: 'i-lucide-zap', onSelect: () => noGrid('i:47231') },
+      { label: b.itemLeitura, icon: 'i-lucide-eye', onSelect: () => noGrid('i:52094', '2026-11-10') },
+      { label: b.reuniaoDeOutro, icon: 'i-lucide-lock', onSelect: () => noGrid('r:r-riscos') },
+      { label: b.tarefaAprovacao, icon: 'i-lucide-stamp', onSelect: () => noGrid('t:273541') },
+      { label: b.particular, icon: 'i-lucide-eye-off', onSelect: () => noGrid('r:r-particular') },
+      { label: b.falharVinculo, icon: 'i-lucide-unlink', onSelect: armarFalha },
+    ],
+  ]
+})
 </script>
 
 <template>
   <div>
-    <CascaDaAgenda :t="t">
+    <TelaDoItem
+      v-if="tela.qual === 'item'"
+      v-model:pasta="tela.pasta"
+      :t="t"
+      :locale="locale"
+      :item-id="tela.itemId"
+      :conectando="conectando"
+      @voltar="tela.qual = 'agenda'"
+      @abrir-evento="irAoEvento"
+      @abrir-tarefa="id => abrirTarefa(id, 'agenda')"
+      @ir-para-dia="irParaDia"
+      @conectar="conectar"
+    />
+    <CascaDaAgenda v-else :t="t">
       <div class="flex h-full min-h-0 flex-col pb-(--altura-do-andaime)">
         <UAlert
           v-if="estado.outlook === 'falha'"
@@ -249,16 +353,56 @@ const atalhos = computed<DropdownMenuItem[]>(() => [
 
     <UPopover :open="!!detalhe" :reference="referencia" :content="{ side: 'right', align: 'start', sideOffset: 8 }" @update:open="v => !v && (detalhe = null)">
       <template #content>
-        <DetalheDoEvento v-if="detalhe" :key="detalhe" :t="t" :locale="locale" :chave="detalhe" @fechar="detalhe = null" @mover="mover" @abrir-item="abrirItem" />
+        <DetalheDoEvento v-if="detalhe" :key="detalhe" :t="t" :locale="locale" :chave="detalhe" @fechar="detalhe = null" @mover="mover" @abrir-item="abrirItem" @abrir-tarefa="abrirTarefa" />
       </template>
     </UPopover>
     <UPopover :open="!!rascunho" :reference="referencia" :content="{ side: 'right', align: 'start', sideOffset: 8 }" @update:open="v => !v && (rascunho = null)">
       <template #content>
-        <CriacaoRapida v-if="rascunho" :t="t" :locale="locale" :lugar="rascunho" @criado="criado" @cancelar="rascunho = null" />
+        <CriacaoRapida v-if="rascunho" :t="t" :locale="locale" :lugar="rascunho" :tipo-inicial="tipoInicial" @criado="criado" @cancelar="rascunho = null" @conectar="conectar" @formulario="abrirFormulario" />
       </template>
     </UPopover>
 
-    <PainelDoItem v-model:open="painel.aberto" v-model:aba="painel.aba" :t="t" :locale="locale" :item-id="painel.itemId" @agendar="agendar" @abrir-evento="irAoEvento" />
+    <PainelDoItem
+      v-model:open="painel.aberto"
+      v-model:aba="painel.aba"
+      :t="t"
+      :locale="locale"
+      :item-id="painel.itemId"
+      :conectando="conectando"
+      @agendar="agendar"
+      @abrir-evento="irAoEvento"
+      @abrir-tarefa="abrirTarefa"
+      @acessar="acessar"
+      @ir-para-dia="irParaDia"
+      @conectar="conectar"
+    />
+    <PainelDaTarefa
+      v-model:open="painelTarefa.aberto"
+      v-model:aba="painelTarefa.aba"
+      :t="t"
+      :locale="locale"
+      :tarefa-id="painelTarefa.id"
+      @mover="mover"
+      @acessar="acessar"
+      @ir-para-dia="irParaDia"
+      @abrir-evento="irAoEvento"
+    />
+    <FormularioDoItem v-model:open="formulario.aberto" :t="t" :rascunho="formulario.rascunho" @criado="toast.add({ title: t.avisos.criado.item, icon: 'i-lucide-circle-check', color: 'success' })" />
+    <UModal v-model:open="confirmacao.aberta" :title="aConfirmar ? t.fluxo.titulo(aConfirmar.campo, aConfirmar.ref) : ''" :ui="{ content: 'max-w-md' }">
+      <template #body>
+        <div v-if="aConfirmar" class="flex flex-col gap-3 text-sm">
+          <p class="flex gap-2 text-highlighted"><UIcon name="i-lucide-zap" class="mt-0.5 size-4 shrink-0 text-warning" />{{ t.fluxo.texto(aConfirmar.fluxo.nome) }}</p>
+          <p class="rounded-md bg-elevated p-2.5 text-toned">{{ aConfirmar.fluxo.efeito }}</p>
+          <p class="text-muted">{{ t.fluxo.semDesfazer }}</p>
+        </div>
+      </template>
+      <template #footer>
+        <div class="flex w-full justify-end gap-2">
+          <UButton :label="t.fluxo.cancelar" color="neutral" variant="ghost" size="sm" @click="confirmacao.aberta = false" />
+          <UButton :label="t.fluxo.confirmar" icon="i-lucide-zap" color="warning" size="sm" @click="confirmar" />
+        </div>
+      </template>
+    </UModal>
     <ConfiguracaoDaAgenda v-model:open="configAberta" :t="t" :conectando="conectando" @salvo="toast.add({ title: t.avisos.salvo, icon: 'i-lucide-circle-check', color: 'success' })" @conectar="conectar" />
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->

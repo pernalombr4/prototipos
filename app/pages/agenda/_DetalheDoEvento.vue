@@ -3,16 +3,21 @@
  * O conteúdo do popover que abre junto do evento (padrão do Google, do Outlook e do ClickUp, visto em tela). Muda
  * por fonte: reunião do Outlook, prazo de tarefa, tarefa rápida, tempo reservado e data de item. Os campos de data e
  * hora são a alternativa de teclado ao arraste e passam pela mesma regra (`aplicar`).
+ *
+ * Rodada 2: o popover só oferece o que a pessoa pode fazer, e diz o motivo numa linha quando tira algo. Reunião de
+ * outra pessoa não muda de horário e ganha a resposta ao convite; evento particular não se liga a item; item só para
+ * leitura não muda de data; data com fluxo avisa que o fluxo roda; tarefa de outra pessoa não conclui nem muda de
+ * prazo; tarefa de aprovação ou formulário leva ao painel da tarefa.
  */
 import type { Lugar } from '~/components/ux/geometriaDoCalendario'
 import { fundoCheio, textoDaCor } from '~/components/ux/geometriaDoCalendario'
 import type { Textos } from './textos'
 import { AGORA, HOJE, diaCurto, diaLongo, duracao, hora, paraMinutos } from './datas'
-import { CORES_DO_OUTLOOK, bloco, estado, blocosDa, concluir, diaDe, fonte, item, ligar, minutoDe, removerBloco, reuniao, situacao, sugestao, tarefa, temSla } from './estado'
-import { categoriaPorSlug, pessoaPorId } from './mocks'
+import { CORES_DO_OUTLOOK, bloco, estado, blocosDa, concluir, diaDe, ehMinha, ehOrganizador, fluxoDoCampo, fonte, item, ligar, minutoDe, organizador, podeConcluir, podeEditarItem, removerBloco, responder, reuniao, situacao, souParticipante, sugestao, tarefa, temSla } from './estado'
+import { EU, categoriaPorSlug, pessoaPorId } from './mocks'
 
 const props = defineProps<{ t: Textos, locale: string, chave: string }>()
-const emit = defineEmits<{ fechar: [], mover: [chave: string, lugar: Lugar], abrirItem: [id: number, aba: 'item' | 'tarefas' | 'agenda'] }>()
+const emit = defineEmits<{ fechar: [], mover: [chave: string, lugar: Lugar], abrirItem: [id: number, aba: 'item' | 'tarefas' | 'agenda'], abrirTarefa: [id: number] }>()
 const toast = useToast()
 
 const tipo = computed(() => props.chave.slice(0, 1))
@@ -21,7 +26,20 @@ const r = computed(() => tipo.value === 'r' ? reuniao(id.value) ?? null : null)
 const b = computed(() => tipo.value === 'b' ? bloco(id.value) ?? null : null)
 const tf = computed(() => tipo.value === 't' || tipo.value === 'q' ? tarefa(Number(id.value)) ?? null : b.value ? tarefa(b.value.tarefaId) ?? null : null)
 const it = computed(() => tipo.value === 'i' ? item(Number(id.value)) : item(r.value?.itemId ?? tf.value?.item))
-const sugerido = computed(() => r.value ? sugestao(r.value) : null)
+const sugerido = computed(() => {
+  const x = r.value ? sugestao(r.value) : null
+  return x && podeEditarItem(x) ? x : null
+})
+/** O que a pessoa pode mexer neste evento. */
+const pode = computed(() => {
+  if (r.value) return ehOrganizador(r.value)
+  if (tf.value) return ehMinha(tf.value)
+  if (tipo.value === 'i' && it.value) return podeEditarItem(it.value)
+  return false
+})
+const fluxo = computed(() => tipo.value === 'i' && it.value ? fluxoDoCampo(it.value) : null)
+const minhaResposta = computed(() => r.value?.participantes.find(p => p.email === EU.email)?.resposta)
+const respostas = ['sim', 'talvez', 'nao'] as const
 
 const cor = computed(() => {
   if (r.value) return CORES_DO_OUTLOOK[r.value.calendario]
@@ -33,6 +51,7 @@ const icone = computed(() => r.value ? (r.value.teams ? 'i-lucide-video' : 'i-lu
 
 /** O lugar atual, que os campos editam. Tarefa com SLA não tem: o prazo não se mexe. */
 const atual = computed<Lugar | null>(() => {
+  if (!pode.value) return null
   if (r.value) return { dia: r.value.dia, inicio: r.value.inicio, fim: r.value.fim }
   if (b.value) return { dia: b.value.dia, inicio: b.value.inicio, fim: b.value.fim }
   if (tf.value) return temSla(tf.value) ? null : { dia: tf.value.due_date ? diaDe(tf.value.due_date) : HOJE, inicio: tf.value.due_date ? minutoDe(tf.value.due_date) : 18 * 60 }
@@ -72,7 +91,7 @@ const todos = ref(false)
 const participantes = computed(() => r.value ? (todos.value ? r.value.participantes : r.value.participantes.slice(0, 4)) : [])
 const iconeDaResposta = { sim: 'i-lucide-circle-check', nao: 'i-lucide-circle-x', talvez: 'i-lucide-circle-help', pendente: 'i-lucide-circle-dashed' }
 const corDaResposta = { sim: 'text-success', nao: 'text-error', talvez: 'text-warning', pendente: 'text-dimmed' }
-const opcoesDeItem = computed(() => estado.itens.map(i => ({ label: `${i.reference} · ${i.titulo}`, value: i.id, icon: categoriaPorSlug(i.categoria).icon ?? undefined })))
+const opcoesDeItem = computed(() => estado.itens.filter(podeEditarItem).map(i => ({ label: `${i.reference} · ${i.titulo}`, value: i.id, icon: categoriaPorSlug(i.categoria).icon ?? undefined })))
 
 function vincular(itemId: number | null) {
   if (!r.value) return
@@ -122,6 +141,16 @@ function tirarBloco() {
       </span>
     </div>
 
+    <!-- O que a pessoa não pode fazer nesta tarefa, e por quê -->
+    <template v-if="tf">
+      <p v-if="!ehMinha(tf)" class="flex gap-2 rounded-md bg-elevated p-2.5 text-xs text-toned">
+        <UIcon name="i-lucide-user-round" class="mt-0.5 size-3.5 shrink-0 text-muted" />{{ t.regras.tarefaDeOutro(pessoaPorId(tf.assigned_to)?.nome ?? '--') }}
+      </p>
+      <p v-else-if="tf.acao && tf.status !== 'completed'" class="flex gap-2 rounded-md bg-elevated p-2.5 text-xs text-toned">
+        <UIcon :name="tf.acao === 'aprovar' ? 'i-lucide-stamp' : 'i-lucide-clipboard-list'" class="mt-0.5 size-3.5 shrink-0 text-muted" />{{ tf.acao === 'aprovar' ? t.regras.pedeAprovacao : t.regras.pedeFormulario }}
+      </p>
+    </template>
+
     <!-- Tarefa com SLA: o prazo fica; o que se agenda é o tempo para fazer -->
     <template v-if="tipo === 't' && tf && temSla(tf)">
       <p class="flex gap-2 rounded-md bg-elevated p-2.5 text-xs text-toned">
@@ -140,13 +169,37 @@ function tirarBloco() {
     <!-- Tempo reservado -->
     <p v-if="b && tf" class="flex gap-2 rounded-md bg-elevated p-2.5 text-xs text-toned">
       <UIcon name="i-lucide-timer" class="mt-0.5 size-3.5 shrink-0 text-primary" />
-      <span>{{ t.detalhe.blocoDe }}. {{ tf.due_date ? t.detalhe.prazoNaoMuda(t.quando(diaCurto(diaDe(tf.due_date), locale), hora(minutoDe(tf.due_date)))) : '' }}</span>
+      <span>{{ t.detalhe.blocoDe }}. {{ tf.due_date ? t.detalhe.prazoNaoMuda(t.quando(diaCurto(diaDe(tf.due_date), locale), hora(minutoDe(tf.due_date)))) : '' }} {{ b.outlook ? t.regras.ocupadoNoOutlook : '' }}</span>
     </p>
 
     <!-- Reunião -->
     <template v-if="r">
-      <UButton v-if="r.teams" :label="t.detalhe.entrar" icon="i-lucide-video" color="info" size="sm" class="self-start" />
-      <p v-else-if="r.local" class="flex items-center gap-1.5 text-xs text-toned"><UIcon name="i-lucide-map-pin" class="size-3.5 text-muted" />{{ r.local }}</p>
+      <span class="flex flex-wrap items-center gap-2">
+        <UButton v-if="r.teams" :label="t.detalhe.entrar" icon="i-lucide-video" color="info" size="sm" />
+        <UButton :label="t.regras.abrirNoOutlook" icon="i-lucide-external-link" color="neutral" variant="outline" size="sm" />
+      </span>
+      <p v-if="!r.teams && r.local" class="flex items-center gap-1.5 text-xs text-toned"><UIcon name="i-lucide-map-pin" class="size-3.5 text-muted" />{{ r.local }}</p>
+
+      <!-- Reunião de outra pessoa: o horário não muda por aqui; a resposta ao convite, sim -->
+      <template v-if="!ehOrganizador(r)">
+        <p class="flex gap-2 rounded-md bg-elevated p-2.5 text-xs text-toned">
+          <UIcon name="i-lucide-lock" class="mt-0.5 size-3.5 shrink-0 text-muted" />{{ t.regras.organizadaPor(organizador(r)) }}
+        </p>
+        <div v-if="souParticipante(r)" class="flex items-center gap-2">
+          <span class="text-xs font-medium text-toned">{{ t.regras.suaResposta }}</span>
+          <UFieldGroup size="xs">
+            <UButton
+              v-for="x in respostas"
+              :key="x"
+              :label="t.detalhe.respostas[x]"
+              :color="minhaResposta === x ? 'primary' : 'neutral'"
+              :variant="minhaResposta === x ? 'solid' : 'outline'"
+              :aria-pressed="minhaResposta === x"
+              @click="responder(r, x)"
+            />
+          </UFieldGroup>
+        </div>
+      </template>
       <p class="flex items-center gap-1.5 text-xs text-muted">
         <span class="size-2 rounded-full" :class="r.calendario === 'meu' ? 'bg-info' : 'bg-inverted/40'" />
         {{ t.lateral.calendariosDoOutlook[r.calendario] }}
@@ -165,8 +218,13 @@ function tirarBloco() {
         <UButton v-if="r.participantes.length > 4 && !todos" :label="t.detalhe.verMais(r.participantes.length - 4)" color="neutral" variant="link" size="xs" class="self-start px-0" @click="todos = true" />
       </div>
 
+      <!-- Evento particular: não se liga a item -->
+      <p v-if="r.particular" class="flex gap-2 border-t border-default pt-3 text-xs text-toned">
+        <UIcon name="i-lucide-lock" class="mt-0.5 size-3.5 shrink-0 text-muted" />{{ t.regras.particular }}
+      </p>
+
       <!-- Ligado a -->
-      <div class="flex flex-col gap-1.5 border-t border-default pt-3">
+      <div v-else class="flex flex-col gap-1.5 border-t border-default pt-3">
         <p class="text-xs font-medium text-toned">{{ t.detalhe.ligadoA }}</p>
         <div v-if="it" class="flex items-center gap-2 rounded-md border border-default p-2">
           <UIcon :name="categoriaPorSlug(it.categoria).icon!" class="size-4 shrink-0 text-muted" />
@@ -175,7 +233,7 @@ function tirarBloco() {
             <span class="block truncate text-xs text-muted">{{ it.titulo }}</span>
           </span>
           <UButton :label="t.detalhe.abrirItem" color="neutral" variant="outline" size="xs" @click="emit('abrirItem', it.id, 'agenda')" />
-          <UButton icon="i-lucide-unlink" color="neutral" variant="ghost" size="xs" :aria-label="t.detalhe.desligar" @click="vincular(null)" />
+          <UButton v-if="podeEditarItem(it)" icon="i-lucide-unlink" color="neutral" variant="ghost" size="xs" :aria-label="t.detalhe.desligar" @click="vincular(null)" />
         </div>
         <div v-else-if="sugerido" class="flex flex-col gap-2 rounded-md border border-info/40 bg-info/10 p-2.5">
           <p class="flex items-center gap-1.5 text-xs text-info"><UIcon name="i-lucide-sparkles" class="size-3.5" />{{ t.detalhe.sugestao(r.participantes.find(p => p.email.endsWith(sugerido!.dominio!))!.email) }}</p>
@@ -196,6 +254,7 @@ function tirarBloco() {
           :search-input="{ placeholder: t.detalhe.buscarItem }"
           @update:model-value="vincular($event as number)"
         />
+        <p v-if="!it" class="text-xs text-muted">{{ t.regras.retrato }}</p>
       </div>
     </template>
 
@@ -203,6 +262,12 @@ function tirarBloco() {
     <p v-if="tipo === 'i' && it" class="flex items-center gap-1.5 text-xs text-muted">
       <UIcon name="i-lucide-calendar" class="size-3.5" />
       {{ categoriaPorSlug(it.categoria).name }} · {{ categoriaPorSlug(it.categoria).campos.find(c => c.chave === fonte(it!.categoria)!.campo)?.rotulo }}
+    </p>
+    <p v-if="tipo === 'i' && it && !podeEditarItem(it)" class="flex gap-2 rounded-md bg-elevated p-2.5 text-xs text-toned">
+      <UIcon name="i-lucide-eye" class="mt-0.5 size-3.5 shrink-0 text-muted" />{{ t.regras.somenteLeitura }}
+    </p>
+    <p v-else-if="fluxo" class="flex gap-2 rounded-md border border-warning/40 bg-warning/10 p-2.5 text-xs text-highlighted">
+      <UIcon name="i-lucide-zap" class="mt-0.5 size-3.5 shrink-0 text-warning" />{{ t.regras.fluxoNoCampo(categoriaPorSlug(it!.categoria).campos.find(c => c.chave === fluxo!.campo)!.rotulo, fluxo.nome) }}
     </p>
 
     <!-- Campos de data e hora: a alternativa de teclado ao arraste -->
@@ -221,10 +286,17 @@ function tirarBloco() {
     <!-- Ações -->
     <div v-if="tf || (tipo === 'i' && it)" class="flex flex-wrap gap-2 border-t border-default pt-3">
       <template v-if="tf">
-        <UButton :label="tf.status === 'completed' ? t.detalhe.reabrir : t.detalhe.concluir" :icon="tf.status === 'completed' ? 'i-lucide-rotate-ccw' : 'i-lucide-check'" :color="tf.status === 'completed' ? 'neutral' : 'success'" variant="outline" size="xs" @click="alternarConclusao" />
-        <UButton v-if="tipo === 't' && temSla(tf)" :label="t.detalhe.reservarTempo" icon="i-lucide-timer" color="neutral" variant="outline" size="xs" @click="reservar" />
-        <UButton v-if="b" :label="t.detalhe.removerBloco" icon="i-lucide-timer-off" color="neutral" variant="outline" size="xs" @click="tirarBloco" />
-        <UButton v-if="it" :label="t.detalhe.abrirTarefa" icon="i-lucide-arrow-up-right" color="neutral" variant="outline" size="xs" @click="emit('abrirItem', it.id, 'tarefas')" />
+        <UButton v-if="podeConcluir(tf)" :label="tf.status === 'completed' ? t.detalhe.reabrir : t.detalhe.concluir" :icon="tf.status === 'completed' ? 'i-lucide-rotate-ccw' : 'i-lucide-check'" :color="tf.status === 'completed' ? 'neutral' : 'success'" variant="outline" size="xs" @click="alternarConclusao" />
+        <UButton v-if="tipo === 't' && temSla(tf) && ehMinha(tf) && tf.status !== 'completed'" :label="t.detalhe.reservarTempo" icon="i-lucide-timer" color="neutral" variant="outline" size="xs" @click="reservar" />
+        <UButton v-if="b && ehMinha(tf)" :label="t.detalhe.removerBloco" icon="i-lucide-timer-off" color="neutral" variant="outline" size="xs" @click="tirarBloco" />
+        <UButton
+          :label="t.detalhe.abrirTarefa"
+          icon="i-lucide-arrow-up-right"
+          :color="ehMinha(tf) && tf.acao && tf.status !== 'completed' ? 'primary' : 'neutral'"
+          :variant="ehMinha(tf) && tf.acao && tf.status !== 'completed' ? 'solid' : 'outline'"
+          size="xs"
+          @click="emit('abrirTarefa', tf.id)"
+        />
       </template>
       <UButton v-else-if="tipo === 'i' && it" :label="t.detalhe.abrirItem" icon="i-lucide-arrow-up-right" color="neutral" variant="outline" size="xs" @click="emit('abrirItem', it.id, 'item')" />
     </div>

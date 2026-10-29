@@ -195,3 +195,101 @@ painel Para agendar com o selo de pendentes. É a ordem certa: onde estou, o que
 | ![](evidencias/tarefa-com-sla.png) | A tarefa com SLA: o prazo trancado e o tempo reservado |
 | ![](evidencias/agenda-do-item.png) | A aba Agenda no painel do contrato |
 | ![](evidencias/configuracao.png) | A configuração com a categoria pelo nome, o campo pelo rótulo e a cor na paleta |
+
+## Rodada 2 · 29/10/2026
+
+### Pedido literal
+
+> certo, se tem relaçao da agenda pro item, como é a relação contraria, do item pra agenda? como é o front do item? isso
+> ta no prototipo? e como é o front da tarefa, ja que a agenda vai pra tarefa e temos que pensar a volta disso tambem?
+> deve ser possivel, do item, marcar algo na agenda e, da tarefa, mexer na agenda? e como interagir com OUTLOOK no
+> item/tarefa? tem que pensar tudo isso.
+
+> e sobre este ponto > Onde pode não caber: categoria com campo obrigatório. [...] voce precisa prototipar essa ideia
+> aqui.
+
+> e sobre o trecho da sua resposta "riscos que voce precisa julgar", voce deve prototipar feedback ao usurio de cada um
+> desses cenarios. e no caso, nao permitir nada que ele nao possa fazer (se nao pode criar item numa categoria nem pode
+> aparecer pra ele a opçao na hora de fazer isso)
+
+### A decisão que orienta as outras
+
+**A Agenda não oferece o gesto que vai falhar.** Sem permissão, o evento não se arrasta, o botão não aparece e a
+categoria some da criação. Onde a pessoa espera a ação e ela não está, uma linha diz o motivo. A regra mora em
+`estado.ts` (`ehMinha`, `podeConcluir`, `podeEditarItem`, `podeCriarEm`, `ehOrganizador`), e toda tela lê dela.
+
+### Mudou: a volta, do item e da tarefa para a Agenda
+
+| O que entra | Onde | Como funciona |
+|---|---|---|
+| **Pasta Agenda na tela do item** | Depois de Tarefas, na barra de pastas | O mesmo conteúdo da aba Agenda do painel (`_AgendaDoItem.vue`): agendar reunião, ligar reunião existente, próximas e anteriores com "Entrar na reunião", tarefas com o tempo reservado e as datas do item com "Ver na Agenda" |
+| **Agendar reunião sem ir à grade** | Item e tarefa | Formulário no lugar: dia, início, fim, participantes (o contato do item já entra), Teams e a linha de conflito com a agenda da pessoa. Na Agenda, "Escolher o horário na grade" volta ao caminho da rodada 1 |
+| **Ligar reunião existente** | Item | Lista das reuniões da pessoa nos próximos 14 dias, sem vínculo, fora as particulares e as diárias |
+| **Mail Box do item liga pelo Outlook** | Item e formulário de reunião | O endereço do item fica à vista com o botão de copiar: quem convida esse endereço no Outlook liga a reunião ao item. No formulário, "Convidar o Mail Box do item" vem ligado e segura o vínculo quando o organizador muda a reunião pelo Outlook |
+| **Aba Agenda no painel da tarefa** | Depois de Comentários | Prazo editável quando a tarefa é da pessoa e não tem SLA; trancado com o motivo quando tem. Tempo reservado com "Reservar tempo", conflito e "Mostrar como ocupado no Outlook". Reuniões do item e "Agendar reunião sobre a tarefa" |
+| **1 painel de tarefa só** | Agenda, item e Tarefas | A Agenda abre o mesmo painel da tela de Tarefas, com a aba Agenda a mais. "Acessar Item" leva à tela do item |
+
+### Mudou: campo obrigatório na criação rápida
+
+| Situação | O que a pessoa vê |
+|---|---|
+| A categoria pede obrigatórios que o popover não tem | Uma caixa lista os campos que faltam; o botão vira "Continuar no formulário" |
+| A categoria não pede | "Mais campos" abre o mesmo formulário, opcional |
+| No formulário | "Novo registro" com todos os campos da categoria. A data e as horas vêm preenchidas pelo horário escolhido, com a ajuda "Preenchido pelo horário escolhido na Agenda". Criar confere os obrigatórios e o formato do e-mail |
+
+### Mudou: cada risco tem resposta na tela
+
+| Risco | O que a pessoa vê |
+|---|---|
+| Fluxo do Spaceflow no campo de data | O popover avisa "Alterar Fim da vigência dispara o fluxo Aviso de renovação". Mover pede confirmação com o efeito do fluxo; depois, o toast não tem Desfazer e um segundo toast diz que o fluxo rodou |
+| Reunião organizada por outra pessoa | Não se arrasta nem muda de horário. "Organizada por Paulo Brandão. Só quem organiza a reunião altera o horário." e a resposta ao convite (Sim, Talvez, Não) |
+| Item sem permissão de editar | Não se arrasta; a data some do popover e uma linha diz o motivo. Agendar e ligar reunião somem da Agenda do item |
+| Categoria sem permissão de criar | Some da aba Item da criação; sem nenhuma categoria, a aba Item some |
+| Tarefa de outra pessoa | Não se arrasta, não conclui; uma linha diz quem é o responsável |
+| Tarefa de aprovação ou com formulário | Não conclui com 1 clique: "Abrir tarefa" vira o botão primário; no painel, Aprovar e Reprovar, ou o campo do formulário antes de "Concluir Etapa" |
+| Falha no vínculo | Toast de aviso que fica: "Reunião criada no Outlook, sem o vínculo", com "Ligar de novo" |
+| Privacidade | Evento particular do Outlook não se liga a item e não entra na sugestão. Ao ligar, a nota diz o que quem tem acesso ao item passa a ver |
+| Outlook desconectado | Reunião some da criação; no item, as reuniões ligadas continuam à vista e um aviso leva a Conectar |
+
+### Fronteira
+
+- **Muda:** a pasta Agenda na tela do item, a aba Agenda no painel da tarefa, o formulário completo na criação, os
+  avisos de permissão e de risco, e o Mail Box do item como forma de ligar.
+- **Não muda:** a tela do item e o painel da tarefa fora dessas partes. As 2 cascas foram copiadas de novo do develop em
+  29/10 (`_TelaDoItem.vue`, `_PainelDaTarefa.vue`): abas sublinhadas, painel do item em caixas, trilho de ícones do
+  painel da tarefa, "Detalhes da Tarefa" e "Concluir Etapa". As outras pastas e a aba Comentários mostram só "não muda".
+- **Achado, não proposta:** o develop tem 2 painéis de tarefa. O da Agenda (abas Tarefa, Item, Histórico) é diferente do
+  de Tarefas › Agendadas (trilho de ícones, abas Tarefa, Item, Histórico, Comentários). O protótipo usa o de Tarefas
+  nos 2 lugares.
+
+### Descartado
+
+- Botão desligado com dica para o que a pessoa não pode fazer: o pedido foi não oferecer. A linha do motivo fica onde a
+  pessoa espera a ação.
+- Ligar pelo domínio como única forma: continua como sugestão, e o Mail Box do item vira a forma explícita, que funciona
+  de dentro do Outlook.
+
+### Andaime
+
+O menu "Ir para" ganhou o grupo Rodada 2: tela do item, painel da tarefa, criar item com obrigatórios, item com fluxo na
+data, item só para leitura, reunião de outra pessoa, tarefa de aprovação, evento particular e "Simular falha no próximo
+vínculo". O atalho mostra todas as pessoas quando o filtro esconde o evento.
+
+### Perguntas em aberto
+
+- A pergunta da rodada 1 "o bloco vai para o Outlook como ocupado?" virou opção por bloco, ligada por padrão. Confirmar
+  com produto.
+- O Mail Box do item recebe convite de calendário hoje, ou só e-mail? Se só e-mail, o vínculo pelo convite pede back-end
+  novo.
+- O fluxo com gatilho em campo de data roda quando a data muda pela Agenda, ou só pelo formulário do item?
+
+### Ver
+
+| Print | O que mostra |
+|---|---|
+| ![](evidencias/tela-do-item-agenda.png) | A pasta Agenda na tela do item, com o endereço do Mail Box |
+| ![](evidencias/painel-da-tarefa-agenda.png) | A aba Agenda no painel da tarefa: prazo do SLA trancado, tempo reservado e o conflito |
+| ![](evidencias/criacao-com-obrigatorios.png) | A criação rápida avisa os 2 obrigatórios e passa a "Continuar no formulário" |
+| ![](evidencias/formulario-do-item.png) | O formulário completo, com a data vinda da Agenda e os obrigatórios cobrados |
+| ![](evidencias/fluxo-na-data.png) | A confirmação antes de mudar a data que dispara o fluxo |
+| ![](evidencias/reuniao-de-outra-pessoa.png) | Reunião de outra pessoa: sem mudar o horário, com a resposta ao convite |

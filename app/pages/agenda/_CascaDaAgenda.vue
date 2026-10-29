@@ -7,24 +7,28 @@
  * (develop, 05/10/2026); a ordem de Membro (Início, Spaceflows, Categorias, Tarefas, Agenda, Knowledge) foi
  * conferida de novo no develop em 28/10/2026. O que estiver diferente do develop é defeito de cópia.
  * O que foi copiado, item por item, está no BRIEFING.md ("A casca da tela, item por item").
+ *
+ * Rodada 2: a mesma casca serve à tela do item (`ativo` = slug da categoria, Categorias aberto e a trilha
+ * workspace › Categorias › categoria › referência), como em `pastas-do-item/_CascaDoItem.vue` (08/10/2026).
  */
 import type { Textos } from './textos'
 import { categorias, EU, workspace } from './mocks'
 
-defineProps<{ t: Textos }>()
+const emit = defineEmits<{ voltar: [], agenda: [] }>()
+const props = withDefaults(defineProps<{ t: Textos, ativo?: string, trilha?: string[] }>(), { ativo: 'agenda', trilha: undefined })
 
 interface Entrada {
   chave: string
   icone: string
   ativo?: boolean
-  filhos?: { chave: string, rotulo?: string, icone: string }[]
+  filhos?: { chave: string, rotulo?: string, icone: string, ativo?: boolean }[]
   externo?: boolean
 }
 
 const membro: Entrada[] = [
   { chave: 'inicio', icone: 'i-lucide-house' },
   { chave: 'spaceflows', icone: 'i-lucide-workflow' },
-  { chave: 'categorias', icone: 'i-lucide-layout-grid', filhos: categorias.map(c => ({ chave: c.slug, rotulo: c.name, icone: 'i-lucide-file' })) },
+  { chave: 'categorias', icone: 'i-lucide-layout-grid', filhos: categorias.map(c => ({ chave: c.slug, rotulo: c.name, icone: 'i-lucide-file', ativo: props.ativo === c.slug })) },
   {
     chave: 'tarefas',
     icone: 'i-lucide-file-text',
@@ -33,7 +37,7 @@ const membro: Entrada[] = [
       { chave: 'rapidas', icone: 'i-lucide-clipboard-check' },
     ],
   },
-  { chave: 'agenda', icone: 'i-lucide-calendar-days', ativo: true },
+  { chave: 'agenda', icone: 'i-lucide-calendar-days', ativo: props.ativo === 'agenda' },
   { chave: 'knowledge', icone: 'i-lucide-table-2', filhos: [] },
 ]
 
@@ -55,7 +59,7 @@ const ajuda: Entrada[] = [
   { chave: 'documentacao', icone: 'i-lucide-book-open', externo: true },
 ]
 
-const abertos = ref<string[]>([])
+const abertos = ref<string[]>(props.ativo === 'agenda' ? [] : ['categorias'])
 function alternar(chave: string) {
   abertos.value = abertos.value.includes(chave) ? abertos.value.filter(x => x !== chave) : [...abertos.value, chave]
 }
@@ -101,7 +105,7 @@ function alternar(chave: string) {
                   :class="e.ativo ? 'font-medium text-primary' : 'text-toned'"
                   :aria-current="e.ativo ? 'page' : undefined"
                   :aria-expanded="e.filhos ? abertos.includes(e.chave) : undefined"
-                  @click="e.filhos && alternar(e.chave)"
+                  @click="e.filhos ? alternar(e.chave) : e.chave === 'agenda' && emit('agenda')"
                 >
                   <UIcon :name="e.icone" class="size-4 shrink-0" :class="e.ativo ? 'text-primary' : 'text-muted'" />
                   <template v-if="state === 'expanded'">
@@ -116,7 +120,9 @@ function alternar(chave: string) {
                   v-for="f in e.filhos"
                   :key="f.chave"
                   type="button"
-                  class="flex w-full items-center gap-2.5 rounded-md py-1.5 pl-7 pr-2 text-left text-toned transition-colors hover:bg-elevated"
+                  class="flex w-full items-center gap-2.5 rounded-md py-1.5 pl-7 pr-2 text-left transition-colors hover:bg-elevated"
+                  :class="f.ativo ? 'font-medium text-primary' : 'text-toned'"
+                  :aria-current="f.ativo ? 'page' : undefined"
                 >
                   <UIcon :name="f.icone" class="size-4 shrink-0" />
                   <span class="flex-1 truncate text-sm">{{ f.rotulo ?? t.casca.itens[f.chave] }}</span>
@@ -130,7 +136,7 @@ function alternar(chave: string) {
 
     <template #navbar-title>
       <div class="flex w-[min(50rem,calc(100vw-30rem))] min-w-0 items-center gap-1 font-normal">
-        <UButton icon="i-lucide-arrow-left" color="neutral" variant="ghost" size="xs" :aria-label="t.casca.voltar" />
+        <UButton icon="i-lucide-arrow-left" color="neutral" variant="ghost" size="xs" :aria-label="t.casca.voltar" @click="emit('voltar')" />
         <UButton icon="i-lucide-arrow-right" color="neutral" variant="ghost" size="xs" :aria-label="t.casca.avancar" />
         <UButton icon="i-lucide-rotate-cw" color="neutral" variant="ghost" size="xs" :aria-label="t.casca.recarregar" />
         <UButton icon="i-lucide-house" color="neutral" variant="ghost" size="xs" :aria-label="t.casca.itens.inicio" />
@@ -139,7 +145,10 @@ function alternar(chave: string) {
           <nav class="flex min-w-0 items-center gap-1.5 text-xs" :aria-label="t.casca.trilha">
             <span class="truncate text-toned">{{ workspace.name }}</span>
             <UIcon name="i-lucide-chevron-right" class="size-3 shrink-0 text-dimmed" />
-            <span class="truncate text-highlighted">{{ t.casca.itens.agenda }}</span>
+            <template v-for="(x, i) in (trilha ?? [t.casca.itens.agenda])" :key="i">
+              <UIcon v-if="i" name="i-lucide-chevron-right" class="size-3 shrink-0 text-dimmed" />
+              <span class="truncate" :class="i === (trilha ?? [0]).length - 1 ? 'text-highlighted' : 'text-toned'">{{ x }}</span>
+            </template>
           </nav>
           <span class="ml-auto flex shrink-0 items-center gap-1">
             <UKbd value="ctrl" size="sm" />
