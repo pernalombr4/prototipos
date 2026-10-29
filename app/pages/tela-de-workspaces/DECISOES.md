@@ -152,7 +152,13 @@ Rodada antes de entregar, e o que ficou de fora:
 - **Texto formal:** a ajuda do passo 1 troca "Dá para mudar tudo depois" por "Você pode alterar tudo depois".
 - **Fronteira:** muda a ordem dos 2 passos da criação, o quadro do ponto de partida e a rolagem do passo 2; não muda a
   galeria, o detalhe do caso nem os campos da identificação.
-- **Requisitos:** não mudam até a redatora aprovar esta rodada (pedido dela).
+- **Requisitos:** mudaram só depois da aprovação da redatora ("com isso feito, aprovado").
+  - A parte 9 virou "9. Criar workspace, identificação" (`parte-9-criar-identificacao.md`): RF602, RF603, RF605 e
+    RF612 falam da identificação; nascem RF622 (rolagem com rodapé fixo) e RF623 (criar e entrar); P601 reescrita.
+  - Na parte 10, RF702, RF705 e RF709 descrevem a Central como 1º passo, com "Começar do zero" e "Usar {caso}", que não
+    criam; RF714 volta à Central; nascem RF717 (Cancelar), RF718 (ponto de partida com Trocar) e RF719 (o caso traz o
+    que mostra). RF715 saiu: o criar e entrar virou RF623.
+  - O `epico.md` ganhou o texto novo do modal e das linhas 9 e 10.
 
 ### Rodada 34 · 2026-10-29
 - **Pedido (literal):** "Dividir a parte 7"

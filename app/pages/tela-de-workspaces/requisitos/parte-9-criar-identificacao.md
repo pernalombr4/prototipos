@@ -1,29 +1,31 @@
-# 9. Criar workspace, passo 1
+# 9. Criar workspace, identificação
 
-**Objetivo:** a pessoa cria um workspace decidindo 1 coisa por vez: só o nome é obrigatório, o ícone deixa de ser
-obrigatório, e o logo da empresa entra por upload.
+**Objetivo:** a pessoa identifica o workspace novo decidindo 1 coisa por vez: só o nome é obrigatório, o ícone deixa
+de ser obrigatório, e o logo da empresa entra por upload.
 
-**Onde vale:** o modal "Criar workspace", aberto pelo botão "Criar workspace" da tela `/workspaces` e pelo botão "Criar
-um workspace" da tela sem workspace.
+**Onde vale:** a identificação do modal "Criar workspace", aberto pelo botão "Criar workspace" da tela `/workspaces` e
+pelo botão "Criar um workspace" da tela sem workspace.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/tela-de-workspaces. No protótipo, o modal abre pelo botão
-"Criar workspace" do cabeçalho.
+"Criar workspace" do cabeçalho, e a identificação vem depois de "Começar do zero".
 
-## Estrutura e passo 1 (RF)
+## Estrutura e identificação (RF)
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
 | RF601 | A criação deve abrir num modal sobre a tela de workspaces, sem mudar a URL. | A URL não muda ao abrir. | Essencial | Obrigatório |
-| RF602 | No passo 1, o modal deve mostrar à direita a prévia do workspace, que muda a cada tecla; no celular, a prévia sai. | Digitar o nome atualiza a prévia. | Importante | Obrigatório |
-| RF603 | O topo do modal deve mostrar o progresso "1 de 2" ou "2 de 2". | No passo 2, o progresso diz "2 de 2". | Importante | Obrigatório |
-| RF605 | O passo 1 deve ter o título "Como esse workspace se chama?". | O passo 1 mostra o título. | Importante | Obrigatório |
+| RF602 | Na identificação, o modal deve mostrar à direita a prévia do workspace, que muda a cada tecla; no celular, a prévia sai. | Digitar o nome atualiza a prévia. | Importante | Obrigatório |
+| RF603 | O topo da identificação deve mostrar o progresso "2 de 2". | Na identificação, o progresso diz "2 de 2". | Importante | Obrigatório |
+| RF605 | A identificação deve ter o título "Como esse workspace se chama?". | A identificação mostra o título. | Importante | Obrigatório |
 | RF606 | O quadrado da identidade e o campo do nome devem ficar na mesma linha, sob o rótulo "Nome", o único obrigatório, com o foco no nome ao abrir. | O `*` de obrigatório aparece só no Nome. | Essencial | Obrigatório |
 | RF607 | O nome deve ter de 3 a 50 caracteres; com 1 ou 2, a ajuda vira "Pelo menos 3 caracteres.", em vermelho. | Com "Ju", aparece o aviso vermelho. | Essencial | Obrigatório |
 | RF608 | "Descrição" deve ficar à vista, opcional, com até 140 caracteres e contador. | O contador vai de 0/140 a 140/140. | Importante | Obrigatório |
 | RF609 | "Referência" deve ficar à vista, opcional, e aceitar só letras minúsculas, números e hífens. | O campo aparece sem clicar em nada. | Essencial | Obrigatório |
 | RF610 | Abaixo da Referência, o modal deve mostrar o endereço "enspace.io/{referência}" e o aviso de que a referência e o endereço não mudam depois de criado o workspace, e o nome muda. | Com "Jurídico Aurora", o endereço mostra `enspace.io/juridico-aurora` e muda a cada tecla na Referência. | Essencial | Obrigatório |
 | RF611 | A referência deve vir do nome (minúsculas, sem acento, só letras, números e hífen, espaço vira hífen, até 50 caracteres) e acompanhar o nome até a pessoa editar o campo Referência. | Editar a Referência e depois mudar o nome mantém a referência editada. | Essencial | Obrigatório |
-| RF612 | O passo 1 deve ter "Cancelar" e "Continuar →", ativo só com 3 caracteres ou mais no nome, sem contar espaços nas pontas. | "  ab  " não libera o "Continuar". | Essencial | Obrigatório |
+| RF612 | A identificação deve ter o botão "Criar workspace", ativo só com 3 caracteres ou mais no nome, sem contar espaços nas pontas. | "  ab  " não libera o "Criar workspace". | Essencial | Obrigatório |
+| RF622 | Quando os campos passam da altura da tela, a identificação deve rolar os campos e manter os botões do rodapé à vista. | Numa tela de 760 px de altura, rolar mostra o aviso do endereço inteiro, e "Criar workspace" continua à vista. | Essencial | Obrigatório |
+| RF623 | Ao clicar em "Criar workspace", o modal deve fechar e levar a pessoa para dentro do workspace novo. | Depois de criar, a pessoa está no workspace novo. | Essencial | Obrigatório |
 
 ## Identidade (RF)
 
@@ -49,4 +51,4 @@ um workspace" da tela sem workspace.
 
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
-| P601 | Se esta parte sair antes de "10. Criar com caso de uso", o modal tem 1 passo só, com o botão de criar no lugar de "Continuar →" e sem o progresso? | produto | Muda RF603 e RF612 |
+| P601 | Se esta parte sair antes de "10. Criar com caso de uso", o modal abre direto na identificação, sem o progresso e com "Cancelar" no rodapé? | produto | Muda RF603 e o rodapé da identificação |

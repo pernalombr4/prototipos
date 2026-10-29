@@ -2,7 +2,8 @@
 
 **O que é:** a tela `/workspaces`, a primeira depois do login, passa a servir só para escolher onde entrar. A pessoa
 entra no workspace dela em 1 clique, arruma a lista do jeito dela (favoritos, padrão, ocultos e etiquetas) e cria
-workspace num modal de 2 passos, que pode começar de um caso de uso.
+workspace num modal de 2 passos: primeiro de onde começar (um caso de uso ou um workspace vazio), depois a
+identificação.
 
 **Onde vale:** a tela `/workspaces` e o modal "Criar workspace", que abre sobre ela.
 
@@ -29,8 +30,8 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 | [6. Ocultos](parte-6-ocultos.md) | Ocultar pelo menu, o botão "Visibilidade" e a seção "Ocultos" no fim da lista | 2 e 3 | Vem depois da 5: ocultar o padrão desfaz o padrão |
 | [7. Agrupar](parte-7-agrupar.md) | O botão Agrupar, agrupar por licença e os grupos recolhíveis, em cards e em lista | 2 e 6 | Agrupar respeita a ordem, o grupo de convites e a seção "Ocultos" das partes anteriores |
 | [8. Etiquetas](parte-8-etiquetas.md) | Etiquetas pessoais: os 2 modais, a etiqueta no card e na lista, agrupar por etiqueta e a busca por etiqueta | 2, 3 e 7 | Fica fora do agrupar porque pode depender de um sistema de etiquetas reutilizável, ainda em decisão |
-| [9. Criar workspace, passo 1](parte-9-criar-passo-1.md) | O modal "Criar workspace" com nome, descrição, referência e identidade (cor, iniciais, ícone e imagem) | | Abre pelo botão "Criar workspace", que já existe; corre em paralelo com as partes 2 a 8 |
-| [10. Criar com caso de uso](parte-10-criar-com-caso-de-uso.md) | O passo 2 do modal: a Central de casos de uso, "Criar do zero" e "Criar com {caso}" | 9 e o catálogo de casos de uso | O catálogo de casos de uso com prints ainda não existe |
+| [9. Criar workspace, identificação](parte-9-criar-identificacao.md) | O modal "Criar workspace" com nome, descrição, referência e identidade (cor, iniciais, ícone e imagem), e o botão que cria o workspace | | Abre pelo botão "Criar workspace", que já existe; corre em paralelo com as partes 2 a 8 |
+| [10. Criar com caso de uso](parte-10-criar-com-caso-de-uso.md) | O 1º passo do modal, antes da identificação: a Central de casos de uso, "Começar do zero", "Usar {caso}" e o ponto de partida com "Trocar" | 9 e o catálogo de casos de uso | O catálogo de casos de uso com prints ainda não existe |
 
 ## Regras de negócio comuns (RN)
 
