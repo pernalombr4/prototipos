@@ -340,6 +340,9 @@ Protótipo em revisão ainda não leva.
   - O documento do épico explica o épico e linka o documento de cada parte.
   - Cada funcionalidade, ou agrupamento de funcionalidades que faz sentido junto, é 1 documento
     de requisitos completo.
+  - O corte das partes é lógico primeiro: 1 funcionalidade por parte, base mínima e a pergunta
+    que pode virar obra nova fora da base. O tamanho só pede outra leitura (skill `requisitos`,
+    "Corte das partes"; decisão da redatora em 2026-10-29).
   - Demanda de 1 parte tem 1 documento só, sem épico.
 - **Mais de 1 épico:** quando o protótipo parece juntar mais de 1 épico (objetivos que se
   entregam e se lançam cada um por si, sem depender do outro), o agente aponta isso à redatora,
