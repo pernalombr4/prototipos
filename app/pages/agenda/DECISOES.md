@@ -289,6 +289,28 @@ tarefa ali na agenda. o botao de \"Ir pra tarefa\" nao deve sumir".
 - A ação é 1 componente só (`_CumprirTarefa.vue`), usado no modal e na aba Tarefa do painel.
 - Tarefa de outra pessoa: o popover mostra só "Ir para a tarefa", como antes.
 
+### Mudou: "Conectar Outlook" abre a tela de integrações do perfil
+
+Pedido da redatora: "na hora que o user clicar em conectar oulook, tem que renderizar a tela de integraçao que temos
+hoje pra conectar o outlook". No develop, a conexão fica em Perfil › Integrações, fora do workspace.
+
+- Todo "Conectar Outlook" da Agenda (lateral, Configuração, pasta Agenda do item, criação de reunião) leva à tela de
+  integrações. "Tentar novamente", do Outlook fora do ar, continua só refazendo a leitura: a conta segue conectada.
+- **Cópia** (`_CascaDoPerfil.vue` e o miolo de `_TelaDeIntegracoes.vue`), vista em 29/10/2026 em
+  `https://develop.enspace.io/profile?tab=integrations`: barra do topo sem menu lateral, abas Perfil, Cobrança,
+  Integrações, Dev, Lab e Segurança, o cabeçalho Integrações e a seção Outlook com os cartões Calendário e Correio.
+- **Não deu:** ver o estado inicial no develop. A conta do develop já está conectada, e desconectar mexeria na conta da
+  redatora. O DOM e o código da página não trazem o rótulo do botão sem conexão, e a pesquisa de UX não tem print da
+  tela. O estado "Não conectado" do protótipo é proposta, não cópia.
+- **Proposta:**
+  - "Voltar para a Agenda" (ou "Voltar para o item") no alto, e o aviso de sucesso com o mesmo botão;
+  - o estado em palavras no cartão: "Não conectado", "Conectado como <conta>", a recusa da Microsoft com "Tentar de
+    novo". No develop há só um ponto verde e o botão desligado "Integrado";
+  - antes do clique, o que o botão faz (abre a janela da Microsoft) e o que a Agenda ganha;
+  - "Reconectar" e "Desconectar" com nome. No develop há um ícone de atualizar sem rótulo nem dica (achado).
+- A janela da Microsoft é simulada: um modal tracejado que diz o que acontece no produto, com "Simular autorização" e
+  "Simular recusa". O protótipo não imita a página da Microsoft e não pede nenhum dado.
+
 ### Fronteira
 
 - **Muda:** a pasta Agenda na tela do item, a aba Agenda no painel da tarefa, o formulário completo na criação, os
@@ -338,5 +360,8 @@ vínculo". O atalho mostra todas as pessoas quando o filtro esconde o evento.
 | ![](evidencias/fluxo-na-data.png) | A confirmação antes de mudar a data que dispara o fluxo |
 | ![](evidencias/reuniao-de-outra-pessoa.png) | Reunião de outra pessoa: sem mudar o horário, com a resposta ao convite |
 | ![](evidencias/configuracao-tarefas.png) | O bloco Tarefas no topo da Configuração, ligado por padrão |
+| ![](evidencias/develop-perfil-integracoes.png) | O develop em 29/10: Perfil › Integrações com o Outlook já conectado |
+| ![](evidencias/janela-da-microsoft.png) | "Conectar" abre a janela da Microsoft, simulada, com autorizar e recusar |
+| ![](evidencias/integracoes-conectado.png) | Calendário conectado, com a conta e a volta para a Agenda; Correio recusado, com "Tentar de novo" |
 | ![](evidencias/cumprir-tarefa-na-agenda.png) | O modal da tarefa sobre a grade: Concluir Etapa e, no rodapé, Ir para a tarefa |
 | ![](evidencias/painel-sem-data.png) | O painel Tarefas sem data, aberto pelo botão da barra, com as 3 tarefas sem prazo |

@@ -33,6 +33,7 @@ import ConfiguracaoDaAgenda from './_ConfiguracaoDaAgenda.vue'
 import PainelDaTarefa from './_PainelDaTarefa.vue'
 import ModalDaTarefa from './_ModalDaTarefa.vue'
 import TelaDoItem from './_TelaDoItem.vue'
+import TelaDeIntegracoes from './_TelaDeIntegracoes.vue'
 import FormularioDoItem from './_FormularioDoItem.vue'
 
 import briefingMd from './BRIEFING.md?raw'
@@ -143,7 +144,15 @@ function abrirFormulario(r: Rascunho) {
 
 /* ---------- Outlook ---------- */
 const conectando = ref(false)
+/** Sem conexão, "Conectar Outlook" leva à tela de integrações do perfil, onde o produto conecta hoje. Com a conexão
+ * caída (`falha`), "Tentar novamente" só refaz a leitura. */
 function conectar() {
+  if (estado.outlook === 'desconectado') {
+    const origem = tela.qual === 'item' ? 'item' : 'agenda'
+    fecharTudo()
+    Object.assign(tela, { qual: 'integracoes', origem })
+    return
+  }
   const voltou = estado.outlook === 'falha'
   conectando.value = true
   setTimeout(() => {
@@ -156,7 +165,7 @@ function conectar() {
 /* ---------- painel do item, painel da tarefa, tela do item e configuração ---------- */
 const painel = reactive({ aberto: false, itemId: null as number | null, aba: 'agenda' as 'item' | 'tarefas' | 'agenda' })
 const painelTarefa = reactive({ aberto: false, id: null as number | null, aba: 'tarefa' as 'tarefa' | 'item' | 'historico' | 'comentarios' | 'agenda' })
-const tela = reactive({ qual: 'agenda' as 'agenda' | 'item', itemId: 47233, pasta: 'agenda' })
+const tela = reactive({ qual: 'agenda' as 'agenda' | 'item' | 'integracoes', origem: 'agenda' as 'agenda' | 'item', itemId: 47233, pasta: 'agenda' })
 
 function abrirTarefa(id: number, aba: typeof painelTarefa.aba = 'tarefa') {
   detalhe.value = null
@@ -275,8 +284,9 @@ const atalhos = computed<DropdownMenuItem[][]>(() => {
 
 <template>
   <div>
+    <TelaDeIntegracoes v-if="tela.qual === 'integracoes'" :t="t" :origem="tela.origem" @voltar="tela.qual = tela.origem" />
     <TelaDoItem
-      v-if="tela.qual === 'item'"
+      v-else-if="tela.qual === 'item'"
       v-model:pasta="tela.pasta"
       :t="t"
       :locale="locale"
