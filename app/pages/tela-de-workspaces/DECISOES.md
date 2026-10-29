@@ -142,7 +142,10 @@ Rodada antes de entregar, e o que ficou de fora:
   TAREFAS sao escritas assim. nosso doc interno nao (gitub nao recebe em formato de lista)"
 - **Mudou (ENSPACE):** as 10 tarefas do card `USEDB9945FD15ED4FA29BECA30882A4E` (24373 a 24380, 24388 e 24389) trocam
   as tabelas por linhas:
-  - requisito e interface: `[ ] <ID> <requisito>`, sem critério de aceite, prioridade e relevância;
+  - requisito e interface: 1 item da "Task List" do editor por linha, `<ID> <requisito>`, sem critério de aceite,
+    prioridade e relevância. A 1ª gravação escreveu "[ ]" como texto, e o dev não marcava com 1 clique (correção da
+    redatora, com print); a 2ª usa o HTML que o editor grava (`ul data-type="taskList"`, `li data-type="taskItem"`,
+    copiado da tarefa 939 do mesmo workspace);
   - a relevância diferente de Obrigatório fica no fim, entre parênteses: "(desejável)";
   - regra de negócio e pergunta em aberto: `<ID> <texto>`, sem caixa; a pergunta leva "(quem responde: …)";
   - as 3 tabelas de decisão (opções de ordenar e texto do último acesso) continuam tabela;
