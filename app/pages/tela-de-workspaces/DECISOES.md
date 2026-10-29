@@ -134,6 +134,30 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 37 · 2026-10-29
+- **Pedido (literal):** o 2º retorno do dev, "cada checkbox de requisito deve ter abaixo um print mostrando o requisito
+  em tela. ja tem o prototipo e ele deve continuar sendo citado no começo de toda task, pra facil referencia. e tambem
+  deve continuar sendo citado na story"; e a redatora: "tem que deixar registrado que sempre vai fazer no final
+  (printar requisitos) e deixar salvo la. essa regra deve acabar valendo tambem pra skill de prototipos."
+- **Mudou (repositório):**
+  - 156 prints, 1 por requisito e interface, em `evidencias/requisitos/<ID>.jpg`, com o destaque magenta no controle
+    do requisito e sem a seta do mouse (156 ok no `detectar_seta_mouse.py`);
+  - `requisitos/prints.json` diz a cena, os passos e o alvo de cada print. Ficam sem print, com o motivo na tarefa:
+    RF309 (o login acontece antes desta tela), RF711 (o protótipo não amplia o print da galeria), RI601 e RI701
+    (interface, sem tela);
+  - `ferramentas/prints-de-requisito.mjs` tira os prints num Chrome sem janela; `ferramentas/tarefas_em_lista.py`
+    põe cada requisito numa caixa da lista de marcar, com o print abaixo pelo endereço do GitHub;
+  - a regra 42 e a seção "Protótipo aprovado: o card no ENSPACE" do `AGENTE_PROTOTIPOS.md`, e o passo 8 do
+    `CLAUDE.md`. A skill `prototipo` lê a spec inteira, então a regra vale também para ela;
+  - a lista de marcar nas tarefas sai do teste da rodada 36 e vira regra;
+  - a legenda da Relevância no `epico.md` diz que, nas tarefas, ela vem entre parênteses no fim do requisito.
+- **Mudou (ENSPACE):** as 10 tarefas do card `USEDB9945FD15ED4FA29BECA30882A4E` levam o print abaixo de cada caixa; o
+  link do protótipo continua no começo de cada tarefa e na descrição do card, que recebe a legenda nova.
+- **Não mudou:** os `.md` de `requisitos/` continuam em tabela, sem print.
+- **Fora deste repositório, pendente:** a skill `requisitos` e o `requisitos_para_enspace.py` (`agentes-base`), que
+  ainda geram a tarefa em tabela; a conversão fica no `tarefas_em_lista.py` daqui. O formato da lista de marcar no
+  `en-api-docs`. Este agente não escreve lá.
+
 ### Rodada 36 · 2026-10-29
 - **Pedido (literal):** o retorno do dev, "sera que nao é melhor, fazer os requisitos ali em uma lista simples? ou
   talvez a lista de tarefas, tipo [ ] O modal "Criar workspace" deve abrir na Central de casos de uso (…) as colunas de
