@@ -134,6 +134,17 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 31 · 2026-10-29
+- **Pedido (literal):** "busque esse card no enspace e insira na aba de tarefas dessa user story os seus fragmentos. é
+  como se a propria user_story fosse o epico e as tarefas dentro dela fossem as stories, as partes a fazer"
+- **Mudou:** o card `user_story` `USEDB9945FD15ED4FA29BECA30882A4E`, que a redatora escreveu com R1 a R126, ganha 8
+  tarefas, 1 por parte do épico, cada uma com os requisitos da parte
+  - partes 1 e 2 pelo MCP (`createTask`); 3 a 8 pela REST (`POST /ws/tasks` com `item`), a pedido dela
+  - cada tarefa diz quais R do card ela cobre, pela correspondência do épico
+- **Fronteira:** muda só o ENSPACE; a descrição do card e as telas do protótipo continuam como estão
+- **Virou regra:** regra 41 da spec, "Protótipo aprovado: o card no ENSPACE"
+- **Ver:** `evidencias/rodada31-tarefas-do-card.png`
+
 ### Rodada 30 · 2026-10-29
 - **Pedido (literal):** "como voce fragmentaria se fosse escrever como um épico?"; depois da análise, "Pode reescrever"
 - **Mudou:** o `REQUISITOS.md` (R1 a R126) vira o épico `requisitos/epico.md`, com 8 partes
