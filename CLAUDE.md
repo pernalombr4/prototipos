@@ -30,10 +30,11 @@ se quebram. Este arquivo só cobre a operação neste repositório — em qualqu
 4. Subir o protótipo, mandar o link e o print.
 5. Commitar: `[PROTO] <slug> — rodada N — <o que mudou>`.
 6. Aprovado: o documento de requisitos pela skill `requisitos`, com a coluna Relevância e, se
-   a demanda é grande, em épico (regra 40 da spec).
+   a demanda é grande, em épico (regra 40 da spec). Parece haver mais de 1 épico: apontar à
+   redatora e só dividir com a confirmação dela.
 7. No fim, **confirmar com a redatora** se cria o card no ENSPACE: o card `user_story` é o
    épico, com todos os requisitos por extenso na descrição, e cada parte vira uma tarefa do
-   card (regra 41 da spec).
+   card (regra 41 da spec). Com mais de 1 épico, 1 card por épico.
 
 ## Antes de desenhar: o que já foi pesquisado
 

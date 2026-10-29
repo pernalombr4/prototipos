@@ -338,9 +338,16 @@ Protótipo em revisão ainda não leva.
   - Cada funcionalidade, ou agrupamento de funcionalidades que faz sentido junto, é 1 documento
     de requisitos completo.
   - Demanda de 1 parte tem 1 documento só, sem épico.
+- **Mais de 1 épico:** quando o protótipo parece juntar mais de 1 épico (objetivos que se
+  entregam e se lançam cada um por si, sem depender do outro), o agente aponta isso à redatora,
+  com a divisão que propõe e o motivo. **Só divide com a confirmação dela**; sem ela, fica 1
+  épico (decisão da redatora em 2026-10-29).
+  - Cada épico é completo e independente: `epico.md`, partes e numeração próprios.
 - **Onde:** na pasta do protótipo.
   - 1 documento: `REQUISITOS.md`.
   - Épico: `requisitos/epico.md` e 1 arquivo por parte, na mesma pasta `requisitos/`.
+  - Mais de 1 épico: 1 subpasta por épico, `requisitos/<épico>/`, cada uma com o `epico.md` e
+    as partes dela.
 - **Antes de entregar:** a conferência da skill `requisitos` (passo 5) em cada documento; no
   épico, também no `epico.md`, que confere os links das partes e o ID repetido entre elas.
 - Os documentos de antes de 2026-10-29 ficam como estão. O `menu-lateral/requisitos/` é o
@@ -359,6 +366,8 @@ a redatora** se cria o card. Sem o sim dela, nada vai para o ENSPACE.
 - **As tarefas do card são as partes:** 1 tarefa por parte, na aba Tarefas do card, com os
   requisitos daquela parte.
   - Demanda de 1 documento só: o card leva o documento inteiro, sem tarefas.
+- **Mais de 1 épico, 1 card por épico:** com 2 épicos, 2 cards `user_story`. Cada card traz na
+  descrição todos os requisitos do seu épico, e as tarefas dele são as partes daquele épico.
 - **Na confirmação, a redatora diz** o título, o tipo, a prioridade e os outros campos do card,
   ou qual card que já existe recebe as tarefas.
   - Card que já existe: a descrição dele só muda com o ok dela.
@@ -918,9 +927,11 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
     2026-10-29. Skill `requisitos`, com a coluna Relevância (Obrigatório, Desejável, Opcional)
     em toda tabela de requisito e, quando a demanda é grande, em épico: o `epico.md` linka o
     documento de cada parte. Detalhe na Fase 5, "Protótipo aprovado: o documento de requisitos".
+    Protótipo que parece juntar mais de 1 épico: o agente aponta, e só divide com a confirmação
+    da redatora.
 
 41. **⛔ PROTÓTIPO APROVADO VIRA CARD NO ENSPACE SÓ COM O SIM DA REDATORA.** Decisão da
     redatora em 2026-10-29. No fim do trabalho, o agente pergunta se cria o card. Com o sim, o
     card `user_story` é o épico, com todos os requisitos por extenso na descrição (nunca só o
-    link para o GitHub), e cada parte vira uma tarefa do card. Detalhe na Fase 5, "Protótipo
-    aprovado: o card no ENSPACE".
+    link para o GitHub), e cada parte vira uma tarefa do card. Com mais de 1 épico, 1 card por
+    épico. Detalhe na Fase 5, "Protótipo aprovado: o card no ENSPACE".
