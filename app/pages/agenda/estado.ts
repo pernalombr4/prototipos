@@ -18,7 +18,7 @@
  */
 import type { CorDoCalendario, EventoDoCalendario, Lugar } from '~/components/ux/geometriaDoCalendario'
 import { AGORA, HOJE, hora, somarDias } from './datas'
-import type { Cor, ItemDaAgenda, Reuniao, SlugDaCategoria, TarefaDaAgenda } from './mocks'
+import type { Cor, ItemDaAgenda, Provedor, Reuniao, SlugDaCategoria, TarefaDaAgenda } from './mocks'
 import { blocosIniciais, categoriaPorSlug, EU, itens, reunioesIniciais, tarefasIniciais } from './mocks'
 
 export type Vista = 'dia' | 'semana' | 'mes' | 'lista'
@@ -40,6 +40,16 @@ const fontesIniciais = (): Fonte[] => [
   { slug: 'processos', ativa: true, campo: 'audiencia', horaInicio: 'audiencia_inicio', horaFim: 'audiencia_fim', cor: 'success' },
   { slug: 'clientes', ativa: true, campo: 'proxima_visita', horaInicio: null, horaFim: null, cor: 'neutral' },
 ]
+
+/**
+ * Os calendários externos que a Agenda conecta. O Google fica pronto na tela e desligado (`disponivel: false`) até a
+ * integração existir (pedido da redatora em 29/10/2026): ligar é trocar a flag e ligar a janela do Google.
+ */
+export const PROVEDORES: { id: Provedor, icone: string, disponivel: boolean }[] = [
+  { id: 'outlook', icone: 'i-simple-icons-microsoftoutlook', disponivel: true },
+  { id: 'google', icone: 'i-simple-icons-googlecalendar', disponivel: false },
+]
+export const provedoresEmBreve = PROVEDORES.filter(p => !p.disponivel)
 
 export const CORES_DO_OUTLOOK: Record<Reuniao['calendario'], CorDoCalendario> = { meu: 'info', juridico: 'neutral' }
 
@@ -123,15 +133,15 @@ const visivel = (responsavel: number) => !estado.responsaveis.length || estado.r
 export const fontesAtivas = computed(() => estado.fontes.filter(f => f.ativa))
 export const outlookNaTela = computed(() => estado.outlook === 'conectado')
 
-/** A sugestão de vínculo: um participante de fora com o mesmo domínio do contato de um item. */
+/** A sugestão de vínculo: um participante de fora com o mesmo domínio do contato de um item ainda não ligado. */
 export function sugestao(r: Reuniao): ItemDaAgenda | null {
-  if (r.itemId || r.sugestaoRecusada || r.particular) return null
+  if (r.sugestaoRecusada || r.particular) return null
   const dominios = r.participantes.map(p => p.email.split('@')[1]).filter(d => d !== 'aurora.example')
-  return estado.itens.find(i => i.dominio && dominios.includes(i.dominio)) ?? null
+  return estado.itens.find(i => i.dominio && dominios.includes(i.dominio) && !r.itens.includes(i.id)) ?? null
 }
 
 export const blocosDa = (tarefaId: number) => estado.blocos.filter(b => b.tarefaId === tarefaId)
-export const reunioesDo = (itemId: number) => estado.reunioes.filter(r => r.itemId === itemId).sort((a, b) => (a.dia + hora(a.inicio ?? 0)).localeCompare(b.dia + hora(b.inicio ?? 0)))
+export const reunioesDo = (itemId: number) => estado.reunioes.filter(r => r.itens.includes(itemId)).sort((a, b) => (a.dia + hora(a.inicio ?? 0)).localeCompare(b.dia + hora(b.inicio ?? 0)))
 
 /* ---------------- eventos da grade ---------------- */
 export const eventos = computed<EventoDoCalendario[]>(() => {
@@ -181,7 +191,7 @@ export const eventos = computed<EventoDoCalendario[]>(() => {
   if (outlookNaTela.value) {
     for (const r of estado.reunioes) {
       if (!c[r.calendario]) continue
-      lista.push({ id: `r:${r.id}`, titulo: r.titulo, dia: r.dia, inicio: r.inicio, fim: r.fim, cor: CORES_DO_OUTLOOK[r.calendario], icone: r.particular ? 'i-lucide-lock' : r.itemId ? 'i-lucide-link-2' : undefined, passado: jaPassou(r.dia, r.fim ?? 1440), arrastavel: ehOrganizador(r), redimensionavel: r.inicio !== undefined && ehOrganizador(r) })
+      lista.push({ id: `r:${r.id}`, titulo: r.titulo, dia: r.dia, inicio: r.inicio, fim: r.fim, cor: CORES_DO_OUTLOOK[r.calendario], icone: r.particular ? 'i-lucide-lock' : r.itens.length ? 'i-lucide-link-2' : undefined, passado: jaPassou(r.dia, r.fim ?? 1440), arrastavel: ehOrganizador(r), redimensionavel: r.inicio !== undefined && ehOrganizador(r) })
     }
   }
   return lista
@@ -276,9 +286,13 @@ export function responder(r: Reuniao, resposta: 'sim' | 'talvez' | 'nao') {
   if (eu) eu.resposta = resposta
 }
 
-export function ligar(r: Reuniao, itemId: number | null) {
-  r.itemId = itemId
-  if (itemId === null) r.sugestaoRecusada = true
+/** A reunião se liga a mais de um item: ligar soma, desligar tira só aquele. */
+export function ligar(r: Reuniao, itemId: number) {
+  if (!r.itens.includes(itemId)) r.itens.push(itemId)
+}
+export function desligar(r: Reuniao, itemId: number) {
+  r.itens = r.itens.filter(x => x !== itemId)
+  r.sugestaoRecusada = true
 }
 
 /** O que a pessoa já tem no horário: reuniões em que é participante e os próprios blocos. Serve aos formulários. */
@@ -290,8 +304,8 @@ export function conflitos(dia: string, inicio: number, fim: number) {
   ].filter((x): x is string => !!x)
 }
 
-/** Reuniões do Outlook da pessoa, sem vínculo e não particulares, dos próximos 14 dias: o "Ligar reunião existente". */
-export const reunioesParaLigar = computed(() => estado.reunioes.filter(r => !r.itemId && !r.particular && souParticipante(r) && r.dia >= HOJE && r.dia <= somarDias(HOJE, 14) && !r.id.startsWith('daily')))
+/** Reuniões do Outlook da pessoa, ainda não ligadas a este item e não particulares, dos próximos 14 dias: o "Ligar reunião existente". */
+export const reunioesParaLigar = (itemId: number) => estado.reunioes.filter(r => !r.itens.includes(itemId) && !r.particular && souParticipante(r) && r.dia >= HOJE && r.dia <= somarDias(HOJE, 14) && !r.id.startsWith('daily'))
 
 /* ---------------- criação rápida ---------------- */
 export type TipoDeCriacao = 'reuniao' | 'rapida' | 'item'
@@ -302,7 +316,8 @@ export interface Criacao {
   lugar: Lugar
   participantes: string[]
   teams: boolean
-  itemId: number | null
+  /** A reunião se liga a vários itens; a tarefa rápida, a 1 só (o primeiro). */
+  itens: number[]
   categoria: SlugDaCategoria
   /** Os outros campos do formulário completo da categoria ("Mais campos"). */
   campos?: Record<string, string | number>
@@ -329,7 +344,7 @@ export function criar(c: Criacao): Criado {
   if (c.tipo === 'reuniao') {
     const id = `r-novo-${sequencia}`
     // A reunião nasce no Outlook (1ª chamada); o vínculo é a 2ª. Se a 2ª falha, a reunião fica sem vínculo.
-    const vinculoFalhou = !!c.itemId && estado.falharVinculo
+    const vinculoFalhou = c.itens.length > 0 && estado.falharVinculo
     estado.falharVinculo = false
     estado.reunioes.push({
       id,
@@ -338,17 +353,22 @@ export function criar(c: Criacao): Criado {
       inicio,
       fim,
       calendario: 'meu',
+      provedor: 'outlook',
       teams: c.teams,
       participantes: [{ nome: EU.nome, email: EU.email!, resposta: 'sim' }, ...c.participantes.map(email => ({ nome: email.split('@')[0]!, email, resposta: 'pendente' as const }))],
-      itemId: vinculoFalhou ? null : c.itemId,
+      itens: vinculoFalhou ? [] : [...c.itens],
       organizador: EU.email!,
     })
     return { chave: `r:${id}`, vinculoFalhou }
   }
   if (c.tipo === 'rapida') {
     const modelo = structuredClone(toRaw(estado.tarefas.find(t => t.origem === 'rapida')!))
-    estado.tarefas.push({ ...modelo, id: sequencia, reference: `#${sequencia}`, name: c.titulo, status: 'pending', due_date: quando(dia, inicio ?? 18 * 60), item: c.itemId, assigned_to: EU.id, completed_at: null, completed_by: null })
-    return { chave: `q:${sequencia}`, vinculoFalhou: false }
+    // Com horário, a tarefa ganha o horário reservado na grade; o prazo fica no fim do dia (ou no fim do horário, se for depois).
+    const id = sequencia
+    const prazo = inicio === undefined ? 18 * 60 : Math.max(18 * 60, fim ?? inicio + 60)
+    estado.tarefas.push({ ...modelo, id, reference: `#${id}`, name: c.titulo, status: 'pending', due_date: quando(dia, prazo), item: c.itens[0] ?? null, assigned_to: EU.id, completed_at: null, completed_by: null })
+    if (inicio !== undefined) reservar(id, dia, inicio, fim ?? inicio + 60, true)
+    return { chave: `q:${id}`, vinculoFalhou: false }
   }
   const f = fonte(c.categoria)!
   const prefixo = { contratos: 'CT', processos: 'PR', clientes: 'CL', chamados: 'CH' }[c.categoria]

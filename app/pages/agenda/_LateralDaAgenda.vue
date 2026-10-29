@@ -6,7 +6,7 @@
 import type { CorDoCalendario } from '~/components/ux/geometriaDoCalendario'
 import type { Textos } from './textos'
 import { HOJE, diasDoMes, inicioDaSemana, nomeDoMes, somarMeses } from './datas'
-import { CORES_DO_OUTLOOK, estado, eventos, fontesAtivas, type Camada } from './estado'
+import { CORES_DO_OUTLOOK, estado, eventos, fontesAtivas, provedoresEmBreve, type Camada } from './estado'
 import { categoriaPorSlug, EU, pessoas } from './mocks'
 
 const props = defineProps<{ t: Textos, locale: string, conectando: boolean }>()
@@ -100,6 +100,10 @@ const opcoesDePessoa = pessoas.map(p => ({ label: p.nome, value: p.id, avatar: {
           <p class="text-xs text-muted">{{ t.lateral.conectarTexto }}</p>
           <UButton :label="t.lateral.conectar" icon="i-lucide-calendar-plus" color="neutral" variant="outline" size="xs" class="self-start" :loading="conectando" @click="emit('conectar')" />
         </div>
+        <p v-for="p in provedoresEmBreve" :key="p.id" class="flex items-center gap-1.5 text-xs text-dimmed" aria-disabled="true">
+          <UIcon :name="p.icone" class="size-3.5" />{{ t.integracoes.provedor[p.id] }}
+          <UBadge :label="t.integracoes.emBreve" color="neutral" variant="subtle" size="xs" class="ml-auto" />
+        </p>
       </div>
     </section>
 

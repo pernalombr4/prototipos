@@ -11,12 +11,14 @@
  *  - o estado em palavras no cartão: "Não conectado", "Conectado como <conta>", a recusa da Microsoft. No develop, só
  *    um ponto verde e o botão desligado "Integrado";
  *  - antes do clique, o que o botão faz (abre a janela da Microsoft) e o que a Agenda ganha;
- *  - "Reconectar" e "Desconectar" com nome, no lugar do ícone de atualizar sem rótulo nem dica.
+ *  - "Reconectar" e "Desconectar" com nome, no lugar do ícone de atualizar sem rótulo nem dica;
+ *  - a seção Google, com "Em breve" e o botão desligado (pedido de 29/10/2026). Ela vem de `provedoresEmBreve`:
+ *    quando o Google entrar, o cartão ganha os mesmos estados do Outlook.
  *
  * A janela da Microsoft é simulada e não pede nenhum dado: "Simular autorização" ou "Simular recusa".
  */
 import type { Textos } from './textos'
-import { estado } from './estado'
+import { estado, provedoresEmBreve } from './estado'
 import { EU } from './mocks'
 import CascaDoPerfil from './_CascaDoPerfil.vue'
 
@@ -138,6 +140,31 @@ function desconectar(c: Chave) {
             />
           </div>
           <p v-if="cartoes[c.chave] === 'desconectado'" class="mt-2 text-[11px] text-muted">{{ t.integracoes.abreJanela }}</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Proposta: o que vem a seguir, pronto e desligado -->
+    <section v-for="p in provedoresEmBreve" :key="p.id" class="mt-6 rounded-lg border border-dashed border-default p-6" :aria-disabled="true">
+      <h2 class="flex items-center gap-2 text-lg font-medium text-highlighted">
+        <span class="flex size-8 items-center justify-center rounded-md border border-default"><UIcon :name="p.icone" class="size-4" /></span>
+        {{ t.integracoes.provedor[p.id] }}
+        <UBadge :label="t.integracoes.emBreve" color="neutral" variant="subtle" size="sm" />
+      </h2>
+      <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <article class="flex flex-col rounded-lg border-2 border-default p-2.5 opacity-75" :aria-label="t.integracoes.provedor[p.id]">
+          <span class="mb-1 size-2" />
+          <div class="flex h-24 items-center justify-center rounded-md bg-elevated text-muted">
+            <UIcon :name="p.icone" class="size-11" />
+          </div>
+          <p class="mt-4 font-semibold text-toned">{{ t.integracoes.google.titulo }} <span class="text-muted">Google</span></p>
+          <p class="mt-2 text-xs text-muted">{{ t.integracoes.google.texto }}</p>
+          <p class="mt-3 flex items-start gap-1.5 text-xs text-muted">
+            <UIcon name="i-lucide-clock" class="mt-0.5 size-3.5 shrink-0" /><span>{{ t.integracoes.google.indisponivel }}</span>
+          </p>
+          <div class="mt-auto pt-4">
+            <UButton :label="t.integracoes.conectar" :icon="p.icone" size="sm" color="neutral" variant="outline" block disabled />
+          </div>
         </article>
       </div>
     </section>

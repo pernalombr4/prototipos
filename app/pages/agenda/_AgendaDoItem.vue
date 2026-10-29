@@ -37,7 +37,7 @@ const tarefas = computed(() => estado.tarefas.filter(x => x.item === props.itemI
 const datas = computed(() => cat.value.campos.filter(c => c.tipo === 'data' && c.chave !== 'created_at' && it.value.data[c.chave]))
 
 const agendando = ref(false)
-const opcoesParaLigar = computed(() => reunioesParaLigar.value.map(r => ({
+const opcoesParaLigar = computed(() => reunioesParaLigar(props.itemId).map(r => ({
   label: r.titulo,
   value: r.id,
   suffix: `${diaCurto(r.dia, props.locale)}${r.inicio === undefined ? '' : ` · ${hora(r.inicio)}`}`,
@@ -52,7 +52,7 @@ function ligarExistente(id: string) {
 }
 function criado(c: Parameters<typeof avisarReuniao>[2]) {
   agendando.value = false
-  avisarReuniao(toast, props.t, c, props.itemId)
+  avisarReuniao(toast, props.t, c, [props.itemId])
 }
 const corDaSituacao = { 'concluida': 'success', 'atrasada': 'error', 'hoje': 'warning', 'no-prazo': 'neutral', 'sem-prazo': 'neutral' } as const
 </script>

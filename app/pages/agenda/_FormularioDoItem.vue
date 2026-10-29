@@ -66,7 +66,7 @@ function enviar() {
       lugar: { dia: String(extra[fonte(r.categoria)!.campo]), inicio: typeof ini === 'number' ? ini : undefined, fim: typeof fim === 'number' ? fim : undefined },
       participantes: [],
       teams: false,
-      itemId: null,
+      itens: [],
       categoria: r.categoria,
       campos: extra,
     })

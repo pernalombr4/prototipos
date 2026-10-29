@@ -225,6 +225,9 @@ export const tarefasIniciais = (): TarefaDaAgenda[] => [
  * ------------------------------------------------------------------ */
 export interface Participante { nome: string, email: string, resposta: 'sim' | 'nao' | 'talvez' | 'pendente' }
 
+/** Os calendários de fora que a Agenda lê. O Google Agenda tem o lugar pronto e fica desligado até a integração. */
+export type Provedor = 'outlook' | 'google'
+
 export interface Reuniao {
   id: string
   titulo: string
@@ -233,11 +236,13 @@ export interface Reuniao {
   inicio?: number
   fim?: number
   calendario: 'meu' | 'juridico'
+  /** PROTÓTIPO: de onde a reunião vem. Só o Outlook está ligado; o Google Agenda vem em breve. */
+  provedor: Provedor
   teams: boolean
   local?: string
   participantes: Participante[]
-  /** PROTÓTIPO: o item a que a reunião está ligada. */
-  itemId: number | null
+  /** PROTÓTIPO: os itens a que a reunião está ligada. Uma reunião se liga a mais de um (o contrato e o cliente, por exemplo). */
+  itens: number[]
   /** PROTÓTIPO: a pessoa recusou a sugestão de vínculo; ela não volta. */
   sugestaoRecusada?: boolean
   /** E-mail de quem organizou. Só o organizador muda o horário no Outlook (`isOrganizer` do Graph). */
@@ -257,21 +262,21 @@ function dailies(): Reuniao[] {
     const dia = somarDias(HOJE, i)
     const semana = new Date(`${dia}T00:00:00Z`).getUTCDay()
     if (semana === 0 || semana === 6 || dia === '2026-11-02') continue
-    lista.push({ id: `daily-${dia}`, titulo: 'Daily do Jurídico', dia, inicio: 540, fim: 555, calendario: 'juridico', teams: true, participantes: [eu(), interno(4), interno(5)], itemId: null, organizador: pessoaPorId(4)!.email! })
+    lista.push({ id: `daily-${dia}`, titulo: 'Daily do Jurídico', dia, inicio: 540, fim: 555, calendario: 'juridico', provedor: 'outlook', teams: true, participantes: [eu(), interno(4), interno(5)], itens: [], organizador: pessoaPorId(4)!.email! })
   }
   return lista
 }
 
 export const reunioesIniciais = (): Reuniao[] => [
   ...dailies(),
-  { id: 'r-ondas-1', titulo: 'Primeira conversa com a Ondas Telecom', dia: '2026-10-20', inicio: 600, fim: 660, calendario: 'meu', teams: true, participantes: [eu(), interno(2), externo('Ana Lopes', 'ana.lopes@ondastelecom.example', 'sim')], itemId: 61118, organizador: EU.email! },
-  { id: 'r-solaris-0', titulo: 'Proposta comercial do Grupo Solaris', dia: '2026-10-22', inicio: 840, fim: 900, calendario: 'meu', teams: true, participantes: [eu(), interno(2), externo('Marcos Teles', 'marcos.teles@solaris.example', 'sim')], itemId: 47233, organizador: EU.email! },
-  { id: 'r-prep', titulo: 'Preparação da audiência de cobrança', dia: '2026-10-26', inicio: 900, fim: 960, calendario: 'meu', teams: false, local: 'Sala Ipê', participantes: [eu(), interno(6)], itemId: 52088, organizador: EU.email! },
-  { id: 'r-1a1', titulo: '1:1 com o Paulo', dia: '2026-10-27', inicio: 660, fim: 720, calendario: 'meu', teams: true, participantes: [eu(), interno(6)], itemId: null, organizador: EU.email! },
-  { id: 'r-ondas-2', titulo: 'Alinhamento do link dedicado com a Ondas Telecom', dia: '2026-10-27', inicio: 840, fim: 900, calendario: 'meu', teams: true, participantes: [eu(), interno(2), externo('Ana Lopes', 'ana.lopes@ondastelecom.example', 'sim'), externo('Caio Ventura', 'caio.ventura@ondastelecom.example', 'talvez')], itemId: null, organizador: EU.email! },
-  { id: 'r-solaris-1', titulo: 'Revisão das cláusulas de reajuste com o Grupo Solaris', dia: '2026-10-28', inicio: 600, fim: 660, calendario: 'meu', teams: true, participantes: [eu(), interno(3), externo('Marcos Teles', 'marcos.teles@solaris.example', 'sim')], itemId: 47233, organizador: EU.email! },
-  { id: 'r-riscos', titulo: 'Comitê de riscos', dia: '2026-10-28', inicio: 630, fim: 690, calendario: 'juridico', teams: false, local: 'Sala Jacarandá', participantes: [eu('talvez'), interno(6), interno(3), interno(4)], itemId: null, organizador: pessoaPorId(6)!.email! },
-  { id: 'r-fin', titulo: 'Ligação rápida com o financeiro', dia: '2026-10-28', inicio: 630, fim: 660, calendario: 'meu', teams: true, participantes: [eu(), interno(3)], itemId: null, organizador: EU.email! },
+  { id: 'r-ondas-1', titulo: 'Primeira conversa com a Ondas Telecom', dia: '2026-10-20', inicio: 600, fim: 660, calendario: 'meu', provedor: 'outlook', teams: true, participantes: [eu(), interno(2), externo('Ana Lopes', 'ana.lopes@ondastelecom.example', 'sim')], itens: [61118], organizador: EU.email! },
+  { id: 'r-solaris-0', titulo: 'Proposta comercial do Grupo Solaris', dia: '2026-10-22', inicio: 840, fim: 900, calendario: 'meu', provedor: 'outlook', teams: true, participantes: [eu(), interno(2), externo('Marcos Teles', 'marcos.teles@solaris.example', 'sim')], itens: [47233], organizador: EU.email! },
+  { id: 'r-prep', titulo: 'Preparação da audiência de cobrança', dia: '2026-10-26', inicio: 900, fim: 960, calendario: 'meu', provedor: 'outlook', teams: false, local: 'Sala Ipê', participantes: [eu(), interno(6)], itens: [52088, 47233], organizador: EU.email! },
+  { id: 'r-1a1', titulo: '1:1 com o Paulo', dia: '2026-10-27', inicio: 660, fim: 720, calendario: 'meu', provedor: 'outlook', teams: true, participantes: [eu(), interno(6)], itens: [], organizador: EU.email! },
+  { id: 'r-ondas-2', titulo: 'Alinhamento do link dedicado com a Ondas Telecom', dia: '2026-10-27', inicio: 840, fim: 900, calendario: 'meu', provedor: 'outlook', teams: true, participantes: [eu(), interno(2), externo('Ana Lopes', 'ana.lopes@ondastelecom.example', 'sim'), externo('Caio Ventura', 'caio.ventura@ondastelecom.example', 'talvez')], itens: [], organizador: EU.email! },
+  { id: 'r-solaris-1', titulo: 'Revisão das cláusulas de reajuste com o Grupo Solaris', dia: '2026-10-28', inicio: 600, fim: 660, calendario: 'meu', provedor: 'outlook', teams: true, participantes: [eu(), interno(3), externo('Marcos Teles', 'marcos.teles@solaris.example', 'sim')], itens: [47233], organizador: EU.email! },
+  { id: 'r-riscos', titulo: 'Comitê de riscos', dia: '2026-10-28', inicio: 630, fim: 690, calendario: 'juridico', provedor: 'outlook', teams: false, local: 'Sala Jacarandá', participantes: [eu('talvez'), interno(6), interno(3), interno(4)], itens: [], organizador: pessoaPorId(6)!.email! },
+  { id: 'r-fin', titulo: 'Ligação rápida com o financeiro', dia: '2026-10-28', inicio: 630, fim: 660, calendario: 'meu', provedor: 'outlook', teams: true, participantes: [eu(), interno(3)], itens: [], organizador: EU.email! },
   {
     id: 'r-vertice',
     titulo: 'Kick-off da manutenção predial com a Vértice Engenharia',
@@ -279,17 +284,18 @@ export const reunioesIniciais = (): Reuniao[] => [
     inicio: 960,
     fim: 1020,
     calendario: 'meu',
+    provedor: 'outlook',
     teams: true,
     participantes: [eu(), interno(2), interno(4), interno(5), externo('Rui Campos', 'rui.campos@vertice.example', 'sim'), externo('Bia Torres', 'bia.torres@vertice.example', 'sim'), externo('Ivo Lemos', 'ivo.lemos@vertice.example'), externo('Sara Duarte', 'sara.duarte@vertice.example'), externo('Leo Faria', 'leo.faria@vertice.example', 'nao'), externo('Compras Vértice', 'compras@vertice.example'), externo('Otto Reis', 'otto.reis@vertice.example', 'talvez'), interno(6, 'pendente')],
-    itemId: null, organizador: pessoaPorId(2)!.email!,
+    itens: [], organizador: pessoaPorId(2)!.email!,
   },
-  { id: 'r-prado', titulo: 'Café com o escritório Prado e Lima', dia: '2026-10-29', inicio: 450, fim: 480, calendario: 'meu', teams: false, local: 'Café da esquina', participantes: [eu(), externo('Helena Prado', 'helena.prado@pradolima.example', 'sim')], itemId: 52088, organizador: EU.email! },
-  { id: 'r-particular', titulo: 'Consulta médica', dia: '2026-10-29', inicio: 720, fim: 780, calendario: 'meu', teams: false, participantes: [eu()], itemId: null, organizador: EU.email!, particular: true },
-  { id: 'r-lgpd', titulo: 'Treinamento de LGPD', dia: '2026-10-30', calendario: 'juridico', teams: true, participantes: [eu(), interno(4), interno(5), interno(3)], itemId: null, organizador: pessoaPorId(3)!.email! },
-  { id: 'r-ondas-3', titulo: 'Negociação da renovação com a Ondas Telecom', dia: '2026-10-30', inicio: 900, fim: 990, calendario: 'meu', teams: true, participantes: [eu(), interno(2), externo('Ana Lopes', 'ana.lopes@ondastelecom.example', 'sim')], itemId: 47231, organizador: EU.email! },
-  { id: 'r-vertice-2', titulo: 'Assinatura do aditivo com a Vértice', dia: '2026-11-03', inicio: 600, fim: 660, calendario: 'meu', teams: true, participantes: [eu(), externo('Rui Campos', 'rui.campos@vertice.example', 'sim')], itemId: 47232, organizador: EU.email! },
-  { id: 'r-solaris-2', titulo: 'Reunião mensal com o Grupo Solaris', dia: '2026-11-04', inicio: 840, fim: 900, calendario: 'meu', teams: true, participantes: [eu(), interno(2), externo('Marcos Teles', 'marcos.teles@solaris.example')], itemId: null, organizador: 'marcos.teles@solaris.example' },
-  { id: 'r-workshop', titulo: 'Workshop de contratos padrão', dia: '2026-11-06', inicio: 540, fim: 720, calendario: 'juridico', teams: false, local: 'Auditório', participantes: [eu(), interno(2), interno(3), interno(4), interno(5), interno(6)], itemId: null, organizador: pessoaPorId(2)!.email! },
+  { id: 'r-prado', titulo: 'Café com o escritório Prado e Lima', dia: '2026-10-29', inicio: 450, fim: 480, calendario: 'meu', provedor: 'outlook', teams: false, local: 'Café da esquina', participantes: [eu(), externo('Helena Prado', 'helena.prado@pradolima.example', 'sim')], itens: [52088], organizador: EU.email! },
+  { id: 'r-particular', titulo: 'Consulta médica', dia: '2026-10-29', inicio: 720, fim: 780, calendario: 'meu', provedor: 'outlook', teams: false, participantes: [eu()], itens: [], organizador: EU.email!, particular: true },
+  { id: 'r-lgpd', titulo: 'Treinamento de LGPD', dia: '2026-10-30', calendario: 'juridico', provedor: 'outlook', teams: true, participantes: [eu(), interno(4), interno(5), interno(3)], itens: [], organizador: pessoaPorId(3)!.email! },
+  { id: 'r-ondas-3', titulo: 'Negociação da renovação com a Ondas Telecom', dia: '2026-10-30', inicio: 900, fim: 990, calendario: 'meu', provedor: 'outlook', teams: true, participantes: [eu(), interno(2), externo('Ana Lopes', 'ana.lopes@ondastelecom.example', 'sim')], itens: [47231, 61118], organizador: EU.email! },
+  { id: 'r-vertice-2', titulo: 'Assinatura do aditivo com a Vértice', dia: '2026-11-03', inicio: 600, fim: 660, calendario: 'meu', provedor: 'outlook', teams: true, participantes: [eu(), externo('Rui Campos', 'rui.campos@vertice.example', 'sim')], itens: [47232], organizador: EU.email! },
+  { id: 'r-solaris-2', titulo: 'Reunião mensal com o Grupo Solaris', dia: '2026-11-04', inicio: 840, fim: 900, calendario: 'meu', provedor: 'outlook', teams: true, participantes: [eu(), interno(2), externo('Marcos Teles', 'marcos.teles@solaris.example')], itens: [], organizador: 'marcos.teles@solaris.example' },
+  { id: 'r-workshop', titulo: 'Workshop de contratos padrão', dia: '2026-11-06', inicio: 540, fim: 720, calendario: 'juridico', provedor: 'outlook', teams: false, local: 'Auditório', participantes: [eu(), interno(2), interno(3), interno(4), interno(5), interno(6)], itens: [], organizador: pessoaPorId(2)!.email! },
 ]
 
 /* ------------------------------------------------------------------ *

@@ -92,7 +92,7 @@ const agendando = ref(false)
 const reunioes = computed(() => it.value ? reunioesDo(it.value.id).filter(r => r.dia >= HOJE) : [])
 function criado(c: Parameters<typeof avisarReuniao>[2]) {
   agendando.value = false
-  avisarReuniao(toast, props.t, c, it.value?.id ?? null)
+  avisarReuniao(toast, props.t, c, it.value ? [it.value.id] : [])
 }
 
 /* ---------- histórico (recorte) ---------- */

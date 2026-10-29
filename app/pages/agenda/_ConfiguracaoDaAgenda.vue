@@ -10,7 +10,7 @@
 import type { CorDoCalendario } from '~/components/ux/geometriaDoCalendario'
 import { barra } from '~/components/ux/geometriaDoCalendario'
 import type { Textos } from './textos'
-import { type Fonte, estado } from './estado'
+import { type Fonte, estado, provedoresEmBreve } from './estado'
 import { type Cor, categorias, EU } from './mocks'
 
 const props = defineProps<{ t: Textos, conectando: boolean }>()
@@ -126,16 +126,22 @@ const corDe = (c: CorDoCalendario) => barra[c]
           </div>
         </section>
 
-        <!-- Outlook -->
+        <!-- Calendários externos: o Outlook e o que vem em breve -->
         <section class="flex flex-col gap-2">
-          <h3 class="text-sm font-semibold text-highlighted">{{ t.config.outlook }}</h3>
+          <h3 class="text-sm font-semibold text-highlighted">{{ t.integracoes.calendariosExternos }}</h3>
           <div class="flex items-center gap-3 rounded-lg border border-default p-3">
-            <UIcon name="i-lucide-calendar" class="size-5 text-info" />
+            <UIcon name="i-simple-icons-microsoftoutlook" class="size-5 text-info" :aria-label="t.config.outlook" />
             <p class="flex-1 text-sm" :class="estado.outlook === 'falha' ? 'text-warning' : 'text-toned'">
               {{ estado.outlook === 'conectado' ? t.config.conectadoComo(EU.email!) : estado.outlook === 'falha' ? t.config.semConexao : t.lateral.conectarTexto }}
             </p>
             <UButton v-if="estado.outlook === 'conectado'" :label="t.config.desconectar" color="neutral" variant="outline" size="xs" @click="estado.outlook = 'desconectado'" />
             <UButton v-else :label="estado.outlook === 'falha' ? t.config.tentar : t.config.conectar" color="neutral" variant="outline" size="xs" :loading="conectando" @click="emit('conectar')" />
+          </div>
+          <div v-for="p in provedoresEmBreve" :key="p.id" class="flex items-center gap-3 rounded-lg border border-dashed border-default p-3" aria-disabled="true">
+            <UIcon :name="p.icone" class="size-5 text-muted" :aria-label="t.integracoes.provedor[p.id]" />
+            <p class="flex-1 text-sm text-muted">{{ t.integracoes.google.indisponivel }}</p>
+            <UBadge :label="t.integracoes.emBreve" color="neutral" variant="subtle" size="sm" />
+            <UButton :label="t.config.conectar" color="neutral" variant="outline" size="xs" disabled />
           </div>
         </section>
 

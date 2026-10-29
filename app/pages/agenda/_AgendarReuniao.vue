@@ -51,7 +51,7 @@ function enviar() {
       lugar: { dia: forma.dia, inicio: intervalo.value.ini, fim: intervalo.value.fim },
       participantes: forma.participantes,
       teams: forma.teams,
-      itemId: props.itemId,
+      itens: props.itemId ? [props.itemId] : [],
       categoria: it.value?.categoria ?? 'contratos',
     }))
   }, 500)

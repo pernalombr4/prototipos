@@ -311,10 +311,103 @@ hoje pra conectar o outlook". No develop, a conexão fica em Perfil › Integra�
 - A janela da Microsoft é simulada: um modal tracejado que diz o que acontece no produto, com "Simular autorização" e
   "Simular recusa". O protótipo não imita a página da Microsoft e não pede nenhum dado.
 
+### Mudou: a reunião se liga a mais de um item
+
+Pedido da redatora: "deve ser possivel ligar um evento a mais de um item".
+
+- A reunião guarda uma lista de itens (`itens: number[]` no `mocks.ts`), não um item só. Exemplo do mock: a preparação
+  da audiência liga o processo e o contrato; a negociação com a Ondas Telecom liga o contrato e o cliente.
+- No popover da reunião, cada item ligado tem a própria linha, com "Abrir item" e o botão de desligar. "Ligar a outro
+  item" continua abaixo enquanto houver item para ligar. A sugestão pelo domínio ignora o item que já está ligado.
+- Na criação, "Ligado a" da reunião aceita vários itens. A tarefa rápida continua com 1 item: no produto, a tarefa
+  pertence a um item.
+
+### Mudou: criar no padrão do Google Agenda, com o horário opcional
+
+Pedido da redatora: "se voce clica no header, pode estar criando só evento/tarefa [...] e pode optar por adicionar um
+horario reservado pra aquilo. se eu clico em adicionar horario automaticamente sai do topo e vai pra baixo".
+
+- O popover de criação troca a linha de texto ("29 de outubro · Dia inteiro") por um bloco "Quando": a data, e o botão
+  "Adicionar horário" ("Reservar horário" na tarefa rápida).
+- Com o horário: início e fim em passos de 15 minutos, o fim com a duração ("15:00 (1 h)"), e "Dia inteiro" para
+  voltar. Mudar o início mantém a duração. O fantasma muda de lugar na hora: desce para a grade com o horário e volta
+  para a faixa do alto sem ele.
+- O horário sugerido é o próximo quarto de hora de agora, hoje, e 09:00 nos outros dias, com 1 hora de duração.
+- A tarefa rápida fica na faixa do alto, no dia do prazo. Com "Reservar horário", a mesma criação reserva o tempo na
+  grade (o bloco que o arraste cria), e a frase abaixo diz o que acontece com cada um.
+- O item só ganha horário quando a categoria tem campo de hora (Audiência do Processo tem; Próxima visita do Cliente
+  não). Sem campo de hora, o botão não aparece e a frase diz por quê.
+- Clicar na grade continua criando com o horário do clique, e os mesmos campos deixam mudar.
+
+### Mudou: Google Agenda preparado, em breve
+
+Pedido da redatora: "prepare o prototipo pra receber integração com google agenda [...] coloque um "em breve" e a opçao
+ainda disabled".
+
+- `PROVEDORES`, no `estado.ts`, lista os calendários externos com `disponivel`. O Google está com `false`, e toda tela
+  lê a lista: ligar o Google é trocar a flag e ligar a janela de autorização.
+- A reunião tem `provedor` (`'outlook' | 'google'`), para a grade e o popover saberem de onde ela vem quando houver 2.
+- Onde aparece, desligado e com "Em breve":
+  - na tela de integrações, a seção Google com o cartão "Agenda do Google" e "Conectar" desligado;
+  - na Configuração, a seção Outlook virou "Calendários externos", com o Outlook e a linha do Google;
+  - na lateral, abaixo do Outlook, a linha "Google Agenda".
+
+### Mudou: botão direito no evento
+
+Pedido da redatora: "pense tambem no que deve ocorrer se eu clicar com botao direito no evento. tanto o teams quanto o
+meet apresentam opçoes". O Teams (que é a agenda do Outlook) tem o menu mais completo: participar, chat, copiar o link,
+abrir, encaminhar, mostrar como, categorizar, particular, duplicar, salvar .ics e excluir. O Google Agenda tem a
+resposta ao convite, participar, excluir e a cor.
+
+- O menu (`menuDoEvento.ts`) abre no evento da grade. No vazio, fica o menu do navegador.
+- Entra só o que a pessoa pode fazer, a mesma regra do popover:
+  - **reunião de outra pessoa:** "Você vai?" com Sim, Não e Talvez, que vai ao Outlook;
+  - **reunião no Teams:** participar e copiar o link;
+  - **toda reunião:** abrir os detalhes e, com itens ligados, o submenu com cada item;
+  - **reunião minha:** cancelar, com Desfazer;
+  - **tarefa:** cumprir (ou reabrir), ir para a tarefa, reservar horário, abrir o item, copiar o link;
+  - **tempo reservado:** as ações da tarefa e "Remover tempo reservado", com Desfazer;
+  - **item:** abrir os detalhes, abrir o item, copiar a referência.
+- **"Agendar reunião sobre isto"**, na tarefa e no item, vem do Outlook, que marca uma reunião no Meet a partir de um
+  evento. Aqui, a criação de reunião abre com o título e o item já ligados, no dia do prazo (ou hoje, se já passou).
+- Do Teams, ficou de fora o que o ENSPACE não guarda: encaminhar, mostrar como, categorizar, salvar .ics e duplicar. A
+  cor é a da fonte, na Configuração; trocar por evento quebraria a leitura por fonte.
+
+### Julgado: criar no alto à moda do Outlook
+
+A redatora mostrou o Outlook: 1 clique no alto abre um campo no próprio dia, basta digitar o título, e o evento nasce
+de dia inteiro. O horário fica no "Agendador", num 2º modal, e é ali que o Outlook perde para o Google.
+
+- O popover já faz a mesma conta de gestos: clicar, digitar, Enter. O título vem focado.
+- Ele mostra, no mesmo lugar, o tipo (reunião, tarefa rápida, item) e o horário, que no Outlook ficam em outra tela.
+- Fica o popover. O campo no próprio dia volta à mesa se o teste com pessoas mostrar que o popover pesa.
+
+### Julgado: agendamento de horários (página de reserva)
+
+Pedido da redatora: "trazer a funcionalidade de agendamento de horario tambem pode ser interessante. julgue se realmente
+é, considerando que hoje temos só integração com oulook".
+
+O agendamento de horários do Google Agenda é uma página pública em que alguém de fora escolhe um horário livre e a
+reunião entra no calendário. **Recomendação: não construir agora.**
+
+- O Outlook já tem a mesma coisa: o Personal Bookings ("Bookings with me"), com página pública, tipos de reunião de 15 e
+  30 minutos e a reunião caindo direto no calendário do Outlook
+  ([Microsoft Learn](https://learn.microsoft.com/en-us/microsoft-365/bookings/personal-bookings-faq?view=o365-worldwide)).
+  Ele depende de licença com o Bookings (Business Standard e Premium, A3 e A5, E3 e E5, nestas com o administrador
+  ligando), e o administrador pode desligar
+  ([Microsoft Learn](https://learn.microsoft.com/en-us/microsoft-365/bookings/bookings-in-outlook?view=o365-worldwide)).
+- Fazer a nossa repete o Outlook e pede o que o ENSPACE não tem hoje: página pública fora do login, cálculo de
+  disponibilidade e criação de reunião em nome de quem reserva.
+- Ganho maior e mais barato, dentro da Agenda:
+  - em "Agendar reunião", sugerir os horários livres de todos os participantes internos (o Outlook informa o livre e o
+    ocupado);
+  - quando a pessoa tem Bookings, um campo no perfil com o link da página dela, para mandar ao cliente pelo item.
+- Fica fora do protótipo. Vale reabrir se o Google entrar e o cliente sem Bookings pedir.
+
 ### Fronteira
 
 - **Muda:** a pasta Agenda na tela do item, a aba Agenda no painel da tarefa, o formulário completo na criação, os
-  avisos de permissão e de risco.
+  avisos de permissão e de risco, o bloco Quando da criação, a reunião com vários itens, o menu do botão direito e as linhas do Google.
 - **Não muda:** a tela do item e o painel da tarefa fora dessas partes. As 2 cascas foram copiadas de novo do develop em
   29/10 (`_TelaDoItem.vue`, `_PainelDaTarefa.vue`): abas sublinhadas, painel do item em caixas, trilho de ícones do
   painel da tarefa, "Detalhes da Tarefa" e "Concluir Etapa". As outras pastas e a aba Comentários mostram só "não muda".
@@ -333,6 +426,8 @@ hoje pra conectar o outlook". No develop, a conexão fica em Perfil › Integra�
   registro. O protótipo já tem os 3 caminhos: a sugestão pelo domínio, "Ligado a" e "Ligar reunião existente", e
   "Agendar reunião" no item e na tarefa.
 
+- Página própria de agendamento de horários: o Outlook já tem o Personal Bookings (ver "Julgado" acima).
+
 ### Andaime
 
 O menu "Ir para" ganhou o grupo Rodada 2: tela do item, painel da tarefa, criar item com obrigatórios, item com fluxo na
@@ -346,6 +441,8 @@ vínculo". O atalho mostra todas as pessoas quando o filtro esconde o evento.
 - Ligar a reunião sem sair do Outlook pede um suplemento do Outlook (o caminho do HubSpot e do Salesforce, fora da
   pesquisa): entra no roteiro?
 - O fluxo com gatilho em campo de data roda quando a data muda pela Agenda, ou só pelo formulário do item?
+- O horário reservado tem duração padrão de 1 hora. Fica fixo ou vira configuração da pessoa (30 min, 1 h, 2 h)?
+- A reunião ligada a 2 itens aparece no histórico dos 2? E o e-mail da reunião, quando houver, também?
 - A configuração Tarefas leva só as tarefas atribuídas à pessoa. A tarefa atribuída a um grupo de que ela faz parte, ou
   compartilhada com ela, também entra na Agenda dela?
 
@@ -365,3 +462,8 @@ vínculo". O atalho mostra todas as pessoas quando o filtro esconde o evento.
 | ![](evidencias/integracoes-conectado.png) | Calendário conectado, com a conta e a volta para a Agenda; Correio recusado, com "Tentar de novo" |
 | ![](evidencias/cumprir-tarefa-na-agenda.png) | O modal da tarefa sobre a grade: Concluir Etapa e, no rodapé, Ir para a tarefa |
 | ![](evidencias/painel-sem-data.png) | O painel Tarefas sem data, aberto pelo botão da barra, com as 3 tarefas sem prazo |
+| ![](evidencias/criacao-com-horario.png) | Tarefa rápida criada na faixa do alto, com "Reservar horário": o fantasma desce para 09:00 às 10:00 |
+| ![](evidencias/reuniao-com-dois-itens.png) | Reunião criada pelo botão direito da tarefa, ligada ao contrato e ao cliente, cada um na sua linha |
+| ![](evidencias/menu-da-tarefa.png) | O botão direito na tarefa: cumprir, ir para a tarefa, reservar horário, abrir o item, agendar reunião |
+| ![](evidencias/menu-da-reuniao.png) | O botão direito na reunião que organizo: detalhes, os 2 itens ligados e cancelar |
+| ![](evidencias/integracoes-google-em-breve.png) | A tela de integrações com o Google Agenda em breve, com o Conectar desligado |

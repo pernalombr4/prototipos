@@ -18,9 +18,10 @@ import type { Lugar } from '~/components/ux/geometriaDoCalendario'
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { textos } from './textos'
 import { AGORA, HOJE, diaCurto, diaDaSemana, hora } from './datas'
-import { type Cenario, type Criado, type Rascunho, type TipoDeCriacao, aplicar, diaDe, escolherCenario, estado, eventos, fluxoDoCampo, foto, item, minutoDe, reiniciar, restaurar, reuniao, semData } from './estado'
+import { type Cenario, type Criado, type Rascunho, type TipoDeCriacao, aplicar, diaDe, escolherCenario, estado, eventos, fluxoDoCampo, fonte, foto, item, minutoDe, reiniciar, restaurar, reuniao, semData, tarefa } from './estado'
 import { HORARIO, categoriaPorSlug, feriados } from './mocks'
 import { avisarReuniao } from './avisos'
+import { menuDoEvento } from './menuDoEvento'
 import CascaDaAgenda from './_CascaDaAgenda.vue'
 import BarraDaAgenda from './_BarraDaAgenda.vue'
 import LateralDaAgenda from './_LateralDaAgenda.vue'
@@ -79,12 +80,42 @@ function abrir(chave: string, ref: Referencia) {
   detalhe.value = chave
 }
 const tipoInicial = ref<TipoDeCriacao | undefined>()
-function criarEm(lugar: Lugar, ref: Referencia, tipo?: TipoDeCriacao) {
+const semente = ref<{ titulo: string, itens: number[] }>()
+function criarEm(lugar: Lugar, ref: Referencia, tipo?: TipoDeCriacao, s?: { titulo: string, itens: number[] }) {
   detalhe.value = null
   referencia.value = ref
   tipoInicial.value = tipo
+  semente.value = s
   rascunho.value = lugar
 }
+
+/* ---------- botão direito no evento ---------- */
+const alvo = ref<string | null>(null)
+/** Só o evento abre o menu; no vazio da grade fica o menu do navegador. */
+function pegarAlvo(ev: MouseEvent) {
+  const chave = (ev.target as HTMLElement).closest<HTMLElement>('[data-evento]')?.dataset.evento
+  if (!chave) return ev.stopPropagation()
+  alvo.value = chave
+}
+/** A reunião sobre a tarefa ou o item: no dia dela (ou hoje, se já passou), no próximo horário livre do dia. */
+function agendarSobre(chave: string, titulo: string, itemId: number | null) {
+  const tf = chave.startsWith('i:') ? null : tarefa(Number(chave.slice(2))) ?? tarefa(Number(estado.blocos.find(b => `b:${b.id}` === chave)?.tarefaId))
+  const it = item(itemId)
+  const data = tf?.due_date ? diaDe(tf.due_date) : it ? String(it.data[fonte(it.categoria)!.campo]) : HOJE
+  const dia = data > HOJE ? data : HOJE
+  const inicio = dia === HOJE ? Math.ceil((AGORA + 1) / 15) * 15 : 9 * 60
+  setTimeout(() => criarEm({ dia, inicio, fim: inicio + 60 }, pelo(`[data-evento="${chave}"]`), 'reuniao', { titulo, itens: itemId ? [itemId] : [] }), 50)
+}
+const menu = computed(() => alvo.value
+  ? menuDoEvento(alvo.value, t.value, {
+      abrir: c => setTimeout(() => abrir(c, pelo(`[data-evento="${c}"]`)), 50),
+      cumprir,
+      irParaTarefa: (id, aba) => abrirTarefa(id, aba),
+      acessarItem: acessar,
+      agendarReuniao: agendarSobre,
+      avisar: (title, desfazer) => toast.add({ title, icon: 'i-lucide-circle-check', color: 'success', actions: desfazer ? [{ label: t.value.avisos.desfazer, color: 'neutral', variant: 'outline', onClick: desfazer }] : undefined }),
+    })
+  : [])
 function novo(el: HTMLElement) {
   const inicio = Math.ceil(AGORA / 60) * 60
   criarEm({ dia: estado.vista === 'dia' ? estado.data : HOJE, inicio, fim: inicio + 60 }, { getBoundingClientRect: () => el.getBoundingClientRect() })
@@ -128,10 +159,10 @@ function executar(chave: string, l: Lugar) {
   toast.add({ title: a.item(e.campo, e.referencia, quando(e.dia, e.inicio)), icon: 'i-lucide-calendar-check', actions: desfazer })
 }
 
-function criado(c: Criado, tipo: TipoDeCriacao, itemId: number | null) {
+function criado(c: Criado, tipo: TipoDeCriacao, itens: number[]) {
   rascunho.value = null
   estado.agendandoPara = null
-  if (tipo === 'reuniao') return avisarReuniao(toast, t.value, c, itemId)
+  if (tipo === 'reuniao') return avisarReuniao(toast, t.value, c, itens)
   toast.add({ title: t.value.avisos.criado[tipo], icon: 'i-lucide-circle-check', color: 'success' })
 }
 
@@ -329,8 +360,11 @@ const atalhos = computed<DropdownMenuItem[][]>(() => {
 
           <div class="relative flex min-h-0 min-w-0 flex-1 flex-col">
             <ListaDaAgenda v-if="estado.vista === 'lista'" :t="t" :locale="locale" :eventos="eventos" :selecionado="detalhe" @abrir="abrir" />
+            <!-- O botão direito no evento abre as ações dele (menuDoEvento.ts) -->
+            <div v-else class="flex min-h-0 flex-1 flex-col" @contextmenu.capture="pegarAlvo">
+              <UContextMenu :items="menu" :content="{ class: 'min-w-60' }">
+                <div class="flex min-h-0 flex-1 flex-col">
             <UxCalendario
-              v-else
               :eventos="eventos"
               :vista="estado.vista"
               :data="estado.data"
@@ -350,6 +384,9 @@ const atalhos = computed<DropdownMenuItem[][]>(() => {
               @soltar="mover"
               @ir-para-dia="d => Object.assign(estado, { vista: 'dia', data: d })"
             />
+                </div>
+              </UContextMenu>
+            </div>
             <div v-if="vazio" class="pointer-events-none absolute inset-0 top-24 flex items-start justify-center">
               <UEmpty
                 icon="i-lucide-calendar-check"
@@ -375,7 +412,7 @@ const atalhos = computed<DropdownMenuItem[][]>(() => {
     </UPopover>
     <UPopover :open="!!rascunho" :reference="referencia" :content="{ side: 'right', align: 'start', sideOffset: 8 }" @update:open="v => !v && (rascunho = null)">
       <template #content>
-        <CriacaoRapida v-if="rascunho" :t="t" :locale="locale" :lugar="rascunho" :tipo-inicial="tipoInicial" @criado="criado" @cancelar="rascunho = null" @conectar="conectar" @formulario="abrirFormulario" />
+        <CriacaoRapida v-if="rascunho" :t="t" :locale="locale" :lugar="rascunho" :tipo-inicial="tipoInicial" :semente="semente" @criado="criado" @cancelar="rascunho = null" @conectar="conectar" @formulario="abrirFormulario" @lugar="l => (rascunho = l)" />
       </template>
     </UPopover>
 

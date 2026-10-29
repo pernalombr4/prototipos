@@ -16,7 +16,7 @@ import type { Lugar } from '~/components/ux/geometriaDoCalendario'
 import { fundoCheio, textoDaCor } from '~/components/ux/geometriaDoCalendario'
 import type { Textos } from './textos'
 import { AGORA, HOJE, diaCurto, diaLongo, duracao, hora, paraMinutos } from './datas'
-import { CORES_DO_OUTLOOK, bloco, estado, blocosDa, concluir, diaDe, ehMinha, ehOrganizador, fluxoDoCampo, fonte, item, ligar, minutoDe, organizador, podeEditarItem, removerBloco, responder, reuniao, situacao, souParticipante, sugestao, tarefa, temSla } from './estado'
+import { CORES_DO_OUTLOOK, bloco, estado, blocosDa, concluir, diaDe, ehMinha, ehOrganizador, desligar, fluxoDoCampo, fonte, item, ligar, minutoDe, organizador, podeEditarItem, removerBloco, responder, reuniao, situacao, souParticipante, sugestao, tarefa, temSla } from './estado'
 import { EU, categoriaPorSlug, pessoaPorId } from './mocks'
 
 const props = defineProps<{ t: Textos, locale: string, chave: string }>()
@@ -28,7 +28,9 @@ const id = computed(() => props.chave.slice(2))
 const r = computed(() => tipo.value === 'r' ? reuniao(id.value) ?? null : null)
 const b = computed(() => tipo.value === 'b' ? bloco(id.value) ?? null : null)
 const tf = computed(() => tipo.value === 't' || tipo.value === 'q' ? tarefa(Number(id.value)) ?? null : b.value ? tarefa(b.value.tarefaId) ?? null : null)
-const it = computed(() => tipo.value === 'i' ? item(Number(id.value)) : item(r.value?.itemId ?? tf.value?.item))
+const it = computed(() => tipo.value === 'i' ? item(Number(id.value)) : item(tf.value?.item))
+/** A reunião se liga a mais de um item. */
+const ligados = computed(() => (r.value?.itens ?? []).map(item).filter(x => !!x))
 const sugerido = computed(() => {
   const x = r.value ? sugestao(r.value) : null
   return x && podeEditarItem(x) ? x : null
@@ -94,13 +96,17 @@ const todos = ref(false)
 const participantes = computed(() => r.value ? (todos.value ? r.value.participantes : r.value.participantes.slice(0, 4)) : [])
 const iconeDaResposta = { sim: 'i-lucide-circle-check', nao: 'i-lucide-circle-x', talvez: 'i-lucide-circle-help', pendente: 'i-lucide-circle-dashed' }
 const corDaResposta = { sim: 'text-success', nao: 'text-error', talvez: 'text-warning', pendente: 'text-dimmed' }
-const opcoesDeItem = computed(() => estado.itens.filter(podeEditarItem).map(i => ({ label: `${i.reference} · ${i.titulo}`, value: i.id, icon: categoriaPorSlug(i.categoria).icon ?? undefined })))
+const opcoesDeItem = computed(() => estado.itens.filter(i => podeEditarItem(i) && !r.value?.itens.includes(i.id)).map(i => ({ label: `${i.reference} · ${i.titulo}`, value: i.id, icon: categoriaPorSlug(i.categoria).icon ?? undefined })))
 
-function vincular(itemId: number | null) {
+function vincular(itemId: number) {
   if (!r.value) return
-  const ref = item(itemId)?.reference
   ligar(r.value, itemId)
-  toast.add({ title: ref ? props.t.avisos.ligada(ref) : props.t.avisos.desligada, icon: 'i-lucide-link-2', color: 'success' })
+  toast.add({ title: props.t.avisos.ligada(item(itemId)!.reference), icon: 'i-lucide-link-2', color: 'success' })
+}
+function desvincular(itemId: number) {
+  if (!r.value) return
+  desligar(r.value, itemId)
+  toast.add({ title: props.t.avisos.desligada, icon: 'i-lucide-unlink', color: 'success' })
 }
 
 /* ---------- tarefa ---------- */
@@ -229,16 +235,16 @@ function tirarBloco() {
       <!-- Ligado a -->
       <div v-else class="flex flex-col gap-1.5 border-t border-default pt-3">
         <p class="text-xs font-medium text-toned">{{ t.detalhe.ligadoA }}</p>
-        <div v-if="it" class="flex items-center gap-2 rounded-md border border-default p-2">
-          <UIcon :name="categoriaPorSlug(it.categoria).icon!" class="size-4 shrink-0 text-muted" />
+        <div v-for="x in ligados" :key="x.id" class="flex animate-[entrada_.2s_ease-out_both] items-center gap-2 rounded-md border border-default p-2">
+          <UIcon :name="categoriaPorSlug(x.categoria).icon!" class="size-4 shrink-0 text-muted" />
           <span class="min-w-0 flex-1">
-            <span class="block text-xs font-medium text-highlighted">{{ it.reference }}</span>
-            <span class="block truncate text-xs text-muted">{{ it.titulo }}</span>
+            <span class="block text-xs font-medium text-highlighted">{{ x.reference }}</span>
+            <span class="block truncate text-xs text-muted">{{ x.titulo }}</span>
           </span>
-          <UButton :label="t.detalhe.abrirItem" color="neutral" variant="outline" size="xs" @click="emit('abrirItem', it.id, 'agenda')" />
-          <UButton v-if="podeEditarItem(it)" icon="i-lucide-unlink" color="neutral" variant="ghost" size="xs" :aria-label="t.detalhe.desligar" @click="vincular(null)" />
+          <UButton :label="t.detalhe.abrirItem" color="neutral" variant="outline" size="xs" @click="emit('abrirItem', x.id, 'agenda')" />
+          <UButton v-if="podeEditarItem(x)" icon="i-lucide-unlink" color="neutral" variant="ghost" size="xs" :aria-label="`${t.detalhe.desligar}: ${x.reference}`" @click="desvincular(x.id)" />
         </div>
-        <div v-else-if="sugerido" class="flex flex-col gap-2 rounded-md border border-info/40 bg-info/10 p-2.5">
+        <div v-if="sugerido" class="flex flex-col gap-2 rounded-md border border-info/40 bg-info/10 p-2.5">
           <p class="flex items-center gap-1.5 text-xs text-info"><UIcon name="i-lucide-sparkles" class="size-3.5" />{{ t.detalhe.sugestao(r.participantes.find(p => p.email.endsWith(sugerido!.dominio!))!.email) }}</p>
           <p class="text-xs text-highlighted"><b>{{ sugerido.reference }}</b> · {{ sugerido.titulo }}</p>
           <span class="flex gap-2">
@@ -247,17 +253,17 @@ function tirarBloco() {
           </span>
         </div>
         <USelectMenu
-          v-else
+          v-if="opcoesDeItem.length"
           :model-value="undefined"
           :items="opcoesDeItem"
           value-key="value"
           size="sm"
           icon="i-lucide-link-2"
-          :placeholder="t.detalhe.ligarA"
+          :placeholder="ligados.length ? t.detalhe.ligarOutro : t.detalhe.ligarA"
           :search-input="{ placeholder: t.detalhe.buscarItem }"
           @update:model-value="vincular($event as number)"
         />
-        <p v-if="!it" class="text-xs text-muted">{{ t.regras.retrato }}</p>
+        <p v-if="!ligados.length" class="text-xs text-muted">{{ t.regras.retrato }}</p>
       </div>
     </template>
 
