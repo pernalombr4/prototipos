@@ -4,9 +4,13 @@ import { AREAS, casosDeUso, localidades, type CasoDeUso, type Complexidade } fro
 import type { TextosDaTela } from './textos'
 
 /**
- * O PASSO 2 DA CRIAÇÃO (rodada 24): a Central de casos de uso, com a cara da
- * central do protótipo menu-lateral (a "lojinha", padrão da Central de modelos
- * do ClickUp), como a Mikaela pediu.
+ * O PASSO 1 DA CRIAÇÃO: a Central de casos de uso, com a cara da central do
+ * protótipo menu-lateral (a "lojinha", padrão da Central de modelos do
+ * ClickUp), como a Mikaela pediu (rodada 24).
+ *
+ * Rodada 34: a central passa a abrir a criação. Escolher um caso, ou começar
+ * do zero, não cria nada: leva ao passo 2, onde a pessoa dá nome, referência
+ * e descrição ao workspace.
  *
  * LISTA
  *   à esquerda, de onde vem (Destaques, Do ENSPACE) e os filtros de
@@ -17,11 +21,11 @@ import type { TextosDaTela } from './textos'
  *
  * DETALHE
  *   galeria que passa, descrição, "O que vem junto" item a item e, à direita,
- *   quem fez, quando e quantas vezes foi usado. "Criar com {caso}" cria o
- *   workspace já com o caso aplicado.
+ *   quem fez, quando e quantas vezes foi usado. "Usar {caso}" leva ao passo 2
+ *   com o caso escolhido.
  */
-const props = defineProps<{ t: TextosDaTela['criar'], criando: boolean }>()
-const emit = defineEmits<{ voltar: [], criar: [caso: CasoDeUso | null] }>()
+const props = defineProps<{ t: TextosDaTela['criar'] }>()
+const emit = defineEmits<{ cancelar: [], escolher: [caso: CasoDeUso | null] }>()
 
 type Fonte = 'destaques' | 'enspace'
 const fonte = ref<Fonte>('destaques')
@@ -116,8 +120,8 @@ function data(iso: string) {
     <!-- ==================== cabeçalho do passo ==================== -->
     <div class="shrink-0 border-b border-default px-6 pb-4 pt-6">
       <div class="mb-4 flex items-center gap-3">
-        <div v-for="n in 2" :key="n" class="h-1 flex-1 rounded-full bg-primary" />
-        <span class="shrink-0 text-xs font-medium text-muted">{{ props.t.passoDe(2, 2) }}</span>
+        <div v-for="n in 2" :key="n" class="h-1 flex-1 rounded-full" :class="n === 1 ? 'bg-primary' : 'bg-accented'" />
+        <span class="shrink-0 text-xs font-medium text-muted">{{ props.t.passoDe(1, 2) }}</span>
       </div>
       <h2 class="text-xl font-bold tracking-tight text-highlighted">{{ props.t.querModelo }}</h2>
       <p class="mt-1 text-sm text-muted">{{ props.t.modeloAjuda }}</p>
@@ -245,12 +249,11 @@ function data(iso: string) {
             </div>
             <UButton
               :label="props.t.criarDoZero"
-              icon="i-lucide-check"
+              trailing-icon="i-lucide-arrow-right"
               size="sm"
               color="neutral"
               variant="outline"
-              :loading="props.criando"
-              @click="emit('criar', null)"
+              @click="emit('escolher', null)"
             />
           </div>
 
@@ -338,12 +341,11 @@ function data(iso: string) {
                 </p>
               </div>
               <UButton
-                :label="props.t.criarCom(aberto.nome)"
-                icon="i-lucide-check"
+                :label="props.t.usarCaso(aberto.nome)"
+                trailing-icon="i-lucide-arrow-right"
                 color="primary"
                 size="lg"
-                :loading="props.criando"
-                @click="emit('criar', aberto)"
+                @click="emit('escolher', aberto)"
               />
             </div>
 
@@ -450,7 +452,7 @@ function data(iso: string) {
 
     <!-- ==================== rodapé ==================== -->
     <div class="flex shrink-0 items-center justify-between gap-3 border-t border-default px-6 py-3">
-      <UButton :label="props.t.voltar" icon="i-lucide-arrow-left" color="neutral" variant="ghost" @click="emit('voltar')" />
+      <UButton :label="props.t.cancelar" color="neutral" variant="ghost" @click="emit('cancelar')" />
       <p class="text-xs text-muted">{{ props.t.rodapeCentral }}</p>
     </div>
   </div>

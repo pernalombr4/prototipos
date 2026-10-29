@@ -13,9 +13,10 @@ import { biblioteca, curadoria, totalDeIcones } from './icones'
  * aparece como `carbon:scales`. O passo 2 leva ~4s em branco e responde
  * "Não há dados" para o Brasil.
  *
- * Aqui a hierarquia é outra: uma decisão de cada vez, na ordem em que a
- * pessoa realmente decide — nome, depois ponto de partida, e o resto como
- * ajuste opcional com bom padrão.
+ * Aqui a hierarquia é outra: uma decisão de cada vez. Rodada 34, pedido da
+ * Mikaela: primeiro o ponto de partida (a Central de casos de uso, com a
+ * opção de começar vazio); depois a identificação (nome, referência,
+ * descrição e identidade visual). Só o passo 2 cria o workspace.
  */
 const aberto = defineModel<boolean>('open', { default: false })
 const t = useTextos(textos)
@@ -23,6 +24,14 @@ const idioma = useIdioma()
 const emit = defineEmits<{ criado: [nome: string] }>()
 
 const passo = ref(1)
+/** Ponto de partida escolhido no passo 1; null é o workspace vazio. */
+const escolhido = ref<CasoDeUso | null>(null)
+
+function escolher(caso: CasoDeUso | null) {
+  escolhido.value = caso
+  passo.value = 2
+}
+
 const form = reactive({
   nome: '',
   referencia: '',
@@ -112,6 +121,7 @@ const criando = ref(false)
 watch(aberto, (v) => {
   if (!v) return
   passo.value = 1
+  escolhido.value = null
   referenciaEditada.value = false
   buscaIcone.value = ''
   removerLogo()
@@ -221,8 +231,8 @@ const iconeEfetivo = computed(() => form.icone || iconeSugerido.value)
 const nomeCurto = computed(() => form.nome.trim().length > 0 && form.nome.trim().length < 3)
 const podeAvancar = computed(() => form.nome.trim().length >= 3)
 
-/** Rodada 24: cria do zero (caso null) ou com o caso de uso escolhido na central. */
-function criar(_caso: CasoDeUso | null = null) {
+/** Cria vazio (escolhido null) ou com o caso de uso escolhido no passo 1. */
+function criar() {
   criando.value = true
   setTimeout(() => {
     criando.value = false
@@ -235,21 +245,24 @@ function criar(_caso: CasoDeUso | null = null) {
 <template>
   <UModal
     v-model:open="aberto"
-    :ui="{ content: passo === 2 ? 'max-w-6xl sm:max-w-6xl h-[88vh] overflow-hidden' : 'max-w-4xl' }"
+    :ui="{ content: passo === 1 ? 'max-w-6xl sm:max-w-6xl h-[88vh] overflow-hidden' : 'max-w-4xl max-h-[88vh] overflow-hidden' }"
   >
     <template #content>
-      <!-- Rodada 24: o passo 2 é a Central de casos de uso, com a cara da
-           central do protótipo menu-lateral. -->
+      <!-- Rodada 34: o passo 1 é a Central de casos de uso (rodada 24), com a
+           opção de começar vazio. A identificação vem depois. -->
       <CentralDeCasos
-        v-if="passo === 2"
+        v-if="passo === 1"
         :t="t.criar"
-        :criando="criando"
-        @voltar="passo = 1"
-        @criar="criar"
+        @cancelar="aberto = false"
+        @escolher="escolher"
       />
-      <div v-else class="grid md:grid-cols-[1fr_20rem]">
+      <!-- Rodada 34: o modal para em 88% da altura; os campos rolam e o rodapé
+           com Voltar e Criar workspace fica fixo, para o callout do endereço
+           não sair da tela. -->
+      <div v-else class="flex max-h-[88vh] min-h-0">
         <!-- ------------------------- coluna das decisões ------------------------- -->
-        <div class="p-6 sm:p-8">
+        <div class="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div class="min-h-0 flex-1 overflow-y-auto p-6 sm:p-8">
           <!-- progresso: duas decisões, e a pessoa vê onde está -->
           <div class="mb-6 flex items-center gap-3">
             <div
@@ -268,8 +281,27 @@ function criar(_caso: CasoDeUso | null = null) {
             leave-active-class="transition duration-150 ease-in"
             leave-to-class="opacity-0 -translate-x-4"
           >
-            <!-- ============ DECISÃO 1: o nome ============ -->
-            <div v-if="passo === 1" key="1">
+            <!-- ============ DECISÃO 2: a identificação ============ -->
+            <div key="2">
+              <!-- O ponto de partida do passo 1 fica à vista, com Trocar. -->
+              <div class="mb-6 flex items-center gap-3 rounded-lg border border-default bg-elevated/40 px-3 py-2.5">
+                <span class="flex size-9 shrink-0 items-center justify-center rounded-lg border border-default bg-default">
+                  <UIcon :name="escolhido?.icone ?? 'i-lucide-square-dashed'" class="size-4.5 text-primary" />
+                </span>
+                <div class="min-w-0 flex-1">
+                  <p class="text-xs text-muted">{{ t.criar.pontoDePartida }}</p>
+                  <p class="truncate text-sm font-medium text-highlighted">{{ escolhido?.nome ?? t.criar.workspaceVazio }}</p>
+                </div>
+                <UButton
+                  :label="t.criar.trocar"
+                  icon="i-lucide-refresh-cw"
+                  size="sm"
+                  color="neutral"
+                  variant="outline"
+                  @click="passo = 1"
+                />
+              </div>
+
               <h2 class="text-xl font-bold tracking-tight text-highlighted">
                 {{ t.criar.comoSeChama }}
               </h2>
@@ -574,27 +606,29 @@ function criar(_caso: CasoDeUso | null = null) {
             </div>
 
           </Transition>
+        </div>
 
           <!-- ------------------------- ações ------------------------- -->
-          <div class="mt-8 flex items-center justify-between gap-3">
+          <div class="flex shrink-0 items-center justify-between gap-3 border-t border-default px-6 py-4 sm:px-8">
             <UButton
-              :label="t.criar.cancelar"
+              :label="t.criar.voltar"
+              icon="i-lucide-arrow-left"
               color="neutral"
               variant="ghost"
-              @click="aberto = false"
+              @click="passo = 1"
             />
             <UButton
-              :label="t.criar.continuar"
-              trailing-icon="i-lucide-arrow-right"
+              :label="t.criar.criarWorkspace"
+              icon="i-lucide-check"
               :disabled="!podeAvancar"
-              class="transition-transform hover:translate-x-0.5"
-              @click="passo = 2"
+              :loading="criando"
+              @click="criar"
             />
           </div>
         </div>
 
         <!-- ------------------------- prévia ao vivo ------------------------- -->
-        <aside class="hidden border-l border-default bg-elevated/30 p-6 md:block">
+        <aside class="hidden w-80 shrink-0 overflow-y-auto border-l border-default bg-elevated/30 p-6 md:block">
           <p class="text-xs font-semibold uppercase tracking-wider text-muted">
             {{ t.criar.comoVaiAparecer }}
           </p>

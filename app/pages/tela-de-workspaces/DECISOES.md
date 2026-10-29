@@ -134,6 +134,26 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 35 · 2026-10-29
+- **Pedido (literal):** "mude a ordem da jornada na criaçao de workspace. a primeira coisa que deve aparecer é a
+  galeria de casos de uso com a opçao de iniciar vazio, sem caso de uso. depois a pessoa define nome/ref/descriçao...
+  as identificaçoes do workspace"; e, vendo o passo 2: "faltou um scroll nessa parte da modal, ta cortando as
+  ifnormaçoes de callout na hora de preencher esses dados"
+- **Mudou (passo 1, a Central de casos de uso):**
+  - abre a criação, com o título "Como você deseja começar?";
+  - "Começar do zero" (antes "Criar do zero") e "Usar {caso}" (antes "Criar com {caso}") não criam nada: levam ao passo 2;
+  - o rodapé tem Cancelar, que fecha o modal, no lugar de Voltar.
+- **Mudou (passo 2, a identificação):**
+  - no topo, o quadro "Ponto de partida" mostra o caso escolhido ou "Workspace vazio", com o botão Trocar, que volta ao
+    passo 1 e mantém o texto digitado;
+  - depois vêm nome, identidade, descrição, referência e o callout do endereço, como antes;
+  - o rodapé tem Voltar e "Criar workspace", que só aqui cria o workspace;
+  - o modal para em 88% da altura da tela: os campos rolam, e o rodapé fica fixo.
+- **Texto formal:** a ajuda do passo 1 troca "Dá para mudar tudo depois" por "Você pode alterar tudo depois".
+- **Fronteira:** muda a ordem dos 2 passos da criação, o quadro do ponto de partida e a rolagem do passo 2; não muda a
+  galeria, o detalhe do caso nem os campos da identificação.
+- **Requisitos:** não mudam até a redatora aprovar esta rodada (pedido dela).
+
 ### Rodada 34 · 2026-10-29
 - **Pedido (literal):** "Dividir a parte 7"
 - **Por que:** pelo corte das partes da skill `requisitos`, a parte 7 juntava 2 funcionalidades (agrupar por licença,
