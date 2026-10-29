@@ -161,8 +161,9 @@ Rodada antes de entregar, e o que ficou de fora:
   - O `epico.md` ganhou o texto novo do modal e das linhas 9 e 10.
 - **Mudou (ENSPACE):** com o ok da redatora ("Atualizar e subir"), as tarefas 24388 ("9. Criar workspace,
   identificação") e 24389 ("10. Criar com caso de uso") do card `USEDB9945FD15ED4FA29BECA30882A4E` foram reescritas
-  pelo `requisitos_para_enspace.py atualizar`; a leitura pelo MCP confere o nome e as tabelas novas. A descrição do
-  card não mudou: ainda tem o texto antigo das linhas 9 e 10.
+  pelo `requisitos_para_enspace.py atualizar`; a leitura pelo MCP confere o nome e as tabelas novas. Depois, com o
+  ok da redatora ("Atualizar descrição"), a descrição do card (`descricao_da_user_story`) recebeu o `epico.md` novo
+  pelo `updateItem` do MCP; os outros campos do card ficaram como estavam.
 - **Mudou (ENSPACE, depois):** a pedido da redatora ("atualize o card no enspace e as tarefas do item com base na ultima
   atualização dos documentos de requisitos"), a descrição do card ganhou o `epico.md` desta rodada (o modal em 2
   passos e as linhas 9 e 10), pelo MCP; as tarefas 24388 e 24389 foram gravadas de novo com o mesmo texto. As 10
