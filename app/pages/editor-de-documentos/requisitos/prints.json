@@ -1,0 +1,2026 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/editor-de-documentos/",
+  "andaime": "Protótipo",
+  "cenas": {
+    "docx7": [
+      {
+        "estado": "DOCX, 7 versões"
+      },
+      {
+        "esperar": 1500
+      }
+    ],
+    "pdf": [
+      {
+        "estado": "PDF"
+      },
+      {
+        "esperar": 1500
+      }
+    ],
+    "vazio": [
+      {
+        "estado": "Sem documento"
+      },
+      {
+        "esperar": 1500
+      }
+    ],
+    "junto": [
+      {
+        "estado": "Editando junto"
+      },
+      {
+        "esperar": 1500
+      }
+    ],
+    "leitura": [
+      {
+        "estado": "Só leitura"
+      },
+      {
+        "estado": "DOCX, 7 versões"
+      },
+      {
+        "esperar": 1500
+      }
+    ],
+    "editor": [
+      {
+        "estado": "DOCX, 7 versões"
+      },
+      {
+        "esperar": 1500
+      },
+      {
+        "clicar": "Abrir no ENSPACE",
+        "esperar": 1500
+      }
+    ],
+    "modelos": [
+      {
+        "estado": "Editor de modelos"
+      },
+      {
+        "esperar": 2000
+      }
+    ],
+    "cond": [
+      {
+        "estado": "Editor de modelos"
+      },
+      {
+        "esperar": 2000
+      },
+      {
+        "clicar": "Condições",
+        "esperar": 700
+      }
+    ],
+    "novaCond": [
+      {
+        "estado": "Editor de modelos"
+      },
+      {
+        "esperar": 2000
+      },
+      {
+        "clicar": "Condições",
+        "esperar": 700
+      },
+      {
+        "clicar": "Nova condição",
+        "esperar": 700
+      }
+    ],
+    "editCond": [
+      {
+        "estado": "Editor de modelos"
+      },
+      {
+        "esperar": 2000
+      },
+      {
+        "clicar": "Condições",
+        "esperar": 700
+      },
+      {
+        "clicar": {
+          "texto": "Editar",
+          "n": 1
+        },
+        "esperar": 700
+      }
+    ],
+    "rep": [
+      {
+        "estado": "Editor de modelos"
+      },
+      {
+        "esperar": 2000
+      },
+      {
+        "clicar": "Repetições",
+        "esperar": 700
+      }
+    ],
+    "editRep": [
+      {
+        "estado": "Editor de modelos"
+      },
+      {
+        "esperar": 2000
+      },
+      {
+        "clicar": "Repetições",
+        "esperar": 700
+      },
+      {
+        "clicar": {
+          "texto": "Editar",
+          "n": 1
+        },
+        "esperar": 700
+      }
+    ],
+    "config": [
+      {
+        "estado": "Configuração do campo"
+      },
+      {
+        "esperar": 1500
+      }
+    ]
+  },
+  "requisitos": {
+    "RF013": {
+      "cena": "docx7",
+      "destacar": [
+        {
+          "regex": "^assessoria contábil serra alta",
+          "n": 1
+        },
+        {
+          "regex": "^versão 7$"
+        },
+        {
+          "regex": "kb · docx$"
+        }
+      ]
+    },
+    "RF014": {
+      "cena": "docx7",
+      "destacar": {
+        "regex": "^assessoria contábil serra alta",
+        "n": 1
+      }
+    },
+    "RF015": {
+      "cena": "docx7",
+      "destacar": "Abrir no ENSPACE"
+    },
+    "RF023": {
+      "cena": "editor",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^cláusula 5\\. foro"
+          }
+        },
+        {
+          "digitar": " Revisado."
+        },
+        {
+          "esperar": 2500
+        },
+        {
+          "clicar": "Concluir",
+          "esperar": 1500
+        }
+      ],
+      "destacar": {
+        "regex": "kb · docx$"
+      }
+    },
+    "RF019": {
+      "cena": "docx7",
+      "passos": [
+        {
+          "clicar": "Mais ações",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RF258": {
+      "cena": "pdf",
+      "passos": [
+        {
+          "clicar": "Mais ações",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RF020": {
+      "cena": "docx7",
+      "passos": [
+        {
+          "clicar": "Mais ações",
+          "esperar": 600
+        },
+        {
+          "clicar": "Remover documento",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "regex": "^remover o documento\\?$",
+        "ancestral": "[role=dialog], [role=alertdialog]"
+      }
+    },
+    "RF022": {
+      "cena": "pdf",
+      "destacar": {
+        "regex": "^ler$"
+      }
+    },
+    "RF096": {
+      "cena": "leitura",
+      "destacar": {
+        "regex": "^ler$"
+      }
+    },
+    "RF026": {
+      "cena": "editor",
+      "destacar": {
+        "regex": "^simulação do onlyoffice"
+      }
+    },
+    "RF027": {
+      "cena": "editor",
+      "destacar": [
+        "Voltar ao item",
+        {
+          "regex": "^ctr-0133 · contratos"
+        }
+      ]
+    },
+    "RF032": {
+      "cena": "editor",
+      "destacar": [
+        {
+          "texto": "Versões",
+          "n": 1
+        },
+        "Baixar",
+        "Concluir"
+      ]
+    },
+    "RF037": {
+      "cena": "editor",
+      "destacar": [
+        {
+          "regex": "esc fecha só o que está por cima"
+        },
+        {
+          "regex": "^versão 7$",
+          "n": 1
+        },
+        {
+          "regex": "diego ramos, há 7 dias$",
+          "n": 1
+        }
+      ]
+    },
+    "RF038": {
+      "sem": "o protótipo imita o ONLYOFFICE e não mostra a revisão ortográfica"
+    },
+    "RF028": {
+      "cena": "editor",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^cláusula 5\\. foro"
+          }
+        },
+        {
+          "digitar": " Revisado."
+        },
+        {
+          "esperar": 3000
+        }
+      ],
+      "destacar": {
+        "regex": "^salvo agora"
+      }
+    },
+    "RF029": {
+      "cena": "editor",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^cláusula 5\\. foro"
+          }
+        },
+        {
+          "digitar": " Revisado."
+        },
+        {
+          "esperar": 3000
+        }
+      ],
+      "destacar": {
+        "regex": "^salvo agora$"
+      }
+    },
+    "RF033": {
+      "cena": "editor",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^cláusula 5\\. foro"
+          }
+        },
+        {
+          "digitar": " Revisado."
+        },
+        {
+          "esperar": 2500
+        },
+        {
+          "clicar": "Concluir",
+          "esperar": 1800
+        }
+      ],
+      "destacar": {
+        "regex": "^versão 8 salva"
+      }
+    },
+    "RF036": {
+      "cena": "editor",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Versões",
+            "n": 1
+          },
+          "esperar": 900
+        },
+        {
+          "tecla": "Escape",
+          "esperar": 500
+        },
+        {
+          "tecla": "Escape",
+          "esperar": 500
+        }
+      ],
+      "destacar": {
+        "regex": "esc fecha só o que está por cima"
+      }
+    },
+    "RF017": {
+      "cena": "leitura",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^ler$"
+          },
+          "esperar": 1500
+        }
+      ],
+      "destacar": {
+        "regex": "somente leitura"
+      }
+    },
+    "RF035": {
+      "cena": "pdf",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^ler$"
+          },
+          "esperar": 1500
+        }
+      ],
+      "destacar": {
+        "regex": "somente leitura"
+      }
+    },
+    "RF097": {
+      "cena": "leitura",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^ler$"
+          },
+          "esperar": 1500
+        },
+        {
+          "clicar": {
+            "regex": "^cláusula 5\\. foro"
+          }
+        },
+        {
+          "digitar": " Revisado."
+        },
+        {
+          "esperar": 500
+        }
+      ],
+      "destacar": {
+        "regex": "^cláusula 5\\. foro"
+      }
+    },
+    "RNF001": {
+      "sem": "tempo de salvamento, medido no develop"
+    },
+    "RF001": {
+      "cena": "vazio",
+      "destacar": [
+        "Nenhum documento ainda",
+        {
+          "regex": "^comece por"
+        }
+      ]
+    },
+    "RF002": {
+      "cena": "vazio",
+      "destacar": [
+        "Usar modelo",
+        "Em branco",
+        "Enviar arquivo"
+      ]
+    },
+    "RF255": {
+      "antes": [
+        {
+          "estado": "Só leitura"
+        }
+      ],
+      "cena": "vazio",
+      "destacar": "Nenhum documento ainda"
+    },
+    "RF004": {
+      "cena": "vazio",
+      "destacar": {
+        "regex": "^\\.docx ou \\.pdf"
+      }
+    },
+    "RF011": {
+      "cena": "vazio",
+      "passos": [
+        {
+          "clicar": "Em branco",
+          "esperar": 150
+        }
+      ],
+      "destacar": {
+        "regex": "^criando"
+      }
+    },
+    "RF005": {
+      "cena": "vazio",
+      "passos": [
+        {
+          "clicar": "Usar modelo",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "regex": "^modelos da categoria$",
+        "ancestral": "[role=dialog]"
+      }
+    },
+    "RF006": {
+      "sem": "o protótipo não tem categoria sem modelo"
+    },
+    "RF007": {
+      "cena": "vazio",
+      "passos": [
+        {
+          "clicar": "Usar modelo",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "regex": "^contrato de prestação de serviços"
+          },
+          "esperar": 1500
+        }
+      ],
+      "destacar": "Criar documento"
+    },
+    "RF008": {
+      "cena": "vazio",
+      "passos": [
+        {
+          "clicar": "Em branco",
+          "esperar": 3500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('body *')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && e.innerText && e.innerText.trim() === 'Minuta do contrato CTR-0141.docx' && (r.y < 40) }).pop(); el.dataset.print = 'nome' })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=nome]"
+      }
+    },
+    "RF009": {
+      "cena": "vazio",
+      "passos": [
+        {
+          "js": "(() => { const i = document.querySelector('input[type=file]'); const d = new DataTransfer(); d.items.add(new File(['x'], 'contrato.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' })); i.files = d.files; i.dispatchEvent(new Event('change', { bubbles: true })) })()"
+        },
+        {
+          "esperar": 3500
+        }
+      ],
+      "destacar": {
+        "regex": "^contrato\\.docx",
+        "n": 1
+      }
+    },
+    "RF003": {
+      "cena": "vazio",
+      "passos": [
+        {
+          "js": "(() => { const z = document.querySelector('[data-dragging]'); const d = new DataTransfer(); d.items.add(new File(['x'], 'contrato.docx')); for (const t of ['dragenter', 'dragover']) z.dispatchEvent(new DragEvent(t, { bubbles: true, cancelable: true, dataTransfer: d })) })()"
+        },
+        {
+          "esperar": 400
+        }
+      ],
+      "destacar": {
+        "css": "[data-dragging=true]"
+      }
+    },
+    "RF010": {
+      "cena": "vazio",
+      "passos": [
+        {
+          "js": "(() => { const i = document.querySelector('input[type=file]'); const d = new DataTransfer(); d.items.add(new File(['x'], 'planilha.xlsx', { type: 'application/vnd.ms-excel' })); i.files = d.files; i.dispatchEvent(new Event('change', { bubbles: true })) })()"
+        },
+        {
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "regex": "não pode"
+      }
+    },
+    "RF018": {
+      "cena": "docx7",
+      "destacar": "Versões"
+    },
+    "RF045": {
+      "cena": "docx7",
+      "passos": [
+        {
+          "clicar": "Versões",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog]",
+        "n": 1
+      }
+    },
+    "RF034": {
+      "cena": "editor",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Versões",
+            "n": 1
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^cada vez que alguém conclui"
+        },
+        {
+          "texto": "Atual",
+          "n": 0
+        }
+      ]
+    },
+    "RF039": {
+      "cena": "docx7",
+      "passos": [
+        {
+          "clicar": "Versões",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "texto": "Atual",
+        "n": 0
+      }
+    },
+    "RF040": {
+      "cena": "docx7",
+      "passos": [
+        {
+          "clicar": "Versões",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Ver",
+          "n": 0
+        },
+        {
+          "texto": "Baixar",
+          "n": 1
+        }
+      ]
+    },
+    "RF041": {
+      "cena": "docx7",
+      "passos": [
+        {
+          "clicar": "Versões",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "texto": "Restaurar",
+        "n": 0
+      }
+    },
+    "RF042": {
+      "cena": "docx7",
+      "passos": [
+        {
+          "clicar": "Versões",
+          "esperar": 900
+        },
+        {
+          "clicar": {
+            "texto": "Restaurar",
+            "n": 0
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "regex": "^restaurar"
+      }
+    },
+    "RF044": {
+      "cena": "leitura",
+      "passos": [
+        {
+          "clicar": "Versões",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "texto": "Ver",
+        "n": 0
+      }
+    },
+    "RF087": {
+      "passos": [
+        {
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "regex": "^minuta aurora",
+        "ancestral": "td"
+      }
+    },
+    "RF088": {
+      "passos": [
+        {
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "texto": "Sem documento",
+        "n": 0,
+        "ancestral": "td"
+      }
+    },
+    "RF090": {
+      "cena": "docx7",
+      "passos": [
+        {
+          "js": "(() => { const i = [...document.querySelectorAll('[role=dialog] input[type=text], [role=dialog] input:not([type])')][0]; const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, i.value + ' Ltda.'); i.dispatchEvent(new Event('input', { bubbles: true })) })()"
+        },
+        {
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "regex": "alterações não salvas"
+      }
+    },
+    "RF091": {
+      "cena": "docx7",
+      "destacar": [
+        "Sair sem salvar",
+        "Salvar"
+      ]
+    },
+    "RF092": {
+      "cena": "editor",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^cláusula 5\\. foro"
+          }
+        },
+        {
+          "digitar": " Revisado."
+        },
+        {
+          "esperar": 2500
+        },
+        {
+          "clicar": "Concluir",
+          "esperar": 1500
+        }
+      ],
+      "destacar": {
+        "regex": "^versão 8$"
+      }
+    },
+    "RF093": {
+      "cena": "docx7",
+      "destacar": [
+        {
+          "texto": "Voltar",
+          "n": 1
+        },
+        {
+          "texto": "Avançar",
+          "n": 1
+        }
+      ]
+    },
+    "RF024": {
+      "cena": "junto",
+      "destacar": {
+        "regex": "está editando agora$"
+      }
+    },
+    "RF025": {
+      "cena": "junto",
+      "destacar": "Editar junto"
+    },
+    "RF031": {
+      "cena": "junto",
+      "passos": [
+        {
+          "clicar": "Editar junto",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = (() => { let e = [...document.querySelectorAll('span')].filter(x => x.innerText.trim() === 'AS' && x.getBoundingClientRect().y < 50).pop(); while (e.parentElement && e.getBoundingClientRect().width < 40) e = e.parentElement; return e })(); el.dataset.print = 'avatares' })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=avatares]"
+      }
+    },
+    "RF089": {
+      "passos": [
+        {
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "regex": "^licenciamen",
+        "ancestral": "td"
+      }
+    },
+    "RF021": {
+      "cena": "junto",
+      "passos": [
+        {
+          "clicar": "Mais ações",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RF043": {
+      "cena": "junto",
+      "passos": [
+        {
+          "clicar": "Versões",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog]",
+        "n": 1
+      }
+    },
+    "RI003": {
+      "sem": "interface, sem tela"
+    },
+    "RF046": {
+      "cena": "docx7",
+      "destacar": "Abrir no ENSPACE"
+    },
+    "RF016": {
+      "cena": "docx7",
+      "destacar": "Onde você quer abrir?"
+    },
+    "RF047": {
+      "cena": "docx7",
+      "passos": [
+        {
+          "clicar": "Onde você quer abrir?",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RF048": {
+      "cena": "docx7",
+      "passos": [
+        {
+          "clicar": "Onde você quer abrir?",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "texto": "Em breve",
+        "n": 0
+      }
+    },
+    "RF049": {
+      "cena": "editor",
+      "destacar": "Abrir no Word"
+    },
+    "RF080": {
+      "cena": "config",
+      "destacar": [
+        "Onde o documento abre",
+        "Como o documento nasce"
+      ]
+    },
+    "RF081": {
+      "cena": "config",
+      "destacar": [
+        "ENSPACE (ONLYOFFICE)",
+        "Microsoft Word",
+        "Word para a web"
+      ]
+    },
+    "RF082": {
+      "cena": "config",
+      "passos": [
+        {
+          "rolar": "Enviar arquivo .pdf"
+        }
+      ],
+      "destacar": "Enviar arquivo .pdf"
+    },
+    "RF083": {
+      "cena": "config",
+      "passos": [
+        {
+          "rolar": "O que se faz no editor"
+        }
+      ],
+      "destacar": "O que se faz no editor"
+    },
+    "RF084": {
+      "cena": "config",
+      "passos": [
+        {
+          "rolar": "O que se faz no editor"
+        }
+      ],
+      "destacar": {
+        "regex": "^editar$"
+      }
+    },
+    "RF085": {
+      "cena": "config",
+      "passos": [
+        {
+          "rolar": "Nenhum documento ainda"
+        }
+      ],
+      "destacar": "Nenhum documento ainda"
+    },
+    "RF086": {
+      "cena": "config",
+      "destacar": {
+        "regex": "^campo: minuta do contrato"
+      }
+    },
+    "RF050": {
+      "cena": "modelos",
+      "passos": [
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('button')].filter(b => b.innerText.trim() === 'Voltar').pop(); el.dataset.print = 'voltar' })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=voltar]"
+        },
+        {
+          "regex": "^modelo da categoria contratos"
+        }
+      ]
+    },
+    "RF051": {
+      "cena": "modelos",
+      "passos": [
+        {
+          "clicar": "Modelo",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF053": {
+      "cena": "modelos",
+      "destacar": [
+        "Campos",
+        "Condições",
+        "Repetições"
+      ]
+    },
+    "RF231": {
+      "cena": "modelos",
+      "destacar": [
+        "Condições",
+        "Repetições"
+      ]
+    },
+    "RF054": {
+      "cena": "config",
+      "destacar": "Editar modelos"
+    },
+    "RF055": {
+      "cena": "modelos",
+      "passos": [
+        {
+          "clicar": "Concluir",
+          "esperar": 400
+        }
+      ],
+      "destacar": {
+        "regex": "^modelo"
+      }
+    },
+    "RF239": {
+      "cena": "editCond",
+      "passos": [
+        {
+          "tecla": "Escape",
+          "esperar": 600
+        }
+      ],
+      "destacar": "Nova condição"
+    },
+    "RF056": {
+      "cena": "modelos",
+      "destacar": [
+        {
+          "regex": "^campos da categoria$"
+        },
+        {
+          "regex": "^dados do item$"
+        }
+      ]
+    },
+    "RF057": {
+      "cena": "modelos",
+      "destacar": {
+        "regex": "^valor r\\$ 184\\.500,00$"
+      }
+    },
+    "RF058": {
+      "cena": "modelos",
+      "passos": [
+        {
+          "clicar": "Buscar campo"
+        },
+        {
+          "digitar": "vig"
+        },
+        {
+          "esperar": 500
+        }
+      ],
+      "destacar": "Vigência (meses)"
+    },
+    "RF059": {
+      "cena": "modelos",
+      "passos": [
+        {
+          "clicar": "Buscar campo"
+        },
+        {
+          "digitar": "xyz"
+        },
+        {
+          "esperar": 500
+        }
+      ],
+      "destacar": {
+        "regex": "^nenhum"
+      }
+    },
+    "RF060": {
+      "cena": "modelos",
+      "destacar": "Inserir com formatação"
+    },
+    "RF061": {
+      "cena": "modelos",
+      "passos": [
+        {
+          "js": "(() => { const p = [...document.querySelectorAll('[contenteditable] p, [contenteditable] li, [contenteditable] h1, [contenteditable] h2')].find(x => x.textContent.trim().startsWith('CLÁUSULA 5')); p.closest('[contenteditable]').focus(); const r = document.createRange(); r.selectNodeContents(p); r.collapse(false); const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.dispatchEvent(new Event('selectionchange')) })()"
+        },
+        {
+          "clicar": {
+            "texto": "Objeto",
+            "n": 0
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "regex": "^cláusula 5\\. foro"
+      }
+    },
+    "RF062": {
+      "cena": "modelos",
+      "destacar": {
+        "texto": "Contratante",
+        "n": 1
+      }
+    },
+    "RF063": {
+      "sem": "comportamento de teclado, que não aparece na imagem"
+    },
+    "RF064": {
+      "sem": "o lugar de inserção sem cursor não aparece numa imagem só"
+    },
+    "RS002": {
+      "sem": "restrição de formato, sem tela"
+    },
+    "RS003": {
+      "sem": "restrição, conferida nos prints das partes 10 a 15"
+    },
+    "RF205": {
+      "cena": "cond",
+      "destacar": [
+        {
+          "regex": "^neste modelo"
+        },
+        {
+          "regex": "^aparece: se$"
+        }
+      ]
+    },
+    "RF249": {
+      "cena": "modelos",
+      "passos": [
+        {
+          "clicar": "Modelo",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "regex": "^contrato de fornecimento"
+          },
+          "esperar": 1500
+        },
+        {
+          "clicar": "Condições",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "regex": "^este modelo ainda não tem condições"
+      }
+    },
+    "RF206": {
+      "cena": "cond",
+      "passos": [
+        {
+          "clicar": "Localizar no documento",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "regex": "^cláusula 4"
+      }
+    },
+    "RF207": {
+      "cena": "editCond",
+      "destacar": {
+        "regex": "^editar condição$"
+      }
+    },
+    "RF208": {
+      "cena": "cond",
+      "passos": [
+        {
+          "clicar": "Mais ações",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RF246": {
+      "cena": "cond",
+      "passos": [
+        {
+          "clicar": "Mais ações",
+          "esperar": 600
+        },
+        {
+          "clicar": "Tirar a condição e manter o texto",
+          "esperar": 400
+        }
+      ],
+      "destacar": {
+        "regex": "^condição tirada"
+      }
+    },
+    "RF247": {
+      "cena": "cond",
+      "passos": [
+        {
+          "clicar": "Mais ações",
+          "esperar": 600
+        },
+        {
+          "clicar": "Excluir a condição e o texto",
+          "esperar": 400
+        }
+      ],
+      "destacar": {
+        "regex": "^condição e texto excluídos"
+      }
+    },
+    "RF209": {
+      "cena": "cond",
+      "passos": [
+        {
+          "js": "(() => { const p = [...document.querySelectorAll('[contenteditable] p, [contenteditable] li, [contenteditable] h1, [contenteditable] h2')].find(x => x.textContent.trim().startsWith('CLÁUSULA 4')); p.closest('[contenteditable]').focus(); const r = document.createRange(); r.selectNodeContents(p); r.collapse(false); const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.dispatchEvent(new Event('selectionchange')) })()"
+        },
+        {
+          "esperar": 500
+        }
+      ],
+      "destacar": {
+        "regex": "^o cursor está aqui"
+      }
+    },
+    "RF210": {
+      "cena": "cond",
+      "destacar": [
+        "Nova condição",
+        {
+          "regex": "^selecione no documento"
+        }
+      ]
+    },
+    "RF071": {
+      "cena": "cond",
+      "passos": [
+        {
+          "js": "(() => { const p = [...document.querySelectorAll('[contenteditable] p')].find(x => x.textContent.trim().startsWith('CLÁUSULA 3')); p.closest('[contenteditable]').focus(); const r = document.createRange(); r.selectNodeContents(p); const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.dispatchEvent(new Event('selectionchange')) })()"
+        },
+        {
+          "esperar": 300
+        },
+        {
+          "clicar": "Nova condição",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "regex": "os parágrafos do trecho selecionado"
+      }
+    },
+    "RF211": {
+      "sem": "seleção parcial de um bloco, que não aparece numa imagem só"
+    },
+    "RF212": {
+      "cena": "cond",
+      "passos": [
+        {
+          "js": "(() => { const p = [...document.querySelectorAll('[contenteditable] p, [contenteditable] li, [contenteditable] h1, [contenteditable] h2')].find(x => x.textContent.trim().startsWith('CLÁUSULA 1')); p.closest('[contenteditable]').focus(); const r = document.createRange(); r.selectNodeContents(p); r.collapse(false); const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.dispatchEvent(new Event('selectionchange')) })()"
+        },
+        {
+          "clicar": "Nova condição",
+          "esperar": 700
+        },
+        {
+          "clicar": "Escolha o campo",
+          "esperar": 500
+        },
+        {
+          "js": "[...document.querySelectorAll('[role=option]')].find(o => o.innerText.trim() === 'Valor').dataset.print = 'valor'"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=valor]"
+          },
+          "esperar": 500
+        },
+        {
+          "js": "[...document.querySelectorAll('input')].filter(i => i.getBoundingClientRect().x > 832 && i.getBoundingClientRect().width > 0).pop().dataset.print = 'numero'"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=numero]"
+          }
+        },
+        {
+          "digitar": "1000"
+        },
+        {
+          "tecla": "Enter"
+        },
+        {
+          "clicar": "Inserir condição",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "regex": "^escreva aqui o texto que aparece"
+      }
+    },
+    "RF234": {
+      "cena": "novaCond",
+      "destacar": {
+        "regex": "^aqui se define quando cada texto aparece"
+      }
+    },
+    "RF065": {
+      "cena": "editCond",
+      "destacar": {
+        "texto": "é maior que",
+        "n": 0
+      }
+    },
+    "RF201": {
+      "cena": "novaCond",
+      "destacar": "Escolha o campo"
+    },
+    "RF242": {
+      "cena": "novaCond",
+      "passos": [
+        {
+          "clicar": "Escolha o campo",
+          "esperar": 500
+        },
+        {
+          "js": "[...document.querySelectorAll('[role=option]')].find(o => o.innerText.trim() === 'Valor').dataset.print = 'valor'"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=valor]"
+          },
+          "esperar": 500
+        }
+      ],
+      "destacar": {
+        "regex": "^é igual a$"
+      }
+    },
+    "RF066": {
+      "cena": "editCond",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "é maior que",
+            "n": 0
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF067": {
+      "cena": "editCond",
+      "passos": [
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('*')].filter(e => { const r = e.getBoundingClientRect(); return r.x > 832 && r.width > 0 }).filter(e => e.tagName === 'INPUT')[0]; el.dataset.print = 'numero1' })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=numero1]"
+      }
+    },
+    "RF213": {
+      "cena": "novaCond",
+      "passos": [
+        {
+          "clicar": "Escolha o campo",
+          "esperar": 500
+        },
+        {
+          "js": "[...document.querySelectorAll('[role=option]')].find(o => o.innerText.trim() === 'Valor').dataset.print = 'valor'"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=valor]"
+          },
+          "esperar": 500
+        },
+        {
+          "clicar": {
+            "regex": "^é igual a$"
+          },
+          "esperar": 500
+        },
+        {
+          "clicar": {
+            "regex": "^está vazio$"
+          },
+          "esperar": 500
+        }
+      ],
+      "destacar": {
+        "regex": "^está vazio$"
+      }
+    },
+    "RF068": {
+      "cena": "editCond",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Condição').dataset.print = 'condicao'"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=condicao]"
+      }
+    },
+    "RF243": {
+      "cena": "novaCond",
+      "destacar": "Remover a condição"
+    },
+    "RF098": {
+      "cena": "editCond",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Condição').dataset.print = 'condicao'"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=condicao]"
+          },
+          "esperar": 500
+        }
+      ],
+      "destacar": {
+        "regex": "^precisa valer"
+      }
+    },
+    "RF232": {
+      "cena": "editCond",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Condição').dataset.print = 'condicao'"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=condicao]"
+          },
+          "esperar": 500
+        }
+      ],
+      "destacar": {
+        "regex": "^e$"
+      }
+    },
+    "RF204": {
+      "cena": "editCond",
+      "passos": [
+        {
+          "rolar": "Salvar condição"
+        }
+      ],
+      "destacar": {
+        "regex": "^com o ctr-0142, aparece"
+      }
+    },
+    "RF215": {
+      "cena": "novaCond",
+      "destacar": [
+        {
+          "regex": "^complete o campo, a condição"
+        },
+        "Inserir condição"
+      ]
+    },
+    "RF238": {
+      "cena": "editCond",
+      "passos": [
+        {
+          "rolar": "Salvar condição"
+        }
+      ],
+      "destacar": [
+        "Cancelar",
+        "Voltar à lista"
+      ]
+    },
+    "RF070": {
+      "cena": "modelos",
+      "passos": [
+        {
+          "rolar": {
+            "regex": "^fim da condição$"
+          }
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "se valor é maior que r\\$ 150\\.000,00$"
+        },
+        {
+          "regex": "^fim da condição$"
+        }
+      ]
+    },
+    "RF069": {
+      "cena": "modelos",
+      "passos": [
+        {
+          "rolar": {
+            "regex": "^fim da condição$"
+          }
+        }
+      ],
+      "destacar": {
+        "regex": "se valor é maior que r\\$ 150\\.000,00$"
+      }
+    },
+    "RF216": {
+      "cena": "editCond",
+      "passos": [
+        {
+          "rolar": "Salvar condição"
+        },
+        {
+          "clicar": "Salvar condição",
+          "esperar": 800
+        },
+        {
+          "rolar": {
+            "regex": "^fim da condição$"
+          }
+        }
+      ],
+      "destacar": {
+        "regex": "se valor é maior que r\\$ 150\\.000,00$"
+      }
+    },
+    "RF200": {
+      "cena": "editCond",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^grupo$"
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": "Remover o grupo"
+    },
+    "RF244": {
+      "cena": "editCond",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^grupo$"
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^qualquer uma$"
+        },
+        {
+          "regex": "^ou$"
+        }
+      ]
+    },
+    "RF214": {
+      "cena": "editCond",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^grupo$"
+          },
+          "esperar": 600
+        },
+        {
+          "clicar": {
+            "texto": "Remover a condição",
+            "n": 2
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "texto": "Escolha o campo",
+        "n": 0
+      }
+    },
+    "RF202": {
+      "cena": "editCond",
+      "destacar": [
+        {
+          "regex": "^senão, se$"
+        },
+        "Remover esta parte"
+      ]
+    },
+    "RF203": {
+      "cena": "editCond",
+      "destacar": {
+        "regex": "^aparece quando nenhuma parte acima vale"
+      }
+    },
+    "RF240": {
+      "cena": "editCond",
+      "passos": [
+        {
+          "rolar": "Salvar condição"
+        }
+      ],
+      "destacar": {
+        "regex": "^senão, se…$"
+      }
+    },
+    "RF217": {
+      "cena": "rep",
+      "destacar": [
+        {
+          "regex": "^neste modelo"
+        },
+        {
+          "regex": "^tabela$"
+        },
+        {
+          "regex": "^3 linhas$"
+        }
+      ]
+    },
+    "RF250": {
+      "cena": "modelos",
+      "passos": [
+        {
+          "clicar": "Modelo",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "regex": "^contrato de fornecimento"
+          },
+          "esperar": 1500
+        },
+        {
+          "clicar": "Repetições",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "regex": "^este modelo ainda não tem repetições"
+      }
+    },
+    "RF248": {
+      "cena": "rep",
+      "passos": [
+        {
+          "clicar": "Mais ações",
+          "esperar": 600
+        },
+        {
+          "clicar": "Excluir a repetição",
+          "esperar": 400
+        }
+      ],
+      "destacar": {
+        "regex": "^repetição excluída"
+      }
+    },
+    "RF218": {
+      "cena": "rep",
+      "destacar": [
+        "Nova repetição",
+        {
+          "regex": "^clique no documento onde a repetição"
+        }
+      ]
+    },
+    "RF076": {
+      "cena": "modelos",
+      "passos": [
+        {
+          "js": "(() => { const c = [...document.querySelectorAll('[contenteditable] td')][0]; c.closest('[contenteditable]').focus(); const r = document.createRange(); r.selectNodeContents(c); r.collapse(false); const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.dispatchEvent(new Event('selectionchange')) })()"
+        },
+        {
+          "esperar": 700
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('*')].filter(e => { const r = e.getBoundingClientRect(); return r.x > 832 && r.width > 0 }).filter(e => e.innerText && e.innerText.trim().startsWith('Para cada linha de Parcelas') && e.innerText.includes('Situação')).pop(); el.dataset.print = 'lista' })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=lista]"
+      }
+    },
+    "RF236": {
+      "cena": "editRep",
+      "destacar": {
+        "regex": "^aqui se define o que repete"
+      }
+    },
+    "RF237": {
+      "cena": "editRep",
+      "destacar": [
+        {
+          "regex": "^o que repete$"
+        },
+        {
+          "regex": "^como aparece$"
+        },
+        {
+          "regex": "^quais linhas saem$"
+        }
+      ]
+    },
+    "RF073": {
+      "cena": "editRep",
+      "passos": [
+        {
+          "js": "(() => { const c = [...document.querySelectorAll('body *')].filter(e => { const r = e.getBoundingClientRect(); return r.x > 832 && r.width > 0 && (e.innerText || '').trim().startsWith('Informa') && (e.innerText || '').includes('cada linha') }).sort((a, b) => a.innerText.length - b.innerText.length); c[0].dataset.print = 'info' })()"
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^lista$"
+        },
+        {
+          "css": "[data-print=info]"
+        }
+      ]
+    },
+    "RF252": {
+      "sem": "a categoria do protótipo tem 1 lista só (Parcelas)"
+    },
+    "RF219": {
+      "cena": "editRep",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^tabela$"
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF220": {
+      "cena": "editRep",
+      "destacar": [
+        {
+          "texto": "Mover para cima",
+          "n": 0
+        },
+        {
+          "texto": "Mover para baixo",
+          "n": 0
+        }
+      ]
+    },
+    "RF074": {
+      "cena": "editRep",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('[role=checkbox]')].filter(c => c.getBoundingClientRect().x > 832).slice(0, 2).forEach(c => c.click())"
+        },
+        {
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "regex": "^escolha ao menos 1 informação"
+      }
+    },
+    "RF227": {
+      "cena": "editRep",
+      "passos": [
+        {
+          "rolar": "Salvar repetição"
+        }
+      ],
+      "destacar": {
+        "regex": "^com o ctr-0142, saem"
+      }
+    },
+    "RF245": {
+      "cena": "editRep",
+      "passos": [
+        {
+          "rolar": "Salvar repetição"
+        }
+      ],
+      "destacar": [
+        "Cancelar",
+        "Voltar à lista"
+      ]
+    },
+    "RF075": {
+      "cena": "modelos",
+      "destacar": [
+        {
+          "regex": "para cada linha de parcelas$"
+        },
+        {
+          "regex": "^fim da repetição$"
+        }
+      ]
+    },
+    "RF221": {
+      "cena": "modelos",
+      "destacar": {
+        "css": "[contenteditable] table tr",
+        "n": 0
+      }
+    },
+    "RF228": {
+      "cena": "editRep",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^tabela$"
+          },
+          "esperar": 600
+        },
+        {
+          "clicar": {
+            "regex": "^texto corrido$"
+          },
+          "esperar": 600
+        },
+        {
+          "rolar": "Salvar repetição"
+        },
+        {
+          "clicar": "Salvar repetição",
+          "esperar": 800
+        },
+        {
+          "clicar": "Prévia",
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "regex": "vencimento: 10/11/2026"
+      }
+    },
+    "RF229": {
+      "cena": "editRep",
+      "passos": [
+        {
+          "rolar": "Salvar repetição"
+        },
+        {
+          "clicar": "Salvar repetição",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "regex": "^não há parcelas\\.$"
+      }
+    },
+    "RF253": {
+      "cena": "rep",
+      "passos": [
+        {
+          "clicar": "Nova repetição",
+          "esperar": 800
+        }
+      ],
+      "destacar": "Numerar as linhas"
+    },
+    "RF222": {
+      "cena": "editRep",
+      "destacar": "Numerar as linhas"
+    },
+    "RF223": {
+      "cena": "editRep",
+      "destacar": {
+        "regex": "^somar valor da parcela no fim$"
+      }
+    },
+    "RF224": {
+      "cena": "editRep",
+      "passos": [
+        {
+          "clicar": "Filtrar as linhas",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "regex": "^só as linhas em que"
+      }
+    },
+    "RF254": {
+      "cena": "editRep",
+      "passos": [
+        {
+          "clicar": "Filtrar as linhas",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "regex": "^complete o campo, a condição"
+      }
+    },
+    "RF225": {
+      "cena": "editRep",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^na ordem da lista$"
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF226": {
+      "cena": "editRep",
+      "passos": [
+        {
+          "rolar": "Salvar repetição"
+        }
+      ],
+      "destacar": {
+        "regex": "^aparece quando nenhuma linha sai"
+      }
+    },
+    "RF235": {
+      "cena": "editRep",
+      "passos": [
+        {
+          "rolar": "Salvar repetição"
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^aparece quando nenhuma linha sai"
+        },
+        {
+          "texto": "Remover \"Se a lista estiver vazia\""
+        }
+      ]
+    },
+    "RF241": {
+      "cena": "editRep",
+      "passos": [
+        {
+          "rolar": "Salvar repetição"
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^aparece quando nenhuma linha sai"
+        },
+        "Filtrar as linhas"
+      ]
+    },
+    "RF233": {
+      "sem": "a prévia com 0 linhas pede montar um filtro, que não cabe numa imagem só"
+    },
+    "RF077": {
+      "cena": "modelos",
+      "destacar": [
+        {
+          "texto": "Editar",
+          "n": 0
+        },
+        "Prévia"
+      ]
+    },
+    "RF099": {
+      "cena": "modelos",
+      "passos": [
+        {
+          "clicar": "Prévia",
+          "esperar": 1200
+        },
+        {
+          "rolar": {
+            "regex": "seguro-garantia"
+          }
+        }
+      ],
+      "destacar": {
+        "regex": "seguro-garantia"
+      }
+    },
+    "RF251": {
+      "cena": "modelos",
+      "passos": [
+        {
+          "clicar": "Prévia",
+          "esperar": 1000
+        },
+        {
+          "clicar": "Condições",
+          "esperar": 600
+        }
+      ],
+      "destacar": "Nova condição"
+    },
+    "RF078": {
+      "cena": "modelos",
+      "passos": [
+        {
+          "clicar": "Ver a marcação",
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "regex": "^o editor gera a marcação"
+      }
+    },
+    "RF230": {
+      "cena": "modelos",
+      "passos": [
+        {
+          "js": "(() => { const p = [...document.querySelectorAll('[contenteditable] p, [contenteditable] li, [contenteditable] h1, [contenteditable] h2')].find(x => x.textContent.trim().startsWith('CLÁUSULA 1')); p.closest('[contenteditable]').focus(); const r = document.createRange(); r.selectNodeContents(p); r.collapse(false); const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.dispatchEvent(new Event('selectionchange')) })()"
+        },
+        {
+          "digitar": " {{data.valor_formatted}}"
+        },
+        {
+          "esperar": 500
+        },
+        {
+          "clicar": "Prévia",
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "regex": "^cláusula 1"
+      }
+    },
+    "RF079": {
+      "cena": "modelos",
+      "passos": [
+        {
+          "js": "(() => { const p = [...document.querySelectorAll('[contenteditable] p, [contenteditable] li, [contenteditable] h1, [contenteditable] h2')].find(x => x.textContent.trim().startsWith('CLÁUSULA 1')); p.closest('[contenteditable]').focus(); const r = document.createRange(); r.selectNodeContents(p); r.collapse(false); const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.dispatchEvent(new Event('selectionchange')) })()"
+        },
+        {
+          "digitar": " {{data.cliente}}"
+        },
+        {
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "regex": "não foi reconhecida"
+      }
+    },
+    "RI004": {
+      "sem": "interface, sem tela"
+    }
+  }
+}

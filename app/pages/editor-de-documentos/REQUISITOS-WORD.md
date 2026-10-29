@@ -6,7 +6,7 @@
 
 **Referência visual:** protótipo `editor-de-documentos`, fase "2. Word liberado" na barra de baixo, em https://pernalombr4.github.io/prototipos/editor-de-documentos/ (rodadas 1 a 11, de 08/10/2026 a 21/10/2026). Prints em `evidencias/proto-02` a `proto-05`, `proto-08` e `proto-09`. A janela do Word no protótipo é simulação; o painel do plugin e o salvamento no item são a proposta.
 
-**Convenção:** "deve" é obrigatório. Cada requisito tem um critério de aceite que se confere na tela. Os textos entre aspas são os da interface em português. Este documento parte da entrega 1 (`REQUISITOS-CAMPO.md`), já pronta; o que ele muda na entrega 1 está em RT102. Os exemplos usam os contratos do protótipo (CTR-0139 com Bruno no Word, CTR-0135 com Ana no ENSPACE, CTR-0142 livre).
+**Convenção:** "deve" é obrigatório. Cada requisito tem um critério de aceite que se confere na tela. Os textos entre aspas são os da interface em português. Este documento parte da entrega 1 (o épico de `requisitos/`), já pronta; o que ele muda na entrega 1 está em RT102. Os exemplos usam os contratos do protótipo (CTR-0139 com Bruno no Word, CTR-0135 com Ana no ENSPACE, CTR-0142 livre).
 
 **Fora do escopo:** tudo o que a entrega 1 cobre (campo, editor no ENSPACE, versões, editor de modelos); a coautoria entre o Word e o ONLYOFFICE ao mesmo tempo; o Word para a web pelo programa de parceiros da Microsoft (CSPP), porque o programa obriga o Office como editor padrão no lugar do ONLYOFFICE.
 

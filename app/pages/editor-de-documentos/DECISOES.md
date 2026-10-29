@@ -202,3 +202,15 @@ flowchart LR
 - **Mudou no `REQUISITOS-CAMPO.md`:** exemplos atualizados para os contratos do protótipo; textos de tela conferidos; lacunas cobertas (Esc, Cancelar, Excluir, estados vazios, modo Prévia, padrões da repetição nova, campo vazio em leitura, PDF sem .docx); linhas com 2 comportamentos separadas; seções do editor de modelos em ordem de leitura; RF030 e RF052 removidos para P10 e P11; perguntas novas P9 a P15.
 - **Mudou no `REQUISITOS-WORD.md`:** a tabela de decisão do cartão virou RF155 (o RN108 descrevia tela); RF116 removido para P112; RT102 diz o que a entrega 2 desliga da entrega 1; textos da pergunta, da janela e do Word para a web completados; perguntas novas P109 a P119 e S103.
 - **Fronteira:** muda a documentação e 5 detalhes do protótipo; o fluxo não muda.
+
+## Rodada 12 · 2026-10-29
+
+- **Pedido (literal):** "https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USEA7622A3058FE4E1FB62A5F693E8F0 faça o mesmo pra este card tambem, mas nao só no enspace. altere tambem a escrita dos docs no github".
+- **Mudou (só os requisitos do campo; o protótipo não mudou):**
+  - `REQUISITOS-CAMPO.md` virou o épico `requisitos/epico.md`, em 15 partes, cada uma a tarefa do card: 1. Documento no campo; 2. Editor no ENSPACE; 3. Criar o documento; 4. Versões; 5. Coluna na lista de itens; 6. Salvar do item; 7. Editando junto; 8. Word em breve; 9. Configuração do campo; 10. Editor de modelos e campos; 11. Condições; 12. Grupo, "Senão, se" e "Nos demais casos"; 13. Repetições; 14. Filtro, ordem, numeração e total; 15. Prévia e marcação;
+  - os IDs ficaram; saíram as linhas já removidas (RF030, RF052, RF072), o que é padrão de qualidade (RF012, RF094, RF095, RNF002, RS001) e as interfaces que só repetiam o RF (RI001, RI002); a P7, já respondida, saiu de "Em aberto";
+  - os requisitos que citavam o ID de outra parte dizem a coisa pelo nome; a RN que vale para mais de 1 parte (RN002, RN005, RN006, RN007) mora no épico;
+  - cada requisito ganhou a coluna Relevância (Desejável onde a prioridade é Desejável, Obrigatório no resto: proposta do agente);
+  - `REQUISITOS-WORD.md` e o README apontam para o épico.
+- **Prints (regra 42):** 143 em `evidencias/requisitos/`, 1 por requisito com tela; 12 sem tela (interface, teclado, tempo, restrição, ou o que não cabe numa imagem só): RF006, RF038, RF063, RF064, RF211, RF233, RF252, RNF001, RI003, RI004, RS002 e RS003. Detector de seta: 0 de 143.
+- **Fronteira:** mudam os documentos de requisitos; não muda nenhuma tela.
