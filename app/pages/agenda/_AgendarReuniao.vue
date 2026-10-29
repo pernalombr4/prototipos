@@ -6,13 +6,10 @@
  *
  * Na Agenda, "Escolher o horário na grade" volta ao caminho da rodada 1 (o próximo horário clicado cria a reunião
  * ligada).
- *
- * "Convidar o Mail Box do item" (ligado por padrão) põe o endereço do item entre os convidados: é o que segura o
- * vínculo quando o organizador muda a reunião pelo Outlook, e o mesmo caminho de quem cria a reunião direto lá.
  */
 import type { Textos } from './textos'
 import { HOJE, hora, paraMinutos, somarDias } from './datas'
-import { type Criado, caixaDoItem, conflitos, criar, item } from './estado'
+import { type Criado, conflitos, criar, item } from './estado'
 
 const props = defineProps<{ t: Textos, itemId: number | null, titulo: string, naAgenda?: boolean }>()
 const emit = defineEmits<{ criado: [c: Criado], cancelar: [], naGrade: [] }>()
@@ -30,7 +27,6 @@ const forma = reactive({
   fim: '11:00',
   participantes: contato.value ? [contato.value] : [] as string[],
   teams: true,
-  caixa: true,
 })
 
 const intervalo = computed(() => ({ ini: paraMinutos(forma.inicio), fim: paraMinutos(forma.fim) }))
@@ -53,7 +49,7 @@ function enviar() {
       tipo: 'reuniao',
       titulo: forma.titulo.trim(),
       lugar: { dia: forma.dia, inicio: intervalo.value.ini, fim: intervalo.value.fim },
-      participantes: forma.caixa && it.value ? [...forma.participantes, caixaDoItem(it.value)] : forma.participantes,
+      participantes: forma.participantes,
       teams: forma.teams,
       itemId: props.itemId,
       categoria: it.value?.categoria ?? 'contratos',
@@ -87,7 +83,6 @@ function enviar() {
     <UInputTags v-model="forma.participantes" :placeholder="t.criacao.participantes" :aria-label="t.criacao.participantes" icon="i-lucide-users" size="sm" add-on-blur add-on-paste delimiter="," class="w-full" />
     <p v-if="contato" class="-mt-1.5 text-xs text-muted">{{ t.reuniaoForm.contato }}</p>
     <USwitch v-model="forma.teams" :label="t.criacao.teams" size="sm" />
-    <USwitch v-if="it" v-model="forma.caixa" :label="t.reuniaoForm.caixa" :description="t.reuniaoForm.caixaTexto" size="sm" />
 
     <p v-if="it" class="flex items-center gap-1.5 text-xs text-toned"><UIcon name="i-lucide-link-2" class="size-3.5 text-info" />{{ t.reuniaoForm.ligadaA(it.reference) }}</p>
     <p class="text-xs text-muted">{{ t.criacao.noOutlook }}</p>

@@ -224,7 +224,7 @@ Endereço `/types/<categoria>/<referência>?folder=<pasta>`: a pasta aberta vai 
 | T10 | Item | Não há como ver nem marcar nada na agenda a partir do item |
 | T11 | Tarefa | O painel não leva à Agenda e não reserva tempo; o prazo só muda fora dele |
 | T12 | Painel da tarefa | São 2 painéis diferentes: o da Agenda (abas Tarefa, Item, Histórico) e o de Tarefas (trilho de ícones e Comentários) |
-| T13 | Outlook | O Mail Box do item já tem endereço próprio, mas nada liga um convite do Outlook ao item |
+| T13 | Outlook | A reunião criada no Outlook não se liga ao item, nem pela tela do item |
 
 ### A casca, item por item (rodada 2)
 

@@ -113,11 +113,6 @@ export const fluxoDoCampo = (i: ItemDaAgenda) => {
   const c = categoriaPorSlug(i.categoria)
   return c.fluxo && c.fluxo.campo === fonte(i.categoria)?.campo ? c.fluxo : null
 }
-/**
- * O endereço do Mail Box do item (no develop, `<referência>.<workspace>@develop.box.enspace.io`). Convidar esse
- * endereço é a forma de ligar pelo Outlook: o convite chega ao item e a reunião se liga a ele.
- */
-export const caixaDoItem = (i: ItemDaAgenda) => `${i.reference.toLowerCase()}.escritorio@box.enspace.example`
 
 const visivel = (responsavel: number) => !estado.responsaveis.length || estado.responsaveis.includes(responsavel)
 export const fontesAtivas = computed(() => estado.fontes.filter(f => f.ativa))

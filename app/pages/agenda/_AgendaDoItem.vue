@@ -11,13 +11,11 @@
  *  - as datas do item, cada uma com "Ver na Agenda".
  *
  * Sem permissão de editar o item, agendar e ligar não aparecem: uma linha diz o motivo.
- *
- * Pelo Outlook, sem passar pelo ENSPACE: quem convida o Mail Box do item liga a reunião a ele. O endereço fica à
- * vista, com o botão de copiar.
+
  */
 import type { Textos } from './textos'
 import { HOJE, diaCurto, diaNumerico, hora } from './datas'
-import { blocosDa, caixaDoItem, diaDe, estado, item, ligar, minutoDe, podeEditarItem, reunioesDo, reunioesParaLigar, situacao, souParticipante, temSla } from './estado'
+import { blocosDa, diaDe, estado, item, ligar, minutoDe, podeEditarItem, reunioesDo, reunioesParaLigar, situacao, souParticipante, temSla } from './estado'
 import { categoriaPorSlug } from './mocks'
 import { avisarReuniao } from './avisos'
 import AgendarReuniao from './_AgendarReuniao.vue'
@@ -55,11 +53,6 @@ function ligarExistente(id: string) {
 function criado(c: Parameters<typeof avisarReuniao>[2]) {
   agendando.value = false
   avisarReuniao(toast, props.t, c, props.itemId)
-}
-const caixa = computed(() => caixaDoItem(it.value))
-function copiar() {
-  navigator.clipboard?.writeText(caixa.value).catch(() => {})
-  toast.add({ title: props.t.agendaItem.copiado, icon: 'i-lucide-copy', color: 'neutral' })
 }
 const corDaSituacao = { 'concluida': 'success', 'atrasada': 'error', 'hoje': 'warning', 'no-prazo': 'neutral', 'sem-prazo': 'neutral' } as const
 </script>
@@ -107,16 +100,7 @@ const corDaSituacao = { 'concluida': 'success', 'atrasada': 'error', 'hoje': 'wa
         @cancelar="agendando = false"
         @na-grade="agendando = false; emit('agendarNaGrade', itemId)"
       />
-      <div class="-mt-2 flex flex-col gap-1.5 text-xs text-muted">
-        <p class="flex gap-1.5"><UIcon name="i-lucide-mail" class="mt-0.5 size-3.5 shrink-0" />{{ t.agendaItem.pelaCaixa }}</p>
-        <span class="flex items-center gap-1 pl-5">
-          <code class="min-w-0 truncate rounded bg-elevated px-1.5 py-0.5 font-mono text-highlighted">{{ caixa }}</code>
-          <UTooltip :text="t.agendaItem.copiar">
-            <UButton icon="i-lucide-copy" color="neutral" variant="ghost" size="xs" :aria-label="t.agendaItem.copiar" @click="copiar" />
-          </UTooltip>
-        </span>
-        <p class="flex gap-1.5"><UIcon name="i-lucide-info" class="mt-0.5 size-3.5 shrink-0" />{{ t.agendaItem.retrato }}</p>
-      </div>
+      <p class="-mt-2 flex gap-1.5 text-xs text-muted"><UIcon name="i-lucide-info" class="mt-0.5 size-3.5 shrink-0" />{{ t.agendaItem.retrato }}</p>
     </template>
 
     <!-- Reuniões ligadas -->

@@ -225,7 +225,6 @@ categoria some da criação. Onde a pessoa espera a ação e ela não está, uma
 | **Pasta Agenda na tela do item** | Depois de Tarefas, na barra de pastas | O mesmo conteúdo da aba Agenda do painel (`_AgendaDoItem.vue`): agendar reunião, ligar reunião existente, próximas e anteriores com "Entrar na reunião", tarefas com o tempo reservado e as datas do item com "Ver na Agenda" |
 | **Agendar reunião sem ir à grade** | Item e tarefa | Formulário no lugar: dia, início, fim, participantes (o contato do item já entra), Teams e a linha de conflito com a agenda da pessoa. Na Agenda, "Escolher o horário na grade" volta ao caminho da rodada 1 |
 | **Ligar reunião existente** | Item | Lista das reuniões da pessoa nos próximos 14 dias, sem vínculo, fora as particulares e as diárias |
-| **Mail Box do item liga pelo Outlook** | Item e formulário de reunião | O endereço do item fica à vista com o botão de copiar: quem convida esse endereço no Outlook liga a reunião ao item. No formulário, "Convidar o Mail Box do item" vem ligado e segura o vínculo quando o organizador muda a reunião pelo Outlook |
 | **Aba Agenda no painel da tarefa** | Depois de Comentários | Prazo editável quando a tarefa é da pessoa e não tem SLA; trancado com o motivo quando tem. Tempo reservado com "Reservar tempo", conflito e "Mostrar como ocupado no Outlook". Reuniões do item e "Agendar reunião sobre a tarefa" |
 | **1 painel de tarefa só** | Agenda, item e Tarefas | A Agenda abre o mesmo painel da tela de Tarefas, com a aba Agenda a mais. "Acessar Item" leva à tela do item |
 
@@ -254,7 +253,7 @@ categoria some da criação. Onde a pessoa espera a ação e ela não está, uma
 ### Fronteira
 
 - **Muda:** a pasta Agenda na tela do item, a aba Agenda no painel da tarefa, o formulário completo na criação, os
-  avisos de permissão e de risco, e o Mail Box do item como forma de ligar.
+  avisos de permissão e de risco.
 - **Não muda:** a tela do item e o painel da tarefa fora dessas partes. As 2 cascas foram copiadas de novo do develop em
   29/10 (`_TelaDoItem.vue`, `_PainelDaTarefa.vue`): abas sublinhadas, painel do item em caixas, trilho de ícones do
   painel da tarefa, "Detalhes da Tarefa" e "Concluir Etapa". As outras pastas e a aba Comentários mostram só "não muda".
@@ -266,8 +265,12 @@ categoria some da criação. Onde a pessoa espera a ação e ela não está, uma
 
 - Botão desligado com dica para o que a pessoa não pode fazer: o pedido foi não oferecer. A linha do motivo fica onde a
   pessoa espera a ação.
-- Ligar pelo domínio como única forma: continua como sugestão, e o Mail Box do item vira a forma explícita, que funciona
-  de dentro do Outlook.
+- Ligar pelo Mail Box do item (convidar o endereço do item na reunião do Outlook): proposto e retirado na mesma rodada,
+  a pedido da redatora. A pessoa precisaria saber que o item tem endereço, e o endereço apareceria entre os convidados
+  do cliente. Nenhum produto da [pesquisa](pesquisa/SINTESE.md) liga assim: Attio, Twenty e HubSpot ligam pelo e-mail
+  do participante e pelo domínio, Notion e ClickUp pelo vínculo manual, Clio e Odoo criando a reunião dentro do
+  registro. O protótipo já tem os 3 caminhos: a sugestão pelo domínio, "Ligado a" e "Ligar reunião existente", e
+  "Agendar reunião" no item e na tarefa.
 
 ### Andaime
 
@@ -279,15 +282,15 @@ vínculo". O atalho mostra todas as pessoas quando o filtro esconde o evento.
 
 - A pergunta da rodada 1 "o bloco vai para o Outlook como ocupado?" virou opção por bloco, ligada por padrão. Confirmar
   com produto.
-- O Mail Box do item recebe convite de calendário hoje, ou só e-mail? Se só e-mail, o vínculo pelo convite pede back-end
-  novo.
+- Ligar a reunião sem sair do Outlook pede um suplemento do Outlook (o caminho do HubSpot e do Salesforce, fora da
+  pesquisa): entra no roteiro?
 - O fluxo com gatilho em campo de data roda quando a data muda pela Agenda, ou só pelo formulário do item?
 
 ### Ver
 
 | Print | O que mostra |
 |---|---|
-| ![](evidencias/tela-do-item-agenda.png) | A pasta Agenda na tela do item, com o endereço do Mail Box |
+| ![](evidencias/tela-do-item-agenda.png) | A pasta Agenda na tela do item: agendar, ligar, reuniões, tarefas e datas do item |
 | ![](evidencias/painel-da-tarefa-agenda.png) | A aba Agenda no painel da tarefa: prazo do SLA trancado, tempo reservado e o conflito |
 | ![](evidencias/criacao-com-obrigatorios.png) | A criação rápida avisa os 2 obrigatórios e passa a "Continuar no formulário" |
 | ![](evidencias/formulario-do-item.png) | O formulário completo, com a data vinda da Agenda e os obrigatórios cobrados |
