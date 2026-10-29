@@ -134,6 +134,23 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 36 · 2026-10-29
+- **Pedido (literal):** o retorno do dev, "sera que nao é melhor, fazer os requisitos ali em uma lista simples? ou
+  talvez a lista de tarefas, tipo [ ] O modal "Criar workspace" deve abrir na Central de casos de uso (…) as colunas de
+  critério, prioridade e relevancia podem só estar ocupando muito espaço e aumentando a carga cognitiva"; e a
+  redatora: "teste isso somente para as tarefas do item que estamos tratando. se funcionar bem, fica como regra que as
+  TAREFAS sao escritas assim. nosso doc interno nao (gitub nao recebe em formato de lista)"
+- **Mudou (ENSPACE):** as 10 tarefas do card `USEDB9945FD15ED4FA29BECA30882A4E` (24373 a 24380, 24388 e 24389) trocam
+  as tabelas por linhas:
+  - requisito e interface: `[ ] <ID> <requisito>`, sem critério de aceite, prioridade e relevância;
+  - a relevância diferente de Obrigatório fica no fim, entre parênteses: "(desejável)";
+  - regra de negócio e pergunta em aberto: `<ID> <texto>`, sem caixa; a pergunta leva "(quem responde: …)";
+  - as 3 tabelas de decisão (opções de ordenar e texto do último acesso) continuam tabela;
+  - os títulos das seções perdem o "(RF)", e o texto de cada tarefa cai para cerca de metade.
+- **Não mudou:** os `.md` de `requisitos/` continuam em tabela; a descrição do card também.
+- **Em teste:** vira regra só se a redatora aprovar o resultado. A conversão é um script da sessão sobre o HTML do
+  `requisitos_para_enspace.py html`.
+
 ### Rodada 35 · 2026-10-29
 - **Pedido (literal):** "mude a ordem da jornada na criaçao de workspace. a primeira coisa que deve aparecer é a
   galeria de casos de uso com a opçao de iniciar vazio, sem caso de uso. depois a pessoa define nome/ref/descriçao...
