@@ -1,11 +1,15 @@
-"""Converte o HTML das tarefas do card (parte-N.html) em lista de marcar, com o print de cada requisito abaixo da caixa.
+"""Converte o HTML das tarefas do card (parte-N.html) em lista de marcar, com o print de cada grupo de requisitos abaixo das caixas.
 
 Regras da redatora de 2026-10-29, a partir do retorno do dev (AGENTE_PROTOTIPOS.md, Fase 5, "Protótipo aprovado: o card no
 ENSPACE", e regra 42):
-- cada RF e RI vira uma caixa da Task List do editor do ENSPACE, "`ID` requisito", sem as colunas de critério,
-  prioridade e relevância; relevância diferente de Obrigatório fica entre parênteses no fim;
-- abaixo de cada caixa, o print do requisito no protótipo, de evidencias/requisitos/<ID>.jpg, pelo endereço do GitHub;
-  requisito com { "sem": "<motivo>" } no prints.json leva "Sem print: <motivo>";
+- cada RF e RI vira uma caixa da Task List do editor do ENSPACE, "`ID` requisito", sem a coluna de critério;
+- a prioridade e a relevância de cada requisito ficam entre parênteses no fim, com o nome de cada escala ("Desejável"
+  existe nas 2): "(prioridade: Essencial; relevância: Obrigatório)" (decisão da redatora em 2026-10-30: o dev precisa
+  saber o que é obrigatório, importante e opcional);
+- 1 print por grupo de requisitos, não por requisito (decisão da redatora em 2026-10-30): os requisitos de um grupo
+  ficam juntos na seção, e o print do grupo vai abaixo das caixas deles, pelo endereço do GitHub. O grupo e o arquivo
+  vêm de evidencias/requisitos/grupos.json, que ferramentas/prints-de-requisito.mjs grava; sem ele, vale <ID>.jpg;
+- requisito com { "sem": "<motivo>" } no prints.json leva "Sem print: <motivo>" abaixo da caixa dele;
 - regra de negócio e pergunta viram parágrafo; parágrafo seguido de parágrafo leva 1 linha em branco (<p></p>).
 
 Uso:
@@ -25,46 +29,60 @@ BLOCO = re.compile(r'<h2><strong>(.*?)</strong></h2><table><tbody>(.*?)</tbody><
 LINHA = re.compile(r'<tr>(.*?)</tr>', re.S)
 CEL = re.compile(r'<t[hd]><p>(.*?)</p></t[hd]>', re.S)
 # A Task List do editor do ENSPACE, no HTML que ele mesmo grava (lido da tarefa 939 do desenvolvimento-enlighten2 em
-# 2026-10-29). O editor tira a imagem de dentro do item e fecha a lista antes dela; por isso cada requisito com print
+# 2026-10-29). O editor tira a imagem de dentro do item e fecha a lista antes dela; por isso cada grupo de requisitos
 # vai numa lista própria, seguida da imagem (medido na tarefa 24389 em 2026-10-29).
 UL = '<ul class="not-prose pl-2 checked-task-light" data-type="taskList">'
 LI = ('<li class="not-prose flex items-center my-1" data-checked="false" data-type="taskItem">'
       '<label><input type="checkbox"><span></span></label>')
 
 
-def converter(html, pasta, sem):
+def converter(html, pasta, sem, grupos):
     faltam = []
 
-    def print_de(id_):
-        if id_ in sem:
-            return f'<p>Sem print: {sem[id_]}.</p>'
-        arq = pasta / 'evidencias' / 'requisitos' / f'{id_}.jpg'
+    def chave(id_):
+        return ('sem', id_) if id_ in sem else ('img', grupos.get(id_, f'{id_}.jpg'))
+
+    def print_de(k, ids):
+        if k[0] == 'sem':
+            return f'<p>Sem print: {sem[k[1]]}.</p>'
+        arq = pasta / 'evidencias' / 'requisitos' / k[1]
         if not arq.exists():
-            faltam.append(id_)
+            faltam.extend(ids)
             return ''
         rel = arq.as_posix().split('app/pages/', 1)[1]
-        return f'<img src="{REPO}/app/pages/{rel}" alt="{id_} no protótipo">'
+        nome = ' a '.join(Path(k[1]).stem.split('-'))
+        return f'<img src="{REPO}/app/pages/{rel}" alt="{nome} no protótipo">'
 
     def bloco(m):
         titulo = re.sub(r'\s*\((RF|RN|RI|RNF|RS|RT)\)$', '', m.group(1))
         linhas = [CEL.findall(l) for l in LINHA.findall(m.group(2))]
         cab, corpo = linhas[0], linhas[1:]
         i_rel = cab.index('Relevância') if 'Relevância' in cab else None
+        i_pri = cab.index('Prioridade') if 'Prioridade' in cab else None
         tipo = cab[1]
         caixa = tipo in ('Requisito', 'Rota ou evento')
         saida = [f'<h2><strong>{titulo}</strong></h2>']
+        caixas = {}
         for c in corpo:
             id_, texto = c[0], c[1]
             if tipo == 'Rota ou evento':
                 texto = f'{texto}: {c[2][0].lower()}{c[2][1:]}'
             if tipo.startswith('Pergunta'):
                 texto = f'{texto} (quem responde: {c[2]})'
-            if i_rel is not None and c[i_rel] != 'Obrigatório':
-                texto = f'{texto} ({c[i_rel].lower()})'
+            escalas = []
+            if caixa and i_pri is not None:
+                escalas.append(f'prioridade: {c[i_pri]}')
+            if i_rel is not None and (caixa or c[i_rel] != 'Obrigatório'):
+                escalas.append(f'relevância: {c[i_rel]}')
+            if escalas:
+                texto = f'{texto} ({"; ".join(escalas)})'
             if caixa:
-                saida.append(f'{UL}{LI}<div><p><code>{id_}</code> {texto}</p></div></li></ul>{print_de(id_)}')
+                caixas.setdefault(chave(id_), []).append((id_, f'{LI}<div><p><code>{id_}</code> {texto}</p></div></li>'))
             else:
                 saida.append(f'<p><code>{id_}</code> {texto}</p>')
+        # Cada grupo na ordem do 1º requisito dele: as caixas numa lista, e o print do grupo abaixo.
+        for k, itens in caixas.items():
+            saida.append(UL + ''.join(li for _, li in itens) + '</ul>' + print_de(k, [i for i, _ in itens]))
         return ''.join(saida)
 
     novo = BLOCO.sub(bloco, html)
@@ -81,6 +99,8 @@ def main():
     rascunho, pasta = Path(sys.argv[1]), Path(sys.argv[2])
     conf = json.loads((pasta / 'requisitos' / 'prints.json').read_text(encoding='utf-8'))
     sem = {i: r['sem'] for i, r in conf['requisitos'].items() if 'sem' in r}
+    arq_grupos = pasta / 'evidencias' / 'requisitos' / 'grupos.json'
+    grupos = json.loads(arq_grupos.read_text(encoding='utf-8')) if arq_grupos.exists() else {}
     todos_faltam = []
     for p in sorted(rascunho.glob('parte-*.html')):
         if p.name.endswith('.tabela.html'):
@@ -89,7 +109,7 @@ def main():
         if not tabela.exists():
             tabela.write_text(p.read_text(encoding='utf-8'), encoding='utf-8')
         html = tabela.read_text(encoding='utf-8')
-        novo, faltam = converter(html, pasta, sem)
+        novo, faltam = converter(html, pasta, sem, grupos)
         todos_faltam += faltam
         p.write_text(novo, encoding='utf-8')
         print(f'{p.name}: {len(html)} -> {len(novo)} bytes, {novo.count("<img ")} prints')

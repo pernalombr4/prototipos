@@ -264,3 +264,10 @@
 - **Prints (regra 42):** 66 em `evidencias/requisitos/`, 1 por requisito com tela; 14 sem tela (interface, atributo de acessibilidade, tempo): RI001 a RI010, RNF002 a RNF004 e RS002. Detector de seta: 0 de 66.
 - **Ferramenta:** `ferramentas/prints-de-requisito.mjs` ganhou o campo `antes` (troca o estado do andaime antes de a cena abrir a caixa) e as teclas Ctrl J e Ctrl Z.
 - **Fronteira:** mudam os documentos de requisitos; não muda nenhuma tela.
+
+## Rodada 14 · 2026-10-30
+
+- **Pedido:** "nao é um print por requisito. isso vai ser insano. é um print por grupo de requisito. se, por exemplo, os 5 primeiros requisitos puderem aparecer no mesmo print, ótimo. basta colocar as caixinhas no print com o texto com o ID do requisito pra dar pra compreender." E: "confira se agora que no card a tabela de requisitos é escrita como LISTA, ainda permanece a indicaçao de quais sao necessarios, opcionais, importantes etc".
+- **Prints (regra 42, revista):** 50 prints para 66 requisitos com tela, 1 por grupo de requisitos da mesma seção que aparecem na mesma tela; cada requisito tem a sua caixa magenta com o ID ao lado. O `grupos.json` diz o print de cada ID. O maior grupo junta 6 requisitos (o modal das chaves: RF047 a RF051 e RF057). RF027 (campo só leitura com a proposta aberta) entra no print de RF025 por `"junto"`. Os requisitos que ficam sozinhos pedem cada um um gesto que muda a tela (passar o mouse, abrir um menu, Esc, digitar). Detector de seta: 0 de 50.
+- **Tarefas:** os requisitos de cada grupo ficam juntos na seção, com o print abaixo das caixas; cada caixa leva no fim a prioridade e a relevância ("(prioridade: Essencial; relevância: Obrigatório)").
+- **Fronteira:** mudam os prints e o texto das tarefas do card; não muda nenhuma tela nem os documentos de requisitos.

@@ -214,3 +214,10 @@ flowchart LR
   - `REQUISITOS-WORD.md` e o README apontam para o épico.
 - **Prints (regra 42):** 143 em `evidencias/requisitos/`, 1 por requisito com tela; 12 sem tela (interface, teclado, tempo, restrição, ou o que não cabe numa imagem só): RF006, RF038, RF063, RF064, RF211, RF233, RF252, RNF001, RI003, RI004, RS002 e RS003. Detector de seta: 0 de 143.
 - **Fronteira:** mudam os documentos de requisitos; não muda nenhuma tela.
+
+## Rodada 13 · 2026-10-30
+
+- **Pedido:** "nao é um print por requisito. isso vai ser insano. é um print por grupo de requisito. se, por exemplo, os 5 primeiros requisitos puderem aparecer no mesmo print, ótimo. basta colocar as caixinhas no print com o texto com o ID do requisito pra dar pra compreender." E: "confira se agora que no card a tabela de requisitos é escrita como LISTA, ainda permanece a indicaçao de quais sao necessarios, opcionais, importantes etc".
+- **Prints (regra 42, revista):** 96 prints para 143 requisitos com tela, 1 por grupo de requisitos da mesma seção que aparecem na mesma tela; cada requisito tem a sua caixa magenta com o ID ao lado. O `grupos.json` diz o print de cada ID. O maior grupo junta 5 requisitos (o montador de condição: RF065, RF067, RF068, RF204 e RF238). Detector de seta: 0 de 96.
+- **Tarefas:** os requisitos de cada grupo ficam juntos na seção, com o print abaixo das caixas; cada caixa leva no fim a prioridade e a relevância ("(prioridade: Essencial; relevância: Obrigatório)").
+- **Fronteira:** mudam os prints e o texto das tarefas do card; não muda nenhuma tela nem os documentos de requisitos.

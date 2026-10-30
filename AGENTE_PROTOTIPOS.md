@@ -379,16 +379,22 @@ a redatora** se cria o card. Sem o sim dela, nada vai para o ENSPACE.
     a parte cita entra na tabela de RN da tarefa (decisão da redatora em 2026-10-29).
   - **Na tarefa, o requisito é lista de marcar, não tabela** (decisão da redatora em 2026-10-29,
     a partir do retorno do dev): cada RF e cada RI vira uma caixa que o dev marca com 1 clique,
-    "`ID` requisito", sem as colunas de critério, prioridade e relevância; relevância diferente
-    de Obrigatório vai entre parênteses no fim. É a Task List do editor do ENSPACE
+    "`ID` requisito", sem a coluna de critério. A prioridade e a relevância de cada requisito vão
+    entre parênteses no fim, com o nome de cada escala, porque "Desejável" existe nas 2:
+    "(prioridade: Essencial; relevância: Obrigatório)" (decisão da redatora em 2026-10-30: o dev
+    precisa saber o que é obrigatório, importante e opcional). É a Task List do editor do ENSPACE
     (`ul data-type="taskList"`, um `li data-type="taskItem"` por requisito), nunca "[ ]"
     escrito. Regra de negócio e pergunta viram parágrafo, e parágrafo seguido de parágrafo leva
     1 linha em branco (`<p></p>`). O documento do GitHub continua em tabela.
-  - **Abaixo de cada caixa de requisito, o print do requisito na tela do protótipo** (decisão da
-    redatora em 2026-10-29, a partir do retorno do dev). O print mostra a tela inteira no estado
-    que o requisito pede, com o elemento contornado em magenta, e sai dos arquivos de
-    `app/pages/<slug>/evidencias/requisitos/<ID>.jpg`, pelo endereço do GitHub
-    (`https://raw.githubusercontent.com/pernalombr4/prototipos/main/app/pages/<slug>/evidencias/requisitos/<ID>.jpg`).
+  - **Abaixo das caixas de requisito, o print delas na tela do protótipo** (decisão da redatora em
+    2026-10-29, a partir do retorno do dev). O print mostra a tela inteira no estado que os
+    requisitos pedem, com o elemento contornado em magenta, e sai dos arquivos de
+    `app/pages/<slug>/evidencias/requisitos/`, pelo endereço do GitHub
+    (`https://raw.githubusercontent.com/pernalombr4/prototipos/main/app/pages/<slug>/evidencias/requisitos/<arquivo>.jpg`).
+    - **1 print por grupo de requisitos, não por requisito** (decisão da redatora em 2026-10-30):
+      os requisitos da mesma seção que aparecem na mesma tela dividem 1 print. Cada um tem a sua
+      caixa magenta no print, com o ID escrito junto, e a tarefa lista juntos os requisitos do
+      grupo, com o print abaixo das caixas deles.
     - O link do protótipo continua no começo de cada tarefa e na descrição do card.
     - Requisito sem tela no protótipo (interface, login, dado do back-end) leva, no lugar do
       print, "Sem print: <motivo>".
@@ -413,16 +419,19 @@ a redatora** se cria o card. Sem o sim dela, nada vai para o ENSPACE.
   0. **Os prints de requisito**, com `ferramentas/prints-de-requisito.mjs`: o
      `requisitos/prints.json` do protótipo diz, para cada ID, o gesto (clicar, digitar, trocar o
      estado do andaime) e o que contornar; `node ferramentas/prints-de-requisito.mjs
-     app/pages/<slug>` abre o protótipo publicado num Chrome sem janela e grava
-     `evidencias/requisitos/<ID>.jpg`, sem ponteiro do mouse e sem a barra do andaime. Requisito
-     sem tela leva `{ "sem": "<motivo>" }`. Confira os prints antes de subir (cada um mostra o
-     que o requisito diz), rode `detectar_seta_mouse.py` neles e faça o commit e o push: a tarefa
-     só mostra o print que já está no GitHub. Modelo: `tela-de-workspaces/requisitos/prints.json`.
+     app/pages/<slug>` abre o protótipo publicado num Chrome sem janela, junta em grupo os
+     requisitos da mesma seção com o mesmo estado e grava 1 print por grupo em
+     `evidencias/requisitos/` (`<ID>.jpg` ou `<1º ID>-<último ID>.jpg`), com o `grupos.json`,
+     sem ponteiro do mouse e sem a barra do andaime. `"junto": "<ID>"` põe no grupo de outro
+     requisito o que aparece na mesma tela por outro caminho. Requisito sem tela leva
+     `{ "sem": "<motivo>" }`. Confira os prints antes de subir (cada caixa mostra o que o
+     requisito do ID diz), rode `detectar_seta_mouse.py` neles e faça o commit e o push: a tarefa
+     só mostra o print que já está no GitHub. Modelo: `editor-de-documentos/requisitos/prints.json`.
   1. `html <pasta requisitos/ ou REQUISITOS.md> <rascunho da sessão>`: gera a descrição do card e
      a de cada tarefa, no HTML do editor da tela, e confere o texto. Aviso se corrige no `.md`
      antes de subir. Depois, `python -B ferramentas/tarefas_em_lista.py <rascunho>
-     app/pages/<slug>` troca as tabelas das tarefas pela lista de marcar, com o print sob cada
-     caixa, e para se faltar o print de um requisito (o script do `agentes-base` ainda gera
+     app/pages/<slug>` troca as tabelas das tarefas pela lista de marcar, com o print de cada
+     grupo sob as caixas dele, e para se faltar o print de um requisito (o script do `agentes-base` ainda gera
      tabela; até ele mudar, a conversão é esta).
   2. O card pelo MCP (`smartCreateItem` na `user_story`), com a descrição gerada.
   3. As tarefas pela REST, com o mesmo script (`tarefas --item <id do card>`, chave pelo
@@ -431,7 +440,7 @@ a redatora** se cria o card. Sem o sim dela, nada vai para o ENSPACE.
      `kanban-tarefas/kanban-tarefas-tarefas-api.md`, "Criar tarefa ligada a um item". Tarefa que já
      existe se reescreve com `atualizar --tarefa <n>=<id>`.
 - **Conferir na tela, pelo Chrome:** a aba Tarefas do card mostra as partes, e uma tarefa aberta
-  mostra as caixas de marcar com o print abaixo de cada uma. A entrega leva o link do card e o
+  mostra as caixas de marcar com o print de cada grupo abaixo delas. A entrega leva o link do card e o
   print da aba.
 - É a única escrita em produção deste agente (exceção da regra 1). Modelo: `tela-de-workspaces`,
   `DECISOES.md`, rodadas 31 e 32.
@@ -738,7 +747,7 @@ app/pages/<slug>/
 ├── requisitos/          no lugar do REQUISITOS.md, quando é épico: epico.md + 1 por parte
 │   └── prints.json      o gesto de cada requisito, para os prints de requisito (regra 42)
 └── evidencias/          prints do develop e das referências
-    └── requisitos/      1 print por requisito, <ID>.jpg, o que vai sob a caixa da tarefa no ENSPACE
+    └── requisitos/      1 print por grupo de requisitos + grupos.json, o que vai sob as caixas da tarefa no ENSPACE
 ```
 
 Toda tela declara seus metadados — é o que alimenta o índice da raiz, que se monta sozinho:
@@ -991,11 +1000,13 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
     tarefa "<n>. <nome>" que traz todos os requisitos dela e se basta. Com mais de 1 épico, 1
     card por épico. Detalhe na Fase 5, "Protótipo aprovado: o card no ENSPACE".
 
-42. **⛔ CADA REQUISITO DA TAREFA LEVA O PRINT DELE NA TELA.** Decisão da redatora em 2026-10-29,
+42. **⛔ CADA REQUISITO DA TAREFA APARECE NUM PRINT DA TELA.** Decisão da redatora em 2026-10-29,
     a partir do retorno do dev. Na tarefa do card, cada requisito é uma caixa de marcar, e
-    abaixo dela vai o print do requisito no protótipo. No fim do trabalho, o agente tira os
-    prints com `ferramentas/prints-de-requisito.mjs`, grava em
-    `app/pages/<slug>/evidencias/requisitos/<ID>.jpg` e sobe ao GitHub, e a tarefa usa a imagem
+    abaixo das caixas vai o print dos requisitos no protótipo. **1 print por grupo de
+    requisitos, não por requisito** (decisão da redatora em 2026-10-30): os requisitos da mesma
+    seção que cabem na mesma tela dividem 1 print, cada um com a sua caixa magenta e o ID escrito
+    junto. No fim do trabalho, o agente tira os prints com `ferramentas/prints-de-requisito.mjs`,
+    grava em `app/pages/<slug>/evidencias/requisitos/` e sobe ao GitHub, e a tarefa usa a imagem
     de lá. O link do protótipo continua no começo de cada tarefa e na descrição do card.
     Requisito sem tela no protótipo diz "Sem print: <motivo>". Detalhe na Fase 5, "Protótipo
     aprovado: o card no ENSPACE".

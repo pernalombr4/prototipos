@@ -1,21 +1,31 @@
 /**
- * Tira o print de cada requisito do protótipo, para ir abaixo da caixa de marcar do requisito na tarefa do card
- * no ENSPACE (regra 42 da spec, decisão da redatora em 2026-10-29).
+ * Tira os prints dos requisitos do protótipo, para ir abaixo das caixas de marcar na tarefa do card no ENSPACE
+ * (regra 42 da spec). 1 print por grupo de requisitos, não por requisito (decisão da redatora em 2026-10-30):
+ * cada requisito do grupo ganha a sua caixa magenta no print, com o ID escrito junto.
  *
  * Uso:
  *   node ferramentas/prints-de-requisito.mjs app/pages/<slug>            # todos os requisitos do prints.json
- *   node ferramentas/prints-de-requisito.mjs app/pages/<slug> RF001 RF702 # só estes
+ *   node ferramentas/prints-de-requisito.mjs app/pages/<slug> RF001 RF702 # só os grupos destes
  *
- * Lê `<pasta>/requisitos/prints.json` e grava `<pasta>/evidencias/requisitos/<ID>.jpg`.
+ * Lê `<pasta>/requisitos/prints.json` e grava `<pasta>/evidencias/requisitos/<ID>.jpg` (grupo de 1) ou
+ * `<1º ID>-<último ID>.jpg` (grupo de 2 ou mais), mais o `grupos.json`, que diz o print de cada ID.
  * Abre o protótipo publicado num Chrome sem janela: o print sai sem o ponteiro do mouse e sem a barra do andaime.
- * Cada requisito começa da página recarregada, faz os passos e contorna o que o requisito pede em magenta.
+ * Cada grupo começa da página recarregada, faz os passos e contorna em magenta o que cada requisito pede.
+ *
+ * Grupo: requisitos da mesma seção da parte (as seções vêm dos `.md` de `requisitos/`), até 8, com o mesmo estado
+ * (antes, cena e passos iguais, fora o passo que só espera, só rola ou só marca data-print) ou com um estado que
+ * outro continua (o cartão entra no print do menu do cartão aberto). "junto": "<ID>" põe o requisito no estado de
+ * outro, para juntar o que aparece na mesma tela por caminhos diferentes. Requisito do grupo cujo contorno não
+ * aparece, sai da tela ou fica coberto (menu, modal) volta à fila no próprio estado. Rodada completa apaga os prints
+ * que nenhum grupo usa mais.
  *
  * prints.json:
  *   {
  *     "url": "https://pernalombr4.github.io/prototipos/<slug>",
  *     "andaime": "Protótipo · estado",          // texto da barra de revisão, escondida no print
  *     "cenas": { "<nome>": [passo, ...] },       // passos que vários requisitos repetem
- *     "requisitos": { "<ID>": { "antes": [passo, ...], "cena": "<nome>", "passos": [passo, ...], "destacar": alvo | [alvo, ...] } }
+ *     "requisitos": { "<ID>": { "antes": [passo, ...], "cena": "<nome>", "passos": [passo, ...], "junto": "<ID>",
+ *                               "destacar": alvo | [alvo, ...] } }
  *   }
  * A ordem é antes, cena, passos: "antes" serve para trocar o estado do andaime antes de a cena abrir a caixa.
  * alvo: "texto" (rótulo, aria-label, placeholder ou texto visível; o mais interno que casa),
@@ -28,7 +38,7 @@
  *      | { "js": "código" } | { "largura": 390 }
  */
 import { spawn } from 'node:child_process'
-import { mkdirSync, readFileSync, writeFileSync, rmSync, existsSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync, rmSync, existsSync, readdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 
@@ -202,21 +212,163 @@ async function preparar() {
   await dormir(700)
 }
 
-async function destacar(alvos) {
-  const lista = Array.isArray(alvos) ? alvos : [alvos]
-  for (const [i, a] of lista.entries()) {
-    const ok = await avaliar(`(() => { let el = __achar(${JSON.stringify(a)}); if (!el) return false
-      el = ${typeof a === 'object' && (a.exato || a.ancestral || a.css) ? 'el' : '__interativo(el)'}
-      ${i === 0 ? `const b0 = el.getBoundingClientRect(); if (b0.top < 0 || b0.bottom > innerHeight) el.scrollIntoView({ block: 'center' })` : ''}
-      const b = el.getBoundingClientRect(); const m = 5
-      const d = document.createElement('div'); d.className = '__destaque'
-      Object.assign(d.style, { position: 'fixed', left: (b.x - m) + 'px', top: (b.y - m) + 'px', width: (b.width + 2 * m) + 'px',
-        height: (b.height + 2 * m) + 'px', border: '3px solid #FF04D1', borderRadius: '10px', boxShadow: '0 0 0 4px rgba(255,4,209,.22)',
-        pointerEvents: 'none', zIndex: 2147483647 })
-      document.body.appendChild(d); return true })()`)
-    if (!ok) throw new Error(`não achei para destacar ${JSON.stringify(a)}`)
+/** Roda no navegador: guarda as caixas de cada requisito e depois desenha as caixas e os rótulos com o ID. */
+const MARCAR = `
+window.__caixas = []
+window.__marcar = (id, alvos, rolar, estrito) => {
+  const els = []
+  for (const a of alvos) {
+    let el = __achar(a); if (!el) return 'não achei para destacar ' + JSON.stringify(a)
+    if (!(typeof a === 'object' && (a.exato || a.ancestral || a.css))) el = __interativo(el)
+    els.push(el)
+  }
+  if (rolar) { const b0 = els[0].getBoundingClientRect(); if (b0.top < 0 || b0.bottom > innerHeight) els[0].scrollIntoView({ block: 'center' }) }
+  const rs = els.map(e => e.getBoundingClientRect())
+  if (estrito && rs.some(b => b.top < 0 || b.bottom > innerHeight || b.left < 0 || b.right > innerWidth)) return 'fora da tela'
+  // Coberto: no centro e nos 4 cantos do alvo está outra coisa (menu, modal, gaveta, o fundo escurecido de um deles).
+  // O teste liga o mouse em tudo (botão desabilitado e camada flutuante ignoram o mouse) e atravessa o que não pinta
+  // nada: opacidade 0, invisível ou sem fundo (input de arquivo transparente, invólucro vazio).
+  if (estrito) {
+    const st = document.createElement('style'); st.textContent = '* { pointer-events: auto !important }'
+    document.head.appendChild(st)
+    const transparente = h => {
+      for (let a = h; a && a !== document.body; a = a.parentElement) {
+        const cs = getComputedStyle(a); if (cs.opacity === '0' || cs.visibility === 'hidden') return true }
+      const cs = getComputedStyle(h)
+      return (cs.backgroundColor === 'rgba(0, 0, 0, 0)' || cs.backgroundColor === 'transparent') && cs.backgroundImage === 'none'
+    }
+    // A camada é o filho do body de onde o elemento vem: o app é uma, cada menu, modal e gaveta (em portal) é outra.
+    // Só cobre o que vem de outra camada; dentro da mesma, a sobreposição é do próprio layout (rodapé fixo da caixa).
+    const camada = e => { let a = e; while (a && a.parentElement && a.parentElement !== document.body) a = a.parentElement; return a }
+    let quem = ''
+    const livre = (el, x, y) => {
+      for (const h of document.elementsFromPoint(x, y)) {
+        if (h === el || el.contains(h) || h.contains(el) || camada(h) === camada(el)) return true
+        if (!transparente(h)) { quem = h.tagName.toLowerCase() + (typeof h.className === 'string' && h.className ? '.' + h.className.trim().split(' ').slice(0, 3).join('.') : ''); return false }
+      }
+      return true
+    }
+    const coberto = (el, b) => { const dx = Math.min(8, b.width / 4), dy = Math.min(8, b.height / 4)
+      return ![[b.x + b.width / 2, b.y + b.height / 2], [b.x + dx, b.y + dy], [b.right - dx, b.y + dy], [b.x + dx, b.bottom - dy],
+        [b.right - dx, b.bottom - dy]].some(([x, y]) => livre(el, x, y)) }
+    const algum = els.some((e, i) => coberto(e, rs[i]))
+    st.remove()
+    if (algum) return 'coberto por ' + quem
+  }
+  for (const b of rs) {
+    const igual = __caixas.find(c => Math.abs(c.x - b.x) < 3 && Math.abs(c.y - b.y) < 3 && Math.abs(c.w - b.width) < 3 && Math.abs(c.h - b.height) < 3)
+    if (igual) { if (!igual.ids.includes(id)) igual.ids.push(id) }
+    else __caixas.push({ x: b.x, y: b.y, w: b.width, h: b.height, ids: [id] })
+  }
+  return ''
+}
+window.__desenhar = () => {
+  const m = 5, ocupado = []
+  const cruza = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h
+  for (const c of __caixas) {
+    const d = document.createElement('div')
+    Object.assign(d.style, { position: 'fixed', left: (c.x - m) + 'px', top: (c.y - m) + 'px', width: (c.w + 2 * m) + 'px',
+      height: (c.h + 2 * m) + 'px', border: '3px solid #FF04D1', borderRadius: '10px', boxShadow: '0 0 0 4px rgba(255,4,209,.22)',
+      pointerEvents: 'none', zIndex: 2147483646 })
+    document.body.appendChild(d)
+  }
+  // O rótulo fica fora da caixa, acima; se cruza outro rótulo ou sai da tela, tenta abaixo, à direita, à esquerda e dentro.
+  for (const c of __caixas) {
+    const r = document.createElement('div'); r.textContent = c.ids.join(' · ')
+    Object.assign(r.style, { position: 'fixed', left: '0px', top: '0px', background: '#FF04D1', color: '#fff',
+      font: '700 12px/16px system-ui, sans-serif', padding: '1px 6px', borderRadius: '4px', whiteSpace: 'nowrap',
+      boxShadow: '0 1px 3px rgba(0,0,0,.35)', pointerEvents: 'none', zIndex: 2147483647 })
+    document.body.appendChild(r)
+    const w = r.offsetWidth, h = r.offsetHeight
+    const opcoes = [[c.x - m, c.y - m - h - 3], [c.x - m, c.y + c.h + m + 3], [c.x + c.w + m + 3, c.y - m],
+      [c.x - m - w - 3, c.y - m], [c.x - m + 4, c.y - m + 4]]
+      .map(([x, y]) => ({ x: Math.min(Math.max(x, 2), innerWidth - w - 2), y: Math.min(Math.max(y, 2), innerHeight - h - 2), w, h }))
+    const livre = opcoes.find(o => !ocupado.some(q => cruza(o, q))) || opcoes[0]
+    ocupado.push(livre)
+    r.style.left = livre.x + 'px'; r.style.top = livre.y + 'px'
   }
 }
+`
+
+const lista = a => (a === undefined ? [] : Array.isArray(a) ? a : [a])
+const passosDe = id => {
+  const r = conf.requisitos[id]
+  if (r.junto) return passosDe(r.junto)
+  return [...(r.antes ?? []), ...(r.cena ? conf.cenas[r.cena] : []), ...(r.passos ?? [])]
+}
+
+/** A ordem dos requisitos nas tarefas: as seções "## " dos .md de requisitos/, parte por parte. */
+function secoes() {
+  const dir = join(pasta, 'requisitos')
+  const num = f => Number(f.match(/\d+/)?.[0] ?? 0)
+  let arqs = existsSync(dir) ? readdirSync(dir).filter(f => f.endsWith('.md') && f !== 'epico.md').sort((a, b) => num(a) - num(b)).map(f => join(dir, f)) : []
+  if (!arqs.length && existsSync(join(pasta, 'REQUISITOS.md'))) arqs = [join(pasta, 'REQUISITOS.md')]
+  const saida = []
+  for (const arq of arqs) {
+    let atual = null
+    for (const linha of readFileSync(arq, 'utf8').split(/\r?\n/)) {
+      if (linha.startsWith('## ')) { atual = []; saida.push(atual) }
+      const m = linha.match(/^\|\s*([A-Z]{2,3}\d{3})\s*\|/)
+      if (m && atual) atual.push(m[1])
+    }
+  }
+  return saida
+}
+
+/**
+ * Passo que não muda o estado da tela: só espera, só rola (o contorno fora da tela abre outro grupo) ou só marca um
+ * elemento com data-print para o contorno achar.
+ */
+const neutro = p => (Object.keys(p).length === 1 && p.esperar !== undefined) || p.rolar !== undefined
+  || (p.js !== undefined && /dataset\.print/.test(p.js) && !/click\(|focus\(|addRange|dispatchEvent|\.value|scrollIntoView/.test(p.js))
+const vivos = id => passosDe(id).filter(p => !neutro(p)).map(p => JSON.stringify(p))
+const prefixo = (a, t) => t.length > a.length && a.every((p, i) => p === t[i])
+
+/**
+ * Grupos: { passos, ids }, na ordem em que o 1º de cada grupo aparece; a tarefa lista juntos os requisitos de cada
+ * grupo (ferramentas/tarefas_em_lista.py lê o grupos.json). Entram no mesmo grupo, até 8, os requisitos da mesma seção
+ * com o mesmo estado e os de estado anterior: o requisito do cartão vai para o print com o menu do cartão aberto, se o
+ * cartão continua à vista (o contorno fora da tela ou coberto tira o requisito do grupo na hora do print). Entre os
+ * estados que continuam o do requisito, vale o de mais requisitos; no empate, o mais curto. O requisito só sai do
+ * próprio estado para um que tem pelo menos tantos requisitos quanto o dele.
+ */
+function grupos() {
+  const MAX = 8
+  const visto = new Set()
+  const saida = []
+  for (const secao of secoes()) {
+    const ids = secao.filter(id => conf.requisitos[id] && !conf.requisitos[id].sem && !visto.has(id))
+    ids.forEach(id => visto.add(id))
+    const v = new Map(ids.map(id => [id, vivos(id)]))
+    const conta = new Map()
+    for (const s of v.values()) conta.set(s.join('\n'), (conta.get(s.join('\n')) ?? 0) + 1)
+    const abertos = new Map()
+    for (const id of ids) {
+      const a = v.get(id)
+      let alvo = a
+      for (const t of v.values()) {
+        if (!prefixo(a, t)) continue
+        const ct = conta.get(t.join('\n'))
+        const ca = conta.get(alvo.join('\n'))
+        if (ct > ca || (ct === ca && (alvo === a || t.length < alvo.length))) alvo = t
+      }
+      const k = alvo.join('\n')
+      const g = abertos.get(k)
+      if (g && g.ids.length < MAX) g.ids.push(id)
+      else {
+        const dono = ids.find(x => v.get(x).join('\n') === k)
+        const novo = { passos: passosDe(dono), ids: [id] }
+        abertos.set(k, novo)
+        saida.push(novo)
+      }
+    }
+  }
+  for (const id of Object.keys(conf.requisitos)) {
+    if (!visto.has(id) && !conf.requisitos[id].sem) saida.push({ passos: passosDe(id), ids: [id] })
+  }
+  return saida
+}
+const nome = g => (g.length === 1 ? `${g[0]}.jpg` : `${g[0]}-${g.at(-1)}.jpg`)
 
 await cdp('Page.enable')
 await cdp('Runtime.enable')
@@ -224,38 +376,80 @@ await cdp('Emulation.setEmulatedMedia', { features: [
   { name: 'prefers-reduced-motion', value: 'reduce' }, { name: 'prefers-color-scheme', value: conf.tema ?? 'light' },
 ] })
 
-const ids = so.length ? so : Object.keys(conf.requisitos)
+for (const id of so) {
+  if (!conf.requisitos[id]) console.log(`${id}: fora do prints.json`)
+  else if (conf.requisitos[id].sem) console.log(`${id}: sem print (${conf.requisitos[id].sem})`)
+}
+const fila = grupos().filter(g => !so.length || g.ids.some(id => so.includes(id)))
+const arqMapa = join(saida, 'grupos.json')
+const mapa = so.length && existsSync(arqMapa) ? JSON.parse(readFileSync(arqMapa, 'utf8')) : {}
 let falhas = 0
-for (const id of ids) {
-  const r = conf.requisitos[id]
-  if (!r) { console.log(`${id}: fora do prints.json`); falhas++; continue }
-  if (r.sem) { console.log(`${id}: sem print (${r.sem})`); continue }
+let prints = 0
+while (fila.length) {
+  const g = fila.shift()
+  const unico = g.ids.length === 1
   try {
     await preparar()
-    const passos = [...(r.antes ?? []), ...(r.cena ? conf.cenas[r.cena] : []), ...(r.passos ?? [])]
-    for (const p of passos) await passo(p)
+    await avaliar(MARCAR)
+    for (const p of g.passos) await passo(p)
     // O hover do último clique sai, salvo quando o requisito é o próprio hover (tooltip, "+N").
-    if (!passos.some(p => p.pairar)) await mouse(LARGURA - 1, ALTURA - 1, false)
-    if (r.destacar) await destacar(r.destacar)
+    if (!g.passos.some(p => p.pairar)) await mouse(LARGURA - 1, ALTURA - 1, false)
+    // A barra do andaime sai antes do contorno: no pé da tela, ela cobriria o alvo.
     await avaliar(`(() => { const a = window.__andaime && window.__andaime(); if (a) a.style.visibility = 'hidden' })()`)
+    const feito = []
+    const fora = []
+    for (const id of g.ids) {
+      const alvos = lista(conf.requisitos[id].destacar)
+      // O passo neutro de cada requisito (a marca data-print) roda antes do contorno dele.
+      // A marca que já está nos passos do grupo não roda de novo (o menu que ela marca pode ter fechado).
+      const feitos = new Set(g.passos.map(p => JSON.stringify(p)))
+      if (!unico) for (const p of passosDe(id).filter(p => neutro(p) && p.js && !feitos.has(JSON.stringify(p)))) await passo(p)
+      const erro = alvos.length ? await avaliar(`__marcar(${JSON.stringify(id)}, ${JSON.stringify(alvos)}, ${unico}, ${!unico})`) : ''
+      if (!erro) feito.push(id)
+      else if (unico) throw new Error(erro)
+      else { fora.push(id); console.log(`  ${id} sai do grupo de ${g.ids[0]}: ${erro}`) }
+    }
+    // O requisito que não coube no print do grupo volta à fila no próprio estado, junto dos que têm o mesmo.
+    const porEstado = new Map()
+    for (const id of fora) {
+      const k = vivos(id).join('\n')
+      if (!porEstado.has(k)) porEstado.set(k, [])
+      porEstado.get(k).push(id)
+    }
+    const novos = []
+    for (const [k, ids] of porEstado) {
+      if (k === g.passos.filter(p => !neutro(p)).map(p => JSON.stringify(p)).join('\n')) ids.forEach(id => novos.push({ passos: passosDe(id), ids: [id] }))
+      else novos.push({ passos: passosDe(ids[0]), ids })
+    }
+    fila.unshift(...novos)
+    if (!feito.length) continue
+    await avaliar('__desenhar()')
     await dormir(250)
     const { data } = await cdp('Page.captureScreenshot', { format: 'jpeg', quality: 85 })
-    writeFileSync(join(saida, `${id}.jpg`), Buffer.from(data, 'base64'))
-    console.log(`${id}: ok`)
+    writeFileSync(join(saida, nome(feito)), Buffer.from(data, 'base64'))
+    for (const id of feito) mapa[id] = nome(feito)
+    prints++
+    console.log(`${nome(feito)}: ok (${feito.join(', ')})`)
   }
   catch (e) {
-    console.log(`${id}: FALHOU ${e.message}`); falhas++
+    console.log(`${g.ids.join(', ')}: FALHOU ${e.message}`); falhas++
     // Para ver onde parou: PRINTS_DEPURAR=<pasta fora do repositório> grava a tela da falha.
     if (process.env.PRINTS_DEPURAR) {
       const { data } = await cdp('Page.captureScreenshot', { format: 'jpeg', quality: 60 })
-      writeFileSync(join(process.env.PRINTS_DEPURAR, `${id}.jpg`), Buffer.from(data, 'base64'))
+      writeFileSync(join(process.env.PRINTS_DEPURAR, nome(g.ids)), Buffer.from(data, 'base64'))
     }
   }
+}
+writeFileSync(arqMapa, JSON.stringify(Object.fromEntries(Object.entries(mapa).sort()), null, 2) + '\n')
+// Rodada completa: o print que nenhum grupo usa mais sai da pasta.
+if (!so.length && !falhas) {
+  const usados = new Set(Object.values(mapa))
+  for (const f of readdirSync(saida)) if (f.endsWith('.jpg') && !usados.has(f)) { rmSync(join(saida, f)); console.log(`${f}: apagado (sem uso)`) }
 }
 
 ws.close()
 proc.kill()
 await dormir(500)
 try { rmSync(perfil, { recursive: true, force: true }) } catch {}
-console.log(`${ids.length - falhas} de ${ids.length} prints gravados em ${saida}`)
+console.log(`${prints} prints para ${Object.keys(mapa).length} requisitos em ${saida}${falhas ? `, ${falhas} grupos falharam` : ''}`)
 process.exit(falhas ? 1 : 0)

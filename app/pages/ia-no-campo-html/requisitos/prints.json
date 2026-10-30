@@ -232,15 +232,7 @@
       }
     },
     "RF027": {
-      "cena": "proposta",
-      "passos": [
-        {
-          "js": "document.querySelectorAll('.ProseMirror')[0].focus()"
-        },
-        {
-          "digitar": "teste"
-        }
-      ],
+      "junto": "RF025",
       "destacar": {
         "css": ".ProseMirror",
         "n": 0
