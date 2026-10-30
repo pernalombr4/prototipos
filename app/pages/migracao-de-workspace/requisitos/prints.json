@@ -1,0 +1,544 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/migracao-de-workspace/",
+  "andaime": "Protótipo · cenário",
+  "cenas": {
+    "aberto": [
+      {
+        "clicar": "Importar Workspace"
+      },
+      {
+        "esperar": 700
+      }
+    ],
+    "lido": [
+      {
+        "clicar": "Importar Workspace"
+      },
+      {
+        "esperar": 700
+      },
+      {
+        "clicar": "Protótipo: usar arquivo de exemplo"
+      },
+      {
+        "esperar": 1500
+      }
+    ],
+    "substituir": [
+      {
+        "clicar": "Importar Workspace"
+      },
+      {
+        "esperar": 700
+      },
+      {
+        "clicar": "Protótipo: usar arquivo de exemplo"
+      },
+      {
+        "esperar": 1500
+      },
+      {
+        "clicar": "Substituição total"
+      },
+      {
+        "esperar": 600
+      }
+    ],
+    "revisarSomar": [
+      {
+        "clicar": "Importar Workspace"
+      },
+      {
+        "esperar": 700
+      },
+      {
+        "clicar": "Protótipo: usar arquivo de exemplo"
+      },
+      {
+        "esperar": 1500
+      },
+      {
+        "clicar": "Inclusão e atualização"
+      },
+      {
+        "clicar": "Continuar"
+      },
+      {
+        "esperar": 900
+      }
+    ],
+    "revisarSubstituir": [
+      {
+        "clicar": "Importar Workspace"
+      },
+      {
+        "esperar": 700
+      },
+      {
+        "clicar": "Protótipo: usar arquivo de exemplo"
+      },
+      {
+        "esperar": 1500
+      },
+      {
+        "clicar": "Substituição total"
+      },
+      {
+        "clicar": "Continuar"
+      },
+      {
+        "esperar": 900
+      }
+    ],
+    "revisarIncluir": [
+      {
+        "clicar": "Importar Workspace"
+      },
+      {
+        "esperar": 700
+      },
+      {
+        "clicar": "Protótipo: usar arquivo de exemplo"
+      },
+      {
+        "esperar": 1500
+      },
+      {
+        "clicar": "Continuar"
+      },
+      {
+        "esperar": 900
+      }
+    ],
+    "importando": [
+      {
+        "clicar": "Importar Workspace"
+      },
+      {
+        "esperar": 700
+      },
+      {
+        "clicar": "Protótipo: usar arquivo de exemplo"
+      },
+      {
+        "esperar": 1500
+      },
+      {
+        "clicar": "Continuar"
+      },
+      {
+        "esperar": 900
+      },
+      {
+        "js": "[...document.querySelector('[role=dialog]').querySelectorAll('button')].find(e => e.innerText.trim() === 'Importar').click()"
+      },
+      {
+        "esperar": 3600
+      }
+    ],
+    "concluido": [
+      {
+        "clicar": "Importar Workspace"
+      },
+      {
+        "esperar": 700
+      },
+      {
+        "clicar": "Protótipo: usar arquivo de exemplo"
+      },
+      {
+        "esperar": 1500
+      },
+      {
+        "clicar": "Continuar"
+      },
+      {
+        "esperar": 900
+      },
+      {
+        "js": "[...document.querySelector('[role=dialog]').querySelectorAll('button')].find(e => e.innerText.trim() === 'Importar').click()"
+      },
+      {
+        "esperar": 9000
+      }
+    ]
+  },
+  "requisitos": {
+    "RN004": {
+      "antes": [
+        {
+          "estado": "Workspace vazio"
+        }
+      ],
+      "cena": "lido",
+      "destacar": [
+        {
+          "css": "fieldset"
+        },
+        "Workspace vazio: todo o conteúdo do arquivo é incluído."
+      ]
+    },
+    "RF001": {
+      "cena": "aberto",
+      "destacar": [
+        "Importar estrutura",
+        "Arquivo e modo",
+        {
+          "texto": "Revisar",
+          "exato": true
+        }
+      ]
+    },
+    "RF031": {
+      "destacar": [
+        {
+          "texto": "Nada é duplicado",
+          "ancestral": "[role=alert], [data-slot=root]"
+        },
+        "Envie o arquivo da exportação. Antes de importar, você escolhe o que fazer com o que já existe e revisa as alterações."
+      ]
+    },
+    "RF002": {
+      "cena": "aberto",
+      "destacar": [
+        {
+          "texto": "Arraste o arquivo da estrutura até aqui",
+          "ancestral": "[data-slot=base], label, [role=button]"
+        }
+      ]
+    },
+    "RF003": {
+      "cena": "aberto",
+      "passos": [
+        {
+          "arquivo": "app/pages/migracao-de-workspace/evidencias/proposta-1-tela.jpg"
+        },
+        {
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Esse arquivo não é uma estrutura do ENSPACE",
+          "ancestral": "[data-slot=root]"
+        },
+        "Continuar"
+      ]
+    },
+    "RF004": {
+      "cena": "lido",
+      "destacar": [
+        {
+          "texto": "Estrutura de",
+          "ancestral": "div.rounded-lg"
+        }
+      ]
+    },
+    "RF005": {
+      "cena": "lido",
+      "destacar": "Trocar arquivo"
+    },
+    "RF010": {
+      "cena": "aberto",
+      "destacar": "Continuar"
+    },
+    "RF006": {
+      "cena": "lido",
+      "destacar": {
+        "css": "fieldset"
+      }
+    },
+    "RF007": {
+      "cena": "lido",
+      "destacar": "Recomendado"
+    },
+    "RF009": {
+      "cena": "substituir",
+      "destacar": {
+        "texto": "Remove tudo o que não está no arquivo, inclusive os itens cadastrados.",
+        "ancestral": "[data-slot=root]"
+      }
+    },
+    "RF008": {
+      "junto": "RN004",
+      "antes": [
+        {
+          "estado": "Workspace vazio"
+        }
+      ],
+      "cena": "lido",
+      "destacar": [
+        "Inclusão e atualização",
+        "Substituição total"
+      ]
+    },
+    "RN001": {
+      "sem": "Regra do back-end: o protótipo não mostra a chave de identidade."
+    },
+    "RN002": {
+      "junto": "RF011",
+      "cena": "revisarSomar",
+      "destacar": {
+        "regex": "^Alterad[ao]$"
+      }
+    },
+    "RN009": {
+      "junto": "RF014",
+      "cena": "revisarSubstituir",
+      "destacar": "Outros componentes"
+    },
+    "RF011": {
+      "cena": "revisarSomar",
+      "destacar": [
+        {
+          "texto": "Processos judiciais",
+          "n": 0
+        }
+      ]
+    },
+    "RF012": {
+      "cena": "revisarSomar",
+      "destacar": {
+        "css": "div.grid.grid-cols-2"
+      }
+    },
+    "RF013": {
+      "cena": "revisarSomar",
+      "destacar": "A lista mostra só as alterações."
+    },
+    "RF014": {
+      "cena": "revisarSubstituir",
+      "passos": [
+        {
+          "js": "(() => { const d = document.querySelector('[role=dialog]'); const b = [...d.querySelectorAll('h4')].find(e => e.innerText.trim() === 'CATEGORIAS'); b.dataset.print = 'categorias' })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=categorias]"
+        },
+        {
+          "regex": "^Campos \\(\\d+\\)$"
+        }
+      ]
+    },
+    "RF015": {
+      "cena": "revisarSomar",
+      "destacar": [
+        {
+          "texto": "Vara ou tribunal",
+          "ancestral": "span.flex"
+        }
+      ]
+    },
+    "RF016": {
+      "cena": "revisarSomar",
+      "destacar": {
+        "texto": "Lista de opções",
+        "n": 0
+      }
+    },
+    "RF017": {
+      "cena": "revisarSubstituir",
+      "destacar": [
+        {
+          "texto": "48 itens cadastrados"
+        }
+      ]
+    },
+    "RF021": {
+      "antes": [
+        {
+          "estado": "Workspace vazio"
+        }
+      ],
+      "cena": "revisarIncluir",
+      "destacar": [
+        "Workspace vazio",
+        "A importação adiciona:"
+      ]
+    },
+    "RF032": {
+      "sem": "O protótipo não tem o cenário de workspace sem categoria em comum com o arquivo."
+    },
+    "RF022": {
+      "antes": [
+        {
+          "estado": "Já igual ao arquivo"
+        }
+      ],
+      "cena": "revisarIncluir",
+      "passos": [
+        {
+          "js": "(() => { const d = document.querySelector('[role=dialog]'); const b = [...d.querySelectorAll('button')].find(e => e.innerText.trim() === 'Fechar'); b.dataset.print = 'fechar' })()"
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Nada a importar",
+          "ancestral": "[data-slot=root]"
+        },
+        {
+          "css": "[data-print=fechar]"
+        }
+      ]
+    },
+    "RI002": {
+      "sem": "Rota do back-end, sem tela."
+    },
+    "RNF001": {
+      "junto": "RF014",
+      "cena": "revisarSubstituir",
+      "destacar": {
+        "regex": "^Removid[ao]$"
+      }
+    },
+    "RF018": {
+      "cena": "revisarSubstituir",
+      "destacar": [
+        {
+          "texto": "Análise de mérito",
+          "n": 0
+        }
+      ]
+    },
+    "RF019": {
+      "cena": "revisarSubstituir",
+      "destacar": "12 itens nesta etapa"
+    },
+    "RF020": {
+      "cena": "revisarSubstituir",
+      "destacar": "Aponta para Carla Mendes, que não existe neste workspace."
+    },
+    "RN003": {
+      "sem": "Regra da migração no back-end, sem tela no protótipo."
+    },
+    "RN005": {
+      "junto": "RF024",
+      "cena": "revisarSubstituir",
+      "destacar": {
+        "css": "input[aria-label='Digite seu e-mail para confirmar']"
+      }
+    },
+    "RN006": {
+      "junto": "RF027",
+      "cena": "concluido",
+      "destacar": "Ver categorias"
+    },
+    "RN007": {
+      "junto": "RF026",
+      "cena": "importando",
+      "destacar": "Cancelar migração"
+    },
+    "RN008": {
+      "junto": "RF028",
+      "cena": "importando",
+      "passos": [
+        {
+          "clicar": "Cancelar migração"
+        },
+        {
+          "esperar": 1200
+        }
+      ],
+      "destacar": "Nada foi migrado."
+    },
+    "RF023": {
+      "cena": "revisarSubstituir",
+      "destacar": "Baixar uma cópia do workspace antes"
+    },
+    "RF024": {
+      "cena": "revisarSubstituir",
+      "passos": [
+        {
+          "focar": {
+            "css": "input[aria-label='Digite seu e-mail para confirmar']"
+          }
+        },
+        {
+          "digitar": "ana.souza@exemplo.com.br"
+        }
+      ],
+      "destacar": [
+        "Para confirmar, digite seu e-mail:",
+        "Substituir workspace"
+      ]
+    },
+    "RF033": {
+      "cena": "revisarSubstituir",
+      "passos": [
+        {
+          "js": "(() => { const d = document.querySelector('[role=dialog]'); const b = [...d.querySelectorAll('button')].find(e => e.innerText.trim() === 'Voltar'); b.dataset.print = 'voltar' })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=voltar]"
+      }
+    },
+    "RF025": {
+      "cena": "importando",
+      "destacar": [
+        "Importando a estrutura",
+        "Criando campos e listas"
+      ]
+    },
+    "RF026": {
+      "cena": "importando",
+      "destacar": "Cancelar migração"
+    },
+    "RF027": {
+      "cena": "concluido",
+      "destacar": [
+        "Migração concluída",
+        "A cópia de antes da importação está na sua pasta de downloads."
+      ]
+    },
+    "RF028": {
+      "cena": "importando",
+      "passos": [
+        {
+          "clicar": "Cancelar migração"
+        },
+        {
+          "esperar": 1200
+        }
+      ],
+      "destacar": "Migração cancelada"
+    },
+    "RF029": {
+      "antes": [
+        {
+          "estado": "Falha"
+        }
+      ],
+      "cena": "importando",
+      "passos": [
+        {
+          "esperar": 2500
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "A migração falhou",
+          "ancestral": "[data-slot=root]"
+        },
+        "Tentar de novo"
+      ]
+    },
+    "RF030": {
+      "sem": "O protótipo não tem o sino: o aviso sai na barra do topo do produto."
+    },
+    "RI001": {
+      "sem": "Rota do back-end, sem tela."
+    },
+    "RI003": {
+      "sem": "Rota do back-end, sem tela."
+    },
+    "RI004": {
+      "sem": "Rota do back-end, sem tela."
+    },
+    "RI005": {
+      "sem": "Rota do back-end, sem tela."
+    }
+  }
+}

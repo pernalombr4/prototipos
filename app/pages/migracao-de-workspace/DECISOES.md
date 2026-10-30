@@ -183,3 +183,15 @@ Migração concluída ──► Ver categorias (não há como desfazer)
 - **Pedido (literal):** "pode tirar essa coisa das fontes. e pode tirar a coluna de fontes das tabelas. isso como regra, tire isso das regras. e edite seu doc novamente"
 - **Mudou:** o `REQUISITOS.md` perde a lista de fontes do cabeçalho e a coluna Fonte de todas as tabelas; nada mais muda. A skill `requisitos` passa a ter essa regra.
 
+
+## Requisitos em épico · 2026-10-30
+- **Pedido (literal):** "agora ajuste este card nos padroes [...] e este também", com o card "Nova experiência na tela de casos de uso".
+- **Base:** a versão da descrição do card, editada pela redatora depois do `REQUISITOS.md`: sem Objetivo, Convenção, Fora do escopo e Resumo, e com só P5, P7 e P8 em "Em aberto".
+- **Mudou:**
+  - O `REQUISITOS.md` vira o épico em `requisitos/`: o `epico.md` e 4 partes (1. Arquivo e modo; 2. Revisão; 3. Fluxo da categoria na revisão; 4. Confirmar e acompanhar a migração). Os IDs não mudaram.
+  - Cada tabela ganha a coluna Relevância: Essencial e Importante viram Obrigatório; Desejável vira Desejável (RF005, RF022 e RF032), para a redatora confirmar.
+  - Cada RN mora na parte que a cita: RN004 na 1; RN001, RN002 (com a tabela de decisão) e RN009 na 2; RN003 e RN005 a RN008 na 4. O RI001 passa a citar a RN003.
+  - RS001 a RS003 e RNF002 saem: idiomas, temas, travessão e movimento reduzido estão no "Padrão de qualidade" do épico. A numeração fica com o buraco.
+  - As marcas "(aguarda P1)", "(aguarda P2)", "(proposta em S1)" e "(em revisão)" saem: P1, P2, S1 e P10 não estão mais no card. O fluxo da categoria fica isolado na parte 3.
+  - O "Depende de" do épico diz a dependência que o card guarda: a mudança na abrangência da migração, em andamento no time de desenvolvimento.
+- **Prints:** `requisitos/prints.json` e `evidencias/requisitos/`, 1 print por grupo de requisitos (regra 42), 33 prints para 39 requisitos. RN001, RN003, RF030, RF032 e RI001 a RI005 ficam sem print, com o motivo na tarefa.
