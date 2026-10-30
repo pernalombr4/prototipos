@@ -372,6 +372,8 @@ a redatora** se cria o card. Sem o sim dela, nada vai para o ENSPACE.
     parte; as regras de negócio comuns; o bloco "Padrão de qualidade"; e o que está em aberto
     entre as partes.
   - A descrição nunca é só o link para os documentos do GitHub.
+  - O texto do card e das tarefas segue também `C:\Users\JardimMikaela\agentes-base\regras\card-enspace.md`
+    (decisão da redatora em 2026-10-30): nada de rodada, nota para a redatora nem documento que o dev não tem.
 - **As tarefas do card são as partes:** 1 tarefa por parte, na aba Tarefas do card, com o nome
   "<n>. <nome>" ("1. Escolher e entrar").
   - **Cada tarefa traz todos os requisitos da parte e se basta:** nada de
