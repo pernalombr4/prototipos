@@ -273,7 +273,7 @@
       ]
     },
     "RN001": {
-      "sem": "Regra do back-end: o protótipo não mostra a chave de identidade."
+      "sem": "regra do back-end: o protótipo não mostra a chave de identidade"
     },
     "RN002": {
       "junto": "RF011",
@@ -359,7 +359,7 @@
       ]
     },
     "RF032": {
-      "sem": "O protótipo não tem o cenário de workspace sem categoria em comum com o arquivo."
+      "sem": "o protótipo não tem o cenário de workspace sem categoria em comum com o arquivo"
     },
     "RF022": {
       "antes": [
@@ -384,7 +384,7 @@
       ]
     },
     "RI002": {
-      "sem": "Rota do back-end, sem tela."
+      "sem": "rota do back-end, sem tela"
     },
     "RNF001": {
       "junto": "RF014",
@@ -411,7 +411,7 @@
       "destacar": "Aponta para Carla Mendes, que não existe neste workspace."
     },
     "RN003": {
-      "sem": "Regra da migração no back-end, sem tela no protótipo."
+      "sem": "regra da migração no back-end, sem tela no protótipo"
     },
     "RN005": {
       "junto": "RF024",
@@ -526,19 +526,19 @@
       ]
     },
     "RF030": {
-      "sem": "O protótipo não tem o sino: o aviso sai na barra do topo do produto."
+      "sem": "o protótipo não tem o sino: o aviso sai na barra do topo do produto"
     },
     "RI001": {
-      "sem": "Rota do back-end, sem tela."
+      "sem": "rota do back-end, sem tela"
     },
     "RI003": {
-      "sem": "Rota do back-end, sem tela."
+      "sem": "rota do back-end, sem tela"
     },
     "RI004": {
-      "sem": "Rota do back-end, sem tela."
+      "sem": "rota do back-end, sem tela"
     },
     "RI005": {
-      "sem": "Rota do back-end, sem tela."
+      "sem": "rota do back-end, sem tela"
     }
   }
 }
