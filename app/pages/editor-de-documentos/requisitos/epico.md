@@ -20,9 +20,10 @@ modelos e a configuração do campo, pelos botões "Editor de modelos" e "Config
 demanda); a barra e as ferramentas do próprio ONLYOFFICE; a geração de documentos em lote; a casca da tela (menu
 lateral, barra do topo, lista de itens fora da coluna do campo).
 
-**Relevância** (nas tarefas, entre parênteses no fim do requisito; sem parênteses, é Obrigatório): Obrigatório, o
-dev faz. Desejável, o dev faz; se achar melhor não fazer, conversa com produtos antes. Opcional, o dev pode não fazer
-quando o esforço é grande para o ganho.
+**Prioridade e relevância** (nas tarefas, entre parênteses no fim de cada requisito): a prioridade é Essencial,
+Importante ou Desejável. A relevância diz o que o dev pode deixar de fazer: Obrigatório, o dev faz. Desejável, o dev
+faz; se achar melhor não fazer, conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço é grande
+para o ganho.
 
 ## As partes
 

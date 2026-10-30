@@ -134,6 +134,23 @@ Rodada antes de entregar, e o que ficou de fora:
 
 ## Iterações
 
+### Rodada 38 · 2026-10-30
+- **Pedido (literal):** a redatora, "nao é um print por requisito. isso vai ser insano. é um print por grupo de
+  requisito. se, por exemplo, os 5 primeiros requisitos puderem aparecer no mesmo print, ótimo. basta colocar as
+  caixinhas no print com o texto com o ID do requisito pra dar pra compreender"; "confira se agora que no card a tabela
+  de requisitos é escrita como LISTA, ainda permanece a indicaçao de quais sao necessarios, opcionais, importantes etc";
+  e o sim para aplicar o mesmo a este card.
+- **Mudou (repositório):**
+  - 101 prints para 156 requisitos com tela, 1 por grupo de requisitos da mesma seção que aparecem na mesma tela;
+    cada requisito tem a sua caixa magenta com o ID acima. O `evidencias/requisitos/grupos.json` diz o print de cada ID.
+    Os prints de 1 por requisito que não servem mais saíram;
+  - a legenda do `requisitos/epico.md` troca "sem parênteses, é Obrigatório" pela escala inteira de prioridade e de
+    relevância.
+- **Mudou (ENSPACE):** nas 10 tarefas do card `USEDB9945FD15ED4FA29BECA30882A4E`, os requisitos do mesmo print ficam
+  juntos, com o print abaixo das caixas, e cada caixa termina com "(prioridade: X; relevância: Y)". A descrição do card
+  recebe a legenda nova.
+- **Não mudou:** nenhuma tela do protótipo e nenhum requisito.
+
 ### Rodada 37 · 2026-10-29
 - **Pedido (literal):** o 2º retorno do dev, "cada checkbox de requisito deve ter abaixo um print mostrando o requisito
   em tela. ja tem o prototipo e ele deve continuar sendo citado no começo de toda task, pra facil referencia. e tambem

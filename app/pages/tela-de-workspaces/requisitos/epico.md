@@ -15,9 +15,10 @@ https://github.com/pernalombr4/prototipos/tree/main/app/pages/tela-de-workspaces
 **Fora do escopo:** a barra do topo (ENSPACE, Suporte, avatar), que continua como está; etiquetas compartilhadas com
 outras pessoas; criar, importar e exportar caso de uso.
 
-**Relevância** (nas tarefas, entre parênteses no fim do requisito; sem parênteses, é Obrigatório): Obrigatório, o
-dev faz. Desejável, o dev faz; se achar melhor não fazer, conversa com produtos antes. Opcional, o dev pode não fazer
-quando o esforço é grande para o ganho.
+**Prioridade e relevância** (nas tarefas, entre parênteses no fim de cada requisito): a prioridade é Essencial,
+Importante ou Desejável. A relevância diz o que o dev pode deixar de fazer: Obrigatório, o dev faz. Desejável, o dev
+faz; se achar melhor não fazer, conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço é grande
+para o ganho.
 
 ## As partes
 

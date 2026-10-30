@@ -272,7 +272,8 @@ window.__desenhar = () => {
       pointerEvents: 'none', zIndex: 2147483646 })
     document.body.appendChild(d)
   }
-  // O rótulo fica fora da caixa, acima; se cruza outro rótulo ou sai da tela, tenta abaixo, à direita, à esquerda e dentro.
+  // O rótulo fica fora da caixa, acima e à direita (o nome do campo fica à esquerda e não some); se cruza outro rótulo,
+  // tenta acima à esquerda, abaixo, à direita, à esquerda e dentro.
   for (const c of __caixas) {
     const r = document.createElement('div'); r.textContent = c.ids.join(' · ')
     Object.assign(r.style, { position: 'fixed', left: '0px', top: '0px', background: '#FF04D1', color: '#fff',
@@ -280,7 +281,8 @@ window.__desenhar = () => {
       boxShadow: '0 1px 3px rgba(0,0,0,.35)', pointerEvents: 'none', zIndex: 2147483647 })
     document.body.appendChild(r)
     const w = r.offsetWidth, h = r.offsetHeight
-    const opcoes = [[c.x - m, c.y - m - h - 3], [c.x - m, c.y + c.h + m + 3], [c.x + c.w + m + 3, c.y - m],
+    const opcoes = [[c.x + c.w + m - w, c.y - m - h - 3], [c.x - m, c.y - m - h - 3], [c.x + c.w + m - w, c.y + c.h + m + 3],
+      [c.x - m, c.y + c.h + m + 3], [c.x + c.w + m + 3, c.y - m],
       [c.x - m - w - 3, c.y - m], [c.x - m + 4, c.y - m + 4]]
       .map(([x, y]) => ({ x: Math.min(Math.max(x, 2), innerWidth - w - 2), y: Math.min(Math.max(y, 2), innerHeight - h - 2), w, h }))
     const livre = opcoes.find(o => !ocupado.some(q => cruza(o, q))) || opcoes[0]
@@ -387,7 +389,9 @@ let falhas = 0
 let prints = 0
 while (fila.length) {
   const g = fila.shift()
-  const unico = g.ids.length === 1
+  // Sozinho no próprio estado: o contorno pode rolar a tela e não confere se está coberto. Sozinho no estado de outro
+  // requisito, confere como grupo e, se não couber, volta à fila no próprio estado.
+  const unico = g.ids.length === 1 && JSON.stringify(g.passos) === JSON.stringify(passosDe(g.ids[0]))
   try {
     await preparar()
     await avaliar(MARCAR)
