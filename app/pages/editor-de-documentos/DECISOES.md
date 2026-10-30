@@ -221,3 +221,17 @@ flowchart LR
 - **Prints (regra 42, revista):** 96 prints para 143 requisitos com tela, 1 por grupo de requisitos da mesma seção que aparecem na mesma tela; cada requisito tem a sua caixa magenta com o ID ao lado. O `grupos.json` diz o print de cada ID. O maior grupo junta 5 requisitos (o montador de condição: RF065, RF067, RF068, RF204 e RF238). Detector de seta: 0 de 96.
 - **Tarefas:** os requisitos de cada grupo ficam juntos na seção, com o print abaixo das caixas; cada caixa leva no fim a prioridade e a relevância ("(prioridade: Essencial; relevância: Obrigatório)").
 - **Fronteira:** mudam os prints e o texto das tarefas do card; não muda nenhuma tela nem os documentos de requisitos.
+
+## Rodada 14 · 2026-10-30
+
+- **Pedido:** à pergunta "na sua visao por que viraria 2 epicos?", a proposta de separar o campo do editor de modelos; a redatora: "concordo. faça essa divisao e me mande a url do card novo + titulo".
+- **Por que 2 épicos:** as partes 1 a 9 (o campo no item) e 10 a 15 (o editor de modelos) não dependem uma da outra, cada lado se lança sozinho, têm quem usa e tela diferentes, e as perguntas do motor de modelos (P8, S3, S4) travam só o editor de modelos.
+- **Requisitos:** `requisitos/` ganha 1 subpasta por épico, como a regra 40 da spec manda:
+  - `documento-no-item/`: o épico "Melhorias de UX/UI no campo editor de documentos", partes 1 a 9, sem mudança no texto delas;
+  - `editor-de-modelos/`: o épico novo "Editor de modelos de documento", com as partes 10 a 15 renumeradas de 1 a 6; os IDs dos requisitos ficam como estavam. O RF054 diz que o botão "Editar modelos" fica em telas do outro épico.
+  - O glossário do editor de modelos e as perguntas P8, P13, S3 e S4 foram para o épico novo; P9, P14, P15 e as RN002 a RN007 ficaram no do campo.
+- **Prints:** os mesmos 96. O `ferramentas/prints-de-requisito.mjs` lê as subpastas de `requisitos/`, na mesma ordem de antes.
+- **ENSPACE:**
+  - card novo `USEE50BA8E510714DE6881049685BFA4` (589478), "Editor de modelos de documento", com as 6 tarefas e os campos do card do campo (Melhoria, prioridade Média, develop, aprovação do PO), sem responsável;
+  - o card `USEA7622A3058FE4E1FB62A5F693E8F0` ficou com a descrição das partes 1 a 9. As tarefas 10 a 15 dele viraram "Movida: ...", com o link do card novo, à espera de a redatora excluir.
+- **Fronteira:** muda a organização dos requisitos e dos cards; não muda nenhuma tela nem nenhum requisito.

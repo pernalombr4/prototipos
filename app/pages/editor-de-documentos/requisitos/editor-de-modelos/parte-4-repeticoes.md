@@ -1,9 +1,9 @@
-# 13. Repetições
+# 4. Repetições
 
 **Objetivo:** quem monta o modelo repete um trecho para cada linha de uma lista do item, escolhendo pela lateral a
 lista, o formato (tabela, lista ou texto) e as informações de cada linha.
 
-**Depende de:** 10. Editor de modelos e campos.
+**Depende de:** 1. Editor de modelos e campos.
 
 **Onde vale:** a aba "Repetições" da lateral do editor de modelos, o montador de repetição e o bloco de repetição no
 documento.

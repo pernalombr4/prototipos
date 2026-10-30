@@ -1,9 +1,9 @@
-# 14. Filtro, ordem, numeração e total
+# 5. Filtro, ordem, numeração e total
 
 **Objetivo:** quem monta a repetição escolhe quais linhas saem e em que ordem, numera as linhas, soma uma informação de
 moeda e escreve o texto que aparece quando nenhuma linha sai.
 
-**Depende de:** 11. Condições; 13. Repetições.
+**Depende de:** 2. Condições; 4. Repetições.
 
 **Onde vale:** o montador de repetição da aba "Repetições" do editor de modelos e o bloco de repetição no documento.
 

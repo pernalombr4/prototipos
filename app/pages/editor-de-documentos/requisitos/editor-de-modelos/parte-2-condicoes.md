@@ -1,9 +1,9 @@
-# 11. Condições
+# 2. Condições
 
 **Objetivo:** quem monta o modelo escolhe, pela lateral, quando um trecho do documento aparece, com linhas de Campo,
 Condição e Valor que se leem como frase, e vê o resultado para o item da prévia.
 
-**Depende de:** 10. Editor de modelos e campos.
+**Depende de:** 1. Editor de modelos e campos.
 
 **Onde vale:** a aba "Condições" da lateral do editor de modelos, o montador de condição e o bloco de condição no
 documento.

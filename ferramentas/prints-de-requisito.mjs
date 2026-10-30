@@ -299,11 +299,16 @@ const passosDe = id => {
   return [...(r.antes ?? []), ...(r.cena ? conf.cenas[r.cena] : []), ...(r.passos ?? [])]
 }
 
-/** A ordem dos requisitos nas tarefas: as seções "## " dos .md de requisitos/, parte por parte. */
+/**
+ * A ordem dos requisitos nas tarefas: as seções "## " dos .md de requisitos/, parte por parte. Com mais de 1 épico,
+ * cada um mora numa subpasta de requisitos/ (as subpastas pela ordem do nome).
+ */
 function secoes() {
   const dir = join(pasta, 'requisitos')
   const num = f => Number(f.match(/\d+/)?.[0] ?? 0)
-  let arqs = existsSync(dir) ? readdirSync(dir).filter(f => f.endsWith('.md') && f !== 'epico.md').sort((a, b) => num(a) - num(b)).map(f => join(dir, f)) : []
+  const partesDe = d => readdirSync(d).filter(f => f.endsWith('.md') && f !== 'epico.md').sort((a, b) => num(a) - num(b)).map(f => join(d, f))
+  const subpastas = d => readdirSync(d, { withFileTypes: true }).filter(e => e.isDirectory()).map(e => join(d, e.name)).sort()
+  let arqs = existsSync(dir) ? [...partesDe(dir), ...subpastas(dir).flatMap(partesDe)] : []
   if (!arqs.length && existsSync(join(pasta, 'REQUISITOS.md'))) arqs = [join(pasta, 'REQUISITOS.md')]
   const saida = []
   for (const arq of arqs) {

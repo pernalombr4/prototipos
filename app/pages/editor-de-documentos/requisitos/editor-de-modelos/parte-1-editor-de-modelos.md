@@ -1,4 +1,4 @@
-# 10. Editor de modelos e campos
+# 1. Editor de modelos e campos
 
 **Objetivo:** quem configura a categoria abre o modelo em tela inteira, com uma lateral de campos, condições e
 repetições, e insere um campo do item no ponto do cursor com 1 clique, sem copiar e colar marcação.
@@ -18,7 +18,7 @@ de modelos" da barra inferior.
 | RF051 | O cabeçalho deve ter um seletor para trocar de modelo sem fechar o editor. | Trocar de "Contrato de prestação de serviços" para "Contrato de fornecimento" carrega o outro modelo. | Desejável | Desejável |
 | RF053 | O editor deve ter uma lateral com as abas "Campos", "Condições" e "Repetições". | A lateral fica visível ao lado do documento, sem cobrir a página. | Essencial | Obrigatório |
 | RF231 | As abas "Condições" e "Repetições" devem mostrar o número de blocos de cada tipo no modelo. | Com 1 bloco de condição, a aba mostra "Condições 1". | Desejável | Desejável |
-| RF054 | O editor deve abrir também pelo botão "Editar modelos" da lista "Usar modelo" do campo e da configuração do campo (quem vê o botão: P6). | Os 2 botões abrem o mesmo editor. | Desejável | Desejável |
+| RF054 | O editor deve abrir também pelo botão "Editar modelos" da lista "Usar modelo" do campo e da configuração do campo, telas que o épico "Melhorias de UX/UI no campo editor de documentos" entrega (quem vê o botão: P6). | Os 2 botões abrem o mesmo editor. | Desejável | Desejável |
 | RF055 | Quando a pessoa clica em Concluir ou em Voltar, o sistema deve salvar o modelo e mostrar "Modelo salvo". | Reabrir o modelo mostra a última edição. | Essencial | Obrigatório |
 | RF239 | No editor de modelos, Esc deve fechar só o montador aberto ou "Ver a marcação"; o editor fecha por Concluir ou Voltar. | Esc com o montador aberto volta à lista e mantém o editor aberto. | Importante | Obrigatório |
 

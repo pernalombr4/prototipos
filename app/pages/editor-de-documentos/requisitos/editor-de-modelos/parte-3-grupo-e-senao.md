@@ -1,9 +1,9 @@
-# 12. Grupo, "Senão, se" e "Nos demais casos"
+# 3. Grupo, "Senão, se" e "Nos demais casos"
 
 **Objetivo:** quem monta a condição mistura E e OU num grupo de linhas e escreve textos alternativos para cada caso,
 com "Senão, se" e "Nos demais casos", no mesmo bloco.
 
-**Depende de:** 11. Condições.
+**Depende de:** 2. Condições.
 
 **Onde vale:** o montador de condição da aba "Condições" do editor de modelos e o bloco de condição no documento.
 

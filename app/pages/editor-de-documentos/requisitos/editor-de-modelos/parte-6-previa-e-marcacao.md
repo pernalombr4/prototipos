@@ -1,9 +1,9 @@
-# 15. Prévia e marcação
+# 6. Prévia e marcação
 
 **Objetivo:** quem monta o modelo vê o documento preenchido com os dados de um item, confere a marcação que o ENSPACE
 grava e pode digitar a marcação à mão, com aviso quando ela não é reconhecida.
 
-**Depende de:** 10. Editor de modelos e campos.
+**Depende de:** 1. Editor de modelos e campos.
 
 **Onde vale:** o cabeçalho do editor de modelos ("Editar", "Prévia", "Prévia com os dados de"), o painel "Ver a
 marcação" e o rodapé do editor de modelos.
