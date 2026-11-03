@@ -195,3 +195,24 @@
   - funil da coluna, hoje: `evidencias/develop-06-funil-da-coluna.jpg`;
   - gaveta "Filtros por campo", hoje: `evidencias/develop-07-gaveta-de-filtros.jpg`;
   - 2º modal "Adicionar Filtro" do construtor, hoje: `evidencias/develop-08-filtro-da-visualizacao.jpg`.
+
+## Requisitos em 3 épicos · 2026-11-03
+- **Pedido (literal):** "veja como eles se dividem em stories de acordo com as novas regras de escrita de requisitos e edite os docs de requisito com base nisso [...] divida em quantos epicos forem necessarios. mas sem exagerar só pra querer fragmentar."
+- **Mudou:** `REQUISITOS.md` e `REQUISITOS-FILTROS.md` saíram (ficam no git). No lugar, 3 épicos em `requisitos/`, cada um com o `epico.md` e 1 documento por parte, no molde da skill `requisitos` (Relevância em cada tabela, padrão de qualidade no épico, parte que se basta):
+  - `requisitos/filtros/`, "Filtros da tela de itens", em 4 partes: linha de filtros e chip, menu da coluna, filtro avançado, filtros no construtor. O "Como é hoje" (H1 a H9) e o que muda na lógica e na tela ficaram no `epico.md`, agora por parte;
+  - `requisitos/barra-de-visualizacoes/`, "Barra de visualizações", em 5 partes: pílulas e lista do "+N", menu e renomear, reordenar e fixar, ordem para todos, minimizar e ocultar;
+  - `requisitos/criar-configurar-e-salvar/`, "Criar, configurar e salvar visualização", em 3 partes: alterações não salvas e salvar, painel Configurar, criar pelo catálogo.
+- **Por que 3 e não 4 ou 5:** cada épico vai ao cliente sem o outro. O filtro avançado ficou como parte do épico de filtros: ele mora na linha de filtros (chip "N regras", "+ Filtro") e usa a mesma condição por tipo de campo (RN008), então não se lança sozinho. "Alterações não salvas e salvar" ficou como parte 1 do épico de criar e configurar: sozinha teria 1 documento só, sem épico.
+- **Corte das partes:** o que depende de mudança no back ficou fora da base: a árvore do filtro avançado (RI008, parte 3 dos filtros) e a ordem de cada pessoa (RI003, parte 3 da barra). A parte 1 dos filtros passa de 1,5 vez a mediana (18 linhas contra 10,5) e ficou inteira: linha, "+ Filtro" e chip só funcionam juntos.
+- **Saíram do texto** (o dev não começou; a numeração fica com o buraco):
+  - RF002 (cor da pílula ativa) e RNF001 (contraste): viraram a linha "Exceção deste épico" do padrão de qualidade da barra;
+  - RNF002 e RNF003 (3 idiomas sem texto cortado): padrão de qualidade;
+  - RF028 e RF127 (aviso com Desfazer ao renomear e ao ocultar): viraram a RN010, 1 regra para cada mudança da barra;
+  - RF074 (as tarefas seguem os documentos): virou o "Onde vale" de cada épico, com a tabela de parâmetros na RN009 (filtros) e na RN013 (criar e configurar);
+  - RF075 (filtros automáticos das tarefas): entrou no critério do RF056; RF076 (nome técnico nas tarefas): entrou no RF055;
+  - RF110 (filtro vira alteração não salva): é o RF029;
+  - RF042: já estava removido.
+- **Divididos:** RN001 (excluir, renomear e ocultar, na barra) e RN012 (alterar para todos, em criar e configurar); RN004 (perfis da barra) e RN011 (perfis de criar e salvar); RI005 (É e Não é com lista, parte 1 dos filtros) e RI008 (árvore, parte 3); RF034 e RF094 em RF136 e RF137 (o filtro avançado na linha); RF069 em RF156 (ponto) e no RF010 (versão só sua); RF071 em RF148 (alça); RF120 em RF149 (arrastar para a barra); RF056 em RF140 a RF143; S001 em S005 (criar só para si).
+- **Novos, tirados do protótipo:** Duplicar (RF144 a RF146), Copiar link (RF147), "Salvar como nova visualização" (RF157 a RF160), "Abrir primeiro para todos" (RF151, RF152), "Voltar à versão de todos" (RF161), o menu da pílula em criação (RF162), a visualização do sistema sem "Fixar no início" (RF150), o cálculo com a pílula minimizada (RF154) e "Mostrar na barra" (RF155); RN008 (condições por tipo de campo, que era o texto do RF057).
+- **Perguntas novas:** P014 e P017 (a ordem de lançamento entre os épicos), P015 (ocultar a última coluna), P018 (nome repetido em "Salvar como nova visualização").
+- **Ver:** `requisitos/filtros/epico.md` · `requisitos/barra-de-visualizacoes/epico.md` · `requisitos/criar-configurar-e-salvar/epico.md`
