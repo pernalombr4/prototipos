@@ -225,3 +225,10 @@
   - o painel em modo de criação tinha o nome acessível "Configurar visualização"; agora é "Nova visualização", o título que ele mostra.
 - **Fronteira:** muda o `_LinhaDeFiltros.vue` (foco ao escolher o campo) e o `_PainelDeConfiguracao.vue` (nome acessível). Nenhuma tela muda de forma.
 - **Links do épico de filtros:** a coluna de evidência do "Como é hoje" aponta para o endereço do GitHub, que abre no card.
+
+## Cards no ENSPACE · 2026-11-03
+- **Criados** no `desenvolvimento-enlighten2`, categoria `user_story`, 1 por épico, com o `epico.md` na descrição e 1 tarefa por parte, cada requisito numa caixa de marcar e o print do grupo abaixo:
+  - "Filtros da tela de itens", 4 tarefas: https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE6E95ABE05B3048F88350116D550F5
+  - "Barra de visualizações", 5 tarefas: https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE549F27D01CC540E6B02FFA72DAC02
+  - "Criar, configurar e salvar visualização", 3 tarefas: https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USEFE27DD99101D4E47B955D3086AE21
+- **Prints:** 97 prints para 142 requisitos; os outros levam o motivo de não ter print. Nenhum print tem ponteiro do mouse.
