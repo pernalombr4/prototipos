@@ -9,20 +9,15 @@ primeiro.
 e, com a mesma lógica, a de Tarefas Rápidas (`/tasks/quick`) e a de Tarefas Agendadas (`/tasks/scheduled`). Muda de uma
 tela para outra só a visualização do sistema (RN001).
 
-**Protótipo:** https://pernalombr4.github.io/prototipos/visualizacoes-da-tela-de-itens, estilo "Proposta", em revisão
-desde 23/10/2026. Os textos nos 3 idiomas estão no `textos.ts` de
-https://github.com/pernalombr4/prototipos/tree/main/app/pages/visualizacoes-da-tela-de-itens. A barra inferior do
-protótipo (Estilo, Visualizações, Perfil, Tela, tema e idioma) é ferramenta de revisão e não entra no produto: "Tela"
-troca a largura, "Visualizações" troca a quantidade (1, 4 ou 18) e "Perfil" troca Owner ou Full por Standard ou Viewer.
+**Protótipo:** https://pernalombr4.github.io/prototipos/visualizacoes-da-tela-de-itens. Os textos nos 3 idiomas estão no `textos.ts` de
+https://github.com/pernalombr4/prototipos/tree/main/app/pages/visualizacoes-da-tela-de-itens. A barra inferior do protótipo é só para revisão; nela, "Perfil" troca Owner ou Full por Standard ou Viewer.
 
 **Fora do escopo:** criar visualização, o construtor de visualização e salvar alterações, que são do épico "Criar,
 configurar e salvar visualização"; os filtros da lista, que são do épico "Filtros da tela de itens"; a barra de folders
 do item; a casca da tela.
 
-**Prioridade e relevância** (nas tarefas, entre parênteses no fim de cada requisito): a prioridade é Essencial,
-Importante ou Desejável. A relevância diz o que o dev pode deixar de fazer: Obrigatório, o dev faz. Desejável, o dev
-faz; se achar melhor não fazer, conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço é grande
-para o ganho.
+**Relevância** (no fim de cada requisito): Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer,
+conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
 
 ## As partes
 
@@ -85,4 +80,3 @@ Perfis (RN004).
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
 | P007 | O menu chama a tela de "Agendadas", e o título dela diz "Tarefas Programadas". Qual nome fica? | Mikaela | Muda o nome da visualização do sistema na RN001 |
-| P004 | Quantas visualizações uma categoria tem nos clientes? O protótipo testa 1, 4 e 18. | Dado de uso | Com dezenas, a busca da lista do "+N" vira o caminho principal, e a reordenação na lista pesa mais que na barra |

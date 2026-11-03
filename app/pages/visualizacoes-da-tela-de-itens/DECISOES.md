@@ -249,3 +249,13 @@
 ## Aprovado · 2026-11-03
 - **Pedido (literal):** "marque como aprovado este prototipo"
 - **Mudou:** o status passa de "em revisão" para "aprovado", no card do índice (`definePageMeta`) e no `README.md`. A versão aprovada é a dos requisitos em 3 épicos, com os cards no ENSPACE.
+
+## Descrição dos cards enxuta · 2026-11-03
+- **Pedido (literal):** "publique e mude os cards pq foi aprovado. mas nem precisa citar essa informaçao lá. inutil nos cards. corte o maximo de info inutil."
+- **Saiu dos 3 épicos e da descrição dos 3 cards:**
+  - o status e o estilo do protótipo ("estilo "Proposta", em revisão desde 23/10/2026"); o protótipo abre na proposta;
+  - a lista dos controles da barra inferior do protótipo: fica 1 frase, que diz que ela é só para revisão e que "Perfil" troca o perfil (nos épicos com regra por perfil);
+  - a explicação da prioridade: fica só a legenda da relevância;
+  - no épico de filtros, "Como é hoje" (H1 a H9), "O que muda na lógica" e "O que muda na tela": eram a investigação, e cada mudança já está nas partes e no `BRIEFING.md`;
+  - no épico da barra, o P004 (quantas visualizações os clientes têm): não muda o que o dev constrói.
+- **Ficou:** o que é, onde vale, o link do protótipo e dos textos, fora do escopo, as partes, as RN, o padrão de qualidade, o glossário e o que está em aberto. As tarefas não mudaram.

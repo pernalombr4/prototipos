@@ -9,20 +9,15 @@ visualização nova nasce de um catálogo de tipos (Tabela ou Kanban) e já abre
 telas Tarefas Rápidas (`/tasks/quick`) e Tarefas Agendadas (`/tasks/scheduled`), com os campos e o "Agrupar por" da
 RN013.
 
-**Protótipo:** https://pernalombr4.github.io/prototipos/visualizacoes-da-tela-de-itens, estilo "Proposta", em revisão
-desde 23/10/2026. Os textos nos 3 idiomas estão no `textos.ts` de
-https://github.com/pernalombr4/prototipos/tree/main/app/pages/visualizacoes-da-tela-de-itens. A barra inferior do
-protótipo (Estilo, Visualizações, Perfil, Tela, tema e idioma) é ferramenta de revisão e não entra no produto: "Perfil"
-troca Owner ou Full por Standard ou Viewer.
+**Protótipo:** https://pernalombr4.github.io/prototipos/visualizacoes-da-tela-de-itens. Os textos nos 3 idiomas estão no `textos.ts` de
+https://github.com/pernalombr4/prototipos/tree/main/app/pages/visualizacoes-da-tela-de-itens. A barra inferior do protótipo é só para revisão; nela, "Perfil" troca Owner ou Full por Standard ou Viewer.
 
 **Fora do escopo:** a barra de visualizações (pílula, menu, arrastar, ocultar), que é do épico "Barra de
 visualizações"; a linha de filtros e a seção Filtros do painel, que são do épico "Filtros da tela de itens"; o cartão do
 quadro do `EnKanbanBoard`.
 
-**Prioridade e relevância** (nas tarefas, entre parênteses no fim de cada requisito): a prioridade é Essencial,
-Importante ou Desejável. A relevância diz o que o dev pode deixar de fazer: Obrigatório, o dev faz. Desejável, o dev
-faz; se achar melhor não fazer, conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço é grande
-para o ganho.
+**Relevância** (no fim de cada requisito): Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer,
+conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
 
 ## As partes
 
