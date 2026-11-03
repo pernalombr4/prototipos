@@ -245,3 +245,7 @@
   - Criar, "3. Criar pelo catálogo" (16): catálogo, visualização nova e modo de criação são 1 fluxo.
   - Filtros, "1. Linha de filtros e chip por campo" (18): linha, "+ Filtro" e chip só funcionam juntos, como já registrado.
 - **No ENSPACE:** a tarefa 6 do card "Barra de visualizações" e a tarefa 4 do card "Criar, configurar e salvar visualização" foram criadas; as tarefas 2 a 5 da barra e a 1 de criar foram reescritas, e a descrição dos 2 cards ganhou a parte nova na tabela das partes.
+
+## Aprovado · 2026-11-03
+- **Pedido (literal):** "marque como aprovado este prototipo"
+- **Mudou:** o status passa de "em revisão" para "aprovado", no card do índice (`definePageMeta`) e no `README.md`. A versão aprovada é a dos requisitos em 3 épicos, com os cards no ENSPACE.

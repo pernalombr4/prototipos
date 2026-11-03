@@ -32,8 +32,8 @@ import decisoesMd from './DECISOES.md?raw'
 definePageMeta({
   titulo: 'Visualizações da tela de itens',
   descricao: 'Barra de visualizações com arrastar, "+N" e nome cortado com tooltip; criar escolhendo Tabela ou Kanban, filtrar por chip ou com o filtro avançado (E, Ou e grupos); salvar para todos ou só para mim.',
-  status: 'em-revisao',
-  atualizado: '2026-10-23',
+  status: 'aprovado',
+  atualizado: '2026-11-03',
   tela: 'Tela nova de itens (lista da categoria)',
 })
 
