@@ -62,4 +62,4 @@ fixa no começo as que usa mais. A ordem e as fixadas valem só para ela (RN002)
 
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
-| P001 | Sem "Mover para a esquerda" e "Mover para a direita" (retirados na rodada 2), o arrasto fica sem alternativa de 1 clique, que a WCAG 2.2 pede (critério 2.5.7). Ctrl + Shift + seta é teclado, não clique. Qual alternativa entra? | Mikaela | Entra um controle de 1 clique, ou a lacuna fica registrada |
+| P001 | Sem "Mover para a esquerda" e "Mover para a direita" (retirados do protótipo), o arrasto fica sem alternativa de 1 clique, que a WCAG 2.2 pede (critério 2.5.7). Ctrl + Shift + seta é teclado, não clique. Qual alternativa entra? | Mikaela | Entra um controle de 1 clique, ou a lacuna fica registrada |

@@ -10,7 +10,7 @@ telas Tarefas Rápidas (`/tasks/quick`) e Tarefas Agendadas (`/tasks/scheduled`)
 da RN009.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/visualizacoes-da-tela-de-itens, estilo "Proposta", em revisão
-desde 23/10/2026 (rodada 7). Os textos nos 3 idiomas estão no `textos.ts` de
+desde 23/10/2026. Os textos nos 3 idiomas estão no `textos.ts` de
 https://github.com/pernalombr4/prototipos/tree/main/app/pages/visualizacoes-da-tela-de-itens. A barra inferior do
 protótipo (Estilo, Visualizações, Perfil, Tela, tema e idioma) é ferramenta de revisão e não entra no produto.
 
