@@ -42,6 +42,7 @@ function excluirSimples(i: number) {
 
 /** "Filtrar" no menu da coluna e o campo escolhido no "+ Filtro": abre o chip do campo, ou cria. */
 async function filtrarPor(path: string) {
+  indoParaChip = maisAberto.value
   maisAberto.value = false
   const i = simples.value.findIndex(f => f.field === path)
   if (i < 0) mudar({ field_filters: [...simples.value, regraNova(path)] })
@@ -54,6 +55,7 @@ async function filtrarPor(path: string) {
 const avancadoAberto = ref(false)
 
 async function abrirAvancado() {
+  indoParaChip = maisAberto.value
   maisAberto.value = false
   if (!avancado.value) {
     const usados = simples.value.map(f => f.field)
@@ -79,6 +81,13 @@ watch(avancadoAberto, (aberto) => {
 /* ---------- "+ Filtro" ---------- */
 
 const maisAberto = ref(false)
+/* Escolher um campo abre o chip dele: o foco não volta para o "+ Filtro", senão o chip recém-aberto fecharia. */
+let indoParaChip = false
+function aoDevolverFocoMais(e: Event) {
+  if (!indoParaChip) return
+  indoParaChip = false
+  e.preventDefault()
+}
 const busca = ref('')
 const camposVisiveis = computed(() => {
   const q = busca.value.trim().toLowerCase()
@@ -147,7 +156,7 @@ defineExpose({ filtrarPor, abrirMais: async () => { await nextTick(); maisAberto
       </template>
     </UPopover>
 
-    <UPopover v-model:open="maisAberto" :content="{ align: 'start', sideOffset: 6 }">
+    <UPopover v-model:open="maisAberto" :content="{ align: 'start', sideOffset: 6, onCloseAutoFocus: aoDevolverFocoMais }">
       <UButton :label="t.linha.filtro" icon="i-lucide-plus" color="neutral" variant="ghost" size="xs" />
       <template #content>
         <div class="w-60 p-1">

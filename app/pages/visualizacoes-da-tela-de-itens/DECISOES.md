@@ -216,3 +216,12 @@
 - **Novos, tirados do protótipo:** Duplicar (RF144 a RF146), Copiar link (RF147), "Salvar como nova visualização" (RF157 a RF160), "Abrir primeiro para todos" (RF151, RF152), "Voltar à versão de todos" (RF161), o menu da pílula em criação (RF162), a visualização do sistema sem "Fixar no início" (RF150), o cálculo com a pílula minimizada (RF154) e "Mostrar na barra" (RF155); RN008 (condições por tipo de campo, que era o texto do RF057).
 - **Perguntas novas:** P014 e P017 (a ordem de lançamento entre os épicos), P015 (ocultar a última coluna), P018 (nome repetido em "Salvar como nova visualização").
 - **Ver:** `requisitos/filtros/epico.md` · `requisitos/barra-de-visualizacoes/epico.md` · `requisitos/criar-configurar-e-salvar/epico.md`
+
+## Prints dos requisitos e 2 correções · 2026-11-03
+- **Pedido (literal):** "agora abra 3 cards diferentes no enspace, na categoria user_story, cada um representando um epico [...] com as evidencias visuais dos requisitos etc."
+- **Mudou:** `requisitos/prints.json` (novo) diz o caminho de cada print; os prints, 1 por grupo de requisitos, ficam em `evidencias/requisitos/`. Os requisitos sem tela levam o motivo: interface do back-end, arrastar (não aparece num print parado), anúncio para leitor de tela, endereço da página e o funil e o alfinete do título da coluna, que o `EnTable` do SDK não desenha.
+- **Corrigido no protótipo** (achados ao tirar os prints):
+  - escolher um campo no "+ Filtro" criava o chip e não o deixava aberto: o foco voltava para o "+ Filtro" e fechava o chip. Agora o chip abre, como pede o RF095;
+  - o painel em modo de criação tinha o nome acessível "Configurar visualização"; agora é "Nova visualização", o título que ele mostra.
+- **Fronteira:** muda o `_LinhaDeFiltros.vue` (foco ao escolher o campo) e o `_PainelDeConfiguracao.vue` (nome acessível). Nenhuma tela muda de forma.
+- **Links do épico de filtros:** a coluna de evidência do "Como é hoje" aponta para o endereço do GitHub, que abre no card.

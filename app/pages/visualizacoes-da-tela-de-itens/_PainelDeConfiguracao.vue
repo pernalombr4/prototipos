@@ -239,7 +239,7 @@ const funcoes = computed({
 
 
 <template>
-  <aside class="flex h-full w-96 shrink-0 flex-col border-l border-default bg-default" :aria-label="t.painel.titulo">
+  <aside class="flex h-full w-96 shrink-0 flex-col border-l border-default bg-default" :aria-label="emCriacao ? t.painel.tituloCriar : t.painel.titulo">
     <header class="flex items-start gap-2 border-b border-default px-4 py-3">
       <div class="min-w-0 flex-1">
         <p class="text-sm font-semibold text-highlighted">{{ emCriacao ? t.painel.tituloCriar : t.painel.titulo }}</p>

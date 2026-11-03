@@ -1,0 +1,2299 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/visualizacoes-da-tela-de-itens/",
+  "andaime": "Por trás",
+  "cenas": {
+    "barra": [
+      {
+        "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+        "esperar": 100
+      },
+      {
+        "esperar": 1200
+      }
+    ],
+    "emAnalise": [
+      {
+        "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+        "esperar": 100
+      },
+      {
+        "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'em-analise'}})"
+      },
+      {
+        "esperar": 900
+      }
+    ],
+    "revisao": [
+      {
+        "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+        "esperar": 100
+      },
+      {
+        "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'revisao-trimestral'}})"
+      },
+      {
+        "esperar": 900
+      }
+    ],
+    "lista": [
+      {
+        "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+        "esperar": 100
+      },
+      {
+        "clicar": {
+          "regex": "^mais \\d+ visualizações$"
+        },
+        "esperar": 800
+      }
+    ],
+    "listaVencidos": [
+      {
+        "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+        "esperar": 100
+      },
+      {
+        "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'vencidos'}})"
+      },
+      {
+        "esperar": 900
+      },
+      {
+        "clicar": {
+          "regex": "^mais \\d+ visualizações$"
+        },
+        "esperar": 800
+      }
+    ],
+    "menuEmAnalise": [
+      {
+        "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+        "esperar": 100
+      },
+      {
+        "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'em-analise'}})"
+      },
+      {
+        "esperar": 900
+      },
+      {
+        "clicar": "Opções de Em análise",
+        "esperar": 700
+      }
+    ],
+    "menuItens": [
+      {
+        "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+        "esperar": 100
+      },
+      {
+        "esperar": 900
+      },
+      {
+        "clicar": "Opções de Itens",
+        "esperar": 700
+      }
+    ],
+    "alterada": [
+      {
+        "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+        "esperar": 100
+      },
+      {
+        "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'em-analise'}})"
+      },
+      {
+        "esperar": 900
+      },
+      {
+        "clicar": "Status: Em análise",
+        "esperar": 600
+      },
+      {
+        "clicar": "Aprovado",
+        "esperar": 500
+      },
+      {
+        "tecla": "Escape",
+        "esperar": 700
+      }
+    ],
+    "painel": [
+      {
+        "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+        "esperar": 100
+      },
+      {
+        "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'em-analise'}})"
+      },
+      {
+        "esperar": 900
+      },
+      {
+        "clicar": "Opções de Em análise",
+        "esperar": 700
+      },
+      {
+        "clicar": "Configurar",
+        "esperar": 1200
+      }
+    ],
+    "painelRevisao": [
+      {
+        "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+        "esperar": 100
+      },
+      {
+        "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'revisao-trimestral'}})"
+      },
+      {
+        "esperar": 900
+      },
+      {
+        "clicar": "Opções de Revisão trimestral dos contratos de fornecedores estratégicos",
+        "esperar": 700
+      },
+      {
+        "clicar": "Configurar",
+        "esperar": 1200
+      }
+    ],
+    "catalogo": [
+      {
+        "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+        "esperar": 100
+      },
+      {
+        "esperar": 900
+      },
+      {
+        "clicar": "Visualização",
+        "esperar": 800
+      }
+    ],
+    "areaNova": [
+      {
+        "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+        "esperar": 100
+      },
+      {
+        "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'em-analise'}})"
+      },
+      {
+        "esperar": 900
+      },
+      {
+        "clicar": "Filtro",
+        "esperar": 700
+      },
+      {
+        "clicar": {
+          "css": "[data-reka-popper-content-wrapper] [role=dialog] button",
+          "n": 3
+        },
+        "esperar": 800
+      }
+    ],
+    "construtor": [
+      {
+        "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+        "esperar": 100
+      },
+      {
+        "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'revisao-trimestral'}})"
+      },
+      {
+        "esperar": 900
+      },
+      {
+        "clicar": "3 regras",
+        "esperar": 900
+      }
+    ],
+    "tabelaNova": [
+      {
+        "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+        "esperar": 100
+      },
+      {
+        "esperar": 900
+      },
+      {
+        "clicar": "Visualização",
+        "esperar": 800
+      },
+      {
+        "clicar": "Tabela",
+        "esperar": 1300
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "cena": "barra",
+      "destacar": [
+        {
+          "css": "[role=tab]",
+          "n": 1
+        },
+        {
+          "css": "[role=tab]",
+          "n": 2
+        }
+      ]
+    },
+    "RF003": {
+      "cena": "revisao",
+      "destacar": {
+        "css": "[role=tab][data-state=active]"
+      }
+    },
+    "RF009": {
+      "sem": "o endereço da página não aparece no print. No protótipo, abrir uma visualização muda o endereço para ?view=<referência>."
+    },
+    "RF008": {
+      "cena": "barra",
+      "passos": [
+        {
+          "pairar": "Visualização",
+          "esperar": 1000
+        }
+      ],
+      "destacar": "Visualização"
+    },
+    "RF004": {
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'alta-prioridade'}})"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "pairar": {
+            "css": "[role=tab][data-state=active]"
+          },
+          "esperar": 2000
+        }
+      ],
+      "destacar": {
+        "regex": "^alta prioridade.*ordenação"
+      }
+    },
+    "RF111": {
+      "cena": "revisao",
+      "passos": [
+        {
+          "pairar": {
+            "css": "[role=tab][data-state=active]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "regex": "^revisão trimestral.*filtros"
+      }
+    },
+    "RF119": {
+      "antes": [
+        {
+          "estado": "4"
+        }
+      ],
+      "cena": "barra",
+      "destacar": "Visualização"
+    },
+    "RF005": {
+      "antes": [
+        {
+          "estado": "Estreita"
+        }
+      ],
+      "cena": "barra",
+      "destacar": {
+        "regex": "^mais \\d+ visualizações$"
+      }
+    },
+    "RF006": {
+      "antes": [
+        {
+          "estado": "Estreita"
+        }
+      ],
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'vencidos'}})"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[role=tab][data-state=active]"
+      }
+    },
+    "RF007": {
+      "cena": "barra",
+      "destacar": [
+        {
+          "regex": "^mais \\d+ visualizações$"
+        },
+        "Visualização"
+      ]
+    },
+    "RF070": {
+      "antes": [
+        {
+          "estado": "Estreita"
+        }
+      ],
+      "cena": "listaVencidos",
+      "destacar": "Pesquisar visualização..."
+    },
+    "RF120": {
+      "antes": [
+        {
+          "estado": "Estreita"
+        }
+      ],
+      "cena": "listaVencidos",
+      "destacar": {
+        "texto": "Não cabem na barra",
+        "exato": true
+      }
+    },
+    "RF121": {
+      "antes": [
+        {
+          "estado": "Estreita"
+        }
+      ],
+      "cena": "listaVencidos",
+      "destacar": {
+        "texto": "Aberta agora",
+        "ancestral": "[data-linha]"
+      }
+    },
+    "RF123": {
+      "antes": [
+        {
+          "estado": "Estreita"
+        }
+      ],
+      "cena": "listaVencidos",
+      "destacar": {
+        "texto": "Nova visualização",
+        "n": 0
+      }
+    },
+    "RF063": {
+      "cena": "barra",
+      "destacar": {
+        "css": "[role=tablist]"
+      }
+    },
+    "RF064": {
+      "cena": "barra",
+      "passos": [
+        {
+          "js": "(()=>{const e=document.querySelector('[role=tab][data-state=active]');e.focus();e.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',code:'ArrowRight',bubbles:true,cancelable:true,ctrlKey:false,shiftKey:false}))})()",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[role=tab]:focus"
+      }
+    },
+    "RF067": {
+      "cena": "lista",
+      "passos": [
+        {
+          "tecla": "ArrowDown"
+        },
+        {
+          "tecla": "ArrowDown",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "css": "[data-linha]:focus, [data-linha]:focus-within, :focus",
+        "n": 0
+      }
+    },
+    "RF018": {
+      "cena": "emAnalise",
+      "destacar": "Opções de Em análise"
+    },
+    "RF019": {
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "js": "(()=>{const t=document.querySelector('[id$=\"-trigger-em-analise\"]');const r=t.getBoundingClientRect();t.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:r.left+20,clientY:r.top+10}))})()",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RF071": {
+      "cena": "lista",
+      "passos": [
+        {
+          "pairar": {
+            "texto": "Alta prioridade",
+            "ancestral": "[data-linha]"
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": "Opções de Alta prioridade"
+    },
+    "RF084": {
+      "junto": "RF020"
+    },
+    "RF020": {
+      "cena": "menuEmAnalise",
+      "destacar": [
+        "Renomear",
+        "Configurar",
+        "Duplicar",
+        "Copiar link"
+      ]
+    },
+    "RF021": {
+      "cena": "menuEmAnalise",
+      "destacar": {
+        "texto": "Só para mim",
+        "exato": true
+      }
+    },
+    "RF022": {
+      "cena": "menuEmAnalise",
+      "destacar": {
+        "texto": "Para todos",
+        "exato": true
+      }
+    },
+    "RF023": {
+      "cena": "menuItens",
+      "destacar": {
+        "regex": "^excluir a visualização itens"
+      }
+    },
+    "RF024": {
+      "cena": "menuEmAnalise",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^excluir$"
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^excluir a visualização em análise\\?$"
+        },
+        "Excluir visualização"
+      ]
+    },
+    "RF144": {
+      "cena": "menuEmAnalise",
+      "passos": [
+        {
+          "clicar": "Duplicar",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=tab][data-state=active]"
+        },
+        {
+          "regex": "^cópia de em análise criada"
+        }
+      ]
+    },
+    "RF146": {
+      "cena": "menuEmAnalise",
+      "passos": [
+        {
+          "clicar": "Duplicar",
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "texto": "Renomear",
+        "exato": true
+      }
+    },
+    "RF145": {
+      "antes": [
+        {
+          "estado": "Standard ou Viewer"
+        }
+      ],
+      "cena": "menuEmAnalise",
+      "passos": [
+        {
+          "clicar": "Duplicar",
+          "esperar": 1500
+        },
+        {
+          "pairar": {
+            "css": "[role=tab][data-state=active]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "texto": "Só você vê",
+        "exato": true
+      }
+    },
+    "RF147": {
+      "cena": "menuEmAnalise",
+      "passos": [
+        {
+          "clicar": "Copiar link",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "regex": "^link de em análise copiado"
+      }
+    },
+    "RF025": {
+      "cena": "menuEmAnalise",
+      "passos": [
+        {
+          "clicar": "Renomear",
+          "esperar": 700
+        }
+      ],
+      "destacar": "Novo nome da visualização"
+    },
+    "RF066": {
+      "junto": "RF025"
+    },
+    "RF079": {
+      "junto": "RF025"
+    },
+    "RF122": {
+      "cena": "lista",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('[data-linha]')].find(e=>e.innerText.trim()==='Vencidos').dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,detail:2}))",
+          "esperar": 800
+        }
+      ],
+      "destacar": "Novo nome da visualização"
+    },
+    "RF026": {
+      "cena": "menuEmAnalise",
+      "passos": [
+        {
+          "clicar": "Renomear",
+          "esperar": 700
+        },
+        {
+          "digitar": "Contratos em análise"
+        },
+        {
+          "tecla": "Enter",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=tab][data-state=active]"
+        },
+        {
+          "regex": "^visualização renomeada"
+        }
+      ]
+    },
+    "RF027": {
+      "cena": "menuEmAnalise",
+      "passos": [
+        {
+          "clicar": "Renomear",
+          "esperar": 700
+        },
+        {
+          "digitar": "Compras"
+        },
+        {
+          "tecla": "Enter",
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "regex": "^já existe uma visualização chamada"
+      }
+    },
+    "RF011": {
+      "sem": "arrastar não aparece num print parado. No protótipo, arraste a pílula na barra."
+    },
+    "RF077": {
+      "sem": "arrastar não aparece num print parado. No protótipo, arraste a pílula na barra."
+    },
+    "RF014": {
+      "sem": "arrastar não aparece num print parado. No protótipo, arraste a pílula na barra."
+    },
+    "RF015": {
+      "sem": "arrastar não aparece num print parado. No protótipo, arraste a pílula na barra."
+    },
+    "RF078": {
+      "sem": "arrastar não aparece num print parado. No protótipo, arraste a pílula na barra."
+    },
+    "RF072": {
+      "sem": "arrastar não aparece num print parado. No protótipo, arraste a linha pela alça na lista do +N."
+    },
+    "RF149": {
+      "sem": "arrastar não aparece num print parado. No protótipo, arraste a linha pela alça na lista do +N."
+    },
+    "RF012": {
+      "cena": "barra",
+      "destacar": {
+        "css": "[role=tab]",
+        "n": 0
+      }
+    },
+    "RF013": {
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'em-analise'}})"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "js": "(()=>{const e=document.querySelector('[role=tab][data-state=active]');e.focus();e.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',code:'ArrowRight',bubbles:true,cancelable:true,ctrlKey:true,shiftKey:true}))})()",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=tab][data-state=active]"
+        },
+        {
+          "regex": "^a ordem vale só para você"
+        }
+      ]
+    },
+    "RF065": {
+      "junto": "RF013"
+    },
+    "RF068": {
+      "sem": "o anúncio é para o leitor de tela e não aparece na tela."
+    },
+    "RF148": {
+      "cena": "lista",
+      "destacar": {
+        "texto": "Todas as visualizações"
+      }
+    },
+    "RF080": {
+      "cena": "lista",
+      "passos": [
+        {
+          "focar": "Pesquisar visualização..."
+        },
+        {
+          "digitar": "jur"
+        }
+      ],
+      "destacar": {
+        "texto": "Todas as visualizações"
+      }
+    },
+    "RF016": {
+      "cena": "menuEmAnalise",
+      "passos": [
+        {
+          "clicar": "Fixar no início",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=tab][data-state=active]"
+        },
+        {
+          "regex": "^em análise fixada no início"
+        }
+      ]
+    },
+    "RF017": {
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'meus-contratos'}})"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "clicar": "Opções de Meus contratos",
+          "esperar": 700
+        },
+        {
+          "clicar": "Desafixar",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=tab][data-state=active]"
+        },
+        {
+          "regex": "^meus contratos desafixada"
+        }
+      ]
+    },
+    "RF150": {
+      "cena": "menuItens",
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RF085": {
+      "sem": "atalho de teclado: o resultado é a lista reordenada, como ao arrastar a linha."
+    },
+    "RI003": {
+      "sem": "interface do back-end, sem tela no protótipo."
+    },
+    "RF036": {
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'em-analise'}})"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "js": "(()=>{const e=document.querySelector('[role=tab][data-state=active]');e.focus();e.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',code:'ArrowRight',bubbles:true,cancelable:true,ctrlKey:true,shiftKey:true}))})()",
+          "esperar": 800
+        },
+        {
+          "esperar": 1500
+        },
+        {
+          "clicar": "Opções de Em análise",
+          "esperar": 700
+        },
+        {
+          "clicar": "Aplicar minha ordem para todos",
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "regex": "^sua ordem agora é a de todos"
+      }
+    },
+    "RF037": {
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'em-analise'}})"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "js": "(()=>{const e=document.querySelector('[role=tab][data-state=active]');e.focus();e.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',code:'ArrowRight',bubbles:true,cancelable:true,ctrlKey:true,shiftKey:true}))})()",
+          "esperar": 800
+        },
+        {
+          "esperar": 1500
+        },
+        {
+          "clicar": "Opções de Em análise",
+          "esperar": 700
+        },
+        {
+          "clicar": "Recuperar a ordem padrão",
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "regex": "^ordem padrão recuperada"
+      }
+    },
+    "RF038": {
+      "cena": "menuEmAnalise",
+      "destacar": [
+        "Aplicar minha ordem para todos",
+        "Recuperar a ordem padrão"
+      ]
+    },
+    "RF039": {
+      "antes": [
+        {
+          "estado": "Standard ou Viewer"
+        }
+      ],
+      "cena": "menuEmAnalise",
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RF073": {
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'em-analise'}})"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "js": "(()=>{const e=document.querySelector('[role=tab][data-state=active]');e.focus();e.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',code:'ArrowRight',bubbles:true,cancelable:true,ctrlKey:true,shiftKey:true}))})()",
+          "esperar": 800
+        },
+        {
+          "esperar": 1500
+        },
+        {
+          "clicar": {
+            "regex": "^mais \\d+ visualizações$"
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Aplicar minha ordem para todos"
+        },
+        {
+          "texto": "Recuperar a ordem padrão"
+        }
+      ]
+    },
+    "RF151": {
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'vencidos'}})"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "clicar": "Opções de Vencidos",
+          "esperar": 700
+        },
+        {
+          "clicar": "Abrir primeiro para todos",
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "regex": "^vencidos abre primeiro para todos"
+      }
+    },
+    "RF152": {
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'vencidos'}})"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "clicar": "Opções de Vencidos",
+          "esperar": 700
+        },
+        {
+          "clicar": "Abrir primeiro para todos",
+          "esperar": 1500
+        },
+        {
+          "clicar": "Opções de Vencidos",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "regex": "^abre primeiro para todos"
+      }
+    },
+    "RI009": {
+      "sem": "interface do back-end, sem tela no protótipo."
+    },
+    "RI004": {
+      "sem": "interface do back-end, sem tela no protótipo."
+    },
+    "RF125": {
+      "antes": [
+        {
+          "estado": "4"
+        }
+      ],
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'quadro-por-status'}})"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "clicar": "Opções de Quadro por status",
+          "esperar": 700
+        },
+        {
+          "clicar": "Minimizar",
+          "esperar": 1000
+        },
+        {
+          "pairar": {
+            "css": "[role=tab][data-state=active]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[role=tab][data-state=active]"
+      }
+    },
+    "RF154": {
+      "antes": [
+        {
+          "estado": "Estreita"
+        }
+      ],
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'em-analise'}})"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "clicar": "Opções de Em análise",
+          "esperar": 700
+        },
+        {
+          "clicar": "Minimizar",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=tab][data-state=active]"
+        },
+        {
+          "regex": "^mais \\d+ visualizações$"
+        }
+      ]
+    },
+    "RF126": {
+      "antes": [
+        {
+          "estado": "4"
+        }
+      ],
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "js": "(()=>{const t=document.querySelector('[id$=\"-trigger-vencendo-30-dias\"]');const r=t.getBoundingClientRect();t.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:r.left+20,clientY:r.top+10}))})()",
+          "esperar": 700
+        },
+        {
+          "clicar": "Ocultar da barra",
+          "esperar": 1000
+        },
+        {
+          "clicar": {
+            "regex": "^mais \\d+ visualizações$"
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "texto": "Oculta da barra",
+        "ancestral": "[data-linha]"
+      }
+    },
+    "RF153": {
+      "antes": [
+        {
+          "estado": "4"
+        }
+      ],
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "js": "(()=>{const t=document.querySelector('[id$=\"-trigger-vencendo-30-dias\"]');const r=t.getBoundingClientRect();t.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:r.left+20,clientY:r.top+10}))})()",
+          "esperar": 700
+        },
+        {
+          "clicar": "Ocultar da barra",
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "regex": "^mais \\d+ visualizações$"
+      }
+    },
+    "RF069": {
+      "antes": [
+        {
+          "estado": "4"
+        }
+      ],
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "js": "(()=>{const t=document.querySelector('[id$=\"-trigger-vencendo-30-dias\"]');const r=t.getBoundingClientRect();t.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:r.left+20,clientY:r.top+10}))})()",
+          "esperar": 700
+        },
+        {
+          "clicar": "Ocultar da barra",
+          "esperar": 1000
+        },
+        {
+          "clicar": {
+            "regex": "^mais \\d+ visualizações$"
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "texto": "Oculta da barra",
+        "exato": true
+      }
+    },
+    "RF155": {
+      "antes": [
+        {
+          "estado": "4"
+        }
+      ],
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "js": "(()=>{const t=document.querySelector('[id$=\"-trigger-vencendo-30-dias\"]');const r=t.getBoundingClientRect();t.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:r.left+20,clientY:r.top+10}))})()",
+          "esperar": 700
+        },
+        {
+          "clicar": "Ocultar da barra",
+          "esperar": 1000
+        },
+        {
+          "clicar": {
+            "regex": "^mais \\d+ visualizações$"
+          },
+          "esperar": 800
+        },
+        {
+          "pairar": {
+            "texto": "Vencendo em 30 dias",
+            "ancestral": "[data-linha]"
+          },
+          "esperar": 600
+        },
+        {
+          "clicar": "Opções de Vencendo em 30 dias",
+          "esperar": 700
+        },
+        {
+          "clicar": "Mostrar na barra",
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "regex": "^vencendo em 30 dias voltou para a barra"
+      }
+    },
+    "RF128": {
+      "antes": [
+        {
+          "estado": "4"
+        }
+      ],
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "js": "(()=>{const t=document.querySelector('[id$=\"-trigger-vencendo-30-dias\"]');const r=t.getBoundingClientRect();t.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:r.left+20,clientY:r.top+10}))})()",
+          "esperar": 700
+        },
+        {
+          "clicar": "Ocultar da barra",
+          "esperar": 1000
+        },
+        {
+          "clicar": {
+            "regex": "^mais \\d+ visualizações$"
+          },
+          "esperar": 800
+        },
+        {
+          "clicar": {
+            "texto": "Vencendo em 30 dias",
+            "ancestral": "[data-linha]"
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "css": "[role=tab][data-state=active]"
+      }
+    },
+    "RF129": {
+      "cena": "menuItens",
+      "destacar": "Minimizar"
+    },
+    "RF034": {
+      "cena": "emAnalise",
+      "destacar": [
+        {
+          "regex": "^status: em análise$"
+        },
+        {
+          "texto": "Filtro",
+          "exato": true
+        }
+      ]
+    },
+    "RF124": {
+      "cena": "barra",
+      "passos": [
+        {
+          "clicar": "Filtros",
+          "esperar": 900
+        }
+      ],
+      "destacar": "Filtrar por..."
+    },
+    "RF106": {
+      "cena": "barra",
+      "passos": [
+        {
+          "clicar": "Filtros",
+          "esperar": 900
+        }
+      ],
+      "destacar": "Filtros"
+    },
+    "RF132": {
+      "junto": "RF106"
+    },
+    "RF099": {
+      "cena": "areaNova",
+      "passos": [
+        {
+          "clicar": "Jurídico",
+          "esperar": 600
+        },
+        {
+          "tecla": "Escape",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^status: em análise$"
+        },
+        {
+          "regex": "^área: jurídico$"
+        }
+      ]
+    },
+    "RF094": {
+      "cena": "emAnalise",
+      "passos": [
+        {
+          "clicar": "Filtro",
+          "esperar": 800
+        },
+        {
+          "focar": "Filtrar por..."
+        },
+        {
+          "digitar": "ven"
+        }
+      ],
+      "destacar": "Filtrar por..."
+    },
+    "RF134": {
+      "cena": "emAnalise",
+      "passos": [
+        {
+          "clicar": "Filtro",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[data-reka-popper-content-wrapper] [role=dialog] button",
+        "n": 0
+      }
+    },
+    "RF095": {
+      "cena": "areaNova",
+      "destacar": {
+        "regex": "^área$"
+      }
+    },
+    "RF112": {
+      "cena": "emAnalise",
+      "passos": [
+        {
+          "clicar": "Filtro",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "css": "[data-reka-popper-content-wrapper] [role=dialog] button",
+            "n": 2
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "regex": "^status: em análise$"
+      }
+    },
+    "RF096": {
+      "cena": "emAnalise",
+      "passos": [
+        {
+          "clicar": "Status: Em análise",
+          "esperar": 600
+        },
+        {
+          "clicar": "Aprovado",
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^status: em análise, aprovado$"
+        },
+        "Condição"
+      ]
+    },
+    "RF057": {
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'vencendo-30-dias'}})"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "clicar": {
+            "regex": "^vencimento"
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": "Condição"
+    },
+    "RF135": {
+      "cena": "areaNova",
+      "destacar": "Limpar seleção"
+    },
+    "RF117": {
+      "cena": "emAnalise",
+      "passos": [
+        {
+          "clicar": "Status: Em análise",
+          "esperar": 600
+        },
+        {
+          "clicar": "Condição",
+          "esperar": 600
+        },
+        {
+          "clicar": {
+            "texto": "Não é",
+            "exato": true
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "regex": "^status"
+      }
+    },
+    "RF097": {
+      "cena": "areaNova",
+      "destacar": {
+        "regex": "^área$"
+      }
+    },
+    "RF113": {
+      "junto": "RF097"
+    },
+    "RF098": {
+      "cena": "emAnalise",
+      "passos": [
+        {
+          "clicar": "Status: Em análise",
+          "esperar": 600
+        },
+        {
+          "clicar": "Mais ações",
+          "esperar": 600
+        }
+      ],
+      "destacar": "Excluir filtro"
+    },
+    "RI005": {
+      "sem": "interface do back-end, sem tela no protótipo."
+    },
+    "RI007": {
+      "sem": "interface do back-end, sem tela no protótipo."
+    },
+    "RF130": {
+      "sem": "o protótipo usa o EnTable do SDK, que não tem o funil no título da coluna. \"Filtrar\" no menu da coluna abre o mesmo chip."
+    },
+    "RF107": {
+      "cena": "barra",
+      "passos": [
+        {
+          "js": "(()=>{const t=[...document.querySelectorAll('th')].find(t=>t.textContent.trim()==='Área');const r=t.getBoundingClientRect();t.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:r.left+20,clientY:r.top+10}))})()",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RF118": {
+      "cena": "emAnalise",
+      "passos": [
+        {
+          "js": "(()=>{const t=[...document.querySelectorAll('th')].find(t=>t.textContent.trim()==='Valor do contrato');const r=t.getBoundingClientRect();t.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:r.left+20,clientY:r.top+10}))})()",
+          "esperar": 700
+        },
+        {
+          "clicar": "Ordenar decrescente",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "th",
+        "n": 5
+      }
+    },
+    "RF108": {
+      "cena": "barra",
+      "passos": [
+        {
+          "js": "(()=>{const t=[...document.querySelectorAll('th')].find(t=>t.textContent.trim()==='Área');const r=t.getBoundingClientRect();t.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:r.left+20,clientY:r.top+10}))})()",
+          "esperar": 700
+        },
+        {
+          "clicar": "Filtrar",
+          "esperar": 900
+        }
+      ],
+      "destacar": "Limpar seleção"
+    },
+    "RF109": {
+      "cena": "barra",
+      "passos": [
+        {
+          "js": "(()=>{const t=[...document.querySelectorAll('th')].find(t=>t.textContent.trim()==='Área');const r=t.getBoundingClientRect();t.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:r.left+20,clientY:r.top+10}))})()",
+          "esperar": 700
+        },
+        {
+          "clicar": "Ocultar coluna",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "thead"
+      }
+    },
+    "RF131": {
+      "sem": "o protótipo usa o EnTable do SDK, sem a seta de ordenar e o alfinete no título. O título segue como no produto."
+    },
+    "RI006": {
+      "sem": "limite do componente do SDK, sem tela no protótipo."
+    },
+    "RF136": {
+      "cena": "revisao",
+      "passos": [
+        {
+          "clicar": "Filtro",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[data-reka-popper-content-wrapper] [role=dialog] button",
+        "n": 9
+      }
+    },
+    "RF137": {
+      "cena": "construtor",
+      "destacar": [
+        {
+          "regex": "^3 regras$"
+        },
+        {
+          "texto": "Onde",
+          "exato": true
+        }
+      ]
+    },
+    "RF138": {
+      "cena": "revisao",
+      "passos": [
+        {
+          "clicar": "Filtro",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "css": "[data-reka-popper-content-wrapper] [role=dialog] button",
+            "n": 3
+          },
+          "esperar": 800
+        },
+        {
+          "clicar": "Jurídico",
+          "esperar": 600
+        },
+        {
+          "tecla": "Escape",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^área: jurídico$"
+        },
+        {
+          "regex": "^3 regras$"
+        }
+      ]
+    },
+    "RF114": {
+      "cena": "emAnalise",
+      "passos": [
+        {
+          "clicar": "Status: Em análise",
+          "esperar": 600
+        },
+        {
+          "clicar": "Mais ações",
+          "esperar": 600
+        },
+        {
+          "clicar": "Levar para o filtro avançado",
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "regex": "^1 regra$"
+      }
+    },
+    "RF116": {
+      "cena": "construtor",
+      "destacar": "Excluir filtro avançado"
+    },
+    "RF115": {
+      "junto": "RF116"
+    },
+    "RF100": {
+      "cena": "construtor",
+      "destacar": [
+        {
+          "texto": "Onde",
+          "exato": true
+        },
+        {
+          "texto": "Como as regras se juntam",
+          "n": 0
+        }
+      ]
+    },
+    "RF101": {
+      "cena": "construtor",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Mais ações",
+            "n": 0
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": "Transformar em grupo"
+    },
+    "RF139": {
+      "cena": "construtor",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Mais ações",
+            "n": 3
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": "Desfazer o grupo"
+    },
+    "RF102": {
+      "cena": "construtor",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Adicionar regra",
+            "n": 1
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": "Adicionar grupo"
+    },
+    "RF105": {
+      "junto": "RF100"
+    },
+    "RF103": {
+      "junto": "RF100"
+    },
+    "RF104": {
+      "junto": "RF139"
+    },
+    "RI008": {
+      "sem": "interface do back-end, sem tela no protótipo."
+    },
+    "RF133": {
+      "cena": "painel",
+      "passos": [
+        {
+          "rolar": "Adicionar filtro",
+          "esperar": 600
+        }
+      ],
+      "destacar": "Adicionar filtro"
+    },
+    "RF056": {
+      "cena": "painel",
+      "passos": [
+        {
+          "rolar": "Adicionar filtro",
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        "Só itens meus",
+        "Só itens dos meus grupos"
+      ]
+    },
+    "RF140": {
+      "cena": "painel",
+      "passos": [
+        {
+          "rolar": "Adicionar filtro",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "regex": "^por campo$"
+      }
+    },
+    "RF058": {
+      "cena": "painel",
+      "passos": [
+        {
+          "rolar": "Adicionar filtro",
+          "esperar": 600
+        },
+        {
+          "clicar": "Adicionar filtro",
+          "esperar": 800
+        }
+      ],
+      "destacar": "Adicionar filtro"
+    },
+    "RF141": {
+      "junto": "RF140"
+    },
+    "RF142": {
+      "cena": "painelRevisao",
+      "passos": [
+        {
+          "rolar": {
+            "texto": "Onde",
+            "exato": true
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "texto": "Onde",
+        "exato": true
+      }
+    },
+    "RF143": {
+      "junto": "RF142"
+    },
+    "RF029": {
+      "cena": "alterada",
+      "destacar": {
+        "regex": "^status: em análise, aprovado$"
+      }
+    },
+    "RF030": {
+      "cena": "alterada",
+      "passos": [
+        {
+          "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'default'}})"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[role=tablist] [role=img][aria-label=\"Alterações não salvas\"]"
+      }
+    },
+    "RF156": {
+      "junto": "RF030"
+    },
+    "RF035": {
+      "cena": "alterada",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Descartar",
+            "exato": true
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "regex": "^alterações descartadas"
+      }
+    },
+    "RF031": {
+      "cena": "alterada",
+      "destacar": [
+        {
+          "regex": "^você alterou em análise$"
+        },
+        "Salvar para todos"
+      ]
+    },
+    "RF032": {
+      "cena": "alterada",
+      "passos": [
+        {
+          "clicar": "Mais opções de salvar",
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        "Salvar só para mim",
+        "Salvar como nova visualização"
+      ]
+    },
+    "RF086": {
+      "cena": "alterada",
+      "passos": [
+        {
+          "pairar": "Fechar sem salvar. O ajuste continua aplicado para você.",
+          "esperar": 1000
+        }
+      ],
+      "destacar": "Fechar sem salvar. O ajuste continua aplicado para você."
+    },
+    "RF087": {
+      "junto": "RF031"
+    },
+    "RF157": {
+      "cena": "alterada",
+      "passos": [
+        {
+          "clicar": "Mais opções de salvar",
+          "esperar": 600
+        },
+        {
+          "clicar": "Salvar como nova visualização",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        "Criar visualização",
+        {
+          "css": "[role=dialog] input"
+        }
+      ]
+    },
+    "RF158": {
+      "cena": "alterada",
+      "passos": [
+        {
+          "clicar": "Mais opções de salvar",
+          "esperar": 600
+        },
+        {
+          "clicar": "Salvar como nova visualização",
+          "esperar": 900
+        },
+        {
+          "clicar": "Criar visualização",
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[role=tab][data-state=active]"
+      }
+    },
+    "RF159": {
+      "antes": [
+        {
+          "estado": "Standard ou Viewer"
+        }
+      ],
+      "cena": "alterada",
+      "passos": [
+        {
+          "clicar": "Mais opções de salvar",
+          "esperar": 600
+        },
+        {
+          "clicar": "Salvar como nova visualização",
+          "esperar": 900
+        },
+        {
+          "clicar": "Criar visualização",
+          "esperar": 1500
+        },
+        {
+          "pairar": {
+            "css": "[role=tab][data-state=active]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "texto": "Só você vê",
+        "exato": true
+      }
+    },
+    "RF160": {
+      "cena": "alterada",
+      "passos": [
+        {
+          "clicar": "Mais opções de salvar",
+          "esperar": 600
+        },
+        {
+          "clicar": "Salvar como nova visualização",
+          "esperar": 900
+        },
+        {
+          "js": "(()=>{const i=document.querySelector('[role=dialog] input');i.focus();i.value='';i.dispatchEvent(new Event('input',{bubbles:true}))})()",
+          "esperar": 500
+        },
+        {
+          "clicar": "Criar visualização",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog] input"
+      }
+    },
+    "RF010": {
+      "cena": "alterada",
+      "passos": [
+        {
+          "clicar": "Mais opções de salvar",
+          "esperar": 600
+        },
+        {
+          "clicar": "Salvar só para mim",
+          "esperar": 1200
+        },
+        {
+          "pairar": {
+            "css": "[role=tab][data-state=active]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[role=tablist] [aria-label=\"Versão só sua\"]"
+      }
+    },
+    "RF161": {
+      "cena": "alterada",
+      "passos": [
+        {
+          "clicar": "Mais opções de salvar",
+          "esperar": 600
+        },
+        {
+          "clicar": "Salvar só para mim",
+          "esperar": 1500
+        },
+        {
+          "clicar": "Opções de Em análise",
+          "esperar": 700
+        }
+      ],
+      "destacar": "Voltar à versão de todos"
+    },
+    "RI002": {
+      "sem": "interface do back-end, sem tela no protótipo."
+    },
+    "RF048": {
+      "cena": "painel",
+      "destacar": {
+        "css": "aside[aria-label=\"Configurar visualização\"]"
+      }
+    },
+    "RF049": {
+      "cena": "painel",
+      "passos": [
+        {
+          "clicar": "Ocultar Responsável",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        "Mostrar Responsável",
+        {
+          "regex": "^alterações não salvas$"
+        }
+      ]
+    },
+    "RF050": {
+      "cena": "painel",
+      "passos": [
+        {
+          "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'acima-100-mil'}})"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=tab][data-state=active]"
+        },
+        {
+          "css": "aside[aria-label=\"Configurar visualização\"]"
+        }
+      ]
+    },
+    "RF051": {
+      "cena": "painel",
+      "destacar": [
+        {
+          "css": "aside h3",
+          "n": 0
+        },
+        {
+          "css": "aside h3",
+          "n": 1
+        }
+      ]
+    },
+    "RF055": {
+      "cena": "painel",
+      "destacar": "Mover Fornecedor para cima"
+    },
+    "RF033": {
+      "junto": "RF062"
+    },
+    "RF062": {
+      "cena": "painel",
+      "passos": [
+        {
+          "clicar": "Ocultar Responsável",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Descartar",
+          "exato": true
+        },
+        {
+          "regex": "^salvar para todos$"
+        }
+      ]
+    },
+    "RF052": {
+      "cena": "painel",
+      "passos": [
+        {
+          "clicar": "Kanban",
+          "esperar": 1200
+        }
+      ],
+      "destacar": "Agrupar por"
+    },
+    "RF053": {
+      "cena": "painel",
+      "passos": [
+        {
+          "clicar": "Kanban",
+          "esperar": 1200
+        },
+        {
+          "rolar": "Título do cartão",
+          "esperar": 600
+        }
+      ],
+      "destacar": "Título do cartão"
+    },
+    "RF054": {
+      "cena": "painel",
+      "destacar": "Ocultar Responsável"
+    },
+    "RF059": {
+      "passos": [
+        {
+          "js": "window.__andaime && window.__andaime() && (window.__andaime().style.visibility = 'hidden')",
+          "esperar": 100
+        },
+        {
+          "js": "document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push({query:{...document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.currentRoute.value.query,view:'alta-prioridade'}})"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "clicar": "Opções de Alta prioridade",
+          "esperar": 700
+        },
+        {
+          "clicar": "Configurar",
+          "esperar": 1200
+        },
+        {
+          "rolar": "Depois por",
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        "Ordenar por",
+        "Depois por"
+      ]
+    },
+    "RF083": {
+      "cena": "painel",
+      "passos": [
+        {
+          "clicar": "Kanban",
+          "esperar": 1200
+        },
+        {
+          "rolar": "Ordem dos cartões em cada coluna",
+          "esperar": 600
+        }
+      ],
+      "destacar": "Ordem dos cartões em cada coluna"
+    },
+    "RF060": {
+      "cena": "painel",
+      "passos": [
+        {
+          "rolar": "Grupos e funções",
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        "Todos do workspace",
+        "Só eu",
+        "Grupos e funções"
+      ]
+    },
+    "RF061": {
+      "antes": [
+        {
+          "estado": "Standard ou Viewer"
+        }
+      ],
+      "cena": "painel",
+      "passos": [
+        {
+          "rolar": "Grupos e funções",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "regex": "^só owner e full mudam"
+      }
+    },
+    "RI001": {
+      "sem": "interface do back-end, sem tela no protótipo."
+    },
+    "RF040": {
+      "cena": "catalogo",
+      "destacar": [
+        "Tabela",
+        "Kanban"
+      ]
+    },
+    "RF090": {
+      "cena": "catalogo",
+      "destacar": "Só para mim"
+    },
+    "RF092": {
+      "cena": "catalogo",
+      "destacar": "Fixar no início"
+    },
+    "RF091": {
+      "antes": [
+        {
+          "estado": "Standard ou Viewer"
+        }
+      ],
+      "cena": "catalogo",
+      "passos": [
+        {
+          "pairar": "Só para mim",
+          "esperar": 1000
+        }
+      ],
+      "destacar": "Só para mim"
+    },
+    "RF041": {
+      "cena": "catalogo",
+      "passos": [
+        {
+          "clicar": "Kanban",
+          "esperar": 1300
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=tab][data-state=active]"
+        },
+        {
+          "css": "aside[aria-label=\"Nova visualização\"]"
+        }
+      ]
+    },
+    "RF088": {
+      "cena": "catalogo",
+      "passos": [
+        {
+          "clicar": "Kanban",
+          "esperar": 1300
+        }
+      ],
+      "destacar": {
+        "css": "main",
+        "n": 0
+      }
+    },
+    "RF081": {
+      "cena": "tabelaNova",
+      "destacar": {
+        "css": "thead"
+      }
+    },
+    "RF089": {
+      "cena": "tabelaNova",
+      "passos": [
+        {
+          "clicar": "Concluir",
+          "esperar": 1000
+        },
+        {
+          "clicar": "Visualização",
+          "esperar": 800
+        },
+        {
+          "clicar": "Tabela",
+          "esperar": 1300
+        }
+      ],
+      "destacar": {
+        "css": "[role=tab][data-state=active]"
+      }
+    },
+    "RF043": {
+      "cena": "tabelaNova",
+      "destacar": {
+        "css": "aside[aria-label=\"Nova visualização\"] input",
+        "n": 0
+      }
+    },
+    "RF082": {
+      "cena": "tabelaNova",
+      "passos": [
+        {
+          "digitar": "Contratos por etapa"
+        }
+      ],
+      "destacar": {
+        "css": "[role=tab][data-state=active]"
+      }
+    },
+    "RF093": {
+      "cena": "tabelaNova",
+      "destacar": [
+        "Concluir",
+        "Descartar visualização"
+      ]
+    },
+    "RF044": {
+      "cena": "tabelaNova",
+      "passos": [
+        {
+          "js": "(()=>{const i=document.querySelector('aside[aria-label=\"Nova visualização\"] input');i.focus();i.value='';i.dispatchEvent(new Event('input',{bubbles:true}))})()",
+          "esperar": 500
+        },
+        {
+          "clicar": "Concluir",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "regex": "^informe um nome\\.$"
+      }
+    },
+    "RF045": {
+      "cena": "tabelaNova",
+      "passos": [
+        {
+          "digitar": "Vencidos"
+        },
+        {
+          "clicar": "Concluir",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "regex": "^já existe uma visualização com este nome\\.$"
+      }
+    },
+    "RF046": {
+      "cena": "tabelaNova",
+      "passos": [
+        {
+          "digitar": "Contratos por etapa"
+        },
+        {
+          "clicar": "Concluir",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=tab][data-state=active]"
+        },
+        {
+          "regex": "^visualização contratos por etapa criada"
+        }
+      ]
+    },
+    "RF047": {
+      "cena": "tabelaNova",
+      "passos": [
+        {
+          "clicar": "Descartar visualização",
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "css": "[role=tab][data-state=active]"
+      }
+    },
+    "RF162": {
+      "cena": "tabelaNova",
+      "passos": [
+        {
+          "js": "(()=>{const t=document.querySelector('[role=tab][data-state=active]');const r=t.getBoundingClientRect();t.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:r.left+20,clientY:r.top+10}))})()",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    }
+  }
+}
