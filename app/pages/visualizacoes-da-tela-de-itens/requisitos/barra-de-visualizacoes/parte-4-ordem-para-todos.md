@@ -3,7 +3,7 @@
 **Objetivo:** Owner ou Full aplica a própria ordem como a ordem padrão da tela, recupera a ordem padrão e escolhe a
 visualização que abre primeiro para todos.
 
-**Depende de:** 2. Menu da visualização e renomear; 3. Reordenar e fixar.
+**Depende de:** 2. Menu da visualização; 3. Reordenar e fixar.
 
 **Onde vale:** o grupo "Para todos" e o grupo "Só para mim" do menu da visualização e o rodapé da lista do "+N", na tela
 de itens, em Tarefas Rápidas e em Tarefas Agendadas.

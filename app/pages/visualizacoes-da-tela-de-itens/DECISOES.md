@@ -232,3 +232,16 @@
   - "Barra de visualizações", 5 tarefas: https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE549F27D01CC540E6B02FFA72DAC02
   - "Criar, configurar e salvar visualização", 3 tarefas: https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USEFE27DD99101D4E47B955D3086AE21
 - **Prints:** 97 prints para 142 requisitos; os outros levam o motivo de não ter print. Nenhum print tem ponteiro do mouse.
+
+## Tarefas divididas onde a lógica pede · 2026-11-03
+- **Pedido (literal):** "veja se nao tem oportunidade de fragmentar ainda mais as tarefas que foram geradas nos ietns. olhe pras maiores tarefas de cada um e veja se faz sentido logico fragmentar. se nao fizer, mantenha como ta hoje."
+- **Dividido:**
+  - Barra, "2. Menu da visualização e renomear" (19 requisitos): o renomear saiu para "6. Renomear" (RF025, RF026, RF027, RF066, RF079, RF122). Tem campo, validação e teclado próprios, entra pelo clique duplo e pelo F2 sem passar pelo menu, e nenhuma parte depende dele. O menu ficou com 13 e leva Renomear como item que chega com a parte 6, do jeito que já levava os itens das outras partes (RF021).
+  - Criar, "1. Alterações não salvas e salvar" (14 requisitos e 2 RN): a versão só minha saiu para "4. Versão só minha" (RN005, RN012, RF032, RF010, RF161, RI002). Pede um lugar novo no back para guardar a versão de cada pessoa (RI002), o mesmo motivo que já deixou a ordem de cada pessoa fora da base da barra. A base ganhou o RF163, a tabela do botão de salvar sem "Salvar só para mim": Standard ou Viewer salva só como nova até a parte 4 chegar. A ajuda da barra nas linhas 2 e 3 é proposta, sem texto no protótipo.
+  - As 2 partes novas ficam no fim, e as tarefas que já existiam não mudam de número.
+- **Mantidas inteiras:**
+  - Barra, "1. Pílulas e lista do "+N"" (17): é a base; o tooltip (2 requisitos) sozinho não faz parte.
+  - Barra, "3. Reordenar e fixar" (19, acima de 1,5 vez a mediana depois da divisão): fixar é uma forma de reordenar, grava na mesma ordem de cada pessoa (RI003) e muda a posição pela RN006; o teclado é a alternativa ao arrasto e sai junto com ele.
+  - Criar, "3. Criar pelo catálogo" (16): catálogo, visualização nova e modo de criação são 1 fluxo.
+  - Filtros, "1. Linha de filtros e chip por campo" (18): linha, "+ Filtro" e chip só funcionam juntos, como já registrado.
+- **No ENSPACE:** a tarefa 6 do card "Barra de visualizações" e a tarefa 4 do card "Criar, configurar e salvar visualização" foram criadas; as tarefas 2 a 5 da barra e a 1 de criar foram reescritas, e a descrição dos 2 cards ganhou a parte nova na tabela das partes.

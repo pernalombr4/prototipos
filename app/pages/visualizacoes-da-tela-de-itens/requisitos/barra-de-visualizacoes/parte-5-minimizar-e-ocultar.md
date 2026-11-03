@@ -3,7 +3,7 @@
 **Objetivo:** a pessoa deixa uma pílula só com o ícone, ou tira da barra uma visualização que não usa, sem perder a
 visualização: a oculta continua na lista do "+N". As 2 escolhas valem só para ela (RN002).
 
-**Depende de:** 1. Pílulas e lista do "+N"; 2. Menu da visualização e renomear.
+**Depende de:** 1. Pílulas e lista do "+N"; 2. Menu da visualização.
 
 **Onde vale:** o grupo "Só para mim" do menu da visualização, a barra e a lista do "+N", na tela de itens, em Tarefas
 Rápidas e em Tarefas Agendadas.

@@ -2294,6 +2294,9 @@
       "destacar": {
         "css": "[role=menu]"
       }
+    },
+    "RF163": {
+      "sem": "o protótipo mostra a barra flutuante com \"Salvar só para mim\", da parte \"4. Versão só minha\". O print da barra flutuante está no RF031"
     }
   }
 }

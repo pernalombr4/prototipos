@@ -29,10 +29,11 @@ para o ganho.
 | Parte | O que entrega | Depende de | Por que nesta ordem |
 |---|---|---|---|
 | [1. Pílulas e lista do "+N"](parte-1-pilulas-e-lista.md) | A pílula com o nome cortado pela largura, o tooltip de resumo, a visualização no endereço, o "+N" só quando alguma fica fora da barra, a lista com busca e o teclado da barra | | É a base: as outras partes põem ações na pílula e na lista |
-| [2. Menu da visualização e renomear](parte-2-menu-e-renomear.md) | A seta ⌄ da ativa, o botão direito e o "⋯" da lista abrem o menu, com os grupos "Só para mim" e "Para todos", excluir e renomear na pílula e na lista | 1 | O menu é a porta de fixar, minimizar, ocultar e da ordem para todos |
+| [2. Menu da visualização](parte-2-menu.md) | A seta ⌄ da ativa, o botão direito e o "⋯" da lista abrem o menu, com os grupos "Só para mim" e "Para todos", Configurar, Duplicar, Copiar link e Excluir | 1 | O menu é a porta de fixar, minimizar, ocultar e da ordem para todos |
 | [3. Reordenar e fixar](parte-3-reordenar-e-fixar.md) | Arrastar na barra e na lista, fixar no início, mover pelo teclado e a ordem de cada pessoa | 1 e 2 | Fica fora da base porque a ordem de cada pessoa pede um lugar novo no back |
 | [4. Ordem para todos](parte-4-ordem-para-todos.md) | "Aplicar minha ordem para todos", "Recuperar a ordem padrão" e "Abrir primeiro para todos", para Owner ou Full | 2 e 3 | A ordem padrão parte da ordem de cada pessoa da parte 3 |
 | [5. Minimizar e ocultar](parte-5-minimizar-e-ocultar.md) | A pílula só com o ícone e a visualização tirada da barra, que continua na lista do "+N" | 1 e 2 | Muda o cálculo de quantas pílulas cabem e o N do "+N" da parte 1 |
+| [6. Renomear](parte-6-renomear.md) | O campo de renomear na pílula e na linha da lista, por clique duplo, pelo atalho de teclado e por Renomear no menu, com o aviso de nome repetido | 1 e 2 | Funcionalidade própria, com campo, validação e teclado; nenhuma outra parte depende dela |
 
 ## Regras de negócio comuns (RN)
 

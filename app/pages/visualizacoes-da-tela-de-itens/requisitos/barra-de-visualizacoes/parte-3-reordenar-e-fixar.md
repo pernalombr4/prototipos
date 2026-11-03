@@ -3,7 +3,7 @@
 **Objetivo:** a pessoa põe as visualizações na ordem dela, arrastando na barra ou na lista do "+N", ou pelo teclado, e
 fixa no começo as que usa mais. A ordem e as fixadas valem só para ela (RN002).
 
-**Depende de:** 1. Pílulas e lista do "+N"; 2. Menu da visualização e renomear.
+**Depende de:** 1. Pílulas e lista do "+N"; 2. Menu da visualização.
 
 **Onde vale:** a barra e a lista do "+N", na tela de itens, em Tarefas Rápidas e em Tarefas Agendadas.
 

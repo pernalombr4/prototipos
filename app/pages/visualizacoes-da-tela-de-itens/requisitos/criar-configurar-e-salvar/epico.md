@@ -28,9 +28,10 @@ para o ganho.
 
 | Parte | O que entrega | Depende de | Por que nesta ordem |
 |---|---|---|---|
-| [1. Alterações não salvas e salvar](parte-1-alteracoes-e-salvar.md) | O ponto de alteração não salva, a barra flutuante com salvar para todos, só para mim ou como nova, o X que fecha sem salvar e a versão só minha | | É a base: o painel salva por ela, e os filtros da tela viram alteração não salva por ela |
+| [1. Alterações não salvas e salvar](parte-1-alteracoes-e-salvar.md) | O ponto de alteração não salva, a barra flutuante com salvar para todos ou como nova e o X que fecha sem salvar | | É a base: o painel salva por ela, e os filtros da tela viram alteração não salva por ela |
 | [2. Painel Configurar](parte-2-painel-configurar.md) | O painel ao lado da tabela, ao vivo, sem 2º modal, com Nome, Exibição, Cartão ou Colunas, Ordenação com níveis e Quem vê | 1 | Troca o modal de hoje; a criação da parte 3 abre este painel |
 | [3. Criar pelo catálogo](parte-3-criar-pelo-catalogo.md) | "+ Visualização" abre o catálogo Tabela ou Kanban; o tipo escolhido cria a visualização genérica, já aberta no painel em modo de criação | 2 | Precisa do painel; tira o modal "Nova Visualização" de hoje |
+| [4. Versão só minha](parte-4-versao-so-minha.md) | "Salvar só para mim" na barra flutuante, o ícone "Versão só sua" na pílula e "Voltar à versão de todos" | 1 | Fica fora da base porque a versão de cada pessoa pede um lugar novo no back. Até ela chegar, Standard ou Viewer salva a mudança numa visualização de todos só como nova, e a linha 3 da RN011 vale inteira com esta parte |
 
 ## Regras de negócio comuns (RN)
 
