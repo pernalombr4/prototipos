@@ -1,4 +1,4 @@
-# Épico: O campo nos 4 formatos (célula, formulário, cru e relatório)
+# Épico: Padronização dos campos do ENSPACE (tabela, formulário, item e relatório)
 
 **O que é:** cada tipo de campo do ENSPACE passa a ter um desenho só, declarado num lugar só, que serve os 4 lugares
 onde o valor aparece: a célula da tabela de itens, o controle no formulário, a linha crua na coluna de resumo do item

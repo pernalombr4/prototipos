@@ -1971,7 +1971,7 @@ descrever o problema.
 Ela confirmou a divisão, e o card foi criado em 09/11/2026 no `desenvolvimento-enlighten2`,
 categoria `user_story` (regra 41 da spec):
 
-**O campo nos 4 formatos: célula, formulário, cru e relatório**
+**Padronização dos campos do ENSPACE: tabela, formulário, item e relatório**
 https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE146A34627C084CF4835FEB723FBC4
 
 - a descrição é o `epico.md` inteiro, com as partes, as 6 RN comuns, o padrão de qualidade, o
