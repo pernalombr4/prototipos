@@ -1814,3 +1814,86 @@ Para copiar o formato do ENSPACE eu precisaria baixar o `.xlsx` que o develop
 gera, e baixar arquivo pede o seu ok. Trabalhei com o que você descreveu (a
 tabela, igual à tela) e com o que a tela do develop mostra. Se quiser a cópia
 fiel do arquivo do produto, é só liberar o download.
+
+## Rodada 26: o épico e os requisitos, só do formato do campo
+
+Protótipo aprovado, então saiu o documento de requisitos (regra 40 da spec). A pasta é
+`requisitos/`, com o `epico.md` e 1 arquivo por parte.
+
+### O recorte, que foi o trabalho desta rodada
+
+Ela cortou o escopo na própria mensagem: **requisito só do que é formato do campo**, em
+tabela, formulário, cru e relatório, e **o dev faz isso no SDK**. "Outros botões criados e tal
+não coloque."
+
+Então ficou fora do documento tudo o que o protótipo ganhou nas rodadas 6 a 24 e que é gesto
+de tela, não desenho de campo: o quadro de edição que salta da célula, a criação pela grade, a
+seleção em massa com a barra flutuante, a bandeja de copiar, o botão Abrir, o cartão do
+registro relacionado, a ficha do campo e o botão que devolve as colunas à largura original. O
+`epico.md` lista isso em "Fora do escopo", para o dev não procurar requisito que não existe.
+
+A largura mínima da coluna, essa sim, ficou dentro: ela é característica do campo, está no
+catálogo de cada tipo e é o que faz o corte com reticências e o contador terem piso. O que
+saiu foi o controle do andaime que desfaz o arraste.
+
+### 1 épico, e não 2
+
+Ela levantou a dúvida: "talvez sejam 2 épicos separados... mas veja se é a mesma coisa só que
+numa tarefa diferente". É a mesma coisa numa tarefa diferente, e por um motivo que o protótipo
+provou: **o relatório é a quarta aplicação da mesma regra de texto**. Se a planilha virar épico
+próprio, a máscara da tela e a da planilha passam a ser 2 decisões, e divergir é só questão de
+tempo. É exatamente o defeito que este protótipo existe para evitar.
+
+O que é verdade, e está escrito na parte 4, é que a exportação é **back-end**, enquanto as
+partes 1 a 3 são componentes do `@be-enlighten/enspace-sdk-ui`. Isso separa quem faz, não o
+que se decide, e o card já separa por tarefa. A spec manda o mesmo: sem a confirmação dela,
+fica 1 épico (regra 40).
+
+### As 4 partes, e por que nesta ordem
+
+| Parte | O que entrega | Onde o dev mexe |
+|---|---|---|
+| 1. A célula na tabela | o componente que LÊ, no formato célula, mais a função que vira texto | SDK |
+| 2. O campo no formulário | o componente que ESCREVE, 1 controle por tipo | SDK |
+| 3. O campo cru na coluna do item | o mesmo componente da parte 1, no formato cru | SDK |
+| 4. A saída no relatório .xlsx | a exportação com o tipo de célula certo por tipo de campo | back-end |
+
+O corte é por **formato**, que é o vocabulário da própria demanda ("são os formatos cell, form
+e naked"). Cortar por família de campo daria 9 partes, cada uma mexendo nos 3 formatos: o dev
+construiria o mesmo componente 9 vezes.
+
+A parte 1 é a base porque é nela que nascem as 2 peças que as outras 3 usam.
+
+### A lista de 34 tipos não entrou como requisito
+
+A regra 9 da skill `requisitos` proíbe enumerar a lista que o dev completa: a regra se escreve
+com "cada" e os exemplos ilustram. E os parâmetros por tipo (família, alinhamento, largura
+mínima, teto da lista, entrada, saída e saída formatada) são 34 linhas de tabela.
+
+Resolvido com a RN905, que manda o dev no lugar onde essa tabela existe de verdade: **a aba
+"Padrão dos campos" da planilha que o protótipo gera no botão "Baixar relatório (.xlsx)"**, na
+barra do topo. Ela pediu isso de forma explícita, e a RN905 é citada pelas 4 partes, então a
+instrução chega em toda tarefa do card.
+
+### Os achados do develop que viraram requisito
+
+Os que são de formato, e só eles:
+
+- **Texto Longo nasce com 1 linha** e não cresce (achado 6.3.4 do briefing). Virou o RF110:
+  3 linhas, crescendo até 6;
+- **ID Personalizado com "Por favor digite"** num campo `readonly` e `disabled`. Virou o RF107;
+- **Matriz de dados com célula em branco** e dado dentro. Virou o RF027;
+- **número da coluna impresso sob cada opção** da matriz. Virou o RF135;
+- **relação com `display` vazio** deixando a célula em branco. Virou a RN904 e os RF024 e RF138;
+- **link do editor abrindo o `prompt()` do navegador**, em inglês. Virou o RF113.
+
+O resto dos achados (contador de 4 dígitos gerando 3, "Formato de Data" sem opção,
+`choose_an_option` sem tradução, Campo virtual imprimindo `[object Object]`) é bug de produto,
+não requisito de formato: continuam registrados nas rodadas 13 a 15 deste arquivo.
+
+### O que ficou em aberto para o back
+
+5 perguntas no `epico.md`, e a que mais pesa é a última: hoje a API devolve o valor cru e cada
+tela aplica o `cFormat` por conta. Enquanto for assim, a regra de texto precisa existir 2
+vezes, uma no SDK e uma na exportação, e é por isso que a parte 4 tem o RNF301 pedindo 1 fonte
+só. Devolver a saída formatada junto do valor cru resolveria as duas pontas.

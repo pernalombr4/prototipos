@@ -41,8 +41,8 @@ import type { Item } from '@be-enlighten/enspace-sdk-schemas'
 definePageMeta({
   titulo: 'Padrão dos campos',
   descricao: 'Como cada tipo de campo aparece na tabela, no formulário e na sidebar, com o contrato de back-end de cada um.',
-  status: 'em-revisao',
-  atualizado: '2026-09-22',
+  status: 'aprovado',
+  atualizado: '2026-11-09',
   tela: 'Tela nova de itens (Lab), categoria com um campo de cada tipo',
 })
 
