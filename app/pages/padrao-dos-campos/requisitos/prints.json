@@ -1,0 +1,989 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/padrao-dos-campos/",
+  "andaime": "Andaime do protótipo, não é produto",
+  "largura": 1440,
+  "cenas": {
+    "tabela": [
+      {
+        "js": "window.__ith=(c)=>[...document.querySelectorAll('th')].findIndex(x=>x.innerText.replace(/\\s+/g,' ').trim()===c);window.__col=(c)=>document.querySelectorAll('th')[__ith(c)];window.__cel=(c,r)=>{const tr=document.querySelectorAll('tbody tr')[r];return tr?tr.children[__ith(c)]:null}"
+      },
+      {
+        "esperar": 300
+      }
+    ],
+    "formulario": [
+      {
+        "estado": "Formulário"
+      },
+      {
+        "esperar": 900
+      }
+    ],
+    "cru": [
+      {
+        "estado": "Cru"
+      },
+      {
+        "esperar": 900
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Texto Curto\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Texto Curto\",0);if(c)c.dataset.print='rf001'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf001]"
+      }
+    },
+    "RF005": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Texto Curto\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const i=__ith(\"Texto Curto\");const c=[...document.querySelectorAll('tbody tr')].map(t=>t.children[i]).find(x=>x&&x.innerText.trim()==='');if(c)c.dataset.print='rf005'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf005]"
+      }
+    },
+    "RF002": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Valor Monetário\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Número\",0);if(c)c.dataset.print='rf002'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf002]"
+      }
+    },
+    "RF008": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Valor Monetário\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const h=__col(\"Valor Monetário\");if(h)h.dataset.print='rf008'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf008]"
+      }
+    },
+    "RF004": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Valor Monetário\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Número\",0);if(c)c.dataset.print='rf004a'})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Número\",1);if(c)c.dataset.print='rf004b'})()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=rf004a]"
+        },
+        {
+          "css": "[data-print=rf004b]"
+        }
+      ]
+    },
+    "RF003": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Chat\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const h=__col(\"Chat\");if(h)h.dataset.print='rf003'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf003]"
+      }
+    },
+    "RF006": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Texto Longo\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Texto Longo\",3);if(c)c.dataset.print='rf006'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf006]"
+      }
+    },
+    "RF007": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Texto Longo\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Texto Longo\",3);if(c)c.dataset.print='rf007'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf007]"
+      }
+    },
+    "RF009": {
+      "sem": "a largura mínima se vê arrastando a borda do cabeçalho da coluna no protótipo, e o arraste não cabe num print"
+    },
+    "RF020": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Anotações\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Editor de texto HTML\",0);if(c)c.dataset.print='rf020'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf020]"
+      }
+    },
+    "RF028": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Anotações\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Anotações\",0);if(c)c.dataset.print='rf028'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf028]"
+      }
+    },
+    "RF021": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Lista de Seleção Múltipla\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Lista de Seleção Única\",0);if(c)c.dataset.print='rf021'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf021]"
+      }
+    },
+    "RF022": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Data (Calendário)\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Alternativa Binária\",0);if(c)c.dataset.print='rf022'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf022]"
+      }
+    },
+    "RF023": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Data (Calendário)\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Data (Calendário)\",0);if(c)c.dataset.print='rf023'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf023]"
+      }
+    },
+    "RF024": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Data (Calendário)\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Relacionamento Simples\",3);if(c)c.dataset.print='rf024'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf024]"
+      }
+    },
+    "RF025": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Pessoa/Empresa\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Pessoa/Empresa\",0);if(c)c.dataset.print='rf025'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf025]"
+      }
+    },
+    "RF026": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Pessoa/Empresa\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Arquivo\",0);if(c)c.dataset.print='rf026'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf026]"
+      }
+    },
+    "RF027": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Matriz de dados\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Matriz de dados\",0);if(c)c.dataset.print='rf027'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf027]"
+      }
+    },
+    "RF029": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Matriz de dados\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"ID personalizado\",0);if(c)c.dataset.print='rf029'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf029]"
+      }
+    },
+    "RF012": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Tags\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Tags\",3);if(c)c.dataset.print='rf012'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf012]"
+      }
+    },
+    "RF013": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Tags\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Tags\",3);if(c)c.dataset.print='rf013'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf013]"
+      }
+    },
+    "RF015": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Tags\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Tags\",3);if(c)c.dataset.print='rf015'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf015]"
+      }
+    },
+    "RF014": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Tags\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Tags\",3);if(c)c.dataset.print='rf014'})()"
+        },
+        {
+          "pairar": {
+            "regex": "^\\+\\d+$"
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf014]"
+      }
+    },
+    "RF030": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Valor Monetário\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Valor Monetário\",0);if(c)c.dataset.print='rf030'})()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=rf030]"
+      }
+    },
+    "RF031": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Valor Monetário\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Valor Monetário\",3);const i=c&&c.querySelector('[role=button]');if(i)i.dataset.print='i4'})()"
+        },
+        {
+          "pairar": {
+            "css": "[data-print=i4]"
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Valor inicial"
+        },
+        {
+          "texto": "Valor atual"
+        }
+      ]
+    },
+    "RF032": {
+      "cena": "tabela",
+      "passos": [
+        {
+          "js": "(()=>{const h=__col(\"Valor Monetário\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
+        },
+        {
+          "js": "(()=>{const c=__cel(\"Valor Monetário\",3);const i=c&&c.querySelector('[role=button]');if(i)i.dataset.print='i4'})()"
+        },
+        {
+          "pairar": {
+            "css": "[data-print=i4]"
+          },
+          "esperar": 900
+        },
+        {
+          "clicar": "Mostrar Legenda",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "texto": "Mostrar Legenda"
+      }
+    },
+    "RF101": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Texto Curto\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Texto Curto",
+        "ancestral": "div"
+      }
+    },
+    "RF104": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Texto Curto\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Texto Curto",
+        "ancestral": "div"
+      }
+    },
+    "RF103": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Texto Curto\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Texto Curto"
+      }
+    },
+    "RF102": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Texto com máscara\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Texto com máscara",
+          "ancestral": "div"
+        },
+        {
+          "texto": "E-mail",
+          "ancestral": "div"
+        }
+      ]
+    },
+    "RF105": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Texto com máscara\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Texto com máscara",
+          "ancestral": "div"
+        },
+        {
+          "texto": "E-mail",
+          "ancestral": "div"
+        }
+      ]
+    },
+    "RF106": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Chat\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Chat",
+        "ancestral": "div"
+      }
+    },
+    "RF107": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"ID personalizado\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "ID personalizado",
+        "ancestral": "div"
+      }
+    },
+    "RF110": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Texto Longo\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Texto Longo",
+        "ancestral": "div"
+      }
+    },
+    "RF114": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Número\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Número",
+        "ancestral": "div"
+      }
+    },
+    "RF115": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Valor Monetário\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Valor Monetário",
+        "ancestral": "div"
+      }
+    },
+    "RF116": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Valor Monetário\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Valor Monetário",
+        "ancestral": "div"
+      }
+    },
+    "RF117": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Duração\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Duração",
+        "ancestral": "div"
+      }
+    },
+    "RF118": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Data (Calendário)\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Data (Calendário)",
+        "ancestral": "div"
+      }
+    },
+    "RF119": {
+      "sem": "o campo de data do protótipo está com Exibir Hora desligado, que é a configuração do mock"
+    },
+    "RF120": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Botões de Seleção única\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Botões de Seleção única",
+        "ancestral": "div"
+      }
+    },
+    "RF121": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Lista de Seleção Única\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Lista de Seleção Única",
+        "ancestral": "div"
+      }
+    },
+    "RF122": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Lista de Seleção Múltipla\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Lista de Seleção Múltipla",
+        "ancestral": "div"
+      }
+    },
+    "RF123": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Lista de Seleção Múltipla\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Lista de Seleção Múltipla",
+        "ancestral": "div"
+      }
+    },
+    "RF124": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Alternativa Binária\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Alternativa Binária",
+        "ancestral": "div"
+      }
+    },
+    "RF111": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Editor de texto HTML\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Editor de texto HTML",
+        "ancestral": "div"
+      }
+    },
+    "RF112": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Editor de texto HTML\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Editor de texto HTML",
+        "ancestral": "div"
+      }
+    },
+    "RF113": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Editor de texto HTML\");b&&b.scrollIntoView({block:'center'})})()"
+        },
+        {
+          "clicar": {
+            "texto": "Inserir link"
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "texto": "Inserir link"
+      }
+    },
+    "RF130": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Pessoa/Empresa\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Pessoa/Empresa",
+        "ancestral": "div"
+      }
+    },
+    "RF131": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Pessoa/Empresa\");b&&b.scrollIntoView({block:'center'})})()"
+        },
+        {
+          "clicar": {
+            "texto": "Por favor, selecione"
+          },
+          "esperar": 600
+        },
+        {
+          "clicar": "Pessoa Jurídica",
+          "esperar": 600
+        },
+        {
+          "focar": {
+            "texto": "99.999.999/9999-99"
+          }
+        },
+        {
+          "digitar": "11222333000199"
+        }
+      ],
+      "destacar": {
+        "texto": "Pessoa/Empresa",
+        "ancestral": "div"
+      }
+    },
+    "RF132": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Pessoa/Empresa\");b&&b.scrollIntoView({block:'center'})})()"
+        },
+        {
+          "clicar": {
+            "texto": "Por favor, selecione"
+          },
+          "esperar": 600
+        },
+        {
+          "clicar": "Pessoa Jurídica",
+          "esperar": 600
+        },
+        {
+          "focar": {
+            "texto": "99.999.999/9999-99"
+          }
+        },
+        {
+          "digitar": "11222333000181"
+        },
+        {
+          "esperar": 1400
+        }
+      ],
+      "destacar": {
+        "texto": "Pessoa/Empresa",
+        "ancestral": "div"
+      }
+    },
+    "RF133": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Endereço\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Endereço",
+        "ancestral": "div"
+      }
+    },
+    "RF134": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Matriz de dados\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Matriz de dados",
+        "ancestral": "div"
+      }
+    },
+    "RF135": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Matriz de dados\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Matriz de dados",
+        "ancestral": "div"
+      }
+    },
+    "RF136": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Repetidor\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Repetidor",
+        "ancestral": "div"
+      }
+    },
+    "RF137": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Arquivo\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Arquivo",
+        "ancestral": "div"
+      }
+    },
+    "RF138": {
+      "cena": "formulario",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.replace(/\\s+/g,' ').trim()===\"Relacionamento Simples\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Relacionamento Simples",
+        "ancestral": "div"
+      }
+    },
+    "RF201": {
+      "cena": "cru",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button[aria-label]')].find(x=>x.getAttribute('aria-label')===\"Texto Curto\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Texto Curto",
+        "ancestral": "div"
+      }
+    },
+    "RF202": {
+      "cena": "cru",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button[aria-label]')].find(x=>x.getAttribute('aria-label')===\"Texto Curto\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Texto Curto",
+        "ancestral": "div"
+      }
+    },
+    "RF203": {
+      "cena": "cru",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button[aria-label]')].find(x=>x.getAttribute('aria-label')===\"Lista de Seleção Única\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Lista de Seleção Única",
+        "ancestral": "div"
+      }
+    },
+    "RF204": {
+      "cena": "cru",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button[aria-label]')].find(x=>x.getAttribute('aria-label')===\"Endereço\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Endereço",
+        "ancestral": "div"
+      }
+    },
+    "RF205": {
+      "cena": "cru",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button[aria-label]')].find(x=>x.getAttribute('aria-label')===\"Data (Calendário)\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Data (Calendário)",
+        "ancestral": "div"
+      }
+    },
+    "RF206": {
+      "cena": "cru",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button[aria-label]')].find(x=>x.getAttribute('aria-label')===\"Tags\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Tags",
+        "ancestral": "div"
+      }
+    },
+    "RF207": {
+      "sem": "o print não mostra ausência. No protótipo, abra a visão rápida e compare a coluna da esquerda com a aba Visão Geral"
+    },
+    "RF208": {
+      "cena": "cru",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button[aria-label]')].find(x=>x.getAttribute('aria-label')===\"Texto Longo\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Texto Longo",
+        "ancestral": "div"
+      }
+    },
+    "RF209": {
+      "cena": "cru",
+      "passos": [
+        {
+          "js": "(()=>{const b=[...document.querySelectorAll('button[aria-label]')].find(x=>x.getAttribute('aria-label')===\"Editor de texto HTML\");b&&b.scrollIntoView({block:'center'})})()"
+        }
+      ],
+      "destacar": {
+        "texto": "Editor de texto HTML",
+        "ancestral": "div"
+      }
+    },
+    "RF301": {
+      "sem": "a saída é o arquivo .xlsx, e não uma tela. No protótipo, clique em \"Baixar relatório (.xlsx)\" na barra do topo e abra o arquivo"
+    },
+    "RF302": {
+      "sem": "a saída é o arquivo .xlsx, e não uma tela. No protótipo, clique em \"Baixar relatório (.xlsx)\" na barra do topo e abra o arquivo"
+    },
+    "RF303": {
+      "sem": "a saída é o arquivo .xlsx, e não uma tela. No protótipo, clique em \"Baixar relatório (.xlsx)\" na barra do topo e abra o arquivo"
+    },
+    "RF304": {
+      "sem": "a saída é o arquivo .xlsx, e não uma tela. No protótipo, clique em \"Baixar relatório (.xlsx)\" na barra do topo e abra o arquivo"
+    },
+    "RF305": {
+      "sem": "a saída é o arquivo .xlsx, e não uma tela. No protótipo, clique em \"Baixar relatório (.xlsx)\" na barra do topo e abra o arquivo"
+    },
+    "RF306": {
+      "sem": "a saída é o arquivo .xlsx, e não uma tela. No protótipo, clique em \"Baixar relatório (.xlsx)\" na barra do topo e abra o arquivo"
+    },
+    "RF310": {
+      "sem": "a saída é o arquivo .xlsx, e não uma tela. No protótipo, clique em \"Baixar relatório (.xlsx)\" na barra do topo e abra o arquivo"
+    },
+    "RF311": {
+      "sem": "a saída é o arquivo .xlsx, e não uma tela. No protótipo, clique em \"Baixar relatório (.xlsx)\" na barra do topo e abra o arquivo"
+    },
+    "RF312": {
+      "sem": "a saída é o arquivo .xlsx, e não uma tela. No protótipo, clique em \"Baixar relatório (.xlsx)\" na barra do topo e abra o arquivo"
+    },
+    "RF313": {
+      "sem": "a saída é o arquivo .xlsx, e não uma tela. No protótipo, clique em \"Baixar relatório (.xlsx)\" na barra do topo e abra o arquivo"
+    },
+    "RF314": {
+      "sem": "a saída é o arquivo .xlsx, e não uma tela. No protótipo, clique em \"Baixar relatório (.xlsx)\" na barra do topo e abra o arquivo"
+    },
+    "RF315": {
+      "sem": "a saída é o arquivo .xlsx, e não uma tela. No protótipo, clique em \"Baixar relatório (.xlsx)\" na barra do topo e abra o arquivo"
+    },
+    "RF316": {
+      "sem": "a saída é o arquivo .xlsx, e não uma tela. No protótipo, clique em \"Baixar relatório (.xlsx)\" na barra do topo e abra o arquivo"
+    },
+    "RF317": {
+      "sem": "a saída é o arquivo .xlsx, e não uma tela. No protótipo, clique em \"Baixar relatório (.xlsx)\" na barra do topo e abra o arquivo"
+    },
+    "RF318": {
+      "sem": "a saída é o arquivo .xlsx, e não uma tela. No protótipo, clique em \"Baixar relatório (.xlsx)\" na barra do topo e abra o arquivo"
+    },
+    "RF319": {
+      "sem": "a saída é o arquivo .xlsx, e não uma tela. No protótipo, clique em \"Baixar relatório (.xlsx)\" na barra do topo e abra o arquivo"
+    },
+    "RF320": {
+      "sem": "a saída é o arquivo .xlsx, e não uma tela. No protótipo, clique em \"Baixar relatório (.xlsx)\" na barra do topo e abra o arquivo"
+    }
+  }
+}

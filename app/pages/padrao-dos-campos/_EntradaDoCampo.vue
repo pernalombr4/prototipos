@@ -952,11 +952,15 @@ const opcoesDeRelacao = computed(() =>
 
     <!-- ──────────────────────────── booleano ────────────────────────────── -->
     <!--
-      Alternativa binária: só o controle, sem rótulo ao lado. "Sim/Não" não é
-      o nosso par: o campo tem um estado só, ligado ou desligado, e o rótulo
-      de cima já diz de que se trata.
+      Alternativa binária: CAIXA DE MARCAR, que é o que o develop usa no
+      formulário (medido em 22/09/2026, BRIEFING.md 6.3.2). Eu tinha posto uma
+      chave aqui, seguindo a recomendação do `Melhoria dos campos.docx`, e isso
+      contrariava a regra deste protótipo: o padrão parte do que existe, e a
+      troca por chave é proposta que ela ainda não decidiu.
+      A célula já desenha a mesma caixa, então os 2 formatos falam a mesma
+      língua. Sem rótulo ao lado: o rótulo de cima já diz de que se trata.
     -->
-    <USwitch
+    <UCheckbox
       v-else-if="campo.tipo === 'inputSwitch'"
       v-model="comoBooleano"
       size="sm"
