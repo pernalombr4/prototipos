@@ -50,7 +50,7 @@
           "js": "(()=>{const h=__col(\"Texto Curto\");h&&h.scrollIntoView({inline:'center',block:'nearest'})})()"
         },
         {
-          "js": "(()=>{const i=__ith(\"Texto Curto\");const c=[...document.querySelectorAll('tbody tr')].map(t=>t.children[i]).find(x=>x&&x.innerText.trim()==='');if(c)c.dataset.print='rf005'})()"
+          "js": "(()=>{const i=__ith(\"Texto Longo\");const c=[...document.querySelectorAll('tbody tr')].map(t=>t.children[i]).find(x=>x&&x.querySelector('.sr-only'));if(c)c.dataset.print='rf005'})()"
         }
       ],
       "destacar": {
