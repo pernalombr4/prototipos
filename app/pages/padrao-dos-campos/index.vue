@@ -295,46 +295,46 @@ async function baixarRelatorio() {
   }
 
   /*
-   * A aba da saída usa CÉLULA TIPADA: número vai como número, data vai como
-   * serial de data e arquivo vai como hyperlink. É a regra da seção de
-   * exportação do documento do time de produtos, e ela está certa: texto em
-   * coluna de valor mata a soma no Excel.
+   * ───────────── A ABA DA TABELA: o que a tela mostra, igual ─────────────
+   *
+   * Ela corrigiu nesta rodada: "na hora de clicar em baixar relatório, deve
+   * extrair exatamente o dado da coluna, igual acontece no ENSPACE mesmo".
+   *
+   * Então esta aba É a tabela: as MESMAS colunas, na MESMA ordem, com os
+   * MESMOS cabeçalhos que estão na tela, e uma linha por item listado. Nada de
+   * coluna inventada na exportação, porque a planilha é o lugar onde o dev lê
+   * qual é o formato de saída de cada tipo de campo.
+   *
+   * O que muda em relação à tela é só o TIPO da célula, e é esse o ensinamento
+   * do arquivo: número vai como número, moeda vai como número com a máscara da
+   * própria moeda, data vai como serial de data, anexo vai como hyperlink. Na
+   * tela isso tudo é texto; na planilha, não pode ser, senão soma, média,
+   * ordem e filtro morrem.
    */
-  /*
-   * A moeda ganha uma coluna própria com o código ISO ao lado do valor. É a
-   * "dica de estrutura" do documento do time de produtos, e ela está certa:
-   * quando a moeda varia por linha, não existe uma máscara só que sirva para
-   * todas. Número puro numa coluna, código ISO na outra, e a soma continua
-   * funcionando.
-   */
-  const colunasDaSaida = campos.flatMap(c =>
-    c.tipo === 'EnCurrency'
-      ? [{ campo: c, iso: false }, { campo: c, iso: true }]
-      : [{ campo: c, iso: false }],
-  )
+  const colunasDaTabela = [
+    { chave: 'reference', rotulo: t.value.referencia, largura: 34 },
+    ...campos.map(c => ({
+      chave: c.refId,
+      rotulo: t.value.campos[c.tipo].rotulo,
+      largura: Math.min(48, Math.max(12, Math.round(c.largura / 7))),
+      campo: c,
+    })),
+  ]
 
-  const abaDaSaida: Aba = {
-    nome: idioma.value === 'en' ? 'Item output' : idioma.value === 'es' ? 'Salida de items' : 'Saida dos itens',
-    larguras: [34, ...colunasDaSaida.map(c => (c.iso ? 10 : Math.min(48, Math.round(c.campo.largura / 7))))],
+  const abaDaTabela: Aba = {
+    nome: idioma.value === 'en' ? 'Items' : idioma.value === 'es' ? 'Items' : 'Itens',
+    larguras: colunasDaTabela.map(c => c.largura),
     linhas: [
-      [
-        t.value.referencia,
-        ...colunasDaSaida.map(c =>
-          c.iso ? `${t.value.campos[c.campo.tipo].rotulo} (ISO)` : t.value.campos[c.campo.tipo].rotulo,
-        ),
-      ] as Celula[],
-      ...itens.value.map(item => [
-        item.reference,
-        ...colunasDaSaida.map((c): Celula => {
-          const bruto = (item.data as Record<string, unknown>)?.[c.campo.refId]
-          if (!c.iso) return celulaDeExportacao(c.campo, bruto, idioma.value, opcoes as never)
-          return (bruto as { currency?: string } | null)?.currency ?? ''
-        }),
-      ] as Celula[]),
+      colunasDaTabela.map(c => c.rotulo) as Celula[],
+      ...itensVisiveis.value.map(item => colunasDaTabela.map((c): Celula => {
+        if (!('campo' in c) || !c.campo) return item.reference
+        const bruto = (item.data as Record<string, unknown>)?.[c.campo.refId]
+        return celulaDeExportacao(c.campo, bruto, idioma.value, opcoes as never)
+      }) as Celula[]),
     ],
   }
 
-  baixar(gerarXlsx([abaDoPadrao, abaDaSaida], idioma.value), `${t.value.relatorioNome}.xlsx`)
+  baixar(gerarXlsx([abaDaTabela, abaDoPadrao], idioma.value), `${t.value.relatorioNome}.xlsx`)
   gerando.value = false
   toast.add({ title: t.value.relatorioPronto, icon: 'i-lucide-file-down', color: 'success' })
 }

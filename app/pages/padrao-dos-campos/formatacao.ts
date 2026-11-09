@@ -393,13 +393,21 @@ export function celulaDeExportacao(
 
     case 'EnCurrency': {
       /*
-       * O documento do time de produtos tem razão: se a moeda varia por linha,
-       * o jeito certo é número puro numa coluna e o código ISO em outra. A
-       * máscara do arquivo é uma só, e forçá-la a uma moeda mentiria sobre as
-       * outras. Aqui vai o número; o código sai na coluna ao lado.
+       * Número puro, com a máscara DA MOEDA daquela célula.
+       *
+       * O documento do time de produtos propõe o número numa coluna e o código
+       * ISO em outra, por entender que a planilha tem uma máscara só. Ela não
+       * tem: o `.xlsx` aceita um formato por célula, e é o que a planilha deste
+       * protótipo faz desde a rodada 25. Assim a coluna exportada é a MESMA que
+       * está na tela, sem coluna inventada, e `US$ 7.250,90` continua sendo
+       * US$ quando a planilha está em português.
        */
       const v = valor as { currency?: string, value?: number } | number
-      return { tipo: 'moeda', valor: typeof v === 'number' ? v : (v.value ?? 0) }
+      return {
+        tipo: 'moeda',
+        valor: typeof v === 'number' ? v : (v.value ?? 0),
+        moeda: typeof v === 'number' ? undefined : v.currency,
+      }
     }
 
     case 'EnlCalendar':

@@ -1739,3 +1739,78 @@ Por 3 gestos, nenhum deles com botão desenhado na peça:
 A barra do andaime diz os dois primeiros, por faceta. Conferido em tela: o
 quadro de edição ficou com Limpar o campo e Fechar, e o nome da coluna abre a
 ficha com Família, Alinhamento, Largura mínima e Como salva.
+
+## Rodada 25: o relatório vira a tabela, e o texto do dev para de parecer copy
+
+### A exportação estava errada
+
+Ela corrigiu: "na hora de clicar em baixar relatório, deve extrair exatamente o
+dado da coluna, igual acontece no ENSPACE mesmo. A tabela deve ser extraída".
+
+A primeira aba do arquivo era o catálogo de tipos, e a segunda uma montagem
+minha com uma coluna extra de código ISO ao lado da moeda. Nenhuma das duas era
+a tabela.
+
+Agora a **primeira aba é a tabela**: as mesmas 35 colunas, na mesma ordem, com
+os mesmos cabeçalhos da tela, e uma linha por item listado. Conferido pelo
+arquivo gerado: o cabeçalho da planilha é idêntico, item por item, ao cabeçalho
+do `<thead>` da tela.
+
+O que muda da tela para a planilha é só o **tipo da célula**, e é esse o
+ensinamento do arquivo para o dev:
+
+| Tipo | Na planilha |
+|---|---|
+| Número | número, com `SOMA` e `MÉDIA` funcionando |
+| Valor Monetário | número, com a máscara **da moeda daquela célula** |
+| Data | serial de data, para ordenar e filtrar por mês e ano |
+| Anexo | hyperlink clicável |
+| Lista, tags, caixas | texto, separado por vírgula |
+| Chat | fora da planilha |
+
+A segunda aba continua sendo o catálogo de tipos, que é o documento do dev.
+
+### A coluna extra de moeda saiu
+
+O documento do time de produtos propõe o número numa coluna e o código ISO em
+outra, por entender que a planilha tem uma máscara só. Ela não tem: o `.xlsx`
+aceita **um formato por célula**. Então a planilha passou a montar um formato
+por moeda que aparece (R$, US$, €, e o próprio código para as demais), e cada
+célula aponta para o da sua moeda.
+
+Com isso a coluna exportada é a mesma da tela, sem coluna inventada, e
+`US$ 7.250,90` continua em dólar numa planilha em português. Conferido no
+arquivo: 3 formatos gerados e as células de moeda com 3 estilos diferentes.
+
+### Texto de ajuda do campo: saiu
+
+Ela apontou a descrição do tipo ("Uma linha de texto. É o campo de uso geral da
+categoria.") no alto da ficha e embaixo do campo no formulário. Era texto de
+ajuda, que no ENSPACE **quem configura é quem monta o campo**. Escrever um aqui
+inventa copy que não é nossa e sugere ao dev que ele precisa de uma frase
+embaixo de cada campo.
+
+Saíram, pela mesma razão: a descrição como placeholder do texto curto e do
+editor de HTML, e o `nome@empresa.com.br` do e-mail. Ficaram as máscaras
+(`999.999.999-99`, `99.999.999/9999-99`) e o placeholder de duração, que são
+cópia do develop, não invenção.
+
+### O que é informação para o dev agora tem cara de anotação
+
+"Enter salva. Sair do campo salva. Esc desfaz." é descrição de comportamento
+para implementar, não frase para o usuário ler. Virou o `_NotaParaODev.vue`:
+borda tracejada, cor de andaime e o rótulo **PARA O DEV** na frente. Quem olha
+sabe, antes de ler o conteúdo, que aquilo não entra no produto.
+
+Recebeu o mesmo tratamento o ID personalizado, que anunciava "O sistema gera
+este identificador ao salvar" no placeholder e a composição numa legenda.
+
+É a regra da rodada 24 aplicada ao texto: o andaime não se disfarça de produto.
+Lá foi um botão; aqui, uma frase.
+
+### Não baixei a exportação do produto
+
+Para copiar o formato do ENSPACE eu precisaria baixar o `.xlsx` que o develop
+gera, e baixar arquivo pede o seu ok. Trabalhei com o que você descreveu (a
+tabela, igual à tela) e com o que a tela do develop mostra. Se quiser a cópia
+fiel do arquivo do produto, é só liberar o download.

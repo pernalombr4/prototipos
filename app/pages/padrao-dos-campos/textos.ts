@@ -198,6 +198,8 @@ export interface Textos {
   moverParaBaixo: string
   arrasteParaReordenar: string
   limparCampo: string
+  /** O rótulo da nota de andaime que fala com o dev, não com o usuário. */
+  notaParaODev: string
   /**
    * O quadro do "i" do valor monetário, copiado do ENSPACE em 24/09/2026.
    * Os textos da legenda são do produto, palavra por palavra, e por isso o
@@ -518,6 +520,7 @@ const ptBR: Textos = {
   moverParaBaixo: 'Mover para baixo',
   arrasteParaReordenar: 'Arraste para reordenar',
   limparCampo: 'Limpar o campo',
+  notaParaODev: 'Para o dev',
   correcao: {
     detalhes: 'Detalhes da correção monetária',
     valorInicial: 'Valor inicial',
@@ -1116,6 +1119,7 @@ const en: Textos = {
   moverParaBaixo: 'Move down',
   arrasteParaReordenar: 'Drag to reorder',
   limparCampo: 'Clear the field',
+  notaParaODev: 'For the dev',
   correcao: {
     detalhes: 'Monetary correction details',
     valorInicial: 'Initial value',
@@ -1714,6 +1718,7 @@ const es: Textos = {
   moverParaBaixo: 'Mover hacia abajo',
   arrasteParaReordenar: 'Arrastre para reordenar',
   limparCampo: 'Limpiar el campo',
+  notaParaODev: 'Para el dev',
   correcao: {
     detalhes: 'Detalles de la corrección monetaria',
     valorInicial: 'Valor inicial',

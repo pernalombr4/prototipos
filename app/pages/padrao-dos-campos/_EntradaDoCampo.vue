@@ -19,6 +19,7 @@ import type { Textos } from './textos'
 import { corDaOpcao, formatarBytes, formatarDataHora, rotuloDaOpcao } from './formatacao'
 import CartaoDoRegistro from './_CartaoDoRegistro.vue'
 import BotaoDeLink from './_BotaoDeLink.vue'
+import NotaParaODev from './_NotaParaODev.vue'
 import MatrizDeDados from './_MatrizDeDados.vue'
 import { cadastroPorDocumento, componentesDoId, indicesDeCorrecao, itensRelacionaveis, matrizDeDados, moedas, opcoes as todasAsOpcoes } from './mocks'
 
@@ -632,7 +633,6 @@ const opcoesDeRelacao = computed(() =>
       size="sm"
       class="w-full"
       :maxlength="120"
-      :placeholder="t.campos[campo.tipo].descricao"
     />
 
     <UTextarea
@@ -667,7 +667,6 @@ const opcoesDeRelacao = computed(() =>
       <UEditor
         v-model="comoTexto"
         :autofocus="autofoco ? 'end' : false"
-        :placeholder="t.campos[campo.tipo].descricao"
         :ui="{ base: 'min-h-20 px-2.5 py-2 text-sm focus:outline-none' }"
       >
         <template #default="{ editor }">
@@ -701,7 +700,6 @@ const opcoesDeRelacao = computed(() =>
       size="sm"
       class="w-full"
       icon="i-lucide-at-sign"
-      placeholder="nome@empresa.com.br"
     />
 
     <UInput
@@ -1034,13 +1032,16 @@ const opcoesDeRelacao = computed(() =>
         size="sm"
         class="w-full font-mono tabular-nums"
         icon="i-lucide-hash"
-        :placeholder="t.idGeradoPeloSistema"
         disabled
       />
-      <p class="text-xs text-muted">
-        {{ t.idComposicao }}:
-        {{ componentesDoId.map(c => `${c.tipo} (${c.detalhe})`).join(' + ') }}
-      </p>
+      <!--
+        O "o sistema gera ao salvar" e a composição são comportamento, não
+        copy: saíram do placeholder e da legenda e viraram nota de andaime.
+      -->
+      <NotaParaODev :t="t" compacta>
+        {{ t.idGeradoPeloSistema }}
+        {{ t.idComposicao }}: {{ componentesDoId.map(c => `${c.tipo} (${c.detalhe})`).join(' + ') }}
+      </NotaParaODev>
     </div>
 
     <UInput
@@ -1501,14 +1502,20 @@ const opcoesDeRelacao = computed(() =>
       passa), então quem a mostra é a barra da tabela, no alto.
     -->
     <div v-if="!semRotulo" class="mt-1 space-y-0.5">
-      <p class="text-xs text-muted">{{ t.campos[campo.tipo].descricao }}</p>
-      <p class="flex items-center gap-1 text-xs text-dimmed">
-        <UIcon
-          :name="campo.comoSalva === 'naoSeAplica' ? 'i-lucide-lock' : 'i-lucide-save'"
-          class="size-3 shrink-0"
-        />
+      <!--
+        SAIU A DESCRIÇÃO DO TIPO ("Uma linha de texto. É o campo de uso geral
+        da categoria."). Ela ocupava o lugar do texto de ajuda, que no ENSPACE
+        é configurado por quem monta o campo: escrever um aqui é inventar copy
+        que não é nossa e sugerir ao dev que ele precisa de uma frase embaixo
+        de cada campo.
+
+        FICOU o que salva, com cara de ANOTAÇÃO e não de interface, porque é
+        descrição de comportamento para o dev implementar, não frase para o
+        usuário ler. Ver o `_NotaParaODev.vue`.
+      -->
+      <NotaParaODev :t="t" compacta>
         {{ t.comoSalvaTextos[campo.comoSalva] }}
-      </p>
+      </NotaParaODev>
     </div>
 
     <!--

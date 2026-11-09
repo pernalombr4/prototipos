@@ -21,6 +21,7 @@ import type { Campo } from './campos'
 import type { Textos } from './textos'
 import ValorDoCampo from './_ValorDoCampo.vue'
 import EntradaDoCampo from './_EntradaDoCampo.vue'
+import NotaParaODev from './_NotaParaODev.vue'
 import { localeDe, saidaCrua, saidaFormatada } from './formatacao'
 import { opcoes as todasAsOpcoes } from './mocks'
 
@@ -134,7 +135,13 @@ const blocos = computed(() => {
 
     <template #body>
       <div v-if="campo && regra" class="space-y-5">
-        <p class="text-sm text-toned">{{ regra.descricao }}</p>
+        <!--
+          SAIU A DESCRIÇÃO DO TIPO. Ela lia como texto de ajuda do campo, que
+          no ENSPACE é configurado por quem monta o formulário: ficava
+          parecendo copy a implementar. O que o dev precisa saber do tipo está
+          nas três regras de renderização e no contrato de back-end, mais
+          abaixo.
+        -->
 
         <!-- A identidade do tipo -->
         <div class="flex flex-wrap items-center gap-1.5">
@@ -190,16 +197,9 @@ const blocos = computed(() => {
           a resposta muda por tipo: por isso ela mora no catálogo, e não num
           texto genérico de tela.
         -->
-        <p class="flex items-center gap-1.5 text-xs text-muted">
-          <UIcon
-            :name="campo.comoSalva === 'naoSeAplica' ? 'i-lucide-lock' : 'i-lucide-save'"
-            class="size-3.5 shrink-0"
-          />
-          <span>
-            <span class="font-medium text-toned">{{ t.comoSalva }}:</span>
-            {{ t.comoSalvaTextos[campo.comoSalva] }}
-          </span>
-        </p>
+        <NotaParaODev :t="t">
+          {{ t.comoSalva }}: {{ t.comoSalvaTextos[campo.comoSalva] }}
+        </NotaParaODev>
 
         <UAlert
           v-if="campo.disponibilidade === 'legado'"
