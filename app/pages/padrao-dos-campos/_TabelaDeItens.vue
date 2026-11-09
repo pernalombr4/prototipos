@@ -1203,30 +1203,23 @@ onMounted(() => nextTick(() => {
         -->
         <div class="mt-1.5 flex items-center gap-2 border-t border-default px-0.5 pt-1.5">
           <!--
-            ─────────────── O RODAPÉ DEIXOU DE DAR AULA ───────────────
-            Aqui morava a frase de o que salva ("Escolher já salva. Não há o
-            que confirmar."), e ela pediu para tirar: instrução escrita em toda
-            abertura de célula é ruído para quem já sabe, e quem não sabe
-            descobre fazendo. O texto não se perdeu: está na ficha do campo, na
-            linha "Como salva", a um clique daqui.
+            ──────────── O RODAPÉ SÓ TEM O QUE O PRODUTO TERIA ────────────
+            Passaram por aqui duas coisas que saíram a pedido dela:
 
-            O que sobrou é o botão da ficha, e ele é **do andaime**, não do
-            produto. Abre o catálogo deste protótipo, com o contrato de
-            back-end, as três regras de renderização e as configurações do
-            tipo. Por isso vem com a cor do andaime, e o balão diz isso na
-            cara em vez de deixar a pessoa achar que configurou campo no
-            ENSPACE.
+            1. a frase de o que salva ("Escolher já salva. Não há o que
+               confirmar."), que era instrução escrita em toda abertura de
+               célula. Está na ficha do campo, na linha "Como salva";
+            2. o botão de configuração do campo. Mesmo marcado com a cor do
+               andaime, ele é um botão desenhado dentro da peça que o dev vai
+               implementar, e botão desenhado vira requisito: o dev olha e
+               entende que precisa construir aquilo. Nenhum rótulo resolve
+               isso, porque a leitura acontece antes de ler o balão.
+
+            A ficha continua a um clique, por gestos que não desenham botão
+            nenhum na peça: **o nome da coluna** na tabela e **o rótulo do
+            campo** no formulário e na visão rápida. A barra do andaime, no
+            topo, diz os dois.
           -->
-          <UTooltip :text="`${t.fichaTitulo} (${t.andaimeTitulo})`">
-            <UButton
-              icon="i-lucide-settings-2"
-              color="warning"
-              variant="soft"
-              size="xs"
-              :aria-label="`${t.fichaTitulo} (${t.andaimeTitulo})`"
-              @click="emit('inspecionar', campoEmEdicao.tipo, emEdicao.item); fecharEdicao()"
-            />
-          </UTooltip>
           <UButton
             v-if="ehLinhaNova(emEdicao.item)"
             class="ml-auto"

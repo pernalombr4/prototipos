@@ -1709,3 +1709,33 @@ casa com o elemento é `opacity: var(--caixa-da-linha, 0)`, e o computado insist
 em `0`. Pela construção está certo, mas quem tem que ver é você, com a janela na
 frente. É a terceira vez hoje que a janela oculta me faz medir errado, e já
 registrei isso na rodada 22.
+
+## Rodada 24: o botão de configuração saiu do quadro de edição
+
+Ela cortou o botão que abria a ficha do campo de dentro do quadro: "vai parecer
+que ele tem que fazer aquele botão".
+
+O argumento vale mais que a marcação que eu tinha posto. Na rodada 22 o botão
+ganhou a cor do andaime e um balão dizendo "Ficha do campo (Andaime do
+protótipo, não é produto)". Não basta: **botão desenhado dentro da peça vira
+requisito**. O dev abre o protótipo, vê um botão no rodapé do editor de célula e
+entende que precisa construir aquilo. A leitura acontece antes de ele passar o
+mouse para ler o balão.
+
+A regra que fica: **o andaime não desenha controle dentro da peça.** Ele vive na
+barra do topo, que é declaradamente outra coisa, ou em gestos que não deixam
+marca na interface.
+
+### Como a ficha continua acessível
+
+Por 3 gestos, nenhum deles com botão desenhado na peça:
+
+| Onde | Gesto |
+|---|---|
+| tabela | clicar no nome da coluna |
+| formulário | clicar no rótulo do campo |
+| visão rápida | clicar no rótulo do campo |
+
+A barra do andaime diz os dois primeiros, por faceta. Conferido em tela: o
+quadro de edição ficou com Limpar o campo e Fechar, e o nome da coluna abre a
+ficha com Família, Alinhamento, Largura mínima e Como salva.
