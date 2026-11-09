@@ -1897,3 +1897,37 @@ não requisito de formato: continuam registrados nas rodadas 13 a 15 deste arqui
 tela aplica o `cFormat` por conta. Enquanto for assim, a regra de texto precisa existir 2
 vezes, uma no SDK e uma na exportação, e é por isso que a parte 4 tem o RNF301 pedindo 1 fonte
 só. Devolver a saída formatada junto do valor cru resolveria as duas pontas.
+
+### O corte mais fino, no mesmo dia
+
+Ela leu as 4 partes e pediu mais corte: "as partes 1 e 2 ainda estão grandes. e a do relatório
+tá grande também. faz sentido dividir mais? ou vai ficar nonsense?"
+
+Faz sentido em 3 lugares, e não faz em nenhum outro. Ficaram 12 partes, e o critério foi o do
+item 1 do corte das partes da skill: cada parte é 1 funcionalidade que o dev constrói, o QA
+confere e a pessoa usa sem a parte seguinte.
+
+| Antes | Depois | Por que o corte existe |
+|---|---|---|
+| 1. A célula na tabela (28 linhas) | 1. A base · 2. O desenho de cada família · 3. A lista que não cabe · 4. O Valor Monetário | A base entrega texto cortado na medida em toda coluna. A forma de cada família se pendura nela depois. O corte da fila de selos é outro problema (medir largura natural), e o quadro de correção monetária depende do back |
+| 2. O campo no formulário (31 linhas) | 5. A moldura · 6. Texto, número, data e escolha · 7. O Editor de texto HTML · 8. O Pessoa/Empresa · 9. Compostos e anexo | A moldura é a grade e as regras de todo campo. O editor e o Pessoa/Empresa são os 2 campos que se entregam sozinhos e carregam o risco (TipTap num, consulta de cadastro no outro) |
+| 4. A saída no relatório (19 linhas) | 11. A tabela extraída · 12. O tipo de célula por tipo de campo | São 2 entregas de verdade: primeiro o arquivo espelha a tela (colunas, ordem, texto), depois cada célula troca de tipo (número, data, moeda, hyperlink). A primeira já serve para exportar; a segunda é o que faz `SOMA` funcionar |
+
+**Onde eu não cortei, e por quê:**
+
+- **por família de campo** (9 partes na célula, 9 no formulário): cada uma mexeria nos 3
+  formatos, e o dev construiria o mesmo componente 9 vezes. É o corte que parece organizado e
+  desorganiza a obra;
+- **a parte 6, com 12 linhas**, e **a parte 12, com 11**: são 1 funcionalidade repetida por
+  tipo (o controle de cada campo simples, o tipo de célula de cada campo). O item 4 do corte
+  diz que o tamanho nunca corta sozinho uma funcionalidade;
+- **a parte 10, o formato cru**: 10 linhas, e o corte possível seria "a coluna" e "o texto
+  longo com Ver mais", que ninguém entrega em separado.
+
+Os IDs ficaram como estavam: a skill manda não renumerar quando a parte se divide depois de
+escrita, e a faixa por parte não aparece no documento. Por isso o RF110 está na parte 6 e o
+RF201 na parte 10.
+
+3 requisitos novos entraram no corte, todos de formato e todos do protótipo: os atalhos do
+calendário (RF118), o controle de hora quando o campo tem Exibir Hora (RF119) e a própria
+separação do símbolo da moeda (RF030) do quadro do "i" (RF031).

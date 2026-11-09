@@ -1,15 +1,12 @@
-# 3. O campo cru na coluna do item
+# 10. O campo cru na coluna do item
 
-**Objetivo:** quem abre um registro lê os campos da categoria na coluna de resumo, no mesmo desenho das linhas de
-metadado que a coluna já tem, sem abrir formulário.
+**Objetivo:** quem abre um registro lê os campos da categoria na coluna de resumo, no mesmo desenho das linhas de metadado que a coluna já tem, sem abrir formulário.
 
-**Depende de:** 1. A célula na tabela.
+**Depende de:** 1. A célula de campo: a base; 2. O desenho de cada família na célula.
 
-**Onde vale:** a coluna da esquerda da visão rápida do item e a mesma coluna na tela dedicada do item
-(`/workspaces/<ws>/types/<categoria>/<REFERENCE>`).
+**Onde vale:** o componente de leitura de campo do `@be-enlighten/enspace-sdk-ui`, no formato cru, na coluna da esquerda da visão rápida do item e na mesma coluna da tela dedicada do item (`/workspaces/<ws>/types/<categoria>/<REFERENCE>`).
 
-**Protótipo:** https://pernalombr4.github.io/prototipos/padrao-dos-campos/. O duplo clique numa linha abre a visão
-rápida, e o `»` da borda esquerda expande a coluna de resumo.
+**Protótipo:** https://pernalombr4.github.io/prototipos/padrao-dos-campos/. O duplo clique numa linha abre a visão rápida, e o `»` da borda esquerda expande a coluna de resumo.
 
 ## A coluna de resumo (RF)
 
