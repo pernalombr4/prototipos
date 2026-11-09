@@ -1909,7 +1909,7 @@ confere e a pessoa usa sem a parte seguinte.
 
 | Antes | Depois | Por que o corte existe |
 |---|---|---|
-| 1. A célula na tabela (28 linhas) | 1. A base · 2. O desenho de cada família · 3. A lista que não cabe · 4. O Valor Monetário | A base entrega texto cortado na medida em toda coluna. A forma de cada família se pendura nela depois. O corte da fila de selos é outro problema (medir largura natural), e o quadro de correção monetária depende do back |
+| 1. A célula na tabela (28 linhas) | 1. A base · 2. O desenho de cada família · 3. A lista de valores e o contador · 4. O Valor Monetário | A base entrega texto cortado na medida em toda coluna. A forma de cada família se pendura nela depois. O corte da fila de selos é outro problema (medir largura natural), e o quadro de correção monetária depende do back |
 | 2. O campo no formulário (31 linhas) | 5. A moldura · 6. Texto, número, data e escolha · 7. O Editor de texto HTML · 8. O Pessoa/Empresa · 9. Compostos e anexo | A moldura é a grade e as regras de todo campo. O editor e o Pessoa/Empresa são os 2 campos que se entregam sozinhos e carregam o risco (TipTap num, consulta de cadastro no outro) |
 | 4. A saída no relatório (19 linhas) | 11. A tabela extraída · 12. O tipo de célula por tipo de campo | São 2 entregas de verdade: primeiro o arquivo espelha a tela (colunas, ordem, texto), depois cada célula troca de tipo (número, data, moeda, hyperlink). A primeira já serve para exportar; a segunda é o que faz `SOMA` funcionar |
 
@@ -1931,3 +1931,37 @@ RF201 na parte 10.
 3 requisitos novos entraram no corte, todos de formato e todos do protótipo: os atalhos do
 calendário (RF118), o controle de hora quando o campo tem Exibir Hora (RF119) e a própria
 separação do símbolo da moeda (RF030) do quadro do "i" (RF031).
+
+### 1 tarefa por campo: não, e o motivo está no próprio protótipo
+
+Ela perguntou se não deveria ser 1 tarefa por campo. Não deveria, e o argumento é a decisão de
+fundo da rodada 1: **existe 1 desenho por FAMÍLIA, não por tipo.** Os 34 tipos caem em 9
+famílias, e o código é 1 componente que lê, 1 que escreve e 1 função que vira texto.
+
+Cortar por tipo brigaria com isso de 3 maneiras:
+
+1. **ninguém seria dono da base.** Grade do formulário, alinhamento, corte com reticências,
+   contador e largura mínima valem para todo campo. Num corte por tipo, ou isso se repete 34
+   vezes ou entra escondido na primeira tarefa;
+2. **o dev construiria tipo a tipo**, que é exatamente a doença que este protótipo existe para
+   curar (a fricção U5 da pesquisa de UX: 3 sistemas de tabela no mesmo produto). Padronizar é
+   escrever a regra 1 vez e aplicá-la a todos;
+3. **a tarefa se repetiria.** Os 10 tipos da família texto teriam a mesma frase de requisito,
+   palavra por palavra, e cada uma com print próprio. A regra 9 da skill `requisitos` já
+   proíbe isso: a regra se escreve com "cada", e a lista dos 34 fica na planilha.
+
+**E o corte por tipo já aconteceu onde ele se paga:** os 3 tipos que não caem numa família
+viraram tarefa própria, porque cada um tem obra e risco próprios.
+
+| Tarefa | Por que ela é 1 tipo só |
+|---|---|
+| 4. O Valor Monetário na célula | depende da correção monetária do back e tem quadro próprio com legenda |
+| 7. O Editor de texto HTML no formulário | é o TipTap, com barra e popover de link |
+| 8. O Pessoa/Empresa no formulário | valida documento e consulta cadastro fora do ENSPACE |
+
+O resto se confere tipo a tipo na aceitação, contra a aba "Padrão dos campos" da planilha, que
+tem 1 linha por tipo. É conferência, não 34 obras.
+
+Na mesma mensagem ela reprovou o nome da parte 3 ("'a lista que nao cabe' é um nome horroroso").
+Virou **"A lista de valores e o contador na célula"**: diz o assunto e o mecanismo, em vez de
+descrever o problema.

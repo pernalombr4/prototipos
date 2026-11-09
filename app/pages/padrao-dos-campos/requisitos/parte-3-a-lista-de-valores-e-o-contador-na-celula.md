@@ -1,6 +1,6 @@
-# 3. A lista que não cabe na célula
+# 3. A lista de valores e o contador na célula
 
-**Objetivo:** o campo que guarda lista mostra o que cabe na coluna e avisa quantos valores ficaram de fora, em qualquer largura.
+**Objetivo:** o campo que guarda lista mostra, na célula, os valores que cabem na coluna e conta os que ficaram de fora, em qualquer largura.
 
 **Depende de:** 1. A célula de campo: a base; 2. O desenho de cada família na célula.
 
