@@ -1965,3 +1965,32 @@ tem 1 linha por tipo. É conferência, não 34 obras.
 Na mesma mensagem ela reprovou o nome da parte 3 ("'a lista que nao cabe' é um nome horroroso").
 Virou **"A lista de valores e o contador na célula"**: diz o assunto e o mecanismo, em vez de
 descrever o problema.
+
+### O card no ENSPACE, com 12 tarefas
+
+Ela confirmou a divisão, e o card foi criado em 09/11/2026 no `desenvolvimento-enlighten2`,
+categoria `user_story` (regra 41 da spec):
+
+**O campo nos 4 formatos: célula, formulário, cru e relatório**
+https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE146A34627C084CF4835FEB723FBC4
+
+- a descrição é o `epico.md` inteiro, com as partes, as 6 RN comuns, o padrão de qualidade, o
+  glossário e as 5 perguntas para o back;
+- 12 tarefas, 1 por parte, na ordem das partes. Cada requisito é uma caixa de marcar com a
+  prioridade e a relevância no fim, e cada grupo de requisitos leva o print abaixo das caixas;
+- a RN comum que a parte cita entra na tabela de RN da própria tarefa, então a tarefa se basta.
+
+**Os prints:** 51 arquivos em `evidencias/requisitos/`, cobrindo 63 requisitos. Saíram do
+`ferramentas/prints-de-requisito.mjs` contra o protótipo publicado, com o `prints.json` desta
+pasta. Os outros 27 requisitos levam "Sem print: <motivo>", e o motivo mais comum é o dos 17
+requisitos do relatório: **a saída é o arquivo .xlsx, e o caminho está escrito na tarefa**
+(clicar em "Baixar relatório (.xlsx)" na barra do topo do protótipo).
+
+### Um achado meu, consertado nesta rodada
+
+O formulário do protótipo usava **chave** na Alternativa Binária, e o develop usa **caixa de
+marcar** (medido em 22/09/2026, BRIEFING 6.3.2). Eu tinha seguido a recomendação do
+`Melhoria dos campos.docx` sem declarar a troca, e isso contraria a regra do protótipo: o
+padrão parte do que existe, e trocar por chave é proposta que ela ainda não decidiu. Agora o
+formulário usa a caixa, igual à célula, e a troca por chave continua disponível como decisão de
+produto.

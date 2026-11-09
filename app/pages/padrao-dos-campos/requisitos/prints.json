@@ -984,6 +984,27 @@
     },
     "RF320": {
       "sem": "a saída é o arquivo .xlsx, e não uma tela. No protótipo, clique em \"Baixar relatório (.xlsx)\" na barra do topo e abra o arquivo"
+    },
+    "RS001": {
+      "sem": "diz onde o código mora, e isso não tem tela"
+    },
+    "RS002": {
+      "sem": "diz onde o código mora, e isso não tem tela"
+    },
+    "RS101": {
+      "sem": "diz onde o código mora, e isso não tem tela"
+    },
+    "RS102": {
+      "sem": "diz onde o código mora, e isso não tem tela"
+    },
+    "RS201": {
+      "sem": "diz onde o código mora, e isso não tem tela"
+    },
+    "RS301": {
+      "sem": "diz onde o código mora, e isso não tem tela"
+    },
+    "RNF301": {
+      "sem": "a regra de texto vive no código, e não numa tela"
     }
   }
 }

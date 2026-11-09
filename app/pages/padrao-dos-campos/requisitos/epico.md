@@ -3,9 +3,9 @@
 **O que é:** cada tipo de campo do ENSPACE passa a ter um desenho só, declarado num lugar só, que serve os 4 lugares
 onde o valor aparece: a célula da tabela de itens, o controle no formulário, a linha crua na coluna de resumo do item
 e a célula da planilha do relatório. O desenho vem da **família** do tipo, e não do tipo, então um tipo novo numa
-família que já existe nasce padronizado. As partes 1 a 3 são componentes do `@be-enlighten/enspace-sdk-ui`: 1
+família que já existe nasce padronizado. As partes 1 a 10 são componentes do `@be-enlighten/enspace-sdk-ui`: 1
 componente que LÊ o valor (nos formatos célula e cru), 1 que o ESCREVE (formulário) e 1 função que transforma valor
-em texto, que os 3 chamam. A parte 4 é a exportação, no back-end, com a mesma regra de texto.
+em texto, que os 2 chamam. As partes 11 e 12 são a exportação, no back-end, com a mesma regra de texto.
 
 **Onde vale:** a tela nova de itens de cada categoria (`/workspaces/<ws>/types/<categoria>`), o modal "Novo registro"
 dela, a visão rápida do item, a tela dedicada do item (`/workspaces/<ws>/types/<categoria>/<REFERENCE>`) e o arquivo
@@ -87,4 +87,4 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 | P902 | `EnlCheckbox` está no schema, e `checkbox` está no dado gravado e no dicionário de idiomas, para o mesmo campo. Qual chave fica? | Time de back | Com as 2 chaves, o componente trata as 2 como o mesmo tipo |
 | P903 | 4 tipos têm dado gravado e não aparecem no seletor: `EnESign`, `EnTreeSelect`, `EnlTimeRange` e `EnlCheckbox`. Eles ainda se criam, ou só se desenham? | produto | Tipo que só se desenha fica em leitura nos 3 formatos e sai do formulário |
 | P904 | As chaves dos subcampos de Pessoa/Empresa (`type`, `cpf`, `cnpj`, `razao_social`, `nome_fantasia`, `name`) saíram da configuração do campo, e não do corpo da requisição, que vai como multipart. | Time de back | Confirma o nome de cada subcampo que o controle escreve e que a coluna lê |
-| P905 | A API devolve o valor cru, e cada tela aplica o `cFormat` por conta. Devolver a saída formatada junto com o valor cru tiraria essa conta do front. | Time de back | Com a saída formatada na resposta, a função de texto da parte 1 passa a só desenhar, e a planilha da parte 4 lê o mesmo campo |
+| P905 | A API devolve o valor cru, e cada tela aplica o `cFormat` por conta. Devolver a saída formatada junto com o valor cru tiraria essa conta do front. | Time de back | Com a saída formatada na resposta, a função de texto da parte 1 passa a só desenhar, e a exportação lê o mesmo campo |
