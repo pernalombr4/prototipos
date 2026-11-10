@@ -68,3 +68,21 @@
 - **Conferência no Chrome:** RF013, RF014, RF002 (1 toast por alteração), tabela, kanban, Spaceflow (editor e execução 9029) em pt-BR e es, nos temas claro e escuro, sem erro no console.
 - **Crítica e acessibilidade:** botões só de ícone (ordenar, filtrar, apagar, tirar filtro) têm nome acessível; painel e modal têm título e descrição; o cartão do kanban é um alvo só, com foco visível. Sem correção: as skills `design:design-critique` e `design:accessibility-review` não rodaram, pelo pedido de economia; o contraste dos selos pequenos de status não foi medido.
 - **Ver:** `http://localhost:3000/prazo-final-nas-tarefas` · `evidencias/proposta-painel-rf014.jpg`, `proposta-kanban.jpg`, `proposta-spaceflow-execucao.jpg`
+
+## Rodada 2 · 2026-11-10
+
+- **Pedido (literal):** "\"prazo\" e \"prazo final\" parecem nomes ruins, nao? talvez \"vencimento\" e \"prazo final\" sejam nomes melhores. ou \"data de vencimento\" e \"data final\"." Depois, sobre a recomendação de "Vencimento" e "Prazo final": "Sim, trocar".
+- **Mudou:** o vencimento se chama "Vencimento" em toda a tela (painel, criação, tabela, filtro da barra, avisos, toasts e Spaceflow).
+- **Mudou:** em espanhol, "Fecha límite" vira "Vencimiento"; em inglês fica "Due date". O campo novo continua "Prazo final", "Final deadline" e "Plazo final".
+- **Fronteira:** muda só o rótulo do vencimento; o comportamento dele não muda.
+- **Descartado:** "Data de vencimento" e "Data final". Motivo: "Data final" parece o fim de um período e pede uma "data inicial" ao lado; "Data de" alonga o cabeçalho da coluna sem acrescentar sentido.
+- **P2 fechada:** "Vencimento" e "Prazo final".
+- **Para o documento de requisitos:**
+  - o item "mudança no nome do vencimento atual" sai do Fora do escopo (o comportamento continua fora);
+  - requisito novo:
+
+    | ID | Requisito | Critério de aceite |
+    |---|---|---|
+    | RF018 | O vencimento da tarefa rápida deve se chamar "Vencimento" (en "Due date", es "Vencimiento") em cada tela que o mostra. | O painel, o modal de criação, a coluna da tabela, o filtro, o modal de Nova Visualização e o seletor de variáveis do Spaceflow mostram "Vencimento"; nenhum mostra "Prazo" nem "Data limite" para essa data. |
+- **Não deu:** conferir os outros lugares que hoje nomeiam o vencimento (Agenda, sino, cartões da Home e as Tarefas Programadas, que estão fora do escopo). A lista do RF018 cobre só as telas de Tarefas Rápidas e o Spaceflow.
+- **Ver:** https://pernalombr4.github.io/prototipos/prazo-final-nas-tarefas/
