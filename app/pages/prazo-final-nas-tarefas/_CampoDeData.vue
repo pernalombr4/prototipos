@@ -9,7 +9,13 @@
 const props = defineProps<{
   id: string
   rotulo: string
+  /** Instrução, entre o rótulo e o campo: o que a data significa. */
+  instrucao?: string
+  /** Ajuda, abaixo do campo: a regra. O aviso de erro toma o lugar dela. */
   ajuda?: string
+  /** Limites do calendário nativo (RN004): o seletor já esconde a data que seria recusada. */
+  min?: string | null
+  max?: string | null
   /** Valor gravado na tarefa, `AAAA-MM-DD` ou null. */
   salvo: string | null
   /** Texto do aviso no próprio campo. */
@@ -46,7 +52,7 @@ function apagar() {
 </script>
 
 <template>
-  <UFormField :label="rotulo" :help="erro ? undefined : ajuda" :error="erro" :name="id">
+  <UFormField :label="rotulo" :description="instrucao" :help="erro ? undefined : ajuda" :error="erro" :name="id">
     <div v-if="somenteLeitura" class="flex h-8 items-center gap-2 text-sm">
       <UIcon name="i-lucide-lock" class="size-3.5 text-muted" aria-hidden="true" />
       <span :class="salvo ? 'text-highlighted' : 'text-muted'">{{ salvo ? formatado : vazio }}</span>
@@ -56,6 +62,8 @@ function apagar() {
         :id="id"
         type="date"
         v-model="rascunho"
+        :min="min ?? undefined"
+        :max="max ?? undefined"
         :icon="icone"
         :loading="salvando"
         class="w-full max-w-48"

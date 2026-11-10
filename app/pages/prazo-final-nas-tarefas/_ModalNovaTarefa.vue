@@ -78,10 +78,14 @@ function criar() {
           <UFormField :label="t.criacao.prioridade" name="prioridade">
             <USelect v-model="prioridade" :items="opcoesDePrioridade" class="w-full" />
           </UFormField>
+        </div>
+        <div class="space-y-4">
           <CampoDeData
             id="nova-prazo"
             :rotulo="t.colunas.prazo"
+            :instrucao="t.prazoInstrucao"
             :ajuda="t.prazoAjuda"
+            :max="prazoFinal"
             :salvo="null"
             :vazio="t.semPrazo"
             icone="i-lucide-calendar"
@@ -90,7 +94,9 @@ function criar() {
           <CampoDeData
             id="nova-prazo-final"
             :rotulo="t.colunas.prazoFinal"
+            :instrucao="t.prazoFinalInstrucao"
             :ajuda="t.prazoFinalAjuda"
+            :min="prazo"
             :salvo="null"
             :vazio="t.semPrazoFinal"
             :erro="erroOrdem"

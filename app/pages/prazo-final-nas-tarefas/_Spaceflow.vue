@@ -182,6 +182,7 @@ function quando(iso: string) {
               <div v-for="campo in (['prazo', 'prazoFinal'] as const)" :key="campo" class="space-y-2 rounded-lg border border-default p-3">
                 <UFormField
                   :label="campo === 'prazo' ? t.colunas.prazo : t.colunas.prazoFinal"
+                  :description="campo === 'prazo' ? t.prazoInstrucao : t.prazoFinalInstrucao"
                   :error="campo === 'prazo' ? erroPrazo : erroPrazoFinal"
                   :name="`sf-${campo}`"
                 >

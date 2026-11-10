@@ -86,3 +86,44 @@
     | RF018 | O vencimento da tarefa rápida deve se chamar "Vencimento" (en "Due date", es "Vencimiento") em cada tela que o mostra. | O painel, o modal de criação, a coluna da tabela, o filtro, o modal de Nova Visualização e o seletor de variáveis do Spaceflow mostram "Vencimento"; nenhum mostra "Prazo" nem "Data limite" para essa data. |
 - **Não deu:** conferir os outros lugares que hoje nomeiam o vencimento (Agenda, sino, cartões da Home e as Tarefas Programadas, que estão fora do escopo). A lista do RF018 cobre só as telas de Tarefas Rápidas e o Spaceflow.
 - **Ver:** https://pernalombr4.github.io/prototipos/prazo-final-nas-tarefas/
+
+## Rodada 3 · 2026-11-10
+
+- **Pedido (literal):** "observe mais um ponto de pesquisa. com base nele voce deve definir instruction e help desses campos e, por ux, qual campo vem antes e qual vem depois no fluxo de leitura/configuraçao" (a pesquisa está resumida no `PESQUISA.md`, rodada 3).
+- **Mudou:** cada data ganha instrução (entre o rótulo e o campo: o que a data significa) e ajuda (abaixo do campo: a regra), no painel, na criação e no nó do Spaceflow.
+- **Mudou:** o calendário nativo já limita as datas: o vencimento não passa do prazo final, e o prazo final não fica antes do vencimento. O aviso de RF013 e RF014 continua para a data digitada.
+- **Fronteira:** muda o texto em volta dos campos e o limite do calendário; não muda rótulo, regra nem posição.
+
+### Instrução e ajuda
+
+| Campo | Instrução | Ajuda |
+|---|---|---|
+| Vencimento | Data planejada para a conclusão da tarefa. | Depois desta data, a tarefa é marcada como atrasada. |
+| Prazo final | Data em que a tarefa precisa estar concluída, como um prazo legal ou contratual. | O prazo final deve ser igual ou posterior ao vencimento e não altera o atraso. |
+
+Em inglês e espanhol, no `textos.ts` (`prazoInstrucao`, `prazoAjuda`, `prazoFinalInstrucao`, `prazoFinalAjuda`).
+
+| Por quê | |
+|---|---|
+| A instrução diz o papel da data | A pesquisa mostra que o mercado usa o par "data de trabalho" e "data limite". O vencimento é a data planejada; o prazo final é a data limite, com o exemplo do prazo legal ou contratual, que é o caso do cliente jurídico |
+| A ajuda diz a regra que surpreende | No mercado, quem marca o atraso é a data limite. No ENSPACE é o vencimento (RN005), e o prazo final não pode ficar antes dele (RN004). As 2 regras vão escritas, porque quem vem de outro produto espera o contrário |
+| O aviso de erro toma o lugar da ajuda | O campo mostra 1 texto embaixo por vez; a instrução continua em cima |
+
+### Ordem: Vencimento antes, Prazo final depois
+
+| Por quê | |
+|---|---|
+| Ordem do tempo | O vencimento é sempre igual ou anterior ao prazo final (RN004). Ler da esquerda para a direita, ou de cima para baixo, é ler do mais cedo para o mais tarde |
+| Dependência na configuração | O prazo final é limitado pelo vencimento: quem preenche o vencimento primeiro já encontra o calendário do prazo final começando nele |
+| O que decide o dia a dia vem primeiro | O vencimento marca o atraso e é a data que a equipe olha todo dia; o prazo final é a garantia |
+| O padrão dos produtos lidos | Things (When, depois Deadline), OmniFocus (Defer e Planned, depois Due) e Todoist (Date, depois Deadline) põem a data de trabalho antes da data limite |
+
+No painel e na criação, as 2 datas passam a ficar empilhadas, Vencimento em cima: com a instrução, lado a lado os campos desalinhavam (a instrução do prazo final ocupa 3 linhas no painel), e empilhar mantém a leitura de cima para baixo.
+
+A mesma ordem vale no painel, na criação, nas colunas da tabela, na linha de datas do cartão do kanban, no nó do Spaceflow e na lista de variáveis. Já era a ordem do protótipo; a rodada 3 registra o motivo.
+
+### O que a pesquisa reforça, sem mudar a tela nesta rodada
+
+- **P10 ganha peso:** o mercado separa "atrasada" de "perdeu o prazo final" (OmniFocus, MS Project, Motion), e para o cliente jurídico é esse estado que importa. Hoje a tarefa atrasada 1 dia e a que perdeu o prazo final mostram o mesmo selo. Proposta para a próxima rodada, se produtos quiser: selo próprio "Prazo final vencido" e destaque da data no cartão e na tabela.
+- **P4 (lembrete):** o mercado prende o lembrete à data de trabalho (Things) ou às 2 datas (OmniFocus).
+- **Maquete:** igual à rodada 1.

@@ -134,11 +134,14 @@ function salvar(campo: 'due_date' | 'final_due_date', valor: string | null) {
               variant="subtle"
               :description="t.somenteLeitura"
             />
-            <div :key="`${tarefa.id}-${versao}`" class="grid gap-4 sm:grid-cols-2">
+            <!-- Empilhados, na ordem do tempo: com a instrução, lado a lado os campos desalinham. -->
+            <div :key="`${tarefa.id}-${versao}`" class="space-y-4">
               <CampoDeData
                 id="painel-prazo"
                 :rotulo="t.colunas.prazo"
+                :instrucao="t.prazoInstrucao"
                 :ajuda="t.prazoAjuda"
+                :max="tarefa.final_due_date"
                 :salvo="tarefa.due_date"
                 :formatado="fmt(tarefa.due_date)"
                 :vazio="t.semPrazo"
@@ -151,7 +154,9 @@ function salvar(campo: 'due_date' | 'final_due_date', valor: string | null) {
               <CampoDeData
                 id="painel-prazo-final"
                 :rotulo="t.colunas.prazoFinal"
+                :instrucao="t.prazoFinalInstrucao"
                 :ajuda="t.prazoFinalAjuda"
+                :min="tarefa.due_date"
                 :salvo="tarefa.final_due_date"
                 :formatado="fmt(tarefa.final_due_date)"
                 :vazio="t.semPrazoFinal"
