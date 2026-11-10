@@ -127,3 +127,39 @@ A mesma ordem vale no painel, na criação, nas colunas da tabela, na linha de d
 - **P10 ganha peso:** o mercado separa "atrasada" de "perdeu o prazo final" (OmniFocus, MS Project, Motion), e para o cliente jurídico é esse estado que importa. Hoje a tarefa atrasada 1 dia e a que perdeu o prazo final mostram o mesmo selo. Proposta para a próxima rodada, se produtos quiser: selo próprio "Prazo final vencido" e destaque da data no cartão e na tabela.
 - **P4 (lembrete):** o mercado prende o lembrete à data de trabalho (Things) ou às 2 datas (OmniFocus).
 - **Maquete:** igual à rodada 1.
+
+## Rodada 4 · 2026-11-10
+
+- **Pedido (literal):** "Sim, desenhar" (o estado "Prazo final vencido", P10).
+- **Mudou:** a tarefa não concluída com o prazo final no passado ganha o estado "Prazo final vencido", que toma o lugar do "Atrasada" onde o selo aparece.
+- **Mudou:** tabela: a data do prazo final fica em vermelho, com o selo "Vencido"; a coluna Vencimento perde o selo "Atrasada" nessa linha, para não repetir.
+- **Mudou:** kanban: o cartão ganha borda esquerda mais grossa, fundo vermelho claro, o prazo final em vermelho e o selo "Prazo final vencido" no lugar de "Atrasada".
+- **Mudou:** painel: o selo do cabeçalho vira "Prazo final vencido".
+- **Mudou:** barra: o botão "Prazo final vencido (2)" filtra só essas tarefas, na tabela e no kanban. Só aparece quando há alguma.
+- **Mudou:** o mock ganha a tarefa "Protocolar a contestação do processo trabalhista" (vencimento 17/11, prazo final 19/11). Com "Coletar as assinaturas do aditivo" (21/11 e 21/11), são 2 tarefas no estado novo.
+- **Fronteira:** muda a forma de mostrar a tarefa atrasada cujo prazo final passou; não muda a regra do atraso (RN005).
+
+| Por quê | |
+|---|---|
+| 1 selo só por tarefa | Pela RN004, toda tarefa com prazo final vencido já está atrasada. Mostrar os 2 selos repete a informação; o selo mais grave vale pelos 2 |
+| Selo cheio (sólido) para o vencido, claro (sutil) para o atrasado | A diferença entre os 2 estados aparece no peso, sem cor nova. O mercado faz parecido: o Motion usa vermelho e laranja, o OmniFocus separa Due Soon de Overdue |
+| A bandeira acompanha o selo | É o ícone do prazo final em toda a tela; o selo diz qual data venceu |
+| Botão de filtro na barra, com a contagem | Para o cliente jurídico, essas são as tarefas que pedem ação imediata. O botão mostra quantas são sem abrir filtro nenhum, e some quando não há nenhuma |
+
+### Para o documento de requisitos
+
+| ID | Requisito | Critério de aceite | Relevância sugerida |
+|---|---|---|---|
+| RN006 | Uma tarefa rápida está com o prazo final vencido quando não está concluída e a data atual passa do prazo final. | Vencimento 17/11, prazo final 19/11, hoje 22/11, status Em andamento: prazo final vencido. A mesma tarefa concluída: sem o estado. | Obrigatório |
+| RF019 | Quando a tarefa rápida está com o prazo final vencido (RN006), a tabela, o cartão do kanban e o painel devem mostrar o selo "Prazo final vencido" no lugar do selo "Atrasada". | A tarefa da RN006 mostra "Prazo final vencido" nos 3 lugares e não mostra "Atrasada"; a tarefa só atrasada continua com "Atrasada". | Desejável |
+| RF020 | A tela de Tarefas Rápidas deve oferecer um atalho que filtra as tarefas com o prazo final vencido, com a contagem delas, na tabela e no kanban. | Com 2 tarefas no estado, o botão diz "Prazo final vencido (2)" e, ligado, deixa só as 2. Sem nenhuma, o botão não aparece. | Opcional |
+
+### Perguntas que ficam
+
+| ID | Pergunta | O que muda |
+|---|---|---|
+| P10 (fechada como proposta) | O estado existe? | Proposto acima; produtos confirma ao aprovar |
+| P11 | Existe o estado anterior, "prazo final próximo" (OmniFocus: Due Soon)? Com quantos dias de antecedência? | Selo e filtro de aviso antes de vencer; casa com o lembrete da P4 |
+| P12 | O estado "Prazo final vencido" vira variável ou gatilho no Spaceflow (por exemplo, avisar o gestor quando o prazo final vence)? | Novo gatilho ou condição no grupo Spaceflow |
+
+- **Maquete:** igual à rodada 1. O "hoje" continua fixo em 22/11/2026.

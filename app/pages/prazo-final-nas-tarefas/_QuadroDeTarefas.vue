@@ -13,7 +13,7 @@ import type { Idioma } from '~/composables/useIdioma'
 import type { Textos } from './textos'
 import type { Situacao, TarefaRapida } from './mocks'
 import { membros } from './mocks'
-import { atrasada, formatar } from './datas'
+import { atrasada, formatar, prazoFinalVencido } from './datas'
 
 const props = defineProps<{
   t: Textos
@@ -54,7 +54,7 @@ const nomeDe = (id: number | null) => membros.find(m => m.id === id)?.nome
           v-for="(tarefa, i) in porRaia[raia.valor]"
           :key="tarefa.id"
           class="group relative rounded-lg border border-default bg-default p-3 shadow-xs transition hover:-translate-y-0.5 hover:border-accented hover:shadow-md [animation:entrada_.3s_ease-out_both]"
-          :class="atrasada(tarefa) ? 'border-l-2 border-l-error' : ''"
+          :class="prazoFinalVencido(tarefa) ? 'border-l-4 border-l-error bg-error/5' : atrasada(tarefa) ? 'border-l-2 border-l-error' : ''"
           :style="{ animationDelay: `${i * 40}ms` }"
         >
           <h4 class="line-clamp-2 text-sm font-medium text-highlighted">
@@ -78,12 +78,13 @@ const nomeDe = (id: number | null) => membros.find(m => m.id === id)?.nome
               <span class="sr-only">{{ t.colunas.prazo }}:</span>
               {{ fmt(tarefa.due_date) }}
             </span>
-            <span v-if="tarefa.final_due_date" class="flex items-center gap-1 text-toned">
+            <span v-if="tarefa.final_due_date" class="flex items-center gap-1" :class="prazoFinalVencido(tarefa) ? 'font-medium text-error' : 'text-toned'">
               <UIcon name="i-lucide-flag" class="size-3.5" aria-hidden="true" />
               <span class="sr-only">{{ t.colunas.prazoFinal }}:</span>
               {{ fmt(tarefa.final_due_date) }}
             </span>
-            <UBadge v-if="atrasada(tarefa)" :label="t.atrasada" color="error" variant="subtle" size="sm" />
+            <UBadge v-if="prazoFinalVencido(tarefa)" :label="t.prazoFinalVencido" color="error" variant="solid" size="sm" icon="i-lucide-flag" />
+            <UBadge v-else-if="atrasada(tarefa)" :label="t.atrasada" color="error" variant="subtle" size="sm" />
             <UAvatar :alt="nomeDe(tarefa.assigned_to) ?? '?'" size="2xs" class="ml-auto" />
           </div>
         </article>

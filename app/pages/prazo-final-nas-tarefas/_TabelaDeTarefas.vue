@@ -11,7 +11,7 @@ import type { Idioma } from '~/composables/useIdioma'
 import type { Textos } from './textos'
 import type { TarefaRapida } from './mocks'
 import { membros } from './mocks'
-import { atrasada, formatar } from './datas'
+import { atrasada, formatar, prazoFinalVencido } from './datas'
 import CabecalhoDeData from './_CabecalhoDeData.vue'
 import type { FiltroDeColuna } from './datas'
 
@@ -163,11 +163,16 @@ const corDaSituacao = { pending: 'neutral', working: 'info', blocked: 'warning',
       <template #due_date-cell="{ row }">
         <span v-if="row.original.due_date" class="flex items-center gap-2" :class="atrasada(row.original) ? 'text-error' : 'text-toned'">
           {{ fmt(row.original.due_date) }}
-          <UBadge v-if="atrasada(row.original)" :label="t.atrasada" color="error" variant="subtle" size="sm" />
+          <UBadge v-if="atrasada(row.original) && !prazoFinalVencido(row.original)" :label="t.atrasada" color="error" variant="subtle" size="sm" />
         </span>
       </template>
       <template #final_due_date-cell="{ row }">
-        <span v-if="row.original.final_due_date" class="flex items-center gap-1.5 text-toned">
+        <span v-if="prazoFinalVencido(row.original)" class="flex items-center gap-1.5 font-medium text-error">
+          <UIcon name="i-lucide-flag" class="size-3.5" aria-hidden="true" />
+          {{ fmt(row.original.final_due_date) }}
+          <UBadge :label="t.vencido" color="error" variant="solid" size="sm" />
+        </span>
+        <span v-else-if="row.original.final_due_date" class="flex items-center gap-1.5 text-toned">
           <UIcon name="i-lucide-flag" class="size-3.5 text-muted" aria-hidden="true" />
           {{ fmt(row.original.final_due_date) }}
         </span>

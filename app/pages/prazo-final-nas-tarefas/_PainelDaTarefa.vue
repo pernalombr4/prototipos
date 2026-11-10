@@ -10,7 +10,7 @@ import type { Idioma } from '~/composables/useIdioma'
 import type { Textos } from './textos'
 import type { TarefaRapida } from './mocks'
 import { membros } from './mocks'
-import { atrasada, formatar, ordemValida } from './datas'
+import { atrasada, formatar, ordemValida, prazoFinalVencido } from './datas'
 import CampoDeData from './_CampoDeData.vue'
 
 const props = defineProps<{
@@ -115,7 +115,8 @@ function salvar(campo: 'due_date' | 'final_due_date', valor: string | null) {
         <div class="flex flex-wrap items-center gap-2">
           <UBadge :label="t.situacoes[tarefa.status]" color="neutral" variant="subtle" />
           <UBadge :label="t.prioridades[tarefa.priority]" color="neutral" variant="outline" />
-          <UBadge v-if="atrasada(tarefa)" :label="t.atrasada" color="error" variant="subtle" icon="i-lucide-alarm-clock" />
+          <UBadge v-if="prazoFinalVencido(tarefa)" :label="t.prazoFinalVencido" color="error" variant="solid" icon="i-lucide-flag" />
+          <UBadge v-else-if="atrasada(tarefa)" :label="t.atrasada" color="error" variant="subtle" icon="i-lucide-alarm-clock" />
           <span class="ml-auto flex items-center gap-2 text-sm text-toned">
             <UAvatar :alt="responsavel ?? t.semResponsavel" size="2xs" />
             {{ responsavel ?? t.semResponsavel }}

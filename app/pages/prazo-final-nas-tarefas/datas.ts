@@ -40,6 +40,15 @@ export function atrasada(t: TarefaRapida): boolean {
   return t.status !== 'completed' && !!t.due_date && t.due_date < HOJE
 }
 
+/**
+ * RN006 (proposta da rodada 4): o prazo final vencido. Tarefa não concluída
+ * cujo prazo final já passou. Pela RN004, ela também está atrasada; este
+ * estado toma o lugar do "Atrasada" onde o selo aparece.
+ */
+export function prazoFinalVencido(t: TarefaRapida): boolean {
+  return t.status !== 'completed' && !!t.final_due_date && t.final_due_date < HOJE
+}
+
 /** RN004: prazo final igual ou posterior ao vencimento. Sem uma das datas, não há o que comparar. */
 export function ordemValida(prazo: string | null, prazoFinal: string | null): boolean {
   return !prazo || !prazoFinal || prazoFinal >= prazo

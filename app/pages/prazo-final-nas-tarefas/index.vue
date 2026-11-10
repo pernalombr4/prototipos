@@ -24,7 +24,7 @@ import Spaceflow from './_Spaceflow.vue'
 import type { TarefaRapida } from './mocks'
 import { tarefasIniciais } from './mocks'
 import type { CampoDeData, Periodo } from './datas'
-import { criadoEm, noPeriodo } from './datas'
+import { criadoEm, noPeriodo, prazoFinalVencido } from './datas'
 import { textos } from './textos'
 
 definePageMeta({
@@ -71,7 +71,11 @@ const opcoesDePeriodo = computed(() => (['todos', 'hoje', 'semana', 'mes'] as co
 
 const base = computed(() => estado.value === 'vazio' ? [] : tarefas.value)
 /** RF007: o mesmo filtro vale para a tabela e para o kanban. */
+/* RF020 (proposta): atalho para as tarefas com prazo final vencido. */
+const soVencidos = ref(false)
+const totalVencidos = computed(() => base.value.filter(prazoFinalVencido).length)
 const filtradas = computed(() => base.value.filter((tr) => {
+  if (soVencidos.value && !prazoFinalVencido(tr)) return false
   if (busca.value && !tr.name.toLowerCase().includes(busca.value.toLowerCase())) return false
   const data = campoDeData.value === 'criado' ? criadoEm(tr) : campoDeData.value === 'prazo' ? tr.due_date : tr.final_due_date
   return noPeriodo(data, periodo.value)
@@ -80,6 +84,7 @@ const filtradas = computed(() => base.value.filter((tr) => {
 const filtroLigado = computed(() => periodo.value !== 'todos')
 function limparFiltros() {
   busca.value = ''
+  soVencidos.value = false
   periodo.value = 'todos'
 }
 
@@ -143,6 +148,17 @@ function reiniciar() {
           <UInput v-model="busca" icon="i-lucide-search" :placeholder="t.buscar" class="w-56" :aria-label="t.buscar" />
           <USelect v-model="campoDeData" :items="opcoesDeCampo" icon="i-lucide-calendar" class="w-40" :aria-label="t.campoDoFiltro" />
           <USelect v-model="periodo" :items="opcoesDePeriodo" class="w-40" :aria-label="t.periodoDoFiltro" />
+          <UButton
+            v-if="totalVencidos"
+            :label="t.filtroVencidos(totalVencidos)"
+            icon="i-lucide-flag"
+            size="sm"
+            color="error"
+            :variant="soVencidos ? 'solid' : 'outline'"
+            :aria-pressed="soVencidos"
+            class="transition-transform hover:-translate-y-0.5"
+            @click="soVencidos = !soVencidos"
+          />
           <span class="text-xs text-muted">{{ t.contagem(filtradas.length) }}</span>
           <UButton :label="t.novaTarefa" icon="i-lucide-plus" class="ml-auto" @click="criacaoAberta = true" />
         </div>
