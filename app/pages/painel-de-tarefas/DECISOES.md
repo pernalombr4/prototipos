@@ -452,3 +452,15 @@ O painel usa só dado que o ENSPACE já grava. Falta uma coisa: **agregar no ser
 
 - **Pedido (literal):** "painel de tarefas tambem ta aprovado!"
 - **Mudou:** status `aprovado` no `definePageMeta` (selo verde no índice) e no README.
+
+## Requisitos · 2026-11-11
+
+- **Pedido (literal):** "pode fazer os requisitos do mvp e os requisitos gerais (pós-mvp) no formato novo: um epico central e seus respectivos requisitos, como nos ultimos prototipos feitos."
+- **Feito:** épico em `requisitos/epico.md`, com 14 partes, 1 arquivo por parte.
+  - MVP, partes 1 a 7, lançadas juntas: a tela e os filtros, a lista do recorte, os 4 números, Criadas e concluídas com Tarefas por status, Tarefas por responsável, Tarefas por grupo e Tempo médio de duração. É o recorte do botão MVP (`mvp.ts`).
+  - Depois do MVP, partes 8 a 14, cada uma por si: os números Abertas e Concluídas, SLA e as listas de prazo, Tarefas por prioridade, os filtros de origem e de categoria, Agrupar por, Colunas e Exportar, e personalizar o painel.
+  - As regras que valem para 2 ou mais partes (status, prazo, situação do prazo, responsável, fila, faixas, semana e fuso) ficam no épico, RN901 a RN918.
+- **Corte:** a base (parte 1) leva só a tela, os filtros e o arranjo fixo. As leituras novas do back que dependem de pergunta em aberto (`/c-flow-items`, `/workflows/executions`) ficam na parte 7, que as outras não esperam.
+- **Sinal de tamanho:** as partes 2 (23 linhas) e 7 (26 linhas) passam de 1,5 vez a mediana (15). Ficam inteiras: cada uma é 1 funcionalidade (a lista lateral; o gráfico de tempos com os 3 níveis e o detalhamento).
+- **Relevância:** proposta do agente, para a redatora confirmar as linhas Desejável e Opcional.
+- **Achado no protótipo, sem correção:** `serie.rotuloAcessivel` diz "Gráfico de barras", e Criadas e concluídas é um gráfico de linhas.
