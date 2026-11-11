@@ -1,0 +1,717 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/painel-de-tarefas/",
+  "andaime": "Protótipo · estado",
+  "cenas": {
+    "abertas": [
+      {
+        "clicar": {
+          "regex": "^abertas: [\\d.]+$"
+        },
+        "esperar": 900
+      }
+    ],
+    "concluidas": [
+      {
+        "clicar": {
+          "regex": "^concluídas: [\\d.]+$"
+        },
+        "esperar": 900
+      }
+    ],
+    "vencidas": [
+      {
+        "clicar": {
+          "regex": "^vencidas: [\\d.]+$"
+        },
+        "esperar": 900
+      }
+    ],
+    "slaConcluidas": [
+      {
+        "clicar": {
+          "css": "[data-painel=sla] [role=tab]",
+          "n": 1
+        },
+        "esperar": 700
+      }
+    ],
+    "slaAVencer": [
+      {
+        "js": "document.querySelectorAll('[data-painel=sla] ul.sr-only button')[1].click()",
+        "esperar": 900
+      }
+    ],
+    "prioridadeUrgente": [
+      {
+        "js": "document.querySelectorAll('[data-painel=prioridade] ul.sr-only button')[0].click()",
+        "esperar": 900
+      }
+    ],
+    "origemManual": [
+      {
+        "clicar": {
+          "regex": "^origem$"
+        }
+      },
+      {
+        "clicar": {
+          "texto": "Criadas manualmente"
+        },
+        "esperar": 900
+      }
+    ],
+    "esteAno": [
+      {
+        "clicar": {
+          "regex": "^período:"
+        }
+      },
+      {
+        "clicar": {
+          "texto": "Este ano"
+        },
+        "esperar": 900
+      }
+    ],
+    "tudoAno": [
+      {
+        "clicar": {
+          "regex": "^período:"
+        }
+      },
+      {
+        "clicar": {
+          "texto": "Todo o período"
+        },
+        "esperar": 900
+      },
+      {
+        "clicar": {
+          "regex": "^agrupar por$"
+        }
+      },
+      {
+        "clicar": {
+          "texto": "Ano"
+        },
+        "esperar": 900
+      }
+    ],
+    "pairarSla": [
+      {
+        "pairar": {
+          "css": "[data-painel=sla]"
+        },
+        "esperar": 600
+      }
+    ],
+    "menuSla": [
+      {
+        "clicar": {
+          "regex": "^mais ações: sla$"
+        },
+        "esperar": 600
+      }
+    ],
+    "ocultarSla": [
+      {
+        "clicar": {
+          "regex": "^mais ações: sla$"
+        }
+      },
+      {
+        "clicar": {
+          "texto": "Ocultar painel"
+        },
+        "esperar": 900
+      }
+    ],
+    "menuPaineis": [
+      {
+        "clicar": {
+          "texto": "Painéis",
+          "exato": true
+        },
+        "esperar": 600
+      }
+    ]
+  },
+  "requisitos": {
+    "RF351": {
+      "destacar": [
+        {
+          "css": "[data-painel=abertas]"
+        },
+        {
+          "css": "[data-painel=vencidas]"
+        },
+        {
+          "css": "[data-painel=aVencer]"
+        },
+        {
+          "css": "[data-painel=concluidas]"
+        },
+        {
+          "css": "[data-painel=noPrazo]"
+        },
+        {
+          "css": "[data-painel=tempo]"
+        }
+      ]
+    },
+    "RF355": {
+      "cena": "concluidas",
+      "destacar": {
+        "texto": "Concluída em"
+      }
+    },
+    "RF356": {
+      "cena": "abertas",
+      "destacar": {
+        "css": "[data-print=resumo]"
+      },
+      "passos": [
+        {
+          "js": "const h=[...document.querySelectorAll('body *')].find(e=>e.children.length===0&&e.textContent.trim()==='Resumo'); let a=h; while(a&&a.getBoundingClientRect().height<300)a=a.parentElement; a.dataset.print='resumo'"
+        }
+      ]
+    },
+    "RF357": {
+      "cena": "concluidas",
+      "destacar": {
+        "css": "[data-print=resumo]"
+      },
+      "passos": [
+        {
+          "js": "const h=[...document.querySelectorAll('body *')].find(e=>e.children.length===0&&e.textContent.trim()==='Resumo'); let a=h; while(a&&a.getBoundingClientRect().height<300)a=a.parentElement; a.dataset.print='resumo'"
+        }
+      ]
+    },
+    "RF401": {
+      "destacar": {
+        "css": "[data-painel=sla] [role=tablist]"
+      }
+    },
+    "RF404": {
+      "destacar": {
+        "css": "[data-painel=sla] [role=img]"
+      }
+    },
+    "RF403": {
+      "cena": "slaConcluidas",
+      "destacar": {
+        "css": "[data-painel=sla] [role=img]"
+      }
+    },
+    "RF405": {
+      "cena": "slaAVencer",
+      "destacar": {
+        "texto": "Prazo",
+        "exato": true
+      }
+    },
+    "RF406": {
+      "cena": "slaAVencer",
+      "destacar": {
+        "css": "[data-print=resumo]"
+      },
+      "passos": [
+        {
+          "js": "const h=[...document.querySelectorAll('body *')].find(e=>e.children.length===0&&e.textContent.trim()==='Resumo'); let a=h; while(a&&a.getBoundingClientRect().height<300)a=a.parentElement; a.dataset.print='resumo'"
+        }
+      ]
+    },
+    "RF408": {
+      "destacar": {
+        "css": "[data-painel=listaVencidas] h3",
+        "n": 0
+      }
+    },
+    "RF410": {
+      "sem": "o protótipo não tem um recorte com a lista de vencidas vazia; o texto da mensagem está no protótipo"
+    },
+    "RF411": {
+      "passos": [
+        {
+          "js": "(async()=>{const r=document.querySelector('[data-painel=proximas] [data-rolagem]'); const v=r.querySelector('[data-reka-scroll-area-viewport]')||r; let h; for(let i=0;i<20;i++){h=[...r.querySelectorAll('h3')].find(x=>/8 a 30/.test(x.innerText)); if(h)break; v.scrollTop=v.scrollHeight; await new Promise(s=>setTimeout(s,400))} if(!h) return; const s=h.parentElement; v.scrollTop+=s.getBoundingClientRect().top-v.getBoundingClientRect().top; await new Promise(s=>setTimeout(s,400)); h.dataset.print='faixa830'})()",
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=faixa830]",
+          "exato": true
+        },
+        {
+          "css": "[data-print=faixa830] + ul li",
+          "n": 0
+        }
+      ]
+    },
+    "RF412": {
+      "destacar": [
+        {
+          "css": "[data-painel=proximas] h3",
+          "n": 0
+        },
+        {
+          "css": "[data-painel=proximas] h3",
+          "n": 1
+        }
+      ]
+    },
+    "RF414": {
+      "sem": "o protótipo não tem um recorte sem tarefa aberta com prazo à frente; o texto da mensagem está no protótipo"
+    },
+    "RF415": {
+      "passos": [
+        {
+          "js": "(async()=>{const r=document.querySelector('[data-painel=listaVencidas] [data-rolagem]'); const v=r.querySelector('[data-reka-scroll-area-viewport]')||r; for(let i=0;i<25;i++){v.scrollTop=v.scrollHeight; await new Promise(s=>setTimeout(s,400)); if(/no total/.test(r.innerText))break} v.scrollTop=v.scrollHeight})()",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[data-painel=listaVencidas] [aria-live=polite]"
+      }
+    },
+    "RF416": {
+      "passos": [
+        {
+          "clicar": {
+            "css": "[data-painel=listaVencidas] li button",
+            "n": 0
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-painel=listaVencidas] li button",
+          "n": 0
+        },
+        {
+          "texto": "No produto, cada linha abre a tarefa."
+        }
+      ]
+    },
+    "RF451": {
+      "destacar": {
+        "css": "[data-painel=prioridade] [role=img]"
+      },
+      "passos": [
+        {
+          "rolar": {
+            "css": "[data-painel=prioridade]"
+          }
+        }
+      ]
+    },
+    "RF452": {
+      "destacar": {
+        "css": "[data-painel=prioridade] [role=img]"
+      },
+      "passos": [
+        {
+          "rolar": {
+            "css": "[data-painel=prioridade]"
+          }
+        }
+      ]
+    },
+    "RF453": {
+      "cena": "prioridadeUrgente",
+      "destacar": {
+        "texto": "Prazo",
+        "exato": true
+      }
+    },
+    "RF454": {
+      "cena": "prioridadeUrgente",
+      "destacar": {
+        "css": "[data-print=resumo]"
+      },
+      "passos": [
+        {
+          "js": "const h=[...document.querySelectorAll('body *')].find(e=>e.children.length===0&&e.textContent.trim()==='Resumo'); let a=h; while(a&&a.getBoundingClientRect().height<300)a=a.parentElement; a.dataset.print='resumo'"
+        }
+      ]
+    },
+    "RF501": {
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^origem$"
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF502": {
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^categoria$"
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF503": {
+      "cena": "origemManual",
+      "destacar": [
+        {
+          "regex": "^origem$"
+        },
+        {
+          "css": "[data-painel=vencidas]"
+        }
+      ]
+    },
+    "RF504": {
+      "cena": "origemManual",
+      "destacar": {
+        "texto": "Limpar filtros"
+      }
+    },
+    "RF505": {
+      "cena": "origemManual",
+      "destacar": {
+        "texto": "Tarefa criada manualmente não tem etapa nem fluxo"
+      }
+    },
+    "RF551": {
+      "destacar": {
+        "regex": "^agrupar por$"
+      }
+    },
+    "RF552": {
+      "cena": "esteAno",
+      "destacar": [
+        {
+          "regex": "^período:"
+        },
+        {
+          "regex": "^agrupar por$"
+        }
+      ],
+      "passos": [
+        {
+          "rolar": {
+            "css": "[data-painel=serie]"
+          }
+        }
+      ]
+    },
+    "RF553": {
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^período:"
+          }
+        },
+        {
+          "clicar": {
+            "texto": "Todo o período"
+          },
+          "esperar": 900
+        },
+        {
+          "clicar": {
+            "regex": "^agrupar por$"
+          }
+        },
+        {
+          "clicar": {
+            "texto": "Ano"
+          },
+          "esperar": 900
+        },
+        {
+          "clicar": {
+            "regex": "^período:"
+          }
+        },
+        {
+          "clicar": {
+            "texto": "Últimos 30 dias"
+          },
+          "esperar": 900
+        },
+        {
+          "rolar": {
+            "css": "[data-painel=serie]"
+          }
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^período:"
+        },
+        {
+          "regex": "^agrupar por$"
+        }
+      ]
+    },
+    "RF554": {
+      "cena": "tudoAno",
+      "destacar": {
+        "css": "[data-painel=serie] [role=img]"
+      }
+    },
+    "RF555": {
+      "cena": "tudoAno",
+      "passos": [
+        {
+          "js": "const r=document.querySelector('[data-painel=serie] [role=img]').getBoundingClientRect(); const d=document.createElement('div'); d.dataset.print='ponto'; Object.assign(d.style,{position:'fixed',left:(r.right-90)+'px',top:(r.top+r.height/2)+'px',width:'4px',height:'4px',pointerEvents:'none'}); document.body.appendChild(d)"
+        },
+        {
+          "pairar": {
+            "css": "[data-print=ponto]"
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "texto": "Saldo"
+      }
+    },
+    "RF601": {
+      "cena": "vencidas",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Colunas",
+            "exato": true
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RF602": {
+      "cena": "vencidas",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Colunas",
+            "exato": true
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "texto": "Criada em"
+      }
+    },
+    "RF603": {
+      "cena": "vencidas",
+      "destacar": {
+        "texto": "Exportar"
+      }
+    },
+    "RF651": {
+      "cena": "pairarSla",
+      "destacar": {
+        "css": "[data-painel=sla]"
+      }
+    },
+    "RF652": {
+      "cena": "pairarSla",
+      "destacar": [
+        {
+          "css": "[data-painel=listaVencidas]"
+        },
+        {
+          "css": "[data-painel=proximas]"
+        }
+      ]
+    },
+    "RF653": {
+      "cena": "pairarSla",
+      "destacar": {
+        "regex": "^mudar o tamanho de sla"
+      }
+    },
+    "RF654": {
+      "cena": "pairarSla",
+      "destacar": {
+        "regex": "^mover sla"
+      }
+    },
+    "RF655": {
+      "passos": [
+        {
+          "pairar": {
+            "css": "[data-painel=sla]"
+          }
+        },
+        {
+          "js": "document.querySelector('[data-painel=sla] [data-grip]').focus()",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "css": "[data-painel=sla] [data-grip]",
+        "exato": true
+      }
+    },
+    "RF656": {
+      "passos": [
+        {
+          "pairar": {
+            "css": "[data-painel=sla]"
+          }
+        },
+        {
+          "js": "document.querySelector('[data-painel=sla] button[aria-label^=\"Mudar o tamanho\"]').focus()",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "regex": "^mudar o tamanho de sla"
+      }
+    },
+    "RF657": {
+      "cena": "pairarSla",
+      "destacar": {
+        "css": "[data-painel=sla]"
+      }
+    },
+    "RF658": {
+      "cena": "menuSla",
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RF659": {
+      "cena": "ocultarSla",
+      "destacar": {
+        "css": "[data-painel=listaVencidas]"
+      }
+    },
+    "RF660": {
+      "cena": "ocultarSla",
+      "destacar": {
+        "texto": "Desfazer",
+        "ancestral": "li"
+      }
+    },
+    "RF661": {
+      "cena": "menuPaineis",
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RF662": {
+      "cena": "menuPaineis",
+      "destacar": {
+        "texto": "O arranjo vale só para você"
+      }
+    },
+    "RF663": {
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^mais ações: tarefas vencidas$"
+          }
+        },
+        {
+          "clicar": {
+            "texto": "Ocultar painel"
+          },
+          "esperar": 900
+        },
+        {
+          "clicar": {
+            "texto": "Painéis",
+            "exato": true
+          },
+          "esperar": 600
+        },
+        {
+          "clicar": {
+            "texto": "Tarefas vencidas"
+          },
+          "esperar": 600
+        },
+        {
+          "tecla": "Escape",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[data-painel=listaVencidas]"
+      }
+    },
+    "RF664": {
+      "cena": "menuPaineis",
+      "destacar": {
+        "texto": "Mostrar todos"
+      }
+    },
+    "RF665": {
+      "cena": "menuPaineis",
+      "destacar": {
+        "texto": "Restaurar padrão"
+      }
+    },
+    "RF666": {
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Painéis",
+            "exato": true
+          },
+          "esperar": 600
+        },
+        {
+          "js": "for (const el of [...document.querySelectorAll('[role=menuitemcheckbox][aria-checked=true]')]) el.click()",
+          "esperar": 900
+        },
+        {
+          "tecla": "Escape",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "texto": "Todos os painéis estão ocultos"
+      }
+    },
+    "RF667": {
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^mais ações: sla$"
+          }
+        },
+        {
+          "clicar": {
+            "texto": "Ocultar painel"
+          },
+          "esperar": 900
+        },
+        {
+          "tecla": "ctrl+z",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[data-painel=sla]"
+      }
+    },
+    "RF668": {
+      "sem": "guardar o arranjo de cada membro entre navegadores e computadores depende da preferência no back-end; no protótipo, o arranjo volta ao padrão quando a página recarrega"
+    },
+    "RI651": {
+      "sem": "rota do back-end, sem tela"
+    }
+  }
+}
