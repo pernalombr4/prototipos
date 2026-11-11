@@ -12,7 +12,29 @@ Registro das rodadas. A mais recente em cima.
   - front e rota nova sobre dado que existe: Itens e Número de uma visualização, contagem "em aberto" das Categorias, Resumo do BENI, guardar a Home;
   - back-end novo: Comunicado e Notas;
   - fora do alcance hoje: prazo de item na Saúde dos prazos (o item não tem prazo próprio) e tarefa programada em Tarefas que delegei.
-- **Personalizar:** decisão aberta, à espera da redatora (ver a resposta da rodada).
+- **Personalizar:** decidido na rodada 4.
+
+## Rodada 4 · 2026-11-11
+
+- **Pedido:** "Sim, trocar", em resposta a "Troco o Personalizar pela edição na própria Home?".
+- **Como os outros fazem** (ajuda pública, lida em 2026-11-11):
+  - QuickBooks: "Customize" põe a Home em edição; arrastar e esticar acontecem nela; "Add or remove widgets" abre um painel só com o catálogo; "Save" no fim ([Customize your Home page](https://quickbooks.intuit.com/learn-support/en-us/help-article/product-setup/customize-home-page-quickbooks-online/L0ryPsyjD_US_en_US));
+  - Asana: menu "Customize" para escolher widgets; mover e redimensionar na própria Home ([How to customize your home page](https://help.asana.com/s/article/how-to-customize-your-home-page));
+  - Jira (dashboards): alça no topo de cada widget e barra que aparece ao passar o mouse, na própria página ([Customize your dashboard layout](https://support.atlassian.com/platform-experiences/docs/customize-your-dashboard-layout/));
+  - ClickUp: move direto na tela; "Manage cards" abre só o catálogo (`PESQUISA.md`, ClickUp).
+- **Mudou:**
+  - "Personalizar" põe a Home em edição. Personalizar e Criar saem, e no alto entra uma barra fixa: "Personalizando a Home", a dica de arrastar e redimensionar, o seletor Minha Home ou Home padrão do workspace (só o administrador), "Adicionar widget", "Restaurar padrão" (só na Minha Home), "Cancelar" e "Concluir";
+  - fora da edição, nada se arrasta nem se redimensiona: a Home é lugar de trabalho. O menu "…" de cada widget continua com Configurar, Tamanho padrão e Remover;
+  - na edição, cada widget tem borda tracejada, a alça à esquerda do título e, à vista, Subir, Descer, Configurar e Remover. Subir e Descer são a alternativa ao arraste da WCAG 2.5.7. O corpo do widget fica inerte: o clique não abre item nem conclui tarefa;
+  - "Cancelar" devolve as 2 Homes ao que eram ao clicar em Personalizar; "Concluir" salva e avisa ("Home salva." ou "Home padrão do workspace salva.");
+  - o painel lateral virou só o catálogo ("Adicionar widget"), aberto pela barra. Saiu a aba "Na sua Home", que repetia em lista a Home de trás;
+  - o aviso da Home padrão perdeu o próprio "Concluir edição": quem conclui é a barra;
+  - o estado "Sem widgets" oferece "Adicionar widget", que já entra na edição com o catálogo aberto;
+  - no celular, o seletor da Home desce para a linha de baixo da barra.
+- **CSS próprio:** sai o `.lista-move` do `_Personalizar.vue`, que deixou de existir; ficam os de `_WMinhasTarefas.vue` e `_WOutros.vue`.
+- **Fronteira:** muda só o jeito de personalizar. Widgets, Criar e casca ficam como na rodada 3.
+- **Descartado:** modal centralizado (o "Customize Home" da HubSpot nova). Esconde a Home enquanto a pessoa a arruma, e a HubSpot nem tem posição nem tamanho livre.
+- **Ver:** `evidencias/rodada4-personalizar-na-home.jpg`, `rodada4-catalogo.jpg`
 
 ## Rodada 2 · 2026-11-11
 

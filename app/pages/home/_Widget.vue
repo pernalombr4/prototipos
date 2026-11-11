@@ -1,14 +1,21 @@
 <script setup lang="ts">
 /**
- * A moldura de todo widget da Home: cabeçalho, menu "…" e os estados que
- * cada widget tem sozinho (carregando, erro, sem acesso).
+ * A moldura de todo widget da Home: cabeçalho, ações e os estados que cada
+ * widget tem sozinho (carregando, erro, sem acesso).
  *
  * Mesmo desenho do `_Painel.vue` do painel-de-tarefas, para o ENSPACE ter um
  * padrão só de painel: borda fina, título pequeno, ícone em círculo.
- * Diferença: aqui só o CABEÇALHO é alça de arraste (`data-alca-de-arraste`).
- * Widget de Home tem linha clicável, caixa de concluir e campo de texto no
- * corpo; com o corpo inteiro como alça, o arraste disputaria com eles. É o
- * que o ClickUp faz (alça à esquerda do título).
+ *
+ * 2 modos (rodada 4):
+ * - uso: a Home é lugar de trabalho. Nada se arrasta por acidente; o menu "…"
+ *   tem Configurar, Tamanho padrão e Remover, como atalho;
+ * - edição (Personalizar): borda tracejada, alça visível à esquerda do título
+ *   (como no ClickUp), Subir e Descer (a alternativa ao arraste da WCAG 2.5.7,
+ *   como o "Move up" e o "Move down" do Jira), Configurar e Remover à vista.
+ *   O corpo fica inerte: na edição, o clique não abre item nem conclui tarefa.
+ *
+ * Só o CABEÇALHO é alça de arraste (`data-alca-de-arraste`): o corpo tem linha
+ * clicável, caixa de concluir e campo de texto.
  *
  * Cada widget carrega, falha e fica sem acesso por conta própria: um widget
  * quebrado não derruba a Home (o oposto do develop, que mostra o erro cru da
@@ -29,11 +36,13 @@ const props = defineProps<{
   categoriaSemAcesso?: string
   configuravel?: boolean
   novo?: boolean
-  /** Sem cabeçalho (o "Criar rápido" é uma faixa). A alça vira a borda esquerda. */
-  semCabecalho?: boolean
+  /** A Home está em edição (Personalizar). */
+  editando?: boolean
+  primeiro?: boolean
+  ultimo?: boolean
 }>()
 
-const emit = defineEmits<{ configurar: [], tamanhoPadrao: [], remover: [], tentarDeNovo: [] }>()
+const emit = defineEmits<{ configurar: [], tamanhoPadrao: [], remover: [], tentarDeNovo: [], subir: [], descer: [] }>()
 
 defineSlots<{
   default(): unknown
@@ -53,42 +62,24 @@ const menu = computed<DropdownMenuItem[][]>(() => [
 
 <template>
   <section
-    class="group/widget relative flex h-full min-h-0 flex-col overflow-hidden rounded-lg border bg-default transition-[border-color,box-shadow] duration-150 hover:border-accented hover:shadow-sm"
-    :class="novo ? 'border-primary/50 ring-1 ring-primary/20' : 'border-default'"
+    class="group/widget relative flex h-full min-h-0 flex-col overflow-hidden rounded-lg border bg-default transition-[border-color,box-shadow] duration-150"
+    :class="[
+      editando ? 'border-dashed border-primary/50 shadow-sm' : 'hover:border-accented hover:shadow-sm',
+      !editando && novo ? 'border-primary/50 ring-1 ring-primary/20' : '',
+      !editando && !novo ? 'border-default' : '',
+    ]"
     :aria-labelledby="id"
   >
-    <!-- Faixa sem cabeçalho: alça à esquerda, menu à direita. -->
-    <template v-if="semCabecalho">
-      <h2 :id="id" class="sr-only">
-        {{ titulo }}
-      </h2>
-      <div
-        data-alca-de-arraste
-        class="absolute inset-y-0 left-0 z-10 flex w-4 cursor-grab touch-none select-none items-center justify-center text-dimmed opacity-0 transition-opacity active:cursor-grabbing group-hover/widget:opacity-100"
-      >
-        <UTooltip :text="t.widget.arrasteParaMover" :content="{ side: 'top' }">
-          <button type="button" data-grip class="flex h-6 w-4 items-center justify-center rounded-sm focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-primary" :aria-label="t.widget.mover(titulo)">
-            <UIcon name="i-lucide-grip-vertical" class="size-3.5" />
-          </button>
-        </UTooltip>
-      </div>
-      <div class="absolute right-1.5 top-1/2 z-10 -translate-y-1/2">
-        <UDropdownMenu :items="menu" :content="{ align: 'end' }">
-          <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="xs" :aria-label="t.widget.maisAcoes(titulo)" />
-        </UDropdownMenu>
-      </div>
-    </template>
-
     <header
-      v-else
-      data-alca-de-arraste
-      class="relative flex shrink-0 cursor-grab touch-none select-none items-center gap-2.5 px-4 pb-2 pt-3 active:cursor-grabbing"
+      :data-alca-de-arraste="editando ? '' : undefined"
+      class="relative flex shrink-0 select-none items-center gap-2.5 pb-2 pt-3 pr-4 transition-[padding] duration-150"
+      :class="editando ? 'cursor-grab touch-none pl-6 active:cursor-grabbing' : 'pl-4'"
     >
-      <UTooltip :text="t.widget.arrasteParaMover" :content="{ side: 'top' }">
+      <UTooltip v-if="editando" :text="t.widget.arrasteParaMover" :content="{ side: 'top' }">
         <button
           type="button"
           data-grip
-          class="absolute left-0 top-3.5 flex h-6 w-4 items-center justify-center rounded-sm text-dimmed opacity-0 transition-opacity focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-primary group-hover/widget:opacity-100"
+          class="absolute left-1 top-3.5 flex h-6 w-4 items-center justify-center rounded-sm text-muted focus-visible:outline-2 focus-visible:outline-primary"
           :aria-label="t.widget.mover(titulo)"
         >
           <UIcon name="i-lucide-grip-vertical" class="size-3.5" />
@@ -110,7 +101,24 @@ const menu = computed<DropdownMenuItem[][]>(() => [
         </p>
       </div>
 
-      <div class="-mr-2 flex shrink-0 items-center gap-0.5" data-sem-arraste>
+      <!-- Edição: as ações à vista. -->
+      <div v-if="editando" class="-mr-2 flex shrink-0 items-center gap-0.5" data-sem-arraste>
+        <UTooltip :text="t.personalizacao.subir(titulo)">
+          <UButton icon="i-lucide-arrow-up" color="neutral" variant="ghost" size="xs" :disabled="primeiro" :aria-label="t.personalizacao.subir(titulo)" @click="emit('subir')" />
+        </UTooltip>
+        <UTooltip :text="t.personalizacao.descer(titulo)">
+          <UButton icon="i-lucide-arrow-down" color="neutral" variant="ghost" size="xs" :disabled="ultimo" :aria-label="t.personalizacao.descer(titulo)" @click="emit('descer')" />
+        </UTooltip>
+        <UTooltip v-if="configuravel" :text="t.widget.configurar">
+          <UButton icon="i-lucide-settings-2" color="neutral" variant="ghost" size="xs" :aria-label="`${t.widget.configurar} ${titulo}`" @click="emit('configurar')" />
+        </UTooltip>
+        <UTooltip :text="t.personalizacao.remover(titulo)">
+          <UButton icon="i-lucide-eye-off" color="neutral" variant="ghost" size="xs" :aria-label="t.personalizacao.remover(titulo)" @click="emit('remover')" />
+        </UTooltip>
+      </div>
+
+      <!-- Uso: as ações do widget e o menu "…". -->
+      <div v-else class="-mr-2 flex shrink-0 items-center gap-0.5">
         <slot name="acoes" />
         <UDropdownMenu :items="menu" :content="{ align: 'end' }">
           <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="xs" :aria-label="t.widget.maisAcoes(titulo)" />
@@ -118,7 +126,7 @@ const menu = computed<DropdownMenuItem[][]>(() => [
       </div>
     </header>
 
-    <div class="relative flex min-h-0 flex-1 flex-col">
+    <div class="relative flex min-h-0 flex-1 flex-col transition-opacity duration-150" :class="editando ? 'opacity-70' : ''" :inert="editando">
       <!-- Carregando: esqueleto do próprio widget, nunca o texto de vazio. -->
       <div v-if="estado === 'carregando'" class="space-y-2.5 px-4 pb-4 pt-1" aria-busy="true">
         <USkeleton class="h-4 w-3/4" />

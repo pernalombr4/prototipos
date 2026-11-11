@@ -6,8 +6,9 @@
  * - a Home é uma grade de widgets que a pessoa arruma: arrasta pelo título,
  *   puxa o canto, remove, adiciona do catálogo. A mesma grade do Painel de
  *   tarefas (`UxGradeDePaineis`), para o ENSPACE ter um gesto só;
- * - "Personalizar" abre o painel lateral com a lista do que está na Home
- *   (Subir, Descer, Remover: o caminho sem arraste) e o catálogo;
+ * - "Personalizar" põe a própria Home em edição (rodada 4): barra no alto,
+ *   alça, Subir, Descer e Remover em cada widget (o caminho sem arraste), e o
+ *   painel lateral só com o catálogo;
  * - o administrador monta a Home padrão do workspace; quem não personalizou
  *   recebe ela inteira, e quem personalizou recebe só o widget novo, com o
  *   selo "Novo" (HubSpot e Notion);
@@ -30,7 +31,7 @@ import BotaoCriar from './_BotaoCriar.vue'
 import ModalNovaTarefa from './_ModalNovaTarefa.vue'
 import ModalNovoItem from './_ModalNovoItem.vue'
 import type { DadosDoItem } from './_ModalNovoItem.vue'
-import Personalizar from './_Personalizar.vue'
+import Catalogo from './_Catalogo.vue'
 import WidgetMoldura from './_Widget.vue'
 import type { EstadoDoWidget } from './_Widget.vue'
 import WCategorias from './_WCategorias.vue'
@@ -156,7 +157,7 @@ function pedirAoBeni(texto: string) {
   toast.add({ title: t.value.criar.beniToast(texto), description: t.value.criar.beniDica, icon: 'i-lucide-sparkles', color: 'neutral' })
 }
 
-const algumaCamadaAberta = computed(() => tarefaAberta.value || novoItemAberto.value || configAberto.value || personalizarAberto.value)
+const algumaCamadaAberta = computed(() => tarefaAberta.value || novoItemAberto.value || configAberto.value || editando.value)
 
 /* Tecla C: abre o Criar fora de campo de texto (o defineShortcuts ignora campo por padrão). */
 defineShortcuts({
@@ -262,6 +263,7 @@ watch(estado, () => { recuperados.value = [] })
 
 /** Andaime. "Estado inicial (primeiro acesso)" é a Home padrão do workspace, sem nada personalizado. */
 function escolherEstado(e: EstadoDaHome) {
+  sairDaEdicao()
   if (e === 'cheio') {
     minha.value = copiaDaHome(padrao.value)
     escopo.value = 'minha'
@@ -296,7 +298,7 @@ const limites = computed<Record<string, LimitesDoPainel>>(() => Object.fromEntri
 const rotulos = computed(() => Object.fromEntries(home.value.widgets.map(w => [w.id, tituloDo(w)])))
 const textosDaGrade = computed(() => ({ redimensionar: t.value.widget.redimensionar, movido: t.value.widget.movido, tamanho: t.value.widget.tamanho }))
 
-const naHome = computed(() => layout.value.map(x => widgetPorId(x.id)).filter((w): w is Widget => !!w).map(w => ({ widget: w, titulo: tituloDo(w) })))
+const tiposNaHome = computed(() => home.value.widgets.map(w => w.tipo))
 
 /* Adicionar, remover, mover */
 
@@ -366,14 +368,51 @@ function restaurar() {
   })
 }
 
-function concluirPadrao() {
-  escopo.value = 'minha'
-  toast.add({ title: t.value.toasts.padraoSalvo, icon: 'i-lucide-circle-check', color: 'success' })
+/* Personalizar: edição na própria Home (rodada 4) */
+
+const editando = ref(false)
+const catalogoAberto = ref(false)
+let antesDaEdicao: { minha: Home, padrao: Home } | null = null
+
+function entrarNaEdicao(abrirCatalogo = false) {
+  if (!editando.value) {
+    antesDaEdicao = { minha: copiaDaHome(minha.value), padrao: copiaDaHome(padrao.value) }
+    editando.value = true
+  }
+  catalogoAberto.value = abrirCatalogo
 }
 
-/* Personalizar e configurar */
+function sairDaEdicao() {
+  editando.value = false
+  catalogoAberto.value = false
+  escopo.value = 'minha'
+  antesDaEdicao = null
+}
 
-const personalizarAberto = ref(false)
+/** Cancelar volta as 2 Homes ao que eram ao clicar em Personalizar. */
+function cancelarEdicao() {
+  if (antesDaEdicao) {
+    minha.value = antesDaEdicao.minha
+    padrao.value = antesDaEdicao.padrao
+  }
+  sairDaEdicao()
+}
+
+function concluirEdicao() {
+  const padraoEditado = escopo.value === 'padrao'
+  sairDaEdicao()
+  toast.add({ title: padraoEditado ? t.value.toasts.padraoSalvo : t.value.personalizacao.salva, icon: 'i-lucide-circle-check', color: 'success' })
+}
+
+const opcoesDeEscopo = computed(() => [
+  { label: t.value.personalizacao.minha, value: 'minha', icon: 'i-lucide-user' },
+  { label: t.value.personalizacao.padrao, value: 'padrao', icon: 'i-lucide-users' },
+])
+
+const posicao = (id: string) => layout.value.findIndex(x => x.id === id)
+
+/* Configurar */
+
 const configAberto = ref(false)
 const configId = ref('')
 const widgetEmConfig = computed(() => widgetPorId(configId.value))
@@ -383,7 +422,7 @@ function abrirConfig(id: string) {
   if (!w) return
   if (!configuravel(w)) return
   configId.value = id
-  personalizarAberto.value = false
+  catalogoAberto.value = false
   configAberto.value = true
 }
 
@@ -402,18 +441,51 @@ function configuravel(w: Widget) {
 <template>
   <CascaDaHome :t="t" :slug="SLUG">
     <div class="min-h-0 flex-1 overflow-y-auto pb-28">
+      <!-- PROPOSTA: a barra de edição (rodada 4). Fica no topo enquanto a pessoa rola. -->
+      <div
+        v-if="editando"
+        class="sticky top-0 z-30 flex animate-[entrada_0.2s_ease-out_both] flex-wrap items-center gap-x-4 gap-y-2 border-b border-default bg-default/95 px-4 py-2.5 backdrop-blur sm:px-6 lg:px-8 2xl:px-10"
+      >
+        <div class="flex min-w-0 flex-1 flex-wrap items-center gap-3">
+          <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 ring ring-inset ring-primary/25">
+            <UIcon name="i-lucide-layout-dashboard" class="size-4 text-primary" />
+          </span>
+          <div class="min-w-0 flex-1 sm:flex-none">
+            <p class="text-sm font-semibold text-highlighted">
+              {{ t.personalizacao.titulo }}
+            </p>
+            <p class="truncate text-xs text-muted">
+              {{ t.personalizacao.descricao }}
+            </p>
+          </div>
+          <USelect
+            v-if="admin"
+            v-model="escopo"
+            :items="opcoesDeEscopo"
+            :icon="escopo === 'padrao' ? 'i-lucide-users' : 'i-lucide-user'"
+            size="sm"
+            class="w-full shrink-0 sm:w-60"
+            :aria-label="t.personalizacao.editando"
+          />
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <UButton :label="t.estados.adicionarWidget" icon="i-lucide-plus" color="neutral" variant="outline" size="sm" @click="catalogoAberto = true" />
+          <UButton v-if="escopo === 'minha'" :label="t.personalizacao.restaurar" icon="i-lucide-rotate-ccw" color="neutral" variant="outline" size="sm" @click="restaurar" />
+          <UButton :label="t.personalizacao.cancelar" color="neutral" variant="outline" size="sm" @click="cancelarEdicao" />
+          <UButton :label="t.personalizacao.concluir" icon="i-lucide-check" size="sm" @click="concluirEdicao" />
+        </div>
+      </div>
+
       <div class="w-full px-4 py-5 sm:px-6 lg:px-8 2xl:px-10">
-        <!-- Banner da Home padrão (administrador editando) -->
+        <!-- Aviso da Home padrão (administrador editando) -->
         <UAlert
-          v-if="escopo === 'padrao'"
+          v-if="editando && escopo === 'padrao'"
           :title="t.bannerPadrao.titulo"
           :description="t.bannerPadrao.texto"
           icon="i-lucide-users"
           color="primary"
           variant="subtle"
           class="mb-4 animate-[entrada_0.3s_ease-out_both]"
-          :actions="[{ label: t.bannerPadrao.concluir, icon: 'i-lucide-check', color: 'primary', variant: 'solid', size: 'xs', onClick: concluirPadrao }]"
-          orientation="horizontal"
         />
 
         <!-- Topo: saudação, dia, resumo e Personalizar -->
@@ -429,14 +501,14 @@ function configuravel(w: Widget) {
               {{ resumo }}
             </p>
           </div>
-          <div class="flex items-center gap-2">
+          <div v-if="!editando" class="flex items-center gap-2">
             <UButton
               :label="t.personalizar"
               icon="i-lucide-layout-dashboard"
               color="neutral"
               variant="outline"
               size="sm"
-              @click="personalizarAberto = true"
+              @click="entrarNaEdicao()"
             />
             <!-- PROPOSTA: o botão Criar (rodada 2) -->
             <BotaoCriar
@@ -455,7 +527,7 @@ function configuravel(w: Widget) {
           icon="i-lucide-layout-dashboard"
           :title="t.estados.vazioTitulo"
           :description="t.estados.vazioTexto"
-          :actions="[{ label: t.estados.adicionarWidget, icon: 'i-lucide-plus', color: 'neutral', variant: 'outline', onClick: () => { personalizarAberto = true } }]"
+          :actions="[{ label: t.estados.adicionarWidget, icon: 'i-lucide-plus', color: 'neutral', variant: 'outline', onClick: () => entrarNaEdicao(true) }]"
           variant="outline"
           class="py-16"
         />
@@ -463,6 +535,7 @@ function configuravel(w: Widget) {
         <UxGradeDePaineis
           v-else
           v-model="layout"
+          :editavel="editando"
           :limites="limites"
           :rotulos="rotulos"
           :textos="textosDaGrade"
@@ -479,6 +552,11 @@ function configuravel(w: Widget) {
                 :categoria-sem-acesso="categoriaSemAcessoDo(w)"
                 :configuravel="configuravel(w)"
                 :novo="w.novo && escopo === 'minha'"
+                :editando="editando"
+                :primeiro="posicao(w.id) === 0"
+                :ultimo="posicao(w.id) === layout.length - 1"
+                @subir="mover(w.id, -1)"
+                @descer="mover(w.id, 1)"
                 @configurar="abrirConfig(w.id)"
                 @tamanho-padrao="tamanhoPadrao(w.id)"
                 @remover="remover(w.id)"
@@ -571,17 +649,13 @@ function configuravel(w: Widget) {
       </div>
     </div>
 
-    <Personalizar
-      v-model:open="personalizarAberto"
-      v-model:escopo="escopo"
+    <Catalogo
+      v-model:open="catalogoAberto"
       :t="t"
-      :na-home="naHome"
+      :na-home="tiposNaHome"
       :admin="admin"
+      :escopo="escopo"
       @adicionar="adicionar"
-      @subir="(id) => mover(id, -1)"
-      @descer="(id) => mover(id, 1)"
-      @remover="remover"
-      @restaurar="restaurar"
     />
 
     <ConfigurarWidget
