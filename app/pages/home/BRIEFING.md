@@ -80,6 +80,27 @@ O formulário "Nova tarefa" tem: Nome (obrigatório), Data limite, Descrição (
 - **Favoritos:** a estrela na trilha do topo, com o atalho Ctrl+B.
 - **Agenda**, o sino de notificações e a Knowledge.
 
+### De onde vem o dado de cada widget (código)
+
+Leitura de 2026-11-11, só na develop, pela skill `investigar-codigo`. O código mostra o que está na branch, não o que está no ar. Siglas: **F** = `en-space@develop e3a6cd15a`; **B** = `enlighten-api@develop 5587592e8`. Esta tabela entra nos requisitos.
+
+| Widget | Veredito | Fonte | Dados que se cruzam | O que falta |
+|---|---|---|---|---|
+| Minhas tarefas | reaproveita | o cartão de hoje lê `c-flow-item-tasks/in-charge` e `tasks` (F `src/components/workspace/WorkspaceTasks.vue:46-47`) | programada: `due_date_lt`/`due_date_gte` agora, `work_status_in=waiting,working` (F `WorkspaceTasks.vue:84-111`); rápida: `status_in=pending,working` (F `:122-126`) | só front: as faixas Hoje e Sem prazo (`due_date_null`), e `blocked` na rápida |
+| Tarefas que delegei | rápida: reaproveita; programada: não existe | `tasks` tem `creator`, `assigned_to`, `collaborators`, `status`, `due_date`, `node_execution` (B `plugins/en-tasks/models/tasks.settings.json:40-105`) | `creator` = eu, `assigned_to` diferente de mim e preenchido, `status_in=pending,working,blocked`, `node_execution` vazio (tira o que o Spaceflow criou, a mesma regra do analytics, B `plugins/en-tasks/schemas/tasks.ts:363-364`) | front: filtro novo (a tela Tarefas não tem "criadas por mim", F `src/assets/models/tasks.ts:60-121`). A programada não guarda quem criou nem quem delegou como campo (B `api/c-flow-item-tasks/models/c-flow-item-tasks.settings.json:34-158`); quem delegou fica só como e-mail no `task_log` |
+| Agenda | reaproveita | a tela Agenda (F `src/pages/workspaces/[workspace]/schedule/index.vue:160-162`) | tarefas das 2 origens, itens pelo campo de data configurado (`c-schedule-configs`) e eventos do Outlook (F `schedule/index.vue:305-377`) | nada no back |
+| Itens de uma visualização / Número | existe o dado, falta rota | `c-model-views` com `model` e `filters` (B `plugins/en-workspaces/models/c-model-views.settings.json:15-63`) | ler a visualização pelo id e chamar `ws/types/{slug}/items` e `/items/count` com os filtros dela | rota que devolva itens ou contagem pelo id da visualização (ou o front monta a query; a conversão de `filters` não foi lida) |
+| Saúde dos prazos | tarefas: reaproveita; itens: não existe | `POST /ws/tasks/analytics` devolve `overdue`, `dueSoon`, `onTime`, `late` (B `plugins/en-tasks/schemas/tasks.ts:152-158`), já usado em Tarefas > Painel (F `src/pages/workspaces/[workspace]/tasks/dashboard.vue:36-37`) | filtros `only`, `status`, `assigneeId`, `range`, `_where` (B `schemas/tasks.ts:337-384`) | o item não tem prazo nem SLA próprio: só tarefa |
+| Gráfico de um painel | reaproveita | `c-dashboard` e `c-dashboard-panel` (B `api/c-dashboard-panel/models/c-dashboard-panel.settings.json:49-62`) | o front busca os itens e agrega (F `src/domain/dashboard/services/DashboardHttpService.ts:98-105`) | o painel está preso a uma tela (`c_screen`): o widget aponta para o painel dessa tela |
+| Categorias | lista: reaproveita; "em aberto": falta rota | `typesLegacy`, já em memória (F `src/components/workspace/WorkspaceCategories.vue:23-30`) | contagem: 1 chamada por categoria a `items/count` | contagem agregada por categoria; definir o que é "em aberto" num item |
+| Atalhos e Recentes | reaproveita, só no front | localStorage `en-space-favorites`, até 10 (F `src/composables/useFavorites.ts:3-12`), e `en-space-navigation-history`, até 20 páginas (F `src/composables/useNavigationHistory.ts:13-27`) | o caminho da página | não segue a pessoa entre aparelhos; Recentes guarda página, não "item visto" |
+| Comunicado | não existe | a chave `workspace_announcements` existe no locale e nada a usa (F `locales/pt-BR.yml:7757`) | | modelo e rota novos |
+| Notas | não existe | `c-item-notes` é nota de item (B `api/c-item-notes/models/c-item-notes.settings.json:15-37`) | | modelo novo |
+| Resumo do BENI | existe o dado, falta rota | `getTaskSummary` é ferramenta do agente e do MCP (B `plugins/en-tasks/ai/tools/get-task-summary.ts:14-18`) | contagens por status, prioridade e prazo | rota dedicada |
+| Guardar a Home | existe o lugar, falta campo | Home padrão: `group-configs.data` (B `api/group-configs/models/group-configs.settings.json:19`), ao lado de `show_types_on_initial_screen`; Home da pessoa: `group-members.meta` (B `api/group-members/models/group-members.settings.json:67`) | administrador = `group-members.type` `full` ou `owner` (B `group-members.settings.json:36-45`) | campo e rota do layout (busca `home_layout`, `home_widgets`, `user_preferences`: 0 nos 2 repositórios) |
+
+Buscas que provam "não existe" em Tarefas que delegei: `delegad`, `criadas por mim`, `created by me`, `delegated`, `assigned by me`, `delegation_history` e `created_by_me` no front e no back, na develop e na principal, mais `branches` e `historico`: 0 que sirva.
+
 ### Preparo por API
 
 Nenhum. Toda a investigação aconteceu pela tela.

@@ -546,7 +546,7 @@ function configuravel(w: Widget) {
                   :atalhos="atalhos"
                   :recentes="recentes"
                   :eventos="eventosDeHoje"
-                  :delegadas="tarefas.filter(x => x.creator === EU.id && x.assigned_to !== EU.id && x.status !== 'completed')"
+                  :delegadas="tarefas.filter(x => x.origem === 'rapida' && x.creator === EU.id && x.assigned_to !== EU.id && x.status !== 'completed')"
                   :largura="item.w"
                   @abrir="abrirMaquete"
                   @configurar="abrirConfig(w.id)"

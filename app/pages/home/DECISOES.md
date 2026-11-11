@@ -2,6 +2,18 @@
 
 Registro das rodadas. A mais recente em cima.
 
+## Rodada 3 · 2026-11-11
+
+- **Pedido (literal):** "alem disso verifique no codigo se os widgets que voce sugeriu fazem sentido, do tipo "tarefas que eu criei e deleguei", faz sentido criar isso? tem no codigo e é ok de mexer? e quais dados vai cruzar pra chegar nisso entao? pq isso tem que estar nos requisitos" e "ao clicar em personalizar, a forma mais clean é realmente abrir uma SIDEBAR? os outros produtos fazem assim tambem? ou de outro modo?"
+- **Leitura do código:** a fonte de cada widget, o veredito e os dados que se cruzam estão no `BRIEFING.md`, "De onde vem o dado de cada widget (código)". Essa tabela entra nos requisitos.
+- **Mudou:** "Tarefas que delegei" mostra só tarefa rápida. A tarefa programada não grava quem a criou nem quem a delegou como campo (`enlighten-api@develop 5587592e8 api/c-flow-item-tasks/models/c-flow-item-tasks.settings.json:34-158`); a descrição do catálogo diz "Tarefas rápidas que você criou para outras pessoas".
+- **Para os requisitos, por esforço:**
+  - só front: Minhas tarefas (faixas Hoje e Sem prazo), Tarefas que delegei, Agenda, Gráfico de um painel, Atalhos e Recentes;
+  - front e rota nova sobre dado que existe: Itens e Número de uma visualização, contagem "em aberto" das Categorias, Resumo do BENI, guardar a Home;
+  - back-end novo: Comunicado e Notas;
+  - fora do alcance hoje: prazo de item na Saúde dos prazos (o item não tem prazo próprio) e tarefa programada em Tarefas que delegei.
+- **Personalizar:** decisão aberta, à espera da redatora (ver a resposta da rodada).
+
 ## Rodada 2 · 2026-11-11
 
 - **Pedido (literal):** "a home também deve poder ter atalho pras categorias. o "criar rápido" ta ruim. deveria ser só um botão bem objetivo mesmo. quando botar pra criar, abre as opçoes "item" e "tarefa", aí ramifica na hora de criar, item > seleciona qual categoria > seleciona qual form (se nao tiver form vai direto). tarefa > rapida ou agendada > abre o modal de criaçao. e aí pode tirar o botão de criação do menu lateral ou, se nao for tirar, deixe identico ao do prototipo de menu lateral de 2 niveis, incluindo opçao de "pedir ao beni" a criaçao de algo. se voce INSISTIR que é bom ter os atalhos especificos de crioação no widget de criar, ja com atalho pra categoria especifica e tal, aí voce vai ter que deixar melhor. usabilidade nao ta legal, specialemnte ux writing, que nao faz sentido no codigo. [...] e vai perceber que "abrir chamado" nao seria um nome possivel, pq chamado é uma categoria e simplesmente pra gente é "criar item em x categoria" ou "criar X", sendo X o nome da categoria."
