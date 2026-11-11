@@ -12,7 +12,7 @@
 import type { ItemDaGrade, LimitesDoPainel } from '~/components/ux/UxGradeDePaineis.vue'
 
 export type TipoDeWidget =
-  | 'criarRapido'
+  | 'categorias'
   | 'minhasTarefas'
   | 'visualizacao'
   | 'numero'
@@ -33,8 +33,8 @@ export interface ConfigDoWidget {
   visualizacao?: string
   /** Título próprio; sem ele, vale o nome da visualização. */
   titulo?: string
-  /** Atalhos de criar fixados (widget `criarRapido`); vazio = os mais usados. */
-  fixados?: string[]
+  /** Categorias escolhidas (widget `categorias`), na ordem; vazio = todas as que a pessoa acessa. */
+  categorias?: string[]
 }
 
 export interface Widget {
@@ -70,7 +70,7 @@ export const CATALOGO: DefinicaoDoWidget[] = [
   { tipo: 'saudeDosPrazos', icone: 'i-lucide-heart-pulse', grupo: 'itens', repete: false, pedeConfig: false, tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 6, minH: 4, maxH: 7 } },
   { tipo: 'graficoDePainel', icone: 'i-lucide-chart-column', grupo: 'itens', repete: true, pedeConfig: false, tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 10 } },
   // Navegação
-  { tipo: 'criarRapido', icone: 'i-lucide-circle-plus', grupo: 'navegacao', repete: false, pedeConfig: false, tamanho: { w: 12, h: 2 }, limites: { minW: 4, maxW: 12, minH: 2, maxH: 2 } },
+  { tipo: 'categorias', icone: 'i-lucide-layout-grid', grupo: 'navegacao', repete: false, pedeConfig: false, tamanho: { w: 12, h: 3 }, limites: { minW: 3, maxW: 12, minH: 3, maxH: 8 } },
   { tipo: 'atalhos', icone: 'i-lucide-bookmark', grupo: 'navegacao', repete: false, pedeConfig: false, tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 12, minH: 3, maxH: 9 } },
   { tipo: 'recentes', icone: 'i-lucide-history', grupo: 'navegacao', repete: false, pedeConfig: false, tamanho: { w: 4, h: 7 }, limites: { minW: 3, maxW: 6, minH: 4, maxH: 10 } },
   // Equipe e notas
@@ -85,7 +85,7 @@ export function definicao(tipo: TipoDeWidget) {
 
 /** O arranjo padrão do workspace, o que o administrador entrega a todos. */
 export const PADRAO_WIDGETS: Widget[] = [
-  { id: 'w-criar', tipo: 'criarRapido', config: { fixados: [] } },
+  { id: 'w-categorias', tipo: 'categorias', config: { categorias: [] } },
   { id: 'w-tarefas', tipo: 'minhasTarefas', config: {} },
   { id: 'w-comunicado', tipo: 'comunicado', config: {} },
   { id: 'w-atalhos', tipo: 'atalhos', config: {} },
@@ -94,25 +94,10 @@ export const PADRAO_WIDGETS: Widget[] = [
 ]
 
 export const PADRAO_LAYOUT: ItemDaGrade[] = [
-  { id: 'w-criar', w: 12, h: 2 },
+  { id: 'w-categorias', w: 12, h: 3 },
   { id: 'w-tarefas', w: 6, h: 8 },
   { id: 'w-compras', w: 6, h: 8 },
   { id: 'w-comunicado', w: 4, h: 5 },
   { id: 'w-atalhos', w: 4, h: 5 },
   { id: 'w-recentes', w: 4, h: 5 },
 ]
-
-/* ------------------------------------------------------------------ *
- * O que se cria                                                        *
- * ------------------------------------------------------------------ */
-
-export interface OpcaoDeCriar {
-  id: string
-  tipo: 'tarefa' | 'item' | 'formulario'
-  icone: string
-  /** Categoria do item ou do formulário. */
-  categoria?: string
-  formulario?: string
-  /** Vezes que a pessoa usou: ordena o "Criar rápido" quando nada está fixado. NOVO: contador por pessoa. */
-  usos: number
-}

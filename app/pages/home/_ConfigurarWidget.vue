@@ -3,8 +3,8 @@
  * Configurar um widget, em modal. 3 desenhos, pelo tipo:
  * - Itens e Número de uma visualização: categoria, visualização salva e
  *   título. A lista de visualizações é a das abas da categoria (`TypeView`);
- * - Criar rápido: quais opções ficam fixadas (até 8). Sem escolha, valem as
- *   mais usadas;
+ * - Categorias: quais categorias aparecem. Sem escolha, todas as que a
+ *   pessoa acessa;
  * - Atalhos: quais atalhos aparecem.
  *
  * Escolha em `USelect`, como no resto do ENSPACE (memória da redatora:
@@ -13,18 +13,14 @@
 import type { SelectItem } from '@nuxt/ui'
 import type { Atalho, Categoria } from './mocks'
 import { atalhosDisponiveis, visualizacoes } from './mocks'
-import type { ConfigDoWidget, OpcaoDeCriar, TipoDeWidget } from './widgets'
+import type { ConfigDoWidget, TipoDeWidget } from './widgets'
 import type { Textos } from './textos'
-
-const MAX_FIXADOS = 8
 
 const props = defineProps<{
   t: Textos
   tipo?: TipoDeWidget
   config?: ConfigDoWidget
   categorias: Categoria[]
-  opcoes: OpcaoDeCriar[]
-  rotuloDaOpcao: (o: OpcaoDeCriar) => string
   atalhos: Atalho[]
 }>()
 const aberto = defineModel<boolean>('open', { default: false })
@@ -33,7 +29,7 @@ const emit = defineEmits<{ salvar: [config: ConfigDoWidget, atalhos?: Atalho[]] 
 const categoria = ref('')
 const vis = ref('')
 const titulo = ref('')
-const fixados = ref<string[]>([])
+const escolhidas = ref<string[]>([])
 const marcados = ref<string[]>([])
 
 watch(aberto, (a) => {
@@ -42,7 +38,7 @@ watch(aberto, (a) => {
   categoria.value = v?.categoria ?? props.categorias[0]?.slug ?? ''
   vis.value = v?.id ?? ''
   titulo.value = props.config?.titulo ?? ''
-  fixados.value = [...(props.config?.fixados ?? [])]
+  escolhidas.value = [...(props.config?.categorias ?? [])]
   marcados.value = props.atalhos.map(a => a.id)
 })
 
@@ -57,9 +53,8 @@ const nomeDoTipo = computed(() => props.tipo ? props.t.widgets[props.tipo].titul
 const ehVisualizacao = computed(() => props.tipo === 'visualizacao' || props.tipo === 'numero')
 const placeholderDoTitulo = computed(() => visualizacoes.find(v => v.id === vis.value)?.nome ?? '')
 
-function alternarFixado(id: string, marcar: boolean) {
-  if (marcar && fixados.value.length < MAX_FIXADOS) fixados.value = [...fixados.value, id]
-  else if (!marcar) fixados.value = fixados.value.filter(x => x !== id)
+function alternarCategoria(slug: string, marcar: boolean) {
+  escolhidas.value = marcar ? [...escolhidas.value, slug] : escolhidas.value.filter(x => x !== slug)
 }
 function alternarAtalho(id: string, marcar: boolean) {
   marcados.value = marcar ? [...marcados.value, id] : marcados.value.filter(x => x !== id)
@@ -67,7 +62,7 @@ function alternarAtalho(id: string, marcar: boolean) {
 
 function salvar() {
   if (ehVisualizacao.value) emit('salvar', { ...props.config, visualizacao: vis.value, titulo: titulo.value.trim() || undefined })
-  else if (props.tipo === 'criarRapido') emit('salvar', { ...props.config, fixados: fixados.value })
+  else if (props.tipo === 'categorias') emit('salvar', { ...props.config, categorias: escolhidas.value })
   else if (props.tipo === 'atalhos') emit('salvar', { ...props.config }, atalhosDisponiveis.filter(a => marcados.value.includes(a.id)))
   aberto.value = false
 }
@@ -89,22 +84,22 @@ function salvar() {
           </UFormField>
         </template>
 
-        <template v-else-if="tipo === 'criarRapido'">
+        <template v-else-if="tipo === 'categorias'">
           <p class="text-sm text-muted">
-            {{ t.config.fixarAjuda(MAX_FIXADOS) }}
+            {{ t.config.categoriasAjuda }}
           </p>
           <ul class="grid gap-1 sm:grid-cols-2">
-            <li v-for="o in opcoes" :key="o.id">
+            <li v-for="c in categorias.filter(x => x.acesso)" :key="c.slug">
               <UCheckbox
-                :model-value="fixados.includes(o.id)"
-                :disabled="!fixados.includes(o.id) && fixados.length >= MAX_FIXADOS"
-                :label="rotuloDaOpcao(o)"
+                :model-value="escolhidas.includes(c.slug)"
+                :label="c.name"
                 class="rounded-md px-2 py-1.5 hover:bg-elevated"
-                @update:model-value="(v) => alternarFixado(o.id, v === true)"
+                @update:model-value="(v) => alternarCategoria(c.slug, v === true)"
               />
             </li>
           </ul>
-          <UButton v-if="fixados.length" :label="t.config.semFixados" icon="i-lucide-rotate-ccw" color="neutral" variant="outline" size="xs" @click="fixados = []" />
+          <!-- Sempre visível (desativado sem escolha): aparecer e sumir fazia o modal pular sob o clique. -->
+          <UButton :disabled="!escolhidas.length" :label="t.config.todas" icon="i-lucide-rotate-ccw" color="neutral" variant="outline" size="xs" @click="escolhidas = []" />
         </template>
 
         <ul v-else-if="tipo === 'atalhos'" class="grid gap-1 sm:grid-cols-2">

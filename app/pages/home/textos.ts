@@ -63,20 +63,34 @@ export interface Textos {
     botao: string
     dica: string
     placeholder: string
-    grupos: { tarefa: string, item: string, formulario: string }
-    tarefaRapida: string
-    tarefaRapidaDescricao: string
-    itemEm: (categoria: string) => string
-    formularioDe: (categoria: string) => string
+    item: string
+    itemDescricao: string
+    tarefa: string
+    tarefaDescricao: string
+    qualCategoria: string
+    qualFormulario: (categoria: string) => string
+    qualTarefa: string
+    formularios: (n: number) => string
+    todosOsCampos: string
+    rapida: string
+    rapidaDescricao: string
+    agendada: string
+    agendadaDescricao: string
+    /** "Criar <singular>", ou "Criar item em <categoria>" sem singular. */
+    criarNa: (singular: string | undefined, categoria: string) => string
+    beni: string
+    beniDescricao: string
+    beniToast: (texto: string) => string
+    beniDica: string
     vazio: (termo: string) => string
     rodape: string
   }
 
-  criarRapido: {
-    maisUsados: string
-    fixados: string
-    escolher: string
-    mais: string
+  categoriasW: {
+    abertos: (n: number) => string
+    acessar: (categoria: string) => string
+    escolhaFormulario: string
+    verTodas: string
   }
 
   tarefas: {
@@ -108,7 +122,7 @@ export interface Textos {
   }
 
   numero: { itens: (n: number) => string, abrir: string }
-  atalhos: { escolher: string, vazio: string, tipos: Record<'categoria' | 'visualizacao' | 'formulario' | 'tela' | 'link', string> }
+  atalhos: { escolher: string, vazio: string, tipos: Record<'visualizacao' | 'tela' | 'link', string> }
   recentes: { ha: (minutos: number) => string, vazio: string, tipos: Record<'item' | 'visualizacao' | 'tela' | 'formulario', string> }
   agenda: { vazio: string, abrir: string, fontes: Record<'tarefa' | 'item' | 'calendario', string> }
   saude: { subtitulo: string, faixas: { vencidas: string, vencem7: string, noPrazo: string, semPrazo: string }, abrirPainel: string }
@@ -149,30 +163,38 @@ export interface Textos {
     tituloAjuda: string
     salvar: string
     cancelar: string
-    fixarAjuda: (max: number) => string
-    semFixados: string
+    categoriasAjuda: string
+    todas: string
   }
 
   novaTarefa: {
-    titulo: string
+    tituloRapida: string
+    tituloAgendada: string
+    descricaoRapida: string
+    descricaoAgendada: string
     nome: string
     nomePlaceholder: string
+    nomeObrigatorio: string
+    item: string
+    itemPlaceholder: string
+    itemObrigatorio: string
     dataLimite: string
+    descricao: string
     responsavel: string
+    colaboradores: string
+    colaboradoresPlaceholder: string
     prioridade: string
     prioridades: Record<Prioridade, string>
     criar: string
     cancelar: string
-    maisCampos: string
-    maisCamposAviso: string
     criada: (ref: string) => string
     abrir: string
   }
 
   novoItem: {
-    titulo: (categoria: string) => string
-    formulario: (nome: string) => string
+    descricao: (categoria: string, formulario?: string) => string
     tituloCampo: string
+    tituloObrigatorio: string
     valor: string
     prazo: string
     urgente: string
@@ -226,11 +248,11 @@ const ptBR: Textos = {
   personalizar: 'Personalizar',
 
   widgets: {
-    criarRapido: { titulo: 'Criar rápido', descricao: 'Botões para criar tarefa, item e formulário em 1 clique.' },
+    categorias: { titulo: 'Categorias', descricao: 'Acesse uma categoria ou crie um item nela.' },
     minhasTarefas: { titulo: 'Minhas tarefas', descricao: 'Suas tarefas rápidas e agendadas, por prazo.' },
     visualizacao: { titulo: 'Itens de uma visualização', descricao: 'Os itens de uma visualização salva de uma categoria.' },
     numero: { titulo: 'Número de uma visualização', descricao: 'Quantos itens uma visualização salva tem agora.' },
-    atalhos: { titulo: 'Atalhos', descricao: 'Categorias, visualizações, formulários, telas e links fixados.' },
+    atalhos: { titulo: 'Atalhos', descricao: 'Visualizações, telas e links fixados.' },
     recentes: { titulo: 'Recentes', descricao: 'Os itens e as telas que você abriu por último.' },
     agenda: { titulo: 'Agenda de hoje', descricao: 'Compromissos, prazos de tarefa e datas de item de hoje.' },
     saudeDosPrazos: { titulo: 'Saúde dos prazos', descricao: 'Tarefas abertas do workspace pela situação do prazo.' },
@@ -263,22 +285,35 @@ const ptBR: Textos = {
 
   criar: {
     botao: 'Criar',
-    dica: 'Criar tarefa, item ou formulário (C)',
+    dica: 'Criar item ou tarefa (C)',
     placeholder: 'O que você quer criar?',
-    grupos: { tarefa: 'Tarefa', item: 'Item', formulario: 'Formulários' },
-    tarefaRapida: 'Tarefa rápida',
-    tarefaRapidaDescricao: 'Para você ou para outra pessoa, com prazo',
-    itemEm: c => c,
-    formularioDe: c => `Formulário de ${c}`,
-    vazio: t => `Nada para criar com "${t}".`,
-    rodape: 'Use as setas e Enter. Esc fecha.',
+    item: 'Item',
+    itemDescricao: 'Em uma categoria, pelo formulário dela',
+    tarefa: 'Tarefa',
+    tarefaDescricao: 'Rápida ou agendada',
+    qualCategoria: 'Em qual categoria?',
+    qualFormulario: c => `Qual formulário de ${c}?`,
+    qualTarefa: 'Qual tipo de tarefa?',
+    formularios: n => `${n} formulários`,
+    todosOsCampos: 'Todos os campos da categoria',
+    rapida: 'Tarefa rápida',
+    rapidaDescricao: 'Para você ou outra pessoa, fora do fluxo',
+    agendada: 'Tarefa agendada',
+    agendadaDescricao: 'Ligada a um item da categoria',
+    criarNa: (s, c) => s ? `Criar ${s}` : `Criar item em ${c}`,
+    beni: 'Pedir ao BENI',
+    beniDescricao: 'Descreva, e o BENI monta para você revisar',
+    beniToast: x => x ? `O BENI monta "${x}" e mostra antes de gravar.` : 'O BENI abre para você descrever o que quer criar.',
+    beniDica: 'Maquete: no produto, abre o chat do BENI AI.',
+    vazio: t => `Nenhuma opção com "${t}".`,
+    rodape: 'Setas e Enter escolhem. Backspace volta. Esc fecha.',
   },
 
-  criarRapido: {
-    maisUsados: 'Os que você mais usa',
-    fixados: 'Fixados por você',
-    escolher: 'Escolher atalhos',
-    mais: 'Mais',
+  categoriasW: {
+    abertos: n => n === 0 ? 'Nenhum em aberto' : n === 1 ? '1 em aberto' : `${n} em aberto`,
+    acessar: c => `Acessar ${c}`,
+    escolhaFormulario: 'Escolha o formulário',
+    verTodas: 'Ver todas as categorias',
   },
 
   tarefas: {
@@ -318,7 +353,7 @@ const ptBR: Textos = {
   atalhos: {
     escolher: 'Escolher atalhos',
     vazio: 'Fixe aqui o que você abre todo dia.',
-    tipos: { categoria: 'Categoria', visualizacao: 'Visualização', formulario: 'Formulário', tela: 'Tela', link: 'Link' },
+    tipos: { visualizacao: 'Visualização', tela: 'Tela', link: 'Link' },
   },
   recentes: {
     ha: m => m < 60 ? `há ${m} min` : m < 1440 ? `há ${Math.round(m / 60)} h` : m < 2880 ? 'ontem' : `há ${Math.round(m / 1440)} dias`,
@@ -372,35 +407,43 @@ const ptBR: Textos = {
     tituloAjuda: 'Sem título, vale o nome da visualização.',
     salvar: 'Salvar',
     cancelar: 'Cancelar',
-    fixarAjuda: m => `Escolha até ${m}. Sem escolha, aparecem os que você mais usa.`,
-    semFixados: 'Mostrar os mais usados',
+    categoriasAjuda: 'Marque as categorias que aparecem no widget. Sem nenhuma marcada, aparecem todas as que você acessa.',
+    todas: 'Mostrar todas',
   },
 
   novaTarefa: {
-    titulo: 'Nova tarefa',
+    tituloRapida: 'Nova tarefa rápida',
+    tituloAgendada: 'Nova tarefa agendada',
+    descricaoRapida: 'Fica em Tarefas > Rápidas.',
+    descricaoAgendada: 'Fica no item e aparece em Tarefas > Agendadas.',
     nome: 'Nome',
     nomePlaceholder: 'Digite o nome da tarefa',
+    nomeObrigatorio: 'Dê um nome à tarefa.',
+    item: 'Item relacionado',
+    itemPlaceholder: 'Buscar pelo título ou pelo número',
+    itemObrigatorio: 'Escolha o item da tarefa agendada.',
     dataLimite: 'Data limite',
+    descricao: 'Descrição',
     responsavel: 'Responsável',
+    colaboradores: 'Colaboradores',
+    colaboradoresPlaceholder: 'Ninguém',
     prioridade: 'Prioridade',
     prioridades: { low: 'Baixa', normal: 'Normal', high: 'Alta', urgent: 'Urgente' },
     criar: 'Criar',
     cancelar: 'Cancelar',
-    maisCampos: 'Mais campos',
-    maisCamposAviso: 'Abre o formulário completo de Tarefas Rápidas, com descrição e colaboradores.',
     criada: r => `Tarefa ${r} criada.`,
     abrir: 'Abrir',
   },
 
   novoItem: {
-    titulo: c => `Novo item em ${c}`,
-    formulario: n => `Formulário: ${n}`,
+    descricao: (c, f) => f ? `${c} · Formulário ${f}` : `${c} · Todos os campos da categoria`,
     tituloCampo: 'Título',
+    tituloObrigatorio: 'Dê um título ao item.',
     valor: 'Valor',
     prazo: 'Data de vencimento',
     urgente: 'Urgente',
     responsavel: 'Responsável',
-    criar: 'Criar item',
+    criar: 'Criar',
     criado: (r, c) => `Item ${r} criado em ${c}.`,
   },
 
@@ -449,11 +492,11 @@ const en: Textos = {
   personalizar: 'Customize',
 
   widgets: {
-    criarRapido: { titulo: 'Quick create', descricao: 'Buttons to create a task, item or form in 1 click.' },
+    categorias: { titulo: 'Categories', descricao: 'Open a category or create an item in it.' },
     minhasTarefas: { titulo: 'My tasks', descricao: 'Your quick and scheduled tasks, by due date.' },
     visualizacao: { titulo: 'Items from a view', descricao: 'The items of a saved view of a category.' },
     numero: { titulo: 'Number from a view', descricao: 'How many items a saved view has right now.' },
-    atalhos: { titulo: 'Shortcuts', descricao: 'Pinned categories, views, forms, screens and links.' },
+    atalhos: { titulo: 'Shortcuts', descricao: 'Pinned views, screens and links.' },
     recentes: { titulo: 'Recent', descricao: 'The items and screens you opened last.' },
     agenda: { titulo: 'Today\'s schedule', descricao: 'Today\'s events, task due dates and item dates.' },
     saudeDosPrazos: { titulo: 'Due date health', descricao: 'Open workspace tasks by due date status.' },
@@ -486,18 +529,36 @@ const en: Textos = {
 
   criar: {
     botao: 'Create',
-    dica: 'Create a task, item or form (C)',
+    dica: 'Create an item or a task (C)',
     placeholder: 'What do you want to create?',
-    grupos: { tarefa: 'Task', item: 'Item', formulario: 'Forms' },
-    tarefaRapida: 'Quick task',
-    tarefaRapidaDescricao: 'For you or someone else, with a due date',
-    itemEm: c => c,
-    formularioDe: c => `${c} form`,
-    vazio: t => `Nothing to create with "${t}".`,
-    rodape: 'Use the arrow keys and Enter. Esc closes.',
+    item: 'Item',
+    itemDescricao: 'In a category, through its form',
+    tarefa: 'Task',
+    tarefaDescricao: 'Quick or scheduled',
+    qualCategoria: 'In which category?',
+    qualFormulario: c => `Which ${c} form?`,
+    qualTarefa: 'Which kind of task?',
+    formularios: n => `${n} forms`,
+    todosOsCampos: 'All category fields',
+    rapida: 'Quick task',
+    rapidaDescricao: 'For you or someone else, outside the flow',
+    agendada: 'Scheduled task',
+    agendadaDescricao: 'Linked to an item in a category',
+    criarNa: (s, c) => s ? `Create ${s}` : `Create item in ${c}`,
+    beni: 'Ask BENI',
+    beniDescricao: 'Describe it, and BENI builds it for you to review',
+    beniToast: x => x ? `BENI builds "${x}" and shows it before saving.` : 'BENI opens so you can describe what to create.',
+    beniDica: 'Mockup: in the product, opens the BENI AI chat.',
+    vazio: t => `No option matches "${t}".`,
+    rodape: 'Arrows and Enter choose. Backspace goes back. Esc closes.',
   },
 
-  criarRapido: { maisUsados: 'The ones you use most', fixados: 'Pinned by you', escolher: 'Choose shortcuts', mais: 'More' },
+  categoriasW: {
+    abertos: n => n === 0 ? 'None open' : `${n} open`,
+    acessar: c => `Open ${c}`,
+    escolhaFormulario: 'Choose the form',
+    verTodas: 'See all categories',
+  },
 
   tarefas: {
     abas: { atraso: 'Overdue', hoje: 'Today', proximas: 'Upcoming', semPrazo: 'No due date' },
@@ -536,7 +597,7 @@ const en: Textos = {
   atalhos: {
     escolher: 'Choose shortcuts',
     vazio: 'Pin here what you open every day.',
-    tipos: { categoria: 'Category', visualizacao: 'View', formulario: 'Form', tela: 'Screen', link: 'Link' },
+    tipos: { visualizacao: 'View', tela: 'Screen', link: 'Link' },
   },
   recentes: {
     ha: m => m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : m < 2880 ? 'yesterday' : `${Math.round(m / 1440)} days ago`,
@@ -590,35 +651,43 @@ const en: Textos = {
     tituloAjuda: 'Without a title, the view name is used.',
     salvar: 'Save',
     cancelar: 'Cancel',
-    fixarAjuda: m => `Choose up to ${m}. Without a choice, the ones you use most show up.`,
-    semFixados: 'Show the most used',
+    categoriasAjuda: 'Check the categories shown in the widget. With none checked, all the ones you can access show up.',
+    todas: 'Show all',
   },
 
   novaTarefa: {
-    titulo: 'New task',
+    tituloRapida: 'New quick task',
+    tituloAgendada: 'New scheduled task',
+    descricaoRapida: 'Goes to Tasks > Quick.',
+    descricaoAgendada: 'Stays in the item and shows in Tasks > Scheduled.',
     nome: 'Name',
     nomePlaceholder: 'Type the task name',
+    nomeObrigatorio: 'Give the task a name.',
+    item: 'Related item',
+    itemPlaceholder: 'Search by title or number',
+    itemObrigatorio: 'Choose the item for the scheduled task.',
     dataLimite: 'Due date',
+    descricao: 'Description',
     responsavel: 'Assignee',
+    colaboradores: 'Collaborators',
+    colaboradoresPlaceholder: 'Nobody',
     prioridade: 'Priority',
     prioridades: { low: 'Low', normal: 'Normal', high: 'High', urgent: 'Urgent' },
     criar: 'Create',
     cancelar: 'Cancel',
-    maisCampos: 'More fields',
-    maisCamposAviso: 'Opens the full Quick Tasks form, with description and collaborators.',
     criada: r => `Task ${r} created.`,
     abrir: 'Open',
   },
 
   novoItem: {
-    titulo: c => `New item in ${c}`,
-    formulario: n => `Form: ${n}`,
+    descricao: (c, f) => f ? `${c} · ${f} form` : `${c} · All category fields`,
     tituloCampo: 'Title',
+    tituloObrigatorio: 'Give the item a title.',
     valor: 'Amount',
     prazo: 'Due date',
     urgente: 'Urgent',
     responsavel: 'Assignee',
-    criar: 'Create item',
+    criar: 'Create',
     criado: (r, c) => `Item ${r} created in ${c}.`,
   },
 
@@ -667,11 +736,11 @@ const es: Textos = {
   personalizar: 'Personalizar',
 
   widgets: {
-    criarRapido: { titulo: 'Crear rápido', descricao: 'Botones para crear tarea, ítem y formulario en 1 clic.' },
+    categorias: { titulo: 'Categorías', descricao: 'Accede a una categoría o crea un ítem en ella.' },
     minhasTarefas: { titulo: 'Mis tareas', descricao: 'Tus tareas rápidas y programadas, por plazo.' },
     visualizacao: { titulo: 'Ítems de una vista', descricao: 'Los ítems de una vista guardada de una categoría.' },
     numero: { titulo: 'Número de una vista', descricao: 'Cuántos ítems tiene ahora una vista guardada.' },
-    atalhos: { titulo: 'Accesos directos', descricao: 'Categorías, vistas, formularios, pantallas y enlaces fijados.' },
+    atalhos: { titulo: 'Accesos directos', descricao: 'Vistas, pantallas y enlaces fijados.' },
     recentes: { titulo: 'Recientes', descricao: 'Los ítems y las pantallas que abriste por último.' },
     agenda: { titulo: 'Agenda de hoy', descricao: 'Compromisos, plazos de tarea y fechas de ítem de hoy.' },
     saudeDosPrazos: { titulo: 'Salud de los plazos', descricao: 'Tareas abiertas del workspace por situación del plazo.' },
@@ -704,18 +773,36 @@ const es: Textos = {
 
   criar: {
     botao: 'Crear',
-    dica: 'Crear tarea, ítem o formulario (C)',
+    dica: 'Crear ítem o tarea (C)',
     placeholder: '¿Qué quieres crear?',
-    grupos: { tarefa: 'Tarea', item: 'Ítem', formulario: 'Formularios' },
-    tarefaRapida: 'Tarea rápida',
-    tarefaRapidaDescricao: 'Para ti o para otra persona, con plazo',
-    itemEm: c => c,
-    formularioDe: c => `Formulario de ${c}`,
-    vazio: t => `Nada para crear con "${t}".`,
-    rodape: 'Usa las flechas y Enter. Esc cierra.',
+    item: 'Ítem',
+    itemDescricao: 'En una categoría, con su formulario',
+    tarefa: 'Tarea',
+    tarefaDescricao: 'Rápida o programada',
+    qualCategoria: '¿En qué categoría?',
+    qualFormulario: c => `¿Qué formulario de ${c}?`,
+    qualTarefa: '¿Qué tipo de tarea?',
+    formularios: n => `${n} formularios`,
+    todosOsCampos: 'Todos los campos de la categoría',
+    rapida: 'Tarea rápida',
+    rapidaDescricao: 'Para ti u otra persona, fuera del flujo',
+    agendada: 'Tarea programada',
+    agendadaDescricao: 'Vinculada a un ítem de una categoría',
+    criarNa: (s, c) => s ? `Crear ${s}` : `Crear ítem en ${c}`,
+    beni: 'Pedir al BENI',
+    beniDescricao: 'Descríbelo, y el BENI lo arma para que lo revises',
+    beniToast: x => x ? `El BENI arma "${x}" y lo muestra antes de guardar.` : 'El BENI se abre para que describas qué crear.',
+    beniDica: 'Maqueta: en el producto, abre el chat del BENI AI.',
+    vazio: t => `Ninguna opción con "${t}".`,
+    rodape: 'Flechas y Enter eligen. Retroceso vuelve. Esc cierra.',
   },
 
-  criarRapido: { maisUsados: 'Los que más usas', fixados: 'Fijados por ti', escolher: 'Elegir accesos', mais: 'Más' },
+  categoriasW: {
+    abertos: n => n === 0 ? 'Ninguno abierto' : n === 1 ? '1 abierto' : `${n} abiertos`,
+    acessar: c => `Acceder a ${c}`,
+    escolhaFormulario: 'Elige el formulario',
+    verTodas: 'Ver todas las categorías',
+  },
 
   tarefas: {
     abas: { atraso: 'Atrasadas', hoje: 'Hoy', proximas: 'Próximas', semPrazo: 'Sin plazo' },
@@ -754,7 +841,7 @@ const es: Textos = {
   atalhos: {
     escolher: 'Elegir accesos',
     vazio: 'Fija aquí lo que abres todos los días.',
-    tipos: { categoria: 'Categoría', visualizacao: 'Vista', formulario: 'Formulario', tela: 'Pantalla', link: 'Enlace' },
+    tipos: { visualizacao: 'Vista', tela: 'Pantalla', link: 'Enlace' },
   },
   recentes: {
     ha: m => m < 60 ? `hace ${m} min` : m < 1440 ? `hace ${Math.round(m / 60)} h` : m < 2880 ? 'ayer' : `hace ${Math.round(m / 1440)} días`,
@@ -808,35 +895,43 @@ const es: Textos = {
     tituloAjuda: 'Sin título, vale el nombre de la vista.',
     salvar: 'Guardar',
     cancelar: 'Cancelar',
-    fixarAjuda: m => `Elige hasta ${m}. Sin elección, aparecen los que más usas.`,
-    semFixados: 'Mostrar los más usados',
+    categoriasAjuda: 'Marca las categorías que aparecen en el widget. Sin ninguna marcada, aparecen todas a las que tienes acceso.',
+    todas: 'Mostrar todas',
   },
 
   novaTarefa: {
-    titulo: 'Nueva tarea',
+    tituloRapida: 'Nueva tarea rápida',
+    tituloAgendada: 'Nueva tarea programada',
+    descricaoRapida: 'Queda en Tareas > Rápidas.',
+    descricaoAgendada: 'Queda en el ítem y aparece en Tareas > Programadas.',
     nome: 'Nombre',
     nomePlaceholder: 'Escribe el nombre de la tarea',
+    nomeObrigatorio: 'Ponle un nombre a la tarea.',
+    item: 'Ítem relacionado',
+    itemPlaceholder: 'Buscar por título o número',
+    itemObrigatorio: 'Elige el ítem de la tarea programada.',
     dataLimite: 'Fecha límite',
+    descricao: 'Descripción',
     responsavel: 'Responsable',
+    colaboradores: 'Colaboradores',
+    colaboradoresPlaceholder: 'Nadie',
     prioridade: 'Prioridad',
     prioridades: { low: 'Baja', normal: 'Normal', high: 'Alta', urgent: 'Urgente' },
     criar: 'Crear',
     cancelar: 'Cancelar',
-    maisCampos: 'Más campos',
-    maisCamposAviso: 'Abre el formulario completo de Tareas Rápidas, con descripción y colaboradores.',
     criada: r => `Tarea ${r} creada.`,
     abrir: 'Abrir',
   },
 
   novoItem: {
-    titulo: c => `Nuevo ítem en ${c}`,
-    formulario: n => `Formulario: ${n}`,
+    descricao: (c, f) => f ? `${c} · Formulario ${f}` : `${c} · Todos los campos de la categoría`,
     tituloCampo: 'Título',
+    tituloObrigatorio: 'Ponle un título al ítem.',
     valor: 'Valor',
     prazo: 'Fecha de vencimiento',
     urgente: 'Urgente',
     responsavel: 'Responsable',
-    criar: 'Crear ítem',
+    criar: 'Crear',
     criado: (r, c) => `Ítem ${r} creado en ${c}.`,
   },
 

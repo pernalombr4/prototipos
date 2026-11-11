@@ -1,8 +1,15 @@
 <script setup lang="ts">
 /**
- * Novo item pelo formulário da categoria, aberto da Home. No produto, abre o
- * formulário de verdade (o campo de cada categoria muda); aqui são 5 campos
- * comuns, o bastante para o item nascer e aparecer no widget da visualização.
+ * Criar item, aberto do botão Criar ou do "+" do widget Categorias. No
+ * produto é o modal de criação da categoria (`EntityItemsFormsUpsert.vue`),
+ * com os campos do formulário escolhido; aqui são 5 campos comuns, o bastante
+ * para o item nascer e aparecer no widget da visualização.
+ *
+ * Título "Criar <singular>" pelo `singular_name` da categoria ("Criar
+ * chamado"); sem singular, "Criar item em <categoria>". A descrição diz de
+ * qual formulário vêm os campos, ou "Todos os campos da categoria" quando ela
+ * não tem formulário. Hoje o modal de develop diz "Novo registro" e o seletor
+ * diz "Formulario", sem acento (DECISOES.md, rodada 2).
  *
  * Componentes: `UModal`, `UFormField`, `UInput`, `UInputNumber`, `USelect`,
  * `USwitch` (MCP nuxt-ui).
@@ -23,7 +30,7 @@ export interface DadosDoItem {
 const props = defineProps<{
   t: Textos
   categoria?: Categoria
-  /** Formulário escolhido; sem ele, o primeiro da categoria. */
+  /** Formulário escolhido; sem ele, todos os campos da categoria. */
   formulario?: string
 }>()
 const aberto = defineModel<boolean>('open', { default: false })
@@ -41,15 +48,12 @@ watch(aberto, (a) => {
   titulo.value = ''
   valor.value = undefined
   prazo.value = ''
-  urgente.value = props.formulario === 'f-compra-urgente'
+  urgente.value = false
   responsavel.value = EU.id
   tentou.value = false
 })
 
-const nomeDoFormulario = computed(() => {
-  const f = props.categoria?.formularios.find(x => x.id === props.formulario) ?? props.categoria?.formularios[0]
-  return f?.nome ?? ''
-})
+const nomeDoFormulario = computed(() => props.categoria?.formularios.find(x => x.id === props.formulario)?.nome)
 
 const opcoesDeResponsavel = computed<SelectItem[]>(() => pessoas.map(p => ({ label: p.nome, value: p.id, avatar: { text: p.iniciais } })))
 
@@ -70,13 +74,13 @@ function criar() {
 <template>
   <UModal
     v-model:open="aberto"
-    :title="t.novoItem.titulo(categoria?.name ?? '')"
-    :description="nomeDoFormulario ? t.novoItem.formulario(nomeDoFormulario) : undefined"
+    :title="t.criar.criarNa(categoria?.singular, categoria?.name ?? '')"
+    :description="t.novoItem.descricao(categoria?.name ?? '', nomeDoFormulario)"
     :ui="{ footer: 'justify-end' }"
   >
     <template #body>
       <form id="form-novo-item" class="space-y-4" @submit.prevent="criar">
-        <UFormField :label="t.novoItem.tituloCampo" required :error="tentou && !titulo.trim() ? t.novoItem.tituloCampo : undefined">
+        <UFormField :label="t.novoItem.tituloCampo" required :error="tentou && !titulo.trim() ? t.novoItem.tituloObrigatorio : undefined">
           <UInput v-model="titulo" autofocus class="w-full" />
         </UFormField>
         <div class="grid gap-4 sm:grid-cols-2">

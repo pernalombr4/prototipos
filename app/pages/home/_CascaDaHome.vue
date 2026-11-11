@@ -2,10 +2,8 @@
 /**
  * A casca do ENSPACE, copiada da Home de develop.
  *
- * ⚠️ NADA AQUI É PROPOSTA, com UMA exceção marcada abaixo: o botão "Criar",
- * logo abaixo de "Buscar...". A demanda pediu o atalho de criar "na home ou no
- * menu lateral"; ele entra no menu porque o menu está em toda tela, e a Home
- * tem o widget "Criar rápido" com as mesmas opções.
+ * ⚠️ NADA AQUI É PROPOSTA. Na rodada 1 o botão "Criar" morava aqui; na
+ * rodada 2 ele saiu, e o Criar mora no topo da Home (DECISOES.md).
  *
  * Referência: `https://develop.enspace.io/workspaces/<ws>`, visitada em
  * 11/11/2026. Base: a casca do `painel-de-tarefas`, conferida de novo no
@@ -23,8 +21,6 @@ defineProps<{
 
 defineSlots<{
   default(): unknown
-  /** PROPOSTA: o botão Criar e o menu dele. */
-  criar(props: { recolhido: boolean }): unknown
 }>()
 
 interface ItemDeMenu {
@@ -110,11 +106,6 @@ const menuRecolhido = ref(false)
           <UKbd value="K" size="sm" />
         </template>
       </button>
-
-      <!-- PROPOSTA: o botão Criar. É a única mudança na casca. -->
-      <div class="mx-2 mb-1 mt-1">
-        <slot name="criar" :recolhido="menuRecolhido" />
-      </div>
 
       <nav class="min-h-0 flex-1 overflow-y-auto pb-4">
         <template v-for="(grupo, i) in [{ titulo: t.casca.membro, itens: membro }, { titulo: t.casca.configuracoes, itens: configuracoes }, { titulo: t.casca.ajuda, itens: ajuda }]" :key="i">

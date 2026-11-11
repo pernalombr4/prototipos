@@ -2,6 +2,44 @@
 
 Registro das rodadas. A mais recente em cima.
 
+## Rodada 2 · 2026-11-11
+
+- **Pedido (literal):** "a home também deve poder ter atalho pras categorias. o "criar rápido" ta ruim. deveria ser só um botão bem objetivo mesmo. quando botar pra criar, abre as opçoes "item" e "tarefa", aí ramifica na hora de criar, item > seleciona qual categoria > seleciona qual form (se nao tiver form vai direto). tarefa > rapida ou agendada > abre o modal de criaçao. e aí pode tirar o botão de criação do menu lateral ou, se nao for tirar, deixe identico ao do prototipo de menu lateral de 2 niveis, incluindo opçao de "pedir ao beni" a criaçao de algo. se voce INSISTIR que é bom ter os atalhos especificos de crioação no widget de criar, ja com atalho pra categoria especifica e tal, aí voce vai ter que deixar melhor. usabilidade nao ta legal, specialemnte ux writing, que nao faz sentido no codigo. [...] e vai perceber que "abrir chamado" nao seria um nome possivel, pq chamado é uma categoria e simplesmente pra gente é "criar item em x categoria" ou "criar X", sendo X o nome da categoria."
+- **Pedido no meio da rodada:** "home vazia = estado inicial? ou o estado inicial = home padrao? nomeie como ESTADO INICIAL (primeiro acesso) o que for representar isso."
+- **O que o código diz** (en-space@develop e3a6cd15a, só leitura):
+  - a Home monta 4 blocos fixos, sem configuração pela pessoa: `src/pages/workspaces/[workspace]/index.vue:15-31` (`WelcomeCard`, `WorkspaceCategories`, `WorkspaceTasks`, `WorkspaceComparisons`);
+  - os cartões de categoria da Home dependem de `show_types_on_initial_screen`: `src/components/workspace/WorkspaceCategories.vue:49`, ligado em `SettingsGeneralConfigs.vue:128`;
+  - o modal de criar item se chama "Novo registro" e o seletor, "Formulario" (sem acento): `EntityItemsFormsUpsert.vue:27-29`;
+  - o seletor de formulário só aparece com 2 ou mais formulários, e vem com o primeiro escolhido: `EntityItemsFormsUpsert.vue:123` e `:296`;
+  - a chave global de criar item é "Criar Item": `locales/pt-BR.yml:1973`;
+  - os campos da tarefa usam "Data limite", "Colaboradores" e "Item relacionado": `locales/pt-BR.yml:4249-4264`;
+  - não há botão Criar global no menu lateral; o BENI aparece como "BENI AI", em Ajuda.
+- **Mudou:**
+  - um botão **Criar** no topo da Home, ao lado de Personalizar, com a tecla C. Ele ramifica:
+    - Item > categoria > formulário (só com 2 ou mais; com 1 ou nenhum, abre o modal direto, a mesma regra do produto);
+    - Tarefa > Tarefa rápida ou Tarefa agendada > modal;
+    - Pedir ao BENI, com o texto digitado na busca;
+  - ao digitar na raiz, as categorias aparecem junto, para quem já sabe onde vai;
+  - saiu o Criar do menu lateral: a casca volta a ser igual ao develop;
+  - o widget **Criar rápido** virou o widget **Categorias**: o cartão inteiro acessa a categoria e o "+" ao lado cria nela; com 2 ou mais formulários, o "+" pergunta qual;
+  - o texto de criar segue a categoria: "Criar <nome no singular>" (`singular_name`) ou, sem singular, "Criar item em <categoria>". Some "Abrir chamado" e qualquer verbo inventado;
+  - o modal do item tem o mesmo título do "+" e diz de qual formulário vem ("Formulário Equipamento de TI" ou "Todos os campos da categoria");
+  - o modal de tarefa tem os campos e rótulos do produto: Nome, Data limite, Prioridade, Responsável, Colaboradores e Descrição;
+  - tarefa agendada pede também o **Item relacionado**, obrigatório, com busca por título e por número;
+  - o widget Categorias se configura: a pessoa marca quais categorias aparecem; sem nenhuma marcada, aparecem todas as que ela acessa;
+  - os Atalhos deixam de ter categoria e formulário (o widget Categorias cobre isso) e ficam com visualização, tela e link;
+  - andaime: "Estado inicial (primeiro acesso)" mostra a Home padrão do workspace, que é o que a pessoa vê no primeiro acesso; o antigo "Vazio" virou "Sem widgets".
+- **Fronteira:** muda o topo da Home (botão Criar), o primeiro widget e os modais de criar; o menu lateral, a barra do topo e a trilha ficam como o develop.
+- **Descartado:**
+  - manter o widget Criar rápido com atalhos para uma categoria específica: repetia o que o widget Categorias faz pelo "+" e obrigava a pessoa a montar a lista;
+  - manter o Criar no menu lateral: o produto não tem criar global ali, e o "+" do protótipo `menu-lateral` serve para criar estrutura (seção, menu, categoria). 2 portas para criar item confundiam;
+  - cartões grandes para escolher o tipo de tarefa: a lista do próprio menu Criar resolve em 1 clique.
+- **NOVO, para o dev confirmar:** criar tarefa agendada à mão. A leitura do código não achou essa criação pela tela; hoje ela nasce do fluxo da categoria. A proposta supõe que ela mora num item, por isso o Item relacionado é obrigatório.
+- **Diferença com o develop, de propósito:** o produto chama o modal de "Novo registro" e o seletor de "Formulario". O protótipo usa o nome da categoria no título e "Formulário" com acento.
+- **Corrigido na conferência:** o modal de configurar o widget pulava quando a primeira categoria era marcada (o "Mostrar todas" aparecia e empurrava a lista). Agora o botão fica sempre no lugar, desativado sem escolha. Os cartões de categoria deixaram de esticar quando há poucos.
+- **Maquete:** Pedir ao BENI (só o aviso; no produto, abre o chat do BENI AI), Acessar a categoria e "Ver todas as categorias".
+- **Ver:** `pnpm dev` → http://localhost:3000/home · `evidencias/rodada2-criar.jpg`, `rodada2-criar-item-formulario.jpg`, `rodada2-modal-do-item.jpg`, `rodada2-tarefa-agendada-escuro-es.jpg`
+
 ## Rodada 1 · 2026-11-11
 
 - **Pedido (literal):** "a home do enspace nao é boa hoje. os usuarios sentem que é muito dura e tem poucos atalhos. é feia, pouco flexível etc. pode pesquisar quickbooks e hubspot como exemplos. ambos trabalham com widgets pra dar liberdade pro user montar a home. Monday e clickup são outros excelentes exemplos. pesquise PROFUNDAMENTE. se precisar crie conta de usuario pra explorar. considere também o enspace atual em develop, a nova tela de dashboard de tarefas etc. talvez atalho pra criar item e criar tarefa também com botao na home. isso pode ser relevante também. ou no menu lateral. enfim... pesquise e decida como prototipar pro enspace."

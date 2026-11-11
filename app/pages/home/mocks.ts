@@ -56,7 +56,16 @@ export function pessoa(id?: number | null) {
  * ------------------------------------------------------------------ */
 
 export type Categoria = Pick<ItemType, 'name' | 'slug' | 'icon' | 'color'> & {
-  /** Formulários da categoria, como aparecem no menu dentro dela. */
+  /**
+   * `singular_name` da categoria (`c-item-types`). É o que vai em "Criar <singular>".
+   * Sem ele, o rótulo cai para "Criar item em <nome>".
+   */
+  singular?: string
+  /**
+   * Formulários de criação da categoria (`forms` com `type` 'all' ou 'create').
+   * Com 2 ou mais, a pessoa escolhe. Com 1, ele abre direto. Sem nenhum, abre
+   * o modal com todos os campos da categoria (o que o produto faz hoje).
+   */
   formularios: { id: string, nome: string }[]
   /** Campo de protótipo: o membro tem acesso a esta categoria? */
   acesso: boolean
@@ -64,28 +73,31 @@ export type Categoria = Pick<ItemType, 'name' | 'slug' | 'icon' | 'color'> & {
 
 export const categorias: Categoria[] = [
   {
-    name: 'Solicitações de compra', slug: 'solicitacoes-de-compra', icon: 'i-lucide-shopping-cart', color: 'primary', acesso: true,
-    formularios: [{ id: 'f-compra', nome: 'Pedir compra' }, { id: 'f-compra-urgente', nome: 'Compra urgente' }],
+    name: 'Solicitações de compra', singular: 'solicitação de compra', slug: 'solicitacoes-de-compra', icon: 'i-lucide-shopping-cart', color: 'primary', acesso: true,
+    formularios: [{ id: 'f-material', nome: 'Material de escritório' }, { id: 'f-equipamento', nome: 'Equipamento de TI' }, { id: 'f-servico', nome: 'Contratação de serviço' }],
   },
   {
-    name: 'Contratos', slug: 'contratos', icon: 'i-lucide-file-signature', color: 'info', acesso: true,
-    formularios: [{ id: 'f-contrato', nome: 'Novo contrato' }, { id: 'f-aditivo', nome: 'Aditivo de contrato' }],
+    name: 'Contratos', singular: 'contrato', slug: 'contratos', icon: 'i-lucide-file-signature', color: 'info', acesso: true,
+    formularios: [{ id: 'f-contrato', nome: 'Contrato novo' }, { id: 'f-aditivo', nome: 'Aditivo' }],
   },
   {
-    name: 'Chamados de TI', slug: 'chamados-de-ti', icon: 'i-lucide-headset', color: 'warning', acesso: true,
-    formularios: [{ id: 'f-chamado', nome: 'Abrir chamado' }],
+    // Sem formulário: o modal mostra todos os campos da categoria.
+    name: 'Chamados de TI', singular: 'chamado', slug: 'chamados-de-ti', icon: 'i-lucide-headset', color: 'warning', acesso: true,
+    formularios: [],
   },
   {
-    name: 'Reembolsos', slug: 'reembolsos', icon: 'i-lucide-receipt', color: 'success', acesso: true,
-    formularios: [{ id: 'f-reembolso', nome: 'Pedir reembolso' }],
+    // 1 formulário: abre direto, sem a escolha.
+    name: 'Reembolsos', singular: 'reembolso', slug: 'reembolsos', icon: 'i-lucide-receipt', color: 'success', acesso: true,
+    formularios: [{ id: 'f-reembolso', nome: 'Despesa de viagem' }],
   },
   {
+    // Sem singular cadastrado: o rótulo cai para "Criar item em Fornecedores".
     name: 'Fornecedores', slug: 'fornecedores', icon: 'i-lucide-building-2', color: 'neutral', acesso: true,
-    formularios: [{ id: 'f-fornecedor', nome: 'Cadastrar fornecedor' }],
+    formularios: [],
   },
   {
     // Sem acesso de propósito: é o estado "sem permissão" de um widget.
-    name: 'Folha de pagamento', slug: 'folha-de-pagamento', icon: 'i-lucide-wallet', color: 'error', acesso: false,
+    name: 'Folha de pagamento', singular: 'lançamento', slug: 'folha-de-pagamento', icon: 'i-lucide-wallet', color: 'error', acesso: false,
     formularios: [],
   },
 ]
@@ -262,7 +274,7 @@ export const recentes: Recente[] = [
   { id: 'r2', tipo: 'visualizacao', nome: 'Contratos vencendo', onde: 'Contratos', icone: 'i-lucide-file-signature', ha: 48 },
   { id: 'r3', tipo: 'item', nome: 'Locação do galpão de Jundiaí', onde: 'Contratos · #23203', icone: 'i-lucide-file-signature', ha: 95 },
   { id: 'r4', tipo: 'tela', nome: 'Painel de tarefas', onde: 'Tarefas', icone: 'i-lucide-chart-column', ha: 180 },
-  { id: 'r5', tipo: 'formulario', nome: 'Pedir reembolso', onde: 'Reembolsos', icone: 'i-lucide-receipt', ha: 1440 },
+  { id: 'r5', tipo: 'item', nome: 'Viagem a Curitiba, visita ao cliente', onde: 'Reembolsos · #23259', icone: 'i-lucide-receipt', ha: 1440 },
   { id: 'r6', tipo: 'item', nome: 'VPN cai a cada 10 minutos no home office', onde: 'Chamados de TI · #23224', icone: 'i-lucide-headset', ha: 1500 },
 ]
 
@@ -272,13 +284,13 @@ export interface Atalho {
   icone: string
   /** Onde leva, para o rótulo de baixo. */
   onde: string
-  tipo: 'categoria' | 'visualizacao' | 'formulario' | 'tela' | 'link'
+  tipo: 'visualizacao' | 'tela' | 'link'
 }
 
 export const atalhosIniciais: Atalho[] = [
   { id: 'a1', nome: 'Pedidos em aberto', icone: 'i-lucide-shopping-cart', onde: 'Solicitações de compra', tipo: 'visualizacao' },
-  { id: 'a2', nome: 'Contratos', icone: 'i-lucide-file-signature', onde: 'Menu Categorias', tipo: 'categoria' },
-  { id: 'a3', nome: 'Abrir chamado', icone: 'i-lucide-headset', onde: 'Chamados de TI', tipo: 'formulario' },
+  { id: 'a2', nome: 'Contratos vencendo', icone: 'i-lucide-file-signature', onde: 'Contratos', tipo: 'visualizacao' },
+  { id: 'a3', nome: 'Chamados abertos', icone: 'i-lucide-headset', onde: 'Chamados de TI', tipo: 'visualizacao' },
   { id: 'a4', nome: 'Painel de tarefas', icone: 'i-lucide-chart-column', onde: 'Tarefas', tipo: 'tela' },
   { id: 'a5', nome: 'Agenda', icone: 'i-lucide-calendar-days', onde: 'Menu', tipo: 'tela' },
   { id: 'a6', nome: 'Política de compras', icone: 'i-lucide-link', onde: 'intranet.exemplo.com.br', tipo: 'link' },
@@ -288,9 +300,9 @@ export const atalhosIniciais: Atalho[] = [
 export const atalhosDisponiveis: Atalho[] = [
   ...atalhosIniciais,
   { id: 'a7', nome: 'Urgentes da semana', icone: 'i-lucide-headset', onde: 'Chamados de TI', tipo: 'visualizacao' },
-  { id: 'a8', nome: 'Pedir reembolso', icone: 'i-lucide-receipt', onde: 'Reembolsos', tipo: 'formulario' },
-  { id: 'a9', nome: 'Fornecedores', icone: 'i-lucide-building-2', onde: 'Menu Categorias', tipo: 'categoria' },
-  { id: 'a10', nome: 'Contratos vencendo', icone: 'i-lucide-file-signature', onde: 'Contratos', tipo: 'visualizacao' },
+  { id: 'a8', nome: 'Reembolsos pendentes', icone: 'i-lucide-receipt', onde: 'Reembolsos', tipo: 'visualizacao' },
+  { id: 'a9', nome: 'Meus pedidos', icone: 'i-lucide-shopping-cart', onde: 'Solicitações de compra', tipo: 'visualizacao' },
+  { id: 'a10', nome: 'Agentes de IA', icone: 'i-lucide-bot', onde: 'Configurações', tipo: 'tela' },
 ]
 
 /** Um painel da Interface (tela do tipo Dashboard), para o widget "Gráfico de um painel". */

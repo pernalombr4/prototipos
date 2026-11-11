@@ -2,7 +2,7 @@
 /**
  * Home do workspace, montada em widgets.
  *
- * A proposta, rodada 1:
+ * A proposta (rodadas 1 e 2):
  * - a Home é uma grade de widgets que a pessoa arruma: arrasta pelo título,
  *   puxa o canto, remove, adiciona do catálogo. A mesma grade do Painel de
  *   tarefas (`UxGradeDePaineis`), para o ENSPACE ter um gesto só;
@@ -11,8 +11,10 @@
  * - o administrador monta a Home padrão do workspace; quem não personalizou
  *   recebe ela inteira, e quem personalizou recebe só o widget novo, com o
  *   selo "Novo" (HubSpot e Notion);
- * - criar em 1 clique: o botão "Criar" no menu lateral (tecla C), em toda
- *   tela, e o widget "Criar rápido" na Home, com o que a pessoa mais usa;
+ * - criar: um botão "Criar" no topo da Home (tecla C), que ramifica em Item
+ *   (categoria, depois formulário) e Tarefa (rápida ou agendada), e "Pedir ao
+ *   BENI". O menu lateral fica como o develop (rodada 2);
+ * - widget "Categorias": acessar a categoria ou criar nela pelo "+";
  * - cada widget carrega, falha e fica sem acesso sozinho.
  *
  * O dado é o `mocks.ts`; o catálogo e a Home padrão, o `widgets.ts`. Tudo em
@@ -24,14 +26,14 @@ import pesquisaMd from './PESQUISA.md?raw'
 import decisoesMd from './DECISOES.md?raw'
 import CascaDaHome from './_CascaDaHome.vue'
 import ConfigurarWidget from './_ConfigurarWidget.vue'
-import MenuCriar from './_MenuCriar.vue'
+import BotaoCriar from './_BotaoCriar.vue'
 import ModalNovaTarefa from './_ModalNovaTarefa.vue'
 import ModalNovoItem from './_ModalNovoItem.vue'
 import type { DadosDoItem } from './_ModalNovoItem.vue'
 import Personalizar from './_Personalizar.vue'
 import WidgetMoldura from './_Widget.vue'
 import type { EstadoDoWidget } from './_Widget.vue'
-import WCriarRapido from './_WCriarRapido.vue'
+import WCategorias from './_WCategorias.vue'
 import WListas from './_WListas.vue'
 import WMinhasTarefas from './_WMinhasTarefas.vue'
 import WNumero from './_WNumero.vue'
@@ -44,13 +46,13 @@ import {
 } from './mocks'
 import type { AbaDeTarefa } from './formatar'
 import { HOJE, abaDa, dataLonga, horaAtual } from './formatar'
-import type { ConfigDoWidget, OpcaoDeCriar, TipoDeWidget, Widget } from './widgets'
+import type { ConfigDoWidget, TipoDeWidget, Widget } from './widgets'
 import { PADRAO_LAYOUT, PADRAO_WIDGETS, definicao } from './widgets'
 import { textos } from './textos'
 
 definePageMeta({
   titulo: 'Home',
-  descricao: 'Home do workspace em widgets que cada pessoa arruma (tarefas, itens de uma visualização, atalhos, recentes, comunicado), Home padrão montada pelo administrador e o botão Criar no menu lateral para tarefa, item e formulário.',
+  descricao: 'Home do workspace em widgets que cada pessoa arruma (categorias, tarefas, itens de uma visualização, atalhos, recentes, comunicado), Home padrão montada pelo administrador e um botão Criar que ramifica em item e tarefa.',
   status: 'em-revisao',
   atualizado: '2026-11-11',
   tela: 'Início',
@@ -68,9 +70,9 @@ type EstadoDaHome = 'cheio' | 'carregando' | 'vazio' | 'erro' | 'semAcesso'
 const estado = ref<EstadoDaHome>('cheio')
 const papel = ref<'membro' | 'admin'>('admin')
 const estados: { valor: EstadoDaHome, rotulo: string }[] = [
-  { valor: 'cheio', rotulo: 'Home padrão' },
+  { valor: 'cheio', rotulo: 'Estado inicial (primeiro acesso)' },
   { valor: 'carregando', rotulo: 'Carregando' },
-  { valor: 'vazio', rotulo: 'Home vazia' },
+  { valor: 'vazio', rotulo: 'Sem widgets' },
   { valor: 'erro', rotulo: 'Erro num widget' },
   { valor: 'semAcesso', rotulo: 'Sem acesso num widget' },
 ]
@@ -121,53 +123,52 @@ const resumo = computed(() => {
  * O que se cria                                                        *
  * ------------------------------------------------------------------ */
 
-const USOS: Record<string, number> = {
-  'o-tarefa': 42, 'o-form-f-compra': 31, 'o-form-f-chamado': 18, 'o-form-f-reembolso': 14, 'o-item-contratos': 9,
-  'o-form-f-contrato': 7, 'o-item-solicitacoes-de-compra': 6, 'o-form-f-compra-urgente': 5, 'o-item-chamados-de-ti': 4,
-}
+const categoriasComAcesso = computed(() => categorias.filter(c => c.acesso))
 
-const opcoesDeCriar = computed<OpcaoDeCriar[]>(() => [
-  { id: 'o-tarefa', tipo: 'tarefa', icone: 'i-lucide-list-checks', usos: USOS['o-tarefa'] ?? 0 },
-  ...categorias.filter(c => c.acesso).map(c => ({ id: `o-item-${c.slug}`, tipo: 'item' as const, icone: c.icon ?? 'i-lucide-file-plus', categoria: c.slug, usos: USOS[`o-item-${c.slug}`] ?? 0 })),
-  ...categorias.filter(c => c.acesso).flatMap(c => c.formularios.map(f => ({
-    id: `o-form-${f.id}`, tipo: 'formulario' as const, icone: 'i-lucide-clipboard-pen', categoria: c.slug, formulario: f.id, usos: USOS[`o-form-${f.id}`] ?? 0,
-  }))),
-])
+/** Itens em aberto por categoria, para o widget Categorias. */
+const abertosPorCategoria = computed(() => {
+  const r: Record<string, number> = {}
+  for (const i of itens.value) if (i.status !== 'concluido') r[i.categoria] = (r[i.categoria] ?? 0) + 1
+  return r
+})
 
-function rotuloDaOpcao(o: OpcaoDeCriar) {
-  const c = categoria(o.categoria ?? '')
-  if (o.tipo === 'tarefa') return t.value.criar.tarefaRapida
-  if (o.tipo === 'item') return t.value.novoItem.titulo(c?.name ?? '')
-  return `${c?.formularios.find(f => f.id === o.formulario)?.nome ?? ''} (${c?.name ?? ''})`
-}
+/** Itens em aberto que a pessoa acessa: o "Item relacionado" da tarefa agendada. */
+const itensAbertos = computed(() => itens.value.filter(i => i.status !== 'concluido' && categoria(i.categoria)?.acesso))
 
 const menuCriarAberto = ref(false)
-const menuDoWidgetAberto = ref(false)
-const novaTarefaAberta = ref(false)
+const tarefaAberta = ref(false)
+const tipoDeTarefa = ref<'rapida' | 'agendada'>('rapida')
 const novoItemAberto = ref(false)
 const itemEmCriacao = ref<{ categoria: string, formulario?: string }>({ categoria: '' })
 
-function escolherCriar(o: OpcaoDeCriar) {
-  if (o.tipo === 'tarefa') { novaTarefaAberta.value = true; return }
-  itemEmCriacao.value = { categoria: o.categoria ?? '', formulario: o.formulario }
+function abrirItem(slug: string, formulario?: string) {
+  itemEmCriacao.value = { categoria: slug, formulario }
   novoItemAberto.value = true
 }
 
-const algumaCamadaAberta = computed(() => novaTarefaAberta.value || novoItemAberto.value || configAberto.value || personalizarAberto.value)
+function abrirTarefa(tipo: 'rapida' | 'agendada') {
+  tipoDeTarefa.value = tipo
+  tarefaAberta.value = true
+}
 
-/* Tecla C: abre o menu Criar fora de campo de texto (o defineShortcuts ignora campo por padrão). */
+/** MAQUETE: no produto, abre o chat do BENI AI com o texto. */
+function pedirAoBeni(texto: string) {
+  toast.add({ title: t.value.criar.beniToast(texto), description: t.value.criar.beniDica, icon: 'i-lucide-sparkles', color: 'neutral' })
+}
+
+const algumaCamadaAberta = computed(() => tarefaAberta.value || novoItemAberto.value || configAberto.value || personalizarAberto.value)
+
+/* Tecla C: abre o Criar fora de campo de texto (o defineShortcuts ignora campo por padrão). */
 defineShortcuts({
   c: () => {
-    if (algumaCamadaAberta.value) return
-    if (window.matchMedia('(min-width: 1024px)').matches) menuCriarAberto.value = true
-    else menuDoWidgetAberto.value = true
+    if (!algumaCamadaAberta.value) menuCriarAberto.value = true
   },
 })
 
 let proximaTarefa = 13300
-function criarTarefa(dados: Pick<TarefaDaHome, 'name' | 'due_date' | 'assigned_to' | 'priority'>) {
+function criarTarefa(dados: Pick<TarefaDaHome, 'name' | 'due_date' | 'assigned_to' | 'priority' | 'origem' | 'item'>) {
   proximaTarefa += 3
-  const nova: TarefaDaHome = { id: proximaTarefa, reference: `#${proximaTarefa}`, status: 'pending', creator: EU.id, origem: 'rapida', ...dados }
+  const nova: TarefaDaHome = { id: proximaTarefa, reference: `#${proximaTarefa}`, status: 'pending', creator: EU.id, ...dados }
   tarefas.value = [...tarefas.value, nova]
   toast.add({
     title: t.value.novaTarefa.criada(nova.reference),
@@ -180,7 +181,7 @@ function criarTarefa(dados: Pick<TarefaDaHome, 'name' | 'due_date' | 'assigned_t
 /** "Adicionar tarefa" no pé de Minhas tarefas: o prazo vem da aba. */
 function criarTarefaNaAba(nome: string, aba: AbaDeTarefa) {
   const due = aba === 'semPrazo' ? null : new Date(HOJE + (aba === 'proximas' ? DIA : 0) + 18 * HORA)
-  criarTarefa({ name: nome, due_date: due, assigned_to: EU.id, priority: 'normal' })
+  criarTarefa({ name: nome, due_date: due, assigned_to: EU.id, priority: 'normal', origem: 'rapida' })
 }
 
 let proximoItem = 23400
@@ -234,6 +235,12 @@ function itensDo(w: Widget) {
   return v ? itens.value.filter(i => i.categoria === v.categoria && v.filtro(i)) : []
 }
 
+function categoriasDo(w: Widget) {
+  const escolhidas = w.config.categorias ?? []
+  if (!escolhidas.length) return categoriasComAcesso.value
+  return escolhidas.map(s => categoria(s)).filter((c): c is NonNullable<typeof c> => !!c && c.acesso)
+}
+
 function categoriaDo(w: Widget) {
   return categoria(visualizacao(w.config.visualizacao ?? '')?.categoria ?? '')
 }
@@ -252,6 +259,15 @@ const alvoDoAndaime = computed(() => layout.value.find(x => ['visualizacao', 'nu
 const recuperando = ref<string[]>([])
 const recuperados = ref<string[]>([])
 watch(estado, () => { recuperados.value = [] })
+
+/** Andaime. "Estado inicial (primeiro acesso)" é a Home padrão do workspace, sem nada personalizado. */
+function escolherEstado(e: EstadoDaHome) {
+  if (e === 'cheio') {
+    minha.value = copiaDaHome(padrao.value)
+    escopo.value = 'minha'
+  }
+  estado.value = e
+}
 
 function estadoDo(w: Widget): EstadoDoWidget {
   if (estado.value === 'carregando' || recuperando.value.includes(w.id)) return 'carregando'
@@ -289,10 +305,10 @@ function adicionar(tipo: TipoDeWidget) {
   const d = definicao(tipo)
   contador++
   const id = `w-${tipo}-${contador}`
-  const config: ConfigDoWidget = tipo === 'visualizacao' ? { visualizacao: 'v-chamados-abertos' } : tipo === 'numero' ? { visualizacao: 'v-chamados-urgentes' } : tipo === 'criarRapido' ? { fixados: [] } : {}
+  const config: ConfigDoWidget = tipo === 'visualizacao' ? { visualizacao: 'v-chamados-abertos' } : tipo === 'numero' ? { visualizacao: 'v-chamados-urgentes' } : tipo === 'categorias' ? { categorias: [] } : {}
   const novo: Widget = { id, tipo, config }
-  // Entra no topo, depois do Criar rápido, para a pessoa ver onde caiu.
-  const posicao = layout.value[0] && widgetPorId(layout.value[0].id)?.tipo === 'criarRapido' ? 1 : 0
+  // Entra no topo, depois de Categorias, para a pessoa ver onde caiu.
+  const posicao = layout.value[0] && widgetPorId(layout.value[0].id)?.tipo === 'categorias' ? 1 : 0
   home.value.widgets = [...home.value.widgets, novo]
   const l = [...layout.value]
   l.splice(posicao, 0, { id, w: d.tamanho.w, h: d.tamanho.h })
@@ -365,7 +381,7 @@ const widgetEmConfig = computed(() => widgetPorId(configId.value))
 function abrirConfig(id: string) {
   const w = widgetPorId(id)
   if (!w) return
-  if (!['visualizacao', 'numero', 'criarRapido', 'atalhos'].includes(w.tipo)) return
+  if (!configuravel(w)) return
   configId.value = id
   personalizarAberto.value = false
   configAberto.value = true
@@ -378,34 +394,13 @@ function salvarConfig(config: ConfigDoWidget, novosAtalhos?: Atalho[]) {
   if (novosAtalhos) atalhos.value = novosAtalhos
 }
 
-const configuravel = (w: Widget) => ['visualizacao', 'numero', 'criarRapido', 'atalhos'].includes(w.tipo)
+function configuravel(w: Widget) {
+  return ['visualizacao', 'numero', 'categorias', 'atalhos'].includes(w.tipo)
+}
 </script>
 
 <template>
   <CascaDaHome :t="t" :slug="SLUG">
-    <!-- PROPOSTA: o botão Criar no menu lateral -->
-    <template #criar="{ recolhido }">
-      <MenuCriar v-model:open="menuCriarAberto" :t="t" :opcoes="opcoesDeCriar" :categorias="categorias" @escolher="escolherCriar">
-        <UTooltip :text="t.criar.dica" :content="{ side: 'right' }">
-          <UButton
-            :label="recolhido ? undefined : t.criar.botao"
-            icon="i-lucide-plus"
-            color="primary"
-            variant="soft"
-            size="sm"
-            :block="!recolhido"
-            :square="recolhido"
-            :aria-label="t.criar.dica"
-            :ui="{ base: 'justify-start' }"
-          >
-            <template v-if="!recolhido" #trailing>
-              <UKbd value="C" size="sm" class="ml-auto" />
-            </template>
-          </UButton>
-        </UTooltip>
-      </MenuCriar>
-    </template>
-
     <div class="min-h-0 flex-1 overflow-y-auto pb-28">
       <div class="w-full px-4 py-5 sm:px-6 lg:px-8 2xl:px-10">
         <!-- Banner da Home padrão (administrador editando) -->
@@ -434,14 +429,25 @@ const configuravel = (w: Widget) => ['visualizacao', 'numero', 'criarRapido', 'a
               {{ resumo }}
             </p>
           </div>
-          <UButton
-            :label="t.personalizar"
-            icon="i-lucide-layout-dashboard"
-            color="neutral"
-            variant="outline"
-            size="sm"
-            @click="personalizarAberto = true"
-          />
+          <div class="flex items-center gap-2">
+            <UButton
+              :label="t.personalizar"
+              icon="i-lucide-layout-dashboard"
+              color="neutral"
+              variant="outline"
+              size="sm"
+              @click="personalizarAberto = true"
+            />
+            <!-- PROPOSTA: o botão Criar (rodada 2) -->
+            <BotaoCriar
+              v-model:open="menuCriarAberto"
+              :t="t"
+              :categorias="categoriasComAcesso"
+              @item="abrirItem"
+              @tarefa="abrirTarefa"
+              @beni="pedirAoBeni"
+            />
+          </div>
         </div>
 
         <UEmpty
@@ -473,13 +479,17 @@ const configuravel = (w: Widget) => ['visualizacao', 'numero', 'criarRapido', 'a
                 :categoria-sem-acesso="categoriaSemAcessoDo(w)"
                 :configuravel="configuravel(w)"
                 :novo="w.novo && escopo === 'minha'"
-                :sem-cabecalho="w.tipo === 'criarRapido'"
                 @configurar="abrirConfig(w.id)"
                 @tamanho-padrao="tamanhoPadrao(w.id)"
                 @remover="remover(w.id)"
                 @tentar-de-novo="tentarDeNovo(w.id)"
               >
-                <template v-if="w.tipo === 'visualizacao'" #acoes>
+                <template v-if="w.tipo === 'categorias'" #acoes>
+                  <UTooltip :text="t.categoriasW.verTodas">
+                    <UButton icon="i-lucide-arrow-up-right" color="neutral" variant="ghost" size="xs" :aria-label="t.categoriasW.verTodas" @click="abrirMaquete(t.categoriasW.verTodas)" />
+                  </UTooltip>
+                </template>
+                <template v-else-if="w.tipo === 'visualizacao'" #acoes>
                   <UTooltip :text="t.visualizacao.abrir">
                     <UButton icon="i-lucide-arrow-up-right" color="neutral" variant="ghost" size="xs" :aria-label="t.visualizacao.abrir" @click="abrirMaquete(tituloDo(w))" />
                   </UTooltip>
@@ -493,21 +503,14 @@ const configuravel = (w: Widget) => ['visualizacao', 'numero', 'criarRapido', 'a
                   <UBadge :label="t.ehMaquete" color="warning" variant="subtle" size="sm" />
                 </template>
 
-                <WCriarRapido
-                  v-if="w.tipo === 'criarRapido'"
+                <WCategorias
+                  v-if="w.tipo === 'categorias'"
                   :t="t"
-                  :opcoes="opcoesDeCriar"
-                  :fixados="w.config.fixados ?? []"
-                  :categorias="categorias"
-                  @escolher="escolherCriar"
-                  @configurar="abrirConfig(w.id)"
-                >
-                  <template #mais>
-                    <MenuCriar v-model:open="menuDoWidgetAberto" :t="t" :opcoes="opcoesDeCriar" :categorias="categorias" lado="bottom" @escolher="escolherCriar">
-                      <UButton :label="t.criarRapido.mais" icon="i-lucide-plus" color="neutral" variant="ghost" size="sm" class="shrink-0" />
-                    </MenuCriar>
-                  </template>
-                </WCriarRapido>
+                  :categorias="categoriasDo(w)"
+                  :abertos="abertosPorCategoria"
+                  @acessar="(c) => abrirMaquete(c.name)"
+                  @criar="abrirItem"
+                />
 
                 <WMinhasTarefas
                   v-else-if="w.tipo === 'minhasTarefas'"
@@ -587,13 +590,11 @@ const configuravel = (w: Widget) => ['visualizacao', 'numero', 'criarRapido', 'a
       :tipo="widgetEmConfig?.tipo"
       :config="widgetEmConfig?.config"
       :categorias="categorias"
-      :opcoes="opcoesDeCriar"
-      :rotulo-da-opcao="rotuloDaOpcao"
       :atalhos="atalhos"
       @salvar="salvarConfig"
     />
 
-    <ModalNovaTarefa v-model:open="novaTarefaAberta" :t="t" @criar="criarTarefa" @mais-campos="abrirMaquete(t.casca.itens.rapidas ?? '')" />
+    <ModalNovaTarefa v-model:open="tarefaAberta" :t="t" :tipo="tipoDeTarefa" :itens="itensAbertos" @criar="criarTarefa" />
     <ModalNovoItem
       v-model:open="novoItemAberto"
       :t="t"
@@ -616,7 +617,7 @@ const configuravel = (w: Widget) => ['visualizacao', 'numero', 'criarRapido', 'a
           class="transition-transform hover:-translate-y-0.5"
           :color="estado === e.valor ? 'primary' : 'neutral'"
           :variant="estado === e.valor ? 'solid' : 'subtle'"
-          @click="estado = e.valor"
+          @click="escolherEstado(e.valor)"
         />
 
         <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
