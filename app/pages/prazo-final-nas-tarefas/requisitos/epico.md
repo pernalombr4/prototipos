@@ -1,6 +1,8 @@
 # Épico: Prazo final nas Tarefas Rápidas
 
-**O que é:** cada tarefa rápida pode ter 2 datas: o vencimento, que já existe e marca o atraso, e o prazo final, a data em que a tarefa precisa estar concluída, como um prazo legal ou contratual. O prazo final aparece em cada lugar onde a tarefa rápida aparece: na tarefa, na tabela, no kanban, no Relatório Padrão, na Agenda, na tela do item, no Painel de tarefas e no Spaceflow.
+**Problema:** hoje a tarefa rápida tem 1 data só, o vencimento. Quem trabalha com prazo legal ou contratual não tem onde registrar a data que não pode passar, e o atraso pelo vencimento não diz se esse prazo foi perdido.
+
+**Proposta:** cada tarefa rápida pode ter 2 datas: o vencimento, que continua marcando o atraso, e o prazo final, a data em que a tarefa precisa estar concluída. O prazo final aparece em cada lugar onde a tarefa rápida aparece: na tarefa, na tabela, no kanban, no Relatório Padrão, na Agenda, na tela do item, no Painel de tarefas e no Spaceflow.
 
 **Onde vale:** Tarefas › Rápidas, Tarefas › Painel, Agenda, a pasta Tarefas da tela do item, o Spaceflow e a API de tarefas.
 
@@ -8,7 +10,7 @@
 
 **Fora do escopo:** as Tarefas Agendadas do fluxo da categoria; mudança no comportamento do vencimento atual, que continua marcando o atraso.
 
-**Relevância** (coluna das tarefas): Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer, conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
+**Prioridade e relevância** (nas tarefas, entre parênteses no fim de cada requisito): a prioridade é Essencial, Importante ou Desejável. A relevância diz o que o dev pode deixar de fazer: Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer, conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
 
 ## As partes
 

@@ -236,3 +236,7 @@ Descartado: uma lâmina "Atrasadas pela folga" (dias até o prazo final de cada 
 - **Corrigido no protótipo:** o texto de "Como calculamos" das lâminas saía cortado em 1 linha; a dica agora quebra a linha.
 - **Prints de requisito:** `requisitos/prints.json` e `evidencias/requisitos/`, 1 print por grupo. RI001, RI002, RI003 e RT001 não têm tela.
 
+- **Card no ENSPACE** (desenvolvimento-enlighten2): `USEFBB2EBB2FFF948A5AA9D58612ECF8` (593783), "[TAREFAS] Prazo final nas Tarefas Rápidas", com o Raul como responsável e o link do protótipo.
+  - A descrição é o épico, aberto por Problema e Proposta; o critério de aceite vai no campo próprio (`requisitos/criterio-de-aceite.md`).
+  - As 7 tarefas são as partes, com as caixas de marcar e o print de cada grupo (tarefas 25380 a 25386).
+  - Tipo, prioridade, status e branch do card ficaram em branco: o pedido não disse.

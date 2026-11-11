@@ -45,6 +45,7 @@
     "RI001": { "sem": "Rota da API, sem tela." },
     "RI002": { "sem": "Rota da API, sem tela. O aviso que a tela mostra está nos prints de RF013 e RF014." },
     "RT001": { "sem": "Carga das tarefas existentes, sem tela." },
+    "RT001 (em revisão)": { "sem": "Carga das tarefas existentes, sem tela." },
 
     "RF005": { "cena": "tarefas", "destacar": { "css": "th", "n": 5 } },
     "RF012": { "cena": "tarefas", "passos": [{ "clicar": "Filtrar Prazo final", "esperar": 800 }], "destacar": { "css": "[data-slot=content]" } },

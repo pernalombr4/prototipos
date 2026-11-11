@@ -1,0 +1,6 @@
+- A tarefa rápida aceita, mostra, altera e apaga o prazo final, na criação e no painel da tarefa, sempre igual ou posterior ao vencimento.
+- O atraso continua marcado pelo vencimento; a tarefa aberta depois do prazo final mostra o selo de prazo final vencido.
+- O prazo final aparece na tabela, no kanban, no Relatório Padrão, na Agenda e na pasta Tarefas do item, como no protótipo.
+- O Painel de tarefas mostra os números, as lâminas e as listas do prazo final, e os números de hoje continuam contando pelo vencimento.
+- O Spaceflow lê o prazo final como variável e o grava nas ações que criam ou alteram tarefa rápida.
+- Cada requisito Obrigatório das 7 tarefas está marcado.
