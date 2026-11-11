@@ -45,7 +45,7 @@ const ponto: Record<string, string> = {
         <h3 class="flex items-center gap-1.5 text-sm font-semibold text-highlighted">
           <span class="size-2 shrink-0 rounded-full" :class="ponto[cor]" aria-hidden="true" />
           {{ titulo }}
-          <UTooltip :text="calculo" :content="{ side: 'top' }" :ui="{ content: 'max-w-72 h-auto whitespace-normal' }">
+          <UTooltip :text="calculo" :content="{ side: 'top' }" :ui="{ content: 'max-w-72 h-auto', text: 'whitespace-normal' }">
             <UButton icon="i-lucide-info" color="neutral" variant="link" size="xs" class="p-0" :aria-label="`${rotuloCalculo}: ${titulo}`" />
           </UTooltip>
         </h3>

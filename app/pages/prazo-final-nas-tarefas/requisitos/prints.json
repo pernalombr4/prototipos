@@ -1,0 +1,93 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/prazo-final-nas-tarefas/",
+  "andaime": "Protótipo · área",
+  "cenas": {
+    "tarefas": [{ "esperar": 1500 }],
+    "criacao": [{ "esperar": 1500 }, { "clicar": "Nova tarefa", "esperar": 900 }],
+    "painel": [{ "esperar": 1500 }, { "clicar": "Revisar o contrato de prestação de serviços", "esperar": 1000 }],
+    "kanban": [{ "esperar": 1500 }, { "clicar": "Kanban", "esperar": 900 }],
+    "relatorio": [
+      { "esperar": 1500 },
+      { "clicar": "Extrair Relatório", "esperar": 700 },
+      { "clicar": "Relatório Padrão", "esperar": 900 },
+      { "clicar": "Excel", "esperar": 1800 }
+    ],
+    "agenda": [{ "estado": "Agenda" }, { "esperar": 1500 }],
+    "agendaConfig": [
+      { "estado": "Agenda" },
+      { "esperar": 1500 },
+      { "clicar": "Configurar", "esperar": 1000 },
+      { "clicar": { "texto": "Tarefas Rápidas", "css": "[role=dialog] [role=tab]", "n": 1 }, "esperar": 700 }
+    ],
+    "item": [{ "estado": "Item" }, { "esperar": 1500 }],
+    "painelDeTarefas": [{ "estado": "Painel de tarefas" }, { "esperar": 1800 }],
+    "spaceflow": [{ "estado": "Spaceflow" }, { "esperar": 1500 }],
+    "execucoes": [{ "estado": "Spaceflow" }, { "esperar": 1500 }, { "clicar": "Execuções", "esperar": 800 }]
+  },
+  "requisitos": {
+    "RF001": { "cena": "criacao", "destacar": { "texto": "Data em que a tarefa precisa estar concluída, como um prazo legal ou contratual.", "ancestral": "[data-slot=root]" } },
+    "RF038": { "cena": "criacao", "destacar": [
+      "Data planejada para a conclusão da tarefa.",
+      "Depois desta data, a tarefa é marcada como atrasada.",
+      "Data em que a tarefa precisa estar concluída, como um prazo legal ou contratual.",
+      "O prazo final deve ser igual ou posterior ao vencimento e não altera o atraso."
+    ] },
+    "RF002": { "cena": "painel", "destacar": { "texto": "Data em que a tarefa precisa estar concluída, como um prazo legal ou contratual.", "ancestral": "[data-slot=root]" } },
+    "RF003": { "cena": "painel", "destacar": "Apagar o prazo final" },
+    "RF004": { "antes": [{ "estado": "Só vê as datas" }], "cena": "painel", "destacar": "Seu papel permite ver as datas desta tarefa, mas não alterá-las." },
+    "RF013": { "cena": "painel", "passos": [
+      { "js": "(() => { const d = [...document.querySelectorAll('[role=dialog] input[type=date]')]; const s = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; s.call(d[1], '2026-11-18'); d[1].dispatchEvent(new Event('input', { bubbles: true })); d[1].dispatchEvent(new Event('change', { bubbles: true })); d[1].dispatchEvent(new FocusEvent('blur')); return true })()", "esperar": 900 }
+    ], "destacar": { "regex": "^o prazo final precisa ser igual ou posterior ao vencimento \\(" } },
+    "RF014": { "cena": "painel", "passos": [
+      { "js": "(() => { const d = [...document.querySelectorAll('[role=dialog] input[type=date]')]; const s = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; s.call(d[0], '2026-11-27'); d[0].dispatchEvent(new Event('input', { bubbles: true })); d[0].dispatchEvent(new Event('change', { bubbles: true })); d[0].dispatchEvent(new FocusEvent('blur')); return true })()", "esperar": 900 }
+    ], "destacar": { "regex": "^o vencimento precisa ser igual ou anterior ao prazo final" } },
+    "RF018": { "cena": "tarefas", "destacar": { "css": "th", "n": 4 } },
+    "RI001": { "sem": "Rota da API, sem tela." },
+    "RI002": { "sem": "Rota da API, sem tela. O aviso que a tela mostra está nos prints de RF013 e RF014." },
+    "RT001": { "sem": "Carga das tarefas existentes, sem tela." },
+
+    "RF005": { "cena": "tarefas", "destacar": { "css": "th", "n": 5 } },
+    "RF012": { "cena": "tarefas", "passos": [{ "clicar": "Filtrar Prazo final", "esperar": 800 }], "destacar": { "css": "[data-slot=content]" } },
+    "RF008": { "cena": "tarefas", "passos": [{ "clicar": "Ordenar por Prazo final", "esperar": 800 }], "destacar": { "css": "[role=menu]" } },
+    "RF007": { "cena": "tarefas", "passos": [{ "clicar": "Campo de data do filtro", "esperar": 800 }], "destacar": { "css": "[role=option]", "n": 2 } },
+    "RF020": { "cena": "tarefas", "destacar": "Prazo final vencido (2)" },
+    "RF006": { "cena": "kanban", "destacar": { "texto": "Revisar o contrato de prestação de serviços", "ancestral": "article" } },
+    "RF019": { "cena": "tarefas", "destacar": [{ "texto": "Vencido", "n": 0 }, { "texto": "Vencido", "n": 1 }] },
+
+    "RF021": { "cena": "relatorio", "destacar": [{ "css": "[role=dialog] th", "n": 6 }, { "css": "[role=dialog] th", "n": 7 }, { "css": "[role=dialog] th", "n": 8 }] },
+    "RF022": { "cena": "relatorio", "destacar": { "texto": "Atualizar o cadastro do fornecedor", "n": 1, "ancestral": "tr" } },
+
+    "RF024": { "cena": "agenda", "destacar": ["Revisar o contrato de prestação de serviços", "Prazo final: Revisar o contrato de prestação de serviços"] },
+    "RF026": { "cena": "agenda", "destacar": ["Prazo final: Protocolar a contestação do processo trabalhista", "Prazo final: Responder ao chamado do cliente"] },
+    "RF027": { "cena": "agenda", "passos": [{ "clicar": "Prazo final: Revisar o contrato de prestação de serviços", "esperar": 1000 }], "destacar": { "texto": "Data em que a tarefa precisa estar concluída, como um prazo legal ou contratual.", "ancestral": "[data-slot=root]" } },
+    "RF023": { "cena": "agendaConfig", "passos": [{ "clicar": { "css": "[role=dialog] button[role=combobox]", "n": 0 }, "esperar": 800 }], "destacar": { "css": "[role=option]", "n": 2 } },
+    "RF025": { "cena": "agendaConfig", "destacar": { "texto": "Marcar o prazo final", "ancestral": "[data-slot=root]" } },
+
+    "RF028": { "cena": "item", "destacar": [{ "css": "th", "n": 4 }, { "css": "th", "n": 5 }, { "texto": "Vencido", "n": 0 }] },
+    "RF029": { "cena": "item", "passos": [{ "clicar": "Coletar as assinaturas do aditivo", "esperar": 1000 }], "destacar": { "texto": "Data em que a tarefa precisa estar concluída, como um prazo legal ou contratual.", "ancestral": "[data-slot=root]" } },
+
+    "RF030": { "cena": "painelDeTarefas", "destacar": { "texto": "22% das abertas · 3 vencem em 7 dias", "ancestral": "section" } },
+    "RF031": { "cena": "painelDeTarefas", "destacar": { "texto": "6 de 8 concluídas com prazo final", "ancestral": "section" } },
+    "RF032": { "cena": "painelDeTarefas", "passos": [{ "clicar": { "css": "[aria-label='Saúde dos prazos'] button", "n": 1 }, "esperar": 900 }], "destacar": { "texto": "Concluídas dentro do prazo final", "ancestral": "section" } },
+    "RF033": { "cena": "painelDeTarefas", "destacar": { "texto": "Quem concentra a fila, as atrasadas e os prazos finais vencidos", "ancestral": "section" } },
+    "RF034": { "cena": "painelDeTarefas", "destacar": { "texto": "venceu há 3 dias", "ancestral": "section" } },
+    "RF035": { "cena": "painelDeTarefas", "destacar": { "texto": "Prazo final em até 7 dias", "ancestral": "section" } },
+    "RF036": { "cena": "painelDeTarefas", "passos": [{ "clicar": "Protocolar a contestação do processo trabalhista", "esperar": 1000 }], "destacar": { "texto": "Data em que a tarefa precisa estar concluída, como um prazo legal ou contratual.", "ancestral": "[data-slot=root]" } },
+    "RF037": { "cena": "painelDeTarefas", "passos": [{ "pairar": "Como calculamos: Prazo final vencido", "esperar": 1200 }], "destacar": "Tarefas abertas cujo prazo final já passou. Conta pelo prazo final; o card Vencidas continua contando pelo vencimento." },
+    "RF039": { "cena": "painelDeTarefas", "passos": [{ "clicar": "Painel de tarefas", "esperar": 800 }, { "clicar": { "css": "[role=option]", "n": 1 }, "esperar": 1000 }], "destacar": "O prazo final existe só nas tarefas rápidas" },
+    "RI003": { "sem": "Agregação no back, sem tela. O que ela devolve aparece nos prints de RF030 a RF035." },
+
+    "RF009": { "cena": "spaceflow", "passos": [{ "clicar": "Configurar o nó Tarefa atualizada", "esperar": 900 }], "destacar": { "texto": "Variáveis que este gatilho entrega", "ancestral": "div" } },
+    "RF010": { "cena": "execucoes", "passos": [{ "clicar": "Atualizar o cadastro do fornecedor", "esperar": 800 }], "destacar": { "texto": "Variáveis recebidas do gatilho", "ancestral": "div" } },
+    "RF011": { "cena": "execucoes", "destacar": { "texto": "Enviar a proposta comercial revisada", "ancestral": "button" } },
+    "RF015": { "cena": "spaceflow", "destacar": { "texto": "Data em que a tarefa precisa estar concluída, como um prazo legal ou contratual.", "ancestral": "[data-slot=root]" } },
+    "RF016": { "cena": "execucoes", "passos": [{ "clicar": "Emitir a fatura de novembro", "esperar": 800 }], "destacar": { "regex": "^o prazo final precisa ser igual ou posterior ao vencimento\\. a tarefa" } },
+    "RF017": { "cena": "spaceflow", "passos": [
+      { "clicar": "Como preencher Vencimento", "esperar": 700 },
+      { "clicar": { "css": "[role=option]", "n": 1 }, "esperar": 700 },
+      { "clicar": "Como preencher Prazo final", "esperar": 700 },
+      { "clicar": { "css": "[role=option]", "n": 1 }, "esperar": 700 },
+      { "js": "(() => { const d = [...document.querySelectorAll('input[type=date]')]; const s = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; s.call(d[0], '2026-11-20'); d[0].dispatchEvent(new Event('input', { bubbles: true })); s.call(d[1], '2026-11-18'); d[1].dispatchEvent(new Event('input', { bubbles: true })); return d.length })()", "esperar": 800 }
+    ], "destacar": { "regex": "^o prazo final precisa ser igual ou posterior ao vencimento \\(" } }
+  }
+}

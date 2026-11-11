@@ -167,7 +167,7 @@ A mesma ordem vale no painel, na criação, nas colunas da tabela, na linha de d
 ## Rodada 5 · 2026-11-11
 
 - **Pedido (literal):** "tem que botar nos requisitos que isso saia em relatorio nativo de tarefas, que isso seja puxado pra agenda (e prototipar como), dentro do item isso tambem tem que aparecer quando a tarefa surgir ali, no kanban e no dashboard de tarefas (novo) / pra este ultimo, veja o dash de tarefas em develop (subiu hoje) e proponha as laminas novas com essa data, como devem ser etc. / atualize requisitos e o prototipo conforme necessario"
-- **Mudou:** o documento inteiro de requisitos agora mora no `REQUISITOS.md`, com o original e as rodadas 1 a 5 (RF021 a RF039, RN007, RI003).
+- **Mudou:** o documento inteiro de requisitos agora mora em `requisitos/` (épico e 7 partes desde o fechamento de 2026-11-11), com o original e as rodadas 1 a 5 (RF021 a RF039, RN007, RI003).
 - **Mudou:** o andaime "Área" ganha Painel de tarefas, Agenda e Item. A barra de Tarefas Rápidas ganha o ícone "Extrair Relatório".
 - **Fronteira:** muda o lugar do prazo final em cada tela; não muda nenhuma lâmina, coluna ou opção que já existe, salvo o seletor da Saúde dos prazos e o segmento da Carga por responsável.
 
@@ -198,6 +198,8 @@ Lâminas, de cima para baixo: os 6 números (Abertas agora, Concluídas, Criadas
 | Prazo final em até 7 dias (lista) | Nova | O par de "Vencem em breve". A tarefa atrasada leva o selo "Atrasada": é a que está na folga e precisa sair |
 | Tarefas agendadas | Sem as lâminas novas | O prazo final só existe na tarefa rápida |
 
+**Aprovado pela redatora em 2026-11-11** ("Sim, seguir"): as 6 lâminas e a posição delas no painel, como no protótipo. A P15 (onde as lâminas entram) fecha com a posição do protótipo: os 2 números depois de "No prazo" e as 2 listas ao lado de "Vencidas" e "Vencem em breve". As relevâncias Desejável e Opcional continuam à espera de confirmação.
+
 Descartado: uma lâmina "Atrasadas pela folga" (dias até o prazo final de cada atrasada). Repetia a lista "Prazo final em até 7 dias".
 
 ### Agenda, relatório e item
@@ -220,3 +222,17 @@ Descartado: uma lâmina "Atrasadas pela folga" (dias até o prazo final de cada 
 - **Não deu:** a pasta Tarefas da tela do item não foi vista no develop: a categoria de exploração não tinha item nos últimos 30 dias (P13). Os relatórios do menu do membro (`/reports`) dão 404 no develop; o relatório nativo de tarefas é o Relatório Padrão das Tarefas Rápidas.
 - **Conferência no Chrome:** painel em pt-BR claro e es escuro; Agenda, Configuração, marcador abrindo o painel; item; relatório até a prévia. Sem erro no console.
 - **Ver:** `evidencias/proposta-painel-de-tarefas.jpg`, `proposta-painel-de-tarefas-es-escuro.jpg`, `proposta-agenda.jpg`, `proposta-agenda-configuracao.jpg`, `proposta-item-tarefas.jpg`, `proposta-relatorio-colunas.jpg`
+
+## Requisitos e card · 2026-11-11
+
+- **Pedido (literal):** "no final, pode criar um card de user story no enspace, com raul como responsavel, dividido do modo como voce ja conhece: o epico é a user story e as tarefas dentro do item sao as partes de desenvolvimento referentes, aí me devolva o link."
+- **Feito:** o `REQUISITOS.md` virou épico em `requisitos/epico.md`, com 7 partes, 1 arquivo por parte. Os IDs ficaram como estavam.
+  - 1. O prazo final na tarefa rápida (a base); 2. Tabela, kanban e prazo final vencido; 3. Relatório Padrão; 4. Agenda; 5. Tarefa dentro do item; 6. Painel de tarefas; 7. Spaceflow.
+  - As regras que valem para 2 ou mais partes (RN002, RN004, RN005 e RN006) ficam no épico; RN001 e RN003 ficam na parte 1, e RN007, na parte 6.
+  - P4, P7 e P11 atravessam as partes e ficam no épico; as outras perguntas ficam na parte que elas mudam.
+- **Corte:** a parte 6 pede agregação nova no back (RI003), então nenhuma outra espera por ela.
+- **Sinal de tamanho:** as partes 1 (13 linhas) e 6 (11 linhas) passam de 1,5 vez a mediana (6). Ficam inteiras: cada uma é 1 funcionalidade (o campo na tarefa; as lâminas do painel).
+- **Mudou no texto:** RF019 e RF028 agora dizem o que o protótipo mostra. Na tabela, o selo da célula do prazo final é "Vencido"; no cartão do kanban e no painel da tarefa, "Prazo final vencido".
+- **Corrigido no protótipo:** o texto de "Como calculamos" das lâminas saía cortado em 1 linha; a dica agora quebra a linha.
+- **Prints de requisito:** `requisitos/prints.json` e `evidencias/requisitos/`, 1 print por grupo. RI001, RI002, RI003 e RT001 não têm tela.
+
