@@ -163,3 +163,60 @@ A mesma ordem vale no painel, na criação, nas colunas da tabela, na linha de d
 | P12 | O estado "Prazo final vencido" vira variável ou gatilho no Spaceflow (por exemplo, avisar o gestor quando o prazo final vence)? | Novo gatilho ou condição no grupo Spaceflow |
 
 - **Maquete:** igual à rodada 1. O "hoje" continua fixo em 22/11/2026.
+
+## Rodada 5 · 2026-11-11
+
+- **Pedido (literal):** "tem que botar nos requisitos que isso saia em relatorio nativo de tarefas, que isso seja puxado pra agenda (e prototipar como), dentro do item isso tambem tem que aparecer quando a tarefa surgir ali, no kanban e no dashboard de tarefas (novo) / pra este ultimo, veja o dash de tarefas em develop (subiu hoje) e proponha as laminas novas com essa data, como devem ser etc. / atualize requisitos e o prototipo conforme necessario"
+- **Mudou:** o documento inteiro de requisitos agora mora no `REQUISITOS.md`, com o original e as rodadas 1 a 5 (RF021 a RF039, RN007, RI003).
+- **Mudou:** o andaime "Área" ganha Painel de tarefas, Agenda e Item. A barra de Tarefas Rápidas ganha o ícone "Extrair Relatório".
+- **Fronteira:** muda o lugar do prazo final em cada tela; não muda nenhuma lâmina, coluna ou opção que já existe, salvo o seletor da Saúde dos prazos e o segmento da Carga por responsável.
+
+### Onde cada requisito está
+
+| Requisito | Onde ver no protótipo |
+|---|---|
+| RF021, RF022 | Tarefas Rápidas › ícone Extrair Relatório › Relatório Padrão › Excel: a prévia do arquivo (andaime) com Vencimento, Prazo final e Prazo final vencido |
+| RF023, RF025 | Agenda › Configurar › Tarefas Rápidas: "Prazo final" na Data e a opção "Marcar o prazo final" |
+| RF024, RF026, RF027 | Agenda: o marcador com a bandeira no dia do prazo final; vermelho cheio em 19/11 e 21/11; clicar abre o painel |
+| RF028, RF029 | Item › CTR-0142 ou PRC-0087 › pasta Tarefas |
+| RF006 | Kanban, como na rodada 1, agora Obrigatório |
+| RF030 a RF037, RF039 | Painel de tarefas |
+
+### O Painel de tarefas do develop (visto em 11/11/2026, workspace de exploração)
+
+Lâminas, de cima para baixo: os 6 números (Abertas agora, Concluídas, Criadas, Vencidas, No prazo, Tempo médio de conclusão); Entrada e saída (Entrada × saída e Backlog); Abertas por status; Saúde dos prazos (Vencidas, Vencem em 7 dias, No prazo, Sem prazo, e Concluídas no prazo); Prioridade (Prioridade, Tipo, Categoria, Item); Pontos; Origem e execução; Atividade; Carga por responsável (Abertas e Concluídas, com Vencidas e Em dia); as listas Vencidas e Vencem em breve. No topo, o seletor Tarefas rápidas, os períodos (Últimos 30 dias, Últimos 90 dias, Personalizado) e o Filtro.
+
+### As lâminas do prazo final
+
+| Lâmina | Nova ou muda | Por quê |
+|---|---|---|
+| Prazo final vencido (número) | Nova, depois de "No prazo" | É o número que o cliente jurídico cobra primeiro. O "Vencidas" continua contando pelo vencimento (RN007): trocar a conta mudaria o que o painel já diz |
+| Dentro do prazo final (número) | Nova | O par do "No prazo": no mock, 20% das concluídas cumprem o vencimento e 75% cumprem o prazo final. É a diferença entre atraso tolerado e prazo perdido |
+| Saúde dos prazos | Muda: seletor Vencimento e Prazo final | As mesmas 4 faixas, contadas pela data escolhida. Uma lâmina nova repetiria o desenho |
+| Carga por responsável | Muda: 3 segmentos em Abertas | Separa quem tem prazo final vencido de quem só está atrasado dentro da folga. Em Concluídas: dentro do prazo final, depois do prazo final e sem prazo final |
+| Prazo final vencido (lista) | Nova | O par da lista Vencidas: onde o gestor age. "venceu há N dias" |
+| Prazo final em até 7 dias (lista) | Nova | O par de "Vencem em breve". A tarefa atrasada leva o selo "Atrasada": é a que está na folga e precisa sair |
+| Tarefas agendadas | Sem as lâminas novas | O prazo final só existe na tarefa rápida |
+
+Descartado: uma lâmina "Atrasadas pela folga" (dias até o prazo final de cada atrasada). Repetia a lista "Prazo final em até 7 dias".
+
+### Agenda, relatório e item
+
+| O que | Por quê |
+|---|---|
+| A tarefa continua no dia da opção "Data"; o prazo final ganha um marcador próprio | Mudar a data da tarefa tiraria o vencimento da Agenda. O marcador põe as 2 datas na grade sem configurar nada |
+| Marcador ligado por padrão, com a opção para desligar | Quem não usa o prazo final não vê nada novo; quem usa não precisa descobrir a opção |
+| Tarefa em cor neutra, marcador do prazo final em vermelho claro, vencido em vermelho cheio | O vermelho fica só para a data que não se move. A cor neutra das tarefas rápidas vem do protótipo `agenda` |
+| No relatório, "Prazo final vencido" é "Sim" ou "Não", e fica vazio sem prazo final | "Não" numa tarefa sem prazo final diria que há um prazo cumprido |
+| No item, a mesma tabela de Tarefas Rápidas | A tarefa se lê igual onde aparece; ordenar e filtrar vêm junto |
+
+### Para o dev
+
+- **Relatório:** a prévia do arquivo é andaime. O caminho (ícone, Relatório Padrão, formato, aviso) é o do develop, visto pelo protótipo `meus-relatorios` em 14/10/2026.
+- **Painel:** as lâminas seguem a moldura do develop (ponto colorido, "i" de "Como calculamos", seletor no canto). A etiqueta "Lâmina nova" e "Lâmina que muda" e a caixa tracejada dos números são andaime.
+- **RI003:** o painel do develop agrega no back; as contagens novas pedem o prazo final na mesma agregação.
+
+- **Maquete:** sem casca nas áreas Painel, Agenda e Item, a pedido da redatora ("nao precisa prototipar como é hoje"). As lâminas do develop que não mudam não foram reproduzidas. A Agenda mostra só novembro de 2026, sem as setas de mês. No item, só a pasta Tarefas tem conteúdo. "Hoje" continua 22/11/2026; o painel usa as concluídas do mock e um histórico fictício.
+- **Não deu:** a pasta Tarefas da tela do item não foi vista no develop: a categoria de exploração não tinha item nos últimos 30 dias (P13). Os relatórios do menu do membro (`/reports`) dão 404 no develop; o relatório nativo de tarefas é o Relatório Padrão das Tarefas Rápidas.
+- **Conferência no Chrome:** painel em pt-BR claro e es escuro; Agenda, Configuração, marcador abrindo o painel; item; relatório até a prévia. Sem erro no console.
+- **Ver:** `evidencias/proposta-painel-de-tarefas.jpg`, `proposta-painel-de-tarefas-es-escuro.jpg`, `proposta-agenda.jpg`, `proposta-agenda-configuracao.jpg`, `proposta-item-tarefas.jpg`, `proposta-relatorio-colunas.jpg`

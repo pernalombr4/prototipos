@@ -65,6 +65,8 @@ S2 As tarefas existentes começam sem prazo final (RT001).
 
 - **Tarefas › Rápidas**, nas visualizações tabela e kanban, no painel da tarefa e no modal de criação.
 - **Spaceflow**, no gatilho "Tarefa atualizada" e nas ações que criam ou alteram tarefa rápida.
+- Rodada 5: **Painel de tarefas** (`/tasks/dashboard`, no develop desde 11/11/2026), **Agenda**, **pasta Tarefas
+  do item** e o **Relatório Padrão** das Tarefas Rápidas. O que o develop mostra está no `DECISOES.md`, rodada 5.
 
 ## O que seria sucesso
 

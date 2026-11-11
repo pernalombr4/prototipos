@@ -5,6 +5,8 @@
  * Cada tarefa rápida ganha uma segunda data: o prazo final. O prazo de hoje
  * continua marcando o atraso. A proposta aparece em 5 lugares, todos daqui:
  * criação, painel da tarefa, tabela, kanban e Spaceflow (andaime "Área").
+ * Rodada 5: relatório nativo (ícone na barra), Agenda, pasta Tarefas do item e
+ * Painel de tarefas.
  *
  * Só a proposta: sem versão "como é hoje", a pedido da redatora. A casca é a
  * do protótipo tarefas-rapidas, importada de lá.
@@ -21,6 +23,12 @@ import QuadroDeTarefas from './_QuadroDeTarefas.vue'
 import PainelDaTarefa from './_PainelDaTarefa.vue'
 import ModalNovaTarefa from './_ModalNovaTarefa.vue'
 import Spaceflow from './_Spaceflow.vue'
+import RelatorioPadrao from './_RelatorioPadrao.vue'
+import Agenda from './_Agenda.vue'
+import TarefasDoItem from './_TarefasDoItem.vue'
+import PainelDeTarefas from './_PainelDeTarefas.vue'
+import { itens } from './mocks'
+import { textosR5 } from './textos-r5'
 import type { TarefaRapida } from './mocks'
 import { tarefasIniciais } from './mocks'
 import type { CampoDeData, Periodo } from './datas'
@@ -29,13 +37,14 @@ import { textos } from './textos'
 
 definePageMeta({
   titulo: 'Prazo final nas Tarefas Rápidas',
-  descricao: 'A tarefa rápida ganha o prazo final ao lado do prazo: na criação, no painel, na tabela, no kanban e no Spaceflow, com a regra de que o prazo final nunca fica antes do prazo.',
+  descricao: 'A tarefa rápida ganha o prazo final ao lado do vencimento: na criação, no painel, na tabela, no kanban, no Spaceflow, no relatório, na Agenda, no item e no Painel de tarefas, com a regra de que o prazo final nunca fica antes do vencimento.',
   status: 'em-revisao',
-  atualizado: '2026-11-10',
-  tela: 'Tarefas › Rápidas e Spaceflow',
+  atualizado: '2026-11-11',
+  tela: 'Tarefas › Rápidas, Painel, Agenda, item e Spaceflow',
 })
 
 const t = useTextos(textos)
+const r = useTextos(textosR5)
 const tc = useTextos(textosDaCasca)
 const idioma = useIdioma()
 const toast = useToast()
@@ -43,7 +52,15 @@ const toast = useToast()
 /* ------------------------------------------------------------------ *
  * ANDAIME. Não é proposta.                                            *
  * ------------------------------------------------------------------ */
-type Area = 'tarefas' | 'spaceflow'
+type Area = 'tarefas' | 'painel' | 'agenda' | 'item' | 'spaceflow'
+const areas: { valor: Area, rotulo: string }[] = [
+  { valor: 'tarefas', rotulo: 'Tarefas Rápidas' },
+  { valor: 'painel', rotulo: 'Painel de tarefas' },
+  { valor: 'agenda', rotulo: 'Agenda' },
+  { valor: 'item', rotulo: 'Item' },
+  { valor: 'spaceflow', rotulo: 'Spaceflow' },
+]
+const referenciaDoItem = ref(itens[0]!.referencia)
 type Estado = 'normal' | 'carregando' | 'erro' | 'vazio'
 const area = ref<Area>('tarefas')
 const podeEditar = ref(true)
@@ -160,7 +177,8 @@ function reiniciar() {
             @click="soVencidos = !soVencidos"
           />
           <span class="text-xs text-muted">{{ t.contagem(filtradas.length) }}</span>
-          <UButton :label="t.novaTarefa" icon="i-lucide-plus" class="ml-auto" @click="criacaoAberta = true" />
+          <div class="ml-auto"><RelatorioPadrao :t="t" :r="r" :idioma="idioma" :tarefas="filtradas" /></div>
+          <UButton :label="t.novaTarefa" icon="i-lucide-plus" @click="criacaoAberta = true" />
         </div>
 
         <Transition
@@ -228,6 +246,9 @@ function reiniciar() {
       </div>
     </CascaDoEnspace>
 
+    <PainelDeTarefas v-else-if="area === 'painel'" :t="t" :r="r" :idioma="idioma" :tarefas="tarefas" @abrir="abrir" />
+    <Agenda v-else-if="area === 'agenda'" :t="t" :r="r" :idioma="idioma" :tarefas="tarefas" @abrir="abrir" />
+    <TarefasDoItem v-else-if="area === 'item'" :key="referenciaDoItem" :t="t" :r="r" :idioma="idioma" :tarefas="tarefas" :referencia="referenciaDoItem" @abrir="abrir" />
     <Spaceflow v-else :t="t" :idioma="idioma" />
 
     <PainelDaTarefa
@@ -246,14 +267,26 @@ function reiniciar() {
       <div class="flex flex-wrap items-center gap-2 px-4 py-3">
         <span class="mr-1 text-xs font-semibold uppercase tracking-wider text-muted">Protótipo · área</span>
         <UButton
-          v-for="a in (['tarefas', 'spaceflow'] as const)"
-          :key="a"
-          :label="a === 'tarefas' ? 'Tarefas Rápidas' : 'Spaceflow'"
+          v-for="a in areas"
+          :key="a.valor"
+          :label="a.rotulo"
           size="xs"
-          :color="area === a ? 'primary' : 'neutral'"
-          :variant="area === a ? 'solid' : 'subtle'"
-          @click="area = a"
+          :color="area === a.valor ? 'primary' : 'neutral'"
+          :variant="area === a.valor ? 'solid' : 'subtle'"
+          @click="area = a.valor"
         />
+        <template v-if="area === 'item'">
+          <USeparator orientation="vertical" class="mx-1 h-5" />
+          <UButton
+            v-for="i in itens"
+            :key="i.referencia"
+            :label="i.referencia"
+            size="xs"
+            :color="referenciaDoItem === i.referencia ? 'primary' : 'neutral'"
+            :variant="referenciaDoItem === i.referencia ? 'solid' : 'subtle'"
+            @click="referenciaDoItem = i.referencia"
+          />
+        </template>
         <template v-if="area === 'tarefas'">
           <USeparator orientation="vertical" class="mx-1 h-5" />
           <span class="text-xs font-semibold uppercase tracking-wider text-muted">Papel</span>

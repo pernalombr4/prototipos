@@ -58,3 +58,19 @@ export function ordemValida(prazo: string | null, prazoFinal: string | null): bo
 export function criadoEm(t: TarefaRapida): string {
   return somarDias(HOJE, -((t.id % 9) + 1))
 }
+
+export function diasEntre(de: string, ate: string): number {
+  return Math.round((Date.parse(`${ate}T00:00:00Z`) - Date.parse(`${de}T00:00:00Z`)) / 86400000)
+}
+
+export { somarDias }
+
+/** Prazo final nos próximos 7 dias, de hoje até hoje + 7, em tarefa aberta. */
+export function prazoFinalEm7Dias(t: TarefaRapida): boolean {
+  return t.status !== 'completed' && !!t.final_due_date && t.final_due_date >= HOJE && t.final_due_date <= somarDias(HOJE, 7)
+}
+
+/** Vencimento nos próximos 7 dias, em tarefa aberta (a "Vencem em 7 dias" do painel do develop). */
+export function vencimentoEm7Dias(t: TarefaRapida): boolean {
+  return t.status !== 'completed' && !!t.due_date && t.due_date >= HOJE && t.due_date <= somarDias(HOJE, 7)
+}

@@ -119,3 +119,50 @@ export const execucoes: Execucao[] = [
   /* Versão anterior do nó, com o prazo final em data fixa (25/11): o prazo que chegou (30/11) fere a RN004. */
   { id: 9029, quando: '2026-11-21T17:30:00', tarefa: 'Emitir a fatura de novembro', mudou: 'prazo', recebido: { prazo: '2026-11-30', prazoFinal: '2026-12-05' }, gravado: { prazo: '2026-11-30', prazoFinal: '2026-11-25' }, resultado: 'falha' },
 ]
+
+/* ------------------------------------------------------------------ *
+ * Rodada 5: item, Agenda e painel de tarefas                          *
+ * ------------------------------------------------------------------ */
+
+/** Item do ENSPACE a que a tarefa rápida está ligada (`item` e `meta.itemReference` da tarefa). */
+export interface ItemDoMock {
+  referencia: string
+  nome: string
+  categoria: string
+}
+
+export const itens: ItemDoMock[] = [
+  { referencia: 'CTR-0142', nome: 'Contrato de prestação de serviços com a Alfa Serviços', categoria: 'Contratos' },
+  { referencia: 'PRC-0087', nome: 'Processo trabalhista 0087', categoria: 'Processos' },
+]
+
+/** Qual item cada tarefa tem. Tarefa fora do mapa não tem item. */
+export const itemDaTarefa: Record<number, string> = {
+  22101: 'CTR-0142',
+  22103: 'CTR-0142',
+  22107: 'CTR-0142',
+  22109: 'CTR-0142',
+  22111: 'PRC-0087',
+  22105: 'PRC-0087',
+}
+
+/** Quando cada tarefa concluída foi concluída (`completed_at`). */
+export const concluidaEm: Record<number, string> = {
+  22109: '2026-11-20',
+  22110: '2026-11-14',
+}
+
+/**
+ * Concluídas nos últimos 30 dias que não estão mais na lista, só para os
+ * números do painel. Vencimento, prazo final e conclusão; valores fictícios.
+ */
+export const historicoDeConcluidas: { prazo: string | null, prazoFinal: string | null, concluida: string, responsavel: number }[] = [
+  { prazo: '2026-10-28', prazoFinal: '2026-11-02', concluida: '2026-10-30', responsavel: 1 },
+  { prazo: '2026-10-30', prazoFinal: '2026-11-04', concluida: '2026-11-03', responsavel: 2 },
+  { prazo: '2026-11-03', prazoFinal: '2026-11-05', concluida: '2026-11-06', responsavel: 3 },
+  { prazo: '2026-11-05', prazoFinal: '2026-11-10', concluida: '2026-11-05', responsavel: 4 },
+  { prazo: '2026-11-09', prazoFinal: '2026-11-12', concluida: '2026-11-11', responsavel: 1 },
+  { prazo: '2026-11-10', prazoFinal: null, concluida: '2026-11-12', responsavel: 2 },
+  { prazo: '2026-11-12', prazoFinal: '2026-11-13', concluida: '2026-11-16', responsavel: 4 },
+  { prazo: '2026-11-17', prazoFinal: '2026-11-21', concluida: '2026-11-18', responsavel: 3 },
+]
