@@ -195,3 +195,12 @@ Migração concluída ──► Ver categorias (não há como desfazer)
   - As marcas "(aguarda P1)", "(aguarda P2)", "(proposta em S1)" e "(em revisão)" saem: P1, P2, S1 e P10 não estão mais no card. O fluxo da categoria fica isolado na parte 3.
   - O "Depende de" do épico diz a dependência que o card guarda: a mudança na abrangência da migração, em andamento no time de desenvolvimento.
 - **Prints:** `requisitos/prints.json` e `evidencias/requisitos/`, 1 print por grupo de requisitos (regra 42), 33 prints para 39 requisitos. RN001, RN003, RF030, RF032 e RI001 a RI005 ficam sem print, com o motivo na tarefa.
+
+## Card no padrão novo · 2026-11-11
+- **Pedido (literal):** "reescreva o card dessa demanda no enspace de acordo com as novas regras de criaçao de card (époico + tarefas)"
+- **Mudou:**
+  - A descrição do épico abre com Problema e Proposta (regras de card do ENSPACE, regra 6), no lugar de "O que é".
+  - O critério de aceite do épico vai no campo próprio da categoria (`criterio_de_aceite`, regra 9), com 6 linhas, sem título.
+  - O "Depende de" sai da descrição: o campo Dependências do card já guarda a dependência, editado pela redatora em 2026-11-11.
+  - Na tabela de decisão da RN002, "não se aplica" vira "sem comparação": a conferência do card barra "não se aplica" como bloco vazio.
+  - As 4 tarefas são reescritas a partir das partes, com as caixas de marcar e os prints. Complexidade, prioridade e Dependências ficam como a redatora deixou.

@@ -22,14 +22,14 @@ exemplo" e Continuar. Os cenários "Workspace vazio" e "Já igual ao arquivo" se
 
 | Linha | Está no arquivo | Está no workspace | Diferença entre as 2 | Modo | Situação | O que a migração faz |
 |---|---|---|---|---|---|---|
-| 1 | sim | não | não se aplica | os 3 | Novo | cria a entidade |
+| 1 | sim | não | sem comparação | os 3 | Novo | cria a entidade |
 | 2 | sim | sim | não | os 3 | Inalterado | nada |
 | 3 | sim | sim | sim | Somente inclusão | Inalterado | mantém a entidade do workspace |
 | 4 | sim | sim | sim | Inclusão e atualização | Alterado | aplica o que o arquivo tem de diferente |
 | 5 | sim | sim | sim | Substituição total | Alterado | aplica o que o arquivo tem de diferente |
-| 6 | não | sim | não se aplica | Somente inclusão | Inalterado | nada |
-| 7 | não | sim | não se aplica | Inclusão e atualização | Inalterado | nada |
-| 8 | não | sim | não se aplica | Substituição total | Removido | remove a entidade e, na categoria, os itens cadastrados nela |
+| 6 | não | sim | sem comparação | Somente inclusão | Inalterado | nada |
+| 7 | não | sim | sem comparação | Inclusão e atualização | Inalterado | nada |
+| 8 | não | sim | sem comparação | Substituição total | Removido | remove a entidade e, na categoria, os itens cadastrados nela |
 
 ## Prévia (RF)
 

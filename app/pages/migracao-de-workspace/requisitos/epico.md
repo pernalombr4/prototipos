@@ -1,12 +1,13 @@
 # Épico: Nova experiência na tela de casos de uso
 
-**O que é:** quem importa a estrutura de outro workspace escolhe o que acontece com o que já existe e vê, antes de
+**Problema:** hoje o botão Importar Workspace importa o arquivo na hora, sem mostrar antes o que muda, e duplica as
+categorias que o workspace já tem.
+
+**Proposta:** quem importa a estrutura de outro workspace escolhe o que acontece com o que já existe e vê, antes de
 confirmar, o que entra, o que muda e o que sai, em estrutura e nunca em JSON. Nada é duplicado.
 
 **Onde vale:** Configurações › Interface › Casos de Uso (`/workspaces/<ws>/settings/interface/usecases`), cartão
 "Migração de Workspace", botão Importar Workspace e a camada que ele abre.
-
-**Depende de:** a mudança na abrangência da migração, em andamento no time de desenvolvimento.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/migracao-de-workspace/, aprovado em 14/10/2026; o fluxo da
 categoria entrou em 20/10/2026. Os cenários se abrem pela barra inferior: "Workspace com conteúdo", "Workspace vazio"
