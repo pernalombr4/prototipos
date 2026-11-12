@@ -177,6 +177,15 @@ export interface Cenario {
   camposDaVisaoGeral: CampoDaVisaoGeral[]
   /** As citações com # já feitas, para o "Mencionada em". */
   mencoes: Mencao[]
+  /** Outros itens do workspace, para "Vincular a um item" (rodada 5). */
+  itensVinculaveis: ItemVinculavel[]
+}
+
+/** Item de qualquer categoria do workspace que a tarefa pode citar. Inventado. */
+export interface ItemVinculavel {
+  reference: string
+  nome: string
+  categoria: string
 }
 
 export interface CampoDaVisaoGeral {
@@ -196,6 +205,21 @@ export interface LinhaDeChecklist {
   subtarefa?: number
 }
 
+/** Uma checklist da tarefa: a tarefa pode ter várias, cada uma com nome (rodada 5). */
+export interface Checklist {
+  id: string
+  nome: string
+  linhas: LinhaDeChecklist[]
+}
+
+/** Arquivo anexado à tarefa. Só o nome e o tamanho: o arquivo não sai do navegador. */
+export interface AnexoDaTarefa {
+  id: string
+  nome: string
+  tamanho: number
+  imagem: boolean
+}
+
 /** Como a tarefa terminou, como o "Close as" do GitHub. Inventado. */
 export interface Conclusao {
   motivo: 'concluida' | 'naoSeraFeita' | 'duplicada'
@@ -205,8 +229,10 @@ export interface Conclusao {
 
 /**
  * Tarefa rápida, tipada pelo `Task`, com o que a proposta acrescenta.
- * Inventado: `mae`, `checklist`, `bloqueadaPor` e `conclusao` não existem no
- * modelo `tasks` do back (lido em 11/11/2026); a subtarefa pede o campo `parent`.
+ * Inventado: `mae`, `checklists`, `bloqueadaPor`, `relacionadas`, `itens`,
+ * `anexos` e `conclusao` não existem no modelo `tasks` do back (lido em
+ * 11/11/2026); a subtarefa pede o campo `parent`. `points` existe: é o campo
+ * Pontos (rodada 5).
  */
 export interface TarefaDoItem {
   tarefa: Task
@@ -214,9 +240,14 @@ export interface TarefaDoItem {
   rodadas: Rodada[]
   /** Id da tarefa-mãe. Um nível só: a subtarefa não tem subtarefas. */
   mae?: number
-  checklist: LinhaDeChecklist[]
+  checklists: Checklist[]
   /** Ids das tarefas que esta espera. */
   bloqueadaPor: number[]
+  /** Ids das tarefas relacionadas, sem ordem de espera. Vale nos 2 sentidos. */
+  relacionadas: number[]
+  /** Referências dos itens vinculados, além do item da tarefa. */
+  itens: string[]
+  anexos: AnexoDaTarefa[]
   conclusao?: Conclusao
 }
 
@@ -466,18 +497,27 @@ const rodadasProduto: Rodada[] = [
 
 let seqLinha = 0
 const linha = (texto: string, feito: boolean, extra: Partial<LinhaDeChecklist> = {}): LinhaDeChecklist => ({ id: `ck-${++seqLinha}`, texto, feito, ...extra })
-const td = (t: Task, extra: Partial<TarefaDoItem> = {}): TarefaDoItem => ({ tarefa: t, apontamentos: [], rodadas: [], checklist: [], bloqueadaPor: [], ...extra })
+let seqChecklist = 0
+const checklist = (linhas: LinhaDeChecklist[], nome = 'Checklist'): Checklist => ({ id: `cl-${++seqChecklist}`, nome, linhas })
+/** As seções que a proposta acrescenta, vazias. */
+export const secoesVazias = (): Pick<TarefaDoItem, 'checklists' | 'bloqueadaPor' | 'relacionadas' | 'itens' | 'anexos'> => ({ checklists: [], bloqueadaPor: [], relacionadas: [], itens: [], anexos: [] })
+const td = (t: Task, extra: Partial<TarefaDoItem> = {}): TarefaDoItem => ({ tarefa: t, apontamentos: [], rodadas: [], ...secoesVazias(), ...extra })
 
 const tarefasProduto: TarefaDoItem[] = [
   {
-    tarefa: tarefa(901, 'Ajustar textos da tela do item', 'working', BRUNO, 'Rótulos, estados vazios e traduções que o teste apontou.'),
-    checklist: [
-      linha('Revisar os rótulos em espanhol', true, { responsavel: BRUNO }),
-      linha('Revisar os estados vazios', false, { responsavel: DEBORA }),
-      linha('Trocar o selo "pending" pelo rótulo traduzido', false, { subtarefa: 904 }),
-      linha('Conferir os textos no tema escuro', false),
+    tarefa: { ...tarefa(901, 'Ajustar textos da tela do item', 'working', BRUNO, 'Rótulos, estados vazios e traduções que o teste apontou.'), points: 5 },
+    checklists: [
+      checklist([
+        linha('Revisar os rótulos em espanhol', true, { responsavel: BRUNO }),
+        linha('Revisar os estados vazios', false, { responsavel: DEBORA }),
+        linha('Trocar o selo "pending" pelo rótulo traduzido', false, { subtarefa: 904 }),
+        linha('Conferir os textos no tema escuro', false),
+      ]),
     ],
     bloqueadaPor: [],
+    relacionadas: [903],
+    itens: ['BUG3D81C2A57E0F4B6C9A14D2E8F07B5C1'],
+    anexos: [{ id: 'ta-1', nome: 'textos-da-tela-do-item.xlsx', tamanho: 48_200, imagem: false }],
     apontamentos: [
       {
         id: 'tap-1', numero: 1,
@@ -505,9 +545,9 @@ const tarefasProduto: TarefaDoItem[] = [
     ],
     rodadas: [{ numero: 1, quem: ANA, quando: d('2026-11-10T11:10:00'), veredito: 'correcao', resumo: '2 ajustes de texto da tarefa.' }],
   },
-  td(tarefa(904, 'Traduzir o selo de status da tarefa', 'pending', BRUNO, 'Usar o rótulo do status nos 3 idiomas.'), { mae: 901 }),
-  td(tarefa(905, 'Revisar os estados vazios com o design', 'completed', DEBORA), { mae: 901, conclusao: { motivo: 'concluida' } }),
-  td({ ...tarefa(902, 'Revisar a migração das pastas ocultas', 'blocked', CAIO, 'Rodar de novo a migração nas pastas com hidden=true.'), priority: 'high' }, { bloqueadaPor: [906] }),
+  td({ ...tarefa(904, 'Traduzir o selo de status da tarefa', 'pending', BRUNO, 'Usar o rótulo do status nos 3 idiomas.'), points: 2 }, { mae: 901 }),
+  td({ ...tarefa(905, 'Revisar os estados vazios com o design', 'completed', DEBORA), points: 3 }, { mae: 901, conclusao: { motivo: 'concluida' } }),
+  td({ ...tarefa(902, 'Revisar a migração das pastas ocultas', 'blocked', CAIO, 'Rodar de novo a migração nas pastas com hidden=true.'), priority: 'high', points: 8 }, { bloqueadaPor: [906] }),
   td(tarefa(906, 'Liberar acesso de leitura ao banco de develop', 'working', CAIO)),
   td(tarefa(903, 'Atualizar a documentação da tela do item', 'completed', DEBORA), { conclusao: { motivo: 'concluida' } }),
 ]
@@ -640,6 +680,12 @@ export const cenarios: Record<Cenario['id'], Cenario> = {
     rodadas: rodadasProduto,
     tarefas: tarefasProduto,
     categoriasDoMenu: [{ nome: 'Demandas', ativo: true }, { nome: 'Bugs' }, { nome: 'Releases' }],
+    itensVinculaveis: [
+      { reference: 'BUG3D81C2A57E0F4B6C9A14D2E8F07B5C1', nome: 'Selo de status da tarefa sem tradução', categoria: 'Bug' },
+      { reference: 'USE52B7E0A19C4D4F3B8E61A2C7D90F5B3', nome: 'Pastas do item com ordem por pessoa', categoria: 'User Story' },
+      { reference: 'USE9C14F3B2E7A0458D9B36E1A4C82D07F', nome: 'Filtros rápidos na tela de itens', categoria: 'User Story' },
+      { reference: 'DOC0E6A93D5B21C47F0A8D4E7B3C61F92A', nome: 'Documentação da tela do item', categoria: 'Documentação' },
+    ],
     camposDaVisaoGeral: [
       { rotulo: 'Status', valor: 'Em teste' },
       { rotulo: 'Título', valor: 'Pastas do item com cara de aba' },
@@ -674,16 +720,28 @@ export const cenarios: Record<Cenario['id'], Cenario> = {
     rodadas: rodadasJuridico,
     tarefas: [
       td({ ...tarefa(911, 'Colher assinaturas', 'pending', RAFAEL, 'Assinaturas da versão final, depois da aprovação da minuta.'), workspace: 'juridico-consultivo', item: 52210 }, {
-        checklist: [
-          linha('Assinatura da contratada', false, { responsavel: RAFAEL }),
-          linha('Assinatura do diretor jurídico', false, { responsavel: HELENA }),
-          linha('Rubrica em todas as páginas do Anexo II', false),
-          linha('Enviar a minuta final ao cliente', false, { subtarefa: 912 }),
+        checklists: [
+          checklist([
+            linha('Assinatura da contratada', false, { responsavel: RAFAEL }),
+            linha('Assinatura do diretor jurídico', false, { responsavel: HELENA }),
+            linha('Rubrica em todas as páginas do Anexo II', false),
+            linha('Enviar a minuta final ao cliente', false, { subtarefa: 912 }),
+          ], 'Assinaturas'),
+          checklist([
+            linha('Arquivar a via assinada no item', false),
+            linha('Avisar o financeiro do início da vigência', false),
+          ], 'Depois de assinar'),
         ],
         bloqueadaPor: [913],
+        itens: ['PRO7A20E4C93B1D46F8A5C27E9B0D3F614'],
       }),
       td({ ...tarefa(912, 'Enviar a minuta final ao cliente', 'pending', RAFAEL), workspace: 'juridico-consultivo', item: 52210 }, { mae: 911 }),
       td({ ...tarefa(913, 'Aprovar a minuta final', 'working', HELENA, 'Depende das pendências #1 e #2.'), workspace: 'juridico-consultivo', item: 52210 }),
+    ],
+    itensVinculaveis: [
+      { reference: 'PRO7A20E4C93B1D46F8A5C27E9B0D3F614', nome: 'Procuração do representante da contratada', categoria: 'Procurações' },
+      { reference: 'CON4B91D7E26A0C4F58B3E9A1D7C05F2B8', nome: 'Proposta comercial de manutenção 2026', categoria: 'Contratos' },
+      { reference: 'PRC2E5F8A07D3B94C61A0E7D2B9F48C3A5', nome: 'Notificação extrajudicial de reajuste', categoria: 'Processos' },
     ],
     camposDaVisaoGeral: [
       { rotulo: 'Status', valor: 'Em revisão' },

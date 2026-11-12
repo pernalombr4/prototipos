@@ -18,8 +18,12 @@
  * Checklist, Subtarefas, Dependências e Mencionada em abaixo de Detalhes, e o
  * Concluir tarefa com motivo (Concluída, Não será feita, Duplicada de) e a
  * opção de concluir junto as subtarefas abertas.
+ *
+ * A proposta (rodada 5): o campo Pontos em Detalhes. O `points` existe na
+ * tarefa (SDK, padrão 0) e o painel do develop não mostra. As seções abaixo de
+ * Detalhes seguem o modo do ClickUp (`_SecoesDaTarefa.vue`).
  */
-import type { Apontamento, Mencao, TarefaDoItem } from './mocks'
+import type { Apontamento, ItemVinculavel, Mencao, TarefaDoItem } from './mocks'
 import type { Lista } from './lista'
 import type { Textos } from './textos'
 import PastaDeApontamentos from './_PastaDeApontamentos.vue'
@@ -35,6 +39,7 @@ const props = defineProps<{
   estadoDaTela: string
   tarefas: TarefaDoItem[]
   mencoes: Mencao[]
+  itens: ItemVinculavel[]
 }>()
 const aberto = defineModel<boolean>('open', { required: true })
 const aba = defineModel<string>('aba', { default: 'tarefa' })
@@ -191,9 +196,20 @@ const linhaDaConclusao = computed(() => {
                 <UFormField :label="t.painelTarefa.descricao">
                   <div class="min-h-24 rounded-md border border-accented px-3 py-2 text-sm text-default">{{ x.tarefa.description || t.tarefas.semDescricao }}</div>
                 </UFormField>
-                <UFormField :label="t.painelTarefa.responsavel">
-                  <UInput :model-value="pessoa?.nome" :avatar="pessoa ? { text: pessoa.iniciais, alt: pessoa.nome } : undefined" trailing-icon="i-lucide-chevron-down" class="w-full" />
-                </UFormField>
+                <div class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
+                  <UFormField :label="t.painelTarefa.responsavel">
+                    <UInput :model-value="pessoa?.nome" :avatar="pessoa ? { text: pessoa.iniciais, alt: pessoa.nome } : undefined" trailing-icon="i-lucide-chevron-down" class="w-full" />
+                  </UFormField>
+                  <!-- Proposta (rodada 5): o campo Pontos -->
+                  <UFormField :label="tr.pontos.rotulo">
+                    <template #hint>
+                      <UTooltip :text="tr.pontos.ajuda" :content="{ side: 'top' }">
+                        <UIcon name="i-lucide-circle-help" class="size-3.5 text-dimmed" :aria-label="tr.pontos.ajuda" />
+                      </UTooltip>
+                    </template>
+                    <UInputNumber v-model="x.tarefa.points" :min="0" :disabled="somenteLeitura" placeholder="0" class="w-full" />
+                  </UFormField>
+                </div>
                 <UFormField :label="t.painelTarefa.prioridade">
                   <div class="flex flex-wrap gap-x-8 gap-y-2">
                     <label v-for="p in prioridades" :key="p" class="flex items-center gap-2 text-xs">
@@ -208,8 +224,10 @@ const linhaDaConclusao = computed(() => {
 
               <!-- Proposta: as seções novas -->
               <SecoesDaTarefa
+                :key="`${x.tarefa.id}-${estadoDaTela}`"
                 :t="t"
                 :x="x"
+                :itens="itens"
                 :tarefas="tarefas"
                 :pessoas="lista.pessoas"
                 :mencoes="mencoes"

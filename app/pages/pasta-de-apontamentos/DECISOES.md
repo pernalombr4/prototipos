@@ -4,6 +4,45 @@
 
 **Rodada 2, em uma linha:** as rodadas ganham vista própria e o cabeçalho perde o gráfico; a tarefa rápida ganha checklist, subtarefas de 1 nível, dependências e conclusão com motivo; o item ganha o contador da lista de tarefas; a citação com # liga apontamento, tarefa e item.
 
+## Rodada 5 · 2026-11-12
+
+- **Pedidos (literais):**
+  - "voce deve prototipar um estado vazio quando o estado vazio estiver selecionado, nao so pros apontamentos. tem que ficar vazio de subtarefa, vazio de checklist etc. aí a tarefa pode ser bem parecida com o clickup (o modo funcional mesmo), como nos prints"
+  - "relacionar itens ou adicionar dependências, é apontar dependencias ou vincular a task a um item ou uma outra task"
+  - "as tarefas rapidas do enspace tem um campo de PONTOS da tarefa tambem. voce deve botar ele la. é um campo de número que pode ser usado de diversas formas."
+- **Referência:** os 4 prints do ClickUp que a redatora mandou: a lista de ações (Add subtask, Relate items or add dependencies, Create checklist, Attach file), o menu "Relate a Task or Doc" com "This task blocks..." e "This task is blocked by...", a seção Checklists com "Add item" e "Add checklist", e a linha "Add subtask" com os ícones, Cancel e Save.
+- **Fronteira:**
+  - muda: as seções abaixo de "Detalhes da tarefa" (ações, Subtarefas, Checklists, Relacionamentos, Anexos), o campo Pontos em Detalhes e o estado vazio da tarefa no andaime;
+  - não muda: o trilho, as abas, o cabeçalho, os outros campos de Detalhes e o rodapé do painel (cópia do develop), o quadro de Tarefas Rápidas, a aba Apontamentos e o "Concluir tarefa" com motivo.
+
+| Decisão | Motivo |
+|---|---|
+| "Estado: Vazio" também esvazia a tarefa: as mesmas tarefas-mãe, sem descrição, prazo, pontos, subtarefas, checklists, relacionamentos, anexos e apontamentos | Pedido literal. O que se cria no vazio fica até trocar de estado; voltar ao "Cheio" reabre a mesma tarefa com o conteúdo de exemplo |
+| A seção só aparece quando tem conteúdo. Na tarefa vazia, abaixo de Detalhes, fica só o quadro "Esta tarefa ainda não tem subtarefas, checklists, relacionamentos nem anexos." com as 4 ações em lista | É o modo do ClickUp: a tarefa nova não mostra 4 caixas vazias, mostra o que se pode acrescentar |
+| Com conteúdo, as 4 ações viram uma fileira de botões com contorno e ícone, logo abaixo de Detalhes | A ação continua no mesmo lugar e não some quando a 1ª seção aparece |
+| A subtarefa não mostra "Adicionar subtarefa" | A subtarefa tem 1 nível, desde a rodada 2 |
+| Subtarefas: a linha de criação tem o círculo tracejado, o nome, os botões de responsável, data limite, prioridade e pontos, Cancelar e Salvar com o atalho Enter | Pedido literal (o print da linha "Add subtask"). Depois de salvar, a linha fica aberta para a próxima, como no ClickUp; Esc cancela |
+| A linha da subtarefa mostra a bandeira (só prioridade alta e urgente), os pontos, a data e o responsável; o cabeçalho soma os pontos das subtarefas | Os pontos servem de soma quando a tarefa se divide; a bandeira normal só ocupa espaço |
+| "Vincular tarefa existente" continua, ao lado de "Adicionar subtarefa" | A tarefa solta já criada também vira parte de outra |
+| Checklists: a tarefa pode ter várias, cada uma com nome; "Adicionar item" leva o responsável na mesma linha, e "Adicionar checklist" cria outra | Pedido literal (o print da seção Checklists). O jurídico mostra 2: "Assinaturas" e "Depois de assinar" |
+| Clicar no nome renomeia; o "..." da checklist tem Renomear e Excluir checklist, com Desfazer | Mesmo comportamento das linhas, que já editam no clique |
+| "Relacionar ou adicionar dependência" abre um menu com busca: Vincular a um item, Vincular a outra tarefa e, em Dependência, "Esta tarefa bloqueia..." e "Esta tarefa está bloqueada por..." | Pedido literal: no ENSPACE, relacionar é apontar dependência ou vincular a item ou a outra tarefa. Cada opção abre a busca dela, com voltar |
+| A busca de item mostra nome, categoria e referência, de qualquer categoria do workspace | O item vinculado quase nunca é da mesma categoria da tarefa (o bug, a procuração) |
+| Tudo cai na seção Relacionamentos: Bloqueada por, Bloqueia, Tarefas relacionadas e Itens vinculados; cada vínculo sai no "x" | Um lugar só para o que liga a tarefa a outra coisa. A antiga seção Dependências entra aqui |
+| Tarefa relacionada vale nos 2 sentidos; "Bloqueia" grava na outra tarefa o "Bloqueada por" | Relacionar A com B mostra o vínculo nas 2. Bloquear é a mesma dependência vista do outro lado |
+| A busca não oferece a própria tarefa, o que já está ligado do mesmo jeito, nem a própria subtarefa como bloqueio | Evita vínculo repetido e a tarefa que espera a parte dela mesma |
+| Clicar no item vinculado avisa que ele abre na tela dele | O protótipo tem 1 item só |
+| "Anexar arquivos" abre o seletor do navegador; a seção Anexos mostra nome e tamanho | O ClickUp tem "Attach file" na mesma lista. O arquivo não sai do navegador |
+| Pontos é um campo de número em Detalhes, ao lado de Responsável, com o "?" "Número livre da tarefa. A equipe define o uso: esforço, valor, peso ou outra medida." | Pedido literal. O `points` existe na tarefa e o painel do develop não mostra (achado do protótipo tarefas-rapidas) |
+| As seções recolhem pela seta do cabeçalho | É o comportamento dos prints do ClickUp |
+
+- **Para o dev:**
+  - `points` (número, padrão 0) já existe em `tasks`; falta mostrar e editar no painel e na criação da subtarefa;
+  - a tarefa ganha várias checklists com nome (`checklists[]`, cada uma com `linhas[]`), vínculo com outra tarefa nos 2 sentidos, vínculo com itens de qualquer categoria e anexos; nada disso existe no modelo `tasks` lido em 11/11/2026;
+  - "Esta tarefa bloqueia X" grava a dependência em X, do mesmo jeito que "X está bloqueada por esta tarefa".
+- **Descartado:** as 4 seções sempre à vista com a frase de vazio de cada uma (rodada 2). Motivo: pedido literal, o modo do ClickUp.
+- **Ver:** https://pernalombr4.github.io/prototipos/pasta-de-apontamentos/?vista=tarefa&estado=vazio · `evidencias/rodada5-tarefa-vazia.jpg` · `evidencias/rodada5-nova-subtarefa.jpg` · `evidencias/rodada5-relacionar.jpg` · `evidencias/rodada5-tarefa-cheia.jpg` · `evidencias/rodada5-subtarefa-vazia.jpg`
+
 ## Rodada 4 · 2026-11-12
 
 - **Pedidos (literais):**

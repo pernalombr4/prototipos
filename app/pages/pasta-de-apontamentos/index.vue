@@ -27,7 +27,7 @@ import type { PastaDaBarra } from './_BarraDePastas.vue'
 import type { Citavel } from './citacao'
 import { CHAVE_CITACAO } from './citacao'
 import { textos } from './textos'
-import { cenarios, pastasDoSistema } from './mocks'
+import { cenarios, pastasDoSistema, secoesVazias } from './mocks'
 import { copia, pendente, responder } from './lista'
 import type { Aviso } from './avisos'
 import { avisos, avisosDe, marcarLidas } from './avisos'
@@ -47,7 +47,7 @@ import decisoesMd from './DECISOES.md?raw'
 
 definePageMeta({
   titulo: 'Pasta de apontamentos',
-  descricao: 'Um tipo novo de pasta do item e uma aba nova da tarefa: a lista de pontos a ajustar, com rodadas de reteste e conferência. Na tarefa rápida, checklist, subtarefas, dependências e conclusão com motivo.',
+  descricao: 'Um tipo novo de pasta do item e uma aba nova da tarefa: a lista de pontos a ajustar, com rodadas de reteste e conferência. Na tarefa rápida, no modo do ClickUp: subtarefas, checklists, relacionamentos, anexos, pontos e conclusão com motivo.',
   status: 'em-revisao',
   atualizado: '2026-11-12',
   tela: 'Tela do item e Tarefas › Rápidas',
@@ -80,16 +80,32 @@ const estadoDaTela = daQuery<EstadoDaTela>('estado', ['cheio', 'vazio', 'carrega
 /* ---------- dado em memória, um por cenário ---------- */
 /** Pasta de outro tipo criada pelo modal: fora do escopo, só aparece na barra. */
 interface PastaExtra { id: string, nome: string, icone: string }
-interface Dados { c: Cenario, vazia: Lista, extras: PastaExtra[] }
+interface Dados { c: Cenario, vazia: Lista, extras: PastaExtra[], tarefasVazias: TarefaDoItem[] }
+
+/**
+ * Estado vazio da tarefa (rodada 5): as mesmas tarefas-mãe, sem descrição,
+ * prazo, pontos, subtarefas, checklists, relacionamentos, anexos nem
+ * apontamentos. O que se acrescenta nele fica até trocar de estado.
+ */
+const tarefasVaziasDe = (ts: TarefaDoItem[]): TarefaDoItem[] => ts.filter(x => !x.mae).map(x => ({
+  tarefa: { ...copia(x.tarefa), description: null, due_date: null, points: 0, status: 'pending', completed_at: null, completed_by: null },
+  apontamentos: [],
+  rodadas: [],
+  ...secoesVazias(),
+}))
 
 function montar(id: IdCenario): Dados {
   const c = structuredClone(toRaw(cenarios[id]))
-  return { c, vazia: { apontamentos: [], rodadas: [], config: c.config, pessoas: c.pessoas }, extras: [] }
+  return { c, vazia: { apontamentos: [], rodadas: [], config: c.config, pessoas: c.pessoas }, extras: [], tarefasVazias: tarefasVaziasDe(c.tarefas) }
 }
 const dados = reactive<Record<IdCenario, Dados>>({ produto: montar('produto'), juridico: montar('juridico') })
 const d = computed(() => dados[cenarioId.value])
 const c = computed(() => d.value.c)
 const quem = computed(() => papel.value === 'conferente' ? c.value.conferente : c.value.resolvedor)
+
+/** As tarefas que a tela mostra: as do cenário, ou as vazias no estado vazio. */
+const tarefasDaTela = computed(() => estadoDaTela.value === 'vazio' ? d.value.tarefasVazias : c.value.tarefas)
+const mencoesDaTela = computed(() => estadoDaTela.value === 'vazio' ? [] : c.value.mencoes)
 
 const listaPrincipal = computed<Lista>(() => estadoDaTela.value === 'vazio'
   ? d.value.vazia
@@ -163,15 +179,14 @@ const listaDaTarefa = computed<Lista | null>(() => {
 
 /** Converter em tarefa: uma saída, não o caminho padrão. O apontamento fica e aponta para a tarefa. */
 function converter(a: Apontamento) {
-  const base = c.value.tarefas[0]!.tarefa
+  const base = (tarefasDaTela.value[0] ?? c.value.tarefas[0]!).tarefa
   const nova: TarefaDoItem = {
-    tarefa: { ...copia(base), id: 990 + c.value.tarefas.length, name: a.titulo, description: null, status: 'pending', assigned_to: a.responsaveis[0] ?? null, priority: a.prioridade },
+    tarefa: { ...copia(base), id: 990 + tarefasDaTela.value.length, name: a.titulo, description: null, status: 'pending', assigned_to: a.responsaveis[0] ?? null, priority: a.prioridade, points: 0 },
     apontamentos: [],
     rodadas: [],
-    checklist: [],
-    bloqueadaPor: [],
+    ...secoesVazias(),
   }
-  c.value.tarefas.push(nova)
+  tarefasDaTela.value.push(nova)
   responder(a, quem.value, `${t.value.apontamento.converterEmTarefa}: ${a.titulo}`)
   toast.add({
     title: t.value.toasts.convertido(a.numero),
@@ -185,13 +200,13 @@ function converter(a: Apontamento) {
 /* ---------- citação com # ---------- */
 provide(CHAVE_CITACAO, {
   citaveis: computed<Citavel[]>(() => [
-    ...c.value.tarefas.map(x => ({ chave: `tarefa-${x.tarefa.id}`, rotulo: x.tarefa.name, tipo: 'tarefa' as const, detalhe: t.value.tarefas.colunas[x.tarefa.status] })),
+    ...tarefasDaTela.value.map(x => ({ chave: `tarefa-${x.tarefa.id}`, rotulo: x.tarefa.name, tipo: 'tarefa' as const, detalhe: t.value.tarefas.colunas[x.tarefa.status] })),
     { chave: 'item', rotulo: c.value.item.reference, tipo: 'item' as const, detalhe: c.value.categoria.slug },
     ...c.value.apontamentos.map(a => ({ chave: `ap-${a.numero}`, rotulo: `${a.numero} ${a.titulo}`, tipo: 'apontamento' as const, detalhe: t.value.estados[a.estado] })),
   ]),
   registrar: (alvo, onde, quem) => { c.value.mencoes.push({ alvo, onde, quem, quando: new Date() }) },
   abrir: (chave) => {
-    const x = c.value.tarefas.find(y => `tarefa-${y.tarefa.id}` === chave)
+    const x = tarefasDaTela.value.find(y => `tarefa-${y.tarefa.id}` === chave)
     if (x) return abrirTarefa(x, 'tarefa')
     if (chave === 'item') {
       tarefaAberta.value = null
@@ -288,9 +303,15 @@ onBeforeUnmount(() => window.removeEventListener('keydown', escDaGaveta))
 /** Na visualização Tarefa rápida, o painel abre na tarefa que tem checklist e subtarefas. */
 function abrirTarefaDaVista() {
   if (vista.value !== 'tarefa') return
-  const x = c.value.tarefas.find(y => !y.mae && y.checklist.length) ?? c.value.tarefas[0]
+  const x = tarefasDaTela.value.find(y => !y.mae && y.checklists.length) ?? tarefasDaTela.value[0]
   if (x) abrirTarefa(x, 'tarefa')
 }
+/* Trocou o estado com a tarefa aberta: abre a mesma tarefa na outra lista. */
+watch(estadoDaTela, () => {
+  const id = tarefaAberta.value?.tarefa.id
+  if (id === undefined) return
+  tarefaAberta.value = tarefasDaTela.value.find(y => y.tarefa.id === id) ?? tarefasDaTela.value[0] ?? null
+})
 watch(vista, (v) => {
   tarefaAberta.value = null
   if (v === 'tarefa') nextTick(abrirTarefaDaVista)
@@ -327,9 +348,9 @@ watch(cenarioId, () => {
       <!-- Visualização Tarefa rápida: a página Tarefas › Rápidas -->
       <div v-if="vista === 'tarefa'" class="h-[calc(100dvh-4rem-3.25rem)] min-h-0 bg-default">
         <PastaTarefas
-          :key="`${cenarioId}-pagina`"
+          :key="`${cenarioId}-pagina-${estadoDaTela}`"
           :t="t"
-          :tarefas="c.tarefas"
+          :tarefas="tarefasDaTela"
           :lista="{ pessoas: c.pessoas }"
           variante="pagina"
           @abrir="abrirTarefa"
@@ -394,9 +415,9 @@ watch(cenarioId, () => {
               />
               <PastaTarefas
                 v-else-if="ativa === 'tarefas'"
-                :key="`${cenarioId}-tarefas`"
+                :key="`${cenarioId}-tarefas-${estadoDaTela}`"
                 :t="t"
-                :tarefas="c.tarefas"
+                :tarefas="tarefasDaTela"
                 :lista="{ pessoas: c.pessoas }"
                 @abrir="abrirTarefa"
               />
@@ -431,8 +452,9 @@ watch(cenarioId, () => {
       :lista="listaDaTarefa"
       :quem="quem"
       :estado-da-tela="estadoDaTela"
-      :tarefas="c.tarefas"
-      :mencoes="c.mencoes"
+      :tarefas="tarefasDaTela"
+      :mencoes="mencoesDaTela"
+      :itens="c.itensVinculaveis"
       @converter="converter"
       @abrir="trocarDeTarefa"
     />

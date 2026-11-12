@@ -27,7 +27,7 @@ import type { TarefaDoItem } from './mocks'
 import type { Lista } from './lista'
 import type { Textos } from './textos'
 import { pendente } from './lista'
-import { feitosDaChecklist } from './tarefas'
+import { feitosDaChecklist, linhasDe } from './tarefas'
 
 const props = defineProps<{ t: Textos, tarefas: TarefaDoItem[], lista: Pick<Lista, 'pessoas'>, variante?: 'pasta' | 'pagina' }>()
 const emit = defineEmits<{ abrir: [t: TarefaDoItem] }>()
@@ -57,6 +57,7 @@ const porId = (id: number) => props.tarefas.find(x => x.tarefa.id === id)
 const filhas = (x: TarefaDoItem) => props.tarefas.filter(y => y.mae === x.tarefa.id)
 const concluidas = (xs: TarefaDoItem[]) => xs.filter(y => y.tarefa.status === 'completed').length
 const feitos = (x: TarefaDoItem) => feitosDaChecklist(props.tarefas, x)
+const totalDaChecklist = (x: TarefaDoItem) => linhasDe(x).length
 const bloqueios = (x: TarefaDoItem) => x.bloqueadaPor.map(porId).filter((y): y is TarefaDoItem => !!y && y.tarefa.status !== 'completed')
 const iconeDoStatus: Record<string, string> = { pending: 'i-lucide-circle', working: 'i-lucide-circle-dashed', blocked: 'i-lucide-circle-pause', completed: 'i-lucide-circle-check' }
 const corDoStatus: Record<string, string> = { pending: 'text-info', working: 'text-warning', blocked: 'text-error', completed: 'text-success' }
@@ -138,14 +139,14 @@ const corDoStatus: Record<string, string> = { pending: 'text-info', working: 'te
             <p class="line-clamp-2 text-xs text-muted">{{ x.tarefa.description || t.tarefas.semDescricao }}</p>
 
             <!-- Proposta: as contagens, em texto -->
-            <div v-if="x.checklist.length || filhas(x).length || x.apontamentos.length || bloqueios(x).length" class="flex flex-col gap-1 text-xs">
+            <div v-if="totalDaChecklist(x) || filhas(x).length || x.apontamentos.length || bloqueios(x).length" class="flex flex-col gap-1 text-xs">
               <p v-if="bloqueios(x).length" class="flex items-center gap-1.5 text-error">
                 <UIcon name="i-lucide-lock" class="size-3.5 shrink-0" />
                 <span class="truncate">{{ t.tarefaRapida.cartao.bloqueadaPor(bloqueios(x)[0]!.tarefa.name) }}</span>
               </p>
-              <p v-if="x.checklist.length" class="flex items-center gap-1.5 text-toned">
-                <UIcon name="i-lucide-square-check" class="size-3.5 shrink-0" :class="feitos(x) === x.checklist.length ? 'text-success' : 'text-muted'" />
-                {{ t.tarefaRapida.cartao.checklist(feitos(x), x.checklist.length) }}
+              <p v-if="totalDaChecklist(x)" class="flex items-center gap-1.5 text-toned">
+                <UIcon name="i-lucide-square-check" class="size-3.5 shrink-0" :class="feitos(x) === totalDaChecklist(x) ? 'text-success' : 'text-muted'" />
+                {{ t.tarefaRapida.cartao.checklist(feitos(x), totalDaChecklist(x)) }}
               </p>
               <p v-if="x.apontamentos.length" class="flex items-center gap-1.5 text-toned">
                 <UIcon name="i-lucide-list-checks" class="size-3.5 shrink-0 text-primary" />
