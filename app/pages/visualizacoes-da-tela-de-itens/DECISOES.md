@@ -260,7 +260,7 @@
   - no épico da barra, o P004 (quantas visualizações os clientes têm): não muda o que o dev constrói.
 - **Ficou:** o que é, onde vale, o link do protótipo e dos textos, fora do escopo, as partes, as RN, o padrão de qualidade, o glossário e o que está em aberto. As tarefas não mudaram.
 
-## Rodada 8 · 2026-11-11 (aguarda validação)
+## Rodada 8 · 2026-11-11 (aprovada em 2026-11-12)
 - **Pedido (literal):**
   - "precisamos permitir que o user crie filtros rapidos pra ficar como botoes na tela nas visualizaçoes personalizadas. fez sentrido a demanda? isso ja acontece no prototipo? se nao, adicione e aguarde minha validaçao."
   - "tanto pra novas visualizaçoes de itens quanto pra novas visualizaçoes de tarefas o user deve ser capaz de fazer isso, beleza? criar os proprios filtros rapidos, no caso, criar um filtro e defini-lo como filtro rapido."
