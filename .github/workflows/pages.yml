@@ -26,7 +26,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # Sempre a ponta da main, nunca o commit que disparou a execução: uma execução atrasada
+      # (refeita à mão, ou presa na fila num incidente do GitHub e solta depois) publica o site
+      # atual, e não um site velho por cima do novo. A rede de segurança é o conferir-publicacao.yml.
       - uses: actions/checkout@v7
+        with:
+          ref: main
 
       # Sem `version:` de propósito — a versão vem do campo `packageManager`
       # do package.json. Declarar nos dois lugares faz a action falhar.
