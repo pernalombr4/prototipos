@@ -76,6 +76,12 @@ const abertura = daQuery<Abertura>('abertura', ['tela', 'painel'], 'tela')
 const cenarioId = daQuery<IdCenario>('cenario', ['produto', 'juridico'], 'produto')
 const papel = daQuery<Papel>('papel', ['conferente', 'resolvedor'], 'conferente')
 const estadoDaTela = daQuery<EstadoDaTela>('estado', ['cheio', 'vazio', 'carregando', 'semPermissao'], 'cheio')
+/* Rodada 6: o formulário da tarefa, atual ou a interface nova. */
+const formulario = daQuery<'atual' | 'nova'>('formulario', ['atual', 'nova'], 'atual')
+const interfaceNova = computed({
+  get: () => formulario.value === 'nova',
+  set: (v: boolean) => { formulario.value = v ? 'nova' : 'atual' },
+})
 
 /* ---------- dado em memória, um por cenário ---------- */
 /** Pasta de outro tipo criada pelo modal: fora do escopo, só aparece na barra. */
@@ -328,7 +334,7 @@ const opcoesDePapel = computed(() => (['conferente', 'resolvedor'] as const).map
 /* Ao trocar de cenário, a pasta e o detalhe abertos ficam para trás. */
 watch(cenarioId, () => {
   tarefaAberta.value = null
-  router.replace({ query: { vista: vista.value, abertura: abertura.value, cenario: cenarioId.value, papel: papel.value, estado: estadoDaTela.value } })
+  router.replace({ query: { vista: vista.value, abertura: abertura.value, cenario: cenarioId.value, papel: papel.value, estado: estadoDaTela.value, formulario: formulario.value } })
   nextTick(abrirTarefaDaVista)
 })
 </script>
@@ -447,6 +453,7 @@ watch(cenarioId, () => {
       v-if="tarefaAberta && listaDaTarefa"
       v-model:open="painelAberto"
       v-model:aba="abaDaTarefa"
+      v-model:interface-nova="interfaceNova"
       :t="t"
       :x="tarefaAberta"
       :lista="listaDaTarefa"
@@ -455,6 +462,7 @@ watch(cenarioId, () => {
       :tarefas="tarefasDaTela"
       :mencoes="mencoesDaTela"
       :itens="c.itensVinculaveis"
+      :etiquetas="c.etiquetas"
       @converter="converter"
       @abrir="trocarDeTarefa"
     />
@@ -493,6 +501,20 @@ watch(cenarioId, () => {
             />
           </UFieldGroup>
         </template>
+
+        <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
+        <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.tarefaNova.andaime.interface }}</span>
+        <UFieldGroup size="xs">
+          <UButton
+            v-for="f in (['atual', 'nova'] as const)"
+            :key="f"
+            :label="t.tarefaNova.andaime[f]"
+            :icon="f === 'atual' ? 'i-lucide-rows-3' : 'i-lucide-sparkles'"
+            :color="formulario === f ? 'primary' : 'neutral'"
+            :variant="formulario === f ? 'solid' : 'outline'"
+            @click="formulario = f"
+          />
+        </UFieldGroup>
 
         <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.cenario }}</span>

@@ -22,12 +22,21 @@
  * A proposta (rodada 5): o campo Pontos em Detalhes. O `points` existe na
  * tarefa (SDK, padrão 0) e o painel do develop não mostra. As seções abaixo de
  * Detalhes seguem o modo do ClickUp (`_SecoesDaTarefa.vue`).
+ *
+ * A proposta (rodada 6): em Detalhes, o Prazo final ao lado da Data limite (os
+ * 2 abrem o mesmo seletor de datas), os Colaboradores ao lado do Responsável e
+ * o Registrar tempo ao lado dos Pontos. "Interface nova", na barra de andaime
+ * (grupo Formulário), troca a aba Tarefa pela interface nova
+ * (`_TarefaInterfaceNova.vue`) e alarga o painel. O resto do painel não muda.
  */
-import type { Apontamento, ItemVinculavel, Mencao, TarefaDoItem } from './mocks'
+import type { Apontamento, Etiqueta, ItemVinculavel, Mencao, TarefaDoItem } from './mocks'
 import type { Lista } from './lista'
 import type { Textos } from './textos'
 import PastaDeApontamentos from './_PastaDeApontamentos.vue'
+import RegistroDeTempo from './_RegistroDeTempo.vue'
 import SecoesDaTarefa from './_SecoesDaTarefa.vue'
+import SeletorDePrazos from './_SeletorDePrazos.vue'
+import TarefaInterfaceNova from './_TarefaInterfaceNova.vue'
 import { pendente } from './lista'
 import { concluida, concluir, filhas, porId, reabrirTarefa } from './tarefas'
 
@@ -40,9 +49,28 @@ const props = defineProps<{
   tarefas: TarefaDoItem[]
   mencoes: Mencao[]
   itens: ItemVinculavel[]
+  etiquetas: Etiqueta[]
 }>()
 const aberto = defineModel<boolean>('open', { required: true })
 const aba = defineModel<string>('aba', { default: 'tarefa' })
+/** Andaime da rodada 6: a interface nova da aba Tarefa. */
+const interfaceNova = defineModel<boolean>('interfaceNova', { default: false })
+const tn = computed(() => props.t.tarefaNova)
+
+/* ---------- proposta (rodada 6): prazo final e colaboradores no formulário atual ---------- */
+const datasAbertas = reactive({ limite: false, final: false })
+const focoLimite = ref<'limite' | 'final'>('limite')
+const focoFinal = ref<'limite' | 'final'>('final')
+watch(() => datasAbertas.limite, (a) => { if (a) focoLimite.value = 'limite' })
+watch(() => datasAbertas.final, (a) => { if (a) focoFinal.value = 'final' })
+const colaboradores = computed({
+  get: () => props.x.tarefa.collaborators ?? [],
+  set: v => { props.x.tarefa.collaborators = v },
+})
+const opcoesDeColaborador = computed(() => props.lista.pessoas
+  .filter(p => p.id !== props.x.tarefa.assigned_to)
+  .map(p => ({ label: p.nome, value: p.id, avatar: { text: p.iniciais, alt: p.nome } })))
+const listaDeColaboradores = computed(() => colaboradores.value.map(id => props.lista.pessoas.find(p => p.id === id)).filter(p => !!p))
 const emit = defineEmits<{ converter: [a: Apontamento], abrir: [x: TarefaDoItem] }>()
 
 const toast = useToast()
@@ -111,7 +139,7 @@ const linhaDaConclusao = computed(() => {
     v-model:open="aberto"
     side="right"
     :title="x.tarefa.name"
-    :ui="{ content: 'max-w-[42rem] w-full', header: 'hidden', body: 'p-0 sm:p-0 flex min-h-0', footer: 'justify-end gap-2 border-t border-default' }"
+    :ui="{ content: interfaceNova && aba === 'tarefa' ? 'max-w-[50rem] w-full transition-[max-width] duration-200' : 'max-w-[42rem] w-full transition-[max-width] duration-200', header: 'hidden', body: 'p-0 sm:p-0 flex min-h-0', footer: 'justify-end gap-2 border-t border-default' }"
   >
     <template #body>
       <!-- Trilho de ícones, copiado -->
@@ -134,7 +162,7 @@ const linhaDaConclusao = computed(() => {
           </template>
         </UTabs>
 
-        <header class="flex items-start gap-3 px-4 pt-3">
+        <header v-if="!(interfaceNova && aba === 'tarefa')" class="flex items-start gap-3 px-4 pt-3">
           <div class="min-w-0 flex-1">
             <!-- Proposta: a trilha da subtarefa -->
             <nav v-if="mae" class="mb-1 flex items-center gap-1 text-xs text-muted" :aria-label="tr.subtarefas.parteDe">
@@ -166,7 +194,8 @@ const linhaDaConclusao = computed(() => {
           <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="sm" :aria-label="t.painelTarefa.fechar" @click="aberto = false" />
         </header>
 
-        <div class="min-h-0 flex-1">
+        <div class="relative min-h-0 flex-1">
+          <UButton v-if="interfaceNova && aba === 'tarefa'" icon="i-lucide-x" color="neutral" variant="ghost" size="sm" class="absolute right-3 top-2.5 z-20" :aria-label="t.painelTarefa.fechar" @click="aberto = false" />
           <Transition mode="out-in" enter-active-class="transition duration-150 ease-out" enter-from-class="opacity-0 translate-y-1" leave-active-class="transition duration-75" leave-to-class="opacity-0">
             <!-- A proposta -->
             <PastaDeApontamentos
@@ -182,6 +211,25 @@ const linhaDaConclusao = computed(() => {
               @converter="(a: Apontamento) => emit('converter', a)"
             />
 
+            <!-- A proposta (rodada 6): a interface nova -->
+            <TarefaInterfaceNova
+              v-else-if="aba === 'tarefa' && interfaceNova"
+              key="tarefa-nova"
+              :t="t"
+              :x="x"
+              :tarefas="tarefas"
+              :pessoas="lista.pessoas"
+              :mencoes="mencoes"
+              :itens="itens"
+              :etiquetas="etiquetas"
+              :quem="quem"
+              :estado-da-tela="estadoDaTela"
+              :somente-leitura="somenteLeitura"
+              @abrir="(y: TarefaDoItem) => emit('abrir', y)"
+              @concluir="abrirConclusao"
+              @reabrir="reabrirTarefa(x)"
+            />
+
             <!-- Tarefa, copiada -->
             <div v-else-if="aba === 'tarefa'" key="tarefa" class="h-full overflow-y-auto px-4 py-4">
               <p class="mb-3 flex items-center gap-2 text-sm font-medium text-highlighted">
@@ -189,17 +237,54 @@ const linhaDaConclusao = computed(() => {
                 {{ t.painelTarefa.detalhes }}
               </p>
               <div class="flex flex-col gap-4 rounded-lg border border-default p-4">
+                <UFormField :label="t.painelTarefa.nome"><UInput :model-value="x.tarefa.name" class="w-full" /></UFormField>
+                <!-- Proposta (rodada 6): o Prazo final ao lado da Data limite, com o mesmo seletor -->
                 <div class="grid gap-3 sm:grid-cols-2">
-                  <UFormField :label="t.painelTarefa.nome"><UInput :model-value="x.tarefa.name" class="w-full" /></UFormField>
-                  <UFormField :label="t.painelTarefa.dataLimite"><UInput :model-value="x.tarefa.due_date ? t.dataHora(x.tarefa.due_date) : ''" trailing-icon="i-lucide-calendar" class="w-full" /></UFormField>
+                  <UFormField :label="t.painelTarefa.dataLimite">
+                    <UPopover v-model:open="datasAbertas.limite" :content="{ align: 'start', side: 'bottom', sideOffset: 6, collisionPadding: 12 }">
+                      <UInput :model-value="x.tarefa.due_date ? t.dataHora(new Date(x.tarefa.due_date)) : ''" readonly trailing-icon="i-lucide-calendar" class="w-full" :ui="{ base: 'cursor-pointer' }" />
+                      <template #content>
+                        <SeletorDePrazos v-model:foco="focoLimite" :t="t" :x="x" :somente-leitura="somenteLeitura" />
+                      </template>
+                    </UPopover>
+                  </UFormField>
+                  <UFormField :label="tn.campos.prazoFinal">
+                    <UPopover v-model:open="datasAbertas.final" :content="{ align: 'start', side: 'bottom', sideOffset: 6, collisionPadding: 12 }">
+                      <UInput :model-value="x.prazoFinal ? t.dataHora(new Date(x.prazoFinal)) : ''" readonly :placeholder="tn.prazos.semData" trailing-icon="i-lucide-flag" class="w-full" :ui="{ base: 'cursor-pointer' }" />
+                      <template #content>
+                        <SeletorDePrazos v-model:foco="focoFinal" :t="t" :x="x" :somente-leitura="somenteLeitura" />
+                      </template>
+                    </UPopover>
+                  </UFormField>
                 </div>
                 <UFormField :label="t.painelTarefa.descricao">
                   <div class="min-h-24 rounded-md border border-accented px-3 py-2 text-sm text-default">{{ x.tarefa.description || t.tarefas.semDescricao }}</div>
                 </UFormField>
-                <div class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
+                <div class="grid gap-3 sm:grid-cols-2">
                   <UFormField :label="t.painelTarefa.responsavel">
                     <UInput :model-value="pessoa?.nome" :avatar="pessoa ? { text: pessoa.iniciais, alt: pessoa.nome } : undefined" trailing-icon="i-lucide-chevron-down" class="w-full" />
                   </UFormField>
+                  <!-- Proposta (rodada 6): Colaboradores, vários, ao lado do Responsável (1 só) -->
+                  <UFormField :label="tn.campos.colaboradores">
+                    <template #hint>
+                      <UTooltip :text="tn.pessoas.ajudaColaboradores" :content="{ side: 'top' }">
+                        <UIcon name="i-lucide-circle-help" class="size-3.5 text-dimmed" :aria-label="tn.pessoas.ajudaColaboradores" />
+                      </UTooltip>
+                    </template>
+                    <USelectMenu v-model="colaboradores" :items="opcoesDeColaborador" value-key="value" multiple :search-input="{ placeholder: tn.pessoas.buscar }" :disabled="somenteLeitura" class="w-full" :ui="{ content: 'min-w-64' }">
+                      <template #default>
+                        <span v-if="!listaDeColaboradores.length" class="text-dimmed">{{ tn.vazio }}</span>
+                        <span v-else class="flex min-w-0 items-center gap-1.5">
+                          <UAvatarGroup size="2xs" :max="3">
+                            <UAvatar v-for="p in listaDeColaboradores" :key="p!.id" :text="p!.iniciais" :alt="p!.nome" />
+                          </UAvatarGroup>
+                          <span class="truncate">{{ listaDeColaboradores.map(p => p!.nome.split(' ')[0]).join(', ') }}</span>
+                        </span>
+                      </template>
+                    </USelectMenu>
+                  </UFormField>
+                </div>
+                <div class="grid gap-3 sm:grid-cols-2">
                   <!-- Proposta (rodada 5): o campo Pontos -->
                   <UFormField :label="tr.pontos.rotulo">
                     <template #hint>
@@ -208,6 +293,10 @@ const linhaDaConclusao = computed(() => {
                       </UTooltip>
                     </template>
                     <UInputNumber v-model="x.tarefa.points" :min="0" :disabled="somenteLeitura" placeholder="0" class="w-full" />
+                  </UFormField>
+                  <!-- Proposta (rodada 6): Registrar tempo -->
+                  <UFormField :label="tn.campos.tempo">
+                    <RegistroDeTempo :t="t" :x="x" :tarefas="tarefas" :pessoas="lista.pessoas" :quem="quem" :somente-leitura="somenteLeitura" modo="atual" />
                   </UFormField>
                 </div>
                 <UFormField :label="t.painelTarefa.prioridade">

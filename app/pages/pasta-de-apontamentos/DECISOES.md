@@ -4,6 +4,55 @@
 
 **Rodada 2, em uma linha:** as rodadas ganham vista própria e o cabeçalho perde o gráfico; a tarefa rápida ganha checklist, subtarefas de 1 nível, dependências e conclusão com motivo; o item ganha o contador da lista de tarefas; a citação com # liga apontamento, tarefa e item.
 
+## Rodada 6 · 2026-11-12
+
+- **Pedidos (literais):**
+  - "alem de data limite, teremos outro prazo na tarefa que é "prazo final". pode colocar aí tambem"
+  - "olhe os campos do topo da task do clickup. pode copiar o que fizer sentido (nós só não podemos ter "assignees" no plural por questao de codigo. temos responsavel e colaboradores. esse campo deve aparecer ali também."
+  - "fique a vontade pra mudar o front do formulario de tarefa [...] a parte do front prototipe num botao especifico ali, do tipo "interface nova", e aí aparece esse front novo, pra nao perder esse antigo que tem menos mudança"
+  - "inclusive o track time PRECISAMOS ter no enspace. e pode copiar 100% o front do clickup mesmo [...] a funcionalidade deve ser bem identica mesmo, do campo em si na interface"
+  - "o jeito que o clickup organiza links é MUITO legal tambem. e é diferente de como organizam arquivos [...] pensando o form nesse formato atual, adaptando, e pensando nele no formato novo também"
+  - "o botao de interface nova tem que estar na barra de controle do prototipo, nao dentro da sidebar"
+- **Referência:** os 3 prints do ClickUp que a redatora mandou e a tarefa aberta no ClickUp: a grade de campos do topo (Status, Assignees, Dates, Time Estimate, Track Time, Tags, Priority, Relationships), o seletor de datas com início e entrega, a lista de atalhos e o calendário, o painel do Track Time e a seção de relacionamentos em abas.
+- **Fronteira:**
+  - muda: a aba Tarefa do painel da tarefa rápida, nos 2 formulários; o andaime ganha o grupo "Formulário: Atual | Interface nova";
+  - não muda: o trilho, as abas e o rodapé do painel, o quadro de Tarefas Rápidas, a aba Apontamentos, o "Concluir tarefa" com motivo e as seções Subtarefas, Checklists e Anexos da rodada 5.
+
+| Decisão | Motivo |
+|---|---|
+| "Formulário: Atual \| Interface nova" fica na barra de andaime, nunca no painel | Pedido literal. O painel mostra só o produto; a troca é do protótipo |
+| A interface atual ganha só o que foi pedido: Data limite e Prazo final lado a lado, Colaboradores ao lado de Responsável, Registrar tempo ao lado de Pontos e a seção Relacionamentos em abas | É a versão "com menos mudança": a mesma caixa de Detalhes, os mesmos campos com borda |
+| A interface nova copia a tarefa do ClickUp: título grande sem caixa, a grade de 2 colunas com rótulo e ícone à esquerda e o valor clicável à direita, a descrição sem borda e as seções separadas por linha | Pedido literal. O valor só ganha fundo no hover, e cada campo abre o seletor dele no lugar |
+| Responsável é um só; Colaboradores é seleção múltipla, com a ajuda "Colaboradores acompanham a tarefa e recebem os avisos dela" | Pedido literal: o ENSPACE não tem assignees no plural. Quem vira responsável sai dos colaboradores |
+| Datas: Data limite e Prazo final no mesmo seletor, como o "Start date / Due date" do ClickUp: os 2 campos no topo, os atalhos à esquerda (Hoje, Amanhã, Este fim de semana, Próxima semana, Próximo fim de semana, 2 semanas, 4 semanas), o calendário à direita e a hora embaixo | Pedido literal, com o comportamento do ClickUp. Clicar no campo escolhe qual data o calendário grava |
+| O prazo final é igual ou posterior à data limite: os dias antes dela ficam desligados quando o foco é o prazo final, e a data limite depois do prazo final mostra o aviso em vermelho e não grava | Regra de negócio RN004 do protótipo prazo-final |
+| A tarefa atrasa pela data limite; o prazo final é o limite sem volta | Mesma regra do protótipo prazo-final. A ajuda de cada campo diz isso no seletor |
+| Estimativa de tempo aceita "3h 20m", "1,5h", "90m" e "2d" (8 horas por dia); número sozinho vale horas | É a entrada do Time Estimate do ClickUp |
+| Registrar tempo copia o Track Time: o círculo liga e para o cronômetro sem abrir nada; o rótulo mostra "4h 45m de 6h" e fica laranja quando passa da estimativa | Pedido literal: o campo idêntico ao do ClickUp |
+| O painel do Registrar tempo tem o total de todas as tarefas e "Só nesta tarefa", "Registrar para" (a pessoa), o tempo digitado ou o cronômetro, a data, a nota e Salvar; abaixo, os registros agrupados por pessoa, que expandem e saem com Desfazer | É o painel do ClickUp, campo por campo. O total de todas as tarefas soma as subtarefas |
+| Parar o cronômetro grava o registro, com no mínimo 1 minuto | Um cronômetro ligado por segundos não some sem registro |
+| Etiquetas: seleção múltipla com busca, e o texto que não existe vira "Criar "<texto>"" | É o Tags do ClickUp. A etiqueta criada entra na lista do workspace |
+| Status: o seletor agrupa Não iniciado, Ativo e Fechado; a seta ao lado avança para o próximo e o visto conclui | É o Status do ClickUp. Concluir passa pelo "Concluir tarefa" com motivo, como antes |
+| "Ocultar campos vazios" esconde os campos sem valor e vira "Mostrar N campos vazios" | É o comportamento do ClickUp; a tarefa nova fica curta |
+| Ao rolar, o título e o status sobem para uma barra fixa no topo do painel | Com a descrição longa, o nome da tarefa e o status continuam à vista |
+| Relacionamentos em abas (Relacionadas, Bloqueada por, Bloqueia), só com as que têm conteúdo; em cada aba, um grupo por tipo (Tarefas, e um por categoria de item) numa tabela curta com nome, data limite ou referência e responsável | Pedido literal: o ClickUp organiza os vínculos assim, separado dos anexos. Na tarefa bloqueada, a aba mostra o aviso de quem ela espera |
+| O "+" da seção e o rodapé de cada tabela ("Adicionar tarefa", "Vincular a um item") abrem o mesmo menu de Relacionar da rodada 5 | Uma porta só para criar vínculo |
+| Na interface nova, o que a tarefa ainda não tem vira linha de ação no fim (Adicionar subtarefa, Relacionar, Criar checklist, Anexar arquivo) | É o modo do ClickUp, no lugar da fileira de botões da interface atual |
+| Painel de 50rem na interface nova (42rem na atual) | A grade de 2 colunas precisa do espaço; com 42rem os valores quebram linha |
+
+- **Campos inventados (o modelo `tasks` lido em 11/11/2026 não tem):**
+  - `final_due_date`, o prazo final (nome de trabalho);
+  - `time_estimate`, em minutos;
+  - `time_entries[]`, cada um com pessoa, início, minutos e nota;
+  - `timer`, o cronômetro ligado (pessoa e início);
+  - etiquetas com nome e cor no workspace (o `tag_ids` existe; a lista de etiquetas e a criação no seletor, não).
+- **Para o dev:**
+  - `assigned_to` (1 pessoa), `collaborators[]`, `tag_ids[]`, `priority`, `points` e `due_date` já existem em `tasks`;
+  - o prazo final segue o protótipo prazo-final, que propõe chamar a data limite de "Vencimento" (RF018); aqui o rótulo continua "Data limite", como a redatora escreveu no pedido;
+  - o cronômetro é por pessoa: ligar numa tarefa com outro ligado deve parar o outro, como no ClickUp (o protótipo tem 1 pessoa ativa e não mostra o caso).
+- **Não deu:** o calendário do Nuxt UI (`UCalendar`) pede datas do pacote `@internationalized/date`, que o app não importa. O seletor pega a 1ª data que o próprio calendário entrega e monta as outras a partir dela. Funciona, mas o produto deve instalar o pacote.
+- **Ver:** https://pernalombr4.github.io/prototipos/pasta-de-apontamentos/?vista=tarefa&formulario=nova · `evidencias/rodada6-interface-nova.jpg` · `evidencias/rodada6-datas.jpg` · `evidencias/rodada6-registrar-tempo.jpg` · `evidencias/rodada6-relacionamentos.jpg` · `evidencias/rodada6-interface-atual.jpg`
+
 ## Rodada 5 · 2026-11-12
 
 - **Pedidos (literais):**

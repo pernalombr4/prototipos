@@ -12,6 +12,7 @@
  */
 import type { Idioma } from '~/composables/useIdioma'
 import { fluxoEn, fluxoEs, fluxoPtBR, tarefaRapidaEn, tarefaRapidaEs, tarefaRapidaPtBR } from './textosDeTarefaERodadas'
+import { tarefaNovaEn, tarefaNovaEs, tarefaNovaPtBR } from './textosDaTarefaNova'
 
 const plural = (n: number, um: string, varios: string) => `${n} ${n === 1 ? um : varios}`
 
@@ -351,6 +352,7 @@ const ptBR = {
   },
   fluxo: fluxoPtBR,
   tarefaRapida: tarefaRapidaPtBR,
+  tarefaNova: tarefaNovaPtBR,
   data: (d: Date) => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
   dataHora: (d: Date) => d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }),
   dataLonga: (d: Date) => d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }),
@@ -694,6 +696,7 @@ const en: Textos = {
   },
   fluxo: fluxoEn,
   tarefaRapida: tarefaRapidaEn,
+  tarefaNova: tarefaNovaEn,
   data: (d: Date) => d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' }),
   dataHora: (d: Date) => d.toLocaleString('en-US', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
   dataLonga: (d: Date) => d.toLocaleString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }),
@@ -1035,6 +1038,7 @@ const es: Textos = {
   },
   fluxo: fluxoEs,
   tarefaRapida: tarefaRapidaEs,
+  tarefaNova: tarefaNovaEs,
   data: (d: Date) => d.toLocaleDateString('es', { day: '2-digit', month: '2-digit' }),
   dataHora: (d: Date) => d.toLocaleString('es', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }),
   dataLonga: (d: Date) => d.toLocaleString('es', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }),

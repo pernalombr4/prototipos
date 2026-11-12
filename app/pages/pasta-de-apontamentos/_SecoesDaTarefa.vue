@@ -19,6 +19,14 @@
  *   tarefa bloqueia..." e "Esta tarefa está bloqueada por...". Tudo cai na
  *   seção Relacionamentos;
  * - Anexos: nome e tamanho; o arquivo não sai do navegador.
+ *
+ * Rodada 6:
+ * - Relacionamentos no modo do ClickUp: abas Relacionadas, Bloqueada por e
+ *   Bloqueia, com a contagem; dentro de cada aba, um grupo por tipo (Tarefas e
+ *   cada categoria de item), com uma tabela curta e "Adicionar" no pé. Vale
+ *   nas 2 interfaces;
+ * - `nova`: a interface nova. As seções perdem a caixa e as ações viram a
+ *   lista de linhas do ClickUp, no fim, só com o que ainda não tem seção.
  */
 import type { CommandPaletteGroup, DropdownMenuItem } from '@nuxt/ui'
 import type { Task } from '@be-enlighten/enspace-sdk-schemas'
@@ -36,11 +44,16 @@ const props = defineProps<{
   itens: ItemVinculavel[]
   quem: number
   somenteLeitura?: boolean
+  /** A interface nova (rodada 6). */
+  nova?: boolean
 }>()
 const emit = defineEmits<{ abrir: [x: TarefaDoItem] }>()
 
 const toast = useToast()
 const tr = computed(() => props.t.tarefaRapida)
+const tn = computed(() => props.t.tarefaNova)
+/** A caixa de cada seção: com borda na interface atual, solta na nova. */
+const caixa = computed(() => props.nova ? 'border-t border-default pt-4' : 'rounded-lg border border-default p-4')
 const pessoa = (id?: number | null) => props.pessoas.find(p => p.id === id)
 const iconeDoStatus: Record<string, string> = { pending: 'i-lucide-circle', working: 'i-lucide-circle-dashed', blocked: 'i-lucide-circle-pause', completed: 'i-lucide-circle-check' }
 const corDoStatus: Record<string, string> = { pending: 'text-info', working: 'text-warning', blocked: 'text-error', completed: 'text-success' }
@@ -267,12 +280,16 @@ function ligar(modo: Modo, y: TarefaDoItem) {
   else if (modo === 'bloqueia') y.bloqueadaPor.push(x.tarefa.id)
   else x.bloqueadaPor.push(y.tarefa.id)
   relacionarAberto.value = false
+  relacionarNaSecao.value = false
+  abaEscolhida.value = modo === 'tarefa' ? 'relacionadas' : modo
   expandir('relacoes')
   toast.add({ title: modo === 'tarefa' ? tr.value.toasts.relacionada(y.tarefa.name) : tr.value.toasts.bloqueio(y.tarefa.name), icon: modo === 'tarefa' ? 'i-lucide-link-2' : 'i-lucide-lock', color: 'success', duration: 2500 })
 }
 function vincularItem(i: ItemVinculavel) {
   props.x.itens.push(i.reference)
   relacionarAberto.value = false
+  relacionarNaSecao.value = false
+  abaEscolhida.value = 'relacionadas'
   expandir('relacoes')
   toast.add({ title: tr.value.toasts.itemVinculado(i.nome), icon: 'i-lucide-file-text', color: 'success', duration: 2500 })
 }
@@ -313,6 +330,45 @@ const gruposDeRelacao = computed<CommandPaletteGroup[]>(() => [
     ],
   },
 ])
+/* As abas de Relacionamentos, como no ClickUp. Aparece a aba que tem conteúdo. */
+type AbaDeRelacao = 'relacionadas' | 'bloqueadaPor' | 'bloqueia'
+const contagens = computed<Record<AbaDeRelacao, number>>(() => ({
+  relacionadas: relacionadas.value.length + itensVinculados.value.length,
+  bloqueadaPor: bloqueadaPor.value.length,
+  bloqueia: bloqueadas.value.length,
+}))
+const abaEscolhida = ref<AbaDeRelacao | null>(null)
+const abaDeRelacao = computed<AbaDeRelacao>({
+  get: () => {
+    const a = abaEscolhida.value
+    if (a && contagens.value[a]) return a
+    return (['bloqueadaPor', 'relacionadas', 'bloqueia'] as const).find(k => contagens.value[k]) ?? 'relacionadas'
+  },
+  set: (v) => { abaEscolhida.value = v },
+})
+const abasDeRelacao = computed(() => (['relacionadas', 'bloqueadaPor', 'bloqueia'] as const)
+  .filter(k => contagens.value[k])
+  .map(k => ({ value: k, label: tn.value.relacoes.abas[k]!, badge: contagens.value[k] })))
+/** Os grupos da aba: as tarefas, e os itens por categoria. */
+const gruposDaAba = computed(() => {
+  const a = abaDeRelacao.value
+  const tarefasDaAba = a === 'relacionadas' ? relacionadas.value : a === 'bloqueadaPor' ? bloqueadaPor.value : bloqueadas.value
+  const grupos: { id: string, rotulo: string, icone: string, tarefas?: TarefaDoItem[], itens?: ItemVinculavel[] }[] = []
+  if (tarefasDaAba.length) grupos.push({ id: 'tarefas', rotulo: tn.value.relacoes.tarefas, icone: 'i-lucide-clipboard-check', tarefas: tarefasDaAba })
+  if (a === 'relacionadas') {
+    const porCategoria = new Map<string, ItemVinculavel[]>()
+    for (const i of itensVinculados.value) porCategoria.set(i.categoria, [...(porCategoria.get(i.categoria) ?? []), i])
+    for (const [cat, itens] of porCategoria) grupos.push({ id: `cat-${cat}`, rotulo: cat, icone: 'i-lucide-file-text', itens })
+  }
+  return grupos
+})
+function removerDaAba(y: TarefaDoItem) {
+  if (abaDeRelacao.value === 'relacionadas') desrelacionar(props.tarefas, props.x, y)
+  else if (abaDeRelacao.value === 'bloqueadaPor') removerBloqueio(y.tarefa.id)
+  else removerBloqueada(y)
+}
+const relacionarNaSecao = ref(false)
+
 const removerBloqueio = (id: number) => props.x.bloqueadaPor.splice(props.x.bloqueadaPor.indexOf(id), 1)
 const removerBloqueada = (y: TarefaDoItem) => y.bloqueadaPor.splice(y.bloqueadaPor.indexOf(props.x.tarefa.id), 1)
 const removerItem = (r: string) => props.x.itens.splice(props.x.itens.indexOf(r), 1)
@@ -344,6 +400,13 @@ const acoes = computed(() => [
   { id: 'checklist', label: tr.value.acoes.checklist, icon: 'i-lucide-list-checks', agir: criarChecklist },
   { id: 'anexar', label: tr.value.acoes.anexar, icon: 'i-lucide-paperclip', agir: () => arquivo.value?.click() },
 ])
+/** Na interface nova, a ação some quando a seção dela já existe, como no ClickUp. */
+const acoesDaNova = computed(() => acoes.value.filter(a =>
+  a.id === 'subtarefa' ? !subs.value.length && !criandoSub.value
+    : a.id === 'relacionar' ? !temRelacoes.value
+      : a.id === 'checklist' ? !props.x.checklists.length
+        : !props.x.anexos.length))
+const rotuloDaNova: Record<string, 'adicionarSubtarefa' | 'relacionar' | 'criarChecklist' | 'anexar'> = { subtarefa: 'adicionarSubtarefa', relacionar: 'relacionar', checklist: 'criarChecklist', anexar: 'anexar' }
 const botaoDaAcao = (a: { label: string, icon: string }) => ({
   label: a.label,
   icon: a.icon,
@@ -362,7 +425,7 @@ const minhasMencoes = computed(() => props.mencoes.filter(m => m.alvo === `taref
   <div class="flex flex-col gap-4">
     <!-- AÇÕES: a lista do estado vazio, ou a fileira de botões -->
     <section
-      v-if="!somenteLeitura"
+      v-if="!somenteLeitura && !nova"
       :aria-label="tr.acoes.rotulo"
       :class="vazia ? 'rounded-lg border border-dashed border-accented p-2' : ''"
     >
@@ -390,11 +453,11 @@ const minhasMencoes = computed(() => props.mencoes.filter(m => m.alvo === `taref
           <UButton v-else v-bind="botaoDaAcao(a)" @click="a.agir" />
         </template>
       </div>
-      <input ref="arquivo" type="file" multiple class="hidden" tabindex="-1" aria-hidden="true" @change="anexar">
     </section>
+    <input ref="arquivo" type="file" multiple class="hidden" tabindex="-1" aria-hidden="true" @change="anexar">
 
     <!-- SUBTAREFAS (só na tarefa-mãe: 1 nível) -->
-    <section v-if="!x.mae && (subs.length || criandoSub)" class="flex flex-col gap-2 rounded-lg border border-default p-4 [animation:entrada_.25s_ease-out_both]" :aria-label="tr.subtarefas.titulo">
+    <section v-if="!x.mae && (subs.length || criandoSub)" class="flex flex-col gap-2 [animation:entrada_.25s_ease-out_both]" :class="caixa" :aria-label="tr.subtarefas.titulo">
       <header class="flex flex-wrap items-center gap-2">
         <button type="button" class="flex items-center gap-1.5 rounded text-left focus-visible:outline-2 focus-visible:outline-primary" :aria-expanded="aberta('subtarefas')" :aria-label="aberta('subtarefas') ? tr.subtarefas.recolher : tr.subtarefas.expandir" @click="alternarSecao('subtarefas')">
           <UIcon name="i-lucide-chevron-down" class="size-4 text-muted transition-transform duration-200" :class="aberta('subtarefas') ? '' : '-rotate-90'" />
@@ -540,7 +603,7 @@ const minhasMencoes = computed(() => props.mencoes.filter(m => m.alvo === `taref
     </section>
 
     <!-- CHECKLISTS -->
-    <section v-if="x.checklists.length" class="flex flex-col gap-3 rounded-lg border border-default p-4 [animation:entrada_.25s_ease-out_both]" :aria-label="tr.checklist.titulo">
+    <section v-if="x.checklists.length" class="flex flex-col gap-3 [animation:entrada_.25s_ease-out_both]" :class="caixa" :aria-label="tr.checklist.titulo">
       <header class="flex items-center gap-2">
         <button type="button" class="flex items-center gap-1.5 rounded text-left focus-visible:outline-2 focus-visible:outline-primary" :aria-expanded="aberta('checklists')" :aria-label="aberta('checklists') ? tr.subtarefas.recolher : tr.subtarefas.expandir" @click="alternarSecao('checklists')">
           <UIcon name="i-lucide-chevron-down" class="size-4 text-muted transition-transform duration-200" :class="aberta('checklists') ? '' : '-rotate-90'" />
@@ -706,17 +769,49 @@ const minhasMencoes = computed(() => props.mencoes.filter(m => m.alvo === `taref
       </div>
     </section>
 
-    <!-- RELACIONAMENTOS: itens, tarefas e dependências -->
-    <section v-if="temRelacoes" class="flex flex-col gap-3 rounded-lg border border-default p-4 [animation:entrada_.25s_ease-out_both]" :aria-label="tr.relacoes.titulo">
+    <!-- RELACIONAMENTOS, no modo do ClickUp: abas, grupos por tipo e tabela curta -->
+    <section v-if="temRelacoes" class="flex flex-col gap-2 [animation:entrada_.25s_ease-out_both]" :class="caixa" :aria-label="tn.relacoes.titulo">
       <header class="flex items-center gap-2">
-        <button type="button" class="flex items-center gap-1.5 rounded text-left focus-visible:outline-2 focus-visible:outline-primary" :aria-expanded="aberta('relacoes')" :aria-label="aberta('relacoes') ? tr.subtarefas.recolher : tr.subtarefas.expandir" @click="alternarSecao('relacoes')">
+        <button type="button" class="flex shrink-0 items-center gap-1.5 rounded text-left focus-visible:outline-2 focus-visible:outline-primary" :aria-expanded="aberta('relacoes')" :aria-label="aberta('relacoes') ? tr.subtarefas.recolher : tr.subtarefas.expandir" @click="alternarSecao('relacoes')">
           <UIcon name="i-lucide-chevron-down" class="size-4 text-muted transition-transform duration-200" :class="aberta('relacoes') ? '' : '-rotate-90'" />
-          <h3 class="text-sm font-medium text-highlighted">{{ tr.relacoes.titulo }}</h3>
+          <h3 class="sr-only">{{ tn.relacoes.titulo }}</h3>
         </button>
+        <UTabs
+          v-model="abaDeRelacao"
+          :items="abasDeRelacao"
+          :content="false"
+          variant="link"
+          size="sm"
+          class="min-w-0 flex-1"
+          :ui="{ list: 'border-b-0 overflow-x-auto overflow-y-hidden [scrollbar-width:none]', trigger: 'shrink-0 px-2', label: 'font-medium' }"
+        >
+          <template #trailing="{ item }">
+            <span class="text-xs tabular-nums text-muted">{{ item.badge }}</span>
+          </template>
+        </UTabs>
+        <UPopover
+          v-if="!somenteLeitura"
+          v-model:open="relacionarNaSecao"
+          :content="{ align: 'end', side: 'bottom', sideOffset: 6, collisionPadding: 12 }"
+          :ui="{ content: 'w-96 max-w-[calc(100vw-2rem)]' }"
+        >
+          <UButton icon="i-lucide-plus" color="neutral" variant="ghost" size="xs" :aria-label="tn.relacoes.adicionar" :title="tn.relacoes.adicionar" />
+          <template #content>
+            <UCommandPalette :groups="gruposDeRelacao" :placeholder="tr.relacionar.titulo" :ui="{ content: 'max-h-72' }" class="h-auto">
+              <template #item-leading="{ item }">
+                <UIcon :name="item.icon" class="size-4 shrink-0" :class="item.cor" />
+              </template>
+              <template #empty>
+                <p class="px-3 py-4 text-center text-sm text-muted">{{ tr.relacionar.nenhum }}</p>
+              </template>
+            </UCommandPalette>
+          </template>
+        </UPopover>
       </header>
+
       <div v-show="aberta('relacoes')" class="flex flex-col gap-3">
         <UAlert
-          v-if="bloqueadaPor.some(y => !concluida(y))"
+          v-if="abaDeRelacao === 'bloqueadaPor' && bloqueadaPor.some(y => !concluida(y))"
           :description="tr.relacoes.aviso(bloqueadaPor.find(y => !concluida(y))!.tarefa.name)"
           icon="i-lucide-lock"
           color="error"
@@ -724,59 +819,76 @@ const minhasMencoes = computed(() => props.mencoes.filter(m => m.alvo === `taref
           orientation="horizontal"
           class="py-2"
         />
-        <dl class="grid gap-3 text-sm sm:grid-cols-[9rem_1fr]">
-          <template v-if="bloqueadaPor.length">
-            <dt class="flex items-center gap-1.5 pt-0.5 text-xs font-medium text-muted"><UIcon name="i-lucide-triangle-alert" class="size-3.5 text-warning" />{{ tr.relacoes.bloqueadaPor }}</dt>
-            <dd class="flex flex-wrap items-center gap-1.5">
-              <span v-for="y in bloqueadaPor" :key="y.tarefa.id" class="inline-flex items-center gap-1 rounded-md border border-default py-0.5 pl-1.5 pr-0.5 text-xs">
-                <UIcon :name="iconeDoStatus[y.tarefa.status]" class="size-3.5" :class="corDoStatus[y.tarefa.status]" />
-                <button type="button" class="max-w-56 truncate hover:underline" :class="concluida(y) ? 'text-muted line-through' : 'text-highlighted'" @click="emit('abrir', y)">{{ y.tarefa.name }}</button>
-                <UButton v-if="!somenteLeitura" icon="i-lucide-x" color="neutral" variant="ghost" size="xs" class="p-0.5" :aria-label="tr.relacoes.remover(y.tarefa.name)" @click="removerBloqueio(y.tarefa.id)" />
-              </span>
-            </dd>
-          </template>
-          <template v-if="bloqueadas.length">
-            <dt class="flex items-center gap-1.5 pt-0.5 text-xs font-medium text-muted"><UIcon name="i-lucide-circle-minus" class="size-3.5 text-error" />{{ tr.relacoes.bloqueia }}</dt>
-            <dd class="flex flex-wrap items-center gap-1.5">
-              <span v-for="y in bloqueadas" :key="y.tarefa.id" class="inline-flex items-center gap-1 rounded-md border border-default py-0.5 pl-1.5 pr-0.5 text-xs">
-                <UIcon :name="iconeDoStatus[y.tarefa.status]" class="size-3.5" :class="corDoStatus[y.tarefa.status]" />
-                <button type="button" class="max-w-56 truncate text-highlighted hover:underline" @click="emit('abrir', y)">{{ y.tarefa.name }}</button>
-                <UButton v-if="!somenteLeitura" icon="i-lucide-x" color="neutral" variant="ghost" size="xs" class="p-0.5" :aria-label="tr.relacoes.remover(y.tarefa.name)" @click="removerBloqueada(y)" />
-              </span>
-            </dd>
-          </template>
-          <template v-if="relacionadas.length">
-            <dt class="flex items-center gap-1.5 pt-0.5 text-xs font-medium text-muted"><UIcon name="i-lucide-clipboard-check" class="size-3.5" />{{ tr.relacoes.tarefas }}</dt>
-            <dd class="flex flex-wrap items-center gap-1.5">
-              <span v-for="y in relacionadas" :key="y.tarefa.id" class="inline-flex items-center gap-1 rounded-md border border-default py-0.5 pl-1.5 pr-0.5 text-xs">
-                <UIcon :name="iconeDoStatus[y.tarefa.status]" class="size-3.5" :class="corDoStatus[y.tarefa.status]" />
-                <button type="button" class="max-w-56 truncate hover:underline" :class="concluida(y) ? 'text-muted line-through' : 'text-highlighted'" @click="emit('abrir', y)">{{ y.tarefa.name }}</button>
-                <UButton v-if="!somenteLeitura" icon="i-lucide-x" color="neutral" variant="ghost" size="xs" class="p-0.5" :aria-label="tr.relacoes.remover(y.tarefa.name)" @click="desrelacionar(tarefas, x, y)" />
-              </span>
-            </dd>
-          </template>
-          <template v-if="itensVinculados.length">
-            <dt class="flex items-center gap-1.5 pt-0.5 text-xs font-medium text-muted"><UIcon name="i-lucide-file-text" class="size-3.5" />{{ tr.relacoes.itens }}</dt>
-            <dd class="flex flex-wrap items-center gap-1.5">
-              <span v-for="i in itensVinculados" :key="i.reference" class="inline-flex items-center gap-1.5 rounded-md border border-default py-0.5 pl-1.5 pr-0.5 text-xs">
-                <span class="rounded bg-primary/10 px-1 font-mono text-[10px] text-primary">{{ i.categoria }}</span>
-                <button type="button" class="max-w-56 truncate text-highlighted hover:underline" @click="abrirItem(i)">{{ i.nome }}</button>
-                <UButton v-if="!somenteLeitura" icon="i-lucide-x" color="neutral" variant="ghost" size="xs" class="p-0.5" :aria-label="tr.relacoes.remover(i.nome)" @click="removerItem(i.reference)" />
-              </span>
-            </dd>
-          </template>
-        </dl>
+
+        <div v-for="g in gruposDaAba" :key="g.id" class="flex flex-col [animation:entrada_.2s_ease-out_both]">
+          <p class="flex items-center gap-1.5 px-1 pb-1 text-xs font-medium text-highlighted">
+            <UIcon :name="g.icone" class="size-3.5 text-muted" />
+            {{ g.rotulo }}
+            <span class="tabular-nums text-muted">{{ (g.tarefas ?? g.itens ?? []).length }}</span>
+          </p>
+          <div class="overflow-x-auto rounded-md border border-default">
+            <table class="w-full min-w-[24rem] text-sm">
+              <thead class="bg-elevated/50 text-left text-xs text-muted">
+                <tr>
+                  <th class="px-2.5 py-1.5 font-normal">{{ tn.relacoes.colunas.nome }}</th>
+                  <th class="w-28 px-2 py-1.5 font-normal">{{ g.tarefas ? tn.relacoes.colunas.data : tn.relacoes.colunas.referencia }}</th>
+                  <th v-if="g.tarefas" class="w-12 px-2 py-1.5 font-normal"><span class="sr-only">{{ tn.relacoes.colunas.responsavel }}</span></th>
+                  <th class="w-9"><span class="sr-only">{{ tn.relacoes.remover }}</span></th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-default">
+                <template v-if="g.tarefas">
+                  <tr v-for="y in g.tarefas" :key="y.tarefa.id" class="group/rel transition-colors hover:bg-elevated/50">
+                    <td class="px-2.5 py-1.5">
+                      <span class="flex min-w-0 items-center gap-2">
+                        <UTooltip :text="t.tarefas.colunas[y.tarefa.status]">
+                          <UIcon :name="iconeDoStatus[y.tarefa.status]" class="size-4 shrink-0" :class="corDoStatus[y.tarefa.status]" />
+                        </UTooltip>
+                        <button type="button" class="min-w-0 truncate text-left hover:underline" :class="concluida(y) ? 'text-muted line-through' : 'text-highlighted'" @click="emit('abrir', y)">{{ y.tarefa.name }}</button>
+                      </span>
+                    </td>
+                    <td class="px-2 py-1.5 text-xs" :class="y.tarefa.due_date && new Date(y.tarefa.due_date) < new Date() && !concluida(y) ? 'text-error' : 'text-muted'">{{ y.tarefa.due_date ? t.data(new Date(y.tarefa.due_date)) : '' }}</td>
+                    <td class="px-2 py-1.5">
+                      <UAvatar v-if="pessoa(y.tarefa.assigned_to)" :text="pessoa(y.tarefa.assigned_to)!.iniciais" :alt="pessoa(y.tarefa.assigned_to)!.nome" size="2xs" />
+                    </td>
+                    <td class="pr-1">
+                      <UButton v-if="!somenteLeitura" icon="i-lucide-x" color="neutral" variant="ghost" size="xs" class="opacity-0 transition-opacity focus-visible:opacity-100 group-hover/rel:opacity-100" :aria-label="tr.relacoes.remover(y.tarefa.name)" @click="removerDaAba(y)" />
+                    </td>
+                  </tr>
+                </template>
+                <template v-else>
+                  <tr v-for="i in g.itens" :key="i.reference" class="group/rel transition-colors hover:bg-elevated/50">
+                    <td class="px-2.5 py-1.5">
+                      <button type="button" class="block max-w-full truncate text-left text-highlighted hover:underline" @click="abrirItem(i)">{{ i.nome }}</button>
+                    </td>
+                    <td class="max-w-28 truncate px-2 py-1.5 font-mono text-[11px] text-muted" :title="i.reference">{{ i.reference.slice(0, 10) }}</td>
+                    <td class="pr-1">
+                      <UButton v-if="!somenteLeitura" icon="i-lucide-x" color="neutral" variant="ghost" size="xs" class="opacity-0 transition-opacity focus-visible:opacity-100 group-hover/rel:opacity-100" :aria-label="tr.relacoes.remover(i.nome)" @click="removerItem(i.reference)" />
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+            <button v-if="!somenteLeitura" type="button" class="flex w-full items-center gap-1.5 border-t border-default px-2.5 py-1.5 text-left text-xs text-muted transition-colors hover:bg-elevated/50 hover:text-highlighted" @click="relacionarNaSecao = true">
+              <UIcon name="i-lucide-plus" class="size-3.5" />
+              {{ g.tarefas ? tn.relacoes.adicionarTarefa : tr.relacionar.item }}
+            </button>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- ANEXOS -->
-    <section v-if="x.anexos.length" class="flex flex-col gap-2 rounded-lg border border-default p-4 [animation:entrada_.25s_ease-out_both]" :aria-label="tr.anexos.titulo">
+    <section v-if="x.anexos.length" class="flex flex-col gap-2 [animation:entrada_.25s_ease-out_both]" :class="caixa" :aria-label="tr.anexos.titulo">
       <header class="flex items-center gap-2">
         <button type="button" class="flex items-center gap-1.5 rounded text-left focus-visible:outline-2 focus-visible:outline-primary" :aria-expanded="aberta('anexos')" :aria-label="aberta('anexos') ? tr.subtarefas.recolher : tr.subtarefas.expandir" @click="alternarSecao('anexos')">
           <UIcon name="i-lucide-chevron-down" class="size-4 text-muted transition-transform duration-200" :class="aberta('anexos') ? '' : '-rotate-90'" />
           <h3 class="text-sm font-medium text-highlighted">{{ tr.anexos.titulo }}</h3>
         </button>
         <span class="text-xs tabular-nums text-muted">{{ x.anexos.length }}</span>
+        <UTooltip v-if="!somenteLeitura" :text="tr.acoes.anexar">
+          <UButton icon="i-lucide-plus" color="neutral" variant="ghost" size="xs" class="ml-auto" :aria-label="tr.acoes.anexar" @click="arquivo?.click()" />
+        </UTooltip>
       </header>
       <ul v-show="aberta('anexos')" class="grid gap-2 sm:grid-cols-2">
         <li v-for="a in x.anexos" :key="a.id" class="group/anexo flex items-center gap-2 rounded-md border border-default px-2.5 py-2 [animation:entrada_.25s_ease-out_both]">
@@ -792,8 +904,33 @@ const minhasMencoes = computed(() => props.mencoes.filter(m => m.alvo === `taref
       </ul>
     </section>
 
+    <!-- INTERFACE NOVA: as linhas de ação do ClickUp, só com o que ainda não tem seção -->
+    <section v-if="nova && !somenteLeitura && acoesDaNova.length" class="-mx-1.5 flex flex-col" :aria-label="tr.acoes.rotulo">
+      <template v-for="a in acoesDaNova" :key="a.id">
+        <UPopover
+          v-if="a.id === 'relacionar'"
+          v-model:open="relacionarAberto"
+          :content="{ align: 'start', side: 'bottom', sideOffset: 4, collisionPadding: 12 }"
+          :ui="{ content: 'w-96 max-w-[calc(100vw-2rem)]' }"
+        >
+          <UButton :label="tn.secoes[rotuloDaNova[a.id]!]" :icon="a.icon" color="neutral" variant="ghost" size="md" class="justify-start font-normal text-muted hover:text-highlighted" block />
+          <template #content>
+            <UCommandPalette :groups="gruposDeRelacao" :placeholder="tr.relacionar.titulo" :ui="{ content: 'max-h-72' }" class="h-auto">
+              <template #item-leading="{ item }">
+                <UIcon :name="item.icon" class="size-4 shrink-0" :class="item.cor" />
+              </template>
+              <template #empty>
+                <p class="px-3 py-4 text-center text-sm text-muted">{{ tr.relacionar.nenhum }}</p>
+              </template>
+            </UCommandPalette>
+          </template>
+        </UPopover>
+        <UButton v-else :label="tn.secoes[rotuloDaNova[a.id]!]" :icon="a.icon" color="neutral" variant="ghost" size="md" class="justify-start font-normal text-muted hover:text-highlighted" block @click="a.agir" />
+      </template>
+    </section>
+
     <!-- MENCIONADA EM -->
-    <section v-if="minhasMencoes.length" class="flex flex-col gap-2 rounded-lg border border-default p-4" :aria-label="tr.mencionadaEm.titulo">
+    <section v-if="minhasMencoes.length" class="flex flex-col gap-2" :class="caixa" :aria-label="tr.mencionadaEm.titulo">
       <header class="flex items-center gap-2">
         <span class="flex size-6 items-center justify-center rounded bg-elevated"><UIcon name="i-lucide-hash" class="size-3.5" /></span>
         <h3 class="text-sm font-medium text-highlighted">{{ tr.mencionadaEm.titulo }}</h3>

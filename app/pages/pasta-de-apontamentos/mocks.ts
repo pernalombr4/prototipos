@@ -179,6 +179,24 @@ export interface Cenario {
   mencoes: Mencao[]
   /** Outros itens do workspace, para "Vincular a um item" (rodada 5). */
   itensVinculaveis: ItemVinculavel[]
+  /** As etiquetas do workspace, que a tarefa cita em `tag_ids` (rodada 6). */
+  etiquetas: Etiqueta[]
+}
+
+/** Etiqueta da tarefa. O `tag_ids` existe na tarefa do SDK; o nome e a cor são inventados. */
+export interface Etiqueta {
+  id: number
+  nome: string
+  cor: 'primary' | 'info' | 'success' | 'warning' | 'error' | 'neutral'
+}
+
+/** Um registro de tempo na tarefa. Inventado (rodada 6): o ENSPACE ainda não registra tempo. */
+export interface RegistroDeTempo {
+  id: string
+  quem: number
+  inicio: Date
+  minutos: number
+  nota?: string
 }
 
 /** Item de qualquer categoria do workspace que a tarefa pode citar. Inventado. */
@@ -249,6 +267,14 @@ export interface TarefaDoItem {
   itens: string[]
   anexos: AnexoDaTarefa[]
   conclusao?: Conclusao
+  /** `final_due_date`, nome de trabalho do protótipo prazo-final-nas-tarefas. RN004: igual ou depois do `due_date`. */
+  prazoFinal?: Date | null
+  /** Inventado (rodada 6): a estimativa em minutos. */
+  estimativa?: number | null
+  /** Inventado (rodada 6): o tempo registrado. */
+  registros?: RegistroDeTempo[]
+  /** Inventado (rodada 6): o cronômetro ligado, com quem e desde quando. */
+  cronometro?: { quem: number, inicio: Date } | null
 }
 
 /* ------------------------------------------------------------------ */
@@ -505,7 +531,14 @@ const td = (t: Task, extra: Partial<TarefaDoItem> = {}): TarefaDoItem => ({ tare
 
 const tarefasProduto: TarefaDoItem[] = [
   {
-    tarefa: { ...tarefa(901, 'Ajustar textos da tela do item', 'working', BRUNO, 'Rótulos, estados vazios e traduções que o teste apontou.'), points: 5 },
+    tarefa: { ...tarefa(901, 'Ajustar textos da tela do item', 'working', BRUNO, 'Rótulos, estados vazios e traduções que o teste apontou.'), points: 5, collaborators: [DEBORA], tag_ids: [1, 2] },
+    prazoFinal: d('2026-11-18T18:00:00'),
+    estimativa: 360,
+    registros: [
+      { id: 'rt-1', quem: BRUNO, inicio: d('2026-11-10T14:00:00'), minutos: 150, nota: 'Rótulos em espanhol' },
+      { id: 'rt-2', quem: DEBORA, inicio: d('2026-11-11T10:30:00'), minutos: 45 },
+      { id: 'rt-3', quem: BRUNO, inicio: d('2026-11-11T16:00:00'), minutos: 50 },
+    ],
     checklists: [
       checklist([
         linha('Revisar os rótulos em espanhol', true, { responsavel: BRUNO }),
@@ -545,9 +578,9 @@ const tarefasProduto: TarefaDoItem[] = [
     ],
     rodadas: [{ numero: 1, quem: ANA, quando: d('2026-11-10T11:10:00'), veredito: 'correcao', resumo: '2 ajustes de texto da tarefa.' }],
   },
-  td({ ...tarefa(904, 'Traduzir o selo de status da tarefa', 'pending', BRUNO, 'Usar o rótulo do status nos 3 idiomas.'), points: 2 }, { mae: 901 }),
+  td({ ...tarefa(904, 'Traduzir o selo de status da tarefa', 'pending', BRUNO, 'Usar o rótulo do status nos 3 idiomas.'), points: 2 }, { mae: 901, registros: [{ id: 'rt-4', quem: BRUNO, inicio: d('2026-11-11T11:00:00'), minutos: 40 }] }),
   td({ ...tarefa(905, 'Revisar os estados vazios com o design', 'completed', DEBORA), points: 3 }, { mae: 901, conclusao: { motivo: 'concluida' } }),
-  td({ ...tarefa(902, 'Revisar a migração das pastas ocultas', 'blocked', CAIO, 'Rodar de novo a migração nas pastas com hidden=true.'), priority: 'high', points: 8 }, { bloqueadaPor: [906] }),
+  td({ ...tarefa(902, 'Revisar a migração das pastas ocultas', 'blocked', CAIO, 'Rodar de novo a migração nas pastas com hidden=true.'), priority: 'high', points: 8, tag_ids: [3] }, { bloqueadaPor: [906], prazoFinal: d('2026-11-16T18:00:00') }),
   td(tarefa(906, 'Liberar acesso de leitura ao banco de develop', 'working', CAIO)),
   td(tarefa(903, 'Atualizar a documentação da tela do item', 'completed', DEBORA), { conclusao: { motivo: 'concluida' } }),
 ]
@@ -686,6 +719,12 @@ export const cenarios: Record<Cenario['id'], Cenario> = {
       { reference: 'USE9C14F3B2E7A0458D9B36E1A4C82D07F', nome: 'Filtros rápidos na tela de itens', categoria: 'User Story' },
       { reference: 'DOC0E6A93D5B21C47F0A8D4E7B3C61F92A', nome: 'Documentação da tela do item', categoria: 'Documentação' },
     ],
+    etiquetas: [
+      { id: 1, nome: 'Interface', cor: 'info' },
+      { id: 2, nome: 'Tradução', cor: 'warning' },
+      { id: 3, nome: 'Banco de dados', cor: 'neutral' },
+      { id: 4, nome: 'Bloqueio de release', cor: 'error' },
+    ],
     camposDaVisaoGeral: [
       { rotulo: 'Status', valor: 'Em teste' },
       { rotulo: 'Título', valor: 'Pastas do item com cara de aba' },
@@ -742,6 +781,11 @@ export const cenarios: Record<Cenario['id'], Cenario> = {
       { reference: 'PRO7A20E4C93B1D46F8A5C27E9B0D3F614', nome: 'Procuração do representante da contratada', categoria: 'Procurações' },
       { reference: 'CON4B91D7E26A0C4F58B3E9A1D7C05F2B8', nome: 'Proposta comercial de manutenção 2026', categoria: 'Contratos' },
       { reference: 'PRC2E5F8A07D3B94C61A0E7D2B9F48C3A5', nome: 'Notificação extrajudicial de reajuste', categoria: 'Processos' },
+    ],
+    etiquetas: [
+      { id: 21, nome: 'Assinatura', cor: 'primary' },
+      { id: 22, nome: 'Cliente', cor: 'info' },
+      { id: 23, nome: 'Prazo legal', cor: 'error' },
     ],
     camposDaVisaoGeral: [
       { rotulo: 'Status', valor: 'Em revisão' },
