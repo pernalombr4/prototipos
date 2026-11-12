@@ -4,7 +4,7 @@
 sem abrir modal nem gaveta.
 
 **Onde vale:** a barra de ferramentas e a linha de filtros da tela de itens, na Tabela e no Kanban; em Tarefas Rápidas
-e Tarefas Agendadas, com os campos e os filtros automáticos da RN009.
+e Tarefas Agendadas, com os campos e os filtros rápidos do sistema da RN009.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/visualizacoes-da-tela-de-itens. A visualização "Em análise"
 abre com o chip "Status: Em análise".
@@ -13,11 +13,11 @@ abre com o chip "Status: Em análise".
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF034 | A linha de filtros abaixo da barra de ferramentas deve mostrar, nesta ordem: cada filtro automático ligado numa etiqueta com X, 1 chip por campo filtrado e "+ Filtro". | Em "Em análise", a linha mostra "Status: Em análise" e "+ Filtro"; o X da etiqueta "Só itens meus" desliga o filtro. | Importante | Obrigatório |
-| RF124 | A linha de filtros deve aparecer quando a visualização ativa tem filtro, quando tem alteração não salva ou depois do botão Filtros, na Tabela e no Kanban. | Em "Itens", sem filtro, a linha só aparece depois do botão Filtros. | Importante | Obrigatório |
+| RF034 | A linha de filtros abaixo da barra de ferramentas deve mostrar, nesta ordem: os botões dos filtros rápidos (parte 5), cada filtro rápido do sistema sempre aplicado numa etiqueta com X, 1 chip por campo filtrado e "+ Filtro". | Em "Vencendo em 30 dias", a linha mostra os 4 botões, "Vencimento: nos próximos 30 dias", "Status: não é Vencido" e "+ Filtro"; em "Meus contratos", o X da etiqueta "Só itens meus" tira o filtro. | Importante | Obrigatório |
+| RF124 | A linha de filtros deve aparecer quando a visualização ativa tem filtro rápido como botão, quando tem filtro, quando tem alteração não salva ou depois do botão Filtros, na Tabela e no Kanban. | Em "Itens", a linha aparece com "Meus itens" e "Dos meus grupos"; com os 2 em "Não usar" e sem filtro, a linha só aparece depois do botão Filtros. | Importante | Obrigatório |
 | RF106 | O botão Filtros da barra de ferramentas deve mostrar a linha de filtros, mesmo sem filtro, com "+ Filtro" aberto. | Em "Itens", o botão abre a lista de campos. | Importante | Obrigatório |
 | RF132 | A gaveta "Filtros por campo" da barra de ferramentas deve sair do produto. | Clicar no botão Filtros não abre gaveta lateral. | Essencial | Obrigatório |
-| RF099 | Os filtros automáticos e os chips devem valer juntos, conforme RN007. | "Área: Jurídico" com "Status: Em análise" mostra só os itens em análise do Jurídico. | Essencial | Obrigatório |
+| RF099 | Os filtros rápidos ligados ou sempre aplicados e os chips devem valer juntos, conforme RN007. | "Área: Jurídico" com "Status: Em análise" mostra só os itens em análise do Jurídico. | Essencial | Obrigatório |
 
 ## "+ Filtro" (RF)
 
@@ -26,7 +26,7 @@ abre com o chip "Status: Em análise".
 | RF094 | "+ Filtro" deve listar cada campo da tela (RN009) com o ícone do tipo e a busca "Filtrar por...". | Digitar "ven" deixa só "Vencimento"; sem resultado, aparece "Nenhum campo encontrado." | Essencial | Obrigatório |
 | RF095 | Escolher em "+ Filtro" um campo sem chip deve criar o chip do campo e abri-lo. | Escolher "Área" em "Em análise" cria e abre o chip "Área". | Essencial | Obrigatório |
 | RF112 | Escolher em "+ Filtro" um campo que já tem chip deve abrir o chip existente. | Escolher "Status" em "Em análise" abre "Status: Em análise". | Importante | Obrigatório |
-| RF134 | Nos filtros, cada campo e cada filtro automático deve aparecer pelo rótulo, e não pelo nome técnico ("reference", "isOwner", "inGroups", "inputText"). | A lista do "+ Filtro" mostra "Referência", não "reference". | Essencial | Obrigatório |
+| RF134 | Nos filtros, cada campo e cada filtro rápido do sistema deve aparecer pelo rótulo, e não pelo nome técnico ("reference", "isOwner", "inGroups", "inputText"). | A lista do "+ Filtro" mostra "Referência", não "reference". | Essencial | Obrigatório |
 
 ## Chip por campo (RF)
 

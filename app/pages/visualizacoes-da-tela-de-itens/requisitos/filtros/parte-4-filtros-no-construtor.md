@@ -16,7 +16,7 @@ painel Configurar, aberto por "Configurar" no menu da visualização.
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
 | RF133 | O 2º modal "Adicionar Filtro" e o 2º modal dos "Filtros Automáticos" devem sair do construtor de visualização. | Adicionar um filtro no construtor não abre modal. | Essencial | Obrigatório |
-| RF056 | A seção Filtros deve mostrar cada filtro automático da tela (RN009) como chave, pelo nome legível. | Em Itens, aparecem as chaves "Só itens meus" e "Só itens dos meus grupos"; em Tarefas Rápidas, "Minhas Tarefas", "Aberto", "Atrasado", "Atribuídos", "Tarefas Externas" e "Tarefas Internas". | Essencial | Obrigatório |
+| RF056 (removido) | As chaves dos filtros automáticos viraram o bloco "Filtros rápidos" da parte 5. | | | |
 | RF140 | O grupo "Por campo" deve mostrar cada filtro por campo numa linha, com o campo em cima e a condição e o valor lado a lado, conforme RN008. | Em "Em análise", a linha mostra Status, "É" e "Em análise". | Essencial | Obrigatório |
 | RF058 | "Adicionar filtro" deve criar a linha num campo de seleção que ainda não tem filtro. | Com "Status é Em análise", o filtro novo nasce em "Área". | Importante | Obrigatório |
 | RF141 | Trocar o campo de uma linha "Por campo" deve recomeçar a condição e o valor. | Trocar "Status" por "Valor do contrato" troca a condição para "Maior ou igual a". | Importante | Obrigatório |
@@ -27,4 +27,4 @@ painel Configurar, aberto por "Configurar" no menu da visualização.
 
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
-| P003 | O filtro automático "isOwner" da tela de itens é dono, criador ou responsável? O protótipo escreve "Só itens meus", com a ajuda "itens em que você é o dono". | Time de back | Muda o nome legível de "isOwner" |
+| P003 | O filtro rápido do sistema "isOwner" da tela de itens é dono, criador ou responsável? O protótipo escreve "Meus itens", com a ajuda "Itens em que você é o dono.". | Time de back | Muda o nome legível de "isOwner" |
