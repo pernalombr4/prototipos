@@ -13,7 +13,7 @@
  */
 import type { FiltroDeCampo, FiltroRapido, GrupoDeRegras, Visualizacao } from './mocks'
 import type { Textos } from './textos'
-import { CAMPOS, ICONE_DO_SUGERIDO, ICONE_DO_TIPO, campoPorPath, clonar, idDoSugerido } from './mocks'
+import { CAMPOS, ICONE_DO_SUGERIDO, ICONE_DO_TIPO, campoPorPath, clonar, idDoSugerido, sugeridosComoBotao } from './mocks'
 import type { Sugerido } from './mocks'
 import { campoLivre, contarRegras, regraNova, useDescricaoDeFiltro } from './filtros'
 import ChipDeFiltro from './_ChipDeFiltro.vue'
@@ -34,9 +34,9 @@ const simples = computed(() => filtros.value.field_filters ?? [])
 const rapidos = computed(() => filtros.value.quick_filters ?? [])
 const avancado = computed(() => filtros.value.avancado)
 const botoes = computed(() => filtros.value.rapidos ?? [])
-/* Rodada 8: o filtro pronto com `required` é chip fixo, como hoje; sem `required`, é botão sugerido pelo sistema. */
+/* Rodada 8: os nativos são botões em toda visualização, por padrão; o que a visualização aplica sempre é chip fixo, como hoje. */
 const fixos = computed(() => rapidos.value.filter(q => q.required))
-const sugeridos = computed(() => rapidos.value.filter(q => !q.required).map(q => q.filter as Sugerido))
+const sugeridos = computed<Sugerido[]>(() => sugeridosComoBotao(filtros.value))
 
 const mudar = (parte: Partial<Filtros>) => { filtros.value = { ...clonar(filtros.value), ...parte } }
 

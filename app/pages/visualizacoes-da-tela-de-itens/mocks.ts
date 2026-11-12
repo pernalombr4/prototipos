@@ -190,7 +190,8 @@ export type Visualizacao = Omit<ModelView, 'id' | 'created_at' | 'updated_at' | 
   }
   filters: {
     field_filters?: FiltroDeCampo[]
-    quick_filters?: { filter: 'isOwner' | 'inGroups' | string, required?: boolean }[]
+    // INVENTADO (rodada 8): `oculto` esconde o botão do filtro nativo nesta visualização.
+    quick_filters?: { filter: 'isOwner' | 'inGroups' | string, required?: boolean, oculto?: boolean }[]
     /** INVENTADO: o filtro avançado, que vale junto (E) com os filtros simples de `field_filters`. */
     avancado?: GrupoDeRegras
     /** INVENTADO (rodada 8): os filtros rápidos da visualização, na ordem dos botões. */
@@ -260,7 +261,6 @@ const POUCAS: Visualizacao[] = [
       rapidos: [
         { id: 'rapido-alta', nome: 'Alta prioridade', regras: { conector: 'and', regras: [{ field: 'prioridade', op: 'in', value: ['Alta'] }] } },
         { id: 'rapido-juridico', nome: 'Jurídico', regras: { conector: 'and', regras: [{ field: 'area', op: 'in', value: ['Jurídico'] }] } },
-        { id: 'rapido-100-mil', nome: 'Acima de R$ 100 mil', regras: { conector: 'and', regras: [{ field: 'valor', op: 'gte', value: 100000 }] } },
       ],
     },
   }),
@@ -333,6 +333,9 @@ export type Sugerido = typeof SUGERIDOS[number]
 export const ICONE_DO_SUGERIDO: Record<Sugerido, string> = { isOwner: 'i-lucide-user-round', inGroups: 'i-lucide-users' }
 /** O sugerido sem `required` é botão na linha de filtros; este é o id dele entre os ligados. */
 export const idDoSugerido = (f: string) => `sistema-${f}`
+/** Os nativos que a linha mostra como botão: todos, por padrão; sai o que a visualização aplica sempre ou esconde. */
+export const sugeridosComoBotao = (f: Visualizacao['filters']): Sugerido[] =>
+  SUGERIDOS.filter((s) => { const q = f.quick_filters?.find(x => x.filter === s); return !q || (!q.required && !q.oculto) })
 
 /**
  * `ligados`: os filtros rápidos ligados agora; cada um vale junto (E) com os outros filtros.

@@ -15,7 +15,7 @@ import type { EnKanbanCardConfig, EnKanbanColumn, EnTableColumn, EnTableSort } f
 import type { Item, Visualizacao, Volume } from './mocks'
 import type { ResumoDaVisualizacao } from './filtros'
 import { textos } from './textos'
-import { CAMPOS, EU, GRUPOS, ITENS, aplicar, campoPorPath, clonar, categoria, nomeDaPessoa, visualizacoesIniciais, workspace, SUGERIDOS } from './mocks'
+import { CAMPOS, EU, GRUPOS, ITENS, aplicar, campoPorPath, clonar, categoria, nomeDaPessoa, visualizacoesIniciais, sugeridosComoBotao, workspace } from './mocks'
 import CascaDaLista from './_CascaDaLista.vue'
 import BarraDeVisualizacoes from './_BarraDeVisualizacoes.vue'
 import BarraDeHoje from './_BarraDeHoje.vue'
@@ -206,7 +206,8 @@ const linhaRef = ref<InstanceType<typeof LinhaDeFiltros> | null>(null)
 const linhaPedida = ref(false)
 const temFiltro = computed(() => {
   const f = efetiva.value.filters
-  return !!(f.field_filters?.length || f.quick_filters?.length || f.avancado || f.rapidos?.length)
+  // Rodada 8: os filtros rápidos nativos são botões por padrão, então a linha aparece em toda visualização que os mostra.
+  return !!(f.field_filters?.length || f.quick_filters?.length || f.avancado || f.rapidos?.length || sugeridosComoBotao(f).length)
 })
 watch(ativa, () => { linhaPedida.value = false })
 
@@ -426,8 +427,7 @@ function novaVisualizacao(d: { tipo: 'table' | 'kanban', soEu: boolean, fixar: b
     fixada: d.fixar,
     // Standard ou Viewer cria só para si.
     user: d.soEu || !ehOwner.value ? EU.id : null,
-    // Rodada 8: a visualização nova já vem com os filtros rápidos que o sistema sugere, como botões.
-    filters: { quick_filters: SUGERIDOS.map(filter => ({ filter, required: false })) },
+    filters: {},
     // Kanban genérico sem etiqueta: o cartão do SDK tem altura fixa (h-48) e, com as 5 partes, o texto de apoio some.
     config: d.tipo === 'kanban'
       ? { hide: false, columns: base.config.columns, groupBy: 'status', cardConfig: { header: 'fornecedor', content: 'valor', userField: 'responsavel', dueDateField: 'vencimento' } }

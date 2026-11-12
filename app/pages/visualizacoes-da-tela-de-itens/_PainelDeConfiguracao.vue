@@ -157,8 +157,8 @@ function soltarColuna() {
 
 /* ---------- filtros ---------- */
 
-/* Rodada 8: cada filtro pronto que o sistema sugere tem 3 usos. "Como botão" é o `quick_filters` sem `required`
- * (o botão na linha de filtros); "Sempre aplicado" é com `required` (o filtro automático de hoje). */
+/* Rodada 8: cada filtro nativo tem 3 usos. "Como botão" é o padrão, sem nada gravado; "Sempre aplicado" é o
+ * `quick_filters` com `required` (o filtro automático de hoje); "Não usar" grava `oculto`. */
 type ModoDoSugerido = 'nao' | 'botao' | 'sempre'
 const modos = computed(() => [
   { label: props.t.rapido.modoNao, value: 'nao' },
@@ -167,12 +167,12 @@ const modos = computed(() => [
 ])
 function modoDe(f: Sugerido): ModoDoSugerido {
   const q = (rascunho.value.filters.quick_filters ?? []).find(x => x.filter === f)
-  return !q ? 'nao' : q.required ? 'sempre' : 'botao'
+  return !q ? 'botao' : q.required ? 'sempre' : q.oculto ? 'nao' : 'botao'
 }
 function mudarSugerido(f: Sugerido, modo: ModoDoSugerido) {
   mudar((x) => {
     const lista = (x.filters.quick_filters ?? []).filter(q => q.filter !== f)
-    x.filters.quick_filters = modo === 'nao' ? lista : [...lista, { filter: f, required: modo === 'sempre' }]
+    x.filters.quick_filters = modo === 'botao' ? lista : [...lista, modo === 'sempre' ? { filter: f, required: true } : { filter: f, oculto: true }]
   })
 }
 
