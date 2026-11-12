@@ -30,10 +30,10 @@ import printComentariosTarefa from './evidencias/hoje-comentarios-da-tarefa.jpg'
  * O significado é fixo; o rótulo de cada estado o admin pode renomear.
  * - pendente: `aberto`, `reaberto` (a vez é de quem resolve);
  * - para conferir: `resolvido` (a vez é de quem confere);
- * - fechado: `conferido`, `descartado`;
- * - `rascunho`: só quem escreveu vê, até enviar o retorno.
+ * - fechado: `conferido`, `descartado`.
+ * Rodada 4: sem rascunho. O apontamento nasce aberto e notifica na hora.
  */
-export type Estado = 'rascunho' | 'aberto' | 'reaberto' | 'resolvido' | 'conferido' | 'descartado'
+export type Estado = 'aberto' | 'reaberto' | 'resolvido' | 'conferido' | 'descartado'
 
 /** Mesma escala da prioridade da tarefa (`Task.priority`). */
 export type Prioridade = Task['priority']
@@ -47,9 +47,9 @@ export interface Pessoa {
 
 export interface Anexo {
   id: string
-  tipo: 'imagem' | 'arquivo' | 'link'
+  tipo: 'imagem' | 'arquivo'
   nome: string
-  /** Imagem: o endereço do print. Link: a URL. Arquivo: vazio (maquete). */
+  /** Imagem: o endereço do print. Arquivo: vazio (maquete). */
   url?: string
   /** Rótulo do tamanho, para arquivo. */
   tamanho?: string
@@ -108,7 +108,8 @@ export interface Apontamento {
   corpo: string
   estado: Estado
   prioridade: Prioridade
-  responsavel: number
+  /** Rodada 4: mais de 1 responsável. A API hoje tem `assigned_to` com 1 só. */
+  responsaveis: number[]
   autor: number
   /** Rodada em que o apontamento nasceu. */
   rodada: number
@@ -149,8 +150,6 @@ export interface ConfigDaPasta {
   exigeConferencia: boolean
   /** Quem confere: quem criou o apontamento ou um grupo. */
   conferente: 'autor' | 'grupo'
-  /** Modelo do corpo de cada apontamento novo, em HTML. */
-  modelo: string
   /** Responsável que já vem preenchido. */
   responsavelPadrao: number
   /** Impede concluir o item com apontamento pendente (gatilho do Spaceflow). Maquete. */
@@ -280,14 +279,13 @@ const pessoasProduto: Pessoa[] = [
   { id: DEBORA, nome: 'Débora Lins', iniciais: 'DL' },
 ]
 
-const MODELO_PRODUTO = '<p><strong>Onde:</strong> </p><p><strong>Problema:</strong> </p><p><strong>Correção sugerida:</strong> </p>'
 
 const apontamentosProduto: Apontamento[] = [
   {
     id: 'ap-1', numero: 1,
     titulo: 'Chave de tradução aparece no menu lateral',
     corpo: '<p><strong>Onde:</strong> menu lateral, grupo Membro, abaixo de Agenda.</p><p><strong>Problema:</strong> o item mostra o texto <code>menu.member.reports.label</code> em vez do nome do menu.</p><p><strong>Correção sugerida:</strong> mostrar "Meus relatórios" nos 3 idiomas.</p>',
-    estado: 'conferido', prioridade: 'normal', responsavel: BRUNO, autor: ANA, rodada: 1, reaberturas: 0,
+    estado: 'conferido', prioridade: 'normal', responsaveis: [BRUNO], autor: ANA, rodada: 1, reaberturas: 0,
     anexos: [{ id: 'an-1', tipo: 'imagem', nome: 'menu-chave-de-traducao.jpg', url: printVisaoGeral }],
     respostas: [
       { id: 're-1', autor: BRUNO, quando: d('2026-11-06T11:20:00'), texto: 'Faltava a chave no dicionário de espanhol e de português. Corrigido nos 3.' },
@@ -303,10 +301,9 @@ const apontamentosProduto: Apontamento[] = [
     id: 'ap-2', numero: 2,
     titulo: 'Rodapé avisa "Alterações não salvas" sem nenhuma alteração',
     corpo: '<p><strong>Onde:</strong> tela do item, pasta Visão Geral.</p><p><strong>Problema:</strong> ao abrir o item, o rodapé já mostra "Alterações não salvas" e o botão Sair sem salvar, sem que nenhum campo tenha sido tocado.</p><p><strong>Correção sugerida:</strong> mostrar o aviso só depois da primeira alteração em um campo.</p>',
-    estado: 'reaberto', prioridade: 'high', responsavel: BRUNO, autor: ANA, rodada: 1, reaberturas: 1,
+    estado: 'reaberto', prioridade: 'high', responsaveis: [BRUNO], autor: ANA, rodada: 1, reaberturas: 1,
     anexos: [
       { id: 'an-2', tipo: 'imagem', nome: 'rodape-sem-alteracao.jpg', url: printVisaoGeral },
-      { id: 'an-3', tipo: 'link', nome: 'Gravação da tela (1 min 12 s)', url: 'https://exemplo.invalid/gravacao-rodape' },
     ],
     respostas: [
       { id: 're-2', autor: BRUNO, quando: d('2026-11-07T15:02:00'), texto: 'O valor monetário era normalizado ao carregar e marcava o formulário como alterado. Corrigido.' },
@@ -324,7 +321,7 @@ const apontamentosProduto: Apontamento[] = [
     id: 'ap-3', numero: 3,
     titulo: 'Status da tarefa aparece em inglês no painel',
     corpo: '<p><strong>Onde:</strong> pasta Tarefas, ao abrir uma tarefa rápida.</p><p><strong>Problema:</strong> o selo no canto do painel mostra <code>pending</code> com a interface em português.</p><p><strong>Correção sugerida:</strong> usar o rótulo traduzido do status (Pendente, Pending, Pendiente).</p>',
-    estado: 'resolvido', prioridade: 'normal', responsavel: BRUNO, autor: ANA, rodada: 1, reaberturas: 0,
+    estado: 'resolvido', prioridade: 'normal', responsaveis: [BRUNO], autor: ANA, rodada: 1, reaberturas: 0,
     anexos: [{ id: 'an-4', tipo: 'imagem', nome: 'painel-da-tarefa-pending.jpg', url: printPainelTarefa }],
     respostas: [
       {
@@ -343,7 +340,7 @@ const apontamentosProduto: Apontamento[] = [
     id: 'ap-4', numero: 4,
     titulo: 'GET da pasta devolve o tipo com nome antigo',
     corpo: '<p><strong>Onde:</strong> API, <code>GET /ws/types/{slug}/views</code>.</p><p><strong>Problema:</strong> as pastas migradas voltam com <code>folder_type</code> em vez de <code>type</code> em 2 das 9 pastas.</p><p><strong>Correção sugerida:</strong> rodar a migração também nas pastas ocultas.</p><p>A coleção e o ambiente do Postman estão anexados. O ambiente vai sem chave: preencha <code>api_key</code> com a sua.</p>',
-    estado: 'resolvido', prioridade: 'urgent', responsavel: CAIO, autor: ANA, rodada: 1, reaberturas: 0,
+    estado: 'resolvido', prioridade: 'urgent', responsaveis: [CAIO, BRUNO], autor: ANA, rodada: 1, reaberturas: 0,
     anexos: [
       { id: 'an-5', tipo: 'arquivo', nome: 'pastas-do-item.postman_collection.json', tamanho: '14 KB' },
       { id: 'an-6', tipo: 'arquivo', nome: 'develop.postman_environment.json', tamanho: '2 KB' },
@@ -361,7 +358,7 @@ const apontamentosProduto: Apontamento[] = [
     id: 'ap-5', numero: 5,
     titulo: 'Campo Ícone obrigatório começa em "Sem ícone"',
     corpo: '<p><strong>Onde:</strong> Nova pasta, campo Ícone.</p><p><strong>Problema:</strong> o campo é obrigatório, mas já vem com a opção "Sem ícone", que não é aceita ao criar.</p><p><strong>Correção sugerida:</strong> trazer um ícone padrão pelo tipo de pasta escolhido.</p>',
-    estado: 'aberto', prioridade: 'low', responsavel: DEBORA, autor: ANA, rodada: 1, reaberturas: 0,
+    estado: 'aberto', prioridade: 'low', responsaveis: [DEBORA], autor: ANA, rodada: 1, reaberturas: 0,
     anexos: [{ id: 'an-7', tipo: 'imagem', nome: 'nova-pasta-icone.jpg', url: printTiposDePasta }],
     respostas: [],
     historico: [evento(ANA, '2026-11-04T17:26:00', 'aberto', 1)],
@@ -371,7 +368,7 @@ const apontamentosProduto: Apontamento[] = [
     id: 'ap-6', numero: 6,
     titulo: 'Botão Criar da tarefa não responde ao primeiro clique',
     corpo: '<p><strong>Onde:</strong> pasta Tarefas, Nova tarefa.</p><p><strong>Problema:</strong> com o nome preenchido, o primeiro clique em Criar não fez nada; o segundo criou.</p>',
-    estado: 'descartado', prioridade: 'normal', responsavel: BRUNO, autor: ANA, rodada: 1, reaberturas: 0,
+    estado: 'descartado', prioridade: 'normal', responsaveis: [BRUNO], autor: ANA, rodada: 1, reaberturas: 0,
     motivo: 'Não reproduzimos em 3 navegadores. Se voltar, anexe a gravação.',
     anexos: [{ id: 'an-8', tipo: 'imagem', nome: 'quadro-de-tarefas.jpg', url: printPastaTarefas }],
     respostas: [],
@@ -385,7 +382,7 @@ const apontamentosProduto: Apontamento[] = [
     id: 'ap-7', numero: 7,
     titulo: 'Estado vazio dos comentários com ponto de exclamação',
     corpo: '<p><strong>Onde:</strong> pasta Comentários e aba Comentários da tarefa.</p><p><strong>Problema:</strong> o texto "Nenhum comentário ainda. Seja o primeiro!" foge do tom formal das outras telas.</p><p><strong>Correção sugerida:</strong> "Nenhum comentário. Escreva o primeiro abaixo."</p>',
-    estado: 'aberto', prioridade: 'low', responsavel: DEBORA, autor: ANA, rodada: 2, reaberturas: 0,
+    estado: 'aberto', prioridade: 'low', responsaveis: [DEBORA], autor: ANA, rodada: 2, reaberturas: 0,
     anexos: [{ id: 'an-9', tipo: 'imagem', nome: 'comentarios-vazio.jpg', url: printComentariosTarefa }],
     respostas: [],
     historico: [evento(ANA, '2026-11-10T09:40:00', 'aberto', 2)],
@@ -395,7 +392,7 @@ const apontamentosProduto: Apontamento[] = [
     id: 'ap-8', numero: 8,
     titulo: 'Tipo de pasta sem descrição na lista',
     corpo: '<p><strong>Onde:</strong> Nova pasta, campo Tipo de Pasta.</p><p><strong>Problema:</strong> os 14 tipos aparecem só pelo nome. "Repetidor" e "Relacionamento Múltiplo" não dizem o que mostram.</p><p><strong>Correção sugerida:</strong> 1 linha de descrição embaixo de cada tipo.</p>',
-    estado: 'aberto', prioridade: 'normal', responsavel: DEBORA, autor: ANA, rodada: 2, reaberturas: 0,
+    estado: 'aberto', prioridade: 'normal', responsaveis: [DEBORA], autor: ANA, rodada: 2, reaberturas: 0,
     anexos: [{ id: 'an-10', tipo: 'imagem', nome: 'tipos-de-pasta.jpg', url: printTiposDePasta }],
     respostas: [],
     historico: [evento(ANA, '2026-11-10T09:52:00', 'aberto', 2)],
@@ -405,7 +402,7 @@ const apontamentosProduto: Apontamento[] = [
     id: 'ap-9', numero: 9,
     titulo: 'A pasta aberta não volta depois de recarregar',
     corpo: '<p><strong>Onde:</strong> tela do item, qualquer pasta.</p><p><strong>Problema:</strong> ao recarregar, a tela voltava para a Visão Geral.</p><p><strong>Correção sugerida:</strong> guardar a pasta aberta no endereço.</p>',
-    estado: 'conferido', prioridade: 'high', responsavel: BRUNO, autor: ANA, rodada: 1, reaberturas: 0,
+    estado: 'conferido', prioridade: 'high', responsaveis: [BRUNO], autor: ANA, rodada: 1, reaberturas: 0,
     anexos: [],
     respostas: [{ id: 're-6', autor: BRUNO, quando: d('2026-11-05T14:10:00'), texto: 'A pasta vai para ?folder= no endereço.' }],
     historico: [
@@ -419,7 +416,7 @@ const apontamentosProduto: Apontamento[] = [
     id: 'ap-10', numero: 10,
     titulo: 'Arrastar a pasta para o mesmo lugar abre o aviso de salvar',
     corpo: '<p><strong>Onde:</strong> barra de pastas, arrastar e soltar.</p><p><strong>Problema:</strong> soltar a pasta na posição de origem abria o aviso de salvar a nova ordem.</p><p><strong>Correção sugerida:</strong> não abrir nada quando a ordem não muda.</p>',
-    estado: 'conferido', prioridade: 'normal', responsavel: BRUNO, autor: ANA, rodada: 1, reaberturas: 0,
+    estado: 'conferido', prioridade: 'normal', responsaveis: [BRUNO], autor: ANA, rodada: 1, reaberturas: 0,
     anexos: [],
     respostas: [],
     historico: [
@@ -433,7 +430,7 @@ const apontamentosProduto: Apontamento[] = [
     id: 'ap-11', numero: 11,
     titulo: 'Aba ativa sem ligação com o conteúdo abaixo',
     corpo: '<p><strong>Onde:</strong> barra de pastas.</p><p><strong>Problema:</strong> a pasta ativa parece um botão aceso, sem ligação com o conteúdo.</p><p><strong>Correção sugerida:</strong> sublinhado na aba ativa e borda inferior na barra, como no protótipo aprovado.</p>',
-    estado: 'conferido', prioridade: 'normal', responsavel: DEBORA, autor: ANA, rodada: 1, reaberturas: 0,
+    estado: 'conferido', prioridade: 'normal', responsaveis: [DEBORA], autor: ANA, rodada: 1, reaberturas: 0,
     anexos: [],
     respostas: [],
     historico: [
@@ -447,10 +444,10 @@ const apontamentosProduto: Apontamento[] = [
     id: 'ap-12', numero: 12,
     titulo: 'Contador de comentários na aba da pasta',
     corpo: '<p><strong>Onde:</strong> barra de pastas, aba Comentários.</p><p><strong>Problema:</strong> não há como saber que o item tem comentário novo sem abrir a pasta.</p><p><strong>Correção sugerida:</strong> número ao lado do nome da aba.</p>',
-    estado: 'rascunho', prioridade: 'low', responsavel: BRUNO, autor: ANA, rodada: 3, reaberturas: 0,
+    estado: 'aberto', prioridade: 'low', responsaveis: [BRUNO], autor: ANA, rodada: 3, reaberturas: 0,
     anexos: [],
     respostas: [],
-    historico: [evento(ANA, '2026-11-11T08:50:00', 'rascunho', 3)],
+    historico: [evento(ANA, '2026-11-11T08:50:00', 'aberto', 3)],
     criadoEm: d('2026-11-11T08:50:00'),
   },
 ]
@@ -486,7 +483,7 @@ const tarefasProduto: TarefaDoItem[] = [
         id: 'tap-1', numero: 1,
         titulo: 'Botão "Guardar progresso" sem tradução em espanhol',
         corpo: '<p><strong>Onde:</strong> painel da tarefa, rodapé.</p><p><strong>Problema:</strong> com a interface em espanhol, o botão continua em português.</p>',
-        estado: 'aberto', prioridade: 'normal', responsavel: BRUNO, autor: ANA, rodada: 1, reaberturas: 0,
+        estado: 'aberto', prioridade: 'normal', responsaveis: [BRUNO], autor: ANA, rodada: 1, reaberturas: 0,
         anexos: [{ id: 'tan-1', tipo: 'imagem', nome: 'rodape-da-tarefa.jpg', url: printPainelTarefa }],
         respostas: [],
         historico: [evento(ANA, '2026-11-10T11:00:00', 'aberto', 1)],
@@ -496,7 +493,7 @@ const tarefasProduto: TarefaDoItem[] = [
         id: 'tap-2', numero: 2,
         titulo: 'Placeholder do comentário corta em telas estreitas',
         corpo: '<p><strong>Onde:</strong> aba Comentários da tarefa.</p><p><strong>Problema:</strong> "(@ para mencionar, Ctrl+Enter para enviar)" é cortado abaixo de 1280 px.</p>',
-        estado: 'resolvido', prioridade: 'low', responsavel: BRUNO, autor: ANA, rodada: 1, reaberturas: 0,
+        estado: 'resolvido', prioridade: 'low', responsaveis: [BRUNO], autor: ANA, rodada: 1, reaberturas: 0,
         anexos: [],
         respostas: [{ id: 'tre-1', autor: BRUNO, quando: d('2026-11-11T09:30:00'), texto: 'Encurtado para "Escreva um comentário...". A dica foi para o tooltip.' }],
         historico: [
@@ -539,14 +536,13 @@ const pessoasJuridico: Pessoa[] = [
   { id: LUCAS, nome: 'Lucas Freire', iniciais: 'LF' },
 ]
 
-const MODELO_JURIDICO = '<p><strong>Cláusula:</strong> </p><p><strong>Como está:</strong> </p><p><strong>Como deve ficar:</strong> </p>'
 
 const apontamentosJuridico: Apontamento[] = [
   {
     id: 'jap-1', numero: 1,
     titulo: 'Multa por rescisão acima do teto da política',
     corpo: '<p><strong>Cláusula:</strong> 12.3.</p><p><strong>Como está:</strong> multa de 30% sobre o saldo do contrato.</p><p><strong>Como deve ficar:</strong> no máximo 10%, conforme a política comercial vigente.</p>',
-    estado: 'resolvido', prioridade: 'high', responsavel: RAFAEL, autor: HELENA, rodada: 1, reaberturas: 0,
+    estado: 'resolvido', prioridade: 'high', responsaveis: [RAFAEL], autor: HELENA, rodada: 1, reaberturas: 0,
     anexos: [{ id: 'jan-1', tipo: 'arquivo', nome: 'minuta-v3-com-marcacoes.docx', tamanho: '186 KB' }],
     respostas: [{ id: 'jre-1', autor: RAFAEL, quando: d('2026-11-09T16:20:00'), texto: 'O cliente aceitou 10%. Minuta v4 anexada.' }],
     historico: [
@@ -559,7 +555,7 @@ const apontamentosJuridico: Apontamento[] = [
     id: 'jap-2', numero: 2,
     titulo: 'Vigência diverge da proposta comercial',
     corpo: '<p><strong>Cláusula:</strong> 3.1.</p><p><strong>Como está:</strong> 24 meses.</p><p><strong>Como deve ficar:</strong> 12 meses com renovação automática, como na proposta aprovada.</p>',
-    estado: 'aberto', prioridade: 'high', responsavel: RAFAEL, autor: HELENA, rodada: 1, reaberturas: 0,
+    estado: 'aberto', prioridade: 'high', responsaveis: [RAFAEL], autor: HELENA, rodada: 1, reaberturas: 0,
     anexos: [{ id: 'jan-2', tipo: 'arquivo', nome: 'proposta-comercial-aprovada.pdf', tamanho: '412 KB' }],
     respostas: [],
     historico: [evento(HELENA, '2026-11-06T10:06:00', 'aberto', 1)],
@@ -569,7 +565,7 @@ const apontamentosJuridico: Apontamento[] = [
     id: 'jap-3', numero: 3,
     titulo: 'Incluir cláusula de tratamento de dados pessoais',
     corpo: '<p><strong>Cláusula:</strong> nova, depois da 14.</p><p><strong>Como está:</strong> o contrato não trata dos dados pessoais que a contratada acessa.</p><p><strong>Como deve ficar:</strong> cláusula padrão de operador de dados, modelo jurídico 2026.</p>',
-    estado: 'conferido', prioridade: 'urgent', responsavel: RAFAEL, autor: HELENA, rodada: 1, reaberturas: 0,
+    estado: 'conferido', prioridade: 'urgent', responsaveis: [RAFAEL], autor: HELENA, rodada: 1, reaberturas: 0,
     anexos: [],
     respostas: [],
     historico: [
@@ -583,7 +579,7 @@ const apontamentosJuridico: Apontamento[] = [
     id: 'jap-4', numero: 4,
     titulo: 'Índice de reajuste sem data-base',
     corpo: '<p><strong>Cláusula:</strong> 8.2.</p><p><strong>Como está:</strong> reajuste anual pelo IPCA.</p><p><strong>Como deve ficar:</strong> reajuste anual pelo IPCA, com data-base no mês da assinatura.</p>',
-    estado: 'aberto', prioridade: 'normal', responsavel: LUCAS, autor: HELENA, rodada: 1, reaberturas: 0,
+    estado: 'aberto', prioridade: 'normal', responsaveis: [LUCAS, RAFAEL], autor: HELENA, rodada: 1, reaberturas: 0,
     anexos: [],
     respostas: [],
     historico: [evento(HELENA, '2026-11-06T10:20:00', 'aberto', 1)],
@@ -593,7 +589,7 @@ const apontamentosJuridico: Apontamento[] = [
     id: 'jap-5', numero: 5,
     titulo: 'Anexo II sem rubrica do representante',
     corpo: '<p><strong>Cláusula:</strong> Anexo II, escopo dos serviços.</p><p><strong>Como está:</strong> as páginas 2 a 4 estão sem rubrica.</p><p><strong>Como deve ficar:</strong> todas as páginas rubricadas na versão final.</p>',
-    estado: 'aberto', prioridade: 'low', responsavel: RAFAEL, autor: HELENA, rodada: 1, reaberturas: 0,
+    estado: 'aberto', prioridade: 'low', responsaveis: [RAFAEL], autor: HELENA, rodada: 1, reaberturas: 0,
     anexos: [],
     respostas: [],
     historico: [evento(HELENA, '2026-11-06T10:25:00', 'aberto', 1)],
@@ -633,7 +629,6 @@ export const cenarios: Record<Cenario['id'], Cenario> = {
       icone: 'i-lucide-list-checks',
       exigeConferencia: true,
       conferente: 'autor',
-      modelo: MODELO_PRODUTO,
       responsavelPadrao: BRUNO,
       travaConclusao: true,
       rotulos: { resolvido: 'Corrigido' },
@@ -668,7 +663,6 @@ export const cenarios: Record<Cenario['id'], Cenario> = {
       icone: 'i-lucide-scale',
       exigeConferencia: true,
       conferente: 'autor',
-      modelo: MODELO_JURIDICO,
       responsavelPadrao: RAFAEL,
       travaConclusao: true,
       rotulos: { resolvido: 'Ajustado' },

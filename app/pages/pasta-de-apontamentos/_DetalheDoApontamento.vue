@@ -10,6 +10,11 @@
  * anteriores (como a issue do GitHub); anexo removível; "Abrir em tela cheia";
  * e a linha do tempo única, que junta mudanças de estado, comentários e
  * edições, separada por rodada, com a resposta que cita com #.
+ *
+ * Rodada 4: Responsáveis em seleção múltipla (quem entra recebe a
+ * notificação); anexo só de arquivo, sem link; `resumivel` mostra só o
+ * cabeçalho, como cartão, com a seta para expandir ali mesmo; em tela cheia, o
+ * conteúdo fica à esquerda e a linha do tempo à direita, como a tarefa do ClickUp.
  */
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Anexo, Apontamento, Citacao, Estado } from './mocks'
@@ -18,7 +23,7 @@ import type { Textos } from './textos'
 import CampoRico from './_CampoRico.vue'
 import CampoComCitacao from './_CampoComCitacao.vue'
 import { CHAVE_CITACAO, iconeDaCitacao, partesDoTexto } from './citacao'
-import { editar, iconeDaPrioridade, pessoa, podeConferir, podeDescartar, podeDesmarcar, podeReabrir, podeResolver, responder, rodadaDaData, rotuloDoEstado, vezDe, visualDoEstado } from './lista'
+import { atribuir, editar, iconeDaPrioridade, pessoa, podeConferir, podeDescartar, podeDesmarcar, podeReabrir, podeResolver, responder, rodadaDaData, rotuloDoEstado, vezDe, visualDoEstado } from './lista'
 
 const props = defineProps<{
   t: Textos
@@ -28,6 +33,8 @@ const props = defineProps<{
   somenteLeitura: boolean
   compacto?: boolean
   emTelaCheia?: boolean
+  /** Cartão na lista: começa só com o cabeçalho e se expande ali mesmo. */
+  resumivel?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -49,10 +56,13 @@ const citacao = inject(CHAVE_CITACAO, null)
 const visual = computed(() => visualDoEstado[props.a.estado])
 const rotulo = (e: Estado) => rotuloDoEstado(props.lista.config, e, props.t.estados, props.t.locale)
 const nome = (id: number) => pessoa(props.lista, id)?.nome ?? ''
-const vez = computed(() => {
-  const id = vezDe(props.a, props.lista.config)
-  return id ? pessoa(props.lista, id) : undefined
-})
+const juntar = (xs: string[]) => new Intl.ListFormat(props.t.locale, { type: 'conjunction' }).format(xs)
+const vez = computed(() => juntar(vezDe(props.a, props.lista.config).map(nome).filter(Boolean)))
+
+/* ---------- cartão resumido ---------- */
+const aberto = ref(false)
+const resumido = computed(() => !!props.resumivel && !aberto.value)
+const temCorpo = computed(() => !!props.a.corpo.replace(/<[^>]*>/g, '').trim())
 
 const ro = computed(() => props.somenteLeitura)
 const acoes = computed(() => ({
@@ -76,6 +86,15 @@ const menu = computed<DropdownMenuItem[][]>(() => [
 ])
 
 /* ---------- campos ---------- */
+/** Quem entra como responsável recebe a notificação de atribuição. */
+const responsaveis = computed<number[]>({
+  get: () => props.a.responsaveis,
+  set: (v) => {
+    const antes = [...props.a.responsaveis]
+    props.a.responsaveis = v
+    atribuir(props.a, props.quem, antes)
+  },
+})
 const opcoesDePessoa = computed(() => props.lista.pessoas.map(p => ({ label: p.nome, value: p.id, avatar: { text: p.iniciais, alt: p.nome } })))
 const opcoesDePrioridade = computed(() => (['low', 'normal', 'high', 'urgent'] as const).map(p => ({ label: props.t.prioridades[p], value: p, icon: iconeDaPrioridade[p] })))
 
@@ -184,15 +203,26 @@ const vereditoDa = (n: number) => props.lista.rodadas.find(r => r.numero === n)?
 const corDoVeredito = (v: string) => v === 'aprovado' ? 'success' : v === 'ressalvas' ? 'warning' : 'error'
 const corDoIcone: Record<string, string> = { neutral: 'text-muted', info: 'text-info', success: 'text-success', error: 'text-error', warning: 'text-warning' }
 const tituloDoEvento = (e: Extract<Entrada, { tipo: 'evento' }>) => !e.de
-  ? (e.para === 'rascunho' ? props.t.apontamento.eventos.rascunho(nome(e.quem)) : props.t.apontamento.eventos.criou(nome(e.quem)))
+  ? props.t.apontamento.eventos.criou(nome(e.quem))
   : props.t.apontamento.eventos.mudou(nome(e.quem), rotulo(e.para))
 </script>
 
 <template>
-  <article class="flex h-full min-h-0 flex-col bg-default">
+  <article class="flex flex-col bg-default" :class="resumivel ? 'rounded-lg border border-default shadow-xs' : 'h-full min-h-0'">
     <!-- Cabeçalho -->
-    <header class="flex flex-col gap-3 border-b border-default px-5 py-4">
+    <header class="flex flex-col gap-3 px-5" :class="[resumido ? 'py-3' : 'border-b border-default py-4']">
       <div class="flex items-start gap-2">
+        <UButton
+          v-if="resumivel"
+          :icon="aberto ? 'i-lucide-chevron-down' : 'i-lucide-chevron-right'"
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          class="-ml-2 mt-2.5"
+          :aria-label="aberto ? t.apontamento.recolher : t.apontamento.expandir"
+          :aria-expanded="aberto"
+          @click="aberto = !aberto"
+        />
         <div class="min-w-0 flex-1">
           <p class="flex items-center gap-2 font-mono text-xs text-dimmed">
             #{{ a.numero }}
@@ -224,13 +254,13 @@ const tituloDoEvento = (e: Extract<Entrada, { tipo: 'evento' }>) => !e.de
             </UPopover>
           </p>
           <UInput v-if="editando" v-model="rascunhoDoTitulo" class="mt-1 w-full" size="lg" :aria-label="t.novo.titulo" />
-          <h3 v-else class="mt-0.5 text-lg font-semibold leading-snug text-highlighted">{{ a.titulo }}</h3>
+          <h3 v-else class="mt-0.5 font-semibold leading-snug text-highlighted" :class="resumivel ? 'cursor-pointer text-base' : 'text-lg'" @click="resumivel && (aberto = !aberto)">{{ a.titulo }}</h3>
         </div>
-        <UButton v-if="acoes.editar && !editando" :label="compacto ? undefined : t.apontamento.editar" icon="i-lucide-pencil" color="neutral" variant="outline" size="sm" :aria-label="t.apontamento.editar" @click="abrirEdicao" />
+        <UButton v-if="acoes.editar && !editando && !resumido" :label="compacto || resumivel ? undefined : t.apontamento.editar" icon="i-lucide-pencil" color="neutral" variant="outline" size="sm" :aria-label="t.apontamento.editar" @click="abrirEdicao" />
         <UTooltip v-if="!emTelaCheia" :text="t.fluxo.telaCheia">
           <UButton icon="i-lucide-maximize-2" color="neutral" variant="ghost" size="sm" :aria-label="t.fluxo.telaCheia" @click="emit('telaCheia')" />
         </UTooltip>
-        <UTooltip :text="t.apontamento.copiarLink">
+        <UTooltip v-if="!resumido" :text="t.apontamento.copiarLink">
           <UButton icon="i-lucide-link" color="neutral" variant="ghost" size="sm" :aria-label="t.apontamento.copiarLink" @click="emit('copiarLink')" />
         </UTooltip>
         <UDropdownMenu :items="menu" :content="{ align: 'end' }">
@@ -252,12 +282,12 @@ const tituloDoEvento = (e: Extract<Entrada, { tipo: 'evento' }>) => !e.de
           <UIcon name="i-lucide-rotate-ccw" class="size-3.5" />{{ t.apontamento.reaberturas(a.reaberturas) }}
         </span>
         <span v-if="vez" class="flex items-center gap-1.5 text-xs text-muted">
-          <UIcon name="i-lucide-arrow-right-circle" class="size-3.5" />{{ t.apontamento.vezDe(vez.nome) }}
+          <UIcon name="i-lucide-arrow-right-circle" class="size-3.5" />{{ t.apontamento.vezDe(vez) }}
         </span>
       </div>
 
       <!-- A ação do papel, em destaque -->
-      <div v-if="acoes.resolver || acoes.desmarcar || acoes.conferir || acoes.reabrir" class="flex flex-wrap gap-2">
+      <div v-if="!resumido && (acoes.resolver || acoes.desmarcar || acoes.conferir || acoes.reabrir)" class="flex flex-wrap gap-2">
         <UButton v-if="acoes.resolver" :label="t.apontamento.marcarResolvido" icon="i-lucide-check" color="success" @click="emit('resolver')" />
         <UButton v-if="acoes.conferir" :label="t.apontamento.conferir" icon="i-lucide-badge-check" color="success" @click="emit('conferir')" />
         <UButton v-if="acoes.reabrir" :label="t.apontamento.reabrir" icon="i-lucide-rotate-ccw" color="neutral" variant="outline" @click="emit('reabrir')" />
@@ -265,7 +295,7 @@ const tituloDoEvento = (e: Extract<Entrada, { tipo: 'evento' }>) => !e.de
       </div>
 
       <UAlert
-        v-if="a.estado === 'descartado' && (a.motivo || a.duplicadoDe)"
+        v-if="!resumido && a.estado === 'descartado' && (a.motivo || a.duplicadoDe)"
         :title="a.duplicadoDe ? t.fluxo.duplicadoTexto(a.duplicadoDe) : t.apontamento.motivoDescarte"
         :description="a.duplicadoDe ? undefined : a.motivo"
         :icon="a.duplicadoDe ? 'i-lucide-copy' : 'i-lucide-circle-slash'"
@@ -274,21 +304,24 @@ const tituloDoEvento = (e: Extract<Entrada, { tipo: 'evento' }>) => !e.de
       />
     </header>
 
-    <div class="min-h-0 flex-1 overflow-y-auto">
+    <div v-if="!resumido" :class="emTelaCheia ? 'grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[minmax(0,1fr)_24rem]' : resumivel ? '' : 'min-h-0 flex-1 overflow-y-auto'">
+      <div :class="emTelaCheia ? 'min-h-0 overflow-y-auto' : 'contents'">
       <!-- Campos -->
       <dl class="grid gap-x-4 gap-y-3 border-b border-default px-5 py-4 text-sm" :class="compacto ? 'grid-cols-1' : 'grid-cols-2'">
         <div class="flex flex-col gap-1">
-          <dt class="text-xs font-medium text-muted">{{ t.apontamento.responsavel }}</dt>
+          <dt class="text-xs font-medium text-muted">{{ t.apontamento.responsaveis }}</dt>
           <dd>
             <USelectMenu
-              v-model="a.responsavel"
+              v-model="responsaveis"
               :items="opcoesDePessoa"
               value-key="value"
+              multiple
               :disabled="ro"
-              :search-input="false"
+              :search-input="{ placeholder: t.apontamento.buscarPessoa }"
+              :placeholder="t.apontamento.semResponsavel"
+              icon="i-lucide-users"
               size="sm"
               class="w-full"
-              :avatar="opcoesDePessoa.find(o => o.value === a.responsavel)?.avatar"
             />
           </dd>
         </div>
@@ -326,6 +359,7 @@ const tituloDoEvento = (e: Extract<Entrada, { tipo: 'evento' }>) => !e.de
             <UButton :label="t.apontamento.salvar" size="sm" @click="salvarEdicao" />
           </div>
         </div>
+        <p v-else-if="!temCorpo" class="text-sm text-dimmed">{{ t.apontamento.semDescricao }}</p>
         <!-- eslint-disable-next-line vue/no-v-html -->
         <div v-else class="corpo text-sm leading-relaxed text-default *:my-1.5 [&_code]:rounded [&_code]:bg-elevated [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-xs [&_strong]:text-highlighted" v-html="a.corpo" />
       </section>
@@ -365,11 +399,11 @@ const tituloDoEvento = (e: Extract<Entrada, { tipo: 'evento' }>) => !e.de
         </div>
         <ul v-if="outros.length" class="flex flex-col divide-y divide-default rounded-md border border-default">
           <li v-for="x in outros" :key="x.id" class="flex items-center gap-2.5 px-3 py-2 text-sm">
-            <UIcon :name="x.tipo === 'link' ? 'i-lucide-video' : iconeDoArquivo(x.nome)" class="size-4 shrink-0 text-muted" />
+            <UIcon :name="iconeDoArquivo(x.nome)" class="size-4 shrink-0 text-muted" />
             <span class="min-w-0 flex-1 truncate text-highlighted">{{ x.nome }}</span>
             <span v-if="x.tamanho" class="text-xs text-dimmed">{{ x.tamanho }}</span>
             <UButton
-              :icon="x.tipo === 'link' ? 'i-lucide-external-link' : 'i-lucide-download'"
+              icon="i-lucide-download"
               color="neutral"
               variant="ghost"
               size="xs"
@@ -380,8 +414,10 @@ const tituloDoEvento = (e: Extract<Entrada, { tipo: 'evento' }>) => !e.de
           </li>
         </ul>
       </section>
+      </div>
 
-      <!-- Linha do tempo, por rodada -->
+      <!-- Linha do tempo, por rodada (em tela cheia, a coluna da direita) -->
+      <div :class="emTelaCheia ? 'min-h-0 overflow-y-auto border-l border-default bg-elevated/30' : 'contents'">
       <section class="flex flex-col gap-3 px-5 py-4">
         <h4 class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.fluxo.linhaDoTempo }}</h4>
         <div v-for="g in linhaDoTempo" :key="g.rodada" class="flex flex-col gap-2">
@@ -446,6 +482,7 @@ const tituloDoEvento = (e: Extract<Entrada, { tipo: 'evento' }>) => !e.de
           <UButton type="submit" :label="t.apontamento.responder" size="sm" color="neutral" variant="outline" class="self-end" :loading="enviando" :disabled="!resposta.trim()" />
         </form>
       </section>
+      </div>
     </div>
 
     <!-- Print em tela cheia -->

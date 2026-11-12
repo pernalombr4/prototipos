@@ -12,6 +12,10 @@
  * Com `ativo="tarefasRapidas"`, o menu fica como na página Tarefas › Rápidas
  * (`/workspaces/teste-ux/tasks/quick`, 11/11/2026): Categorias recolhido e
  * Tarefas aberto com Agendadas, Rápidas (ativo) e Painel.
+ *
+ * Rodada 4, proposta: o sino mostra as notificações de quem você é no andaime
+ * (atribuído, reaberto, retorno enviado), com o número das não lidas no lugar
+ * do "99+" e "Marcar todas como lidas". Clicar numa delas abre o apontamento.
  */
 import type { Textos } from './textos'
 
@@ -21,7 +25,16 @@ const props = defineProps<{
   workspace: { name: string, reference: string }
   categoriasDoMenu: { nome: string, ativo?: boolean }[]
   ativo?: 'categorias' | 'tarefasRapidas'
+  /** Proposta: as notificações de quem está no papel escolhido. */
+  avisos?: { id: string, texto: string, quando: string, iniciais: string, lida: boolean }[]
 }>()
+const emit = defineEmits<{ abrirAviso: [id: string], marcarLidas: [] }>()
+const naoLidas = computed(() => props.avisos?.filter(a => !a.lida).length ?? 0)
+const sinoAberto = ref(false)
+function abrirAviso(id: string) {
+  sinoAberto.value = false
+  emit('abrirAviso', id)
+}
 
 const aberto = computed(() => props.ativo === 'tarefasRapidas' ? 'tarefas' : 'categorias')
 const filhosDeTarefas = computed(() => [
@@ -162,9 +175,39 @@ const ajuda: Entrada[] = [
       <span class="flex size-6 items-center justify-center rounded-full bg-success/15 text-[9px] font-bold text-success" :aria-label="t.casca.idioma">BR</span>
       <UButton icon="i-lucide-sun" color="neutral" variant="ghost" size="xs" :aria-label="t.casca.tema" />
       <UButton icon="i-lucide-headset" :label="t.casca.suporte" color="neutral" variant="outline" size="xs" />
-      <UChip text="99+" color="error" size="3xl">
-        <UButton icon="i-lucide-bell" color="neutral" variant="ghost" size="xs" :aria-label="t.casca.notificacoes" />
-      </UChip>
+      <UPopover v-model:open="sinoAberto" :content="{ align: 'end', sideOffset: 8 }">
+        <UChip :text="naoLidas ? String(naoLidas) : undefined" :show="!!naoLidas" color="error" size="3xl">
+          <UButton icon="i-lucide-bell" color="neutral" variant="ghost" size="xs" :aria-label="naoLidas ? t.avisos.naoLidas(naoLidas) : t.casca.notificacoes" />
+        </UChip>
+        <template #content>
+          <div class="flex w-96 max-w-[calc(100vw-2rem)] flex-col">
+            <div class="flex items-center justify-between gap-2 border-b border-default px-4 py-2.5">
+              <p class="text-sm font-semibold text-highlighted">{{ t.casca.notificacoes }}</p>
+              <UButton v-if="naoLidas" :label="t.avisos.marcarLidas" icon="i-lucide-check-check" color="neutral" variant="ghost" size="xs" @click="emit('marcarLidas')" />
+            </div>
+            <ul v-if="avisos?.length" class="flex max-h-96 flex-col overflow-y-auto">
+              <li v-for="a in avisos" :key="a.id">
+                <button
+                  type="button"
+                  class="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-elevated"
+                  :class="a.lida ? '' : 'bg-primary/5'"
+                  @click="abrirAviso(a.id)"
+                >
+                  <UAvatar :text="a.iniciais" size="sm" class="shrink-0" />
+                  <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span class="text-sm text-default" :class="a.lida ? '' : 'font-medium text-highlighted'">{{ a.texto }}</span>
+                    <span class="text-xs text-dimmed">{{ a.quando }}</span>
+                  </span>
+                  <span v-if="!a.lida" class="mt-1.5 size-2 shrink-0 rounded-full bg-primary" :aria-label="t.avisos.naoLida" />
+                </button>
+              </li>
+            </ul>
+            <p v-else class="flex flex-col items-center gap-2 px-4 py-8 text-center text-sm text-muted">
+              <UIcon name="i-lucide-bell-off" class="size-6 text-dimmed" />{{ t.avisos.vazio }}
+            </p>
+          </div>
+        </template>
+      </UPopover>
       <UChip color="success" size="sm" inset>
         <UAvatar size="sm" text="MJ" alt="Pessoa logada" />
       </UChip>

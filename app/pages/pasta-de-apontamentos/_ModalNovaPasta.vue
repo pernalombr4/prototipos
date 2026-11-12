@@ -8,8 +8,9 @@
  *
  * A proposta: o tipo Apontamentos no topo da lista, com selo Novo e descrição,
  * e, quando ele é escolhido, a seção de configuração logo abaixo: conferência,
- * responsável padrão, modelo do corpo, nomes dos estados e a trava de conclusão
- * do item.
+ * responsável padrão, nomes dos estados e a trava de conclusão do item.
+ *
+ * Rodada 4: sai o modelo do corpo. O apontamento novo começa vazio.
  *
  * Rodada 3: o nome da pasta Apontamentos é fixo. Com o tipo escolhido, o Nome
  * da Pasta mostra "Apontamentos" travado. Cada categoria tem no máximo 1 pasta
@@ -33,11 +34,6 @@ const props = defineProps<{
 const aberto = defineModel<boolean>('open', { required: true })
 const emit = defineEmits<{ criar: [p: { nome: string, icone: string }], salvar: [c: ConfigDaPasta] }>()
 
-const MODELOS: Record<string, string> = {
-  nenhum: '',
-  bug: '<p><strong>Onde:</strong> </p><p><strong>Problema:</strong> </p><p><strong>Correção sugerida:</strong> </p>',
-  clausula: '<p><strong>Cláusula:</strong> </p><p><strong>Como está:</strong> </p><p><strong>Como deve ficar:</strong> </p>',
-}
 const ICONES = ['i-lucide-list-checks', 'i-lucide-clipboard-check', 'i-lucide-scale', 'i-lucide-flag', 'i-lucide-bug', 'i-lucide-search-check']
 
 const nome = ref('')
@@ -47,14 +43,12 @@ const icone = ref<string>(SEM)
 const exigeConferencia = ref(true)
 const conferente = ref<'autor' | 'grupo'>('autor')
 const responsavel = ref(props.responsavelPadrao)
-const modelo = ref<'nenhum' | 'bug' | 'clausula'>('bug')
 const rotulos = reactive<Partial<Record<Estado, string>>>({})
 const trava = ref(true)
 const tentou = ref(false)
 const criando = ref(false)
 
 const nomeFixo = computed(() => props.t.novaPasta.tipos.apontamentos!)
-const modeloAtual = (html: string) => (Object.entries(MODELOS).find(([, v]) => v === html)?.[0] ?? 'nenhum') as 'nenhum' | 'bug' | 'clausula'
 
 watch(aberto, (v) => {
   if (!v) return
@@ -71,7 +65,6 @@ watch(aberto, (v) => {
   exigeConferencia.value = e.exigeConferencia
   conferente.value = e.conferente
   responsavel.value = e.responsavelPadrao
-  modelo.value = modeloAtual(e.modelo)
   for (const k of Object.keys(rotulos) as Estado[]) delete rotulos[k]
   Object.assign(rotulos, e.rotulos)
   trava.value = e.travaConclusao
@@ -89,7 +82,6 @@ const eApontamentos = computed(() => tipo.value === 'apontamentos')
 const itensDeIcone = computed(() => [{ value: SEM, label: props.t.novaPasta.semIcone }, ...ICONES.map(i => ({ value: i, label: i.replace('i-lucide-', ''), icon: i }))])
 const opcoesDePessoa = computed(() => props.pessoas.map(p => ({ label: p.nome, value: p.id, avatar: { text: p.iniciais, alt: p.nome } })))
 const opcoesDeConferente = computed(() => (['autor', 'grupo'] as const).map(v => ({ value: v, label: props.t.novaPasta.conferentes[v] })))
-const opcoesDeModelo = computed(() => (['nenhum', 'bug', 'clausula'] as const).map(v => ({ value: v, label: props.t.novaPasta.modelos[v] })))
 const estadosRenomeaveis: Estado[] = ['aberto', 'resolvido', 'conferido', 'descartado']
 
 const erros = computed(() => ({ nome: tentou.value && !eApontamentos.value && !nome.value.trim(), tipo: tentou.value && !tipo.value }))
@@ -105,7 +97,6 @@ async function criar() {
       icone: iconeFinal(),
       exigeConferencia: exigeConferencia.value,
       conferente: conferente.value,
-      modelo: MODELOS[modelo.value]!,
       responsavelPadrao: responsavel.value,
       travaConclusao: trava.value,
       rotulos: Object.fromEntries(Object.entries(rotulos).filter(([, v]) => v?.trim())),
@@ -164,9 +155,6 @@ async function criar() {
               </UFormField>
               <UFormField :label="t.novaPasta.responsavelPadrao">
                 <USelectMenu v-model="responsavel" :items="opcoesDePessoa" value-key="value" :search-input="false" :avatar="opcoesDePessoa.find(o => o.value === responsavel)?.avatar" class="w-full" />
-              </UFormField>
-              <UFormField :label="t.novaPasta.modelo" :help="t.novaPasta.modeloAjuda" class="sm:col-span-2">
-                <USelect v-model="modelo" :items="opcoesDeModelo" class="w-full" />
               </UFormField>
             </div>
 

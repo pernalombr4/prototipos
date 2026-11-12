@@ -1,8 +1,58 @@
 # Decisões: Pasta de apontamentos
 
-**A proposta em uma linha:** um tipo novo de pasta, Apontamentos, com nome fixo e no máximo 1 por categoria; dentro dela, uma lista de pontos a ajustar, cada um com corpo rico, anexos, responsável, estado e histórico, que quem resolve marca e quem confere aprova ou reabre, em rodadas. A tarefa ganha a mesma lista numa aba fixa.
+**A proposta em uma linha:** um tipo novo de pasta, Apontamentos, com nome fixo e no máximo 1 por categoria; dentro dela, uma lista de pontos a ajustar, cada um com corpo rico, anexos, responsáveis, estado e histórico, que quem resolve marca e quem confere aprova ou reabre, em rodadas. A tarefa ganha a mesma lista numa aba fixa.
 
 **Rodada 2, em uma linha:** as rodadas ganham vista própria e o cabeçalho perde o gráfico; a tarefa rápida ganha checklist, subtarefas de 1 nível, dependências e conclusão com motivo; o item ganha o contador da lista de tarefas; a citação com # liga apontamento, tarefa e item.
+
+## Rodada 4 · 2026-11-12
+
+- **Pedidos (literais):**
+  - "voce mostra a tarefa rapida em sidebar, certo? e o item em tela cheia. tem que mostrar o item no prototipo em sidebar tambem. vai ajudar a entendermos se ta sobrecarregado de elementos ou nao"
+  - "o campo de texto do apontamento deve vir vazio (o html) se precisar pode ter só um placeholder ali do tipo "descreva...""
+  - "o botao anexar arquivo deve ser "anexar arquivos" no plural"
+  - "o campo com nome da pessoa e o do lado não têm título"
+  - "o campo de responsável deve ser de seleçao multipla, sendo um campo de responsáveis no plural"
+  - "acho que ele deveria ficar como um card resumido, trazendo só a parte de cima (print) e podendo ser expandido ali ou colocado em tela cheia"
+  - "ao botar em tela cheia, o modal ta pegando o maximo da altura da tela, tem que limitar um bocado"
+  - "no botao "Novo apontamento" nao deve existir no dorpdown dele a iopçao de copiar link da pasta"
+  - "o apontamento gerado pro usuario X deve enviar NOTIFICAÇAO pra ele"
+  - "a questao do link realmente ta perdida. até aparece no meio dos anexos. ta ilógico. acho que tem que tirar isso do link"
+  - "o botao de agrupar por rodada nao precisa. e o "só os meus" deve ter a emsma aparencia de filtros rapidos de outras telas do enspace"
+  - "pode tirar a ideia de poder deixar um apontamento em rascunho tambem. desnecessário."
+- **Fronteira:**
+  - muda: a visualização "Item em: Tela cheia | Painel lateral" no andaime; o formulário do apontamento; o detalhe (cartão resumido e tela cheia); os filtros da lista; o menu do "Novo apontamento"; o sino do topo; o Editar da pasta (sem modelo); o fim do rascunho;
+  - não muda: a listagem da categoria e a gaveta do item (cópia do develop), a barra de pastas com o "+N" (cópia do develop), a vista Rodadas, a tarefa rápida.
+
+| Decisão | Motivo |
+|---|---|
+| "Item em: Painel lateral" abre o item na gaveta da direita, sobre a listagem da categoria, como o develop faz ao clicar numa linha | Pedido literal. A gaveta mede 700 px, de 400 a 1400, com a alça de largura; é nela que se julga se a pasta pesa |
+| Na gaveta, a barra de pastas mostra as que cabem e o "+N" com as outras, copiado do develop | É o comportamento real da barra no item aberto em gaveta, sem melhoria de passagem |
+| O corpo do apontamento novo começa vazio, com a dica "Descreva o apontamento..." | Pedido literal. Sai o modelo por pasta (Onde, Problema, Correção sugerida) e a opção dele no Editar da pasta |
+| No detalhe, corpo vazio mostra "Sem descrição." | Sem a frase, a seção fica em branco e parece erro de carregamento |
+| "Anexar arquivos", no plural | Pedido literal. O seletor já aceita vários arquivos |
+| Sai o link como anexo e o botão "Adicionar link" | Pedido literal. A gravação ou a página entra como arquivo ou no texto do corpo |
+| Responsáveis e Prioridade com rótulo, no formulário e no detalhe | Pedido literal. Sem rótulo, o nome da pessoa não diz o papel dela |
+| Responsáveis em seleção múltipla, com busca | Pedido literal. A vez do apontamento pendente é de todos os responsáveis ("A vez é de Bruno Tavares e Caio Mendes"); qualquer um deles marca "Resolvido" |
+| Na lista, os responsáveis viram um grupo de avatares (até 3) | Cabe na linha sem quebrar o título |
+| No espaço estreito (gaveta e painel da tarefa), o apontamento escolhido vira cartão na própria lista: só o cabeçalho (#, título, estado e de quem é a vez), com a seta para expandir ali e o botão de tela cheia | Pedido literal. A lista continua à vista e o cartão não empurra os outros apontamentos para fora |
+| No espaço estreito, nada abre sozinho | Antes, o 1º reaberto abria e escondia a lista na gaveta |
+| A tela cheia é um modal de até 72rem por 46rem, mais largo do que alto: o conteúdo à esquerda e a linha do tempo à direita | Pedido literal, com o ClickUp como referência: a tarefa aberta é um modal largo com a atividade numa coluna à parte |
+| Sai "Copiar link da pasta" do menu do "Novo apontamento" | Pedido literal. O menu fica com o que cria: "Colar uma lista" e "Exportar PDF" |
+| Sai "Agrupar por rodada" | Pedido literal. O filtro de rodada e a vista Rodadas já respondem "o que é da rodada 2" |
+| "Só os meus" é um filtro rápido: botão com ícone, neutro e suave quando desligado, primário e sutil quando ligado | Pedido literal. É a marcação da barra de filtros das listagens do ENSPACE (`UButton size="sm"`, `color` e `variant` pelo estado) |
+| Atribuir, reabrir e enviar o retorno notificam cada responsável no sino do topo, menos quem fez a ação | Pedido literal. O sino mostra o número das não lidas, a lista com quem fez e o quê, e "Marcar todas como lidas"; clicar abre o apontamento |
+| O toast de criar e o de enviar o retorno dizem quem recebeu a notificação | Quem escreve vê na hora que o aviso saiu, sem abrir o sino |
+| Sem rascunho: o apontamento nasce aberto e notifica na hora | Pedido literal. O "Enviar retorno" continua, para fechar a rodada com veredito e resumo |
+| Para quem confere, o aviso "A rodada N está em preparo" leva ao "Enviar retorno" | Sem o rascunho, é a rodada em preparo que pede o envio |
+
+- **Para o dev:**
+  - o apontamento guarda `responsaveis: number[]`; a API de tarefas tem `assigned_to` com 1 só, e o "Converter em tarefa" leva o 1º;
+  - 3 notificações novas: apontamento atribuído (ao criar e a quem entra como responsável depois), apontamento reaberto e retorno da rodada enviado (com quantos apontamentos são da pessoa);
+  - sai o estado `rascunho` e o modelo do corpo da configuração da pasta;
+  - sai o anexo do tipo link: anexo é imagem ou arquivo, em `c-files`;
+  - na gaveta, o sino fica sob o painel, como no develop: para ver a notificação, use "Item em: Tela cheia".
+- **Descartado:** o link como anexo, o "Agrupar por rodada", o modelo do corpo, o "Copiar link da pasta" e o rascunho. Motivo: pedido literal.
+- **Ver:** https://pernalombr4.github.io/prototipos/pasta-de-apontamentos/?abertura=painel&cenario=juridico · `evidencias/hoje-item-no-painel.jpg` · `evidencias/rodada4-cartao-no-painel.jpg` · `evidencias/rodada4-notificacao.jpg`
 
 ## Rodada 3 · 2026-11-12
 
@@ -107,7 +157,7 @@
 
 ```mermaid
 flowchart LR
-  A[Quem confere escreve os apontamentos em rascunho] -->|Enviar retorno: veredito e resumo| B[Rodada N: 1 aviso para cada responsável]
+  A[Quem confere escreve os apontamentos: cada responsável recebe a notificação] -->|Enviar retorno: veredito e resumo| B[Rodada N fechada: notificação para cada responsável]
   B --> C[Quem resolve marca cada um como resolvido]
   C -->|todos resolvidos| D[Pedir reteste: 1 aviso para quem confere]
   D --> E{Quem confere}
@@ -128,12 +178,12 @@ flowchart LR
 | Quem resolve não fecha: marca "Resolvido", e quem confere confere ou reabre | Procore, Marker.io e Fieldwire fazem igual. É o que impede o "corrigido" que não foi testado |
 | A conferência é opcional, por pasta | Pasta sem conferência: "Resolvido" já fecha. Serve a quem só quer um checklist com dono |
 | Estados com significado fixo e nome editável | O relatório e o Spaceflow leem o significado; o cliente lê o nome ("Corrigido", "Ajustado") |
-| Rascunho e "Enviar retorno" | O GitHub faz isso na revisão de PR: o dev recebe 1 aviso com a rodada inteira, não 1 por apontamento |
+| ~~Rascunho e "Enviar retorno"~~ (rodada 4: sai o rascunho; o "Enviar retorno" fecha a rodada) | O GitHub faz isso na revisão de PR: o dev recebe 1 aviso com a rodada inteira, não 1 por apontamento |
 | Rodada (R1, R2) em cada apontamento e no cabeçalho | Substitui o histórico do `.docx`: a rodada guarda veredito, resumo e quem pediu reteste |
 | Reabrir e descartar pedem motivo | Sem o motivo, o reaberto vira adivinhação. O motivo entra na conversa do apontamento |
-| Print, arquivo e link como anexo, fora do corpo | O corpo fica legível; o anexo ganha contagem na linha, tela cheia para imagem e download para Postman e JSON |
-| Modelo do corpo por pasta | Produto escreve Onde, Problema e Correção sugerida; jurídico escreve Cláusula, Como está e Como deve ficar |
-| "Colar uma lista" cria rascunhos em lote | Quem testou já tem a lista escrita em outro lugar; 1 linha vira 1 apontamento |
+| Print e arquivo como anexo, fora do corpo (rodada 4: sai o link) | O corpo fica legível; o anexo ganha contagem na linha, tela cheia para imagem e download para Postman e JSON |
+| ~~Modelo do corpo por pasta~~ (rodada 4: o corpo começa vazio) | Produto escreve Onde, Problema e Correção sugerida; jurídico escreve Cláusula, Como está e Como deve ficar |
+| "Colar uma lista" cria apontamentos em lote (em rascunho até a rodada 3) | Quem testou já tem a lista escrita em outro lugar; 1 linha vira 1 apontamento |
 | "Converter em tarefa" é uma saída, no menu do apontamento | Para o ponto que cresceu e pede prazo próprio. O apontamento fica, com a referência à tarefa |
 | A tarefa ganha a aba fixa Apontamentos, entre Comentários e Logs | A tarefa não tem pastas (abas fixas no componente). A aba usa a configuração padrão do tipo: conferência ligada, quem confere é quem criou |
 | Subtarefa fica fora | O pedido descarta. O apontamento não tem prazo, quadro nem status de tarefa; a subtarefa teria, e duplicaria a pasta Tarefas |
@@ -144,7 +194,7 @@ flowchart LR
 - Componente novo `_PastaDeApontamentos.vue` serve à pasta do item e à aba da tarefa; a prop `compacto` troca o lado a lado pela sequência.
 - O apontamento selecionado vai para o endereço (`?apontamentos-ap=4`): o link de um apontamento abre nele.
 - A pasta Tarefas não usa o `EnKanbanBoard`: o `EnKanbanCardConfig` monta selos só a partir de campos de seleção, e a linha "1 de 2 pendentes" muda com a lista.
-- CSS próprio: o fundo listrado do rascunho (`bg-[repeating-linear-gradient(...)]` em `_LinhaDoApontamento.vue`). Nenhum `UBadge` ou variante do Nuxt UI marca "só você vê"; a listra diz isso sem texto.
+- ~~CSS próprio: o fundo listrado do rascunho em `_LinhaDoApontamento.vue`.~~ Saiu na rodada 4, com o rascunho.
 
 - **Descartado:** subtarefas. Motivo: pedido literal, e a subtarefa traria prazo e status de tarefa para um ponto que só precisa de dono e de check.
 - **Descartado:** quadro de apontamentos por estado. Motivo: pedido literal ("nao cards de kanban").

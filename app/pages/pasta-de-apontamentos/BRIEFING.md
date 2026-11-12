@@ -89,5 +89,10 @@ Copiado olhando o develop em 11/11/2026. Nada aqui é proposta.
 | Menu Tarefas (rodada 2) | `_CascaDoWorkspace.vue`: Tarefas aberto com Agendadas, Rápidas (ativa) e Painel |
 | Página Tarefas › Rápidas (rodada 2) | `_PastaTarefas.vue` com `variante="pagina"`: barra de visualizações, busca, Criado em, Todo o período, Filtros, as 4 colunas com o degradê do develop e o rodapé com a paginação e "500 por página" |
 | Trilha da Tarefa rápida (rodada 2) | Workspace, Tarefas, Rápidas |
+| Listagem da categoria (rodada 4, copiada em 12/11/2026) | `_ListaDaCategoria.vue`: aba de visualização Itens, busca, Criado em, Todo o período, os ícones da barra, Novo registro, a tabela com seleção, Ações e Referência, e o rodapé "Mostrando" com "100 por página" |
+| Gaveta do item (rodada 4) | `index.vue` com "Item em: Painel lateral": painel à direita de 700 px, de 400 a 1400, fundo `bg-muted`, alça de largura, véu sobre a listagem e o item inteiro dentro (painel do item, barra de pastas e pasta). Cobre a barra do topo, como no develop |
+| Barra de pastas na gaveta (rodada 4) | `_BarraDePastas.vue`: as abas que cabem e o "+N", com a busca "Pesquisar pasta...", as pastas da barra, "Fora da barra", Nova pasta, "Aplicar minha ordem para todos" e "Usar ordem da categoria" |
+
+![O item aberto na gaveta da listagem, no develop](evidencias/hoje-item-no-painel.jpg)
 
 As pastas Emails Automáticos, Mail Box e Campos do item de exploração ficaram fora da barra: são do tipo de lá, não de todo item.

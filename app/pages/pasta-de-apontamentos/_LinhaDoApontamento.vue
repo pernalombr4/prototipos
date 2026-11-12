@@ -32,11 +32,10 @@ const emit = defineEmits<{
 const visual = computed(() => visualDoEstado[props.a.estado])
 const corDoIcone: Record<string, string> = { neutral: 'text-muted', info: 'text-info', success: 'text-success', error: 'text-error', warning: 'text-warning' }
 const rotulo = computed(() => rotuloDoEstado(props.lista.config, props.a.estado, props.t.estados, props.t.locale))
-const responsavel = computed(() => pessoa(props.lista, props.a.responsavel))
-const vez = computed(() => {
-  const id = vezDe(props.a, props.lista.config)
-  return id ? pessoa(props.lista, id) : undefined
-})
+const responsaveis = computed(() => props.a.responsaveis.map(id => pessoa(props.lista, id)).filter(p => !!p))
+const juntar = (xs: string[]) => new Intl.ListFormat(props.t.locale, { type: 'conjunction' }).format(xs)
+const idsDaVez = computed(() => vezDe(props.a, props.lista.config))
+const vez = computed(() => juntar(idsDaVez.value.map(id => pessoa(props.lista, id)?.nome ?? '').filter(Boolean)))
 
 const marcavel = computed(() => !props.somenteLeitura && podeResolver(props.a, props.quem))
 const desmarcavel = computed(() => !props.somenteLeitura && podeDesmarcar(props.a, props.quem, props.lista.config))
@@ -46,7 +45,7 @@ const reabrivel = computed(() => !props.somenteLeitura && props.a.estado === 're
 const dicaDoControle = computed(() => {
   if (marcavel.value) return props.t.apontamento.marcarResolvido
   if (desmarcavel.value) return props.t.apontamento.desmarcar
-  if (vez.value) return props.t.apontamento.vezDe(vez.value.nome)
+  if (vez.value) return props.t.apontamento.vezDe(vez.value)
   return rotulo.value
 })
 
@@ -64,10 +63,7 @@ const outros = computed(() => props.a.anexos.length - imagens.value)
 <template>
   <li
     class="group relative flex items-start gap-3 border-b border-default px-4 py-3 transition-colors duration-150"
-    :class="[
-      selecionado ? 'bg-elevated' : 'hover:bg-elevated/50',
-      a.estado === 'rascunho' ? 'bg-[repeating-linear-gradient(135deg,transparent,transparent_6px,var(--ui-bg-elevated)_6px,var(--ui-bg-elevated)_7px)]' : '',
-    ]"
+    :class="selecionado ? 'bg-elevated' : 'hover:bg-elevated/50'"
   >
     <span
       class="absolute inset-y-0 left-0 w-0.5 rounded-r transition-colors"
@@ -134,14 +130,16 @@ const outros = computed(() => props.a.anexos.length - imagens.value)
       <UButton v-if="conferivel" :label="t.apontamento.conferir" icon="i-lucide-badge-check" color="success" variant="soft" size="xs" @click.stop="emit('conferir')" />
     </div>
 
-    <UTooltip v-if="responsavel" :text="vez ? t.apontamento.vezDe(vez.nome) : responsavel.nome">
-      <UAvatar
-        :text="responsavel.iniciais"
-        :alt="responsavel.nome"
-        size="xs"
-        class="relative z-10 mt-0.5 shrink-0"
-        :class="vez && vez.id === responsavel.id ? 'ring-2 ring-primary/50' : ''"
-      />
+    <UTooltip v-if="responsaveis.length" :text="vez ? t.apontamento.vezDe(vez) : juntar(responsaveis.map(p => p!.nome))">
+      <UAvatarGroup size="xs" :max="3" class="relative z-10 mt-0.5 shrink-0">
+        <UAvatar
+          v-for="p in responsaveis"
+          :key="p!.id"
+          :text="p!.iniciais"
+          :alt="p!.nome"
+          :class="idsDaVez.includes(p!.id) ? 'ring-2 ring-primary/50' : ''"
+        />
+      </UAvatarGroup>
     </UTooltip>
   </li>
 </template>

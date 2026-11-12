@@ -12,6 +12,12 @@
  * rápida (a página Tarefas › Rápidas, com checklist, subtarefas, dependências
  * e conclusão com motivo no painel). A citação com # vale nas duas.
  *
+ * Rodada 4: na visualização Item, o andaime alterna Tela cheia e Painel
+ * lateral. No painel, o fundo é a listagem da categoria e o item abre à
+ * direita como no develop (gaveta redimensionável, 700 px de partida, de 400 a
+ * 1400), com a mesma tela do item dentro. Serve para julgar se a pasta de
+ * apontamentos cabe no espaço estreito.
+ *
  * Andaime: visualização, cenário (produto ou jurídico, para provar que o tipo
  * é universal), quem você é (quem confere ou quem resolve) e o estado da tela.
  */
@@ -23,6 +29,8 @@ import { CHAVE_CITACAO } from './citacao'
 import { textos } from './textos'
 import { cenarios, pastasDoSistema } from './mocks'
 import { copia, pendente, responder } from './lista'
+import type { Aviso } from './avisos'
+import { avisos, avisosDe, marcarLidas } from './avisos'
 import CascaDoWorkspace from './_CascaDoWorkspace.vue'
 import PainelDoItem from './_PainelDoItem.vue'
 import BarraDePastas from './_BarraDePastas.vue'
@@ -31,6 +39,7 @@ import PastaTarefas from './_PastaTarefas.vue'
 import PainelDaTarefa from './_PainelDaTarefa.vue'
 import ModalNovaPasta from './_ModalNovaPasta.vue'
 import VisaoGeralDoItem from './_VisaoGeralDoItem.vue'
+import ListaDaCategoria from './_ListaDaCategoria.vue'
 
 import briefingMd from './BRIEFING.md?raw'
 import pesquisaMd from './PESQUISA.md?raw'
@@ -52,6 +61,7 @@ const router = useRouter()
 /* ---------- andaime, no endereço ---------- */
 type IdCenario = Cenario['id']
 type Vista = 'item' | 'tarefa'
+type Abertura = 'tela' | 'painel'
 type Papel = 'conferente' | 'resolvedor'
 type EstadoDaTela = 'cheio' | 'vazio' | 'carregando' | 'semPermissao'
 
@@ -62,6 +72,7 @@ function daQuery<T extends string>(chave: string, validos: readonly T[], padrao:
   })
 }
 const vista = daQuery<Vista>('vista', ['item', 'tarefa'], 'item')
+const abertura = daQuery<Abertura>('abertura', ['tela', 'painel'], 'tela')
 const cenarioId = daQuery<IdCenario>('cenario', ['produto', 'juridico'], 'produto')
 const papel = daQuery<Papel>('papel', ['conferente', 'resolvedor'], 'conferente')
 const estadoDaTela = daQuery<EstadoDaTela>('estado', ['cheio', 'vazio', 'carregando', 'semPermissao'], 'cheio')
@@ -143,7 +154,6 @@ const listaDaTarefa = computed<Lista | null>(() => {
       icone: 'i-lucide-list-checks',
       exigeConferencia: true,
       conferente: 'autor',
-      modelo: c.value.config.modelo,
       responsavelPadrao: x.tarefa.assigned_to ?? c.value.resolvedor,
       travaConclusao: false,
       rotulos: {},
@@ -155,7 +165,7 @@ const listaDaTarefa = computed<Lista | null>(() => {
 function converter(a: Apontamento) {
   const base = c.value.tarefas[0]!.tarefa
   const nova: TarefaDoItem = {
-    tarefa: { ...copia(base), id: 990 + c.value.tarefas.length, name: a.titulo, description: null, status: 'pending', assigned_to: a.responsavel, priority: a.prioridade },
+    tarefa: { ...copia(base), id: 990 + c.value.tarefas.length, name: a.titulo, description: null, status: 'pending', assigned_to: a.responsaveis[0] ?? null, priority: a.prioridade },
     apontamentos: [],
     rodadas: [],
     checklist: [],
@@ -187,20 +197,93 @@ provide(CHAVE_CITACAO, {
       tarefaAberta.value = null
       vista.value = 'item'
       ativa.value = 'visao-geral'
+      if (abertura.value === 'painel') abrirGaveta()
       return
     }
     const n = chave.startsWith('ap-') ? chave.slice(3) : ''
-    if (n) {
-      tarefaAberta.value = null
-      router.replace({ query: { ...route.query, vista: 'item', folder: ID_PRINCIPAL, [`${ID_PRINCIPAL}-ap`]: n } })
-    }
+    if (n) abrirNaPasta(n)
   },
 })
+
+/** Abre a pasta de Apontamentos do item, com o apontamento escolhido quando há. */
+function abrirNaPasta(numero?: string) {
+  tarefaAberta.value = null
+  router.replace({ query: { ...route.query, vista: 'item', folder: ID_PRINCIPAL, [`${ID_PRINCIPAL}-ap`]: numero } })
+  if (abertura.value === 'painel') abrirGaveta()
+}
+
+/* ---------- notificações do sino (rodada 4) ---------- */
+const nomeDaPessoa = (id: number) => c.value.pessoas.find(p => p.id === id)
+const meusAvisos = computed(() => avisosDe(quem.value).map((a) => {
+  const autor = nomeDaPessoa(a.quem)
+  const nome = autor?.nome ?? ''
+  return {
+    id: a.id,
+    lida: a.lida,
+    iniciais: autor?.iniciais ?? '',
+    quando: t.value.dataHora(a.quando),
+    texto: a.tipo === 'retorno' ? t.value.avisos.retorno(nome, a.qtd ?? 0, a.rodada ?? 1) : t.value.avisos[a.tipo](nome, a.numero ?? 0, a.titulo ?? ''),
+  }
+}))
+function abrirAviso(id: string) {
+  const a: Aviso | undefined = avisos.find(x => x.id === id)
+  if (!a) return
+  a.lida = true
+  if (!a.apontamento) return abrirNaPasta()
+  if (c.value.apontamentos.some(x => x.id === a.apontamento)) return abrirNaPasta(String(a.numero))
+  const x = c.value.tarefas.find(y => y.apontamentos.some(z => z.id === a.apontamento))
+  if (x) abrirTarefa(x, 'apontamentos')
+}
 
 /* ---------- casca ---------- */
 const trilha = computed(() => vista.value === 'tarefa'
   ? [c.value.workspace.name, t.value.casca.itens.tarefas!, t.value.tarefaRapida.pagina.rapidas]
-  : [c.value.workspace.name, t.value.casca.categorias, c.value.categoria.slug, c.value.item.reference])
+  : abertura.value === 'painel'
+    ? [c.value.workspace.name, t.value.casca.categorias, c.value.categoria.slug]
+    : [c.value.workspace.name, t.value.casca.categorias, c.value.categoria.slug, c.value.item.reference])
+
+/* ---------- item no painel lateral (cópia da gaveta da listagem do develop) ---------- */
+const itemNoPainel = computed(() => vista.value === 'item' && abertura.value === 'painel')
+const gavetaAberta = ref(true)
+const larguraDaGaveta = ref(700)
+const limitar = (w: number) => Math.round(Math.min(Math.max(w, 400), Math.min(1400, window.innerWidth - 80)))
+function abrirGaveta() {
+  gavetaAberta.value = true
+  painelRecolhido.value = false
+}
+watch(abertura, (a) => {
+  if (a === 'painel') abrirGaveta()
+  else painelRecolhido.value = true
+})
+function redimensionar(e: MouseEvent) {
+  e.preventDefault()
+  const mover = (ev: MouseEvent) => { larguraDaGaveta.value = limitar(window.innerWidth - ev.clientX) }
+  const soltar = () => {
+    window.removeEventListener('mousemove', mover)
+    window.removeEventListener('mouseup', soltar)
+  }
+  window.addEventListener('mousemove', mover)
+  window.addEventListener('mouseup', soltar)
+}
+function teclaDaGaveta(e: KeyboardEvent) {
+  if (!itemNoPainel.value || !gavetaAberta.value) return
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    e.preventDefault()
+    larguraDaGaveta.value = limitar(larguraDaGaveta.value + (e.key === 'ArrowLeft' ? 40 : -40))
+  }
+}
+function escDaGaveta(e: KeyboardEvent) {
+  if (e.key !== 'Escape' || !itemNoPainel.value || !gavetaAberta.value) return
+  /* Com modal, painel da tarefa ou menu aberto por cima, o Esc é deles. */
+  if (document.querySelector('[role="dialog"][data-state="open"], [role="menu"], [role="listbox"]')) return
+  gavetaAberta.value = false
+}
+onMounted(() => {
+  larguraDaGaveta.value = limitar(larguraDaGaveta.value)
+  if (itemNoPainel.value) painelRecolhido.value = false
+  window.addEventListener('keydown', escDaGaveta)
+})
+onBeforeUnmount(() => window.removeEventListener('keydown', escDaGaveta))
 
 /** Na visualização Tarefa rápida, o painel abre na tarefa que tem checklist e subtarefas. */
 function abrirTarefaDaVista() {
@@ -224,14 +307,23 @@ const opcoesDePapel = computed(() => (['conferente', 'resolvedor'] as const).map
 /* Ao trocar de cenário, a pasta e o detalhe abertos ficam para trás. */
 watch(cenarioId, () => {
   tarefaAberta.value = null
-  router.replace({ query: { vista: vista.value, cenario: cenarioId.value, papel: papel.value, estado: estadoDaTela.value } })
+  router.replace({ query: { vista: vista.value, abertura: abertura.value, cenario: cenarioId.value, papel: papel.value, estado: estadoDaTela.value } })
   nextTick(abrirTarefaDaVista)
 })
 </script>
 
 <template>
   <div>
-    <CascaDoWorkspace :t="t" :trilha="trilha" :workspace="c.workspace" :categorias-do-menu="c.categoriasDoMenu" :ativo="vista === 'tarefa' ? 'tarefasRapidas' : 'categorias'">
+    <CascaDoWorkspace
+      :t="t"
+      :trilha="trilha"
+      :workspace="c.workspace"
+      :categorias-do-menu="c.categoriasDoMenu"
+      :ativo="vista === 'tarefa' ? 'tarefasRapidas' : 'categorias'"
+      :avisos="meusAvisos"
+      @abrir-aviso="abrirAviso"
+      @marcar-lidas="marcarLidas(quem)"
+    >
       <!-- Visualização Tarefa rápida: a página Tarefas › Rápidas -->
       <div v-if="vista === 'tarefa'" class="h-[calc(100dvh-4rem-3.25rem)] min-h-0 bg-default">
         <PastaTarefas
@@ -244,7 +336,40 @@ watch(cenarioId, () => {
         />
       </div>
 
-      <div v-else class="flex h-[calc(100dvh-4rem-3.25rem)] min-h-0">
+      <div v-else class="relative h-[calc(100dvh-4rem-3.25rem)] min-h-0">
+        <!-- Item em painel lateral: o fundo é a listagem da categoria (cópia) -->
+        <ListaDaCategoria v-if="itemNoPainel" :t="t" :c="c" :aberto="gavetaAberta" @abrir="abrirGaveta" />
+        <Transition enter-active-class="transition-opacity duration-200" enter-from-class="opacity-0" leave-active-class="transition-opacity duration-150" leave-to-class="opacity-0">
+          <div v-if="itemNoPainel && gavetaAberta" class="fixed inset-x-0 top-0 bottom-[3.25rem] z-30 bg-default/60" aria-hidden="true" @click="gavetaAberta = false" />
+        </Transition>
+
+        <!-- A tela do item: inteira, ou dentro da gaveta da direita -->
+        <Transition enter-active-class="transition-transform duration-200 ease-out" enter-from-class="translate-x-full" leave-active-class="transition-transform duration-150 ease-in" leave-to-class="translate-x-full">
+        <div
+          v-show="!itemNoPainel || gavetaAberta"
+          :role="itemNoPainel ? 'dialog' : undefined"
+          :aria-label="itemNoPainel ? c.item.reference : undefined"
+          class="flex min-h-0"
+          :class="itemNoPainel ? 'fixed right-0 top-0 bottom-[3.25rem] z-30 border-l border-default bg-muted pl-4 shadow-xl' : 'h-full'"
+          :style="itemNoPainel ? { width: `${larguraDaGaveta}px` } : undefined"
+        >
+        <!-- Alça de largura, como no develop -->
+        <div
+          v-if="itemNoPainel"
+          role="separator"
+          aria-orientation="vertical"
+          tabindex="0"
+          :aria-label="t.categoria.redimensionar"
+          :aria-valuenow="larguraDaGaveta"
+          aria-valuemin="400"
+          aria-valuemax="1400"
+          class="group absolute inset-y-0 left-0 z-10 w-1 cursor-ew-resize transition-colors hover:bg-primary focus-visible:bg-primary focus-visible:outline-none"
+          @mousedown="redimensionar"
+          @keydown="teclaDaGaveta"
+        >
+          <span class="absolute inset-y-0 left-0 w-4 -translate-x-1.5" />
+          <span class="absolute left-0 top-1/2 h-12 w-1 -translate-y-1/2 rounded-full bg-accented transition-colors group-hover:bg-primary" />
+        </div>
         <PainelDoItem v-model:recolhido="painelRecolhido" :t="t" :item="c.item" :categoria="c.categoria" />
         <section class="flex min-w-0 flex-1 flex-col bg-default">
           <BarraDePastas v-model:ativa="ativa" :t="t" :pastas="pastas" @nova="modalNova = true" @editar="editarPasta" />
@@ -292,6 +417,8 @@ watch(cenarioId, () => {
             </Transition>
           </div>
         </section>
+        </div>
+        </Transition>
       </div>
     </CascaDoWorkspace>
 
@@ -328,6 +455,22 @@ watch(cenarioId, () => {
             @click="vista = v"
           />
         </UFieldGroup>
+
+        <template v-if="vista === 'item'">
+          <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
+          <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.tarefaRapida.andaime.abertura }}</span>
+          <UFieldGroup size="xs">
+            <UButton
+              v-for="a in (['tela', 'painel'] as const)"
+              :key="a"
+              :label="t.tarefaRapida.andaime.aberturas[a]"
+              :icon="a === 'tela' ? 'i-lucide-maximize-2' : 'i-lucide-panel-right'"
+              :color="abertura === a ? 'primary' : 'neutral'"
+              :variant="abertura === a ? 'solid' : 'outline'"
+              @click="abertura = a"
+            />
+          </UFieldGroup>
+        </template>
 
         <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.cenario }}</span>

@@ -7,13 +7,19 @@
  * (lista à esquerda, detalhe à direita) por lista e detalhe em sequência,
  * para caber no painel da tarefa e em tela estreita.
  *
- * O ciclo: quem confere escreve em rascunho e envia o retorno da rodada (1
- * aviso só); quem resolve marca cada um como resolvido e pede o reteste; quem
+ * O ciclo: quem confere escreve os apontamentos (cada responsável recebe a
+ * notificação na hora) e fecha a rodada com o retorno e o veredito; quem resolve marca cada um como resolvido e pede o reteste; quem
  * confere confere ou reabre. Descartar pede motivo. Tudo em memória.
  *
  * Rodada 2: o topo fica sem gráfico (as contagens moram nos filtros, em
  * texto); a pasta ganha as vistas Lista e Rodadas; a lista filtra e agrupa por
  * rodada; o detalhe abre em tela cheia; descartar aceita "Duplicado de".
+ *
+ * Rodada 4: "Só os meus" vira filtro rápido, com a cara dos filtros rápidos
+ * das listagens do ENSPACE; "Agrupar por rodada" e "Copiar link da pasta"
+ * saem. Em sequência (gaveta do item e painel da tarefa), o apontamento
+ * escolhido abre na própria lista como cartão resumido, que se expande ali ou
+ * vai para a tela cheia; a tela cheia é um modal mais largo do que alto.
  */
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Apontamento, Rodada } from './mocks'
@@ -24,8 +30,8 @@ import DetalheDoApontamento from './_DetalheDoApontamento.vue'
 import NovoApontamentoForm from './_NovoApontamento.vue'
 import VistaDeRodadas from './_VistaDeRodadas.vue'
 import {
-  conferir, contagem, criar, desmarcar, descartar, enviarRetorno, foto, grupoDe, pedirReteste, pessoa,
-  podeConferir, podeResolver, proximaRodada, reabrir, resolver, restaurar, resumoDaProxima, situacao, visiveis,
+  conferir, contagem, criar, desmarcar, descartar, ehResponsavel, enviarRetorno, foto, grupoDe, pedirReteste, pessoa,
+  podeConferir, podeResolver, proximaRodada, reabrir, resolver, restaurar, resumoDaProxima, situacao, temPreparo, visiveis,
 } from './lista'
 
 const props = defineProps<{
@@ -70,7 +76,6 @@ const grupo = ref<Grupo>('todos')
 const busca = ref('')
 const soMeus = ref(false)
 const rodadaFiltro = ref<number | 'todas'>('todas')
-const agrupar = ref(false)
 const rodadasExistentes = computed(() => [...new Set(visiveis(props.lista, props.quem).map(a => a.rodada))].sort((x, y) => x - y))
 const opcoesDeRodada = computed(() => [
   { value: 'todas' as const, label: props.t.fluxo.todasAsRodadas },
@@ -83,16 +88,15 @@ const grupos = computed(() => {
   ]
   if (props.lista.config.exigeConferencia) base.push({ value: 'paraConferir', label: props.t.filtros.paraConferir, n: c.value.paraConferir })
   base.push({ value: 'fechados', label: props.t.filtros.fechados, n: c.value.fechados })
-  if (c.value.rascunhos) base.push({ value: 'rascunhos', label: props.t.filtros.rascunhos, n: c.value.rascunhos })
   return base
 })
 
-const ordemDoGrupo: Record<string, number> = { rascunhos: 0, pendentes: 1, paraConferir: 2, fechados: 3 }
+const ordemDoGrupo: Record<string, number> = { pendentes: 1, paraConferir: 2, fechados: 3 }
 const filtrados = computed(() => {
   const termo = busca.value.trim().toLowerCase()
   return visiveis(props.lista, props.quem)
     .filter(a => grupo.value === 'todos' || grupoDe(a, props.lista.config) === grupo.value)
-    .filter(a => !soMeus.value || a.responsavel === props.quem || a.autor === props.quem)
+    .filter(a => !soMeus.value || ehResponsavel(a, props.quem) || a.autor === props.quem)
     .filter(a => rodadaFiltro.value === 'todas' || a.rodada === rodadaFiltro.value)
     .filter(a => !termo || a.titulo.toLowerCase().includes(termo) || String(a.numero) === termo.replace('#', ''))
     .sort((x, y) => (ordemDoGrupo[grupoDe(x, props.lista.config)]! - ordemDoGrupo[grupoDe(y, props.lista.config)]!) || x.numero - y.numero)
@@ -104,13 +108,6 @@ function limparFiltro() {
   soMeus.value = false
   rodadaFiltro.value = 'todas'
 }
-
-/** Com "Agrupar por rodada", a lista se divide pela rodada em que cada apontamento nasceu. */
-const blocosDaLista = computed(() => {
-  if (!agrupar.value) return [{ rodada: 0, itens: filtrados.value }]
-  const nums = [...new Set(filtrados.value.map(a => a.rodada))].sort((x, y) => y - x)
-  return nums.map(n => ({ rodada: n, itens: filtrados.value.filter(a => a.rodada === n) }))
-})
 
 /* ---------- seleção, no endereço ---------- */
 const parametro = computed(() => `${props.chave}-ap`)
@@ -130,9 +127,14 @@ const selecionadoId = computed<string | null>({
 })
 const selecionado = computed(() => props.lista.apontamentos.find(a => a.id === selecionadoId.value) ?? null)
 
-/* No lado a lado, o primeiro reaberto (ou o primeiro da lista) já vem aberto. */
+/*
+ * No lado a lado, o primeiro reaberto (ou o primeiro da lista) já vem aberto.
+ * Em sequência, nada abre sozinho: a lista vem primeiro. A largura se mede
+ * aqui, antes do ResizeObserver, para a gaveta estreita não abrir o detalhe.
+ */
 onMounted(() => {
-  if (!props.compacto && !selecionadoId.value && props.estadoDaTela === 'cheio') {
+  const largura = raiz.value?.getBoundingClientRect().width ?? 1200
+  if (!props.compacto && largura >= 880 && !selecionadoId.value && props.estadoDaTela === 'cheio') {
     const primeiro = filtrados.value.find(a => a.estado === 'reaberto') ?? filtrados.value[0]
     if (primeiro) local.value = primeiro.id
   }
@@ -168,7 +170,7 @@ function pedirMotivo(tipo: 'reabrir' | 'descartar', a: Apontamento) {
 }
 const opcoesDeDescarte = computed(() => (['naoSeraFeito', 'duplicado'] as const).map(v => ({ value: v, label: props.t.fluxo.motivos[v] })))
 const opcoesDeDuplicado = computed(() => props.lista.apontamentos
-  .filter(a => a.id !== pedido.value?.a.id && a.estado !== 'rascunho')
+  .filter(a => a.id !== pedido.value?.a.id)
   .map(a => ({ value: a.numero, label: `#${a.numero} ${a.titulo}` })))
 const duplicando = computed(() => pedido.value?.tipo === 'descartar' && tipoDeDescarte.value === 'duplicado')
 const podeConfirmar = computed(() => duplicando.value ? !!duplicadoDe.value : !!motivo.value.trim())
@@ -213,12 +215,23 @@ function copiarLink(a: Apontamento) {
 
 /* ---------- criar ---------- */
 const criando = ref(false)
-function aoCriar(n: NovoApontamento, rascunho: boolean) {
-  const a = criar(props.lista, n, props.quem, rascunho)
+const juntar = (xs: string[]) => new Intl.ListFormat(props.t.locale, { type: 'conjunction' }).format(xs)
+/** Quem recebe a notificação: os responsáveis, menos quem fez a ação. */
+const avisados = (ids: number[]) => juntar([...new Set(ids)].filter(id => id !== props.quem).map(nomeDe).filter(Boolean))
+
+function aoCriar(n: NovoApontamento) {
+  const a = criar(props.lista, n, props.quem)
   criando.value = false
   grupo.value = 'todos'
   selecionadoId.value = a.id
-  toast.add({ title: rascunho ? props.t.toasts.rascunho(a.numero) : props.t.toasts.criado(a.numero), icon: rascunho ? 'i-lucide-pencil-line' : 'i-lucide-plus', color: 'success', duration: 3000 })
+  const quem = avisados(a.responsaveis)
+  toast.add({
+    title: props.t.toasts.criado(a.numero),
+    description: quem ? props.t.avisos.enviada(quem) : undefined,
+    icon: 'i-lucide-plus',
+    color: 'success',
+    duration: 3500,
+  })
 }
 
 const colando = ref(false)
@@ -226,12 +239,12 @@ const textoColado = ref('')
 const linhasColadas = computed(() => textoColado.value.split('\n').map(s => s.trim()).filter(Boolean))
 function criarDaLista() {
   for (const titulo of linhasColadas.value) {
-    criar(props.lista, { titulo, corpo: props.lista.config.modelo, responsavel: props.lista.config.responsavelPadrao, prioridade: 'normal', anexos: [] }, props.quem, true)
+    criar(props.lista, { titulo, corpo: '', responsaveis: [props.lista.config.responsavelPadrao], prioridade: 'normal', anexos: [] }, props.quem)
   }
   toast.add({ title: props.t.toasts.criados(linhasColadas.value.length), icon: 'i-lucide-list-plus', color: 'success', duration: 3000 })
   textoColado.value = ''
   colando.value = false
-  grupo.value = 'rascunhos'
+  grupo.value = 'pendentes'
 }
 
 const gerandoPdf = ref(false)
@@ -246,14 +259,14 @@ const menuDeCriar = computed<DropdownMenuItem[][]>(() => [[
   { label: props.t.lista.colarLista, icon: 'i-lucide-list-plus', onSelect: () => { colando.value = true } },
 ], [
   { label: props.t.lista.exportarPdf, icon: 'i-lucide-file-down', onSelect: exportarPdf },
-  { label: props.t.lista.copiarLinkDaPasta, icon: 'i-lucide-link', onSelect: () => toast.add({ title: props.t.toasts.linkCopiado, icon: 'i-lucide-link', duration: 2000 }) },
 ]])
 
 /* ---------- rodada: enviar retorno e pedir reteste ---------- */
-const meusRascunhos = computed(() => props.lista.apontamentos.filter(a => a.estado === 'rascunho' && a.autor === props.quem).length)
+/** Quem confere tem a rodada em preparo: apontamento novo ou conferência feita desde o último retorno. */
+const emPreparo = computed(() => souConferente.value && temPreparo(props.lista, props.quem))
 const paraEuConferir = computed(() => props.lista.apontamentos.filter(a => podeConferir(a, props.quem, props.lista.config)).length)
 const meusPendentes = computed(() => props.lista.apontamentos.filter(a => podeResolver(a, props.quem)).length)
-const meusResolvidos = computed(() => props.lista.apontamentos.filter(a => a.estado === 'resolvido' && a.responsavel === props.quem).length)
+const meusResolvidos = computed(() => props.lista.apontamentos.filter(a => a.estado === 'resolvido' && ehResponsavel(a, props.quem)).length)
 const podePedirReteste = computed(() => props.lista.config.exigeConferencia && !souConferente.value && !meusPendentes.value && meusResolvidos.value > 0 && !!props.lista.rodadas.length && !props.lista.rodadas.at(-1)?.retestePedidoEm)
 
 const enviando = ref(false)
@@ -265,12 +278,12 @@ const opcoesDeVeredito = computed(() => (['correcao', 'ressalvas', 'aprovado'] a
 async function confirmarEnvio() {
   salvandoEnvio.value = true
   await new Promise(r => setTimeout(r, 500))
+  const quem = avisados(proxima.value.responsaveis)
   const n = enviarRetorno(props.lista, props.quem, veredito.value, resumo.value.trim())
   salvandoEnvio.value = false
   enviando.value = false
   resumo.value = ''
-  if (grupo.value === 'rascunhos') grupo.value = 'todos'
-  toast.add({ title: props.t.toasts.enviado(n), icon: 'i-lucide-send', color: 'success', duration: 3000 })
+  toast.add({ title: props.t.toasts.enviado(n), description: quem ? props.t.avisos.enviada(quem) : undefined, icon: 'i-lucide-send', color: 'success', duration: 3500 })
 }
 
 const pedindoReteste = ref(false)
@@ -375,9 +388,9 @@ const emSequencia = computed(() => props.compacto || estreito.value)
             class="rounded-none border-b border-default py-2.5" />
         <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-1" leave-active-class="transition duration-150" leave-to-class="opacity-0">
           <UAlert
-            v-if="!somenteLeitura && meusRascunhos"
-            :description="t.lista.rascunhos(meusRascunhos)"
-            icon="i-lucide-pencil-line"
+            v-if="!somenteLeitura && emPreparo"
+            :description="t.lista.preparo(proximaRodada(lista))"
+            icon="i-lucide-send"
             color="primary"
             variant="subtle"
             orientation="horizontal"
@@ -408,7 +421,7 @@ const emSequencia = computed(() => props.compacto || estreito.value)
       </div>
 
       <!-- VAZIO -->
-      <div v-if="!c.todos && !c.rascunhos && !criando" class="flex flex-1 items-center justify-center p-8">
+      <div v-if="!c.todos && !criando" class="flex flex-1 items-center justify-center p-8">
         <UEmpty
           :icon="lista.config.icone"
           :title="t.lista.vazioTitulo"
@@ -428,7 +441,6 @@ const emSequencia = computed(() => props.compacto || estreito.value)
       <!-- LISTA E DETALHE -->
       <div v-else class="flex min-h-0 flex-1">
         <section
-          v-show="!emSequencia || !selecionado"
           class="flex min-h-0 min-w-0 flex-col"
           :class="emSequencia ? 'flex-1' : 'w-[44%] min-w-80 max-w-[34rem] border-r border-default'"
         >
@@ -448,31 +460,54 @@ const emSequencia = computed(() => props.compacto || estreito.value)
                 <span class="tabular-nums" :class="grupo === g.value ? 'text-primary' : 'text-dimmed'">{{ g.n }}</span>
               </UButton>
             </div>
-            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <div class="flex flex-wrap items-center gap-2">
               <UInput v-model="busca" icon="i-lucide-search" :placeholder="t.filtros.buscar" size="sm" class="min-w-40 flex-1" :aria-label="t.filtros.buscar" />
               <USelect v-model="rodadaFiltro" :items="opcoesDeRodada" size="sm" icon="i-lucide-history" class="w-40" :aria-label="t.fluxo.filtroRodada" />
-            </div>
-            <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
-              <USwitch v-model="soMeus" :label="t.filtros.soMeus" size="sm" />
-              <USwitch v-model="agrupar" :label="t.fluxo.agrupar" size="sm" />
+              <!-- Filtro rápido, como na barra de filtros das listagens do ENSPACE -->
+              <UButton
+                :label="t.filtros.soMeus"
+                icon="i-lucide-user-round"
+                size="sm"
+                :color="soMeus ? 'primary' : 'neutral'"
+                :variant="soMeus ? 'subtle' : 'soft'"
+                :aria-pressed="soMeus"
+                class="shrink-0 cursor-pointer"
+                @click="soMeus = !soMeus"
+              />
             </div>
           </div>
 
           <div class="min-h-0 flex-1 overflow-y-auto">
             <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-2" leave-active-class="transition duration-150 ease-in" leave-to-class="opacity-0 -translate-y-1">
-              <NovoApontamentoForm v-if="criando" :t="t" :lista="lista" :conferente="souConferente" @criar="aoCriar" @cancelar="criando = false" />
+              <NovoApontamentoForm v-if="criando" :t="t" :lista="lista" @criar="aoCriar" @cancelar="criando = false" />
             </Transition>
 
-            <template v-for="bl in blocosDaLista" :key="bl.rodada">
-              <p v-if="agrupar" class="sticky top-0 z-10 flex items-center gap-2 border-b border-default bg-default/95 px-4 py-1.5 text-xs font-semibold text-muted backdrop-blur">
-                <span class="rounded bg-inverted px-1.5 py-0.5 font-mono text-[11px] text-inverted">R{{ bl.rodada }}</span>
-                {{ t.fluxo.grupoRodada(bl.rodada) }}
-                <span class="tabular-nums text-dimmed">{{ bl.itens.length }}</span>
-              </p>
-              <TransitionGroup tag="ul" move-class="transition-transform duration-300 ease-out" enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0 translate-y-2" leave-active-class="absolute opacity-0 transition duration-150" class="relative">
+            <TransitionGroup tag="ul" move-class="transition-transform duration-300 ease-out" enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0 translate-y-2" leave-active-class="absolute opacity-0 transition duration-150" class="relative">
+              <template v-for="(a, i) in filtrados" :key="a.id">
+                <!-- Em sequência, o escolhido vira cartão resumido na própria lista -->
+                <li v-if="emSequencia && selecionadoId === a.id" class="px-3 py-2">
+                  <DetalheDoApontamento
+                    :t="t"
+                    :lista="lista"
+                    :a="a"
+                    :quem="quem"
+                    :somente-leitura="somenteLeitura"
+                    :compacto="compacto"
+                    resumivel
+                    @fechar="selecionadoId = null"
+                    @resolver="aoResolver(a)"
+                    @desmarcar="aoDesmarcar(a)"
+                    @conferir="aoConferir(a)"
+                    @reabrir="pedirMotivo('reabrir', a)"
+                    @descartar="pedirMotivo('descartar', a)"
+                    @excluir="aoExcluir(a)"
+                    @copiar-link="copiarLink(a)"
+                    @converter="emit('converter', a)"
+                    @tela-cheia="telaCheia = true"
+                  />
+                </li>
                 <LinhaDoApontamento
-                  v-for="(a, i) in bl.itens"
-                  :key="a.id"
+                  v-else
                   :t="t"
                   :lista="lista"
                   :a="a"
@@ -486,8 +521,8 @@ const emSequencia = computed(() => props.compacto || estreito.value)
                   @conferir="aoConferir(a)"
                   @reabrir="pedirMotivo('reabrir', a)"
                 />
-              </TransitionGroup>
-            </template>
+              </template>
+            </TransitionGroup>
 
             <div v-if="!filtrados.length && !criando" class="flex flex-col items-center gap-2 px-6 py-10 text-center">
               <UIcon name="i-lucide-filter-x" class="size-6 text-dimmed" />
@@ -497,9 +532,9 @@ const emSequencia = computed(() => props.compacto || estreito.value)
           </div>
         </section>
 
-        <!-- Detalhe -->
-        <section v-if="!emSequencia || selecionado" class="min-h-0 min-w-0 flex-1">
-          <Transition mode="out-in" enter-active-class="transition duration-200 ease-out" :enter-from-class="emSequencia ? 'opacity-0 translate-x-3' : 'opacity-0 translate-y-1'" leave-active-class="transition duration-100" leave-to-class="opacity-0">
+        <!-- Detalhe, no lado a lado -->
+        <section v-if="!emSequencia" class="min-h-0 min-w-0 flex-1">
+          <Transition mode="out-in" enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 translate-y-1" leave-active-class="transition duration-100" leave-to-class="opacity-0">
             <DetalheDoApontamento
               v-if="selecionado"
               :key="selecionado.id"
@@ -508,7 +543,6 @@ const emSequencia = computed(() => props.compacto || estreito.value)
               :a="selecionado"
               :quem="quem"
               :somente-leitura="somenteLeitura"
-              :compacto="emSequencia"
               @fechar="selecionadoId = null"
               @resolver="aoResolver(selecionado)"
               @desmarcar="aoDesmarcar(selecionado)"
@@ -564,10 +598,14 @@ const emSequencia = computed(() => props.compacto || estreito.value)
       </template>
     </UModal>
 
-    <!-- Apontamento em tela cheia -->
-    <UModal v-model:open="telaCheia" fullscreen :title="selecionado ? `#${selecionado.numero} ${selecionado.titulo}` : ''" :ui="{ header: 'hidden', body: 'p-0 sm:p-0' }">
+    <!-- Apontamento em tela cheia: modal mais largo do que alto, como a tarefa aberta do ClickUp -->
+    <UModal
+      v-model:open="telaCheia"
+      :title="selecionado ? `#${selecionado.numero} ${selecionado.titulo}` : ''"
+      :ui="{ content: 'max-w-none w-[min(72rem,calc(100vw-2rem))] h-[min(46rem,calc(100dvh-6rem))] overflow-hidden', header: 'hidden', body: 'flex-1 min-h-0 p-0 sm:p-0 overflow-hidden' }"
+    >
       <template #body>
-        <div class="mx-auto h-full max-w-4xl border-x border-default">
+        <div class="h-full">
           <DetalheDoApontamento
             v-if="selecionado"
             :t="t"

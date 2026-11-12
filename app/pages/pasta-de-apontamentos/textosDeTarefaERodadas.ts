@@ -25,8 +25,6 @@ export const fluxoPtBR = {
   } as Record<string, (n: number, d: string) => string>,
   todasAsRodadas: 'Todas as rodadas',
   filtroRodada: 'Filtrar por rodada',
-  agrupar: 'Agrupar por rodada',
-  grupoRodada: (n: number) => `Apontados na rodada ${n}`,
   emPreparo: (n: number) => `Rodada ${n} · em preparação`,
   emPreparoTexto: 'Só você vê até enviar o retorno.',
   secoes: { novos: 'Apontados', reabertos: 'Reabertos', resolvidos: 'Resolvidos', conferidos: 'Conferidos', descartados: 'Descartados' } as Record<string, string>,
@@ -148,6 +146,8 @@ export const tarefaRapidaPtBR = {
   andaime: {
     vista: 'Visualização',
     vistas: { item: 'Item', tarefa: 'Tarefa rápida' } as Record<string, string>,
+    abertura: 'Item em',
+    aberturas: { tela: 'Tela cheia', painel: 'Painel lateral' } as Record<string, string>,
   },
   toasts: {
     subtarefaCriada: (nome: string) => `Subtarefa "${nome}" criada`,
@@ -177,8 +177,6 @@ export const fluxoEn: FluxoTextos = {
   },
   todasAsRodadas: 'All rounds',
   filtroRodada: 'Filter by round',
-  agrupar: 'Group by round',
-  grupoRodada: (n: number) => `Raised in round ${n}`,
   emPreparo: (n: number) => `Round ${n} · in preparation`,
   emPreparoTexto: 'Only you can see it until you send the feedback.',
   secoes: { novos: 'Raised', reabertos: 'Reopened', resolvidos: 'Resolved', conferidos: 'Verified', descartados: 'Discarded' },
@@ -300,6 +298,8 @@ export const tarefaRapidaEn: TarefaRapidaTextos = {
   andaime: {
     vista: 'View',
     vistas: { item: 'Item', tarefa: 'Quick task' },
+    abertura: 'Item in',
+    aberturas: { tela: 'Full page', painel: 'Side panel' },
   },
   toasts: {
     subtarefaCriada: (nome: string) => `Subtask "${nome}" created`,
@@ -326,8 +326,6 @@ export const fluxoEs: FluxoTextos = {
   },
   todasAsRodadas: 'Todas las rondas',
   filtroRodada: 'Filtrar por ronda',
-  agrupar: 'Agrupar por ronda',
-  grupoRodada: (n: number) => `Señalados en la ronda ${n}`,
   emPreparo: (n: number) => `Ronda ${n} · en preparación`,
   emPreparoTexto: 'Solo usted lo ve hasta enviar el retorno.',
   secoes: { novos: 'Señalados', reabertos: 'Reabiertos', resolvidos: 'Resueltos', conferidos: 'Verificados', descartados: 'Descartados' },
@@ -449,6 +447,8 @@ export const tarefaRapidaEs: TarefaRapidaTextos = {
   andaime: {
     vista: 'Visualización',
     vistas: { item: 'Ítem', tarefa: 'Tarea rápida' },
+    abertura: 'Ítem en',
+    aberturas: { tela: 'Pantalla completa', painel: 'Panel lateral' },
   },
   toasts: {
     subtarefaCriada: (nome: string) => `Subtarea "${nome}" creada`,

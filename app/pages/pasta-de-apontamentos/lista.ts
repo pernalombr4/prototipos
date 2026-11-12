@@ -6,6 +6,7 @@
  */
 import { toRaw } from 'vue'
 import type { Apontamento, ConfigDaPasta, Estado, Pessoa, Rodada } from './mocks'
+import { avisar } from './avisos'
 
 export interface Lista {
   apontamentos: Apontamento[]
@@ -14,7 +15,7 @@ export interface Lista {
   pessoas: Pessoa[]
 }
 
-export type Grupo = 'todos' | 'pendentes' | 'paraConferir' | 'fechados' | 'rascunhos'
+export type Grupo = 'todos' | 'pendentes' | 'paraConferir' | 'fechados'
 
 export const pendente = (e: Estado) => e === 'aberto' || e === 'reaberto'
 
@@ -23,27 +24,23 @@ export function fechado(a: Apontamento, c: ConfigDaPasta) {
 }
 
 export function grupoDe(a: Apontamento, c: ConfigDaPasta): Exclude<Grupo, 'todos'> {
-  if (a.estado === 'rascunho') return 'rascunhos'
   if (pendente(a.estado)) return 'pendentes'
   if (fechado(a, c)) return 'fechados'
   return 'paraConferir'
 }
 
-/** O que a pessoa vê: rascunho só de quem escreveu. */
-export function visiveis(l: Lista, quem: number) {
-  return l.apontamentos.filter(a => a.estado !== 'rascunho' || a.autor === quem)
+/** O que a pessoa vê: todos (rodada 4, sem rascunho). */
+export function visiveis(l: Lista, _quem: number) {
+  return l.apontamentos
 }
 
 export function contagem(l: Lista, quem: number) {
   const vis = visiveis(l, quem)
-  const c = { todos: 0, pendentes: 0, paraConferir: 0, fechados: 0, rascunhos: 0, conferido: 0, resolvido: 0, aberto: 0, reaberto: 0, descartado: 0 }
+  const c = { todos: 0, pendentes: 0, paraConferir: 0, fechados: 0, conferido: 0, resolvido: 0, aberto: 0, reaberto: 0, descartado: 0 }
   for (const a of vis) {
-    const g = grupoDe(a, l.config)
-    c[g]++
-    if (a.estado !== 'rascunho') {
-      c.todos++
-      c[a.estado]++
-    }
+    c[grupoDe(a, l.config)]++
+    c.todos++
+    c[a.estado]++
   }
   return c
 }
@@ -57,26 +54,28 @@ export type Situacao = 'semRetorno' | 'emCorrecao' | 'aguardandoReteste' | 'conc
 
 export function situacao(l: Lista): Situacao {
   if (!l.rodadas.length) return 'semRetorno'
-  const enviados = l.apontamentos.filter(a => a.estado !== 'rascunho')
+  const enviados = l.apontamentos
   if (enviados.length && enviados.every(a => fechado(a, l.config))) return 'concluido'
   if (l.rodadas.at(-1)?.retestePedidoEm) return 'aguardandoReteste'
   return 'emCorrecao'
 }
 
-/** De quem é a vez no apontamento. */
-export function vezDe(a: Apontamento, c: ConfigDaPasta): number | null {
-  if (pendente(a.estado)) return a.responsavel
-  if (a.estado === 'resolvido' && c.exigeConferencia) return a.autor
-  return null
+/** De quem é a vez no apontamento: os responsáveis enquanto pendente, quem confere depois. */
+export function vezDe(a: Apontamento, c: ConfigDaPasta): number[] {
+  if (pendente(a.estado)) return a.responsaveis
+  if (a.estado === 'resolvido' && c.exigeConferencia) return [a.autor]
+  return []
 }
+
+export const ehResponsavel = (a: Apontamento, quem: number) => a.responsaveis.includes(quem)
 
 /* ---------- permissões por papel ---------- */
 
-export const podeResolver = (a: Apontamento, quem: number) => pendente(a.estado) && a.responsavel === quem
-export const podeDesmarcar = (a: Apontamento, quem: number, c: ConfigDaPasta) => a.estado === 'resolvido' && a.responsavel === quem && !!c
+export const podeResolver = (a: Apontamento, quem: number) => pendente(a.estado) && ehResponsavel(a, quem)
+export const podeDesmarcar = (a: Apontamento, quem: number, c: ConfigDaPasta) => a.estado === 'resolvido' && ehResponsavel(a, quem) && !!c
 export const podeConferir = (a: Apontamento, quem: number, c: ConfigDaPasta) => a.estado === 'resolvido' && c.exigeConferencia && a.autor === quem
 export const podeReabrir = (a: Apontamento, quem: number) => (a.estado === 'resolvido' || a.estado === 'conferido' || a.estado === 'descartado') && a.autor === quem
-export const podeDescartar = (a: Apontamento, quem: number) => (pendente(a.estado) || a.estado === 'resolvido') && (a.autor === quem || a.responsavel === quem)
+export const podeDescartar = (a: Apontamento, quem: number) => (pendente(a.estado) || a.estado === 'resolvido') && (a.autor === quem || ehResponsavel(a, quem))
 
 /* ---------- ações ---------- */
 
@@ -140,6 +139,7 @@ export function reabrir(l: Lista, a: Apontamento, quem: number, nota: string) {
   a.reaberturas++
   a.motivo = undefined
   registrar(l, a, quem, 'reaberto', nota)
+  avisar(a.responsaveis, quem, { tipo: 'reaberto', apontamento: a.id, numero: a.numero, titulo: a.titulo })
 }
 
 export function descartar(l: Lista, a: Apontamento, quem: number, motivo: string, duplicadoDe?: number) {
@@ -168,8 +168,7 @@ export function secoesDaRodada(l: Lista, n: number, quem: number): Record<Secao,
   const r: Record<Secao, Apontamento[]> = { novos: [], reabertos: [], resolvidos: [], conferidos: [], descartados: [] }
   for (const a of visiveis(l, quem)) {
     const ev = a.historico.filter(e => e.rodada === n)
-    if (a.estado === 'rascunho' && a.rodada === n) r.novos.push(a)
-    else if (ev.some(e => e.para === 'aberto' && (!e.de || e.de === 'rascunho'))) r.novos.push(a)
+    if (ev.some(e => e.para === 'aberto' && !e.de)) r.novos.push(a)
     if (ev.some(e => e.para === 'reaberto')) r.reabertos.push(a)
     if (ev.some(e => e.para === 'resolvido')) r.resolvidos.push(a)
     if (ev.some(e => e.para === 'conferido')) r.conferidos.push(a)
@@ -178,7 +177,7 @@ export function secoesDaRodada(l: Lista, n: number, quem: number): Record<Secao,
   return r
 }
 
-/** A rodada que quem confere está preparando tem algo? Rascunho ou conferência já feita. */
+/** A rodada que quem confere está preparando tem algo? Apontamento novo ou conferência já feita. */
 export function temPreparo(l: Lista, quem: number) {
   const n = proximaRodada(l)
   const s = secoesDaRodada(l, n, quem)
@@ -192,15 +191,20 @@ export function responder(a: Apontamento, quem: number, texto: string) {
 export interface NovoApontamento {
   titulo: string
   corpo: string
-  responsavel: number
+  responsaveis: number[]
   prioridade: Apontamento['prioridade']
   anexos: Apontamento['anexos']
 }
 
-export function criar(l: Lista, n: NovoApontamento, quem: number, rascunho: boolean): Apontamento {
+/**
+ * Cria o apontamento já aberto e notifica os responsáveis (rodada 4: sem rascunho).
+ * Quem confere escreve na rodada que está preparando; quem resolve, na rodada em correção.
+ */
+export function criar(l: Lista, n: NovoApontamento, quem: number): Apontamento {
   const numero = Math.max(0, ...l.apontamentos.map(a => a.numero)) + 1
-  const estado: Estado = rascunho ? 'rascunho' : 'aberto'
-  const rodada = rascunho ? proximaRodada(l) : rodadaAtual(l)
+  const estado: Estado = 'aberto'
+  const conferente = l.rodadas.some(r => r.quem === quem) || l.apontamentos.some(a => a.autor === quem)
+  const rodada = conferente ? proximaRodada(l) : rodadaAtual(l)
   const agora = new Date()
   const a: Apontamento = {
     id: id('ap'),
@@ -209,7 +213,7 @@ export function criar(l: Lista, n: NovoApontamento, quem: number, rascunho: bool
     corpo: n.corpo,
     estado,
     prioridade: n.prioridade,
-    responsavel: n.responsavel,
+    responsaveis: [...n.responsaveis],
     autor: quem,
     rodada,
     reaberturas: 0,
@@ -219,21 +223,26 @@ export function criar(l: Lista, n: NovoApontamento, quem: number, rascunho: bool
     criadoEm: agora,
   }
   l.apontamentos.push(a)
+  avisar(a.responsaveis, quem, { tipo: 'atribuido', apontamento: a.id, numero, titulo: a.titulo })
   return a
 }
 
-/** Envia os rascunhos de quem confere e fecha a rodada. */
+/** Fecha a rodada com o veredito e notifica quem tem apontamento novo ou reaberto nela. */
 export function enviarRetorno(l: Lista, quem: number, veredito: Rodada['veredito'], resumo: string) {
   const numero = proximaRodada(l)
-  for (const a of l.apontamentos) {
-    if (a.estado === 'rascunho' && a.autor === quem) {
-      a.historico.push({ id: id('ev'), quem, quando: new Date(), de: 'rascunho', para: 'aberto', rodada: numero })
-      a.estado = 'aberto'
-      a.rodada = numero
-    }
+  const porPessoa = new Map<number, number>()
+  for (const a of daRodada(l, numero)) {
+    for (const r of a.responsaveis) porPessoa.set(r, (porPessoa.get(r) ?? 0) + 1)
   }
   l.rodadas.push({ numero, quem, quando: new Date(), veredito, resumo })
+  for (const [r, qtd] of porPessoa) avisar([r], quem, { tipo: 'retorno', rodada: numero, qtd })
   return numero
+}
+
+/** Responsáveis que entraram depois de criado o apontamento: recebem o aviso de atribuição. */
+export function atribuir(a: Apontamento, quem: number, antes: number[]) {
+  const novos = a.responsaveis.filter(r => !antes.includes(r))
+  avisar(novos, quem, { tipo: 'atribuido', apontamento: a.id, numero: a.numero, titulo: a.titulo })
 }
 
 export function pedirReteste(l: Lista, quem: number) {
@@ -243,12 +252,15 @@ export function pedirReteste(l: Lista, quem: number) {
   r.retestePedidoPor = quem
 }
 
-/** Quantos rascunhos e reabertos entram na rodada que quem confere está preparando. */
+/** Apontamentos que nasceram ou voltaram na rodada. */
+const daRodada = (l: Lista, n: number) => l.apontamentos.filter(a => a.historico.some(e => e.rodada === n && ((e.para === 'aberto' && !e.de) || e.para === 'reaberto')))
+
+/** Quantos novos e reabertos entram na rodada que quem confere está preparando. */
 export function resumoDaProxima(l: Lista, quem: number) {
   const n = proximaRodada(l)
-  const novos = l.apontamentos.filter(a => a.estado === 'rascunho' && a.autor === quem).length
+  const novos = l.apontamentos.filter(a => a.autor === quem && a.historico.some(e => e.rodada === n && e.para === 'aberto' && !e.de)).length
   const reabertos = l.apontamentos.filter(a => a.historico.some(e => e.para === 'reaberto' && e.rodada === n)).length
-  const responsaveis = new Set(l.apontamentos.filter(a => (a.estado === 'rascunho' && a.autor === quem) || a.historico.some(e => e.para === 'reaberto' && e.rodada === n)).map(a => a.responsavel))
+  const responsaveis = new Set(daRodada(l, n).flatMap(a => a.responsaveis))
   return { novos, reabertos, responsaveis: [...responsaveis] }
 }
 
@@ -260,7 +272,6 @@ export function rotuloDoEstado(c: ConfigDaPasta, e: Estado, padrao: Record<strin
 }
 
 export const visualDoEstado: Record<Estado, { cor: 'neutral' | 'info' | 'success' | 'error' | 'warning', icone: string, variante: 'soft' | 'outline' | 'subtle' }> = {
-  rascunho: { cor: 'neutral', icone: 'i-lucide-pencil-line', variante: 'outline' },
   aberto: { cor: 'neutral', icone: 'i-lucide-circle', variante: 'soft' },
   reaberto: { cor: 'error', icone: 'i-lucide-rotate-ccw', variante: 'soft' },
   resolvido: { cor: 'info', icone: 'i-lucide-circle-check', variante: 'soft' },
