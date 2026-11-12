@@ -1,9 +1,9 @@
 # Modelo atual de permissões do ENSPACE (quem vê o quê), para o painel de Tarefas
 
 Fontes lidas em 2026-11-11, só leitura, na cópia local da documentação oficial (PT). Abreviações dos caminhos:
-`docs/` = `C:/Users/JardimMikaela/Documents/Github/en-docs/content/pt/1.docs/`;
-`blog/` = `C:/Users/JardimMikaela/Documents/Github/en-docs/content/pt/2.blog/docs/` (notas de versão);
-`proto/` = `C:/Users/JardimMikaela/Documents/Github/enspace-prototipos/app/pages/`.
+`docs/` = `en-docs/content/pt/1.docs/`;
+`blog/` = `en-docs/content/pt/2.blog/docs/` (notas de versão);
+`proto/` = `enspace-prototipos/app/pages/`.
 Cada fato traz o arquivo e o título da seção. O que a doc não diz está em "Gaps".
 
 ## 1. Licenças, cargos e granularidade da permissão
