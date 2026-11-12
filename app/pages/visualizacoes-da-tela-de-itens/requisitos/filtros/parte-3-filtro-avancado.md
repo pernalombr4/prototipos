@@ -16,7 +16,7 @@ trimestral" abre com o chip "3 regras", com 1 grupo "Ou".
 |---|---|---|---|---|
 | RF136 | A lista do "+ Filtro" deve terminar em "Filtro avançado", com a contagem de regras quando o filtro avançado existe. | Em "Revisão trimestral", o fim da lista mostra "Filtro avançado" com "3". | Essencial | Obrigatório |
 | RF137 | O filtro avançado deve aparecer na linha de filtros como o chip "N regras", depois dos chips por campo, e abrir o construtor. | Em "Revisão trimestral", o chip "3 regras" abre o construtor com o grupo. | Essencial | Obrigatório |
-| RF138 | O filtro avançado deve valer junto com os filtros automáticos e os chips, conforme RN007. | "Área: Jurídico" junto com "3 regras" mostra só os itens do Jurídico que passam nas 3 regras. | Essencial | Obrigatório |
+| RF138 | O filtro avançado deve valer junto com os filtros rápidos ligados ou sempre aplicados e os chips, conforme RN007. | "Área: Jurídico" junto com "3 regras" mostra só os itens do Jurídico que passam nas 3 regras. | Essencial | Obrigatório |
 | RF114 | O "⋯" de cada chip deve ter "Levar para o filtro avançado", que move a regra do chip para o fim do filtro avançado, cria o filtro avançado quando não existe e o abre. | Levar "Status: Em análise, Aprovado" deixa o chip "1 regra", com a mesma tabela. | Importante | Obrigatório |
 | RF116 | "Excluir filtro avançado" deve apagar cada regra e cada grupo do filtro avançado. | O chip "N regras" sai da linha de filtros. | Importante | Obrigatório |
 | RF115 | O filtro avançado sem regra deve sair quando o construtor fecha. | Excluir a única regra e fechar o construtor tira o chip "N regras". | Importante | Obrigatório |

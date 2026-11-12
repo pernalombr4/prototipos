@@ -2909,6 +2909,12 @@
     },
     "RF181": {
       "sem": "A divisão se refaz sozinha; os prints da seção mostram o resultado em 2 larguras de janela."
+    },
+    "RI010": {
+      "sem": "interface do back-end, sem tela no protótipo."
+    },
+    "RI011": {
+      "sem": "interface do back-end, sem tela no protótipo."
     }
   }
 }
