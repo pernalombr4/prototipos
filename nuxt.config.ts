@@ -132,6 +132,12 @@ export default defineNuxtConfig({
         '@nuxt/ui > @tiptap/extension-image',
         '@nuxt/ui > @tiptap/extension-mention',
         '@nuxt/ui > @tiptap/extension-placeholder',
+        // Os gráficos do SDK (EnChart*) usam o Unovis, que importa o `striptags`
+        // em CommonJS. Sem pré-empacotar, o app não liga em `pnpm dev` ("does not
+        // provide an export named 'default'"). Junto com a subida do SDK para a
+        // 0.21, pedido da redatora em 12/11/2026 (dashboards, rodada 1).
+        '@unovis/ts',
+        '@unovis/vue',
       ],
     },
   },
