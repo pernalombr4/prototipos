@@ -327,10 +327,20 @@ function passaNoGrupo(item: Item, g: GrupoDeRegras): boolean {
   return g.conector === 'or' ? regras.some(vale) : regras.every(vale)
 }
 
-/** `ligados`: os filtros rápidos ligados agora; cada um vale junto (E) com os outros filtros. */
+/** PROPOSTA (rodada 8): os filtros prontos do produto, que o sistema sugere como filtros rápidos. */
+export const SUGERIDOS = ['isOwner', 'inGroups'] as const
+export type Sugerido = typeof SUGERIDOS[number]
+export const ICONE_DO_SUGERIDO: Record<Sugerido, string> = { isOwner: 'i-lucide-user-round', inGroups: 'i-lucide-users' }
+/** O sugerido sem `required` é botão na linha de filtros; este é o id dele entre os ligados. */
+export const idDoSugerido = (f: string) => `sistema-${f}`
+
+/**
+ * `ligados`: os filtros rápidos ligados agora; cada um vale junto (E) com os outros filtros.
+ * O filtro pronto com `required` vale sempre; sem `required`, só quando o botão dele está ligado.
+ */
 export function aplicar(v: Visualizacao, itens: Item[] = ITENS, ligados: string[] = []): Item[] {
   const filtros = v.filters.field_filters ?? []
-  const rapidos = v.filters.quick_filters ?? []
+  const rapidos = (v.filters.quick_filters ?? []).filter(r => r.required || ligados.includes(idDoSugerido(r.filter)))
   const avancado = v.filters.avancado
   const botoes = (v.filters.rapidos ?? []).filter(r => ligados.includes(r.id))
   let lista = itens.filter(i => filtros.every(f => passa(i, f)) && (!avancado || passaNoGrupo(i, avancado)) && botoes.every(b => passaNoGrupo(i, b.regras)))

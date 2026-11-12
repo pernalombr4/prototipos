@@ -13,7 +13,8 @@
  */
 import type { FiltroDeCampo, FiltroRapido, GrupoDeRegras, Visualizacao } from './mocks'
 import type { Textos } from './textos'
-import { CAMPOS, ICONE_DO_TIPO, campoPorPath, clonar } from './mocks'
+import { CAMPOS, ICONE_DO_SUGERIDO, ICONE_DO_TIPO, campoPorPath, clonar, idDoSugerido } from './mocks'
+import type { Sugerido } from './mocks'
 import { campoLivre, contarRegras, regraNova, useDescricaoDeFiltro } from './filtros'
 import ChipDeFiltro from './_ChipDeFiltro.vue'
 import ConstrutorDeRegras from './_ConstrutorDeRegras.vue'
@@ -33,6 +34,9 @@ const simples = computed(() => filtros.value.field_filters ?? [])
 const rapidos = computed(() => filtros.value.quick_filters ?? [])
 const avancado = computed(() => filtros.value.avancado)
 const botoes = computed(() => filtros.value.rapidos ?? [])
+/* Rodada 8: o filtro pronto com `required` é chip fixo, como hoje; sem `required`, é botão sugerido pelo sistema. */
+const fixos = computed(() => rapidos.value.filter(q => q.required))
+const sugeridos = computed(() => rapidos.value.filter(q => !q.required).map(q => q.filter as Sugerido))
 
 const mudar = (parte: Partial<Filtros>) => { filtros.value = { ...clonar(filtros.value), ...parte } }
 
@@ -163,8 +167,26 @@ defineExpose({ filtrarPor, abrirMais: async () => { await nextTick(); maisAberto
     <UIcon name="i-lucide-filter" class="size-3.5 text-muted" />
 
     <!-- PROPOSTA (rodada 8): os filtros rápidos da visualização, botões que ligam e desligam -->
-    <template v-if="botoes.length">
+    <template v-if="botoes.length || sugeridos.length">
       <div role="group" :aria-label="t.rapido.grupo" class="flex flex-wrap items-center gap-1.5">
+        <UTooltip v-for="f in sugeridos" :key="f" :delay-duration="400" :content="{ side: 'bottom' }">
+          <UButton
+            :label="t.rapido.sugerido[f].nome"
+            :icon="ligados.includes(idDoSugerido(f)) ? 'i-lucide-check' : ICONE_DO_SUGERIDO[f]"
+            :color="ligados.includes(idDoSugerido(f)) ? 'primary' : 'neutral'"
+            :variant="ligados.includes(idDoSugerido(f)) ? 'soft' : 'outline'"
+            size="xs"
+            :aria-pressed="ligados.includes(idDoSugerido(f))"
+            class="transition-colors"
+            @click="alternar(idDoSugerido(f))"
+          />
+          <template #content>
+            <div class="max-w-72 space-y-0.5 py-0.5">
+              <p class="font-medium text-highlighted">{{ t.rapido.sugerido[f].ajuda }}</p>
+              <p class="text-muted">{{ t.rapido.dicaSistema }}</p>
+            </div>
+          </template>
+        </UTooltip>
         <UContextMenu v-for="b in botoes" :key="b.id" :items="menuDoBotao(b)">
           <UTooltip :delay-duration="400" :content="{ side: 'bottom' }">
             <UButton
@@ -190,7 +212,7 @@ defineExpose({ filtrarPor, abrirMais: async () => { await nextTick(); maisAberto
     </template>
 
     <UBadge
-      v-for="q in rapidos"
+      v-for="q in fixos"
       :key="q.filter"
       :label="q.filter === 'isOwner' ? t.resumo.meus : t.resumo.meusGrupos"
       color="neutral"

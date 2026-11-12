@@ -15,7 +15,7 @@ import type { EnKanbanCardConfig, EnKanbanColumn, EnTableColumn, EnTableSort } f
 import type { Item, Visualizacao, Volume } from './mocks'
 import type { ResumoDaVisualizacao } from './filtros'
 import { textos } from './textos'
-import { CAMPOS, EU, GRUPOS, ITENS, aplicar, campoPorPath, clonar, categoria, nomeDaPessoa, visualizacoesIniciais, workspace } from './mocks'
+import { CAMPOS, EU, GRUPOS, ITENS, aplicar, campoPorPath, clonar, categoria, nomeDaPessoa, visualizacoesIniciais, workspace, SUGERIDOS } from './mocks'
 import CascaDaLista from './_CascaDaLista.vue'
 import BarraDeVisualizacoes from './_BarraDeVisualizacoes.vue'
 import BarraDeHoje from './_BarraDeHoje.vue'
@@ -179,7 +179,7 @@ const { descrever, partesDoGrupo, moeda, data } = useDescricaoDeFiltro(t, idioma
 function resumoDe(v: Visualizacao): ResumoDaVisualizacao {
   const r = t.value.resumo
   const filtros: ResumoDaVisualizacao['filtros'] = [
-    ...(v.filters.quick_filters ?? []).map(q => ({ texto: q.filter === 'isOwner' ? r.meus : r.meusGrupos })),
+    ...(v.filters.quick_filters ?? []).filter(q => q.required).map(q => ({ texto: q.filter === 'isOwner' ? r.meus : r.meusGrupos })),
     ...(v.filters.field_filters ?? []).filter(f => !vazia(f)).map(f => ({ texto: descrever(f) })),
   ]
   // O filtro avançado em partes: com E, cada parte vale como mais um filtro; com Ou, as partes levam "ou" entre elas.
@@ -426,7 +426,8 @@ function novaVisualizacao(d: { tipo: 'table' | 'kanban', soEu: boolean, fixar: b
     fixada: d.fixar,
     // Standard ou Viewer cria só para si.
     user: d.soEu || !ehOwner.value ? EU.id : null,
-    filters: {},
+    // Rodada 8: a visualização nova já vem com os filtros rápidos que o sistema sugere, como botões.
+    filters: { quick_filters: SUGERIDOS.map(filter => ({ filter, required: false })) },
     // Kanban genérico sem etiqueta: o cartão do SDK tem altura fixa (h-48) e, com as 5 partes, o texto de apoio some.
     config: d.tipo === 'kanban'
       ? { hide: false, columns: base.config.columns, groupBy: 'status', cardConfig: { header: 'fornecedor', content: 'valor', userField: 'responsavel', dueDateField: 'vencimento' } }

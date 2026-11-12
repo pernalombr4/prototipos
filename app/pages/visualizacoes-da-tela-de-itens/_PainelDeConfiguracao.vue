@@ -18,7 +18,8 @@ import type { FiltroDeCampo, FiltroRapido, GrupoDeRegras, Ordenacao, Visualizaca
 import type { Textos } from './textos'
 
 type Escopo = 'todos' | 'eu' | 'propria' | 'nova'
-import { CAMPOS, FUNCOES, GRUPOS, ICONE_DO_TIPO, campoPorPath, clonar } from './mocks'
+import { CAMPOS, FUNCOES, GRUPOS, ICONE_DO_SUGERIDO, ICONE_DO_TIPO, SUGERIDOS, campoPorPath, clonar } from './mocks'
+import type { Sugerido } from './mocks'
 import { campoLivre, regraNova, useDescricaoDeFiltro } from './filtros'
 import RegraDeFiltro from './_RegraDeFiltro.vue'
 import ConstrutorDeRegras from './_ConstrutorDeRegras.vue'
@@ -156,12 +157,22 @@ function soltarColuna() {
 
 /* ---------- filtros ---------- */
 
-const rapidos = computed(() => (rascunho.value.filters.quick_filters ?? []).map(q => q.filter))
-
-function alternarRapido(filtro: 'isOwner' | 'inGroups', ligado: boolean) {
+/* Rodada 8: cada filtro pronto que o sistema sugere tem 3 usos. "Como botão" é o `quick_filters` sem `required`
+ * (o botão na linha de filtros); "Sempre aplicado" é com `required` (o filtro automático de hoje). */
+type ModoDoSugerido = 'nao' | 'botao' | 'sempre'
+const modos = computed(() => [
+  { label: props.t.rapido.modoNao, value: 'nao' },
+  { label: props.t.rapido.modoBotao, value: 'botao' },
+  { label: props.t.rapido.modoSempre, value: 'sempre' },
+])
+function modoDe(f: Sugerido): ModoDoSugerido {
+  const q = (rascunho.value.filters.quick_filters ?? []).find(x => x.filter === f)
+  return !q ? 'nao' : q.required ? 'sempre' : 'botao'
+}
+function mudarSugerido(f: Sugerido, modo: ModoDoSugerido) {
   mudar((x) => {
-    const lista = (x.filters.quick_filters ?? []).filter(q => q.filter !== filtro)
-    x.filters.quick_filters = ligado ? [...lista, { filter: filtro, required: true }] : lista
+    const lista = (x.filters.quick_filters ?? []).filter(q => q.filter !== f)
+    x.filters.quick_filters = modo === 'nao' ? lista : [...lista, { filter: f, required: modo === 'sempre' }]
   })
 }
 
@@ -434,31 +445,32 @@ const funcoes = computed({
       <!-- Filtros (rodada 5): os 2 automáticos como chaves; os filtros por campo; o filtro avançado, com o mesmo construtor do chip "N regras". -->
       <section class="space-y-3 p-4">
         <h3 class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.painel.filtros }}</h3>
-        <div class="space-y-3">
-          <USwitch
-            :model-value="rapidos.includes('isOwner')"
-            :label="t.painel.soMeus"
-            :description="t.painel.soMeusAjuda"
-            size="sm"
-            :ui="{ description: 'text-xs' }"
-            @update:model-value="(v: boolean) => alternarRapido('isOwner', v)"
-          />
-          <USwitch
-            :model-value="rapidos.includes('inGroups')"
-            :label="t.painel.meusGrupos"
-            :description="t.painel.meusGruposAjuda"
-            size="sm"
-            :ui="{ description: 'text-xs' }"
-            @update:model-value="(v: boolean) => alternarRapido('inGroups', v)"
-          />
-        </div>
-
-        <!-- PROPOSTA (rodada 8): os filtros rápidos, os botões que a linha de filtros mostra. -->
-        <div class="space-y-2 border-t border-default pt-3">
+        <!-- PROPOSTA (rodada 8): os filtros rápidos. Primeiro os que o sistema sugere, depois os que a pessoa cria. -->
+        <div class="space-y-2">
           <div>
             <p class="text-sm font-medium text-highlighted">{{ t.rapido.grupo }}</p>
             <p class="text-xs text-muted">{{ t.rapido.painelAjuda }}</p>
           </div>
+          <p class="pt-1 text-xs font-medium text-muted">{{ t.rapido.doSistema }}</p>
+          <ul class="space-y-1.5">
+            <li v-for="f in SUGERIDOS" :key="f" class="flex items-center gap-2 rounded-lg bg-elevated/60 py-1.5 pl-2.5 pr-1.5">
+              <UIcon :name="ICONE_DO_SUGERIDO[f]" class="size-4 shrink-0 text-dimmed" />
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm text-highlighted">{{ t.rapido.sugerido[f].nome }}</p>
+                <p class="truncate text-xs text-muted">{{ t.rapido.sugerido[f].ajuda }}</p>
+              </div>
+              <USelect
+                :model-value="modoDe(f)"
+                :items="modos"
+                size="xs"
+                class="w-36 shrink-0"
+                :aria-label="t.rapido.comoUsar(t.rapido.sugerido[f].nome)"
+                @update:model-value="(m: ModoDoSugerido) => mudarSugerido(f, m)"
+              />
+            </li>
+          </ul>
+          <p class="pt-1 text-xs font-medium text-muted">{{ t.rapido.seus }}</p>
+          <p v-if="!botoes.length" class="text-xs text-dimmed">{{ t.rapido.nenhum }}</p>
           <TransitionGroup
             tag="ul"
             class="space-y-1.5"

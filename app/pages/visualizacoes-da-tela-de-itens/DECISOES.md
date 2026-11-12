@@ -265,6 +265,7 @@
   - "precisamos permitir que o user crie filtros rapidos pra ficar como botoes na tela nas visualizaçoes personalizadas. fez sentrido a demanda? isso ja acontece no prototipo? se nao, adicione e aguarde minha validaçao."
   - "tanto pra novas visualizaçoes de itens quanto pra novas visualizaçoes de tarefas o user deve ser capaz de fazer isso, beleza? criar os proprios filtros rapidos, no caso, criar um filtro e defini-lo como filtro rapido."
   - "nao só enquanto ta visualizando ele deve poder criar o filtro, mas na hora de criar uma nova visualizaçao personalizada ele tem a configuraçao de filtros automaicos, correto? nesse momento ele deve poder fazer isso tambem."
+  - "mas lembre que na hora de criar views, ja tem filtros rapidos sugeridos pelo sistema. e o user deve poder criar mais. essa deve ser a jornada."
 - **Como é hoje** (lido no código do front e do back, branch develop, em 2026-11-11): o filtro rápido da visualização guarda só a chave de um filtro pronto do produto, sem condição de campo. Nos itens, os prontos são "Só os itens meus" e "Só os itens dos meus grupos"; nas Tarefas Rápidas e Agendadas, outros prontos, como Minhas tarefas, Aberto e Atrasado. Os que a visualização marca sem "obrigatório" viram botões na barra da tabela. A pessoa não cria um filtro rápido com regra própria: a demanda faz sentido e pede ao back um lugar para guardar o nome e as regras de cada botão.
 - **Proposta:**
   - o filtro rápido é um botão na linha de filtros, com nome e regras; as regras usam o mesmo construtor do filtro avançado (E, Ou e grupos);
@@ -273,13 +274,16 @@
   - criar na tela, com a visualização aberta:
     - no menu do chip: "Salvar como filtro rápido". O modal vem com o nome do chip e a regra dele; ao criar, o chip sai e o botão nasce ligado, e a tabela não muda;
     - no "+ Filtro": "Filtro rápido", que abre o modal vazio;
-  - criar na configuração, também ao criar uma visualização nova: o painel ganha o bloco "Filtros rápidos", logo abaixo dos 2 filtros automáticos, com a lista dos botões (editar e excluir em cada um) e "Adicionar filtro rápido". Cada filtro por campo do painel ganha o botão "Salvar como filtro rápido", que faz o mesmo que o menu do chip;
+  - criar na configuração, também ao criar uma visualização nova: o painel ganha o bloco "Filtros rápidos", no lugar dos 2 filtros automáticos, em 2 partes:
+    - "Sugeridos pelo sistema": os filtros prontos do produto ("Meus itens" e "Dos meus grupos"), cada um com 3 usos: "Não usar", "Como botão" (o botão na linha de filtros) e "Sempre aplicado" (o filtro automático de hoje, que continua como chip fixo). A visualização nova já vem com os 2 como botão;
+    - "Criados por você": os botões da pessoa, com editar e excluir em cada um, e "Adicionar filtro rápido";
+  - cada filtro por campo do painel ganha o botão "Salvar como filtro rápido", que faz o mesmo que o menu do chip;
   - editar e excluir na tela: botão direito no filtro rápido, ou "Excluir filtro rápido" dentro do modal de edição;
   - a dica do botão mostra a regra e "Clique para ligar ou desligar. Botão direito para editar.";
   - o modal pede nome (até 40 caracteres, sem repetir na mesma visualização) e pelo menos 1 regra com valor.
-- **Tarefas:** a mesma lógica vale para as visualizações das Tarefas Rápidas e das Tarefas Agendadas, ao lado dos filtros prontos que elas já têm. O protótipo mostra a tela de itens.
-- **Fronteira:** muda a linha de filtros, o menu do chip e o painel de configuração; o modal novo fica em `_EditorDeFiltroRapido.vue`. A barra de visualizações, a tabela e os filtros prontos não mudam.
-- **Prints:** `evidencias/r8-*.jpg`, 11 prints.
+- **Tarefas:** a mesma lógica vale para as visualizações das Tarefas Rápidas e das Tarefas Agendadas: os filtros prontos delas (como Minhas tarefas, Aberto e Atrasado) entram em "Sugeridos pelo sistema", e a pessoa cria outros. O protótipo mostra a tela de itens.
+- **Fronteira:** muda a linha de filtros, o menu do chip e o painel de configuração (os 2 filtros automáticos viram os sugeridos do bloco de filtros rápidos); o modal novo fica em `_EditorDeFiltroRapido.vue`. A barra de visualizações, a tabela e os filtros prontos não mudam.
+- **Prints:** `evidencias/r8-*.jpg`, 12 prints.
 - **Em aberto:**
   - o botão ligado fica ligado ao voltar à visualização, ou volta desligado como no protótipo?
   - quem não pode salvar a visualização pode criar filtro rápido só para si?
