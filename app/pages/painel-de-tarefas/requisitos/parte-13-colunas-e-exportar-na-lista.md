@@ -20,6 +20,7 @@
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
 | RF603 | A lista deve ter o botão "Exportar", que baixa a lista do recorte num arquivo CSV. | Exemplo: "Exportar" na lista de Vencidas com 113 tarefas baixa um CSV com 113 linhas de tarefa. | Desejável | Opcional |
+| RF604 | O CSV deve levar só as tarefas que o membro vê (RN919). | Exemplo: o CSV de Vencidas de um Standard tem as linhas que a lista dele mostra. | Desejável | Obrigatório |
 
 ## Em aberto
 

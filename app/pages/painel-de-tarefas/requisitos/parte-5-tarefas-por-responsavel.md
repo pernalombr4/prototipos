@@ -41,6 +41,7 @@
 | RF215 | A tabela deve ter "Contar por", com "Designada para" (RN201) e "Quem assumiu" (RN202), e abrir em "Designada para". | Exemplo: em "Quem assumiu", a tarefa do grupo Jurídico assumida por Carla Nunes entra na linha de Carla Nunes. | Essencial | Obrigatório |
 | RF216 | Em "Designada para", o rodapé da tabela deve avisar que a tarefa designada a 2 pessoas conta para as 2 e que a soma das linhas pode passar do total. | O texto está no protótipo. | Importante | Obrigatório |
 | RF217 | Em "Quem assumiu", o rodapé da tabela deve avisar que a tarefa de grupo está em Tarefas por grupo e que quem do grupo assumiu aparece em "Quem assumiu". | O texto está no protótipo. | Importante | Obrigatório |
+| RF219 | O (i) "Como calculamos" de Tarefas por responsável deve dizer que cada membro que abre o painel vê esses números, contados com as tarefas que esse membro vê (RN922). | O texto está no protótipo. | Importante | Obrigatório |
 | RF218 | O clique numa linha da tabela deve abrir a lista da fila, com as abertas agora e as concluídas no período, no modo de "Contar por" escolhido. | Exemplo: em "Quem assumiu", a linha de Carla Nunes abre a lista com a tarefa do grupo Jurídico que ela assumiu. | Importante | Obrigatório |
 
 ## Interfaces (RI)

@@ -12,7 +12,7 @@
 
 | ID | Regra | Exemplo | Relevância |
 |---|---|---|---|
-| RN651 | O arranjo do painel (a ordem, o tamanho e os painéis ocultos) é de cada membro. O conteúdo de cada painel é igual para cada membro. | Ana esconde Tarefas por prioridade, e Bruno continua vendo o painel. | Obrigatório |
+| RN651 | O arranjo do painel (a ordem, o tamanho e os painéis ocultos) é de cada membro. O conteúdo de cada painel segue as tarefas que cada membro vê (RN919). | Ana esconde Tarefas por prioridade, e Bruno continua vendo o painel. | Obrigatório |
 | RN652 | O catálogo de painéis é fechado: o membro só mostra, esconde, move e redimensiona os painéis que o ENSPACE oferece. | O botão "Painéis" lista os mesmos painéis para cada membro. | Obrigatório |
 | RN653 | Cada painel tem a largura e a altura mínima e máxima dele, em colunas e linhas da grade de 12 colunas. | Um número vai de 2 a 4 colunas; Tempo médio de duração, de 5 a 12. Os limites de cada painel estão no protótipo. | Obrigatório |
 

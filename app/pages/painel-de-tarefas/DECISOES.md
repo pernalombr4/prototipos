@@ -464,3 +464,12 @@ O painel usa só dado que o ENSPACE já grava. Falta uma coisa: **agregar no ser
 - **Sinal de tamanho:** as partes 2 (23 linhas) e 7 (26 linhas) passam de 1,5 vez a mediana (15). Ficam inteiras: cada uma é 1 funcionalidade (a lista lateral; o gráfico de tempos com os 3 níveis e o detalhamento).
 - **Relevância:** proposta do agente, para a redatora confirmar as linhas Desejável e Opcional.
 - **Achado no protótipo, sem correção:** `serie.rotuloAcessivel` diz "Gráfico de barras", e Criadas e concluídas é um gráfico de linhas.
+
+## Permissões · 2026-11-12
+
+- **Pedido (literal):** "tem que decidir tambem as permissoes pra essa tela, de acordo com o MERCADO. o que o mercado pede?"
+- **Pesquisa:** `pesquisa/reports/Permissões do painel de tarefas.md`, com as notas em `pesquisa/research_notes/`.
+- **Decisão da redatora:** o painel conta o que cada membro vê. A caixa "Ver o painel de tarefas" nasce desligada em cada cargo. Os gestores são Owner ou Full, então a permissão de ver cada tarefa sem a licença Full fica fora do MVP. Os números por pessoa seguem o mercado: aparecem para quem abre o painel, sem restrição própria.
+- **Requisitos:** RN919 a RN923 e P909 a P911 no épico; na parte 1, RF016 e RF014 reescritos, RF017 a RF021 novos, RS001 com as permissões, RN001 e P002 retirados; RF219 na parte 5; RF604 na parte 13; RN651 da parte 14 reescrita.
+- **Protótipo:** o texto de sem permissão nos 3 idiomas, a linha de escopo abaixo do título ("Todas as tarefas do workspace.", a visão do Owner), os textos do escopo por perfil e do vazio por perfil no `textos.ts` e a frase dos números por pessoa no (i) de Tarefas por responsável.
+- **Sem print:** RF017 (o editor de cargo não está no protótipo) e RF018 a RF021 (estados de outro perfil).

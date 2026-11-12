@@ -659,6 +659,9 @@ const carregando = computed(() => estado.value === 'carregando' || atualizando.v
           <p class="text-sm text-muted">
             {{ t.subtitulo }}
           </p>
+          <p v-if="estado !== 'semPermissao'" class="text-xs text-muted">
+            {{ t.escopoTodas }}
+          </p>
         </div>
         <div v-if="estado !== 'erro' && estado !== 'semPermissao'" class="flex items-center gap-2">
           <span class="text-xs text-muted">{{ t.atualizadoAs(hora(AGORA, t)) }}</span>

@@ -8,7 +8,7 @@
 
 **Regra de lançamento:** o MVP são as partes 1 a 7, lançadas juntas. As partes 8 a 14 entram depois do MVP, cada uma por si. O pedido dos gestores decide a ordem: recorte por origem ou por categoria puxa a parte 11, e pedido para esconder painel puxa a parte 14.
 
-**Fora do escopo:** criar, editar, atribuir ou concluir tarefa pelo painel (a lista leva à tela da tarefa); montar painel próprio ou escolher métrica, porque o catálogo de painéis é fechado; os cartões de tarefa da Início e as telas de Agendadas e de Rápidas, que não mudam.
+**Fora do escopo:** criar, editar, atribuir ou concluir tarefa pelo painel (a lista leva à tela da tarefa); montar painel próprio ou escolher métrica, porque o catálogo de painéis é fechado; os cartões de tarefa da Início e as telas de Agendadas e de Rápidas, que não mudam; a permissão para ver cada tarefa do workspace sem a licença Full; a visão do gestor por grupo, com um responsável pelo grupo.
 
 **Relevância** (coluna das tarefas): Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer, conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
 
@@ -106,6 +106,25 @@
 | 6 | vence em mais de 30 dias | Em mais de 30 dias |
 | 7 | sem prazo (RN906) | Sem prazo |
 
+| ID | Regra | Exemplo | Relevância |
+|---|---|---|---|
+| RN919 | Cada número, coluna, barra, lista e arquivo do painel conta só as tarefas que o membro vê em Tarefas › Rápidas e em Tarefas › Agendadas, com as permissões da licença e do cargo dele. | O Owner conta cada tarefa do workspace. Um Standard conta as tarefas que as listas dele mostram, e Vencidas abre a lista que ele já vê em Agendadas e em Rápidas. | Obrigatório |
+| RN920 | A tabela a seguir define quem abre o painel. Política: Única. | Linha 3: um Standard com a permissão "Ver o painel de tarefas" no cargo abre o painel. | Obrigatório |
+
+| Linha | Membro | Abre o painel |
+|---|---|---|
+| 1 | Owner | sim |
+| 2 | Full, com "Ignorar Permissões para Membros Full" ligado no workspace | sim |
+| 3 | Full, Standard ou Viewer, com a permissão "Ver o painel de tarefas" no cargo | sim |
+| 4 | Full, Standard ou Viewer, sem a permissão "Ver o painel de tarefas" no cargo | não |
+| 5 | usuário externo, que responde a tarefa pelo portal | não |
+
+| ID | Regra | Exemplo | Relevância |
+|---|---|---|---|
+| RN921 | A permissão "Ver o painel de tarefas" nasce desligada em cada cargo, no cargo que já existe e no cargo novo. | No lançamento, só as linhas 1 e 2 de RN920 abrem o painel, até quem edita cargos ligar a permissão. | Obrigatório |
+| RN922 | Os números de cada responsável e de cada grupo (a fila, o "No prazo" e o "Tempo médio") aparecem para cada membro que abre o painel, contados com as tarefas que esse membro vê (RN919). | Um Standard com a permissão vê o "No prazo" de Ana, contado com as tarefas de Ana que ele vê. | Obrigatório |
+| RN923 | Cada texto do painel omite quantas tarefas do workspace o membro deixa de ver. | O cabeçalho de um Standard diz "Tarefas que o seu perfil permite ver.", sem "113 de 240". | Obrigatório |
+
 ## Padrão de qualidade
 
 | Tema | O que se espera |
@@ -139,4 +158,7 @@
 | P905 | Bloqueada aparece na barra de Tarefas por responsável e de Tarefas por grupo, e não tem filtro próprio no seletor. Ganha o filtro? | produto | As partes 5 e 6 ganham a opção "Bloqueada" no seletor |
 | P906 | O ENSPACE não tem fuso por workspace, e o painel usa o horário de Brasília. O cliente fora do Brasil conta a semana e o mês no horário dele? | Time de back | Com fuso por workspace, RN914 passa a usar o fuso do workspace |
 | P907 | Se o nó do Spaceflow sem prazo gravar `due_date: null`, a exceção de RN906 deixa de ser necessária. O back muda a gravação? | Time de back | RN906 fica só com "sem `due_date`" |
+| P909 | O que Standard e Viewer veem hoje nas listas de Agendadas e de Rápidas: só as tarefas em que têm papel (criador, responsável, colaborador), ou cada tarefa que o cargo libera? | produto e time de back | Define o que RN919 conta para Standard e Viewer |
+| P910 | A tarefa de um item que o membro não lê, por permissão de categoria ou de formulário, aparece nas listas dele? | produto e time de back | Com "não aparece", RN919 tira essa tarefa da conta |
+| P911 | O Full com cargo reduzido vê a tarefa de Agendadas sem responsável e a tarefa com "Limitar acesso" que não o inclui? | produto e time de back | Define o que RN919 conta para o Full sem a linha 2 de RN920 |
 | P908 | O painel Tarefas por tipo, com a ação da tarefa (aprovação, formulário, confirmação, integração), entra depois do MVP? | produto | Com o sim, o épico ganha uma parte depois da 14 |

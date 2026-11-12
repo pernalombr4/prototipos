@@ -38,6 +38,8 @@ export interface Textos {
 
   titulo: string
   subtitulo: string
+  escopoTodas: string
+  escopoPerfil: string
   atualizadoAs: (hora: string) => string
   atualizar: string
 
@@ -261,6 +263,7 @@ export interface Textos {
     erroTitulo: string
     erroTexto: string
     tentarDeNovo: string
+    vazioPerfilTitulo: string
     semPermissaoTitulo: string
     semPermissaoTexto: string
   }
@@ -334,6 +337,8 @@ export const textos: Record<Idioma, Textos> = {
 
     titulo: 'Painel de tarefas',
     subtitulo: 'As tarefas criadas manualmente e as criadas por fluxo, num lugar só.',
+    escopoTodas: 'Todas as tarefas do workspace.',
+    escopoPerfil: 'Tarefas que o seu perfil permite ver.',
     atualizadoAs: h => `Atualizado às ${h}`,
     atualizar: 'Atualizar',
 
@@ -432,7 +437,7 @@ export const textos: Record<Idioma, Textos> = {
       serie: 'Criadas pela data de criação e concluídas pela data de conclusão, em semanas de segunda a domingo, no horário de Brasília. Quando a linha das criadas fica acima da das concluídas, a fila cresce.',
       contagemStatus: 'Pendente, Em andamento e Bloqueada: as abertas agora (Pendente e Aguardando contam como Pendente; Trabalhando, como Em andamento). Concluída: as concluídas no período, pela data de conclusão. Clique numa coluna para ver a lista; o resumo ao lado divide pela situação do prazo.',
       grupos: 'A fila de cada grupo de membros: a tarefa feita para o grupo (tipo de responsável Grupo, na tarefa de etapa) e a tarefa de cada membro. A tarefa conta uma vez por grupo; a de quem está em 2 grupos conta nos 2. A tarefa para Todo mundo não entra em grupo. As partes da barra e os filtros seguem as regras de Tarefas por responsável.',
-      responsaveis: 'Conta pela pessoa para quem a tarefa foi feita (responsável da rápida, tipo de responsável da tarefa de etapa). A tarefa feita para um grupo está em Tarefas por grupo. Todos: a barra dividida em vencida, pendente, em andamento, bloqueada e concluída, sem repetir tarefa. Vencida é a aberta com prazo passado, em qualquer status; pendente, em andamento e bloqueada são as outras abertas agora; concluída é do período. Os outros filtros mostram uma parte só. Mostra as 10 maiores filas; "Ver tabela" mostra todas.',
+      responsaveis: 'Conta pela pessoa para quem a tarefa foi feita (responsável da rápida, tipo de responsável da tarefa de etapa). A tarefa feita para um grupo está em Tarefas por grupo. Todos: a barra dividida em vencida, pendente, em andamento, bloqueada e concluída, sem repetir tarefa. Vencida é a aberta com prazo passado, em qualquer status; pendente, em andamento e bloqueada são as outras abertas agora; concluída é do período. Os outros filtros mostram uma parte só. Mostra as 10 maiores filas; "Ver tabela" mostra todas. Cada membro que abre o painel vê esses números, contados com as tarefas que ele vê.',
       prioridade: 'Abertas agora, pela prioridade da tarefa rápida e da tarefa do Spaceflow. A tarefa de etapa não tem prioridade e fica de fora: a quickview mostra quantas.',
       tempos: 'Tempo em dias corridos, em 3 níveis ligados: o fluxo, a etapa (só no fluxo da categoria) e a tarefa. O seletor do painel troca o nível e a regra de cada um.',
       tempoTarefa: 'Da criação à conclusão, agrupado pelo nome da tarefa de etapa ou do nó do Spaceflow. As criadas manualmente ficam numa linha só: o nome livre de cada uma não agrupa nada. Nas agendadas com "Habilitar Atribuição", o tempo se divide em espera (até alguém assumir) e execução.',
@@ -608,8 +613,9 @@ export const textos: Record<Idioma, Textos> = {
       erroTitulo: 'Não conseguimos carregar o painel',
       erroTexto: 'As tarefas continuam lá. Tente de novo em alguns segundos.',
       tentarDeNovo: 'Tentar de novo',
-      semPermissaoTitulo: 'Seu perfil não vê o painel de tarefas',
-      semPermissaoTexto: 'O painel mostra as tarefas do workspace inteiro. Peça acesso de leitura a Tarefas e a Tarefas Programadas a quem administra o workspace.',
+      vazioPerfilTitulo: 'Ainda não há tarefas que o seu perfil permite ver',
+      semPermissaoTitulo: 'Seu perfil não tem acesso ao painel de tarefas',
+      semPermissaoTexto: 'Para ver o painel, peça a permissão Ver o painel de tarefas a quem administra o workspace.',
     },
 
     unidades: { d: 'd', h: 'h', min: 'min', menosDeUmMin: 'menos de 1 min' },
@@ -632,6 +638,8 @@ export const textos: Record<Idioma, Textos> = {
 
     titulo: 'Task dashboard',
     subtitulo: 'Tasks created manually and tasks created by flows, in one place.',
+    escopoTodas: 'All tasks in the workspace.',
+    escopoPerfil: 'Tasks your profile can see.',
     atualizadoAs: h => `Updated at ${h}`,
     atualizar: 'Refresh',
 
@@ -730,7 +738,7 @@ export const textos: Record<Idioma, Textos> = {
       serie: 'Created by creation date and done by completion date, in Monday to Sunday weeks, Brasília time. When the created line sits above the done line, the queue grows.',
       contagemStatus: 'Pending, In progress and Blocked: open tasks right now (Pending and Waiting count as Pending; Working, as In progress). Done: tasks completed in the period, by completion date. Click a column to see the list; the summary next to it splits by due date situation.',
       grupos: 'Each member group queue: tasks made for the group (Group responsibility type, on stage tasks) and tasks of each member. A task counts once per group; a task of someone in 2 groups counts in both. Tasks for Everybody stay out of groups. Bar parts and filters follow the Tasks by assignee rules.',
-      responsaveis: 'Counts by the person the task was made for (quick task assignee, stage task responsibility type). Tasks made for a group are in Tasks by group. All: the bar split into overdue, pending, in progress, blocked and done, with no task counted twice. Overdue is an open task past its due date, in any status; pending, in progress and blocked are the other open tasks now; done is for the period. The other filters show one part only. Shows the 10 longest queues; "See table" shows them all.',
+      responsaveis: 'Counts by the person the task was made for (quick task assignee, stage task responsibility type). Tasks made for a group are in Tasks by group. All: the bar split into overdue, pending, in progress, blocked and done, with no task counted twice. Overdue is an open task past its due date, in any status; pending, in progress and blocked are the other open tasks now; done is for the period. The other filters show one part only. Shows the 10 longest queues; "See table" shows them all. Each member who opens the dashboard sees these numbers, counted with the tasks they can see.',
       prioridade: 'Open now, by the priority of quick tasks and Spaceflow tasks. Stage tasks have no priority and stay out: the quickview shows how many.',
       tempos: 'Time in calendar days, on 3 linked levels: the flow, the stage (category flows only) and the task. The panel selector switches the level and each one has its own rule.',
       tempoTarefa: 'From creation to completion, grouped by stage task or Spaceflow node name. Tasks created manually share one row: each free name groups nothing. For scheduled tasks with "Enable assignment", time splits into waiting (until someone picks it up) and execution.',
@@ -906,8 +914,9 @@ export const textos: Record<Idioma, Textos> = {
       erroTitulo: 'We could not load the dashboard',
       erroTexto: 'Your tasks are still there. Try again in a few seconds.',
       tentarDeNovo: 'Try again',
-      semPermissaoTitulo: 'Your profile cannot see the task dashboard',
-      semPermissaoTexto: 'The dashboard shows the tasks of the whole workspace. Ask a workspace admin for read access to Tasks and Scheduled Tasks.',
+      vazioPerfilTitulo: 'No tasks your profile can see yet',
+      semPermissaoTitulo: 'Your profile has no access to the task dashboard',
+      semPermissaoTexto: 'To see the dashboard, ask a workspace admin for the View task dashboard permission.',
     },
 
     unidades: { d: 'd', h: 'h', min: 'min', menosDeUmMin: 'under 1 min' },
@@ -930,6 +939,8 @@ export const textos: Record<Idioma, Textos> = {
 
     titulo: 'Panel de tareas',
     subtitulo: 'Las tareas creadas manualmente y las creadas por flujo, en un solo lugar.',
+    escopoTodas: 'Todas las tareas del workspace.',
+    escopoPerfil: 'Tareas que su perfil puede ver.',
     atualizadoAs: h => `Actualizado a las ${h}`,
     atualizar: 'Actualizar',
 
@@ -1028,7 +1039,7 @@ export const textos: Record<Idioma, Textos> = {
       serie: 'Creadas por fecha de creación y concluidas por fecha de conclusión, en semanas de lunes a domingo, hora de Brasilia. Cuando la línea de creadas queda por encima de la de concluidas, la fila crece.',
       contagemStatus: 'Pendiente, En curso y Bloqueada: las abiertas ahora (Pendiente y Esperando cuentan como Pendiente; Trabajando, como En curso). Concluida: las concluidas en el período, por fecha de conclusión. Haga clic en una columna para ver la lista; el resumen al lado divide por la situación del plazo.',
       grupos: 'La fila de cada grupo de miembros: la tarea hecha para el grupo (tipo de responsable Grupo, en la tarea de etapa) y la tarea de cada miembro. La tarea cuenta una vez por grupo; la de quien está en 2 grupos cuenta en los 2. La tarea para Todo el mundo no entra en grupo. Las partes de la barra y los filtros siguen las reglas de Tareas por responsable.',
-      responsaveis: 'Cuenta por la persona para quien se hizo la tarea (responsable de la rápida, tipo de responsable de la tarea de etapa). La tarea hecha para un grupo está en Tareas por grupo. Todos: la barra dividida en vencida, pendiente, en curso, bloqueada y concluida, sin repetir tarea. Vencida es la abierta con plazo pasado, en cualquier estado; pendiente, en curso y bloqueada son las otras abiertas ahora; concluida es del período. Los otros filtros muestran una parte sola. Muestra las 10 filas más largas; "Ver tabla" muestra todas.',
+      responsaveis: 'Cuenta por la persona para quien se hizo la tarea (responsable de la rápida, tipo de responsable de la tarea de etapa). La tarea hecha para un grupo está en Tareas por grupo. Todos: la barra dividida en vencida, pendiente, en curso, bloqueada y concluida, sin repetir tarea. Vencida es la abierta con plazo pasado, en cualquier estado; pendiente, en curso y bloqueada son las otras abiertas ahora; concluida es del período. Los otros filtros muestran una parte sola. Muestra las 10 filas más largas; "Ver tabla" muestra todas. Cada miembro que abre el panel ve estos números, contados con las tareas que ve.',
       prioridade: 'Abiertas ahora, por la prioridad de la tarea rápida y de la tarea de Spaceflow. La tarea de etapa no tiene prioridad y queda fuera: la quickview muestra cuántas.',
       tempos: 'Tiempo en días corridos, en 3 niveles ligados: el flujo, la etapa (solo en el flujo de la categoría) y la tarea. El selector del panel cambia el nivel y cada uno tiene su regla.',
       tempoTarefa: 'De la creación a la conclusión, agrupado por el nombre de la tarea de etapa o del nodo de Spaceflow. Las creadas manualmente quedan en una sola fila: el nombre libre de cada una no agrupa nada. En las programadas con "Habilitar asignación", el tiempo se divide en espera (hasta que alguien la toma) y ejecución.',
@@ -1204,8 +1215,9 @@ export const textos: Record<Idioma, Textos> = {
       erroTitulo: 'No pudimos cargar el panel',
       erroTexto: 'Sus tareas siguen ahí. Intente de nuevo en unos segundos.',
       tentarDeNovo: 'Intentar de nuevo',
-      semPermissaoTitulo: 'Su perfil no ve el panel de tareas',
-      semPermissaoTexto: 'El panel muestra las tareas de todo el workspace. Pida acceso de lectura a Tareas y a Tareas Programadas a quien administra el workspace.',
+      vazioPerfilTitulo: 'Aún no hay tareas que su perfil pueda ver',
+      semPermissaoTitulo: 'Su perfil no tiene acceso al panel de tareas',
+      semPermissaoTexto: 'Para ver el panel, pida el permiso Ver el panel de tareas a quien administra el workspace.',
     },
 
     unidades: { d: 'd', h: 'h', min: 'min', menosDeUmMin: 'menos de 1 min' },
