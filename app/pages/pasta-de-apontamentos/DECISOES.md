@@ -38,6 +38,7 @@
 | Relacionamentos em abas (Relacionadas, Bloqueada por, Bloqueia), só com as que têm conteúdo; em cada aba, um grupo por tipo (Tarefas, e um por categoria de item) numa tabela curta com nome, data limite ou referência e responsável | Pedido literal: o ClickUp organiza os vínculos assim, separado dos anexos. Na tarefa bloqueada, a aba mostra o aviso de quem ela espera |
 | O "+" da seção e o rodapé de cada tabela ("Adicionar tarefa", "Vincular a um item") abrem o mesmo menu de Relacionar da rodada 5 | Uma porta só para criar vínculo |
 | Na interface nova, o que a tarefa ainda não tem vira linha de ação no fim (Adicionar subtarefa, Relacionar, Criar checklist, Anexar arquivo) | É o modo do ClickUp, no lugar da fileira de botões da interface atual |
+| O item abre no painel lateral por padrão; "Item em: Tela cheia" continua no andaime | Pedido da redatora depois da rodada 6: a gaveta mostra o item como o develop abre ao clicar na linha. Desde a rodada 4, o padrão era a tela cheia, e o painel só aparecia quando alguém o escolhia |
 | Painel de 50rem na interface nova (42rem na atual) | A grade de 2 colunas precisa do espaço; com 42rem os valores quebram linha |
 
 - **Campos inventados (o modelo `tasks` lido em 11/11/2026 não tem):**

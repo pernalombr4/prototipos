@@ -12,8 +12,8 @@
  * rápida (a página Tarefas › Rápidas, com checklist, subtarefas, dependências
  * e conclusão com motivo no painel). A citação com # vale nas duas.
  *
- * Rodada 4: na visualização Item, o andaime alterna Tela cheia e Painel
- * lateral. No painel, o fundo é a listagem da categoria e o item abre à
+ * Rodada 4: na visualização Item, o andaime alterna Painel lateral (padrão desde
+ * a rodada 6) e Tela cheia. No painel, o fundo é a listagem da categoria e o item abre à
  * direita como no develop (gaveta redimensionável, 700 px de partida, de 400 a
  * 1400), com a mesma tela do item dentro. Serve para julgar se a pasta de
  * apontamentos cabe no espaço estreito.
@@ -72,7 +72,7 @@ function daQuery<T extends string>(chave: string, validos: readonly T[], padrao:
   })
 }
 const vista = daQuery<Vista>('vista', ['item', 'tarefa'], 'item')
-const abertura = daQuery<Abertura>('abertura', ['tela', 'painel'], 'tela')
+const abertura = daQuery<Abertura>('abertura', ['painel', 'tela'], 'painel')
 const cenarioId = daQuery<IdCenario>('cenario', ['produto', 'juridico'], 'produto')
 const papel = daQuery<Papel>('papel', ['conferente', 'resolvedor'], 'conferente')
 const estadoDaTela = daQuery<EstadoDaTela>('estado', ['cheio', 'vazio', 'carregando', 'semPermissao'], 'cheio')
@@ -491,7 +491,7 @@ watch(cenarioId, () => {
           <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.tarefaRapida.andaime.abertura }}</span>
           <UFieldGroup size="xs">
             <UButton
-              v-for="a in (['tela', 'painel'] as const)"
+              v-for="a in (['painel', 'tela'] as const)"
               :key="a"
               :label="t.tarefaRapida.andaime.aberturas[a]"
               :icon="a === 'tela' ? 'i-lucide-maximize-2' : 'i-lucide-panel-right'"
