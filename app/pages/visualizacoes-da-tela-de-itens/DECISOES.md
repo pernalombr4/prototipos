@@ -259,3 +259,28 @@
   - no épico de filtros, "Como é hoje" (H1 a H9), "O que muda na lógica" e "O que muda na tela": eram a investigação, e cada mudança já está nas partes e no `BRIEFING.md`;
   - no épico da barra, o P004 (quantas visualizações os clientes têm): não muda o que o dev constrói.
 - **Ficou:** o que é, onde vale, o link do protótipo e dos textos, fora do escopo, as partes, as RN, o padrão de qualidade, o glossário e o que está em aberto. As tarefas não mudaram.
+
+## Rodada 8 · 2026-11-11 (aguarda validação)
+- **Pedido (literal):**
+  - "precisamos permitir que o user crie filtros rapidos pra ficar como botoes na tela nas visualizaçoes personalizadas. fez sentrido a demanda? isso ja acontece no prototipo? se nao, adicione e aguarde minha validaçao."
+  - "tanto pra novas visualizaçoes de itens quanto pra novas visualizaçoes de tarefas o user deve ser capaz de fazer isso, beleza? criar os proprios filtros rapidos, no caso, criar um filtro e defini-lo como filtro rapido."
+  - "nao só enquanto ta visualizando ele deve poder criar o filtro, mas na hora de criar uma nova visualizaçao personalizada ele tem a configuraçao de filtros automaicos, correto? nesse momento ele deve poder fazer isso tambem."
+- **Como é hoje** (lido no código do front e do back, branch develop, em 2026-11-11): o filtro rápido da visualização guarda só a chave de um filtro pronto do produto, sem condição de campo. Nos itens, os prontos são "Só os itens meus" e "Só os itens dos meus grupos"; nas Tarefas Rápidas e Agendadas, outros prontos, como Minhas tarefas, Aberto e Atrasado. Os que a visualização marca sem "obrigatório" viram botões na barra da tabela. A pessoa não cria um filtro rápido com regra própria: a demanda faz sentido e pede ao back um lugar para guardar o nome e as regras de cada botão.
+- **Proposta:**
+  - o filtro rápido é um botão na linha de filtros, com nome e regras; as regras usam o mesmo construtor do filtro avançado (E, Ou e grupos);
+  - clicar liga e desliga o botão. Ligar não é alteração da visualização: vale até sair da tela;
+  - criar, editar e excluir o botão é alteração da visualização e passa pela barra de alterações não salvas, com as permissões de salvar que já existem;
+  - criar na tela, com a visualização aberta:
+    - no menu do chip: "Salvar como filtro rápido". O modal vem com o nome do chip e a regra dele; ao criar, o chip sai e o botão nasce ligado, e a tabela não muda;
+    - no "+ Filtro": "Filtro rápido", que abre o modal vazio;
+  - criar na configuração, também ao criar uma visualização nova: o painel ganha o bloco "Filtros rápidos", logo abaixo dos 2 filtros automáticos, com a lista dos botões (editar e excluir em cada um) e "Adicionar filtro rápido". Cada filtro por campo do painel ganha o botão "Salvar como filtro rápido", que faz o mesmo que o menu do chip;
+  - editar e excluir na tela: botão direito no filtro rápido, ou "Excluir filtro rápido" dentro do modal de edição;
+  - a dica do botão mostra a regra e "Clique para ligar ou desligar. Botão direito para editar.";
+  - o modal pede nome (até 40 caracteres, sem repetir na mesma visualização) e pelo menos 1 regra com valor.
+- **Tarefas:** a mesma lógica vale para as visualizações das Tarefas Rápidas e das Tarefas Agendadas, ao lado dos filtros prontos que elas já têm. O protótipo mostra a tela de itens.
+- **Fronteira:** muda a linha de filtros, o menu do chip e o painel de configuração; o modal novo fica em `_EditorDeFiltroRapido.vue`. A barra de visualizações, a tabela e os filtros prontos não mudam.
+- **Prints:** `evidencias/r8-*.jpg`, 11 prints.
+- **Em aberto:**
+  - o botão ligado fica ligado ao voltar à visualização, ou volta desligado como no protótipo?
+  - quem não pode salvar a visualização pode criar filtro rápido só para si?
+  - existe um limite de botões por visualização?

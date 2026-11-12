@@ -15,11 +15,13 @@ import ValorDaRegra from './_ValorDaRegra.vue'
 const props = defineProps<{ t: Textos, valorCurto: string }>()
 const regra = defineModel<FiltroDeCampo>({ required: true })
 const aberto = defineModel<boolean>('open', { default: false })
-const emit = defineEmits<{ excluir: [], levar: [] }>()
+const emit = defineEmits<{ excluir: [], levar: [], rapido: [] }>()
 
 const campo = computed(() => campoPorPath(regra.value.field))
 const acoes = computed(() => [[
   { label: props.t.filtro.levarParaAvancado, icon: 'i-lucide-list-filter', onSelect: () => { aberto.value = false; emit('levar') } },
+  // PROPOSTA (rodada 8): o filtro aplicado vira um botão que liga e desliga.
+  { label: props.t.rapido.doChip, icon: 'i-lucide-zap', disabled: vazia(regra.value), onSelect: () => { aberto.value = false; emit('rapido') } },
 ], [
   { label: props.t.filtro.excluirFiltro, icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => { aberto.value = false; emit('excluir') } },
 ]])

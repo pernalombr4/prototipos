@@ -69,6 +69,10 @@ export const contarRegras = (g?: GrupoDeRegras): number =>
 export const vazia = (r: FiltroDeCampo) =>
   (ehLista(r.op) && Array.isArray(r.value) && !r.value.length) || (r.op === 'contains' && !String(r.value ?? '').trim())
 
+/** O grupo que filtra alguma coisa: pelo menos 1 regra com valor. */
+export const grupoComEfeito = (g: GrupoDeRegras): boolean =>
+  g.regras.some(r => ehGrupo(r) ? grupoComEfeito(r) : !vazia(r))
+
 export function useDescricaoDeFiltro(t: Ref<Textos>, idioma: Ref<string>) {
   const moeda = (n: number) => new Intl.NumberFormat(idioma.value, { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(n)
   const data = (s: string) => new Intl.DateTimeFormat(idioma.value, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(`${s}T12:00:00`))

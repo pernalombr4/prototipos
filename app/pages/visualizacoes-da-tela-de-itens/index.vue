@@ -159,8 +159,15 @@ watch(ativa, () => {
   setTimeout(() => { trocando.value = false }, 260)
 })
 
+/* Rodada 8: os filtros rápidos ligados, por visualização. Não é alteração: o reload zera, como no produto. */
+const ligados = ref<Record<string, string[]>>({})
+const ligadosDaAtiva = computed({
+  get: () => ligados.value[ativa.value] ?? [],
+  set: (v: string[]) => { ligados.value = { ...ligados.value, [ativa.value]: v } },
+})
+
 const itensDaVisualizacao = computed(() => {
-  const lista = aplicar(efetiva.value)
+  const lista = aplicar(efetiva.value, ITENS, ligadosDaAtiva.value)
   const q = busca.value.trim().toLowerCase()
   return q ? lista.filter(i => `${i.reference} ${i.fornecedor}`.toLowerCase().includes(q)) : lista
 })
@@ -199,7 +206,7 @@ const linhaRef = ref<InstanceType<typeof LinhaDeFiltros> | null>(null)
 const linhaPedida = ref(false)
 const temFiltro = computed(() => {
   const f = efetiva.value.filters
-  return !!(f.field_filters?.length || f.quick_filters?.length || f.avancado)
+  return !!(f.field_filters?.length || f.quick_filters?.length || f.avancado || f.rapidos?.length)
 })
 watch(ativa, () => { linhaPedida.value = false })
 
@@ -720,6 +727,7 @@ const opcoesDoAndaime = computed(() => [
             <LinhaDeFiltros
               v-if="estilo === 'proposta' && (temFiltro || modificada || linhaPedida)"
               ref="linhaRef"
+              v-model:ligados="ligadosDaAtiva"
               :model-value="efetiva.filters"
               :t="t"
               :idioma="idioma"
@@ -827,7 +835,9 @@ const opcoesDoAndaime = computed(() => [
                 :eh-owner="ehOwner"
                 :criando="criando"
                 :nomes-existentes="salvas.filter(v => v.reference !== ativa).map(v => v.name ?? '')"
+                :idioma="idioma"
                 @salvar="salvar"
+                @ligar="(id: string) => { ligadosDaAtiva = [...ligadosDaAtiva, id] }"
                 @descartar="descartar"
                 @criar="concluirCriacao"
                 @cancelar-criacao="cancelarCriacao()"

@@ -5,27 +5,34 @@
  * - os 2 filtros automáticos ("Só itens meus", "Só itens dos meus grupos") como etiqueta com X;
  * - 1 chip por filtro simples (`_ChipDeFiltro`); todos valem juntos;
  * - o chip "N regras" abre o filtro avançado (`_ConstrutorDeRegras`), que vale junto com os simples;
- * - "+ Filtro" lista os campos com busca e, no fim, "Filtro avançado".
+ * - "+ Filtro" lista os campos com busca e, no fim, "Filtro avançado" e "Filtro rápido";
+ * - rodada 8: os filtros rápidos que a pessoa cria são botões no começo da linha, que ligam e desligam.
+ *   Ligar não é alteração da visualização; criar, editar e excluir o botão é.
  *
  * Tudo vira rascunho da visualização: a barra flutuante oferece salvar para todos ou como nova.
  */
-import type { FiltroDeCampo, GrupoDeRegras, Visualizacao } from './mocks'
+import type { FiltroDeCampo, FiltroRapido, GrupoDeRegras, Visualizacao } from './mocks'
 import type { Textos } from './textos'
-import { CAMPOS, ICONE_DO_TIPO, clonar } from './mocks'
+import { CAMPOS, ICONE_DO_TIPO, campoPorPath, clonar } from './mocks'
 import { campoLivre, contarRegras, regraNova, useDescricaoDeFiltro } from './filtros'
 import ChipDeFiltro from './_ChipDeFiltro.vue'
 import ConstrutorDeRegras from './_ConstrutorDeRegras.vue'
+import EditorDeFiltroRapido from './_EditorDeFiltroRapido.vue'
 
 type Filtros = Visualizacao['filters']
 
 const props = defineProps<{ t: Textos, idioma: string }>()
 const filtros = defineModel<Filtros>({ required: true })
+/** Os filtros rápidos ligados agora. Não entram na visualização: valem até sair da tela. */
+const ligados = defineModel<string[]>('ligados', { default: () => [] })
+const toast = useToast()
 
-const { valorCurto } = useDescricaoDeFiltro(toRef(props, 't'), toRef(props, 'idioma'))
+const { valorCurto, descreverGrupo } = useDescricaoDeFiltro(toRef(props, 't'), toRef(props, 'idioma'))
 
 const simples = computed(() => filtros.value.field_filters ?? [])
 const rapidos = computed(() => filtros.value.quick_filters ?? [])
 const avancado = computed(() => filtros.value.avancado)
+const botoes = computed(() => filtros.value.rapidos ?? [])
 
 const mudar = (parte: Partial<Filtros>) => { filtros.value = { ...clonar(filtros.value), ...parte } }
 
@@ -99,12 +106,88 @@ function tirarRapido(filtro: string) {
   mudar({ quick_filters: rapidos.value.filter(q => q.filter !== filtro) })
 }
 
+/* ---------- filtros rápidos (rodada 8) ---------- */
+
+function alternar(id: string) {
+  ligados.value = ligados.value.includes(id) ? ligados.value.filter(x => x !== id) : [...ligados.value, id]
+}
+
+const editor = reactive({ aberto: false, editando: false, inicial: null as FiltroRapido | null, doChip: null as number | null })
+const nomesUsados = computed(() => botoes.value.filter(b => b.id !== editor.inicial?.id).map(b => b.nome))
+
+function abrirEditor(inicial: FiltroRapido, editando: boolean, doChip: number | null = null) {
+  Object.assign(editor, { inicial, editando, doChip })
+  editor.aberto = true
+}
+function novoRapido() {
+  maisAberto.value = false
+  abrirEditor({ id: '', nome: '', regras: { conector: 'and', regras: [regraNova(campoLivre([]).path)] } }, false)
+}
+/* O chip vira botão: o nome sugerido é o texto do chip, e o botão nasce ligado, com o mesmo resultado. */
+function rapidoDoChip(i: number) {
+  const r = simples.value[i]!
+  const nome = `${campoPorPath(r.field)?.label ?? r.field}: ${valorCurto(r)}`.slice(0, 40)
+  abrirEditor({ id: '', nome, regras: { conector: 'and', regras: [clonar(r)] } }, false, i)
+}
+
+function salvarRapido(f: FiltroRapido) {
+  if (editor.editando) {
+    mudar({ rapidos: botoes.value.map(b => b.id === f.id ? f : b) })
+    toast.add({ title: props.t.rapido.alterado(f.nome), icon: 'i-lucide-zap' })
+    return
+  }
+  const campos = editor.doChip === null ? simples.value : simples.value.filter((_, j) => j !== editor.doChip)
+  mudar({ rapidos: [...botoes.value, f], field_filters: campos })
+  ligados.value = [...ligados.value, f.id]
+  toast.add({ title: props.t.rapido.criado(f.nome), description: props.t.rapido.criadoAjuda, icon: 'i-lucide-zap' })
+}
+function excluirRapido() {
+  const f = editor.inicial
+  if (!f) return
+  mudar({ rapidos: botoes.value.filter(b => b.id !== f.id) })
+  ligados.value = ligados.value.filter(x => x !== f.id)
+  toast.add({ title: props.t.rapido.excluido(f.nome), icon: 'i-lucide-trash-2' })
+}
+
+const menuDoBotao = (b: FiltroRapido) => [[
+  { label: props.t.rapido.editar, icon: 'i-lucide-pencil', onSelect: () => abrirEditor(clonar(b), true) },
+], [
+  { label: props.t.rapido.excluir, icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => { editor.inicial = b; excluirRapido() } },
+]]
+
 defineExpose({ filtrarPor, abrirMais: async () => { await nextTick(); maisAberto.value = true } })
 </script>
 
 <template>
   <div class="flex flex-wrap items-center gap-1.5 border-b border-default bg-elevated/40 px-4 py-1.5">
     <UIcon name="i-lucide-filter" class="size-3.5 text-muted" />
+
+    <!-- PROPOSTA (rodada 8): os filtros rápidos da visualização, botões que ligam e desligam -->
+    <template v-if="botoes.length">
+      <div role="group" :aria-label="t.rapido.grupo" class="flex flex-wrap items-center gap-1.5">
+        <UContextMenu v-for="b in botoes" :key="b.id" :items="menuDoBotao(b)">
+          <UTooltip :delay-duration="400" :content="{ side: 'bottom' }">
+            <UButton
+              :label="b.nome"
+              :icon="ligados.includes(b.id) ? 'i-lucide-check' : 'i-lucide-zap'"
+              :color="ligados.includes(b.id) ? 'primary' : 'neutral'"
+              :variant="ligados.includes(b.id) ? 'soft' : 'outline'"
+              size="xs"
+              :aria-pressed="ligados.includes(b.id)"
+              class="transition-colors"
+              @click="alternar(b.id)"
+            />
+            <template #content>
+              <div class="max-w-72 space-y-0.5 py-0.5">
+                <p class="font-medium text-highlighted">{{ descreverGrupo(b.regras) }}</p>
+                <p class="text-muted">{{ t.rapido.dicaAcao }}</p>
+              </div>
+            </template>
+          </UTooltip>
+        </UContextMenu>
+      </div>
+      <span class="mx-0.5 h-4 w-px bg-accented" aria-hidden="true" />
+    </template>
 
     <UBadge
       v-for="q in rapidos"
@@ -131,6 +214,7 @@ defineExpose({ filtrarPor, abrirMais: async () => { await nextTick(); maisAberto
       @update:open="(v: boolean) => (chipAberto = v ? i : null)"
       @excluir="excluirSimples(i)"
       @levar="levarParaAvancado(i)"
+      @rapido="rapidoDoChip(i)"
     />
 
     <UPopover v-if="avancado" v-model:open="avancadoAberto" :content="{ align: 'start', sideOffset: 6 }">
@@ -182,8 +266,19 @@ defineExpose({ filtrarPor, abrirMais: async () => { await nextTick(); maisAberto
             <span class="flex-1 text-left">{{ t.filtro.avancado }}</span>
             <span v-if="avancado" class="text-xs text-muted">{{ t.filtro.regras(contarRegras(avancado)) }}</span>
           </UButton>
+          <UButton :label="t.rapido.noMais" color="neutral" variant="ghost" size="sm" block class="justify-start" icon="i-lucide-zap" @click="novoRapido" />
         </div>
       </template>
     </UPopover>
+
+    <EditorDeFiltroRapido
+      v-model:open="editor.aberto"
+      :t="t"
+      :inicial="editor.inicial"
+      :editando="editor.editando"
+      :nomes-usados="nomesUsados"
+      @salvar="salvarRapido"
+      @excluir="excluirRapido"
+    />
   </div>
 </template>

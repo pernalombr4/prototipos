@@ -14,14 +14,15 @@
  * `sidebar-right`). Aqui é uma coluna dentro do conteúdo, para o protótipo
  * controlar abrir e fechar.
  */
-import type { FiltroDeCampo, GrupoDeRegras, Ordenacao, Visualizacao } from './mocks'
+import type { FiltroDeCampo, FiltroRapido, GrupoDeRegras, Ordenacao, Visualizacao } from './mocks'
 import type { Textos } from './textos'
 
 type Escopo = 'todos' | 'eu' | 'propria' | 'nova'
 import { CAMPOS, FUNCOES, GRUPOS, ICONE_DO_TIPO, campoPorPath, clonar } from './mocks'
-import { campoLivre, regraNova } from './filtros'
+import { campoLivre, regraNova, useDescricaoDeFiltro } from './filtros'
 import RegraDeFiltro from './_RegraDeFiltro.vue'
 import ConstrutorDeRegras from './_ConstrutorDeRegras.vue'
+import EditorDeFiltroRapido from './_EditorDeFiltroRapido.vue'
 
 const props = defineProps<{
   t: Textos
@@ -34,6 +35,8 @@ const props = defineProps<{
   /** Modo de criação (a visualização tem `novo`): o botão Concluir e os nomes que já existem. */
   criando: boolean
   nomesExistentes: string[]
+  /** Rodada 8: o idioma descreve a regra de cada filtro rápido. */
+  idioma?: string
 }>()
 
 const rascunho = defineModel<Visualizacao>({ required: true })
@@ -44,6 +47,8 @@ const emit = defineEmits<{
   fechar: []
   criar: []
   cancelarCriacao: []
+  /** Rodada 8: o filtro por campo que virou botão nasce ligado, e a tabela não muda. */
+  ligar: [id: string]
 }>()
 
 const emCriacao = computed(() => !!rascunho.value.novo)
@@ -172,6 +177,42 @@ function mudarFiltro(i: number, r: FiltroDeCampo) {
 
 function tirarFiltro(i: number) {
   mudar((x) => { x.filters.field_filters = (x.filters.field_filters ?? []).filter((_, j) => j !== i) })
+}
+
+/* ---------- filtros rápidos (rodada 8) ----------
+ * Os mesmos botões da linha de filtros: aqui a pessoa os cria já na criação da visualização, ou transforma um
+ * filtro por campo em botão. Tudo vai para o rascunho e só fica com o Salvar (ou o Criar). */
+
+const { valorCurto, descreverGrupo } = useDescricaoDeFiltro(toRef(props, 't'), computed(() => props.idioma ?? 'pt-BR'))
+const botoes = computed(() => rascunho.value.filters.rapidos ?? [])
+const editor = reactive({ aberto: false, editando: false, inicial: null as FiltroRapido | null, doFiltro: null as number | null })
+const nomesUsados = computed(() => botoes.value.filter(b => b.id !== editor.inicial?.id).map(b => b.nome))
+
+function abrirEditor(inicial: FiltroRapido, editando: boolean, doFiltro: number | null = null) {
+  Object.assign(editor, { inicial, editando, doFiltro })
+  editor.aberto = true
+}
+function novoRapido() {
+  const usados = (rascunho.value.filters.field_filters ?? []).map(f => f.field)
+  abrirEditor({ id: '', nome: '', regras: { conector: 'and', regras: [regraNova(campoLivre(usados).path)] } }, false)
+}
+/* O filtro por campo vira botão: sai da lista de filtros e o nome sugerido é o texto dele. */
+function rapidoDoFiltro(i: number) {
+  const r = (rascunho.value.filters.field_filters ?? [])[i]!
+  const nome = `${campoPorPath(r.field)?.label ?? r.field}: ${valorCurto(r)}`.slice(0, 40)
+  abrirEditor({ id: '', nome, regras: { conector: 'and', regras: [clonar(r)] } }, false, i)
+}
+function salvarRapido(f: FiltroRapido) {
+  mudar((x) => {
+    const lista = x.filters.rapidos ?? []
+    x.filters.rapidos = editor.editando ? lista.map(b => b.id === f.id ? f : b) : [...lista, f]
+    if (!editor.editando && editor.doFiltro !== null) x.filters.field_filters = (x.filters.field_filters ?? []).filter((_, j) => j !== editor.doFiltro)
+  })
+  if (!editor.editando && editor.doFiltro !== null) emit('ligar', f.id)
+}
+function excluirRapido(b: FiltroRapido | null = editor.inicial) {
+  if (!b) return
+  mudar((x) => { x.filters.rapidos = (x.filters.rapidos ?? []).filter(y => y.id !== b.id) })
 }
 
 function novoAvancado() {
@@ -412,7 +453,34 @@ const funcoes = computed({
           />
         </div>
 
-        <div class="space-y-2">
+        <!-- PROPOSTA (rodada 8): os filtros rápidos, os botões que a linha de filtros mostra. -->
+        <div class="space-y-2 border-t border-default pt-3">
+          <div>
+            <p class="text-sm font-medium text-highlighted">{{ t.rapido.grupo }}</p>
+            <p class="text-xs text-muted">{{ t.rapido.painelAjuda }}</p>
+          </div>
+          <TransitionGroup
+            tag="ul"
+            class="space-y-1.5"
+            enter-active-class="transition duration-150 ease-out"
+            enter-from-class="opacity-0 -translate-y-1"
+            leave-active-class="transition duration-100 ease-in"
+            leave-to-class="opacity-0"
+          >
+            <li v-for="b in botoes" :key="b.id" class="flex items-center gap-2 rounded-lg bg-elevated/60 py-1.5 pl-2.5 pr-1">
+              <UIcon name="i-lucide-zap" class="size-4 shrink-0 text-dimmed" />
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm text-highlighted">{{ b.nome }}</p>
+                <p class="truncate text-xs text-muted">{{ descreverGrupo(b.regras) }}</p>
+              </div>
+              <UButton icon="i-lucide-pencil" color="neutral" variant="ghost" size="sm" :aria-label="t.rapido.editarNome(b.nome)" @click="abrirEditor(clonar(b), true)" />
+              <UButton icon="i-lucide-trash-2" color="neutral" variant="ghost" size="sm" :aria-label="t.rapido.excluirNome(b.nome)" @click="excluirRapido(b)" />
+            </li>
+          </TransitionGroup>
+          <UButton :label="t.rapido.adicionar" icon="i-lucide-zap" color="neutral" variant="outline" size="sm" @click="novoRapido" />
+        </div>
+
+        <div class="space-y-2 border-t border-default pt-3">
           <div>
             <p class="text-sm font-medium text-highlighted">{{ t.filtro.simples }}</p>
             <p class="text-xs text-muted">{{ t.filtro.simplesAjuda }}</p>
@@ -427,6 +495,9 @@ const funcoes = computed({
           >
             <div v-for="(f, i) in (rascunho.filters.field_filters ?? [])" :key="`${f.field}-${i}`" class="flex items-start gap-1.5 rounded-lg bg-elevated/60 p-2">
               <RegraDeFiltro :model-value="f" :t="t" empilhado class="flex-1" @update:model-value="(r: FiltroDeCampo) => mudarFiltro(i, r)" />
+              <UTooltip :text="t.rapido.doChip">
+                <UButton icon="i-lucide-zap" color="neutral" variant="ghost" size="sm" :aria-label="t.rapido.doChip" @click="rapidoDoFiltro(i)" />
+              </UTooltip>
               <UButton icon="i-lucide-trash-2" color="neutral" variant="ghost" size="sm" :aria-label="t.filtro.excluirFiltro" @click="tirarFiltro(i)" />
             </div>
           </TransitionGroup>
@@ -502,6 +573,7 @@ const funcoes = computed({
       <UButton :label="t.painel.descartarNova" icon="i-lucide-trash-2" color="error" variant="ghost" size="sm" @click="emit('cancelarCriacao')" />
       <UButton :label="t.painel.concluir" size="sm" class="ml-auto" :loading="criando" @click="criar" />
     </footer>
+
     <footer v-else class="flex items-center gap-2 border-t border-default px-4 py-3">
       <p class="min-w-0 flex-1 text-xs text-muted">
         <span v-if="modificada" class="flex items-center gap-1.5"><span class="size-2 shrink-0 rounded-full bg-warning" />{{ t.painel.naoSalvas }}</span>
@@ -515,5 +587,15 @@ const funcoes = computed({
         </UDropdownMenu>
       </UFieldGroup>
     </footer>
+
+    <EditorDeFiltroRapido
+      v-model:open="editor.aberto"
+      :t="t"
+      :inicial="editor.inicial"
+      :editando="editor.editando"
+      :nomes-usados="nomesUsados"
+      @salvar="salvarRapido"
+      @excluir="excluirRapido()"
+    />
   </aside>
 </template>

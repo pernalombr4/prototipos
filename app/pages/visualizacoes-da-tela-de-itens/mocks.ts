@@ -174,6 +174,13 @@ export const ehGrupo = (x: FiltroDeCampo | GrupoDeRegras): x is GrupoDeRegras =>
 export interface Ordenacao { field: string, direction: 'asc' | 'desc' }
 
 /**
+ * INVENTADO (rodada 8): o filtro rápido que a pessoa cria. Vira um botão na linha de filtros da visualização,
+ * que liga e desliga. O que existe se salva com a visualização; ligado ou desligado vale só até sair da tela.
+ * Hoje o `quick_filters` do schema guarda só a chave de um filtro fixo no código (isOwner, inGroups).
+ */
+export interface FiltroRapido { id: string, nome: string, regras: GrupoDeRegras }
+
+/**
  * A visualização do protótipo: o `ModelView` do schema, mais o que o protótipo inventou.
  */
 export type Visualizacao = Omit<ModelView, 'id' | 'created_at' | 'updated_at' | 'config' | 'filters'> & {
@@ -186,6 +193,8 @@ export type Visualizacao = Omit<ModelView, 'id' | 'created_at' | 'updated_at' | 
     quick_filters?: { filter: 'isOwner' | 'inGroups' | string, required?: boolean }[]
     /** INVENTADO: o filtro avançado, que vale junto (E) com os filtros simples de `field_filters`. */
     avancado?: GrupoDeRegras
+    /** INVENTADO (rodada 8): os filtros rápidos da visualização, na ordem dos botões. */
+    rapidos?: FiltroRapido[]
   }
   /** INVENTADO: fixada no começo da barra, só para quem fixou. */
   fixada?: boolean
@@ -246,7 +255,14 @@ const POUCAS: Visualizacao[] = [
     name: 'Vencendo em 30 dias',
     icon: 'i-lucide-alarm-clock',
     config: { hide: false, columns: cols('reference', 'fornecedor', 'status', 'responsavel', 'vencimento'), sorts: [{ field: 'vencimento', direction: 'asc' }] },
-    filters: { field_filters: [{ field: 'vencimento', op: 'next_days', value: 30 }, { field: 'status', op: 'nin', value: ['Vencido'] }] },
+    filters: {
+      field_filters: [{ field: 'vencimento', op: 'next_days', value: 30 }, { field: 'status', op: 'nin', value: ['Vencido'] }],
+      rapidos: [
+        { id: 'rapido-alta', nome: 'Alta prioridade', regras: { conector: 'and', regras: [{ field: 'prioridade', op: 'in', value: ['Alta'] }] } },
+        { id: 'rapido-juridico', nome: 'Jurídico', regras: { conector: 'and', regras: [{ field: 'area', op: 'in', value: ['Jurídico'] }] } },
+        { id: 'rapido-100-mil', nome: 'Acima de R$ 100 mil', regras: { conector: 'and', regras: [{ field: 'valor', op: 'gte', value: 100000 }] } },
+      ],
+    },
   }),
 ]
 
@@ -311,11 +327,13 @@ function passaNoGrupo(item: Item, g: GrupoDeRegras): boolean {
   return g.conector === 'or' ? regras.some(vale) : regras.every(vale)
 }
 
-export function aplicar(v: Visualizacao, itens: Item[] = ITENS): Item[] {
+/** `ligados`: os filtros rápidos ligados agora; cada um vale junto (E) com os outros filtros. */
+export function aplicar(v: Visualizacao, itens: Item[] = ITENS, ligados: string[] = []): Item[] {
   const filtros = v.filters.field_filters ?? []
   const rapidos = v.filters.quick_filters ?? []
   const avancado = v.filters.avancado
-  let lista = itens.filter(i => filtros.every(f => passa(i, f)) && (!avancado || passaNoGrupo(i, avancado)))
+  const botoes = (v.filters.rapidos ?? []).filter(r => ligados.includes(r.id))
+  let lista = itens.filter(i => filtros.every(f => passa(i, f)) && (!avancado || passaNoGrupo(i, avancado)) && botoes.every(b => passaNoGrupo(i, b.regras)))
   if (rapidos.some(r => r.filter === 'isOwner')) lista = lista.filter(i => i.responsavel === EU.id)
   if (rapidos.some(r => r.filter === 'inGroups')) lista = lista.filter(i => EU.grupos.includes(i.grupo))
   const sorts = v.config.sorts ?? []
