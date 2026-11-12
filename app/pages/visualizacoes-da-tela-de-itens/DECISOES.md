@@ -283,9 +283,14 @@
   - editar e excluir na tela: botão direito no filtro rápido, ou "Excluir filtro rápido" dentro do modal de edição;
   - a dica do botão mostra a regra e "Clique para ligar ou desligar. Botão direito para editar.";
   - o modal pede nome (até 40 caracteres, sem repetir na mesma visualização) e pelo menos 1 regra com valor.
+  - quando os botões não cabem na linha (tela estreita, muitos botões ou muitos chips), os que sobram vão para um "+N" no fim do grupo, como as pílulas da barra de visualizações:
+    - o "+N" abre a lista dos escondidos; clicar liga o filtro, e o botão ligado vai para a linha no lugar do último desligado;
+    - os criados pela pessoa têm o lápis de editar na lista, e o fim da lista tem "Novo filtro rápido";
+    - o botão ligado nunca fica escondido no "+N";
+    - os chips dos filtros aplicados nunca se escondem: os botões cedem lugar primeiro, e os chips só quebram para a linha de baixo quando nem o "+N" com os botões ligados cabe.
 - **Tarefas:** a mesma lógica vale para as visualizações das Tarefas Rápidas e das Tarefas Agendadas: os filtros prontos delas (como Minhas tarefas, Aberto e Atrasado) aparecem como botões do sistema, e a pessoa cria outros. O protótipo mostra a tela de itens.
 - **Fronteira:** muda a linha de filtros, o menu do chip e o painel de configuração (os 2 filtros automáticos viram os nativos do bloco de filtros rápidos); a visualização de exemplo "Vencendo em 30 dias" tem 2 botões criados pela pessoa; o modal novo fica em `_EditorDeFiltroRapido.vue`. A barra de visualizações, a tabela e os filtros prontos não mudam.
-- **Prints:** `evidencias/r8-*.jpg`, 14 prints.
+- **Prints:** `evidencias/r8-*.jpg`, 17 prints; os 3 do "+N" (`r8-filtros-rapidos-no-mais`, `r8-mais-filtros-rapidos-aberto`, `r8-filtro-ligado-sai-do-mais`) foram tirados em tela estreita.
 - **Em aberto:**
   - o botão ligado fica ligado ao voltar à visualização, ou volta desligado como no protótipo?
   - quem não pode salvar a visualização pode criar filtro rápido só para si?

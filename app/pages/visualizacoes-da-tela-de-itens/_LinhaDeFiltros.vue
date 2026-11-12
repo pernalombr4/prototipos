@@ -8,6 +8,8 @@
  * - "+ Filtro" lista os campos com busca e, no fim, "Filtro avançado" e "Filtro rápido";
  * - rodada 8: os filtros rápidos que a pessoa cria são botões no começo da linha, que ligam e desligam.
  *   Ligar não é alteração da visualização; criar, editar e excluir o botão é.
+ * - rodada 8: os botões que não cabem vão para um "+N" no fim do grupo, como as pílulas da barra; o ligado fica
+ *   sempre na linha. Os chips dos filtros aplicados nunca se escondem: quebram para a linha de baixo.
  *
  * Tudo vira rascunho da visualização: a barra flutuante oferece salvar para todos ou como nova.
  */
@@ -159,17 +161,93 @@ const menuDoBotao = (b: FiltroRapido) => [[
   { label: props.t.rapido.excluir, icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => { editor.inicial = b; excluirRapido() } },
 ]]
 
+/* ---------- quantos filtros rápidos cabem (rodada 8) ----------
+ * Mesma regra da barra de visualizações: mede cada botão numa cópia escondida e mostra os que cabem, na ordem.
+ * O grupo fica com o espaço que os chips e o "+ Filtro" deixam: os botões cedem lugar antes, e os chips só quebram
+ * de linha quando nem o "+N" com os botões ligados cabe. */
+
+type ItemRapido = { id: string, nome: string, sistema: Sugerido | null, botao: FiltroRapido | null }
+const todosRapidos = computed<ItemRapido[]>(() => [
+  ...sugeridos.value.map(f => ({ id: idDoSugerido(f), nome: props.t.rapido.sugerido[f].nome, sistema: f, botao: null })),
+  ...botoes.value.map(b => ({ id: b.id, nome: b.nome, sistema: null, botao: b })),
+])
+
+const linha = ref<HTMLElement>()
+const medidas = ref<HTMLElement>()
+const larguraDaLinha = ref(0)
+const larguraDoResto = ref(0)
+const larguraDe = ref<Record<string, number>>({})
+const VAO = 6
+/** O "+N" e o separador. */
+const RESERVA_RAPIDOS = 64
+
+function medirRapidos() {
+  if (!linha.value || !medidas.value) return
+  const estilo = getComputedStyle(linha.value)
+  larguraDaLinha.value = linha.value.clientWidth - parseFloat(estilo.paddingLeft) - parseFloat(estilo.paddingRight)
+  larguraDoResto.value = [...linha.value.children]
+    .filter(el => el instanceof HTMLElement && !el.hasAttribute('data-rapidos') && !el.hasAttribute('data-medidas'))
+    .reduce((soma, el) => soma + (el as HTMLElement).offsetWidth + VAO, 0)
+  const novas: Record<string, number> = {}
+  medidas.value.querySelectorAll<HTMLElement>('[data-medida]').forEach((el) => { novas[el.dataset.medida!] = el.offsetWidth })
+  larguraDe.value = novas
+}
+
+let observador: ResizeObserver | undefined
+onMounted(() => {
+  observador = new ResizeObserver(() => medirRapidos())
+  if (linha.value) observador.observe(linha.value)
+  // A cópia muda de largura quando a fonte termina de carregar ou o idioma troca.
+  if (medidas.value) observador.observe(medidas.value)
+  nextTick(medirRapidos)
+})
+onBeforeUnmount(() => observador?.disconnect())
+watch(() => [props.t, filtros.value, ligados.value], () => nextTick(medirRapidos), { deep: true })
+
+const rapidosVisiveis = computed<Set<string>>(() => {
+  const itens = todosRapidos.value
+  const w = (r: ItemRapido) => (larguraDe.value[r.id] ?? 110) + VAO
+  if (!larguraDaLinha.value) return new Set(itens.map(r => r.id))
+  const espaco = larguraDaLinha.value - larguraDoResto.value
+  const total = itens.reduce((s, r) => s + w(r), 0)
+  if (total <= espaco) return new Set(itens.map(r => r.id))
+  const limite = espaco - RESERVA_RAPIDOS
+  const cabem: ItemRapido[] = []
+  let soma = 0
+  for (const r of itens) {
+    if (soma + w(r) > limite) break
+    cabem.push(r)
+    soma += w(r)
+  }
+  // O ligado nunca vai para o "+N": entra no lugar do último desligado que cabia.
+  for (const r of itens.filter(x => ligados.value.includes(x.id) && !cabem.includes(x))) {
+    while (soma + w(r) > limite) {
+      const i = cabem.map(x => ligados.value.includes(x.id)).lastIndexOf(false)
+      if (i < 0) break
+      soma -= w(cabem[i]!)
+      cabem.splice(i, 1)
+    }
+    cabem.push(r)
+    soma += w(r)
+  }
+  return new Set(cabem.map(r => r.id))
+})
+const sugeridosVisiveis = computed(() => sugeridos.value.filter(f => rapidosVisiveis.value.has(idDoSugerido(f))))
+const botoesVisiveis = computed(() => botoes.value.filter(b => rapidosVisiveis.value.has(b.id)))
+const rapidosEscondidos = computed(() => todosRapidos.value.filter(r => !rapidosVisiveis.value.has(r.id)))
+const maisRapidosAberto = ref(false)
+
 defineExpose({ filtrarPor, abrirMais: async () => { await nextTick(); maisAberto.value = true } })
 </script>
 
 <template>
-  <div class="flex flex-wrap items-center gap-1.5 border-b border-default bg-elevated/40 px-4 py-1.5">
+  <div ref="linha" class="relative flex flex-wrap items-center gap-1.5 border-b border-default bg-elevated/40 px-4 py-1.5">
     <UIcon name="i-lucide-filter" class="size-3.5 text-muted" />
 
     <!-- PROPOSTA (rodada 8): os filtros rápidos da visualização, botões que ligam e desligam -->
     <template v-if="botoes.length || sugeridos.length">
-      <div role="group" :aria-label="t.rapido.grupo" class="flex flex-wrap items-center gap-1.5">
-        <UTooltip v-for="f in sugeridos" :key="f" :delay-duration="400" :content="{ side: 'bottom' }">
+      <div role="group" :aria-label="t.rapido.grupo" class="flex items-center gap-1.5" data-rapidos>
+        <UTooltip v-for="f in sugeridosVisiveis" :key="f" :delay-duration="400" :content="{ side: 'bottom' }">
           <UButton
             :label="t.rapido.sugerido[f].nome"
             :icon="ligados.includes(idDoSugerido(f)) ? 'i-lucide-check' : ICONE_DO_SUGERIDO[f]"
@@ -187,7 +265,7 @@ defineExpose({ filtrarPor, abrirMais: async () => { await nextTick(); maisAberto
             </div>
           </template>
         </UTooltip>
-        <UContextMenu v-for="b in botoes" :key="b.id" :items="menuDoBotao(b)">
+        <UContextMenu v-for="b in botoesVisiveis" :key="b.id" :items="menuDoBotao(b)">
           <UTooltip :delay-duration="400" :content="{ side: 'bottom' }">
             <UButton
               :label="b.nome"
@@ -207,8 +285,48 @@ defineExpose({ filtrarPor, abrirMais: async () => { await nextTick(); maisAberto
             </template>
           </UTooltip>
         </UContextMenu>
+
+        <!-- Rodada 8: os que não cabem. Todos aqui estão desligados; ligar leva o botão para a linha. -->
+        <UPopover v-if="rapidosEscondidos.length" v-model:open="maisRapidosAberto" :content="{ align: 'start', sideOffset: 6 }">
+          <UButton
+            :label="`+${rapidosEscondidos.length}`"
+            trailing-icon="i-lucide-chevron-down"
+            color="neutral"
+            variant="outline"
+            size="xs"
+            :aria-label="t.rapido.maisN(rapidosEscondidos.length)"
+          />
+          <template #content>
+            <div class="w-64 p-1">
+              <p class="px-2 pb-1 pt-1.5 text-xs text-muted">{{ t.rapido.maisAjuda }}</p>
+              <div v-for="r in rapidosEscondidos" :key="r.id" class="flex items-center">
+                <UButton
+                  :label="r.nome"
+                  :icon="r.sistema ? ICONE_DO_SUGERIDO[r.sistema] : 'i-lucide-zap'"
+                  color="neutral"
+                  variant="ghost"
+                  size="sm"
+                  block
+                  class="min-w-0 flex-1 justify-start"
+                  @click="alternar(r.id)"
+                />
+                <UButton
+                  v-if="r.botao"
+                  icon="i-lucide-pencil"
+                  color="neutral"
+                  variant="ghost"
+                  size="sm"
+                  :aria-label="t.rapido.editarNome(r.nome)"
+                  @click="maisRapidosAberto = false; abrirEditor(clonar(r.botao), true)"
+                />
+              </div>
+              <USeparator class="my-1" />
+              <UButton :label="t.rapido.novo" icon="i-lucide-plus" color="neutral" variant="ghost" size="sm" block class="justify-start" @click="maisRapidosAberto = false; novoRapido()" />
+            </div>
+          </template>
+        </UPopover>
       </div>
-      <span class="mx-0.5 h-4 w-px bg-accented" aria-hidden="true" />
+      <span class="mx-0.5 h-4 w-px bg-accented" aria-hidden="true" data-rapidos />
     </template>
 
     <UBadge
@@ -292,6 +410,11 @@ defineExpose({ filtrarPor, abrirMais: async () => { await nextTick(); maisAberto
         </div>
       </template>
     </UPopover>
+
+    <!-- Cópia escondida dos filtros rápidos, só para medir a largura de cada um. -->
+    <div ref="medidas" data-medidas aria-hidden="true" class="pointer-events-none invisible absolute left-0 top-0 flex gap-1.5">
+      <UButton v-for="r in todosRapidos" :key="r.id" :data-medida="r.id" :label="r.nome" icon="i-lucide-zap" color="neutral" variant="outline" size="xs" tabindex="-1" />
+    </div>
 
     <EditorDeFiltroRapido
       v-model:open="editor.aberto"
