@@ -6,7 +6,8 @@
  * develop em 11/11/2026 (`/workspaces/teste-ux/types/leve/<referência>?folder=`):
  * abas sublinhadas com ícone, seta de opções na aba ativa e o botão de nova
  * pasta no canto direito. A proposta só acrescenta o número de pendentes ao
- * lado do nome da pasta de Apontamentos.
+ * lado do nome da pasta de Apontamentos e liga o Editar dela à configuração
+ * (rodada 3: o nome é fixo, então a configuração mora no Editar).
  */
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Textos } from './textos'
@@ -22,10 +23,10 @@ export interface PastaDaBarra {
 
 const props = defineProps<{ t: Textos, pastas: PastaDaBarra[] }>()
 const ativa = defineModel<string>('ativa', { required: true })
-const emit = defineEmits<{ nova: [] }>()
+const emit = defineEmits<{ nova: [], editar: [id: string] }>()
 
 const opcoes = computed<DropdownMenuItem[]>(() => [
-  { label: props.t.pastas.editar, icon: 'i-lucide-pencil' },
+  { label: props.t.pastas.editar, icon: 'i-lucide-pencil', onSelect: () => emit('editar', ativa.value) },
   { label: props.t.pastas.ocultar, icon: 'i-lucide-eye-off' },
   { label: props.t.pastas.excluir, icon: 'i-lucide-trash-2', color: 'error' },
 ])

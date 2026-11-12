@@ -2,10 +2,10 @@
 /**
  * Pasta de apontamentos: um tipo novo de pasta do item e uma aba nova da tarefa.
  *
- * Uma porta: a tela do item. A pasta "Retorno de testes" (ou "Pendências do
- * contrato", no outro cenário) é do tipo Apontamentos; a pasta Tarefas abre o
- * painel da tarefa, que ganha a aba Apontamentos. O botão de nova pasta abre o
- * modal com o tipo novo.
+ * Uma porta: a tela do item. A pasta Apontamentos tem nome fixo, igual nos 2
+ * cenários (rodada 3); a pasta Tarefas abre o painel da tarefa, que ganha a aba
+ * Apontamentos. O botão de nova pasta abre o modal com o tipo novo, e o Editar
+ * da pasta abre a configuração dela.
  *
  * Rodada 2: duas visualizações no andaime. Item (a tela do item, com a pasta
  * de apontamentos e a Visão Geral com o contador da lista de tarefas) e Tarefa
@@ -67,7 +67,8 @@ const papel = daQuery<Papel>('papel', ['conferente', 'resolvedor'], 'conferente'
 const estadoDaTela = daQuery<EstadoDaTela>('estado', ['cheio', 'vazio', 'carregando', 'semPermissao'], 'cheio')
 
 /* ---------- dado em memória, um por cenário ---------- */
-interface PastaExtra { id: string, lista: Lista }
+/** Pasta de outro tipo criada pelo modal: fora do escopo, só aparece na barra. */
+interface PastaExtra { id: string, nome: string, icone: string }
 interface Dados { c: Cenario, vazia: Lista, extras: PastaExtra[] }
 
 function montar(id: IdCenario): Dados {
@@ -88,25 +89,32 @@ const ID_PRINCIPAL = 'apontamentos'
 const pendentesDe = (l: Lista) => l.apontamentos.filter(a => pendente(a.estado)).length
 const pastas = computed<PastaDaBarra[]>(() => [
   ...pastasDoSistema.map(p => ({ id: p.id, nome: t.value.pastas.nomes[p.id]!, icone: p.icone })),
-  { id: ID_PRINCIPAL, nome: c.value.config.nome, icone: c.value.config.icone, pendentes: pendentesDe(listaPrincipal.value) },
-  ...d.value.extras.map(e => ({ id: e.id, nome: e.lista.config.nome, icone: e.lista.config.icone, pendentes: pendentesDe(e.lista) })),
+  { id: ID_PRINCIPAL, nome: t.value.novaPasta.tipos.apontamentos!, icone: c.value.config.icone, pendentes: pendentesDe(listaPrincipal.value) },
+  ...d.value.extras.map(e => ({ id: e.id, nome: e.nome, icone: e.icone })),
 ])
 const ativa = computed<string>({
   get: () => pastas.value.some(p => p.id === route.query.folder) ? String(route.query.folder) : ID_PRINCIPAL,
   set: id => router.replace({ query: { ...route.query, folder: id } }),
 })
-const listaDaPasta = computed<Lista | null>(() => ativa.value === ID_PRINCIPAL
-  ? listaPrincipal.value
-  : d.value.extras.find(e => e.id === ativa.value)?.lista ?? null)
+const listaDaPasta = computed<Lista | null>(() => ativa.value === ID_PRINCIPAL ? listaPrincipal.value : null)
 const nomeDaAtiva = computed(() => pastas.value.find(p => p.id === ativa.value)?.nome ?? '')
 
 const painelRecolhido = ref(true)
 const modalNova = ref(false)
-function criarPasta(config: Lista['config']) {
+/** Editar da pasta Apontamentos: o mesmo modal, com a configuração preenchida. */
+const editandoPasta = ref(false)
+function criarPasta(p: { nome: string, icone: string }) {
   const id = `pasta-${Date.now()}`
-  d.value.extras.push({ id, lista: { apontamentos: [], rodadas: [], config, pessoas: c.value.pessoas } })
+  d.value.extras.push({ id, ...p })
   ativa.value = id
-  toast.add({ title: t.value.toasts.pastaCriada(config.nome), icon: 'i-lucide-folder-plus', color: 'success', duration: 3000 })
+  toast.add({ title: t.value.toasts.pastaCriada(p.nome), icon: 'i-lucide-folder-plus', color: 'success', duration: 3000 })
+}
+function editarPasta(id: string) {
+  if (id === ID_PRINCIPAL) editandoPasta.value = true
+}
+function salvarPasta(config: Lista['config']) {
+  Object.assign(c.value.config, config)
+  toast.add({ title: t.value.toasts.pastaSalva(t.value.novaPasta.tipos.apontamentos!), icon: 'i-lucide-check', color: 'success', duration: 3000 })
 }
 
 /* ---------- tarefas ---------- */
@@ -239,7 +247,7 @@ watch(cenarioId, () => {
       <div v-else class="flex h-[calc(100dvh-4rem-3.25rem)] min-h-0">
         <PainelDoItem v-model:recolhido="painelRecolhido" :t="t" :item="c.item" :categoria="c.categoria" />
         <section class="flex min-w-0 flex-1 flex-col bg-default">
-          <BarraDePastas v-model:ativa="ativa" :t="t" :pastas="pastas" @nova="modalNova = true" />
+          <BarraDePastas v-model:ativa="ativa" :t="t" :pastas="pastas" @nova="modalNova = true" @editar="editarPasta" />
 
           <div class="min-h-0 flex-1">
             <Transition
@@ -302,7 +310,8 @@ watch(cenarioId, () => {
       @abrir="trocarDeTarefa"
     />
 
-    <ModalNovaPasta v-model:open="modalNova" :t="t" :pessoas="c.pessoas" :responsavel-padrao="c.resolvedor" @criar="criarPasta" />
+    <ModalNovaPasta v-model:open="modalNova" :t="t" :pessoas="c.pessoas" :responsavel-padrao="c.resolvedor" ja-existe @criar="criarPasta" />
+    <ModalNovaPasta v-model:open="editandoPasta" :t="t" :pessoas="c.pessoas" :responsavel-padrao="c.resolvedor" :editando="c.config" @salvar="salvarPasta" />
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">

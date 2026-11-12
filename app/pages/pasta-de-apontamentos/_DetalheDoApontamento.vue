@@ -146,7 +146,7 @@ async function enviarResposta() {
   responder(props.a, props.quem, texto)
   const r = props.a.respostas.at(-1)!
   if (usadas.length) r.citacoes = usadas
-  for (const c of usadas) citacao?.registrar(c.chave, `${props.lista.config.nome} #${props.a.numero}`, props.quem)
+  for (const c of usadas) citacao?.registrar(c.chave, `#${props.a.numero}`, props.quem)
   resposta.value = ''
   citacoesDaResposta.value = []
   enviando.value = false

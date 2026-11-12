@@ -399,7 +399,7 @@ const minhasMencoes = computed(() => props.mencoes.filter(m => m.alvo === `taref
       <ul class="flex flex-col gap-1.5">
         <li v-for="(m, i) in minhasMencoes" :key="i" class="flex items-center gap-2 text-sm">
           <UIcon name="i-lucide-list-checks" class="size-4 shrink-0 text-primary" />
-          <span class="font-medium text-highlighted">{{ m.onde }}</span>
+          <span class="font-medium text-highlighted">{{ t.novaPasta.tipos.apontamentos }} {{ m.onde }}</span>
           <span class="text-xs text-muted">{{ tr.mencionadaEm.linha(pessoa(m.quem)?.nome ?? '', t.dataHora(m.quando)) }}</span>
         </li>
       </ul>

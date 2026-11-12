@@ -322,7 +322,7 @@ const emSequencia = computed(() => props.compacto || estreito.value)
         <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
           <div class="flex min-w-0 items-center gap-2">
             <UIcon :name="lista.config.icone" class="size-5 shrink-0 text-primary" />
-            <h2 class="truncate text-base font-semibold text-highlighted">{{ lista.config.nome }}</h2>
+            <h2 class="truncate text-base font-semibold text-highlighted">{{ t.novaPasta.tipos.apontamentos }}</h2>
           </div>
           <!-- A vista da pasta -->
           <UTabs

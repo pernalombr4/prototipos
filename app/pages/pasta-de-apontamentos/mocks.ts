@@ -7,8 +7,8 @@
  * inventados.
  *
  * Dois cenários provam que o tipo de pasta é universal:
- * - `produto`: a pasta "Retorno de testes" de uma demanda de desenvolvimento;
- * - `juridico`: a pasta "Pendências do contrato" de um contrato.
+ * - `produto`: a pasta Apontamentos de uma demanda de desenvolvimento;
+ * - `juridico`: a pasta Apontamentos de um contrato.
  *
  * Os prints anexados aos apontamentos de produto são capturas do develop feitas
  * na Fase 2 (estão em `evidencias/`). Os apontamentos que descrevem o que o
@@ -138,9 +138,12 @@ export interface Rodada {
   retestePedidoPor?: number
 }
 
-/** Configuração da pasta do tipo Apontamentos. Inventado: o back guarda a pasta como JSON livre. */
+/**
+ * Configuração da pasta do tipo Apontamentos. Inventado: o back guarda a pasta como JSON livre.
+ * Sem nome: a pasta se chama sempre Apontamentos (Issues, Puntos de ajuste), no idioma da
+ * interface, e cada categoria tem no máximo 1 (rodada 3).
+ */
 export interface ConfigDaPasta {
-  nome: string
   icone: string
   /** Com conferência, "Resolvido" espera quem confere. Sem, "Resolvido" fecha. */
   exigeConferencia: boolean
@@ -627,7 +630,6 @@ export const cenarios: Record<Cenario['id'], Cenario> = {
     item: itemProduto,
     titulo: 'Pastas do item com cara de aba',
     config: {
-      nome: 'Retorno de testes',
       icone: 'i-lucide-list-checks',
       exigeConferencia: true,
       conferente: 'autor',
@@ -654,7 +656,7 @@ export const cenarios: Record<Cenario['id'], Cenario> = {
       ] },
       { rotulo: 'Versão', valor: '3.3.0' },
     ],
-    mencoes: [{ alvo: 'tarefa-904', onde: 'Retorno de testes #3', quem: BRUNO, quando: d('2026-11-11T10:05:00') }],
+    mencoes: [{ alvo: 'tarefa-904', onde: '#3', quem: BRUNO, quando: d('2026-11-11T10:05:00') }],
   },
   juridico: {
     id: 'juridico',
@@ -663,7 +665,6 @@ export const cenarios: Record<Cenario['id'], Cenario> = {
     item: itemJuridico,
     titulo: 'Prestação de serviços de manutenção',
     config: {
-      nome: 'Pendências do contrato',
       icone: 'i-lucide-scale',
       exigeConferencia: true,
       conferente: 'autor',

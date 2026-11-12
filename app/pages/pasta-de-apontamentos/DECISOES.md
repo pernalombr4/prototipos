@@ -1,8 +1,30 @@
 # Decisões: Pasta de apontamentos
 
-**A proposta em uma linha:** um tipo novo de pasta, Apontamentos, que o admin nomeia ("Retorno de testes", "Pendências do contrato"); dentro dela, uma lista de pontos a ajustar, cada um com corpo rico, anexos, responsável, estado e histórico, que quem resolve marca e quem confere aprova ou reabre, em rodadas. A tarefa ganha a mesma lista numa aba fixa.
+**A proposta em uma linha:** um tipo novo de pasta, Apontamentos, com nome fixo e no máximo 1 por categoria; dentro dela, uma lista de pontos a ajustar, cada um com corpo rico, anexos, responsável, estado e histórico, que quem resolve marca e quem confere aprova ou reabre, em rodadas. A tarefa ganha a mesma lista numa aba fixa.
 
 **Rodada 2, em uma linha:** as rodadas ganham vista própria e o cabeçalho perde o gráfico; a tarefa rápida ganha checklist, subtarefas de 1 nível, dependências e conclusão com motivo; o item ganha o contador da lista de tarefas; a citação com # liga apontamento, tarefa e item.
+
+## Rodada 3 · 2026-11-12
+
+- **Pedido (literal):** "O nome da pasta não será personalizável. Então mesmo no exemplo jurídico o nome da pasta será apontamentos. Arrume isso"
+- **Fronteira:**
+  - muda: o nome da pasta na barra, no cabeçalho e na citação; o modal "Nova pasta"; o Editar da pasta Apontamentos; os nomes dos cenários no andaime;
+  - não muda: o resto da pasta, a tarefa rápida, os nomes editáveis dos estados ("Corrigido", "Ajustado").
+
+| Decisão | Motivo |
+|---|---|
+| A pasta se chama Apontamentos em todo workspace; em inglês, Issues; em espanhol, Puntos de ajuste | Pedido literal. O nome segue o idioma de quem usa, como as pastas do sistema (Tarefas, Anexos) |
+| No máximo 1 pasta Apontamentos por categoria | 2 pastas com o mesmo nome na barra não se distinguem |
+| No "Nova pasta", a opção Apontamentos fica desabilitada quando a categoria já tem a pasta, com o aviso de onde configurar | Quem procura o tipo entende por que não pode escolher e acha o caminho |
+| Com o tipo Apontamentos, o Nome da Pasta mostra "Apontamentos" travado, com cadeado e a ajuda "O nome da pasta é fixo e acompanha o idioma de cada pessoa." | O campo continua no lugar do develop, sem pedir um nome que não vale |
+| A configuração da pasta mora no Editar da própria pasta (seta da aba) | Sem criar outra pasta, o Editar é o único caminho para conferência, responsável, modelo, nomes dos estados e trava |
+| A citação guarda só o número ("#3") e a tela escreve "Apontamentos #3" no idioma de quem lê | O nome fixo traduz; o número não muda |
+| Os cenários do andaime se chamam Produto e Jurídico | O nome antigo do cenário era o nome da pasta |
+
+- **Para o dev:** a configuração da pasta (JSON em `c_type_views.folders`) perde o nome para o tipo `apontamentos`; o front escreve o nome pelo idioma. O back recusa a 2ª pasta do tipo na mesma categoria.
+- **Descartado:** o nome personalizável e as sugestões de nome do modal ("Retorno de testes", "Pendências do contrato"). Motivo: decisão da redatora.
+- **Maquete:** criar pasta de outro tipo põe a aba na barra, com o aviso de fora do escopo.
+- **Ver:** https://pernalombr4.github.io/prototipos/pasta-de-apontamentos/?cenario=juridico · `evidencias/rodada3-editar-pasta.jpg`
 
 ## Rodada 2 · 2026-11-11
 
@@ -23,7 +45,7 @@
 
 | No GitHub | No protótipo | O que mudou para quem não é dev |
 |---|---|---|
-| Issue | O apontamento | Nome de cada pasta dado pelo admin; estados com nome do cliente; "Resolvido" e "Conferido" no lugar de "closed" |
+| Issue | O apontamento | Pasta com nome fixo, Apontamentos; estados com nome do cliente; "Resolvido" e "Conferido" no lugar de "closed" |
 | Review com "Request changes" | A rodada, com veredito | Ajustes necessários, Aprovado com ressalvas e Aprovado, em vez do jargão de revisão |
 | Task list (`- [ ]`) e "2 of 4 tasks" | Checklist da tarefa; contador no campo HTML do item | Seção própria na tarefa, com dono por linha e arrastar; no item, o editor que já existe ganha só o contador |
 | Converter linha em issue | "Converter em subtarefa" | A linha convertida se marca sozinha quando a subtarefa é concluída |
@@ -99,7 +121,7 @@ flowchart LR
 
 | Decisão | Motivo |
 |---|---|
-| Tipo de pasta novo, com o nome que o admin der | O tipo carrega o comportamento; o nome carrega o contexto. "Retorno de testes" e "Pendências do contrato" são a mesma peça |
+| ~~Tipo de pasta novo, com o nome que o admin der~~ (substituída na rodada 3: o nome é fixo) | O tipo carrega o comportamento; o nome carregava o contexto |
 | O tipo se chama Apontamentos (ES "Puntos de ajuste"; EN "Issues" desde a rodada 2) | "Pendência" já designa outra coisa no produto (tarefa pendente); "issue" e "punch item" são de um ramo só. Ver PESQUISA, "Nome do tipo de pasta" |
 | Lista, nunca quadro | Pedido literal. A lista mostra ordem e progresso; o quadro esconde o que está em outra coluna |
 | Lista e detalhe lado a lado; em espaço estreito, um depois do outro | Quem confere passa por 12 apontamentos sem fechar e abrir janela. No painel da tarefa e abaixo de 880 px, o detalhe ocupa o lugar da lista, com Voltar |
