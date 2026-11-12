@@ -8,15 +8,27 @@
  * "menu.member.reports.label" e Knowledge), Configurações e Ajuda; barra do topo
  * com voltar, avançar, recarregar, início, trilha, Ctrl B, estrela, idioma,
  * tema, Suporte, sino 99+ e avatar. Os nomes das categorias são do mock.
+ *
+ * Com `ativo="tarefasRapidas"`, o menu fica como na página Tarefas › Rápidas
+ * (`/workspaces/teste-ux/tasks/quick`, 11/11/2026): Categorias recolhido e
+ * Tarefas aberto com Agendadas, Rápidas (ativo) e Painel.
  */
 import type { Textos } from './textos'
 
-defineProps<{
+const props = defineProps<{
   t: Textos
   trilha: string[]
   workspace: { name: string, reference: string }
   categoriasDoMenu: { nome: string, ativo?: boolean }[]
+  ativo?: 'categorias' | 'tarefasRapidas'
 }>()
+
+const aberto = computed(() => props.ativo === 'tarefasRapidas' ? 'tarefas' : 'categorias')
+const filhosDeTarefas = computed(() => [
+  { nome: props.t.tarefaRapida.pagina.agendadas, icone: 'i-lucide-calendar' },
+  { nome: props.t.tarefaRapida.pagina.rapidas, icone: 'i-lucide-clipboard-check', ativo: true },
+  { nome: props.t.tarefaRapida.pagina.painel, icone: 'i-lucide-calendar-range' },
+])
 
 interface Entrada { chave: string, icone: string, filhos?: boolean, externo?: boolean }
 
@@ -83,17 +95,30 @@ const ajuda: Entrada[] = [
                 <button
                   type="button"
                   class="flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-elevated"
-                  :class="e.chave === 'categorias' ? 'font-medium text-highlighted' : 'text-toned'"
+                  :class="e.chave === aberto ? 'font-medium text-highlighted' : 'text-toned'"
                 >
-                  <UIcon :name="e.icone" class="size-4 shrink-0" :class="e.chave === 'categorias' ? 'text-highlighted' : 'text-muted'" />
+                  <UIcon :name="e.icone" class="size-4 shrink-0" :class="e.chave === aberto ? 'text-highlighted' : 'text-muted'" />
                   <template v-if="state === 'expanded'">
                     <span class="flex-1 truncate text-sm">{{ t.casca.itens[e.chave] }}</span>
                     <UIcon v-if="e.externo" name="i-lucide-arrow-up-right" class="size-3 shrink-0 text-dimmed" />
-                    <UIcon v-else-if="e.filhos" :name="e.chave === 'categorias' ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'" class="size-4 shrink-0 text-muted" />
+                    <UIcon v-else-if="e.filhos" :name="e.chave === aberto ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'" class="size-4 shrink-0 text-muted" />
                   </template>
                 </button>
               </UTooltip>
-              <div v-if="state === 'expanded' && e.chave === 'categorias'" class="flex flex-col">
+              <div v-if="state === 'expanded' && e.chave === 'tarefas' && aberto === 'tarefas'" class="flex flex-col">
+                <button
+                  v-for="f in filhosDeTarefas"
+                  :key="f.nome"
+                  type="button"
+                  class="flex w-full items-center gap-2.5 rounded-md py-1.5 pl-6 pr-2 text-left text-sm transition-colors"
+                  :class="f.ativo ? 'font-medium text-highlighted' : 'text-toned hover:bg-elevated'"
+                  :aria-current="f.ativo ? 'page' : undefined"
+                >
+                  <UIcon :name="f.icone" class="size-4 shrink-0" :class="f.ativo ? 'text-primary' : 'text-muted'" />
+                  <span class="flex-1 truncate">{{ f.nome }}</span>
+                </button>
+              </div>
+              <div v-if="state === 'expanded' && e.chave === 'categorias' && aberto === 'categorias'" class="flex flex-col">
                 <button
                   v-for="c in categoriasDoMenu"
                   :key="c.nome"

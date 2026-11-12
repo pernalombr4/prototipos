@@ -60,6 +60,32 @@ export interface Resposta {
   autor: number
   quando: Date
   texto: string
+  /** O que a resposta cita com #: tarefa, item ou outro apontamento. */
+  citacoes?: Citacao[]
+}
+
+/** Uma citação com #, como a referência cruzada do GitHub. Inventado. */
+export interface Citacao {
+  /** `tarefa-901`, `item`, `ap-3`. */
+  chave: string
+  rotulo: string
+  tipo: 'tarefa' | 'item' | 'apontamento'
+}
+
+/** O outro lado da citação: "Mencionada em". Inventado. */
+export interface Mencao {
+  alvo: string
+  onde: string
+  quem: number
+  quando: Date
+}
+
+/** Versão anterior do título e do corpo, para o "editado". Inventado. */
+export interface Versao {
+  quem: number
+  quando: Date
+  titulo: string
+  corpo: string
 }
 
 export interface Evento {
@@ -94,6 +120,10 @@ export interface Apontamento {
   criadoEm: Date
   /** Motivo do descarte. */
   motivo?: string
+  /** Descartado por ser cópia de outro apontamento: o número dele. */
+  duplicadoDe?: number
+  /** Versões anteriores, da mais antiga para a mais nova. */
+  versoes?: Versao[]
 }
 
 /** Uma rodada é um envio de retorno, com veredito e resumo. */
@@ -141,13 +171,51 @@ export interface Cenario {
   rodadas: Rodada[]
   tarefas: TarefaDoItem[]
   categoriasDoMenu: { nome: string, ativo?: boolean }[]
+  /** Os campos da Visão Geral do item; o campo HTML com caixas ganha o contador. */
+  camposDaVisaoGeral: CampoDaVisaoGeral[]
+  /** As citações com # já feitas, para o "Mencionada em". */
+  mencoes: Mencao[]
 }
 
-/** Tarefa rápida do item, tipada pelo `Task`, com os apontamentos dela (inventado). */
+export interface CampoDaVisaoGeral {
+  rotulo: string
+  valor?: string
+  /** Campo HTML com a "Lista de Tarefas" do editor, que o produto já tem. */
+  checklist?: { texto: string, feito: boolean }[]
+}
+
+/** Linha da checklist da tarefa. Inventado: a tarefa não tem checklist hoje. */
+export interface LinhaDeChecklist {
+  id: string
+  texto: string
+  feito: boolean
+  responsavel?: number
+  /** Linha convertida em subtarefa: marca sozinha quando ela é concluída. */
+  subtarefa?: number
+}
+
+/** Como a tarefa terminou, como o "Close as" do GitHub. Inventado. */
+export interface Conclusao {
+  motivo: 'concluida' | 'naoSeraFeita' | 'duplicada'
+  duplicadaDe?: number
+  nota?: string
+}
+
+/**
+ * Tarefa rápida, tipada pelo `Task`, com o que a proposta acrescenta.
+ * Inventado: `mae`, `checklist`, `bloqueadaPor` e `conclusao` não existem no
+ * modelo `tasks` do back (lido em 11/11/2026); a subtarefa pede o campo `parent`.
+ */
 export interface TarefaDoItem {
   tarefa: Task
   apontamentos: Apontamento[]
   rodadas: Rodada[]
+  /** Id da tarefa-mãe. Um nível só: a subtarefa não tem subtarefas. */
+  mae?: number
+  checklist: LinhaDeChecklist[]
+  /** Ids das tarefas que esta espera. */
+  bloqueadaPor: number[]
+  conclusao?: Conclusao
 }
 
 /* ------------------------------------------------------------------ */
@@ -247,6 +315,7 @@ const apontamentosProduto: Apontamento[] = [
       evento(ANA, '2026-11-10T09:31:00', 'reaberto', 2, 'resolvido', 'Continua acontecendo em item com campo de Duração vazio.'),
     ],
     criadoEm: d('2026-11-04T17:05:00'),
+    versoes: [{ quem: ANA, quando: d('2026-11-04T17:44:00'), titulo: 'Aviso de alterações não salvas sem motivo', corpo: '<p><strong>Onde:</strong> tela do item.</p><p><strong>Problema:</strong> o rodapé mostra "Alterações não salvas" ao abrir.</p>' }],
   },
   {
     id: 'ap-3', numero: 3,
@@ -255,7 +324,11 @@ const apontamentosProduto: Apontamento[] = [
     estado: 'resolvido', prioridade: 'normal', responsavel: BRUNO, autor: ANA, rodada: 1, reaberturas: 0,
     anexos: [{ id: 'an-4', tipo: 'imagem', nome: 'painel-da-tarefa-pending.jpg', url: printPainelTarefa }],
     respostas: [
-      { id: 're-4', autor: BRUNO, quando: d('2026-11-11T10:05:00'), texto: 'Trocado pelo mesmo selo da lista de tarefas.' },
+      {
+        id: 're-4', autor: BRUNO, quando: d('2026-11-11T10:05:00'),
+        texto: 'Trocado pelo mesmo selo da lista de tarefas. A tradução dos 3 idiomas segue em #Traduzir o selo de status da tarefa.',
+        citacoes: [{ chave: 'tarefa-904', rotulo: 'Traduzir o selo de status da tarefa', tipo: 'tarefa' }],
+      },
     ],
     historico: [
       evento(ANA, '2026-11-04T17:11:00', 'aberto', 1),
@@ -391,9 +464,20 @@ const rodadasProduto: Rodada[] = [
   },
 ]
 
+let seqLinha = 0
+const linha = (texto: string, feito: boolean, extra: Partial<LinhaDeChecklist> = {}): LinhaDeChecklist => ({ id: `ck-${++seqLinha}`, texto, feito, ...extra })
+const td = (t: Task, extra: Partial<TarefaDoItem> = {}): TarefaDoItem => ({ tarefa: t, apontamentos: [], rodadas: [], checklist: [], bloqueadaPor: [], ...extra })
+
 const tarefasProduto: TarefaDoItem[] = [
   {
     tarefa: tarefa(901, 'Ajustar textos da tela do item', 'working', BRUNO, 'Rótulos, estados vazios e traduções que o teste apontou.'),
+    checklist: [
+      linha('Revisar os rótulos em espanhol', true, { responsavel: BRUNO }),
+      linha('Revisar os estados vazios', false, { responsavel: DEBORA }),
+      linha('Trocar o selo "pending" pelo rótulo traduzido', false, { subtarefa: 904 }),
+      linha('Conferir os textos no tema escuro', false),
+    ],
+    bloqueadaPor: [],
     apontamentos: [
       {
         id: 'tap-1', numero: 1,
@@ -421,16 +505,11 @@ const tarefasProduto: TarefaDoItem[] = [
     ],
     rodadas: [{ numero: 1, quem: ANA, quando: d('2026-11-10T11:10:00'), veredito: 'correcao', resumo: '2 ajustes de texto da tarefa.' }],
   },
-  {
-    tarefa: tarefa(902, 'Revisar a migração das pastas ocultas', 'pending', CAIO),
-    apontamentos: [],
-    rodadas: [],
-  },
-  {
-    tarefa: tarefa(903, 'Atualizar a documentação da tela do item', 'completed', DEBORA),
-    apontamentos: [],
-    rodadas: [],
-  },
+  td(tarefa(904, 'Traduzir o selo de status da tarefa', 'pending', BRUNO, 'Usar o rótulo do status nos 3 idiomas.'), { mae: 901 }),
+  td(tarefa(905, 'Revisar os estados vazios com o design', 'completed', DEBORA), { mae: 901, conclusao: { motivo: 'concluida' } }),
+  td({ ...tarefa(902, 'Revisar a migração das pastas ocultas', 'blocked', CAIO, 'Rodar de novo a migração nas pastas com hidden=true.'), priority: 'high' }, { bloqueadaPor: [906] }),
+  td(tarefa(906, 'Liberar acesso de leitura ao banco de develop', 'working', CAIO)),
+  td(tarefa(903, 'Atualizar a documentação da tela do item', 'completed', DEBORA), { conclusao: { motivo: 'concluida' } }),
 ]
 
 const itemProduto: Item = {
@@ -564,6 +643,18 @@ export const cenarios: Record<Cenario['id'], Cenario> = {
     rodadas: rodadasProduto,
     tarefas: tarefasProduto,
     categoriasDoMenu: [{ nome: 'Demandas', ativo: true }, { nome: 'Bugs' }, { nome: 'Releases' }],
+    camposDaVisaoGeral: [
+      { rotulo: 'Status', valor: 'Em teste' },
+      { rotulo: 'Título', valor: 'Pastas do item com cara de aba' },
+      { rotulo: 'Critérios de aceite', checklist: [
+        { texto: 'A pasta ativa tem sublinhado e a barra tem borda inferior', feito: true },
+        { texto: 'A aba mostra o contador de pendentes', feito: true },
+        { texto: 'A pasta aberta volta depois de recarregar', feito: false },
+        { texto: 'Os 3 idiomas mostram o mesmo rótulo', feito: false },
+      ] },
+      { rotulo: 'Versão', valor: '3.3.0' },
+    ],
+    mencoes: [{ alvo: 'tarefa-904', onde: 'Retorno de testes #3', quem: BRUNO, quando: d('2026-11-11T10:05:00') }],
   },
   juridico: {
     id: 'juridico',
@@ -587,8 +678,29 @@ export const cenarios: Record<Cenario['id'], Cenario> = {
     apontamentos: apontamentosJuridico,
     rodadas: rodadasJuridico,
     tarefas: [
-      { tarefa: { ...tarefa(911, 'Colher assinaturas', 'pending', RAFAEL), workspace: 'juridico-consultivo', item: 52210 }, apontamentos: [], rodadas: [] },
+      td({ ...tarefa(911, 'Colher assinaturas', 'pending', RAFAEL, 'Assinaturas da versão final, depois da aprovação da minuta.'), workspace: 'juridico-consultivo', item: 52210 }, {
+        checklist: [
+          linha('Assinatura da contratada', false, { responsavel: RAFAEL }),
+          linha('Assinatura do diretor jurídico', false, { responsavel: HELENA }),
+          linha('Rubrica em todas as páginas do Anexo II', false),
+          linha('Enviar a minuta final ao cliente', false, { subtarefa: 912 }),
+        ],
+        bloqueadaPor: [913],
+      }),
+      td({ ...tarefa(912, 'Enviar a minuta final ao cliente', 'pending', RAFAEL), workspace: 'juridico-consultivo', item: 52210 }, { mae: 911 }),
+      td({ ...tarefa(913, 'Aprovar a minuta final', 'working', HELENA, 'Depende das pendências #1 e #2.'), workspace: 'juridico-consultivo', item: 52210 }),
     ],
+    camposDaVisaoGeral: [
+      { rotulo: 'Status', valor: 'Em revisão' },
+      { rotulo: 'Contratante', valor: 'Manutenção Predial Exemplo Ltda.' },
+      { rotulo: 'Condições para assinar', checklist: [
+        { texto: 'Minuta aprovada pelo jurídico', feito: false },
+        { texto: 'Proposta comercial anexada', feito: true },
+        { texto: 'Procuração do representante dentro da validade', feito: true },
+      ] },
+      { rotulo: 'Valor mensal', valor: 'R$ 18.400,00' },
+    ],
+    mencoes: [],
     categoriasDoMenu: [{ nome: 'Contratos', ativo: true }, { nome: 'Procurações' }, { nome: 'Processos' }],
   },
 }

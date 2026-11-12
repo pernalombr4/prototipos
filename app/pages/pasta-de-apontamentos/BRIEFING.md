@@ -39,8 +39,10 @@ Visto em 11/11/2026 no workspace de exploração, categoria `leve`, item `LEVD83
 | Painel da tarefa | Abas fixas Tarefa, Item, Comentários e Logs de Auditoria; selo de status; rodapé com 3 botões | `evidencias/hoje-painel-da-tarefa.jpg` |
 | Comentários da tarefa | Lista simples com menção e anexo, sem estado nem responsável | `evidencias/hoje-comentarios-da-tarefa.jpg` |
 | Comentários do item | Mesmo componente; estado vazio "Seja o primeiro!" | `evidencias/hoje-comentarios-do-item.jpg` |
+| Tarefas › Rápidas (rodada 2) | Página própria com a barra de visualizações, busca e filtros; quadro de 4 colunas; cartão sem contador de nada | `evidencias/hoje-tarefas-rapidas.jpg` |
+| Lista de tarefas na descrição (rodada 2) | O editor aceita a lista de marcar; o cartão e o painel não contam as linhas, e a linha não tem dono | `evidencias/hoje-lista-de-tarefas-na-descricao.jpg` |
 
-Para ver o painel da tarefa, criei pela tela 1 tarefa rápida, "Revisar tela de cadastro", na pasta Tarefas do item acima. Ela continua lá.
+Para ver o painel da tarefa, criei pela tela 1 tarefa rápida, "Revisar tela de cadastro", na pasta Tarefas do item acima. Na rodada 2, a descrição dela ganhou uma lista de tarefas de 2 linhas, também pela tela. As 2 coisas continuam lá.
 
 ### O que o código diz
 
@@ -51,7 +53,9 @@ Lido pela skill `investigar-codigo` em 11/11/2026 (front `en-space`, back `enlig
 - **Tarefa:** o painel tem abas fixas no componente; a tarefa não tem mecanismo de pastas. A tarefa programada tem outras abas (Visão geral, Item, Histórico, Comentários).
 - **Comentários:** genéricos por entidade, com menção, anexo e resposta (`parent`). Não têm estado, responsável nem marca de feito.
 - **Checklist:** a única lista de marcar é a TaskList do editor de texto, dentro do corpo, sem dono nem estado.
-- **Subtarefa:** não existe no develop.
+- **Subtarefa:** não existe no develop. O modelo `tasks` não tem `parent` nem relação de bloqueio (rodada 2).
+- **Aprovações:** o nome já está em uso. A tarefa tem aprovadores (`task_approvers`, com status approver, waiting, canceled e disapprove) e a opção "Ativar Aprovadores". Uma pasta "Aprovações" se confundiria com eles (rodada 2).
+- **Lista de tarefas do editor:** é a extensão `TaskList` do TipTap no `EnEditor`; guarda as caixas no HTML do campo. Nenhuma tela conta as linhas marcadas (rodada 2).
 - **Anexos:** sobem para `c-files`, presos ao item; limite de 200 MB.
 - **Avisos:** já existem `comment.mention`, `task.assigned`, `task.status_changed` e `flow-item-task.assigned`. A proposta pede 2 novos: apontamento atribuído e apontamento reaberto.
 - **Auditoria:** todo modelo é auditado; o apontamento entra nos Logs de Auditoria do item sem trabalho extra.
@@ -82,5 +86,8 @@ Copiado olhando o develop em 11/11/2026. Nada aqui é proposta.
 | Pasta Tarefas | `_PastaTarefas.vue`: chip Tarefas Rápidas, Visualizar, busca, Criado em, Todo o período, Filtros por campo, 4 colunas e o rodapé "Mostrando" |
 | Painel da tarefa | `_PainelDaTarefa.vue`: trilho de ícones, abas, título, selo "pending", Reference, Detalhes da tarefa e o rodapé de 3 botões |
 | Modal "Nova pasta" | `_ModalNovaPasta.vue`: Nome da Pasta, Tipo de Pasta com busca, Ícone com "Sem ícone", Cancelar e Criar |
+| Menu Tarefas (rodada 2) | `_CascaDoWorkspace.vue`: Tarefas aberto com Agendadas, Rápidas (ativa) e Painel |
+| Página Tarefas › Rápidas (rodada 2) | `_PastaTarefas.vue` com `variante="pagina"`: barra de visualizações, busca, Criado em, Todo o período, Filtros, as 4 colunas com o degradê do develop e o rodapé com a paginação e "500 por página" |
+| Trilha da Tarefa rápida (rodada 2) | Workspace, Tarefas, Rápidas |
 
 As pastas Emails Automáticos, Mail Box e Campos do item de exploração ficaram fora da barra: são do tipo de lá, não de todo item.

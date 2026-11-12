@@ -10,6 +10,10 @@
  * O ciclo: quem confere escreve em rascunho e envia o retorno da rodada (1
  * aviso só); quem resolve marca cada um como resolvido e pede o reteste; quem
  * confere confere ou reabre. Descartar pede motivo. Tudo em memória.
+ *
+ * Rodada 2: o topo fica sem gráfico (as contagens moram nos filtros, em
+ * texto); a pasta ganha as vistas Lista e Rodadas; a lista filtra e agrupa por
+ * rodada; o detalhe abre em tela cheia; descartar aceita "Duplicado de".
  */
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Apontamento, Rodada } from './mocks'
@@ -18,6 +22,7 @@ import type { Textos } from './textos'
 import LinhaDoApontamento from './_LinhaDoApontamento.vue'
 import DetalheDoApontamento from './_DetalheDoApontamento.vue'
 import NovoApontamentoForm from './_NovoApontamento.vue'
+import VistaDeRodadas from './_VistaDeRodadas.vue'
 import {
   conferir, contagem, criar, desmarcar, descartar, enviarRetorno, foto, grupoDe, pedirReteste, pessoa,
   podeConferir, podeResolver, proximaRodada, reabrir, resolver, restaurar, resumoDaProxima, situacao, visiveis,
@@ -44,28 +49,33 @@ const somenteLeitura = computed(() => props.estadoDaTela === 'semPermissao')
 const nomeDe = (id: number) => pessoa(props.lista, id)?.nome ?? ''
 const souConferente = computed(() => props.lista.apontamentos.some(a => a.autor === props.quem) || props.lista.rodadas.some(r => r.quem === props.quem))
 
-/* ---------- contagem, progresso e situação ---------- */
+/* ---------- contagem e situação, em texto (sem gráfico no topo) ---------- */
 const c = computed(() => contagem(props.lista, props.quem))
 const sit = computed(() => situacao(props.lista))
-const corDaSituacao: Record<string, 'neutral' | 'warning' | 'info' | 'success'> = { semRetorno: 'neutral', emCorrecao: 'warning', aguardandoReteste: 'info', concluido: 'success' }
-const fechadosTotal = computed(() => c.value.fechados)
-const barra = computed(() => {
-  const total = c.value.todos || 1
-  const exige = props.lista.config.exigeConferencia
-  return [
-    { chave: 'conferido', n: exige ? c.value.conferido : c.value.conferido + c.value.resolvido, classe: 'bg-success' },
-    { chave: 'resolvido', n: exige ? c.value.resolvido : 0, classe: 'bg-info' },
-    { chave: 'descartado', n: c.value.descartado, classe: 'bg-accented' },
-    { chave: 'reaberto', n: c.value.reaberto, classe: 'bg-error' },
-    { chave: 'aberto', n: c.value.aberto, classe: 'bg-muted ring-1 ring-inset ring-accented' },
-  ].filter(s => s.n).map(s => ({ ...s, largura: `${(s.n / total) * 100}%` }))
+const corDaSituacao: Record<string, string> = { semRetorno: 'text-muted', emCorrecao: 'text-warning', aguardandoReteste: 'text-info', concluido: 'text-success' }
+const iconeDaSituacao: Record<string, string> = { semRetorno: 'i-lucide-circle-dashed', emCorrecao: 'i-lucide-wrench', aguardandoReteste: 'i-lucide-repeat', concluido: 'i-lucide-circle-check-big' }
+const linhaDaSituacao = computed(() => {
+  const ultima = props.lista.rodadas.at(-1)
+  const n = ultima?.numero ?? 1
+  const quando = sit.value === 'aguardandoReteste' ? ultima?.retestePedidoEm : ultima?.quando
+  return props.t.fluxo.cabecalho[sit.value]!(n, quando ? props.t.data(quando) : '')
 })
-const rotulo = (e: string) => (props.t.locale === 'pt-BR' && props.lista.config.rotulos[e as 'resolvido']) || props.t.estados[e] || e
+
+/* ---------- vista: Lista ou Rodadas ---------- */
+const vista = ref<'lista' | 'rodadas'>('lista')
+const opcoesDeVista = computed(() => (['lista', 'rodadas'] as const).map(v => ({ value: v, label: props.t.fluxo.vistas[v], icon: v === 'lista' ? 'i-lucide-list' : 'i-lucide-history' })))
 
 /* ---------- filtro ---------- */
 const grupo = ref<Grupo>('todos')
 const busca = ref('')
 const soMeus = ref(false)
+const rodadaFiltro = ref<number | 'todas'>('todas')
+const agrupar = ref(false)
+const rodadasExistentes = computed(() => [...new Set(visiveis(props.lista, props.quem).map(a => a.rodada))].sort((x, y) => x - y))
+const opcoesDeRodada = computed(() => [
+  { value: 'todas' as const, label: props.t.fluxo.todasAsRodadas },
+  ...rodadasExistentes.value.map(n => ({ value: n, label: props.t.lista.rodada(n) })),
+])
 const grupos = computed(() => {
   const base: { value: Grupo, label: string, n: number }[] = [
     { value: 'todos', label: props.t.filtros.todos, n: c.value.todos },
@@ -83,6 +93,7 @@ const filtrados = computed(() => {
   return visiveis(props.lista, props.quem)
     .filter(a => grupo.value === 'todos' || grupoDe(a, props.lista.config) === grupo.value)
     .filter(a => !soMeus.value || a.responsavel === props.quem || a.autor === props.quem)
+    .filter(a => rodadaFiltro.value === 'todas' || a.rodada === rodadaFiltro.value)
     .filter(a => !termo || a.titulo.toLowerCase().includes(termo) || String(a.numero) === termo.replace('#', ''))
     .sort((x, y) => (ordemDoGrupo[grupoDe(x, props.lista.config)]! - ordemDoGrupo[grupoDe(y, props.lista.config)]!) || x.numero - y.numero)
 })
@@ -91,7 +102,15 @@ function limparFiltro() {
   grupo.value = 'todos'
   busca.value = ''
   soMeus.value = false
+  rodadaFiltro.value = 'todas'
 }
+
+/** Com "Agrupar por rodada", a lista se divide pela rodada em que cada apontamento nasceu. */
+const blocosDaLista = computed(() => {
+  if (!agrupar.value) return [{ rodada: 0, itens: filtrados.value }]
+  const nums = [...new Set(filtrados.value.map(a => a.rodada))].sort((x, y) => y - x)
+  return nums.map(n => ({ rodada: n, itens: filtrados.value.filter(a => a.rodada === n) }))
+})
 
 /* ---------- seleção, no endereço ---------- */
 const parametro = computed(() => `${props.chave}-ap`)
@@ -136,19 +155,46 @@ const aoResolver = (a: Apontamento) => comDesfazer(a, () => resolver(props.lista
 const aoDesmarcar = (a: Apontamento) => desmarcar(props.lista, a, props.quem)
 const aoConferir = (a: Apontamento) => comDesfazer(a, () => conferir(props.lista, a, props.quem), props.t.toasts.conferido(a.numero), 'i-lucide-badge-check', 'success')
 
-/* Reabrir e descartar pedem o motivo. */
+/* Reabrir e descartar pedem o motivo; descartar aceita "Duplicado de". */
 const pedido = ref<{ tipo: 'reabrir' | 'descartar', a: Apontamento } | null>(null)
 const motivo = ref('')
+const tipoDeDescarte = ref<'naoSeraFeito' | 'duplicado'>('naoSeraFeito')
+const duplicadoDe = ref<number | undefined>()
 function pedirMotivo(tipo: 'reabrir' | 'descartar', a: Apontamento) {
   motivo.value = ''
+  tipoDeDescarte.value = 'naoSeraFeito'
+  duplicadoDe.value = undefined
   pedido.value = { tipo, a }
 }
+const opcoesDeDescarte = computed(() => (['naoSeraFeito', 'duplicado'] as const).map(v => ({ value: v, label: props.t.fluxo.motivos[v] })))
+const opcoesDeDuplicado = computed(() => props.lista.apontamentos
+  .filter(a => a.id !== pedido.value?.a.id && a.estado !== 'rascunho')
+  .map(a => ({ value: a.numero, label: `#${a.numero} ${a.titulo}` })))
+const duplicando = computed(() => pedido.value?.tipo === 'descartar' && tipoDeDescarte.value === 'duplicado')
+const podeConfirmar = computed(() => duplicando.value ? !!duplicadoDe.value : !!motivo.value.trim())
 function confirmarMotivo() {
-  if (!pedido.value || !motivo.value.trim()) return
+  if (!pedido.value || !podeConfirmar.value) return
   const { tipo, a } = pedido.value
-  if (tipo === 'reabrir') comDesfazer(a, () => reabrir(props.lista, a, props.quem, motivo.value.trim()), props.t.toasts.reaberto(a.numero), 'i-lucide-rotate-ccw')
-  else comDesfazer(a, () => descartar(props.lista, a, props.quem, motivo.value.trim()), props.t.toasts.descartado(a.numero), 'i-lucide-circle-slash')
+  if (tipo === 'reabrir') {
+    comDesfazer(a, () => reabrir(props.lista, a, props.quem, motivo.value.trim()), props.t.toasts.reaberto(a.numero), 'i-lucide-rotate-ccw')
+  }
+  else if (duplicando.value) {
+    const n = duplicadoDe.value!
+    comDesfazer(a, () => descartar(props.lista, a, props.quem, props.t.fluxo.duplicadoTexto(n), n), props.t.toasts.descartado(a.numero), 'i-lucide-copy')
+  }
+  else {
+    comDesfazer(a, () => descartar(props.lista, a, props.quem, motivo.value.trim()), props.t.toasts.descartado(a.numero), 'i-lucide-circle-slash')
+  }
   pedido.value = null
+}
+
+/* ---------- tela cheia ---------- */
+const telaCheia = ref(false)
+function abrirDaRodada(a: Apontamento) {
+  vista.value = 'lista'
+  grupo.value = 'todos'
+  rodadaFiltro.value = 'todas'
+  selecionadoId.value = a.id
 }
 
 function aoExcluir(a: Apontamento) {
@@ -257,7 +303,7 @@ const emSequencia = computed(() => props.compacto || estreito.value)
     <!-- CARREGANDO -->
     <div v-if="estadoDaTela === 'carregando'" class="flex flex-col gap-4 p-5" :aria-label="t.lista.carregando" aria-busy="true">
       <USkeleton class="h-6 w-64" />
-      <USkeleton class="h-2 w-full" />
+      <USkeleton class="h-4 w-56" />
       <div class="flex gap-2">
         <USkeleton v-for="i in 4" :key="i" class="h-7 w-24" />
       </div>
@@ -278,30 +324,17 @@ const emSequencia = computed(() => props.compacto || estreito.value)
             <UIcon :name="lista.config.icone" class="size-5 shrink-0 text-primary" />
             <h2 class="truncate text-base font-semibold text-highlighted">{{ lista.config.nome }}</h2>
           </div>
-          <UBadge v-if="c.todos" :label="t.lista.situacoes[sit]" :color="corDaSituacao[sit]" variant="subtle" size="sm" />
-
-          <!-- Rodadas -->
-          <UPopover v-if="lista.rodadas.length" :content="{ align: 'start' }">
-            <UButton :label="t.lista.rodada(lista.rodadas.length)" icon="i-lucide-history" trailing-icon="i-lucide-chevron-down" color="neutral" variant="ghost" size="xs" />
-            <template #content>
-              <div class="flex w-96 max-w-[90vw] flex-col gap-3 p-4">
-                <p class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.lista.rodadas }}</p>
-                <ol class="flex flex-col gap-3">
-                  <li v-for="r in [...lista.rodadas].reverse()" :key="r.numero" class="flex flex-col gap-1 border-l-2 pl-3" :class="r.veredito === 'aprovado' ? 'border-success' : r.veredito === 'ressalvas' ? 'border-warning' : 'border-error'">
-                    <p class="flex items-center gap-2 text-sm">
-                      <span class="font-semibold text-highlighted">{{ t.lista.rodada(r.numero) }}</span>
-                      <UBadge :label="t.lista.vereditos[r.veredito]" size="sm" :color="r.veredito === 'aprovado' ? 'success' : r.veredito === 'ressalvas' ? 'warning' : 'error'" variant="soft" />
-                    </p>
-                    <p class="text-xs text-muted">{{ t.lista.enviadaPor(nomeDe(r.quem), t.dataHora(r.quando)) }}</p>
-                    <p v-if="r.resumo" class="text-sm text-default">{{ r.resumo }}</p>
-                    <p v-if="r.retestePedidoEm && r.retestePedidoPor" class="flex items-center gap-1 text-xs text-info">
-                      <UIcon name="i-lucide-repeat" class="size-3.5" />{{ t.lista.retestePedido(nomeDe(r.retestePedidoPor), t.dataHora(r.retestePedidoEm)) }}
-                    </p>
-                  </li>
-                </ol>
-              </div>
-            </template>
-          </UPopover>
+          <!-- A vista da pasta -->
+          <UTabs
+            v-if="c.todos || lista.rodadas.length"
+            v-model="vista"
+            :items="opcoesDeVista"
+            :content="false"
+            variant="pill"
+            size="xs"
+            :aria-label="t.fluxo.vistaDaPasta"
+            :ui="{ list: 'p-0.5', trigger: 'px-2.5' }"
+          />
 
           <div class="ml-auto flex items-center gap-2">
             <UButton
@@ -325,18 +358,15 @@ const emSequencia = computed(() => props.compacto || estreito.value)
           </div>
         </div>
 
-        <!-- Progresso -->
-        <div v-if="c.todos" class="flex flex-col gap-1.5">
-          <div class="flex h-2 w-full gap-0.5 overflow-hidden rounded-full bg-elevated" role="img" :aria-label="lista.config.exigeConferencia ? t.lista.progresso(fechadosTotal, c.todos) : t.lista.progressoSemConferencia(fechadosTotal, c.todos)">
-            <span v-for="s in barra" :key="s.chave" class="h-full transition-[width] duration-500 ease-out first:rounded-l-full last:rounded-r-full" :class="s.classe" :style="{ width: s.largura }" />
-          </div>
-          <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
-            <span class="font-medium text-highlighted">{{ lista.config.exigeConferencia ? t.lista.progresso(fechadosTotal, c.todos) : t.lista.progressoSemConferencia(fechadosTotal, c.todos) }}</span>
-            <span v-for="s in barra" :key="s.chave" class="flex items-center gap-1.5">
-              <span class="size-2 rounded-full" :class="s.classe" aria-hidden="true" />{{ rotulo(s.chave) }} <span class="tabular-nums text-highlighted">{{ s.n }}</span>
-            </span>
-          </div>
-        </div>
+        <!-- A rodada em curso, em texto -->
+        <p v-if="c.todos" class="flex flex-wrap items-center gap-1.5 text-xs" :class="corDaSituacao[sit]">
+          <UIcon :name="iconeDaSituacao[sit]" class="size-3.5" />
+          <span class="font-medium">{{ linhaDaSituacao }}</span>
+          <template v-if="lista.rodadas.at(-1)">
+            <span class="text-dimmed">·</span>
+            <span class="text-muted">{{ t.lista.vereditos[lista.rodadas.at(-1)!.veredito] }}</span>
+          </template>
+        </p>
       </header>
 
       <!-- AVISOS DA RODADA, conforme o papel -->
@@ -392,6 +422,9 @@ const emSequencia = computed(() => props.compacto || estreito.value)
         />
       </div>
 
+      <!-- RODADAS -->
+      <VistaDeRodadas v-else-if="vista === 'rodadas'" :t="t" :lista="lista" :quem="quem" @abrir="abrirDaRodada" />
+
       <!-- LISTA E DETALHE -->
       <div v-else class="flex min-h-0 flex-1">
         <section
@@ -415,9 +448,13 @@ const emSequencia = computed(() => props.compacto || estreito.value)
                 <span class="tabular-nums" :class="grupo === g.value ? 'text-primary' : 'text-dimmed'">{{ g.n }}</span>
               </UButton>
             </div>
-            <div class="flex items-center gap-3">
-              <UInput v-model="busca" icon="i-lucide-search" :placeholder="t.filtros.buscar" size="sm" class="min-w-0 flex-1" :aria-label="t.filtros.buscar" />
-              <USwitch v-model="soMeus" :label="t.filtros.soMeus" size="sm" class="shrink-0" />
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <UInput v-model="busca" icon="i-lucide-search" :placeholder="t.filtros.buscar" size="sm" class="min-w-40 flex-1" :aria-label="t.filtros.buscar" />
+              <USelect v-model="rodadaFiltro" :items="opcoesDeRodada" size="sm" icon="i-lucide-history" class="w-40" :aria-label="t.fluxo.filtroRodada" />
+            </div>
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <USwitch v-model="soMeus" :label="t.filtros.soMeus" size="sm" />
+              <USwitch v-model="agrupar" :label="t.fluxo.agrupar" size="sm" />
             </div>
           </div>
 
@@ -426,24 +463,31 @@ const emSequencia = computed(() => props.compacto || estreito.value)
               <NovoApontamentoForm v-if="criando" :t="t" :lista="lista" :conferente="souConferente" @criar="aoCriar" @cancelar="criando = false" />
             </Transition>
 
-            <TransitionGroup tag="ul" move-class="transition-transform duration-300 ease-out" enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0 translate-y-2" leave-active-class="absolute opacity-0 transition duration-150" class="relative">
-              <LinhaDoApontamento
-                v-for="(a, i) in filtrados"
-                :key="a.id"
-                :t="t"
-                :lista="lista"
-                :a="a"
-                :quem="quem"
-                :selecionado="selecionadoId === a.id"
-                :somente-leitura="somenteLeitura"
-                :style="{ transitionDelay: `${Math.min(i, 10) * 25}ms` }"
-                @abrir="selecionadoId = a.id"
-                @resolver="aoResolver(a)"
-                @desmarcar="aoDesmarcar(a)"
-                @conferir="aoConferir(a)"
-                @reabrir="pedirMotivo('reabrir', a)"
-              />
-            </TransitionGroup>
+            <template v-for="bl in blocosDaLista" :key="bl.rodada">
+              <p v-if="agrupar" class="sticky top-0 z-10 flex items-center gap-2 border-b border-default bg-default/95 px-4 py-1.5 text-xs font-semibold text-muted backdrop-blur">
+                <span class="rounded bg-inverted px-1.5 py-0.5 font-mono text-[11px] text-inverted">R{{ bl.rodada }}</span>
+                {{ t.fluxo.grupoRodada(bl.rodada) }}
+                <span class="tabular-nums text-dimmed">{{ bl.itens.length }}</span>
+              </p>
+              <TransitionGroup tag="ul" move-class="transition-transform duration-300 ease-out" enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0 translate-y-2" leave-active-class="absolute opacity-0 transition duration-150" class="relative">
+                <LinhaDoApontamento
+                  v-for="(a, i) in bl.itens"
+                  :key="a.id"
+                  :t="t"
+                  :lista="lista"
+                  :a="a"
+                  :quem="quem"
+                  :selecionado="selecionadoId === a.id"
+                  :somente-leitura="somenteLeitura"
+                  :style="{ transitionDelay: `${Math.min(i, 10) * 25}ms` }"
+                  @abrir="selecionadoId = a.id"
+                  @resolver="aoResolver(a)"
+                  @desmarcar="aoDesmarcar(a)"
+                  @conferir="aoConferir(a)"
+                  @reabrir="pedirMotivo('reabrir', a)"
+                />
+              </TransitionGroup>
+            </template>
 
             <div v-if="!filtrados.length && !criando" class="flex flex-col items-center gap-2 px-6 py-10 text-center">
               <UIcon name="i-lucide-filter-x" class="size-6 text-dimmed" />
@@ -474,6 +518,7 @@ const emSequencia = computed(() => props.compacto || estreito.value)
               @excluir="aoExcluir(selecionado)"
               @copiar-link="copiarLink(selecionado)"
               @converter="emit('converter', selecionado)"
+              @tela-cheia="telaCheia = true"
             />
             <div v-else class="flex h-full flex-col items-center justify-center gap-2 p-8 text-center">
               <UIcon name="i-lucide-mouse-pointer-click" class="size-7 text-dimmed" />
@@ -493,8 +538,14 @@ const emSequencia = computed(() => props.compacto || estreito.value)
       @update:open="(v: boolean) => { if (!v) pedido = null }"
     >
       <template #body>
-        <form id="form-motivo" @submit.prevent="confirmarMotivo">
-          <UFormField :label="pedido?.tipo === 'reabrir' ? t.apontamento.perguntaReabrir : t.apontamento.perguntaDescartar" required>
+        <form id="form-motivo" class="flex flex-col gap-4" @submit.prevent="confirmarMotivo">
+          <UFormField v-if="pedido?.tipo === 'descartar'" :label="t.fluxo.motivoDoDescarte">
+            <URadioGroup v-model="tipoDeDescarte" :items="opcoesDeDescarte" variant="table" orientation="horizontal" size="sm" />
+          </UFormField>
+          <UFormField v-if="duplicando" :label="t.fluxo.duplicadoDe" required>
+            <USelectMenu v-model="duplicadoDe" :items="opcoesDeDuplicado" value-key="value" :placeholder="t.fluxo.escolhaApontamento" class="w-full" />
+          </UFormField>
+          <UFormField v-else :label="pedido?.tipo === 'reabrir' ? t.apontamento.perguntaReabrir : t.apontamento.perguntaDescartar" required>
             <UTextarea v-model="motivo" :rows="3" autoresize autofocus class="w-full" />
           </UFormField>
         </form>
@@ -507,7 +558,33 @@ const emSequencia = computed(() => props.compacto || estreito.value)
             form="form-motivo"
             :label="pedido?.tipo === 'reabrir' ? t.apontamento.confirmarReabrir : t.apontamento.confirmarDescartar"
             :color="pedido?.tipo === 'reabrir' ? 'error' : 'neutral'"
-            :disabled="!motivo.trim()"
+            :disabled="!podeConfirmar"
+          />
+        </div>
+      </template>
+    </UModal>
+
+    <!-- Apontamento em tela cheia -->
+    <UModal v-model:open="telaCheia" fullscreen :title="selecionado ? `#${selecionado.numero} ${selecionado.titulo}` : ''" :ui="{ header: 'hidden', body: 'p-0 sm:p-0' }">
+      <template #body>
+        <div class="mx-auto h-full max-w-4xl border-x border-default">
+          <DetalheDoApontamento
+            v-if="selecionado"
+            :t="t"
+            :lista="lista"
+            :a="selecionado"
+            :quem="quem"
+            :somente-leitura="somenteLeitura"
+            em-tela-cheia
+            @fechar="telaCheia = false"
+            @resolver="aoResolver(selecionado)"
+            @desmarcar="aoDesmarcar(selecionado)"
+            @conferir="aoConferir(selecionado)"
+            @reabrir="pedirMotivo('reabrir', selecionado)"
+            @descartar="pedirMotivo('descartar', selecionado)"
+            @excluir="() => { telaCheia = false; aoExcluir(selecionado!) }"
+            @copiar-link="copiarLink(selecionado)"
+            @converter="emit('converter', selecionado)"
           />
         </div>
       </template>

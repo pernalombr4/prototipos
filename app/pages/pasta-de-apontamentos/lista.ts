@@ -97,9 +97,22 @@ function registrar(l: Lista, a: Apontamento, quem: number, para: Estado, nota?: 
   a.estado = para
 }
 
+/**
+ * Cópia funda sem os proxies do Vue. O toRaw só tira o de fora: um array
+ * reativo guardado dentro (a citação de uma resposta, a versão de uma edição)
+ * faz o structuredClone falhar.
+ */
+export function copia<T>(v: T): T {
+  const cru = toRaw(v) as unknown
+  if (Array.isArray(cru)) return cru.map(copia) as T
+  if (cru instanceof Date) return new Date(cru) as T
+  if (cru && typeof cru === 'object') return Object.fromEntries(Object.entries(cru).map(([k, x]) => [k, copia(x)])) as T
+  return cru as T
+}
+
 /** Foto do apontamento, para o Desfazer do toast. */
 export function foto(a: Apontamento): Apontamento {
-  return structuredClone(toRaw(a))
+  return copia(a)
 }
 
 export function restaurar(l: Lista, f: Apontamento) {
@@ -129,9 +142,47 @@ export function reabrir(l: Lista, a: Apontamento, quem: number, nota: string) {
   registrar(l, a, quem, 'reaberto', nota)
 }
 
-export function descartar(l: Lista, a: Apontamento, quem: number, motivo: string) {
+export function descartar(l: Lista, a: Apontamento, quem: number, motivo: string, duplicadoDe?: number) {
   a.motivo = motivo
+  a.duplicadoDe = duplicadoDe
   registrar(l, a, quem, 'descartado', motivo)
+}
+
+/** Edita título e corpo e guarda a versão anterior, para o "editado". */
+export function editar(a: Apontamento, quem: number, titulo: string, corpo: string) {
+  if (titulo === a.titulo && corpo === a.corpo) return
+  a.versoes = [...(a.versoes ?? []), { quem, quando: new Date(), titulo: a.titulo, corpo: a.corpo }]
+  a.titulo = titulo
+  a.corpo = corpo
+}
+
+/** A rodada em vigor numa data: quantos retornos já tinham saído, no mínimo 1. */
+export function rodadaDaData(l: Lista, quando: Date) {
+  return Math.max(1, l.rodadas.filter(r => r.quando <= quando).length)
+}
+
+export type Secao = 'novos' | 'reabertos' | 'resolvidos' | 'conferidos' | 'descartados'
+
+/** O que cada rodada fez: quem nasceu, voltou, foi resolvido, conferido ou descartado nela. */
+export function secoesDaRodada(l: Lista, n: number, quem: number): Record<Secao, Apontamento[]> {
+  const r: Record<Secao, Apontamento[]> = { novos: [], reabertos: [], resolvidos: [], conferidos: [], descartados: [] }
+  for (const a of visiveis(l, quem)) {
+    const ev = a.historico.filter(e => e.rodada === n)
+    if (a.estado === 'rascunho' && a.rodada === n) r.novos.push(a)
+    else if (ev.some(e => e.para === 'aberto' && (!e.de || e.de === 'rascunho'))) r.novos.push(a)
+    if (ev.some(e => e.para === 'reaberto')) r.reabertos.push(a)
+    if (ev.some(e => e.para === 'resolvido')) r.resolvidos.push(a)
+    if (ev.some(e => e.para === 'conferido')) r.conferidos.push(a)
+    if (ev.some(e => e.para === 'descartado')) r.descartados.push(a)
+  }
+  return r
+}
+
+/** A rodada que quem confere está preparando tem algo? Rascunho ou conferência já feita. */
+export function temPreparo(l: Lista, quem: number) {
+  const n = proximaRodada(l)
+  const s = secoesDaRodada(l, n, quem)
+  return Object.values(s).some(x => x.length)
 }
 
 export function responder(a: Apontamento, quem: number, texto: string) {

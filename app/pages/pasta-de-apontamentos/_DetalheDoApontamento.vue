@@ -4,15 +4,21 @@
  *
  * Cabeçalho com estado, de quem é a vez e a ação principal do papel; os campos
  * (responsável, prioridade, rodada, autor); o corpo em texto rico; os anexos
- * (print abre em tela cheia, arquivo e link em linha); a conversa do
- * apontamento e o histórico de estados, com a rodada de cada mudança.
+ * (print abre em tela cheia, arquivo e link em linha).
+ *
+ * Rodada 2: "Editar" à vista, com o marcador "editado" e as versões
+ * anteriores (como a issue do GitHub); anexo removível; "Abrir em tela cheia";
+ * e a linha do tempo única, que junta mudanças de estado, comentários e
+ * edições, separada por rodada, com a resposta que cita com #.
  */
 import type { DropdownMenuItem } from '@nuxt/ui'
-import type { Anexo, Apontamento } from './mocks'
+import type { Anexo, Apontamento, Citacao, Estado } from './mocks'
 import type { Lista } from './lista'
 import type { Textos } from './textos'
 import CampoRico from './_CampoRico.vue'
-import { iconeDaPrioridade, pessoa, podeConferir, podeDescartar, podeDesmarcar, podeReabrir, podeResolver, responder, rotuloDoEstado, vezDe, visualDoEstado } from './lista'
+import CampoComCitacao from './_CampoComCitacao.vue'
+import { CHAVE_CITACAO, iconeDaCitacao, partesDoTexto } from './citacao'
+import { editar, iconeDaPrioridade, pessoa, podeConferir, podeDescartar, podeDesmarcar, podeReabrir, podeResolver, responder, rodadaDaData, rotuloDoEstado, vezDe, visualDoEstado } from './lista'
 
 const props = defineProps<{
   t: Textos
@@ -21,6 +27,7 @@ const props = defineProps<{
   quem: number
   somenteLeitura: boolean
   compacto?: boolean
+  emTelaCheia?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -32,13 +39,15 @@ const emit = defineEmits<{
   converter: []
   excluir: []
   copiarLink: []
+  telaCheia: []
   fechar: []
 }>()
 
 const toast = useToast()
+const citacao = inject(CHAVE_CITACAO, null)
 
 const visual = computed(() => visualDoEstado[props.a.estado])
-const rotulo = (e: Apontamento['estado']) => rotuloDoEstado(props.lista.config, e, props.t.estados, props.t.locale)
+const rotulo = (e: Estado) => rotuloDoEstado(props.lista.config, e, props.t.estados, props.t.locale)
 const nome = (id: number) => pessoa(props.lista, id)?.nome ?? ''
 const vez = computed(() => {
   const id = vezDe(props.a, props.lista.config)
@@ -52,6 +61,7 @@ const acoes = computed(() => ({
   conferir: !ro.value && podeConferir(props.a, props.quem, props.lista.config),
   reabrir: !ro.value && podeReabrir(props.a, props.quem),
   descartar: !ro.value && podeDescartar(props.a, props.quem),
+  editar: !ro.value && props.a.autor === props.quem,
 }))
 
 const menu = computed<DropdownMenuItem[][]>(() => [
@@ -69,21 +79,21 @@ const menu = computed<DropdownMenuItem[][]>(() => [
 const opcoesDePessoa = computed(() => props.lista.pessoas.map(p => ({ label: p.nome, value: p.id, avatar: { text: p.iniciais, alt: p.nome } })))
 const opcoesDePrioridade = computed(() => (['low', 'normal', 'high', 'urgent'] as const).map(p => ({ label: props.t.prioridades[p], value: p, icon: iconeDaPrioridade[p] })))
 
-/* ---------- corpo ---------- */
+/* ---------- edição, com versões ---------- */
 const editando = ref(false)
 const rascunhoDoCorpo = ref('')
 const rascunhoDoTitulo = ref('')
-function editar() {
+function abrirEdicao() {
   rascunhoDoCorpo.value = props.a.corpo
   rascunhoDoTitulo.value = props.a.titulo
   editando.value = true
 }
-function salvarCorpo() {
-  props.a.corpo = rascunhoDoCorpo.value
-  props.a.titulo = rascunhoDoTitulo.value.trim() || props.a.titulo
+function salvarEdicao() {
+  editar(props.a, props.quem, rascunhoDoTitulo.value.trim() || props.a.titulo, rascunhoDoCorpo.value)
   editando.value = false
 }
-watch(() => props.a.id, () => { editando.value = false; resposta.value = '' })
+const versaoVista = ref<number | null>(null)
+watch(() => props.a.id, () => { editando.value = false; resposta.value = ''; citacoesDaResposta.value = []; versaoVista.value = null })
 
 /* ---------- anexos ---------- */
 const imagens = computed(() => props.a.anexos.filter(x => x.tipo === 'imagem'))
@@ -108,33 +118,74 @@ function anexar(e: Event) {
   }
   ;(e.target as HTMLInputElement).value = ''
 }
+function removerAnexo(x: Anexo) {
+  const i = props.a.anexos.indexOf(x)
+  if (i < 0) return
+  props.a.anexos.splice(i, 1)
+  toast.add({
+    title: props.t.fluxo.removerAnexo(x.nome),
+    icon: 'i-lucide-trash-2',
+    duration: 4000,
+    actions: [{ label: props.t.toasts.desfazer, color: 'neutral', variant: 'outline', onClick: () => { props.a.anexos.splice(i, 0, x) } }],
+  })
+}
 function baixar(x: Anexo) {
   toast.add({ title: props.t.apontamento.baixar(x.nome), icon: 'i-lucide-download', duration: 2000 })
 }
 
-/* ---------- conversa ---------- */
+/* ---------- resposta, com citação ---------- */
 const resposta = ref('')
+const citacoesDaResposta = ref<Citacao[]>([])
 const enviando = ref(false)
 async function enviarResposta() {
   const texto = resposta.value.trim()
   if (!texto) return
   enviando.value = true
   await new Promise(r => setTimeout(r, 300))
+  const usadas = citacoesDaResposta.value.filter(c => texto.includes(`#${c.rotulo}`))
   responder(props.a, props.quem, texto)
+  const r = props.a.respostas.at(-1)!
+  if (usadas.length) r.citacoes = usadas
+  for (const c of usadas) citacao?.registrar(c.chave, `${props.lista.config.nome} #${props.a.numero}`, props.quem)
   resposta.value = ''
+  citacoesDaResposta.value = []
   enviando.value = false
 }
 
-/* ---------- histórico ---------- */
-const linhaDoTempo = computed(() => [...props.a.historico].reverse().map(e => ({
-  value: e.id,
-  date: `${props.t.dataHora(e.quando)} · ${props.t.lista.rodadaCurta(e.rodada)}`,
-  title: !e.de
-    ? (e.para === 'rascunho' ? props.t.apontamento.eventos.rascunho(nome(e.quem)) : props.t.apontamento.eventos.criou(nome(e.quem)))
-    : props.t.apontamento.eventos.mudou(nome(e.quem), rotulo(e.para)),
-  description: e.nota,
-  icon: visualDoEstado[e.para].icone,
-})))
+/* ---------- linha do tempo por rodada ---------- */
+type Entrada =
+  | { tipo: 'evento', id: string, quando: Date, rodada: number, quem: number, de?: Estado, para: Estado, nota?: string }
+  | { tipo: 'comentario', id: string, quando: Date, rodada: number, quem: number, texto: string, citacoes?: Citacao[] }
+  | { tipo: 'edicao', id: string, quando: Date, rodada: number, quem: number }
+
+const linhaDoTempo = computed(() => {
+  const ev = props.a.historico
+  const entradas: Entrada[] = [
+    ...ev.map(e => ({ tipo: 'evento' as const, id: e.id, quando: e.quando, rodada: e.rodada, quem: e.quem, de: e.de, para: e.para, nota: e.nota })),
+    ...props.a.respostas
+      /* O motivo de reabrir e descartar já aparece no evento. */
+      .filter(r => !ev.some(e => e.nota === r.texto && e.quem === r.autor))
+      .map((r) => {
+        const junto = ev.find(e => e.quem === r.autor && Math.abs(+e.quando - +r.quando) < 60_000)
+        return { tipo: 'comentario' as const, id: r.id, quando: r.quando, rodada: junto?.rodada ?? rodadaDaData(props.lista, r.quando), quem: r.autor, texto: r.texto, citacoes: r.citacoes }
+      }),
+    ...(props.a.versoes ?? []).map((v, i) => ({ tipo: 'edicao' as const, id: `ver-${i}`, quando: v.quando, rodada: rodadaDaData(props.lista, v.quando), quem: v.quem })),
+  ].sort((x, y) => +x.quando - +y.quando)
+
+  const grupos: { rodada: number, entradas: Entrada[] }[] = []
+  for (const e of entradas) {
+    const g = grupos.find(x => x.rodada === e.rodada)
+    if (g) g.entradas.push(e)
+    else grupos.push({ rodada: e.rodada, entradas: [e] })
+  }
+  return grupos.sort((x, y) => x.rodada - y.rodada)
+})
+const vereditoDa = (n: number) => props.lista.rodadas.find(r => r.numero === n)?.veredito
+const corDoVeredito = (v: string) => v === 'aprovado' ? 'success' : v === 'ressalvas' ? 'warning' : 'error'
+const corDoIcone: Record<string, string> = { neutral: 'text-muted', info: 'text-info', success: 'text-success', error: 'text-error', warning: 'text-warning' }
+const tituloDoEvento = (e: Extract<Entrada, { tipo: 'evento' }>) => !e.de
+  ? (e.para === 'rascunho' ? props.t.apontamento.eventos.rascunho(nome(e.quem)) : props.t.apontamento.eventos.criou(nome(e.quem)))
+  : props.t.apontamento.eventos.mudou(nome(e.quem), rotulo(e.para))
 </script>
 
 <template>
@@ -143,14 +194,56 @@ const linhaDoTempo = computed(() => [...props.a.historico].reverse().map(e => ({
     <header class="flex flex-col gap-3 border-b border-default px-5 py-4">
       <div class="flex items-start gap-2">
         <div class="min-w-0 flex-1">
-          <p class="font-mono text-xs text-dimmed">#{{ a.numero }}</p>
+          <p class="flex items-center gap-2 font-mono text-xs text-dimmed">
+            #{{ a.numero }}
+            <!-- Editado: as versões anteriores, como na issue do GitHub -->
+            <UPopover v-if="a.versoes?.length" :content="{ align: 'start' }">
+              <button type="button" class="flex items-center gap-0.5 font-sans text-xs text-muted underline decoration-dotted underline-offset-2 hover:text-highlighted">
+                {{ t.fluxo.editado }}<UIcon name="i-lucide-chevron-down" class="size-3" />
+              </button>
+              <template #content>
+                <div class="flex w-96 max-w-[90vw] flex-col gap-2 p-3">
+                  <p class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.fluxo.versoes }}</p>
+                  <ol class="flex flex-col gap-1">
+                    <li v-for="(v, i) in [...a.versoes].reverse()" :key="i">
+                      <button
+                        type="button"
+                        class="flex w-full flex-col rounded-md px-2 py-1.5 text-left transition-colors hover:bg-elevated"
+                        :class="versaoVista === i ? 'bg-elevated' : ''"
+                        @click="versaoVista = versaoVista === i ? null : i"
+                      >
+                        <span class="text-xs text-muted">{{ t.fluxo.versaoDe(nome(v.quem), t.dataHora(v.quando)) }}</span>
+                        <span class="truncate text-sm text-highlighted">{{ v.titulo }}</span>
+                      </button>
+                      <!-- eslint-disable-next-line vue/no-v-html -->
+                      <div v-if="versaoVista === i" class="mx-2 mb-1 rounded-md border border-dashed border-accented px-3 py-2 text-xs text-toned line-through decoration-dimmed *:my-1" v-html="v.corpo" />
+                    </li>
+                  </ol>
+                </div>
+              </template>
+            </UPopover>
+          </p>
           <UInput v-if="editando" v-model="rascunhoDoTitulo" class="mt-1 w-full" size="lg" :aria-label="t.novo.titulo" />
           <h3 v-else class="mt-0.5 text-lg font-semibold leading-snug text-highlighted">{{ a.titulo }}</h3>
         </div>
+        <UButton v-if="acoes.editar && !editando" :label="compacto ? undefined : t.apontamento.editar" icon="i-lucide-pencil" color="neutral" variant="outline" size="sm" :aria-label="t.apontamento.editar" @click="abrirEdicao" />
+        <UTooltip v-if="!emTelaCheia" :text="t.fluxo.telaCheia">
+          <UButton icon="i-lucide-maximize-2" color="neutral" variant="ghost" size="sm" :aria-label="t.fluxo.telaCheia" @click="emit('telaCheia')" />
+        </UTooltip>
+        <UTooltip :text="t.apontamento.copiarLink">
+          <UButton icon="i-lucide-link" color="neutral" variant="ghost" size="sm" :aria-label="t.apontamento.copiarLink" @click="emit('copiarLink')" />
+        </UTooltip>
         <UDropdownMenu :items="menu" :content="{ align: 'end' }">
           <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="sm" :aria-label="t.apontamento.maisAcoes" />
         </UDropdownMenu>
-        <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="sm" :aria-label="t.apontamento.fechar" @click="emit('fechar')" />
+        <UButton
+          :icon="emTelaCheia ? 'i-lucide-minimize-2' : 'i-lucide-x'"
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          :aria-label="emTelaCheia ? t.fluxo.sairTelaCheia : t.apontamento.fechar"
+          @click="emit('fechar')"
+        />
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
@@ -172,10 +265,10 @@ const linhaDoTempo = computed(() => [...props.a.historico].reverse().map(e => ({
       </div>
 
       <UAlert
-        v-if="a.estado === 'descartado' && a.motivo"
-        :title="t.apontamento.motivoDescarte"
-        :description="a.motivo"
-        icon="i-lucide-circle-slash"
+        v-if="a.estado === 'descartado' && (a.motivo || a.duplicadoDe)"
+        :title="a.duplicadoDe ? t.fluxo.duplicadoTexto(a.duplicadoDe) : t.apontamento.motivoDescarte"
+        :description="a.duplicadoDe ? undefined : a.motivo"
+        :icon="a.duplicadoDe ? 'i-lucide-copy' : 'i-lucide-circle-slash'"
         color="neutral"
         variant="subtle"
       />
@@ -230,23 +323,11 @@ const linhaDoTempo = computed(() => [...props.a.historico].reverse().map(e => ({
           <CampoRico v-model="rascunhoDoCorpo" autofocus />
           <div class="flex justify-end gap-2">
             <UButton :label="t.apontamento.cancelar" color="neutral" variant="ghost" size="sm" @click="editando = false" />
-            <UButton :label="t.apontamento.salvar" size="sm" @click="salvarCorpo" />
+            <UButton :label="t.apontamento.salvar" size="sm" @click="salvarEdicao" />
           </div>
         </div>
-        <div v-else class="group/corpo relative">
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <div class="corpo text-sm leading-relaxed text-default *:my-1.5 [&_code]:rounded [&_code]:bg-elevated [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-xs [&_strong]:text-highlighted" v-html="a.corpo" />
-          <UButton
-            v-if="!ro && a.autor === quem"
-            :label="t.apontamento.editar"
-            icon="i-lucide-pencil"
-            color="neutral"
-            variant="outline"
-            size="xs"
-            class="absolute -top-1 right-0 opacity-0 transition-opacity group-hover/corpo:opacity-100 focus-visible:opacity-100"
-            @click="editar"
-          />
-        </div>
+        <!-- eslint-disable-next-line vue/no-v-html -->
+        <div v-else class="corpo text-sm leading-relaxed text-default *:my-1.5 [&_code]:rounded [&_code]:bg-elevated [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-xs [&_strong]:text-highlighted" v-html="a.corpo" />
       </section>
 
       <!-- Anexos -->
@@ -260,17 +341,27 @@ const linhaDoTempo = computed(() => [...props.a.historico].reverse().map(e => ({
         </div>
         <p v-if="!a.anexos.length" class="text-sm text-dimmed">{{ t.apontamento.semAnexos }}</p>
         <div v-if="imagens.length" class="grid gap-2" :class="compacto ? 'grid-cols-2' : 'grid-cols-3'">
-          <button
-            v-for="x in imagens"
-            :key="x.id"
-            type="button"
-            class="group/img relative aspect-video overflow-hidden rounded-md border border-default bg-elevated transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-primary"
-            :aria-label="t.apontamento.abrirImagem(x.nome)"
-            @click="ampliada = x"
-          >
-            <img :src="x.url" :alt="x.nome" class="size-full object-cover object-left-top transition-transform duration-200 group-hover/img:scale-105">
-            <span class="absolute inset-x-0 bottom-0 truncate bg-default/85 px-2 py-1 text-left text-[11px] text-toned">{{ x.nome }}</span>
-          </button>
+          <div v-for="x in imagens" :key="x.id" class="group/img relative">
+            <button
+              type="button"
+              class="relative block aspect-video w-full overflow-hidden rounded-md border border-default bg-elevated transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-primary"
+              :aria-label="t.apontamento.abrirImagem(x.nome)"
+              @click="ampliada = x"
+            >
+              <img :src="x.url" :alt="x.nome" class="size-full object-cover object-left-top transition-transform duration-200 group-hover/img:scale-105">
+              <span class="absolute inset-x-0 bottom-0 truncate bg-default/85 px-2 py-1 text-left text-[11px] text-toned">{{ x.nome }}</span>
+            </button>
+            <UButton
+              v-if="!ro"
+              icon="i-lucide-x"
+              color="neutral"
+              variant="solid"
+              size="xs"
+              class="absolute right-1 top-1 opacity-0 transition-opacity group-hover/img:opacity-100 focus-visible:opacity-100"
+              :aria-label="t.fluxo.removerAnexo(x.nome)"
+              @click="removerAnexo(x)"
+            />
+          </div>
         </div>
         <ul v-if="outros.length" class="flex flex-col divide-y divide-default rounded-md border border-default">
           <li v-for="x in outros" :key="x.id" class="flex items-center gap-2.5 px-3 py-2 text-sm">
@@ -278,45 +369,82 @@ const linhaDoTempo = computed(() => [...props.a.historico].reverse().map(e => ({
             <span class="min-w-0 flex-1 truncate text-highlighted">{{ x.nome }}</span>
             <span v-if="x.tamanho" class="text-xs text-dimmed">{{ x.tamanho }}</span>
             <UButton
-              v-if="x.tipo === 'link'"
-              icon="i-lucide-external-link"
+              :icon="x.tipo === 'link' ? 'i-lucide-external-link' : 'i-lucide-download'"
               color="neutral"
               variant="ghost"
               size="xs"
-              :aria-label="x.nome"
+              :aria-label="t.apontamento.baixar(x.nome)"
               @click="baixar(x)"
             />
-            <UButton v-else icon="i-lucide-download" color="neutral" variant="ghost" size="xs" :aria-label="t.apontamento.baixar(x.nome)" @click="baixar(x)" />
+            <UButton v-if="!ro" icon="i-lucide-x" color="neutral" variant="ghost" size="xs" :aria-label="t.fluxo.removerAnexo(x.nome)" @click="removerAnexo(x)" />
           </li>
         </ul>
       </section>
 
-      <!-- Conversa -->
-      <section class="flex flex-col gap-3 border-b border-default px-5 py-4">
-        <h4 class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.apontamento.conversa }} · {{ a.respostas.length }}</h4>
-        <p v-if="!a.respostas.length" class="text-sm text-dimmed">{{ t.apontamento.semConversa }}</p>
-        <TransitionGroup tag="ul" class="flex flex-col gap-3" enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 translate-y-1">
-          <li v-for="r in a.respostas" :key="r.id" class="flex gap-2.5">
-            <UAvatar :text="pessoa(lista, r.autor)?.iniciais" :alt="nome(r.autor)" size="xs" class="mt-0.5" />
-            <div class="min-w-0 flex-1 rounded-md bg-elevated/60 px-3 py-2">
-              <p class="flex items-baseline gap-2 text-xs">
-                <span class="font-semibold text-highlighted">{{ nome(r.autor) }}</span>
-                <span class="text-dimmed">{{ t.dataHora(r.quando) }}</span>
+      <!-- Linha do tempo, por rodada -->
+      <section class="flex flex-col gap-3 px-5 py-4">
+        <h4 class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.fluxo.linhaDoTempo }}</h4>
+        <div v-for="g in linhaDoTempo" :key="g.rodada" class="flex flex-col gap-2">
+          <div class="flex items-center gap-2">
+            <span class="rounded bg-inverted px-1.5 py-0.5 font-mono text-[11px] font-semibold text-inverted">R{{ g.rodada }}</span>
+            <UBadge v-if="vereditoDa(g.rodada)" :label="t.lista.vereditos[vereditoDa(g.rodada)!]" :color="corDoVeredito(vereditoDa(g.rodada)!)" variant="soft" size="sm" />
+            <span class="h-px flex-1 bg-accented" aria-hidden="true" />
+          </div>
+          <ol class="flex flex-col gap-2 border-l border-accented pl-3">
+            <li v-for="e in g.entradas" :key="e.id">
+              <!-- Mudança de estado -->
+              <div v-if="e.tipo === 'evento'" class="flex flex-col gap-0.5 text-xs">
+                <p class="flex items-center gap-1.5">
+                  <UIcon :name="visualDoEstado[e.para].icone" class="size-3.5 shrink-0" :class="corDoIcone[visualDoEstado[e.para].cor]" />
+                  <span class="text-highlighted">{{ tituloDoEvento(e) }}</span>
+                  <span class="text-dimmed">{{ t.dataHora(e.quando) }}</span>
+                </p>
+                <p v-if="e.nota" class="ml-5 rounded-md bg-elevated/60 px-2.5 py-1.5 text-sm text-default">{{ e.nota }}</p>
+              </div>
+              <!-- Edição -->
+              <p v-else-if="e.tipo === 'edicao'" class="flex items-center gap-1.5 text-xs">
+                <UIcon name="i-lucide-pencil" class="size-3.5 shrink-0 text-muted" />
+                <span class="text-highlighted">{{ t.fluxo.editou(nome(e.quem)) }}</span>
+                <span class="text-dimmed">{{ t.dataHora(e.quando) }}</span>
               </p>
-              <p class="mt-0.5 text-sm text-default">{{ r.texto }}</p>
-            </div>
-          </li>
-        </TransitionGroup>
-        <form v-if="!ro" class="flex flex-col gap-2" @submit.prevent="enviarResposta">
-          <UTextarea v-model="resposta" :placeholder="t.apontamento.respostaPlaceholder" :rows="2" autoresize class="w-full" @keydown.ctrl.enter="enviarResposta" />
+              <!-- Comentário -->
+              <div v-else class="flex gap-2.5">
+                <UAvatar :text="pessoa(lista, e.quem)?.iniciais" :alt="nome(e.quem)" size="xs" class="mt-0.5" />
+                <div class="min-w-0 flex-1 rounded-md bg-elevated/60 px-3 py-2">
+                  <p class="flex items-baseline gap-2 text-xs">
+                    <span class="font-semibold text-highlighted">{{ nome(e.quem) }}</span>
+                    <span class="text-dimmed">{{ t.dataHora(e.quando) }}</span>
+                  </p>
+                  <p class="mt-0.5 text-sm text-default">
+                    <template v-for="(p, i) in partesDoTexto(e.texto, e.citacoes)" :key="i">
+                      <template v-if="'texto' in p">{{ p.texto }}</template>
+                      <button
+                        v-else
+                        type="button"
+                        class="inline-flex items-center gap-1 rounded bg-primary/10 px-1 font-medium text-primary transition-colors hover:bg-primary/20"
+                        @click="citacao?.abrir(p.citacao.chave)"
+                      >
+                        <UIcon :name="iconeDaCitacao[p.citacao.tipo]" class="size-3.5" />{{ p.citacao.rotulo }}
+                      </button>
+                    </template>
+                  </p>
+                </div>
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <form v-if="!ro" class="flex flex-col gap-2 pt-1" @submit.prevent="enviarResposta">
+          <CampoComCitacao
+            v-model="resposta"
+            v-model:citacoes="citacoesDaResposta"
+            :t="t"
+            :placeholder="t.apontamento.respostaPlaceholder"
+            :excluir="a.id"
+            @enviar="enviarResposta"
+          />
           <UButton type="submit" :label="t.apontamento.responder" size="sm" color="neutral" variant="outline" class="self-end" :loading="enviando" :disabled="!resposta.trim()" />
         </form>
-      </section>
-
-      <!-- Histórico -->
-      <section class="flex flex-col gap-3 px-5 py-4">
-        <h4 class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.apontamento.historico }}</h4>
-        <UTimeline :items="linhaDoTempo" size="xs" color="neutral" />
       </section>
     </div>
 

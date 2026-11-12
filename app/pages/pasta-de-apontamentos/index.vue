@@ -7,15 +7,22 @@
  * painel da tarefa, que ganha a aba Apontamentos. O botão de nova pasta abre o
  * modal com o tipo novo.
  *
- * Andaime: cenário (produto ou jurídico, para provar que o tipo é universal),
- * quem você é (quem confere ou quem resolve) e o estado da tela.
+ * Rodada 2: duas visualizações no andaime. Item (a tela do item, com a pasta
+ * de apontamentos e a Visão Geral com o contador da lista de tarefas) e Tarefa
+ * rápida (a página Tarefas › Rápidas, com checklist, subtarefas, dependências
+ * e conclusão com motivo no painel). A citação com # vale nas duas.
+ *
+ * Andaime: visualização, cenário (produto ou jurídico, para provar que o tipo
+ * é universal), quem você é (quem confere ou quem resolve) e o estado da tela.
  */
 import type { Apontamento, Cenario, TarefaDoItem } from './mocks'
 import type { Lista } from './lista'
 import type { PastaDaBarra } from './_BarraDePastas.vue'
+import type { Citavel } from './citacao'
+import { CHAVE_CITACAO } from './citacao'
 import { textos } from './textos'
 import { cenarios, pastasDoSistema } from './mocks'
-import { pendente, responder } from './lista'
+import { copia, pendente, responder } from './lista'
 import CascaDoWorkspace from './_CascaDoWorkspace.vue'
 import PainelDoItem from './_PainelDoItem.vue'
 import BarraDePastas from './_BarraDePastas.vue'
@@ -23,6 +30,7 @@ import PastaDeApontamentos from './_PastaDeApontamentos.vue'
 import PastaTarefas from './_PastaTarefas.vue'
 import PainelDaTarefa from './_PainelDaTarefa.vue'
 import ModalNovaPasta from './_ModalNovaPasta.vue'
+import VisaoGeralDoItem from './_VisaoGeralDoItem.vue'
 
 import briefingMd from './BRIEFING.md?raw'
 import pesquisaMd from './PESQUISA.md?raw'
@@ -30,10 +38,10 @@ import decisoesMd from './DECISOES.md?raw'
 
 definePageMeta({
   titulo: 'Pasta de apontamentos',
-  descricao: 'Um tipo novo de pasta do item e uma aba nova da tarefa: a lista de pontos a ajustar, com responsável, estado, anexos, rodadas de reteste e conferência.',
+  descricao: 'Um tipo novo de pasta do item e uma aba nova da tarefa: a lista de pontos a ajustar, com rodadas de reteste e conferência. Na tarefa rápida, checklist, subtarefas, dependências e conclusão com motivo.',
   status: 'em-revisao',
-  atualizado: '2026-11-11',
-  tela: 'Tela do item e painel da tarefa',
+  atualizado: '2026-11-12',
+  tela: 'Tela do item e Tarefas › Rápidas',
 })
 
 const t = useTextos(textos)
@@ -43,6 +51,7 @@ const router = useRouter()
 
 /* ---------- andaime, no endereço ---------- */
 type IdCenario = Cenario['id']
+type Vista = 'item' | 'tarefa'
 type Papel = 'conferente' | 'resolvedor'
 type EstadoDaTela = 'cheio' | 'vazio' | 'carregando' | 'semPermissao'
 
@@ -52,6 +61,7 @@ function daQuery<T extends string>(chave: string, validos: readonly T[], padrao:
     set: v => router.replace({ query: { ...route.query, [chave]: v } }),
   })
 }
+const vista = daQuery<Vista>('vista', ['item', 'tarefa'], 'item')
 const cenarioId = daQuery<IdCenario>('cenario', ['produto', 'juridico'], 'produto')
 const papel = daQuery<Papel>('papel', ['conferente', 'resolvedor'], 'conferente')
 const estadoDaTela = daQuery<EstadoDaTela>('estado', ['cheio', 'vazio', 'carregando', 'semPermissao'], 'cheio')
@@ -106,10 +116,12 @@ const painelAberto = computed({
   get: () => !!tarefaAberta.value,
   set: (v) => { if (!v) tarefaAberta.value = null },
 })
-function abrirTarefa(x: TarefaDoItem) {
-  abaDaTarefa.value = x.apontamentos.length ? 'apontamentos' : 'tarefa'
+function abrirTarefa(x: TarefaDoItem, aba?: string) {
+  abaDaTarefa.value = aba ?? (vista.value === 'tarefa' || !x.apontamentos.length ? 'tarefa' : 'apontamentos')
   tarefaAberta.value = x
 }
+/** De uma tarefa para outra (subtarefa, mãe, bloqueio): fica na aba Tarefa. */
+const trocarDeTarefa = (x: TarefaDoItem) => abrirTarefa(x, 'tarefa')
 /** A aba da tarefa não tem configuração de pasta: usa o padrão do tipo. */
 const listaDaTarefa = computed<Lista | null>(() => {
   const x = tarefaAberta.value
@@ -135,9 +147,11 @@ const listaDaTarefa = computed<Lista | null>(() => {
 function converter(a: Apontamento) {
   const base = c.value.tarefas[0]!.tarefa
   const nova: TarefaDoItem = {
-    tarefa: { ...structuredClone(toRaw(base)), id: 990 + c.value.tarefas.length, name: a.titulo, description: null, status: 'pending', assigned_to: a.responsavel, priority: a.prioridade },
+    tarefa: { ...copia(base), id: 990 + c.value.tarefas.length, name: a.titulo, description: null, status: 'pending', assigned_to: a.responsavel, priority: a.prioridade },
     apontamentos: [],
     rodadas: [],
+    checklist: [],
+    bloqueadaPor: [],
   }
   c.value.tarefas.push(nova)
   responder(a, quem.value, `${t.value.apontamento.converterEmTarefa}: ${a.titulo}`)
@@ -150,8 +164,48 @@ function converter(a: Apontamento) {
   })
 }
 
+/* ---------- citação com # ---------- */
+provide(CHAVE_CITACAO, {
+  citaveis: computed<Citavel[]>(() => [
+    ...c.value.tarefas.map(x => ({ chave: `tarefa-${x.tarefa.id}`, rotulo: x.tarefa.name, tipo: 'tarefa' as const, detalhe: t.value.tarefas.colunas[x.tarefa.status] })),
+    { chave: 'item', rotulo: c.value.item.reference, tipo: 'item' as const, detalhe: c.value.categoria.slug },
+    ...c.value.apontamentos.map(a => ({ chave: `ap-${a.numero}`, rotulo: `${a.numero} ${a.titulo}`, tipo: 'apontamento' as const, detalhe: t.value.estados[a.estado] })),
+  ]),
+  registrar: (alvo, onde, quem) => { c.value.mencoes.push({ alvo, onde, quem, quando: new Date() }) },
+  abrir: (chave) => {
+    const x = c.value.tarefas.find(y => `tarefa-${y.tarefa.id}` === chave)
+    if (x) return abrirTarefa(x, 'tarefa')
+    if (chave === 'item') {
+      tarefaAberta.value = null
+      vista.value = 'item'
+      ativa.value = 'visao-geral'
+      return
+    }
+    const n = chave.startsWith('ap-') ? chave.slice(3) : ''
+    if (n) {
+      tarefaAberta.value = null
+      router.replace({ query: { ...route.query, vista: 'item', folder: ID_PRINCIPAL, [`${ID_PRINCIPAL}-ap`]: n } })
+    }
+  },
+})
+
 /* ---------- casca ---------- */
-const trilha = computed(() => [c.value.workspace.name, t.value.casca.categorias, c.value.categoria.slug, c.value.item.reference])
+const trilha = computed(() => vista.value === 'tarefa'
+  ? [c.value.workspace.name, t.value.casca.itens.tarefas!, t.value.tarefaRapida.pagina.rapidas]
+  : [c.value.workspace.name, t.value.casca.categorias, c.value.categoria.slug, c.value.item.reference])
+
+/** Na visualização Tarefa rápida, o painel abre na tarefa que tem checklist e subtarefas. */
+function abrirTarefaDaVista() {
+  if (vista.value !== 'tarefa') return
+  const x = c.value.tarefas.find(y => !y.mae && y.checklist.length) ?? c.value.tarefas[0]
+  if (x) abrirTarefa(x, 'tarefa')
+}
+watch(vista, (v) => {
+  tarefaAberta.value = null
+  if (v === 'tarefa') nextTick(abrirTarefaDaVista)
+})
+/* Depois da hidratação, para o painel abrir já com a página pronta. */
+onNuxtReady(abrirTarefaDaVista)
 
 const opcoesDePapel = computed(() => (['conferente', 'resolvedor'] as const).map(p => ({
   value: p,
@@ -162,14 +216,27 @@ const opcoesDePapel = computed(() => (['conferente', 'resolvedor'] as const).map
 /* Ao trocar de cenário, a pasta e o detalhe abertos ficam para trás. */
 watch(cenarioId, () => {
   tarefaAberta.value = null
-  router.replace({ query: { cenario: cenarioId.value, papel: papel.value, estado: estadoDaTela.value } })
+  router.replace({ query: { vista: vista.value, cenario: cenarioId.value, papel: papel.value, estado: estadoDaTela.value } })
+  nextTick(abrirTarefaDaVista)
 })
 </script>
 
 <template>
   <div>
-    <CascaDoWorkspace :t="t" :trilha="trilha" :workspace="c.workspace" :categorias-do-menu="c.categoriasDoMenu">
-      <div class="flex h-[calc(100dvh-4rem-3.25rem)] min-h-0">
+    <CascaDoWorkspace :t="t" :trilha="trilha" :workspace="c.workspace" :categorias-do-menu="c.categoriasDoMenu" :ativo="vista === 'tarefa' ? 'tarefasRapidas' : 'categorias'">
+      <!-- Visualização Tarefa rápida: a página Tarefas › Rápidas -->
+      <div v-if="vista === 'tarefa'" class="h-[calc(100dvh-4rem-3.25rem)] min-h-0 bg-default">
+        <PastaTarefas
+          :key="`${cenarioId}-pagina`"
+          :t="t"
+          :tarefas="c.tarefas"
+          :lista="{ pessoas: c.pessoas }"
+          variante="pagina"
+          @abrir="abrirTarefa"
+        />
+      </div>
+
+      <div v-else class="flex h-[calc(100dvh-4rem-3.25rem)] min-h-0">
         <PainelDoItem v-model:recolhido="painelRecolhido" :t="t" :item="c.item" :categoria="c.categoria" />
         <section class="flex min-w-0 flex-1 flex-col bg-default">
           <BarraDePastas v-model:ativa="ativa" :t="t" :pastas="pastas" @nova="modalNova = true" />
@@ -201,7 +268,10 @@ watch(cenarioId, () => {
                 @abrir="abrirTarefa"
               />
               <div v-else :key="ativa" class="flex h-full flex-col">
-                <div class="flex flex-1 items-center justify-center p-8 text-center">
+                <div v-if="ativa === 'visao-geral'" class="min-h-0 flex-1 overflow-y-auto">
+                  <VisaoGeralDoItem :t="t" :campos="c.camposDaVisaoGeral" />
+                </div>
+                <div v-else class="flex flex-1 items-center justify-center p-8 text-center">
                   <p class="max-w-sm text-sm text-muted">{{ t.pastas.foraDoEscopo(nomeDaAtiva) }}</p>
                 </div>
                 <!-- Rodapé da Visão Geral, copiado: o aviso aparece sem nenhuma alteração (achado) -->
@@ -226,7 +296,10 @@ watch(cenarioId, () => {
       :lista="listaDaTarefa"
       :quem="quem"
       :estado-da-tela="estadoDaTela"
+      :tarefas="c.tarefas"
+      :mencoes="c.mencoes"
       @converter="converter"
+      @abrir="trocarDeTarefa"
     />
 
     <ModalNovaPasta v-model:open="modalNova" :t="t" :pessoas="c.pessoas" :responsavel-padrao="c.resolvedor" @criar="criarPasta" />
@@ -234,6 +307,20 @@ watch(cenarioId, () => {
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">
       <div class="flex flex-wrap items-center gap-2 px-4 py-2.5">
+        <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.tarefaRapida.andaime.vista }}</span>
+        <UFieldGroup size="xs">
+          <UButton
+            v-for="v in (['item', 'tarefa'] as const)"
+            :key="v"
+            :label="t.tarefaRapida.andaime.vistas[v]"
+            :icon="v === 'item' ? 'i-lucide-file-text' : 'i-lucide-clipboard-check'"
+            :color="vista === v ? 'primary' : 'neutral'"
+            :variant="vista === v ? 'solid' : 'outline'"
+            @click="vista = v"
+          />
+        </UFieldGroup>
+
+        <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.cenario }}</span>
         <UFieldGroup size="xs">
           <UButton
