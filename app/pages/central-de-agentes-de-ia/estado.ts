@@ -5,13 +5,13 @@
  * dado sem passar tudo por props: a lista de agentes, a biblioteca de modelos
  * de resposta, os arquivos, as políticas e o que está aberto na tela.
  */
-import { agentes as agentesIniciais, arquivos as arquivosIniciais, blocos as blocosIniciais, type Agente } from './mocks'
-import { modelos } from './catalogo'
+import { agentes as agentesIniciais, arquivos as arquivosIniciais, blocos as blocosIniciais, manuais as manuaisIniciais, type Agente, type ArquivoDeReferencia, type Manual, type Severidade } from './mocks'
+import { modeloPorId, modelos } from './catalogo'
 
 const copia = <T>(x: T): T => JSON.parse(JSON.stringify(x))
 
-export type AbaDoTopo = 'agentes' | 'respostas' | 'playbooks' | 'atividade' | 'politicas'
-export type AbaDoEditor = 'essencial' | 'personalizacao' | 'ferramentas' | 'conhecimento' | 'respostas' | 'acesso' | 'testar' | 'versoes' | 'desempenho'
+export type AbaDoTopo = 'agentes' | 'conhecimento' | 'respostas' | 'playbooks' | 'atividade' | 'politicas'
+export type AbaDoEditor = 'essencial' | 'personalizacao' | 'ferramentas' | 'conhecimento' | 'respostas' | 'acesso' | 'testar' | 'desempenho'
 export type EstadoDoCartao = 'pendente' | 'executando' | 'confirmado' | 'cancelado' | 'erro'
 export type CenarioDoChat = 'confirmacao' | 'lote' | 'minuta' | 'novo'
 
@@ -32,9 +32,60 @@ export function useBlocos() {
   return useState('cda-blocos', () => copia(blocosIniciais))
 }
 
+export function useManuais() {
+  return useState<Manual[]>('cda-manuais', () => copia(manuaisIniciais))
+}
+
 export function useArquivos() {
   return useState('cda-arquivos', () => copia(arquivosIniciais))
 }
+
+/**
+ * O conhecimento que um agente consulta e como ele lê.
+ *
+ * Capacidade = metade do contexto do menor modelo permitido (a outra metade
+ * fica para a conversa). Cabe: tudo lido inteiro. Passou: só os fixados são
+ * lidos inteiros, e nos outros o agente busca os trechos de cada pergunta.
+ */
+export function conhecimentoDoAgente(a: Agente, docs: ArquivoDeReferencia[]) {
+  const doWorkspace = a.usarDoWorkspace ? docs.filter(d => d.escopo === 'workspace') : []
+  const doAgente = docs.filter(d => d.escopo === 'agente' && a.arquivos.includes(d.id))
+  const todos = [...doWorkspace, ...doAgente]
+  const soma = (l: ArquivoDeReferencia[]) => l.reduce((s, d) => s + d.tokens, 0)
+  const total = soma(todos)
+  const fixados = soma(todos.filter(d => d.fixado))
+  const ids = a.modelosPermitidos.length ? a.modelosPermitidos : [a.model]
+  const menor = ids.map(modeloPorId).filter(Boolean).sort((x, y) => x!.contexto - y!.contexto)[0]
+  const limite = Math.floor((menor?.contexto ?? 128) / 2)
+  return {
+    doWorkspace,
+    doAgente,
+    todos,
+    total,
+    fixados,
+    limite,
+    menorModelo: menor?.name ?? '',
+    pct: Math.round((total / limite) * 100),
+    modo: (total <= limite ? 'inteiro' : 'trechos') as 'inteiro' | 'trechos',
+    fixadosCabem: fixados <= limite,
+  }
+}
+
+/** Ícone e cor de cada tipo de documento. */
+export const iconeDoDocumento = (tipo: ArquivoDeReferencia['tipo']) => ({
+  pdf: { icone: 'i-lucide-file-text', cor: 'text-error' },
+  docx: { icone: 'i-lucide-file-type', cor: 'text-info' },
+  xlsx: { icone: 'i-lucide-file-spreadsheet', cor: 'text-success' },
+  texto: { icone: 'i-lucide-notebook-pen', cor: 'text-primary' },
+}[tipo])
+
+/** Severidade da regra do manual: ordem, cor e ícone (a cor nunca vem sozinha). */
+export const ORDEM_DAS_SEVERIDADES: Severidade[] = ['critical', 'high', 'medium', 'low', 'info']
+export const corDaSeveridade: Record<Severidade, 'error' | 'warning' | 'info' | 'neutral'> = { critical: 'error', high: 'warning', medium: 'info', low: 'neutral', info: 'neutral' }
+export const iconeDaSeveridade: Record<Severidade, string> = { critical: 'i-lucide-octagon-alert', high: 'i-lucide-triangle-alert', medium: 'i-lucide-circle-alert', low: 'i-lucide-circle-dot', info: 'i-lucide-info' }
+
+/** O modelo comporta os fixados do agente? */
+export const fixadosCabemNo = (contexto: number, fixados: number) => fixados <= contexto / 2
 
 export function usePoliticas() {
   return useState<Politicas>('cda-politicas', () => ({
@@ -84,15 +135,13 @@ export function agenteVazio(dono: number): Agente {
     icon: null,
     ferramentas: {},
     arquivos: [],
-    basesDeConhecimento: [],
+    usarDoWorkspace: true,
     blocos: [],
     acesso: 'todos',
     acessoAlvos: [],
     editores: [dono],
     dono,
     sugestoes: [],
-    versoes: [{ numero: 1, publicadaEm: null, por: dono, resumo: '' }],
-    rascunhoPendente: true,
     casos: [],
     uso: { conversas: 0, pessoas: 0, creditos: 0, positivas: 0, negativas: 0, confirmacoes: 0, canceladas: 0 },
     atualizadoEm: '2026-11-16',

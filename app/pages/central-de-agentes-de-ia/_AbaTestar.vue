@@ -9,8 +9,7 @@
  *   confirmado, mostra o resultado sem gravar (PESQUISA: Salesforce Simulate);
  * - "Comparar modelos": a mesma mensagem em até 3 modelos, lado a lado, com
  *   tempo e créditos, e "Usar como padrão" (nenhum concorrente faz: PESQUISA);
- * - "Ver rastro": instruções, arquivos, modelo, ferramentas e custo;
- * - casos de teste salvos, para rodar antes de publicar.
+ * - casos de teste salvos, para rodar antes de salvar.
  *
  * MAQUETE: as respostas são fixas e os números de tempo e crédito, inventados.
  */
@@ -18,9 +17,9 @@ import type { Textos } from './textos'
 import type { Agente } from './mocks'
 import Conversa from './_Conversa.vue'
 import SeletorDeModelo from './_SeletorDeModelo.vue'
-import { modeloPorId, iconeDoProvedor, ferramentaPorSlug } from './catalogo'
+import { modeloPorId, ferramentaPorSlug } from './catalogo'
 import { idDaMensagem, respostaDeExemplo, roteiroDeConfirmacao, roteiroDeMinuta, type Mensagem } from './conversa'
-import { espera, useArquivos } from './estado'
+import { conhecimentoDoAgente, espera, fixadosCabemNo, useArquivos } from './estado'
 
 const props = defineProps<{ t: Textos, a: Agente }>()
 const comparando = defineModel<boolean>('comparando', { default: false })
@@ -118,33 +117,10 @@ async function rodarTodos() {
 const passaram = computed(() => props.a.casos.filter(c => c.ultimo === 'passou').length)
 const corDoResultado = { passou: 'success', falhou: 'error', nunca: 'neutral' } as const
 
-/* Rastro */
-const rastroAberto = ref(false)
-const rastroModelo = ref(props.a.model)
-const refs = computed(() => arquivos.value.filter(x => props.a.arquivos.includes(x.id)))
-const passos = computed(() => {
-  const m = modeloPorId(rastroModelo.value)!
-  const { seg, cred } = metricas(rastroModelo.value)
-  return [
-    { title: props.t.essencial.instrucoes, description: `${(props.a.instructions ?? '').length} caracteres · ${props.a.rules.length} regras`, icon: 'i-lucide-scroll-text' },
-    ...refs.value.map(x => ({ title: x.nome, description: `${props.t.conhecimento.arquivosTitulo} · ${x.tokens} mil tokens`, icon: 'i-lucide-book-marked' })),
-    { title: m.name, description: props.t.essencial.modeloPadrao, icon: iconeDoProvedor[m.provider] },
-    { title: props.t.ferramentas.nomes.readFile!, description: 'Ofício 4471-2026, 3ª Vara Cível de Campinas.pdf', icon: 'i-lucide-eye' },
-    ...(!comparando.value && 'sendEmail' in props.a.ferramentas
-      ? [{ title: props.t.ferramentas.nomes.sendEmail!, description: `${props.t.ferramentas.modo[props.a.ferramentas.sendEmail!]}${simular.value ? ` · ${tt.value.simulado}` : ''}`, icon: 'i-lucide-send' }]
-      : []),
-    { title: tt.value.metricas(seg, cred), description: '', icon: 'i-lucide-timer' },
-  ]
-})
-function abrirRastro(id: string) {
-  rastroModelo.value = id
-  rastroAberto.value = true
-}
-
-const naoCabe = computed(() => {
-  const tok = refs.value.reduce((s, x) => s + x.tokens, 0)
-  return props.a.modelosPermitidos.filter(id => (modeloPorId(id)?.contexto ?? 0) < tok * 1.25)
-})
+const saber = computed(() => conhecimentoDoAgente(props.a, arquivos.value))
+const refs = computed(() => saber.value.todos)
+/* Modelo que não comporta os documentos fixados. */
+const naoCabe = computed(() => props.a.modelosPermitidos.filter(id => !fixadosCabemNo(modeloPorId(id)?.contexto ?? 0, saber.value.fixados)))
 const ferramentasLigadas = computed(() => Object.keys(props.a.ferramentas).length)
 const gravam = computed(() => Object.keys(props.a.ferramentas).filter(s => ferramentaPorSlug(s).efeito !== 'le').length)
 </script>
@@ -177,9 +153,6 @@ const gravam = computed(() => Object.keys(props.a.ferramentas).filter(s => ferra
         <Conversa :t="t" :mensagens="unica" :cor="a.cor" :pensando="pensando" />
         <p v-if="!unica.length && !pensando" class="py-16 text-center text-sm text-muted">{{ t.chat.boasVindas }}</p>
       </div>
-      <div class="flex items-center justify-end border-t border-default px-3 py-1.5">
-        <UButton :label="tt.rastro" icon="i-lucide-route" color="neutral" variant="link" size="xs" @click="abrirRastro(modelo ?? a.model)" />
-      </div>
     </div>
 
     <!-- Comparar modelos -->
@@ -196,7 +169,6 @@ const gravam = computed(() => Object.keys(props.a.ferramentas).filter(s => ferra
           </div>
           <footer class="flex flex-wrap items-center gap-2 border-t border-default px-2 py-1.5">
             <span class="text-xs tabular-nums text-muted">{{ tt.metricas(c.seg, c.cred) }}</span>
-            <UButton :label="tt.rastro" icon="i-lucide-route" color="neutral" variant="link" size="xs" @click="abrirRastro(c.modelo)" />
             <UButton v-if="c.modelo !== a.model" :label="tt.usarComoPadrao" icon="i-lucide-star" color="neutral" variant="outline" size="xs" class="ml-auto" @click="usarComoPadrao(c.modelo)" />
           </footer>
         </div>
@@ -254,10 +226,5 @@ const gravam = computed(() => Object.keys(props.a.ferramentas).filter(s => ferra
       </ul>
     </section>
 
-    <USlideover v-model:open="rastroAberto" :title="tt.rastroTitulo" :description="modeloPorId(rastroModelo)?.name">
-      <template #body>
-        <UTimeline :items="passos" :default-value="passos.length - 1" size="xs" color="neutral" />
-      </template>
-    </USlideover>
   </div>
 </template>

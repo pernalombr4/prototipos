@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * A lista de agentes. Continua em cards, como no produto (regra 15), com o que
- * a pessoa precisa para decidir sem abrir o agente: status, publicação, modelo,
+ * a pessoa precisa para decidir sem abrir o agente: status, modelo,
  * ferramentas que pedem confirmação, arquivos, dono e uso.
  */
 import type { DropdownMenuItem } from '@nuxt/ui'
@@ -79,11 +79,8 @@ function duplicar(nome: string, base?: Agente) {
   const novo: Agente = JSON.parse(JSON.stringify(fonte))
   novo.slug = `${fonte.slug}-copia-${Date.now() % 1000}`
   novo.name = props.t.central.copia(nome)
-  novo.status = 'inactive'
   novo.dono = EU
   novo.editores = [EU]
-  novo.rascunhoPendente = true
-  novo.versoes = [{ numero: 1, publicadaEm: null, por: EU, resumo: '' }]
   novo.uso = { conversas: 0, pessoas: 0, creditos: 0, positivas: 0, negativas: 0, confirmacoes: 0, canceladas: 0 }
   novo.atualizadoEm = '2026-11-16'
   agentes.value.unshift(novo)
@@ -240,7 +237,6 @@ function usarModelo(id: string) {
         <div class="mt-3 flex flex-wrap gap-1.5">
           <UBadge v-if="a.status === 'inactive'" :label="t.central.status.inactive" color="neutral" variant="soft" size="sm" icon="i-lucide-circle-pause" />
           <UBadge v-else :label="t.central.status.active" color="success" variant="soft" size="sm" icon="i-lucide-circle-check" />
-          <UBadge v-if="a.rascunhoPendente" :label="t.central.rascunho" color="warning" variant="soft" size="sm" icon="i-lucide-pencil-line" />
           <UBadge v-if="a.type !== 'chat'" :label="t.central.tipos[a.type]" color="neutral" variant="outline" size="sm" />
         </div>
 

@@ -20,7 +20,7 @@ import AvatarDoAgente from './_AvatarDoAgente.vue'
 import { agentesDoSistema } from './mocks'
 import { MODELO_PADRAO_DO_SERVIDOR } from './catalogo'
 import { idDaMensagem, respostaDeExemplo, roteiroDeConfirmacao, roteiroDeLote, roteiroDeMinuta, type Mensagem } from './conversa'
-import { espera, useAgentes, useArquivos, usePoliticas, useTela } from './estado'
+import { conhecimentoDoAgente, espera, iconeDoDocumento, useAgentes, useArquivos, usePoliticas, useTela } from './estado'
 
 const props = defineProps<{ t: Textos }>()
 const tela = useTela()
@@ -42,7 +42,7 @@ const doSistema = computed(() => agentesDoSistema.map(s => ({
   modelosPermitidos: politicas.value.modelos, arquivos: [] as string[], sugestoes: [] as string[], description: s.description,
 })))
 const disponiveis = computed(() => [
-  ...agentes.value.filter(a => a.status === 'active' && a.versoes.some(v => v.publicadaEm)),
+  ...agentes.value.filter(a => a.status === 'active'),
   ...doSistema.value,
 ])
 const agente = computed(() => disponiveis.value.find(a => a.slug === tela.value.chatAgente) ?? disponiveis.value[0]!)
@@ -56,7 +56,8 @@ const itensDeAgente = computed(() => [
 const permitidos = computed(() => agente.value.modelosPermitidos.filter(id => politicas.value.modelos.includes(id) || id === agente.value.model))
 const modeloEmUso = computed(() => modelo.value ?? agente.value.model)
 
-const refs = computed(() => arquivos.value.filter(a => agente.value.arquivos.includes(a.id)))
+const saber = computed(() => conhecimentoDoAgente(agente.value, arquivos.value))
+const refs = computed(() => saber.value.todos)
 
 function montar() {
   const m = modeloEmUso.value
@@ -152,21 +153,24 @@ function anexar(e: Event) {
         <UTooltip :text="t.chat.fechar"><UButton icon="i-lucide-x" color="neutral" variant="ghost" size="sm" :aria-label="t.chat.fechar" @click="tela.chatAberto = false" /></UTooltip>
       </header>
 
-      <!-- Arquivos de referência: discreto, abre a lista (demanda 3) -->
+      <!-- Conhecimento: discreto, abre a lista (demanda 3) -->
       <div v-if="refs.length" class="flex justify-center border-b border-default bg-elevated/40 py-1">
         <UPopover :content="{ side: 'bottom' }">
           <UButton :label="t.chat.referencia(refs.length)" icon="i-lucide-book-marked" color="neutral" variant="link" size="xs" />
           <template #content>
             <div class="w-72 p-3">
               <p class="text-sm font-medium text-highlighted">{{ t.chat.referenciaTitulo }}</p>
-              <p class="mb-2 text-xs text-muted">{{ t.chat.referenciaTexto }}</p>
-              <ul class="space-y-1.5">
-                <li v-for="a in refs" :key="a.id" class="flex items-center gap-2 text-xs">
-                  <UIcon :name="a.tipo === 'pdf' ? 'i-lucide-file-text' : 'i-lucide-file-type'" class="size-4 shrink-0" :class="a.tipo === 'pdf' ? 'text-error' : 'text-info'" />
-                  <span class="min-w-0 flex-1 truncate">{{ a.nome }}</span>
-                  <span class="text-dimmed">{{ t.conhecimento.versao(a.versao) }}</span>
-                </li>
-              </ul>
+              <p class="mb-2 text-xs text-muted">{{ saber.modo === 'inteiro' ? t.chat.referenciaInteiro : t.chat.referenciaTrechos }}</p>
+              <template v-for="g in [{ titulo: t.conhecimento.workspaceTitulo, docs: saber.doWorkspace }, { titulo: t.conhecimento.agenteTitulo, docs: saber.doAgente }]" :key="g.titulo">
+                <p v-if="g.docs.length" class="mt-2 mb-1 text-[11px] font-semibold uppercase tracking-wide text-dimmed">{{ g.titulo }}</p>
+                <ul class="space-y-1.5">
+                  <li v-for="a in g.docs" :key="a.id" class="flex items-center gap-2 text-xs">
+                    <UIcon :name="iconeDoDocumento(a.tipo).icone" class="size-4 shrink-0" :class="iconeDoDocumento(a.tipo).cor" />
+                    <span class="min-w-0 flex-1 truncate">{{ a.nome }}</span>
+                    <UIcon v-if="a.fixado" name="i-lucide-pin" class="size-3.5 shrink-0 text-primary" :aria-label="t.conhecimento.fixado" />
+                  </li>
+                </ul>
+              </template>
             </div>
           </template>
         </UPopover>

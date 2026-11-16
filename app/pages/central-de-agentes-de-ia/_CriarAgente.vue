@@ -2,19 +2,20 @@
 /**
  * As 3 portas do agente novo, como o mercado faz (PESQUISA): descrever em
  * linguagem natural, partir de um modelo pronto ou começar do zero. As 3
- * terminam no mesmo cadastro, que a pessoa revisa antes de publicar.
+ * terminam no mesmo cadastro, que a pessoa revisa antes de criar.
  *
- * MAQUETE: "Gerar rascunho" não chama IA. Espera 1,4 s e preenche o cadastro
+ * MAQUETE: "Gerar agente" não chama IA. Espera 1,4 s e preenche o cadastro
  * com o texto do modelo "Respostas a ofícios", com o nome tirado da descrição.
  */
 import type { Textos } from './textos'
 import { EU, modelosDeAgente, type Agente } from './mocks'
 import { pedeConfirmacaoPorPadrao, ferramentaPorSlug } from './catalogo'
-import { agenteVazio, espera, useAgentes, useTela } from './estado'
+import { agenteVazio, espera, useAgentes, usePoliticas, useTela } from './estado'
 
 const props = defineProps<{ t: Textos }>()
 const tela = useTela()
 const agentes = useAgentes()
+const politicas = usePoliticas()
 const toast = useToast()
 
 const descricao = ref('')
@@ -25,10 +26,12 @@ const aberto = computed({
   set: (v) => { tela.value.criarAberto = v },
 })
 
-function criarComo(base: Partial<Agente>, ferramentas: readonly string[]) {
+function criarComo(base: Partial<Agente>, ferramentas: readonly string[] | Agente['ferramentas']) {
   const novo = { ...agenteVazio(EU), ...base }
   novo.slug = `${(base.name ?? 'agente').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${Date.now() % 1000}`
-  novo.ferramentas = Object.fromEntries(ferramentas.map(s => [s, pedeConfirmacaoPorPadrao(ferramentaPorSlug(s)) ? 'confirmar' : 'executar']))
+  novo.ferramentas = Array.isArray(ferramentas)
+    ? Object.fromEntries(ferramentas.map(s => [s, pedeConfirmacaoPorPadrao(ferramentaPorSlug(s)) ? 'confirmar' : 'executar']))
+    : { ...ferramentas }
   agentes.value.unshift(novo)
   tela.value.editando = novo.slug
   tela.value.abaDoEditor = 'essencial'
@@ -36,10 +39,30 @@ function criarComo(base: Partial<Agente>, ferramentas: readonly string[]) {
   tela.value.editorAberto = true
 }
 
+/* O modelo preenche todo o cadastro (mapa em MODELOS-PRONTOS.md). */
 function doModelo(id: string) {
   const mod = modelosDeAgente.find(x => x.id === id)!
   const txt = props.t.criar.modelos[id]!
-  criarComo({ name: txt.nome, description: txt.descricao, icon: mod.icone, status: 'inactive' }, mod.ferramentas)
+  /* As Políticas mandam: modelo desligado e ferramenta bloqueada ficam fora. */
+  const permitidos = mod.essencial.modelosPermitidos.filter(m => politicas.value.modelos.includes(m))
+  const ferramentas = Object.fromEntries(Object.entries(mod.ferramentas).filter(([s]) => !politicas.value.bloqueadas.includes(s)))
+  criarComo({
+    name: txt.nome,
+    description: txt.descricao,
+    icon: mod.icone,
+    cor: mod.cor,
+    ...mod.essencial,
+    model: permitidos.includes(mod.essencial.model) ? mod.essencial.model : permitidos[0] ?? mod.essencial.model,
+    modelosPermitidos: permitidos.length ? permitidos : [mod.essencial.model],
+    sugestoes: [...mod.essencial.sugestoes],
+    ...mod.personalizacao,
+    rules: [...mod.personalizacao.rules],
+    usarDoWorkspace: mod.conhecimento.usarDoWorkspace,
+    acesso: mod.acesso.acesso,
+    acessoAlvos: [...mod.acesso.acessoAlvos],
+  }, ferramentas)
+  const docs = mod.conhecimento.documentosSugeridos.map(d => `"${d.nome}"${d.fixado ? ` (${props.t.criar.fixar})` : ''}`).join(', ')
+  if (docs) toast.add({ title: props.t.criar.documentosSugeridos(docs), icon: 'i-lucide-library', color: 'info' })
 }
 
 async function gerar() {
@@ -54,7 +77,6 @@ async function gerar() {
     approach: base.approach,
     instructions: base.instructions,
     rules: [...base.rules],
-    status: 'inactive',
     icon: base.icon,
     cor: '#7c3aed',
   }, ['readFile', 'getCurrentDateTime', 'sendEmail'])
@@ -72,7 +94,7 @@ function doZero() {
 </script>
 
 <template>
-  <UModal v-model:open="aberto" :title="t.criar.titulo" :description="t.criar.subtitulo" :ui="{ content: 'sm:max-w-3xl' }">
+  <UModal v-model:open="aberto" :title="t.criar.titulo" :description="t.criar.subtitulo" :ui="{ content: 'sm:max-w-4xl' }">
     <template #body>
       <div class="space-y-6">
         <!-- 1. Descrever -->
@@ -119,9 +141,10 @@ function doZero() {
               <span class="mb-2 flex size-8 items-center justify-center rounded-md bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-inverted">
                 <UIcon :name="mod.icone" class="size-4" />
               </span>
+              <span class="text-[11px] font-semibold uppercase tracking-wide text-dimmed">{{ t.criar.areas[mod.area] }}</span>
               <span class="text-sm font-medium text-highlighted">{{ t.criar.modelos[mod.id]!.nome }}</span>
               <span class="mt-0.5 flex-1 text-xs text-muted">{{ t.criar.modelos[mod.id]!.descricao }}</span>
-              <span class="mt-2 text-xs text-dimmed">{{ t.criar.ferramentasDoModelo(mod.ferramentas.length) }}</span>
+              <span class="mt-2 text-xs text-dimmed">{{ t.criar.ferramentasDoModelo(Object.keys(mod.ferramentas).length) }}</span>
             </button>
           </div>
         </div>

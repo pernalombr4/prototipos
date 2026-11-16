@@ -5,6 +5,7 @@ import CriarAgente from './_CriarAgente.vue'
 import EditorDoAgente from './_EditorDoAgente.vue'
 import ChatFlutuante from './_ChatFlutuante.vue'
 import Biblioteca from './_Biblioteca.vue'
+import ConhecimentoDoWorkspace from './_ConhecimentoDoWorkspace.vue'
 import Atividade from './_Atividade.vue'
 import Politicas from './_Politicas.vue'
 import Playbooks from './_Playbooks.vue'
@@ -28,6 +29,7 @@ const tela = useTela()
 
 const abas = computed(() => [
   { value: 'agentes', label: t.value.abas.agentes, icon: 'i-lucide-bot' },
+  { value: 'conhecimento', label: t.value.abas.conhecimento, icon: 'i-lucide-library' },
   { value: 'respostas', label: t.value.abas.respostas, icon: 'i-lucide-text-quote' },
   { value: 'playbooks', label: t.value.abas.playbooks, icon: 'i-lucide-book-open-check' },
   { value: 'atividade', label: t.value.abas.atividade, icon: 'i-lucide-activity' },
@@ -85,6 +87,7 @@ const cartaoAtivo = computed(() => tela.value.cenario === 'lote' ? 'lote' : tela
         leave-to-class="opacity-0"
       >
         <Central v-if="tela.aba === 'agentes'" key="agentes" :t="t" />
+        <ConhecimentoDoWorkspace v-else-if="tela.aba === 'conhecimento'" key="conhecimento" :t="t" />
         <Biblioteca v-else-if="tela.aba === 'respostas'" key="respostas" :t="t" :abrir-primeiro="estado === 'respostas'" />
         <Playbooks v-else-if="tela.aba === 'playbooks'" key="playbooks" :t="t" />
         <Atividade v-else-if="tela.aba === 'atividade'" key="atividade" :t="t" />

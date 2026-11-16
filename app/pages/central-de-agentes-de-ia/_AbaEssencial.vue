@@ -12,7 +12,7 @@
 import type { Textos } from './textos'
 import type { Agente } from './mocks'
 import { modeloPorId, nomeDoProvedor, iconeDoProvedor, provedoresEmOrdem, ferramentaPorSlug } from './catalogo'
-import { useArquivos, usePoliticas } from './estado'
+import { conhecimentoDoAgente, fixadosCabemNo, useArquivos, usePoliticas } from './estado'
 
 const props = defineProps<{ t: Textos, a: Agente, erro: boolean }>()
 const emit = defineEmits<{ ir: [aba: 'ferramentas' | 'conhecimento'] }>()
@@ -23,8 +23,9 @@ const e = computed(() => props.t.essencial)
 const MAX_INSTRUCOES = 20000
 
 /* Modelos liberados nas Políticas, agrupados por empresa como no seletor do chat. */
-const tokensDosArquivos = computed(() => arquivos.value.filter(x => props.a.arquivos.includes(x.id)).reduce((s, x) => s + x.tokens, 0))
-const naoCabe = (id: string) => (modeloPorId(id)?.contexto ?? 0) < tokensDosArquivos.value * 1.25
+/* Modelo que não comporta os documentos fixados do agente. */
+const fixados = computed(() => conhecimentoDoAgente(props.a, arquivos.value).fixados)
+const naoCabe = (id: string) => !fixadosCabemNo(modeloPorId(id)?.contexto ?? 0, fixados.value)
 
 const itensDeModelo = computed(() => provedoresEmOrdem
   .map(p => politicas.value.modelos.map(modeloPorId).filter(m => m?.provider === p))

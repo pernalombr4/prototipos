@@ -81,6 +81,28 @@ Visitado em 2026-11-16, no workspace de exploração, pelo Chrome.
 - **Base de conhecimento:** o agente tem o campo de ligação no servidor, e a tela não mostra.
 - **Não existe hoje:** confirmação antes de ferramenta, modelos permitidos por agente, arquivo fixo no agente, biblioteca de modelos de resposta. O mais perto da confirmação é o modo Planejamento do chat, que bloqueia as ferramentas que gravam, e só existe no BENI.
 
+### Rodada 2: Manuais de revisão e conhecimento (develop, 2026-11-16)
+
+| Tela | Onde | Print |
+|---|---|---|
+| Manuais de instruções (aba Playbooks) | Central de Agentes IA > Playbooks | `evidencias/develop-09-playbooks.jpg` |
+| Criar Manual | idem, "Criar Manual" | `evidencias/develop-10-playbook-criar.jpg` |
+| Manual do sistema aberto | idem, cartão em Sistema | `evidencias/develop-11-playbook-do-sistema.jpg` |
+| Knowledge Base do menu do membro | Knowledge > Knowledge Base | `evidencias/develop-12-knowledge-base.jpg` |
+
+**Manuais (playbooks), pela tela e pelo código:**
+- A tela chama de "Manual", "Manuais de instruções", "Manuais de Revisão" e "Playbook de Revisão"; a aba fica "Playbooks", sem tradução.
+- O formulário tem Nome, Descrição, Ícone (rótulo cru "icon"), Instruções em 1 linha, Formato de Saída, Tom, Regras (título, descrição, categoria, severidade) e Itens de Verificação (item, categoria, obrigatório).
+- O servidor guarda também a categoria do manual (8 valores), mas a tela nunca mostra e sempre grava "custom".
+- Limites da tela (regra 100 e 255, item 100) menores que os da API (200, 1.000 e 500); categoria da regra obrigatória na tela e opcional na API.
+- Sem ordem das regras, sem busca nem filtro, e o manual do sistema abre desabilitado e sem saída.
+- Nenhum manual se liga ao agente: o Revisor oferece o manual no chat. O resultado tem achados por severidade, nota de 0 a 100 e o checklist.
+- No workspace de exploração, os manuais do sistema aparecem repetidos dezenas de vezes (achado de passagem).
+
+**Conhecimento:**
+- "Knowledge Base" do menu do membro é a busca de perguntas e respostas, sem ligação com IA.
+- A base vetorial do servidor (PDF, DOCX, TXT, MD, CSV, XLSX, HTML; trechos de 1.000 caracteres; até 5 trechos por mensagem) não tem tela. O agente tem o campo `knowledge_base_ids`, sem tela; não há conhecimento que valha para todos os agentes nem arquivo fixo no agente.
+
 ### Onde trava
 
 - O dono do agente não controla o modelo que o time usa no chat.

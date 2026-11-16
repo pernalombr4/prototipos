@@ -1,5 +1,61 @@
 # Decisões
 
+## Rodada 2 · 2026-11-16
+
+- **Pedido (literal, trechos):**
+  - "O agente gerado nasce inativo > nao precisamos disso. a pessoa pode definir o status na hora de criar"
+  - "Central vazia que mostra os modelos prontos > [...] colocar nos requisitos exatamente o mapa de preenchimento do form de cada modelo [...] No máximo 10. E conte nisso os agentes q seriam muito úteis pro próprio enspace."
+  - "Selo "Alterações não publicadas" > isso nao faz sentido pq nao trabalhamos com rascunho ali"
+  - Modelos de resposta: "nao foque nisso pra demanda. [...] a demanda seria resolvida se ativassemos a base de conhecimento pros agentes usarem, talvez. [...] me proponha no chat."
+  - "Playbooks sem mudança > pode sugerir alterações ali também pra melhorar"
+  - "base de conhecimento + arquivos. pode ser algo similar. pode ter uma geral pra todos os agentes e uma por agente"
+  - "“Ver rastro” [...] pode deletar isso. nao faremos."
+  - "“Salvar rascunho” nao teremos."
+  - Depois: "poed tirar a aba de versoes e o sistema de versionamento dos agentes. bote um salvamento normal mesmo, como ja é hoje."
+- **Fronteira:** muda o conhecimento (aba nova no topo e aba do agente), a aba Playbooks (agora Manuais de revisão), os modelos prontos, o Salvar e o Testar; não muda a casca, a biblioteca de Modelos de resposta nem as abas Acesso, Desempenho, Atividade e Políticas.
+- **Prints:** `evidencias/proposta-02` a `proposta-06`.
+
+### O que mudou
+
+| Pedido | Como ficou |
+|---|---|
+| Status na criação | Agente gerado, duplicado ou de modelo nasce Ativo; a pessoa muda o Status no cadastro antes de criar. |
+| Sem rascunho e sem versão | Saem "Salvar rascunho", "Publicar versão N", o selo "Alterações não publicadas" e a aba Versões. **Salvar** grava direto, como hoje; o chat usa o que foi salvo. |
+| Rastro | Sai "Ver rastro" do Testar. |
+| Conhecimento | Aba **Conhecimento** no topo, para o workspace, e aba **Conhecimento** no agente, com a lista do workspace (liga e desliga) e a deste agente. Barra de capacidade: até ela, tudo é lido inteiro; acima, o agente lê inteiros só os **fixados** e busca nos outros os trechos de cada pergunta. Arquivo ou texto escrito na hora. Substitui "Arquivos de referência" e o seletor de bases da rodada 1. |
+| Manuais de revisão | Nome único, busca, filtro por categoria, severidade e uso no cartão, Ativar e Desativar, "Duplicar para editar" no do sistema. Formulário com categoria, instruções em área de texto, formato e tom explicados, regras com severidade, ordem e duplicar, item obrigatório, limites da API e prévia do resultado ao lado. |
+| Modelos prontos | 10 modelos (Jurídico, Contratos, Atendimento, Financeiro, Suprimentos, Marketing e 2 do ENSPACE), que preenchem todo o cadastro. Mapa para os devs em `MODELOS-PRONTOS.md`, gerado de `modelos-prontos.json`. |
+
+### Decisões de forma
+
+- **Capacidade medida no menor modelo permitido, metade do contexto.** A outra metade fica para a conversa. Passar da capacidade não é erro: o modo muda e a tela diz. Erro só quando os fixados não cabem.
+- **Uma lista de documentos para workspace e agente** (`_TabelaDeDocumentos.vue`), com a coluna Leitura ("Fixado" ou "Automática").
+- **Formato e tom do manual em `USelect` com a explicação na opção**, não em cartões (memória da redatora).
+- **Prévia do manual fixa ao lado do formulário** em tela larga, embaixo no celular.
+- **Modelos prontos num JSON**: o protótipo e o mapa leem o mesmo arquivo, e as Políticas cortam modelo desligado e ferramenta bloqueada na hora de aplicar.
+
+### Descartado
+
+- Rascunho, publicação, versões e "Comparar versões" (pedido da redatora).
+- "Ver rastro" (pedido da redatora).
+- Agente novo forçado a Inativo (pedido da redatora).
+- Os 3 modelos da rodada 1 que não entram nos 10: Resumo de item, Boas-vindas a clientes e Dúvidas internas (esta última vira o próprio conhecimento do workspace).
+
+### Maquete
+
+- Enviar arquivo ao agente gera o PDF grande de exemplo (640 mil tokens), para mostrar a busca por trechos; no workspace, gera "Código de conduta.pdf".
+- A prévia do manual é um exemplo fixo: as regras de posição par "falham" e o último item opcional "falta".
+- "Abrir o Conhecimento do workspace" fecha o cadastro sem salvar.
+
+### CSS próprio
+
+Nenhum nesta rodada.
+
+### Achados de passagem no develop (sem correção aqui)
+
+- Os manuais do sistema aparecem repetidos dezenas de vezes no workspace de exploração.
+- Os limites da tela dos manuais são menores que os da API, e a categoria do manual nunca aparece.
+
 ## Rodada 1 · 2026-11-16
 
 - **Pedido (literal):** as 5 melhorias da demanda (confirmação antes de ferramenta sensível; modelo padrão e modelos permitidos no chat; arquivos de referência; aba Testar igual ao chat, com comparação de modelos; biblioteca de modelos de resposta com campos) e, da redatora: "voce deve fazer uma pesquisa /deep-research vendo como o mercado de SAAS e ERPs, alem de sistemas juridicos e sistemas de gestao de tarefa apresentam CONSTRUTORES DE AGENTES DE IA [...] e aí voce junta no prototipo o que mais faltar, pra deixar completo nosso desnenho de hoje. aí teremos uma central de agentes de ia como um produto completo. nao precisa botar no protitpo uma simulaçao de como é hoje."

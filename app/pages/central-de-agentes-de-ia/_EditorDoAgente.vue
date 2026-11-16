@@ -4,9 +4,9 @@
  * Personalização e Testar no lugar de hoje; as abas novas entram entre elas e
  * depois de Testar (regra 20: o que existia continua onde estava).
  *
- * PROPOSTA de ciclo: "Salvar rascunho" guarda sem mudar o chat; "Publicar"
- * cria a versão nova e põe no ar (PESQUISA: Salesforce, Notion, Langdock).
- * O agente em edição é uma cópia; nada muda na lista até salvar.
+ * Salvar grava direto, como hoje: sem rascunho e sem versão (pedido da
+ * redatora na rodada 2). O agente em edição é uma cópia; nada muda na lista
+ * até salvar.
  */
 import type { Textos } from './textos'
 import AvatarDoAgente from './_AvatarDoAgente.vue'
@@ -17,7 +17,6 @@ import AbaConhecimento from './_AbaConhecimento.vue'
 import AbaRespostas from './_AbaRespostas.vue'
 import AbaAcesso from './_AbaAcesso.vue'
 import AbaTestar from './_AbaTestar.vue'
-import AbaVersoes from './_AbaVersoes.vue'
 import AbaDesempenho from './_AbaDesempenho.vue'
 import { EU, type Agente } from './mocks'
 import { agenteVazio, espera, useAgentes, useTela, type AbaDoEditor } from './estado'
@@ -62,18 +61,15 @@ const faltando = computed(() => {
 const podePublicar = computed(() => !faltando.value.essencial.length && !faltando.value.personalizacao.length)
 const tentouPublicar = ref(false)
 
-const ordem: AbaDoEditor[] = ['essencial', 'personalizacao', 'ferramentas', 'conhecimento', 'respostas', 'acesso', 'testar', 'versoes', 'desempenho']
+const ordem: AbaDoEditor[] = ['essencial', 'personalizacao', 'ferramentas', 'conhecimento', 'respostas', 'acesso', 'testar', 'desempenho']
 const itens = computed(() => ordem
-  .filter(k => !novo.value || !['versoes', 'desempenho'].includes(k))
+  .filter(k => !novo.value || k !== 'desempenho')
   .map(k => ({
     value: k,
     label: props.t.editor.abas[k],
     icon: tentouPublicar.value && (faltando.value as Record<string, string[]>)[k]?.length ? 'i-lucide-circle-alert' : undefined,
     ui: tentouPublicar.value && (faltando.value as Record<string, string[]>)[k]?.length ? { leadingIcon: 'text-error' } : undefined,
   })))
-
-const versaoNoAr = computed(() => rascunho.value.versoes.find(v => v.publicadaEm)?.numero ?? 0)
-const proximaVersao = computed(() => Math.max(...rascunho.value.versoes.map(v => v.numero), 0) + (rascunho.value.versoes[0]?.publicadaEm ? 1 : 0))
 
 function gravarNaLista() {
   const r = rascunho.value
@@ -87,33 +83,23 @@ function gravarNaLista() {
   novo.value = false
 }
 
-function salvarRascunho() {
-  const r = rascunho.value
-  r.rascunhoPendente = true
-  if (r.versoes[0]?.publicadaEm) r.versoes.unshift({ numero: proximaVersao.value, publicadaEm: null, por: EU, resumo: '' })
-  const eraNovo = novo.value
-  gravarNaLista()
-  toast.add({ title: eraNovo ? props.t.editor.criado : props.t.editor.rascunhoSalvo, icon: 'i-lucide-save', color: 'neutral' })
+/** Confere os obrigatórios; com falta, leva à aba que falta. */
+function conferir() {
+  tentouPublicar.value = true
+  if (podePublicar.value) return true
+  aba.value = faltando.value.essencial.length ? 'essencial' : 'personalizacao'
+  return false
 }
 
-async function publicar() {
-  tentouPublicar.value = true
-  if (!podePublicar.value) {
-    aba.value = faltando.value.essencial.length ? 'essencial' : 'personalizacao'
-    return
-  }
+/* Salvar grava direto, como hoje: sem rascunho e sem versão. O chat usa o que foi salvo. */
+async function salvar() {
+  if (!conferir()) return
+  const eraNovo = novo.value
   publicando.value = true
-  await espera(900)
-  const r = rascunho.value
-  const v = proximaVersao.value
-  if (r.versoes[0] && !r.versoes[0].publicadaEm) r.versoes[0].publicadaEm = '2026-11-16'
-  else r.versoes.unshift({ numero: v, publicadaEm: '2026-11-16', por: EU, resumo: '' })
-  r.versoes[0]!.numero = v
-  r.versoes[0]!.por = EU
-  r.rascunhoPendente = false
+  await espera(700)
   gravarNaLista()
   publicando.value = false
-  toast.add({ title: props.t.editor.publicado(v), icon: 'i-lucide-rocket', color: 'success' })
+  toast.add({ title: eraNovo ? props.t.editor.criado : props.t.editor.salvo, icon: eraNovo ? 'i-lucide-check' : 'i-lucide-save', color: 'success' })
 }
 
 /* Trocar de aba volta ao topo. */
@@ -135,9 +121,7 @@ const larga = computed(() => aba.value === 'testar' && comparando.value)
         <div class="min-w-0 flex-1">
           <h2 class="truncate text-lg font-semibold text-highlighted">{{ novo ? t.editor.novo : (rascunho.name || t.editor.novo) }}</h2>
           <div class="mt-0.5 flex flex-wrap items-center gap-1.5">
-            <UBadge v-if="!versaoNoAr" :label="t.editor.estadoNunca" color="neutral" variant="soft" size="sm" />
-            <UBadge v-else :label="t.editor.estadoPublicado(versaoNoAr)" color="success" variant="soft" size="sm" icon="i-lucide-radio" />
-            <UBadge v-if="rascunho.rascunhoPendente && versaoNoAr" :label="t.editor.estadoRascunho(proximaVersao)" color="warning" variant="soft" size="sm" icon="i-lucide-pencil-line" />
+            <UBadge v-if="!novo" :label="t.central.status[rascunho.status]" :color="rascunho.status === 'active' ? 'success' : 'neutral'" variant="soft" size="sm" />
           </div>
         </div>
         <UButton icon="i-lucide-x" color="neutral" variant="ghost" :aria-label="t.editor.cancelar" @click="aberto = false" />
@@ -173,7 +157,6 @@ const larga = computed(() => aba.value === 'testar' && comparando.value)
           <AbaRespostas v-else-if="aba === 'respostas'" :t="t" :a="rascunho" />
           <AbaAcesso v-else-if="aba === 'acesso'" :t="t" :a="rascunho" />
           <AbaTestar v-else-if="aba === 'testar'" v-model:comparando="comparando" :t="t" :a="rascunho" />
-          <AbaVersoes v-else-if="aba === 'versoes'" :t="t" :a="rascunho" />
           <AbaDesempenho v-else :t="t" :a="rascunho" />
         </Transition>
       </div>
@@ -183,15 +166,7 @@ const larga = computed(() => aba.value === 'testar' && comparando.value)
       <div class="flex w-full flex-wrap items-center justify-end gap-2">
         <p v-if="sistema" class="mr-auto text-sm text-muted">{{ t.editor.sistema }}</p>
         <UButton :label="t.editor.cancelar" color="neutral" variant="subtle" @click="aberto = false" />
-        <template v-if="!sistema">
-          <UButton :label="t.editor.salvarRascunho" icon="i-lucide-save" color="neutral" variant="outline" @click="salvarRascunho" />
-          <UButton
-            :label="publicando ? t.editor.publicando : t.editor.publicarNova(proximaVersao)"
-            icon="i-lucide-rocket"
-            :loading="publicando"
-            @click="publicar"
-          />
-        </template>
+        <UButton v-if="!sistema" :label="novo ? t.editor.criar : t.editor.salvar" :icon="novo ? 'i-lucide-check' : 'i-lucide-save'" :loading="publicando" @click="salvar" />
       </div>
     </template>
   </USlideover>

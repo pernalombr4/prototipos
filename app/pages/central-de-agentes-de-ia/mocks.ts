@@ -10,6 +10,7 @@
  * partir de modelos aprovados. Nenhum texto, nome ou número de cliente real
  * entra aqui (regra 13): "Aurora Pagamentos" e os processos são inventados.
  */
+import modelosProntos from './modelos-prontos.json'
 import type { Agent } from '@be-enlighten/enspace-sdk-schemas'
 import { ferramentas, pedeConfirmacaoPorPadrao } from './catalogo'
 
@@ -33,32 +34,51 @@ export const EU = 5
 export const cargos = ['Administrador', 'Coordenação jurídica', 'Analistas de BPO', 'Atendimento', 'Financeiro']
 export const gruposDeMembros = ['Time de ofícios', 'Plantão de bloqueios', 'Diretoria']
 
-/* ─────────────────────── Arquivos de referência ─────────────────────── */
+/* ───────────────────────── Conhecimento ───────────────────────── */
 
-/** PROPOSTA (demanda 3): arquivo que o agente lê inteiro em toda conversa. */
+/**
+ * PROPOSTA (demanda 3, rodada 2): documento de conhecimento, no jeito do
+ * Claude (instruções + arquivos). Mora no workspace (todos os agentes
+ * consultam) ou no agente (só ele consulta).
+ *
+ * O que couber na capacidade do agente é lido inteiro em toda conversa; acima
+ * disso, o agente lê inteiro só os fixados e busca nos outros os trechos de
+ * cada pergunta (a busca é a `en-knowledge` que o servidor já tem).
+ */
 export interface ArquivoDeReferencia {
   id: string
   nome: string
-  tipo: 'pdf' | 'docx'
+  tipo: 'pdf' | 'docx' | 'xlsx' | 'texto'
+  escopo: 'workspace' | 'agente'
+  /** lido inteiro sempre, mesmo acima da capacidade */
+  fixado: boolean
   /** em KB */
   tamanho: number
   paginas: number
-  /** quanto do contexto o arquivo ocupa, em milhares de tokens */
+  /** quanto do contexto o documento ocupa, em milhares de tokens */
   tokens: number
   enviadoEm: string
   enviadoPor: number
   versao: number
+  /** só no tipo texto */
+  texto?: string
 }
 
 export const arquivos: ArquivoDeReferencia[] = [
-  { id: 'a1', nome: 'Respostas prontas a ofícios v7.pdf', tipo: 'pdf', tamanho: 412, paginas: 38, tokens: 52, enviadoEm: '2026-11-10', enviadoPor: 1, versao: 7 },
-  { id: 'a2', nome: 'Manual de cumprimento de ordens judiciais.docx', tipo: 'docx', tamanho: 186, paginas: 21, tokens: 31, enviadoEm: '2026-10-28', enviadoPor: 4, versao: 2 },
-  { id: 'a3', nome: 'Tabela de prazos por tribunal.pdf', tipo: 'pdf', tamanho: 64, paginas: 4, tokens: 6, enviadoEm: '2026-09-15', enviadoPor: 1, versao: 1 },
+  // Do workspace
+  { id: 'w1', nome: 'Glossário do workspace', tipo: 'texto', escopo: 'workspace', fixado: true, tamanho: 9, paginas: 3, tokens: 2, enviadoEm: '2026-11-03', enviadoPor: 1, versao: 4, texto: 'Item: cada registro de uma categoria.\nResponsável: quem responde pelo item na etapa atual.\nSLA: prazo da etapa, em dias úteis.' },
+  { id: 'w2', nome: 'Política de atendimento ao cliente.pdf', tipo: 'pdf', escopo: 'workspace', fixado: false, tamanho: 248, paginas: 26, tokens: 21, enviadoEm: '2026-10-21', enviadoPor: 3, versao: 3 },
+  { id: 'w3', nome: 'Normas internas de compras e contratos.docx', tipo: 'docx', escopo: 'workspace', fixado: false, tamanho: 402, paginas: 44, tokens: 48, enviadoEm: '2026-10-02', enviadoPor: 2, versao: 6 },
+  { id: 'w4', nome: 'Tabela de alçadas de aprovação.xlsx', tipo: 'xlsx', escopo: 'workspace', fixado: true, tamanho: 38, paginas: 2, tokens: 4, enviadoEm: '2026-09-30', enviadoPor: 2, versao: 2 },
+  // Dos agentes
+  { id: 'a1', nome: 'Respostas prontas a ofícios v7.pdf', tipo: 'pdf', escopo: 'agente', fixado: true, tamanho: 412, paginas: 38, tokens: 52, enviadoEm: '2026-11-10', enviadoPor: 1, versao: 7 },
+  { id: 'a2', nome: 'Manual de cumprimento de ordens judiciais.docx', tipo: 'docx', escopo: 'agente', fixado: false, tamanho: 186, paginas: 21, tokens: 31, enviadoEm: '2026-10-28', enviadoPor: 4, versao: 2 },
+  { id: 'a3', nome: 'Tabela de prazos por tribunal.pdf', tipo: 'pdf', escopo: 'agente', fixado: false, tamanho: 64, paginas: 4, tokens: 6, enviadoEm: '2026-09-15', enviadoPor: 1, versao: 1 },
 ]
 
-/** O arquivo grande que o protótipo usa para mostrar o aviso de tamanho. */
+/** O arquivo grande que o protótipo usa para mostrar a busca por trechos. */
 export const arquivoGrande: ArquivoDeReferencia = {
-  id: 'a9', nome: 'Jurisprudência consolidada 2020 a 2026.pdf', tipo: 'pdf', tamanho: 9840, paginas: 1260, tokens: 640, enviadoEm: '2026-11-16', enviadoPor: EU, versao: 1,
+  id: 'a9', nome: 'Jurisprudência consolidada 2020 a 2026.pdf', tipo: 'pdf', escopo: 'agente', fixado: false, tamanho: 9840, paginas: 1260, tokens: 640, enviadoEm: '2026-11-16', enviadoPor: EU, versao: 1,
 }
 
 /* ───────────────────────── Modelos de resposta ───────────────────────── */
@@ -165,13 +185,11 @@ export const blocos: BlocoDeResposta[] = [
 export type ModoDaFerramenta = 'confirmar' | 'executar'
 
 /** PROPOSTA: uma versão publicada ou o rascunho em edição. */
-export interface Versao {
-  numero: number
-  publicadaEm: string | null
-  por: number
-  resumo: string
-}
-
+/**
+ * PROPOSTA: a versão do agente, como a do Spaceflow em develop (2026-11-16):
+ * número SemVer calculado pelo tipo de mudança, título e descrição opcionais,
+ * autor e data. Salvar cria a versão e ela passa a valer; não há rascunho.
+ */
 /** PROPOSTA: um caso de teste salvo na aba Testar. */
 export interface CasoDeTeste {
   id: string
@@ -191,10 +209,10 @@ export interface Agente extends Pick<Agent, 'slug' | 'name' | 'description' | 'r
   ferramentas: Record<string, ModoDaFerramenta>
   /** PROPOSTA (demanda 2) */
   modelosPermitidos: string[]
-  /** PROPOSTA (demanda 3) */
+  /** PROPOSTA (demanda 3): documentos só deste agente */
   arquivos: string[]
-  /** `knowledge_base_ids` existe no servidor e não tem tela */
-  basesDeConhecimento: string[]
+  /** PROPOSTA: consulta o conhecimento do workspace. Substitui `knowledge_base_ids`, que não tem tela. */
+  usarDoWorkspace: boolean
   /** PROPOSTA (demanda 5) */
   blocos: string[]
   /** PROPOSTA: quem usa e quem edita */
@@ -204,9 +222,6 @@ export interface Agente extends Pick<Agent, 'slug' | 'name' | 'description' | 'r
   dono: number
   /** PROPOSTA: sugestões que aparecem na conversa nova */
   sugestoes: string[]
-  /** PROPOSTA: versões; a 1ª é o rascunho quando há mudança não publicada */
-  versoes: Versao[]
-  rascunhoPendente: boolean
   casos: CasoDeTeste[]
   /** PROPOSTA: uso nos últimos 30 dias */
   uso: { conversas: number, pessoas: number, creditos: number, positivas: number, negativas: number, confirmacoes: number, canceladas: number }
@@ -244,21 +259,13 @@ export const agentes: Agente[] = [
     icon: 'i-lucide-scale',
     ferramentas: { ...comModoPadrao(['readFile', 'getCurrentDateTime', 'getWorkspaceSchema', 'sendEmail', 'smartCreateItem', 'smartBatchCreateItems', 'legalLookupCase']), legalLookupCase: 'confirmar' },
     arquivos: ['a1', 'a2'],
-    basesDeConhecimento: [],
+    usarDoWorkspace: true,
     blocos: ['b1', 'b2', 'b3', 'b4', 'b5', 'b6'],
     acesso: 'grupos',
     acessoAlvos: ['Time de ofícios', 'Plantão de bloqueios'],
     editores: [1, 4],
     dono: 1,
     sugestoes: ['Novo ofício para responder', 'Qual modelo uso para conta encerrada?'],
-    versoes: [
-      { numero: 5, publicadaEm: null, por: EU, resumo: 'Modelos permitidos: só Claude Sonnet 5.5 e Claude Opus 5.5.' },
-      { numero: 4, publicadaEm: '2026-11-12', por: 1, resumo: 'Arquivo de referência atualizado para a versão 7.' },
-      { numero: 3, publicadaEm: '2026-11-03', por: 1, resumo: 'Envio de e-mail passa a pedir confirmação.' },
-      { numero: 2, publicadaEm: '2026-10-21', por: 4, resumo: 'Regras reescritas e modelos de resposta S4 a S6.' },
-      { numero: 1, publicadaEm: '2026-10-14', por: 1, resumo: 'Primeira versão.' },
-    ],
-    rascunhoPendente: true,
     casos: [
       { id: 'c1', nome: 'Ofício com 2 alvos, um sem cadastro', mensagem: 'ofício anexado + "ve ai"', esperado: 'Lista os 2 alvos e oferece S3 para o alvo sem cadastro.', ultimo: 'passou' },
       { id: 'c2', nome: 'Resposta solta depois da lista', mensagem: '"a nao achei nada. o b tem conta 884201377 saldo 1250"', esperado: 'Monta S3 para A e S1 para B, com as partes do ofício.', ultimo: 'passou' },
@@ -285,15 +292,13 @@ export const agentes: Agente[] = [
     icon: 'i-lucide-inbox',
     ferramentas: comModoPadrao(['smartQueryItems', 'getItemByReference', 'getWorkspaceMembers', 'createTask', 'updateItem']),
     arquivos: [],
-    basesDeConhecimento: ['Base de atendimento'],
+    usarDoWorkspace: true,
     blocos: [],
     acesso: 'cargos',
     acessoAlvos: ['Atendimento'],
     editores: [2],
     dono: 2,
     sugestoes: ['Triar os chamados de hoje', 'Quem está com menos chamados?'],
-    versoes: [{ numero: 2, publicadaEm: '2026-11-08', por: 2, resumo: 'Base de atendimento ligada.' }, { numero: 1, publicadaEm: '2026-10-30', por: 2, resumo: 'Primeira versão.' }],
-    rascunhoPendente: false,
     casos: [],
     uso: { conversas: 1290, pessoas: 14, creditos: 6120, positivas: 210, negativas: 31, confirmacoes: 402, canceladas: 26 },
     atualizadoEm: '2026-11-08',
@@ -316,15 +321,13 @@ export const agentes: Agente[] = [
     icon: 'i-lucide-file-search',
     ferramentas: comModoPadrao(['readFile']),
     arquivos: ['a3'],
-    basesDeConhecimento: [],
+    usarDoWorkspace: true,
     blocos: [],
     acesso: 'todos',
     acessoAlvos: [],
     editores: [1],
     dono: 1,
     sugestoes: [],
-    versoes: [{ numero: 1, publicadaEm: '2026-10-02', por: 1, resumo: 'Primeira versão.' }],
-    rascunhoPendente: false,
     casos: [],
     uso: { conversas: 77, pessoas: 5, creditos: 9310, positivas: 40, negativas: 2, confirmacoes: 0, canceladas: 0 },
     atualizadoEm: '2026-10-02',
@@ -347,15 +350,13 @@ export const agentes: Agente[] = [
     icon: 'i-lucide-landmark',
     ferramentas: comModoPadrao(['legalLookupCase', 'legalGetCaseMovements', 'legalGetCaseSummary', 'getCurrentDateTime']),
     arquivos: [],
-    basesDeConhecimento: [],
+    usarDoWorkspace: true,
     blocos: [],
     acesso: 'pessoas',
     acessoAlvos: ['Renata Lopes', 'Carlos Eduardo Albuquerque de Vasconcellos'],
     editores: [4],
     dono: 4,
     sugestoes: [],
-    versoes: [{ numero: 1, publicadaEm: '2026-09-18', por: 4, resumo: 'Primeira versão.' }],
-    rascunhoPendente: false,
     casos: [],
     uso: { conversas: 0, pessoas: 0, creditos: 0, positivas: 0, negativas: 0, confirmacoes: 0, canceladas: 0 },
     atualizadoEm: '2026-09-18',
@@ -378,15 +379,13 @@ export const agentes: Agente[] = [
     icon: 'i-lucide-hand-coins',
     ferramentas: {},
     arquivos: [],
-    basesDeConhecimento: [],
+    usarDoWorkspace: false,
     blocos: [],
     acesso: 'todos',
     acessoAlvos: [],
     editores: [EU],
     dono: EU,
     sugestoes: [],
-    versoes: [{ numero: 1, publicadaEm: null, por: EU, resumo: 'Rascunho.' }],
-    rascunhoPendente: true,
     casos: [],
     uso: { conversas: 0, pessoas: 0, creditos: 0, positivas: 0, negativas: 0, confirmacoes: 0, canceladas: 0 },
     atualizadoEm: '2026-11-15',
@@ -402,13 +401,128 @@ export const agentesDoSistema = [
 ]
 
 /** PROPOSTA: pontos de partida para o agente novo. */
-export const modelosDeAgente = [
-  { id: 'oficios', icone: 'i-lucide-scale', ferramentas: ['readFile', 'getCurrentDateTime'] },
-  { id: 'triagem', icone: 'i-lucide-inbox', ferramentas: ['smartQueryItems', 'createTask'] },
-  { id: 'contratos', icone: 'i-lucide-file-search', ferramentas: ['readFile'] },
-  { id: 'resumo', icone: 'i-lucide-list-collapse', ferramentas: ['getItemByReference', 'getTaskSummary'] },
-  { id: 'onboarding', icone: 'i-lucide-user-plus', ferramentas: ['smartQueryItems', 'sendEmail'] },
-  { id: 'faq', icone: 'i-lucide-message-circle-question', ferramentas: ['searchKnowledgeBase'] },
-] as const
+/**
+ * PROPOSTA (rodada 2): os 10 modelos prontos, com o preenchimento de cada
+ * campo do cadastro. Fonte única: `modelos-prontos.json`, que também gera o
+ * MODELOS-PRONTOS.md para os devs.
+ */
+export interface ModeloDeAgente {
+  id: string
+  area: 'juridico' | 'clm' | 'atendimento' | 'financeiro' | 'erp' | 'marketing' | 'enspace'
+  icone: string
+  cor: string
+  nome: string
+  descricao: string
+  essencial: Pick<Agente, 'type' | 'status' | 'model' | 'modelosPermitidos' | 'instructions' | 'sugestoes'>
+  personalizacao: Pick<Agente, 'role' | 'approach' | 'writing_style' | 'rules'>
+  ferramentas: Record<string, ModoDaFerramenta>
+  conhecimento: { usarDoWorkspace: boolean, documentosSugeridos: { nome: string, fixado: boolean }[] }
+  /** nome do manual de revisão do sistema que o Revisor oferece primeiro */
+  manual: string | null
+  acesso: { acesso: Acesso, acessoAlvos: string[] }
+}
+export const modelosDeAgente = modelosProntos as unknown as ModeloDeAgente[]
 
-export const basesDisponiveis = ['Base de atendimento', 'Normas internas', 'Jurisprudência selecionada']
+
+/* ───────────────────────── Manuais de revisão (playbooks) ───────────────────────── */
+
+/**
+ * PROPOSTA (rodada 2): o manual de revisão com os campos que o servidor já
+ * tem (`ai_review_playbook`) e o formulário usa pela metade. Categoria aparece
+ * (hoje sempre `custom`), severidade e ordem das regras, item obrigatório, e
+ * limites iguais aos da API (nome 150, regra 200 e 1.000, item 500).
+ */
+export type Severidade = 'critical' | 'high' | 'medium' | 'low' | 'info'
+export type CategoriaDoManual = 'legal_contract' | 'nda' | 'compliance' | 'financial' | 'quality' | 'policy' | 'technical' | 'custom'
+
+export interface RegraDoManual { id: string, titulo: string, descricao: string, severidade: Severidade, categoria: string }
+export interface ItemDoManual { id: string, item: string, obrigatorio: boolean, categoria: string }
+
+export interface Manual {
+  id: string
+  nome: string
+  descricao: string
+  categoria: CategoriaDoManual
+  icone: string
+  instrucoes: string
+  formato: 'detailed' | 'summary' | 'checklist' | 'scored'
+  tom: 'formal' | 'technical' | 'advisory' | 'conversational'
+  regras: RegraDoManual[]
+  checklist: ItemDoManual[]
+  sistema: boolean
+  status: 'active' | 'inactive'
+  autor: number
+  atualizadoEm: string
+  /** revisões feitas com o manual nos últimos 30 dias */
+  revisoes30d: number
+}
+
+const regraDe = (id: string, titulo: string, descricao: string, severidade: Severidade, categoria = ''): RegraDoManual => ({ id, titulo, descricao, severidade, categoria })
+const itemDe = (id: string, item: string, obrigatorio = true, categoria = ''): ItemDoManual => ({ id, item, obrigatorio, categoria })
+
+export const manuais: Manual[] = [
+  {
+    id: 'm1', nome: 'Contrato de prestação de serviços', descricao: 'Confere cláusulas de prazo, preço, rescisão e dados pessoais antes da assinatura.',
+    categoria: 'legal_contract', icone: 'i-lucide-file-check', formato: 'scored', tom: 'formal', sistema: false, status: 'active', autor: 1, atualizadoEm: '2026-11-08', revisoes30d: 42,
+    instrucoes: 'Revise o contrato do ponto de vista da contratante. Aponte cada cláusula que falta ou contraria a regra, cite o trecho e sugira a redação. No fim, dê a nota de 0 a 100.',
+    regras: [
+      regraDe('r1', 'Proteção de dados pessoais', 'O contrato prevê o tratamento de dados pessoais conforme a LGPD, com papel de controlador e operador definido.', 'critical', 'Dados pessoais'),
+      regraDe('r2', 'Rescisão com aviso prévio', 'Qualquer das partes pode rescindir com aviso prévio de no mínimo 30 dias.', 'high', 'Rescisão'),
+      regraDe('r3', 'Multa limitada', 'A multa por descumprimento não passa de 20% do valor total do contrato.', 'medium', 'Penalidades'),
+      regraDe('r4', 'Reajuste definido', 'O contrato diz o índice e a periodicidade do reajuste.', 'medium', 'Preço'),
+      regraDe('r5', 'Foro da contratante', 'O foro é o da comarca da sede da contratante.', 'low', 'Geral'),
+      regraDe('r6', 'Responsabilidade limitada', 'A responsabilidade da contratada tem teto definido.', 'info', 'Geral'),
+    ],
+    checklist: [
+      itemDe('c1', 'Partes qualificadas com CNPJ e endereço'),
+      itemDe('c2', 'Valor e forma de pagamento'),
+      itemDe('c3', 'Vigência e renovação'),
+      itemDe('c4', 'Anexos citados estão juntos', false),
+    ],
+  },
+  {
+    id: 'm2', nome: 'Acordo de confidencialidade', descricao: 'Confere o alcance da informação sigilosa, o prazo e as exceções.',
+    categoria: 'nda', icone: 'i-lucide-lock', formato: 'checklist', tom: 'technical', sistema: false, status: 'active', autor: 3, atualizadoEm: '2026-10-19', revisoes30d: 17,
+    instrucoes: 'Confira se o acordo protege a informação da empresa e se as exceções são as usuais. Responda em checklist.',
+    regras: [
+      regraDe('r1', 'Definição de informação confidencial', 'O acordo define o que é informação confidencial, com exemplos.', 'high'),
+      regraDe('r2', 'Prazo do sigilo', 'O sigilo vale por no mínimo 5 anos depois do fim da relação.', 'high'),
+      regraDe('r3', 'Exceções usuais', 'As exceções são só informação pública, já conhecida ou exigida por ordem judicial.', 'medium'),
+      regraDe('r4', 'Devolução do material', 'Ao fim, o material é devolvido ou destruído, com declaração.', 'low'),
+    ],
+    checklist: [itemDe('c1', 'Assinatura das 2 partes'), itemDe('c2', 'Data de início'), itemDe('c3', 'Testemunhas', false)],
+  },
+  {
+    id: 'm3', nome: 'Política interna de compras', descricao: 'Confere se a requisição segue as alçadas e as cotações exigidas.',
+    categoria: 'policy', icone: 'i-lucide-shopping-cart', formato: 'summary', tom: 'advisory', sistema: false, status: 'inactive', autor: 2, atualizadoEm: '2026-09-02', revisoes30d: 0,
+    instrucoes: 'Compare a requisição com a política de compras e diga o que falta para aprovar.',
+    regras: [
+      regraDe('r1', '3 cotações acima de R$ 10 mil', 'Compra acima de R$ 10 mil tem 3 cotações anexadas.', 'high'),
+      regraDe('r2', 'Alçada de aprovação', 'O aprovador tem a alçada do valor, pela tabela de alçadas.', 'critical'),
+      regraDe('r3', 'Centro de custo', 'A requisição diz o centro de custo.', 'low'),
+    ],
+    checklist: [itemDe('c1', 'Justificativa da compra'), itemDe('c2', 'Fornecedor cadastrado')],
+  },
+  // Do sistema (nomes do bootstrap do servidor; regras e itens de exemplo)
+  {
+    id: 's1', nome: 'Revisão de contrato geral', descricao: 'Revisão ampla de qualquer contrato: partes, objeto, preço, prazo, rescisão e foro.',
+    categoria: 'legal_contract', icone: 'i-lucide-scale', formato: 'detailed', tom: 'formal', sistema: true, status: 'active', autor: 1, atualizadoEm: '2026-08-01', revisoes30d: 63,
+    instrucoes: 'Revise o contrato inteiro e aponte riscos por severidade.',
+    regras: [regraDe('r1', 'Objeto claro', 'O objeto do contrato está descrito sem ambiguidade.', 'high'), regraDe('r2', 'Preço e pagamento', 'Valor, vencimento e forma de pagamento definidos.', 'high'), regraDe('r3', 'Foro', 'O foro está definido.', 'low')],
+    checklist: [itemDe('c1', 'Partes qualificadas'), itemDe('c2', 'Assinaturas')],
+  },
+  {
+    id: 's2', nome: 'Acordo de confidencialidade (NDA)', descricao: 'Revisão padrão de NDA unilateral ou bilateral.',
+    categoria: 'nda', icone: 'i-lucide-shield', formato: 'checklist', tom: 'technical', sistema: true, status: 'active', autor: 1, atualizadoEm: '2026-08-01', revisoes30d: 21,
+    instrucoes: 'Confira as cláusulas usuais de um NDA.',
+    regras: [regraDe('r1', 'Prazo do sigilo', 'O prazo do sigilo está definido.', 'high'), regraDe('r2', 'Exceções', 'As exceções estão listadas.', 'medium')],
+    checklist: [itemDe('c1', 'Assinatura das partes')],
+  },
+  {
+    id: 's3', nome: 'Contrato de fornecedor', descricao: 'Revisão de contrato com fornecedor: entrega, qualidade, garantia e penalidades.',
+    categoria: 'legal_contract', icone: 'i-lucide-truck', formato: 'scored', tom: 'formal', sistema: true, status: 'active', autor: 1, atualizadoEm: '2026-08-01', revisoes30d: 9,
+    instrucoes: 'Revise o contrato do ponto de vista de quem compra.',
+    regras: [regraDe('r1', 'Prazo de entrega', 'O prazo de entrega e a multa por atraso estão definidos.', 'high'), regraDe('r2', 'Garantia', 'O prazo de garantia está definido.', 'medium')],
+    checklist: [itemDe('c1', 'Especificação do produto')],
+  },
+]
