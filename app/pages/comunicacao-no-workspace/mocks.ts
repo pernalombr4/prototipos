@@ -7,8 +7,9 @@
  * - Formulário, e-mail, caixa de e-mail e evento da Agenda NÃO têm schema no
  *   SDK 0.17. A forma deles saiu das telas do develop (Formulários, Mail Box,
  *   E-mails Enviados, Caixas de E-mail, Agenda), visitadas em 05/10/2026.
- * - E-mails em `example.com`, domínio reservado para exemplo. Telefones
- *   inventados: o protótipo não abre o WhatsApp nem o SMS, só mostra o link.
+ * - E-mails em `example.com`, domínio reservado para exemplo. Os telefones
+ *   são só dado de campo: o protótipo não tem atalho de WhatsApp nem de SMS
+ *   (fora do plano, decisão da redatora na rodada 6).
  */
 import type { Field, Item, ItemType, Member, Task, Workspace } from '@be-enlighten/enspace-sdk-schemas'
 
@@ -120,13 +121,11 @@ export type SlugDaCategoria = 'contratos' | 'solicitacoes' | 'fornecedores'
 
 export interface Categoria extends ItemType {
   slug: SlugDaCategoria
-  /** PROTÓTIPO: vem de Estrutura › Categorias › Pastas de Visualização. */
-  temMailBox: boolean
   /** PROTÓTIPO: prefixo do ID Personalizado (campo "ID Personalizado"). */
   prefixo: string
 }
 
-function categoria(id: number, name: string, slug: SlugDaCategoria, prefixo: string, icon: string, description: string, temMailBox: boolean): Categoria {
+function categoria(id: number, name: string, slug: SlugDaCategoria, prefixo: string, icon: string, description: string): Categoria {
   return {
     id,
     created_at: new Date('2025-03-12T10:00:00-03:00'),
@@ -138,15 +137,14 @@ function categoria(id: number, name: string, slug: SlugDaCategoria, prefixo: str
     color: 'primary',
     settings: {},
     itemVersioning: false,
-    temMailBox,
     prefixo,
   }
 }
 
 export const categorias: Categoria[] = [
-  categoria(31, 'Contratos', 'contratos', 'CTR', 'i-lucide-file-signature', 'Contratos com clientes e fornecedores, da minuta à renovação', true),
-  categoria(32, 'Solicitações', 'solicitacoes', 'SOL', 'i-lucide-inbox', 'Pedidos que chegam ao jurídico pelo formulário', true),
-  categoria(33, 'Fornecedores', 'fornecedores', 'FOR', 'i-lucide-truck', 'Cadastro e homologação de fornecedores', false),
+  categoria(31, 'Contratos', 'contratos', 'CTR', 'i-lucide-file-signature', 'Contratos com clientes e fornecedores, da minuta à renovação'),
+  categoria(32, 'Solicitações', 'solicitacoes', 'SOL', 'i-lucide-inbox', 'Pedidos que chegam ao jurídico pelo formulário'),
+  categoria(33, 'Fornecedores', 'fornecedores', 'FOR', 'i-lucide-truck', 'Cadastro e homologação de fornecedores'),
 ]
 
 export function categoriaPorSlug(slug: SlugDaCategoria) {
@@ -519,11 +517,11 @@ export function linkPublico(f: Formulario) {
  * ------------------------------------------------------------------ */
 
 /**
- * Caixa do workspace (Configurações › E-mails › Caixas de E-mail). Recebe
- * e-mail e pode iniciar um Spaceflow ("Caixa de Entrada"); é também remetente
- * de notificações e fluxos. Não é remetente do e-mail que a pessoa escreve:
- * esse sai da conta do Outlook dela. Aqui as caixas só recebem (e-mails sem
- * item na área E-mails). Não confirmei se o endereço final leva o workspace.
+ * Caixa do workspace (Configurações › E-mails › Caixas de E-mail). No código do
+ * develop (17/11/2026) ela só recebe: triagem, conversa na Central de
+ * Atendimento e o gatilho do Spaceflow. O e-mail que chega nela não vai para a
+ * Mail Box nem para a tela E-mails. Na Fase 2 ela vira remetente do e-mail que
+ * a pessoa escreve.
  */
 export interface CaixaDeEmail {
   id: string
@@ -572,6 +570,10 @@ export interface Email {
   lido: boolean
   /** Quem enviou pelo ENSPACE (para os enviados). */
   autor?: number
+  /** Fase 3: a tarefa vinculada. Hoje o e-mail guarda só a referência do item. */
+  tarefaId?: number | null
+  /** O registro só existe a partir desta fase (e-mail sem item, e-mail saído de caixa). */
+  desdeFase?: 2 | 3
 }
 
 function email(e: Omit<Email, 'cc' | 'anexos' | 'lido'> & Partial<Pick<Email, 'cc' | 'anexos' | 'lido'>>): Email {
@@ -586,18 +588,18 @@ const sol88 = itens.find(i => i.reference === 'SOL-00088')!
 const sol87 = itens.find(i => i.reference === 'SOL-00087')!
 
 export const emails: Email[] = [
-  email({ id: 1, direcao: 'recebido', de: 'marina.alves@example.com', para: [enderecoDoItem(ctr231)], assunto: 'Re: CTR-00231 · Minuta revisada', corpo: '<p>Olá, Bruno.</p><p>Revisamos a minuta e mandamos de volta com 2 comentários na cláusula 7. Podemos assinar na quinta?</p><p>Marina</p>', data: dia(5, '08:12'), caixa: enderecoDoItem(ctr231), itemId: ctr231.id, lido: false, anexos: ['minuta-v3-comentada.pdf'] }),
-  email({ id: 2, direcao: 'enviado', de: 'bruno.teixeira@example.com', para: ['marina.alves@example.com'], assunto: 'CTR-00231 · Minuta revisada', corpo: '<p>Marina, boa tarde.</p><p>Segue a minuta com os ajustes que combinamos na reunião.</p>', data: dia(2, '16:40'), caixa: enderecoDoItem(ctr231), itemId: ctr231.id, autor: 2, anexos: ['minuta-v3.docx'] }),
+  email({ id: 1, direcao: 'recebido', de: 'marina.alves@example.com', para: [enderecoDoItem(ctr231)], assunto: 'Re: CTR-00231 · Minuta revisada', corpo: '<p>Olá, Bruno.</p><p>Revisamos a minuta e mandamos de volta com 2 comentários na cláusula 7. Podemos assinar na quinta?</p><p>Marina</p>', data: dia(5, '08:12'), caixa: enderecoDoItem(ctr231), itemId: ctr231.id, lido: false, anexos: ['minuta-v3-comentada.pdf'], tarefaId: 1042 }),
+  email({ id: 2, direcao: 'enviado', de: 'bruno.teixeira@example.com', para: ['marina.alves@example.com'], assunto: 'CTR-00231 · Minuta revisada', corpo: '<p>Marina, boa tarde.</p><p>Segue a minuta com os ajustes que combinamos na reunião.</p>', data: dia(2, '16:40'), caixa: enderecoDoItem(ctr231), itemId: ctr231.id, autor: 2, anexos: ['minuta-v3.docx'], tarefaId: 1042 }),
+  email({ id: 12, direcao: 'enviado', de: 'ana.ribeiro@example.com', para: ['financeiro@example.com'], assunto: 'CTR-00231 · Nota fiscal de setembro', corpo: '<p>Olá. Pode confirmar se a nota de setembro já foi emitida?</p>', data: dia(3, '11:20'), caixa: enderecoDoItem(ctr231), itemId: ctr231.id, autor: 1 }),
   email({ id: 3, direcao: 'recebido', de: 'rafael.monteiro@example.com', para: [enderecoDoItem(ctr230)], assunto: 'Licença: quantidade de usuários', corpo: '<p>Bom dia. Precisamos confirmar se são 40 ou 60 usuários antes de emitir a nota.</p>', data: dia(4, '11:05'), caixa: enderecoDoItem(ctr230), itemId: ctr230.id }),
-  email({ id: 4, direcao: 'enviado', de: 'gabriela.lins@example.com', para: ['juliana.freitas@example.com'], cc: ['financeiro@example.com'], assunto: 'CTR-00229 · Índice de reajuste', corpo: '<p>Juliana, qual índice vocês propõem para este ano?</p>', data: dia(1, '10:20'), caixa: enderecoDoItem(ctr229), itemId: ctr229.id, autor: 7 }),
+  email({ id: 4, direcao: 'enviado', de: 'gabriela.lins@example.com', para: ['juliana.freitas@example.com'], cc: ['financeiro@example.com'], assunto: 'CTR-00229 · Índice de reajuste', corpo: '<p>Juliana, qual índice vocês propõem para este ano?</p>', data: dia(1, '10:20'), caixa: enderecoDoItem(ctr229), itemId: ctr229.id, autor: 7, tarefaId: 1047 }),
   email({ id: 5, direcao: 'recebido', de: 'lucas.almeida@example.com', para: [enderecoDoItem(sol88)], assunto: 'Cláusula de reajuste do cliente Delta', corpo: '<p>Oi, time. O cliente Delta pediu para trocar o índice. Podem olhar?</p>', data: dia(3, '14:33'), caixa: enderecoDoItem(sol88), itemId: sol88.id }),
-  email({ id: 6, direcao: 'recebido', de: 'contato@example.com', para: [caixas[0]!.email], assunto: 'Pedido de cópia de contrato', corpo: '<p>Olá, gostaria de receber a cópia do contrato assinado em agosto.</p>', data: dia(5, '07:50'), caixa: caixas[0]!.email, itemId: null, lido: false }),
   email({ id: 7, direcao: 'recebido', de: 'caio.fernandes@example.com', para: [enderecoDoItem(ctr223)], assunto: 'Visita técnica para o link dedicado', corpo: '<p>Conseguimos agendar a visita técnica para o dia 8, às 14h.</p>', data: dia(2, '09:18'), caixa: enderecoDoItem(ctr223), itemId: ctr223.id }),
-  email({ id: 8, direcao: 'enviado', de: 'fabio.castro@example.com', para: ['fornecedor.novo@example.com'], assunto: 'Cadastro de fornecedor', corpo: '<p>Segue o link do formulário de cadastro.</p>', data: dia(1, '15:00'), caixa: 'fabio.castro@example.com', itemId: null, autor: 6 }),
   email({ id: 9, direcao: 'recebido', de: 'natalia.couto@example.com', para: [enderecoDoItem(sol87)], assunto: 'Acesso ao sistema de contratos', corpo: '<p>Preciso de acesso de leitura para a equipe de RH.</p>', data: dia(4, '17:02'), caixa: enderecoDoItem(sol87), itemId: sol87.id }),
-  // Chegou na caixa do workspace, sem item, de quem é contato de 3 contratos: a sugestão pelo remetente aparece.
-  email({ id: 11, direcao: 'recebido', de: 'marina.alves@example.com', para: [caixas[0]!.email], assunto: 'Dúvida sobre a renovação', corpo: '<p>Olá. O contrato de manutenção renova sozinho ou precisamos assinar um aditivo?</p>', data: dia(5, '09:02'), caixa: caixas[0]!.email, itemId: null, lido: false }),
-  email({ id: 10, direcao: 'recebido', de: 'boletos@example.com', para: [caixas[1]!.email], assunto: 'Boleto de outubro', corpo: '<p>Segue o boleto com vencimento em 15/10.</p>', data: dia(3, '06:30'), caixa: caixas[1]!.email, itemId: null, anexos: ['boleto-outubro.pdf'] }),
+  // Fase 2: enviado sem item. Hoje sai do Outlook e não fica registrado no ENSPACE.
+  email({ id: 8, direcao: 'enviado', de: 'fabio.castro@example.com', para: ['fornecedor.novo@example.com'], assunto: 'Cadastro de fornecedor', corpo: '<p>Segue o link do formulário de cadastro.</p>', data: dia(1, '15:00'), caixa: 'fabio.castro@example.com', itemId: null, autor: 6, desdeFase: 2 }),
+  // Fase 2: enviado pela caixa do workspace, com item.
+  email({ id: 13, direcao: 'enviado', de: caixas[0]!.email, para: ['natalia.couto@example.com'], assunto: 'Re: Acesso ao sistema de contratos', corpo: '<p>Natália, o acesso de leitura foi liberado para a equipe de RH.</p>', data: dia(5, '08:40'), caixa: enderecoDoItem(sol87), itemId: sol87.id, autor: 5, desdeFase: 2 }),
 ]
 
 /* ------------------------------------------------------------------ *
@@ -617,9 +619,8 @@ export interface EventoDaAgenda {
   fonte: 'outlook' | 'item' | 'tarefa'
   local?: string
   /**
-   * Quem recebe o lembrete. Outlook: os participantes (só e-mail). Item: os
-   * contatos do item (cartão "Atalhos de comunicação" da categoria). Tarefa: o
-   * responsável.
+   * Quem recebe o lembrete. Outlook: os participantes. Item: os contatos do
+   * item (cartão "Atalhos de comunicação" da categoria). Tarefa: o responsável.
    */
   participantes: { nome?: string, email?: string, telefone?: string | null }[]
   itemId?: number

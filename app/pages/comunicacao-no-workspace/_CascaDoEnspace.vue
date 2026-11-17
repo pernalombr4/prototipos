@@ -15,7 +15,7 @@
  * exploração não tinha. Ela entra para a jornada do formulário existir.
  */
 import type { Textos } from './textos'
-import { categorias, EU, workspace } from './mocks'
+import { categorias, EU, itemPorId, workspace } from './mocks'
 import { type Tela, useComunicacao, useMarcaDeProposta } from './estado'
 
 const props = defineProps<{
@@ -24,7 +24,7 @@ const props = defineProps<{
   trilha: string[]
 }>()
 
-const { tela, categoriaAtual, ir, abrirCompositor, rascunho, compositorAberto, config } = useComunicacao()
+const { tela, categoriaAtual, ir, rascunho, compositorAberto, config, contextoDaTela, novoEmailNoContexto } = useComunicacao()
 const marca = useMarcaDeProposta()
 
 interface Entrada {
@@ -57,7 +57,7 @@ const membro = computed<Entrada[]>(() => [
   },
   { chave: 'agenda', icone: 'i-lucide-calendar-days', tela: 'agenda' },
   // PROPOSTA: a caixa de e-mail do workspace sai de dentro do item.
-  { chave: 'emails', icone: 'i-lucide-mail', tela: 'emails', proposta: true, quando: () => config.value.emailDoEnspace },
+  { chave: 'emails', icone: 'i-lucide-mail', tela: 'emails', proposta: true },
   { chave: 'knowledge', icone: 'i-lucide-table-2', filhos: [] },
   // Menu configurado em Interface › Menus (tela nativa /request).
   { chave: 'requisicoes', icone: 'i-lucide-clipboard-pen-line', tela: 'requisicoes' },
@@ -133,8 +133,15 @@ const grupos = computed(() => [
 ])
 
 /** "C" escreve um e-mail de qualquer tela (Gmail, Notion Mail). Fora de campo de texto. */
+/** O botão reconhece a tela: no item (ou na tarefa aberta), já vem vinculado. */
+const dicaDoNovoEmail = computed(() => {
+  const ctx = contextoDaTela()
+  const i = itemPorId(ctx?.itemId)
+  return i ? props.t.casca.novoEmailNoItem(i.reference) : props.t.casca.novoEmailDica
+})
+
 defineShortcuts({
-  c: () => { if (config.value.emailDoEnspace) abrirCompositor() },
+  c: () => { if (config.value.atalhos) novoEmailNoContexto() },
 })
 
 const temRascunho = computed(() => !compositorAberto.value && !!(rascunho.value.para.length || rascunho.value.assunto || rascunho.value.corpo.replace(/<[^>]+>/g, '').trim()))
@@ -270,7 +277,7 @@ const temRascunho = computed(() => !compositorAberto.value && !!(rascunho.value.
       <UButton icon="i-lucide-sun" color="neutral" variant="ghost" size="xs" :aria-label="t.casca.tema" />
 
       <!-- PROPOSTA: escrever um e-mail de qualquer tela, sem entrar num item. -->
-      <UTooltip v-if="config.emailDoEnspace" :text="t.casca.novoEmailDica" :kbds="['C']">
+      <UTooltip v-if="config.atalhos" :text="dicaDoNovoEmail" :kbds="['C']">
         <UChip :show="temRascunho" color="warning" size="md" inset>
           <UButton
             icon="i-lucide-mail-plus"
@@ -279,7 +286,7 @@ const temRascunho = computed(() => !compositorAberto.value && !!(rascunho.value.
             variant="outline"
             size="xs"
             :class="marca"
-            @click="abrirCompositor()"
+            @click="novoEmailNoContexto()"
           />
         </UChip>
       </UTooltip>

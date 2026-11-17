@@ -4,24 +4,27 @@
  * da esquerda (Identificação, Origem, Histórico) e as pastas em abas.
  *
  * PROPOSTA:
- *  - o cartão "Contato rápido" no topo do painel da esquerda;
- *  - na aba Mail Box, o lápis abre o compositor novo, com o item já vinculado.
+ *  - o cartão "Contato do item" no topo do painel da esquerda, com o contato
+ *    que a categoria define (a avaliar com os devs: pede uma chave nova na
+ *    configuração da categoria);
+ *  - o ícone de e-mail ao lado de cada campo de e-mail da Visão Geral, sem
+ *    configuração nenhuma;
+ *  - a Mail Box em todo item (`_MailBox.vue`), sem a pasta precisar ser
+ *    adicionada na categoria.
  * A Visão Geral edita e o Salvar grava (em memória): é o fim da jornada de
- * "Cadastrar telefone", e o Contato rápido muda junto.
- * As pastas criadas para a exploração foram as do develop: Tarefas, Anexos,
- * Emails Automáticos, Mail Box, Notas e Campos.
+ * "Cadastrar e-mail", e o Contato do item muda junto.
  */
 import type { Textos } from './textos'
-import { agora, categoriaPorSlug, enderecoDoItem, itemPorId, membroPorId, tarefas } from './mocks'
+import { agora, campos, categoriaPorSlug, itemPorId, tarefas } from './mocks'
 import { contatosDoItem, useComunicacao, useMarcaDeProposta } from './estado'
-import { useAtalhos, useCopiar } from './atalhos'
+import { useAtalhos } from './atalhos'
 import AcoesDeContato from './_AcoesDeContato.vue'
+import MailBox from './_MailBox.vue'
 
 const props = defineProps<{ t: Textos }>()
 
-const { itemAberto, abaDoItem, emails, config, ir, abrirCompositor } = useComunicacao()
-const { canaisEm, motivo } = useAtalhos()
-const { copiar, copiado } = useCopiar()
+const { itemAberto, abaDoItem, config, podeEnviar, ir } = useComunicacao()
+const { ativos } = useAtalhos()
 const marca = useMarcaDeProposta()
 const idioma = useIdioma()
 const toast = useToast()
@@ -29,10 +32,10 @@ const toast = useToast()
 const item = computed(() => itemPorId(itemAberto.value))
 const categoria = computed(() => item.value ? categoriaPorSlug(item.value.categoria) : null)
 
-/* ---------- contato rápido ---------- */
+/* ---------- contato do item ---------- */
 
 const contatos = computed(() => item.value ? contatosDoItem(item.value, config.value) : [])
-const comDado = computed(() => contatos.value.filter(c => c.email || c.telefone))
+const comDado = computed(() => contatos.value.filter(c => c.email || c.nome))
 const escolhido = ref<string | undefined>()
 watch(item, () => (escolhido.value = comDado.value[0]?.id), { immediate: true })
 const contato = computed(() => comDado.value.find(c => c.id === escolhido.value) ?? null)
@@ -48,26 +51,12 @@ function iniciais(s: string) {
   return s.split(/[\s.@]/).filter(Boolean).slice(0, 2).map(p => p[0]!.toUpperCase()).join('')
 }
 
-const mostrarContato = computed(() => canaisEm('item').length > 0)
-
-/** O que falta ou está errado no contato, dito na tela e não só no tooltip. */
-const aviso = computed(() => {
-  const c = contato.value
-  if (!c) return null
-  if (!c.telefone) return { texto: props.t.item.semTelefoneAviso, acao: props.t.item.cadastrarTelefone }
-  if (motivo('whatsapp', c)) return { texto: props.t.item.telefoneInvalidoAviso, acao: props.t.item.corrigirTelefone }
-  if (!c.email) return { texto: props.t.item.semEmailAviso, acao: props.t.item.cadastrarEmail }
-  return null
-})
-
-/** O campo da categoria que guardaria o dado que falta neste contato. */
-const campoQueFalta = computed(() => {
+/** O campo da categoria que guarda o e-mail deste contato, para o "Cadastrar e-mail". */
+const campoDoEmail = computed(() => {
   const i = item.value
-  if (!i || !contato.value) return null
+  if (!i || !contato.value || contato.value.email) return null
   const regra = config.value.porCategoria[i.categoria].contatos.find(c => c.id === contato.value!.id)
-  if (!regra) return null
-  const telefoneComProblema = !contato.value.telefone || !!motivo('whatsapp', contato.value)
-  return telefoneComProblema ? regra.campoTelefone : (regra.campoEmail !== 'request_email' ? regra.campoEmail : null)
+  return regra?.campoEmail && regra.campoEmail !== 'request_email' ? regra.campoEmail : null
 })
 
 async function irParaCampo(campo: string) {
@@ -88,43 +77,21 @@ const abas = computed(() => [
   { value: 'tarefas', label: props.t.item.abas.tarefas, icon: 'i-lucide-clipboard-check' },
   { value: 'anexos', label: props.t.item.abas.anexos, icon: 'i-lucide-paperclip' },
   { value: 'automaticos', label: props.t.item.abas.automaticos, icon: 'i-lucide-mail' },
-  ...(categoria.value?.temMailBox ? [{ value: 'mailbox', label: props.t.item.abas.mailbox, icon: 'i-lucide-mailbox' }] : []),
+  // PROPOSTA: a Mail Box vem em todo item (hoje só onde alguém adicionou a pasta).
+  { value: 'mailbox', label: props.t.item.abas.mailbox, icon: 'i-lucide-mailbox' },
   { value: 'notas', label: props.t.item.abas.notas, icon: 'i-lucide-notebook-pen' },
 ])
 
-/* ---------- mail box ---------- */
-
-const caixa = ref<'recebido' | 'enviado'>('recebido')
-const doItem = computed(() => emails.value
-  .filter(e => e.itemId === item.value?.id)
-  .sort((a, b) => +b.data - +a.data))
-const daCaixa = computed(() => doItem.value.filter(e => e.direcao === caixa.value))
-const contagem = computed(() => ({
-  recebido: doItem.value.filter(e => e.direcao === 'recebido').length,
-  enviado: doItem.value.filter(e => e.direcao === 'enviado').length,
-}))
-const aberto = ref<number | null>(null)
-
-const formatoData = computed(() => new Intl.DateTimeFormat(idioma.value, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }))
-
-function escrever() {
-  if (!item.value) return
-  const c = contatos.value.find(x => x.email)
-  abrirCompositor({ itemId: item.value.id, para: c?.email ? [c.email] : [], origem: 'item' })
-}
-
-function responder(id: number) {
-  const e = emails.value.find(x => x.id === id)
-  if (!e || !item.value) return
-  abrirCompositor({
-    itemId: item.value.id,
-    para: [e.direcao === 'recebido' ? e.de : e.para[0]!],
-    assunto: e.assunto.startsWith('Re:') ? e.assunto : `Re: ${e.assunto}`,
-    origem: 'responder',
-  })
-}
-
 /* ---------- visão geral ---------- */
+
+/** O tipo de cada campo: o ícone de e-mail aparece nos campos E-mail e no e-mail de Pessoa/Empresa. */
+function ehEmail(chave: string) {
+  const i = item.value
+  if (!i) return false
+  const [raiz, sub] = chave.split('.') as [string, string | undefined]
+  const campo = campos.find(c => c.categoria === i.categoria && c.refId === raiz)
+  return sub ? sub === 'contact_email' : campo?.type === 'email'
+}
 
 const camposVisiveis = computed(() => {
   const i = item.value
@@ -164,6 +131,10 @@ function descartarEdicao() {
   edicao.value = Object.fromEntries(camposVisiveis.value.map(c => [c.chave, c.valor]))
 }
 
+const formatoData = computed(() => new Intl.DateTimeFormat(idioma.value, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }))
+
+const valido = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
+
 const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.id))
 </script>
 
@@ -192,14 +163,15 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
         {{ item.titulo }}
       </p>
 
-      <!-- PROPOSTA: contato rápido -->
-      <section v-if="mostrarContato" class="mt-5 animate-[entrada_.3s_ease-out]" :class="marca">
+      <!-- PROPOSTA: o contato do item (a avaliar com os devs) -->
+      <section v-if="ativos" class="mt-5 animate-[entrada_.3s_ease-out]" :class="marca">
         <h2 class="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted">
-          <span class="size-1 rounded-full bg-muted" />{{ t.item.contatoRapido }}
+          <span class="size-1 rounded-full bg-muted" />{{ t.item.contato }}
         </h2>
         <div class="rounded-lg border border-default p-3">
           <template v-if="comDado.length">
             <USelectMenu
+              v-if="comDado.length > 1"
               v-model="escolhido"
               :items="opcoesDeContato"
               value-key="value"
@@ -208,40 +180,45 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
               :ui="{ base: 'py-1.5' }"
               :aria-label="t.item.paraQuem"
             />
-            <p v-if="contato" class="mt-1.5 truncate px-1 text-xs text-muted">
-              {{ [contato.email, contato.telefone].filter(Boolean).join(' · ') }}
+            <div v-else-if="contato" class="flex items-center gap-2">
+              <UAvatar :text="iniciais(contato.nome ?? contato.email ?? '?')" size="xs" />
+              <span class="min-w-0">
+                <span class="block truncate text-sm font-medium text-highlighted">{{ contato.nome ?? contato.email }}</span>
+                <span class="block truncate text-xs text-muted">{{ contato.rotulo }}</span>
+              </span>
+            </div>
+            <p v-if="contato?.email" class="mt-1.5 truncate px-1 text-xs text-muted">
+              {{ contato.email }}
             </p>
-            <!-- O motivo à vista: botão desabilitado não recebe foco, e o tooltip não chega a quem usa teclado. -->
-            <div v-if="aviso" class="mt-1 flex flex-wrap items-center gap-x-1 px-1 text-xs text-warning">
+            <!-- O motivo à vista: botão indisponível não mostra tooltip a quem usa teclado. -->
+            <div v-else-if="contato" class="mt-1.5 flex flex-wrap items-center gap-x-1 px-1 text-xs text-warning">
               <UIcon name="i-lucide-info" class="size-3.5 shrink-0" />
-              {{ aviso.texto }}
-              <!-- O próximo passo, como o "+ Add phone number" do HubSpot: leva ao campo. -->
+              {{ t.item.semEmailAviso }}
               <UButton
-                v-if="campoQueFalta"
-                :label="aviso.acao"
+                v-if="campoDoEmail"
+                :label="t.item.cadastrarEmail"
                 color="primary"
                 variant="link"
                 size="xs"
                 class="p-0"
-                @click="irParaCampo(campoQueFalta)"
+                @click="irParaCampo(campoDoEmail)"
               />
             </div>
             <AcoesDeContato
               :t="t"
               :destino="contato"
               :item="item"
-              lugar="item"
               tamanho="sm"
               bloco
               class="mt-3"
             />
-            <p class="mt-3 text-xs leading-relaxed text-muted">
-              {{ config.emailDoEnspace ? t.item.ajudaComEnspace : t.item.ajudaSemEnspace }}
+            <p class="mt-2 text-xs leading-relaxed text-muted">
+              {{ podeEnviar ? t.item.ajudaComEnspace(item.reference) : t.item.ajudaSemEnspace }}
             </p>
           </template>
           <UEmpty
-            variant="naked"
             v-else
+            variant="naked"
             icon="i-lucide-user-x"
             :title="t.item.semContatoTitulo"
             :description="t.item.semContatoDica"
@@ -337,7 +314,20 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
       <!-- Visão geral (cópia) -->
       <div v-if="abaDoItem === 'visao'" class="grid max-w-3xl gap-4 p-5 animate-[entrada_.25s_ease-out]">
         <UFormField v-for="c in camposVisiveis" :key="c.chave" :label="c.rotulo">
-          <UInput :id="`campo-${c.chave}`" v-model="edicao[c.chave]" class="w-full" />
+          <UInput :id="`campo-${c.chave}`" v-model="edicao[c.chave]" class="w-full" :ui="ehEmail(c.chave) && ativos ? { trailing: 'pe-1' } : undefined">
+            <!-- PROPOSTA: o e-mail ao lado do próprio campo -->
+            <template v-if="ehEmail(c.chave) && ativos" #trailing>
+              <AcoesDeContato
+                :t="t"
+                :destino="{ nome: null, email: edicao[c.chave] && valido(edicao[c.chave]!) ? edicao[c.chave]! : null }"
+                :item="item"
+                variante="icone"
+                tamanho="xs"
+                :rotulo="t.item.emailPara(c.rotulo)"
+                :class="marca"
+              />
+            </template>
+          </UInput>
         </UFormField>
         <div class="flex justify-end gap-2">
           <UButton :label="t.item.sairSemSalvar" icon="i-lucide-undo-2" color="neutral" variant="ghost" @click="descartarEdicao" />
@@ -345,77 +335,9 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
         </div>
       </div>
 
-      <!-- Mail Box -->
-      <div v-else-if="abaDoItem === 'mailbox'" class="p-4 animate-[entrada_.25s_ease-out]">
-        <div class="flex items-center gap-2">
-          <UBadge color="info" variant="subtle" class="max-w-full font-mono text-xs">
-            <span class="truncate">{{ enderecoDoItem(item) }}</span>
-          </UBadge>
-          <UButton
-            :icon="copiado === 'caixa' ? 'i-lucide-check' : 'i-lucide-copy'"
-            color="neutral"
-            variant="ghost"
-            size="xs"
-            :aria-label="t.item.copiarEndereco"
-            @click="copiar('caixa', enderecoDoItem(item), enderecoDoItem(item))"
-          />
-          <UTooltip :text="t.item.escreverEmail">
-            <UButton icon="i-lucide-pencil" color="neutral" variant="soft" size="sm" class="ml-auto" :aria-label="t.item.escreverEmail" @click="escrever" />
-          </UTooltip>
-        </div>
-
-        <UTabs
-          v-model="caixa"
-          :items="[
-            { value: 'recebido', label: t.item.recebidos, badge: contagem.recebido || undefined },
-            { value: 'enviado', label: t.item.enviados, badge: contagem.enviado || undefined },
-          ]"
-          :content="false"
-          variant="link"
-          class="mt-4 w-full"
-          :ui="{ list: 'w-full', trigger: 'flex-1 justify-center' }"
-        />
-
-        <ul v-if="daCaixa.length" class="mt-3 flex flex-col gap-2">
-          <li
-            v-for="(e, i) in daCaixa"
-            :key="e.id"
-            class="animate-[entrada_.25s_ease-out_both] rounded-lg border border-default transition hover:border-accented"
-            :style="{ animationDelay: `${i * 40}ms` }"
-          >
-            <button type="button" class="flex w-full items-start gap-3 p-3 text-left" :aria-expanded="aberto === e.id" @click="aberto = aberto === e.id ? null : e.id">
-              <UAvatar :text="iniciais(e.direcao === 'recebido' ? e.de : (membroPorId(e.autor)?.nome ?? e.de))" size="sm" />
-              <span class="min-w-0 flex-1">
-                <span class="flex items-center gap-2">
-                  <span class="truncate text-sm" :class="e.lido ? 'text-toned' : 'font-semibold text-highlighted'">
-                    {{ e.direcao === 'recebido' ? e.de : t.item.para(e.para.join(', ')) }}
-                  </span>
-                  <UIcon v-if="e.anexos.length" name="i-lucide-paperclip" class="size-3.5 shrink-0 text-muted" />
-                  <span class="ml-auto shrink-0 text-xs text-muted">{{ formatoData.format(e.data) }}</span>
-                </span>
-                <span class="block truncate text-sm text-highlighted">{{ e.assunto }}</span>
-                <span v-if="e.direcao === 'enviado' && e.autor" class="block text-xs text-muted">{{ t.item.enviadoPor(membroPorId(e.autor)?.nome ?? '') }}</span>
-              </span>
-            </button>
-            <div v-if="aberto === e.id" class="border-t border-default px-4 py-3">
-              <!-- eslint-disable-next-line vue/no-v-html -->
-              <div class="prose-sm text-sm text-default [&_p]:my-1.5" v-html="e.corpo" />
-              <div v-if="e.anexos.length" class="mt-2 flex flex-wrap gap-1.5">
-                <UBadge v-for="a in e.anexos" :key="a" :label="a" icon="i-lucide-paperclip" color="neutral" variant="outline" size="sm" />
-              </div>
-              <UButton :label="t.item.responder" icon="i-lucide-reply" color="neutral" variant="outline" size="xs" class="mt-3" @click="responder(e.id)" />
-            </div>
-          </li>
-        </ul>
-        <UEmpty
-          variant="naked"
-          v-else
-          icon="i-lucide-inbox"
-          :title="t.item.nenhumEmail"
-          size="sm"
-          class="mt-6"
-          :actions="config.emailDoEnspace ? [{ label: t.item.escreverEmail, icon: 'i-lucide-pencil', color: 'neutral', variant: 'outline', onClick: escrever }] : []"
-        />
+      <!-- Mail Box (PROPOSTA: em todo item, repaginada) -->
+      <div v-else-if="abaDoItem === 'mailbox'" class="max-w-4xl p-4 animate-[entrada_.25s_ease-out]">
+        <MailBox :t="t" :item-id="item.id" />
       </div>
 
       <!-- Tarefas do item -->

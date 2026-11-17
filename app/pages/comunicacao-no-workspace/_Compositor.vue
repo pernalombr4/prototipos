@@ -10,15 +10,18 @@
  * `item_ref` (a referência do item). Sem conta integrada, a gaveta mostra
  * "Nenhuma conta integrada disponível" e o botão "Integrar contas".
  *
- * PROPOSTA:
+ * PROPOSTA, Fase 1 (só tela):
  *  - abre de qualquer tela (barra do topo, tela inicial, item, tarefa, E-mails);
  *  - "De" visível (hoje a tela não mostra) e "Responder para" quando há item;
  *  - "Vincular a item (opcional)", separado dos campos do e-mail;
  *  - Descartar com Desfazer, e o rascunho sobrevive a fechar a gaveta.
+ * Fase 2: o "De" vira escolha entre a conta do Outlook e as caixas do
+ * workspace; o e-mail sem item também fica registrado.
+ * Fase 3: "Vincular a tarefa".
  */
 import type { EditorToolbarItem } from '@nuxt/ui'
 import type { Textos } from './textos'
-import { type Email, EU, agora, categoriaPorSlug, itemPorId, itens, membros, modelos } from './mocks'
+import { type Email, EU, agora, categoriaPorSlug, itemPorId, itens, membros, modelos, tarefas } from './mocks'
 import { contatosDoItem, preencher, useComunicacao, useMarcaDeProposta } from './estado'
 import BuscaDeItem from './_BuscaDeItem.vue'
 import LinkDoEditor from './_LinkDoEditor.vue'
@@ -26,7 +29,7 @@ import { useAppExterno } from './simulador'
 
 const props = defineProps<{ t: Textos }>()
 
-const { compositorAberto, rascunho, emails, config, cenario, outlookIntegrado, remetentePadrao, responderPara, abrirItem, ir, descartarRascunho } = useComunicacao()
+const { compositorAberto, rascunho, emails, config, cenario, fase, remetentes, podeEnviar, remetentePadrao, responderPara, abrirItem, ir, descartarRascunho } = useComunicacao()
 const marca = useMarcaDeProposta()
 const toast = useToast()
 
@@ -35,9 +38,50 @@ const categoria = computed(() => item.value ? categoriaPorSlug(item.value.catego
 
 /* ---------- De e Responder para ---------- */
 
-/** O remetente é sempre a conta da pessoa; o item só define o "Responder para". */
+/**
+ * Fase 1: o remetente é sempre a conta do Outlook da pessoa (o envio de hoje
+ * não aceita outro). Fase 2: a pessoa escolhe entre a conta e as caixas do
+ * workspace. O item só define o "Responder para".
+ */
 const enderecoDeResposta = computed(() => responderPara(rascunho.value.itemId))
-watch(outlookIntegrado, () => (rascunho.value.de = remetentePadrao()))
+watch(remetentes, (lista) => {
+  if (!lista.some(r => r.email === rascunho.value.de)) rascunho.value.de = remetentePadrao()
+})
+
+const remetente = computed(() => remetentes.value.find(r => r.email === rascunho.value.de) ?? null)
+const escolheDe = computed(() => fase.value >= 2 && remetentes.value.length > 1)
+
+/** O "De" da Fase 2, agrupado: a conta da pessoa e as caixas do workspace. */
+const opcoesDeRemetente = computed(() => {
+  const c = props.t.compositor
+  const outlook = remetentes.value.filter(r => r.tipo === 'outlook')
+  const deCaixa = remetentes.value.filter(r => r.tipo === 'caixa')
+  return [
+    ...(outlook.length ? [[{ type: 'label' as const, label: c.grupoOutlook }, ...outlook.map(r => ({ value: r.email, label: r.email, description: c.suaConta, icon: 'i-lucide-user' }))]] : []),
+    ...(deCaixa.length ? [[{ type: 'label' as const, label: c.grupoCaixas }, ...deCaixa.map(r => ({ value: r.email, label: r.caixa!.nome, description: r.email, icon: 'i-lucide-inbox' }))]] : []),
+  ]
+})
+
+/** Para onde vão as respostas, dito embaixo do "De". */
+const ajudaDoDe = computed(() => {
+  const c = props.t.compositor
+  if (remetente.value?.tipo === 'caixa') return c.respostasNaCaixa(remetente.value.caixa!.nome)
+  return fase.value >= 2 ? c.respostasNoSeuOutlook : c.semItemNaoRegistra
+})
+
+/* ---------- Vincular a tarefa (Fase 3) ---------- */
+
+const opcoesDeTarefa = computed(() => {
+  const lista = item.value ? tarefas.filter(x => x.item === item.value!.id) : tarefas
+  return [
+    { value: null, label: props.t.compositor.semTarefa },
+    ...lista.map(x => ({ value: x.id, label: `${x.reference} · ${x.name}` })),
+  ]
+})
+watch(() => rascunho.value.itemId, (id) => {
+  const x = tarefas.find(y => y.id === rascunho.value.tarefaId)
+  if (x && id && x.item !== id) rascunho.value.tarefaId = null
+})
 
 const { abrirApp } = useAppExterno()
 
@@ -157,7 +201,7 @@ function validar() {
 }
 
 async function enviar() {
-  if (!outlookIntegrado.value || !validar()) return
+  if (!podeEnviar.value || !validar()) return
   enviando.value = true
   await new Promise(r => setTimeout(r, 900))
   enviando.value = false
@@ -180,22 +224,28 @@ async function enviar() {
     // A resposta volta para o endereço do item; sem item, só para o Outlook da pessoa.
     caixa: enderecoDeResposta.value ?? r.de!,
     itemId: r.itemId,
+    tarefaId: fase.value >= 3 ? r.tarefaId : null,
     anexos: r.anexos,
     lido: true,
     autor: EU.id,
+    // Fase 1: sem item, o envio de hoje não grava nada no ENSPACE.
+    ...(r.itemId ? {} : { desdeFase: 2 as const }),
   }
   emails.value = [novo, ...emails.value]
 
   const vinculado = item.value
+  const registra = !!vinculado || fase.value >= 2
   descartarRascunho()
   toast.add({
     title: props.t.compositor.enviadoTitulo,
-    description: vinculado ? props.t.compositor.enviadoComItem(vinculado.reference) : props.t.compositor.enviadoSemItem(novo.de),
+    description: vinculado
+      ? props.t.compositor.enviadoComItem(vinculado.reference)
+      : registra ? props.t.compositor.enviadoSemItemRegistrado(novo.de) : props.t.compositor.enviadoSemItem(novo.de),
     icon: 'i-lucide-send',
     color: 'success',
-    actions: [vinculado
-      ? { label: props.t.compositor.verNoItem, color: 'neutral', variant: 'outline', onClick: () => abrirItem(vinculado.id, 'mailbox') }
-      : { label: props.t.compositor.verEmEmails, color: 'neutral', variant: 'outline', onClick: () => ir('emails') }],
+    actions: vinculado
+      ? [{ label: props.t.compositor.verNoItem, color: 'neutral', variant: 'outline', onClick: () => abrirItem(vinculado.id, 'mailbox') }]
+      : registra ? [{ label: props.t.compositor.verEmEmails, color: 'neutral', variant: 'outline', onClick: () => ir('emails') }] : [],
   })
 }
 
@@ -259,6 +309,13 @@ const dicaDeOrigem = computed(() => {
   if (o === 'tarefa') return props.t.compositor.vinculadoPelaTarefa
   return null
 })
+
+/** Responder e encaminhar: na Fase 1 a resposta sai como mensagem nova; na Fase 2, na mesma conversa. */
+const notaDaResposta = computed(() => {
+  const o = rascunho.value.origem
+  if (o !== 'responder' && o !== 'encaminhar') return null
+  return fase.value >= 2 ? props.t.compositor.respostaNaConversa : props.t.compositor.respostaComoNova
+})
 </script>
 
 <template>
@@ -294,7 +351,7 @@ const dicaDeOrigem = computed(() => {
     <template #body>
       <!-- Sem conta integrada: o mesmo aviso da Mail Box de hoje -->
       <UEmpty
-        v-if="!outlookIntegrado"
+        v-if="!podeEnviar"
         icon="i-lucide-mail-x"
         :title="t.compositor.semContaTitulo"
         :description="t.compositor.semContaDescricao"
@@ -304,19 +361,45 @@ const dicaDeOrigem = computed(() => {
       />
 
       <template v-else>
-      <!-- De (proposta: a conta existe, mas a tela de hoje não mostra) -->
+      <UAlert
+        v-if="notaDaResposta"
+        :description="notaDaResposta"
+        icon="i-lucide-info"
+        color="neutral"
+        variant="subtle"
+        :class="marca"
+      />
+
+      <!-- De. Fase 1: a conta do Outlook, que a tela de hoje não mostra. Fase 2: a escolha. -->
       <UFormField :label="t.compositor.de" :error="erros.de" :class="marca">
-        <div class="flex items-center gap-2 rounded-md border border-default px-2.5 py-1.5 text-sm">
-          <UIcon name="i-lucide-mail" class="size-4 shrink-0 text-muted" />
+        <USelectMenu
+          v-if="escolheDe"
+          v-model="rascunho.de"
+          :items="opcoesDeRemetente"
+          value-key="value"
+          :search-input="false"
+          :icon="remetente?.tipo === 'caixa' ? 'i-lucide-inbox' : 'i-lucide-user'"
+          class="w-full"
+          :ui="{ content: 'min-w-80' }"
+        >
+          <template #default>
+            <span class="flex min-w-0 items-center gap-2">
+              <span class="truncate text-highlighted">{{ remetente?.caixa ? `${remetente.caixa.nome} (${remetente.email})` : rascunho.de }}</span>
+              <span class="shrink-0 text-xs text-muted">{{ remetente?.tipo === 'caixa' ? t.compositor.caixaDoWorkspace : t.compositor.suaConta }}</span>
+            </span>
+          </template>
+        </USelectMenu>
+        <div v-else class="flex items-center gap-2 rounded-md border border-default px-2.5 py-1.5 text-sm">
+          <UIcon :name="remetente?.tipo === 'caixa' ? 'i-lucide-inbox' : 'i-lucide-mail'" class="size-4 shrink-0 text-muted" />
           <span class="truncate text-highlighted">{{ rascunho.de }}</span>
-          <span class="ml-auto shrink-0 text-xs text-muted">{{ t.compositor.suaConta }}</span>
+          <span class="ml-auto shrink-0 text-xs text-muted">{{ remetente?.tipo === 'caixa' ? t.compositor.caixaDoWorkspace : t.compositor.suaConta }}</span>
         </div>
         <template #help>
-          <span v-if="enderecoDeResposta" class="flex flex-col gap-0.5">
-            <span>{{ t.compositor.responderParaItem }}</span>
-            <span class="truncate font-mono text-xs">{{ enderecoDeResposta }}</span>
+          <span class="flex flex-col gap-0.5">
+            <span v-if="enderecoDeResposta">{{ t.compositor.responderParaItem }}</span>
+            <span v-if="enderecoDeResposta" class="truncate font-mono text-xs">{{ enderecoDeResposta }}</span>
+            <span v-else :class="fase < 2 ? 'text-warning' : ''">{{ ajudaDoDe }}</span>
           </span>
-          <span v-else>{{ t.compositor.respostasNoSeuOutlook }}</span>
         </template>
       </UFormField>
 
@@ -423,10 +506,19 @@ const dicaDeOrigem = computed(() => {
         <p v-if="dicaDeOrigem && !trocando" class="mt-1.5 text-xs text-muted">
           {{ dicaDeOrigem }}
         </p>
-        <p v-if="item && categoria && !categoria.temMailBox" class="mt-1.5 flex items-center gap-1 text-xs text-warning">
-          <UIcon name="i-lucide-triangle-alert" class="size-3.5" />{{ t.compositor.semMailBox(categoria.name) }}
-        </p>
       </section>
+
+      <!-- Fase 3: vincular a tarefa -->
+      <UFormField v-if="fase >= 3" :label="t.compositor.vincularTarefa" :hint="t.compositor.opcional" :help="t.compositor.vincularTarefaAjuda" :class="marca">
+        <USelectMenu
+          v-model="rascunho.tarefaId"
+          :items="opcoesDeTarefa"
+          value-key="value"
+          icon="i-lucide-square-check-big"
+          :placeholder="t.compositor.semTarefa"
+          class="w-full"
+        />
+      </UFormField>
 
       <!-- Mensagem -->
       <UFormField :label="t.compositor.mensagem" required :error="erros.corpo">
@@ -460,7 +552,7 @@ const dicaDeOrigem = computed(() => {
       </template>
     </template>
 
-    <template v-if="outlookIntegrado" #footer>
+    <template v-if="podeEnviar" #footer>
       <div class="flex items-center gap-1">
         <input ref="seletorDeArquivo" type="file" multiple class="hidden" @change="arquivosEscolhidos">
         <UButton :label="t.compositor.anexarArquivo" icon="i-lucide-paperclip" color="neutral" variant="ghost" @click="anexar" />

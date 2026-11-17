@@ -3,34 +3,41 @@
 ## A proposta em 1 minuto
 
 **Um protótipo para as 3 partes do documento**, porque elas mexem nas mesmas telas e no mesmo
-botão de E-mail (motivo no `BRIEFING.md`, seção 4).
+botão de E-mail (motivo no `BRIEFING.md`, seção 4). Desde a rodada 6, **só e-mail**: WhatsApp e
+SMS saíram do plano.
+
+**O protótipo se divide em 3 fases**, escolhidas no controle "Fase" da barra de baixo:
+
+| Fase | O que entra | Base |
+|---|---|---|
+| 1 · MVP | Atalhos e telas que só usam o que o produto já tem: botão E-mail nas telas de uso, "Novo e-mail" no topo, área E-mails, Mail Box na tarefa (a do item dela), link do formulário público | Lido no código do develop: o envio sai do Outlook da pessoa e só fica registrado com item |
+| 2 · Remetente | Escolher o "De" (Outlook ou caixa do workspace), responder na mesma conversa, encaminhar, registrar e-mail sem item e vincular depois | Funcionalidade nova |
+| 3 · Tarefa | Vincular o e-mail a uma tarefa e a Mail Box própria da tarefa ("Desta tarefa" e "Do item") | Funcionalidade nova |
 
 | Parte do documento | Onde aparece no protótipo |
 |---|---|
 | (a) Link do formulário público | Requisições (cartão "Compartilhar este formulário"); lista de itens da categoria; painel da tarefa de preencher formulário |
-| (b) Atalhos de e-mail, WhatsApp e SMS | Item (Contato rápido); lista de itens (menu "Contatar"); quadro de itens (clique direito); tarefas (coluna Contato, aviso em lote, clique direito, painel); Agenda (lembrete) |
-| Configuração dos atalhos | Sistema › Módulos ("Atalhos de comunicação": canais, telas, texto inicial, cópia para o item); Categorias › cartão "Atalhos de comunicação" (de quais campos vêm nome, e-mail e telefone) |
-| E-mail do ENSPACE em todas as telas | "Novo e-mail" na barra do topo; "E-mails" no menu (Recebidos e Enviados, com o item); o compositor com "De" e "Vincular a item" |
-| Configuração do e-mail | Sistema › Módulos ("E-mail do ENSPACE em todas as telas": de onde o e-mail sai e quais categorias têm a pasta Mail Box). Cada pessoa integra o Correio do Outlook no próprio perfil |
+| (b) Atalho de e-mail | Item (Contato do item na lateral e ícone ao lado do campo de e-mail); lista e quadro de itens (submenu "E-mail"); tarefas (coluna Contato, e-mail em lote, clique direito, painel); Agenda (lembrete) |
+| Configuração | Sistema › Módulos: 1 chave, "Atalhos de comunicação", sem escolher telas nem canais; Categorias › cartão "Contato da categoria" (de quais campos vêm nome e e-mail), a avaliar com os devs |
+| E-mail do ENSPACE em todas as telas | "Novo e-mail" no topo, que reconhece o item ou a tarefa aberta; "E-mails" no menu, com a tabela e os filtros do develop; o compositor |
 
 ## O fluxo do e-mail
 
 ```
-De qualquer tela                     Do item (Contato rápido ou Mail Box)
-   │ Novo e-mail (topo)                 │ E-mail (botão dividido)
+De qualquer tela                     Do item, da tarefa ou da Mail Box
+   │ Novo e-mail (topo: já vinculado    │ E-mail (botão dividido ou ícone)
+   │ ao item ou à tarefa aberta)        │
    ▼                                    ▼
-Nova Mensagem ── De: sua conta do Outlook (a mesma nos 2 casos)
-   │                                    │  Vincular a item: já preenchido
-   │ Vincular a item (opcional)          │  (troca ou remove)
-   │  busca: nome, referência, ID,       │
-   │  categoria, contato                 │
+Nova Mensagem ── De: Fase 1, o Outlook da pessoa
+   │               Fase 2, o Outlook ou uma caixa do workspace
+   │ Vincular a item (opcional)         │ Vincular a item: já preenchido
+   │ Vincular a tarefa (Fase 3)         │
    ▼                                    ▼
  Enviar ─────────────────────────────────┘
    │
-   ├─ com item: Responder para = endereço do item; a resposta volta para a Mail Box;
-   │            o e-mail aparece em E-mails e na Mail Box do item
-   └─ sem item: sem Responder para; a resposta chega só no Outlook da pessoa;
-                o e-mail aparece em E-mails, coluna Item "Sem item"
+   ├─ com item: Responder para = endereço do item; aparece em E-mails e na Mail Box do item
+   └─ sem item: Fase 1, nada fica no ENSPACE (só no Outlook da pessoa);
+                Fase 2, aparece em E-mails com "Vincular", para ligar ao item depois
 
 Sem o Correio do Outlook integrado: a gaveta mostra "Nenhuma conta integrada
 disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:).
@@ -217,6 +224,73 @@ disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:)
   [app de e-mail](evidencias/prototipo-14-simulacao-app-de-email.jpg),
   [formulário público](evidencias/prototipo-15-simulacao-formulario-publico.jpg).
 
+## Rodada 6 · 2026-11-17
+
+- **Pedido:** o retorno geral sobre o protótipo e o "De" escolhido pela pessoa ("se sai do outlook
+  ou de alguma caixa específica do enspace"). Aprovação do plano, literal: "pode aplicar. ícone ao
+  lado do campo, chave em módulos ok", com 4 observações:
+  - "nao teremos conexao com whatsapp e sms";
+  - o módulo de e-mail em todas as telas "nao faz sentido. deve simplesmente aparecer a chave do
+    modulo atalhos de comunicaçao";
+  - "o user nao deve poder configurar onde eles aparecem, nem os canais";
+  - "precisa prototipar a logica de ter um contato pra cada categoria [...] aí avaliamos com os
+    devs".
+  Para a tabela: "use /investigar-codigo pra ler o componente de tabelas do enspace usado na tela
+  de logs e nas novas telas de itens".
+- **Fases no andaime.** O controle "Fase" da barra de baixo troca entre 1 · MVP, 2 · Remetente e
+  3 · Tarefa. A Fase 1 só usa o que o código do develop já faz:
+  - o envio sai da integração da pessoa com o Correio do Outlook; não há envio pela caixa do
+    workspace;
+  - o e-mail enviado só fica registrado no ENSPACE com item;
+  - as caixas do workspace (Central de Atendimento) só recebem;
+  - "Responder" está comentado na tela do develop: na Fase 1, responder abre um e-mail novo, com
+    "Re:" e o aviso de que não continua a conversa;
+  - tarefa não tem vínculo com e-mail.
+- **Saiu:** WhatsApp, SMS, telefone do contato, texto inicial do app, a fila de envio das tarefas,
+  a escolha de telas e canais em Sistema › Módulos e o módulo "E-mail do ENSPACE em todas as telas".
+- **Sistema › Módulos:** 1 chave, "Atalhos de comunicação", com a lista do que ela ativa e o link
+  para o contato de cada categoria.
+- **Contato da categoria (a avaliar com os devs):** o cartão 13 da categoria diz de quais campos
+  vêm o nome e o e-mail de cada contato e o assunto do e-mail, com a prévia de Para, Assunto e Cc.
+  Alimenta o "Contato do item" na lateral do item, que voltou. A categoria guarda configuração em
+  JSON hoje, mas o contato é dado novo.
+- **Item:** o "Contato rápido" virou "Contato do item", com o botão E-mail dividido; o campo de
+  e-mail ganhou o ícone ao lado; a Mail Box tem o botão "Novo e-mail" com rótulo no lugar do lápis
+  e "Responder" no hover da linha.
+- **"Novo e-mail" do topo reconhece a tela:** com um item ou uma tarefa aberta, o compositor já abre
+  vinculado a ela. A dica do botão diz a qual item.
+- **Tarefas:** o painel tem as abas Detalhes e Mail Box. Fases 1 e 2: a Mail Box do item da tarefa.
+  Fase 3: "Desta tarefa" e "Do item". Tarefa sem item mostra o vazio com o motivo (Fases 1 e 2).
+- **Compositor:**
+  - Fase 2: o "De" é uma lista em 2 grupos, a conta do Outlook e as caixas do workspace, com a ajuda
+    de para onde vão as respostas;
+  - Fase 3: "Vincular a tarefa";
+  - sem item na Fase 1, a ajuda do "De" avisa que o e-mail não fica no ENSPACE.
+- **E-mails refeita no padrão do develop** (tela de Logs de Auditoria e telas novas de itens):
+  - ações na 1ª coluna, com o rótulo "Ações" e o menu ⋮; o mesmo menu no clique direito da linha;
+  - cabeçalho com ordenar e o funil do filtro da coluna (`_FiltroDeColuna.vue`): texto com
+    operadores em frase ("É totalmente Igual a", "Contém parcialmente"...), um por operador; seleção com
+    busca, Todos e Limpar;
+  - barra com busca, período, "Limpar filtros", Colunas e os filtros rápidos (Recebidos, Enviados,
+    Não lidos, Com anexo e, na Fase 2, Sem item);
+  - paginação "Mostrando 1 a 10 de 10 resultados" com itens por página;
+  - a leitura do e-mail abre em painel lateral, com Responder, Encaminhar (Fase 2) e o vínculo com
+    o item (sugestões pelo remetente e busca).
+- **Ícones:** o develop usa o conjunto solar; o protótipo usa lucide, o único instalado. A forma do
+  ícone é a mais próxima; o dev usa o do produto.
+- **Corrigido no caminho:**
+  - nome e e-mail do contato colados na lista de itens;
+  - a classe da marca de proposta não chegava ao botão de e-mail (o componente não tinha raiz);
+  - o compositor piscava vazio ao fechar depois de enviar;
+  - texto de interface no registro formal (Sistema, Agenda) e o vazio da Mail Box da tarefa.
+- **Ver:** prints [E-mails](evidencias/prototipo-16-emails-tabela.jpg),
+  [filtro da coluna](evidencias/prototipo-17-filtro-de-coluna.jpg),
+  [De com as caixas](evidencias/prototipo-18-compositor-escolher-de.jpg),
+  [Mail Box da tarefa](evidencias/prototipo-19-tarefa-mail-box.jpg),
+  [contato da categoria](evidencias/prototipo-20-contato-da-categoria.jpg).
+- **Valem até a rodada 5 e saíram aqui:** as seções "Canal sem dado", "Membro sem telefone" e
+  "'Não gerar conteúdo' e o texto inicial" abaixo, e os prints de WhatsApp (09 e 13).
+
 ## Por que cada decisão
 
 ### O e-mail sai da conta do Outlook da pessoa; o item recebe a resposta
@@ -247,6 +321,10 @@ A "Nova Mensagem" de hoje não diz de onde o e-mail sai (o texto "De (Contas Int
 código e não aparece na tela). O protótipo mostra a conta da pessoa e, com item, o "Responder para".
 HubSpot, Salesforce, Close e Pipefy mostram o From.
 
+Na Fase 2, o "De" vira escolha: a conta do Outlook da pessoa ou uma caixa do workspace. Hoje as
+caixas do workspace só recebem; enviar por elas é funcionalidade nova. A ajuda embaixo do "De" diz
+para onde vão as respostas: a caixa escolhida, o item (quando há) ou o Outlook da pessoa.
+
 ### O botão E-mail tem 2 caminhos, num botão dividido
 
 Com o módulo "E-mail do ENSPACE" ligado, o E-mail dos atalhos é um botão dividido
@@ -271,7 +349,7 @@ nada. Liga e desliga em Sistema › Módulos ("Pôr a caixa do item em cópia").
 HubSpot e Pipedrive usam Cco. Com Cco, a resposta só volta se alguém a encaminhar; com Cc, volta
 quando o cliente responde a todos. O protótipo fica com o Cc e diz isso na opção do menu.
 
-### "Não gerar conteúdo" e o texto inicial
+### "Não gerar conteúdo" e o texto inicial (até a rodada 5)
 
 O documento diz que o ENSPACE "não deverá gerar conteúdo da mensagem" e, no mesmo parágrafo, pede
 `mailto:...?subject=ASSUNTO&body=CORPO`. O protótipo resolve assim:
@@ -293,7 +371,7 @@ e-mail e o telefone de cada contato. As origens possíveis: campo E-mail, Texto 
 "Contato da contraparte" e "Requisitante"); o Contato rápido do item deixa escolher. A prévia ao
 lado mostra o link que cada atalho abre com o item de exemplo.
 
-### Canal sem dado: desabilitado, com o motivo
+### Canal sem dado: desabilitado, com o motivo (até a rodada 5)
 
 Pedido do documento ("o respectivo botão deverá ficar indisponível"). O mercado esconde o botão
 (Agendor, Ploomes, Twenty) ou oferece completar o dado (HubSpot "+ Add phone number", Apollo). O
@@ -307,7 +385,7 @@ protótipo junta as 2 coisas:
 
 Canal que o administrador desligou não aparece.
 
-### Membro sem telefone
+### Membro sem telefone (até a rodada 5)
 
 O perfil não tem telefone. O schema tem `User.meta.phone`, e o protótipo supõe esse dado em metade
 dos membros, para mostrar os 2 estados. Para o aviso ao responsável de uma tarefa por WhatsApp ou
@@ -432,6 +510,8 @@ Classes com valor arbitrário:
 | `_RascunhoMinimizado.vue` | `w-[min(26rem,calc(100vw-2rem))]` | A barra do rascunho cabe na tela estreita sem passar da borda |
 | `_AppExterno.vue` | `max-h-[90dvh]` | A simulação cabe na altura da tela e rola por dentro |
 | `_AcoesDeContato.vue` | `itemDescription: 'whitespace-normal'` | O tema do `DropdownMenu` corta a descrição em 1 linha; o aviso do Cc precisa ser lido inteiro |
+| `_TelaEmails.vue` | `sm:max-w-[700px]` no painel | A largura do painel lateral de leitura do develop (tela de Logs de Auditoria) |
+| `_TelaEmails.vue` | `LARGURA` (117 px nas Ações) | As larguras fixas da tabela do develop; a coluna de Ações tem 117 px lá |
 
 ## Crítica e acessibilidade
 

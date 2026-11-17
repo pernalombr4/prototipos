@@ -74,13 +74,11 @@ function abrirNovaAba() {
       <AcoesDeContato
         :t="t"
         :destino="null"
-        lugar="formularios"
         sem-destinatario
         tamanho="xs"
         origem="inicio"
         :assunto="t.form.assuntoDoLink(formulario.nome)"
-        :mensagem="t.form.mensagemDoLink(formulario.nome, url)"
-        :corpo-enspace="`<p>${t.form.mensagemDoLink(formulario.nome, url)}</p>`"
+        :corpo="t.form.mensagemDoLink(formulario.nome, url)"
       />
     </div>
   </section>

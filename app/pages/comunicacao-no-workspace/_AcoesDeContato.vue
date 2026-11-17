@@ -1,166 +1,143 @@
 <script setup lang="ts">
 /**
- * PROPOSTA. Os 3 atalhos de contato (E-mail, WhatsApp, SMS), iguais em toda
- * tela. Canal sem dado fica desabilitado e diz por quê; canal que o
- * administrador desligou não aparece.
+ * PROPOSTA. O botão de e-mail, igual em toda tela. Sem e-mail no destino, fica
+ * indisponível e diz por quê. Com o módulo "Atalhos de comunicação" desligado,
+ * não aparece.
  *
- * Com o "E-mail do ENSPACE" ligado, o E-mail vira 2 caminhos: escrever pelo
- * ENSPACE (fica no histórico do item) ou abrir o app de e-mail da pessoa.
+ * 2 caminhos: escrever pelo ENSPACE (fica na Mail Box do item) ou abrir o app
+ * de e-mail da pessoa. Sem por onde enviar pelo ENSPACE (Fase 1 sem Outlook
+ * integrado), o botão abre o app direto.
  */
-import type { DropdownMenuItem } from '@nuxt/ui'
 import type { ItemDoProtótipo } from './mocks'
 import type { Textos } from './textos'
-import { type Lugar, type Rascunho, useComunicacao } from './estado'
-import { type Destino, ICONE_DO_CANAL, useAtalhos } from './atalhos'
+import { type Rascunho, useComunicacao } from './estado'
+import { type Destino, useAtalhos } from './atalhos'
 
 const props = withDefaults(defineProps<{
   t: Textos
   destino: Destino | null
-  lugar: Lugar
   item?: ItemDoProtótipo | null
-  /** Sobrescreve o texto inicial (ex.: o link de um formulário). */
+  /** Sobrescreve o assunto da categoria (ex.: o link de um formulário). */
   assunto?: string
-  mensagem?: string
-  variante?: 'botoes' | 'icones'
+  /** Texto do corpo, sem HTML. */
+  corpo?: string
+  /** Vários destinatários de uma vez. */
+  varios?: Destino[]
+  /** `botao`: E-mail com a seta das outras formas. `icone`: só o ícone, com menu. */
+  variante?: 'botao' | 'icone'
   tamanho?: 'xs' | 'sm' | 'md'
-  /** Mostra a escolha ENSPACE ou app no E-mail. Desligado em atalho sem item. */
-  permitirEnspace?: boolean
   origem?: Rascunho['origem']
-  /** Atalho sem destinatário: o app abre e a pessoa escolhe para quem (link de formulário). */
+  tarefaId?: number | null
+  /** Sem destinatário: o compositor abre e a pessoa escolhe para quem (link de formulário). */
   semDestinatario?: boolean
-  /** Corpo que o compositor do ENSPACE já abre preenchido. */
-  corpoEnspace?: string
-  /** Os botões dividem a largura em partes iguais (cartão estreito). */
+  /** O botão ocupa a largura toda (cartão estreito). */
   bloco?: boolean
+  rotulo?: string
 }>(), {
   item: null,
-  variante: 'botoes',
+  variante: 'botao',
   tamanho: 'sm',
-  permitirEnspace: true,
   origem: 'item',
+  tarefaId: null,
 })
 
-const { canaisEm, motivo: motivoDoCanal, abrir, escreverNoEnspace, vaiComCopia, config } = useAtalhos()
-const { outlookIntegrado } = useComunicacao()
+const { ativos, motivo: motivoDoDestino, itensDeMenu, escreverNoEnspace, abrirNoApp } = useAtalhos()
+const { podeEnviar } = useComunicacao()
 
-function motivo(c: 'email' | 'whatsapp' | 'sms', d: Destino | null) {
-  return props.semDestinatario ? null : motivoDoCanal(c, d)
-}
+const motivo = computed(() => {
+  if (props.semDestinatario) return null
+  if (props.varios) return props.varios.some(v => v.email) ? null : props.t.atalho.semEmail
+  return motivoDoDestino(props.destino)
+})
 
-const canais = computed(() => canaisEm(props.lugar))
-// Sem o Correio do Outlook integrado não há envio pelo ENSPACE: o E-mail abre o app da pessoa.
-const comEnspace = computed(() => props.permitirEnspace && config.value.emailDoEnspace && outlookIntegrado.value)
-
-const opcoes = computed(() => ({ item: props.item, assunto: props.assunto, mensagem: props.mensagem }))
-
-function escreverAqui() {
-  escreverNoEnspace(props.destino, props.item, props.origem, {
-    ...(props.assunto ? { assunto: props.assunto } : {}),
-    ...(props.corpoEnspace ? { corpo: props.corpoEnspace } : {}),
-  })
-}
-
-const opcaoDoApp = computed<DropdownMenuItem>(() => ({
-  label: props.t.atalho.abrirNoApp,
-  // Com Cc, a resposta só volta ao item se a pessoa responder a todos: o aviso diz isso.
-  description: vaiComCopia(props.item) ? props.t.atalho.abrirNoAppComCopia : props.t.atalho.abrirNoAppDica,
-  icon: 'i-lucide-external-link',
-  // O tema corta a descrição numa linha; o aviso do Cc precisa ser lido inteiro.
-  ui: { itemDescription: 'whitespace-normal' },
-  onSelect: () => abrir('email', props.destino, opcoes.value),
+const opcoes = computed(() => ({
+  item: props.item,
+  assunto: props.assunto,
+  corpo: props.corpo,
+  varios: props.varios,
+  semDestinatario: props.semDestinatario,
+  origem: props.origem,
+  tarefaId: props.tarefaId,
 }))
 
-/** Na coluna de ícones não cabe o botão dividido: os 2 caminhos vão num menu só. */
-const menuDeEmail = computed<DropdownMenuItem[]>(() => [
-  {
-    label: props.t.atalho.escreverNoEnspace,
-    description: props.item ? props.t.atalho.escreverNoEnspaceComItem(props.item.reference) : props.t.atalho.escreverNoEnspaceSemItem,
-    icon: 'i-lucide-send',
-    ui: { itemDescription: 'whitespace-normal' },
-    onSelect: escreverAqui,
-  },
-  opcaoDoApp.value,
-])
+const menu = computed(() => [itensDeMenu(props.destino, opcoes.value)])
+const soOApp = computed(() => [itensDeMenu(props.destino, opcoes.value).filter(i => i.icon === 'i-lucide-external-link')])
 
-function rotulo(c: 'email' | 'whatsapp' | 'sms') {
-  return props.t.atalho.canal[c]
+function principal() {
+  if (motivo.value) return
+  if (podeEnviar.value) escreverNoEnspace(props.destino, opcoes.value)
+  else abrirNoApp(props.destino, opcoes.value)
 }
+
+const dica = computed(() => motivo.value
+  ?? (podeEnviar.value
+    ? (props.item ? props.t.atalho.escreverNoEnspaceComItem(props.item.reference) : props.t.atalho.escreverNoEnspace)
+    : props.t.atalho.abrirNoAppDica))
 </script>
 
 <template>
-  <div
-    v-if="canais.length"
-    :class="bloco ? 'flex gap-1.5' : ['flex flex-wrap items-center', variante === 'icones' ? 'gap-1' : 'gap-2']"
-  >
-    <template v-for="c in canais" :key="c">
-      <!--
-        E-mail com 2 caminhos, em botão dividido (FieldGroupDropdownExample do
-        Nuxt UI): o clique no corpo escreve pelo ENSPACE, a seta abre o app.
-      -->
-      <UFieldGroup
-        v-if="c === 'email' && comEnspace && !motivo(c, destino) && variante === 'botoes'"
-        :size="tamanho"
-        :class="bloco ? 'flex flex-auto' : ''"
-      >
-        <UTooltip :text="item ? t.atalho.escreverNoEnspaceComItem(item.reference) : t.atalho.escreverNoEnspaceSemItem">
-          <UButton
-            :icon="ICONE_DO_CANAL[c]"
-            :label="rotulo(c)"
-            color="neutral"
-            variant="outline"
-            :class="bloco ? 'flex-auto justify-center' : ''"
-            @click="escreverAqui"
-          />
-        </UTooltip>
-        <UDropdownMenu :items="[opcaoDoApp]" :content="{ align: 'end' }" :ui="{ content: 'w-64' }">
-          <UButton
-            icon="i-lucide-chevron-down"
-            color="neutral"
-            variant="outline"
-            :aria-label="t.atalho.outrasFormasDeEmail"
-          />
-        </UDropdownMenu>
-      </UFieldGroup>
-
-      <UTooltip
-        v-else-if="c === 'email' && comEnspace && !motivo(c, destino)"
-        :text="rotulo(c)"
-      >
-        <UDropdownMenu :items="menuDeEmail" :content="{ align: 'start' }" :ui="{ content: 'w-72' }">
-          <UButton
-            :icon="ICONE_DO_CANAL[c]"
-            color="neutral"
-            variant="outline"
-            :size="tamanho"
-            :aria-label="rotulo(c)"
-            class="transition-transform hover:-translate-y-0.5"
-          />
-        </UDropdownMenu>
-      </UTooltip>
-
-      <!--
-        Canal sem dado: aria-disabled, não disabled. O botão continua no Tab e o
-        motivo aparece no foco e no hover (achado da revisão de acessibilidade).
-      -->
-      <UTooltip v-else :text="motivo(c, destino) ?? (variante === 'icones' ? rotulo(c) : '')" :disabled="!motivo(c, destino) && variante !== 'icones'">
+  <!-- Raiz real: o UTooltip não gera elemento, e a classe de quem usa (a marca da proposta) precisa de onde cair. -->
+  <span v-if="ativos" :class="bloco ? 'flex w-full' : 'inline-flex'">
+    <!-- Ícone: o menu com os 2 caminhos (coluna de tabela, campo, participante) -->
+    <UTooltip v-if="variante === 'icone'" :text="motivo ?? (rotulo ?? t.atalho.email)">
+      <UDropdownMenu v-if="!motivo" :items="menu" :content="{ align: 'end' }" :ui="{ content: 'w-72' }">
         <UButton
-          :icon="ICONE_DO_CANAL[c]"
-          :label="variante === 'botoes' ? rotulo(c) : undefined"
+          icon="i-lucide-mail"
+          color="neutral"
+          variant="ghost"
+          :size="tamanho"
+          :aria-label="rotulo ?? t.atalho.email"
+          class="transition-transform hover:-translate-y-0.5"
+          @click.stop
+        />
+      </UDropdownMenu>
+      <!-- Sem e-mail: aria-disabled, não disabled. O botão continua no Tab e o motivo aparece no foco. -->
+      <UButton
+        v-else
+        icon="i-lucide-mail"
+        color="neutral"
+        variant="ghost"
+        :size="tamanho"
+        aria-disabled="true"
+        :aria-label="`${rotulo ?? t.atalho.email}: ${motivo}`"
+        class="cursor-not-allowed opacity-50"
+        @click.stop
+      />
+    </UTooltip>
+
+    <!--
+      Botão dividido (FieldGroupDropdownExample do Nuxt UI): o corpo escreve pelo
+      ENSPACE; a seta abre o app de e-mail.
+    -->
+    <UFieldGroup v-else-if="!motivo && podeEnviar" :size="tamanho" :class="bloco ? 'flex w-full' : ''">
+      <UTooltip :text="dica">
+        <UButton
+          icon="i-lucide-mail"
+          :label="rotulo ?? t.atalho.email"
           color="neutral"
           variant="outline"
-          :size="tamanho"
-          :block="bloco"
-          :aria-disabled="motivo(c, destino) ? 'true' : undefined"
-          :aria-label="motivo(c, destino) ? `${rotulo(c)}: ${motivo(c, destino)}` : rotulo(c)"
-          class="transition-transform"
-          :class="[
-            motivo(c, destino) ? 'cursor-not-allowed opacity-50' : 'hover:-translate-y-0.5',
-            bloco ? 'flex-auto' : '',
-          ]"
-          :ui="c === 'whatsapp' && !motivo(c, destino) ? { leadingIcon: 'text-success' } : undefined"
-          @click="!motivo(c, destino) && abrir(c, destino, opcoes)"
+          :class="bloco ? 'flex-auto justify-center' : ''"
+          @click="principal"
         />
       </UTooltip>
-    </template>
-  </div>
+      <UDropdownMenu :items="soOApp" :content="{ align: 'end' }" :ui="{ content: 'w-72' }">
+        <UButton icon="i-lucide-chevron-down" color="neutral" variant="outline" :aria-label="t.atalho.outrasFormasDeEmail" />
+      </UDropdownMenu>
+    </UFieldGroup>
+
+    <UTooltip v-else :text="dica">
+      <UButton
+        icon="i-lucide-mail"
+        :label="rotulo ?? t.atalho.email"
+        color="neutral"
+        variant="outline"
+        :size="tamanho"
+        :block="bloco"
+        :aria-disabled="motivo ? 'true' : undefined"
+        :aria-label="motivo ? `${rotulo ?? t.atalho.email}: ${motivo}` : undefined"
+        :class="motivo ? 'cursor-not-allowed opacity-50' : 'transition-transform hover:-translate-y-0.5'"
+        @click="principal"
+      />
+    </UTooltip>
+  </span>
 </template>

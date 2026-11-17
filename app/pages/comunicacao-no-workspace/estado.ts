@@ -2,105 +2,92 @@
  * O estado do protótipo: a configuração do workspace e o que a pessoa faz nele.
  *
  * Tudo em memória (`useState`), sem rede. Recarregar a página volta ao começo.
+ *
+ * As 3 fases (rodada 6) ficam no andaime. Cada fase soma à anterior:
+ *  - Fase 1 (MVP): só o que o código de hoje já sustenta. O e-mail sai da conta
+ *    do Outlook da pessoa e só fica no ENSPACE quando vai com item.
+ *  - Fase 2: escolher o "De" (Outlook pessoal ou caixa do workspace), responder
+ *    na mesma conversa, encaminhar e guardar o e-mail sem item.
+ *  - Fase 3: vincular o e-mail a uma tarefa e a Mail Box da própria tarefa.
  */
 import {
   CAMPO_REQUISITANTE,
+  type CaixaDeEmail,
   type Email,
   type Formulario,
   type ItemDoProtótipo,
   type SlugDaCategoria,
   EU,
+  caixas,
   categoriaPorSlug,
   emails as emailsIniciais,
   enderecoDoItem,
   formularios as formulariosIniciais,
   itemPorId,
+  tarefas,
 } from './mocks'
+
+/* ------------------------------------------------------------------ *
+ * Fase
+ * ------------------------------------------------------------------ */
+
+export type Fase = 1 | 2 | 3
+export const FASES: Fase[] = [1, 2, 3]
 
 /* ------------------------------------------------------------------ *
  * Configuração
  * ------------------------------------------------------------------ */
 
-export type Canal = 'email' | 'whatsapp' | 'sms'
-export const CANAIS: Canal[] = ['email', 'whatsapp', 'sms']
-
-/** As telas em que os atalhos podem aparecer. Cada uma liga e desliga. */
 /**
- * A tela inicial saiu (rodada 5): ali não há destinatário, item para vincular
- * nem formulário certo para o link. O e-mail global fica no "Novo e-mail".
+ * Uma pessoa de contato do item: de quais campos vêm o nome e o e-mail.
+ * A avaliar com os devs: a configuração mora na categoria, numa chave nova do
+ * JSON `modules` que o modelo da categoria já tem.
  */
-export type Lugar = 'item' | 'itens' | 'tarefas' | 'agenda' | 'formularios'
-export const LUGARES: Lugar[] = ['item', 'itens', 'tarefas', 'agenda', 'formularios']
-
-/** Uma pessoa de contato do item: de quais campos vêm nome, e-mail e telefone. */
 export interface ContatoDaCategoria {
   id: string
   rotulo: string
   campoNome: string | null
   campoEmail: string | null
-  campoTelefone: string | null
 }
 
 export interface ConfigDaCategoria {
   contatos: ContatoDaCategoria[]
   /** Assunto sugerido do e-mail. Aceita {referencia}, {titulo}, {nome}, {categoria}. */
   assunto: string
-  /** Texto inicial de WhatsApp e SMS. Mesmas variáveis. */
-  mensagem: string
 }
 
 export interface ConfigDeComunicacao {
-  /** Módulo "Atalhos de comunicação" (Sistema › Módulos). */
+  /**
+   * Módulo "Atalhos de comunicação" (Sistema › Módulos), ao lado de Correção
+   * Monetária e Comparações. Uma chave só: quem administra não escolhe canal
+   * nem tela (decisão da redatora, rodada 6).
+   */
   atalhos: boolean
-  canais: Record<Canal, boolean>
-  lugares: Record<Lugar, boolean>
-  /** Preenche assunto e texto inicial. Desligado, o app abre só com o destinatário. */
-  textoInicial: boolean
-  /**
-   * Põe a caixa do item em cópia no e-mail aberto no app da pessoa. A resposta
-   * volta para a aba Mail Box sem o ENSPACE enviar nada (o "CC to pulse" do
-   * monday, ver PESQUISA.md).
-   */
-  copiaParaOItem: boolean
-  /**
-   * Módulo "E-mail do ENSPACE em todas as telas". O envio é o da pasta Mail Box
-   * de hoje: sai da conta do Outlook que cada pessoa integrou (Perfil ›
-   * Integrações › Correio do Outlook). Não há caixa do workspace a escolher.
-   */
-  emailDoEnspace: boolean
   porCategoria: Record<SlugDaCategoria, ConfigDaCategoria>
 }
 
 export function configInicial(): ConfigDeComunicacao {
   return {
     atalhos: true,
-    canais: { email: true, whatsapp: true, sms: true },
-    lugares: { item: true, itens: true, tarefas: true, agenda: true, formularios: true },
-    textoInicial: true,
-    copiaParaOItem: true,
-    emailDoEnspace: true,
     porCategoria: {
       contratos: {
         contatos: [
-          { id: 'contraparte', rotulo: 'Contato da contraparte', campoNome: 'contato_nome', campoEmail: 'contato_email', campoTelefone: 'contato_telefone' },
-          { id: 'requisitante', rotulo: 'Requisitante', campoNome: null, campoEmail: CAMPO_REQUISITANTE, campoTelefone: null },
+          { id: 'contraparte', rotulo: 'Contato da contraparte', campoNome: 'contato_nome', campoEmail: 'contato_email' },
+          { id: 'requisitante', rotulo: 'Requisitante', campoNome: null, campoEmail: CAMPO_REQUISITANTE },
         ],
         assunto: '{referencia} · {titulo}',
-        mensagem: 'Olá, {nome}. Aqui é do jurídico da Aurora, sobre {titulo} ({referencia}).',
       },
       solicitacoes: {
         contatos: [
-          { id: 'solicitante', rotulo: 'Quem pediu', campoNome: 'solicitante_nome', campoEmail: 'solicitante_email', campoTelefone: 'solicitante_telefone' },
+          { id: 'solicitante', rotulo: 'Quem pediu', campoNome: 'solicitante_nome', campoEmail: 'solicitante_email' },
         ],
         assunto: '{referencia} · {titulo}',
-        mensagem: 'Olá, {nome}. Sobre a sua solicitação {referencia}.',
       },
       fornecedores: {
         contatos: [
-          { id: 'comercial', rotulo: 'Contato comercial', campoNome: 'contato_nome', campoEmail: 'contato_email', campoTelefone: 'contato_whatsapp' },
+          { id: 'comercial', rotulo: 'Contato comercial', campoNome: 'pessoa_empresa.contact_name', campoEmail: 'pessoa_empresa.contact_email' },
         ],
         assunto: '{titulo} · Cadastro de fornecedor',
-        mensagem: 'Olá, {nome}. Aqui é de Compras da Aurora.',
       },
     },
   }
@@ -115,10 +102,9 @@ export interface Contato {
   rotulo: string
   nome: string | null
   email: string | null
-  telefone: string | null
 }
 
-function valorDoCampo(i: ItemDoProtótipo, campo: string | null): string | null {
+export function valorDoCampo(i: ItemDoProtótipo, campo: string | null): string | null {
   if (!campo) return null
   if (campo === CAMPO_REQUISITANTE) return i.request_email ?? null
   // Subcampo de Pessoa/Empresa: "pessoa_empresa.contact_email".
@@ -134,11 +120,10 @@ export function contatosDoItem(i: ItemDoProtótipo, config: ConfigDeComunicacao)
     rotulo: c.rotulo,
     nome: valorDoCampo(i, c.campoNome),
     email: valorDoCampo(i, c.campoEmail),
-    telefone: valorDoCampo(i, c.campoTelefone),
   }))
 }
 
-/** Preenche as variáveis do texto inicial. */
+/** Preenche as variáveis do assunto. */
 export function preencher(modelo: string, i: ItemDoProtótipo | null, nome: string | null) {
   return modelo
     .replaceAll('{referencia}', i?.reference ?? '')
@@ -152,16 +137,7 @@ export function preencher(modelo: string, i: ItemDoProtótipo | null, nome: stri
     .trim()
 }
 
-/* ------------------------------------------------------------------ *
- * Os links (deep links). O ENSPACE não envia: só abre o app.
- * ------------------------------------------------------------------ */
-
-/** Só dígitos, com 55 na frente quando o número veio sem país. */
-export function soDigitos(telefone: string) {
-  const d = telefone.replace(/\D/g, '')
-  return d.length <= 11 ? `55${d}` : d
-}
-
+/** O `mailto:` que o "Abrir no meu app de e-mail" abre. */
 export function linkDeEmail(para: string[], assunto?: string, corpo?: string, cc?: string) {
   const q = new URLSearchParams()
   if (cc) q.set('cc', cc)
@@ -169,16 +145,6 @@ export function linkDeEmail(para: string[], assunto?: string, corpo?: string, cc
   if (corpo) q.set('body', corpo)
   const query = q.toString().replace(/\+/g, '%20')
   return `mailto:${para.join(',')}${query ? `?${query}` : ''}`
-}
-
-export function linkDeWhatsapp(telefone: string | null, texto?: string) {
-  const base = telefone ? `https://wa.me/${soDigitos(telefone)}` : 'https://wa.me/'
-  return texto ? `${base}?text=${encodeURIComponent(texto)}` : base
-}
-
-export function linkDeSms(telefone: string | null, texto?: string) {
-  const base = telefone ? `sms:+${soDigitos(telefone)}` : 'sms:'
-  return texto ? `${base}?body=${encodeURIComponent(texto)}` : base
 }
 
 /* ------------------------------------------------------------------ *
@@ -197,6 +163,7 @@ export type Tela =
   | 'categoria'
 
 export interface Rascunho {
+  /** O endereço de onde o e-mail sai: a conta do Outlook ou, na Fase 2, uma caixa. */
   de: string | null
   para: string[]
   cc: string[]
@@ -206,25 +173,37 @@ export interface Rascunho {
   assunto: string
   corpo: string
   itemId: number | null
+  /** Fase 3: a tarefa vinculada. */
+  tarefaId: number | null
   anexos: string[]
   /** De onde o compositor foi aberto, para o texto de ajuda. */
-  origem: 'barra' | 'item' | 'tarefa' | 'inicio' | 'emails' | 'responder'
+  origem: 'barra' | 'item' | 'tarefa' | 'inicio' | 'emails' | 'responder' | 'encaminhar'
 }
 
 export function rascunhoVazio(): Rascunho {
-  return { de: null, para: [], cc: [], cco: [], mostrarCopia: false, modelo: null, assunto: '', corpo: '', itemId: null, anexos: [], origem: 'barra' }
+  return { de: null, para: [], cc: [], cco: [], mostrarCopia: false, modelo: null, assunto: '', corpo: '', itemId: null, tarefaId: null, anexos: [], origem: 'barra' }
 }
 
 export type Cenario = 'normal' | 'sem-outlook' | 'falha'
 
+/** Uma opção do "De". */
+export interface Remetente {
+  email: string
+  tipo: 'outlook' | 'caixa'
+  caixa?: CaixaDeEmail
+}
+
 export function useComunicacao() {
   const config = useState<ConfigDeComunicacao>('cnw-config', configInicial)
+  const fase = useState<Fase>('cnw-fase', () => 1)
   const emails = useState<Email[]>('cnw-emails', () => structuredClone(emailsIniciais))
   const formularios = useState<Formulario[]>('cnw-formularios', () => structuredClone(formulariosIniciais))
   const tela = useState<Tela>('cnw-tela', () => 'inicio')
   const categoriaAtual = useState<SlugDaCategoria>('cnw-categoria', () => 'contratos')
   const itemAberto = useState<number | null>('cnw-item', () => null)
   const abaDoItem = useState<string>('cnw-aba-item', () => 'visao')
+  /** A tarefa aberta no painel de Tarefas: o "Novo e-mail" do topo vincula ao item dela. */
+  const tarefaAberta = useState<number | null>('cnw-tarefa-aberta', () => null)
   const compositorAberto = useState<boolean>('cnw-compositor', () => false)
   const rascunho = useState<Rascunho>('cnw-rascunho', rascunhoVazio)
   const cenario = useState<Cenario>('cnw-cenario', () => 'normal')
@@ -233,17 +212,25 @@ export function useComunicacao() {
 
   /**
    * A pessoa integrou o Correio do Outlook? Sem isso, a gaveta "Nova Mensagem"
-   * da Mail Box mostra "Nenhuma conta integrada disponível" (código do develop,
-   * 05/10/2026). O cenário "Sem Outlook integrado" do andaime mostra esse caso.
+   * da Mail Box mostra "Nenhuma conta integrada" (código do develop, lido em
+   * 17/11/2026). O cenário "Sem Outlook integrado" do andaime mostra esse caso.
    */
   const outlookIntegrado = computed(() => cenario.value !== 'sem-outlook')
 
   /**
-   * Remetente: a conta do Outlook da pessoa, com ou sem item. O item não muda o
-   * remetente; ele entra em "Responder para" (ver `responderPara`).
+   * As opções do "De". Fase 1: só a conta do Outlook (o envio de hoje não
+   * aceita remetente). Fase 2: também as caixas do workspace.
    */
+  const remetentes = computed<Remetente[]>(() => [
+    ...(outlookIntegrado.value && EU.email ? [{ email: EU.email, tipo: 'outlook' as const }] : []),
+    ...(fase.value >= 2 ? caixas.map(c => ({ email: c.email, tipo: 'caixa' as const, caixa: c })) : []),
+  ])
+
+  /** Há por onde enviar pelo ENSPACE? Sem nada, o botão E-mail abre o app da pessoa. */
+  const podeEnviar = computed(() => remetentes.value.length > 0)
+
   function remetentePadrao() {
-    return outlookIntegrado.value ? EU.email ?? null : null
+    return remetentes.value[0]?.email ?? null
   }
 
   /** O endereço do item vai em "Responder para": a resposta volta para a Mail Box. */
@@ -252,11 +239,18 @@ export function useComunicacao() {
     return i ? enderecoDoItem(i) : null
   }
 
+  /** O e-mail existe no ENSPACE nesta fase? Fase 1: só com item. */
+  function registrado(e: Email) {
+    if ((e.desdeFase ?? 1) > fase.value) return false
+    return fase.value >= 2 || e.itemId !== null
+  }
+
   function ir(t: Tela, extra?: { categoria?: SlugDaCategoria, item?: number, aba?: string, vista?: 'lista' | 'painel' | 'atalhos' | 'formularios' }) {
     if (extra?.categoria) categoriaAtual.value = extra.categoria
     if (extra?.vista) vistaDaCategoria.value = extra.vista
     if (extra?.item !== undefined) itemAberto.value = extra.item
     if (extra?.aba) abaDoItem.value = extra.aba
+    if (t !== 'tarefas') tarefaAberta.value = null
     tela.value = t
     if (import.meta.client) {
       window.scrollTo({ top: 0 })
@@ -272,7 +266,7 @@ export function useComunicacao() {
 
   /**
    * Abre o compositor. Se já há rascunho com conteúdo e o pedido traz outro
-   * item, o rascunho é substituído: o pedido é sempre o mais novo.
+   * contexto, o rascunho é substituído: o pedido é sempre o mais novo.
    */
   function abrirCompositor(parcial: Partial<Rascunho> = {}) {
     const atual = rascunho.value
@@ -285,29 +279,65 @@ export function useComunicacao() {
     compositorAberto.value = true
   }
 
+  /**
+   * O "Novo e-mail" do topo reconhece a tela: no item, vincula o item e põe o
+   * primeiro contato em Para; com uma tarefa aberta, vincula o item da tarefa
+   * (e a tarefa, na Fase 3). Nas outras telas, abre sem vínculo.
+   */
+  function contextoDaTela(): Partial<Rascunho> | null {
+    if (tela.value === 'item' && itemAberto.value) {
+      const i = itemPorId(itemAberto.value)
+      if (!i) return null
+      const c = contatosDoItem(i, config.value).find(x => x.email)
+      return { itemId: i.id, para: c?.email ? [c.email] : [], origem: 'item' }
+    }
+    if (tela.value === 'tarefas' && tarefaAberta.value) {
+      const x = tarefas.find(t => t.id === tarefaAberta.value)
+      if (!x) return null
+      const id = x.item ?? null
+      const deFase3 = fase.value >= 3 ? { tarefaId: x.id } : {}
+      if (id === null && !Object.keys(deFase3).length) return null
+      return { itemId: id, origem: 'tarefa', ...deFase3 }
+    }
+    return null
+  }
+
+  function novoEmailNoContexto() {
+    const ctx = contextoDaTela()
+    abrirCompositor(ctx ?? {})
+  }
+
   function descartarRascunho() {
-    rascunho.value = rascunhoVazio()
     compositorAberto.value = false
+    // Limpa depois que o painel termina de fechar, para o formulário não piscar vazio na saída.
+    setTimeout(() => { if (!compositorAberto.value) rascunho.value = rascunhoVazio() }, 300)
   }
 
   return {
     config,
+    fase,
     emails,
     formularios,
     tela,
     categoriaAtual,
     itemAberto,
     abaDoItem,
+    tarefaAberta,
     compositorAberto,
     rascunho,
     cenario,
     destacar,
     outlookIntegrado,
+    remetentes,
+    podeEnviar,
     remetentePadrao,
     responderPara,
+    registrado,
     ir,
     abrirItem,
     abrirCompositor,
+    contextoDaTela,
+    novoEmailNoContexto,
     descartarRascunho,
   }
 }

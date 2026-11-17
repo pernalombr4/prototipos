@@ -6,14 +6,14 @@
  *
  * PROPOSTA, só no cartão Módulos, ao lado de Correção Monetária e Comparações
  * (pedido literal do documento: "do mesmo modo como foi feito em correções
- * monetárias, comparador"):
- *  - "Atalhos de comunicação", com canais, telas e texto inicial;
- *  - "E-mail do ENSPACE em todas as telas", com de onde o e-mail sai e os
- *    pré-requisitos (Correio do Outlook de cada pessoa, pasta Mail Box).
+ * monetárias, comparador"): a chave "Atalhos de comunicação". Ela liga o
+ * atalho de e-mail em todas as telas. Onde aparece e por qual canal não se
+ * configura: o canal é só e-mail e as telas são sempre as mesmas (pedido da
+ * redatora na rodada 6). O contato de cada categoria se escolhe na categoria.
  */
 import type { Textos } from './textos'
-import { categorias, workspace } from './mocks'
-import { CANAIS, type ConfigDeComunicacao, LUGARES, useComunicacao, useMarcaDeProposta } from './estado'
+import { workspace } from './mocks'
+import { type ConfigDeComunicacao, useComunicacao, useMarcaDeProposta } from './estado'
 
 const props = defineProps<{ t: Textos }>()
 
@@ -27,15 +27,6 @@ watch(config, v => (rascunho.value = structuredClone(toRaw(v))), { deep: true })
 
 const modulos = reactive({ correcao: true, comparacoes: false, juridico: true })
 
-const canais = computed({
-  get: () => CANAIS.filter(c => rascunho.value.canais[c]),
-  set: (v: string[]) => { for (const c of CANAIS) rascunho.value.canais[c] = v.includes(c) },
-})
-const lugares = computed({
-  get: () => LUGARES.filter(l => rascunho.value.lugares[l]),
-  set: (v: string[]) => { for (const l of LUGARES) rascunho.value.lugares[l] = v.includes(l) },
-})
-
 const salvando = ref(false)
 async function salvarModulos() {
   salvando.value = true
@@ -45,7 +36,6 @@ async function salvarModulos() {
   toast.add({ title: props.t.sistema.modulosSalvos, icon: 'i-lucide-check', color: 'success' })
 }
 
-const comMailBox = categorias.filter(c => c.temMailBox).length
 </script>
 
 <template>
@@ -120,16 +110,9 @@ const comMailBox = categorias.filter(c => c.temMailBox).length
           :class="marca"
           :ui="{ root: 'flex-col-reverse items-start gap-2', label: 'font-medium', wrapper: 'ms-0' }"
         />
-        <USwitch
-          v-model="rascunho.emailDoEnspace"
-          :label="t.sistema.emailDoEnspace"
-          :description="t.sistema.emailDoEnspaceDescricao"
-          :class="marca"
-          :ui="{ root: 'flex-col-reverse items-start gap-2', label: 'font-medium', wrapper: 'ms-0' }"
-        />
       </div>
 
-      <!-- PROPOSTA: as opções dos atalhos -->
+      <!-- PROPOSTA: o que a chave liga -->
       <Transition
         enter-active-class="transition duration-200 ease-out"
         enter-from-class="-translate-y-1 opacity-0"
@@ -138,76 +121,24 @@ const comMailBox = categorias.filter(c => c.temMailBox).length
       >
         <section v-if="rascunho.atalhos" class="mt-6 rounded-lg border border-default bg-elevated/30 p-4" :class="marca">
           <h3 class="text-sm font-semibold text-highlighted">
-            {{ t.sistema.atalhos }}
+            {{ t.sistema.oQueLiga }}
           </h3>
-          <div class="mt-3 grid gap-5 lg:grid-cols-2">
-            <UFormField :label="t.sistema.canais" :help="t.sistema.canaisAjuda">
-              <UCheckboxGroup
-                v-model="canais"
-                :items="CANAIS.map(c => ({ value: c, label: t.atalho.canal[c] }))"
-                orientation="horizontal"
-              />
-            </UFormField>
-            <UFormField :label="t.sistema.ondeAparecem">
-              <UCheckboxGroup
-                v-model="lugares"
-                :items="LUGARES.map(l => ({ value: l, label: t.sistema.lugares[l] }))"
-                :ui="{ fieldset: 'grid grid-cols-2 gap-2' }"
-              />
-            </UFormField>
-            <USwitch v-model="rascunho.textoInicial" :label="t.sistema.textoInicial" :description="t.sistema.textoInicialAjuda" />
-            <USwitch v-model="rascunho.copiaParaOItem" :label="t.sistema.copiaParaOItem" :description="t.sistema.copiaParaOItemAjuda" />
-          </div>
+          <ul class="mt-2 grid gap-1.5 text-sm text-default sm:grid-cols-2">
+            <li v-for="(l, i) in t.sistema.lugaresDoAtalho" :key="i" class="flex items-start gap-2">
+              <UIcon name="i-lucide-circle-check" class="mt-0.5 size-4 shrink-0 text-success" />{{ l }}
+            </li>
+          </ul>
+          <p class="mt-3 text-sm text-muted">
+            {{ t.sistema.contatoNaCategoria }}
+          </p>
           <UButton
             :label="t.sistema.irParaCategorias"
             trailing-icon="i-lucide-arrow-right"
             color="neutral"
             variant="link"
-            class="mt-3 px-0"
-            @click="ir('categoria', { vista: 'lista' })"
+            class="mt-1 px-0"
+            @click="ir('categoria', { vista: 'atalhos' })"
           />
-        </section>
-      </Transition>
-
-      <!-- PROPOSTA: as opções do e-mail do ENSPACE -->
-      <Transition
-        enter-active-class="transition duration-200 ease-out"
-        enter-from-class="-translate-y-1 opacity-0"
-        leave-active-class="transition duration-150 ease-in"
-        leave-to-class="opacity-0"
-      >
-        <section v-if="rascunho.emailDoEnspace" class="mt-4 rounded-lg border border-default bg-elevated/30 p-4" :class="marca">
-          <h3 class="text-sm font-semibold text-highlighted">
-            {{ t.sistema.emailDoEnspace }}
-          </h3>
-          <div class="mt-3 grid gap-5 lg:grid-cols-2">
-            <div>
-              <p class="text-sm font-medium text-highlighted">
-                {{ t.sistema.comoSai }}
-              </p>
-              <p class="mt-1 text-sm text-muted">
-                {{ t.sistema.comoSaiDescricao }}
-              </p>
-            </div>
-            <div>
-              <p class="text-sm font-medium text-highlighted">
-                {{ t.sistema.preRequisito(comMailBox, categorias.length) }}
-              </p>
-              <ul class="mt-2 flex flex-col gap-1.5 text-sm">
-                <li v-for="c in categorias" :key="c.slug" class="flex items-start gap-2">
-                  <UIcon
-                    :name="c.temMailBox ? 'i-lucide-circle-check' : 'i-lucide-triangle-alert'"
-                    class="mt-0.5 size-4 shrink-0"
-                    :class="c.temMailBox ? 'text-success' : 'text-warning'"
-                  />
-                  <span>
-                    <span class="text-highlighted">{{ c.name }}</span>
-                    <span v-if="!c.temMailBox" class="block text-xs text-muted">{{ t.sistema.semMailBox }}</span>
-                  </span>
-                </li>
-              </ul>
-            </div>
-          </div>
         </section>
       </Transition>
 

@@ -7,9 +7,7 @@
 
 import type { Idioma } from '../../composables/useIdioma'
 import type { StatusDoItem } from './mocks'
-import type { Canal, Lugar } from './estado'
-
-type PorCanal = Record<Canal, string>
+import type { Fase } from './estado'
 
 export interface Textos {
   casca: {
@@ -31,20 +29,18 @@ export interface Textos {
     novoEmail: string
     novoEmailDica: string
     itens: Record<string, string>
+    novoEmailNoItem: (ref: string) => string
   }
   atalho: {
-    canal: PorCanal
     semContato: string
     semEmail: string
-    semTelefone: string
     escreverNoEnspace: string
     escreverNoEnspaceComItem: (ref: string) => string
-    escreverNoEnspaceSemItem: string
     abrirNoApp: string
     abrirNoAppDica: string
     outrasFormasDeEmail: string
-    telefoneInvalido: string
     abrirNoAppComCopia: string
+    email: string
   }
   inicio: {
     saudacao: (nome: string) => string
@@ -92,15 +88,10 @@ export interface Textos {
     dicaDoQuadro: string
   }
   item: {
-    contatoRapido: string
     paraQuem: string
-    ajudaComEnspace: string
+    ajudaComEnspace: (ref: string) => string
     ajudaSemEnspace: string
-    semTelefoneAviso: string
     semEmailAviso: string
-    cadastrarTelefone: string
-    telefoneInvalidoAviso: string
-    corrigirTelefone: string
     cadastrarEmail: string
     semContatoTitulo: string
     semContatoDica: string
@@ -120,7 +111,6 @@ export interface Textos {
     salvar: string
     salvo: string
     copiarEndereco: string
-    escreverEmail: string
     recebidos: string
     enviados: string
     para: (quem: string) => string
@@ -130,6 +120,14 @@ export interface Textos {
     semTarefas: string
     foraDoEscopo: string
     foraDoEscopoDica: string
+    contato: string
+    emailPara: (rotulo: string) => string
+    novoEmail: string
+    enviadoPelaCaixa: (nome: string, caixa: string) => string
+    nenhumEmailDica: string
+    nenhumEmailDaTarefa: string
+    dataTarefa: string
+    doItem: (ref: string) => string
   }
   form: {
     formularios: string
@@ -174,27 +172,20 @@ export interface Textos {
     semResponsavel: string
     semResponsavelDica: string
     abrir: string
-    avisar: (nome: string) => string
-    avisarSemResponsavel: string
-    avisarResponsaveisPor: string
     selecionadas: (n: number) => string
     ajudaDoLote: string
     foraDoLote: (n: number) => string
-    loteTitulo: (canal: string) => string
-    loteDescricao: string
-    abrirConversa: string
-    aberta: string
     dicaDoQuadro: string
-    membroSemTelefone: string
     respostaCriaItem: (categoria: string) => string
-    loteProgresso: (i: number, n: number) => string
-    proxima: string
-    fechar: string
-    loteConcluido: string
-    foraSemTelefone: (nomes: string) => string
     assuntoDoAviso: (tarefa: string, prazo: string | null) => string
     mensagemDoAviso: (nome: string, tarefa: string, prazo: string | null) => string
     assuntoDoLote: (n: number) => string
+    emailPara: (nome: string) => string
+    emailParaResponsaveis: (n: number) => string
+    abrirMailBox: string
+    detalhes: string
+    semItemTitulo: string
+    semItemDescricao: string
   }
   agenda: {
     hoje: string
@@ -213,34 +204,55 @@ export interface Textos {
     intervalo: (de: string, ate: string) => string
     enviarLembrete: string
     emailParaTodos: (n: number) => string
-    ajudaComTelefone: string
-    ajudaSemTelefone: string
     assuntoDoLembrete: (evento: string, quando: string) => string
     mensagemDoLembrete: (nome: string, evento: string, quando: string) => string
+    emailPara: (nome: string) => string
+    ajudaDoLembrete: string
   }
   emails: {
     titulo: string
-    recebidos: string
-    enviados: string
+    descricaoFase1: string
+    descricaoFase2: string
     pesquisar: string
-    vinculo: Record<'todos' | 'com' | 'sem', string>
-    de: string
-    para: string
-    assunto: string
-    item: string
-    caixa: string
-    enviadoPor: string
-    data: string
+    limparBusca: string
+    periodoRotulo: string
+    periodo: Record<'todos' | 'hoje' | 'semana' | 'mes', string>
+    limparFiltros: string
+    colunas: string
+    expandirFiltros: string
+    recolherFiltros: string
+    rapidos: Record<'recebidos' | 'enviados' | 'naoLidos' | 'comAnexo' | 'semItem', string>
+    col: Record<'tipo' | 'de' | 'para' | 'assunto' | 'item' | 'tarefa' | 'enviadoPor' | 'data' | 'acoes', string>
+    tipo: Record<'recebido' | 'enviado', string>
+    ordenar: (coluna: string) => string
+    filtro: {
+      filtrar: string
+      totalmente: string
+      operadores: Record<'eq' | 'ne' | 'contains' | 'ncontains' | 'containss' | 'ncontainss', string>
+      preposicao: Record<'eq' | 'ne' | 'contains' | 'ncontains' | 'containss' | 'ncontainss', string>
+      digiteValor: string
+      aplicar: string
+      remover: string
+      adicionar: string
+      pendentes: string
+      buscarOpcoes: string
+      todos: string
+      limpar: string
+      selecionados: (n: number) => string
+      nenhumResultado: string
+    }
+    pagina: { mostrando: (inicio: number, fim: number, total: number) => string, porPagina: (n: number) => string, rotulo: string }
+    acoes: Record<'verDetalhes' | 'responder' | 'encaminhar' | 'marcarNaoLido' | 'verItem' | 'vincular', string>
     semItem: string
     naoLido: string
-    vazioTitulo: string
+    comAnexo: string
     vazioDescricao: string
+    vazioFiltrado: string
     vinculadoTitulo: string
     vinculadoDescricao: (ref: string) => string
     vincularDepois: string
-    encaminhar: string
-    vincular: string
     sugestoesPeloRemetente: string
+    vincular: string
   }
   compositor: {
     titulo: string
@@ -266,7 +278,6 @@ export interface Textos {
     cancelar: string
     vinculadoPeloItem: string
     vinculadoPelaTarefa: string
-    semMailBox: (categoria: string) => string
     recentes: string
     resultados: (mostrando: number, total: number) => string
     sobra: (n: number) => string
@@ -310,6 +321,17 @@ export interface Textos {
     verEmEmails: string
     descartado: string
     desfazer: string
+    grupoOutlook: string
+    grupoCaixas: string
+    caixaDoWorkspace: string
+    respostasNaCaixa: (caixa: string) => string
+    semItemNaoRegistra: string
+    vincularTarefa: string
+    vincularTarefaAjuda: string
+    semTarefa: string
+    respostaComoNova: string
+    respostaNaConversa: string
+    enviadoSemItemRegistrado: (de: string) => string
   }
   sistema: {
     titulo: string
@@ -325,25 +347,14 @@ export interface Textos {
     juridico: string
     atalhos: string
     atalhosDescricao: string
-    emailDoEnspace: string
-    emailDoEnspaceDescricao: string
-    canais: string
-    canaisAjuda: string
-    ondeAparecem: string
-    lugares: Record<Lugar, string>
-    textoInicial: string
-    textoInicialAjuda: string
-    copiaParaOItem: string
-    copiaParaOItemAjuda: string
     irParaCategorias: string
-    comoSai: string
-    comoSaiDescricao: string
-    preRequisito: (n: number, total: number) => string
-    semMailBox: string
     modulosSalvos: string
     zonaDePerigo: string
     excluirWorkspace: string
     excluirWorkspaceDica: string
+    oQueLiga: string
+    lugaresDoAtalho: string[]
+    contatoNaCategoria: string
   }
   categoria: {
     categorias: string
@@ -375,10 +386,8 @@ export interface Textos {
     removerContato: string
     campoNome: string
     campoEmail: string
-    campoTelefone: string
     nenhum: string
     tipoEmail: string
-    tipoMascara: string
     tipoPessoa: string
     subNome: string
     subEmail: string
@@ -387,32 +396,22 @@ export interface Textos {
     campoPadrao: string
     novoContato: string
     adicionarContato: string
-    semCampoDeTelefone: string
-    textoInicial: string
-    textoInicialDica: string
-    textoInicialDesligado: string
     assuntoDoEmail: string
-    mensagemDoApp: string
     inserir: string
     previa: string
     semNome: string
     salvo: string
+    avaliarComDevs: string
+    assuntoDica: string
   }
   simulador: {
     selo: string
-    titulo: Record<'whatsapp' | 'sms' | 'email' | 'formulario' | 'outlook', string>
-    noProduto: Record<'whatsapp' | 'sms' | 'email' | 'formulario' | 'outlook', string>
+    titulo: Record<'email' | 'formulario' | 'outlook', string>
+    noProduto: Record<'email' | 'formulario' | 'outlook', string>
     voltar: string
     enviar: string
     descartar: string
-    digiteMensagem: string
     escrevaAqui: string
-    paraNumero: string
-    novaConversa: string
-    textoPronto: string
-    naoRegistra: { whatsapp: string, sms: string }
-    enviada: string
-    mensagens: string
     novaMensagem: string
     comCopiaAviso: string
     semCopiaAviso: string
@@ -453,6 +452,9 @@ export interface Textos {
     cenarios: { normal: string, semOutlook: string, falha: string }
     mostrarOQueMuda: string
     porTras: string
+    fase: string
+    fases: Record<Fase, string>
+    fasesDica: Record<Fase, string>
   }
 }
 
@@ -511,20 +513,18 @@ const ptBR: Textos = {
       releases: 'Releases',
       documentacao: 'Documentação',
     },
+    novoEmailNoItem: ref => `Escrever um e-mail vinculado a ${ref}`,
   },
   atalho: {
-    canal: { email: 'E-mail', whatsapp: 'WhatsApp', sms: 'SMS' },
     semContato: 'Sem contato',
     semEmail: 'Sem e-mail cadastrado',
-    semTelefone: 'Sem telefone cadastrado',
     escreverNoEnspace: 'Escrever pelo ENSPACE',
-    escreverNoEnspaceComItem: ref => `Sai da sua conta do Outlook e fica na Mail Box de ${ref}`,
-    escreverNoEnspaceSemItem: 'Sai da sua conta do Outlook',
+    escreverNoEnspaceComItem: ref => `O e-mail fica na Mail Box de ${ref}`,
     abrirNoApp: 'Abrir no meu app de e-mail',
     abrirNoAppDica: 'Outlook, Gmail ou o app padrão do computador',
     outrasFormasDeEmail: 'Outras formas de enviar e-mail',
-    telefoneInvalido: 'Telefone inválido',
-    abrirNoAppComCopia: 'A caixa do item vai em cópia: a resposta volta quando a pessoa responde a todos.',
+    abrirNoAppComCopia: 'O endereço do item vai em cópia: a resposta volta para a Mail Box quando a pessoa responde a todos.',
+    email: 'E-mail',
   },
   inicio: {
     saudacao: nome => `Bom dia, ${nome}!`,
@@ -569,18 +569,13 @@ const ptBR: Textos = {
     copiarLink: 'Copiar Link',
     contatar: 'Contatar',
     semContato: 'Sem contato',
-    dicaDoQuadro: 'Clique com o botão direito num cartão para contatar.',
+    dicaDoQuadro: 'Clique com o botão direito num cartão para enviar e-mail ao contato.',
   },
   item: {
-    contatoRapido: 'Contato rápido',
     paraQuem: 'Para quem',
-    ajudaComEnspace: 'WhatsApp e SMS abrem o app do seu computador ou celular. O e-mail sai pelo ENSPACE ou pelo seu app.',
-    ajudaSemEnspace: 'Abre o seu app com o destinatário preenchido. O ENSPACE não envia a mensagem.',
-    semTelefoneAviso: 'Sem telefone: WhatsApp e SMS indisponíveis.',
-    semEmailAviso: 'Sem e-mail: o atalho de e-mail fica indisponível.',
-    cadastrarTelefone: 'Cadastrar telefone',
-    telefoneInvalidoAviso: 'Telefone inválido: WhatsApp e SMS indisponíveis.',
-    corrigirTelefone: 'Corrigir telefone',
+    ajudaComEnspace: ref => `O e-mail sai pelo ENSPACE e fica na Mail Box de ${ref}. A seta abre o seu app de e-mail.`,
+    ajudaSemEnspace: 'Abre o seu app de e-mail com o destinatário preenchido e o endereço do item em cópia.',
+    semEmailAviso: 'Este contato não tem e-mail cadastrado.',
     cadastrarEmail: 'Cadastrar e-mail',
     semContatoTitulo: 'Nenhum contato neste item',
     semContatoDica: 'Os campos de contato deste item estão vazios.',
@@ -615,7 +610,6 @@ const ptBR: Textos = {
     salvar: 'Salvar',
     salvo: 'Item salvo',
     copiarEndereco: 'Copiar o endereço da caixa',
-    escreverEmail: 'Escrever e-mail',
     recebidos: 'Recebidos',
     enviados: 'Enviados',
     para: quem => `Para: ${quem}`,
@@ -625,6 +619,14 @@ const ptBR: Textos = {
     semTarefas: 'Nenhuma tarefa neste item',
     foraDoEscopo: 'Pasta fora deste protótipo',
     foraDoEscopoDica: 'Esta pasta existe no develop e não muda com a proposta.',
+    contato: 'Contato do item',
+    emailPara: rotulo => `Enviar e-mail para ${rotulo}`,
+    novoEmail: 'Novo e-mail',
+    enviadoPelaCaixa: (nome, caixa) => `Enviado por ${nome} pela caixa ${caixa}`,
+    nenhumEmailDica: 'Os e-mails enviados para o endereço do item e os enviados por aqui aparecem nesta lista.',
+    nenhumEmailDaTarefa: 'Os e-mails vinculados a esta tarefa aparecem nesta lista. Os demais e-mails do item estão em "Do item".',
+    dataTarefa: 'Desta tarefa',
+    doItem: ref => `Do item ${ref}`,
   },
   form: {
     formularios: 'Formulários',
@@ -667,29 +669,22 @@ const ptBR: Textos = {
     prioridade: 'Prioridade',
     item: 'Item',
     semResponsavel: 'Sem responsável',
-    semResponsavelDica: 'Atribua um responsável para avisar alguém.',
+    semResponsavelDica: 'Atribua um responsável para enviar o e-mail.',
     abrir: 'Abrir tarefa',
-    avisar: nome => `Avisar ${nome}`,
-    avisarSemResponsavel: 'Avisar responsável',
-    avisarResponsaveisPor: 'Avisar responsáveis por',
     selecionadas: n => plural(n, 'tarefa selecionada', 'tarefas selecionadas'),
-    ajudaDoLote: 'O e-mail abre 1 rascunho para todos. WhatsApp e SMS abrem 1 conversa por responsável.',
+    ajudaDoLote: 'Abre 1 e-mail com todos os responsáveis em Para.',
     foraDoLote: n => n === 1 ? '1 tarefa sem responsável fica de fora.' : `${n} tarefas sem responsável ficam de fora.`,
-    loteTitulo: canal => `Avisar por ${canal}`,
-    loteDescricao: 'Uma conversa por pessoa. Abra uma de cada vez.',
-    abrirConversa: 'Abrir conversa',
-    aberta: 'Aberta',
-    dicaDoQuadro: 'Clique no cartão para abrir a tarefa. Com o botão direito, avise o responsável.',
-    membroSemTelefone: 'WhatsApp e SMS pedem o telefone do membro. A tela de perfil ainda não tem esse campo.',
+    dicaDoQuadro: 'Clique no cartão para abrir a tarefa. Com o botão direito, envie e-mail ao responsável.',
     respostaCriaItem: categoria => `A resposta pelo link cria um item novo em ${categoria}. Esta tarefa continua aberta até você concluí-la.`,
-    loteProgresso: (i, n) => `Conversa ${i} de ${n}`,
-    proxima: 'Próxima',
-    fechar: 'Fechar',
-    loteConcluido: 'Todas as conversas abertas.',
-    foraSemTelefone: nomes => `Ficam de fora, sem telefone: ${nomes}.`,
     assuntoDoAviso: (tarefa, prazo) => prazo ? `Tarefa: ${tarefa} (prazo ${prazo})` : `Tarefa: ${tarefa}`,
     mensagemDoAviso: (nome, tarefa, prazo) => `${nome ? `Olá, ${nome}.` : 'Olá.'} Lembrete da tarefa "${tarefa}"${prazo ? `, prazo ${prazo}` : ''}.`,
     assuntoDoLote: n => `${n} tarefas pendentes`,
+    emailPara: nome => `Enviar e-mail para ${nome}`,
+    emailParaResponsaveis: n => n === 1 ? 'E-mail para o responsável' : `E-mail para os ${n} responsáveis`,
+    abrirMailBox: 'Abrir a Mail Box',
+    detalhes: 'Detalhes',
+    semItemTitulo: 'Tarefa sem item',
+    semItemDescricao: 'A Mail Box é do item. Esta tarefa não tem item vinculado, por isso não tem e-mails.',
   },
   agenda: {
     hoje: 'Hoje',
@@ -708,34 +703,55 @@ const ptBR: Textos = {
     intervalo: (de, ate) => `${de} às ${ate}`,
     enviarLembrete: 'Enviar lembrete',
     emailParaTodos: n => `E-mail para todos (${n})`,
-    ajudaComTelefone: 'Data, hora e assunto vão preenchidos. WhatsApp e SMS abrem 1 conversa por participante.',
-    ajudaSemTelefone: 'Data, hora e assunto vão preenchidos. Os participantes deste evento não têm telefone no ENSPACE: só o e-mail funciona.',
     assuntoDoLembrete: (evento, quando) => `Lembrete: ${evento} (${quando})`,
     mensagemDoLembrete: (nome, evento, quando) => `${nome ? `Olá, ${nome}.` : 'Olá.'} Lembrete: ${evento}, ${quando}.`,
+    emailPara: nome => `Enviar e-mail para ${nome}`,
+    ajudaDoLembrete: 'O e-mail abre com data, hora e assunto preenchidos. É possível alterar o texto antes do envio.',
   },
   emails: {
     titulo: 'E-mails',
-    recebidos: 'Recebidos',
-    enviados: 'Enviados',
-    pesquisar: 'Pesquisar e-mails',
-    vinculo: { todos: 'Todos', com: 'Com item', sem: 'Sem item' },
-    de: 'De',
-    para: 'Para',
-    assunto: 'Assunto',
-    item: 'Item',
-    caixa: 'Caixa',
-    enviadoPor: 'Enviado por',
-    data: 'Data',
+    descricaoFase1: 'Os e-mails recebidos e enviados pela Mail Box dos itens.',
+    descricaoFase2: 'Os e-mails recebidos e enviados pelo ENSPACE, com ou sem item.',
+    pesquisar: 'Pesquisar...',
+    limparBusca: 'Limpar a busca',
+    periodoRotulo: 'Período',
+    periodo: { todos: 'Todo o período', hoje: 'Hoje', semana: 'Últimos 7 dias', mes: 'Últimos 30 dias' },
+    limparFiltros: 'Limpar filtros',
+    colunas: 'Colunas',
+    expandirFiltros: 'Expandir filtros',
+    recolherFiltros: 'Recolher filtros',
+    rapidos: { recebidos: 'Recebidos', enviados: 'Enviados', naoLidos: 'Não lidos', comAnexo: 'Com anexo', semItem: 'Sem item' },
+    col: { tipo: 'Tipo', de: 'De', para: 'Para', assunto: 'Assunto', item: 'Item', tarefa: 'Tarefa', enviadoPor: 'Enviado por', data: 'Data', acoes: 'Ações' },
+    tipo: { recebido: 'Recebido', enviado: 'Enviado' },
+    ordenar: coluna => `Ordenar por ${coluna}`,
+    filtro: {
+      filtrar: 'Filtrar',
+      totalmente: 'É totalmente',
+      operadores: { eq: 'Igual', ne: 'Diferente', contains: 'Contém', ncontains: 'Não contém', containss: 'Contém (case sensitive)', ncontainss: 'Não contém (case sensitive)' },
+      preposicao: { eq: 'a', ne: 'De', contains: 'parcialmente', ncontains: '', containss: 'parcialmente', ncontainss: '' },
+      digiteValor: 'Digite o valor...',
+      aplicar: 'Clique para aplicar o filtro',
+      remover: 'Remover filtro',
+      adicionar: 'Adicionar Filtro',
+      pendentes: 'Aplique os filtros pendentes antes de adicionar um novo.',
+      buscarOpcoes: 'Buscar...',
+      todos: 'Todos',
+      limpar: 'Limpar',
+      selecionados: n => plural(n, 'selecionado', 'selecionados'),
+      nenhumResultado: 'Nenhum resultado encontrado',
+    },
+    pagina: { mostrando: (a, b, n) => `Mostrando ${a} a ${b} de ${n} resultados`, porPagina: n => `${n} por página`, rotulo: 'Itens por página' },
+    acoes: { verDetalhes: 'Ver Detalhes', responder: 'Responder', encaminhar: 'Encaminhar', marcarNaoLido: 'Marcar como não lido', verItem: 'Ver Item', vincular: 'Vincular a um item' },
     semItem: 'Sem item',
     naoLido: 'Não lido',
-    vazioTitulo: 'Nenhum e-mail aqui',
-    vazioDescricao: 'Mude o filtro ou escreva um e-mail novo.',
+    comAnexo: 'Com anexo',
+    vazioDescricao: 'Nenhum e-mail encontrado.',
+    vazioFiltrado: 'Nenhum e-mail com estes filtros.',
     vinculadoTitulo: 'E-mail vinculado',
     vinculadoDescricao: ref => `Aparece na aba Mail Box de ${ref}.`,
-    vincularDepois: 'O e-mail passa a aparecer na aba Mail Box do item.',
-    encaminhar: 'Encaminhar',
+    vincularDepois: 'Este e-mail não tem item. Ao vincular, ele passa a aparecer na aba Mail Box do item.',
+    sugestoesPeloRemetente: 'Sugestões pelo destinatário',
     vincular: 'Vincular',
-    sugestoesPeloRemetente: 'Sugestões pelo remetente',
   },
   compositor: {
     titulo: 'Nova Mensagem',
@@ -759,9 +775,8 @@ const ptBR: Textos = {
     trocar: 'Trocar',
     desvincular: 'Remover vínculo',
     cancelar: 'Cancelar',
-    vinculadoPeloItem: 'Vinculado porque você começou no item. Dá para trocar ou remover.',
-    vinculadoPelaTarefa: 'Vinculado ao item da tarefa. Dá para trocar ou remover.',
-    semMailBox: categoria => `${categoria} não tem a pasta Mail Box: o e-mail não aparece na tela do item.`,
+    vinculadoPeloItem: 'Vinculado porque você começou no item. É possível trocar ou remover o vínculo.',
+    vinculadoPelaTarefa: 'Vinculado ao item da tarefa. É possível trocar ou remover o vínculo.',
     recentes: 'Atualizados por último',
     resultados: (m, n) => `${m} de ${plural(n, 'item', 'itens')}`,
     sobra: n => `Mais ${plural(n, 'item', 'itens')}. Continue digitando para achar.`,
@@ -800,11 +815,22 @@ const ptBR: Textos = {
     semAssunto: '(sem assunto)',
     enviadoTitulo: 'E-mail enviado',
     enviadoComItem: ref => `Vinculado a ${ref}. As respostas voltam para o item.`,
-    enviadoSemItem: de => `Saiu de ${de}, sem item vinculado.`,
+    enviadoSemItem: de => `Enviado de ${de}. Sem item vinculado, o e-mail fica só no seu Outlook e não aparece no ENSPACE.`,
     verNoItem: 'Ver no item',
     verEmEmails: 'Ver em E-mails',
     descartado: 'Rascunho descartado',
     desfazer: 'Desfazer',
+    grupoOutlook: 'Sua conta',
+    grupoCaixas: 'Caixas do workspace',
+    caixaDoWorkspace: 'Caixa do workspace',
+    respostasNaCaixa: caixa => `Sem item vinculado, a resposta chega na caixa ${caixa}, na Central de Atendimento.`,
+    semItemNaoRegistra: 'Sem item vinculado, o e-mail fica só no seu Outlook e não aparece no ENSPACE.',
+    vincularTarefa: 'Vincular a tarefa',
+    vincularTarefaAjuda: 'O e-mail aparece também na Mail Box da tarefa.',
+    semTarefa: 'Nenhuma tarefa',
+    respostaComoNova: 'A resposta sai como uma mensagem nova, com o texto original citado. Ela não entra na mesma conversa.',
+    respostaNaConversa: 'A resposta segue na mesma conversa do e-mail original.',
+    enviadoSemItemRegistrado: de => `Enviado de ${de}, sem item vinculado. O e-mail fica em E-mails.`,
   },
   sistema: {
     titulo: 'Configurações Gerais',
@@ -819,26 +845,15 @@ const ptBR: Textos = {
     comparacoes: 'Comparações',
     juridico: 'Juridico',
     atalhos: 'Atalhos de comunicação',
-    atalhosDescricao: 'Botões de e-mail, WhatsApp e SMS nas telas, e o link dos formulários públicos.',
-    emailDoEnspace: 'E-mail do ENSPACE em todas as telas',
-    emailDoEnspaceDescricao: 'Escrever e-mail de qualquer tela, com vínculo a item, e a área E-mails no menu.',
-    canais: 'Canais',
-    canaisAjuda: 'Canal desligado some de todas as telas.',
-    ondeAparecem: 'Onde aparecem',
-    lugares: { item: 'Tela do item', itens: 'Lista e quadro de itens', tarefas: 'Tarefas', agenda: 'Agenda', formularios: 'Link de formulário público' },
-    textoInicial: 'Preencher assunto e mensagem',
-    textoInicialAjuda: 'O texto vem da configuração de cada categoria. Quem envia pode mudar antes de mandar.',
-    copiaParaOItem: 'Pôr a caixa do item em cópia',
-    copiaParaOItemAjuda: 'No e-mail aberto no app da pessoa. A resposta volta para a aba Mail Box do item.',
+    atalhosDescricao: 'Botão de e-mail nas telas de uso, o Novo e-mail no topo e o link dos formulários públicos.',
     irParaCategorias: 'Escolher o contato de cada categoria',
-    comoSai: 'De onde o e-mail sai',
-    comoSaiDescricao: 'Da conta do Outlook de cada pessoa, como na pasta Mail Box de hoje. Cada pessoa integra a conta em Perfil › Integrações › Correio do Outlook. Com item vinculado, a resposta volta para a Mail Box do item.',
-    preRequisito: (n, total) => `Pasta Mail Box: ${n} de ${total} categorias têm`,
-    semMailBox: 'Sem a pasta Mail Box, o e-mail vinculado não aparece na tela do item.',
     modulosSalvos: 'Módulos salvos',
     zonaDePerigo: 'Zona de Perigo',
     excluirWorkspace: 'Excluir Workspace',
     excluirWorkspaceDica: 'Excluir permanentemente este workspace e todos os seus dados. Esta ação não pode ser desfeita.',
+    oQueLiga: 'O que o módulo ativa',
+    lugaresDoAtalho: ['E-mail no campo de e-mail do item', 'E-mail no menu da lista e do quadro de itens', 'E-mail para o responsável da tarefa', 'Lembrete por e-mail na Agenda', 'Novo e-mail no topo de toda tela', 'Link do formulário público nas telas de uso'],
+    contatoNaCategoria: 'Defina na própria categoria os campos de nome e de e-mail do contato.',
   },
   categoria: {
     categorias: 'Categorias',
@@ -872,7 +887,7 @@ const ptBR: Textos = {
       execucoes: 'Execuções Programadas',
       status: 'Status',
       correcao: 'Correção Monetária',
-      atalhos: 'Atalhos de comunicação',
+      atalhos: 'Contato da categoria',
     },
     descricoes: {
       campos: 'Propriedades e formato de dados da categoria.',
@@ -887,21 +902,19 @@ const ptBR: Textos = {
       execucoes: 'Agendamento de tarefas e execuções automáticas para os itens da categoria.',
       status: 'Configurações de status e etapas para os itens da categoria.',
       correcao: 'Configurações de Correção Monetária para esta categoria.',
-      atalhos: 'Quem é o contato do item e o texto que os atalhos abrem.',
+      atalhos: 'Quem é o contato do item e o assunto do e-mail.',
     },
     moduloDesligado: 'Módulo desligado',
     moduloDesligadoTitulo: 'O módulo Atalhos de comunicação está desligado',
     moduloDesligadoDica: 'A configuração fica guardada e passa a valer quando alguém ligar o módulo em Sistema › Módulos.',
     quemEhContato: 'Quem é o contato',
-    quemEhContatoDica: 'Cada contato aparece no Contato rápido do item. Escolha de quais campos vêm o nome, o e-mail e o telefone.',
+    quemEhContatoDica: 'Cada contato aparece no Contato do item, na lateral do item. Escolha de quais campos vêm o nome e o e-mail.',
     rotulo: 'Nome do contato na tela',
     removerContato: 'Remover contato',
     campoNome: 'Nome',
     campoEmail: 'E-mail',
-    campoTelefone: 'Telefone',
     nenhum: 'Nenhum',
     tipoEmail: 'Campo E-mail',
-    tipoMascara: 'Texto com Máscara',
     tipoPessoa: 'Pessoa/Empresa',
     subNome: 'Nome de contato',
     subEmail: 'E-mail de contato',
@@ -910,23 +923,18 @@ const ptBR: Textos = {
     campoPadrao: 'Campo padrão de toda categoria',
     novoContato: 'Novo contato',
     adicionarContato: 'Adicionar contato',
-    semCampoDeTelefone: 'Esta categoria não tem campo de telefone. Para WhatsApp e SMS, crie um campo Texto com Máscara.',
-    textoInicial: 'Texto inicial',
-    textoInicialDica: 'O app abre com este texto. Quem envia pode mudar antes de mandar.',
-    textoInicialDesligado: 'O preenchimento está desligado em Sistema › Módulos: o app abre só com o destinatário.',
     assuntoDoEmail: 'Assunto do e-mail',
-    mensagemDoApp: 'Mensagem de WhatsApp e SMS',
     inserir: 'Inserir:',
-    previa: 'Prévia: o que cada atalho abre',
+    previa: 'Prévia: o que o botão E-mail abre',
     semNome: 'Sem nome',
-    salvo: 'Atalhos salvos',
+    salvo: 'Contato da categoria salvo',
+    avaliarComDevs: 'A avaliar com os devs',
+    assuntoDica: 'O e-mail abre com este assunto. Quem envia pode mudar antes de mandar.',
   },
   simulador: {
     selo: 'Simulação · fora do ENSPACE',
-    titulo: { whatsapp: 'WhatsApp', sms: 'Mensagens', email: 'Seu app de e-mail', formulario: 'Página pública do formulário', outlook: 'Integrar o Correio do Outlook' },
+    titulo: { email: 'Seu app de e-mail', formulario: 'Página pública do formulário', outlook: 'Integrar o Correio do Outlook' },
     noProduto: {
-      whatsapp: 'No produto, o navegador abre o WhatsApp (app ou Web) com este link. O texto vai pronto; a pessoa muda e envia lá.',
-      sms: 'No produto, o computador abre o app de mensagens registrado para sms: (no Windows, Vincular ao Celular).',
       email: 'No produto, abre o app de e-mail padrão do computador, já preenchido.',
       formulario: 'É o que a pessoa de fora vê: o formulário sem login. Responder cria um item no ENSPACE.',
       outlook: 'No produto: Perfil › Integrações e o login da conta Microsoft corporativa.',
@@ -934,14 +942,7 @@ const ptBR: Textos = {
     voltar: 'Voltar ao ENSPACE',
     enviar: 'Enviar',
     descartar: 'Descartar',
-    digiteMensagem: 'Digite uma mensagem',
     escrevaAqui: 'Escreva o e-mail',
-    paraNumero: 'Para: número com DDD',
-    novaConversa: 'Nova conversa',
-    textoPronto: 'O texto inicial já está na caixa de mensagem. Mude o que quiser e envie.',
-    naoRegistra: { whatsapp: 'O ENSPACE não registra conversas do WhatsApp.', sms: 'O ENSPACE não registra SMS.' },
-    enviada: 'Enviada',
-    mensagens: 'Mensagens',
     novaMensagem: 'Nova mensagem',
     comCopiaAviso: 'O endereço do item está em Cc: a cópia chega na Mail Box do item.',
     semCopiaAviso: 'Sem o endereço do item em Cc, este e-mail não chega ao ENSPACE.',
@@ -976,12 +977,15 @@ const ptBR: Textos = {
     umItem: ref => `Item ${ref}`,
     mailBox: ref => `Mail Box de ${ref}`,
     modulos: 'Sistema › Módulos',
-    atalhosDaCategoria: 'Atalhos da categoria Contratos',
+    atalhosDaCategoria: 'Contato da categoria Contratos',
     formularios: 'Formulários de Solicitações',
     cenario: 'Cenário',
     cenarios: { normal: 'Normal', semOutlook: 'Sem Outlook integrado', falha: 'Envio falha' },
     mostrarOQueMuda: 'Mostrar o que muda',
     porTras: 'Por trás',
+    fase: 'Fase',
+    fases: { 1: '1 · MVP', 2: '2 · Remetente', 3: '3 · Tarefa' },
+    fasesDica: { 1: 'Só tela, sobre o que o ENSPACE já tem', 2: 'Escolher o De, responder na conversa, encaminhar e registrar sem item', 3: 'Vincular o e-mail a uma tarefa' },
   },
 }
 
@@ -1038,20 +1042,18 @@ const en: Textos = {
       releases: 'Releases',
       documentacao: 'Documentation',
     },
+    novoEmailNoItem: ref => `Write an email linked to ${ref}`,
   },
   atalho: {
-    canal: { email: 'Email', whatsapp: 'WhatsApp', sms: 'SMS' },
     semContato: 'No contact',
     semEmail: 'No email on file',
-    semTelefone: 'No phone on file',
     escreverNoEnspace: 'Write in ENSPACE',
-    escreverNoEnspaceComItem: ref => `Sent from your Outlook account and kept in the ${ref} Mail Box`,
-    escreverNoEnspaceSemItem: 'Sent from your Outlook account',
+    escreverNoEnspaceComItem: ref => `The email stays in the Mail Box of ${ref}`,
     abrirNoApp: 'Open in my email app',
     abrirNoAppDica: 'Outlook, Gmail or the computer default app',
     outrasFormasDeEmail: 'Other ways to send email',
-    telefoneInvalido: 'Invalid phone',
-    abrirNoAppComCopia: 'The item mailbox goes in Cc: the reply comes back when the person replies to all.',
+    abrirNoAppComCopia: 'The item address goes in Cc: the reply returns to the Mail Box when the person replies to all.',
+    email: 'Email',
   },
   inicio: {
     saudacao: nome => `Good morning, ${nome}!`,
@@ -1096,18 +1098,13 @@ const en: Textos = {
     copiarLink: 'Copy Link',
     contatar: 'Contact',
     semContato: 'No contact',
-    dicaDoQuadro: 'Right-click a card to contact.',
+    dicaDoQuadro: 'Right-click a card to email the contact.',
   },
   item: {
-    contatoRapido: 'Quick contact',
     paraQuem: 'To whom',
-    ajudaComEnspace: 'WhatsApp and SMS open the app on your computer or phone. Email goes out through ENSPACE or your app.',
-    ajudaSemEnspace: 'Opens your app with the recipient filled in. ENSPACE does not send the message.',
-    semTelefoneAviso: 'No phone: WhatsApp and SMS unavailable.',
-    semEmailAviso: 'No email: the email shortcut is unavailable.',
-    cadastrarTelefone: 'Add phone',
-    telefoneInvalidoAviso: 'Invalid phone: WhatsApp and SMS unavailable.',
-    corrigirTelefone: 'Fix phone',
+    ajudaComEnspace: ref => `The email goes out through ENSPACE and stays in the Mail Box of ${ref}. The arrow opens your email app.`,
+    ajudaSemEnspace: 'Opens your email app with the recipient filled in and the item address in Cc.',
+    semEmailAviso: 'This contact has no email address.',
     cadastrarEmail: 'Add email',
     semContatoTitulo: 'No contact on this item',
     semContatoDica: 'The contact fields of this item are empty.',
@@ -1142,7 +1139,6 @@ const en: Textos = {
     salvar: 'Save',
     salvo: 'Item saved',
     copiarEndereco: 'Copy the mailbox address',
-    escreverEmail: 'Write email',
     recebidos: 'Received',
     enviados: 'Sent',
     para: quem => `To: ${quem}`,
@@ -1152,6 +1148,14 @@ const en: Textos = {
     semTarefas: 'No tasks on this item',
     foraDoEscopo: 'Folder outside this prototype',
     foraDoEscopoDica: 'This folder exists in develop and does not change with the proposal.',
+    contato: 'Item contact',
+    emailPara: rotulo => `Send email to ${rotulo}`,
+    novoEmail: 'New email',
+    enviadoPelaCaixa: (nome, caixa) => `Sent by ${nome} from the ${caixa} mailbox`,
+    nenhumEmailDica: 'Emails sent to the item address and emails sent from here appear in this list.',
+    nenhumEmailDaTarefa: 'Emails linked to this task appear in this list. The other item emails are under "Item".',
+    dataTarefa: 'This task',
+    doItem: ref => `Item ${ref}`,
   },
   form: {
     formularios: 'Forms',
@@ -1194,29 +1198,22 @@ const en: Textos = {
     prioridade: 'Priority',
     item: 'Item',
     semResponsavel: 'No assignee',
-    semResponsavelDica: 'Assign someone to notify them.',
+    semResponsavelDica: 'Assign someone to send the email.',
     abrir: 'Open task',
-    avisar: nome => `Notify ${nome}`,
-    avisarSemResponsavel: 'Notify assignee',
-    avisarResponsaveisPor: 'Notify assignees by',
     selecionadas: n => `${n} ${n === 1 ? 'task' : 'tasks'} selected`,
-    ajudaDoLote: 'Email opens 1 draft to everyone. WhatsApp and SMS open 1 chat per assignee.',
+    ajudaDoLote: 'Opens 1 email with all assignees in To.',
     foraDoLote: n => `${n} ${n === 1 ? 'task' : 'tasks'} without assignee left out.`,
-    loteTitulo: canal => `Notify by ${canal}`,
-    loteDescricao: 'One chat per person. Open one at a time.',
-    abrirConversa: 'Open chat',
-    aberta: 'Opened',
-    dicaDoQuadro: 'Click a card to open the task. Right-click to notify the assignee.',
-    membroSemTelefone: 'WhatsApp and SMS need the member phone. The profile screen does not have this field yet.',
+    dicaDoQuadro: 'Click a card to open the task. Right-click to email the assignee.',
     respostaCriaItem: categoria => `An answer through the link creates a new item in ${categoria}. This task stays open until you complete it.`,
-    loteProgresso: (i, n) => `Chat ${i} of ${n}`,
-    proxima: 'Next',
-    fechar: 'Close',
-    loteConcluido: 'All chats opened.',
-    foraSemTelefone: nomes => `Left out, no phone: ${nomes}.`,
     assuntoDoAviso: (tarefa, prazo) => prazo ? `Task: ${tarefa} (due ${prazo})` : `Task: ${tarefa}`,
     mensagemDoAviso: (nome, tarefa, prazo) => `${nome ? `Hi, ${nome}.` : 'Hi.'} Reminder about the task "${tarefa}"${prazo ? `, due ${prazo}` : ''}.`,
     assuntoDoLote: n => `${n} pending tasks`,
+    emailPara: nome => `Send email to ${nome}`,
+    emailParaResponsaveis: n => n === 1 ? 'Email the assignee' : `Email the ${n} assignees`,
+    abrirMailBox: 'Open the Mail Box',
+    detalhes: 'Details',
+    semItemTitulo: 'Task without an item',
+    semItemDescricao: 'The Mail Box belongs to the item. This task has no linked item, so it has no emails.',
   },
   agenda: {
     hoje: 'Today',
@@ -1235,34 +1232,55 @@ const en: Textos = {
     intervalo: (de, ate) => `${de} to ${ate}`,
     enviarLembrete: 'Send reminder',
     emailParaTodos: n => `Email everyone (${n})`,
-    ajudaComTelefone: 'Date, time and subject are prefilled. WhatsApp and SMS open 1 chat per participant.',
-    ajudaSemTelefone: 'Date, time and subject are prefilled. These participants have no phone in ENSPACE: only email works.',
     assuntoDoLembrete: (evento, quando) => `Reminder: ${evento} (${quando})`,
     mensagemDoLembrete: (nome, evento, quando) => `${nome ? `Hi, ${nome}.` : 'Hi.'} Reminder: ${evento}, ${quando}.`,
+    emailPara: nome => `Send email to ${nome}`,
+    ajudaDoLembrete: 'The email opens with the date, time and subject filled in. You can edit the text before sending.',
   },
   emails: {
     titulo: 'Emails',
-    recebidos: 'Received',
-    enviados: 'Sent',
-    pesquisar: 'Search emails',
-    vinculo: { todos: 'All', com: 'With item', sem: 'No item' },
-    de: 'From',
-    para: 'To',
-    assunto: 'Subject',
-    item: 'Item',
-    caixa: 'Mailbox',
-    enviadoPor: 'Sent by',
-    data: 'Date',
-    semItem: 'No item',
+    descricaoFase1: 'Emails received and sent through the item Mail Box.',
+    descricaoFase2: 'Emails received and sent through ENSPACE, with or without an item.',
+    pesquisar: 'Search...',
+    limparBusca: 'Clear search',
+    periodoRotulo: 'Period',
+    periodo: { todos: 'All time', hoje: 'Today', semana: 'Last 7 days', mes: 'Last 30 days' },
+    limparFiltros: 'Clear filters',
+    colunas: 'Columns',
+    expandirFiltros: 'Expand filters',
+    recolherFiltros: 'Collapse filters',
+    rapidos: { recebidos: 'Received', enviados: 'Sent', naoLidos: 'Unread', comAnexo: 'With attachment', semItem: 'Without item' },
+    col: { tipo: 'Type', de: 'From', para: 'To', assunto: 'Subject', item: 'Item', tarefa: 'Task', enviadoPor: 'Sent by', data: 'Date', acoes: 'Actions' },
+    tipo: { recebido: 'Received', enviado: 'Sent' },
+    ordenar: coluna => `Sort by ${coluna}`,
+    filtro: {
+      filtrar: 'Filter',
+      totalmente: 'Is exactly',
+      operadores: { eq: 'Equal', ne: 'Different', contains: 'Contains', ncontains: 'Does not contain', containss: 'Contains (case sensitive)', ncontainss: 'Does not contain (case sensitive)' },
+      preposicao: { eq: 'to', ne: 'Than', contains: 'partially', ncontains: '', containss: 'partially', ncontainss: '' },
+      digiteValor: 'Type the value...',
+      aplicar: 'Click to apply the filter',
+      remover: 'Remove filter',
+      adicionar: 'Add Filter',
+      pendentes: 'Apply the pending filters before adding a new one.',
+      buscarOpcoes: 'Search...',
+      todos: 'All',
+      limpar: 'Clear',
+      selecionados: n => `${n} selected`,
+      nenhumResultado: 'No results found',
+    },
+    pagina: { mostrando: (a, b, n) => `Showing ${a} to ${b} of ${n} results`, porPagina: n => `${n} per page`, rotulo: 'Items per page' },
+    acoes: { verDetalhes: 'View Details', responder: 'Reply', encaminhar: 'Forward', marcarNaoLido: 'Mark as unread', verItem: 'View Item', vincular: 'Link to an item' },
+    semItem: 'Without item',
     naoLido: 'Unread',
-    vazioTitulo: 'No emails here',
-    vazioDescricao: 'Change the filter or write a new email.',
+    comAnexo: 'With attachment',
+    vazioDescricao: 'No emails found.',
+    vazioFiltrado: 'No emails match these filters.',
     vinculadoTitulo: 'Email linked',
-    vinculadoDescricao: ref => `It shows in the Mail Box tab of ${ref}.`,
-    vincularDepois: 'The email shows in the Mail Box tab of the item.',
-    encaminhar: 'Forward',
+    vinculadoDescricao: ref => `It appears in the Mail Box tab of ${ref}.`,
+    vincularDepois: 'This email has no item. Once linked, it appears in the Mail Box tab of the item.',
+    sugestoesPeloRemetente: 'Suggestions from the recipient',
     vincular: 'Link',
-    sugestoesPeloRemetente: 'Suggestions from the sender',
   },
   compositor: {
     titulo: 'New Message',
@@ -1286,9 +1304,8 @@ const en: Textos = {
     trocar: 'Change',
     desvincular: 'Remove link',
     cancelar: 'Cancel',
-    vinculadoPeloItem: 'Linked because you started from the item. You can change or remove it.',
-    vinculadoPelaTarefa: 'Linked to the task item. You can change or remove it.',
-    semMailBox: categoria => `${categoria} has no Mail Box folder: the email does not show on the item screen.`,
+    vinculadoPeloItem: 'Linked because you started on the item. You can change or remove the link.',
+    vinculadoPelaTarefa: 'Linked to the task item. You can change or remove the link.',
     recentes: 'Recently updated',
     resultados: (m, n) => `${m} of ${n} ${n === 1 ? 'item' : 'items'}`,
     sobra: n => `${n} more ${n === 1 ? 'item' : 'items'}. Keep typing to narrow down.`,
@@ -1297,7 +1314,7 @@ const en: Textos = {
     nenhumItemDica: 'Search by reference (CTR-00231), ID or contact name.',
     suaConta: 'Your Outlook account',
     responderParaItem: 'Reply-to: the item address. Replies come back to the Mail Box tab.',
-    respostasNoSeuOutlook: 'With no linked item, replies only reach your Outlook.',
+    respostasNoSeuOutlook: 'Without a linked item, replies reach only your Outlook.',
     semContaTitulo: 'No integrated accounts available.',
     semContaDescricao: 'ENSPACE email goes out from your Outlook account. Connect Outlook Mail in Profile › Integrations. Until then, the Email button opens your email app.',
     integrarContas: 'Connect accounts',
@@ -1327,11 +1344,22 @@ const en: Textos = {
     semAssunto: '(no subject)',
     enviadoTitulo: 'Email sent',
     enviadoComItem: ref => `Linked to ${ref}. Replies come back to the item.`,
-    enviadoSemItem: de => `Sent from ${de}, no item linked.`,
+    enviadoSemItem: de => `Sent from ${de}. Without a linked item, the email stays only in your Outlook and does not appear in ENSPACE.`,
     verNoItem: 'See on item',
     verEmEmails: 'See in Emails',
     descartado: 'Draft discarded',
     desfazer: 'Undo',
+    grupoOutlook: 'Your account',
+    grupoCaixas: 'Workspace mailboxes',
+    caixaDoWorkspace: 'Workspace mailbox',
+    respostasNaCaixa: caixa => `Without a linked item, replies reach the ${caixa} mailbox, in the Service Center.`,
+    semItemNaoRegistra: 'Without a linked item, the email stays only in your Outlook and does not appear in ENSPACE.',
+    vincularTarefa: 'Link to task',
+    vincularTarefaAjuda: 'The email also appears in the task Mail Box.',
+    semTarefa: 'No task',
+    respostaComoNova: 'The reply goes out as a new message, quoting the original. It does not join the same thread.',
+    respostaNaConversa: 'The reply continues in the same thread as the original email.',
+    enviadoSemItemRegistrado: de => `Sent from ${de}, without a linked item. The email stays in Emails.`,
   },
   sistema: {
     titulo: 'General Settings',
@@ -1346,26 +1374,15 @@ const en: Textos = {
     comparacoes: 'Comparisons',
     juridico: 'Legal',
     atalhos: 'Communication shortcuts',
-    atalhosDescricao: 'Email, WhatsApp and SMS buttons on screens, and the public form link.',
-    emailDoEnspace: 'ENSPACE email on every screen',
-    emailDoEnspaceDescricao: 'Write email from any screen, linked to an item, and the Emails area in the menu.',
-    canais: 'Channels',
-    canaisAjuda: 'A channel turned off disappears from every screen.',
-    ondeAparecem: 'Where they show',
-    lugares: { item: 'Item screen', itens: 'Item list and board', tarefas: 'Tasks', agenda: 'Schedule', formularios: 'Public form link' },
-    textoInicial: 'Prefill subject and message',
-    textoInicialAjuda: 'The text comes from each category settings. The sender can change it before sending.',
-    copiaParaOItem: 'Cc the item mailbox',
-    copiaParaOItemAjuda: 'On the email opened in the person app. Replies come back to the Mail Box tab of the item.',
+    atalhosDescricao: 'Email button on the work screens, New email at the top and the public form link.',
     irParaCategorias: 'Choose the contact of each category',
-    comoSai: 'Where the email goes out from',
-    comoSaiDescricao: 'From each person\'s Outlook account, as in the Mail Box folder today. Each person connects the account in Profile › Integrations › Outlook Mail. With a linked item, replies come back to the item Mail Box.',
-    preRequisito: (n, total) => `Mail Box folder: ${n} of ${total} categories have it`,
-    semMailBox: 'Without the Mail Box folder, the linked email does not show on the item screen.',
     modulosSalvos: 'Modules saved',
     zonaDePerigo: 'Danger Zone',
     excluirWorkspace: 'Delete Workspace',
     excluirWorkspaceDica: 'Permanently delete this workspace and all its data. This cannot be undone.',
+    oQueLiga: 'What the module enables',
+    lugaresDoAtalho: ['Email on the item email field', 'Email in the item list and board menu', 'Email to the task assignee', 'Email reminder in the Calendar', 'New email at the top of every screen', 'Public form link on the work screens'],
+    contatoNaCategoria: 'Set the contact name and email fields in each category.',
   },
   categoria: {
     categorias: 'Categories',
@@ -1399,7 +1416,7 @@ const en: Textos = {
       execucoes: 'Scheduled Runs',
       status: 'Status',
       correcao: 'Monetary Correction',
-      atalhos: 'Communication shortcuts',
+      atalhos: 'Category contact',
     },
     descricoes: {
       campos: 'Category data properties and format.',
@@ -1414,21 +1431,19 @@ const en: Textos = {
       execucoes: 'Task scheduling and automatic runs for category items.',
       status: 'Status and stage settings for category items.',
       correcao: 'Monetary Correction settings for this category.',
-      atalhos: 'Who the item contact is and the text the shortcuts open.',
+      atalhos: 'Who the item contact is and the email subject.',
     },
     moduloDesligado: 'Module off',
     moduloDesligadoTitulo: 'The Communication shortcuts module is off',
     moduloDesligadoDica: 'These settings are kept and apply once someone turns the module on in System › Modules.',
     quemEhContato: 'Who the contact is',
-    quemEhContatoDica: 'Each contact shows in the item Quick contact. Choose which fields hold the name, email and phone.',
+    quemEhContatoDica: 'Each contact appears in Item contact, on the item side panel. Choose which fields hold the name and the email.',
     rotulo: 'Contact name on screen',
     removerContato: 'Remove contact',
     campoNome: 'Name',
     campoEmail: 'Email',
-    campoTelefone: 'Phone',
     nenhum: 'None',
     tipoEmail: 'Email field',
-    tipoMascara: 'Masked text',
     tipoPessoa: 'Person/Company',
     subNome: 'Contact name',
     subEmail: 'Contact email',
@@ -1437,38 +1452,26 @@ const en: Textos = {
     campoPadrao: 'Default field of every category',
     novoContato: 'New contact',
     adicionarContato: 'Add contact',
-    semCampoDeTelefone: 'This category has no phone field. For WhatsApp and SMS, create a Masked Text field.',
-    textoInicial: 'Starting text',
-    textoInicialDica: 'The app opens with this text. The sender can change it before sending.',
-    textoInicialDesligado: 'Prefill is off in System › Modules: the app opens with the recipient only.',
     assuntoDoEmail: 'Email subject',
-    mensagemDoApp: 'WhatsApp and SMS message',
     inserir: 'Insert:',
-    previa: 'Preview: what each shortcut opens',
+    previa: 'Preview: what the Email button opens',
     semNome: 'No name',
-    salvo: 'Shortcuts saved',
+    salvo: 'Category contact saved',
+    avaliarComDevs: 'To review with the developers',
+    assuntoDica: 'The email opens with this subject. The sender can change it before sending.',
   },
   simulador: {
     selo: 'Simulation · outside ENSPACE',
-    titulo: { whatsapp: 'WhatsApp', sms: 'Messages', email: 'Your email app', formulario: 'Public form page', outlook: 'Connect Outlook Mail' },
+    titulo: { email: 'Your email app', formulario: 'Public form page', outlook: 'Connect Outlook Mail' },
     noProduto: {
-      whatsapp: 'In the product, the browser opens WhatsApp (app or Web) with this link. The text is ready; the person edits and sends it there.',
-      sms: 'In the product, the computer opens the app registered for sms: (on Windows, Phone Link).',
       email: 'In the product, the default email app of the computer opens, already filled in.',
-      formulario: 'This is what an outside person sees: the form with no login. Answering creates an item in ENSPACE.',
-      outlook: 'In the product: Profile › Integrations and the corporate Microsoft account login.',
+      formulario: 'This is what an outside person sees: the form without login. Answering creates an item in ENSPACE.',
+      outlook: 'In the product: Profile › Integrations and the corporate Microsoft login.',
     },
     voltar: 'Back to ENSPACE',
     enviar: 'Send',
     descartar: 'Discard',
-    digiteMensagem: 'Type a message',
     escrevaAqui: 'Write the email',
-    paraNumero: 'To: number with area code',
-    novaConversa: 'New chat',
-    textoPronto: 'The starting text is already in the message box. Change what you want and send.',
-    naoRegistra: { whatsapp: 'ENSPACE does not record WhatsApp chats.', sms: 'ENSPACE does not record SMS.' },
-    enviada: 'Delivered',
-    mensagens: 'Messages',
     novaMensagem: 'New message',
     comCopiaAviso: 'The item address is in Cc: the copy reaches the item Mail Box.',
     semCopiaAviso: 'Without the item address in Cc, this email does not reach ENSPACE.',
@@ -1503,12 +1506,15 @@ const en: Textos = {
     umItem: ref => `Item ${ref}`,
     mailBox: ref => `${ref} Mail Box`,
     modulos: 'System › Modules',
-    atalhosDaCategoria: 'Contracts category shortcuts',
+    atalhosDaCategoria: 'Contact of the Contracts category',
     formularios: 'Requests forms',
     cenario: 'Scenario',
     cenarios: { normal: 'Normal', semOutlook: 'No Outlook connected', falha: 'Sending fails' },
     mostrarOQueMuda: 'Show what changes',
     porTras: 'Behind it',
+    fase: 'Phase',
+    fases: { 1: '1 · MVP', 2: '2 · Sender', 3: '3 · Task' },
+    fasesDica: { 1: 'Screen only, on what ENSPACE already has', 2: 'Choose From, reply in the thread, forward and record without item', 3: 'Link the email to a task' },
   },
 }
 
@@ -1565,20 +1571,18 @@ const es: Textos = {
       releases: 'Releases',
       documentacao: 'Documentación',
     },
+    novoEmailNoItem: ref => `Escribir un correo vinculado a ${ref}`,
   },
   atalho: {
-    canal: { email: 'Correo', whatsapp: 'WhatsApp', sms: 'SMS' },
     semContato: 'Sin contacto',
     semEmail: 'Sin correo registrado',
-    semTelefone: 'Sin teléfono registrado',
     escreverNoEnspace: 'Escribir en ENSPACE',
-    escreverNoEnspaceComItem: ref => `Sale de tu cuenta de Outlook y queda en el Mail Box de ${ref}`,
-    escreverNoEnspaceSemItem: 'Sale de tu cuenta de Outlook',
+    escreverNoEnspaceComItem: ref => `El correo queda en el Mail Box de ${ref}`,
     abrirNoApp: 'Abrir en mi app de correo',
     abrirNoAppDica: 'Outlook, Gmail o la app predeterminada del equipo',
     outrasFormasDeEmail: 'Otras formas de enviar correo',
-    telefoneInvalido: 'Teléfono inválido',
-    abrirNoAppComCopia: 'El buzón del ítem va en copia: la respuesta vuelve cuando la persona responde a todos.',
+    abrirNoAppComCopia: 'La dirección del ítem va en copia: la respuesta vuelve al Mail Box cuando la persona responde a todos.',
+    email: 'Correo',
   },
   inicio: {
     saudacao: nome => `¡Buenos días, ${nome}!`,
@@ -1623,18 +1627,13 @@ const es: Textos = {
     copiarLink: 'Copiar Enlace',
     contatar: 'Contactar',
     semContato: 'Sin contacto',
-    dicaDoQuadro: 'Haz clic derecho en una tarjeta para contactar.',
+    dicaDoQuadro: 'Haga clic derecho en una tarjeta para enviar un correo al contacto.',
   },
   item: {
-    contatoRapido: 'Contacto rápido',
     paraQuem: 'Para quién',
-    ajudaComEnspace: 'WhatsApp y SMS abren la app de tu computadora o celular. El correo sale por ENSPACE o por tu app.',
-    ajudaSemEnspace: 'Abre tu app con el destinatario completo. ENSPACE no envía el mensaje.',
-    semTelefoneAviso: 'Sin teléfono: WhatsApp y SMS no disponibles.',
-    semEmailAviso: 'Sin correo: el atajo de correo no está disponible.',
-    cadastrarTelefone: 'Registrar teléfono',
-    telefoneInvalidoAviso: 'Teléfono inválido: WhatsApp y SMS no disponibles.',
-    corrigirTelefone: 'Corregir teléfono',
+    ajudaComEnspace: ref => `El correo sale por ENSPACE y queda en el Mail Box de ${ref}. La flecha abre su app de correo.`,
+    ajudaSemEnspace: 'Abre su app de correo con el destinatario completo y la dirección del ítem en copia.',
+    semEmailAviso: 'Este contacto no tiene correo registrado.',
     cadastrarEmail: 'Registrar correo',
     semContatoTitulo: 'Ningún contacto en este ítem',
     semContatoDica: 'Los campos de contacto de este ítem están vacíos.',
@@ -1669,7 +1668,6 @@ const es: Textos = {
     salvar: 'Guardar',
     salvo: 'Ítem guardado',
     copiarEndereco: 'Copiar la dirección del buzón',
-    escreverEmail: 'Escribir correo',
     recebidos: 'Recibidos',
     enviados: 'Enviados',
     para: quem => `Para: ${quem}`,
@@ -1679,6 +1677,14 @@ const es: Textos = {
     semTarefas: 'Ninguna tarea en este ítem',
     foraDoEscopo: 'Carpeta fuera de este prototipo',
     foraDoEscopoDica: 'Esta carpeta existe en develop y no cambia con la propuesta.',
+    contato: 'Contacto del ítem',
+    emailPara: rotulo => `Enviar correo a ${rotulo}`,
+    novoEmail: 'Nuevo correo',
+    enviadoPelaCaixa: (nome, caixa) => `Enviado por ${nome} desde el buzón ${caixa}`,
+    nenhumEmailDica: 'Los correos enviados a la dirección del ítem y los enviados desde aquí aparecen en esta lista.',
+    nenhumEmailDaTarefa: 'Los correos vinculados a esta tarea aparecen en esta lista. Los demás correos del ítem están en "Del ítem".',
+    dataTarefa: 'De esta tarea',
+    doItem: ref => `Del ítem ${ref}`,
   },
   form: {
     formularios: 'Formularios',
@@ -1721,29 +1727,22 @@ const es: Textos = {
     prioridade: 'Prioridad',
     item: 'Ítem',
     semResponsavel: 'Sin responsable',
-    semResponsavelDica: 'Asigna un responsable para avisar a alguien.',
+    semResponsavelDica: 'Asigne un responsable para enviar el correo.',
     abrir: 'Abrir tarea',
-    avisar: nome => `Avisar a ${nome}`,
-    avisarSemResponsavel: 'Avisar al responsable',
-    avisarResponsaveisPor: 'Avisar a los responsables por',
     selecionadas: n => `${n} ${n === 1 ? 'tarea seleccionada' : 'tareas seleccionadas'}`,
-    ajudaDoLote: 'El correo abre 1 borrador para todos. WhatsApp y SMS abren 1 conversación por responsable.',
+    ajudaDoLote: 'Abre 1 correo con todos los responsables en Para.',
     foraDoLote: n => `${n} ${n === 1 ? 'tarea sin responsable queda fuera' : 'tareas sin responsable quedan fuera'}.`,
-    loteTitulo: canal => `Avisar por ${canal}`,
-    loteDescricao: 'Una conversación por persona. Abre una por vez.',
-    abrirConversa: 'Abrir conversación',
-    aberta: 'Abierta',
-    dicaDoQuadro: 'Haz clic en la tarjeta para abrir la tarea. Con el botón derecho, avisa al responsable.',
-    membroSemTelefone: 'WhatsApp y SMS necesitan el teléfono del miembro. La pantalla de perfil aún no tiene ese campo.',
+    dicaDoQuadro: 'Haga clic en la tarjeta para abrir la tarea. Con el botón derecho, envíe un correo al responsable.',
     respostaCriaItem: categoria => `La respuesta por el enlace crea un ítem nuevo en ${categoria}. Esta tarea sigue abierta hasta que la completes.`,
-    loteProgresso: (i, n) => `Conversación ${i} de ${n}`,
-    proxima: 'Siguiente',
-    fechar: 'Cerrar',
-    loteConcluido: 'Todas las conversaciones abiertas.',
-    foraSemTelefone: nomes => `Quedan fuera, sin teléfono: ${nomes}.`,
     assuntoDoAviso: (tarefa, prazo) => prazo ? `Tarea: ${tarefa} (plazo ${prazo})` : `Tarea: ${tarefa}`,
     mensagemDoAviso: (nome, tarefa, prazo) => `${nome ? `Hola, ${nome}.` : 'Hola.'} Recordatorio de la tarea "${tarefa}"${prazo ? `, plazo ${prazo}` : ''}.`,
     assuntoDoLote: n => `${n} tareas pendientes`,
+    emailPara: nome => `Enviar correo a ${nome}`,
+    emailParaResponsaveis: n => n === 1 ? 'Correo al responsable' : `Correo a los ${n} responsables`,
+    abrirMailBox: 'Abrir el Mail Box',
+    detalhes: 'Detalles',
+    semItemTitulo: 'Tarea sin ítem',
+    semItemDescricao: 'El Mail Box es del ítem. Esta tarea no tiene ítem vinculado, por eso no tiene correos.',
   },
   agenda: {
     hoje: 'Hoy',
@@ -1762,34 +1761,55 @@ const es: Textos = {
     intervalo: (de, ate) => `${de} a ${ate}`,
     enviarLembrete: 'Enviar recordatorio',
     emailParaTodos: n => `Correo para todos (${n})`,
-    ajudaComTelefone: 'Fecha, hora y asunto van completos. WhatsApp y SMS abren 1 conversación por participante.',
-    ajudaSemTelefone: 'Fecha, hora y asunto van completos. Estos participantes no tienen teléfono en ENSPACE: solo funciona el correo.',
     assuntoDoLembrete: (evento, quando) => `Recordatorio: ${evento} (${quando})`,
     mensagemDoLembrete: (nome, evento, quando) => `${nome ? `Hola, ${nome}.` : 'Hola.'} Recordatorio: ${evento}, ${quando}.`,
+    emailPara: nome => `Enviar correo a ${nome}`,
+    ajudaDoLembrete: 'El correo se abre con la fecha, la hora y el asunto completos. Es posible editar el texto antes del envío.',
   },
   emails: {
     titulo: 'Correos',
-    recebidos: 'Recibidos',
-    enviados: 'Enviados',
-    pesquisar: 'Buscar correos',
-    vinculo: { todos: 'Todos', com: 'Con ítem', sem: 'Sin ítem' },
-    de: 'De',
-    para: 'Para',
-    assunto: 'Asunto',
-    item: 'Ítem',
-    caixa: 'Buzón',
-    enviadoPor: 'Enviado por',
-    data: 'Fecha',
+    descricaoFase1: 'Los correos recibidos y enviados por el Mail Box de los ítems.',
+    descricaoFase2: 'Los correos recibidos y enviados por ENSPACE, con o sin ítem.',
+    pesquisar: 'Buscar...',
+    limparBusca: 'Limpiar la búsqueda',
+    periodoRotulo: 'Período',
+    periodo: { todos: 'Todo el período', hoje: 'Hoy', semana: 'Últimos 7 días', mes: 'Últimos 30 días' },
+    limparFiltros: 'Limpiar filtros',
+    colunas: 'Columnas',
+    expandirFiltros: 'Expandir filtros',
+    recolherFiltros: 'Contraer filtros',
+    rapidos: { recebidos: 'Recibidos', enviados: 'Enviados', naoLidos: 'No leídos', comAnexo: 'Con adjunto', semItem: 'Sin ítem' },
+    col: { tipo: 'Tipo', de: 'De', para: 'Para', assunto: 'Asunto', item: 'Ítem', tarefa: 'Tarea', enviadoPor: 'Enviado por', data: 'Fecha', acoes: 'Acciones' },
+    tipo: { recebido: 'Recibido', enviado: 'Enviado' },
+    ordenar: coluna => `Ordenar por ${coluna}`,
+    filtro: {
+      filtrar: 'Filtrar',
+      totalmente: 'Es totalmente',
+      operadores: { eq: 'Igual', ne: 'Diferente', contains: 'Contiene', ncontains: 'No contiene', containss: 'Contiene (distingue mayúsculas y minúsculas)', ncontainss: 'No contiene (distingue mayúsculas y minúsculas)' },
+      preposicao: { eq: 'a', ne: 'De', contains: 'parcialmente', ncontains: '', containss: 'parcialmente', ncontainss: '' },
+      digiteValor: 'Escriba el valor...',
+      aplicar: 'Haga clic para aplicar el filtro',
+      remover: 'Quitar filtro',
+      adicionar: 'Agregar Filtro',
+      pendentes: 'Aplique los filtros pendientes antes de agregar uno nuevo.',
+      buscarOpcoes: 'Buscar...',
+      todos: 'Todos',
+      limpar: 'Limpiar',
+      selecionados: n => `${n} ${n === 1 ? 'seleccionado' : 'seleccionados'}`,
+      nenhumResultado: 'No se encontraron resultados',
+    },
+    pagina: { mostrando: (a, b, n) => `Mostrando ${a} a ${b} de ${n} resultados`, porPagina: n => `${n} por página`, rotulo: 'Ítems por página' },
+    acoes: { verDetalhes: 'Ver Detalles', responder: 'Responder', encaminhar: 'Reenviar', marcarNaoLido: 'Marcar como no leído', verItem: 'Ver Ítem', vincular: 'Vincular a un ítem' },
     semItem: 'Sin ítem',
     naoLido: 'No leído',
-    vazioTitulo: 'Ningún correo aquí',
-    vazioDescricao: 'Cambia el filtro o escribe un correo nuevo.',
+    comAnexo: 'Con adjunto',
+    vazioDescricao: 'No se encontraron correos.',
+    vazioFiltrado: 'Ningún correo con estos filtros.',
     vinculadoTitulo: 'Correo vinculado',
     vinculadoDescricao: ref => `Aparece en la pestaña Mail Box de ${ref}.`,
-    vincularDepois: 'El correo pasa a aparecer en la pestaña Mail Box del ítem.',
-    encaminhar: 'Reenviar',
+    vincularDepois: 'Este correo no tiene ítem. Al vincularlo, pasa a aparecer en la pestaña Mail Box del ítem.',
+    sugestoesPeloRemetente: 'Sugerencias por el destinatario',
     vincular: 'Vincular',
-    sugestoesPeloRemetente: 'Sugerencias por el remitente',
   },
   compositor: {
     titulo: 'Nuevo Mensaje',
@@ -1813,9 +1833,8 @@ const es: Textos = {
     trocar: 'Cambiar',
     desvincular: 'Quitar vínculo',
     cancelar: 'Cancelar',
-    vinculadoPeloItem: 'Vinculado porque empezaste en el ítem. Puedes cambiarlo o quitarlo.',
-    vinculadoPelaTarefa: 'Vinculado al ítem de la tarea. Puedes cambiarlo o quitarlo.',
-    semMailBox: categoria => `${categoria} no tiene la carpeta Mail Box: el correo no aparece en la pantalla del ítem.`,
+    vinculadoPeloItem: 'Vinculado porque usted empezó en el ítem. Es posible cambiar o quitar el vínculo.',
+    vinculadoPelaTarefa: 'Vinculado al ítem de la tarea. Es posible cambiar o quitar el vínculo.',
     recentes: 'Actualizados recientemente',
     resultados: (m, n) => `${m} de ${n} ${n === 1 ? 'ítem' : 'ítems'}`,
     sobra: n => `${n} ${n === 1 ? 'ítem más' : 'ítems más'}. Sigue escribiendo para encontrarlo.`,
@@ -1824,7 +1843,7 @@ const es: Textos = {
     nenhumItemDica: 'Busca por referencia (CTR-00231), ID o nombre del contacto.',
     suaConta: 'Tu cuenta de Outlook',
     responderParaItem: 'Responder a: la dirección del ítem. La respuesta vuelve a la pestaña Mail Box.',
-    respostasNoSeuOutlook: 'Sin ítem vinculado, la respuesta llega solo a tu Outlook.',
+    respostasNoSeuOutlook: 'Sin ítem vinculado, la respuesta llega solo a su Outlook.',
     semContaTitulo: 'No hay cuentas integradas disponibles.',
     semContaDescricao: 'El correo de ENSPACE sale de tu cuenta de Outlook. Integra el Correo de Outlook en Perfil › Integraciones. Mientras tanto, el botón Correo abre tu app de correo.',
     integrarContas: 'Integrar cuentas',
@@ -1854,11 +1873,22 @@ const es: Textos = {
     semAssunto: '(sin asunto)',
     enviadoTitulo: 'Correo enviado',
     enviadoComItem: ref => `Vinculado a ${ref}. Las respuestas vuelven al ítem.`,
-    enviadoSemItem: de => `Salió de ${de}, sin ítem vinculado.`,
+    enviadoSemItem: de => `Enviado desde ${de}. Sin ítem vinculado, el correo queda solo en su Outlook y no aparece en ENSPACE.`,
     verNoItem: 'Ver en el ítem',
     verEmEmails: 'Ver en Correos',
     descartado: 'Borrador descartado',
     desfazer: 'Deshacer',
+    grupoOutlook: 'Su cuenta',
+    grupoCaixas: 'Buzones del workspace',
+    caixaDoWorkspace: 'Buzón del workspace',
+    respostasNaCaixa: caixa => `Sin ítem vinculado, la respuesta llega al buzón ${caixa}, en la Central de Atención.`,
+    semItemNaoRegistra: 'Sin ítem vinculado, el correo queda solo en su Outlook y no aparece en ENSPACE.',
+    vincularTarefa: 'Vincular a una tarea',
+    vincularTarefaAjuda: 'El correo aparece también en el Mail Box de la tarea.',
+    semTarefa: 'Ninguna tarea',
+    respostaComoNova: 'La respuesta sale como un mensaje nuevo, con el texto original citado. No entra en la misma conversación.',
+    respostaNaConversa: 'La respuesta sigue en la misma conversación del correo original.',
+    enviadoSemItemRegistrado: de => `Enviado desde ${de}, sin ítem vinculado. El correo queda en Correos.`,
   },
   sistema: {
     titulo: 'Configuración General',
@@ -1873,26 +1903,15 @@ const es: Textos = {
     comparacoes: 'Comparaciones',
     juridico: 'Jurídico',
     atalhos: 'Atajos de comunicación',
-    atalhosDescricao: 'Botones de correo, WhatsApp y SMS en las pantallas, y el enlace de los formularios públicos.',
-    emailDoEnspace: 'Correo de ENSPACE en todas las pantallas',
-    emailDoEnspaceDescricao: 'Escribir correo desde cualquier pantalla, con vínculo a ítem, y el área Correos en el menú.',
-    canais: 'Canales',
-    canaisAjuda: 'Un canal apagado desaparece de todas las pantallas.',
-    ondeAparecem: 'Dónde aparecen',
-    lugares: { item: 'Pantalla del ítem', itens: 'Lista y tablero de ítems', tarefas: 'Tareas', agenda: 'Agenda', formularios: 'Enlace de formulario público' },
-    textoInicial: 'Completar asunto y mensaje',
-    textoInicialAjuda: 'El texto viene de la configuración de cada categoría. Quien envía puede cambiarlo antes.',
-    copiaParaOItem: 'Poner el buzón del ítem en copia',
-    copiaParaOItemAjuda: 'En el correo abierto en la app de la persona. La respuesta vuelve a la pestaña Mail Box del ítem.',
+    atalhosDescricao: 'Botón de correo en las pantallas de uso, el Nuevo correo arriba y el enlace de los formularios públicos.',
     irParaCategorias: 'Elegir el contacto de cada categoría',
-    comoSai: 'Desde dónde sale el correo',
-    comoSaiDescricao: 'Desde la cuenta de Outlook de cada persona, como en la carpeta Mail Box de hoy. Cada persona integra la cuenta en Perfil › Integraciones › Correo de Outlook. Con ítem vinculado, la respuesta vuelve al Mail Box del ítem.',
-    preRequisito: (n, total) => `Carpeta Mail Box: ${n} de ${total} categorías la tienen`,
-    semMailBox: 'Sin la carpeta Mail Box, el correo vinculado no aparece en la pantalla del ítem.',
     modulosSalvos: 'Módulos guardados',
     zonaDePerigo: 'Zona de Peligro',
     excluirWorkspace: 'Eliminar Workspace',
     excluirWorkspaceDica: 'Eliminar para siempre este workspace y todos sus datos. Esta acción no se puede deshacer.',
+    oQueLiga: 'Lo que activa el módulo',
+    lugaresDoAtalho: ['Correo en el campo de correo del ítem', 'Correo en el menú de la lista y del tablero de ítems', 'Correo al responsable de la tarea', 'Recordatorio por correo en la Agenda', 'Nuevo correo arriba en toda pantalla', 'Enlace del formulario público en las pantallas de uso'],
+    contatoNaCategoria: 'Defina en cada categoría los campos de nombre y de correo del contacto.',
   },
   categoria: {
     categorias: 'Categorías',
@@ -1926,7 +1945,7 @@ const es: Textos = {
       execucoes: 'Ejecuciones Programadas',
       status: 'Estado',
       correcao: 'Corrección Monetaria',
-      atalhos: 'Atajos de comunicación',
+      atalhos: 'Contacto de la categoría',
     },
     descricoes: {
       campos: 'Propiedades y formato de datos de la categoría.',
@@ -1941,21 +1960,19 @@ const es: Textos = {
       execucoes: 'Programación de tareas y ejecuciones automáticas de los ítems.',
       status: 'Configuración de estados y etapas de los ítems de la categoría.',
       correcao: 'Configuración de Corrección Monetaria de esta categoría.',
-      atalhos: 'Quién es el contacto del ítem y el texto que abren los atajos.',
+      atalhos: 'Quién es el contacto del ítem y el asunto del correo.',
     },
     moduloDesligado: 'Módulo apagado',
     moduloDesligadoTitulo: 'El módulo Atajos de comunicación está apagado',
     moduloDesligadoDica: 'La configuración queda guardada y vale cuando alguien encienda el módulo en Sistema › Módulos.',
     quemEhContato: 'Quién es el contacto',
-    quemEhContatoDica: 'Cada contacto aparece en el Contacto rápido del ítem. Elige de qué campos vienen el nombre, el correo y el teléfono.',
+    quemEhContatoDica: 'Cada contacto aparece en Contacto del ítem, en el panel lateral del ítem. Elija de qué campos vienen el nombre y el correo.',
     rotulo: 'Nombre del contacto en pantalla',
     removerContato: 'Quitar contacto',
     campoNome: 'Nombre',
     campoEmail: 'Correo',
-    campoTelefone: 'Teléfono',
     nenhum: 'Ninguno',
     tipoEmail: 'Campo Correo',
-    tipoMascara: 'Texto con Máscara',
     tipoPessoa: 'Persona/Empresa',
     subNome: 'Nombre de contacto',
     subEmail: 'Correo de contacto',
@@ -1964,38 +1981,26 @@ const es: Textos = {
     campoPadrao: 'Campo estándar de toda categoría',
     novoContato: 'Nuevo contacto',
     adicionarContato: 'Agregar contacto',
-    semCampoDeTelefone: 'Esta categoría no tiene campo de teléfono. Para WhatsApp y SMS, crea un campo Texto con Máscara.',
-    textoInicial: 'Texto inicial',
-    textoInicialDica: 'La app abre con este texto. Quien envía puede cambiarlo antes.',
-    textoInicialDesligado: 'El completado está apagado en Sistema › Módulos: la app abre solo con el destinatario.',
     assuntoDoEmail: 'Asunto del correo',
-    mensagemDoApp: 'Mensaje de WhatsApp y SMS',
     inserir: 'Insertar:',
-    previa: 'Vista previa: lo que abre cada atajo',
+    previa: 'Vista previa: lo que abre el botón Correo',
     semNome: 'Sin nombre',
-    salvo: 'Atajos guardados',
+    salvo: 'Contacto de la categoría guardado',
+    avaliarComDevs: 'Para evaluar con los desarrolladores',
+    assuntoDica: 'El correo abre con este asunto. Quien envía puede cambiarlo antes de mandar.',
   },
   simulador: {
     selo: 'Simulación · fuera de ENSPACE',
-    titulo: { whatsapp: 'WhatsApp', sms: 'Mensajes', email: 'Tu app de correo', formulario: 'Página pública del formulario', outlook: 'Integrar el Correo de Outlook' },
+    titulo: { email: 'Su app de correo', formulario: 'Página pública del formulario', outlook: 'Integrar el Correo de Outlook' },
     noProduto: {
-      whatsapp: 'En el producto, el navegador abre WhatsApp (app o Web) con este enlace. El texto va listo; la persona lo cambia y lo envía allí.',
-      sms: 'En el producto, la computadora abre la app registrada para sms: (en Windows, Enlace Móvil).',
-      email: 'En el producto, se abre la app de correo predeterminada de la computadora, ya completa.',
-      formulario: 'Es lo que ve la persona de afuera: el formulario sin login. Responder crea un ítem en ENSPACE.',
-      outlook: 'En el producto: Perfil › Integraciones y el login de la cuenta Microsoft corporativa.',
+      email: 'En el producto, abre la app de correo predeterminada del equipo, ya completa.',
+      formulario: 'Es lo que ve la persona de afuera: el formulario sin inicio de sesión. Responder crea un ítem en ENSPACE.',
+      outlook: 'En el producto: Perfil › Integraciones y el inicio de sesión de la cuenta Microsoft corporativa.',
     },
     voltar: 'Volver a ENSPACE',
     enviar: 'Enviar',
     descartar: 'Descartar',
-    digiteMensagem: 'Escribe un mensaje',
     escrevaAqui: 'Escribe el correo',
-    paraNumero: 'Para: número con código de área',
-    novaConversa: 'Nueva conversación',
-    textoPronto: 'El texto inicial ya está en la caja de mensaje. Cambia lo que quieras y envía.',
-    naoRegistra: { whatsapp: 'ENSPACE no registra conversaciones de WhatsApp.', sms: 'ENSPACE no registra SMS.' },
-    enviada: 'Enviado',
-    mensagens: 'Mensajes',
     novaMensagem: 'Mensaje nuevo',
     comCopiaAviso: 'La dirección del ítem está en Cc: la copia llega al Mail Box del ítem.',
     semCopiaAviso: 'Sin la dirección del ítem en Cc, este correo no llega a ENSPACE.',
@@ -2030,12 +2035,15 @@ const es: Textos = {
     umItem: ref => `Ítem ${ref}`,
     mailBox: ref => `Mail Box de ${ref}`,
     modulos: 'Sistema › Módulos',
-    atalhosDaCategoria: 'Atajos de la categoría Contratos',
+    atalhosDaCategoria: 'Contacto de la categoría Contratos',
     formularios: 'Formularios de Solicitudes',
     cenario: 'Escenario',
     cenarios: { normal: 'Normal', semOutlook: 'Sin Outlook integrado', falha: 'El envío falla' },
     mostrarOQueMuda: 'Mostrar lo que cambia',
     porTras: 'Detrás',
+    fase: 'Fase',
+    fases: { 1: '1 · MVP', 2: '2 · Remitente', 3: '3 · Tarea' },
+    fasesDica: { 1: 'Solo pantalla, sobre lo que ENSPACE ya tiene', 2: 'Elegir el De, responder en la conversación, reenviar y registrar sin ítem', 3: 'Vincular el correo a una tarea' },
   },
 }
 

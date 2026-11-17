@@ -146,6 +146,11 @@ não entram no repositório público):
 > A lógica geral será: Redigir e-mail → opcionalmente localizar Item → vincular → enviar; ou,
 > quando partir de um Item: Item → redigir e-mail → Item já vinculado → enviar.
 
+**Rodada 6 (2026-11-17):** a redatora tirou WhatsApp e SMS do plano, reduziu a configuração a 1
+chave ("Atalhos de comunicação", sem escolher telas nem canais), pediu o "De" escolhido pela pessoa
+(Outlook ou caixa do workspace) e a divisão em fases: a 1ª só com o que o produto já tem, as
+seguintes com o que é novo. O registro literal está no `DECISOES.md`, "Rodada 6".
+
 ## 2. Telas e jornadas em jogo
 
 | Quem | Tela do develop | O que a demanda pede ali |
@@ -345,6 +350,31 @@ interfere no conteúdo ou envio").
 | E-mails (config) | `/workspaces/<ws>/settings/emails/{sent,templates,boxes}` |
 | Integrações | `/workspaces/<ws>/settings/integrations` |
 | Perfil | `/profile` |
+
+### 7.6 O e-mail no código do develop (rodada 6)
+
+Lido no código do develop em 2026-11-17, pela skill `investigar-codigo`. É o que separa a Fase 1
+(o que existe) das Fases 2 e 3 (o que é novo):
+
+| Pergunta | O que o código faz hoje |
+|---|---|
+| De onde sai o e-mail que a pessoa escreve? | Da integração dela com o Correio do Outlook. Não há envio pela caixa do workspace |
+| O ENSPACE guarda o e-mail enviado? | Só com item: o registro da Mail Box exige o item |
+| Para que servem as caixas do workspace? | Receber (Central de Atendimento) e iniciar fluxo; não enviam e-mail escrito à mão |
+| Dá para responder na mesma conversa? | Não: o "Responder" está comentado na tela |
+| Tarefa tem vínculo com e-mail? | Não |
+
+### 7.7 A tabela e o filtro das telas novas
+
+Lido no código do develop (tabela da tela de Logs de Auditoria e da tabela nova de itens), para a
+tela E-mails seguir o mesmo padrão:
+
+- **Colunas:** seleção, depois Ações, depois os dados. A coluna de Ações tem 117 px, o rótulo
+  "Ações" e o menu ⋮ centrado; o clique na célula não abre a linha.
+- **Filtro de texto por coluna:** operador em frase. "É totalmente Igual a", "É totalmente
+  Diferente De", "Contém parcialmente" e "Não contém", mais as variantes que diferenciam
+  maiúsculas. Cada operador entra 1 vez.
+- **Ícones:** o develop usa o conjunto solar. O protótipo usa lucide, o único instalado.
 
 ## 8. Achados no caminho
 

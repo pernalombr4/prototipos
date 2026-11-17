@@ -2,11 +2,10 @@
 /**
  * ANDAIME DE PROTÓTIPO, não é proposta de tela.
  *
- * A janela do app de fora: WhatsApp, Mensagens (SMS), o app de e-mail da
- * pessoa, a página pública do formulário e o login da Microsoft. No produto,
- * o navegador abre o link da barra de cima e o resto acontece fora do ENSPACE.
- * A simulação segue a mesma regra:
- *  - WhatsApp e SMS: o ENSPACE não fica sabendo da conversa;
+ * A janela do app de fora: o app de e-mail da pessoa, a página pública do
+ * formulário e o login da Microsoft. No produto, o navegador abre o link da
+ * barra de cima e o resto acontece fora do ENSPACE. A simulação segue a mesma
+ * regra:
  *  - e-mail pelo app: só chega à Mail Box se o endereço do item foi em cópia;
  *  - formulário público: a resposta cria um item na categoria do formulário;
  *  - Microsoft: aceitar integra o Correio do Outlook e o compositor libera.
@@ -25,24 +24,9 @@ const idioma = useIdioma()
 
 const aberto = computed({ get: () => !!app.value, set: (v) => { if (!v) fechar() } })
 const titulo = computed(() => app.value ? props.t.simulador.titulo[app.value.tipo] : '')
-const largura = computed(() => app.value?.tipo === 'sms' ? 'max-w-sm' : app.value?.tipo === 'email' || app.value?.tipo === 'formulario' ? 'max-w-2xl' : 'max-w-lg')
+const largura = computed(() => app.value?.tipo === 'email' || app.value?.tipo === 'formulario' ? 'max-w-2xl' : 'max-w-lg')
 
-/* ---------- WhatsApp e SMS ---------- */
-
-const numero = ref('')
-const texto = ref('')
-const enviadas = ref<{ texto: string, hora: string }[]>([])
 const horaCurta = computed(() => new Intl.DateTimeFormat(idioma.value, { hour: '2-digit', minute: '2-digit' }))
-
-const conversa = computed(() => app.value?.tipo === 'whatsapp' || app.value?.tipo === 'sms' ? app.value as Extract<AppExterno, { tipo: 'whatsapp' | 'sms' }> : null)
-const destinoDaConversa = computed(() => conversa.value?.telefone ?? numero.value.trim())
-const podeEnviarMensagem = computed(() => !!texto.value.trim() && destinoDaConversa.value.replace(/\D/g, '').length >= 10)
-
-function enviarMensagem() {
-  if (!podeEnviarMensagem.value) return
-  enviadas.value.push({ texto: texto.value.trim(), hora: horaCurta.value.format(agora()) })
-  texto.value = ''
-}
 
 /* ---------- App de e-mail ---------- */
 
@@ -139,18 +123,11 @@ function aceitar() {
 
 watch(app, (a) => {
   if (!a) return
-  numero.value = ''
-  enviadas.value = []
   respostas.value = {}
   respondido.value = false
   passo.value = 'integracoes'
-  if (a.tipo === 'whatsapp' || a.tipo === 'sms') texto.value = a.texto
   if (a.tipo === 'email') Object.assign(email, { para: [...a.para], cc: [...a.cc], assunto: a.assunto, corpo: a.corpo })
 }, { immediate: true })
-
-function iniciais(s: string | null) {
-  return (s ?? '?').split(/[\s.@]/).filter(Boolean).slice(0, 2).map(p => p[0]!.toUpperCase()).join('')
-}
 </script>
 
 <template>
@@ -167,79 +144,8 @@ function iniciais(s: string | null) {
           {{ t.simulador.noProduto[app.tipo] }}
         </p>
 
-        <!-- WhatsApp -->
-        <div v-if="app.tipo === 'whatsapp'" class="flex h-112 flex-col">
-          <header class="flex items-center gap-3 bg-success px-4 py-2.5 text-inverted">
-            <UAvatar :text="iniciais(conversa?.nome ?? null)" size="sm" />
-            <span class="min-w-0">
-              <span class="block truncate text-sm font-semibold">{{ conversa?.nome ?? conversa?.telefone ?? t.simulador.novaConversa }}</span>
-              <span v-if="conversa?.telefone" class="block truncate text-xs opacity-80">{{ conversa.telefone }}</span>
-            </span>
-          </header>
-          <div v-if="!conversa?.telefone" class="border-b border-default px-3 py-2">
-            <UInput v-model="numero" :placeholder="t.simulador.paraNumero" icon="i-lucide-phone" class="w-full" />
-          </div>
-          <div class="flex flex-1 flex-col gap-2 overflow-y-auto bg-elevated p-4">
-            <p v-if="!enviadas.length" class="mx-auto rounded-md bg-default px-3 py-1 text-xs text-muted shadow-sm">
-              {{ t.simulador.textoPronto }}
-            </p>
-            <div v-for="(m, i) in enviadas" :key="i" class="ml-auto max-w-xs rounded-lg bg-success/15 px-3 py-2 text-sm text-highlighted shadow-sm">
-              <p class="whitespace-pre-wrap">
-                {{ m.texto }}
-              </p>
-              <p class="mt-1 flex items-center justify-end gap-1 text-xs text-muted">
-                {{ m.hora }}<UIcon name="i-lucide-check-check" class="size-3.5 text-info" />
-              </p>
-            </div>
-          </div>
-          <footer class="flex items-end gap-2 border-t border-default p-2">
-            <UTextarea v-model="texto" autoresize :rows="1" :maxrows="5" :placeholder="t.simulador.digiteMensagem" class="flex-1" />
-            <UButton icon="i-lucide-send-horizontal" color="success" :disabled="!podeEnviarMensagem" :aria-label="t.simulador.enviar" @click="enviarMensagem" />
-          </footer>
-          <p class="px-3 pb-2 text-xs text-muted">
-            {{ t.simulador.naoRegistra.whatsapp }}
-          </p>
-        </div>
-
-        <!-- Mensagens (SMS) -->
-        <div v-else-if="app.tipo === 'sms'" class="p-4">
-          <div class="mx-auto flex h-112 flex-col overflow-hidden rounded-3xl border-4 border-accented bg-default">
-            <header class="border-b border-default px-4 py-3 text-center">
-              <p class="text-xs text-muted">
-                {{ t.simulador.mensagens }}
-              </p>
-              <p class="truncate text-sm font-semibold text-highlighted">
-                {{ conversa?.nome ?? conversa?.telefone ?? t.simulador.novaConversa }}
-              </p>
-              <p v-if="conversa?.nome && conversa?.telefone" class="text-xs text-muted">
-                {{ conversa.telefone }}
-              </p>
-            </header>
-            <div v-if="!conversa?.telefone" class="border-b border-default px-3 py-2">
-              <UInput v-model="numero" :placeholder="t.simulador.paraNumero" icon="i-lucide-phone" size="sm" class="w-full" />
-            </div>
-            <div class="flex flex-1 flex-col gap-2 overflow-y-auto p-3">
-              <div v-for="(m, i) in enviadas" :key="i" class="ml-auto max-w-56 rounded-2xl bg-info px-3 py-2 text-sm text-inverted">
-                <p class="whitespace-pre-wrap">
-                  {{ m.texto }}
-                </p>
-              </div>
-              <p v-if="enviadas.length" class="ml-auto text-xs text-muted">
-                {{ t.simulador.enviada }} · {{ enviadas[enviadas.length - 1]!.hora }}
-              </p>
-            </div>
-            <footer class="flex items-end gap-2 border-t border-default p-2">
-              <UTextarea v-model="texto" autoresize :rows="1" :maxrows="4" size="sm" :placeholder="t.simulador.digiteMensagem" class="flex-1" />
-              <UButton icon="i-lucide-arrow-up" color="info" size="sm" :disabled="!podeEnviarMensagem" :aria-label="t.simulador.enviar" @click="enviarMensagem" />
-            </footer>
-          </div>
-          <p class="mt-2 text-center text-xs text-muted">
-            {{ t.simulador.naoRegistra.sms }}
-          </p>
-        </div>
-
         <!-- App de e-mail da pessoa (genérico, sem marca) -->
-        <div v-else-if="app.tipo === 'email'" class="flex flex-col">
+        <div v-if="app.tipo === 'email'" class="flex flex-col">
           <div class="flex items-center gap-2 bg-elevated px-4 py-2 text-sm font-medium text-highlighted">
             <UIcon name="i-lucide-mail" class="size-4" />{{ t.simulador.novaMensagem }}
           </div>

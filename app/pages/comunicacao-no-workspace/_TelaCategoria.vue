@@ -4,17 +4,20 @@
  * categorias em cartões, o painel da categoria com os 12 cartões (Campos,
  * Formulários… Correção Monetária) e a lista de Formulários.
  *
- * PROPOSTA:
- *  - o 13º cartão, "Atalhos de comunicação", ao lado de Correção Monetária;
- *  - a página dele: de quais campos vêm nome, e-mail e telefone de cada
- *    contato, e o texto inicial, com a prévia do link que cada atalho abre.
+ * PROPOSTA (a avaliar com os devs):
+ *  - o 13º cartão, "Contato da categoria", ao lado de Correção Monetária;
+ *  - a página dele: de quais campos vêm o nome e o e-mail de cada contato, e
+ *    o assunto do e-mail, com a prévia do que o botão E-mail abre. É o que
+ *    alimenta o "Contato do item" na lateral do item;
  *  - na lista de Formulários, o Copiar dá o mesmo aviso de toda tela.
+ * Hoje a categoria guarda configuração em `c-item-types.modules` e `view`
+ * (JSON); o contato caberia ali, mas é dado novo: por isso "a avaliar".
  */
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import type { Textos } from './textos'
-import { CAMPO_REQUISITANTE, type Formulario, type SlugDaCategoria, campos, categoriaPorSlug, categorias, itens, linkPublico } from './mocks'
-import { type ConfigDaCategoria, contatosDoItem, linkDeEmail, linkDeSms, linkDeWhatsapp, preencher, useComunicacao, useMarcaDeProposta } from './estado'
+import { CAMPO_REQUISITANTE, type Formulario, type SlugDaCategoria, campos, categoriaPorSlug, categorias, enderecoDoItem, itens, linkPublico } from './mocks'
+import { type ConfigDaCategoria, contatosDoItem, preencher, useComunicacao, useMarcaDeProposta } from './estado'
 import { useCopiar } from './atalhos'
 
 const props = defineProps<{ t: Textos }>()
@@ -49,7 +52,7 @@ const cartoes = computed(() => [
   { chave: 'execucoes', icone: 'i-lucide-calendar-clock' },
   { chave: 'status', icone: 'i-lucide-tag' },
   { chave: 'correcao', icone: 'i-lucide-circle-dollar-sign' },
-  { chave: 'atalhos', icone: 'i-lucide-message-circle-more', vista: 'atalhos' as Vista, proposta: true },
+  { chave: 'atalhos', icone: 'i-lucide-contact', vista: 'atalhos' as Vista, proposta: true },
 ])
 
 /* ---------- atalhos: rascunho da configuração da categoria ---------- */
@@ -64,8 +67,8 @@ const NENHUM = '__nenhum'
 
 const camposDaCategoria = computed(() => campos.filter(c => c.categoria === categoriaAtual.value))
 /** Pessoa/Empresa (`EnPerson`) entra pelos subcampos de contato. */
-function deContato(sub: 'contact_name' | 'contact_email' | 'contact_phone') {
-  const rotulo = { contact_name: props.t.categoria.subNome, contact_email: props.t.categoria.subEmail, contact_phone: props.t.categoria.subTelefone }[sub]
+function deContato(sub: 'contact_name' | 'contact_email') {
+  const rotulo = { contact_name: props.t.categoria.subNome, contact_email: props.t.categoria.subEmail }[sub]
   return camposDaCategoria.value.filter(c => c.type === 'EnPerson').map(c => ({ value: `${c.refId}.${sub}`, label: `${c.name} › ${rotulo}`, description: props.t.categoria.tipoPessoa }))
 }
 const opcoesDeNome = computed(() => [{ value: NENHUM, label: props.t.categoria.nenhum }, ...camposDaCategoria.value.filter(c => c.type === 'inputText').map(c => ({ value: c.refId, label: c.name })), ...deContato('contact_name')])
@@ -75,19 +78,14 @@ const opcoesDeEmail = computed(() => [
   ...deContato('contact_email'),
   { value: CAMPO_REQUISITANTE, label: props.t.categoria.emailDoRequisitante, description: props.t.categoria.campoPadrao },
 ])
-const opcoesDeTelefone = computed(() => [
-  { value: NENHUM, label: props.t.categoria.nenhum },
-  ...camposDaCategoria.value.filter(c => c.type === 'EnlMask').map(c => ({ value: c.refId, label: c.name, description: props.t.categoria.tipoMascara })),
-  ...deContato('contact_phone'),
-])
-
 function adicionarContato() {
-  rascunho.value.contatos.push({ id: `c${Date.now()}`, rotulo: props.t.categoria.novoContato, campoNome: null, campoEmail: null, campoTelefone: null })
+  rascunho.value.contatos.push({ id: `c${Date.now()}`, rotulo: props.t.categoria.novoContato, campoNome: null, campoEmail: null })
 }
 
 const variaveis = ['{referencia}', '{titulo}', '{nome}', '{categoria}']
-function inserir(campo: 'assunto' | 'mensagem', v: string) {
-  rascunho.value[campo] = `${rascunho.value[campo]}${rascunho.value[campo].endsWith(' ') || !rascunho.value[campo] ? '' : ' '}${v}`
+function inserir(v: string) {
+  const a = rascunho.value.assunto
+  rascunho.value.assunto = `${a}${a.endsWith(' ') || !a ? '' : ' '}${v}`
 }
 
 /* Prévia: um item de exemplo, com a configuração em edição. */
@@ -99,18 +97,11 @@ const previa = computed(() => {
   const i = itemExemplo.value
   if (!i) return []
   const cfg = { ...config.value, porCategoria: { ...config.value.porCategoria, [i.categoria]: rascunho.value } }
-  return contatosDoItem(i, cfg).map((c) => {
-    const assunto = preencher(rascunho.value.assunto, i, c.nome)
-    const mensagem = preencher(rascunho.value.mensagem, i, c.nome)
-    return {
-      contato: c,
-      links: [
-        { canal: 'email' as const, url: c.email ? linkDeEmail([c.email], assunto) : null },
-        { canal: 'whatsapp' as const, url: c.telefone ? linkDeWhatsapp(c.telefone, mensagem) : null },
-        { canal: 'sms' as const, url: c.telefone ? linkDeSms(c.telefone, mensagem) : null },
-      ],
-    }
-  })
+  return contatosDoItem(i, cfg).map(c => ({
+    contato: c,
+    assunto: preencher(rascunho.value.assunto, i, c.nome),
+    cc: enderecoDoItem(i),
+  }))
 })
 
 const salvando = ref(false)
@@ -174,6 +165,7 @@ function menuDoFormulario(f: Formulario): DropdownMenuItem[][] {
         {{ vista === 'lista' ? t.categoria.categorias : categoria.name }}
       </h1>
       <span v-if="vista === 'atalhos'" class="text-sm text-muted">· {{ t.categoria.cartoes.atalhos }}</span>
+      <UBadge v-if="vista === 'atalhos'" :label="t.categoria.avaliarComDevs" icon="i-lucide-messages-square" color="warning" variant="subtle" size="sm" />
       <span v-if="vista === 'formularios'" class="text-sm text-muted">· {{ t.categoria.cartoes.formularios }}</span>
     </div>
 
@@ -267,54 +259,37 @@ function menuDoFormulario(f: Formulario): DropdownMenuItem[][] {
                   @click="rascunho.contatos.splice(i, 1)"
                 />
               </div>
-              <div class="mt-3 grid gap-3 sm:grid-cols-3">
+              <div class="mt-3 grid gap-3 sm:grid-cols-2">
                 <UFormField :label="t.categoria.campoNome">
                   <USelect :model-value="c.campoNome ?? NENHUM" :items="opcoesDeNome" class="w-full" @update:model-value="c.campoNome = $event === NENHUM ? null : ($event as string)" />
                 </UFormField>
                 <UFormField :label="t.categoria.campoEmail">
                   <USelect :model-value="c.campoEmail ?? NENHUM" :items="opcoesDeEmail" class="w-full" @update:model-value="c.campoEmail = $event === NENHUM ? null : ($event as string)" />
                 </UFormField>
-                <UFormField :label="t.categoria.campoTelefone">
-                  <USelect :model-value="c.campoTelefone ?? NENHUM" :items="opcoesDeTelefone" class="w-full" @update:model-value="c.campoTelefone = $event === NENHUM ? null : ($event as string)" />
-                </UFormField>
               </div>
             </div>
           </TransitionGroup>
           <UButton :label="t.categoria.adicionarContato" icon="i-lucide-plus" color="neutral" variant="outline" size="sm" class="mt-3" @click="adicionarContato" />
-          <p v-if="!opcoesDeTelefone.slice(1).length" class="mt-3 text-xs text-muted">
-            {{ t.categoria.semCampoDeTelefone }}
-          </p>
         </UCard>
 
         <UCard>
           <template #header>
             <h2 class="font-semibold text-highlighted">
-              {{ t.categoria.textoInicial }}
+              {{ t.categoria.assuntoDoEmail }}
             </h2>
             <p class="mt-1 text-sm text-muted">
-              {{ config.textoInicial ? t.categoria.textoInicialDica : t.categoria.textoInicialDesligado }}
+              {{ t.categoria.assuntoDica }}
             </p>
           </template>
-          <div class="flex flex-col gap-4">
-            <UFormField :label="t.categoria.assuntoDoEmail">
-              <UInput v-model="rascunho.assunto" class="w-full" :disabled="!config.textoInicial" />
-              <template #help>
-                <span class="flex flex-wrap items-center gap-1">
-                  {{ t.categoria.inserir }}
-                  <UButton v-for="v in variaveis" :key="v" :label="v" color="neutral" variant="soft" size="xs" class="font-mono" :disabled="!config.textoInicial" @click="inserir('assunto', v)" />
-                </span>
-              </template>
-            </UFormField>
-            <UFormField :label="t.categoria.mensagemDoApp">
-              <UTextarea v-model="rascunho.mensagem" :rows="3" autoresize class="w-full" :disabled="!config.textoInicial" />
-              <template #help>
-                <span class="flex flex-wrap items-center gap-1">
-                  {{ t.categoria.inserir }}
-                  <UButton v-for="v in variaveis" :key="v" :label="v" color="neutral" variant="soft" size="xs" class="font-mono" :disabled="!config.textoInicial" @click="inserir('mensagem', v)" />
-                </span>
-              </template>
-            </UFormField>
-          </div>
+          <UFormField :label="t.categoria.assuntoDoEmail">
+            <UInput v-model="rascunho.assunto" class="w-full" />
+            <template #help>
+              <span class="flex flex-wrap items-center gap-1">
+                {{ t.categoria.inserir }}
+                <UButton v-for="v in variaveis" :key="v" :label="v" color="neutral" variant="soft" size="xs" class="font-mono" @click="inserir(v)" />
+              </span>
+            </template>
+          </UFormField>
         </UCard>
 
         <div class="flex justify-end">
@@ -344,13 +319,29 @@ function menuDoFormulario(f: Formulario): DropdownMenuItem[][] {
               <p class="text-sm text-highlighted">
                 {{ p.contato.nome ?? t.categoria.semNome }}
               </p>
-              <ul class="mt-1.5 flex flex-col gap-1">
-                <li v-for="l in p.links" :key="l.canal" class="flex items-start gap-2 text-xs">
-                  <UBadge :label="t.atalho.canal[l.canal]" :color="l.url ? 'primary' : 'neutral'" variant="subtle" size="sm" class="w-20 shrink-0 justify-center" />
-                  <span v-if="l.url" class="break-all font-mono text-toned">{{ l.url }}</span>
-                  <span v-else class="text-muted">{{ l.canal === 'email' ? t.atalho.semEmail : t.atalho.semTelefone }}</span>
-                </li>
-              </ul>
+              <dl v-if="p.contato.email" class="mt-1.5 grid grid-cols-[4.5rem_1fr] gap-x-2 gap-y-1 text-xs">
+                <dt class="text-muted">
+                  {{ t.compositor.para }}
+                </dt>
+                <dd class="break-all font-mono text-toned">
+                  {{ p.contato.email }}
+                </dd>
+                <dt class="text-muted">
+                  {{ t.compositor.assunto }}
+                </dt>
+                <dd class="text-toned">
+                  {{ p.assunto || '-' }}
+                </dd>
+                <dt class="text-muted">
+                  {{ t.compositor.cc }}
+                </dt>
+                <dd class="break-all font-mono text-toned">
+                  {{ p.cc }}
+                </dd>
+              </dl>
+              <p v-else class="mt-1 flex items-center gap-1 text-xs text-warning">
+                <UIcon name="i-lucide-triangle-alert" class="size-3.5" />{{ t.atalho.semEmail }}
+              </p>
             </div>
           </div>
         </UCard>

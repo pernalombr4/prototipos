@@ -1,113 +1,116 @@
 /**
- * Os atalhos de contato, numa peça só para todas as telas.
+ * O atalho de e-mail, numa peça só para todas as telas.
  *
- * Regra do documento: o ENSPACE só abre o app (deep link). Não envia, não
- * autentica e não se integra à conta de ninguém. No protótipo o atalho abre a
- * simulação do app (`_AppExterno.vue`), com o link exato no topo: o dev vê o
- * formato e ninguém manda mensagem para um número inventado.
+ * Só e-mail: WhatsApp e SMS saíram do plano (rodada 6). O atalho tem 2
+ * caminhos:
+ *  - escrever pelo ENSPACE: o compositor, com o item já vinculado. Sai da conta
+ *    do Outlook da pessoa (Fase 1) ou também de uma caixa do workspace (Fase 2);
+ *  - abrir o app de e-mail da pessoa (`mailto:`), com o endereço do item em
+ *    cópia, para a resposta voltar à Mail Box.
+ * No protótipo, o `mailto:` abre a simulação do app (`_AppExterno.vue`), com o
+ * link exato no topo.
  */
-import { type ItemDoProtótipo, categoriaPorSlug, enderecoDoItem } from './mocks'
+import type { DropdownMenuItem } from '@nuxt/ui'
+import { type ItemDoProtótipo, enderecoDoItem } from './mocks'
 import { useAppExterno } from './simulador'
 import { textos } from './textos'
-import {
-  type Canal,
-  type Contato,
-  type Lugar,
-  type Rascunho,
-  linkDeEmail,
-  linkDeSms,
-  linkDeWhatsapp,
-  preencher,
-  useComunicacao,
-} from './estado'
+import { type Contato, type Rascunho, linkDeEmail, preencher, useComunicacao } from './estado'
 
-/** O mínimo de um destinatário: nome, e-mail e telefone, qualquer um pode faltar. */
-export type Destino = Pick<Contato, 'nome' | 'email' | 'telefone'>
+/** O mínimo de um destinatário: nome e e-mail, qualquer um pode faltar. */
+export type Destino = Pick<Contato, 'nome' | 'email'>
 
-export const ICONE_DO_CANAL: Record<Canal, string> = {
-  email: 'i-lucide-mail',
-  whatsapp: 'i-simple-icons-whatsapp',
-  sms: 'i-lucide-message-square-text',
+export interface OpcoesDoEmail {
+  item?: ItemDoProtótipo | null
+  assunto?: string
+  /** Texto do corpo, sem HTML. */
+  corpo?: string
+  /** Vários destinatários (lote de tarefas, lembrete da Agenda). */
+  varios?: Destino[]
+  /** Sem destinatário: a pessoa escolhe para quem no compositor ou no app (link de formulário). */
+  semDestinatario?: boolean
 }
 
 export function useAtalhos() {
   const t = useTextos(textos)
-  const { config, abrirCompositor } = useComunicacao()
+  const { config, podeEnviar, abrirCompositor } = useComunicacao()
   const { abrirApp } = useAppExterno()
 
-  /** Os canais que o administrador ligou para esta tela. Vazio = atalhos fora. */
-  function canaisEm(lugar: Lugar): Canal[] {
-    const c = config.value
-    if (!c.atalhos || !c.lugares[lugar]) return []
-    return (['email', 'whatsapp', 'sms'] as Canal[]).filter(k => c.canais[k])
-  }
+  /** O módulo está ligado? Desligado, nenhum atalho aparece. */
+  const ativos = computed(() => config.value.atalhos)
 
-  /** Por que o canal não está disponível para esta pessoa. Nulo = disponível. */
-  function motivo(canal: Canal, d: Destino | null): string | null {
+  /** Por que o e-mail não está disponível para este destino. Nulo = disponível. */
+  function motivo(d: Destino | null) {
     if (!d) return t.value.atalho.semContato
-    if (canal === 'email') return d.email ? null : t.value.atalho.semEmail
-    if (!d.telefone) return t.value.atalho.semTelefone
-    // Número curto não abre conversa nenhuma (Twenty e Ploomes nem mostram o link).
-    return d.telefone.replace(/\D/g, '').length < 10 ? t.value.atalho.telefoneInvalido : null
+    return d.email ? null : t.value.atalho.semEmail
   }
 
-  function textos_(item: ItemDoProtótipo | null | undefined, d: Destino | null) {
-    if (!config.value.textoInicial || !item) return { assunto: undefined, mensagem: undefined }
-    const cat = config.value.porCategoria[item.categoria]
-    return {
-      assunto: preencher(cat.assunto, item, d?.nome ?? null) || undefined,
-      mensagem: preencher(cat.mensagem, item, d?.nome ?? null) || undefined,
-    }
+  function assuntoPadrao(item: ItemDoProtótipo | null | undefined, d: Destino | null) {
+    if (!item) return undefined
+    return preencher(config.value.porCategoria[item.categoria].assunto, item, d?.nome ?? null) || undefined
   }
 
-  type Opcoes = { item?: ItemDoProtótipo | null, assunto?: string, mensagem?: string, varios?: Destino[] }
-
-  /** O que vai no link: destinatários, cópia, assunto e texto. */
-  function partes(canal: Canal, d: Destino | null, opcoes: Opcoes) {
-    const padrao = textos_(opcoes.item, d)
-    const assunto = opcoes.assunto ?? padrao.assunto
-    // No e-mail, o corpo só vai quando a tela manda um (o link do formulário, o lembrete).
-    const mensagem = canal === 'email' ? opcoes.mensagem : opcoes.mensagem ?? padrao.mensagem
-    const para = (opcoes.varios ?? (d ? [d] : [])).map(x => x.email).filter(Boolean) as string[]
-    const i = opcoes.item
-    const cc = canal === 'email' && i && config.value.copiaParaOItem && categoriaPorSlug(i.categoria).temMailBox ? enderecoDoItem(i) : undefined
-    return { assunto, mensagem, para, cc }
+  function para(d: Destino | null, o: OpcoesDoEmail) {
+    return (o.varios ?? (d ? [d] : [])).map(x => x.email).filter(Boolean) as string[]
   }
 
-  /** O link que o atalho abre. */
-  function link(canal: Canal, d: Destino | null, opcoes: Opcoes = {}) {
-    const p = partes(canal, d, opcoes)
-    if (canal === 'email') return linkDeEmail(p.para, p.assunto, p.mensagem, p.cc)
-    if (canal === 'whatsapp') return linkDeWhatsapp(d?.telefone ?? null, p.mensagem)
-    return linkDeSms(d?.telefone ?? null, p.mensagem)
+  /** O `mailto:` do atalho. Com item, o endereço dele vai em cópia. */
+  function link(d: Destino | null, o: OpcoesDoEmail = {}) {
+    return linkDeEmail(para(d, o), o.assunto ?? assuntoPadrao(o.item, d), o.corpo, o.item ? enderecoDoItem(o.item) : undefined)
   }
 
-  /** O clique no atalho. No produto: `window.open(link)`. Aqui: a simulação do app. */
-  function abrir(canal: Canal, d: Destino | null, opcoes: Opcoes = {}) {
-    const p = partes(canal, d, opcoes)
-    const url = link(canal, d, opcoes)
-    if (canal === 'email') abrirApp({ tipo: 'email', url, para: p.para, cc: p.cc ? [p.cc] : [], assunto: p.assunto ?? '', corpo: p.mensagem ?? '' })
-    else abrirApp({ tipo: canal, url, nome: d?.nome ?? null, telefone: d?.telefone ?? null, texto: p.mensagem ?? '' })
-  }
-
-  /** E-mail pelo ENSPACE, com o item já vinculado quando há item. */
-  function escreverNoEnspace(d: Destino | null, item: ItemDoProtótipo | null | undefined, origem: Rascunho['origem'], extra: Partial<Rascunho> = {}) {
-    const padrao = textos_(item, d)
-    abrirCompositor({
-      itemId: item?.id ?? null,
-      para: d?.email ? [d.email] : [],
-      assunto: padrao.assunto ?? '',
-      origem,
-      ...extra,
+  /** "Abrir no meu app de e-mail". No produto: `window.open(link)`. Aqui: a simulação. */
+  function abrirNoApp(d: Destino | null, o: OpcoesDoEmail = {}) {
+    abrirApp({
+      tipo: 'email',
+      url: link(d, o),
+      para: para(d, o),
+      cc: o.item ? [enderecoDoItem(o.item)] : [],
+      assunto: o.assunto ?? assuntoPadrao(o.item, d) ?? '',
+      corpo: o.corpo ?? '',
     })
   }
 
-  /** O e-mail aberto no app leva a caixa do item em cópia? */
-  function vaiComCopia(item: ItemDoProtótipo | null | undefined) {
-    return !!item && config.value.copiaParaOItem && categoriaPorSlug(item.categoria).temMailBox
+  /** "Escrever pelo ENSPACE": o compositor, com o item já vinculado quando há item. */
+  function escreverNoEnspace(d: Destino | null, o: OpcoesDoEmail & { origem: Rascunho['origem'], tarefaId?: number | null } = { origem: 'barra' }) {
+    abrirCompositor({
+      itemId: o.item?.id ?? null,
+      tarefaId: o.tarefaId ?? null,
+      para: para(d, o),
+      assunto: o.assunto ?? assuntoPadrao(o.item, d) ?? '',
+      corpo: o.corpo ? `<p>${o.corpo}</p>` : '',
+      origem: o.origem,
+    })
   }
 
-  return { canaisEm, motivo, link, abrir, escreverNoEnspace, vaiComCopia, config }
+  /**
+   * As 2 opções num menu (linha da tabela, cartão do quadro, tarefa). Sem por
+   * onde enviar pelo ENSPACE (Fase 1 sem Outlook integrado), sobra o app.
+   */
+  function itensDeMenu(d: Destino | null, o: OpcoesDoEmail & { origem: Rascunho['origem'], tarefaId?: number | null }): DropdownMenuItem[] {
+    const m = o.semDestinatario ? null : o.varios ? (para(d, o).length ? null : t.value.atalho.semEmail) : motivo(d)
+    const lista: DropdownMenuItem[] = []
+    if (podeEnviar.value) {
+      lista.push({
+        label: t.value.atalho.escreverNoEnspace,
+        description: m ?? (o.item ? t.value.atalho.escreverNoEnspaceComItem(o.item.reference) : undefined),
+        icon: 'i-lucide-send',
+        disabled: !!m,
+        ui: { itemDescription: 'whitespace-normal' },
+        onSelect: () => escreverNoEnspace(d, o),
+      })
+    }
+    lista.push({
+      label: t.value.atalho.abrirNoApp,
+      description: m ?? (o.item ? t.value.atalho.abrirNoAppComCopia : t.value.atalho.abrirNoAppDica),
+      icon: 'i-lucide-external-link',
+      disabled: !!m,
+      ui: { itemDescription: 'whitespace-normal' },
+      onSelect: () => abrirNoApp(d, o),
+    })
+    return lista
+  }
+
+  return { ativos, motivo, link, abrirNoApp, escreverNoEnspace, itensDeMenu, assuntoPadrao, config }
 }
 
 /**

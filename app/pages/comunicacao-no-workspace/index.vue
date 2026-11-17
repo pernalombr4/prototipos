@@ -4,8 +4,14 @@
  * protótipo só, porque as 3 mexem nas mesmas telas e no mesmo botão de e-mail.
  *
  *   1. link do formulário público nas telas de uso;
- *   2. atalhos de contato (e-mail, WhatsApp, SMS) por deep link;
+ *   2. atalhos de e-mail (só e-mail: WhatsApp e SMS saíram do plano);
  *   3. o e-mail do ENSPACE de qualquer tela, com vínculo a item.
+ *
+ * Dividido em 3 fases, que o andaime alterna:
+ *   Fase 1 (MVP): só tela, sobre o que o ENSPACE já tem;
+ *   Fase 2: escolher o "De" (Outlook ou caixa do workspace), responder na
+ *           mesma conversa, encaminhar, registrar o e-mail sem item;
+ *   Fase 3: vincular o e-mail a uma tarefa.
  *
  * Uma porta: as telas se navegam pelo menu lateral, como no produto.
  */
@@ -13,7 +19,7 @@ import type { Component } from 'vue'
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { textos } from './textos'
 import { categoriaPorSlug, itemPorId, itens, workspace } from './mocks'
-import { type Cenario, type Tela, useComunicacao } from './estado'
+import { type Cenario, FASES, type Tela, useComunicacao } from './estado'
 import CascaDoEnspace from './_CascaDoEnspace.vue'
 import Compositor from './_Compositor.vue'
 import RascunhoMinimizado from './_RascunhoMinimizado.vue'
@@ -34,14 +40,14 @@ import decisoesMd from './DECISOES.md?raw'
 
 definePageMeta({
   titulo: 'Comunicação no workspace',
-  descricao: 'Link do formulário público, atalhos de e-mail, WhatsApp e SMS e o e-mail do ENSPACE em qualquer tela, com vínculo a item. Jornada de quem usa e de quem configura.',
+  descricao: 'Link do formulário público, atalhos de e-mail e o e-mail do ENSPACE em qualquer tela, com a Mail Box no item e na tarefa. Em 3 fases: o MVP sobre o que já existe, o remetente e a tarefa.',
   status: 'em-revisao',
-  atualizado: '2026-10-05',
+  atualizado: '2026-11-17',
   tela: 'Início, itens, tarefas, Agenda, Requisições, E-mails e Sistema › Módulos',
 })
 
 const t = useTextos(textos)
-const { tela, categoriaAtual, itemAberto, cenario, destacar, ir, abrirItem } = useComunicacao()
+const { tela, categoriaAtual, itemAberto, cenario, destacar, fase, ir, abrirItem } = useComunicacao()
 
 const telas: Record<Tela, Component> = {
   inicio: TelaInicio,
@@ -93,7 +99,7 @@ const irPara = computed<DropdownMenuItem[][]>(() => [
   [{ type: 'label', label: t.value.andaime.quemConfigura }],
   [
     { label: t.value.andaime.modulos, icon: 'i-lucide-settings', onSelect: () => ir('sistema') },
-    { label: t.value.andaime.atalhosDaCategoria, icon: 'i-lucide-message-circle-more', onSelect: () => ir('categoria', { categoria: 'contratos', vista: 'atalhos' }) },
+    { label: t.value.andaime.atalhosDaCategoria, icon: 'i-lucide-contact', onSelect: () => ir('categoria', { categoria: 'contratos', vista: 'atalhos' }) },
     { label: t.value.andaime.formularios, icon: 'i-lucide-file-spreadsheet', onSelect: () => ir('categoria', { categoria: 'solicitacoes', vista: 'formularios' }) },
   ],
 ])
@@ -121,7 +127,7 @@ const cenarios = computed<{ value: Cenario, label: string }[]>(() => [
 
     <Compositor :t="t" />
     <RascunhoMinimizado :t="t" />
-    <!-- ANDAIME: a simulação do app de fora (WhatsApp, Mensagens, e-mail, formulário público, Microsoft) -->
+    <!-- ANDAIME: a simulação do app de fora (e-mail, formulário público, Microsoft) -->
     <AppExterno :t="t" />
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->
@@ -131,6 +137,20 @@ const cenarios = computed<{ value: Cenario, label: string }[]>(() => [
         <UDropdownMenu :items="irPara" :content="{ side: 'top', align: 'start' }" :ui="{ content: 'w-64' }">
           <UButton :label="t.andaime.irPara" icon="i-lucide-map" trailing-icon="i-lucide-chevron-up" size="xs" color="neutral" variant="subtle" />
         </UDropdownMenu>
+
+        <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
+        <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.fase }}</span>
+        <UFieldGroup size="xs">
+          <UTooltip v-for="f in FASES" :key="f" :text="t.andaime.fasesDica[f]">
+            <UButton
+              :label="t.andaime.fases[f]"
+              :color="fase === f ? 'primary' : 'neutral'"
+              :variant="fase === f ? 'solid' : 'subtle'"
+              :aria-pressed="fase === f"
+              @click="fase = f"
+            />
+          </UTooltip>
+        </UFieldGroup>
 
         <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.cenario }}</span>

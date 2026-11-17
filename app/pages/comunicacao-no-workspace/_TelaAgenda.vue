@@ -5,8 +5,8 @@
  * A grade é montada à mão: o Nuxt UI não tem calendário de eventos e o SDK
  * também não. É a tela de hoje, não componente novo.
  *
- * PROPOSTA: no modal, "Enviar lembrete" (e-mail para todos e WhatsApp ou SMS
- * para cada participante com telefone).
+ * PROPOSTA: no modal, "Enviar lembrete" por e-mail, para todos de uma vez ou
+ * para cada participante.
  */
 import type { Textos } from './textos'
 import { type EventoDaAgenda, HOJE, eventos, itemPorId } from './mocks'
@@ -17,7 +17,7 @@ import AcoesDeContato from './_AcoesDeContato.vue'
 const props = defineProps<{ t: Textos }>()
 
 const { abrirItem } = useComunicacao()
-const { canaisEm, abrir, config } = useAtalhos()
+const { ativos, config } = useAtalhos()
 const marca = useMarcaDeProposta()
 const idioma = useIdioma()
 
@@ -47,7 +47,6 @@ const aberto = ref<EventoDaAgenda | null>(null)
 const modal = computed({ get: () => !!aberto.value, set: (v) => { if (!v) aberto.value = null } })
 const itemDoEvento = computed(() => itemPorId(aberto.value?.itemId))
 
-const canais = computed(() => canaisEm('agenda'))
 /**
  * Quem recebe o lembrete. Reunião do Outlook e prazo de tarefa: os participantes
  * do evento. Data de item: os contatos do item, lidos agora (o que a Visão Geral
@@ -58,27 +57,19 @@ const pessoas = computed(() => {
   if (!e) return []
   if (e.fonte === 'item' && itemDoEvento.value) {
     return contatosDoItem(itemDoEvento.value, config.value)
-      .filter(c => c.email || c.telefone)
-      .map(c => ({ nome: c.nome ?? undefined, email: c.email ?? undefined, telefone: c.telefone }))
+      .filter(c => c.email || c.nome)
+      .map(c => ({ nome: c.nome ?? undefined, email: c.email ?? undefined }))
   }
-  return e.participantes
+  return e.participantes.map(p => ({ nome: p.nome, email: p.email }))
 })
-const comEmail = computed(() => pessoas.value.filter(p => p.email))
-const algumTelefone = computed(() => pessoas.value.some(p => p.telefone))
+const comEmail = computed(() => pessoas.value.filter(p => p.email).map(p => ({ nome: p.nome ?? null, email: p.email ?? null })))
 
 function textosDoLembrete(e: EventoDaAgenda, nome?: string) {
-  if (!config.value.textoInicial) return { assunto: undefined, mensagem: undefined }
   const quando = [`${dataLonga.value.format(e.inicio)}, ${hora.value.format(e.inicio)}`, e.local].filter(Boolean).join(', ')
   return {
     assunto: props.t.agenda.assuntoDoLembrete(e.titulo, quando),
-    mensagem: props.t.agenda.mensagemDoLembrete(nome?.split(' ')[0] ?? '', e.titulo, quando),
+    corpo: props.t.agenda.mensagemDoLembrete(nome?.split(' ')[0] ?? '', e.titulo, quando),
   }
-}
-
-function emailParaTodos() {
-  const e = aberto.value
-  if (!e) return
-  abrir('email', null, { varios: comEmail.value.map(p => ({ nome: p.nome ?? null, email: p.email ?? null, telefone: null })), item: itemDoEvento.value, ...textosDoLembrete(e) })
 }
 
 function iniciais(p: { nome?: string, email?: string }) {
@@ -190,18 +181,17 @@ function iniciais(p: { nome?: string, email?: string }) {
                 <UAvatar :text="iniciais(p)" size="xs" />
                 <span class="min-w-0 flex-1">
                   <span class="block truncate text-sm text-highlighted">{{ p.nome ?? p.email }}</span>
-                  <span v-if="p.nome" class="block truncate text-xs text-muted">{{ [p.email, p.telefone].filter(Boolean).join(' · ') }}</span>
+                  <span v-if="p.nome" class="block truncate text-xs text-muted">{{ p.email ?? t.atalho.semEmail }}</span>
                 </span>
                 <!-- PROPOSTA: atalho por participante -->
                 <AcoesDeContato
-                  v-if="canais.length"
                   :t="t"
-                  :destino="{ nome: p.nome ?? null, email: p.email ?? null, telefone: p.telefone ?? null }"
+                  :destino="{ nome: p.nome ?? null, email: p.email ?? null }"
                   :item="itemDoEvento"
-                  lugar="agenda"
-                  variante="icones"
+                  variante="icone"
                   tamanho="xs"
-                  :permitir-enspace="!!itemDoEvento"
+                  origem="barra"
+                  :rotulo="t.agenda.emailPara(p.nome ?? p.email ?? '')"
                   :class="marca"
                   v-bind="textosDoLembrete(aberto, p.nome)"
                 />
@@ -210,24 +200,24 @@ function iniciais(p: { nome?: string, email?: string }) {
           </div>
 
           <!-- PROPOSTA: lembrete para todos -->
-          <section v-if="canais.length" class="rounded-lg border border-dashed border-default p-4" :class="marca">
+          <section v-if="ativos" class="rounded-lg border border-dashed border-default p-4" :class="marca">
             <h3 class="text-xs font-semibold uppercase tracking-wide text-muted">
               {{ t.agenda.enviarLembrete }}
             </h3>
             <div class="mt-2 flex flex-wrap items-center gap-2">
-              <UButton
-                v-if="canais.includes('email')"
-                icon="i-lucide-mail"
-                :label="t.agenda.emailParaTodos(comEmail.length)"
-                color="neutral"
-                variant="outline"
-                size="sm"
-                :disabled="!comEmail.length"
-                @click="emailParaTodos"
+              <AcoesDeContato
+                :t="t"
+                :destino="null"
+                :varios="comEmail"
+                :item="itemDoEvento"
+                :rotulo="t.agenda.emailParaTodos(comEmail.length)"
+                tamanho="sm"
+                origem="barra"
+                v-bind="textosDoLembrete(aberto)"
               />
             </div>
             <p class="mt-2 text-xs text-muted">
-              {{ algumTelefone ? t.agenda.ajudaComTelefone : t.agenda.ajudaSemTelefone }}
+              {{ t.agenda.ajudaDoLembrete }}
             </p>
           </section>
         </div>

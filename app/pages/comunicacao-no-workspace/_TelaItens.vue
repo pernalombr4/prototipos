@@ -5,7 +5,8 @@
  * e da visualização Kanban sobre o `EnKanbanBoard`.
  *
  * PROPOSTA:
- *  - "Contatar" no menu de cada linha e no clique direito do cartão;
+ *  - "E-mail" no menu de cada linha e no clique direito do cartão, com os
+ *    contatos do item (só e-mail: WhatsApp e SMS saíram do plano);
  *  - o botão do link público, ao lado de "Novo registro", quando a categoria
  *    tem formulário público.
  */
@@ -14,13 +15,13 @@ import type { EnKanbanCardConfig, EnKanbanColumn, EnTableColumn } from '@be-enli
 import type { Textos } from './textos'
 import { type ItemDoProtótipo, type StatusDoItem, categoriaPorSlug, itens, workspace } from './mocks'
 import { type Contato, contatosDoItem, useComunicacao, useMarcaDeProposta } from './estado'
-import { ICONE_DO_CANAL, useAtalhos, useCopiar } from './atalhos'
+import { useAtalhos, useCopiar } from './atalhos'
 import LinksPublicos from './_LinksPublicos.vue'
 
 const props = defineProps<{ t: Textos }>()
 
-const { categoriaAtual, abrirItem, formularios, config, outlookIntegrado } = useComunicacao()
-const { canaisEm, motivo, abrir, escreverNoEnspace } = useAtalhos()
+const { categoriaAtual, abrirItem, formularios, config } = useComunicacao()
+const { ativos, itensDeMenu } = useAtalhos()
 const { copiar } = useCopiar()
 const marca = useMarcaDeProposta()
 const idioma = useIdioma()
@@ -45,7 +46,7 @@ const filtrados = computed(() => {
 })
 const daPagina = computed(() => filtrados.value.slice((pagina.value - 1) * POR_PAGINA, pagina.value * POR_PAGINA))
 
-const temLinkPublico = computed(() => config.value.atalhos && config.value.lugares.formularios
+const temLinkPublico = computed(() => config.value.atalhos
   && formularios.value.some(f => f.visibilidade === 'publico' && f.categoria === categoriaAtual.value))
 
 /* ---------- linhas ---------- */
@@ -95,40 +96,13 @@ const colunas = computed<EnTableColumn[]>(() => [
 /* ---------- contatar: o mesmo menu na linha e no cartão ---------- */
 
 function opcoesDeContato(i: ItemDoProtótipo): DropdownMenuItem[] {
-  const canais = canaisEm('itens')
-  if (!canais.length) return []
-  const grupo: DropdownMenuItem[] = []
-  for (const c of contatosDoItem(i, config.value)) {
-    grupo.push({ type: 'label', label: c.nome ? `${c.rotulo} · ${c.nome}` : c.rotulo })
-    for (const canal of canais) {
-      const m = motivo(canal, c)
-      if (canal === 'email' && config.value.emailDoEnspace && outlookIntegrado.value) {
-        grupo.push({
-          label: props.t.atalho.escreverNoEnspace,
-          icon: 'i-lucide-send',
-          description: m ?? undefined,
-          disabled: !!m,
-          onSelect: () => escreverNoEnspace(c, i, 'item'),
-        })
-        grupo.push({
-          label: props.t.atalho.abrirNoApp,
-          icon: ICONE_DO_CANAL.email,
-          description: m ?? undefined,
-          disabled: !!m,
-          onSelect: () => abrir('email', c, { item: i }),
-        })
-        continue
-      }
-      grupo.push({
-        label: props.t.atalho.canal[canal],
-        icon: ICONE_DO_CANAL[canal],
-        description: m ?? c.telefone ?? undefined,
-        disabled: !!m,
-        onSelect: () => abrir(canal, c, { item: i }),
-      })
-    }
-  }
-  return [{ label: props.t.itens.contatar, icon: 'i-lucide-message-circle-more', children: [grupo], class: marca.value }]
+  if (!ativos.value) return []
+  const grupos: DropdownMenuItem[][] = contatosDoItem(i, config.value).map(c => [
+    { type: 'label', label: c.nome ? `${c.rotulo} · ${c.nome}` : c.rotulo },
+    ...itensDeMenu(c, { item: i, origem: 'item' }),
+  ])
+  if (!grupos.length) grupos.push([{ label: props.t.atalho.semContato, disabled: true }])
+  return [{ label: props.t.atalho.email, icon: 'i-lucide-mail', children: grupos, class: marca.value }]
 }
 
 function menuDaLinha(i: ItemDoProtótipo): DropdownMenuItem[][] {
@@ -252,7 +226,7 @@ const menuDoCartao = computed<ContextMenuItem[][]>(() => {
         <template #cell-contato="{ row }">
           <span v-if="(row as Linha).contato?.nome || (row as Linha).contato?.email" class="block max-w-64 truncate text-sm">
             <span class="text-highlighted">{{ (row as Linha).contato?.nome ?? '' }}</span>
-            <span class="text-muted"> {{ (row as Linha).contato?.email ?? '' }}</span>
+            <span class="ml-1.5 text-muted">{{ (row as Linha).contato?.email ?? '' }}</span>
           </span>
           <span v-else class="text-sm text-dimmed">-</span>
         </template>

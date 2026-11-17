@@ -25,7 +25,7 @@ const opcoes = computed(() => formularios.value.map(f => ({
   icon: f.visibilidade === 'publico' ? 'i-lucide-globe' : 'i-lucide-lock',
 })))
 
-const mostrarLink = computed(() => !!formulario.value && formulario.value.visibilidade === 'publico' && TIPOS_COM_LINK.includes(formulario.value.tipo) && config.value.atalhos && config.value.lugares.formularios)
+const mostrarLink = computed(() => !!formulario.value && formulario.value.visibilidade === 'publico' && TIPOS_COM_LINK.includes(formulario.value.tipo) && config.value.atalhos)
 const enviando = ref(false)
 async function salvar() {
   enviando.value = true

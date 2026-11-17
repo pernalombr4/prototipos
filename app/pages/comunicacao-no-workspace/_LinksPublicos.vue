@@ -7,7 +7,7 @@ import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Formulario, SlugDaCategoria } from './mocks'
 import type { Textos } from './textos'
 import { TIPOS_COM_LINK, categoriaPorSlug, linkPublico } from './mocks'
-import { ICONE_DO_CANAL, useAtalhos, useCopiar } from './atalhos'
+import { useAtalhos, useCopiar } from './atalhos'
 import { useComunicacao, useMarcaDeProposta } from './estado'
 
 const props = defineProps<{
@@ -18,8 +18,8 @@ const props = defineProps<{
   soIcone?: boolean
 }>()
 
-const { formularios, ir, outlookIntegrado } = useComunicacao()
-const { canaisEm, abrir, escreverNoEnspace, config } = useAtalhos()
+const { formularios, ir } = useComunicacao()
+const { ativos, itensDeMenu, config } = useAtalhos()
 const { copiar, copiado } = useCopiar()
 const marca = useMarcaDeProposta()
 
@@ -28,25 +28,10 @@ const publicos = computed(() => formularios.value.filter(f =>
 
 function menuDeEnvio(f: Formulario): DropdownMenuItem[][] {
   const url = linkPublico(f)
-  const mensagem = props.t.form.mensagemDoLink(f.nome, url)
-  const assunto = props.t.form.assuntoDoLink(f.nome)
-  const canais = canaisEm('formularios')
-  const itens: DropdownMenuItem[] = []
-  if (canais.includes('email') && config.value.emailDoEnspace && outlookIntegrado.value) {
-    itens.push({
-      label: props.t.atalho.escreverNoEnspace,
-      icon: 'i-lucide-send',
-      onSelect: () => escreverNoEnspace(null, null, 'inicio', { assunto, corpo: `<p>${mensagem}</p>` }),
-    })
-  }
-  for (const c of canais) {
-    itens.push({
-      label: c === 'email' ? props.t.atalho.abrirNoApp : props.t.atalho.canal[c],
-      icon: ICONE_DO_CANAL[c],
-      onSelect: () => abrir(c, null, { assunto, mensagem }),
-    })
-  }
-  return [[{ type: 'label', label: props.t.form.enviarLinkPor }], itens]
+  return [
+    [{ type: 'label', label: props.t.form.enviarLinkPor }],
+    itensDeMenu(null, { assunto: props.t.form.assuntoDoLink(f.nome), corpo: props.t.form.mensagemDoLink(f.nome, url), semDestinatario: true, origem: 'inicio' }),
+  ]
 }
 </script>
 
@@ -104,7 +89,7 @@ function menuDeEnvio(f: Formulario): DropdownMenuItem[][] {
                 @click="copiar(f.id, linkPublico(f), f.nome)"
               />
             </UTooltip>
-            <UDropdownMenu v-if="canaisEm('formularios').length" :items="menuDeEnvio(f)" :content="{ align: 'end' }">
+            <UDropdownMenu v-if="ativos" :items="menuDeEnvio(f)" :content="{ align: 'end' }">
               <UButton icon="i-lucide-send" color="neutral" variant="ghost" size="sm" :aria-label="`${t.form.enviarLinkPor}: ${f.nome}`" />
             </UDropdownMenu>
           </li>
