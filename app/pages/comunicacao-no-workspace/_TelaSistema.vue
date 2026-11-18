@@ -17,7 +17,7 @@ import { type ConfigDeComunicacao, useComunicacao, useMarcaDeProposta } from './
 
 const props = defineProps<{ t: Textos }>()
 
-const { config, ir } = useComunicacao()
+const { config, fase, ir } = useComunicacao()
 const marca = useMarcaDeProposta()
 const toast = useToast()
 
@@ -129,9 +129,10 @@ async function salvarModulos() {
             </li>
           </ul>
           <p class="mt-3 text-sm text-muted">
-            {{ t.sistema.contatoNaCategoria }}
+            {{ fase >= 2 ? t.sistema.contatoNaCategoria : t.sistema.contatoPelosCampos }}
           </p>
           <UButton
+            v-if="fase >= 2"
             :label="t.sistema.irParaCategorias"
             trailing-icon="i-lucide-arrow-right"
             color="neutral"

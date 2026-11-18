@@ -4,12 +4,16 @@
  * Tudo em memória (`useState`), sem rede. Recarregar a página volta ao começo.
  *
  * As 3 fases (rodada 6) ficam no andaime. Cada fase soma à anterior:
- *  - Fase 1 (MVP): só o que o código de hoje já sustenta. O e-mail sai da conta
- *    do Outlook da pessoa e só fica no ENSPACE quando vai com item.
+ *  - Fase 1 (MVP): só o que o código de hoje já sustenta, sem back-end novo. O
+ *    e-mail sai da conta do Outlook da pessoa e só fica no ENSPACE quando vai
+ *    com item; o contato do item vem dos campos de e-mail que ele já tem.
  *  - Fase 2: escolher o "De" (Outlook pessoal ou caixa do workspace), responder
- *    na mesma conversa, encaminhar e guardar o e-mail sem item.
+ *    na mesma conversa, encaminhar e guardar o e-mail sem item; mais o que pede
+ *    back-end: o contato por categoria, a busca de item entre categorias e a
+ *    área E-mails (a lista por pessoa e permissão).
  *  - Fase 3: vincular o e-mail a uma tarefa e a Mail Box da própria tarefa.
  */
+import type { Ref } from 'vue'
 import {
   CAMPO_REQUISITANTE,
   type CaixaDeEmail,
@@ -19,6 +23,7 @@ import {
   type SlugDaCategoria,
   EU,
   caixas,
+  campos,
   categoriaPorSlug,
   emails as emailsIniciais,
   enderecoDoItem,
@@ -33,6 +38,9 @@ import {
 
 export type Fase = 1 | 2 | 3
 export const FASES: Fase[] = [1, 2, 3]
+
+/** Espelho da fase do andaime para as funções puras (contatosDoItem). Reativo: é o próprio `useState`. */
+let faseAtual: Ref<Fase> | null = null
 
 /* ------------------------------------------------------------------ *
  * Configuração
@@ -114,7 +122,27 @@ export function valorDoCampo(i: ItemDoProtótipo, campo: string | null): string 
   return typeof v === 'string' && v.trim() ? v : null
 }
 
+/** O nome que o develop dá ao e-mail de quem abriu a requisição. */
+const ROTULO_REQUISITANTE = 'Requisitante'
+
 export function contatosDoItem(i: ItemDoProtótipo, config: ConfigDeComunicacao): Contato[] {
+  // Fase 1: sem configuração nova. O contato é cada campo de e-mail que o item
+  // já tem (e o subcampo de e-mail de Pessoa/Empresa), mais o e-mail de quem pediu.
+  if ((faseAtual?.value ?? 1) < 2) {
+    const lista: Contato[] = []
+    for (const c of campos.filter(x => x.categoria === i.categoria)) {
+      if (c.type === 'email') {
+        const email = valorDoCampo(i, c.refId)
+        if (email) lista.push({ id: c.refId, rotulo: c.name, nome: null, email })
+      }
+      if (c.type === 'EnPerson') {
+        const email = valorDoCampo(i, `${c.refId}.contact_email`)
+        if (email) lista.push({ id: c.refId, rotulo: c.name, nome: valorDoCampo(i, `${c.refId}.contact_name`), email })
+      }
+    }
+    if (i.request_email) lista.push({ id: CAMPO_REQUISITANTE, rotulo: ROTULO_REQUISITANTE, nome: null, email: i.request_email })
+    return lista
+  }
   return config.porCategoria[i.categoria].contatos.map(c => ({
     id: c.id,
     rotulo: c.rotulo,
@@ -196,6 +224,7 @@ export interface Remetente {
 export function useComunicacao() {
   const config = useState<ConfigDeComunicacao>('cnw-config', configInicial)
   const fase = useState<Fase>('cnw-fase', () => 1)
+  faseAtual = fase
   const emails = useState<Email[]>('cnw-emails', () => structuredClone(emailsIniciais))
   const formularios = useState<Formulario[]>('cnw-formularios', () => structuredClone(formulariosIniciais))
   const tela = useState<Tela>('cnw-tela', () => 'inicio')
@@ -243,6 +272,15 @@ export function useComunicacao() {
   function registrado(e: Email) {
     if ((e.desdeFase ?? 1) > fase.value) return false
     return fase.value >= 2 || e.itemId !== null
+  }
+
+  // Fase 1 sem o que pede back-end: quem estava em E-mails ou no contato da categoria sai dali.
+  if (import.meta.client) {
+    watch(fase, (f) => {
+      if (f >= 2) return
+      if (tela.value === 'emails') tela.value = 'inicio'
+      if (vistaDaCategoria.value === 'atalhos') vistaDaCategoria.value = 'painel'
+    })
   }
 
   function ir(t: Tela, extra?: { categoria?: SlugDaCategoria, item?: number, aba?: string, vista?: 'lista' | 'painel' | 'atalhos' | 'formularios' }) {

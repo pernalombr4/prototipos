@@ -269,6 +269,7 @@ export interface Textos {
     assunto: string
     assuntoPlaceholder: string
     vincularTitulo: string
+    itemVinculado: string
     opcional: string
     vincularDica: string
     buscarItem: string
@@ -278,6 +279,7 @@ export interface Textos {
     cancelar: string
     vinculadoPeloItem: string
     vinculadoPelaTarefa: string
+    vinculadoFixo: (ref: string) => string
     recentes: string
     resultados: (mostrando: number, total: number) => string
     sobra: (n: number) => string
@@ -355,6 +357,7 @@ export interface Textos {
     oQueLiga: string
     lugaresDoAtalho: string[]
     contatoNaCategoria: string
+    contatoPelosCampos: string
   }
   categoria: {
     categorias: string
@@ -768,6 +771,7 @@ const ptBR: Textos = {
     assunto: 'Assunto',
     assuntoPlaceholder: 'Digite o assunto do e-mail',
     vincularTitulo: 'Vincular a item',
+    itemVinculado: 'Item vinculado',
     opcional: '(opcional)',
     vincularDica: 'O e-mail entra no histórico do item. O vínculo guarda o item, não o nome: renomear o item não quebra nada.',
     buscarItem: 'Buscar por nome, referência ou ID',
@@ -777,6 +781,7 @@ const ptBR: Textos = {
     cancelar: 'Cancelar',
     vinculadoPeloItem: 'Vinculado porque você começou no item. É possível trocar ou remover o vínculo.',
     vinculadoPelaTarefa: 'Vinculado ao item da tarefa. É possível trocar ou remover o vínculo.',
+    vinculadoFixo: ref => `O e-mail fica na Mail Box de ${ref}, e a resposta volta para lá.`,
     recentes: 'Atualizados por último',
     resultados: (m, n) => `${m} de ${plural(n, 'item', 'itens')}`,
     sobra: n => `Mais ${plural(n, 'item', 'itens')}. Continue digitando para achar.`,
@@ -854,6 +859,7 @@ const ptBR: Textos = {
     oQueLiga: 'O que o módulo ativa',
     lugaresDoAtalho: ['E-mail no campo de e-mail do item', 'E-mail no menu da lista e do quadro de itens', 'E-mail para o responsável da tarefa', 'Lembrete por e-mail na Agenda', 'Novo e-mail no topo de toda tela', 'Link do formulário público nas telas de uso'],
     contatoNaCategoria: 'Defina na própria categoria os campos de nome e de e-mail do contato.',
+    contatoPelosCampos: 'O contato de cada item vem dos campos de e-mail que a categoria já tem e do e-mail de quem abriu a requisição.',
   },
   categoria: {
     categorias: 'Categorias',
@@ -1297,6 +1303,7 @@ const en: Textos = {
     assunto: 'Subject',
     assuntoPlaceholder: 'Type the email subject',
     vincularTitulo: 'Link to item',
+    itemVinculado: 'Linked item',
     opcional: '(optional)',
     vincularDica: 'The email goes into the item history. The link keeps the item, not its name: renaming the item breaks nothing.',
     buscarItem: 'Search by name, reference or ID',
@@ -1306,6 +1313,7 @@ const en: Textos = {
     cancelar: 'Cancel',
     vinculadoPeloItem: 'Linked because you started on the item. You can change or remove the link.',
     vinculadoPelaTarefa: 'Linked to the task item. You can change or remove the link.',
+    vinculadoFixo: ref => `The email is kept in the ${ref} Mail Box, and the reply goes back there.`,
     recentes: 'Recently updated',
     resultados: (m, n) => `${m} of ${n} ${n === 1 ? 'item' : 'items'}`,
     sobra: n => `${n} more ${n === 1 ? 'item' : 'items'}. Keep typing to narrow down.`,
@@ -1383,6 +1391,7 @@ const en: Textos = {
     oQueLiga: 'What the module enables',
     lugaresDoAtalho: ['Email on the item email field', 'Email in the item list and board menu', 'Email to the task assignee', 'Email reminder in the Calendar', 'New email at the top of every screen', 'Public form link on the work screens'],
     contatoNaCategoria: 'Set the contact name and email fields in each category.',
+    contatoPelosCampos: 'The contact of each item comes from the email fields the category already has and from the requester email.',
   },
   categoria: {
     categorias: 'Categories',
@@ -1826,6 +1835,7 @@ const es: Textos = {
     assunto: 'Asunto',
     assuntoPlaceholder: 'Escribe el asunto del correo',
     vincularTitulo: 'Vincular a ítem',
+    itemVinculado: 'Ítem vinculado',
     opcional: '(opcional)',
     vincularDica: 'El correo entra en el historial del ítem. El vínculo guarda el ítem, no el nombre: renombrar el ítem no rompe nada.',
     buscarItem: 'Buscar por nombre, referencia o ID',
@@ -1835,6 +1845,7 @@ const es: Textos = {
     cancelar: 'Cancelar',
     vinculadoPeloItem: 'Vinculado porque usted empezó en el ítem. Es posible cambiar o quitar el vínculo.',
     vinculadoPelaTarefa: 'Vinculado al ítem de la tarea. Es posible cambiar o quitar el vínculo.',
+    vinculadoFixo: ref => `El correo queda en la Mail Box de ${ref}, y la respuesta vuelve allí.`,
     recentes: 'Actualizados recientemente',
     resultados: (m, n) => `${m} de ${n} ${n === 1 ? 'ítem' : 'ítems'}`,
     sobra: n => `${n} ${n === 1 ? 'ítem más' : 'ítems más'}. Sigue escribiendo para encontrarlo.`,
@@ -1912,6 +1923,7 @@ const es: Textos = {
     oQueLiga: 'Lo que activa el módulo',
     lugaresDoAtalho: ['Correo en el campo de correo del ítem', 'Correo en el menú de la lista y del tablero de ítems', 'Correo al responsable de la tarea', 'Recordatorio por correo en la Agenda', 'Nuevo correo arriba en toda pantalla', 'Enlace del formulario público en las pantallas de uso'],
     contatoNaCategoria: 'Defina en cada categoría los campos de nombre y de correo del contacto.',
+    contatoPelosCampos: 'El contacto de cada ítem viene de los campos de correo que la categoría ya tiene y del correo de quien abrió la solicitud.',
   },
   categoria: {
     categorias: 'Categorías',

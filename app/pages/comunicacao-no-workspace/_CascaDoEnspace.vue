@@ -24,7 +24,7 @@ const props = defineProps<{
   trilha: string[]
 }>()
 
-const { tela, categoriaAtual, ir, rascunho, compositorAberto, config, contextoDaTela, novoEmailNoContexto } = useComunicacao()
+const { tela, categoriaAtual, ir, rascunho, compositorAberto, config, fase, contextoDaTela, novoEmailNoContexto } = useComunicacao()
 const marca = useMarcaDeProposta()
 
 interface Entrada {
@@ -56,8 +56,8 @@ const membro = computed<Entrada[]>(() => [
     ],
   },
   { chave: 'agenda', icone: 'i-lucide-calendar-days', tela: 'agenda' },
-  // PROPOSTA: a caixa de e-mail do workspace sai de dentro do item.
-  { chave: 'emails', icone: 'i-lucide-mail', tela: 'emails', proposta: true },
+  // PROPOSTA (Fase 2): a área E-mails pede a lista de e-mails por pessoa e permissão no back.
+  { chave: 'emails', icone: 'i-lucide-mail', tela: 'emails', proposta: true, quando: () => fase.value >= 2 },
   { chave: 'knowledge', icone: 'i-lucide-table-2', filhos: [] },
   // Menu configurado em Interface › Menus (tela nativa /request).
   { chave: 'requisicoes', icone: 'i-lucide-clipboard-pen-line', tela: 'requisicoes' },

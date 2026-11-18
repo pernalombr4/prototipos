@@ -10,16 +10,16 @@ SMS saíram do plano.
 
 | Fase | O que entra | Base |
 |---|---|---|
-| 1 · MVP | Atalhos e telas que só usam o que o produto já tem: botão E-mail nas telas de uso, "Novo e-mail" no topo, área E-mails, Mail Box na tarefa (a do item dela), link do formulário público | Lido no código do develop: o envio sai do Outlook da pessoa e só fica registrado com item |
-| 2 · Remetente | Escolher o "De" (Outlook ou caixa do workspace), responder na mesma conversa, encaminhar, registrar e-mail sem item e vincular depois | Funcionalidade nova |
+| 1 · MVP | Atalhos e telas que só usam o que o produto já tem, sem back-end novo: botão E-mail nas telas de uso (o contato vem dos campos de e-mail do item), "Novo e-mail" no topo, Mail Box na tarefa (a do item dela), link do formulário público | Lido no código do develop: o envio sai do Outlook da pessoa e só fica registrado com item |
+| 2 · Remetente | Escolher o "De" (Outlook ou caixa do workspace), responder na mesma conversa, encaminhar, registrar e-mail sem item e vincular depois; o contato por categoria, a busca de item entre categorias e a área E-mails | Funcionalidade nova, com back-end |
 | 3 · Tarefa | Vincular o e-mail a uma tarefa e a Mail Box própria da tarefa ("Desta tarefa" e "Do item") | Funcionalidade nova |
 
 | Parte do documento | Onde aparece no protótipo |
 |---|---|
 | (a) Link do formulário público | Requisições (cartão "Compartilhar este formulário"); lista de itens da categoria; painel da tarefa de preencher formulário |
 | (b) Atalho de e-mail | Item (Contato do item na lateral e ícone ao lado do campo de e-mail); lista e quadro de itens (submenu "E-mail"); tarefas (coluna Contato, e-mail em lote, clique direito, painel); Agenda (lembrete) |
-| Configuração | Sistema › Módulos: 1 chave, "Atalhos de comunicação", sem escolher telas nem canais; Categorias › cartão "Contato da categoria" (de quais campos vêm nome e e-mail), a avaliar com os devs |
-| E-mail do ENSPACE em todas as telas | "Novo e-mail" no topo, que reconhece o item ou a tarefa aberta; "E-mails" no menu, com a tabela e os filtros do develop; o compositor |
+| Configuração | Sistema › Módulos: 1 chave, "Atalhos de comunicação", sem escolher telas nem canais; Categorias › cartão "Contato da categoria" (Fase 2, a avaliar com os devs) |
+| E-mail do ENSPACE em todas as telas | "Novo e-mail" no topo, que reconhece o item ou a tarefa aberta; o compositor; "E-mails" no menu, com a tabela e os filtros do develop (Fase 2) |
 
 ## O fluxo do e-mail
 
@@ -30,12 +30,14 @@ De qualquer tela                     Do item, da tarefa ou da Mail Box
    ▼                                    ▼
 Nova Mensagem ── De: Fase 1, o Outlook da pessoa
    │               Fase 2, o Outlook ou uma caixa do workspace
-   │ Vincular a item (opcional)         │ Vincular a item: já preenchido
+   │ Item: Fase 1, só o da tela de      │ Item vinculado: já preenchido
+   │ origem; Fase 2, busca (opcional)   │
    │ Vincular a tarefa (Fase 3)         │
    ▼                                    ▼
  Enviar ─────────────────────────────────┘
    │
-   ├─ com item: Responder para = endereço do item; aparece em E-mails e na Mail Box do item
+   ├─ com item: Responder para = endereço do item; aparece na Mail Box do item
+   │            (e, na Fase 2, em E-mails)
    └─ sem item: Fase 1, nada fica no ENSPACE (só no Outlook da pessoa);
                 Fase 2, aparece em E-mails com "Vincular", para ligar ao item depois
 
@@ -290,6 +292,22 @@ disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:)
   [contato da categoria](evidencias/prototipo-20-contato-da-categoria.jpg).
 - **Valem até a rodada 5 e saíram aqui:** as seções "Canal sem dado", "Membro sem telefone" e
   "'Não gerar conteúdo' e o texto inicial" abaixo, e os prints de WhatsApp (09 e 13).
+
+## Rodada 6, ajuste · 2026-11-18
+
+- **Pedido (literal):** "pode deixar na fase 2 todos esses itens que voce falou que dao trabalho no
+  backend."
+- **Foram para a Fase 2:**
+  - o cartão "Contato da categoria". Na Fase 1, o contato do item vem dos campos de e-mail que ele
+    já tem, do subcampo de e-mail de Pessoa/Empresa e do e-mail de quem abriu a requisição;
+    Sistema › Módulos diz isso no lugar do link para a categoria;
+  - a busca de item entre categorias. Na Fase 1, o compositor só leva o item da tela de origem,
+    fixo ("Item vinculado", sem Trocar nem remover); sem item de origem, o bloco não aparece. As
+    sugestões de item e o autocompletar com contatos de outros itens também são Fase 2;
+  - a área "E-mails" no menu, que pede a lista por pessoa e permissão.
+- **No caminho:** sem nome de pessoa, a lateral do item mostra embaixo do e-mail o nome do campo,
+  em vez de repetir o e-mail. Quem volta para a Fase 1 estando em E-mails ou no contato da
+  categoria sai dessas telas.
 
 ## Por que cada decisão
 

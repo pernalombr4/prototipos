@@ -94,12 +94,12 @@ const irPara = computed<DropdownMenuItem[][]>(() => [
     { label: t.value.casca.itens.rapidas, icon: 'i-lucide-clipboard-check', onSelect: () => ir('tarefas') },
     { label: t.value.casca.itens.agenda, icon: 'i-lucide-calendar-days', onSelect: () => ir('agenda') },
     { label: t.value.casca.itens.requisicoes, icon: 'i-lucide-clipboard-pen-line', onSelect: () => ir('requisicoes') },
-    { label: t.value.casca.itens.emails, icon: 'i-lucide-mail', onSelect: () => ir('emails') },
+    ...(fase.value >= 2 ? [{ label: t.value.casca.itens.emails, icon: 'i-lucide-mail', onSelect: () => ir('emails') }] : []),
   ],
   [{ type: 'label', label: t.value.andaime.quemConfigura }],
   [
     { label: t.value.andaime.modulos, icon: 'i-lucide-settings', onSelect: () => ir('sistema') },
-    { label: t.value.andaime.atalhosDaCategoria, icon: 'i-lucide-contact', onSelect: () => ir('categoria', { categoria: 'contratos', vista: 'atalhos' }) },
+    ...(fase.value >= 2 ? [{ label: t.value.andaime.atalhosDaCategoria, icon: 'i-lucide-contact', onSelect: () => ir('categoria', { categoria: 'contratos', vista: 'atalhos' }) }] : []),
     { label: t.value.andaime.formularios, icon: 'i-lucide-file-spreadsheet', onSelect: () => ir('categoria', { categoria: 'solicitacoes', vista: 'formularios' }) },
   ],
 ])

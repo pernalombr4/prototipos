@@ -418,7 +418,7 @@ com "99+" e o avatar.
 
 - "Requisições" na seção Membro: entrada de menu configurada em Interface › Menus (tela nativa
   `/request`). Cliente costuma ter; o workspace de exploração não tinha.
-- "E-mails" na seção Membro e "Novo e-mail" na barra do topo: proposta (ver `DECISOES.md`).
+- "E-mails" na seção Membro (Fase 2) e "Novo e-mail" na barra do topo: proposta (ver `DECISOES.md`).
 
 ## 10. Preparo por API
 

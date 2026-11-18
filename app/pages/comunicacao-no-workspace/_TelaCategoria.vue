@@ -22,7 +22,7 @@ import { useCopiar } from './atalhos'
 
 const props = defineProps<{ t: Textos }>()
 
-const { categoriaAtual, config, formularios } = useComunicacao()
+const { categoriaAtual, config, formularios, fase } = useComunicacao()
 const marca = useMarcaDeProposta()
 const toast = useToast()
 const idioma = useIdioma()
@@ -37,7 +37,7 @@ function entrar(slug: SlugDaCategoria) {
   vista.value = 'painel'
 }
 
-/* ---------- painel (12 cartões de hoje + 1) ---------- */
+/* ---------- painel (12 cartões de hoje + 1 na Fase 2) ---------- */
 
 const cartoes = computed(() => [
   { chave: 'campos', icone: 'i-lucide-text-cursor-input' },
@@ -52,7 +52,8 @@ const cartoes = computed(() => [
   { chave: 'execucoes', icone: 'i-lucide-calendar-clock' },
   { chave: 'status', icone: 'i-lucide-tag' },
   { chave: 'correcao', icone: 'i-lucide-circle-dollar-sign' },
-  { chave: 'atalhos', icone: 'i-lucide-contact', vista: 'atalhos' as Vista, proposta: true },
+  // Fase 2: o contato por categoria é dado novo no back.
+  ...(fase.value >= 2 ? [{ chave: 'atalhos', icone: 'i-lucide-contact', vista: 'atalhos' as Vista, proposta: true }] : []),
 ])
 
 /* ---------- atalhos: rascunho da configuração da categoria ---------- */

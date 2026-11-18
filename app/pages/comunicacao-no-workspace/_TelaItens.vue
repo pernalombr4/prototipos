@@ -20,7 +20,7 @@ import LinksPublicos from './_LinksPublicos.vue'
 
 const props = defineProps<{ t: Textos }>()
 
-const { categoriaAtual, abrirItem, formularios, config } = useComunicacao()
+const { categoriaAtual, abrirItem, formularios, config, fase } = useComunicacao()
 const { ativos, itensDeMenu } = useAtalhos()
 const { copiar } = useCopiar()
 const marca = useMarcaDeProposta()
@@ -89,7 +89,7 @@ const colunas = computed<EnTableColumn[]>(() => [
   { key: 'reference', label: props.t.itens.referencia },
   { key: 'titulo', label: props.t.itens.nome },
   { key: 'etapa', label: props.t.itens.etapa },
-  { key: 'contato', label: config.value.porCategoria[categoriaAtual.value].contatos[0]?.rotulo ?? props.t.itens.contato },
+  { key: 'contato', label: (fase.value >= 2 ? config.value.porCategoria[categoriaAtual.value].contatos[0]?.rotulo : null) ?? props.t.itens.contato },
   { key: 'atualizado', label: props.t.itens.atualizadoEm },
 ])
 

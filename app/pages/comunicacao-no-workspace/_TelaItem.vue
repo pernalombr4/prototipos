@@ -23,7 +23,7 @@ import MailBox from './_MailBox.vue'
 
 const props = defineProps<{ t: Textos }>()
 
-const { itemAberto, abaDoItem, config, podeEnviar, ir } = useComunicacao()
+const { itemAberto, abaDoItem, config, podeEnviar, fase, ir } = useComunicacao()
 const { ativos } = useAtalhos()
 const marca = useMarcaDeProposta()
 const idioma = useIdioma()
@@ -187,8 +187,9 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
                 <span class="block truncate text-xs text-muted">{{ contato.rotulo }}</span>
               </span>
             </div>
+            <!-- Sem nome (Fase 1: o contato é o próprio campo de e-mail), a linha diz de qual campo ele vem. -->
             <p v-if="contato?.email" class="mt-1.5 truncate px-1 text-xs text-muted">
-              {{ contato.email }}
+              {{ contato.nome ? contato.email : contato.rotulo }}
             </p>
             <!-- O motivo à vista: botão indisponível não mostra tooltip a quem usa teclado. -->
             <div v-else-if="contato" class="mt-1.5 flex flex-wrap items-center gap-x-1 px-1 text-xs text-warning">
@@ -223,7 +224,7 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
             :title="t.item.semContatoTitulo"
             :description="t.item.semContatoDica"
             size="sm"
-            :actions="[{ label: t.item.escolherCampos, color: 'neutral', variant: 'outline', size: 'xs', onClick: () => ir('categoria', { vista: 'atalhos' }) }]"
+            :actions="fase >= 2 ? [{ label: t.item.escolherCampos, color: 'neutral', variant: 'outline', size: 'xs', onClick: () => ir('categoria', { vista: 'atalhos' }) }] : undefined"
           />
         </div>
       </section>

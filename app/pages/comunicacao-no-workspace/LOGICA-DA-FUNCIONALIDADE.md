@@ -1,7 +1,7 @@
 # Comunicação no workspace: lógica da funcionalidade
 
 Para dev e produto. Protótipo: https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/
-(17/11/2026, rodada 6). O controle "Fase", na barra de baixo do protótipo, troca entre as 3 fases.
+(18/11/2026, rodada 6). O controle "Fase", na barra de baixo do protótipo, troca entre as 3 fases.
 
 ## 1. Resumo
 
@@ -9,9 +9,9 @@ O documento do Felipe pede 3 coisas. Cada uma tem configuração e uso:
 
 | Parte | O que a pessoa faz | Onde configura |
 |---|---|---|
-| Atalho de e-mail | Escreve ao contato do item, ao responsável da tarefa ou aos participantes de um evento, pelo ENSPACE ou pelo app de e-mail dela | Sistema › Módulos e o cartão "Contato da categoria" |
+| Atalho de e-mail | Escreve ao contato do item, ao responsável da tarefa ou aos participantes de um evento, pelo ENSPACE ou pelo app de e-mail dela | Sistema › Módulos. Na Fase 2, também o cartão "Contato da categoria" |
 | Link de formulário público | Copia ou envia o link do formulário público sem ir à configuração | Formulários da categoria (visibilidade, já existe) |
-| E-mail do ENSPACE em qualquer tela | Escreve o e-mail de qualquer tela e o vincula a um item | Correio do Outlook no perfil de cada pessoa |
+| E-mail do ENSPACE em qualquer tela | Escreve o e-mail de qualquer tela. Com um item aberto, o e-mail fica no item | Correio do Outlook no perfil de cada pessoa |
 
 Regras que valem para tudo:
 
@@ -34,8 +34,8 @@ Cada fase soma à anterior.
 
 | Fase | O que entra | O que já existe no produto | O que é novo |
 |---|---|---|---|
-| 1 · MVP | Atalho de e-mail nas telas de uso; cartão "Contato da categoria"; "Novo e-mail" no topo, que reconhece o item ou a tarefa aberta; compositor com o "De" à vista e "Vincular a item"; área E-mails; Mail Box em todo item e no painel da tarefa; link do formulário público nas telas de uso; lembrete por e-mail na Agenda | Envio pela conta do Outlook da pessoa; endereço do item; registro do e-mail com item; Mail Box do item; tela "Emails Recebidos", sem entrada no menu; link público e visibilidade do formulário; Modelos de E-mail | As telas e o módulo; o contato da categoria (dado novo, a avaliar com os devs); a busca de item entre categorias; a lista de e-mails por pessoa e permissão |
-| 2 · Remetente | Escolher o "De" (conta do Outlook ou caixa do workspace); responder na mesma conversa; encaminhar; registrar o e-mail enviado sem item; vincular e trocar o vínculo depois | Caixas de E-mail do workspace, que hoje só recebem | Envio por caixa do workspace; resposta na conversa; encaminhar; registro sem item; rota de vínculo |
+| 1 · MVP | Atalho de e-mail nas telas de uso, com o contato tirado dos campos de e-mail que o item já tem; "Novo e-mail" no topo, que reconhece o item ou a tarefa aberta; compositor com o "De" à vista e o item da tela de origem; Mail Box em todo item e no painel da tarefa; link do formulário público nas telas de uso; lembrete por e-mail na Agenda | Envio pela conta do Outlook da pessoa; endereço do item; registro do e-mail com item; Mail Box do item; campos de e-mail da categoria e E-mail do Requisitante; link público e visibilidade do formulário; Modelos de E-mail | As telas e o módulo, sobre os dados e as rotas que já existem |
+| 2 · Remetente | Contato por categoria (cartão "Contato da categoria"); busca de item entre categorias no compositor ("Vincular a item (opcional)"), com as sugestões pelo destinatário e o autocompletar do Para com contatos de outros itens; área E-mails no menu; escolher o "De" (conta do Outlook ou caixa do workspace); responder na mesma conversa; encaminhar; registrar o e-mail enviado sem item; vincular e trocar o vínculo depois | Caixas de E-mail do workspace, que hoje só recebem; tela "Emails Recebidos", sem entrada no menu; configuração da categoria em JSON | O contato da categoria (dado novo, a avaliar com os devs); a busca de item entre categorias; a lista de e-mails por pessoa e permissão; envio por caixa do workspace; resposta na conversa; encaminhar; registro sem item; rota de vínculo |
 | 3 · Tarefa | "Vincular a tarefa" no compositor; Mail Box própria da tarefa ("Desta tarefa" e "Do item"); coluna Tarefa na área E-mails | Nada: a tarefa não tem vínculo com e-mail | Vínculo do e-mail com a tarefa |
 
 **O que o código do develop faz hoje** (lido em 17/11/2026). É a base da Fase 1:
@@ -56,20 +56,20 @@ Cada fase soma à anterior.
 | D2 | Conta Microsoft corporativa | TI do cliente | Sim, só Microsoft | 1 | Os mesmos de D1 | Quem usa Google fica só com "Abrir no meu app de e-mail" |
 | D3 | Calendário do Outlook integrado no perfil (outra integração, separada do Correio) | Cada pessoa (Perfil › Integrações) | Sim | 1 | 5.5 | As reuniões do Outlook não aparecem na Agenda |
 | D4 | Módulo "Atalhos de comunicação" ligado | Administrador (Sistema › Módulos) | Não: é novo | 1 | 5, 6, 7.2 | Nenhum atalho de e-mail, sem "Novo e-mail" no topo e sem link público nas telas de uso |
-| D5 | Contato configurado na categoria | Administrador (cartão "Contato da categoria") | Não: é novo, a avaliar com os devs | 1 | 5.2, 5.3, 5.5, 7.4 | O item mostra "Nenhum contato neste item"; a lista e o quadro ficam sem o submenu "E-mail" |
-| D6 | Campos de e-mail na categoria (E-mail, Pessoa/Empresa, E-mail do Requisitante) | Administrador (Estrutura › Categorias › Campos) | Sim | 1 | 4.2, 5.2 | Não há campo para escolher no cartão; o ícone ao lado do campo não aparece |
+| D5 | Contato configurado na categoria | Administrador (cartão "Contato da categoria") | Não: é novo, a avaliar com os devs | 2 | 4.2, 5.2, 5.3, 5.5, 7.4 | O item mostra "Nenhum contato neste item"; a lista e o quadro ficam sem o submenu "E-mail" |
+| D6 | Campos de e-mail na categoria (E-mail, Pessoa/Empresa, E-mail do Requisitante) | Administrador (Estrutura › Categorias › Campos) | Sim | 1 | 4.2, 5.1, 5.2, 5.3, 5.5 | Fase 1: o item fica só com o contato "Requisitante", quando há. Fase 2: não há campo para escolher no cartão. O ícone ao lado do campo não aparece |
 | D7 | E-mail preenchido no item | Quem usa (Visão Geral do item) | Sim | 1 | 5 | Botão indisponível: "Sem e-mail cadastrado" |
 | D8 | Mail Box em todo item, sem a pasta precisar ser adicionada na categoria | Dev (front) | Não: hoje a Mail Box é uma pasta que alguém adiciona na categoria | 1 | 7.8, 7.9 | Na categoria sem a pasta, o e-mail sai, mas ele e a resposta não aparecem na tela do item |
-| D9 | Permissão de ver a categoria e o item | Cargo (Gestão de Membros) | Sim | 1 | 5, 7.4, 7.7 | O item não aparece na busca nem na área E-mails |
-| D10 | Permissão de editar o campo de e-mail | Cargo (Gestão de Membros) | Sim | 1 | 5.2 | Sem "Cadastrar e-mail"; fica só o motivo |
+| D9 | Permissão de ver a categoria e o item | Cargo (Gestão de Membros) | Sim | 1 | 5, 7.4, 7.7 | A pessoa não chega ao item. Na Fase 2, o item não aparece na busca nem na área E-mails |
+| D10 | Permissão de editar o campo de e-mail | Cargo (Gestão de Membros) | Sim | 2 | 5.2 | Sem "Cadastrar e-mail"; fica só o motivo |
 | D11 | Formulário com visibilidade Público e tipo Criação ou Geral | Administrador (Editar do formulário) | Sim | 1 | 6 | O link não aparece; formulário privado mostra o porquê |
 | D12 | Tela Requisições no menu | Administrador (Interface › Menus) | Sim | 1 | 6.2 | Sem o cartão nessa tela; sobram a lista de itens e a tarefa |
 | D13 | Spaceflow que gera tarefa de formulário (nó Formulário ou Operações de Dados manual) | Administrador (Spaceflow) | Sim | 1 | 6.2 | Não há tarefa de formulário |
 | D14 | Configurações da Agenda: categorias com campo de data e tipos de tarefa marcados | Administrador (Agenda › Configurações) | Sim | 1 | 5.5 | O evento não aparece na Agenda |
 | D15 | Modelos de E-mail cadastrados | Administrador (Configurações › E-mails › Modelos de E-mail) | Sim | 1 | 7.3 | Campo Template vazio |
 | D16 | App de e-mail padrão no computador da pessoa (`mailto:`) | Cada pessoa ou o TI | Fora do ENSPACE | 1 | 5.1, 6 | O navegador não abre nada ou pergunta qual app usar |
-| D17 | Rota de busca de item entre categorias, filtrada por permissão | Dev (back) | Não | 1 | 7.4 | Sem a busca de "Vincular a item"; o vínculo só vem quando a pessoa começa no item |
-| D18 | Lista de e-mails por pessoa e por permissão, para a área E-mails | Dev (back e front) | Em parte: os dados e a tela "Emails Recebidos" existem; a tela não tem entrada no menu | 1 | 7.7 | Sem a área E-mails |
+| D17 | Rota de busca de item entre categorias, filtrada por permissão | Dev (back) | Não | 2 | 7.3, 7.4, 7.7 | Sem a busca de "Vincular a item"; fica o item da tela de origem, como na Fase 1 |
+| D18 | Lista de e-mails por pessoa e por permissão, para a área E-mails | Dev (back e front) | Em parte: os dados e a tela "Emails Recebidos" existem; a tela não tem entrada no menu | 2 | 7.7 | Sem a área E-mails |
 | D19 | Envio por caixa do workspace | Dev (back) | Não: as caixas só recebem | 2 | 7.3 | O "De" tem só a conta do Outlook |
 | D20 | Resposta na mesma conversa e encaminhar | Dev (back e front) | Não: o "Responder" está comentado na tela | 2 | 7.5 | Responder abre um e-mail novo com "Re:"; sem "Encaminhar" |
 | D21 | Registro do e-mail enviado sem item e rota para vincular e trocar o vínculo depois | Dev (back) | Não | 2 | 7.3, 7.7 | Sem item, o e-mail fica só no Outlook; sem "Vincular" |
@@ -91,8 +91,12 @@ Cada fase soma à anterior.
   - Lembrete por e-mail na Agenda;
   - Novo e-mail no topo de toda tela;
   - Link do formulário público nas telas de uso.
-- O bloco termina com "Escolher o contato de cada categoria", que abre o cartão da categoria (4.2).
-- A área E-mails e a Mail Box do item e da tarefa não dependem da chave.
+- O fim do bloco muda com a fase:
+  - Fase 1: "O contato de cada item vem dos campos de e-mail que a categoria já tem e do e-mail de
+    quem abriu a requisição.", sem link;
+  - Fase 2: "Defina na própria categoria os campos de nome e de e-mail do contato." e o link
+    "Escolher o contato de cada categoria", que abre o cartão da categoria (4.2).
+- A Mail Box do item e da tarefa e, na Fase 2, a área E-mails não dependem da chave.
 - O Salvar do cartão Módulos grava, como nos outros módulos.
 - Dado: a chave fica junto dos outros módulos do workspace (`Workspace.modules`).
 
@@ -108,7 +112,7 @@ Cada fase soma à anterior.
 1. Abre Configurações › Sistema.
 2. Liga "Atalhos de comunicação" no cartão Módulos.
 3. Clica em Salvar.
-4. Clica em "Escolher o contato de cada categoria" (4.2).
+4. Na Fase 2, clica em "Escolher o contato de cada categoria" (4.2).
 
 **Por que assim**
 
@@ -117,10 +121,11 @@ Cada fase soma à anterior.
   moram nesse cartão.
 - Com 1 canal e telas fixas, não há o que escolher além de ligar e desligar.
 
-### 4.2 Cartão "Contato da categoria" (Fase 1, a avaliar com os devs)
+### 4.2 Cartão "Contato da categoria" (Fase 2, a avaliar com os devs)
 
 **Como funciona**
 
+- Na Fase 1 não há cartão: o contato vem dos campos de e-mail que o item já tem (5.2).
 - 13º cartão no painel da categoria (Configurações › Estrutura › Categorias › categoria), ao lado
   do cartão Correção Monetária. Descrição: "Quem é o contato do item e o assunto do e-mail."
 - A página tem 3 blocos:
@@ -163,8 +168,10 @@ Cada fase soma à anterior.
 - Cada categoria tem os seus campos. O contato de um contrato não mora no mesmo campo que o de uma
   solicitação, e o sistema não sabe sozinho qual campo é o do contato.
 - O assunto é por categoria porque o de um contrato e o de uma solicitação são diferentes.
-- O contato alimenta o "Contato do item" (5.2), o submenu da lista (5.3), o lembrete da Agenda
-  (5.5) e as sugestões do compositor (7.4).
+- Na Fase 2, o contato alimenta o "Contato do item" (5.2), o submenu da lista (5.3), o lembrete da
+  Agenda (5.5) e as sugestões do compositor (7.4).
+- Fica na Fase 2 porque é dado novo: pede onde guardar no back. A Fase 1 usa só o que o item já
+  tem.
 
 ### 4.3 Correio do Outlook (cada pessoa, já existe)
 
@@ -220,8 +227,8 @@ Cada fase soma à anterior.
   enviar e-mail") abre o app. Onde só cabe ícone ou menu (linha da tabela, cartão, tarefa), os 2
   caminhos vão num menu.
 - Sem por onde enviar pelo ENSPACE (Fase 1 sem o Correio do Outlook), o botão abre direto o app.
-- O assunto vem do cartão "Contato da categoria", com as variáveis trocadas. A pessoa muda tudo
-  antes de enviar.
+- O assunto abre preenchido. Na Fase 1, com um padrão fixo, sem configuração. Na Fase 2, vem do
+  cartão "Contato da categoria", com as variáveis trocadas. A pessoa muda tudo antes de enviar.
 - No app, o endereço do item vai em Cc. A cópia chega à Mail Box do item, e a resposta volta para
   lá quando o destinatário responde a todos. Sem o Cc, o ENSPACE não fica sabendo do e-mail.
 - Contato sem e-mail deixa o botão indisponível, com o motivo na dica e no nome acessível: "Sem
@@ -233,7 +240,8 @@ Cada fase soma à anterior.
 | Dependência | Onde se resolve | Se faltar |
 |---|---|---|
 | Módulo 4.1 ligado (D4) | Sistema › Módulos | O botão não aparece |
-| Contato configurado na categoria (D5) | Cartão "Contato da categoria" | Sem contato para o botão |
+| Fase 1: campos de e-mail na categoria (D6) | Estrutura › Categorias › Campos | Sem contato para o botão |
+| Fase 2: contato configurado na categoria (D5) | Cartão "Contato da categoria" | Sem contato para o botão |
 | E-mail preenchido no item (D7) | Visão Geral do item | Botão indisponível com o motivo |
 | Permissão de ver o item (D9) | Cargo | A pessoa não chega ao item |
 | Correio do Outlook (D1), para "Escrever pelo ENSPACE" | Perfil › Integrações | O botão abre direto o app |
@@ -251,13 +259,22 @@ Cada fase soma à anterior.
 **Como funciona**
 
 - **"Contato do item":** cartão no alto do painel esquerdo do item, acima de Identificação.
-  - "Para quem": seletor com os contatos da categoria (4.2) que têm nome ou e-mail;
+  - "Para quem": seletor com os contatos do item, quando há mais de 1;
+  - na Fase 1, os contatos vêm do que o item já tem:
+    - cada campo do tipo e-mail da categoria preenchido no item, com o nome do campo como rótulo e
+      sem nome de pessoa;
+    - o E-mail de contato de cada campo Pessoa/Empresa, com o nome do subcampo Nome de contato;
+    - o e-mail de quem abriu a requisição, com o rótulo "Requisitante";
+  - na Fase 2, os contatos vêm do cartão "Contato da categoria" (4.2): os que têm nome ou e-mail;
+  - a linha embaixo do contato mostra o e-mail. Sem nome, mostra o nome do campo de onde o contato
+    vem;
   - o botão E-mail dividido (5.1), com a linha "O e-mail sai pelo ENSPACE e fica na Mail Box de
     <referência>. A seta abre o seu app de e-mail.";
-  - contato sem e-mail: "Este contato não tem e-mail cadastrado." e o botão "Cadastrar e-mail",
-    que abre a Visão Geral com o cursor no campo;
-  - item sem nenhum contato preenchido: "Nenhum contato neste item" e o botão "Escolher os campos
-    de contato", que abre o cartão da categoria.
+  - contato sem e-mail (Fase 2): "Este contato não tem e-mail cadastrado." e o botão "Cadastrar
+    e-mail", que abre a Visão Geral com o cursor no campo. Na Fase 1, campo vazio não vira contato;
+  - item sem nenhum contato preenchido: "Nenhum contato neste item" e "Os campos de contato deste
+    item estão vazios." Na Fase 2, com o botão "Escolher os campos de contato", que abre o cartão da
+    categoria.
 - **Ícone de e-mail ao lado de cada campo de e-mail** da Visão Geral (campo E-mail e Pessoa/Empresa
   › E-mail de contato). A dica diz "Enviar e-mail para <nome do campo>". Não pede configuração: vale
   para todo campo desse tipo.
@@ -268,16 +285,17 @@ Cada fase soma à anterior.
 | Dependência | Onde se resolve | Se faltar |
 |---|---|---|
 | Tudo de 5.1 | Ver 5.1 | Ver 5.1 |
-| Permissão de editar o campo de e-mail (D10) | Cargo | Sem "Cadastrar e-mail"; fica só o motivo. Regra para o dev: o protótipo mostra o botão sempre |
-| O campo de e-mail no formulário da Visão Geral | Formulário Editar ou Geral da categoria | "Cadastrar e-mail" leva a um campo que não está na tela |
-| "Cadastrar e-mail" não serve para o E-mail do Requisitante | Não se aplica | O campo é preenchido na criação do item |
+| Fase 2: permissão de editar o campo de e-mail (D10) | Cargo | Sem "Cadastrar e-mail"; fica só o motivo. Regra para o dev: o protótipo mostra o botão sempre |
+| O campo de e-mail no formulário da Visão Geral | Formulário Editar ou Geral da categoria | Na Fase 1, a pessoa não preenche o e-mail do contato na tela do item. Na Fase 2, "Cadastrar e-mail" leva a um campo que não está na tela |
+| Fase 2: "Cadastrar e-mail" não serve para o E-mail do Requisitante | Não se aplica | O campo é preenchido na criação do item |
 
 **Como a pessoa usa**
 
 1. Abre o item.
 2. Escolhe o contato em "Para quem", se houver mais de 1.
 3. Clica em E-mail, ou no ícone ao lado do campo de e-mail.
-4. Se o botão estiver indisponível, clica em "Cadastrar e-mail", preenche e salva.
+4. Sem contato, preenche o campo de e-mail na Visão Geral e salva. Na Fase 2, com o botão
+   indisponível, clica em "Cadastrar e-mail", preenche e salva.
 
 **Por que assim**
 
@@ -290,7 +308,8 @@ Cada fase soma à anterior.
 **Como funciona**
 
 - **Lista:** o menu da linha ganha o submenu "E-mail", com um grupo por contato e os 2 caminhos de
-  5.1. A coluna de contato mostra o nome e o e-mail do 1º contato da categoria.
+  5.1. A coluna "Contato" mostra o nome e o e-mail do 1º contato do item. Na Fase 2, a coluna
+  leva o rótulo do 1º contato da categoria.
 - **Quadro:** o clique direito no cartão traz o mesmo submenu. A dica do quadro diz "Clique com o
   botão direito num cartão para enviar e-mail ao contato."
 - Contato sem e-mail aparece com o motivo, indisponível.
@@ -360,7 +379,7 @@ O modal "Evento" ganha "Enviar lembrete", com o botão de e-mail por pessoa ("En
 | Origem do evento | Quem recebe (rótulo no modal) |
 |---|---|
 | Reunião do Outlook | "Participantes" |
-| Data de um item (campo de data da categoria) | "Contatos do item" (4.2) |
+| Data de um item (campo de data da categoria) | "Contatos do item" (5.2) |
 | Prazo de uma tarefa | "Responsável" |
 
 O e-mail abre com o assunto "Lembrete: <evento> (<quando>)" e o texto com data, hora e, na reunião
@@ -374,7 +393,8 @@ alterar o texto antes do envio."
 | Tudo de 5.1 | Ver 5.1 | Sem "Enviar lembrete" |
 | Reunião: Calendário do Outlook no perfil (D3), que não é o Correio do Outlook | Perfil › Integrações | A reunião não aparece na Agenda |
 | Data de item: a categoria marcada nas Configurações da Agenda, com o campo de data, e permissão na categoria (D14, D9) | Agenda › Configurações; cargo | O evento não aparece |
-| Data de item: contato configurado na categoria (D5) | Cartão "Contato da categoria" | Sem quem recebe |
+| Data de item, Fase 1: campos de e-mail na categoria (D6) | Estrutura › Categorias › Campos | Sem quem recebe |
+| Data de item, Fase 2: contato configurado na categoria (D5) | Cartão "Contato da categoria" | Sem quem recebe |
 | Prazo de tarefa: "Fluxo Padrão" ou "Tarefas Rápidas" marcados nas Configurações da Agenda (D14) | Agenda › Configurações | A tarefa não aparece |
 
 **Como a pessoa usa**
@@ -486,7 +506,8 @@ O vínculo fica gravado pela referência do item, não pelo nome. É o que o doc
     dica do botão diz "Escrever um e-mail vinculado a <referência>";
   - com uma tarefa aberta no painel, o compositor abre vinculado ao item da tarefa. Na Fase 3,
     também à tarefa;
-  - nas outras telas, abre sem vínculo. A dica diz "Escrever um e-mail sem sair desta tela".
+  - nas outras telas, abre sem vínculo. A dica diz "Escrever um e-mail sem sair desta tela". Na
+    Fase 1, o compositor abre sem o bloco do item; na Fase 2, com a busca (7.4).
 
 **Depende de**
 
@@ -504,7 +525,8 @@ O vínculo fica gravado pela referência do item, não pelo nome. É o que o doc
 
 - O documento pede o e-mail "da mesma forma que outras funcionalidades transversais da plataforma".
   As transversais de hoje (Suporte, notificações) moram na barra do topo.
-- Quem está num item quase sempre escreve sobre ele. O vínculo pronto evita o passo de buscar.
+- Quem está num item quase sempre escreve sobre ele. Na Fase 1, a tela de origem é o único jeito
+  de vincular o e-mail a um item. Na Fase 2, o vínculo pronto evita o passo de buscar.
 
 ### 7.3 O compositor
 
@@ -515,11 +537,13 @@ O vínculo fica gravado pela referência do item, não pelo nome. É o que o doc
 | De | Fase 1: a conta do Outlook da pessoa, só leitura, com "Sua conta do Outlook". Hoje a tela não mostra o remetente | 1 |
 | De, com escolha | Lista em 2 grupos: "Sua conta" (o Outlook) e "Caixas do workspace". A caixa escolhida mostra "Caixa do workspace" | 2 |
 | Ajuda do De | Com item: "Responder para: o endereço do item. A resposta volta para a aba Mail Box." e o endereço. Sem item, Fase 1: "Sem item vinculado, o e-mail fica só no seu Outlook e não aparece no ENSPACE." Sem item, Fase 2: "Sem item vinculado, a resposta chega só no seu Outlook." ou, com caixa, "Sem item vinculado, a resposta chega na caixa <nome>, na Central de Atendimento." | 1 e 2 |
-| Para | Obrigatório. Sugere os contatos do item vinculado, os membros e os contatos dos itens que a pessoa vê | 1 |
+| Para | Obrigatório. Sugere os contatos do item vinculado e os membros | 1 |
+| Para, com os contatos de outros itens | O autocompletar sugere também os contatos dos itens que a pessoa vê | 2 |
 | Cc e Cco | Atrás de "Adicionar em Cópia", como hoje | 1 |
 | Template | Os Modelos de E-mail. As variáveis só se preenchem com item vinculado | 1 |
 | Assunto | Livre. Vindo de um atalho, já vem com o assunto da categoria | 1 |
-| Vincular a item (opcional) | Bloco separado dos campos do e-mail (7.4) | 1 |
+| Item vinculado | Só quando o compositor abre de uma tela com item. Sem item de origem, o bloco não aparece (7.4) | 1 |
+| Vincular a item (opcional) | Bloco separado dos campos do e-mail, com busca (7.4) | 2 |
 | Vincular a tarefa (opcional) | Lista das tarefas do item vinculado (ou de todas, sem item) e "Nenhuma tarefa". Ajuda: "O e-mail aparece também na Mail Box da tarefa." | 3 |
 | Mensagem | Obrigatória. Editor com negrito, itálico, sublinhado, tachado, listas e link | 1 |
 | Anexar arquivo e Inserir assinatura | Como hoje | 1 |
@@ -543,6 +567,7 @@ O vínculo fica gravado pela referência do item, não pelo nome. É o que o doc
 | Correio do Outlook (D1) | Perfil › Integrações | Fase 1: aviso no lugar do formulário |
 | Modelos de E-mail cadastrados (D15) | Configurações › E-mails › Modelos de E-mail | Campo Template vazio |
 | Assinatura configurada na conta do Outlook | Outlook da pessoa | "Inserir assinatura" não insere nada |
+| Fase 2: busca de item entre categorias (D17) | Dev (back) | Fica o item da tela de origem, sem busca |
 | Fase 2: envio por caixa do workspace (D19) | Dev (back) | O "De" fica só com a conta do Outlook |
 | Fase 2: registro do e-mail sem item (D21) | Dev (back) | Sem item, o e-mail fica só no Outlook |
 | Fase 3: vínculo do e-mail com a tarefa (D22) | Dev (back) | Sem "Vincular a tarefa" |
@@ -552,13 +577,22 @@ O vínculo fica gravado pela referência do item, não pelo nome. É o que o doc
 - É a mesma gaveta "Nova Mensagem" de hoje, na mesma ordem, como o documento pede.
 - O "De" e o "Responder para" à vista evitam que a pessoa ache que o e-mail sai do endereço do item.
 - Na Fase 1, a ajuda do De avisa que o e-mail sem item não fica no ENSPACE. Sem o aviso, a pessoa
-  procura o e-mail na área E-mails e não acha.
+  procura o e-mail no ENSPACE e não acha.
 - Na Fase 2, a ajuda diz para onde vão as respostas, porque muda com o remetente.
 - A gaveta que não trava a página deixa consultar o item durante a escrita, como Salesforce e Gmail.
 
-### 7.4 Vincular a item (Fase 1)
+### 7.4 Item vinculado (Fase 1) e Vincular a item (Fase 2)
 
-**Como funciona**
+**Como funciona na Fase 1: "Item vinculado"**
+
+- O bloco aparece só quando o compositor abre de uma tela com item: o item, a tarefa com item, a
+  Mail Box ou o "Novo e-mail" do topo com um item aberto.
+- Mostra nome, referência e categoria, sem "(opcional)", sem Trocar e sem remover.
+- Ajuda: "O e-mail fica na Mail Box de <referência>, e a resposta volta para lá."
+- Sem item de origem, o bloco não aparece. A ajuda do De já avisa que o e-mail fica só no Outlook
+  (7.3).
+
+**Como funciona na Fase 2: "Vincular a item (opcional)"**
 
 - Campo de busca (autocompletar), não lista. Vazio, mostra os 5 itens atualizados por último. Com
   texto, os 8 melhores e quantos ficaram de fora.
@@ -578,18 +612,20 @@ O vínculo fica gravado pela referência do item, não pelo nome. É o que o doc
 
 | Dependência | Onde se resolve | Se faltar |
 |---|---|---|
-| Rota de busca de item entre categorias, filtrada por permissão (D17). A busca global (Ctrl K) não procura itens: navega por menus e ações | Dev (back) | Sem a busca; o vínculo só vem quando a pessoa começa no item ou na tarefa |
+| Fase 2: rota de busca de item entre categorias, filtrada por permissão (D17). A busca global (Ctrl K) não procura itens: navega por menus e ações | Dev (back) | Sem a busca; fica o item da tela de origem, como na Fase 1 |
 | Permissão de ver a categoria e o item (D9) | Cargo | O item não aparece |
-| Contato configurado nas categorias (D5), para as sugestões | Cartão "Contato da categoria" | Sem sugestões; a busca continua |
+| Fase 2: contato configurado nas categorias (D5), para as sugestões | Cartão "Contato da categoria" | Sem sugestões; a busca continua |
 
 **Como a pessoa usa**
 
 - Do item: clica em E-mail; o item já está vinculado; envia.
-- De outra tela: clica em "Novo e-mail", preenche o Para, clica na sugestão ou digita na busca,
-  escolhe o item e envia.
+- De outra tela, na Fase 2: clica em "Novo e-mail", preenche o Para, clica na sugestão ou digita
+  na busca, escolhe o item e envia.
 
 **Por que assim**
 
+- Na Fase 1, o item vem da tela de origem porque o envio com item já existe. A busca entre
+  categorias pede rota nova no back.
 - O documento pede busca por "nome/titulo do item, ID, Folder, Workspace" e que a pessoa nunca ache
   item sem acesso.
 - Só o workspace atual porque o endereço do item e as permissões são do workspace.
@@ -604,7 +640,8 @@ O vínculo fica gravado pela referência do item, não pelo nome. É o que o doc
 | Encaminhar | Não há | Abre o compositor com "Enc:", o texto citado, os anexos e o Para vazio |
 
 - O e-mail respondido ou encaminhado mantém o item vinculado (e a tarefa, na Fase 3).
-- "Responder" aparece na área E-mails, no hover da linha da Mail Box e no e-mail aberto.
+- "Responder" aparece no hover da linha da Mail Box, no e-mail aberto e, na Fase 2, na área
+  E-mails.
 
 **Depende de**
 
@@ -625,18 +662,18 @@ hoje aceita: um e-mail novo, com o aviso para a pessoa não esperar a mesma conv
 - Fase 2: o "De" oferece só as caixas do workspace. A pessoa escreve pelo ENSPACE sem a integração.
 - No protótipo: cenário "Sem Outlook integrado", na barra de baixo.
 
-### 7.7 Área "E-mails" no menu (Fase 1)
+### 7.7 Área "E-mails" no menu (Fase 2)
 
 **Como funciona**
 
-- Entrada "E-mails" na seção Membro do menu. O subtítulo diz o que a lista tem:
-  - Fase 1: "Os e-mails recebidos e enviados pela Mail Box dos itens.";
-  - Fase 2: "Os e-mails recebidos e enviados pelo ENSPACE, com ou sem item."
+- Na Fase 1 não há a entrada no menu. O e-mail fica na Mail Box do item e da tarefa (7.8, 7.9).
+- Entrada "E-mails" na seção Membro do menu. O subtítulo diz "Os e-mails recebidos e enviados pelo
+  ENSPACE, com ou sem item."
 - Segue o padrão de tabela e filtros das telas novas do develop (Logs de Auditoria e a tabela nova
   de itens):
   - **barra:** busca, período ("Todo o período", "Hoje", "Últimos 7 dias", "Últimos 30 dias"),
     "Limpar filtros", "Colunas" e o botão que mostra os filtros rápidos;
-  - **filtros rápidos:** "Recebidos", "Enviados", "Não lidos", "Com anexo" e, na Fase 2, "Sem item";
+  - **filtros rápidos:** "Recebidos", "Enviados", "Não lidos", "Com anexo" e "Sem item";
   - **colunas:** "Ações" primeiro (menu ⋮), depois Tipo, De, Para, Assunto, Item, Tarefa (Fase 3),
     Enviado por e Data. "Colunas" esconde e mostra as opcionais;
   - **cabeçalho:** ordenar e o funil do filtro da coluna. No texto, o operador em frase ("É
@@ -645,14 +682,14 @@ hoje aceita: um e-mail novo, com o aviso para a pessoa não esperar a mesma conv
     "Limpar";
   - **paginação:** "Mostrando 1 a 10 de 10 resultados", com 10, 25, 50 ou 100 por página;
   - **clique direito na linha:** o mesmo menu da coluna Ações.
-- Menu de ações: "Ver Detalhes", "Responder", "Encaminhar" (Fase 2), "Marcar como não lido" (no
-  recebido lido) e "Ver Item" ou, sem item, "Vincular a um item".
+- Menu de ações: "Ver Detalhes", "Responder", "Encaminhar", "Marcar como não lido" (no recebido
+  lido) e "Ver Item" ou, sem item, "Vincular a um item".
 - O clique na linha abre a leitura num painel lateral: Tipo, De (com o nome da caixa, quando é
   caixa do workspace), Para, Cc, Enviado por, Tarefa (Fase 3), o item vinculado e o corpo. Botões:
-  "Responder", "Encaminhar" (Fase 2) e "Marcar como não lido".
+  "Responder", "Encaminhar" e "Marcar como não lido".
 - **Vínculo com o item na leitura:**
-  - com item: o item, com "Trocar" na Fase 2;
-  - sem item (só na Fase 2): "Este e-mail não tem item. Ao vincular, ele passa a aparecer na aba
+  - com item: o item, com "Trocar";
+  - sem item: "Este e-mail não tem item. Ao vincular, ele passa a aparecer na aba
     Mail Box do item.", as "Sugestões pelo destinatário" (itens em que o remetente ou o
     destinatário é contato) e a busca de 7.4. O aviso confirma "E-mail vinculado".
 - Só aparecem e-mails de itens que a pessoa pode ver.
@@ -663,21 +700,23 @@ hoje aceita: um e-mail novo, com o aviso para a pessoa não esperar a mesma conv
 | Dependência | Onde se resolve | Se faltar |
 |---|---|---|
 | Lista de e-mails por pessoa e permissão (D18). Os dados existem; a tela "Emails Recebidos" (`/itemEmails`) existe sem entrada no menu | Dev (back e front) | Sem a área |
-| Fase 2: registro do e-mail sem item e rota para vincular e trocar o vínculo (D21) | Dev (back) | Sem o filtro "Sem item" e sem "Vincular" |
-| Fase 2: encaminhar (D20) | Dev | Sem "Encaminhar" |
+| Registro do e-mail sem item e rota para vincular e trocar o vínculo (D21) | Dev (back) | Sem o filtro "Sem item" e sem "Vincular" |
+| Busca de item entre categorias (D17), para vincular na leitura | Dev (back) | Sem a busca; ficam as sugestões |
+| Encaminhar (D20) | Dev | Sem "Encaminhar" |
 | Fase 3: vínculo com a tarefa (D22) | Dev (back) | Sem a coluna Tarefa |
 | Permissão de ver o item (D9) | Cargo | O e-mail do item não aparece |
 
 **Como a pessoa usa**
 
 1. Abre E-mails no menu.
-2. Filtra (por exemplo, "Não lidos" ou, na Fase 2, "Sem item").
+2. Filtra (por exemplo, "Não lidos" ou "Sem item").
 3. Clica na linha para ler; responde ou, sem item, clica na sugestão ou busca o item para vincular.
 
 **Por que assim**
 
 - O documento pede que o e-mail vinculado apareça "na área de E-mail do usuário". Essa área existe
   escondida: a tela "Emails Recebidos", sem entrada no menu.
+- Fica na Fase 2 porque a lista por pessoa e permissão pede trabalho no back (D18).
 - O padrão das telas novas do develop evita uma tabela com comportamento próprio.
 
 ### 7.8 Mail Box do item (Fase 1)
@@ -740,20 +779,20 @@ hoje aceita: um e-mail novo, com o aviso para a pessoa não esperar a mesma conv
 | Ponto | Front | Back |
 |---|---|---|
 | Módulo "Atalhos de comunicação" (4.1) | Chave e bloco "O que o módulo ativa" no cartão Módulos | Guardar a chave em `Workspace.modules` |
-| Contato da categoria (4.2) | Cartão e página no painel da categoria | Guardar o contato (onde: pergunta 1) |
-| Atalho de e-mail (5.1 a 5.5) | Botão dividido, ícone no campo, submenu, coluna, lote, lembrete, motivo de indisponível | Nada |
+| Atalho de e-mail (5.1 a 5.5) | Botão dividido, ícone no campo, submenu, coluna, lote, lembrete, motivo de indisponível, contato tirado dos campos de e-mail do item | Nada |
 | Clique direito no quadro (5.3, 5.4) | Menu de contexto | Opcional, no SDK: prop `cardActions` no `EnKanbanBoard` |
 | Link público (6) | Cartão e menu nas telas de uso | Nada: o link e a visibilidade já existem |
-| "Novo e-mail" e compositor (7.2, 7.3) | Gaveta aberta de qualquer tela, contexto da tela, "De" e "Responder para" | Nada: o envio com item já existe |
-| Vincular a item (7.4) | Campo de busca com sugestões | Rota de busca de item entre categorias, filtrada por permissão |
+| "Novo e-mail" e compositor (7.2, 7.3) | Gaveta aberta de qualquer tela, contexto da tela, "De" e "Responder para", bloco "Item vinculado" com o item da tela de origem | Nada: o envio com item já existe |
 | Responder (7.5) | E-mail novo com "Re:", texto citado e aviso | Nada |
-| Área E-mails (7.7) | Tabela, filtros e painel de leitura no padrão do develop | Lista por pessoa e permissão |
 | Mail Box em todo item e na tarefa (7.8, 7.9) | Aba em todo item; aba no painel da tarefa | Nada |
 
 ### Fase 2 · Remetente
 
 | Ponto | Front | Back |
 |---|---|---|
+| Contato da categoria (4.2) | Cartão e página no painel da categoria; "Escolher os campos de contato" no item; link no cartão Módulos | Guardar o contato (onde: pergunta 1) |
+| Vincular a item (7.4) | Campo de busca com sugestões, Trocar e remover; autocompletar do Para com contatos de outros itens | Rota de busca de item entre categorias, filtrada por permissão |
+| Área E-mails (7.7) | Entrada no menu, tabela, filtros e painel de leitura no padrão do develop | Lista por pessoa e permissão |
 | "De" com as caixas do workspace (4.4, 7.3) | Lista em 2 grupos e a ajuda de para onde vão as respostas | Envio por caixa do workspace; regra de quem envia por qual caixa |
 | Resposta na mesma conversa (7.5) | Religar o "Responder" | Enviar como resposta da conversa original |
 | Encaminhar (7.5, 7.7, 7.8) | Botão e ação no menu | Encaminhar com os anexos |
@@ -770,7 +809,7 @@ hoje aceita: um e-mail novo, com o aviso para a pessoa não esperar a mesma conv
 
 ## 9. Perguntas para dev e produto
 
-1. **Contato por categoria (Fase 1):** onde guardar? A categoria já guarda configuração em JSON; o
+1. **Contato por categoria (Fase 2):** onde guardar? A categoria já guarda configuração em JSON; o
    contato cabe ali ou pede estrutura própria? Quem pode editar?
 2. **Envio por caixa do workspace (Fase 2):** a rota de envio passa a aceitar a caixa como
    remetente? Quem envia por qual caixa: todo membro, um cargo ou os membros ligados à caixa? Sem
@@ -781,8 +820,8 @@ hoje aceita: um e-mail novo, com o aviso para a pessoa não esperar a mesma conv
    trocar o item. Criar?
 5. **Resposta na mesma conversa (Fase 2):** o "Responder" está comentado na tela do develop. O que
    falta para religar?
-6. **Caixas do workspace na área E-mails:** quem vê o que chega numa Caixa de E-mail do workspace?
-   Hoje a caixa é porta de entrada de Spaceflow e da Central de Atendimento.
+6. **Caixas do workspace na área E-mails (Fase 2):** quem vê o que chega numa Caixa de E-mail do
+   workspace? Hoje a caixa é porta de entrada de Spaceflow e da Central de Atendimento.
 7. **Mail Box em todo item (Fase 1):** tirar a exigência da pasta afeta alguma categoria que
    esconde a Mail Box de propósito?
 8. **Vínculo com tarefa (Fase 3):** o registro do e-mail ganha a tarefa. A tarefa sem item tem

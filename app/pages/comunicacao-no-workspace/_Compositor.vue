@@ -109,7 +109,8 @@ const sugestoes = computed(() => {
   }
   for (const m of membros) if (m.email && !lista.some(l => l.value === m.email)) lista.push({ value: m.email, label: m.nome, description: m.email, avatar: avatar(m.nome) })
   // Contatos dos itens que a pessoa vê, como o autocompletar do HubSpot e do Gmail.
-  for (const i of itens) {
+  // Fase 2: pede busca entre categorias no back.
+  for (const i of fase.value >= 2 ? itens : []) {
     if (i.semAcesso) continue
     for (const c of contatosDoItem(i, config.value)) {
       if (c.email && !lista.some(l => l.value === c.email)) lista.push({ value: c.email, label: c.nome ?? c.email, description: `${c.email} · ${i.reference}`, avatar: avatar(c.nome ?? c.email) })
@@ -133,7 +134,7 @@ const valido = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
  * sugerem o registro pelo endereço). Item sem permissão não entra.
  */
 const sugestoesDeItem = computed(() => {
-  if (item.value || !rascunho.value.para.length) return []
+  if (fase.value < 2 || item.value || !rascunho.value.para.length) return []
   const para = new Set(rascunho.value.para.map(e => e.toLowerCase()))
   const achados: { id: number, reference: string, titulo: string, nome: string }[] = []
   for (const i of itens) {
@@ -305,6 +306,8 @@ defineShortcuts({
 const dicaDeOrigem = computed(() => {
   const o = rascunho.value.origem
   if (!item.value) return null
+  // Fase 1: o item vem da tela de origem e não se troca.
+  if (fase.value < 2) return props.t.compositor.vinculadoFixo(item.value.reference)
   if (o === 'item' || o === 'responder') return props.t.compositor.vinculadoPeloItem
   if (o === 'tarefa') return props.t.compositor.vinculadoPelaTarefa
   return null
@@ -449,12 +452,15 @@ const notaDaResposta = computed(() => {
         <UInput v-model="rascunho.assunto" :placeholder="t.compositor.assuntoPlaceholder" class="w-full" />
       </UFormField>
 
-      <!-- PROPOSTA: vincular a item, separado dos campos do e-mail -->
-      <section class="rounded-lg border border-primary/25 bg-primary/5 p-3" :class="marca" :aria-label="t.compositor.vincularTitulo">
+      <!--
+        PROPOSTA: vincular a item, separado dos campos do e-mail.
+        Fase 1: só o item da tela de origem, fixo (a busca entre categorias pede back-end).
+      -->
+      <section v-if="fase >= 2 || item" class="rounded-lg border border-primary/25 bg-primary/5 p-3" :class="marca" :aria-label="t.compositor.vincularTitulo">
         <div class="flex items-center gap-2">
           <UIcon name="i-lucide-link-2" class="size-4 text-primary" />
-          <span class="text-sm font-medium text-highlighted">{{ t.compositor.vincularTitulo }}</span>
-          <span class="text-sm text-muted">{{ t.compositor.opcional }}</span>
+          <span class="text-sm font-medium text-highlighted">{{ fase >= 2 ? t.compositor.vincularTitulo : t.compositor.itemVinculado }}</span>
+          <span v-if="fase >= 2" class="text-sm text-muted">{{ t.compositor.opcional }}</span>
           <UTooltip :text="t.compositor.vincularDica" :content="{ side: 'top' }">
             <UIcon name="i-lucide-info" class="size-4 text-muted" />
           </UTooltip>
@@ -472,8 +478,10 @@ const notaDaResposta = computed(() => {
               <span class="block truncate text-sm font-medium text-highlighted">{{ item.titulo }}</span>
               <span class="block truncate text-xs text-muted">{{ item.reference }} · {{ categoria?.name }}</span>
             </span>
-            <UButton :label="t.compositor.trocar" color="neutral" variant="ghost" size="xs" @click="trocando = true; nextTick(() => buscaRef?.focar())" />
-            <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="xs" :aria-label="t.compositor.desvincular" @click="desvincular" />
+            <template v-if="fase >= 2">
+              <UButton :label="t.compositor.trocar" color="neutral" variant="ghost" size="xs" @click="trocando = true; nextTick(() => buscaRef?.focar())" />
+              <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="xs" :aria-label="t.compositor.desvincular" @click="desvincular" />
+            </template>
           </div>
 
           <!-- Buscando -->
