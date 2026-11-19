@@ -30,7 +30,7 @@ import Sistema from './_Sistema.vue'
 definePageMeta({
   titulo: 'Módulo de assinaturas',
   descricao: 'O módulo de assinaturas reorganizado: os provedores na loja de apps, a página do provedor sem informação repetida, a lista e o detalhe do envelope com 1 faixa de estado e a trilha que diz quem fez. Em cima disso, as correções do teste de 18/11/2026: cancelamento e recusa levando o Spaceflow e a tarefa a erro, o desfecho no nó, a fila de assinatura, o limite do provedor e os estados iniciais.',
-  status: 'em-revisao',
+  status: 'aprovado',
   atualizado: '2026-11-19',
   tela: 'Integrações › Apps; Módulos › Assinaturas; Spaceflow › Execução e editor do nó; Tarefa Integração; Sistema › Módulos',
 })

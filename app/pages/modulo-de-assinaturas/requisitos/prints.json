@@ -1,0 +1,1215 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/modulo-de-assinaturas/",
+  "andaime": "Protótipo",
+  "cenas": {
+    "apps": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "Integrações > Apps"
+      }
+    ],
+    "certisign": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "Página da Certisign"
+      }
+    ],
+    "d4sign": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "Página da D4Sign (falta o cofre)"
+      }
+    ],
+    "docusign": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "Integrações > Apps"
+      },
+      {
+        "clicar": {
+          "texto": "DocuSign"
+        }
+      },
+      {
+        "esperar": 500
+      }
+    ],
+    "lista": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "Lista de envelopes"
+      }
+    ],
+    "novo": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "Lista de envelopes"
+      },
+      {
+        "clicar": "Novo envelope"
+      },
+      {
+        "esperar": 600
+      }
+    ],
+    "novoLimite": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "M14 · Novo envelope com arquivo acima do limite"
+      },
+      {
+        "esperar": 600
+      }
+    ],
+    "novoSemProvedor": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "M16 · Novo envelope sem provedor"
+      },
+      {
+        "esperar": 600
+      }
+    ],
+    "vazio": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "M16 · Nem provedor nem envelope"
+      }
+    ],
+    "semEnvelope": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "M16 · Provedor conectado, sem envelope"
+      }
+    ],
+    "soRascunhos": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "M16 · Rascunhos, sem provedor"
+      }
+    ],
+    "cancFluxo": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "M35 · Cancelado no módulo, vindo do Spaceflow"
+      }
+    ],
+    "categoria": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "M35 · Cancelar envelope do fluxo da categoria"
+      }
+    ],
+    "ordem": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "M31 e M23 · Participante na fila e Reenviar"
+      }
+    ],
+    "certAvulso": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "M34 e M13 · Certisign avulso, sem retorno"
+      },
+      {
+        "esperar": 600
+      }
+    ],
+    "certCategoria": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "C52 · Certisign do fluxo da categoria"
+      }
+    ],
+    "d4Cancelado": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "C43 e M21 · Cancelado com a confirmação do provedor"
+      }
+    ],
+    "erro": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "Falha no envio (motivo nomeado)"
+      }
+    ],
+    "concluido": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "Envelope concluído"
+      }
+    ],
+    "execCancelado": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "M35 e M32 · Execução com o nó em erro"
+      }
+    ],
+    "execConfig": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "C55 · Erro de configuração e editor do nó"
+      }
+    ],
+    "editor": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "C55 · Erro de configuração e editor do nó"
+      },
+      {
+        "clicar": "Editar o nó"
+      },
+      {
+        "esperar": 600
+      }
+    ],
+    "tarefaErro": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "C10 e C48 · Tarefa Integração em erro"
+      }
+    ],
+    "desligar": [
+      {
+        "estado": "Ir para"
+      },
+      {
+        "clicar": "M16 · Desligar o módulo com envelopes abertos"
+      },
+      {
+        "esperar": 600
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "cena": "apps",
+      "destacar": [
+        "Credenciais",
+        "Webhooks"
+      ]
+    },
+    "RF002": {
+      "cena": "apps",
+      "destacar": "Conecte o ENSPACE às ferramentas que a empresa já usa."
+    },
+    "RF003": {
+      "cena": "apps",
+      "destacar": [
+        "Inteligência Artificial",
+        "Assinatura eletrônica"
+      ]
+    },
+    "RF004": {
+      "cena": "apps",
+      "destacar": "Envie documentos para assinatura pelo módulo Assinaturas"
+    },
+    "RF005": {
+      "cena": "apps",
+      "destacar": {
+        "texto": "Novo",
+        "exato": true
+      }
+    },
+    "RF006": {
+      "cena": "apps",
+      "destacar": "Adobe Acrobat Sign"
+    },
+    "RF007": {
+      "cena": "apps",
+      "destacar": [
+        {
+          "texto": "Assinatura eletrônica brasileira, com validade",
+          "ancestral": "button"
+        },
+        {
+          "texto": "A OpenAI traz",
+          "ancestral": "button"
+        }
+      ]
+    },
+    "RF008": {
+      "cena": "apps",
+      "destacar": {
+        "texto": "Portal de Assinaturas da Certisign",
+        "ancestral": "button"
+      }
+    },
+    "RF009": {
+      "cena": "apps",
+      "destacar": "Falta 1 etapa"
+    },
+    "RF010": {
+      "cena": "apps",
+      "destacar": "Não conectado"
+    },
+    "RF011": {
+      "cena": "apps",
+      "destacar": "Ver detalhes"
+    },
+    "RF012": {
+      "cena": "apps",
+      "destacar": "Integrações antigas de assinatura"
+    },
+    "RF013": {
+      "cena": "apps",
+      "destacar": "Continuam funcionando nos fluxos de categoria",
+      "passos": [
+        {
+          "clicar": "Integrações antigas de assinatura"
+        },
+        {
+          "esperar": 500
+        }
+      ]
+    },
+    "RF014": {
+      "cena": "apps",
+      "destacar": "Usada pelo fluxo de",
+      "passos": [
+        {
+          "clicar": "Integrações antigas de assinatura"
+        },
+        {
+          "esperar": 500
+        }
+      ]
+    },
+    "RF015": {
+      "cena": "apps",
+      "destacar": "Sem uso",
+      "passos": [
+        {
+          "clicar": "Integrações antigas de assinatura"
+        },
+        {
+          "esperar": 500
+        }
+      ]
+    },
+    "RF016": {
+      "cena": "apps",
+      "destacar": "Não conectados"
+    },
+    "RF017": {
+      "cena": "apps",
+      "destacar": "Conectados"
+    },
+    "RF018": {
+      "cena": "apps",
+      "destacar": "Canais de mensagem",
+      "passos": [
+        {
+          "clicar": "Não conectados"
+        },
+        {
+          "esperar": 500
+        }
+      ]
+    },
+    "RF019": {
+      "cena": "apps",
+      "destacar": {
+        "css": "input[placeholder='Buscar app']"
+      },
+      "passos": [
+        {
+          "clicar": {
+            "css": "input[placeholder='Buscar app']"
+          }
+        },
+        {
+          "digitar": "assinatura"
+        },
+        {
+          "esperar": 500
+        }
+      ]
+    },
+    "RF020": {
+      "cena": "apps",
+      "destacar": "Conectados",
+      "passos": [
+        {
+          "clicar": "Conectados"
+        },
+        {
+          "clicar": {
+            "css": "input[placeholder='Buscar app']"
+          }
+        },
+        {
+          "digitar": "sign"
+        },
+        {
+          "esperar": 500
+        }
+      ]
+    },
+    "RF021": {
+      "cena": "apps",
+      "destacar": "Integrações antigas de assinatura",
+      "passos": [
+        {
+          "clicar": {
+            "css": "input[placeholder='Buscar app']"
+          }
+        },
+        {
+          "digitar": "docusign"
+        },
+        {
+          "esperar": 600
+        }
+      ]
+    },
+    "RF022": {
+      "cena": "apps",
+      "destacar": "Limpar busca",
+      "passos": [
+        {
+          "clicar": {
+            "css": "input[placeholder='Buscar app']"
+          }
+        },
+        {
+          "digitar": "sign"
+        },
+        {
+          "esperar": 400
+        }
+      ]
+    },
+    "RF023": {
+      "cena": "apps",
+      "destacar": "Nenhum app para esta busca",
+      "passos": [
+        {
+          "clicar": {
+            "css": "input[placeholder='Buscar app']"
+          }
+        },
+        {
+          "digitar": "xyz"
+        },
+        {
+          "esperar": 400
+        }
+      ]
+    },
+    "RF101": {
+      "cena": "certisign",
+      "destacar": "Pronto para enviar"
+    },
+    "RF102": {
+      "cena": "certisign",
+      "destacar": "Portal de Assinaturas da Certisign"
+    },
+    "RF103": {
+      "cena": "certisign",
+      "destacar": [
+        "Como funciona",
+        "Credenciais registradas",
+        "Nova credencial"
+      ]
+    },
+    "RF104": {
+      "cena": "certisign",
+      "destacar": "Configuração"
+    },
+    "RF105": {
+      "cena": "d4sign",
+      "destacar": "Escolha o cofre de cada credencial"
+    },
+    "RF106": {
+      "cena": "certisign",
+      "destacar": "Cadastre uma credencial"
+    },
+    "RF107": {
+      "cena": "certisign",
+      "destacar": "Aguardando confirmação"
+    },
+    "RF108": {
+      "cena": "certisign",
+      "destacar": {
+        "regex": "^1 de 2 etapas conclu"
+      }
+    },
+    "RF109": {
+      "cena": "d4sign",
+      "destacar": "Falta escolher o cofre"
+    },
+    "RF110": {
+      "sem": "o menu ⋮ da credencial abre por cima da etapa; o protótipo mostra as ações ao clicar no ⋮"
+    },
+    "RF111": {
+      "cena": "d4sign",
+      "destacar": "Escolher cofre"
+    },
+    "RF112": {
+      "cena": "certisign",
+      "destacar": "A URL leva o token do workspace. Trate como senha."
+    },
+    "RF113": {
+      "cena": "certisign",
+      "destacar": "Aguardando o 1º retorno"
+    },
+    "RF114": {
+      "cena": "docusign",
+      "destacar": "Autorizada em 03/11/2026"
+    },
+    "RF115": {
+      "cena": "certisign",
+      "destacar": "Cancela só no ENSPACE"
+    },
+    "RF116": {
+      "cena": "certisign",
+      "destacar": "Cancelar envelope"
+    },
+    "RF117": {
+      "cena": "certisign",
+      "destacar": "Detalhes técnicos",
+      "passos": [
+        {
+          "clicar": "Detalhes técnicos"
+        },
+        {
+          "esperar": 500
+        }
+      ]
+    },
+    "RF118": {
+      "cena": "certisign",
+      "destacar": "Nova credencial da Certisign",
+      "passos": [
+        {
+          "clicar": "Nova credencial"
+        },
+        {
+          "esperar": 600
+        }
+      ]
+    },
+    "RF119": {
+      "cena": "certisign",
+      "destacar": "Escolha o ambiente",
+      "junto": "RF118"
+    },
+    "RF120": {
+      "sem": "o resultado de salvar aparece nas etapas, que os prints da RF104 a RF109 mostram"
+    },
+    "RF201": {
+      "cena": "lista",
+      "destacar": "Precisam de atenção"
+    },
+    "RF202": {
+      "cena": "lista",
+      "destacar": "Com erro",
+      "passos": [
+        {
+          "clicar": "Com erro"
+        },
+        {
+          "esperar": 500
+        }
+      ]
+    },
+    "RF203": {
+      "cena": "lista",
+      "destacar": {
+        "regex": "^sem retorno há \\d+ dias$"
+      }
+    },
+    "RF204": {
+      "cena": "lista",
+      "destacar": {
+        "css": "input[placeholder='Buscar por título, referência ou signatário']"
+      },
+      "passos": [
+        {
+          "clicar": {
+            "css": "input[placeholder='Buscar por título, referência ou signatário']"
+          }
+        },
+        {
+          "digitar": "otavio"
+        },
+        {
+          "esperar": 500
+        }
+      ]
+    },
+    "RF205": {
+      "cena": "lista",
+      "destacar": [
+        "Com erro",
+        "Provedor"
+      ],
+      "passos": [
+        {
+          "clicar": "Com erro"
+        },
+        {
+          "esperar": 400
+        }
+      ]
+    },
+    "RF206": {
+      "cena": "lista",
+      "destacar": "Nenhum envelope para estes filtros",
+      "passos": [
+        {
+          "clicar": {
+            "css": "input[placeholder='Buscar por título, referência ou signatário']"
+          }
+        },
+        {
+          "digitar": "xyz"
+        },
+        {
+          "esperar": 500
+        }
+      ]
+    },
+    "RF207": {
+      "cena": "lista",
+      "destacar": "Contrato de fornecedor"
+    },
+    "RF208": {
+      "cena": "soRascunhos",
+      "destacar": "Sem provedor"
+    },
+    "RF209": {
+      "cena": "lista",
+      "destacar": {
+        "regex": "^\\d{2}/\\d{2},? \\d{2}:\\d{2}$"
+      }
+    },
+    "RF210": {
+      "cena": "lista",
+      "destacar": {
+        "regex": "^\\d+/\\d+$"
+      }
+    },
+    "RF211": {
+      "cena": "lista",
+      "destacar": "Ver detalhes",
+      "passos": [
+        {
+          "clicar": {
+            "css": "tbody tr button",
+            "n": 0
+          }
+        },
+        {
+          "esperar": 500
+        }
+      ]
+    },
+    "RF212": {
+      "cena": "soRascunhos",
+      "destacar": "Para enviar, conecte um provedor.",
+      "passos": [
+        {
+          "clicar": {
+            "css": "tbody tr button",
+            "n": 0
+          }
+        },
+        {
+          "esperar": 500
+        }
+      ]
+    },
+    "RF213": {
+      "sem": "o modal é o do detalhe; os prints da parte 6 mostram cada um"
+    },
+    "RF214": {
+      "cena": "soRascunhos",
+      "destacar": "Nenhum provedor conectado"
+    },
+    "RF215": {
+      "cena": "soRascunhos",
+      "destacar": "Conectar um provedor"
+    },
+    "RF301": {
+      "cena": "novo",
+      "destacar": "Provedor e credencial"
+    },
+    "RF302": {
+      "cena": "novo",
+      "destacar": "Só aparecem as credenciais prontas para uso."
+    },
+    "RF303": {
+      "cena": "novoSemProvedor",
+      "destacar": [
+        "Nenhuma credencial disponível",
+        "Conectar um provedor"
+      ]
+    },
+    "RF304": {
+      "cena": "novoLimite",
+      "destacar": {
+        "regex": "até 10 mb na adobe acrobat sign$"
+      }
+    },
+    "RF305": {
+      "cena": "novoSemProvedor",
+      "destacar": "O tamanho máximo depende do provedor"
+    },
+    "RF306": {
+      "cena": "novoLimite",
+      "destacar": "A Adobe Acrobat Sign aceita até 10 MB."
+    },
+    "RF307": {
+      "sem": "o protótipo não tem arquivo de exemplo em formato recusado"
+    },
+    "RF308": {
+      "sem": "a troca de credencial é um gesto; o resultado é o da RF306"
+    },
+    "RF309": {
+      "cena": "novo",
+      "destacar": "Expira em"
+    },
+    "RF310": {
+      "cena": "novo",
+      "destacar": "Vazio usa o prazo padrão do provedor."
+    },
+    "RF311": {
+      "cena": "novo",
+      "destacar": [
+        "Enviar para assinatura",
+        "Salvar rascunho"
+      ]
+    },
+    "RF312": {
+      "cena": "novo",
+      "destacar": "Preencha o título, a credencial",
+      "passos": [
+        {
+          "clicar": "Enviar para assinatura"
+        },
+        {
+          "esperar": 400
+        }
+      ]
+    },
+    "RF313": {
+      "cena": "novoSemProvedor",
+      "destacar": "Salvar rascunho"
+    },
+    "RF314": {
+      "cena": "novoSemProvedor",
+      "destacar": "Salvar rascunho",
+      "junto": "RF313"
+    },
+    "RF315": {
+      "cena": "novo",
+      "destacar": "Mesma ordem: assinam ao mesmo tempo."
+    },
+    "RF401": {
+      "cena": "ordem",
+      "destacar": "Atualizado "
+    },
+    "RF402": {
+      "cena": "cancFluxo",
+      "destacar": "Spaceflow · Contrato de fornecedor"
+    },
+    "RF403": {
+      "cena": "ordem",
+      "destacar": [
+        "Atualizar status",
+        "Mais ações"
+      ]
+    },
+    "RF404": {
+      "cena": "concluido",
+      "destacar": "Baixar original",
+      "passos": [
+        {
+          "clicar": "Mais ações"
+        },
+        {
+          "esperar": 500
+        }
+      ]
+    },
+    "RF405": {
+      "cena": "certAvulso",
+      "destacar": "não permite cancelar pela integração"
+    },
+    "RF406": {
+      "cena": "ordem",
+      "destacar": "Atualizar de novo em",
+      "passos": [
+        {
+          "clicar": "Atualizar status"
+        },
+        {
+          "esperar": 1500
+        }
+      ]
+    },
+    "RF407": {
+      "cena": "ordem",
+      "destacar": "Nada mudou.",
+      "passos": [
+        {
+          "clicar": "Atualizar status"
+        },
+        {
+          "esperar": 1200
+        }
+      ]
+    },
+    "RF408": {
+      "sem": "o estado sem ninguém na vez não tem atalho no andaime"
+    },
+    "RF409": {
+      "cena": "cancFluxo",
+      "destacar": "Cancelado por Ana Ribeiro"
+    },
+    "RF410": {
+      "cena": "cancFluxo",
+      "destacar": "Ver execução"
+    },
+    "RF411": {
+      "cena": "ordem",
+      "destacar": [
+        "Ordem 1",
+        "Ordem 2"
+      ]
+    },
+    "RF412": {
+      "cena": "ordem",
+      "destacar": {
+        "regex": "^visualizou em"
+      }
+    },
+    "RF413": {
+      "cena": "ordem",
+      "destacar": "Recebe o convite quando a ordem"
+    },
+    "RF414": {
+      "cena": "d4Cancelado",
+      "destacar": "Não assinou"
+    },
+    "RF415": {
+      "cena": "certCategoria",
+      "destacar": {
+        "css": "button[aria-label='Copiar link de assinatura']",
+        "n": 0
+      }
+    },
+    "RF416": {
+      "cena": "ordem",
+      "destacar": [
+        "Original",
+        "Assinado"
+      ]
+    },
+    "RF417": {
+      "cena": "d4Cancelado",
+      "destacar": {
+        "regex": "^por "
+      }
+    },
+    "RF418": {
+      "cena": "d4Cancelado",
+      "destacar": "Motivo: Valor do distrato errado"
+    },
+    "RF419": {
+      "cena": "d4Cancelado",
+      "destacar": "confirmou às"
+    },
+    "RF420": {
+      "cena": "erro",
+      "destacar": "Etapa:"
+    },
+    "RF421": {
+      "cena": "ordem",
+      "destacar": [
+        "Todos",
+        "Erros"
+      ],
+      "passos": [
+        {
+          "rolar": "Trilha de auditoria"
+        }
+      ]
+    },
+    "RF501": {
+      "cena": "categoria",
+      "destacar": "A ação não pode ser desfeita.",
+      "passos": [
+        {
+          "clicar": "Mais ações"
+        },
+        {
+          "esperar": 400
+        },
+        {
+          "clicar": {
+            "texto": "Cancelar envelope",
+            "n": 0
+          }
+        },
+        {
+          "esperar": 600
+        }
+      ]
+    },
+    "RF502": {
+      "cena": "categoria",
+      "destacar": "vai para erro com este motivo",
+      "junto": "RF501"
+    },
+    "RF503": {
+      "cena": "categoria",
+      "destacar": "Motivo",
+      "junto": "RF501"
+    },
+    "RF504": {
+      "sem": "o envelope avulso que cancela pela integração não tem atalho no andaime"
+    },
+    "RF505": {
+      "cena": "certCategoria",
+      "destacar": "não cancela pela integração",
+      "passos": [
+        {
+          "clicar": "Mais ações"
+        },
+        {
+          "esperar": 400
+        },
+        {
+          "clicar": {
+            "texto": "Cancelar envelope",
+            "n": 0
+          }
+        },
+        {
+          "esperar": 600
+        }
+      ]
+    },
+    "RF506": {
+      "cena": "d4Cancelado",
+      "destacar": "Não assinou",
+      "junto": "RF414"
+    },
+    "RF507": {
+      "cena": "execCancelado",
+      "destacar": "Envio cancelado no módulo de assinaturas"
+    },
+    "RF508": {
+      "cena": "ordem",
+      "destacar": "envia de novo o convite a quem está na vez",
+      "passos": [
+        {
+          "clicar": "Reenviar e-mail"
+        },
+        {
+          "esperar": 600
+        }
+      ]
+    },
+    "RF509": {
+      "cena": "ordem",
+      "destacar": "na fila recebe",
+      "junto": "RF508"
+    },
+    "RF510": {
+      "sem": "o toast some antes do print; o texto está na linha da RF510"
+    },
+    "RF511": {
+      "cena": "certCategoria",
+      "destacar": "Quem tiver o link assina como aquela pessoa.",
+      "passos": [
+        {
+          "clicar": "Links de assinatura"
+        },
+        {
+          "esperar": 600
+        }
+      ]
+    },
+    "RF512": {
+      "cena": "certCategoria",
+      "destacar": {
+        "css": "[role=dialog] li button",
+        "n": 0
+      },
+      "junto": "RF511"
+    },
+    "RF513": {
+      "cena": "ordem",
+      "destacar": "Ainda não está na vez",
+      "passos": [
+        {
+          "clicar": "Mais ações"
+        },
+        {
+          "esperar": 400
+        },
+        {
+          "clicar": "Links de assinatura"
+        },
+        {
+          "esperar": 600
+        }
+      ]
+    },
+    "RF514": {
+      "cena": "certCategoria",
+      "destacar": "Gerar novamente",
+      "junto": "RF511"
+    },
+    "RF515": {
+      "cena": "certCategoria",
+      "destacar": "Links de assinatura"
+    },
+    "RF601": {
+      "cena": "vazio",
+      "destacar": "Envie documentos para assinatura sem sair do ENSPACE"
+    },
+    "RF602": {
+      "cena": "vazio",
+      "destacar": [
+        "Criar o primeiro envelope",
+        "Conectar um provedor"
+      ]
+    },
+    "RF603": {
+      "cena": "vazio",
+      "destacar": "O envelope pode ser criado antes da conexão"
+    },
+    "RF604": {
+      "cena": "vazio",
+      "destacar": "Contrato de locação"
+    },
+    "RF605": {
+      "cena": "vazio",
+      "destacar": "Pode ser depois"
+    },
+    "RF606": {
+      "cena": "vazio",
+      "destacar": "Provedores disponíveis"
+    },
+    "RF607": {
+      "cena": "vazio",
+      "destacar": [
+        "Pelo Spaceflow",
+        "Pelo fluxo da categoria"
+      ]
+    },
+    "RF608": {
+      "cena": "semEnvelope",
+      "destacar": "Tudo pronto para o primeiro envelope"
+    },
+    "RF609": {
+      "cena": "semEnvelope",
+      "destacar": "Concluído · "
+    },
+    "RF610": {
+      "cena": "semEnvelope",
+      "destacar": {
+        "texto": "Conectado",
+        "ancestral": "button"
+      }
+    },
+    "RF611": {
+      "sem": "o toast some antes do print; o texto está na linha da RF611"
+    },
+    "RF612": {
+      "cena": "desligar",
+      "destacar": "Desligar o módulo de assinaturas?"
+    },
+    "RF613": {
+      "cena": "desligar",
+      "destacar": "aguardam assinatura",
+      "junto": "RF612"
+    },
+    "RF614": {
+      "cena": "desligar",
+      "destacar": [
+        "Desligar o módulo",
+        "Manter ligado"
+      ],
+      "junto": "RF612"
+    },
+    "RF701": {
+      "cena": "editor",
+      "destacar": "As credenciais aparecem agrupadas por provedor."
+    },
+    "RF702": {
+      "cena": "editor",
+      "destacar": "De um nó anterior"
+    },
+    "RF703": {
+      "cena": "editor",
+      "destacar": "De uma lista"
+    },
+    "RF704": {
+      "sem": "o editor abre com os signatários da lista; os fixos aparecem ao escolher Fixos"
+    },
+    "RF705": {
+      "cena": "editor",
+      "destacar": "A entrada do disparo fica em workflow_input.input"
+    },
+    "RF706": {
+      "cena": "editor",
+      "destacar": "Caminho da lista"
+    },
+    "RF707": {
+      "cena": "editor",
+      "destacar": "Chaves de cada item da lista"
+    },
+    "RF708": {
+      "cena": "editor",
+      "destacar": "Se o envelope for recusado, cancelado ou expirar"
+    },
+    "RF709": {
+      "cena": "editor",
+      "destacar": "O cancelamento pelo módulo sempre leva a execução a erro"
+    },
+    "RF710": {
+      "cena": "execCancelado",
+      "destacar": {
+        "texto": "Cancelado",
+        "exato": true
+      }
+    },
+    "RF711": {
+      "cena": "execCancelado",
+      "destacar": {
+        "texto": "Erro",
+        "n": 0
+      }
+    },
+    "RF712": {
+      "cena": "execCancelado",
+      "destacar": "Resultado"
+    },
+    "RF713": {
+      "cena": "execCancelado",
+      "destacar": "Ver cancelamento"
+    },
+    "RF714": {
+      "cena": "execCancelado",
+      "destacar": "A execução parou neste nó."
+    },
+    "RF715": {
+      "cena": "execConfig",
+      "destacar": [
+        "Nenhum signatário resolvido.",
+        "Editar o nó"
+      ]
+    },
+    "RF716": {
+      "cena": "execCancelado",
+      "destacar": "Abrir envelope"
+    },
+    "RF717": {
+      "cena": "execCancelado",
+      "destacar": "Signatários"
+    },
+    "RF718": {
+      "cena": "execCancelado",
+      "destacar": "Configuração"
+    },
+    "RF719": {
+      "cena": "execCancelado",
+      "destacar": "Dados técnicos"
+    },
+    "RF801": {
+      "cena": "tarefaErro",
+      "destacar": "Envelope no módulo de assinaturas"
+    },
+    "RF802": {
+      "cena": "tarefaErro",
+      "destacar": {
+        "texto": "Erro",
+        "n": 0
+      }
+    },
+    "RF803": {
+      "sem": "a falha de envio se escolhe no seletor do andaime; o texto está na linha da RF805"
+    },
+    "RF804": {
+      "cena": "tarefaErro",
+      "destacar": "Tarefa em erro"
+    },
+    "RF805": {
+      "sem": "a falha de envio se escolhe no seletor do andaime, que o print não abre"
+    },
+    "RF806": {
+      "sem": "aparece só na falha de envio, que o print não abre"
+    },
+    "RF807": {
+      "cena": "tarefaErro",
+      "destacar": "Sem cobrança"
+    },
+    "RF808": {
+      "sem": "o requisito é a ausência do botão; o print da RF804 mostra a tarefa sem ele"
+    },
+    "RF809": {
+      "cena": "tarefaErro",
+      "destacar": "Histórico",
+      "passos": [
+        {
+          "clicar": "Histórico"
+        },
+        {
+          "esperar": 500
+        }
+      ]
+    }
+  }
+}

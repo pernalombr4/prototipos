@@ -166,3 +166,12 @@
 ### Fechamento
 
 - **Ver:** os 30 prints de `evidencias/` foram regravados com o logo; a página do provedor está em `prototipo-ux-pagina-do-provedor.png` (Certisign, 1 etapa concluída e 1 aguardando) e `prototipo-m16-primeira-credencial.png` (ClickSign, nenhuma etapa concluída).
+
+## Requisitos · 2026-11-19
+
+- **Pedido (literal):** "prnto. ja fez os docs de requisito no github?"
+- **Aprovado em 19/11/2026**, depois da rodada 3. O status do protótipo passou para `aprovado`.
+- **1 épico de 9 partes**, em `requisitos/`: `epico.md` e 1 arquivo por parte, com a RN comum (RN901 a RN908) e o padrão de qualidade só no épico.
+  - As 12 partes do 1º desenho viraram 9, porque a faixa de ID 901 a 999 é do épico: a busca e o filtro entraram na loja de apps (parte 1), a trilha entrou no detalhe do envelope (parte 5), e o editor e a execução do nó viraram 1 parte (parte 8).
+  - A loja de apps muda também os cards da OpenAI, do Plugin do Word, do SendGrid e do Twilio; se ela vira um épico próprio está em aberto (P902), para a redatora decidir. Sem a decisão, fica 1 épico.
+- **Prints dos requisitos:** `evidencias/requisitos/`, gerados por `node ferramentas/prints-de-requisito.mjs app/pages/modulo-de-assinaturas` a partir de `requisitos/prints.json`. O requisito sem tela no protótipo (toast que some, gesto, ausência de botão) leva o motivo no lugar do print.
