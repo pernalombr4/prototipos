@@ -2,137 +2,196 @@
 /**
  * Configurações > Integrações > Apps, a loja de apps.
  *
- * Cópia da prévia: as seções por assunto e o card por app. PROPOSTA (B1 e B2):
- * - a seção "Assinatura eletrônica" traz os 5 provedores do módulo novo, com 1 estado em texto e 1 botão. É daqui que
- *   se chega à página do provedor; o item "Assinatura Eletrônica" sai do menu;
- * - a descrição do card diz o que o provedor faz, em linguagem de quem configura (M26). Os recursos técnicos ficam na
- *   página do provedor;
- * - as 5 integrações antigas ficam recolhidas embaixo, com 1 aviso para as 5 (hoje o mesmo aviso aparece 5 vezes).
+ * Cópia da prévia: as seções por assunto (Inteligência Artificial, Documentos, E-mails, Canais de mensagem) e os apps de
+ * cada uma. PROPOSTA:
+ * - B1: a seção "Assinatura eletrônica" traz os 5 provedores do módulo novo. É daqui que se chega à página do provedor;
+ *   o item "Assinatura Eletrônica" sai do menu;
+ * - 1 formato de card para todo app (`_CardDeApp.vue`): logo, nome, descrição, estado em texto e 1 botão
+ *   "Ver detalhes". Hoje são 3 formatos de botão e 4 rótulos (Gerenciar Integração, Instalar Integração, Utilizar
+ *   Plugin, link rosa com seta);
+ * - o estado usa o mesmo vocabulário em todo app: Conectado, Falta 1 etapa, Não conectado, Legado;
+ * - busca e filtro Todos, Conectados e Não conectados, com a contagem;
+ * - cada seção diz para que serve, numa linha;
+ * - B2: as 5 integrações antigas ficam recolhidas na seção de assinatura, com 1 aviso para as 5 e o mesmo card.
  */
 import type { ProvedorId } from './mocks'
 import { provedores } from './mocks'
 import { credenciaisVisiveis, credencialPronta, estado } from './estado'
 import type { Textos } from './textos'
-import Monograma from './_Monograma.vue'
+import type { TomDoEstado } from './_CardDeApp.vue'
+import CardDeApp from './_CardDeApp.vue'
 
 const props = defineProps<{ t: Textos }>()
 const emit = defineEmits<{ abrir: [ProvedorId] }>()
 const toast = useToast()
 const a = computed(() => props.t.apps)
 
-function estadoDo(id: ProvedorId) {
+type Secao = 'ia' | 'assinatura' | 'documentos' | 'emails' | 'mensagens'
+interface App { id: string, nome: string, secao: Secao, estado: { texto: string, tom: TomDoEstado, detalhe?: string }, conectado: boolean, provedor?: ProvedorId, icone?: string, legado?: boolean }
+
+function estadoDoProvedor(id: ProvedorId) {
   const creds = credenciaisVisiveis.value.filter(c => c.provedor === id)
-  if (!creds.length) return { texto: a.value.naoConectado, cor: 'text-muted', ponto: 'bg-(--ui-text-dimmed)', conectado: false }
+  const e = a.value.estados
+  if (!creds.length) return { texto: e.naoConectado!, tom: 'neutral' as const }
   const falta = creds.some(c => !credencialPronta(c)) || (provedores.find(p => p.id === id)!.webhook === 'conta' && !estado.webhookConfirmado[id])
-  return falta
-    ? { texto: a.value.faltaEtapa, cor: 'text-warning', ponto: 'bg-warning', conectado: true }
-    : { texto: a.value.conectado(creds.length), cor: 'text-success', ponto: 'bg-success', conectado: true }
+  return { texto: falta ? e.faltaEtapa! : e.conectado!, tom: falta ? 'warning' as const : 'success' as const, detalhe: a.value.credenciais(creds.length) }
 }
 
-const outros = [
-  { secao: 'ia', apps: [{ id: 'openai', nome: 'OpenAI', icone: 'i-simple-icons-openai', instalado: true }] },
-  { secao: 'documentos', apps: [{ id: 'word', nome: 'Plugin do Word', icone: 'i-lucide-file-text', instalado: false, plugin: true }] },
-  { secao: 'emails', apps: [{ id: 'sendgrid', nome: 'SendGrid', icone: 'i-lucide-send', instalado: true }] },
-  { secao: 'mensagens', apps: [{ id: 'twilio', nome: 'Twilio', icone: 'i-lucide-message-square', instalado: false }] },
-]
+const apps = computed<App[]>(() => {
+  const e = a.value.estados
+  const ligado = { texto: e.conectado!, tom: 'success' as const }
+  const desligado = { texto: e.naoConectado!, tom: 'neutral' as const }
+  return [
+    { id: 'openai', nome: 'OpenAI', secao: 'ia', icone: 'i-simple-icons-openai', estado: ligado, conectado: true },
+    ...provedores.map(p => ({ id: p.id, nome: p.nome, secao: 'assinatura' as const, provedor: p.id, estado: estadoDoProvedor(p.id), conectado: estadoDoProvedor(p.id).tom !== 'neutral' })),
+    { id: 'word', nome: 'Plugin do Word', secao: 'documentos', icone: 'i-lucide-file-text', estado: desligado, conectado: false },
+    { id: 'sendgrid', nome: 'SendGrid', secao: 'emails', icone: 'i-lucide-send', estado: ligado, conectado: true },
+    { id: 'twilio', nome: 'Twilio', secao: 'mensagens', icone: 'i-lucide-message-square', estado: desligado, conectado: false },
+  ]
+})
+// Os fluxos de categoria que ainda usam cada integração antiga (inventado). O aviso comum fica no cabeçalho do grupo;
+// o card diz o que é só dele: quem usa.
+const usoDoLegado: Record<ProvedorId, string[]> = {
+  clicksign: ['Contratos de locação', 'Termos de confidencialidade'], certisign: ['Contratos de fornecedores'], d4sign: ['Admissões'], docusign: [], adobesign: ['Propostas comerciais'],
+}
+const legados = computed<(App & { uso: string[] })[]>(() => provedores.map(p => ({
+  id: `legado-${p.id}`, nome: p.id === 'adobesign' ? 'Adobe Sign' : p.nome, secao: 'assinatura', provedor: p.id, legado: true, conectado: false, uso: usoDoLegado[p.id],
+  estado: usoDoLegado[p.id].length
+    ? { texto: a.value.emUso, tom: 'neutral', detalhe: a.value.fluxos(usoDoLegado[p.id].length) }
+    : { texto: a.value.semUso, tom: 'neutral' },
+})))
 
-const legados = ['ClickSign', 'Certisign', 'D4Sign', 'DocuSign', 'Adobe Sign']
+/* ---------- busca e filtro ---------- */
+const busca = ref('')
+const filtro = ref<'todos' | 'conectados' | 'naoConectados'>('todos')
+const normalizar = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
+const casa = (app: App) => {
+  const q = normalizar(busca.value.trim())
+  return !q || [app.nome, a.value.secoes[app.secao]!, a.value.descricoes[app.id.replace('legado-', '')] ?? ''].some(x => normalizar(x).includes(q))
+}
+const contagem = computed(() => ({
+  todos: apps.value.length,
+  conectados: apps.value.filter(x => x.conectado).length,
+  naoConectados: apps.value.filter(x => !x.conectado).length,
+}))
+const abas = computed(() => (['todos', 'conectados', 'naoConectados'] as const).map(k => ({ value: k, label: a.value.filtros[k], badge: { label: String(contagem.value[k]), color: 'neutral' as const, variant: 'soft' as const } })))
+const visiveis = computed(() => apps.value.filter(x => casa(x) && (filtro.value === 'todos' || (filtro.value === 'conectados' ? x.conectado : !x.conectado))))
+const legadosVisiveis = computed(() => (filtro.value === 'todos' ? legados.value.filter(casa) : []))
+
+const secoes: { id: Secao, icone: string }[] = [
+  { id: 'ia', icone: 'i-lucide-sparkles' },
+  { id: 'assinatura', icone: 'i-lucide-signature' },
+  { id: 'documentos', icone: 'i-lucide-file-text' },
+  { id: 'emails', icone: 'i-lucide-mail' },
+  { id: 'mensagens', icone: 'i-lucide-message-square' },
+]
+const secoesComApps = computed(() => secoes
+  .map(s => ({ ...s, apps: visiveis.value.filter(x => x.secao === s.id) }))
+  .filter(s => s.apps.length || (s.id === 'assinatura' && legadosVisiveis.value.length)))
+
 const legadoAberto = ref(false)
+watch(busca, (q) => { if (q.trim() && legadosVisiveis.value.length) legadoAberto.value = true })
+
 const foraDoEscopo = () => toast.add({ title: props.t.geral.foraDoEscopo, description: props.t.geral.foraDoEscopoDesc, icon: 'i-lucide-construction', color: 'neutral' })
+function abrir(app: App) {
+  if (app.provedor && !app.legado) emit('abrir', app.provedor)
+  else foraDoEscopo()
+}
 </script>
 
 <template>
   <div class="min-h-0 flex-1 overflow-y-auto">
-    <div class="mx-auto max-w-6xl space-y-8 px-6 py-6">
-      <h1 class="text-xl font-semibold text-highlighted">{{ a.titulo }}</h1>
+    <div class="mx-auto max-w-6xl space-y-6 px-6 py-6">
+      <!-- PROPOSTA: título com a linha do que é a tela, busca e filtro -->
+      <header class="space-y-4">
+        <div>
+          <h1 class="text-xl font-semibold text-highlighted">{{ a.titulo }}</h1>
+          <p class="mt-1 text-sm text-muted">{{ a.subtitulo }}</p>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <UTabs v-model="filtro" :items="abas" :content="false" variant="pill" size="sm" color="neutral" />
+          <UInput v-model="busca" icon="i-lucide-search" :placeholder="a.buscar" class="w-72" :aria-label="a.buscar">
+            <template v-if="busca" #trailing>
+              <UButton icon="i-lucide-x" color="neutral" variant="link" size="xs" :aria-label="a.limparBusca" @click="busca = ''" />
+            </template>
+          </UInput>
+        </div>
+      </header>
 
-      <!-- Inteligência Artificial (cópia) -->
-      <section v-for="(s, si) in [outros[0]!]" :key="s.secao" class="space-y-3">
-        <h2 class="text-sm font-semibold text-highlighted">{{ a.secoes[s.secao] }}</h2>
-        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          <div v-for="app in s.apps" :key="app.id" class="flex animate-[entrada_.3s_ease-out_both] flex-col gap-3 rounded-lg border border-default bg-default p-4" :style="{ animationDelay: `${si * 40}ms` }">
-            <div class="flex items-center gap-3">
-              <span class="flex size-10 items-center justify-center rounded-md bg-elevated"><UIcon :name="app.icone" class="size-5 text-highlighted" /></span>
-              <span class="font-medium text-highlighted">{{ app.nome }}</span>
+      <UEmpty
+        v-if="!secoesComApps.length"
+        icon="i-lucide-search-x"
+        :title="a.vazioBusca"
+        variant="naked"
+        class="py-16"
+        :actions="[{ label: a.limparBusca, color: 'neutral', variant: 'outline', onClick: () => { busca = ''; filtro = 'todos' } }]"
+      />
+
+      <TransitionGroup tag="div" class="space-y-10" enter-active-class="transition-[opacity,transform] duration-200 ease-out" enter-from-class="opacity-0 translate-y-1" leave-active-class="transition-opacity duration-100" leave-to-class="opacity-0">
+        <section v-for="(s, si) in secoesComApps" :key="s.id" class="space-y-4" :aria-labelledby="`secao-${s.id}`">
+          <div class="flex items-start gap-3 border-b border-default pb-3">
+            <span class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <UIcon :name="s.icone" class="size-4" />
+            </span>
+            <div class="min-w-0 flex-1">
+              <h2 :id="`secao-${s.id}`" class="flex items-center gap-2 font-semibold text-highlighted">
+                {{ a.secoes[s.id] }}
+                <span class="text-sm font-normal tabular-nums text-muted">{{ s.apps.length }}</span>
+                <UBadge v-if="s.id === 'assinatura'" :label="a.novo" color="primary" variant="subtle" size="sm" />
+              </h2>
+              <p class="text-sm text-muted">{{ a.secaoDesc[s.id] }}</p>
             </div>
-            <p class="line-clamp-2 text-sm text-muted">{{ a.descricoes[app.id] }}</p>
-            <UButton :label="app.instalado ? a.gerenciar : a.instalar" color="neutral" variant="outline" size="sm" block class="mt-auto" @click="foraDoEscopo" />
           </div>
-        </div>
-      </section>
 
-      <!-- PROPOSTA: os provedores de assinatura ficam na loja -->
-      <section class="space-y-3" aria-labelledby="secao-assinatura">
-        <h2 id="secao-assinatura" class="text-sm font-semibold text-highlighted">{{ a.secoes.assinatura }}</h2>
-        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          <button
-            v-for="(p, i) in provedores"
-            :key="p.id"
-            type="button"
-            class="group flex animate-[entrada_.3s_ease-out_both] flex-col gap-3 rounded-lg border border-default bg-default p-4 text-left transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-accented hover:shadow-sm focus-visible:outline-2 focus-visible:outline-primary"
-            :style="{ animationDelay: `${60 + i * 40}ms` }"
-            @click="emit('abrir', p.id)"
-          >
-            <span class="flex items-center gap-3">
-              <Monograma :provedor="p.id" />
-              <span class="font-medium text-highlighted">{{ p.nome }}</span>
-            </span>
-            <span class="line-clamp-2 text-sm text-muted">{{ a.descricoes[p.id] }}</span>
-            <span class="mt-auto flex items-center justify-between gap-2 pt-1">
-              <span class="flex min-w-0 items-center gap-1.5 text-xs font-medium" :class="estadoDo(p.id).cor">
-                <span class="size-1.5 shrink-0 rounded-full" :class="estadoDo(p.id).ponto" />
-                <span class="truncate">{{ estadoDo(p.id).texto }}</span>
-              </span>
-              <span class="flex shrink-0 items-center gap-1 text-sm font-medium text-primary">
-                {{ estadoDo(p.id).conectado ? a.gerenciar : a.conectar }}
-                <UIcon name="i-lucide-arrow-right" class="size-4 transition-transform group-hover:translate-x-0.5" />
-              </span>
-            </span>
-          </button>
-        </div>
-
-        <!-- PROPOSTA: 1 aviso para as 5 integrações antigas, recolhidas -->
-        <div class="rounded-lg border border-default bg-elevated/40">
-          <div class="flex flex-wrap items-center gap-3 px-4 py-3">
-            <UIcon name="i-lucide-archive" class="size-4 shrink-0 text-muted" />
-            <p class="min-w-60 flex-1 text-sm text-toned">{{ a.legadoAviso }}</p>
-            <UButton
-              :label="legadoAberto ? a.legadoOcultar : a.legadoVer(legados.length)"
-              :trailing-icon="legadoAberto ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
-              color="neutral"
-              variant="outline"
-              size="sm"
-              :aria-expanded="legadoAberto"
-              @click="legadoAberto = !legadoAberto"
+          <div v-if="s.apps.length" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <CardDeApp
+              v-for="(app, i) in s.apps"
+              :key="app.id"
+              :nome="app.nome"
+              :descricao="a.descricoes[app.id]!"
+              :estado="app.estado"
+              :rotulo="a.verDetalhes"
+              :provedor="app.provedor"
+              :icone="app.icone"
+              class="animate-[entrada_.3s_ease-out_both]"
+              :style="{ animationDelay: `${Math.min(si * 2 + i, 12) * 35}ms` }"
+              @abrir="abrir(app)"
             />
           </div>
-          <Transition enter-active-class="transition-[opacity,transform] duration-200 ease-out" enter-from-class="opacity-0 -translate-y-1" leave-active-class="transition-opacity duration-100" leave-to-class="opacity-0">
-            <div v-if="legadoAberto" class="grid gap-3 border-t border-default p-4 sm:grid-cols-2 xl:grid-cols-3">
-              <div v-for="nome in legados" :key="nome" class="flex items-center gap-3 rounded-md border border-default bg-default px-3 py-2.5">
-                <span class="flex size-8 items-center justify-center rounded-md bg-elevated text-xs font-semibold text-muted">{{ nome.slice(0, 2).toUpperCase() }}</span>
-                <span class="min-w-0 flex-1 truncate text-sm text-highlighted">{{ nome }}</span>
-                <UBadge :label="a.legadoSelo" color="neutral" variant="soft" size="sm" />
-                <UButton :label="a.gerenciar" color="neutral" variant="ghost" size="xs" @click="foraDoEscopo" />
-              </div>
-            </div>
-          </Transition>
-        </div>
-      </section>
 
-      <!-- Documentos, E-mails e Canais de mensagem (cópia) -->
-      <section v-for="s in outros.slice(1)" :key="s.secao" class="space-y-3">
-        <h2 class="text-sm font-semibold text-highlighted">{{ a.secoes[s.secao] }}</h2>
-        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          <div v-for="app in s.apps" :key="app.id" class="flex flex-col gap-3 rounded-lg border border-default bg-default p-4">
-            <div class="flex items-center gap-3">
-              <span class="flex size-10 items-center justify-center rounded-md bg-elevated"><UIcon :name="app.icone" class="size-5 text-highlighted" /></span>
-              <span class="font-medium text-highlighted">{{ app.nome }}</span>
-            </div>
-            <p class="line-clamp-2 text-sm text-muted">{{ a.descricoes[app.id] }}</p>
-            <UButton :label="'plugin' in app ? a.usarPlugin : app.instalado ? a.gerenciar : a.instalar" color="neutral" variant="outline" size="sm" block class="mt-auto" @click="foraDoEscopo" />
+          <!-- PROPOSTA (B2): as integrações antigas, recolhidas, com 1 aviso e o mesmo card -->
+          <div v-if="s.id === 'assinatura' && legadosVisiveis.length" class="rounded-xl border border-dashed border-default">
+            <button
+              type="button"
+              class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors hover:bg-elevated/50 focus-visible:outline-2 focus-visible:outline-primary"
+              :aria-expanded="legadoAberto"
+              @click="legadoAberto = !legadoAberto"
+            >
+              <UIcon name="i-lucide-archive" class="size-4 shrink-0 text-muted" />
+              <span class="min-w-0 flex-1">
+                <span class="block text-sm font-medium text-highlighted">{{ a.legadoTitulo }} <span class="font-normal tabular-nums text-muted">{{ legadosVisiveis.length }}</span></span>
+                <span class="block text-sm text-muted">{{ a.legadoDesc }}</span>
+              </span>
+              <UIcon name="i-lucide-chevron-down" class="size-4 shrink-0 text-muted transition-transform duration-200" :class="legadoAberto && 'rotate-180'" />
+            </button>
+            <Transition enter-active-class="transition-[opacity,transform] duration-200 ease-out" enter-from-class="opacity-0 -translate-y-1" leave-active-class="transition-opacity duration-100" leave-to-class="opacity-0">
+              <div v-if="legadoAberto" class="grid gap-4 border-t border-dashed border-default p-4 sm:grid-cols-2 xl:grid-cols-3">
+                <CardDeApp
+                  v-for="app in legadosVisiveis"
+                  :key="app.id"
+                  :nome="app.nome"
+                  :descricao="a.legadoUso(app.uso)"
+                  :estado="app.estado"
+                  :rotulo="a.verDetalhes"
+                  :provedor="app.provedor"
+                  apagado
+                  @abrir="abrir(app)"
+                />
+              </div>
+            </Transition>
           </div>
-        </div>
-      </section>
+        </section>
+      </TransitionGroup>
     </div>
   </div>
 </template>

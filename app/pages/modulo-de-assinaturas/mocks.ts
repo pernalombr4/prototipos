@@ -148,8 +148,9 @@ export interface Envelope {
   title: string
   description?: string
   status: StatusDoEnvelope
-  provider: ProvedorId
-  credential: number
+  /** Vazio no rascunho criado antes de conectar um provedor. */
+  provider?: ProvedorId
+  credential?: number
   provider_envelope_id?: string
   documento: { nome: string, tamanhoMb: number }
   assinado?: { nome: string, tamanhoMb: number }

@@ -14,7 +14,7 @@ import decisoesMd from './DECISOES.md?raw'
 import type { ProvedorId } from './mocks'
 import { ENVELOPE, envelopesIniciais, provedorPorId, tarefaIntegracao, workspace } from './mocks'
 import type { Desfecho, Situacao } from './estado'
-import { cancelar, envelopePorId, estado, reiniciarEstado } from './estado'
+import { cancelar, carregarSituacao, credenciaisVisiveis, envelopePorId, envelopesVisiveis, estado, reiniciarEstado } from './estado'
 import { textos } from './textos'
 import type { Destino } from './_CascaDoEnspace.vue'
 import CascaDoEnspace from './_CascaDoEnspace.vue'
@@ -31,7 +31,7 @@ definePageMeta({
   titulo: 'Módulo de assinaturas',
   descricao: 'O módulo de assinaturas reorganizado: os provedores na loja de apps, a página do provedor sem informação repetida, a lista e o detalhe do envelope com 1 faixa de estado e a trilha que diz quem fez. Em cima disso, as correções do teste de 18/11/2026: cancelamento e recusa levando o Spaceflow e a tarefa a erro, o desfecho no nó, a fila de assinatura, o limite do provedor e os estados iniciais.',
   status: 'em-revisao',
-  atualizado: '2026-11-18',
+  atualizado: '2026-11-19',
   tela: 'Integrações › Apps; Módulos › Assinaturas; Spaceflow › Execução e editor do nó; Tarefa Integração; Sistema › Módulos',
 })
 
@@ -98,9 +98,17 @@ const exemploNovo = ref<{ credencial: number, arquivo: { nome: string, tamanhoMb
 
 const situacoes: { value: Situacao, label: string }[] = [
   { value: 'normal', label: 'Dia normal' },
-  { value: 'semProvedor', label: 'Nenhum provedor conectado' },
+  { value: 'vazio', label: 'Nem provedor nem envelope' },
   { value: 'semEnvelope', label: 'Provedor conectado, sem envelope' },
+  { value: 'soRascunhos', label: 'Rascunhos, sem provedor' },
 ]
+// O que a tela mostra agora: criar um rascunho ou uma credencial muda a situação sem passar pelo andaime.
+const situacaoVista = computed<Situacao>(() => {
+  if (estado.situacao === 'normal') return 'normal'
+  const c = credenciaisVisiveis.value.length
+  const e = envelopesVisiveis.value.length
+  return !c && !e ? 'vazio' : c && !e ? 'semEnvelope' : !c ? 'soRascunhos' : estado.situacao
+})
 const desfechos: { value: Desfecho, label: string }[] = [
   { value: 'aguardando', label: 'Aguardando assinatura' },
   { value: 'assinado', label: 'Assinado' },
@@ -138,8 +146,9 @@ const estadoDaTarefa = computed<EstadoTarefa>({
 })
 
 function situacao(v: Situacao) {
-  estado.situacao = v
-  if (v !== 'normal') tela.value = { tipo: 'envelopes' }
+  carregarSituacao(v)
+  tela.value = { tipo: 'envelopes' }
+  n.value++
 }
 
 const atalhos = computed(() => [
@@ -148,7 +157,7 @@ const atalhos = computed(() => [
     { label: 'Integrações > Apps', icon: 'i-lucide-layout-grid', onSelect: () => { tela.value = { tipo: 'apps' } } },
     { label: 'Página da Certisign', icon: 'i-lucide-plug', onSelect: () => { tela.value = { tipo: 'provedor', id: 'certisign' } } },
     { label: 'Página da D4Sign (falta o cofre)', icon: 'i-lucide-plug', onSelect: () => { tela.value = { tipo: 'provedor', id: 'd4sign' } } },
-    { label: 'Lista de envelopes', icon: 'i-lucide-list', onSelect: () => { estado.situacao = 'normal'; tela.value = { tipo: 'envelopes' } } },
+    { label: 'Lista de envelopes', icon: 'i-lucide-list', onSelect: () => situacao('normal') },
     { label: 'Envelope concluído', icon: 'i-lucide-file-check', onSelect: () => abrirEnvelope(ENVELOPE.adobeConcluido) },
   ],
   [
@@ -164,8 +173,11 @@ const atalhos = computed(() => [
     { label: 'C43 e M21 · Cancelado com a confirmação do provedor', icon: 'i-lucide-check-check', onSelect: () => abrirEnvelope(ENVELOPE.d4signCancelado) },
     { label: 'Falha no envio (motivo nomeado)', icon: 'i-lucide-octagon-alert', onSelect: () => abrirEnvelope(ENVELOPE.d4signErro) },
     { label: 'M14 · Novo envelope com arquivo acima do limite', icon: 'i-lucide-file-x', onSelect: () => { exemploNovo.value = { credencial: 65, arquivo: { nome: 'aditivo-prazo-vila-verde.pdf', tamanhoMb: 14.2 } }; tela.value = { tipo: 'envelopes' }; novoAberto.value = true } },
-    { label: 'M16 · Nenhum provedor conectado', icon: 'i-lucide-plug-zap', onSelect: () => situacao('semProvedor') },
-    { label: 'M16 · 1ª credencial liga o módulo', icon: 'i-lucide-power', onSelect: () => { estado.situacao = 'semProvedor'; estado.moduloLigado = false; estado.webhookConfirmado.clicksign = null; tela.value = { tipo: 'provedor', id: 'clicksign' } } },
+    { label: 'M16 · Nem provedor nem envelope', icon: 'i-lucide-sparkles', onSelect: () => situacao('vazio') },
+    { label: 'M16 · Novo envelope sem provedor', icon: 'i-lucide-file-plus-2', onSelect: () => { situacao('vazio'); abrirNovo() } },
+    { label: 'M16 · Rascunhos, sem provedor', icon: 'i-lucide-plug-zap', onSelect: () => situacao('soRascunhos') },
+    { label: 'M16 · Provedor conectado, sem envelope', icon: 'i-lucide-file-plus', onSelect: () => situacao('semEnvelope') },
+    { label: 'M16 · 1ª credencial liga o módulo', icon: 'i-lucide-power', onSelect: () => { carregarSituacao('vazio'); estado.moduloLigado = false; tela.value = { tipo: 'provedor', id: 'clicksign' } } },
     { label: 'M16 · Desligar o módulo com envelopes abertos', icon: 'i-lucide-power-off', onSelect: () => { estado.moduloLigado = true; tela.value = { tipo: 'sistema', aviso: true }; n.value++ } },
   ],
 ])
@@ -208,7 +220,17 @@ const chave = computed(() => {
         <Transition mode="out-in" enter-active-class="transition-[opacity,transform] duration-200 ease-out" enter-from-class="opacity-0 translate-y-1" leave-active-class="transition-opacity duration-100" leave-to-class="opacity-0">
           <Apps v-if="tela.tipo === 'apps'" :key="chave" :t="t" @abrir="(id) => tela = { tipo: 'provedor', id }" />
           <Provedor v-else-if="tela.tipo === 'provedor'" :key="chave" :t="t" :provedor="tela.id" @voltar="tela = { tipo: 'apps' }" />
-          <Envelopes v-else-if="tela.tipo === 'envelopes'" :key="chave" :t="t" @abrir="(id) => abrirEnvelope(id)" @novo="abrirNovo" @conectar="tela = { tipo: 'apps' }" />
+          <Envelopes
+            v-else-if="tela.tipo === 'envelopes'"
+            :key="chave"
+            :t="t"
+            @abrir="(id) => abrirEnvelope(id)"
+            @novo="abrirNovo"
+            @conectar="tela = { tipo: 'apps' }"
+            @provedor="(id) => tela = { tipo: 'provedor', id }"
+            @ir-fluxo="tela = { tipo: 'execucao', aba: 'editor' }"
+            @ir-tarefa="tela = { tipo: 'tarefa' }"
+          />
           <Envelope
             v-else-if="tela.tipo === 'envelope'"
             :id="tela.id"
@@ -218,6 +240,7 @@ const chave = computed(() => {
             @voltar="tela = anterior.tipo === 'envelope' ? { tipo: 'envelopes' } : anterior"
             @ir-execucao="() => { const e = envelopePorId((tela as { id: number }).id); estado.desfecho = e?.id === ENVELOPE.d4signErro ? 'erroProvedor' : e?.id === ENVELOPE.adobeEmOrdem ? 'aguardando' : 'cancelado'; tela = { tipo: 'execucao', aba: 'execucoes' } }"
             @ir-tarefa="tela = { tipo: 'tarefa' }"
+            @conectar="tela = { tipo: 'apps' }"
           />
           <Execucao v-else-if="tela.tipo === 'execucao'" :key="chave" v-model:aba="tela.aba" :t="t" @abrir-envelope="(id) => abrirEnvelope(id)" />
           <TarefaIntegracao v-else-if="tela.tipo === 'tarefa'" :key="chave" :t="t" @abrir-envelope="(id) => abrirEnvelope(id)" @enviar-de-novo="estadoDaTarefa = 'andamento'" />
@@ -226,7 +249,7 @@ const chave = computed(() => {
       </div>
     </CascaDoEnspace>
 
-    <NovoEnvelope v-model:open="novoAberto" :t="t" :exemplo="exemploNovo" @criado="(id) => abrirEnvelope(id)" />
+    <NovoEnvelope v-model:open="novoAberto" :t="t" :exemplo="exemploNovo" @criado="(id) => abrirEnvelope(id)" @conectar="tela = { tipo: 'apps' }" />
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->
     <div ref="andaime" class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">
@@ -237,7 +260,7 @@ const chave = computed(() => {
         </UDropdownMenu>
         <USeparator orientation="vertical" class="mx-1 h-5" />
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">Workspace</span>
-        <USelect :model-value="estado.situacao" :items="situacoes" value-key="value" size="xs" class="w-60" aria-label="Situação do workspace" @update:model-value="(v) => situacao(v as Situacao)" />
+        <USelect :model-value="situacaoVista" :items="situacoes" value-key="value" size="xs" class="w-60" aria-label="Situação do workspace" @update:model-value="(v) => situacao(v as Situacao)" />
         <template v-if="tela.tipo === 'execucao'">
           <span class="text-xs font-semibold uppercase tracking-wider text-muted">Desfecho do nó</span>
           <USelect v-model="estado.desfecho" :items="desfechos" value-key="value" size="xs" class="w-52" aria-label="Desfecho do nó" />

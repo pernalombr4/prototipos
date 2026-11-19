@@ -8,6 +8,9 @@
  * - M14: o Documento diz o limite e os formatos do provedor escolhido e recusa o arquivo na hora, com o motivo. Hoje o
  *   texto é "PDF ou DOCX até 25 MB" para todo provedor, e a Adobe recusa acima de 10 MB só depois do envio;
  * - "Enviar para assinatura" direto, ao lado de "Salvar rascunho". Hoje é preciso salvar, abrir o rascunho e enviar;
+ * - M16: sem provedor conectado, o envelope pode ser criado e fica como rascunho. O campo da credencial avisa, com o atalho
+ *   para conectar (hoje o formulário também avisa: "Nenhuma credencial configurada para <provedor>"). "Salvar rascunho"
+ *   vira a ação principal, e "Enviar para assinatura" só aparece com um provedor conectado;
  * - "Expira em" leva a hora e não aceita data passada (C42 ficou fora do escopo; o mínimo vem junto por ser o mesmo campo).
  */
 import type { Papel } from './mocks'
@@ -21,7 +24,7 @@ const props = defineProps<{
   exemplo?: { credencial: number, arquivo: { nome: string, tamanhoMb: number } } | null
 }>()
 const aberto = defineModel<boolean>('open', { default: false })
-const emit = defineEmits<{ criado: [number] }>()
+const emit = defineEmits<{ criado: [number], conectar: [] }>()
 const toast = useToast()
 const n = computed(() => props.t.novo)
 
@@ -32,7 +35,7 @@ const expira = ref('')
 const arquivo = ref<{ nome: string, tamanhoMb: number } | null>(null)
 interface Linha { ordem: number, nome: string, email: string, papel: Papel }
 const participantes = ref<Linha[]>([])
-const tentou = ref(false)
+const tentou = ref<false | 'rascunho' | 'enviar'>(false)
 const salvando = ref<'rascunho' | 'enviar' | null>(null)
 
 function limpar() {
@@ -50,6 +53,8 @@ const itensCredencial = computed(() => provedores
   .map(p => ({ p, creds: credenciaisVisiveis.value.filter(c => c.provedor === p.id && credencialPronta(c)) }))
   .filter(g => g.creds.length)
   .map(g => [{ type: 'label' as const, label: g.p.nome }, ...g.creds.map(c => ({ label: `${c.nome} · ${props.t.ambientes[c.ambiente]}`, value: c.id }))]))
+
+const semProvedor = computed(() => itensCredencial.value.length === 0)
 
 const provedor = computed(() => {
   const c = credenciaisVisiveis.value.find(x => x.id === credencial.value)
@@ -79,14 +84,15 @@ const itensPapel = computed(() => (['signer', 'approver', 'witness', 'viewer'] a
 const minimo = HOJE.slice(0, 16)
 
 async function salvar(enviarAgora: boolean) {
-  tentou.value = true
-  const ok = titulo.value.trim() && credencial.value && arquivo.value && !erroDoArquivo.value && participantes.value.some(p => p.nome.trim() && p.email.trim())
-  if (!ok) return toast.add({ title: n.value.obrigatorio, icon: 'i-lucide-circle-alert', color: 'warning' })
+  tentou.value = enviarAgora ? 'enviar' : 'rascunho'
+  // A credencial só é obrigatória para enviar: o rascunho pode esperar o provedor.
+  const ok = titulo.value.trim() && (credencial.value || !enviarAgora) && arquivo.value && !erroDoArquivo.value && participantes.value.some(p => p.nome.trim() && p.email.trim())
+  if (!ok) return toast.add({ title: enviarAgora ? n.value.obrigatorio : n.value.obrigatorioRascunho, icon: 'i-lucide-circle-alert', color: 'warning' })
   salvando.value = enviarAgora ? 'enviar' : 'rascunho'
   await new Promise(r => setTimeout(r, 800))
   salvando.value = null
   const id = criarEnvelope({
-    title: titulo.value.trim(), description: descricao.value.trim() || undefined, credential: credencial.value!, documento: arquivo.value!,
+    title: titulo.value.trim(), description: descricao.value.trim() || undefined, credential: credencial.value, documento: arquivo.value!,
     participantes: participantes.value.filter(p => p.nome.trim() && p.email.trim()), expires_at: expira.value ? `${expira.value}:00-03:00` : undefined,
   }, enviarAgora)
   aberto.value = false
@@ -106,12 +112,23 @@ async function salvar(enviarAgora: boolean) {
           <UFormField :label="n.campoDescricao" class="sm:col-span-2">
             <UTextarea v-model="descricao" :rows="2" autoresize class="w-full" />
           </UFormField>
-          <UFormField :label="n.credencial" :help="n.credencialAjuda" required :error="tentou && !credencial ? true : undefined">
-            <USelect v-model="credencial" :items="itensCredencial" value-key="value" :placeholder="n.credencialPh" class="w-full" />
+          <UFormField :label="n.credencial" :help="semProvedor ? undefined : n.credencialAjuda" :required="!semProvedor" :error="tentou === 'enviar' && !credencial ? true : undefined">
+            <USelect v-model="credencial" :items="itensCredencial" value-key="value" :placeholder="semProvedor ? n.credencialPhVazio : n.credencialPh" :disabled="semProvedor" class="w-full" />
           </UFormField>
           <UFormField :label="n.expira" :help="n.expiraAjuda">
             <UInput v-model="expira" type="datetime-local" :min="minimo" class="w-full" />
           </UFormField>
+          <!-- M16: sem provedor, o rascunho continua possível -->
+          <UAlert
+            v-if="semProvedor"
+            color="warning"
+            variant="subtle"
+            icon="i-lucide-plug-zap"
+            :title="n.semProvedor.titulo"
+            :description="n.semProvedor.texto"
+            class="animate-[entrada_.3s_ease-out_both] sm:col-span-2"
+            :actions="[{ label: n.semProvedor.botao, icon: 'i-lucide-plug', color: 'warning', variant: 'outline', onClick: () => { aberto = false; emit('conectar') } }]"
+          />
         </div>
 
         <!-- M14: o limite do provedor escolhido e a recusa na hora -->
@@ -131,7 +148,7 @@ async function salvar(enviarAgora: boolean) {
           >
             <UIcon name="i-lucide-upload" class="size-5 text-muted" />
             <span class="text-sm text-toned">{{ n.soltar }}</span>
-            <span class="text-xs text-muted">{{ provedor ? n.limite(provedor.nome, provedor.limiteMb, formatos) : n.limiteSemProvedor }}</span>
+            <span class="text-xs text-muted">{{ provedor ? n.limite(provedor.nome, provedor.limiteMb, formatos) : semProvedor ? n.limiteGeral : n.limiteSemProvedor }}</span>
           </div>
           <div v-else class="flex items-center gap-3 rounded-lg border px-3 py-2.5" :class="erroDoArquivo ? 'border-error bg-error/5' : 'border-default'">
             <UIcon :name="erroDoArquivo ? 'i-lucide-file-x' : 'i-lucide-file-text'" class="size-5 shrink-0" :class="erroDoArquivo ? 'text-error' : 'text-muted'" />
@@ -165,8 +182,9 @@ async function salvar(enviarAgora: boolean) {
     <template #footer>
       <div class="flex w-full flex-wrap justify-end gap-2">
         <UButton :label="t.geral.cancelar" color="neutral" variant="ghost" @click="aberto = false" />
-        <UButton :label="n.salvarRascunho" icon="i-lucide-save" color="neutral" variant="outline" :loading="salvando === 'rascunho'" @click="salvar(false)" />
-        <UButton :label="n.enviar" icon="i-lucide-send" :loading="salvando === 'enviar'" @click="salvar(true)" />
+        <!-- M16: sem provedor, Salvar rascunho é a ação principal; enviar volta depois da conexão -->
+        <UButton :label="n.salvarRascunho" icon="i-lucide-save" :color="semProvedor ? 'primary' : 'neutral'" :variant="semProvedor ? 'solid' : 'outline'" :loading="salvando === 'rascunho'" @click="salvar(false)" />
+        <UButton v-if="!semProvedor" :label="n.enviar" icon="i-lucide-send" :loading="salvando === 'enviar'" @click="salvar(true)" />
       </div>
     </template>
   </UModal>

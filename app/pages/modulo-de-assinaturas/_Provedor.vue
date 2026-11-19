@@ -14,7 +14,7 @@
  */
 import type { Credencial, ProvedorId } from './mocks'
 import { provedorPorId } from './mocks'
-import { credenciaisVisiveis, credencialPronta, criarCredencial, estado } from './estado'
+import { credenciaisVisiveis, credencialPronta, criarCredencial, estado, excluirCredencial } from './estado'
 import { dataHora } from './formato'
 import type { Textos } from './textos'
 import Monograma from './_Monograma.vue'
@@ -69,7 +69,7 @@ const menuDa = (c: Credencial) => [[
   { label: pt.value.testar, icon: 'i-lucide-plug-zap', onSelect: () => testar(c) },
   ...(c.provedor === 'd4sign' && c.cofre ? [{ label: pt.value.trocarCofre, icon: 'i-lucide-vault', onSelect: () => { c.cofre = null } }] : []),
 ], [
-  { label: pt.value.excluir, icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => { estado.credenciais = estado.credenciais.filter(x => x.id !== c.id) } },
+  { label: pt.value.excluir, icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => excluirCredencial(c.id) },
 ]]
 
 /* ---------- webhook ---------- */

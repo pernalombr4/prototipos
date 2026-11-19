@@ -17,11 +17,12 @@
  * - M20, C43 e C54: a trilha diz quem fez, pela pessoa, pelo provedor ou pelo ENSPACE, com o motivo; o eco do provedor
  *   vira "A <provedor> confirmou às..." na mesma linha, e não um 2º evento;
  * - M13: sem retorno há mais de 2 dias, a faixa avisa e oferece Atualizar status (ou o portal, se o provedor não consulta);
- * - M27: as datas levam a hora, também o "Expira em".
+ * - M27: as datas levam a hora, também o "Expira em";
+ * - M16: o rascunho criado antes de conectar um provedor diz isso na faixa e leva a conectar; o envio espera a conexão.
  */
 import type { Envelope, Evento } from './mocks'
 import { categoriasDoFluxo, fluxoPorId, pessoaPorId, provedorPorId } from './mocks'
-import { aberto, assinados, diasSemRetorno, envelopePorId, enviar, estado, quemEstaNaVez, tem } from './estado'
+import { aberto, assinados, credenciaisVisiveis, diasSemRetorno, envelopePorId, enviar, quemEstaNaVez, tem, todasAsCredenciais } from './estado'
 import { dataHora, hora, minutosDesde } from './formato'
 import { corDoParticipante, corDoStatus } from './cores'
 import type { Textos } from './textos'
@@ -31,11 +32,13 @@ import ReenviarEmail from './_ReenviarEmail.vue'
 import LinksDeAssinatura from './_LinksDeAssinatura.vue'
 
 const props = defineProps<{ t: Textos, id: number, abrirMenu?: boolean }>()
-const emit = defineEmits<{ voltar: [], irExecucao: [], irTarefa: [] }>()
+const emit = defineEmits<{ voltar: [], irExecucao: [], irTarefa: [], conectar: [] }>()
 const toast = useToast()
 
 const e = computed(() => envelopePorId(props.id)!)
-const p = computed(() => provedorPorId.get(e.value.provider)!)
+// O rascunho criado antes de conectar não tem provedor; ele tem os próprios textos, e `p` só é lido quando há provedor.
+const semProvedor = computed(() => !e.value.provider)
+const p = computed(() => provedorPorId.get(e.value.provider ?? 'clicksign')!)
 const v = computed(() => props.t.envelope)
 const loc = computed(() => props.t.locale)
 const dh = (iso: string) => dataHora(iso, loc.value)
@@ -86,8 +89,17 @@ const acoes = computed(() => {
   const env = e.value
   const visiveis: Acao[] = []
   const mais: Acao[] = []
-  if (env.status === 'draft') {
-    visiveis.push({ label: a.editar, icon: 'i-lucide-pencil', onClick: () => toast.add({ title: props.t.geral.foraDoEscopo, icon: 'i-lucide-construction', color: 'neutral' }), color: 'neutral', variant: 'outline' })
+  const editar = () => toast.add({ title: props.t.geral.foraDoEscopo, icon: 'i-lucide-construction', color: 'neutral' })
+  if (env.status === 'draft' && semProvedor.value) {
+    // M16: sem provedor no rascunho. Sem nenhum conectado, a ação é conectar; com 1 conectado, é escolher a credencial no rascunho.
+    if (credenciaisVisiveis.value.length) visiveis.push({ label: a.editar, icon: 'i-lucide-pencil', onClick: editar })
+    else {
+      visiveis.push({ label: a.editar, icon: 'i-lucide-pencil', onClick: editar, color: 'neutral', variant: 'outline' })
+      visiveis.push({ label: a.conectar, icon: 'i-lucide-plug', onClick: () => emit('conectar') })
+    }
+  }
+  else if (env.status === 'draft') {
+    visiveis.push({ label: a.editar, icon: 'i-lucide-pencil', onClick: editar, color: 'neutral', variant: 'outline' })
     visiveis.push({ label: a.enviar, icon: 'i-lucide-send', onClick: enviarAgora, loading: enviando.value })
   }
   else if (env.status === 'error') {
@@ -130,7 +142,12 @@ const faixa = computed(() => {
   const efeitoNoFluxo = o.tipo === 'workflow' ? f.fluxoEmErro(fluxoPorId.get(o.fluxo)!.etapa, fluxoPorId.get(o.fluxo)!.nome) : o.tipo === 'c-flow' ? f.tarefaEmErro(o.tarefa) : ''
   const atalho = o.tipo === 'workflow' ? { label: f.verExecucao, onClick: () => emit('irExecucao') } : o.tipo === 'c-flow' ? { label: f.verTarefa, onClick: () => emit('irTarefa') } : null
   switch (env.status) {
-    case 'draft': return { cor: 'neutral' as const, icone: 'i-lucide-file-pen', titulo: f.draft(p.value.nome), linhas: [] as string[], atalho: null }
+    case 'draft':
+      if (semProvedor.value) {
+        const ha = credenciaisVisiveis.value.length > 0
+        return { cor: 'warning' as const, icone: 'i-lucide-plug-zap', titulo: f.draftSemProvedor, linhas: ha ? [f.draftEscolher] : [], atalho: null }
+      }
+      return { cor: 'neutral' as const, icone: 'i-lucide-file-pen', titulo: f.draft(p.value.nome), linhas: [] as string[], atalho: null }
     case 'completed': return { cor: 'success' as const, icone: 'i-lucide-circle-check', titulo: f.completed(dh(env.completed_at!)), linhas: [], atalho: null }
     case 'canceled': {
       const ev = ultimo('canceled')
@@ -213,7 +230,7 @@ const eventos = computed(() => [...e.value.eventos].reverse().filter(ev =>
 
 /* ---------- detalhes ---------- */
 const datas = computed(() => (['created_at', 'sent_at', 'completed_at', 'canceled_at', 'expires_at'] as const).filter(k => e.value[k]).map(k => ({ k, valor: dh(e.value[k]!) })))
-const nomeDaCredencial = computed(() => estado.credenciais.find(c => c.id === e.value.credential)?.nome ?? String(e.value.credential))
+const nomeDaCredencial = computed(() => (e.value.credential ? todasAsCredenciais.value.find(c => c.id === e.value.credential)?.nome ?? String(e.value.credential) : v.value.nenhumaCredencial))
 </script>
 
 <template>
@@ -232,7 +249,8 @@ const nomeDaCredencial = computed(() => estado.credenciais.find(c => c.id === e.
             <UBadge :label="t.status[e.status]" :color="corDoStatus[e.status]" variant="soft" />
           </div>
           <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
-            <span class="flex items-center gap-1.5"><Monograma :provedor="e.provider" tamanho="sm" />{{ p.nome }}</span>
+            <span v-if="e.provider" class="flex items-center gap-1.5"><Monograma :provedor="e.provider" tamanho="sm" />{{ p.nome }}</span>
+            <span v-else class="flex items-center gap-1.5"><UIcon name="i-lucide-plug-zap" class="size-4" />{{ v.semProvedor }}</span>
             <component
               :is="origem.ir ? 'button' : 'span'"
               :type="origem.ir ? 'button' : undefined"
@@ -367,8 +385,11 @@ const nomeDaCredencial = computed(() => estado.credenciais.find(c => c.id === e.
       </div>
     </div>
 
-    <CancelarEnvelope v-model:open="cancelarAberto" :t="t" :envelope="e" />
-    <ReenviarEmail v-model:open="reenviarAberto" :t="t" :envelope="e" />
-    <LinksDeAssinatura v-model:open="linksAberto" :t="t" :envelope="e" />
+    <!-- Os modais só existem com provedor: o rascunho sem provedor não cancela, não reenvia e não gera link. -->
+    <template v-if="e.provider">
+      <CancelarEnvelope v-model:open="cancelarAberto" :t="t" :envelope="e" />
+      <ReenviarEmail v-model:open="reenviarAberto" :t="t" :envelope="e" />
+      <LinksDeAssinatura v-model:open="linksAberto" :t="t" :envelope="e" />
+    </template>
   </div>
 </template>

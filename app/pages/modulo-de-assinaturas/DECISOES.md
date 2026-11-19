@@ -69,3 +69,67 @@
   - os cards de provedor em Apps são botões, com foco visível;
   - sem correção: o tema escuro e os idiomas EN e ES não foram conferidos tela a tela nesta rodada; os textos existem nos 3 idiomas.
 - **Ver:** `https://pernalombr4.github.io/prototipos/modulo-de-assinaturas` · `evidencias/prototipo-*.png` (25 prints, 1 por item, sem ponteiro, sem a barra do andaime).
+
+## Rodada 2 · 2026-11-19
+
+- **Pedido (literal):** "a tela de apps ta bem estranha. um escrito gerenciar, outro escrito instalar... faça direito isso do jeito certo. e ta parecendo um rascunho em vez de uma tela completa. [...] os estados iniciais da tela do modulo nao estao legais. o que nao tem integrador instalado nao tem nem atalho. [...] todos os cards na tela apps precisam ter o mesmo formato. [...] nao tem um estado quando nao tem NEM envelope e nem provedor conectado. [...] nao ter provedor conectado nao é impeditivo pro cara usar o módulo. [...] ele pode criar o primeiro envelope dele sem provedor, so nao vai conseguir enviar."
+- **Fronteira:** muda Integrações > Apps inteira, o começo de Módulos > Assinaturas, o novo envelope e o detalhe do rascunho sem provedor; o resto fica como na rodada 1.
+
+### Apps: 1 formato de card
+
+- **1 card para todo app** (`_CardDeApp.vue`), na loja e no começo do módulo: logo, nome, descrição, estado em texto e 1 botão. O card inteiro abre o app.
+  - Antes: 3 formatos de botão (cheio, link rosa com seta, fantasma) e 4 rótulos (Gerenciar Integração, Instalar Integração, Utilizar Plugin, Conectar).
+  - Agora: o botão é "Ver detalhes" em todo card da loja. O que fazer (conectar, instalar, gerenciar) fica na página do app.
+- **O estado usa o mesmo vocabulário em todo app:** Conectado, Falta 1 etapa, Não conectado. O detalhe vem junto: "· 2 credenciais".
+- **A tela ganhou o que faltava para parecer completa:**
+  - a linha do que é a tela;
+  - o filtro Todos, Conectados e Não conectados, com a contagem;
+  - a busca;
+  - cada seção com ícone, contagem e 1 linha do que faz.
+- **Nada se repete:**
+  - "Novo" aparece 1 vez, na seção Assinatura eletrônica, e não em cada card;
+  - o card não repete a categoria, que a seção já diz;
+  - o aviso das integrações antigas fica 1 vez, no cabeçalho do grupo recolhido;
+  - o card antigo diz o que é só dele: os fluxos de categoria que ainda o usam ("Em uso · 2 fluxos" ou "Sem uso").
+
+### O começo do módulo (M16)
+
+- **4 situações**, todas no andaime ("Workspace" e "Ir para"):
+
+  | Situação | O que a tela mostra |
+  |---|---|
+  | Nem provedor nem envelope | o começo completo, com "Criar o primeiro envelope" como ação principal e "Conectar um provedor" ao lado |
+  | Provedor conectado, sem envelope | o mesmo começo, com o provedor conectado no topo e o passo 1 concluído |
+  | Rascunhos, sem provedor | a lista, com o aviso "Nenhum provedor conectado" e o atalho para conectar |
+  | Dia normal | a lista, como na rodada 1 |
+
+- **O começo completo** (`_ComecoDoModulo.vue`) tem 4 blocos:
+  - o que o módulo faz, com uma prévia de como o envelope fica (participantes por ordem, Assinou, Na vez, Na fila);
+  - os 3 passos (conectar, criar, acompanhar), com o estado de cada um. Sem provedor, o passo 1 diz "Pode ser depois";
+  - sem provedor: os 5 provedores, no mesmo card da loja, cada um com o limite de arquivo e o atalho "Conectar" para a página dele. A rodada 1 tinha só os nomes, sem atalho;
+  - as outras formas de criar envelope (nó do Spaceflow e tarefa Integração), com o atalho de cada uma.
+- **Sem provedor, o envelope continua possível:** ele é salvo como rascunho e é enviado depois.
+  - **Novo envelope:** o campo da credencial avisa, com o atalho para conectar. O produto já avisa hoje, com "Nenhuma credencial configurada para <provedor>". "Salvar rascunho" vira a ação principal, e "Enviar para assinatura" só aparece com um provedor conectado.
+  - **Lista:** a coluna Provedor diz "Sem provedor". No menu ⋮, Enviar fica desligado, com o motivo.
+  - **Detalhe do rascunho:** a faixa diz que o envio espera a conexão, e a ação principal é "Conectar um provedor". Com um provedor já conectado, a faixa manda escolher a credencial no rascunho.
+- **Descartado:**
+  - **Rótulo do botão conforme o estado (Conectar ou Gerenciar).** É o que a redatora apontou como estranho. O estado em texto já diz se o app está conectado.
+  - **"Enviar para assinatura" desligado no modal.** O botão desligado parecia ligado, o mesmo problema do "Concluir Tarefa" da rodada 1.
+
+### Fechamento
+
+- **Maquete:**
+  - o dia normal fica intacto. Os começos usam um workspace à parte, para os atalhos dos outros itens continuarem abrindo os envelopes;
+  - criar rascunho ou credencial num começo muda a situação sozinho.
+- **CSS próprio:** nenhum.
+- **Conferido:**
+  - Apps e o começo no tema escuro;
+  - Apps e o começo em espanhol, sem texto estourado.
+- **Ver:** `evidencias/` tem 30 prints, sem ponteiro e sem a barra do andaime. Os desta rodada:
+  - `prototipo-ux-apps-assinatura.png` e `prototipo-ux-apps-legado.png`;
+  - `prototipo-m16-nem-provedor-nem-envelope.png` e `prototipo-m16-atalhos-do-comeco.png`;
+  - `prototipo-m16-novo-envelope-sem-provedor.png`;
+  - `prototipo-m16-rascunhos-sem-provedor.png` e `prototipo-m16-rascunho-sem-provedor-detalhe.png`;
+  - `prototipo-m16-sem-envelope.png`.
+
+  O `prototipo-m16-sem-provedor.png` saiu: o estado mudou.

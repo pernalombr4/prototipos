@@ -4,7 +4,9 @@
  *
  * Cópia da prévia: a barra (busca, Colunas, Novo envelope), os filtros Status, Provedor e Origem e as colunas da tabela.
  * PROPOSTA:
- * - M16: sem provedor, a tela leva a conectar 1; com provedor e sem envelope, convida a criar o 1º;
+ * - M16: sem envelope, o começo do módulo (`_ComecoDoModulo.vue`), com ou sem provedor; com rascunhos e sem provedor, a
+ *   lista aparece com o aviso e o atalho para conectar. Não ter provedor não impede de criar o envelope: ele fica como
+ *   rascunho;
  * - "Precisam de atenção": os envelopes com erro, os sem retorno do provedor e os que vencem, num clique;
  * - M13: o envelope aberto sem notícia do provedor há mais de 2 dias leva o selo "Sem retorno há N dias";
  * - M18: a busca acha também pelo nome e pelo e-mail do signatário;
@@ -19,13 +21,14 @@ import { aberto, assinados, credenciaisVisiveis, diasSemRetorno, envelopesVisive
 import { dataHoraCurta, diasAte } from './formato'
 import type { Textos } from './textos'
 import Monograma from './_Monograma.vue'
+import ComecoDoModulo from './_ComecoDoModulo.vue'
 import CancelarEnvelope from './_CancelarEnvelope.vue'
 import ReenviarEmail from './_ReenviarEmail.vue'
 import LinksDeAssinatura from './_LinksDeAssinatura.vue'
 import { corDoStatus } from './cores'
 
 const props = defineProps<{ t: Textos }>()
-const emit = defineEmits<{ abrir: [number], novo: [], conectar: [] }>()
+const emit = defineEmits<{ abrir: [number], novo: [], conectar: [], provedor: [ProvedorId], irFluxo: [], irTarefa: [] }>()
 const toast = useToast()
 const idioma = useIdioma()
 const l = computed(() => props.t.lista)
@@ -52,7 +55,7 @@ const filtrados = computed(() => {
   return envelopesVisiveis.value.filter(e =>
     (!q || [e.title, e.reference, ...e.participantes.flatMap(p => [p.nome, p.email])].some(x => normalizar(x).includes(q)))
     && (!status.value.length || status.value.includes(e.status))
-    && (!provedor.value.length || provedor.value.includes(e.provider))
+    && (!provedor.value.length || (!!e.provider && provedor.value.includes(e.provider)))
     && (!origem.value.length || origem.value.includes(e.origem.tipo))
     && (!rapido.value || regraRapida[rapido.value](e)))
 })
@@ -101,13 +104,13 @@ const linksAberto = modalAberto('links')
 
 function menuDo(e: Envelope) {
   const m = l.value.menu
-  const p = provedorPorId.get(e.provider)!
+  const p = e.provider ? provedorPorId.get(e.provider)! : null
   const avisar = (titulo: string) => toast.add({ title: titulo, description: e.title, icon: 'i-lucide-check', color: 'success' })
   const principais = [{ label: m.ver, icon: 'i-lucide-eye', onSelect: () => emit('abrir', e.id) }]
   const acoes: Record<string, unknown>[] = []
-  if (e.status === 'draft') acoes.push({ label: m.enviar, icon: 'i-lucide-send', onSelect: () => emit('abrir', e.id) })
+  if (e.status === 'draft') acoes.push({ label: m.enviar, icon: 'i-lucide-send', disabled: !e.provider, description: e.provider ? undefined : l.value.enviarSemProvedor, onSelect: () => emit('abrir', e.id) })
   if (aberto(e)) {
-    if (tem(e, 'consultaStatus')) acoes.push({ label: m.atualizar, icon: 'i-lucide-refresh-cw', onSelect: () => avisar(props.t.envelope.atualizadoToast(p.nome)) })
+    if (tem(e, 'consultaStatus')) acoes.push({ label: m.atualizar, icon: 'i-lucide-refresh-cw', onSelect: () => avisar(props.t.envelope.atualizadoToast(p!.nome)) })
     if (tem(e, 'reenvio')) acoes.push({ label: m.reenviar, icon: 'i-lucide-mail', onSelect: () => abrirModal(e, 'reenviar') })
     if (tem(e, 'links')) acoes.push({ label: m.links, icon: 'i-lucide-link', onSelect: () => abrirModal(e, 'links') })
   }
@@ -128,7 +131,7 @@ function menuDo(e: Envelope) {
 
 /* ---------- estados iniciais (M16) ---------- */
 const semProvedor = computed(() => credenciaisVisiveis.value.length === 0)
-const semEnvelope = computed(() => !semProvedor.value && envelopesVisiveis.value.length === 0)
+const semEnvelope = computed(() => envelopesVisiveis.value.length === 0)
 </script>
 
 <template>
@@ -138,42 +141,31 @@ const semEnvelope = computed(() => !semProvedor.value && envelopesVisiveis.value
         <h1 class="text-xl font-semibold text-highlighted">{{ t.casca.itens.assinaturas }}</h1>
       </div>
 
-      <!-- M16: sem provedor conectado -->
-      <UEmpty
-        v-if="semProvedor"
-        icon="i-lucide-signature"
-        :title="l.semProvedor.titulo"
-        :description="l.semProvedor.texto"
-        variant="outline"
-        size="lg"
-        class="animate-[entrada_.3s_ease-out_both] py-14"
-        :actions="[{ label: l.semProvedor.botao, icon: 'i-lucide-plug', onClick: () => emit('conectar') }]"
-      >
-        <template #body>
-          <div class="flex flex-col items-center gap-2">
-            <span class="text-xs font-medium text-muted">{{ l.semProvedor.aceitos }}</span>
-            <span class="flex flex-wrap justify-center gap-2">
-              <span v-for="p in provedores" :key="p.id" class="flex items-center gap-1.5 rounded-md border border-default px-2 py-1 text-xs text-toned">
-                <Monograma :provedor="p.id" tamanho="sm" />{{ p.nome }}
-              </span>
-            </span>
-          </div>
-        </template>
-      </UEmpty>
-
-      <!-- M16: com provedor e sem envelope -->
-      <UEmpty
-        v-else-if="semEnvelope"
-        icon="i-lucide-file-plus-2"
-        :title="l.semEnvelope.titulo"
-        :description="l.semEnvelope.texto"
-        variant="outline"
-        size="lg"
-        class="animate-[entrada_.3s_ease-out_both] py-14"
-        :actions="[{ label: l.semEnvelope.botao, icon: 'i-lucide-plus', onClick: () => emit('novo') }]"
+      <!-- M16: o começo do módulo, com ou sem provedor -->
+      <ComecoDoModulo
+        v-if="semEnvelope"
+        :t="t"
+        :variante="semProvedor ? 'vazio' : 'semEnvelope'"
+        @novo="emit('novo')"
+        @conectar="emit('conectar')"
+        @provedor="(id) => emit('provedor', id)"
+        @ir-fluxo="emit('irFluxo')"
+        @ir-tarefa="emit('irTarefa')"
       />
 
       <template v-else>
+        <!-- M16: rascunhos sem provedor. O envelope existe; só o envio espera a conexão -->
+        <UAlert
+          v-if="semProvedor"
+          color="warning"
+          variant="subtle"
+          icon="i-lucide-plug-zap"
+          :title="l.soRascunhos.titulo"
+          :description="l.soRascunhos.texto"
+          class="animate-[entrada_.3s_ease-out_both]"
+          :actions="[{ label: l.soRascunhos.botao, icon: 'i-lucide-plug', color: 'warning', variant: 'outline', onClick: () => emit('conectar') }]"
+        />
+
         <!-- A barra (cópia), com a busca que acha o signatário -->
         <div class="flex flex-wrap items-center gap-2">
           <UInput v-model="busca" icon="i-lucide-search" :placeholder="l.buscar" class="w-80" :aria-label="l.buscar" />
@@ -222,7 +214,7 @@ const semEnvelope = computed(() => !semProvedor.value && envelopesVisiveis.value
         >
           <template #cell-acoes="{ row }">
             <span @click.stop>
-              <UDropdownMenu :items="menuDo(row as Envelope)" :content="{ align: 'start' }">
+              <UDropdownMenu :items="menuDo(row as Envelope)" :content="{ align: 'start' }" :ui="{ content: 'min-w-56 max-w-72', itemDescription: 'whitespace-normal' }">
                 <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" size="xs" :aria-label="t.geral.maisAcoes" />
               </UDropdownMenu>
             </span>
@@ -237,8 +229,11 @@ const semEnvelope = computed(() => !semProvedor.value && envelopesVisiveis.value
             </span>
           </template>
           <template #cell-provedor="{ row }">
-            <span class="flex items-center gap-2 whitespace-nowrap text-sm">
-              <Monograma :provedor="(row as Envelope).provider" tamanho="sm" />{{ provedorPorId.get((row as Envelope).provider)!.nome }}
+            <span v-if="(row as Envelope).provider" class="flex items-center gap-2 whitespace-nowrap text-sm">
+              <Monograma :provedor="(row as Envelope).provider!" tamanho="sm" />{{ provedorPorId.get((row as Envelope).provider!)!.nome }}
+            </span>
+            <span v-else class="flex items-center gap-2 whitespace-nowrap text-sm text-muted">
+              <span class="flex size-6 items-center justify-center rounded-md border border-dashed border-accented"><UIcon name="i-lucide-plug-zap" class="size-3.5" /></span>{{ l.semProvedorCelula }}
             </span>
           </template>
           <template #cell-status="{ row }">
