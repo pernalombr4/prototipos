@@ -8,6 +8,10 @@
       },
       {
         "clicar": "Integrações > Apps"
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "certisign": [
@@ -16,6 +20,10 @@
       },
       {
         "clicar": "Página da Certisign"
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "d4sign": [
@@ -24,6 +32,10 @@
       },
       {
         "clicar": "Página da D4Sign (falta o cofre)"
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "docusign": [
@@ -40,6 +52,10 @@
       },
       {
         "esperar": 500
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "lista": [
@@ -48,6 +64,10 @@
       },
       {
         "clicar": "Lista de envelopes"
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "novo": [
@@ -62,6 +82,10 @@
       },
       {
         "esperar": 600
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "novoLimite": [
@@ -73,6 +97,10 @@
       },
       {
         "esperar": 600
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "novoSemProvedor": [
@@ -84,6 +112,10 @@
       },
       {
         "esperar": 600
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "vazio": [
@@ -92,6 +124,10 @@
       },
       {
         "clicar": "M16 · Nem provedor nem envelope"
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "semEnvelope": [
@@ -100,6 +136,10 @@
       },
       {
         "clicar": "M16 · Provedor conectado, sem envelope"
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "soRascunhos": [
@@ -108,6 +148,10 @@
       },
       {
         "clicar": "M16 · Rascunhos, sem provedor"
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "cancFluxo": [
@@ -116,6 +160,10 @@
       },
       {
         "clicar": "M35 · Cancelado no módulo, vindo do Spaceflow"
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "categoria": [
@@ -124,6 +172,10 @@
       },
       {
         "clicar": "M35 · Cancelar envelope do fluxo da categoria"
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "ordem": [
@@ -132,6 +184,10 @@
       },
       {
         "clicar": "M31 e M23 · Participante na fila e Reenviar"
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "certAvulso": [
@@ -143,6 +199,10 @@
       },
       {
         "esperar": 600
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "certCategoria": [
@@ -151,6 +211,10 @@
       },
       {
         "clicar": "C52 · Certisign do fluxo da categoria"
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "d4Cancelado": [
@@ -159,6 +223,10 @@
       },
       {
         "clicar": "C43 e M21 · Cancelado com a confirmação do provedor"
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "erro": [
@@ -167,6 +235,10 @@
       },
       {
         "clicar": "Falha no envio (motivo nomeado)"
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "concluido": [
@@ -175,6 +247,10 @@
       },
       {
         "clicar": "Envelope concluído"
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "execCancelado": [
@@ -183,6 +259,10 @@
       },
       {
         "clicar": "M35 e M32 · Execução com o nó em erro"
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "execConfig": [
@@ -191,6 +271,10 @@
       },
       {
         "clicar": "C55 · Erro de configuração e editor do nó"
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "editor": [
@@ -205,6 +289,10 @@
       },
       {
         "esperar": 600
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "tarefaErro": [
@@ -213,6 +301,10 @@
       },
       {
         "clicar": "C10 e C48 · Tarefa Integração em erro"
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ],
     "desligar": [
@@ -224,6 +316,10 @@
       },
       {
         "esperar": 600
+      },
+      {
+        "js": "document.documentElement.style.setProperty('--altura-do-andaime', '0px')",
+        "esperar": 300
       }
     ]
   },
@@ -259,7 +355,10 @@
     },
     "RF006": {
       "cena": "apps",
-      "destacar": "Adobe Acrobat Sign"
+      "destacar": {
+        "texto": "Envie documentos para assinatura pelo módulo",
+        "ancestral": "section"
+      }
     },
     "RF007": {
       "cena": "apps",
@@ -461,15 +560,24 @@
     },
     "RF104": {
       "cena": "certisign",
-      "destacar": "Configuração"
+      "destacar": {
+        "texto": "Configuração",
+        "ancestral": "section"
+      }
     },
     "RF105": {
       "cena": "d4sign",
-      "destacar": "Escolha o cofre de cada credencial"
+      "destacar": {
+        "texto": "Escolha o cofre de cada credencial",
+        "ancestral": "[data-slot=item]"
+      }
     },
     "RF106": {
       "cena": "certisign",
-      "destacar": "Cadastre uma credencial"
+      "destacar": {
+        "texto": "Cadastre uma credencial",
+        "ancestral": "[data-slot=item]"
+      }
     },
     "RF107": {
       "cena": "certisign",
@@ -494,11 +602,17 @@
     },
     "RF112": {
       "cena": "certisign",
-      "destacar": "A URL leva o token do workspace. Trate como senha."
+      "destacar": {
+        "texto": "A URL leva o token",
+        "ancestral": "[data-slot=item]"
+      }
     },
     "RF113": {
       "cena": "certisign",
-      "destacar": "Aguardando o 1º retorno"
+      "destacar": {
+        "texto": "A URL leva o token",
+        "ancestral": "[data-slot=item]"
+      }
     },
     "RF114": {
       "cena": "docusign",
@@ -506,15 +620,24 @@
     },
     "RF115": {
       "cena": "certisign",
-      "destacar": "Cancela só no ENSPACE"
+      "destacar": {
+        "texto": "Cancela só no ENSPACE",
+        "ancestral": "section"
+      }
     },
     "RF116": {
       "cena": "certisign",
-      "destacar": "Cancelar envelope"
+      "destacar": {
+        "texto": "Cancela só no ENSPACE",
+        "ancestral": "li"
+      }
     },
     "RF117": {
       "cena": "certisign",
-      "destacar": "Detalhes técnicos",
+      "destacar": {
+        "texto": "Detalhes técnicos",
+        "ancestral": "[data-slot=root]"
+      },
       "passos": [
         {
           "clicar": "Detalhes técnicos"
@@ -546,7 +669,15 @@
     },
     "RF201": {
       "cena": "lista",
-      "destacar": "Precisam de atenção"
+      "destacar": {
+        "css": "[data-print=rf201]"
+      },
+      "passos": [
+        {
+          "js": "(()=>{const s=[...document.querySelectorAll('span')].find(e=>e.innerText.trim()==='Precisam de atenção');const b=s.parentElement;b.dataset.print='rf201';b.style.width='fit-content'})()",
+          "esperar": 300
+        }
+      ]
     },
     "RF202": {
       "cena": "lista",
@@ -563,7 +694,8 @@
     "RF203": {
       "cena": "lista",
       "destacar": {
-        "regex": "^sem retorno há \\d+ dias$"
+        "regex": "^sem retorno há \\d+ dias$",
+        "ancestral": "td"
       }
     },
     "RF204": {
@@ -628,8 +760,17 @@
     "RF209": {
       "cena": "lista",
       "destacar": {
-        "regex": "^\\d{2}/\\d{2},? \\d{2}:\\d{2}$"
-      }
+        "regex": "^\\d{2}/\\d{2},? \\d{2}:\\d{2}$",
+        "ancestral": "td"
+      },
+      "passos": [
+        {
+          "largura": 1600
+        },
+        {
+          "esperar": 500
+        }
+      ]
     },
     "RF210": {
       "cena": "lista",
@@ -639,16 +780,22 @@
     },
     "RF211": {
       "cena": "lista",
-      "destacar": "Ver detalhes",
+      "destacar": {
+        "css": "[role=menu]"
+      },
       "passos": [
         {
           "clicar": {
             "css": "tbody tr button",
-            "n": 0
+            "n": 3
           }
         },
         {
           "esperar": 500
+        },
+        {
+          "js": "document.querySelector('[role=menu]').style.translate='0 22px'",
+          "esperar": 300
         }
       ]
     },
@@ -672,11 +819,17 @@
     },
     "RF214": {
       "cena": "soRascunhos",
-      "destacar": "Nenhum provedor conectado"
+      "destacar": {
+        "texto": "Os rascunhos ficam salvos.",
+        "ancestral": "[data-slot=root]"
+      }
     },
     "RF215": {
       "cena": "soRascunhos",
-      "destacar": "Conectar um provedor"
+      "destacar": {
+        "texto": "Os rascunhos ficam salvos.",
+        "ancestral": "[data-slot=root]"
+      }
     },
     "RF301": {
       "cena": "novo",
@@ -690,7 +843,10 @@
       "cena": "novoSemProvedor",
       "destacar": [
         "Nenhuma credencial disponível",
-        "Conectar um provedor"
+        {
+          "texto": "Salve o envelope como rascunho",
+          "ancestral": "[data-slot=root]"
+        }
       ]
     },
     "RF304": {
@@ -755,7 +911,10 @@
     },
     "RF401": {
       "cena": "ordem",
-      "destacar": "Atualizado "
+      "destacar": {
+        "css": "h1",
+        "ancestral": "div.min-w-0"
+      }
     },
     "RF402": {
       "cena": "cancFluxo",
@@ -763,10 +922,10 @@
     },
     "RF403": {
       "cena": "ordem",
-      "destacar": [
-        "Atualizar status",
-        "Mais ações"
-      ]
+      "destacar": {
+        "texto": "Mais ações",
+        "ancestral": "div.flex-wrap"
+      }
     },
     "RF404": {
       "cena": "concluido",
@@ -786,7 +945,10 @@
     },
     "RF406": {
       "cena": "ordem",
-      "destacar": "Atualizar de novo em",
+      "destacar": {
+        "texto": "Mais ações",
+        "ancestral": "div.flex-wrap"
+      },
       "passos": [
         {
           "clicar": "Atualizar status"
@@ -798,7 +960,9 @@
     },
     "RF407": {
       "cena": "ordem",
-      "destacar": "Nada mudou.",
+      "destacar": {
+        "css": "ol[data-slot=viewport] li"
+      },
       "passos": [
         {
           "clicar": "Atualizar status"
@@ -813,28 +977,38 @@
     },
     "RF409": {
       "cena": "cancFluxo",
-      "destacar": "Cancelado por Ana Ribeiro"
+      "destacar": {
+        "texto": "Cancelado por Ana Ribeiro",
+        "ancestral": "[data-slot=root]"
+      }
     },
     "RF410": {
       "cena": "cancFluxo",
-      "destacar": "Ver execução"
+      "destacar": {
+        "texto": "Cancelado por Ana Ribeiro",
+        "ancestral": "[data-slot=root]"
+      }
     },
     "RF411": {
       "cena": "ordem",
-      "destacar": [
-        "Ordem 1",
-        "Ordem 2"
-      ]
+      "destacar": {
+        "texto": "Recebe o convite quando a ordem",
+        "ancestral": "section"
+      }
     },
     "RF412": {
       "cena": "ordem",
       "destacar": {
-        "regex": "^visualizou em"
+        "texto": "Visualizou em",
+        "ancestral": "li"
       }
     },
     "RF413": {
       "cena": "ordem",
-      "destacar": "Recebe o convite quando a ordem"
+      "destacar": {
+        "texto": "Recebe o convite quando a ordem",
+        "ancestral": "li"
+      }
     },
     "RF414": {
       "cena": "d4Cancelado",
@@ -857,36 +1031,43 @@
     "RF417": {
       "cena": "d4Cancelado",
       "destacar": {
-        "regex": "^por "
+        "texto": "confirmou às",
+        "ancestral": "li"
       }
     },
     "RF418": {
       "cena": "d4Cancelado",
-      "destacar": "Motivo: Valor do distrato errado"
+      "destacar": {
+        "texto": "confirmou às",
+        "ancestral": "li"
+      }
     },
     "RF419": {
       "cena": "d4Cancelado",
-      "destacar": "confirmou às"
+      "destacar": {
+        "texto": "confirmou às",
+        "ancestral": "li"
+      }
     },
     "RF420": {
       "cena": "erro",
-      "destacar": "Etapa:"
+      "destacar": {
+        "texto": "Etapa:",
+        "ancestral": "li"
+      }
     },
     "RF421": {
       "cena": "ordem",
-      "destacar": [
-        "Todos",
-        "Erros"
-      ],
-      "passos": [
-        {
-          "rolar": "Trilha de auditoria"
-        }
-      ]
+      "destacar": {
+        "texto": "Trilha de auditoria",
+        "ancestral": "header"
+      }
     },
     "RF501": {
       "cena": "categoria",
-      "destacar": "A ação não pode ser desfeita.",
+      "destacar": {
+        "css": "[role=dialog]"
+      },
       "passos": [
         {
           "clicar": "Mais ações"
@@ -941,8 +1122,16 @@
     },
     "RF506": {
       "cena": "d4Cancelado",
-      "destacar": "Não assinou",
-      "junto": "RF414"
+      "destacar": [
+        {
+          "texto": "Não assinou",
+          "ancestral": "li"
+        },
+        {
+          "texto": "confirmou às",
+          "ancestral": "li"
+        }
+      ]
     },
     "RF507": {
       "cena": "execCancelado",
@@ -950,19 +1139,23 @@
     },
     "RF508": {
       "cena": "ordem",
-      "destacar": "envia de novo o convite a quem está na vez",
+      "destacar": {
+        "css": "[role=dialog]"
+      },
       "passos": [
         {
           "clicar": "Reenviar e-mail"
         },
         {
-          "esperar": 600
+          "esperar": 1000
         }
       ]
     },
     "RF509": {
       "cena": "ordem",
-      "destacar": "na fila recebe",
+      "destacar": {
+        "css": "[role=dialog] p.mt-3"
+      },
       "junto": "RF508"
     },
     "RF510": {
@@ -1017,7 +1210,10 @@
     },
     "RF601": {
       "cena": "vazio",
-      "destacar": "Envie documentos para assinatura sem sair do ENSPACE"
+      "destacar": [
+        "Envie documentos para assinatura sem sair do ENSPACE",
+        "Crie envelopes, defina quem assina e em que ordem, e acompanhe cada participante até o documento assinado voltar ao ENSPACE."
+      ]
     },
     "RF602": {
       "cena": "vazio",
@@ -1032,22 +1228,27 @@
     },
     "RF604": {
       "cena": "vazio",
-      "destacar": "Contrato de locação"
+      "destacar": {
+        "css": "div.max-w-sm"
+      }
     },
     "RF605": {
       "cena": "vazio",
-      "destacar": "Pode ser depois"
+      "destacar": {
+        "css": "section[aria-labelledby=titulo-passos]"
+      }
     },
     "RF606": {
       "cena": "vazio",
-      "destacar": "Provedores disponíveis"
+      "destacar": {
+        "css": "section[aria-labelledby=titulo-provedores]"
+      }
     },
     "RF607": {
       "cena": "vazio",
-      "destacar": [
-        "Pelo Spaceflow",
-        "Pelo fluxo da categoria"
-      ]
+      "destacar": {
+        "css": "section[aria-labelledby=titulo-outras]"
+      }
     },
     "RF608": {
       "cena": "semEnvelope",
@@ -1090,11 +1291,23 @@
     },
     "RF702": {
       "cena": "editor",
-      "destacar": "De um nó anterior"
+      "destacar": {
+        "texto": "De um nó anterior",
+        "ancestral": "[role=radiogroup]"
+      }
     },
     "RF703": {
       "cena": "editor",
-      "destacar": "De uma lista"
+      "destacar": {
+        "texto": "De uma lista",
+        "ancestral": "[role=radiogroup]"
+      },
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('[role=radiogroup]')].find(e=>e.innerText.includes('De uma lista')).scrollIntoView({block:'center'})",
+          "esperar": 500
+        }
+      ]
     },
     "RF704": {
       "sem": "o editor abre com os signatários da lista; os fixos aparecem ao escolher Fixos"
@@ -1105,7 +1318,10 @@
     },
     "RF706": {
       "cena": "editor",
-      "destacar": "Caminho da lista"
+      "destacar": {
+        "texto": "A entrada do disparo fica em workflow_input.input",
+        "exato": true
+      }
     },
     "RF707": {
       "cena": "editor",
@@ -1135,7 +1351,10 @@
     },
     "RF712": {
       "cena": "execCancelado",
-      "destacar": "Resultado"
+      "destacar": {
+        "texto": "Ver cancelamento",
+        "ancestral": "section"
+      }
     },
     "RF713": {
       "cena": "execCancelado",
@@ -1147,26 +1366,38 @@
     },
     "RF715": {
       "cena": "execConfig",
-      "destacar": [
-        "Nenhum signatário resolvido.",
-        "Editar o nó"
-      ]
+      "destacar": {
+        "texto": "Nenhum signatário resolvido",
+        "ancestral": "section"
+      }
     },
     "RF716": {
       "cena": "execCancelado",
-      "destacar": "Abrir envelope"
+      "destacar": {
+        "texto": "Abrir envelope",
+        "ancestral": "section"
+      }
     },
     "RF717": {
       "cena": "execCancelado",
-      "destacar": "Signatários"
+      "destacar": {
+        "texto": "Rafael Moura",
+        "ancestral": "section"
+      }
     },
     "RF718": {
       "cena": "execCancelado",
-      "destacar": "Configuração"
+      "destacar": {
+        "texto": "Modo de execução",
+        "ancestral": "section"
+      }
     },
     "RF719": {
       "cena": "execCancelado",
-      "destacar": "Dados técnicos"
+      "destacar": {
+        "texto": "Dados técnicos",
+        "ancestral": "[data-slot=root]"
+      }
     },
     "RF801": {
       "cena": "tarefaErro",
@@ -1184,7 +1415,10 @@
     },
     "RF804": {
       "cena": "tarefaErro",
-      "destacar": "Tarefa em erro"
+      "destacar": {
+        "texto": "Tarefa em erro",
+        "ancestral": "[data-slot=root]"
+      }
     },
     "RF805": {
       "sem": "a falha de envio se escolhe no seletor do andaime, que o print não abre"
@@ -1211,5 +1445,6 @@
         }
       ]
     }
-  }
+  },
+  "altura": 960
 }

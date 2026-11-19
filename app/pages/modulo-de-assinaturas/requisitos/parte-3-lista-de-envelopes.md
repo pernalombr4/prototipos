@@ -28,7 +28,7 @@ onde veio cada envelope e oferece no menu ⋮ só as ações que o status e o pr
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF201 | Acima da tabela, a lista deve ter "Precisam de atenção" com 3 atalhos: "Com erro", "Sem retorno há mais de 2 dias" (RN903) e "Vencem em até 3 dias" (RN201), cada um com o número de envelopes. | Com 1 envelope em Erro, o atalho "Com erro" mostra 1. | Importante | Obrigatório |
+| RF201 | Acima da tabela, a lista deve ter "Precisam de atenção" com os atalhos "Com erro", "Sem retorno há mais de 2 dias" (RN903) e "Vencem em até 3 dias" (RN201), cada um com o número de envelopes e só quando o número é 1 ou mais. | Com 1 envelope em Erro e 0 a vencer, aparece "Com erro" com 1, e "Vencem em até 3 dias" não aparece. Com os 3 em 0, o bloco não aparece. | Importante | Obrigatório |
 | RF202 | Clicar num atalho deve filtrar a tabela pelos envelopes dele, e o 2º clique tira o filtro. | "Com erro" deixa só os envelopes em Erro. | Importante | Obrigatório |
 | RF203 | O envelope sem retorno (RN903) deve levar, na coluna Status, o selo "Sem retorno há {n} dias". | O envelope sem retorno desde 15/11 mostra "Sem retorno há 4 dias" em 19/11. | Essencial | Obrigatório |
 
