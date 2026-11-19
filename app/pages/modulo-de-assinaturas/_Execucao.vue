@@ -19,7 +19,7 @@ import type { Desfecho } from './estado'
 import { assinados, envelopePorId, estado } from './estado'
 import { dataHora } from './formato'
 import type { Textos } from './textos'
-import Monograma from './_Monograma.vue'
+import Logo from './_Logo.vue'
 import EditorDoNo from './_EditorDoNo.vue'
 
 const props = defineProps<{ t: Textos, aba: 'editor' | 'execucoes' }>()
@@ -249,7 +249,7 @@ const editorAberto = ref(true)
                   class="group flex w-full items-center gap-3 rounded-md border border-default px-3 py-2.5 text-left transition-colors hover:border-accented hover:bg-elevated/50"
                   @click="emit('abrirEnvelope', env.id)"
                 >
-                  <Monograma :provedor="env.provider" tamanho="sm" />
+                  <Logo :app="env.provider" :nome="provedorPorId.get(env.provider)!.nome" tamanho="sm" class="w-20" />
                   <span class="min-w-0 flex-1">
                     <span class="block truncate text-sm font-medium text-highlighted">{{ env.title }}</span>
                     <span class="text-xs text-muted">{{ t.status[env.status] }} · {{ assinados(env) }}/{{ env.participantes.length }}</span>

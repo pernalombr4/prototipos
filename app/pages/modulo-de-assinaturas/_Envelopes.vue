@@ -20,7 +20,6 @@ import { categoriasDoFluxo, fluxoPorId, provedores, provedorPorId } from './mock
 import { aberto, assinados, credenciaisVisiveis, diasSemRetorno, envelopesVisiveis, tem } from './estado'
 import { dataHoraCurta, diasAte } from './formato'
 import type { Textos } from './textos'
-import Monograma from './_Monograma.vue'
 import ComecoDoModulo from './_ComecoDoModulo.vue'
 import CancelarEnvelope from './_CancelarEnvelope.vue'
 import ReenviarEmail from './_ReenviarEmail.vue'
@@ -229,11 +228,9 @@ const semEnvelope = computed(() => envelopesVisiveis.value.length === 0)
             </span>
           </template>
           <template #cell-provedor="{ row }">
-            <span v-if="(row as Envelope).provider" class="flex items-center gap-2 whitespace-nowrap text-sm">
-              <Monograma :provedor="(row as Envelope).provider!" tamanho="sm" />{{ provedorPorId.get((row as Envelope).provider!)!.nome }}
-            </span>
+            <span v-if="(row as Envelope).provider" class="whitespace-nowrap text-sm">{{ provedorPorId.get((row as Envelope).provider!)!.nome }}</span>
             <span v-else class="flex items-center gap-2 whitespace-nowrap text-sm text-muted">
-              <span class="flex size-6 items-center justify-center rounded-md border border-dashed border-accented"><UIcon name="i-lucide-plug-zap" class="size-3.5" /></span>{{ l.semProvedorCelula }}
+              <UIcon name="i-lucide-plug-zap" class="size-3.5" />{{ l.semProvedorCelula }}
             </span>
           </template>
           <template #cell-status="{ row }">

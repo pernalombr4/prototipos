@@ -26,7 +26,7 @@ import { aberto, assinados, credenciaisVisiveis, diasSemRetorno, envelopePorId, 
 import { dataHora, hora, minutosDesde } from './formato'
 import { corDoParticipante, corDoStatus } from './cores'
 import type { Textos } from './textos'
-import Monograma from './_Monograma.vue'
+import Logo from './_Logo.vue'
 import CancelarEnvelope from './_CancelarEnvelope.vue'
 import ReenviarEmail from './_ReenviarEmail.vue'
 import LinksDeAssinatura from './_LinksDeAssinatura.vue'
@@ -249,7 +249,7 @@ const nomeDaCredencial = computed(() => (e.value.credential ? todasAsCredenciais
             <UBadge :label="t.status[e.status]" :color="corDoStatus[e.status]" variant="soft" />
           </div>
           <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
-            <span v-if="e.provider" class="flex items-center gap-1.5"><Monograma :provedor="e.provider" tamanho="sm" />{{ p.nome }}</span>
+            <Logo v-if="e.provider" :app="e.provider" :nome="p.nome" tamanho="md" />
             <span v-else class="flex items-center gap-1.5"><UIcon name="i-lucide-plug-zap" class="size-4" />{{ v.semProvedor }}</span>
             <component
               :is="origem.ir ? 'button' : 'span'"

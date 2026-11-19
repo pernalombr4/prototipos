@@ -20,6 +20,7 @@ import { credenciaisVisiveis, credencialPronta, estado } from './estado'
 import type { Textos } from './textos'
 import type { TomDoEstado } from './_CardDeApp.vue'
 import CardDeApp from './_CardDeApp.vue'
+import type { AppComLogo } from './_Logo.vue'
 
 const props = defineProps<{ t: Textos }>()
 const emit = defineEmits<{ abrir: [ProvedorId] }>()
@@ -27,7 +28,7 @@ const toast = useToast()
 const a = computed(() => props.t.apps)
 
 type Secao = 'ia' | 'assinatura' | 'documentos' | 'emails' | 'mensagens'
-interface App { id: string, nome: string, secao: Secao, estado: { texto: string, tom: TomDoEstado, detalhe?: string }, conectado: boolean, provedor?: ProvedorId, icone?: string, legado?: boolean }
+interface App { id: string, nome: string, secao: Secao, estado: { texto: string, tom: TomDoEstado, detalhe?: string }, conectado: boolean, logo: AppComLogo, provedor?: ProvedorId, legado?: boolean }
 
 function estadoDoProvedor(id: ProvedorId) {
   const creds = credenciaisVisiveis.value.filter(c => c.provedor === id)
@@ -42,11 +43,11 @@ const apps = computed<App[]>(() => {
   const ligado = { texto: e.conectado!, tom: 'success' as const }
   const desligado = { texto: e.naoConectado!, tom: 'neutral' as const }
   return [
-    { id: 'openai', nome: 'OpenAI', secao: 'ia', icone: 'i-simple-icons-openai', estado: ligado, conectado: true },
-    ...provedores.map(p => ({ id: p.id, nome: p.nome, secao: 'assinatura' as const, provedor: p.id, estado: estadoDoProvedor(p.id), conectado: estadoDoProvedor(p.id).tom !== 'neutral' })),
-    { id: 'word', nome: 'Plugin do Word', secao: 'documentos', icone: 'i-lucide-file-text', estado: desligado, conectado: false },
-    { id: 'sendgrid', nome: 'SendGrid', secao: 'emails', icone: 'i-lucide-send', estado: ligado, conectado: true },
-    { id: 'twilio', nome: 'Twilio', secao: 'mensagens', icone: 'i-lucide-message-square', estado: desligado, conectado: false },
+    { id: 'openai', nome: 'OpenAI', secao: 'ia', logo: 'openai', estado: ligado, conectado: true },
+    ...provedores.map(p => ({ id: p.id, nome: p.nome, secao: 'assinatura' as const, logo: p.id, provedor: p.id, estado: estadoDoProvedor(p.id), conectado: estadoDoProvedor(p.id).tom !== 'neutral' })),
+    { id: 'word', nome: 'Plugin do Word', secao: 'documentos', logo: 'word', estado: desligado, conectado: false },
+    { id: 'sendgrid', nome: 'SendGrid', secao: 'emails', logo: 'sendgrid', estado: ligado, conectado: true },
+    { id: 'twilio', nome: 'Twilio', secao: 'mensagens', logo: 'twilio', estado: desligado, conectado: false },
   ]
 })
 // Os fluxos de categoria que ainda usam cada integração antiga (inventado). O aviso comum fica no cabeçalho do grupo;
@@ -55,7 +56,7 @@ const usoDoLegado: Record<ProvedorId, string[]> = {
   clicksign: ['Contratos de locação', 'Termos de confidencialidade'], certisign: ['Contratos de fornecedores'], d4sign: ['Admissões'], docusign: [], adobesign: ['Propostas comerciais'],
 }
 const legados = computed<(App & { uso: string[] })[]>(() => provedores.map(p => ({
-  id: `legado-${p.id}`, nome: p.id === 'adobesign' ? 'Adobe Sign' : p.nome, secao: 'assinatura', provedor: p.id, legado: true, conectado: false, uso: usoDoLegado[p.id],
+  id: `legado-${p.id}`, nome: p.id === 'adobesign' ? 'Adobe Sign' : p.nome, secao: 'assinatura', logo: p.id, provedor: p.id, legado: true, conectado: false, uso: usoDoLegado[p.id],
   estado: usoDoLegado[p.id].length
     ? { texto: a.value.emUso, tom: 'neutral', detalhe: a.value.fluxos(usoDoLegado[p.id].length) }
     : { texto: a.value.semUso, tom: 'neutral' },
@@ -151,8 +152,7 @@ function abrir(app: App) {
               :descricao="a.descricoes[app.id]!"
               :estado="app.estado"
               :rotulo="a.verDetalhes"
-              :provedor="app.provedor"
-              :icone="app.icone"
+              :logo="app.logo"
               class="animate-[entrada_.3s_ease-out_both]"
               :style="{ animationDelay: `${Math.min(si * 2 + i, 12) * 35}ms` }"
               @abrir="abrir(app)"
@@ -183,7 +183,7 @@ function abrir(app: App) {
                   :descricao="a.legadoUso(app.uso)"
                   :estado="app.estado"
                   :rotulo="a.verDetalhes"
-                  :provedor="app.provedor"
+                  :logo="app.logo"
                   apagado
                   @abrir="abrir(app)"
                 />

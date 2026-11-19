@@ -41,8 +41,6 @@ export type Recurso = 'cancela' | 'cancelaSoNoEnspace' | 'consultaStatus' | 'ree
 export interface Provedor {
   id: ProvedorId
   nome: string
-  /** PROTÓTIPO: a cor do monograma no lugar do logo, que o protótipo não reproduz. */
-  cor: 'primary' | 'info' | 'success' | 'warning' | 'error' | 'neutral'
   recursos: Recurso[]
   limiteMb: number
   formatos: string[]
@@ -55,11 +53,11 @@ export interface Provedor {
 }
 
 export const provedores: Provedor[] = [
-  { id: 'clicksign', nome: 'ClickSign', cor: 'warning', recursos: ['cancela', 'consultaStatus', 'reenvio', 'webhookDaConta'], limiteMb: 20, formatos: ['PDF', 'DOCX'], webhook: 'conta', ambientes: ['sandbox', 'producao'], tipoDeCredencial: 'api_key', portal: 'app.clicksign.example' },
-  { id: 'certisign', nome: 'Certisign', cor: 'info', recursos: ['cancelaSoNoEnspace', 'links', 'webhookDaConta'], limiteMb: 20, formatos: ['PDF', 'DOCX'], webhook: 'conta', ambientes: ['sandbox', 'producao'], tipoDeCredencial: 'api_key', portal: 'portaldeassinaturas.example' },
-  { id: 'd4sign', nome: 'D4Sign', cor: 'neutral', recursos: ['cancela', 'consultaStatus', 'reenvio', 'cofres', 'webhookAutomatico'], limiteMb: 20, formatos: ['PDF', 'DOCX'], webhook: 'automatico', ambientes: ['sandbox', 'producao'], tipoDeCredencial: 'api_key', portal: 'secure.d4sign.example' },
-  { id: 'docusign', nome: 'DocuSign', cor: 'primary', recursos: ['cancela', 'consultaStatus', 'reenvio', 'configurador', 'webhookAutomatico'], limiteMb: 20, formatos: ['PDF', 'DOCX'], webhook: 'automatico', ambientes: ['demo', 'producao'], tipoDeCredencial: 'jwt', portal: 'app.docusign.example' },
-  { id: 'adobesign', nome: 'Adobe Acrobat Sign', cor: 'error', recursos: ['cancela', 'consultaStatus', 'reenvio', 'links', 'webhookAutomatico'], limiteMb: 10, formatos: ['PDF', 'DOCX'], webhook: 'automatico', ambientes: ['sandbox', 'producao'], tipoDeCredencial: 'api_key', portal: 'secure.adobesign.example' },
+  { id: 'clicksign', nome: 'ClickSign', recursos: ['cancela', 'consultaStatus', 'reenvio', 'webhookDaConta'], limiteMb: 20, formatos: ['PDF', 'DOCX'], webhook: 'conta', ambientes: ['sandbox', 'producao'], tipoDeCredencial: 'api_key', portal: 'app.clicksign.example' },
+  { id: 'certisign', nome: 'Certisign', recursos: ['cancelaSoNoEnspace', 'links', 'webhookDaConta'], limiteMb: 20, formatos: ['PDF', 'DOCX'], webhook: 'conta', ambientes: ['sandbox', 'producao'], tipoDeCredencial: 'api_key', portal: 'portaldeassinaturas.example' },
+  { id: 'd4sign', nome: 'D4Sign', recursos: ['cancela', 'consultaStatus', 'reenvio', 'cofres', 'webhookAutomatico'], limiteMb: 20, formatos: ['PDF', 'DOCX'], webhook: 'automatico', ambientes: ['sandbox', 'producao'], tipoDeCredencial: 'api_key', portal: 'secure.d4sign.example' },
+  { id: 'docusign', nome: 'DocuSign', recursos: ['cancela', 'consultaStatus', 'reenvio', 'configurador', 'webhookAutomatico'], limiteMb: 20, formatos: ['PDF', 'DOCX'], webhook: 'automatico', ambientes: ['demo', 'producao'], tipoDeCredencial: 'jwt', portal: 'app.docusign.example' },
+  { id: 'adobesign', nome: 'Adobe Acrobat Sign', recursos: ['cancela', 'consultaStatus', 'reenvio', 'links', 'webhookAutomatico'], limiteMb: 10, formatos: ['PDF', 'DOCX'], webhook: 'automatico', ambientes: ['sandbox', 'producao'], tipoDeCredencial: 'api_key', portal: 'secure.adobesign.example' },
 ]
 export const provedorPorId = new Map(provedores.map(p => [p.id, p]))
 

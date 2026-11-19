@@ -6,7 +6,9 @@
  * provedor"). Aqui cada informação tem 1 lugar:
  * - o topo diz o provedor e 1 estado: pronto para enviar ou falta configurar;
  * - "Configuração" lista só as etapas de quem configura, numeradas, cada uma com o próprio conteúdo: a credencial está
- *   dentro da etapa 1, a URL do webhook dentro da etapa do webhook. O segredo do servidor sai da lista;
+ *   dentro da etapa 1, a URL do webhook dentro da etapa do webhook. O segredo do servidor sai da lista. As etapas são
+ *   uma linha do tempo vertical (UTimeline, rodada 3), com a linha que liga uma etapa à outra e sem divisória: a linha
+ *   fica verde até a última etapa concluída;
  * - a etapa do webhook da conta só conclui quando o 1º retorno chega (M17): o ENSPACE não confere o portal do provedor;
  * - "O que a <provedor> faz no ENSPACE" diz cada recurso 1 vez, com a consequência. Substitui os selos do topo, o alerta,
  *   "Como se comporta" e "Recursos opcionais";
@@ -17,7 +19,7 @@ import { provedorPorId } from './mocks'
 import { credenciaisVisiveis, credencialPronta, criarCredencial, estado, excluirCredencial } from './estado'
 import { dataHora } from './formato'
 import type { Textos } from './textos'
-import Monograma from './_Monograma.vue'
+import Logo from './_Logo.vue'
 import NovaCredencial from './_NovaCredencial.vue'
 
 const props = defineProps<{ t: Textos, provedor: ProvedorId }>()
@@ -44,11 +46,19 @@ const feitas = computed(() => etapas.value.filter(e => e.estado === 'feito').len
 const aguardando = computed(() => etapas.value.filter(e => e.estado === 'aguardando').length)
 const pronto = computed(() => creds.value.some(credencialPronta))
 
-const corDaEtapa: Record<EstadoDaEtapa, { icone: string, classe: string, badge: 'success' | 'neutral' | 'warning' }> = {
-  feito: { icone: 'i-lucide-check', classe: 'bg-success text-inverted', badge: 'success' },
-  pendente: { icone: '', classe: 'border border-accented text-muted', badge: 'neutral' },
-  aguardando: { icone: 'i-lucide-clock', classe: 'bg-warning/15 text-warning', badge: 'warning' },
+const corDaEtapa: Record<EstadoDaEtapa, { icone?: string, indicador: string, linha: string, badge: 'success' | 'neutral' | 'warning' }> = {
+  feito: { icone: 'i-lucide-check', indicador: 'bg-success text-inverted', linha: 'bg-success', badge: 'success' },
+  pendente: { indicador: 'bg-default text-muted ring-1 ring-inset ring-accented', linha: 'bg-accented', badge: 'neutral' },
+  aguardando: { icone: 'i-lucide-clock', indicador: 'bg-warning/15 text-warning ring-1 ring-inset ring-warning/40', linha: 'bg-accented', badge: 'warning' },
 }
+// As etapas na linha do tempo: o indicador mostra o estado (concluída, aguardando) ou o número da etapa pendente.
+const linhaDoTempo = computed(() => etapas.value.map((e, i) => ({
+  ...e,
+  value: e.chave,
+  icon: corDaEtapa[e.estado].icone,
+  avatar: corDaEtapa[e.estado].icone ? undefined : { text: String(i + 1) },
+  ui: { indicator: corDaEtapa[e.estado].indicador, separator: corDaEtapa[e.estado].linha },
+})))
 
 /* ---------- credenciais ---------- */
 const novaAberta = ref(false)
@@ -107,13 +117,15 @@ const foraDoEscopo = () => toast.add({ title: props.t.geral.foraDoEscopo, descri
       <!-- Topo: o provedor, 1 estado e as ações -->
       <div class="flex flex-wrap items-start gap-4">
         <UButton icon="i-lucide-arrow-left" color="neutral" variant="ghost" size="sm" :aria-label="t.geral.voltar" @click="emit('voltar')" />
-        <Monograma :provedor="provedor" tamanho="lg" />
-        <div class="min-w-64 flex-1">
-          <div class="flex flex-wrap items-center gap-2">
-            <h1 class="text-xl font-semibold text-highlighted">{{ p.nome }}</h1>
+        <div class="min-w-64 flex-1 space-y-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <Logo :app="provedor" :nome="p.nome" tamanho="lg" />
             <UBadge :label="pronto ? pt.pronto : pt.falta" :color="pronto ? 'success' : 'warning'" variant="soft" :icon="pronto ? 'i-lucide-circle-check' : 'i-lucide-circle-alert'" />
           </div>
-          <p class="mt-1 max-w-2xl text-sm text-muted">{{ t.apps.descricoes[provedor] }}</p>
+          <div>
+            <h1 class="text-xl font-semibold text-highlighted">{{ p.nome }}</h1>
+            <p class="mt-1 max-w-2xl text-sm text-muted">{{ t.apps.descricoes[provedor] }}</p>
+          </div>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <UButton :label="pt.comoFunciona" icon="i-lucide-circle-help" color="neutral" variant="ghost" @click="foraDoEscopo" />
@@ -130,13 +142,9 @@ const foraDoEscopo = () => toast.add({ title: props.t.geral.foraDoEscopo, descri
             <span class="text-sm text-muted">{{ pt.progresso(feitas, aguardando, etapas.length) }}</span>
           </header>
 
-          <ol class="divide-y divide-default">
-            <li v-for="(e, i) in etapas" :key="e.chave" class="flex gap-4 px-5 py-4">
-              <span class="flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold" :class="corDaEtapa[e.estado].classe">
-                <UIcon v-if="corDaEtapa[e.estado].icone" :name="corDaEtapa[e.estado].icone" class="size-4" />
-                <template v-else>{{ i + 1 }}</template>
-              </span>
-              <div class="min-w-0 flex-1 space-y-3">
+          <UTimeline :items="linhaDoTempo" size="sm" class="px-5 pt-5" :ui="{ wrapper: 'min-w-0 pb-7' }">
+            <template #wrapper="{ item: e }">
+              <div class="min-w-0 space-y-3">
                 <div class="flex items-start justify-between gap-3">
                   <div>
                     <p class="font-medium text-highlighted">{{ e.titulo }}</p>
@@ -202,8 +210,8 @@ const foraDoEscopo = () => toast.add({ title: props.t.geral.foraDoEscopo, descri
                   </p>
                 </template>
               </div>
-            </li>
-          </ol>
+            </template>
+          </UTimeline>
         </section>
 
         <!-- O que o provedor faz: cada recurso 1 vez, com a consequência -->

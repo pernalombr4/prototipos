@@ -133,3 +133,36 @@
   - `prototipo-m16-sem-envelope.png`.
 
   O `prototipo-m16-sem-provedor.png` saiu: o estado mudou.
+
+## Rodada 3 · 2026-11-19
+
+- **Pedido (literal):** "do modo como voce fez esse header quando entra num doc nao ta sem graça? hoje o dev ta usando o icone/logo do assinador. ta mais ilustrativo, nao? melhor ser como ta hoje, eu acredito. opine. o mesmo vale pra tela de configuraçao [...] a parte central que mostra os passos de configuraçao, nao poderia usar o componente de step-by-step do nuxt?? de cima pra baixo, que faz uma linha vertical, sem divider entre os passos"
+- **Fronteira:** muda o logo do app em toda tela do protótipo e as etapas da página do provedor; o resto fica como na rodada 2.
+
+### O logo do app no lugar do monograma
+
+- **O logo é o mesmo arquivo do produto**, claro e escuro, para os 5 provedores, a OpenAI, o SendGrid, o Twilio e o Plugin do Word (`logos/`, lido por `_Logo.vue`). O monograma das rodadas 1 e 2 saiu (`_Monograma.vue`).
+  - Os arquivos tiveram a margem transparente cortada e a altura reduzida para 96 px. No original, o Adobe Sign, a Certisign e o SendGrid escuro vêm com margem grande e aparecem pequenos.
+  - O tema troca o arquivo por CSS (`dark:`).
+- **Onde o logo aparece:**
+
+  | Tela | Como |
+  |---|---|
+  | Card da loja e do começo do módulo | o logo em cima, o nome e a descrição embaixo, como no card do produto |
+  | Página do provedor | o logo e o estado em cima, o nome e a descrição embaixo, como no produto |
+  | Detalhe do envelope | o logo no lugar do monograma e do nome, ao lado da origem |
+  | Começo do módulo com provedor conectado | o logo no atalho do provedor, sem o nome repetido |
+  | Execução do nó (envelope criado) | o logo no atalho do envelope |
+  | Lista de envelopes | só o nome do provedor, como na tabela do produto; o logo em cada linha pesa a tabela |
+
+- **Repositório público:** os logos são das marcas dos provedores e o produto os serve sem login; nenhum outro arquivo do produto veio junto.
+
+### As etapas da configuração em linha do tempo
+
+- **`UTimeline` vertical** no lugar da lista com divisória. A linha liga uma etapa à seguinte e fica verde até a última etapa concluída; a etapa que aguarda o provedor tem o relógio, e a pendente, o número.
+- **Por que não o `UStepper`:** ele mostra o conteúdo de 1 etapa por vez, como um assistente de passos. Aqui cada etapa tem conteúdo que fica à vista (a credencial, o cofre, a URL do webhook), e quem volta à página precisa ver todas.
+- **CSS próprio:** nenhum; as cores do indicador e da linha vão pelo `ui` de cada item.
+
+### Fechamento
+
+- **Ver:** os 30 prints de `evidencias/` foram regravados com o logo; a página do provedor está em `prototipo-ux-pagina-do-provedor.png` (Certisign, 1 etapa concluída e 1 aguardando) e `prototipo-m16-primeira-credencial.png` (ClickSign, nenhuma etapa concluída).

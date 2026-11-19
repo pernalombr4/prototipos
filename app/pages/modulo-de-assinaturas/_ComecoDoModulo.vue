@@ -15,7 +15,7 @@ import type { ProvedorId } from './mocks'
 import { provedores, provedorPorId } from './mocks'
 import { credenciaisVisiveis } from './estado'
 import type { Textos } from './textos'
-import Monograma from './_Monograma.vue'
+import Logo from './_Logo.vue'
 import CardDeApp from './_CardDeApp.vue'
 
 const props = defineProps<{ t: Textos, variante: 'vazio' | 'semEnvelope' }>()
@@ -67,8 +67,7 @@ const iniciais = (nome: string) => nome.split(' ').map(x => x[0]).join('')
               class="group flex items-center gap-2 rounded-lg border border-default bg-default/70 py-1.5 pl-1.5 pr-3 text-sm transition-colors hover:border-accented focus-visible:outline-2 focus-visible:outline-primary"
               @click="emit('provedor', conectado.id)"
             >
-              <Monograma :provedor="conectado.id" tamanho="sm" />
-              <span class="font-medium text-highlighted">{{ conectado.nome }}</span>
+              <Logo :app="conectado.id" :nome="conectado.nome" tamanho="sm" class="px-1.5" />
               <span class="flex items-center gap-1 text-xs font-medium text-success"><span class="size-1.5 rounded-full bg-success" />{{ t.apps.estados.conectado }}</span>
               <UIcon name="i-lucide-arrow-right" class="size-3.5 text-muted transition-transform group-hover:translate-x-0.5" />
             </button>
@@ -166,7 +165,7 @@ const iniciais = (nome: string) => nome.split(' ').map(x => x[0]).join('')
           :descricao="t.apps.descricoes[p.id]!"
           :estado="{ texto: t.apps.limiteCurto(p.limiteMb, p.formatos.join(', ')), tom: 'info' }"
           :rotulo="c.conectar"
-          :provedor="p.id"
+          :logo="p.id"
           class="animate-[entrada_.3s_ease-out_both]"
           :style="{ animationDelay: `${120 + i * 40}ms` }"
           @abrir="emit('provedor', p.id)"
