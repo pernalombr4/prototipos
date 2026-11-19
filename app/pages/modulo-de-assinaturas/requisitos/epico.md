@@ -11,7 +11,7 @@ envelope e detalhe do envelope); o editor e a execução do nó Assinatura eletr
 do fluxo da categoria; Configurações > Sistema > Módulos.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/modulo-de-assinaturas, aprovado em 19/11/2026. Os textos nos
-3 idiomas estão no `textos.ts` de https://github.com/pernalombr4/prototipos/tree/main/app/pages/modulo-de-assinaturas.
+3 idiomas estão no arquivo de textos da pasta do protótipo: https://github.com/pernalombr4/prototipos/tree/main/app/pages/modulo-de-assinaturas.
 A barra "Protótipo" no pé da tela (Ir para, situação do workspace, desfecho do nó, estado da tarefa, Menu de hoje,
 Reiniciar) é ferramenta de revisão e não entra no produto.
 
@@ -88,5 +88,5 @@ para o ganho.
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
 | P901 | O épico sai inteiro com o módulo, ou cada parte pode ir ao cliente quando fica pronta? | produto | Saindo por parte, cada parte precisa conviver com a tela antiga da outra |
-| S901 | A tabela da RN904 e os limites da RN908 são os do módulo na prévia de 18/11/2026 e do teste de assinadores da mesma data. | dev do módulo | Se um provedor ganhar ou perder um recurso, só a tabela muda; as telas leem dela |
-| P902 | A loja de apps (parte 1) muda também os cards da OpenAI, do Plugin do Word, do SendGrid e do Twilio. Ela entra neste épico ou vira um épico próprio da loja? | redatora | Num épico próprio, a busca, o filtro e o card dos outros apps saem daqui, e este épico fica só com a seção "Assinatura eletrônica" |
+| S901 | A tabela da RN904 e os limites da RN908 são os do módulo na prévia de 18/11/2026. | dev do módulo | Se um provedor ganhar ou perder um recurso, só a tabela muda; as telas leem dela |
+| P902 | A loja de apps (parte 1) muda também os cards da OpenAI, do Plugin do Word, do SendGrid e do Twilio. Ela entra neste épico ou vira um épico próprio da loja? | produto | Num épico próprio, a busca, o filtro e o card dos outros apps saem daqui, e este épico fica só com a seção "Assinatura eletrônica" |

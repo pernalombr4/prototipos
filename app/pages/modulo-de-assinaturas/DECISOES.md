@@ -175,3 +175,12 @@
   - As 12 partes do 1º desenho viraram 9, porque a faixa de ID 901 a 999 é do épico: a busca e o filtro entraram na loja de apps (parte 1), a trilha entrou no detalhe do envelope (parte 5), e o editor e a execução do nó viraram 1 parte (parte 8).
   - A loja de apps muda também os cards da OpenAI, do Plugin do Word, do SendGrid e do Twilio; se ela vira um épico próprio está em aberto (P902), para a redatora decidir. Sem a decisão, fica 1 épico.
 - **Prints dos requisitos:** `evidencias/requisitos/`, gerados por `node ferramentas/prints-de-requisito.mjs app/pages/modulo-de-assinaturas` a partir de `requisitos/prints.json`. O requisito sem tela no protótipo (toast que some, gesto, ausência de botão) leva o motivo no lugar do print.
+
+## Card no ENSPACE · 2026-11-19
+
+- **Pedido (literal):** "Sim, criar o card"
+- **Card** (desenvolvimento-enlighten2): `USEBF3A0934422F46368061325CFB52A` (597411), "[ASSINATURAS] Módulo de assinaturas: base de UX". Descrição = `epico.md`; critério de aceite no campo próprio; link do protótipo; To Do, Melhoria, prioridade Média, teste do PO. Sem responsável: a redatora não indicou.
+- **Tarefas** 26172 a 26180, "1. Provedores na loja de apps" a "9. Tarefa Integração": 151 caixas de requisito, 80 prints e 14 "Sem print", conferidos pela API.
+- **Prints regravados antes do card** (pedido da sessão de reteste de assinadores): altura 960, barra do protótipo escondida, caixa no bloco inteiro e etiqueta fora do texto. O detector de seta deu "ok" nos 80.
+- **Épico ajustado para o card:** "textos.ts" virou "arquivo de textos da pasta do protótipo"; S901 sem a menção ao teste; P902 pergunta a produto.
+- **Falta:** conferir na tela a aba Tarefas do card. O Chrome caiu no login do ENSPACE, e a sessão SSO não voltou sozinha.
