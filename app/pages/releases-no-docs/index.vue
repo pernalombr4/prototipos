@@ -3,12 +3,13 @@
  * A comunicação das releases no docs.enspace.io: abas Blog e Releases.
  *
  * A demanda: com deploy contínuo, o número da versão deixa de marcar o lançamento. A aba Releases
- * vira changelog por item, o Blog fica com o post mensal, e uma página "Próximas mudanças" reúne o
- * que exige ação do cliente, com prazo. Feed RSS e inscrição por e-mail entram só como interface.
+ * vira o changelog lido na própria trilha (o texto de cada versão, fechado por padrão), e o Blog fica
+ * com o post mensal. O que exige ação do cliente vai como rótulo e seção no texto da versão, com o
+ * prazo e as 3 fases. Feed RSS e inscrição por e-mail entram só como interface.
  * Proposta da pesquisa de mercado de 2026-11-24 (deploy contínuo e lançamento), seção 5.
  *
- * Uma porta só: as 3 telas se navegam por dentro, pela barra do topo (Blog, Releases) e pelas abas
- * da aba Releases (Changelog, Próximas mudanças). O andaime troca entre "Hoje" e "Proposta".
+ * Uma porta só: as telas se navegam por dentro, pela barra do topo (Blog, Releases). O andaime troca
+ * entre "Hoje" e "Proposta".
  *
  * 100% front-end: o conteúdo vem do `mocks.ts` desta pasta. Nada de rede.
  */
@@ -18,7 +19,6 @@ import Changelog from './_Changelog.vue'
 import HeroDaSecao from './_HeroDaSecao.vue'
 import ListaDoBlog from './_ListaDoBlog.vue'
 import PostDoMes from './_PostDoMes.vue'
-import ProximasMudancas from './_ProximasMudancas.vue'
 import ReleasesHoje from './_ReleasesHoje.vue'
 import { entradas, linkPermanente, postsDaProposta, postsDeHoje } from './mocks'
 import { textos } from './textos'
@@ -30,7 +30,7 @@ import pesquisaMd from './PESQUISA.md?raw'
 
 definePageMeta({
   titulo: 'Releases no docs',
-  descricao: 'Changelog por item na aba Releases, post mensal no Blog e a página Próximas mudanças, com o que exige ação e o prazo.',
+  descricao: 'O changelog lido na própria trilha da aba Releases, com o que exige ação e o prazo, e o post mensal no Blog.',
   status: 'em-revisao',
   atualizado: '2026-11-24',
   tela: 'docs.enspace.io, abas Blog e Releases',
@@ -47,28 +47,19 @@ const estadosPossiveis = ['cheio', 'vazio', 'carregando'] as const
 
 /* ---------------- Navegação por dentro ---------------- */
 const secao = ref<'blog' | 'releases'>('releases')
-const aba = ref<'changelog' | 'proximas'>('changelog')
 const postAberto = ref<string | null>(null)
 /** Id da versão (`v3-4-0`) ou do item a mostrar na trilha. Rodada 4: não há mais página da versão. */
 const destaque = ref<string | null>(null)
-const destaqueMudanca = ref<string | null>(null)
 const assinarAberto = ref(false)
 
 const post = computed(() => postsDaProposta.find(p => p.id === postAberto.value))
 
 const topo = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
-function irParaReleases(a: 'changelog' | 'proximas') {
+function irParaReleases() {
   versao.value = 'proposta'
   secao.value = 'releases'
   postAberto.value = null
-  aba.value = a
-}
-
-/** Rodada 2: Changelog e Próximas mudanças trocam por link discreto acima da lista, sem abas. */
-function irAba(a: 'changelog' | 'proximas') {
-  irParaReleases(a)
-  topo()
 }
 
 function irSecao(s: 'blog' | 'releases') {
@@ -79,23 +70,22 @@ function irSecao(s: 'blog' | 'releases') {
 
 /** Leva à âncora na trilha: a versão (`v3-4-0`) ou o item (o id dele). */
 async function irPara(id: string) {
-  irParaReleases('changelog')
+  irParaReleases()
   history.replaceState(null, '', `#${id}`)
   destaque.value = null
   await nextTick()
   destaque.value = id
 }
 
-/** Do post do mês e de Próximas mudanças: o item, na trilha. */
+/** Do post do mês: o item, na trilha. */
 function verEntrada(id: string) {
   irPara(id)
 }
 
-async function verMudanca(id: string) {
-  irParaReleases('proximas')
-  destaqueMudanca.value = null
-  await nextTick()
-  destaqueMudanca.value = id
+/** Rodada 5: sai a página Próximas mudanças. A mudança leva ao item que exige ação, na trilha. */
+function verMudanca(id: string) {
+  const e = entradas.find(x => x.mudanca === id)
+  if (e) irPara(e.id)
 }
 
 function verPost(mes: string) {
@@ -116,13 +106,14 @@ function abrirPost(id: string) {
 }
 
 function verChangelog() {
-  irAba('changelog')
+  irParaReleases()
+  topo()
 }
 
-/** O link permanente da versão: copia o endereço e põe a âncora na barra do navegador. */
-async function copiar(v: string) {
-  const url = linkPermanente(idioma.value, v)
-  history.replaceState(null, '', `#${ancoraDaVersao(v)}`)
+/** O link de um título (versão, subtítulo ou item): copia o endereço e põe a âncora na barra do navegador. */
+async function copiar(ancora: string) {
+  const url = linkPermanente(idioma.value, ancora)
+  history.replaceState(null, '', `#${ancora}`)
   try { await navigator.clipboard.writeText(url) }
   catch { /* sem permissão: o toast ainda mostra o endereço */ }
   toast.add({ title: t.value.entrada.linkCopiado, description: url, icon: 'i-lucide-link', color: 'success', duration: 3000 })
@@ -131,24 +122,21 @@ async function copiar(v: string) {
 /** Quem chega pelo link permanente cai na versão ou no item, com o destaque aceso. */
 onMounted(() => {
   const id = decodeURIComponent(location.hash.slice(1))
-  if (entradas.some(e => e.id === id || ancoraDaVersao(e.versao) === id)) irPara(id)
+  if (entradas.some(e => e.id === id || id === ancoraDaVersao(e.versao) || id.startsWith(`${ancoraDaVersao(e.versao)}-`))) irPara(id)
 })
 
 watch(versao, () => {
   postAberto.value = null
-  aba.value = 'changelog'
 })
 
 const hero = computed(() => {
   if (secao.value === 'blog') return { titulo: t.value.hero.blogTitulo, descricao: t.value.hero.blogDescricao }
-  // Rodada 3: em Próximas mudanças, o título da página vai no hero, em vez de um 2º título abaixo dele.
-  if (versao.value === 'proposta' && aba.value === 'proximas') return { titulo: t.value.proximas.titulo, descricao: t.value.proximas.descricao }
   // Rodada 2: a proposta mantém o topo de hoje ("Versões do ENSPACE").
   return { titulo: t.value.hero.releasesHojeTitulo, descricao: t.value.hero.releasesHojeDescricao }
 })
 
 /** A chave da vista: muda a vista, a transição roda. */
-const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value ?? 'lista'}-${aba.value}`)
+const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value ?? 'lista'}`)
 </script>
 
 <template>
@@ -181,26 +169,14 @@ const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value 
             <!-- hoje -->
             <ReleasesHoje v-if="versao === 'hoje'" :t="t" :estado="estado" />
 
-            <!-- proposta: a linha do tempo de hoje com rótulos e filtros, e Próximas mudanças -->
+            <!-- proposta: a linha do tempo de hoje, com o texto de cada versão -->
             <UContainer v-else>
               <Changelog
-                v-if="aba === 'changelog'"
                 :t="t"
                 :estado="estado"
                 :destaque="destaque"
                 @copiar="copiar"
-                @ver-mudanca="verMudanca"
                 @ver-post="verPost"
-                @ir-proximas="irAba('proximas')"
-                @assinar="assinarAberto = true"
-              />
-              <ProximasMudancas
-                v-else
-                :t="t"
-                :estado="estado"
-                :destaque="destaqueMudanca"
-                @ver-entrada="verEntrada"
-                @voltar="irAba('changelog')"
                 @assinar="assinarAberto = true"
               />
             </UContainer>

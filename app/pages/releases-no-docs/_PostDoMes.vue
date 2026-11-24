@@ -100,7 +100,7 @@ const etiquetas = (e: Entrada) => [
             icon="i-lucide-triangle-alert"
             :title="t.post.exigeAcao(acoes.length, data(acoes[0]!.fases.obrigatoria))"
             :description="L(acoes[0]!.titulo)"
-            :actions="[{ label: t.post.verEmProximas, color: 'neutral', variant: 'outline', trailingIcon: 'i-lucide-arrow-right', onClick: () => emit('verMudanca', acoes[0]!.id) }]"
+            :actions="[{ label: t.post.verChangelog, color: 'neutral', variant: 'outline', trailingIcon: 'i-lucide-arrow-right', onClick: () => emit('verMudanca', acoes[0]!.id) }]"
           />
         </section>
 
@@ -202,17 +202,6 @@ const etiquetas = (e: Entrada) => [
 
             <div class="flex flex-wrap gap-2">
               <UButton size="sm" color="neutral" variant="outline" icon="i-lucide-list" :label="t.post.verChangelog" class="cursor-pointer" @click="emit('verEntrada', e.id)" />
-              <UButton
-                v-if="e.mudanca"
-                size="sm"
-                color="neutral"
-                variant="outline"
-                icon="i-lucide-list-checks"
-                :ui="{ leadingIcon: 'text-warning' }"
-                :label="t.entrada.verOQueFazer"
-                class="cursor-pointer"
-                @click="emit('verMudanca', e.mudanca)"
-              />
             </div>
           </div>
         </section>

@@ -3,13 +3,16 @@
 Proposta da pesquisa de mercado de 2026-11-24 (deploy contínuo e lançamento), seção 5: com deploy
 contínuo, o número da versão deixa de marcar o lançamento. A aba Releases vira changelog por item, o
 Blog fica com o post do mês, e "Próximas mudanças" reúne o que exige ação do cliente, com prazo.
+Na rodada 5, "Próximas mudanças" sai: o que exige ação fica na trilha, com o prazo e as 3 fases.
 
 ## A fronteira (a partir da rodada 2)
 
 - **Muda na aba Releases:** o texto de cada versão é lido na própria linha do tempo, como prosa
-  (rodada 4); 1 barra de filtros acima da trilha (tamanho da versão e funcionalidade); no máximo 2
-  rótulos por versão; link permanente por versão e por item; o acesso a "Próximas mudanças" e a
-  "Assinar"; os patches como blocos curtos na mesma trilha. O banner sai da versão e fica no post.
+  (rodada 4), fechado por padrão com "Mostrar mais" (rodada 5); sem filtros (rodada 5); no máximo 2
+  rótulos por versão; cada título (versão, subtítulo e item) copia o próprio link (rodada 5); a
+  versão em breve no topo da trilha, com o que exige ação e as 3 fases no texto do item (rodada 5);
+  "Assinar"; os patches como blocos curtos na mesma trilha. O
+  banner sai da versão e fica no post.
 - **Muda no Blog:** o post do mês no lugar do post por versão; o post só de changelog sai da lista
   (rodada 3); o banner mostra o mês e o ano (rodada 4).
 - **Não muda:** a casca do docs, o topo "Versões do ENSPACE", a árvore e os `:ui` da página de
@@ -21,18 +24,44 @@ Blog fica com o post do mês, e "Próximas mudanças" reúne o que exige ação 
 flowchart LR
   B[Blog: lista] -->|Ler o post| P[Post do mês]
   P -->|Ver no changelog| C[Releases: o texto de cada versão na trilha]
-  P -->|Ver em Próximas mudanças| M[Releases: Próximas mudanças]
   C -->|Ler o post de lançamento| P
-  C -->|Ver o que fazer| M
-  C -->|Próximas mudanças| M
-  M -->|Ver no changelog| C
-  M -->|Versões do ENSPACE| C
-  C -->|Copiar link| L[Link da versão ou do item]
+  C -->|Clicar no título| L[Link da versão, do subtítulo ou do item]
   L -->|Abrir o link| C
   C -->|Assinar| A[E-mail e RSS]
 ```
 
 ## Rodadas
+
+### Rodada 5 · 2026-11-24
+- **Pedido (literal):**
+  - "tem que vir por padrao colapsado o texto, igual no changelog do nuxt."
+  - "pode tirar os filtros dali. nenhum produto que vi tem isso."
+  - "ao clicar no titulo da release deve copiar o link, como é na doc do changelog do notion. bem como acontece com docs .md renderizados no nuxt mesmo. cada titulo tem seu link."
+  - "pode copiar igualzinho ao notion a questao dos links (o texto interno tambem tem copia de link nos subtitulos e tal)"
+- **Conferido antes:** no código do template "Changelog" do Nuxt UI (`nuxt-ui-templates/changelog`, `app/pages/index.vue`) e da página de releases do Nuxt UI (`nuxt/ui`, `docs/app/pages/docs/releases/[[tag]].vue`), o texto não vem fechado: o template mostra o texto inteiro, e a página do Nuxt UI mostra 1 release por página. O texto fechado usa o componente pronto do Nuxt UI para isso, o `UCollapsible`. No Notion (notion.com/releases), cada título leva ao próprio endereço; a leitura sem navegador não mostrou o ícone ao passar o mouse
+- **Mudou:**
+  - o texto de cada versão vem fechado (`UCollapsible`). Fechada, a versão mostra a data, os rótulos, o título e o resumo curto ("Esta release apresenta 4 itens: 2 novidades e 2 melhorias."); em breve, a data prevista
+  - "Mostrar mais" e "Mostrar menos" ficam no rodapé da versão, abaixo do texto; só esse botão abre e fecha
+  - quem chega por link de item, de subtítulo ou pelo post do mês cai na versão já aberta, no ponto certo
+  - sai a barra de filtros (tamanho e funcionalidade) e o código e os textos que só serviam a ela; sai também a contagem de versões, que sem filtro não diz nada. Fica "Assinar"
+  - cada título tem link, como os títulos de markdown do Nuxt UI: o título da versão (`#v3-4-0`), os subtítulos Exige ação, Novidades, Melhorias e Correções (`ProseH3` com âncora, `#v3-4-0-novidades`) e o título em negrito de cada item (`#<id do item>`). Passar o mouse mostra o ícone `#` à esquerda (o mesmo ícone dos títulos do Nuxt UI, só em telas largas); clicar copia o endereço completo e mostra "Link copiado"
+  - sai "Copiar link" do rodapé, porque o título faz isso
+  - o link permanente passa a ser da página única: `docs.enspace.io/pt/releases#<âncora>`
+- **Pedido seguinte (do coordenador):** "a página Próximas mudanças sai. A pesquisa não achou essa página em nenhum dos changelogs analisados, e a redatora pediu para tirar nesse caso."
+- **Mudou com esse pedido:**
+  - sai a página "Próximas mudanças", com o componente, os textos e as ações que só ela usava. Motivo: a pesquisa de changelogs (`pesquisa-de-mercado`, run 2026-11-24, `changelog-referencias.md`) não achou essa página em nenhum produto analisado, e a redatora pediu para tirar nesse caso
+  - a versão em breve fica no topo da trilha, no mesmo padrão das outras (texto fechado, título que copia o link). É o equivalente ao "Unreleased" do Keep a Changelog
+  - "Exige ação · Agir até <data>" fica como rótulo da versão e como a seção Exige ação no começo do texto dela
+  - as 3 fases viram 1 frase no texto do item que exige ação, depois do prazo: "Opcional desde 08/12/2026; ligada para todos em 12/01/2027; obrigatória em 09/02/2027." Sem linha do tempo e sem cartão
+  - sai o link para "Próximas mudanças" do topo da trilha; fica só "Assinar"
+  - no post do mês, o aviso de ação leva ao item na trilha ("Ver no changelog"); sai o botão "Ver o que fazer"
+  - os prints `rodada3-proximas-*` ficam em `evidencias/` como histórico
+- **Print do ícone no subtítulo:** a captura sem janela não tem mouse; o estado de hover foi forçado pelo DevTools do Chrome (`CSS.forcePseudoState`) no link do subtítulo "Novidades". Não há ponteiro na imagem
+- **Para a redatora decidir:**
+  - o ícone ao passar o mouse é o `#` dos títulos do Nuxt UI; o Notion usa o ícone de corrente. Trocar o ícone muda todos os títulos de markdown do repositório, porque vem da configuração do app
+  - os 2 pontos da rodada 4 seguem abertos (a 3.4.2 patch com novidade; nenhuma versão major no mock)
+- **Commit:** nenhum nesta rodada; o commit sai pelo coordenador
+- **Ver:** `http://localhost:3000/releases-no-docs` · `evidencias/rodada5-trilha-desktop-claro.jpg` · `evidencias/rodada5-trilha-desktop-escuro.jpg` · `evidencias/rodada5-trilha-mobile-claro.jpg` · `evidencias/rodada5-versao-aberta-desktop-claro.jpg` · `evidencias/rodada5-versao-aberta-mobile-escuro.jpg` · `evidencias/rodada5-em-breve-aberta-desktop-claro.jpg` · `evidencias/rodada5-item-pelo-link-desktop-claro.jpg` · `evidencias/rodada5-link-no-subtitulo-desktop-claro.jpg` · `evidencias/rodada5-link-copiado-desktop-claro.jpg`
 
 ### Rodada 4 · 2026-11-24
 - **Pedido (literal):**

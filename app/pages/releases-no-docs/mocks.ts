@@ -81,7 +81,7 @@ export interface Entrada {
   todosAte?: string
   /** PROPOSTA */
   acesso?: Acesso
-  /** PROPOSTA: liga a entrada à mudança em "Próximas mudanças", que traz o prazo e o que fazer. */
+  /** PROPOSTA: liga a entrada à mudança que quebra, que traz o prazo e as 3 fases (no texto do item, na trilha). */
   mudanca?: string
   /** PROPOSTA: tier de lançamento. 1 e 2 entram em destaque no post do mês; 3 e correção ficam só aqui. */
   tier?: 1 | 2 | 3
@@ -396,7 +396,7 @@ export const entradas: Entrada[] = [
 ]
 
 /* ------------------------------------------------------------------ *
- * PRÓXIMAS MUDANÇAS (PROPOSTA: não existe no docs hoje)               *
+ * MUDANÇAS QUE EXIGEM AÇÃO (PROPOSTA: não existe no docs hoje)        *
  * ------------------------------------------------------------------ */
 
 /**
@@ -653,7 +653,8 @@ export const moduloDe = (id: ChaveDeModulo) => modulos.find(m => m.id === id)!
  * PROPOSTA, rodada 3: cada versão tem página própria. O link da versão é a página
  * (`/releases/3-4-0`); o link do item é a página da versão com a âncora do item (`#<id do item>`).
  */
-export function linkPermanente(idioma: Idioma, versao: string, item?: string) {
+export function linkPermanente(idioma: Idioma, ancora: string) {
   const prefixo = idioma === 'pt-BR' ? 'pt' : idioma
-  return `https://docs.enspace.io/${prefixo}/releases/${versao.replaceAll('.', '-')}${item ? `#${item}` : ''}`
+  // Rodada 5: 1 página só (a trilha), com âncora por versão, por subtítulo e por item.
+  return `https://docs.enspace.io/${prefixo}/releases#${ancora}`
 }

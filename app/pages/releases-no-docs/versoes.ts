@@ -32,6 +32,9 @@ export function montarVersoes(t: Textos, idioma: Idioma) {
     const post = postsDeHoje.find(p => p.versao === versao)
     const emBreve = itens.every(e => e.estado === 'em-breve')
     const data = post?.data ?? itens.map(e => e.data).sort().at(emBreve ? 0 : -1)!
+    const contagem = (['novidade', 'melhoria', 'correcao'] as const)
+      .map(tp => ({ tp, n: itens.filter(e => e.tipo === tp).length }))
+      .filter(x => x.n)
     const prazos = itens.map(e => mudancaDe(e.mudanca)).filter(m => !!m).map(m => m!.fases.obrigatoria).sort()
     const tamanho = tamanhoDaVersao(versao)
     return {
@@ -44,10 +47,10 @@ export function montarVersoes(t: Textos, idioma: Idioma) {
       cor: post?.cor ?? (tamanho === 'patch' ? 'purple' : 'orange'),
       itens,
       titulo: emBreve ? t.releases.emBreveTitulo(versao) : t.releases.noAr(versao),
-      /** Rodada 4: a versão no ar não tem resumo; o texto dela vem no corpo. Em breve diz a data prevista. */
+      /** Rodada 5: com o texto fechado, o resumo curto diz o que a versão traz. Em breve diz a data prevista. */
       descricao: emBreve
         ? t.releases.emBreveDescricao(formatarData(data, idioma, { day: 'numeric', month: 'long', year: 'numeric' }))
-        : undefined,
+        : t.releases.resumoDaVersao(itens.length, contagem.map(x => t.releases.partes[x.tp](x.n))),
       prazo: prazos[0],
       mudanca: itens.find(e => e.mudanca)?.mudanca,
       liberando: itens.some(e => e.estado === 'liberando'),
