@@ -11,6 +11,7 @@ Na rodada 5, "Próximas mudanças" sai: o que exige ação fica na trilha, com o
   (rodada 4), fechado por padrão com "Mostrar mais" (rodada 5); sem filtros (rodada 5); no máximo 2
   rótulos por versão; cada título (versão, subtítulo e item) copia o próprio link (rodada 5); a
   versão em breve no topo da trilha, com o que exige ação e as 3 fases no texto do item (rodada 5);
+  o rótulo "Exige ação" abre o resumo da mudança, e o item traz "O que fazer" em passos (rodada 6);
   "Assinar"; os patches como blocos curtos na mesma trilha. O
   banner sai da versão e fica no post.
 - **Muda no Blog:** o post do mês no lugar do post por versão; o post só de changelog sai da lista
@@ -25,12 +26,31 @@ flowchart LR
   B[Blog: lista] -->|Ler o post| P[Post do mês]
   P -->|Ver no changelog| C[Releases: o texto de cada versão na trilha]
   C -->|Ler o post de lançamento| P
+  C -->|Rótulo Exige ação| R[Resumo da mudança]
+  R -->|Ver na versão| C
+  R -->|Ver o guia| G[Doc de suporte, fora do protótipo]
   C -->|Clicar no título| L[Link da versão, do subtítulo ou do item]
   L -->|Abrir o link| C
   C -->|Assinar| A[E-mail e RSS]
 ```
 
 ## Rodadas
+
+### Rodada 6 · 2026-11-24
+- **Pergunta da redatora (pelo coordenador; o texto literal não veio na mensagem):** como o usuário sabe no que precisa agir, agora que Próximas mudanças saiu
+- **Aprovação (literal):** "concordo com suas sugestoes. aplique no prototipo"
+- **Conferido antes:** no MCP do Nuxt UI, o `UPopover` abre por clique por padrão (`mode: 'click'`), o que vale também para o toque, e posiciona o conteúdo com `collisionPadding` para não sair da tela
+- **Mudou:**
+  - o rótulo "Exige ação · Agir até <data>" da versão vira botão e abre um `UPopover`, mesmo com a versão fechada. Dentro, nesta ordem: o que muda, em 1 frase; quem é afetado; o prazo e as 3 fases em 1 linha; os links "Ver na versão" e "Ver o guia"
+  - "Ver na versão" fecha o popover, abre a versão e leva ao item, aceso; "Ver o guia" aponta para a doc de suporte e, no protótipo, mostra o aviso de que ela fica fora dele
+  - com mais de 1 mudança que exige ação na versão, o popover lista cada uma, separada por `USeparator`. O mock tem 1 por versão, então esse caso está no código e sem print
+  - no texto da versão, cada item de "Exige ação" traz, depois das frases e das fases, "O que fazer" com até 3 passos numerados (`ProseOl`), os mesmos do mock de Próximas mudanças
+  - o guia completo fica na doc de suporte; o changelog só aponta para ele
+  - no celular, o popover tem 320 px de largura e cabe em 375 px (de 39 a 359), sem rolagem lateral
+- **Como o popover foi aberto nos prints:** pelo próprio componente, com evento real do DevTools do Chrome: clique do mouse (`Input.dispatchMouseEvent`) no desktop e toque (`Input.dispatchTouchEvent`, com toque emulado) no celular. A captura sem janela não desenha ponteiro, e o mouse sai do botão antes da captura
+- **Para a redatora decidir:** o rótulo ganhou uma seta para baixo, para mostrar que abre; sem ela, nada indica que o rótulo é clicável
+- **Commit:** nenhum nesta rodada; o commit sai pelo coordenador
+- **Ver:** `http://localhost:3000/releases-no-docs` · `evidencias/rodada6-popover-desktop-claro.jpg` · `evidencias/rodada6-popover-desktop-escuro.jpg` · `evidencias/rodada6-popover-mobile-claro.jpg` · `evidencias/rodada6-o-que-fazer-desktop-claro.jpg`
 
 ### Rodada 5 · 2026-11-24
 - **Pedido (literal):**

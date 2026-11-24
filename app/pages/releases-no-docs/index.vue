@@ -177,6 +177,7 @@ const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value 
                 :destaque="destaque"
                 @copiar="copiar"
                 @ver-post="verPost"
+                @ir-para="irPara"
                 @assinar="assinarAberto = true"
               />
             </UContainer>

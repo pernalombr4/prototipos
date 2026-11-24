@@ -20,10 +20,15 @@
  * - cada título tem link, como os títulos de markdown do Nuxt UI e o changelog do Notion: o título
  *   da versão, os subtítulos (`ProseH3` com âncora) e o título de cada item. Passar o mouse mostra o
  *   ícone; clicar copia o link e mostra "Link copiado".
+ *
+ * Rodada 6: o rótulo "Exige ação" abre um `UPopover` com o que muda, quem é afetado, o prazo com as
+ * 3 fases e os links "Ver na versão" e "Ver o guia", mesmo com a versão fechada. No texto da versão,
+ * cada item que exige ação traz "O que fazer" em passos numerados (`ProseOl`).
  */
 import ProseA from '@nuxt/ui/runtime/components/prose/A.vue'
 import ProseH3 from '@nuxt/ui/runtime/components/prose/H3.vue'
 import ProseLi from '@nuxt/ui/runtime/components/prose/Li.vue'
+import ProseOl from '@nuxt/ui/runtime/components/prose/Ol.vue'
 import ProseP from '@nuxt/ui/runtime/components/prose/P.vue'
 import ProseStrong from '@nuxt/ui/runtime/components/prose/Strong.vue'
 import ProseUl from '@nuxt/ui/runtime/components/prose/Ul.vue'
@@ -41,6 +46,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   copiar: [ancora: string]
   verPost: [mes: string]
+  /** Leva ao item na trilha, com a versão aberta. */
+  irPara: [id: string]
   assinar: []
 }>()
 
@@ -58,6 +65,8 @@ const versoes = computed(() => {
     .sort((a, b) => Number(b.emBreve) - Number(a.emBreve) || b.data.localeCompare(a.data) || b.versao.localeCompare(a.versao))
     .map(v => ({
       ...v,
+      /** As mudanças que exigem ação, com o item que as anuncia: o conteúdo do popover do rótulo. */
+      acoes: v.itens.filter(e => e.mudanca).map(e => ({ entrada: e, mudanca: mudancaDe(e.mudanca)! })),
       secoes: [
         { chave: 'exige-acao', titulo: props.t.entrada.exigeAcao, itens: v.itens.filter(e => e.mudanca) },
         { chave: 'novidades', titulo: props.t.releases.tipos.novidade, itens: v.itens.filter(e => !e.mudanca && e.tipo === 'novidade') },
@@ -86,6 +95,12 @@ function fases(e: Entrada) {
 const dataLonga = (iso: string) => formatarData(iso, idioma.value, { day: 'numeric', month: 'long', year: 'numeric' })
 /** A data no formato do idioma, em números, sem voltar 1 dia (hoje o site mostra "Dec 7, 2026" para 8 de dezembro). */
 const dataDaVersao = (iso: string) => formatarData(iso, idioma.value, { day: '2-digit', month: '2-digit', year: 'numeric' })
+
+/** Do popover do rótulo: fecha e leva ao item, com a versão aberta. */
+function verNaVersao(id: string, fechar: () => void) {
+  fechar()
+  emit('irPara', id)
+}
 
 function foraDoPrototipo() {
   toast.add({ title: props.t.releases.foraDoPrototipo, icon: 'i-lucide-info', color: 'neutral', duration: 2500 })
@@ -186,16 +201,63 @@ watch(() => props.destaque, async (id) => {
         <!-- No máximo 2 rótulos: o tamanho e o prazo -->
         <template #badge>
           <UBadge color="neutral" variant="subtle" size="sm" :label="v.tamanho" />
-          <UBadge
+          <!-- Rodada 6: o rótulo abre o resumo do que exige ação, mesmo com a versão fechada -->
+          <UPopover
             v-if="v.prazo"
-            color="warning"
-            variant="outline"
-            size="sm"
-            icon="i-lucide-triangle-alert"
-            class="bg-warning/10 text-highlighted"
-            :ui="{ leadingIcon: 'text-warning' }"
-            :label="`${t.entrada.exigeAcao} · ${t.entrada.agirAte(formatarData(v.prazo, idioma))}`"
-          />
+            :content="{ side: 'bottom', align: 'start', sideOffset: 8, collisionPadding: 16 }"
+            :ui="{ content: 'w-80 p-4 sm:w-96' }"
+          >
+            <UButton
+              color="warning"
+              variant="outline"
+              size="xs"
+              icon="i-lucide-triangle-alert"
+              trailing-icon="i-lucide-chevron-down"
+              class="cursor-pointer bg-warning/10 text-highlighted hover:bg-warning/20"
+              :ui="{ leadingIcon: 'text-warning', trailingIcon: 'text-warning' }"
+              :aria-label="t.releases.abrirMudancas"
+              :label="`${t.entrada.exigeAcao} · ${t.entrada.agirAte(formatarData(v.prazo, idioma))}`"
+            />
+
+            <template #content="{ close }">
+              <div class="flex flex-col gap-4">
+                <template v-for="(x, i) in v.acoes" :key="x.entrada.id">
+                  <USeparator v-if="i" />
+                  <div class="flex flex-col gap-2 text-sm leading-6">
+                    <p class="font-semibold text-highlighted">
+                      {{ L(x.mudanca.titulo) }}.
+                    </p>
+                    <p class="text-muted">
+                      {{ t.releases.quemEAfetado(L(x.mudanca.quem)) }}
+                    </p>
+                    <p class="text-default">
+                      <span class="font-semibold text-highlighted">{{ t.releases.agirAteData(dataLonga(x.mudanca.fases.obrigatoria)) }}</span>{{ ' ' }}{{ fases(x.entrada) }}
+                    </p>
+                    <div class="-ml-2 flex flex-wrap gap-x-2">
+                      <UButton
+                        size="xs"
+                        color="primary"
+                        variant="link"
+                        trailing-icon="i-lucide-arrow-down"
+                        :label="t.releases.verNaVersao"
+                        class="cursor-pointer"
+                        @click="verNaVersao(x.entrada.id, close)"
+                      />
+                      <UButton
+                        size="xs"
+                        color="primary"
+                        variant="link"
+                        trailing-icon="i-lucide-arrow-up-right"
+                        :label="t.releases.verOGuia"
+                        class="cursor-pointer"
+                        @click="close(); foraDoPrototipo()"
+                      />
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </template>
+          </UPopover>
         </template>
 
         <!-- O título é link, como um título de markdown do Nuxt UI: o ícone # aparece ao passar o mouse -->
@@ -230,6 +292,38 @@ watch(() => props.destaque, async (id) => {
                     </ProseLi>
                   </ProseUl>
 
+                  <!-- Rodada 6: o item que exige ação traz "O que fazer" em passos numerados -->
+                  <template v-else-if="s.chave === 'exige-acao'">
+                    <div
+                      v-for="e in s.itens"
+                      :id="e.id"
+                      :key="e.id"
+                      class="scroll-mt-32 rounded-sm transition-colors duration-500"
+                      :class="aceso === e.id ? 'bg-primary/10' : ''"
+                    >
+                      <ProseP class="mb-2">
+                        <a :href="`#${e.id}`" :title="t.entrada.copiarLink" class="group relative rounded-sm text-highlighted outline-primary/25 focus-visible:outline-3">
+                          <span class="absolute top-0 -ms-8 hidden rounded-md bg-elevated p-1 text-muted opacity-0 transition group-hover:text-primary group-hover:opacity-100 group-focus:opacity-100 lg:flex" aria-hidden="true">
+                            <UIcon :name="icones.hash" class="size-4 shrink-0" />
+                          </span>
+                          <ProseStrong>{{ tituloDoItem(e) }}</ProseStrong>
+                        </a>{{ ' ' }}{{ L(e.resumo) }}
+                        {{ ' ' }}<ProseStrong>{{ t.releases.agirAteData(dataLonga(mudancaDe(e.mudanca)!.fases.obrigatoria)) }}</ProseStrong>{{ ' ' }}{{ fases(e) }}
+                        <template v-if="!v.emBreve">
+                          {{ ' ' }}<ProseA href="#" @click.prevent="foraDoPrototipo">{{ t.releases.saibaMais }}</ProseA>
+                        </template>
+                      </ProseP>
+                      <ProseP class="mt-2 mb-1">
+                        <ProseStrong>{{ t.releases.oQueFazer }}</ProseStrong>
+                      </ProseP>
+                      <ProseOl class="mt-1">
+                        <ProseLi v-for="(passo, i) in mudancaDe(e.mudanca)!.oQueFazer" :key="i">
+                          {{ L(passo) }}
+                        </ProseLi>
+                      </ProseOl>
+                    </div>
+                  </template>
+
                   <template v-else>
                     <ProseP
                       v-for="e in s.itens"
@@ -244,9 +338,6 @@ watch(() => props.destaque, async (id) => {
                         </span>
                         <ProseStrong>{{ tituloDoItem(e) }}</ProseStrong>
                       </a>{{ ' ' }}{{ L(e.resumo) }}
-                      <template v-if="mudancaDe(e.mudanca)">
-                        {{ ' ' }}<ProseStrong>{{ t.releases.agirAteData(dataLonga(mudancaDe(e.mudanca)!.fases.obrigatoria)) }}</ProseStrong>{{ ' ' }}{{ fases(e) }}
-                      </template>
                       <template v-if="!v.emBreve">
                         {{ ' ' }}<ProseA href="#" @click.prevent="foraDoPrototipo">{{ t.releases.saibaMais }}</ProseA>
                       </template>
