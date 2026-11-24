@@ -62,7 +62,8 @@ diz o que muda, em palavras, e quantas pessoas sentem.
    O back precisa de 3 mudanças:
    - a origem "itens sem formulário" vira uma permissão própria da categoria, e o item com `form` nulo só
      aparece para quem a tem quando a categoria está restrita a alguns formulários;
-   - o filtro da listagem considera só os formulários com Ver, e não qualquer ação de formulário;
+   - o filtro da listagem considera só os formulários com Ver, e não qualquer ação de formulário: Criar,
+     Atualizar ou Excluir num formulário não muda o que a pessoa vê;
    - categoria marcada sem nenhum formulário gravado continua valendo para todos, inclusive o formulário
      criado depois (já é assim hoje).
 4. **`EnTable` sem slot de cabeçalho.** A caixa de coluna é peça central e o `EnTable` só aceita rótulo em
@@ -91,8 +92,9 @@ USE87A7C6 está na develop desde 2026-11-16 e ainda não está na branch princip
 | Ponto | O back hoje | O protótipo | Quem está certo |
 |---|---|---|---|
 | Ver da categoria | Obrigatório para listar. Sem ele, a listagem dá 403, mesmo com Ver num formulário. | A categoria com traço já tem Ver. | Os 2 batem, desde que a tela grave o Ver da categoria junto com o do formulário. |
-| Formulário com permissão própria | Basta 1 permissão de formulário (qualquer ação) para a listagem ficar só nos formulários que têm Ver. Os outros formulários somem. | Rodadas 1 a 4: "Segue a categoria" por formulário, sem efeito nos irmãos. | **O código.** O protótipo prometia algo que o back não faz. A rodada 5 troca pelo modelo de caixa pai e filhas, que diz na tela o que o back faz. |
-| Permissão de formulário que não é Ver | Conta para restringir a listagem. Cargo com só "Criar" num formulário e Ver na categoria passa a não ver item nenhum. | Cada ação tem a sua lista de formulários. | **O protótipo.** No back é um efeito colateral, não uma regra. |
+| Formulário com permissão própria | Basta 1 permissão de formulário (qualquer ação) para a listagem ficar só nos formulários que têm Ver. Os outros formulários somem: com Ver e Criar na categoria e só Ver gravado no formulário B, a listagem mostra só os itens de B. | Rodadas 1 a 4: "Segue a categoria" por formulário, sem efeito nos outros formulários. | **O protótipo das rodadas 1 a 4 descrevia um comportamento que o back não tem.** A rodada 5 troca a chave pelo modelo de caixa pai e filhas: ele faz tudo o que a chave fazia (ação por ação, na mesma grade), deixa o formulário novo desmarcado na categoria com traço (a chave o deixaria seguir a categoria, e quem só vê Criminal veria o formulário novo) e tem 1 regra só. Decidido com a redatora em 2026-11-24. |
+| Permissão de formulário que não é Ver | Conta para restringir a listagem. Cargo com Ver na categoria e Criar só no formulário A não vê item nenhum: o back procura Ver nos formulários gravados, não acha e bloqueia a listagem. Com Criar em A e Ver em B, a listagem mostra só B. | Cada ação tem a sua lista de formulários: Ver decide o que a pessoa vê, Criar decide onde ela cria, e uma não altera a outra. | **O protótipo.** No back é um efeito colateral, não uma regra. Criar sem Ver continua valendo, configurado na própria ação (abaixo). |
+| Criar sem Ver (denúncia anônima) | Criar na categoria sem Ver: a pessoa cria e a listagem dá 403. O item guarda quem criou. | Criar não exige Ver; só Atualizar e Excluir exigem. Para acompanhar só as próprias denúncias, Ver com a regra de criador. | Os 2 batem no Criar sem Ver. A regra de criador depende do item de `rules` (acima). Decidido com a redatora em 2026-11-24. |
 | Itens sem formulário | Na branch principal, somem quando há permissão de formulário. Na develop (USE87A7C6), aparecem sempre. | Linha "Itens sem formulário", marcada ou não como qualquer formulário. | **O protótipo.** Sempre esconder trava o caso do agente de IA; sempre mostrar vaza no caso Cível e Criminal. |
 | Formulário criado depois | Sem permissão de formulário gravada, entra com a categoria. Com permissão gravada, fica de fora. | O mesmo: entra na ação marcada inteira; na ação com traço, entra desmarcado. | Os 2 batem. |
 | Campos | Na leitura, `fields` vazio = todos. | "Todos os campos" é o padrão. | Os 2 batem; falta a tela gravar vazio. |
@@ -246,6 +248,10 @@ USE87A7C6 está na develop desde 2026-11-16 e ainda não está na branch princip
   - Mock: Processos Judiciais com os formulários Cível, Criminal e Trabalhista; o cargo só cria, vê e
     atualiza em Criminal.
   - DECISOES: seção "Conferência com o código", com as divergências e quem está certo.
+- **Decidido com a redatora (2026-11-24):**
+  - a chave "Segue a categoria" não volta; o modelo de caixa pai e filhas fica;
+  - Ver e Criar por formulário são independentes: Criar num formulário não restringe o que a pessoa vê;
+  - Criar sem Ver vale (denúncia anônima); "só os que eu criei" funciona, porque o item guarda quem criou.
 - **Fronteira:** muda a coluna e as sublinhas de formulário da tabela de categorias e a aba Formulários do
   Ajustar; não muda a casca, as abas, o aviso de pendências e o lugar do Salvar.
 - **Maquete:** recarregar volta ao começo.
