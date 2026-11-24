@@ -11,7 +11,13 @@
  * - `categorias[id].proprio`: `null` segue o padrão; um objeto é a regra própria;
  * - `categorias[id].campos`: `null` = todos os campos que a ação libera;
  *   um objeto = a lista escolhida campo a campo, por ação;
- * - `categorias[id].formularios[id]`: `null` segue a categoria;
+ * - `categorias[id].origens[acao]`: de onde vêm os itens que a ação alcança.
+ *   Ausente = todas as origens, inclusive formulário criado depois (caixa da
+ *   categoria marcada). Uma lista = só essas origens (caixa com traço). A
+ *   origem é um formulário ou `SEM_FORMULARIO` (item com `form` nulo: API,
+ *   importação, Spaceflow, agente de IA). Rodada 5: substitui o "Segue a
+ *   categoria" por formulário. Marcar a categoria marca todas as origens;
+ *   desmarcar uma origem deixa a categoria com traço.
  * - `padraoItens` e `categorias[id].itens`: "Quais itens". Por ação (Ver,
  *   Atualizar, Excluir), só se a pessoa for a criadora e/ou a responsável.
  *   Na categoria, `null` segue o padrão; `campos` diz quais campos Pessoa
@@ -22,6 +28,7 @@
  */
 import {
   type Acao,
+  type Origem,
   type AcaoDeAlcance,
   type AcaoDeCampo,
   type CategoriaMock,
@@ -36,6 +43,7 @@ import {
   configuracoes,
   fixasIniciais,
   padrao,
+  SEM_FORMULARIO,
 } from './mocks'
 
 export type MapaDeAcoes = Record<Acao, boolean>
@@ -43,7 +51,7 @@ export type MapaDeAcoes = Record<Acao, boolean>
 export interface EstadoDaCategoria {
   proprio: MapaDeAcoes | null
   campos: Record<AcaoDeCampo, string[]> | null
-  formularios: Record<number, MapaDeAcoes | null>
+  origens: Partial<Record<Acao, Origem[]>>
   itens: ItensDaCategoria | null
 }
 
@@ -84,9 +92,8 @@ export function comDependencia(m: MapaDeAcoes): MapaDeAcoes {
 export function estadoInicial(lista: CategoriaMock[]): EstadoDoCargo {
   const categorias: Record<number, EstadoDaCategoria> = {}
   lista.forEach((c, i) => {
-    const e: EstadoDaCategoria = { proprio: null, campos: null, formularios: {}, itens: null }
+    const e: EstadoDaCategoria = { proprio: null, campos: null, origens: {}, itens: null }
     const responsavel = camposPessoa(c).find(f => f.label === 'Responsável') ?? camposPessoa(c)[0]
-    c.formularios.forEach(f => (e.formularios[f.id] = null))
 
     // Analista de Contratos: cria e atualiza onde o assunto é contrato.
     if (/Contrato|Aditivo|Procura/.test(c.name))
@@ -109,10 +116,19 @@ export function estadoInicial(lista: CategoriaMock[]): EstadoDoCargo {
       const ocultos = ['Valor do contrato', 'Multa por rescisão', 'Agência e conta', 'Banco']
       const visiveis = c.campos.filter(f => !ocultos.includes(f.label ?? '')).map(f => f.name)
       e.campos = { criar: [...visiveis], ver: ['created_at', 'updated_at', ...visiveis], atualizar: [...visiveis] }
-      // O formulário de assinatura só se vê.
+      // O formulário de assinatura só se vê: Criar e Atualizar ficam com traço.
       const assinatura = c.formularios.find(f => f.nome === 'Assinatura')
-      if (assinatura)
-        e.formularios[assinatura.id] = { criar: false, ver: true, atualizar: false, excluir: false }
+      if (assinatura) {
+        const semAssinatura = origensDe(c).filter(o => o !== assinatura.id)
+        e.origens = { criar: semAssinatura, atualizar: [...semAssinatura] }
+      }
+    }
+    // Processos Judiciais: este cargo só trabalha na área Criminal (o caso da segregação).
+    if (c.name === 'Processos Judiciais') {
+      const criminal = c.formularios.find(f => f.nome === 'Criminal')
+      e.proprio = { criar: true, ver: true, atualizar: true, excluir: false }
+      if (criminal)
+        e.origens = { criar: [criminal.id], ver: [criminal.id], atualizar: [criminal.id] }
     }
     categorias[c.id] = e
   })
@@ -188,8 +204,130 @@ export function acoesDaCategoria(e: EstadoDoCargo, id: number): MapaDeAcoes {
   return e.categorias[id]?.proprio ?? e.padrao
 }
 
-export function acoesDoFormulario(e: EstadoDoCargo, idCategoria: number, idForm: number): MapaDeAcoes {
-  return e.categorias[idCategoria]?.formularios[idForm] ?? acoesDaCategoria(e, idCategoria)
+/* ------------------------------------------------------------------ *
+ * Origens: formulários e itens sem formulário.
+ * ------------------------------------------------------------------ */
+
+/** Todas as origens da categoria: os formulários e, por último, os itens sem formulário. */
+export function origensDe(c: CategoriaMock): Origem[] {
+  return [...c.formularios.map(f => f.id), SEM_FORMULARIO]
+}
+
+/** A categoria tem o que separar? Sem formulário, todo item é "sem formulário". */
+export function temOrigens(c: CategoriaMock) {
+  return c.formularios.length > 0
+}
+
+/** As origens que a ação alcança. `null` = todas, inclusive formulário criado depois. */
+export function origensDaAcao(e: EstadoDoCargo, c: CategoriaMock, acao: Acao): Origem[] | null {
+  if (!acoesDaCategoria(e, c.id)[acao])
+    return []
+  return e.categorias[c.id]?.origens[acao] ?? null
+}
+
+/** A ação vale nesta origem? */
+export function liberadoNaOrigem(e: EstadoDoCargo, c: CategoriaMock, acao: Acao, o: Origem): boolean {
+  const lista = origensDaAcao(e, c, acao)
+  return lista === null || lista.includes(o)
+}
+
+/** Ação liberada só em parte das origens: a caixa da categoria fica com traço. */
+export function parcialPorOrigem(e: EstadoDoCargo, c: CategoriaMock, acao: Acao) {
+  const lista = origensDaAcao(e, c, acao)
+  if (lista === null || !lista.length)
+    return null
+  return { n: lista.length, total: origensDe(c).length, lista }
+}
+
+/** O mapa de ações de uma origem, para leitura. */
+export function acoesDoFormulario(e: EstadoDoCargo, c: CategoriaMock, o: Origem): MapaDeAcoes {
+  return Object.fromEntries(acoes.map(a => [a, liberadoNaOrigem(e, c, a, o)])) as MapaDeAcoes
+}
+
+/**
+ * Grava a lista de origens de uma ação:
+ * - lista vazia desliga a ação;
+ * - lista com todas as origens volta a "todas" (caixa marcada, inclui formulário novo).
+ * A categoria que seguia o padrão ganha regra própria só se as ações mudarem.
+ */
+function gravarOrigens(e: EstadoDoCargo, c: CategoriaMock, acao: Acao, lista: Origem[] | null) {
+  const ec = e.categorias[c.id]!
+  const todas = origensDe(c)
+  const ligada = lista === null || lista.length > 0
+  const acoesAtuais = acoesDaCategoria(e, c.id)
+  if (acoesAtuais[acao] !== ligada) {
+    const novo = { ...acoesAtuais, [acao]: ligada }
+    ec.proprio = acoes.every(a => novo[a] === e.padrao[a]) ? null : novo
+  }
+  const completa = lista === null || todas.every(o => lista.includes(o))
+  if (!ligada || completa)
+    delete ec.origens[acao]
+  else
+    ec.origens[acao] = todas.filter(o => lista.includes(o))
+}
+
+/**
+ * Depois de mudar as ações da categoria: a ação desligada perde a lista de
+ * origens, e Ver acompanha Atualizar e Excluir.
+ */
+export function ajustarOrigens(e: EstadoDoCargo, c: CategoriaMock) {
+  const ec = e.categorias[c.id]!
+  const a = acoesDaCategoria(e, c.id)
+  for (const x of acoes) {
+    if (!a[x])
+      delete ec.origens[x]
+  }
+  exigirVer(e, c)
+}
+
+/** Atualizar e Excluir exigem Ver na mesma origem. */
+function exigirVer(e: EstadoDoCargo, c: CategoriaMock) {
+  const precisa = (['atualizar', 'excluir'] as Acao[]).map(a => origensDaAcao(e, c, a))
+  if (precisa.some(l => l === null)) {
+    if (origensDaAcao(e, c, 'ver') !== null)
+      gravarOrigens(e, c, 'ver', null)
+    return
+  }
+  const uniao = new Set(precisa.flat() as Origem[])
+  const ver = origensDaAcao(e, c, 'ver')!
+  if ([...uniao].every(o => ver.includes(o)))
+    return
+  gravarOrigens(e, c, 'ver', [...new Set([...ver, ...uniao])])
+}
+
+/** Marca ou desmarca a ação numa origem (a caixa da sublinha do formulário). */
+export function definirNaOrigem(e: EstadoDoCargo, c: CategoriaMock, acao: Acao, o: Origem, valor: boolean) {
+  const atual = origensDaAcao(e, c, acao)
+  const base = atual === null ? origensDe(c) : atual
+  const nova = valor ? [...new Set([...base, o])] : base.filter(x => x !== o)
+  gravarOrigens(e, c, acao, nova)
+  exigirVer(e, c)
+}
+
+/** Marca a ação em todas as origens (o clique na caixa com traço da categoria). */
+export function liberarEmTodas(e: EstadoDoCargo, c: CategoriaMock, acao: Acao) {
+  gravarOrigens(e, c, acao, null)
+  exigirVer(e, c)
+}
+
+/** Ver travado nesta origem porque Atualizar ou Excluir valem nela. */
+export function verTravadoNaOrigem(e: EstadoDoCargo, c: CategoriaMock, o: Origem): Acao | null {
+  if (liberadoNaOrigem(e, c, 'atualizar', o) && acoesDaCategoria(e, c.id).atualizar)
+    return 'atualizar'
+  if (liberadoNaOrigem(e, c, 'excluir', o) && acoesDaCategoria(e, c.id).excluir)
+    return 'excluir'
+  return null
+}
+
+/** Quantas origens a categoria alcança em alguma ação, e quais, quando alguma ação é parcial. */
+export function resumoDeOrigens(e: EstadoDoCargo, c: CategoriaMock) {
+  if (!temOrigens(c) || !temAcesso(e, c.id))
+    return null
+  const parciais = acoes.filter(a => parcialPorOrigem(e, c, a))
+  if (!parciais.length)
+    return null
+  const alcancadas = origensDe(c).filter(o => acoes.some(a => acoesDaCategoria(e, c.id)[a] && liberadoNaOrigem(e, c, a, o)))
+  return { n: alcancadas.length, total: origensDe(c).length, alcancadas, parciais }
 }
 
 export function campoLiberado(e: EstadoDoCargo, c: CategoriaMock, acao: AcaoDeCampo, campo: string): boolean {
@@ -214,10 +352,6 @@ export function resumoDeCampos(e: EstadoDoCargo, c: CategoriaMock): { liberados:
   return { liberados: visiveis.size, total: c.campos.length }
 }
 
-export function formulariosProprios(e: EstadoDoCargo, c: CategoriaMock): number {
-  return c.formularios.filter(f => e.categorias[c.id]?.formularios[f.id]).length
-}
-
 export function temAcesso(e: EstadoDoCargo, id: number): boolean {
   return acoes.some(a => acoesDaCategoria(e, id)[a])
 }
@@ -238,7 +372,7 @@ export function permissoesAtivas(e: EstadoDoCargo, lista: CategoriaMock[]): numb
   for (const c of lista) {
     n += acoes.filter(a => acoesDaCategoria(e, c.id)[a]).length
     for (const f of c.formularios)
-      n += acoes.filter(a => acoesDoFormulario(e, c.id, f.id)[a]).length
+      n += acoes.filter(a => liberadoNaOrigem(e, c, a, f.id)).length
   }
   return n
 }
@@ -319,9 +453,10 @@ export function mudancas(
       partes.push(b.campos ? { chave: 'camposEscolhidos', valor: resumoDeCampos(atual, c)?.liberados ?? 0 } : { chave: 'todosOsCampos' })
     if (JSON.stringify(a.itens) !== JSON.stringify(b.itens))
       partes.push({ chave: 'alcance' })
-    const fa = c.formularios.filter(f => JSON.stringify(a.formularios[f.id]) !== JSON.stringify(b.formularios[f.id])).length
-    if (fa)
-      partes.push({ chave: 'formularios', valor: fa })
+    if (JSON.stringify(a.origens) !== JSON.stringify(b.origens)) {
+      const r = resumoDeOrigens(atual, c)
+      partes.push(r ? { chave: 'origensEmParte', valor: r.n } : { chave: 'origensTodas' })
+    }
     if (partes.length)
       saida.push({ onde: c.name, partes })
   }

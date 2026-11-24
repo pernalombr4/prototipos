@@ -74,6 +74,18 @@ export interface Textos {
   dicas: Record<Acao, string>
   descLinhas: Record<string, string>
   parcialDica: (acao: string, n: number, total: number) => string
+  parcialOrigemDica: (acao: string, nomes: string) => string
+  semFormulario: string
+  semFormularioDesc: string
+  semFormularios: string
+  origensTodas: string
+  origensDe: (n: number, total: number) => string
+  origensEmParte: string
+  acaoEmOrigens: (acao: string, n: number, total: number) => string
+  todosOsFormularios: string
+  todosOsFormulariosDesc: string
+  todosComTracoDica: string
+  formNovoAviso: string
   voltarAcao: (acao: string, onde: string) => string
   exigidoPor: (acao: string) => string
   pessoasNoCargo: (n: number) => string
@@ -191,7 +203,8 @@ export interface Textos {
     segueOPadrao: (n: number) => string
     camposEscolhidos: (n: number) => string
     todosOsCampos: string
-    formularios: (n: number) => string
+    origensEmParte: (n: number) => string
+    origensTodas: string
     alcance: string
   }
   toastSalvo: string
@@ -300,6 +313,18 @@ const pt: Textos = {
     credenciais: 'Chaves e senhas das integrações.',
   },
   parcialDica: (a, n, t) => `${a} em ${n} de ${t} campos. Clique para ajustar.`,
+  parcialOrigemDica: (a, nomes) => `${a} só em: ${nomes}. Clique para liberar em todos os formulários.`,
+  semFormulario: 'Itens sem formulário',
+  semFormularioDesc: 'Criados pela API, por importação, pelo Spaceflow ou por agente de IA.',
+  semFormularios: 'Sem formulários',
+  origensTodas: 'Todos',
+  origensDe: (n, t) => `${n} de ${t}`,
+  origensEmParte: 'Em parte',
+  acaoEmOrigens: (a, n, t) => `${a} em ${n} de ${t}`,
+  todosOsFormularios: 'Todos os formulários',
+  todosOsFormulariosDesc: 'Inclui os itens sem formulário e os formulários criados depois.',
+  todosComTracoDica: 'Liberado só em parte. Clique para liberar em todos.',
+  formNovoAviso: 'Formulário criado depois entra na ação marcada em "Todos os formulários". Na ação com traço, ele entra desmarcado.',
   voltarAcao: (a, o) => `Voltar ${a} ao padrão em ${o}`,
   exigidoPor: a => `Exigido por ${a}. Desmarque ${a} para tirar Ver.`,
   pessoasNoCargo: n => n === 1 ? '1 pessoa com este cargo' : `${n} pessoas com este cargo`,
@@ -395,7 +420,7 @@ const pt: Textos = {
   atualizadoEm: 'Atualizado em',
   colunaFormulario: 'Formulário',
   colunaSegue: 'Segue a categoria',
-  formsDesc: 'Desligue para dar a um formulário uma regra diferente da categoria.',
+  formsDesc: 'Marque a categoria para liberar todos os formulários. Marque só alguns para restringir o cargo a eles.',
   semAcesso: 'Este cargo não acessa esta categoria. Libere uma ação na tabela para ajustar campos e formulários.',
   concluir: 'Concluir',
   vazioCampo: 'Nenhum campo com esse nome.',
@@ -439,7 +464,8 @@ const pt: Textos = {
     segueOPadrao: n => `vale para ${n} categorias`,
     camposEscolhidos: n => `${n} campos escolhidos`,
     todosOsCampos: 'todos os campos',
-    formularios: n => n === 1 ? '1 formulário mudou' : `${n} formulários mudaram`,
+    origensEmParte: n => n === 1 ? 'só em 1 formulário' : `só em ${n} formulários`,
+    origensTodas: 'em todos os formulários',
     alcance: 'mudou a regra de criador',
   },
   toastSalvo: 'Permissões salvas',
@@ -547,6 +573,18 @@ const en: Textos = {
     credenciais: 'Integration keys and passwords.',
   },
   parcialDica: (a, n, t) => `${a} on ${n} of ${t} fields. Click to adjust.`,
+  parcialOrigemDica: (a, nomes) => `${a} only on: ${nomes}. Click to allow on all forms.`,
+  semFormulario: 'Items without a form',
+  semFormularioDesc: 'Created by the API, by import, by Spaceflow or by an AI agent.',
+  semFormularios: 'No forms',
+  origensTodas: 'All',
+  origensDe: (n, t) => `${n} of ${t}`,
+  origensEmParte: 'Partial',
+  acaoEmOrigens: (a, n, t) => `${a} on ${n} of ${t}`,
+  todosOsFormularios: 'All forms',
+  todosOsFormulariosDesc: 'Includes items without a form and forms created later.',
+  todosComTracoDica: 'Allowed only in part. Click to allow on all.',
+  formNovoAviso: 'A form created later joins the actions checked in "All forms". In a partial action, it starts unchecked.',
   voltarAcao: (a, o) => `Set ${a} back to default in ${o}`,
   exigidoPor: a => `Required by ${a}. Uncheck ${a} to remove View.`,
   pessoasNoCargo: n => n === 1 ? '1 person with this role' : `${n} people with this role`,
@@ -642,7 +680,7 @@ const en: Textos = {
   atualizadoEm: 'Updated at',
   colunaFormulario: 'Form',
   colunaSegue: 'Follows the category',
-  formsDesc: 'Turn off to give a form a rule different from the category.',
+  formsDesc: 'Check the category to allow all forms. Check only some to limit the role to them.',
   semAcesso: 'This role has no access to this category. Allow an action in the table to adjust fields and forms.',
   concluir: 'Done',
   vazioCampo: 'No field with that name.',
@@ -686,7 +724,8 @@ const en: Textos = {
     segueOPadrao: n => `applies to ${n} categories`,
     camposEscolhidos: n => `${n} fields chosen`,
     todosOsCampos: 'all fields',
-    formularios: n => n === 1 ? '1 form changed' : `${n} forms changed`,
+    origensEmParte: n => n === 1 ? 'only on 1 form' : `only on ${n} forms`,
+    origensTodas: 'on all forms',
     alcance: 'changed the creator rule',
   },
   toastSalvo: 'Permissions saved',
@@ -794,6 +833,18 @@ const es: Textos = {
     credenciais: 'Claves y contraseñas de las integraciones.',
   },
   parcialDica: (a, n, t) => `${a} en ${n} de ${t} campos. Haga clic para ajustar.`,
+  parcialOrigemDica: (a, nomes) => `${a} solo en: ${nomes}. Haga clic para permitir en todos los formularios.`,
+  semFormulario: 'Ítems sin formulario',
+  semFormularioDesc: 'Creados por la API, por importación, por Spaceflow o por un agente de IA.',
+  semFormularios: 'Sin formularios',
+  origensTodas: 'Todos',
+  origensDe: (n, t) => `${n} de ${t}`,
+  origensEmParte: 'En parte',
+  acaoEmOrigens: (a, n, t) => `${a} en ${n} de ${t}`,
+  todosOsFormularios: 'Todos los formularios',
+  todosOsFormulariosDesc: 'Incluye los ítems sin formulario y los formularios creados después.',
+  todosComTracoDica: 'Permitido solo en parte. Haga clic para permitir en todos.',
+  formNovoAviso: 'Un formulario creado después entra en las acciones marcadas en "Todos los formularios". En una acción parcial, entra desmarcado.',
   voltarAcao: (a, o) => `Volver ${a} al predeterminado en ${o}`,
   exigidoPor: a => `Exigido por ${a}. Desmarque ${a} para quitar Ver.`,
   pessoasNoCargo: n => n === 1 ? '1 persona con este cargo' : `${n} personas con este cargo`,
@@ -889,7 +940,7 @@ const es: Textos = {
   atualizadoEm: 'Actualizado el',
   colunaFormulario: 'Formulario',
   colunaSegue: 'Sigue la categoría',
-  formsDesc: 'Desactive para dar a un formulario una regla distinta de la categoría.',
+  formsDesc: 'Marque la categoría para permitir todos los formularios. Marque solo algunos para limitar el cargo a ellos.',
   semAcesso: 'Este cargo no accede a esta categoría. Permita una acción en la tabla para ajustar campos y formularios.',
   concluir: 'Listo',
   vazioCampo: 'Ningún campo con ese nombre.',
@@ -933,7 +984,8 @@ const es: Textos = {
     segueOPadrao: n => `vale para ${n} categorías`,
     camposEscolhidos: n => `${n} campos elegidos`,
     todosOsCampos: 'todos los campos',
-    formularios: n => n === 1 ? '1 formulario cambió' : `${n} formularios cambiaron`,
+    origensEmParte: n => n === 1 ? 'solo en 1 formulario' : `solo en ${n} formularios`,
+    origensTodas: 'en todos los formularios',
     alcance: 'cambió la regla de creador',
   },
   toastSalvo: 'Permisos guardados',

@@ -17,8 +17,20 @@ import type { TableColumn } from '@nuxt/ui'
 import type { Textos } from './textos'
 import CaixaDePermissao from './_CaixaDePermissao.vue'
 import EditorDeItens from './_EditorDeItens.vue'
-import { type Acao, type AcaoDeCampo, type CategoriaMock, acessoDeOutroCargo, acoes, acoesDeCampo, cargo, outrosCargos } from './mocks'
-import { type EstadoDoCargo, acoesDaCategoria, acoesDoFormulario, comDependencia, temAcesso, verExigidoPor } from './estado'
+import { type Acao, type AcaoDeCampo, type CategoriaMock, SEM_FORMULARIO, acessoDeOutroCargo, acoes, acoesDeCampo, cargo, outrosCargos } from './mocks'
+import {
+  type EstadoDoCargo,
+  acoesDaCategoria,
+  ajustarOrigens,
+  comDependencia,
+  definirNaOrigem,
+  liberadoNaOrigem,
+  liberarEmTodas,
+  parcialPorOrigem,
+  temAcesso,
+  verExigidoPor,
+  verTravadoNaOrigem,
+} from './estado'
 
 type Aba = 'campos' | 'formularios' | 'itens' | 'acesso'
 
@@ -134,33 +146,74 @@ const colunasDeCampo = computed<TableColumn<LinhaDeCampo>[]>(() => [
  * Formulários
  * ------------------------------------------------------------------ */
 
-function segue(idForm: number) {
-  return !ec.value?.formularios[idForm]
+/*
+ * Rodada 5: a caixa da categoria e as dos formulários são pai e filhas.
+ * Marcar "Todos" marca todas as origens (e o formulário criado depois);
+ * marcar só algumas deixa "Todos" com traço. "Itens sem formulário" é uma
+ * origem como as outras: API, importação, Spaceflow, agente de IA.
+ */
+interface LinhaDeOrigem {
+  id: number
+  nome: string
+  desc?: string
+  todos?: boolean
 }
 
-function alternarSegue(idForm: number, seguir: boolean) {
-  if (!ec.value || !props.categoria)
+const linhasDeOrigem = computed<LinhaDeOrigem[]>(() => {
+  if (!props.categoria)
+    return []
+  return [
+    { id: -1, nome: props.t.todosOsFormularios, desc: props.t.todosOsFormulariosDesc, todos: true },
+    ...props.categoria.formularios.map(f => ({ id: f.id, nome: f.nome })),
+    { id: SEM_FORMULARIO, nome: props.t.semFormulario, desc: props.t.semFormularioDesc },
+  ]
+})
+
+function valorDaOrigem(l: LinhaDeOrigem, a: Acao): Valor {
+  const c = props.categoria!
+  if (!acoesDaCategoria(props.estado, c.id)[a])
+    return false
+  if (l.todos)
+    return parcialPorOrigem(props.estado, c, a) ? 'indeterminate' : true
+  return liberadoNaOrigem(props.estado, c, a, l.id)
+}
+
+function alterarOrigem(l: LinhaDeOrigem, a: Acao, valor: boolean) {
+  const c = props.categoria!
+  if (l.todos) {
+    // Traço ou vazio: libera em todas. Marcada: tira de todas.
+    if (valor || parcialPorOrigem(props.estado, c, a)) {
+      liberarEmTodas(props.estado, c, a)
+    }
+    else {
+      const novo = comDependencia({ ...acoesDaCategoria(props.estado, c.id), [a]: false })
+      props.estado.categorias[c.id]!.proprio = novo
+      ajustarOrigens(props.estado, c)
+    }
     return
-  ec.value.formularios[idForm] = seguir ? null : { ...acoesDaCategoria(props.estado, props.categoria.id) }
+  }
+  definirNaOrigem(props.estado, c, a, l.id, valor)
 }
 
-function definirForm(idForm: number, a: Acao, valor: boolean) {
-  const f = ec.value?.formularios[idForm]
-  if (f && ec.value)
-    ec.value.formularios[idForm] = comDependencia({ ...f, [a]: valor })
-}
-
-function travadaNoForm(idForm: number, a: Acao) {
-  if (a !== 'ver' || segue(idForm) || !props.categoria)
+function travadaNaOrigem(l: LinhaDeOrigem, a: Acao) {
+  const c = props.categoria!
+  if (a !== 'ver' || !acoesDaCategoria(props.estado, c.id).ver)
     return null
-  const quem = verExigidoPor(acoesDoFormulario(props.estado, props.categoria.id, idForm))
+  if (l.todos) {
+    if (parcialPorOrigem(props.estado, c, 'ver'))
+      return null
+    const quem = verExigidoPor(acoesDaCategoria(props.estado, c.id))
+    return quem ? props.t.exigidoPor(props.t.acoes[quem]) : null
+  }
+  if (!liberadoNaOrigem(props.estado, c, 'ver', l.id))
+    return null
+  const quem = verTravadoNaOrigem(props.estado, c, l.id)
   return quem ? props.t.exigidoPor(props.t.acoes[quem]) : null
 }
 
-const colunasDeForm = computed<TableColumn<{ id: number, nome: string }>[]>(() => [
+const colunasDeForm = computed<TableColumn<LinhaDeOrigem>[]>(() => [
   { accessorKey: 'nome', header: props.t.colunaFormulario },
-  { id: 'segue', header: props.t.colunaSegue, meta: { class: { th: 'w-36', td: 'w-36' } } },
-  ...acoes.map(a => ({ id: a, header: props.t.acoes[a], meta: { class: { th: 'text-center w-20', td: 'text-center w-20' } } })),
+  ...acoes.map(a => ({ id: a, header: props.t.acoes[a], meta: { class: { th: 'text-center w-20 px-0', td: 'text-center w-20 px-0' } } })),
 ])
 
 /* ------------------------------------------------------------------ *
@@ -254,6 +307,45 @@ const itensDeAba = computed(() => [
           <EditorDeItens :t="t" :estado="estado" :categoria="categoria" :somente-leitura="somenteLeitura" />
         </div>
 
+        <!-- FORMULÁRIOS: a categoria é a caixa pai, cada formulário uma filha. -->
+        <div v-else-if="aba === 'formularios'" class="space-y-3 animate-[entrada_.25s_ease-out_both]">
+          <p class="text-sm text-muted">{{ t.formsDesc }}</p>
+          <UTable
+            :data="linhasDeOrigem"
+            :columns="colunasDeForm"
+            :meta="{ class: { tr: (r: { original: LinhaDeOrigem }) => r.original.todos ? 'bg-elevated/60' : '' } }"
+            class="rounded-lg border border-default"
+            :ui="{ base: 'w-full min-w-[36rem] table-fixed', th: 'py-2 text-xs', td: 'py-2' }"
+          >
+            <template #nome-cell="{ row }">
+              <span class="flex min-w-0 items-center gap-2" :class="row.original.todos ? '' : 'pl-6'">
+                <UIcon
+                  :name="row.original.todos ? 'i-lucide-layers' : row.original.id === SEM_FORMULARIO ? 'i-lucide-bot' : 'i-lucide-file-text'"
+                  class="size-4 shrink-0 text-muted"
+                />
+                <span class="min-w-0">
+                  <span class="block truncate text-sm" :class="row.original.todos ? 'font-medium text-highlighted' : 'text-default'">{{ row.original.nome }}</span>
+                  <span v-if="row.original.desc" class="block whitespace-normal text-xs text-muted">{{ row.original.desc }}</span>
+                </span>
+              </span>
+            </template>
+            <template v-for="a in acoes" :key="a" #[`${a}-cell`]="{ row }">
+              <CaixaDePermissao
+                :valor="valorDaOrigem(row.original, a)"
+                :rotulo="`${t.acoes[a]}: ${row.original.nome}`"
+                :travada-por="travadaNaOrigem(row.original, a)"
+                :dica="row.original.todos && valorDaOrigem(row.original, a) === 'indeterminate' ? t.todosComTracoDica : ''"
+                :desabilitada="somenteLeitura"
+                @alterar="v => alterarOrigem(row.original, a, v)"
+              />
+            </template>
+          </UTable>
+          <p class="flex items-start gap-2 rounded-md bg-elevated px-3 py-2 text-xs text-muted">
+            <UIcon name="i-lucide-info" class="mt-0.5 size-3.5 shrink-0" />
+            {{ t.formNovoAviso }}
+          </p>
+        </div>
+
         <UAlert
           v-else-if="!comAcesso"
           icon="i-lucide-lock"
@@ -330,43 +422,6 @@ const itensDeAba = computed(() => [
           </template>
         </div>
 
-        <!-- FORMULÁRIOS -->
-        <div v-else class="space-y-3 animate-[entrada_.25s_ease-out_both]">
-          <p class="text-sm text-muted">{{ t.formsDesc }}</p>
-          <UTable
-            :data="categoria.formularios"
-            :columns="colunasDeForm"
-            class="rounded-lg border border-default"
-            :ui="{ base: 'w-full min-w-[40rem] table-fixed', th: 'py-2 text-xs', td: 'py-2' }"
-          >
-            <template #nome-cell="{ row }">
-              <span class="flex items-center gap-2">
-                <span class="text-sm text-default">{{ row.original.nome }}</span>
-                <UBadge v-if="!segue(row.original.id)" :label="t.regraPropria" color="info" variant="subtle" size="sm" />
-              </span>
-            </template>
-            <template #segue-cell="{ row }">
-              <USwitch
-                :model-value="segue(row.original.id)"
-                :disabled="somenteLeitura"
-                size="sm"
-                :aria-label="`${t.colunaSegue}: ${row.original.nome}`"
-                @update:model-value="v => alternarSegue(row.original.id, v)"
-              />
-            </template>
-            <template v-for="a in acoes" :key="a" #[`${a}-cell`]="{ row }">
-              <CaixaDePermissao
-                :valor="acoesDoFormulario(estado, categoria.id, row.original.id)[a]"
-                :rotulo="`${t.acoes[a]}: ${row.original.nome}`"
-                herdada
-                :difere="!segue(row.original.id) && acoesDoFormulario(estado, categoria.id, row.original.id)[a] !== acoesCat[a]"
-                :travada-por="travadaNoForm(row.original.id, a)"
-                :desabilitada="somenteLeitura || segue(row.original.id)"
-                @alterar="v => definirForm(row.original.id, a, v)"
-              />
-            </template>
-          </UTable>
-        </div>
       </template>
     </template>
 

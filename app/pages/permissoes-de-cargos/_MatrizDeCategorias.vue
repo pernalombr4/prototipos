@@ -30,16 +30,23 @@ import {
   acoesDeAlcance,
   acoesDeCampo,
   camposPessoa,
+  SEM_FORMULARIO,
 } from './mocks'
 import {
   type EstadoDoCargo,
   type MapaDeAcoes,
   acoesDaCategoria,
-  acoesDoFormulario,
+  ajustarOrigens,
   comDependencia,
+  definirNaOrigem,
   definirRegra,
-  formulariosProprios,
   itensDaCategoria,
+  liberadoNaOrigem,
+  liberarEmTodas,
+  parcialPorOrigem,
+  resumoDeOrigens,
+  temOrigens,
+  verTravadoNaOrigem,
   resumoDeCampos,
   temAcesso,
   temRegraDeItens,
@@ -71,7 +78,7 @@ const alterada = (c: CategoriaMock) =>
   || (!props.estado.categorias[c.id]?.proprio && JSON.stringify(props.estado.padrao) !== JSON.stringify(props.salvo.padrao))
   || (!props.estado.categorias[c.id]?.itens && JSON.stringify(props.estado.padraoItens) !== JSON.stringify(props.salvo.padraoItens))
 
-const propria = (c: CategoriaMock) => !!props.estado.categorias[c.id]?.proprio
+const propria = (c: CategoriaMock) => !!props.estado.categorias[c.id]?.proprio || Object.keys(props.estado.categorias[c.id]?.origens ?? {}).length > 0
 
 function normalizar(texto: string) {
   return texto.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -108,6 +115,7 @@ type Linha =
   | { tipo: 'criador', id: string, c: CategoriaMock }
   | { tipo: 'responsavel', id: string, c: CategoriaMock }
   | { tipo: 'formulario', id: string, c: CategoriaMock, f: FormularioMock }
+  | { tipo: 'semForm', id: string, c: CategoriaMock }
 
 const linhas = computed<Linha[]>(() => {
   const saida: Linha[] = []
@@ -119,7 +127,10 @@ const linhas = computed<Linha[]>(() => {
       saida.push({ tipo: 'campos', id: `k${c.id}`, c })
       saida.push({ tipo: 'criador', id: `o${c.id}`, c })
       saida.push({ tipo: 'responsavel', id: `r${c.id}`, c })
-      c.formularios.forEach(f => saida.push({ tipo: 'formulario', id: `f${f.id}`, c, f }))
+      if (temOrigens(c)) {
+        c.formularios.forEach(f => saida.push({ tipo: 'formulario', id: `f${f.id}`, c, f }))
+        saida.push({ tipo: 'semForm', id: `s${c.id}`, c })
+      }
     }
   }
   return saida
@@ -143,16 +154,22 @@ function definirAcao(c: CategoriaMock, acao: Acao, valor: boolean) {
   const e = props.estado.categorias[c.id]!
   const novo = comDependencia({ ...acoesDaCategoria(props.estado, c.id), [acao]: valor })
   e.proprio = igualAoPadrao(novo) ? null : novo
+  // Marcar a categoria marca todas as origens; desmarcar tira de todas.
+  delete e.origens[acao]
+  ajustarOrigens(props.estado, c)
 }
 
 function definirLinha(c: CategoriaMock, valor: boolean) {
   const e = props.estado.categorias[c.id]!
   const novo = { criar: valor, ver: valor, atualizar: valor, excluir: valor }
   e.proprio = igualAoPadrao(novo) ? null : novo
+  e.origens = {}
 }
 
 function voltarAoPadrao(c: CategoriaMock) {
   props.estado.categorias[c.id]!.proprio = null
+  props.estado.categorias[c.id]!.origens = {}
+  ajustarOrigens(props.estado, c)
 }
 
 function definirPadrao(acao: Acao, valor: boolean) {
@@ -176,7 +193,7 @@ function estadoDaColuna(acao: Acao): Valor {
 function definirColuna(acao: Acao, valor: boolean) {
   const alvo = filtradas.value
   // A caixa de coluna mexe em muitas categorias de uma vez: o aviso oferece desfazer.
-  const antes = new Map(alvo.map(c => [c.id, props.estado.categorias[c.id]!.proprio]))
+  const antes = new Map(alvo.map(c => [c.id, { proprio: props.estado.categorias[c.id]!.proprio, origens: { ...props.estado.categorias[c.id]!.origens } }]))
   alvo.forEach(c => definirAcao(c, acao, valor))
   toast.add({
     title: props.t.toastColuna(props.t.acoes[acao], alvo.length, valor),
@@ -188,7 +205,10 @@ function definirColuna(acao: Acao, valor: boolean) {
       icon: 'i-lucide-undo-2',
       color: 'neutral',
       variant: 'outline',
-      onClick: () => antes.forEach((p, id) => { props.estado.categorias[id]!.proprio = p }),
+      onClick: () => antes.forEach((p, id) => {
+        props.estado.categorias[id]!.proprio = p.proprio
+        props.estado.categorias[id]!.origens = p.origens
+      }),
     }],
   })
 }
@@ -219,11 +239,44 @@ function parcial(c: CategoriaMock, acao: Acao) {
 }
 
 function valorDaCelula(c: CategoriaMock, acao: Acao): Valor {
-  return parcial(c, acao) ? 'indeterminate' : acoesDaCategoria(props.estado, c.id)[acao]
+  return parcial(c, acao) || parcialPorOrigem(props.estado, c, acao) ? 'indeterminate' : acoesDaCategoria(props.estado, c.id)[acao]
+}
+
+/** Os nomes das origens, na ordem da categoria. */
+function nomesDasOrigens(c: CategoriaMock, lista: number[]) {
+  return lista.map(o => o === SEM_FORMULARIO ? props.t.semFormulario : c.formularios.find(f => f.id === o)?.nome ?? '').join(', ')
+}
+
+/** "1 de 4" quando alguma origem fica sem ação nenhuma; "Em parte" quando só algumas ações se limitam. */
+function rotuloDeOrigens(c: CategoriaMock) {
+  const r = resumoDeOrigens(props.estado, c)!
+  return r.n < r.total ? props.t.origensDe(r.n, r.total) : props.t.origensEmParte
+}
+
+/** Uma linha por ação limitada: "Criar em 12 de 13". Com 1 a 3 origens, os nomes. */
+function dicaDeOrigens(c: CategoriaMock) {
+  const r = resumoDeOrigens(props.estado, c)!
+  return r.parciais.map((a) => {
+    const p = parcialPorOrigem(props.estado, c, a)!
+    return p.n <= 3 ? `${props.t.acoes[a]}: ${nomesDasOrigens(c, p.lista)}` : props.t.acaoEmOrigens(props.t.acoes[a], p.n, p.total)
+  }).join(' · ')
+}
+
+function dicaDaCelula(c: CategoriaMock, acao: Acao) {
+  const o = parcialPorOrigem(props.estado, c, acao)
+  if (o)
+    return props.t.parcialOrigemDica(props.t.acoes[acao], nomesDasOrigens(c, o.lista))
+  const p = parcial(c, acao)
+  return p ? props.t.parcialDica(props.t.acoes[acao], p.n, p.total) : ''
 }
 
 function clicarCelula(c: CategoriaMock, acao: Acao, valor: boolean) {
-  // Parcial: o clique leva ao ajuste dos campos, sem apagar a escolha feita lá.
+  // Traço por formulário: o clique libera em todos (a regra da caixa pai e filha).
+  if (parcialPorOrigem(props.estado, c, acao)) {
+    liberarEmTodas(props.estado, c, acao)
+    return
+  }
+  // Traço por campo: o clique leva ao ajuste dos campos, sem apagar a escolha feita lá.
   if (parcial(c, acao)) {
     emit('ajustar', c, 'campos')
     return
@@ -279,19 +332,16 @@ function nomesDosResponsaveis(c: CategoriaMock) {
   return escolhidos.map(f => f.label ?? f.name).join(', ')
 }
 
-function formSegue(c: CategoriaMock, f: FormularioMock) {
-  return !props.estado.categorias[c.id]?.formularios[f.id]
+/** Ver travado na sublinha porque Atualizar ou Excluir valem nesta origem. */
+function travadaNaOrigem(c: CategoriaMock, a: Acao, o: number) {
+  if (a !== 'ver' || !liberadoNaOrigem(props.estado, c, 'ver', o) || !acoesDaCategoria(props.estado, c.id).ver)
+    return null
+  const quem = verTravadoNaOrigem(props.estado, c, o)
+  return quem ? props.t.exigidoPor(props.t.acoes[quem]) : null
 }
 
-function alternarSegueForm(c: CategoriaMock, f: FormularioMock, seguir: boolean) {
-  props.estado.categorias[c.id]!.formularios[f.id] = seguir ? null : { ...acoesDaCategoria(props.estado, c.id) }
-}
-
-function definirForm(c: CategoriaMock, f: FormularioMock, a: Acao, valor: boolean) {
-  const atual = props.estado.categorias[c.id]!.formularios[f.id]
-  if (atual)
-    props.estado.categorias[c.id]!.formularios[f.id] = comDependencia({ ...atual, [a]: valor })
-}
+const valorNaOrigem = (c: CategoriaMock, a: Acao, o: number) =>
+  acoesDaCategoria(props.estado, c.id)[a] && liberadoNaOrigem(props.estado, c, a, o)
 
 const colunas = computed<TableColumn<Linha>[]>(() => [
   { id: 'nome', header: props.t.colunaCategoria, meta: { class: { th: 'w-auto', td: 'w-auto' } } },
@@ -482,7 +532,15 @@ const meta = {
         <span v-else-if="row.original.tipo === 'formulario'" class="flex min-w-0 items-center gap-2 pl-16">
           <UIcon name="i-lucide-file-text" class="size-4 shrink-0 text-muted" />
           <span class="truncate text-sm text-default">{{ row.original.f.nome }}</span>
-          <UBadge v-if="!formSegue(row.original.c, row.original.f)" :label="t.regraPropria" color="info" variant="subtle" size="sm" class="shrink-0" />
+        </span>
+
+        <!-- Sublinha: itens sem formulário (API, importação, Spaceflow, agente de IA) -->
+        <span v-else-if="row.original.tipo === 'semForm'" class="flex min-w-0 items-center gap-2 pl-16">
+          <UIcon name="i-lucide-bot" class="size-4 shrink-0 text-muted" />
+          <span class="min-w-0">
+            <span class="block truncate text-sm text-default">{{ t.semFormulario }}</span>
+            <span class="block truncate text-xs text-muted" :title="t.semFormularioDesc">{{ t.semFormularioDesc }}</span>
+          </span>
         </span>
       </template>
 
@@ -518,8 +576,8 @@ const meta = {
           :rotulo="`${t.acoes[a]}: ${row.original.c.name}`"
           herdada
           :difere="difere(row.original.c, a)"
-          :travada-por="parcial(row.original.c, a) ? null : travadaPor(acoesDaCategoria(estado, row.original.c.id), a)"
-          :dica="parcial(row.original.c, a) ? t.parcialDica(t.acoes[a], parcial(row.original.c, a)!.n, parcial(row.original.c, a)!.total) : ''"
+          :travada-por="parcial(row.original.c, a) || parcialPorOrigem(estado, row.original.c, a) ? null : travadaPor(acoesDaCategoria(estado, row.original.c.id), a)"
+          :dica="dicaDaCelula(row.original.c, a)"
           :desabilitada="somenteLeitura"
           :rotulo-desfazer="t.voltarAcao(t.acoes[a], row.original.c.name)"
           :regra="regraDaCelula(row.original.c, a)"
@@ -558,16 +616,17 @@ const meta = {
           <span v-else class="text-dimmed" aria-hidden="true">·</span>
         </template>
 
-        <!-- Formulário: segue a categoria (claro, travado) ou regra própria. -->
+        <!--
+          Formulário e itens sem formulário: marcar libera nesta origem e deixa a
+          categoria com traço; marcar todas volta a categoria a marcada.
+        -->
         <CaixaDePermissao
-          v-else-if="row.original.tipo === 'formulario'"
-          :valor="acoesDoFormulario(estado, row.original.c.id, row.original.f.id)[a]"
-          :rotulo="`${t.acoes[a]}: ${row.original.f.nome}`"
-          herdada
-          :difere="!formSegue(row.original.c, row.original.f) && acoesDoFormulario(estado, row.original.c.id, row.original.f.id)[a] !== acoesDaCategoria(estado, row.original.c.id)[a]"
-          :travada-por="formSegue(row.original.c, row.original.f) ? null : travadaPor(acoesDoFormulario(estado, row.original.c.id, row.original.f.id), a)"
-          :desabilitada="somenteLeitura || formSegue(row.original.c, row.original.f)"
-          @alterar="v => definirForm(row.original.c, row.original.f, a, v)"
+          v-else-if="row.original.tipo === 'formulario' || row.original.tipo === 'semForm'"
+          :valor="valorNaOrigem(row.original.c, a, row.original.tipo === 'formulario' ? row.original.f.id : SEM_FORMULARIO)"
+          :rotulo="`${t.acoes[a]}: ${row.original.tipo === 'formulario' ? row.original.f.nome : t.semFormulario} (${row.original.c.name})`"
+          :travada-por="travadaNaOrigem(row.original.c, a, row.original.tipo === 'formulario' ? row.original.f.id : SEM_FORMULARIO)"
+          :desabilitada="somenteLeitura"
+          @alterar="v => definirNaOrigem(estado, row.original.c, a, row.original.tipo === 'formulario' ? row.original.f.id : SEM_FORMULARIO, v)"
         />
       </template>
 
@@ -604,27 +663,26 @@ const meta = {
       <!-- ───────── Formulários ───────── -->
       <template #formularios-cell="{ row }">
         <template v-if="row.original.tipo === 'padrao'">
-          <span class="text-xs text-muted">{{ t.formsSeguem }}</span>
+          <span class="text-xs text-muted">{{ t.origensTodas }}</span>
         </template>
         <template v-else-if="row.original.tipo === 'categoria'">
-          <UBadge
-            v-if="formulariosProprios(estado, row.original.c)"
-            :label="t.formsProprios(formulariosProprios(estado, row.original.c))"
-            icon="i-lucide-split"
-            color="info"
-            variant="subtle"
-            size="sm"
-          />
-          <span v-else class="text-xs text-muted">{{ t.formsSeguem }}</span>
+          <span v-if="!temAcesso(estado, row.original.c.id)" class="text-xs text-dimmed">{{ t.camposNenhum }}</span>
+          <span v-else-if="!temOrigens(row.original.c)" class="text-xs text-muted">{{ t.semFormularios }}</span>
+          <UTooltip
+            v-else-if="resumoDeOrigens(estado, row.original.c)"
+            :text="dicaDeOrigens(row.original.c)"
+          >
+            <UButton
+              :label="rotuloDeOrigens(row.original.c)"
+              icon="i-lucide-split"
+              color="warning"
+              variant="subtle"
+              size="xs"
+              @click="emit('ajustar', row.original.c, 'formularios')"
+            />
+          </UTooltip>
+          <span v-else class="text-xs text-muted">{{ t.origensTodas }}</span>
         </template>
-        <USwitch
-          v-else-if="row.original.tipo === 'formulario'"
-          :model-value="formSegue(row.original.c, row.original.f)"
-          :label="t.colunaSegue"
-          :disabled="somenteLeitura"
-          size="xs"
-          @update:model-value="v => alternarSegueForm(row.original.c, row.original.f, v)"
-        />
       </template>
 
       <!-- ───────── Ajustar ───────── -->

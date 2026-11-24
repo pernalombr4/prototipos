@@ -137,7 +137,8 @@ function frase(p: { chave: string, valor?: string | number }) {
     case 'segueOPadrao': return ps.segueOPadrao(Number(p.valor))
     case 'camposEscolhidos': return ps.camposEscolhidos(Number(p.valor))
     case 'todosOsCampos': return ps.todosOsCampos
-    case 'formularios': return ps.formularios(Number(p.valor))
+    case 'origensEmParte': return ps.origensEmParte(Number(p.valor))
+    case 'origensTodas': return ps.origensTodas
     case 'alcance': return ps.alcance
     default: return p.chave
   }

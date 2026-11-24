@@ -7,8 +7,9 @@ Excluir) vale para toda categoria sem regra própria, inclusive as criadas depoi
 categoria** com as mesmas 4 caixas em colunas fixas, busca, filtros (Regra própria, Com acesso, Sem acesso,
 Alteradas) e uma **caixa no cabeçalho de cada coluna** que marca a lista filtrada inteira. Campo e
 formulário saem da tabela e ficam em **Ajustar**, uma camada lateral: o campo vira 1 linha com Criar, Ver e
-Atualizar lado a lado, e "Todos os campos" é o padrão; o formulário segue a categoria até alguém desligar
-"Segue a categoria". As 82 permissões fixas (Padrão e Configurações) viram matriz por área. A confirmação
+Atualizar lado a lado, e "Todos os campos" é o padrão. A categoria e os formulários são caixa pai e caixas
+filhas (rodada 5): marcar a categoria libera todos os formulários e os itens sem formulário; marcar só
+alguns deixa a categoria com traço e restringe o cargo a eles. As 82 permissões fixas (Padrão e Configurações) viram matriz por área. A confirmação
 diz o que muda, em palavras, e quantas pessoas sentem.
 
 | No volume grande (120 categorias) | Hoje | Proposta |
@@ -53,12 +54,17 @@ diz o que muda, em palavras, e quantas pessoas sentem.
 1. **Padrão que vale para categoria futura.** Hoje cada permissão é `types::<categoria>::<ação>`. O padrão
    precisa de uma referência coringa (por exemplo `types::*::read`) e de uma regra de precedência: a
    permissão da categoria vence o coringa.
-2. **"Todos os campos" sem lista.** Hoje Ver grava os 35 nomes; campo criado depois fica de fora até
-   alguém editar o cargo. Precisa de um valor que signifique "todos", como `fields: ["*"]` ou lista vazia
-   com esse sentido.
-3. **Formulário que segue a categoria.** Hoje o formulário tem permissão própria e explícita (a doc exige
-   Ver e Atualizar do formulário para executar a tarefa). Sem formulário marcado, ele precisa herdar a
-   categoria.
+2. **"Todos os campos" sem lista.** Hoje a tela grava os nomes de todos os campos marcados; campo criado
+   depois fica de fora até alguém editar o cargo. Rodada 5, lido no código: na leitura, o back já trata
+   `fields` vazio como "todos os campos". Falta a tela gravar a lista vazia quando a escolha é "Todos os
+   campos", e conferir se a gravação e a edição seguem a mesma regra.
+3. **Categoria e formulários como caixa pai e filhas (rodada 5).** Ver "Conferência com o código" abaixo.
+   O back precisa de 3 mudanças:
+   - a origem "itens sem formulário" vira uma permissão própria da categoria, e o item com `form` nulo só
+     aparece para quem a tem quando a categoria está restrita a alguns formulários;
+   - o filtro da listagem considera só os formulários com Ver, e não qualquer ação de formulário;
+   - categoria marcada sem nenhum formulário gravado continua valendo para todos, inclusive o formulário
+     criado depois (já é assim hoje).
 4. **`EnTable` sem slot de cabeçalho.** A caixa de coluna é peça central e o `EnTable` só aceita rótulo em
    texto no cabeçalho. O protótipo usa o `UTable` (slot `#<coluna>-header`, `sticky`). Pedido para o SDK:
    slot `#header-{key}` no `EnTable`.
@@ -68,14 +74,50 @@ diz o que muda, em palavras, e quantas pessoas sentem.
    precisa de uma regra ali (por exemplo, criador = pessoa logada) e de o back-end aplicá-la na listagem,
    na edição e na exclusão. O responsável é outra regra: a pessoa logada está em um dos campos Pessoa
    escolhidos (na categoria) ou em qualquer campo Pessoa (no padrão). As 2 juntas valem com OU. O padrão
-   também precisa de regra coringa, como no item 1.
+   também precisa de regra coringa, como no item 1. **Risco (rodada 5, lido no código):** hoje o back nega
+   por inteiro a permissão com `rules` preenchido, porque a validação de regras não existe. Se a tela gravar a
+   regra antes de o back aplicá-la, o cargo perde o acesso à categoria.
 7. **Quem acessa.** A aba lista o que cada cargo faz numa categoria: pede uma rota que devolva as
    permissões de todos os cargos para 1 categoria, ou a tela monta isso lendo `/ws/roles` inteiro.
 
 Sem os itens 1 a 3, a tela ainda funciona: o front escreve a regra em cada categoria e formulário ao
 salvar. Perde-se só a herança para o que for criado depois.
 
+## Conferência com o código (rodada 5 · 2026-11-24)
+
+Lido na develop do back e do front em 2026-11-24. A versão no ar pode estar atrás: a correção do card
+USE87A7C6 está na develop desde 2026-11-16 e ainda não está na branch principal.
+
+| Ponto | O back hoje | O protótipo | Quem está certo |
+|---|---|---|---|
+| Ver da categoria | Obrigatório para listar. Sem ele, a listagem dá 403, mesmo com Ver num formulário. | A categoria com traço já tem Ver. | Os 2 batem, desde que a tela grave o Ver da categoria junto com o do formulário. |
+| Formulário com permissão própria | Basta 1 permissão de formulário (qualquer ação) para a listagem ficar só nos formulários que têm Ver. Os outros formulários somem. | Rodadas 1 a 4: "Segue a categoria" por formulário, sem efeito nos irmãos. | **O código.** O protótipo prometia algo que o back não faz. A rodada 5 troca pelo modelo de caixa pai e filhas, que diz na tela o que o back faz. |
+| Permissão de formulário que não é Ver | Conta para restringir a listagem. Cargo com só "Criar" num formulário e Ver na categoria passa a não ver item nenhum. | Cada ação tem a sua lista de formulários. | **O protótipo.** No back é um efeito colateral, não uma regra. |
+| Itens sem formulário | Na branch principal, somem quando há permissão de formulário. Na develop (USE87A7C6), aparecem sempre. | Linha "Itens sem formulário", marcada ou não como qualquer formulário. | **O protótipo.** Sempre esconder trava o caso do agente de IA; sempre mostrar vaza no caso Cível e Criminal. |
+| Formulário criado depois | Sem permissão de formulário gravada, entra com a categoria. Com permissão gravada, fica de fora. | O mesmo: entra na ação marcada inteira; na ação com traço, entra desmarcado. | Os 2 batem. |
+| Campos | Na leitura, `fields` vazio = todos. | "Todos os campos" é o padrão. | Os 2 batem; falta a tela gravar vazio. |
+| Criador e responsável | `rules` preenchido nega a permissão inteira (validação de regras não feita). | Coluna "Quais itens". | **O protótipo** é a proposta; o back precisa da regra antes de a tela gravar. |
+| Padrão para todas as categorias | A referência precisa de categoria que existe; um coringa é recusado. | Linha do padrão. | **O protótipo** é a proposta; pede back-end (item 1). |
+| Tela de hoje | Árvore com cascata: a caixa da categoria marca as 4 ações e os formulários juntos; o traço só aparece no nó da categoria. | Traço por ação, na linha da categoria. | O protótipo mostra o parcial por ação, onde ele tem efeito. |
+
+**O que o mercado faz** (documentação oficial, lida em 2026-11-24):
+- Jira: item sem nível de segurança fica visível para todos do projeto, como a correção da develop.
+- HubSpot: liberar um pipeline para alguém restringe os demais; registro de outro pipeline fica esmaecido.
+- SharePoint e Google Drive: o filho herda do pai; quando só o filho é liberado, o pai fica com acesso
+  limitado (SharePoint) ou esmaecido (Drive).
+- Salesforce e Zoho: o tipo de registro e o layout controlam criação e tela, não quem vê.
+- Nenhum mostra o pai com traço na tela de permissão. O traço é a convenção de árvore de caixas (a tela de
+  hoje já usa) e casa com o pedido.
+
 ## Perguntas em aberto
+
+- **Formulário criado depois na categoria com traço.** O protótipo segue o back e a regra de menor
+  privilégio: entra desmarcado. Confirmar com produto.
+- **Formulário padrão.** Conferir na tela se o item criado pelo formulário padrão da categoria grava `form`
+  nulo. Se gravar, ele cai em "Itens sem formulário", e o rótulo precisa dizer isso.
+- **Cargo gravado hoje com formulário.** Cargo com Ver na categoria e Ver em alguns formulários vira
+  categoria com traço, sem "Itens sem formulário". Na develop, esses itens aparecem; a migração precisa
+  decidir se marca a linha para não mudar o que o cargo vê.
 
 - **Criar sem Ver.** Na rodada 2, Atualizar e Excluir passaram a exigir Ver. Criar continua solto, para o
   caso de quem só abre chamado sem ver os outros. Confirmar com produto se o back-end aceita Atualizar sem
@@ -182,3 +224,31 @@ salvar. Perde-se só a herança para o que for criado depois.
 - **Fronteira:** muda a tabela de categorias (coluna, filtro, sublinhas), o Ajustar e o selo do topo; não muda a casca, as abas, o aviso de pendências e o lugar do Salvar.
 - **Maquete:** as regras não filtram item nenhum, só gravam a escolha; "Abrir Gestão de Membros" mostra um aviso; recarregar volta ao começo.
 - **Ver:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/
+
+## Rodada 5 · 2026-11-24
+- **Pedido (resumo):** conferir o protótipo com as permissões do back pela skill `investigar-codigo`, dizer
+  quem está certo nas divergências e resolver o caso de categoria e formulários: marcar o formulário deixa
+  a categoria com traço; marcar a categoria marca todos os formulários; os itens criados sem formulário
+  (agente de IA do Spaceflow, workspace de produtos) não podem sumir; e quem vê Criminal não pode ver Cível
+  (caso da Vivo).
+- **Mudou:**
+  - Saiu o "Segue a categoria" por formulário. A categoria e os formulários são caixa pai e caixas filhas,
+    por ação: marcar 1 formulário liga a ação na categoria com traço; marcar a categoria (ou clicar no
+    traço) libera em todos; desmarcar 1 formulário deixa a categoria com traço.
+  - Origem nova **Itens sem formulário** (criados pela API, por importação, pelo Spaceflow ou por agente
+    de IA), com caixa como qualquer formulário. Marcar a categoria inteira a inclui.
+  - Ver acompanha Atualizar e Excluir também por formulário: o Ver do formulário fica travado enquanto
+    Atualizar ou Excluir valem nele.
+  - Coluna Formulários: "Todos", "1 de 4" (alguma origem sem ação nenhuma) ou "Em parte" (só algumas ações
+    limitadas), com dica por ação e clique que abre Ajustar › Formulários.
+  - Ajustar › Formulários: linha "Todos os formulários" no topo, como caixa pai, e o aviso de que formulário
+    criado depois entra só na ação marcada inteira.
+  - Mock: Processos Judiciais com os formulários Cível, Criminal e Trabalhista; o cargo só cria, vê e
+    atualiza em Criminal.
+  - DECISOES: seção "Conferência com o código", com as divergências e quem está certo.
+- **Fronteira:** muda a coluna e as sublinhas de formulário da tabela de categorias e a aba Formulários do
+  Ajustar; não muda a casca, as abas, o aviso de pendências e o lugar do Salvar.
+- **Maquete:** recarregar volta ao começo.
+- **Ver:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/
+- **Prints:** `evidencias/proposta-r5-01-so-criminal.jpg`, `proposta-r5-02-ver-em-todos.jpg`,
+  `proposta-r5-03-ajustar-formularios.jpg`.

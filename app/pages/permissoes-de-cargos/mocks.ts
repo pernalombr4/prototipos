@@ -68,6 +68,14 @@ export interface FormularioMock {
   nome: string
 }
 
+/**
+ * Origem do item: um formulário da categoria ou `SEM_FORMULARIO` (item com
+ * `form` nulo, criado pela API, por importação, pelo Spaceflow ou por agente
+ * de IA). No back, o item sem formulário é o que tem `c_items.form` nulo.
+ */
+export const SEM_FORMULARIO = 0
+export type Origem = number
+
 export interface CategoriaMock extends Pick<ItemType, 'id' | 'name' | 'slug' | 'icon'> {
   campos: CampoMock[]
   formularios: FormularioMock[]
@@ -296,7 +304,9 @@ function gerarCategoria(i: number, unidade: string, sortear: () => number): Cate
   }
 
   const qtdForms = i === 0 ? 12 : 1 + Math.floor(sortear() * 8)
-  const formularios: FormularioMock[] = nomesDeFormulario.slice(0, qtdForms).map((nome, f) => ({
+  // Processos Judiciais: o caso de segregar por área (quem vê Criminal não vê Cível).
+  const nomes = base === 'Processos Judiciais' ? ['Cível', 'Criminal', 'Trabalhista'] : nomesDeFormulario.slice(0, qtdForms)
+  const formularios: FormularioMock[] = nomes.map((nome, f) => ({
     id: (i + 1) * 100 + f,
     nome,
   }))
