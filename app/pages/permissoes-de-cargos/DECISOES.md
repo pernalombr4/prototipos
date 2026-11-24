@@ -115,8 +115,9 @@ USE87A7C6 está na develop desde 2026-11-16 e ainda não está na branch princip
 
 - **Formulário criado depois na categoria com traço.** O protótipo segue o back e a regra de menor
   privilégio: entra desmarcado. Confirmar com produto.
-- **Formulário padrão.** Conferir na tela se o item criado pelo formulário padrão da categoria grava `form`
-  nulo. Se gravar, ele cai em "Itens sem formulário", e o rótulo precisa dizer isso.
+- **Formulário padrão.** Respondido em 2026-11-24, lido no código (develop do back): a criação de item
+  troca o formulário `default` por nenhum, e o item fica com `form` nulo. Ele cai em "Itens sem formulário",
+  e a descrição da linha passou a citar o formulário padrão nos 3 idiomas.
 - **Cargo gravado hoje com formulário.** Cargo com Ver na categoria e Ver em alguns formulários vira
   categoria com traço, sem "Itens sem formulário". Na develop, esses itens aparecem; a migração precisa
   decidir se marca a linha para não mudar o que o cargo vê.
@@ -258,3 +259,25 @@ USE87A7C6 está na develop desde 2026-11-16 e ainda não está na branch princip
 - **Ver:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/
 - **Prints:** `evidencias/proposta-r5-01-so-criminal.jpg`, `proposta-r5-02-ver-em-todos.jpg`,
   `proposta-r5-03-ajustar-formularios.jpg`.
+
+## Requisitos · 2026-11-24
+- **Pedido (literal):** "escreve o documento de requisitos e se precisar fragmente em mais de um épico. foque em
+  separar em um épico o que já dá pra fazer hoje de modo simples, com o que temos, e coisas novas vao ficando pra
+  outro épico."
+- **2 épicos**, pela regra "Épico pelo esforço" da skill `requisitos` (decisão da redatora em 2026-11-24):
+  - `requisitos/com-o-que-ja-existe/`: a tela nova sobre o que o back grava hoje, em 6 partes (tabela de
+    categorias, campos, formulários, permissões fixas, pessoas e confirmação, Quem acessa);
+  - `requisitos/regras-novas/`: o que pede back, em 3 partes (itens sem formulário e ações por formulário, padrão,
+    Quais itens).
+- **Conferido no código** (develop do back, 8669875cf), para pôr cada requisito num lado:
+  - a ação sem lista de campos já vale como "todos os campos" na leitura, na criação e na atualização: "Todos os
+    campos" fica no épico do que já existe;
+  - a criação, a edição e a exclusão de item pela API olham só a permissão da categoria; Criar, Atualizar e
+    Excluir por formulário só valem hoje na tarefa de formulário: a regra por formulário em toda porta vai para as
+    regras novas;
+  - a lista de cargos e a lista de membros já têm rota: Quem acessa e as pessoas do cargo ficam no épico do que
+    já existe;
+  - o item do formulário padrão fica sem formulário: a descrição de "Itens sem formulário" passou a citá-lo.
+- **Para a redatora decidir:** as 3 partes das regras novas se lançam sozinhas e podem virar 3 épicos (P902 do
+  épico); a correção do card USE87A7C6 na develop vaza os itens sem formulário no caso Cível e Criminal (P901 dos
+  2 épicos).
