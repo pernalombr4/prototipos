@@ -4,8 +4,9 @@
  *
  * Copiada do Notion atual (evidencias/ref-notion-resultado-da-ia.png) e da
  * Tiptap (ref-tiptap-resultado-da-ia.png): o texto novo já aparece no lugar
- * e esta barra decide. Aceitar (Enter), Descartar (Esc), Tentar de novo,
- * Inserir abaixo, um campo para pedir ajuste, 👍 e 👎. Pedido livre ganha
+ * e esta barra decide. Aceitar (Enter) e Descartar (Esc) com texto; Tentar de
+ * novo, Inserir abaixo, 👍 e 👎 só com ícone, dica e aria-label; o atalho fica
+ * na dica, nunca no botão. Um campo para pedir ajuste. Pedido livre ganha
  * "Salvar pedido" (os Skills do Notion). O Revisor mostra o que mudou.
  */
 import type { Textos } from './textos'
@@ -100,9 +101,9 @@ onBeforeUnmount(() => document.removeEventListener('keydown', teclar, true))
       <!-- GERANDO -->
       <template v-if="fase === 'gerando'">
         <span class="flex-1 text-sm text-muted" aria-live="polite">{{ escrevendo }}</span>
-        <UButton :label="tb.parar" icon="i-lucide-square" color="neutral" variant="outline" size="xs" @click="emit('parar')">
-          <template #trailing><UKbd value="Esc" size="sm" /></template>
-        </UButton>
+        <UTooltip :text="tb.parar" :kbds="['escape']">
+          <UButton :label="tb.parar" icon="i-lucide-square" color="neutral" variant="outline" size="xs" aria-keyshortcuts="Escape" @click="emit('parar')" />
+        </UTooltip>
       </template>
 
       <!-- ERRO -->
@@ -140,15 +141,21 @@ onBeforeUnmount(() => document.removeEventListener('keydown', teclar, true))
             </template>
           </UPopover>
 
+          <UTooltip :text="tb.tentarDeNovo">
+            <UButton icon="i-lucide-rotate-ccw" color="neutral" variant="ghost" size="xs" :aria-label="tb.tentarDeNovo" @click="emit('tentar')" />
+          </UTooltip>
+          <UTooltip v-if="comSelecao" :text="tb.inserirAbaixo">
+            <UButton icon="i-lucide-arrow-down-to-line" color="neutral" variant="ghost" size="xs" :aria-label="tb.inserirAbaixo" @click="emit('abaixo')" />
+          </UTooltip>
+
+          <!-- Rodada 15: Aceitar e Descartar ficam com texto; o atalho sai do botão e vai para a dica e o aria-keyshortcuts. -->
           <span class="mx-1 h-4 w-px bg-accented" aria-hidden="true" />
-          <UButton :label="tb.tentarDeNovo" icon="i-lucide-rotate-ccw" color="neutral" variant="ghost" size="xs" @click="emit('tentar')" />
-          <UButton v-if="comSelecao" :label="tb.inserirAbaixo" icon="i-lucide-arrow-down-to-line" color="neutral" variant="ghost" size="xs" @click="emit('abaixo')" />
-          <UButton :label="tb.descartar" color="neutral" variant="ghost" size="xs" @click="emit('descartar')">
-            <template #trailing><UKbd value="Esc" size="sm" /></template>
-          </UButton>
-          <UButton ref="botaoAceitar" :label="tb.aceitar" icon="i-lucide-check" size="xs" @click="emit('aceitar')">
-            <template #trailing><UKbd value="enter" size="sm" color="neutral" variant="solid" class="bg-white/20 text-inverted ring-0" /></template>
-          </UButton>
+          <UTooltip :text="tb.descartar" :kbds="['escape']">
+            <UButton :label="tb.descartar" color="neutral" variant="ghost" size="xs" aria-keyshortcuts="Escape" @click="emit('descartar')" />
+          </UTooltip>
+          <UTooltip :text="tb.aceitar" :kbds="['enter']">
+            <UButton ref="botaoAceitar" :label="tb.aceitar" icon="i-lucide-check" size="xs" aria-keyshortcuts="Enter" @click="emit('aceitar')" />
+          </UTooltip>
         </span>
       </template>
     </div>

@@ -271,3 +271,16 @@
 - **Prints (regra 42, revista):** 50 prints para 66 requisitos com tela, 1 por grupo de requisitos da mesma seção que aparecem na mesma tela; cada requisito tem a sua caixa magenta com o ID ao lado. O `grupos.json` diz o print de cada ID. O maior grupo junta 6 requisitos (o modal das chaves: RF047 a RF051 e RF057). RF027 (campo só leitura com a proposta aberta) entra no print de RF025 por `"junto"`. Os requisitos que ficam sozinhos pedem cada um um gesto que muda a tela (passar o mouse, abrir um menu, Esc, digitar). Detector de seta: 0 de 50.
 - **Tarefas:** os requisitos de cada grupo ficam juntos na seção, com o print abaixo das caixas; cada caixa leva no fim a prioridade e a relevância ("(prioridade: Essencial; relevância: Obrigatório)").
 - **Fronteira:** mudam os prints e o texto das tarefas do card; não muda nenhuma tela nem os documentos de requisitos.
+
+## Rodada 15 · 2026-11-24
+- **Pedido (literal):** "aceito, pode trocar no protótipo e PRINTAR o prototipo pra dar pra ver no retorno o que é esperado." Origem: o teste do card em develop, em 24/11, achou a barra da proposta em 3 linhas, e a redatora perguntou se os botões não deviam ser símbolos.
+- **Mudou:**
+  - "Tentar de novo" e "Inserir abaixo" viram só ícone, com dica e `aria-label`, como 👍, 👎 e "Salvar pedido";
+  - "Aceitar" e "Descartar" continuam com texto: são a decisão sobre a proposta, e um X sozinho lê como "fechar";
+  - os selos Enter e Esc saem de dentro de "Aceitar", "Descartar" e "Parar" e vão para a dica (`UTooltip` com `kbds`) e para o `aria-keyshortcuts`;
+  - o divisor passa a separar os ícones das 2 decisões;
+  - RF028 da parte 1 diz a forma nova.
+- **Fronteira:** muda a linha de controles da barra da proposta; não muda o estado de erro (2 botões com texto cabem), o campo do ajuste nem a caixa do BENI.
+- **Medida:** em espanhol, a linha inteira cabe numa linha só no campo de 770 px: 4 ícones de 24 px, "Descartar" com 68 px e "Aceptar" com 77 px.
+- **Não deu:** os prints de requisito do RF028 (`evidencias/requisitos/`) e a tarefa 1 do card ainda mostram a barra antiga. Por quê: o pedido foi a troca e o print do retorno; regravar os prints e reescrever a tarefa pede o ok da redatora.
+- **Ver:** `evidencias/proto-barra-da-proposta.jpg` · `evidencias/proto-barra-da-proposta-es.jpg`
