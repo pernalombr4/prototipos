@@ -1,40 +1,52 @@
 <script setup lang="ts">
 /**
- * PROPOSTA. A trilha da aba Releases, montada com a mesma árvore da página de hoje do `en-docs`
- * (`app/pages/releases/[section].vue`, lido em origin/main 910960b4): `UChangelogVersions` com
- * `indicator-motion` e 1 `UChangelogVersion` por versão, com os mesmos `:ui` (container
- * `max-w-2xl`, título `text-2xl`, descrição `line-clamp-4`) e o `ReleaseNotesBanner` no `#image`.
+ * PROPOSTA, rodada 4. A trilha da aba Releases é o próprio changelog: o texto de cada versão é lido
+ * na linha do tempo, sem abrir outra página. Modelo: o template oficial "Changelog" do Nuxt UI
+ * (nuxt-ui-templates/changelog), que põe o texto da versão no `#body` do `UChangelogVersion`.
+ * Síntese da pesquisa: pesquisa-de-mercado, runs/2026-11-24-deploy-continuo-e-lancamento,
+ * evidencias/notas/changelog-referencias.md, "Proposta para o protótipo".
  *
- * O que se acrescenta:
- * - rótulos no `#badge`: o tamanho técnico (major, minor, patch), Exige ação com o prazo, Em breve,
- *   Liberando, Beta ou Acesso antecipado, Liberado para alguns workspaces e as funcionalidades;
- * - 1 barra acima da lista: o tamanho da versão (Todas, Grandes, Médias, Pequenas, com dica) e a
- *   funcionalidade (rodada 3: sai o filtro por tipo de item e o "Só o que exige ação");
- * - o link permanente de cada versão e o acesso a "Próximas mudanças" e a "Assinar";
- * - clicar na versão abre a página da versão, com a lista dos itens (rodada 3; antes abria o post do mês).
+ * Mantido da página de hoje do `en-docs`: `UChangelogVersions` com `indicator-motion`, 1
+ * `UChangelogVersion` por versão, o container `max-w-2xl` e o título `text-2xl`.
+ *
+ * O que muda:
+ * - o `#body` traz o texto da versão como prosa (os componentes Prose do Nuxt UI, os mesmos do texto
+ *   de um post): Exige ação (só quando há), Novidades, Melhorias e Correções;
+ * - novidade e melhoria: 1 linha em negrito com a funcionalidade e o que muda, 1 a 3 frases e
+ *   "Saiba mais"; correção: 1 linha. Beta e "liberado para alguns workspaces" vão no texto do título;
+ * - no máximo 2 rótulos por versão: o tamanho (minor, patch) e "Exige ação · Agir até <data>";
+ * - sai o banner da versão: ele fica no post do Blog;
+ * - o `#footer` tem "Copiar link" e, quando a versão faz parte do post do mês, "Ler o post de lançamento";
+ * - âncora por versão (`#v3-4-0`) e por item (o id do item no parágrafo dele).
  */
-import BannerDaRelease from './_BannerDaRelease.vue'
-import { modulos, mudancaAberta, mudancas, type ChaveDeModulo } from './mocks'
+import ProseA from '@nuxt/ui/runtime/components/prose/A.vue'
+import ProseH4 from '@nuxt/ui/runtime/components/prose/H4.vue'
+import ProseLi from '@nuxt/ui/runtime/components/prose/Li.vue'
+import ProseP from '@nuxt/ui/runtime/components/prose/P.vue'
+import ProseStrong from '@nuxt/ui/runtime/components/prose/Strong.vue'
+import ProseUl from '@nuxt/ui/runtime/components/prose/Ul.vue'
+import { modulos, mudancaAberta, mudancaDe, mudancas, type ChaveDeModulo, type Entrada } from './mocks'
 import { formatarData, type Textos } from './textos'
 import { montarVersoes, type Tamanho } from './versoes'
 
 const props = defineProps<{
   t: Textos
   estado: 'cheio' | 'vazio' | 'carregando'
-  /** Id da versão a mostrar: limpa os filtros, rola até ela e acende o contorno. */
+  /** Id da versão (`v3-4-0`) ou do item a mostrar: limpa os filtros, rola até ele e acende. */
   destaque: string | null
 }>()
 
 const emit = defineEmits<{
-  abrirVersao: [versao: string]
   copiar: [versao: string]
   verMudanca: [id: string]
+  verPost: [mes: string]
   irProximas: []
   assinar: []
 }>()
 
 const idioma = useIdioma()
 const L = (x: Record<string, string>) => x[idioma.value]
+const toast = useToast()
 
 /* ---------------- Filtros ---------------- */
 const tamanho = ref<'todas' | Tamanho>('todas')
@@ -49,37 +61,64 @@ function limpar() {
 const opcoesDeTamanho = ['todas', 'major', 'minor', 'patch'] as const
 const opcoesDeModulo = computed(() => modulos.map(m => ({ label: L(m.nome), value: m.id, icon: m.icone })))
 
-/* ---------------- As versões ---------------- */
+/* ---------------- As versões e o texto de cada uma ---------------- */
 const todasAsVersoes = computed(() => montarVersoes(props.t, idioma.value))
+
+const doFiltro = (e: Entrada) => !modulosEscolhidos.value.length || modulosEscolhidos.value.includes(e.modulo)
 
 /** Em breve no topo; depois da mais nova para a mais antiga, como hoje (date DESC). */
 const versoes = computed(() => {
   if (props.estado === 'vazio') return []
   return todasAsVersoes.value
     .filter(v => tamanho.value === 'todas' || v.tamanho === tamanho.value)
-    .filter(v => !modulosEscolhidos.value.length || v.itens.some(e => modulosEscolhidos.value.includes(e.modulo)))
+    .filter(v => v.itens.some(doFiltro))
     .sort((a, b) => Number(b.emBreve) - Number(a.emBreve) || b.data.localeCompare(a.data) || b.versao.localeCompare(a.versao))
+    .map(v => {
+      const itens = v.itens.filter(doFiltro)
+      return {
+        ...v,
+        secoes: [
+          { chave: 'acao', titulo: props.t.entrada.exigeAcao, itens: itens.filter(e => e.mudanca) },
+          { chave: 'novidade', titulo: props.t.releases.tipos.novidade, itens: itens.filter(e => !e.mudanca && e.tipo === 'novidade') },
+          { chave: 'melhoria', titulo: props.t.releases.tipos.melhoria, itens: itens.filter(e => !e.mudanca && e.tipo === 'melhoria') },
+          { chave: 'correcao', titulo: props.t.releases.tipos.correcao, itens: itens.filter(e => !e.mudanca && e.tipo === 'correcao') },
+        ].filter(s => s.itens.length),
+      }
+    })
 })
 
 const abertas = computed(() => mudancas.filter(mudancaAberta).length)
-const moduloDe = (id: ChaveDeModulo) => modulos.find(m => m.id === id)!
 
+/** O título do item, com Beta, acesso antecipado, liberação aos poucos e público no próprio texto. */
+function tituloDoItem(e: Entrada) {
+  const extras = [
+    e.acesso ? props.t.entrada.acesso[e.acesso] : '',
+    e.estado === 'liberando' ? (e.todosAte ? props.t.entrada.paraTodosAte(formatarData(e.todosAte, idioma.value)) : props.t.entrada.estado.liberando) : '',
+    e.publico === 'alguns' ? props.t.entrada.alguns : '',
+  ].filter(Boolean).map(x => x.charAt(0).toLocaleLowerCase(idioma.value) + x.slice(1))
+  return extras.length ? `${L(e.titulo)} (${extras.join(', ')}).` : `${L(e.titulo)}.`
+}
+
+const dataLonga = (iso: string) => formatarData(iso, idioma.value, { day: 'numeric', month: 'long', year: 'numeric' })
 /** A data no formato do idioma, em números, sem voltar 1 dia (hoje o site mostra "Dec 7, 2026" para 8 de dezembro). */
 const dataDaVersao = (iso: string) => formatarData(iso, idioma.value, { day: '2-digit', month: '2-digit', year: 'numeric' })
-const diaDoBanner = (iso: string) => formatarData(iso, idioma.value)
 
-/* ---------------- Ir até uma versão ---------------- */
-const acesa = ref<string | null>(null)
+function foraDoPrototipo() {
+  toast.add({ title: props.t.releases.foraDoPrototipo, icon: 'i-lucide-info', color: 'neutral', duration: 2500 })
+}
+
+/* ---------------- Ir até uma versão ou um item ---------------- */
+const aceso = ref<string | null>(null)
 let apagar: ReturnType<typeof setTimeout> | undefined
 watch(() => props.destaque, async (id) => {
   if (!id) return
   limpar()
   await nextTick()
   await new Promise(r => setTimeout(r, 380))
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  acesa.value = id
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: /^v\d/.test(id) ? 'start' : 'center' })
+  aceso.value = id
   clearTimeout(apagar)
-  apagar = setTimeout(() => { acesa.value = null }, 2600)
+  apagar = setTimeout(() => { aceso.value = null }, 2600)
 }, { immediate: true, flush: 'post' })
 </script>
 
@@ -165,14 +204,14 @@ watch(() => props.destaque, async (id) => {
         <USkeleton class="h-7 w-1/3" />
         <USkeleton class="h-4 w-full" />
         <USkeleton class="h-4 w-2/3" />
-        <USkeleton class="aspect-[16/9] w-full rounded-lg" />
+        <USkeleton class="h-4 w-5/6" />
       </div>
     </div>
 
     <!-- Vazio: sem versão, ou nenhuma com os filtros -->
     <UEmpty
       v-else-if="!versoes.length"
-      class="mx-auto max-w-2xl animate-[entrada_.3s_ease-out_both]"
+      class="mx-auto max-w-2xl"
       :icon="temFiltro ? 'i-lucide-filter-x' : 'i-lucide-rocket'"
       :title="temFiltro ? t.releases.semResultadoTitulo : t.releases.vazioTitulo"
       :description="temFiltro ? t.releases.semResultadoTexto : t.releases.vazioTexto"
@@ -180,7 +219,7 @@ watch(() => props.destaque, async (id) => {
       variant="naked"
     />
 
-    <!-- A linha do tempo de hoje -->
+    <!-- A linha do tempo de hoje, com o texto de cada versão no corpo -->
     <UChangelogVersions v-else indicator-motion :ui="{ container: 'flex flex-col gap-y-10 sm:gap-y-14 lg:gap-y-18' }">
       <UChangelogVersion
         v-for="v in versoes"
@@ -189,25 +228,24 @@ watch(() => props.destaque, async (id) => {
         :title="v.titulo"
         :description="v.descricao"
         :date="v.data"
-        class="scroll-mt-28 cursor-pointer"
+        class="scroll-mt-28"
         :ui="{
           container: [
-            'max-w-2xl [content-visibility:auto] [contain-intrinsic-size:auto_520px]',
-            'rounded-lg outline-offset-8 transition-[outline-color] duration-500',
-            acesa === v.id ? 'outline-2 outline-primary' : 'outline-2 outline-transparent',
+            'max-w-2xl rounded-lg outline-offset-8 transition-[outline-color] duration-500',
+            aceso === v.id ? 'outline-2 outline-primary' : 'outline-2 outline-transparent',
           ].join(' '),
           meta: 'flex flex-wrap items-center gap-1.5 mb-2',
           title: 'text-2xl font-bold text-highlighted',
-          description: 'text-base text-muted mt-2 leading-relaxed line-clamp-4',
-          imageWrapper: v.tamanho === 'patch' ? 'relative overflow-hidden rounded-lg aspect-[3/1] sm:aspect-[4/1] mt-5' : undefined,
+          description: 'text-base text-muted mt-2 leading-relaxed',
+          footer: 'border-t border-default pt-4 mt-2 flex flex-wrap items-center justify-between gap-2',
           dotInner: v.emBreve ? 'size-2 rounded-full bg-dimmed' : undefined,
         }"
-        @click="emit('abrirVersao', v.versao)"
       >
         <template #date>
           {{ dataDaVersao(v.data) }}
         </template>
 
+        <!-- No máximo 2 rótulos: o tamanho e o prazo -->
         <template #badge>
           <UBadge color="neutral" variant="subtle" size="sm" :label="v.tamanho" />
           <UBadge
@@ -220,64 +258,67 @@ watch(() => props.destaque, async (id) => {
             :ui="{ leadingIcon: 'text-warning' }"
             :label="`${t.entrada.exigeAcao} · ${t.entrada.agirAte(formatarData(v.prazo, idioma))}`"
           />
-          <UBadge v-if="v.emBreve" color="neutral" variant="subtle" size="sm" icon="i-lucide-calendar-clock" :label="t.entrada.estado['em-breve']" />
-          <UBadge v-if="v.liberando" color="info" variant="subtle" size="sm" icon="i-lucide-loader" :label="t.entrada.estado.liberando" />
-          <UBadge v-for="a in v.acessos" :key="a" color="secondary" variant="subtle" size="sm" icon="i-lucide-flask-conical" :label="t.entrada.acesso[a]" />
-          <UBadge v-if="v.alguns" color="neutral" variant="subtle" size="sm" icon="i-lucide-users" :label="t.entrada.alguns" />
-          <UBadge
-            v-for="m in v.modulos"
-            :key="m"
-            color="neutral"
-            variant="outline"
-            size="sm"
-            :icon="moduloDe(m).icone"
-            :label="L(moduloDe(m).nome)"
-          />
         </template>
 
-        <template v-if="!v.emBreve" #image>
-          <BannerDaRelease
-            :versao="v.versao"
-            :data="diaDoBanner(v.data)"
-            :cor="v.cor"
-            :compacto="v.tamanho === 'patch'"
-            class="h-full"
-          />
-        </template>
-
-        <!-- O link permanente da versão e o que fazer, quando a versão pede ação -->
+        <!-- O texto da versão, como o texto de um post -->
         <template #body>
-          <div class="mt-3 flex flex-wrap items-center gap-1" @click.stop>
-            <UButton
-              size="xs"
-              color="neutral"
-              variant="ghost"
-              icon="i-lucide-list"
-              :label="t.releases.verItens(v.itens.length)"
-              class="-ml-2 cursor-pointer"
-              @click="emit('abrirVersao', v.versao)"
-            />
-            <UButton
-              size="xs"
-              color="neutral"
-              variant="ghost"
-              icon="i-lucide-link"
-              :label="t.entrada.copiarLink"
-              class="cursor-pointer"
-              @click="emit('copiar', v.versao)"
-            />
-            <UButton
-              v-if="v.mudanca"
-              size="xs"
-              color="neutral"
-              variant="ghost"
-              icon="i-lucide-list-checks"
-              :ui="{ leadingIcon: 'text-warning' }"
-              :label="t.entrada.verOQueFazer"
-              class="cursor-pointer"
-              @click="emit('verMudanca', v.mudanca!)"
-            />
+          <div class="text-default">
+            <template v-for="s in v.secoes" :key="s.chave">
+              <ProseH4>{{ s.titulo }}</ProseH4>
+
+              <ProseUl v-if="s.chave === 'correcao'">
+                <ProseLi
+                  v-for="e in s.itens"
+                  :id="e.id"
+                  :key="e.id"
+                  class="scroll-mt-32 rounded-sm transition-colors duration-500"
+                  :class="aceso === e.id ? 'bg-primary/10' : ''"
+                >
+                  {{ L(e.titulo) }}
+                </ProseLi>
+              </ProseUl>
+
+              <template v-else>
+                <ProseP
+                  v-for="e in s.itens"
+                  :id="e.id"
+                  :key="e.id"
+                  class="scroll-mt-32 rounded-sm transition-colors duration-500"
+                  :class="aceso === e.id ? 'bg-primary/10' : ''"
+                >
+                  <ProseStrong>{{ tituloDoItem(e) }}</ProseStrong>{{ ' ' }}{{ L(e.resumo) }}
+                  <template v-if="mudancaDe(e.mudanca)">
+                    {{ ' ' }}<ProseStrong>{{ t.releases.agirAteData(dataLonga(mudancaDe(e.mudanca)!.fases.obrigatoria)) }}</ProseStrong>{{ ' ' }}<ProseA href="#" @click.prevent="emit('verMudanca', mudancaDe(e.mudanca)!.id)">{{ t.entrada.verOQueFazer }}</ProseA>.
+                  </template>
+                  <template v-if="!v.emBreve">
+                    {{ ' ' }}<ProseA href="#" @click.prevent="foraDoPrototipo">{{ t.releases.saibaMais }}</ProseA>
+                  </template>
+                </ProseP>
+              </template>
+            </template>
           </div>
+        </template>
+
+        <template #footer>
+          <UButton
+            size="xs"
+            color="neutral"
+            variant="link"
+            icon="i-lucide-link"
+            :label="t.entrada.copiarLink"
+            class="-ml-2 cursor-pointer"
+            @click="emit('copiar', v.versao)"
+          />
+          <UButton
+            v-if="v.emPostDoMes"
+            size="xs"
+            color="neutral"
+            variant="link"
+            trailing-icon="i-lucide-arrow-right"
+            :label="t.releases.lerPostDeLancamento"
+            class="cursor-pointer"
+            @click="emit('verPost', v.mes)"
+          />
         </template>
       </UChangelogVersion>
     </UChangelogVersions>

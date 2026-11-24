@@ -50,7 +50,7 @@ function irPara(id: string) {
 }
 
 const passosAbertos = ref<Record<string, boolean>>({})
-const rotuloDoMes = computed(() => { const m = data(props.post.data, { month: 'long' }); return m.charAt(0).toUpperCase() + m.slice(1) })
+const rotuloDoMes = computed(() => { const m = data(props.post.data, { month: 'long', year: 'numeric' }); return m.charAt(0).toUpperCase() + m.slice(1) })
 const etiquetas = (e: Entrada) => [
   { icon: moduloDe(e.modulo).icone, label: L(moduloDe(e.modulo).nome), color: 'neutral' as const, variant: 'outline' as const },
   ...(e.acesso ? [{ icon: 'i-lucide-flask-conical', label: props.t.entrada.acesso[e.acesso], color: 'secondary' as const, variant: 'subtle' as const }] : []),
@@ -85,7 +85,7 @@ const etiquetas = (e: Entrada) => [
     <BannerDaRelease
       :rotulo="rotuloDoMes"
       :subtitulo="t.blog.bannerSubtitulo"
-      :data="data(post.data)"
+      :data="data(post.data, { day: 'numeric', month: 'long', year: 'numeric' })"
       :cor="post.cor"
       class="mb-10"
     />

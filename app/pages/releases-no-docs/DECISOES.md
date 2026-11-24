@@ -6,12 +6,12 @@ Blog fica com o post do mês, e "Próximas mudanças" reúne o que exige ação 
 
 ## A fronteira (a partir da rodada 2)
 
-- **Muda na aba Releases:** rótulos ao lado da data de cada versão, 1 barra de filtros acima da
-  linha do tempo (tamanho da versão e funcionalidade), o link permanente de cada versão e de cada
-  item, o acesso a "Próximas mudanças" e a "Assinar", os patches como versões curtas na mesma linha
-  do tempo e a página da versão, com a lista curta dos itens (rodada 3).
+- **Muda na aba Releases:** o texto de cada versão é lido na própria linha do tempo, como prosa
+  (rodada 4); 1 barra de filtros acima da trilha (tamanho da versão e funcionalidade); no máximo 2
+  rótulos por versão; link permanente por versão e por item; o acesso a "Próximas mudanças" e a
+  "Assinar"; os patches como blocos curtos na mesma trilha. O banner sai da versão e fica no post.
 - **Muda no Blog:** o post do mês no lugar do post por versão; o post só de changelog sai da lista
-  (rodada 3).
+  (rodada 3); o banner mostra o mês e o ano (rodada 4).
 - **Não muda:** a casca do docs, o topo "Versões do ENSPACE", a árvore e os `:ui` da página de
   releases, o título, o resumo e o quadro escuro de cada versão, e o filtro de categoria do Blog.
 
@@ -20,22 +20,49 @@ Blog fica com o post do mês, e "Próximas mudanças" reúne o que exige ação 
 ```mermaid
 flowchart LR
   B[Blog: lista] -->|Ler o post| P[Post do mês]
-  P -->|Ver o item| V[Página da versão]
+  P -->|Ver no changelog| C[Releases: o texto de cada versão na trilha]
   P -->|Ver em Próximas mudanças| M[Releases: Próximas mudanças]
-  C[Releases: versões] -->|Clicar na versão| V
-  V -->|Versões do ENSPACE| C
-  V -->|Ler o resumo do mês no Blog| P
-  V -->|Ver o que fazer| M
+  C -->|Ler o post de lançamento| P
   C -->|Ver o que fazer| M
   C -->|Próximas mudanças| M
-  M -->|Ver na página da versão| V
+  M -->|Ver no changelog| C
   M -->|Versões do ENSPACE| C
-  V -->|Copiar link| L[Link permanente da versão ou do item]
-  L -->|Abrir o link| V
+  C -->|Copiar link| L[Link da versão ou do item]
+  L -->|Abrir o link| C
   C -->|Assinar| A[E-mail e RSS]
 ```
 
 ## Rodadas
+
+### Rodada 4 · 2026-11-24
+- **Pedido (literal):**
+  - "ao abrir os itens da release nao é mais um blogpost. ta todo estilizado. nao dá pra ser simplesmente um texto? como é hoje mesmo. e produtos escreve o texto de modo direto. ta inventando muita moda... nao?"
+  - "nao ha nenhum componente do nuxt já pronto pra isso? mais ou menos como o changelog do proprio nuxt talvez? e aí ficaria fácil de ler o texto ali mesmo, sem abrir"
+  - "nas imagens de preview do blogpost, tem que caber nao só o mes, mas o ano tambem. cuide disso no prototipo"
+- **Base:** a síntese da pesquisa, seção "Proposta para o protótipo": `C:\Users\JardimMikaela\Documents\Github\pesquisa-de-mercado\runs\2026-11-24-deploy-continuo-e-lancamento\evidencias\notas\changelog-referencias.md`. Referência pronta: o template oficial "Changelog" do Nuxt UI (`nuxt-ui-templates/changelog`), que põe o texto de cada versão no `#body` do `UChangelogVersion`
+uns6-11-24-deploy-continuo-e-lancamento\evidencias
+otas\changelog-referencias.md`. Referência pronta: o template oficial "Changelog" do Nuxt UI (`nuxt-ui-templates/changelog`), que põe o texto de cada versão no `#body` do `UChangelogVersion`
+- **Mudou:**
+  - sai a página da versão (`_PaginaDaVersao.vue`, da rodada 3). O texto de cada versão é lido na trilha, no `#body` do `UChangelogVersion`, com os componentes Prose do Nuxt UI (os do texto de um post): títulos pequenos (`ProseH4`), parágrafos e listas
+  - ordem do texto: Exige ação (só quando há), Novidades, Melhorias, Correções
+  - novidade e melhoria: 1 linha em negrito com a funcionalidade e o que muda ("Spaceflow: nó de espera por data."), 1 a 3 frases e "Saiba mais"; o item que exige ação traz "Agir até <data>" e "Ver o que fazer"; correção: 1 linha numa lista
+  - Beta, Acesso antecipado, "liberando, para todos até <data>" e "liberado para alguns workspaces" vão entre parênteses no título do item, sem rótulo
+  - no máximo 2 rótulos por versão: o tamanho (minor, patch) e "Exige ação · Agir até <data>"
+  - sai o banner da versão; ele fica no post do Blog. A versão no ar não tem resumo: o texto vem logo abaixo do título
+  - no rodapé da versão: "Copiar link" e, quando a versão faz parte do post do mês, "Ler o post de lançamento"
+  - âncora por versão (`#v3-4-0`) e por item (o id do item no parágrafo dele). O post do mês e "Ver no changelog" de Próximas mudanças levam à âncora do item na trilha, com o fundo aceso por 2,6 s
+  - os filtros da rodada 3 ficam (tamanho e funcionalidade); o de funcionalidade também filtra os itens dentro de cada versão
+  - banner do Blog: o rótulo traz o mês e o ano ("Dezembro de 2026") e o canto, a data com o ano ("8 de dezembro de 2026"). O rótulo usa uma escala menor que a da versão e quebra em 2 linhas equilibradas quando falta largura, sem corte. Vale para a lista, o cartão, o post do mês e o modo Hoje
+  - Próximas mudanças fica como na rodada 3; só o link "Ver no changelog" leva à âncora na trilha
+- **Descartado:**
+  - cartão por item e rótulo por item (rodada 3). Motivo: o pedido de texto simples, como hoje
+  - página separada por versão. Motivo: o texto cabe na trilha ("ler o texto ali mesmo, sem abrir")
+- **Maquete:** "Saiba mais" mostra o aviso "A documentação fica fora deste protótipo."
+- **Para a redatora decidir:**
+  - a 3.4.2 do mock é patch e tem 1 novidade e 1 melhoria; pelo filtro "Pequenas: correções e ajustes rápidos", ela seria minor. Manter o mock ou renumerar
+  - "Grandes" continua vazio no mock (sem versão major)
+- **Commit:** nenhum nesta rodada; o commit sai pelo coordenador
+- **Ver:** `http://localhost:3000/releases-no-docs` · `evidencias/rodada4-trilha-desktop-claro.jpg` · `evidencias/rodada4-trilha-desktop-escuro.jpg` · `evidencias/rodada4-trilha-mobile-claro.jpg` · `evidencias/rodada4-versao-minor-desktop-claro.jpg` · `evidencias/rodada4-versao-minor-mobile-escuro.jpg` · `evidencias/rodada4-versao-patch-desktop-claro.jpg` · `evidencias/rodada4-item-pelo-link-desktop-claro.jpg` · `evidencias/rodada4-blog-desktop-claro.jpg` · `evidencias/rodada4-blog-mobile-claro.jpg` · `evidencias/rodada4-blog-post-mobile-claro.jpg`
 
 ### Rodada 3 · 2026-11-24
 - **Pedido (literal), item a item:**

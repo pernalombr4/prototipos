@@ -30,7 +30,8 @@ function dataComDefeito(iso: string) {
 function diaDoBanner(iso: string) {
   const d = new Date(`${iso}T12:00:00Z`)
   d.setUTCDate(d.getUTCDate() - 1)
-  return formatarData(d.toISOString().slice(0, 10), idioma.value)
+  // Rodada 4: o banner mostra o ano junto do dia e do mês.
+  return formatarData(d.toISOString().slice(0, 10), idioma.value, { day: 'numeric', month: 'long', year: 'numeric' })
 }
 </script>
 

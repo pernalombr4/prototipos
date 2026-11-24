@@ -49,8 +49,9 @@ const primeiro = computed(() => lista.value[0])
 const temBanner = (p: Post) => p.categoria !== 'artigo'
 const maiuscula = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 const rotuloDoBanner = (p: Post) =>
-  p.categoria === 'mensal' ? maiuscula(formatarData(p.data, idioma.value, { month: 'long' })) : undefined
-const dataDoBanner = (p: Post) => formatarData(p.data, idioma.value, { day: 'numeric', month: 'long' })
+  p.categoria === 'mensal' ? maiuscula(formatarData(p.data, idioma.value, { month: 'long', year: 'numeric' })) : undefined
+/** Rodada 4: o banner mostra o mês e o ano ("Dezembro de 2026") e, no canto, a data com o ano. */
+const dataDoBanner = (p: Post) => formatarData(p.data, idioma.value, { day: 'numeric', month: 'long', year: 'numeric' })
 
 /** O texto do botão do destaque, como no site: "Ver release" ou "Ler artigo"; na proposta, "Ler o post". */
 const rotuloDoLink = (p: Post) =>

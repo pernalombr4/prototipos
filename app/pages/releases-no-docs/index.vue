@@ -18,12 +18,11 @@ import Changelog from './_Changelog.vue'
 import HeroDaSecao from './_HeroDaSecao.vue'
 import ListaDoBlog from './_ListaDoBlog.vue'
 import PostDoMes from './_PostDoMes.vue'
-import PaginaDaVersao from './_PaginaDaVersao.vue'
 import ProximasMudancas from './_ProximasMudancas.vue'
 import ReleasesHoje from './_ReleasesHoje.vue'
 import { entradas, linkPermanente, postsDaProposta, postsDeHoje } from './mocks'
 import { textos } from './textos'
-import { ancoraDaVersao, montarVersoes } from './versoes'
+import { ancoraDaVersao } from './versoes'
 
 import briefingMd from './BRIEFING.md?raw'
 import decisoesMd from './DECISOES.md?raw'
@@ -50,25 +49,19 @@ const estadosPossiveis = ['cheio', 'vazio', 'carregando'] as const
 const secao = ref<'blog' | 'releases'>('releases')
 const aba = ref<'changelog' | 'proximas'>('changelog')
 const postAberto = ref<string | null>(null)
-/** Rodada 3: a página da versão (o changelog simples dela), aberta ao clicar na versão. */
-const versaoAberta = ref<string | null>(null)
-const destaqueVersao = ref<string | null>(null)
-const destaqueItem = ref<string | null>(null)
+/** Id da versão (`v3-4-0`) ou do item a mostrar na trilha. Rodada 4: não há mais página da versão. */
+const destaque = ref<string | null>(null)
 const destaqueMudanca = ref<string | null>(null)
 const assinarAberto = ref(false)
 
 const post = computed(() => postsDaProposta.find(p => p.id === postAberto.value))
-const versoes = computed(() => montarVersoes(t.value, idioma.value))
-const paginaDaVersao = computed(() => versoes.value.find(v => v.versao === versaoAberta.value))
 
 const topo = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
 function irParaReleases(a: 'changelog' | 'proximas') {
-  if (versaoAberta.value) history.replaceState(null, '', location.pathname)
   versao.value = 'proposta'
   secao.value = 'releases'
   postAberto.value = null
-  versaoAberta.value = null
   aba.value = a
 }
 
@@ -79,37 +72,23 @@ function irAba(a: 'changelog' | 'proximas') {
 }
 
 function irSecao(s: 'blog' | 'releases') {
-  if (versaoAberta.value) history.replaceState(null, '', location.pathname)
   secao.value = s
   postAberto.value = null
-  versaoAberta.value = null
   topo()
 }
 
-/** Abre a página da versão; com `item`, rola até ele e acende o contorno. */
-async function abrirVersao(v: string, item: string | null = null) {
+/** Leva à âncora na trilha: a versão (`v3-4-0`) ou o item (o id dele). */
+async function irPara(id: string) {
   irParaReleases('changelog')
-  versaoAberta.value = v
-  destaqueItem.value = null
-  history.replaceState(null, '', `#${item ?? ancoraDaVersao(v)}`)
-  if (!item) topo()
+  history.replaceState(null, '', `#${id}`)
+  destaque.value = null
   await nextTick()
-  destaqueItem.value = item
+  destaque.value = id
 }
 
-/** Do post do mês e de Próximas mudanças: o item abre na página da versão dele. */
+/** Do post do mês e de Próximas mudanças: o item, na trilha. */
 function verEntrada(id: string) {
-  const e = entradas.find(x => x.id === id)
-  if (e) abrirVersao(e.versao, id)
-}
-
-/** Da página da versão de volta à trilha, com a versão acesa. */
-async function voltarDaVersao() {
-  const v = versaoAberta.value
-  irParaReleases('changelog')
-  destaqueVersao.value = null
-  await nextTick()
-  destaqueVersao.value = v ? ancoraDaVersao(v) : null
+  irPara(id)
 }
 
 async function verMudanca(id: string) {
@@ -123,7 +102,6 @@ function verPost(mes: string) {
   const p = postsDaProposta.find(x => x.mes === mes)
   if (!p) return
   secao.value = 'blog'
-  versaoAberta.value = null
   postAberto.value = p.id
   topo()
 }
@@ -141,26 +119,23 @@ function verChangelog() {
   irAba('changelog')
 }
 
-/** O link permanente da versão, ou do item com a âncora: copia o endereço e põe a âncora na barra. */
-async function copiar(v: string, item?: string) {
-  const url = linkPermanente(idioma.value, v, item)
-  history.replaceState(null, '', `#${item ?? ancoraDaVersao(v)}`)
+/** O link permanente da versão: copia o endereço e põe a âncora na barra do navegador. */
+async function copiar(v: string) {
+  const url = linkPermanente(idioma.value, v)
+  history.replaceState(null, '', `#${ancoraDaVersao(v)}`)
   try { await navigator.clipboard.writeText(url) }
   catch { /* sem permissão: o toast ainda mostra o endereço */ }
   toast.add({ title: t.value.entrada.linkCopiado, description: url, icon: 'i-lucide-link', color: 'success', duration: 3000 })
 }
 
-/** Quem chega pelo link permanente cai na página da versão, ou no item dentro dela. */
+/** Quem chega pelo link permanente cai na versão ou no item, com o destaque aceso. */
 onMounted(() => {
   const id = decodeURIComponent(location.hash.slice(1))
-  const v = versoes.value.find(x => x.id === id)
-  if (v) abrirVersao(v.versao)
-  else if (entradas.some(e => e.id === id)) verEntrada(id)
+  if (entradas.some(e => e.id === id || ancoraDaVersao(e.versao) === id)) irPara(id)
 })
 
 watch(versao, () => {
   postAberto.value = null
-  versaoAberta.value = null
   aba.value = 'changelog'
 })
 
@@ -173,7 +148,7 @@ const hero = computed(() => {
 })
 
 /** A chave da vista: muda a vista, a transição roda. */
-const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value ?? 'lista'}-${aba.value}-${versaoAberta.value ?? 'trilha'}`)
+const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value ?? 'lista'}-${aba.value}`)
 </script>
 
 <template>
@@ -198,18 +173,6 @@ const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value 
           @assinar="assinarAberto = true"
         />
 
-        <!-- PÁGINA DA VERSÃO (proposta, rodada 3): o changelog simples de 1 versão -->
-        <PaginaDaVersao
-          v-else-if="secao === 'releases' && paginaDaVersao"
-          :t="t"
-          :v="paginaDaVersao"
-          :destaque="destaqueItem"
-          @voltar="voltarDaVersao"
-          @copiar="copiar"
-          @ver-mudanca="verMudanca"
-          @ver-post="verPost"
-        />
-
         <!-- RELEASES: a mesma árvore do en-docs (UPage > hero > UPageBody > UContainer) -->
         <UPage v-else-if="secao === 'releases'" class="overflow-x-hidden">
           <HeroDaSecao :title="hero.titulo" :description="hero.descricao" />
@@ -224,10 +187,10 @@ const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value 
                 v-if="aba === 'changelog'"
                 :t="t"
                 :estado="estado"
-                :destaque="destaqueVersao"
-                @abrir-versao="abrirVersao"
+                :destaque="destaque"
                 @copiar="copiar"
                 @ver-mudanca="verMudanca"
+                @ver-post="verPost"
                 @ir-proximas="irAba('proximas')"
                 @assinar="assinarAberto = true"
               />

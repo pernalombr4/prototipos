@@ -5,7 +5,9 @@
  *
  * Nada aqui é proposta, com 1 exceção declarada: a prop `rotulo`. No post mensal, o quadro mostra
  * o mês ("Dezembro") no lugar da versão, porque o post deixa de ser de uma versão. O componente é o
- * mesmo; só o texto do meio muda.
+ * mesmo; só o texto do meio muda. Rodada 4: o rótulo traz o mês e o ano ("Dezembro de 2026"); para
+ * caber inteiro no celular e no cartão do Blog, ele usa uma escala menor que a da versão e quebra em
+ * 2 linhas equilibradas quando falta largura, sem corte nem reticências.
  *
  * Diferenças de cópia, declaradas no DECISOES.md: o logo vem do `enspace.svg` local (o site busca
  * uma imagem no CDN, e o protótipo não faz rede), e as estrelas do `StarsBg` viraram pontos fixos.
@@ -62,14 +64,19 @@ const estrelas = Array.from({ length: 36 }, (_, i) => ({
       {{ data }}
     </span>
 
-    <div class="relative z-10 flex flex-col items-center text-center" :class="compacto ? 'gap-1.5' : 'gap-4 sm:gap-5'">
+    <div class="relative z-10 flex max-w-full flex-col items-center text-center" :class="compacto ? 'gap-1.5' : 'gap-4 sm:gap-5'">
       <img :src="logoEnspace" alt="ENSPACE" :class="compacto ? 'h-4' : 'h-7 sm:h-8'">
       <div
         v-if="versao || rotulo"
-        class="relative flex items-center justify-center rounded-lg border border-space-500/30 bg-space-500/20 backdrop-blur-xs"
+        class="relative flex max-w-full items-center justify-center rounded-lg border border-space-500/30 bg-space-500/20 backdrop-blur-xs"
         :class="compacto ? 'px-2 py-1' : 'px-4 py-2'"
       >
-        <span class="relative font-bold" :class="[esquema[2], compacto ? 'text-2xl' : 'text-5xl sm:text-6xl']">
+        <span
+          class="relative font-bold text-balance"
+          :class="[esquema[2], rotulo
+            ? (compacto ? 'text-xl leading-tight' : 'text-3xl leading-tight sm:text-5xl')
+            : (compacto ? 'text-2xl' : 'text-5xl sm:text-6xl')]"
+        >
           {{ rotulo ?? `v${versao}` }}
         </span>
       </div>
