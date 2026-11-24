@@ -390,6 +390,20 @@ disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:)
   [Modelos com o menu ⋮](evidencias/prototipo-25-modelos-menu-de-acoes.jpg),
   [workspace novo](evidencias/prototipo-26-workspace-novo-mensagens.jpg),
   [primeiro uso](evidencias/prototipo-27-primeiro-uso-mensagens.jpg).
+- **Pedido (aba Configurações):** "a largura aqui nao ta estranha nao? e os recados nao estao muito
+  soltos na tela? [...] e precisamos dos retangulos? [...] tem que seguir corretamente nosso design
+  system."
+- **Mudou:** a aba segue o padrão das telas de configuração novas do develop (Integrações › Webhooks,
+  lido no código em 24/11/2026):
+  - largura total da área, como as outras abas, no lugar da coluna estreita no meio;
+  - cada grupo tem um cabeçalho (`UPageCard` naked, título e descrição) e 1 cartão (`UPageCard`
+    subtle), no lugar de 4 cartões soltos;
+  - os 2 recados soltos viraram descrição de cabeçalho: "Sua conta de envio" e "Regras do
+    workspace", que diz que só quem administra vê o grupo;
+  - dentro de "Regras do workspace", cada regra é uma linha (`UFormField`: rótulo e explicação à
+    esquerda, ação à direita), separadas por `USeparator`, como no modelo de configurações do
+    Nuxt UI.
+- **Ver:** print [Configurações no padrão](evidencias/prototipo-28-configuracoes-no-padrao.jpg).
 
 ## Por que cada decisão
 

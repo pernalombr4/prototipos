@@ -211,118 +211,103 @@ function integrar() {
       />
     </div>
 
-    <!-- ===== Configurações ===== -->
-    <div v-else class="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-4 sm:px-6">
-      <p class="text-sm text-muted">
-        {{ tc.dicas.configuracoes }}
-      </p>
-
+    <!-- ===== Configurações: o padrão das telas de configuração do develop
+         (Integrações › Webhooks): cabeçalho da seção num UPageCard naked e o
+         conteúdo num UPageCard subtle, em largura total. Dentro, cada regra é
+         uma linha (rótulo e explicação à esquerda, ação à direita), separadas
+         por USeparator, como no modelo de configurações do Nuxt UI. ===== -->
+    <div v-else class="flex flex-col gap-8 p-4 sm:p-6">
       <!-- Todo perfil: a conta de envio da pessoa -->
-      <UCard>
-        <template #header>
-          <h2 class="flex items-center gap-2 font-semibold text-highlighted">
-            <UIcon name="i-lucide-user-round" class="size-4 text-muted" />{{ tc.config.contaTitulo }}
-          </h2>
-          <p class="mt-1 text-sm text-muted">
-            {{ tc.config.contaDescricao }}
-          </p>
-        </template>
-        <div class="flex flex-wrap items-center gap-3">
-          <UBadge
-            :label="outlookIntegrado ? tc.config.contaConectada(EU.email ?? '') : tc.config.contaSem"
-            :icon="outlookIntegrado ? 'i-lucide-circle-check' : 'i-lucide-circle-alert'"
-            :color="outlookIntegrado ? 'success' : 'warning'"
-            variant="subtle"
-            class="max-w-full"
-            :ui="{ label: 'whitespace-normal text-left' }"
-          />
-          <UButton
-            :label="outlookIntegrado ? tc.config.gerenciar : tc.config.integrar"
-            icon="i-lucide-plug"
-            color="neutral"
-            variant="outline"
-            size="sm"
-            class="ml-auto"
-            @click="integrar"
-          />
-        </div>
-      </UCard>
+      <section>
+        <UPageCard :title="tc.config.contaTitulo" :description="tc.config.contaDescricao" variant="naked" orientation="horizontal" class="mb-4" />
+        <UPageCard variant="subtle" :ui="{ container: 'p-4 sm:p-6' }">
+          <div class="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
+            <UBadge
+              :label="outlookIntegrado ? tc.config.contaConectada(EU.email ?? '') : tc.config.contaSem"
+              :icon="outlookIntegrado ? 'i-lucide-circle-check' : 'i-lucide-circle-alert'"
+              :color="outlookIntegrado ? 'success' : 'warning'"
+              variant="subtle"
+              class="max-w-full"
+              :ui="{ label: 'whitespace-normal text-left' }"
+            />
+            <UButton
+              :label="outlookIntegrado ? tc.config.gerenciar : tc.config.integrar"
+              icon="i-lucide-plug"
+              color="neutral"
+              variant="outline"
+              size="sm"
+              class="shrink-0"
+              @click="integrar"
+            />
+          </div>
+        </UPageCard>
+      </section>
 
-      <template v-if="ehAdmin">
-        <p class="flex items-center gap-1.5 text-xs text-muted">
-          <UIcon name="i-lucide-shield" class="size-3.5" />{{ tc.config.soAdmin }}
-        </p>
+      <!-- Quem administra: as regras do workspace -->
+      <section v-if="ehAdmin">
+        <UPageCard :title="tc.config.regrasTitulo" :description="tc.config.regrasDescricao" variant="naked" orientation="horizontal" class="mb-4" />
+        <UPageCard variant="subtle" :ui="{ container: 'p-4 sm:p-6 gap-y-4' }">
+          <!-- O contato do item -->
+          <UFormField
+            :label="tc.config.contatoTitulo"
+            :description="fase >= 2 ? tc.config.contatoNaCategoria : tc.config.contatoPelosCampos"
+            class="flex items-start justify-between gap-4 max-sm:flex-col"
+            :ui="{ wrapper: 'max-w-2xl', container: 'shrink-0' }"
+          >
+            <UButton
+              v-if="fase >= 2"
+              :label="tc.config.irParaCategorias"
+              trailing-icon="i-lucide-arrow-right"
+              color="neutral"
+              variant="outline"
+              size="sm"
+              @click="ir('categoria', { categoria: 'contratos', vista: 'atalhos' })"
+            />
+          </UFormField>
 
-        <!-- O contato do item -->
-        <UCard>
-          <template #header>
-            <h2 class="flex items-center gap-2 font-semibold text-highlighted">
-              <UIcon name="i-lucide-contact" class="size-4 text-muted" />{{ tc.config.contatoTitulo }}
-            </h2>
-          </template>
-          <p class="text-sm text-default">
-            {{ fase >= 2 ? tc.config.contatoNaCategoria : tc.config.contatoPelosCampos }}
-          </p>
-          <UButton
-            v-if="fase >= 2"
-            :label="tc.config.irParaCategorias"
-            trailing-icon="i-lucide-arrow-right"
-            color="neutral"
-            variant="outline"
-            size="sm"
-            class="mt-3"
-            @click="ir('categoria', { categoria: 'contratos', vista: 'atalhos' })"
-          />
-        </UCard>
-
-        <!-- Fase 2: caixas no "De" -->
-        <UCard v-if="fase >= 2">
-          <template #header>
-            <h2 class="flex items-center gap-2 font-semibold text-highlighted">
-              <UIcon name="i-lucide-inbox" class="size-4 text-muted" />{{ tc.config.remetentesTitulo }}
-            </h2>
-            <p class="mt-1 text-sm text-muted">
-              {{ tc.config.remetentesDescricao }}
-            </p>
-          </template>
-          <p v-if="!caixasDoWorkspace.length" class="text-sm text-muted">
-            {{ tc.vazio.caixasTitulo }}
-          </p>
-          <div v-else class="flex flex-col divide-y divide-default">
-            <div v-for="c in caixasDoWorkspace" :key="c.id" class="flex flex-wrap items-center gap-3 py-2.5 first:pt-0 last:pb-0">
-              <div class="min-w-0">
-                <p class="text-sm font-medium text-highlighted">
-                  {{ c.nome }}
-                </p>
-                <p class="truncate font-mono text-xs text-muted">
-                  {{ c.email }}
-                </p>
+          <!-- Fase 2: caixas no "De" -->
+          <template v-if="fase >= 2">
+            <USeparator />
+            <UFormField
+              :label="tc.config.remetentesTitulo"
+              :description="tc.config.remetentesDescricao"
+              :ui="{ wrapper: 'max-w-2xl', container: 'mt-3' }"
+            >
+              <p v-if="!caixasDoWorkspace.length" class="text-sm text-muted">
+                {{ tc.vazio.caixasTitulo }}
+              </p>
+              <div v-else class="flex flex-col divide-y divide-default rounded-md border border-default bg-default">
+                <div v-for="c in caixasDoWorkspace" :key="c.id" class="flex flex-wrap items-center gap-3 px-3 py-2.5">
+                  <div class="min-w-0">
+                    <p class="text-sm font-medium text-highlighted">
+                      {{ c.nome }}
+                    </p>
+                    <p class="truncate font-mono text-xs text-muted">
+                      {{ c.email }}
+                    </p>
+                  </div>
+                  <USwitch v-model="noDe[c.id]" :label="tc.config.disponivelNoDe" size="sm" class="ml-auto" />
+                </div>
               </div>
-              <USwitch v-model="noDe[c.id]" :label="tc.config.disponivelNoDe" size="sm" class="ml-auto" />
-            </div>
-          </div>
-          <template #footer>
-            <div class="flex justify-end">
-              <UButton :label="tc.config.salvar" :loading="salvando" @click="salvar" />
-            </div>
+              <div v-if="caixasDoWorkspace.length" class="mt-3 flex justify-end">
+                <UButton :label="tc.config.salvar" :loading="salvando" size="sm" @click="salvar" />
+              </div>
+            </UFormField>
           </template>
-        </UCard>
 
-        <!-- O domínio de envio (integração SendGrid de hoje) -->
-        <UCard>
-          <template #header>
-            <h2 class="flex items-center gap-2 font-semibold text-highlighted">
-              <UIcon name="i-lucide-globe" class="size-4 text-muted" />{{ tc.config.dominioTitulo }}
-            </h2>
-          </template>
-          <div class="flex flex-wrap items-center gap-3">
-            <p class="min-w-0 flex-1 text-sm text-default">
-              {{ tc.config.dominioDescricao }}
-            </p>
+          <USeparator />
+
+          <!-- O domínio de envio (integração SendGrid de hoje) -->
+          <UFormField
+            :label="tc.config.dominioTitulo"
+            :description="tc.config.dominioDescricao"
+            class="flex items-start justify-between gap-4 max-sm:flex-col"
+            :ui="{ wrapper: 'max-w-2xl', container: 'shrink-0' }"
+          >
             <UButton :label="tc.config.abrirIntegracoes" icon="i-lucide-blocks" color="neutral" variant="outline" size="sm" @click="maquete" />
-          </div>
-        </UCard>
-      </template>
+          </UFormField>
+        </UPageCard>
+      </section>
     </div>
   </div>
 </template>

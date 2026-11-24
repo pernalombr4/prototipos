@@ -375,6 +375,8 @@ export interface Textos {
       remetentesDescricao: string
       disponivelNoDe: string
       soAdmin: string
+      regrasTitulo: string
+      regrasDescricao: string
       salvar: string
       salvo: string
     }
@@ -917,6 +919,8 @@ const ptBR: Textos = {
       remetentesDescricao: 'Escolha as caixas do workspace que aparecem no campo De de quem escreve um e-mail.',
       disponivelNoDe: 'Disponível no campo De',
       soAdmin: 'Visível só para quem administra o workspace.',
+      regrasTitulo: 'Regras do workspace',
+      regrasDescricao: 'Valem para todas as pessoas do workspace. Visível somente para quem administra.',
       salvar: 'Salvar',
       salvo: 'Configuração salva',
     },
@@ -1489,6 +1493,8 @@ const en: Textos = {
       remetentesDescricao: 'Choose the workspace boxes offered in the From field to whoever writes an email.',
       disponivelNoDe: 'Available in From',
       soAdmin: 'Visible only to workspace administrators.',
+      regrasTitulo: 'Workspace rules',
+      regrasDescricao: 'They apply to everyone in the workspace. Visible only to administrators.',
       salvar: 'Save',
       salvo: 'Settings saved',
     },
@@ -2061,6 +2067,8 @@ const es: Textos = {
       remetentesDescricao: 'Elija los buzones del workspace que aparecen en el campo De de quien escribe un correo.',
       disponivelNoDe: 'Disponible en el campo De',
       soAdmin: 'Visible solo para quien administra el workspace.',
+      regrasTitulo: 'Reglas del workspace',
+      regrasDescricao: 'Valen para todas las personas del workspace. Visible solo para quien administra.',
       salvar: 'Guardar',
       salvo: 'Configuración guardada',
     },
