@@ -1,0 +1,29 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/permissoes-de-cargos/",
+  "andaime": "Volume",
+  "cenas": {
+    "formsProcessos": [
+      { "focar": "Buscar categoria" },
+      { "digitar": "Processos Judiciais" },
+      { "esperar": 600 },
+      { "clicar": { "texto": "1 de 4", "exato": true } },
+      { "esperar": 900 }
+    ]
+  },
+  "requisitos": {
+    "RF601": { "cena": "formsProcessos", "destacar": { "texto": "Itens sem formulário" } },
+    "RF602": { "cena": "formsProcessos", "destacar": "Criados pelo formulário padrão, pela API, por importação, pelo Spaceflow ou por agente de IA." },
+    "RF603": { "cena": "formsProcessos", "destacar": "Todos os formulários" },
+    "RF604": { "sem": "no protótipo, toda categoria tem formulário; a categoria sem formulário mostra só as 4 ações, como hoje" },
+    "RI601": { "sem": "é a permissão que o back grava; não tem tela" },
+    "RF611": { "sem": "regra da listagem no back; o protótipo não lista itens" },
+    "RF612": { "sem": "regra da listagem no back; o protótipo não lista itens" },
+    "RF613": { "sem": "regra da listagem no back; o protótipo não lista itens" },
+    "RF614": { "sem": "regra da listagem no back; o protótipo não lista itens" },
+    "RF615": { "sem": "regra da abertura do item no back; o protótipo não abre itens" },
+    "RF616": { "sem": "comportamento de hoje, que continua; o protótipo não lista itens" },
+    "RF617": { "sem": "comportamento de hoje, que continua; o protótipo não lista itens" },
+    "RT611": { "sem": "migração dos cargos gravados, no back" },
+    "RT612": { "sem": "migração dos cargos gravados, no back" }
+  }
+}
