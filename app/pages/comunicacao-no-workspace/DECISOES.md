@@ -404,6 +404,15 @@ disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:)
     esquerda, ação à direita), separadas por `USeparator`, como no modelo de configurações do
     Nuxt UI.
 - **Ver:** print [Configurações no padrão](evidencias/prototipo-28-configuracoes-no-padrao.jpg).
+- **Pedido (ícones e títulos):** "voce mudou a aba de configuraçoes e acabou perdendo algumas coisas
+  interessantes: os ícones que tava utlizando, título da seçao etc".
+- **Mudou:** os ícones e o peso dos títulos voltaram dentro do estilo novo:
+  - cabeçalho de seção com ícone no título (`#title` do `UPageCard`): pessoa em "Sua conta de
+    envio", escudo em "Regras do workspace";
+  - cada regra com ícone e o nome em negrito (`#label` do `UFormField`): contato, caixa de entrada
+    e globo;
+  - a descrição recua até o texto do título, para ícone e texto formarem uma coluna.
+- **Ver:** print [Configurações com os ícones](evidencias/prototipo-30-configuracoes-com-icones.jpg).
 - **Pedido (texto ao lado da busca):** "esses textos instrucionais ao lado das caixas de busca devem
   ser retirados. ta horrivel [...] talvez a própria aba possa ter um "i" de informaçao com tooltip
   indicando esse texto. acha que funciona?"

@@ -216,7 +216,11 @@ function integrar() {
     <div v-else class="flex flex-col gap-8 p-4 sm:p-6">
       <!-- Todo perfil: a conta de envio da pessoa -->
       <section>
-        <UPageCard :title="tc.config.contaTitulo" :description="tc.config.contaDescricao" variant="naked" orientation="horizontal" class="mb-4" />
+        <UPageCard :description="tc.config.contaDescricao" variant="naked" orientation="horizontal" class="mb-4" :ui="{ description: 'ps-6' }">
+          <template #title>
+            <span class="flex items-center gap-2"><UIcon name="i-lucide-user-round" class="size-4 shrink-0 text-muted" />{{ tc.config.contaTitulo }}</span>
+          </template>
+        </UPageCard>
         <UPageCard variant="subtle" :ui="{ container: 'p-4 sm:p-6' }">
           <div class="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
             <UBadge
@@ -242,15 +246,21 @@ function integrar() {
 
       <!-- Quem administra: as regras do workspace -->
       <section v-if="ehAdmin">
-        <UPageCard :title="tc.config.regrasTitulo" :description="tc.config.regrasDescricao" variant="naked" orientation="horizontal" class="mb-4" />
+        <UPageCard :description="tc.config.regrasDescricao" variant="naked" orientation="horizontal" class="mb-4" :ui="{ description: 'ps-6' }">
+          <template #title>
+            <span class="flex items-center gap-2"><UIcon name="i-lucide-shield" class="size-4 shrink-0 text-muted" />{{ tc.config.regrasTitulo }}</span>
+          </template>
+        </UPageCard>
         <UPageCard variant="subtle" :ui="{ container: 'p-4 sm:p-6 gap-y-4' }">
           <!-- O contato do item -->
           <UFormField
-            :label="tc.config.contatoTitulo"
             :description="fase >= 2 ? tc.config.contatoNaCategoria : tc.config.contatoPelosCampos"
             class="flex items-start justify-between gap-4 max-sm:flex-col"
-            :ui="{ wrapper: 'max-w-2xl', container: 'shrink-0' }"
+            :ui="{ wrapper: 'max-w-2xl', description: 'ps-6', container: 'shrink-0' }"
           >
+            <template #label>
+              <span class="flex items-center gap-2 text-base font-semibold text-highlighted"><UIcon name="i-lucide-contact" class="size-4 shrink-0 text-muted" />{{ tc.config.contatoTitulo }}</span>
+            </template>
             <UButton
               v-if="fase >= 2"
               :label="tc.config.irParaCategorias"
@@ -266,10 +276,12 @@ function integrar() {
           <template v-if="fase >= 2">
             <USeparator />
             <UFormField
-              :label="tc.config.remetentesTitulo"
               :description="tc.config.remetentesDescricao"
-              :ui="{ wrapper: 'max-w-2xl', container: 'mt-3' }"
+              :ui="{ wrapper: 'max-w-2xl', description: 'ps-6', container: 'mt-3 ps-6' }"
             >
+              <template #label>
+                <span class="flex items-center gap-2 text-base font-semibold text-highlighted"><UIcon name="i-lucide-inbox" class="size-4 shrink-0 text-muted" />{{ tc.config.remetentesTitulo }}</span>
+              </template>
               <p v-if="!caixasDoWorkspace.length" class="text-sm text-muted">
                 {{ tc.vazio.caixasTitulo }}
               </p>
@@ -296,11 +308,13 @@ function integrar() {
 
           <!-- O domínio de envio (integração SendGrid de hoje) -->
           <UFormField
-            :label="tc.config.dominioTitulo"
             :description="tc.config.dominioDescricao"
             class="flex items-start justify-between gap-4 max-sm:flex-col"
-            :ui="{ wrapper: 'max-w-2xl', container: 'shrink-0' }"
+            :ui="{ wrapper: 'max-w-2xl', description: 'ps-6', container: 'shrink-0' }"
           >
+            <template #label>
+              <span class="flex items-center gap-2 text-base font-semibold text-highlighted"><UIcon name="i-lucide-globe" class="size-4 shrink-0 text-muted" />{{ tc.config.dominioTitulo }}</span>
+            </template>
             <UButton :label="tc.config.abrirIntegracoes" icon="i-lucide-blocks" color="neutral" variant="outline" size="sm" @click="maquete" />
           </UFormField>
         </UPageCard>
