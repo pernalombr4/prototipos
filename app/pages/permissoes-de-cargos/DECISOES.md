@@ -281,3 +281,17 @@ USE87A7C6 está na develop desde 2026-11-16 e ainda não está na branch princip
 - **Para a redatora decidir:** as 3 partes das regras novas se lançam sozinhas e podem virar 3 épicos (P902 do
   épico); a correção do card USE87A7C6 na develop vaza os itens sem formulário no caso Cível e Criminal (P901 dos
   2 épicos).
+
+## Requisitos, 7 épicos · 2026-11-24
+- **Pedido (literal):** "organize as partes em ordem de relevancia, no caso da mudança de regras, ok? ordem de
+  urgencia. se algo for muito urgente, tem que ter um épico só pra aquilo, pra subir logo. [...] se for pra subir as
+  partes separadamente, aí tem que ter um epico pra cada. se for pra subir tudo jnto pra ter logica, ok. é um pacote
+  de um epico mesmo"
+- **Mudou:** os 2 épicos viraram 7, em ordem de urgência (`requisitos/README.md`). Cada um sobe sozinho; só a tela
+  nova tem partes, porque tabela, campos, formulários e confirmação só fazem sentido juntos.
+  - O urgente (itens sem formulário) ganhou épico próprio e não espera a tela nova: a origem entra como 1 nó na
+    árvore de hoje.
+  - Ações por formulário em toda porta saiu dos itens sem formulário: não é urgente e sobe depois.
+  - A parte de Quais itens que depende do padrão foi para o épico do padrão.
+  - Permissões fixas e Quem acessa saíram da tela nova: sobem sozinhas.
+- **Para a redatora decidir:** a ordem dos épicos 2 a 7 é proposta do agente.

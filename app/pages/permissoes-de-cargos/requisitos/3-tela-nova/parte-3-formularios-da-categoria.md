@@ -23,6 +23,7 @@ ou clique em Ajustar › Formulários.
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
 | RF201 | A aba Formulários deve mostrar a linha "Todos os formulários" e, abaixo, 1 linha por formulário, com as colunas Criar, Ver, Atualizar e Excluir. | "Processos Judiciais" mostra "Todos os formulários", Cível, Criminal e Trabalhista. | Essencial | Obrigatório |
+| RF215 | Cada origem que a árvore de hoje mostra na categoria deve virar uma linha da aba, com as mesmas regras de caixa dos formulários. | Com o épico "Itens sem formulário" no ar, "Itens sem formulário" aparece depois de Trabalhista, com a descrição que a árvore mostra. | Essencial | Obrigatório |
 | RF202 | Marcar uma ação num formulário, com a ação desligada na categoria, deve ligar a ação na categoria com traço (RN201). | Marcar Ver em Criminal, sem Ver na categoria, deixa Ver de "Processos Judiciais" com traço. | Essencial | Obrigatório |
 | RF203 | Marcar a caixa de "Todos os formulários", ou clicar nela com traço, deve marcar a ação em cada formulário. | O clique no traço de Ver em "Todos os formulários" marca Ver em Cível, Criminal e Trabalhista. | Essencial | Obrigatório |
 | RF204 | Desmarcar 1 formulário numa ação marcada inteira deve deixar a ação da categoria com traço. | Desmarcar Ver em Cível deixa Ver da categoria com traço. | Essencial | Obrigatório |

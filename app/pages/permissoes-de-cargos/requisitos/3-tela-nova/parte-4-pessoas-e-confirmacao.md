@@ -1,7 +1,9 @@
-# 5. Pessoas do cargo e confirmação
+# 4. Pessoas do cargo e confirmação
 
 **Objetivo:** antes de salvar, o administrador sabe quem tem o cargo e lê, em palavras, o que cada alteração muda e
 para quantas pessoas.
+
+**Depende de:** 1. Tabela de categorias.
 
 **Onde vale:** o selo ao lado do nome do cargo, o aviso de alterações pendentes no topo e a confirmação de "Salvar
 Alterações".
@@ -23,7 +25,7 @@ cargo"; marque uma caixa e clique em "Salvar Alterações".
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
 | RF405 | Com alteração não salva, o topo deve mostrar "Alterações pendentes", "{n} alterações não salvas.", "Descartar" e "Salvar Alterações". | Marcar Ver em 2 categorias mostra "2 alterações não salvas.". | Essencial | Obrigatório |
-| RF406 | Cada categoria e cada área fixa alterada deve contar como 1 alteração, com 1 ou mais caixas mexidas. | Escolher 35 campos em "Contratos" conta 1 alteração. | Importante | Obrigatório |
+| RF406 | Cada categoria alterada deve contar como 1 alteração, com 1 ou mais caixas mexidas. | Escolher 35 campos em "Contratos" conta 1 alteração. | Importante | Obrigatório |
 | RF407 | "Descartar" deve voltar cada caixa ao estado salvo e mostrar o toast "Mudanças descartadas". | Depois de descartar, o filtro Alteradas mostra 0. | Essencial | Obrigatório |
 
 ## Confirmação (RF)
