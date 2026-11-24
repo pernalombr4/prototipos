@@ -418,6 +418,10 @@ disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:)
 - **Mudou:** a conta de envio virou uma linha igual às regras: ícone de e-mail, "Correio do Outlook" em
   negrito, o status como descrição (círculo verde e "Conta conectada: <e-mail>", ou alerta amarelo e o
   aviso de que o botão E-mail abre o aplicativo do computador) e o botão à direita. O selo verde saiu.
+- **Ajuste (alinhamento):** "meio colado, meio torto o texto em comparaçao ao simbolo". O ícone do
+  status fica na coluna do ícone do título, e o texto na coluna do nome, cada ícone centrado na
+  própria linha, com um respiro entre o nome e o status. Medido na tela: ícones e textos em 2 colunas
+  exatas.
 - **Ver:** print [a conta de envio em linha](evidencias/prototipo-31-conta-de-envio-em-linha.jpg).
 - **Pedido (texto ao lado da busca):** "esses textos instrucionais ao lado das caixas de busca devem
   ser retirados. ta horrivel [...] talvez a própria aba possa ter um "i" de informaçao com tooltip

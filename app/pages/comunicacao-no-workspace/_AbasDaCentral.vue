@@ -225,16 +225,17 @@ function integrar() {
           <!-- A conta é uma linha como as regras: nome, status na descrição, ação à direita -->
           <UFormField
             class="flex items-start justify-between gap-4 max-sm:flex-col"
-            :ui="{ wrapper: 'max-w-2xl', description: 'ps-6', container: 'shrink-0' }"
+            :ui="{ wrapper: 'max-w-2xl', description: 'mt-1', container: 'shrink-0' }"
           >
             <template #label>
               <span class="flex items-center gap-2 text-base font-semibold text-highlighted"><UIcon name="i-lucide-mail" class="size-4 shrink-0 text-muted" />{{ tc.config.outlookTitulo }}</span>
             </template>
             <template #description>
-              <span class="flex items-start gap-1.5">
+              <!-- O ícone do status fica na coluna do ícone do título, e o texto na coluna do nome -->
+              <span class="flex items-center gap-2">
                 <UIcon
                   :name="outlookIntegrado ? 'i-lucide-circle-check' : 'i-lucide-circle-alert'"
-                  class="mt-0.5 size-4 shrink-0"
+                  class="size-4 shrink-0"
                   :class="outlookIntegrado ? 'text-success' : 'text-warning'"
                 />
                 {{ outlookIntegrado ? tc.config.contaConectada(EU.email ?? '') : tc.config.contaSem }}
