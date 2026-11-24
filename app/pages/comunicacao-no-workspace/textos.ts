@@ -362,6 +362,7 @@ export interface Textos {
       contaDescricao: string
       contaConectada: (email: string) => string
       contaSem: string
+      outlookTitulo: string
       integrar: string
       gerenciar: string
       dominioTitulo: string
@@ -905,6 +906,7 @@ const ptBR: Textos = {
       contaTitulo: 'Sua conta de envio',
       contaDescricao: 'O e-mail escrito no ENSPACE sai da conta do Outlook que você integrou ao seu perfil.',
       contaConectada: (email: string) => `Conta conectada: ${email}`,
+      outlookTitulo: 'Correio do Outlook',
       contaSem: 'Nenhuma conta integrada. Sem ela, o botão E-mail abre o aplicativo de e-mail do computador.',
       integrar: 'Integrar contas',
       gerenciar: 'Gerenciar integração',
@@ -1479,6 +1481,7 @@ const en: Textos = {
       contaTitulo: 'Your sending account',
       contaDescricao: 'Email written in ENSPACE is sent from the Outlook account you connected to your profile.',
       contaConectada: (email: string) => `Connected account: ${email}`,
+      outlookTitulo: 'Outlook Mail',
       contaSem: 'No connected account. Without it, the Email button opens the computer email app.',
       integrar: 'Connect accounts',
       gerenciar: 'Manage integration',
@@ -2053,6 +2056,7 @@ const es: Textos = {
       contaTitulo: 'Su cuenta de envío',
       contaDescricao: 'El correo escrito en ENSPACE sale de la cuenta de Outlook que usted integró a su perfil.',
       contaConectada: (email: string) => `Cuenta conectada: ${email}`,
+      outlookTitulo: 'Correo de Outlook',
       contaSem: 'Ninguna cuenta integrada. Sin ella, el botón Correo abre la aplicación de correo del equipo.',
       integrar: 'Integrar cuentas',
       gerenciar: 'Administrar integración',

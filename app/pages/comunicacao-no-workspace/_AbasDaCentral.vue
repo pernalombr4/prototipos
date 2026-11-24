@@ -222,25 +222,33 @@ function integrar() {
           </template>
         </UPageCard>
         <UPageCard variant="subtle" :ui="{ container: 'p-4 sm:p-6' }">
-          <div class="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
-            <UBadge
-              :label="outlookIntegrado ? tc.config.contaConectada(EU.email ?? '') : tc.config.contaSem"
-              :icon="outlookIntegrado ? 'i-lucide-circle-check' : 'i-lucide-circle-alert'"
-              :color="outlookIntegrado ? 'success' : 'warning'"
-              variant="subtle"
-              class="max-w-full"
-              :ui="{ label: 'whitespace-normal text-left' }"
-            />
+          <!-- A conta é uma linha como as regras: nome, status na descrição, ação à direita -->
+          <UFormField
+            class="flex items-start justify-between gap-4 max-sm:flex-col"
+            :ui="{ wrapper: 'max-w-2xl', description: 'ps-6', container: 'shrink-0' }"
+          >
+            <template #label>
+              <span class="flex items-center gap-2 text-base font-semibold text-highlighted"><UIcon name="i-lucide-mail" class="size-4 shrink-0 text-muted" />{{ tc.config.outlookTitulo }}</span>
+            </template>
+            <template #description>
+              <span class="flex items-start gap-1.5">
+                <UIcon
+                  :name="outlookIntegrado ? 'i-lucide-circle-check' : 'i-lucide-circle-alert'"
+                  class="mt-0.5 size-4 shrink-0"
+                  :class="outlookIntegrado ? 'text-success' : 'text-warning'"
+                />
+                {{ outlookIntegrado ? tc.config.contaConectada(EU.email ?? '') : tc.config.contaSem }}
+              </span>
+            </template>
             <UButton
               :label="outlookIntegrado ? tc.config.gerenciar : tc.config.integrar"
               icon="i-lucide-plug"
               color="neutral"
               variant="outline"
               size="sm"
-              class="shrink-0"
               @click="integrar"
             />
-          </div>
+          </UFormField>
         </UPageCard>
       </section>
 

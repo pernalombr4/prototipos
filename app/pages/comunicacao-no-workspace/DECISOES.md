@@ -413,6 +413,12 @@ disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:)
     e globo;
   - a descrição recua até o texto do título, para ícone e texto formarem uma coluna.
 - **Ver:** print [Configurações com os ícones](evidencias/prototipo-30-configuracoes-com-icones.jpg).
+- **Pedido (cartão da conta):** "perceba que o primeiro "card" ta estranho. diferente do padrao dos
+  outros. só uma badge verde flutuante dentro. super estranho".
+- **Mudou:** a conta de envio virou uma linha igual às regras: ícone de e-mail, "Correio do Outlook" em
+  negrito, o status como descrição (círculo verde e "Conta conectada: <e-mail>", ou alerta amarelo e o
+  aviso de que o botão E-mail abre o aplicativo do computador) e o botão à direita. O selo verde saiu.
+- **Ver:** print [a conta de envio em linha](evidencias/prototipo-31-conta-de-envio-em-linha.jpg).
 - **Pedido (texto ao lado da busca):** "esses textos instrucionais ao lado das caixas de busca devem
   ser retirados. ta horrivel [...] talvez a própria aba possa ter um "i" de informaçao com tooltip
   indicando esse texto. acha que funciona?"
