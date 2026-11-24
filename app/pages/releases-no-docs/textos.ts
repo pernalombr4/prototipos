@@ -11,6 +11,8 @@
 import type { Idioma } from '~/composables/useIdioma'
 
 const plural = (n: number, um: string, varios: string) => (n === 1 ? um : varios)
+/** "a, b e c" */
+const lista = (xs: string[], e: string) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} ${e} ${xs.at(-1)}`)
 
 const pt = {
   casca: {
@@ -31,8 +33,6 @@ const pt = {
     blogDescricao: 'Descubra novidades, atualizações da plataforma e conteúdos relevantes para aproveitar ao máximo o ENSPACE.',
     releasesHojeTitulo: 'Versões do ENSPACE',
     releasesHojeDescricao: 'Acompanhe todas as atualizações, melhorias e correções de cada versão do ENSPACE.',
-    releasesTitulo: 'O que mudou no ENSPACE',
-    releasesDescricao: 'Cada novidade, melhoria e correção, no dia em que fica disponível. E as mudanças que pedem a sua ação, com prazo.',
   },
   blog: {
     categorias: 'Categorias',
@@ -62,14 +62,24 @@ const pt = {
     modulosEscolhidos: (n: number) => `${n} ${plural(n, 'módulo', 'módulos')}`,
     soExigeAcao: 'Só o que exige ação',
     limpar: 'Limpar filtros',
-    contagem: (n: number) => `${n} ${plural(n, 'entrada', 'entradas')}`,
-    semResultadoTitulo: 'Nenhuma entrada com esses filtros',
+    contagem: (n: number) => `${n} ${plural(n, 'versão', 'versões')}`,
+    semResultadoTitulo: 'Nenhuma versão com esses filtros',
     semResultadoTexto: 'Tire um filtro ou escolha outro módulo.',
-    vazioTitulo: 'Nenhuma entrada ainda',
+    vazioTitulo: 'Nenhuma versão ainda',
     vazioTexto: 'Cada novidade, melhoria e correção aparece aqui no dia em que fica disponível.',
     aviso: (n: number, data: string) => `${n} ${plural(n, 'mudança exige', 'mudanças exigem')} ação. A mais próxima: até ${data}.`,
     verProximas: 'Ver próximas mudanças',
     emBreve: 'Em breve',
+    emBreveTitulo: (v: string) => `${v} em breve`,
+    emBreveDescricao: (d: string) => `Os itens desta versão estão previstos para ${d}. As datas podem mudar.`,
+    noAr: (v: string) => `${v} está no ar`,
+    resumoDaVersao: (n: number, partes: string[]) => `Esta release apresenta ${n} ${plural(n, 'item', 'itens')}: ${lista(partes, 'e')}.`,
+    inclui: (titulos: string[]) => `Inclui: ${titulos.join('; ')}.`,
+    partes: {
+      novidade: (n: number) => `${n} ${plural(n, 'novidade', 'novidades')}`,
+      melhoria: (n: number) => `${n} ${plural(n, 'melhoria', 'melhorias')}`,
+      correcao: (n: number) => `${n} ${plural(n, 'correção', 'correções')}`,
+    },
   },
   entrada: {
     tipo: { novidade: 'Novidade', melhoria: 'Melhoria', correcao: 'Correção' },
@@ -185,8 +195,6 @@ const en: Textos = {
     blogDescricao: 'Discover news, platform updates, and relevant content to get the most out of ENSPACE.',
     releasesHojeTitulo: 'ENSPACE Versions',
     releasesHojeDescricao: 'Follow all updates, improvements, and fixes for each version of ENSPACE.',
-    releasesTitulo: 'What changed in ENSPACE',
-    releasesDescricao: 'Every new feature, improvement and fix, on the day it becomes available. And the changes that need your action, with a deadline.',
   },
   blog: {
     categorias: 'Categories',
@@ -216,14 +224,24 @@ const en: Textos = {
     modulosEscolhidos: (n: number) => `${n} ${plural(n, 'module', 'modules')}`,
     soExigeAcao: 'Action required only',
     limpar: 'Clear filters',
-    contagem: (n: number) => `${n} ${plural(n, 'entry', 'entries')}`,
-    semResultadoTitulo: 'No entries match these filters',
+    contagem: (n: number) => `${n} ${plural(n, 'version', 'versions')}`,
+    semResultadoTitulo: 'No versions match these filters',
     semResultadoTexto: 'Remove a filter or choose another module.',
-    vazioTitulo: 'No entries yet',
+    vazioTitulo: 'No versions yet',
     vazioTexto: 'Every new feature, improvement and fix shows up here on the day it becomes available.',
     aviso: (n: number, data: string) => `${n} ${plural(n, 'change requires', 'changes require')} action. The nearest: by ${data}.`,
     verProximas: 'See upcoming changes',
     emBreve: 'Coming soon',
+    emBreveTitulo: (v: string) => `${v} coming soon`,
+    emBreveDescricao: (d: string) => `The items in this version are planned for ${d}. Dates may change.`,
+    noAr: (v: string) => `${v} is live`,
+    resumoDaVersao: (n: number, partes: string[]) => `This release brings ${n} ${plural(n, 'item', 'items')}: ${lista(partes, 'and')}.`,
+    inclui: (titulos: string[]) => `Includes: ${titulos.join('; ')}.`,
+    partes: {
+      novidade: (n: number) => `${n} ${plural(n, 'new feature', 'new features')}`,
+      melhoria: (n: number) => `${n} ${plural(n, 'improvement', 'improvements')}`,
+      correcao: (n: number) => `${n} ${plural(n, 'fix', 'fixes')}`,
+    },
   },
   entrada: {
     tipo: { novidade: 'New', melhoria: 'Improvement', correcao: 'Fix' },
@@ -337,8 +355,6 @@ const es: Textos = {
     blogDescricao: 'Descubre novedades, actualizaciones de la plataforma y contenidos relevantes para aprovechar al máximo ENSPACE.',
     releasesHojeTitulo: 'Versiones de ENSPACE',
     releasesHojeDescricao: 'Sigue todas las actualizaciones, mejoras y correcciones de cada versión de ENSPACE.',
-    releasesTitulo: 'Qué cambió en ENSPACE',
-    releasesDescricao: 'Cada novedad, mejora y corrección, el día en que queda disponible. Y los cambios que piden tu acción, con plazo.',
   },
   blog: {
     categorias: 'Categorías',
@@ -368,14 +384,24 @@ const es: Textos = {
     modulosEscolhidos: (n: number) => `${n} ${plural(n, 'módulo', 'módulos')}`,
     soExigeAcao: 'Solo lo que requiere acción',
     limpar: 'Limpiar filtros',
-    contagem: (n: number) => `${n} ${plural(n, 'entrada', 'entradas')}`,
-    semResultadoTitulo: 'Ninguna entrada con estos filtros',
+    contagem: (n: number) => `${n} ${plural(n, 'versión', 'versiones')}`,
+    semResultadoTitulo: 'Ninguna versión con estos filtros',
     semResultadoTexto: 'Quita un filtro o elige otro módulo.',
-    vazioTitulo: 'Aún no hay entradas',
+    vazioTitulo: 'Aún no hay versiones',
     vazioTexto: 'Cada novedad, mejora y corrección aparece aquí el día en que queda disponible.',
     aviso: (n: number, data: string) => `${n} ${plural(n, 'cambio requiere', 'cambios requieren')} acción. El más cercano: hasta el ${data}.`,
     verProximas: 'Ver próximos cambios',
     emBreve: 'Próximamente',
+    emBreveTitulo: (v: string) => `${v} próximamente`,
+    emBreveDescricao: (d: string) => `Los ítems de esta versión están previstos para el ${d}. Las fechas pueden cambiar.`,
+    noAr: (v: string) => `${v} ya está disponible`,
+    resumoDaVersao: (n: number, partes: string[]) => `Esta release presenta ${n} ${plural(n, 'ítem', 'ítems')}: ${lista(partes, 'y')}.`,
+    inclui: (titulos: string[]) => `Incluye: ${titulos.join('; ')}.`,
+    partes: {
+      novidade: (n: number) => `${n} ${plural(n, 'novedad', 'novedades')}`,
+      melhoria: (n: number) => `${n} ${plural(n, 'mejora', 'mejoras')}`,
+      correcao: (n: number) => `${n} ${plural(n, 'corrección', 'correcciones')}`,
+    },
   },
   entrada: {
     tipo: { novidade: 'Novedad', melhoria: 'Mejora', correcao: 'Corrección' },

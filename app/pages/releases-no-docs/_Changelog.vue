@@ -1,17 +1,26 @@
 <script setup lang="ts">
 /**
- * PROPOSTA. A aba Releases como changelog por item: 1 entrada por item, inclusive patch e correção,
- * agrupada por mês, com filtro por tipo, módulo e "Exige ação". Os filtros filtram de verdade,
- * sobre o mock, em memória.
+ * PROPOSTA, rodada 2. A aba Releases montada com a mesma árvore da página de hoje do `en-docs`
+ * (`app/pages/releases/[section].vue`, lido em origin/main 910960b4): `UChangelogVersions` com
+ * `indicator-motion` e 1 `UChangelogVersion` por versão, com os mesmos `:ui` (container
+ * `max-w-2xl`, título `text-2xl`, descrição `line-clamp-4`) e o `ReleaseNotesBanner` no `#image`.
+ *
+ * O que se acrescenta, e só isto:
+ * - rótulos no `#badge`: o badge que o mapeamento do site já tem ("minor", "patch") e os novos
+ *   (Exige ação com o prazo, Em breve, Liberando, Beta ou Acesso antecipado, Liberado para alguns
+ *   workspaces e os módulos da versão);
+ * - 1 barra de filtros acima da lista (tipo, módulo, "Só o que exige ação");
+ * - o link permanente de cada versão e o acesso a "Próximas mudanças" e a "Assinar";
+ * - o patch entra na mesma linha do tempo, como versão mais curta, com o banner compacto.
  */
-import EntradaDoChangelog from './_EntradaDoChangelog.vue'
-import { entradas, modulos, mudancaAberta, mudancas, postsDaProposta, type ChaveDeModulo, type Tipo } from './mocks'
+import BannerDaRelease from './_BannerDaRelease.vue'
+import { entradas, modulos, mudancaAberta, mudancaDe, mudancas, postsDaProposta, postsDeHoje, type ChaveDeModulo, type Entrada, type Tipo } from './mocks'
 import { formatarData, type Textos } from './textos'
 
 const props = defineProps<{
   t: Textos
   estado: 'cheio' | 'vazio' | 'carregando'
-  /** Id da entrada a mostrar: limpa os filtros, rola até ela e acende o contorno. */
+  /** Id da versão (ou de um item dela) a mostrar: limpa os filtros, rola até ela e acende o contorno. */
   destaque: string | null
 }>()
 
@@ -20,6 +29,7 @@ const emit = defineEmits<{
   verMudanca: [id: string]
   verPost: [mes: string]
   irProximas: []
+  assinar: []
 }>()
 
 const idioma = useIdioma()
@@ -40,55 +50,85 @@ function limpar() {
 const opcoesDeTipo = ['todos', 'novidade', 'melhoria', 'correcao'] as const
 const opcoesDeModulo = computed(() => modulos.map(m => ({ label: L(m.nome), value: m.id, icon: m.icone })))
 
-const visiveis = computed(() => {
-  if (props.estado === 'vazio') return []
-  return entradas.filter(e =>
-    (tipo.value === 'todos' || e.tipo === tipo.value)
-    && (!modulosEscolhidos.value.length || modulosEscolhidos.value.includes(e.modulo))
-    && (!soAcao.value || !!e.mudanca),
-  )
+const passa = (e: Entrada) =>
+  (tipo.value === 'todos' || e.tipo === tipo.value)
+  && (!modulosEscolhidos.value.length || modulosEscolhidos.value.includes(e.modulo))
+  && (!soAcao.value || !!e.mudanca)
+
+/* ---------------- As versões ---------------- */
+/** A âncora do link permanente da versão: 3.4.2 vira "v3-4-2". */
+const ancora = (v: string) => `v${v.replaceAll('.', '-')}`
+const tipoDaVersao = (v: string) => (v.endsWith('.0.0') ? 'major' : v.endsWith('.0') ? 'minor' : 'patch')
+
+const todasAsVersoes = computed(() => {
+  const mapa = new Map<string, Entrada[]>()
+  for (const e of entradas) {
+    if (!mapa.has(e.versao)) mapa.set(e.versao, [])
+    mapa.get(e.versao)!.push(e)
+  }
+  return [...mapa.entries()].map(([versao, itens]) => {
+    const post = postsDeHoje.find(p => p.versao === versao)
+    const emBreve = itens.every(e => e.estado === 'em-breve')
+    const data = post?.data ?? itens.map(e => e.data).sort().at(emBreve ? 0 : -1)!
+    const contagem = (['novidade', 'melhoria', 'correcao'] as const)
+      .map(tp => ({ tp, n: itens.filter(e => e.tipo === tp).length }))
+      .filter(x => x.n)
+    const prazos = itens.map(e => mudancaDe(e.mudanca)).filter(m => !!m).map(m => m!.fases.obrigatoria).sort()
+    const tier = (e: Entrada) => e.tier ?? 9
+    return {
+      versao,
+      id: ancora(versao),
+      tipo: tipoDaVersao(versao),
+      emBreve,
+      data,
+      mes: data.slice(0, 7),
+      cor: post?.cor ?? (tipoDaVersao(versao) === 'patch' ? 'purple' : 'orange'),
+      itens,
+      titulo: emBreve ? props.t.releases.emBreveTitulo(versao) : props.t.releases.noAr(versao),
+      descricao: [
+        emBreve
+          ? props.t.releases.emBreveDescricao(formatarData(data, idioma.value, { day: 'numeric', month: 'long', year: 'numeric' }))
+          : props.t.releases.resumoDaVersao(itens.length, contagem.map(x => props.t.releases.partes[x.tp](x.n))),
+        props.t.releases.inclui(itens.toSorted((a, b) => tier(a) - tier(b)).map(e => L(e.titulo))),
+      ].join(' '),
+      prazo: prazos[0],
+      mudanca: itens.find(e => e.mudanca)?.mudanca,
+      liberando: itens.some(e => e.estado === 'liberando'),
+      acessos: [...new Set(itens.map(e => e.acesso).filter(a => !!a))] as NonNullable<Entrada['acesso']>[],
+      alguns: itens.some(e => e.publico === 'alguns'),
+      modulos: [...new Set(itens.map(e => e.modulo))],
+      temDestaque: itens.some(e => e.tier === 1 || e.tier === 2),
+    }
+  })
 })
 
-/** Em breve primeiro; depois 1 grupo por mês, do mais novo ao mais antigo. */
-const grupos = computed(() => {
-  const mapa = new Map<string, typeof entradas>()
-  for (const e of visiveis.value) {
-    const chave = e.estado === 'em-breve' ? 'em-breve' : e.data.slice(0, 7)
-    if (!mapa.has(chave)) mapa.set(chave, [])
-    mapa.get(chave)!.push(e)
-  }
-  return [...mapa.entries()].map(([chave, lista]) => ({
-    chave,
-    titulo: chave === 'em-breve'
-      ? props.t.releases.emBreve
-      : formatarData(`${chave}-01`, idioma.value, { month: 'long', year: 'numeric' }),
-    lista,
-  }))
+/** Em breve no topo; depois da mais nova para a mais antiga, como hoje (date DESC). */
+const versoes = computed(() => {
+  if (props.estado === 'vazio') return []
+  return todasAsVersoes.value
+    .filter(v => v.itens.some(passa))
+    .sort((a, b) => Number(b.emBreve) - Number(a.emBreve) || b.data.localeCompare(a.data) || b.versao.localeCompare(a.versao))
 })
 
 const mesesComPost = new Set(postsDaProposta.filter(p => p.mes).map(p => p.mes!))
+const abertas = computed(() => mudancas.filter(mudancaAberta).length)
 
-/* ---------------- Aviso das mudanças abertas ---------------- */
-/** Na tela estreita, a ação do aviso desce para baixo do texto. */
-const estreita = ref(false)
-onMounted(() => {
-  const mq = window.matchMedia('(max-width: 640px)')
-  estreita.value = mq.matches
-  mq.addEventListener('change', e => { estreita.value = e.matches })
-})
-const abertas = computed(() => mudancas.filter(mudancaAberta).sort((a, b) => a.fases.obrigatoria.localeCompare(b.fases.obrigatoria)))
+/** A data no idioma da página, sem voltar 1 dia (hoje o site mostra "Dec 7, 2026" para 8 de dezembro). */
+const dataDaVersao = (iso: string) => formatarData(iso, idioma.value, { day: '2-digit', month: '2-digit', year: 'numeric' })
+const diaDoBanner = (iso: string) => formatarData(iso, idioma.value)
 
-/* ---------------- Ir até uma entrada ---------------- */
+/* ---------------- Ir até uma versão ---------------- */
 const acesa = ref<string | null>(null)
 let apagar: ReturnType<typeof setTimeout> | undefined
 watch(() => props.destaque, async (id) => {
   if (!id) return
+  // O item (do post ou de Próximas mudanças) leva à versão dele.
+  const alvo = entradas.find(e => e.id === id) ? ancora(entradas.find(e => e.id === id)!.versao) : id
   limpar()
   await nextTick()
-  // Espera a troca de vista e a entrada em cascata assentarem antes de rolar.
   await new Promise(r => setTimeout(r, 380))
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  acesa.value = id
+  document.getElementById(alvo)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  acesa.value = alvo
   clearTimeout(apagar)
   apagar = setTimeout(() => { acesa.value = null }, 2600)
 }, { immediate: true, flush: 'post' })
@@ -96,20 +136,8 @@ watch(() => props.destaque, async (id) => {
 
 <template>
   <div>
-    <!-- Aviso: as mudanças que pedem ação, com o prazo mais próximo -->
-    <UAlert
-      v-if="estado === 'cheio' && abertas.length"
-      color="warning"
-      variant="subtle"
-      icon="i-lucide-triangle-alert"
-      class="mx-auto mb-8 max-w-2xl animate-[entrada_.35s_ease-out_both]"
-      :title="t.releases.aviso(abertas.length, formatarData(abertas[0]!.fases.obrigatoria, idioma))"
-      :actions="[{ label: t.releases.verProximas, color: 'neutral', variant: 'outline', trailingIcon: 'i-lucide-arrow-right', onClick: () => emit('irProximas') }]"
-      :orientation="estreita ? 'vertical' : 'horizontal'"
-    />
-
-    <!-- Filtros -->
-    <div class="mx-auto mb-10 flex max-w-2xl flex-col gap-3">
+    <!-- Barra acima da lista, na coluna do conteúdo (max-w-2xl, como a versão) -->
+    <div class="mx-auto mb-12 flex max-w-2xl flex-col gap-3">
       <div class="flex flex-wrap items-center gap-3">
         <UFieldGroup size="sm" :aria-label="t.releases.tipo">
           <UButton
@@ -134,7 +162,7 @@ watch(() => props.destaque, async (id) => {
           :placeholder="t.releases.todosModulos"
           :search-input="false"
           :aria-label="t.releases.modulo"
-          class="min-w-52"
+          class="min-w-48"
         >
           <template #default>
             <span v-if="modulosEscolhidos.length" class="truncate text-highlighted">{{ t.releases.modulosEscolhidos(modulosEscolhidos.length) }}</span>
@@ -145,8 +173,8 @@ watch(() => props.destaque, async (id) => {
         <USwitch v-model="soAcao" size="sm" :label="t.releases.soExigeAcao" color="warning" />
       </div>
 
-      <div class="flex min-h-7 items-center justify-between gap-2 text-sm text-muted">
-        <span aria-live="polite">{{ estado === 'carregando' ? '' : t.releases.contagem(visiveis.length) }}</span>
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
+        <span aria-live="polite">{{ estado === 'carregando' ? '' : t.releases.contagem(versoes.length) }}</span>
         <UButton
           v-if="temFiltro"
           size="xs"
@@ -154,60 +182,153 @@ watch(() => props.destaque, async (id) => {
           variant="link"
           icon="i-lucide-x"
           :label="t.releases.limpar"
-          class="cursor-pointer"
+          class="-ml-1 cursor-pointer"
           @click="limpar"
         />
+        <span class="ml-auto flex items-center gap-1">
+          <UButton
+            size="sm"
+            color="neutral"
+            variant="link"
+            icon="i-lucide-calendar-clock"
+            :label="t.releases.abaProximas"
+            class="cursor-pointer"
+            @click="emit('irProximas')"
+          >
+            <template #trailing>
+              <UBadge v-if="abertas" color="warning" variant="outline" size="sm" class="bg-warning/10 text-highlighted" :label="String(abertas)" />
+            </template>
+          </UButton>
+          <UButton
+            size="sm"
+            color="neutral"
+            variant="link"
+            icon="i-lucide-bell-plus"
+            :label="t.releases.assinar"
+            class="cursor-pointer"
+            @click="emit('assinar')"
+          />
+        </span>
       </div>
     </div>
 
     <!-- Carregando -->
     <div v-if="estado === 'carregando'" class="mx-auto flex max-w-2xl flex-col gap-10" aria-busy="true">
-      <div v-for="i in 4" :key="i" class="flex flex-col gap-2">
-        <div class="flex gap-2">
-          <USkeleton class="h-5 w-20" />
-          <USkeleton class="h-5 w-24" />
-          <USkeleton class="h-5 w-20" />
-        </div>
-        <USkeleton class="h-6 w-3/4" />
+      <div v-for="i in 2" :key="i" class="flex flex-col gap-3">
+        <USkeleton class="h-7 w-1/3" />
         <USkeleton class="h-4 w-full" />
-        <USkeleton class="h-4 w-1/3" />
+        <USkeleton class="h-4 w-2/3" />
+        <USkeleton class="aspect-[16/9] w-full rounded-lg" />
       </div>
     </div>
 
-    <!-- Vazio: sem nenhuma entrada, ou nenhuma com os filtros -->
-    <UEmpty
-      v-else-if="!visiveis.length"
-      class="mx-auto max-w-2xl animate-[entrada_.3s_ease-out_both]"
-      :icon="temFiltro ? 'i-lucide-filter-x' : 'i-lucide-rocket'"
-      :title="temFiltro ? t.releases.semResultadoTitulo : t.releases.vazioTitulo"
-      :description="temFiltro ? t.releases.semResultadoTexto : t.releases.vazioTexto"
-      :actions="temFiltro ? [{ label: t.releases.limpar, color: 'neutral', variant: 'outline', onClick: limpar }] : []"
-      variant="naked"
-    />
+    <!-- Vazio: o estado de hoje (ícone em círculo, título e texto); com filtro, o botão de limpar -->
+    <div v-else-if="!versoes.length" class="mx-auto flex max-w-2xl flex-col items-center py-12 text-center animate-[entrada_.3s_ease-out_both]">
+      <div class="mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10">
+        <UIcon :name="temFiltro ? 'i-lucide-filter-x' : 'i-lucide-rocket'" class="size-8 text-primary" />
+      </div>
+      <h3 class="mb-2 text-lg font-semibold text-highlighted">
+        {{ temFiltro ? t.releases.semResultadoTitulo : t.releases.vazioTitulo }}
+      </h3>
+      <p class="text-muted">
+        {{ temFiltro ? t.releases.semResultadoTexto : t.releases.vazioTexto }}
+      </p>
+      <UButton v-if="temFiltro" :label="t.releases.limpar" color="neutral" variant="outline" class="mt-4 cursor-pointer" @click="limpar" />
+    </div>
 
-    <!-- A lista -->
-    <UChangelogVersions v-else indicator-motion :ui="{ container: 'flex flex-col gap-y-4 sm:gap-y-4 lg:gap-y-4' }">
-      <template v-for="(g, gi) in grupos" :key="g.chave">
-        <h2
-          class="mx-auto w-full max-w-2xl px-4 pt-4 text-sm font-semibold tracking-wider text-toned uppercase first:pt-0"
-          :class="gi > 0 ? 'mt-6 border-t border-default pt-8' : ''"
-        >
-          {{ g.titulo }}
-        </h2>
-        <EntradaDoChangelog
-          v-for="(e, i) in g.lista"
-          :key="e.id"
-          :e="e"
-          :t="t"
-          :destacada="acesa === e.id"
-          :tem-post="mesesComPost.has(e.data.slice(0, 7))"
-          class="animate-[entrada_.35s_ease-out_both]"
-          :style="{ animationDelay: `${Math.min(i, 8) * 40}ms` }"
-          @copiar="emit('copiar', $event)"
-          @ver-mudanca="emit('verMudanca', $event)"
-          @ver-post="emit('verPost', $event)"
-        />
-      </template>
+    <!-- A linha do tempo de hoje -->
+    <UChangelogVersions v-else indicator-motion :ui="{ container: 'flex flex-col gap-y-10 sm:gap-y-14 lg:gap-y-18' }">
+      <UChangelogVersion
+        v-for="v in versoes"
+        :id="v.id"
+        :key="v.versao"
+        :title="v.titulo"
+        :description="v.descricao"
+        :date="v.data"
+        class="scroll-mt-28"
+        :class="!v.emBreve && v.temDestaque && mesesComPost.has(v.mes) ? 'cursor-pointer' : ''"
+        :ui="{
+          container: [
+            'max-w-2xl [content-visibility:auto] [contain-intrinsic-size:auto_520px]',
+            'rounded-lg outline-offset-8 transition-[outline-color] duration-500',
+            acesa === v.id ? 'outline-2 outline-primary' : 'outline-2 outline-transparent',
+          ].join(' '),
+          meta: 'flex flex-wrap items-center gap-1.5 mb-2',
+          title: 'text-2xl font-bold text-highlighted',
+          description: 'text-base text-muted mt-2 leading-relaxed line-clamp-4',
+          imageWrapper: v.tipo === 'patch' ? 'relative overflow-hidden rounded-lg aspect-[3/1] sm:aspect-[4/1] mt-5' : undefined,
+          dotInner: v.emBreve ? 'size-2 rounded-full bg-dimmed' : undefined,
+        }"
+        @click="!v.emBreve && v.temDestaque && mesesComPost.has(v.mes) && emit('verPost', v.mes)"
+      >
+        <template #date>
+          {{ dataDaVersao(v.data) }}
+        </template>
+
+        <!-- Os rótulos: o badge do mapeamento de hoje e os novos -->
+        <template #badge>
+          <UBadge color="neutral" variant="subtle" size="sm" :label="v.tipo" />
+          <UBadge
+            v-if="v.prazo"
+            color="warning"
+            variant="outline"
+            size="sm"
+            icon="i-lucide-triangle-alert"
+            class="bg-warning/10 text-highlighted"
+            :ui="{ leadingIcon: 'text-warning' }"
+            :label="`${t.entrada.exigeAcao} · ${t.entrada.agirAte(formatarData(v.prazo, idioma))}`"
+          />
+          <UBadge v-if="v.emBreve" color="neutral" variant="subtle" size="sm" icon="i-lucide-calendar-clock" :label="t.entrada.estado['em-breve']" />
+          <UBadge v-if="v.liberando" color="info" variant="subtle" size="sm" icon="i-lucide-loader" :label="t.entrada.estado.liberando" />
+          <UBadge v-for="a in v.acessos" :key="a" color="secondary" variant="subtle" size="sm" icon="i-lucide-flask-conical" :label="t.entrada.acesso[a]" />
+          <UBadge v-if="v.alguns" color="neutral" variant="subtle" size="sm" icon="i-lucide-users" :label="t.entrada.alguns" />
+          <UBadge
+            v-for="m in v.modulos"
+            :key="m"
+            color="neutral"
+            variant="outline"
+            size="sm"
+            :icon="modulos.find(x => x.id === m)!.icone"
+            :label="L(modulos.find(x => x.id === m)!.nome)"
+          />
+        </template>
+
+        <template v-if="!v.emBreve" #image>
+          <BannerDaRelease
+            :versao="v.versao"
+            :data="diaDoBanner(v.data)"
+            :cor="v.cor"
+            :compacto="v.tipo === 'patch'"
+            class="h-full"
+          />
+        </template>
+
+        <!-- O link permanente da versão e o que fazer, quando a versão pede ação -->
+        <template #body>
+          <div class="mt-3 flex flex-wrap items-center gap-1" @click.stop>
+            <UButton
+              size="xs"
+              color="neutral"
+              variant="ghost"
+              icon="i-lucide-link"
+              :label="t.entrada.copiarLink"
+              class="-ml-2 cursor-pointer"
+              @click="emit('copiar', v.id)"
+            />
+            <UButton
+              v-if="v.mudanca"
+              size="xs"
+              color="neutral"
+              variant="ghost"
+              icon="i-lucide-list-checks"
+              :ui="{ leadingIcon: 'text-warning' }"
+              :label="t.entrada.verOQueFazer"
+              class="cursor-pointer"
+              @click="emit('verMudanca', v.mudanca!)"
+            />
+          </div>
+        </template>
+      </UChangelogVersion>
     </UChangelogVersions>
   </div>
 </template>

@@ -380,7 +380,7 @@ export const entradas: Entrada[] = [
   },
   {
     id: 'integracoes-token-da-api-nao-expira-antes-da-data',
-    data: '2026-11-04',
+    data: '2026-11-12',
     tipo: 'correcao',
     modulo: 'integracoes',
     titulo: L('Integrações: o token da API não expira antes da data mostrada', 'Integrations: the API token no longer expires before the date shown', 'Integraciones: el token de la API no expira antes de la fecha mostrada'),
@@ -389,7 +389,7 @@ export const entradas: Entrada[] = [
       'The token is valid until the end of its expiry day, in the workspace time zone.',
       'El token vale hasta el final del día de vencimiento, en la zona horaria del workspace.',
     ),
-    versao: '3.2.4',
+    versao: '3.3.1',
     estado: 'disponivel',
     publico: 'todos',
   },

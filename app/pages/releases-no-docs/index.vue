@@ -20,7 +20,7 @@ import ListaDoBlog from './_ListaDoBlog.vue'
 import PostDoMes from './_PostDoMes.vue'
 import ProximasMudancas from './_ProximasMudancas.vue'
 import ReleasesHoje from './_ReleasesHoje.vue'
-import { entradas, linkPermanente, mudancaAberta, mudancas, postsDaProposta, postsDeHoje } from './mocks'
+import { entradas, linkPermanente, postsDaProposta, postsDeHoje } from './mocks'
 import { textos } from './textos'
 
 import briefingMd from './BRIEFING.md?raw'
@@ -53,14 +53,14 @@ const destaqueMudanca = ref<string | null>(null)
 const assinarAberto = ref(false)
 
 const post = computed(() => postsDaProposta.find(p => p.id === postAberto.value))
-const abertas = computed(() => mudancas.filter(mudancaAberta).length)
-
-const abas = computed(() => [
-  { label: t.value.releases.abaChangelog, value: 'changelog', icon: 'i-lucide-list' },
-  { label: t.value.releases.abaProximas, value: 'proximas', icon: 'i-lucide-calendar-clock', badge: abertas.value ? { label: String(abertas.value), color: 'warning' as const, variant: 'outline' as const, class: 'bg-warning/10 text-highlighted' } : undefined },
-])
 
 const topo = () => window.scrollTo({ top: 0, behavior: 'smooth' })
+
+/** Rodada 2: Changelog e Próximas mudanças trocam por link discreto acima da lista, sem abas. */
+function irAba(a: 'changelog' | 'proximas') {
+  aba.value = a
+  topo()
+}
 
 function irSecao(s: 'blog' | 'releases') {
   secao.value = s
@@ -124,7 +124,7 @@ async function copiar(id: string) {
 /** Quem chega pelo link permanente cai na entrada, com o contorno aceso. */
 onMounted(() => {
   const id = decodeURIComponent(location.hash.slice(1))
-  if (entradas.some(e => e.id === id)) verEntrada(id)
+  if (entradas.some(e => e.id === id || `v${e.versao.replaceAll('.', '-')}` === id)) verEntrada(id)
 })
 
 watch(versao, () => {
@@ -134,9 +134,8 @@ watch(versao, () => {
 
 const hero = computed(() => {
   if (secao.value === 'blog') return { titulo: t.value.hero.blogTitulo, descricao: t.value.hero.blogDescricao }
-  return versao.value === 'hoje'
-    ? { titulo: t.value.hero.releasesHojeTitulo, descricao: t.value.hero.releasesHojeDescricao }
-    : { titulo: t.value.hero.releasesTitulo, descricao: t.value.hero.releasesDescricao }
+  // Rodada 2: a proposta mantém o topo de hoje ("Versões do ENSPACE").
+  return { titulo: t.value.hero.releasesHojeTitulo, descricao: t.value.hero.releasesHojeDescricao }
 })
 
 /** A chave da vista: muda a vista, a transição roda. */
@@ -165,44 +164,16 @@ const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value 
           @assinar="assinarAberto = true"
         />
 
-        <template v-else>
+        <!-- RELEASES: a mesma árvore do en-docs (UPage > hero > UPageBody > UContainer) -->
+        <UPage v-else-if="secao === 'releases'" class="overflow-x-hidden">
           <HeroDaSecao :title="hero.titulo" :description="hero.descricao" />
 
           <UPageBody>
-            <!-- BLOG -->
-            <ListaDoBlog
-              v-if="secao === 'blog'"
-              :t="t"
-              :modo="versao"
-              :posts="versao === 'hoje' ? postsDeHoje : postsDaProposta"
-              :estado="estado"
-              @abrir="abrirPost"
-            />
+            <!-- hoje -->
+            <ReleasesHoje v-if="versao === 'hoje'" :t="t" :estado="estado" />
 
-            <!-- RELEASES, hoje -->
-            <ReleasesHoje v-else-if="versao === 'hoje'" :t="t" :estado="estado" />
-
-            <!-- RELEASES, proposta: changelog e próximas mudanças -->
+            <!-- proposta: a linha do tempo de hoje com rótulos e filtros, e Próximas mudanças -->
             <UContainer v-else>
-              <div class="mx-auto mb-8 flex max-w-2xl flex-wrap items-center justify-between gap-3 border-b border-default">
-                <UTabs
-                  v-model="aba"
-                  :items="abas"
-                  :content="false"
-                  variant="link"
-                  :ui="{ list: 'border-b-0', trigger: 'cursor-pointer' }"
-                />
-                <UButton
-                  icon="i-lucide-bell-plus"
-                  :label="t.releases.assinar"
-                  color="neutral"
-                  variant="outline"
-                  size="sm"
-                  class="mb-2 cursor-pointer"
-                  @click="assinarAberto = true"
-                />
-              </div>
-
               <Changelog
                 v-if="aba === 'changelog'"
                 :t="t"
@@ -211,7 +182,8 @@ const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value 
                 @copiar="copiar"
                 @ver-mudanca="verMudanca"
                 @ver-post="verPost"
-                @ir-proximas="aba = 'proximas'"
+                @ir-proximas="irAba('proximas')"
+                @assinar="assinarAberto = true"
               />
               <ProximasMudancas
                 v-else
@@ -219,8 +191,25 @@ const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value 
                 :estado="estado"
                 :destaque="destaqueMudanca"
                 @ver-entrada="verEntrada"
+                @voltar="irAba('changelog')"
+                @assinar="assinarAberto = true"
               />
             </UContainer>
+          </UPageBody>
+        </UPage>
+
+        <!-- BLOG (fica como está) -->
+        <template v-else>
+          <HeroDaSecao :title="hero.titulo" :description="hero.descricao" />
+
+          <UPageBody>
+            <ListaDoBlog
+              :t="t"
+              :modo="versao"
+              :posts="versao === 'hoje' ? postsDeHoje : postsDaProposta"
+              :estado="estado"
+              @abrir="abrirPost"
+            />
           </UPageBody>
         </template>
       </div>

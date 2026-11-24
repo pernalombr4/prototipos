@@ -4,6 +4,9 @@
  * data prevista, o prazo ("agir até"), o que fazer e as 3 fases (opcional, ligada por padrão com
  * opção de desligar, obrigatória). Mora dentro da aba Releases, ao lado do changelog, para não mexer
  * na barra do topo (regra 37).
+ *
+ * Rodada 2: a página usa a mesma linha do tempo da aba Releases, com o prazo ("agir até") no lugar
+ * da data e a mesma largura e o mesmo alinhamento. O "por que muda" virou o resumo da entrada.
  */
 import { diasAte, faseAtual, moduloDe, mudancaAberta, mudancas, type ChaveDeFase, type Mudanca } from './mocks'
 import { formatarData, type Textos } from './textos'
@@ -14,7 +17,7 @@ const props = defineProps<{
   destaque: string | null
 }>()
 
-const emit = defineEmits<{ verEntrada: [id: string] }>()
+const emit = defineEmits<{ verEntrada: [id: string], voltar: [], assinar: [] }>()
 
 const idioma = useIdioma()
 const L = (x: Record<string, string>) => x[idioma.value]
@@ -61,13 +64,34 @@ watch(() => props.destaque, async (id) => {
 </script>
 
 <template>
-  <div class="mx-auto max-w-2xl">
-    <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div class="max-w-2xl">
-        <h2 class="text-2xl font-bold text-highlighted">
+  <div>
+    <!-- Barra acima da linha do tempo, na coluna do conteúdo -->
+    <div class="mx-auto mb-4 flex max-w-2xl items-center justify-between gap-2">
+      <UButton
+        size="sm"
+        color="neutral"
+        variant="link"
+        icon="i-lucide-arrow-left"
+        :label="t.hero.releasesHojeTitulo"
+        class="-ml-2.5 cursor-pointer"
+        @click="emit('voltar')"
+      />
+      <UButton
+        size="sm"
+        color="neutral"
+        variant="link"
+        icon="i-lucide-bell-plus"
+        :label="t.releases.assinar"
+        class="cursor-pointer"
+        @click="emit('assinar')"
+      />
+    </div>
+    <div class="mx-auto mb-12 flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <h2 class="mb-2 text-2xl font-bold text-highlighted">
           {{ t.proximas.titulo }}
         </h2>
-        <p class="mt-2 text-muted">
+        <p class="text-muted">
           {{ t.proximas.descricao }}
         </p>
         <p class="mt-2 flex items-center gap-1.5 text-sm text-toned">
@@ -75,11 +99,15 @@ watch(() => props.destaque, async (id) => {
           {{ t.proximas.datasPodemMudar }}
         </p>
       </div>
-      <USwitch v-model="mostrarEncerradas" size="sm" :label="t.proximas.mostrarEncerradas" class="shrink-0" />
+      <USwitch v-model="mostrarEncerradas" size="sm" :label="t.proximas.mostrarEncerradas" class="shrink-0 sm:mt-1" />
     </div>
 
-    <div v-if="estado === 'carregando'" class="flex flex-col gap-6" aria-busy="true">
-      <USkeleton v-for="i in 2" :key="i" class="h-72 w-full rounded-xl" />
+    <div v-if="estado === 'carregando'" class="mx-auto flex max-w-2xl flex-col gap-10" aria-busy="true">
+      <div v-for="i in 2" :key="i" class="flex flex-col gap-3">
+        <USkeleton class="h-7 w-2/3" />
+        <USkeleton class="h-4 w-full" />
+        <USkeleton class="h-40 w-full rounded-lg" />
+      </div>
     </div>
 
     <UEmpty
@@ -88,131 +116,126 @@ watch(() => props.destaque, async (id) => {
       :title="t.proximas.vazioTitulo"
       :description="t.proximas.vazioTexto"
       variant="naked"
-      class="animate-[entrada_.3s_ease-out_both]"
+      class="mx-auto max-w-2xl animate-[entrada_.3s_ease-out_both]"
     />
 
-    <div v-else class="flex flex-col gap-6">
-      <UCard
+    <!-- A mesma linha do tempo da aba Releases: a data à esquerda é o prazo -->
+    <UChangelogVersions v-else indicator-motion :ui="{ container: 'flex flex-col gap-y-10 sm:gap-y-14 lg:gap-y-18' }">
+      <UChangelogVersion
         v-for="(m, i) in lista"
         :id="`mudanca-${m.id}`"
         :key="m.id"
-        class="scroll-mt-32 animate-[entrada_.35s_ease-out_both] transition-[box-shadow] duration-500"
-        :class="[
-          acesa === m.id ? 'ring-2 ring-primary' : '',
-          mudancaAberta(m) ? '' : 'opacity-70',
-        ]"
-        :style="{ animationDelay: `${i * 60}ms` }"
-        :ui="{ body: 'flex flex-col gap-6' }"
+        :title="L(m.titulo)"
+        :description="L(m.motivo)"
+        :date="m.fases.obrigatoria"
+        class="scroll-mt-32 animate-[entrada_.35s_ease-out_both]"
+        :class="mudancaAberta(m) ? '' : 'opacity-70'"
+        :style="{ animationDelay: `${i * 80}ms` }"
+        :ui="{
+          container: [
+            'max-w-2xl rounded-lg outline-offset-8 transition-[outline-color] duration-500',
+            acesa === m.id ? 'outline-2 outline-primary' : 'outline-2 outline-transparent',
+          ].join(' '),
+          meta: 'flex flex-wrap items-center gap-1.5 mb-2',
+          title: 'text-2xl font-bold text-highlighted',
+          description: 'text-base text-muted mt-2 leading-relaxed',
+          dotInner: mudancaAberta(m) ? 'size-2 rounded-full bg-warning' : 'size-2 rounded-full bg-dimmed',
+        }"
       >
-        <!-- Cabeçalho: módulo, título e o prazo -->
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div class="min-w-0">
-            <div class="mb-2 flex flex-wrap items-center gap-1.5">
-              <UBadge color="neutral" variant="outline" size="sm" :icon="moduloDe(m.modulo).icone" :label="L(moduloDe(m.modulo).nome)" />
-              <UBadge
-                v-if="mudancaAberta(m)"
-                color="warning"
-                variant="outline"
-                size="sm"
-                icon="i-lucide-triangle-alert"
-                class="bg-warning/10 text-highlighted"
-                :ui="{ leadingIcon: 'text-warning' }"
-                :label="t.entrada.exigeAcao"
-              />
-              <UBadge v-else color="neutral" variant="subtle" size="sm" icon="i-lucide-check" :label="t.proximas.encerradaEm(data(m.fases.obrigatoria))" />
-            </div>
-            <h3 class="text-lg font-semibold text-highlighted">
-              {{ L(m.titulo) }}
-            </h3>
-          </div>
+        <template #date>
+          {{ data(m.fases.obrigatoria, { day: '2-digit', month: '2-digit', year: 'numeric' }) }}
+        </template>
 
-          <div v-if="mudancaAberta(m)" class="shrink-0 rounded-lg border border-warning/30 bg-warning/10 px-4 py-2 sm:text-right">
-            <p class="flex items-center gap-1 text-xs font-semibold tracking-wider text-highlighted uppercase sm:justify-end">
-              <UIcon name="i-lucide-triangle-alert" class="size-3.5 text-warning" />
-              {{ t.proximas.agirAte }}
-            </p>
-            <p class="text-lg font-bold text-highlighted">
-              {{ data(m.fases.obrigatoria) }}
-            </p>
-            <p class="text-sm text-muted">
-              {{ t.proximas.faltam(diasAte(m.fases.obrigatoria)) }}
-            </p>
-            <p v-if="m.dataAnterior" class="mt-1 text-xs text-toned">
-              {{ t.proximas.dataMudou(data(m.dataAnterior, { day: 'numeric', month: 'short' })) }}
-            </p>
-          </div>
-        </div>
-
-        <!-- Por que, quem e o que fazer -->
-        <div class="grid gap-6 md:grid-cols-2">
-          <div class="flex flex-col gap-4">
-            <div>
-              <p class="mb-1 text-xs font-semibold tracking-wider text-toned uppercase">
-                {{ t.proximas.porQue }}
-              </p>
-              <p class="text-sm text-default">
-                {{ L(m.motivo) }}
-              </p>
-            </div>
-            <div>
-              <p class="mb-1 text-xs font-semibold tracking-wider text-toned uppercase">
-                {{ t.proximas.quem }}
-              </p>
-              <p class="flex items-center gap-1.5 text-sm text-default">
-                <UIcon name="i-lucide-users" class="size-4 shrink-0 text-muted" />
-                {{ L(m.quem) }}
-              </p>
-            </div>
-          </div>
-          <div>
-            <p class="mb-1 text-xs font-semibold tracking-wider text-toned uppercase">
-              {{ t.proximas.oQueFazer }}
-            </p>
-            <ol class="flex flex-col gap-2 text-sm text-default">
-              <li v-for="(passo, pi) in m.oQueFazer" :key="pi" class="flex gap-2">
-                <span class="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{{ pi + 1 }}</span>
-                <span>{{ L(passo) }}</span>
-              </li>
-            </ol>
-          </div>
-        </div>
-
-        <!-- As 3 fases -->
-        <div>
-          <p class="mb-3 flex items-center gap-2 text-xs font-semibold tracking-wider text-toned uppercase">
-            {{ t.proximas.fases }}
-            <UBadge v-if="faseAtual(m) === 'anunciada'" color="neutral" variant="subtle" size="sm" :label="t.proximas.anunciada" />
-          </p>
-          <UTimeline
-            :items="fases(m)"
-            :model-value="faseDaTimeline(m)"
-            orientation="horizontal"
+        <template #badge>
+          <UBadge
+            v-if="mudancaAberta(m)"
+            color="warning"
+            variant="outline"
             size="sm"
-            :color="mudancaAberta(m) ? 'warning' : 'neutral'"
-            class="w-full"
-            :ui="{ item: 'flex-1 min-w-0', description: 'text-xs text-muted' }"
-          >
-            <template #date="{ item }">
-              <span class="flex items-center gap-1.5">
-                {{ item.date }}
-                <UBadge v-if="faseDaTimeline(m) === item.value" color="warning" variant="outline" size="xs" class="bg-warning/10 text-highlighted" :label="t.proximas.agora" />
-              </span>
-            </template>
-          </UTimeline>
-        </div>
-
-        <div v-if="m.entrada" class="flex justify-end border-t border-default pt-4">
-          <UButton
-            size="sm"
-            color="neutral"
-            variant="ghost"
-            trailing-icon="i-lucide-arrow-right"
-            :label="t.proximas.verNoChangelog"
-            class="cursor-pointer"
-            @click="emit('verEntrada', m.entrada!)"
+            icon="i-lucide-triangle-alert"
+            class="bg-warning/10 text-highlighted"
+            :ui="{ leadingIcon: 'text-warning' }"
+            :label="t.entrada.exigeAcao"
           />
-        </div>
-      </UCard>
-    </div>
+          <UBadge v-else color="neutral" variant="subtle" size="sm" icon="i-lucide-check" :label="t.proximas.encerradaEm(data(m.fases.obrigatoria))" />
+          <UBadge color="neutral" variant="outline" size="sm" :icon="moduloDe(m.modulo).icone" :label="L(moduloDe(m.modulo).nome)" />
+        </template>
+
+        <template #body>
+          <div class="mt-5 flex flex-col gap-6">
+            <!-- O prazo -->
+            <div v-if="mudancaAberta(m)" class="flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-lg border border-warning/30 bg-warning/10 px-4 py-3">
+              <span class="flex items-center gap-1 text-xs font-semibold tracking-wider text-highlighted uppercase">
+                <UIcon name="i-lucide-triangle-alert" class="size-3.5 text-warning" />
+                {{ t.proximas.agirAte }}
+              </span>
+              <span class="text-lg font-bold text-highlighted">{{ data(m.fases.obrigatoria) }}</span>
+              <span class="text-sm text-muted">{{ t.proximas.faltam(diasAte(m.fases.obrigatoria)) }}</span>
+              <span v-if="m.dataAnterior" class="text-xs text-toned">{{ t.proximas.dataMudou(data(m.dataAnterior, { day: 'numeric', month: 'short' })) }}</span>
+            </div>
+
+            <!-- Quem e o que fazer -->
+            <div class="grid gap-6 md:grid-cols-2">
+              <div>
+                <p class="mb-1 text-xs font-semibold tracking-wider text-toned uppercase">
+                  {{ t.proximas.quem }}
+                </p>
+                <p class="flex items-center gap-1.5 text-sm text-default">
+                  <UIcon name="i-lucide-users" class="size-4 shrink-0 text-muted" />
+                  {{ L(m.quem) }}
+                </p>
+              </div>
+              <div>
+                <p class="mb-1 text-xs font-semibold tracking-wider text-toned uppercase">
+                  {{ t.proximas.oQueFazer }}
+                </p>
+                <ol class="flex flex-col gap-2 text-sm text-default">
+                  <li v-for="(passo, pi) in m.oQueFazer" :key="pi" class="flex gap-2">
+                    <span class="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{{ pi + 1 }}</span>
+                    <span>{{ L(passo) }}</span>
+                  </li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- As 3 fases -->
+            <div>
+              <p class="mb-3 flex items-center gap-2 text-xs font-semibold tracking-wider text-toned uppercase">
+                {{ t.proximas.fases }}
+                <UBadge v-if="faseAtual(m) === 'anunciada'" color="neutral" variant="subtle" size="sm" :label="t.proximas.anunciada" />
+              </p>
+              <UTimeline
+                :items="fases(m)"
+                :model-value="faseDaTimeline(m)"
+                orientation="horizontal"
+                size="sm"
+                :color="mudancaAberta(m) ? 'warning' : 'neutral'"
+                class="w-full"
+                :ui="{ item: 'flex-1 min-w-0', description: 'text-xs text-muted' }"
+              >
+                <template #date="{ item }">
+                  <span class="flex items-center gap-1.5">
+                    {{ item.date }}
+                    <UBadge v-if="faseDaTimeline(m) === item.value" color="warning" variant="outline" size="xs" class="bg-warning/10 text-highlighted" :label="t.proximas.agora" />
+                  </span>
+                </template>
+              </UTimeline>
+            </div>
+
+            <div v-if="m.entrada">
+              <UButton
+                size="sm"
+                color="neutral"
+                variant="link"
+                trailing-icon="i-lucide-arrow-right"
+                :label="t.proximas.verNoChangelog"
+                class="-ml-2.5 cursor-pointer"
+                @click="emit('verEntrada', m.entrada!)"
+              />
+            </div>
+          </div>
+        </template>
+      </UChangelogVersion>
+    </UChangelogVersions>
   </div>
 </template>

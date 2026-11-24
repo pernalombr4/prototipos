@@ -52,7 +52,7 @@ function diaDoBanner(iso: string) {
         class="animate-[entrada_.35s_ease-out_both] cursor-pointer"
         :style="{ animationDelay: `${i * 80}ms` }"
         :ui="{
-          container: 'max-w-2xl',
+          container: 'max-w-2xl [content-visibility:auto] [contain-intrinsic-size:auto_520px]',
           title: 'text-2xl font-bold text-highlighted',
           description: 'text-base text-muted mt-2 leading-relaxed line-clamp-4',
         }"
@@ -62,7 +62,7 @@ function diaDoBanner(iso: string) {
           {{ dataComDefeito(v.data) }}
         </template>
         <template #image>
-          <BannerDaRelease :versao="v.versao" :data="diaDoBanner(v.data)" :cor="v.cor" />
+          <BannerDaRelease :versao="v.versao" :data="diaDoBanner(v.data)" :cor="v.cor" class="h-full" />
         </template>
       </UChangelogVersion>
     </UChangelogVersions>
