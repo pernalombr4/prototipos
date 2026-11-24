@@ -7,9 +7,11 @@ Blog fica com o post do mês, e "Próximas mudanças" reúne o que exige ação 
 ## A fronteira (a partir da rodada 2)
 
 - **Muda na aba Releases:** rótulos ao lado da data de cada versão, 1 barra de filtros acima da
-  linha do tempo, o link permanente de cada versão, o acesso a "Próximas mudanças" e a "Assinar", e
-  os patches como versões curtas na mesma linha do tempo.
-- **Muda no Blog:** o post do mês no lugar do post por versão (rodada 1, sem mudança na rodada 2).
+  linha do tempo (tamanho da versão e funcionalidade), o link permanente de cada versão e de cada
+  item, o acesso a "Próximas mudanças" e a "Assinar", os patches como versões curtas na mesma linha
+  do tempo e a página da versão, com a lista curta dos itens (rodada 3).
+- **Muda no Blog:** o post do mês no lugar do post por versão; o post só de changelog sai da lista
+  (rodada 3).
 - **Não muda:** a casca do docs, o topo "Versões do ENSPACE", a árvore e os `:ui` da página de
   releases, o título, o resumo e o quadro escuro de cada versão, e o filtro de categoria do Blog.
 
@@ -18,19 +20,52 @@ Blog fica com o post do mês, e "Próximas mudanças" reúne o que exige ação 
 ```mermaid
 flowchart LR
   B[Blog: lista] -->|Ler o post| P[Post do mês]
-  P -->|Ver no changelog| C[Releases: versões]
+  P -->|Ver o item| V[Página da versão]
   P -->|Ver em Próximas mudanças| M[Releases: Próximas mudanças]
+  C[Releases: versões] -->|Clicar na versão| V
+  V -->|Versões do ENSPACE| C
+  V -->|Ler o resumo do mês no Blog| P
+  V -->|Ver o que fazer| M
   C -->|Ver o que fazer| M
   C -->|Próximas mudanças| M
-  M -->|Ver no changelog| C
+  M -->|Ver na página da versão| V
   M -->|Versões do ENSPACE| C
-  C -->|Clicar na versão| P
-  C -->|Copiar link| L[Link permanente da versão]
-  L -->|Abrir o link| C
+  V -->|Copiar link| L[Link permanente da versão ou do item]
+  L -->|Abrir o link| V
   C -->|Assinar| A[E-mail e RSS]
 ```
 
 ## Rodadas
+
+### Rodada 3 · 2026-11-24
+- **Pedido (literal), item a item:**
+  - "nao use o termo 'modulos' ali no filtro. isso pro enspace é a outra coisa."
+  - o filtro "Só o que exige ação" sai; o rótulo "Exige ação" fica na versão
+  - o filtro por tipo (Novidades, Melhorias, Correções) sai; entra o filtro pelo tamanho da versão, com dica curta em cada opção
+  - Próximas mudanças: "ta tudo torto e horrivel... fontes extremamente grandes junto de outras pequenas... muito feio mesmo. ajuste isso. preze pela ux."
+  - clicar na versão abria o post do mês no Blog: "isso nao ta errado??"
+  - "use 100% /nuxt-ui"
+- **Mudou:**
+  - o filtro e os rótulos dizem "Funcionalidade" ("Todas as funcionalidades"); nenhum texto da tela diz "módulo". O nome interno `modulos` ficou no código
+  - sai "Só o que exige ação"; "Exige ação · Agir até <data>" segue no rótulo da versão
+  - sai o filtro por tipo. Entra o tamanho da versão, num grupo de botões (`UFieldGroup` com `UButton` e `UTooltip`): Todas, Grandes, Médias, Pequenas. Dicas: "Grandes: mudam a forma de usar", "Médias: novidades e melhorias", "Pequenas: correções e ajustes rápidos". O rótulo técnico (minor, patch) segue discreto na versão
+  - o tipo de cada item (Novidade, Melhoria, Correção) passa para a página da versão
+  - página da versão, nova: clicar na versão (ou em "Ver os N itens") abre o changelog simples dela, com `UContainer`, `UPage`, `UPageHeader` e `UPageBody`. Os itens vêm em grupos por tipo (`USeparator`) e são `UPageCard` dentro de `UPageList`, com 1 a 3 linhas, rótulos (tipo, funcionalidade, Exige ação, Beta ou Acesso antecipado, Liberando, Liberado para alguns workspaces) e os links Documentação, Tutorial, Ver o que fazer e Copiar link
+  - link permanente por item: `docs.enspace.io/pt/releases/3-4-0#<id do item>`. Abrir a página com `#<id do item>` rola até ele e acende o contorno; com `#v3-4-0`, abre a versão
+  - quando a versão entra no post do mês (tem item Tier 1 ou 2), a página mostra 1 aviso discreto: "Ler o resumo do mês no Blog"
+  - o item do post do mês e o "Ver na página da versão" de Próximas mudanças levam à página da versão, no item
+  - Blog: sai o post "Versão 3.2.0" (categoria release) da lista da proposta; ficam os 2 posts do mês e o artigo
+  - Próximas mudanças refeita só com componentes do Nuxt UI e 1 escala de texto: o título da página vai no topo da seção (no lugar de um 2º título); cada mudança tem o título no tamanho do título da versão; o prazo é 1 `UAlert` ("Agir até 15 de janeiro de 2027", com os dias que faltam); "Quem é afetado" e "O que fazer" são `UPageCard` com texto normal; as 3 fases são 1 `UTimeline` dentro de `UPageCard`. Saem os rótulos em maiúsculas, a data grande e os números em círculo. Mesma largura da trilha (`max-w-2xl`)
+- **Descartado:**
+  - abas (`UTabs`) para o tamanho da versão. Motivo: o grupo de botões ocupa 1 linha com o filtro de funcionalidade e aceita dica em cada opção
+  - fases em linha horizontal. Motivo: no celular as 3 fases não cabem lado a lado; na vertical a leitura é a mesma nas 2 larguras
+- **Maquete:** Documentação e Tutorial mostram o aviso "A documentação e o tutorial ficam fora deste protótipo."; o mock não tem versão grande (major), então "Grandes" mostra o estado sem resultado
+- **Para a redatora decidir:**
+  - "Grandes" fica vazio no mock: manter a opção (o filtro mostra "nenhuma versão") ou esconder enquanto não houver versão grande
+  - o rótulo técnico "minor" ou "patch" na versão: manter, como hoje no mapeamento do `en-docs`, ou tirar, já que o filtro diz Médias e Pequenas
+  - o destino de Documentação e Tutorial em cada item: a doc de suporte e o passo a passo no Tango, ou só a doc
+- **Commit:** nenhum nesta rodada; o commit sai depois do ok da redatora
+- **Ver:** `http://localhost:3000/releases-no-docs` (versão: `#v3-4-0`) · `evidencias/rodada3-trilha-desktop-claro.jpg` (a dica de cada tamanho está no código; sem evidência visual: a captura sem navegador visível não registrou a dica aberta) · `evidencias/rodada3-trilha-pequenas-desktop-claro.jpg` · `evidencias/rodada3-trilha-desktop-escuro.jpg` · `evidencias/rodada3-versao-minor-desktop-claro.jpg` · `evidencias/rodada3-versao-minor-desktop-escuro.jpg` · `evidencias/rodada3-versao-patch-desktop-claro.jpg` · `evidencias/rodada3-proximas-desktop-claro.jpg` · `evidencias/rodada3-proximas-desktop-escuro.jpg` · `evidencias/rodada3-blog-desktop-claro.jpg` · `evidencias/rodada3-trilha-mobile-claro.jpg` · `evidencias/rodada3-versao-minor-mobile-claro.jpg` · `evidencias/rodada3-versao-patch-mobile-escuro.jpg` · `evidencias/rodada3-proximas-mobile-claro.jpg` · `evidencias/rodada3-blog-mobile-claro.jpg`
 
 ### Rodada 2 · 2026-11-24
 - **Pedido (literal):** "ta pessimo no local. a estetica ta nada a ver. preserve a estetica que ta na doc hoje e veja o que pode fazer sem alteraçoes absurdas. pode usar as tags e tal, mas nao tire a imagem nem nada. só a parte de releases está ruim. a de blog ta boa. até a largura ta estranha aqui, conforme print. ajuste isso." E, em seguida: "refaça olhando en-docs com /investigar-codigo e vendo os componentes utilizados nessa tela prezando pelo minimo de modificaçao possivel ok??"

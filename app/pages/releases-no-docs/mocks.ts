@@ -563,19 +563,6 @@ export const postsDaProposta: Post[] = [
     data: '2026-10-20',
     cor: 'purple',
   },
-  {
-    id: 'release-3-2-0',
-    categoria: 'release',
-    titulo: L('3.2.0 está no ar', '3.2.0 is live', '3.2.0 ya está disponible'),
-    descricao: L(
-      'O post por versão continua no ar, como arquivo. Os posts novos saem por mês.',
-      'The per version post stays online as an archive. New posts come out monthly.',
-      'El post por versión sigue publicado como archivo. Los posts nuevos salen por mes.',
-    ),
-    data: '2026-10-27',
-    cor: 'orange',
-    versao: '3.2.0',
-  },
 ]
 
 /**
@@ -662,7 +649,11 @@ export const mudancaDe = (id?: string) => mudancas.find(m => m.id === id)
 export const moduloDe = (id: ChaveDeModulo) => modulos.find(m => m.id === id)!
 
 /** Endereço do link permanente de uma entrada. */
-export function linkPermanente(idioma: Idioma, id: string) {
+/**
+ * PROPOSTA, rodada 3: cada versão tem página própria. O link da versão é a página
+ * (`/releases/3-4-0`); o link do item é a página da versão com a âncora do item (`#<id do item>`).
+ */
+export function linkPermanente(idioma: Idioma, versao: string, item?: string) {
   const prefixo = idioma === 'pt-BR' ? 'pt' : idioma
-  return `https://docs.enspace.io/${prefixo}/releases/docs#${id}`
+  return `https://docs.enspace.io/${prefixo}/releases/${versao.replaceAll('.', '-')}${item ? `#${item}` : ''}`
 }

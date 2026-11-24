@@ -18,10 +18,12 @@ import Changelog from './_Changelog.vue'
 import HeroDaSecao from './_HeroDaSecao.vue'
 import ListaDoBlog from './_ListaDoBlog.vue'
 import PostDoMes from './_PostDoMes.vue'
+import PaginaDaVersao from './_PaginaDaVersao.vue'
 import ProximasMudancas from './_ProximasMudancas.vue'
 import ReleasesHoje from './_ReleasesHoje.vue'
 import { entradas, linkPermanente, postsDaProposta, postsDeHoje } from './mocks'
 import { textos } from './textos'
+import { ancoraDaVersao, montarVersoes } from './versoes'
 
 import briefingMd from './BRIEFING.md?raw'
 import decisoesMd from './DECISOES.md?raw'
@@ -48,41 +50,70 @@ const estadosPossiveis = ['cheio', 'vazio', 'carregando'] as const
 const secao = ref<'blog' | 'releases'>('releases')
 const aba = ref<'changelog' | 'proximas'>('changelog')
 const postAberto = ref<string | null>(null)
-const destaqueEntrada = ref<string | null>(null)
+/** Rodada 3: a página da versão (o changelog simples dela), aberta ao clicar na versão. */
+const versaoAberta = ref<string | null>(null)
+const destaqueVersao = ref<string | null>(null)
+const destaqueItem = ref<string | null>(null)
 const destaqueMudanca = ref<string | null>(null)
 const assinarAberto = ref(false)
 
 const post = computed(() => postsDaProposta.find(p => p.id === postAberto.value))
+const versoes = computed(() => montarVersoes(t.value, idioma.value))
+const paginaDaVersao = computed(() => versoes.value.find(v => v.versao === versaoAberta.value))
 
 const topo = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
+function irParaReleases(a: 'changelog' | 'proximas') {
+  if (versaoAberta.value) history.replaceState(null, '', location.pathname)
+  versao.value = 'proposta'
+  secao.value = 'releases'
+  postAberto.value = null
+  versaoAberta.value = null
+  aba.value = a
+}
+
 /** Rodada 2: Changelog e Próximas mudanças trocam por link discreto acima da lista, sem abas. */
 function irAba(a: 'changelog' | 'proximas') {
-  aba.value = a
+  irParaReleases(a)
   topo()
 }
 
 function irSecao(s: 'blog' | 'releases') {
+  if (versaoAberta.value) history.replaceState(null, '', location.pathname)
   secao.value = s
   postAberto.value = null
+  versaoAberta.value = null
   topo()
 }
 
-async function verEntrada(id: string) {
-  versao.value = 'proposta'
-  secao.value = 'releases'
-  postAberto.value = null
-  aba.value = 'changelog'
-  destaqueEntrada.value = null
+/** Abre a página da versão; com `item`, rola até ele e acende o contorno. */
+async function abrirVersao(v: string, item: string | null = null) {
+  irParaReleases('changelog')
+  versaoAberta.value = v
+  destaqueItem.value = null
+  history.replaceState(null, '', `#${item ?? ancoraDaVersao(v)}`)
+  if (!item) topo()
   await nextTick()
-  destaqueEntrada.value = id
+  destaqueItem.value = item
+}
+
+/** Do post do mês e de Próximas mudanças: o item abre na página da versão dele. */
+function verEntrada(id: string) {
+  const e = entradas.find(x => x.id === id)
+  if (e) abrirVersao(e.versao, id)
+}
+
+/** Da página da versão de volta à trilha, com a versão acesa. */
+async function voltarDaVersao() {
+  const v = versaoAberta.value
+  irParaReleases('changelog')
+  destaqueVersao.value = null
+  await nextTick()
+  destaqueVersao.value = v ? ancoraDaVersao(v) : null
 }
 
 async function verMudanca(id: string) {
-  versao.value = 'proposta'
-  secao.value = 'releases'
-  postAberto.value = null
-  aba.value = 'proximas'
+  irParaReleases('proximas')
   destaqueMudanca.value = null
   await nextTick()
   destaqueMudanca.value = id
@@ -92,6 +123,7 @@ function verPost(mes: string) {
   const p = postsDaProposta.find(x => x.mes === mes)
   if (!p) return
   secao.value = 'blog'
+  versaoAberta.value = null
   postAberto.value = p.id
   topo()
 }
@@ -106,40 +138,42 @@ function abrirPost(id: string) {
 }
 
 function verChangelog() {
-  secao.value = 'releases'
-  aba.value = 'changelog'
-  postAberto.value = null
-  topo()
+  irAba('changelog')
 }
 
-/** O link permanente: copia o endereço com a âncora e põe a âncora na barra do navegador. */
-async function copiar(id: string) {
-  const url = linkPermanente(idioma.value, id)
-  history.replaceState(null, '', `#${id}`)
+/** O link permanente da versão, ou do item com a âncora: copia o endereço e põe a âncora na barra. */
+async function copiar(v: string, item?: string) {
+  const url = linkPermanente(idioma.value, v, item)
+  history.replaceState(null, '', `#${item ?? ancoraDaVersao(v)}`)
   try { await navigator.clipboard.writeText(url) }
   catch { /* sem permissão: o toast ainda mostra o endereço */ }
   toast.add({ title: t.value.entrada.linkCopiado, description: url, icon: 'i-lucide-link', color: 'success', duration: 3000 })
 }
 
-/** Quem chega pelo link permanente cai na entrada, com o contorno aceso. */
+/** Quem chega pelo link permanente cai na página da versão, ou no item dentro dela. */
 onMounted(() => {
   const id = decodeURIComponent(location.hash.slice(1))
-  if (entradas.some(e => e.id === id || `v${e.versao.replaceAll('.', '-')}` === id)) verEntrada(id)
+  const v = versoes.value.find(x => x.id === id)
+  if (v) abrirVersao(v.versao)
+  else if (entradas.some(e => e.id === id)) verEntrada(id)
 })
 
 watch(versao, () => {
   postAberto.value = null
+  versaoAberta.value = null
   aba.value = 'changelog'
 })
 
 const hero = computed(() => {
   if (secao.value === 'blog') return { titulo: t.value.hero.blogTitulo, descricao: t.value.hero.blogDescricao }
+  // Rodada 3: em Próximas mudanças, o título da página vai no hero, em vez de um 2º título abaixo dele.
+  if (versao.value === 'proposta' && aba.value === 'proximas') return { titulo: t.value.proximas.titulo, descricao: t.value.proximas.descricao }
   // Rodada 2: a proposta mantém o topo de hoje ("Versões do ENSPACE").
   return { titulo: t.value.hero.releasesHojeTitulo, descricao: t.value.hero.releasesHojeDescricao }
 })
 
 /** A chave da vista: muda a vista, a transição roda. */
-const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value ?? 'lista'}-${aba.value}`)
+const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value ?? 'lista'}-${aba.value}-${versaoAberta.value ?? 'trilha'}`)
 </script>
 
 <template>
@@ -164,6 +198,18 @@ const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value 
           @assinar="assinarAberto = true"
         />
 
+        <!-- PÁGINA DA VERSÃO (proposta, rodada 3): o changelog simples de 1 versão -->
+        <PaginaDaVersao
+          v-else-if="secao === 'releases' && paginaDaVersao"
+          :t="t"
+          :v="paginaDaVersao"
+          :destaque="destaqueItem"
+          @voltar="voltarDaVersao"
+          @copiar="copiar"
+          @ver-mudanca="verMudanca"
+          @ver-post="verPost"
+        />
+
         <!-- RELEASES: a mesma árvore do en-docs (UPage > hero > UPageBody > UContainer) -->
         <UPage v-else-if="secao === 'releases'" class="overflow-x-hidden">
           <HeroDaSecao :title="hero.titulo" :description="hero.descricao" />
@@ -178,10 +224,10 @@ const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value 
                 v-if="aba === 'changelog'"
                 :t="t"
                 :estado="estado"
-                :destaque="destaqueEntrada"
+                :destaque="destaqueVersao"
+                @abrir-versao="abrirVersao"
                 @copiar="copiar"
                 @ver-mudanca="verMudanca"
-                @ver-post="verPost"
                 @ir-proximas="irAba('proximas')"
                 @assinar="assinarAberto = true"
               />

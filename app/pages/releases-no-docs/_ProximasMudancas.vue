@@ -1,12 +1,14 @@
 <script setup lang="ts">
 /**
- * PROPOSTA. A página "Próximas mudanças": só o que exige ação de quem administra o workspace, com a
- * data prevista, o prazo ("agir até"), o que fazer e as 3 fases (opcional, ligada por padrão com
+ * PROPOSTA. A página "Próximas mudanças": só o que exige ação de quem administra o workspace, com o
+ * prazo ("agir até"), quem é afetado, o que fazer e as 3 fases (opcional, ligada por padrão com
  * opção de desligar, obrigatória). Mora dentro da aba Releases, ao lado do changelog, para não mexer
  * na barra do topo (regra 37).
  *
- * Rodada 2: a página usa a mesma linha do tempo da aba Releases, com o prazo ("agir até") no lugar
- * da data e a mesma largura e o mesmo alinhamento. O "por que muda" virou o resumo da entrada.
+ * Rodada 3: só componentes do Nuxt UI e 1 escala de texto. O título e a descrição da página vão no
+ * hero da seção (como "Versões do ENSPACE"); cada mudança é 1 `UChangelogVersion` com o título no
+ * tamanho do título da versão; o prazo é 1 `UAlert`; "Quem é afetado" e "O que fazer" são
+ * `UPageCard` com texto normal; as fases são 1 `UTimeline`. Mesma largura da trilha (`max-w-2xl`).
  */
 import { diasAte, faseAtual, moduloDe, mudancaAberta, mudancas, type ChaveDeFase, type Mudanca } from './mocks'
 import { formatarData, type Textos } from './textos'
@@ -36,10 +38,11 @@ const ordemDasFases: ChaveDeFase[] = ['opt-in', 'opt-out', 'obrigatoria']
 const iconeDaFase = { 'opt-in': 'i-lucide-toggle-left', 'opt-out': 'i-lucide-toggle-right', obrigatoria: 'i-lucide-lock' } as const
 
 function fases(m: Mudanca) {
+  const agora = faseAtual(m)
   return ordemDasFases.map(f => ({
     value: f,
-    date: data(m.fases[f], { day: 'numeric', month: 'short', year: 'numeric' }),
-    title: props.t.proximas.nomeFase[f],
+    date: data(m.fases[f]),
+    title: agora === f ? `${props.t.proximas.nomeFase[f]} · ${props.t.proximas.agora}` : props.t.proximas.nomeFase[f],
     description: props.t.proximas.textoFase[f],
     icon: iconeDaFase[f],
   }))
@@ -50,6 +53,12 @@ const faseDaTimeline = (m: Mudanca) => {
   const f = faseAtual(m)
   return f === 'anunciada' ? undefined : f
 }
+
+/** O texto do prazo: quantos dias faltam e, quando a data mudou, a data de antes. */
+const textoDoPrazo = (m: Mudanca) => [
+  props.t.proximas.faltam(diasAte(m.fases.obrigatoria)),
+  m.dataAnterior ? props.t.proximas.dataMudou(data(m.dataAnterior)) : '',
+].filter(Boolean).join('. ')
 
 const acesa = ref<string | null>(null)
 watch(() => props.destaque, async (id) => {
@@ -65,48 +74,43 @@ watch(() => props.destaque, async (id) => {
 
 <template>
   <div>
-    <!-- Barra acima da linha do tempo, na coluna do conteúdo -->
-    <div class="mx-auto mb-4 flex max-w-2xl items-center justify-between gap-2">
-      <UButton
-        size="sm"
-        color="neutral"
-        variant="link"
-        icon="i-lucide-arrow-left"
-        :label="t.hero.releasesHojeTitulo"
-        class="-ml-2.5 cursor-pointer"
-        @click="emit('voltar')"
-      />
-      <UButton
-        size="sm"
-        color="neutral"
-        variant="link"
-        icon="i-lucide-bell-plus"
-        :label="t.releases.assinar"
-        class="cursor-pointer"
-        @click="emit('assinar')"
-      />
-    </div>
-    <div class="mx-auto mb-12 flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-      <div>
-        <h2 class="mb-2 text-2xl font-bold text-highlighted">
-          {{ t.proximas.titulo }}
-        </h2>
-        <p class="text-muted">
-          {{ t.proximas.descricao }}
-        </p>
-        <p class="mt-2 flex items-center gap-1.5 text-sm text-toned">
+    <!-- Barra acima da linha do tempo, na coluna do conteúdo (max-w-2xl, como a trilha) -->
+    <div class="mx-auto mb-12 flex max-w-2xl flex-col gap-3">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <UButton
+          size="sm"
+          color="neutral"
+          variant="link"
+          icon="i-lucide-arrow-left"
+          :label="t.releases.voltar"
+          class="-ml-2.5 cursor-pointer"
+          @click="emit('voltar')"
+        />
+        <UButton
+          size="sm"
+          color="neutral"
+          variant="link"
+          icon="i-lucide-bell-plus"
+          :label="t.releases.assinar"
+          class="cursor-pointer"
+          @click="emit('assinar')"
+        />
+      </div>
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-sm text-muted">
+        <span class="flex items-center gap-1.5">
           <UIcon name="i-lucide-info" class="size-4 shrink-0" />
           {{ t.proximas.datasPodemMudar }}
-        </p>
+        </span>
+        <USwitch v-model="mostrarEncerradas" size="sm" :label="t.proximas.mostrarEncerradas" />
       </div>
-      <USwitch v-model="mostrarEncerradas" size="sm" :label="t.proximas.mostrarEncerradas" class="shrink-0 sm:mt-1" />
     </div>
 
     <div v-if="estado === 'carregando'" class="mx-auto flex max-w-2xl flex-col gap-10" aria-busy="true">
       <div v-for="i in 2" :key="i" class="flex flex-col gap-3">
         <USkeleton class="h-7 w-2/3" />
         <USkeleton class="h-4 w-full" />
-        <USkeleton class="h-40 w-full rounded-lg" />
+        <USkeleton class="h-16 w-full rounded-lg" />
+        <USkeleton class="h-32 w-full rounded-lg" />
       </div>
     </div>
 
@@ -116,21 +120,19 @@ watch(() => props.destaque, async (id) => {
       :title="t.proximas.vazioTitulo"
       :description="t.proximas.vazioTexto"
       variant="naked"
-      class="mx-auto max-w-2xl animate-[entrada_.3s_ease-out_both]"
+      class="mx-auto max-w-2xl"
     />
 
-    <!-- A mesma linha do tempo da aba Releases: a data à esquerda é o prazo -->
+    <!-- A mesma linha do tempo da trilha: a data à esquerda é o prazo -->
     <UChangelogVersions v-else indicator-motion :ui="{ container: 'flex flex-col gap-y-10 sm:gap-y-14 lg:gap-y-18' }">
       <UChangelogVersion
-        v-for="(m, i) in lista"
+        v-for="m in lista"
         :id="`mudanca-${m.id}`"
         :key="m.id"
         :title="L(m.titulo)"
         :description="L(m.motivo)"
         :date="m.fases.obrigatoria"
-        class="scroll-mt-32 animate-[entrada_.35s_ease-out_both]"
-        :class="mudancaAberta(m) ? '' : 'opacity-70'"
-        :style="{ animationDelay: `${i * 80}ms` }"
+        class="scroll-mt-32"
         :ui="{
           container: [
             'max-w-2xl rounded-lg outline-offset-8 transition-[outline-color] duration-500',
@@ -158,69 +160,45 @@ watch(() => props.destaque, async (id) => {
             :label="t.entrada.exigeAcao"
           />
           <UBadge v-else color="neutral" variant="subtle" size="sm" icon="i-lucide-check" :label="t.proximas.encerradaEm(data(m.fases.obrigatoria))" />
+          <UBadge v-if="faseAtual(m) === 'anunciada'" color="neutral" variant="subtle" size="sm" :label="t.proximas.anunciada" />
           <UBadge color="neutral" variant="outline" size="sm" :icon="moduloDe(m.modulo).icone" :label="L(moduloDe(m.modulo).nome)" />
         </template>
 
         <template #body>
-          <div class="mt-5 flex flex-col gap-6">
+          <div class="mt-6 flex flex-col gap-4">
             <!-- O prazo -->
-            <div v-if="mudancaAberta(m)" class="flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-lg border border-warning/30 bg-warning/10 px-4 py-3">
-              <span class="flex items-center gap-1 text-xs font-semibold tracking-wider text-highlighted uppercase">
-                <UIcon name="i-lucide-triangle-alert" class="size-3.5 text-warning" />
-                {{ t.proximas.agirAte }}
-              </span>
-              <span class="text-lg font-bold text-highlighted">{{ data(m.fases.obrigatoria) }}</span>
-              <span class="text-sm text-muted">{{ t.proximas.faltam(diasAte(m.fases.obrigatoria)) }}</span>
-              <span v-if="m.dataAnterior" class="text-xs text-toned">{{ t.proximas.dataMudou(data(m.dataAnterior, { day: 'numeric', month: 'short' })) }}</span>
-            </div>
+            <UAlert
+              v-if="mudancaAberta(m)"
+              color="warning"
+              variant="subtle"
+              icon="i-lucide-calendar-clock"
+              :title="t.entrada.agirAte(data(m.fases.obrigatoria))"
+              :description="textoDoPrazo(m)"
+            />
 
-            <!-- Quem e o que fazer -->
-            <div class="grid gap-6 md:grid-cols-2">
-              <div>
-                <p class="mb-1 text-xs font-semibold tracking-wider text-toned uppercase">
-                  {{ t.proximas.quem }}
-                </p>
-                <p class="flex items-center gap-1.5 text-sm text-default">
-                  <UIcon name="i-lucide-users" class="size-4 shrink-0 text-muted" />
-                  {{ L(m.quem) }}
-                </p>
-              </div>
-              <div>
-                <p class="mb-1 text-xs font-semibold tracking-wider text-toned uppercase">
-                  {{ t.proximas.oQueFazer }}
-                </p>
-                <ol class="flex flex-col gap-2 text-sm text-default">
-                  <li v-for="(passo, pi) in m.oQueFazer" :key="pi" class="flex gap-2">
-                    <span class="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{{ pi + 1 }}</span>
-                    <span>{{ L(passo) }}</span>
-                  </li>
-                </ol>
-              </div>
+            <!-- Quem é afetado e o que fazer -->
+            <div class="grid gap-4 md:grid-cols-2">
+              <UPageCard variant="subtle" icon="i-lucide-users" :title="t.proximas.quem" :description="L(m.quem)" />
+              <UPageCard variant="subtle" icon="i-lucide-list-checks" :title="t.proximas.oQueFazer">
+                <template #description>
+                  <ol class="flex list-decimal flex-col gap-1.5 pl-5">
+                    <li v-for="(passo, pi) in m.oQueFazer" :key="pi">
+                      {{ L(passo) }}
+                    </li>
+                  </ol>
+                </template>
+              </UPageCard>
             </div>
 
             <!-- As 3 fases -->
-            <div>
-              <p class="mb-3 flex items-center gap-2 text-xs font-semibold tracking-wider text-toned uppercase">
-                {{ t.proximas.fases }}
-                <UBadge v-if="faseAtual(m) === 'anunciada'" color="neutral" variant="subtle" size="sm" :label="t.proximas.anunciada" />
-              </p>
+            <UPageCard variant="subtle" icon="i-lucide-milestone" :title="t.proximas.fases">
               <UTimeline
                 :items="fases(m)"
                 :model-value="faseDaTimeline(m)"
-                orientation="horizontal"
                 size="sm"
                 :color="mudancaAberta(m) ? 'warning' : 'neutral'"
-                class="w-full"
-                :ui="{ item: 'flex-1 min-w-0', description: 'text-xs text-muted' }"
-              >
-                <template #date="{ item }">
-                  <span class="flex items-center gap-1.5">
-                    {{ item.date }}
-                    <UBadge v-if="faseDaTimeline(m) === item.value" color="warning" variant="outline" size="xs" class="bg-warning/10 text-highlighted" :label="t.proximas.agora" />
-                  </span>
-                </template>
-              </UTimeline>
-            </div>
+              />
+            </UPageCard>
 
             <div v-if="m.entrada">
               <UButton

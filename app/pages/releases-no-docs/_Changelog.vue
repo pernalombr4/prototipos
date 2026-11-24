@@ -1,33 +1,34 @@
 <script setup lang="ts">
 /**
- * PROPOSTA, rodada 2. A aba Releases montada com a mesma árvore da página de hoje do `en-docs`
+ * PROPOSTA. A trilha da aba Releases, montada com a mesma árvore da página de hoje do `en-docs`
  * (`app/pages/releases/[section].vue`, lido em origin/main 910960b4): `UChangelogVersions` com
  * `indicator-motion` e 1 `UChangelogVersion` por versão, com os mesmos `:ui` (container
  * `max-w-2xl`, título `text-2xl`, descrição `line-clamp-4`) e o `ReleaseNotesBanner` no `#image`.
  *
- * O que se acrescenta, e só isto:
- * - rótulos no `#badge`: o badge que o mapeamento do site já tem ("minor", "patch") e os novos
- *   (Exige ação com o prazo, Em breve, Liberando, Beta ou Acesso antecipado, Liberado para alguns
- *   workspaces e os módulos da versão);
- * - 1 barra de filtros acima da lista (tipo, módulo, "Só o que exige ação");
+ * O que se acrescenta:
+ * - rótulos no `#badge`: o tamanho técnico (major, minor, patch), Exige ação com o prazo, Em breve,
+ *   Liberando, Beta ou Acesso antecipado, Liberado para alguns workspaces e as funcionalidades;
+ * - 1 barra acima da lista: o tamanho da versão (Todas, Grandes, Médias, Pequenas, com dica) e a
+ *   funcionalidade (rodada 3: sai o filtro por tipo de item e o "Só o que exige ação");
  * - o link permanente de cada versão e o acesso a "Próximas mudanças" e a "Assinar";
- * - o patch entra na mesma linha do tempo, como versão mais curta, com o banner compacto.
+ * - clicar na versão abre a página da versão, com a lista dos itens (rodada 3; antes abria o post do mês).
  */
 import BannerDaRelease from './_BannerDaRelease.vue'
-import { entradas, modulos, mudancaAberta, mudancaDe, mudancas, postsDaProposta, postsDeHoje, type ChaveDeModulo, type Entrada, type Tipo } from './mocks'
+import { modulos, mudancaAberta, mudancas, type ChaveDeModulo } from './mocks'
 import { formatarData, type Textos } from './textos'
+import { montarVersoes, type Tamanho } from './versoes'
 
 const props = defineProps<{
   t: Textos
   estado: 'cheio' | 'vazio' | 'carregando'
-  /** Id da versão (ou de um item dela) a mostrar: limpa os filtros, rola até ela e acende o contorno. */
+  /** Id da versão a mostrar: limpa os filtros, rola até ela e acende o contorno. */
   destaque: string | null
 }>()
 
 const emit = defineEmits<{
-  copiar: [id: string]
+  abrirVersao: [versao: string]
+  copiar: [versao: string]
   verMudanca: [id: string]
-  verPost: [mes: string]
   irProximas: []
   assinar: []
 }>()
@@ -36,84 +37,34 @@ const idioma = useIdioma()
 const L = (x: Record<string, string>) => x[idioma.value]
 
 /* ---------------- Filtros ---------------- */
-const tipo = ref<'todos' | Tipo>('todos')
+const tamanho = ref<'todas' | Tamanho>('todas')
 const modulosEscolhidos = ref<ChaveDeModulo[]>([])
-const soAcao = ref(false)
 
-const temFiltro = computed(() => tipo.value !== 'todos' || modulosEscolhidos.value.length > 0 || soAcao.value)
+const temFiltro = computed(() => tamanho.value !== 'todas' || modulosEscolhidos.value.length > 0)
 function limpar() {
-  tipo.value = 'todos'
+  tamanho.value = 'todas'
   modulosEscolhidos.value = []
-  soAcao.value = false
 }
 
-const opcoesDeTipo = ['todos', 'novidade', 'melhoria', 'correcao'] as const
+const opcoesDeTamanho = ['todas', 'major', 'minor', 'patch'] as const
 const opcoesDeModulo = computed(() => modulos.map(m => ({ label: L(m.nome), value: m.id, icon: m.icone })))
 
-const passa = (e: Entrada) =>
-  (tipo.value === 'todos' || e.tipo === tipo.value)
-  && (!modulosEscolhidos.value.length || modulosEscolhidos.value.includes(e.modulo))
-  && (!soAcao.value || !!e.mudanca)
-
 /* ---------------- As versões ---------------- */
-/** A âncora do link permanente da versão: 3.4.2 vira "v3-4-2". */
-const ancora = (v: string) => `v${v.replaceAll('.', '-')}`
-const tipoDaVersao = (v: string) => (v.endsWith('.0.0') ? 'major' : v.endsWith('.0') ? 'minor' : 'patch')
-
-const todasAsVersoes = computed(() => {
-  const mapa = new Map<string, Entrada[]>()
-  for (const e of entradas) {
-    if (!mapa.has(e.versao)) mapa.set(e.versao, [])
-    mapa.get(e.versao)!.push(e)
-  }
-  return [...mapa.entries()].map(([versao, itens]) => {
-    const post = postsDeHoje.find(p => p.versao === versao)
-    const emBreve = itens.every(e => e.estado === 'em-breve')
-    const data = post?.data ?? itens.map(e => e.data).sort().at(emBreve ? 0 : -1)!
-    const contagem = (['novidade', 'melhoria', 'correcao'] as const)
-      .map(tp => ({ tp, n: itens.filter(e => e.tipo === tp).length }))
-      .filter(x => x.n)
-    const prazos = itens.map(e => mudancaDe(e.mudanca)).filter(m => !!m).map(m => m!.fases.obrigatoria).sort()
-    const tier = (e: Entrada) => e.tier ?? 9
-    return {
-      versao,
-      id: ancora(versao),
-      tipo: tipoDaVersao(versao),
-      emBreve,
-      data,
-      mes: data.slice(0, 7),
-      cor: post?.cor ?? (tipoDaVersao(versao) === 'patch' ? 'purple' : 'orange'),
-      itens,
-      titulo: emBreve ? props.t.releases.emBreveTitulo(versao) : props.t.releases.noAr(versao),
-      descricao: [
-        emBreve
-          ? props.t.releases.emBreveDescricao(formatarData(data, idioma.value, { day: 'numeric', month: 'long', year: 'numeric' }))
-          : props.t.releases.resumoDaVersao(itens.length, contagem.map(x => props.t.releases.partes[x.tp](x.n))),
-        props.t.releases.inclui(itens.toSorted((a, b) => tier(a) - tier(b)).map(e => L(e.titulo))),
-      ].join(' '),
-      prazo: prazos[0],
-      mudanca: itens.find(e => e.mudanca)?.mudanca,
-      liberando: itens.some(e => e.estado === 'liberando'),
-      acessos: [...new Set(itens.map(e => e.acesso).filter(a => !!a))] as NonNullable<Entrada['acesso']>[],
-      alguns: itens.some(e => e.publico === 'alguns'),
-      modulos: [...new Set(itens.map(e => e.modulo))],
-      temDestaque: itens.some(e => e.tier === 1 || e.tier === 2),
-    }
-  })
-})
+const todasAsVersoes = computed(() => montarVersoes(props.t, idioma.value))
 
 /** Em breve no topo; depois da mais nova para a mais antiga, como hoje (date DESC). */
 const versoes = computed(() => {
   if (props.estado === 'vazio') return []
   return todasAsVersoes.value
-    .filter(v => v.itens.some(passa))
+    .filter(v => tamanho.value === 'todas' || v.tamanho === tamanho.value)
+    .filter(v => !modulosEscolhidos.value.length || v.itens.some(e => modulosEscolhidos.value.includes(e.modulo)))
     .sort((a, b) => Number(b.emBreve) - Number(a.emBreve) || b.data.localeCompare(a.data) || b.versao.localeCompare(a.versao))
 })
 
-const mesesComPost = new Set(postsDaProposta.filter(p => p.mes).map(p => p.mes!))
 const abertas = computed(() => mudancas.filter(mudancaAberta).length)
+const moduloDe = (id: ChaveDeModulo) => modulos.find(m => m.id === id)!
 
-/** A data no idioma da página, sem voltar 1 dia (hoje o site mostra "Dec 7, 2026" para 8 de dezembro). */
+/** A data no formato do idioma, em números, sem voltar 1 dia (hoje o site mostra "Dec 7, 2026" para 8 de dezembro). */
 const dataDaVersao = (iso: string) => formatarData(iso, idioma.value, { day: '2-digit', month: '2-digit', year: 'numeric' })
 const diaDoBanner = (iso: string) => formatarData(iso, idioma.value)
 
@@ -122,13 +73,11 @@ const acesa = ref<string | null>(null)
 let apagar: ReturnType<typeof setTimeout> | undefined
 watch(() => props.destaque, async (id) => {
   if (!id) return
-  // O item (do post ou de Próximas mudanças) leva à versão dele.
-  const alvo = entradas.find(e => e.id === id) ? ancora(entradas.find(e => e.id === id)!.versao) : id
   limpar()
   await nextTick()
   await new Promise(r => setTimeout(r, 380))
-  document.getElementById(alvo)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  acesa.value = alvo
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  acesa.value = id
   clearTimeout(apagar)
   apagar = setTimeout(() => { acesa.value = null }, 2600)
 }, { immediate: true, flush: 'post' })
@@ -139,17 +88,17 @@ watch(() => props.destaque, async (id) => {
     <!-- Barra acima da lista, na coluna do conteúdo (max-w-2xl, como a versão) -->
     <div class="mx-auto mb-12 flex max-w-2xl flex-col gap-3">
       <div class="flex flex-wrap items-center gap-3">
-        <UFieldGroup size="sm" :aria-label="t.releases.tipo">
-          <UButton
-            v-for="op in opcoesDeTipo"
-            :key="op"
-            :label="t.releases.tipos[op]"
-            :color="tipo === op ? 'primary' : 'neutral'"
-            :variant="tipo === op ? 'solid' : 'outline'"
-            :aria-pressed="tipo === op"
-            class="cursor-pointer"
-            @click="tipo = op"
-          />
+        <UFieldGroup size="sm" :aria-label="t.releases.tamanho">
+          <UTooltip v-for="op in opcoesDeTamanho" :key="op" :text="t.releases.dicaDoTamanho[op]" :delay-duration="200">
+            <UButton
+              :label="t.releases.tamanhos[op]"
+              :color="tamanho === op ? 'primary' : 'neutral'"
+              :variant="tamanho === op ? 'solid' : 'outline'"
+              :aria-pressed="tamanho === op"
+              class="cursor-pointer"
+              @click="tamanho = op"
+            />
+          </UTooltip>
         </UFieldGroup>
 
         <USelectMenu
@@ -162,15 +111,13 @@ watch(() => props.destaque, async (id) => {
           :placeholder="t.releases.todosModulos"
           :search-input="false"
           :aria-label="t.releases.modulo"
-          class="min-w-48"
+          class="min-w-56"
         >
           <template #default>
             <span v-if="modulosEscolhidos.length" class="truncate text-highlighted">{{ t.releases.modulosEscolhidos(modulosEscolhidos.length) }}</span>
             <span v-else class="truncate text-muted">{{ t.releases.todosModulos }}</span>
           </template>
         </USelectMenu>
-
-        <USwitch v-model="soAcao" size="sm" :label="t.releases.soExigeAcao" color="warning" />
       </div>
 
       <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
@@ -222,19 +169,16 @@ watch(() => props.destaque, async (id) => {
       </div>
     </div>
 
-    <!-- Vazio: o estado de hoje (ícone em círculo, título e texto); com filtro, o botão de limpar -->
-    <div v-else-if="!versoes.length" class="mx-auto flex max-w-2xl flex-col items-center py-12 text-center animate-[entrada_.3s_ease-out_both]">
-      <div class="mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10">
-        <UIcon :name="temFiltro ? 'i-lucide-filter-x' : 'i-lucide-rocket'" class="size-8 text-primary" />
-      </div>
-      <h3 class="mb-2 text-lg font-semibold text-highlighted">
-        {{ temFiltro ? t.releases.semResultadoTitulo : t.releases.vazioTitulo }}
-      </h3>
-      <p class="text-muted">
-        {{ temFiltro ? t.releases.semResultadoTexto : t.releases.vazioTexto }}
-      </p>
-      <UButton v-if="temFiltro" :label="t.releases.limpar" color="neutral" variant="outline" class="mt-4 cursor-pointer" @click="limpar" />
-    </div>
+    <!-- Vazio: sem versão, ou nenhuma com os filtros -->
+    <UEmpty
+      v-else-if="!versoes.length"
+      class="mx-auto max-w-2xl animate-[entrada_.3s_ease-out_both]"
+      :icon="temFiltro ? 'i-lucide-filter-x' : 'i-lucide-rocket'"
+      :title="temFiltro ? t.releases.semResultadoTitulo : t.releases.vazioTitulo"
+      :description="temFiltro ? t.releases.semResultadoTexto : t.releases.vazioTexto"
+      :actions="temFiltro ? [{ label: t.releases.limpar, color: 'neutral', variant: 'outline', onClick: limpar }] : []"
+      variant="naked"
+    />
 
     <!-- A linha do tempo de hoje -->
     <UChangelogVersions v-else indicator-motion :ui="{ container: 'flex flex-col gap-y-10 sm:gap-y-14 lg:gap-y-18' }">
@@ -245,8 +189,7 @@ watch(() => props.destaque, async (id) => {
         :title="v.titulo"
         :description="v.descricao"
         :date="v.data"
-        class="scroll-mt-28"
-        :class="!v.emBreve && v.temDestaque && mesesComPost.has(v.mes) ? 'cursor-pointer' : ''"
+        class="scroll-mt-28 cursor-pointer"
         :ui="{
           container: [
             'max-w-2xl [content-visibility:auto] [contain-intrinsic-size:auto_520px]',
@@ -256,18 +199,17 @@ watch(() => props.destaque, async (id) => {
           meta: 'flex flex-wrap items-center gap-1.5 mb-2',
           title: 'text-2xl font-bold text-highlighted',
           description: 'text-base text-muted mt-2 leading-relaxed line-clamp-4',
-          imageWrapper: v.tipo === 'patch' ? 'relative overflow-hidden rounded-lg aspect-[3/1] sm:aspect-[4/1] mt-5' : undefined,
+          imageWrapper: v.tamanho === 'patch' ? 'relative overflow-hidden rounded-lg aspect-[3/1] sm:aspect-[4/1] mt-5' : undefined,
           dotInner: v.emBreve ? 'size-2 rounded-full bg-dimmed' : undefined,
         }"
-        @click="!v.emBreve && v.temDestaque && mesesComPost.has(v.mes) && emit('verPost', v.mes)"
+        @click="emit('abrirVersao', v.versao)"
       >
         <template #date>
           {{ dataDaVersao(v.data) }}
         </template>
 
-        <!-- Os rótulos: o badge do mapeamento de hoje e os novos -->
         <template #badge>
-          <UBadge color="neutral" variant="subtle" size="sm" :label="v.tipo" />
+          <UBadge color="neutral" variant="subtle" size="sm" :label="v.tamanho" />
           <UBadge
             v-if="v.prazo"
             color="warning"
@@ -288,8 +230,8 @@ watch(() => props.destaque, async (id) => {
             color="neutral"
             variant="outline"
             size="sm"
-            :icon="modulos.find(x => x.id === m)!.icone"
-            :label="L(modulos.find(x => x.id === m)!.nome)"
+            :icon="moduloDe(m).icone"
+            :label="L(moduloDe(m).nome)"
           />
         </template>
 
@@ -298,7 +240,7 @@ watch(() => props.destaque, async (id) => {
             :versao="v.versao"
             :data="diaDoBanner(v.data)"
             :cor="v.cor"
-            :compacto="v.tipo === 'patch'"
+            :compacto="v.tamanho === 'patch'"
             class="h-full"
           />
         </template>
@@ -310,10 +252,19 @@ watch(() => props.destaque, async (id) => {
               size="xs"
               color="neutral"
               variant="ghost"
+              icon="i-lucide-list"
+              :label="t.releases.verItens(v.itens.length)"
+              class="-ml-2 cursor-pointer"
+              @click="emit('abrirVersao', v.versao)"
+            />
+            <UButton
+              size="xs"
+              color="neutral"
+              variant="ghost"
               icon="i-lucide-link"
               :label="t.entrada.copiarLink"
-              class="-ml-2 cursor-pointer"
-              @click="emit('copiar', v.id)"
+              class="cursor-pointer"
+              @click="emit('copiar', v.versao)"
             />
             <UButton
               v-if="v.mudanca"
