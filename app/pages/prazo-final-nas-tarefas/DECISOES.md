@@ -240,3 +240,5 @@ Descartado: uma lâmina "Atrasadas pela folga" (dias até o prazo final de cada 
   - A descrição é o épico, aberto por Problema e Proposta; o critério de aceite vai no campo próprio (`requisitos/criterio-de-aceite.md`).
   - As 7 tarefas são as partes, com as caixas de marcar e o print de cada grupo (tarefas 25380 a 25386).
   - Tipo, prioridade, status e branch do card ficaram em branco: o pedido não disse.
+
+- **Status:** aprovado em 2026-11-24, a pedido da redatora; o card do índice passa a mostrar "Aprovado".

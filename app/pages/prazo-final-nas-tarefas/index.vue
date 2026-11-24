@@ -38,8 +38,8 @@ import { textos } from './textos'
 definePageMeta({
   titulo: 'Prazo final nas Tarefas Rápidas',
   descricao: 'A tarefa rápida ganha o prazo final ao lado do vencimento: na criação, no painel, na tabela, no kanban, no Spaceflow, no relatório, na Agenda, no item e no Painel de tarefas, com a regra de que o prazo final nunca fica antes do vencimento.',
-  status: 'em-revisao',
-  atualizado: '2026-11-11',
+  status: 'aprovado',
+  atualizado: '2026-11-24',
   tela: 'Tarefas › Rápidas, Painel, Agenda, item e Spaceflow',
 })
 
