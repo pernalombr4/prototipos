@@ -24,7 +24,7 @@ import MailBox from './_MailBox.vue'
 
 const props = defineProps<{ t: Textos }>()
 
-const { abrirItem, formularios, config, fase, tarefaAberta, emails, registrado } = useComunicacao()
+const { abrirItem, formularios, fase, tarefaAberta, emails, registrado } = useComunicacao()
 const { ativos, itensDeMenu } = useAtalhos()
 const marca = useMarcaDeProposta()
 const idioma = useIdioma()
@@ -385,7 +385,7 @@ const semResponsavel = computed(() => selecionadas.value.filter(l => !l.responsa
               formulário e não conclui a tarefa. Por isso só Criação e Geral, e a
               linha que diz isso.
             -->
-            <div v-if="formularioDaAberta && formularioDaAberta.visibilidade === 'publico' && TIPOS_COM_LINK.includes(formularioDaAberta.tipo) && config.atalhos">
+            <div v-if="formularioDaAberta && formularioDaAberta.visibilidade === 'publico' && TIPOS_COM_LINK.includes(formularioDaAberta.tipo)">
               <CompartilharFormulario :t="t" :formulario="formularioDaAberta" compacto />
               <p class="mt-1.5 flex items-start gap-1.5 text-xs text-muted" :class="marca">
                 <UIcon name="i-lucide-info" class="mt-0.5 size-3.5 shrink-0" />{{ t.tarefas.respostaCriaItem(categoriaPorSlug(formularioDaAberta.categoria).name) }}

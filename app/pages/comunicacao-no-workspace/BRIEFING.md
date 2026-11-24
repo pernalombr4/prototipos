@@ -418,7 +418,15 @@ com "99+" e o avatar.
 
 - "Requisições" na seção Membro: entrada de menu configurada em Interface › Menus (tela nativa
   `/request`). Cliente costuma ter; o workspace de exploração não tinha.
-- "E-mails" na seção Membro (Fase 2) e "Novo e-mail" na barra do topo: proposta (ver `DECISOES.md`).
+- a central "E-mails" na seção Membro (todas as fases, desde a rodada 7) e "Novo e-mail" na barra
+  do topo: proposta (ver `DECISOES.md`);
+- os 3 itens de Configurações › E-mails abrem a aba correspondente da central (rodada 7). O
+  rótulo e a posição no menu continuam os de hoje; muda só o destino.
+
+**Permissões das telas de e-mail (lido no código do develop em 24/11/2026):** Modelos de E-mail,
+Caixas de E-mail e E-mails Enviados têm, cada uma, uma permissão de leitura própria nas
+configurações de e-mail. "Emails Recebidos" é uma tela nativa que entra no menu pelo editor de
+menus. A central usa essas permissões para mostrar ou esconder cada aba.
 
 ## 10. Preparo por API
 

@@ -210,7 +210,6 @@ function menuDoFormulario(f: Formulario): DropdownMenuItem[][] {
           <span class="flex items-center gap-3">
             <span class="flex size-8 items-center justify-center rounded-full bg-elevated"><UIcon :name="c.icone" class="size-4 text-muted" /></span>
             <span class="text-sm font-medium text-highlighted">{{ t.categoria.cartoes[c.chave as keyof typeof t.categoria.cartoes] }}</span>
-            <UBadge v-if="c.proposta && !config.atalhos" :label="t.categoria.moduloDesligado" color="neutral" variant="subtle" size="sm" class="ml-auto" />
           </span>
         </template>
         <p class="text-sm text-toned">
@@ -227,15 +226,6 @@ function menuDoFormulario(f: Formulario): DropdownMenuItem[][] {
     <!-- PROPOSTA: Atalhos de comunicação da categoria -->
     <div v-else-if="vista === 'atalhos'" class="grid gap-6 xl:grid-cols-[1fr_24rem]" :class="marca">
       <div class="flex flex-col gap-6">
-        <UAlert
-          v-if="!config.atalhos"
-          icon="i-lucide-power"
-          color="warning"
-          variant="subtle"
-          :title="t.categoria.moduloDesligadoTitulo"
-          :description="t.categoria.moduloDesligadoDica"
-        />
-
         <UCard>
           <template #header>
             <h2 class="font-semibold text-highlighted">

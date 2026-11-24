@@ -10,16 +10,16 @@ SMS saíram do plano.
 
 | Fase | O que entra | Base |
 |---|---|---|
-| 1 · MVP | Atalhos e telas que só usam o que o produto já tem, sem back-end novo: botão E-mail nas telas de uso (o contato vem dos campos de e-mail do item), "Novo e-mail" no topo, Mail Box na tarefa (a do item dela), link do formulário público | Lido no código do develop: o envio sai do Outlook da pessoa e só fica registrado com item |
-| 2 · Remetente | Escolher o "De" (Outlook ou caixa do workspace), responder na mesma conversa, encaminhar, registrar e-mail sem item e vincular depois; o contato por categoria, a busca de item entre categorias e a área E-mails | Funcionalidade nova, com back-end |
+| 1 · MVP | Atalhos e telas que só usam o que o produto já tem, sem back-end novo: botão E-mail nas telas de uso (o contato vem dos campos de e-mail do item), "Novo e-mail" no topo, Mail Box na tarefa (a do item dela), link do formulário público, a central E-mails com as telas de e-mail de hoje em abas | Lido no código do develop: o envio sai do Outlook da pessoa e só fica registrado com item |
+| 2 · Remetente | Escolher o "De" (Outlook ou caixa do workspace) e quais caixas entram nele, responder na mesma conversa, encaminhar, registrar e-mail sem item e vincular depois; o contato por categoria, a busca de item entre categorias e a lista de mensagens por pessoa | Funcionalidade nova, com back-end |
 | 3 · Tarefa | Vincular o e-mail a uma tarefa e a Mail Box própria da tarefa ("Desta tarefa" e "Do item") | Funcionalidade nova |
 
 | Parte do documento | Onde aparece no protótipo |
 |---|---|
 | (a) Link do formulário público | Requisições (cartão "Compartilhar este formulário"); lista de itens da categoria; painel da tarefa de preencher formulário |
 | (b) Atalho de e-mail | Item (Contato do item na lateral e ícone ao lado do campo de e-mail); lista e quadro de itens (submenu "E-mail"); tarefas (coluna Contato, e-mail em lote, clique direito, painel); Agenda (lembrete) |
-| Configuração | Sistema › Módulos: 1 chave, "Atalhos de comunicação", sem escolher telas nem canais; Categorias › cartão "Contato da categoria" (Fase 2, a avaliar com os devs) |
-| E-mail do ENSPACE em todas as telas | "Novo e-mail" no topo, que reconhece o item ou a tarefa aberta; o compositor; "E-mails" no menu, com a tabela e os filtros do develop (Fase 2) |
+| Configuração | Aba Configurações da central E-mails: a conta de envio de cada pessoa e, para quem administra, o contato do item, o remetente com o domínio da empresa e (Fase 2) as caixas no "De". Sem chave em Sistema › Módulos: o e-mail vem sempre ligado. Categorias › cartão "Contato da categoria" (Fase 2, a avaliar com os devs) |
+| E-mail do ENSPACE em todas as telas | "Novo e-mail" no topo, que reconhece o item ou a tarefa aberta; o compositor; a central "E-mails" no menu, com Mensagens, Modelos, Caixas de E-mail, Enviados pelo sistema e Configurações, cada aba pela permissão de hoje |
 
 ## O fluxo do e-mail
 
@@ -309,6 +309,46 @@ disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:)
   em vez de repetir o e-mail. Quem volta para a Fase 1 estando em E-mails ou no contato da
   categoria sai dessas telas.
 
+## Rodada 7 · 2026-11-24
+
+- **Pedido (literal):** "a configuração do módulo não deve ocorrer na tela de sistema. essa tela é
+  mais direta." e "tem que ver como fazer com que essa tela geral já dê atalhos pra configuraçao
+  tambem, pra que o user nao precise interagir com 2 lugares chamados "emails"." Depois da
+  pesquisa, a escolha: "pode seguir com a hipótese A / o e-mail vem sempre ligado e tudo fica numa
+  central "E-mails" no menu, com a configuração dentro dela." Sobre desligar os atalhos: "veja se
+  realmente é necessário deixar desligar os atalhos na fase 2. talvez nao seja necessario."
+- **Pesquisa:** [PESQUISA-MODULOS-E-EMAIL.md](PESQUISA-MODULOS-E-EMAIL.md), com 24 produtos e os
+  guias de interface da Apple, do Android, do NN/g e do Carbon. Nos CRMs e help desks, o e-mail é parte da base, não módulo. Pipefy, Help
+  Scout e Bitrix24 guardam a configuração do e-mail dentro da própria tela de e-mail.
+- **Sem módulo, em nenhuma fase:**
+  - a chave "Atalhos de comunicação" saiu de Sistema › Módulos, que voltou a ser cópia de hoje (3
+    chaves: Correção Monetária, Comparações e Jurídico);
+  - os atalhos não ganharam chave nem na Fase 2. Nenhum produto pesquisado tem chave geral de
+    e-mail; o atalho só aparece onde o item tem e-mail, e o envio pede a conta do Outlook
+    integrada. Quem não quer usar não clica, e o botão não ocupa lugar onde não há contato;
+  - a Fase 1 perdeu o único trabalho de back que tinha: guardar a chave do módulo.
+- **A central "E-mails"** fica na seção Membro nas 3 fases, com 5 abas:
+
+  | Aba | O que mostra | Quem vê |
+  |---|---|---|
+  | Mensagens | a tabela de e-mails da rodada 6 | todo membro |
+  | Modelos | a tela Modelos de E-mail de hoje, com "Usar em um e-mail" | quem tem a permissão de hoje |
+  | Caixas de E-mail | a tela Caixas de E-mail de hoje | quem tem a permissão de hoje |
+  | Enviados pelo sistema | a tela E-mails Enviados de hoje: o que tarefas e fluxos enviaram, com "Reenviar e-mail" | quem tem a permissão de hoje |
+  | Configurações | "Sua conta de envio" para todos; para quem administra, "Contato do item", "Remetente com o domínio da empresa" (SendGrid) e, na Fase 2, "Caixas como remetente" | todo membro, com o recorte |
+
+- **Configurações › E-mails vira atalho:** os 3 itens de hoje continuam no menu de Configurações e
+  abrem a aba certa da central (marcados como proposta). Fica 1 destino só, e quem procura pelo
+  caminho antigo chega ao mesmo lugar.
+- **Perfil no andaime:** o seletor "Perfil: Admin | Membro" mostra a central pelos 2 olhares. O
+  membro vê Mensagens e Configurações, só com a própria conta de envio, e não vê a seção
+  Configurações do menu.
+- **Saiu junto:** o aviso de módulo desligado na categoria e a condição do módulo nas telas de
+  itens, tarefas e Requisições.
+- **Ver:** prints [central em Mensagens](evidencias/prototipo-21-central-mensagens.jpg),
+  [aba Configurações de quem administra](evidencias/prototipo-22-central-configuracoes.jpg),
+  [central do membro](evidencias/prototipo-23-central-membro.jpg).
+
 ## Por que cada decisão
 
 ### O e-mail sai da conta do Outlook da pessoa; o item recebe a resposta
@@ -345,15 +385,15 @@ para onde vão as respostas: a caixa escolhida, o item (quando há) ou o Outlook
 
 ### O botão E-mail tem 2 caminhos, num botão dividido
 
-Com o módulo "E-mail do ENSPACE" ligado, o E-mail dos atalhos é um botão dividido
+Com o Correio do Outlook integrado, o E-mail dos atalhos é um botão dividido
 (`UFieldGroup` com `UDropdownMenu`, como o exemplo `FieldGroupDropdownExample` do Nuxt UI):
 
 - **o clique no corpo escreve pelo ENSPACE:** sai da conta do Outlook da pessoa e fica na Mail Box
   do item;
 - **a seta abre "Abrir no meu app de e-mail":** o `mailto:` que o documento pede.
 
-O caminho do ENSPACE vem primeiro porque é o único em que a resposta sempre volta ao item. Com o
-módulo desligado, ou sem o Correio do Outlook integrado, o botão abre direto o app. É a regra do Twenty (com caixa, compositor interno; sem
+O caminho do ENSPACE vem primeiro porque é o único em que a resposta sempre volta ao item. Sem o
+Correio do Outlook integrado, o botão abre direto o app. É a regra do Twenty (com caixa, compositor interno; sem
 caixa, `mailto:`), com a escolha à vista, porque no ENSPACE as 2 coisas existem juntas. Agendor
 tem o mesmo desenho no WhatsApp; o Pipedrive troca o método por uma seta. Na coluna de ícones não
 cabe o botão dividido: lá, os 2 caminhos vão num menu.
@@ -362,7 +402,7 @@ cabe o botão dividido: lá, os 2 caminhos vão num menu.
 
 Ideia do monday ("CC to pulse"). Quando a pessoa abre o e-mail no Outlook, o `mailto:` leva a
 caixa do item em `cc`. A resposta do cliente volta para a aba Mail Box, e o ENSPACE não enviou
-nada. Liga e desliga em Sistema › Módulos ("Pôr a caixa do item em cópia").
+nada. Até a rodada 5, ligava e desligava em Sistema › Módulos ("Pôr a caixa do item em cópia").
 
 HubSpot e Pipedrive usam Cco. Com Cco, a resposta só volta se alguém a encaminhar; com Cc, volta
 quando o cliente responde a todos. O protótipo fica com o Cc e diz isso na opção do menu.
@@ -462,7 +502,9 @@ Recebidos e Enviados, a coluna Item, o filtro "Com item" e "Sem item", e o vínc
 - **sugestão pelo remetente** na leitura: os itens em que quem escreveu é contato aparecem antes da
   busca livre.
 
-O nome repete o "E-mails" de Configurações, como "Categorias" já se repete entre Membro e Estrutura.
+Até a rodada 6, o nome repetia o "E-mails" de Configurações. Desde a rodada 7, é 1 lugar só: a
+central reúne as telas de e-mail de hoje em abas, e os itens de Configurações › E-mails abrem a aba
+deles.
 
 ### "Novo e-mail" na barra do topo
 

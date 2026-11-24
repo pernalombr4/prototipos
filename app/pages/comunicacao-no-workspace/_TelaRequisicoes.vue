@@ -13,7 +13,7 @@ import CompartilharFormulario from './_CompartilharFormulario.vue'
 
 defineProps<{ t: Textos }>()
 
-const { formularios, config } = useComunicacao()
+const { formularios } = useComunicacao()
 const marca = useMarcaDeProposta()
 
 const escolhido = useState<string | undefined>('cnw-form-escolhido', () => 'f-solicitacao-juridica')
@@ -25,7 +25,7 @@ const opcoes = computed(() => formularios.value.map(f => ({
   icon: f.visibilidade === 'publico' ? 'i-lucide-globe' : 'i-lucide-lock',
 })))
 
-const mostrarLink = computed(() => !!formulario.value && formulario.value.visibilidade === 'publico' && TIPOS_COM_LINK.includes(formulario.value.tipo) && config.value.atalhos)
+const mostrarLink = computed(() => !!formulario.value && formulario.value.visibilidade === 'publico' && TIPOS_COM_LINK.includes(formulario.value.tipo))
 const enviando = ref(false)
 async function salvar() {
   enviando.value = true

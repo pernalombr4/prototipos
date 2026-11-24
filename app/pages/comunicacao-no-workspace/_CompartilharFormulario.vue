@@ -1,8 +1,7 @@
 <script setup lang="ts">
 /**
  * PROPOSTA. O link do formulário público na tela em que o membro usa o
- * formulário. Só aparece quando o formulário é público e o administrador
- * deixou os atalhos ligados em "Formulários".
+ * formulário. Só aparece quando o formulário é público.
  */
 import type { Formulario } from './mocks'
 import type { Textos } from './textos'

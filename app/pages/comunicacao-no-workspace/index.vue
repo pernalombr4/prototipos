@@ -5,7 +5,9 @@
  *
  *   1. link do formulário público nas telas de uso;
  *   2. atalhos de e-mail (só e-mail: WhatsApp e SMS saíram do plano);
- *   3. o e-mail do ENSPACE de qualquer tela, com vínculo a item.
+ *   3. o e-mail do ENSPACE de qualquer tela, com vínculo a item, e a central
+ *      "E-mails" no menu, que reúne mensagens, modelos, caixas, envios do
+ *      sistema e a configuração (rodada 7: o e-mail não é módulo).
  *
  * Dividido em 3 fases, que o andaime alterna:
  *   Fase 1 (MVP): só tela, sobre o que o ENSPACE já tem;
@@ -40,14 +42,14 @@ import decisoesMd from './DECISOES.md?raw'
 
 definePageMeta({
   titulo: 'Comunicação no workspace',
-  descricao: 'Link do formulário público, atalhos de e-mail e o e-mail do ENSPACE em qualquer tela, com a Mail Box no item e na tarefa. Em 3 fases: o MVP sobre o que já existe, o remetente e a tarefa.',
+  descricao: 'Link do formulário público, atalhos de e-mail e o e-mail do ENSPACE em qualquer tela, com a central E-mails no menu e a Mail Box no item e na tarefa. Em 3 fases: o MVP sobre o que já existe, o remetente e a tarefa.',
   status: 'em-revisao',
-  atualizado: '2026-11-17',
-  tela: 'Início, itens, tarefas, Agenda, Requisições, E-mails e Sistema › Módulos',
+  atualizado: '2026-11-24',
+  tela: 'Início, itens, tarefas, Agenda, Requisições e a central E-mails',
 })
 
 const t = useTextos(textos)
-const { tela, categoriaAtual, itemAberto, cenario, destacar, fase, ir, abrirItem } = useComunicacao()
+const { tela, categoriaAtual, itemAberto, cenario, destacar, fase, perfil, ehAdmin, abaDaCentral, ir, abrirItem } = useComunicacao()
 
 const telas: Record<Tela, Component> = {
   inicio: TelaInicio,
@@ -73,7 +75,7 @@ const trilha = computed(() => {
     case 'tarefas': return [ws, c.itens.tarefas, c.itens.rapidas]
     case 'agenda': return [ws, c.itens.agenda]
     case 'requisicoes': return [ws, 'request']
-    case 'emails': return [ws, c.itens.emails]
+    case 'emails': return [ws, c.itens.emails, t.value.central.abas[abaDaCentral.value]]
     case 'sistema': return [ws, c.configuracoes, c.itens.sistema]
     case 'categoria': return [ws, c.configuracoes, c.dados, c.itens.estruturaCategorias, cat]
   }
@@ -94,14 +96,18 @@ const irPara = computed<DropdownMenuItem[][]>(() => [
     { label: t.value.casca.itens.rapidas, icon: 'i-lucide-clipboard-check', onSelect: () => ir('tarefas') },
     { label: t.value.casca.itens.agenda, icon: 'i-lucide-calendar-days', onSelect: () => ir('agenda') },
     { label: t.value.casca.itens.requisicoes, icon: 'i-lucide-clipboard-pen-line', onSelect: () => ir('requisicoes') },
-    ...(fase.value >= 2 ? [{ label: t.value.casca.itens.emails, icon: 'i-lucide-mail', onSelect: () => ir('emails') }] : []),
+    { label: t.value.casca.itens.emails, icon: 'i-lucide-mail', onSelect: () => ir('emails', { central: 'mensagens' }) },
   ],
-  [{ type: 'label', label: t.value.andaime.quemConfigura }],
-  [
-    { label: t.value.andaime.modulos, icon: 'i-lucide-settings', onSelect: () => ir('sistema') },
-    ...(fase.value >= 2 ? [{ label: t.value.andaime.atalhosDaCategoria, icon: 'i-lucide-contact', onSelect: () => ir('categoria', { categoria: 'contratos', vista: 'atalhos' }) }] : []),
-    { label: t.value.andaime.formularios, icon: 'i-lucide-file-spreadsheet', onSelect: () => ir('categoria', { categoria: 'solicitacoes', vista: 'formularios' }) },
-  ],
+  ...(ehAdmin.value
+    ? [
+        [{ type: 'label' as const, label: t.value.andaime.quemConfigura }],
+        [
+          { label: t.value.andaime.configDosEmails, icon: 'i-lucide-settings', onSelect: () => ir('emails', { central: 'configuracoes' }) },
+          ...(fase.value >= 2 ? [{ label: t.value.andaime.atalhosDaCategoria, icon: 'i-lucide-contact', onSelect: () => ir('categoria', { categoria: 'contratos', vista: 'atalhos' }) }] : []),
+          { label: t.value.andaime.formularios, icon: 'i-lucide-file-spreadsheet', onSelect: () => ir('categoria', { categoria: 'solicitacoes', vista: 'formularios' }) },
+        ],
+      ]
+    : []),
 ])
 
 const cenarios = computed<{ value: Cenario, label: string }[]>(() => [
@@ -151,6 +157,22 @@ const cenarios = computed<{ value: Cenario, label: string }[]>(() => [
             />
           </UTooltip>
         </UFieldGroup>
+
+        <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
+        <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.perfil }}</span>
+        <UTooltip :text="t.andaime.perfilDica">
+          <UFieldGroup size="xs">
+            <UButton
+              v-for="p in (['admin', 'membro'] as const)"
+              :key="p"
+              :label="t.andaime.perfis[p]"
+              :color="perfil === p ? 'primary' : 'neutral'"
+              :variant="perfil === p ? 'solid' : 'subtle'"
+              :aria-pressed="perfil === p"
+              @click="perfil = p"
+            />
+          </UFieldGroup>
+        </UTooltip>
 
         <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.cenario }}</span>

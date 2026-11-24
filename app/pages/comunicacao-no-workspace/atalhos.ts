@@ -35,8 +35,8 @@ export function useAtalhos() {
   const { config, podeEnviar, abrirCompositor } = useComunicacao()
   const { abrirApp } = useAppExterno()
 
-  /** O módulo está ligado? Desligado, nenhum atalho aparece. */
-  const ativos = computed(() => config.value.atalhos)
+  /** Sempre ligados (rodada 7): sem chave de módulo; o atalho só aparece onde há e-mail. */
+  const ativos = computed(() => true)
 
   /** Por que o e-mail não está disponível para este destino. Nulo = disponível. */
   function motivo(d: Destino | null) {

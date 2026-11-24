@@ -1,6 +1,13 @@
 <script setup lang="ts">
 /**
- * PROPOSTA. A área de e-mail do workspace, na seção Membro do menu.
+ * PROPOSTA. A central "E-mails", na seção Membro do menu (rodada 7: hipótese A
+ * da pesquisa de mercado, aprovada pela redatora em 24/11/2026). O e-mail vem
+ * sempre ligado e tudo fica aqui, em abas que seguem a permissão de hoje:
+ * Mensagens (todo perfil), Modelos, Caixas de E-mail e Enviados pelo sistema
+ * (quem administra) e Configurações (a conta de cada um; o resto, quem
+ * administra). Configurações › E-mails passa a abrir estas abas.
+ *
+ * A aba Mensagens:
  *
  * Parte do que já existe escondido: a tela nativa "Emails Recebidos"
  * (`/itemEmails`), que hoje só se acha no editor de menus (pesquisa de UX,
@@ -26,18 +33,28 @@
 import type { ContextMenuItem, DropdownMenuItem, TableColumn } from '@nuxt/ui'
 import type { Textos } from './textos'
 import { type Email, caixas, itemPorId, itens, membroPorId, tarefas } from './mocks'
-import { contatosDoItem, useComunicacao, useMarcaDeProposta } from './estado'
+import { type AbaDaCentral, ABAS_DE_ADMIN, contatosDoItem, useComunicacao, useMarcaDeProposta } from './estado'
 import BuscaDeItem from './_BuscaDeItem.vue'
+import AbasDaCentral from './_AbasDaCentral.vue'
 import FiltroDeColuna, { type Filtros } from './_FiltroDeColuna.vue'
 
 const props = defineProps<{ t: Textos }>()
 
-const { emails, config, fase, registrado, abrirCompositor, abrirItem } = useComunicacao()
+const { emails, config, fase, registrado, abrirCompositor, abrirItem, abaDaCentral, ehAdmin } = useComunicacao()
 const marca = useMarcaDeProposta()
 const idioma = useIdioma()
 const toast = useToast()
 
 const te = computed(() => props.t.emails)
+
+/* ---------- abas da central ---------- */
+
+const ICONE_DA_ABA: Record<AbaDaCentral, string> = {
+  mensagens: 'i-lucide-inbox', modelos: 'i-lucide-file-text', caixas: 'i-lucide-mailbox', sistema: 'i-lucide-send', configuracoes: 'i-lucide-settings',
+}
+const abas = computed(() => (Object.keys(ICONE_DA_ABA) as AbaDaCentral[])
+  .filter(a => ehAdmin.value || !ABAS_DE_ADMIN.includes(a))
+  .map(a => ({ value: a, label: props.t.central.abas[a], icon: ICONE_DA_ABA[a] })))
 
 /* ---------- barra ---------- */
 
@@ -316,12 +333,28 @@ function nomeDaCaixa(endereco: string) {
         <h1 class="text-xl font-semibold text-highlighted">
           {{ te.titulo }}
         </h1>
-        <p class="text-sm text-muted">
+        <p v-if="abaDaCentral === 'mensagens'" class="text-sm text-muted">
           {{ fase >= 2 ? te.descricaoFase2 : te.descricaoFase1 }}
         </p>
       </div>
       <UButton :label="t.casca.novoEmail" icon="i-lucide-mail-plus" class="ml-auto" @click="abrirCompositor({ origem: 'emails' })" />
     </div>
+
+    <!-- Abas da central -->
+    <UTabs
+      v-model="abaDaCentral"
+      :items="abas"
+      :content="false"
+      variant="link"
+      size="sm"
+      class="shrink-0 px-4 sm:px-6"
+      :class="marca"
+      :ui="{ list: 'border-b border-default' }"
+    />
+
+    <AbasDaCentral v-if="abaDaCentral !== 'mensagens'" :t="t" :aba="abaDaCentral" />
+
+    <template v-else>
 
     <!-- Barra: TablesPartsDataToolbar -->
     <div class="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-default px-3 py-2 sm:px-4" :class="marca">
@@ -552,6 +585,8 @@ function nomeDaCaixa(endereco: string) {
         <UPagination v-model:page="pagina" :total="ordenados.length" :items-per-page="porPagina" size="sm" color="neutral" variant="outline" active-color="primary" active-variant="solid" />
       </div>
     </div>
+
+    </template>
 
     <!-- Gaveta à direita: SharedResizableDrawer -->
     <USlideover v-model:open="gaveta" :title="aberto?.assunto" :description="aberto ? formato.format(aberto.data) : undefined" :ui="{ content: 'sm:max-w-[700px]' }">

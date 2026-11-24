@@ -64,19 +64,17 @@ export interface ConfigDaCategoria {
   assunto: string
 }
 
+/**
+ * Sem chave de módulo (rodada 7): o e-mail vem sempre ligado, como nos CRMs e
+ * help desks pesquisados (PESQUISA-MODULOS-E-EMAIL.md). O atalho só aparece
+ * onde há endereço de e-mail, e o envio pede a conta do Outlook integrada.
+ */
 export interface ConfigDeComunicacao {
-  /**
-   * Módulo "Atalhos de comunicação" (Sistema › Módulos), ao lado de Correção
-   * Monetária e Comparações. Uma chave só: quem administra não escolhe canal
-   * nem tela (decisão da redatora, rodada 6).
-   */
-  atalhos: boolean
   porCategoria: Record<SlugDaCategoria, ConfigDaCategoria>
 }
 
 export function configInicial(): ConfigDeComunicacao {
   return {
-    atalhos: true,
     porCategoria: {
       contratos: {
         contatos: [
@@ -163,6 +161,8 @@ export function preencher(modelo: string, i: ItemDoProtótipo | null, nome: stri
     .replace(/,\./g, '.')
     .replace(/\(\)/g, '')
     .trim()
+    // Sem item: "{referencia} · Assunto" não começa nem termina no separador.
+    .replace(/^·\s*|\s*·$/g, '')
 }
 
 /** O `mailto:` que o "Abrir no meu app de e-mail" abre. */
@@ -214,6 +214,17 @@ export function rascunhoVazio(): Rascunho {
 
 export type Cenario = 'normal' | 'sem-outlook' | 'falha'
 
+/**
+ * Quem olha o protótipo (andaime). Cada aba da central segue a permissão que já
+ * existe no develop: `settings::emails::templates`, `::boxes` e `::sent`, hoje
+ * de quem administra; Mensagens é a tela de e-mails que todo membro pode ter.
+ */
+export type Perfil = 'admin' | 'membro'
+
+/** As abas da central "E-mails". */
+export type AbaDaCentral = 'mensagens' | 'modelos' | 'caixas' | 'sistema' | 'configuracoes'
+export const ABAS_DE_ADMIN: AbaDaCentral[] = ['modelos', 'caixas', 'sistema']
+
 /** Uma opção do "De". */
 export interface Remetente {
   email: string
@@ -238,6 +249,11 @@ export function useComunicacao() {
   const cenario = useState<Cenario>('cnw-cenario', () => 'normal')
   const destacar = useState<boolean>('cnw-destacar', () => false)
   const vistaDaCategoria = useState<'lista' | 'painel' | 'atalhos' | 'formularios'>('cnw-vista-categoria', () => 'painel')
+  const perfil = useState<Perfil>('cnw-perfil', () => 'admin')
+  const abaDaCentral = useState<AbaDaCentral>('cnw-aba-central', () => 'mensagens')
+  const ehAdmin = computed(() => perfil.value === 'admin')
+  /** Fase 2: as caixas que aparecem no "De" (central › Configurações). */
+  const caixasNoDe = useState<Record<string, boolean>>('cnw-caixas-no-de', () => Object.fromEntries(caixas.map(c => [c.id, true])))
 
   /**
    * A pessoa integrou o Correio do Outlook? Sem isso, a gaveta "Nova Mensagem"
@@ -252,7 +268,7 @@ export function useComunicacao() {
    */
   const remetentes = computed<Remetente[]>(() => [
     ...(outlookIntegrado.value && EU.email ? [{ email: EU.email, tipo: 'outlook' as const }] : []),
-    ...(fase.value >= 2 ? caixas.map(c => ({ email: c.email, tipo: 'caixa' as const, caixa: c })) : []),
+    ...(fase.value >= 2 ? caixas.filter(c => caixasNoDe.value[c.id] !== false).map(c => ({ email: c.email, tipo: 'caixa' as const, caixa: c })) : []),
   ])
 
   /** Há por onde enviar pelo ENSPACE? Sem nada, o botão E-mail abre o app da pessoa. */
@@ -274,16 +290,21 @@ export function useComunicacao() {
     return fase.value >= 2 || e.itemId !== null
   }
 
-  // Fase 1 sem o que pede back-end: quem estava em E-mails ou no contato da categoria sai dali.
+  // Fase 1 sem o que pede back-end: quem estava no contato da categoria sai dali.
+  // Membro não vê as abas de quem administra nem as Configurações do workspace.
   if (import.meta.client) {
     watch(fase, (f) => {
-      if (f >= 2) return
-      if (tela.value === 'emails') tela.value = 'inicio'
-      if (vistaDaCategoria.value === 'atalhos') vistaDaCategoria.value = 'painel'
+      if (f < 2 && vistaDaCategoria.value === 'atalhos') vistaDaCategoria.value = 'painel'
+    })
+    watch(perfil, (p) => {
+      if (p === 'admin') return
+      if (ABAS_DE_ADMIN.includes(abaDaCentral.value)) abaDaCentral.value = 'mensagens'
+      if (tela.value === 'sistema' || tela.value === 'categoria') tela.value = 'inicio'
     })
   }
 
-  function ir(t: Tela, extra?: { categoria?: SlugDaCategoria, item?: number, aba?: string, vista?: 'lista' | 'painel' | 'atalhos' | 'formularios' }) {
+  function ir(t: Tela, extra?: { categoria?: SlugDaCategoria, item?: number, aba?: string, vista?: 'lista' | 'painel' | 'atalhos' | 'formularios', central?: AbaDaCentral }) {
+    if (extra?.central) abaDaCentral.value = extra.central
     if (extra?.categoria) categoriaAtual.value = extra.categoria
     if (extra?.vista) vistaDaCategoria.value = extra.vista
     if (extra?.item !== undefined) itemAberto.value = extra.item
@@ -365,6 +386,10 @@ export function useComunicacao() {
     rascunho,
     cenario,
     destacar,
+    perfil,
+    ehAdmin,
+    abaDaCentral,
+    caixasNoDe,
     outlookIntegrado,
     remetentes,
     podeEnviar,

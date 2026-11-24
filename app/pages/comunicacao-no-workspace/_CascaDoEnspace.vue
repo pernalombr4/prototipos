@@ -2,10 +2,14 @@
 /**
  * A casca do ENSPACE, copiada do develop, montada no `EnLayout` do SDK.
  *
- * ⚠️ NADA AQUI É PROPOSTA, com 2 exceções marcadas no código e pelo contorno
+ * ⚠️ NADA AQUI É PROPOSTA, com 3 exceções marcadas no código e pelo contorno
  * tracejado do andaime ("Mostrar o que muda"):
- *   1. a entrada "E-mails" na seção Membro do menu;
- *   2. o botão "Novo e-mail" na barra do topo.
+ *   1. a entrada "E-mails" na seção Membro do menu, que abre a central;
+ *   2. os 3 itens de Configurações › E-mails, que passam a abrir a aba
+ *      correspondente da central (1 destino só, rodada 7);
+ *   3. o botão "Novo e-mail" na barra do topo.
+ * O perfil Membro do andaime não vê a seção Configurações (no develop, ela
+ * depende das permissões de configuração).
  * O resto (ordem, ícones, rótulos, seções que abrem, trilha, atalhos de
  * teclado) reproduz `https://develop.enspace.io/workspaces/<ws>` em 05/10/2026.
  * O que estiver diferente do develop é defeito de cópia, não sugestão.
@@ -16,7 +20,7 @@
  */
 import type { Textos } from './textos'
 import { categorias, EU, itemPorId, workspace } from './mocks'
-import { type Tela, useComunicacao, useMarcaDeProposta } from './estado'
+import { type AbaDaCentral, type Tela, useComunicacao, useMarcaDeProposta } from './estado'
 
 const props = defineProps<{
   t: Textos
@@ -24,14 +28,14 @@ const props = defineProps<{
   trilha: string[]
 }>()
 
-const { tela, categoriaAtual, ir, rascunho, compositorAberto, config, fase, contextoDaTela, novoEmailNoContexto } = useComunicacao()
+const { tela, categoriaAtual, ir, rascunho, compositorAberto, abaDaCentral, ehAdmin, contextoDaTela, novoEmailNoContexto } = useComunicacao()
 const marca = useMarcaDeProposta()
 
 interface Entrada {
   chave: string
   icone: string
   tela?: Tela
-  filhos?: { chave: string, rotulo?: string, icone: string, tela?: Tela, categoria?: string }[]
+  filhos?: { chave: string, rotulo?: string, icone: string, tela?: Tela, categoria?: string, central?: AbaDaCentral, proposta?: boolean }[]
   externo?: boolean
   /** Peça proposta: ganha o contorno do andaime. */
   proposta?: boolean
@@ -56,8 +60,8 @@ const membro = computed<Entrada[]>(() => [
     ],
   },
   { chave: 'agenda', icone: 'i-lucide-calendar-days', tela: 'agenda' },
-  // PROPOSTA (Fase 2): a área E-mails pede a lista de e-mails por pessoa e permissão no back.
-  { chave: 'emails', icone: 'i-lucide-mail', tela: 'emails', proposta: true, quando: () => fase.value >= 2 },
+  // PROPOSTA (rodada 7): a central E-mails, nas 3 fases. Cada aba segue a permissão que já existe.
+  { chave: 'emails', icone: 'i-lucide-mail', tela: 'emails', proposta: true },
   { chave: 'knowledge', icone: 'i-lucide-table-2', filhos: [] },
   // Menu configurado em Interface › Menus (tela nativa /request).
   { chave: 'requisicoes', icone: 'i-lucide-clipboard-pen-line', tela: 'requisicoes' },
@@ -81,9 +85,10 @@ const configuracoes: Entrada[] = [
     chave: 'emailsConfig',
     icone: 'i-lucide-mails',
     filhos: [
-      { chave: 'emailsEnviados', icone: 'i-lucide-send' },
-      { chave: 'modelosDeEmail', icone: 'i-lucide-file-text' },
-      { chave: 'caixasDeEmail', icone: 'i-lucide-inbox' },
+      // PROPOSTA (rodada 7): os rótulos de hoje, abrindo a aba da central.
+      { chave: 'emailsEnviados', icone: 'i-lucide-send', tela: 'emails', central: 'sistema', proposta: true },
+      { chave: 'modelosDeEmail', icone: 'i-lucide-file-text', tela: 'emails', central: 'modelos', proposta: true },
+      { chave: 'caixasDeEmail', icone: 'i-lucide-inbox', tela: 'emails', central: 'caixas', proposta: true },
     ],
   },
   { chave: 'integracoes', icone: 'i-lucide-blocks' },
@@ -111,8 +116,9 @@ function alternar(chave: string) {
     : [...abertos.value, chave]
 }
 
-function ativo(e: { tela?: Tela, categoria?: string }) {
+function ativo(e: { tela?: Tela, categoria?: string, central?: AbaDaCentral }) {
   if (!e.tela) return false
+  if (e.central) return tela.value === 'emails' && abaDaCentral.value === e.central
   if (e.categoria) return (tela.value === 'itens' || tela.value === 'item') && categoriaAtual.value === e.categoria
   return tela.value === e.tela
 }
@@ -123,12 +129,13 @@ function clicar(e: Entrada | NonNullable<Entrada['filhos']>[number]) {
     return
   }
   if (e.chave === 'estruturaCategorias') ir('categoria', { vista: 'lista' })
+  else if ('central' in e && e.central) ir('emails', { central: e.central })
   else if (e.tela) ir(e.tela, 'categoria' in e && e.categoria ? { categoria: e.categoria as never } : undefined)
 }
 
 const grupos = computed(() => [
   { titulo: props.t.casca.membro, itens: membro.value.filter(e => !e.quando || e.quando()) },
-  { titulo: props.t.casca.configuracoes, itens: configuracoes },
+  ...(ehAdmin.value ? [{ titulo: props.t.casca.configuracoes, itens: configuracoes }] : []),
   { titulo: props.t.casca.ajuda, itens: ajuda },
 ])
 
@@ -141,7 +148,7 @@ const dicaDoNovoEmail = computed(() => {
 })
 
 defineShortcuts({
-  c: () => { if (config.value.atalhos) novoEmailNoContexto() },
+  c: () => novoEmailNoContexto(),
 })
 
 const temRascunho = computed(() => !compositorAberto.value && !!(rascunho.value.para.length || rascunho.value.assunto || rascunho.value.corpo.replace(/<[^>]+>/g, '').trim()))
@@ -232,7 +239,7 @@ const temRascunho = computed(() => !compositorAberto.value && !!(rascunho.value.
                   :key="f.chave"
                   type="button"
                   class="flex w-full items-center gap-2.5 rounded-md py-1.5 pl-7 pr-2 text-left transition-colors"
-                  :class="ativo(f) ? 'bg-primary/10 font-medium text-primary' : 'text-toned hover:bg-elevated'"
+                  :class="[ativo(f) ? 'bg-primary/10 font-medium text-primary' : 'text-toned hover:bg-elevated', f.proposta ? marca : '']"
                   :aria-current="ativo(f) ? 'page' : undefined"
                   @click="clicar(f)"
                 >
@@ -277,7 +284,7 @@ const temRascunho = computed(() => !compositorAberto.value && !!(rascunho.value.
       <UButton icon="i-lucide-sun" color="neutral" variant="ghost" size="xs" :aria-label="t.casca.tema" />
 
       <!-- PROPOSTA: escrever um e-mail de qualquer tela, sem entrar num item. -->
-      <UTooltip v-if="config.atalhos" :text="dicaDoNovoEmail" :kbds="['C']">
+      <UTooltip :text="dicaDoNovoEmail" :kbds="['C']">
         <UChip :show="temRascunho" color="warning" size="md" inset>
           <UButton
             icon="i-lucide-mail-plus"

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /**
  * PROPOSTA. O botão de e-mail, igual em toda tela. Sem e-mail no destino, fica
- * indisponível e diz por quê. Com o módulo "Atalhos de comunicação" desligado,
- * não aparece.
+ * indisponível e diz por quê. Sem chave de módulo desde a rodada 7: aparece
+ * sempre.
  *
  * 2 caminhos: escrever pelo ENSPACE (fica na Mail Box do item) ou abrir o app
  * de e-mail da pessoa. Sem por onde enviar pelo ENSPACE (Fase 1 sem Outlook

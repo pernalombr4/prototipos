@@ -6,6 +6,9 @@ Consulta em 05/10/2026, nas 3 partes da demanda:
 2. Atalhos de contato por deep link (`mailto:`, `wa.me`, `sms:`).
 3. E-mail de qualquer tela, com vínculo opcional a um item.
 
+Como o mercado liga, desliga e configura o e-mail (rodada 7, 24/11/2026): ver
+[PESQUISA-MODULOS-E-EMAIL.md](PESQUISA-MODULOS-E-EMAIL.md).
+
 ## Produtos pesquisados
 
 | Rodada | Produtos |

@@ -4,26 +4,16 @@
  * empilhados, cada um com o seu Salvar (é assim hoje; a pesquisa de UX já
  * registrou o problema em S3-F7 e não é deste protótipo resolver).
  *
- * PROPOSTA, só no cartão Módulos, ao lado de Correção Monetária e Comparações
- * (pedido literal do documento: "do mesmo modo como foi feito em correções
- * monetárias, comparador"): a chave "Atalhos de comunicação". Ela liga o
- * atalho de e-mail em todas as telas. Onde aparece e por qual canal não se
- * configura: o canal é só e-mail e as telas são sempre as mesmas (pedido da
- * redatora na rodada 6). O contato de cada categoria se escolhe na categoria.
+ * Sem proposta desde a rodada 7: o e-mail não é módulo. Ele vem sempre ligado,
+ * e o que se configura dele fica dentro da central E-mails (pedido da
+ * redatora: "a configuração do módulo não deve ocorrer na tela de sistema").
  */
 import type { Textos } from './textos'
 import { workspace } from './mocks'
-import { type ConfigDeComunicacao, useComunicacao, useMarcaDeProposta } from './estado'
 
 const props = defineProps<{ t: Textos }>()
 
-const { config, fase, ir } = useComunicacao()
-const marca = useMarcaDeProposta()
 const toast = useToast()
-
-/** O cartão guarda a edição até o Salvar dele, como os outros cartões da tela. */
-const rascunho = ref<ConfigDeComunicacao>(structuredClone(toRaw(config.value)))
-watch(config, v => (rascunho.value = structuredClone(toRaw(v))), { deep: true })
 
 const modulos = reactive({ correcao: true, comparacoes: false, juridico: true })
 
@@ -32,7 +22,6 @@ async function salvarModulos() {
   salvando.value = true
   await new Promise(r => setTimeout(r, 600))
   salvando.value = false
-  config.value = structuredClone(toRaw(rascunho.value))
   toast.add({ title: props.t.sistema.modulosSalvos, icon: 'i-lucide-check', color: 'success' })
 }
 
@@ -88,7 +77,7 @@ async function salvarModulos() {
       </div>
     </UCard>
 
-    <!-- Módulos -->
+    <!-- Módulos (cópia, sem proposta desde a rodada 7) -->
     <UCard class="mt-4">
       <template #header>
         <h2 class="font-semibold text-highlighted">
@@ -97,51 +86,10 @@ async function salvarModulos() {
       </template>
 
       <div class="grid gap-x-10 gap-y-6 sm:grid-cols-2">
-        <!-- Os 3 de hoje -->
         <USwitch v-model="modulos.correcao" :label="t.sistema.correcaoMonetaria" :ui="{ root: 'flex-col-reverse items-start gap-2', label: 'font-medium' }" />
         <USwitch v-model="modulos.comparacoes" :label="t.sistema.comparacoes" :ui="{ root: 'flex-col-reverse items-start gap-2', label: 'font-medium' }" />
         <USwitch v-model="modulos.juridico" :label="t.sistema.juridico" :ui="{ root: 'flex-col-reverse items-start gap-2', label: 'font-medium' }" />
-
-        <!-- PROPOSTA -->
-        <USwitch
-          v-model="rascunho.atalhos"
-          :label="t.sistema.atalhos"
-          :description="t.sistema.atalhosDescricao"
-          :class="marca"
-          :ui="{ root: 'flex-col-reverse items-start gap-2', label: 'font-medium', wrapper: 'ms-0' }"
-        />
       </div>
-
-      <!-- PROPOSTA: o que a chave liga -->
-      <Transition
-        enter-active-class="transition duration-200 ease-out"
-        enter-from-class="-translate-y-1 opacity-0"
-        leave-active-class="transition duration-150 ease-in"
-        leave-to-class="opacity-0"
-      >
-        <section v-if="rascunho.atalhos" class="mt-6 rounded-lg border border-default bg-elevated/30 p-4" :class="marca">
-          <h3 class="text-sm font-semibold text-highlighted">
-            {{ t.sistema.oQueLiga }}
-          </h3>
-          <ul class="mt-2 grid gap-1.5 text-sm text-default sm:grid-cols-2">
-            <li v-for="(l, i) in t.sistema.lugaresDoAtalho" :key="i" class="flex items-start gap-2">
-              <UIcon name="i-lucide-circle-check" class="mt-0.5 size-4 shrink-0 text-success" />{{ l }}
-            </li>
-          </ul>
-          <p class="mt-3 text-sm text-muted">
-            {{ fase >= 2 ? t.sistema.contatoNaCategoria : t.sistema.contatoPelosCampos }}
-          </p>
-          <UButton
-            v-if="fase >= 2"
-            :label="t.sistema.irParaCategorias"
-            trailing-icon="i-lucide-arrow-right"
-            color="neutral"
-            variant="link"
-            class="mt-1 px-0"
-            @click="ir('categoria', { vista: 'atalhos' })"
-          />
-        </section>
-      </Transition>
 
       <div class="mt-6 flex justify-end">
         <UButton :label="t.sistema.salvar" :loading="salvando" @click="salvarModulos" />

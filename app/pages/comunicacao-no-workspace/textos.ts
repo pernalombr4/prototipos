@@ -335,6 +335,44 @@ export interface Textos {
     respostaNaConversa: string
     enviadoSemItemRegistrado: (de: string) => string
   }
+  central: {
+    abas: Record<'mensagens' | 'modelos' | 'caixas' | 'sistema' | 'configuracoes', string>
+    dicas: Record<'modelos' | 'caixas' | 'sistema' | 'configuracoes', string>
+    novoModelo: string
+    novaCaixa: string
+    col: Record<'nome' | 'assunto' | 'remetentePorDominio' | 'email' | 'provedor' | 'criadoEm' | 'status' | 'destino' | 'copia' | 'tarefa' | 'acoes', string>
+    sim: string
+    nao: string
+    editar: string
+    excluir: string
+    usar: string
+    status: Record<'enviado' | 'processando' | 'falhou', string>
+    verEmail: string
+    reenviar: string
+    reenviado: string
+    maquete: string
+    config: {
+      contaTitulo: string
+      contaDescricao: string
+      contaConectada: (email: string) => string
+      contaSem: string
+      integrar: string
+      gerenciar: string
+      dominioTitulo: string
+      dominioDescricao: string
+      abrirIntegracoes: string
+      contatoTitulo: string
+      contatoPelosCampos: string
+      contatoNaCategoria: string
+      irParaCategorias: string
+      remetentesTitulo: string
+      remetentesDescricao: string
+      disponivelNoDe: string
+      soAdmin: string
+      salvar: string
+      salvo: string
+    }
+  }
   sistema: {
     titulo: string
     abas: Record<'basicas' | 'calendario' | 'notificacoes' | 'dicionarios' | 'cobranca', string>
@@ -347,17 +385,10 @@ export interface Textos {
     correcaoMonetaria: string
     comparacoes: string
     juridico: string
-    atalhos: string
-    atalhosDescricao: string
-    irParaCategorias: string
     modulosSalvos: string
     zonaDePerigo: string
     excluirWorkspace: string
     excluirWorkspaceDica: string
-    oQueLiga: string
-    lugaresDoAtalho: string[]
-    contatoNaCategoria: string
-    contatoPelosCampos: string
   }
   categoria: {
     categorias: string
@@ -380,9 +411,6 @@ export interface Textos {
     formulariosDica: string
     cartoes: Record<'campos' | 'formularios' | 'fluxos' | 'pastas' | 'relatorios' | 'condicionais' | 'templates' | 'notificacoes' | 'responsabilidade' | 'execucoes' | 'status' | 'correcao' | 'atalhos', string>
     descricoes: Record<'campos' | 'formularios' | 'fluxos' | 'pastas' | 'relatorios' | 'condicionais' | 'templates' | 'notificacoes' | 'responsabilidade' | 'execucoes' | 'status' | 'correcao' | 'atalhos', string>
-    moduloDesligado: string
-    moduloDesligadoTitulo: string
-    moduloDesligadoDica: string
     quemEhContato: string
     quemEhContatoDica: string
     rotulo: string
@@ -448,7 +476,10 @@ export interface Textos {
     listaDeItens: string
     umItem: (ref: string) => string
     mailBox: (ref: string) => string
-    modulos: string
+    configDosEmails: string
+    perfil: string
+    perfis: Record<'admin' | 'membro', string>
+    perfilDica: string
     atalhosDaCategoria: string
     formularios: string
     cenario: string
@@ -837,6 +868,44 @@ const ptBR: Textos = {
     respostaNaConversa: 'A resposta segue na mesma conversa do e-mail original.',
     enviadoSemItemRegistrado: de => `Enviado de ${de}, sem item vinculado. O e-mail fica em E-mails.`,
   },
+  central: {
+    abas: { mensagens: 'Mensagens', modelos: 'Modelos', caixas: 'Caixas de E-mail', sistema: 'Enviados pelo sistema', configuracoes: 'Configurações' },
+    dicas: { modelos: 'Os modelos que aparecem no campo Modelo do e-mail.', caixas: 'Os endereços do workspace que recebem e-mails e podem iniciar um fluxo.', sistema: 'Os e-mails que tarefas e fluxos enviaram, com o status de cada envio.', configuracoes: 'A conta de envio de cada pessoa e as regras do e-mail no workspace.' },
+    novoModelo: 'Novo modelo',
+    novaCaixa: 'Nova caixa',
+    col: { nome: 'Nome', assunto: 'Assunto', remetentePorDominio: 'Usar remetente por domínio', email: 'E-mail', provedor: 'Provedor', criadoEm: 'Criado em', status: 'Status', destino: 'E-mail', copia: 'E-mail em cópia', tarefa: 'Tarefa', acoes: 'Ações' },
+    sim: 'Sim',
+    nao: 'Não',
+    editar: 'Editar',
+    excluir: 'Excluir',
+    usar: 'Usar em um e-mail',
+    status: { enviado: 'Enviado', processando: 'Em processamento', falhou: 'Falhou' },
+    verEmail: 'Ver e-mail',
+    reenviar: 'Reenviar e-mail',
+    reenviado: 'E-mail colocado na fila de envio',
+    maquete: 'Esta ação não tem efeito no protótipo.',
+    config: {
+      contaTitulo: 'Sua conta de envio',
+      contaDescricao: 'O e-mail escrito no ENSPACE sai da conta do Outlook que você integrou ao seu perfil.',
+      contaConectada: (email: string) => `Conta conectada: ${email}`,
+      contaSem: 'Nenhuma conta integrada. Sem ela, o botão E-mail abre o aplicativo de e-mail do computador.',
+      integrar: 'Integrar contas',
+      gerenciar: 'Gerenciar integração',
+      dominioTitulo: 'Remetente com o domínio da empresa',
+      dominioDescricao: 'Os e-mails enviados pelo sistema podem sair com o domínio da empresa, pela integração SendGrid.',
+      abrirIntegracoes: 'Abrir Integrações',
+      contatoTitulo: 'Contato do item',
+      contatoPelosCampos: 'O contato de cada item vem dos campos de e-mail que a categoria já tem e do e-mail de quem abriu a requisição.',
+      contatoNaCategoria: 'Defina na própria categoria os campos de nome e de e-mail do contato.',
+      irParaCategorias: 'Escolher o contato de cada categoria',
+      remetentesTitulo: 'Caixas como remetente',
+      remetentesDescricao: 'Escolha as caixas do workspace que aparecem no campo De de quem escreve um e-mail.',
+      disponivelNoDe: 'Disponível no campo De',
+      soAdmin: 'Visível só para quem administra o workspace.',
+      salvar: 'Salvar',
+      salvo: 'Configuração salva',
+    },
+  },
   sistema: {
     titulo: 'Configurações Gerais',
     abas: { basicas: 'Informações Básicas', calendario: 'Calendário', notificacoes: 'Notificações', dicionarios: 'Dicionários', cobranca: 'Cobrança' },
@@ -849,17 +918,10 @@ const ptBR: Textos = {
     correcaoMonetaria: 'Correção Monetária',
     comparacoes: 'Comparações',
     juridico: 'Juridico',
-    atalhos: 'Atalhos de comunicação',
-    atalhosDescricao: 'Botão de e-mail nas telas de uso, o Novo e-mail no topo e o link dos formulários públicos.',
-    irParaCategorias: 'Escolher o contato de cada categoria',
     modulosSalvos: 'Módulos salvos',
     zonaDePerigo: 'Zona de Perigo',
     excluirWorkspace: 'Excluir Workspace',
     excluirWorkspaceDica: 'Excluir permanentemente este workspace e todos os seus dados. Esta ação não pode ser desfeita.',
-    oQueLiga: 'O que o módulo ativa',
-    lugaresDoAtalho: ['E-mail no campo de e-mail do item', 'E-mail no menu da lista e do quadro de itens', 'E-mail para o responsável da tarefa', 'Lembrete por e-mail na Agenda', 'Novo e-mail no topo de toda tela', 'Link do formulário público nas telas de uso'],
-    contatoNaCategoria: 'Defina na própria categoria os campos de nome e de e-mail do contato.',
-    contatoPelosCampos: 'O contato de cada item vem dos campos de e-mail que a categoria já tem e do e-mail de quem abriu a requisição.',
   },
   categoria: {
     categorias: 'Categorias',
@@ -910,9 +972,6 @@ const ptBR: Textos = {
       correcao: 'Configurações de Correção Monetária para esta categoria.',
       atalhos: 'Quem é o contato do item e o assunto do e-mail.',
     },
-    moduloDesligado: 'Módulo desligado',
-    moduloDesligadoTitulo: 'O módulo Atalhos de comunicação está desligado',
-    moduloDesligadoDica: 'A configuração fica guardada e passa a valer quando alguém ligar o módulo em Sistema › Módulos.',
     quemEhContato: 'Quem é o contato',
     quemEhContatoDica: 'Cada contato aparece no Contato do item, na lateral do item. Escolha de quais campos vêm o nome e o e-mail.',
     rotulo: 'Nome do contato na tela',
@@ -982,7 +1041,10 @@ const ptBR: Textos = {
     listaDeItens: 'Lista de itens (Contratos)',
     umItem: ref => `Item ${ref}`,
     mailBox: ref => `Mail Box de ${ref}`,
-    modulos: 'Sistema › Módulos',
+    configDosEmails: 'E-mails › Configurações',
+    perfil: 'Perfil',
+    perfis: { admin: 'Admin', membro: 'Membro' },
+    perfilDica: 'O membro vê Mensagens e a própria conta de envio. Quem administra vê também modelos, caixas e envios do sistema.',
     atalhosDaCategoria: 'Contato da categoria Contratos',
     formularios: 'Formulários de Solicitações',
     cenario: 'Cenário',
@@ -1369,6 +1431,44 @@ const en: Textos = {
     respostaNaConversa: 'The reply continues in the same thread as the original email.',
     enviadoSemItemRegistrado: de => `Sent from ${de}, without a linked item. The email stays in Emails.`,
   },
+  central: {
+    abas: { mensagens: 'Messages', modelos: 'Templates', caixas: 'Email Boxes', sistema: 'Sent by the system', configuracoes: 'Settings' },
+    dicas: { modelos: 'The templates offered in the email Template field.', caixas: 'The workspace addresses that receive email and can start a flow.', sistema: 'The emails that tasks and flows sent, with the status of each one.', configuracoes: 'Each person\'s sending account and the workspace email rules.' },
+    novoModelo: 'New template',
+    novaCaixa: 'New box',
+    col: { nome: 'Name', assunto: 'Subject', remetentePorDominio: 'Use sender by domain', email: 'Email', provedor: 'Provider', criadoEm: 'Created at', status: 'Status', destino: 'Email', copia: 'CC email', tarefa: 'Task', acoes: 'Actions' },
+    sim: 'Yes',
+    nao: 'No',
+    editar: 'Edit',
+    excluir: 'Delete',
+    usar: 'Use in an email',
+    status: { enviado: 'Sent', processando: 'Processing', falhou: 'Failed' },
+    verEmail: 'View email',
+    reenviar: 'Resend email',
+    reenviado: 'Email added to the sending queue',
+    maquete: 'This action has no effect in the prototype.',
+    config: {
+      contaTitulo: 'Your sending account',
+      contaDescricao: 'Email written in ENSPACE is sent from the Outlook account you connected to your profile.',
+      contaConectada: (email: string) => `Connected account: ${email}`,
+      contaSem: 'No connected account. Without it, the Email button opens the computer email app.',
+      integrar: 'Connect accounts',
+      gerenciar: 'Manage integration',
+      dominioTitulo: 'Sender with the company domain',
+      dominioDescricao: 'Emails sent by the system can use the company domain, through the SendGrid integration.',
+      abrirIntegracoes: 'Open Integrations',
+      contatoTitulo: 'Item contact',
+      contatoPelosCampos: 'The contact of each item comes from the email fields the category already has and from the requester email.',
+      contatoNaCategoria: 'Set the contact name and email fields in each category.',
+      irParaCategorias: 'Choose the contact of each category',
+      remetentesTitulo: 'Boxes as sender',
+      remetentesDescricao: 'Choose the workspace boxes offered in the From field to whoever writes an email.',
+      disponivelNoDe: 'Available in From',
+      soAdmin: 'Visible only to workspace administrators.',
+      salvar: 'Save',
+      salvo: 'Settings saved',
+    },
+  },
   sistema: {
     titulo: 'General Settings',
     abas: { basicas: 'Basic Information', calendario: 'Calendar', notificacoes: 'Notifications', dicionarios: 'Dictionaries', cobranca: 'Billing' },
@@ -1381,17 +1481,10 @@ const en: Textos = {
     correcaoMonetaria: 'Monetary Correction',
     comparacoes: 'Comparisons',
     juridico: 'Legal',
-    atalhos: 'Communication shortcuts',
-    atalhosDescricao: 'Email button on the work screens, New email at the top and the public form link.',
-    irParaCategorias: 'Choose the contact of each category',
     modulosSalvos: 'Modules saved',
     zonaDePerigo: 'Danger Zone',
     excluirWorkspace: 'Delete Workspace',
     excluirWorkspaceDica: 'Permanently delete this workspace and all its data. This cannot be undone.',
-    oQueLiga: 'What the module enables',
-    lugaresDoAtalho: ['Email on the item email field', 'Email in the item list and board menu', 'Email to the task assignee', 'Email reminder in the Calendar', 'New email at the top of every screen', 'Public form link on the work screens'],
-    contatoNaCategoria: 'Set the contact name and email fields in each category.',
-    contatoPelosCampos: 'The contact of each item comes from the email fields the category already has and from the requester email.',
   },
   categoria: {
     categorias: 'Categories',
@@ -1442,9 +1535,6 @@ const en: Textos = {
       correcao: 'Monetary Correction settings for this category.',
       atalhos: 'Who the item contact is and the email subject.',
     },
-    moduloDesligado: 'Module off',
-    moduloDesligadoTitulo: 'The Communication shortcuts module is off',
-    moduloDesligadoDica: 'These settings are kept and apply once someone turns the module on in System › Modules.',
     quemEhContato: 'Who the contact is',
     quemEhContatoDica: 'Each contact appears in Item contact, on the item side panel. Choose which fields hold the name and the email.',
     rotulo: 'Contact name on screen',
@@ -1514,7 +1604,10 @@ const en: Textos = {
     listaDeItens: 'Item list (Contracts)',
     umItem: ref => `Item ${ref}`,
     mailBox: ref => `${ref} Mail Box`,
-    modulos: 'System › Modules',
+    configDosEmails: 'Emails › Settings',
+    perfil: 'Profile',
+    perfis: { admin: 'Admin', membro: 'Member' },
+    perfilDica: 'The member sees Messages and their own sending account. Administrators also see templates, boxes and system emails.',
     atalhosDaCategoria: 'Contact of the Contracts category',
     formularios: 'Requests forms',
     cenario: 'Scenario',
@@ -1901,6 +1994,44 @@ const es: Textos = {
     respostaNaConversa: 'La respuesta sigue en la misma conversación del correo original.',
     enviadoSemItemRegistrado: de => `Enviado desde ${de}, sin ítem vinculado. El correo queda en Correos.`,
   },
+  central: {
+    abas: { mensagens: 'Mensajes', modelos: 'Plantillas', caixas: 'Buzones de correo', sistema: 'Enviados por el sistema', configuracoes: 'Configuración' },
+    dicas: { modelos: 'Las plantillas que aparecen en el campo Plantilla del correo.', caixas: 'Las direcciones del workspace que reciben correos y pueden iniciar un flujo.', sistema: 'Los correos que tareas y flujos enviaron, con el estado de cada envío.', configuracoes: 'La cuenta de envío de cada persona y las reglas del correo en el workspace.' },
+    novoModelo: 'Nueva plantilla',
+    novaCaixa: 'Nuevo buzón',
+    col: { nome: 'Nombre', assunto: 'Asunto', remetentePorDominio: 'Usar remitente por dominio', email: 'Correo', provedor: 'Proveedor', criadoEm: 'Creado el', status: 'Estado', destino: 'Correo', copia: 'Correo en copia', tarefa: 'Tarea', acoes: 'Acciones' },
+    sim: 'Sí',
+    nao: 'No',
+    editar: 'Editar',
+    excluir: 'Eliminar',
+    usar: 'Usar en un correo',
+    status: { enviado: 'Enviado', processando: 'En proceso', falhou: 'Falló' },
+    verEmail: 'Ver correo',
+    reenviar: 'Reenviar correo',
+    reenviado: 'Correo puesto en la cola de envío',
+    maquete: 'Esta acción no tiene efecto en el prototipo.',
+    config: {
+      contaTitulo: 'Su cuenta de envío',
+      contaDescricao: 'El correo escrito en ENSPACE sale de la cuenta de Outlook que usted integró a su perfil.',
+      contaConectada: (email: string) => `Cuenta conectada: ${email}`,
+      contaSem: 'Ninguna cuenta integrada. Sin ella, el botón Correo abre la aplicación de correo del equipo.',
+      integrar: 'Integrar cuentas',
+      gerenciar: 'Administrar integración',
+      dominioTitulo: 'Remitente con el dominio de la empresa',
+      dominioDescricao: 'Los correos enviados por el sistema pueden salir con el dominio de la empresa, por la integración SendGrid.',
+      abrirIntegracoes: 'Abrir Integraciones',
+      contatoTitulo: 'Contacto del ítem',
+      contatoPelosCampos: 'El contacto de cada ítem viene de los campos de correo que la categoría ya tiene y del correo de quien abrió la solicitud.',
+      contatoNaCategoria: 'Defina en cada categoría los campos de nombre y de correo del contacto.',
+      irParaCategorias: 'Elegir el contacto de cada categoría',
+      remetentesTitulo: 'Buzones como remitente',
+      remetentesDescricao: 'Elija los buzones del workspace que aparecen en el campo De de quien escribe un correo.',
+      disponivelNoDe: 'Disponible en el campo De',
+      soAdmin: 'Visible solo para quien administra el workspace.',
+      salvar: 'Guardar',
+      salvo: 'Configuración guardada',
+    },
+  },
   sistema: {
     titulo: 'Configuración General',
     abas: { basicas: 'Información Básica', calendario: 'Calendario', notificacoes: 'Notificaciones', dicionarios: 'Diccionarios', cobranca: 'Facturación' },
@@ -1913,17 +2044,10 @@ const es: Textos = {
     correcaoMonetaria: 'Corrección Monetaria',
     comparacoes: 'Comparaciones',
     juridico: 'Jurídico',
-    atalhos: 'Atajos de comunicación',
-    atalhosDescricao: 'Botón de correo en las pantallas de uso, el Nuevo correo arriba y el enlace de los formularios públicos.',
-    irParaCategorias: 'Elegir el contacto de cada categoría',
     modulosSalvos: 'Módulos guardados',
     zonaDePerigo: 'Zona de Peligro',
     excluirWorkspace: 'Eliminar Workspace',
     excluirWorkspaceDica: 'Eliminar para siempre este workspace y todos sus datos. Esta acción no se puede deshacer.',
-    oQueLiga: 'Lo que activa el módulo',
-    lugaresDoAtalho: ['Correo en el campo de correo del ítem', 'Correo en el menú de la lista y del tablero de ítems', 'Correo al responsable de la tarea', 'Recordatorio por correo en la Agenda', 'Nuevo correo arriba en toda pantalla', 'Enlace del formulario público en las pantallas de uso'],
-    contatoNaCategoria: 'Defina en cada categoría los campos de nombre y de correo del contacto.',
-    contatoPelosCampos: 'El contacto de cada ítem viene de los campos de correo que la categoría ya tiene y del correo de quien abrió la solicitud.',
   },
   categoria: {
     categorias: 'Categorías',
@@ -1974,9 +2098,6 @@ const es: Textos = {
       correcao: 'Configuración de Corrección Monetaria de esta categoría.',
       atalhos: 'Quién es el contacto del ítem y el asunto del correo.',
     },
-    moduloDesligado: 'Módulo apagado',
-    moduloDesligadoTitulo: 'El módulo Atajos de comunicación está apagado',
-    moduloDesligadoDica: 'La configuración queda guardada y vale cuando alguien encienda el módulo en Sistema › Módulos.',
     quemEhContato: 'Quién es el contacto',
     quemEhContatoDica: 'Cada contacto aparece en Contacto del ítem, en el panel lateral del ítem. Elija de qué campos vienen el nombre y el correo.',
     rotulo: 'Nombre del contacto en pantalla',
@@ -2046,7 +2167,10 @@ const es: Textos = {
     listaDeItens: 'Lista de ítems (Contratos)',
     umItem: ref => `Ítem ${ref}`,
     mailBox: ref => `Mail Box de ${ref}`,
-    modulos: 'Sistema › Módulos',
+    configDosEmails: 'Correos › Configuración',
+    perfil: 'Perfil',
+    perfis: { admin: 'Admin', membro: 'Miembro' },
+    perfilDica: 'El miembro ve Mensajes y su propia cuenta de envío. Quien administra ve también plantillas, buzones y envíos del sistema.',
     atalhosDaCategoria: 'Contacto de la categoría Contratos',
     formularios: 'Formularios de Solicitudes',
     cenario: 'Escenario',

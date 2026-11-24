@@ -540,12 +540,37 @@ export interface ModeloDeEmail {
   nome: string
   assunto: string
   corpo: string
+  /** A coluna "Usar Remetente por Domínio" da tela de hoje (integração SendGrid). */
+  remetentePorDominio?: boolean
 }
 
 export const modelos: ModeloDeEmail[] = [
-  { id: 'm-assinatura', nome: 'Envio para assinatura', assunto: '{referencia} · Documento para assinatura', corpo: '<p>Olá,</p><p>Segue o documento para assinatura. Qualquer dúvida, é só responder este e-mail.</p>' },
+  { id: 'm-assinatura', remetentePorDominio: true, nome: 'Envio para assinatura', assunto: '{referencia} · Documento para assinatura', corpo: '<p>Olá,</p><p>Segue o documento para assinatura. Qualquer dúvida, é só responder este e-mail.</p>' },
   { id: 'm-vencimento', nome: 'Lembrete de vencimento', assunto: '{referencia} · Vencimento próximo', corpo: '<p>Olá,</p><p>O contrato vence nos próximos dias. Podemos conversar sobre a renovação?</p>' },
   { id: 'm-documentos', nome: 'Pedido de documentos', assunto: '{referencia} · Documentos pendentes', corpo: '<p>Olá,</p><p>Para seguir com o cadastro, precisamos dos documentos abaixo.</p>' },
+]
+
+/**
+ * Configurações › E-mails › E-mails Enviados (`sendmails` no develop, lido em
+ * 24/11/2026): os e-mails que o sistema enviou por tarefa ou fluxo, com o
+ * status do envio e "Reenviar E-mail". Não é o e-mail que a pessoa escreve.
+ */
+export interface EnvioDoSistema {
+  id: number
+  criadoEm: Date
+  status: 'enviado' | 'processando' | 'falhou'
+  para: string
+  cc: string[]
+  assunto: string
+  /** Referência da tarefa que enviou. */
+  tarefa: string | null
+}
+
+export const enviosDoSistema: EnvioDoSistema[] = [
+  { id: 1, criadoEm: new Date('2026-10-05T08:02:00-03:00'), status: 'enviado', para: 'marina.alves@example.com', cc: [], assunto: 'CTR-00231 · Documento para assinatura', tarefa: 'T-1042' },
+  { id: 2, criadoEm: new Date('2026-10-04T17:45:00-03:00'), status: 'falhou', para: 'juliana.freitas@example.com', cc: ['financeiro@example.com'], assunto: 'CTR-00229 · Vencimento próximo', tarefa: 'T-1047' },
+  { id: 3, criadoEm: new Date('2026-10-04T10:10:00-03:00'), status: 'enviado', para: 'lucas.almeida@example.com', cc: [], assunto: 'SOL-00088 · Solicitação recebida', tarefa: null },
+  { id: 4, criadoEm: new Date('2026-10-05T09:28:00-03:00'), status: 'processando', para: 'caio.fernandes@example.com', cc: [], assunto: 'CTR-00223 · Visita técnica confirmada', tarefa: null },
 ]
 
 export interface Email {

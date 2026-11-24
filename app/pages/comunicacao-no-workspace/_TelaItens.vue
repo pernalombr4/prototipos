@@ -46,8 +46,7 @@ const filtrados = computed(() => {
 })
 const daPagina = computed(() => filtrados.value.slice((pagina.value - 1) * POR_PAGINA, pagina.value * POR_PAGINA))
 
-const temLinkPublico = computed(() => config.value.atalhos
-  && formularios.value.some(f => f.visibilidade === 'publico' && f.categoria === categoriaAtual.value))
+const temLinkPublico = computed(() => formularios.value.some(f => f.visibilidade === 'publico' && f.categoria === categoriaAtual.value))
 
 /* ---------- linhas ---------- */
 
