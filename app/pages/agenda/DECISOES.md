@@ -546,3 +546,103 @@ reunião em outro fuso, evento de vários dias e data com campo removido.
 | ![](evidencias/modelagem-09-varias-datas-e-campo-removido.png) | B8, B9 e B12: Clientes com 2 datas, data de fim, responsável e o aviso do campo removido |
 | ![](evidencias/modelagem-10-tarefa-atribuida.png) | "Atribuir a" no botão direito: a tarefa sai da Agenda, com Desfazer |
 | ![](evidencias/modelagem-11-horario-oferecido-ao-novo-responsavel.png) | Decisão 3: o horário futuro da tarefa atribuída fica oferecido a Diego Salles |
+
+## Rodada 3 · 24/11/2026
+
+### Pedido literal
+
+> por que a agenda ta com cor forte somente de 8 às 18h? qual a razão? isso ta configurado? porque a hora útil de um
+> workspace pode ser diferente da do outro. simplesmente não mude a cor de fundo se isso não for configurado
+>
+> o botão de ir para na base de controle do protótipo ta com tanta opção que ta ficando inútil. objetivamente deve ser
+> ir pros pontos centrais, do tipo: ir pro item, ir pra tarefa... só os pontos centrais mesmo
+>
+> e você deve prototipar o que seria a config do spaceflow contando com isso: deve ser possível definir na geração da
+> tarefa se ela aparece na agenda ou não automaticamente quando for gerada
+>
+> tem ali tarefas sem data. mas quando clico nelas, mesmo dizendo que ta sem prazo, eu abro e tem um prazo definido
+> ali. exemplo: a checar documentos do fornecedor novo ta com prazo 28/10/2026
+>
+> a agenda da tarefa e do item devem ser exatamente o mesmo componente, ok? só mudar a lógica de item pra tarefa. hoje
+> ta meio diferente. veja como deixar o mais idêntico possível. a do item ta parecendo mais organizada hoje.
+
+### Mudou: o fundo da grade só muda com horário configurado
+
+O tom mais escuro de 08:00 às 18:00 vinha de um valor inventado no `mocks.ts`, rotulado como "horário de trabalho do
+Calendário do sistema". O Calendário do sistema do develop configura dias úteis e feriados, não horário. Agora:
+
+- sem horário configurado, a grade não muda o fundo de hora nenhuma;
+- o `UxCalendario` recebe `horario` opcional; vazio, a camada do fora do expediente não existe;
+- a hachura do fim de semana e do feriado fica, porque esses dias vêm do Calendário do sistema.
+
+### Mudou: a tarefa sem prazo abre sem prazo
+
+O popover da tarefa preenchia o campo Prazo com o dia de hoje do protótipo (28/10/2026) às 18:00 quando a tarefa não
+tinha prazo. A lista dizia "Sem prazo" e o campo dizia 28/10. Agora:
+
+- o campo Prazo abre vazio;
+- escolher um dia dá o prazo às 18:00, como soltar a tarefa na grade sem hora;
+- o painel da tarefa já abria certo e continua igual.
+
+### Mudou: a Agenda do item e a da tarefa são o mesmo componente
+
+`_AgendaDoItem.vue` virou `_AgendaDoAlvo.vue` e entra nos 3 lugares: a aba Agenda do painel do item, a pasta Agenda da
+tela do item e a aba Agenda do painel da tarefa. O desenho é o do item, que estava mais organizado.
+
+| Parte | Item | Tarefa |
+|---|---|---|
+| Ações | Agendar reunião, Nova tarefa rápida, Ligar reunião existente | Agendar reunião, Reservar tempo (com SLA), Ligar reunião existente |
+| Sem permissão | Linha "acesso de leitura" | Linha "Tarefa de <pessoa>"; concluída: "reabra a tarefa" |
+| Reuniões | Próximas e Anteriores; as das tarefas do item com "Pela tarefa" | Próximas e Anteriores, só as ligadas à tarefa |
+| Bloco do meio | Tarefas e tempo reservado | Tempo reservado, no cartão da reunião com borda tracejada |
+| Datas | Datas do item, cada uma com "Ver na Agenda" | Prazo, editável por quem responde e sem SLA, com "Ver na Agenda" |
+
+O que a tarefa ganhou por ser o mesmo componente: as reuniões anteriores, quem ligou cada reunião, "Ligar reunião
+existente", "Desligar da tarefa" e o aviso sem Outlook. "Agendar reunião sobre a tarefa" virou "Agendar reunião", como
+no item; o título da reunião continua "Sobre a tarefa: <nome>".
+
+### Mudou: o nó Tarefa do Spaceflow decide se a tarefa aparece na Agenda
+
+Tela nova, `_TelaDoSpaceflow.vue`, aberta pelo "Ir para". O modal do nó Tarefa ganha a seção **Agenda**, depois de
+"Tempo de conclusão", com 1 opção:
+
+- **Mostrar a tarefa na Agenda**, ligada por padrão: a tarefa aparece na Agenda do responsável e dos colaboradores, no
+  dia do prazo; sem prazo, no painel Sem data;
+- desligada: a tarefa fica só em Tarefas. A Agenda não mostra o prazo nem a oferece no painel Sem data;
+- vale para as tarefas que o nó criar depois de salvar; as já criadas não mudam;
+- ligada, cada pessoa ainda escolhe na Configuração da Agenda se vê tarefas.
+
+Campo novo no nó, inventado: `show_in_calendar`, gravado na tarefa criada. Interruptor, não lista: são 2 estados.
+
+### Andaime
+
+O "Ir para" ficou com 5 pontos centrais: Agenda na semana de hoje, item na pasta Agenda, tarefa na aba Agenda,
+Configuração da Agenda e o nó do Spaceflow. Os casos de modelagem se acham navegando a semana. Saiu "Simular falha no
+próximo vínculo": o estado "Ligar de novo" continua no código, sem atalho.
+
+### Fronteira
+
+- **Muda:** o fundo da grade, o campo Prazo do popover, a aba Agenda da tarefa e a seção Agenda do nó Tarefa.
+- **Não muda:** a casca do Spaceflow (menu, trilha, abas do editor, canvas, moldura do modal), importada do
+  `no-de-atraso`. As seções de hoje do nó Tarefa ficam recolhidas e mostram só "sem mudança".
+
+### Perguntas em aberto
+
+- O horário de trabalho existe em algum lugar do workspace ou da pessoa? Se não existe, a grade fica sem tom de
+  expediente até ele ser criado.
+- A pessoa pode pôr na Agenda uma tarefa que o fluxo criou fora dela?
+- A opção vale também para Aprovação e Formulário, que usam o mesmo bloco de tarefa?
+
+### Ver
+
+| Print | O que mostra |
+|---|---|
+| ![](evidencias/rodada3-ir-para-e-grade-sem-horario.png) | A grade sem tom de expediente, só com a hachura do fim de semana, e o "Ir para" com os 5 pontos |
+| ![](evidencias/rodada3-tarefa-sem-prazo-abre-vazia.png) | "Checar documentos do fornecedor novo", aberta pelo painel Sem data: o campo Prazo vazio |
+| ![](evidencias/rodada3-agenda-da-tarefa-sem-prazo.png) | A aba Agenda da tarefa sem prazo, no desenho da Agenda do item, com o prazo para preencher |
+| ![](evidencias/rodada3-agenda-da-tarefa-com-sla.png) | A aba Agenda da tarefa com SLA: Reservar tempo, o tempo reservado e o prazo trancado |
+| ![](evidencias/rodada3-agenda-do-item.png) | A pasta Agenda do item, o mesmo componente |
+| ![](evidencias/rodada3-spaceflow-no-tarefa-agenda.png) | O nó Tarefa do Spaceflow com a seção Agenda, ligada por padrão |
+| ![](evidencias/rodada3-spaceflow-agenda-desligada.png) | A opção desligada: o texto diz que a tarefa fica só em Tarefas |
+| ![](evidencias/rodada3-spaceflow-salvo.png) | Depois de salvar: "As próximas tarefas deste nó ficam fora da Agenda" |
+| ![](evidencias/rodada3-spaceflow-escuro-espanhol.png) | O mesmo modal no escuro e em espanhol |

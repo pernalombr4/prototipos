@@ -19,7 +19,7 @@ import type { DropdownMenuItem } from '@nuxt/ui'
 import { textos } from './textos'
 import { AGORA, HOJE, diaCurto, diaDaSemana, hora } from './datas'
 import { type Cenario, type Criado, type Rascunho, type Semente, type TipoDeCriacao, aplicar, bloco, diaDe, escolherCenario, estado, eventos, fluxoDoCampo, fonteDoEvento, foto, item, lerChave, minutoDe, reiniciar, restaurar, reuniao, rotuloDoCampo, semData, tarefa } from './estado'
-import { type Alvo, HORARIO, feriados } from './mocks'
+import { type Alvo, feriados } from './mocks'
 import { avisarReuniao } from './avisos'
 import { menuDoEvento } from './menuDoEvento'
 import CascaDaAgenda from './_CascaDaAgenda.vue'
@@ -35,6 +35,7 @@ import PainelDaTarefa from './_PainelDaTarefa.vue'
 import ModalDaTarefa from './_ModalDaTarefa.vue'
 import TelaDoItem from './_TelaDoItem.vue'
 import TelaDeIntegracoes from './_TelaDeIntegracoes.vue'
+import TelaDoSpaceflow from './_TelaDoSpaceflow.vue'
 import FormularioDoItem from './_FormularioDoItem.vue'
 
 import briefingMd from './BRIEFING.md?raw'
@@ -45,7 +46,7 @@ definePageMeta({
   titulo: 'Agenda',
   descricao: 'A Agenda como lugar de ação: grade convencional e calma, camadas por fonte, reunião do Outlook ligada a item, arrastar para agendar, painel Para agendar e tempo reservado para tarefa com SLA.',
   status: 'em-revisao',
-  atualizado: '2026-10-29',
+  atualizado: '2026-11-24',
   tela: 'Membro › Agenda',
 })
 
@@ -207,7 +208,7 @@ function conectar() {
 /* ---------- painel do item, painel da tarefa, tela do item e configuração ---------- */
 const painel = reactive({ aberto: false, itemId: null as number | null, aba: 'agenda' as 'item' | 'tarefas' | 'agenda' })
 const painelTarefa = reactive({ aberto: false, id: null as number | null, aba: 'tarefa' as 'tarefa' | 'item' | 'historico' | 'comentarios' | 'agenda' })
-const tela = reactive({ qual: 'agenda' as 'agenda' | 'item' | 'integracoes', origem: 'agenda' as 'agenda' | 'item', itemId: 47233, pasta: 'agenda' })
+const tela = reactive({ qual: 'agenda' as 'agenda' | 'item' | 'integracoes' | 'spaceflow', origem: 'agenda' as 'agenda' | 'item', itemId: 47233, pasta: 'agenda' })
 
 function abrirTarefa(id: number, aba: typeof painelTarefa.aba = 'tarefa') {
   detalhe.value = null
@@ -285,71 +286,28 @@ function cenario(c: Cenario) {
   fecharTudo()
   escolherCenario(c)
 }
-function noGrid(chave: string, dia = HOJE) {
-  fecharTudo()
-  Object.assign(estado, { vista: 'semana', data: dia })
-  // O filtro de responsável pode esconder o evento do atalho (o item de outra pessoa): mostra todos.
-  if (!eventos.value.some(e => e.id === chave)) estado.responsaveis = []
-  const alvo = lerChave(chave)
-  if (alvo.tipo === 'i') estado.camadas[fonteDoEvento(item(Number(alvo.id))!, alvo.campo)!.id] = true
-  // Depois de o menu fechar e devolver o foco ao "Ir para"; antes disso, o popover nasce e já se fecha.
-  setTimeout(() => abrir(chave, pelo(`[data-evento="${chave}"]`)), 300)
-}
 const cenarios: Cenario[] = ['normal', 'primeiro', 'falha', 'vazia', 'carregando']
-function criarComObrigatorios() {
+function irParaAgenda() {
   fecharTudo()
   Object.assign(estado, { vista: 'semana', data: HOJE })
-  const centro = { getBoundingClientRect: () => new DOMRect(window.innerWidth / 2, 220, 0, 0) }
-  setTimeout(() => criarEm({ dia: '2026-10-30', inicio: 600, fim: 660 }, centro, 'item'), 300)
 }
-function armarFalha() {
-  estado.falharVinculo = true
-  toast.add({ title: t.value.atalhos2.falharVinculo, description: t.value.atalhos2.falhaArmada, icon: 'i-lucide-unlink', color: 'neutral' })
-}
+/** Só os pontos centrais da proposta; cada caso de modelagem se acha navegando a semana. */
 const atalhos = computed<DropdownMenuItem[][]>(() => {
   const a = t.value.andaime.atalhos
-  const b = t.value.atalhos2
-  const m = t.value.atalhos3
-  return [
-    [
-      { label: a.sugestao, icon: 'i-lucide-sparkles', onSelect: () => noGrid('r:r-vertice') },
-      { label: a.sla, icon: 'i-lucide-flag', onSelect: () => noGrid('t:273512') },
-      { label: a.item, icon: 'i-lucide-panel-right', onSelect: () => abrirItem(47233, 'agenda') },
-      { label: a.configuracao, icon: 'i-lucide-settings-2', onSelect: () => (configAberta.value = true) },
-      { label: a.mes, icon: 'i-lucide-calendar', onSelect: () => (estado.vista = 'mes') },
-    ],
-    [
-      { type: 'label', label: b.grupoRodada2 },
-      { label: b.telaDoItem, icon: 'i-lucide-folder-open', onSelect: () => acessar(47233) },
-      { label: b.painelDaTarefa, icon: 'i-lucide-panel-right-open', onSelect: () => abrirTarefa(273512, 'agenda') },
-      { label: b.criarComObrigatorios, icon: 'i-lucide-file-plus', onSelect: criarComObrigatorios },
-      { label: b.itemComFluxo, icon: 'i-lucide-zap', onSelect: () => noGrid('i:47231:fim_vigencia') },
-      { label: b.itemLeitura, icon: 'i-lucide-eye', onSelect: () => noGrid('i:52094:audiencia', '2026-11-10') },
-      { label: b.reuniaoDeOutro, icon: 'i-lucide-lock', onSelect: () => noGrid('r:r-riscos') },
-      { label: b.tarefaAprovacao, icon: 'i-lucide-stamp', onSelect: () => noGrid('t:273541') },
-      { label: b.particular, icon: 'i-lucide-eye-off', onSelect: () => noGrid('r:r-particular') },
-      { label: b.falharVinculo, icon: 'i-lucide-unlink', onSelect: armarFalha },
-    ],
-    [
-      { type: 'label', label: m.grupo },
-      { label: m.pelaTarefa, icon: 'i-lucide-flag', onSelect: () => acessar(47233) },
-      { label: m.porOutro, icon: 'i-lucide-users', onSelect: () => noGrid('r:r-vertice') },
-      { label: m.semAcesso, icon: 'i-lucide-eye-off', onSelect: () => noGrid('r:r-fin') },
-      { label: m.serie, icon: 'i-lucide-repeat', onSelect: () => noGrid('r:r-solaris-2', '2026-11-04') },
-      { label: m.particular, icon: 'i-lucide-lock', onSelect: () => acessar(47232) },
-      { label: m.oferecido, icon: 'i-lucide-user-plus', onSelect: () => noGrid('b:b-4', '2026-10-30') },
-      { label: m.colabora, icon: 'i-lucide-users', onSelect: () => noGrid('t:273594', '2026-10-30') },
-      { label: m.fuso, icon: 'i-lucide-globe', onSelect: () => noGrid('r:r-lisboa', '2026-10-30') },
-      { label: m.variosDias, icon: 'i-lucide-calendar-range', onSelect: () => noGrid('r:r-congresso@2026-11-04', '2026-11-04') },
-      { label: m.campoSumiu, icon: 'i-lucide-triangle-alert', onSelect: () => { fecharTudo(); configAberta.value = true } },
-    ],
-  ]
+  return [[
+    { label: a.agenda, icon: 'i-lucide-calendar-days', onSelect: irParaAgenda },
+    { label: a.item, icon: 'i-lucide-folder-open', onSelect: () => acessar(47233) },
+    { label: a.tarefa, icon: 'i-lucide-square-check', onSelect: () => { fecharTudo(); abrirTarefa(273512, 'agenda') } },
+    { label: a.configuracao, icon: 'i-lucide-settings-2', onSelect: () => { fecharTudo(); configAberta.value = true } },
+    { label: a.spaceflow, icon: 'i-lucide-workflow', onSelect: () => { fecharTudo(); tela.qual = 'spaceflow' } },
+  ]]
 })
 </script>
 
 <template>
   <div>
     <TelaDeIntegracoes v-if="tela.qual === 'integracoes'" :t="t" :origem="tela.origem" @voltar="tela.qual = tela.origem" />
+    <TelaDoSpaceflow v-else-if="tela.qual === 'spaceflow'" :t="t" />
     <TelaDoItem
       v-else-if="tela.qual === 'item'"
       v-model:pasta="tela.pasta"
@@ -407,7 +365,6 @@ const atalhos = computed<DropdownMenuItem[][]>(() => {
               :hoje="HOJE"
               :agora="AGORA"
               :locale="locale"
-              :horario="HORARIO"
               :nao-util="naoUtil"
               :rotulo-do-dia="rotuloDoDia"
               :rotulos="rotulos"
@@ -473,7 +430,9 @@ const atalhos = computed<DropdownMenuItem[][]>(() => {
       :t="t"
       :locale="locale"
       :tarefa-id="painelTarefa.id"
+      :conectando="conectando"
       @mover="mover"
+      @conectar="conectar"
       @acessar="acessar"
       @ir-para-dia="irParaDia"
       @abrir-evento="irAoEvento"
@@ -501,7 +460,7 @@ const atalhos = computed<DropdownMenuItem[][]>(() => {
     <div ref="andaime" class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">
       <div class="flex flex-wrap items-center gap-2 px-4 py-2.5">
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.prototipo }}</span>
-        <UDropdownMenu :items="atalhos" :content="{ side: 'top', align: 'start', onCloseAutoFocus: (e: Event) => e.preventDefault() }" :ui="{ content: 'w-72 max-h-[70vh]' }">
+        <UDropdownMenu :items="atalhos" :content="{ side: 'top', align: 'start', onCloseAutoFocus: (e: Event) => e.preventDefault() }" :ui="{ content: 'w-72' }">
           <UButton :label="t.andaime.irPara" icon="i-lucide-map" trailing-icon="i-lucide-chevron-up" size="xs" color="neutral" variant="subtle" />
         </UDropdownMenu>
 

@@ -68,7 +68,8 @@ const atual = computed<Lugar | null>(() => {
   if (!pode.value) return null
   if (r.value) return r.value.diaFim ? null : { dia: r.value.dia, inicio: r.value.inicio, fim: r.value.fim }
   if (b.value) return { dia: b.value.dia, inicio: b.value.inicio, fim: b.value.fim }
-  if (tf.value) return temSla(tf.value) ? null : { dia: tf.value.due_date ? diaDe(tf.value.due_date) : HOJE, inicio: tf.value.due_date ? minutoDe(tf.value.due_date) : 18 * 60 }
+  // Sem prazo, o campo fica vazio: preencher com hoje fazia a tarefa "sem prazo" abrir com um prazo que ela não tem.
+  if (tf.value) return temSla(tf.value) ? null : tf.value.due_date ? { dia: diaDe(tf.value.due_date), inicio: minutoDe(tf.value.due_date) } : { dia: '' }
   if (it.value && f.value) {
     const ini = f.value.horaInicio && !fimDoItem.value ? it.value.data[f.value.horaInicio] as number | undefined : undefined
     return { dia: String(it.value.data[f.value.campo]), inicio: ini, fim: ini === undefined ? undefined : (f.value.horaFim ? it.value.data[f.value.horaFim] as number : ini + 60) }
@@ -103,6 +104,8 @@ function mudar(campo: 'dia' | 'inicio' | 'fim', valor: string) {
   if (!l || !valor) return
   const novo: Lugar = { ...l }
   if (campo === 'dia') novo.dia = valor
+  // A tarefa que ganha o primeiro prazo pelo campo vence às 18:00, como a que se solta na grade sem hora.
+  if (campo === 'dia' && tf.value && novo.inicio === undefined) novo.inicio = 18 * 60
   else novo[campo] = paraMinutos(valor)
   if (campo === 'inicio' && l.inicio !== undefined && l.fim !== undefined) novo.fim = novo.inicio! + (l.fim - l.inicio)
   if (novo.fim !== undefined && novo.inicio !== undefined && novo.fim <= novo.inicio) return

@@ -10,14 +10,14 @@
  * Salvar no canto de baixo. A pasta aberta vai para a URL (`?folder=`).
  *
  * A proposta é 1 pasta: Agenda, depois de Tarefas, com o mesmo conteúdo da aba Agenda do painel
- * (`_AgendaDoItem.vue`). As outras pastas não mudam e mostram só o aviso, menos a Visão Geral (os campos do item).
+ * (`_AgendaDoAlvo.vue`). As outras pastas não mudam e mostram só o aviso, menos a Visão Geral (os campos do item).
  */
 import type { Textos } from './textos'
 import { diaNumerico, hora } from './datas'
 import { item } from './estado'
 import { categoriaPorSlug, pessoaPorId } from './mocks'
 import CascaDaAgenda from './_CascaDaAgenda.vue'
-import AgendaDoItem from './_AgendaDoItem.vue'
+import AgendaDoAlvo from './_AgendaDoAlvo.vue'
 
 const props = defineProps<{ t: Textos, locale: string, itemId: number, conectando?: boolean }>()
 const pasta = defineModel<string>('pasta', { default: 'agenda' })
@@ -123,10 +123,10 @@ const grupos = computed(() => [
 
         <div class="min-h-0 flex-1 overflow-y-auto p-5" role="tabpanel">
           <div v-if="pasta === 'agenda'" class="mx-auto max-w-2xl animate-[entrada_.3s_ease-out_both]">
-            <AgendaDoItem
+            <AgendaDoAlvo
               :t="t"
               :locale="locale"
-              :item-id="itemId"
+              :alvo="{ tipo: 'item', id: itemId }"
               :conectando="conectando"
               @abrir-evento="emit('abrirEvento', $event)"
               @abrir-tarefa="emit('abrirTarefa', $event)"

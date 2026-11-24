@@ -25,7 +25,8 @@ const props = withDefaults(defineProps<{
   /** Minuto do dia da linha da hora atual. */
   agora: number
   locale: string
-  horario: { inicio: number, fim: number }
+  /** O horário de trabalho configurado. Sem configuração, a grade não muda o fundo de hora nenhuma. */
+  horario?: { inicio: number, fim: number } | null
   naoUtil: (dia: string) => boolean
   rotuloDoDia?: (dia: string) => string | null
   rotulos: { diaInteiro: string, mais: (n: number) => string, novo: string, intervalo: (a: string, b: string) => string }
@@ -34,7 +35,7 @@ const props = withDefaults(defineProps<{
   selecionado?: string | null
   carregando?: boolean
   horaInicial?: number
-}>(), { horaInicial: 8, rascunho: null, selecionado: null, rotuloDoDia: () => null })
+}>(), { horaInicial: 8, horario: null, rascunho: null, selecionado: null, rotuloDoDia: () => null })
 
 const emit = defineEmits<{
   abrir: [id: string, referencia: Referencia]
@@ -376,8 +377,8 @@ const limiteDaFaixa = computed(() => props.vista === 'dia' ? 99 : 3)
             @dragover="sobre($event, d, true)"
             @drop="receber"
           >
-            <!-- Fora do horário de trabalho do Calendário do sistema -->
-            <template v-if="!naoUtil(d)">
+            <!-- Fora do horário de trabalho, só quando o workspace configura um -->
+            <template v-if="horario && !naoUtil(d)">
               <div class="pointer-events-none absolute inset-x-0 top-0 bg-elevated/50" :style="{ height: `${horario.inicio * PX_POR_MINUTO}px` }" />
               <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-elevated/50" :style="{ top: `${horario.fim * PX_POR_MINUTO}px` }" />
             </template>

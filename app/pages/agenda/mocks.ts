@@ -433,5 +433,8 @@ export const blocosIniciais = (): Bloco[] => [
  * Calendário do sistema: dias não úteis (feriados nacionais de 2026)
  * ------------------------------------------------------------------ */
 export const feriados = ['2026-10-12', '2026-11-02', '2026-11-15', '2026-11-20', '2026-12-25']
-/** Horário de trabalho do Calendário do sistema: 08:00 a 18:00. */
-export const HORARIO = { inicio: 480, fim: 1080 }
+/*
+ * O Calendário do sistema do develop configura dias úteis e feriados, não horário de trabalho. Por isso a grade não
+ * escurece hora nenhuma: o tom fora do expediente só existe quando o workspace configura o horário (correção da
+ * redatora em 24/11/2026).
+ */

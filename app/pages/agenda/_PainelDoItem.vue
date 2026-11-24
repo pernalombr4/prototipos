@@ -1,14 +1,14 @@
 <script setup lang="ts">
 /**
  * Painel lateral do item, aberto sobre a própria Agenda (decisão 3 da redatora: uma porta). Abas Item e Tarefas são
- * o recorte da visualização rápida do item; a aba Agenda é a proposta (`_AgendaDoItem.vue`, a mesma da pasta Agenda
+ * o recorte da visualização rápida do item; a aba Agenda é a proposta (`_AgendaDoAlvo.vue`, a mesma da pasta Agenda
  * na tela do item). "Acessar Item" leva à tela do item, como o botão do painel da tarefa no develop.
  */
 import type { Textos } from './textos'
 import { diaCurto, diaNumerico, hora } from './datas'
 import { diaDe, estado, item, minutoDe, reunioesDo, situacao } from './estado'
 import { categoriaPorSlug, pessoaPorId } from './mocks'
-import AgendaDoItem from './_AgendaDoItem.vue'
+import AgendaDoAlvo from './_AgendaDoAlvo.vue'
 
 const props = defineProps<{ t: Textos, locale: string, itemId: number | null, conectando?: boolean }>()
 const aba = defineModel<'item' | 'tarefas' | 'agenda'>('aba', { default: 'agenda' })
@@ -70,11 +70,11 @@ const corDaSituacao = { 'concluida': 'success', 'atrasada': 'error', 'hoje': 'wa
         </ul>
 
         <!-- Agenda (proposta) -->
-        <AgendaDoItem
+        <AgendaDoAlvo
           v-else
           :t="t"
           :locale="locale"
-          :item-id="it.id"
+          :alvo="{ tipo: 'item', id: it.id }"
           :conectando="conectando"
           na-agenda
           @abrir-evento="emit('abrirEvento', $event)"

@@ -277,7 +277,16 @@ export function reunioesDo(itemId: number): ReuniaoLigada[] {
   }
   return semRepetir(lista, x => x.r.uid).sort((a, b) => porHorario(a.r, b.r))
 }
-export const reunioesDaTarefa = (id: number) => semRepetir(estado.reunioes.filter(r => vinculosDa(r).some(v => v.alvo.tipo === 'tarefa' && v.alvo.id === id)), r => r.uid).sort(porHorario)
+/** As reuniões da tarefa: só as ligadas a ela. */
+export function reunioesDaTarefa(id: number): ReuniaoLigada[] {
+  const lista: ReuniaoLigada[] = []
+  for (const r of estado.reunioes) {
+    for (const v of vinculosDa(r)) if (v.alvo.tipo === 'tarefa' && v.alvo.id === id) lista.push({ r, v })
+  }
+  return semRepetir(lista, x => x.r.uid).sort((a, b) => porHorario(a.r, b.r))
+}
+/** A Agenda do item e a da tarefa são o mesmo componente: muda só de onde vêm as reuniões. */
+export const reunioesDoAlvo = (alvo: Alvo) => alvo.tipo === 'item' ? reunioesDo(alvo.id) : reunioesDaTarefa(alvo.id)
 
 /** A hora da reunião no fuso de quem organizou. A grade fica no de Brasília (UTC-3, sem horário de verão). */
 export function noFuso(r: Reuniao, min: number, locale: string) {
@@ -519,8 +528,8 @@ export function conflitos(dia: string, inicio: number, fim: number) {
  * O "Ligar reunião existente": as reuniões da pessoa nos próximos 14 dias, não particulares, não canceladas e ainda
  * não ligadas a este item. A recorrente entra uma vez, pela próxima ocorrência, e liga a série.
  */
-export function reunioesParaLigar(itemId: number) {
-  const ligadas = reunioesDo(itemId).filter(x => !x.pela).map(x => x.r.uid)
+export function reunioesParaLigar(alvo: Alvo) {
+  const ligadas = reunioesDoAlvo(alvo).filter(x => !x.pela).map(x => x.r.uid)
   const candidatas = estado.reunioes
     .filter(r => r.calendario && !r.cancelada && !r.particular && souParticipante(r) && r.dia >= HOJE && r.dia <= somarDias(HOJE, 14) && !ligadas.includes(r.uid))
     .sort(porHorario)
