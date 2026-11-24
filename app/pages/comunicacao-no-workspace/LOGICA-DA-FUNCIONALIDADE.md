@@ -336,7 +336,7 @@ Cada fase soma à anterior.
 
 **Como funciona**
 
-- Quem recebe é o **responsável** da tarefa (`Task.assigned_to`), um membro. O e-mail do membro
+- Quem recebe é o **responsável** da tarefa (o campo Responsável), um membro. O e-mail do membro
   sempre existe: é o login.
 - **Lista:** coluna Contato, com o botão de e-mail por linha. Tarefa sem responsável mostra "Sem
   responsável".
@@ -477,14 +477,14 @@ tarefa.
 
 ### 7.1 Como o envio funciona hoje (base da Fase 1)
 
-Lido no código da gaveta "Nova Mensagem" da Mail Box, no develop:
+Como a gaveta "Nova Mensagem" da Mail Box funciona hoje, no develop:
 
-- O envio é `POST user-integrations/microsoft/send-email`, com `to`, `cc`, `bcc`, `replyTo`,
-  `subject`, `message`, `attachments` e `item_ref`.
+- O e-mail sai pela integração do Correio do Outlook, com Para, Cc, Cco, o endereço de resposta, o
+  assunto, a mensagem, os anexos e a referência do item.
 - O remetente é a conta do Outlook que a pessoa integrou. **Por isso a Mail Box do item já depende
   do Correio do Outlook hoje:** sem ele, a gaveta não deixa escrever.
-- No item, `replyTo` e `mailBox` recebem o endereço do item, e `item_ref` recebe a referência do
-  item. O endereço do item é `<referência do item em minúsculas>.<referência do
+- No item, a resposta vai para o endereço do item, e o e-mail fica ligado à referência do item. O
+  endereço do item é `<referência do item em minúsculas>.<referência do
   workspace>@<domínio das caixas>`.
 - O registro do e-mail enviado exige o item. Sem item, o e-mail sai, mas não fica no ENSPACE.
 - A resposta do destinatário chega no endereço do item e aparece em Mail Box › Recebidos. O enviado
@@ -794,7 +794,7 @@ No workspace novo, o texto do próximo passo muda com o perfil:
 | Permissões de hoje de ver os modelos, as caixas e os e-mails enviados (D4) | Cargo (Gestão de Membros) | A pessoa não vê as abas Modelos e Caixas de E-mail nem os e-mails do sistema em Mensagens; em Configurações, vê só "Sua conta de envio" |
 | Lista única dos e-mails dos itens e dos enviados pelo sistema (D24) | Dev (back); 9, pergunta 14 | O filtro "Do sistema" troca a fonte da tabela, 1 lista por vez |
 | Correio do Outlook (D1), para "Sua conta de envio" | Perfil › Integrações | O bloco mostra "Nenhuma conta integrada." e "Integrar contas" |
-| Fase 1: a tela "Emails Recebidos" (`/itemEmails`), que existe sem entrada no menu, como base da aba Mensagens | Dev (front); 9, pergunta 13 | Sem a aba Mensagens; o e-mail fica na Mail Box do item e da tarefa (7.8, 7.9) |
+| Fase 1: a tela "Emails Recebidos", que existe sem entrada no menu, como base da aba Mensagens | Dev (front); 9, pergunta 13 | Sem a aba Mensagens; o e-mail fica na Mail Box do item e da tarefa (7.8, 7.9) |
 | Fase 2: lista de e-mails por pessoa e permissão (D18) | Dev (back e front) | A aba Mensagens mostra o que a tela "Emails Recebidos" mostra hoje |
 | Fase 2: registro do e-mail sem item e rota para vincular e trocar o vínculo (D21) | Dev (back) | Sem o filtro "Sem item" e sem "Vincular" |
 | Fase 2: busca de item entre categorias (D17), para vincular na leitura | Dev (back) | Sem a busca; ficam as sugestões |
