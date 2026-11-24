@@ -14,7 +14,7 @@
  *
  * Rodada 5:
  * - o texto vem fechado (`UCollapsible`); fechada, a versão mostra a data, os rótulos, o título e o
- *   resumo curto. "Mostrar mais" no rodapé abre e fecha;
+ *   resumo curto. "Mostrar mais", acima da linha do rodapé, abre e fecha;
  * - sem filtros e sem a contagem de versões; sai a página Próximas mudanças: a versão Em breve fica
  *   no topo, e as 3 fases da mudança que quebra entram em 1 frase no texto do item;
  * - cada título tem link, como os títulos de markdown do Nuxt UI e o changelog do Notion: o título
@@ -175,7 +175,7 @@ watch(() => props.destaque, async (id) => {
           meta: 'flex flex-wrap items-center gap-1.5 mb-2',
           title: 'text-2xl font-bold text-highlighted',
           description: 'text-base text-muted mt-2 leading-relaxed',
-          footer: 'border-t border-default pt-4 mt-4 flex flex-wrap items-center justify-between gap-2',
+          footer: v.emPostDoMes ? 'border-t border-default pt-4 mt-4 flex flex-wrap items-center justify-end gap-2' : 'border-t border-default mt-4',
           dotInner: v.emBreve ? 'size-2 rounded-full bg-dimmed' : undefined,
         }"
       >
@@ -256,9 +256,8 @@ watch(() => props.destaque, async (id) => {
               </div>
             </template>
           </UCollapsible>
-        </template>
 
-        <template #footer>
+          <!-- Mostrar mais e Mostrar menos ficam acima da linha do rodapé, logo abaixo do texto -->
           <UButton
             size="xs"
             color="neutral"
@@ -267,9 +266,13 @@ watch(() => props.destaque, async (id) => {
             trailing-icon="i-lucide-chevron-down"
             :aria-expanded="estaAberta(v.id)"
             :ui="{ trailingIcon: ['transition-transform duration-200', estaAberta(v.id) ? 'rotate-180' : ''].join(' ') }"
-            class="-ml-2 cursor-pointer"
+            class="-ml-2 mt-3 cursor-pointer"
             @click="alternar(v.id)"
           />
+        </template>
+
+        <!-- Abaixo da linha, só o post de lançamento; sem post, o rodapé é só a linha -->
+        <template #footer>
           <UButton
             v-if="v.emPostDoMes"
             size="xs"

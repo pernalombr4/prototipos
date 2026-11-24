@@ -56,6 +56,10 @@ flowchart LR
   - sai o link para "Próximas mudanças" do topo da trilha; fica só "Assinar"
   - no post do mês, o aviso de ação leva ao item na trilha ("Ver no changelog"); sai o botão "Ver o que fazer"
   - os prints `rodada3-proximas-*` ficam em `evidencias/` como histórico
+- **Ajuste seguinte (pedido literal):** "o botao de mostrar mais deve vir ANTES do divider, nao depois. acima dele, nao abaixo."
+  - "Mostrar mais" e "Mostrar menos" saem do rodapé do `UChangelogVersion` e vão para o fim do `#body`, logo abaixo do texto e acima da linha do rodapé
+  - "Ler o post de lançamento" fica no `#footer`, abaixo da linha, à direita. Na versão sem post, o rodapé é só a linha, sem espaço vazio embaixo
+  - prints refeitos: `rodada5-trilha-desktop-claro.jpg` e `rodada5-versao-aberta-desktop-claro.jpg`. Os outros prints da rodada 5 mostram o botão ainda abaixo da linha
 - **Print do ícone no subtítulo:** a captura sem janela não tem mouse; o estado de hover foi forçado pelo DevTools do Chrome (`CSS.forcePseudoState`) no link do subtítulo "Novidades". Não há ponteiro na imagem
 - **Para a redatora decidir:**
   - o ícone ao passar o mouse é o `#` dos títulos do Nuxt UI; o Notion usa o ícone de corrente. Trocar o ícone muda todos os títulos de markdown do repositório, porque vem da configuração do app
