@@ -67,6 +67,13 @@ const abas = computed(() => (Object.keys(ICONE_DA_ABA) as AbaDaCentral[])
   .filter(a => ehAdmin.value || !ABAS_DE_ADMIN.includes(a))
   .map(a => ({ value: a, label: props.t.central.abas[a], icon: ICONE_DA_ABA[a] })))
 
+/** O texto do "i" de cada aba. */
+function dicaDaAba(a: AbaDaCentral) {
+  if (a !== 'mensagens') return props.t.central.dicas[a]
+  const base = fase.value >= 2 ? props.t.emails.descricaoFase2 : props.t.emails.descricaoFase1
+  return ehAdmin.value ? `${base} ${props.t.emails.descricaoDoSistema}` : base
+}
+
 /* ---------- barra ---------- */
 
 const busca = ref('')
@@ -368,14 +375,9 @@ function nomeDaCaixa(endereco: string) {
   <div class="flex min-h-0 flex-col">
     <!-- Título -->
     <div class="flex flex-wrap items-center gap-3 px-4 pb-2 pt-4 sm:px-6">
-      <div class="min-w-0">
-        <h1 class="text-xl font-semibold text-highlighted">
-          {{ te.titulo }}
-        </h1>
-        <p v-if="abaDaCentral === 'mensagens'" class="text-sm text-muted">
-          {{ (fase >= 2 ? te.descricaoFase2 : te.descricaoFase1) + (ehAdmin ? ' ' + te.descricaoDoSistema : '') }}
-        </p>
-      </div>
+      <h1 class="min-w-0 text-xl font-semibold text-highlighted">
+        {{ te.titulo }}
+      </h1>
       <UButton :label="t.casca.novoEmail" icon="i-lucide-mail-plus" class="ml-auto" @click="abrirCompositor({ origem: 'emails' })" />
     </div>
 
@@ -389,7 +391,16 @@ function nomeDaCaixa(endereco: string) {
       class="shrink-0 px-4 sm:px-6"
       :class="marca"
       :ui="{ list: 'border-b border-default' }"
-    />
+    >
+      <!-- O que a aba guarda: no "i", não num texto solto na barra (pedido da rodada 8) -->
+      <template #trailing="{ item }">
+        <UTooltip :text="dicaDaAba(item.value as AbaDaCentral)" :content="{ side: 'bottom' }">
+          <span role="img" :aria-label="dicaDaAba(item.value as AbaDaCentral)" class="inline-flex">
+            <UIcon name="i-lucide-info" class="size-3.5 text-dimmed" />
+          </span>
+        </UTooltip>
+      </template>
+    </UTabs>
 
     <AbasDaCentral v-if="abaDaCentral !== 'mensagens'" :t="t" :aba="abaDaCentral" />
 

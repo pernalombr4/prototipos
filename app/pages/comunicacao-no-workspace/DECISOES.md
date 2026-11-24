@@ -404,6 +404,16 @@ disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:)
     esquerda, ação à direita), separadas por `USeparator`, como no modelo de configurações do
     Nuxt UI.
 - **Ver:** print [Configurações no padrão](evidencias/prototipo-28-configuracoes-no-padrao.jpg).
+- **Pedido (texto ao lado da busca):** "esses textos instrucionais ao lado das caixas de busca devem
+  ser retirados. ta horrivel [...] talvez a própria aba possa ter um "i" de informaçao com tooltip
+  indicando esse texto. acha que funciona?"
+- **Mudou:** o texto saiu da barra de Modelos e Caixas, e o subtítulo de Mensagens saiu de baixo do
+  título. Cada uma das 4 abas tem um "i" ao lado do nome, com o texto num `UTooltip`. As 4 abas
+  explicam o que guardam do mesmo jeito.
+- **Por que o "i", e não um aviso na tela:** o texto descreve a aba e só ajuda na primeira visita.
+  Um aviso fixo ocuparia altura em toda visita, numa tela de tabela. Quando a lista está vazia, o
+  estado vazio já dá a explicação completa e o próximo passo.
+- **Ver:** print [o "i" de Modelos aberto](evidencias/prototipo-29-dica-da-aba-no-i.jpg).
 
 ## Por que cada decisão
 

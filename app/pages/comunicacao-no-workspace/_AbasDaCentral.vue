@@ -119,9 +119,6 @@ function integrar() {
           class="w-56"
           :aria-label="aba === 'modelos' ? tc.pesquisarModelos : tc.pesquisarCaixas"
         />
-        <p class="hidden text-sm text-muted lg:block">
-          {{ tc.dicas[aba] }}
-        </p>
         <UButton :label="aba === 'modelos' ? tc.novoModelo : tc.novaCaixa" icon="i-lucide-plus" size="sm" class="ml-auto" @click="maquete" />
       </div>
 
