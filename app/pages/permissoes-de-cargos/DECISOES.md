@@ -295,3 +295,15 @@ USE87A7C6 está na develop desde 2026-11-16 e ainda não está na branch princip
   - A parte de Quais itens que depende do padrão foi para o épico do padrão.
   - Permissões fixas e Quem acessa saíram da tela nova: sobem sozinhas.
 - **Para a redatora decidir:** a ordem dos épicos 2 a 7 é proposta do agente.
+
+## Card no ENSPACE · 2026-11-24
+- **Pedido (literal):** "na verddade por enquanto voce vai criar somente o primeiro card, o mais urgente do joao. os
+  outros nao. se ja criou pode deletar." Nenhum card tinha sido criado antes: não havia o que apagar.
+- **Card** (desenvolvimento-enlighten2): `USEA5B7584D4402492EB72602B5C8950` (598686), "[PERMISSÕES] Itens sem
+  formulário nas permissões do cargo". Descrição = `requisitos/1-itens-sem-formulario/epico.md`; critério de aceite no
+  campo próprio (6 pontos: Demandas do agente de IA, Cível e Criminal, abertura pelo endereço, árvore, migração); link
+  do protótipo; To Do, Melhoria, prioridade Urgente, teste do PO. Sem responsável: a redatora não indicou.
+- **Tarefas** 26562 ("1. Origem na tela de permissões", 5 caixas, 1 print) e 26563 ("2. Listagem e abertura", 9
+  caixas, "Sem print" com o motivo), conferidas pela API.
+- **Sem card:** os épicos 2 a 7, até a redatora pedir.
+- **Falta:** conferir o card na tela. O Chrome parou na aprovação da Microsoft (Authenticator), que é da redatora.
