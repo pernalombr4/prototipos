@@ -31,7 +31,10 @@ se quebram. Este arquivo só cobre a operação neste repositório — em qualqu
 5. Commitar: `[PROTO] <slug> — rodada N — <o que mudou>`.
 6. Aprovado: o documento de requisitos pela skill `requisitos`, com a coluna Relevância e, se
    a demanda é grande, em épico (regra 40 da spec). Parece haver mais de 1 épico: apontar à
-   redatora e só dividir com a confirmação dela.
+   redatora e só dividir com a confirmação dela. Exceção, sempre e sem confirmação: o que já
+   dá para fazer hoje com o que o produto tem fica num épico, e o que é novo (back-end,
+   componente, decisão em aberto) em outro (decisão da redatora em 2026-11-24; skill
+   `requisitos`, "Épico pelo esforço").
 7. No fim, **confirmar com a redatora** se cria o card no ENSPACE: o card `user_story` é o
    épico, com o documento do épico na descrição, e cada parte vira uma tarefa "<n>. <nome>",
    com todos os requisitos dela, sem remeter à descrição (regra 41 da spec). O padrão de

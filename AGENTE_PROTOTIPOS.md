@@ -349,6 +349,11 @@ Protótipo em revisão ainda não leva.
   com a divisão que propõe e o motivo. **Só divide com a confirmação dela**; sem ela, fica 1
   épico (decisão da redatora em 2026-10-29).
   - Cada épico é completo e independente: `epico.md`, partes e numeração próprios.
+- **⛔ Épico pelo esforço, sempre** (decisão da redatora em 2026-11-24): um épico com o que já
+  dá para fazer hoje, de modo simples, com o back, a API e os componentes que o produto já tem
+  (conferido no código pela skill `investigar-codigo`); e o que é novo (back-end novo ou
+  alterado, componente novo, decisão de produto em aberto) em outro épico. Essa separação não
+  pede confirmação. A regra inteira está na skill `requisitos`, "Épico pelo esforço".
 - **Onde:** na pasta do protótipo.
   - 1 documento: `REQUISITOS.md`.
   - Épico: `requisitos/epico.md` e 1 arquivo por parte, na mesma pasta `requisitos/`.
@@ -993,7 +998,9 @@ Não abra `datarobot-agent-skills`, `marketing`, `customer-support`, `data`,
     em toda tabela de requisito e, quando a demanda é grande, em épico: o `epico.md` linka o
     documento de cada parte. Detalhe na Fase 5, "Protótipo aprovado: o documento de requisitos".
     Protótipo que parece juntar mais de 1 épico: o agente aponta, e só divide com a confirmação
-    da redatora.
+    da redatora. Exceção, sem confirmação: o épico com o que já dá para fazer hoje se separa
+    sempre do épico das novidades (decisão da redatora em 2026-11-24; skill `requisitos`,
+    "Épico pelo esforço").
 
 41. **⛔ PROTÓTIPO APROVADO VIRA CARD NO ENSPACE SÓ COM O SIM DA REDATORA.** Decisão da
     redatora em 2026-10-29. No fim do trabalho, o agente pergunta se cria o card. Com o sim, o
