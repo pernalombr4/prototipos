@@ -2,6 +2,35 @@
 
 Registro das rodadas. A mais recente em cima.
 
+## Rodada 5 · 2026-11-24
+
+- **Pedido (literal):** "observe como ta a home hoje em develop. note que os elementos do dashboard de tarefas foram levados pra lá. o usuário deve poder pegar esses elementos como lâminas. pra agrupar melhor a sidebar de adicionar widgets, você pode fazer um menu que vai de um nível pro outro, em arvore, do tipo. selecionei que quero puxar ali dados de tarefas > aparecem as opções pra mim de cada lamina/informação. Selecionei que quero botar categorias > seleciono quais quero mostrar. inúteis e pode tirar: numero de uma visualização, itens de uma visualização. o widget de categorias ta estranho. todos os cards ali dentro deveriam ter o mesmo tamanho. o user deveria poder definir a ordem em que eles aparecem dentro do widget também. o estado inicial do primeiro acesso na verdade é com os widgets vazios. eles estão ali, mas sem informação. e ai pode ser como você já colocou mesmo. mas seria estado inicial com workspace vazio (acabou de criar) e estado configurado (é o que vc ta chamando de inicial hoje). entendido? e o estado sem widgets continua la."
+- **O develop hoje:** a Home já monta as lâminas do Painel de tarefas, tem o alternador "Minhas tarefas · Workspace" e já edita na própria Home, com "Adicionar painel" num menu curto de 4 lâminas (`BRIEFING.md`, "A Home em 24/11/2026"). O protótipo leva essa edição adiante: o catálogo inteiro, em árvore, e os widgets que não são de tarefa.
+- **Mudou:**
+  - cada lâmina do Painel de tarefas é um widget, com o nome e a regra do SDK:
+    - Números: Abertas, Concluídas, Criadas, Vencidas e Vencem em 7 dias. Abertas, Concluídas e Criadas têm a curva das 4 semanas; Vencidas e Vencem em 7 dias, a parte das abertas;
+    - Listas: Vencidas e Vencem em breve, nas faixas do SDK ("Há até 7 dias", "Há mais de 7 dias", "Nas próximas 24 h", "Em 1 a 7 dias"), com o tempo no selo; Minhas tarefas e Tarefas que delegei continuam;
+    - Gráficos: Abertas por status, Prioridade (só tarefa rápida), Carga por responsável, Atividade (4 semanas), Saúde dos prazos e Entrada e saída;
+  - "Minhas tarefas · Workspace" no topo da Home, ao lado de Personalizar: troca as lâminas todas de uma vez. Minhas tarefas = as atribuídas a mim;
+  - a Home padrão segue a de develop: os 4 números, Vencidas e Vencem em breve, Categorias na largura toda, e depois Minhas tarefas, o gráfico de um painel, Comunicado, Atalhos e Recentes;
+  - o catálogo vira árvore de 2 níveis:
+    - 1º nível: Tarefas, Categorias, Navegação e agenda, Equipe e notas, cada um com quantas opções tem;
+    - Tarefas > as lâminas em Números, Listas e Gráficos, cada uma com Adicionar ou "Na Home";
+    - Categorias > quais aparecem e em que ordem, com "Adicionar à Home" ou, quando o widget já está nela, "Salvar na Home";
+    - a busca do 1º nível procura em todas as folhas;
+  - saíram "Itens de uma visualização" e "Número de uma visualização", e com eles a escolha de visualização e de título no Configurar;
+  - o widget Categorias tem cartões do mesmo tamanho (colunas iguais, altura fixa, nome truncado) e mostra as categorias na ordem escolhida. A ordem se muda com Subir e Descer, no catálogo e no Configurar;
+  - estados de partida no andaime:
+    - **Workspace vazio (primeiro acesso):** o workspace acabou de nascer. Os widgets da Home padrão estão no lugar, sem dado: os números em 0, "Nada por aqui" nas listas, "Sem tarefas para mostrar." nos gráficos, Categorias com "Criar categoria" para o administrador (o membro lê que o administrador ainda não criou), Comunicado com "Escrever comunicado" para o administrador;
+    - **Workspace configurado:** o que se chamava "Estado inicial (primeiro acesso)": a Home padrão com o dado do mocks.ts;
+    - Carregando, Sem widgets, Erro num widget e Sem acesso num widget continuam. Erro cai na primeira lista ou gráfico de tarefas; Sem acesso, no gráfico de um painel ("Você não tem acesso a Painéis de compras").
+- **CSS próprio:** entra o `.lista-move` do `_OrdemDeCategorias.vue`, para a linha deslizar ao Subir e Descer (o `TransitionGroup` pede a classe; o Nuxt UI não tem lista reordenável).
+- **Fronteira:** muda o que entra na Home (as lâminas), o catálogo, o widget Categorias e os estados. Criar, Personalizar na própria Home e a casca ficam como na rodada 4.
+- **Descartado:**
+  - arrastar para ordenar as categorias: os exemplos do Nuxt UI pedem `@vueuse/integrations` e `sortablejs`, que o app não importa, e Subir e Descer servem também a quem não arrasta (WCAG 2.5.7);
+  - um alternador de escopo em cada lâmina: em develop ele é um só, no topo.
+- **Ver:** `evidencias/rodada5-*.jpg`
+
 ## Rodada 3 · 2026-11-11
 
 - **Pedido (literal):** "alem disso verifique no codigo se os widgets que voce sugeriu fazem sentido, do tipo "tarefas que eu criei e deleguei", faz sentido criar isso? tem no codigo e é ok de mexer? e quais dados vai cruzar pra chegar nisso entao? pq isso tem que estar nos requisitos" e "ao clicar em personalizar, a forma mais clean é realmente abrir uma SIDEBAR? os outros produtos fazem assim tambem? ou de outro modo?"

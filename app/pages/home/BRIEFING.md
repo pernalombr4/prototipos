@@ -37,9 +37,36 @@ Procurei no `enspace-ux-research` (auditoria de UX por persona) antes de desenha
 
 ## O que o develop faz hoje
 
-Investigado em 11/11/2026, no workspace de exploração, pelo Chrome da usuária.
+### A Home em 24/11/2026 (rodada 5)
 
-### A Home
+A redatora avisou que os elementos do Painel de tarefas foram levados para a Home. Lido no código (en-space@develop be2a5d850 e en-sdk@develop 58a81c6, só leitura):
+
+- a Home monta uma lista de lâminas, cada uma com id, tamanho na grade e se aparece de saída: `src/utils/workspaceHome.ts`, `homeEntries`;
+- de saída aparecem:
+  - 4 cartões de número, cada um com 3 colunas por 4 linhas: abertas, concluídas, criadas e vencidas (`kpi-open`, `kpi-completed`, `kpi-created`, `kpi-overdue`);
+  - a fila de prazos (`tasks-due`, a lâmina `dueList` do SDK: Vencidas e Vencem em breve);
+  - os cartões de categoria, na largura toda (12 por 8);
+  - as comparações (o bloco `WorkspaceComparisons` que já existia);
+- ficam escondidas, para ligar: status, prioridade (o recorte por prioridade do `breakdown`), carga por responsável e atividade;
+- um alternador "minhas" ou "workspace" decide de quem são as tarefas, e fica guardado no navegador;
+- as lâminas vêm do catálogo do Painel de tarefas do SDK (`components/tasks/insights/catalog.ts`): cartões de número (abertas, concluídas, criadas, vencidas, vencem em breve, no prazo, tempo de ciclo), "Entrada e saída", "Abertas por status", "Saúde dos prazos", "Recortes", pontos, origem, atividade, "Carga por responsável", "Tempo por etapa" e "Fila de prazos";
+- os status de tarefa são 4: `pending`, `working`, `completed` e `blocked`.
+
+Visto na tela em 24/11/2026, no workspace de exploração, pelo Chrome da usuária:
+
+- no topo, à direita: "Minhas tarefas" e "Workspace" (abas) e o botão "Personalizar";
+- abaixo, 4 cartões de número ("Abertas agora", "Concluídas", "Criadas", "Vencidas") e, lado a lado, "Vencidas" e "Vencem em breve", cada lista com o selo "Rápidas + Flow" e as faixas ("Há mais de 7 dias");
+- "Personalizar" põe a Home em edição: o aviso "Arraste para reorganizar · puxe o canto para redimensionar" e, embaixo, a barra "Adicionar painel", "Desfazer", "Restaurar padrão" e "Concluir";
+- "Adicionar painel" abre um menu curto, sem busca, em 2 grupos: Tarefas ("Abertas por status", "Carga por responsável", "Atividade") e Tarefas rápidas ("Prioridade"). As lâminas que já estão na Home não aparecem nele;
+- os cartões de categoria não apareceram neste workspace, que não liga `show_types_on_initial_screen`.
+
+![Home de develop em edição, com o menu Adicionar painel aberto](evidencias/develop-home-adicionar-painel.jpg)
+
+**O que isso muda na proposta:** os widgets de tarefa do protótipo passam a ser essas lâminas, com os nomes e as faixas do SDK, e o alternador fica no topo da Home, como em develop.
+
+### A Home em 11/11/2026
+
+Investigado no workspace de exploração, pelo Chrome da usuária.
 
 - URL: `https://develop.enspace.io/workspaces/<ws>` (título da aba: "<workspace>/Home").
 - De cima para baixo:

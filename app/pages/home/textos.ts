@@ -4,7 +4,7 @@
  * Regra 33: nenhum texto de interface leva travessão.
  */
 import type { Idioma } from '~/composables/useIdioma'
-import type { GrupoDoCatalogo, TipoDeWidget } from './widgets'
+import type { GrupoDoCatalogo, SecaoDeTarefas, TipoDeWidget } from './widgets'
 
 type Aba = 'atraso' | 'hoje' | 'proximas' | 'semPrazo'
 type Prioridade = 'low' | 'normal' | 'high' | 'urgent'
@@ -114,14 +114,6 @@ export interface Textos {
 
   delegadas: { para: (nome: string) => string, vazio: string }
 
-  visualizacao: {
-    colunas: { item: string, etapa: string, responsavel: string, valor: string }
-    vazio: string
-    abrir: string
-    contagem: (n: number) => string
-  }
-
-  numero: { itens: (n: number) => string, abrir: string }
   atalhos: { escolher: string, vazio: string, tipos: Record<'visualizacao' | 'tela' | 'link', string> }
   recentes: { ha: (minutos: number) => string, vazio: string, tipos: Record<'item' | 'visualizacao' | 'tela' | 'formulario', string> }
   agenda: { vazio: string, abrir: string, fontes: Record<'tarefa' | 'item' | 'calendario', string> }
@@ -158,10 +150,6 @@ export interface Textos {
 
   config: {
     titulo: (widget: string) => string
-    categoria: string
-    visualizacao: string
-    tituloDoWidget: string
-    tituloAjuda: string
     salvar: string
     cancelar: string
     categoriasAjuda: string
@@ -219,6 +207,49 @@ export interface Textos {
     abrirMaquete: (destino: string) => string
   }
 
+  secoes: Record<SecaoDeTarefas, string>
+  descricaoDosGrupos: Record<GrupoDoCatalogo, string>
+  escopoDeTarefas: { rotulo: string, minhas: string, workspace: string }
+  catalogo: {
+    voltar: string
+    opcoes: (n: number) => string
+    escopoDica: string
+    categoriasDica: string
+    adicionarCategorias: string
+    salvarCategorias: string
+    semCategorias: string
+    marcadas: (n: number, total: number) => string
+    resultados: string
+  }
+  ordem: { subir: (nome: string) => string, descer: (nome: string) => string, mostrar: (nome: string) => string }
+  laminas: {
+    subtitulos: Partial<Record<TipoDeWidget, string>>
+    dasAbertas: (pct: number) => string
+    nadaPorAqui: string
+    semDados: string
+    faixas: { haMaisDe7: string, haAte7: string, em24h: string, em1a7: string }
+    venceuHa: (duracao: string) => string
+    em: (duracao: string) => string
+    duracao: (dias: number, horas: number) => string
+    semResponsavel: string
+    status: Record<'pending' | 'working' | 'blocked', string>
+    abertas: string
+    carga: { vencidas: string, emDia: string }
+    atividade: { diasAtivos: string, sequencia: string, dias: (n: number) => string, celula: (data: string, n: number) => string, menos: string, mais: string }
+    entrada: { criadas: string, concluidas: string, saldo: string, semana: (data: string) => string }
+    abrirPainel: string
+  }
+  vazios: {
+    categoriasTitulo: string
+    categoriasAdmin: string
+    categoriasMembro: string
+    criarCategoria: string
+    comunicado: string
+    escreverComunicado: string
+    beni: string
+    grafico: (tela: string) => string
+  }
+
   ehMaquete: string
 }
 
@@ -249,21 +280,31 @@ const ptBR: Textos = {
   personalizar: 'Personalizar',
 
   widgets: {
+    kpiAbertas: { titulo: 'Abertas agora', descricao: 'Quantas tarefas estão abertas, com a curva das últimas 4 semanas.' },
+    kpiConcluidas: { titulo: 'Concluídas', descricao: 'Tarefas concluídas nas últimas 4 semanas.' },
+    kpiCriadas: { titulo: 'Criadas', descricao: 'Tarefas criadas nas últimas 4 semanas.' },
+    kpiVencidas: { titulo: 'Vencidas', descricao: 'Tarefas abertas com o prazo já passado.' },
+    kpiVencem7: { titulo: 'Vencem em 7 dias', descricao: 'Tarefas abertas que vencem até o fim do 7º dia.' },
+    vencidas: { titulo: 'Vencidas', descricao: 'A lista das tarefas vencidas, das mais antigas às mais recentes.' },
+    vencemEmBreve: { titulo: 'Vencem em breve', descricao: 'A lista das tarefas que vencem nos próximos 7 dias.' },
+    minhasTarefas: { titulo: 'Minhas tarefas', descricao: 'Suas tarefas rápidas e agendadas, por prazo, com Concluir.' },
+    tarefasDelegadas: { titulo: 'Tarefas que delegei', descricao: 'Tarefas rápidas que você criou para outras pessoas.' },
+    status: { titulo: 'Abertas por status', descricao: 'Como a fila atual está distribuída.' },
+    prioridade: { titulo: 'Prioridade', descricao: 'Tarefas rápidas abertas por prioridade.' },
+    carga: { titulo: 'Carga por responsável', descricao: 'Quem concentra a fila e as vencidas.' },
+    atividade: { titulo: 'Atividade', descricao: 'Concluídas por dia nas últimas 4 semanas.' },
+    saudeDosPrazos: { titulo: 'Saúde dos prazos', descricao: 'Tarefas abertas pela situação do prazo.' },
+    entradaESaida: { titulo: 'Entrada e saída', descricao: 'Tarefas criadas e concluídas por semana.' },
     categorias: { titulo: 'Categorias', descricao: 'Acesse uma categoria ou crie um item nela.' },
-    minhasTarefas: { titulo: 'Minhas tarefas', descricao: 'Suas tarefas rápidas e agendadas, por prazo.' },
-    visualizacao: { titulo: 'Itens de uma visualização', descricao: 'Os itens de uma visualização salva de uma categoria.' },
-    numero: { titulo: 'Número de uma visualização', descricao: 'Quantos itens uma visualização salva tem agora.' },
     atalhos: { titulo: 'Atalhos', descricao: 'Visualizações, telas e links fixados.' },
     recentes: { titulo: 'Recentes', descricao: 'Os itens e as telas que você abriu por último.' },
     agenda: { titulo: 'Agenda de hoje', descricao: 'Compromissos, prazos de tarefa e datas de item de hoje.' },
-    saudeDosPrazos: { titulo: 'Saúde dos prazos', descricao: 'Tarefas abertas do workspace pela situação do prazo.' },
     graficoDePainel: { titulo: 'Gráfico de um painel', descricao: 'Um painel de uma tela do tipo Dashboard.' },
-    tarefasDelegadas: { titulo: 'Tarefas que delegei', descricao: 'Tarefas rápidas que você criou para outras pessoas.' },
-    notas: { titulo: 'Bloco de notas', descricao: 'Anotações suas. Só você vê.' },
     comunicado: { titulo: 'Comunicado', descricao: 'Aviso do administrador para todo o workspace.' },
+    notas: { titulo: 'Bloco de notas', descricao: 'Anotações suas. Só você vê.' },
     beni: { titulo: 'Resumo do BENI', descricao: 'O BENI resume o que pede sua atenção hoje.' },
   },
-  grupos: { trabalho: 'Trabalho', itens: 'Itens e números', navegacao: 'Navegação', equipe: 'Equipe e notas' },
+  grupos: { tarefas: 'Tarefas', categorias: 'Categorias', navegacao: 'Navegação e agenda', equipe: 'Equipe e notas' },
 
   widget: {
     configurar: 'Configurar',
@@ -281,7 +322,7 @@ const ptBR: Textos = {
     erroTitulo: 'Não foi possível carregar',
     erroTexto: 'Os outros widgets continuam funcionando.',
     semAcessoTitulo: 'Sem acesso',
-    semAcessoTexto: c => `Você não tem acesso à categoria ${c}. Peça ao administrador ou remova o widget.`,
+    semAcessoTexto: c => `Você não tem acesso a ${c}. Peça ao administrador ou remova o widget.`,
   },
 
   criar: {
@@ -343,14 +384,6 @@ const ptBR: Textos = {
 
   delegadas: { para: n => `Com ${n}`, vazio: 'Você não delegou nenhuma tarefa aberta.' },
 
-  visualizacao: {
-    colunas: { item: 'Item', etapa: 'Etapa', responsavel: 'Responsável', valor: 'Valor' },
-    vazio: 'Nenhum item nesta visualização.',
-    abrir: 'Abrir visualização',
-    contagem: n => n === 1 ? '1 item' : `${n} itens`,
-  },
-
-  numero: { itens: n => n === 1 ? 'item' : 'itens', abrir: 'Abrir a visualização' },
   atalhos: {
     escolher: 'Escolher atalhos',
     vazio: 'Fixe aqui o que você abre todo dia.',
@@ -402,13 +435,9 @@ const ptBR: Textos = {
 
   config: {
     titulo: w => `Configurar ${w}`,
-    categoria: 'Categoria',
-    visualizacao: 'Visualização',
-    tituloDoWidget: 'Título do widget',
-    tituloAjuda: 'Sem título, vale o nome da visualização.',
     salvar: 'Salvar',
     cancelar: 'Cancelar',
-    categoriasAjuda: 'Marque as categorias que aparecem no widget. Sem nenhuma marcada, aparecem todas as que você acessa.',
+    categoriasAjuda: 'Marque as categorias que aparecem no widget e use as setas para definir a ordem. Sem nenhuma marcada, aparecem todas as que você acessa, na ordem do workspace.',
     todas: 'Mostrar todas',
   },
 
@@ -463,6 +492,72 @@ const ptBR: Textos = {
     abrirMaquete: d => `No produto, abre ${d}.`,
   },
 
+  secoes: { numeros: 'Números', listas: 'Listas', graficos: 'Gráficos' },
+  descricaoDosGrupos: {
+    tarefas: 'Números, listas e gráficos das tarefas rápidas e agendadas.',
+    categorias: 'Atalho para as categorias, na ordem que você escolher.',
+    navegacao: 'Atalhos, recentes, agenda e o gráfico de uma tela.',
+    equipe: 'Comunicado, bloco de notas e o resumo do BENI.',
+  },
+  escopoDeTarefas: { rotulo: 'De quem são as tarefas', minhas: 'Minhas tarefas', workspace: 'Workspace' },
+  catalogo: {
+    voltar: 'Voltar',
+    opcoes: n => n === 1 ? '1 opção' : `${n} opções`,
+    escopoDica: 'Os números, as listas de prazo e os gráficos seguem a escolha Minhas tarefas ou Workspace do topo da Home.',
+    categoriasDica: 'Marque as categorias que aparecem no widget e use as setas para definir a ordem.',
+    adicionarCategorias: 'Adicionar à Home',
+    salvarCategorias: 'Salvar na Home',
+    semCategorias: 'O workspace ainda não tem categorias.',
+    marcadas: (n, t) => n === 0 ? `Nenhuma marcada: aparecem as ${t}, na ordem do workspace.` : `${n} de ${t} marcadas`,
+    resultados: 'Resultados',
+  },
+  ordem: { subir: n => `Subir ${n}`, descer: n => `Descer ${n}`, mostrar: n => `Mostrar ${n}` },
+  laminas: {
+    subtitulos: {
+      kpiConcluidas: 'Últimas 4 semanas',
+      kpiCriadas: 'Últimas 4 semanas',
+      vencidas: 'Rápidas e agendadas',
+      vencemEmBreve: 'Rápidas e agendadas',
+      status: 'Como a fila atual está distribuída',
+      prioridade: 'Tarefas rápidas abertas',
+      carga: 'Quem concentra a fila e as vencidas',
+      atividade: 'Concluídas por dia, últimas 4 semanas',
+      saudeDosPrazos: 'Abertas agora pela situação do prazo',
+      entradaESaida: 'Criadas e concluídas por semana',
+    },
+    dasAbertas: p => `${p}% das abertas`,
+    nadaPorAqui: 'Nada por aqui',
+    semDados: 'Sem tarefas para mostrar.',
+    faixas: { haMaisDe7: 'Há mais de 7 dias', haAte7: 'Há até 7 dias', em24h: 'Em até 24 h', em1a7: 'Em 1 a 7 dias' },
+    venceuHa: d => `venceu há ${d}`,
+    em: d => `em ${d}`,
+    duracao: (d, h) => d ? (h ? `${d} d ${h} h` : `${d} d`) : `${h} h`,
+    semResponsavel: 'Sem responsável',
+    status: { pending: 'Pendente', working: 'Em andamento', blocked: 'Bloqueada' },
+    abertas: 'abertas',
+    carga: { vencidas: 'Vencidas', emDia: 'Em dia' },
+    atividade: {
+      diasAtivos: 'Dias ativos',
+      sequencia: 'Sequência atual',
+      dias: n => n === 1 ? '1 dia' : `${n} dias`,
+      celula: (d, n) => `${d}: ${n} ${n === 1 ? 'concluída' : 'concluídas'}`,
+      menos: 'Menos',
+      mais: 'Mais',
+    },
+    entrada: { criadas: 'Criadas', concluidas: 'Concluídas', saldo: 'Saldo do período', semana: d => `Semana de ${d}` },
+    abrirPainel: 'Abrir o Painel de tarefas',
+  },
+  vazios: {
+    categoriasTitulo: 'Nenhuma categoria ainda',
+    categoriasAdmin: 'Crie a primeira categoria para o time começar a registrar itens.',
+    categoriasMembro: 'O administrador ainda não criou categorias neste workspace.',
+    criarCategoria: 'Criar categoria',
+    comunicado: 'Nenhum comunicado publicado.',
+    escreverComunicado: 'Escrever comunicado',
+    beni: 'O BENI começa a resumir quando houver tarefas e itens no workspace.',
+    grafico: t => `A tela ${t} ainda não tem dados.`,
+  },
+
   ehMaquete: 'Maquete',
 }
 
@@ -493,21 +588,31 @@ const en: Textos = {
   personalizar: 'Customize',
 
   widgets: {
+    kpiAbertas: { titulo: 'Open now', descricao: 'How many tasks are open, with the curve of the last 4 weeks.' },
+    kpiConcluidas: { titulo: 'Completed', descricao: 'Tasks completed in the last 4 weeks.' },
+    kpiCriadas: { titulo: 'Created', descricao: 'Tasks created in the last 4 weeks.' },
+    kpiVencidas: { titulo: 'Overdue', descricao: 'Open tasks past their due date.' },
+    kpiVencem7: { titulo: 'Due in 7 days', descricao: 'Open tasks due by the end of the 7th day.' },
+    vencidas: { titulo: 'Overdue', descricao: 'The list of overdue tasks, oldest first.' },
+    vencemEmBreve: { titulo: 'Due soon', descricao: 'The list of tasks due in the next 7 days.' },
+    minhasTarefas: { titulo: 'My tasks', descricao: 'Your quick and scheduled tasks, by due date, with Complete.' },
+    tarefasDelegadas: { titulo: 'Tasks I delegated', descricao: 'Quick tasks you created for other people.' },
+    status: { titulo: 'Open by status', descricao: 'How the current queue is split.' },
+    prioridade: { titulo: 'Priority', descricao: 'Open quick tasks by priority.' },
+    carga: { titulo: 'Workload by assignee', descricao: 'Who holds the queue and the overdue tasks.' },
+    atividade: { titulo: 'Activity', descricao: 'Completed per day in the last 4 weeks.' },
+    saudeDosPrazos: { titulo: 'Due date health', descricao: 'Open tasks by due date status.' },
+    entradaESaida: { titulo: 'In and out', descricao: 'Tasks created and completed per week.' },
     categorias: { titulo: 'Categories', descricao: 'Open a category or create an item in it.' },
-    minhasTarefas: { titulo: 'My tasks', descricao: 'Your quick and scheduled tasks, by due date.' },
-    visualizacao: { titulo: 'Items from a view', descricao: 'The items of a saved view of a category.' },
-    numero: { titulo: 'Number from a view', descricao: 'How many items a saved view has right now.' },
     atalhos: { titulo: 'Shortcuts', descricao: 'Pinned views, screens and links.' },
     recentes: { titulo: 'Recent', descricao: 'The items and screens you opened last.' },
     agenda: { titulo: 'Today\'s schedule', descricao: 'Today\'s events, task due dates and item dates.' },
-    saudeDosPrazos: { titulo: 'Due date health', descricao: 'Open workspace tasks by due date status.' },
     graficoDePainel: { titulo: 'Chart from a dashboard', descricao: 'A panel from a Dashboard screen.' },
-    tarefasDelegadas: { titulo: 'Tasks I delegated', descricao: 'Quick tasks you created for other people.' },
-    notas: { titulo: 'Notepad', descricao: 'Your notes. Only you can see them.' },
     comunicado: { titulo: 'Announcement', descricao: 'A notice from the admin to the whole workspace.' },
+    notas: { titulo: 'Notepad', descricao: 'Your notes. Only you can see them.' },
     beni: { titulo: 'BENI summary', descricao: 'BENI sums up what needs your attention today.' },
   },
-  grupos: { trabalho: 'Work', itens: 'Items and numbers', navegacao: 'Navigation', equipe: 'Team and notes' },
+  grupos: { tarefas: 'Tasks', categorias: 'Categories', navegacao: 'Navigation and schedule', equipe: 'Team and notes' },
 
   widget: {
     configurar: 'Configure',
@@ -525,7 +630,7 @@ const en: Textos = {
     erroTitulo: 'Could not load',
     erroTexto: 'The other widgets keep working.',
     semAcessoTitulo: 'No access',
-    semAcessoTexto: c => `You do not have access to the ${c} category. Ask the admin or remove the widget.`,
+    semAcessoTexto: c => `You do not have access to ${c}. Ask the admin or remove the widget.`,
   },
 
   criar: {
@@ -587,14 +692,6 @@ const en: Textos = {
 
   delegadas: { para: n => `With ${n}`, vazio: 'You have not delegated any open task.' },
 
-  visualizacao: {
-    colunas: { item: 'Item', etapa: 'Stage', responsavel: 'Assignee', valor: 'Amount' },
-    vazio: 'No items in this view.',
-    abrir: 'Open view',
-    contagem: n => n === 1 ? '1 item' : `${n} items`,
-  },
-
-  numero: { itens: n => n === 1 ? 'item' : 'items', abrir: 'Open the view' },
   atalhos: {
     escolher: 'Choose shortcuts',
     vazio: 'Pin here what you open every day.',
@@ -646,13 +743,9 @@ const en: Textos = {
 
   config: {
     titulo: w => `Configure ${w}`,
-    categoria: 'Category',
-    visualizacao: 'View',
-    tituloDoWidget: 'Widget title',
-    tituloAjuda: 'Without a title, the view name is used.',
     salvar: 'Save',
     cancelar: 'Cancel',
-    categoriasAjuda: 'Check the categories shown in the widget. With none checked, all the ones you can access show up.',
+    categoriasAjuda: 'Check the categories shown in the widget and use the arrows to set their order. With none checked, all the ones you can access show up, in workspace order.',
     todas: 'Show all',
   },
 
@@ -707,6 +800,72 @@ const en: Textos = {
     abrirMaquete: d => `In the product, this opens ${d}.`,
   },
 
+  secoes: { numeros: 'Numbers', listas: 'Lists', graficos: 'Charts' },
+  descricaoDosGrupos: {
+    tarefas: 'Numbers, lists and charts of quick and scheduled tasks.',
+    categorias: 'Shortcuts to categories, in the order you choose.',
+    navegacao: 'Shortcuts, recents, schedule and a chart from a screen.',
+    equipe: 'Announcement, notepad and the BENI summary.',
+  },
+  escopoDeTarefas: { rotulo: 'Whose tasks', minhas: 'My tasks', workspace: 'Workspace' },
+  catalogo: {
+    voltar: 'Back',
+    opcoes: n => n === 1 ? '1 option' : `${n} options`,
+    escopoDica: 'Numbers, due lists and charts follow the My tasks or Workspace choice at the top of the Home.',
+    categoriasDica: 'Check the categories shown in the widget and use the arrows to set their order.',
+    adicionarCategorias: 'Add to Home',
+    salvarCategorias: 'Save on Home',
+    semCategorias: 'The workspace has no categories yet.',
+    marcadas: (n, t) => n === 0 ? `None checked: all ${t} show up, in workspace order.` : `${n} of ${t} checked`,
+    resultados: 'Results',
+  },
+  ordem: { subir: n => `Move ${n} up`, descer: n => `Move ${n} down`, mostrar: n => `Show ${n}` },
+  laminas: {
+    subtitulos: {
+      kpiConcluidas: 'Last 4 weeks',
+      kpiCriadas: 'Last 4 weeks',
+      vencidas: 'Quick and scheduled',
+      vencemEmBreve: 'Quick and scheduled',
+      status: 'How the current queue is split',
+      prioridade: 'Open quick tasks',
+      carga: 'Who holds the queue and the overdue tasks',
+      atividade: 'Completed per day, last 4 weeks',
+      saudeDosPrazos: 'Open now by due date status',
+      entradaESaida: 'Created and completed per week',
+    },
+    dasAbertas: p => `${p}% of open`,
+    nadaPorAqui: 'Nothing here',
+    semDados: 'No tasks to show.',
+    faixas: { haMaisDe7: 'Over 7 days ago', haAte7: 'Up to 7 days ago', em24h: 'Within 24 h', em1a7: 'In 1 to 7 days' },
+    venceuHa: d => `overdue by ${d}`,
+    em: d => `in ${d}`,
+    duracao: (d, h) => d ? (h ? `${d} d ${h} h` : `${d} d`) : `${h} h`,
+    semResponsavel: 'Unassigned',
+    status: { pending: 'Pending', working: 'In progress', blocked: 'Blocked' },
+    abertas: 'open',
+    carga: { vencidas: 'Overdue', emDia: 'On track' },
+    atividade: {
+      diasAtivos: 'Active days',
+      sequencia: 'Current streak',
+      dias: n => n === 1 ? '1 day' : `${n} days`,
+      celula: (d, n) => `${d}: ${n} completed`,
+      menos: 'Less',
+      mais: 'More',
+    },
+    entrada: { criadas: 'Created', concluidas: 'Completed', saldo: 'Period balance', semana: d => `Week of ${d}` },
+    abrirPainel: 'Open the Tasks dashboard',
+  },
+  vazios: {
+    categoriasTitulo: 'No categories yet',
+    categoriasAdmin: 'Create the first category so the team can start recording items.',
+    categoriasMembro: 'The admin has not created categories in this workspace yet.',
+    criarCategoria: 'Create category',
+    comunicado: 'No announcement published.',
+    escreverComunicado: 'Write announcement',
+    beni: 'BENI starts summarizing once the workspace has tasks and items.',
+    grafico: t => `The ${t} screen has no data yet.`,
+  },
+
   ehMaquete: 'Mockup',
 }
 
@@ -737,21 +896,31 @@ const es: Textos = {
   personalizar: 'Personalizar',
 
   widgets: {
+    kpiAbertas: { titulo: 'Abiertas ahora', descricao: 'Cuántas tareas están abiertas, con la curva de las últimas 4 semanas.' },
+    kpiConcluidas: { titulo: 'Completadas', descricao: 'Tareas completadas en las últimas 4 semanas.' },
+    kpiCriadas: { titulo: 'Creadas', descricao: 'Tareas creadas en las últimas 4 semanas.' },
+    kpiVencidas: { titulo: 'Vencidas', descricao: 'Tareas abiertas con el plazo ya vencido.' },
+    kpiVencem7: { titulo: 'Vencen en 7 días', descricao: 'Tareas abiertas que vencen hasta el final del 7.º día.' },
+    vencidas: { titulo: 'Vencidas', descricao: 'La lista de tareas vencidas, de las más antiguas a las más recientes.' },
+    vencemEmBreve: { titulo: 'Vencen pronto', descricao: 'La lista de tareas que vencen en los próximos 7 días.' },
+    minhasTarefas: { titulo: 'Mis tareas', descricao: 'Tus tareas rápidas y programadas, por plazo, con Completar.' },
+    tarefasDelegadas: { titulo: 'Tareas que delegué', descricao: 'Tareas rápidas que creaste para otras personas.' },
+    status: { titulo: 'Abiertas por estado', descricao: 'Cómo está distribuida la cola actual.' },
+    prioridade: { titulo: 'Prioridad', descricao: 'Tareas rápidas abiertas por prioridad.' },
+    carga: { titulo: 'Carga por responsable', descricao: 'Quién concentra la cola y las vencidas.' },
+    atividade: { titulo: 'Actividad', descricao: 'Completadas por día en las últimas 4 semanas.' },
+    saudeDosPrazos: { titulo: 'Salud de los plazos', descricao: 'Tareas abiertas por situación del plazo.' },
+    entradaESaida: { titulo: 'Entrada y salida', descricao: 'Tareas creadas y completadas por semana.' },
     categorias: { titulo: 'Categorías', descricao: 'Accede a una categoría o crea un ítem en ella.' },
-    minhasTarefas: { titulo: 'Mis tareas', descricao: 'Tus tareas rápidas y programadas, por plazo.' },
-    visualizacao: { titulo: 'Ítems de una vista', descricao: 'Los ítems de una vista guardada de una categoría.' },
-    numero: { titulo: 'Número de una vista', descricao: 'Cuántos ítems tiene ahora una vista guardada.' },
     atalhos: { titulo: 'Accesos directos', descricao: 'Vistas, pantallas y enlaces fijados.' },
     recentes: { titulo: 'Recientes', descricao: 'Los ítems y las pantallas que abriste por último.' },
     agenda: { titulo: 'Agenda de hoy', descricao: 'Compromisos, plazos de tarea y fechas de ítem de hoy.' },
-    saudeDosPrazos: { titulo: 'Salud de los plazos', descricao: 'Tareas abiertas del workspace por situación del plazo.' },
     graficoDePainel: { titulo: 'Gráfico de un panel', descricao: 'Un panel de una pantalla de tipo Dashboard.' },
-    tarefasDelegadas: { titulo: 'Tareas que delegué', descricao: 'Tareas rápidas que creaste para otras personas.' },
-    notas: { titulo: 'Bloc de notas', descricao: 'Tus notas. Solo tú las ves.' },
     comunicado: { titulo: 'Comunicado', descricao: 'Aviso del administrador para todo el workspace.' },
+    notas: { titulo: 'Bloc de notas', descricao: 'Tus notas. Solo tú las ves.' },
     beni: { titulo: 'Resumen del BENI', descricao: 'El BENI resume lo que necesita tu atención hoy.' },
   },
-  grupos: { trabalho: 'Trabajo', itens: 'Ítems y números', navegacao: 'Navegación', equipe: 'Equipo y notas' },
+  grupos: { tarefas: 'Tareas', categorias: 'Categorías', navegacao: 'Navegación y agenda', equipe: 'Equipo y notas' },
 
   widget: {
     configurar: 'Configurar',
@@ -769,7 +938,7 @@ const es: Textos = {
     erroTitulo: 'No se pudo cargar',
     erroTexto: 'Los otros widgets siguen funcionando.',
     semAcessoTitulo: 'Sin acceso',
-    semAcessoTexto: c => `No tienes acceso a la categoría ${c}. Pídelo al administrador o quita el widget.`,
+    semAcessoTexto: c => `No tienes acceso a ${c}. Pídelo al administrador o quita el widget.`,
   },
 
   criar: {
@@ -831,14 +1000,6 @@ const es: Textos = {
 
   delegadas: { para: n => `Con ${n}`, vazio: 'No delegaste ninguna tarea abierta.' },
 
-  visualizacao: {
-    colunas: { item: 'Ítem', etapa: 'Etapa', responsavel: 'Responsable', valor: 'Valor' },
-    vazio: 'Ningún ítem en esta vista.',
-    abrir: 'Abrir vista',
-    contagem: n => n === 1 ? '1 ítem' : `${n} ítems`,
-  },
-
-  numero: { itens: n => n === 1 ? 'ítem' : 'ítems', abrir: 'Abrir la vista' },
   atalhos: {
     escolher: 'Elegir accesos',
     vazio: 'Fija aquí lo que abres todos los días.',
@@ -890,13 +1051,9 @@ const es: Textos = {
 
   config: {
     titulo: w => `Configurar ${w}`,
-    categoria: 'Categoría',
-    visualizacao: 'Vista',
-    tituloDoWidget: 'Título del widget',
-    tituloAjuda: 'Sin título, vale el nombre de la vista.',
     salvar: 'Guardar',
     cancelar: 'Cancelar',
-    categoriasAjuda: 'Marca las categorías que aparecen en el widget. Sin ninguna marcada, aparecen todas a las que tienes acceso.',
+    categoriasAjuda: 'Marca las categorías que aparecen en el widget y usa las flechas para definir el orden. Sin ninguna marcada, aparecen todas a las que tienes acceso, en el orden del workspace.',
     todas: 'Mostrar todas',
   },
 
@@ -949,6 +1106,72 @@ const es: Textos = {
     restaurada: 'Inicio predeterminado restaurado.',
     padraoSalvo: 'Inicio predeterminado del workspace guardado.',
     abrirMaquete: d => `En el producto, abre ${d}.`,
+  },
+
+  secoes: { numeros: 'Números', listas: 'Listas', graficos: 'Gráficos' },
+  descricaoDosGrupos: {
+    tarefas: 'Números, listas y gráficos de las tareas rápidas y programadas.',
+    categorias: 'Accesos a las categorías, en el orden que elijas.',
+    navegacao: 'Accesos directos, recientes, agenda y el gráfico de una pantalla.',
+    equipe: 'Comunicado, bloc de notas y el resumen del BENI.',
+  },
+  escopoDeTarefas: { rotulo: 'De quién son las tareas', minhas: 'Mis tareas', workspace: 'Workspace' },
+  catalogo: {
+    voltar: 'Volver',
+    opcoes: n => n === 1 ? '1 opción' : `${n} opciones`,
+    escopoDica: 'Los números, las listas de plazo y los gráficos siguen la opción Mis tareas o Workspace de la parte superior del Inicio.',
+    categoriasDica: 'Marca las categorías que aparecen en el widget y usa las flechas para definir el orden.',
+    adicionarCategorias: 'Agregar al Inicio',
+    salvarCategorias: 'Guardar en el Inicio',
+    semCategorias: 'El workspace aún no tiene categorías.',
+    marcadas: (n, t) => n === 0 ? `Ninguna marcada: aparecen las ${t}, en el orden del workspace.` : `${n} de ${t} marcadas`,
+    resultados: 'Resultados',
+  },
+  ordem: { subir: n => `Subir ${n}`, descer: n => `Bajar ${n}`, mostrar: n => `Mostrar ${n}` },
+  laminas: {
+    subtitulos: {
+      kpiConcluidas: 'Últimas 4 semanas',
+      kpiCriadas: 'Últimas 4 semanas',
+      vencidas: 'Rápidas y programadas',
+      vencemEmBreve: 'Rápidas y programadas',
+      status: 'Cómo está distribuida la cola actual',
+      prioridade: 'Tareas rápidas abiertas',
+      carga: 'Quién concentra la cola y las vencidas',
+      atividade: 'Completadas por día, últimas 4 semanas',
+      saudeDosPrazos: 'Abiertas ahora por situación del plazo',
+      entradaESaida: 'Creadas y completadas por semana',
+    },
+    dasAbertas: p => `${p}% de las abiertas`,
+    nadaPorAqui: 'Nada por aquí',
+    semDados: 'No hay tareas para mostrar.',
+    faixas: { haMaisDe7: 'Hace más de 7 días', haAte7: 'Hace hasta 7 días', em24h: 'En hasta 24 h', em1a7: 'En 1 a 7 días' },
+    venceuHa: d => `venció hace ${d}`,
+    em: d => `en ${d}`,
+    duracao: (d, h) => d ? (h ? `${d} d ${h} h` : `${d} d`) : `${h} h`,
+    semResponsavel: 'Sin responsable',
+    status: { pending: 'Pendiente', working: 'En curso', blocked: 'Bloqueada' },
+    abertas: 'abiertas',
+    carga: { vencidas: 'Vencidas', emDia: 'Al día' },
+    atividade: {
+      diasAtivos: 'Días activos',
+      sequencia: 'Racha actual',
+      dias: n => n === 1 ? '1 día' : `${n} días`,
+      celula: (d, n) => `${d}: ${n} ${n === 1 ? 'completada' : 'completadas'}`,
+      menos: 'Menos',
+      mais: 'Más',
+    },
+    entrada: { criadas: 'Creadas', concluidas: 'Completadas', saldo: 'Saldo del período', semana: d => `Semana del ${d}` },
+    abrirPainel: 'Abrir el Panel de tareas',
+  },
+  vazios: {
+    categoriasTitulo: 'Aún no hay categorías',
+    categoriasAdmin: 'Crea la primera categoría para que el equipo empiece a registrar ítems.',
+    categoriasMembro: 'El administrador aún no creó categorías en este workspace.',
+    criarCategoria: 'Crear categoría',
+    comunicado: 'No hay comunicados publicados.',
+    escreverComunicado: 'Escribir comunicado',
+    beni: 'El BENI empieza a resumir cuando haya tareas e ítems en el workspace.',
+    grafico: t => `La pantalla ${t} aún no tiene datos.`,
   },
 
   ehMaquete: 'Maqueta',

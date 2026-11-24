@@ -18,6 +18,17 @@
  * - widget "Categorias": acessar a categoria ou criar nela pelo "+";
  * - cada widget carrega, falha e fica sem acesso sozinho.
  *
+ * Rodada 5, a partir da Home de develop (en-space@develop be2a5d850,
+ * `src/utils/workspaceHome.ts`), que já traz as lâminas do Painel de tarefas:
+ * - cada lâmina é um widget (números, Vencidas, Vencem em breve, status,
+ *   prioridade, carga, atividade, saúde dos prazos, entrada e saída), e todas
+ *   seguem o "Minhas tarefas · Workspace" do topo, como em develop;
+ * - o catálogo vira árvore: Tarefas > a lâmina; Categorias > quais e em que
+ *   ordem;
+ * - saem os widgets de visualização salva (itens e número);
+ * - 2 estados de partida: o workspace que acabou de nascer (os widgets da
+ *   Home padrão no lugar, sem dado) e o workspace configurado.
+ *
  * O dado é o `mocks.ts`; o catálogo e a Home padrão, o `widgets.ts`. Tudo em
  * memória: o reload volta ao começo.
  */
@@ -37,25 +48,24 @@ import type { EstadoDoWidget } from './_Widget.vue'
 import WCategorias from './_WCategorias.vue'
 import WListas from './_WListas.vue'
 import WMinhasTarefas from './_WMinhasTarefas.vue'
-import WNumero from './_WNumero.vue'
+import WLamina from './_WLamina.vue'
 import WOutros from './_WOutros.vue'
-import WVisualizacao from './_WVisualizacao.vue'
-import type { Atalho, Item, TarefaDaHome } from './mocks'
+import type { Atalho, Categoria, DiaDeTarefas, Evento, Item, Recente, TarefaDaHome } from './mocks'
 import {
-  AGORA, DIA, EU, HORA, atalhosIniciais, categoria, categorias, comunicadoInicial, eventosDeHoje, itensIniciais,
-  notaInicial, recentes, resumoDoBeni, tarefasIniciais, visualizacao,
+  AGORA, DIA, EU, HORA, atalhosIniciais, categoria, categorias as categoriasIniciais, comunicadoInicial, eventosDeHoje,
+  itensIniciais, notaInicial, painelDeCompras, recentes as recentesIniciais, resumoDoBeni, serieDasTarefas, tarefasIniciais,
 } from './mocks'
 import type { AbaDeTarefa } from './formatar'
 import { HOJE, abaDa, dataLonga, horaAtual } from './formatar'
-import type { ConfigDoWidget, TipoDeWidget, Widget } from './widgets'
-import { PADRAO_LAYOUT, PADRAO_WIDGETS, definicao } from './widgets'
+import type { ConfigDoWidget, LaminaDeTarefas, TipoDeWidget, Widget } from './widgets'
+import { LAMINAS, PADRAO_LAYOUT, PADRAO_WIDGETS, definicao } from './widgets'
 import { textos } from './textos'
 
 definePageMeta({
   titulo: 'Home',
-  descricao: 'Home do workspace em widgets que cada pessoa arruma (categorias, tarefas, itens de uma visualização, atalhos, recentes, comunicado), Home padrão montada pelo administrador e um botão Criar que ramifica em item e tarefa.',
+  descricao: 'Home do workspace em widgets que cada pessoa arruma (as lâminas do Painel de tarefas, categorias na ordem escolhida, atalhos, recentes, comunicado), catálogo em árvore, Home padrão montada pelo administrador e um botão Criar que ramifica em item e tarefa.',
   status: 'em-revisao',
-  atualizado: '2026-11-11',
+  atualizado: '2026-11-24',
   tela: 'Início',
 })
 
@@ -67,11 +77,12 @@ const SLUG = 'operacoes-lumina'
  * ANDAIME: estado e papel. Não é proposta.                             *
  * ------------------------------------------------------------------ */
 
-type EstadoDaHome = 'cheio' | 'carregando' | 'vazio' | 'erro' | 'semAcesso'
-const estado = ref<EstadoDaHome>('cheio')
+type EstadoDaHome = 'workspaceVazio' | 'configurado' | 'carregando' | 'vazio' | 'erro' | 'semAcesso'
+const estado = ref<EstadoDaHome>('configurado')
 const papel = ref<'membro' | 'admin'>('admin')
 const estados: { valor: EstadoDaHome, rotulo: string }[] = [
-  { valor: 'cheio', rotulo: 'Estado inicial (primeiro acesso)' },
+  { valor: 'workspaceVazio', rotulo: 'Workspace vazio (primeiro acesso)' },
+  { valor: 'configurado', rotulo: 'Workspace configurado' },
   { valor: 'carregando', rotulo: 'Carregando' },
   { valor: 'vazio', rotulo: 'Sem widgets' },
   { valor: 'erro', rotulo: 'Erro num widget' },
@@ -83,12 +94,51 @@ const admin = computed(() => papel.value === 'admin')
  * Dado em memória                                                      *
  * ------------------------------------------------------------------ */
 
-const tarefas = ref<TarefaDaHome[]>(tarefasIniciais.map(x => ({ ...x })))
-const itens = ref<Item[]>(itensIniciais.map(x => ({ ...x })))
+const tarefas = ref<TarefaDaHome[]>([])
+const itens = ref<Item[]>([])
+const categorias = ref<Categoria[]>([])
+const recentes = ref<Recente[]>([])
+const eventos = ref<Evento[]>([])
+const series = ref<{ minhas: DiaDeTarefas[], workspace: DiaDeTarefas[] }>({ minhas: [], workspace: [] })
+const atalhos = ref<Atalho[]>([])
+const nota = ref('')
+const comunicado = ref<typeof comunicadoInicial | null>(null)
+const beni = ref<{ linhas: { icone: string, texto: string }[] }>({ linhas: [] })
 const recemCriados = ref<number[]>([])
-const atalhos = ref<Atalho[]>([...atalhosIniciais])
-const nota = ref(notaInicial)
-const comunicado = ref({ ...comunicadoInicial })
+
+/**
+ * Andaime. O workspace que acabou de nascer não tem tarefa, item, categoria,
+ * atalho nem comunicado, e a série das 4 semanas é toda zero; o configurado
+ * é o mocks.ts inteiro.
+ */
+function carregarDados(vazio: boolean) {
+  const zerar = (d: DiaDeTarefas[]) => d.map(x => ({ ...x, criadas: 0, concluidas: 0 }))
+  tarefas.value = vazio ? [] : tarefasIniciais.map(x => ({ ...x }))
+  itens.value = vazio ? [] : itensIniciais.map(x => ({ ...x }))
+  categorias.value = vazio ? [] : [...categoriasIniciais]
+  recentes.value = vazio ? [] : [...recentesIniciais]
+  eventos.value = vazio ? [] : [...eventosDeHoje]
+  series.value = vazio ? { minhas: zerar(serieDasTarefas.minhas), workspace: zerar(serieDasTarefas.workspace) } : { ...serieDasTarefas }
+  atalhos.value = vazio ? [] : [...atalhosIniciais]
+  nota.value = vazio ? '' : notaInicial
+  comunicado.value = vazio ? null : { ...comunicadoInicial }
+  beni.value = vazio ? { linhas: [] } : resumoDoBeni
+  recemCriados.value = []
+}
+carregarDados(false)
+
+/**
+ * PROPOSTA: de quem são as tarefas das lâminas. A Home de develop já tem o
+ * alternador (`workspaceHome.ts`, guardado no navegador); aqui ele vale para
+ * todas as lâminas de uma vez. Minhas tarefas = as atribuídas a mim.
+ */
+const escopoDasTarefas = ref<'minhas' | 'workspace'>('minhas')
+const opcoesDoEscopoDasTarefas = computed(() => [
+  { label: t.value.escopoDeTarefas.minhas, value: 'minhas', icon: 'i-lucide-user' },
+  { label: t.value.escopoDeTarefas.workspace, value: 'workspace', icon: 'i-lucide-users' },
+])
+const tarefasDoEscopo = computed(() => escopoDasTarefas.value === 'minhas' ? tarefas.value.filter(x => x.assigned_to === EU.id) : tarefas.value)
+const serieDoEscopo = computed(() => series.value[escopoDasTarefas.value])
 
 interface Home { widgets: Widget[], layout: ItemDaGrade[] }
 const copiaDaHome = (h: Home): Home => ({ widgets: h.widgets.map(w => ({ ...w, config: { ...w.config } })), layout: h.layout.map(x => ({ ...x })) })
@@ -124,7 +174,7 @@ const resumo = computed(() => {
  * O que se cria                                                        *
  * ------------------------------------------------------------------ */
 
-const categoriasComAcesso = computed(() => categorias.filter(c => c.acesso))
+const categoriasComAcesso = computed(() => categorias.value.filter(c => c.acesso))
 
 /** Itens em aberto por categoria, para o widget Categorias. */
 const abertosPorCategoria = computed(() => {
@@ -217,6 +267,11 @@ function concluirTarefa(id: number) {
   })
 }
 
+/** Comunicado: editar o que existe ou escrever o primeiro (workspace novo). */
+function salvarComunicado(texto: string) {
+  comunicado.value = { titulo: comunicado.value?.titulo ?? t.value.widgets.comunicado.titulo, texto, autor: EU.nome, ha: 0 }
+}
+
 function abrirMaquete(destino: string) {
   toast.add({ title: t.value.toasts.abrirMaquete(destino), icon: 'i-lucide-square-arrow-out-up-right', color: 'neutral' })
 }
@@ -226,64 +281,62 @@ function abrirMaquete(destino: string) {
  * ------------------------------------------------------------------ */
 
 function tituloDo(w: Widget) {
-  if (w.config.titulo) return w.config.titulo
-  if ((w.tipo === 'visualizacao' || w.tipo === 'numero') && w.config.visualizacao) return visualizacao(w.config.visualizacao)?.nome ?? t.value.widgets[w.tipo].titulo
   return t.value.widgets[w.tipo].titulo
 }
 
-function itensDo(w: Widget) {
-  const v = visualizacao(w.config.visualizacao ?? '')
-  return v ? itens.value.filter(i => i.categoria === v.categoria && v.filtro(i)) : []
-}
-
+/** As categorias do widget, na ordem escolhida. Sem escolha, todas as que a pessoa acessa. */
 function categoriasDo(w: Widget) {
   const escolhidas = w.config.categorias ?? []
   if (!escolhidas.length) return categoriasComAcesso.value
-  return escolhidas.map(s => categoria(s)).filter((c): c is NonNullable<typeof c> => !!c && c.acesso)
-}
-
-function categoriaDo(w: Widget) {
-  return categoria(visualizacao(w.config.visualizacao ?? '')?.categoria ?? '')
+  return escolhidas.map(s => categoriasComAcesso.value.find(c => c.slug === s)).filter((c): c is Categoria => !!c)
 }
 
 function subtituloDo(w: Widget) {
   if (estadoDo(w) !== 'ok') return undefined
-  if (w.tipo === 'visualizacao') return `${categoriaDo(w)?.name ?? ''} · ${t.value.visualizacao.contagem(itensDo(w).length)}`
-  if (w.tipo === 'saudeDosPrazos') return t.value.saude.subtitulo
+  const daLamina = t.value.laminas.subtitulos[w.tipo]
+  if (daLamina) return daLamina
   if (w.tipo === 'agenda') return dataLonga(AGORA, t.value)
-  if (w.tipo === 'graficoDePainel') return 'Compras por mês'
+  if (w.tipo === 'graficoDePainel') return painelDeCompras.tela
   return undefined
 }
 
-/** O primeiro widget de itens leva o estado do andaime (erro, sem acesso). */
-const alvoDoAndaime = computed(() => layout.value.find(x => ['visualizacao', 'numero'].includes(widgetPorId(x.id)?.tipo ?? ''))?.id)
+const ehLamina = (w: Widget) => (LAMINAS as readonly TipoDeWidget[]).includes(w.tipo)
+
+/**
+ * Andaime: quem leva o estado. Erro: a primeira lista ou gráfico de tarefas.
+ * Sem acesso: o gráfico de um painel, cuja tela a pessoa pode não acessar.
+ */
+const alvoDoErro = computed(() => layout.value.find((x) => {
+  const w = widgetPorId(x.id)
+  return !!w && ['listas', 'graficos'].includes(definicao(w.tipo).secao ?? '')
+})?.id)
+const alvoDoSemAcesso = computed(() => home.value.widgets.find(w => w.tipo === 'graficoDePainel')?.id)
 const recuperando = ref<string[]>([])
 const recuperados = ref<string[]>([])
 watch(estado, () => { recuperados.value = [] })
 
-/** Andaime. "Estado inicial (primeiro acesso)" é a Home padrão do workspace, sem nada personalizado. */
+/**
+ * Andaime. Os 2 de partida mostram a Home padrão do workspace, sem nada
+ * personalizado: "Workspace vazio" sem dado nenhum, "Workspace configurado"
+ * com o mocks.ts inteiro. Os outros partem do configurado.
+ */
 function escolherEstado(e: EstadoDaHome) {
   sairDaEdicao()
-  if (e === 'cheio') {
-    minha.value = copiaDaHome(padrao.value)
-    escopo.value = 'minha'
-  }
+  carregarDados(e === 'workspaceVazio')
+  if (e === 'workspaceVazio' || e === 'configurado') minha.value = copiaDaHome(padrao.value)
   estado.value = e
 }
 
 function estadoDo(w: Widget): EstadoDoWidget {
   if (estado.value === 'carregando' || recuperando.value.includes(w.id)) return 'carregando'
-  if (w.id === alvoDoAndaime.value && !recuperados.value.includes(w.id)) {
-    if (estado.value === 'erro') return 'erro'
-    if (estado.value === 'semAcesso') return 'semAcesso'
-  }
-  const c = categoriaDo(w)
-  if (c && !c.acesso) return 'semAcesso'
+  if (recuperados.value.includes(w.id)) return 'ok'
+  if (estado.value === 'erro' && w.id === alvoDoErro.value) return 'erro'
+  if (estado.value === 'semAcesso' && w.id === alvoDoSemAcesso.value) return 'semAcesso'
   return 'ok'
 }
 
 function categoriaSemAcessoDo(w: Widget) {
-  return estado.value === 'semAcesso' && w.id === alvoDoAndaime.value ? 'Folha de pagamento' : categoriaDo(w)?.name
+  return w.id === alvoDoSemAcesso.value ? painelDeCompras.tela : undefined
 }
 
 function tentarDeNovo(id: string) {
@@ -303,11 +356,10 @@ const tiposNaHome = computed(() => home.value.widgets.map(w => w.tipo))
 /* Adicionar, remover, mover */
 
 let contador = 0
-function adicionar(tipo: TipoDeWidget) {
+function adicionar(tipo: TipoDeWidget, config: ConfigDoWidget = tipo === 'categorias' ? { categorias: [] } : {}) {
   const d = definicao(tipo)
   contador++
   const id = `w-${tipo}-${contador}`
-  const config: ConfigDoWidget = tipo === 'visualizacao' ? { visualizacao: 'v-chamados-abertos' } : tipo === 'numero' ? { visualizacao: 'v-chamados-urgentes' } : tipo === 'categorias' ? { categorias: [] } : {}
   const novo: Widget = { id, tipo, config }
   // Entra no topo, depois de Categorias, para a pessoa ver onde caiu.
   const posicao = layout.value[0] && widgetPorId(layout.value[0].id)?.tipo === 'categorias' ? 1 : 0
@@ -325,7 +377,15 @@ function adicionar(tipo: TipoDeWidget) {
   }
 
   toast.add({ title: t.value.toasts.adicionado(tituloDo(novo)), icon: 'i-lucide-plus' })
-  if (d.pedeConfig) abrirConfig(id)
+}
+
+/** O botão do 2º nível de Categorias no catálogo: adiciona o widget ou salva a escolha no que já está na Home. */
+const widgetDeCategorias = computed(() => home.value.widgets.find(w => w.tipo === 'categorias'))
+function aplicarCategorias(escolhidas: string[]) {
+  const w = widgetDeCategorias.value
+  if (!w) return adicionar('categorias', { categorias: escolhidas })
+  w.config = { ...w.config, categorias: escolhidas }
+  toast.add({ title: t.value.personalizacao.salva, description: tituloDo(w), icon: 'i-lucide-circle-check', color: 'success' })
 }
 
 function remover(id: string) {
@@ -434,7 +494,7 @@ function salvarConfig(config: ConfigDoWidget, novosAtalhos?: Atalho[]) {
 }
 
 function configuravel(w: Widget) {
-  return ['visualizacao', 'numero', 'categorias', 'atalhos'].includes(w.tipo)
+  return ['categorias', 'atalhos'].includes(w.tipo)
 }
 </script>
 
@@ -501,7 +561,15 @@ function configuravel(w: Widget) {
               {{ resumo }}
             </p>
           </div>
-          <div v-if="!editando" class="flex items-center gap-2">
+          <div v-if="!editando" class="flex flex-wrap items-center gap-2">
+            <!-- PROPOSTA: o escopo das lâminas de tarefas, como em develop (rodada 5) -->
+            <UTabs
+              v-model="escopoDasTarefas"
+              :items="opcoesDoEscopoDasTarefas"
+              :content="false"
+              size="xs"
+              :aria-label="t.escopoDeTarefas.rotulo"
+            />
             <UButton
               :label="t.personalizar"
               icon="i-lucide-layout-dashboard"
@@ -567,9 +635,9 @@ function configuravel(w: Widget) {
                     <UButton icon="i-lucide-arrow-up-right" color="neutral" variant="ghost" size="xs" :aria-label="t.categoriasW.verTodas" @click="abrirMaquete(t.categoriasW.verTodas)" />
                   </UTooltip>
                 </template>
-                <template v-else-if="w.tipo === 'visualizacao'" #acoes>
-                  <UTooltip :text="t.visualizacao.abrir">
-                    <UButton icon="i-lucide-arrow-up-right" color="neutral" variant="ghost" size="xs" :aria-label="t.visualizacao.abrir" @click="abrirMaquete(tituloDo(w))" />
+                <template v-else-if="definicao(w.tipo).segueEscopo" #acoes>
+                  <UTooltip :text="t.laminas.abrirPainel">
+                    <UButton icon="i-lucide-arrow-up-right" color="neutral" variant="ghost" size="xs" :aria-label="t.laminas.abrirPainel" @click="abrirMaquete(t.laminas.abrirPainel)" />
                   </UTooltip>
                 </template>
                 <template v-else-if="w.tipo === 'agenda'" #acoes>
@@ -586,8 +654,10 @@ function configuravel(w: Widget) {
                   :t="t"
                   :categorias="categoriasDo(w)"
                   :abertos="abertosPorCategoria"
+                  :admin="admin"
                   @acessar="(c) => abrirMaquete(c.name)"
                   @criar="abrirItem"
+                  @criar-categoria="abrirMaquete(t.vazios.criarCategoria)"
                 />
 
                 <WMinhasTarefas
@@ -601,20 +671,13 @@ function configuravel(w: Widget) {
                   @ver-todas="abrirMaquete(t.casca.itens.rapidas ?? '')"
                 />
 
-                <WVisualizacao
-                  v-else-if="w.tipo === 'visualizacao'"
+                <WLamina
+                  v-else-if="ehLamina(w)"
                   :t="t"
-                  :itens="itensDo(w)"
-                  :recem-criados="recemCriados"
-                  @abrir-item="(i) => abrirMaquete(i.titulo)"
-                />
-
-                <WNumero
-                  v-else-if="w.tipo === 'numero'"
-                  :t="t"
-                  :valor="itensDo(w).length"
-                  :categoria="categoriaDo(w)?.name ?? ''"
-                  @abrir="abrirMaquete(tituloDo(w))"
+                  :tipo="w.tipo as LaminaDeTarefas"
+                  :tarefas="tarefasDoEscopo"
+                  :serie="serieDoEscopo"
+                  @abrir="abrirMaquete"
                 />
 
                 <WListas
@@ -623,7 +686,7 @@ function configuravel(w: Widget) {
                   :tipo="w.tipo as 'atalhos' | 'recentes' | 'agenda' | 'tarefasDelegadas'"
                   :atalhos="atalhos"
                   :recentes="recentes"
-                  :eventos="eventosDeHoje"
+                  :eventos="eventos"
                   :delegadas="tarefas.filter(x => x.origem === 'rapida' && x.creator === EU.id && x.assigned_to !== EU.id && x.status !== 'completed')"
                   :largura="item.w"
                   @abrir="abrirMaquete"
@@ -635,12 +698,13 @@ function configuravel(w: Widget) {
                   v-model:nota="nota"
                   :t="t"
                   :tipo="w.tipo as 'saudeDosPrazos' | 'graficoDePainel' | 'notas' | 'comunicado' | 'beni'"
-                  :tarefas="tarefas"
-                  :comunicado="comunicado"
+                  :tarefas="tarefasDoEscopo"
+                  :comunicado="comunicado ?? undefined"
                   :pode-editar-comunicado="admin"
-                  :beni="resumoDoBeni"
+                  :beni="beni"
+                  :sem-dados="estado === 'workspaceVazio'"
                   @abrir="abrirMaquete"
-                  @salvar-comunicado="(texto) => { comunicado = { ...comunicado, texto, autor: EU.nome, ha: 0 } }"
+                  @salvar-comunicado="salvarComunicado"
                 />
               </WidgetMoldura>
             </template>
@@ -655,7 +719,10 @@ function configuravel(w: Widget) {
       :na-home="tiposNaHome"
       :admin="admin"
       :escopo="escopo"
-      @adicionar="adicionar"
+      :categorias="categoriasComAcesso"
+      :categorias-escolhidas="widgetDeCategorias?.config.categorias"
+      @adicionar="(tipo) => adicionar(tipo)"
+      @categorias="aplicarCategorias"
     />
 
     <ConfigurarWidget
@@ -663,7 +730,7 @@ function configuravel(w: Widget) {
       :t="t"
       :tipo="widgetEmConfig?.tipo"
       :config="widgetEmConfig?.config"
-      :categorias="categorias"
+      :categorias="categoriasComAcesso"
       :atalhos="atalhos"
       @salvar="salvarConfig"
     />

@@ -8,6 +8,10 @@
  * - Bloco de notas: texto só da pessoa. NOVO no produto;
  * - Comunicado: aviso do administrador. NOVO; só o administrador edita;
  * - Resumo do BENI: frases geradas pelo agente de IA. MAQUETE: o texto é fixo.
+ *
+ * Rodada 5: cada um tem o estado do workspace que acabou de nascer (sem
+ * tarefa, sem dado no painel, sem comunicado). O widget fica no lugar e diz o
+ * que falta; o administrador ganha "Escrever comunicado".
  */
 import type { TarefaDaHome } from './mocks'
 import { AGORA, DIA, painelDeCompras } from './mocks'
@@ -20,23 +24,26 @@ const props = defineProps<{
   comunicado?: { titulo: string, texto: string, autor: string, ha: number }
   podeEditarComunicado?: boolean
   beni?: { linhas: { icone: string, texto: string }[] }
+  /** Gráfico de um painel: a tela ainda não tem dado (workspace novo). */
+  semDados?: boolean
 }>()
 
 const emit = defineEmits<{ abrir: [destino: string], salvarComunicado: [texto: string] }>()
 const nota = defineModel<string>('nota', { default: '' })
 
 /* Saúde dos prazos */
+const abertas = computed(() => (props.tarefas ?? []).filter(x => x.status !== 'completed'))
 const faixas = computed(() => {
-  const abertas = (props.tarefas ?? []).filter(x => x.status !== 'completed')
+  const lista = abertas.value
   const agora = AGORA.getTime()
   const r = { vencidas: 0, vencem7: 0, noPrazo: 0, semPrazo: 0 }
-  for (const x of abertas) {
+  for (const x of lista) {
     if (!x.due_date) r.semPrazo++
     else if (x.due_date.getTime() < agora) r.vencidas++
     else if (x.due_date.getTime() < agora + 7 * DIA) r.vencem7++
     else r.noPrazo++
   }
-  const total = abertas.length || 1
+  const total = lista.length || 1
   return ([
     ['vencidas', r.vencidas, 'bg-error', 'text-error-700 dark:text-error-300'],
     ['vencem7', r.vencem7, 'bg-warning', 'text-warning-700 dark:text-warning-300'],
@@ -63,7 +70,10 @@ function publicar() {
 
 <template>
   <!-- Saúde dos prazos -->
-  <div v-if="tipo === 'saudeDosPrazos'" class="flex min-h-0 flex-1 flex-col gap-3 px-4 pb-3">
+  <p v-if="tipo === 'saudeDosPrazos' && !abertas.length" class="flex min-h-0 flex-1 items-center justify-center px-4 pb-4 text-sm text-muted">
+    {{ t.laminas.semDados }}
+  </p>
+  <div v-else-if="tipo === 'saudeDosPrazos'" class="flex min-h-0 flex-1 flex-col gap-3 px-4 pb-3">
     <div class="flex h-2.5 overflow-hidden rounded-full bg-elevated">
       <span
         v-for="f in faixas"
@@ -93,6 +103,9 @@ function publicar() {
   </div>
 
   <!-- Gráfico de um painel -->
+  <p v-else-if="tipo === 'graficoDePainel' && semDados" class="flex min-h-0 flex-1 items-center justify-center px-4 pb-4 text-center text-sm text-muted">
+    {{ t.vazios.grafico(painelDeCompras.tela) }}
+  </p>
   <div v-else-if="tipo === 'graficoDePainel'" class="flex min-h-0 flex-1 flex-col px-4 pb-3">
     <div class="flex min-h-0 flex-1 items-end gap-2 pt-2" role="img" :aria-label="painelDeCompras.meses.map((m, i) => `${m}: ${painelDeCompras.valores[i]}`).join(', ')">
       <div v-for="(v, i) in painelDeCompras.valores" :key="i" class="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1">
@@ -129,7 +142,13 @@ function publicar() {
 
   <!-- Comunicado -->
   <div v-else-if="tipo === 'comunicado'" class="flex min-h-0 flex-1 flex-col gap-2 px-4 pb-3">
-    <template v-if="!editando">
+    <div v-if="!editando && !comunicado" class="flex flex-1 flex-col items-center justify-center gap-2 text-center">
+      <p class="text-sm text-muted">
+        {{ t.vazios.comunicado }}
+      </p>
+      <UButton v-if="podeEditarComunicado" :label="t.vazios.escreverComunicado" icon="i-lucide-pencil" color="neutral" variant="outline" size="xs" @click="editar" />
+    </div>
+    <template v-else-if="!editando">
       <p class="text-sm font-semibold text-highlighted">
         {{ comunicado?.titulo }}
       </p>
@@ -151,6 +170,9 @@ function publicar() {
   </div>
 
   <!-- Resumo do BENI -->
+  <p v-else-if="!beni?.linhas.length" class="flex min-h-0 flex-1 items-center justify-center gap-2 px-4 pb-4 text-center text-sm text-muted">
+    <UIcon name="i-lucide-sparkles" class="size-4 shrink-0 text-dimmed" />{{ t.vazios.beni }}
+  </p>
   <div v-else class="flex min-h-0 flex-1 flex-col gap-2 px-4 pb-3">
     <ul class="space-y-2">
       <li v-for="(l, i) in beni?.linhas" :key="i" class="flex gap-2.5 animate-[entrada_0.3s_ease-out_both]" :style="{ animationDelay: `${i * 80}ms` }">

@@ -106,35 +106,6 @@ export function categoria(slug: string) {
   return categorias.find(c => c.slug === slug)
 }
 
-/**
- * Visualização salva da categoria: as abas da tela de itens ("Pedidos em
- * aberto", "Urgentes da semana"). O `filtro` é do protótipo: no produto, a
- * visualização guarda o filtro, as colunas e a ordem (`TypeView`).
- */
-export interface Visualizacao {
-  id: string
-  categoria: string
-  nome: string
-  filtro: (i: Item) => boolean
-}
-
-export const visualizacoes: Visualizacao[] = [
-  { id: 'v-compras-abertas', categoria: 'solicitacoes-de-compra', nome: 'Pedidos em aberto', filtro: i => i.status !== 'concluido' },
-  { id: 'v-compras-minhas', categoria: 'solicitacoes-de-compra', nome: 'Meus pedidos', filtro: i => i.responsavel === EU.id },
-  { id: 'v-compras-aprovacao', categoria: 'solicitacoes-de-compra', nome: 'Aguardando aprovação', filtro: i => i.etapa === 'Aprovação' },
-  { id: 'v-contratos-vencendo', categoria: 'contratos', nome: 'Contratos vencendo', filtro: i => i.status !== 'concluido' && (i.prazo ?? Infinity) < emDias(45).getTime() },
-  { id: 'v-contratos-todos', categoria: 'contratos', nome: 'Todos', filtro: () => true },
-  { id: 'v-chamados-abertos', categoria: 'chamados-de-ti', nome: 'Chamados abertos', filtro: i => i.status !== 'concluido' },
-  { id: 'v-chamados-urgentes', categoria: 'chamados-de-ti', nome: 'Urgentes da semana', filtro: i => i.status !== 'concluido' && i.urgente === true },
-  { id: 'v-reembolsos-pendentes', categoria: 'reembolsos', nome: 'Reembolsos pendentes', filtro: i => i.status !== 'concluido' },
-  { id: 'v-fornecedores-todos', categoria: 'fornecedores', nome: 'Todos', filtro: () => true },
-  { id: 'v-folha', categoria: 'folha-de-pagamento', nome: 'Lançamentos do mês', filtro: () => true },
-]
-
-export function visualizacao(id: string) {
-  return visualizacoes.find(v => v.id === id)
-}
-
 /* ------------------------------------------------------------------ *
  * Itens                                                                *
  * ------------------------------------------------------------------ */
@@ -219,7 +190,7 @@ export const tarefasIniciais: TarefaDaHome[] = [
   // Hoje
   tarefa({ name: 'Assinar o NDA da Vértice Consultoria', origem: 'agendada', priority: 'urgent', due_date: emDias(0, 16), assigned_to: 7001, item: { reference: '#23217', categoria: 'contratos' } }),
   tarefa({ name: 'Enviar a pauta da reunião de compras', origem: 'rapida', priority: 'normal', due_date: emDias(0, 17), assigned_to: 7001, status: 'working' }),
-  tarefa({ name: 'Ligar para a Lumen sobre o reajuste', origem: 'rapida', priority: 'low', due_date: emDias(0, 18), assigned_to: 7001 }),
+  tarefa({ name: 'Ligar para a Lumen sobre o reajuste', origem: 'rapida', priority: 'low', due_date: emDias(0, 18), assigned_to: 7001, status: 'blocked' }),
   // Próximas
   tarefa({ name: 'Negociar a renovação do galpão de Jundiaí', origem: 'agendada', priority: 'high', due_date: emDias(2, 15), assigned_to: 7001, item: { reference: '#23203', categoria: 'contratos' } }),
   tarefa({ name: 'Cotar 3 fornecedores de cadeiras', origem: 'agendada', priority: 'normal', due_date: emDias(3, 12), assigned_to: 7001, item: { reference: '#23154', categoria: 'solicitacoes-de-compra' } }),
@@ -234,10 +205,56 @@ export const tarefasIniciais: TarefaDaHome[] = [
   tarefa({ name: 'Instalar o projetor da sala 3', origem: 'rapida', priority: 'normal', due_date: emDias(6, 18), assigned_to: 7005 }),
   // De outras pessoas, para a Saúde dos prazos do workspace
   tarefa({ name: 'Resolver a VPN do home office', origem: 'agendada', priority: 'urgent', due_date: emDias(-1, 12), assigned_to: 7005, creator: 7002 }),
-  tarefa({ name: 'Trocar o toner do 2º andar', origem: 'agendada', priority: 'low', due_date: emDias(1, 12), assigned_to: 7002, creator: 7003 }),
+  tarefa({ name: 'Trocar o toner do 2º andar', origem: 'agendada', priority: 'low', due_date: emDias(1, 12), assigned_to: 7002, creator: 7003, status: 'blocked' }),
   tarefa({ name: 'Pagar o reembolso do almoço', origem: 'agendada', priority: 'normal', due_date: emDias(-4, 12), assigned_to: 7004, creator: 7004 }),
   tarefa({ name: 'Conferir a vigência dos contratos de TI', origem: 'rapida', priority: 'normal', due_date: emDias(10, 12), assigned_to: 7003, creator: 7003 }),
+  // Rodada 5: mais fila de outras pessoas, para a Carga por responsável e as listas do workspace.
+  tarefa({ name: 'Liberar o acesso ao sistema fiscal da nova analista', origem: 'agendada', priority: 'high', due_date: emDias(0, 20), assigned_to: 7005, creator: 7002, status: 'working' }),
+  tarefa({ name: 'Cotar o seguro da frota', origem: 'rapida', priority: 'urgent', due_date: emDias(-12, 12), assigned_to: 7002, creator: 7004 }),
+  tarefa({ name: 'Revisar o fluxo de aprovação de compras', origem: 'rapida', priority: 'normal', due_date: emDias(4, 12), assigned_to: 7003, creator: 7001 }),
+  tarefa({ name: 'Fechar a conciliação de outubro', origem: 'agendada', priority: 'high', due_date: emDias(1, 9), assigned_to: 7004, creator: 7003 }),
+  tarefa({ name: 'Responder a auditoria interna sobre contratos', origem: 'rapida', priority: 'high', due_date: null, assigned_to: 7003, creator: 7004, status: 'working' }),
+  tarefa({ name: 'Atualizar o cadastro da Atria Sistemas', origem: 'agendada', priority: 'low', due_date: emDias(6, 12), assigned_to: 7002, creator: 7002 }),
 ]
+
+/* ------------------------------------------------------------------ *
+ * Série diária de tarefas (rodada 5)                                   *
+ * ------------------------------------------------------------------ */
+
+/**
+ * Criadas e concluídas por dia, dos últimos 28 dias até hoje. Campo de
+ * protótipo: no produto, o SDK pede a série agregada ao servidor (a lâmina
+ * "Entrada e saída" e as curvas dos cartões de número). As "abertas" de cada
+ * dia se reconstroem de trás para a frente a partir das abertas de hoje.
+ */
+export interface DiaDeTarefas {
+  data: Date
+  criadas: number
+  concluidas: number
+}
+
+function serieDeTarefas(semente: number, escala: number): DiaDeTarefas[] {
+  let s = semente
+  const sortear = () => {
+    s = (s * 9301 + 49297) % 233280
+    return s / 233280
+  }
+  return Array.from({ length: 28 }, (_, i) => {
+    const data = emDias(i - 27, 12)
+    const fimDeSemana = [0, 6].includes(data.getUTCDay())
+    const peso = fimDeSemana ? 0.15 : 1
+    return {
+      data,
+      criadas: Math.round(sortear() * 4 * escala * peso),
+      concluidas: Math.round(sortear() * 4 * escala * peso),
+    }
+  })
+}
+
+export const serieDasTarefas = {
+  minhas: serieDeTarefas(17, 1),
+  workspace: serieDeTarefas(41, 3),
+}
 
 /* ------------------------------------------------------------------ *
  * Agenda, recentes, painéis, comunicado                                *
