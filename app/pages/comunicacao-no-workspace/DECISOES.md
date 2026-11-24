@@ -19,7 +19,7 @@ SMS saíram do plano.
 | (a) Link do formulário público | Requisições (cartão "Compartilhar este formulário"); lista de itens da categoria; painel da tarefa de preencher formulário |
 | (b) Atalho de e-mail | Item (Contato do item na lateral e ícone ao lado do campo de e-mail); lista e quadro de itens (submenu "E-mail"); tarefas (coluna Contato, e-mail em lote, clique direito, painel); Agenda (lembrete) |
 | Configuração | Aba Configurações da central E-mails: a conta de envio de cada pessoa e, para quem administra, o contato do item, o remetente com o domínio da empresa e (Fase 2) as caixas no "De". Sem chave em Sistema › Módulos: o e-mail vem sempre ligado. Categorias › cartão "Contato da categoria" (Fase 2, a avaliar com os devs) |
-| E-mail do ENSPACE em todas as telas | "Novo e-mail" no topo, que reconhece o item ou a tarefa aberta; o compositor; a central "E-mails" no menu, com Mensagens, Modelos, Caixas de E-mail, Enviados pelo sistema e Configurações, cada aba pela permissão de hoje |
+| E-mail do ENSPACE em todas as telas | "Novo e-mail" no topo, que reconhece o item ou a tarefa aberta; o compositor; a central "E-mails" no menu, com Mensagens (também os enviados pelo sistema, para quem tem a permissão), Modelos, Caixas de E-mail e Configurações, cada aba pela permissão de hoje; o estado vazio de cada tabela diz o próximo passo |
 
 ## O fluxo do e-mail
 
@@ -349,6 +349,48 @@ disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:)
   [aba Configurações de quem administra](evidencias/prototipo-22-central-configuracoes.jpg),
   [central do membro](evidencias/prototipo-23-central-membro.jpg).
 
+## Rodada 8 · 2026-11-24
+
+- **Pedido (literal):**
+  - "voce nao ta seguindo o componente de tabelas do enspace nesse prototipo. [...] o botao de
+    açoes, inclusive, é um botao unico de 3 pontos com dropdown com as opçoes";
+  - "me questiono se "enviados pelo sistema" deveria existir como aba ou deveria ser mais uma
+    coluna e mais um filtro na aba de mensagens. veja o que é melhor.";
+  - "estado inicial (assim que cria o workspace, nada feito, nada configurado, nada enviado...)" e
+    "estado inicial (primeira vez vendo a tela de email, sem ter enviado nada e tal, mas pode ja
+    estar configurado)".
+- **A tabela do develop em toda a central.** Lido no código do develop em 24/11/2026: as telas
+  novas (Logs de Auditoria, itens) usam a mesma tabela, com a coluna Ações primeiro (117 px), 1
+  botão ⋮ que abre o menu da linha, o mesmo menu no clique direito, barra com busca e o paginador.
+  O protótipo ganhou a cópia dela (`_TabelaDoEnspace.vue`) e do paginador (`_Paginador.vue`), e
+  Mensagens, Modelos e Caixas usam as 2. Os ícones soltos de Modelos e Caixas saíram. Hoje as telas
+  de Configurações › E-mails usam a tabela antiga; a central as leva para a nova.
+- **"Enviados pelo sistema" virou filtro, não aba.** Os e-mails que tarefas e fluxos enviam entram
+  em Mensagens:
+  - o filtro rápido "Do sistema" e a opção "Sistema" no filtro de "Enviado por";
+  - "Enviado por" mostra "Sistema · T-1042" quando há tarefa;
+  - a coluna Status (Enviado, Em processamento, Falhou);
+  - no menu ⋮ e na leitura, "Reenviar e-mail" no lugar de Responder;
+  - Configurações › E-mails › E-mails Enviados abre Mensagens com o filtro ligado.
+
+  Só quem tem a permissão de hoje de ver os enviados vê essas linhas, o filtro e a coluna. O
+  e-mail do sistema continua fora da Mail Box do item, como hoje.
+- **Estados iniciais, no controle "Dados" do andaime:**
+
+  | Dados | O que o workspace tem | A aba Mensagens mostra |
+  |---|---|---|
+  | Workspace novo | nada: sem modelo, sem caixa, sem a conta do Outlook, sem e-mail | "Nenhum e-mail ainda", o próximo passo e "Integrar conta do Outlook"; quem administra vê também "Criar modelo" e "Criar caixa de e-mail" |
+  | Primeiro uso | modelos, caixas e a conta do Outlook prontos, sem e-mail | "Nenhum e-mail ainda" e "Novo e-mail" |
+  | Em uso | os dados de exemplo | a tabela |
+
+  Modelos e Caixas vazios mostram o mesmo padrão, com "Novo modelo" e "Nova caixa". O 2º estado
+  inicial ficou, porque o próximo passo muda: sem configuração, integrar; com configuração,
+  escrever.
+- **Ver:** prints [Mensagens com "Do sistema" e o menu ⋮](evidencias/prototipo-24-mensagens-do-sistema.jpg),
+  [Modelos com o menu ⋮](evidencias/prototipo-25-modelos-menu-de-acoes.jpg),
+  [workspace novo](evidencias/prototipo-26-workspace-novo-mensagens.jpg),
+  [primeiro uso](evidencias/prototipo-27-primeiro-uso-mensagens.jpg).
+
 ## Por que cada decisão
 
 ### O e-mail sai da conta do Outlook da pessoa; o item recebe a resposta
@@ -506,6 +548,27 @@ Até a rodada 6, o nome repetia o "E-mails" de Configurações. Desde a rodada 7
 central reúne as telas de e-mail de hoje em abas, e os itens de Configurações › E-mails abrem a aba
 deles.
 
+### Os enviados pelo sistema: filtro em Mensagens, não aba
+
+Quem quer saber se o cliente recebeu um e-mail procura num lugar só, tenha sido escrito por uma
+pessoa ou enviado por um fluxo. Uma aba a mais repetiria a mesma tabela, com quase as mesmas
+colunas. O filtro rápido "Do sistema" dá o mesmo recorte em 1 clique, e o atalho de Configurações
+› E-mails › E-mails Enviados chega com ele ligado.
+
+O risco é do back: hoje são 2 listas (os e-mails dos itens e os enviados pelo sistema). Se juntar
+as 2 com ordem e paginação únicas pedir back novo, a saída da Fase 1 é o filtro trocar a fonte da
+tabela, uma lista por vez. A pergunta está na lógica da funcionalidade.
+
+### O estado vazio diz o próximo passo
+
+A tabela do develop mostra, sem dado, só o ícone e "Nenhum resultado encontrado". Num workspace
+novo isso não ajuda: a pessoa não sabe se falta configurar ou se ainda não chegou nada. O vazio da
+central usa o `UEmpty` do Nuxt UI (título, texto e botões) e muda com o que falta:
+
+- sem a conta do Outlook: integrar a conta; quem administra também cria modelo e caixa;
+- com tudo pronto: escrever o primeiro e-mail;
+- com filtro: o vazio de hoje, com "Limpar filtros".
+
 ### "Novo e-mail" na barra do topo
 
 O documento pede o e-mail "da mesma forma que outras funcionalidades transversais da plataforma".
@@ -571,7 +634,8 @@ Classes com valor arbitrário:
 | `_AppExterno.vue` | `max-h-[90dvh]` | A simulação cabe na altura da tela e rola por dentro |
 | `_AcoesDeContato.vue` | `itemDescription: 'whitespace-normal'` | O tema do `DropdownMenu` corta a descrição em 1 linha; o aviso do Cc precisa ser lido inteiro |
 | `_TelaEmails.vue` | `sm:max-w-[700px]` no painel | A largura do painel lateral de leitura do develop (tela de Logs de Auditoria) |
-| `_TelaEmails.vue` | `LARGURA` (117 px nas Ações) | As larguras fixas da tabela do develop; a coluna de Ações tem 117 px lá |
+| `_TabelaDoEnspace.vue` | 117 px nas Ações | As larguras fixas da tabela do develop; a coluna de Ações tem 117 px lá |
+| `_TabelaDoEnspace.vue` | `sticky left-0` com a largura medida no vazio | Com colunas largas, a tabela passa da tela; o vazio fica no meio da parte visível |
 
 ## Crítica e acessibilidade
 

@@ -1,86 +1,90 @@
 <script setup lang="ts">
 /**
  * PROPOSTA (rodada 7). As abas de configuração da central "E-mails", que
- * trazem para dentro dela as 3 telas de Configurações › E-mails de hoje:
+ * trazem para dentro dela as telas de Configurações › E-mails de hoje:
  *
- *  - Modelos: Modelos de E-mail (Nome, Assunto, Ação, Usar Remetente por
- *    Domínio), com a permissão `settings::emails::templates` de hoje;
+ *  - Modelos: Modelos de E-mail (Nome, Assunto, Usar Remetente por Domínio),
+ *    com a permissão `settings::emails::templates` de hoje;
  *  - Caixas de E-mail: Nome, E-mail e Provedor, com `settings::emails::boxes`;
- *  - Enviados pelo sistema: E-mails Enviados (`sendmails`), com Status e
- *    "Reenviar E-mail", com `settings::emails::sent`;
  *  - Configurações: a conta de envio da pessoa (todo perfil) e, para quem
  *    administra, o domínio de envio, o contato do item e, na Fase 2, as
  *    caixas que entram no "De".
  *
- * Lido no código do develop em 24/11/2026. O conteúdo das 3 telas é o de hoje:
- * só o endereço muda (pesquisa de mercado: 1 lugar, configuração junto do uso).
+ * Rodada 8: a tela E-mails Enviados virou o filtro "Do sistema" da aba
+ * Mensagens. As tabelas usam o `_TabelaDoEnspace.vue` (a tabela do develop:
+ * Ações primeiro, 1 botão ⋮ com o menu, clique direito), com busca e
+ * paginador. Workspace novo: as tabelas mostram o vazio com o próximo passo.
+ *
+ * Lido no código do develop em 24/11/2026. Hoje as 3 telas usam a tabela
+ * antiga; aqui elas ganham a tabela nova, como as outras telas do protótipo.
  */
-import type { TableColumn } from '@nuxt/ui'
+import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
 import type { Textos } from './textos'
-import { caixas, DOMINIO_DAS_CAIXAS, EU, enviosDoSistema, modelos, type EnvioDoSistema } from './mocks'
+import { type CaixaDeEmail, type ModeloDeEmail, DOMINIO_DAS_CAIXAS, EU } from './mocks'
 import { type AbaDaCentral, useComunicacao, useMarcaDeProposta } from './estado'
 import { useAppExterno } from './simulador'
+import TabelaDoEnspace from './_TabelaDoEnspace.vue'
+import Paginador from './_Paginador.vue'
 
 const props = defineProps<{ t: Textos, aba: Exclude<AbaDaCentral, 'mensagens'> }>()
 
-const { fase, ehAdmin, outlookIntegrado, caixasNoDe, ir, abrirCompositor } = useComunicacao()
+const { fase, ehAdmin, outlookIntegrado, caixasNoDe, ir, abrirCompositor, modelosDoWorkspace, caixasDoWorkspace } = useComunicacao()
 const { abrirApp } = useAppExterno()
 const marca = useMarcaDeProposta()
-const idioma = useIdioma()
 const toast = useToast()
 
 const tc = computed(() => props.t.central)
-
-/** As classes da tabela nova do develop (`EntityRendererManyTable`), como na aba Mensagens. */
-const UI_DA_TABELA = {
-  base: 'min-w-0 w-full border-separate border-spacing-0 table-fixed',
-  thead: 'bg-elevated/50',
-  th: 'relative border-b border-default px-4 py-2 text-left text-sm font-medium text-highlighted',
-  td: 'border-b border-default py-1 px-4 h-12 max-h-12 overflow-hidden align-middle text-sm',
-  empty: 'p-0',
-}
 
 function maquete() {
   toast.add({ title: tc.value.maquete, icon: 'i-lucide-info', color: 'neutral' })
 }
 
+/** Busca e página de cada tabela. A troca de aba zera os dois. */
+const busca = ref('')
+const pagina = ref(1)
+const porPagina = ref(25)
+watch(() => props.aba, () => { busca.value = ''; pagina.value = 1 })
+watch(busca, () => { pagina.value = 1 })
+
+function daBusca<T extends Record<string, any>>(lista: T[], campos: (keyof T)[]) {
+  const q = busca.value.trim().toLowerCase()
+  return q ? lista.filter(x => campos.some(c => String(x[c] ?? '').toLowerCase().includes(q))) : lista
+}
+function daPagina<T>(lista: T[]) {
+  return lista.slice((pagina.value - 1) * porPagina.value, pagina.value * porPagina.value)
+}
+
 /* ---------- Modelos ---------- */
 
-const colunasDeModelos = computed<TableColumn<(typeof modelos)[number]>[]>(() => [
-  { id: 'acoes', header: tc.value.col.acoes, meta: { style: { th: { width: '117px' } } } },
+const modelosFiltrados = computed(() => daBusca(modelosDoWorkspace.value, ['nome', 'assunto']))
+const colunasDeModelos = computed<TableColumn<ModeloDeEmail>[]>(() => [
   { accessorKey: 'nome', header: tc.value.col.nome },
   { accessorKey: 'assunto', header: tc.value.col.assunto },
-  { id: 'remetente', header: tc.value.col.remetentePorDominio, meta: { style: { th: { width: '220px' } } } },
+  { id: 'remetente', header: tc.value.col.remetentePorDominio, meta: { style: { th: { width: '220px' }, td: { width: '220px' } } } },
 ])
+function acoesDoModelo(m: ModeloDeEmail): DropdownMenuItem[][] {
+  return [
+    [
+      { label: tc.value.usar, icon: 'i-lucide-mail-plus', onSelect: () => abrirCompositor({ origem: 'emails', modelo: m.id }) },
+      { label: tc.value.editar, icon: 'i-lucide-pencil', onSelect: maquete },
+    ],
+    [{ label: tc.value.excluir, icon: 'i-lucide-trash-2', color: 'error', onSelect: maquete }],
+  ]
+}
 
 /* ---------- Caixas ---------- */
 
-const colunasDeCaixas = computed<TableColumn<(typeof caixas)[number]>[]>(() => [
-  { id: 'acoes', header: tc.value.col.acoes, meta: { style: { th: { width: '117px' } } } },
+const caixasFiltradas = computed(() => daBusca(caixasDoWorkspace.value, ['nome', 'email']))
+const colunasDeCaixas = computed<TableColumn<CaixaDeEmail>[]>(() => [
   { accessorKey: 'nome', header: tc.value.col.nome },
   { accessorKey: 'email', header: tc.value.col.email },
-  { id: 'provedor', header: tc.value.col.provedor, meta: { style: { th: { width: '200px' } } } },
+  { id: 'provedor', header: tc.value.col.provedor, meta: { style: { th: { width: '200px' }, td: { width: '200px' } } } },
 ])
-
-/* ---------- Enviados pelo sistema ---------- */
-
-const envios = ref<EnvioDoSistema[]>(structuredClone(enviosDoSistema).sort((a, b) => +b.criadoEm - +a.criadoEm))
-const formato = computed(() => new Intl.DateTimeFormat(idioma.value, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }))
-const COR_DO_STATUS: Record<EnvioDoSistema['status'], 'success' | 'info' | 'error'> = { enviado: 'success', processando: 'info', falhou: 'error' }
-
-const colunasDeEnvios = computed<TableColumn<EnvioDoSistema>[]>(() => [
-  { id: 'acoes', header: tc.value.col.acoes, meta: { style: { th: { width: '117px' } } } },
-  { id: 'criadoEm', header: tc.value.col.criadoEm, meta: { style: { th: { width: '160px' } } } },
-  { id: 'status', header: tc.value.col.status, meta: { style: { th: { width: '170px' } } } },
-  { accessorKey: 'para', header: tc.value.col.destino },
-  { id: 'cc', header: tc.value.col.copia },
-  { accessorKey: 'assunto', header: tc.value.col.assunto },
-  { id: 'tarefa', header: tc.value.col.tarefa, meta: { style: { th: { width: '110px' } } } },
-])
-
-function reenviar(e: EnvioDoSistema) {
-  envios.value = envios.value.map(x => x.id === e.id ? { ...x, status: 'processando' } : x)
-  toast.add({ title: tc.value.reenviado, icon: 'i-lucide-send', color: 'success' })
+function acoesDaCaixa(): DropdownMenuItem[][] {
+  return [
+    [{ label: tc.value.editar, icon: 'i-lucide-pencil', onSelect: maquete }],
+    [{ label: tc.value.excluir, icon: 'i-lucide-trash-2', color: 'error', onSelect: maquete }],
+  ]
 }
 
 /* ---------- Configurações ---------- */
@@ -102,56 +106,75 @@ function integrar() {
 </script>
 
 <template>
-  <div class="animate-[entrada_.25s_ease-out] px-4 py-4 sm:px-6" :class="marca">
-    <!-- ===== Modelos ===== -->
-    <template v-if="aba === 'modelos'">
-      <div class="mb-3 flex flex-wrap items-center gap-3">
-        <p class="text-sm text-muted">
-          {{ tc.dicas.modelos }}
+  <div class="animate-[entrada_.25s_ease-out]" :class="marca">
+    <!-- ===== Modelos e Caixas: barra, tabela e paginador do develop ===== -->
+    <div v-if="aba === 'modelos' || aba === 'caixas'" class="flex min-h-0 flex-col">
+      <div class="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-default px-3 py-2 sm:px-4">
+        <UInput
+          v-model="busca"
+          :placeholder="aba === 'modelos' ? tc.pesquisarModelos : tc.pesquisarCaixas"
+          icon="i-lucide-search"
+          size="sm"
+          variant="soft"
+          class="w-56"
+          :aria-label="aba === 'modelos' ? tc.pesquisarModelos : tc.pesquisarCaixas"
+        />
+        <p class="hidden text-sm text-muted lg:block">
+          {{ tc.dicas[aba] }}
         </p>
-        <UButton :label="tc.novoModelo" icon="i-lucide-plus" size="sm" class="ml-auto" @click="maquete" />
+        <UButton :label="aba === 'modelos' ? tc.novoModelo : tc.novaCaixa" icon="i-lucide-plus" size="sm" class="ml-auto" @click="maquete" />
       </div>
-      <div class="overflow-hidden rounded-lg border border-default">
-        <UTable :data="modelos" :columns="colunasDeModelos" :ui="UI_DA_TABELA">
-          <template #acoes-cell="{ row }">
-            <div class="flex items-center gap-0.5">
-              <UTooltip :text="tc.usar">
-                <UButton icon="i-lucide-mail-plus" color="neutral" variant="ghost" size="xs" :aria-label="tc.usar" @click="abrirCompositor({ origem: 'emails', modelo: row.original.id })" />
-              </UTooltip>
-              <UTooltip :text="tc.editar">
-                <UButton icon="i-lucide-pencil" color="neutral" variant="ghost" size="xs" :aria-label="tc.editar" @click="maquete" />
-              </UTooltip>
-              <UTooltip :text="tc.excluir">
-                <UButton icon="i-lucide-trash-2" color="error" variant="ghost" size="xs" :aria-label="tc.excluir" @click="maquete" />
-              </UTooltip>
-            </div>
+
+      <div class="min-h-0 flex-1 overflow-auto">
+        <TabelaDoEnspace
+          v-if="aba === 'modelos'"
+          :data="daPagina(modelosFiltrados)"
+          :columns="colunasDeModelos"
+          :acoes="acoesDoModelo"
+          :rotulo-acoes="tc.col.acoes"
+          :get-row-id="(m: ModeloDeEmail) => m.id"
+          @select="maquete"
+        >
+          <template #nome-cell="{ row }">
+            <span class="block truncate text-highlighted" :title="row.original.nome">{{ row.original.nome }}</span>
+          </template>
+          <template #assunto-cell="{ row }">
+            <span class="block truncate text-default" :title="row.original.assunto">{{ row.original.assunto }}</span>
           </template>
           <template #remetente-cell="{ row }">
             <UBadge :label="row.original.remetentePorDominio ? tc.sim : tc.nao" :color="row.original.remetentePorDominio ? 'success' : 'neutral'" variant="subtle" size="sm" />
           </template>
-        </UTable>
-      </div>
-    </template>
-
-    <!-- ===== Caixas de E-mail ===== -->
-    <template v-else-if="aba === 'caixas'">
-      <div class="mb-3 flex flex-wrap items-center gap-3">
-        <p class="text-sm text-muted">
-          {{ tc.dicas.caixas }}
-        </p>
-        <UButton :label="tc.novaCaixa" icon="i-lucide-plus" size="sm" class="ml-auto" @click="maquete" />
-      </div>
-      <div class="overflow-hidden rounded-lg border border-default">
-        <UTable :data="caixas" :columns="colunasDeCaixas" :ui="UI_DA_TABELA">
-          <template #acoes-cell>
-            <div class="flex items-center gap-0.5">
-              <UTooltip :text="tc.editar">
-                <UButton icon="i-lucide-pencil" color="neutral" variant="ghost" size="xs" :aria-label="tc.editar" @click="maquete" />
-              </UTooltip>
-              <UTooltip :text="tc.excluir">
-                <UButton icon="i-lucide-trash-2" color="error" variant="ghost" size="xs" :aria-label="tc.excluir" @click="maquete" />
-              </UTooltip>
+          <template #empty>
+            <UEmpty
+              v-if="!modelosDoWorkspace.length"
+              variant="naked"
+              icon="i-lucide-file-text"
+              :title="tc.vazio.modelosTitulo"
+              :description="tc.vazio.modelosDescricao"
+              :actions="[{ label: tc.novoModelo, icon: 'i-lucide-plus', onClick: maquete }]"
+              class="py-12"
+              :class="marca"
+            />
+            <div v-else class="flex flex-col items-center justify-center py-12 text-muted">
+              <UIcon name="i-lucide-file-text" class="mb-3 h-12 w-12" />
+              <p class="text-sm">
+                {{ t.emails.vazioDescricao }}
+              </p>
             </div>
+          </template>
+        </TabelaDoEnspace>
+
+        <TabelaDoEnspace
+          v-else
+          :data="daPagina(caixasFiltradas)"
+          :columns="colunasDeCaixas"
+          :acoes="acoesDaCaixa"
+          :rotulo-acoes="tc.col.acoes"
+          :get-row-id="(c: CaixaDeEmail) => c.id"
+          @select="maquete"
+        >
+          <template #nome-cell="{ row }">
+            <span class="block truncate text-highlighted">{{ row.original.nome }}</span>
           </template>
           <template #email-cell="{ row }">
             <span class="block truncate font-mono text-xs text-default" :title="row.original.email">{{ row.original.email }}</span>
@@ -159,53 +182,37 @@ function integrar() {
           <template #provedor-cell>
             <span class="font-mono text-xs text-muted">{{ DOMINIO_DAS_CAIXAS }}</span>
           </template>
-        </UTable>
-      </div>
-    </template>
-
-    <!-- ===== Enviados pelo sistema ===== -->
-    <template v-else-if="aba === 'sistema'">
-      <p class="mb-3 text-sm text-muted">
-        {{ tc.dicas.sistema }}
-      </p>
-      <div class="overflow-x-auto rounded-lg border border-default">
-        <UTable :data="envios" :columns="colunasDeEnvios" :ui="UI_DA_TABELA">
-          <template #acoes-cell="{ row }">
-            <div class="flex items-center gap-0.5">
-              <UTooltip :text="tc.verEmail">
-                <UButton icon="i-lucide-eye" color="neutral" variant="ghost" size="xs" :aria-label="tc.verEmail" @click="maquete" />
-              </UTooltip>
-              <UTooltip :text="tc.reenviar">
-                <UButton icon="i-lucide-send" color="neutral" variant="ghost" size="xs" :aria-label="tc.reenviar" :disabled="row.original.status === 'processando'" @click="reenviar(row.original)" />
-              </UTooltip>
+          <template #empty>
+            <UEmpty
+              v-if="!caixasDoWorkspace.length"
+              variant="naked"
+              icon="i-lucide-mailbox"
+              :title="tc.vazio.caixasTitulo"
+              :description="tc.vazio.caixasDescricao"
+              :actions="[{ label: tc.novaCaixa, icon: 'i-lucide-plus', onClick: maquete }]"
+              class="py-12"
+              :class="marca"
+            />
+            <div v-else class="flex flex-col items-center justify-center py-12 text-muted">
+              <UIcon name="i-lucide-mailbox" class="mb-3 h-12 w-12" />
+              <p class="text-sm">
+                {{ t.emails.vazioDescricao }}
+              </p>
             </div>
           </template>
-          <template #criadoEm-cell="{ row }">
-            <span class="whitespace-nowrap text-muted">{{ formato.format(row.original.criadoEm) }}</span>
-          </template>
-          <template #status-cell="{ row }">
-            <UBadge :label="tc.status[row.original.status]" :color="COR_DO_STATUS[row.original.status]" variant="subtle" size="sm" />
-          </template>
-          <template #para-cell="{ row }">
-            <span class="block truncate text-default" :title="row.original.para">{{ row.original.para }}</span>
-          </template>
-          <template #cc-cell="{ row }">
-            <span v-if="row.original.cc.length" class="block truncate text-default">{{ row.original.cc.join(', ') }}</span>
-            <span v-else class="text-dimmed">-</span>
-          </template>
-          <template #assunto-cell="{ row }">
-            <span class="block truncate text-default" :title="row.original.assunto">{{ row.original.assunto }}</span>
-          </template>
-          <template #tarefa-cell="{ row }">
-            <UBadge v-if="row.original.tarefa" :label="row.original.tarefa" icon="i-lucide-square-check-big" color="neutral" variant="subtle" size="sm" class="font-mono" />
-            <span v-else class="text-dimmed">-</span>
-          </template>
-        </UTable>
+        </TabelaDoEnspace>
       </div>
-    </template>
+
+      <Paginador
+        v-model:pagina="pagina"
+        v-model:por-pagina="porPagina"
+        :t="t"
+        :total="aba === 'modelos' ? modelosFiltrados.length : caixasFiltradas.length"
+      />
+    </div>
 
     <!-- ===== Configurações ===== -->
-    <div v-else class="mx-auto flex max-w-3xl flex-col gap-4">
+    <div v-else class="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-4 sm:px-6">
       <p class="text-sm text-muted">
         {{ tc.dicas.configuracoes }}
       </p>
@@ -278,8 +285,11 @@ function integrar() {
               {{ tc.config.remetentesDescricao }}
             </p>
           </template>
-          <div class="flex flex-col divide-y divide-default">
-            <div v-for="c in caixas" :key="c.id" class="flex flex-wrap items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+          <p v-if="!caixasDoWorkspace.length" class="text-sm text-muted">
+            {{ tc.vazio.caixasTitulo }}
+          </p>
+          <div v-else class="flex flex-col divide-y divide-default">
+            <div v-for="c in caixasDoWorkspace" :key="c.id" class="flex flex-wrap items-center gap-3 py-2.5 first:pt-0 last:pb-0">
               <div class="min-w-0">
                 <p class="text-sm font-medium text-highlighted">
                   {{ c.nome }}

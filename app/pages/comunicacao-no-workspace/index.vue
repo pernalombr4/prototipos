@@ -49,7 +49,7 @@ definePageMeta({
 })
 
 const t = useTextos(textos)
-const { tela, categoriaAtual, itemAberto, cenario, destacar, fase, perfil, ehAdmin, abaDaCentral, ir, abrirItem } = useComunicacao()
+const { tela, categoriaAtual, itemAberto, cenario, destacar, fase, perfil, ehAdmin, abaDaCentral, dados, ir, abrirItem } = useComunicacao()
 
 const telas: Record<Tela, Component> = {
   inicio: TelaInicio,
@@ -170,6 +170,22 @@ const cenarios = computed<{ value: Cenario, label: string }[]>(() => [
               :variant="perfil === p ? 'solid' : 'subtle'"
               :aria-pressed="perfil === p"
               @click="perfil = p"
+            />
+          </UFieldGroup>
+        </UTooltip>
+
+        <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
+        <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.dados }}</span>
+        <UTooltip :text="t.andaime.dadosDica">
+          <UFieldGroup size="xs">
+            <UButton
+              v-for="d in (['novo', 'primeiroUso', 'emUso'] as const)"
+              :key="d"
+              :label="t.andaime.dadosOpcoes[d]"
+              :color="dados === d ? 'primary' : 'neutral'"
+              :variant="dados === d ? 'solid' : 'subtle'"
+              :aria-pressed="dados === d"
+              @click="dados = d"
             />
           </UFieldGroup>
         </UTooltip>

@@ -3,9 +3,16 @@
  * PROPOSTA. A central "E-mails", na seção Membro do menu (rodada 7: hipótese A
  * da pesquisa de mercado, aprovada pela redatora em 24/11/2026). O e-mail vem
  * sempre ligado e tudo fica aqui, em abas que seguem a permissão de hoje:
- * Mensagens (todo perfil), Modelos, Caixas de E-mail e Enviados pelo sistema
- * (quem administra) e Configurações (a conta de cada um; o resto, quem
- * administra). Configurações › E-mails passa a abrir estas abas.
+ * Mensagens (todo perfil), Modelos e Caixas de E-mail (quem administra) e
+ * Configurações (a conta de cada um; o resto, quem administra).
+ * Configurações › E-mails passa a abrir estas abas.
+ *
+ * Rodada 8: os e-mails enviados pelo sistema (tarefa ou fluxo, a tela E-mails
+ * Enviados de hoje) entram em Mensagens, com o filtro rápido "Do sistema", a
+ * coluna Status e "Reenviar e-mail". Só quem tem a permissão de ver os
+ * enviados vê essas linhas. A tabela é o `_TabelaDoEnspace.vue`, cópia da
+ * tabela do develop. Sem nenhum e-mail, a tabela mostra o próximo passo
+ * (workspace novo ou primeiro uso, no controle Dados do andaime).
  *
  * A aba Mensagens:
  *
@@ -30,17 +37,21 @@
  * Fase 2: também os enviados sem item, com "Vincular a um item", e Encaminhar.
  * Fase 3: a coluna Tarefa.
  */
-import type { ContextMenuItem, DropdownMenuItem, TableColumn } from '@nuxt/ui'
+import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
 import type { Textos } from './textos'
 import { type Email, caixas, itemPorId, itens, membroPorId, tarefas } from './mocks'
-import { type AbaDaCentral, ABAS_DE_ADMIN, contatosDoItem, useComunicacao, useMarcaDeProposta } from './estado'
+import { type AbaDaCentral, ABAS_DE_ADMIN, type Rapido, contatosDoItem, useComunicacao, useMarcaDeProposta } from './estado'
+import { useAppExterno } from './simulador'
 import BuscaDeItem from './_BuscaDeItem.vue'
 import AbasDaCentral from './_AbasDaCentral.vue'
+import TabelaDoEnspace from './_TabelaDoEnspace.vue'
+import Paginador from './_Paginador.vue'
 import FiltroDeColuna, { type Filtros } from './_FiltroDeColuna.vue'
 
 const props = defineProps<{ t: Textos }>()
 
-const { emails, config, fase, registrado, abrirCompositor, abrirItem, abaDaCentral, ehAdmin } = useComunicacao()
+const { emails, config, fase, registrado, abrirCompositor, abrirItem, abaDaCentral, ehAdmin, rapidosDaCentral, dados, outlookIntegrado } = useComunicacao()
+const { abrirApp } = useAppExterno()
 const marca = useMarcaDeProposta()
 const idioma = useIdioma()
 const toast = useToast()
@@ -50,7 +61,7 @@ const te = computed(() => props.t.emails)
 /* ---------- abas da central ---------- */
 
 const ICONE_DA_ABA: Record<AbaDaCentral, string> = {
-  mensagens: 'i-lucide-inbox', modelos: 'i-lucide-file-text', caixas: 'i-lucide-mailbox', sistema: 'i-lucide-send', configuracoes: 'i-lucide-settings',
+  mensagens: 'i-lucide-inbox', modelos: 'i-lucide-file-text', caixas: 'i-lucide-mailbox', configuracoes: 'i-lucide-settings',
 }
 const abas = computed(() => (Object.keys(ICONE_DA_ABA) as AbaDaCentral[])
   .filter(a => ehAdmin.value || !ABAS_DE_ADMIN.includes(a))
@@ -64,15 +75,20 @@ const periodo = ref<Periodo>('todos')
 const filtros = ref<Filtros>({})
 const mostrarRapidos = ref(true)
 
-type Rapido = 'recebidos' | 'enviados' | 'naoLidos' | 'comAnexo' | 'semItem'
-const rapidos = ref<Set<Rapido>>(new Set())
-const COR_DO_RAPIDO: Record<Rapido, 'info' | 'success' | 'primary' | 'neutral' | 'warning'> = {
-  recebidos: 'info', enviados: 'success', naoLidos: 'primary', comAnexo: 'neutral', semItem: 'warning',
+/** No estado, para Configurações › E-mails › E-mails Enviados abrir com "Do sistema". */
+const rapidos = computed<Set<Rapido>>({
+  get: () => new Set(rapidosDaCentral.value),
+  set: (s) => { rapidosDaCentral.value = [...s] },
+})
+const COR_DO_RAPIDO: Record<Rapido, 'info' | 'success' | 'primary' | 'neutral' | 'warning' | 'secondary'> = {
+  recebidos: 'info', enviados: 'success', sistema: 'secondary', naoLidos: 'primary', comAnexo: 'neutral', semItem: 'warning',
 }
 const ICONE_DO_RAPIDO: Record<Rapido, string> = {
-  recebidos: 'i-lucide-inbox', enviados: 'i-lucide-send', naoLidos: 'i-lucide-mail', comAnexo: 'i-lucide-paperclip', semItem: 'i-lucide-unlink',
+  recebidos: 'i-lucide-inbox', enviados: 'i-lucide-send', sistema: 'i-lucide-workflow', naoLidos: 'i-lucide-mail', comAnexo: 'i-lucide-paperclip', semItem: 'i-lucide-unlink',
 }
-const rapidosDaFase = computed<Rapido[]>(() => ['recebidos', 'enviados', 'naoLidos', 'comAnexo', ...(fase.value >= 2 ? ['semItem' as const] : [])])
+const rapidosDaFase = computed<Rapido[]>(() => [
+  'recebidos', 'enviados', ...(ehAdmin.value ? ['sistema' as const] : []), 'naoLidos', 'comAnexo', ...(fase.value >= 2 ? ['semItem' as const] : []),
+])
 function alternarRapido(r: Rapido) {
   const s = new Set(rapidos.value)
   if (s.has(r)) s.delete(r)
@@ -110,8 +126,11 @@ function tarefaRef(id: number | null | undefined) {
 }
 function autorDe(e: Email) {
   if (e.direcao !== 'enviado') return null
+  if (e.sistema) return te.value.sistema
   return membroPorId(e.autor)?.nome ?? null
 }
+
+const COR_DO_STATUS = { enviado: 'success', processando: 'info', falhou: 'error' } as const
 
 /** O valor de cada coluna, usado no filtro, na ordem e na busca. */
 function valor(e: Email, campo: string): string {
@@ -122,7 +141,7 @@ function valor(e: Email, campo: string): string {
     case 'assunto': return e.assunto
     case 'item': return itemPorId(e.itemId)?.reference ?? ''
     case 'tarefa': return tarefaRef(e.tarefaId) ?? ''
-    case 'enviadoPor': return e.autor ? String(e.autor) : ''
+    case 'enviadoPor': return e.sistema ? 'sistema' : e.autor ? String(e.autor) : ''
     default: return ''
   }
 }
@@ -151,9 +170,11 @@ const filtrados = computed(() => {
   const r = rapidos.value
   return emails.value
     .filter(registrado)
+    .filter(e => !e.sistema || ehAdmin.value)
     .filter(e => dentroDoPeriodo(e.data))
     .filter(e => !(r.has('recebidos') && !r.has('enviados')) || e.direcao === 'recebido')
     .filter(e => !(r.has('enviados') && !r.has('recebidos')) || e.direcao === 'enviado')
+    .filter(e => !r.has('sistema') || !!e.sistema)
     .filter(e => !r.has('naoLidos') || (e.direcao === 'recebido' && !e.lido))
     .filter(e => !r.has('comAnexo') || e.anexos.length > 0)
     .filter(e => !r.has('semItem') || !e.itemId)
@@ -182,25 +203,24 @@ const ordenados = computed(() => {
 const pagina = ref(1)
 const porPagina = ref(25)
 watch([filtrados, porPagina], () => { pagina.value = 1 })
-const opcoesDePorPagina = computed(() => [10, 25, 50, 100].map(n => ({ value: n, label: te.value.pagina.porPagina(n) })))
 const daPagina = computed(() => ordenados.value.slice((pagina.value - 1) * porPagina.value, pagina.value * porPagina.value))
-const inicio = computed(() => ordenados.value.length ? (pagina.value - 1) * porPagina.value + 1 : 0)
-const fim = computed(() => Math.min(pagina.value * porPagina.value, ordenados.value.length))
 
 /* ---------- colunas ---------- */
 
-type Coluna = 'acoes' | 'tipo' | 'de' | 'para' | 'assunto' | 'item' | 'tarefa' | 'enviadoPor' | 'data'
-/** Ações primeiro, como a tabela nova do develop: o menu não some quando a tabela rola para o lado. */
+type Coluna = 'tipo' | 'de' | 'para' | 'assunto' | 'item' | 'tarefa' | 'enviadoPor' | 'status' | 'data'
+/** A coluna Ações (117 px, primeira) vem do `_TabelaDoEnspace.vue`. */
 const LARGURA: Record<Coluna, number> = {
-  acoes: 117, tipo: 120, de: 210, para: 210, assunto: 300, item: 130, tarefa: 110, enviadoPor: 150, data: 150,
+  tipo: 120, de: 210, para: 210, assunto: 300, item: 130, tarefa: 110, enviadoPor: 170, status: 150, data: 150,
 }
-const OCULTAVEIS: Coluna[] = ['tipo', 'de', 'para', 'item', 'tarefa', 'enviadoPor']
+const OCULTAVEIS: Coluna[] = ['tipo', 'de', 'para', 'item', 'tarefa', 'enviadoPor', 'status']
 const visiveis = ref<Record<string, boolean>>({})
 
-const colunasDaFase = computed<Coluna[]>(() => (Object.keys(LARGURA) as Coluna[]).filter(c => c !== 'tarefa' || fase.value >= 3))
+const colunasDaFase = computed<Coluna[]>(() => (Object.keys(LARGURA) as Coluna[])
+  .filter(c => c !== 'tarefa' || fase.value >= 3)
+  .filter(c => c !== 'status' || ehAdmin.value))
 const colunas = computed<TableColumn<Linha>[]>(() => colunasDaFase.value.map(id => ({
   id,
-  ...(id === 'acoes' ? {} : { accessorKey: id }),
+  accessorKey: id,
   meta: { style: { th: { width: `${LARGURA[id]}px` }, td: { width: `${LARGURA[id]}px` } } },
 })))
 
@@ -211,16 +231,6 @@ const menuDeColunas = computed<DropdownMenuItem[]>(() => OCULTAVEIS.filter(c => 
   onUpdateChecked: (v: boolean) => { visiveis.value = { ...visiveis.value, [c]: v } },
   onSelect: (e: Event) => e.preventDefault(),
 })))
-
-/** As classes da tabela nova do develop (`EntityRendererManyTable`). */
-const UI_DA_TABELA = {
-  base: 'min-w-0 w-full border-separate border-spacing-0 table-fixed',
-  thead: 'bg-elevated/50',
-  th: 'relative border-b border-default px-4 py-2 text-left text-sm font-medium text-highlighted',
-  td: 'border-b border-default py-1 px-4 h-12 max-h-12 overflow-hidden align-middle text-sm',
-  tr: 'cursor-pointer transition-colors hover:bg-elevated/40',
-  empty: 'p-0',
-}
 
 interface Linha extends Record<string, unknown> { id: number, email: Email }
 const linhas = computed<Linha[]>(() => daPagina.value.map(e => ({ id: e.id, email: e })))
@@ -235,8 +245,11 @@ const opcoesDeItem = computed(() => {
     ...refs.map(r => ({ value: r, label: r })),
   ]
 })
-const opcoesDeAutor = computed(() => [...new Set(emails.value.filter(registrado).map(e => e.autor).filter(Boolean))]
-  .map(id => ({ value: String(id), label: membroPorId(id)?.nome ?? String(id) })))
+const opcoesDeAutor = computed(() => [
+  ...(ehAdmin.value ? [{ value: 'sistema', label: te.value.sistema, icon: 'i-lucide-workflow' }] : []),
+  ...[...new Set(emails.value.filter(registrado).map(e => e.autor).filter(Boolean))]
+    .map(id => ({ value: String(id), label: membroPorId(id)?.nome ?? String(id) })),
+])
 const opcoesDeTarefa = computed(() => [...new Set(emails.value.filter(registrado).map(e => tarefaRef(e.tarefaId)).filter(Boolean) as string[])]
   .map(r => ({ value: r, label: r })))
 
@@ -296,8 +309,23 @@ function responder(e: Email, encaminhar = false) {
   })
 }
 
+function reenviar(e: Email) {
+  emails.value = emails.value.map(x => x.id === e.id && x.sistema ? { ...x, sistema: { ...x.sistema, status: 'processando' as const } } : x)
+  if (aberto.value?.id === e.id) aberto.value = emails.value.find(x => x.id === e.id) ?? null
+  toast.add({ title: props.t.central.reenviado, icon: 'i-lucide-send', color: 'success' })
+}
+
 function acoesDe(e: Email): DropdownMenuItem[][] {
   const a = te.value.acoes
+  if (e.sistema) {
+    return [
+      [
+        { label: a.verDetalhes, icon: 'i-lucide-eye', onSelect: () => abrir(e) },
+        { label: props.t.central.reenviar, icon: 'i-lucide-send', disabled: e.sistema.status === 'processando', onSelect: () => reenviar(e) },
+      ],
+      e.itemId ? [{ label: a.verItem, icon: 'i-lucide-file-symlink', onSelect: () => abrirItem(e.itemId!, 'visao') }] : [],
+    ]
+  }
   return [
     [
       { label: a.verDetalhes, icon: 'i-lucide-eye', onSelect: () => abrir(e) },
@@ -313,12 +341,23 @@ function acoesDe(e: Email): DropdownMenuItem[][] {
   ]
 }
 
-/** Clique direito na linha abre o mesmo menu (como a tabela nova de itens). */
-const linhaDoMenu = ref<Email | null>(null)
-const menuDoClique = computed<ContextMenuItem[][]>(() => linhaDoMenu.value ? acoesDe(linhaDoMenu.value) as ContextMenuItem[][] : [])
-function aoCliqueDireito(_e: Event, row: { original: Linha }) {
-  linhaDoMenu.value = row.original.email
-}
+/** O estado vazio sem filtro: workspace novo (nada configurado) ou primeiro uso. */
+const semNenhumEmail = computed(() => !emails.value.some(e => registrado(e) && (!e.sistema || ehAdmin.value)))
+const acoesDoVazio = computed(() => {
+  const v = te.value.vazio
+  if (!outlookIntegrado.value) {
+    return [
+      { label: v.integrar, icon: 'i-lucide-plug', onClick: () => abrirApp({ tipo: 'outlook', url: 'https://app.enspace.io/profile?tab=integrations' }) },
+      ...(ehAdmin.value && dados.value === 'novo'
+        ? [
+            { label: v.criarModelo, icon: 'i-lucide-file-text', color: 'neutral' as const, variant: 'outline' as const, onClick: () => { abaDaCentral.value = 'modelos' } },
+            { label: v.criarCaixa, icon: 'i-lucide-mailbox', color: 'neutral' as const, variant: 'outline' as const, onClick: () => { abaDaCentral.value = 'caixas' } },
+          ]
+        : []),
+    ]
+  }
+  return [{ label: v.escrever, icon: 'i-lucide-mail-plus', onClick: () => abrirCompositor({ origem: 'emails' }) }]
+})
 
 function nomeDaCaixa(endereco: string) {
   return caixas.find(c => c.email === endereco)?.nome ?? null
@@ -334,7 +373,7 @@ function nomeDaCaixa(endereco: string) {
           {{ te.titulo }}
         </h1>
         <p v-if="abaDaCentral === 'mensagens'" class="text-sm text-muted">
-          {{ fase >= 2 ? te.descricaoFase2 : te.descricaoFase1 }}
+          {{ (fase >= 2 ? te.descricaoFase2 : te.descricaoFase1) + (ehAdmin ? ' ' + te.descricaoDoSistema : '') }}
         </p>
       </div>
       <UButton :label="t.casca.novoEmail" icon="i-lucide-mail-plus" class="ml-auto" @click="abrirCompositor({ origem: 'emails' })" />
@@ -424,19 +463,17 @@ function nomeDaCaixa(endereco: string) {
       />
     </div>
 
-    <!-- Tabela: EntityRendererManyTable -->
+    <!-- Tabela: EntityRendererManyTable (cópia em _TabelaDoEnspace.vue) -->
     <div class="min-h-0 flex-1 animate-[entrada_.25s_ease-out] overflow-auto">
-      <UContextMenu :items="menuDoClique" :disabled="!linhaDoMenu">
-        <UTable
-          v-model:column-visibility="visiveis"
-          :data="linhas"
-          :columns="colunas"
-          sticky
-          :get-row-id="(r: Linha) => String(r.id)"
-          :on-select="(_e: Event, row: any) => abrir(row.original.email)"
-          :on-contextmenu="aoCliqueDireito"
-          :ui="UI_DA_TABELA"
-        >
+      <TabelaDoEnspace
+        v-model:column-visibility="visiveis"
+        :data="linhas"
+        :columns="colunas"
+        :acoes="(l: Linha) => acoesDe(l.email)"
+        :rotulo-acoes="te.col.acoes"
+        :get-row-id="(r: Linha) => String(r.id)"
+        @select="(l: Linha) => abrir(l.email)"
+      >
           <!-- ===== cabeçalhos: ordem, rótulo, funil ===== -->
           <template v-for="c in (['de', 'para', 'assunto', 'item', 'data'] as const)" :key="c" #[`${c}-header`]>
             <div class="flex w-full items-center justify-start gap-1">
@@ -490,8 +527,8 @@ function nomeDaCaixa(endereco: string) {
               <FiltroDeColuna v-model="filtros" class="ml-2" :t="t" campo="tarefa" :rotulo="te.col.tarefa" tipo="selecao" :opcoes="opcoesDeTarefa" />
             </div>
           </template>
-          <template #acoes-header>
-            <span>{{ te.col.acoes }}</span>
+          <template #status-header>
+            <span class="truncate">{{ te.col.status }}</span>
           </template>
 
           <!-- ===== células ===== -->
@@ -530,7 +567,7 @@ function nomeDaCaixa(endereco: string) {
               variant="outline"
               size="xs"
               class="font-mono"
-              @click.stop="abrirItem(row.original.email.itemId!, 'mailbox')"
+              @click.stop="abrirItem(row.original.email.itemId!, row.original.email.sistema ? 'visao' : 'mailbox')"
             />
             <UButton
               v-else
@@ -548,43 +585,46 @@ function nomeDaCaixa(endereco: string) {
             <span v-else class="text-dimmed">-</span>
           </template>
           <template #enviadoPor-cell="{ row }">
-            <span v-if="autorDe(row.original.email)" class="block truncate text-default">{{ autorDe(row.original.email) }}</span>
+            <span v-if="row.original.email.sistema" class="flex min-w-0 items-center gap-1.5 text-default">
+              <UIcon name="i-lucide-workflow" class="size-3.5 shrink-0 text-muted" />
+              <span class="truncate">{{ te.sistema }}<template v-if="row.original.email.sistema.tarefa"> · <span class="font-mono">{{ row.original.email.sistema.tarefa }}</span></template></span>
+            </span>
+            <span v-else-if="autorDe(row.original.email)" class="block truncate text-default">{{ autorDe(row.original.email) }}</span>
             <span v-else class="text-dimmed">-</span>
           </template>
           <template #data-cell="{ row }">
             <span class="whitespace-nowrap text-muted">{{ formato.format(row.original.email.data) }}</span>
           </template>
-          <template #acoes-cell="{ row }">
-            <div class="flex items-center justify-center" @click.stop>
-            <UDropdownMenu :items="acoesDe(row.original.email)" :content="{ align: 'end' }">
-              <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" size="xs" :aria-label="te.col.acoes" />
-            </UDropdownMenu>
-            </div>
+          <template #status-cell="{ row }">
+            <UBadge v-if="row.original.email.sistema" :label="t.central.status[row.original.email.sistema.status]" :color="COR_DO_STATUS[row.original.email.sistema.status]" variant="subtle" size="sm" />
+            <span v-else class="text-dimmed">-</span>
           </template>
 
           <template #empty>
-            <div class="flex flex-col items-center justify-center py-12 text-center">
+            <div v-if="temFiltro || !semNenhumEmail" class="flex flex-col items-center justify-center py-12 text-center">
               <UIcon name="i-lucide-inbox" class="mb-3 h-12 w-12 text-dimmed" />
               <p class="text-sm text-muted">
                 {{ temFiltro ? te.vazioFiltrado : te.vazioDescricao }}
               </p>
               <UButton v-if="temFiltro" :label="te.limparFiltros" icon="i-lucide-filter-x" color="neutral" variant="outline" size="sm" class="mt-3" @click="limparFiltros" />
             </div>
+            <!-- PROPOSTA (rodada 8): sem nenhum e-mail, o próximo passo -->
+            <UEmpty
+              v-else
+              variant="naked"
+              icon="i-lucide-inbox"
+              :title="outlookIntegrado ? te.vazio.primeiroTitulo : te.vazio.novoTitulo"
+              :description="outlookIntegrado ? te.vazio.primeiroDescricao : ehAdmin && dados === 'novo' ? te.vazio.novoDescricao : te.vazio.novoMembroDescricao"
+              :actions="acoesDoVazio"
+              class="py-12"
+              :class="marca"
+            />
           </template>
-        </UTable>
-      </UContextMenu>
+      </TabelaDoEnspace>
     </div>
 
     <!-- Paginador: EntityRendererPaginator -->
-    <div class="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-default px-4 py-2.5">
-      <p class="text-sm text-muted">
-        {{ te.pagina.mostrando(inicio, fim, ordenados.length) }}
-      </p>
-      <div class="flex items-center gap-3">
-        <USelectMenu v-model="porPagina" :items="opcoesDePorPagina" value-key="value" :search-input="false" size="sm" class="w-36" :aria-label="te.pagina.rotulo" />
-        <UPagination v-model:page="pagina" :total="ordenados.length" :items-per-page="porPagina" size="sm" color="neutral" variant="outline" active-color="primary" active-variant="solid" />
-      </div>
-    </div>
+    <Paginador v-model:pagina="pagina" v-model:por-pagina="porPagina" :t="t" :total="ordenados.length" />
 
     </template>
 
@@ -627,6 +667,22 @@ function nomeDaCaixa(endereco: string) {
                 {{ autorDe(aberto) }}
               </dd>
             </template>
+            <template v-if="aberto.sistema">
+              <dt class="text-muted">
+                {{ te.col.status }}
+              </dt>
+              <dd>
+                <UBadge :label="t.central.status[aberto.sistema.status]" :color="COR_DO_STATUS[aberto.sistema.status]" variant="subtle" size="sm" />
+              </dd>
+              <template v-if="aberto.sistema.tarefa">
+                <dt class="text-muted">
+                  {{ te.col.tarefa }}
+                </dt>
+                <dd class="font-mono text-highlighted">
+                  {{ aberto.sistema.tarefa }}
+                </dd>
+              </template>
+            </template>
             <template v-if="fase >= 3 && tarefaRef(aberto.tarefaId)">
               <dt class="text-muted">
                 {{ te.col.tarefa }}
@@ -653,7 +709,7 @@ function nomeDaCaixa(endereco: string) {
                 :ui="{ label: 'truncate' }"
                 @click="abrirItem(aberto.itemId!, 'mailbox'); aberto = null"
               />
-              <UButton v-if="fase >= 2" :label="t.compositor.trocar" color="neutral" variant="ghost" size="xs" @click="vinculando = true" />
+              <UButton v-if="fase >= 2 && !aberto.sistema" :label="t.compositor.trocar" color="neutral" variant="ghost" size="xs" @click="vinculando = true" />
             </div>
             <div v-else class="mt-2">
               <p class="mb-2 text-xs text-muted">
@@ -686,7 +742,10 @@ function nomeDaCaixa(endereco: string) {
         </div>
       </template>
       <template #footer>
-        <div v-if="aberto" class="flex flex-wrap gap-2">
+        <div v-if="aberto?.sistema" class="flex flex-wrap gap-2">
+          <UButton :label="t.central.reenviar" icon="i-lucide-send" :disabled="aberto.sistema.status === 'processando'" @click="reenviar(aberto)" />
+        </div>
+        <div v-else-if="aberto" class="flex flex-wrap gap-2">
           <UButton :label="te.acoes.responder" icon="i-lucide-reply" @click="responder(aberto)" />
           <UButton v-if="fase >= 2" :label="te.acoes.encaminhar" icon="i-lucide-forward" color="neutral" variant="outline" :class="marca" @click="responder(aberto, true)" />
           <UButton v-if="aberto.direcao === 'recebido'" :label="te.acoes.marcarNaoLido" icon="i-lucide-mail" color="neutral" variant="ghost" class="ml-auto" @click="marcarNaoLido(aberto)" />

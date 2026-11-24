@@ -213,6 +213,7 @@ export interface Textos {
     titulo: string
     descricaoFase1: string
     descricaoFase2: string
+    descricaoDoSistema: string
     pesquisar: string
     limparBusca: string
     periodoRotulo: string
@@ -221,8 +222,8 @@ export interface Textos {
     colunas: string
     expandirFiltros: string
     recolherFiltros: string
-    rapidos: Record<'recebidos' | 'enviados' | 'naoLidos' | 'comAnexo' | 'semItem', string>
-    col: Record<'tipo' | 'de' | 'para' | 'assunto' | 'item' | 'tarefa' | 'enviadoPor' | 'data' | 'acoes', string>
+    rapidos: Record<'recebidos' | 'enviados' | 'sistema' | 'naoLidos' | 'comAnexo' | 'semItem', string>
+    col: Record<'tipo' | 'de' | 'para' | 'assunto' | 'item' | 'tarefa' | 'enviadoPor' | 'status' | 'data' | 'acoes', string>
     tipo: Record<'recebido' | 'enviado', string>
     ordenar: (coluna: string) => string
     filtro: {
@@ -248,6 +249,8 @@ export interface Textos {
     comAnexo: string
     vazioDescricao: string
     vazioFiltrado: string
+    sistema: string
+    vazio: Record<'novoTitulo' | 'novoDescricao' | 'novoMembroDescricao' | 'primeiroTitulo' | 'primeiroDescricao' | 'integrar' | 'criarModelo' | 'criarCaixa' | 'escrever', string>
     vinculadoTitulo: string
     vinculadoDescricao: (ref: string) => string
     vincularDepois: string
@@ -336,10 +339,13 @@ export interface Textos {
     enviadoSemItemRegistrado: (de: string) => string
   }
   central: {
-    abas: Record<'mensagens' | 'modelos' | 'caixas' | 'sistema' | 'configuracoes', string>
-    dicas: Record<'modelos' | 'caixas' | 'sistema' | 'configuracoes', string>
+    abas: Record<'mensagens' | 'modelos' | 'caixas' | 'configuracoes', string>
+    dicas: Record<'modelos' | 'caixas' | 'configuracoes', string>
     novoModelo: string
     novaCaixa: string
+    pesquisarModelos: string
+    pesquisarCaixas: string
+    vazio: Record<'modelosTitulo' | 'modelosDescricao' | 'caixasTitulo' | 'caixasDescricao', string>
     col: Record<'nome' | 'assunto' | 'remetentePorDominio' | 'email' | 'provedor' | 'criadoEm' | 'status' | 'destino' | 'copia' | 'tarefa' | 'acoes', string>
     sim: string
     nao: string
@@ -480,6 +486,9 @@ export interface Textos {
     perfil: string
     perfis: Record<'admin' | 'membro', string>
     perfilDica: string
+    dados: string
+    dadosOpcoes: Record<'novo' | 'primeiroUso' | 'emUso', string>
+    dadosDica: string
     atalhosDaCategoria: string
     formularios: string
     cenario: string
@@ -746,6 +755,7 @@ const ptBR: Textos = {
     titulo: 'E-mails',
     descricaoFase1: 'Os e-mails recebidos e enviados pela Mail Box dos itens.',
     descricaoFase2: 'Os e-mails recebidos e enviados pelo ENSPACE, com ou sem item.',
+    descricaoDoSistema: 'Também os e-mails que tarefas e fluxos enviaram.',
     pesquisar: 'Pesquisar...',
     limparBusca: 'Limpar a busca',
     periodoRotulo: 'Período',
@@ -754,8 +764,8 @@ const ptBR: Textos = {
     colunas: 'Colunas',
     expandirFiltros: 'Expandir filtros',
     recolherFiltros: 'Recolher filtros',
-    rapidos: { recebidos: 'Recebidos', enviados: 'Enviados', naoLidos: 'Não lidos', comAnexo: 'Com anexo', semItem: 'Sem item' },
-    col: { tipo: 'Tipo', de: 'De', para: 'Para', assunto: 'Assunto', item: 'Item', tarefa: 'Tarefa', enviadoPor: 'Enviado por', data: 'Data', acoes: 'Ações' },
+    rapidos: { recebidos: 'Recebidos', enviados: 'Enviados', sistema: 'Do sistema', naoLidos: 'Não lidos', comAnexo: 'Com anexo', semItem: 'Sem item' },
+    col: { tipo: 'Tipo', de: 'De', para: 'Para', assunto: 'Assunto', item: 'Item', tarefa: 'Tarefa', enviadoPor: 'Enviado por', status: 'Status', data: 'Data', acoes: 'Ações' },
     tipo: { recebido: 'Recebido', enviado: 'Enviado' },
     ordenar: coluna => `Ordenar por ${coluna}`,
     filtro: {
@@ -781,6 +791,8 @@ const ptBR: Textos = {
     comAnexo: 'Com anexo',
     vazioDescricao: 'Nenhum e-mail encontrado.',
     vazioFiltrado: 'Nenhum e-mail com estes filtros.',
+    sistema: 'Sistema',
+    vazio: { novoTitulo: 'Nenhum e-mail ainda', novoDescricao: 'Os e-mails que as pessoas trocam pelos itens aparecem aqui. Para começar, integre a sua conta do Outlook e crie os modelos e as caixas do workspace.', novoMembroDescricao: 'Os e-mails que você troca pelos itens aparecem aqui. Para enviar pelo ENSPACE, integre a sua conta do Outlook.', primeiroTitulo: 'Nenhum e-mail ainda', primeiroDescricao: 'Escreva o primeiro e-mail. Ele aparece aqui e na Mail Box do item vinculado.', integrar: 'Integrar conta do Outlook', criarModelo: 'Criar modelo', criarCaixa: 'Criar caixa de e-mail', escrever: 'Novo e-mail' },
     vinculadoTitulo: 'E-mail vinculado',
     vinculadoDescricao: ref => `Aparece na aba Mail Box de ${ref}.`,
     vincularDepois: 'Este e-mail não tem item. Ao vincular, ele passa a aparecer na aba Mail Box do item.',
@@ -869,10 +881,13 @@ const ptBR: Textos = {
     enviadoSemItemRegistrado: de => `Enviado de ${de}, sem item vinculado. O e-mail fica em E-mails.`,
   },
   central: {
-    abas: { mensagens: 'Mensagens', modelos: 'Modelos', caixas: 'Caixas de E-mail', sistema: 'Enviados pelo sistema', configuracoes: 'Configurações' },
-    dicas: { modelos: 'Os modelos que aparecem no campo Modelo do e-mail.', caixas: 'Os endereços do workspace que recebem e-mails e podem iniciar um fluxo.', sistema: 'Os e-mails que tarefas e fluxos enviaram, com o status de cada envio.', configuracoes: 'A conta de envio de cada pessoa e as regras do e-mail no workspace.' },
+    abas: { mensagens: 'Mensagens', modelos: 'Modelos', caixas: 'Caixas de E-mail', configuracoes: 'Configurações' },
+    dicas: { modelos: 'Os modelos que aparecem no campo Template do e-mail.', caixas: 'Os endereços do workspace que recebem e-mails e podem iniciar um fluxo.', configuracoes: 'A conta de envio de cada pessoa e as regras do e-mail no workspace.' },
     novoModelo: 'Novo modelo',
     novaCaixa: 'Nova caixa',
+    pesquisarModelos: 'Pesquisar modelos...',
+    pesquisarCaixas: 'Pesquisar caixas...',
+    vazio: { modelosTitulo: 'Nenhum modelo', modelosDescricao: 'O modelo preenche o assunto e a mensagem de um e-mail. Crie o primeiro para a equipe usar.', caixasTitulo: 'Nenhuma caixa de e-mail', caixasDescricao: 'A caixa recebe os e-mails enviados ao workspace e pode iniciar um fluxo.' },
     col: { nome: 'Nome', assunto: 'Assunto', remetentePorDominio: 'Usar remetente por domínio', email: 'E-mail', provedor: 'Provedor', criadoEm: 'Criado em', status: 'Status', destino: 'E-mail', copia: 'E-mail em cópia', tarefa: 'Tarefa', acoes: 'Ações' },
     sim: 'Sim',
     nao: 'Não',
@@ -1045,6 +1060,9 @@ const ptBR: Textos = {
     perfil: 'Perfil',
     perfis: { admin: 'Admin', membro: 'Membro' },
     perfilDica: 'O membro vê Mensagens e a própria conta de envio. Quem administra vê também modelos, caixas e envios do sistema.',
+    dados: 'Dados',
+    dadosOpcoes: { novo: 'Workspace novo', primeiroUso: 'Primeiro uso', emUso: 'Em uso' },
+    dadosDica: 'Workspace novo: nada configurado e nada enviado. Primeiro uso: modelos, caixas e conta do Outlook prontos, nenhum e-mail ainda.',
     atalhosDaCategoria: 'Contato da categoria Contratos',
     formularios: 'Formulários de Solicitações',
     cenario: 'Cenário',
@@ -1309,6 +1327,7 @@ const en: Textos = {
     titulo: 'Emails',
     descricaoFase1: 'Emails received and sent through the item Mail Box.',
     descricaoFase2: 'Emails received and sent through ENSPACE, with or without an item.',
+    descricaoDoSistema: 'Also the emails that tasks and flows sent.',
     pesquisar: 'Search...',
     limparBusca: 'Clear search',
     periodoRotulo: 'Period',
@@ -1317,8 +1336,8 @@ const en: Textos = {
     colunas: 'Columns',
     expandirFiltros: 'Expand filters',
     recolherFiltros: 'Collapse filters',
-    rapidos: { recebidos: 'Received', enviados: 'Sent', naoLidos: 'Unread', comAnexo: 'With attachment', semItem: 'Without item' },
-    col: { tipo: 'Type', de: 'From', para: 'To', assunto: 'Subject', item: 'Item', tarefa: 'Task', enviadoPor: 'Sent by', data: 'Date', acoes: 'Actions' },
+    rapidos: { recebidos: 'Received', enviados: 'Sent', sistema: 'From the system', naoLidos: 'Unread', comAnexo: 'With attachment', semItem: 'Without item' },
+    col: { tipo: 'Type', de: 'From', para: 'To', assunto: 'Subject', item: 'Item', tarefa: 'Task', enviadoPor: 'Sent by', status: 'Status', data: 'Date', acoes: 'Actions' },
     tipo: { recebido: 'Received', enviado: 'Sent' },
     ordenar: coluna => `Sort by ${coluna}`,
     filtro: {
@@ -1344,6 +1363,8 @@ const en: Textos = {
     comAnexo: 'With attachment',
     vazioDescricao: 'No emails found.',
     vazioFiltrado: 'No emails match these filters.',
+    sistema: 'System',
+    vazio: { novoTitulo: 'No emails yet', novoDescricao: 'Emails people exchange through items appear here. To start, connect your Outlook account and create the workspace templates and boxes.', novoMembroDescricao: 'Emails you exchange through items appear here. To send through ENSPACE, connect your Outlook account.', primeiroTitulo: 'No emails yet', primeiroDescricao: 'Write the first email. It appears here and in the Mail Box of the linked item.', integrar: 'Connect Outlook account', criarModelo: 'Create template', criarCaixa: 'Create email box', escrever: 'New email' },
     vinculadoTitulo: 'Email linked',
     vinculadoDescricao: ref => `It appears in the Mail Box tab of ${ref}.`,
     vincularDepois: 'This email has no item. Once linked, it appears in the Mail Box tab of the item.',
@@ -1432,10 +1453,13 @@ const en: Textos = {
     enviadoSemItemRegistrado: de => `Sent from ${de}, without a linked item. The email stays in Emails.`,
   },
   central: {
-    abas: { mensagens: 'Messages', modelos: 'Templates', caixas: 'Email Boxes', sistema: 'Sent by the system', configuracoes: 'Settings' },
-    dicas: { modelos: 'The templates offered in the email Template field.', caixas: 'The workspace addresses that receive email and can start a flow.', sistema: 'The emails that tasks and flows sent, with the status of each one.', configuracoes: 'Each person\'s sending account and the workspace email rules.' },
+    abas: { mensagens: 'Messages', modelos: 'Templates', caixas: 'Email Boxes', configuracoes: 'Settings' },
+    dicas: { modelos: 'The templates offered in the email Template field.', caixas: 'The workspace addresses that receive email and can start a flow.', configuracoes: 'Each person\'s sending account and the workspace email rules.' },
     novoModelo: 'New template',
     novaCaixa: 'New box',
+    pesquisarModelos: 'Search templates...',
+    pesquisarCaixas: 'Search boxes...',
+    vazio: { modelosTitulo: 'No templates', modelosDescricao: 'A template fills in the subject and message of an email. Create the first one for your team.', caixasTitulo: 'No email boxes', caixasDescricao: 'A box receives the emails sent to the workspace and can start a flow.' },
     col: { nome: 'Name', assunto: 'Subject', remetentePorDominio: 'Use sender by domain', email: 'Email', provedor: 'Provider', criadoEm: 'Created at', status: 'Status', destino: 'Email', copia: 'CC email', tarefa: 'Task', acoes: 'Actions' },
     sim: 'Yes',
     nao: 'No',
@@ -1608,6 +1632,9 @@ const en: Textos = {
     perfil: 'Profile',
     perfis: { admin: 'Admin', membro: 'Member' },
     perfilDica: 'The member sees Messages and their own sending account. Administrators also see templates, boxes and system emails.',
+    dados: 'Data',
+    dadosOpcoes: { novo: 'New workspace', primeiroUso: 'First use', emUso: 'In use' },
+    dadosDica: 'New workspace: nothing set up and nothing sent. First use: templates, boxes and Outlook account ready, no emails yet.',
     atalhosDaCategoria: 'Contact of the Contracts category',
     formularios: 'Requests forms',
     cenario: 'Scenario',
@@ -1872,6 +1899,7 @@ const es: Textos = {
     titulo: 'Correos',
     descricaoFase1: 'Los correos recibidos y enviados por el Mail Box de los ítems.',
     descricaoFase2: 'Los correos recibidos y enviados por ENSPACE, con o sin ítem.',
+    descricaoDoSistema: 'También los correos que tareas y flujos enviaron.',
     pesquisar: 'Buscar...',
     limparBusca: 'Limpiar la búsqueda',
     periodoRotulo: 'Período',
@@ -1880,8 +1908,8 @@ const es: Textos = {
     colunas: 'Columnas',
     expandirFiltros: 'Expandir filtros',
     recolherFiltros: 'Contraer filtros',
-    rapidos: { recebidos: 'Recibidos', enviados: 'Enviados', naoLidos: 'No leídos', comAnexo: 'Con adjunto', semItem: 'Sin ítem' },
-    col: { tipo: 'Tipo', de: 'De', para: 'Para', assunto: 'Asunto', item: 'Ítem', tarefa: 'Tarea', enviadoPor: 'Enviado por', data: 'Fecha', acoes: 'Acciones' },
+    rapidos: { recebidos: 'Recibidos', enviados: 'Enviados', sistema: 'Del sistema', naoLidos: 'No leídos', comAnexo: 'Con adjunto', semItem: 'Sin ítem' },
+    col: { tipo: 'Tipo', de: 'De', para: 'Para', assunto: 'Asunto', item: 'Ítem', tarefa: 'Tarea', enviadoPor: 'Enviado por', status: 'Estado', data: 'Fecha', acoes: 'Acciones' },
     tipo: { recebido: 'Recibido', enviado: 'Enviado' },
     ordenar: coluna => `Ordenar por ${coluna}`,
     filtro: {
@@ -1907,6 +1935,8 @@ const es: Textos = {
     comAnexo: 'Con adjunto',
     vazioDescricao: 'No se encontraron correos.',
     vazioFiltrado: 'Ningún correo con estos filtros.',
+    sistema: 'Sistema',
+    vazio: { novoTitulo: 'Ningún correo todavía', novoDescricao: 'Los correos que las personas intercambian por los ítems aparecen aquí. Para empezar, integre su cuenta de Outlook y cree las plantillas y los buzones del workspace.', novoMembroDescricao: 'Los correos que usted intercambia por los ítems aparecen aquí. Para enviar por ENSPACE, integre su cuenta de Outlook.', primeiroTitulo: 'Ningún correo todavía', primeiroDescricao: 'Escriba el primer correo. Aparece aquí y en el Mail Box del ítem vinculado.', integrar: 'Integrar cuenta de Outlook', criarModelo: 'Crear plantilla', criarCaixa: 'Crear buzón de correo', escrever: 'Nuevo correo' },
     vinculadoTitulo: 'Correo vinculado',
     vinculadoDescricao: ref => `Aparece en la pestaña Mail Box de ${ref}.`,
     vincularDepois: 'Este correo no tiene ítem. Al vincularlo, pasa a aparecer en la pestaña Mail Box del ítem.',
@@ -1995,10 +2025,13 @@ const es: Textos = {
     enviadoSemItemRegistrado: de => `Enviado desde ${de}, sin ítem vinculado. El correo queda en Correos.`,
   },
   central: {
-    abas: { mensagens: 'Mensajes', modelos: 'Plantillas', caixas: 'Buzones de correo', sistema: 'Enviados por el sistema', configuracoes: 'Configuración' },
-    dicas: { modelos: 'Las plantillas que aparecen en el campo Plantilla del correo.', caixas: 'Las direcciones del workspace que reciben correos y pueden iniciar un flujo.', sistema: 'Los correos que tareas y flujos enviaron, con el estado de cada envío.', configuracoes: 'La cuenta de envío de cada persona y las reglas del correo en el workspace.' },
+    abas: { mensagens: 'Mensajes', modelos: 'Plantillas', caixas: 'Buzones de correo', configuracoes: 'Configuración' },
+    dicas: { modelos: 'Las plantillas que aparecen en el campo Plantilla del correo.', caixas: 'Las direcciones del workspace que reciben correos y pueden iniciar un flujo.', configuracoes: 'La cuenta de envío de cada persona y las reglas del correo en el workspace.' },
     novoModelo: 'Nueva plantilla',
     novaCaixa: 'Nuevo buzón',
+    pesquisarModelos: 'Buscar plantillas...',
+    pesquisarCaixas: 'Buscar buzones...',
+    vazio: { modelosTitulo: 'Ninguna plantilla', modelosDescricao: 'La plantilla completa el asunto y el mensaje de un correo. Cree la primera para el equipo.', caixasTitulo: 'Ningún buzón de correo', caixasDescricao: 'El buzón recibe los correos enviados al workspace y puede iniciar un flujo.' },
     col: { nome: 'Nombre', assunto: 'Asunto', remetentePorDominio: 'Usar remitente por dominio', email: 'Correo', provedor: 'Proveedor', criadoEm: 'Creado el', status: 'Estado', destino: 'Correo', copia: 'Correo en copia', tarefa: 'Tarea', acoes: 'Acciones' },
     sim: 'Sí',
     nao: 'No',
@@ -2171,6 +2204,9 @@ const es: Textos = {
     perfil: 'Perfil',
     perfis: { admin: 'Admin', membro: 'Miembro' },
     perfilDica: 'El miembro ve Mensajes y su propia cuenta de envío. Quien administra ve también plantillas, buzones y envíos del sistema.',
+    dados: 'Datos',
+    dadosOpcoes: { novo: 'Workspace nuevo', primeiroUso: 'Primer uso', emUso: 'En uso' },
+    dadosDica: 'Workspace nuevo: nada configurado y nada enviado. Primer uso: plantillas, buzones y cuenta de Outlook listos, ningún correo todavía.',
     atalhosDaCategoria: 'Contacto de la categoría Contratos',
     formularios: 'Formularios de Solicitudes',
     cenario: 'Escenario',

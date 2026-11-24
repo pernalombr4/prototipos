@@ -550,29 +550,6 @@ export const modelos: ModeloDeEmail[] = [
   { id: 'm-documentos', nome: 'Pedido de documentos', assunto: '{referencia} · Documentos pendentes', corpo: '<p>Olá,</p><p>Para seguir com o cadastro, precisamos dos documentos abaixo.</p>' },
 ]
 
-/**
- * Configurações › E-mails › E-mails Enviados (`sendmails` no develop, lido em
- * 24/11/2026): os e-mails que o sistema enviou por tarefa ou fluxo, com o
- * status do envio e "Reenviar E-mail". Não é o e-mail que a pessoa escreve.
- */
-export interface EnvioDoSistema {
-  id: number
-  criadoEm: Date
-  status: 'enviado' | 'processando' | 'falhou'
-  para: string
-  cc: string[]
-  assunto: string
-  /** Referência da tarefa que enviou. */
-  tarefa: string | null
-}
-
-export const enviosDoSistema: EnvioDoSistema[] = [
-  { id: 1, criadoEm: new Date('2026-10-05T08:02:00-03:00'), status: 'enviado', para: 'marina.alves@example.com', cc: [], assunto: 'CTR-00231 · Documento para assinatura', tarefa: 'T-1042' },
-  { id: 2, criadoEm: new Date('2026-10-04T17:45:00-03:00'), status: 'falhou', para: 'juliana.freitas@example.com', cc: ['financeiro@example.com'], assunto: 'CTR-00229 · Vencimento próximo', tarefa: 'T-1047' },
-  { id: 3, criadoEm: new Date('2026-10-04T10:10:00-03:00'), status: 'enviado', para: 'lucas.almeida@example.com', cc: [], assunto: 'SOL-00088 · Solicitação recebida', tarefa: null },
-  { id: 4, criadoEm: new Date('2026-10-05T09:28:00-03:00'), status: 'processando', para: 'caio.fernandes@example.com', cc: [], assunto: 'CTR-00223 · Visita técnica confirmada', tarefa: null },
-]
-
 export interface Email {
   id: number
   direcao: 'recebido' | 'enviado'
@@ -599,11 +576,21 @@ export interface Email {
   tarefaId?: number | null
   /** O registro só existe a partir desta fase (e-mail sem item, e-mail saído de caixa). */
   desdeFase?: 2 | 3
+  /**
+   * Enviado pelo sistema, por tarefa ou fluxo: o que hoje fica em Configurações ›
+   * E-mails › E-mails Enviados (`sendmails`, lido no develop em 24/11/2026), com
+   * o status do envio e "Reenviar E-mail". Desde a rodada 8 entra na aba
+   * Mensagens, só para quem tem a permissão de ver os enviados.
+   */
+  sistema?: { status: 'enviado' | 'processando' | 'falhou', tarefa: string | null }
 }
 
 function email(e: Omit<Email, 'cc' | 'anexos' | 'lido'> & Partial<Pick<Email, 'cc' | 'anexos' | 'lido'>>): Email {
   return { cc: [], anexos: [], lido: true, ...e }
 }
+
+/** O remetente dos e-mails que tarefas e fluxos enviam (inventado). */
+export const REMETENTE_DO_SISTEMA = 'notificacoes@example.com'
 
 const ctr231 = itens.find(i => i.reference === 'CTR-00231')!
 const ctr230 = itens.find(i => i.reference === 'CTR-00230')!
@@ -624,6 +611,11 @@ export const emails: Email[] = [
   // Fase 2: enviado sem item. Hoje sai do Outlook e não fica registrado no ENSPACE.
   email({ id: 8, direcao: 'enviado', de: 'fabio.castro@example.com', para: ['fornecedor.novo@example.com'], assunto: 'Cadastro de fornecedor', corpo: '<p>Segue o link do formulário de cadastro.</p>', data: dia(1, '15:00'), caixa: 'fabio.castro@example.com', itemId: null, autor: 6, desdeFase: 2 }),
   // Fase 2: enviado pela caixa do workspace, com item.
+  // Enviados pelo sistema (tarefa ou fluxo). Existem hoje, fora da tela de e-mails.
+  email({ id: 21, direcao: 'enviado', de: REMETENTE_DO_SISTEMA, para: ['marina.alves@example.com'], assunto: 'CTR-00231 · Documento para assinatura', corpo: '<p>Olá,</p><p>Segue o documento para assinatura.</p>', data: dia(5, '08:02'), caixa: enderecoDoItem(ctr231), itemId: ctr231.id, sistema: { status: 'enviado', tarefa: 'T-1042' } }),
+  email({ id: 22, direcao: 'enviado', de: REMETENTE_DO_SISTEMA, para: ['juliana.freitas@example.com'], cc: ['financeiro@example.com'], assunto: 'CTR-00229 · Vencimento próximo', corpo: '<p>Olá,</p><p>O contrato vence nos próximos dias.</p>', data: dia(4, '17:45'), caixa: enderecoDoItem(ctr229), itemId: ctr229.id, sistema: { status: 'falhou', tarefa: 'T-1047' } }),
+  email({ id: 23, direcao: 'enviado', de: REMETENTE_DO_SISTEMA, para: ['lucas.almeida@example.com'], assunto: 'SOL-00088 · Solicitação recebida', corpo: '<p>Recebemos a sua solicitação. O número de acompanhamento é SOL-00088.</p>', data: dia(4, '10:10'), caixa: enderecoDoItem(sol88), itemId: sol88.id, sistema: { status: 'enviado', tarefa: null } }),
+  email({ id: 24, direcao: 'enviado', de: REMETENTE_DO_SISTEMA, para: ['caio.fernandes@example.com'], assunto: 'CTR-00223 · Visita técnica confirmada', corpo: '<p>A visita técnica está confirmada para o dia 8, às 14h.</p>', data: dia(5, '09:28'), caixa: enderecoDoItem(ctr223), itemId: ctr223.id, sistema: { status: 'processando', tarefa: null } }),
   email({ id: 13, direcao: 'enviado', de: caixas[0]!.email, para: ['natalia.couto@example.com'], assunto: 'Re: Acesso ao sistema de contratos', corpo: '<p>Natália, o acesso de leitura foi liberado para a equipe de RH.</p>', data: dia(5, '08:40'), caixa: enderecoDoItem(sol87), itemId: sol87.id, autor: 5, desdeFase: 2 }),
 ]
 

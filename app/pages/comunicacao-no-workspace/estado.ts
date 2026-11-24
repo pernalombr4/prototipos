@@ -29,6 +29,7 @@ import {
   enderecoDoItem,
   formularios as formulariosIniciais,
   itemPorId,
+  modelos,
   tarefas,
 } from './mocks'
 
@@ -215,15 +216,28 @@ export function rascunhoVazio(): Rascunho {
 export type Cenario = 'normal' | 'sem-outlook' | 'falha'
 
 /**
+ * O estado dos dados de e-mail (andaime, rodada 8):
+ *  - novo: o workspace acabou de nascer. Nada configurado (sem modelo, sem
+ *    caixa, sem a conta do Outlook) e nada enviado;
+ *  - primeiroUso: tudo configurado, nenhum e-mail ainda;
+ *  - emUso: o protótipo de sempre, com dados.
+ */
+export type Dados = 'novo' | 'primeiroUso' | 'emUso'
+
+/** Os filtros rápidos da aba Mensagens. Ficam no estado para o menu Configurações › E-mails › E-mails Enviados abrir já filtrado. */
+export type Rapido = 'recebidos' | 'enviados' | 'sistema' | 'naoLidos' | 'comAnexo' | 'semItem'
+
+/**
  * Quem olha o protótipo (andaime). Cada aba da central segue a permissão que já
- * existe no develop: `settings::emails::templates`, `::boxes` e `::sent`, hoje
- * de quem administra; Mensagens é a tela de e-mails que todo membro pode ter.
+ * existe no develop: `settings::emails::templates` e `::boxes`, hoje de quem
+ * administra. Mensagens é para todo membro; as linhas dos e-mails enviados pelo
+ * sistema (`settings::emails::sent`) só aparecem para quem tem essa permissão.
  */
 export type Perfil = 'admin' | 'membro'
 
 /** As abas da central "E-mails". */
-export type AbaDaCentral = 'mensagens' | 'modelos' | 'caixas' | 'sistema' | 'configuracoes'
-export const ABAS_DE_ADMIN: AbaDaCentral[] = ['modelos', 'caixas', 'sistema']
+export type AbaDaCentral = 'mensagens' | 'modelos' | 'caixas' | 'configuracoes'
+export const ABAS_DE_ADMIN: AbaDaCentral[] = ['modelos', 'caixas']
 
 /** Uma opção do "De". */
 export interface Remetente {
@@ -252,6 +266,11 @@ export function useComunicacao() {
   const perfil = useState<Perfil>('cnw-perfil', () => 'admin')
   const abaDaCentral = useState<AbaDaCentral>('cnw-aba-central', () => 'mensagens')
   const ehAdmin = computed(() => perfil.value === 'admin')
+  const rapidosDaCentral = useState<Rapido[]>('cnw-rapidos', () => [])
+  const dados = useState<Dados>('cnw-dados', () => 'emUso')
+  /** Workspace novo: sem modelo e sem caixa. */
+  const modelosDoWorkspace = computed(() => dados.value === 'novo' ? [] : modelos)
+  const caixasDoWorkspace = computed(() => dados.value === 'novo' ? [] : caixas)
   /** Fase 2: as caixas que aparecem no "De" (central › Configurações). */
   const caixasNoDe = useState<Record<string, boolean>>('cnw-caixas-no-de', () => Object.fromEntries(caixas.map(c => [c.id, true])))
 
@@ -260,7 +279,7 @@ export function useComunicacao() {
    * da Mail Box mostra "Nenhuma conta integrada" (código do develop, lido em
    * 17/11/2026). O cenário "Sem Outlook integrado" do andaime mostra esse caso.
    */
-  const outlookIntegrado = computed(() => cenario.value !== 'sem-outlook')
+  const outlookIntegrado = computed(() => cenario.value !== 'sem-outlook' && dados.value !== 'novo')
 
   /**
    * As opções do "De". Fase 1: só a conta do Outlook (o envio de hoje não
@@ -268,7 +287,7 @@ export function useComunicacao() {
    */
   const remetentes = computed<Remetente[]>(() => [
     ...(outlookIntegrado.value && EU.email ? [{ email: EU.email, tipo: 'outlook' as const }] : []),
-    ...(fase.value >= 2 ? caixas.filter(c => caixasNoDe.value[c.id] !== false).map(c => ({ email: c.email, tipo: 'caixa' as const, caixa: c })) : []),
+    ...(fase.value >= 2 ? caixasDoWorkspace.value.filter(c => caixasNoDe.value[c.id] !== false).map(c => ({ email: c.email, tipo: 'caixa' as const, caixa: c })) : []),
   ])
 
   /** Há por onde enviar pelo ENSPACE? Sem nada, o botão E-mail abre o app da pessoa. */
@@ -300,11 +319,18 @@ export function useComunicacao() {
       if (p === 'admin') return
       if (ABAS_DE_ADMIN.includes(abaDaCentral.value)) abaDaCentral.value = 'mensagens'
       if (tela.value === 'sistema' || tela.value === 'categoria') tela.value = 'inicio'
+      rapidosDaCentral.value = rapidosDaCentral.value.filter(r => r !== 'sistema')
+    })
+    // Workspace novo e primeiro uso: nenhum e-mail. Em uso: os dados de exemplo.
+    watch(dados, (d) => {
+      emails.value = d === 'emUso' ? structuredClone(emailsIniciais) : []
+      rapidosDaCentral.value = []
     })
   }
 
-  function ir(t: Tela, extra?: { categoria?: SlugDaCategoria, item?: number, aba?: string, vista?: 'lista' | 'painel' | 'atalhos' | 'formularios', central?: AbaDaCentral }) {
+  function ir(t: Tela, extra?: { categoria?: SlugDaCategoria, item?: number, aba?: string, vista?: 'lista' | 'painel' | 'atalhos' | 'formularios', central?: AbaDaCentral, rapido?: Rapido }) {
     if (extra?.central) abaDaCentral.value = extra.central
+    if (extra?.central === 'mensagens') rapidosDaCentral.value = extra.rapido ? [extra.rapido] : []
     if (extra?.categoria) categoriaAtual.value = extra.categoria
     if (extra?.vista) vistaDaCategoria.value = extra.vista
     if (extra?.item !== undefined) itemAberto.value = extra.item
@@ -389,6 +415,10 @@ export function useComunicacao() {
     perfil,
     ehAdmin,
     abaDaCentral,
+    rapidosDaCentral,
+    dados,
+    modelosDoWorkspace,
+    caixasDoWorkspace,
     caixasNoDe,
     outlookIntegrado,
     remetentes,

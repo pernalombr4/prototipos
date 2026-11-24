@@ -21,7 +21,7 @@
  */
 import type { EditorToolbarItem } from '@nuxt/ui'
 import type { Textos } from './textos'
-import { type Email, EU, agora, categoriaPorSlug, itemPorId, itens, membros, modelos, tarefas } from './mocks'
+import { type Email, EU, agora, categoriaPorSlug, itemPorId, itens, membros, tarefas } from './mocks'
 import { contatosDoItem, preencher, useComunicacao, useMarcaDeProposta } from './estado'
 import BuscaDeItem from './_BuscaDeItem.vue'
 import LinkDoEditor from './_LinkDoEditor.vue'
@@ -29,7 +29,7 @@ import { useAppExterno } from './simulador'
 
 const props = defineProps<{ t: Textos }>()
 
-const { compositorAberto, rascunho, emails, config, cenario, fase, remetentes, podeEnviar, remetentePadrao, responderPara, abrirItem, ir, descartarRascunho } = useComunicacao()
+const { compositorAberto, rascunho, emails, config, cenario, fase, remetentes, podeEnviar, remetentePadrao, responderPara, abrirItem, ir, descartarRascunho, modelosDoWorkspace } = useComunicacao()
 const marca = useMarcaDeProposta()
 const toast = useToast()
 
@@ -164,7 +164,7 @@ function desvincular() {
 /* ---------- Template ---------- */
 
 watch(() => rascunho.value.modelo, (id) => {
-  const m = modelos.find(x => x.id === id)
+  const m = modelosDoWorkspace.value.find(x => x.id === id)
   if (!m) return
   rascunho.value.assunto = preencher(m.assunto, item.value, null)
   rascunho.value.corpo = m.corpo
@@ -445,7 +445,7 @@ const notaDaResposta = computed(() => {
       </div>
 
       <UFormField :label="t.compositor.template">
-        <USelect v-model="rascunho.modelo" :items="modelos.map(m => ({ value: m.id, label: m.nome }))" :placeholder="t.compositor.templatePlaceholder" class="w-full" />
+        <USelect v-model="rascunho.modelo" :items="modelosDoWorkspace.map(m => ({ value: m.id, label: m.nome }))" :placeholder="t.compositor.templatePlaceholder" class="w-full" />
       </UFormField>
 
       <UFormField :label="t.compositor.assunto">

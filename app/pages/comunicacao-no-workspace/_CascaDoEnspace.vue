@@ -6,7 +6,8 @@
  * tracejado do andaime ("Mostrar o que muda"):
  *   1. a entrada "E-mails" na seção Membro do menu, que abre a central;
  *   2. os 3 itens de Configurações › E-mails, que passam a abrir a aba
- *      correspondente da central (1 destino só, rodada 7);
+ *      correspondente da central (1 destino só, rodada 7). E-mails Enviados
+ *      abre Mensagens com o filtro "Do sistema" (rodada 8);
  *   3. o botão "Novo e-mail" na barra do topo.
  * O perfil Membro do andaime não vê a seção Configurações (no develop, ela
  * depende das permissões de configuração).
@@ -20,7 +21,7 @@
  */
 import type { Textos } from './textos'
 import { categorias, EU, itemPorId, workspace } from './mocks'
-import { type AbaDaCentral, type Tela, useComunicacao, useMarcaDeProposta } from './estado'
+import { type AbaDaCentral, type Rapido, type Tela, useComunicacao, useMarcaDeProposta } from './estado'
 
 const props = defineProps<{
   t: Textos
@@ -28,14 +29,14 @@ const props = defineProps<{
   trilha: string[]
 }>()
 
-const { tela, categoriaAtual, ir, rascunho, compositorAberto, abaDaCentral, ehAdmin, contextoDaTela, novoEmailNoContexto } = useComunicacao()
+const { tela, categoriaAtual, ir, rascunho, compositorAberto, abaDaCentral, rapidosDaCentral, ehAdmin, contextoDaTela, novoEmailNoContexto } = useComunicacao()
 const marca = useMarcaDeProposta()
 
 interface Entrada {
   chave: string
   icone: string
   tela?: Tela
-  filhos?: { chave: string, rotulo?: string, icone: string, tela?: Tela, categoria?: string, central?: AbaDaCentral, proposta?: boolean }[]
+  filhos?: { chave: string, rotulo?: string, icone: string, tela?: Tela, categoria?: string, central?: AbaDaCentral, rapido?: Rapido, proposta?: boolean }[]
   externo?: boolean
   /** Peça proposta: ganha o contorno do andaime. */
   proposta?: boolean
@@ -86,7 +87,7 @@ const configuracoes: Entrada[] = [
     icone: 'i-lucide-mails',
     filhos: [
       // PROPOSTA (rodada 7): os rótulos de hoje, abrindo a aba da central.
-      { chave: 'emailsEnviados', icone: 'i-lucide-send', tela: 'emails', central: 'sistema', proposta: true },
+      { chave: 'emailsEnviados', icone: 'i-lucide-send', tela: 'emails', central: 'mensagens', rapido: 'sistema', proposta: true },
       { chave: 'modelosDeEmail', icone: 'i-lucide-file-text', tela: 'emails', central: 'modelos', proposta: true },
       { chave: 'caixasDeEmail', icone: 'i-lucide-inbox', tela: 'emails', central: 'caixas', proposta: true },
     ],
@@ -116,9 +117,9 @@ function alternar(chave: string) {
     : [...abertos.value, chave]
 }
 
-function ativo(e: { tela?: Tela, categoria?: string, central?: AbaDaCentral }) {
+function ativo(e: { tela?: Tela, categoria?: string, central?: AbaDaCentral, rapido?: Rapido }) {
   if (!e.tela) return false
-  if (e.central) return tela.value === 'emails' && abaDaCentral.value === e.central
+  if (e.central) return tela.value === 'emails' && abaDaCentral.value === e.central && (!e.rapido || rapidosDaCentral.value.includes(e.rapido))
   if (e.categoria) return (tela.value === 'itens' || tela.value === 'item') && categoriaAtual.value === e.categoria
   return tela.value === e.tela
 }
@@ -129,7 +130,7 @@ function clicar(e: Entrada | NonNullable<Entrada['filhos']>[number]) {
     return
   }
   if (e.chave === 'estruturaCategorias') ir('categoria', { vista: 'lista' })
-  else if ('central' in e && e.central) ir('emails', { central: e.central })
+  else if ('central' in e && e.central) ir('emails', { central: e.central, rapido: 'rapido' in e ? e.rapido : undefined })
   else if (e.tela) ir(e.tela, 'categoria' in e && e.categoria ? { categoria: e.categoria as never } : undefined)
 }
 

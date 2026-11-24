@@ -44,6 +44,8 @@ watch(() => props.tarefa?.id, () => (recorte.value = 'tarefa'))
 
 const daCaixa = computed(() => emails.value
   .filter(registrado)
+  // O e-mail enviado pelo sistema não entra na Mail Box do item, como hoje.
+  .filter(e => !e.sistema)
   .filter((e) => {
     if (porTarefa.value && (recorte.value === 'tarefa' || !item.value)) return e.tarefaId === props.tarefa!.id
     return e.itemId === props.itemId
