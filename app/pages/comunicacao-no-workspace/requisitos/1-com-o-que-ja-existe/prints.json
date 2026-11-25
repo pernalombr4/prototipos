@@ -3154,6 +3154,12 @@
       "destacar": {
         "regex": "^abre o whatsapp com a mensagem e o link"
       }
+    },
+    "RS301": {
+      "sem": "restrição: o cartão do quadro de itens continua sem botão; o atalho fica no clique direito (RF311 e RF312)"
+    },
+    "RS401": {
+      "sem": "restrição: o cartão do quadro de tarefas continua sem botão; os atalhos ficam no clique direito (RF421 a RF425)"
     }
   }
 }
