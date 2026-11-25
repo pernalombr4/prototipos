@@ -32,15 +32,17 @@
  * do guia de migração, que diz o destino. O guia completo é uma página da doc (`_GuiaDeMigracao.vue`).
  * Pesquisa: pesquisa-de-mercado, runs/2026-11-24-deploy-continuo-e-lancamento,
  * evidencias/notas/acao-exige-acao.md.
+ *
+ * Rodada 9: o guia é a única fonte do "como". Na release ficam o título com o porquê, quem é afetado,
+ * "Agir até" e o link do guia; o rótulo do topo abre o guia quando a versão tem 1 mudança.
  */
 import ProseA from '@nuxt/ui/runtime/components/prose/A.vue'
 import ProseH3 from '@nuxt/ui/runtime/components/prose/H3.vue'
 import ProseLi from '@nuxt/ui/runtime/components/prose/Li.vue'
-import ProseOl from '@nuxt/ui/runtime/components/prose/Ol.vue'
 import ProseP from '@nuxt/ui/runtime/components/prose/P.vue'
 import ProseStrong from '@nuxt/ui/runtime/components/prose/Strong.vue'
 import ProseUl from '@nuxt/ui/runtime/components/prose/Ul.vue'
-import { mudancaDe, type Entrada, type Mudanca } from './mocks'
+import { mudancaDe, type Entrada } from './mocks'
 import { formatarData, type Textos } from './textos'
 import { montarVersoes } from './versoes'
 
@@ -93,12 +95,6 @@ function tituloDoItem(e: Entrada) {
     e.publico === 'alguns' ? props.t.entrada.alguns : '',
   ].filter(Boolean).map(x => x.charAt(0).toLocaleLowerCase(idioma.value) + x.slice(1))
   return extras.length ? `${L(e.titulo)} (${extras.join(', ')}).` : `${L(e.titulo)}.`
-}
-
-/** As 3 fases da mudança que quebra, em 1 frase (rodada 5: sai a página Próximas mudanças). */
-function fases(m: Mudanca) {
-  const f = m.fases
-  return props.t.releases.fasesDaMudanca(dataDaVersao(f['opt-in']), dataDaVersao(f['opt-out']), dataDaVersao(f.obrigatoria))
 }
 
 const dataLonga = (iso: string) => formatarData(iso, idioma.value, { day: 'numeric', month: 'long', year: 'numeric' })
@@ -206,18 +202,21 @@ watch(() => props.destaque, async (id) => {
         <!-- No máximo 2 rótulos: o tamanho e o prazo -->
         <template #badge>
           <UBadge color="neutral" variant="subtle" size="sm" :label="v.tamanho" />
-          <!-- Rodada 7: o rótulo leva à seção Exige ação da versão, que fica sempre aberta -->
+          <!--
+            Rodada 9: com 1 mudança que exige ação, o rótulo abre o guia de migração dela; com 2 ou
+            mais, leva à seção Exige ação, que tem 1 link por guia.
+          -->
           <UButton
             v-if="v.prazo"
             color="warning"
             variant="outline"
             size="xs"
             icon="i-lucide-triangle-alert"
-            trailing-icon="i-lucide-arrow-down"
+            :trailing-icon="v.acoes.length === 1 ? 'i-lucide-arrow-right' : 'i-lucide-arrow-down'"
             class="cursor-pointer bg-warning/10 text-highlighted hover:bg-warning/20"
             :ui="{ leadingIcon: 'text-warning', trailingIcon: 'text-warning' }"
             :label="`${t.entrada.exigeAcao} · ${t.entrada.agirAte(formatarData(v.prazo, idioma))}`"
-            @click.stop="emit('irPara', `${v.id}-exige-acao`)"
+            @click.stop="v.acoes.length === 1 ? emit('abrirGuia', v.acoes[0]!.mudanca.id) : emit('irPara', `${v.id}-exige-acao`)"
           />
         </template>
 
@@ -235,8 +234,8 @@ watch(() => props.destaque, async (id) => {
         <template #body>
           <!--
             Rodada 7: Exige ação, sempre aberta e antes do texto recolhido, como "Breaking Changes" no
-            post de versão do Nuxt. Cada item: título; o que muda e por quê; quem é afetado; prazo,
-            fases e o que acontece depois; O que fazer; o link do guia de migração.
+            post de versão do Nuxt. Rodada 9: cada item leva só o título com o porquê, quem é afetado,
+            "Agir até" e o link do guia. Fases, passos e o que acontece depois moram só no guia.
           -->
           <div v-if="v.acoes.length" class="pt-2 text-default">
             <ProseH3 :id="`${v.id}-exige-acao`" anchor :ui="{ base: 'text-lg mt-6 mb-2 scroll-mt-32' }">
@@ -263,16 +262,8 @@ watch(() => props.destaque, async (id) => {
                 {{ t.releases.quemEAfetado(L(x.mudanca.quem)) }}
               </ProseP>
               <ProseP class="my-2">
-                <ProseStrong>{{ t.releases.agirAteData(dataLonga(x.mudanca.fases.obrigatoria)) }}</ProseStrong>{{ ' ' }}{{ fases(x.mudanca) }}{{ ' ' }}{{ L(x.mudanca.depois) }}
+                <ProseStrong>{{ t.releases.agirAteData(dataLonga(x.mudanca.fases.obrigatoria)) }}</ProseStrong>
               </ProseP>
-              <ProseP class="mt-2 mb-1">
-                <ProseStrong>{{ t.releases.oQueFazer }}</ProseStrong>
-              </ProseP>
-              <ProseOl class="mt-1 mb-2">
-                <ProseLi v-for="(passo, i) in x.mudanca.oQueFazer" :key="i">
-                  {{ L(passo) }}
-                </ProseLi>
-              </ProseOl>
               <ProseP class="mt-2">
                 <ProseA :href="`#guia-${x.mudanca.id}`" @click.stop.prevent="emit('abrirGuia', x.mudanca.id)">
                   {{ t.releases.guiaDe(L(x.mudanca.titulo)) }}

@@ -1,19 +1,23 @@
 # Modelo: mudança que exige ação
 
-Rodada 7 (2026-11-24). O padrão da doc do Nuxt, em 2 lugares:
+Rodada 7 (2026-11-24), enxugado na rodada 9 (2026-11-25). O padrão da doc do Nuxt, em 2 lugares, com
+o guia como a única fonte do "como":
 
 | Onde | O que leva | Precisa de código novo? |
 |---|---|---|
-| Release (aba Releases) | A seção "Exige ação", sempre aberta, com os passos no texto | Sim, 1 vez: o rótulo e a seção saem do frontmatter |
-| Guia de migração (Docs > Referência) | O que muda, por quê, quem, prazo, passos e o que acontece depois | Não: só componentes que o `en-docs` já renderiza |
+| Release (aba Releases) | O rótulo "Exige ação · Agir até <data>" e a seção "Exige ação", sempre aberta: título com o porquê, quem é afetado, "Agir até" e o link do guia | Sim, 1 vez: o rótulo e a seção saem do frontmatter |
+| Guia de migração (Docs > Referência) | O que muda, por quê, quem, prazo e fases, passos e o que acontece depois | Não: só componentes que o `en-docs` já renderiza |
 
 Depois que o dev fizer a parte da release, uma mudança nova pede só preencher os 2 modelos abaixo.
 
 ## 1. Na release: o bloco `actionRequired` do frontmatter
 
-Proposta para o dev. Cada mudança é 1 item da lista. O rótulo da versão usa a data `phases.required`
-mais próxima; a seção "Exige ação" mostra os itens nesta ordem: título, `why`, `who`, prazo e fases,
-`after`, `steps` (até 3) e o link do `guide`.
+Proposta para o dev. Cada mudança é 1 item da lista, com 6 campos. Fases, passos e o que acontece
+depois do prazo não entram aqui: moram só no guia (decisão da redatora em 2026-11-25).
+
+- O rótulo da versão usa a data `required` mais próxima.
+- Versão com 1 mudança: o rótulo abre o `guide`. Com 2 ou mais: o rótulo leva à seção "Exige ação".
+- A seção mostra cada item nesta ordem: `title` com `why`, `who`, "Agir até `required`" e o link do `guide`.
 
 ```yaml
 actionRequired:
@@ -21,30 +25,21 @@ actionRequired:
     title: "Integrações: webhooks com nova assinatura de segurança"
     why: "A assinatura nova protege o seu servidor de envios falsos."
     who: "Workspaces com webhooks de saída ativos"
-    phases:
-      optIn: 2026-12-08                  # Opcional: quem quiser liga antes
-      optOut: 2027-01-12                 # Ligada para todos: quem não terminou desliga
-      required: 2027-02-09               # Obrigatória: é o "Agir até"
-    # previousRequired: 2027-01-26       # só quando o prazo mudou: vira o ::note do guia
-    after: "Depois do prazo, o ENSPACE envia só a assinatura nova, e o servidor que confere a antiga recusa os envios."
-    steps:
-      - "No seu servidor, confira o cabeçalho X-Enspace-Signature-256 em cada envio."
-      - "Em Configurações > Integrações > Webhooks, ligue Usar nova assinatura."
-      - "Clique em Testar e confira a entrega."
+    required: 2027-02-09                 # o "Agir até"; a mesma data da fase Obrigatória do guia
     guide: /pt/docs/reference/migration-guides/assinatura-dos-webhooks
 ```
 
 Regras do texto:
 - `title` é o título do item no changelog; `why` tem 1 frase e não repete o título.
-- `after` diz o que quebra para quem não agiu, em 1 frase.
-- `steps` tem até 3 passos, cada um com o caminho da tela ou o nome técnico exato. Mais que isso vai só para o guia.
+- `required` e a fase Obrigatória do guia mudam juntas. Prazo que mudou ganha o `::note` no guia.
 - O link sai como "Guia de migração: <title do guia>", nunca "Saiba mais".
 
 ## 2. O guia de migração: markdown do `en-docs`, sem código novo
 
 Arquivo em `content/<idioma>/1.docs/8.Reference/<n>.Migration Guides/<id>.md`, ao lado de "Limitações
 Conhecidas". Todo guia mora ali, também o de API e de webhook: a aba Dev é a referência da API e não
-recebe guia (decisão da redatora em 2026-11-25). O guia de API leva link para a página da rota. As seções seguem o guia de atualização da doc do Nuxt: "What Changed", "Reasons for Change",
+recebe guia (decisão da redatora em 2026-11-25). O guia de API leva link para a página da rota. As seções
+seguem o guia de atualização da doc do Nuxt: "What Changed", "Reasons for Change",
 "Migration Steps".
 
 ````md

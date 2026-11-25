@@ -13,7 +13,8 @@ Na rodada 5, "Próximas mudanças" sai: o que exige ação fica na trilha, com o
   versão em breve no topo da trilha, com o que exige ação e as 3 fases no texto do item (rodada 5);
   o rótulo "Exige ação" abre o resumo da mudança, e o item traz "O que fazer" em passos (rodada 6);
   o popover sai, a seção Exige ação fica sempre aberta e o item leva ao guia de migração, uma página
-  nova da doc (rodada 7), em Docs > Referência (rodada 8);
+  nova da doc (rodada 7), em Docs > Referência (rodada 8); o guia é a única fonte do "como", e a
+  release fica com o porquê, quem é afetado, "Agir até" e o link, que o rótulo também abre (rodada 9);
   "Assinar"; os patches como blocos curtos na mesma trilha. O
   banner sai da versão e fica no post.
 - **Muda no Blog:** o post do mês no lugar do post por versão; o post só de changelog sai da lista
@@ -28,7 +29,8 @@ flowchart LR
   B[Blog: lista] -->|Ler o post| P[Post do mês]
   P -->|Ver no changelog| C[Releases: o texto de cada versão na trilha]
   C -->|Ler o post de lançamento| P
-  C -->|Rótulo Exige ação| R[Seção Exige ação da versão, sempre aberta]
+  C -->|Rótulo Exige ação, 1 mudança| G
+  C -->|Rótulo Exige ação, 2 ou mais| R[Seção Exige ação da versão, sempre aberta]
   R -->|Guia de migração| G[Guia de migração na doc]
   G -->|Anunciada no changelog| C
   G -->|Anterior e próximo, menu| G
@@ -38,6 +40,18 @@ flowchart LR
 ```
 
 ## Rodadas
+
+### Rodada 9 · 2026-11-25
+- **Pedido (literal):** "agora que existe a ideia do guia de migraçao, acha que precisamos citar no texto da release o que deve ser feito?? ou só colocar um link pro guia, e tambem no badge do topo ter esse link pro guia? pra simplificar e centralizar". A redatora aprovou a proposta: tirar os passos da release, manter 3 informações curtas e ligar o rótulo ao guia
+- **Mudou:**
+  - o guia vira a única fonte do "como". Cada item da seção Exige ação leva só o título com o porquê, quem é afetado, "Agir até <data>" e o link do guia
+  - saem da release: as 3 fases com as datas, o que acontece depois do prazo e "O que fazer" em passos. Os 3 continuam no guia
+  - o rótulo "Exige ação · Agir até <data>" abre o guia quando a versão tem 1 mudança que exige ação (seta para a direita); com 2 ou mais, leva à seção Exige ação (seta para baixo), que tem 1 link por guia. No mock, toda versão tem no máximo 1
+  - o bloco `actionRequired` do `MODELO-EXIGE-ACAO.md` cai de 9 campos para 6: `id`, `title`, `why`, `who`, `required` e `guide`
+- **Por quê:** os passos escritos na release e no guia divergem quando 1 dos 2 muda. As 3 informações que ficam bastam para o leitor do RSS e do e-mail decidir, sem clicar, se a mudança o afeta e até quando agir
+- **Descartado:** só o link do guia na release. Motivo: quem lê pelo RSS ou pelo e-mail teria de abrir o guia para saber se a mudança o afeta
+- **Fronteira:** muda a seção Exige ação e o destino do rótulo; o guia fica como na rodada 8
+- **Ver:** `https://pernalombr4.github.io/prototipos/releases-no-docs/` · `evidencias/rodada9-exige-acao-desktop-claro.jpg` · `evidencias/rodada9-exige-acao-mobile-claro.jpg`
 
 ### Rodada 8 · 2026-11-25
 - **Pedido (literal):** "a pagina dev é a doc da api. nao faz sentido os guias de migraçao estarem ali dentro. ache outro aninhamento. sugira e se eu validar voce aplica". Das 3 opções (Docs > Referência, aba Releases, Docs > Primeiros passos), a redatora escolheu Docs > Referência
