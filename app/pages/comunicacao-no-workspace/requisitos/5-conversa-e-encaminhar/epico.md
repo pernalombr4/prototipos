@@ -1,7 +1,7 @@
-# Épico: Responder na conversa e encaminhar
+# Épico: Responder na mesma conversa e encaminhar e-mail
 
 **O que é:** a resposta escrita pelo ENSPACE passa a seguir na mesma conversa do e-mail original, no lugar do e-mail
-novo com "Re:" do épico "E-mail com o que o produto já tem". O e-mail ganha "Encaminhar", com o texto citado e os
+novo com "Re:" do épico "Escrever e-mail de qualquer tela e central E-mails no menu". O e-mail ganha "Encaminhar", com o texto citado e os
 anexos. Nos 2 casos, o e-mail continua no item do original.
 
 **Onde vale:** a Mail Box do item e a da tarefa (hover da linha e e-mail aberto) e a aba Mensagens da central E-mails
@@ -11,8 +11,7 @@ anexos. Nos 2 casos, o e-mail continua no item do original.
 baixo, escolha "Fase: 2 · Remetente" e abra a Mail Box de CTR-00231 ou a aba Mensagens. Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
 **Fora do escopo:** responder e encaminhar o e-mail enviado pelo sistema (tarefas e fluxos), que tem "Reenviar e-mail"
-no lugar; a escolha do remetente (épico "Caixa do workspace como remetente"); a tarefa vinculada (épico "E-mail ligado
-à tarefa").
+no lugar; a escolha do remetente (épico "Enviar e-mail pelas Caixas de E-mail do workspace"); a tarefa vinculada (épico "Vincular e-mail a uma tarefa").
 
 **Relevância** (coluna das tarefas): Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer,
 conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
@@ -49,4 +48,4 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
 | P901 | O "Responder" está desligado na tela do develop. O que falta, no envio pela integração do Correio do Outlook, para responder e encaminhar a partir do e-mail original? | dev do back e do front | Define a obra das 2 partes |
-| P902 | Com o épico "Caixa do workspace como remetente" no ar, a resposta e o encaminhamento enviados por uma caixa seguem as mesmas regras? | dev do back | Sem o mesmo caminho na caixa, as 2 partes valem só para a conta do Outlook |
+| P902 | Com o épico "Enviar e-mail pelas Caixas de E-mail do workspace" no ar, a resposta e o encaminhamento enviados por uma caixa seguem as mesmas regras? | dev do back | Sem o mesmo caminho na caixa, as 2 partes valem só para a conta do Outlook |

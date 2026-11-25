@@ -1,4 +1,4 @@
-# Épico: E-mail ligado à tarefa
+# Épico: Vincular e-mail a uma tarefa
 
 **O que é:** o e-mail passa a ter, além do item, uma tarefa vinculada. Quem escreve escolhe a tarefa no compositor, a
 Mail Box da tarefa separa os e-mails dela dos do item, e a aba Mensagens e a Mail Box do item mostram a tarefa de cada
@@ -12,7 +12,7 @@ baixo, escolha "Fase: 3 · Tarefa"; em Tarefas, abra "Enviar minuta assinada à 
 Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
 **Fora do escopo:** o e-mail enviado pelo sistema por uma tarefa, que já mostra "Sistema · <tarefa>" em "Enviado por"
-(épico "E-mail com o que o produto já tem"); o vínculo com mais de 1 tarefa.
+(épico "Escrever e-mail de qualquer tela e central E-mails no menu"); o vínculo com mais de 1 tarefa.
 
 **Relevância** (coluna das tarefas): Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer,
 conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço é grande para o ganho.

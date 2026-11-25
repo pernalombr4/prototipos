@@ -1,10 +1,10 @@
 # Requisitos: Botão de e-mail no cartão do quadro
 
 **Objetivo:** o cartão do quadro de itens e o do quadro de tarefas ganham um botão de e-mail
-que o teclado alcança. O épico "E-mail com o que o produto já tem" põe o atalho só no menu do clique direito do
+que o teclado alcança. O épico "Escrever e-mail de qualquer tela e central E-mails no menu" põe o atalho só no menu do clique direito do
 cartão.
 
-**Depende de:** o clique direito no cartão com o submenu "E-mail", do épico "E-mail com o que o produto já tem".
+**Depende de:** o clique direito no cartão com o submenu "E-mail", do épico "Escrever e-mail de qualquer tela e central E-mails no menu".
 
 **Onde vale:** o quadro de itens (lista de itens da categoria, visualização em quadro) e o quadro de Tarefas › Rápidas,
 os 2 com o mesmo cartão de quadro do produto.
@@ -13,7 +13,7 @@ os 2 com o mesmo cartão de quadro do produto.
 não tem o botão no cartão: mostra o mesmo menu no clique direito do cartão, no quadro de itens e no de tarefas. Os
 textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
-**Fora do escopo:** o clique direito no cartão, que fica no épico "E-mail com o que o produto já tem"; outras ações
+**Fora do escopo:** o clique direito no cartão, que fica no épico "Escrever e-mail de qualquer tela e central E-mails no menu"; outras ações
 no cartão além do e-mail.
 
 **Relevância** (coluna das tarefas): Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer,

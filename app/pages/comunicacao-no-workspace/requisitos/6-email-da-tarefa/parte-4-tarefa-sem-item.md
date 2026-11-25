@@ -4,7 +4,7 @@
 esses e-mails.
 
 **Depende de:** 1. Vincular a tarefa no compositor; 2. Mail Box da tarefa; o registro do e-mail enviado sem item, do
-épico "E-mail sem item e lista por permissão".
+épico "Gravar e-mail enviado sem item e filtrar Mensagens por permissão".
 
 **Onde vale:** o compositor sem item vinculado; Tarefas › Rápidas, o painel da tarefa sem item (aba Mail Box) e o
 quadro de tarefas.

@@ -3,8 +3,8 @@
 **Objetivo:** quem escreve um e-mail de qualquer tela busca e escolhe o item do e-mail entre as categorias que pode
 ver, troca ou remove o item vindo da tela de origem e recebe no Para os contatos de outros itens.
 
-**Depende de:** o épico "E-mail com o que o produto já tem" (o compositor e o bloco "Item vinculado"). As sugestões
-pelo destinatário dependem também do épico "Contato da categoria".
+**Depende de:** o épico "Escrever e-mail de qualquer tela e central E-mails no menu" (o compositor e o bloco "Item vinculado"). As sugestões
+pelo destinatário dependem também do épico "Escolher na categoria de onde vêm o nome e o e-mail do contato".
 
 **Onde vale:** o compositor ("Nova Mensagem"), aberto do "Novo e-mail" da barra do topo, dos atalhos de e-mail, da
 Mail Box e da central E-mails.
@@ -49,7 +49,7 @@ e-mail" na tela Início, e o botão E-mail do item CTR-00231.
 | RF121 | Sem item vinculado e com o Para preenchido, o bloco deve mostrar acima da busca, em "Sugestões", os itens sugeridos para o e-mail (RN904). | Para marina.alves@example.com: "Sugestões" com CTR-00231, CTR-00219 e CTR-00207. | Importante | Obrigatório |
 | RF122 | Cada sugestão deve ter a dica "<nome> é contato deste item". | Hover em CTR-00231: "Marina Alves é contato deste item". | Importante | Obrigatório |
 | RF123 | O clique na sugestão deve vincular o item ao e-mail. | O clique em CTR-00219 deixa o bloco com CTR-00219, "Trocar" e o X. | Importante | Obrigatório |
-| RF124 | Sem o contato configurado nas categorias (épico "Contato da categoria"), o bloco deve mostrar só a busca, sem "Sugestões". | Workspace sem o cartão "Contato da categoria" salvo: o Para preenchido não mostra sugestões, e a busca funciona. | Importante | Obrigatório |
+| RF124 | Sem o contato configurado nas categorias (épico "Escolher na categoria de onde vêm o nome e o e-mail do contato"), o bloco deve mostrar só a busca, sem "Sugestões". | Workspace sem o cartão "Contato da categoria" salvo: o Para preenchido não mostra sugestões, e a busca funciona. | Importante | Obrigatório |
 
 ## Para com contatos de outros itens (RF)
 
@@ -63,4 +63,4 @@ e-mail" na tela Início, e o botão E-mail do item CTR-00231.
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
 | P101 | Quantos contatos de outros itens o Para sugere, e a busca deles usa a mesma rota da busca de item? | dev do back | O limite da lista do Para e a rota que a alimenta |
-| S101 | Os contatos de um item, na busca e no Para, seguem a regra vigente: os campos de e-mail do item ou, com o cartão salvo, o "Contato da categoria". | produto | Sem o épico "Contato da categoria", a busca procura nos campos de e-mail do item |
+| S101 | Os contatos de um item, na busca e no Para, seguem a regra vigente: os campos de e-mail do item ou, com o cartão salvo, o "Contato da categoria". | produto | Sem o épico "Escolher na categoria de onde vêm o nome e o e-mail do contato", a busca procura nos campos de e-mail do item |

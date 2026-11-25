@@ -3,7 +3,7 @@
 **Objetivo:** quem administra escolhe quais Caixas de E-mail do workspace aparecem no campo De do compositor.
 
 **Onde vale:** a central E-mails, aba Configurações, grupo "Regras do workspace" (o grupo de quem administra, do épico
-"E-mail com o que o produto já tem").
+"Escrever e-mail de qualquer tela e central E-mails no menu").
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/. Com "Fase: 2 · Remetente" e
 "Perfil: Admin", abra E-mails › Configurações: o bloco "Caixas como remetente" fica entre "Contato do item" e

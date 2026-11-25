@@ -4,7 +4,7 @@
 compositor avisa isso.
 
 **Onde vale:** o "Responder" da Mail Box do item e da tarefa (hover da linha e e-mail aberto) e o da aba Mensagens da
-central E-mails (menu da linha e leitura no painel lateral), que o épico "E-mail com o que o produto já tem" já põe na
+central E-mails (menu da linha e leitura no painel lateral), que o épico "Escrever e-mail de qualquer tela e central E-mails no menu" já põe na
 tela.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/. Com "Fase: 2 · Remetente", abra
@@ -16,7 +16,7 @@ CTR-00231 › Mail Box e clique em "Responder" no e-mail "Re: CTR-00231 · Minut
 |---|---|---|---|---|
 | RF001 | Quando a pessoa envia um e-mail aberto por "Responder", o sistema deve enviá-lo como resposta da conversa do e-mail original. | Exemplo: resposta ao e-mail de marina.alves@example.com; no Outlook de Marina, a resposta aparece na mesma conversa da minuta. | Essencial | Obrigatório |
 | RF002 | O compositor aberto por "Responder" deve mostrar o aviso "A resposta segue na mesma conversa do e-mail original.", no lugar de "A resposta sai como uma mensagem nova, com o texto original citado. Ela não entra na mesma conversa.". | Clique em "Responder" na Mail Box de CTR-00231: o aviso novo aparece no alto do compositor. | Importante | Obrigatório |
-| RF003 | O compositor aberto por "Responder" deve vir com "Re:" no assunto, o texto original citado e, em Para, o remetente do recebido ou o 1º destinatário do enviado, como no épico "E-mail com o que o produto já tem". | Resposta a "Re: CTR-00231 · Minuta revisada" abre com o assunto "Re: CTR-00231 · Minuta revisada", sem "Re: Re:". | Importante | Obrigatório |
+| RF003 | O compositor aberto por "Responder" deve vir com "Re:" no assunto, o texto original citado e, em Para, o remetente do recebido ou o 1º destinatário do enviado, como no épico "Escrever e-mail de qualquer tela e central E-mails no menu". | Resposta a "Re: CTR-00231 · Minuta revisada" abre com o assunto "Re: CTR-00231 · Minuta revisada", sem "Re: Re:". | Importante | Obrigatório |
 | RF004 | A resposta enviada deve ficar no item do e-mail original (RN901). | A resposta aparece em Mail Box › Enviados de CTR-00231. | Essencial | Obrigatório |
 | RF005 | O e-mail enviado pelo sistema não deve ter "Responder" (RN902). | O e-mail "Do sistema" na aba Mensagens mostra só "Ver Detalhes", "Reenviar e-mail" e "Ver Item" no menu da linha. | Importante | Obrigatório |
 

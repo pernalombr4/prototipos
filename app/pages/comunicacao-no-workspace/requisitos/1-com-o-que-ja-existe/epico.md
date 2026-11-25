@@ -1,4 +1,4 @@
-# Épico: E-mail com o que o produto já tem
+# Épico: Escrever e-mail de qualquer tela e central E-mails no menu
 
 **O que é:** a pessoa escreve o e-mail de cada tela de uso do ENSPACE: do item, da lista e do quadro de itens, das
 tarefas, da Agenda e do "Novo e-mail" da barra do topo. Com item na tela, o e-mail fica na Mail Box do item, que passa
@@ -18,12 +18,12 @@ mostra o workspace novo, o primeiro uso e o workspace em uso; "Cenário" mostra 
 falha". A barra de baixo é ferramenta de revisão e não entra no produto. Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
 **Fora do escopo:**
-- o contato configurado por categoria e o cartão "Contato da categoria" (épico "Contato da categoria");
-- a busca de item para vincular no compositor, o autocompletar do Para com contatos de outros itens, o e-mail sem item gravado no ENSPACE, "Vincular a um item" depois do envio, a lista da aba Mensagens por pessoa e permissão e a lista única dos e-mails do sistema e dos itens (épico "E-mail sem item e lista por permissão");
-- a caixa do workspace no "De" e o bloco "Caixas como remetente" (épico "Caixa do workspace como remetente");
-- a resposta na mesma conversa e "Encaminhar" (épico "Responder na conversa e encaminhar");
-- "Vincular a tarefa", a Mail Box própria da tarefa e a coluna Tarefa da aba Mensagens (épico "E-mail ligado à tarefa");
-- o botão de e-mail no cartão do quadro (documento "Botão de e-mail no cartão do quadro"); aqui o quadro usa o clique direito;
+- o contato configurado por categoria e o cartão "Contato da categoria" (épico "Escolher na categoria de onde vêm o nome e o e-mail do contato");
+- a busca de item para vincular no compositor, o autocompletar do Para com contatos de outros itens, o e-mail sem item gravado no ENSPACE, "Vincular a um item" depois do envio, a lista da aba Mensagens por pessoa e permissão e a lista única dos e-mails do sistema e dos itens (épico "Gravar e-mail enviado sem item e filtrar Mensagens por permissão");
+- a caixa do workspace no "De" e o bloco "Caixas como remetente" (épico "Enviar e-mail pelas Caixas de E-mail do workspace");
+- a resposta na mesma conversa e "Encaminhar" (épico "Responder na mesma conversa e encaminhar e-mail");
+- "Vincular a tarefa", a Mail Box própria da tarefa e a coluna Tarefa da aba Mensagens (épico "Vincular e-mail a uma tarefa");
+- o botão de e-mail no cartão do quadro (documento "Botão de e-mail no cartão do quadro de itens e de tarefas"); aqui o quadro usa o clique direito;
 - atalhos e link de formulário na tela inicial: a tela inicial continua como hoje;
 - WhatsApp, SMS e integração com Google.
 

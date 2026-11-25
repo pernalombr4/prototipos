@@ -1,10 +1,9 @@
-# Épico: Contato da categoria
+# Épico: Escolher na categoria de onde vêm o nome e o e-mail do contato
 
 **O que é:** cada categoria ganha o cartão "Contato da categoria". Nele, quem administra escolhe de quais campos vêm o
 nome e o e-mail de cada contato do item e o assunto com que o e-mail abre. Com o cartão salvo, o "Contato do item", o
 submenu "E-mail" da lista e do quadro, a coluna "Contato", o Para do compositor e o lembrete da Agenda passam a usar
-esses contatos e esse assunto. É dado novo na categoria: onde guardar fica com os devs. Depende do épico "E-mail com o
-que o produto já tem", que entrega os atalhos com o contato tirado dos campos de e-mail do item.
+esses contatos e esse assunto. É dado novo na categoria: onde guardar fica com os devs. Depende do épico "Escrever e-mail de qualquer tela e central E-mails no menu", que entrega os atalhos com o contato tirado dos campos de e-mail do item.
 
 **Onde vale:** Configurações › Estrutura › Categorias › a categoria (o 13º cartão e a página dele); a tela do item
 (cartão "Contato do item" e Visão Geral); a lista e o quadro de itens; o modal "Evento" da Agenda; o compositor; a
@@ -15,8 +14,8 @@ baixo, escolha "2 · Remetente" no controle "Fase". "Ir para" › "Contato da ca
 para" › "Item CTR-00231" abre o item. Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
 **Fora do escopo:** telefone e outros canais (o canal é só e-mail); o contato tirado dos campos de e-mail do item, sem
-cartão (épico "E-mail com o que o produto já tem"); as sugestões de item pelo destinatário no compositor e na leitura
-do e-mail, que usam este contato (épico "E-mail sem item e lista por permissão"); chave para ligar ou desligar os
+cartão (épico "Escrever e-mail de qualquer tela e central E-mails no menu"); as sugestões de item pelo destinatário no compositor e na leitura
+do e-mail, que usam este contato (épico "Gravar e-mail enviado sem item e filtrar Mensagens por permissão"); chave para ligar ou desligar os
 atalhos, que não existe em épico algum.
 
 **Relevância** (coluna das tarefas): Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer,
@@ -71,6 +70,6 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 |---|---|---|---|
 | P901 | Onde guardar o contato da categoria: na configuração em JSON que a categoria já tem, ou numa estrutura própria? | dev do back | O formato da gravação das 2 partes |
 | P902 | Quem pode editar o cartão? Suposição S901: quem já acessa a configuração da categoria em Estrutura › Categorias. | produto | Com outro papel, o cartão pede permissão própria no cargo |
-| P903 | Categoria sem o cartão salvo: o item continua com os contatos tirados dos campos de e-mail (como no épico "E-mail com o que o produto já tem"), ou mostra "Nenhum contato neste item" e a lista fica sem o submenu "E-mail", como no item sem contato? | produto | Na 2ª resposta, cada categoria precisa do cartão salvo antes do lançamento, ou os atalhos somem |
+| P903 | Categoria sem o cartão salvo: o item continua com os contatos tirados dos campos de e-mail (como no épico "Escrever e-mail de qualquer tela e central E-mails no menu"), ou mostra "Nenhum contato neste item" e a lista fica sem o submenu "E-mail", como no item sem contato? | produto | Na 2ª resposta, cada categoria precisa do cartão salvo antes do lançamento, ou os atalhos somem |
 | P904 | No lançamento, o cartão de cada categoria abre preenchido com os contatos que o item já tinha (cada campo E-mail, cada "Pessoa/Empresa" e o Requisitante)? | produto | Sem o preenchimento, quem administra monta cada categoria do zero |
 | P905 | Campo de origem excluído da categoria depois de salvo o cartão: o contato fica sem origem, o cartão avisa, ou a exclusão do campo é barrada? | produto e dev do back | A parte 1 ganha aviso ou validação; a parte 2 trata a origem que sumiu como vazia |

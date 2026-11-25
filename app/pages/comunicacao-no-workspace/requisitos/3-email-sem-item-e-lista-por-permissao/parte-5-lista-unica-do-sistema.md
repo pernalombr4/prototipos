@@ -3,7 +3,7 @@
 **Objetivo:** a aba Mensagens junta numa lista só os e-mails dos itens e os enviados pelo sistema, com ordem e
 paginação únicas. O filtro "Do sistema" recorta essa lista, no lugar de trocar a fonte da tabela.
 
-**Depende de:** o épico "E-mail com o que o produto já tem" (os e-mails do sistema na aba Mensagens, o filtro "Do
+**Depende de:** o épico "Escrever e-mail de qualquer tela e central E-mails no menu" (os e-mails do sistema na aba Mensagens, o filtro "Do
 sistema", a coluna Status e o atalho Configurações › E-mails › E-mails Enviados).
 
 **Onde vale:** a central E-mails, aba Mensagens, para quem tem a permissão de hoje de ver os e-mails enviados.
@@ -34,10 +34,10 @@ sistema", a coluna Status e o atalho Configurações › E-mails › E-mails Env
 
 | ID | Requisito | Como medir ou conferir | Prioridade | Relevância |
 |---|---|---|---|---|
-| RT401 | Até a lista única sair, o filtro "Do sistema" deve trocar a fonte da tabela, 1 lista por vez, como no épico "E-mail com o que o produto já tem". Critério de fim: a lista única no ar. | Antes desta parte, ligar "Do sistema" mostra só os e-mails do sistema, com paginação própria. | Importante | Obrigatório |
+| RT401 | Até a lista única sair, o filtro "Do sistema" deve trocar a fonte da tabela, 1 lista por vez, como no épico "Escrever e-mail de qualquer tela e central E-mails no menu". Critério de fim: a lista única no ar. | Antes desta parte, ligar "Do sistema" mostra só os e-mails do sistema, com paginação própria. | Importante | Obrigatório |
 
 ## Em aberto
 
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
-| P401 | A aba consegue juntar as 2 listas de hoje (os e-mails dos itens e os enviados pelo sistema) com ordem e paginação únicas, sem back novo? | dev do back | Sem back novo, esta parte entra no épico "E-mail com o que o produto já tem", e a RT401 sai |
+| P401 | A aba consegue juntar as 2 listas de hoje (os e-mails dos itens e os enviados pelo sistema) com ordem e paginação únicas, sem back novo? | dev do back | Sem back novo, esta parte entra no épico "Escrever e-mail de qualquer tela e central E-mails no menu", e a RT401 sai |

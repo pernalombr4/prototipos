@@ -1,10 +1,9 @@
-# Épico: E-mail sem item e lista por permissão
+# Épico: Gravar e-mail enviado sem item e filtrar Mensagens por permissão
 
 **O que é:** o e-mail enviado pelo ENSPACE sem item passa a ficar gravado e aparece na aba Mensagens da central
 E-mails. Quem escreve busca o item do e-mail entre as categorias que pode ver, no compositor ou depois do envio, na
 leitura do e-mail. A aba Mensagens mostra a cada pessoa só os e-mails dos itens que ela vê e junta numa lista só os
-e-mails dos itens e os enviados pelo sistema. Pede rotas e gravação novas no back. Depende do épico "E-mail com o que o
-produto já tem", que entrega o compositor, o bloco "Item vinculado" e a aba Mensagens.
+e-mails dos itens e os enviados pelo sistema. Pede rotas e gravação novas no back. Depende do épico "Escrever e-mail de qualquer tela e central E-mails no menu", que entrega o compositor, o bloco "Item vinculado" e a aba Mensagens.
 
 **Onde vale:** o compositor ("Nova Mensagem"), aberto do "Novo e-mail" da barra do topo, dos atalhos e da Mail Box; a
 central E-mails, aba Mensagens (tabela, filtros, menu da linha e leitura no painel lateral); a Mail Box do item.
@@ -15,9 +14,8 @@ em E-mails › Mensagens, o filtro "Sem item" mostra o e-mail "Cadastro de forne
 leitura. O controle "Perfil" troca o olhar de quem administra e do membro. Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
 **Fora do escopo:** o "De" com as caixas do workspace e a ajuda "Sem item vinculado, a resposta chega na caixa
-<nome>, na Central de Atendimento." (épico "Caixa do workspace como remetente"); Encaminhar e a resposta na mesma
-conversa (épico "Responder na conversa e encaminhar"); "Vincular a tarefa" e a coluna Tarefa (épico "E-mail ligado à
-tarefa"); a busca global (Ctrl K), que segue sem procurar itens; o e-mail enviado pelo app de e-mail da pessoa
+<nome>, na Central de Atendimento." (épico "Enviar e-mail pelas Caixas de E-mail do workspace"); Encaminhar e a resposta na mesma
+conversa (épico "Responder na mesma conversa e encaminhar e-mail"); "Vincular a tarefa" e a coluna Tarefa (épico "Vincular e-mail a uma tarefa"); a busca global (Ctrl K), que segue sem procurar itens; o e-mail enviado pelo app de e-mail da pessoa
 (`mailto:`) sem o endereço do item em Cc, que segue fora do ENSPACE; itens de outro workspace.
 
 **Relevância** (coluna das tarefas): Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer,
@@ -40,7 +38,7 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 | RN901 | Só os itens que a pessoa pode ver, no workspace atual, aparecem na busca de item, nas sugestões de item e na aba Mensagens. O item sem permissão fica fora também da contagem. | CTR-00214, sem permissão para a pessoa, não aparece na busca por "CTR-00214", e a contagem "<m> de <n> itens" não o soma. | Obrigatório |
 | RN902 | Cada e-mail tem 0 ou 1 item vinculado. | O e-mail "Cadastro de fornecedor" não tem item; o e-mail "CTR-00231 · Minuta revisada" tem CTR-00231. | Obrigatório |
 | RN903 | O vínculo guarda o item pela referência: renomear o item mantém o vínculo. | CTR-00231 renomeado continua com os e-mails na Mail Box. | Obrigatório |
-| RN904 | Um item é considerado sugestão para um e-mail quando um endereço do e-mail é o e-mail de um contato do item configurado no cartão "Contato da categoria" (épico "Contato da categoria"). Cada e-mail tem até 3 sugestões. | Para marina.alves@example.com: CTR-00231, CTR-00219 e CTR-00207, os 3 contratos com Marina Alves no "Contato da contraparte". | Obrigatório |
+| RN904 | Um item é considerado sugestão para um e-mail quando um endereço do e-mail é o e-mail de um contato do item configurado no cartão "Contato da categoria" (épico "Escolher na categoria de onde vêm o nome e o e-mail do contato"). Cada e-mail tem até 3 sugestões. | Para marina.alves@example.com: CTR-00231, CTR-00219 e CTR-00207, os 3 contratos com Marina Alves no "Contato da contraparte". | Obrigatório |
 
 ## Padrão de qualidade
 
@@ -67,5 +65,5 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
-| P901 | Quem vê o e-mail sem item na aba Mensagens: só quem enviou, ou também outras pessoas (por exemplo, quem tem acesso à caixa usada, no épico "Caixa do workspace como remetente")? O protótipo mostra o e-mail sem item só a quem enviou. | produto | A regra de quem vê o e-mail sem item (parte 1) e de quem pode vinculá-lo (parte 4) |
+| P901 | Quem vê o e-mail sem item na aba Mensagens: só quem enviou, ou também outras pessoas (por exemplo, quem tem acesso à caixa usada, no épico "Enviar e-mail pelas Caixas de E-mail do workspace")? O protótipo mostra o e-mail sem item só a quem enviou. | produto | A regra de quem vê o e-mail sem item (parte 1) e de quem pode vinculá-lo (parte 4) |
 | P902 | Qual critério ordena os 8 itens que mais combinam com o texto da busca: referência exata primeiro, nome, data de atualização? | produto e dev do back | A ordem dos resultados no compositor e na leitura |

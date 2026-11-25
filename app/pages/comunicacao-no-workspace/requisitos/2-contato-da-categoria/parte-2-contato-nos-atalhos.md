@@ -4,7 +4,7 @@
 compositor e da Agenda usam os contatos e o assunto da categoria. O item sem contato leva quem usa ao campo que falta
 ou ao cartão da categoria.
 
-**Depende de:** 1. Cartão "Contato da categoria"; o épico "E-mail com o que o produto já tem" (o cartão "Contato do
+**Depende de:** 1. Cartão "Contato da categoria"; o épico "Escrever e-mail de qualquer tela e central E-mails no menu" (o cartão "Contato do
 item", o submenu "E-mail", a coluna "Contato", o compositor, o lembrete da Agenda e o bloco "Contato do item" da
 central E-mails).
 

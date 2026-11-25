@@ -32,4 +32,4 @@ de CTR-00231; na visão "Por etapa", clique com o botão direito num cartão.
 
 | ID | Requisito | Como medir ou conferir | Prioridade | Relevância |
 |---|---|---|---|---|
-| RS301 | O atalho do quadro entra no menu do clique direito que o cartão já tem; o cartão não ganha botão. O botão no cartão é o documento "Botão de e-mail no cartão do quadro". | O cartão não ganha botão; o clique direito traz as ações de hoje e o submenu. | Essencial | Obrigatório |
+| RS301 | O atalho do quadro entra no menu do clique direito que o cartão já tem; o cartão não ganha botão. O botão no cartão é o documento "Botão de e-mail no cartão do quadro de itens e de tarefas". | O cartão não ganha botão; o clique direito traz as ações de hoje e o submenu. | Essencial | Obrigatório |

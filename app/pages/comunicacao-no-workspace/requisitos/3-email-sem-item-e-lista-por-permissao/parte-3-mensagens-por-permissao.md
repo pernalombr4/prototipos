@@ -3,7 +3,7 @@
 **Objetivo:** a aba Mensagens da central E-mails mostra a cada pessoa só os e-mails dos itens que ela pode ver, na
 tabela, na busca, nos filtros e na contagem.
 
-**Depende de:** o épico "E-mail com o que o produto já tem" (a aba Mensagens sobre a tela "Emails Recebidos").
+**Depende de:** o épico "Escrever e-mail de qualquer tela e central E-mails no menu" (a aba Mensagens sobre a tela "Emails Recebidos").
 
 **Onde vale:** a central E-mails, aba Mensagens: tabela, busca, filtros, paginador e leitura no painel lateral.
 

@@ -1,4 +1,4 @@
-# Épico: Caixa do workspace como remetente
+# Épico: Enviar e-mail pelas Caixas de E-mail do workspace
 
 **O que é:** as Caixas de E-mail do workspace, que hoje só recebem, passam a enviar. Quem administra escolhe, na aba
 Configurações da central E-mails, quais caixas entram no campo De; quem escreve escolhe entre a própria conta do
@@ -12,7 +12,7 @@ baixo, escolha "Fase: 2 · Remetente" e "Perfil: Admin"; o cenário "Sem Outlook
 caixas. Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
 **Fora do escopo:** a configuração da própria caixa (aba Caixas de E-mail, que não muda); o registro do e-mail enviado
-sem item e a aba Mensagens por pessoa e permissão (épico "E-mail sem item e lista por permissão"); a integração com o
+sem item e a aba Mensagens por pessoa e permissão (épico "Gravar e-mail enviado sem item e filtrar Mensagens por permissão"); a integração com o
 Google.
 
 **Relevância** (coluna das tarefas): Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer,

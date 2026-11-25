@@ -3,7 +3,7 @@
 **Objetivo:** o e-mail enviado pelo ENSPACE sem item vinculado fica gravado e aparece na aba Mensagens da central
 E-mails, no lugar de ficar só no Outlook de quem enviou.
 
-**Depende de:** o épico "E-mail com o que o produto já tem" (o compositor, o envio pela conta do Outlook e a aba
+**Depende de:** o épico "Escrever e-mail de qualquer tela e central E-mails no menu" (o compositor, o envio pela conta do Outlook e a aba
 Mensagens).
 
 **Onde vale:** o compositor aberto sem item (o "Novo e-mail" da barra do topo fora de um item, o "Novo e-mail" da

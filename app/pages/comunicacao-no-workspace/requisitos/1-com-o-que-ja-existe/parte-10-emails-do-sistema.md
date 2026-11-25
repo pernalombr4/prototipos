@@ -44,5 +44,5 @@ Enviados de Configurações › E-mails.
 
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
-| P951 | A aba consegue juntar as 2 listas de hoje (os e-mails dos itens e os do sistema) com ordem e paginação únicas, sem back novo? Se não consegue, vale a troca de fonte desta parte, e a lista única fica no épico "E-mail sem item e lista por permissão". | dev do back | Se consegue sem back, o filtro "Do sistema" passa a recortar uma lista só |
+| P951 | A aba consegue juntar as 2 listas de hoje (os e-mails dos itens e os do sistema) com ordem e paginação únicas, sem back novo? Se não consegue, vale a troca de fonte desta parte, e a lista única fica no épico "Gravar e-mail enviado sem item e filtrar Mensagens por permissão". | dev do back | Se consegue sem back, o filtro "Do sistema" passa a recortar uma lista só |
 | P952 | Com "Do sistema" ligado, os filtros rápidos "Recebidos", "Não lidos" e "Com anexo" e os filtros de coluna de De, Para e Item valem sobre a lista do sistema, ou ficam indisponíveis? | dev e produto | Muda o que a barra oferece com a fonte do sistema |
