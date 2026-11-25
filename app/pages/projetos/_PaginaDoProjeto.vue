@@ -1,0 +1,196 @@
+<script setup lang="ts">
+/**
+ * PROPOSTA: a página do projeto (/workspaces/{ws}/projects/{referência}).
+ *
+ * Cabeçalho: ícone, nome, descrição, selo de visibilidade, o acesso de quem lê e as ações à direita.
+ * Corpo: painéis como os da Home, 1 visualização por painel (memória "painel de dashboard enxuto"):
+ * categorias, tarefas do projeto, participantes e atividade.
+ */
+import type { Textos } from './textos'
+import { cargos, grupos, iniciais, minhasTarefas, pessoa, type Participante } from './mocks'
+import { COR_DO_PROJETO, ICONE_DA_VISIBILIDADE, useMarcaDeProposta, useProjetos } from './estado'
+
+const props = defineProps<{ t: Textos, id: number }>()
+const prj = useProjetos()
+const { marca } = useMarcaDeProposta()
+const idioma = useIdioma()
+const toast = useToast()
+
+const p = computed(() => prj.projetos.value.find(x => x.id === props.id)!)
+const papel = computed(() => prj.papel(p.value))
+const admin = computed(() => prj.podeAdministrar(p.value))
+const categorias = computed(() => prj.categoriasDe(props.id))
+const tarefas = computed(() => minhasTarefas.filter(x => categorias.value.some(c => c.id === x.categoria)))
+const total = computed(() => prj.quantosVeem(p.value))
+
+const rotuloDoPapel = computed(() => papel.value ? props.t.papel[papel.value] : '')
+const dicaDoPapel = computed(() => {
+  const r = papel.value
+  if (r === 'dono') return props.t.papel.donoDica
+  if (r === 'admin') return props.t.papel.adminDica
+  if (r === 'participante') return props.t.papel.participanteDica
+  if (r === 'membro') return props.t.papel.membroDica
+  return ''
+})
+
+function nomeDe(x: Participante) {
+  if (x.tipo === 'pessoa') return pessoa(x.id as number)?.nome ?? ''
+  if (x.tipo === 'grupo') return grupos.find(g => g.id === x.id)?.name ?? ''
+  return cargos.find(c => c.id === x.id)?.name ?? ''
+}
+const iconeDoTipo = { pessoa: 'i-lucide-user-round', grupo: 'i-lucide-users-round', cargo: 'i-lucide-shield-check' } as const
+
+function mostrar() {
+  prj.mostrarNoMenu(p.value.id)
+  toast.add({ title: props.t.diretorio.mostrado(p.value.nome), icon: 'i-lucide-check', color: 'success' })
+}
+function ocultar() {
+  prj.ocultarDoMenu(p.value.id)
+  toast.add({ title: props.t.painel.ocultado(p.value.nome), icon: 'i-lucide-eye-off', color: 'neutral' })
+}
+function configurar(aba = 'geral') {
+  prj.janelas.configurar.value = { id: p.value.id, aba }
+}
+const formatarData = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString(idioma.value)
+</script>
+
+<template>
+  <div class="mx-auto w-full max-w-6xl px-6 py-5" :class="marca">
+    <!-- arquivado -->
+    <UAlert
+      v-if="p.status === 'arquivado'"
+      :title="t.pagina.arquivadoTitulo"
+      :description="t.pagina.arquivadoTexto"
+      icon="i-lucide-archive"
+      color="warning"
+      variant="subtle"
+      class="mb-4"
+      :actions="prj.souDono.value ? [{ label: t.diretorio.restaurar, icon: 'i-lucide-archive-restore', color: 'neutral', variant: 'outline', onClick: () => prj.restaurar(p.id) }] : []"
+    />
+
+    <!-- cabeçalho -->
+    <div class="flex flex-wrap items-start gap-4 animate-[entrada_0.2s_ease-out_both]">
+      <span class="flex size-12 shrink-0 items-center justify-center rounded-xl" :class="COR_DO_PROJETO[p.cor]">
+        <UIcon :name="p.icone" class="size-6" />
+      </span>
+      <div class="min-w-0 flex-1">
+        <div class="flex flex-wrap items-center gap-2">
+          <h1 class="truncate text-xl font-semibold text-highlighted">{{ p.nome }}</h1>
+          <UTooltip :text="t.visibilidade[`${p.visibilidade}Dica`]">
+            <UBadge :label="t.visibilidade[p.visibilidade]" :icon="ICONE_DA_VISIBILIDADE[p.visibilidade]" color="neutral" variant="subtle" size="sm" />
+          </UTooltip>
+        </div>
+        <p class="mt-0.5 text-sm" :class="p.descricao ? 'text-muted' : 'text-muted italic'">{{ p.descricao || t.pagina.semDescricao }}</p>
+        <p class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
+          <UTooltip :text="dicaDoPapel">
+            <span class="flex items-center gap-1"><UIcon name="i-lucide-badge-check" class="size-3.5" />{{ t.pagina.seuAcesso }}: <span class="font-medium text-toned">{{ rotuloDoPapel }}</span></span>
+          </UTooltip>
+          <span>{{ t.pagina.criadoEm(formatarData(p.criadoEm)) }}</span>
+        </p>
+      </div>
+      <div class="flex shrink-0 items-center gap-2">
+        <UButton v-if="!prj.estaNoMenu(p.id) && p.status === 'ativo'" :label="t.pagina.mostrarNoMenu" icon="i-lucide-panel-left" color="neutral" variant="outline" size="sm" @click="mostrar" />
+        <UButton v-else-if="p.status === 'ativo'" :label="t.pagina.ocultarDoMenu" icon="i-lucide-eye-off" color="neutral" variant="ghost" size="sm" @click="ocultar" />
+        <UButton v-if="admin" :label="t.pagina.configurar" icon="i-lucide-settings" color="neutral" variant="outline" size="sm" @click="configurar()" />
+      </div>
+    </div>
+
+    <div class="mt-6 grid gap-4 lg:grid-cols-3">
+      <!-- categorias -->
+      <section class="rounded-lg border border-default bg-default lg:col-span-2 animate-[entrada_0.25s_ease-out_both]" style="animation-delay: 40ms">
+        <header class="flex items-center gap-2 border-b border-default px-4 py-3">
+          <h2 class="flex-1 text-sm font-semibold text-highlighted">{{ t.pagina.categorias }}</h2>
+          <UTooltip :text="t.pagina.categoriasDica">
+            <UIcon name="i-lucide-info" class="size-4 text-muted" :aria-label="t.pagina.categoriasDica" />
+          </UTooltip>
+          <UButton v-if="admin && categorias.length" :label="t.painel.adicionarCategoria" icon="i-lucide-plus" size="xs" color="neutral" variant="outline" @click="configurar('categorias')" />
+        </header>
+        <div v-if="categorias.length" class="grid gap-2 p-3 sm:grid-cols-2">
+          <button
+            v-for="c in categorias"
+            :key="c.id"
+            type="button"
+            class="group flex items-center gap-3 rounded-md border border-default px-3 py-2.5 text-left transition-[background-color,transform] duration-150 hover:-translate-y-0.5 hover:bg-elevated focus-visible:outline-2 focus-visible:outline-primary"
+            @click="prj.abrirCategoria(c.id)"
+          >
+            <span class="flex size-8 shrink-0 items-center justify-center rounded-md bg-elevated text-toned group-hover:bg-accented">
+              <UIcon :name="c.icon ?? 'i-lucide-folder'" class="size-4" />
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-sm font-medium text-highlighted">{{ c.name }}</span>
+              <span class="block truncate text-xs text-muted">{{ t.pagina.itens(c.itens) }}</span>
+            </span>
+            <UIcon name="i-lucide-chevron-right" class="size-4 text-dimmed" />
+          </button>
+        </div>
+        <div v-else class="flex flex-col items-center gap-2 px-6 py-10 text-center">
+          <UIcon name="i-lucide-database" class="size-7 text-muted" />
+          <p class="text-sm font-semibold text-highlighted">{{ t.pagina.vazioCategoriasTitulo }}</p>
+          <p class="max-w-sm text-sm text-muted">{{ t.pagina.vazioCategoriasTexto }}</p>
+          <div v-if="admin" class="mt-1 flex flex-wrap justify-center gap-2">
+            <UButton :label="t.config.adicionarCategoria" icon="i-lucide-folder-input" size="sm" color="neutral" variant="outline" @click="configurar('categorias')" />
+            <UButton :label="t.pagina.criarCategoria" icon="i-lucide-plus" size="sm" color="neutral" variant="outline" @click="toast.add({ title: t.casca.maquete, icon: 'i-lucide-info', color: 'neutral' })" />
+          </div>
+        </div>
+      </section>
+
+      <!-- participantes -->
+      <section class="rounded-lg border border-default bg-default animate-[entrada_0.25s_ease-out_both]" style="animation-delay: 80ms">
+        <header class="flex items-center gap-2 border-b border-default px-4 py-3">
+          <h2 class="flex-1 text-sm font-semibold text-highlighted">{{ t.pagina.participantes }}</h2>
+          <span class="text-xs text-muted">{{ t.pagina.quemTemAcesso(total) }}</span>
+        </header>
+        <ul class="divide-y divide-default">
+          <li v-for="x in p.participantes" :key="`${x.tipo}-${x.id}`" class="flex items-center gap-2.5 px-4 py-2">
+            <UAvatar v-if="x.tipo === 'pessoa'" size="xs" :text="iniciais(nomeDe(x))" :alt="nomeDe(x)" />
+            <span v-else class="flex size-6 items-center justify-center rounded-full bg-elevated"><UIcon :name="iconeDoTipo[x.tipo]" class="size-3.5 text-muted" /></span>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-sm text-highlighted">{{ nomeDe(x) }}</span>
+              <span class="block truncate text-xs text-muted">{{ t.tipoDeParticipante[x.tipo] }}<template v-if="x.tipo !== 'pessoa'"> · {{ t.diretorio.pessoas(prj.alcance(x)) }}</template></span>
+            </span>
+            <UBadge v-if="x.papel === 'admin'" :label="t.papel.admin" size="sm" color="primary" variant="soft" />
+          </li>
+        </ul>
+        <div v-if="admin" class="border-t border-default p-2">
+          <UButton :label="t.pagina.gerenciar" icon="i-lucide-user-plus" size="xs" color="neutral" variant="outline" block @click="configurar('participantes')" />
+        </div>
+      </section>
+
+      <!-- tarefas do projeto -->
+      <section class="rounded-lg border border-default bg-default lg:col-span-2 animate-[entrada_0.25s_ease-out_both]" style="animation-delay: 120ms">
+        <header class="border-b border-default px-4 py-3">
+          <h2 class="text-sm font-semibold text-highlighted">{{ t.pagina.tarefas }}</h2>
+        </header>
+        <ul v-if="tarefas.length" class="divide-y divide-default">
+          <li v-for="x in tarefas" :key="x.id" class="flex items-center gap-3 px-4 py-2.5">
+            <UIcon name="i-lucide-circle" class="size-4 shrink-0 text-muted" />
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-sm text-highlighted">{{ x.titulo }}</span>
+              <span class="block truncate text-xs text-muted">{{ prj.categorias.value.find(c => c.id === x.categoria)?.name }} · {{ x.item }}</span>
+            </span>
+            <UBadge v-if="x.atrasada" :label="t.tarefas.atrasada" color="error" variant="subtle" size="sm" />
+            <span class="shrink-0 text-xs text-muted">{{ formatarData(x.prazo) }}</span>
+          </li>
+        </ul>
+        <p v-else class="px-4 py-8 text-center text-sm text-muted">{{ t.pagina.semTarefas }}</p>
+      </section>
+
+      <!-- atividade -->
+      <section class="rounded-lg border border-default bg-default animate-[entrada_0.25s_ease-out_both]" style="animation-delay: 160ms">
+        <header class="border-b border-default px-4 py-3">
+          <h2 class="text-sm font-semibold text-highlighted">{{ t.pagina.atividade }}</h2>
+        </header>
+        <ul v-if="p.atividade.length" class="space-y-3 px-4 py-3">
+          <li v-for="(a, i) in p.atividade" :key="i" class="flex gap-2.5">
+            <UAvatar size="2xs" :text="iniciais(pessoa(a.quem)?.nome ?? '')" :alt="pessoa(a.quem)?.nome" />
+            <p class="min-w-0 text-sm text-default">
+              <span class="font-medium text-highlighted">{{ pessoa(a.quem)?.nome }}</span> {{ a.oque }}
+              <span class="block text-xs text-muted">{{ a.quando }}</span>
+            </p>
+          </li>
+        </ul>
+        <p v-else class="px-4 py-8 text-center text-sm text-muted">{{ t.pagina.semAtividade }}</p>
+      </section>
+    </div>
+  </div>
+</template>
