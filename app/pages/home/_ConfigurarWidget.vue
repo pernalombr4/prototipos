@@ -6,6 +6,9 @@
  *   pessoa acessa, na ordem do workspace;
  * - Atalhos: quais atalhos aparecem.
  *
+ * Rodada 6: sai o botão "Mostrar todas", que repetia o "Desmarcar todas" da
+ * própria lista (sem marcada, o widget mostra todas).
+ *
  * Os widgets de visualização salva saíram na rodada 5, a pedido da redatora
  * ("inúteis e pode tirar"), e com eles a escolha de categoria, visualização
  * e título.
@@ -60,8 +63,6 @@ function salvar() {
             {{ t.config.categoriasAjuda }}
           </p>
           <OrdemDeCategorias v-model="escolhidas" :t="t" :categorias="categorias" />
-          <!-- Sempre visível (desativado sem escolha): aparecer e sumir fazia o modal pular sob o clique. -->
-          <UButton :disabled="!escolhidas.length" :label="t.config.todas" icon="i-lucide-rotate-ccw" color="neutral" variant="outline" size="xs" @click="escolhidas = []" />
         </template>
 
         <ul v-else-if="tipo === 'atalhos'" class="grid gap-1 sm:grid-cols-2">

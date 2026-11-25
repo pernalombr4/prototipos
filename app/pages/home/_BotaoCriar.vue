@@ -3,8 +3,12 @@
  * O botão "Criar" da Home (rodada 2). Um botão só, e o caminho ramifica:
  *
  *   Criar ▸ Item   ▸ categoria ▸ formulário (só com 2 ou mais) ▸ modal
- *   Criar ▸ Tarefa ▸ rápida ou agendada ▸ modal
- *   Criar ▸ Pedir ao BENI (com o que foi digitado)
+ *   Criar ▸ Tarefa ▸ modal da tarefa rápida
+ *   Criar ▸ Pedir ao BENI ▸ conversa com o BENI, com o que foi digitado
+ *
+ * Rodada 6: "criar tarefa só pode ser tarefa rápida". Tarefa abre o modal
+ * direto, sem o nível rápida ou agendada. "Pedir ao BENI" abre a conversa
+ * (`_ChatDoBeni.vue`), que monta o rascunho do item ou da tarefa.
  *
  * Pedido da redatora: "deveria ser só um botão bem objetivo mesmo. quando
  * botar pra criar, abre as opçoes 'item' e 'tarefa', aí ramifica na hora de
@@ -33,7 +37,7 @@ const props = defineProps<{
 const aberto = defineModel<boolean>('open', { default: false })
 const emit = defineEmits<{
   item: [categoria: string, formulario?: string]
-  tarefa: [tipo: 'rapida' | 'agendada']
+  tarefa: []
   beni: [texto: string]
 }>()
 
@@ -83,11 +87,7 @@ const grupos = computed<CommandPaletteGroup<CommandPaletteItem>[]>(() => {
         label: t.tarefa,
         description: t.tarefaDescricao,
         icon: 'i-lucide-list-checks',
-        placeholder: t.qualTarefa,
-        children: [
-          { label: t.rapida, description: t.rapidaDescricao, icon: 'i-lucide-zap', onSelect: () => fechar(() => emit('tarefa', 'rapida')) },
-          { label: t.agendada, description: t.agendadaDescricao, icon: 'i-lucide-calendar-clock', onSelect: () => fechar(() => emit('tarefa', 'agendada')) },
-        ],
+        onSelect: () => fechar(() => emit('tarefa')),
       },
     ],
   }]

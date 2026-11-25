@@ -15,6 +15,11 @@
  *   widget ou salva a escolha no que já está na Home;
  * - a busca do 1º nível procura em todas as folhas de uma vez.
  *
+ * Rodada 6: 5 grupos (Tarefas, Agenda, Itens e categorias, Telas e atalhos,
+ * BENI e equipe). Categorias passa a ser uma linha de "Itens e categorias", e
+ * a escolha de quais e em que ordem vira o 3º nível; "Voltar" leva de volta a
+ * Itens e categorias.
+ *
  * Abre só pelo "Adicionar widget" da barra de edição (rodada 4). Sem sombra e
  * sem travar a Home (`:overlay="false"`, `:modal="false"`): a pessoa vê o
  * widget entrar no topo.
@@ -46,7 +51,8 @@ const emit = defineEmits<{
   categorias: [escolhidas: string[]]
 }>()
 
-const nivel = ref<GrupoDoCatalogo | null>(null)
+type Nivel = GrupoDoCatalogo | 'escolherCategorias'
+const nivel = ref<Nivel | null>(null)
 const busca = ref('')
 const escolha = ref<string[]>([])
 
@@ -60,15 +66,21 @@ const visiveis = computed(() => CATALOGO.filter(d => props.admin || !d.soAdmin))
 const tiposNaHome = computed(() => new Set(props.naHome))
 const categoriasNaHome = computed(() => tiposNaHome.value.has('categorias'))
 
-function abrirGrupo(g: GrupoDoCatalogo) {
-  if (g === 'categorias') escolha.value = [...(props.categoriasEscolhidas ?? [])]
+function abrirGrupo(g: Nivel) {
+  if (g === 'escolherCategorias') escolha.value = [...(props.categoriasEscolhidas ?? [])]
   busca.value = ''
   nivel.value = g
 }
 
 function quantas(g: GrupoDoCatalogo) {
-  return g === 'categorias' ? props.categorias.length : visiveis.value.filter(d => d.grupo === g).length
+  return visiveis.value.filter(d => d.grupo === g).length
 }
+
+function voltar() {
+  nivel.value = nivel.value === 'escolherCategorias' ? 'itens' : null
+}
+
+const nomeDoNivel = (n: Nivel) => n === 'escolherCategorias' ? props.t.widgets.categorias.titulo : props.t.grupos[n]
 
 const doGrupo = (g: GrupoDoCatalogo) => visiveis.value.filter(d => d.grupo === g)
 
@@ -86,7 +98,7 @@ function aplicarCategorias() {
   emit('categorias', escolha.value)
 }
 
-const titulo = computed(() => nivel.value ? props.t.grupos[nivel.value] : props.t.personalizacao.catalogoTitulo)
+const titulo = computed(() => nivel.value ? nomeDoNivel(nivel.value) : props.t.personalizacao.catalogoTitulo)
 </script>
 
 <template>
@@ -133,12 +145,12 @@ const titulo = computed(() => nivel.value ? props.t.grupos[nivel.value] : props.
               </h3>
               <ul v-if="resultados.length" class="space-y-2">
                 <li v-for="d in resultados" :key="d.tipo">
-                  <!-- Categorias pede a escolha: a linha leva ao 2º nível. -->
+                  <!-- Categorias pede a escolha: a linha leva ao nível da escolha. -->
                   <button
                     v-if="d.tipo === 'categorias'"
                     type="button"
                     class="flex w-full items-center gap-3 rounded-lg border border-default p-3 text-left transition-colors hover:border-accented hover:bg-elevated/40"
-                    @click="abrirGrupo('categorias')"
+                    @click="abrirGrupo('escolherCategorias')"
                   >
                     <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 ring ring-inset ring-primary/25">
                       <UIcon :name="d.icone" class="size-4 text-primary" />
@@ -162,10 +174,10 @@ const titulo = computed(() => nivel.value ? props.t.grupos[nivel.value] : props.
         <!-- 2º nível -->
         <template v-else>
           <div class="flex items-center gap-2 border-b border-default px-2 py-2 sm:px-4">
-            <UButton :label="t.catalogo.voltar" icon="i-lucide-arrow-left" color="neutral" variant="ghost" size="sm" @click="nivel = null" />
+            <UButton :label="t.catalogo.voltar" icon="i-lucide-arrow-left" color="neutral" variant="ghost" size="sm" @click="voltar" />
             <span class="h-4 w-px bg-accented" aria-hidden="true" />
             <h3 class="truncate text-sm font-semibold text-highlighted">
-              {{ t.grupos[nivel] }}
+              <span v-if="nivel === 'escolherCategorias'" class="font-normal text-muted">{{ t.grupos.itens }} / </span>{{ nomeDoNivel(nivel) }}
             </h3>
           </div>
 
@@ -188,7 +200,7 @@ const titulo = computed(() => nivel.value ? props.t.grupos[nivel.value] : props.
             </template>
 
             <!-- Categorias: quais e em que ordem -->
-            <template v-else-if="nivel === 'categorias'">
+            <template v-else-if="nivel === 'escolherCategorias'">
               <UEmpty v-if="!categorias.length" icon="i-lucide-layout-grid" :description="t.catalogo.semCategorias" variant="naked" size="sm" />
               <template v-else>
                 <p class="text-sm text-muted">
@@ -198,15 +210,31 @@ const titulo = computed(() => nivel.value ? props.t.grupos[nivel.value] : props.
               </template>
             </template>
 
-            <!-- Navegação e agenda, Equipe e notas -->
+            <!-- Os outros grupos: uma linha por widget. Categorias leva à escolha. -->
             <ul v-else class="space-y-2">
               <li v-for="d in doGrupo(nivel)" :key="d.tipo">
-                <LinhaDoCatalogo :t="t" :d="d" :na-home="tiposNaHome.has(d.tipo)" @adicionar="emit('adicionar', d.tipo)" />
+                <button
+                  v-if="d.tipo === 'categorias'"
+                  type="button"
+                  class="flex w-full items-center gap-3 rounded-lg border border-default p-3 text-left transition-colors hover:border-accented hover:bg-elevated/40 focus-visible:outline-2 focus-visible:outline-primary"
+                  @click="abrirGrupo('escolherCategorias')"
+                >
+                  <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 ring ring-inset ring-primary/25">
+                    <UIcon :name="d.icone" class="size-4 text-primary" />
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block text-sm font-medium text-highlighted">{{ t.widgets[d.tipo].titulo }}</span>
+                    <span class="block text-xs text-muted">{{ t.widgets[d.tipo].descricao }}</span>
+                  </span>
+                  <UBadge v-if="categoriasNaHome" :label="t.personalizacao.jaNaHome" color="neutral" variant="subtle" size="sm" class="shrink-0" />
+                  <UIcon name="i-lucide-chevron-right" class="size-4 shrink-0 text-dimmed" />
+                </button>
+                <LinhaDoCatalogo v-else :t="t" :d="d" :na-home="tiposNaHome.has(d.tipo)" @adicionar="emit('adicionar', d.tipo)" />
               </li>
             </ul>
           </div>
 
-          <div v-if="nivel === 'categorias' && categorias.length" class="border-t border-default px-4 py-3 sm:px-6">
+          <div v-if="nivel === 'escolherCategorias' && categorias.length" class="border-t border-default px-4 py-3 sm:px-6">
             <UButton
               :label="categoriasNaHome ? t.catalogo.salvarCategorias : t.catalogo.adicionarCategorias"
               :icon="categoriasNaHome ? 'i-lucide-check' : 'i-lucide-plus'"

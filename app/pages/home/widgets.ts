@@ -9,9 +9,19 @@
  * a Home de develop já oferece a lâmina ou se ela só existe no Painel de
  * tarefas hoje.
  *
- * O catálogo é uma árvore de 2 níveis: a fonte do dado (Tarefas, Categorias,
- * Navegação e agenda, Equipe e notas) e, dentro dela, cada widget. Em Tarefas,
- * os widgets se dividem em Números, Listas e Gráficos.
+ * O catálogo é uma árvore: a fonte do dado e, dentro dela, cada widget. Em
+ * Tarefas, os widgets se dividem em Números, Listas e Gráficos.
+ *
+ * Rodada 6, a pedido da redatora ("a categorização com 'Navegação e agenda'
+ * ficou nonsense... a sensação é de que somente a seção de tarefas tá bem
+ * alimentada"): 5 grupos, cada um pela coisa que a pessoa procura.
+ * - Tarefas: as 15 de antes;
+ * - Agenda: o dia, a semana e o mês (NOVOS os 2 últimos), das mesmas fontes
+ *   da tela Agenda (compromisso do calendário, prazo de tarefa, data de item);
+ * - Itens e categorias: o atalho das categorias e 4 NOVOS sobre itens (meus,
+ *   os mais novos, os que vencem, em aberto por categoria);
+ * - Telas e atalhos: atalhos, recentes e o gráfico de um painel;
+ * - BENI e equipe: o BENI, o comunicado e o bloco de notas.
  *
  * Saíram na rodada 5, a pedido da redatora: "Itens de uma visualização" e
  * "Número de uma visualização".
@@ -40,14 +50,21 @@ export type TipoDeWidget =
   | 'atividade'
   | 'saudeDosPrazos'
   | 'entradaESaida'
-  // Categorias
+  // Agenda
+  | 'agenda'
+  | 'agendaSemana'
+  | 'agendaMes'
+  // Itens e categorias
   | 'categorias'
-  // Navegação e agenda
+  | 'meusItens'
+  | 'ultimosItens'
+  | 'prazosDeItens'
+  | 'itensPorCategoria'
+  // Telas e atalhos
   | 'atalhos'
   | 'recentes'
-  | 'agenda'
   | 'graficoDePainel'
-  // Equipe e notas
+  // BENI e equipe
   | 'comunicado'
   | 'notas'
   | 'beni'
@@ -57,7 +74,7 @@ export const LAMINAS = ['kpiAbertas', 'kpiConcluidas', 'kpiCriadas', 'kpiVencida
 export type LaminaDeTarefas = typeof LAMINAS[number]
 
 /** O 1º nível do catálogo: de onde vem o dado. */
-export type GrupoDoCatalogo = 'tarefas' | 'categorias' | 'navegacao' | 'equipe'
+export type GrupoDoCatalogo = 'tarefas' | 'agenda' | 'itens' | 'atalhos' | 'equipe'
 
 /** As seções de Tarefas no 2º nível. */
 export type SecaoDeTarefas = 'numeros' | 'listas' | 'graficos'
@@ -113,24 +130,35 @@ export const CATALOGO: DefinicaoDoWidget[] = [
   { tipo: 'atividade', icone: 'i-lucide-calendar-check', grupo: 'tarefas', secao: 'graficos', painel: 'activity', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 8, h: 5 }, limites: { minW: 5, maxW: 12, minH: 4, maxH: 8 } },
   { tipo: 'saudeDosPrazos', icone: 'i-lucide-heart-pulse', grupo: 'tarefas', secao: 'graficos', painel: 'dueHealth', segueEscopo: true, tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 8, minH: 4, maxH: 7 } },
   { tipo: 'entradaESaida', icone: 'i-lucide-arrow-left-right', grupo: 'tarefas', secao: 'graficos', painel: 'throughput', segueEscopo: true, tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 5, maxH: 10 } },
-  // Categorias
-  { tipo: 'categorias', icone: 'i-lucide-layout-grid', grupo: 'categorias', painel: 'categories', naHomeDeDevelop: true, tamanho: { w: 12, h: 3 }, limites: { minW: 4, maxW: 12, minH: 3, maxH: 10 } },
-  // Navegação e agenda
-  { tipo: 'atalhos', icone: 'i-lucide-bookmark', grupo: 'navegacao', tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 12, minH: 3, maxH: 9 } },
-  { tipo: 'recentes', icone: 'i-lucide-history', grupo: 'navegacao', tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 6, minH: 4, maxH: 10 } },
-  { tipo: 'agenda', icone: 'i-lucide-calendar-days', grupo: 'navegacao', tamanho: { w: 4, h: 6 }, limites: { minW: 3, maxW: 6, minH: 4, maxH: 10 } },
-  { tipo: 'graficoDePainel', icone: 'i-lucide-chart-column', grupo: 'navegacao', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 10 } },
-  // Equipe e notas
+  // Agenda
+  { tipo: 'agenda', icone: 'i-lucide-calendar-days', grupo: 'agenda', tamanho: { w: 4, h: 6 }, limites: { minW: 3, maxW: 6, minH: 4, maxH: 10 } },
+  // NOVO: os 7 dias a partir de hoje, em colunas.
+  { tipo: 'agendaSemana', icone: 'i-lucide-calendar-range', grupo: 'agenda', tamanho: { w: 8, h: 6 }, limites: { minW: 6, maxW: 12, minH: 5, maxH: 10 } },
+  // NOVO: o mês em miniatura, com o dia escolhido embaixo.
+  { tipo: 'agendaMes', icone: 'i-lucide-calendar', grupo: 'agenda', tamanho: { w: 4, h: 9 }, limites: { minW: 3, maxW: 8, minH: 8, maxH: 12 } },
+  // Itens e categorias
+  { tipo: 'categorias', icone: 'i-lucide-layout-grid', grupo: 'itens', painel: 'categories', naHomeDeDevelop: true, tamanho: { w: 12, h: 3 }, limites: { minW: 4, maxW: 12, minH: 3, maxH: 10 } },
+  // NOVO, os 4: leem o que o item já guarda (responsável, criação, campo de data, status).
+  { tipo: 'meusItens', icone: 'i-lucide-user-check', grupo: 'itens', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 12 } },
+  { tipo: 'ultimosItens', icone: 'i-lucide-file-clock', grupo: 'itens', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 12 } },
+  { tipo: 'prazosDeItens', icone: 'i-lucide-calendar-clock', grupo: 'itens', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 12 } },
+  { tipo: 'itensPorCategoria', icone: 'i-lucide-chart-bar', grupo: 'itens', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 10 } },
+  // Telas e atalhos
+  { tipo: 'atalhos', icone: 'i-lucide-bookmark', grupo: 'atalhos', tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 12, minH: 3, maxH: 9 } },
+  { tipo: 'recentes', icone: 'i-lucide-history', grupo: 'atalhos', tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 6, minH: 4, maxH: 10 } },
+  { tipo: 'graficoDePainel', icone: 'i-lucide-chart-column', grupo: 'atalhos', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 10 } },
+  // BENI e equipe
+  { tipo: 'beni', icone: 'i-lucide-sparkles', grupo: 'equipe', tamanho: { w: 8, h: 5 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 9 } },
   { tipo: 'comunicado', icone: 'i-lucide-megaphone', grupo: 'equipe', soAdmin: true, tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 12, minH: 3, maxH: 6 } },
   { tipo: 'notas', icone: 'i-lucide-notebook-pen', grupo: 'equipe', tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 8, minH: 3, maxH: 9 } },
-  { tipo: 'beni', icone: 'i-lucide-sparkles', grupo: 'equipe', tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 8, minH: 4, maxH: 7 } },
 ]
 
 export const GRUPOS: { grupo: GrupoDoCatalogo, icone: string }[] = [
   { grupo: 'tarefas', icone: 'i-lucide-list-checks' },
-  { grupo: 'categorias', icone: 'i-lucide-layout-grid' },
-  { grupo: 'navegacao', icone: 'i-lucide-compass' },
-  { grupo: 'equipe', icone: 'i-lucide-users' },
+  { grupo: 'agenda', icone: 'i-lucide-calendar-days' },
+  { grupo: 'itens', icone: 'i-lucide-layout-grid' },
+  { grupo: 'atalhos', icone: 'i-lucide-bookmark' },
+  { grupo: 'equipe', icone: 'i-lucide-sparkles' },
 ]
 
 export const SECOES: SecaoDeTarefas[] = ['numeros', 'listas', 'graficos']
@@ -143,15 +171,22 @@ export function definicao(tipo: TipoDeWidget) {
  * O arranjo padrão do workspace, o que o administrador entrega a todos.
  * Começa como a Home de develop (4 números, Vencidas, Vencem em breve e
  * Categorias) e soma os widgets da proposta.
+ *
+ * Rodada 6, a pedido da redatora: Categorias abre a Home ("o atalho de
+ * categorias deve ser por padrão o widget do topo, o primeiro de todos") e o
+ * BENI entra no padrão, também no workspace vazio ("pra induzir o user a usar
+ * IA"), ao lado da Agenda de hoje.
  */
 export const PADRAO_WIDGETS: Widget[] = [
+  { id: 'w-categorias', tipo: 'categorias', config: { categorias: [] } },
   { id: 'w-abertas', tipo: 'kpiAbertas', config: {} },
   { id: 'w-concluidas', tipo: 'kpiConcluidas', config: {} },
   { id: 'w-criadas', tipo: 'kpiCriadas', config: {} },
   { id: 'w-kpi-vencidas', tipo: 'kpiVencidas', config: {} },
+  { id: 'w-beni', tipo: 'beni', config: {} },
+  { id: 'w-agenda', tipo: 'agenda', config: {} },
   { id: 'w-vencidas', tipo: 'vencidas', config: {} },
   { id: 'w-vencem', tipo: 'vencemEmBreve', config: {} },
-  { id: 'w-categorias', tipo: 'categorias', config: { categorias: [] } },
   { id: 'w-tarefas', tipo: 'minhasTarefas', config: {} },
   { id: 'w-grafico', tipo: 'graficoDePainel', config: {} },
   { id: 'w-comunicado', tipo: 'comunicado', config: {} },
@@ -160,13 +195,15 @@ export const PADRAO_WIDGETS: Widget[] = [
 ]
 
 export const PADRAO_LAYOUT: ItemDaGrade[] = [
+  { id: 'w-categorias', w: 12, h: 3 },
   { id: 'w-abertas', w: 3, h: 3 },
   { id: 'w-concluidas', w: 3, h: 3 },
   { id: 'w-criadas', w: 3, h: 3 },
   { id: 'w-kpi-vencidas', w: 3, h: 3 },
+  { id: 'w-beni', w: 8, h: 5 },
+  { id: 'w-agenda', w: 4, h: 5 },
   { id: 'w-vencidas', w: 6, h: 6 },
   { id: 'w-vencem', w: 6, h: 6 },
-  { id: 'w-categorias', w: 12, h: 3 },
   { id: 'w-tarefas', w: 6, h: 8 },
   { id: 'w-grafico', w: 6, h: 8 },
   { id: 'w-comunicado', w: 4, h: 5 },

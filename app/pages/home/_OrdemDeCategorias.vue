@@ -11,6 +11,12 @@
  * (WCAG 2.5.7), e o arraste dos exemplos do Nuxt UI pede pacotes que o app
  * não importa (`@vueuse/integrations` e `sortablejs`).
  *
+ * Rodada 6, a pedido da redatora ("deve poder selecionar todos e desmarcar
+ * todos também"): "Marcar todas" mantém a ordem das já marcadas e põe as
+ * outras no fim, na ordem do workspace; "Desmarcar todas" limpa a escolha.
+ * Os 2 ficam no alto da lista, ao lado da contagem, e se desativam quando não
+ * há o que fazer.
+ *
  * Usado no 2º nível do catálogo (Categorias) e no Configurar do widget.
  * Componentes: `UCheckbox`, `UButton`, `UTooltip`, `UIcon` (MCP nuxt-ui).
  */
@@ -37,6 +43,10 @@ function alternar(slug: string, marcar: boolean) {
   escolhidas.value = marcar ? [...escolhidas.value, slug] : escolhidas.value.filter(x => x !== slug)
 }
 
+function marcarTodas() {
+  escolhidas.value = [...escolhidas.value, ...props.categorias.map(c => c.slug).filter(s => !escolhidas.value.includes(s))]
+}
+
 function mover(slug: string, passo: -1 | 1) {
   const l = [...escolhidas.value]
   const i = l.indexOf(slug)
@@ -49,6 +59,15 @@ function mover(slug: string, passo: -1 | 1) {
 
 <template>
   <div class="space-y-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <p class="text-xs text-muted" aria-live="polite">
+        {{ t.catalogo.marcadas(escolhidas.length, categorias.length) }}
+      </p>
+      <span class="flex items-center gap-1">
+        <UButton :label="t.ordem.todas" icon="i-lucide-check-check" color="neutral" variant="ghost" size="xs" :disabled="escolhidas.length === categorias.length" @click="marcarTodas" />
+        <UButton :label="t.ordem.nenhuma" icon="i-lucide-x" color="neutral" variant="ghost" size="xs" :disabled="!escolhidas.length" @click="escolhidas = []" />
+      </span>
+    </div>
     <TransitionGroup tag="ul" name="lista" class="space-y-1">
       <li
         v-for="({ c, marcada }, i) in linhas"
@@ -74,9 +93,6 @@ function mover(slug: string, passo: -1 | 1) {
         </template>
       </li>
     </TransitionGroup>
-    <p class="text-xs text-muted">
-      {{ t.catalogo.marcadas(escolhidas.length, categorias.length) }}
-    </p>
   </div>
 </template>
 

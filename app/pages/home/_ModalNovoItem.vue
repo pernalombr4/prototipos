@@ -11,6 +11,9 @@
  * não tem formulário. Hoje o modal de develop diz "Novo registro" e o seletor
  * diz "Formulario", sem acento (DECISOES.md, rodada 2).
  *
+ * `inicial` (rodada 6): o rascunho que o BENI montou, quando a pessoa escolhe
+ * "Revisar no formulário" na conversa.
+ *
  * Componentes: `UModal`, `UFormField`, `UInput`, `UInputNumber`, `USelect`,
  * `USwitch` (MCP nuxt-ui).
  */
@@ -32,6 +35,8 @@ const props = defineProps<{
   categoria?: Categoria
   /** Formulário escolhido; sem ele, todos os campos da categoria. */
   formulario?: string
+  /** Rascunho do BENI, quando vem da conversa. */
+  inicial?: Partial<DadosDoItem>
 }>()
 const aberto = defineModel<boolean>('open', { default: false })
 const emit = defineEmits<{ criar: [dados: DadosDoItem] }>()
@@ -45,11 +50,13 @@ const tentou = ref(false)
 
 watch(aberto, (a) => {
   if (!a) return
-  titulo.value = ''
-  valor.value = undefined
-  prazo.value = ''
-  urgente.value = false
-  responsavel.value = EU.id
+  const i = props.inicial
+  titulo.value = i?.titulo ?? ''
+  valor.value = i?.valor
+  // O prazo é gravado às 21:00 UTC (18:00 de Brasília): o campo de data mostra o dia.
+  prazo.value = i?.prazo ? new Date(i.prazo).toISOString().slice(0, 10) : ''
+  urgente.value = i?.urgente ?? false
+  responsavel.value = i?.responsavel ?? EU.id
   tentou.value = false
 })
 

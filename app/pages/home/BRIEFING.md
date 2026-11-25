@@ -37,6 +37,15 @@ Procurei no `enspace-ux-research` (auditoria de UX por persona) antes de desenha
 
 ## O que o develop faz hoje
 
+### O BENI e o alternador de escopo (rodada 6)
+
+Leitura de 2026-11-24 pela skill `investigar-codigo`, em `en-space@develop be2a5d850`. O código mostra a branch, não o que está no ar.
+
+- **Lido no código:** o alternador "Minhas tarefas · Workspace" da Home não tem trava de papel: o `UTabs` do escopo é desenhado para todo membro (`src/pages/workspaces/[workspace]/index.vue:171`). Mostrar só ao administrador é proposta da rodada 6.
+- **Lido no código:** a conversa flutuante do BENI já existe. O `AiChatFloat` (`src/components/ai/AiChatFloat.vue`) fica no fim do cabeçalho do workspace (`src/components/workspace/WorkspaceHeaderEnd.vue:24`) e tem a versão em tela cheia, a página `ai/chat` (`src/pages/workspaces/[workspace]/ai/chat/index.vue`).
+- **Lido no código:** a página aceita `?prompt=` para abrir já com um pedido, usado hoje pelo "Ask BENI AI" do construtor de relatórios (`ai/chat/index.vue:23-26`), e pede a permissão `ai.chat` (`:21`). Os créditos de IA passam pelo `useAiWalletGate` (`:28`).
+- Para o protótipo: "Criar ▸ Pedir ao BENI" e o botão do widget BENI abrem essa mesma conversa. O caminho existe; o que é novo é o rascunho de item e de tarefa dentro dela.
+
 ### A Home em 24/11/2026 (rodada 5)
 
 A redatora avisou que os elementos do Painel de tarefas foram levados para a Home. Lido no código (en-space@develop be2a5d850 e en-sdk@develop 58a81c6, só leitura):

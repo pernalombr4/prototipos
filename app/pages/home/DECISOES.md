@@ -2,6 +2,49 @@
 
 Registro das rodadas. A mais recente em cima.
 
+## Rodada 6 · 2026-11-24
+
+- **Pedido (literal):** "se estou vendo como membro, nao deve existir no topo o filtro "minhas tarefas/workspace" somenre owner ve isso. --- na seleçao de categorias na hora de adicionar o widget deve poder selecionar todos e desmarcar todos tambem. pra facilitar. --- os botoes dessa barra estão excessivos. parece muito texto e muito botao. alem disso a ordem deles nao ta muito lógica. vejas como pode melhorar, sem tirar nenhum botão. talvez o cancelar ser somente um X pode ser bom... sei lá... --- prototipe o "pedir ao beni" do botao criar. como seria a interaçao? --- o resumo do beni deve aparecer por padrao, pra induzir o user a usar ia, mesmo no estado inicial. deve fazer aprte do padrao mesmo. e o atalho de categorias deve ser por padrao o widget do topo, o primeiro de todos. --- criar tarefa só pode ser tarefa rápida. então pode reduzir essa jornada. --- nos widgets, a categorizaçao que voce fez com "Naveçao e agenda" ficou nonsense. talvez tenha que ser tarefas e agenda. ou se fizer sentido ter MAIS widgets de agenda, por exemplo, trazendo a PROPRIA agenda em miniatura pra home, podssa ser separada a categoria. veja isso. a sensçao é de que somente a seçao de tarefas ta bem alimentada. veja o restante como da pra alimentar mais e setorizar melhor talvez."
+- **Correção no meio da rodada (literal):** "o resumo do beni (widget) nao deve ter chat de conversa. é só o resumo dele mesmo. mas ele pode ter um botao que, ao ser clicado, abre o chat flutuante do beni pra facilitar.mas o user deve digitar no chat, nao no widget"
+- **Mudou:**
+  - "Minhas tarefas · Workspace" só aparece para o administrador. O membro vê sempre as próprias tarefas. Em develop o alternador aparece para todos (`BRIEFING.md`, "O BENI e o alternador de escopo");
+  - no 3º nível do catálogo (Categorias), "Marcar todas" e "Desmarcar todas" ao lado da contagem. Cada um fica desligado quando não tem efeito;
+  - a barra de edição, na ordem de uso:
+    - Adicionar widget (a ação principal enquanto se edita);
+    - Restaurar padrão vira ícone com dica, só na Minha Home;
+    - um divisor;
+    - Concluir;
+    - Cancelar vira X com a dica "Cancelar e descartar as mudanças";
+    - a frase de ajuda só aparece em tela larga (xl).
+    Nenhum botão saiu;
+  - "Pedir ao BENI" do Criar abre a conversa flutuante do BENI com o texto digitado. O BENI responde com um rascunho:
+    - tarefa rápida: nome, data limite, responsável e prioridade;
+    - item: a categoria, o formulário (com escolha quando a categoria tem mais de 1) e os campos que entendeu;
+    - categoria: a sugestão, com "Montar categoria";
+    - pergunta: a ajuda com exemplos.
+    O rascunho tem Criar, "Revisar no formulário" (abre o modal de sempre já preenchido) e Descartar. Criado, mostra a referência e Abrir. A conversa tem Nova conversa, Tela cheia e Fechar;
+  - o widget BENI é só o resumo do dia e o botão "Conversar com o BENI", que abre a mesma conversa com o cursor no campo dela. No workspace vazio, o BENI se apresenta no lugar do resumo;
+  - Home padrão: Categorias em 1º, na largura toda; depois os 4 números; BENI e Agenda de hoje lado a lado; Vencidas e Vencem em breve; Minhas tarefas e o gráfico; Comunicado, Atalhos e Recentes;
+  - Criar ▸ Tarefa abre direto o modal de tarefa rápida, sem a escolha entre rápida e agendada;
+  - o catálogo passa a ter 5 grupos, cada um com mais opções:
+    - Tarefas (15): as lâminas da rodada 5;
+    - Agenda (3): Agenda de hoje, Agenda da semana (7 colunas, a partir de hoje) e Agenda do mês (o calendário; o dia escolhido lista o que há nele);
+    - Itens e categorias (5): Categorias (que leva à escolha e à ordem), Meus itens, Itens criados recentemente, Prazos de itens e Itens em aberto por categoria;
+    - Telas e atalhos (3);
+    - BENI e equipe (3): BENI, Comunicado e Bloco de notas.
+- **Componentes:**
+  - a conversa usa `UChatMessages`, `UChatPrompt`, `UChatPromptSubmit` e `UChatShimmer`. A janela é um painel fixo próprio no canto, como o `AiChatFloat` de develop: o `USlideover` e o `UModal` do Nuxt UI escurecem a tela, e a conversa flutuante deixa a Home à vista;
+  - a Agenda do mês é uma grade própria: o `UCalendar` pede `@internationalized/date`, que o app não importa, e não desenha os pontos de cada dia;
+  - o keyframe de entrada das barras de "Itens em aberto por categoria" está num `<style>` global com nome único: o `@keyframes` com escopo do Vue muda de nome e o `animate-[...]` do Tailwind não o acha.
+- **Fronteira:** muda o que está no Criar (Tarefa e Pedir ao BENI), a barra de edição, o catálogo, a Home padrão, o widget BENI e o alternador de escopo. A casca, a grade e o modal de item ficam como na rodada 5.
+- **Descartado:**
+  - a tarefa agendada no Criar: ela nasce do fluxo da categoria, não de um botão;
+  - "Mostrar todas" no Configurar do widget Categorias: com "Marcar todas" no catálogo, ele repetia a ação;
+  - campo de pedido e sugestões dentro do widget BENI, que a correção da redatora tirou: o pedido acontece só na conversa;
+  - "Navegação e agenda" como grupo do catálogo.
+- **MAQUETE:** o BENI entende o texto por regras de palavra-chave (`beni.ts`), para a conversa responder no protótipo. No produto, quem entende é o agente de IA do workspace.
+- **Ver:** `evidencias/rodada6-*.jpg` e `evidencias/rodada6-*.png`
+
 ## Rodada 5 · 2026-11-24
 
 - **Pedido (literal):** "observe como ta a home hoje em develop. note que os elementos do dashboard de tarefas foram levados pra lá. o usuário deve poder pegar esses elementos como lâminas. pra agrupar melhor a sidebar de adicionar widgets, você pode fazer um menu que vai de um nível pro outro, em arvore, do tipo. selecionei que quero puxar ali dados de tarefas > aparecem as opções pra mim de cada lamina/informação. Selecionei que quero botar categorias > seleciono quais quero mostrar. inúteis e pode tirar: numero de uma visualização, itens de uma visualização. o widget de categorias ta estranho. todos os cards ali dentro deveriam ter o mesmo tamanho. o user deveria poder definir a ordem em que eles aparecem dentro do widget também. o estado inicial do primeiro acesso na verdade é com os widgets vazios. eles estão ali, mas sem informação. e ai pode ser como você já colocou mesmo. mas seria estado inicial com workspace vazio (acabou de criar) e estado configurado (é o que vc ta chamando de inicial hoje). entendido? e o estado sem widgets continua la."

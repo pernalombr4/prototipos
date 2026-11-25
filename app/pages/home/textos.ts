@@ -142,6 +142,8 @@ export interface Textos {
     catalogoMinha: string
     catalogoPadrao: string
     cancelar: string
+    cancelarDica: string
+    restaurarDica: string
     concluir: string
     salva: string
   }
@@ -221,7 +223,7 @@ export interface Textos {
     marcadas: (n: number, total: number) => string
     resultados: string
   }
-  ordem: { subir: (nome: string) => string, descer: (nome: string) => string, mostrar: (nome: string) => string }
+  ordem: { subir: (nome: string) => string, descer: (nome: string) => string, mostrar: (nome: string) => string, todas: string, nenhuma: string }
   laminas: {
     subtitulos: Partial<Record<TipoDeWidget, string>>
     dasAbertas: (pct: number) => string
@@ -248,6 +250,50 @@ export interface Textos {
     escreverComunicado: string
     beni: string
     grafico: (tela: string) => string
+  }
+
+  beniChat: {
+    titulo: string
+    novaConversa: string
+    telaCheia: string
+    fechar: string
+    placeholder: string
+    aviso: string
+    enviar: string
+    ola: (nome: string) => string
+    apresentacao: string
+    sugestoes: string[]
+    pensando: string
+    respostaTarefa: string
+    respostaItem: (categoria: string) => string
+    respostaCategoria: string
+    respostaAjuda: string
+    respostaResumo: string
+    rascunho: { tarefa: string, item: (categoria: string) => string, categoria: string }
+    campos: { nome: string, titulo: string, prazo: string, responsavel: string, prioridade: string, valor: string, urgente: string, sim: string, formulario: string, camposSugeridos: string, nomeDaCategoria: string, semPrazo: string, semNome: string }
+    camposSugeridos: string[]
+    acoes: { criar: string, revisar: string, descartar: string, montar: string }
+    criadaTarefa: (ref: string) => string
+    criadoItem: (ref: string) => string
+    revisando: string
+    descartado: string
+    montarToast: string
+  }
+  beniW: { conversar: string, boasVindas: string }
+  agendaW: {
+    mais: (n: number) => string
+    nadaNoDia: string
+    hoje: string
+    mesAnterior: string
+    proximoMes: string
+  }
+  itensW: {
+    vazio: string
+    vazioMeus: string
+    vazioPrazos: string
+    venceEm: (data: string) => string
+    venceu: (data: string) => string
+    abertos: (n: number) => string
   }
 
   ehMaquete: string
@@ -302,9 +348,15 @@ const ptBR: Textos = {
     graficoDePainel: { titulo: 'Gráfico de um painel', descricao: 'Um painel de uma tela do tipo Dashboard.' },
     comunicado: { titulo: 'Comunicado', descricao: 'Aviso do administrador para todo o workspace.' },
     notas: { titulo: 'Bloco de notas', descricao: 'Anotações suas. Só você vê.' },
-    beni: { titulo: 'Resumo do BENI', descricao: 'O BENI resume o que pede sua atenção hoje.' },
+    beni: { titulo: 'BENI', descricao: 'O resumo do dia feito pelo BENI, com o atalho para a conversa com ele.' },
+    agendaSemana: { titulo: 'Agenda da semana', descricao: 'Os 7 dias a partir de hoje, em colunas.' },
+    agendaMes: { titulo: 'Agenda do mês', descricao: 'O calendário do mês. Clique num dia para ver o que há nele.' },
+    meusItens: { titulo: 'Meus itens', descricao: 'Os itens em aberto em que você é o responsável.' },
+    ultimosItens: { titulo: 'Itens criados recentemente', descricao: 'Os últimos itens criados nas categorias que você acessa.' },
+    prazosDeItens: { titulo: 'Prazos de itens', descricao: 'Itens com data de vencimento ou vigência nos próximos 30 dias.' },
+    itensPorCategoria: { titulo: 'Itens em aberto por categoria', descricao: 'Quantos itens estão em aberto em cada categoria.' },
   },
-  grupos: { tarefas: 'Tarefas', categorias: 'Categorias', navegacao: 'Navegação e agenda', equipe: 'Equipe e notas' },
+  grupos: { tarefas: 'Tarefas', agenda: 'Agenda', itens: 'Itens e categorias', atalhos: 'Telas e atalhos', equipe: 'BENI e equipe' },
 
   widget: {
     configurar: 'Configurar',
@@ -332,7 +384,7 @@ const ptBR: Textos = {
     item: 'Item',
     itemDescricao: 'Em uma categoria, pelo formulário dela',
     tarefa: 'Tarefa',
-    tarefaDescricao: 'Rápida ou agendada',
+    tarefaDescricao: 'Tarefa rápida, com prazo e responsável',
     qualCategoria: 'Em qual categoria?',
     qualFormulario: c => `Qual formulário de ${c}?`,
     qualTarefa: 'Qual tipo de tarefa?',
@@ -424,6 +476,8 @@ const ptBR: Textos = {
     catalogoMinha: 'O widget entra no topo da sua Home. Ninguém mais vê a mudança.',
     catalogoPadrao: 'O widget entra na Home padrão e também na Home de quem já personalizou.',
     cancelar: 'Cancelar',
+    cancelarDica: 'Cancelar e descartar as mudanças',
+    restaurarDica: 'Restaurar a Home padrão do workspace',
     concluir: 'Concluir',
     salva: 'Home salva.',
   },
@@ -495,9 +549,10 @@ const ptBR: Textos = {
   secoes: { numeros: 'Números', listas: 'Listas', graficos: 'Gráficos' },
   descricaoDosGrupos: {
     tarefas: 'Números, listas e gráficos das tarefas rápidas e agendadas.',
-    categorias: 'Atalho para as categorias, na ordem que você escolher.',
-    navegacao: 'Atalhos, recentes, agenda e o gráfico de uma tela.',
-    equipe: 'Comunicado, bloco de notas e o resumo do BENI.',
+    agenda: 'O dia, a semana e o mês, com compromissos, prazos de tarefa e datas de item.',
+    itens: 'As categorias e os itens: os seus, os mais novos e os que vencem.',
+    atalhos: 'Atalhos, telas abertas por último e o gráfico de um painel.',
+    equipe: 'O BENI, o comunicado do administrador e o bloco de notas.',
   },
   escopoDeTarefas: { rotulo: 'De quem são as tarefas', minhas: 'Minhas tarefas', workspace: 'Workspace' },
   catalogo: {
@@ -511,7 +566,7 @@ const ptBR: Textos = {
     marcadas: (n, t) => n === 0 ? `Nenhuma marcada: aparecem as ${t}, na ordem do workspace.` : `${n} de ${t} marcadas`,
     resultados: 'Resultados',
   },
-  ordem: { subir: n => `Subir ${n}`, descer: n => `Descer ${n}`, mostrar: n => `Mostrar ${n}` },
+  ordem: { subir: n => `Subir ${n}`, descer: n => `Descer ${n}`, mostrar: n => `Mostrar ${n}`, todas: 'Marcar todas', nenhuma: 'Desmarcar todas' },
   laminas: {
     subtitulos: {
       kpiConcluidas: 'Últimas 4 semanas',
@@ -554,10 +609,61 @@ const ptBR: Textos = {
     criarCategoria: 'Criar categoria',
     comunicado: 'Nenhum comunicado publicado.',
     escreverComunicado: 'Escrever comunicado',
-    beni: 'O BENI começa a resumir quando houver tarefas e itens no workspace.',
+    beni: 'O BENI resume o dia quando houver tarefas e itens. Enquanto isso, ele ajuda a montar o workspace.',
     grafico: t => `A tela ${t} ainda não tem dados.`,
   },
 
+  beniChat: {
+    titulo: 'BENI AI',
+    novaConversa: 'Nova conversa',
+    telaCheia: 'Abrir em tela cheia',
+    fechar: 'Fechar a conversa',
+    placeholder: 'Descreva o item ou a tarefa que você quer criar',
+    aviso: 'O BENI pode errar. Confira o rascunho antes de criar.',
+    enviar: 'Enviar',
+    ola: n => `Olá, ${n}. Eu sou o BENI.`,
+    apresentacao: 'Descreva o que você precisa criar, com prazo e responsável se houver. Eu preparo o rascunho, e você confere antes de criar.',
+    sugestoes: [
+      'Criar uma tarefa para amanhã às 10h: ligar para a Atria sobre a renovação',
+      'Abrir um chamado urgente: impressora do 3º andar sem papel',
+      'Novo reembolso de R$ 84,90: táxi até o aeroporto',
+      'Montar uma categoria de Eventos',
+    ],
+    pensando: 'Preparando o rascunho',
+    respostaTarefa: 'Preparei esta tarefa rápida. Confira os campos antes de criar.',
+    respostaItem: c => `Preparei o rascunho em ${c}. Confira os campos antes de criar.`,
+    respostaCategoria: 'Montei uma sugestão de categoria. Os campos podem mudar depois, nas configurações da categoria.',
+    respostaAjuda: 'Eu crio itens e tarefas a partir do que você escrever. Diga o que é, para quando e para quem. Por exemplo:',
+    respostaResumo: 'Este é o resumo de hoje:',
+    rascunho: { tarefa: 'Tarefa rápida', item: c => `Item em ${c}`, categoria: 'Nova categoria' },
+    campos: { nome: 'Nome', titulo: 'Título', prazo: 'Data limite', responsavel: 'Responsável', prioridade: 'Prioridade', valor: 'Valor', urgente: 'Urgente', sim: 'Sim', formulario: 'Formulário', camposSugeridos: 'Campos sugeridos', nomeDaCategoria: 'Nome', semPrazo: 'Sem prazo', semNome: 'Sem nome' },
+    camposSugeridos: ['Título', 'Responsável', 'Status', 'Data', 'Anexos'],
+    acoes: { criar: 'Criar', revisar: 'Revisar no formulário', descartar: 'Descartar', montar: 'Montar categoria' },
+    criadaTarefa: r => `Tarefa ${r} criada.`,
+    criadoItem: r => `Item ${r} criado.`,
+    revisando: 'Rascunho aberto no formulário.',
+    descartado: 'Rascunho descartado.',
+    montarToast: 'Maquete: no produto, a categoria abre nas configurações com estes campos.',
+  },
+  beniW: {
+    conversar: 'Conversar com o BENI',
+    boasVindas: 'O BENI cria itens e tarefas a partir do que você escrever e responde dúvidas sobre o workspace.',
+  },
+  agendaW: {
+    mais: n => `Mais ${n}`,
+    nadaNoDia: 'Nada neste dia.',
+    hoje: 'Hoje',
+    mesAnterior: 'Mês anterior',
+    proximoMes: 'Próximo mês',
+  },
+  itensW: {
+    vazio: 'Nenhum item criado ainda.',
+    vazioMeus: 'Nenhum item em aberto sob sua responsabilidade.',
+    vazioPrazos: 'Nenhum item vence nos próximos 30 dias.',
+    venceEm: d => `Vence em ${d}`,
+    venceu: d => `Venceu em ${d}`,
+    abertos: n => n === 1 ? '1 em aberto' : `${n} em aberto`,
+  },
   ehMaquete: 'Maquete',
 }
 
@@ -610,9 +716,15 @@ const en: Textos = {
     graficoDePainel: { titulo: 'Chart from a dashboard', descricao: 'A panel from a Dashboard screen.' },
     comunicado: { titulo: 'Announcement', descricao: 'A notice from the admin to the whole workspace.' },
     notas: { titulo: 'Notepad', descricao: 'Your notes. Only you can see them.' },
-    beni: { titulo: 'BENI summary', descricao: 'BENI sums up what needs your attention today.' },
+    beni: { titulo: 'BENI', descricao: 'The day summary written by BENI, with a shortcut to the chat with him.' },
+    agendaSemana: { titulo: 'This week', descricao: 'The 7 days starting today, in columns.' },
+    agendaMes: { titulo: 'This month', descricao: 'The month calendar. Click a day to see what is on it.' },
+    meusItens: { titulo: 'My items', descricao: 'Open items you are responsible for.' },
+    ultimosItens: { titulo: 'Recently created items', descricao: 'The latest items created in the categories you can access.' },
+    prazosDeItens: { titulo: 'Item due dates', descricao: 'Items with a due or expiry date in the next 30 days.' },
+    itensPorCategoria: { titulo: 'Open items by category', descricao: 'How many items are open in each category.' },
   },
-  grupos: { tarefas: 'Tasks', categorias: 'Categories', navegacao: 'Navigation and schedule', equipe: 'Team and notes' },
+  grupos: { tarefas: 'Tasks', agenda: 'Schedule', itens: 'Items and categories', atalhos: 'Screens and shortcuts', equipe: 'BENI and team' },
 
   widget: {
     configurar: 'Configure',
@@ -640,7 +752,7 @@ const en: Textos = {
     item: 'Item',
     itemDescricao: 'In a category, through its form',
     tarefa: 'Task',
-    tarefaDescricao: 'Quick or scheduled',
+    tarefaDescricao: 'Quick task, with due date and assignee',
     qualCategoria: 'In which category?',
     qualFormulario: c => `Which ${c} form?`,
     qualTarefa: 'Which kind of task?',
@@ -732,6 +844,8 @@ const en: Textos = {
     catalogoMinha: 'The widget goes to the top of your Home. Nobody else sees the change.',
     catalogoPadrao: 'The widget goes to the default Home and also to the Home of people who already customized it.',
     cancelar: 'Cancel',
+    cancelarDica: 'Cancel and discard changes',
+    restaurarDica: 'Restore the workspace default Home',
     concluir: 'Done',
     salva: 'Home saved.',
   },
@@ -803,9 +917,10 @@ const en: Textos = {
   secoes: { numeros: 'Numbers', listas: 'Lists', graficos: 'Charts' },
   descricaoDosGrupos: {
     tarefas: 'Numbers, lists and charts of quick and scheduled tasks.',
-    categorias: 'Shortcuts to categories, in the order you choose.',
-    navegacao: 'Shortcuts, recents, schedule and a chart from a screen.',
-    equipe: 'Announcement, notepad and the BENI summary.',
+    agenda: 'The day, the week and the month, with events, task due dates and item dates.',
+    itens: 'Categories and items: yours, the newest and the ones coming due.',
+    atalhos: 'Shortcuts, screens opened last and a chart from a dashboard.',
+    equipe: 'BENI, the administrator announcement and the notepad.',
   },
   escopoDeTarefas: { rotulo: 'Whose tasks', minhas: 'My tasks', workspace: 'Workspace' },
   catalogo: {
@@ -819,7 +934,7 @@ const en: Textos = {
     marcadas: (n, t) => n === 0 ? `None checked: all ${t} show up, in workspace order.` : `${n} of ${t} checked`,
     resultados: 'Results',
   },
-  ordem: { subir: n => `Move ${n} up`, descer: n => `Move ${n} down`, mostrar: n => `Show ${n}` },
+  ordem: { subir: n => `Move ${n} up`, descer: n => `Move ${n} down`, mostrar: n => `Show ${n}`, todas: 'Select all', nenhuma: 'Clear all' },
   laminas: {
     subtitulos: {
       kpiConcluidas: 'Last 4 weeks',
@@ -862,10 +977,61 @@ const en: Textos = {
     criarCategoria: 'Create category',
     comunicado: 'No announcement published.',
     escreverComunicado: 'Write announcement',
-    beni: 'BENI starts summarizing once the workspace has tasks and items.',
+    beni: 'BENI sums up the day once there are tasks and items. Meanwhile, BENI helps you set up the workspace.',
     grafico: t => `The ${t} screen has no data yet.`,
   },
 
+  beniChat: {
+    titulo: 'BENI AI',
+    novaConversa: 'New conversation',
+    telaCheia: 'Open in full screen',
+    fechar: 'Close the conversation',
+    placeholder: 'Describe the item or task you want to create',
+    aviso: 'BENI can make mistakes. Check the draft before creating.',
+    enviar: 'Send',
+    ola: n => `Hello, ${n}. I am BENI.`,
+    apresentacao: 'Describe what you need to create, with a due date and an assignee if there are any. I prepare the draft, and you check it before creating.',
+    sugestoes: [
+      'Create a task for tomorrow at 10:00: call Atria about the renewal',
+      'Open an urgent ticket: 3rd floor printer out of paper',
+      'New reimbursement of R$ 84,90: taxi to the airport',
+      'Set up an Events category',
+    ],
+    pensando: 'Preparing the draft',
+    respostaTarefa: 'I prepared this quick task. Check the fields before creating.',
+    respostaItem: c => `I prepared the draft in ${c}. Check the fields before creating.`,
+    respostaCategoria: 'I put together a category suggestion. The fields can change later, in the category settings.',
+    respostaAjuda: 'I create items and tasks from what you write. Say what it is, when it is due and who it is for. For example:',
+    respostaResumo: 'This is the summary for today:',
+    rascunho: { tarefa: 'Quick task', item: c => `Item in ${c}`, categoria: 'New category' },
+    campos: { nome: 'Name', titulo: 'Title', prazo: 'Due date', responsavel: 'Assignee', prioridade: 'Priority', valor: 'Amount', urgente: 'Urgent', sim: 'Yes', formulario: 'Form', camposSugeridos: 'Suggested fields', nomeDaCategoria: 'Name', semPrazo: 'No due date', semNome: 'No name' },
+    camposSugeridos: ['Title', 'Assignee', 'Status', 'Date', 'Attachments'],
+    acoes: { criar: 'Create', revisar: 'Review in the form', descartar: 'Discard', montar: 'Set up category' },
+    criadaTarefa: r => `Task ${r} created.`,
+    criadoItem: r => `Item ${r} created.`,
+    revisando: 'Draft opened in the form.',
+    descartado: 'Draft discarded.',
+    montarToast: 'Mockup: in the product, the category opens in the settings with these fields.',
+  },
+  beniW: {
+    conversar: 'Chat with BENI',
+    boasVindas: 'BENI creates items and tasks from what you write and answers questions about the workspace.',
+  },
+  agendaW: {
+    mais: n => `${n} more`,
+    nadaNoDia: 'Nothing on this day.',
+    hoje: 'Today',
+    mesAnterior: 'Previous month',
+    proximoMes: 'Next month',
+  },
+  itensW: {
+    vazio: 'No items created yet.',
+    vazioMeus: 'No open items assigned to you.',
+    vazioPrazos: 'No items are due in the next 30 days.',
+    venceEm: d => `Due on ${d}`,
+    venceu: d => `Was due on ${d}`,
+    abertos: n => `${n} open`,
+  },
   ehMaquete: 'Mockup',
 }
 
@@ -918,9 +1084,15 @@ const es: Textos = {
     graficoDePainel: { titulo: 'Gráfico de un panel', descricao: 'Un panel de una pantalla de tipo Dashboard.' },
     comunicado: { titulo: 'Comunicado', descricao: 'Aviso del administrador para todo el workspace.' },
     notas: { titulo: 'Bloc de notas', descricao: 'Tus notas. Solo tú las ves.' },
-    beni: { titulo: 'Resumen del BENI', descricao: 'El BENI resume lo que necesita tu atención hoy.' },
+    beni: { titulo: 'BENI', descricao: 'El resumen del día hecho por el BENI, con el atajo a la conversación con él.' },
+    agendaSemana: { titulo: 'Agenda de la semana', descricao: 'Los 7 días a partir de hoy, en columnas.' },
+    agendaMes: { titulo: 'Agenda del mes', descricao: 'El calendario del mes. Haz clic en un día para ver lo que hay.' },
+    meusItens: { titulo: 'Mis ítems', descricao: 'Los ítems abiertos de los que eres responsable.' },
+    ultimosItens: { titulo: 'Ítems creados recientemente', descricao: 'Los últimos ítems creados en las categorías a las que accedes.' },
+    prazosDeItens: { titulo: 'Plazos de ítems', descricao: 'Ítems con fecha de vencimiento o vigencia en los próximos 30 días.' },
+    itensPorCategoria: { titulo: 'Ítems abiertos por categoría', descricao: 'Cuántos ítems están abiertos en cada categoría.' },
   },
-  grupos: { tarefas: 'Tareas', categorias: 'Categorías', navegacao: 'Navegación y agenda', equipe: 'Equipo y notas' },
+  grupos: { tarefas: 'Tareas', agenda: 'Agenda', itens: 'Ítems y categorías', atalhos: 'Pantallas y accesos', equipe: 'BENI y equipo' },
 
   widget: {
     configurar: 'Configurar',
@@ -948,7 +1120,7 @@ const es: Textos = {
     item: 'Ítem',
     itemDescricao: 'En una categoría, con su formulario',
     tarefa: 'Tarea',
-    tarefaDescricao: 'Rápida o programada',
+    tarefaDescricao: 'Tarea rápida, con plazo y responsable',
     qualCategoria: '¿En qué categoría?',
     qualFormulario: c => `¿Qué formulario de ${c}?`,
     qualTarefa: '¿Qué tipo de tarea?',
@@ -1040,6 +1212,8 @@ const es: Textos = {
     catalogoMinha: 'El widget entra arriba en tu Inicio. Nadie más ve el cambio.',
     catalogoPadrao: 'El widget entra en el Inicio predeterminado y también en el de quien ya lo personalizó.',
     cancelar: 'Cancelar',
+    cancelarDica: 'Cancelar y descartar los cambios',
+    restaurarDica: 'Restaurar la Home predeterminada del workspace',
     concluir: 'Listo',
     salva: 'Inicio guardado.',
   },
@@ -1111,9 +1285,10 @@ const es: Textos = {
   secoes: { numeros: 'Números', listas: 'Listas', graficos: 'Gráficos' },
   descricaoDosGrupos: {
     tarefas: 'Números, listas y gráficos de las tareas rápidas y programadas.',
-    categorias: 'Accesos a las categorías, en el orden que elijas.',
-    navegacao: 'Accesos directos, recientes, agenda y el gráfico de una pantalla.',
-    equipe: 'Comunicado, bloc de notas y el resumen del BENI.',
+    agenda: 'El día, la semana y el mes, con compromisos, plazos de tarea y fechas de ítem.',
+    itens: 'Las categorías y los ítems: los tuyos, los más nuevos y los que vencen.',
+    atalhos: 'Accesos directos, pantallas abiertas por último y el gráfico de un panel.',
+    equipe: 'El BENI, el comunicado del administrador y el bloc de notas.',
   },
   escopoDeTarefas: { rotulo: 'De quién son las tareas', minhas: 'Mis tareas', workspace: 'Workspace' },
   catalogo: {
@@ -1127,7 +1302,7 @@ const es: Textos = {
     marcadas: (n, t) => n === 0 ? `Ninguna marcada: aparecen las ${t}, en el orden del workspace.` : `${n} de ${t} marcadas`,
     resultados: 'Resultados',
   },
-  ordem: { subir: n => `Subir ${n}`, descer: n => `Bajar ${n}`, mostrar: n => `Mostrar ${n}` },
+  ordem: { subir: n => `Subir ${n}`, descer: n => `Bajar ${n}`, mostrar: n => `Mostrar ${n}`, todas: 'Marcar todas', nenhuma: 'Desmarcar todas' },
   laminas: {
     subtitulos: {
       kpiConcluidas: 'Últimas 4 semanas',
@@ -1170,10 +1345,61 @@ const es: Textos = {
     criarCategoria: 'Crear categoría',
     comunicado: 'No hay comunicados publicados.',
     escreverComunicado: 'Escribir comunicado',
-    beni: 'El BENI empieza a resumir cuando haya tareas e ítems en el workspace.',
+    beni: 'El BENI resume el día cuando haya tareas e ítems. Mientras tanto, ayuda a montar el workspace.',
     grafico: t => `La pantalla ${t} aún no tiene datos.`,
   },
 
+  beniChat: {
+    titulo: 'BENI AI',
+    novaConversa: 'Nueva conversación',
+    telaCheia: 'Abrir en pantalla completa',
+    fechar: 'Cerrar la conversación',
+    placeholder: 'Describe el ítem o la tarea que quieres crear',
+    aviso: 'El BENI puede equivocarse. Revisa el borrador antes de crear.',
+    enviar: 'Enviar',
+    ola: n => `Hola, ${n}. Soy el BENI.`,
+    apresentacao: 'Describe lo que necesitas crear, con plazo y responsable si los hay. Preparo el borrador, y lo revisas antes de crear.',
+    sugestoes: [
+      'Crear una tarea para mañana a las 10h: llamar a Atria sobre la renovación',
+      'Abrir un ticket urgente: impresora del 3er piso sin papel',
+      'Nuevo reembolso de R$ 84,90: taxi al aeropuerto',
+      'Montar una categoría de Eventos',
+    ],
+    pensando: 'Preparando el borrador',
+    respostaTarefa: 'Preparé esta tarea rápida. Revisa los campos antes de crear.',
+    respostaItem: c => `Preparé el borrador en ${c}. Revisa los campos antes de crear.`,
+    respostaCategoria: 'Armé una sugerencia de categoría. Los campos pueden cambiar después, en la configuración de la categoría.',
+    respostaAjuda: 'Creo ítems y tareas a partir de lo que escribas. Di qué es, para cuándo y para quién. Por ejemplo:',
+    respostaResumo: 'Este es el resumen de hoy:',
+    rascunho: { tarefa: 'Tarea rápida', item: c => `Ítem en ${c}`, categoria: 'Nueva categoría' },
+    campos: { nome: 'Nombre', titulo: 'Título', prazo: 'Fecha límite', responsavel: 'Responsable', prioridade: 'Prioridad', valor: 'Valor', urgente: 'Urgente', sim: 'Sí', formulario: 'Formulario', camposSugeridos: 'Campos sugeridos', nomeDaCategoria: 'Nombre', semPrazo: 'Sin plazo', semNome: 'Sin nombre' },
+    camposSugeridos: ['Título', 'Responsable', 'Estado', 'Fecha', 'Adjuntos'],
+    acoes: { criar: 'Crear', revisar: 'Revisar en el formulario', descartar: 'Descartar', montar: 'Montar categoría' },
+    criadaTarefa: r => `Tarea ${r} creada.`,
+    criadoItem: r => `Ítem ${r} creado.`,
+    revisando: 'Borrador abierto en el formulario.',
+    descartado: 'Borrador descartado.',
+    montarToast: 'Maqueta: en el producto, la categoría se abre en la configuración con estos campos.',
+  },
+  beniW: {
+    conversar: 'Conversar con el BENI',
+    boasVindas: 'El BENI crea ítems y tareas a partir de lo que escribas y responde dudas sobre el workspace.',
+  },
+  agendaW: {
+    mais: n => `${n} más`,
+    nadaNoDia: 'Nada en este día.',
+    hoje: 'Hoy',
+    mesAnterior: 'Mes anterior',
+    proximoMes: 'Mes siguiente',
+  },
+  itensW: {
+    vazio: 'Aún no hay ítems creados.',
+    vazioMeus: 'No hay ítems abiertos bajo tu responsabilidad.',
+    vazioPrazos: 'Ningún ítem vence en los próximos 30 días.',
+    venceEm: d => `Vence el ${d}`,
+    venceu: d => `Venció el ${d}`,
+    abertos: n => n === 1 ? '1 abierto' : `${n} abiertos`,
+  },
   ehMaquete: 'Maqueta',
 }
 

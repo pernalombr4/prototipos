@@ -8,6 +8,8 @@
  * - Bloco de notas: texto só da pessoa. NOVO no produto;
  * - Comunicado: aviso do administrador. NOVO; só o administrador edita;
  * - Resumo do BENI: frases geradas pelo agente de IA. MAQUETE: o texto é fixo.
+ *   Rodada 6: o widget BENI passou para o `_WBeni.vue`; o trecho daqui fica
+ *   sem uso.
  *
  * Rodada 5: cada um tem o estado do workspace que acabou de nascer (sem
  * tarefa, sem dado no painel, sem comunicado). O widget fica no lugar e diz o

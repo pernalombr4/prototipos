@@ -29,6 +29,18 @@
  * - 2 estados de partida: o workspace que acabou de nascer (os widgets da
  *   Home padrão no lugar, sem dado) e o workspace configurado.
  *
+ * Rodada 6:
+ * - o "Minhas tarefas · Workspace" do topo só aparece para o administrador;
+ *   o membro vê sempre as próprias tarefas;
+ * - a barra de edição fica mais curta: Adicionar widget, Restaurar padrão
+ *   (só ícone), Concluir e Cancelar como X;
+ * - Criar ▸ Tarefa abre a tarefa rápida direto; "Pedir ao BENI" abre a
+ *   conversa do BENI, que monta o rascunho (`_ChatDoBeni.vue`);
+ * - a Home padrão abre com Categorias e traz o BENI, também no workspace vazio;
+ * - o widget BENI é só o resumo, com o botão que abre a conversa (o pedido se
+ *   digita na conversa, nunca no widget);
+ * - o catálogo ganha 5 grupos e 6 widgets novos de agenda e de itens.
+ *
  * O dado é o `mocks.ts`; o catálogo e a Home padrão, o `widgets.ts`. Tudo em
  * memória: o reload volta ao começo.
  */
@@ -40,6 +52,11 @@ import CascaDaHome from './_CascaDaHome.vue'
 import ConfigurarWidget from './_ConfigurarWidget.vue'
 import BotaoCriar from './_BotaoCriar.vue'
 import ModalNovaTarefa from './_ModalNovaTarefa.vue'
+import type { DadosDaTarefa } from './_ModalNovaTarefa.vue'
+import ChatDoBeni from './_ChatDoBeni.vue'
+import WAgenda from './_WAgenda.vue'
+import WItens from './_WItens.vue'
+import WBeni from './_WBeni.vue'
 import ModalNovoItem from './_ModalNovoItem.vue'
 import type { DadosDoItem } from './_ModalNovoItem.vue'
 import Catalogo from './_Catalogo.vue'
@@ -52,18 +69,18 @@ import WLamina from './_WLamina.vue'
 import WOutros from './_WOutros.vue'
 import type { Atalho, Categoria, DiaDeTarefas, Evento, Item, Recente, TarefaDaHome } from './mocks'
 import {
-  AGORA, DIA, EU, HORA, atalhosIniciais, categoria, categorias as categoriasIniciais, comunicadoInicial, eventosDeHoje,
+  AGORA, DIA, EU, HORA, atalhosIniciais, categoria, categorias as categoriasIniciais, comunicadoInicial, eventosDoCalendario,
   itensIniciais, notaInicial, painelDeCompras, recentes as recentesIniciais, resumoDoBeni, serieDasTarefas, tarefasIniciais,
 } from './mocks'
 import type { AbaDeTarefa } from './formatar'
-import { HOJE, abaDa, dataLonga, horaAtual } from './formatar'
+import { HOJE, abaDa, dataCurta, dataLonga, horaAtual } from './formatar'
 import type { ConfigDoWidget, LaminaDeTarefas, TipoDeWidget, Widget } from './widgets'
 import { LAMINAS, PADRAO_LAYOUT, PADRAO_WIDGETS, definicao } from './widgets'
 import { textos } from './textos'
 
 definePageMeta({
   titulo: 'Home',
-  descricao: 'Home do workspace em widgets que cada pessoa arruma (as lâminas do Painel de tarefas, categorias na ordem escolhida, atalhos, recentes, comunicado), catálogo em árvore, Home padrão montada pelo administrador e um botão Criar que ramifica em item e tarefa.',
+  descricao: 'Home do workspace em widgets que cada pessoa arruma (categorias, lâminas do Painel de tarefas, BENI, agenda do dia, da semana e do mês, itens), catálogo em 5 grupos, Home padrão montada pelo administrador e um botão Criar com item, tarefa rápida e a conversa com o BENI.',
   status: 'em-revisao',
   atualizado: '2026-11-24',
   tela: 'Início',
@@ -117,7 +134,7 @@ function carregarDados(vazio: boolean) {
   itens.value = vazio ? [] : itensIniciais.map(x => ({ ...x }))
   categorias.value = vazio ? [] : [...categoriasIniciais]
   recentes.value = vazio ? [] : [...recentesIniciais]
-  eventos.value = vazio ? [] : [...eventosDeHoje]
+  eventos.value = vazio ? [] : [...eventosDoCalendario]
   series.value = vazio ? { minhas: zerar(serieDasTarefas.minhas), workspace: zerar(serieDasTarefas.workspace) } : { ...serieDasTarefas }
   atalhos.value = vazio ? [] : [...atalhosIniciais]
   nota.value = vazio ? '' : notaInicial
@@ -137,6 +154,8 @@ const opcoesDoEscopoDasTarefas = computed(() => [
   { label: t.value.escopoDeTarefas.minhas, value: 'minhas', icon: 'i-lucide-user' },
   { label: t.value.escopoDeTarefas.workspace, value: 'workspace', icon: 'i-lucide-users' },
 ])
+/* Rodada 6: o alternador é do administrador. O membro vê sempre as próprias tarefas. */
+watch(papel, (p) => { if (p === 'membro') escopoDasTarefas.value = 'minhas' })
 const tarefasDoEscopo = computed(() => escopoDasTarefas.value === 'minhas' ? tarefas.value.filter(x => x.assigned_to === EU.id) : tarefas.value)
 const serieDoEscopo = computed(() => series.value[escopoDasTarefas.value])
 
@@ -183,28 +202,47 @@ const abertosPorCategoria = computed(() => {
   return r
 })
 
-/** Itens em aberto que a pessoa acessa: o "Item relacionado" da tarefa agendada. */
-const itensAbertos = computed(() => itens.value.filter(i => i.status !== 'concluido' && categoria(i.categoria)?.acesso))
+/** Os itens das categorias que a pessoa acessa: o dado dos widgets de itens. */
+const itensComAcesso = computed(() => itens.value.filter(i => categoria(i.categoria)?.acesso))
+
+/**
+ * As 3 fontes da Agenda, como a tela Agenda junta: os compromissos do
+ * calendário, o prazo das minhas tarefas abertas e a data dos itens em aberto
+ * sob minha responsabilidade. Tarefa ou item criado agora já entra.
+ */
+const agendaCompleta = computed<Evento[]>(() => [
+  ...eventos.value,
+  ...minhasAbertas.value.filter(x => x.due_date).map(x => ({ id: `t-${x.id}`, titulo: x.name, inicio: x.due_date!, fim: x.due_date!, fonte: 'tarefa' as const })),
+  ...itensComAcesso.value.filter(i => i.prazo && i.status !== 'concluido' && i.responsavel === EU.id)
+    .map(i => ({ id: `i-${i.id}`, titulo: i.titulo, inicio: new Date(i.prazo!), fim: new Date(i.prazo!), fonte: 'item' as const })),
+])
+const agendaDeHoje = computed(() => agendaCompleta.value.filter(e => e.inicio.getTime() >= HOJE && e.inicio.getTime() < HOJE + DIA))
 
 const menuCriarAberto = ref(false)
 const tarefaAberta = ref(false)
-const tipoDeTarefa = ref<'rapida' | 'agendada'>('rapida')
+const tarefaInicial = ref<Partial<DadosDaTarefa>>()
 const novoItemAberto = ref(false)
-const itemEmCriacao = ref<{ categoria: string, formulario?: string }>({ categoria: '' })
+const itemEmCriacao = ref<{ categoria: string, formulario?: string, inicial?: Partial<DadosDoItem> }>({ categoria: '' })
 
-function abrirItem(slug: string, formulario?: string) {
-  itemEmCriacao.value = { categoria: slug, formulario }
+function abrirItem(slug: string, formulario?: string, inicial?: Partial<DadosDoItem>) {
+  itemEmCriacao.value = { categoria: slug, formulario, inicial }
   novoItemAberto.value = true
 }
 
-function abrirTarefa(tipo: 'rapida' | 'agendada') {
-  tipoDeTarefa.value = tipo
+/** Rodada 6: Criar ▸ Tarefa é sempre a tarefa rápida. */
+function abrirTarefa(inicial?: Partial<DadosDaTarefa>) {
+  tarefaInicial.value = inicial
   tarefaAberta.value = true
 }
 
-/** MAQUETE: no produto, abre o chat do BENI AI com o texto. */
+/* PROPOSTA (rodada 6): a conversa do BENI, aberta pelo Criar ou pelo widget BENI. */
+const chatAberto = ref(false)
+const pedidoAoBeni = ref<{ texto: string, n: number }>()
+let pedidos = 0
 function pedirAoBeni(texto: string) {
-  toast.add({ title: t.value.criar.beniToast(texto), description: t.value.criar.beniDica, icon: 'i-lucide-sparkles', color: 'neutral' })
+  menuCriarAberto.value = false
+  chatAberto.value = true
+  pedidoAoBeni.value = { texto, n: ++pedidos }
 }
 
 const algumaCamadaAberta = computed(() => tarefaAberta.value || novoItemAberto.value || configAberto.value || editando.value)
@@ -217,16 +255,19 @@ defineShortcuts({
 })
 
 let proximaTarefa = 13300
-function criarTarefa(dados: Pick<TarefaDaHome, 'name' | 'due_date' | 'assigned_to' | 'priority' | 'origem' | 'item'>) {
+/** Cria a tarefa e devolve o número. Pela conversa do BENI, sem toast: a confirmação fica no cartão. */
+function criarTarefa(dados: DadosDaTarefa, silencioso = false) {
   proximaTarefa += 3
   const nova: TarefaDaHome = { id: proximaTarefa, reference: `#${proximaTarefa}`, status: 'pending', creator: EU.id, ...dados }
   tarefas.value = [...tarefas.value, nova]
+  if (silencioso) return nova.reference
   toast.add({
     title: t.value.novaTarefa.criada(nova.reference),
     icon: 'i-lucide-circle-check',
     color: 'success',
     actions: [{ label: t.value.novaTarefa.abrir, color: 'neutral', variant: 'outline', onClick: () => abrirMaquete(nova.name) }],
   })
+  return nova.reference
 }
 
 /** "Adicionar tarefa" no pé de Minhas tarefas: o prazo vem da aba. */
@@ -237,21 +278,28 @@ function criarTarefaNaAba(nome: string, aba: AbaDeTarefa) {
 
 let proximoItem = 23400
 function criarItem(dados: DadosDoItem) {
+  criarItemEm(itemEmCriacao.value.categoria, dados)
+}
+
+/** Cria o item e devolve o número. Pela conversa do BENI, sem toast. */
+function criarItemEm(slug: string, dados: DadosDoItem, silencioso = false) {
   proximoItem += 7
-  const c = categoria(itemEmCriacao.value.categoria)
+  const c = categoria(slug)
   const novo: Item = {
-    id: proximoItem, reference: `#${proximoItem}`, categoria: itemEmCriacao.value.categoria, titulo: dados.titulo,
+    id: proximoItem, reference: `#${proximoItem}`, categoria: slug, titulo: dados.titulo,
     status: 'aberto', etapa: 'Triagem', responsavel: dados.responsavel, valor: dados.valor, prazo: dados.prazo,
     urgente: dados.urgente, criadoEm: AGORA.getTime() + (proximoItem - 23400) * 1000,
   }
   itens.value = [...itens.value, novo]
   recemCriados.value = [...recemCriados.value, novo.id]
+  if (silencioso) return novo.reference
   toast.add({
     title: t.value.novoItem.criado(novo.reference, c?.name ?? ''),
     icon: 'i-lucide-circle-check',
     color: 'success',
     actions: [{ label: t.value.novaTarefa.abrir, color: 'neutral', variant: 'outline', onClick: () => abrirMaquete(novo.titulo) }],
   })
+  return novo.reference
 }
 
 function concluirTarefa(id: number) {
@@ -296,6 +344,7 @@ function subtituloDo(w: Widget) {
   const daLamina = t.value.laminas.subtitulos[w.tipo]
   if (daLamina) return daLamina
   if (w.tipo === 'agenda') return dataLonga(AGORA, t.value)
+  if (w.tipo === 'agendaSemana') return `${dataCurta(HOJE, t.value)} - ${dataCurta(HOJE + 6 * DIA, t.value)}`
   if (w.tipo === 'graficoDePainel') return painelDeCompras.tela
   return undefined
 }
@@ -514,7 +563,7 @@ function configuravel(w: Widget) {
             <p class="text-sm font-semibold text-highlighted">
               {{ t.personalizacao.titulo }}
             </p>
-            <p class="truncate text-xs text-muted">
+            <p class="hidden truncate text-xs text-muted xl:block">
               {{ t.personalizacao.descricao }}
             </p>
           </div>
@@ -528,11 +577,22 @@ function configuravel(w: Widget) {
             :aria-label="t.personalizacao.editando"
           />
         </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <UButton :label="t.estados.adicionarWidget" icon="i-lucide-plus" color="neutral" variant="outline" size="sm" @click="catalogoAberto = true" />
-          <UButton v-if="escopo === 'minha'" :label="t.personalizacao.restaurar" icon="i-lucide-rotate-ccw" color="neutral" variant="outline" size="sm" @click="restaurar" />
-          <UButton :label="t.personalizacao.cancelar" color="neutral" variant="outline" size="sm" @click="cancelarEdicao" />
+        <!--
+          Rodada 6: "os botões dessa barra estão excessivos... a ordem deles não tá
+          muito lógica". Primeiro o que muda a Home (Adicionar, Restaurar), depois
+          o que encerra a edição (Concluir, Cancelar). Restaurar e Cancelar viram
+          ícone com dica: são os 2 menos usados e os 2 que desfazem.
+        -->
+        <div class="flex items-center gap-1">
+          <UButton :label="t.estados.adicionarWidget" icon="i-lucide-plus" color="primary" variant="soft" size="sm" @click="catalogoAberto = true" />
+          <UTooltip v-if="escopo === 'minha'" :text="t.personalizacao.restaurarDica">
+            <UButton icon="i-lucide-rotate-ccw" color="neutral" variant="ghost" size="sm" :aria-label="t.personalizacao.restaurar" @click="restaurar" />
+          </UTooltip>
+          <span class="mx-1.5 h-5 w-px bg-accented" aria-hidden="true" />
           <UButton :label="t.personalizacao.concluir" icon="i-lucide-check" size="sm" @click="concluirEdicao" />
+          <UTooltip :text="t.personalizacao.cancelarDica">
+            <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="sm" :aria-label="t.personalizacao.cancelar" @click="cancelarEdicao" />
+          </UTooltip>
         </div>
       </div>
 
@@ -562,8 +622,9 @@ function configuravel(w: Widget) {
             </p>
           </div>
           <div v-if="!editando" class="flex flex-wrap items-center gap-2">
-            <!-- PROPOSTA: o escopo das lâminas de tarefas, como em develop (rodada 5) -->
+            <!-- PROPOSTA: o escopo das lâminas de tarefas, como em develop (rodada 5); só o administrador vê (rodada 6) -->
             <UTabs
+              v-if="admin"
               v-model="escopoDasTarefas"
               :items="opcoesDoEscopoDasTarefas"
               :content="false"
@@ -584,7 +645,7 @@ function configuravel(w: Widget) {
               :t="t"
               :categorias="categoriasComAcesso"
               @item="abrirItem"
-              @tarefa="abrirTarefa"
+              @tarefa="abrirTarefa()"
               @beni="pedirAoBeni"
             />
           </div>
@@ -640,7 +701,7 @@ function configuravel(w: Widget) {
                     <UButton icon="i-lucide-arrow-up-right" color="neutral" variant="ghost" size="xs" :aria-label="t.laminas.abrirPainel" @click="abrirMaquete(t.laminas.abrirPainel)" />
                   </UTooltip>
                 </template>
-                <template v-else-if="w.tipo === 'agenda'" #acoes>
+                <template v-else-if="['agenda', 'agendaSemana', 'agendaMes'].includes(w.tipo)" #acoes>
                   <UTooltip :text="t.agenda.abrir">
                     <UButton icon="i-lucide-arrow-up-right" color="neutral" variant="ghost" size="xs" :aria-label="t.agenda.abrir" @click="abrirMaquete(t.agenda.abrir)" />
                   </UTooltip>
@@ -686,18 +747,42 @@ function configuravel(w: Widget) {
                   :tipo="w.tipo as 'atalhos' | 'recentes' | 'agenda' | 'tarefasDelegadas'"
                   :atalhos="atalhos"
                   :recentes="recentes"
-                  :eventos="eventos"
+                  :eventos="agendaDeHoje"
                   :delegadas="tarefas.filter(x => x.origem === 'rapida' && x.creator === EU.id && x.assigned_to !== EU.id && x.status !== 'completed')"
                   :largura="item.w"
                   @abrir="abrirMaquete"
                   @configurar="abrirConfig(w.id)"
                 />
 
+                <WAgenda
+                  v-else-if="w.tipo === 'agendaSemana' || w.tipo === 'agendaMes'"
+                  :t="t"
+                  :tipo="w.tipo"
+                  :eventos="agendaCompleta"
+                  @abrir="abrirMaquete"
+                />
+
+                <WItens
+                  v-else-if="['meusItens', 'ultimosItens', 'prazosDeItens', 'itensPorCategoria'].includes(w.tipo)"
+                  :t="t"
+                  :tipo="w.tipo as 'meusItens' | 'ultimosItens' | 'prazosDeItens' | 'itensPorCategoria'"
+                  :itens="itensComAcesso"
+                  :recem-criados="recemCriados"
+                  @abrir="abrirMaquete"
+                />
+
+                <WBeni
+                  v-else-if="w.tipo === 'beni'"
+                  :t="t"
+                  :beni="beni"
+                  @conversar="pedirAoBeni('')"
+                />
+
                 <WOutros
                   v-else
                   v-model:nota="nota"
                   :t="t"
-                  :tipo="w.tipo as 'saudeDosPrazos' | 'graficoDePainel' | 'notas' | 'comunicado' | 'beni'"
+                  :tipo="w.tipo as 'saudeDosPrazos' | 'graficoDePainel' | 'notas' | 'comunicado'"
                   :tarefas="tarefasDoEscopo"
                   :comunicado="comunicado ?? undefined"
                   :pode-editar-comunicado="admin"
@@ -735,13 +820,29 @@ function configuravel(w: Widget) {
       @salvar="salvarConfig"
     />
 
-    <ModalNovaTarefa v-model:open="tarefaAberta" :t="t" :tipo="tipoDeTarefa" :itens="itensAbertos" @criar="criarTarefa" />
+    <ModalNovaTarefa v-model:open="tarefaAberta" :t="t" :inicial="tarefaInicial" @criar="(d) => criarTarefa(d)" />
     <ModalNovoItem
       v-model:open="novoItemAberto"
       :t="t"
       :categoria="categoria(itemEmCriacao.categoria)"
       :formulario="itemEmCriacao.formulario"
+      :inicial="itemEmCriacao.inicial"
       @criar="criarItem"
+    />
+
+    <ChatDoBeni
+      v-model:open="chatAberto"
+      :t="t"
+      :nome="EU.nome.split(' ')[0] ?? ''"
+      :categorias="categoriasComAcesso"
+      :resumo="beni.linhas"
+      :pedido="pedidoAoBeni"
+      :criar-tarefa="(d) => criarTarefa(d, true) ?? ''"
+      :criar-item="(slug, _formulario, d) => criarItemEm(slug, d, true) ?? ''"
+      @revisar-tarefa="abrirTarefa"
+      @revisar-item="abrirItem"
+      @abrir="abrirMaquete"
+      @tela-cheia="abrirMaquete(t.beniChat.titulo)"
     />
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->

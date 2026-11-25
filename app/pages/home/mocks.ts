@@ -269,12 +269,34 @@ export interface Evento {
   fonte: 'tarefa' | 'item' | 'calendario'
 }
 
-export const eventosDeHoje: Evento[] = [
-  { id: 'e1', titulo: 'Reunião de compras', inicio: emDias(0, 9), fim: emDias(0, 10), fonte: 'calendario' },
-  { id: 'e2', titulo: 'Assinar o NDA da Vértice Consultoria', inicio: emDias(0, 16), fim: emDias(0, 16), fonte: 'tarefa' },
-  { id: 'e3', titulo: '1:1 com Otávio', inicio: emDias(0, 15), fim: emDias(0, 15.5), fonte: 'calendario' },
-  { id: 'e4', titulo: 'Vigência: Prestação de serviços de limpeza', inicio: emDias(0, 18), fim: emDias(0, 18), fonte: 'item' },
-]
+/**
+ * Os compromissos do calendário conectado (Outlook), de 1/11 a 31/12. A
+ * Agenda de hoje, a da semana e a do mês somam a eles os prazos das tarefas e
+ * as datas dos itens, que vêm do dado da Home (index.vue, `agendaCompleta`).
+ *
+ * Rodada 6: era a lista fixa de hoje (`eventosDeHoje`); virou o calendário do
+ * período para a semana e o mês terem o que mostrar.
+ */
+export const eventosDoCalendario: Evento[] = (() => {
+  const lista: Evento[] = []
+  // AGORA é quarta: o dia da semana de AGORA + n é (3 + n) % 7.
+  for (let n = -10; n <= 50; n++) {
+    const semana = ((3 + n) % 7 + 7) % 7
+    if (semana === 3) {
+      lista.push({ id: `c-compras-${n}`, titulo: 'Reunião de compras', inicio: emDias(n, 9), fim: emDias(n, 10), fonte: 'calendario' })
+      lista.push({ id: `c-otavio-${n}`, titulo: '1:1 com Otávio', inicio: emDias(n, 15), fim: emDias(n, 15.5), fonte: 'calendario' })
+    }
+    if (semana === 1) lista.push({ id: `c-comite-${n}`, titulo: 'Comitê de contratos', inicio: emDias(n, 14), fim: emDias(n, 15), fonte: 'calendario' })
+    if (semana === 5) lista.push({ id: `c-revisao-${n}`, titulo: 'Revisão da semana com o time', inicio: emDias(n, 16), fim: emDias(n, 16.5), fonte: 'calendario' })
+  }
+  lista.push(
+    { id: 'c-almoco', titulo: 'Almoço com a Atria Sistemas', inicio: emDias(2, 12), fim: emDias(2, 13.5), fonte: 'calendario' },
+    { id: 'c-treinamento', titulo: 'Treinamento do ENSPACE para a filial', inicio: emDias(7, 10), fim: emDias(7, 11), fonte: 'calendario' },
+    { id: 'c-auditoria', titulo: 'Visita da auditoria externa', inicio: emDias(13, 9), fim: emDias(13, 17), fonte: 'calendario' },
+    { id: 'c-fechamento', titulo: 'Fechamento de novembro', inicio: emDias(19, 10), fim: emDias(19, 11), fonte: 'calendario' },
+  )
+  return lista
+})()
 
 export interface Recente {
   id: string
