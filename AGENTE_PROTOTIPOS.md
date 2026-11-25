@@ -217,6 +217,11 @@ criado à mão.
 | Permissão, papel, compartilhamento | Notion, Figma, Linear, Google Workspace |
 | Relatório, painel, visualização | Metabase, Hex, Retool, Looker Studio |
 
+**Os produtos mais próximos do caso, no mínimo 2, se exploram no uso, por dentro:** com a conta da redatora onde
+ela tem e, sem conta, com uma criada por e-mail temporário, com o sim dela (decisão da redatora em 2026-11-25).
+Regra inteira em `C:\Users\JardimMikaela\Documents\Github\pesquisa-de-mercado\AGENTE_PESQUISA_MERCADO.md`,
+"Explorar o produto por dentro"; leia antes de pesquisar.
+
 Use `WebSearch` e `WebFetch` (carregue com `ToolSearch`). **Twenty CRM é open source** —
 quando a dúvida for de comportamento, vale ler o componente no repositório `twentyhq/twenty`
 em vez de deduzir do print.
