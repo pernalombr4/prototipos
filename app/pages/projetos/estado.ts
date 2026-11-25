@@ -56,6 +56,8 @@ function copiarProjetos(lista: Projeto[]) {
 export function useProjetos() {
   const cenario = useState<Cenario>('prj-cenario', () => 'emUso')
   const estadoDaTela = useState<EstadoDaTela>('prj-estado', () => 'normal')
+  /** Andaime: a proposta sobre o menu novo (protótipo menu-lateral) ou sobre o menu de hoje do develop. */
+  const menu = useState<'novo' | 'atual'>('prj-casca', () => 'novo')
   const eu = useState<number>('prj-eu', () => 1)
   const projetos = useState<Projeto[]>('prj-projetos', () => copiarProjetos(projetosBase))
   const categorias = useState<Categoria[]>('prj-categorias', () => categoriasBase.map(c => ({ ...c })))
@@ -292,7 +294,7 @@ export function useProjetos() {
   }
 
   return {
-    cenario, estadoDaTela, eu, euPessoa, souDono, souConvidado,
+    cenario, estadoDaTela, menu, eu, euPessoa, souDono, souConvidado,
     projetos, categorias, area, tela, expandidos, pedidos, janelas,
     participa, papel, enxerga, entra, podeAdministrar,
     ativos, visiveis, queEntro, noMenu, estaNoMenu, mostrarNoMenu, ocultarDoMenu, reordenar,

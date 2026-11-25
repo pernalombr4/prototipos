@@ -127,6 +127,25 @@ Resumido em relação ao `menu-lateral`: o painel Início não traz as seções 
 Personalizar; Análise, Comercial, Configurações e "Mais" avisam que são maquete. A casca não ganhou melhoria
 de passagem.
 
+### A segunda casca: o menu de hoje do develop (rodada 2)
+
+A chave "Menu" do andaime troca a casca. A do menu atual mora em `_CascaDoMenuAtual.vue`, com o comentário
+"nada aqui é proposta", copiada em 2026-11-25 de `evidencias/develop-menu-lateral-topo.png` e
+`evidencias/develop-menu-lateral-fim.png`.
+
+| Peça | Como está na casca |
+|---|---|
+| Topo do menu | O mesmo da casca nova: botão do workspace e "Buscar..." com Ctrl K |
+| Largura | 16.5rem aberto, 3.5rem recolhido; botão redondo de recolher na borda |
+| Membro | Início, Spaceflows, Categorias (aberta), Tarefas (aberta: Painel com o selo "Novo", Agendadas, Rápidas), Agenda, Relatórios, Knowledge (Knowledge Base) |
+| Configurações | Visão geral; Sistema; Estrutura (Categorias, Listas, Spaceflow); Gestão de membros; Interface (Menus, Telas, Casos de uso); E-mails (Enviados, Modelos, Caixas); Integrações (Apps, Credenciais, Webhooks, Agentes de IA); Logs |
+| Ajuda | Releases e Documentação, com a seta de link externo |
+| Item ativo | Fundo `primary/10`, texto `primary` |
+| Barra do topo | A mesma da casca nova |
+
+Resumido em relação ao develop: as categorias não abrem as visualizações delas; Início e Painel navegam, o
+resto avisa que é maquete. O convidado vê Início e Tarefas, e Configurações aparece só para quem configura.
+
 ## O fluxo que o protótipo cobre
 
 1. Rita (proprietária) abre Projetos na trilha e vê os 4 projetos do menu dela.

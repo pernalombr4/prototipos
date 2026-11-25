@@ -2,7 +2,10 @@
 /**
  * Projetos dentro do workspace: o nível entre o workspace e as categorias.
  *
- * A casca é o menu novo (protótipo menu-lateral, rodada 35), congelada em _CascaDoMenuNovo.vue.
+ * 2 cascas, trocadas pela chave Menu do andaime (rodada 2):
+ *   - o menu novo (protótipo menu-lateral, rodada 35), congelado em _CascaDoMenuNovo.vue;
+ *   - o menu de hoje do develop, em _CascaDoMenuAtual.vue, para o caso de os projetos chegarem antes do
+ *     menu novo. No menu atual, Projetos é uma seção abaixo de Spaceflows (_ProjetosNoMenuAtual.vue).
  * A proposta:
  *   - o ícone Projetos na trilha, abaixo de Início, só quando a pessoa enxerga 1 projeto ou mais;
  *   - o painel Projetos, com o menu de cada pessoa, busca e "Ver todos os N projetos";
@@ -21,12 +24,10 @@ import CascaDoMenuNovo from './_CascaDoMenuNovo.vue'
 import PainelInicio from './_PainelInicio.vue'
 import PainelDados from './_PainelDados.vue'
 import PainelDeProjetos from './_PainelDeProjetos.vue'
-import TelaInicio from './_TelaInicio.vue'
-import TelaTarefas from './_TelaTarefas.vue'
-import ListaDaCategoria from './_ListaDaCategoria.vue'
-import PaginaDoProjeto from './_PaginaDoProjeto.vue'
-import DiretorioDeProjetos from './_DiretorioDeProjetos.vue'
-import SemAcesso from './_SemAcesso.vue'
+import CascaDoMenuAtual from './_CascaDoMenuAtual.vue'
+import ProjetosNoMenuAtual from './_ProjetosNoMenuAtual.vue'
+import TodasAsCategorias from './_TodasAsCategorias.vue'
+import Telas from './_Telas.vue'
 import CriarProjeto from './_CriarProjeto.vue'
 import ConfiguracoesDoProjeto from './_ConfiguracoesDoProjeto.vue'
 import MoverCategoria from './_MoverCategoria.vue'
@@ -37,15 +38,15 @@ import decisoesMd from './DECISOES.md?raw'
 
 definePageMeta({
   titulo: 'Projetos no workspace',
-  descricao: 'Um nível entre o workspace e as categorias: o ícone Projetos na trilha do menu novo, o painel de cada pessoa, o diretório, a página do projeto, criar e configurar, mover categoria, acesso por visibilidade e o "Item sem acesso".',
+  descricao: 'Um nível entre o workspace e as categorias, no menu novo ou no menu de hoje: o menu de projetos de cada pessoa, o diretório, a página do projeto, criar e configurar, mover categoria, acesso por visibilidade e o "Item sem acesso".',
   status: 'rascunho',
   atualizado: '2026-11-25',
-  tela: 'Menu lateral novo, diretório e página do projeto, lista da categoria e Minhas tarefas',
+  tela: 'Menu lateral (novo e atual), diretório e página do projeto, lista da categoria e Minhas tarefas',
 })
 
 const t = useTextos(textos)
 const prj = useProjetos()
-const { area, tela, cenario, estadoDaTela, eu, souDono, souConvidado, visiveis } = prj
+const { area, tela, cenario, estadoDaTela, menu, eu, souDono, souConvidado, visiveis } = prj
 const { destacar, marca } = useMarcaDeProposta()
 const toast = useToast()
 
@@ -99,7 +100,22 @@ const breadcrumb = computed(() => {
   return [ws, t.value.nome.plural, p?.nome ?? '']
 })
 
+/* ---------- menu atual ---------- */
+/** O item da casca de hoje que corresponde à tela aberta (projetos e categorias marcam a si mesmos). */
+const ativoNoAtual = computed(() => tela.value.tipo === 'inicio' ? 'inicio' as const : tela.value.tipo === 'tarefas' ? 'painel' as const : null)
+function irNoAtual(chave: string) {
+  if (chave === 'inicio') tela.value = { tipo: 'inicio' }
+  else if (chave === 'painel') tela.value = { tipo: 'tarefas' }
+}
+const vendoTodasCategorias = ref(false)
+const categoriasVisiveis = computed(() => prj.categorias.value.filter(c => prj.veCategoria(c)).length)
+const categoriaAtiva = computed(() => tela.value.tipo === 'categoria' ? tela.value.id : null)
+
 /* ---------- andaime ---------- */
+const menus = computed(() => [
+  { value: 'novo' as const, label: t.value.andaime.menuNovo },
+  { value: 'atual' as const, label: t.value.andaime.menuAtual },
+])
 const cenarios = computed<{ value: Cenario, label: string }[]>(() => [
   { value: 'semProjetos', label: t.value.andaime.semProjetos },
   { value: 'emUso', label: t.value.andaime.emUso },
@@ -120,6 +136,7 @@ const pessoaEscolhida = computed({
 <template>
   <div>
     <CascaDoMenuNovo
+      v-if="menu === 'novo'"
       :t="t"
       :area="area"
       :breadcrumb="breadcrumb"
@@ -151,30 +168,76 @@ const pessoaEscolhida = computed({
         <PainelInicio v-else key="inicio" class="animate-[entrada_0.2s_ease-out_both]" :t="t" @recolher="recolher" />
       </template>
 
-      <Transition
-        mode="out-in"
-        enter-active-class="transition duration-200 ease-out"
-        enter-from-class="opacity-0 translate-y-1"
-        leave-active-class="transition duration-100 ease-in"
-        leave-to-class="opacity-0"
-      >
-        <TelaInicio v-if="tela.tipo === 'inicio'" key="inicio" :t="t" />
-        <TelaTarefas v-else-if="tela.tipo === 'tarefas'" key="tarefas" :t="t" />
-        <DiretorioDeProjetos v-else-if="tela.tipo === 'diretorio'" key="diretorio" :t="t" />
-        <ListaDaCategoria v-else-if="tela.tipo === 'categoria'" :key="`c-${tela.id}`" :t="t" :id="tela.id" />
-        <PaginaDoProjeto v-else-if="tela.tipo === 'projeto'" :key="`p-${tela.id}`" :t="t" :id="tela.id" />
-        <SemAcesso v-else :key="`s-${tela.id}`" :t="t" :id="tela.id" />
-      </Transition>
+      <Telas :t="t" />
     </CascaDoMenuNovo>
+
+    <CascaDoMenuAtual
+      v-else
+      :t="t"
+      :breadcrumb="breadcrumb"
+      :convidado="souConvidado"
+      :pode-configurar="souDono"
+      :iniciais="iniciais(prj.euPessoa.value.nome)"
+      :ativo="ativoNoAtual"
+      @ir="irNoAtual"
+    >
+      <template #projetos>
+        <ProjetosNoMenuAtual :t="t" />
+      </template>
+
+      <!-- PROPOSTA: Categorias mostra só as do workspace; as de projeto ficam no projeto. -->
+      <template #categorias>
+        <div :class="marca">
+          <button
+            v-for="c in prj.categoriasDoWorkspace.value"
+            :key="c.id"
+            type="button"
+            class="flex w-full items-center gap-2.5 py-2 pl-10 pr-4 text-left transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+            :class="categoriaAtiva === c.id ? 'bg-primary/10 font-medium text-primary' : 'text-toned hover:bg-elevated'"
+            :aria-current="categoriaAtiva === c.id ? 'page' : undefined"
+            @click="prj.abrirCategoria(c.id)"
+          >
+            <UIcon :name="c.icon ?? 'i-lucide-folder'" class="size-4 shrink-0" />
+            <span class="truncate text-sm">{{ c.name }}</span>
+          </button>
+          <button
+            type="button"
+            class="flex w-full items-center gap-2.5 py-2 pl-10 pr-4 text-left text-muted transition-colors hover:bg-elevated hover:text-default focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+            @click="vendoTodasCategorias = true"
+          >
+            <UIcon name="i-lucide-layout-grid" class="size-4 shrink-0" />
+            <span class="truncate text-sm">{{ t.menuAtual.verTodasCategorias(categoriasVisiveis) }}</span>
+          </button>
+        </div>
+      </template>
+
+      <Telas :t="t" />
+    </CascaDoMenuAtual>
 
     <CriarProjeto :t="t" />
     <ConfiguracoesDoProjeto :t="t" />
     <MoverCategoria :t="t" />
+    <TodasAsCategorias v-model:open="vendoTodasCategorias" :t="t" />
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">
       <div class="flex flex-wrap items-center gap-2 px-4 py-2.5">
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.prototipo }}</span>
+
+        <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.menu }}</span>
+        <UFieldGroup size="xs">
+          <UButton
+            v-for="m in menus"
+            :key="m.value"
+            :label="m.label"
+            :color="menu === m.value ? 'primary' : 'neutral'"
+            :variant="menu === m.value ? 'solid' : 'subtle'"
+            :aria-pressed="menu === m.value"
+            @click="menu = m.value"
+          />
+        </UFieldGroup>
+
+        <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
 
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.verComo }}</span>
         <USelect v-model="pessoaEscolhida" :items="opcoesDePessoa" size="xs" class="w-60" :aria-label="t.andaime.verComo" />

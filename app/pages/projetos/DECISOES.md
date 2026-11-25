@@ -150,3 +150,30 @@ Alternativas para decidir com ela: Projetos, Espaços, Áreas.
   - `evidencias/entrega-item-sem-acesso.png`: Contas a pagar como participante, com "Item sem acesso";
   - `evidencias/entrega-diretorio.png`: o diretório como participante, com "Pedir acesso";
   - `evidencias/entrega-sem-acesso-fechado.png`: a tela sem acesso do projeto Fechado.
+
+## Rodada 2 · 2026-11-25
+- **Pedido (literal):** "pode prototipar, mas prototipe em seguida uma versao com o menu atual do enspace, isso
+  porque nao sabemos se os devs ja vao ter o menu novo quando forem fazer a logica de projetos, entao o de hoje
+  pode ajudar a basear tambem. aí só botar uma chave na base (com menu novo / com menu atual) pra mudar o menu
+  pro user que ta vendo o prototipo"
+- **Mudou:**
+  - chave "Menu novo / Menu atual" no andaime; a troca mantém a tela aberta e a pessoa de "Ver como";
+  - casca nova `_CascaDoMenuAtual.vue`, cópia do menu de hoje do develop;
+  - no menu atual, Projetos é uma seção logo abaixo de Spaceflows (abaixo de Início, para o convidado), com os
+    projetos do menu da pessoa, as categorias e as telas dentro e "Ver todos os N projetos" no fim;
+  - o "+" de criar projeto fica no próprio item Projetos, no hover, e só para quem cria;
+  - a seção Categorias passa a listar só as categorias do workspace, mais "Ver todas (N)", que abre a mesma
+    janela "Todas as categorias" do painel Dados;
+  - ações do projeto (•••), reordenar (arraste, Alt e setas) e mover categoria iguais às do painel do menu novo;
+  - as telas da área de conteúdo são as mesmas nas 2 cascas.
+- **Fronteira:** muda a seção Projetos e o conteúdo da seção Categorias; não muda o resto do menu de hoje.
+- **Diferença entre as 2 cascas:** o menu de hoje não tem lugar para busca de projeto. Quem tem muitos projetos
+  acha pelo diretório, que já tem busca. No cenário sem projetos, a seção some e Categorias lista todas.
+- **Maquete:**
+  - o menu atual é resumido: as categorias não abrem as visualizações delas;
+  - Spaceflows, Agendadas, Rápidas, Agenda, Relatórios, Knowledge, Configurações e Ajuda avisam que são maquete.
+- **Crítica e acessibilidade:**
+  - linhas com `py-2` e menu com 16.5rem, medidos contra o print do develop, para os nomes não cortarem;
+  - os prints da rodada 1 saíram de novo, sem o ícone do Nuxt DevTools.
+- **Ver:** https://pernalombr4.github.io/prototipos/projetos
+  - `evidencias/entrega-menu-atual-projeto.png`: o menu atual com o Financeiro aberto, como proprietária.
