@@ -67,5 +67,5 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
-| P901 | Quem vê o e-mail sem item na aba Mensagens: só quem enviou, ou também outras pessoas (por exemplo, quem tem acesso à caixa usada, no épico "Caixa do workspace como remetente")? O protótipo mostra o e-mail sem item de outra pessoa a quem abre a aba. | produto | A regra de quem vê o e-mail sem item (parte 1) e de quem pode vinculá-lo (parte 4) |
+| P901 | Quem vê o e-mail sem item na aba Mensagens: só quem enviou, ou também outras pessoas (por exemplo, quem tem acesso à caixa usada, no épico "Caixa do workspace como remetente")? O protótipo mostra o e-mail sem item só a quem enviou. | produto | A regra de quem vê o e-mail sem item (parte 1) e de quem pode vinculá-lo (parte 4) |
 | P902 | Qual critério ordena os 8 itens que mais combinam com o texto da busca: referência exata primeiro, nome, data de atualização? | produto e dev do back | A ordem dos resultados no compositor e na leitura |

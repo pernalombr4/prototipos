@@ -470,6 +470,20 @@ disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:)
 - **Exemplos dos requisitos alinhados aos dados do protótipo** (nomes, referências, contagens), para o
   print mostrar o que o exemplo diz. Pergunta nova: P004 do épico 2, o assunto com {nome} quando o
   contato não tem nome.
+- **Cards no ENSPACE** (desenvolvimento-enlighten2, 2026-11-25): 1 `user_story` por épico, com o
+  documento do épico na descrição e 1 tarefa por parte; o documento "Botão de e-mail no cartão do
+  quadro" vira 1 card sem tarefas, com o documento inteiro na descrição. Todos com prioridade Média,
+  status To Do, aprovação do PO e o link do protótipo.
+
+  | Card | Tipo | Tarefas |
+  |---|---|---|
+  | [E-mail com o que o produto já tem](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE43B719A7958E477E896536B49D307) | Melhoria | 10 |
+  | [Contato da categoria](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE9ECFA785A7DF40F0B715D3384C6D8) | Inovação | 2 |
+  | [E-mail sem item e lista por permissão](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USEA192C88EF210435D86E3D0D759DD7) | Inovação | 5 |
+  | [Caixa do workspace como remetente](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USEEA43CA2899994226AA8A6002D5799) | Inovação | 2 |
+  | [Responder na conversa e encaminhar](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USEE7549AB3B7AC401A8D2B5791E7D2C) | Inovação | 2 |
+  | [E-mail ligado à tarefa](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE0D4EAB388F5E4E238D7E3BDF138B1) | Inovação | 4 |
+  | [Botão de e-mail no cartão do quadro](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE38811F4778A94A3983977CD6F8F9A) | Melhoria | 0 |
 
 ## Por que cada decisão
 
