@@ -2,6 +2,36 @@
 
 Registro das rodadas. A mais recente em cima.
 
+## Rodada 7 · 2026-11-24
+
+- **Pedido (literal):** "alem disso, no widget de categoirias, nao da pra dizer "6 em aberto", "4 em aberto"... nem existe esse conceito de aberto. Pode tirar isso. lembre-se de que "em aberto" nao existe no widget de categorias. deve ser só o onme da categoria, a descriçao dela abaixo e o botao de açao. alem disso, veja se tem mais widgets de IA que voce poderia sugerir. assim teríamos uma seçao somente pra IA. poe nem ser só beni. pode ser o beni + funcionalidades de agentes de IA puxadas pra widget, se fizer sentido. nao crie só porque to pedindo. tem que realmente apresentar algum ganho. o botao de restaurar o padrao ta em posiçao ruim ali também. acredito que deva estar ao lado do de cancelar a operaçao? ou nao? como o ux design define esse tipo de coisa por regra? pesquise pra executar. o widget "agenda de hoje" deve se chamar "compromissos do dia""
+- **Mudou:**
+  - Categorias: cada card mostra o nome, a descrição da categoria em até 2 linhas e o botão de criar. "Em aberto" sai de toda a Home:
+    - o widget "Itens em aberto por categoria" vira "Itens por categoria";
+    - Meus itens e Prazos de itens deixam de filtrar por "em aberto";
+    - a Agenda junta os itens pela data, sem filtro de estado.
+    O item do ENSPACE não tem estado de aberto (`BRIEFING.md`, "A IA do workspace e a categoria");
+  - "Agenda de hoje" passa a se chamar "Compromissos do dia" (EN "Today's appointments", ES "Compromisos del día");
+  - a barra de edição em 3 grupos: Adicionar widget | Concluir | Restaurar padrão e X. Restaurar sai de perto do Concluir e vai para junto do X, os 2 que desfazem. O divisor separa os grupos, para o Restaurar não ser clicado no lugar do primário. Sem diálogo de confirmação: o aviso "Home restaurada" traz Desfazer. A pesquisa está em `PESQUISA.md`, "Onde fica o Restaurar padrão";
+  - o catálogo ganha o grupo **IA**, com 5 widgets. O BENI sai de "BENI e equipe", que vira "Equipe e notas" (Comunicado e Bloco de notas). Cada widget novo entrou por um ganho que a Home não tinha:
+    - **Agentes de IA:** os agentes do workspace (os do sistema e os criados nele), com a cor de cada um. O clique abre a conversa flutuante com aquele agente. Ganho: hoje só se chega a um agente pela tela Agentes de IA ou pela página de conversa;
+    - **Revisões por IA:** concluídas no mês, na fila ou revisando, nota média e a lista de documentos com o status e a nota (amarela abaixo de 70). Ganho: quem manda um contrato para o revisor vê o andamento sem abrir o item;
+    - **Créditos de IA** (só o administrador): o saldo, quantos dias ele dura no ritmo dos últimos 7 dias, o consumo dos últimos 30 dias, Comprar créditos e Ver extrato. O selo "Saldo baixo" aparece com menos de 14 dias. Ganho: o crédito acaba e a IA para; hoje só se vê na tela de carteira;
+    - **Falhas dos agentes** (só o administrador): o passo de agente que falhou num fluxo do Spaceflow, com o erro, o fluxo, o item e Repetir. Ganho: a falha de um agente para o fluxo em silêncio, e hoje só aparece na execução do fluxo;
+  - a conversa flutuante atende qualquer agente: o cabeçalho, a cor do avatar, a saudação, o campo e o aviso do rodapé trocam para o agente escolhido. O BENI continua com o rascunho de item e de tarefa;
+  - o membro não vê Créditos nem Falhas no catálogo, e eles saem da Home dele (a carteira e a execução dos fluxos pedem permissão de administrador). O selo no catálogo diz "Só o administrador vê"; o do Comunicado continua "Só o administrador edita";
+  - no workspace vazio, Agentes de IA mostra só o BENI, e Revisões e Falhas mostram o estado vazio.
+- **Componentes:** o avatar dos agentes é o mesmo `@be-enlighten/beni-avatar`, com a cor do agente (`beniTheme`). As barras de consumo crescem com o keyframe global `home-crescer-y`, pelo mesmo motivo do `home-crescer-x` da rodada 6.
+- **Fronteira:** muda o widget Categorias, os nomes "Itens por categoria" e "Compromissos do dia", a barra de edição, o catálogo (grupo IA) e a conversa flutuante. A casca, a grade e a Home padrão ficam como na rodada 6.
+- **Descartado:**
+  - **Conversas recentes:** a conversa flutuante já lista as conversas da pessoa (`GET /ai/chats`); o widget repetiria a mesma lista;
+  - **Propostas do BENI:** a proposta só existe na prévia do editor, sem gravação nem rota;
+  - **Uso de IA por pessoa:** o dado só existe no painel admin, fora do workspace;
+  - **Confirmação antes de Restaurar padrão:** o Desfazer no aviso e o X já recuperam a Home.
+- **Depende de:** filtrar as execuções de nó pelo tipo `ai_agent`. Não confirmado no código; sem o filtro, o front separa as execuções de agente.
+- **MAQUETE:** fora do BENI, a resposta do agente na conversa é uma frase fixa que diz que, no produto, responde o agente com o modelo e as ferramentas dele.
+- **Ver:** `evidencias/rodada7-*.jpg` e `evidencias/rodada7-barra-de-edicao.png`
+
 ## Rodada 6 · 2026-11-24
 
 - **Pedido (literal):** "se estou vendo como membro, nao deve existir no topo o filtro "minhas tarefas/workspace" somenre owner ve isso. --- na seleçao de categorias na hora de adicionar o widget deve poder selecionar todos e desmarcar todos tambem. pra facilitar. --- os botoes dessa barra estão excessivos. parece muito texto e muito botao. alem disso a ordem deles nao ta muito lógica. vejas como pode melhorar, sem tirar nenhum botão. talvez o cancelar ser somente um X pode ser bom... sei lá... --- prototipe o "pedir ao beni" do botao criar. como seria a interaçao? --- o resumo do beni deve aparecer por padrao, pra induzir o user a usar ia, mesmo no estado inicial. deve fazer aprte do padrao mesmo. e o atalho de categorias deve ser por padrao o widget do topo, o primeiro de todos. --- criar tarefa só pode ser tarefa rápida. então pode reduzir essa jornada. --- nos widgets, a categorizaçao que voce fez com "Naveçao e agenda" ficou nonsense. talvez tenha que ser tarefas e agenda. ou se fizer sentido ter MAIS widgets de agenda, por exemplo, trazendo a PROPRIA agenda em miniatura pra home, podssa ser separada a categoria. veja isso. a sensçao é de que somente a seçao de tarefas ta bem alimentada. veja o restante como da pra alimentar mais e setorizar melhor talvez."

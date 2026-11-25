@@ -37,6 +37,25 @@ Procurei no `enspace-ux-research` (auditoria de UX por persona) antes de desenha
 
 ## O que o develop faz hoje
 
+### A IA do workspace e a categoria (rodada 7)
+
+Leitura de 2026-11-24 pela skill `investigar-codigo`. Siglas: **F** = `en-space@develop be2a5d850`; **B** = `enlighten-api@develop 8669875cf`. O código mostra a branch, não o que está no ar.
+
+| Widget ou dado | O que o código tem | Fonte |
+|---|---|---|
+| Categorias: descrição | a categoria (ItemType) tem `description`, e o card de categorias de develop já mostra | F `src/components/workspace/WorkspaceCategories.vue:28,103` |
+| Categorias: "em aberto" | o item não tem estado de aberto ou fechado; a contagem da rodada 5 não tinha base | sem campo; ver "De onde vem o dado de cada widget" |
+| Agentes de IA | o modelo `ai_agent` e a rota `GET /ai/agents` (membro do workspace), que junta os agentes do sistema e os do workspace; cada agente tem `beniTheme` (a cor do BENI) e nenhum campo limita quem usa | B `plugins/en-ai/models/ai_agent.settings.json:13-90`, `plugins/en-ai/config/routes.json:274-287`, `resolver.ts:347` |
+| Conversa com um agente | a página de conversa aceita `?agent=` além de `?prompt=` | F `src/pages/workspaces/[workspace]/ai/chat/index.vue:23-26` |
+| Revisões por IA | `GET /ai/review/sessions` e `GET /ai/review/stats`; a sessão tem o status `pending`, `in_progress`, `completed` ou `failed` | B `plugins/en-ai/config/routes.json:62-116`, `ai_review_session.settings.json:54-55` |
+| Créditos de IA | `GET /ws/financial/wallet` e `GET /ws/financial/wallets/:id/transactions` (membro do workspace) | B `plugins/en-financial/config/routes.json:190-195` |
+| Falhas dos agentes | o nó `ai_agent` do Spaceflow; `GET /workflows/nodes` lista as execuções de nó e `POST /workflows/nodes/:id/retry` repete a que falhou | B `plugins/en-workflows/docs/pt-BR/nodes/ai_agent.md` |
+| Conversas recentes | `GET /ai/chats` devolve as conversas da própria pessoa | B `plugins/en-ai/controllers/chat.ts:167-179` |
+| Propostas do BENI | só a prévia local do editor; não grava e não tem rota | sem rota |
+| Uso de IA por pessoa | só no painel admin (en-admin) | sem rota no workspace |
+
+Inconclusivo: se `GET /workflows/nodes` filtra pelo tipo do nó. Sem esse filtro, o widget de falhas traz todas as execuções com erro e separa as de agente no front.
+
 ### O BENI e o alternador de escopo (rodada 6)
 
 Leitura de 2026-11-24 pela skill `investigar-codigo`, em `en-space@develop be2a5d850`. O código mostra a branch, não o que está no ar.

@@ -64,17 +64,22 @@ export type TipoDeWidget =
   | 'atalhos'
   | 'recentes'
   | 'graficoDePainel'
-  // BENI e equipe
+  // IA
+  | 'beni'
+  | 'agentesIa'
+  | 'revisoesIa'
+  | 'creditosIa'
+  | 'falhasIa'
+  // Equipe e notas
   | 'comunicado'
   | 'notas'
-  | 'beni'
 
 /** As lâminas do Painel de tarefas que o `_WLamina.vue` desenha. */
 export const LAMINAS = ['kpiAbertas', 'kpiConcluidas', 'kpiCriadas', 'kpiVencidas', 'kpiVencem7', 'vencidas', 'vencemEmBreve', 'status', 'prioridade', 'carga', 'atividade', 'entradaESaida'] as const satisfies readonly TipoDeWidget[]
 export type LaminaDeTarefas = typeof LAMINAS[number]
 
 /** O 1º nível do catálogo: de onde vem o dado. */
-export type GrupoDoCatalogo = 'tarefas' | 'agenda' | 'itens' | 'atalhos' | 'equipe'
+export type GrupoDoCatalogo = 'tarefas' | 'agenda' | 'itens' | 'ia' | 'atalhos' | 'equipe'
 
 /** As seções de Tarefas no 2º nível. */
 export type SecaoDeTarefas = 'numeros' | 'listas' | 'graficos'
@@ -147,8 +152,17 @@ export const CATALOGO: DefinicaoDoWidget[] = [
   { tipo: 'atalhos', icone: 'i-lucide-bookmark', grupo: 'atalhos', tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 12, minH: 3, maxH: 9 } },
   { tipo: 'recentes', icone: 'i-lucide-history', grupo: 'atalhos', tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 6, minH: 4, maxH: 10 } },
   { tipo: 'graficoDePainel', icone: 'i-lucide-chart-column', grupo: 'atalhos', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 10 } },
-  // BENI e equipe
-  { tipo: 'beni', icone: 'i-lucide-sparkles', grupo: 'equipe', tamanho: { w: 8, h: 5 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 9 } },
+  // IA (rodada 7). Cada um lê o que o back já guarda; ver o mocks.ts.
+  { tipo: 'beni', icone: 'i-lucide-sparkles', grupo: 'ia', tamanho: { w: 8, h: 5 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 9 } },
+  // NOVO: os agentes que a pessoa pode usar; o clique abre a conversa com o agente.
+  { tipo: 'agentesIa', icone: 'i-lucide-bot', grupo: 'ia', tamanho: { w: 4, h: 6 }, limites: { minW: 3, maxW: 8, minH: 4, maxH: 10 } },
+  // NOVO: as revisões de documento feitas pelo agente revisor, com a nota e o que está em andamento.
+  { tipo: 'revisoesIa', icone: 'i-lucide-file-search', grupo: 'ia', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 10 } },
+  // NOVO: o saldo da carteira e o ritmo de consumo. Sem crédito, a IA para no workspace inteiro.
+  { tipo: 'creditosIa', icone: 'i-lucide-coins', grupo: 'ia', soAdmin: true, tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 8, minH: 4, maxH: 7 } },
+  // NOVO: o passo de agente que falhou num fluxo do Spaceflow, com Repetir.
+  { tipo: 'falhasIa', icone: 'i-lucide-triangle-alert', grupo: 'ia', soAdmin: true, tamanho: { w: 6, h: 5 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 9 } },
+  // Equipe e notas
   { tipo: 'comunicado', icone: 'i-lucide-megaphone', grupo: 'equipe', soAdmin: true, tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 12, minH: 3, maxH: 6 } },
   { tipo: 'notas', icone: 'i-lucide-notebook-pen', grupo: 'equipe', tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 8, minH: 3, maxH: 9 } },
 ]
@@ -157,8 +171,9 @@ export const GRUPOS: { grupo: GrupoDoCatalogo, icone: string }[] = [
   { grupo: 'tarefas', icone: 'i-lucide-list-checks' },
   { grupo: 'agenda', icone: 'i-lucide-calendar-days' },
   { grupo: 'itens', icone: 'i-lucide-layout-grid' },
+  { grupo: 'ia', icone: 'i-lucide-sparkles' },
   { grupo: 'atalhos', icone: 'i-lucide-bookmark' },
-  { grupo: 'equipe', icone: 'i-lucide-sparkles' },
+  { grupo: 'equipe', icone: 'i-lucide-users' },
 ]
 
 export const SECOES: SecaoDeTarefas[] = ['numeros', 'listas', 'graficos']
@@ -175,7 +190,7 @@ export function definicao(tipo: TipoDeWidget) {
  * Rodada 6, a pedido da redatora: Categorias abre a Home ("o atalho de
  * categorias deve ser por padrão o widget do topo, o primeiro de todos") e o
  * BENI entra no padrão, também no workspace vazio ("pra induzir o user a usar
- * IA"), ao lado da Agenda de hoje.
+ * IA"), ao lado dos Compromissos do dia.
  */
 export const PADRAO_WIDGETS: Widget[] = [
   { id: 'w-categorias', tipo: 'categorias', config: { categorias: [] } },

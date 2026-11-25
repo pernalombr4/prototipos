@@ -567,6 +567,27 @@ Catálogo, fora do padrão:
 - **Posição do Criar:** não há dado de uso que compare topo, menu lateral e Home.
 - **Celular:** a pesquisa não cobriu a Home no celular, salvo Notion e Twenty.
 
+## Onde fica o Restaurar padrão (rodada 7, 2026-11-24)
+
+Pedido da redatora: "o botao de restaurar o padrao ta em posiçao ruim ali também. acredito que deva estar ao lado do de cancelar a operaçao? ou nao? como o ux design define esse tipo de coisa por regra? pesquise pra executar".
+
+O que as fontes dizem (lidas em 2026-11-24; Apple HIG e Material 3 não abriram o conteúdo, e ficam de fora):
+
+| Fonte | Regra | O que vale para a barra |
+|---|---|---|
+| NN/g, Reset and Cancel buttons [101] | Reset quase nunca ajuda e costuma atrapalhar: o clique acidental no lugar do Submit apaga o trabalho. Vale em diálogo complexo, com padrões bons para voltar. Pede desfazer, não diálogo. | Restaurar se justifica (a Home tem padrão), mas longe do primário e com Desfazer. |
+| Microsoft, Command Buttons [102] | Botões da janela inteira ficam na linha de comando, à direita: OK (ou a ação da janela), depois Cancel. | Concluir antes do X; o X no fim. Restaurar é ação da janela inteira e fica no lado do Cancel. |
+| Atlassian, Button group [103] | Agrupe os botões pelo uso e pela importância; o principal do grupo é o primário. | 3 grupos: montar (Adicionar widget), confirmar (Concluir), desfazer (Restaurar e X). |
+| Visa e UK ICDS, Button [104][105] | Ação destrutiva que pode ser clicada sem querer ganha estilo terciário; permita desfazer. O exemplo do ICDS afasta o destrutivo do primário. | Restaurar em ícone fantasma, separado do Concluir. |
+
+Concluído para o protótipo:
+- a intuição da redatora se confirma: Restaurar vai para junto do X, que também desfaz;
+- um divisor separa o grupo desfazer do Concluir, para o Restaurar não ser clicado no lugar do primário;
+- o X fica no canto: é onde se fecha um modo, e à direita do confirmar, como o Cancel;
+- sem diálogo de confirmação: o aviso de "Home restaurada" traz Desfazer, e o X ainda descarta tudo.
+
+Nenhuma fonte dá uma regra única com o nome "Restaurar padrão"; a posição sai da soma das regras acima.
+
 ## Fontes
 
 1. https://www.notion.com/en-gb/help/home-and-my-tasks
@@ -669,3 +690,8 @@ Catálogo, fora do padrão:
 98. https://www.nngroup.com/articles/drag-drop/
 99. https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements
 100. https://www.patternfly.org/patterns/dashboard/design-guidelines
+101. https://www.nngroup.com/articles/reset-and-cancel-buttons/
+102. https://learn.microsoft.com/en-us/previous-versions/windows/desktop/bb246415(v=vs.85)
+103. https://atlassian.design/components/button/button-group/usage
+104. https://design.visa.com/components/button/usage/
+105. https://design.sis.gov.uk/components/inputs/button

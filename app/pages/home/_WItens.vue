@@ -2,11 +2,15 @@
 /**
  * Os 4 widgets NOVOS de itens (rodada 6), para o grupo "Itens e categorias"
  * ter mais que o atalho das categorias. Todos leem o que o item já guarda:
- * - Meus itens: em aberto, com a pessoa no campo responsável;
+ * - Meus itens: os que têm a pessoa no campo responsável;
  * - Itens criados recentemente: os 8 mais novos, pela data de criação;
  * - Prazos de itens: um campo de data da categoria (vencimento, vigência)
- *   nos próximos 30 dias, e os que já venceram e seguem em aberto;
- * - Itens em aberto por categoria: barras horizontais, 1 por categoria.
+ *   de hoje aos próximos 30 dias;
+ * - Itens por categoria: barras horizontais, 1 por categoria.
+ *
+ * Rodada 7: o item não tem "em aberto" no ENSPACE (a redatora: "nem existe
+ * esse conceito de aberto"). Nenhum widget filtra ou conta por isso; a etapa
+ * do fluxo continua na linha, como o produto mostra.
  *
  * Só as categorias que a pessoa acessa entram (`itens` já chega filtrado).
  * Cada linha é um alvo só (regra 25) e abre o item.
@@ -15,7 +19,7 @@
  */
 import type { Item } from './mocks'
 import { AGORA, DIA, EU, categoria, pessoa } from './mocks'
-import { dataCurta, dinheiro } from './formatar'
+import { HOJE, dataCurta, dinheiro } from './formatar'
 import type { Textos } from './textos'
 
 const props = defineProps<{
@@ -27,12 +31,11 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ abrir: [destino: string] }>()
 
-const abertos = computed(() => props.itens.filter(i => i.status !== 'concluido'))
 
 const lista = computed(() => {
-  if (props.tipo === 'meusItens') return abertos.value.filter(i => i.responsavel === EU.id).sort((a, b) => b.criadoEm - a.criadoEm)
+  if (props.tipo === 'meusItens') return props.itens.filter(i => i.responsavel === EU.id).sort((a, b) => b.criadoEm - a.criadoEm)
   if (props.tipo === 'ultimosItens') return [...props.itens].sort((a, b) => b.criadoEm - a.criadoEm).slice(0, 8)
-  if (props.tipo === 'prazosDeItens') return abertos.value.filter(i => i.prazo && i.prazo < AGORA.getTime() + 30 * DIA).sort((a, b) => a.prazo! - b.prazo!)
+  if (props.tipo === 'prazosDeItens') return props.itens.filter(i => i.prazo && i.prazo >= HOJE && i.prazo < AGORA.getTime() + 30 * DIA).sort((a, b) => a.prazo! - b.prazo!)
   return []
 })
 
@@ -40,7 +43,7 @@ const vazio = computed(() => ({ meusItens: props.t.itensW.vazioMeus, ultimosIten
 
 const barras = computed(() => {
   const r = new Map<string, number>()
-  for (const i of abertos.value) r.set(i.categoria, (r.get(i.categoria) ?? 0) + 1)
+  for (const i of props.itens) r.set(i.categoria, (r.get(i.categoria) ?? 0) + 1)
   const linhas = [...r.entries()].map(([slug, n]) => ({ c: categoria(slug)!, n })).filter(x => x.c).sort((a, b) => b.n - a.n)
   const max = Math.max(1, ...linhas.map(x => x.n))
   return linhas.map(x => ({ ...x, pct: Math.round(x.n / max * 100) }))

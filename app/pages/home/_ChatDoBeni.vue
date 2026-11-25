@@ -35,6 +35,7 @@ import { entender } from './beni'
 import type { DadosDaTarefa } from './_ModalNovaTarefa.vue'
 import type { DadosDoItem } from './_ModalNovoItem.vue'
 import AvatarDoBeni from './_AvatarDoBeni.vue'
+import type { AgenteDeIA } from './mocks'
 import type { Textos } from './textos'
 
 const props = defineProps<{
@@ -45,6 +46,11 @@ const props = defineProps<{
   resumo: { icone: string, texto: string }[]
   /** O pedido que abriu a conversa; `n` muda a cada pedido novo. */
   pedido?: { texto: string, n: number }
+  /**
+   * Rodada 7: o agente escolhido no widget Agentes de IA. Sem ele, ou com o
+   * BENI, é a conversa do BENI, que monta rascunho de item e de tarefa.
+   */
+  agente?: AgenteDeIA | null
   criarTarefa: (d: DadosDaTarefa) => string
   criarItem: (categoria: string, formulario: string | undefined, d: DadosDoItem) => string
 }>()
@@ -83,6 +89,10 @@ function respostaDe(r: Rascunho) {
   return t.respostaAjuda
 }
 
+/** Outro agente que não o BENI: a resposta é do agente, e o protótipo não a imita. */
+const outroAgente = computed(() => props.agente && props.agente.slug !== 'beni' ? props.agente : null)
+watch(() => props.agente?.slug, () => novaConversa())
+
 function enviar(valor = texto.value) {
   const v = valor.trim()
   if (!v || status.value !== 'ready') return
@@ -92,6 +102,11 @@ function enviar(valor = texto.value) {
   const r = entender(v, props.categorias)
   timer = setTimeout(() => {
     const id = `a${++seq}`
+    if (outroAgente.value) {
+      mensagens.value = [...mensagens.value, { id, role: 'assistant', parts: [{ type: 'text', text: props.t.iaW.respostaDoAgente(outroAgente.value.nome) }] }]
+      status.value = 'ready'
+      return
+    }
     mensagens.value = [...mensagens.value, { id, role: 'assistant', parts: [{ type: 'text', text: respostaDe(r) }] }]
     if (r.tipo !== 'ajuda' || !r.resumo) {
       cartoes.value = { ...cartoes.value, [id]: { r, estado: 'aberto', formulario: r.tipo === 'item' ? r.formulario : undefined } }
@@ -188,11 +203,11 @@ defineShortcuts({ escape: () => { if (aberto.value) aberto.value = false } })
       v-if="aberto"
       class="fixed bottom-20 right-4 z-50 flex h-[min(38rem,calc(100dvh-7rem))] w-[min(27rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl bg-default shadow-xl ring ring-default"
       role="dialog"
-      :aria-label="t.beniChat.titulo"
+      :aria-label="outroAgente?.nome ?? t.beniChat.titulo"
     >
       <header class="flex items-center gap-2 border-b border-default px-3 py-2">
-        <AvatarDoBeni :estado="status === 'submitted' ? 'working' : 'idle'" />
-        <span class="text-sm font-semibold text-highlighted">{{ t.beniChat.titulo }}</span>
+        <AvatarDoBeni :estado="status === 'submitted' ? 'working' : 'idle'" :cor="agente?.cor" />
+        <span class="truncate text-sm font-semibold text-highlighted">{{ outroAgente?.nome ?? t.beniChat.titulo }}</span>
         <UBadge :label="t.ehMaquete" color="warning" variant="subtle" size="sm" />
         <span class="ml-auto flex items-center">
           <UTooltip :text="t.beniChat.novaConversa">
@@ -211,17 +226,17 @@ defineShortcuts({ escape: () => { if (aberto.value) aberto.value = false } })
         <!-- Conversa vazia: a apresentação e os exemplos -->
         <div v-if="vazia" class="flex h-full flex-col justify-end gap-3 animate-[entrada_0.3s_ease-out_both] motion-reduce:animate-none">
           <div class="flex items-start gap-3">
-            <AvatarDoBeni tamanho="md" />
+            <AvatarDoBeni tamanho="md" :cor="agente?.cor" />
             <div>
               <p class="text-sm font-medium text-highlighted">
-                {{ t.beniChat.ola(nome) }}
+                {{ outroAgente ? t.iaW.ola(nome) : t.beniChat.ola(nome) }}
               </p>
               <p class="mt-1 text-sm text-toned">
-                {{ t.beniChat.apresentacao }}
+                {{ outroAgente?.descricao ?? t.beniChat.apresentacao }}
               </p>
             </div>
           </div>
-          <ul class="space-y-1.5">
+          <ul v-if="!outroAgente" class="space-y-1.5">
             <li v-for="(s, i) in t.beniChat.sugestoes" :key="s" class="animate-[entrada_0.3s_ease-out_both] motion-reduce:animate-none" :style="{ animationDelay: `${80 + i * 50}ms` }">
               <button
                 type="button"
@@ -332,7 +347,7 @@ defineShortcuts({ escape: () => { if (aberto.value) aberto.value = false } })
       <footer class="border-t border-default p-2">
         <UChatPrompt
           v-model="texto"
-          :placeholder="t.beniChat.placeholder"
+          :placeholder="outroAgente ? t.iaW.agentes.conversar(outroAgente.nome) : t.beniChat.placeholder"
           variant="subtle"
           :rows="1"
           :maxrows="4"
@@ -342,7 +357,7 @@ defineShortcuts({ escape: () => { if (aberto.value) aberto.value = false } })
           <UChatPromptSubmit :status="status" size="xs" :aria-label="t.beniChat.enviar" />
         </UChatPrompt>
         <p class="mt-1.5 flex items-center gap-1 px-1 text-[11px] text-dimmed">
-          <UIcon name="i-lucide-info" class="size-3" />{{ t.beniChat.aviso }}
+          <UIcon name="i-lucide-info" class="size-3" />{{ outroAgente ? t.iaW.avisoDoAgente : t.beniChat.aviso }}
         </p>
       </footer>
     </section>

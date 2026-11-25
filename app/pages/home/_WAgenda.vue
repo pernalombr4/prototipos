@@ -8,7 +8,7 @@
  *   por padrão), com 1 ponto por fonte em cada dia; clicar num dia lista o
  *   que há nele embaixo.
  *
- * As fontes e as cores são as da Agenda de hoje: compromisso do calendário
+ * As fontes e as cores são as da Compromissos do dia: compromisso do calendário
  * conectado, prazo de tarefa e data de item. O dado chega pronto em
  * `eventos` (index.vue, `agendaCompleta`).
  *

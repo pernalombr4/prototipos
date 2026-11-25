@@ -41,6 +41,15 @@
  *   digita na conversa, nunca no widget);
  * - o catálogo ganha 5 grupos e 6 widgets novos de agenda e de itens.
  *
+ * Rodada 7:
+ * - Categorias mostra o nome, a descrição e o botão; "em aberto" sai da Home
+ *   (o item não tem esse estado);
+ * - "Agenda de hoje" passa a "Compromissos do dia";
+ * - barra de edição em 3 grupos: Adicionar widget | Concluir | Restaurar e X;
+ * - grupo IA no catálogo: BENI, Agentes de IA, Revisões por IA, Créditos de
+ *   IA e Falhas dos agentes (os 2 últimos só do administrador, `_WIa.vue`);
+ * - a conversa flutuante atende o agente clicado, não só o BENI.
+ *
  * O dado é o `mocks.ts`; o catálogo e a Home padrão, o `widgets.ts`. Tudo em
  * memória: o reload volta ao começo.
  */
@@ -56,6 +65,7 @@ import type { DadosDaTarefa } from './_ModalNovaTarefa.vue'
 import ChatDoBeni from './_ChatDoBeni.vue'
 import WAgenda from './_WAgenda.vue'
 import WItens from './_WItens.vue'
+import WIa from './_WIa.vue'
 import WBeni from './_WBeni.vue'
 import ModalNovoItem from './_ModalNovoItem.vue'
 import type { DadosDoItem } from './_ModalNovoItem.vue'
@@ -67,15 +77,15 @@ import WListas from './_WListas.vue'
 import WMinhasTarefas from './_WMinhasTarefas.vue'
 import WLamina from './_WLamina.vue'
 import WOutros from './_WOutros.vue'
-import type { Atalho, Categoria, DiaDeTarefas, Evento, Item, Recente, TarefaDaHome } from './mocks'
+import type { AgenteDeIA, Atalho, Categoria, DiaDeTarefas, Evento, FalhaDeAgente, Item, Recente, RevisaoDeIA, TarefaDaHome } from './mocks'
 import {
-  AGORA, DIA, EU, HORA, atalhosIniciais, categoria, categorias as categoriasIniciais, comunicadoInicial, eventosDoCalendario,
-  itensIniciais, notaInicial, painelDeCompras, recentes as recentesIniciais, resumoDoBeni, serieDasTarefas, tarefasIniciais,
+  AGORA, DIA, EU, HORA, agentesDeIA, atalhosIniciais, categoria, categorias as categoriasIniciais, comunicadoInicial, eventosDoCalendario,
+  falhasDeAgentes, itensIniciais, notaInicial, revisoesDeIA, painelDeCompras, recentes as recentesIniciais, resumoDoBeni, serieDasTarefas, tarefasIniciais,
 } from './mocks'
 import type { AbaDeTarefa } from './formatar'
 import { HOJE, abaDa, dataCurta, dataLonga, horaAtual } from './formatar'
 import type { ConfigDoWidget, LaminaDeTarefas, TipoDeWidget, Widget } from './widgets'
-import { LAMINAS, PADRAO_LAYOUT, PADRAO_WIDGETS, definicao } from './widgets'
+import { CATALOGO, LAMINAS, PADRAO_LAYOUT, PADRAO_WIDGETS, definicao } from './widgets'
 import { textos } from './textos'
 
 definePageMeta({
@@ -122,6 +132,10 @@ const nota = ref('')
 const comunicado = ref<typeof comunicadoInicial | null>(null)
 const beni = ref<{ linhas: { icone: string, texto: string }[] }>({ linhas: [] })
 const recemCriados = ref<number[]>([])
+/* Rodada 7: o grupo IA. No workspace novo só existe o BENI (agente do sistema). */
+const agentes = ref<AgenteDeIA[]>([])
+const revisoes = ref<RevisaoDeIA[]>([])
+const falhas = ref<FalhaDeAgente[]>([])
 
 /**
  * Andaime. O workspace que acabou de nascer não tem tarefa, item, categoria,
@@ -140,6 +154,9 @@ function carregarDados(vazio: boolean) {
   nota.value = vazio ? '' : notaInicial
   comunicado.value = vazio ? null : { ...comunicadoInicial }
   beni.value = vazio ? { linhas: [] } : resumoDoBeni
+  agentes.value = vazio ? agentesDeIA.filter(a => a.sistema) : [...agentesDeIA]
+  revisoes.value = vazio ? [] : [...revisoesDeIA]
+  falhas.value = vazio ? [] : [...falhasDeAgentes]
   recemCriados.value = []
 }
 carregarDados(false)
@@ -167,7 +184,27 @@ const minha = ref<Home>(copiaDaHome(padrao.value))
 
 /** O administrador escolhe no Personalizar qual Home está editando. */
 const escopo = ref<'minha' | 'padrao'>('minha')
-watch(papel, (p) => { if (p === 'membro') escopo.value = 'minha' })
+/**
+ * Rodada 7: Créditos e Falhas dos agentes são só do administrador (a carteira e
+ * a execução dos fluxos pedem permissão de admin). Na Home do membro eles não
+ * entram, nem quando o administrador os põe na Home padrão.
+ */
+const SO_DO_ADMIN = new Set(CATALOGO.filter(d => d.soAdmin && d.tipo !== 'comunicado').map(d => d.tipo))
+/** O que saiu ao ver como membro volta ao ver de novo como administrador (o alternador simula 2 pessoas). */
+let guardadosDoAdmin: Home = { widgets: [], layout: [] }
+watch(papel, (p) => {
+  if (p === 'admin') {
+    minha.value.widgets.push(...guardadosDoAdmin.widgets)
+    minha.value.layout.push(...guardadosDoAdmin.layout)
+    guardadosDoAdmin = { widgets: [], layout: [] }
+    return
+  }
+  escopo.value = 'minha'
+  const fora = new Set(minha.value.widgets.filter(w => SO_DO_ADMIN.has(w.tipo)).map(w => w.id))
+  guardadosDoAdmin = { widgets: minha.value.widgets.filter(w => fora.has(w.id)), layout: minha.value.layout.filter(x => fora.has(x.id)) }
+  minha.value.widgets = minha.value.widgets.filter(w => !fora.has(w.id))
+  minha.value.layout = minha.value.layout.filter(x => !fora.has(x.id))
+})
 const home = computed(() => escopo.value === 'padrao' ? padrao.value : minha.value)
 
 const layout = computed({
@@ -195,25 +232,18 @@ const resumo = computed(() => {
 
 const categoriasComAcesso = computed(() => categorias.value.filter(c => c.acesso))
 
-/** Itens em aberto por categoria, para o widget Categorias. */
-const abertosPorCategoria = computed(() => {
-  const r: Record<string, number> = {}
-  for (const i of itens.value) if (i.status !== 'concluido') r[i.categoria] = (r[i.categoria] ?? 0) + 1
-  return r
-})
-
 /** Os itens das categorias que a pessoa acessa: o dado dos widgets de itens. */
 const itensComAcesso = computed(() => itens.value.filter(i => categoria(i.categoria)?.acesso))
 
 /**
  * As 3 fontes da Agenda, como a tela Agenda junta: os compromissos do
- * calendário, o prazo das minhas tarefas abertas e a data dos itens em aberto
- * sob minha responsabilidade. Tarefa ou item criado agora já entra.
+ * calendário, o prazo das minhas tarefas abertas e a data dos itens sob minha
+ * responsabilidade (o item não tem "em aberto": entra pela data). Tarefa ou item criado agora já entra.
  */
 const agendaCompleta = computed<Evento[]>(() => [
   ...eventos.value,
   ...minhasAbertas.value.filter(x => x.due_date).map(x => ({ id: `t-${x.id}`, titulo: x.name, inicio: x.due_date!, fim: x.due_date!, fonte: 'tarefa' as const })),
-  ...itensComAcesso.value.filter(i => i.prazo && i.status !== 'concluido' && i.responsavel === EU.id)
+  ...itensComAcesso.value.filter(i => i.prazo && i.responsavel === EU.id)
     .map(i => ({ id: `i-${i.id}`, titulo: i.titulo, inicio: new Date(i.prazo!), fim: new Date(i.prazo!), fonte: 'item' as const })),
 ])
 const agendaDeHoje = computed(() => agendaCompleta.value.filter(e => e.inicio.getTime() >= HOJE && e.inicio.getTime() < HOJE + DIA))
@@ -238,11 +268,20 @@ function abrirTarefa(inicial?: Partial<DadosDaTarefa>) {
 /* PROPOSTA (rodada 6): a conversa do BENI, aberta pelo Criar ou pelo widget BENI. */
 const chatAberto = ref(false)
 const pedidoAoBeni = ref<{ texto: string, n: number }>()
+/** Rodada 7: o agente da conversa. Nulo = BENI. */
+const agenteDoChat = ref<AgenteDeIA | null>(null)
 let pedidos = 0
-function pedirAoBeni(texto: string) {
+function pedirAoBeni(texto: string, agente: AgenteDeIA | null = null) {
   menuCriarAberto.value = false
+  agenteDoChat.value = agente
   chatAberto.value = true
   pedidoAoBeni.value = { texto, n: ++pedidos }
+}
+
+/** Rodada 7: Repetir o passo de agente que falhou (`POST /workflows/nodes/:id/retry`). */
+function repetirFalha(f: FalhaDeAgente) {
+  falhas.value = falhas.value.filter(x => x.id !== f.id)
+  toast.add({ title: t.value.iaW.falhas.repetido, icon: 'i-lucide-rotate-cw' })
 }
 
 const algumaCamadaAberta = computed(() => tarefaAberta.value || novoItemAberto.value || configAberto.value || editando.value)
@@ -579,17 +618,27 @@ function configuravel(w: Widget) {
         </div>
         <!--
           Rodada 6: "os botões dessa barra estão excessivos... a ordem deles não tá
-          muito lógica". Primeiro o que muda a Home (Adicionar, Restaurar), depois
-          o que encerra a edição (Concluir, Cancelar). Restaurar e Cancelar viram
-          ícone com dica: são os 2 menos usados e os 2 que desfazem.
+          muito lógica". Restaurar e Cancelar viram ícone com dica: são os 2 menos
+          usados e os 2 que desfazem.
+
+          Rodada 7: Restaurar sai do lado do Adicionar e vai para junto do X (pesquisa
+          no PESQUISA.md, "Onde fica o Restaurar padrão"). 3 grupos, por função:
+          - montar: Adicionar widget;
+          - confirmar: Concluir, o primário;
+          - desfazer: Restaurar e o X. O X fica no canto, onde se fecha um modo
+            (e à direita do confirmar, como o Cancel no Windows). Restaurar fica
+            ao lado dele e separado do Concluir por um divisor, para não ser
+            clicado no lugar do primário (NN/g). Não pede confirmação: o aviso
+            traz "Desfazer", e o X ainda descarta tudo.
         -->
         <div class="flex items-center gap-1">
           <UButton :label="t.estados.adicionarWidget" icon="i-lucide-plus" color="primary" variant="soft" size="sm" @click="catalogoAberto = true" />
+          <span class="mx-1.5 h-5 w-px bg-accented" aria-hidden="true" />
+          <UButton :label="t.personalizacao.concluir" icon="i-lucide-check" size="sm" @click="concluirEdicao" />
+          <span class="mx-1.5 h-5 w-px bg-accented" aria-hidden="true" />
           <UTooltip v-if="escopo === 'minha'" :text="t.personalizacao.restaurarDica">
             <UButton icon="i-lucide-rotate-ccw" color="neutral" variant="ghost" size="sm" :aria-label="t.personalizacao.restaurar" @click="restaurar" />
           </UTooltip>
-          <span class="mx-1.5 h-5 w-px bg-accented" aria-hidden="true" />
-          <UButton :label="t.personalizacao.concluir" icon="i-lucide-check" size="sm" @click="concluirEdicao" />
           <UTooltip :text="t.personalizacao.cancelarDica">
             <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="sm" :aria-label="t.personalizacao.cancelar" @click="cancelarEdicao" />
           </UTooltip>
@@ -714,7 +763,6 @@ function configuravel(w: Widget) {
                   v-if="w.tipo === 'categorias'"
                   :t="t"
                   :categorias="categoriasDo(w)"
-                  :abertos="abertosPorCategoria"
                   :admin="admin"
                   @acessar="(c) => abrirMaquete(c.name)"
                   @criar="abrirItem"
@@ -778,6 +826,19 @@ function configuravel(w: Widget) {
                   @conversar="pedirAoBeni('')"
                 />
 
+                <WIa
+                  v-else-if="['agentesIa', 'revisoesIa', 'creditosIa', 'falhasIa'].includes(w.tipo)"
+                  :t="t"
+                  :tipo="w.tipo as 'agentesIa' | 'revisoesIa' | 'creditosIa' | 'falhasIa'"
+                  :agentes="agentes"
+                  :revisoes="revisoes"
+                  :falhas="falhas"
+                  :admin="admin"
+                  @conversar="(a) => pedirAoBeni('', a.slug === 'beni' ? null : a)"
+                  @abrir="abrirMaquete"
+                  @repetir="repetirFalha"
+                />
+
                 <WOutros
                   v-else
                   v-model:nota="nota"
@@ -837,6 +898,7 @@ function configuravel(w: Widget) {
       :categorias="categoriasComAcesso"
       :resumo="beni.linhas"
       :pedido="pedidoAoBeni"
+      :agente="agenteDoChat"
       :criar-tarefa="(d) => criarTarefa(d, true) ?? ''"
       :criar-item="(slug, _formulario, d) => criarItemEm(slug, d, true) ?? ''"
       @revisar-tarefa="abrirTarefa"

@@ -5,7 +5,6 @@
  * A Home de develop já tem cartões de categoria (`WorkspaceCategories.vue`,
  * 4 por vez, botão "Acessar", ligados por `show_types_on_initial_screen`). O
  * widget continua o mesmo atalho e soma:
- * - quantos itens estão em aberto, para a pessoa saber onde há trabalho;
  * - "Criar <singular>" em cada cartão, pelo `singular_name` da categoria.
  *   Com 2 ou mais formulários, o botão pergunta qual; com 1 ou nenhum, abre
  *   o modal direto. É a mesma regra do botão Criar do topo.
@@ -17,6 +16,10 @@
  *   ordenada em `categorias`;
  * - workspace sem categoria: o administrador vê "Criar categoria"; o membro,
  *   o aviso de que o administrador ainda não criou.
+ *
+ * Rodada 7: o cartão mostra o nome, a descrição da categoria (`description`,
+ * a mesma que o cartão de develop mostra) e o botão de criar. Sai a contagem
+ * "em aberto": o ENSPACE não tem esse conceito para item.
  *
  * O cartão inteiro é "Acessar"; o "+" é um botão à parte, ao lado, e não
  * dentro do cartão (dois controles irmãos, sem clique dentro de clique).
@@ -32,7 +35,6 @@ const props = defineProps<{
   t: Textos
   /** As categorias do widget, já na ordem escolhida. */
   categorias: Categoria[]
-  abertos: Record<string, number>
   admin: boolean
 }>()
 const emit = defineEmits<{
@@ -72,18 +74,18 @@ function formularios(c: Categoria): DropdownMenuItem[][] {
       </span>
       <UButton v-if="admin" :label="t.vazios.criarCategoria" icon="i-lucide-plus" color="neutral" variant="outline" size="sm" @click="emit('criarCategoria')" />
     </div>
-    <ul v-else class="grid grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-3">
+    <ul v-else class="grid grid-cols-[repeat(auto-fill,minmax(17rem,1fr))] gap-3">
       <li
         v-for="(c, i) in categorias"
         :key="c.slug"
-        class="flex h-16 min-w-0 animate-[entrada_0.3s_ease-out_both] items-center gap-1 rounded-lg border border-default bg-default pl-1.5 pr-3 transition-colors duration-150 hover:border-accented hover:bg-elevated/40 motion-reduce:animate-none"
+        class="flex h-[4.5rem] min-w-0 animate-[entrada_0.3s_ease-out_both] items-center gap-1 rounded-lg border border-default bg-default pl-1.5 pr-3 transition-colors duration-150 hover:border-accented hover:bg-elevated/40 motion-reduce:animate-none"
         :style="{ animationDelay: `${i * 40}ms` }"
       >
         <button
           type="button"
           class="flex h-full min-w-0 flex-1 items-center gap-3 rounded-md px-2 text-left focus-visible:outline-2 focus-visible:outline-primary"
           :aria-label="t.categoriasW.acessar(c.name)"
-          :title="c.name"
+          :title="c.description ? `${c.name}: ${c.description}` : c.name"
           @click="emit('acessar', c)"
         >
           <span class="flex size-10 shrink-0 items-center justify-center rounded-lg ring ring-inset" :class="COR[c.color ?? 'neutral'] ?? COR.neutral">
@@ -91,7 +93,7 @@ function formularios(c: Categoria): DropdownMenuItem[][] {
           </span>
           <span class="min-w-0">
             <span class="block truncate text-sm font-medium text-highlighted">{{ c.name }}</span>
-            <span class="block truncate text-xs" :class="abertos[c.slug] ? 'text-toned' : 'text-muted'">{{ t.categoriasW.abertos(abertos[c.slug] ?? 0) }}</span>
+            <span v-if="c.description" class="mt-0.5 line-clamp-2 text-xs leading-snug text-muted">{{ c.description }}</span>
           </span>
         </button>
 

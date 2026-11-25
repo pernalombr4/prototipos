@@ -87,7 +87,6 @@ export interface Textos {
   }
 
   categoriasW: {
-    abertos: (n: number) => string
     acessar: (categoria: string) => string
     escolhaFormulario: string
     verTodas: string
@@ -280,6 +279,24 @@ export interface Textos {
     montarToast: string
   }
   beniW: { conversar: string, boasVindas: string }
+  iaW: {
+    agentes: { conversar: (nome: string) => string, sistema: string, revisor: string, gerenciar: string }
+    revisoes: {
+      status: Record<'pending' | 'in_progress' | 'completed' | 'failed', string>
+      nota: (n: number) => string
+      achados: (n: number) => string
+      concluidas: string
+      emAndamento: string
+      notaMedia: string
+      vazio: string
+    }
+    creditos: { unidade: string, duram: (dias: number) => string, consumo: string, comprar: string, extrato: string, baixo: string }
+    falhas: { repetir: string, repetido: string, vazio: string, abrirFluxo: string }
+    soAdminVe: string
+    avisoDoAgente: string
+    ola: (nome: string) => string
+    respostaDoAgente: (agente: string) => string
+  }
   agendaW: {
     mais: (n: number) => string
     nadaNoDia: string
@@ -293,7 +310,6 @@ export interface Textos {
     vazioPrazos: string
     venceEm: (data: string) => string
     venceu: (data: string) => string
-    abertos: (n: number) => string
   }
 
   ehMaquete: string
@@ -344,19 +360,23 @@ const ptBR: Textos = {
     categorias: { titulo: 'Categorias', descricao: 'Acesse uma categoria ou crie um item nela.' },
     atalhos: { titulo: 'Atalhos', descricao: 'Visualizações, telas e links fixados.' },
     recentes: { titulo: 'Recentes', descricao: 'Os itens e as telas que você abriu por último.' },
-    agenda: { titulo: 'Agenda de hoje', descricao: 'Compromissos, prazos de tarefa e datas de item de hoje.' },
+    agenda: { titulo: 'Compromissos do dia', descricao: 'Compromissos, prazos de tarefa e datas de item de hoje.' },
     graficoDePainel: { titulo: 'Gráfico de um painel', descricao: 'Um painel de uma tela do tipo Dashboard.' },
     comunicado: { titulo: 'Comunicado', descricao: 'Aviso do administrador para todo o workspace.' },
     notas: { titulo: 'Bloco de notas', descricao: 'Anotações suas. Só você vê.' },
     beni: { titulo: 'BENI', descricao: 'O resumo do dia feito pelo BENI, com o atalho para a conversa com ele.' },
+    agentesIa: { titulo: 'Agentes de IA', descricao: 'Os agentes do workspace. Um clique abre a conversa com o agente.' },
+    revisoesIa: { titulo: 'Revisões por IA', descricao: 'Os documentos que o agente revisor está revisando ou já revisou, com a nota.' },
+    creditosIa: { titulo: 'Créditos de IA', descricao: 'O saldo da carteira e quanto tempo ele dura no ritmo atual.' },
+    falhasIa: { titulo: 'Falhas dos agentes', descricao: 'O passo de agente que falhou num fluxo do Spaceflow, com Repetir.' },
     agendaSemana: { titulo: 'Agenda da semana', descricao: 'Os 7 dias a partir de hoje, em colunas.' },
     agendaMes: { titulo: 'Agenda do mês', descricao: 'O calendário do mês. Clique num dia para ver o que há nele.' },
-    meusItens: { titulo: 'Meus itens', descricao: 'Os itens em aberto em que você é o responsável.' },
+    meusItens: { titulo: 'Meus itens', descricao: 'Os itens em que você é o responsável.' },
     ultimosItens: { titulo: 'Itens criados recentemente', descricao: 'Os últimos itens criados nas categorias que você acessa.' },
     prazosDeItens: { titulo: 'Prazos de itens', descricao: 'Itens com data de vencimento ou vigência nos próximos 30 dias.' },
-    itensPorCategoria: { titulo: 'Itens em aberto por categoria', descricao: 'Quantos itens estão em aberto em cada categoria.' },
+    itensPorCategoria: { titulo: 'Itens por categoria', descricao: 'Quantos itens há em cada categoria que você acessa.' },
   },
-  grupos: { tarefas: 'Tarefas', agenda: 'Agenda', itens: 'Itens e categorias', atalhos: 'Telas e atalhos', equipe: 'BENI e equipe' },
+  grupos: { tarefas: 'Tarefas', agenda: 'Agenda', itens: 'Itens e categorias', atalhos: 'Telas e atalhos', ia: 'IA', equipe: 'Equipe e notas' },
 
   widget: {
     configurar: 'Configurar',
@@ -404,7 +424,6 @@ const ptBR: Textos = {
   },
 
   categoriasW: {
-    abertos: n => n === 0 ? 'Nenhum em aberto' : n === 1 ? '1 em aberto' : `${n} em aberto`,
     acessar: c => `Acessar ${c}`,
     escolhaFormulario: 'Escolha o formulário',
     verTodas: 'Ver todas as categorias',
@@ -552,7 +571,8 @@ const ptBR: Textos = {
     agenda: 'O dia, a semana e o mês, com compromissos, prazos de tarefa e datas de item.',
     itens: 'As categorias e os itens: os seus, os mais novos e os que vencem.',
     atalhos: 'Atalhos, telas abertas por último e o gráfico de um painel.',
-    equipe: 'O BENI, o comunicado do administrador e o bloco de notas.',
+    ia: 'O BENI, os agentes do workspace, as revisões, os créditos e as falhas dos agentes.',
+    equipe: 'O comunicado do administrador e o bloco de notas.',
   },
   escopoDeTarefas: { rotulo: 'De quem são as tarefas', minhas: 'Minhas tarefas', workspace: 'Workspace' },
   catalogo: {
@@ -649,6 +669,36 @@ const ptBR: Textos = {
     conversar: 'Conversar com o BENI',
     boasVindas: 'O BENI cria itens e tarefas a partir do que você escrever e responde dúvidas sobre o workspace.',
   },
+  iaW: {
+    agentes: { conversar: n => `Conversar com ${n}`, sistema: 'Do sistema', revisor: 'Revisor', gerenciar: 'Gerenciar agentes' },
+    revisoes: {
+      status: { pending: 'Na fila', in_progress: 'Revisando', completed: 'Concluída', failed: 'Falhou' },
+      nota: n => `Nota ${n}`,
+      achados: n => n === 0 ? 'Nenhum achado grave' : n === 1 ? '1 achado grave' : `${n} achados graves`,
+      concluidas: 'Concluídas no mês',
+      emAndamento: 'Na fila ou revisando',
+      notaMedia: 'Nota média',
+      vazio: 'Nenhum documento revisado por IA ainda.',
+    },
+    creditos: {
+      unidade: 'créditos',
+      duram: d => `No ritmo dos últimos 7 dias, o saldo dura cerca de ${d} dias.`,
+      consumo: 'Consumo diário, últimos 30 dias',
+      comprar: 'Comprar créditos',
+      extrato: 'Ver extrato',
+      baixo: 'Saldo baixo',
+    },
+    falhas: {
+      repetir: 'Repetir',
+      repetido: 'O passo voltou para a fila do fluxo.',
+      vazio: 'Nenhum passo de agente falhou nos últimos 7 dias.',
+      abrirFluxo: 'Abrir a execução no Spaceflow',
+    },
+    soAdminVe: 'Só o administrador vê',
+    avisoDoAgente: 'O agente pode errar. Confira a resposta antes de usar.',
+    ola: n => `Olá, ${n}.`,
+    respostaDoAgente: a => `No produto, quem responde é o agente ${a}, com o modelo e as ferramentas configurados nele.`,
+  },
   agendaW: {
     mais: n => `Mais ${n}`,
     nadaNoDia: 'Nada neste dia.',
@@ -658,11 +708,10 @@ const ptBR: Textos = {
   },
   itensW: {
     vazio: 'Nenhum item criado ainda.',
-    vazioMeus: 'Nenhum item em aberto sob sua responsabilidade.',
+    vazioMeus: 'Nenhum item sob sua responsabilidade.',
     vazioPrazos: 'Nenhum item vence nos próximos 30 dias.',
     venceEm: d => `Vence em ${d}`,
     venceu: d => `Venceu em ${d}`,
-    abertos: n => n === 1 ? '1 em aberto' : `${n} em aberto`,
   },
   ehMaquete: 'Maquete',
 }
@@ -712,19 +761,23 @@ const en: Textos = {
     categorias: { titulo: 'Categories', descricao: 'Open a category or create an item in it.' },
     atalhos: { titulo: 'Shortcuts', descricao: 'Pinned views, screens and links.' },
     recentes: { titulo: 'Recent', descricao: 'The items and screens you opened last.' },
-    agenda: { titulo: 'Today\'s schedule', descricao: 'Today\'s events, task due dates and item dates.' },
+    agenda: { titulo: 'Today\'s appointments', descricao: 'Today\'s events, task due dates and item dates.' },
     graficoDePainel: { titulo: 'Chart from a dashboard', descricao: 'A panel from a Dashboard screen.' },
     comunicado: { titulo: 'Announcement', descricao: 'A notice from the admin to the whole workspace.' },
     notas: { titulo: 'Notepad', descricao: 'Your notes. Only you can see them.' },
     beni: { titulo: 'BENI', descricao: 'The day summary written by BENI, with a shortcut to the chat with him.' },
+    agentesIa: { titulo: 'AI agents', descricao: 'The workspace agents. One click opens the chat with the agent.' },
+    revisoesIa: { titulo: 'AI reviews', descricao: 'The documents the reviewer agent is reviewing or has reviewed, with the score.' },
+    creditosIa: { titulo: 'AI credits', descricao: 'The wallet balance and how long it lasts at the current pace.' },
+    falhasIa: { titulo: 'Agent failures', descricao: 'The agent step that failed in a Spaceflow flow, with Retry.' },
     agendaSemana: { titulo: 'This week', descricao: 'The 7 days starting today, in columns.' },
     agendaMes: { titulo: 'This month', descricao: 'The month calendar. Click a day to see what is on it.' },
-    meusItens: { titulo: 'My items', descricao: 'Open items you are responsible for.' },
+    meusItens: { titulo: 'My items', descricao: 'The items you are responsible for.' },
     ultimosItens: { titulo: 'Recently created items', descricao: 'The latest items created in the categories you can access.' },
     prazosDeItens: { titulo: 'Item due dates', descricao: 'Items with a due or expiry date in the next 30 days.' },
-    itensPorCategoria: { titulo: 'Open items by category', descricao: 'How many items are open in each category.' },
+    itensPorCategoria: { titulo: 'Items by category', descricao: 'How many items each category you can access has.' },
   },
-  grupos: { tarefas: 'Tasks', agenda: 'Schedule', itens: 'Items and categories', atalhos: 'Screens and shortcuts', equipe: 'BENI and team' },
+  grupos: { tarefas: 'Tasks', agenda: 'Schedule', itens: 'Items and categories', atalhos: 'Screens and shortcuts', ia: 'AI', equipe: 'Team and notes' },
 
   widget: {
     configurar: 'Configure',
@@ -772,7 +825,6 @@ const en: Textos = {
   },
 
   categoriasW: {
-    abertos: n => n === 0 ? 'None open' : `${n} open`,
     acessar: c => `Open ${c}`,
     escolhaFormulario: 'Choose the form',
     verTodas: 'See all categories',
@@ -920,7 +972,8 @@ const en: Textos = {
     agenda: 'The day, the week and the month, with events, task due dates and item dates.',
     itens: 'Categories and items: yours, the newest and the ones coming due.',
     atalhos: 'Shortcuts, screens opened last and a chart from a dashboard.',
-    equipe: 'BENI, the administrator announcement and the notepad.',
+    ia: 'BENI, the workspace agents, the reviews, the credits and the agent failures.',
+    equipe: 'The administrator announcement and the notepad.',
   },
   escopoDeTarefas: { rotulo: 'Whose tasks', minhas: 'My tasks', workspace: 'Workspace' },
   catalogo: {
@@ -1017,6 +1070,36 @@ const en: Textos = {
     conversar: 'Chat with BENI',
     boasVindas: 'BENI creates items and tasks from what you write and answers questions about the workspace.',
   },
+  iaW: {
+    agentes: { conversar: n => `Chat with ${n}`, sistema: 'System', revisor: 'Reviewer', gerenciar: 'Manage agents' },
+    revisoes: {
+      status: { pending: 'Queued', in_progress: 'Reviewing', completed: 'Done', failed: 'Failed' },
+      nota: n => `Score ${n}`,
+      achados: n => n === 0 ? 'No serious findings' : n === 1 ? '1 serious finding' : `${n} serious findings`,
+      concluidas: 'Done this month',
+      emAndamento: 'Queued or reviewing',
+      notaMedia: 'Average score',
+      vazio: 'No document reviewed by AI yet.',
+    },
+    creditos: {
+      unidade: 'credits',
+      duram: d => `At the pace of the last 7 days, the balance lasts about ${d} days.`,
+      consumo: 'Daily use, last 30 days',
+      comprar: 'Buy credits',
+      extrato: 'View statement',
+      baixo: 'Low balance',
+    },
+    falhas: {
+      repetir: 'Retry',
+      repetido: 'The step is back in the flow queue.',
+      vazio: 'No agent step failed in the last 7 days.',
+      abrirFluxo: 'Open the run in Spaceflow',
+    },
+    soAdminVe: 'Only the admin sees it',
+    avisoDoAgente: 'The agent can make mistakes. Check the answer before using it.',
+    ola: n => `Hello, ${n}.`,
+    respostaDoAgente: a => `In the product, the ${a} agent answers, with the model and tools set up in it.`,
+  },
   agendaW: {
     mais: n => `${n} more`,
     nadaNoDia: 'Nothing on this day.',
@@ -1026,11 +1109,10 @@ const en: Textos = {
   },
   itensW: {
     vazio: 'No items created yet.',
-    vazioMeus: 'No open items assigned to you.',
+    vazioMeus: 'No items assigned to you.',
     vazioPrazos: 'No items are due in the next 30 days.',
     venceEm: d => `Due on ${d}`,
     venceu: d => `Was due on ${d}`,
-    abertos: n => `${n} open`,
   },
   ehMaquete: 'Mockup',
 }
@@ -1080,19 +1162,23 @@ const es: Textos = {
     categorias: { titulo: 'Categorías', descricao: 'Accede a una categoría o crea un ítem en ella.' },
     atalhos: { titulo: 'Accesos directos', descricao: 'Vistas, pantallas y enlaces fijados.' },
     recentes: { titulo: 'Recientes', descricao: 'Los ítems y las pantallas que abriste por último.' },
-    agenda: { titulo: 'Agenda de hoy', descricao: 'Compromisos, plazos de tarea y fechas de ítem de hoy.' },
+    agenda: { titulo: 'Compromisos del día', descricao: 'Compromisos, plazos de tarea y fechas de ítem de hoy.' },
     graficoDePainel: { titulo: 'Gráfico de un panel', descricao: 'Un panel de una pantalla de tipo Dashboard.' },
     comunicado: { titulo: 'Comunicado', descricao: 'Aviso del administrador para todo el workspace.' },
     notas: { titulo: 'Bloc de notas', descricao: 'Tus notas. Solo tú las ves.' },
     beni: { titulo: 'BENI', descricao: 'El resumen del día hecho por el BENI, con el atajo a la conversación con él.' },
+    agentesIa: { titulo: 'Agentes de IA', descricao: 'Los agentes del workspace. Un clic abre la conversación con el agente.' },
+    revisoesIa: { titulo: 'Revisiones por IA', descricao: 'Los documentos que el agente revisor está revisando o ya revisó, con la nota.' },
+    creditosIa: { titulo: 'Créditos de IA', descricao: 'El saldo de la cartera y cuánto dura al ritmo actual.' },
+    falhasIa: { titulo: 'Fallas de los agentes', descricao: 'El paso de agente que falló en un flujo del Spaceflow, con Reintentar.' },
     agendaSemana: { titulo: 'Agenda de la semana', descricao: 'Los 7 días a partir de hoy, en columnas.' },
     agendaMes: { titulo: 'Agenda del mes', descricao: 'El calendario del mes. Haz clic en un día para ver lo que hay.' },
-    meusItens: { titulo: 'Mis ítems', descricao: 'Los ítems abiertos de los que eres responsable.' },
+    meusItens: { titulo: 'Mis ítems', descricao: 'Los ítems de los que eres responsable.' },
     ultimosItens: { titulo: 'Ítems creados recientemente', descricao: 'Los últimos ítems creados en las categorías a las que accedes.' },
     prazosDeItens: { titulo: 'Plazos de ítems', descricao: 'Ítems con fecha de vencimiento o vigencia en los próximos 30 días.' },
-    itensPorCategoria: { titulo: 'Ítems abiertos por categoría', descricao: 'Cuántos ítems están abiertos en cada categoría.' },
+    itensPorCategoria: { titulo: 'Ítems por categoría', descricao: 'Cuántos ítems hay en cada categoría a la que accedes.' },
   },
-  grupos: { tarefas: 'Tareas', agenda: 'Agenda', itens: 'Ítems y categorías', atalhos: 'Pantallas y accesos', equipe: 'BENI y equipo' },
+  grupos: { tarefas: 'Tareas', agenda: 'Agenda', itens: 'Ítems y categorías', atalhos: 'Pantallas y accesos', ia: 'IA', equipe: 'Equipo y notas' },
 
   widget: {
     configurar: 'Configurar',
@@ -1140,7 +1226,6 @@ const es: Textos = {
   },
 
   categoriasW: {
-    abertos: n => n === 0 ? 'Ninguno abierto' : n === 1 ? '1 abierto' : `${n} abiertos`,
     acessar: c => `Acceder a ${c}`,
     escolhaFormulario: 'Elige el formulario',
     verTodas: 'Ver todas las categorías',
@@ -1288,7 +1373,8 @@ const es: Textos = {
     agenda: 'El día, la semana y el mes, con compromisos, plazos de tarea y fechas de ítem.',
     itens: 'Las categorías y los ítems: los tuyos, los más nuevos y los que vencen.',
     atalhos: 'Accesos directos, pantallas abiertas por último y el gráfico de un panel.',
-    equipe: 'El BENI, el comunicado del administrador y el bloc de notas.',
+    ia: 'El BENI, los agentes del workspace, las revisiones, los créditos y las fallas de los agentes.',
+    equipe: 'El comunicado del administrador y el bloc de notas.',
   },
   escopoDeTarefas: { rotulo: 'De quién son las tareas', minhas: 'Mis tareas', workspace: 'Workspace' },
   catalogo: {
@@ -1385,6 +1471,36 @@ const es: Textos = {
     conversar: 'Conversar con el BENI',
     boasVindas: 'El BENI crea ítems y tareas a partir de lo que escribas y responde dudas sobre el workspace.',
   },
+  iaW: {
+    agentes: { conversar: n => `Conversar con ${n}`, sistema: 'Del sistema', revisor: 'Revisor', gerenciar: 'Administrar agentes' },
+    revisoes: {
+      status: { pending: 'En cola', in_progress: 'Revisando', completed: 'Concluida', failed: 'Falló' },
+      nota: n => `Nota ${n}`,
+      achados: n => n === 0 ? 'Ningún hallazgo grave' : n === 1 ? '1 hallazgo grave' : `${n} hallazgos graves`,
+      concluidas: 'Concluidas en el mes',
+      emAndamento: 'En cola o revisando',
+      notaMedia: 'Nota media',
+      vazio: 'Ningún documento revisado por IA todavía.',
+    },
+    creditos: {
+      unidade: 'créditos',
+      duram: d => `Al ritmo de los últimos 7 días, el saldo dura cerca de ${d} días.`,
+      consumo: 'Consumo diario, últimos 30 días',
+      comprar: 'Comprar créditos',
+      extrato: 'Ver extracto',
+      baixo: 'Saldo bajo',
+    },
+    falhas: {
+      repetir: 'Reintentar',
+      repetido: 'El paso volvió a la cola del flujo.',
+      vazio: 'Ningún paso de agente falló en los últimos 7 días.',
+      abrirFluxo: 'Abrir la ejecución en el Spaceflow',
+    },
+    soAdminVe: 'Solo el administrador lo ve',
+    avisoDoAgente: 'El agente puede equivocarse. Revisa la respuesta antes de usarla.',
+    ola: n => `Hola, ${n}.`,
+    respostaDoAgente: a => `En el producto, responde el agente ${a}, con el modelo y las herramientas configurados en él.`,
+  },
   agendaW: {
     mais: n => `${n} más`,
     nadaNoDia: 'Nada en este día.',
@@ -1394,11 +1510,10 @@ const es: Textos = {
   },
   itensW: {
     vazio: 'Aún no hay ítems creados.',
-    vazioMeus: 'No hay ítems abiertos bajo tu responsabilidad.',
+    vazioMeus: 'No hay ítems bajo tu responsabilidad.',
     vazioPrazos: 'Ningún ítem vence en los próximos 30 días.',
     venceEm: d => `Vence el ${d}`,
     venceu: d => `Venció el ${d}`,
-    abertos: n => n === 1 ? '1 abierto' : `${n} abiertos`,
   },
   ehMaquete: 'Maqueta',
 }

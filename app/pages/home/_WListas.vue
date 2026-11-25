@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * Os 4 widgets de lista simples: Atalhos, Recentes, Agenda de hoje e Tarefas
+ * Os 4 widgets de lista simples: Atalhos, Recentes, Compromissos do dia e Tarefas
  * que delegei. Cada linha é um alvo só (regra 25), com o ícone, o nome e o
  * "onde" embaixo.
  *
@@ -81,7 +81,7 @@ const agora = computed(() => props.eventos?.slice().sort((a, b) => a.inicio.getT
       </li>
     </ul>
 
-    <!-- Agenda de hoje -->
+    <!-- Compromissos do dia -->
     <ol v-else-if="tipo === 'agenda'" class="relative px-4 pb-3">
       <li v-for="(e, i) in agora" :key="e.id" class="flex gap-3 py-1.5 animate-[entrada_0.3s_ease-out_both]" :style="{ animationDelay: `${i * 30}ms` }">
         <span class="w-11 shrink-0 pt-0.5 text-right text-xs font-medium tabular-nums text-muted">{{ hora(e.inicio, t) }}</span>

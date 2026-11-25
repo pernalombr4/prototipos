@@ -55,7 +55,7 @@ export function pessoa(id?: number | null) {
  * Categorias, formulários e visualizações                              *
  * ------------------------------------------------------------------ */
 
-export type Categoria = Pick<ItemType, 'name' | 'slug' | 'icon' | 'color'> & {
+export type Categoria = Pick<ItemType, 'name' | 'slug' | 'icon' | 'color' | 'description'> & {
   /**
    * `singular_name` da categoria (`c-item-types`). É o que vai em "Criar <singular>".
    * Sem ele, o rótulo cai para "Criar item em <nome>".
@@ -74,30 +74,36 @@ export type Categoria = Pick<ItemType, 'name' | 'slug' | 'icon' | 'color'> & {
 export const categorias: Categoria[] = [
   {
     name: 'Solicitações de compra', singular: 'solicitação de compra', slug: 'solicitacoes-de-compra', icon: 'i-lucide-shopping-cart', color: 'primary', acesso: true,
+    description: 'Pedidos de material, equipamento e serviço, da cotação à aprovação.',
     formularios: [{ id: 'f-material', nome: 'Material de escritório' }, { id: 'f-equipamento', nome: 'Equipamento de TI' }, { id: 'f-servico', nome: 'Contratação de serviço' }],
   },
   {
     name: 'Contratos', singular: 'contrato', slug: 'contratos', icon: 'i-lucide-file-signature', color: 'info', acesso: true,
+    description: 'Contratos e aditivos com clientes e fornecedores, até a assinatura.',
     formularios: [{ id: 'f-contrato', nome: 'Contrato novo' }, { id: 'f-aditivo', nome: 'Aditivo' }],
   },
   {
     // Sem formulário: o modal mostra todos os campos da categoria.
     name: 'Chamados de TI', singular: 'chamado', slug: 'chamados-de-ti', icon: 'i-lucide-headset', color: 'warning', acesso: true,
+    description: 'Pedidos de suporte, acesso e equipamento para o time de TI.',
     formularios: [],
   },
   {
     // 1 formulário: abre direto, sem a escolha.
     name: 'Reembolsos', singular: 'reembolso', slug: 'reembolsos', icon: 'i-lucide-receipt', color: 'success', acesso: true,
+    description: 'Despesas de viagem e de trabalho para reembolso.',
     formularios: [{ id: 'f-reembolso', nome: 'Despesa de viagem' }],
   },
   {
     // Sem singular cadastrado: o rótulo cai para "Criar item em Fornecedores".
     name: 'Fornecedores', slug: 'fornecedores', icon: 'i-lucide-building-2', color: 'neutral', acesso: true,
+    description: 'Cadastro e homologação de fornecedores.',
     formularios: [],
   },
   {
     // Sem acesso de propósito: é o estado "sem permissão" de um widget.
     name: 'Folha de pagamento', singular: 'lançamento', slug: 'folha-de-pagamento', icon: 'i-lucide-wallet', color: 'error', acesso: false,
+    description: 'Lançamentos da folha de pagamento.',
     formularios: [],
   },
 ]
@@ -271,7 +277,7 @@ export interface Evento {
 
 /**
  * Os compromissos do calendário conectado (Outlook), de 1/11 a 31/12. A
- * Agenda de hoje, a da semana e a do mês somam a eles os prazos das tarefas e
+ * Compromissos do dia, a da semana e a do mês somam a eles os prazos das tarefas e
  * as datas dos itens, que vêm do dado da Home (index.vue, `agendaCompleta`).
  *
  * Rodada 6: era a lista fixa de hoje (`eventosDeHoje`); virou o calendário do
@@ -370,5 +376,79 @@ export const resumoDoBeni = {
     { icone: 'i-lucide-shopping-cart', texto: '2 pedidos de compra seus esperam aprovação, somando R$ 71.300,00.' },
   ],
 }
+
+/* ---------------------------------------------------------------------------
+ * IA (rodada 7). A forma vem do que o back já guarda (develop, 2026-11-24):
+ * - agente: `ai_agent` (`name`, `slug`, `description`, `type`, `status`,
+ *   `beniTheme`), lido por `GET /ai/agents`, que junta os do sistema e os do
+ *   workspace;
+ * - revisão: `ai_review_session` (`status` pending, in_progress, completed,
+ *   failed), por `GET /ai/review/sessions` e `/ai/review/stats`;
+ * - créditos: a carteira do workspace (`GET /ws/financial/wallet`) e o extrato
+ *   (`/ws/financial/wallets/:id/transactions`);
+ * - falha: execução de nó do Spaceflow com `status` error (`GET /workflows/nodes`),
+ *   que se repete por `POST /workflows/nodes/:id/retry`.
+ * Os valores são inventados.
+ * ------------------------------------------------------------------------- */
+
+export interface AgenteDeIA {
+  slug: string
+  nome: string
+  descricao: string
+  /** Cor do corpo do BENI (`beniTheme.colors.body`). */
+  cor: string
+  /** `source: 'system'`: BENI e BENI BUILDER. */
+  sistema?: boolean
+  tipo: 'chat' | 'reviewer'
+}
+
+export const agentesDeIA: AgenteDeIA[] = [
+  { slug: 'beni', nome: 'BENI', descricao: 'O assistente do workspace: cria itens e tarefas e responde dúvidas.', cor: '#60a5fa', sistema: true, tipo: 'chat' },
+  { slug: 'analista-de-contratos', nome: 'Analista de contratos', descricao: 'Revisa contratos e aditivos pelo manual jurídico da empresa.', cor: '#34d399', tipo: 'reviewer' },
+  { slug: 'triagem-de-chamados', nome: 'Triagem de chamados', descricao: 'Classifica o chamado de TI e sugere a prioridade e o responsável.', cor: '#fbbf24', tipo: 'chat' },
+  { slug: 'conferente-de-reembolsos', nome: 'Conferente de reembolsos', descricao: 'Confere a nota e o valor do reembolso pela política de viagens.', cor: '#a78bfa', tipo: 'chat' },
+]
+
+export interface RevisaoDeIA {
+  id: string
+  documento: string
+  /** A referência do item de onde veio o documento. */
+  item: string
+  manual: string
+  status: 'pending' | 'in_progress' | 'completed' | 'failed'
+  /** De 0 a 100, só na concluída. */
+  nota?: number
+  /** Achados de severidade alta, só na concluída. */
+  achadosAltos?: number
+  em: number
+}
+
+export const revisoesDeIA: RevisaoDeIA[] = [
+  { id: 'rv-1', documento: 'NDA com a Vértice Consultoria', item: '#23217', manual: 'Revisão de NDA', status: 'in_progress', em: AGORA.getTime() - 12 * 60_000 },
+  { id: 'rv-2', documento: 'Aditivo da locação do galpão de Jundiaí', item: '#23203', manual: 'Revisão de aditivo', status: 'completed', nota: 64, achadosAltos: 2, em: AGORA.getTime() - 3 * HORA },
+  { id: 'rv-3', documento: 'Prestação de serviços de limpeza, Lumen Facilities', item: '#23196', manual: 'Contrato de serviço', status: 'completed', nota: 88, achadosAltos: 0, em: AGORA.getTime() - DIA },
+  { id: 'rv-4', documento: 'Licença do software de design', item: '#23142', manual: 'Contrato de software', status: 'failed', em: AGORA.getTime() - 2 * DIA },
+  { id: 'rv-5', documento: 'Contrato de manutenção dos elevadores', item: '#23121', manual: 'Contrato de serviço', status: 'pending', em: AGORA.getTime() - 5 * 60_000 },
+]
+
+/** A carteira de IA do workspace. Consumo diário dos últimos 30 dias, em créditos. */
+export const carteiraDeIA = {
+  saldo: 18_400,
+  consumoPorDia: [420, 380, 510, 0, 0, 640, 590, 610, 700, 480, 0, 0, 720, 810, 760, 690, 830, 0, 0, 880, 910, 850, 940, 870, 0, 0, 990, 1020, 960, 1050],
+}
+
+export interface FalhaDeAgente {
+  id: string
+  agente: string
+  fluxo: string
+  item: string
+  erro: string
+  em: number
+}
+
+export const falhasDeAgentes: FalhaDeAgente[] = [
+  { id: 'nx-1', agente: 'triagem-de-chamados', fluxo: 'Triagem de chamados de TI', item: '#23224', erro: 'O agente passou do limite de 10 passos.', em: AGORA.getTime() - 40 * 60_000 },
+  { id: 'nx-2', agente: 'conferente-de-reembolsos', fluxo: 'Conferência de reembolso', item: '#23259', erro: 'O anexo da nota não abriu (arquivo protegido por senha).', em: AGORA.getTime() - 5 * HORA },
+]
 
 export { DIA, HORA }

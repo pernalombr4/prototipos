@@ -24,7 +24,7 @@ const emit = defineEmits<{ adicionar: [] }>()
     <span class="min-w-0 flex-1">
       <span class="flex items-center gap-1.5 text-sm font-medium text-highlighted">
         {{ t.widgets[d.tipo].titulo }}
-        <UBadge v-if="d.soAdmin" :label="t.comunicado.soAdmin" color="neutral" variant="subtle" size="sm" />
+        <UBadge v-if="d.soAdmin" :label="d.tipo === 'comunicado' ? t.comunicado.soAdmin : t.iaW.soAdminVe" color="neutral" variant="subtle" size="sm" />
       </span>
       <span class="block text-xs text-muted">{{ t.widgets[d.tipo].descricao }}</span>
     </span>
