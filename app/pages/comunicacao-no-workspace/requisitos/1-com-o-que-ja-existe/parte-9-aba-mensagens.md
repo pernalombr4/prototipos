@@ -33,7 +33,7 @@ controle "Dados" mostra "Workspace novo", "Primeiro uso" e "Em uso".
 | RF804 | A tabela deve ter as colunas Ações, Tipo, De, Para, Assunto, Item, "Enviado por" e Data, com a Data mais recente primeiro ao abrir. | O e-mail de hoje fica na 1ª linha. | Essencial | Obrigatório |
 | RF805 | "Colunas" deve esconder e mostrar Tipo, De, Para, Item e "Enviado por". | Desmarcar Tipo tira a coluna da tabela. | Importante | Obrigatório |
 | RF806 | O cabeçalho de De, Para, Assunto, Item e Data deve ordenar a tabela no clique. | 2 cliques em Assunto ordenam de A a Z e de Z a A. | Importante | Obrigatório |
-| RF807 | O funil de De, Para e Assunto deve filtrar por texto, com os operadores "É totalmente Igual a", "É totalmente Diferente De", "Contém parcialmente", "Não contém" e as variantes que diferenciam maiúsculas, cada operador 1 vez. | "Contém parcialmente" "vertice" em De deixa só os e-mails da Vértice. | Importante | Obrigatório |
+| RF807 | O funil de De, Para e Assunto deve filtrar por texto, com os operadores "É totalmente Igual a", "É totalmente Diferente De", "Contém parcialmente", "Não contém" e as variantes que diferenciam maiúsculas, cada operador 1 vez. | "Contém parcialmente" "rafael" em De deixa só os e-mails de rafael.monteiro@example.com. | Importante | Obrigatório |
 | RF808 | O funil de Tipo, Item e "Enviado por" deve filtrar por seleção, com busca, "Todos" e "Limpar". | Marcar CTR-00231 em Item deixa só os e-mails desse item. | Importante | Obrigatório |
 
 ## Barra e filtros rápidos (RF)
@@ -51,7 +51,7 @@ controle "Dados" mostra "Workspace novo", "Primeiro uso" e "Em uso".
 |---|---|---|---|---|
 | RF821 | O menu da linha deve ter "Ver Detalhes", "Responder", "Marcar como não lido" (no recebido já lido) e "Ver Item" (RN914). | O menu de um recebido lido mostra os 4 itens; o de um enviado, sem "Marcar como não lido". | Essencial | Obrigatório |
 | RF822 | "Ver Item" deve abrir o item do e-mail na aba Mail Box. | "Ver Item" num e-mail de CTR-00231 abre a Mail Box de CTR-00231. | Importante | Obrigatório |
-| RF823 | O clique na linha e "Ver Detalhes" devem abrir a leitura num painel lateral, com Tipo, De, Para, Cc, "Enviado por", o item vinculado e o corpo. | O painel de "Minuta revisada" mostra os campos e o texto. | Essencial | Obrigatório |
+| RF823 | O clique na linha e "Ver Detalhes" devem abrir a leitura num painel lateral, com Tipo, De, Para, Cc, "Enviado por", o item vinculado e o corpo. | O painel de "CTR-00229 · Índice de reajuste" mostra os campos e o texto. | Essencial | Obrigatório |
 | RF824 | Abrir a leitura de um recebido não lido deve marcar o e-mail como lido. | O e-mail sai de "Não lidos" depois de aberto. | Importante | Obrigatório |
 | RF825 | O painel de leitura deve ter "Responder" e, no recebido, "Marcar como não lido" (RN914). | "Responder" no painel abre "Re: Minuta revisada" vinculado a CTR-00231. | Essencial | Obrigatório |
 

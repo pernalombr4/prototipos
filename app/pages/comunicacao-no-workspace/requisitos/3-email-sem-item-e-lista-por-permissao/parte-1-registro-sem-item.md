@@ -17,8 +17,8 @@ Início, "Novo e-mail"; em E-mails › Mensagens, o filtro rápido "Sem item".
 | ID | Regra | Exemplo | Relevância |
 |---|---|---|---|
 | RN001 | Cada e-mail enviado pelo ENSPACE fica gravado, com item ou sem item. | O e-mail "Cadastro de fornecedor", sem item, fica no ENSPACE. | Obrigatório |
-| RN002 | A resposta a um e-mail sem item, enviado pela conta do Outlook, chega só no Outlook de quem enviou. | fornecedor.novo@example.com responde "Cadastro de fornecedor"; a resposta chega no Outlook de Fábio Castro, fora do ENSPACE. | Obrigatório |
-| RN003 | O e-mail sem item enviado pela conta do Outlook aparece na aba Mensagens de quem enviou. | Fábio Castro vê "Cadastro de fornecedor" na aba Mensagens. | Obrigatório |
+| RN002 | A resposta a um e-mail sem item, enviado pela conta do Outlook, chega só no Outlook de quem enviou. | fornecedor.novo@example.com responde "Cadastro de fornecedor"; a resposta chega no Outlook de Ana Ribeiro, fora do ENSPACE. | Obrigatório |
+| RN003 | O e-mail sem item enviado pela conta do Outlook aparece na aba Mensagens de quem enviou. | Ana Ribeiro, que enviou, vê "Cadastro de fornecedor" na aba Mensagens. | Obrigatório |
 
 ## Gravar o e-mail (RF)
 
@@ -39,7 +39,7 @@ Início, "Novo e-mail"; em E-mails › Mensagens, o filtro rápido "Sem item".
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF006 | A aba Mensagens deve listar o e-mail sem item para quem enviou (RN003). | Fábio Castro vê "Cadastro de fornecedor", do tipo Enviado, sem item na coluna Item. | Essencial | Obrigatório |
+| RF006 | A aba Mensagens deve listar o e-mail sem item para quem enviou (RN003). | Ana Ribeiro, que enviou, vê "Cadastro de fornecedor", do tipo Enviado, sem item na coluna Item. | Essencial | Obrigatório |
 | RF007 | A dica do "i" da aba Mensagens deve dizer "Os e-mails recebidos e enviados pelo ENSPACE, com ou sem item." | Hover no "i" ao lado de "Mensagens" mostra o texto. | Importante | Obrigatório |
 | RF008 | Os filtros rápidos devem ganhar "Sem item", que mostra só os e-mails sem item vinculado. | "Sem item" ligado: a lista mostra "Cadastro de fornecedor" e esconde os e-mails de CTR-00231. | Importante | Obrigatório |
 | RF009 | O filtro da coluna Item deve ganhar a opção "Sem item". | No funil da coluna Item, "Sem item" aparece antes das referências. | Desejável | Desejável |

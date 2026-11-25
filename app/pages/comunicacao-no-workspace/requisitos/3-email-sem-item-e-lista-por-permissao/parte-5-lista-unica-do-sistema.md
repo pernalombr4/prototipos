@@ -23,12 +23,12 @@ sistema", a coluna Status e o atalho Configurações › E-mails › E-mails Env
 |---|---|---|---|---|
 | RF401 | A aba Mensagens deve listar numa tabela só os e-mails dos itens e os enviados pelo sistema (RN401). | Com a permissão, a tabela intercala as linhas de "Enviado por" com nome de pessoa e as de "Sistema · <tarefa>". | Essencial | Obrigatório |
 | RF402 | A ordem escolhida no cabeçalho deve valer para a lista única, sem separar as 2 origens. | Ordenar por Data, mais recente primeiro (o padrão), põe o e-mail do sistema de ontem entre os e-mails de pessoa de hoje e de anteontem. | Essencial | Obrigatório |
-| RF403 | O paginador deve contar e paginar a lista única. | Com 30 e-mails de item e 12 do sistema, o paginador diz "Mostrando 1 a 25 de 42 resultados". | Essencial | Obrigatório |
-| RF404 | O filtro "Do sistema" deve recortar a lista única, sem trocar a fonte da tabela. | "Do sistema" ligado com "Com anexo": a tabela mostra só os e-mails do sistema com anexo. | Essencial | Obrigatório |
+| RF403 | O paginador deve contar e paginar a lista única. | Com 10 e-mails de pessoa e 4 do sistema, o paginador diz "de 14 resultados". | Essencial | Obrigatório |
+| RF404 | O filtro "Do sistema" deve recortar a lista única, sem trocar a fonte da tabela. | "Do sistema" ligado com a busca "CTR-00231": a tabela mostra só o e-mail do sistema de CTR-00231. | Essencial | Obrigatório |
 | RF405 | O filtro "Enviados" deve incluir os e-mails enviados pelo sistema, que são do tipo Enviado. | "Enviados" ligado mostra os e-mails de pessoa e os do sistema. | Importante | Obrigatório |
 | RF406 | A busca, o período e os filtros de coluna devem valer para as 2 origens ao mesmo tempo. | Período "Hoje" mostra os e-mails de pessoa e os do sistema de hoje. | Importante | Obrigatório |
-| RF407 | Sem a permissão de ver os e-mails enviados, a lista, a contagem e os filtros devem considerar só os e-mails dos itens. | Membro sem a permissão: o paginador diz "de 30 resultados", sem as 12 linhas do sistema. | Essencial | Obrigatório |
-| RF408 | Configurações › E-mails › E-mails Enviados deve abrir a lista única com o filtro "Do sistema" ligado. | O clique abre Mensagens com "Do sistema" ligado e a contagem de 12 resultados. | Importante | Obrigatório |
+| RF407 | Sem a permissão de ver os e-mails enviados, a lista, a contagem e os filtros devem considerar só os e-mails dos itens. | Membro sem a permissão: o paginador diz "de 10 resultados", sem as 4 linhas do sistema. | Essencial | Obrigatório |
+| RF408 | Configurações › E-mails › E-mails Enviados deve abrir a lista única com o filtro "Do sistema" ligado. | O clique abre Mensagens com "Do sistema" ligado e a contagem de 4 resultados. | Importante | Obrigatório |
 
 ## Não funcionais, restrições e transição (RNF, RS, RT)
 

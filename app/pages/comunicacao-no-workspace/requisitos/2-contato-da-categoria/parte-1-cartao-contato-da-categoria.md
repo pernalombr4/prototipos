@@ -67,4 +67,5 @@ o nome e o e-mail de cada contato do item, ajusta o assunto do e-mail, confere a
 | P001 | O assunto pode ficar vazio? Vazio, o atalho abre sem assunto ou com o assunto padrão do épico "E-mail com o que o produto já tem"? O protótipo salva vazio, e a prévia mostra "-". | produto | O Salvar ganha validação, ou a parte 2 usa o assunto padrão |
 | P002 | O Salvar aceita contato com o "Nome do contato na tela" vazio, ou com as 2 origens em "Nenhum"? O protótipo salva. | produto | O Salvar ganha validação com aviso no campo |
 | P003 | Sair da página com edição não salva pede confirmação? O protótipo descarta sem perguntar. | produto | Um aviso de saída antes de descartar |
+| P004 | Com o contato sem nome, como fica o assunto com {nome}? O protótipo troca por vazio, e "Olá, {nome}" vira "Olá,". | produto | A variável cai para o e-mail, ou o trecho com a pontuação some |
 | S001 | O seletor da prévia mostra os itens da categoria que a pessoa pode ver, em número que a tela comporta; o protótipo mostra 4. | dev do front e produto | O número de itens e a ordem do seletor |

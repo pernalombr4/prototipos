@@ -39,7 +39,7 @@
  */
 import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
 import type { Textos } from './textos'
-import { type Email, caixas, itemPorId, itens, membroPorId, tarefas } from './mocks'
+import { EU, type Email, agora as agoraDoPrototipo, caixas, itemPorId, itens, membroPorId, tarefas } from './mocks'
 import { type AbaDaCentral, ABAS_DE_ADMIN, type Rapido, contatosDoItem, useComunicacao, useMarcaDeProposta } from './estado'
 import { useAppExterno } from './simulador'
 import BuscaDeItem from './_BuscaDeItem.vue'
@@ -126,8 +126,9 @@ const opcoesDePeriodo = computed(() => (Object.keys(te.value.periodo) as Periodo
 
 /* ---------- dados ---------- */
 
-const agora = new Date()
+// O período conta a partir do dia do protótipo (05/10/2026), não do relógio do computador.
 function dentroDoPeriodo(d: Date) {
+  const agora = agoraDoPrototipo()
   const dias = { todos: Infinity, hoje: 0, semana: 7, mes: 30 }[periodo.value]
   if (dias === Infinity) return true
   if (dias === 0) return d.toDateString() === agora.toDateString()
@@ -186,6 +187,8 @@ const filtrados = computed(() => {
     // Fase 1: os e-mails do sistema e os dos itens vêm de 2 telas de hoje, e "Do sistema" troca a fonte
     // (RF952). A lista única, com os 2 juntos, é da fase 2 (épico "E-mail sem item e lista por permissão").
     .filter(e => !e.sistema || (ehAdmin.value && (fase.value >= 2 || r.has('sistema'))))
+    // O e-mail sem item aparece só para quem enviou (épico "E-mail sem item e lista por permissão", RN003).
+    .filter(e => !!e.itemId || !!e.sistema || e.direcao === 'recebido' || e.autor === EU.id)
     .filter(e => dentroDoPeriodo(e.data))
     .filter(e => !(r.has('recebidos') && !r.has('enviados')) || e.direcao === 'recebido')
     .filter(e => !(r.has('enviados') && !r.has('recebidos')) || e.direcao === 'enviado')
@@ -295,10 +298,10 @@ function marcarNaoLido(e: Email) {
 /** Sugestão pelo destinatário: itens em que esse endereço é contato (Pipedrive, HubSpot e monday sugerem antes da busca). */
 const sugestoes = computed(() => {
   const e = aberto.value
-  if (!e || e.itemId) return []
+  if (!e || (e.itemId && !vinculando.value)) return []
   const enderecos = new Set((e.direcao === 'recebido' ? [e.de] : e.para).map(x => x.toLowerCase()))
   return itens
-    .filter(i => !i.semAcesso && contatosDoItem(i, config.value).some(c => c.email && enderecos.has(c.email.toLowerCase())))
+    .filter(i => !i.semAcesso && i.id !== e.itemId && contatosDoItem(i, config.value).some(c => c.email && enderecos.has(c.email.toLowerCase())))
     .slice(0, 3)
 })
 
@@ -731,7 +734,7 @@ function nomeDaCaixa(endereco: string) {
               <UButton v-if="fase >= 2 && !aberto.sistema" :label="t.compositor.trocar" color="neutral" variant="ghost" size="xs" @click="vinculando = true" />
             </div>
             <div v-else class="mt-2">
-              <p class="mb-2 text-xs text-muted">
+              <p v-if="!aberto.itemId" class="mb-2 text-xs text-muted">
                 {{ te.vincularDepois }}
               </p>
               <div v-if="sugestoes.length" class="mb-2 flex flex-wrap items-center gap-1.5">
@@ -750,6 +753,7 @@ function nomeDaCaixa(endereco: string) {
                 />
               </div>
               <BuscaDeItem :t="t" @escolher="vincular" />
+              <UButton v-if="aberto.itemId" :label="t.compositor.cancelar" color="neutral" variant="ghost" size="xs" class="mt-2" @click="vinculando = false" />
             </div>
           </div>
 

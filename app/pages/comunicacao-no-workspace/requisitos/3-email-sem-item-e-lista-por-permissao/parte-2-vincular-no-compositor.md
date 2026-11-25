@@ -31,7 +31,7 @@ e-mail" na tela Início, e o botão E-mail do item CTR-00231.
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
 | RF110 | Com a busca vazia, a lista deve mostrar os 5 itens atualizados por último, sob "Atualizados por último". | O foco no campo vazio abre a lista com 5 itens. | Essencial | Obrigatório |
-| RF111 | Com texto, a lista deve mostrar os 8 itens que mais combinam com o texto, com "<m> de <n> itens". | Com 12 itens que combinam com o texto, a lista mostra 8 e "8 de 12 itens". | Essencial | Obrigatório |
+| RF111 | Com texto, a lista deve mostrar os 8 itens que mais combinam com o texto, com "<m> de <n> itens". | "contrato" combina com 37 itens: a lista mostra 8 e "8 de 37 itens". | Essencial | Obrigatório |
 | RF112 | Com mais de 8 resultados, o rodapé deve mostrar "Mais <n> itens. Continue digitando para achar." | 12 itens combinam: "Mais 4 itens. Continue digitando para achar." | Importante | Obrigatório |
 | RF113 | A busca deve procurar na referência, no ID, no nome, na categoria, nos contatos e nos campos de texto do item. | "Lumen" acha CTR-00231 pela contraparte; "47231" acha CTR-00231 pelo ID. | Essencial | Obrigatório |
 | RF114 | A busca deve ignorar acento e diferença de maiúsculas. | "MANUTENCAO" acha "Contrato de manutenção predial". | Desejável | Desejável |

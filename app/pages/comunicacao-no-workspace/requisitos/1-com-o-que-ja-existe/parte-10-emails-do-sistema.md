@@ -37,7 +37,7 @@ Enviados de Configurações › E-mails.
 | RF961 | O menu da linha do e-mail do sistema deve ter "Ver Detalhes", "Reenviar e-mail" e, com item, "Ver Item", sem "Responder". | O menu do e-mail de fluxo mostra os 3 itens, sem "Responder". | Essencial | Obrigatório |
 | RF962 | "Ver Item" no e-mail do sistema deve abrir o item na Visão Geral. | "Ver Item" abre CTR-00231 na Visão Geral. | Importante | Obrigatório |
 | RF963 | Com o status Em processamento, "Reenviar e-mail" deve ficar indisponível (RN952). | O e-mail Em processamento mostra "Reenviar e-mail" cinza. | Essencial | Obrigatório |
-| RF964 | A leitura do e-mail do sistema no painel lateral deve mostrar também Status e Tarefa, com o botão "Reenviar e-mail" no lugar de "Responder". | O painel do e-mail de T-1042 mostra Falhou, T-1042 e "Reenviar e-mail". | Essencial | Obrigatório |
+| RF964 | A leitura do e-mail do sistema no painel lateral deve mostrar também Status e Tarefa, com o botão "Reenviar e-mail" no lugar de "Responder". | O painel do e-mail de T-1047 mostra Falhou, T-1047 e "Reenviar e-mail". | Essencial | Obrigatório |
 | RF965 | "Reenviar e-mail" deve pôr o e-mail na fila de envio de hoje, mudar o status para Em processamento e mostrar o aviso "E-mail colocado na fila de envio". | Reenviar o e-mail Falhou muda a coluna para Em processamento. | Essencial | Obrigatório |
 
 ## Em aberto

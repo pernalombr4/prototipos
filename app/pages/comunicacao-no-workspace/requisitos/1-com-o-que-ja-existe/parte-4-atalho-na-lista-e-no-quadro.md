@@ -15,7 +15,7 @@ de CTR-00231; na visão "Por etapa", clique com o botão direito num cartão.
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF301 | O menu da linha deve ganhar o submenu "E-mail", depois das ações de hoje, com 1 grupo por contato do item (RN907). | O menu de CTR-00231 mantém "Ver Detalhes", "Editar", "Enviar para Lixeira" e "Copiar Link" e ganha "E-mail" com os grupos "E-mail do contato" e "Requisitante". | Essencial | Obrigatório |
+| RF301 | O menu da linha deve ganhar o submenu "E-mail", depois das ações de hoje, com 1 grupo por contato do item (RN907). | O menu de CTR-00231 mantém "Ver Detalhes", "Editar", "Enviar para Lixeira" e "Copiar Link" e ganha "E-mail" com os grupos "E-mail do contato", "E-mail do financeiro" e "Requisitante". | Essencial | Obrigatório |
 | RF302 | Cada grupo deve ter como título o rótulo do contato, com o nome quando há, e os 2 caminhos do atalho para esse contato, com o item vinculado (RN909, RN910, RN911, RN912). | "Escrever pelo ENSPACE" traz a descrição "O e-mail fica na Mail Box de CTR-00231"; "Abrir no meu app de e-mail" traz a do endereço do item em cópia. | Essencial | Obrigatório |
 | RF303 | No item sem contato, o submenu "E-mail" deve mostrar "Sem contato", indisponível (RN913). | Um item sem campo de e-mail preenchido mostra "Sem contato" cinza. | Importante | Obrigatório |
 | RF304 | A lista deve ter a coluna "Contato", com o nome e o e-mail do 1º contato do item (RN908). | A linha de CTR-00231 mostra o e-mail de "E-mail do contato". | Importante | Obrigatório |

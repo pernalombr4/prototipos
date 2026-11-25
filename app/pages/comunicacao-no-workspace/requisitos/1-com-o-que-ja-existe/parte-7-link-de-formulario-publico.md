@@ -15,7 +15,7 @@ formulário público e um privado; na lista de Contratos, abra "Link de formulá
 
 | ID | Regra | Exemplo | Relevância |
 |---|---|---|---|
-| RN601 | Um formulário só tem link público se tiver a visibilidade Público e o tipo Criação ou Geral. | "Nova solicitação" (Criação, Público) tem link; "Revisão do contrato" (Editar, Público) e "Cadastro interno" (Criação, Privado) não têm. | Obrigatório |
+| RN601 | Um formulário só tem link público se tiver a visibilidade Público e o tipo Criação ou Geral. | "Solicitação jurídica" (Criação, Público) tem link; "Revisão de contrato" (Editar) e "Pedido de orçamento" (Criação, Privado) não têm. | Obrigatório |
 | RN602 | O link público é o de hoje, `/public/<formulário>/Answer`: abre sem login e não expira. A resposta pelo link cria um item na categoria do formulário. | Responder "Nova solicitação" pelo link cria um item em Solicitações. | Obrigatório |
 | RN603 | A resposta pelo link público não conclui a tarefa de formulário: a tarefa continua aberta até o responsável preencher e concluir. | A tarefa de formulário T-1050 continua aberta depois da resposta pelo link. | Obrigatório |
 
@@ -32,11 +32,11 @@ formulário público e um privado; na lista de Contratos, abra "Link de formulá
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF611 | Em Requisições, com um formulário público escolhido (RN601), o cartão "Compartilhar este formulário" deve aparecer entre o seletor e o formulário, com o link, "Copiar link", "Abrir numa nova aba" e "Enviar o link por". | Escolher "Nova solicitação" mostra o cartão acima dos campos. | Essencial | Obrigatório |
-| RF612 | Em Requisições, com um formulário privado escolhido, a tela deve mostrar a linha "Formulário privado: só membros do workspace respondem. Por isso não tem link para enviar." no lugar do cartão. | Escolher "Cadastro interno" mostra a linha, sem o cartão. | Importante | Obrigatório |
+| RF611 | Em Requisições, com um formulário público escolhido (RN601), o cartão "Compartilhar este formulário" deve aparecer entre o seletor e o formulário, com o link, "Copiar link", "Abrir numa nova aba" e "Enviar o link por". | Escolher "Solicitação jurídica" mostra o cartão acima dos campos. | Essencial | Obrigatório |
+| RF612 | Em Requisições, com um formulário privado escolhido, a tela deve mostrar a linha "Formulário privado: só membros do workspace respondem. Por isso não tem link para enviar." no lugar do cartão. | Escolher "Pedido de orçamento" mostra a linha, sem o cartão. | Importante | Obrigatório |
 | RF613 | A lista de itens deve ter o botão "Link de formulário público" ao lado de "Novo registro", com os formulários públicos da categoria (RN601), cada um com copiar e enviar. | Em Solicitações, o menu lista "Nova solicitação" com os botões de copiar e de enviar. | Essencial | Obrigatório |
-| RF614 | Na categoria sem formulário público, o menu do botão deve mostrar "Nenhum formulário público", a explicação e "Ver formulários", que abre os Formulários da categoria. | Em Fornecedores, sem formulário público, o menu mostra o vazio e "Ver formulários". | Importante | Obrigatório |
-| RF615 | O painel da tarefa de formulário com formulário público deve mostrar o cartão "Compartilhar este formulário" e a linha "A resposta pelo link cria um item novo em <categoria>. Esta tarefa continua aberta até você concluí-la." (RN603). | T-1050 mostra o cartão e a linha com "Solicitações". | Essencial | Obrigatório |
+| RF614 | Na categoria sem formulário público, o menu do botão deve mostrar "Nenhum formulário público", a explicação e "Ver formulários", que abre os Formulários da categoria. | Em Contratos, sem formulário público, o menu mostra o vazio e "Ver formulários". | Importante | Obrigatório |
+| RF615 | O painel da tarefa de formulário com formulário público deve mostrar o cartão "Compartilhar este formulário" e a linha "A resposta pelo link cria um item novo em <categoria>. Esta tarefa continua aberta até você concluí-la." (RN603). | T-1049 mostra o cartão e a linha com "Solicitações". | Essencial | Obrigatório |
 | RF616 | O menu da linha dos Formulários da categoria deve ganhar "Tornar público" no formulário privado e "Tornar privado" no público, que mudam a visibilidade como o Editar › Visibilidade de hoje. | "Tornar privado" em "Nova solicitação" deixa o formulário privado, e o link some de Requisições. | Importante | Obrigatório |
 | RF617 | No formulário privado, o "Copiar" do menu da linha deve ficar indisponível com o motivo "Só formulário público tem link". | O menu de "Cadastro interno" mostra "Copiar" cinza com o motivo. | Desejável | Desejável |
 

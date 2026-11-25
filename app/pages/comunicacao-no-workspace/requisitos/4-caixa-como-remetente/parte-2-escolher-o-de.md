@@ -39,7 +39,7 @@ em "Novo e-mail" e abra o "De". O cenário "Sem Outlook integrado" mostra o "De"
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
 | RF121 | Quando a pessoa envia com uma caixa no "De", o sistema deve enviar o e-mail com o endereço da caixa como remetente. | Exemplo: envio com "Atendimento jurídico"; o destinatário recebe o e-mail de atendimento.aurora-servicos@box.enspace.io. | Essencial | Obrigatório |
-| RF122 | Com item vinculado, o e-mail enviado pela caixa deve ter o endereço do item como endereço de resposta e ficar na Mail Box › Enviados do item (RN101). | Exemplo: envio de CTR-00231 por "Compras"; o e-mail aparece em Enviados de CTR-00231, e a resposta chega em Recebidos. | Essencial | Obrigatório |
+| RF122 | Com item vinculado, o e-mail enviado pela caixa deve ter o endereço do item como endereço de resposta e ficar na Mail Box › Enviados do item (RN101). | Exemplo: envio de SOL-00087 pela caixa "Atendimento jurídico"; o e-mail aparece em Enviados de SOL-00087, e a resposta chega em Recebidos. | Essencial | Obrigatório |
 | RF123 | Sem item vinculado, o e-mail enviado pela caixa deve ter o endereço da caixa como endereço de resposta (RN102). | Exemplo: envio sem item por "Compras"; a resposta do destinatário chega na caixa Compras. | Essencial | Obrigatório |
 | RF124 | O e-mail enviado pela caixa deve ficar gravado no ENSPACE com a caixa e a pessoa que escreveu. | Exemplo: Ana envia por "Atendimento jurídico"; a aba Mensagens mostra a caixa no De e Ana em "Enviado por". | Essencial | Obrigatório |
 
@@ -47,8 +47,8 @@ em "Novo e-mail" e abra o "De". O cenário "Sem Outlook integrado" mostra o "De"
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF131 | Na Mail Box do item, a linha do e-mail enviado pela caixa deve dizer "Enviado por <nome> pela caixa <caixa>". | "Enviado por Ana Ribeiro pela caixa Atendimento jurídico" na aba Enviados de CTR-00231. | Importante | Obrigatório |
-| RF132 | Na tabela da aba Mensagens, a coluna De deve mostrar o nome da caixa quando o remetente é uma caixa do workspace, com o endereço na dica. | A linha enviada por "Compras" mostra "Compras" na coluna De; o mouse sobre o nome mostra o endereço. | Importante | Obrigatório |
+| RF131 | Na Mail Box do item, a linha do e-mail enviado pela caixa deve dizer "Enviado por <nome> pela caixa <caixa>". | "Enviado por Elisa Prado pela caixa Atendimento jurídico" na aba Enviados de SOL-00087. | Importante | Obrigatório |
+| RF132 | Na tabela da aba Mensagens, a coluna De deve mostrar o nome da caixa quando o remetente é uma caixa do workspace, com o endereço na dica. | A linha enviada pela caixa "Atendimento jurídico" mostra "Atendimento jurídico" na coluna De; o mouse sobre o nome mostra o endereço. | Importante | Obrigatório |
 | RF133 | Na leitura no painel lateral da aba Mensagens, o campo De deve mostrar o endereço da caixa e o nome dela entre parênteses. | "compras.aurora-servicos@box.enspace.io (Compras)". | Importante | Obrigatório |
 
 ## Sem o Correio do Outlook (RF)

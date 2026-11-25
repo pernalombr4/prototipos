@@ -55,13 +55,13 @@ modal "Evento" da Agenda; a central E-mails, aba Configurações.
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
 | RF114 | Com um item vinculado, o Para do compositor deve sugerir os contatos do item com e-mail (RN101), com o "Nome do contato na tela" e o e-mail. | CTR-00231: o Para sugere Marina Alves (Contato da contraparte · marina.alves@example.com). | Importante | Obrigatório |
-| RF115 | O "Novo e-mail" da barra do topo e da Mail Box, com um item aberto, deve pôr em Para o 1º contato do item com e-mail. | Em CTR-00231, o Para abre com marina.alves@example.com. | Importante | Obrigatório |
+| RF115 | O "Novo e-mail" da barra do topo e da Mail Box, com um item aberto, deve pôr em Para o 1º contato do item com e-mail. | Em CTR-00231, o Para abre com Marina Alves, de marina.alves@example.com. | Importante | Obrigatório |
 
 ## Agenda (RF)
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF116 | No modal "Evento" de uma data de item, "Contatos do item" deve listar os contatos do item (RN101), cada um com o botão "Enviar e-mail para <nome>". | Evento de vencimento de CTR-00231: Marina Alves e carla.nogueira@example.com. | Importante | Obrigatório |
+| RF116 | No modal "Evento" de uma data de item, "Contatos do item" deve listar os contatos do item (RN101), cada um com o botão "Enviar e-mail para <nome>". | Evento "Assinatura: Contrato de manutenção predial", de CTR-00231: Marina Alves e carla.nogueira@example.com. | Importante | Obrigatório |
 | RF117 | "E-mail para todos (<N>)" deve contar e pôr em Para só os contatos do item com e-mail. | Evento de CTR-00231: "E-mail para todos (2)" abre 1 e-mail com marina.alves@example.com e carla.nogueira@example.com em Para. | Importante | Obrigatório |
 
 ## Central E-mails (RF)

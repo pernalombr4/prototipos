@@ -32,11 +32,11 @@ Mensagens, filtro "Sem item", menu ⋮ de "Cadastro de fornecedor" › "Vincular
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
 | RF304 | Na leitura do e-mail sem item, o bloco Item deve mostrar "Este e-mail não tem item. Ao vincular, ele passa a aparecer na aba Mail Box do item.", as "Sugestões pelo destinatário" e a busca de item. | A leitura de "Cadastro de fornecedor" mostra o texto e a busca. | Essencial | Obrigatório |
-| RF305 | As "Sugestões pelo destinatário" devem ser os itens sugeridos (RN904) pelo remetente, no e-mail recebido, ou pelos destinatários, no e-mail enviado. | E-mail recebido de marina.alves@example.com, sem item: sugere CTR-00231, CTR-00219 e CTR-00207. | Importante | Obrigatório |
+| RF305 | As "Sugestões pelo destinatário" devem ser os itens sugeridos (RN904) pelo remetente, no e-mail recebido, ou pelos destinatários, no e-mail enviado. | E-mail enviado sem item para marina.alves@example.com: sugere CTR-00231, CTR-00219 e CTR-00207. | Importante | Obrigatório |
 | RF306 | Sem o contato configurado nas categorias (épico "Contato da categoria"), o bloco deve mostrar só a busca, sem as sugestões. | Workspace sem o cartão salvo: a leitura mostra o texto e a busca. | Importante | Obrigatório |
 | RF307 | A busca de item da leitura deve seguir a busca do compositor: os 5 atualizados por último com a busca vazia, os 8 que mais combinam com o texto, agrupados por categoria, com ID e etapa, só com os itens que a pessoa pode ver (RN901). | "Papelaria" mostra FOR-00040 no grupo Fornecedores; CTR-00214, sem permissão, fica de fora. | Essencial | Obrigatório |
 | RF308 | Na leitura do e-mail com item, o bloco Item deve mostrar o item com o botão "Trocar". | A leitura de "CTR-00231 · Minuta revisada" mostra CTR-00231 e "Trocar". | Essencial | Obrigatório |
-| RF309 | "Trocar" deve abrir no bloco Item as sugestões e a busca de item. | O clique em "Trocar" mostra a busca no lugar de CTR-00231. | Importante | Obrigatório |
+| RF309 | "Trocar" deve abrir no bloco Item as sugestões, a busca de item e o botão "Cancelar", que volta ao item atual. | O clique em "Trocar" mostra a busca no lugar de CTR-00231; "Cancelar" volta a CTR-00231. | Importante | Obrigatório |
 | RF310 | Na leitura do e-mail enviado pelo sistema, o bloco Item deve mostrar só o item, sem "Trocar" (RN302). | O e-mail do sistema de T-1042 mostra CTR-00231 sem o botão. | Importante | Obrigatório |
 
 ## Gravar o vínculo (RF)
