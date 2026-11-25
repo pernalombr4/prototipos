@@ -48,7 +48,7 @@ modal "Evento" da Agenda; a central E-mails, aba Configurações.
 | RF110 | O submenu "E-mail" do menu da linha deve ter 1 grupo por contato do item (RN101), com o título "<Nome do contato na tela> · <nome>", ou só o rótulo quando o contato não tem nome. | CTR-00231: "Contato da contraparte · Marina Alves" e "Requisitante". | Essencial | Obrigatório |
 | RF111 | O clique direito no cartão do quadro deve trazer o submenu "E-mail" do menu da linha, com os grupos de RF110. | No quadro de Contratos, o clique direito em CTR-00231 mostra os 2 grupos. | Importante | Obrigatório |
 | RF112 | O cabeçalho da coluna "Contato" deve levar o "Nome do contato na tela" do 1º contato da categoria. | Contratos: a coluna se chama "Contato da contraparte"; Solicitações, "Quem pediu". | Importante | Obrigatório |
-| RF113 | A célula da coluna deve mostrar o nome e o e-mail que o item tem no 1º contato da categoria. | CTR-00231: Marina Alves marina.alves@example.com; CTR-00224: célula vazia. | Importante | Obrigatório |
+| RF113 | A célula da coluna deve mostrar o nome e o e-mail que o item tem no 1º contato da categoria. | CTR-00231: Marina Alves marina.alves@example.com; CTR-00224, sem e-mail no contato: "Sem contato". | Importante | Obrigatório |
 
 ## Compositor (RF)
 

@@ -1052,6 +1052,9 @@
           "regex": "^mostrando 1 a \\d+ de \\d+ resultados$"
         }
       ]
+    },
+    "RT401": {
+      "sem": "a troca de fonte com \"Do sistema\" aparece no protótipo com \"Fase: 1 · MVP\"; o print está na parte 10 do épico \"E-mail com o que o produto já tem\""
     }
   }
 }

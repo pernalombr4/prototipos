@@ -1740,10 +1740,6 @@
         {
           "clicar": "Usar em um e-mail",
           "esperar": 1500
-        },
-        {
-          "clicar": "Abrir rascunho",
-          "esperar": 1500
         }
       ],
       "destacar": [
@@ -2553,10 +2549,14 @@
           "esperar": 1500
         },
         {
+          "clicar": "Do sistema",
+          "esperar": 900
+        },
+        {
           "js": "void 0"
         },
         {
-          "js": "(() => { const tds = [...document.querySelectorAll('tbody td:nth-child(8)')]; tds.find(td => td.textContent.trim() === 'Enviado').dataset.print = 'st-env'; tds.find(td => td.textContent.trim() === 'Falhou').dataset.print = 'st-falhou'; tds.find(td => td.textContent.trim() === 'Em processamento').dataset.print = 'st-proc'; tds.find(td => td.textContent.trim() === '-').dataset.print = 'st-traco' })()"
+          "js": "(() => { const tds = [...document.querySelectorAll('tbody td:nth-child(8)')]; tds.find(td => td.textContent.trim() === 'Enviado').dataset.print = 'st-env'; tds.find(td => td.textContent.trim() === 'Falhou').dataset.print = 'st-falhou'; tds.find(td => td.textContent.trim() === 'Em processamento').dataset.print = 'st-proc' })()"
         }
       ],
       "destacar": [
@@ -2568,9 +2568,6 @@
         },
         {
           "css": "[data-print=st-proc]"
-        },
-        {
-          "css": "[data-print=st-traco]"
         }
       ]
     },
@@ -2625,6 +2622,10 @@
           "esperar": 1500
         },
         {
+          "clicar": "Do sistema",
+          "esperar": 900
+        },
+        {
           "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.textContent.includes(\"CTR-00229 \\u00b7 Vencimento pr\\u00f3ximo\")); tr.querySelector('button').dataset.print = \"menu-falhou\" })()"
         },
         {
@@ -2643,6 +2644,10 @@
         {
           "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
           "esperar": 1500
+        },
+        {
+          "clicar": "Do sistema",
+          "esperar": 900
         },
         {
           "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.textContent.includes(\"CTR-00229 \\u00b7 Vencimento pr\\u00f3ximo\")); tr.querySelector('button').dataset.print = \"menu-falhou\" })()"
@@ -2675,6 +2680,10 @@
           "esperar": 1500
         },
         {
+          "clicar": "Do sistema",
+          "esperar": 900
+        },
+        {
           "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.textContent.includes(\"CTR-00223 \\u00b7 Visita t\\u00e9cnica confirmada\")); tr.querySelector('button').dataset.print = \"menu-proc\" })()"
         },
         {
@@ -2695,6 +2704,10 @@
         {
           "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
           "esperar": 1500
+        },
+        {
+          "clicar": "Do sistema",
+          "esperar": 900
         },
         {
           "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.textContent.includes(\"CTR-00229 \\u00b7 Vencimento pr\\u00f3ximo\")); tr.querySelectorAll('td')[4].querySelector('span').click() })()",
@@ -2718,6 +2731,10 @@
         {
           "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
           "esperar": 1500
+        },
+        {
+          "clicar": "Do sistema",
+          "esperar": 900
         },
         {
           "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.textContent.includes(\"CTR-00229 \\u00b7 Vencimento pr\\u00f3ximo\")); tr.querySelectorAll('td')[4].querySelector('span').click() })()",

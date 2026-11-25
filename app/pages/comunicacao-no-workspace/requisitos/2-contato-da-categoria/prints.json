@@ -596,7 +596,7 @@
       "cena": "lista",
       "passos": [
         {
-          "js": "(() => { const linha = ref => [...document.querySelectorAll('tr')].find(r => r.innerText.includes(ref)); const c1 = [...linha('CTR-00231').querySelectorAll('td')].find(td => td.innerText.includes('marina.alves')); if (c1) c1.dataset.print = 'cel231'; const c2 = [...linha('CTR-00224').querySelectorAll('td')].find(td => td.innerText.trim() === '-'); if (c2) c2.dataset.print = 'cel224' })()",
+          "js": "(() => { const linha = ref => [...document.querySelectorAll('tr')].find(r => r.innerText.includes(ref)); const c1 = [...linha('CTR-00231').querySelectorAll('td')].find(td => td.innerText.includes('marina.alves')); if (c1) c1.dataset.print = 'cel231'; const c2 = [...linha('CTR-00224').querySelectorAll('td')].find(td => td.innerText.trim() === 'Sem contato'); if (c2) c2.dataset.print = 'cel224' })()",
           "esperar": 300
         }
       ],
