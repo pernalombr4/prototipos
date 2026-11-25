@@ -24,6 +24,16 @@ Na rodada 5, "Próximas mudanças" sai: o que exige ação fica na trilha, com o
 - **Não muda:** a casca do docs, o topo "Versões do ENSPACE", a árvore e os `:ui` da página de
   releases, o título, o resumo e o quadro escuro de cada versão, e o filtro de categoria do Blog.
 
+## Requisitos (2026-11-25)
+
+Pedido (literal): "nao deixe de escrevre os docs e requisito com /prototipo pra este prototipo que voce ta construindo".
+Escritos pela skill `requisitos`, em 2 épicos separados pelo esforço:
+
+- `requisitos/com-o-que-ja-existe/`: data e link da versão; guias de migração na Referência. Só campos e componentes que o `en-docs` já tem (schema do conteúdo com `release` e `badge`, lido em `en-docs@develop a23cf854`).
+- `requisitos/changelog-por-item/`: texto da versão na trilha; versão em breve e patches; mudança que exige ação; post do mês; Assinar. Pede campos novos no conteúdo, os feeds RSS (o `en-docs` não tem rota de feed) e um serviço de e-mail.
+
+Para a redatora decidir: se Assinar vira um épico à parte (P902), e as linhas de relevância Desejável e Opcional, que são proposta do agente. Sem os prints de requisito e sem card: os 2 saem quando o protótipo for aprovado (regras 41 e 42 da spec).
+
 ## A jornada
 
 ```mermaid
