@@ -38,7 +38,7 @@ Chave "Complementos da pesquisa", nas Opções 1, 2 e 3, quando a Visão Geral m
   - Esc fecha a barra lateral; o fundo esmaecido é um botão "Fechar item";
   - sem correção: a barra lateral é `role=dialog` sem prender o foco, como a do produto, e o `UTabs` com `content=false` não gera `role=tabpanel`;
   - sem correção: em espanhol, o andaime quebra em 3 linhas e cobre a parte de baixo da lista; é andaime, não proposta
-- **Ver:** <https://pernalombr4.github.io/prototipos/campos-do-item-por-formulario/> · `evidencias/proposta-hoje.jpg`, `proposta-opcao-1.jpg`, `proposta-opcao-1-complementos.jpg`, `proposta-opcao-2.jpg`, `proposta-opcao-3.jpg`, `proposta-pasta-de-formulario.jpg`
+- **Ver:** <https://pernalombr4.github.io/prototipos/campos-do-item-por-formulario/> · `evidencias/proposta-hoje.jpg`, `proposta-opcao-1.jpg`, `proposta-opcao-1-complementos.jpg`, `proposta-opcao-2.jpg`, `proposta-opcao-3.jpg`
 
 ### Perguntas para decidir
 
