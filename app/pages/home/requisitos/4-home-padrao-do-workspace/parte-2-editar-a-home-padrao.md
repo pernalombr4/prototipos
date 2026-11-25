@@ -8,7 +8,7 @@ acrescenta chega a cada membro.
 **Onde vale:** o modo de edição da Home (Personalizar), para o administrador, e a Home de cada membro.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/home, com "Proposta completa" em "Versão" e "Administrador"
-em "Papel". Clique em "Personalizar" e escolha "Home padrão do workspace".
+em "Ver como". Clique em "Personalizar" e escolha "Home padrão do workspace".
 
 ## Regras de negócio (RN)
 

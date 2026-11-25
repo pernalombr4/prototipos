@@ -1,0 +1,1944 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/home",
+  "andaime": "Protótipo · estado",
+  "cenas": {
+    "edicao": [
+      {
+        "clicar": "Personalizar",
+        "esperar": 600
+      }
+    ],
+    "catalogo": [
+      {
+        "clicar": "Personalizar",
+        "esperar": 600
+      },
+      {
+        "clicar": {
+          "css": "div.sticky.top-0 button",
+          "n": 0
+        },
+        "esperar": 700
+      }
+    ],
+    "catTarefas": [
+      {
+        "clicar": "Personalizar",
+        "esperar": 600
+      },
+      {
+        "clicar": {
+          "css": "div.sticky.top-0 button",
+          "n": 0
+        },
+        "esperar": 700
+      },
+      {
+        "clicar": "Números, listas e gráficos das tarefas rápidas e agendadas.",
+        "esperar": 600
+      }
+    ],
+    "mt": [
+      {
+        "js": "document.querySelector(\"[data-painel='w-tarefas']\").scrollIntoView({block:'center'})",
+        "esperar": 600
+      }
+    ],
+    "criar": [
+      {
+        "clicar": "Criar item ou tarefa (C)",
+        "esperar": 700
+      }
+    ],
+    "menuCat": [
+      {
+        "clicar": "Mais ações de Categorias",
+        "esperar": 600
+      }
+    ],
+    "tarefa": [
+      {
+        "clicar": "Criar item ou tarefa (C)",
+        "esperar": 700
+      },
+      {
+        "clicar": "Tarefa rápida, com prazo e responsável",
+        "esperar": 800
+      }
+    ],
+    "item": [
+      {
+        "clicar": "Criar item ou tarefa (C)",
+        "esperar": 700
+      },
+      {
+        "clicar": "Em uma categoria, pelo formulário dela",
+        "esperar": 700
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        "Quarta-feira, 11 de novembro",
+        "Boa tarde, Renata!"
+      ]
+    },
+    "RF002": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        "Você tem"
+      ]
+    },
+    "RF003": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "passos": [
+        {
+          "js": "(() => { const r = document.querySelector('.h-dvh'); const z = 0.58; r.style.zoom = z; r.style.height = (innerHeight / z) + 'px'; r.style.width = (innerWidth / z) + 'px' })()",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "css": ".grid-flow-row-dense"
+        }
+      ]
+    },
+    "RF004": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "estado": "Workspace vazio (primeiro acesso)"
+        },
+        {
+          "esperar": 700
+        }
+      ],
+      "passos": [
+        {
+          "js": "(() => { const r = document.querySelector('.h-dvh'); const z = 0.58; r.style.zoom = z; r.style.height = (innerHeight / z) + 'px'; r.style.width = (innerWidth / z) + 'px' })()",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "css": ".grid-flow-row-dense"
+        }
+      ]
+    },
+    "RF005": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "estado": "Sem widgets"
+        },
+        {
+          "esperar": 500
+        }
+      ],
+      "passos": [
+        {
+          "clicar": "Adicionar widget",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        "Sua Home está vazia",
+        {
+          "css": "[role=dialog]"
+        }
+      ]
+    },
+    "RF006": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "edicao",
+      "passos": [
+        {
+          "js": "document.querySelector('.pb-28').scrollTop = 1e5",
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        {
+          "css": "div.sticky.top-0"
+        },
+        {
+          "css": "[data-painel='w-status']"
+        }
+      ]
+    },
+    "RF007": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "edicao",
+      "passos": [
+        {
+          "pairar": {
+            "css": "div.sticky.top-0 button",
+            "n": 2
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "css": "div.sticky.top-0 button",
+          "n": 0
+        },
+        {
+          "css": "div.sticky.top-0 button",
+          "n": 1
+        },
+        {
+          "css": "div.sticky.top-0 button",
+          "n": 2
+        },
+        {
+          "css": "div.sticky.top-0 button",
+          "n": 3
+        }
+      ]
+    },
+    "RF008": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "edicao",
+      "destacar": [
+        {
+          "css": "[data-painel='w-categorias'] header"
+        },
+        {
+          "css": "[data-painel='w-abertas'] header"
+        }
+      ]
+    },
+    "RF009": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "edicao",
+      "destacar": [
+        {
+          "css": "[data-painel='w-tarefas'] [inert]"
+        }
+      ]
+    },
+    "RF010": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "edicao",
+      "passos": [
+        {
+          "pairar": {
+            "css": "[data-painel='w-vencidas'] [data-grip]"
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-painel='w-vencidas'] header"
+        }
+      ]
+    },
+    "RF027": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "edicao",
+      "passos": [
+        {
+          "js": "document.querySelector(\"[data-painel='w-vencidas']\").scrollIntoView({block:'center'})",
+          "esperar": 600
+        },
+        {
+          "pairar": {
+            "css": "[data-painel='w-vencidas'] header"
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-painel='w-vencidas'] button[aria-label^='Redimensionar']"
+        }
+      ]
+    },
+    "RF011": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "edicao",
+      "passos": [
+        {
+          "focar": {
+            "css": "[data-painel='w-abertas'] [data-grip]"
+          }
+        },
+        {
+          "tecla": "ArrowDown",
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-painel='w-abertas'] header"
+        }
+      ]
+    },
+    "RF012": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "edicao",
+      "destacar": [
+        {
+          "css": "[data-painel='w-categorias'] button[aria-label^='Subir']"
+        },
+        {
+          "css": "[data-painel='w-categorias'] button[aria-label^='Descer']"
+        }
+      ]
+    },
+    "RF013": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "edicao",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div.sticky.top-0 button",
+            "n": 1
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Home salva.",
+          "ancestral": "li"
+        }
+      ]
+    },
+    "RF014": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "edicao",
+      "passos": [
+        {
+          "pairar": {
+            "css": "div.sticky.top-0 button",
+            "n": 3
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "css": "div.sticky.top-0 button",
+          "n": 3
+        }
+      ]
+    },
+    "RF015": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "edicao",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div.sticky.top-0 button",
+            "n": 2
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Home padrão restaurada.",
+          "ancestral": "li"
+        }
+      ]
+    },
+    "RF016": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "catalogo",
+      "destacar": [
+        {
+          "css": "[role=dialog]"
+        }
+      ]
+    },
+    "RF017": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "catalogo",
+      "destacar": [
+        "Números, listas e gráficos das tarefas rápidas e agendadas.",
+        "As categorias do workspace, com o botão de criar item."
+      ]
+    },
+    "RF018": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "catTarefas",
+      "destacar": [
+        "Números",
+        "Listas",
+        {
+          "css": "[role=dialog] li > div",
+          "n": 0
+        },
+        {
+          "css": "[role=dialog] li > div",
+          "n": 4
+        }
+      ]
+    },
+    "RF019": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "catalogo",
+      "passos": [
+        {
+          "clicar": "Buscar widget"
+        },
+        {
+          "digitar": "venc"
+        }
+      ],
+      "destacar": [
+        "Buscar widget",
+        {
+          "css": "[role=dialog] ul.space-y-2"
+        }
+      ]
+    },
+    "RF020": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "catTarefas",
+      "passos": [
+        {
+          "clicar": {
+            "css": "[role=dialog] li > div button",
+            "n": 1
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-painel^='w-prioridade']"
+        }
+      ]
+    },
+    "RF021": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "menuCat",
+      "destacar": [
+        {
+          "css": "[role=menu]"
+        }
+      ]
+    },
+    "RF022": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "menuCat",
+      "destacar": [
+        "Tamanho padrão"
+      ]
+    },
+    "RF023": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "passos": [
+        {
+          "clicar": "Mais ações de Abertas agora",
+          "esperar": 600
+        },
+        {
+          "clicar": "Remover da Home",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Abertas agora saiu da Home.",
+          "ancestral": "li"
+        }
+      ]
+    },
+    "RF024": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "estado": "Erro num widget"
+        },
+        {
+          "esperar": 600
+        }
+      ],
+      "passos": [
+        {
+          "clicar": "Tentar de novo",
+          "esperar": 250
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-painel='w-vencidas'] [aria-busy]"
+        },
+        {
+          "css": "[data-painel='w-vencem'] ul"
+        }
+      ]
+    },
+    "RF025": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "estado": "Erro num widget"
+        },
+        {
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Não foi possível carregar",
+          "ancestral": "div"
+        }
+      ]
+    },
+    "RF026": {
+      "antes": [
+        {
+          "estado": "Sem acesso num widget"
+        },
+        {
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Sem acesso",
+          "ancestral": "div"
+        }
+      ]
+    },
+    "RF101": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "catTarefas",
+      "destacar": [
+        {
+          "css": "[role=dialog] section",
+          "n": 0
+        }
+      ]
+    },
+    "RF102": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "catTarefas",
+      "destacar": [
+        {
+          "css": "[role=dialog] section",
+          "n": 1
+        }
+      ]
+    },
+    "RF103": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "catTarefas",
+      "destacar": [
+        {
+          "css": "[role=dialog] section",
+          "n": 2
+        }
+      ]
+    },
+    "RF104": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "catTarefas",
+      "passos": [
+        {
+          "clicar": {
+            "css": "[role=dialog] li > div button",
+            "n": 0
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-painel^='w-kpiVencem7']"
+        }
+      ]
+    },
+    "RF105": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "passos": [
+        {
+          "js": "void 'base'"
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Abrir o Painel de tarefas",
+          "n": 0
+        },
+        {
+          "texto": "Abrir o Painel de tarefas",
+          "n": 1
+        }
+      ]
+    },
+    "RF106": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "passos": [
+        {
+          "js": "void 'base'"
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Últimas 4 semanas",
+          "n": 0
+        },
+        {
+          "texto": "Rápidas e agendadas",
+          "n": 0
+        }
+      ]
+    },
+    "RF107": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "passos": [
+        {
+          "js": "void 'base'"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=tablist]",
+          "n": 0
+        }
+      ]
+    },
+    "RF108": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "passos": [
+        {
+          "clicar": {
+            "css": "[role=tablist] [role=tab]",
+            "n": 1
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=tablist]",
+          "n": 0
+        },
+        {
+          "css": "[data-painel='w-abertas']"
+        },
+        {
+          "css": "[data-painel='w-kpi-vencidas']"
+        }
+      ]
+    },
+    "RF109": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "estado": "Membro"
+        },
+        {
+          "esperar": 500
+        }
+      ],
+      "destacar": [
+        "Personalizar",
+        "Criar item ou tarefa (C)"
+      ]
+    },
+    "RF110": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "edicao",
+      "destacar": [
+        {
+          "css": "div.mb-5"
+        }
+      ]
+    },
+    "RF201": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "mt",
+      "destacar": [
+        {
+          "css": "[data-painel='w-tarefas'] [role=tablist]"
+        },
+        {
+          "css": "[data-painel='w-tarefas'] ul"
+        }
+      ]
+    },
+    "RF202": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "mt",
+      "destacar": [
+        {
+          "css": "[data-painel='w-tarefas'] [role=tab]",
+          "n": 0
+        }
+      ]
+    },
+    "RF203": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "mt",
+      "passos": [
+        {
+          "clicar": {
+            "css": "[data-painel='w-tarefas'] [role=tab]",
+            "n": 2
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-painel='w-tarefas'] ul"
+        }
+      ]
+    },
+    "RF204": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "mt",
+      "passos": [
+        {
+          "clicar": "Tipo de tarefa",
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=listbox]"
+        }
+      ]
+    },
+    "RF205": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "mt",
+      "passos": [
+        {
+          "js": "void 'linha'"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-painel='w-tarefas'] li",
+          "n": 1
+        }
+      ]
+    },
+    "RF206": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "mt",
+      "passos": [
+        {
+          "js": "void 'prazo'"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-painel='w-tarefas'] li span.tabular-nums",
+          "n": 0
+        },
+        {
+          "css": "[data-painel='w-tarefas'] li span.tabular-nums",
+          "n": 1
+        },
+        {
+          "css": "[data-painel='w-tarefas'] li span.tabular-nums",
+          "n": 2
+        }
+      ]
+    },
+    "RF207": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "mt",
+      "passos": [
+        {
+          "clicar": {
+            "css": "[data-painel='w-tarefas'] li button.text-left",
+            "n": 1
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-painel='w-tarefas'] li",
+          "n": 1
+        },
+        {
+          "texto": "No produto, abre Aprovar a compra dos notebooks do atendimento.",
+          "ancestral": "li"
+        }
+      ]
+    },
+    "RF208": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "mt",
+      "destacar": [
+        {
+          "css": "[data-painel='w-tarefas'] div.px-3.py-2 button",
+          "n": 1
+        }
+      ]
+    },
+    "RF209": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "estado": "Workspace vazio (primeiro acesso)"
+        },
+        {
+          "esperar": 700
+        }
+      ],
+      "cena": "mt",
+      "destacar": [
+        "Nenhuma tarefa em atraso."
+      ]
+    },
+    "RF210": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "mt",
+      "passos": [
+        {
+          "clicar": "Concluir Revisar resposta ao cliente sobre o chamado de acesso",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Tarefa concluída.",
+          "ancestral": "li"
+        },
+        {
+          "css": "[data-painel='w-tarefas'] [role=tab]",
+          "n": 0
+        }
+      ]
+    },
+    "RF211": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        "Desfazer"
+      ],
+      "junto": "RF210"
+    },
+    "RF212": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "mt",
+      "passos": [
+        {
+          "clicar": "Adicionar tarefa",
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        "Nome da tarefa. Enter cria."
+      ]
+    },
+    "RF213": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "mt",
+      "passos": [
+        {
+          "clicar": {
+            "css": "[data-painel='w-tarefas'] [role=tab]",
+            "n": 2
+          },
+          "esperar": 500
+        },
+        {
+          "clicar": "Adicionar tarefa",
+          "esperar": 600
+        },
+        {
+          "digitar": "Ligar para o fornecedor"
+        },
+        {
+          "tecla": "Enter",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Ligar para o fornecedor",
+          "ancestral": "li"
+        },
+        {
+          "css": "[data-painel='w-tarefas'] [role=tab]",
+          "n": 2
+        }
+      ]
+    },
+    "RF214": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "mt",
+      "passos": [
+        {
+          "clicar": "Adicionar tarefa",
+          "esperar": 600
+        },
+        {
+          "tecla": "Enter",
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        "Nome da tarefa. Enter cria.",
+        {
+          "css": "[data-painel='w-tarefas'] [role=tab]",
+          "n": 0
+        }
+      ]
+    },
+    "RF301": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-painel='w-categorias'] section"
+        }
+      ]
+    },
+    "RF302": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-painel='w-categorias'] li",
+          "n": 0
+        }
+      ]
+    },
+    "RF303": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "passos": [
+        {
+          "pairar": {
+            "css": "[data-painel='w-categorias'] li button",
+            "n": 0
+          },
+          "esperar": 1500
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-painel='w-categorias'] li button",
+          "n": 0
+        }
+      ]
+    },
+    "RF304": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-painel='w-categorias'] button[aria-label^='Acessar']",
+          "n": 2
+        }
+      ]
+    },
+    "RF305": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "passos": [
+        {
+          "pairar": "Criar chamado",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        "Criar chamado"
+      ]
+    },
+    "RF306": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "passos": [
+        {
+          "clicar": "Criar contrato",
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=menu]"
+        }
+      ]
+    },
+    "RF307": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "passos": [
+        {
+          "clicar": "Criar chamado",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog]"
+        }
+      ]
+    },
+    "RF308": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        "Ver todas as categorias"
+      ]
+    },
+    "RF309": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "menuCat",
+      "passos": [
+        {
+          "clicar": "Configurar",
+          "esperar": 900
+        },
+        {
+          "clicar": "Mostrar Contratos"
+        },
+        {
+          "clicar": "Mostrar Chamados de TI"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog]"
+        }
+      ]
+    },
+    "RF310": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "menuCat",
+      "passos": [
+        {
+          "clicar": "Configurar",
+          "esperar": 900
+        },
+        {
+          "clicar": "Mostrar Contratos"
+        },
+        {
+          "clicar": "Mostrar Chamados de TI"
+        }
+      ],
+      "destacar": [
+        "Marcar todas",
+        "Desmarcar todas"
+      ]
+    },
+    "RF311": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "menuCat",
+      "passos": [
+        {
+          "clicar": "Configurar",
+          "esperar": 900
+        },
+        {
+          "clicar": "Mostrar Contratos"
+        },
+        {
+          "clicar": "Mostrar Chamados de TI"
+        },
+        {
+          "clicar": "Salvar",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-painel='w-categorias'] ul"
+        }
+      ]
+    },
+    "RF312": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "catalogo",
+      "passos": [
+        {
+          "clicar": "As categorias do workspace, com o botão de criar item.",
+          "esperar": 600
+        },
+        {
+          "clicar": "Acesse uma categoria ou crie um item nela.",
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog] ul"
+        },
+        "Salvar na Home"
+      ]
+    },
+    "RF313": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "estado": "Workspace vazio (primeiro acesso)"
+        },
+        {
+          "esperar": 700
+        }
+      ],
+      "passos": [
+        {
+          "js": "void 'admin'"
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Nenhuma categoria ainda",
+          "ancestral": "div"
+        }
+      ]
+    },
+    "RF314": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        },
+        {
+          "estado": "Workspace vazio (primeiro acesso)"
+        },
+        {
+          "esperar": 700
+        },
+        {
+          "estado": "Membro"
+        },
+        {
+          "esperar": 500
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Nenhuma categoria ainda",
+          "ancestral": "div"
+        }
+      ]
+    },
+    "RF401": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "passos": [
+        {
+          "pairar": "Criar item ou tarefa (C)",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        "Criar item ou tarefa (C)",
+        "Personalizar"
+      ]
+    },
+    "RF402": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "passos": [
+        {
+          "js": "document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'c', code: 'KeyC', bubbles: true }))",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog]"
+        }
+      ]
+    },
+    "RF403": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "criar",
+      "destacar": [
+        "O que você quer criar?",
+        "Em uma categoria, pelo formulário dela",
+        "Tarefa rápida, com prazo e responsável",
+        "Pedir ao BENI"
+      ]
+    },
+    "RF404": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "criar",
+      "passos": [
+        {
+          "digitar": "contr"
+        }
+      ],
+      "destacar": [
+        "2 formulários"
+      ]
+    },
+    "RF405": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "item",
+      "destacar": [
+        {
+          "css": "[role=dialog] button",
+          "n": 0
+        },
+        "Setas e Enter escolhem. Backspace volta. Esc fecha."
+      ]
+    },
+    "RF406": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "criar",
+      "passos": [
+        {
+          "digitar": "xyz"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog]"
+        }
+      ]
+    },
+    "RF407": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "item",
+      "passos": [
+        {
+          "js": "void 'categoria'"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog] [role=listbox]"
+        }
+      ]
+    },
+    "RF408": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "item",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Contratos",
+            "n": 1
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog] [role=listbox]"
+        },
+        "Qual formulário de Contratos?"
+      ]
+    },
+    "RF409": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "item",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Chamados de TI",
+            "n": 1
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog]"
+        }
+      ]
+    },
+    "RF410": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "item",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Chamados de TI",
+            "n": 1
+          },
+          "esperar": 900
+        },
+        {
+          "digitar": "Impressora do 2º andar parada"
+        },
+        {
+          "clicar": {
+            "css": "[role=dialog] button[type=submit]"
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Item #23407 criado em Chamados de TI.",
+          "ancestral": "li"
+        }
+      ]
+    },
+    "RF411": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "tarefa",
+      "destacar": [
+        {
+          "css": "[role=dialog]"
+        }
+      ]
+    },
+    "RF412": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "tarefa",
+      "destacar": [
+        {
+          "css": "[role=dialog] form > div.grid > div",
+          "n": 1
+        },
+        {
+          "css": "[role=dialog] form > div.grid > div",
+          "n": 2
+        }
+      ]
+    },
+    "RF413": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "tarefa",
+      "passos": [
+        {
+          "clicar": {
+            "css": "[role=dialog] button[type=submit]"
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        "Dê um nome à tarefa."
+      ]
+    },
+    "RF414": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "tarefa",
+      "passos": [
+        {
+          "digitar": "Revisar o contrato da gráfica"
+        },
+        {
+          "clicar": {
+            "css": "[role=dialog] button[type=submit]"
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Tarefa #13303 criada.",
+          "ancestral": "li"
+        }
+      ]
+    },
+    "RF417": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "tarefa",
+      "passos": [
+        {
+          "digitar": "Revisar o contrato da gráfica"
+        },
+        {
+          "clicar": {
+            "css": "[role=dialog] button[type=submit]"
+          },
+          "esperar": 900
+        },
+        {
+          "js": "document.querySelector(\"[data-painel='w-tarefas']\").scrollIntoView({block:'center'})",
+          "esperar": 600
+        },
+        {
+          "clicar": {
+            "css": "[data-painel='w-tarefas'] [role=tab]",
+            "n": 1
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Revisar o contrato da gráfica",
+          "ancestral": "li"
+        }
+      ]
+    },
+    "RF415": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "criar",
+      "passos": [
+        {
+          "digitar": "chamado de impressora parada"
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "\"chamado de impressora parada\""
+        }
+      ]
+    },
+    "RF416": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "cena": "criar",
+      "passos": [
+        {
+          "clicar": "Pedir ao BENI",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "No produto, abre a conversa com o BENI em tela cheia.",
+          "ancestral": "li"
+        }
+      ]
+    },
+    "RI401": {
+      "sem": "Rota da página de conversa em tela cheia, que o protótipo não tem"
+    }
+  }
+}

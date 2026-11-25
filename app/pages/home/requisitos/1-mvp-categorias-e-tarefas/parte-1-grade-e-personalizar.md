@@ -53,7 +53,7 @@ lado do botão Criar.
 | RF016 | "Adicionar widget" deve abrir o painel lateral "Adicionar widget" sem escurecer nem travar a Home. | Com o painel aberto, a pessoa vê o widget novo entrar na Home. | Essencial | Obrigatório |
 | RF017 | O 1º nível do catálogo deve mostrar os grupos Tarefas e Itens e categorias, cada um com a descrição e quantos widgets tem. | Tarefas mostra 14 opções; Itens e categorias, 1. | Essencial | Obrigatório |
 | RF018 | O 2º nível de Tarefas deve separar os widgets em Números, Listas e Gráficos, com o ícone, o nome, a descrição e "Adicionar" ou o selo "Na Home" de cada widget (RN002). | Abrir Tarefas e voltar com "Voltar" devolve ao 1º nível. | Essencial | Obrigatório |
-| RF019 | O campo "Buscar widget" deve procurar pelo nome nos 2 grupos de uma vez. | Exemplo: "venc" mostra Vencidas (número), Vencidas (lista), Vencem em 7 dias e Vencem em breve; sem resultado, "Nenhum widget com esse nome.". | Importante | Obrigatório |
+| RF019 | O campo "Buscar widget" deve procurar pelo nome e pela descrição nos 2 grupos de uma vez. | Exemplo: "venc" mostra Vencidas (número), Vencidas (lista), Vencem em 7 dias, Vencem em breve e Carga por responsável; sem resultado, "Nenhum widget com esse nome.". | Importante | Obrigatório |
 | RF020 | "Adicionar" deve pôr o widget no topo da Home, logo depois de Categorias quando Categorias é o 1º, no tamanho padrão dele. | Adicionar Prioridade com Categorias no topo põe Prioridade na 2ª posição. | Essencial | Obrigatório |
 
 ## Menu "⋯" do widget (RF)

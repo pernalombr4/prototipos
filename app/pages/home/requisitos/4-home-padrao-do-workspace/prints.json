@@ -1,0 +1,277 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/home",
+  "andaime": "Protótipo · estado",
+  "cenas": {
+    "editar": [
+      {
+        "clicar": "Personalizar",
+        "esperar": 700
+      }
+    ],
+    "padrao": [
+      {
+        "clicar": "Personalizar",
+        "esperar": 700
+      },
+      {
+        "clicar": "Editando",
+        "esperar": 600
+      },
+      {
+        "clicar": {
+          "css": "[role=option]",
+          "n": 1
+        },
+        "esperar": 800
+      }
+    ],
+    "novoMembro": [
+      {
+        "clicar": "Personalizar",
+        "esperar": 700
+      },
+      {
+        "clicar": "Editando",
+        "esperar": 600
+      },
+      {
+        "clicar": {
+          "css": "[role=option]",
+          "n": 1
+        },
+        "esperar": 800
+      },
+      {
+        "clicar": "Adicionar widget",
+        "esperar": 800
+      },
+      {
+        "clicar": "Buscar widget"
+      },
+      {
+        "digitar": "Bloco de notas"
+      },
+      {
+        "js": "(() => { const r = [...document.querySelectorAll('[role=dialog] div.rounded-lg')].filter(d => d.innerText.trim().startsWith(\"Bloco de notas\")).sort((a, b) => a.innerText.length - b.innerText.length)[0]; [...r.querySelectorAll('button')].find(b => b.innerText.trim() === 'Adicionar').click() })()",
+        "esperar": 900
+      },
+      {
+        "js": "(() => { [...document.querySelectorAll(\"body\")].flatMap(r => [...r.querySelectorAll('button')]).find(b => b.innerText.trim() === \"Concluir\").click() })()",
+        "esperar": 700
+      },
+      {
+        "esperar": 600
+      },
+      {
+        "estado": "Membro"
+      },
+      {
+        "esperar": 600
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "cena": "padrao",
+      "passos": [
+        {
+          "js": "(() => { [...document.querySelectorAll(\"body\")].flatMap(r => [...r.querySelectorAll('button')]).find(b => b.innerText.trim() === \"Concluir\").click() })()",
+          "esperar": 700
+        },
+        {
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "regex": "^home padrão do workspace salva"
+      }
+    },
+    "RF002": {
+      "cena": "editar",
+      "passos": [
+        {
+          "js": "(() => { [...document.querySelectorAll(\"body\")].flatMap(r => [...r.querySelectorAll('button')]).find(b => b.innerText.trim() === \"Concluir\").click() })()",
+          "esperar": 700
+        },
+        {
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "regex": "^home salva\\.$"
+      }
+    },
+    "RF003": {
+      "sem": "A migração do navegador para o workspace acontece no back, sem tela"
+    },
+    "RF004": {
+      "cena": "editar",
+      "passos": [
+        {
+          "clicar": "Restaurar padrão",
+          "esperar": 500
+        }
+      ],
+      "destacar": [
+        "Restaurar padrão",
+        {
+          "regex": "^home padrão restaurada"
+        }
+      ]
+    },
+    "RF005": {
+      "antes": [
+        {
+          "estado": "MVP"
+        },
+        {
+          "esperar": 600
+        },
+        {
+          "estado": "Workspace vazio (primeiro acesso)"
+        },
+        {
+          "esperar": 800
+        }
+      ],
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].filter(e => e.innerText.trim().split('\\n')[0].trim() === \"Categorias\")[0]; if (h) h.closest('section').dataset.print = \"w0\" })()"
+        },
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].filter(e => e.innerText.trim().split('\\n')[0].trim() === \"Abertas agora\")[0]; if (h) h.closest('section').dataset.print = \"w1\" })()"
+        },
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].filter(e => e.innerText.trim().split('\\n')[0].trim() === \"Conclu\\u00eddas\")[0]; if (h) h.closest('section').dataset.print = \"w2\" })()"
+        },
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].filter(e => e.innerText.trim().split('\\n')[0].trim() === \"Criadas\")[0]; if (h) h.closest('section').dataset.print = \"w3\" })()"
+        },
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].filter(e => e.innerText.trim().split('\\n')[0].trim() === \"Vencidas\")[0]; if (h) h.closest('section').dataset.print = \"w4\" })()"
+        },
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].filter(e => e.innerText.trim().split('\\n')[0].trim() === \"Vencidas\")[1]; if (h) h.closest('section').dataset.print = \"w5\" })()"
+        },
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].filter(e => e.innerText.trim().split('\\n')[0].trim() === \"Vencem em breve\")[0]; if (h) h.closest('section').dataset.print = \"w6\" })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=w0]"
+        },
+        {
+          "css": "[data-print=w1]"
+        },
+        {
+          "css": "[data-print=w2]"
+        },
+        {
+          "css": "[data-print=w3]"
+        },
+        {
+          "css": "[data-print=w4]"
+        },
+        {
+          "css": "[data-print=w5]"
+        },
+        {
+          "css": "[data-print=w6]"
+        }
+      ]
+    },
+    "RI001": {
+      "sem": "Rota de back-end, sem tela"
+    },
+    "RI002": {
+      "sem": "Rota de back-end, sem tela"
+    },
+    "RF101": {
+      "cena": "editar",
+      "passos": [
+        {
+          "clicar": "Editando",
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        "Editando",
+        {
+          "css": "[role=listbox]"
+        }
+      ]
+    },
+    "RF102": {
+      "cena": "padrao",
+      "destacar": [
+        {
+          "regex": "^você está editando a home padrão do workspace$",
+          "ancestral": "div.rounded-lg"
+        },
+        "Editando"
+      ]
+    },
+    "RF103": {
+      "cena": "padrao",
+      "passos": [
+        {
+          "clicar": "Adicionar widget",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "regex": "^o widget entra na home padrão"
+      }
+    },
+    "RF104": {
+      "cena": "padrao",
+      "passos": [
+        {
+          "js": "(() => { const b = [...document.querySelectorAll('button')].find(x => x.innerText.trim() === 'Concluir'); b.parentElement.dataset.print = 'acoes' })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=acoes]"
+      }
+    },
+    "RF105": {
+      "junto": "RF001",
+      "destacar": {
+        "regex": "^home padrão do workspace salva"
+      }
+    },
+    "RF106": {
+      "cena": "padrao",
+      "passos": [
+        {
+          "pairar": "Cancelar",
+          "esperar": 700
+        },
+        {
+          "js": "(() => { const c = [...document.querySelectorAll('body *')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 20 && r.height > 8 && (e.innerText || '').trim().startsWith(\"Cancelar e descartar\") }).sort((a, b) => a.innerText.length - b.innerText.length || a.getBoundingClientRect().width - b.getBoundingClientRect().width); if (c[0]) c[0].dataset.print = \"dica\" })()"
+        }
+      ],
+      "destacar": "Cancelar"
+    },
+    "RF107": {
+      "cena": "novoMembro",
+      "passos": [
+        {
+          "pairar": {
+            "regex": "^novo$"
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^novo$"
+        },
+        {
+          "regex": "^o administrador adicionou"
+        }
+      ]
+    }
+  }
+}

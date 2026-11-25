@@ -8,7 +8,7 @@ mostram as tarefas dele ou as do workspace.
 **Onde vale:** a Home do workspace e o grupo Tarefas do catálogo.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/home, com "MVP" em "Versão". Para ver o controle do
-administrador, escolha "Administrador" em "Papel".
+administrador, escolha "Administrador" em "Ver como".
 
 ## Regras de negócio (RN)
 

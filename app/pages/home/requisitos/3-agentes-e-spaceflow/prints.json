@@ -1,0 +1,370 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/home",
+  "andaime": "Protótipo · estado",
+  "cenas": {
+    "agentes": [
+      {
+        "clicar": "Personalizar"
+      },
+      {
+        "clicar": "Adicionar widget",
+        "esperar": 700
+      },
+      {
+        "focar": "Buscar widget"
+      },
+      {
+        "digitar": "Agentes de IA"
+      },
+      {
+        "clicar": "Adicionar"
+      },
+      {
+        "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Concluir').click()",
+        "esperar": 5800
+      }
+    ],
+    "grupoSpaceflow": [
+      {
+        "clicar": "Personalizar"
+      },
+      {
+        "clicar": "Adicionar widget",
+        "esperar": 700
+      },
+      {
+        "clicar": "As execuções dos fluxos: os números, as falhas e o que está em andamento.",
+        "esperar": 700
+      }
+    ],
+    "fluxos": [
+      {
+        "clicar": "Personalizar"
+      },
+      {
+        "clicar": "Adicionar widget",
+        "esperar": 700
+      },
+      {
+        "focar": "Buscar widget"
+      },
+      {
+        "digitar": "fluxos"
+      },
+      {
+        "clicar": "Adicionar"
+      },
+      {
+        "clicar": "Adicionar"
+      },
+      {
+        "clicar": "Adicionar"
+      },
+      {
+        "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Concluir').click()",
+        "esperar": 5800
+      }
+    ],
+    "fluxosVazio": [
+      {
+        "estado": "Workspace vazio (primeiro acesso)"
+      },
+      {
+        "esperar": 800
+      },
+      {
+        "clicar": "Personalizar"
+      },
+      {
+        "clicar": "Adicionar widget",
+        "esperar": 700
+      },
+      {
+        "focar": "Buscar widget"
+      },
+      {
+        "digitar": "fluxos"
+      },
+      {
+        "clicar": "Adicionar"
+      },
+      {
+        "clicar": "Adicionar"
+      },
+      {
+        "clicar": "Adicionar"
+      },
+      {
+        "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Concluir').click()",
+        "esperar": 5800
+      }
+    ],
+    "fluxosMembro": [
+      {
+        "clicar": "Personalizar"
+      },
+      {
+        "clicar": "Adicionar widget",
+        "esperar": 700
+      },
+      {
+        "focar": "Buscar widget"
+      },
+      {
+        "digitar": "Execuções dos fluxos"
+      },
+      {
+        "clicar": "Adicionar"
+      },
+      {
+        "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Concluir').click()",
+        "esperar": 5800
+      },
+      {
+        "estado": "Membro"
+      },
+      {
+        "esperar": 800
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "cena": "agentes",
+      "destacar": {
+        "texto": "Agentes de IA",
+        "n": 1,
+        "ancestral": "section"
+      }
+    },
+    "RF002": {
+      "cena": "agentes",
+      "destacar": [
+        "Conversar com BENI",
+        "Conversar com Analista de contratos",
+        "Conversar com Triagem de chamados"
+      ]
+    },
+    "RF003": {
+      "cena": "agentes",
+      "destacar": "Conversar com Triagem de chamados"
+    },
+    "RF004": {
+      "cena": "agentes",
+      "destacar": "Gerenciar agentes"
+    },
+    "RI001": {
+      "sem": "Interface de back-end. O protótipo usa dado simulado e não chama a rota"
+    },
+    "RI002": {
+      "sem": "Rota da página de conversa em tela cheia. O protótipo não tem essa página"
+    },
+    "RF101": {
+      "cena": "grupoSpaceflow",
+      "destacar": [
+        {
+          "texto": "Pede acesso aos fluxos",
+          "n": 0
+        },
+        {
+          "texto": "Pede acesso aos fluxos",
+          "n": 1
+        },
+        {
+          "texto": "Pede acesso aos fluxos",
+          "n": 2
+        }
+      ]
+    },
+    "RF102": {
+      "cena": "fluxosMembro",
+      "destacar": [
+        {
+          "texto": "Execuções dos fluxos",
+          "ancestral": "section"
+        }
+      ]
+    },
+    "RF103": {
+      "cena": "fluxos",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Abrir o Spaceflow",
+            "n": 0
+          }
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('body *')].find(e => { const r = e.getBoundingClientRect(); return r.width > 100 && e.children.length === 0 && /^(No produto, abre|O passo voltou)/.test(e.textContent.trim()) }); let a = el; while (a && !a.querySelector('button')) a = a.parentElement; a.dataset.print = 'toast' })()"
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Abrir o Spaceflow",
+          "n": 0
+        },
+        {
+          "css": "[data-print=toast]"
+        }
+      ]
+    },
+    "RF104": {
+      "cena": "fluxos",
+      "passos": [
+        {
+          "rolar": "Execuções dos fluxos"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "dl"
+        },
+        "Execuções dos fluxos"
+      ]
+    },
+    "RF105": {
+      "cena": "fluxos",
+      "passos": [
+        {
+          "rolar": "Execuções dos fluxos"
+        },
+        {
+          "js": "(() => { document.querySelector(\"[role=img][aria-label$='foram concluídas']\").parentElement.dataset.print = 'barra' })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=barra]"
+      }
+    },
+    "RF106": {
+      "cena": "fluxosVazio",
+      "passos": [
+        {
+          "rolar": "Nenhum fluxo rodou nos últimos 7 dias."
+        }
+      ],
+      "destacar": "Nenhum fluxo rodou nos últimos 7 dias."
+    },
+    "RF107": {
+      "cena": "fluxos",
+      "destacar": {
+        "texto": "Falhas nos fluxos",
+        "ancestral": "section"
+      }
+    },
+    "RF108": {
+      "cena": "fluxos",
+      "passos": [
+        {
+          "pairar": {
+            "css": "section li [class*='bg-error/10']",
+            "n": 1
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        "Abrir a execução: Triagem de chamados de TI",
+        {
+          "texto": "Agente de IA",
+          "exato": true
+        }
+      ]
+    },
+    "RF109": {
+      "cena": "fluxos",
+      "passos": [
+        {
+          "clicar": "Abrir a execução: Triagem de chamados de TI"
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('body *')].find(e => { const r = e.getBoundingClientRect(); return r.width > 100 && e.children.length === 0 && /^(No produto, abre|O passo voltou)/.test(e.textContent.trim()) }); let a = el; while (a && !a.querySelector('button')) a = a.parentElement; a.dataset.print = 'toast' })()"
+        }
+      ],
+      "destacar": [
+        "Abrir a execução: Triagem de chamados de TI",
+        {
+          "css": "[data-print=toast]"
+        }
+      ]
+    },
+    "RF110": {
+      "cena": "fluxos",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Repetir",
+            "n": 0
+          }
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('body *')].find(e => { const r = e.getBoundingClientRect(); return r.width > 100 && e.children.length === 0 && /^(No produto, abre|O passo voltou)/.test(e.textContent.trim()) }); let a = el; while (a && !a.querySelector('button')) a = a.parentElement; a.dataset.print = 'toast' })()"
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Falhas nos fluxos",
+          "ancestral": "section"
+        },
+        {
+          "css": "[data-print=toast]"
+        }
+      ]
+    },
+    "RF111": {
+      "cena": "fluxosVazio",
+      "destacar": "Nenhum fluxo parou com erro nos últimos 7 dias."
+    },
+    "RF112": {
+      "cena": "fluxos",
+      "destacar": {
+        "texto": "Fluxos em andamento",
+        "ancestral": "section"
+      }
+    },
+    "RF113": {
+      "cena": "fluxos",
+      "destacar": "Abrir a execução: Renovação de contrato"
+    },
+    "RF114": {
+      "cena": "fluxos",
+      "destacar": [
+        {
+          "texto": "Parado há mais de 2 dias",
+          "n": 0
+        },
+        "Abrir a execução: Cadastro de fornecedor"
+      ]
+    },
+    "RF115": {
+      "cena": "fluxos",
+      "passos": [
+        {
+          "clicar": "Abrir a execução: Renovação de contrato"
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('body *')].find(e => { const r = e.getBoundingClientRect(); return r.width > 100 && e.children.length === 0 && /^(No produto, abre|O passo voltou)/.test(e.textContent.trim()) }); let a = el; while (a && !a.querySelector('button')) a = a.parentElement; a.dataset.print = 'toast' })()"
+        }
+      ],
+      "destacar": [
+        "Abrir a execução: Renovação de contrato",
+        {
+          "css": "[data-print=toast]"
+        }
+      ]
+    },
+    "RF116": {
+      "cena": "fluxosVazio",
+      "destacar": "Nenhum fluxo em andamento."
+    },
+    "RI101": {
+      "sem": "Interface de back-end. O protótipo usa dado simulado e não chama a rota"
+    },
+    "RI102": {
+      "sem": "Interface de back-end. O protótipo usa dado simulado e não chama a rota"
+    },
+    "RI103": {
+      "sem": "Interface de back-end. O protótipo simula o Repetir em memória e não chama a rota"
+    }
+  }
+}

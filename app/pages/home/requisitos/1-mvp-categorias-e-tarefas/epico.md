@@ -6,8 +6,7 @@ leva a item, tarefa rápida ou conversa com o BENI. Tudo usa o dado, a rota e o 
 
 **Onde vale:** a Home do workspace (`/workspaces/<workspace>`, item "Início" do menu lateral).
 
-**Protótipo:** https://pernalombr4.github.io/prototipos/home, com "MVP" escolhido em "Versão" na barra de baixo. Os
-textos nos 3 idiomas estão no `textos.ts` de https://github.com/pernalombr4/prototipos/tree/main/app/pages/home. A
+**Protótipo:** https://pernalombr4.github.io/prototipos/home, com "MVP" escolhido em "Versão" na barra de baixo. A troca de idioma do protótipo mostra os textos em português, inglês e espanhol. A
 barra de baixo (estado, papel, versão, tema, idioma) é ferramenta de revisão e não entra no produto.
 
 **Fora do escopo:** a Home padrão montada pelo administrador, os widgets de itens, agenda, atalhos, IA e Spaceflow, o

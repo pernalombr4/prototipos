@@ -9,7 +9,7 @@ quais estão esperando, e repete o passo que falhou sem abrir a execução.
 catálogo. A execução abre na tela de execução do Spaceflow.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/home, com "Proposta completa" em "Versão". Para ver o "Sem
-acesso", escolha "Membro" em "Papel".
+acesso", escolha "Membro" em "Ver como".
 
 ## Regras de negócio (RN)
 
@@ -31,7 +31,7 @@ acesso", escolha "Membro" em "Papel".
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF104 | O widget deve mostrar, com o subtítulo "Últimos 7 dias", quantas execuções do workspace estão Em andamento, Concluídas, Com erro e Canceladas no período. | Exemplo: 9, 214, 6 e 3. | Essencial | Obrigatório |
+| RF104 | O widget deve mostrar quantas execuções do workspace dos últimos 7 dias estão Em andamento, Concluídas, Com erro e Canceladas. | Exemplo: 9, 214, 6 e 3. | Essencial | Obrigatório |
 | RF105 | Abaixo dos números, o widget deve mostrar a barra com a proporção de cada status e a frase "<n>% das execuções terminadas foram concluídas" (RN103). | Exemplo: "96% das execuções terminadas foram concluídas". | Importante | Obrigatório |
 | RF106 | Sem execução no período, o widget deve mostrar "Nenhum fluxo rodou nos últimos 7 dias.". | Workspace sem fluxo mostra o texto. | Importante | Obrigatório |
 

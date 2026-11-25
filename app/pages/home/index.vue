@@ -103,8 +103,8 @@ import { textos } from './textos'
 definePageMeta({
   titulo: 'Home',
   descricao: 'Home do workspace em widgets que cada pessoa arruma (categorias, lâminas do Painel de tarefas, BENI e agentes, agenda, itens que a pessoa criou), Home padrão montada pelo administrador, um botão Criar com item, tarefa rápida e a conversa com o BENI, e a versão MVP só com o que o develop já tem.',
-  status: 'em-revisao',
-  atualizado: '2026-11-24',
+  status: 'aprovado',
+  atualizado: '2026-11-25',
   tela: 'Início',
 })
 

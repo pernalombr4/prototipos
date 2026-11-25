@@ -8,7 +8,7 @@ aviso.
 **Onde vale:** o widget Comunicado, no grupo Equipe e notas do catálogo.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/home, com "Proposta completa" em "Versão". Para editar, escolha
-"Administrador" em "Papel".
+"Administrador" em "Ver como".
 
 ## Regras de negócio (RN)
 

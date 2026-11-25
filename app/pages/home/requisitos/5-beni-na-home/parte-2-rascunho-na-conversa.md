@@ -34,7 +34,7 @@ o pedido e escolha "Pedir ao BENI".
 | RF106 | O cartão deve ter "Criar", "Revisar no formulário" e "Descartar". | Os 3 botões ficam no pé do cartão. | Essencial | Obrigatório |
 | RF107 | "Criar" deve criar a tarefa ou o item (RN101) e trocar o cartão pela confirmação "Tarefa <número> criada." ou "Item <número> criado.", com "Abrir". | O item criado entra nos widgets da Home na hora. | Essencial | Obrigatório |
 | RF108 | "Revisar no formulário" deve abrir o modal de criação do botão Criar, preenchido com o rascunho. | Mudar o nome no modal e criar grava o nome novo. | Essencial | Obrigatório |
-| RF109 | "Descartar" deve fechar o cartão sem criar nada, com o toast "Rascunho descartado.". | Nada nasce, e a conversa continua aberta. | Importante | Obrigatório |
+| RF109 | "Descartar" deve deixar o cartão esmaecido, sem criar nada, com "Rascunho descartado." no lugar dos botões. | Nada nasce, e a conversa continua aberta. | Importante | Obrigatório |
 | RF110 | Para pedido que o BENI não reconhece como tarefa nem como item, o BENI deve responder com a ajuda e exemplos de pedido. | Exemplo: "oi" recebe a ajuda. | Importante | Obrigatório |
 | RF111 | O pé da conversa deve mostrar "O BENI pode errar. Confira o rascunho antes de criar.". | O aviso fica visível durante a conversa inteira. | Importante | Obrigatório |
 

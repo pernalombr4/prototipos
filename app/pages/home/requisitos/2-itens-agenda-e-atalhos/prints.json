@@ -1,0 +1,447 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/home",
+  "andaime": "Protótipo · estado",
+  "cenas": {
+    "vazio": [
+      {
+        "estado": "Workspace vazio (primeiro acesso)"
+      },
+      {
+        "esperar": 800
+      }
+    ],
+    "itens": [
+      {
+        "clicar": "Personalizar"
+      },
+      {
+        "clicar": "Adicionar widget",
+        "esperar": 700
+      },
+      {
+        "focar": "Buscar widget"
+      },
+      {
+        "digitar": "itens"
+      },
+      {
+        "clicar": "Adicionar"
+      },
+      {
+        "clicar": "Adicionar"
+      },
+      {
+        "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Concluir').click()",
+        "esperar": 5800
+      }
+    ],
+    "itensVazio": [
+      {
+        "estado": "Workspace vazio (primeiro acesso)"
+      },
+      {
+        "esperar": 800
+      },
+      {
+        "clicar": "Personalizar"
+      },
+      {
+        "clicar": "Adicionar widget",
+        "esperar": 700
+      },
+      {
+        "focar": "Buscar widget"
+      },
+      {
+        "digitar": "itens"
+      },
+      {
+        "clicar": "Adicionar"
+      },
+      {
+        "clicar": "Adicionar"
+      },
+      {
+        "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Concluir').click()",
+        "esperar": 5800
+      }
+    ],
+    "semana": [
+      {
+        "clicar": "Personalizar"
+      },
+      {
+        "clicar": "Adicionar widget",
+        "esperar": 700
+      },
+      {
+        "focar": "Buscar widget"
+      },
+      {
+        "digitar": "Agenda da semana"
+      },
+      {
+        "clicar": "Adicionar"
+      },
+      {
+        "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Concluir').click()",
+        "esperar": 5800
+      }
+    ],
+    "mes": [
+      {
+        "clicar": "Personalizar"
+      },
+      {
+        "clicar": "Adicionar widget",
+        "esperar": 700
+      },
+      {
+        "focar": "Buscar widget"
+      },
+      {
+        "digitar": "Agenda do mês"
+      },
+      {
+        "clicar": "Adicionar"
+      },
+      {
+        "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Concluir').click()",
+        "esperar": 5800
+      }
+    ],
+    "atalhosLargo": [
+      {
+        "clicar": "Personalizar",
+        "esperar": 700
+      },
+      {
+        "js": "(async () => { for (let i = 0; i < 4; i++) { document.querySelector('[aria-label=\"Redimensionar Atalhos. Use as setas.\"]').dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })); await new Promise(r => setTimeout(r, 200)) } })()"
+      },
+      {
+        "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Concluir').click()",
+        "esperar": 5800
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "passos": [
+        {
+          "rolar": "Reunião de compras"
+        }
+      ],
+      "destacar": {
+        "texto": "Compromissos do dia",
+        "ancestral": "section"
+      }
+    },
+    "RF002": {
+      "passos": [
+        {
+          "rolar": "Reunião de compras"
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Reunião de compras",
+          "ancestral": "li"
+        },
+        {
+          "texto": "Assinar o NDA da Vértice Consultoria",
+          "ancestral": "li"
+        }
+      ]
+    },
+    "RF003": {
+      "passos": [
+        {
+          "clicar": "Assinar o NDA da Vértice Consultoria"
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('body *')].find(e => { const r = e.getBoundingClientRect(); return r.width > 100 && e.children.length === 0 && /^(No produto, abre|O passo voltou)/.test(e.textContent.trim()) }); let a = el; while (a && !a.querySelector('button')) a = a.parentElement; a.dataset.print = 'toast' })()"
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Assinar o NDA da Vértice Consultoria",
+          "ancestral": "li"
+        },
+        {
+          "css": "[data-print=toast]"
+        }
+      ]
+    },
+    "RF004": {
+      "passos": [
+        {
+          "clicar": "Abrir a Agenda"
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('body *')].find(e => { const r = e.getBoundingClientRect(); return r.width > 100 && e.children.length === 0 && /^(No produto, abre|O passo voltou)/.test(e.textContent.trim()) }); let a = el; while (a && !a.querySelector('button')) a = a.parentElement; a.dataset.print = 'toast' })()"
+        }
+      ],
+      "destacar": [
+        "Abrir a Agenda",
+        {
+          "css": "[data-print=toast]"
+        }
+      ]
+    },
+    "RF005": {
+      "cena": "vazio",
+      "passos": [
+        {
+          "rolar": "Nada na agenda hoje."
+        }
+      ],
+      "destacar": "Nada na agenda hoje."
+    },
+    "RF101": {
+      "cena": "itens",
+      "destacar": {
+        "texto": "Meus itens",
+        "ancestral": "section"
+      }
+    },
+    "RF102": {
+      "cena": "itens",
+      "destacar": "Monitor extra para a controladoria"
+    },
+    "RF103": {
+      "cena": "itens",
+      "passos": [
+        {
+          "clicar": "Monitor extra para a controladoria"
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('body *')].find(e => { const r = e.getBoundingClientRect(); return r.width > 100 && e.children.length === 0 && /^(No produto, abre|O passo voltou)/.test(e.textContent.trim()) }); let a = el; while (a && !a.querySelector('button')) a = a.parentElement; a.dataset.print = 'toast' })()"
+        }
+      ],
+      "destacar": [
+        "Monitor extra para a controladoria",
+        {
+          "css": "[data-print=toast]"
+        }
+      ]
+    },
+    "RF104": {
+      "cena": "itensVazio",
+      "destacar": "Você ainda não criou nenhum item."
+    },
+    "RF105": {
+      "cena": "itens",
+      "destacar": {
+        "texto": "Itens criados recentemente",
+        "ancestral": "section"
+      }
+    },
+    "RF106": {
+      "cena": "itens",
+      "passos": [
+        {
+          "js": "(() => { const li = [...document.querySelectorAll('li')].find(x => x.innerText.includes('Cadeiras ergonômicas, filial Campinas')); li.querySelector('[data-slot=fallback]').parentElement.dataset.print = 'avatar' })()"
+        },
+        {
+          "pairar": {
+            "css": "[data-print=avatar]"
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        "Cadeiras ergonômicas, filial Campinas",
+        "Criado por Otávio Mendes"
+      ]
+    },
+    "RF107": {
+      "cena": "itens",
+      "passos": [
+        {
+          "clicar": "Cadeiras ergonômicas, filial Campinas"
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('body *')].find(e => { const r = e.getBoundingClientRect(); return r.width > 100 && e.children.length === 0 && /^(No produto, abre|O passo voltou)/.test(e.textContent.trim()) }); let a = el; while (a && !a.querySelector('button')) a = a.parentElement; a.dataset.print = 'toast' })()"
+        }
+      ],
+      "destacar": [
+        "Cadeiras ergonômicas, filial Campinas",
+        {
+          "css": "[data-print=toast]"
+        }
+      ]
+    },
+    "RF108": {
+      "cena": "itensVazio",
+      "destacar": "Nenhum item criado ainda."
+    },
+    "RF201": {
+      "passos": [
+        {
+          "rolar": "Pedidos em aberto"
+        }
+      ],
+      "destacar": {
+        "texto": "Atalhos",
+        "ancestral": "section"
+      }
+    },
+    "RF202": {
+      "cena": "atalhosLargo",
+      "passos": [
+        {
+          "rolar": "Pedidos em aberto"
+        }
+      ],
+      "destacar": {
+        "texto": "Atalhos",
+        "ancestral": "section"
+      }
+    },
+    "RF203": {
+      "passos": [
+        {
+          "clicar": "Pedidos em aberto"
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('body *')].find(e => { const r = e.getBoundingClientRect(); return r.width > 100 && e.children.length === 0 && /^(No produto, abre|O passo voltou)/.test(e.textContent.trim()) }); let a = el; while (a && !a.querySelector('button')) a = a.parentElement; a.dataset.print = 'toast' })()"
+        }
+      ],
+      "destacar": [
+        "Pedidos em aberto",
+        {
+          "css": "[data-print=toast]"
+        }
+      ]
+    },
+    "RF204": {
+      "passos": [
+        {
+          "clicar": "Mais ações de Atalhos"
+        },
+        {
+          "clicar": "Configurar",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog]"
+        }
+      ]
+    },
+    "RF205": {
+      "cena": "vazio",
+      "passos": [
+        {
+          "rolar": "Fixe aqui o que você abre todo dia."
+        }
+      ],
+      "destacar": "Fixe aqui o que você abre todo dia."
+    },
+    "RF206": {
+      "passos": [
+        {
+          "rolar": "Locação do galpão de Jundiaí"
+        }
+      ],
+      "destacar": {
+        "texto": "Recentes",
+        "ancestral": "section"
+      }
+    },
+    "RF207": {
+      "passos": [
+        {
+          "clicar": "Locação do galpão de Jundiaí"
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('body *')].find(e => { const r = e.getBoundingClientRect(); return r.width > 100 && e.children.length === 0 && /^(No produto, abre|O passo voltou)/.test(e.textContent.trim()) }); let a = el; while (a && !a.querySelector('button')) a = a.parentElement; a.dataset.print = 'toast' })()"
+        }
+      ],
+      "destacar": [
+        "Locação do galpão de Jundiaí",
+        {
+          "css": "[data-print=toast]"
+        }
+      ]
+    },
+    "RF208": {
+      "cena": "vazio",
+      "passos": [
+        {
+          "rolar": "O que você abrir aparece aqui."
+        }
+      ],
+      "destacar": "O que você abrir aparece aqui."
+    },
+    "RF301": {
+      "cena": "semana",
+      "destacar": {
+        "texto": "Agenda da semana",
+        "ancestral": "section"
+      }
+    },
+    "RF302": {
+      "cena": "semana",
+      "passos": [
+        {
+          "clicar": "Almoço com a Atria Sistemas"
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('body *')].find(e => { const r = e.getBoundingClientRect(); return r.width > 100 && e.children.length === 0 && /^(No produto, abre|O passo voltou)/.test(e.textContent.trim()) }); let a = el; while (a && !a.querySelector('button')) a = a.parentElement; a.dataset.print = 'toast' })()"
+        }
+      ],
+      "destacar": [
+        "Almoço com a Atria Sistemas",
+        {
+          "css": "[data-print=toast]"
+        }
+      ]
+    },
+    "RF303": {
+      "cena": "mes",
+      "destacar": [
+        {
+          "texto": "Agenda do mês",
+          "ancestral": "section"
+        },
+        "quarta-feira, 11 de novembro"
+      ]
+    },
+    "RF304": {
+      "cena": "mes",
+      "passos": [
+        {
+          "clicar": "sexta-feira, 13 de novembro"
+        }
+      ],
+      "destacar": [
+        "sexta-feira, 13 de novembro",
+        "Revisão da semana com o time"
+      ]
+    },
+    "RF305": {
+      "cena": "mes",
+      "destacar": [
+        "Mês anterior",
+        "Próximo mês"
+      ]
+    },
+    "RF306": {
+      "cena": "mes",
+      "passos": [
+        {
+          "clicar": "Próximo mês"
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Hoje",
+          "exato": true
+        },
+        "Dezembro de 2026"
+      ]
+    }
+  }
+}

@@ -1,0 +1,213 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/home",
+  "andaime": "Protótipo · estado",
+  "cenas": {
+    "editarCom": [
+      {
+        "js": "(() => { const h = [...document.querySelectorAll('section h2')].filter(e => e.innerText.trim().split('\\n')[0].trim() === \"Comunicado\")[0]; if (h) h.closest('section').dataset.print = \"wc\" })()"
+      },
+      {
+        "rolar": {
+          "css": "[data-print=wc]"
+        }
+      },
+      {
+        "js": "(() => { [...document.querySelectorAll(\"section\")].flatMap(r => [...r.querySelectorAll('button')]).find(b => b.innerText.trim() === \"Editar comunicado\").click() })()",
+        "esperar": 700
+      },
+      {
+        "esperar": 400
+      }
+    ],
+    "notas": [
+      {
+        "clicar": "Personalizar",
+        "esperar": 700
+      },
+      {
+        "clicar": "Adicionar widget",
+        "esperar": 800
+      },
+      {
+        "clicar": "Buscar widget"
+      },
+      {
+        "digitar": "Bloco de notas"
+      },
+      {
+        "js": "(() => { const r = [...document.querySelectorAll('[role=dialog] div.rounded-lg')].filter(d => d.innerText.trim().startsWith(\"Bloco de notas\")).sort((a, b) => a.innerText.length - b.innerText.length)[0]; [...r.querySelectorAll('button')].find(b => b.innerText.trim() === 'Adicionar').click() })()",
+        "esperar": 900
+      },
+      {
+        "js": "(() => { [...document.querySelectorAll(\"body\")].flatMap(r => [...r.querySelectorAll('button')]).find(b => b.innerText.trim() === \"Concluir\").click() })()",
+        "esperar": 700
+      },
+      {
+        "esperar": 600
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].filter(e => e.innerText.trim().split('\\n')[0].trim() === \"Comunicado\")[0]; if (h) h.closest('section').dataset.print = \"wc\" })()"
+        },
+        {
+          "rolar": {
+            "css": "[data-print=wc]"
+          }
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^fechamento de novembro$"
+        },
+        {
+          "regex": "^os pedidos de compra de novembro"
+        },
+        {
+          "regex": "^otávio mendes, "
+        }
+      ]
+    },
+    "RF002": {
+      "cena": "editarCom",
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].find(e => e.innerText.trim().split('\\n')[0].trim() === \"Comunicado\"); const el = h && [...h.closest('section').querySelectorAll(\"textarea\")][0]; if (el) el.dataset.print = \"campo\" })()"
+        },
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].find(e => e.innerText.trim().split('\\n')[0].trim() === \"Comunicado\"); const el = h && [...h.closest('section').querySelectorAll(\"button\")].filter(e => e.innerText.trim() === \"Cancelar\")[0]; if (el) el.dataset.print = \"bc\" })()"
+        },
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].find(e => e.innerText.trim().split('\\n')[0].trim() === \"Comunicado\"); const el = h && [...h.closest('section').querySelectorAll(\"button\")].filter(e => e.innerText.trim() === \"Publicar\")[0]; if (el) el.dataset.print = \"bp\" })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=campo]"
+        },
+        {
+          "css": "[data-print=bc]"
+        },
+        {
+          "css": "[data-print=bp]"
+        }
+      ]
+    },
+    "RF003": {
+      "cena": "editarCom",
+      "passos": [
+        {
+          "js": "(() => { const t = document.querySelector(\"section textarea\"); t.focus(); t.setSelectionRange(t.value.length, t.value.length) })()"
+        },
+        {
+          "digitar": " Dúvidas, falar com o financeiro."
+        },
+        {
+          "js": "(() => { [...document.querySelectorAll(\"section\")].flatMap(r => [...r.querySelectorAll('button')]).find(b => b.innerText.trim() === \"Publicar\").click() })()",
+          "esperar": 700
+        },
+        {
+          "esperar": 500
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "dúvidas, falar com o financeiro\\.$"
+        },
+        {
+          "regex": "^renata .+, hoje$"
+        }
+      ]
+    },
+    "RF004": {
+      "antes": [
+        {
+          "estado": "Workspace vazio (primeiro acesso)"
+        },
+        {
+          "esperar": 800
+        }
+      ],
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].filter(e => e.innerText.trim().split('\\n')[0].trim() === \"Comunicado\")[0]; if (h) h.closest('section').dataset.print = \"wc\" })()"
+        },
+        {
+          "rolar": {
+            "css": "[data-print=wc]"
+          }
+        }
+      ],
+      "destacar": {
+        "regex": "^nenhum comunicado publicado\\.$",
+        "ancestral": "div"
+      }
+    },
+    "RF005": {
+      "passos": [
+        {
+          "clicar": "Personalizar",
+          "esperar": 700
+        },
+        {
+          "clicar": "Adicionar widget",
+          "esperar": 800
+        },
+        {
+          "clicar": "Equipe e notas",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "regex": "^só o administrador edita$"
+      }
+    },
+    "RI001": {
+      "sem": "Rota de back-end, sem tela"
+    },
+    "RF101": {
+      "antes": [
+        {
+          "estado": "Workspace vazio (primeiro acesso)"
+        },
+        {
+          "esperar": 800
+        }
+      ],
+      "cena": "notas",
+      "destacar": "Escreva aqui. Só você vê."
+    },
+    "RF102": {
+      "cena": "notas",
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].find(e => e.innerText.trim().split('\\n')[0].trim() === \"Bloco de notas\"); const el = h && [...h.closest('section').querySelectorAll(\"textarea\")][0]; if (el) el.dataset.print = \"campo\" })()"
+        },
+        {
+          "js": "(() => { const t = document.querySelector(\"[data-print=campo]\"); t.focus(); t.setSelectionRange(t.value.length, t.value.length) })()"
+        },
+        {
+          "digitar": "\nPedir o orçamento da reforma."
+        },
+        {
+          "esperar": 500
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=campo]"
+      }
+    },
+    "RF103": {
+      "cena": "notas",
+      "destacar": {
+        "regex": "^só você vê$"
+      }
+    },
+    "RI101": {
+      "sem": "Rota de back-end, sem tela"
+    }
+  }
+}

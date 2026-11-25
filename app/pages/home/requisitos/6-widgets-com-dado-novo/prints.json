@@ -1,0 +1,290 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/home",
+  "andaime": "Protótipo · estado",
+  "cenas": {
+    "delegadas": [
+      {
+        "clicar": "Personalizar",
+        "esperar": 700
+      },
+      {
+        "clicar": "Adicionar widget",
+        "esperar": 800
+      },
+      {
+        "clicar": "Buscar widget"
+      },
+      {
+        "digitar": "Tarefas que delegei"
+      },
+      {
+        "js": "(() => { const r = [...document.querySelectorAll('[role=dialog] div.rounded-lg')].filter(d => d.innerText.trim().startsWith(\"Tarefas que delegei\")).sort((a, b) => a.innerText.length - b.innerText.length)[0]; [...r.querySelectorAll('button')].find(b => b.innerText.trim() === 'Adicionar').click() })()",
+        "esperar": 900
+      },
+      {
+        "js": "(() => { [...document.querySelectorAll(\"body\")].flatMap(r => [...r.querySelectorAll('button')]).find(b => b.innerText.trim() === \"Concluir\").click() })()",
+        "esperar": 700
+      },
+      {
+        "esperar": 600
+      }
+    ],
+    "porCategoria": [
+      {
+        "clicar": "Personalizar",
+        "esperar": 700
+      },
+      {
+        "clicar": "Adicionar widget",
+        "esperar": 800
+      },
+      {
+        "clicar": "Buscar widget"
+      },
+      {
+        "digitar": "Itens por categoria"
+      },
+      {
+        "js": "(() => { const r = [...document.querySelectorAll('[role=dialog] div.rounded-lg')].filter(d => d.innerText.trim().startsWith(\"Itens por categoria\")).sort((a, b) => a.innerText.length - b.innerText.length)[0]; [...r.querySelectorAll('button')].find(b => b.innerText.trim() === 'Adicionar').click() })()",
+        "esperar": 900
+      },
+      {
+        "js": "(() => { [...document.querySelectorAll(\"body\")].flatMap(r => [...r.querySelectorAll('button')]).find(b => b.innerText.trim() === \"Concluir\").click() })()",
+        "esperar": 700
+      },
+      {
+        "esperar": 600
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "cena": "delegadas",
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].filter(e => e.innerText.trim().split('\\n')[0].trim() === \"Tarefas que delegei\")[0]; if (h) h.closest('section').dataset.print = \"wd\" })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=wd]"
+      }
+    },
+    "RF002": {
+      "cena": "delegadas",
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].find(e => e.innerText.trim().split('\\n')[0].trim() === \"Tarefas que delegei\"); const el = h && [...h.closest('section').querySelectorAll(\"li button\")][0]; if (el) el.dataset.print = \"linha\" })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=linha]"
+      }
+    },
+    "RF003": {
+      "cena": "delegadas",
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].find(e => e.innerText.trim().split('\\n')[0].trim() === \"Tarefas que delegei\"); const el = h && [...h.closest('section').querySelectorAll(\"li button\")][0]; if (el) el.dataset.print = \"linha\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=linha]"
+          },
+          "esperar": 500
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=linha]"
+        },
+        {
+          "regex": "^no produto, abre"
+        }
+      ]
+    },
+    "RF004": {
+      "antes": [
+        {
+          "estado": "Workspace vazio (primeiro acesso)"
+        },
+        {
+          "esperar": 800
+        }
+      ],
+      "cena": "delegadas",
+      "destacar": {
+        "regex": "^você não delegou nenhuma tarefa aberta\\.$"
+      }
+    },
+    "RI001": {
+      "sem": "Filtro novo na rota de tarefas, sem tela"
+    },
+    "RF101": {
+      "cena": "porCategoria",
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].filter(e => e.innerText.trim().split('\\n')[0].trim() === \"Itens por categoria\")[0]; if (h) h.closest('section').dataset.print = \"wi\" })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=wi]"
+      }
+    },
+    "RF102": {
+      "cena": "porCategoria",
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].find(e => e.innerText.trim().split('\\n')[0].trim() === \"Itens por categoria\"); const el = h && [...h.closest('section').querySelectorAll(\"li button\")][1]; if (el) el.dataset.print = \"barra\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=barra]"
+          },
+          "esperar": 500
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=barra]"
+        },
+        {
+          "regex": "^no produto, abre"
+        }
+      ]
+    },
+    "RF103": {
+      "antes": [
+        {
+          "estado": "Workspace vazio (primeiro acesso)"
+        },
+        {
+          "esperar": 800
+        }
+      ],
+      "cena": "porCategoria",
+      "destacar": {
+        "regex": "^nenhum item criado ainda\\.$"
+      }
+    },
+    "RI101": {
+      "sem": "Rota de back-end, sem tela"
+    },
+    "RF201": {
+      "sem": "O protótipo não tem o Configurar do Gráfico de um painel"
+    },
+    "RF202": {
+      "antes": [
+        {
+          "estado": "Workspace configurado"
+        },
+        {
+          "esperar": 500
+        }
+      ],
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].filter(e => e.innerText.trim().split('\\n')[0].trim() === \"Gr\\u00e1fico de um painel\")[0]; if (h) h.closest('section').dataset.print = \"wg\" })()"
+        },
+        {
+          "rolar": {
+            "css": "[data-print=wg]"
+          }
+        },
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].find(e => e.innerText.trim().split('\\n')[0].trim() === \"Gr\\u00e1fico de um painel\"); const el = h && [...h.closest('section').querySelectorAll(\"[role=img]\")][0]; if (el) el.dataset.print = \"barras\" })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=barras]"
+        }
+      ]
+    },
+    "RF203": {
+      "antes": [
+        {
+          "estado": "Workspace configurado"
+        },
+        {
+          "esperar": 500
+        }
+      ],
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].filter(e => e.innerText.trim().split('\\n')[0].trim() === \"Gr\\u00e1fico de um painel\")[0]; if (h) h.closest('section').dataset.print = \"wg\" })()"
+        },
+        {
+          "rolar": {
+            "css": "[data-print=wg]"
+          }
+        },
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].find(e => e.innerText.trim().split('\\n')[0].trim() === \"Gr\\u00e1fico de um painel\"); const el = h && [...h.closest('section').querySelectorAll(\"[role=img]\")][0]; if (el) el.dataset.print = \"barras\" })()"
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^da tela painéis de compras$"
+        }
+      ]
+    },
+    "RF204": {
+      "antes": [
+        {
+          "estado": "Workspace vazio (primeiro acesso)"
+        },
+        {
+          "esperar": 800
+        }
+      ],
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].filter(e => e.innerText.trim().split('\\n')[0].trim() === \"Gr\\u00e1fico de um painel\")[0]; if (h) h.closest('section').dataset.print = \"wg\" })()"
+        },
+        {
+          "rolar": {
+            "css": "[data-print=wg]"
+          }
+        }
+      ],
+      "destacar": {
+        "regex": "^a tela painéis de compras ainda não tem dados\\.$"
+      }
+    },
+    "RF205": {
+      "antes": [
+        {
+          "estado": "Sem acesso num widget"
+        },
+        {
+          "esperar": 800
+        }
+      ],
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].filter(e => e.innerText.trim().split('\\n')[0].trim() === \"Gr\\u00e1fico de um painel\")[0]; if (h) h.closest('section').dataset.print = \"wg\" })()"
+        },
+        {
+          "rolar": {
+            "css": "[data-print=wg]"
+          }
+        },
+        {
+          "clicar": "Mais ações de Gráfico de um painel",
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^sem acesso$"
+        },
+        {
+          "regex": "^você não tem acesso a painéis de compras"
+        },
+        {
+          "css": "[role=menu]"
+        }
+      ]
+    }
+  }
+}

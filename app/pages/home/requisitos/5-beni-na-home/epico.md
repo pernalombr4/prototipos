@@ -6,8 +6,7 @@ produto ainda não tem: rota do resumo, interação nova na conversa e o agente 
 
 **Onde vale:** a Home do workspace, o botão Criar e a conversa flutuante do BENI AI.
 
-**Protótipo:** https://pernalombr4.github.io/prototipos/home, com "Proposta completa" em "Versão". Os textos nos 3
-idiomas estão no `textos.ts` de https://github.com/pernalombr4/prototipos/tree/main/app/pages/home. No protótipo, quem
+**Protótipo:** https://pernalombr4.github.io/prototipos/home, com "Proposta completa" em "Versão". A troca de idioma do protótipo mostra os textos em português, inglês e espanhol. No protótipo, quem
 entende o pedido é uma lista de palavras-chave, e não a IA. A barra de baixo é ferramenta de revisão e não entra no
 produto.
 

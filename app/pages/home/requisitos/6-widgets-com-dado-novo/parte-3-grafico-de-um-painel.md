@@ -21,8 +21,8 @@ widget mostra 1 painel fixo, sem a escolha.
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
 | RF201 | "Configurar" no widget deve pedir a tela do tipo Dashboard e o painel dela. | Só aparecem as telas que a pessoa acessa. | Essencial | Obrigatório |
-| RF202 | O widget deve mostrar o painel escolhido (RN201), com o subtítulo "Da tela <tela>". | Exemplo: o painel Compras por mês mostra "Da tela Compras". | Essencial | Obrigatório |
-| RF203 | O cabeçalho do widget deve ter o botão só de ícone "Abrir a tela", que abre a tela de origem. | O clique troca a Home pela tela de origem. | Importante | Desejável |
+| RF202 | O widget deve mostrar o painel escolhido (RN201), com o nome da tela de origem como subtítulo. | Exemplo: o painel da tela Compras mostra o subtítulo "Compras". | Essencial | Obrigatório |
+| RF203 | O pé do widget deve ter "Da tela <tela>", que abre a tela de origem. | O clique troca a Home pela tela de origem. | Importante | Desejável |
 | RF204 | Se a tela não tem dados, o widget deve mostrar "A tela <tela> ainda não tem dados.". | A tela sem item mostra o texto no lugar do gráfico. | Importante | Obrigatório |
 | RF205 | Se a pessoa perde o acesso à tela, o widget deve mostrar "Sem acesso" com "Você não tem acesso a <tela>. Peça ao administrador ou remova o widget.". | O menu "⋯" do widget continua com "Remover da Home". | Importante | Obrigatório |
 

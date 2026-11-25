@@ -5,8 +5,7 @@ bloco de notas, que só a própria pessoa vê. Os 2 pedem modelo e rota novos: h
 
 **Onde vale:** a Home do workspace e o grupo Equipe e notas do catálogo.
 
-**Protótipo:** https://pernalombr4.github.io/prototipos/home, com "Proposta completa" em "Versão". Os textos nos 3
-idiomas estão no `textos.ts` de https://github.com/pernalombr4/prototipos/tree/main/app/pages/home. A barra de baixo é
+**Protótipo:** https://pernalombr4.github.io/prototipos/home, com "Proposta completa" em "Versão". A troca de idioma do protótipo mostra os textos em português, inglês e espanhol. A barra de baixo é
 ferramenta de revisão e não entra no produto.
 
 **Relevância** (coluna das tarefas): Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer,

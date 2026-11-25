@@ -1,0 +1,414 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/home",
+  "andaime": "Protótipo · estado",
+  "cenas": {
+    "agente": [
+      {
+        "clicar": "Personalizar",
+        "esperar": 700
+      },
+      {
+        "clicar": "Adicionar widget",
+        "esperar": 800
+      },
+      {
+        "clicar": "Buscar widget"
+      },
+      {
+        "digitar": "Agentes de IA"
+      },
+      {
+        "js": "(() => { const r = [...document.querySelectorAll('[role=dialog] div.rounded-lg')].filter(d => d.innerText.trim().startsWith(\"Agentes de IA\")).sort((a, b) => a.innerText.length - b.innerText.length)[0]; [...r.querySelectorAll('button')].find(b => b.innerText.trim() === 'Adicionar').click() })()",
+        "esperar": 900
+      },
+      {
+        "js": "(() => { [...document.querySelectorAll(\"body\")].flatMap(r => [...r.querySelectorAll('button')]).find(b => b.innerText.trim() === \"Concluir\").click() })()",
+        "esperar": 700
+      },
+      {
+        "esperar": 600
+      },
+      {
+        "clicar": "Conversar com Triagem de chamados",
+        "esperar": 900
+      },
+      {
+        "js": "document.activeElement && document.activeElement.blur()"
+      }
+    ],
+    "resumo": [
+      {
+        "clicar": {
+          "regex": "^criar$"
+        },
+        "esperar": 700
+      },
+      {
+        "digitar": "resuma meus chamados"
+      },
+      {
+        "clicar": "Pedir ao BENI",
+        "esperar": 1800
+      },
+      {
+        "js": "document.activeElement && document.activeElement.blur()"
+      }
+    ],
+    "chamado": [
+      {
+        "clicar": {
+          "regex": "^criar$"
+        },
+        "esperar": 700
+      },
+      {
+        "digitar": "Abrir um chamado urgente: impressora do 3º andar sem papel"
+      },
+      {
+        "clicar": "Pedir ao BENI",
+        "esperar": 1800
+      },
+      {
+        "js": "document.activeElement && document.activeElement.blur()"
+      }
+    ],
+    "vazia": [
+      {
+        "clicar": {
+          "regex": "^criar$"
+        },
+        "esperar": 700
+      },
+      {
+        "clicar": "Pedir ao BENI",
+        "esperar": 1800
+      },
+      {
+        "js": "document.activeElement && document.activeElement.blur()"
+      }
+    ],
+    "tarefa": [
+      {
+        "clicar": {
+          "regex": "^criar$"
+        },
+        "esperar": 700
+      },
+      {
+        "digitar": "Criar uma tarefa para amanhã às 10h: ligar para a Atria sobre a renovação"
+      },
+      {
+        "clicar": "Pedir ao BENI",
+        "esperar": 1800
+      },
+      {
+        "js": "document.activeElement && document.activeElement.blur()"
+      }
+    ],
+    "contrato": [
+      {
+        "clicar": {
+          "regex": "^criar$"
+        },
+        "esperar": 700
+      },
+      {
+        "digitar": "Novo contrato de R$ 50.000,00: manutenção do galpão"
+      },
+      {
+        "clicar": "Pedir ao BENI",
+        "esperar": 1800
+      },
+      {
+        "js": "document.activeElement && document.activeElement.blur()"
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "cena": "agente",
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].filter(e => e.innerText.trim().split('\\n')[0].trim() === \"Agentes de IA\")[0]; if (h) h.closest('section').dataset.print = \"wia\" })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "section[role=dialog]"
+        },
+        {
+          "css": "[data-print=wia]"
+        }
+      ]
+    },
+    "RF002": {
+      "cena": "resumo",
+      "passos": [
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('section[role=dialog] ' + \"div\")].filter(e => e.innerText.trim() === \"resuma meus chamados\").sort((a, b) => a.getBoundingClientRect().width - b.getBoundingClientRect().width)[0]; if (el) el.dataset.print = \"pedido\" })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=pedido]"
+        },
+        {
+          "regex": "^este é o resumo de hoje"
+        }
+      ]
+    },
+    "RF003": {
+      "cena": "agente",
+      "passos": [
+        {
+          "js": "document.querySelector('section[role=dialog] header')?.dataset && (document.querySelector('section[role=dialog] header').dataset.print = 'cab')"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=cab]"
+        },
+        {
+          "regex": "^o agente pode errar"
+        }
+      ]
+    },
+    "RF004": {
+      "cena": "agente",
+      "destacar": "Abrir em tela cheia"
+    },
+    "RF101": {
+      "cena": "chamado",
+      "passos": [
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('section[role=dialog] ' + \"div\")].filter(e => e.innerText.trim() === \"Abrir um chamado urgente: impressora do 3\\u00ba andar sem papel\").sort((a, b) => a.getBoundingClientRect().width - b.getBoundingClientRect().width)[0]; if (el) el.dataset.print = \"pedido\" })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=pedido]"
+      }
+    },
+    "RF102": {
+      "cena": "vazia",
+      "passos": [
+        {
+          "js": "document.querySelector('section[role=dialog] ul')?.dataset && (document.querySelector('section[role=dialog] ul').dataset.print = 'sug')"
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^olá, renata\\. eu sou o beni\\.$"
+        },
+        {
+          "regex": "^descreva o que você precisa criar"
+        },
+        {
+          "css": "[data-print=sug]"
+        }
+      ]
+    },
+    "RF103": {
+      "antes": [
+        {
+          "clicar": {
+            "regex": "^criar$"
+          },
+          "esperar": 700
+        },
+        {
+          "digitar": "Criar uma tarefa para amanhã às 10h: ligar para a Atria sobre a renovação"
+        }
+      ],
+      "passos": [
+        {
+          "clicar": "Pedir ao BENI",
+          "esperar": 150
+        }
+      ],
+      "destacar": {
+        "regex": "^preparando o rascunho$"
+      }
+    },
+    "RF104": {
+      "cena": "tarefa",
+      "passos": [
+        {
+          "js": "(() => { const c = [...document.querySelectorAll(\"section[role=dialog] div.rounded-lg\")].filter(e => e.getBoundingClientRect().width > 0 && (e.innerText || '').trim().startsWith(\"Tarefa r\\u00e1pida\")).sort((a, b) => a.innerText.length - b.innerText.length); if (c[0]) c[0].dataset.print = \"cartao\" })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=cartao]"
+      }
+    },
+    "RF105": {
+      "cena": "contrato",
+      "passos": [
+        {
+          "js": "(() => { const c = [...document.querySelectorAll(\"section[role=dialog] div.rounded-lg\")].filter(e => e.getBoundingClientRect().width > 0 && (e.innerText || '').trim().startsWith(\"Item em Contratos\")).sort((a, b) => a.innerText.length - b.innerText.length); if (c[0]) c[0].dataset.print = \"cartao\" })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=cartao]"
+      }
+    },
+    "RF106": {
+      "cena": "tarefa",
+      "passos": [
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('section[role=dialog] ' + \"button\")].filter(e => e.innerText.trim() === \"Criar\").sort((a, b) => a.getBoundingClientRect().width - b.getBoundingClientRect().width)[0]; if (el) el.dataset.print = \"b1\" })()"
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('section[role=dialog] ' + \"button\")].filter(e => e.innerText.trim() === \"Revisar no formul\\u00e1rio\").sort((a, b) => a.getBoundingClientRect().width - b.getBoundingClientRect().width)[0]; if (el) el.dataset.print = \"b2\" })()"
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('section[role=dialog] ' + \"button\")].filter(e => e.innerText.trim() === \"Descartar\").sort((a, b) => a.getBoundingClientRect().width - b.getBoundingClientRect().width)[0]; if (el) el.dataset.print = \"b3\" })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=b1]"
+        },
+        {
+          "css": "[data-print=b2]"
+        },
+        {
+          "css": "[data-print=b3]"
+        }
+      ]
+    },
+    "RF107": {
+      "cena": "tarefa",
+      "passos": [
+        {
+          "js": "(() => { [...document.querySelectorAll(\"section[role=dialog]\")].flatMap(r => [...r.querySelectorAll('button')]).find(b => b.innerText.trim() === \"Criar\").click() })()",
+          "esperar": 700
+        },
+        {
+          "esperar": 500
+        }
+      ],
+      "destacar": {
+        "regex": "^tarefa #\\d+ criada\\.$",
+        "ancestral": "div.border-t"
+      }
+    },
+    "RF108": {
+      "cena": "tarefa",
+      "passos": [
+        {
+          "js": "(() => { [...document.querySelectorAll(\"section[role=dialog]\")].flatMap(r => [...r.querySelectorAll('button')]).find(b => b.innerText.trim() === \"Revisar no formul\\u00e1rio\").click() })()",
+          "esperar": 700
+        },
+        {
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "regex": "^nova tarefa rápida$",
+        "ancestral": "[role=dialog]"
+      }
+    },
+    "RF109": {
+      "cena": "tarefa",
+      "passos": [
+        {
+          "js": "(() => { [...document.querySelectorAll(\"section[role=dialog]\")].flatMap(r => [...r.querySelectorAll('button')]).find(b => b.innerText.trim() === \"Descartar\").click() })()",
+          "esperar": 700
+        },
+        {
+          "esperar": 500
+        }
+      ],
+      "destacar": {
+        "regex": "^rascunho descartado\\.$"
+      }
+    },
+    "RF110": {
+      "antes": [
+        {
+          "clicar": {
+            "regex": "^criar$"
+          },
+          "esperar": 700
+        },
+        {
+          "digitar": "O que você faz?"
+        },
+        {
+          "clicar": "Pedir ao BENI",
+          "esperar": 1800
+        },
+        {
+          "js": "document.activeElement && document.activeElement.blur()"
+        }
+      ],
+      "passos": [
+        {
+          "js": "(() => { const c = [...document.querySelectorAll(\"section[role=dialog] div\")].filter(e => e.getBoundingClientRect().width > 0 && (e.innerText || '').trim().startsWith(\"Eu crio itens e tarefas\")).sort((a, b) => a.innerText.length - b.innerText.length); if (c[0]) c[0].dataset.print = \"ajuda\" })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=ajuda]"
+      }
+    },
+    "RF111": {
+      "cena": "tarefa",
+      "destacar": {
+        "regex": "^o beni pode errar\\. confira o rascunho"
+      }
+    },
+    "RF201": {
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].find(e => e.innerText.trim().split('\\n')[0].trim() === \"BENI\"); const el = h && [...h.closest('section').querySelectorAll(\"ul\")][0]; if (el) el.dataset.print = \"resumo\" })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=resumo]"
+      }
+    },
+    "RF202": {
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('section h2')].find(e => e.innerText.trim().split('\\n')[0].trim() === \"BENI\"); const el = h && [...h.closest('section').querySelectorAll(\"ul\")][0]; if (el) el.dataset.print = \"resumo\" })()"
+        }
+      ],
+      "destacar": {
+        "regex": "^gerado pelo beni\\. confira antes de agir\\.$"
+      }
+    },
+    "RF203": {
+      "passos": [
+        {
+          "clicar": "Conversar com o BENI",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        "Conversar com o BENI",
+        {
+          "css": "section[role=dialog] textarea"
+        }
+      ]
+    },
+    "RF204": {
+      "antes": [
+        {
+          "estado": "Workspace vazio (primeiro acesso)"
+        },
+        {
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^o beni resume o dia quando houver"
+        },
+        "Conversar com o BENI"
+      ]
+    },
+    "RI201": {
+      "sem": "Rota de back-end, sem tela"
+    }
+  }
+}
