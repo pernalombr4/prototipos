@@ -5,7 +5,7 @@ Rodada 7 (2026-11-24). O padrão da doc do Nuxt, em 2 lugares:
 | Onde | O que leva | Precisa de código novo? |
 |---|---|---|
 | Release (aba Releases) | A seção "Exige ação", sempre aberta, com os passos no texto | Sim, 1 vez: o rótulo e a seção saem do frontmatter |
-| Guia de migração (Docs ou Dev) | O que muda, por quê, quem, prazo, passos e o que acontece depois | Não: só componentes que o `en-docs` já renderiza |
+| Guia de migração (Docs > Referência) | O que muda, por quê, quem, prazo, passos e o que acontece depois | Não: só componentes que o `en-docs` já renderiza |
 
 Depois que o dev fizer a parte da release, uma mudança nova pede só preencher os 2 modelos abaixo.
 
@@ -31,7 +31,7 @@ actionRequired:
       - "No seu servidor, confira o cabeçalho X-Enspace-Signature-256 em cada envio."
       - "Em Configurações > Integrações > Webhooks, ligue Usar nova assinatura."
       - "Clique em Testar e confira a entrega."
-    guide: /pt/developer/guias-de-migracao/assinatura-dos-webhooks
+    guide: /pt/docs/reference/migration-guides/assinatura-dos-webhooks
 ```
 
 Regras do texto:
@@ -42,8 +42,9 @@ Regras do texto:
 
 ## 2. O guia de migração: markdown do `en-docs`, sem código novo
 
-Arquivo em `content/<idioma>/1.docs/.../guias-de-migracao/<id>.md` (Docs) ou na seção Dev, para API e
-webhook. As seções seguem o guia de atualização da doc do Nuxt: "What Changed", "Reasons for Change",
+Arquivo em `content/<idioma>/1.docs/8.Reference/<n>.Migration Guides/<id>.md`, ao lado de "Limitações
+Conhecidas". Todo guia mora ali, também o de API e de webhook: a aba Dev é a referência da API e não
+recebe guia (decisão da redatora em 2026-11-25). O guia de API leva link para a página da rota. As seções seguem o guia de atualização da doc do Nuxt: "What Changed", "Reasons for Change",
 "Migration Steps".
 
 ````md

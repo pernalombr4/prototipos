@@ -55,8 +55,8 @@ const assinarAberto = ref(false)
 /** Rodada 7: o guia de migração aberto (id da mudança), como página da doc. */
 const guiaAberto = ref<string | null>(null)
 const route = useRoute()
-/** A seção do topo acesa: o guia mora em Docs ou em Dev. */
-const secaoDaCasca = computed(() => (guiaAberto.value ? mudancas.find(m => m.id === guiaAberto.value)!.guia.secao : secao.value))
+/** A seção do topo acesa: o guia mora em Docs > Referência (decisão da redatora em 2026-11-25). */
+const secaoDaCasca = computed(() => (guiaAberto.value ? 'docs' : secao.value))
 
 const post = computed(() => postsDaProposta.find(p => p.id === postAberto.value))
 

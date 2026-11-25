@@ -13,7 +13,7 @@ Na rodada 5, "Próximas mudanças" sai: o que exige ação fica na trilha, com o
   versão em breve no topo da trilha, com o que exige ação e as 3 fases no texto do item (rodada 5);
   o rótulo "Exige ação" abre o resumo da mudança, e o item traz "O que fazer" em passos (rodada 6);
   o popover sai, a seção Exige ação fica sempre aberta e o item leva ao guia de migração, uma página
-  nova da doc (rodada 7);
+  nova da doc (rodada 7), em Docs > Referência (rodada 8);
   "Assinar"; os patches como blocos curtos na mesma trilha. O
   banner sai da versão e fica no post.
 - **Muda no Blog:** o post do mês no lugar do post por versão; o post só de changelog sai da lista
@@ -38,6 +38,18 @@ flowchart LR
 ```
 
 ## Rodadas
+
+### Rodada 8 · 2026-11-25
+- **Pedido (literal):** "a pagina dev é a doc da api. nao faz sentido os guias de migraçao estarem ali dentro. ache outro aninhamento. sugira e se eu validar voce aplica". Das 3 opções (Docs > Referência, aba Releases, Docs > Primeiros passos), a redatora escolheu Docs > Referência
+- **Mudou:**
+  - todo guia de migração, de produto ou de API, mora em Docs > Referência > Guias de migração, ao lado de "Limitações Conhecidas". A trilha diz "Docs › Referência › Guias de migração", o topo acende Docs e o menu lista os 4 guias
+  - o endereço proposto passa a `docs.enspace.io/<idioma>/docs/reference/migration-guides/<id>`, no padrão das pastas do `en-docs` (`8.Reference`)
+  - o mock perde o campo `guia.secao`; o `MODELO-EXIGE-ACAO.md` aponta para `content/<idioma>/1.docs/8.Reference/<n>.Migration Guides/<id>.md`
+- **Descartado:**
+  - a aba Releases com 2 páginas (Changelog e Guias de migração). Motivo: hoje ela é uma página só, sem menu lateral; seria um padrão novo na doc
+  - Docs > Primeiros passos, onde o Nuxt põe o guia de atualização. Motivo: Primeiros passos serve a quem começa, e o guia serve a quem já usa
+- **Fronteira:** muda só onde o guia mora (trilha, topo, menu e endereço); o corpo do guia e a seção Exige ação ficam como na rodada 7
+- **Ver:** `https://pernalombr4.github.io/prototipos/releases-no-docs/` · `evidencias/rodada8-guia-desktop-claro.jpg` · `evidencias/rodada8-guia-passos-desktop-escuro.jpg`
 
 ### Rodada 7 · 2026-11-24
 - **Pedido (literal):**

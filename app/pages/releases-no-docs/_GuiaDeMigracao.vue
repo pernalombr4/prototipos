@@ -57,7 +57,7 @@ const L = (x: Record<string, string>) => x[idioma.value]
 
 const m = computed(() => mudancas.find(x => x.id === props.id)!)
 const entrada = computed(() => entradas.find(e => e.id === m.value.entrada))
-const daSecao = computed(() => mudancas.filter(x => x.guia.secao === m.value.guia.secao))
+const daSecao = computed(() => mudancas)
 
 const dataLonga = (iso: string) => formatarData(iso, idioma.value, { day: 'numeric', month: 'long', year: 'numeric' })
 const dataCurta = (iso: string) => formatarData(iso, idioma.value, { day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -69,7 +69,8 @@ const ordemDasFases: ChaveDeFase[] = ['opt-in', 'opt-out', 'obrigatoria']
 
 /* ---------------- A casca da página de doc (en-docs) ---------------- */
 const trilha = computed(() => [
-  { label: m.value.guia.secao === 'dev' ? props.t.casca.dev : props.t.casca.docs },
+  { label: props.t.casca.docs },
+  { label: props.t.guia.referencia },
   { label: props.t.guia.trilha },
 ])
 

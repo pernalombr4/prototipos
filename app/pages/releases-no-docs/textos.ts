@@ -81,6 +81,7 @@ const pt = {
   },
   guia: {
     trilha: 'Guias de migração',
+    referencia: 'Referência',
     descricao: (d: string) => `O que muda, quem é afetado e como migrar até ${d}.`,
     status: 'Publicado',
     copiarTexto: 'Copiar texto',
@@ -239,6 +240,7 @@ const en: Textos = {
   },
   guia: {
     trilha: 'Migration guides',
+    referencia: 'Reference',
     descricao: (d: string) => `What changes, who is affected and how to migrate by ${d}.`,
     status: 'Published',
     copiarTexto: 'Copy page text',
@@ -395,6 +397,7 @@ const es: Textos = {
   },
   guia: {
     trilha: 'Guías de migración',
+    referencia: 'Referencia',
     descricao: (d: string) => `Qué cambia, a quién afecta y cómo migrar hasta el ${d}.`,
     status: 'Publicado',
     copiarTexto: 'Copiar texto',

@@ -427,10 +427,9 @@ export interface Mudanca {
   /**
    * PROPOSTA (rodada 7): o guia de migração na doc de suporte, no padrão da doc do Nuxt
    * ("What Changed", "Reasons for Change", "Migration Steps"). Os passos são os de `oQueFazer`;
-   * `detalhes` traz o texto de cada passo, na mesma ordem. `secao` diz onde o guia mora no docs.
+   * `detalhes` traz o texto de cada passo, na mesma ordem.
    */
   guia: {
-    secao: 'docs' | 'dev'
     detalhes: Trad[]
     /** Código do passo `passo` (contado de 0), como diff: linha com "-" sai, com "+" entra. */
     codigo?: { passo: number, arquivo: string, icone: string, linhas: string[] }
@@ -461,7 +460,6 @@ export const mudancas: Mudanca[] = [
       'Después del plazo, el cargo sin formulario marcado deja de ver los ítems de la categoría.',
     ),
     guia: {
-      secao: 'docs',
       detalhes: [
         L('Só os cargos personalizados mudam. Administrador e Membro continuam vendo todos os formulários.', 'Only custom roles change. Admin and Member keep seeing all forms.', 'Solo cambian los cargos personalizados. Administrador y Miembro siguen viendo todos los formularios.'),
         L('A lista mostra os formulários de cada categoria. Marque Todos para manter o acesso de hoje.', 'The list shows the forms of each category. Check All to keep today\'s access.', 'La lista muestra los formularios de cada categoría. Marca Todos para mantener el acceso de hoy.'),
@@ -492,7 +490,6 @@ export const mudancas: Mudanca[] = [
       'Después del plazo, ENSPACE envía solo la firma nueva, y el servidor que verifica la antigua rechaza los envíos.',
     ),
     guia: {
-      secao: 'dev',
       detalhes: [
         L('O cabeçalho traz o HMAC SHA-256 do corpo, feito com o segredo do webhook. Compare com o valor que o seu servidor calcula.', 'The header carries the HMAC SHA-256 of the body, made with the webhook secret. Compare it with the value your server computes.', 'El encabezado trae el HMAC SHA-256 del cuerpo, hecho con el secreto del webhook. Compáralo con el valor que calcula tu servidor.'),
         L('Com a opção ligada, a assinatura antiga deixa de ser enviada para este webhook. Dá para desligar até o prazo.', 'With the option on, the old signature is no longer sent to this webhook. You can turn it off until the deadline.', 'Con la opción activada, la firma antigua deja de enviarse a este webhook. Puedes desactivarla hasta el plazo.'),
@@ -535,7 +532,6 @@ export const mudancas: Mudanca[] = [
       'Después del plazo, la lista ignora el parámetro page y devuelve siempre la primera página.',
     ),
     guia: {
-      secao: 'dev',
       detalhes: [
         L('Cada resposta traz next_cursor. Envie esse valor em cursor para ler a página seguinte; null indica que a lista acabou.', 'Each response carries next_cursor. Send that value in cursor to read the next page; null means the list has ended.', 'Cada respuesta trae next_cursor. Envía ese valor en cursor para leer la página siguiente; null indica que la lista terminó.'),
         L('Em homologação, a paginação por cursor já vale para todos. Confira se a integração lê a lista inteira, sem item repetido.', 'In staging, cursor pagination already applies to everyone. Check that the integration reads the whole list, with no repeated item.', 'En homologación, la paginación por cursor ya vale para todos. Revisa que la integración lea la lista completa, sin ítems repetidos.'),
@@ -571,7 +567,6 @@ export const mudancas: Mudanca[] = [
       'Desde el plazo, la importación rechaza la fila con fecha en otro formato y muestra su número.',
     ),
     guia: {
-      secao: 'docs',
       detalhes: [
         L('No workspace em português, a data é DD/MM/AAAA; em inglês, MM/DD/AAAA.', 'In a Portuguese workspace, the date is DD/MM/YYYY; in English, MM/DD/YYYY.', 'En un workspace en portugués, la fecha es DD/MM/AAAA; en inglés, MM/DD/AAAA.'),
       ],
@@ -743,11 +738,10 @@ export function linkPermanente(idioma: Idioma, ancora: string) {
 }
 
 /**
- * PROPOSTA (rodada 7): o endereço do guia de migração. Guia de API e de webhook mora em Dev
- * (`developer`); o resto, em Docs. A pasta "guias-de-migracao" é nova nas 2 seções.
+ * PROPOSTA (rodada 7): o endereço do guia de migração. Todo guia, de produto ou de API, mora em
+ * Docs > Referência, na pasta nova "Migration Guides" (decisão da redatora em 2026-11-25).
  */
 export function linkDoGuia(idioma: Idioma, m: Mudanca, ancora?: string) {
   const prefixo = idioma === 'pt-BR' ? 'pt' : idioma
-  const secao = m.guia.secao === 'dev' ? 'developer' : 'docs'
-  return `https://docs.enspace.io/${prefixo}/${secao}/guias-de-migracao/${m.id}${ancora ? `#${ancora}` : ''}`
+  return `https://docs.enspace.io/${prefixo}/docs/reference/migration-guides/${m.id}${ancora ? `#${ancora}` : ''}`
 }
