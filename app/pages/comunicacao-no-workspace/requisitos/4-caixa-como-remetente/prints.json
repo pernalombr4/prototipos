@@ -1,0 +1,483 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/",
+  "andaime": "Protótipo",
+  "cenas": {
+    "config": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"configuracoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ],
+    "inicio": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-tela'] = \"inicio\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "clicar": "Novo e-mail",
+        "esperar": 1300
+      }
+    ],
+    "item231": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-tela'] = \"item\"; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47231; s['$scnw-aba-item'] = \"visao\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "clicar": "Novo e-mail",
+        "esperar": 1300
+      }
+    ],
+    "mailbox87": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-tela'] = \"item\"; s['$scnw-categoria'] = \"solicitacoes\"; s['$scnw-item'] = 52087; s['$scnw-aba-item'] = \"mailbox\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "clicar": "Enviados",
+        "esperar": 900
+      }
+    ],
+    "mensagens": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "cena": "config",
+      "passos": [
+        {
+          "js": "(() => { const d = [...document.querySelectorAll('p')].find(e => e.textContent.trim().startsWith('Escolha as caixas do workspace')); let b = d && d.parentElement; while (b && !b.textContent.includes('Caixas como remetente')) b = b.parentElement; if (b) b.dataset.print = 'titulo' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=titulo]"
+      }
+    },
+    "RF002": {
+      "cena": "config",
+      "passos": [
+        {
+          "pairar": "Regras do workspace"
+        }
+      ],
+      "destacar": {
+        "texto": "Atendimento jurídico",
+        "ancestral": ".divide-y"
+      }
+    },
+    "RF003": {
+      "antes": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"membro\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 600
+        },
+        {
+          "js": "(s => { s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"configuracoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        }
+      ],
+      "destacar": "Sua conta de envio"
+    },
+    "RF004": {
+      "antes": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"novo\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 600
+        },
+        {
+          "js": "(s => { s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"configuracoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        }
+      ],
+      "destacar": {
+        "texto": "Nenhuma caixa de e-mail",
+        "exato": true
+      }
+    },
+    "RF011": {
+      "cena": "config",
+      "passos": [
+        {
+          "clicar": {
+            "css": "[role=switch]",
+            "n": 1
+          },
+          "esperar": 500
+        },
+        {
+          "clicar": "Salvar",
+          "esperar": 1300
+        },
+        {
+          "clicar": {
+            "css": "[role=tab]"
+          },
+          "esperar": 900
+        },
+        {
+          "clicar": {
+            "css": "[role=tab]",
+            "n": 3
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        "Compras",
+        {
+          "css": "[role=switch]",
+          "n": 1
+        }
+      ]
+    },
+    "RF012": {
+      "cena": "config",
+      "passos": [
+        {
+          "clicar": {
+            "css": "[role=switch]",
+            "n": 1
+          },
+          "esperar": 500
+        },
+        {
+          "clicar": "Novo e-mail",
+          "esperar": 1300
+        },
+        {
+          "clicar": "Sua conta do Outlook",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF013": {
+      "cena": "config",
+      "passos": [
+        {
+          "clicar": {
+            "css": "[role=switch]",
+            "n": 1
+          },
+          "esperar": 500
+        },
+        {
+          "clicar": "Salvar",
+          "esperar": 1300
+        },
+        {
+          "clicar": "Novo e-mail",
+          "esperar": 1300
+        },
+        {
+          "clicar": "Sua conta do Outlook",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF101": {
+      "cena": "inicio",
+      "passos": [
+        {
+          "clicar": "Sua conta do Outlook",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF102": {
+      "cena": "inicio",
+      "passos": [
+        {
+          "clicar": "Sua conta do Outlook",
+          "esperar": 800
+        },
+        {
+          "clicar": "Atendimento jurídico",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "texto": "Caixa do workspace"
+      }
+    },
+    "RF103": {
+      "antes": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\"; s['$scnw-caixas-no-de'] = {\"atendimento\": false, \"compras\": false} })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 600
+        },
+        {
+          "js": "(s => { s['$scnw-tela'] = \"inicio\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        }
+      ],
+      "passos": [
+        {
+          "clicar": "Novo e-mail",
+          "esperar": 1300
+        }
+      ],
+      "destacar": {
+        "texto": "Sua conta do Outlook",
+        "ancestral": ".rounded-md"
+      }
+    },
+    "RF104": {
+      "antes": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\"; s['$scnw-cenario'] = \"sem-outlook\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 600
+        },
+        {
+          "js": "(s => { s['$scnw-tela'] = \"inicio\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        }
+      ],
+      "passos": [
+        {
+          "clicar": "Novo e-mail",
+          "esperar": 1300
+        }
+      ],
+      "destacar": {
+        "texto": "Caixa do workspace"
+      }
+    },
+    "RF111": {
+      "cena": "item231",
+      "passos": [
+        {
+          "clicar": "Sua conta do Outlook",
+          "esperar": 800
+        },
+        {
+          "clicar": "Compras",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Caixa do workspace"
+        },
+        "Responder para: o endereço do item. A resposta volta para a aba Mail Box.",
+        "ctr-00231.aurora-servicos@box.enspace.io"
+      ]
+    },
+    "RF112": {
+      "cena": "inicio",
+      "passos": [
+        {
+          "clicar": "Sua conta do Outlook",
+          "esperar": 800
+        },
+        {
+          "clicar": "Compras",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Caixa do workspace"
+        },
+        "Sem item vinculado, a resposta chega na caixa Compras, na Central de Atendimento."
+      ]
+    },
+    "RF121": {
+      "sem": "o envio e o e-mail que o destinatário recebe ficam fora do protótipo"
+    },
+    "RF122": {
+      "cena": "mailbox87",
+      "destacar": {
+        "texto": "Re: Acesso ao sistema de contratos",
+        "ancestral": "li"
+      }
+    },
+    "RF123": {
+      "sem": "a resposta do destinatário chegando na caixa fica fora do protótipo"
+    },
+    "RF124": {
+      "cena": "mensagens",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('td span')].find(e => e.textContent.trim() === 'Re: Acesso ao sistema de contratos').click()",
+          "esperar": 1200
+        },
+        {
+          "js": "(() => { const dd = rot => { const dt = [...document.querySelectorAll('[role=dialog] dt')].find(e => e.textContent.trim() === rot); return dt && dt.nextElementSibling }; const de = dd('De'); if (de) de.dataset.print = 'de'; const por = dd('Enviado por'); if (por) por.dataset.print = 'por' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=de]"
+        },
+        {
+          "css": "[data-print=por]"
+        }
+      ]
+    },
+    "RF131": {
+      "cena": "mailbox87",
+      "passos": [
+        {
+          "pairar": "Mail Box"
+        }
+      ],
+      "destacar": "Enviado por Elisa Prado pela caixa Atendimento jurídico"
+    },
+    "RF132": {
+      "cena": "mensagens",
+      "destacar": {
+        "texto": "Atendimento jurídico",
+        "exato": true
+      }
+    },
+    "RF133": {
+      "cena": "mensagens",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('td span')].find(e => e.textContent.trim() === 'Re: Acesso ao sistema de contratos').click()",
+          "esperar": 1200
+        },
+        {
+          "js": "(() => { const dd = rot => { const dt = [...document.querySelectorAll('[role=dialog] dt')].find(e => e.textContent.trim() === rot); return dt && dt.nextElementSibling }; const de = dd('De'); if (de) de.dataset.print = 'de'; const por = dd('Enviado por'); if (por) por.dataset.print = 'por' })()",
+          "esperar": 300
+        },
+        {
+          "pairar": "Tipo"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=de]"
+      }
+    },
+    "RF141": {
+      "antes": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\"; s['$scnw-cenario'] = \"sem-outlook\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 600
+        },
+        {
+          "js": "(s => { s['$scnw-tela'] = \"inicio\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        }
+      ],
+      "passos": [
+        {
+          "clicar": "Novo e-mail",
+          "esperar": 1300
+        },
+        {
+          "clicar": "Caixa do workspace",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF144": {
+      "antes": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\"; s['$scnw-cenario'] = \"sem-outlook\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 600
+        },
+        {
+          "js": "(s => { s['$scnw-tela'] = \"inicio\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        }
+      ],
+      "passos": [
+        {
+          "clicar": "Novo e-mail",
+          "esperar": 1300
+        },
+        {
+          "pairar": "Nova Mensagem"
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Caixa do workspace"
+        },
+        "Enviar"
+      ]
+    },
+    "RF142": {
+      "antes": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\"; s['$scnw-cenario'] = \"sem-outlook\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 600
+        },
+        {
+          "js": "(s => { s['$scnw-tela'] = \"item\"; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47231; s['$scnw-aba-item'] = \"visao\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        }
+      ],
+      "passos": [
+        {
+          "clicar": {
+            "texto": "E-mail",
+            "n": 0
+          },
+          "esperar": 1300
+        }
+      ],
+      "destacar": {
+        "texto": "Caixa do workspace"
+      }
+    },
+    "RF143": {
+      "antes": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\"; s['$scnw-cenario'] = \"sem-outlook\"; s['$scnw-caixas-no-de'] = {\"atendimento\": false, \"compras\": false} })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 600
+        },
+        {
+          "js": "(s => { s['$scnw-tela'] = \"inicio\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        }
+      ],
+      "passos": [
+        {
+          "clicar": "Novo e-mail",
+          "esperar": 1300
+        }
+      ],
+      "destacar": "Nenhuma conta integrada disponível."
+    }
+  }
+}

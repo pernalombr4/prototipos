@@ -1,0 +1,277 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/",
+  "andaime": "Protótipo",
+  "cenas": {
+    "mailbox": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47231; s['$scnw-aba-item'] = \"mailbox\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ],
+    "mensagens": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-aba-central'] = \"mensagens\"; s['$scnw-tela'] = \"emails\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "sem": "a conversa do e-mail no Outlook do destinatário fica fora do protótipo"
+    },
+    "RF002": {
+      "cena": "mailbox",
+      "passos": [
+        {
+          "clicar": "Re: CTR-00231 · Minuta revisada",
+          "esperar": 900
+        },
+        {
+          "clicar": "Responder",
+          "esperar": 1500
+        }
+      ],
+      "destacar": "A resposta segue na mesma conversa do e-mail original."
+    },
+    "RF003": {
+      "cena": "mailbox",
+      "passos": [
+        {
+          "clicar": "Re: CTR-00231 · Minuta revisada",
+          "esperar": 900
+        },
+        {
+          "clicar": "Responder",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = document.querySelector(\"[role=dialog] input[placeholder='Digite um nome ou e-mail']\").parentElement; if (el) el.dataset.print = 'para' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog] input[placeholder='Digite o assunto do e-mail']"
+        },
+        {
+          "css": "[data-print=para]"
+        },
+        {
+          "css": "[role=dialog] blockquote"
+        }
+      ]
+    },
+    "RF004": {
+      "cena": "mailbox",
+      "passos": [
+        {
+          "clicar": "Re: CTR-00231 · Minuta revisada",
+          "esperar": 900
+        },
+        {
+          "clicar": "Responder",
+          "esperar": 1500
+        },
+        {
+          "clicar": "Enviar",
+          "esperar": 2500
+        },
+        {
+          "clicar": "Enviados",
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "texto": "Re: CTR-00231 · Minuta revisada",
+        "ancestral": "li"
+      }
+    },
+    "RF005": {
+      "cena": "mensagens",
+      "passos": [
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('tr')].find(r => r.innerText.includes(\"Documento para assinatura\"))?.querySelector('button[aria-label=\"Ações\"]'); if (el) el.dataset.print = 'menu' })()",
+          "esperar": 300
+        },
+        {
+          "clicar": {
+            "css": "[data-print=menu]"
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RI001": {
+      "sem": "envio pela integração do Correio do Outlook, sem tela"
+    },
+    "RF101": {
+      "cena": "mailbox",
+      "passos": [
+        {
+          "pairar": "Re: CTR-00231 · Minuta revisada",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "button[aria-label^='Responder: ']"
+        },
+        {
+          "css": "button[aria-label^='Encaminhar: ']"
+        }
+      ]
+    },
+    "RF102": {
+      "cena": "mailbox",
+      "passos": [
+        {
+          "clicar": "Re: CTR-00231 · Minuta revisada",
+          "esperar": 900
+        },
+        {
+          "pairar": "Mail Box",
+          "esperar": 600
+        }
+      ],
+      "destacar": "Encaminhar"
+    },
+    "RF103": {
+      "cena": "mensagens",
+      "passos": [
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('tr')].find(r => r.innerText.includes(\"Licen\\u00e7a: quantidade de usu\\u00e1rios\"))?.querySelector('button[aria-label=\"Ações\"]'); if (el) el.dataset.print = 'menu' })()",
+          "esperar": 300
+        },
+        {
+          "clicar": {
+            "css": "[data-print=menu]"
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RF104": {
+      "cena": "mensagens",
+      "passos": [
+        {
+          "clicar": "Licença: quantidade de usuários",
+          "esperar": 1500
+        }
+      ],
+      "destacar": [
+        "Responder",
+        "Encaminhar"
+      ]
+    },
+    "RF105": {
+      "cena": "mensagens",
+      "passos": [
+        {
+          "clicar": "CTR-00231 · Documento para assinatura",
+          "esperar": 1500
+        }
+      ],
+      "destacar": "Reenviar e-mail"
+    },
+    "RF111": {
+      "cena": "mailbox",
+      "passos": [
+        {
+          "clicar": "Re: CTR-00231 · Minuta revisada",
+          "esperar": 900
+        },
+        {
+          "clicar": "Encaminhar",
+          "esperar": 1500
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog] input[placeholder='Digite o assunto do e-mail']"
+      }
+    },
+    "RF112": {
+      "cena": "mailbox",
+      "passos": [
+        {
+          "clicar": "Re: CTR-00231 · Minuta revisada",
+          "esperar": 900
+        },
+        {
+          "clicar": "Encaminhar",
+          "esperar": 1500
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog] blockquote"
+      }
+    },
+    "RF113": {
+      "cena": "mailbox",
+      "passos": [
+        {
+          "clicar": "Re: CTR-00231 · Minuta revisada",
+          "esperar": 900
+        },
+        {
+          "clicar": "Encaminhar",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] span')].find(e => e.textContent.trim() === 'minuta-v3-comentada.pdf' && e.querySelector('button')); if (el) el.dataset.print = 'anexo' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=anexo]"
+      }
+    },
+    "RF114": {
+      "cena": "mailbox",
+      "passos": [
+        {
+          "clicar": "Re: CTR-00231 · Minuta revisada",
+          "esperar": 900
+        },
+        {
+          "clicar": "Encaminhar",
+          "esperar": 1500
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog] input[placeholder='Digite um nome ou e-mail']"
+      }
+    },
+    "RF115": {
+      "cena": "mailbox",
+      "passos": [
+        {
+          "clicar": "Re: CTR-00231 · Minuta revisada",
+          "esperar": 900
+        },
+        {
+          "clicar": "Encaminhar",
+          "esperar": 1500
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog] section[aria-label='Vincular a item']"
+      }
+    },
+    "RF116": {
+      "sem": "o envio do anexo ao destinatário acontece no Outlook, fora do protótipo"
+    },
+    "RI101": {
+      "sem": "envio pela integração do Correio do Outlook, sem tela"
+    }
+  }
+}

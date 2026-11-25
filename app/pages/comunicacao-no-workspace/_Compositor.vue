@@ -578,3 +578,15 @@ const notaDaResposta = computed(() => {
     </template>
   </USlideover>
 </template>
+
+<style>
+/*
+ * O compositor fica em z-60, por cima do painel da tarefa e do modal "Evento" da Agenda (DECISOES,
+ * rodada 9). Lista, menu e dica do Nuxt UI abrem num portal com z-index automático e ficavam atrás
+ * dele: a busca de item, o "De" e o modelo não apareciam. Toda camada flutuante sobe acima do
+ * compositor e do app de e-mail simulado (z-70). Não há prop do Nuxt UI para o z-index do portal.
+ */
+[data-reka-popper-content-wrapper] {
+  z-index: 80 !important;
+}
+</style>

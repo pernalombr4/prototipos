@@ -457,6 +457,19 @@ disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:)
   igual (D23, 5.3, 5.4 e a pergunta 11).
 - **Cartão do quadro de itens:** mostrava "Sem contato" quando o contato não tinha nome, mesmo com
   e-mail. Agora mostra o e-mail.
+- **Correções que os prints de requisito acharam:**
+  - o compositor abre por cima do painel da tarefa e do modal "Evento" da Agenda, e não fecha com
+    clique fora;
+  - "Trocar", na leitura do e-mail com item, mostra as sugestões, a busca e "Cancelar" (antes dizia
+    que o e-mail não tinha item);
+  - o filtro de período conta a partir do dia do protótipo (05/10/2026), não do relógio do
+    computador;
+  - o e-mail sem item aparece só para quem enviou (RN003 do épico 3): "Cadastro de fornecedor" passa
+    a ser de Ana Ribeiro, que usa o protótipo;
+  - na fase 1, "Do sistema" troca a fonte da tabela; a lista única é da fase 2.
+- **Exemplos dos requisitos alinhados aos dados do protótipo** (nomes, referências, contagens), para o
+  print mostrar o que o exemplo diz. Pergunta nova: P004 do épico 2, o assunto com {nome} quando o
+  contato não tem nome.
 
 ## Por que cada decisão
 

@@ -1,0 +1,672 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/",
+  "andaime": "Protótipo",
+  "cenas": {
+    "painel": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-tela'] = \"categoria\"; s['$scnw-categoria'] = \"contratos\"; s['$scnw-vista-categoria'] = \"painel\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ],
+    "contatos": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-tela'] = \"categoria\"; s['$scnw-categoria'] = \"contratos\"; s['$scnw-vista-categoria'] = \"atalhos\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "js": "(() => { const el = [...document.querySelectorAll('input')].find(e => e.value.includes('{titulo}') || e.value.includes('{referencia}')); if (el) el.dataset.print = 'assunto' })()",
+        "esperar": 300
+      },
+      {
+        "js": "(() => { const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim().startsWith('Prévia')); const box = h.closest('aside'); box.querySelectorAll('.flex.flex-col.gap-4 > div').forEach((b, i) => { const ps = b.querySelectorAll(':scope > p'); if (ps[0]) ps[0].dataset.print = 'rot' + i; if (ps[1]) ps[1].dataset.print = 'nome' + i; const dl = b.querySelector('dl'); if (dl) { dl.dataset.print = 'dl' + i; const dd = dl.querySelectorAll('dd'); dd[0].dataset.print = 'para' + i; dd[1].dataset.print = 'assunto' + i; dd[2].dataset.print = 'cc' + i } else if (ps[2]) ps[2].dataset.print = 'semEmail' + i }) })()",
+        "esperar": 300
+      }
+    ],
+    "solicitacoes": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-tela'] = \"categoria\"; s['$scnw-categoria'] = \"solicitacoes\"; s['$scnw-vista-categoria'] = \"atalhos\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ],
+    "fornecedores": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-tela'] = \"categoria\"; s['$scnw-categoria'] = \"fornecedores\"; s['$scnw-vista-categoria'] = \"atalhos\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ],
+    "item231": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-tela'] = \"item\"; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47231; s['$scnw-aba-item'] = \"visao\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ],
+    "item229": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-tela'] = \"item\"; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47229; s['$scnw-aba-item'] = \"visao\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ],
+    "item224": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-tela'] = \"item\"; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47224; s['$scnw-aba-item'] = \"visao\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ],
+    "lista": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-tela'] = \"itens\"; s['$scnw-categoria'] = \"contratos\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ],
+    "quadro": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-tela'] = \"itens\"; s['$scnw-categoria'] = \"contratos\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "clicar": "Por etapa",
+        "esperar": 1800
+      }
+    ],
+    "agenda": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-tela'] = \"agenda\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "clicar": {
+          "regex": "Assinatura: Contrato de manutenção predial"
+        },
+        "esperar": 900
+      }
+    ],
+    "central": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"configuracoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "cena": "painel",
+      "destacar": [
+        {
+          "texto": "Contato da categoria",
+          "ancestral": ".divide-y"
+        },
+        {
+          "texto": "Correção Monetária",
+          "ancestral": ".divide-y"
+        }
+      ]
+    },
+    "RF002": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "pairar": "Quem é o contato"
+        }
+      ],
+      "destacar": {
+        "texto": "Quem é o contato",
+        "ancestral": ".divide-y"
+      }
+    },
+    "RF003": {
+      "cena": "fornecedores",
+      "passos": [
+        {
+          "clicar": "Pessoa/Empresa › Nome de contato",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF004": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "clicar": "E-mail do contato",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF005": {
+      "cena": "solicitacoes",
+      "passos": [
+        {
+          "clicar": "Adicionar contato",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "texto": "Nome do contato na tela",
+        "n": 1,
+        "ancestral": ".rounded-lg"
+      }
+    },
+    "RF006": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Remover contato",
+            "n": 1
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "texto": "Quem é o contato",
+        "ancestral": ".divide-y"
+      }
+    },
+    "RF007": {
+      "cena": "solicitacoes",
+      "passos": [
+        {
+          "pairar": "Quem é o contato"
+        }
+      ],
+      "destacar": "Remover contato"
+    },
+    "RF008": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "rolar": {
+            "css": "[data-print=assunto]"
+          }
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=assunto]"
+      }
+    },
+    "RF009": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "rolar": {
+            "css": "[data-print=assunto]"
+          }
+        },
+        {
+          "pairar": "Assunto do e-mail"
+        }
+      ],
+      "destacar": [
+        "{referencia}",
+        "{titulo}",
+        "{nome}",
+        "{categoria}"
+      ]
+    },
+    "RF010": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "js": "(() => { const el = document.querySelector('[data-print=assunto]'); el.value = \"Contrato\"; el.dispatchEvent(new Event('input', { bubbles: true })) })()",
+          "esperar": 600
+        },
+        {
+          "clicar": "{nome}",
+          "esperar": 500
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=assunto]"
+      }
+    },
+    "RF011": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "clicar": "CTR-00231 · Contrato de manutenção predial",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF012": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "js": "(() => { [0, 1].forEach(i => { const a = document.querySelector('[data-print=rot' + i + ']'); const b = document.querySelector('[data-print=nome' + i + ']'); if (!a || !b || a.parentElement.dataset.print) return; const w = document.createElement('div'); w.dataset.print = 'cab' + i; a.parentElement.insertBefore(w, a); w.appendChild(a); w.appendChild(b) }) })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=cab0]"
+        },
+        {
+          "css": "[data-print=cab1]"
+        }
+      ]
+    },
+    "RF013": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "pairar": "Quem é o contato"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=dl0]"
+      }
+    },
+    "RF014": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "js": "(() => { const el = document.querySelector('[data-print=assunto]'); el.value = \"Olá, {nome}\"; el.dispatchEvent(new Event('input', { bubbles: true })) })()",
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=assunto]"
+        },
+        {
+          "css": "[data-print=assunto0]"
+        }
+      ]
+    },
+    "RF015": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "pairar": "Assunto do e-mail"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=cc0]"
+      }
+    },
+    "RF016": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "pairar": "Prévia: o que o botão E-mail abre"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=nome1]"
+        },
+        {
+          "css": "[data-print=para1]"
+        }
+      ]
+    },
+    "RF017": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "clicar": "CTR-00231 · Contrato de manutenção predial",
+          "esperar": 700
+        },
+        {
+          "clicar": "CTR-00229 · Contrato de limpeza e conservação",
+          "esperar": 900
+        },
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim().startsWith('Prévia')); const box = h.closest('aside'); box.querySelectorAll('.flex.flex-col.gap-4 > div').forEach((b, i) => { const ps = b.querySelectorAll(':scope > p'); if (ps[0]) ps[0].dataset.print = 'rot' + i; if (ps[1]) ps[1].dataset.print = 'nome' + i; const dl = b.querySelector('dl'); if (dl) { dl.dataset.print = 'dl' + i; const dd = dl.querySelectorAll('dd'); dd[0].dataset.print = 'para' + i; dd[1].dataset.print = 'assunto' + i; dd[2].dataset.print = 'cc' + i } else if (ps[2]) ps[2].dataset.print = 'semEmail' + i }) })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=nome0]"
+        },
+        {
+          "css": "[data-print=semEmail0]"
+        }
+      ]
+    },
+    "RF018": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "clicar": "E-mail do contato",
+          "esperar": 700
+        },
+        {
+          "clicar": "E-mail do financeiro",
+          "esperar": 900
+        },
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim().startsWith('Prévia')); const box = h.closest('aside'); box.querySelectorAll('.flex.flex-col.gap-4 > div').forEach((b, i) => { const ps = b.querySelectorAll(':scope > p'); if (ps[0]) ps[0].dataset.print = 'rot' + i; if (ps[1]) ps[1].dataset.print = 'nome' + i; const dl = b.querySelector('dl'); if (dl) { dl.dataset.print = 'dl' + i; const dd = dl.querySelectorAll('dd'); dd[0].dataset.print = 'para' + i; dd[1].dataset.print = 'assunto' + i; dd[2].dataset.print = 'cc' + i } else if (ps[2]) ps[2].dataset.print = 'semEmail' + i }) })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": [
+        "E-mail do financeiro",
+        {
+          "css": "[data-print=para0]"
+        }
+      ]
+    },
+    "RF019": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "clicar": "Salvar",
+          "esperar": 1300
+        }
+      ],
+      "destacar": [
+        "Salvar",
+        "Contato da categoria salvo"
+      ]
+    },
+    "RF020": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "js": "(() => { const el = document.querySelector('[data-print=assunto]'); el.value = \"Contrato sem salvar\"; el.dispatchEvent(new Event('input', { bubbles: true })) })()",
+          "esperar": 600
+        },
+        {
+          "js": "document.querySelector('main button[aria-label=Voltar]').click()",
+          "esperar": 1000
+        },
+        {
+          "clicar": "Acessar: Contato da categoria",
+          "esperar": 1300
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('input')].find(e => e.value.includes('{titulo}') || e.value.includes('{referencia}')); if (el) el.dataset.print = 'assunto' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=assunto]"
+      }
+    },
+    "RF101": {
+      "cena": "item231",
+      "passos": [
+        {
+          "clicar": "Para quem",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF102": {
+      "cena": "item229",
+      "passos": [
+        {
+          "pairar": "Identificação"
+        }
+      ],
+      "destacar": [
+        "Este contato não tem e-mail cadastrado.",
+        "E-mail: Sem e-mail cadastrado"
+      ]
+    },
+    "RF103": {
+      "cena": "item229",
+      "passos": [
+        {
+          "pairar": "Contato do item"
+        }
+      ],
+      "destacar": "Cadastrar e-mail"
+    },
+    "RF104": {
+      "cena": "item229",
+      "passos": [
+        {
+          "clicar": "Cadastrar e-mail",
+          "esperar": 1300
+        }
+      ],
+      "destacar": {
+        "css": "#campo-contato_email"
+      }
+    },
+    "RF105": {
+      "sem": "o protótipo não tem a permissão de editar o campo, e o botão Cadastrar e-mail aparece para toda pessoa"
+    },
+    "RF106": {
+      "antes": [
+        {
+          "js": "(s => { s['$scnw-config'].porCategoria.contratos.contatos[1].campoNome = 'contato_nome' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 300
+        }
+      ],
+      "cena": "item229",
+      "passos": [
+        {
+          "clicar": "Para quem",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "texto": "Requisitante",
+            "n": 0
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": "Este contato não tem e-mail cadastrado."
+    },
+    "RF107": {
+      "cena": "item224",
+      "destacar": [
+        "Nenhum contato neste item",
+        "Os campos de contato deste item estão vazios.",
+        "Escolher os campos de contato"
+      ]
+    },
+    "RF108": {
+      "cena": "item224",
+      "passos": [
+        {
+          "clicar": "Escolher os campos de contato",
+          "esperar": 1300
+        }
+      ],
+      "destacar": "· Contato da categoria"
+    },
+    "RF109": {
+      "cena": "item231",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "E-mail",
+            "n": 0
+          },
+          "esperar": 1300
+        }
+      ],
+      "destacar": "Digite o assunto do e-mail"
+    },
+    "RF110": {
+      "cena": "lista",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Ações",
+            "n": 0
+          },
+          "esperar": 700
+        },
+        {
+          "pairar": {
+            "css": "[role=menu] [role=menuitem]",
+            "n": 4
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        "Contato da contraparte · Marina Alves",
+        {
+          "texto": "Requisitante",
+          "exato": true
+        }
+      ]
+    },
+    "RF111": {
+      "cena": "quadro",
+      "passos": [
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('main p')].find(e => /^CTR-00231/.test(e.textContent.trim())); const r = el.getBoundingClientRect(); el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.x + 20, clientY: r.y + 5, button: 2 })) })()",
+          "esperar": 800
+        },
+        {
+          "pairar": "E-mail",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        "Contato da contraparte · Marina Alves",
+        {
+          "texto": "Requisitante",
+          "exato": true
+        }
+      ]
+    },
+    "RF112": {
+      "cena": "lista",
+      "destacar": {
+        "texto": "Contato da contraparte",
+        "ancestral": "th"
+      }
+    },
+    "RF113": {
+      "cena": "lista",
+      "passos": [
+        {
+          "js": "(() => { const linha = ref => [...document.querySelectorAll('tr')].find(r => r.innerText.includes(ref)); const c1 = [...linha('CTR-00231').querySelectorAll('td')].find(td => td.innerText.includes('marina.alves')); if (c1) c1.dataset.print = 'cel231'; const c2 = [...linha('CTR-00224').querySelectorAll('td')].find(td => td.innerText.trim() === '-'); if (c2) c2.dataset.print = 'cel224' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=cel231]"
+        },
+        {
+          "css": "[data-print=cel224]"
+        }
+      ]
+    },
+    "RF114": {
+      "cena": "item231",
+      "passos": [
+        {
+          "clicar": "Novo e-mail",
+          "esperar": 1300
+        },
+        {
+          "clicar": {
+            "css": "[role=dialog] [data-slot=trailing]",
+            "n": 1
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF115": {
+      "cena": "item231",
+      "passos": [
+        {
+          "clicar": "Novo e-mail",
+          "esperar": 1300
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog] [data-slot=tagsItem]"
+      }
+    },
+    "RF116": {
+      "cena": "agenda",
+      "destacar": {
+        "texto": "Contatos do item",
+        "ancestral": ".rounded-lg"
+      }
+    },
+    "RF117": {
+      "cena": "agenda",
+      "destacar": "E-mail para todos (2)"
+    },
+    "RF118": {
+      "cena": "central",
+      "destacar": [
+        "Defina na própria categoria os campos de nome e de e-mail do contato.",
+        "Escolher o contato de cada categoria"
+      ]
+    },
+    "RF119": {
+      "cena": "central",
+      "passos": [
+        {
+          "clicar": "Escolher o contato de cada categoria",
+          "esperar": 1300
+        }
+      ],
+      "destacar": "· Contato da categoria"
+    }
+  }
+}

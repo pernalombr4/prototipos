@@ -1,0 +1,1057 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/",
+  "andaime": "Protótipo",
+  "cenas": {
+    "inicio": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-tela'] = 'inicio' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ],
+    "comp": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-tela'] = 'inicio' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "clicar": "Novo e-mail",
+        "esperar": 1200
+      }
+    ],
+    "enviado": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-tela'] = 'inicio' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "clicar": "Novo e-mail",
+        "esperar": 1200
+      },
+      {
+        "js": "(s => { const r = s['$scnw-rascunho']; r.para = ['fornecedor.novo@example.com']; r.assunto = 'Cadastro de fornecedor'; r.corpo = '<p>Segue o link do formulário de cadastro.</p>' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 800
+      },
+      {
+        "clicar": "Enviar",
+        "esperar": 1800
+      }
+    ],
+    "emailsVer": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-tela'] = 'inicio' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "clicar": "Novo e-mail",
+        "esperar": 1200
+      },
+      {
+        "js": "(s => { const r = s['$scnw-rascunho']; r.para = ['fornecedor.novo@example.com']; r.assunto = 'Cadastro de fornecedor'; r.corpo = '<p>Segue o link do formulário de cadastro.</p>' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 800
+      },
+      {
+        "clicar": "Enviar",
+        "esperar": 1800
+      },
+      {
+        "clicar": "Ver em E-mails",
+        "esperar": 1500
+      }
+    ],
+    "sugest": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-tela'] = 'inicio' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "clicar": "Novo e-mail",
+        "esperar": 1200
+      },
+      {
+        "js": "(s => { s['$scnw-rascunho'].para = ['marina.alves@example.com'] })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 800
+      }
+    ],
+    "busca": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-tela'] = 'inicio' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "clicar": "Novo e-mail",
+        "esperar": 1200
+      },
+      {
+        "js": "document.querySelector(\"section[aria-label='Vincular a item']\").scrollIntoView({ block: 'start' })",
+        "esperar": 500
+      },
+      {
+        "clicar": "Buscar por nome, referência ou ID",
+        "esperar": 800
+      }
+    ],
+    "compItem": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-categoria'] = 'contratos'; s['$scnw-item'] = 47231; s['$scnw-aba-item'] = 'visao'; s['$scnw-tela'] = 'item' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "clicar": "E-mail",
+        "esperar": 1200
+      }
+    ],
+    "msg": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-aba-central'] = 'mensagens'; s['$scnw-tela'] = 'emails' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ],
+    "msgSemItem": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-aba-central'] = 'mensagens'; s['$scnw-rapidos'] = ['semItem']; s['$scnw-tela'] = 'emails' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ],
+    "leituraForn": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-aba-central'] = 'mensagens'; s['$scnw-tela'] = 'emails' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "js": "(() => { const el = [...document.querySelectorAll('tbody td span')].find(e => e.textContent.trim() === \"Cadastro de fornecedor\"); el.click() })()",
+        "esperar": 1200
+      }
+    ],
+    "membro": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = 'membro'; s['$scnw-aba-central'] = 'mensagens'; s['$scnw-tela'] = 'emails' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "cena": "emailsVer",
+      "destacar": {
+        "texto": "Cadastro de fornecedor",
+        "ancestral": "tr"
+      }
+    },
+    "RF002": {
+      "cena": "leituraForn",
+      "destacar": [
+        {
+          "css": "[role=dialog] dl"
+        },
+        {
+          "css": "[role=dialog] [data-slot=description]"
+        },
+        {
+          "css": "[role=dialog] div.p-4.rounded-lg"
+        }
+      ]
+    },
+    "RF003": {
+      "cena": "comp",
+      "destacar": "Sem item vinculado, a resposta chega só no seu Outlook."
+    },
+    "RF004": {
+      "cena": "enviado",
+      "destacar": {
+        "regex": "^(e-mail enviado|e-mail vinculado)",
+        "ancestral": "li"
+      }
+    },
+    "RF005": {
+      "cena": "emailsVer",
+      "destacar": [
+        {
+          "css": "[role=tab][aria-selected=true]"
+        },
+        {
+          "texto": "Cadastro de fornecedor",
+          "ancestral": "tr"
+        }
+      ]
+    },
+    "RF006": {
+      "cena": "msg",
+      "destacar": {
+        "texto": "Cadastro de fornecedor",
+        "ancestral": "tr"
+      }
+    },
+    "RF007": {
+      "cena": "msg",
+      "passos": [
+        {
+          "pairar": {
+            "css": "[role=tab] [role=img]"
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "css": "[data-reka-popper-content-wrapper] [data-slot=text]"
+      }
+    },
+    "RF008": {
+      "cena": "msgSemItem",
+      "destacar": [
+        "Sem item",
+        {
+          "texto": "Cadastro de fornecedor",
+          "ancestral": "tr"
+        }
+      ]
+    },
+    "RF009": {
+      "cena": "msg",
+      "passos": [
+        {
+          "clicar": "Filtrar Item",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[data-reka-popper-content-wrapper] button[aria-pressed]"
+      }
+    },
+    "RF010": {
+      "cena": "leituraForn",
+      "destacar": [
+        {
+          "css": "[role=dialog] dl"
+        },
+        {
+          "css": "[role=dialog] div.p-4.rounded-lg"
+        }
+      ]
+    },
+    "RF011": {
+      "cena": "msgSemItem",
+      "passos": [
+        {
+          "clicar": "Ações",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RF101": {
+      "cena": "comp",
+      "destacar": {
+        "css": "section[aria-label='Vincular a item']"
+      }
+    },
+    "RF102": {
+      "cena": "comp",
+      "destacar": "Buscar por nome, referência ou ID"
+    },
+    "RF103": {
+      "cena": "compItem",
+      "destacar": [
+        {
+          "css": "section[aria-label='Vincular a item'] div.rounded-md"
+        },
+        "Trocar",
+        "Remover vínculo"
+      ]
+    },
+    "RF104": {
+      "cena": "compItem",
+      "passos": [
+        {
+          "clicar": "Trocar",
+          "esperar": 800
+        },
+        {
+          "clicar": {
+            "css": "section[aria-label='Vincular a item'] span.font-medium"
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        "Buscar por nome, referência ou ID",
+        "Cancelar"
+      ]
+    },
+    "RF105": {
+      "cena": "compItem",
+      "passos": [
+        {
+          "clicar": "Remover vínculo",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        "Buscar por nome, referência ou ID",
+        "Sem item vinculado, a resposta chega só no seu Outlook."
+      ]
+    },
+    "RF106": {
+      "cena": "compItem",
+      "destacar": [
+        {
+          "css": "section[aria-label='Vincular a item'] div.rounded-md"
+        },
+        "Vinculado porque você começou no item. É possível trocar ou remover o vínculo."
+      ]
+    },
+    "RF107": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-tela'] = 'tarefas' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        },
+        {
+          "clicar": "Enviar minuta assinada à contraparte",
+          "esperar": 1200
+        },
+        {
+          "clicar": "Enviar e-mail para Bruno Teixeira",
+          "esperar": 1200
+        },
+        {
+          "js": "(() => { const d = [...document.querySelectorAll('[role=dialog]')].find(x => x.querySelector('h2')?.textContent.includes('Enviar minuta assinada')); d.querySelector('[data-slot=close]').click() })()",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "css": "section[aria-label='Vincular a item'] div.rounded-md"
+        },
+        "Vinculado ao item da tarefa. É possível trocar ou remover o vínculo."
+      ]
+    },
+    "RF108": {
+      "cena": "compItem",
+      "passos": [
+        {
+          "clicar": "Trocar",
+          "esperar": 800
+        },
+        {
+          "clicar": "Buscar por nome, referência ou ID",
+          "esperar": 500
+        },
+        {
+          "digitar": "CTR-00219"
+        },
+        {
+          "clicar": {
+            "css": "[role=option]"
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "section[aria-label='Vincular a item']"
+      }
+    },
+    "RF109": {
+      "cena": "compItem",
+      "passos": [
+        {
+          "clicar": "Trocar",
+          "esperar": 800
+        },
+        {
+          "clicar": "Buscar por nome, referência ou ID",
+          "esperar": 500
+        },
+        {
+          "digitar": "CTR-00219"
+        },
+        {
+          "clicar": {
+            "css": "[role=option]"
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "css": "section[aria-label='Vincular a item']"
+        },
+        {
+          "regex": "^ctr-00219\\."
+        }
+      ]
+    },
+    "RF110": {
+      "cena": "busca",
+      "passos": [
+        {
+          "pairar": "Atualizados por último",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "css": "[data-reka-popper-content-wrapper]"
+      }
+    },
+    "RF119": {
+      "cena": "busca",
+      "passos": [
+        {
+          "pairar": "Atualizados por último",
+          "esperar": 300
+        }
+      ],
+      "destacar": "Só aparecem itens que você pode ver."
+    },
+    "RF111": {
+      "cena": "busca",
+      "passos": [
+        {
+          "digitar": "contrato"
+        }
+      ],
+      "destacar": {
+        "css": "[data-reka-popper-content-wrapper]"
+      }
+    },
+    "RF112": {
+      "cena": "busca",
+      "passos": [
+        {
+          "digitar": "contrato"
+        }
+      ],
+      "destacar": {
+        "regex": "^mais \\d+ itens\\. continue digitando para achar\\.$"
+      }
+    },
+    "RF113": {
+      "cena": "busca",
+      "passos": [
+        {
+          "digitar": "Lumen"
+        }
+      ],
+      "destacar": {
+        "css": "[role=option]"
+      }
+    },
+    "RF114": {
+      "cena": "busca",
+      "passos": [
+        {
+          "digitar": "MANUTENCAO"
+        }
+      ],
+      "destacar": {
+        "css": "[role=option]"
+      }
+    },
+    "RF115": {
+      "cena": "busca",
+      "passos": [
+        {
+          "digitar": "manutenção 2024"
+        }
+      ],
+      "destacar": {
+        "css": "[data-reka-popper-content-wrapper]"
+      }
+    },
+    "RF116": {
+      "cena": "busca",
+      "passos": [
+        {
+          "digitar": "Marina"
+        }
+      ],
+      "destacar": {
+        "texto": "Contratos",
+        "n": 1
+      }
+    },
+    "RF117": {
+      "cena": "busca",
+      "passos": [
+        {
+          "digitar": "Marina"
+        }
+      ],
+      "destacar": {
+        "css": "[role=option]"
+      }
+    },
+    "RF118": {
+      "cena": "busca",
+      "passos": [
+        {
+          "digitar": "CTR-00214"
+        }
+      ],
+      "destacar": {
+        "regex": "^nenhum item com \"ctr-00214\"$"
+      }
+    },
+    "RF120": {
+      "cena": "busca",
+      "passos": [
+        {
+          "digitar": "xyz"
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^nenhum item com \"xyz\"$"
+        },
+        "Procure pela referência (CTR-00231), pelo ID ou pelo nome do contato."
+      ]
+    },
+    "RF121": {
+      "cena": "sugest",
+      "destacar": {
+        "texto": "Sugestões",
+        "ancestral": "div"
+      }
+    },
+    "RF122": {
+      "cena": "sugest",
+      "passos": [
+        {
+          "pairar": {
+            "regex": "^ctr-00231 · "
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "css": "[data-reka-popper-content-wrapper] [data-slot=text]"
+      }
+    },
+    "RF123": {
+      "cena": "sugest",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "^ctr-00219 · "
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "css": "section[aria-label='Vincular a item'] div.rounded-md"
+        },
+        "Trocar",
+        "Remover vínculo"
+      ]
+    },
+    "RF124": {
+      "sem": "o protótipo não tem o estado sem o cartão Contato da categoria salvo"
+    },
+    "RF125": {
+      "cena": "comp",
+      "passos": [
+        {
+          "clicar": "Digite um nome ou e-mail",
+          "esperar": 500
+        },
+        {
+          "digitar": "rafa"
+        }
+      ],
+      "destacar": {
+        "texto": "rafael.monteiro@example.com · CTR-00230",
+        "ancestral": "[role=option]"
+      }
+    },
+    "RF126": {
+      "cena": "comp",
+      "passos": [
+        {
+          "clicar": "Digite um nome ou e-mail",
+          "esperar": 500
+        },
+        {
+          "digitar": "marina"
+        }
+      ],
+      "destacar": {
+        "texto": "marina.alves@example.com · CTR-00231",
+        "ancestral": "[role=option]"
+      }
+    },
+    "RF201": {
+      "cena": "membro",
+      "destacar": [
+        {
+          "texto": "CTR-00231",
+          "n": 0
+        },
+        {
+          "texto": "CTR-00231",
+          "n": 1
+        },
+        {
+          "texto": "CTR-00231",
+          "n": 2
+        }
+      ]
+    },
+    "RF202": {
+      "cena": "membro",
+      "destacar": {
+        "regex": "^mostrando 1 a \\d+ de \\d+ resultados$"
+      }
+    },
+    "RF203": {
+      "cena": "membro",
+      "passos": [
+        {
+          "clicar": "Pesquisar...",
+          "esperar": 400
+        },
+        {
+          "digitar": "CTR-00214"
+        }
+      ],
+      "destacar": [
+        "Pesquisar...",
+        "Nenhum e-mail com estes filtros."
+      ]
+    },
+    "RF204": {
+      "cena": "membro",
+      "passos": [
+        {
+          "clicar": "Filtrar Item",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[data-reka-popper-content-wrapper]"
+      }
+    },
+    "RF301": {
+      "cena": "msgSemItem",
+      "passos": [
+        {
+          "clicar": "Ações",
+          "esperar": 800
+        }
+      ],
+      "destacar": "Vincular a um item"
+    },
+    "RF302": {
+      "cena": "msgSemItem",
+      "passos": [
+        {
+          "clicar": "Ações",
+          "esperar": 800
+        },
+        {
+          "clicar": "Vincular a um item",
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog] div.rounded-lg.p-3"
+      }
+    },
+    "RF303": {
+      "cena": "msg",
+      "destacar": "Vincular"
+    },
+    "RF304": {
+      "cena": "leituraForn",
+      "passos": [
+        {
+          "pairar": "Este e-mail não tem item. Ao vincular, ele passa a aparecer na aba Mail Box do item.",
+          "esperar": 300
+        }
+      ],
+      "destacar": [
+        "Este e-mail não tem item. Ao vincular, ele passa a aparecer na aba Mail Box do item.",
+        "Buscar por nome, referência ou ID"
+      ]
+    },
+    "RF305": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-tela'] = 'inicio' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        },
+        {
+          "clicar": "Novo e-mail",
+          "esperar": 1200
+        },
+        {
+          "js": "(s => { const r = s['$scnw-rascunho']; r.para = ['marina.alves@example.com']; r.assunto = 'Proposta de renovação'; r.corpo = '<p>Segue a proposta de renovação.</p>' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 800
+        },
+        {
+          "clicar": "Enviar",
+          "esperar": 1800
+        },
+        {
+          "clicar": "Ver em E-mails",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('tbody td span')].find(e => e.textContent.trim() === \"Proposta de renova\\u00e7\\u00e3o\"); el.click() })()",
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "texto": "Sugestões pelo destinatário",
+        "ancestral": "div"
+      }
+    },
+    "RF306": {
+      "sem": "o protótipo não tem o estado sem o cartão Contato da categoria salvo"
+    },
+    "RF307": {
+      "cena": "leituraForn",
+      "passos": [
+        {
+          "clicar": "Buscar por nome, referência ou ID",
+          "esperar": 500
+        },
+        {
+          "digitar": "Papelaria"
+        }
+      ],
+      "destacar": {
+        "css": "[data-reka-popper-content-wrapper] [role=group]"
+      }
+    },
+    "RF308": {
+      "cena": "msg",
+      "passos": [
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('tbody td span')].find(e => e.textContent.trim() === \"CTR-00231 \\u00b7 Minuta revisada\"); el.click() })()",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog] div.rounded-lg.p-3"
+        },
+        "Trocar"
+      ]
+    },
+    "RF309": {
+      "cena": "msg",
+      "passos": [
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('tbody td span')].find(e => e.textContent.trim() === \"CTR-00231 \\u00b7 Minuta revisada\"); el.click() })()",
+          "esperar": 1200
+        },
+        {
+          "clicar": "Trocar",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog] div.rounded-lg.p-3"
+      }
+    },
+    "RF310": {
+      "cena": "msg",
+      "passos": [
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('tbody td span')].find(e => e.textContent.trim() === \"CTR-00231 \\u00b7 Documento para assinatura\"); el.click() })()",
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog] div.rounded-lg.p-3"
+      }
+    },
+    "RF311": {
+      "cena": "leituraForn",
+      "passos": [
+        {
+          "clicar": "Buscar por nome, referência ou ID",
+          "esperar": 500
+        },
+        {
+          "digitar": "Papelaria"
+        },
+        {
+          "clicar": {
+            "css": "[role=option]"
+          },
+          "esperar": 1200
+        },
+        {
+          "tecla": "Escape",
+          "esperar": 800
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('tbody td span')].find(e => e.textContent.trim() === \"Cadastro de fornecedor\"); el.click() })()",
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog] div.rounded-lg.p-3"
+      }
+    },
+    "RF312": {
+      "cena": "leituraForn",
+      "passos": [
+        {
+          "clicar": "Buscar por nome, referência ou ID",
+          "esperar": 500
+        },
+        {
+          "digitar": "Papelaria"
+        },
+        {
+          "clicar": {
+            "css": "[role=option]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "regex": "^(e-mail enviado|e-mail vinculado)",
+        "ancestral": "li"
+      }
+    },
+    "RF313": {
+      "cena": "leituraForn",
+      "passos": [
+        {
+          "clicar": "Buscar por nome, referência ou ID",
+          "esperar": 500
+        },
+        {
+          "digitar": "Papelaria"
+        },
+        {
+          "clicar": {
+            "css": "[role=option]"
+          },
+          "esperar": 1200
+        },
+        {
+          "clicar": {
+            "regex": "^for-00040 · "
+          },
+          "esperar": 1500
+        },
+        {
+          "clicar": "Enviados",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "texto": "Cadastro de fornecedor",
+        "ancestral": "li"
+      }
+    },
+    "RF314": {
+      "cena": "msg",
+      "passos": [
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('tbody td span')].find(e => e.textContent.trim() === \"CTR-00231 \\u00b7 Minuta revisada\"); el.click() })()",
+          "esperar": 1200
+        },
+        {
+          "clicar": "Trocar",
+          "esperar": 800
+        },
+        {
+          "clicar": "Buscar por nome, referência ou ID",
+          "esperar": 500
+        },
+        {
+          "digitar": "CTR-00219"
+        },
+        {
+          "clicar": {
+            "css": "[role=option]"
+          },
+          "esperar": 1200
+        },
+        {
+          "js": "(s => { s['$scnw-categoria'] = 'contratos'; s['$scnw-item'] = 47231; s['$scnw-aba-item'] = 'mailbox'; s['$scnw-tela'] = 'item' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        },
+        {
+          "clicar": "Enviados",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "ul.divide-y"
+      }
+    },
+    "RF315": {
+      "cena": "leituraForn",
+      "passos": [
+        {
+          "clicar": "Buscar por nome, referência ou ID",
+          "esperar": 500
+        },
+        {
+          "digitar": "Papelaria"
+        },
+        {
+          "clicar": {
+            "css": "[role=option]"
+          },
+          "esperar": 1200
+        },
+        {
+          "tecla": "Escape",
+          "esperar": 800
+        }
+      ],
+      "destacar": "FOR-00040"
+    },
+    "RF401": {
+      "cena": "msg",
+      "passos": [
+        {
+          "js": "document.querySelector('table').closest('.overflow-auto').scrollLeft = 10000",
+          "esperar": 500
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^sistema · t-1042$",
+          "exato": true
+        },
+        {
+          "texto": "Bruno Teixeira",
+          "exato": true
+        }
+      ]
+    },
+    "RF402": {
+      "cena": "msg",
+      "passos": [
+        {
+          "js": "document.querySelector('table').closest('.overflow-auto').scrollLeft = 10000",
+          "esperar": 500
+        }
+      ],
+      "destacar": [
+        {
+          "css": "thead th:last-child"
+        },
+        {
+          "regex": "^sistema · t-1042$",
+          "exato": true
+        }
+      ]
+    },
+    "RF403": {
+      "cena": "msg",
+      "passos": [
+        {
+          "js": "document.querySelector('table').closest('.overflow-auto').scrollLeft = 10000",
+          "esperar": 500
+        }
+      ],
+      "destacar": {
+        "regex": "^mostrando 1 a \\d+ de \\d+ resultados$"
+      }
+    },
+    "RF404": {
+      "cena": "msg",
+      "passos": [
+        {
+          "clicar": "Do sistema",
+          "esperar": 800
+        },
+        {
+          "clicar": "Pesquisar...",
+          "esperar": 400
+        },
+        {
+          "digitar": "CTR-00231"
+        }
+      ],
+      "destacar": [
+        "Do sistema",
+        "Pesquisar...",
+        {
+          "css": "tbody"
+        }
+      ]
+    },
+    "RF405": {
+      "cena": "msg",
+      "passos": [
+        {
+          "clicar": "Enviados",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        "Enviados",
+        {
+          "regex": "^sistema · t-1042$"
+        },
+        "Bruno Teixeira"
+      ]
+    },
+    "RF406": {
+      "cena": "msg",
+      "passos": [
+        {
+          "clicar": "Todo o período",
+          "esperar": 600
+        },
+        {
+          "clicar": "Hoje",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        "Hoje",
+        {
+          "css": "tbody"
+        }
+      ]
+    },
+    "RF407": {
+      "cena": "membro",
+      "destacar": [
+        {
+          "regex": "^mostrando 1 a \\d+ de \\d+ resultados$"
+        },
+        {
+          "texto": "Recebidos",
+          "ancestral": "div"
+        }
+      ]
+    },
+    "RF408": {
+      "cena": "inicio",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "E-mails",
+            "n": 1
+          },
+          "esperar": 600
+        },
+        {
+          "clicar": "E-mails Enviados",
+          "esperar": 1500
+        }
+      ],
+      "destacar": [
+        "E-mails Enviados",
+        "Do sistema",
+        {
+          "regex": "^mostrando 1 a \\d+ de \\d+ resultados$"
+        }
+      ]
+    }
+  }
+}

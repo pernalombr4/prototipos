@@ -1,0 +1,821 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/",
+  "andaime": "Protótipo",
+  "cenas": {
+    "item": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 3; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47231; s['$scnw-aba-item'] = \"visao\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "js": "(s => { s['$scnw-fase'] = 3; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ],
+    "mailbox": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 3; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47231; s['$scnw-aba-item'] = \"mailbox\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "js": "(s => { s['$scnw-fase'] = 3; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ],
+    "tarefas": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 3; s['$scnw-tela'] = \"tarefas\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ],
+    "mensagens": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 3; s['$scnw-aba-central'] = \"mensagens\"; s['$scnw-tela'] = \"emails\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ],
+    "inicio": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 3; s['$scnw-tela'] = \"inicio\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "cena": "item",
+      "passos": [
+        {
+          "clicar": "E-mail",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] label')].find(l => l.textContent.trim().startsWith('Vincular a tarefa'))?.closest('[data-slot=root]'); if (el) el.dataset.print = 'tarefa' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog] section[aria-label='Vincular a item']"
+        },
+        {
+          "css": "[data-print=tarefa]"
+        }
+      ]
+    },
+    "RF002": {
+      "cena": "item",
+      "passos": [
+        {
+          "clicar": "E-mail",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] label')].find(l => l.textContent.trim().startsWith('Vincular a tarefa'))?.closest('[data-slot=root]')?.querySelector('button'); if (el) el.dataset.print = 'combo' })()",
+          "esperar": 300
+        },
+        {
+          "clicar": {
+            "css": "[data-print=combo]"
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF003": {
+      "cena": "item",
+      "passos": [
+        {
+          "clicar": "E-mail",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] label')].find(l => l.textContent.trim().startsWith('Vincular a tarefa'))?.closest('[data-slot=root]'); if (el) el.dataset.print = 'tarefa' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "texto": "Nenhuma tarefa"
+      }
+    },
+    "RF004": {
+      "cena": "item",
+      "passos": [
+        {
+          "clicar": "E-mail",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] label')].find(l => l.textContent.trim().startsWith('Vincular a tarefa'))?.closest('[data-slot=root]')?.querySelector('button'); if (el) el.dataset.print = 'combo' })()",
+          "esperar": 300
+        },
+        {
+          "clicar": {
+            "css": "[data-print=combo]"
+          },
+          "esperar": 900
+        },
+        {
+          "clicar": "T-1042 · Enviar minuta assinada à contraparte",
+          "esperar": 900
+        },
+        {
+          "clicar": "Trocar",
+          "esperar": 900
+        },
+        {
+          "clicar": "Buscar por nome, referência ou ID",
+          "esperar": 700
+        },
+        {
+          "digitar": "CTR-00230"
+        },
+        {
+          "clicar": {
+            "css": "[role=listbox] [role=option]"
+          },
+          "esperar": 1200
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] label')].find(l => l.textContent.trim().startsWith('Vincular a tarefa'))?.closest('[data-slot=root]'); if (el) el.dataset.print = 'tarefa' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog] section[aria-label='Vincular a item']"
+        },
+        {
+          "css": "[data-print=tarefa]"
+        }
+      ]
+    },
+    "RF011": {
+      "cena": "tarefas",
+      "passos": [
+        {
+          "clicar": "Enviar minuta assinada à contraparte",
+          "esperar": 1500
+        },
+        {
+          "clicar": "Enviar e-mail para Bruno Teixeira",
+          "esperar": 1500
+        },
+        {
+          "clicar": "Fechar",
+          "esperar": 1000
+        },
+        {
+          "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Abrir rascunho')?.click()",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] label')].find(l => l.textContent.trim().startsWith('Vincular a tarefa'))?.closest('[data-slot=root]'); if (el) el.dataset.print = 'tarefa' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog] section[aria-label='Vincular a item']"
+        },
+        {
+          "css": "[data-print=tarefa]"
+        }
+      ]
+    },
+    "RF012": {
+      "cena": "tarefas",
+      "passos": [
+        {
+          "clicar": "Lista",
+          "esperar": 1200
+        },
+        {
+          "js": "[...document.querySelectorAll('tr')].find(r => r.innerText.includes('Enviar minuta assinada')).querySelector('[role=checkbox]').click()",
+          "esperar": 500
+        },
+        {
+          "js": "[...document.querySelectorAll('tr')].find(r => r.innerText.includes('Coletar aprovação do orçamento')).querySelector('[role=checkbox]').click()",
+          "esperar": 500
+        },
+        {
+          "clicar": "E-mail para os 2 responsáveis",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] label')].find(l => l.textContent.trim().startsWith('Vincular a tarefa'))?.closest('[data-slot=root]'); if (el) el.dataset.print = 'tarefa' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=tarefa]"
+      }
+    },
+    "RF013": {
+      "cena": "mailbox",
+      "passos": [
+        {
+          "clicar": "Re: CTR-00231 · Minuta revisada",
+          "esperar": 900
+        },
+        {
+          "clicar": "Responder",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] label')].find(l => l.textContent.trim().startsWith('Vincular a tarefa'))?.closest('[data-slot=root]'); if (el) el.dataset.print = 'tarefa' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=tarefa]"
+      }
+    },
+    "RF014": {
+      "cena": "mailbox",
+      "passos": [
+        {
+          "clicar": "Re: CTR-00231 · Minuta revisada",
+          "esperar": 900
+        },
+        {
+          "clicar": "Encaminhar",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] label')].find(l => l.textContent.trim().startsWith('Vincular a tarefa'))?.closest('[data-slot=root]'); if (el) el.dataset.print = 'tarefa' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=tarefa]"
+      }
+    },
+    "RF021": {
+      "cena": "mailbox",
+      "passos": [
+        {
+          "clicar": "Novo e-mail",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] label')].find(l => l.textContent.trim().startsWith('Vincular a tarefa'))?.closest('[data-slot=root]')?.querySelector('button'); if (el) el.dataset.print = 'combo' })()",
+          "esperar": 300
+        },
+        {
+          "clicar": {
+            "css": "[data-print=combo]"
+          },
+          "esperar": 900
+        },
+        {
+          "clicar": "T-1042 · Enviar minuta assinada à contraparte",
+          "esperar": 900
+        },
+        {
+          "focar": {
+            "css": "[role=dialog] .ProseMirror"
+          }
+        },
+        {
+          "digitar": "Segue a minuta com as duas assinaturas."
+        },
+        {
+          "clicar": "Enviar",
+          "esperar": 2500
+        },
+        {
+          "clicar": "Enviados",
+          "esperar": 1200
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('main li:first-child span')].find(e => e.textContent.trim() === 'T-1042' && e.parentElement.textContent.trim() !== 'T-1042'); if (el) el.dataset.print = 'ref' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": [
+        {
+          "css": "main li",
+          "n": 0
+        },
+        {
+          "css": "[data-print=ref]"
+        }
+      ]
+    },
+    "RF101": {
+      "cena": "tarefas",
+      "passos": [
+        {
+          "clicar": "Enviar minuta assinada à contraparte",
+          "esperar": 1500
+        },
+        {
+          "clicar": {
+            "css": "[role=dialog] [role=tab]",
+            "n": 1
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog] [role=tablist]",
+        "n": 1
+      }
+    },
+    "RF102": {
+      "cena": "tarefas",
+      "passos": [
+        {
+          "clicar": "Enviar minuta assinada à contraparte",
+          "esperar": 1500
+        },
+        {
+          "clicar": {
+            "css": "[role=dialog] [role=tab]",
+            "n": 1
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog] ul"
+      }
+    },
+    "RF103": {
+      "cena": "tarefas",
+      "passos": [
+        {
+          "clicar": "Enviar minuta assinada à contraparte",
+          "esperar": 1500
+        },
+        {
+          "clicar": {
+            "css": "[role=dialog] [role=tab]",
+            "n": 1
+          },
+          "esperar": 1200
+        },
+        {
+          "clicar": "Do item CTR-00231",
+          "esperar": 1200
+        },
+        {
+          "clicar": "Enviados",
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog] ul"
+      }
+    },
+    "RF104": {
+      "cena": "tarefas",
+      "passos": [
+        {
+          "clicar": "Enviar minuta assinada à contraparte",
+          "esperar": 1500
+        },
+        {
+          "clicar": {
+            "css": "[role=dialog] [role=tab]",
+            "n": 1
+          },
+          "esperar": 1200
+        },
+        {
+          "clicar": "Do item CTR-00231",
+          "esperar": 1200
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] ul span')].find(e => e.textContent.trim() === 'T-1042' && e.parentElement.textContent.trim() !== 'T-1042'); if (el) el.dataset.print = 'ref' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=ref]"
+      }
+    },
+    "RF105": {
+      "cena": "tarefas",
+      "passos": [
+        {
+          "clicar": "Coletar aprovação do orçamento com a diretoria",
+          "esperar": 1500
+        },
+        {
+          "clicar": {
+            "css": "[role=dialog] [role=tab]",
+            "n": 1
+          },
+          "esperar": 1200
+        },
+        {
+          "js": "(() => { const el = (() => { let e = [...document.querySelectorAll('[role=dialog] *')].find(x => x.children.length === 0 && x.textContent.trim() === 'Nenhum e-mail encontrado.'); while (e && !e.querySelector('button')) e = e.parentElement; return e })(); if (el) el.dataset.print = 'vazio' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=vazio]"
+      }
+    },
+    "RF106": {
+      "cena": "tarefas",
+      "passos": [
+        {
+          "clicar": "Enviar minuta assinada à contraparte",
+          "esperar": 1500
+        },
+        {
+          "clicar": {
+            "css": "[role=dialog] [role=tab]",
+            "n": 1
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog] [role=tab]",
+        "n": 1
+      }
+    },
+    "RF107": {
+      "cena": "tarefas",
+      "passos": [
+        {
+          "clicar": "Enviar minuta assinada à contraparte",
+          "esperar": 1500
+        },
+        {
+          "clicar": {
+            "css": "[role=dialog] [role=tab]",
+            "n": 1
+          },
+          "esperar": 1200
+        },
+        {
+          "clicar": "Do item CTR-00231",
+          "esperar": 1200
+        },
+        {
+          "clicar": "Enviados",
+          "esperar": 1000
+        },
+        {
+          "clicar": "CTR-00231 · Nota fiscal de setembro",
+          "esperar": 900
+        },
+        {
+          "clicar": "Responder",
+          "esperar": 1500
+        },
+        {
+          "clicar": "Fechar",
+          "esperar": 1000
+        },
+        {
+          "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Abrir rascunho')?.click()",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] label')].find(l => l.textContent.trim().startsWith('Vincular a tarefa'))?.closest('[data-slot=root]'); if (el) el.dataset.print = 'tarefa' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=tarefa]"
+      }
+    },
+    "RF201": {
+      "cena": "mensagens",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('th')].find(t => t.innerText.trim() === 'Tarefa').scrollIntoView({ inline: 'center', block: 'nearest' })",
+          "esperar": 600
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('th')].find(t => t.innerText.trim() === 'Tarefa'); if (el) el.dataset.print = 'col' })()",
+          "esperar": 300
+        },
+        {
+          "js": "(() => { const ths = [...document.querySelectorAll('thead th')]; const i = ths.findIndex(t => t.innerText.trim() === 'Tarefa'); const rows = [...document.querySelectorAll('tbody tr')]; const com = rows.find(r => r.children[i]?.innerText.trim() === 'T-1042'); const sem = rows.find(r => r.children[i]?.innerText.trim() === '-'); if (com) com.children[i].dataset.print = 'com'; if (sem) sem.children[i].dataset.print = 'sem' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=col]"
+        },
+        {
+          "css": "[data-print=com]"
+        },
+        {
+          "css": "[data-print=sem]"
+        }
+      ]
+    },
+    "RF202": {
+      "cena": "mensagens",
+      "passos": [
+        {
+          "clicar": "Colunas",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu] [role=menuitemcheckbox]",
+        "n": 4
+      }
+    },
+    "RF203": {
+      "cena": "mensagens",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('th')].find(t => t.innerText.trim() === 'Tarefa').scrollIntoView({ inline: 'center', block: 'nearest' })",
+          "esperar": 700
+        },
+        {
+          "clicar": "Filtrar Tarefa",
+          "esperar": 900
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[data-reka-popper-content-wrapper]')].find(w => w.querySelector('input'))?.firstElementChild; if (el) el.dataset.print = 'pop' })()",
+          "esperar": 300
+        },
+        {
+          "clicar": {
+            "css": "[data-print=pop] button[aria-pressed]",
+            "n": 0
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=pop]"
+      }
+    },
+    "RF204": {
+      "cena": "mensagens",
+      "passos": [
+        {
+          "clicar": "Re: CTR-00231 · Minuta revisada",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] dt')].find(d => d.textContent.trim() === 'Tarefa'); if (el) el.dataset.print = 'dt' })()",
+          "esperar": 300
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] dt')].find(d => d.textContent.trim() === 'Tarefa')?.nextElementSibling; if (el) el.dataset.print = 'dd' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=dt]"
+        },
+        {
+          "css": "[data-print=dd]"
+        }
+      ]
+    },
+    "RF211": {
+      "cena": "mailbox",
+      "passos": [
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('main li span')].find(e => e.textContent.trim() === 'T-1042' && e.parentElement.textContent.trim() !== 'T-1042'); if (el) el.dataset.print = 'ref' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=ref]"
+      }
+    },
+    "RF301": {
+      "cena": "inicio",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Novo e-mail' && !b.closest('[role=dialog]')).click()",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] label')].find(l => l.textContent.trim().startsWith('Vincular a tarefa'))?.closest('[data-slot=root]')?.querySelector('button'); if (el) el.dataset.print = 'combo' })()",
+          "esperar": 300
+        },
+        {
+          "clicar": {
+            "css": "[data-print=combo]"
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF302": {
+      "cena": "tarefas",
+      "passos": [
+        {
+          "clicar": "Pedir ficha de cadastro ao fornecedor novo",
+          "esperar": 1500
+        },
+        {
+          "clicar": {
+            "regex": "^enviar e-mail para "
+          },
+          "esperar": 1500
+        },
+        {
+          "clicar": "Fechar",
+          "esperar": 1000
+        },
+        {
+          "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Abrir rascunho')?.click()",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] label')].find(l => l.textContent.trim().startsWith('Vincular a tarefa'))?.closest('[data-slot=root]'); if (el) el.dataset.print = 'tarefa' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog] section[aria-label='Vincular a item']"
+        },
+        {
+          "css": "[data-print=tarefa]"
+        }
+      ]
+    },
+    "RF303": {
+      "cena": "inicio",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Novo e-mail' && !b.closest('[role=dialog]')).click()",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] label')].find(l => l.textContent.trim().startsWith('Vincular a tarefa'))?.closest('[data-slot=root]')?.querySelector('button'); if (el) el.dataset.print = 'combo' })()",
+          "esperar": 300
+        },
+        {
+          "clicar": {
+            "css": "[data-print=combo]"
+          },
+          "esperar": 900
+        },
+        {
+          "clicar": "T-1045 · Pedir ficha de cadastro ao fornecedor novo",
+          "esperar": 900
+        },
+        {
+          "focar": {
+            "css": "[role=dialog] input[placeholder='Digite um nome ou e-mail']"
+          }
+        },
+        {
+          "digitar": "fornecedor.novo@example.com"
+        },
+        {
+          "tecla": "Enter",
+          "esperar": 600
+        },
+        {
+          "tecla": "Escape",
+          "esperar": 400
+        },
+        {
+          "focar": {
+            "css": "[role=dialog] .ProseMirror"
+          }
+        },
+        {
+          "digitar": "Segue o link da ficha de cadastro."
+        },
+        {
+          "clicar": "Enviar",
+          "esperar": 2500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 3; s['$scnw-aba-central'] = \"mensagens\"; s['$scnw-tela'] = \"emails\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        },
+        {
+          "js": "[...document.querySelectorAll('th')].find(t => t.innerText.trim() === 'Tarefa').scrollIntoView({ inline: 'center', block: 'nearest' })",
+          "esperar": 600
+        },
+        {
+          "js": "(() => { const ths = [...document.querySelectorAll('thead th')]; const it = ths.findIndex(t => t.innerText.trim().endsWith('Item')); const ta = ths.findIndex(t => t.innerText.trim() === 'Tarefa'); const r = [...document.querySelectorAll('tbody tr')].find(r => r.children[ta]?.innerText.trim() === 'T-1045'); if (r) { r.children[ta].dataset.print = 'ta'; r.children[it].dataset.print = 'it' } })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=ta]"
+        },
+        {
+          "css": "[data-print=it]"
+        }
+      ]
+    },
+    "RF311": {
+      "cena": "inicio",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Novo e-mail' && !b.closest('[role=dialog]')).click()",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('[role=dialog] label')].find(l => l.textContent.trim().startsWith('Vincular a tarefa'))?.closest('[data-slot=root]')?.querySelector('button'); if (el) el.dataset.print = 'combo' })()",
+          "esperar": 300
+        },
+        {
+          "clicar": {
+            "css": "[data-print=combo]"
+          },
+          "esperar": 900
+        },
+        {
+          "clicar": "T-1045 · Pedir ficha de cadastro ao fornecedor novo",
+          "esperar": 900
+        },
+        {
+          "focar": {
+            "css": "[role=dialog] input[placeholder='Digite um nome ou e-mail']"
+          }
+        },
+        {
+          "digitar": "fornecedor.novo@example.com"
+        },
+        {
+          "tecla": "Enter",
+          "esperar": 600
+        },
+        {
+          "tecla": "Escape",
+          "esperar": 400
+        },
+        {
+          "focar": {
+            "css": "[role=dialog] .ProseMirror"
+          }
+        },
+        {
+          "digitar": "Segue o link da ficha de cadastro."
+        },
+        {
+          "clicar": "Enviar",
+          "esperar": 2500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 3; s['$scnw-tela'] = \"tarefas\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        },
+        {
+          "clicar": "Pedir ficha de cadastro ao fornecedor novo",
+          "esperar": 1500
+        },
+        {
+          "clicar": {
+            "css": "[role=dialog] [role=tab]",
+            "n": 1
+          },
+          "esperar": 1200
+        },
+        {
+          "clicar": "Enviados",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog] ul"
+        },
+        {
+          "texto": "Novo e-mail",
+          "n": 1
+        }
+      ]
+    },
+    "RF312": {
+      "cena": "tarefas",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('main *')].find(e => e.children.length === 0 && e.textContent.trim() === 'Pedir ficha de cadastro ao fornecedor novo').closest('[draggable=true]').scrollIntoView({ block: 'center' })",
+          "esperar": 800
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('main *')].find(e => e.children.length === 0 && e.textContent.trim() === 'Pedir ficha de cadastro ao fornecedor novo'); const r = el.getBoundingClientRect(); el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.x + 20, clientY: r.y + 5, button: 2 })) })()",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    }
+  }
+}
