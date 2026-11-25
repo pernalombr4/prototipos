@@ -17,7 +17,7 @@ Lista, selecione 3 tarefas; na visão do quadro, clique com o botão direito num
 | RN401 | O destinatário do atalho da tarefa é o responsável da tarefa (o campo Responsável). O e-mail do responsável é o login do membro. | T-1042, com Bruno Teixeira como responsável, abre o e-mail para bruno.teixeira@example.com. | Obrigatório |
 | RN402 | O e-mail da tarefa ligada a um item fica vinculado a esse item (RN906). | O e-mail de T-1042, ligada a CTR-00231, fica na Mail Box de CTR-00231. | Obrigatório |
 | RN403 | O e-mail de uma tarefa abre com o assunto "Tarefa: <nome> (prazo <data>)", ou "Tarefa: <nome>" sem prazo, e com o texto do lembrete da tarefa. | "Tarefa: Confirmar data da audiência (prazo 08 de dez.)" e "Olá, Diego. Lembrete da tarefa "Confirmar data da audiência", prazo 08 de dez.". | Obrigatório |
-| RN404 | O WhatsApp de uma tarefa vai para o telefone do responsável (P905) e abre com o texto do lembrete da tarefa, o mesmo do e-mail (RN403, RN917). | O WhatsApp de T-1042 abre a conversa com o telefone de Bruno Teixeira e "Olá, Bruno. Lembrete da tarefa...". | Obrigatório |
+| RN404 | O WhatsApp de uma tarefa vai para o telefone do responsável (P403) e abre com o texto do lembrete da tarefa, o mesmo do e-mail (RN403, RN917). | O WhatsApp de T-1042 abre a conversa com o telefone de Bruno Teixeira e "Olá, Bruno. Lembrete da tarefa...". | Obrigatório |
 
 ## Lista de tarefas (RF)
 
@@ -69,4 +69,5 @@ Lista, selecione 3 tarefas; na visão do quadro, clique com o botão direito num
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
 | S401 | O e-mail em lote sai sem item vinculado, porque as tarefas selecionadas podem ser de itens diferentes. | produto | Com vínculo, falta a regra de qual item escolher |
+| P403 | De onde vem o telefone do responsável? O cadastro do usuário tem o campo de telefone, mas nenhuma tela do develop deixa a pessoa preenchê-lo. | produto e dev | Sem tela para o telefone, o WhatsApp ao responsável fica indisponível até o perfil ganhar o campo |
 | S402 | O responsável de 2 ou mais tarefas selecionadas entra 1 vez no Para e 1 vez na fila do WhatsApp, e "<N> responsáveis" conta pessoas, não tarefas. Na fila, o texto é o da 1ª tarefa dele na seleção. | produto | Muda a contagem do botão e o texto da conversa |
