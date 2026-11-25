@@ -55,6 +55,11 @@ function tarefaDoVinculo(x: TarefaDoProtótipo) {
 /* ---------- painel da tarefa ---------- */
 
 const aberta = ref<TarefaDoProtótipo | null>(null)
+/** O clique na barra do topo ou no compositor não fecha o painel: o e-mail sai vinculado ao item da tarefa. */
+function manterPainel(e: Event) {
+  const alvo = e.target as Element | null
+  if (alvo?.closest('[data-slot="navbar"], header, [data-compositor]')) e.preventDefault()
+}
 const painel = computed({ get: () => !!aberta.value, set: (v) => { if (!v) aberta.value = null } })
 const abaDoPainel = ref<'detalhes' | 'mailbox'>('detalhes')
 const responsavelDaAberta = computed(() => membroPorId(aberta.value?.assigned_to))
@@ -255,7 +260,7 @@ const semResponsavel = computed(() => selecionadas.value.filter(l => !l.responsa
             origem="tarefa"
           />
           <span class="basis-full text-xs text-muted">
-            {{ t.tarefas.ajudaDoLote }}<template v-if="semResponsavel"> {{ t.tarefas.foraDoLote(semResponsavel) }}</template>
+            {{ semResponsavel ? `${t.tarefas.ajudaDoLote} ${t.tarefas.foraDoLote(semResponsavel)}` : t.tarefas.ajudaDoLote }}
           </span>
         </div>
       </Transition>
@@ -309,7 +314,15 @@ const semResponsavel = computed(() => selecionadas.value.filter(l => !l.responsa
     </div>
 
     <!-- Painel da tarefa -->
-    <USlideover v-model:open="painel" :title="aberta?.name" :description="aberta ? `T-${aberta.id}` : ''" :ui="{ content: 'sm:max-w-2xl' }">
+    <!-- Sem modal: com o painel aberto, a barra do topo ("Novo e-mail") e o compositor continuam clicáveis (RF006, RF124). -->
+    <USlideover
+      v-model:open="painel"
+      :title="aberta?.name"
+      :description="aberta ? `T-${aberta.id}` : ''"
+      :modal="false"
+      :content="{ onInteractOutside: manterPainel }"
+      :ui="{ content: 'sm:max-w-2xl' }"
+    >
       <template #body>
         <div v-if="aberta" class="flex flex-col gap-4">
           <!-- PROPOSTA: a aba Mail Box ao lado dos detalhes -->

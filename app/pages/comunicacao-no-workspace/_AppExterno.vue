@@ -131,7 +131,7 @@ watch(app, (a) => {
 </script>
 
 <template>
-  <UModal v-model:open="aberto" :title="titulo" :description="t.simulador.selo" :ui="{ content: largura }">
+  <UModal v-model:open="aberto" :title="titulo" :description="t.simulador.selo" :ui="{ content: `${largura} z-[70]`, overlay: 'z-[70]' }">
     <template #content>
       <div v-if="app" class="flex max-h-[90dvh] flex-col overflow-hidden">
         <!-- Barra da simulação: o link que o produto abriria -->

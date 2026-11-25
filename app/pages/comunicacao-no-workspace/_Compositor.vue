@@ -332,8 +332,8 @@ const notaDaResposta = computed(() => {
     :title="t.compositor.titulo"
     :overlay="false"
     :modal="false"
-    :content="{ onOpenAutoFocus: focarAoAbrir }"
-    :ui="{ content: expandido ? 'max-w-5xl' : 'max-w-2xl', body: 'flex flex-col gap-4', footer: 'justify-between' }"
+    :content="{ onOpenAutoFocus: focarAoAbrir, 'data-compositor': '' }"
+    :ui="{ content: expandido ? 'max-w-5xl z-[60]' : 'max-w-2xl z-[60]', body: 'flex flex-col gap-4', footer: 'justify-between' }"
   >
     <template #actions>
       <UTooltip :text="expandido ? t.compositor.reduzir : t.compositor.expandir">

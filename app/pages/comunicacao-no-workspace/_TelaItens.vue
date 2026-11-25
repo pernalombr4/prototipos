@@ -46,7 +46,8 @@ const filtrados = computed(() => {
 })
 const daPagina = computed(() => filtrados.value.slice((pagina.value - 1) * POR_PAGINA, pagina.value * POR_PAGINA))
 
-const temLinkPublico = computed(() => formularios.value.some(f => f.visibilidade === 'publico' && f.categoria === categoriaAtual.value))
+// O botão aparece em toda categoria com formulário; sem formulário público, o menu mostra o vazio (RF614).
+const temLinkPublico = computed(() => formularios.value.some(f => f.categoria === categoriaAtual.value))
 
 /* ---------- linhas ---------- */
 
@@ -235,7 +236,7 @@ const menuDoCartao = computed<ContextMenuItem[][]>(() => {
             <span class="text-highlighted">{{ (row as Linha).contato?.nome ?? '' }}</span>
             <span class="ml-1.5 text-muted">{{ (row as Linha).contato?.email ?? '' }}</span>
           </span>
-          <span v-else class="text-sm text-dimmed">-</span>
+          <span v-else class="text-sm text-dimmed">{{ t.itens.semContato }}</span>
         </template>
         <template #actions="{ row }">
           <UDropdownMenu :items="menuDaLinha((row as Linha).item)" :content="{ align: 'end' }" :ui="{ content: 'w-64' }">
@@ -252,7 +253,7 @@ const menuDoCartao = computed<ContextMenuItem[][]>(() => {
         {{ t.itens.dicaDoQuadro }}
       </p>
       <ClientOnly>
-        <UContextMenu :items="menuDoCartao" :ui="{ content: 'w-64' }">
+        <UContextMenu :items="menuDoCartao" :ui="{ content: 'w-80' }">
           <div>
             <div @contextmenu.capture="(ev: MouseEvent) => cliqueDireitoNoCartao(ev, texto => itens.find(i => texto.includes(i.reference)) ?? undefined, i => (cartaoDoMenu = i))">
             <EnKanbanBoard

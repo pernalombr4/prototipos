@@ -46,7 +46,8 @@ const { podeEnviar } = useComunicacao()
 
 const motivo = computed(() => {
   if (props.semDestinatario) return null
-  if (props.varios) return props.varios.some(v => v.email) ? null : props.t.atalho.semEmail
+  // Lote sem nenhum destinatário (só tarefas sem responsável): "Sem contato", como manda a RN913.
+  if (props.varios) return props.varios.some(v => v.email) ? null : props.varios.length ? props.t.atalho.semEmail : props.t.atalho.semContato
   return motivoDoDestino(props.destino)
 })
 
@@ -79,8 +80,9 @@ const dica = computed(() => motivo.value
   <!-- Raiz real: o UTooltip não gera elemento, e a classe de quem usa (a marca da proposta) precisa de onde cair. -->
   <span v-if="ativos" :class="bloco ? 'flex w-full' : 'inline-flex'">
     <!-- Ícone: o menu com os 2 caminhos (coluna de tabela, campo, participante) -->
-    <UTooltip v-if="variante === 'icone'" :text="motivo ?? (rotulo ?? t.atalho.email)">
-      <UDropdownMenu v-if="!motivo" :items="menu" :content="{ align: 'end' }" :ui="{ content: 'w-72' }">
+    <!-- Com menu, a dica fica dentro do gatilho do menu: o UTooltip por fora do UDropdownMenu não abria. -->
+    <UDropdownMenu v-if="variante === 'icone' && !motivo" :items="menu" :content="{ align: 'end' }" :ui="{ content: 'w-72' }">
+      <UTooltip :text="rotulo ?? t.atalho.email">
         <UButton
           icon="i-lucide-mail"
           color="neutral"
@@ -90,10 +92,11 @@ const dica = computed(() => motivo.value
           class="transition-transform hover:-translate-y-0.5"
           @click.stop
         />
-      </UDropdownMenu>
-      <!-- Sem e-mail: aria-disabled, não disabled. O botão continua no Tab e o motivo aparece no foco. -->
+      </UTooltip>
+    </UDropdownMenu>
+    <!-- Sem e-mail: aria-disabled, não disabled. O botão continua no Tab e o motivo aparece no foco. -->
+    <UTooltip v-else-if="variante === 'icone'" :text="motivo">
       <UButton
-        v-else
         icon="i-lucide-mail"
         color="neutral"
         variant="ghost"
