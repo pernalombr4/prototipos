@@ -16,8 +16,8 @@
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import type { Textos } from './textos'
-import { CAMPO_REQUISITANTE, type Formulario, type SlugDaCategoria, campos, categoriaPorSlug, categorias, enderecoDoItem, itens, linkPublico } from './mocks'
-import { type ConfigDaCategoria, contatosDoItem, preencher, useComunicacao, useMarcaDeProposta } from './estado'
+import { CAMPO_REQUISITANTE, MASCARA_CEL, type Formulario, type SlugDaCategoria, campos, categoriaPorSlug, categorias, enderecoDoItem, itens, linkPublico } from './mocks'
+import { type ConfigDaCategoria, contatosDoItem, linkDeWhatsApp, numeroDoWhatsApp, preencher, useComunicacao, useMarcaDeProposta } from './estado'
 import { useCopiar } from './atalhos'
 
 const props = defineProps<{ t: Textos }>()
@@ -68,8 +68,8 @@ const NENHUM = '__nenhum'
 
 const camposDaCategoria = computed(() => campos.filter(c => c.categoria === categoriaAtual.value))
 /** Pessoa/Empresa (`EnPerson`) entra pelos subcampos de contato. */
-function deContato(sub: 'contact_name' | 'contact_email') {
-  const rotulo = { contact_name: props.t.categoria.subNome, contact_email: props.t.categoria.subEmail }[sub]
+function deContato(sub: 'contact_name' | 'contact_email' | 'contact_phone') {
+  const rotulo = { contact_name: props.t.categoria.subNome, contact_email: props.t.categoria.subEmail, contact_phone: props.t.categoria.subTelefone }[sub]
   return camposDaCategoria.value.filter(c => c.type === 'EnPerson').map(c => ({ value: `${c.refId}.${sub}`, label: `${c.name} › ${rotulo}`, description: props.t.categoria.tipoPessoa }))
 }
 const opcoesDeNome = computed(() => [{ value: NENHUM, label: props.t.categoria.nenhum }, ...camposDaCategoria.value.filter(c => c.type === 'inputText').map(c => ({ value: c.refId, label: c.name })), ...deContato('contact_name')])
@@ -79,14 +79,20 @@ const opcoesDeEmail = computed(() => [
   ...deContato('contact_email'),
   { value: CAMPO_REQUISITANTE, label: props.t.categoria.emailDoRequisitante, description: props.t.categoria.campoPadrao },
 ])
+/** Telefone: Texto com máscara (o develop não tem tipo telefone) e o telefone de contato de Pessoa/Empresa. */
+const opcoesDeTelefone = computed(() => [
+  { value: NENHUM, label: props.t.categoria.nenhum },
+  ...camposDaCategoria.value.filter(c => c.type === 'EnlMask' && c.mascara === MASCARA_CEL).map(c => ({ value: c.refId, label: c.name, description: 'CEL' })),
+  ...deContato('contact_phone'),
+])
 function adicionarContato() {
-  rascunho.value.contatos.push({ id: `c${Date.now()}`, rotulo: props.t.categoria.novoContato, campoNome: null, campoEmail: null })
+  rascunho.value.contatos.push({ id: `c${Date.now()}`, rotulo: props.t.categoria.novoContato, campoNome: null, campoEmail: null, campoTelefone: null })
 }
 
 const variaveis = ['{referencia}', '{titulo}', '{nome}', '{categoria}']
-function inserir(v: string) {
-  const a = rascunho.value.assunto
-  rascunho.value.assunto = `${a}${a.endsWith(' ') || !a ? '' : ' '}${v}`
+function inserir(v: string, onde: 'assunto' | 'mensagem' = 'assunto') {
+  const a = rascunho.value[onde]
+  rascunho.value[onde] = `${a}${a.endsWith(' ') || !a ? '' : ' '}${v}`
 }
 
 /* Prévia: um item de exemplo, com a configuração em edição. */
@@ -98,11 +104,16 @@ const previa = computed(() => {
   const i = itemExemplo.value
   if (!i) return []
   const cfg = { ...config.value, porCategoria: { ...config.value.porCategoria, [i.categoria]: rascunho.value } }
-  return contatosDoItem(i, cfg).map(c => ({
-    contato: c,
-    assunto: preencher(rascunho.value.assunto, i, c.nome),
-    cc: enderecoDoItem(i),
-  }))
+  return contatosDoItem(i, cfg).map((c) => {
+    const mensagem = preencher(rascunho.value.mensagem, i, c.nome)
+    return {
+      contato: c,
+      assunto: preencher(rascunho.value.assunto, i, c.nome),
+      cc: enderecoDoItem(i),
+      mensagem,
+      whatsapp: numeroDoWhatsApp(c.telefone) ? linkDeWhatsApp(c.telefone, mensagem || undefined) : null,
+    }
+  })
 })
 
 const salvando = ref(false)
@@ -250,12 +261,15 @@ function menuDoFormulario(f: Formulario): DropdownMenuItem[][] {
                   @click="rascunho.contatos.splice(i, 1)"
                 />
               </div>
-              <div class="mt-3 grid gap-3 sm:grid-cols-2">
+              <div class="mt-3 grid gap-3 sm:grid-cols-3">
                 <UFormField :label="t.categoria.campoNome">
                   <USelect :model-value="c.campoNome ?? NENHUM" :items="opcoesDeNome" class="w-full" @update:model-value="c.campoNome = $event === NENHUM ? null : ($event as string)" />
                 </UFormField>
                 <UFormField :label="t.categoria.campoEmail">
                   <USelect :model-value="c.campoEmail ?? NENHUM" :items="opcoesDeEmail" class="w-full" @update:model-value="c.campoEmail = $event === NENHUM ? null : ($event as string)" />
+                </UFormField>
+                <UFormField :label="t.whatsapp.campoTelefone">
+                  <USelect :model-value="c.campoTelefone ?? NENHUM" :items="opcoesDeTelefone" class="w-full" @update:model-value="c.campoTelefone = $event === NENHUM ? null : ($event as string)" />
                 </UFormField>
               </div>
             </div>
@@ -278,6 +292,26 @@ function menuDoFormulario(f: Formulario): DropdownMenuItem[][] {
               <span class="flex flex-wrap items-center gap-1">
                 {{ t.categoria.inserir }}
                 <UButton v-for="v in variaveis" :key="v" :label="v" color="neutral" variant="soft" size="xs" class="font-mono" @click="inserir(v)" />
+              </span>
+            </template>
+          </UFormField>
+        </UCard>
+
+        <UCard>
+          <template #header>
+            <h2 class="flex items-center gap-2 font-semibold text-highlighted">
+              <UIcon name="i-simple-icons-whatsapp" class="size-4 text-success" />{{ t.whatsapp.mensagem }}
+            </h2>
+            <p class="mt-1 text-sm text-muted">
+              {{ t.whatsapp.mensagemDica }}
+            </p>
+          </template>
+          <UFormField :label="t.whatsapp.mensagem">
+            <UTextarea v-model="rascunho.mensagem" :rows="2" autoresize class="w-full" />
+            <template #help>
+              <span class="flex flex-wrap items-center gap-1">
+                {{ t.categoria.inserir }}
+                <UButton v-for="v in variaveis" :key="v" :label="v" color="neutral" variant="soft" size="xs" class="font-mono" @click="inserir(v, 'mensagem')" />
               </span>
             </template>
           </UFormField>
@@ -332,6 +366,24 @@ function menuDoFormulario(f: Formulario): DropdownMenuItem[][] {
               </dl>
               <p v-else class="mt-1 flex items-center gap-1 text-xs text-warning">
                 <UIcon name="i-lucide-triangle-alert" class="size-3.5" />{{ t.atalho.semEmail }}
+              </p>
+              <!-- WhatsApp: o telefone e o link que o botão abre -->
+              <dl v-if="p.whatsapp" class="mt-1.5 grid grid-cols-[4.5rem_1fr] gap-x-2 gap-y-1 text-xs">
+                <dt class="text-muted">
+                  {{ t.whatsapp.previa }}
+                </dt>
+                <dd class="font-mono text-toned">
+                  {{ p.contato.telefone }}
+                </dd>
+                <dt class="text-muted">
+                  {{ t.whatsapp.mensagem }}
+                </dt>
+                <dd class="text-toned">
+                  {{ p.mensagem || '-' }}
+                </dd>
+              </dl>
+              <p v-else class="mt-1 flex items-center gap-1 text-xs text-warning">
+                <UIcon name="i-lucide-triangle-alert" class="size-3.5" />{{ p.contato.telefone ? t.whatsapp.telefoneInvalido : t.whatsapp.semTelefone }}
               </p>
             </div>
           </div>

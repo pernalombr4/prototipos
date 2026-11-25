@@ -8,8 +8,8 @@
  *   SDK 0.17. A forma deles saiu das telas do develop (Formulários, Mail Box,
  *   E-mails Enviados, Caixas de E-mail, Agenda), visitadas em 05/10/2026.
  * - E-mails em `example.com`, domínio reservado para exemplo. Os telefones
- *   são só dado de campo: o protótipo não tem atalho de WhatsApp nem de SMS
- *   (fora do plano, decisão da redatora na rodada 6).
+ *   são inventados e alimentam o atalho de WhatsApp (de volta na rodada 10;
+ *   o SMS continua fora do plano).
  */
 import type { Field, Item, ItemType, Member, Task, Workspace } from '@be-enlighten/enspace-sdk-schemas'
 
@@ -154,10 +154,18 @@ export function categoriaPorSlug(slug: SlugDaCategoria) {
 /** O campo como a configuração do protótipo precisa. Subconjunto do `Field`. */
 export type CampoDaCategoria = Pick<Field, 'refId' | 'type' | 'name' | 'label'> & {
   categoria: SlugDaCategoria // PROTÓTIPO: no schema é `item_type` (id)
+  /** PROTÓTIPO: a máscara do Texto com máscara, que o develop guarda na configuração do campo. */
+  mascara?: string
 }
 
-function campo(categoria: SlugDaCategoria, refId: string, name: string, type: Field['type']): CampoDaCategoria {
-  return { categoria, refId, name, label: name, type }
+/**
+ * A máscara pronta "CEL" do Texto com máscara, como o develop grava (lido no
+ * código do front em 25/11/2026). É o que diz que o campo guarda telefone.
+ */
+export const MASCARA_CEL = '(###) #####-####'
+
+function campo(categoria: SlugDaCategoria, refId: string, name: string, type: Field['type'], mascara?: string): CampoDaCategoria {
+  return { categoria, refId, name, label: name, type, ...(mascara ? { mascara } : {}) }
 }
 
 export const campos: CampoDaCategoria[] = [
@@ -165,7 +173,7 @@ export const campos: CampoDaCategoria[] = [
   campo('contratos', 'contraparte', 'Contraparte', 'inputText'),
   campo('contratos', 'contato_nome', 'Contato da contraparte', 'inputText'),
   campo('contratos', 'contato_email', 'E-mail do contato', 'email'),
-  campo('contratos', 'contato_telefone', 'Telefone do contato', 'EnlMask'),
+  campo('contratos', 'contato_telefone', 'Telefone do contato', 'EnlMask', MASCARA_CEL),
   campo('contratos', 'financeiro_email', 'E-mail do financeiro', 'email'),
   campo('contratos', 'valor', 'Valor', 'EnlNumber'),
   campo('contratos', 'vencimento', 'Vencimento', 'EnlCalendar'),
@@ -173,14 +181,14 @@ export const campos: CampoDaCategoria[] = [
   campo('solicitacoes', 'titulo', 'Assunto', 'inputText'),
   campo('solicitacoes', 'solicitante_nome', 'Nome de quem pediu', 'inputText'),
   campo('solicitacoes', 'solicitante_email', 'E-mail de quem pediu', 'email'),
-  campo('solicitacoes', 'solicitante_telefone', 'Telefone de quem pediu', 'EnlMask'),
+  campo('solicitacoes', 'solicitante_telefone', 'Telefone de quem pediu', 'EnlMask', MASCARA_CEL),
   campo('solicitacoes', 'area', 'Área', 'EnlDropdown'),
 
   campo('fornecedores', 'titulo', 'Razão social', 'inputText'),
-  campo('fornecedores', 'cnpj', 'CNPJ', 'EnlMask'),
+  campo('fornecedores', 'cnpj', 'CNPJ', 'EnlMask', '##.###.###/####-##'),
   campo('fornecedores', 'contato_nome', 'Contato comercial', 'inputText'),
   campo('fornecedores', 'contato_email', 'E-mail comercial', 'email'),
-  campo('fornecedores', 'contato_whatsapp', 'WhatsApp comercial', 'EnlMask'),
+  campo('fornecedores', 'contato_whatsapp', 'WhatsApp comercial', 'EnlMask', MASCARA_CEL),
   // Pessoa/Empresa (`EnPerson`): guarda contact_name, contact_email e contact_phone (docs: Dados de campos).
   campo('fornecedores', 'pessoa_empresa', 'Pessoa/Empresa', 'EnPerson'),
 ]

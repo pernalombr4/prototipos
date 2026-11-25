@@ -2,11 +2,14 @@
 /**
  * ANDAIME DE PROTÓTIPO, não é proposta de tela.
  *
- * A janela do app de fora: o app de e-mail da pessoa, a página pública do
- * formulário e o login da Microsoft. No produto, o navegador abre o link da
+ * A janela do app de fora: o app de e-mail da pessoa, o WhatsApp Web, a página
+ * pública do formulário e o login da Microsoft. No produto, o navegador abre o link da
  * barra de cima e o resto acontece fora do ENSPACE. A simulação segue a mesma
  * regra:
  *  - e-mail pelo app: só chega à Mail Box se o endereço do item foi em cópia;
+ *  - WhatsApp: com número, abre a conversa com ele; sem número (link do
+ *    formulário), a pessoa escolhe a conversa. A mensagem já está no campo e
+ *    quem envia é ela; o ENSPACE não fica sabendo;
  *  - formulário público: a resposta cria um item na categoria do formulário;
  *  - Microsoft: aceitar integra o Correio do Outlook e o compositor libera.
  */
@@ -63,6 +66,36 @@ function enviarEmail() {
     color: item ? 'success' : 'neutral',
     actions: item ? [{ label: props.t.simulador.verNaMailBox, color: 'neutral', variant: 'outline', onClick: () => abrirItem(item.id, 'mailbox') }] : undefined,
   })
+}
+
+/* ---------- WhatsApp Web ---------- */
+
+/** Conversas inventadas da pessoa no WhatsApp (andaime). */
+const conversas = [
+  { nome: 'Marina Alves', detalhe: '+55 11 98765-4321' },
+  { nome: 'Rafael Monteiro', detalhe: '+55 21 99876-1234' },
+  { nome: 'Fornecedores · Atlas', detalhe: 'Grupo · 12 participantes' },
+  { nome: 'Patrícia Nunes', detalhe: '+55 31 97654-3210' },
+  { nome: 'Jurídico · Solicitações', detalhe: 'Grupo · 8 participantes' },
+]
+const buscaDeConversa = ref('')
+const conversasFiltradas = computed(() => {
+  const q = buscaDeConversa.value.trim().toLowerCase()
+  return q ? conversas.filter(c => c.nome.toLowerCase().includes(q)) : conversas
+})
+const conversa = ref<(typeof conversas)[number] | null>(null)
+const mensagem = ref('')
+const enviadas = ref<{ texto: string, hora: string }[]>([])
+
+function enviarMensagem() {
+  if (!mensagem.value.trim()) return
+  enviadas.value.push({ texto: mensagem.value.trim(), hora: horaCurta.value.format(agora()) })
+  mensagem.value = ''
+}
+
+function iniciais(s: string) {
+  // Só letras: um número de telefone não vira "+1".
+  return s.split(/[\s·]+/).filter(p => /^\p{L}/u.test(p)).slice(0, 2).map(p => p[0]!.toUpperCase()).join('')
 }
 
 /* ---------- Página pública do formulário ---------- */
@@ -127,6 +160,13 @@ watch(app, (a) => {
   respondido.value = false
   passo.value = 'integracoes'
   if (a.tipo === 'email') Object.assign(email, { para: [...a.para], cc: [...a.cc], assunto: a.assunto, corpo: a.corpo })
+  if (a.tipo === 'whatsapp') {
+    // Com número, o link já abre a conversa com ele.
+    conversa.value = a.telefone ? { nome: a.nome ?? a.telefone, detalhe: a.telefone } : null
+    buscaDeConversa.value = ''
+    mensagem.value = a.texto
+    enviadas.value = []
+  }
 }, { immediate: true })
 </script>
 
@@ -171,6 +211,63 @@ watch(app, (a) => {
             <UButton :label="t.simulador.descartar" color="neutral" variant="ghost" @click="fechar" />
             <UButton :label="t.simulador.enviar" icon="i-lucide-send" :disabled="!podeEnviarEmail" @click="enviarEmail" />
           </footer>
+        </div>
+
+        <!-- WhatsApp Web (genérico): escolher a conversa, a mensagem pronta no campo, enviar -->
+        <div v-else-if="app.tipo === 'whatsapp'" class="flex h-112 flex-col">
+          <template v-if="!conversa">
+            <header class="flex items-center gap-2 border-b border-default bg-elevated px-4 py-2.5 text-sm font-semibold text-highlighted">
+              <UIcon name="i-simple-icons-whatsapp" class="size-4 text-success" />{{ t.simulador.escolhaAConversa }}
+            </header>
+            <div class="border-b border-default px-3 py-2">
+              <UInput v-model="buscaDeConversa" :placeholder="t.simulador.buscarConversa" icon="i-lucide-search" class="w-full" autofocus />
+            </div>
+            <ul class="flex-1 overflow-y-auto">
+              <li v-for="c in conversasFiltradas" :key="c.nome">
+                <button
+                  type="button"
+                  class="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-elevated focus-visible:bg-elevated focus-visible:outline-none"
+                  @click="conversa = c"
+                >
+                  <UAvatar :text="iniciais(c.nome)" size="sm" />
+                  <span class="min-w-0">
+                    <span class="block truncate text-sm font-medium text-highlighted">{{ c.nome }}</span>
+                    <span class="block truncate text-xs text-muted">{{ c.detalhe }}</span>
+                  </span>
+                </button>
+              </li>
+              <li v-if="!conversasFiltradas.length" class="px-4 py-6 text-center text-sm text-muted">
+                {{ t.simulador.nenhumaConversa }}
+              </li>
+            </ul>
+          </template>
+          <template v-else>
+            <header class="flex items-center gap-3 border-b border-default bg-elevated px-4 py-2.5 text-highlighted">
+              <UAvatar :text="iniciais(conversa.nome) || undefined" icon="i-lucide-user" size="sm" />
+              <span class="min-w-0 flex-1">
+                <span class="block truncate text-sm font-semibold">{{ conversa.nome }}</span>
+                <span class="block truncate text-xs text-muted">{{ conversa.detalhe }}</span>
+              </span>
+              <UButton v-if="!app.telefone" :label="t.simulador.trocarConversa" color="neutral" variant="outline" size="xs" class="shrink-0" @click="conversa = null" />
+            </header>
+            <div class="flex flex-1 flex-col gap-2 overflow-y-auto bg-muted p-4">
+              <div v-for="(m, i) in enviadas" :key="i" class="ml-auto max-w-sm rounded-lg bg-success/15 px-3 py-2 text-sm text-highlighted shadow-sm">
+                <p class="whitespace-pre-wrap break-words">
+                  {{ m.texto }}
+                </p>
+                <p class="mt-1 flex items-center justify-end gap-1 text-xs text-muted">
+                  {{ m.hora }}<UIcon name="i-lucide-check-check" class="size-3.5 text-info" />
+                </p>
+              </div>
+            </div>
+            <footer class="flex items-end gap-2 border-t border-default p-2">
+              <UTextarea v-model="mensagem" autoresize :rows="2" :maxrows="5" :placeholder="t.simulador.digiteMensagem" class="flex-1" :aria-label="t.simulador.digiteMensagem" />
+              <UButton icon="i-lucide-send-horizontal" color="success" :disabled="!mensagem.trim()" :aria-label="t.simulador.enviar" @click="enviarMensagem" />
+            </footer>
+          </template>
+          <p class="border-t border-default px-3 py-2 text-xs text-muted">
+            {{ t.simulador.naoRegistra }}
+          </p>
         </div>
 
         <!-- Página pública do formulário -->

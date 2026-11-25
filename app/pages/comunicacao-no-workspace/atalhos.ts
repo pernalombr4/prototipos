@@ -1,8 +1,9 @@
 /**
  * O atalho de e-mail, numa peça só para todas as telas.
  *
- * Só e-mail: WhatsApp e SMS saíram do plano (rodada 6). O atalho tem 2
- * caminhos:
+ * O WhatsApp voltou na rodada 10, em `useWhatsApp`: o contato do item, o
+ * responsável da tarefa, o lembrete da Agenda e o link do formulário público.
+ * O SMS continua fora do plano. O atalho de e-mail tem 2 caminhos:
  *  - escrever pelo ENSPACE: o compositor, com o item já vinculado. Sai da conta
  *    do Outlook da pessoa (Fase 1) ou também de uma caixa do workspace (Fase 2);
  *  - abrir o app de e-mail da pessoa (`mailto:`), com o endereço do item em
@@ -14,7 +15,7 @@ import type { DropdownMenuItem } from '@nuxt/ui'
 import { type ItemDoProtótipo, enderecoDoItem } from './mocks'
 import { useAppExterno } from './simulador'
 import { textos } from './textos'
-import { type Contato, type Rascunho, linkDeEmail, preencher, useComunicacao } from './estado'
+import { type Contato, type Rascunho, MENSAGEM_PADRAO, linkDeEmail, linkDeWhatsApp, numeroDoWhatsApp, preencher, useComunicacao } from './estado'
 
 /** O mínimo de um destinatário: nome e e-mail, qualquer um pode faltar. */
 export type Destino = Pick<Contato, 'nome' | 'email'>
@@ -111,6 +112,86 @@ export function useAtalhos() {
   }
 
   return { ativos, motivo, link, abrirNoApp, escreverNoEnspace, itensDeMenu, assuntoPadrao, config }
+}
+
+/** O mínimo de quem recebe pelo WhatsApp: nome e telefone, qualquer um pode faltar. */
+export type DestinoDoWhatsApp = Pick<Contato, 'nome' | 'telefone'>
+
+/** Uma pessoa da fila do WhatsApp em lote (`_FilaDoWhatsApp.vue`). */
+export interface PessoaDaFila {
+  id: string | number
+  nome: string
+  telefone: string | null
+  /** O texto pronto desta pessoa (com o nome dela). */
+  texto: string
+}
+
+export interface OpcoesDoWhatsApp {
+  item?: ItemDoProtótipo | null
+  /** Texto pronto. Sem ele, o texto da categoria do item. */
+  texto?: string
+}
+
+/**
+ * O atalho de WhatsApp (rodada 10). O link é o da ajuda do WhatsApp ("conversa
+ * em um clique"):
+ *  - com número, `https://wa.me/<número>?text=<texto>` abre a conversa com ele;
+ *  - sem número (o link do formulário), `https://wa.me/?text=<texto>` mostra a
+ *    lista de contatos e a pessoa escolhe a conversa ou o grupo.
+ * O texto chega no campo de mensagem e quem envia é a pessoa. Funciona no
+ * WhatsApp Web e no app; o ENSPACE não fica sabendo do envio. No produto:
+ * `window.open(link, '_blank')`. Aqui: a simulação.
+ */
+export function useWhatsApp() {
+  const t = useTextos(textos)
+  const { config, fase } = useComunicacao()
+  const { abrirApp } = useAppExterno()
+
+  /** Por que o WhatsApp não está disponível para este destino. Nulo = disponível. */
+  function motivoDoWhatsApp(d: DestinoDoWhatsApp | null) {
+    if (!d) return t.value.atalho.semContato
+    if (!d.telefone) return t.value.whatsapp.semTelefone
+    return numeroDoWhatsApp(d.telefone) ? null : t.value.whatsapp.telefoneInvalido
+  }
+
+  /** O texto pronto, com as variáveis trocadas. Fase 1: fixo. Fase 2: o da categoria do item. */
+  function textoPadrao(item: ItemDoProtótipo | null | undefined, d: DestinoDoWhatsApp | null) {
+    if (!item) return ''
+    const modelo = fase.value >= 2 ? config.value.porCategoria[item.categoria].mensagem : MENSAGEM_PADRAO
+    return preencher(modelo, item, d?.nome ?? null)
+  }
+
+  /** Abre a conversa com o destino (ou, sem destino, a escolha da conversa). */
+  function abrirConversa(d: DestinoDoWhatsApp | null, o: OpcoesDoWhatsApp = {}) {
+    const texto = o.texto ?? textoPadrao(o.item, d)
+    abrirApp({
+      tipo: 'whatsapp',
+      url: linkDeWhatsApp(d?.telefone ?? null, texto || undefined),
+      texto,
+      nome: d?.nome ?? null,
+      telefone: d?.telefone ?? null,
+    })
+  }
+
+  /** O link do formulário público: sem número, a pessoa escolhe a conversa. */
+  function abrirWhatsApp(texto: string) {
+    abrirConversa(null, { texto })
+  }
+
+  /** A opção "WhatsApp" de um menu (linha da tabela, cartão, clique direito). */
+  function itemDeMenu(d: DestinoDoWhatsApp | null, o: OpcoesDoWhatsApp = {}, rotulo?: string): DropdownMenuItem {
+    const m = motivoDoWhatsApp(d)
+    return {
+      label: rotulo ?? t.value.whatsapp.rotulo,
+      description: m ?? d?.telefone ?? undefined,
+      icon: 'i-simple-icons-whatsapp',
+      disabled: !!m,
+      ui: { itemDescription: 'whitespace-normal' },
+      onSelect: () => abrirConversa(d, o),
+    }
+  }
+
+  return { motivoDoWhatsApp, textoPadrao, abrirConversa, abrirWhatsApp, itemDeMenu }
 }
 
 /**

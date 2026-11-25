@@ -12,12 +12,14 @@ O documento do Felipe pede 3 coisas. Cada uma tem configuração e uso:
 | Parte | O que a pessoa faz | Onde configura |
 |---|---|---|
 | Atalho de e-mail | Escreve ao contato do item, ao responsável da tarefa ou aos participantes de um evento, pelo ENSPACE ou pelo app de e-mail dela | Nada a ligar: vem sempre ligado. Na Fase 2, o cartão "Contato da categoria" |
+| Atalho de WhatsApp | Abre a conversa no WhatsApp com o mesmo contato, com o texto pronto, e envia o link do formulário público | Nada a ligar. Na Fase 2, o telefone e o texto pronto no cartão "Contato da categoria" |
 | Link de formulário público | Copia ou envia o link do formulário público sem ir à configuração | Formulários da categoria (visibilidade, já existe) |
 | E-mail do ENSPACE em qualquer tela | Escreve o e-mail de qualquer tela. Com um item aberto, o e-mail fica no item. Lê e responde na central E-mails | Correio do Outlook no perfil de cada pessoa. Modelos, caixas e regras do workspace, na central E-mails |
 
 Regras que valem para tudo:
 
-- **O canal é só e-mail.** WhatsApp e SMS ficam fora do plano.
+- **Os canais são e-mail e WhatsApp.** O WhatsApp abre por um link do próprio WhatsApp, com o texto pronto; a pessoa
+  envia, e o ENSPACE não registra a conversa. O SMS fica fora do plano.
 - **O e-mail vem sempre ligado.** Não há chave em Sistema › Módulos nem em outro lugar, em nenhuma
   fase. O atalho aparece onde há endereço de e-mail (4.1).
 - **Tudo do e-mail fica numa central só:** "E-mails", na seção Membro do menu, com as abas
@@ -29,8 +31,8 @@ Regras que valem para tudo:
   caixa do workspace. O item vinculado define para onde a resposta volta, não o remetente.
 - **O Correio do Outlook é do perfil de cada pessoa.** Cada pessoa integra a própria conta em Perfil
   › Integrações. O administrador não liga pelos outros.
-- **Contato sem e-mail deixa o botão indisponível, com o motivo** e, no item, o atalho para
-  preencher.
+- **Contato sem e-mail ou sem telefone válido deixa o botão indisponível, com o motivo** e, no item,
+  o atalho para preencher ou corrigir.
 
 Cada ponto das seções 4 a 7 diz em que fase entra e tem um bloco **Depende de**: o que precisa
 existir, onde se resolve e o que a pessoa vê quando falta. A seção 3 junta as dependências num mapa.
@@ -119,23 +121,25 @@ Cada fase soma à anterior.
 
 **Como funciona**
 
-- Na Fase 1 não há cartão: o contato vem dos campos de e-mail que o item já tem (5.2).
+- Na Fase 1 não há cartão: o contato vem dos campos de e-mail e de telefone que o item já tem (5.2, 5.7).
 - 13º cartão no painel da categoria (Configurações › Estrutura › Categorias › categoria), ao lado
   do cartão Correção Monetária. Descrição: "Quem é o contato do item e o assunto do e-mail."
 - A página tem 3 blocos:
-  - **"Quem é o contato":** cada contato tem o "Nome do contato na tela" e 2 origens, nome e
-    e-mail. Uma categoria tem 1 ou mais contatos (Contratos: "Contato da contraparte" e
+  - **"Quem é o contato":** cada contato tem o "Nome do contato na tela" e 3 origens: nome,
+    e-mail e telefone. Uma categoria tem 1 ou mais contatos (Contratos: "Contato da contraparte" e
     "Requisitante"). "Adicionar contato" cria outro;
   - **"Assunto do e-mail":** o assunto com que o e-mail abre, com as variáveis `{referencia}`,
     `{titulo}`, `{nome}` e `{categoria}` (botões em "Inserir:");
-  - **"Prévia: o que o botão E-mail abre":** para cada contato, com um item de exemplo, o Para, o
-    Assunto e o Cc (o endereço do item).
+  - **"Texto pronto do WhatsApp":** o texto com que a conversa abre, com as mesmas variáveis;
+  - **"Prévia: o que os botões E-mail e WhatsApp abrem":** para cada contato, com um item de
+    exemplo, o Para, o Assunto e o Cc (o endereço do item), e o telefone e o texto do WhatsApp.
 - Origens aceitas:
 
 | Dado | Campos que servem |
 |---|---|
 | Nome | Texto curto; Pessoa/Empresa › Nome de contato |
 | E-mail | Campo E-mail; Pessoa/Empresa › E-mail de contato; E-mail do Requisitante (campo padrão de toda categoria) |
+| Telefone | Texto com máscara com a máscara CEL; Pessoa/Empresa › Telefone de contato |
 
 - Na central, E-mails › Configurações › "Contato do item" leva ao cartão pelo link "Escolher o
   contato de cada categoria".
@@ -368,7 +372,8 @@ Cada fase soma à anterior.
 **Por que assim**
 
 - O mockup 3 pede 1 rascunho para todos os responsáveis.
-- Com só e-mail, o lote cabe num e-mail: não há fila de conversas.
+- O e-mail em lote cabe num e-mail. O WhatsApp em lote vira uma fila de conversas, 1 por vez, porque o link do
+  WhatsApp leva 1 número.
 
 ### 5.5 Agenda: lembrete por e-mail (Fase 1)
 
@@ -420,6 +425,50 @@ protótipo não põe, porque a tela inicial não tem contexto para eles:
 
 O link público fica onde o formulário está em uso (6.2). **Pergunta para produto:** o Felipe
 concorda em tirar a linha da tela inicial?
+
+### 5.7 WhatsApp em cada atalho (Fase 1)
+
+**Como funciona**
+
+- Onde há atalho de e-mail para uma pessoa, há também o de WhatsApp: o botão no Contato do item, o
+  ícone ao lado do campo de telefone, o submenu "WhatsApp" da lista e do quadro, o ícone na coluna
+  Contato das tarefas, o item no clique direito do cartão de tarefa, o botão no painel da tarefa e o
+  ícone por pessoa no modal "Evento" da Agenda.
+- O atalho abre numa aba nova o link do próprio WhatsApp, `https://wa.me/<número>?text=<texto>`. O
+  WhatsApp Web ou o app abre a conversa com o texto no campo; a pessoa revisa e aperta Enviar. Sem
+  número (o link do formulário), o link é `https://wa.me/?text=<texto>`, e a pessoa escolhe a
+  conversa ou o grupo.
+- O telefone vem do campo Texto com máscara com a máscara CEL e do Telefone de contato do
+  Pessoa/Empresa. O produto não tem campo do tipo telefone.
+- O número é o telefone só com os dígitos; com 10 ou 11 dígitos, ganha o 55; com menos de 10, é
+  inválido.
+- O texto pronto: no item, "Olá, <primeiro nome>. Escrevo sobre <referência> · <nome do item>."; na
+  tarefa e na Agenda, o texto do e-mail daquela tela; no link do formulário, o texto do e-mail do
+  link. Na Fase 2, o texto do item vem do cartão "Contato da categoria".
+- Para várias pessoas (responsáveis das tarefas selecionadas, "WhatsApp para todos" da Agenda), a
+  fila "Avisar pelo WhatsApp" diz quem fica de fora e abre 1 conversa por vez: "Conversa 1 de N",
+  "Abrir conversa", "Próxima".
+- Sem telefone ou com telefone inválido, o atalho fica indisponível com o motivo ("Sem telefone
+  cadastrado", "Telefone inválido"). No item, "Corrigir telefone" leva ao campo.
+
+**Depende de**
+
+| O que precisa existir | Onde se resolve | Sem isso, a pessoa vê |
+|---|---|---|
+| Telefone no item | Campo Texto com máscara CEL ou Pessoa/Empresa na categoria | O atalho indisponível, com "Sem telefone cadastrado" |
+| Telefone do membro (tarefas e Agenda) | O cadastro do usuário tem o campo, mas nenhuma tela o preenche (pergunta 15) | O atalho indisponível para cada responsável |
+| WhatsApp no computador ou no celular da pessoa | Fora do ENSPACE | A página do WhatsApp pede para entrar ou instalar |
+
+**Por que assim**
+
+O link do WhatsApp não pede back-end nem conta paga: a mensagem sai do WhatsApp de quem envia, como
+nos CRMs brasileiros (RD Station CRM, Agendor, Ploomes, Kommo). O registro da conversa no item
+pediria a API paga do WhatsApp Business, fora do plano. A fila existe porque o link leva 1 número e
+o navegador bloqueia várias abas abertas de uma vez.
+
+Na Fase 1, o e-mail e o telefone de um mesmo contato vêm de 2 campos e aparecem como 2 contatos
+("E-mail do contato" e "Telefone do contato"). Só o Pessoa/Empresa junta os 2. Juntar é o cartão
+"Contato da categoria" (4.2).
 
 ## 6. Link de formulário público (Fase 1)
 
@@ -903,6 +952,7 @@ No workspace novo, o texto do próximo passo muda com o perfil:
 |---|---|---|
 | Atalho de e-mail (5.1 a 5.5) | Botão dividido, ícone no campo, submenu, coluna, lote, lembrete, motivo de indisponível, contato tirado dos campos de e-mail do item | Nada |
 | Clique direito no quadro (5.3, 5.4) | Itens novos no menu que o cartão já tem | Nada |
+| WhatsApp (5.7) | Botão, ícone e submenu nas telas dos atalhos, fila para várias pessoas, link do formulário pelo WhatsApp, motivo de indisponível | Nada: o link é do próprio WhatsApp |
 | Link público (6) | Cartão e menu nas telas de uso | Nada: o link e a visibilidade já existem |
 | "Novo e-mail" e compositor (7.2, 7.3) | Gaveta aberta de qualquer tela, contexto da tela, "De" e "Responder para", bloco "Item vinculado" com o item da tela de origem | Nada: o envio com item já existe |
 | Responder (7.5) | E-mail novo com "Re:", texto citado e aviso | Nada |
@@ -913,7 +963,7 @@ No workspace novo, o texto do próximo passo muda com o perfil:
 
 | Ponto | Front | Back |
 |---|---|---|
-| Contato da categoria (4.2) | Cartão e página no painel da categoria; "Escolher os campos de contato" no item; link em E-mails › Configurações | Guardar o contato (onde: pergunta 1) |
+| Contato da categoria (4.2) | Cartão e página no painel da categoria, com a origem do telefone e o texto pronto do WhatsApp; "Escolher os campos de contato" no item; link em E-mails › Configurações | Guardar o contato e o texto pronto (onde: pergunta 1) |
 | Vincular a item (7.4) | Campo de busca com sugestões, Trocar e remover; autocompletar do Para com contatos de outros itens | Rota de busca de item entre categorias, filtrada por permissão |
 | Aba Mensagens por pessoa e permissão (7.7) | Filtro da lista pelo que a pessoa pode ver | Lista por pessoa e permissão |
 | "De" com as caixas do workspace (4.4, 7.3, 7.7) | Lista em 2 grupos e a ajuda de para onde vão as respostas; bloco "Caixas como remetente" em E-mails › Configurações | Envio por caixa do workspace; guardar quais caixas entram no "De"; regra de quem envia por qual caixa |
@@ -964,6 +1014,11 @@ No workspace novo, o texto do próximo passo muda com o perfil:
     e-mails dos itens e os enviados pelo sistema) com ordem e paginação únicas, sem back novo? Se
     não, a saída da Fase 1 é o filtro "Do sistema" trocar a fonte da tabela (1 lista por vez), e a
     lista única fica para a Fase 2.
+15. **Telefone do membro:** o WhatsApp ao responsável da tarefa e ao participante da Agenda usa o
+    telefone do membro. O cadastro do usuário tem o campo, mas nenhuma tela deixa a pessoa
+    preenchê-lo. O perfil ganha o campo?
+16. **Máscara do telefone:** a máscara do Texto com máscara pode ser escrita à mão. O campo de
+    telefone com outra máscara, como "(##) ####-####", também conta como telefone?
 
 ## 10. O que o protótipo não faz
 

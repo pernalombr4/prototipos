@@ -1,7 +1,7 @@
 # 6. Lembrete na Agenda
 
-**Objetivo:** do evento da Agenda, a pessoa manda um lembrete por e-mail a cada pessoa do evento, ou a todas num e-mail
-só, com a data e a hora já no texto.
+**Objetivo:** do evento da Agenda, a pessoa manda um lembrete por e-mail ou pelo WhatsApp a cada pessoa do evento, ou a
+todas, num e-mail só ou numa fila de conversas, com a data e a hora já no texto.
 
 **Depende de:** 1. Compositor e Novo e-mail na barra do topo.
 
@@ -18,6 +18,7 @@ e em "Prazo: confirmar data da audiência" (prazo de tarefa).
 | RN501 | A tabela depois destas regras define quem recebe o lembrete por origem do evento e o rótulo da lista no modal. Política: Única. | Linha 2: o evento "Assinatura: Contrato de manutenção predial" lista os contatos de CTR-00231. | Obrigatório |
 | RN502 | O lembrete abre com o assunto "Lembrete: <evento> (<quando>)" e o texto com a data e a hora; na reunião do Outlook, o texto leva também o local. | "Lembrete: Alinhamento semanal do jurídico (5 de dezembro, 09:00, Reuniões do Microsoft Teams)". | Obrigatório |
 | RN503 | O lembrete do evento de data de item fica vinculado ao item (RN906). | O lembrete de "Assinatura: Contrato de manutenção predial" fica na Mail Box de CTR-00231. | Obrigatório |
+| RN504 | O lembrete pelo WhatsApp vai para o telefone de cada pessoa da lista e abre com o texto do lembrete por e-mail (RN502, RN917). O telefone vem do contato do item (RN918) ou do membro (P905). O participante da reunião do Outlook só tem e-mail e fica sem WhatsApp. | O WhatsApp para Diego Martins, no prazo de tarefa, abre com "Olá, Diego. Lembrete..."; os participantes de "Alinhamento semanal do jurídico" ficam com o WhatsApp indisponível. | Obrigatório |
 
 | Linha | Origem do evento | Quem recebe | Rótulo no modal |
 |---|---|---|---|
@@ -35,6 +36,14 @@ e em "Prazo: confirmar data da audiência" (prazo de tarefa).
 | RF504 | A seção "Enviar lembrete" deve mostrar a ajuda "O e-mail abre com data, hora e assunto preenchidos. É possível alterar o texto antes do envio.". | A ajuda aparece embaixo do botão. | Importante | Obrigatório |
 | RF505 | A pessoa sem e-mail deve aparecer na lista com "Sem e-mail cadastrado" e o botão indisponível, fora da contagem de "E-mail para todos (<N>)" (RN913). | Um contato com nome e sem e-mail aparece cinza, e o botão diz "E-mail para todos (2)". | Importante | Obrigatório |
 | RF506 | No evento de data de item, o lembrete deve abrir vinculado ao item, com o endereço do item em Cc no app (RN503, RN911). | O app abre com o endereço de CTR-00231 em Cc. | Essencial | Obrigatório |
+
+## Lembrete pelo WhatsApp (RF)
+
+| ID | Requisito | Critério de aceite | Prioridade | Relevância |
+|---|---|---|---|---|
+| RF511 | Cada pessoa da lista deve mostrar o telefone embaixo do nome e ter, ao lado do botão de e-mail, o ícone do WhatsApp com a dica "WhatsApp para <nome>", que abre a conversa com o texto do lembrete (RN504). | No prazo de tarefa, Diego Martins mostra "+55 21 99318-5520" e o ícone "WhatsApp para Diego Martins". | Essencial | Obrigatório |
+| RF512 | A pessoa sem telefone válido deve ter o ícone indisponível, com o motivo (RN921). | Em "Prazo: revisar cláusula de reajuste", Gabriela Lins mostra o ícone cinza, com "Sem telefone cadastrado". | Importante | Obrigatório |
+| RF513 | A seção "Enviar lembrete" deve ter o botão "WhatsApp para todos (<N>)", que conta só quem tem telefone válido e abre a fila "Avisar pelo WhatsApp" das tarefas (RF417 a RF419), com o lembrete de cada pessoa (RN922). Com N igual a 0, o botão fica indisponível com o motivo "Nenhuma pessoa com telefone válido.". | Em "Assinatura: Contrato de manutenção predial", o botão diz "WhatsApp para todos (1)"; na reunião do Outlook, "WhatsApp para todos (0)" fica cinza. | Essencial | Obrigatório |
 
 ## Em aberto
 

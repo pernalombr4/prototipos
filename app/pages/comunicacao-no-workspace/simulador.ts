@@ -1,8 +1,9 @@
 /**
  * ANDAIME DE PROTÓTIPO: o app de fora que o botão abre.
  *
- * No produto, o atalho só abre um link (`mailto:`, a página pública do
- * formulário, o login da Microsoft) e o resto acontece fora do ENSPACE. Aqui a
+ * No produto, o atalho só abre um link (`mailto:`, `https://wa.me/?text=`, a
+ * página pública do formulário, o login da Microsoft) e o resto acontece fora
+ * do ENSPACE. Aqui a
  * janela `_AppExterno.vue` simula esse app, para o comportamento de cada botão
  * ficar previsível. Não é proposta de tela.
  */
@@ -10,6 +11,8 @@ export type AppExterno =
   | { tipo: 'email', url: string, para: string[], cc: string[], assunto: string, corpo: string }
   | { tipo: 'formulario', url: string, formularioId: string }
   | { tipo: 'outlook', url: string }
+  /** WhatsApp: com telefone, abre a conversa com ele; sem telefone (link do formulário), a pessoa escolhe a conversa. */
+  | { tipo: 'whatsapp', url: string, texto: string, nome: string | null, telefone: string | null }
 
 export function useAppExterno() {
   const app = useState<AppExterno | null>('cnw-app-externo', () => null)

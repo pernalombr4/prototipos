@@ -2753,6 +2753,407 @@
           "css": "[role=dialog] dl"
         }
       ]
+    },
+    "RF208": {
+      "cena": "item231",
+      "passos": [
+        {
+          "clicar": "Para quem",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "regex": "^\\+55 11 3456-7710$"
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        "Este contato não tem e-mail cadastrado.",
+        "E-mail: Sem e-mail cadastrado"
+      ]
+    },
+    "RF221": {
+      "cena": "item231",
+      "passos": [
+        {
+          "clicar": "Para quem",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "regex": "^\\+55 11 3456-7710$"
+          },
+          "esperar": 800
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog]"
+      }
+    },
+    "RF222": {
+      "cena": "item231",
+      "passos": [
+        {
+          "clicar": "Para quem",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "regex": "^\\+55 11 3456-7710$"
+          },
+          "esperar": 800
+        },
+        {
+          "pairar": {
+            "texto": "WhatsApp",
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "regex": "^abre a conversa no whatsapp com o texto pronto"
+      }
+    },
+    "RF223": {
+      "cena": "item231",
+      "destacar": [
+        "Sem telefone: o WhatsApp está indisponível.",
+        "WhatsApp: Sem telefone cadastrado"
+      ]
+    },
+    "RF224": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47226; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1800
+        },
+        {
+          "clicar": "Para quem",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "regex": "^9210-8834$"
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        "Telefone inválido: o WhatsApp está indisponível.",
+        "Corrigir telefone"
+      ]
+    },
+    "RF231": {
+      "cena": "item231",
+      "passos": [
+        {
+          "pairar": "WhatsApp para Telefone do contato",
+          "esperar": 1200
+        }
+      ],
+      "destacar": "WhatsApp para Telefone do contato"
+    },
+    "RF232": {
+      "cena": "item231",
+      "passos": [
+        {
+          "clicar": "WhatsApp para Telefone do contato",
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog]"
+      }
+    },
+    "RF233": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47226; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1800
+        },
+        {
+          "pairar": "WhatsApp para Telefone do contato: Telefone inválido",
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "#campo-contato_telefone",
+        "ancestral": "div"
+      }
+    },
+    "RF306": {
+      "cena": "lista",
+      "passos": [
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tr')].find(r => r.innerText.includes('CTR-00231')); tr.querySelector('button[aria-label=\"Ações\"]').dataset.print = 'acoes231' })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=acoes231]"
+          },
+          "esperar": 700
+        },
+        {
+          "pairar": "WhatsApp",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=menu]",
+          "n": 1
+        }
+      ]
+    },
+    "RF307": {
+      "cena": "lista",
+      "passos": [
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tr')].find(r => r.innerText.includes('CTR-00226')); tr.querySelector('button[aria-label=\"Ações\"]').dataset.print = 'acoes226' })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=acoes226]"
+          },
+          "esperar": 700
+        },
+        {
+          "pairar": "WhatsApp",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "texto": "Telefone inválido"
+      }
+    },
+    "RF403": {
+      "cena": "tlista",
+      "passos": [
+        {
+          "pairar": "WhatsApp para Carla Nogueira: Sem telefone cadastrado",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "WhatsApp para Bruno Teixeira",
+          "n": 0
+        },
+        "WhatsApp para Carla Nogueira: Sem telefone cadastrado"
+      ]
+    },
+    "RF415": {
+      "cena": "tlista",
+      "passos": [
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Enviar minuta assinada\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Confirmar data da audiência\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Pedir ficha de cadastro\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "esperar": 600
+        }
+      ],
+      "destacar": "WhatsApp para 3 responsáveis"
+    },
+    "RF416": {
+      "cena": "tlista",
+      "passos": [
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Coletar aprovação do orçamento\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Conferir apólice do seguro\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "pairar": "WhatsApp para 0 responsáveis: Nenhuma pessoa com telefone válido.",
+          "esperar": 1200
+        }
+      ],
+      "destacar": "WhatsApp para 0 responsáveis: Nenhuma pessoa com telefone válido."
+    },
+    "RF417": {
+      "cena": "tlista",
+      "passos": [
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Enviar minuta assinada\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Coletar aprovação do orçamento\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Confirmar data da audiência\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "clicar": "WhatsApp para 2 responsáveis",
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "regex": "^ficam de fora, sem telefone válido"
+      }
+    },
+    "RF418": {
+      "cena": "tlista",
+      "passos": [
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Enviar minuta assinada\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Coletar aprovação do orçamento\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Confirmar data da audiência\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "clicar": "WhatsApp para 2 responsáveis",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^conversa 1 de 2$"
+        },
+        "Abrir conversa"
+      ]
+    },
+    "RF419": {
+      "cena": "tlista",
+      "passos": [
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Enviar minuta assinada\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Coletar aprovação do orçamento\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Confirmar data da audiência\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "clicar": "WhatsApp para 2 responsáveis",
+          "esperar": 1200
+        },
+        {
+          "clicar": "Próxima",
+          "esperar": 800
+        },
+        {
+          "clicar": "Abrir conversa",
+          "esperar": 1000
+        },
+        {
+          "js": "(s => { s['$scnw-app-externo'] = null })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^todas as conversas foram abertas"
+        },
+        "Fechar"
+      ]
+    },
+    "RF511": {
+      "cena": "agenda",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "prazo: confirmar data da audiência$"
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        "WhatsApp para Diego Martins",
+        {
+          "regex": "99318-5520$"
+        }
+      ]
+    },
+    "RF512": {
+      "cena": "agenda",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "prazo: revisar cláusula de reajuste$"
+          },
+          "esperar": 1000
+        },
+        {
+          "pairar": "WhatsApp para Gabriela Lins: Sem telefone cadastrado",
+          "esperar": 1200
+        }
+      ],
+      "destacar": "WhatsApp para Gabriela Lins: Sem telefone cadastrado"
+    },
+    "RF513": {
+      "cena": "agenda",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "assinatura: contrato de manutenção predial$"
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": "WhatsApp para todos (1)"
+    },
+    "RF605": {
+      "cena": "req",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog]"
+      }
+    },
+    "RF606": {
+      "cena": "req",
+      "passos": [
+        {
+          "pairar": {
+            "texto": "WhatsApp",
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "regex": "^abre o whatsapp com a mensagem e o link"
+      }
     }
   }
 }

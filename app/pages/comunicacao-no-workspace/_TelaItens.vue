@@ -6,7 +6,8 @@
  *
  * PROPOSTA:
  *  - "E-mail" no menu de cada linha e no clique direito do cartão, com os
- *    contatos do item (só e-mail: WhatsApp e SMS saíram do plano);
+ *    contatos do item, e o submenu "WhatsApp" ao lado (rodada 10; o SMS
+ *    continua fora do plano);
  *  - o botão do link público, ao lado de "Novo registro", quando a categoria
  *    tem formulário público.
  */
@@ -15,13 +16,14 @@ import type { EnKanbanCardConfig, EnKanbanColumn, EnTableColumn } from '@be-enli
 import type { Textos } from './textos'
 import { type ItemDoProtótipo, type StatusDoItem, categoriaPorSlug, itens, workspace } from './mocks'
 import { type Contato, cliqueDireitoNoCartao, contatosDoItem, useComunicacao, useMarcaDeProposta } from './estado'
-import { useAtalhos, useCopiar } from './atalhos'
+import { useAtalhos, useCopiar, useWhatsApp } from './atalhos'
 import LinksPublicos from './_LinksPublicos.vue'
 
 const props = defineProps<{ t: Textos }>()
 
 const { categoriaAtual, abrirItem, formularios, config, fase } = useComunicacao()
 const { ativos, itensDeMenu } = useAtalhos()
+const { itemDeMenu: itemDeWhatsApp } = useWhatsApp()
 const { copiar } = useCopiar()
 const marca = useMarcaDeProposta()
 const idioma = useIdioma()
@@ -97,12 +99,22 @@ const colunas = computed<EnTableColumn[]>(() => [
 
 function opcoesDeContato(i: ItemDoProtótipo): DropdownMenuItem[] {
   if (!ativos.value) return []
-  const grupos: DropdownMenuItem[][] = contatosDoItem(i, config.value).map(c => [
+  // O contato que é só um campo de telefone (Fase 1) fica só no WhatsApp.
+  const grupos: DropdownMenuItem[][] = contatosDoItem(i, config.value).filter(c => c.email || c.nome || !c.telefone).map(c => [
     { type: 'label', label: c.nome ? `${c.rotulo} · ${c.nome}` : c.rotulo },
     ...itensDeMenu(c, { item: i, origem: 'item' }),
   ])
   if (!grupos.length) grupos.push([{ label: props.t.atalho.semContato, disabled: true }])
-  return [{ label: props.t.atalho.email, icon: 'i-lucide-mail', children: grupos, class: marca.value }]
+  // WhatsApp: 1 linha por contato com telefone (telefone curto aparece com o motivo).
+  // Sem nenhum telefone, 1 linha indisponível com o motivo.
+  const comTelefone = contatosDoItem(i, config.value).filter(c => c.telefone)
+  const whatsapp: DropdownMenuItem[] = comTelefone.length
+    ? comTelefone.map(c => itemDeWhatsApp(c, { item: i }, c.nome ? `${c.rotulo} · ${c.nome}` : c.rotulo))
+    : [{ label: props.t.whatsapp.semTelefone, disabled: true }]
+  return [
+    { label: props.t.atalho.email, icon: 'i-lucide-mail', children: grupos, class: marca.value },
+    { label: props.t.whatsapp.rotulo, icon: 'i-simple-icons-whatsapp', children: [whatsapp], class: marca.value },
+  ]
 }
 
 function menuDaLinha(i: ItemDoProtótipo): DropdownMenuItem[][] {
@@ -145,7 +157,7 @@ const menuDoCartao = computed<ContextMenuItem[][]>(() => {
   const i = cartaoDoMenu.value
   if (!i) return []
   // Cópia do menu que o cartão já tem no develop (código da develop lido em 25/11/2026): Ver
-  // Detalhes, Editar, Mover para, Enviar para Lixeira e Copiar Link. A proposta soma o "E-mail".
+  // Detalhes, Editar, Mover para, Enviar para Lixeira e Copiar Link. A proposta soma o "E-mail" e o "WhatsApp".
   return [
     [{ type: 'label', label: `${i.reference} · ${i.titulo}` }],
     [
@@ -232,9 +244,9 @@ const menuDoCartao = computed<ContextMenuItem[][]>(() => {
           <UBadge :label="t.etapa[(row as Linha).etapa]" :color="corDaEtapa[(row as Linha).etapa]" variant="subtle" size="sm" />
         </template>
         <template #cell-contato="{ row }">
-          <span v-if="(row as Linha).contato?.nome || (row as Linha).contato?.email" class="block max-w-64 truncate text-sm">
+          <span v-if="(row as Linha).contato?.nome || (row as Linha).contato?.email || (row as Linha).contato?.telefone" class="block max-w-64 truncate text-sm">
             <span class="text-highlighted">{{ (row as Linha).contato?.nome ?? '' }}</span>
-            <span class="ml-1.5 text-muted">{{ (row as Linha).contato?.email ?? '' }}</span>
+            <span class="ml-1.5 text-muted">{{ (row as Linha).contato?.email ?? (row as Linha).contato?.telefone ?? '' }}</span>
           </span>
           <span v-else class="text-sm text-dimmed">{{ t.itens.semContato }}</span>
         </template>

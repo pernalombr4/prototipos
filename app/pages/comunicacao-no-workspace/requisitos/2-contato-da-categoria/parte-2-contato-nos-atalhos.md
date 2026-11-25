@@ -1,8 +1,8 @@
 # 2. O contato da categoria nos atalhos
 
-**Objetivo:** com o cartão "Contato da categoria" salvo, os atalhos de e-mail do item, da lista, do quadro, do
-compositor e da Agenda usam os contatos e o assunto da categoria. O item sem contato leva quem usa ao campo que falta
-ou ao cartão da categoria.
+**Objetivo:** com o cartão "Contato da categoria" salvo, os atalhos de e-mail e de WhatsApp do item, da lista, do
+quadro, do compositor e da Agenda usam os contatos, o assunto e o texto pronto da categoria. O item sem contato leva
+quem usa ao campo que falta ou ao cartão da categoria.
 
 **Depende de:** 1. Cartão "Contato da categoria"; o épico "Escrever e-mail de qualquer tela e central E-mails no menu" (o cartão "Contato do
 item", o submenu "E-mail", a coluna "Contato", o compositor, o lembrete da Agenda e o bloco "Contato do item" da
@@ -18,9 +18,10 @@ modal "Evento" da Agenda; a central E-mails, aba Configurações.
 
 | ID | Regra | Exemplo | Relevância |
 |---|---|---|---|
-| RN101 | Os contatos de um item são os contatos da categoria com nome ou e-mail preenchido no item, na ordem da página "Contato da categoria". | CTR-00231: "Contato da contraparte" (Marina Alves) e "Requisitante" (carla.nogueira@example.com). CTR-00224, sem contato e sem requisitante, fica sem contato. | Obrigatório |
+| RN101 | Os contatos de um item são os contatos da categoria com nome, e-mail ou telefone preenchido no item, na ordem da página "Contato da categoria". O e-mail e o telefone do mesmo contato ficam juntos. | CTR-00231: "Contato da contraparte" (Marina Alves) e "Requisitante" (carla.nogueira@example.com). CTR-00224, sem contato e sem requisitante, fica sem contato. | Obrigatório |
 | RN102 | O assunto do e-mail aberto por um atalho do item é o assunto da categoria, com as variáveis trocadas pelos valores do item e do contato escolhido (RN903). | Contratos com "{referencia} · {titulo}": CTR-00231 abre com "CTR-00231 · Contrato de manutenção predial". | Obrigatório |
 | RN103 | O assunto da categoria é sugestão: quem envia pode mudar o assunto antes de enviar. | No compositor, o assunto preenchido aceita edição. | Obrigatório |
+| RN104 | O WhatsApp aberto por um atalho do item vai para o telefone do contato escolhido e abre com o texto pronto da categoria, com as variáveis trocadas (RN903, RN905). Quem envia pode mudar o texto antes de enviar. | Contratos: o WhatsApp de CTR-00231 para Marina Alves abre com "Olá, Marina. Escrevo sobre CTR-00231 · Contrato de manutenção predial.". | Obrigatório |
 
 ## Contato do item (RF)
 
@@ -35,6 +36,15 @@ modal "Evento" da Agenda; a central E-mails, aba Configurações.
 | RF107 | O item sem contato (RN101) deve mostrar "Nenhum contato neste item", "Os campos de contato deste item estão vazios." e o botão "Escolher os campos de contato". | CTR-00224 mostra os 2 textos e o botão. | Importante | Obrigatório |
 | RF108 | "Escolher os campos de contato" deve abrir a página "Contato da categoria" da categoria do item. | Em CTR-00224, o botão abre a página de Contratos. | Importante | Obrigatório |
 
+## WhatsApp no Contato do item (RF)
+
+| ID | Requisito | Critério de aceite | Prioridade | Relevância |
+|---|---|---|---|---|
+| RF120 | O contato escolhido deve mostrar o telefone embaixo do e-mail, e o botão WhatsApp deve abrir a conversa com esse telefone e o texto pronto da categoria (RN104). | CTR-00231: Marina Alves, marina.alves@example.com e +55 11 3456-7710; o WhatsApp abre com "Olá, Marina...". | Essencial | Obrigatório |
+| RF121 | Para o contato sem telefone, o cartão deve mostrar "Sem telefone: o WhatsApp está indisponível." e, para quem tem a permissão de editar o campo de origem do telefone, o botão "Cadastrar telefone", que abre a Visão Geral com o cursor nesse campo. | CTR-00228: Otávio Rezende, com o aviso e "Cadastrar telefone", que leva a "Telefone do contato". | Importante | Obrigatório |
+| RF122 | Para o contato com telefone inválido, o cartão deve mostrar "Telefone inválido: o WhatsApp está indisponível." e "Corrigir telefone", com a mesma condição e o mesmo destino de RF121. | CTR-00226: Sérgio Batista, 9210-8834, com o aviso e "Corrigir telefone". | Importante | Obrigatório |
+| RF123 | Na Visão Geral, o campo escolhido como origem do telefone deve ter o ícone do WhatsApp, como o campo de telefone do épico "Escrever e-mail de qualquer tela e central E-mails no menu", com o texto pronto da categoria. | Em FOR-00040, "WhatsApp comercial" e "Pessoa/Empresa › Telefone de contato" abrem com o texto de Fornecedores. | Importante | Obrigatório |
+
 ## Assunto do atalho (RF)
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
@@ -46,7 +56,8 @@ modal "Evento" da Agenda; a central E-mails, aba Configurações.
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
 | RF110 | O submenu "E-mail" do menu da linha deve ter 1 grupo por contato do item (RN101), com o título "<Nome do contato na tela> · <nome>", ou só o rótulo quando o contato não tem nome. | CTR-00231: "Contato da contraparte · Marina Alves" e "Requisitante". | Essencial | Obrigatório |
-| RF111 | O clique direito no cartão do quadro deve trazer o submenu "E-mail" do menu da linha, com os grupos de RF110. | No quadro de Contratos, o clique direito em CTR-00231 mostra os 2 grupos. | Importante | Obrigatório |
+| RF111 | O clique direito no cartão do quadro deve trazer os submenus "E-mail" e "WhatsApp" do menu da linha, com os grupos de RF110 e as linhas de RF124. | No quadro de Contratos, o clique direito em CTR-00231 mostra os 2 grupos do e-mail e a linha do WhatsApp. | Importante | Obrigatório |
+| RF124 | O submenu "WhatsApp" do menu da linha deve ter 1 linha por contato do item com telefone, com o título "<Nome do contato na tela> · <nome>" e o telefone embaixo (RN104). | CTR-00231: "Contato da contraparte · Marina Alves" e "+55 11 3456-7710". | Essencial | Obrigatório |
 | RF112 | O cabeçalho da coluna "Contato" deve levar o "Nome do contato na tela" do 1º contato da categoria. | Contratos: a coluna se chama "Contato da contraparte"; Solicitações, "Quem pediu". | Importante | Obrigatório |
 | RF113 | A célula da coluna deve mostrar o nome e o e-mail que o item tem no 1º contato da categoria. | CTR-00231: Marina Alves marina.alves@example.com; CTR-00224, sem e-mail no contato: "Sem contato". | Importante | Obrigatório |
 
@@ -63,12 +74,13 @@ modal "Evento" da Agenda; a central E-mails, aba Configurações.
 |---|---|---|---|---|
 | RF116 | No modal "Evento" de uma data de item, "Contatos do item" deve listar os contatos do item (RN101), cada um com o botão "Enviar e-mail para <nome>". | Evento "Assinatura: Contrato de manutenção predial", de CTR-00231: Marina Alves e carla.nogueira@example.com. | Importante | Obrigatório |
 | RF117 | "E-mail para todos (<N>)" deve contar e pôr em Para só os contatos do item com e-mail. | Evento de CTR-00231: "E-mail para todos (2)" abre 1 e-mail com marina.alves@example.com e carla.nogueira@example.com em Para. | Importante | Obrigatório |
+| RF125 | Cada contato da lista deve ter o ícone do WhatsApp com o telefone do contato da categoria, e "WhatsApp para todos (<N>)" deve contar só os contatos com telefone válido. | Evento de CTR-00231: Marina Alves com o ícone e "WhatsApp para todos (1)". | Importante | Obrigatório |
 
 ## Central E-mails (RF)
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF118 | Para quem administra, o bloco "Contato do item" da aba Configurações deve mostrar "Defina na própria categoria os campos de nome e de e-mail do contato." e o link "Escolher o contato de cada categoria". | Perfil de quem administra, aba Configurações: o texto e o link aparecem no lugar do texto sobre os campos de e-mail. | Importante | Obrigatório |
+| RF118 | Para quem administra, o bloco "Contato do item" da aba Configurações deve mostrar "Defina na própria categoria os campos de nome, e-mail e telefone do contato." e o link "Escolher o contato de cada categoria". | Perfil de quem administra, aba Configurações: o texto e o link aparecem no lugar do texto sobre os campos de e-mail. | Importante | Obrigatório |
 | RF119 | "Escolher o contato de cada categoria" deve levar ao cartão "Contato da categoria". | No protótipo, o link abre a página de Contratos. | Importante | Obrigatório |
 
 ## Em aberto

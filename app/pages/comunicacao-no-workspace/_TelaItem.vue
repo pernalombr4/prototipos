@@ -7,18 +7,22 @@
  *  - o cartão "Contato do item" no topo do painel da esquerda, com o contato
  *    que a categoria define (a avaliar com os devs: pede uma chave nova na
  *    configuração da categoria);
- *  - o ícone de e-mail ao lado de cada campo de e-mail da Visão Geral, sem
- *    configuração nenhuma;
+ *  - o ícone de e-mail ao lado de cada campo de e-mail da Visão Geral, e o de
+ *    WhatsApp ao lado de cada campo de telefone (máscara CEL e telefone de
+ *    Pessoa/Empresa), sem configuração nenhuma;
+ *  - o botão WhatsApp no Contato do item (rodada 10), com "Cadastrar
+ *    telefone" e "Corrigir telefone" quando falta o número;
  *  - a Mail Box em todo item (`_MailBox.vue`), sem a pasta precisar ser
  *    adicionada na categoria.
  * A Visão Geral edita e o Salvar grava (em memória): é o fim da jornada de
  * "Cadastrar e-mail", e o Contato do item muda junto.
  */
 import type { Textos } from './textos'
-import { agora, campos, categoriaPorSlug, itemPorId, tarefas } from './mocks'
-import { contatosDoItem, useComunicacao, useMarcaDeProposta } from './estado'
+import { MASCARA_CEL, agora, campos, categoriaPorSlug, itemPorId, tarefas } from './mocks'
+import { contatosDoItem, numeroDoWhatsApp, useComunicacao, useMarcaDeProposta } from './estado'
 import { useAtalhos } from './atalhos'
 import AcoesDeContato from './_AcoesDeContato.vue'
+import BotaoWhatsApp from './_BotaoWhatsApp.vue'
 import MailBox from './_MailBox.vue'
 
 const props = defineProps<{ t: Textos }>()
@@ -35,16 +39,16 @@ const categoria = computed(() => item.value ? categoriaPorSlug(item.value.catego
 /* ---------- contato do item ---------- */
 
 const contatos = computed(() => item.value ? contatosDoItem(item.value, config.value) : [])
-const comDado = computed(() => contatos.value.filter(c => c.email || c.nome))
+const comDado = computed(() => contatos.value.filter(c => c.email || c.nome || c.telefone))
 const escolhido = ref<string | undefined>()
 watch(item, () => (escolhido.value = comDado.value[0]?.id), { immediate: true })
 const contato = computed(() => comDado.value.find(c => c.id === escolhido.value) ?? null)
 
 const opcoesDeContato = computed(() => comDado.value.map(c => ({
   value: c.id,
-  label: c.nome ?? c.email ?? c.rotulo,
+  label: c.nome ?? c.email ?? c.telefone ?? c.rotulo,
   description: c.rotulo,
-  avatar: { text: iniciais(c.nome ?? c.email ?? '?'), size: '2xs' as const },
+  avatar: { text: iniciais(c.nome ?? c.email ?? c.rotulo), size: '2xs' as const },
 })))
 
 function iniciais(s: string) {
@@ -58,6 +62,22 @@ const campoDoEmail = computed(() => {
   const regra = config.value.porCategoria[i.categoria].contatos.find(c => c.id === contato.value!.id)
   return regra?.campoEmail && regra.campoEmail !== 'request_email' ? regra.campoEmail : null
 })
+
+/**
+ * O campo que guarda o telefone deste contato, para "Cadastrar telefone" e
+ * "Corrigir telefone". Fase 1: o próprio campo CEL do contato. Fase 2: o campo
+ * de telefone que o cartão "Contato da categoria" escolheu.
+ */
+const campoDoTelefone = computed(() => {
+  const i = item.value
+  const c = contato.value
+  if (!i || !c) return null
+  const campo = fase.value >= 2
+    ? config.value.porCategoria[i.categoria].contatos.find(x => x.id === c.id)?.campoTelefone ?? null
+    : campos.some(x => x.categoria === i.categoria && x.refId === c.id && x.mascara === MASCARA_CEL) ? c.id : null
+  return campo && camposVisiveis.value.some(x => x.chave === campo) ? campo : null
+})
+const telefoneInvalido = computed(() => !!contato.value?.telefone && !numeroDoWhatsApp(contato.value.telefone))
 
 async function irParaCampo(campo: string) {
   abaDoItem.value = 'visao'
@@ -83,6 +103,15 @@ const abas = computed(() => [
 ])
 
 /* ---------- visão geral ---------- */
+
+/** O ícone de WhatsApp aparece nos campos Texto com máscara CEL e no telefone de Pessoa/Empresa. */
+function ehTelefone(chave: string) {
+  const i = item.value
+  if (!i) return false
+  const [raiz, sub] = chave.split('.') as [string, string | undefined]
+  const campo = campos.find(c => c.categoria === i.categoria && c.refId === raiz)
+  return sub ? sub === 'contact_phone' : campo?.type === 'EnlMask' && campo.mascara === MASCARA_CEL
+}
 
 /** O tipo de cada campo: o ícone de e-mail aparece nos campos E-mail e no e-mail de Pessoa/Empresa. */
 function ehEmail(chave: string) {
@@ -181,9 +210,9 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
               :aria-label="t.item.paraQuem"
             />
             <div v-else-if="contato" class="flex items-center gap-2">
-              <UAvatar :text="iniciais(contato.nome ?? contato.email ?? '?')" size="xs" />
+              <UAvatar :text="iniciais(contato.nome ?? contato.email ?? contato.rotulo)" size="xs" />
               <span class="min-w-0">
-                <span class="block truncate text-sm font-medium text-highlighted">{{ contato.nome ?? contato.email }}</span>
+                <span class="block truncate text-sm font-medium text-highlighted">{{ contato.nome ?? contato.email ?? contato.telefone }}</span>
                 <span class="block truncate text-xs text-muted">{{ contato.rotulo }}</span>
               </span>
             </div>
@@ -191,8 +220,14 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
             <p v-if="contato?.email" class="mt-1.5 truncate px-1 text-xs text-muted">
               {{ contato.nome ? contato.email : contato.rotulo }}
             </p>
+            <p v-if="contato?.telefone && (contato.nome || contato.email)" class="mt-0.5 truncate px-1 text-xs text-muted">
+              {{ contato.telefone }}
+            </p>
+            <p v-else-if="contato?.telefone" class="mt-1.5 truncate px-1 text-xs text-muted">
+              {{ contato.rotulo }}
+            </p>
             <!-- O motivo à vista: botão indisponível não mostra tooltip a quem usa teclado. -->
-            <div v-else-if="contato" class="mt-1.5 flex flex-wrap items-center gap-x-1 px-1 text-xs text-warning">
+            <div v-if="contato && !contato.email" class="mt-1.5 flex flex-wrap items-center gap-x-1 px-1 text-xs text-warning">
               <UIcon name="i-lucide-info" class="size-3.5 shrink-0" />
               {{ t.item.semEmailAviso }}
               <UButton
@@ -205,6 +240,20 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
                 @click="irParaCampo(campoDoEmail)"
               />
             </div>
+            <!-- O motivo do WhatsApp à vista, com o caminho para o campo. -->
+            <div v-if="contato && (!contato.telefone || telefoneInvalido)" class="mt-1 flex flex-wrap items-center gap-x-1 px-1 text-xs text-warning">
+              <UIcon name="i-lucide-info" class="size-3.5 shrink-0" />
+              {{ telefoneInvalido ? t.whatsapp.telefoneInvalidoAviso : t.whatsapp.semTelefoneAviso }}
+              <UButton
+                v-if="campoDoTelefone"
+                :label="telefoneInvalido ? t.whatsapp.corrigirTelefone : t.whatsapp.cadastrarTelefone"
+                color="primary"
+                variant="link"
+                size="xs"
+                class="p-0"
+                @click="irParaCampo(campoDoTelefone)"
+              />
+            </div>
             <AcoesDeContato
               :t="t"
               :destino="contato"
@@ -212,6 +261,14 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
               tamanho="sm"
               bloco
               class="mt-3"
+            />
+            <BotaoWhatsApp
+              :t="t"
+              :destino="contato"
+              :item="item"
+              tamanho="sm"
+              bloco
+              class="mt-2"
             />
             <p class="mt-2 text-xs leading-relaxed text-muted">
               {{ podeEnviar ? t.item.ajudaComEnspace(item.reference) : t.item.ajudaSemEnspace }}
@@ -315,7 +372,7 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
       <!-- Visão geral (cópia) -->
       <div v-if="abaDoItem === 'visao'" class="grid max-w-3xl gap-4 p-5 animate-[entrada_.25s_ease-out]">
         <UFormField v-for="c in camposVisiveis" :key="c.chave" :label="c.rotulo">
-          <UInput :id="`campo-${c.chave}`" v-model="edicao[c.chave]" class="w-full" :ui="ehEmail(c.chave) && ativos ? { trailing: 'pe-1' } : undefined">
+          <UInput :id="`campo-${c.chave}`" v-model="edicao[c.chave]" class="w-full" :ui="(ehEmail(c.chave) || ehTelefone(c.chave)) && ativos ? { trailing: 'pe-1' } : undefined">
             <!-- PROPOSTA: o e-mail ao lado do próprio campo -->
             <template v-if="ehEmail(c.chave) && ativos" #trailing>
               <AcoesDeContato
@@ -325,6 +382,18 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
                 variante="icone"
                 tamanho="xs"
                 :rotulo="t.item.emailPara(c.rotulo)"
+                :class="marca"
+              />
+            </template>
+            <!-- PROPOSTA: o WhatsApp ao lado do próprio campo de telefone -->
+            <template v-else-if="ehTelefone(c.chave) && ativos" #trailing>
+              <BotaoWhatsApp
+                :t="t"
+                :destino="{ nome: null, telefone: edicao[c.chave] || null }"
+                :item="item"
+                variante="icone"
+                tamanho="xs"
+                :rotulo="t.whatsapp.para(c.rotulo)"
                 :class="marca"
               />
             </template>

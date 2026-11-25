@@ -10,9 +10,11 @@
  */
 import type { Textos } from './textos'
 import { type EventoDaAgenda, HOJE, eventos, itemPorId } from './mocks'
-import { contatosDoItem, useComunicacao, useMarcaDeProposta } from './estado'
-import { useAtalhos } from './atalhos'
+import { contatosDoItem, numeroDoWhatsApp, useComunicacao, useMarcaDeProposta } from './estado'
+import { type PessoaDaFila, useAtalhos } from './atalhos'
 import AcoesDeContato from './_AcoesDeContato.vue'
+import BotaoWhatsApp from './_BotaoWhatsApp.vue'
+import FilaDoWhatsApp from './_FilaDoWhatsApp.vue'
 
 const props = defineProps<{ t: Textos }>()
 
@@ -57,10 +59,10 @@ const pessoas = computed(() => {
   if (!e) return []
   if (e.fonte === 'item' && itemDoEvento.value) {
     return contatosDoItem(itemDoEvento.value, config.value)
-      .filter(c => c.email || c.nome)
-      .map(c => ({ nome: c.nome ?? undefined, email: c.email ?? undefined }))
+      .filter(c => c.email || c.nome || c.telefone)
+      .map(c => ({ nome: c.nome ?? undefined, email: c.email ?? undefined, telefone: c.telefone, rotulo: c.rotulo }))
   }
-  return e.participantes.map(p => ({ nome: p.nome, email: p.email }))
+  return e.participantes.map(p => ({ nome: p.nome, email: p.email, telefone: p.telefone ?? null, rotulo: undefined as string | undefined }))
 })
 const comEmail = computed(() => pessoas.value.filter(p => p.email).map(p => ({ nome: p.nome ?? null, email: p.email ?? null })))
 
@@ -72,8 +74,23 @@ function textosDoLembrete(e: EventoDaAgenda, nome?: string) {
   }
 }
 
-function iniciais(p: { nome?: string, email?: string }) {
-  const base = p.nome ?? p.email ?? '?'
+/** WhatsApp para todos: a fila, 1 conversa por pessoa, com o lembrete no nome dela. */
+const filaAberta = ref(false)
+const pessoasDaFila = computed<PessoaDaFila[]>(() => {
+  const e = aberto.value
+  if (!e) return []
+  return pessoas.value.map((p, i) => ({
+    id: i,
+    nome: p.nome ?? p.rotulo ?? p.telefone ?? p.email ?? '',
+    telefone: p.telefone,
+    texto: textosDoLembrete(e, p.nome).corpo,
+  }))
+})
+
+const comTelefone = computed(() => pessoasDaFila.value.filter(p => numeroDoWhatsApp(p.telefone)).length)
+
+function iniciais(p: { nome?: string, email?: string, telefone?: string | null, rotulo?: string }) {
+  const base = p.nome ?? p.email ?? p.rotulo ?? p.telefone ?? '?'
   return base.split(/[\s.@]/).filter(Boolean).slice(0, 2).map(x => x[0]!.toUpperCase()).join('')
 }
 </script>
@@ -180,8 +197,8 @@ function iniciais(p: { nome?: string, email?: string }) {
               <li v-for="(p, i) in pessoas" :key="i" class="flex items-center gap-3">
                 <UAvatar :text="iniciais(p)" size="xs" />
                 <span class="min-w-0 flex-1">
-                  <span class="block truncate text-sm text-highlighted">{{ p.nome ?? p.email }}</span>
-                  <span v-if="p.nome" class="block truncate text-xs text-muted">{{ p.email ?? t.atalho.semEmail }}</span>
+                  <span class="block truncate text-sm text-highlighted">{{ p.nome ?? p.email ?? p.rotulo }}</span>
+                  <span v-if="p.nome || !p.email" class="block truncate text-xs text-muted">{{ [p.nome ? (p.email ?? t.atalho.semEmail) : null, p.telefone].filter(Boolean).join(' · ') }}</span>
                 </span>
                 <!-- PROPOSTA: atalho por participante -->
                 <AcoesDeContato
@@ -194,6 +211,15 @@ function iniciais(p: { nome?: string, email?: string }) {
                   :rotulo="t.agenda.emailPara(p.nome ?? p.email ?? '')"
                   :class="marca"
                   v-bind="textosDoLembrete(aberto, p.nome)"
+                />
+                <BotaoWhatsApp
+                  :t="t"
+                  :destino="{ nome: p.nome ?? null, telefone: p.telefone }"
+                  :texto="textosDoLembrete(aberto, p.nome).corpo"
+                  variante="icone"
+                  tamanho="xs"
+                  :rotulo="t.whatsapp.para(p.nome ?? p.rotulo ?? p.telefone ?? '')"
+                  :class="marca"
                 />
               </li>
             </ul>
@@ -215,6 +241,20 @@ function iniciais(p: { nome?: string, email?: string }) {
                 origem="barra"
                 v-bind="textosDoLembrete(aberto)"
               />
+              <!-- Indisponível com aria-disabled: continua no Tab, com o motivo na dica e no nome. -->
+              <UTooltip :text="comTelefone ? t.whatsapp.filaDescricao : t.whatsapp.ninguem">
+                <UButton
+                  icon="i-simple-icons-whatsapp"
+                  :label="t.whatsapp.paraTodos(comTelefone)"
+                  color="neutral"
+                  variant="outline"
+                  size="sm"
+                  :aria-disabled="comTelefone ? undefined : 'true'"
+                  :aria-label="comTelefone ? undefined : `${t.whatsapp.paraTodos(0)}: ${t.whatsapp.ninguem}`"
+                  :class="comTelefone ? '' : 'cursor-not-allowed opacity-50'"
+                  @click="comTelefone && (filaAberta = true)"
+                />
+              </UTooltip>
             </div>
             <p class="mt-2 text-xs text-muted">
               {{ t.agenda.ajudaDoLembrete }}
@@ -223,5 +263,8 @@ function iniciais(p: { nome?: string, email?: string }) {
         </div>
       </template>
     </UModal>
+
+    <!-- PROPOSTA: WhatsApp para todos vira fila (o wa.me abre 1 número por vez) -->
+    <FilaDoWhatsApp v-model:open="filaAberta" :t="t" :pessoas="pessoasDaFila" />
   </div>
 </template>

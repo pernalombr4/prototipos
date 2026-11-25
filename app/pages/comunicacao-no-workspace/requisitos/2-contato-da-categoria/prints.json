@@ -129,6 +129,36 @@
         "js": "(s => { s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"configuracoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
         "esperar": 1500
       }
+    ],
+    "item228": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47228; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1800
+      }
+    ],
+    "item226": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47226; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1800
+      }
+    ],
+    "item40": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-categoria'] = \"fornecedores\"; s['$scnw-item'] = 61000; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1800
+      }
     ]
   },
   "requisitos": {
@@ -667,6 +697,147 @@
         }
       ],
       "destacar": "· Contato da categoria"
+    },
+    "RF021": {
+      "cena": "fornecedores",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "telefone de contato$"
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF022": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim() === 'Texto pronto do WhatsApp'); h.closest('.divide-y').dataset.print = 'cartaowa'; h.closest('.divide-y').scrollIntoView({ block: 'center' }) })()",
+          "esperar": 500
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=cartaowa]"
+      }
+    },
+    "RF023": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim() === 'Texto pronto do WhatsApp'); h.closest('.divide-y').dataset.print = 'cartaowa'; h.closest('.divide-y').scrollIntoView({ block: 'center' }) })()",
+          "esperar": 500
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "{referencia}",
+          "n": 1
+        },
+        {
+          "texto": "{titulo}",
+          "n": 1
+        },
+        {
+          "texto": "{nome}",
+          "n": 1
+        },
+        {
+          "texto": "{categoria}",
+          "n": 1
+        }
+      ]
+    },
+    "RF024": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim().startsWith('Prévia')); const box = h.closest('aside'); box.querySelectorAll('.flex.flex-col.gap-4 > div').forEach((b, i) => { const dls = b.querySelectorAll('dl'); if (dls[1]) dls[1].dataset.print = 'wa' + i }) })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=wa0]"
+      }
+    },
+    "RF025": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim().startsWith('Prévia')); const box = h.closest('aside'); box.querySelectorAll('.flex.flex-col.gap-4 > div').forEach((b, i) => { const dls = b.querySelectorAll('dl'); if (dls[1]) dls[1].dataset.print = 'wa' + i }) })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "texto": "Sem telefone cadastrado",
+        "n": 0
+      }
+    },
+    "RF120": {
+      "cena": "item231",
+      "destacar": [
+        {
+          "regex": "^\\+55 11 3456-7710$",
+          "n": 0
+        },
+        {
+          "texto": "WhatsApp",
+          "n": 0
+        }
+      ]
+    },
+    "RF121": {
+      "cena": "item228",
+      "destacar": [
+        "Sem telefone: o WhatsApp está indisponível.",
+        "Cadastrar telefone"
+      ]
+    },
+    "RF122": {
+      "cena": "item226",
+      "destacar": [
+        "Telefone inválido: o WhatsApp está indisponível.",
+        "Corrigir telefone"
+      ]
+    },
+    "RF123": {
+      "cena": "item40",
+      "destacar": "WhatsApp para WhatsApp comercial"
+    },
+    "RF124": {
+      "cena": "lista",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Ações",
+            "n": 0
+          },
+          "esperar": 700
+        },
+        {
+          "pairar": {
+            "css": "[role=menu] [role=menuitem]",
+            "n": 5
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=menu]",
+          "n": 1
+        }
+      ]
+    },
+    "RF125": {
+      "cena": "agenda",
+      "destacar": [
+        "WhatsApp para Marina Alves",
+        "WhatsApp para todos (1)"
+      ]
     }
   }
 }

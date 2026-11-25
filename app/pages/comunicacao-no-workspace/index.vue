@@ -4,7 +4,7 @@
  * protótipo só, porque as 3 mexem nas mesmas telas e no mesmo botão de e-mail.
  *
  *   1. link do formulário público nas telas de uso;
- *   2. atalhos de e-mail (só e-mail: WhatsApp e SMS saíram do plano);
+ *   2. atalhos de e-mail e WhatsApp (o SMS saiu do plano na rodada 6; o WhatsApp voltou na 10);
  *   3. o e-mail do ENSPACE de qualquer tela, com vínculo a item, e a central
  *      "E-mails" no menu, que reúne mensagens, modelos, caixas, envios do
  *      sistema e a configuração (rodada 7: o e-mail não é módulo).

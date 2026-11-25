@@ -16,9 +16,11 @@ import type { ContextMenuItem } from '@nuxt/ui'
 import type { EnKanbanCardConfig, EnKanbanColumn, EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import type { Textos } from './textos'
 import { HOJE, type MembroDoProtótipo, TIPOS_COM_LINK, type TarefaDoProtótipo, categoriaPorSlug, itemPorId, membroPorId, tarefas } from './mocks'
-import { cliqueDireitoNoCartao, useComunicacao, useMarcaDeProposta } from './estado'
-import { useAtalhos } from './atalhos'
+import { cliqueDireitoNoCartao, numeroDoWhatsApp, useComunicacao, useMarcaDeProposta } from './estado'
+import { type PessoaDaFila, useAtalhos, useWhatsApp } from './atalhos'
 import AcoesDeContato from './_AcoesDeContato.vue'
+import BotaoWhatsApp from './_BotaoWhatsApp.vue'
+import FilaDoWhatsApp from './_FilaDoWhatsApp.vue'
 import CompartilharFormulario from './_CompartilharFormulario.vue'
 import MailBox from './_MailBox.vue'
 
@@ -26,6 +28,7 @@ const props = defineProps<{ t: Textos }>()
 
 const { abrirItem, formularios, fase, tarefaAberta, emails, registrado } = useComunicacao()
 const { ativos, itensDeMenu } = useAtalhos()
+const { itemDeMenu: itemDeWhatsApp } = useWhatsApp()
 const marca = useMarcaDeProposta()
 const idioma = useIdioma()
 
@@ -46,6 +49,11 @@ function textosDoAviso(x: TarefaDoProtótipo, m: MembroDoProtótipo | null) {
     assunto: props.t.tarefas.assuntoDoAviso(x.name, prazo),
     corpo: props.t.tarefas.mensagemDoAviso(m?.nome.split(' ')[0] ?? '', x.name, prazo),
   }
+}
+
+/** O texto pronto do WhatsApp ao responsável: o mesmo texto do e-mail. */
+function textoDoWhatsApp(x: TarefaDoProtótipo, m: MembroDoProtótipo | null) {
+  return textosDoAviso(x, m).corpo
 }
 
 function tarefaDoVinculo(x: TarefaDoProtótipo) {
@@ -128,7 +136,9 @@ function avisos(x: TarefaDoProtótipo): ContextMenuItem[] {
     disabled: !m,
     class: marca.value,
     children: m ? itensDeMenu(m, { item: itemPorId(x.item), ...textosDoAviso(x, m), origem: 'tarefa', tarefaId: tarefaDoVinculo(x) }) as ContextMenuItem[] : [],
-  }]
+  }, m
+    ? { ...itemDeWhatsApp(m, { texto: textoDoWhatsApp(x, m) }, props.t.whatsapp.para(m.nome)), class: marca.value } as ContextMenuItem
+    : { label: props.t.whatsapp.rotulo, icon: 'i-simple-icons-whatsapp', description: props.t.tarefas.semResponsavel, disabled: true, class: marca.value }]
 }
 
 const menuDoCartao = computed<ContextMenuItem[][]>(() => {
@@ -179,6 +189,16 @@ const responsaveis = computed(() => {
   return [...vistos.values()]
 })
 const semResponsavel = computed(() => selecionadas.value.filter(l => !l.responsavel).length)
+
+/** Quantos responsáveis têm telefone válido: é o número do botão. */
+const comTelefone = computed(() => responsaveis.value.filter(m => numeroDoWhatsApp(m.telefone)).length)
+
+/** WhatsApp em lote: a fila, 1 conversa por responsável, com o texto da tarefa dele. */
+const filaAberta = ref(false)
+const pessoasDaFila = computed<PessoaDaFila[]>(() => responsaveis.value.map((m) => {
+  const tarefa = selecionadas.value.find(l => l.responsavel?.id === m.id)!.tarefa
+  return { id: m.id, nome: m.nome, telefone: m.telefone, texto: textoDoWhatsApp(tarefa, m) }
+}))
 </script>
 
 <template>
@@ -259,6 +279,20 @@ const semResponsavel = computed(() => selecionadas.value.filter(l => !l.responsa
             tamanho="xs"
             origem="tarefa"
           />
+          <!-- Indisponível com aria-disabled: continua no Tab, com o motivo na dica e no nome. -->
+          <UTooltip :text="comTelefone ? t.whatsapp.filaDescricao : t.whatsapp.ninguem">
+            <UButton
+              icon="i-simple-icons-whatsapp"
+              :label="t.whatsapp.paraResponsaveis(comTelefone)"
+              color="neutral"
+              variant="outline"
+              size="xs"
+              :aria-disabled="comTelefone ? undefined : 'true'"
+              :aria-label="comTelefone ? undefined : `${t.whatsapp.paraResponsaveis(0)}: ${t.whatsapp.ninguem}`"
+              :class="comTelefone ? '' : 'cursor-not-allowed opacity-50'"
+              @click="comTelefone && (filaAberta = true)"
+            />
+          </UTooltip>
           <span class="basis-full text-xs text-muted">
             {{ semResponsavel ? `${t.tarefas.ajudaDoLote} ${t.tarefas.foraDoLote(semResponsavel)}` : t.tarefas.ajudaDoLote }}
           </span>
@@ -296,7 +330,7 @@ const semResponsavel = computed(() => selecionadas.value.filter(l => !l.responsa
           <span v-else class="text-sm text-dimmed">{{ t.tarefas.semResponsavel }}</span>
         </template>
         <template #cell-contato="{ row }">
-          <div :class="marca" @click.stop>
+          <div class="flex items-center" :class="marca" @click.stop>
             <AcoesDeContato
               :t="t"
               :destino="(row as Linha).responsavel"
@@ -307,6 +341,14 @@ const semResponsavel = computed(() => selecionadas.value.filter(l => !l.responsa
               :tarefa-id="tarefaDoVinculo((row as Linha).tarefa)"
               :rotulo="(row as Linha).responsavel ? t.tarefas.emailPara((row as Linha).responsavel!.nome) : undefined"
               v-bind="textosDoAviso((row as Linha).tarefa, (row as Linha).responsavel)"
+            />
+            <BotaoWhatsApp
+              :t="t"
+              :destino="(row as Linha).responsavel"
+              :texto="textoDoWhatsApp((row as Linha).tarefa, (row as Linha).responsavel)"
+              variante="icone"
+              tamanho="xs"
+              :rotulo="(row as Linha).responsavel ? t.whatsapp.para((row as Linha).responsavel!.nome) : undefined"
             />
           </div>
         </template>
@@ -386,16 +428,23 @@ const semResponsavel = computed(() => selecionadas.value.filter(l => !l.responsa
               <h3 class="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
                 {{ t.tarefas.responsavel }}
               </h3>
-              <AcoesDeContato
-                v-if="responsavelDaAberta"
-                :t="t"
-                :destino="responsavelDaAberta"
-                :item="itemDaAberta"
-                origem="tarefa"
-                :tarefa-id="tarefaDoVinculo(aberta)"
-                :rotulo="t.tarefas.emailPara(responsavelDaAberta.nome)"
-                v-bind="textosDoAviso(aberta, responsavelDaAberta)"
-              />
+              <div v-if="responsavelDaAberta" class="flex flex-wrap items-center gap-2">
+                <AcoesDeContato
+                  :t="t"
+                  :destino="responsavelDaAberta"
+                  :item="itemDaAberta"
+                  origem="tarefa"
+                  :tarefa-id="tarefaDoVinculo(aberta)"
+                  :rotulo="t.tarefas.emailPara(responsavelDaAberta.nome)"
+                  v-bind="textosDoAviso(aberta, responsavelDaAberta)"
+                />
+                <BotaoWhatsApp
+                  :t="t"
+                  :destino="responsavelDaAberta"
+                  :texto="textoDoWhatsApp(aberta, responsavelDaAberta)"
+                  :rotulo="t.whatsapp.para(responsavelDaAberta.nome)"
+                />
+              </div>
               <p v-else class="text-sm text-muted">
                 {{ t.tarefas.semResponsavelDica }}
               </p>
@@ -423,5 +472,8 @@ const semResponsavel = computed(() => selecionadas.value.filter(l => !l.responsa
         </div>
       </template>
     </USlideover>
+
+    <!-- PROPOSTA: WhatsApp em lote vira fila (o wa.me abre 1 número por vez) -->
+    <FilaDoWhatsApp v-model:open="filaAberta" :t="t" :pessoas="pessoasDaFila" />
   </div>
 </template>

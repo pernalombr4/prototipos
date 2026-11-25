@@ -1,7 +1,7 @@
 # 7. Link de formulário público
 
-**Objetivo:** a pessoa copia ou envia o link do formulário público onde o formulário está em uso, sem ir à configuração
-da categoria.
+**Objetivo:** a pessoa copia ou envia o link do formulário público, por e-mail ou pelo WhatsApp, onde o formulário está
+em uso, sem ir à configuração da categoria.
 
 **Depende de:** 1. Compositor e Novo e-mail na barra do topo.
 
@@ -27,6 +27,8 @@ formulário público e um privado; na lista de Contratos, abra "Link de formulá
 | RF602 | "Abrir numa nova aba" deve abrir a página pública do formulário numa aba nova. | A aba nova mostra o formulário sem login. | Importante | Obrigatório |
 | RF603 | "Enviar o link por" deve oferecer os 2 caminhos do atalho, sem item vinculado e com o Para em branco (RN909, RN910). | O compositor abre com o Para vazio; o app abre sem Cc. | Essencial | Obrigatório |
 | RF604 | O e-mail do link deve abrir com o assunto "Formulário: <nome>" e o texto "Para preencher o formulário "<nome>", use este link: <link>". | "Formulário: Nova solicitação", com o link no texto. | Importante | Obrigatório |
+| RF605 | "Enviar o link por" deve ter também o WhatsApp, que abre o WhatsApp sem número, com o texto "Para preencher o formulário "<nome>", use este link: <link>": a pessoa escolhe a conversa ou o grupo e envia (RN917). | Em Requisições, o WhatsApp abre `https://wa.me/?text=` com o texto e o link de "Solicitação jurídica". | Essencial | Obrigatório |
+| RF606 | A dica do WhatsApp deve dizer "Abre o WhatsApp com a mensagem e o link. Escolha a conversa e envie.". | A dica aparece no botão de Requisições e no item do menu da lista de itens. | Importante | Obrigatório |
 
 ## Onde o link aparece (RF)
 
@@ -34,7 +36,7 @@ formulário público e um privado; na lista de Contratos, abra "Link de formulá
 |---|---|---|---|---|
 | RF611 | Em Requisições, com um formulário público escolhido (RN601), o cartão "Compartilhar este formulário" deve aparecer entre o seletor e o formulário, com o link, "Copiar link", "Abrir numa nova aba" e "Enviar o link por". | Escolher "Solicitação jurídica" mostra o cartão acima dos campos. | Essencial | Obrigatório |
 | RF612 | Em Requisições, com um formulário privado escolhido, a tela deve mostrar a linha "Formulário privado: só membros do workspace respondem. Por isso não tem link para enviar." no lugar do cartão. | Escolher "Pedido de orçamento" mostra a linha, sem o cartão. | Importante | Obrigatório |
-| RF613 | A lista de itens deve ter o botão "Link de formulário público" ao lado de "Novo registro", com os formulários públicos da categoria (RN601), cada um com copiar e enviar. | Em Solicitações, o menu lista "Nova solicitação" com os botões de copiar e de enviar. | Essencial | Obrigatório |
+| RF613 | A lista de itens deve ter o botão "Link de formulário público" ao lado de "Novo registro", com os formulários públicos da categoria (RN601), cada um com copiar e enviar por e-mail e por WhatsApp. | Em Solicitações, o menu lista "Nova solicitação" com copiar, e-mail e WhatsApp. | Essencial | Obrigatório |
 | RF614 | Na categoria sem formulário público, o menu do botão deve mostrar "Nenhum formulário público", a explicação e "Ver formulários", que abre os Formulários da categoria. | Em Contratos, sem formulário público, o menu mostra o vazio e "Ver formulários". | Importante | Obrigatório |
 | RF615 | O painel da tarefa de formulário com formulário público deve mostrar o cartão "Compartilhar este formulário" e a linha "A resposta pelo link cria um item novo em <categoria>. Esta tarefa continua aberta até você concluí-la." (RN603). | T-1049 mostra o cartão e a linha com "Solicitações". | Essencial | Obrigatório |
 | RF616 | O menu da linha dos Formulários da categoria deve ganhar "Tornar público" no formulário privado e "Tornar privado" no público, que mudam a visibilidade como o Editar › Visibilidade de hoje. | "Tornar privado" em "Nova solicitação" deixa o formulário privado, e o link some de Requisições. | Importante | Obrigatório |

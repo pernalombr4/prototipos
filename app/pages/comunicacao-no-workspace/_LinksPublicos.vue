@@ -7,7 +7,7 @@ import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Formulario, SlugDaCategoria } from './mocks'
 import type { Textos } from './textos'
 import { TIPOS_COM_LINK, categoriaPorSlug, linkPublico } from './mocks'
-import { useAtalhos, useCopiar } from './atalhos'
+import { useAtalhos, useCopiar, useWhatsApp } from './atalhos'
 import { useComunicacao, useMarcaDeProposta } from './estado'
 
 const props = defineProps<{
@@ -21,6 +21,7 @@ const props = defineProps<{
 const { formularios, ir } = useComunicacao()
 const { ativos, itensDeMenu, config } = useAtalhos()
 const { copiar, copiado } = useCopiar()
+const { abrirWhatsApp } = useWhatsApp()
 const marca = useMarcaDeProposta()
 
 const publicos = computed(() => formularios.value.filter(f =>
@@ -31,6 +32,13 @@ function menuDeEnvio(f: Formulario): DropdownMenuItem[][] {
   return [
     [{ type: 'label', label: props.t.form.enviarLinkPor }],
     itensDeMenu(null, { assunto: props.t.form.assuntoDoLink(f.nome), corpo: props.t.form.mensagemDoLink(f.nome, url), semDestinatario: true, origem: 'inicio' }),
+    [{
+      label: props.t.form.whatsapp,
+      description: props.t.form.whatsappDica,
+      icon: 'i-simple-icons-whatsapp',
+      ui: { itemDescription: 'whitespace-normal' },
+      onSelect: () => abrirWhatsApp(props.t.form.mensagemDoLink(f.nome, url)),
+    }],
   ]
 }
 </script>
@@ -89,7 +97,7 @@ function menuDeEnvio(f: Formulario): DropdownMenuItem[][] {
                 @click="copiar(f.id, linkPublico(f), f.nome)"
               />
             </UTooltip>
-            <UDropdownMenu v-if="ativos" :items="menuDeEnvio(f)" :content="{ align: 'end' }">
+            <UDropdownMenu v-if="ativos" :items="menuDeEnvio(f)" :content="{ align: 'end' }" :ui="{ content: 'w-72' }">
               <UButton icon="i-lucide-send" color="neutral" variant="ghost" size="sm" :aria-label="`${t.form.enviarLinkPor}: ${f.nome}`" />
             </UDropdownMenu>
           </li>

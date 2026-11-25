@@ -148,6 +148,8 @@ export interface Textos {
     enviarLinkPor: string
     assuntoDoLink: (nome: string) => string
     mensagemDoLink: (nome: string, url: string) => string
+    whatsapp: string
+    whatsappDica: string
     linkCopiado: string
     linkDeFormulario: string
     copiarLinkPublico: string
@@ -449,10 +451,37 @@ export interface Textos {
     avaliarComDevs: string
     assuntoDica: string
   }
+  whatsapp: {
+    rotulo: string
+    para: (nome: string) => string
+    dica: string
+    semTelefone: string
+    telefoneInvalido: string
+    semTelefoneAviso: string
+    telefoneInvalidoAviso: string
+    cadastrarTelefone: string
+    corrigirTelefone: string
+    paraResponsaveis: (n: number) => string
+    paraTodos: (n: number) => string
+    filaTitulo: string
+    filaDescricao: string
+    foraSemTelefone: (nomes: string) => string
+    progresso: (i: number, n: number) => string
+    abrirConversa: string
+    aberta: string
+    proxima: string
+    concluido: string
+    fechar: string
+    ninguem: string
+    campoTelefone: string
+    mensagem: string
+    mensagemDica: string
+    previa: string
+  }
   simulador: {
     selo: string
-    titulo: Record<'email' | 'formulario' | 'outlook', string>
-    noProduto: Record<'email' | 'formulario' | 'outlook', string>
+    titulo: Record<'email' | 'formulario' | 'outlook' | 'whatsapp', string>
+    noProduto: Record<'email' | 'formulario' | 'outlook' | 'whatsapp', string>
     voltar: string
     enviar: string
     descartar: string
@@ -481,6 +510,12 @@ export interface Textos {
     aceitar: string
     integrado: string
     integradoDescricao: string
+    escolhaAConversa: string
+    buscarConversa: string
+    nenhumaConversa: string
+    digiteMensagem: string
+    trocarConversa: string
+    naoRegistra: string
   }
   andaime: {
     prototipo: string
@@ -624,7 +659,7 @@ const ptBR: Textos = {
     copiarLinkExterno: 'Copiar Link Externo',
     contatar: 'Contatar',
     semContato: 'Sem contato',
-    dicaDoQuadro: 'Clique com o botão direito num cartão para enviar e-mail ao contato.',
+    dicaDoQuadro: 'Clique com o botão direito num cartão para enviar e-mail ou WhatsApp ao contato.',
   },
   item: {
     paraQuem: 'Para quem',
@@ -697,6 +732,8 @@ const ptBR: Textos = {
     enviarLinkPor: 'Enviar o link por',
     assuntoDoLink: nome => `Formulário: ${nome}`,
     mensagemDoLink: (nome, url) => `Para preencher o formulário "${nome}", use este link: ${url}`,
+    whatsapp: 'WhatsApp',
+    whatsappDica: 'Abre o WhatsApp com a mensagem e o link. Escolha a conversa e envie.',
     linkCopiado: 'Link copiado',
     linkDeFormulario: 'Link de formulário público',
     copiarLinkPublico: 'Copiar link de formulário público',
@@ -729,7 +766,7 @@ const ptBR: Textos = {
     selecionadas: n => plural(n, 'tarefa selecionada', 'tarefas selecionadas'),
     ajudaDoLote: 'Abre 1 e-mail com todos os responsáveis em Para.',
     foraDoLote: n => n === 1 ? '1 tarefa sem responsável fica de fora.' : `${n} tarefas sem responsável ficam de fora.`,
-    dicaDoQuadro: 'Clique no cartão para abrir a tarefa. Com o botão direito, envie e-mail ao responsável.',
+    dicaDoQuadro: 'Clique no cartão para abrir a tarefa. Com o botão direito, envie e-mail ou WhatsApp ao responsável.',
     respostaCriaItem: categoria => `A resposta pelo link cria um item novo em ${categoria}. Esta tarefa continua aberta até você concluí-la.`,
     assuntoDoAviso: (tarefa, prazo) => prazo ? `Tarefa: ${tarefa} (prazo ${prazo})` : `Tarefa: ${tarefa}`,
     mensagemDoAviso: (nome, tarefa, prazo) => `${nome ? `Olá, ${nome}.` : 'Olá.'} Lembrete da tarefa "${tarefa}"${prazo ? `, prazo ${prazo}` : ''}${prazo?.endsWith('.') ? '' : '.'}`,
@@ -924,7 +961,7 @@ const ptBR: Textos = {
       abrirIntegracoes: 'Abrir Integrações',
       contatoTitulo: 'Contato do item',
       contatoPelosCampos: 'O contato de cada item vem dos campos de e-mail que a categoria já tem e do e-mail de quem abriu a requisição.',
-      contatoNaCategoria: 'Defina na própria categoria os campos de nome e de e-mail do contato.',
+      contatoNaCategoria: 'Defina na própria categoria os campos de nome, e-mail e telefone do contato.',
       irParaCategorias: 'Escolher o contato de cada categoria',
       remetentesTitulo: 'Caixas como remetente',
       remetentesDescricao: 'Escolha as caixas do workspace que aparecem no campo De de quem escreve um e-mail.',
@@ -1003,7 +1040,7 @@ const ptBR: Textos = {
       atalhos: 'Quem é o contato do item e o assunto do e-mail.',
     },
     quemEhContato: 'Quem é o contato',
-    quemEhContatoDica: 'Cada contato aparece no Contato do item, na lateral do item. Escolha de quais campos vêm o nome e o e-mail.',
+    quemEhContatoDica: 'Cada contato aparece no Contato do item, na lateral do item. Escolha de quais campos vêm o nome, o e-mail e o telefone do WhatsApp.',
     rotulo: 'Nome do contato na tela',
     removerContato: 'Remover contato',
     campoNome: 'Nome',
@@ -1020,19 +1057,47 @@ const ptBR: Textos = {
     adicionarContato: 'Adicionar contato',
     assuntoDoEmail: 'Assunto do e-mail',
     inserir: 'Inserir:',
-    previa: 'Prévia: o que o botão E-mail abre',
+    previa: 'Prévia: o que os botões E-mail e WhatsApp abrem',
     semNome: 'Sem nome',
     salvo: 'Contato da categoria salvo',
     avaliarComDevs: 'A avaliar com os devs',
     assuntoDica: 'O e-mail abre com este assunto. Quem envia pode mudar antes de mandar.',
   },
+  whatsapp: {
+    rotulo: 'WhatsApp',
+    para: nome => `WhatsApp para ${nome}`,
+    dica: 'Abre a conversa no WhatsApp com o texto pronto. Revise o texto e envie. O ENSPACE não registra a conversa.',
+    semTelefone: 'Sem telefone cadastrado',
+    telefoneInvalido: 'Telefone inválido',
+    semTelefoneAviso: 'Sem telefone: o WhatsApp está indisponível.',
+    telefoneInvalidoAviso: 'Telefone inválido: o WhatsApp está indisponível.',
+    cadastrarTelefone: 'Cadastrar telefone',
+    corrigirTelefone: 'Corrigir telefone',
+    paraResponsaveis: n => n === 1 ? 'WhatsApp para 1 responsável' : `WhatsApp para ${n} responsáveis`,
+    paraTodos: n => `WhatsApp para todos (${n})`,
+    filaTitulo: 'Avisar pelo WhatsApp',
+    filaDescricao: 'O WhatsApp abre 1 conversa por vez. Abra a conversa, envie e passe para a próxima.',
+    foraSemTelefone: nomes => `Ficam de fora, sem telefone válido: ${nomes}.`,
+    progresso: (i, n) => `Conversa ${i} de ${n}`,
+    abrirConversa: 'Abrir conversa',
+    aberta: 'Aberta',
+    proxima: 'Próxima',
+    concluido: 'Todas as conversas foram abertas.',
+    fechar: 'Fechar',
+    ninguem: 'Nenhuma pessoa com telefone válido.',
+    campoTelefone: 'Telefone',
+    mensagem: 'Texto pronto do WhatsApp',
+    mensagemDica: 'Aceita as mesmas variáveis do assunto. Quem envia pode mudar o texto antes de enviar.',
+    previa: 'WhatsApp',
+  },
   simulador: {
     selo: 'Simulação · fora do ENSPACE',
-    titulo: { email: 'Seu app de e-mail', formulario: 'Página pública do formulário', outlook: 'Integrar o Correio do Outlook' },
+    titulo: { email: 'Seu app de e-mail', formulario: 'Página pública do formulário', outlook: 'Integrar o Correio do Outlook', whatsapp: 'WhatsApp Web' },
     noProduto: {
       email: 'No produto, abre o app de e-mail padrão do computador, já preenchido.',
       formulario: 'É o que a pessoa de fora vê: o formulário sem login. Responder cria um item no ENSPACE.',
       outlook: 'No produto: Perfil › Integrações e o login da conta Microsoft corporativa.',
+      whatsapp: 'No produto, abre o WhatsApp Web ou o app do WhatsApp em uma aba nova, com a mensagem no campo de texto.',
     },
     voltar: 'Voltar ao ENSPACE',
     enviar: 'Enviar',
@@ -1062,6 +1127,12 @@ const ptBR: Textos = {
     aceitar: 'Aceitar',
     integrado: 'Integrado',
     integradoDescricao: 'O e-mail do ENSPACE sai da sua conta do Outlook.',
+    escolhaAConversa: 'Escolha a conversa',
+    buscarConversa: 'Pesquisar contato ou grupo',
+    nenhumaConversa: 'Nenhuma conversa encontrada.',
+    digiteMensagem: 'Digite uma mensagem',
+    trocarConversa: 'Trocar conversa',
+    naoRegistra: 'O ENSPACE não registra a conversa do WhatsApp.',
   },
   andaime: {
     prototipo: 'Protótipo',
@@ -1203,7 +1274,7 @@ const en: Textos = {
     copiarLinkExterno: 'Copy External Link',
     contatar: 'Contact',
     semContato: 'No contact',
-    dicaDoQuadro: 'Right-click a card to email the contact.',
+    dicaDoQuadro: 'Right-click a card to email or WhatsApp the contact.',
   },
   item: {
     paraQuem: 'To whom',
@@ -1276,6 +1347,8 @@ const en: Textos = {
     enviarLinkPor: 'Send the link by',
     assuntoDoLink: nome => `Form: ${nome}`,
     mensagemDoLink: (nome, url) => `To fill in the form "${nome}", use this link: ${url}`,
+    whatsapp: 'WhatsApp',
+    whatsappDica: 'Opens WhatsApp with the message and the link. Choose the chat and send.',
     linkCopiado: 'Link copied',
     linkDeFormulario: 'Public form link',
     copiarLinkPublico: 'Copy a public form link',
@@ -1308,7 +1381,7 @@ const en: Textos = {
     selecionadas: n => `${n} ${n === 1 ? 'task' : 'tasks'} selected`,
     ajudaDoLote: 'Opens 1 email with all assignees in To.',
     foraDoLote: n => `${n} ${n === 1 ? 'task' : 'tasks'} without assignee left out.`,
-    dicaDoQuadro: 'Click a card to open the task. Right-click to email the assignee.',
+    dicaDoQuadro: 'Click a card to open the task. Right-click to email or WhatsApp the assignee.',
     respostaCriaItem: categoria => `An answer through the link creates a new item in ${categoria}. This task stays open until you complete it.`,
     assuntoDoAviso: (tarefa, prazo) => prazo ? `Task: ${tarefa} (due ${prazo})` : `Task: ${tarefa}`,
     mensagemDoAviso: (nome, tarefa, prazo) => `${nome ? `Hi, ${nome}.` : 'Hi.'} Reminder about the task "${tarefa}"${prazo ? `, due ${prazo}` : ''}${prazo?.endsWith('.') ? '' : '.'}`,
@@ -1503,7 +1576,7 @@ const en: Textos = {
       abrirIntegracoes: 'Open Integrations',
       contatoTitulo: 'Item contact',
       contatoPelosCampos: 'The contact of each item comes from the email fields the category already has and from the requester email.',
-      contatoNaCategoria: 'Set the contact name and email fields in each category.',
+      contatoNaCategoria: 'Set the contact name, email and phone fields in each category.',
       irParaCategorias: 'Choose the contact of each category',
       remetentesTitulo: 'Boxes as sender',
       remetentesDescricao: 'Choose the workspace boxes offered in the From field to whoever writes an email.',
@@ -1582,7 +1655,7 @@ const en: Textos = {
       atalhos: 'Who the item contact is and the email subject.',
     },
     quemEhContato: 'Who the contact is',
-    quemEhContatoDica: 'Each contact appears in Item contact, on the item side panel. Choose which fields hold the name and the email.',
+    quemEhContatoDica: 'Each contact appears in Item contact, on the item side panel. Choose which fields hold the name, the email and the WhatsApp phone.',
     rotulo: 'Contact name on screen',
     removerContato: 'Remove contact',
     campoNome: 'Name',
@@ -1599,19 +1672,47 @@ const en: Textos = {
     adicionarContato: 'Add contact',
     assuntoDoEmail: 'Email subject',
     inserir: 'Insert:',
-    previa: 'Preview: what the Email button opens',
+    previa: 'Preview: what the Email and WhatsApp buttons open',
     semNome: 'No name',
     salvo: 'Category contact saved',
     avaliarComDevs: 'To review with the developers',
     assuntoDica: 'The email opens with this subject. The sender can change it before sending.',
   },
+  whatsapp: {
+    rotulo: 'WhatsApp',
+    para: nome => `WhatsApp to ${nome}`,
+    dica: 'Opens the WhatsApp chat with the ready text. Review the text and send. ENSPACE does not record the chat.',
+    semTelefone: 'No phone on file',
+    telefoneInvalido: 'Invalid phone',
+    semTelefoneAviso: 'No phone: WhatsApp is unavailable.',
+    telefoneInvalidoAviso: 'Invalid phone: WhatsApp is unavailable.',
+    cadastrarTelefone: 'Add phone',
+    corrigirTelefone: 'Fix phone',
+    paraResponsaveis: n => n === 1 ? 'WhatsApp to 1 assignee' : `WhatsApp to ${n} assignees`,
+    paraTodos: n => `WhatsApp to everyone (${n})`,
+    filaTitulo: 'Notify by WhatsApp',
+    filaDescricao: 'WhatsApp opens 1 chat at a time. Open the chat, send and move to the next one.',
+    foraSemTelefone: nomes => `Left out, no valid phone: ${nomes}.`,
+    progresso: (i, n) => `Chat ${i} of ${n}`,
+    abrirConversa: 'Open chat',
+    aberta: 'Opened',
+    proxima: 'Next',
+    concluido: 'All chats were opened.',
+    fechar: 'Close',
+    ninguem: 'No one with a valid phone.',
+    campoTelefone: 'Phone',
+    mensagem: 'WhatsApp ready text',
+    mensagemDica: 'Accepts the same variables as the subject. The sender can change the text before sending.',
+    previa: 'WhatsApp',
+  },
   simulador: {
     selo: 'Simulation · outside ENSPACE',
-    titulo: { email: 'Your email app', formulario: 'Public form page', outlook: 'Connect Outlook Mail' },
+    titulo: { email: 'Your email app', formulario: 'Public form page', outlook: 'Connect Outlook Mail', whatsapp: 'WhatsApp Web' },
     noProduto: {
       email: 'In the product, the default email app of the computer opens, already filled in.',
       formulario: 'This is what an outside person sees: the form without login. Answering creates an item in ENSPACE.',
       outlook: 'In the product: Profile › Integrations and the corporate Microsoft login.',
+      whatsapp: 'In the product, opens WhatsApp Web or the WhatsApp app in a new tab, with the message in the text box.',
     },
     voltar: 'Back to ENSPACE',
     enviar: 'Send',
@@ -1641,6 +1742,12 @@ const en: Textos = {
     aceitar: 'Accept',
     integrado: 'Connected',
     integradoDescricao: 'ENSPACE email goes out from your Outlook account.',
+    escolhaAConversa: 'Choose the chat',
+    buscarConversa: 'Search contact or group',
+    nenhumaConversa: 'No chat found.',
+    digiteMensagem: 'Type a message',
+    trocarConversa: 'Change chat',
+    naoRegistra: 'ENSPACE does not record the WhatsApp chat.',
   },
   andaime: {
     prototipo: 'Prototype',
@@ -1782,7 +1889,7 @@ const es: Textos = {
     copiarLinkExterno: 'Copiar Enlace Externo',
     contatar: 'Contactar',
     semContato: 'Sin contacto',
-    dicaDoQuadro: 'Haga clic derecho en una tarjeta para enviar un correo al contacto.',
+    dicaDoQuadro: 'Haga clic derecho en una tarjeta para enviar un correo o un WhatsApp al contacto.',
   },
   item: {
     paraQuem: 'Para quién',
@@ -1855,6 +1962,8 @@ const es: Textos = {
     enviarLinkPor: 'Enviar el enlace por',
     assuntoDoLink: nome => `Formulario: ${nome}`,
     mensagemDoLink: (nome, url) => `Para completar el formulario "${nome}", usa este enlace: ${url}`,
+    whatsapp: 'WhatsApp',
+    whatsappDica: 'Abre WhatsApp con el mensaje y el enlace. Elija la conversación y envíe.',
     linkCopiado: 'Enlace copiado',
     linkDeFormulario: 'Enlace de formulario público',
     copiarLinkPublico: 'Copiar enlace de formulario público',
@@ -1887,7 +1996,7 @@ const es: Textos = {
     selecionadas: n => `${n} ${n === 1 ? 'tarea seleccionada' : 'tareas seleccionadas'}`,
     ajudaDoLote: 'Abre 1 correo con todos los responsables en Para.',
     foraDoLote: n => `${n} ${n === 1 ? 'tarea sin responsable queda fuera' : 'tareas sin responsable quedan fuera'}.`,
-    dicaDoQuadro: 'Haga clic en la tarjeta para abrir la tarea. Con el botón derecho, envíe un correo al responsable.',
+    dicaDoQuadro: 'Haga clic en la tarjeta para abrir la tarea. Con el botón derecho, envíe un correo o un WhatsApp al responsable.',
     respostaCriaItem: categoria => `La respuesta por el enlace crea un ítem nuevo en ${categoria}. Esta tarea sigue abierta hasta que la completes.`,
     assuntoDoAviso: (tarefa, prazo) => prazo ? `Tarea: ${tarefa} (plazo ${prazo})` : `Tarea: ${tarefa}`,
     mensagemDoAviso: (nome, tarefa, prazo) => `${nome ? `Hola, ${nome}.` : 'Hola.'} Recordatorio de la tarea "${tarefa}"${prazo ? `, plazo ${prazo}` : ''}${prazo?.endsWith('.') ? '' : '.'}`,
@@ -2082,7 +2191,7 @@ const es: Textos = {
       abrirIntegracoes: 'Abrir Integraciones',
       contatoTitulo: 'Contacto del ítem',
       contatoPelosCampos: 'El contacto de cada ítem viene de los campos de correo que la categoría ya tiene y del correo de quien abrió la solicitud.',
-      contatoNaCategoria: 'Defina en cada categoría los campos de nombre y de correo del contacto.',
+      contatoNaCategoria: 'Defina en cada categoría los campos de nombre, correo y teléfono del contacto.',
       irParaCategorias: 'Elegir el contacto de cada categoría',
       remetentesTitulo: 'Buzones como remitente',
       remetentesDescricao: 'Elija los buzones del workspace que aparecen en el campo De de quien escribe un correo.',
@@ -2161,7 +2270,7 @@ const es: Textos = {
       atalhos: 'Quién es el contacto del ítem y el asunto del correo.',
     },
     quemEhContato: 'Quién es el contacto',
-    quemEhContatoDica: 'Cada contacto aparece en Contacto del ítem, en el panel lateral del ítem. Elija de qué campos vienen el nombre y el correo.',
+    quemEhContatoDica: 'Cada contacto aparece en Contacto del ítem, en el panel lateral del ítem. Elija de qué campos vienen el nombre, el correo y el teléfono de WhatsApp.',
     rotulo: 'Nombre del contacto en pantalla',
     removerContato: 'Quitar contacto',
     campoNome: 'Nombre',
@@ -2178,19 +2287,47 @@ const es: Textos = {
     adicionarContato: 'Agregar contacto',
     assuntoDoEmail: 'Asunto del correo',
     inserir: 'Insertar:',
-    previa: 'Vista previa: lo que abre el botón Correo',
+    previa: 'Vista previa: lo que abren los botones Correo y WhatsApp',
     semNome: 'Sin nombre',
     salvo: 'Contacto de la categoría guardado',
     avaliarComDevs: 'Para evaluar con los desarrolladores',
     assuntoDica: 'El correo abre con este asunto. Quien envía puede cambiarlo antes de mandar.',
   },
+  whatsapp: {
+    rotulo: 'WhatsApp',
+    para: nome => `WhatsApp para ${nome}`,
+    dica: 'Abre la conversación de WhatsApp con el texto listo. Revise el texto y envíe. ENSPACE no registra la conversación.',
+    semTelefone: 'Sin teléfono registrado',
+    telefoneInvalido: 'Teléfono inválido',
+    semTelefoneAviso: 'Sin teléfono: WhatsApp no está disponible.',
+    telefoneInvalidoAviso: 'Teléfono inválido: WhatsApp no está disponible.',
+    cadastrarTelefone: 'Registrar teléfono',
+    corrigirTelefone: 'Corregir teléfono',
+    paraResponsaveis: n => n === 1 ? 'WhatsApp para 1 responsable' : `WhatsApp para ${n} responsables`,
+    paraTodos: n => `WhatsApp para todos (${n})`,
+    filaTitulo: 'Avisar por WhatsApp',
+    filaDescricao: 'WhatsApp abre 1 conversación a la vez. Abra la conversación, envíe y pase a la siguiente.',
+    foraSemTelefone: nomes => `Quedan fuera, sin teléfono válido: ${nomes}.`,
+    progresso: (i, n) => `Conversación ${i} de ${n}`,
+    abrirConversa: 'Abrir conversación',
+    aberta: 'Abierta',
+    proxima: 'Siguiente',
+    concluido: 'Todas las conversaciones fueron abiertas.',
+    fechar: 'Cerrar',
+    ninguem: 'Ninguna persona con teléfono válido.',
+    campoTelefone: 'Teléfono',
+    mensagem: 'Texto listo de WhatsApp',
+    mensagemDica: 'Acepta las mismas variables del asunto. Quien envía puede cambiar el texto antes de enviar.',
+    previa: 'WhatsApp',
+  },
   simulador: {
     selo: 'Simulación · fuera de ENSPACE',
-    titulo: { email: 'Su app de correo', formulario: 'Página pública del formulario', outlook: 'Integrar el Correo de Outlook' },
+    titulo: { email: 'Su app de correo', formulario: 'Página pública del formulario', outlook: 'Integrar el Correo de Outlook', whatsapp: 'WhatsApp Web' },
     noProduto: {
       email: 'En el producto, abre la app de correo predeterminada del equipo, ya completa.',
       formulario: 'Es lo que ve la persona de afuera: el formulario sin inicio de sesión. Responder crea un ítem en ENSPACE.',
       outlook: 'En el producto: Perfil › Integraciones y el inicio de sesión de la cuenta Microsoft corporativa.',
+      whatsapp: 'En el producto, abre WhatsApp Web o la app de WhatsApp en una pestaña nueva, con el mensaje en el campo de texto.',
     },
     voltar: 'Volver a ENSPACE',
     enviar: 'Enviar',
@@ -2220,6 +2357,12 @@ const es: Textos = {
     aceitar: 'Aceptar',
     integrado: 'Integrado',
     integradoDescricao: 'El correo de ENSPACE sale de tu cuenta de Outlook.',
+    escolhaAConversa: 'Elija la conversación',
+    buscarConversa: 'Buscar contacto o grupo',
+    nenhumaConversa: 'Ninguna conversación encontrada.',
+    digiteMensagem: 'Escriba un mensaje',
+    trocarConversa: 'Cambiar conversación',
+    naoRegistra: 'ENSPACE no registra la conversación de WhatsApp.',
   },
   andaime: {
     prototipo: 'Prototipo',

@@ -16,6 +16,7 @@
 import type { Ref } from 'vue'
 import {
   CAMPO_REQUISITANTE,
+  MASCARA_CEL,
   type CaixaDeEmail,
   type Email,
   type Formulario,
@@ -48,7 +49,8 @@ let faseAtual: Ref<Fase> | null = null
  * ------------------------------------------------------------------ */
 
 /**
- * Uma pessoa de contato do item: de quais campos vêm o nome e o e-mail.
+ * Uma pessoa de contato do item: de quais campos vêm o nome, o e-mail e o
+ * telefone (o telefone abre o WhatsApp, de volta na rodada 10).
  * A avaliar com os devs: a configuração mora na categoria, numa chave nova do
  * JSON `modules` que o modelo da categoria já tem.
  */
@@ -57,13 +59,19 @@ export interface ContatoDaCategoria {
   rotulo: string
   campoNome: string | null
   campoEmail: string | null
+  campoTelefone: string | null
 }
 
 export interface ConfigDaCategoria {
   contatos: ContatoDaCategoria[]
   /** Assunto sugerido do e-mail. Aceita {referencia}, {titulo}, {nome}, {categoria}. */
   assunto: string
+  /** Texto pronto do WhatsApp. Aceita as mesmas variáveis do assunto. */
+  mensagem: string
 }
+
+/** O texto pronto do WhatsApp de cada categoria até alguém salvar outro no cartão "Contato da categoria". */
+export const MENSAGEM_PADRAO = 'Olá, {nome}. Escrevo sobre {referencia} · {titulo}.'
 
 /**
  * Sem chave de módulo (rodada 7): o e-mail vem sempre ligado, como nos CRMs e
@@ -79,22 +87,25 @@ export function configInicial(): ConfigDeComunicacao {
     porCategoria: {
       contratos: {
         contatos: [
-          { id: 'contraparte', rotulo: 'Contato da contraparte', campoNome: 'contato_nome', campoEmail: 'contato_email' },
-          { id: 'requisitante', rotulo: 'Requisitante', campoNome: null, campoEmail: CAMPO_REQUISITANTE },
+          { id: 'contraparte', rotulo: 'Contato da contraparte', campoNome: 'contato_nome', campoEmail: 'contato_email', campoTelefone: 'contato_telefone' },
+          { id: 'requisitante', rotulo: 'Requisitante', campoNome: null, campoEmail: CAMPO_REQUISITANTE, campoTelefone: null },
         ],
         assunto: '{referencia} · {titulo}',
+        mensagem: MENSAGEM_PADRAO,
       },
       solicitacoes: {
         contatos: [
-          { id: 'solicitante', rotulo: 'Quem pediu', campoNome: 'solicitante_nome', campoEmail: 'solicitante_email' },
+          { id: 'solicitante', rotulo: 'Quem pediu', campoNome: 'solicitante_nome', campoEmail: 'solicitante_email', campoTelefone: 'solicitante_telefone' },
         ],
         assunto: '{referencia} · {titulo}',
+        mensagem: MENSAGEM_PADRAO,
       },
       fornecedores: {
         contatos: [
-          { id: 'comercial', rotulo: 'Contato comercial', campoNome: 'pessoa_empresa.contact_name', campoEmail: 'pessoa_empresa.contact_email' },
+          { id: 'comercial', rotulo: 'Contato comercial', campoNome: 'pessoa_empresa.contact_name', campoEmail: 'pessoa_empresa.contact_email', campoTelefone: 'pessoa_empresa.contact_phone' },
         ],
         assunto: '{titulo} · Cadastro de fornecedor',
+        mensagem: 'Olá, {nome}. Escrevo sobre o cadastro de {titulo} como fornecedor.',
       },
     },
   }
@@ -109,6 +120,7 @@ export interface Contato {
   rotulo: string
   nome: string | null
   email: string | null
+  telefone: string | null
 }
 
 export function valorDoCampo(i: ItemDoProtótipo, campo: string | null): string | null {
@@ -126,20 +138,26 @@ const ROTULO_REQUISITANTE = 'Requisitante'
 
 export function contatosDoItem(i: ItemDoProtótipo, config: ConfigDeComunicacao): Contato[] {
   // Fase 1: sem configuração nova. O contato é cada campo de e-mail que o item
-  // já tem (e o subcampo de e-mail de Pessoa/Empresa), mais o e-mail de quem pediu.
+  // já tem, cada Texto com máscara CEL (telefone), o Pessoa/Empresa (nome,
+  // e-mail e telefone de contato) e o e-mail de quem pediu.
   if ((faseAtual?.value ?? 1) < 2) {
     const lista: Contato[] = []
     for (const c of campos.filter(x => x.categoria === i.categoria)) {
       if (c.type === 'email') {
         const email = valorDoCampo(i, c.refId)
-        if (email) lista.push({ id: c.refId, rotulo: c.name, nome: null, email })
+        if (email) lista.push({ id: c.refId, rotulo: c.name, nome: null, email, telefone: null })
+      }
+      if (c.type === 'EnlMask' && c.mascara === MASCARA_CEL) {
+        const telefone = valorDoCampo(i, c.refId)
+        if (telefone) lista.push({ id: c.refId, rotulo: c.name, nome: null, email: null, telefone })
       }
       if (c.type === 'EnPerson') {
         const email = valorDoCampo(i, `${c.refId}.contact_email`)
-        if (email) lista.push({ id: c.refId, rotulo: c.name, nome: valorDoCampo(i, `${c.refId}.contact_name`), email })
+        const telefone = valorDoCampo(i, `${c.refId}.contact_phone`)
+        if (email || telefone) lista.push({ id: c.refId, rotulo: c.name, nome: valorDoCampo(i, `${c.refId}.contact_name`), email, telefone })
       }
     }
-    if (i.request_email) lista.push({ id: CAMPO_REQUISITANTE, rotulo: ROTULO_REQUISITANTE, nome: null, email: i.request_email })
+    if (i.request_email) lista.push({ id: CAMPO_REQUISITANTE, rotulo: ROTULO_REQUISITANTE, nome: null, email: i.request_email, telefone: null })
     return lista
   }
   return config.porCategoria[i.categoria].contatos.map(c => ({
@@ -147,6 +165,7 @@ export function contatosDoItem(i: ItemDoProtótipo, config: ConfigDeComunicacao)
     rotulo: c.rotulo,
     nome: valorDoCampo(i, c.campoNome),
     email: valorDoCampo(i, c.campoEmail),
+    telefone: valorDoCampo(i, c.campoTelefone),
   }))
 }
 
@@ -164,6 +183,29 @@ export function preencher(modelo: string, i: ItemDoProtótipo | null, nome: stri
     .trim()
     // Sem item: "{referencia} · Assunto" não começa nem termina no separador.
     .replace(/^·\s*|\s*·$/g, '')
+}
+
+/**
+ * O número que vai no `wa.me`: só dígitos, sem os zeros da frente (a máscara
+ * CEL grava o DDD com 3 dígitos, "(011)"), com 55 quando vier sem país (10 ou
+ * 11 dígitos). Menos de 10 dígitos não abre conversa: nulo.
+ */
+export function numeroDoWhatsApp(telefone: string | null | undefined) {
+  if (!telefone) return null
+  const d = telefone.replace(/\D/g, '').replace(/^0+/, '')
+  if (d.length < 10) return null
+  return d.length <= 11 ? `55${d}` : d
+}
+
+/**
+ * O link do WhatsApp (ajuda do WhatsApp, "conversa em um clique"): com número,
+ * abre a conversa com ele; sem número, a pessoa escolhe a conversa. O texto
+ * chega no campo de mensagem, e quem envia é a pessoa.
+ */
+export function linkDeWhatsApp(telefone: string | null, texto?: string) {
+  const n = numeroDoWhatsApp(telefone)
+  const base = n ? `https://wa.me/${n}` : 'https://wa.me/'
+  return texto ? `${base}?text=${encodeURIComponent(texto)}` : base
 }
 
 /** O `mailto:` que o "Abrir no meu app de e-mail" abre. */

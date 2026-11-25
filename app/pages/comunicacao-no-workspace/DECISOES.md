@@ -3,8 +3,8 @@
 ## A proposta em 1 minuto
 
 **Um protótipo para as 3 partes do documento**, porque elas mexem nas mesmas telas e no mesmo
-botão de E-mail (motivo no `BRIEFING.md`, seção 4). Desde a rodada 6, **só e-mail**: WhatsApp e
-SMS saíram do plano.
+botão de E-mail (motivo no `BRIEFING.md`, seção 4). Os canais são **e-mail e WhatsApp**: o WhatsApp
+saiu na rodada 6 e voltou na 10, pelo link do próprio WhatsApp; o SMS continua fora.
 
 **O protótipo se divide em 3 fases**, escolhidas no controle "Fase" da barra de baixo:
 
@@ -17,7 +17,7 @@ SMS saíram do plano.
 | Parte do documento | Onde aparece no protótipo |
 |---|---|
 | (a) Link do formulário público | Requisições (cartão "Compartilhar este formulário"); lista de itens da categoria; painel da tarefa de preencher formulário |
-| (b) Atalho de e-mail | Item (Contato do item na lateral e ícone ao lado do campo de e-mail); lista e quadro de itens (submenu "E-mail"); tarefas (coluna Contato, e-mail em lote, clique direito, painel); Agenda (lembrete) |
+| (b) Atalho de e-mail e WhatsApp | Item (Contato do item na lateral e ícone ao lado do campo de e-mail e do de telefone); lista e quadro de itens (submenus "E-mail" e "WhatsApp"); tarefas (coluna Contato, e-mail em lote, fila do WhatsApp, clique direito, painel); Agenda (lembrete por e-mail e por WhatsApp) |
 | Configuração | Aba Configurações da central E-mails: a conta de envio de cada pessoa e, para quem administra, o contato do item, o remetente com o domínio da empresa e (Fase 2) as caixas no "De". Sem chave em Sistema › Módulos: o e-mail vem sempre ligado. Categorias › cartão "Contato da categoria" (Fase 2, a avaliar com os devs) |
 | E-mail do ENSPACE em todas as telas | "Novo e-mail" no topo, que reconhece o item ou a tarefa aberta; o compositor; a central "E-mails" no menu, com Mensagens (também os enviados pelo sistema, para quem tem a permissão), Modelos, Caixas de E-mail e Configurações, cada aba pela permissão de hoje; o estado vazio de cada tabela diz o próximo passo |
 
@@ -484,6 +484,50 @@ disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:)
   | [\[E-MAIL NO WORKSPACE\] Responder na mesma conversa e encaminhar e-mail](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USEE7549AB3B7AC401A8D2B5791E7D2C) | Inovação | 2 |
   | [\[E-MAIL NO WORKSPACE\] Vincular e-mail a uma tarefa](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE0D4EAB388F5E4E238D7E3BDF138B1) | Inovação | 4 |
   | [\[E-MAIL NO WORKSPACE\] Botão de e-mail no cartão do quadro de itens e de tarefas](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE38811F4778A94A3983977CD6F8F9A) | Melhoria | 0 |
+
+## Rodada 10 · 2026-11-25 (o WhatsApp volta)
+
+Pedido da redatora: "pode voltar todos de whatsapp que tinha". Voltam os 8 pontos de WhatsApp que a
+rodada 6 tirou; o SMS, a fileira de atalhos da tela inicial e a escolha de canais em Sistema ›
+Módulos continuam fora.
+
+| O que voltou | Onde |
+|---|---|
+| Botão WhatsApp no Contato do item e ícone ao lado do campo de telefone | `_TelaItem.vue`, `_BotaoWhatsApp.vue` |
+| Submenu "WhatsApp" no menu da linha e no clique direito do cartão | `_TelaItens.vue` |
+| Tarefas: ícone na coluna Contato, item no clique direito, botão no painel e a fila em lote ("Conversa 1 de N") | `_TelaTarefas.vue`, `_FilaDoWhatsApp.vue` |
+| Agenda: ícone por pessoa e "WhatsApp para todos (N)", com a fila | `_TelaAgenda.vue` |
+| Link do formulário público pelo WhatsApp, sem número | `_CompartilharFormulario.vue`, `_LinksPublicos.vue` |
+| Os estados "Sem telefone cadastrado" e "Telefone inválido", com "Cadastrar telefone" e "Corrigir telefone" | `_TelaItem.vue`, `atalhos.ts` |
+| Fase 2: a origem do telefone no "Contato da categoria" e o texto pronto do WhatsApp por categoria, sem chave de ligar | `_TelaCategoria.vue`, `estado.ts` |
+| A simulação do WhatsApp Web: escolher a conversa, texto no campo, enviar | `_AppExterno.vue` |
+
+- **O link é o do próprio WhatsApp** (ajuda do WhatsApp, "conversa em um clique", lida em
+  2026-11-25; `PESQUISA.md`): `https://wa.me/<número>?text=<texto>`, ou `https://wa.me/?text=<texto>`
+  sem número, e a pessoa escolhe a conversa. Abre o WhatsApp Web ou o app; a pessoa aperta Enviar; o
+  ENSPACE não fica sabendo do envio. Não pede back-end, então fica no épico 1.
+- **De onde vem o telefone, sem configuração:** o develop não tem campo do tipo telefone. Fica o
+  Texto com máscara com a máscara "CEL: (###) #####-####" (lido no código do front, na develop de
+  2026-11-25) e o Telefone de contato do Pessoa/Empresa. O mock ganhou essa máscara em
+  "Telefone do contato", "Telefone de quem pediu" e "WhatsApp comercial".
+- **O número:** só os dígitos, sem zero no começo; com 10 ou 11 dígitos ganha o 55; com menos de 10
+  é inválido. "9210-8834", de CTR-00226, mostra o estado inválido.
+- **Para várias pessoas, uma fila:** o link leva 1 número, e o navegador bloqueia várias abas de uma
+  vez. A fila diz quem fica de fora e abre 1 conversa por vez, como na rodada 5. Os botões do lote
+  contam só quem tem telefone válido e, com 0, ficam indisponíveis com `aria-disabled`.
+- **Limite da Fase 1:** sem configuração, o e-mail e o telefone de um mesmo contato vêm de 2 campos
+  e aparecem como 2 contatos ("E-mail do contato" e "Telefone do contato"). Só o Pessoa/Empresa junta
+  os 2. Juntar é o "Contato da categoria" da Fase 2. Pergunta S904 do épico 1.
+- **Texto pronto:** na Fase 1, fixo ("Olá, {nome}. Escrevo sobre {referencia} · {titulo}."); na
+  Fase 2, o da categoria. Na tarefa e na Agenda, o texto do e-mail daquela tela.
+- **O telefone do membro** (tarefas e Agenda) continua sem tela no produto: o cadastro do usuário tem
+  o campo, e nenhuma tela o preenche. Pergunta P905 do épico 1.
+- **Ajustes de passagem:** o submenu "E-mail" deixa de listar o contato que é só um campo de
+  telefone; a coluna Contato mostra o telefone quando o contato não tem e-mail; as dicas dos 2
+  quadros citam o WhatsApp.
+- **Requisitos:** épico 1 (RN907, RN908 e RN917 a RN923; partes 3 a 7), épico 2 (RN901, RN904 e
+  RN905; partes 1 e 2) e o documento do botão no cartão (RF007 e RF008). Os prints estão em
+  `evidencias/requisitos/`.
 
 ## Por que cada decisão
 

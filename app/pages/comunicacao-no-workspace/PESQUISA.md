@@ -347,6 +347,22 @@ do lote. **Não serve:** revelar dado com crédito (prospecção fria).
 **Serve:** `wa.me` como prática do mercado brasileiro; menu de 2 caminhos; modelos de mensagem.
 **Não serve:** esconder o botão sem dizer por quê.
 
+## O link do WhatsApp, pela ajuda oficial (rodada 10)
+
+Fonte: ajuda do WhatsApp, "Como usar o recurso de conversa em um clique"
+(https://faq.whatsapp.com/5913398998672934), lida em 2026-11-25.
+
+- **Com número:** `https://wa.me/<número>`, com o número completo no formato internacional, só
+  dígitos: sem zero no começo, sem parênteses, traço nem "+".
+- **Com texto pronto:** `https://wa.me/<número>?text=<texto codificado para URL>`; o texto chega no
+  campo de mensagem.
+- **Sem número:** `https://wa.me/?text=<texto>`; a pessoa escolhe o contato ou o grupo.
+- O link abre a conversa no celular e no WhatsApp Web; quem envia é a pessoa.
+
+**Serve:** o atalho de WhatsApp do protótipo sem back-end (épico 1), o link do formulário sem número
+e a regra do número (55 na frente do telefone brasileiro de 10 ou 11 dígitos).
+**Não serve:** registrar a conversa no item; isso pede a API paga do WhatsApp Business.
+
 ## Gmail e Outlook na web
 
 - **Gmail:** "Compose" em janela flutuante no canto inferior direito, minimizável, várias ao mesmo

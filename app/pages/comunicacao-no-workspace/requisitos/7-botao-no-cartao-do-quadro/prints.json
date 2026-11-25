@@ -44,6 +44,12 @@
       "destacar": {
         "css": "[role=menu]"
       }
+    },
+    "RF007": {
+      "sem": "o protótipo não desenha o botão no cartão; o print sai com o desenho do botão"
+    },
+    "RF008": {
+      "sem": "o protótipo não desenha o botão no cartão; o print sai com o desenho do botão"
     }
   }
 }
