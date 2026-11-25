@@ -957,7 +957,7 @@ function configuravel(w: Widget) {
 
         <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">Versão</span>
-        <UTooltip text="O MVP mostra só o que se faz no front com o que o develop já tem (DECISOES.md, rodada 8)">
+        <UTooltip text="O MVP mostra Categorias e tarefas, só com o que o develop já tem (DECISOES.md, rodada 10)">
           <span class="flex gap-2">
             <UButton
               v-for="v in [{ v: 'completa', r: 'Proposta completa' }, { v: 'mvp', r: 'MVP' }] as const"

@@ -75,6 +75,8 @@ Leitura de 2026-11-24 pela skill `investigar-codigo`. Siglas: **F** = `en-space@
 
 Na rodada 8 saíram Revisões por IA, Créditos de IA e Falhas dos agentes, a pedido da redatora. As linhas deles na tabela abaixo ficam como registro.
 
+Na rodada 10, o MVP ficou só com Categorias e os widgets de tarefas, a pedido da redatora. As outras linhas "sim" da tabela acima passam para os épicos 2 e 3 dos requisitos (`requisitos/README.md`), que também usam só o que develop já tem.
+
 ### A IA do workspace e a categoria (rodada 7)
 
 Leitura de 2026-11-24 pela skill `investigar-codigo`. Siglas: **F** = `en-space@develop be2a5d850`; **B** = `enlighten-api@develop 8669875cf`. O código mostra a branch, não o que está no ar.
@@ -101,7 +103,7 @@ Leitura de 2026-11-24 pela skill `investigar-codigo`. Siglas: **F** = `en-space@
 | Widget | Veredito | Fonte | O que falta |
 |---|---|---|---|
 | Execuções dos fluxos | reaproveita | `GET /workflows/metrics` conta `workflow_executions` por `status` do workspace, com `startDate` e `endDate` sobre `created_at` (B `plugins/en-workflows/services/workflows/metrics.ts:12-34`, rota em `routes/workflows/get.metrics.ts`); o SDK já chama (S `packages/core/src/resources/workflows/index.ts:204`, `packages/vue/src/query/resources/workflows.ts:212`) | só front |
-| Falhas nos fluxos | reaproveita | `workflow_executions.status` tem `working`, `completed`, `error`, `canceled` (B `plugins/en-workflows/models/workflow-executions.settings.json:42-46`) e o item (`:62`); a lista de execuções aceita os campos do modelo como filtro, o status entre eles (B `routes/workflows/executions/get.ts`, `schemas/workflow-executions.ts:43,74`); Repetir é `PUT /workflows/nodes/:id/retry`, o mesmo da tela de execução (F `src/composables/useNodeExecutions.ts:17`) | o passo que falhou e a mensagem vêm da execução do passo: 1 chamada por execução, ou o front lê a lista de passos da execução aberta |
+| Falhas nos fluxos | reaproveita | `workflow_executions.status` tem `working`, `completed`, `error`, `canceled` (B `plugins/en-workflows/models/workflow-executions.settings.json:42-46`) e o item (`:62`); a lista de execuções aceita os campos do modelo como filtro, o status entre eles (B `routes/workflows/executions/get.ts`, `schemas/workflow-executions.ts:43,74`); Repetir é `PUT /workflows/nodes/:id/retry`, o mesmo da tela de execução (F `src/composables/entity/useNodeExecutions.ts:17`; a tela de execução pede confirmação antes ("Deseja executar novamente? Tarefas, processos e sub-fluxos podem ser criados novamente.", `executions/[execution].vue:47`)) | o passo que falhou e a mensagem vêm da execução do passo: 1 chamada por execução, ou o front lê a lista de passos da execução aberta |
 | Fluxos em andamento | reaproveita | a mesma lista, com `status=working`, ordenada por início; o passo que espera é a execução do passo com `status` `working` (B `plugins/en-workflows/models/node-executions.settings.json:30-34`) | o mesmo da linha acima; "Parado" (mais de 2 dias) é regra de front |
 | Só falhas de agente | não existe | o tipo do passo fica no JSON `node` da execução do passo (B `node-executions.settings.json:40-42`), sem coluna para filtrar | rota ou coluna nova. Por isso o widget mostra a falha de qualquer passo |
 

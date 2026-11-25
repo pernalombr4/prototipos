@@ -2,6 +2,20 @@
 
 Registro das rodadas. A mais recente em cima.
 
+## Rodada 10 · 2026-11-25
+
+- **Pedido (literal):** "no final pode escrever os docs de requisitos separando em epicos. / um pro mvp, depois os outros restantes. / o mvp pode ser ainda mais enxuto em widgets, ok? pode ter só categorias e tarefas. / depois vamos entrando com o restante separando os epicos necessarios / --- / no chrome eu mesma vou testar pra nao atrasar"
+- **Mudou no protótipo:**
+  - o MVP leva só Categorias e os 14 widgets de tarefas (os 13 do Painel de tarefas e Minhas tarefas). Os outros 9 saem do MVP e continuam na "Proposta completa";
+  - a Home padrão do MVP: Categorias na largura toda, os 4 números (Abertas agora, Concluídas, Criadas, Vencidas), Vencidas, Vencem em breve, Minhas tarefas e Abertas por status;
+  - a descrição do grupo Itens e categorias no catálogo do MVP fala só das categorias.
+- **Requisitos em 7 épicos** (`requisitos/README.md`), pela regra "Épico pelo esforço" da skill `requisitos`:
+  - com o que já existe: 1. Home em widgets, com Categorias e tarefas (o MVP); 2. Itens, agenda e atalhos; 3. Agentes de IA e Spaceflow;
+  - novidades: 4. Home padrão do workspace; 5. BENI na Home; 6. Widgets com dado novo; 7. Comunicado e notas.
+- **Sinal de corte mantido:** a parte 1 do MVP tem 29 linhas (mediana de 17) e a parte 2 do épico 5 tem 13 (mediana de 6). Cada uma é 1 funcionalidade só (personalizar a Home; o rascunho na conversa), e o tamanho sozinho não corta funcionalidade.
+- **Fronteira:** muda só o conteúdo do MVP. A "Proposta completa", a casca e os widgets ficam como na rodada 9.
+- **Teste no navegador:** fica com a redatora, no Chrome dela. A rodada passou no `vue-tsc` sem erro na Home e o `/home` responde 200 no servidor local.
+
 ## Rodada 9 · 2026-11-24
 
 - **Pedido (literal):** "melhore o padding interno pra que o titulo nao fique parecendo "colado" lá no alto. melhore o alinhamento também. o título não deve passar da altura do ícone e o texto da desrciçao nao deve descer alem da base do icone. de repente vale aumentar o ícone pra ficar descriçao + titulo ali no espaço que o ícone ocupa. e o truncamento se mantem / adicione tambem widgets de spaceflow: erros em fluxos é um deles. em vez de ser só erro nos agentes, faça algo similar pra mostrar falhas dos fluxos em geral / e outros status que voce achar interessantes de trazer aí."

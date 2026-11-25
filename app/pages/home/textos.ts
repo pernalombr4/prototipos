@@ -573,7 +573,7 @@ const ptBR: Textos = {
   secoes: { numeros: 'Números', listas: 'Listas', graficos: 'Gráficos' },
   descricaoDosGruposMvp: {
     agenda: 'Os compromissos do dia, com os prazos de tarefa e as datas de item.',
-    itens: 'As categorias e os itens: os que você criou e os mais novos.',
+    itens: 'As categorias do workspace, com o botão de criar item.',
     atalhos: 'Atalhos e telas abertas por último.',
     ia: 'Os agentes do workspace.',
   },
@@ -972,7 +972,7 @@ const en: Textos = {
   secoes: { numeros: 'Numbers', listas: 'Lists', graficos: 'Charts' },
   descricaoDosGruposMvp: {
     agenda: "Today's appointments, with task due dates and item dates.",
-    itens: 'Categories and items: the ones you created and the newest.',
+    itens: 'The workspace categories, with the create item button.',
     atalhos: 'Shortcuts and recently opened screens.',
     ia: 'The workspace agents.',
   },
@@ -1371,7 +1371,7 @@ const es: Textos = {
   secoes: { numeros: 'Números', listas: 'Listas', graficos: 'Gráficos' },
   descricaoDosGruposMvp: {
     agenda: 'Los compromisos del día, con los plazos de tarea y las fechas de ítem.',
-    itens: 'Las categorías y los ítems: los que creaste y los más nuevos.',
+    itens: 'Las categorías del workspace, con el botón de crear ítem.',
     atalhos: 'Atajos y pantallas abiertas por último.',
     ia: 'Los agentes del workspace.',
   },
