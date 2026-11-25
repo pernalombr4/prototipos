@@ -1,13 +1,13 @@
 # Requisitos: Botão de e-mail no cartão do quadro
 
 **Objetivo:** o cartão do quadro de itens e o do quadro de tarefas ganham um botão de e-mail, o "Notify" do mockup 5,
-que o teclado alcança. Hoje o atalho de e-mail do quadro fica só no clique direito, porque o `EnKanbanBoard` do SDK não
-aceita ação extra no cartão.
+que o teclado alcança. O épico "E-mail com o que o produto já tem" põe o atalho só no menu do clique direito do
+cartão.
 
 **Depende de:** o clique direito no cartão com o submenu "E-mail", do épico "E-mail com o que o produto já tem".
 
 **Onde vale:** o quadro de itens (lista de itens da categoria, visualização em quadro) e o quadro de Tarefas › Rápidas,
-os 2 montados sobre o `EnKanbanBoard`.
+os 2 com o mesmo cartão de quadro do produto.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/, aprovado em 24/11/2026. O protótipo
 não tem o botão no cartão: mostra o mesmo menu no clique direito do cartão, no quadro de itens e no de tarefas. Os
@@ -30,20 +30,13 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 | RF005 | O botão de e-mail do cartão deve ser alcançável pelo Tab e abrir o menu pelo teclado. | Com Tab até o cartão de CTR-00231 e Enter no botão, o menu abre. | Desejável | Opcional |
 | RF006 | O clique direito no cartão deve continuar com o submenu "E-mail", junto do botão. | Clique direito no cartão de CTR-00231: o menu de contexto continua com "E-mail". | Desejável | Opcional |
 
-## Interfaces (RI)
-
-| ID | Rota ou evento | O que deve receber ou devolver | Relevância |
-|---|---|---|---|
-| RI001 | Prop `cardActions` no `EnKanbanBoard` do SDK | Deve receber, por cartão, a lista de itens de menu, cada um com rótulo, ícone, submenu, indisponível (`disabled`) e motivo (`description`), e mostrar o botão no cartão. | Opcional |
-
 ## Em aberto
 
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
-| P001 | A prop `cardActions` no `EnKanbanBoard` entra no roteiro do SDK? A outra saída é um slot no rodapé do cartão. | dev do SDK | Com o slot, RI001 vira o slot, e o botão se monta na tela do produto |
-| P002 | Onde fica o botão no cartão e qual o rótulo: o "Notify" do mockup 5 traduzido, "E-mail" ou só o ícone? O protótipo não desenha o botão. | redatora e produto | Define o desenho do botão nos 3 idiomas |
-| P003 | Com o botão no cartão, as dicas dos quadros mudam? Hoje dizem "Clique com o botão direito num cartão para enviar e-mail ao contato." e "Clique no cartão para abrir a tarefa. Com o botão direito, envie e-mail ao responsável.". | redatora | Textos novos para as 2 dicas, nos 3 idiomas |
-| S001 | O clique no botão de e-mail não abre o item nem o painel da tarefa, como faz o clique no resto do cartão. | protótipo da próxima rodada ou dev do SDK | Se abrir, o menu e o painel aparecem juntos |
+| P001 | Onde fica o botão no cartão e qual o rótulo: o "Notify" do mockup 5 traduzido, "E-mail" ou só o ícone? O protótipo não desenha o botão. | redatora e produto | Define o desenho do botão nos 3 idiomas |
+| P002 | Com o botão no cartão, as dicas dos quadros mudam? Hoje dizem "Clique com o botão direito num cartão para enviar e-mail ao contato." e "Clique no cartão para abrir a tarefa. Com o botão direito, envie e-mail ao responsável.". | redatora | Textos novos para as 2 dicas, nos 3 idiomas |
+| S001 | O clique no botão de e-mail não abre o item nem o painel da tarefa, como faz o clique no resto do cartão. | protótipo da próxima rodada ou dev | Se abrir, o menu e o painel aparecem juntos |
 
 ## Padrão de qualidade
 

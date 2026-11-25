@@ -14,7 +14,7 @@ import type { DropdownMenuItem, ContextMenuItem } from '@nuxt/ui'
 import type { EnKanbanCardConfig, EnKanbanColumn, EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import type { Textos } from './textos'
 import { type ItemDoProtótipo, type StatusDoItem, categoriaPorSlug, itens, workspace } from './mocks'
-import { type Contato, contatosDoItem, useComunicacao, useMarcaDeProposta } from './estado'
+import { type Contato, cliqueDireitoNoCartao, contatosDoItem, useComunicacao, useMarcaDeProposta } from './estado'
 import { useAtalhos, useCopiar } from './atalhos'
 import LinksPublicos from './_LinksPublicos.vue'
 
@@ -127,7 +127,7 @@ const colunasDoQuadro = computed<EnKanbanColumn[]>(() =>
 const cartoes = computed(() => filtrados.value.map(i => ({
   id: i.id,
   titulo: i.titulo,
-  descricao: `${i.reference} · ${principal(i)?.nome ?? props.t.itens.semContato}`,
+  descricao: `${i.reference} · ${principal(i)?.nome ?? principal(i)?.email ?? props.t.itens.semContato}`,
   etapa: i.etapa,
   created_at: i.created_at.toISOString(),
 })))
@@ -143,9 +143,17 @@ const cartaoDoMenu = ref<ItemDoProtótipo | null>(null)
 const menuDoCartao = computed<ContextMenuItem[][]>(() => {
   const i = cartaoDoMenu.value
   if (!i) return []
+  // Cópia do menu que o cartão já tem no develop (código da develop lido em 25/11/2026): Ver
+  // Detalhes, Editar, Mover para, Enviar para Lixeira e Copiar Link. A proposta soma o "E-mail".
   return [
     [{ type: 'label', label: `${i.reference} · ${i.titulo}` }],
-    [{ label: props.t.itens.verDetalhes, icon: 'i-lucide-eye', onSelect: () => abrirItem(i.id) }],
+    [
+      { label: props.t.itens.verDetalhes, icon: 'i-lucide-eye', onSelect: () => abrirItem(i.id) },
+      { label: props.t.itens.editar, icon: 'i-lucide-pencil', onSelect: () => abrirItem(i.id) },
+      { label: props.t.itens.moverPara, icon: 'i-lucide-move-right', children: colunasDoQuadro.value.map(c => ({ label: c.label })) },
+      { label: props.t.itens.enviarParaLixeira, icon: 'i-lucide-trash-2' },
+      { label: props.t.itens.copiarLink, icon: 'i-lucide-link', onSelect: () => copiar(`item-${i.id}`, `https://app.enspace.io/workspaces/${workspace.reference}/types/${i.categoria}/${i.id}`, i.reference) },
+    ],
     opcoesDeContato(i) as ContextMenuItem[],
   ].filter(g => g.length)
 })
@@ -246,6 +254,7 @@ const menuDoCartao = computed<ContextMenuItem[][]>(() => {
       <ClientOnly>
         <UContextMenu :items="menuDoCartao" :ui="{ content: 'w-64' }">
           <div>
+            <div @contextmenu.capture="(ev: MouseEvent) => cliqueDireitoNoCartao(ev, texto => itens.find(i => texto.includes(i.reference)) ?? undefined, i => (cartaoDoMenu = i))">
             <EnKanbanBoard
               :data="cartoes"
               :card-map="cartao"
@@ -255,8 +264,8 @@ const menuDoCartao = computed<ContextMenuItem[][]>(() => {
               :stagger-column-ms="60"
               :locale="idioma"
               @card-click="(c) => abrirItem(Number((c as { id: number }).id))"
-              @context-mouse="({ data }) => (cartaoDoMenu = itens.find(i => i.id === Number((data as { id: number }).id)) ?? null)"
             />
+            </div>
           </div>
         </UContextMenu>
       </ClientOnly>

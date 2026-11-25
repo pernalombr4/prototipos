@@ -38,8 +38,8 @@ Lista, selecione 3 tarefas; na visão do quadro, clique com o botão direito num
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF421 | O clique direito no cartão do quadro deve abrir um menu com o nome da tarefa como título, "Abrir tarefa", "Abrir a Mail Box" e "Enviar e-mail para <nome>", com os 2 caminhos do atalho (RN909). | Clique direito em T-1042 mostra os 3 itens; "Enviar e-mail para Diego Martins" abre o submenu. | Essencial | Obrigatório |
-| RF422 | No cartão da tarefa sem item, o menu deve ficar sem "Abrir a Mail Box". | Uma tarefa rápida sem item mostra só "Abrir tarefa" e o e-mail. | Importante | Obrigatório |
+| RF421 | O menu do clique direito no cartão do quadro deve ganhar o nome da tarefa como título e, depois das ações que já tem ("Editar", "Duplicar", "Mover para", "Arquivar", "Enviar para Lixeira", "Copiar Link Externo"), "Abrir a Mail Box" e "Enviar e-mail para <nome>", com os 2 caminhos do atalho (RN909). | Clique direito em T-1042 mostra as ações de hoje, "Abrir a Mail Box" e "Enviar e-mail para Diego Martins", que abre o submenu. | Essencial | Obrigatório |
+| RF422 | No cartão da tarefa sem item, o menu deve ficar sem "Abrir a Mail Box". | Uma tarefa rápida sem item mostra as ações de hoje e o e-mail, sem "Abrir a Mail Box". | Importante | Obrigatório |
 | RF423 | No cartão da tarefa sem responsável, o item de e-mail deve mostrar "Sem responsável", indisponível (RN913). | O menu da tarefa sem responsável mostra "Sem responsável" cinza. | Importante | Obrigatório |
 | RF424 | "Abrir a Mail Box" deve abrir o painel da tarefa na aba Mail Box. | Em T-1042, o painel abre na aba Mail Box com os e-mails de CTR-00231. | Importante | Obrigatório |
 | RF425 | O quadro deve mostrar a dica "Clique no cartão para abrir a tarefa. Com o botão direito, envie e-mail ao responsável.". | A dica aparece acima das colunas. | Importante | Obrigatório |
@@ -50,7 +50,7 @@ Lista, selecione 3 tarefas; na visão do quadro, clique com o botão direito num
 
 | ID | Requisito | Como medir ou conferir | Prioridade | Relevância |
 |---|---|---|---|---|
-| RS401 | O quadro de tarefas deve usar o `EnKanbanBoard` do SDK como está: o atalho fica no clique direito, sem botão no cartão. Imposta por: o `EnKanbanBoard` não aceita ação extra no cartão. | O cartão não ganha botão; o clique direito traz o menu. | Essencial | Obrigatório |
+| RS401 | O atalho do quadro de tarefas entra no menu do clique direito que o cartão já tem; o cartão não ganha botão. O botão no cartão é o documento "Botão de e-mail no cartão do quadro". | O cartão não ganha botão; o clique direito traz as ações de hoje e o atalho. | Essencial | Obrigatório |
 
 ## Em aberto
 

@@ -1,0 +1,27 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/",
+  "andaime": "Protótipo",
+  "cenas": {
+    "quadro": [
+      { "estado": "Ir para", "esperar": 500 },
+      { "clicar": "Lista de itens (Contratos)", "esperar": 1200 },
+      { "clicar": "Por etapa", "esperar": 1500 }
+    ]
+  },
+  "requisitos": {
+    "RF001": { "sem": "o protótipo não desenha o botão no cartão; o desenho fica para a próxima rodada" },
+    "RF002": { "sem": "o protótipo não desenha o botão no cartão; o desenho fica para a próxima rodada" },
+    "RF003": { "sem": "o protótipo não desenha o botão no cartão; o desenho fica para a próxima rodada" },
+    "RF004": { "sem": "o protótipo não desenha o botão no cartão; o desenho fica para a próxima rodada" },
+    "RF005": { "sem": "o protótipo não desenha o botão no cartão; o desenho fica para a próxima rodada" },
+    "RF006": {
+      "cena": "quadro",
+      "passos": [
+        { "js": "(() => { const el = [...document.querySelectorAll('main *')].filter(e => e.children.length === 0 && e.textContent.trim() === 'CTR-00231')[0]; const r = el.getBoundingClientRect(); el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.x + 20, clientY: r.y + 10, button: 2 })) })()", "esperar": 800 },
+        { "pairar": "E-mail", "esperar": 800 }
+      ],
+      "destacar": { "css": "[role=menu]" }
+    },
+    "RI001": { "sem": "prop do SDK, sem tela" }
+  }
+}

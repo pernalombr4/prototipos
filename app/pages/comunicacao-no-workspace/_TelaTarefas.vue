@@ -16,7 +16,7 @@ import type { ContextMenuItem } from '@nuxt/ui'
 import type { EnKanbanCardConfig, EnKanbanColumn, EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import type { Textos } from './textos'
 import { HOJE, type MembroDoProtótipo, TIPOS_COM_LINK, type TarefaDoProtótipo, categoriaPorSlug, itemPorId, membroPorId, tarefas } from './mocks'
-import { useComunicacao, useMarcaDeProposta } from './estado'
+import { cliqueDireitoNoCartao, useComunicacao, useMarcaDeProposta } from './estado'
 import { useAtalhos } from './atalhos'
 import AcoesDeContato from './_AcoesDeContato.vue'
 import CompartilharFormulario from './_CompartilharFormulario.vue'
@@ -129,12 +129,20 @@ function avisos(x: TarefaDoProtótipo): ContextMenuItem[] {
 const menuDoCartao = computed<ContextMenuItem[][]>(() => {
   const x = tarefaDoMenu.value
   if (!x) return []
+  // Cópia do menu que o cartão já tem no develop (código da develop lido em 25/11/2026): Editar,
+  // Duplicar, Mover para, Arquivar, Enviar para Lixeira e Copiar Link Externo. A proposta soma
+  // "Abrir a Mail Box" e o e-mail ao responsável.
   return [
     [{ type: 'label', label: x.name }],
     [
-      { label: props.t.tarefas.abrir, icon: 'i-lucide-panel-right-open', onSelect: () => (aberta.value = x) },
-      ...(x.item || fase.value >= 3 ? [{ label: props.t.tarefas.abrirMailBox, icon: 'i-lucide-inbox', class: marca.value, onSelect: () => { aberta.value = x; abaDoPainel.value = 'mailbox' } }] : []),
+      { label: props.t.itens.editar, icon: 'i-lucide-pencil', onSelect: () => (aberta.value = x) },
+      { label: props.t.itens.duplicar, icon: 'i-lucide-copy' },
+      { label: props.t.itens.moverPara, icon: 'i-lucide-move-right', children: colunasDoQuadro.value.map(c => ({ label: c.label })) },
+      { label: props.t.itens.arquivar, icon: 'i-lucide-archive' },
+      { label: props.t.itens.enviarParaLixeira, icon: 'i-lucide-trash-2' },
+      { label: props.t.itens.copiarLinkExterno, icon: 'i-lucide-link', disabled: true },
     ],
+    ...(x.item || fase.value >= 3 ? [[{ label: props.t.tarefas.abrirMailBox, icon: 'i-lucide-inbox', class: marca.value, onSelect: () => { aberta.value = x; abaDoPainel.value = 'mailbox' } }]] : []),
     avisos(x),
   ].filter(g => g.length)
 })
@@ -204,6 +212,7 @@ const semResponsavel = computed(() => selecionadas.value.filter(l => !l.responsa
       <ClientOnly>
         <UContextMenu :items="menuDoCartao" :ui="{ content: 'w-72' }">
           <div>
+            <div @contextmenu.capture="(ev: MouseEvent) => cliqueDireitoNoCartao(ev, texto => tarefas.find(x => texto.includes(x.name)) ?? undefined, x => (tarefaDoMenu = x))">
             <EnKanbanBoard
               :data="cartoes"
               :card-map="cartao"
@@ -214,8 +223,8 @@ const semResponsavel = computed(() => selecionadas.value.filter(l => !l.responsa
               :stagger-column-ms="60"
               :locale="idioma"
               @card-click="(c) => (aberta = tarefas.find(x => x.id === Number((c as { id: number }).id)) ?? null)"
-              @context-mouse="({ data }) => (tarefaDoMenu = tarefas.find(x => x.id === Number((data as { id: number }).id)) ?? null)"
             />
+            </div>
           </div>
         </UContextMenu>
       </ClientOnly>

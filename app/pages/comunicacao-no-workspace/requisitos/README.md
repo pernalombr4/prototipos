@@ -1,8 +1,8 @@
 # Requisitos: comunicação no workspace
 
 6 épicos e 1 documento avulso. Cada épico sobe sozinho e vira 1 card `user_story`, com as partes como tarefas. O
-épico 1 só mexe na tela, com o back de hoje; os outros pedem back novo ou mudança no SDK (skill `requisitos`, "Épico
-pelo esforço"). Protótipo: https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/
+épico 1 só mexe na tela, com o back de hoje; os épicos 2 a 6 pedem back novo (skill `requisitos`, "Épico pelo
+esforço"). O documento 7 também só mexe na tela, mas fica à parte porque o botão ainda não tem desenho. Protótipo: https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/
 
 | Ordem | Épico | O que entrega | Lado | Depende de |
 |---|---|---|---|---|
@@ -12,7 +12,7 @@ pelo esforço"). Protótipo: https://pernalombr4.github.io/prototipos/comunicaca
 | 4 | [Caixa do workspace como remetente](4-caixa-como-remetente/epico.md) | As caixas do workspace no "De" do compositor, escolhidas por quem administra | Novo: envio por caixa | 1 |
 | 5 | [Responder na conversa e encaminhar](5-conversa-e-encaminhar/epico.md) | A resposta na mesma conversa do e-mail original e o "Encaminhar" | Novo | 1 |
 | 6 | [E-mail ligado à tarefa](6-email-da-tarefa/epico.md) | A tarefa vinculada ao e-mail, a Mail Box própria da tarefa e a coluna Tarefa | Novo: vínculo com a tarefa | 1; 3 para a tarefa sem item |
-| 7 | [Botão de e-mail no cartão do quadro](7-botao-no-cartao-do-quadro/REQUISITOS.md) (documento avulso, Opcional) | O botão de e-mail no cartão do quadro de itens e de tarefas, além do clique direito | Novo: prop no SDK | 1 |
+| 7 | [Botão de e-mail no cartão do quadro](7-botao-no-cartao-do-quadro/REQUISITOS.md) (documento avulso, Opcional) | O botão de e-mail no cartão do quadro de itens e de tarefas, além do clique direito | Só tela; o botão ainda sem desenho | 1 |
 
 ## As partes de cada épico
 

@@ -445,3 +445,20 @@ export function useMarcaDeProposta() {
     ? 'outline-2 outline-dashed outline-offset-2 outline-warning rounded-md'
     : '')
 }
+
+/**
+ * O EnKanbanBoard 0.21 pôs no cartão um menu de clique direito próprio, que segura o evento: o
+ * `context-mouse` não chega mais ao protótipo. Este clique direito roda antes do cartão (na fase
+ * de captura), acha o dado pelo texto do cartão e reabre o evento no contêiner de fora, que é o
+ * gatilho do menu do protótipo. Cartão que `achar` não reconhece segue para o menu do SDK.
+ */
+export function cliqueDireitoNoCartao<T>(ev: MouseEvent, achar: (textoDoCartao: string) => T | undefined, abrir: (dado: T) => void) {
+  const cartao = (ev.target as HTMLElement | null)?.closest('[draggable="true"]')
+  const dado = cartao ? achar(cartao.textContent ?? '') : undefined
+  if (dado === undefined) return
+  ev.stopPropagation()
+  ev.preventDefault()
+  abrir(dado)
+  const gatilho = (ev.currentTarget as HTMLElement).parentElement
+  gatilho?.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: ev.clientX, clientY: ev.clientY }))
+}

@@ -83,6 +83,11 @@ export interface Textos {
     editar: string
     enviarParaLixeira: string
     copiarLink: string
+    /** O menu que o cartão do quadro já tem no develop (rótulos do código da develop, 25/11/2026). */
+    moverPara: string
+    duplicar: string
+    arquivar: string
+    copiarLinkExterno: string
     contatar: string
     semContato: string
     dicaDoQuadro: string
@@ -613,6 +618,10 @@ const ptBR: Textos = {
     editar: 'Editar',
     enviarParaLixeira: 'Enviar para Lixeira',
     copiarLink: 'Copiar Link',
+    moverPara: 'Mover para',
+    duplicar: 'Duplicar',
+    arquivar: 'Arquivar',
+    copiarLinkExterno: 'Copiar Link Externo',
     contatar: 'Contatar',
     semContato: 'Sem contato',
     dicaDoQuadro: 'Clique com o botão direito num cartão para enviar e-mail ao contato.',
@@ -1188,6 +1197,10 @@ const en: Textos = {
     editar: 'Edit',
     enviarParaLixeira: 'Move to Trash',
     copiarLink: 'Copy Link',
+    moverPara: 'Move to',
+    duplicar: 'Duplicate',
+    arquivar: 'Archive',
+    copiarLinkExterno: 'Copy External Link',
     contatar: 'Contact',
     semContato: 'No contact',
     dicaDoQuadro: 'Right-click a card to email the contact.',
@@ -1763,6 +1776,10 @@ const es: Textos = {
     editar: 'Editar',
     enviarParaLixeira: 'Enviar a la Papelera',
     copiarLink: 'Copiar Enlace',
+    moverPara: 'Mover a',
+    duplicar: 'Duplicar',
+    arquivar: 'Archivar',
+    copiarLinkExterno: 'Copiar Enlace Externo',
     contatar: 'Contactar',
     semContato: 'Sin contacto',
     dicaDoQuadro: 'Haga clic derecho en una tarjeta para enviar un correo al contacto.',

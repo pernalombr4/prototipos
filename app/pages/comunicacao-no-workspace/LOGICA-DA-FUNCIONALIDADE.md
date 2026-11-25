@@ -85,7 +85,7 @@ Cada fase soma à anterior.
 | D20 | Resposta na mesma conversa e encaminhar | Dev (back e front) | Não: o "Responder" está comentado na tela | 2 | 7.5 | Responder abre um e-mail novo com "Re:"; sem "Encaminhar" |
 | D21 | Registro do e-mail enviado sem item e rota para vincular e trocar o vínculo depois | Dev (back) | Não | 2 | 7.3, 7.7 | Sem item, o e-mail fica só no Outlook; sem "Vincular" |
 | D22 | Vínculo do e-mail com a tarefa | Dev (back) | Não | 3 | 7.3, 7.7, 7.9 | Sem "Vincular a tarefa"; a Mail Box da tarefa mostra os e-mails do item |
-| D23 | Prop `cardActions` no `EnKanbanBoard`, o quadro do SDK (o kit de componentes do ENSPACE) | Dev (SDK) | Não | Opcional | 5.3, 5.4 | O atalho fica só no clique direito, sem botão no cartão |
+| D23 | Desenho do botão de e-mail no cartão do quadro (o "Notify" do mockup 5) | Produtos | Não | Opcional | 5.3, 5.4 | O atalho fica só no clique direito, sem botão no cartão |
 | D24 | Lista única dos e-mails dos itens e dos enviados pelo sistema, com ordem e paginação únicas, para a aba Mensagens | Dev (back) | Não: hoje são 2 listas separadas | 1 | 7.7 | O filtro "Do sistema" troca a fonte da tabela, 1 lista por vez (9, pergunta 14) |
 
 ## 4. Configuração (quem administra o workspace)
@@ -310,7 +310,8 @@ Cada fase soma à anterior.
 - **Lista:** o menu da linha ganha o submenu "E-mail", com um grupo por contato e os 2 caminhos de
   5.1. A coluna "Contato" mostra o nome e o e-mail do 1º contato do item. Na Fase 2, a coluna
   leva o rótulo do 1º contato da categoria.
-- **Quadro:** o clique direito no cartão traz o mesmo submenu. A dica do quadro diz "Clique com o
+- **Quadro:** o menu do clique direito que o cartão já tem (Ver Detalhes, Editar, Mover para,
+  Enviar para Lixeira, Copiar Link) ganha o mesmo submenu. A dica do quadro diz "Clique com o
   botão direito num cartão para enviar e-mail ao contato."
 - Contato sem e-mail aparece com o motivo, indisponível.
 
@@ -319,7 +320,7 @@ Cada fase soma à anterior.
 | Dependência | Onde se resolve | Se faltar |
 |---|---|---|
 | Tudo de 5.1 | Ver 5.1 | Ver 5.1 |
-| Para o botão no cartão (o "Notify" do mockup 5): prop `cardActions` no `EnKanbanBoard` (D23) | Dev (SDK) | Fica só o clique direito |
+| Para o botão no cartão (o "Notify" do mockup 5): o desenho do botão (D23) | Produtos | Fica só o clique direito |
 
 **Como a pessoa usa**
 
@@ -329,8 +330,8 @@ Cada fase soma à anterior.
 **Por que assim**
 
 - A lista já tem muitas colunas. O menu da linha já existe e recebe a ação sem ocupar espaço.
-- O `EnKanbanBoard` do SDK não aceita ação extra no cartão. O clique direito funciona sem mudar o
-  SDK.
+- O cartão do quadro já tem menu no clique direito. O atalho entra nele sem ocupar espaço no
+  cartão.
 
 ### 5.4 Tarefas: e-mail para o responsável (Fase 1)
 
@@ -343,8 +344,8 @@ Cada fase soma à anterior.
 - **Seleção de várias tarefas:** a barra ganha "E-mail para os <N> responsáveis", que abre 1 e-mail
   com todos em Para ("Abre 1 e-mail com todos os responsáveis em Para."). A barra diz quantas
   tarefas sem responsável ficam de fora.
-- **Quadro:** o clique direito no cartão traz "Abrir tarefa", "Abrir a Mail Box" e "Enviar e-mail
-  para <nome>".
+- **Quadro:** o menu do clique direito que o cartão já tem (Editar, Duplicar, Mover para, Arquivar,
+  Enviar para Lixeira, Copiar Link Externo) ganha "Abrir a Mail Box" e "Enviar e-mail para <nome>".
 - **Painel da tarefa:** abas Detalhes e Mail Box. Detalhes tem o botão de e-mail para o
   responsável; sem responsável, "Atribua um responsável para enviar o e-mail." A Mail Box está em
   7.9.
@@ -901,7 +902,7 @@ No workspace novo, o texto do próximo passo muda com o perfil:
 | Ponto | Front | Back |
 |---|---|---|
 | Atalho de e-mail (5.1 a 5.5) | Botão dividido, ícone no campo, submenu, coluna, lote, lembrete, motivo de indisponível, contato tirado dos campos de e-mail do item | Nada |
-| Clique direito no quadro (5.3, 5.4) | Menu de contexto | Opcional, no SDK: prop `cardActions` no `EnKanbanBoard` |
+| Clique direito no quadro (5.3, 5.4) | Itens novos no menu que o cartão já tem | Nada |
 | Link público (6) | Cartão e menu nas telas de uso | Nada: o link e a visibilidade já existem |
 | "Novo e-mail" e compositor (7.2, 7.3) | Gaveta aberta de qualquer tela, contexto da tela, "De" e "Responder para", bloco "Item vinculado" com o item da tela de origem | Nada: o envio com item já existe |
 | Responder (7.5) | E-mail novo com "Re:", texto citado e aviso | Nada |
@@ -953,7 +954,8 @@ No workspace novo, o texto do próximo passo muda com o perfil:
    nem a rota. Existe em outro lugar ou é plano?
 10. **Quem não usa Microsoft:** o cliente com Google fica só com o `mailto:` na Fase 1. Na Fase 2,
     as caixas do workspace atendem esse cliente, ou a integração com Google entra no roteiro?
-11. **SDK:** a prop `cardActions` no `EnKanbanBoard` entra no roteiro do SDK?
+11. **Botão no cartão do quadro:** onde fica e qual o rótulo (o "Notify" do mockup 5, "E-mail" ou só
+    o ícone)?
 12. **Tela inicial:** o Felipe concorda em tirar os atalhos da tela inicial (5.6)?
 13. **Aba Mensagens na Fase 1:** a tela "Emails Recebidos" de hoje basta como base da aba? Ela
     mostra também os enviados com item, ou só os recebidos? Quem a vê hoje: todo membro, ou só quem

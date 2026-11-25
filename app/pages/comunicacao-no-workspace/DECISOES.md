@@ -438,6 +438,26 @@ disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:)
   tela, com o back de hoje; os outros pedem back novo ou mudança no SDK. O card no ENSPACE espera a confirmação
   da redatora.
 
+## Rodada 9 · 2026-11-25 (prints de requisito e cards)
+
+- **O SDK passou de 0.17 para 0.21** (atualização do repositório, outra sessão). O `EnKanbanBoard`
+  0.21 tem menu de clique direito próprio no cartão e segura o evento: o submenu "E-mail" do quadro
+  tinha sumido do protótipo. O `cliqueDireitoNoCartao` (em `estado.ts`) pega o clique direito antes
+  do cartão e reabre o menu do protótipo, nos 2 quadros.
+- **O quadro do produto não é o `EnKanbanBoard`:** é um componente do front, e o cartão já tem menu
+  no clique direito (código da develop lido em 2026-11-25; falta conferir na tela). Itens: Ver
+  Detalhes, Editar, Mover para, Enviar para Lixeira, Copiar Link (Duplicar quando a categoria
+  permite). Tarefas: Editar, Duplicar, Mover para, Arquivar, Enviar para Lixeira, Copiar Link
+  Externo. O menu do protótipo passa a copiar esse menu e a somar a proposta: "E-mail" no quadro de
+  itens; "Abrir a Mail Box" e "Enviar e-mail para <nome>" no de tarefas. "Abrir tarefa" sai: no
+  produto, o clique no cartão e o "Editar" já abrem a tarefa.
+- **Requisitos alinhados:** RF311, RS301, RF421, RF422 e RS401 do épico 1 e RF312 do épico 6 citam o
+  menu que o cartão já tem. O documento "Botão de e-mail no cartão do quadro" perde a prop do SDK
+  (o botão é do front) e continua à parte só porque o botão ainda não tem desenho. A LOGICA segue
+  igual (D23, 5.3, 5.4 e a pergunta 11).
+- **Cartão do quadro de itens:** mostrava "Sem contato" quando o contato não tinha nome, mesmo com
+  e-mail. Agora mostra o e-mail.
+
 ## Por que cada decisão
 
 ### O e-mail sai da conta do Outlook da pessoa; o item recebe a resposta

@@ -25,11 +25,11 @@ de CTR-00231; na visão "Por etapa", clique com o botão direito num cartão.
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF311 | O clique direito num cartão do quadro deve abrir um menu com "<referência> · <nome do item>" como título, "Ver Detalhes" e o submenu "E-mail" da lista. | Clique direito no cartão de CTR-00231 mostra "CTR-00231 · Contrato de manutenção predial", "Ver Detalhes" e "E-mail". | Essencial | Obrigatório |
+| RF311 | O menu do clique direito no cartão do quadro deve ganhar o título "<referência> · <nome do item>" e, depois das ações que já tem ("Ver Detalhes", "Editar", "Mover para", "Enviar para Lixeira", "Copiar Link"), o submenu "E-mail" da lista. | Clique direito no cartão de CTR-00231 mostra "CTR-00231 · Contrato de manutenção predial", as ações de hoje e "E-mail". | Essencial | Obrigatório |
 | RF312 | O quadro deve mostrar a dica "Clique com o botão direito num cartão para enviar e-mail ao contato.". | A dica aparece acima das colunas do quadro. | Importante | Obrigatório |
 
 ## Restrições (RS)
 
 | ID | Requisito | Como medir ou conferir | Prioridade | Relevância |
 |---|---|---|---|---|
-| RS301 | O quadro deve usar o `EnKanbanBoard` do SDK como está: o atalho fica no clique direito, sem botão no cartão. Imposta por: o `EnKanbanBoard` não aceita ação extra no cartão. | O cartão não ganha botão; o clique direito traz o submenu. | Essencial | Obrigatório |
+| RS301 | O atalho do quadro entra no menu do clique direito que o cartão já tem; o cartão não ganha botão. O botão no cartão é o documento "Botão de e-mail no cartão do quadro". | O cartão não ganha botão; o clique direito traz as ações de hoje e o submenu. | Essencial | Obrigatório |

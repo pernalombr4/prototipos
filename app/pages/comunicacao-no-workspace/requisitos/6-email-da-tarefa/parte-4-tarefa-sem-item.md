@@ -25,7 +25,7 @@ quadro de tarefas.
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
 | RF311 | A aba Mail Box da tarefa sem item deve listar os e-mails vinculados à tarefa, em Recebidos e Enviados, sem o endereço do item e sem o seletor "Desta tarefa" e "Do item", no lugar do vazio "Tarefa sem item". | Painel de T-1045 › Mail Box: aparece o e-mail enviado com T-1045, com o botão "Novo e-mail". | Importante | Obrigatório |
-| RF312 | No quadro de tarefas, o clique direito no cartão da tarefa sem item deve mostrar "Abrir a Mail Box". | Clique direito no cartão de T-1045: o menu tem "Abrir tarefa" e "Abrir a Mail Box". | Desejável | Obrigatório |
+| RF312 | No quadro de tarefas, o clique direito no cartão da tarefa sem item deve mostrar "Abrir a Mail Box". | Clique direito no cartão de T-1045: o menu tem as ações de hoje e "Abrir a Mail Box". | Desejável | Obrigatório |
 
 ## Em aberto
 
