@@ -2,6 +2,27 @@
 
 Registro das rodadas. A mais recente em cima.
 
+## Cards no ENSPACE · 2026-11-25
+
+- **Pedido (literal):** "Sim, criar os 7" e "depois de criar os cards, pode mudar o status do prototipo no goithub pra aprovado".
+- **Cards** (desenvolvimento-enlighten2, `user_story`, To Do, aprovação do PO "Sim", sem responsável): a descrição é o `epico.md` de cada épico, e o critério de aceite vai no campo próprio. Tipo e prioridade são proposta do agente, porque a redatora não disse:
+
+  | Épico | Card | Tipo | Prioridade | Tarefas |
+  |---|---|---|---|---|
+  | 1. Home em widgets, com Categorias e tarefas | [USEC795895B62E54B949B808B6F8F269](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USEC795895B62E54B949B808B6F8F269) | Melhoria | Alta | 26591 a 26595 |
+  | 2. Widgets de itens, agenda e atalhos | [USED5D5E3E293344E868DEC6D17B4B50](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USED5D5E3E293344E868DEC6D17B4B50) | Melhoria | Media | 26596 a 26599 |
+  | 3. Widgets de agentes de IA e do Spaceflow | [USE2E26C55343634F58947CEB91D5458](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE2E26C55343634F58947CEB91D5458) | Melhoria | Media | 26600 e 26601 |
+  | 4. Home padrão do workspace | [USE2810D9F7E77147729839B3350FB3A](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE2810D9F7E77147729839B3350FB3A) | Inovação | Media | 26602 e 26603 |
+  | 5. BENI na Home | [USE92A0D5769F064ABD872A115A6C87F](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE92A0D5769F064ABD872A115A6C87F) | Inovação | Media | 26604 a 26606 |
+  | 6. Widgets da Home com dado novo | [USE92C3256A993C46DE93F2F067B6C5F](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE92C3256A993C46DE93F2F067B6C5F) | Inovação | Media | 26607 a 26609 |
+  | 7. Comunicado e Bloco de notas | [USEE645604A8C0A4062B56CCC635AAAC](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USEE645604A8C0A4062B56CCC635AAAC) | Inovação | Media | 26610 e 26611 |
+
+- **Prints de requisito:** 140, em `evidencias/requisitos/<épico>/`, 1 subpasta por épico, porque os IDs se repetem entre os épicos; o `prints.json` de cada épico mora na pasta dele em `requisitos/`. 16 requisitos levam "Sem print" (rotas de back-end, a migração do navegador, o Configurar do Gráfico de um painel e a página de conversa em tela cheia).
+- **Requisitos alinhados ao protótipo aprovado** (o texto descrevia outra tela): RF019, RF406, RF408, RF410 e RF414 do épico 1; RF104 do épico 3; RF109 do épico 5; RF202 e RF203 do épico 6. O "Papel" das instruções virou "Ver como", o rótulo do andaime, e o `textos.ts` saiu da descrição do card.
+- **O protótipo simplifica, e o requisito fica como está:** RF407 do épico 1 (o ícone da categoria sem a cor); RF003 do épico 3 (o protótipo abre a conversa flutuante, que é do épico 5); RF110 do épico 5 (as palavras-chave tratam "oi" como tarefa); RF001 do épico 6 (a ordem das tarefas delegadas no dado simulado).
+- **Status:** a Home passa a "aprovado" no índice e no `README.md`.
+- **Falta:** conferir os cards na tela do ENSPACE. A tarefa 26609 foi conferida pela API: caixas de marcar, os 2 prints e o "Sem print".
+
 ## Rodada 10 · 2026-11-25
 
 - **Pedido (literal):** "no final pode escrever os docs de requisitos separando em epicos. / um pro mvp, depois os outros restantes. / o mvp pode ser ainda mais enxuto em widgets, ok? pode ter só categorias e tarefas. / depois vamos entrando com o restante separando os epicos necessarios / --- / no chrome eu mesma vou testar pra nao atrasar"
