@@ -146,9 +146,9 @@ disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:)
 - **Conferido:** o código da Mail Box no develop (gaveta "Nova Mensagem"), os schemas do SDK 0.17,
   a documentação de suporte (`en-docs`, só leitura) e as telas do workspace de exploração.
 - **Premissa errada, corrigida:** o e-mail da Mail Box **não sai do endereço do item**. Sai da conta
-  do Outlook que a pessoa integrou (Perfil › Integrações › Correio do Outlook), pela rota
-  `user-integrations/microsoft/send-email`. O endereço do item vai em `replyTo` e `mailBox`, e a
-  referência do item em `item_ref`. Sem conta integrada, a gaveta mostra "Nenhuma conta integrada
+  do Outlook que a pessoa integrou (Perfil › Integrações › Correio do Outlook), pela integração do
+  Correio do Outlook. A resposta vai para o endereço do item, e o e-mail fica ligado à referência do
+  item. Sem conta integrada, a gaveta mostra "Nenhuma conta integrada
   disponível" e "Integrar contas". A pergunta da rodada 1 (o vínculo é o remetente?) acabou: o
   remetente é sempre a pessoa; o vínculo só define para onde a resposta volta e onde o e-mail fica.
 - **Mudou:**
@@ -442,20 +442,20 @@ disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:)
 
 ### O e-mail sai da conta do Outlook da pessoa; o item recebe a resposta
 
-Lido no código da gaveta "Nova Mensagem" da Mail Box (develop, 05/10/2026):
+Como a gaveta "Nova Mensagem" da Mail Box funciona no develop (05/10/2026):
 
-- o envio é `POST user-integrations/microsoft/send-email` com `to`, `cc`, `bcc`, `replyTo`,
-  `subject`, `message`, `attachments` e `item_ref`;
+- o e-mail sai pela integração do Correio do Outlook, com Para, Cc, Cco, o endereço de resposta, o
+  assunto, a mensagem, os anexos e a referência do item;
 - o remetente é a conta do Outlook que a pessoa integrou em Perfil › Integrações;
-- no item, `replyTo` e `mailBox` recebem `<referência do item>.<workspace>@<domínio das caixas>`, e
-  `item_ref` recebe a referência do item;
+- no item, a resposta vai para `<referência do item>.<workspace>@<domínio das caixas>`, e o e-mail
+  fica ligado à referência do item;
 - sem conta integrada, a gaveta mostra "Nenhuma conta integrada disponível" e "Integrar contas".
 
 Daí o compositor global usa o mesmo envio:
 
 - **com item vinculado:** o mesmo envio de hoje. A resposta volta para a Mail Box do item;
-- **sem item:** o mesmo envio sem `replyTo` e sem `item_ref`. A resposta chega só no Outlook da
-  pessoa. **Pergunta ao dev:** o envio sem `item_ref` fica gravado em `sendmails` para aparecer na
+- **sem item:** o mesmo envio, sem o endereço de resposta e sem a referência do item. A resposta
+  chega só no Outlook da pessoa. **Pergunta ao dev:** o envio sem item fica gravado para aparecer na
   área E-mails?
 
 Isso fecha com o documento: "O vínculo com o item é uma informação interna do ENSPACE e não
@@ -573,9 +573,9 @@ A Agenda junta 3 fontes: datas de itens (campo de data da categoria), tarefas (F
 Tarefas Rápidas) e reuniões do Outlook. O modal "Evento" ganha um atalho por pessoa e "E-mail para
 todos", e a pessoa muda conforme a fonte:
 
-- **reunião do Outlook:** os participantes. Só têm e-mail, então WhatsApp e SMS ficam
-  desabilitados com o motivo;
-- **data de um item:** os contatos do item (cartão "Atalhos de comunicação" da categoria);
+- **reunião do Outlook:** os participantes;
+- **data de um item:** os contatos do item, tirados dos campos de e-mail do item (no épico "Contato
+  da categoria", do cartão "Contato da categoria");
 - **prazo de uma tarefa:** o responsável.
 
 O texto do lembrete leva data, hora e, na reunião do Outlook, o local.
@@ -583,9 +583,10 @@ O texto do lembrete leva data, hora e, na reunião do Outlook, o local.
 ### A área "E-mails" no menu
 
 O documento pede que o e-mail apareça "na área de E-mail do usuário". Essa área existe escondida
-(`/itemEmails`, "Emails Recebidos"; achado S2-F1 da pesquisa de UX: telas nativas que só existem no editor de menus). O protótipo a põe na seção Membro, com
-Recebidos e Enviados, a coluna Item, o filtro "Com item" e "Sem item", e o vínculo depois do envio
-(ideia do Pipedrive):
+(a tela "Emails Recebidos"; achado S2-F1 da pesquisa de UX: telas nativas que só existem no editor
+de menus). O protótipo a põe na seção Membro como a central "E-mails" (rodada 7), com a aba
+Mensagens: filtros rápidos "Recebidos", "Enviados", "Do sistema", "Não lidos", "Com anexo" e "Sem
+item", a coluna Item e o vínculo depois do envio (ideia do Pipedrive):
 
 - **"Vincular" na própria linha** do e-mail sem item (o "Link item" do Pipedrive);
 - **sugestão pelo remetente** na leitura: os itens em que quem escreveu é contato aparecem antes da

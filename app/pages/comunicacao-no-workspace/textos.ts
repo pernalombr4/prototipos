@@ -962,7 +962,7 @@ const ptBR: Textos = {
     respostas: 'Respostas',
     visibilidade: 'Visibilidade',
     tipos: { criacao: 'Criação', editar: 'Editar', geral: 'Geral', visualizar: 'Visualizar' },
-    formulariosDica: 'Formulário público ganha o link para copiar nas telas de uso: tela inicial, lista de itens, tarefas e Requisições.',
+    formulariosDica: 'Formulário público ganha o link para copiar nas telas de uso: lista de itens, tarefas e Requisições.',
     cartoes: {
       campos: 'Campos',
       formularios: 'Formulários',
@@ -1537,7 +1537,7 @@ const en: Textos = {
     respostas: 'Answers',
     visibilidade: 'Visibility',
     tipos: { criacao: 'Creation', editar: 'Edit', geral: 'General', visualizar: 'View' },
-    formulariosDica: 'A public form gets a copy link on the screens where it is used: home, item list, tasks and Requests.',
+    formulariosDica: 'A public form gets a copy link on the screens where it is used: item list, tasks and Requests.',
     cartoes: {
       campos: 'Fields',
       formularios: 'Forms',
@@ -2112,7 +2112,7 @@ const es: Textos = {
     respostas: 'Respuestas',
     visibilidade: 'Visibilidad',
     tipos: { criacao: 'Creación', editar: 'Editar', geral: 'General', visualizar: 'Visualizar' },
-    formulariosDica: 'Un formulario público gana el enlace para copiar en las pantallas de uso: inicio, lista de ítems, tareas y Solicitudes.',
+    formulariosDica: 'Un formulario público gana el enlace para copiar en las pantallas de uso: lista de ítems, tareas y Solicitudes.',
     cartoes: {
       campos: 'Campos',
       formularios: 'Formularios',

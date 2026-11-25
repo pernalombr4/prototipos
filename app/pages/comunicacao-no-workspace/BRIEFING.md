@@ -286,9 +286,9 @@ ação para fora).
 **De onde o e-mail sai** (código da gaveta no develop, lido na rodada 3; a rodada 1 supôs errado
 que saía do endereço do item):
 
-- o envio é `user-integrations/microsoft/send-email`: sai da **conta do Outlook que a pessoa
+- o e-mail sai pela integração do Correio do Outlook: sai da **conta do Outlook que a pessoa
   integrou** em Perfil › Integrações › Correio do Outlook;
-- o endereço do item vai em `replyTo` e `mailBox`, e a referência do item em `item_ref`: a resposta
+- a resposta vai para o endereço do item, e o e-mail fica ligado à referência do item: a resposta
   volta para a Mail Box e o vínculo fica gravado pela referência;
 - o template troca as variáveis pelos dados do item, e há "Inserir assinatura";
 - sem conta integrada, a gaveta mostra "Nenhuma conta integrada disponível" e "Integrar contas". A

@@ -637,7 +637,8 @@ export interface EventoDaAgenda {
   local?: string
   /**
    * Quem recebe o lembrete. Outlook: os participantes. Item: os contatos do
-   * item (cartão "Atalhos de comunicação" da categoria). Tarefa: o responsável.
+   * item (os campos de e-mail do item; no épico "Contato da categoria", o
+   * cartão da categoria). Tarefa: o responsável.
    */
   participantes: { nome?: string, email?: string, telefone?: string | null }[]
   itemId?: number
