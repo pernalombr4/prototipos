@@ -87,6 +87,12 @@ const rapidos = computed<Set<Rapido>>({
   get: () => new Set(rapidosDaCentral.value),
   set: (s) => { rapidosDaCentral.value = [...s] },
 })
+/** "Sistema" no filtro de "Enviado por" liga o filtro rápido "Do sistema" (RF953). */
+watch(filtros, (f) => {
+  const marcouSistema = Object.entries(f).some(([k, v]) => k.startsWith('enviadoPor_') && Array.isArray(v) && v.includes('sistema'))
+  if (marcouSistema && !rapidos.value.has('sistema')) rapidos.value = new Set([...rapidos.value, 'sistema'])
+}, { deep: true })
+
 const COR_DO_RAPIDO: Record<Rapido, 'info' | 'success' | 'primary' | 'neutral' | 'warning' | 'secondary'> = {
   recebidos: 'info', enviados: 'success', sistema: 'secondary', naoLidos: 'primary', comAnexo: 'neutral', semItem: 'warning',
 }
@@ -177,7 +183,9 @@ const filtrados = computed(() => {
   const r = rapidos.value
   return emails.value
     .filter(registrado)
-    .filter(e => !e.sistema || ehAdmin.value)
+    // Fase 1: os e-mails do sistema e os dos itens vêm de 2 telas de hoje, e "Do sistema" troca a fonte
+    // (RF952). A lista única, com os 2 juntos, é da fase 2 (épico "E-mail sem item e lista por permissão").
+    .filter(e => !e.sistema || (ehAdmin.value && (fase.value >= 2 || r.has('sistema'))))
     .filter(e => dentroDoPeriodo(e.data))
     .filter(e => !(r.has('recebidos') && !r.has('enviados')) || e.direcao === 'recebido')
     .filter(e => !(r.has('enviados') && !r.has('recebidos')) || e.direcao === 'enviado')
