@@ -26,7 +26,7 @@
         "esperar": 300
       },
       {
-        "js": "(() => { const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim().startsWith('Prévia')); const box = h.closest('aside'); box.querySelectorAll('.flex.flex-col.gap-4 > div').forEach((b, i) => { const ps = b.querySelectorAll(':scope > p'); if (ps[0]) ps[0].dataset.print = 'rot' + i; if (ps[1]) ps[1].dataset.print = 'nome' + i; const dl = b.querySelector('dl'); if (dl) { dl.dataset.print = 'dl' + i; const dd = dl.querySelectorAll('dd'); dd[0].dataset.print = 'para' + i; dd[1].dataset.print = 'assunto' + i; dd[2].dataset.print = 'cc' + i } else if (ps[2]) ps[2].dataset.print = 'semEmail' + i }) })()",
+        "js": "(() => { const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim().startsWith('Prévia')); const box = h.closest('aside'); box.querySelectorAll('.flex.flex-col.gap-4 > div').forEach((b, i) => { const ps = b.querySelectorAll(':scope > p'); if (ps[0]) ps[0].dataset.print = 'rot' + i; if (ps[1]) ps[1].dataset.print = 'nome' + i; const dl = [...b.querySelectorAll(':scope > dl')].find(x => x.querySelectorAll('dd').length === 3); if (dl) { dl.dataset.print = 'dl' + i; const dd = dl.querySelectorAll('dd'); dd[0].dataset.print = 'para' + i; dd[1].dataset.print = 'assunto' + i; dd[2].dataset.print = 'cc' + i } else if (ps[2]) ps[2].dataset.print = 'semEmail' + i }) })()",
         "esperar": 300
       }
     ],
@@ -370,7 +370,7 @@
       "cena": "contatos",
       "passos": [
         {
-          "pairar": "Prévia: o que o botão E-mail abre"
+          "pairar": "Prévia: o que os botões E-mail e WhatsApp abrem"
         }
       ],
       "destacar": [
@@ -394,7 +394,7 @@
           "esperar": 900
         },
         {
-          "js": "(() => { const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim().startsWith('Prévia')); const box = h.closest('aside'); box.querySelectorAll('.flex.flex-col.gap-4 > div').forEach((b, i) => { const ps = b.querySelectorAll(':scope > p'); if (ps[0]) ps[0].dataset.print = 'rot' + i; if (ps[1]) ps[1].dataset.print = 'nome' + i; const dl = b.querySelector('dl'); if (dl) { dl.dataset.print = 'dl' + i; const dd = dl.querySelectorAll('dd'); dd[0].dataset.print = 'para' + i; dd[1].dataset.print = 'assunto' + i; dd[2].dataset.print = 'cc' + i } else if (ps[2]) ps[2].dataset.print = 'semEmail' + i }) })()",
+          "js": "(() => { const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim().startsWith('Prévia')); const box = h.closest('aside'); box.querySelectorAll('.flex.flex-col.gap-4 > div').forEach((b, i) => { const ps = b.querySelectorAll(':scope > p'); if (ps[0]) ps[0].dataset.print = 'rot' + i; if (ps[1]) ps[1].dataset.print = 'nome' + i; const dl = [...b.querySelectorAll(':scope > dl')].find(x => x.querySelectorAll('dd').length === 3); if (dl) { dl.dataset.print = 'dl' + i; const dd = dl.querySelectorAll('dd'); dd[0].dataset.print = 'para' + i; dd[1].dataset.print = 'assunto' + i; dd[2].dataset.print = 'cc' + i } else if (ps[2]) ps[2].dataset.print = 'semEmail' + i }) })()",
           "esperar": 300
         }
       ],
@@ -419,7 +419,7 @@
           "esperar": 900
         },
         {
-          "js": "(() => { const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim().startsWith('Prévia')); const box = h.closest('aside'); box.querySelectorAll('.flex.flex-col.gap-4 > div').forEach((b, i) => { const ps = b.querySelectorAll(':scope > p'); if (ps[0]) ps[0].dataset.print = 'rot' + i; if (ps[1]) ps[1].dataset.print = 'nome' + i; const dl = b.querySelector('dl'); if (dl) { dl.dataset.print = 'dl' + i; const dd = dl.querySelectorAll('dd'); dd[0].dataset.print = 'para' + i; dd[1].dataset.print = 'assunto' + i; dd[2].dataset.print = 'cc' + i } else if (ps[2]) ps[2].dataset.print = 'semEmail' + i }) })()",
+          "js": "(() => { const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim().startsWith('Prévia')); const box = h.closest('aside'); box.querySelectorAll('.flex.flex-col.gap-4 > div').forEach((b, i) => { const ps = b.querySelectorAll(':scope > p'); if (ps[0]) ps[0].dataset.print = 'rot' + i; if (ps[1]) ps[1].dataset.print = 'nome' + i; const dl = [...b.querySelectorAll(':scope > dl')].find(x => x.querySelectorAll('dd').length === 3); if (dl) { dl.dataset.print = 'dl' + i; const dd = dl.querySelectorAll('dd'); dd[0].dataset.print = 'para' + i; dd[1].dataset.print = 'assunto' + i; dd[2].dataset.print = 'cc' + i } else if (ps[2]) ps[2].dataset.print = 'semEmail' + i }) })()",
           "esperar": 300
         }
       ],
@@ -684,7 +684,7 @@
     "RF118": {
       "cena": "central",
       "destacar": [
-        "Defina na própria categoria os campos de nome e de e-mail do contato.",
+        "Defina na própria categoria os campos de nome, e-mail e telefone do contato.",
         "Escolher o contato de cada categoria"
       ]
     },
