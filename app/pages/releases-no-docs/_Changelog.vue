@@ -38,6 +38,10 @@
  *
  * Rodada 10: o rótulo volta a abrir um `UPopover` (chevron), agora curto: o título da mudança,
  * "Agir até" com o porquê e o link "Abrir o guia de migração". Sair da página é escolha da pessoa.
+ *
+ * Rodada 11: a seção Exige ação sai. A mudança é um item do tipo dela (Novidades, Melhorias), com o
+ * rótulo "Exige ação" no item, o porquê, quem é afetado, "Agir até" e o link do guia. A versão volta
+ * a ficar toda recolhida; o resumo do rótulo do topo ganha "Ver na versão", que abre e rola até o item.
  */
 import ProseA from '@nuxt/ui/runtime/components/prose/A.vue'
 import ProseH3 from '@nuxt/ui/runtime/components/prose/H3.vue'
@@ -80,12 +84,12 @@ const versoes = computed(() => {
     .sort((a, b) => Number(b.emBreve) - Number(a.emBreve) || b.data.localeCompare(a.data) || b.versao.localeCompare(a.versao))
     .map(v => ({
       ...v,
-      /** Rodada 7: as mudanças que exigem ação ficam fora do texto recolhido, sempre à vista. */
+      /** As mudanças que exigem ação, para o resumo do rótulo. Rodada 11: no texto, cada uma fica no tipo dela. */
       acoes: v.itens.filter(e => e.mudanca).map(e => ({ entrada: e, mudanca: mudancaDe(e.mudanca)! })),
       secoes: [
-        { chave: 'novidades', titulo: props.t.releases.tipos.novidade, itens: v.itens.filter(e => !e.mudanca && e.tipo === 'novidade') },
-        { chave: 'melhorias', titulo: props.t.releases.tipos.melhoria, itens: v.itens.filter(e => !e.mudanca && e.tipo === 'melhoria') },
-        { chave: 'correcoes', titulo: props.t.releases.tipos.correcao, itens: v.itens.filter(e => !e.mudanca && e.tipo === 'correcao') },
+        { chave: 'novidades', titulo: props.t.releases.tipos.novidade, itens: v.itens.filter(e => e.tipo === 'novidade') },
+        { chave: 'melhorias', titulo: props.t.releases.tipos.melhoria, itens: v.itens.filter(e => e.tipo === 'melhoria') },
+        { chave: 'correcoes', titulo: props.t.releases.tipos.correcao, itens: v.itens.filter(e => e.tipo === 'correcao') },
       ].filter(s => s.itens.length),
     }))
 })
@@ -131,12 +135,10 @@ let apagar: ReturnType<typeof setTimeout> | undefined
 watch(() => props.destaque, async (id) => {
   if (!id) return
   const v = versoes.value.find(x => x.id === id || id.startsWith(`${x.id}-`) || x.itens.some(e => e.id === id))
-  /** Rodada 7: o que exige ação está fora do texto recolhido; ir até lá não abre a versão. */
-  const aVista = !!v && (id === v.id || id === `${v.id}-exige-acao` || v.acoes.some(x => x.entrada.id === id))
-  if (v && !estaAberta(v.id) && !aVista) abertasNaTela.value = [...abertasNaTela.value, v.id]
+  if (v && !estaAberta(v.id) && id !== v.id) abertasNaTela.value = [...abertasNaTela.value, v.id]
   await nextTick()
   await new Promise(r => setTimeout(r, 450))
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: id === v?.id || id.endsWith('-exige-acao') ? 'start' : 'center' })
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: id === v?.id ? 'start' : 'center' })
   aceso.value = id
   clearTimeout(apagar)
   apagar = setTimeout(() => { aceso.value = null }, 2600)
@@ -237,7 +239,16 @@ watch(() => props.destaque, async (id) => {
                     <p class="text-default">
                       <span class="font-semibold text-highlighted">{{ t.releases.agirAteData(dataLonga(x.mudanca.fases.obrigatoria)) }}</span>{{ ' ' }}{{ L(x.mudanca.motivo) }}
                     </p>
-                    <div class="-ml-2">
+                    <div class="-ml-2 flex flex-wrap gap-x-2">
+                      <UButton
+                        size="xs"
+                        color="primary"
+                        variant="link"
+                        trailing-icon="i-lucide-arrow-down"
+                        :label="t.releases.verNaVersao"
+                        class="cursor-pointer"
+                        @click="close(); emit('irPara', x.entrada.id)"
+                      />
                       <UButton
                         size="xs"
                         color="primary"
@@ -267,46 +278,6 @@ watch(() => props.destaque, async (id) => {
 
         <!-- O texto da versão, como o texto de um post, fechado por padrão -->
         <template #body>
-          <!--
-            Rodada 7: Exige ação, sempre aberta e antes do texto recolhido, como "Breaking Changes" no
-            post de versão do Nuxt. Rodada 9: cada item leva só o título com o porquê, quem é afetado,
-            "Agir até" e o link do guia. Fases, passos e o que acontece depois moram só no guia.
-          -->
-          <div v-if="v.acoes.length" class="pt-2 text-default">
-            <ProseH3 :id="`${v.id}-exige-acao`" anchor :ui="{ base: 'text-lg mt-6 mb-2 scroll-mt-32' }">
-              <UIcon name="i-lucide-triangle-alert" class="me-1.5 inline-block size-5 align-text-bottom text-warning" aria-hidden="true" />
-              {{ t.entrada.exigeAcao }}
-            </ProseH3>
-
-            <div
-              v-for="x in v.acoes"
-              :id="x.entrada.id"
-              :key="x.entrada.id"
-              class="scroll-mt-32 rounded-sm transition-colors duration-500"
-              :class="aceso === x.entrada.id || aceso === `${v.id}-exige-acao` ? 'bg-warning/10' : ''"
-            >
-              <ProseP class="mb-2">
-                <a :href="`#${x.entrada.id}`" :title="t.entrada.copiarLink" class="group relative rounded-sm text-highlighted outline-primary/25 focus-visible:outline-3">
-                  <span class="absolute top-0 -ms-8 hidden rounded-md bg-elevated p-1 text-muted opacity-0 transition group-hover:text-primary group-hover:opacity-100 group-focus:opacity-100 lg:flex" aria-hidden="true">
-                    <UIcon :name="icones.hash" class="size-4 shrink-0" />
-                  </span>
-                  <ProseStrong>{{ tituloDoItem(x.entrada) }}</ProseStrong>
-                </a>{{ ' ' }}{{ L(x.mudanca.motivo) }}
-              </ProseP>
-              <ProseP class="my-2">
-                {{ t.releases.quemEAfetado(L(x.mudanca.quem)) }}
-              </ProseP>
-              <ProseP class="my-2">
-                <ProseStrong>{{ t.releases.agirAteData(dataLonga(x.mudanca.fases.obrigatoria)) }}</ProseStrong>
-              </ProseP>
-              <ProseP class="mt-2">
-                <ProseA :href="`#guia-${x.mudanca.id}`" @click.stop.prevent="emit('abrirGuia', x.mudanca.id)">
-                  {{ t.releases.guiaDe(L(x.mudanca.titulo)) }}
-                </ProseA>
-              </ProseP>
-            </div>
-          </div>
-
           <UCollapsible v-if="v.secoes.length" :open="estaAberta(v.id)">
             <template #content>
               <div class="pt-2 text-default">
@@ -328,23 +299,50 @@ watch(() => props.destaque, async (id) => {
                   </ProseUl>
 
                   <template v-else>
-                    <ProseP
+                    <div
                       v-for="e in s.itens"
                       :id="e.id"
                       :key="e.id"
                       class="scroll-mt-32 rounded-sm transition-colors duration-500"
                       :class="aceso === e.id ? 'bg-primary/10' : ''"
                     >
-                      <a :href="`#${e.id}`" :title="t.entrada.copiarLink" class="group relative rounded-sm text-highlighted outline-primary/25 focus-visible:outline-3">
-                        <span class="absolute top-0 -ms-8 hidden rounded-md bg-elevated p-1 text-muted opacity-0 transition group-hover:text-primary group-hover:opacity-100 group-focus:opacity-100 lg:flex" aria-hidden="true">
-                          <UIcon :name="icones.hash" class="size-4 shrink-0" />
-                        </span>
-                        <ProseStrong>{{ tituloDoItem(e) }}</ProseStrong>
-                      </a>{{ ' ' }}{{ L(e.resumo) }}
-                      <template v-if="!v.emBreve">
-                        {{ ' ' }}<ProseA href="#" @click.prevent="foraDoPrototipo">{{ t.releases.saibaMais }}</ProseA>
+                      <ProseP :class="e.mudanca ? 'mb-2' : ''">
+                        <a :href="`#${e.id}`" :title="t.entrada.copiarLink" class="group relative rounded-sm text-highlighted outline-primary/25 focus-visible:outline-3">
+                          <span class="absolute top-0 -ms-8 hidden rounded-md bg-elevated p-1 text-muted opacity-0 transition group-hover:text-primary group-hover:opacity-100 group-focus:opacity-100 lg:flex" aria-hidden="true">
+                            <UIcon :name="icones.hash" class="size-4 shrink-0" />
+                          </span>
+                          <ProseStrong>{{ tituloDoItem(e) }}</ProseStrong>
+                        </a>
+                        <!-- Rodada 11: a mudança que exige ação é um item do tipo dela, marcado no próprio item -->
+                        <template v-if="e.mudanca">
+                          {{ ' ' }}<UBadge
+                            color="warning"
+                            variant="subtle"
+                            size="sm"
+                            icon="i-lucide-triangle-alert"
+                            :label="t.entrada.exigeAcao"
+                            class="align-text-bottom"
+                          />
+                          {{ ' ' }}{{ L(mudancaDe(e.mudanca)!.motivo) }}
+                        </template>
+                        <template v-else>
+                          {{ ' ' }}{{ L(e.resumo) }}
+                          <template v-if="!v.emBreve">
+                            {{ ' ' }}<ProseA href="#" @click.prevent="foraDoPrototipo">{{ t.releases.saibaMais }}</ProseA>
+                          </template>
+                        </template>
+                      </ProseP>
+                      <template v-if="e.mudanca">
+                        <ProseP class="my-2">
+                          {{ t.releases.quemEAfetado(L(mudancaDe(e.mudanca)!.quem)) }}{{ ' ' }}<ProseStrong>{{ t.releases.agirAteData(dataLonga(mudancaDe(e.mudanca)!.fases.obrigatoria)) }}</ProseStrong>
+                        </ProseP>
+                        <ProseP class="mt-2">
+                          <ProseA :href="`#guia-${e.mudanca}`" @click.stop.prevent="emit('abrirGuia', e.mudanca)">
+                            {{ t.releases.guiaDe(L(mudancaDe(e.mudanca)!.titulo)) }}
+                          </ProseA>
+                        </ProseP>
                       </template>
-                    </ProseP>
+                    </div>
                   </template>
                 </template>
               </div>

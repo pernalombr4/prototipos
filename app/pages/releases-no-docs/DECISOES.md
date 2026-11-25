@@ -15,7 +15,8 @@ Na rodada 5, "Próximas mudanças" sai: o que exige ação fica na trilha, com o
   o popover sai, a seção Exige ação fica sempre aberta e o item leva ao guia de migração, uma página
   nova da doc (rodada 7), em Docs > Referência (rodada 8); o guia é a única fonte do "como", e a
   release fica com o porquê, quem é afetado, "Agir até" e o link (rodada 9); o rótulo abre um resumo
-  curto com o link do guia, sem sair da página (rodada 10);
+  curto com o link do guia, sem sair da página (rodada 10); a seção Exige ação sai, e a mudança é um
+  item do tipo dela, com o rótulo no item (rodada 11);
   "Assinar"; os patches como blocos curtos na mesma trilha. O
   banner sai da versão e fica no post.
 - **Muda no Blog:** o post do mês no lugar do post por versão; o post só de changelog sai da lista
@@ -32,7 +33,7 @@ flowchart LR
   C -->|Ler o post de lançamento| P
   C -->|Rótulo Exige ação| O[Resumo curto no popover]
   O -->|Abrir o guia de migração| G
-  C -->|Rolar| R[Seção Exige ação da versão, sempre aberta]
+  O -->|Ver na versão| R[Item que exige ação, no tipo dele, com a versão aberta]
   R -->|Guia de migração| G[Guia de migração na doc]
   G -->|Anunciada no changelog| C
   G -->|Anterior e próximo, menu| G
@@ -42,6 +43,18 @@ flowchart LR
 ```
 
 ## Rodadas
+
+### Rodada 11 · 2026-11-25
+- **Pedido (literal):** "o modo como o texto da release ta montado, com o exige açao sendo um bloco acima de novidaes, ta bem estranho... faz o user nao compreender que tem mais novidades. parece que tem uma novidade e um problema". A redatora aprovou a proposta: a mudança volta a ser um item do tipo dela, marcado no próprio item
+- **Mudou:**
+  - a seção Exige ação sai do texto da versão. A mudança fica em Novidades, Melhorias ou Correções, como os outros itens, e a contagem do resumo ("4 itens: 2 novidades e 2 melhorias") bate com o que aparece
+  - o item leva, ao lado do título, o rótulo "Exige ação"; depois o porquê, quem é afetado com "Agir até <data>" e o link "Guia de migração: <título>"
+  - a versão volta a ficar toda recolhida por padrão; o aviso continua à vista pelo rótulo do topo
+  - o resumo do rótulo do topo ganha "Ver na versão", que abre o texto e rola até o item, ao lado de "Abrir o guia de migração"
+- **Descartado:** manter a seção com o título "Antes de atualizar" e "1 exige ação" no resumo da versão. Motivo: a contagem bateria, mas o aviso continuaria parecendo um bloco à parte
+- **Perde:** com a versão recolhida, a ação não aparece escrita na página, só no resumo do rótulo. O texto completo vai inteiro para o RSS e o e-mail, com o rótulo no item
+- **Fronteira:** muda o lugar do item que exige ação e o resumo do rótulo; o guia fica como na rodada 9
+- **Ver:** `https://pernalombr4.github.io/prototipos/releases-no-docs/` · `evidencias/rodada11-item-desktop-claro.jpg` · `evidencias/rodada11-item-mobile-escuro.jpg`
 
 ### Rodada 10 · 2026-11-25
 - **Pedido (literal):** "o badge deveria ter continuado com o chevron e o texto curto e link. nao redirecionando direto pra pagina. o user deve poder escolher se ele sai daquela pagina ou nao"

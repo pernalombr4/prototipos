@@ -5,7 +5,7 @@ o guia como a única fonte do "como":
 
 | Onde | O que leva | Precisa de código novo? |
 |---|---|---|
-| Release (aba Releases) | O rótulo "Exige ação · Agir até <data>" e a seção "Exige ação", sempre aberta: título com o porquê, quem é afetado, "Agir até" e o link do guia | Sim, 1 vez: o rótulo e a seção saem do frontmatter |
+| Release (aba Releases) | O rótulo "Exige ação · Agir até <data>" no topo da versão e, no item da mudança, dentro do tipo dela, o rótulo "Exige ação", o porquê, quem é afetado, "Agir até" e o link do guia | Sim, 1 vez: os 2 rótulos e as linhas do item saem do frontmatter |
 | Guia de migração (Docs > Referência) | O que muda, por quê, quem, prazo e fases, passos e o que acontece depois | Não: só componentes que o `en-docs` já renderiza |
 
 Depois que o dev fizer a parte da release, uma mudança nova pede só preencher os 2 modelos abaixo.
@@ -18,8 +18,10 @@ depois do prazo não entram aqui: moram só no guia (decisão da redatora em 202
 - O rótulo da versão usa a data `required` mais próxima.
 - O rótulo abre um popover curto com cada mudança: `title`, "Agir até `required`" com o `why` e o link
   "Abrir o guia de migração". O rótulo nunca leva direto ao guia: sair da página é escolha de quem lê
-  (decisão da redatora em 2026-11-25).
-- A seção mostra cada item nesta ordem: `title` com `why`, `who`, "Agir até `required`" e o link do `guide`.
+  (decisão da redatora em 2026-11-25). O popover também tem "Ver na versão", que abre o texto e rola até o item.
+- Não há seção "Exige ação": o item fica no tipo dele (Novidades, Melhorias, Correções), como os outros,
+  nesta ordem: `title`, o rótulo "Exige ação", `why`; depois `who` e "Agir até `required`"; depois o link do
+  `guide` (decisão da redatora em 2026-11-25).
 
 ```yaml
 actionRequired:
