@@ -14,7 +14,8 @@ Na rodada 5, "Próximas mudanças" sai: o que exige ação fica na trilha, com o
   o rótulo "Exige ação" abre o resumo da mudança, e o item traz "O que fazer" em passos (rodada 6);
   o popover sai, a seção Exige ação fica sempre aberta e o item leva ao guia de migração, uma página
   nova da doc (rodada 7), em Docs > Referência (rodada 8); o guia é a única fonte do "como", e a
-  release fica com o porquê, quem é afetado, "Agir até" e o link, que o rótulo também abre (rodada 9);
+  release fica com o porquê, quem é afetado, "Agir até" e o link (rodada 9); o rótulo abre um resumo
+  curto com o link do guia, sem sair da página (rodada 10);
   "Assinar"; os patches como blocos curtos na mesma trilha. O
   banner sai da versão e fica no post.
 - **Muda no Blog:** o post do mês no lugar do post por versão; o post só de changelog sai da lista
@@ -29,8 +30,9 @@ flowchart LR
   B[Blog: lista] -->|Ler o post| P[Post do mês]
   P -->|Ver no changelog| C[Releases: o texto de cada versão na trilha]
   C -->|Ler o post de lançamento| P
-  C -->|Rótulo Exige ação, 1 mudança| G
-  C -->|Rótulo Exige ação, 2 ou mais| R[Seção Exige ação da versão, sempre aberta]
+  C -->|Rótulo Exige ação| O[Resumo curto no popover]
+  O -->|Abrir o guia de migração| G
+  C -->|Rolar| R[Seção Exige ação da versão, sempre aberta]
   R -->|Guia de migração| G[Guia de migração na doc]
   G -->|Anunciada no changelog| C
   G -->|Anterior e próximo, menu| G
@@ -40,6 +42,16 @@ flowchart LR
 ```
 
 ## Rodadas
+
+### Rodada 10 · 2026-11-25
+- **Pedido (literal):** "o badge deveria ter continuado com o chevron e o texto curto e link. nao redirecionando direto pra pagina. o user deve poder escolher se ele sai daquela pagina ou nao"
+- **Mudou:**
+  - o rótulo "Exige ação · Agir até <data>" volta a ter o chevron e abre um popover, como na rodada 6, agora curto: o título da mudança, "Agir até <data>" com o porquê e o link "Abrir o guia de migração". Com 2 ou mais mudanças, o popover lista uma abaixo da outra
+  - o rótulo não leva mais direto ao guia nem rola até a seção: a pessoa lê o resumo e escolhe se sai da página
+  - a seção Exige ação no texto da versão fica como na rodada 9, para quem lê pelo RSS e pelo e-mail
+- **Descartado:** voltar o popover inteiro da rodada 6, com quem é afetado, as 3 fases e "Ver na versão". Motivo: fases e passos moram só no guia desde a rodada 9; quem é afetado já está na seção, logo abaixo
+- **Fronteira:** muda só o rótulo; a seção Exige ação e o guia ficam como na rodada 9
+- **Ver:** `https://pernalombr4.github.io/prototipos/releases-no-docs/` · `evidencias/rodada10-rotulo-desktop-claro.jpg` · `evidencias/rodada10-rotulo-mobile-claro.jpg`
 
 ### Rodada 9 · 2026-11-25
 - **Pedido (literal):** "agora que existe a ideia do guia de migraçao, acha que precisamos citar no texto da release o que deve ser feito?? ou só colocar um link pro guia, e tambem no badge do topo ter esse link pro guia? pra simplificar e centralizar". A redatora aprovou a proposta: tirar os passos da release, manter 3 informações curtas e ligar o rótulo ao guia

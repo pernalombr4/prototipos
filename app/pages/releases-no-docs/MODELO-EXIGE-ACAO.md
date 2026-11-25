@@ -16,7 +16,9 @@ Proposta para o dev. Cada mudança é 1 item da lista, com 6 campos. Fases, pass
 depois do prazo não entram aqui: moram só no guia (decisão da redatora em 2026-11-25).
 
 - O rótulo da versão usa a data `required` mais próxima.
-- Versão com 1 mudança: o rótulo abre o `guide`. Com 2 ou mais: o rótulo leva à seção "Exige ação".
+- O rótulo abre um popover curto com cada mudança: `title`, "Agir até `required`" com o `why` e o link
+  "Abrir o guia de migração". O rótulo nunca leva direto ao guia: sair da página é escolha de quem lê
+  (decisão da redatora em 2026-11-25).
 - A seção mostra cada item nesta ordem: `title` com `why`, `who`, "Agir até `required`" e o link do `guide`.
 
 ```yaml

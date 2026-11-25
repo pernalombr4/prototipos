@@ -34,7 +34,10 @@
  * evidencias/notas/acao-exige-acao.md.
  *
  * Rodada 9: o guia é a única fonte do "como". Na release ficam o título com o porquê, quem é afetado,
- * "Agir até" e o link do guia; o rótulo do topo abre o guia quando a versão tem 1 mudança.
+ * "Agir até" e o link do guia.
+ *
+ * Rodada 10: o rótulo volta a abrir um `UPopover` (chevron), agora curto: o título da mudança,
+ * "Agir até" com o porquê e o link "Abrir o guia de migração". Sair da página é escolha da pessoa.
  */
 import ProseA from '@nuxt/ui/runtime/components/prose/A.vue'
 import ProseH3 from '@nuxt/ui/runtime/components/prose/H3.vue'
@@ -203,21 +206,53 @@ watch(() => props.destaque, async (id) => {
         <template #badge>
           <UBadge color="neutral" variant="subtle" size="sm" :label="v.tamanho" />
           <!--
-            Rodada 9: com 1 mudança que exige ação, o rótulo abre o guia de migração dela; com 2 ou
-            mais, leva à seção Exige ação, que tem 1 link por guia.
+            Rodada 10: o rótulo abre um resumo curto de cada mudança, com o link do guia. A pessoa
+            escolhe se sai da página; o rótulo nunca leva direto ao guia.
           -->
-          <UButton
+          <UPopover
             v-if="v.prazo"
-            color="warning"
-            variant="outline"
-            size="xs"
-            icon="i-lucide-triangle-alert"
-            :trailing-icon="v.acoes.length === 1 ? 'i-lucide-arrow-right' : 'i-lucide-arrow-down'"
-            class="cursor-pointer bg-warning/10 text-highlighted hover:bg-warning/20"
-            :ui="{ leadingIcon: 'text-warning', trailingIcon: 'text-warning' }"
-            :label="`${t.entrada.exigeAcao} · ${t.entrada.agirAte(formatarData(v.prazo, idioma))}`"
-            @click.stop="v.acoes.length === 1 ? emit('abrirGuia', v.acoes[0]!.mudanca.id) : emit('irPara', `${v.id}-exige-acao`)"
-          />
+            :content="{ side: 'bottom', align: 'start', sideOffset: 8, collisionPadding: 16 }"
+            :ui="{ content: 'w-80 p-4 sm:w-96' }"
+          >
+            <UButton
+              color="warning"
+              variant="outline"
+              size="xs"
+              icon="i-lucide-triangle-alert"
+              trailing-icon="i-lucide-chevron-down"
+              class="cursor-pointer bg-warning/10 text-highlighted hover:bg-warning/20"
+              :ui="{ leadingIcon: 'text-warning', trailingIcon: 'text-warning' }"
+              :label="`${t.entrada.exigeAcao} · ${t.entrada.agirAte(formatarData(v.prazo, idioma))}`"
+              @click.stop
+            />
+
+            <template #content="{ close }">
+              <div class="flex flex-col gap-4">
+                <template v-for="(x, i) in v.acoes" :key="x.entrada.id">
+                  <USeparator v-if="i" />
+                  <div class="flex flex-col gap-2 text-sm leading-6">
+                    <p class="font-semibold text-highlighted">
+                      {{ L(x.mudanca.titulo) }}
+                    </p>
+                    <p class="text-default">
+                      <span class="font-semibold text-highlighted">{{ t.releases.agirAteData(dataLonga(x.mudanca.fases.obrigatoria)) }}</span>{{ ' ' }}{{ L(x.mudanca.motivo) }}
+                    </p>
+                    <div class="-ml-2">
+                      <UButton
+                        size="xs"
+                        color="primary"
+                        variant="link"
+                        trailing-icon="i-lucide-arrow-right"
+                        :label="t.releases.abrirGuia"
+                        class="cursor-pointer"
+                        @click="close(); emit('abrirGuia', x.mudanca.id)"
+                      />
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </template>
+          </UPopover>
         </template>
 
         <!-- O título é link, como um título de markdown do Nuxt UI: o ícone # aparece ao passar o mouse -->
