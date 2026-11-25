@@ -12,8 +12,7 @@ central E-mails, aba Configurações, bloco "Contato do item".
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/, aprovado em 24/11/2026. Na barra de
 baixo, escolha "2 · Remetente" no controle "Fase". "Ir para" › "Contato da categoria Contratos" abre o cartão; "Ir
-para" › "Item CTR-00231" abre o item. Os textos nos 3 idiomas estão em
-`app/pages/comunicacao-no-workspace/textos.ts`.
+para" › "Item CTR-00231" abre o item. Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
 **Fora do escopo:** telefone e outros canais (o canal é só e-mail); o contato tirado dos campos de e-mail do item, sem
 cartão (épico "E-mail com o que o produto já tem"); as sugestões de item pelo destinatário no compositor e na leitura

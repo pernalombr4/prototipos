@@ -1,6 +1,6 @@
 # Requisitos: Botão de e-mail no cartão do quadro
 
-**Objetivo:** o cartão do quadro de itens e o do quadro de tarefas ganham um botão de e-mail, o "Notify" do mockup 5,
+**Objetivo:** o cartão do quadro de itens e o do quadro de tarefas ganham um botão de e-mail
 que o teclado alcança. O épico "E-mail com o que o produto já tem" põe o atalho só no menu do clique direito do
 cartão.
 
@@ -11,7 +11,7 @@ os 2 com o mesmo cartão de quadro do produto.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/, aprovado em 24/11/2026. O protótipo
 não tem o botão no cartão: mostra o mesmo menu no clique direito do cartão, no quadro de itens e no de tarefas. Os
-textos nos 3 idiomas estão em `app/pages/comunicacao-no-workspace/textos.ts`.
+textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
 **Fora do escopo:** o clique direito no cartão, que fica no épico "E-mail com o que o produto já tem"; outras ações
 no cartão além do e-mail.
@@ -34,9 +34,9 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
-| P001 | Onde fica o botão no cartão e qual o rótulo: o "Notify" do mockup 5 traduzido, "E-mail" ou só o ícone? O protótipo não desenha o botão. | redatora e produto | Define o desenho do botão nos 3 idiomas |
-| P002 | Com o botão no cartão, as dicas dos quadros mudam? Hoje dizem "Clique com o botão direito num cartão para enviar e-mail ao contato." e "Clique no cartão para abrir a tarefa. Com o botão direito, envie e-mail ao responsável.". | redatora | Textos novos para as 2 dicas, nos 3 idiomas |
-| S001 | O clique no botão de e-mail não abre o item nem o painel da tarefa, como faz o clique no resto do cartão. | protótipo da próxima rodada ou dev | Se abrir, o menu e o painel aparecem juntos |
+| P001 | Onde fica o botão no cartão e qual o rótulo: "Notificar", "E-mail" ou só o ícone? O protótipo não desenha o botão. | produto | Define o desenho do botão nos 3 idiomas |
+| P002 | Com o botão no cartão, as dicas dos quadros mudam? Hoje dizem "Clique com o botão direito num cartão para enviar e-mail ao contato." e "Clique no cartão para abrir a tarefa. Com o botão direito, envie e-mail ao responsável.". | produto | Textos novos para as 2 dicas, nos 3 idiomas |
+| S001 | O clique no botão de e-mail não abre o item nem o painel da tarefa, como faz o clique no resto do cartão. | produto, no desenho do botão, ou dev | Se abrir, o menu e o painel aparecem juntos |
 
 ## Padrão de qualidade
 

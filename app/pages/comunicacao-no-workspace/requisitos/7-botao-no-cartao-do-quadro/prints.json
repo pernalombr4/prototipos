@@ -15,19 +15,19 @@
   },
   "requisitos": {
     "RF001": {
-      "sem": "o protótipo não desenha o botão no cartão; o desenho fica para a próxima rodada"
+      "sem": "o protótipo não desenha o botão no cartão; o print sai com o desenho do botão"
     },
     "RF002": {
-      "sem": "o protótipo não desenha o botão no cartão; o desenho fica para a próxima rodada"
+      "sem": "o protótipo não desenha o botão no cartão; o print sai com o desenho do botão"
     },
     "RF003": {
-      "sem": "o protótipo não desenha o botão no cartão; o desenho fica para a próxima rodada"
+      "sem": "o protótipo não desenha o botão no cartão; o print sai com o desenho do botão"
     },
     "RF004": {
-      "sem": "o protótipo não desenha o botão no cartão; o desenho fica para a próxima rodada"
+      "sem": "o protótipo não desenha o botão no cartão; o print sai com o desenho do botão"
     },
     "RF005": {
-      "sem": "o protótipo não desenha o botão no cartão; o desenho fica para a próxima rodada"
+      "sem": "o protótipo não desenha o botão no cartão; o print sai com o desenho do botão"
     },
     "RF006": {
       "cena": "quadro",

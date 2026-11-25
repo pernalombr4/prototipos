@@ -12,8 +12,7 @@ central E-mails, aba Mensagens (tabela, filtros, menu da linha e leitura no pain
 **Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/, aprovado em 24/11/2026. Na barra de
 baixo, escolha "2 · Remetente" no controle "Fase". Na tela Início, "Novo e-mail" mostra "Vincular a item (opcional)";
 em E-mails › Mensagens, o filtro "Sem item" mostra o e-mail "Cadastro de fornecedor", e "Vincular a um item" abre a
-leitura. O controle "Perfil" troca o olhar de quem administra e do membro. Os textos nos 3 idiomas estão em
-`app/pages/comunicacao-no-workspace/textos.ts`.
+leitura. O controle "Perfil" troca o olhar de quem administra e do membro. Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
 **Fora do escopo:** o "De" com as caixas do workspace e a ajuda "Sem item vinculado, a resposta chega na caixa
 <nome>, na Central de Atendimento." (épico "Caixa do workspace como remetente"); Encaminhar e a resposta na mesma

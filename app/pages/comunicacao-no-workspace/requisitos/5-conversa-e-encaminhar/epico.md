@@ -8,8 +8,7 @@ anexos. Nos 2 casos, o e-mail continua no item do original.
 (menu da linha e leitura no painel lateral), com o compositor "Nova Mensagem".
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/, aprovado em 24/11/2026. Na barra de
-baixo, escolha "Fase: 2 · Remetente" e abra a Mail Box de CTR-00231 ou a aba Mensagens. Os textos nos 3 idiomas estão
-em `app/pages/comunicacao-no-workspace/textos.ts`.
+baixo, escolha "Fase: 2 · Remetente" e abra a Mail Box de CTR-00231 ou a aba Mensagens. Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
 **Fora do escopo:** responder e encaminhar o e-mail enviado pelo sistema (tarefas e fluxos), que tem "Reenviar e-mail"
 no lugar; a escolha do remetente (épico "Caixa do workspace como remetente"); a tarefa vinculada (épico "E-mail ligado

@@ -9,7 +9,7 @@ tarefas, a Mail Box do item e a aba Mensagens da central E-mails.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/, aprovado em 24/11/2026. Na barra de
 baixo, escolha "Fase: 3 · Tarefa"; em Tarefas, abra "Enviar minuta assinada à contraparte" (T-1042) e a aba Mail Box.
-Os textos nos 3 idiomas estão em `app/pages/comunicacao-no-workspace/textos.ts`.
+Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
 **Fora do escopo:** o e-mail enviado pelo sistema por uma tarefa, que já mostra "Sistema · <tarefa>" em "Enviado por"
 (épico "E-mail com o que o produto já tem"); o vínculo com mais de 1 tarefa.

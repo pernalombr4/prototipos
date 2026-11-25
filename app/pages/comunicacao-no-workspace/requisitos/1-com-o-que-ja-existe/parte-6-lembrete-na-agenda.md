@@ -15,18 +15,15 @@ e em "Prazo: confirmar data da audiência" (prazo de tarefa).
 
 | ID | Regra | Exemplo | Relevância |
 |---|---|---|---|
-| RN501 | A tabela a seguir define quem recebe o lembrete por origem do evento e o rótulo da lista no modal. Política: Única. | Linha 2: o evento "Assinatura: Contrato de manutenção predial" lista os contatos de CTR-00231. | Obrigatório |
+| RN501 | A tabela depois destas regras define quem recebe o lembrete por origem do evento e o rótulo da lista no modal. Política: Única. | Linha 2: o evento "Assinatura: Contrato de manutenção predial" lista os contatos de CTR-00231. | Obrigatório |
+| RN502 | O lembrete abre com o assunto "Lembrete: <evento> (<quando>)" e o texto com a data e a hora; na reunião do Outlook, o texto leva também o local. | "Lembrete: Alinhamento semanal do jurídico (5 de dezembro, 09:00, Reuniões do Microsoft Teams)". | Obrigatório |
+| RN503 | O lembrete do evento de data de item fica vinculado ao item (RN906). | O lembrete de "Assinatura: Contrato de manutenção predial" fica na Mail Box de CTR-00231. | Obrigatório |
 
 | Linha | Origem do evento | Quem recebe | Rótulo no modal |
 |---|---|---|---|
 | 1 | Reunião do Outlook | Os participantes da reunião | "Participantes" |
 | 2 | Data de um item (campo de data da categoria) | Os contatos do item (RN907) | "Contatos do item" |
 | 3 | Prazo de uma tarefa | O responsável da tarefa | "Responsável" |
-
-| ID | Regra | Exemplo | Relevância |
-|---|---|---|---|
-| RN502 | O lembrete abre com o assunto "Lembrete: <evento> (<quando>)" e o texto com a data e a hora; na reunião do Outlook, o texto leva também o local. | "Lembrete: Alinhamento semanal do jurídico (5 de dezembro, 09:00, Reuniões do Microsoft Teams)". | Obrigatório |
-| RN503 | O lembrete do evento de data de item fica vinculado ao item (RN906). | O lembrete de "Assinatura: Contrato de manutenção predial" fica na Mail Box de CTR-00231. | Obrigatório |
 
 ## Modal "Evento" (RF)
 

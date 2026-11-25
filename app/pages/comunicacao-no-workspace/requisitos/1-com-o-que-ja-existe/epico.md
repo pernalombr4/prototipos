@@ -15,19 +15,15 @@ E-mails.
 **Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/, aprovado em 24/11/2026. Na barra
 de baixo, o controle "Fase" em "1 · MVP" mostra este épico; "Perfil" troca entre quem administra e o membro; "Dados"
 mostra o workspace novo, o primeiro uso e o workspace em uso; "Cenário" mostra "Sem Outlook integrado" e "Envio
-falha". A barra de baixo é ferramenta de revisão e não entra no produto. Os textos nos 3 idiomas estão em
-`app/pages/comunicacao-no-workspace/textos.ts`.
+falha". A barra de baixo é ferramenta de revisão e não entra no produto. Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
 **Fora do escopo:**
 - o contato configurado por categoria e o cartão "Contato da categoria" (épico "Contato da categoria");
-- a busca de item para vincular no compositor, o autocompletar do Para com contatos de outros itens, o e-mail sem item
-  gravado no ENSPACE, "Vincular a um item" depois do envio, a lista da aba Mensagens por pessoa e permissão e a lista
-  única dos e-mails do sistema e dos itens (épico "E-mail sem item e lista por permissão");
+- a busca de item para vincular no compositor, o autocompletar do Para com contatos de outros itens, o e-mail sem item gravado no ENSPACE, "Vincular a um item" depois do envio, a lista da aba Mensagens por pessoa e permissão e a lista única dos e-mails do sistema e dos itens (épico "E-mail sem item e lista por permissão");
 - a caixa do workspace no "De" e o bloco "Caixas como remetente" (épico "Caixa do workspace como remetente");
 - a resposta na mesma conversa e "Encaminhar" (épico "Responder na conversa e encaminhar");
 - "Vincular a tarefa", a Mail Box própria da tarefa e a coluna Tarefa da aba Mensagens (épico "E-mail ligado à tarefa");
-- o botão de e-mail no cartão do quadro (documento "Botão de e-mail no cartão do quadro"); aqui o quadro usa o clique
-  direito;
+- o botão de e-mail no cartão do quadro (documento "Botão de e-mail no cartão do quadro"); aqui o quadro usa o clique direito;
 - atalhos e link de formulário na tela inicial: a tela inicial continua como hoje;
 - WhatsApp, SMS e integração com Google.
 
@@ -63,7 +59,7 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 | RN908 | O 1º contato do item é o 1º contato da lista com e-mail. | Em CTR-00231, o 1º contato é "E-mail do contato". | Obrigatório |
 | RN909 | Cada atalho de e-mail tem 2 caminhos: "Escrever pelo ENSPACE", que abre o compositor com o item vinculado e o contato em Para, e "Abrir no meu app de e-mail", que abre o app de e-mail padrão do computador. Escrever pelo ENSPACE é o caminho principal; o app fica atrás da seta "Outras formas de enviar e-mail" ou, onde só cabe ícone ou menu, como 2º item do menu. | No item, o clique no corpo do botão E-mail abre o compositor; a seta abre o app. | Obrigatório |
 | RN910 | Sem a conta do Outlook integrada, o atalho de e-mail abre direto o app de e-mail do computador. | Bruno, sem a integração, clica em E-mail no item e o app abre, sem o compositor. | Obrigatório |
-| RN911 | O e-mail aberto no app segue o link `mailto:<para>?cc=<endereço do item>&subject=<assunto>`: o contato em Para, o endereço do item em Cc e o assunto padrão. Sem item, o link não leva Cc. O Cc é o que traz a cópia para a Mail Box do item e a resposta de quem usa "Responder a todos". | `mailto:marina.alves@example.com?cc=ctr-00231.aurora@<domínio das caixas>&subject=CTR-00231%20%C2%B7%20Contrato%20de%20manuten%C3%A7%C3%A3o%20predial`. | Obrigatório |
+| RN911 | O e-mail aberto no app segue o link `mailto:<para>?cc=<endereço do item>&subject=<assunto>`: o contato em Para, o endereço do item em Cc e o assunto padrão. Sem item, o link não leva Cc. O Cc é o que traz a cópia para a Mail Box do item e a resposta de quem usa "Responder a todos". | `mailto:marina.alves@example.com?cc=ctr-00231.aurora@<domínio das caixas>&subject=<assunto padrão codificado para URL>`. | Obrigatório |
 | RN912 | O e-mail de um atalho de item abre com o assunto padrão, igual em cada categoria e sem configuração (S901). A pessoa muda o assunto e o texto antes de enviar. | O atalho de CTR-00231 abre com "CTR-00231 · Contrato de manutenção predial". | Obrigatório |
 | RN913 | Um destinatário sem e-mail deixa o atalho indisponível, com o motivo: "Sem e-mail cadastrado" para o contato sem e-mail e "Sem contato" para a falta de contato. O atalho indisponível continua no Tab do teclado, com o motivo na dica e no nome acessível. | A tarefa sem responsável mostra o botão cinza; o leitor de tela lê "Sem contato". | Obrigatório |
 | RN914 | Responder um e-mail abre um e-mail novo, com "Re:" no assunto, o texto original citado, o item vinculado do e-mail original e o aviso "A resposta sai como uma mensagem nova, com o texto original citado. Ela não entra na mesma conversa.". | Responder "Minuta revisada" de CTR-00231 abre "Re: Minuta revisada", vinculado a CTR-00231. | Obrigatório |
@@ -108,9 +104,9 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
-| S901 | O assunto padrão do atalho de item é "<referência> · <nome do item>", como no protótipo. O documento pede um padrão fixo, sem configuração, e não diz qual. | produto | Muda o assunto com que o compositor e o app abrem nas partes 3 e 4 |
+| S901 | O assunto padrão do atalho de item é "<referência> · <nome do item>", como no protótipo. O assunto fixo, sem configuração, ainda não tem texto definido. | produto | Muda o assunto com que o compositor e o app abrem nas partes 3 e 4 |
 | S902 | "Quem administra", para a seção "Regras do workspace" e para os botões "Criar modelo" e "Criar caixa de e-mail" do estado inicial, é quem tem ao menos 1 das permissões de hoje de ver os modelos, as caixas ou os e-mails enviados. | produto e dev | Com outra regra (cargo de administrador, por exemplo), muda quem vê a seção nas partes 8 e 9 |
 | P901 | Quem vê a tela "Emails Recebidos" hoje: todo membro, ou só quem vê o item do e-mail? Ela mostra também os enviados com item? | dev | Muda o que a aba Mensagens mostra a cada membro nas partes 8 e 9 |
 | P902 | A documentação do Correio do Outlook diz que a integração exibe a caixa de entrada dentro do ENSPACE e vincula e-mails a tarefas e registros. O develop não tem essa tela. Existe em outro lugar ou é plano? | produto e dev | Se existe, a central "E-mails" precisa conviver com ela ou substituí-la |
 | P903 | O cliente que usa Google, e não Microsoft, fica só com "Abrir no meu app de e-mail". Está aceito para este épico? | produto | Sem aceite, a integração com Google entra no roteiro |
-| P904 | O Felipe concorda em tirar da tela inicial os atalhos de e-mail e o link de formulário público do mockup 6? | produto (Felipe) | Se não concorda, a tela inicial entra num épico próprio, com a escolha do formulário e do item |
+| P904 | A tela inicial fica sem os atalhos de e-mail e sem o link de formulário público, como no protótipo? | produto | Se não, a tela inicial entra num épico próprio, com a escolha do formulário e do item |

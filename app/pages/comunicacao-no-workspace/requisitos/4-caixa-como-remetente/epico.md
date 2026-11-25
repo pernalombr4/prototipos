@@ -9,7 +9,7 @@ do item e a aba Mensagens da central.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/, aprovado em 24/11/2026. Na barra de
 baixo, escolha "Fase: 2 · Remetente" e "Perfil: Admin"; o cenário "Sem Outlook integrado" mostra o "De" só com as
-caixas. Os textos nos 3 idiomas estão em `app/pages/comunicacao-no-workspace/textos.ts`.
+caixas. Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
 **Fora do escopo:** a configuração da própria caixa (aba Caixas de E-mail, que não muda); o registro do e-mail enviado
 sem item e a aba Mensagens por pessoa e permissão (épico "E-mail sem item e lista por permissão"); a integração com o
