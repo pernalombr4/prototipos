@@ -24,6 +24,14 @@
  * Rodada 6: o rótulo "Exige ação" abre um `UPopover` com o que muda, quem é afetado, o prazo com as
  * 3 fases e os links "Ver na versão" e "Ver o guia", mesmo com a versão fechada. No texto da versão,
  * cada item que exige ação traz "O que fazer" em passos numerados (`ProseOl`).
+ *
+ * Rodada 7: o padrão da doc do Nuxt. O popover sai: a ação mora no texto, como a seção "Breaking
+ * Changes" do post de versão do Nuxt. A seção "Exige ação" fica sempre aberta, fora do texto
+ * recolhido, e o rótulo leva até ela. Cada item tem, nesta ordem: o título; o que muda e por quê;
+ * quem é afetado; o prazo, as 3 fases e o que acontece depois; "O que fazer" em até 3 passos; o link
+ * do guia de migração, que diz o destino. O guia completo é uma página da doc (`_GuiaDeMigracao.vue`).
+ * Pesquisa: pesquisa-de-mercado, runs/2026-11-24-deploy-continuo-e-lancamento,
+ * evidencias/notas/acao-exige-acao.md.
  */
 import ProseA from '@nuxt/ui/runtime/components/prose/A.vue'
 import ProseH3 from '@nuxt/ui/runtime/components/prose/H3.vue'
@@ -32,7 +40,7 @@ import ProseOl from '@nuxt/ui/runtime/components/prose/Ol.vue'
 import ProseP from '@nuxt/ui/runtime/components/prose/P.vue'
 import ProseStrong from '@nuxt/ui/runtime/components/prose/Strong.vue'
 import ProseUl from '@nuxt/ui/runtime/components/prose/Ul.vue'
-import { mudancaDe, type Entrada } from './mocks'
+import { mudancaDe, type Entrada, type Mudanca } from './mocks'
 import { formatarData, type Textos } from './textos'
 import { montarVersoes } from './versoes'
 
@@ -48,6 +56,8 @@ const emit = defineEmits<{
   verPost: [mes: string]
   /** Leva ao item na trilha, com a versão aberta. */
   irPara: [id: string]
+  /** Rodada 7: o guia de migração da mudança, na doc. */
+  abrirGuia: [mudanca: string]
   assinar: []
 }>()
 
@@ -65,10 +75,9 @@ const versoes = computed(() => {
     .sort((a, b) => Number(b.emBreve) - Number(a.emBreve) || b.data.localeCompare(a.data) || b.versao.localeCompare(a.versao))
     .map(v => ({
       ...v,
-      /** As mudanças que exigem ação, com o item que as anuncia: o conteúdo do popover do rótulo. */
+      /** Rodada 7: as mudanças que exigem ação ficam fora do texto recolhido, sempre à vista. */
       acoes: v.itens.filter(e => e.mudanca).map(e => ({ entrada: e, mudanca: mudancaDe(e.mudanca)! })),
       secoes: [
-        { chave: 'exige-acao', titulo: props.t.entrada.exigeAcao, itens: v.itens.filter(e => e.mudanca) },
         { chave: 'novidades', titulo: props.t.releases.tipos.novidade, itens: v.itens.filter(e => !e.mudanca && e.tipo === 'novidade') },
         { chave: 'melhorias', titulo: props.t.releases.tipos.melhoria, itens: v.itens.filter(e => !e.mudanca && e.tipo === 'melhoria') },
         { chave: 'correcoes', titulo: props.t.releases.tipos.correcao, itens: v.itens.filter(e => !e.mudanca && e.tipo === 'correcao') },
@@ -87,20 +96,14 @@ function tituloDoItem(e: Entrada) {
 }
 
 /** As 3 fases da mudança que quebra, em 1 frase (rodada 5: sai a página Próximas mudanças). */
-function fases(e: Entrada) {
-  const f = mudancaDe(e.mudanca)!.fases
+function fases(m: Mudanca) {
+  const f = m.fases
   return props.t.releases.fasesDaMudanca(dataDaVersao(f['opt-in']), dataDaVersao(f['opt-out']), dataDaVersao(f.obrigatoria))
 }
 
 const dataLonga = (iso: string) => formatarData(iso, idioma.value, { day: 'numeric', month: 'long', year: 'numeric' })
 /** A data no formato do idioma, em números, sem voltar 1 dia (hoje o site mostra "Dec 7, 2026" para 8 de dezembro). */
 const dataDaVersao = (iso: string) => formatarData(iso, idioma.value, { day: '2-digit', month: '2-digit', year: 'numeric' })
-
-/** Do popover do rótulo: fecha e leva ao item, com a versão aberta. */
-function verNaVersao(id: string, fechar: () => void) {
-  fechar()
-  emit('irPara', id)
-}
 
 function foraDoPrototipo() {
   toast.add({ title: props.t.releases.foraDoPrototipo, icon: 'i-lucide-info', color: 'neutral', duration: 2500 })
@@ -129,10 +132,12 @@ let apagar: ReturnType<typeof setTimeout> | undefined
 watch(() => props.destaque, async (id) => {
   if (!id) return
   const v = versoes.value.find(x => x.id === id || id.startsWith(`${x.id}-`) || x.itens.some(e => e.id === id))
-  if (v && !estaAberta(v.id) && id !== v.id) abertasNaTela.value = [...abertasNaTela.value, v.id]
+  /** Rodada 7: o que exige ação está fora do texto recolhido; ir até lá não abre a versão. */
+  const aVista = !!v && (id === v.id || id === `${v.id}-exige-acao` || v.acoes.some(x => x.entrada.id === id))
+  if (v && !estaAberta(v.id) && !aVista) abertasNaTela.value = [...abertasNaTela.value, v.id]
   await nextTick()
   await new Promise(r => setTimeout(r, 450))
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: id === v?.id ? 'start' : 'center' })
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: id === v?.id || id.endsWith('-exige-acao') ? 'start' : 'center' })
   aceso.value = id
   clearTimeout(apagar)
   apagar = setTimeout(() => { aceso.value = null }, 2600)
@@ -201,63 +206,19 @@ watch(() => props.destaque, async (id) => {
         <!-- No máximo 2 rótulos: o tamanho e o prazo -->
         <template #badge>
           <UBadge color="neutral" variant="subtle" size="sm" :label="v.tamanho" />
-          <!-- Rodada 6: o rótulo abre o resumo do que exige ação, mesmo com a versão fechada -->
-          <UPopover
+          <!-- Rodada 7: o rótulo leva à seção Exige ação da versão, que fica sempre aberta -->
+          <UButton
             v-if="v.prazo"
-            :content="{ side: 'bottom', align: 'start', sideOffset: 8, collisionPadding: 16 }"
-            :ui="{ content: 'w-80 p-4 sm:w-96' }"
-          >
-            <UButton
-              color="warning"
-              variant="outline"
-              size="xs"
-              icon="i-lucide-triangle-alert"
-              trailing-icon="i-lucide-chevron-down"
-              class="cursor-pointer bg-warning/10 text-highlighted hover:bg-warning/20"
-              :ui="{ leadingIcon: 'text-warning', trailingIcon: 'text-warning' }"
-              :aria-label="t.releases.abrirMudancas"
-              :label="`${t.entrada.exigeAcao} · ${t.entrada.agirAte(formatarData(v.prazo, idioma))}`"
-            />
-
-            <template #content="{ close }">
-              <div class="flex flex-col gap-4">
-                <template v-for="(x, i) in v.acoes" :key="x.entrada.id">
-                  <USeparator v-if="i" />
-                  <div class="flex flex-col gap-2 text-sm leading-6">
-                    <p class="font-semibold text-highlighted">
-                      {{ L(x.mudanca.titulo) }}.
-                    </p>
-                    <p class="text-muted">
-                      {{ t.releases.quemEAfetado(L(x.mudanca.quem)) }}
-                    </p>
-                    <p class="text-default">
-                      <span class="font-semibold text-highlighted">{{ t.releases.agirAteData(dataLonga(x.mudanca.fases.obrigatoria)) }}</span>{{ ' ' }}{{ fases(x.entrada) }}
-                    </p>
-                    <div class="-ml-2 flex flex-wrap gap-x-2">
-                      <UButton
-                        size="xs"
-                        color="primary"
-                        variant="link"
-                        trailing-icon="i-lucide-arrow-down"
-                        :label="t.releases.verNaVersao"
-                        class="cursor-pointer"
-                        @click="verNaVersao(x.entrada.id, close)"
-                      />
-                      <UButton
-                        size="xs"
-                        color="primary"
-                        variant="link"
-                        trailing-icon="i-lucide-arrow-up-right"
-                        :label="t.releases.verOGuia"
-                        class="cursor-pointer"
-                        @click="close(); foraDoPrototipo()"
-                      />
-                    </div>
-                  </div>
-                </template>
-              </div>
-            </template>
-          </UPopover>
+            color="warning"
+            variant="outline"
+            size="xs"
+            icon="i-lucide-triangle-alert"
+            trailing-icon="i-lucide-arrow-down"
+            class="cursor-pointer bg-warning/10 text-highlighted hover:bg-warning/20"
+            :ui="{ leadingIcon: 'text-warning', trailingIcon: 'text-warning' }"
+            :label="`${t.entrada.exigeAcao} · ${t.entrada.agirAte(formatarData(v.prazo, idioma))}`"
+            @click.stop="emit('irPara', `${v.id}-exige-acao`)"
+          />
         </template>
 
         <!-- O título é link, como um título de markdown do Nuxt UI: o ícone # aparece ao passar o mouse -->
@@ -272,7 +233,55 @@ watch(() => props.destaque, async (id) => {
 
         <!-- O texto da versão, como o texto de um post, fechado por padrão -->
         <template #body>
-          <UCollapsible :open="estaAberta(v.id)">
+          <!--
+            Rodada 7: Exige ação, sempre aberta e antes do texto recolhido, como "Breaking Changes" no
+            post de versão do Nuxt. Cada item: título; o que muda e por quê; quem é afetado; prazo,
+            fases e o que acontece depois; O que fazer; o link do guia de migração.
+          -->
+          <div v-if="v.acoes.length" class="pt-2 text-default">
+            <ProseH3 :id="`${v.id}-exige-acao`" anchor :ui="{ base: 'text-lg mt-6 mb-2 scroll-mt-32' }">
+              <UIcon name="i-lucide-triangle-alert" class="me-1.5 inline-block size-5 align-text-bottom text-warning" aria-hidden="true" />
+              {{ t.entrada.exigeAcao }}
+            </ProseH3>
+
+            <div
+              v-for="x in v.acoes"
+              :id="x.entrada.id"
+              :key="x.entrada.id"
+              class="scroll-mt-32 rounded-sm transition-colors duration-500"
+              :class="aceso === x.entrada.id || aceso === `${v.id}-exige-acao` ? 'bg-warning/10' : ''"
+            >
+              <ProseP class="mb-2">
+                <a :href="`#${x.entrada.id}`" :title="t.entrada.copiarLink" class="group relative rounded-sm text-highlighted outline-primary/25 focus-visible:outline-3">
+                  <span class="absolute top-0 -ms-8 hidden rounded-md bg-elevated p-1 text-muted opacity-0 transition group-hover:text-primary group-hover:opacity-100 group-focus:opacity-100 lg:flex" aria-hidden="true">
+                    <UIcon :name="icones.hash" class="size-4 shrink-0" />
+                  </span>
+                  <ProseStrong>{{ tituloDoItem(x.entrada) }}</ProseStrong>
+                </a>{{ ' ' }}{{ L(x.mudanca.motivo) }}
+              </ProseP>
+              <ProseP class="my-2">
+                {{ t.releases.quemEAfetado(L(x.mudanca.quem)) }}
+              </ProseP>
+              <ProseP class="my-2">
+                <ProseStrong>{{ t.releases.agirAteData(dataLonga(x.mudanca.fases.obrigatoria)) }}</ProseStrong>{{ ' ' }}{{ fases(x.mudanca) }}{{ ' ' }}{{ L(x.mudanca.depois) }}
+              </ProseP>
+              <ProseP class="mt-2 mb-1">
+                <ProseStrong>{{ t.releases.oQueFazer }}</ProseStrong>
+              </ProseP>
+              <ProseOl class="mt-1 mb-2">
+                <ProseLi v-for="(passo, i) in x.mudanca.oQueFazer" :key="i">
+                  {{ L(passo) }}
+                </ProseLi>
+              </ProseOl>
+              <ProseP class="mt-2">
+                <ProseA :href="`#guia-${x.mudanca.id}`" @click.stop.prevent="emit('abrirGuia', x.mudanca.id)">
+                  {{ t.releases.guiaDe(L(x.mudanca.titulo)) }}
+                </ProseA>
+              </ProseP>
+            </div>
+          </div>
+
+          <UCollapsible v-if="v.secoes.length" :open="estaAberta(v.id)">
             <template #content>
               <div class="pt-2 text-default">
                 <template v-for="s in v.secoes" :key="s.chave">
@@ -291,38 +300,6 @@ watch(() => props.destaque, async (id) => {
                       {{ L(e.titulo) }}
                     </ProseLi>
                   </ProseUl>
-
-                  <!-- Rodada 6: o item que exige ação traz "O que fazer" em passos numerados -->
-                  <template v-else-if="s.chave === 'exige-acao'">
-                    <div
-                      v-for="e in s.itens"
-                      :id="e.id"
-                      :key="e.id"
-                      class="scroll-mt-32 rounded-sm transition-colors duration-500"
-                      :class="aceso === e.id ? 'bg-primary/10' : ''"
-                    >
-                      <ProseP class="mb-2">
-                        <a :href="`#${e.id}`" :title="t.entrada.copiarLink" class="group relative rounded-sm text-highlighted outline-primary/25 focus-visible:outline-3">
-                          <span class="absolute top-0 -ms-8 hidden rounded-md bg-elevated p-1 text-muted opacity-0 transition group-hover:text-primary group-hover:opacity-100 group-focus:opacity-100 lg:flex" aria-hidden="true">
-                            <UIcon :name="icones.hash" class="size-4 shrink-0" />
-                          </span>
-                          <ProseStrong>{{ tituloDoItem(e) }}</ProseStrong>
-                        </a>{{ ' ' }}{{ L(e.resumo) }}
-                        {{ ' ' }}<ProseStrong>{{ t.releases.agirAteData(dataLonga(mudancaDe(e.mudanca)!.fases.obrigatoria)) }}</ProseStrong>{{ ' ' }}{{ fases(e) }}
-                        <template v-if="!v.emBreve">
-                          {{ ' ' }}<ProseA href="#" @click.prevent="foraDoPrototipo">{{ t.releases.saibaMais }}</ProseA>
-                        </template>
-                      </ProseP>
-                      <ProseP class="mt-2 mb-1">
-                        <ProseStrong>{{ t.releases.oQueFazer }}</ProseStrong>
-                      </ProseP>
-                      <ProseOl class="mt-1">
-                        <ProseLi v-for="(passo, i) in mudancaDe(e.mudanca)!.oQueFazer" :key="i">
-                          {{ L(passo) }}
-                        </ProseLi>
-                      </ProseOl>
-                    </div>
-                  </template>
 
                   <template v-else>
                     <ProseP
@@ -350,6 +327,7 @@ watch(() => props.destaque, async (id) => {
 
           <!-- Mostrar mais e Mostrar menos ficam acima da linha do rodapé, logo abaixo do texto -->
           <UButton
+            v-if="v.secoes.length"
             size="xs"
             color="neutral"
             variant="link"

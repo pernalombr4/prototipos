@@ -12,6 +12,8 @@ Na rodada 5, "Próximas mudanças" sai: o que exige ação fica na trilha, com o
   rótulos por versão; cada título (versão, subtítulo e item) copia o próprio link (rodada 5); a
   versão em breve no topo da trilha, com o que exige ação e as 3 fases no texto do item (rodada 5);
   o rótulo "Exige ação" abre o resumo da mudança, e o item traz "O que fazer" em passos (rodada 6);
+  o popover sai, a seção Exige ação fica sempre aberta e o item leva ao guia de migração, uma página
+  nova da doc (rodada 7);
   "Assinar"; os patches como blocos curtos na mesma trilha. O
   banner sai da versão e fica no post.
 - **Muda no Blog:** o post do mês no lugar do post por versão; o post só de changelog sai da lista
@@ -26,15 +28,47 @@ flowchart LR
   B[Blog: lista] -->|Ler o post| P[Post do mês]
   P -->|Ver no changelog| C[Releases: o texto de cada versão na trilha]
   C -->|Ler o post de lançamento| P
-  C -->|Rótulo Exige ação| R[Resumo da mudança]
-  R -->|Ver na versão| C
-  R -->|Ver o guia| G[Doc de suporte, fora do protótipo]
+  C -->|Rótulo Exige ação| R[Seção Exige ação da versão, sempre aberta]
+  R -->|Guia de migração| G[Guia de migração na doc]
+  G -->|Anunciada no changelog| C
+  G -->|Anterior e próximo, menu| G
   C -->|Clicar no título| L[Link da versão, do subtítulo ou do item]
   L -->|Abrir o link| C
   C -->|Assinar| A[E-mail e RSS]
 ```
 
 ## Rodadas
+
+### Rodada 7 · 2026-11-24
+- **Pedido (literal):**
+  - "a açao é melhor estar descrita dentro do proprio popover, nao? ou no texto mesmo, pelo padrao de mercado? PESQUISE antes de responder."
+  - "nesse caso, o prototipo tem que estar preparado pro dev ja deixar isso no códgio pronto pra ser usado a qualquer omento. pode usar os mesmoc omponentes que o nuxt usa na sua documentaçao"
+- **Pesquisa:** nenhum dos 13 produtos lidos (Nuxt, Nuxt UI e 11 SaaS) põe a ação no popover do rótulo; ela vai no texto do item, com link para o guia de migração quando é longa. Nota: pesquisa-de-mercado, `runs/2026-11-24-deploy-continuo-e-lancamento/evidencias/notas/acao-exige-acao.md`
+- **Mudou:**
+  - o popover sai. O rótulo "Exige ação · Agir até <data>" leva à seção Exige ação da versão e acende a seção; não abre o texto recolhido
+  - a seção Exige ação fica sempre aberta, antes do texto recolhido, com o título de nível 3 e o ícone de aviso, como "Breaking Changes" no post de versão do Nuxt. "Mostrar mais" só aparece quando a versão tem outra seção
+  - cada item tem 7 partes, nesta ordem: título com link; por que muda; quem é afetado; "Agir até", as 3 fases e o que acontece depois do prazo; "O que fazer" em até 3 passos; o link "Guia de migração: <título>"
+  - guia de migração novo, como página da doc: a árvore da página de doc do `en-docs` (menu da seção à esquerda, trilha, status, "Copiar texto", anterior e próximo, "Nesta página" à direita) e o corpo no padrão do guia de atualização do Nuxt: aviso do prazo (`::warning`), O que muda, Por que muda, Quem é afetado, Prazo e fases (tabela), Passos da migração (`::steps`, com o código em diff no passo que tem código), Depois do prazo e o `::tip` de ajuda. Prazo que mudou ganha `::note`
+  - o guia de API e de webhook mora em Dev; o resto, em Docs. O topo acende a seção certa
+  - `MODELO-EXIGE-ACAO.md`: o bloco `actionRequired` do frontmatter que o dev lê para desenhar o rótulo e a seção, e o markdown do guia. O guia usa só componentes que o `en-docs` já renderiza (`::warning` 486 vezes, `::steps` 655, `::note`, `::tip`, tabela e bloco de código); escrever um guia novo não pede código
+  - o mock ganhou `depois` e `guia` (texto de cada passo e o código) nas 4 mudanças
+- **Componentes, conferidos no MCP do Nuxt UI e no disco (4.11.1):** `ProseWarning`, `ProseNote`, `ProseTip`, `ProseSteps` (nível 3), `ProsePre` com `icon` e `filename`, `ProseTable`, `ProseH2` e `ProseH3` com âncora, `UPageHeader`, `UBreadcrumb`, `UPageAside`, `UContentNavigation`, `UContentSurround` e `UContentToc`. A página de migração do Nuxt UI (`/docs/getting-started/migration`) usa o mesmo conjunto
+- **Fronteira:** muda a seção Exige ação da versão, o rótulo e a página nova do guia; não muda a casca do docs, a árvore da página de doc do `en-docs` nem as outras seções da versão
+- **Descartado:**
+  - manter o popover só com a definição do rótulo. Motivo: a ação inteira já está à vista; o popover repetiria o texto
+  - a seção Exige ação dentro de um `::warning`. Motivo: o Nuxt usa título de seção no post de versão; a caixa de aviso fica no guia, só para o prazo
+  - "Saiba mais" no item que exige ação. Motivo: o link diz o destino
+- **Maquete:**
+  - o menu do guia leva `active` e `onClick` em cada item, e o anterior e o próximo navegam por `#guia-<id>`; no `en-docs` os 2 saem da rota
+  - "Copiar texto" copia o texto do corpo; o menu ao lado do botão no `en-docs` (perguntar ao BENI, abrir no ChatGPT) ficou fora
+  - o código do guia é texto colorido por linha (verde entra, vermelho sai), sem o realce de sintaxe do `en-docs`
+  - o link do título no guia copia o endereço `docs.enspace.io/<idioma>/<docs ou developer>/guias-de-migracao/<id>#<âncora>`, que é proposta
+- **Crítica e acessibilidade:**
+  - o nome do rótulo é o texto visível (sai o `aria-label` que não continha o texto)
+  - o ícone de aviso no título da seção é decorativo (`aria-hidden`); o título diz "Exige ação"
+  - o texto da ação chega ao RSS e ao e-mail, porque está no corpo da versão
+  - sem CSS próprio: `<style>`, `:deep()` e `!important` não aparecem na pasta
+- **Ver:** `https://pernalombr4.github.io/prototipos/releases-no-docs/` · `evidencias/rodada7-exige-acao-desktop-claro.jpg` · `evidencias/rodada7-guia-desktop-claro.jpg` · `evidencias/rodada7-guia-passos-desktop-escuro.jpg` · `evidencias/rodada7-exige-acao-mobile-claro.jpg`
 
 ### Rodada 6 · 2026-11-24
 - **Pergunta da redatora (pelo coordenador; o texto literal não veio na mensagem):** como o usuário sabe no que precisa agir, agora que Próximas mudanças saiu

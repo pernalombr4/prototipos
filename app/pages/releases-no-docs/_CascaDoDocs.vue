@@ -19,7 +19,8 @@ import type { Textos } from './textos'
 
 const props = defineProps<{
   t: Textos
-  secaoAtiva: 'blog' | 'releases'
+  /** Rodada 7: Docs e Dev acendem quando o guia de migração está aberto. */
+  secaoAtiva: 'blog' | 'releases' | 'docs' | 'dev'
 }>()
 
 const emit = defineEmits<{ secao: [s: 'blog' | 'releases'] }>()

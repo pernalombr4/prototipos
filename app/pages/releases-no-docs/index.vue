@@ -16,11 +16,12 @@
 import Assinar from './_Assinar.vue'
 import CascaDoDocs from './_CascaDoDocs.vue'
 import Changelog from './_Changelog.vue'
+import GuiaDeMigracao from './_GuiaDeMigracao.vue'
 import HeroDaSecao from './_HeroDaSecao.vue'
 import ListaDoBlog from './_ListaDoBlog.vue'
 import PostDoMes from './_PostDoMes.vue'
 import ReleasesHoje from './_ReleasesHoje.vue'
-import { entradas, linkPermanente, postsDaProposta, postsDeHoje } from './mocks'
+import { entradas, linkPermanente, mudancas, postsDaProposta, postsDeHoje } from './mocks'
 import { textos } from './textos'
 import { ancoraDaVersao } from './versoes'
 
@@ -51,6 +52,11 @@ const postAberto = ref<string | null>(null)
 /** Id da versão (`v3-4-0`) ou do item a mostrar na trilha. Rodada 4: não há mais página da versão. */
 const destaque = ref<string | null>(null)
 const assinarAberto = ref(false)
+/** Rodada 7: o guia de migração aberto (id da mudança), como página da doc. */
+const guiaAberto = ref<string | null>(null)
+const route = useRoute()
+/** A seção do topo acesa: o guia mora em Docs ou em Dev. */
+const secaoDaCasca = computed(() => (guiaAberto.value ? mudancas.find(m => m.id === guiaAberto.value)!.guia.secao : secao.value))
 
 const post = computed(() => postsDaProposta.find(p => p.id === postAberto.value))
 
@@ -60,12 +66,35 @@ function irParaReleases() {
   versao.value = 'proposta'
   secao.value = 'releases'
   postAberto.value = null
+  guiaAberto.value = null
 }
 
 function irSecao(s: 'blog' | 'releases') {
   secao.value = s
   postAberto.value = null
+  guiaAberto.value = null
   topo()
+}
+
+/** Rodada 7: o link do guia, no item que exige ação, abre a página do guia na doc. */
+function abrirGuia(id: string) {
+  if (!mudancas.some(m => m.id === id)) return
+  guiaAberto.value = id
+  history.replaceState(null, '', `#guia-${id}`)
+  topo()
+}
+
+/** O anterior e o próximo do guia (`UContentSurround`) navegam pela âncora `#guia-<id>`. */
+watch(() => route.hash, (h) => {
+  if (h.startsWith('#guia-')) abrirGuia(h.slice(6))
+})
+
+/** O link de um título do guia: o endereço vem pronto do guia. */
+async function copiarEndereco(url: string, ancora: string) {
+  history.replaceState(null, '', `#${ancora}`)
+  try { await navigator.clipboard.writeText(url) }
+  catch { /* sem permissão: o toast ainda mostra o endereço */ }
+  toast.add({ title: t.value.entrada.linkCopiado, description: url, icon: 'i-lucide-link', color: 'success', duration: 3000 })
 }
 
 /** Leva à âncora na trilha: a versão (`v3-4-0`) ou o item (o id dele). */
@@ -122,11 +151,14 @@ async function copiar(ancora: string) {
 /** Quem chega pelo link permanente cai na versão ou no item, com o destaque aceso. */
 onMounted(() => {
   const id = decodeURIComponent(location.hash.slice(1))
+  // Trocar a vista durante a hidratação quebra a transição: o guia abre quando o Nuxt fica pronto.
+  if (id.startsWith('guia-')) return onNuxtReady(() => abrirGuia(id.slice(5)))
   if (entradas.some(e => e.id === id || id === ancoraDaVersao(e.versao) || id.startsWith(`${ancoraDaVersao(e.versao)}-`))) irPara(id)
 })
 
 watch(versao, () => {
   postAberto.value = null
+  guiaAberto.value = null
 })
 
 const hero = computed(() => {
@@ -136,11 +168,11 @@ const hero = computed(() => {
 })
 
 /** A chave da vista: muda a vista, a transição roda. */
-const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value ?? 'lista'}`)
+const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value ?? 'lista'}-${guiaAberto.value ?? ''}`)
 </script>
 
 <template>
-  <CascaDoDocs :t="t" :secao-ativa="secao" @secao="irSecao">
+  <CascaDoDocs :t="t" :secao-ativa="secaoDaCasca" @secao="irSecao">
     <Transition
       mode="out-in"
       enter-active-class="transition duration-250 ease-out"
@@ -149,9 +181,19 @@ const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value 
       leave-to-class="opacity-0"
     >
       <div :key="vista" class="overflow-x-clip pb-40">
+        <!-- Rodada 7: GUIA DE MIGRAÇÃO, uma página da doc -->
+        <GuiaDeMigracao
+          v-if="guiaAberto"
+          :id="guiaAberto"
+          :t="t"
+          @abrir="abrirGuia"
+          @ir-para="irPara"
+          @copiar="copiarEndereco"
+        />
+
         <!-- POST MENSAL ABERTO (proposta) -->
         <PostDoMes
-          v-if="secao === 'blog' && post"
+          v-else-if="secao === 'blog' && post"
           :t="t"
           :post="post"
           @voltar="postAberto = null"
@@ -178,6 +220,7 @@ const vista = computed(() => `${versao.value}-${secao.value}-${postAberto.value 
                 @copiar="copiar"
                 @ver-post="verPost"
                 @ir-para="irPara"
+                @abrir-guia="abrirGuia"
                 @assinar="assinarAberto = true"
               />
             </UContainer>
