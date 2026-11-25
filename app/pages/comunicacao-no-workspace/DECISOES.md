@@ -433,6 +433,10 @@ disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:)
   Um aviso fixo ocuparia altura em toda visita, numa tela de tabela. Quando a lista está vazia, o
   estado vazio já dá a explicação completa e o próximo passo.
 - **Ver:** print [o "i" de Modelos aberto](evidencias/prototipo-29-dica-da-aba-no-i.jpg).
+- **Requisitos (2026-11-25):** pedido "pode criar os docs de requisitos dos epicos, ok? como achar que faz
+  sentido". Saíram 6 épicos e 1 documento avulso em [requisitos/](requisitos/README.md): o épico 1 só mexe na
+  tela, com o back de hoje; os outros pedem back novo ou mudança no SDK. O card no ENSPACE espera a confirmação
+  da redatora.
 
 ## Por que cada decisão
 
