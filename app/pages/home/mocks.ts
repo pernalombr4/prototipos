@@ -123,15 +123,22 @@ export interface Item {
   categoria: string
   /** Campo de protótipo: no produto vem de `data` (o campo título da categoria). */
   titulo: string
-  /** Campo de protótipo: o status do item no fluxo. */
-  status: 'aberto' | 'andamento' | 'concluido'
   /** Campo de protótipo: a etapa atual do fluxo da categoria. */
   etapa: string
-  responsavel: number
+  /**
+   * `Item.user`: quem criou. A autoria vem de quem está logado na criação
+   * (enlighten-api@develop b693d8d2b `plugins/en-types/schemas/items.ts:141`).
+   * O item não tem responsável (rodada 8).
+   */
+  criador: number
   /** Campo de protótipo: um campo de valor da categoria, em reais. */
   valor?: number
-  /** Campo de protótipo: um campo de data da categoria (vigência, vencimento). */
-  prazo?: number
+  /**
+   * Campo de protótipo: o campo de data que a Agenda usa nesta categoria
+   * (`c-schedule-configs`). O item não tem prazo próprio: a data é um campo
+   * que a categoria criou, e só a configuração da Agenda diz qual é (rodada 8).
+   */
+  data?: number
   urgente?: boolean
   criadoEm: number
 }
@@ -143,28 +150,28 @@ function item(dados: Omit<Item, 'id' | 'reference'>): Item {
 }
 
 export const itensIniciais: Item[] = [
-  item({ categoria: 'solicitacoes-de-compra', titulo: 'Notebooks para o time de atendimento', status: 'andamento', etapa: 'Aprovação', responsavel: 7001, valor: 48900, criadoEm: emDias(-2).getTime() }),
-  item({ categoria: 'solicitacoes-de-compra', titulo: 'Cadeiras ergonômicas, filial Campinas', status: 'aberto', etapa: 'Cotação', responsavel: 7002, valor: 12750, criadoEm: emDias(-1).getTime() }),
-  item({ categoria: 'solicitacoes-de-compra', titulo: 'Licenças do software de design para o marketing, renovação anual com 14 assentos', status: 'andamento', etapa: 'Aprovação', responsavel: 7001, valor: 22400, criadoEm: emDias(-5).getTime() }),
-  item({ categoria: 'solicitacoes-de-compra', titulo: 'Material de escritório de novembro', status: 'aberto', etapa: 'Triagem', responsavel: 7003, valor: 1830.5, criadoEm: emDias(0, 9).getTime() }),
-  item({ categoria: 'solicitacoes-de-compra', titulo: 'Projetor para a sala de reunião 3', status: 'andamento', etapa: 'Compra', responsavel: 7005, valor: 6120, criadoEm: emDias(-8).getTime() }),
-  item({ categoria: 'solicitacoes-de-compra', titulo: 'Uniformes da equipe de campo', status: 'concluido', etapa: 'Entregue', responsavel: 7002, valor: 9400, criadoEm: emDias(-20).getTime() }),
-  item({ categoria: 'solicitacoes-de-compra', titulo: 'Monitor extra para a controladoria', status: 'aberto', etapa: 'Triagem', responsavel: 7001, valor: 2190, criadoEm: emDias(-3).getTime() }),
-  item({ categoria: 'contratos', titulo: 'Prestação de serviços de limpeza, Lumen Facilities', status: 'andamento', etapa: 'Vigente', responsavel: 7004, valor: 186000, prazo: emDias(12).getTime(), criadoEm: emDias(-300).getTime() }),
-  item({ categoria: 'contratos', titulo: 'Locação do galpão de Jundiaí', status: 'andamento', etapa: 'Renovação', responsavel: 7001, valor: 420000, prazo: emDias(28).getTime(), criadoEm: emDias(-700).getTime() }),
-  item({ categoria: 'contratos', titulo: 'Suporte de TI, Atria Sistemas', status: 'andamento', etapa: 'Vigente', responsavel: 7003, valor: 96000, prazo: emDias(140).getTime(), criadoEm: emDias(-200).getTime() }),
-  item({ categoria: 'contratos', titulo: 'NDA com a Vértice Consultoria', status: 'aberto', etapa: 'Assinatura', responsavel: 7001, prazo: emDias(4).getTime(), criadoEm: emDias(-4).getTime() }),
-  item({ categoria: 'chamados-de-ti', titulo: 'VPN cai a cada 10 minutos no home office', status: 'aberto', etapa: 'Fila', responsavel: 7005, urgente: true, criadoEm: emDias(0, 10).getTime() }),
-  item({ categoria: 'chamados-de-ti', titulo: 'Acesso ao sistema fiscal para nova analista', status: 'andamento', etapa: 'Atendimento', responsavel: 7005, criadoEm: emDias(-1).getTime() }),
-  item({ categoria: 'chamados-de-ti', titulo: 'Impressora do 2º andar sem toner', status: 'aberto', etapa: 'Fila', responsavel: 7002, criadoEm: emDias(-2).getTime() }),
-  item({ categoria: 'chamados-de-ti', titulo: 'E-mail não sincroniza no celular', status: 'concluido', etapa: 'Resolvido', responsavel: 7005, criadoEm: emDias(-6).getTime() }),
-  item({ categoria: 'chamados-de-ti', titulo: 'Troca de senha bloqueada após 3 tentativas', status: 'aberto', etapa: 'Fila', responsavel: 7005, urgente: true, criadoEm: emDias(-1, 15).getTime() }),
-  item({ categoria: 'reembolsos', titulo: 'Viagem a Curitiba, visita ao cliente', status: 'aberto', etapa: 'Conferência', responsavel: 7001, valor: 1284.9, criadoEm: emDias(-3).getTime() }),
-  item({ categoria: 'reembolsos', titulo: 'Almoço com fornecedor', status: 'andamento', etapa: 'Pagamento', responsavel: 7004, valor: 186, criadoEm: emDias(-7).getTime() }),
-  item({ categoria: 'reembolsos', titulo: 'Curso de Excel avançado', status: 'aberto', etapa: 'Conferência', responsavel: 7003, valor: 690, criadoEm: emDias(-1).getTime() }),
-  item({ categoria: 'fornecedores', titulo: 'Lumen Facilities', status: 'concluido', etapa: 'Homologado', responsavel: 7004, criadoEm: emDias(-400).getTime() }),
-  item({ categoria: 'fornecedores', titulo: 'Atria Sistemas', status: 'concluido', etapa: 'Homologado', responsavel: 7003, criadoEm: emDias(-210).getTime() }),
-  item({ categoria: 'fornecedores', titulo: 'Papelaria Bom Traço', status: 'andamento', etapa: 'Documentação', responsavel: 7002, criadoEm: emDias(-9).getTime() }),
+  item({ categoria: 'solicitacoes-de-compra', titulo: 'Notebooks para o time de atendimento', etapa: 'Aprovação', criador: 7001, valor: 48900, criadoEm: emDias(-2).getTime() }),
+  item({ categoria: 'solicitacoes-de-compra', titulo: 'Cadeiras ergonômicas, filial Campinas', etapa: 'Cotação', criador: 7002, valor: 12750, criadoEm: emDias(-1).getTime() }),
+  item({ categoria: 'solicitacoes-de-compra', titulo: 'Licenças do software de design para o marketing, renovação anual com 14 assentos', etapa: 'Aprovação', criador: 7001, valor: 22400, criadoEm: emDias(-5).getTime() }),
+  item({ categoria: 'solicitacoes-de-compra', titulo: 'Material de escritório de novembro', etapa: 'Triagem', criador: 7003, valor: 1830.5, criadoEm: emDias(0, 9).getTime() }),
+  item({ categoria: 'solicitacoes-de-compra', titulo: 'Projetor para a sala de reunião 3', etapa: 'Compra', criador: 7005, valor: 6120, criadoEm: emDias(-8).getTime() }),
+  item({ categoria: 'solicitacoes-de-compra', titulo: 'Uniformes da equipe de campo', etapa: 'Entregue', criador: 7002, valor: 9400, criadoEm: emDias(-20).getTime() }),
+  item({ categoria: 'solicitacoes-de-compra', titulo: 'Monitor extra para a controladoria', etapa: 'Triagem', criador: 7001, valor: 2190, criadoEm: emDias(-3).getTime() }),
+  item({ categoria: 'contratos', titulo: 'Prestação de serviços de limpeza, Lumen Facilities', etapa: 'Vigente', criador: 7004, valor: 186000, data: emDias(12).getTime(), criadoEm: emDias(-300).getTime() }),
+  item({ categoria: 'contratos', titulo: 'Locação do galpão de Jundiaí', etapa: 'Renovação', criador: 7001, valor: 420000, data: emDias(28).getTime(), criadoEm: emDias(-700).getTime() }),
+  item({ categoria: 'contratos', titulo: 'Suporte de TI, Atria Sistemas', etapa: 'Vigente', criador: 7003, valor: 96000, data: emDias(140).getTime(), criadoEm: emDias(-200).getTime() }),
+  item({ categoria: 'contratos', titulo: 'NDA com a Vértice Consultoria', etapa: 'Assinatura', criador: 7001, data: emDias(4).getTime(), criadoEm: emDias(-4).getTime() }),
+  item({ categoria: 'chamados-de-ti', titulo: 'VPN cai a cada 10 minutos no home office', etapa: 'Fila', criador: 7005, urgente: true, criadoEm: emDias(0, 10).getTime() }),
+  item({ categoria: 'chamados-de-ti', titulo: 'Acesso ao sistema fiscal para nova analista', etapa: 'Atendimento', criador: 7005, criadoEm: emDias(-1).getTime() }),
+  item({ categoria: 'chamados-de-ti', titulo: 'Impressora do 2º andar sem toner', etapa: 'Fila', criador: 7002, criadoEm: emDias(-2).getTime() }),
+  item({ categoria: 'chamados-de-ti', titulo: 'E-mail não sincroniza no celular', etapa: 'Resolvido', criador: 7005, criadoEm: emDias(-6).getTime() }),
+  item({ categoria: 'chamados-de-ti', titulo: 'Troca de senha bloqueada após 3 tentativas', etapa: 'Fila', criador: 7005, urgente: true, criadoEm: emDias(-1, 15).getTime() }),
+  item({ categoria: 'reembolsos', titulo: 'Viagem a Curitiba, visita ao cliente', etapa: 'Conferência', criador: 7001, valor: 1284.9, criadoEm: emDias(-3).getTime() }),
+  item({ categoria: 'reembolsos', titulo: 'Almoço com fornecedor', etapa: 'Pagamento', criador: 7004, valor: 186, criadoEm: emDias(-7).getTime() }),
+  item({ categoria: 'reembolsos', titulo: 'Curso de Excel avançado', etapa: 'Conferência', criador: 7003, valor: 690, criadoEm: emDias(-1).getTime() }),
+  item({ categoria: 'fornecedores', titulo: 'Lumen Facilities', etapa: 'Homologado', criador: 7004, criadoEm: emDias(-400).getTime() }),
+  item({ categoria: 'fornecedores', titulo: 'Atria Sistemas', etapa: 'Homologado', criador: 7003, criadoEm: emDias(-210).getTime() }),
+  item({ categoria: 'fornecedores', titulo: 'Papelaria Bom Traço', etapa: 'Documentação', criador: 7002, criadoEm: emDias(-9).getTime() }),
 ]
 
 /* ------------------------------------------------------------------ *
@@ -378,16 +385,10 @@ export const resumoDoBeni = {
 }
 
 /* ---------------------------------------------------------------------------
- * IA (rodada 7). A forma vem do que o back já guarda (develop, 2026-11-24):
- * - agente: `ai_agent` (`name`, `slug`, `description`, `type`, `status`,
- *   `beniTheme`), lido por `GET /ai/agents`, que junta os do sistema e os do
- *   workspace;
- * - revisão: `ai_review_session` (`status` pending, in_progress, completed,
- *   failed), por `GET /ai/review/sessions` e `/ai/review/stats`;
- * - créditos: a carteira do workspace (`GET /ws/financial/wallet`) e o extrato
- *   (`/ws/financial/wallets/:id/transactions`);
- * - falha: execução de nó do Spaceflow com `status` error (`GET /workflows/nodes`),
- *   que se repete por `POST /workflows/nodes/:id/retry`.
+ * IA (rodada 7). O agente vem do que o back já guarda (develop, 2026-11-24):
+ * `ai_agent` (`name`, `slug`, `description`, `type`, `status`, `beniTheme`),
+ * lido por `GET /ai/agents`, que junta os do sistema e os do workspace.
+ * Rodada 8: Revisões, Créditos e Falhas saíram, a pedido da redatora.
  * Os valores são inventados.
  * ------------------------------------------------------------------------- */
 
@@ -405,50 +406,58 @@ export interface AgenteDeIA {
 export const agentesDeIA: AgenteDeIA[] = [
   { slug: 'beni', nome: 'BENI', descricao: 'O assistente do workspace: cria itens e tarefas e responde dúvidas.', cor: '#60a5fa', sistema: true, tipo: 'chat' },
   { slug: 'analista-de-contratos', nome: 'Analista de contratos', descricao: 'Revisa contratos e aditivos pelo manual jurídico da empresa.', cor: '#34d399', tipo: 'reviewer' },
-  { slug: 'triagem-de-chamados', nome: 'Triagem de chamados', descricao: 'Classifica o chamado de TI e sugere a prioridade e o responsável.', cor: '#fbbf24', tipo: 'chat' },
+  { slug: 'triagem-de-chamados', nome: 'Triagem de chamados', descricao: 'Classifica o chamado de TI e sugere a prioridade.', cor: '#fbbf24', tipo: 'chat' },
   { slug: 'conferente-de-reembolsos', nome: 'Conferente de reembolsos', descricao: 'Confere a nota e o valor do reembolso pela política de viagens.', cor: '#a78bfa', tipo: 'chat' },
 ]
 
-export interface RevisaoDeIA {
+/* ---------------------------------------------------------------------------
+ * Spaceflow (rodada 9). A forma vem do que o back já guarda (develop,
+ * 2026-11-24, enlighten-api@develop b693d8d2b):
+ * - execução: `workflow_executions` (`status` working, completed, error,
+ *   canceled; `workflow`, `item`, `created_at`, `stopped_at`), listada por
+ *   `GET /workflows/executions`, que filtra pelos campos do modelo;
+ * - contagem por status no período: `GET /workflows/metrics?startDate&endDate`;
+ * - o passo: `node_executions` (`status`, `node` com o tipo e o nome, `output`
+ *   com o erro), por `GET /workflows/nodes`; repetir: `PUT /workflows/nodes/:id/retry`.
+ * Os valores são inventados.
+ * ------------------------------------------------------------------------- */
+
+/** O tipo do nó, como os docs do Spaceflow nomeiam (`docs/pt-BR/nodes/`). */
+export type TipoDeNo = 'approval' | 'signature' | 'task' | 'form' | 'delay' | 'http' | 'email' | 'ai_agent' | 'crud'
+
+export interface ExecucaoDeFluxo {
+  /** `workflow_executions.reference`. */
   id: string
-  documento: string
-  /** A referência do item de onde veio o documento. */
-  item: string
-  manual: string
-  status: 'pending' | 'in_progress' | 'completed' | 'failed'
-  /** De 0 a 100, só na concluída. */
-  nota?: number
-  /** Achados de severidade alta, só na concluída. */
-  achadosAltos?: number
-  em: number
-}
-
-export const revisoesDeIA: RevisaoDeIA[] = [
-  { id: 'rv-1', documento: 'NDA com a Vértice Consultoria', item: '#23217', manual: 'Revisão de NDA', status: 'in_progress', em: AGORA.getTime() - 12 * 60_000 },
-  { id: 'rv-2', documento: 'Aditivo da locação do galpão de Jundiaí', item: '#23203', manual: 'Revisão de aditivo', status: 'completed', nota: 64, achadosAltos: 2, em: AGORA.getTime() - 3 * HORA },
-  { id: 'rv-3', documento: 'Prestação de serviços de limpeza, Lumen Facilities', item: '#23196', manual: 'Contrato de serviço', status: 'completed', nota: 88, achadosAltos: 0, em: AGORA.getTime() - DIA },
-  { id: 'rv-4', documento: 'Licença do software de design', item: '#23142', manual: 'Contrato de software', status: 'failed', em: AGORA.getTime() - 2 * DIA },
-  { id: 'rv-5', documento: 'Contrato de manutenção dos elevadores', item: '#23121', manual: 'Contrato de serviço', status: 'pending', em: AGORA.getTime() - 5 * 60_000 },
-]
-
-/** A carteira de IA do workspace. Consumo diário dos últimos 30 dias, em créditos. */
-export const carteiraDeIA = {
-  saldo: 18_400,
-  consumoPorDia: [420, 380, 510, 0, 0, 640, 590, 610, 700, 480, 0, 0, 720, 810, 760, 690, 830, 0, 0, 880, 910, 850, 940, 870, 0, 0, 990, 1020, 960, 1050],
-}
-
-export interface FalhaDeAgente {
-  id: string
-  agente: string
   fluxo: string
-  item: string
-  erro: string
-  em: number
+  /** A referência do item que disparou, quando há item. */
+  item?: string
+  status: 'working' | 'completed' | 'error' | 'canceled'
+  /** `created_at`: quando começou. */
+  inicio: number
+  /** O passo em que parou (em andamento) ou que falhou (erro). */
+  passo: { id: string, nome: string, tipo: TipoDeNo }
+  /** A mensagem do passo que falhou (`output` do nó). */
+  erro?: string
+  /** No erro: quando parou (`stopped_at`). */
+  em?: number
 }
 
-export const falhasDeAgentes: FalhaDeAgente[] = [
-  { id: 'nx-1', agente: 'triagem-de-chamados', fluxo: 'Triagem de chamados de TI', item: '#23224', erro: 'O agente passou do limite de 10 passos.', em: AGORA.getTime() - 40 * 60_000 },
-  { id: 'nx-2', agente: 'conferente-de-reembolsos', fluxo: 'Conferência de reembolso', item: '#23259', erro: 'O anexo da nota não abriu (arquivo protegido por senha).', em: AGORA.getTime() - 5 * HORA },
+/** `GET /workflows/metrics` dos últimos 7 dias: execuções por status. */
+export const metricasDosFluxos = { working: 9, completed: 214, error: 6, canceled: 3 }
+
+export const execucoesDeFluxos: ExecucaoDeFluxo[] = [
+  // Com erro
+  { id: 'wfe-9312', fluxo: 'Aprovação de compras', item: '#23147', status: 'error', inicio: AGORA.getTime() - 50 * 60_000, em: AGORA.getTime() - 48 * 60_000, passo: { id: 'nx-71', nome: 'Avisar o financeiro', tipo: 'email' }, erro: 'O endereço do destinatário está vazio no campo E-mail do aprovador.' },
+  { id: 'wfe-9305', fluxo: 'Triagem de chamados de TI', item: '#23224', status: 'error', inicio: AGORA.getTime() - 3 * HORA, em: AGORA.getTime() - 3 * HORA + 2 * 60_000, passo: { id: 'nx-64', nome: 'Classificar o chamado', tipo: 'ai_agent' }, erro: 'O agente passou do limite de 10 passos.' },
+  { id: 'wfe-9288', fluxo: 'Cadastro de fornecedor', item: '#23266', status: 'error', inicio: AGORA.getTime() - 9 * HORA, em: AGORA.getTime() - 9 * HORA + 60_000, passo: { id: 'nx-52', nome: 'Consultar o CNPJ', tipo: 'http' }, erro: 'O serviço respondeu 503 (indisponível) depois de 3 tentativas.' },
+  { id: 'wfe-9240', fluxo: 'Conferência de reembolso', item: '#23259', status: 'error', inicio: AGORA.getTime() - 2 * DIA, em: AGORA.getTime() - 2 * DIA + 5 * 60_000, passo: { id: 'nx-31', nome: 'Ler a nota fiscal', tipo: 'ai_agent' }, erro: 'O anexo da nota não abriu (arquivo protegido por senha).' },
+  // Em andamento, parado num passo que espera alguém
+  { id: 'wfe-9101', fluxo: 'Renovação de contrato', item: '#23203', status: 'working', inicio: AGORA.getTime() - 6 * DIA, passo: { id: 'nx-12', nome: 'Assinatura das partes', tipo: 'signature' } },
+  { id: 'wfe-9180', fluxo: 'Aprovação de compras', item: '#23154', status: 'working', inicio: AGORA.getTime() - 3 * DIA, passo: { id: 'nx-22', nome: 'Aprovação da diretoria', tipo: 'approval' } },
+  { id: 'wfe-9233', fluxo: 'Onboarding de colaborador', status: 'working', inicio: AGORA.getTime() - 2 * DIA, passo: { id: 'nx-27', nome: 'Entregar o notebook', tipo: 'task' } },
+  { id: 'wfe-9290', fluxo: 'Cadastro de fornecedor', item: '#23273', status: 'working', inicio: AGORA.getTime() - 20 * HORA, passo: { id: 'nx-55', nome: 'Documentos do fornecedor', tipo: 'form' } },
+  { id: 'wfe-9301', fluxo: 'Cobrança de nota em atraso', item: '#23238', status: 'working', inicio: AGORA.getTime() - 5 * HORA, passo: { id: 'nx-61', nome: 'Esperar 2 dias', tipo: 'delay' } },
+  { id: 'wfe-9316', fluxo: 'Aprovação de compras', item: '#23161', status: 'working', inicio: AGORA.getTime() - 30 * 60_000, passo: { id: 'nx-73', nome: 'Aprovação do gestor', tipo: 'approval' } },
 ]
 
 export { DIA, HORA }

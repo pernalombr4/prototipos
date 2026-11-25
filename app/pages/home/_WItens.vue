@@ -1,12 +1,17 @@
 <script setup lang="ts">
 /**
- * Os 4 widgets NOVOS de itens (rodada 6), para o grupo "Itens e categorias"
+ * Os widgets NOVOS de itens (rodada 6), para o grupo "Itens e categorias"
  * ter mais que o atalho das categorias. Todos leem o que o item já guarda:
- * - Meus itens: os que têm a pessoa no campo responsável;
+ * - Meus itens: os que a pessoa criou (`Item.user`). É o filtro "Meus Itens"
+ *   que a busca de itens já tem (en-space@develop be2a5d850
+ *   `src/assets/models/cItems.ts:71-80`, campo `user` = o usuário logado);
  * - Itens criados recentemente: os 8 mais novos, pela data de criação;
- * - Prazos de itens: um campo de data da categoria (vencimento, vigência)
- *   de hoje aos próximos 30 dias;
  * - Itens por categoria: barras horizontais, 1 por categoria.
+ *
+ * Rodada 8, a pedido da redatora: o item não tem responsável ("nao existe
+ * responsabilidade por item") nem prazo ("sao campos de data aleatorios que o
+ * user pode criar, nao da pro sistema prever"). "Meus itens" passa a ser o que
+ * a pessoa criou, e "Prazos de itens" sai.
  *
  * Rodada 7: o item não tem "em aberto" no ENSPACE (a redatora: "nem existe
  * esse conceito de aberto"). Nenhum widget filtra ou conta por isso; a etapa
@@ -18,13 +23,13 @@
  * Componentes: `UScrollArea`, `UIcon`, `UBadge`, `UAvatar` (MCP nuxt-ui).
  */
 import type { Item } from './mocks'
-import { AGORA, DIA, EU, categoria, pessoa } from './mocks'
-import { HOJE, dataCurta, dinheiro } from './formatar'
+import { EU, categoria, pessoa } from './mocks'
+import { dataCurta, dinheiro } from './formatar'
 import type { Textos } from './textos'
 
 const props = defineProps<{
   t: Textos
-  tipo: 'meusItens' | 'ultimosItens' | 'prazosDeItens' | 'itensPorCategoria'
+  tipo: 'meusItens' | 'ultimosItens' | 'itensPorCategoria'
   itens: Item[]
   /** Itens que a pessoa acabou de criar: entram com destaque. */
   recemCriados: number[]
@@ -33,13 +38,12 @@ const emit = defineEmits<{ abrir: [destino: string] }>()
 
 
 const lista = computed(() => {
-  if (props.tipo === 'meusItens') return props.itens.filter(i => i.responsavel === EU.id).sort((a, b) => b.criadoEm - a.criadoEm)
+  if (props.tipo === 'meusItens') return props.itens.filter(i => i.criador === EU.id).sort((a, b) => b.criadoEm - a.criadoEm)
   if (props.tipo === 'ultimosItens') return [...props.itens].sort((a, b) => b.criadoEm - a.criadoEm).slice(0, 8)
-  if (props.tipo === 'prazosDeItens') return props.itens.filter(i => i.prazo && i.prazo >= HOJE && i.prazo < AGORA.getTime() + 30 * DIA).sort((a, b) => a.prazo! - b.prazo!)
   return []
 })
 
-const vazio = computed(() => ({ meusItens: props.t.itensW.vazioMeus, ultimosItens: props.t.itensW.vazio, prazosDeItens: props.t.itensW.vazioPrazos, itensPorCategoria: props.t.itensW.vazio })[props.tipo])
+const vazio = computed(() => ({ meusItens: props.t.itensW.vazioMeus, ultimosItens: props.t.itensW.vazio, itensPorCategoria: props.t.itensW.vazio })[props.tipo])
 
 const barras = computed(() => {
   const r = new Map<string, number>()
@@ -52,10 +56,6 @@ const barras = computed(() => {
 const COR: Record<string, string> = { primary: 'bg-primary', info: 'bg-info', success: 'bg-success', warning: 'bg-warning', error: 'bg-error', neutral: 'bg-inverted/40' }
 
 function lateral(i: Item) {
-  if (props.tipo === 'prazosDeItens' && i.prazo) {
-    const venceu = i.prazo < AGORA.getTime()
-    return { texto: venceu ? props.t.itensW.venceu(dataCurta(i.prazo, props.t)) : props.t.itensW.venceEm(dataCurta(i.prazo, props.t)), classe: venceu ? 'text-error-700 dark:text-error-300' : i.prazo < AGORA.getTime() + 7 * DIA ? 'text-warning-700 dark:text-warning-300' : 'text-muted' }
-  }
   if (props.tipo === 'ultimosItens') return { texto: dataCurta(i.criadoEm, props.t), classe: 'text-muted' }
   return { texto: i.valor ? dinheiro(i.valor, props.t) : '', classe: 'text-muted' }
 }
@@ -103,7 +103,10 @@ function lateral(i: Item) {
             </span>
             <span class="block truncate text-xs text-muted">{{ categoria(i.categoria)?.name }} · {{ i.reference }} · {{ i.etapa }}</span>
           </span>
-          <UAvatar v-if="tipo !== 'meusItens'" size="2xs" :text="pessoa(i.responsavel)?.iniciais" :alt="pessoa(i.responsavel)?.nome" class="shrink-0" />
+          <!-- Quem criou: em Meus itens é sempre a pessoa, então não aparece. -->
+          <UTooltip v-if="tipo !== 'meusItens'" :text="t.itensW.criadoPor(pessoa(i.criador)?.nome ?? '')">
+            <UAvatar size="2xs" :text="pessoa(i.criador)?.iniciais" :alt="t.itensW.criadoPor(pessoa(i.criador)?.nome ?? '')" class="shrink-0" />
+          </UTooltip>
           <span v-if="lateral(i).texto" class="shrink-0 text-xs tabular-nums" :class="lateral(i).classe">{{ lateral(i).texto }}</span>
         </button>
       </li>

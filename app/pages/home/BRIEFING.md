@@ -37,6 +37,44 @@ Procurei no `enspace-ux-research` (auditoria de UX por persona) antes de desenha
 
 ## O que o develop faz hoje
 
+### O MVP, widget por widget (rodada 8)
+
+Leitura de 2026-11-24 pela skill `investigar-codigo`. Siglas: **F** = `en-space@develop be2a5d850`; **B** = `enlighten-api@develop b693d8d2b`; **S** = `en-sdk@develop 2dbd22c`. O código mostra a branch, não o que está no ar.
+
+**O item:**
+
+- **Lido no código:** o item guarda quem o criou no campo `user` (B `api/c-items/models/c-items.settings.json:19-22`). A autoria vem de quem está logado na criação (B `plugins/en-types/schemas/items.ts:141`, `plugins/en-types/controllers/items.ts:27`).
+- **Lido no código:** a busca de itens já tem o filtro "Meus Itens" (`isOwner`), com o campo `user` igual ao usuário logado (F `src/assets/models/cItems.ts:71-80`; rótulo em `locales/pt-BR.yml:4099-4101`, "Exibe apenas itens dos quais o usuário é o proprietário").
+- **Lido no código:** o item não tem campo de responsável nem de prazo. Os campos do modelo são `reference`, `user`, `group`, `status` (`active` ou `inactive`), `type`, `data`, `request_email`, `form_result`, `stage_status`, `last_status_change`, `form`, `mgroups`, `icon`, `ignore_triggers`, `deleted_at`, `last_update`, `counter` e `tag_ids` (B `c-items.settings.json:14-86`). As datas que a pessoa vê ficam em `data`, nos campos que cada categoria cria.
+- **Lido no código:** a tela Agenda busca os itens de cada categoria pelo campo de data configurado nela, sem filtro de pessoa (F `src/pages/workspaces/[workspace]/schedule/index.vue:329`), e já desenha o mês (`month-grid`, `:164`).
+
+**A Home, a IA e a disposição:**
+
+- **Lido no código:** a Home de develop monta as lâminas pelo catálogo do Painel de tarefas do SDK (F `src/pages/workspaces/[workspace]/index.vue:112-128`) e guarda a disposição por workspace e pessoa (`useDashboardLayout`, `:130-134`), no navegador (S `packages/ui/src/composables/useDashboardLayout.ts:25`).
+- **Lido no código:** a conversa flutuante (F `src/components/ai/AiChatFloat.vue`) é o `EnAiChatsSharedFloat` do SDK, que guarda o agente só por dentro (S `packages/ui/src/components/ai/AiChatsSharedFloat.vue:62`) e não tem prop para abrir com um agente. A página de conversa aceita `?agent=` e `?prompt=` (F `ai/chat/index.vue:23-26`).
+
+| Widget ou recurso | No MVP? | Por quê |
+|---|---|---|
+| 13 lâminas de tarefas (números, Vencidas, Vencem em breve, status, prioridade, carga, atividade, saúde dos prazos, entrada e saída) | sim | estão no catálogo do Painel de tarefas do SDK, que a Home já usa |
+| Minhas tarefas | sim | o cartão `WorkspaceTasks` e as rotas existem ("De onde vem o dado de cada widget") |
+| Compromissos do dia | sim | as mesmas fontes da tela Agenda, filtradas para hoje |
+| Categorias | sim | `WorkspaceCategories` já mostra nome e descrição |
+| Meus itens | sim | o filtro "Meus Itens" da busca de itens |
+| Itens criados recentemente | sim | a mesma busca, pela data de criação |
+| Agentes de IA | sim | `GET /ai/agents`; o clique abre a página de conversa com `?agent=` |
+| Atalhos e Recentes | sim | já ficam no navegador (`useFavorites`, `useNavigationHistory`) |
+| "Minhas tarefas · Workspace" só do administrador | sim | só front |
+| Home padrão do administrador e selo "Novo" | não | falta o campo do layout no workspace (busca `home_layout`, `home_widgets`, `user_preferences`: 0) |
+| Rascunho na conversa do BENI | não | interação nova; a conversa flutuante não recebe agente nem pedido de fora |
+| Widget BENI | não | o resumo não tem rota |
+| Tarefas que delegei | não | a tarefa agendada não guarda quem delegou |
+| Agenda da semana e do mês | não | a tela Agenda já mostra |
+| Itens por categoria | não | sem contagem agregada |
+| Gráfico de um painel | não | o painel está preso a uma tela |
+| Comunicado e Bloco de notas | não | modelo e rota novos |
+
+Na rodada 8 saíram Revisões por IA, Créditos de IA e Falhas dos agentes, a pedido da redatora. As linhas deles na tabela abaixo ficam como registro.
+
 ### A IA do workspace e a categoria (rodada 7)
 
 Leitura de 2026-11-24 pela skill `investigar-codigo`. Siglas: **F** = `en-space@develop be2a5d850`; **B** = `enlighten-api@develop 8669875cf`. O código mostra a branch, não o que está no ar.
@@ -55,6 +93,20 @@ Leitura de 2026-11-24 pela skill `investigar-codigo`. Siglas: **F** = `en-space@
 | Uso de IA por pessoa | só no painel admin (en-admin) | sem rota no workspace |
 
 Inconclusivo: se `GET /workflows/nodes` filtra pelo tipo do nó. Sem esse filtro, o widget de falhas traz todas as execuções com erro e separa as de agente no front.
+
+### Spaceflow na Home (rodada 9)
+
+Leitura de 2026-11-24 pela skill `investigar-codigo`. Siglas: **F** = `en-space@develop be2a5d850`; **B** = `enlighten-api@develop b693d8d2b`; **S** = `en-sdk@develop 2dbd22c`. O código mostra a branch, não o que está no ar.
+
+| Widget | Veredito | Fonte | O que falta |
+|---|---|---|---|
+| Execuções dos fluxos | reaproveita | `GET /workflows/metrics` conta `workflow_executions` por `status` do workspace, com `startDate` e `endDate` sobre `created_at` (B `plugins/en-workflows/services/workflows/metrics.ts:12-34`, rota em `routes/workflows/get.metrics.ts`); o SDK já chama (S `packages/core/src/resources/workflows/index.ts:204`, `packages/vue/src/query/resources/workflows.ts:212`) | só front |
+| Falhas nos fluxos | reaproveita | `workflow_executions.status` tem `working`, `completed`, `error`, `canceled` (B `plugins/en-workflows/models/workflow-executions.settings.json:42-46`) e o item (`:62`); a lista de execuções aceita os campos do modelo como filtro, o status entre eles (B `routes/workflows/executions/get.ts`, `schemas/workflow-executions.ts:43,74`); Repetir é `PUT /workflows/nodes/:id/retry`, o mesmo da tela de execução (F `src/composables/useNodeExecutions.ts:17`) | o passo que falhou e a mensagem vêm da execução do passo: 1 chamada por execução, ou o front lê a lista de passos da execução aberta |
+| Fluxos em andamento | reaproveita | a mesma lista, com `status=working`, ordenada por início; o passo que espera é a execução do passo com `status` `working` (B `plugins/en-workflows/models/node-executions.settings.json:30-34`) | o mesmo da linha acima; "Parado" (mais de 2 dias) é regra de front |
+| Só falhas de agente | não existe | o tipo do passo fica no JSON `node` da execução do passo (B `node-executions.settings.json:40-42`), sem coluna para filtrar | rota ou coluna nova. Por isso o widget mostra a falha de qualquer passo |
+
+- **Permissão:** a tela de fluxos pede a permissão `workflows` (F `src/composables/usePermissions.ts:87`). Os 3 widgets seguem a mesma regra.
+- **Abrir a execução:** a tela já existe (F `src/pages/workspaces/[workspace]/workflows/[workflow]/executions/[execution].vue`).
 
 ### O BENI e o alternador de escopo (rodada 6)
 

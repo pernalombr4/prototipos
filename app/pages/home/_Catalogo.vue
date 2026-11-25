@@ -44,6 +44,8 @@ const props = defineProps<{
   categorias: Categoria[]
   /** A escolha atual do widget Categorias, quando ele já está na Home. */
   categoriasEscolhidas?: string[]
+  /** Rodada 8: só os widgets do MVP (`mvp` no widgets.ts). */
+  mvp?: boolean
 }>()
 const aberto = defineModel<boolean>('open', { default: false })
 const emit = defineEmits<{
@@ -62,7 +64,10 @@ watch(aberto, (a) => {
   nivel.value = null
 })
 
-const visiveis = computed(() => CATALOGO.filter(d => props.admin || !d.soAdmin))
+/* Rodada 9: o widget que pede permissão (Spaceflow) não aparece para o membro do protótipo, que não a tem. */
+const visiveis = computed(() => CATALOGO.filter(d => (props.admin || (!d.soAdmin && !d.permissao)) && (!props.mvp || d.mvp)))
+/** O grupo sem widget nenhum (Equipe e notas, no MVP) não aparece. */
+const grupos = computed(() => GRUPOS.filter(g => quantas(g.grupo) > 0))
 const tiposNaHome = computed(() => new Set(props.naHome))
 const categoriasNaHome = computed(() => tiposNaHome.value.has('categorias'))
 
@@ -120,7 +125,7 @@ const titulo = computed(() => nivel.value ? nomeDoNivel(nivel.value) : props.t.p
 
           <div class="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
             <ul v-if="!busca.trim()" class="space-y-2" :aria-label="titulo">
-              <li v-for="g in GRUPOS" :key="g.grupo">
+              <li v-for="g in grupos" :key="g.grupo">
                 <button
                   type="button"
                   class="group/no flex w-full items-center gap-3 rounded-lg border border-default p-3 text-left transition-colors duration-150 hover:border-accented hover:bg-elevated/40 focus-visible:outline-2 focus-visible:outline-primary"
@@ -131,7 +136,7 @@ const titulo = computed(() => nivel.value ? nomeDoNivel(nivel.value) : props.t.p
                   </span>
                   <span class="min-w-0 flex-1">
                     <span class="block text-sm font-medium text-highlighted">{{ t.grupos[g.grupo] }}</span>
-                    <span class="block text-xs text-muted">{{ t.descricaoDosGrupos[g.grupo] }}</span>
+                    <span class="block text-xs text-muted">{{ (mvp && t.descricaoDosGruposMvp[g.grupo]) || t.descricaoDosGrupos[g.grupo] }}</span>
                   </span>
                   <UBadge :label="t.catalogo.opcoes(quantas(g.grupo))" color="neutral" variant="subtle" size="sm" class="shrink-0" />
                   <UIcon name="i-lucide-chevron-right" class="size-4 shrink-0 text-dimmed transition-transform duration-150 group-hover/no:translate-x-0.5" />

@@ -2,6 +2,51 @@
 
 Registro das rodadas. A mais recente em cima.
 
+## Rodada 9 · 2026-11-24
+
+- **Pedido (literal):** "melhore o padding interno pra que o titulo nao fique parecendo "colado" lá no alto. melhore o alinhamento também. o título não deve passar da altura do ícone e o texto da desrciçao nao deve descer alem da base do icone. de repente vale aumentar o ícone pra ficar descriçao + titulo ali no espaço que o ícone ocupa. e o truncamento se mantem / adicione tambem widgets de spaceflow: erros em fluxos é um deles. em vez de ser só erro nos agentes, faça algo similar pra mostrar falhas dos fluxos em geral / e outros status que voce achar interessantes de trazer aí."
+- **Mudou:**
+  - **cartão de Categorias:** o ícone passa de 40 px para 56 px, e o texto ocupa no máximo a altura dele (título de 20 px, 4 px de espaço e até 2 linhas de descrição de 16 px). O bloco centraliza na altura do ícone, com 12 px de respiro em cima e embaixo. O nome continua truncado em 1 linha e a descrição em 2;
+  - **grupo Spaceflow no catálogo**, com 3 widgets:
+    - **Execuções dos fluxos:** as execuções dos últimos 7 dias por status (em andamento, concluídas, com erro, canceladas), a barra com a proporção e a taxa de conclusão das terminadas;
+    - **Falhas nos fluxos:** a execução que parou com erro em qualquer passo (e-mail, agente de IA, requisição HTTP e os outros), com o passo, a mensagem, o item e o botão Repetir. Substitui a ideia de "Falhas dos agentes", que a rodada 8 tirou;
+    - **Fluxos em andamento:** a execução que espera, a mais antiga primeiro, com o passo (aprovação, assinatura, tarefa, formulário, espera). A que espera há mais de 2 dias leva o selo "Parado".
+  - o clique na linha abre a execução no Spaceflow, e o botão do cabeçalho abre o Spaceflow;
+  - **permissão:** os 3 pedem a permissão de fluxos. No catálogo levam o selo "Pede acesso aos fluxos", e o membro do protótipo, que não a tem, não os vê no catálogo e vê "Sem acesso" se o administrador os puser na Home padrão.
+- **MVP:** os 3 entram no MVP. A contagem por status já tem rota, a lista sai da rota de execuções com filtro de status, e o Repetir é a mesma chamada da tela de execução. A tabela "Spaceflow na Home (rodada 9)" do `BRIEFING.md` traz as citações. Nenhum dos 3 entra na Home padrão: quem quer, põe pelo catálogo.
+- **Por que não "falhas dos agentes":** o tipo do passo fica dentro do JSON `node` da execução do passo, sem coluna para filtrar. Separar só os agentes pede rota nova; a falha de qualquer passo sai da rota que já existe.
+- **Componentes:** `_WSpaceflow.vue`, com `UScrollArea`, `UButton`, `UTooltip`, `UIcon` e `UBadge`. Nenhum CSS próprio além da barra que cresce, que reusa o `home-crescer-x` do widget de itens.
+- **Fronteira:** muda o cartão de Categorias e o catálogo ganha o grupo Spaceflow. A casca, a grade, a barra de edição e os outros widgets ficam como na rodada 8.
+- **Teste no navegador:** não feito nesta rodada. O Chrome da redatora ficou desconectado e o navegador do app não abriu (a máquina ficou com 0,3 GB de memória livre). A rodada passou no `vue-tsc` sem erro na Home e o `/home` responde 200 no servidor local.
+
+## Rodada 8 · 2026-11-24
+
+- **Pedido (literal):** "Meus itens / Os itens em que você é o responsável. / nao faz sentido. é itens que aquele usuário criou. nao rsponsavel. nao existe responsabilidade por item. / Prazos de itens / Itens com data de vencimento ou vigência nos próximos 30 dias. / tambem nao existe. itens nao tem campo de data de vencimento. sao campos de data aleatorios que o user pode criar, nao da pro sistema prever. / revisoes por ia nao faz sentido / creditos de ia também nao, nem falhas dos agentes / --- / ajuste isso e, apos deletar o que nao faz sentido ou modificar a descriçao, pode prototipar um botao que contenha somente o MVP da solução. tente guiar o mvp com base no que ja existe hoje no código e seria simples de fazer. use /investigar-codigo pra garantir que ta correto."
+- **Mudou:**
+  - **Meus itens:** passa a ser "Os itens que você criou". O item guarda quem o criou (`Item.user`), e a busca de itens de develop já tem o filtro "Meus Itens" por esse campo. Em Itens criados recentemente, o avatar da linha é de quem criou, com a dica "Criado por <nome>";
+  - **saem:** Prazos de itens, Revisões por IA, Créditos de IA e Falhas dos agentes. O grupo IA fica com o BENI e Agentes de IA, e o selo "Só o administrador vê" sai com os 2 widgets do administrador;
+  - **o item não tem responsável:** o modal de criar item perde o campo Responsável, e o rascunho de item do BENI também. A tarefa continua com responsável (`assigned_to`);
+  - **a Agenda** junta o item pelo campo de data que a Agenda da categoria usa, sem filtro de pessoa, como a tela Agenda faz hoje;
+  - **o botão do MVP:** o andaime ganha "Versão: Proposta completa · MVP". O MVP mostra só o que se faz no front, com dado e componente que o develop já tem. A tabela "O MVP, widget por widget (rodada 8)" do `BRIEFING.md` traz o motivo de cada um.
+- **O que o MVP tem:**
+  - os 13 widgets de tarefas que já estão no catálogo do Painel de tarefas do SDK, mais Minhas tarefas;
+  - Compromissos do dia, Categorias, Meus itens, Itens criados recentemente, Agentes de IA, Atalhos e Recentes;
+  - a grade, o Personalizar, a barra de edição, o Restaurar padrão e o botão Criar com Item e Tarefa;
+  - "Minhas tarefas · Workspace" só para o administrador;
+  - a Home padrão do MVP: a Home de develop de hoje (Categorias, 4 números, Vencidas, Vencem em breve) mais Minhas tarefas, Compromissos do dia, Meus itens, Agentes de IA, Atalhos e Recentes.
+- **O que fica fora do MVP:**
+  - **Home padrão montada pelo administrador** e o selo "Novo": pede um campo novo no workspace. No MVP cada pessoa arruma a própria Home, guardada no navegador, como develop já faz;
+  - **rascunho de item e de tarefa na conversa do BENI:** é interação nova. No MVP, "Pedir ao BENI" e o clique num agente abrem a conversa em tela cheia, que já aceita o pedido e o agente pela URL. A conversa flutuante não recebe um agente de fora;
+  - **widget BENI:** o resumo não tem rota;
+  - **Tarefas que delegei:** a tarefa agendada não guarda quem a delegou;
+  - **Agenda da semana e do mês:** a tela Agenda já mostra os 2;
+  - **Itens por categoria:** não há contagem agregada (1 chamada por categoria);
+  - **Gráfico de um painel:** o painel está preso a uma tela, e escolher tela e painel é configuração nova;
+  - **Comunicado e Bloco de notas:** pedem modelo e rota novos. O grupo "Equipe e notas" some do catálogo do MVP.
+- **Componentes:** nenhum novo. O botão de versão é andaime, como os de estado e de papel.
+- **Fronteira:** muda o widget Meus itens, o grupo IA, o modal de item, o rascunho de item do BENI e a Agenda. A casca, a grade, a barra de edição e a Home padrão da proposta completa ficam como na rodada 7.
+- **Ver:** `evidencias/rodada8-*.jpg`
+
 ## Rodada 7 · 2026-11-24
 
 - **Pedido (literal):** "alem disso, no widget de categoirias, nao da pra dizer "6 em aberto", "4 em aberto"... nem existe esse conceito de aberto. Pode tirar isso. lembre-se de que "em aberto" nao existe no widget de categorias. deve ser só o onme da categoria, a descriçao dela abaixo e o botao de açao. alem disso, veja se tem mais widgets de IA que voce poderia sugerir. assim teríamos uma seçao somente pra IA. poe nem ser só beni. pode ser o beni + funcionalidades de agentes de IA puxadas pra widget, se fizer sentido. nao crie só porque to pedindo. tem que realmente apresentar algum ganho. o botao de restaurar o padrao ta em posiçao ruim ali também. acredito que deva estar ao lado do de cancelar a operaçao? ou nao? como o ux design define esse tipo de coisa por regra? pesquise pra executar. o widget "agenda de hoje" deve se chamar "compromissos do dia""

@@ -50,6 +50,17 @@
  *   IA e Falhas dos agentes (os 2 últimos só do administrador, `_WIa.vue`);
  * - a conversa flutuante atende o agente clicado, não só o BENI.
  *
+ * Rodada 8:
+ * - saem Prazos de itens (o item não tem prazo), Revisões por IA, Créditos de
+ *   IA e Falhas dos agentes;
+ * - "Meus itens" são os que a pessoa criou (`Item.user`): o item não tem
+ *   responsável. A Agenda junta o item pelo campo de data que a Agenda da
+ *   categoria usa, sem filtro de pessoa, como a tela Agenda;
+ * - o andaime ganha "Versão: Proposta completa · MVP". O MVP mostra só o que
+ *   se faz no front com o que o develop já tem (`mvp` no widgets.ts): sem
+ *   Home padrão do administrador, sem rascunho na conversa do BENI, e o
+ *   agente abre a conversa em tela cheia.
+ *
  * O dado é o `mocks.ts`; o catálogo e a Home padrão, o `widgets.ts`. Tudo em
  * memória: o reload volta ao começo.
  */
@@ -66,6 +77,7 @@ import ChatDoBeni from './_ChatDoBeni.vue'
 import WAgenda from './_WAgenda.vue'
 import WItens from './_WItens.vue'
 import WIa from './_WIa.vue'
+import WSpaceflow from './_WSpaceflow.vue'
 import WBeni from './_WBeni.vue'
 import ModalNovoItem from './_ModalNovoItem.vue'
 import type { DadosDoItem } from './_ModalNovoItem.vue'
@@ -77,20 +89,20 @@ import WListas from './_WListas.vue'
 import WMinhasTarefas from './_WMinhasTarefas.vue'
 import WLamina from './_WLamina.vue'
 import WOutros from './_WOutros.vue'
-import type { AgenteDeIA, Atalho, Categoria, DiaDeTarefas, Evento, FalhaDeAgente, Item, Recente, RevisaoDeIA, TarefaDaHome } from './mocks'
+import type { AgenteDeIA, Atalho, Categoria, DiaDeTarefas, Evento, ExecucaoDeFluxo, Item, Recente, TarefaDaHome } from './mocks'
 import {
   AGORA, DIA, EU, HORA, agentesDeIA, atalhosIniciais, categoria, categorias as categoriasIniciais, comunicadoInicial, eventosDoCalendario,
-  falhasDeAgentes, itensIniciais, notaInicial, revisoesDeIA, painelDeCompras, recentes as recentesIniciais, resumoDoBeni, serieDasTarefas, tarefasIniciais,
+  execucoesDeFluxos, itensIniciais, metricasDosFluxos, notaInicial, painelDeCompras, recentes as recentesIniciais, resumoDoBeni, serieDasTarefas, tarefasIniciais,
 } from './mocks'
 import type { AbaDeTarefa } from './formatar'
 import { HOJE, abaDa, dataCurta, dataLonga, horaAtual } from './formatar'
 import type { ConfigDoWidget, LaminaDeTarefas, TipoDeWidget, Widget } from './widgets'
-import { CATALOGO, LAMINAS, PADRAO_LAYOUT, PADRAO_WIDGETS, definicao } from './widgets'
+import { LAMINAS, MVP_LAYOUT, MVP_WIDGETS, PADRAO_LAYOUT, PADRAO_WIDGETS, definicao } from './widgets'
 import { textos } from './textos'
 
 definePageMeta({
   titulo: 'Home',
-  descricao: 'Home do workspace em widgets que cada pessoa arruma (categorias, lâminas do Painel de tarefas, BENI, agenda do dia, da semana e do mês, itens), catálogo em 5 grupos, Home padrão montada pelo administrador e um botão Criar com item, tarefa rápida e a conversa com o BENI.',
+  descricao: 'Home do workspace em widgets que cada pessoa arruma (categorias, lâminas do Painel de tarefas, BENI e agentes, agenda, itens que a pessoa criou), Home padrão montada pelo administrador, um botão Criar com item, tarefa rápida e a conversa com o BENI, e a versão MVP só com o que o develop já tem.',
   status: 'em-revisao',
   atualizado: '2026-11-24',
   tela: 'Início',
@@ -134,8 +146,9 @@ const beni = ref<{ linhas: { icone: string, texto: string }[] }>({ linhas: [] })
 const recemCriados = ref<number[]>([])
 /* Rodada 7: o grupo IA. No workspace novo só existe o BENI (agente do sistema). */
 const agentes = ref<AgenteDeIA[]>([])
-const revisoes = ref<RevisaoDeIA[]>([])
-const falhas = ref<FalhaDeAgente[]>([])
+/* Rodada 9: o grupo Spaceflow. No workspace novo não há fluxo nem execução. */
+const fluxos = ref<ExecucaoDeFluxo[]>([])
+const metricas = ref({ ...metricasDosFluxos })
 
 /**
  * Andaime. O workspace que acabou de nascer não tem tarefa, item, categoria,
@@ -155,8 +168,8 @@ function carregarDados(vazio: boolean) {
   comunicado.value = vazio ? null : { ...comunicadoInicial }
   beni.value = vazio ? { linhas: [] } : resumoDoBeni
   agentes.value = vazio ? agentesDeIA.filter(a => a.sistema) : [...agentesDeIA]
-  revisoes.value = vazio ? [] : [...revisoesDeIA]
-  falhas.value = vazio ? [] : [...falhasDeAgentes]
+  fluxos.value = vazio ? [] : execucoesDeFluxos.map(x => ({ ...x }))
+  metricas.value = vazio ? { working: 0, completed: 0, error: 0, canceled: 0 } : { ...metricasDosFluxos }
   recemCriados.value = []
 }
 carregarDados(false)
@@ -179,32 +192,29 @@ const serieDoEscopo = computed(() => series.value[escopoDasTarefas.value])
 interface Home { widgets: Widget[], layout: ItemDaGrade[] }
 const copiaDaHome = (h: Home): Home => ({ widgets: h.widgets.map(w => ({ ...w, config: { ...w.config } })), layout: h.layout.map(x => ({ ...x })) })
 
-const padrao = ref<Home>(copiaDaHome({ widgets: PADRAO_WIDGETS, layout: PADRAO_LAYOUT }))
+/**
+ * Andaime (rodada 8): a versão que se vê. "MVP" mostra só o que se faz no
+ * front com o que o develop já tem; "Proposta completa", tudo.
+ */
+const versao = ref<'completa' | 'mvp'>('completa')
+const mvp = computed(() => versao.value === 'mvp')
+const padraoDaVersao = () => mvp.value ? { widgets: MVP_WIDGETS, layout: MVP_LAYOUT } : { widgets: PADRAO_WIDGETS, layout: PADRAO_LAYOUT }
+
+const padrao = ref<Home>(copiaDaHome(padraoDaVersao()))
 const minha = ref<Home>(copiaDaHome(padrao.value))
 
-/** O administrador escolhe no Personalizar qual Home está editando. */
+/** O administrador escolhe no Personalizar qual Home está editando. No MVP não há Home padrão gravada no workspace. */
 const escopo = ref<'minha' | 'padrao'>('minha')
-/**
- * Rodada 7: Créditos e Falhas dos agentes são só do administrador (a carteira e
- * a execução dos fluxos pedem permissão de admin). Na Home do membro eles não
- * entram, nem quando o administrador os põe na Home padrão.
- */
-const SO_DO_ADMIN = new Set(CATALOGO.filter(d => d.soAdmin && d.tipo !== 'comunicado').map(d => d.tipo))
-/** O que saiu ao ver como membro volta ao ver de novo como administrador (o alternador simula 2 pessoas). */
-let guardadosDoAdmin: Home = { widgets: [], layout: [] }
-watch(papel, (p) => {
-  if (p === 'admin') {
-    minha.value.widgets.push(...guardadosDoAdmin.widgets)
-    minha.value.layout.push(...guardadosDoAdmin.layout)
-    guardadosDoAdmin = { widgets: [], layout: [] }
-    return
-  }
-  escopo.value = 'minha'
-  const fora = new Set(minha.value.widgets.filter(w => SO_DO_ADMIN.has(w.tipo)).map(w => w.id))
-  guardadosDoAdmin = { widgets: minha.value.widgets.filter(w => fora.has(w.id)), layout: minha.value.layout.filter(x => fora.has(x.id)) }
-  minha.value.widgets = minha.value.widgets.filter(w => !fora.has(w.id))
-  minha.value.layout = minha.value.layout.filter(x => !fora.has(x.id))
-})
+watch(papel, (p) => { if (p === 'membro') escopo.value = 'minha' })
+
+function escolherVersao(v: 'completa' | 'mvp') {
+  if (versao.value === v) return
+  sairDaEdicao()
+  chatAberto.value = false
+  versao.value = v
+  padrao.value = copiaDaHome(padraoDaVersao())
+  minha.value = copiaDaHome(padrao.value)
+}
 const home = computed(() => escopo.value === 'padrao' ? padrao.value : minha.value)
 
 const layout = computed({
@@ -237,14 +247,17 @@ const itensComAcesso = computed(() => itens.value.filter(i => categoria(i.catego
 
 /**
  * As 3 fontes da Agenda, como a tela Agenda junta: os compromissos do
- * calendário, o prazo das minhas tarefas abertas e a data dos itens sob minha
- * responsabilidade (o item não tem "em aberto": entra pela data). Tarefa ou item criado agora já entra.
+ * calendário, o prazo das minhas tarefas abertas e os itens pelo campo de data
+ * que a Agenda de cada categoria usa (`c-schedule-configs`). A tela Agenda
+ * busca esses itens sem filtro de pessoa (en-space@develop be2a5d850
+ * `src/pages/workspaces/[workspace]/schedule/index.vue:329`): o item não tem
+ * responsável (rodada 8). Tarefa ou item criado agora já entra.
  */
 const agendaCompleta = computed<Evento[]>(() => [
   ...eventos.value,
   ...minhasAbertas.value.filter(x => x.due_date).map(x => ({ id: `t-${x.id}`, titulo: x.name, inicio: x.due_date!, fim: x.due_date!, fonte: 'tarefa' as const })),
-  ...itensComAcesso.value.filter(i => i.prazo && i.responsavel === EU.id)
-    .map(i => ({ id: `i-${i.id}`, titulo: i.titulo, inicio: new Date(i.prazo!), fim: new Date(i.prazo!), fonte: 'item' as const })),
+  ...itensComAcesso.value.filter(i => i.data)
+    .map(i => ({ id: `i-${i.id}`, titulo: i.titulo, inicio: new Date(i.data!), fim: new Date(i.data!), fonte: 'item' as const })),
 ])
 const agendaDeHoje = computed(() => agendaCompleta.value.filter(e => e.inicio.getTime() >= HOJE && e.inicio.getTime() < HOJE + DIA))
 
@@ -273,15 +286,11 @@ const agenteDoChat = ref<AgenteDeIA | null>(null)
 let pedidos = 0
 function pedirAoBeni(texto: string, agente: AgenteDeIA | null = null) {
   menuCriarAberto.value = false
+  // MVP: a página de conversa já aceita `?prompt=` e `?agent=`; o rascunho na conversa é proposta.
+  if (mvp.value) return abrirMaquete(t.value.iaW.conversaEmTelaCheia(agente?.nome ?? 'BENI'))
   agenteDoChat.value = agente
   chatAberto.value = true
   pedidoAoBeni.value = { texto, n: ++pedidos }
-}
-
-/** Rodada 7: Repetir o passo de agente que falhou (`POST /workflows/nodes/:id/retry`). */
-function repetirFalha(f: FalhaDeAgente) {
-  falhas.value = falhas.value.filter(x => x.id !== f.id)
-  toast.add({ title: t.value.iaW.falhas.repetido, icon: 'i-lucide-rotate-cw' })
 }
 
 const algumaCamadaAberta = computed(() => tarefaAberta.value || novoItemAberto.value || configAberto.value || editando.value)
@@ -326,7 +335,7 @@ function criarItemEm(slug: string, dados: DadosDoItem, silencioso = false) {
   const c = categoria(slug)
   const novo: Item = {
     id: proximoItem, reference: `#${proximoItem}`, categoria: slug, titulo: dados.titulo,
-    status: 'aberto', etapa: 'Triagem', responsavel: dados.responsavel, valor: dados.valor, prazo: dados.prazo,
+    etapa: 'Triagem', criador: EU.id, valor: dados.valor, data: dados.data,
     urgente: dados.urgente, criadoEm: AGORA.getTime() + (proximoItem - 23400) * 1000,
   }
   itens.value = [...itens.value, novo]
@@ -420,11 +429,21 @@ function estadoDo(w: Widget): EstadoDoWidget {
   if (recuperados.value.includes(w.id)) return 'ok'
   if (estado.value === 'erro' && w.id === alvoDoErro.value) return 'erro'
   if (estado.value === 'semAcesso' && w.id === alvoDoSemAcesso.value) return 'semAcesso'
+  /* Rodada 9: o membro do protótipo não tem a permissão `workflows`. */
+  if (!admin.value && definicao(w.tipo).permissao) return 'semAcesso'
   return 'ok'
 }
 
 function categoriaSemAcessoDo(w: Widget) {
+  if (!admin.value && definicao(w.tipo).permissao) return 'Spaceflow'
   return w.id === alvoDoSemAcesso.value ? painelDeCompras.tela : undefined
+}
+
+/** Repetir: no produto, `PUT /workflows/nodes/:id/retry`. Aqui sai da lista e conta como em andamento. */
+function repetirFluxo(e: ExecucaoDeFluxo) {
+  fluxos.value = fluxos.value.filter(x => x.id !== e.id)
+  metricas.value = { ...metricas.value, error: Math.max(0, metricas.value.error - 1), working: metricas.value.working + 1 }
+  toast.add({ title: t.value.spaceflowW.repetido, description: e.fluxo, icon: 'i-lucide-rotate-cw', color: 'success' })
 }
 
 function tentarDeNovo(id: string) {
@@ -607,7 +626,7 @@ function configuravel(w: Widget) {
             </p>
           </div>
           <USelect
-            v-if="admin"
+            v-if="admin && !mvp"
             v-model="escopo"
             :items="opcoesDeEscopo"
             :icon="escopo === 'padrao' ? 'i-lucide-users' : 'i-lucide-user'"
@@ -729,7 +748,7 @@ function configuravel(w: Widget) {
                 :estado="estadoDo(w)"
                 :categoria-sem-acesso="categoriaSemAcessoDo(w)"
                 :configuravel="configuravel(w)"
-                :novo="w.novo && escopo === 'minha'"
+                :novo="w.novo && escopo === 'minha' && !mvp"
                 :editando="editando"
                 :primeiro="posicao(w.id) === 0"
                 :ultimo="posicao(w.id) === layout.length - 1"
@@ -753,6 +772,11 @@ function configuravel(w: Widget) {
                 <template v-else-if="['agenda', 'agendaSemana', 'agendaMes'].includes(w.tipo)" #acoes>
                   <UTooltip :text="t.agenda.abrir">
                     <UButton icon="i-lucide-arrow-up-right" color="neutral" variant="ghost" size="xs" :aria-label="t.agenda.abrir" @click="abrirMaquete(t.agenda.abrir)" />
+                  </UTooltip>
+                </template>
+                <template v-else-if="definicao(w.tipo).grupo === 'spaceflow' && estadoDo(w) === 'ok'" #acoes>
+                  <UTooltip :text="t.spaceflowW.abrirSpaceflow">
+                    <UButton icon="i-lucide-arrow-up-right" color="neutral" variant="ghost" size="xs" :aria-label="t.spaceflowW.abrirSpaceflow" @click="abrirMaquete(t.spaceflowW.abrirSpaceflow)" />
                   </UTooltip>
                 </template>
                 <template v-else-if="w.tipo === 'beni'" #acoes>
@@ -811,9 +835,9 @@ function configuravel(w: Widget) {
                 />
 
                 <WItens
-                  v-else-if="['meusItens', 'ultimosItens', 'prazosDeItens', 'itensPorCategoria'].includes(w.tipo)"
+                  v-else-if="['meusItens', 'ultimosItens', 'itensPorCategoria'].includes(w.tipo)"
                   :t="t"
-                  :tipo="w.tipo as 'meusItens' | 'ultimosItens' | 'prazosDeItens' | 'itensPorCategoria'"
+                  :tipo="w.tipo as 'meusItens' | 'ultimosItens' | 'itensPorCategoria'"
                   :itens="itensComAcesso"
                   :recem-criados="recemCriados"
                   @abrir="abrirMaquete"
@@ -827,16 +851,22 @@ function configuravel(w: Widget) {
                 />
 
                 <WIa
-                  v-else-if="['agentesIa', 'revisoesIa', 'creditosIa', 'falhasIa'].includes(w.tipo)"
+                  v-else-if="w.tipo === 'agentesIa'"
                   :t="t"
-                  :tipo="w.tipo as 'agentesIa' | 'revisoesIa' | 'creditosIa' | 'falhasIa'"
                   :agentes="agentes"
-                  :revisoes="revisoes"
-                  :falhas="falhas"
                   :admin="admin"
                   @conversar="(a) => pedirAoBeni('', a.slug === 'beni' ? null : a)"
                   @abrir="abrirMaquete"
-                  @repetir="repetirFalha"
+                />
+
+                <WSpaceflow
+                  v-else-if="definicao(w.tipo).grupo === 'spaceflow'"
+                  :t="t"
+                  :tipo="w.tipo as 'execucoesFluxos' | 'falhasFluxos' | 'fluxosAndamento'"
+                  :execucoes="fluxos"
+                  :metricas="metricas"
+                  @repetir="repetirFluxo"
+                  @abrir="abrirMaquete"
                 />
 
                 <WOutros
@@ -867,6 +897,7 @@ function configuravel(w: Widget) {
       :escopo="escopo"
       :categorias="categoriasComAcesso"
       :categorias-escolhidas="widgetDeCategorias?.config.categorias"
+      :mvp="mvp"
       @adicionar="(tipo) => adicionar(tipo)"
       @categorias="aplicarCategorias"
     />
@@ -923,6 +954,23 @@ function configuravel(w: Widget) {
           :variant="estado === e.valor ? 'solid' : 'subtle'"
           @click="escolherEstado(e.valor)"
         />
+
+        <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
+        <span class="text-xs font-semibold uppercase tracking-wider text-muted">Versão</span>
+        <UTooltip text="O MVP mostra só o que se faz no front com o que o develop já tem (DECISOES.md, rodada 8)">
+          <span class="flex gap-2">
+            <UButton
+              v-for="v in [{ v: 'completa', r: 'Proposta completa' }, { v: 'mvp', r: 'MVP' }] as const"
+              :key="v.v"
+              :label="v.r"
+              size="xs"
+              class="transition-transform hover:-translate-y-0.5"
+              :color="versao === v.v ? 'primary' : 'neutral'"
+              :variant="versao === v.v ? 'solid' : 'subtle'"
+              @click="escolherVersao(v.v)"
+            />
+          </span>
+        </UTooltip>
 
         <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">Ver como</span>

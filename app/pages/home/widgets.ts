@@ -18,8 +18,8 @@
  * - Tarefas: as 15 de antes;
  * - Agenda: o dia, a semana e o mês (NOVOS os 2 últimos), das mesmas fontes
  *   da tela Agenda (compromisso do calendário, prazo de tarefa, data de item);
- * - Itens e categorias: o atalho das categorias e 4 NOVOS sobre itens (meus,
- *   os mais novos, os que vencem, em aberto por categoria);
+ * - Itens e categorias: o atalho das categorias e 3 NOVOS sobre itens (os que
+ *   criei, os mais novos, a contagem por categoria);
  * - Telas e atalhos: atalhos, recentes e o gráfico de um painel;
  * - BENI e equipe: o BENI, o comunicado e o bloco de notas.
  *
@@ -28,6 +28,15 @@
  *
  * Todo widget lê dado que o ENSPACE já tem; o que não existe no produto hoje
  * está marcado como NOVO no comentário.
+ *
+ * Rodada 8, a pedido da redatora: saem Prazos de itens (o item não tem prazo:
+ * a data é um campo que cada categoria cria), Revisões por IA, Créditos de IA
+ * e Falhas dos agentes. "Meus itens" passa a ser o que a pessoa criou.
+ *
+ * Rodada 8, o MVP: `mvp` marca o widget que se faz só no front, com dado e
+ * componente que o develop já tem (leitura de 2026-11-24 pela skill
+ * investigar-codigo; tabela no BRIEFING.md). O motivo de cada um fora do MVP
+ * está no comentário da linha.
  */
 import type { ItemDaGrade, LimitesDoPainel } from '~/components/ux/UxGradeDePaineis.vue'
 
@@ -58,7 +67,6 @@ export type TipoDeWidget =
   | 'categorias'
   | 'meusItens'
   | 'ultimosItens'
-  | 'prazosDeItens'
   | 'itensPorCategoria'
   // Telas e atalhos
   | 'atalhos'
@@ -67,9 +75,10 @@ export type TipoDeWidget =
   // IA
   | 'beni'
   | 'agentesIa'
-  | 'revisoesIa'
-  | 'creditosIa'
-  | 'falhasIa'
+  // Spaceflow
+  | 'execucoesFluxos'
+  | 'falhasFluxos'
+  | 'fluxosAndamento'
   // Equipe e notas
   | 'comunicado'
   | 'notas'
@@ -79,7 +88,7 @@ export const LAMINAS = ['kpiAbertas', 'kpiConcluidas', 'kpiCriadas', 'kpiVencida
 export type LaminaDeTarefas = typeof LAMINAS[number]
 
 /** O 1º nível do catálogo: de onde vem o dado. */
-export type GrupoDoCatalogo = 'tarefas' | 'agenda' | 'itens' | 'ia' | 'atalhos' | 'equipe'
+export type GrupoDoCatalogo = 'tarefas' | 'agenda' | 'itens' | 'ia' | 'spaceflow' | 'atalhos' | 'equipe'
 
 /** As seções de Tarefas no 2º nível. */
 export type SecaoDeTarefas = 'numeros' | 'listas' | 'graficos'
@@ -112,58 +121,70 @@ export interface DefinicaoDoWidget {
   naHomeDeDevelop?: boolean
   /** Segue o "Minhas tarefas · Workspace" do topo da Home. */
   segueEscopo?: boolean
+  /** Rodada 8: entra no MVP (só front, com o que o develop já tem). */
+  mvp?: boolean
+  /** Rodada 9: pede a permissão Fluxos do papel (`usePermissions.ts`); sem ela, o widget fica sem acesso. */
+  permissao?: 'fluxos'
 }
 
-const KPI = { minW: 2, maxW: 6, minH: 3, maxH: 4, wCelular: 1 }
+const KPI = { minW: 2, maxW: 6, minH: 3, maxH: 4, wCelular: 1 as const }
 
 export const CATALOGO: DefinicaoDoWidget[] = [
   // Tarefas > Números
-  { tipo: 'kpiAbertas', icone: 'i-lucide-inbox', grupo: 'tarefas', secao: 'numeros', painel: 'kpi-open', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 3, h: 3 }, limites: KPI },
-  { tipo: 'kpiConcluidas', icone: 'i-lucide-circle-check', grupo: 'tarefas', secao: 'numeros', painel: 'kpi-completed', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 3, h: 3 }, limites: KPI },
-  { tipo: 'kpiCriadas', icone: 'i-lucide-circle-plus', grupo: 'tarefas', secao: 'numeros', painel: 'kpi-created', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 3, h: 3 }, limites: KPI },
-  { tipo: 'kpiVencidas', icone: 'i-lucide-alarm-clock', grupo: 'tarefas', secao: 'numeros', painel: 'kpi-overdue', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 3, h: 3 }, limites: KPI },
-  { tipo: 'kpiVencem7', icone: 'i-lucide-calendar-clock', grupo: 'tarefas', secao: 'numeros', painel: 'kpi-dueSoon', segueEscopo: true, tamanho: { w: 3, h: 3 }, limites: KPI },
+  { tipo: 'kpiAbertas', mvp: true, icone: 'i-lucide-inbox', grupo: 'tarefas', secao: 'numeros', painel: 'kpi-open', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 3, h: 3 }, limites: KPI },
+  { tipo: 'kpiConcluidas', mvp: true, icone: 'i-lucide-circle-check', grupo: 'tarefas', secao: 'numeros', painel: 'kpi-completed', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 3, h: 3 }, limites: KPI },
+  { tipo: 'kpiCriadas', mvp: true, icone: 'i-lucide-circle-plus', grupo: 'tarefas', secao: 'numeros', painel: 'kpi-created', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 3, h: 3 }, limites: KPI },
+  { tipo: 'kpiVencidas', mvp: true, icone: 'i-lucide-alarm-clock', grupo: 'tarefas', secao: 'numeros', painel: 'kpi-overdue', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 3, h: 3 }, limites: KPI },
+  { tipo: 'kpiVencem7', mvp: true, icone: 'i-lucide-calendar-clock', grupo: 'tarefas', secao: 'numeros', painel: 'kpi-dueSoon', segueEscopo: true, tamanho: { w: 3, h: 3 }, limites: KPI },
   // Tarefas > Listas
-  { tipo: 'vencidas', icone: 'i-lucide-alarm-clock', grupo: 'tarefas', secao: 'listas', painel: 'dueList', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 12 } },
-  { tipo: 'vencemEmBreve', icone: 'i-lucide-hourglass', grupo: 'tarefas', secao: 'listas', painel: 'dueList', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 12 } },
-  { tipo: 'minhasTarefas', icone: 'i-lucide-list-checks', grupo: 'tarefas', secao: 'listas', tamanho: { w: 6, h: 8 }, limites: { minW: 4, maxW: 12, minH: 5, maxH: 14 } },
+  { tipo: 'vencidas', mvp: true, icone: 'i-lucide-alarm-clock', grupo: 'tarefas', secao: 'listas', painel: 'dueList', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 12 } },
+  { tipo: 'vencemEmBreve', mvp: true, icone: 'i-lucide-hourglass', grupo: 'tarefas', secao: 'listas', painel: 'dueList', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 12 } },
+  { tipo: 'minhasTarefas', mvp: true, icone: 'i-lucide-list-checks', grupo: 'tarefas', secao: 'listas', tamanho: { w: 6, h: 8 }, limites: { minW: 4, maxW: 12, minH: 5, maxH: 14 } },
+  // Fora do MVP: a tarefa agendada não guarda quem a delegou (só o e-mail no task_log); a rápida pede filtro novo.
   { tipo: 'tarefasDelegadas', icone: 'i-lucide-send', grupo: 'tarefas', secao: 'listas', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 12 } },
   // Tarefas > Gráficos
-  { tipo: 'status', icone: 'i-lucide-chart-pie', grupo: 'tarefas', secao: 'graficos', painel: 'status', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 4, h: 6 }, limites: { minW: 3, maxW: 8, minH: 5, maxH: 10 } },
-  { tipo: 'prioridade', icone: 'i-lucide-flag', grupo: 'tarefas', secao: 'graficos', painel: 'breakdown', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 4, h: 6 }, limites: { minW: 3, maxW: 8, minH: 4, maxH: 10 } },
-  { tipo: 'carga', icone: 'i-lucide-users', grupo: 'tarefas', secao: 'graficos', painel: 'workload', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 4, h: 6 }, limites: { minW: 3, maxW: 12, minH: 4, maxH: 12 } },
-  { tipo: 'atividade', icone: 'i-lucide-calendar-check', grupo: 'tarefas', secao: 'graficos', painel: 'activity', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 8, h: 5 }, limites: { minW: 5, maxW: 12, minH: 4, maxH: 8 } },
-  { tipo: 'saudeDosPrazos', icone: 'i-lucide-heart-pulse', grupo: 'tarefas', secao: 'graficos', painel: 'dueHealth', segueEscopo: true, tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 8, minH: 4, maxH: 7 } },
-  { tipo: 'entradaESaida', icone: 'i-lucide-arrow-left-right', grupo: 'tarefas', secao: 'graficos', painel: 'throughput', segueEscopo: true, tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 5, maxH: 10 } },
+  { tipo: 'status', mvp: true, icone: 'i-lucide-chart-pie', grupo: 'tarefas', secao: 'graficos', painel: 'status', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 4, h: 6 }, limites: { minW: 3, maxW: 8, minH: 5, maxH: 10 } },
+  { tipo: 'prioridade', mvp: true, icone: 'i-lucide-flag', grupo: 'tarefas', secao: 'graficos', painel: 'breakdown', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 4, h: 6 }, limites: { minW: 3, maxW: 8, minH: 4, maxH: 10 } },
+  { tipo: 'carga', mvp: true, icone: 'i-lucide-users', grupo: 'tarefas', secao: 'graficos', painel: 'workload', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 4, h: 6 }, limites: { minW: 3, maxW: 12, minH: 4, maxH: 12 } },
+  { tipo: 'atividade', mvp: true, icone: 'i-lucide-calendar-check', grupo: 'tarefas', secao: 'graficos', painel: 'activity', naHomeDeDevelop: true, segueEscopo: true, tamanho: { w: 8, h: 5 }, limites: { minW: 5, maxW: 12, minH: 4, maxH: 8 } },
+  { tipo: 'saudeDosPrazos', mvp: true, icone: 'i-lucide-heart-pulse', grupo: 'tarefas', secao: 'graficos', painel: 'dueHealth', segueEscopo: true, tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 8, minH: 4, maxH: 7 } },
+  { tipo: 'entradaESaida', mvp: true, icone: 'i-lucide-arrow-left-right', grupo: 'tarefas', secao: 'graficos', painel: 'throughput', segueEscopo: true, tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 5, maxH: 10 } },
   // Agenda
-  { tipo: 'agenda', icone: 'i-lucide-calendar-days', grupo: 'agenda', tamanho: { w: 4, h: 6 }, limites: { minW: 3, maxW: 6, minH: 4, maxH: 10 } },
+  { tipo: 'agenda', mvp: true, icone: 'i-lucide-calendar-days', grupo: 'agenda', tamanho: { w: 4, h: 6 }, limites: { minW: 3, maxW: 6, minH: 4, maxH: 10 } },
   // NOVO: os 7 dias a partir de hoje, em colunas.
+  // Fora do MVP: a tela Agenda já mostra a semana; o widget repete a tela.
   { tipo: 'agendaSemana', icone: 'i-lucide-calendar-range', grupo: 'agenda', tamanho: { w: 8, h: 6 }, limites: { minW: 6, maxW: 12, minH: 5, maxH: 10 } },
   // NOVO: o mês em miniatura, com o dia escolhido embaixo.
+  // Fora do MVP: a tela Agenda já mostra o mês; o widget repete a tela.
   { tipo: 'agendaMes', icone: 'i-lucide-calendar', grupo: 'agenda', tamanho: { w: 4, h: 9 }, limites: { minW: 3, maxW: 8, minH: 8, maxH: 12 } },
   // Itens e categorias
-  { tipo: 'categorias', icone: 'i-lucide-layout-grid', grupo: 'itens', painel: 'categories', naHomeDeDevelop: true, tamanho: { w: 12, h: 3 }, limites: { minW: 4, maxW: 12, minH: 3, maxH: 10 } },
-  // NOVO, os 4: leem o que o item já guarda (responsável, criação, campo de data, status).
-  { tipo: 'meusItens', icone: 'i-lucide-user-check', grupo: 'itens', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 12 } },
-  { tipo: 'ultimosItens', icone: 'i-lucide-file-clock', grupo: 'itens', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 12 } },
-  { tipo: 'prazosDeItens', icone: 'i-lucide-calendar-clock', grupo: 'itens', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 12 } },
+  { tipo: 'categorias', mvp: true, icone: 'i-lucide-layout-grid', grupo: 'itens', painel: 'categories', naHomeDeDevelop: true, tamanho: { w: 12, h: 3 }, limites: { minW: 4, maxW: 12, minH: 3, maxH: 10 } },
+  // NOVO, os 3: leem o que o item já guarda (quem criou, quando, a categoria). Rodada 8: o item não tem responsável nem prazo.
+  { tipo: 'meusItens', mvp: true, icone: 'i-lucide-file-user', grupo: 'itens', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 12 } },
+  { tipo: 'ultimosItens', mvp: true, icone: 'i-lucide-file-clock', grupo: 'itens', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 12 } },
+  // Fora do MVP: não há contagem agregada: seria 1 chamada a items/count por categoria.
   { tipo: 'itensPorCategoria', icone: 'i-lucide-chart-bar', grupo: 'itens', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 10 } },
   // Telas e atalhos
-  { tipo: 'atalhos', icone: 'i-lucide-bookmark', grupo: 'atalhos', tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 12, minH: 3, maxH: 9 } },
-  { tipo: 'recentes', icone: 'i-lucide-history', grupo: 'atalhos', tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 6, minH: 4, maxH: 10 } },
+  { tipo: 'atalhos', mvp: true, icone: 'i-lucide-bookmark', grupo: 'atalhos', tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 12, minH: 3, maxH: 9 } },
+  { tipo: 'recentes', mvp: true, icone: 'i-lucide-history', grupo: 'atalhos', tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 6, minH: 4, maxH: 10 } },
+  // Fora do MVP: o painel está preso a uma tela (c_screen); escolher tela e painel é configuração nova.
   { tipo: 'graficoDePainel', icone: 'i-lucide-chart-column', grupo: 'atalhos', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 10 } },
   // IA (rodada 7). Cada um lê o que o back já guarda; ver o mocks.ts.
+  // Fora do MVP: o resumo do BENI não tem rota (getTaskSummary é ferramenta do agente); a conversa flutuante já está no topo.
   { tipo: 'beni', icone: 'i-lucide-sparkles', grupo: 'ia', tamanho: { w: 8, h: 5 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 9 } },
   // NOVO: os agentes que a pessoa pode usar; o clique abre a conversa com o agente.
-  { tipo: 'agentesIa', icone: 'i-lucide-bot', grupo: 'ia', tamanho: { w: 4, h: 6 }, limites: { minW: 3, maxW: 8, minH: 4, maxH: 10 } },
-  // NOVO: as revisões de documento feitas pelo agente revisor, com a nota e o que está em andamento.
-  { tipo: 'revisoesIa', icone: 'i-lucide-file-search', grupo: 'ia', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 10 } },
-  // NOVO: o saldo da carteira e o ritmo de consumo. Sem crédito, a IA para no workspace inteiro.
-  { tipo: 'creditosIa', icone: 'i-lucide-coins', grupo: 'ia', soAdmin: true, tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 8, minH: 4, maxH: 7 } },
-  // NOVO: o passo de agente que falhou num fluxo do Spaceflow, com Repetir.
-  { tipo: 'falhasIa', icone: 'i-lucide-triangle-alert', grupo: 'ia', soAdmin: true, tamanho: { w: 6, h: 5 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 9 } },
+  { tipo: 'agentesIa', mvp: true, icone: 'i-lucide-bot', grupo: 'ia', tamanho: { w: 4, h: 6 }, limites: { minW: 3, maxW: 8, minH: 4, maxH: 10 } },
+  // Spaceflow (rodada 9). Leem `workflow_executions` e `node_executions`; ver o mocks.ts.
+  // NOVO: as execuções dos últimos 7 dias por status (`GET /workflows/metrics`).
+  { tipo: 'execucoesFluxos', mvp: true, permissao: 'fluxos', icone: 'i-lucide-activity', grupo: 'spaceflow', tamanho: { w: 6, h: 4 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 6 } },
+  // NOVO: a execução que parou com erro, o passo, a mensagem e Repetir (`PUT /workflows/nodes/:id/retry`).
+  { tipo: 'falhasFluxos', mvp: true, permissao: 'fluxos', icone: 'i-lucide-triangle-alert', grupo: 'spaceflow', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 12 } },
+  // NOVO: a execução em andamento, a mais antiga primeiro, com o passo em que espera.
+  { tipo: 'fluxosAndamento', mvp: true, permissao: 'fluxos', icone: 'i-lucide-loader', grupo: 'spaceflow', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 12 } },
   // Equipe e notas
+  // Fora do MVP: pede modelo e rota novos.
   { tipo: 'comunicado', icone: 'i-lucide-megaphone', grupo: 'equipe', soAdmin: true, tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 12, minH: 3, maxH: 6 } },
+  // Fora do MVP: pede modelo e rota novos (c-item-notes é nota de item).
   { tipo: 'notas', icone: 'i-lucide-notebook-pen', grupo: 'equipe', tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 8, minH: 3, maxH: 9 } },
 ]
 
@@ -172,6 +193,7 @@ export const GRUPOS: { grupo: GrupoDoCatalogo, icone: string }[] = [
   { grupo: 'agenda', icone: 'i-lucide-calendar-days' },
   { grupo: 'itens', icone: 'i-lucide-layout-grid' },
   { grupo: 'ia', icone: 'i-lucide-sparkles' },
+  { grupo: 'spaceflow', icone: 'i-lucide-workflow' },
   { grupo: 'atalhos', icone: 'i-lucide-bookmark' },
   { grupo: 'equipe', icone: 'i-lucide-users' },
 ]
@@ -224,4 +246,45 @@ export const PADRAO_LAYOUT: ItemDaGrade[] = [
   { id: 'w-comunicado', w: 4, h: 5 },
   { id: 'w-atalhos', w: 4, h: 5 },
   { id: 'w-recentes', w: 4, h: 5 },
+]
+
+/**
+ * Rodada 8: a Home padrão do MVP. É a Home de develop de hoje (Categorias, os
+ * 4 números, Vencidas e Vencem em breve) mais os widgets do MVP que mais
+ * poupam caminho: Minhas tarefas, Compromissos do dia, Meus itens, Agentes de
+ * IA, Atalhos e Recentes. No MVP não há Home padrão montada pelo
+ * administrador: cada pessoa arruma a própria, guardada no navegador, como
+ * develop já faz (`useDashboardLayout`, en-sdk@develop 2dbd22c
+ * `packages/ui/src/composables/useDashboardLayout.ts:25`).
+ */
+export const MVP_WIDGETS: Widget[] = [
+  { id: 'w-categorias', tipo: 'categorias', config: { categorias: [] } },
+  { id: 'w-abertas', tipo: 'kpiAbertas', config: {} },
+  { id: 'w-concluidas', tipo: 'kpiConcluidas', config: {} },
+  { id: 'w-criadas', tipo: 'kpiCriadas', config: {} },
+  { id: 'w-kpi-vencidas', tipo: 'kpiVencidas', config: {} },
+  { id: 'w-vencidas', tipo: 'vencidas', config: {} },
+  { id: 'w-vencem', tipo: 'vencemEmBreve', config: {} },
+  { id: 'w-tarefas', tipo: 'minhasTarefas', config: {} },
+  { id: 'w-agenda', tipo: 'agenda', config: {} },
+  { id: 'w-meus-itens', tipo: 'meusItens', config: {} },
+  { id: 'w-agentes', tipo: 'agentesIa', config: {} },
+  { id: 'w-atalhos', tipo: 'atalhos', config: {} },
+  { id: 'w-recentes', tipo: 'recentes', config: {} },
+]
+
+export const MVP_LAYOUT: ItemDaGrade[] = [
+  { id: 'w-categorias', w: 12, h: 3 },
+  { id: 'w-abertas', w: 3, h: 3 },
+  { id: 'w-concluidas', w: 3, h: 3 },
+  { id: 'w-criadas', w: 3, h: 3 },
+  { id: 'w-kpi-vencidas', w: 3, h: 3 },
+  { id: 'w-vencidas', w: 6, h: 6 },
+  { id: 'w-vencem', w: 6, h: 6 },
+  { id: 'w-tarefas', w: 8, h: 8 },
+  { id: 'w-agenda', w: 4, h: 8 },
+  { id: 'w-meus-itens', w: 6, h: 6 },
+  { id: 'w-agentes', w: 6, h: 6 },
+  { id: 'w-atalhos', w: 6, h: 5 },
+  { id: 'w-recentes', w: 6, h: 5 },
 ]

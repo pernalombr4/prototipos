@@ -2,7 +2,7 @@
 /**
  * Criar item, aberto do botão Criar ou do "+" do widget Categorias. No
  * produto é o modal de criação da categoria (`EntityItemsFormsUpsert.vue`),
- * com os campos do formulário escolhido; aqui são 5 campos comuns, o bastante
+ * com os campos do formulário escolhido; aqui são 4 campos comuns, o bastante
  * para o item nascer e aparecer no widget da visualização.
  *
  * Título "Criar <singular>" pelo `singular_name` da categoria ("Criar
@@ -14,20 +14,20 @@
  * `inicial` (rodada 6): o rascunho que o BENI montou, quando a pessoa escolhe
  * "Revisar no formulário" na conversa.
  *
- * Componentes: `UModal`, `UFormField`, `UInput`, `UInputNumber`, `USelect`,
- * `USwitch` (MCP nuxt-ui).
+ * Rodada 8: sai o campo Responsável. O item não tem responsável; quem cria é
+ * o autor (`Item.user`). A data é um campo do formulário da categoria.
+ *
+ * Componentes: `UModal`, `UFormField`, `UInput`, `UInputNumber`, `USwitch` (MCP nuxt-ui).
  */
-import type { SelectItem } from '@nuxt/ui'
 import type { Categoria } from './mocks'
-import { EU, pessoas } from './mocks'
 import type { Textos } from './textos'
 
 export interface DadosDoItem {
   titulo: string
   valor?: number
-  prazo?: number
+  /** Um campo de data do formulário da categoria. */
+  data?: number
   urgente: boolean
-  responsavel: number
 }
 
 const props = defineProps<{
@@ -43,9 +43,8 @@ const emit = defineEmits<{ criar: [dados: DadosDoItem] }>()
 
 const titulo = ref('')
 const valor = ref<number | undefined>()
-const prazo = ref('')
+const data = ref('')
 const urgente = ref(false)
-const responsavel = ref<number>(EU.id)
 const tentou = ref(false)
 
 watch(aberto, (a) => {
@@ -53,16 +52,13 @@ watch(aberto, (a) => {
   const i = props.inicial
   titulo.value = i?.titulo ?? ''
   valor.value = i?.valor
-  // O prazo é gravado às 21:00 UTC (18:00 de Brasília): o campo de data mostra o dia.
-  prazo.value = i?.prazo ? new Date(i.prazo).toISOString().slice(0, 10) : ''
+  // A data é gravada às 21:00 UTC (18:00 de Brasília): o campo de data mostra o dia.
+  data.value = i?.data ? new Date(i.data).toISOString().slice(0, 10) : ''
   urgente.value = i?.urgente ?? false
-  responsavel.value = i?.responsavel ?? EU.id
   tentou.value = false
 })
 
 const nomeDoFormulario = computed(() => props.categoria?.formularios.find(x => x.id === props.formulario)?.nome)
-
-const opcoesDeResponsavel = computed<SelectItem[]>(() => pessoas.map(p => ({ label: p.nome, value: p.id, avatar: { text: p.iniciais } })))
 
 function criar() {
   tentou.value = true
@@ -70,9 +66,8 @@ function criar() {
   emit('criar', {
     titulo: titulo.value.trim(),
     valor: valor.value,
-    prazo: prazo.value ? new Date(`${prazo.value}T21:00:00.000Z`).getTime() : undefined,
+    data: data.value ? new Date(`${data.value}T21:00:00.000Z`).getTime() : undefined,
     urgente: urgente.value,
-    responsavel: responsavel.value,
   })
   aberto.value = false
 }
@@ -104,12 +99,9 @@ function criar() {
             />
           </UFormField>
           <UFormField :label="t.novoItem.prazo">
-            <UInput v-model="prazo" type="date" class="w-full" />
+            <UInput v-model="data" type="date" class="w-full" />
           </UFormField>
         </div>
-        <UFormField :label="t.novoItem.responsavel">
-          <USelect v-model="responsavel" :items="opcoesDeResponsavel" class="w-full" />
-        </UFormField>
         <USwitch v-model="urgente" :label="t.novoItem.urgente" />
       </form>
     </template>

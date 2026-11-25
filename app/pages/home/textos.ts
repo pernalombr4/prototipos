@@ -188,7 +188,6 @@ export interface Textos {
     valor: string
     prazo: string
     urgente: string
-    responsavel: string
     criar: string
     criado: (ref: string, categoria: string) => string
   }
@@ -210,6 +209,8 @@ export interface Textos {
 
   secoes: Record<SecaoDeTarefas, string>
   descricaoDosGrupos: Record<GrupoDoCatalogo, string>
+  /** Rodada 8: a descrição do grupo quando o catálogo mostra só o MVP. */
+  descricaoDosGruposMvp: Partial<Record<GrupoDoCatalogo, string>>
   escopoDeTarefas: { rotulo: string, minhas: string, workspace: string }
   catalogo: {
     voltar: string
@@ -281,21 +282,29 @@ export interface Textos {
   beniW: { conversar: string, boasVindas: string }
   iaW: {
     agentes: { conversar: (nome: string) => string, sistema: string, revisor: string, gerenciar: string }
-    revisoes: {
-      status: Record<'pending' | 'in_progress' | 'completed' | 'failed', string>
-      nota: (n: number) => string
-      achados: (n: number) => string
-      concluidas: string
-      emAndamento: string
-      notaMedia: string
-      vazio: string
-    }
-    creditos: { unidade: string, duram: (dias: number) => string, consumo: string, comprar: string, extrato: string, baixo: string }
-    falhas: { repetir: string, repetido: string, vazio: string, abrirFluxo: string }
-    soAdminVe: string
     avisoDoAgente: string
+    /** Rodada 8, MVP: o destino do clique no agente ou no Pedir ao BENI. */
+    conversaEmTelaCheia: (agente: string) => string
     ola: (nome: string) => string
     respostaDoAgente: (agente: string) => string
+  }
+  spaceflowW: {
+    periodo: string
+    status: Record<'working' | 'completed' | 'error' | 'canceled', string>
+    sucesso: (pct: number) => string
+    repetir: string
+    repetido: string
+    abrirExecucao: string
+    vazioFalhas: string
+    vazioAndamento: string
+    vazioExecucoes: string
+    aguarda: (passo: string) => string
+    falhouEm: (passo: string) => string
+    ha: (tempo: string) => string
+    parado: string
+    tipos: Record<'approval' | 'signature' | 'task' | 'form' | 'delay' | 'http' | 'email' | 'ai_agent' | 'crud', string>
+    soQuemAcessa: string
+    abrirSpaceflow: string
   }
   agendaW: {
     mais: (n: number) => string
@@ -307,9 +316,7 @@ export interface Textos {
   itensW: {
     vazio: string
     vazioMeus: string
-    vazioPrazos: string
-    venceEm: (data: string) => string
-    venceu: (data: string) => string
+    criadoPor: (nome: string) => string
   }
 
   ehMaquete: string
@@ -366,17 +373,16 @@ const ptBR: Textos = {
     notas: { titulo: 'Bloco de notas', descricao: 'Anotações suas. Só você vê.' },
     beni: { titulo: 'BENI', descricao: 'O resumo do dia feito pelo BENI, com o atalho para a conversa com ele.' },
     agentesIa: { titulo: 'Agentes de IA', descricao: 'Os agentes do workspace. Um clique abre a conversa com o agente.' },
-    revisoesIa: { titulo: 'Revisões por IA', descricao: 'Os documentos que o agente revisor está revisando ou já revisou, com a nota.' },
-    creditosIa: { titulo: 'Créditos de IA', descricao: 'O saldo da carteira e quanto tempo ele dura no ritmo atual.' },
-    falhasIa: { titulo: 'Falhas dos agentes', descricao: 'O passo de agente que falhou num fluxo do Spaceflow, com Repetir.' },
+    execucoesFluxos: { titulo: 'Execuções dos fluxos', descricao: 'Quantas execuções estão em andamento, concluídas, com erro e canceladas nos últimos 7 dias.' },
+    falhasFluxos: { titulo: 'Falhas nos fluxos', descricao: 'O fluxo que parou com erro, o passo, a mensagem e Repetir.' },
+    fluxosAndamento: { titulo: 'Fluxos em andamento', descricao: 'Os fluxos que estão rodando, o mais antigo primeiro, com o passo em que esperam.' },
     agendaSemana: { titulo: 'Agenda da semana', descricao: 'Os 7 dias a partir de hoje, em colunas.' },
     agendaMes: { titulo: 'Agenda do mês', descricao: 'O calendário do mês. Clique num dia para ver o que há nele.' },
-    meusItens: { titulo: 'Meus itens', descricao: 'Os itens em que você é o responsável.' },
+    meusItens: { titulo: 'Meus itens', descricao: 'Os itens que você criou.' },
     ultimosItens: { titulo: 'Itens criados recentemente', descricao: 'Os últimos itens criados nas categorias que você acessa.' },
-    prazosDeItens: { titulo: 'Prazos de itens', descricao: 'Itens com data de vencimento ou vigência nos próximos 30 dias.' },
     itensPorCategoria: { titulo: 'Itens por categoria', descricao: 'Quantos itens há em cada categoria que você acessa.' },
   },
-  grupos: { tarefas: 'Tarefas', agenda: 'Agenda', itens: 'Itens e categorias', atalhos: 'Telas e atalhos', ia: 'IA', equipe: 'Equipe e notas' },
+  grupos: { tarefas: 'Tarefas', agenda: 'Agenda', itens: 'Itens e categorias', atalhos: 'Telas e atalhos', ia: 'IA', spaceflow: 'Spaceflow', equipe: 'Equipe e notas' },
 
   widget: {
     configurar: 'Configurar',
@@ -545,7 +551,6 @@ const ptBR: Textos = {
     valor: 'Valor',
     prazo: 'Data de vencimento',
     urgente: 'Urgente',
-    responsavel: 'Responsável',
     criar: 'Criar',
     criado: (r, c) => `Item ${r} criado em ${c}.`,
   },
@@ -566,12 +571,19 @@ const ptBR: Textos = {
   },
 
   secoes: { numeros: 'Números', listas: 'Listas', graficos: 'Gráficos' },
+  descricaoDosGruposMvp: {
+    agenda: 'Os compromissos do dia, com os prazos de tarefa e as datas de item.',
+    itens: 'As categorias e os itens: os que você criou e os mais novos.',
+    atalhos: 'Atalhos e telas abertas por último.',
+    ia: 'Os agentes do workspace.',
+  },
   descricaoDosGrupos: {
     tarefas: 'Números, listas e gráficos das tarefas rápidas e agendadas.',
     agenda: 'O dia, a semana e o mês, com compromissos, prazos de tarefa e datas de item.',
-    itens: 'As categorias e os itens: os seus, os mais novos e os que vencem.',
+    itens: 'As categorias e os itens: os que você criou, os mais novos e a contagem por categoria.',
     atalhos: 'Atalhos, telas abertas por último e o gráfico de um painel.',
-    ia: 'O BENI, os agentes do workspace, as revisões, os créditos e as falhas dos agentes.',
+    ia: 'O BENI e os agentes do workspace.',
+    spaceflow: 'As execuções dos fluxos: os números, as falhas e o que está em andamento.',
     equipe: 'O comunicado do administrador e o bloco de notas.',
   },
   escopoDeTarefas: { rotulo: 'De quem são as tarefas', minhas: 'Minhas tarefas', workspace: 'Workspace' },
@@ -671,33 +683,28 @@ const ptBR: Textos = {
   },
   iaW: {
     agentes: { conversar: n => `Conversar com ${n}`, sistema: 'Do sistema', revisor: 'Revisor', gerenciar: 'Gerenciar agentes' },
-    revisoes: {
-      status: { pending: 'Na fila', in_progress: 'Revisando', completed: 'Concluída', failed: 'Falhou' },
-      nota: n => `Nota ${n}`,
-      achados: n => n === 0 ? 'Nenhum achado grave' : n === 1 ? '1 achado grave' : `${n} achados graves`,
-      concluidas: 'Concluídas no mês',
-      emAndamento: 'Na fila ou revisando',
-      notaMedia: 'Nota média',
-      vazio: 'Nenhum documento revisado por IA ainda.',
-    },
-    creditos: {
-      unidade: 'créditos',
-      duram: d => `No ritmo dos últimos 7 dias, o saldo dura cerca de ${d} dias.`,
-      consumo: 'Consumo diário, últimos 30 dias',
-      comprar: 'Comprar créditos',
-      extrato: 'Ver extrato',
-      baixo: 'Saldo baixo',
-    },
-    falhas: {
-      repetir: 'Repetir',
-      repetido: 'O passo voltou para a fila do fluxo.',
-      vazio: 'Nenhum passo de agente falhou nos últimos 7 dias.',
-      abrirFluxo: 'Abrir a execução no Spaceflow',
-    },
-    soAdminVe: 'Só o administrador vê',
     avisoDoAgente: 'O agente pode errar. Confira a resposta antes de usar.',
+    conversaEmTelaCheia: a => `a conversa com ${a === 'BENI' ? 'o BENI' : a} em tela cheia`,
     ola: n => `Olá, ${n}.`,
     respostaDoAgente: a => `No produto, quem responde é o agente ${a}, com o modelo e as ferramentas configurados nele.`,
+  },
+  spaceflowW: {
+    periodo: 'Últimos 7 dias',
+    status: { working: 'Em andamento', completed: 'Concluídas', error: 'Com erro', canceled: 'Canceladas' },
+    sucesso: p => `${p}% das execuções terminadas foram concluídas`,
+    repetir: 'Repetir',
+    repetido: 'O passo voltou para a fila do fluxo.',
+    abrirExecucao: 'Abrir a execução',
+    vazioFalhas: 'Nenhum fluxo parou com erro nos últimos 7 dias.',
+    vazioAndamento: 'Nenhum fluxo em andamento.',
+    vazioExecucoes: 'Nenhum fluxo rodou nos últimos 7 dias.',
+    aguarda: p => `Aguarda: ${p}`,
+    falhouEm: p => `Falhou em: ${p}`,
+    ha: t => `Começou ${t}`,
+    parado: 'Parado há mais de 2 dias',
+    tipos: { approval: 'Aprovação', signature: 'Assinatura', task: 'Tarefa', form: 'Formulário', delay: 'Espera', http: 'Requisição HTTP', email: 'E-mail', ai_agent: 'Agente de IA', crud: 'Item' },
+    soQuemAcessa: 'Pede acesso aos fluxos',
+    abrirSpaceflow: 'Abrir o Spaceflow',
   },
   agendaW: {
     mais: n => `Mais ${n}`,
@@ -708,10 +715,8 @@ const ptBR: Textos = {
   },
   itensW: {
     vazio: 'Nenhum item criado ainda.',
-    vazioMeus: 'Nenhum item sob sua responsabilidade.',
-    vazioPrazos: 'Nenhum item vence nos próximos 30 dias.',
-    venceEm: d => `Vence em ${d}`,
-    venceu: d => `Venceu em ${d}`,
+    vazioMeus: 'Você ainda não criou nenhum item.',
+    criadoPor: n => `Criado por ${n}`,
   },
   ehMaquete: 'Maquete',
 }
@@ -767,17 +772,16 @@ const en: Textos = {
     notas: { titulo: 'Notepad', descricao: 'Your notes. Only you can see them.' },
     beni: { titulo: 'BENI', descricao: 'The day summary written by BENI, with a shortcut to the chat with him.' },
     agentesIa: { titulo: 'AI agents', descricao: 'The workspace agents. One click opens the chat with the agent.' },
-    revisoesIa: { titulo: 'AI reviews', descricao: 'The documents the reviewer agent is reviewing or has reviewed, with the score.' },
-    creditosIa: { titulo: 'AI credits', descricao: 'The wallet balance and how long it lasts at the current pace.' },
-    falhasIa: { titulo: 'Agent failures', descricao: 'The agent step that failed in a Spaceflow flow, with Retry.' },
+    execucoesFluxos: { titulo: 'Flow runs', descricao: 'How many runs are running, completed, failed and canceled in the last 7 days.' },
+    falhasFluxos: { titulo: 'Flow failures', descricao: 'The flow that stopped with an error, the step, the message and Retry.' },
+    fluxosAndamento: { titulo: 'Running flows', descricao: 'The flows that are running, oldest first, with the step they are waiting on.' },
     agendaSemana: { titulo: 'This week', descricao: 'The 7 days starting today, in columns.' },
     agendaMes: { titulo: 'This month', descricao: 'The month calendar. Click a day to see what is on it.' },
-    meusItens: { titulo: 'My items', descricao: 'The items you are responsible for.' },
+    meusItens: { titulo: 'My items', descricao: 'The items you created.' },
     ultimosItens: { titulo: 'Recently created items', descricao: 'The latest items created in the categories you can access.' },
-    prazosDeItens: { titulo: 'Item due dates', descricao: 'Items with a due or expiry date in the next 30 days.' },
     itensPorCategoria: { titulo: 'Items by category', descricao: 'How many items each category you can access has.' },
   },
-  grupos: { tarefas: 'Tasks', agenda: 'Schedule', itens: 'Items and categories', atalhos: 'Screens and shortcuts', ia: 'AI', equipe: 'Team and notes' },
+  grupos: { tarefas: 'Tasks', agenda: 'Schedule', itens: 'Items and categories', atalhos: 'Screens and shortcuts', ia: 'AI', spaceflow: 'Spaceflow', equipe: 'Team and notes' },
 
   widget: {
     configurar: 'Configure',
@@ -946,7 +950,6 @@ const en: Textos = {
     valor: 'Amount',
     prazo: 'Due date',
     urgente: 'Urgent',
-    responsavel: 'Assignee',
     criar: 'Create',
     criado: (r, c) => `Item ${r} created in ${c}.`,
   },
@@ -967,12 +970,19 @@ const en: Textos = {
   },
 
   secoes: { numeros: 'Numbers', listas: 'Lists', graficos: 'Charts' },
+  descricaoDosGruposMvp: {
+    agenda: "Today's appointments, with task due dates and item dates.",
+    itens: 'Categories and items: the ones you created and the newest.',
+    atalhos: 'Shortcuts and recently opened screens.',
+    ia: 'The workspace agents.',
+  },
   descricaoDosGrupos: {
     tarefas: 'Numbers, lists and charts of quick and scheduled tasks.',
     agenda: 'The day, the week and the month, with events, task due dates and item dates.',
-    itens: 'Categories and items: yours, the newest and the ones coming due.',
+    itens: 'Categories and items: the ones you created, the newest and the count by category.',
     atalhos: 'Shortcuts, screens opened last and a chart from a dashboard.',
-    ia: 'BENI, the workspace agents, the reviews, the credits and the agent failures.',
+    ia: 'BENI and the workspace agents.',
+    spaceflow: 'Flow runs: the numbers, the failures and what is running.',
     equipe: 'The administrator announcement and the notepad.',
   },
   escopoDeTarefas: { rotulo: 'Whose tasks', minhas: 'My tasks', workspace: 'Workspace' },
@@ -1072,33 +1082,28 @@ const en: Textos = {
   },
   iaW: {
     agentes: { conversar: n => `Chat with ${n}`, sistema: 'System', revisor: 'Reviewer', gerenciar: 'Manage agents' },
-    revisoes: {
-      status: { pending: 'Queued', in_progress: 'Reviewing', completed: 'Done', failed: 'Failed' },
-      nota: n => `Score ${n}`,
-      achados: n => n === 0 ? 'No serious findings' : n === 1 ? '1 serious finding' : `${n} serious findings`,
-      concluidas: 'Done this month',
-      emAndamento: 'Queued or reviewing',
-      notaMedia: 'Average score',
-      vazio: 'No document reviewed by AI yet.',
-    },
-    creditos: {
-      unidade: 'credits',
-      duram: d => `At the pace of the last 7 days, the balance lasts about ${d} days.`,
-      consumo: 'Daily use, last 30 days',
-      comprar: 'Buy credits',
-      extrato: 'View statement',
-      baixo: 'Low balance',
-    },
-    falhas: {
-      repetir: 'Retry',
-      repetido: 'The step is back in the flow queue.',
-      vazio: 'No agent step failed in the last 7 days.',
-      abrirFluxo: 'Open the run in Spaceflow',
-    },
-    soAdminVe: 'Only the admin sees it',
     avisoDoAgente: 'The agent can make mistakes. Check the answer before using it.',
+    conversaEmTelaCheia: a => `the chat with ${a} in full screen`,
     ola: n => `Hello, ${n}.`,
     respostaDoAgente: a => `In the product, the ${a} agent answers, with the model and tools set up in it.`,
+  },
+  spaceflowW: {
+    periodo: 'Last 7 days',
+    status: { working: 'Running', completed: 'Completed', error: 'Failed', canceled: 'Canceled' },
+    sucesso: p => `${p}% of finished runs completed`,
+    repetir: 'Retry',
+    repetido: 'The step is back in the flow queue.',
+    abrirExecucao: 'Open the run',
+    vazioFalhas: 'No flow stopped with an error in the last 7 days.',
+    vazioAndamento: 'No flows running.',
+    vazioExecucoes: 'No flows ran in the last 7 days.',
+    aguarda: p => `Waiting: ${p}`,
+    falhouEm: p => `Failed at: ${p}`,
+    ha: t => `Started ${t}`,
+    parado: 'Stuck for more than 2 days',
+    tipos: { approval: 'Approval', signature: 'Signature', task: 'Task', form: 'Form', delay: 'Wait', http: 'HTTP request', email: 'Email', ai_agent: 'AI agent', crud: 'Item' },
+    soQuemAcessa: 'Requires flow access',
+    abrirSpaceflow: 'Open Spaceflow',
   },
   agendaW: {
     mais: n => `${n} more`,
@@ -1109,10 +1114,8 @@ const en: Textos = {
   },
   itensW: {
     vazio: 'No items created yet.',
-    vazioMeus: 'No items assigned to you.',
-    vazioPrazos: 'No items are due in the next 30 days.',
-    venceEm: d => `Due on ${d}`,
-    venceu: d => `Was due on ${d}`,
+    vazioMeus: 'You have not created any items yet.',
+    criadoPor: n => `Created by ${n}`,
   },
   ehMaquete: 'Mockup',
 }
@@ -1168,17 +1171,16 @@ const es: Textos = {
     notas: { titulo: 'Bloc de notas', descricao: 'Tus notas. Solo tú las ves.' },
     beni: { titulo: 'BENI', descricao: 'El resumen del día hecho por el BENI, con el atajo a la conversación con él.' },
     agentesIa: { titulo: 'Agentes de IA', descricao: 'Los agentes del workspace. Un clic abre la conversación con el agente.' },
-    revisoesIa: { titulo: 'Revisiones por IA', descricao: 'Los documentos que el agente revisor está revisando o ya revisó, con la nota.' },
-    creditosIa: { titulo: 'Créditos de IA', descricao: 'El saldo de la cartera y cuánto dura al ritmo actual.' },
-    falhasIa: { titulo: 'Fallas de los agentes', descricao: 'El paso de agente que falló en un flujo del Spaceflow, con Reintentar.' },
+    execucoesFluxos: { titulo: 'Ejecuciones de los flujos', descricao: 'Cuántas ejecuciones están en curso, concluidas, con error y canceladas en los últimos 7 días.' },
+    falhasFluxos: { titulo: 'Fallas en los flujos', descricao: 'El flujo que se detuvo con error, el paso, el mensaje y Reintentar.' },
+    fluxosAndamento: { titulo: 'Flujos en curso', descricao: 'Los flujos que se están ejecutando, el más antiguo primero, con el paso en que esperan.' },
     agendaSemana: { titulo: 'Agenda de la semana', descricao: 'Los 7 días a partir de hoy, en columnas.' },
     agendaMes: { titulo: 'Agenda del mes', descricao: 'El calendario del mes. Haz clic en un día para ver lo que hay.' },
-    meusItens: { titulo: 'Mis ítems', descricao: 'Los ítems de los que eres responsable.' },
+    meusItens: { titulo: 'Mis ítems', descricao: 'Los ítems que creaste.' },
     ultimosItens: { titulo: 'Ítems creados recientemente', descricao: 'Los últimos ítems creados en las categorías a las que accedes.' },
-    prazosDeItens: { titulo: 'Plazos de ítems', descricao: 'Ítems con fecha de vencimiento o vigencia en los próximos 30 días.' },
     itensPorCategoria: { titulo: 'Ítems por categoría', descricao: 'Cuántos ítems hay en cada categoría a la que accedes.' },
   },
-  grupos: { tarefas: 'Tareas', agenda: 'Agenda', itens: 'Ítems y categorías', atalhos: 'Pantallas y accesos', ia: 'IA', equipe: 'Equipo y notas' },
+  grupos: { tarefas: 'Tareas', agenda: 'Agenda', itens: 'Ítems y categorías', atalhos: 'Pantallas y accesos', ia: 'IA', spaceflow: 'Spaceflow', equipe: 'Equipo y notas' },
 
   widget: {
     configurar: 'Configurar',
@@ -1347,7 +1349,6 @@ const es: Textos = {
     valor: 'Valor',
     prazo: 'Fecha de vencimiento',
     urgente: 'Urgente',
-    responsavel: 'Responsable',
     criar: 'Crear',
     criado: (r, c) => `Ítem ${r} creado en ${c}.`,
   },
@@ -1368,12 +1369,19 @@ const es: Textos = {
   },
 
   secoes: { numeros: 'Números', listas: 'Listas', graficos: 'Gráficos' },
+  descricaoDosGruposMvp: {
+    agenda: 'Los compromisos del día, con los plazos de tarea y las fechas de ítem.',
+    itens: 'Las categorías y los ítems: los que creaste y los más nuevos.',
+    atalhos: 'Atajos y pantallas abiertas por último.',
+    ia: 'Los agentes del workspace.',
+  },
   descricaoDosGrupos: {
     tarefas: 'Números, listas y gráficos de las tareas rápidas y programadas.',
     agenda: 'El día, la semana y el mes, con compromisos, plazos de tarea y fechas de ítem.',
-    itens: 'Las categorías y los ítems: los tuyos, los más nuevos y los que vencen.',
+    itens: 'Las categorías y los ítems: los que creaste, los más nuevos y el conteo por categoría.',
     atalhos: 'Accesos directos, pantallas abiertas por último y el gráfico de un panel.',
-    ia: 'El BENI, los agentes del workspace, las revisiones, los créditos y las fallas de los agentes.',
+    ia: 'El BENI y los agentes del workspace.',
+    spaceflow: 'Las ejecuciones de los flujos: los números, las fallas y lo que está en curso.',
     equipe: 'El comunicado del administrador y el bloc de notas.',
   },
   escopoDeTarefas: { rotulo: 'De quién son las tareas', minhas: 'Mis tareas', workspace: 'Workspace' },
@@ -1473,33 +1481,28 @@ const es: Textos = {
   },
   iaW: {
     agentes: { conversar: n => `Conversar con ${n}`, sistema: 'Del sistema', revisor: 'Revisor', gerenciar: 'Administrar agentes' },
-    revisoes: {
-      status: { pending: 'En cola', in_progress: 'Revisando', completed: 'Concluida', failed: 'Falló' },
-      nota: n => `Nota ${n}`,
-      achados: n => n === 0 ? 'Ningún hallazgo grave' : n === 1 ? '1 hallazgo grave' : `${n} hallazgos graves`,
-      concluidas: 'Concluidas en el mes',
-      emAndamento: 'En cola o revisando',
-      notaMedia: 'Nota media',
-      vazio: 'Ningún documento revisado por IA todavía.',
-    },
-    creditos: {
-      unidade: 'créditos',
-      duram: d => `Al ritmo de los últimos 7 días, el saldo dura cerca de ${d} días.`,
-      consumo: 'Consumo diario, últimos 30 días',
-      comprar: 'Comprar créditos',
-      extrato: 'Ver extracto',
-      baixo: 'Saldo bajo',
-    },
-    falhas: {
-      repetir: 'Reintentar',
-      repetido: 'El paso volvió a la cola del flujo.',
-      vazio: 'Ningún paso de agente falló en los últimos 7 días.',
-      abrirFluxo: 'Abrir la ejecución en el Spaceflow',
-    },
-    soAdminVe: 'Solo el administrador lo ve',
     avisoDoAgente: 'El agente puede equivocarse. Revisa la respuesta antes de usarla.',
+    conversaEmTelaCheia: a => `la conversación con ${a === 'BENI' ? 'el BENI' : a} en pantalla completa`,
     ola: n => `Hola, ${n}.`,
     respostaDoAgente: a => `En el producto, responde el agente ${a}, con el modelo y las herramientas configurados en él.`,
+  },
+  spaceflowW: {
+    periodo: 'Últimos 7 días',
+    status: { working: 'En curso', completed: 'Concluidas', error: 'Con error', canceled: 'Canceladas' },
+    sucesso: p => `${p}% de las ejecuciones terminadas se concluyeron`,
+    repetir: 'Reintentar',
+    repetido: 'El paso volvió a la cola del flujo.',
+    abrirExecucao: 'Abrir la ejecución',
+    vazioFalhas: 'Ningún flujo se detuvo con error en los últimos 7 días.',
+    vazioAndamento: 'Ningún flujo en curso.',
+    vazioExecucoes: 'Ningún flujo se ejecutó en los últimos 7 días.',
+    aguarda: p => `Espera: ${p}`,
+    falhouEm: p => `Falló en: ${p}`,
+    ha: t => `Comenzó ${t}`,
+    parado: 'Detenido hace más de 2 días',
+    tipos: { approval: 'Aprobación', signature: 'Firma', task: 'Tarea', form: 'Formulario', delay: 'Espera', http: 'Solicitud HTTP', email: 'Correo', ai_agent: 'Agente de IA', crud: 'Ítem' },
+    soQuemAcessa: 'Requiere acceso a los flujos',
+    abrirSpaceflow: 'Abrir el Spaceflow',
   },
   agendaW: {
     mais: n => `${n} más`,
@@ -1510,10 +1513,8 @@ const es: Textos = {
   },
   itensW: {
     vazio: 'Aún no hay ítems creados.',
-    vazioMeus: 'No hay ítems bajo tu responsabilidad.',
-    vazioPrazos: 'Ningún ítem vence en los próximos 30 días.',
-    venceEm: d => `Vence el ${d}`,
-    venceu: d => `Venció el ${d}`,
+    vazioMeus: 'Aún no has creado ningún ítem.',
+    criadoPor: n => `Creado por ${n}`,
   },
   ehMaquete: 'Maqueta',
 }

@@ -162,8 +162,7 @@ function linhas(c: Cartao): { rotulo: string, valor: string, destaque?: boolean 
     return [
       { rotulo: f.titulo, valor: r.dados.titulo || f.semNome },
       ...(r.dados.valor ? [{ rotulo: f.valor, valor: dinheiro(r.dados.valor, props.t) }] : []),
-      ...(r.dados.prazo ? [{ rotulo: props.t.novoItem.prazo, valor: new Intl.DateTimeFormat(props.t.locale, { day: 'numeric', month: 'long', timeZone: 'America/Sao_Paulo' }).format(r.dados.prazo) }] : []),
-      { rotulo: f.responsavel, valor: pessoa(r.dados.responsavel)?.nome ?? '' },
+      ...(r.dados.data ? [{ rotulo: props.t.novoItem.prazo, valor: new Intl.DateTimeFormat(props.t.locale, { day: 'numeric', month: 'long', timeZone: 'America/Sao_Paulo' }).format(r.dados.data) }] : []),
       ...(r.dados.urgente ? [{ rotulo: f.urgente, valor: f.sim, destaque: true }] : []),
     ]
   }

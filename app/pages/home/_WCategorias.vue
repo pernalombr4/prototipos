@@ -21,6 +21,9 @@
  * a mesma que o cartão de develop mostra) e o botão de criar. Sai a contagem
  * "em aberto": o ENSPACE não tem esse conceito para item.
  *
+ * Rodada 9: ícone de 56 px e o texto dentro da altura dele (detalhe no
+ * comentário do cartão).
+ *
  * O cartão inteiro é "Acessar"; o "+" é um botão à parte, ao lado, e não
  * dentro do cartão (dois controles irmãos, sem clique dentro de clique).
  *
@@ -78,22 +81,28 @@ function formularios(c: Categoria): DropdownMenuItem[][] {
       <li
         v-for="(c, i) in categorias"
         :key="c.slug"
-        class="flex h-[4.5rem] min-w-0 animate-[entrada_0.3s_ease-out_both] items-center gap-1 rounded-lg border border-default bg-default pl-1.5 pr-3 transition-colors duration-150 hover:border-accented hover:bg-elevated/40 motion-reduce:animate-none"
+        class="flex h-20 min-w-0 animate-[entrada_0.3s_ease-out_both] items-center gap-2 rounded-lg border border-default bg-default pl-1.5 pr-3 transition-colors duration-150 hover:border-accented hover:bg-elevated/40 motion-reduce:animate-none"
         :style="{ animationDelay: `${i * 40}ms` }"
       >
+        <!--
+          Rodada 9, a pedido da redatora: o título não passa do topo do ícone e a
+          descrição não desce além da base dele. Ícone de 56 px (size-14); o texto
+          ocupa no máximo os mesmos 56 px: título 20 px + 4 px + 2 linhas de 16 px.
+          Com 1 linha de descrição, o bloco centraliza na altura do ícone.
+        -->
         <button
           type="button"
-          class="flex h-full min-w-0 flex-1 items-center gap-3 rounded-md px-2 text-left focus-visible:outline-2 focus-visible:outline-primary"
+          class="flex h-full min-w-0 flex-1 items-center gap-3 rounded-md px-2.5 py-3 text-left focus-visible:outline-2 focus-visible:outline-primary"
           :aria-label="t.categoriasW.acessar(c.name)"
           :title="c.description ? `${c.name}: ${c.description}` : c.name"
           @click="emit('acessar', c)"
         >
-          <span class="flex size-10 shrink-0 items-center justify-center rounded-lg ring ring-inset" :class="COR[c.color ?? 'neutral'] ?? COR.neutral">
-            <UIcon :name="c.icon ?? 'i-lucide-folder'" class="size-4" />
+          <span class="flex size-14 shrink-0 items-center justify-center rounded-xl ring ring-inset" :class="COR[c.color ?? 'neutral'] ?? COR.neutral">
+            <UIcon :name="c.icon ?? 'i-lucide-folder'" class="size-6" />
           </span>
-          <span class="min-w-0">
-            <span class="block truncate text-sm font-medium text-highlighted">{{ c.name }}</span>
-            <span v-if="c.description" class="mt-0.5 line-clamp-2 text-xs leading-snug text-muted">{{ c.description }}</span>
+          <span class="flex max-h-14 min-w-0 flex-col justify-center">
+            <span class="block truncate text-sm font-medium leading-5 text-highlighted">{{ c.name }}</span>
+            <span v-if="c.description" class="mt-1 line-clamp-2 text-xs leading-4 text-muted">{{ c.description }}</span>
           </span>
         </button>
 

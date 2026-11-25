@@ -175,9 +175,8 @@ export function entender(texto: string, categorias: Categoria[]): Rascunho {
       dados: {
         titulo: limparTitulo(texto, cat.termo) || texto.trim(),
         valor: lerValor(texto),
-        prazo: dia === undefined ? undefined : HOJE + dia * DIA + 18 * HORA,
+        data: dia === undefined ? undefined : HOJE + dia * DIA + 18 * HORA,
         urgente,
-        responsavel: quem?.id ?? EU.id,
       },
     }
   }
