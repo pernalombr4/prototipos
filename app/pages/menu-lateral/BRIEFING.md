@@ -100,6 +100,21 @@ MEMBRO                              CONFIGURAÇÕES              AJUDA
                                     └ Credenciais
 ```
 
+### A casca de hoje, copiada em 2026-11-24 (rodada 35)
+
+Copiada do develop, no workspace de exploração. Nada aqui é proposta.
+
+| Lugar | Item por item |
+|---|---|
+| Topo da barra lateral | sigla e nome do workspace com a seta; "Buscar..." com Ctrl K |
+| Barra do topo | recolher a barra, voltar, avançar, recarregar, início; a trilha em pílula com Ctrl B e estrela; bandeira do idioma, tema, Suporte, sino com 99+, avatar |
+| Tela da categoria | sem título; as abas (Todos e os formulários); a barra de ferramentas com "Pesquisar registros", "Criado em", "Todo o período", exportar, colunas, filtros, a engrenagem de configurar e "+ Novo registro" |
+| Tarefas | abre em Painel (selo "Novo"), Agendadas e Rápidas |
+| Relatórios | a lista dos relatórios exportados, em `/reports` |
+| Módulo Assinatura Eletrônica | ligado, cria o grupo "Módulos" com Assinaturas (`/signatures`) |
+
+Nenhuma tela de hoje tem a trilha dentro do miolo: ela mora só na barra do topo.
+
 ### A medição
 
 | | Valor |

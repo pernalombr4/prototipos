@@ -389,6 +389,57 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 35 · 2026-11-24
+- **Pedido (literal):** "agora tem que dar conta de 2 novos menus: relatórios e dashboard de tarefas. isso já ta no protótipo? além disso, já temos um módulo de ASSINATURAS que você pode usar como exemplo. veja como funciona hoje no menu em develop e veja como ficaria no seu."
+- **Pedido (literal):** "vamos olhar para os dashboards de itens assim como o clickup olha pros relatórios de tarefas (que funcionam pra eles como nossos itens). Existe uma tela central pra eles/menu centralizado, mas o user pode adicionar a tela de dash em cada menu de categoria ou personalizado se quiser, como tela separada mesmo."
+- **Pedido (literal):** "falta você prototipar o estado inicial, quando o user ainda não configurou nada no menu. o workspace ta configurado, com as categorias criadas, mas ele não mexeu no menu. foi só organizando nativamente. precisamos saber quais serão as regras de comportamento deste momento."
+- **Pedido (literal):** "o botão que você deixou como 'workspace novo' prototipou errado. um workspace novo não deveria ter 'rotina do jurídico' workspace novo começa do zero, vazio, sem categoria criada. o que ele mostraria?"
+- **Pedido (literal):** "na base do menu, tem o botão de personalizar a barra lateral. ele tem que estar centralizado."
+- **Pedido (literal):** "nesse protótipo você mudou o topo do enspace... recomendo prototipar idêntico por enquanto. além disso, você colocou no protótipo um breadcrumb que vai se formando dentro da tela útil do user. hoje isso não acontece. e isso vai mudar algumas ideias suas ali, tipo onde você botou botão de configurar na mesma linha desse breadcrumb. reveja isso. tem que ser consistente com o que temos hoje."
+- **Pedido (literal):** "o botão 'comparar com o menu de hoje' não precisa existir. apague o código que acompanha ele"
+- **O develop hoje (2026-11-24, workspace de exploração):**
+  - Relatórios é a lista dos relatórios exportados (`/reports`);
+  - o "Dashboard de tarefas" é Tarefas > Painel, com o selo "Novo";
+  - o módulo Assinatura Eletrônica, ligado, cria o grupo "Módulos" com 1 item, Assinaturas (`/signatures`). O módulo foi ligado para ver e desligado de novo;
+  - a tela da categoria não tem título; a engrenagem de configurar mora na barra de ferramentas da lista.
+- **Mudou: os 2 menus novos e o módulo.**
+  - Relatórios: o destino nativo que já existia ("Meus relatórios") passa a se chamar Relatórios, como no develop.
+  - Tarefas ganhou as 3 telas nativas de hoje: Painel (o dashboard de tarefas, com o selo "Novo"), Agendadas e Rápidas. Tarefas abre e fecha como no develop; a tela ativa abre o pai sozinha.
+  - Assinaturas entra como destino do módulo Assinatura Eletrônica, no Início, e some quando o módulo é desligado em Configurações > Módulos. No develop ele cria um grupo só para si; aqui é 1 linha entre os destinos.
+  - Em Análise, Dashboards substitui os 2 painéis de antes: é a tela central de todos os dashboards de itens.
+- **Mudou: os dashboards de itens, no modelo do ClickUp.**
+  - A tela central (Análise > Dashboards) lista todos os dashboards com Nome, Categoria, Criado por, Atualizado em e a chave "No menu da categoria".
+  - Ligar a chave põe o dashboard no menu, abaixo da categoria (3º nível), como tela separada. O botão direito da categoria tem "Dashboards no menu", com a lista dos dashboards dela para marcar e "Novo dashboard".
+  - O dashboard no menu tem "Abrir" e "Tirar do menu". Tirar do menu não exclui: o dashboard continua na tela central, e o aviso diz isso.
+  - A trilha do topo mostra workspace > Categorias > categoria > dashboard.
+- **Regra: estado "Sem personalização"** (o workspace tem categorias e módulos; ninguém mexeu no menu):
+  - a trilha mostra só as áreas nativas (Dados, Análise, Auditoria, Integrações e Configurações);
+  - o Início mostra os destinos nativos e os dos módulos ligados;
+  - Favoritos não aparece até a primeira estrela;
+  - Categorias mostra até 5, pela ordem de uso; sem histórico, a ordem é alfabética. O resto fica em "Ver todas";
+  - não há seção pessoal nem seção do workspace;
+  - os dashboards existem na tela central, e nenhum aparece no menu: pôr no menu já é personalizar.
+- **Regra: estado "Workspace novo"** (recém-criado, sem nada):
+  - só os destinos e as áreas nativas;
+  - Categorias mostra o cartão vazio, com "Criar categoria" e "Começar por um caso de uso" para quem configura; quem não configura lê que a primeira categoria aparece ali quando existir;
+  - sem módulo, sem seção, sem dashboard e sem relatório emitido;
+  - Dashboards abre vazio e diz que o dashboard precisa de uma categoria.
+- **Corrigido:** o "Workspace novo" das rodadas 1 a 34 tinha a seção pessoal "Rotina do jurídico". O andaime agora tem 3 cenários, Em uso, Sem personalização e Workspace novo, e trocar de cenário recomeça o menu do zero.
+- **Mudou: a casca, idêntica à de hoje.**
+  - O cabeçalho que o protótipo tinha inventado (busca no centro, "Criar +") saiu.
+  - A barra lateral abre com o workspace e "Buscar... Ctrl K", como hoje.
+  - A barra do topo é a de hoje: recolher, voltar, avançar, recarregar, início, a trilha em pílula com Ctrl B e estrela, idioma, tema, Suporte, sino e avatar.
+  - A trilha que se formava dentro da tela saiu, e o "Configurar categoria" dela foi para a engrenagem da barra de ferramentas da lista, onde fica hoje.
+  - A tela da categoria copia a de hoje: abas, barra de ferramentas e "+ Novo registro", sem título. O que é proposta nela é o formulário como aba.
+- **Mudou:** "Personalizar a barra lateral", no pé do Início, fica centralizado.
+- **Removido:** o botão "Comparar com o menu de hoje", o componente dele (`_MenuDeHoje.vue`), o dado do menu de hoje no `mocks.ts`, os textos dele e o seletor "Modo" (nativo ou completo) do andaime, que os cenários substituem.
+- **Fronteira:** muda o que está acima; não mudam a trilha, os painéis das áreas, o Personalizar, o editor de menus nem a Central de casos de uso.
+- **Em aberto:**
+  - P1: o dashboard pode ir para um menu que o workspace criou, além da categoria? O pedido diz "categoria ou personalizado"; aqui só a categoria tem a porta.
+  - P2: o dashboard no menu da categoria vale para todos ou só para quem pôs? Aqui vale para todos, como mudança do workspace.
+  - P3: Assinaturas fica entre os destinos do Início ou mantém o grupo "Módulos" de hoje?
+- **Ver:** `pnpm dev` → http://localhost:3000/menu-lateral, andaime "Estado". Prints do develop em `evidencias/develop-2026-11-24-modulo-assinaturas.jpg` e `evidencias/develop-2026-11-24-tela-da-categoria.jpg`. Sem evidência visual do protótipo nesta rodada: o Chrome desconectou e o navegador do app não respondeu em 300 s; a conferência foi pelo HTML do servidor e pela compilação de cada arquivo alterado.
+
 ### Rodada 34 · 2026-10-21
 - **Pedido (literal):** "pode botar a confirmaçao no painel do menu, mas nao mexa em mais nada naquele prototipo."
 - **Mudou:** excluir um menu do tipo Painéis, ou uma seção que leva um painel junto, abre a janela "Excluir o painel <nome>?"

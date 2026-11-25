@@ -32,6 +32,7 @@ import { useMenuDoWorkspace } from './estado'
 import { useLimites } from './limites'
 import { useJanelasDaTrilha } from './trilha'
 import { useConfirmarExclusao } from './confirmacao'
+import { destinoDoDashboard, useDashboards } from './dashboards'
 
 export type Acoes = ContextMenuItem[][]
 
@@ -56,6 +57,7 @@ export function useAcoesDoMenu(g: Ganchos) {
   const confirmacao = useConfirmarExclusao()
   const janelas = useJanelasDaTrilha()
   const limites = useLimites()
+  const dashboards = useDashboards()
 
   /* ------------------------------ o bloco "ir" ------------------------------ */
 
@@ -341,9 +343,36 @@ export function useAcoesDoMenu(g: Ganchos) {
       )
     }
     const travado = !g.podeConfigurar()
+    /*
+     * Rodada 35: os dashboards da categoria, como o ClickUp faz com os dele.
+     * Marcar põe o dashboard no menu, embaixo da categoria, como tela
+     * separada; desmarcar tira do menu e ele continua em Análise > Dashboards.
+     */
+    const dosDashboards = dashboards.lista.value.filter(d => d.categoriaId === c.id)
+    const blocoDashboards: ContextMenuItem[] = [{
+      label: t.dashNoMenu,
+      icon: 'i-lucide-layout-dashboard',
+      children: [
+        ...dosDashboards.map(d => ({
+          label: d.nome,
+          type: 'checkbox' as const,
+          checked: d.noMenuDaCategoria,
+          onSelect: (e: Event) => { e.preventDefault(); dashboards.mostrarNaCategoria(d.id, !d.noMenuDaCategoria) },
+        })),
+        {
+          label: t.dashNovo,
+          icon: 'i-lucide-plus',
+          onSelect: () => {
+            const d = dashboards.criar(t.dashNomeNovo(c.name), c.id, '')
+            g.abrirDestino(destinoDoDashboard(d.id))
+          },
+        },
+      ],
+    }]
     return [
       blocoIr(() => g.abrirCategoria(c), `categoria-${c.id}`),
       meio,
+      blocoDashboards,
       [{
         label: t.ctxConfigurarCategoria,
         icon: 'i-lucide-settings-2',

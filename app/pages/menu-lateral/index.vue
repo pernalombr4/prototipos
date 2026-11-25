@@ -34,13 +34,13 @@ import CriarMaquete from './_CriarMaquete.vue'
 import RodapeDaJanela from './_RodapeDaJanela.vue'
 import { MOLDURA } from './moldura'
 import TodasAsCategorias from './_TodasAsCategorias.vue'
-import MenuDeHoje from './_MenuDeHoje.vue'
 import {
   categoriasNormais,
   categoriasVolume,
   gruposDeConfiguracao,
   workspace,
   usuaria,
+  relatoriosEmitidos,
   type NoDoMenu,
   type Categoria,
 } from './mocks'
@@ -49,6 +49,8 @@ import { useRenomeando } from './acoes'
 import { useJanelasDaTrilha } from './trilha'
 import { useLimites } from './limites'
 import { useJanelasDeCasos } from './casos'
+import { dashboardDoDestino, useDashboards } from './dashboards'
+import { useMeusRelatorios } from './relatorios'
 import { textos } from './textos'
 
 // O contexto do protótipo vem dos próprios .md desta pasta, como texto.
@@ -64,11 +66,18 @@ definePageMeta({
   titulo: 'Menu lateral em dois níveis',
   descricao: 'Tirar a administração do caminho do trabalho e dar teto à lista de categorias, sem mudar de endereço.',
   status: 'em-revisao',
-  atualizado: '2026-10-09',
+  atualizado: '2026-11-24',
   tela: 'Menu lateral do workspace',
 })
 
 const t = useTextos(textos)
+/* A barra do topo de hoje (rodada 35): a sigla do idioma e o tema funcionam de verdade. */
+const idioma = useIdioma()
+const siglaDoIdioma = computed(() => ({ 'pt-BR': 'BR', en: 'EN', es: 'ES' } as Record<string, string>)[idioma.value] ?? 'BR')
+const modoDeCor = useColorMode()
+function alternarTema() {
+  modoDeCor.preference = modoDeCor.value === 'dark' ? 'light' : 'dark'
+}
 const toast = useToast()
 
 /** A árvore do menu, a mesma que o editor edita e que as duas barras mostram. */
@@ -89,20 +98,45 @@ const itensDeSecao = computed(() =>
    ANDAIME: o seletor de estados não faz parte da proposta. Existe para
    revisar os seis estados sem back-end.
 ------------------------------------------------------------------ */
-type Estado = 'normal' | 'volume' | 'vazio' | 'carregando' | 'erro' | 'semPermissao'
+/*
+ * Rodada 35: os 3 primeiros são CENÁRIOS, e trocar de um para outro recomeça o
+ * menu do zero, como se fosse outro workspace:
+ *   Em uso              o workspace de demonstração, com seção pessoal,
+ *                       seções do workspace e módulos;
+ *   Sem personalização  categorias e módulos, e ninguém mexeu no menu;
+ *   Workspace novo      recém-criado: só o nativo, sem categoria nem módulo.
+ * O "Workspace novo" das rodadas 1 a 34 tinha a seção pessoal "Rotina do
+ * jurídico", e isso estava errado: workspace novo começa vazio.
+ * Os 4 últimos são estados da tela, por cima do cenário que estiver escolhido.
+ */
+type Estado = 'normal' | 'semPersonalizacao' | 'vazio' | 'volume' | 'carregando' | 'erro' | 'semPermissao'
 const estado = ref<Estado>('normal')
-const estados: { valor: Estado, rotulo: string }[] = [
-  { valor: 'normal', rotulo: '8 categorias' },
+const estados = computed<{ valor: Estado, rotulo: string }[]>(() => [
+  { valor: 'normal', rotulo: t.value.cenarioEmUso },
+  { valor: 'semPersonalizacao', rotulo: t.value.cenarioSemPersonalizacao },
+  { valor: 'vazio', rotulo: t.value.cenarioNovo },
   { valor: 'volume', rotulo: '40 categorias' },
-  { valor: 'vazio', rotulo: 'Workspace novo' },
   { valor: 'carregando', rotulo: 'Carregando' },
   { valor: 'erro', rotulo: 'Erro' },
   { valor: 'semPermissao', rotulo: 'Sem permissão' },
-]
+])
+const relatoriosDoCenario = useMeusRelatorios()
+watch(estado, (e) => {
+  if (e === 'normal') menu.aplicarCenario('emUso')
+  else if (e === 'semPersonalizacao') menu.aplicarCenario('semPersonalizacao')
+  else if (e === 'vazio') menu.aplicarCenario('novo')
+  else return
+  fixadasManualmente.value = []
+  // Workspace novo não tem dashboard nem relatório emitido.
+  dashboardsDeItens.recomecar(e === 'vazio' ? 'novo' : e === 'semPersonalizacao' ? 'semPersonalizacao' : 'emUso')
+  relatoriosDoCenario.lista.value = e === 'vazio' ? [] : relatoriosEmitidos.map(r => ({ ...r }))
+  irParaDestino(menu.destinos.value[0]?.id ?? 'n-inicio')
+  painel.value = 'trabalho'
+})
 
 const podeConfigurar = computed(() => estado.value !== 'semPermissao')
 const estadoDoPainel = computed(() => {
-  if (estado.value === 'volume' || estado.value === 'semPermissao') return 'normal' as const
+  if (estado.value === 'volume' || estado.value === 'semPermissao' || estado.value === 'semPersonalizacao') return 'normal' as const
   return estado.value as 'normal' | 'vazio' | 'carregando' | 'erro'
 })
 
@@ -120,11 +154,20 @@ const base = computed<Categoria[]>(() => {
 /** Favoritar mexe no array em memória. Recarregar a página volta ao começo. */
 const fixadasManualmente = ref<number[]>([])
 
+/*
+ * Sem personalização (rodada 35): ninguém marcou favorito nem abriu nada
+ * ainda, então não há favorito nem histórico de uso.
+ */
+const semHistorico = computed(() => estado.value === 'semPersonalizacao')
 const categorias = computed<Categoria[]>(() =>
-  base.value.map(c => ({
-    ...c,
-    favorita: fixadasManualmente.value.includes(c.id) ? !c.favorita : c.favorita,
-  })),
+  base.value.map((c) => {
+    const favorita = semHistorico.value ? false : c.favorita
+    return {
+      ...c,
+      aberturas: semHistorico.value ? 0 : c.aberturas,
+      favorita: fixadasManualmente.value.includes(c.id) ? !favorita : favorita,
+    }
+  }),
 )
 
 const favoritas = computed(() => categorias.value.filter(c => c.favorita))
@@ -150,7 +193,8 @@ const naoFavoritas = computed(() => {
   }
   if (ordem.value === 'alfabetica') return [...lista].sort((a, b) => a.name.localeCompare(b.name))
   if (ordem.value === 'recentes') return [...lista].sort((a, b) => b.id - a.id)
-  return [...lista].sort((a, b) => b.aberturas - a.aberturas)
+  // Rodada 35: sem histórico de uso o empate é geral, e a ordem vira alfabética.
+  return [...lista].sort((a, b) => b.aberturas - a.aberturas || a.name.localeCompare(b.name))
 })
 
 /**
@@ -212,8 +256,23 @@ const rotuloDoDestino = computed(() => {
   if (nativo) return rotuloDoNo(nativo)
   const emSecao = itensDeSecao.value.find(x => x.no.id === destinoAtivo.value)
   if (emSecao) return rotuloDoNo(emSecao.no)
-  return ''
+  // Rodada 35: o dashboard aberto pelo submenu da categoria.
+  const dash = dashboardAtivo.value
+  if (dash) return dash.nome
+  // Rodada 35: as telas que um nativo traz (Tarefas > Painel) e as telas de submenu.
+  const qualquer = menu.acharNo(destinoAtivo.value)
+  return qualquer ? rotuloDoNo(qualquer) : ''
 })
+
+/** O dashboard aberto no miolo, quando o destino é "dash:<id>" (rodada 35). */
+const dashboardsDeItens = useDashboards()
+const dashboardAtivo = computed(() => {
+  const id = dashboardDoDestino(destinoAtivo.value)
+  return id ? dashboardsDeItens.achar(id) : null
+})
+
+/** O nativo dono da tela ativa, quando ela é uma das telas dele (Tarefas > Painel). */
+const nativoDono = computed(() => menu.destinos.value.find(d => d.filhos?.some(f => f.id === destinoAtivo.value)) ?? null)
 
 const breadcrumb = computed(() => {
   if (painel.value === 'config') {
@@ -222,12 +281,28 @@ const breadcrumb = computed(() => {
       .filter(Boolean)
   }
   if (categoriaAtiva.value) return [workspace.nome, t.value.categorias, categoriaAtiva.value.name]
+  if (nativoDono.value) return [workspace.nome, rotuloDoNo(nativoDono.value), rotuloDoDestino.value]
+  // O dashboard mora embaixo da categoria no menu, e a trilha diz isso.
+  if (dashboardAtivo.value) {
+    const c = categorias.value.find(x => x.id === dashboardAtivo.value!.categoriaId)
+    return [workspace.nome, t.value.categorias, c?.name ?? '', dashboardAtivo.value.nome].filter(Boolean)
+  }
   return [workspace.nome, rotuloDoDestino.value]
 })
 
 function irParaDestino(id: string) {
   destinoAtivo.value = id
   categoriaAtiva.value = null
+}
+
+/** A casinha da barra do topo: volta ao Início, como hoje. */
+const rotuloDoInicio = computed(() => {
+  const inicio = menu.destinos.value[0]
+  return inicio ? rotuloDoNo(inicio) : ''
+})
+function irParaInicio() {
+  painel.value = 'trabalho'
+  irParaDestino(menu.destinos.value[0]?.id ?? 'n-inicio')
 }
 
 function abrirCategoria(c: Categoria) {
@@ -352,7 +427,6 @@ function abrirMaquete(modo: 'item' | 'tarefa') {
 const vendoTodas = ref(false)
 const editando = ref(false)
 const formInicial = ref<'secao' | 'item' | null>(null)
-const vendoHoje = ref(false)
 const buscando = ref(false)
 /*
  * O termo da busca global (rodada 17). Ele chega preenchido quando a busca
@@ -371,10 +445,8 @@ watch(buscando, (v) => { if (!v) termoDaBusca.value = '' })
  * animação de saída, que um `v-if` no próprio `open` cortaria pela metade.
  */
 const usouTodas = ref(false)
-const usouHoje = ref(false)
 const usouEditor = ref(false)
 watch(vendoTodas, v => { if (v) usouTodas.value = true })
-watch(vendoHoje, v => { if (v) usouHoje.value = true })
 watch(editando, v => { if (v) usouEditor.value = true })
 
 /** A paleta busca em tudo: categoria, seção do workspace e configuração. */
@@ -393,11 +465,12 @@ const gruposDaBusca = computed(() => [
     id: 'destinos',
     label: workspace.nome,
     items: [
-      ...menu.destinos.value.map(d => ({
-        label: rotuloDoNo(d),
-        icon: d.icone,
-        onSelect: () => { irParaDestino(d.id); painel.value = 'trabalho' },
-      })),
+      ...menu.destinos.value.flatMap(d => [d, ...(d.filhos ?? [])].map(n => ({
+        label: rotuloDoNo(n),
+        icon: n.icone,
+        suffix: n === d ? undefined : rotuloDoNo(d),
+        onSelect: () => { irParaDestino(n.id); painel.value = 'trabalho' },
+      }))),
       ...itensDeSecao.value.map(({ no, secao }) => ({
         label: rotuloDoNo(no),
         icon: no.icone,
@@ -605,51 +678,6 @@ function emBreve() {
 <template>
   <div class="flex h-dvh flex-col bg-elevated/30">
     <!-- ============================================================
-         A BARRA DE CIMA. A busca global subiu para cá na rodada 3, que é
-         onde o Jira novo, o Airtable e o HubSpot a põem: atravessa a tela
-         inteira e não disputa altura com a navegação. O filtro do menu
-         continua dentro da barra lateral, porque é outra função.
-    ============================================================ -->
-    <header class="flex h-12 shrink-0 items-center gap-2 border-b border-default bg-default px-3">
-      <UButton color="neutral" variant="ghost" class="shrink-0" :aria-label="t.trocarWorkspace">
-        <span class="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary text-xs font-bold text-inverted">
-          {{ workspace.inicial }}
-        </span>
-        <span class="hidden truncate text-sm font-semibold text-highlighted sm:inline">{{ workspace.nome }}</span>
-        <UIcon name="i-lucide-chevrons-up-down" class="size-4 shrink-0 text-muted" />
-      </UButton>
-
-      <!--
-        RODADA 7: o perfil fica AQUI, na esquerda de cima, e em lugar nenhum
-        mais. Ele estava também no pé da barra lateral e no pé da trilha: três
-        lugares para a mesma pessoa, gastando altura que a navegação precisava.
-        Um lugar só, ao lado do workspace, e o canto superior esquerdo vira a
-        zona de identidade: onde eu estou e quem eu sou.
-      -->
-      <UTooltip :text="usuaria.nome">
-        <UAvatar :alt="usuaria.nome" size="xs" class="shrink-0" />
-      </UTooltip>
-
-      <div class="flex min-w-0 flex-1 justify-center">
-        <UButton
-          color="neutral"
-          variant="outline"
-          class="w-full max-w-md justify-start"
-          @click="buscando = true"
-        >
-          <UIcon name="i-lucide-search" class="size-4 shrink-0 text-muted" />
-          <span class="min-w-0 flex-1 truncate text-left text-sm font-normal text-muted">{{ t.buscarEmTudo }}</span>
-          <UKbd value="ctrl" size="sm" />
-          <UKbd value="K" size="sm" />
-        </UButton>
-      </div>
-
-      <UDropdownMenu :items="itensDeCriar" :content="{ align: 'end' }">
-        <UButton icon="i-lucide-plus" color="primary" :label="t.criar" class="shrink-0" />
-      </UDropdownMenu>
-    </header>
-
-    <!-- ============================================================
          O QUADRO DO PRODUTO: barra lateral mais conteúdo.
          A barra tem dois painéis que se substituem, nunca se somam.
     ============================================================ -->
@@ -659,7 +687,7 @@ function emBreve() {
       rodape, onde moram Configuracoes e o icone de ajuda. Rodada 9.
     -->
     <div class="flex min-h-0 flex-1 gap-0 pb-20">
-      <div class="flex min-h-0 w-full overflow-hidden border-t border-default bg-default">
+      <div class="flex min-h-0 w-full overflow-hidden bg-default">
         <!-- barra lateral -->
         <!--
           A largura anda junto com o recolher (rodada 14), em 200 ms. O
@@ -677,6 +705,49 @@ function emBreve() {
           :style="recolhido ? undefined : { width: `${largura}px` }"
           :aria-label="t.menuLateral"
         >
+          <!--
+            RODADA 35: "ou você deve prototipar idêntico, mudando só o menu
+            lateral [...] recomendo prototipar idêntico por enquanto" (Mikaela).
+            O topo do menu é o de hoje: o workspace com a referência e a seta de
+            troca, e o "Buscar..." com Ctrl K. Nada aqui é proposta.
+          -->
+          <div class="flex h-full min-h-0 flex-col">
+          <div class="shrink-0 space-y-0.5 border-b border-default p-2">
+            <UTooltip :text="workspace.nome" :disabled="!recolhido" :content="{ side: 'right' }">
+              <button
+                type="button"
+                class="flex w-full items-center gap-2 rounded-md px-1.5 py-1.5 text-left transition-colors hover:bg-elevated"
+                :class="recolhido ? 'justify-center' : ''"
+                :aria-label="t.trocarWorkspace"
+              >
+                <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
+                  {{ workspace.nome.slice(0, 2).toUpperCase() }}
+                </span>
+                <span v-if="!recolhido" class="min-w-0 flex-1">
+                  <span class="block truncate text-sm font-semibold text-highlighted">{{ workspace.nome }}</span>
+                  <span class="block truncate text-xs text-muted">{{ workspace.referencia }}</span>
+                </span>
+                <UIcon v-if="!recolhido" name="i-lucide-chevron-down" class="size-4 shrink-0 text-muted" />
+              </button>
+            </UTooltip>
+            <UTooltip :text="t.cascaBuscar" :kbds="['ctrl', 'K']" :disabled="!recolhido" :content="{ side: 'right' }">
+              <button
+                type="button"
+                class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-elevated"
+                :class="recolhido ? 'justify-center' : ''"
+                :aria-label="t.cascaBuscar"
+                @click="abrirBusca()"
+              >
+                <UIcon name="i-lucide-search" class="size-4 shrink-0 text-highlighted" />
+                <template v-if="!recolhido">
+                  <span class="flex-1 text-sm font-medium text-highlighted">{{ t.cascaBuscar }}</span>
+                  <UKbd value="ctrl" size="sm" />
+                  <UKbd value="K" size="sm" />
+                </template>
+              </button>
+            </UTooltip>
+          </div>
+          <div class="flex min-h-0 flex-1">
           <!-- MODELO ALTERNATIVO: trilha de icones mais painel da area. -->
           <ModeloTrilha
             v-if="modelo === 'trilha'"
@@ -773,6 +844,8 @@ function emBreve() {
             @recolher="alternarRecolhido"
           />
           </template>
+          </div>
+          </div>
           <!--
             A BORDA QUE SE ARRASTA (rodada 19). Invisível parada; acende no
             hover, no foco e durante o arraste, e fica amarela quando soltar ali
@@ -802,17 +875,61 @@ function emBreve() {
           </div>
         </aside>
 
-        <!-- conteúdo -->
-        <Conteudo
-          :t="t"
-          :destino="destinoAtivo"
-          :rotulo-do-destino="rotuloDoDestino"
-          :categoria="categoriaAtiva"
-          :breadcrumb="breadcrumb"
-          :item-config="painel === 'config' ? itemConfigAtivo : undefined"
-          @configurar-categoria="configurarCategoriaAtual"
-          @ir-para="irParaDestino"
-        />
+        <!-- conteúdo, com a barra do topo de hoje em cima -->
+        <div class="flex min-w-0 flex-1 flex-col">
+          <!--
+            A BARRA DO TOPO, copiada do develop em 2026-11-24 (rodada 35). Nada
+            aqui é proposta: recolher o menu, voltar, avançar, recarregar,
+            início, a trilha com Ctrl B e a estrela, idioma, tema, Suporte, sino
+            e avatar. A trilha mora aqui, como hoje, e não dentro da tela.
+          -->
+          <header class="flex h-12 shrink-0 items-center gap-1 border-b border-default bg-default px-2">
+            <UTooltip :text="t.cascaMenu">
+              <UButton icon="i-lucide-panel-left" color="neutral" variant="ghost" size="xs" :aria-label="t.cascaMenu" @click="alternarRecolhido" />
+            </UTooltip>
+            <UButton icon="i-lucide-arrow-left" color="neutral" variant="ghost" size="xs" :aria-label="t.cascaVoltar" />
+            <UButton icon="i-lucide-arrow-right" color="neutral" variant="ghost" size="xs" :aria-label="t.cascaAvancar" />
+            <UButton icon="i-lucide-rotate-cw" color="neutral" variant="ghost" size="xs" :aria-label="t.cascaRecarregar" />
+            <UButton icon="i-lucide-house" color="neutral" variant="ghost" size="xs" :aria-label="rotuloDoInicio" @click="irParaInicio" />
+
+            <div class="mx-2 flex min-w-0 flex-1 items-center gap-2 rounded-md bg-elevated/70 px-3 py-1.5">
+              <nav class="flex min-w-0 items-center gap-1.5 text-xs" :aria-label="t.cascaTrilha">
+                <template v-for="(parte, i) in breadcrumb" :key="i">
+                  <UIcon v-if="i" name="i-lucide-chevron-right" class="size-3 shrink-0 text-dimmed" />
+                  <span class="truncate" :class="i === breadcrumb.length - 1 ? 'text-highlighted' : 'text-toned'">{{ parte }}</span>
+                </template>
+              </nav>
+              <span class="ml-auto hidden shrink-0 items-center gap-1 sm:flex">
+                <UKbd value="ctrl" size="sm" />
+                <UKbd value="B" size="sm" />
+                <UIcon name="i-lucide-star" class="ml-1 size-3.5 text-muted" :aria-label="t.cascaFavoritar" />
+              </span>
+            </div>
+
+            <div class="flex shrink-0 items-center gap-1.5">
+              <span class="flex size-6 items-center justify-center rounded-full bg-success/15 text-[9px] font-bold text-success" :aria-label="t.cascaIdioma">{{ siglaDoIdioma }}</span>
+              <UButton :icon="modoDeCor.value === 'dark' ? 'i-lucide-moon' : 'i-lucide-sun'" color="neutral" variant="ghost" size="xs" :aria-label="t.cascaTema" @click="alternarTema" />
+              <UButton icon="i-lucide-headset" :label="t.cascaSuporte" color="neutral" variant="outline" size="xs" class="hidden sm:inline-flex" @click="avisarAjuda(t.cascaSuporte)" />
+              <UChip text="99+" color="error" size="3xl">
+                <UButton icon="i-lucide-bell" color="neutral" variant="ghost" size="xs" :aria-label="t.cascaNotificacoes" />
+              </UChip>
+              <UChip color="success" size="sm" inset>
+                <UAvatar size="sm" :text="usuaria.iniciais" :alt="t.cascaConta" />
+              </UChip>
+            </div>
+          </header>
+
+          <Conteudo
+            :t="t"
+            :destino="destinoAtivo"
+            :rotulo-do-destino="rotuloDoDestino"
+            :categoria="categoriaAtiva"
+            :categorias="categorias"
+            :item-config="painel === 'config' ? itemConfigAtivo : undefined"
+            @configurar-categoria="configurarCategoriaAtual"
+            @ir-para="irParaDestino"
+          />
+        </div>
       </div>
     </div>
 
@@ -830,8 +947,6 @@ function emBreve() {
       @alternar-fixar="alternarFixar"
       @abrir="abrirCategoria"
     />
-
-    <MenuDeHoje v-if="usouHoje" v-model:open="vendoHoje" :t="t" />
 
     <EditorDeMenus
       v-if="usouEditor"
@@ -906,7 +1021,7 @@ function emBreve() {
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated">
       <div class="flex flex-wrap items-center gap-1.5 px-4 py-1.5">
         <span class="mr-0.5 text-xs font-semibold uppercase tracking-wider text-muted">
-          Estado
+          {{ t.cenarioRotulo }}
         </span>
         <UButton
           v-for="e in estados"
@@ -917,26 +1032,6 @@ function emBreve() {
           :color="estado === e.valor ? 'primary' : 'neutral'"
           :variant="estado === e.valor ? 'solid' : 'subtle'"
           @click="estado = e.valor"
-        />
-
-        <span class="ml-2 mr-0.5 text-xs font-semibold uppercase tracking-wider text-muted">
-          {{ t.modoRotulo }}
-        </span>
-        <UButton
-          :label="t.modoNativo"
-          size="xs"
-          class="transition-transform hover:-translate-y-0.5"
-          :color="menu.modoDoMenu.value === 'nativo' ? 'primary' : 'neutral'"
-          :variant="menu.modoDoMenu.value === 'nativo' ? 'solid' : 'subtle'"
-          @click="menu.soNativo()"
-        />
-        <UButton
-          :label="t.modoCompleto"
-          size="xs"
-          class="transition-transform hover:-translate-y-0.5"
-          :color="menu.modoDoMenu.value === 'completo' ? 'primary' : 'neutral'"
-          :variant="menu.modoDoMenu.value === 'completo' ? 'solid' : 'subtle'"
-          @click="menu.comTudo()"
         />
 
         <span class="ml-2 mr-0.5 text-xs font-semibold uppercase tracking-wider text-muted">
@@ -956,16 +1051,6 @@ function emBreve() {
             />
           </span>
         </UTooltip>
-
-        <UButton
-          :label="vendoHoje ? t.compararFechar : t.compararAbrir"
-          icon="i-lucide-columns-2"
-          size="xs"
-          color="neutral"
-          variant="subtle"
-          class="transition-transform hover:-translate-y-0.5"
-          @click="vendoHoje = !vendoHoje"
-        />
 
         <ControlesDePrototipo class="ml-auto" />
 

@@ -145,6 +145,28 @@ function prefsIniciais(): PrefsDaTrilha {
   }
 }
 
+/*
+ * RODADA 35. O menu de quem ainda não mexeu em nada: "o workspace ta
+ * configurado, com as categorias criadas, mas ele não mexeu no menu. foi só
+ * organizando nativamente" (Mikaela). Sem seção pessoal, sem item no "Mais"
+ * além dos de sempre, e a trilha só com as áreas nativas.
+ */
+function prefsSemPersonalizacao(): PrefsDaTrilha {
+  return {
+    fixadas: ['dados', 'sec:s-analise', 'sec:s-auditoria', 'sec:s-integracoes', 'config'],
+    rotulos: true,
+    inicioOcultos: ['n-documentos', 'todas-categorias'],
+    ordemDoInicio: [],
+    ordemDasSecoes: ['favoritos', 'categorias'],
+    secoesOcultas: [],
+    pessoais: [],
+    personalizou: false,
+  }
+}
+
+/** Os cenários do andaime: em uso, sem personalização e workspace novo. */
+export type Cenario = 'emUso' | 'semPersonalizacao' | 'novo'
+
 function clonarPrefs(p: PrefsDaTrilha): PrefsDaTrilha {
   return JSON.parse(JSON.stringify(p))
 }
@@ -243,20 +265,6 @@ export function useMenuDoWorkspace() {
     else modulosAtivos.value.push(id)
   }
 
-  /** Os dois modos que a demanda pediu, num controle só. */
-  function soNativo() {
-    modulosAtivos.value = []
-    mostrarPersonalizados.value = false
-  }
-
-  function comTudo() {
-    modulosAtivos.value = modulos.filter(m => m.ativoPorPadrao).map(m => m.id)
-    mostrarPersonalizados.value = true
-  }
-
-  const modoDoMenu = computed<'nativo' | 'completo'>(() =>
-    modulosAtivos.value.length === 0 && !mostrarPersonalizados.value ? 'nativo' : 'completo',
-  )
 
   /*
    * A ordem manual das categorias.
@@ -342,6 +350,30 @@ export function useMenuDoWorkspace() {
     ordemCategoriasRascunho.value = [...ordemCategorias.value]
     prefs.value = clonarPrefs(prefsAoVivo.value)
     tocados.value = []
+  }
+
+  /*
+   * Rodada 35: trocar de cenário no andaime recomeça o menu do zero, como se
+   * fosse outro workspace: árvore publicada, preferências e rascunho.
+   *   emUso              o workspace de demonstração, com tudo;
+   *   semPersonalizacao  categorias e módulos, e ninguém mexeu no menu;
+   *   novo               workspace recém-criado: só o nativo, nada mais.
+   */
+  const cenario = useState<Cenario>('menu-cenario', () => 'emUso')
+  function aplicarCenario(c: Cenario) {
+    cenario.value = c
+    aoVivo.value = arvoreCompleta()
+    rascunho.value = arvoreCompleta()
+    pessoal.value = null
+    alcanceSalvo.value = null
+    tocados.value = []
+    ordemCategorias.value = []
+    ordemCategoriasRascunho.value = []
+    const p = c === 'emUso' ? prefsIniciais() : prefsSemPersonalizacao()
+    prefsAoVivo.value = clonarPrefs(p)
+    prefs.value = clonarPrefs(p)
+    modulosAtivos.value = c === 'novo' ? [] : modulos.filter(m => m.ativoPorPadrao).map(m => m.id)
+    mostrarPersonalizados.value = c === 'emUso'
   }
 
   /** Desfazer o "só para mim" e voltar ao menu que o workspace publicou. */
@@ -740,10 +772,9 @@ export function useMenuDoWorkspace() {
     lida,
     marcarLida,
     marcarTodasLidas,
-    soNativo,
-    comTudo,
-    modoDoMenu,
     secoesNaTrilha,
+    aplicarCenario,
+    cenario,
     secoesNoPainel,
     arvoreDaBarra,
     destinosDaBarra,

@@ -20,6 +20,12 @@ export function rotuloDoNo(no: NoDoMenu, t: TextosDaTela) {
     documentos: t.documentos,
     // Rodada 22: destino nativo, a porta da tela /myReports que já existe.
     meusRelatorios: t.meusRelatorios,
+    // Rodada 35: as 3 telas de Tarefas, como no develop de 2026-11-24.
+    tarefasPainel: t.tarefasPainel,
+    tarefasAgendadas: t.tarefasAgendadas,
+    tarefasRapidas: t.tarefasRapidas,
+    assinaturas: t.assinaturas,
+    dashboards: t.dashboards,
     categorias: t.categorias,
     auditoria: t.grupos.auditoria ?? '',
     logsAuditoria: t.itens['logs-auditoria'] ?? '',

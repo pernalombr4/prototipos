@@ -718,7 +718,7 @@ function classeDaArea(a: Area) {
           color="neutral"
           variant="ghost"
           block
-          class="justify-start text-muted hover:text-default"
+          class="justify-center text-muted hover:text-default"
           @click="trilha.abrirPersonalizar('navegacao')"
         />
       </div>

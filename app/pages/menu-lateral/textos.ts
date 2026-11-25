@@ -481,9 +481,6 @@ export interface TextosDaTela {
   semAlteracao: string
 
   // rodada 8: modulos e os dois modos do menu
-  modoRotulo: string
-  modoNativo: string
-  modoCompleto: string
   seloModulo: string
   modulosTitulo: string
   modulosDescricao: string
@@ -501,21 +498,63 @@ export interface TextosDaTela {
   tipos: Record<string, string>
 
   // comparação
-  hojeTitulo: string
-  hojeLegenda: string
-  hojeRodape: string
   modeloBarra: string
   modeloTrilha: string
   modeloBarraTravado: string
   modeloRotulo: string
   propostaTitulo: string
   propostaLegenda: string
-  linhas: (n: number) => string
-  niveis: (n: number) => string
   cabeNaTela: string
-  naoCabeNaTela: (px: number) => string
-  compararAbrir: string
-  compararFechar: string
+  cascaBuscar: string
+  cascaVoltar: string
+  cascaAvancar: string
+  cascaRecarregar: string
+  cascaTrilha: string
+  cascaFavoritar: string
+  cascaIdioma: string
+  cascaTema: string
+  cascaSuporte: string
+  cascaNotificacoes: string
+  cascaConta: string
+  cascaMenu: string
+  listaPesquisar: string
+  listaTodoPeriodo: string
+  listaColunas: string
+  listaFiltros: string
+  listaNovoRegistro: string
+  tarefasPainel: string
+  tarefasAgendadas: string
+  tarefasRapidas: string
+  seloNovo: string
+  assinaturas: string
+  moduloAssinaturas: string
+  moduloAssinaturasDesc: string
+  dashboards: string
+  vazioSemPermissao: string
+  comecarPorCaso: string
+  cenarioEmUso: string
+  cenarioSemPersonalizacao: string
+  cenarioNovo: string
+  cenarioRotulo: string
+  dashNoMenu: string
+  dashNovo: string
+  dashNomeNovo: (categoria: string) => string
+  dashTirarDoMenu: string
+  dashSaiuDoMenu: (nome: string) => string
+  dashEntrouNoMenu: (nome: string, categoria: string) => string
+  dashColNome: string
+  dashColCategoria: string
+  dashColDono: string
+  dashColAtualizado: string
+  dashColNoMenu: string
+  dashDescricao: string
+  dashRodape: string
+  dashVazioTitulo: string
+  dashVazioDescricao: string
+  dashVazioSemCategoria: string
+  dashItensDe: (categoria: string) => string
+  dashTodos: string
+  dashVoce: string
 }
 
 const ptBR: TextosDaTela = {
@@ -908,8 +947,8 @@ const ptBR: TextosDaTela = {
   formatoTitulo: 'Formato de extração',
   formatoDescricao: 'Escolha um formato para extrair o relatório.',
   relatorioEmProcessamento: 'Relatório em processamento',
-  relatorioEmProcessamentoDescricao: 'Acompanhe em Meus relatórios. Quando ficar pronto, o número no menu avisa, e você recebe um e-mail.',
-  abrirMeusRelatorios: 'Abrir Meus relatórios',
+  relatorioEmProcessamentoDescricao: 'Acompanhe em Relatórios. Quando ficar pronto, o número no menu avisa, e você recebe um e-mail.',
+  abrirMeusRelatorios: 'Abrir Relatórios',
   relatorioBaixado: a => `${a} baixado`,
   relatorioBaixadoDescricao: 'Na maquete, nenhum arquivo sai do navegador.',
   relatorioDeletado: 'Relatório tirado da lista.',
@@ -941,7 +980,7 @@ const ptBR: TextosDaTela = {
   documentos: 'Documentos',
   painelTarefas: 'Dashboard de tarefas',
   painelDados: 'Dashboard de dados',
-  meusRelatorios: 'Meus relatórios',
+  meusRelatorios: 'Relatórios',
   emBreve: 'Em breve',
   editorAbrir: 'Montar o menu',
   editorTitulo: 'Montar o menu',
@@ -999,9 +1038,6 @@ const ptBR: TextosDaTela = {
   arrastarDica: 'Arraste para reordenar',
   arrastarTeclado: 'Com o foco no item, Alt e as setas movem sem o mouse.',
   menuSalvo: 'Menu salvo.',
-  modoRotulo: 'Menu',
-  modoNativo: 'Só nativo',
-  modoCompleto: 'Com módulos e do workspace',
   seloModulo: 'Módulo',
   modulosTitulo: 'Módulos',
   modulosDescricao: 'Módulos são funcionalidades que o workspace liga quando precisa. Ligar um módulo acrescenta as telas dele ao menu lateral; desligar tira, e a configuração fica guardada.',
@@ -1044,21 +1080,63 @@ const ptBR: TextosDaTela = {
     'triagem': 'Triagem',
   },
 
-  hojeTitulo: 'O menu nativo de hoje',
-  hojeLegenda: 'O que existe em qualquer workspace, com zero categorias cadastradas. Capturado no develop em 16/09/2026, com os rótulos como foram capturados.',
-  hojeRodape: 'Cada categoria com menu automático soma mais uma linha, e mais uma por formulário quando expandida. Cada seção do workspace soma uma mais os itens dela.',
   modeloBarra: 'Barra única',
   modeloTrilha: 'Trilha e painel',
   modeloBarraTravado: 'Fora da proposta. O protótipo segue com a trilha.',
   modeloRotulo: 'Modelo',
   propostaTitulo: 'A proposta',
   propostaLegenda: 'Dois níveis. A administração continua no mesmo endereço, mas abre no lugar do menu em vez de morar dentro dele.',
-  linhas: n => `${n} linhas`,
-  niveis: n => `${n} níveis`,
   cabeNaTela: 'Cabe na tela',
-  naoCabeNaTela: px => `${px} px fora da tela`,
-  compararAbrir: 'Comparar com o menu de hoje',
-  compararFechar: 'Fechar a comparação',
+  cascaBuscar: 'Buscar...',
+  cascaVoltar: 'Voltar',
+  cascaAvancar: 'Avançar',
+  cascaRecarregar: 'Recarregar',
+  cascaTrilha: 'Trilha de navegação',
+  cascaFavoritar: 'Favoritar esta página',
+  cascaIdioma: 'Idioma',
+  cascaTema: 'Tema',
+  cascaSuporte: 'Suporte',
+  cascaNotificacoes: 'Notificações',
+  cascaConta: 'Minha conta',
+  cascaMenu: 'Mostrar ou recolher o menu',
+  listaPesquisar: 'Pesquisar registros',
+  listaTodoPeriodo: 'Todo o período',
+  listaColunas: 'Colunas',
+  listaFiltros: 'Filtros',
+  listaNovoRegistro: 'Novo registro',
+  tarefasPainel: 'Painel',
+  tarefasAgendadas: 'Agendadas',
+  tarefasRapidas: 'Rápidas',
+  seloNovo: 'Novo',
+  assinaturas: 'Assinaturas',
+  moduloAssinaturas: 'Assinatura Eletrônica',
+  moduloAssinaturasDesc: 'Envia documentos para assinatura nos provedores conectados e acompanha cada envelope.',
+  dashboards: 'Dashboards',
+  vazioSemPermissao: 'Quem configura o workspace cria as categorias. A primeira aparece aqui assim que existir.',
+  comecarPorCaso: 'Começar por um caso de uso',
+  cenarioEmUso: 'Em uso',
+  cenarioSemPersonalizacao: 'Sem personalização',
+  cenarioNovo: 'Workspace novo',
+  cenarioRotulo: 'Estado',
+  dashNoMenu: 'Dashboards no menu',
+  dashNovo: 'Novo dashboard',
+  dashNomeNovo: c => `Dashboard de ${c}`,
+  dashTirarDoMenu: 'Tirar do menu',
+  dashSaiuDoMenu: n => `${n} saiu do menu. O dashboard continua em Análise > Dashboards.`,
+  dashEntrouNoMenu: (n, c) => `${n} aparece no menu, abaixo de ${c}.`,
+  dashColNome: 'Nome',
+  dashColCategoria: 'Categoria',
+  dashColDono: 'Criado por',
+  dashColAtualizado: 'Atualizado em',
+  dashColNoMenu: 'No menu da categoria',
+  dashDescricao: 'Todos os dashboards de itens do workspace. Para abrir um dashboard pelo menu, ative No menu da categoria: ele aparece abaixo da categoria como uma tela separada.',
+  dashRodape: 'Remover um dashboard do menu não o exclui. Ele continua nesta lista.',
+  dashVazioTitulo: 'Nenhum dashboard ainda',
+  dashVazioDescricao: 'Crie um dashboard para acompanhar os itens de uma categoria em gráficos.',
+  dashVazioSemCategoria: 'O dashboard mostra os itens de uma categoria. Crie a primeira categoria para criar um dashboard.',
+  dashItensDe: c => `Itens de ${c}`,
+  dashTodos: 'Todos os dashboards',
+  dashVoce: 'Você',
 }
 
 const en: TextosDaTela = {
@@ -1451,8 +1529,8 @@ const en: TextosDaTela = {
   formatoTitulo: 'Extraction format',
   formatoDescricao: 'Choose a format to extract the report.',
   relatorioEmProcessamento: 'Report processing',
-  relatorioEmProcessamentoDescricao: 'Follow it in My reports. When it is ready, the number in the menu tells you, and you get an email.',
-  abrirMeusRelatorios: 'Open My reports',
+  relatorioEmProcessamentoDescricao: 'Follow it in Reports. When it is ready, the number in the menu tells you, and you get an email.',
+  abrirMeusRelatorios: 'Open Reports',
   relatorioBaixado: a => `${a} downloaded`,
   relatorioBaixadoDescricao: 'In the mockup, no file leaves the browser.',
   relatorioDeletado: 'Report removed from the list.',
@@ -1484,7 +1562,7 @@ const en: TextosDaTela = {
   documentos: 'Documents',
   painelTarefas: 'Task dashboard',
   painelDados: 'Data dashboard',
-  meusRelatorios: 'My reports',
+  meusRelatorios: 'Reports',
   emBreve: 'Coming soon',
   editorAbrir: 'Build the menu',
   editorTitulo: 'Build the menu',
@@ -1542,9 +1620,6 @@ const en: TextosDaTela = {
   arrastarDica: 'Drag to reorder',
   arrastarTeclado: 'With the item focused, Alt and the arrows move it without the mouse.',
   menuSalvo: 'Menu saved.',
-  modoRotulo: 'Menu',
-  modoNativo: 'Native only',
-  modoCompleto: 'With modules and workspace',
   seloModulo: 'Module',
   modulosTitulo: 'Modules',
   modulosDescricao: 'Modules are features the workspace turns on when it needs them. Turning one on adds its screens to the sidebar; turning it off removes them, and the setup is kept.',
@@ -1587,21 +1662,63 @@ const en: TextosDaTela = {
     'triagem': 'Triage',
   },
 
-  hojeTitulo: 'The native menu today',
-  hojeLegenda: 'What exists in any workspace, with zero categories created. Captured on develop on 16 Sep 2026, labels as captured.',
-  hojeRodape: 'Each category with the automatic menu adds one more row, plus one per form when expanded. Each workspace section adds one plus its items.',
   modeloBarra: 'Single sidebar',
   modeloTrilha: 'Rail and panel',
   modeloBarraTravado: 'Out of the proposal. The prototype follows the rail.',
   modeloRotulo: 'Model',
   propostaTitulo: 'The proposal',
   propostaLegenda: 'Two levels. Administration keeps the same address, but opens in place of the menu instead of living inside it.',
-  linhas: n => `${n} rows`,
-  niveis: n => `${n} levels`,
   cabeNaTela: 'Fits on screen',
-  naoCabeNaTela: px => `${px} px off screen`,
-  compararAbrir: 'Compare with the menu of today',
-  compararFechar: 'Close the comparison',
+  cascaBuscar: 'Search...',
+  cascaVoltar: 'Back',
+  cascaAvancar: 'Forward',
+  cascaRecarregar: 'Reload',
+  cascaTrilha: 'Breadcrumb',
+  cascaFavoritar: 'Bookmark this page',
+  cascaIdioma: 'Language',
+  cascaTema: 'Theme',
+  cascaSuporte: 'Support',
+  cascaNotificacoes: 'Notifications',
+  cascaConta: 'My account',
+  cascaMenu: 'Show or collapse the menu',
+  listaPesquisar: 'Search records',
+  listaTodoPeriodo: 'All time',
+  listaColunas: 'Columns',
+  listaFiltros: 'Filters',
+  listaNovoRegistro: 'New record',
+  tarefasPainel: 'Dashboard',
+  tarefasAgendadas: 'Scheduled',
+  tarefasRapidas: 'Quick',
+  seloNovo: 'New',
+  assinaturas: 'Signatures',
+  moduloAssinaturas: 'Electronic Signature',
+  moduloAssinaturasDesc: 'Sends documents for signature through the connected providers and tracks each envelope.',
+  dashboards: 'Dashboards',
+  vazioSemPermissao: 'Workspace admins create the categories. The first one shows up here as soon as it exists.',
+  comecarPorCaso: 'Start from a use case',
+  cenarioEmUso: 'In use',
+  cenarioSemPersonalizacao: 'Not customized',
+  cenarioNovo: 'New workspace',
+  cenarioRotulo: 'State',
+  dashNoMenu: 'Dashboards in the menu',
+  dashNovo: 'New dashboard',
+  dashNomeNovo: c => `${c} dashboard`,
+  dashTirarDoMenu: 'Remove from menu',
+  dashSaiuDoMenu: n => `${n} left the menu. The dashboard stays in Análise > Dashboards.`,
+  dashEntrouNoMenu: (n, c) => `${n} now shows in the menu, under ${c}.`,
+  dashColNome: 'Name',
+  dashColCategoria: 'Category',
+  dashColDono: 'Created by',
+  dashColAtualizado: 'Updated on',
+  dashColNoMenu: 'In the category menu',
+  dashDescricao: 'All item dashboards in the workspace. To open a dashboard from the menu, turn on In the category menu: it shows under the category as a separate screen.',
+  dashRodape: 'Removing a dashboard from the menu does not delete it. It stays in this list.',
+  dashVazioTitulo: 'No dashboards yet',
+  dashVazioDescricao: 'Create a dashboard to track a category\'s items in charts.',
+  dashVazioSemCategoria: 'A dashboard shows the items of a category. Create the first category to create a dashboard.',
+  dashItensDe: c => `Items in ${c}`,
+  dashTodos: 'All dashboards',
+  dashVoce: 'You',
 }
 
 const es: TextosDaTela = {
@@ -1994,8 +2111,8 @@ const es: TextosDaTela = {
   formatoTitulo: 'Formato de extracción',
   formatoDescricao: 'Elige un formato para extraer el informe.',
   relatorioEmProcessamento: 'Informe en proceso',
-  relatorioEmProcessamentoDescricao: 'Síguelo en Mis informes. Cuando esté listo, el número del menú te avisa y recibes un correo.',
-  abrirMeusRelatorios: 'Abrir Mis informes',
+  relatorioEmProcessamentoDescricao: 'Síguelo en Informes. Cuando esté listo, el número del menú te avisa y recibes un correo.',
+  abrirMeusRelatorios: 'Abrir Informes',
   relatorioBaixado: a => `${a} descargado`,
   relatorioBaixadoDescricao: 'En la maqueta, ningún archivo sale del navegador.',
   relatorioDeletado: 'Informe quitado de la lista.',
@@ -2027,7 +2144,7 @@ const es: TextosDaTela = {
   documentos: 'Documentos',
   painelTarefas: 'Panel de tareas',
   painelDados: 'Panel de datos',
-  meusRelatorios: 'Mis informes',
+  meusRelatorios: 'Informes',
   emBreve: 'Próximamente',
   editorAbrir: 'Armar el menú',
   editorTitulo: 'Armar el menú',
@@ -2085,9 +2202,6 @@ const es: TextosDaTela = {
   arrastarDica: 'Arrastra para reordenar',
   arrastarTeclado: 'Con el foco en el elemento, Alt y las flechas lo mueven sin ratón.',
   menuSalvo: 'Menú guardado.',
-  modoRotulo: 'Menú',
-  modoNativo: 'Solo nativo',
-  modoCompleto: 'Con módulos y del workspace',
   seloModulo: 'Módulo',
   modulosTitulo: 'Módulos',
   modulosDescricao: 'Los módulos son funciones que el workspace activa cuando las necesita. Activar uno añade sus pantallas al menú lateral; desactivarlo las quita, y la configuración queda guardada.',
@@ -2130,21 +2244,63 @@ const es: TextosDaTela = {
     'triagem': 'Triaje',
   },
 
-  hojeTitulo: 'El menú nativo de hoy',
-  hojeLegenda: 'Lo que existe en cualquier workspace, con cero categorías creadas. Capturado en develop el 16/09/2026, con las etiquetas tal como se capturaron.',
-  hojeRodape: 'Cada categoría con el menú automático suma una fila más, y otra por formulario cuando se expande. Cada sección del workspace suma una más sus elementos.',
   modeloBarra: 'Barra única',
   modeloTrilha: 'Riel y panel',
   modeloBarraTravado: 'Fuera de la propuesta. El prototipo sigue con el riel.',
   modeloRotulo: 'Modelo',
   propostaTitulo: 'La propuesta',
   propostaLegenda: 'Dos niveles. La administración mantiene la misma dirección, pero se abre en lugar del menú en vez de vivir dentro de él.',
-  linhas: n => `${n} filas`,
-  niveis: n => `${n} niveles`,
   cabeNaTela: 'Cabe en la pantalla',
-  naoCabeNaTela: px => `${px} px fuera de la pantalla`,
-  compararAbrir: 'Comparar con el menú de hoy',
-  compararFechar: 'Cerrar la comparación',
+  cascaBuscar: 'Buscar...',
+  cascaVoltar: 'Volver',
+  cascaAvancar: 'Avanzar',
+  cascaRecarregar: 'Recargar',
+  cascaTrilha: 'Ruta de navegación',
+  cascaFavoritar: 'Marcar esta página',
+  cascaIdioma: 'Idioma',
+  cascaTema: 'Tema',
+  cascaSuporte: 'Soporte',
+  cascaNotificacoes: 'Notificaciones',
+  cascaConta: 'Mi cuenta',
+  cascaMenu: 'Mostrar u ocultar el menú',
+  listaPesquisar: 'Buscar registros',
+  listaTodoPeriodo: 'Todo el período',
+  listaColunas: 'Columnas',
+  listaFiltros: 'Filtros',
+  listaNovoRegistro: 'Nuevo registro',
+  tarefasPainel: 'Panel',
+  tarefasAgendadas: 'Programadas',
+  tarefasRapidas: 'Rápidas',
+  seloNovo: 'Nuevo',
+  assinaturas: 'Firmas',
+  moduloAssinaturas: 'Firma Electrónica',
+  moduloAssinaturasDesc: 'Envía documentos para firma en los proveedores conectados y sigue cada sobre.',
+  dashboards: 'Dashboards',
+  vazioSemPermissao: 'Quien configura el workspace crea las categorías. La primera aparece aquí en cuanto exista.',
+  comecarPorCaso: 'Empezar por un caso de uso',
+  cenarioEmUso: 'En uso',
+  cenarioSemPersonalizacao: 'Sin personalizar',
+  cenarioNovo: 'Workspace nuevo',
+  cenarioRotulo: 'Estado',
+  dashNoMenu: 'Dashboards en el menú',
+  dashNovo: 'Nuevo dashboard',
+  dashNomeNovo: c => `Dashboard de ${c}`,
+  dashTirarDoMenu: 'Quitar del menú',
+  dashSaiuDoMenu: n => `${n} salió del menú. El dashboard sigue en Análise > Dashboards.`,
+  dashEntrouNoMenu: (n, c) => `${n} aparece en el menú, debajo de ${c}.`,
+  dashColNome: 'Nombre',
+  dashColCategoria: 'Categoría',
+  dashColDono: 'Creado por',
+  dashColAtualizado: 'Actualizado el',
+  dashColNoMenu: 'En el menú de la categoría',
+  dashDescricao: 'Todos los dashboards de ítems del workspace. Para abrir un dashboard desde el menú, active En el menú de la categoría: aparece debajo de la categoría como una pantalla separada.',
+  dashRodape: 'Quitar un dashboard del menú no lo elimina. Sigue en esta lista.',
+  dashVazioTitulo: 'Aún no hay dashboards',
+  dashVazioDescricao: 'Cree un dashboard para seguir los ítems de una categoría en gráficos.',
+  dashVazioSemCategoria: 'El dashboard muestra los ítems de una categoría. Cree la primera categoría para crear un dashboard.',
+  dashItensDe: c => `Ítems de ${c}`,
+  dashTodos: 'Todos los dashboards',
+  dashVoce: 'Usted',
 }
 
 export const textos: Record<Idioma, TextosDaTela> = {

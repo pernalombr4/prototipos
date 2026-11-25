@@ -3,6 +3,7 @@ import type { EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import TelaDeModulos from './_TelaDeModulos.vue'
 import TelaDeInbox from './_TelaDeInbox.vue'
 import TelaDeRelatorios from './_TelaDeRelatorios.vue'
+import TelaDeDashboards from './_TelaDeDashboards.vue'
 import { useMeusRelatorios } from './relatorios'
 import type { FormatoDoRelatorio } from './mocks'
 import type { Categoria } from './mocks'
@@ -22,7 +23,8 @@ const props = defineProps<{
   destino: string
   rotuloDoDestino: string
   categoria: Categoria | null
-  breadcrumb: string[]
+  /** Para dar nome à categoria de cada dashboard (rodada 35). */
+  categorias: Categoria[]
   /** Qual item das configurações está aberto, quando o painel é o de config. */
   itemConfig?: string
 }>()
@@ -98,31 +100,11 @@ const linhas = computed(() => {
 
 <template>
   <div class="flex min-w-0 flex-1 flex-col bg-default">
-    <!-- Barra superior: o caminho e as ações da tela. -->
-    <header class="flex h-14 shrink-0 items-center gap-2 border-b border-default px-5">
-      <nav class="flex min-w-0 items-center gap-1.5 text-sm" aria-label="breadcrumb">
-        <template v-for="(p, i) in props.breadcrumb" :key="i">
-          <span v-if="i > 0" class="text-muted" aria-hidden="true">/</span>
-          <span
-            class="truncate"
-            :class="i === props.breadcrumb.length - 1 ? 'font-semibold text-highlighted' : 'text-muted'"
-          >{{ p }}</span>
-        </template>
-      </nav>
-
-      <span class="flex-1" />
-
-      <UButton
-        v-if="props.categoria"
-        :label="props.t.configurarCategoria"
-        icon="i-lucide-settings-2"
-        size="sm"
-        color="neutral"
-        variant="subtle"
-        @click="emit('configurarCategoria')"
-      />
-    </header>
-
+    <!--
+      Rodada 35: a linha com o caminho e o "Configurar categoria" saiu. Hoje a
+      trilha mora na barra do topo, e a engrenagem da categoria mora na barra
+      de ferramentas da lista (print do develop de 2026-11-24).
+    -->
     <div class="min-h-0 flex-1 overflow-y-auto p-5">
       <!--
         A tela de Módulos é a única do miolo que não é maquete: é o mecanismo
@@ -139,29 +121,31 @@ const linhas = computed(() => {
       <!-- Meus relatórios, rodada 22: a tela /myReports do develop, com a porta no menu. -->
       <TelaDeRelatorios v-else-if="props.destino === 'n-relatorios'" :t="props.t" @ver-modelo="emit('configurarCategoria')" />
 
-      <!-- ---------------- tela de uma categoria ---------------- -->
-      <div v-else-if="props.categoria" :key="props.categoria.id" class="animate-[entrada_0.25s_ease-out_both]">
-        <div class="mb-4 flex items-center gap-3">
-          <UIcon :name="props.categoria.icon ?? 'i-lucide-folder'" class="size-6 text-toned" />
-          <div class="min-w-0">
-            <h1 class="truncate text-xl font-bold text-highlighted">{{ props.categoria.name }}</h1>
-            <p v-if="props.categoria.description" class="truncate text-sm text-muted">
-              {{ props.categoria.description }}
-            </p>
-          </div>
-        </div>
+      <!-- Dashboards de itens, rodada 35: a tela central e o dashboard aberto pelo menu. -->
+      <TelaDeDashboards
+        v-else-if="props.destino === 't-dashboards' || props.destino.startsWith('dash:')"
+        :t="props.t"
+        :destino="props.destino"
+        :categorias="props.categorias"
+        @ir-para="d => emit('irPara', d)"
+      />
 
+      <!-- ---------------- tela de uma categoria ---------------- -->
+      <div v-else-if="props.categoria" :key="props.categoria.id" class="-mx-5 -mt-5 animate-[entrada_0.25s_ease-out_both]">
         <!--
-          AQUI mora a proposta: o formulário virou ABA.
-          No menu de hoje ele é o terceiro nível (Categorias > leve > AUD Formulario).
+          Como no develop (2026-11-24): a tela da categoria não tem título; em
+          cima ficam as abas, e embaixo a barra de ferramentas da lista.
+          AQUI mora a proposta: o formulário virou ABA. No menu de hoje ele é o
+          terceiro nível (Categorias > leve > AUD Formulario).
         -->
-        <div class="mb-3 flex flex-wrap items-center gap-2 border-b border-default pb-2">
+        <div class="flex flex-wrap items-center gap-1 border-b border-default px-3 py-1.5">
           <UButton
             v-for="aba in abas"
             :key="aba.value"
             :label="aba.label"
+            icon="i-lucide-table"
             size="sm"
-            :color="abaAtiva === aba.value ? 'primary' : 'neutral'"
+            color="neutral"
             :variant="abaAtiva === aba.value ? 'soft' : 'ghost'"
             @click="abaAtiva = aba.value"
           />
@@ -170,8 +154,16 @@ const linhas = computed(() => {
             icon="i-lucide-plus"
             size="sm"
             color="neutral"
-            variant="link"
+            variant="ghost"
+            class="text-muted"
           />
+        </div>
+
+        <!-- A barra de ferramentas da lista, como hoje. A engrenagem configura a categoria. -->
+        <div class="flex items-center gap-1 border-b border-default px-3 py-2">
+          <UInput icon="i-lucide-search" :placeholder="props.t.listaPesquisar" size="sm" variant="ghost" class="w-52" />
+          <UButton icon="i-lucide-calendar" :label="props.t.criadoEmRotulo" size="sm" color="neutral" variant="ghost" class="text-muted" />
+          <UButton icon="i-lucide-arrow-down-up" :label="props.t.listaTodoPeriodo" size="sm" color="neutral" variant="ghost" class="text-muted" />
 
           <span class="flex-1" />
 
@@ -181,6 +173,16 @@ const linhas = computed(() => {
               <UButton icon="i-lucide-file-down" size="sm" color="neutral" variant="ghost" :aria-label="props.t.extrairRelatorio" />
             </UTooltip>
           </UDropdownMenu>
+          <UTooltip :text="props.t.listaColunas">
+            <UButton icon="i-lucide-columns-2" size="sm" color="neutral" variant="ghost" :aria-label="props.t.listaColunas" />
+          </UTooltip>
+          <UTooltip :text="props.t.listaFiltros">
+            <UButton icon="i-lucide-sliders-horizontal" size="sm" color="neutral" variant="ghost" :aria-label="props.t.listaFiltros" />
+          </UTooltip>
+          <UTooltip :text="props.t.configurarCategoria">
+            <UButton icon="i-lucide-settings" size="sm" color="neutral" variant="ghost" :aria-label="props.t.configurarCategoria" @click="emit('configurarCategoria')" />
+          </UTooltip>
+          <UButton icon="i-lucide-plus" :label="props.t.listaNovoRegistro" size="sm" color="primary" variant="soft" class="ml-1" />
         </div>
 
         <EnTable :key="abaAtiva" :columns="colunas" :rows="linhas" />

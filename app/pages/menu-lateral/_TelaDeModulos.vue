@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useMenuDoWorkspace } from './estado'
-import { modulos, secoesDeModulo } from './mocks'
+import { menuDoEditor, modulos, secoesDeModulo } from './mocks'
+import { rotuloDoNo } from './rotulos'
 import type { TextosDaTela } from './textos'
 
 /**
@@ -30,12 +31,14 @@ const menu = useMenuDoWorkspace()
 const descricoes: Record<string, { nome: string, desc: string }> = {
   'comparacoes': { nome: props.t.moduloComparacoes, desc: props.t.moduloComparacoesDesc },
   'correcao-monetaria': { nome: props.t.moduloCorrecao, desc: props.t.moduloCorrecaoDesc },
+  'assinatura-eletronica': { nome: props.t.moduloAssinaturas, desc: props.t.moduloAssinaturasDesc },
 }
 
 /** O que cada módulo acrescenta ao menu, lido da própria árvore. */
 function oQueTraz(moduloId: string) {
   const secao = secoesDeModulo.find(s => s.moduloId === moduloId)
-  if (!secao) return []
+  // Rodada 35: módulo de tela única (Assinaturas) traz um destino, não uma seção.
+  if (!secao) return menuDoEditor.filter(n => n.moduloId === moduloId).map(n => rotuloDoNo(n, props.t))
   return [secao.rotulo ?? '', ...(secao.filhos ?? []).map(f => f.rotulo ?? '')]
 }
 

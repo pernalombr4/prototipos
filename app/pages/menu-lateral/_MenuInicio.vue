@@ -4,10 +4,12 @@ import LinhaDeMenu from './_LinhaDeMenu.vue'
 import SecaoDeMenu from './_SecaoDeMenu.vue'
 import AvisosDoMenu from './_AvisosDoMenu.vue'
 import MaisDaSecao from './_MaisDaSecao.vue'
+import DashboardsDaCategoria from './_DashboardsDaCategoria.vue'
 import { useArraste, useMenuDoWorkspace, type Atalho } from './estado'
 import { useMeusRelatorios } from './relatorios'
-import { chaveDoAtalho, useTrilha } from './trilha'
+import { chaveDoAtalho, useJanelasDaTrilha, useTrilha } from './trilha'
 import { useAcoesDoMenu, type Acoes } from './acoes'
+import { useJanelasDeCasos } from './casos'
 import { rotuloDoNo } from './rotulos'
 import { FLUTUANTE } from './moldura'
 import type { Categoria, NoDoMenu } from './mocks'
@@ -124,6 +126,27 @@ const nativosVisiveis = computed(() => trilha.ordemDoInicio(idsDosNativos.value)
   }))
 const nativosNoMais = computed(() => nativos.value.filter(n => trilha.prefs.value.inicioOcultos.includes(n.id)))
 
+/*
+ * Rodada 35: o nativo que traz telas (Tarefas) abre e fecha pela seta, como
+ * no develop. Começa fechado; abre sozinho quando uma tela dele está ativa.
+ */
+const nativosAbertos = ref<string[]>([])
+function telasDoNativo(n: Nativo) {
+  return (n.no?.filhos ?? []).filter(f => !f.oculto)
+}
+function nativoAberto(id: string) {
+  return filtrando.value || nativosAbertos.value.includes(id)
+}
+function alternarNativo(id: string) {
+  nativosAbertos.value = nativosAbertos.value.includes(id)
+    ? nativosAbertos.value.filter(x => x !== id)
+    : [...nativosAbertos.value, id]
+}
+watch(() => props.destinoAtivo, (id) => {
+  const dono = nativos.value.find(n => n.no?.filhos?.some(f => f.id === id))
+  if (dono && !nativosAbertos.value.includes(dono.id)) nativosAbertos.value = [...nativosAbertos.value, dono.id]
+}, { immediate: true })
+
 function abrirNativo(n: Nativo) {
   if (n.id === 'todas-categorias') emit('verTodas')
   else emit('destino', n.id)
@@ -138,6 +161,9 @@ function contadorDe(n: Nativo) {
 }
 
 const limites = useLimites()
+/* Rodada 35: o cartão do workspace sem categoria abre estas 2 janelas. */
+const janelasDaTrilha = useJanelasDaTrilha()
+const janelasDeCasos = useJanelasDeCasos()
 
 /*
  * O limite da seção (rodada 19): o que passa dele vira "Mais N". Filtrando
@@ -625,14 +651,14 @@ function moverSecao(s: SecaoDoInicio, passo: -1 | 1) {
   <div>
     <!-- ==================== os nativos, em ordem fixa ==================== -->
     <div class="space-y-0.5">
+      <template v-for="(n, i) in nativosVisiveis" :key="n.id">
       <LinhaDeMenu
-        v-for="(n, i) in nativosVisiveis"
-        :key="n.id"
         :icone="n.icone"
         :rotulo="n.rotulo"
         :contador="contadorDe(n)"
         :selo="n.no?.emBreve ? props.t.emBreve : undefined"
         :ativo="props.destinoAtivo === n.id"
+        :expandido="telasDoNativo(n).length ? nativoAberto(n.id) : undefined"
         :atraso="i * 20"
         :acoes="props.flutuante ? undefined : acoesDoNativo(n)"
         :com-reticencias="!props.flutuante"
@@ -642,13 +668,31 @@ function moverSecao(s: SecaoDoInicio, passo: -1 | 1) {
         :arrastavel="podeArrastar"
         :saindo="arraste.arrastando.value === `nativo:${n.id}`"
         :marca="marcaDe(`nativo:${n.id}`) === 'dentro' ? null : marcaDe(`nativo:${n.id}`)"
-        @selecionar="abrirNativo(n)"
+        @selecionar="telasDoNativo(n).length ? alternarNativo(n.id) : abrirNativo(n)"
         @arrastar-inicio="arraste.comecar(`nativo:${n.id}`)"
         @arrastar-sobre="p => arraste.mirar(`nativo:${n.id}`, p)"
         @soltar="p => largarNoNativo(n.id, p)"
         @arrastar-fim="arraste.terminar()"
         @mover="p => passoDoNativo(n, p)"
       />
+      <!-- Rodada 35: as telas que o nativo traz (Tarefas: Painel, Agendadas, Rápidas), como no develop. -->
+      <template v-if="telasDoNativo(n).length && nativoAberto(n.id)">
+        <LinhaDeMenu
+          v-for="(f, j) in telasDoNativo(n)"
+          :key="f.id"
+          :icone="f.icone"
+          :rotulo="rotuloDe(f)"
+          :nivel="2"
+          :selo="f.novidade ? props.t.seloNovo : undefined"
+          :ativo="props.destinoAtivo === f.id"
+          :atraso="j * 20"
+          :acoes="props.flutuante ? undefined : acoes.daLinha(f, telasDoNativo(n).map(x => x.id))"
+          :com-reticencias="!props.flutuante"
+          :rotulo-reticencias="props.t.maisAcoes(rotuloDe(f))"
+          @selecionar="emit('destino', f.id)"
+        />
+      </template>
+      </template>
 
       <!-- "⋯ Mais": os nativos que saíram, com alfinete e atalho para Personalizar. -->
       <UPopover
@@ -743,9 +787,8 @@ function moverSecao(s: SecaoDoInicio, passo: -1 | 1) {
 
       <!-- ---------- Favoritos ---------- -->
       <template v-if="s.tipo === 'favoritos'">
+        <template v-for="(c, i) in exibidos('favoritos', favoritasF)" :key="c.id">
         <LinhaDeMenu
-          v-for="(c, i) in exibidos('favoritos', favoritasF)"
-          :key="c.id"
           :icone="c.icon ?? 'i-lucide-folder'"
           :rotulo="c.name"
           :nivel="2"
@@ -760,14 +803,45 @@ function moverSecao(s: SecaoDoInicio, passo: -1 | 1) {
           @arrastar-inicio="arraste.comecar(`cat:${c.id}`)"
           @arrastar-fim="arraste.terminar()"
         />
+        <DashboardsDaCategoria :t="props.t" :categoria-id="c.id" :destino-ativo="props.destinoAtivo" :flutuante="props.flutuante" @destino="id => emit('destino', id)" />
+        </template>
         <MaisDaSecao :t="props.t" id="favoritos" :resto="restoDe('favoritos', favoritasF)" :total="favoritasF.length" />
       </template>
 
       <!-- ---------- Categorias ---------- -->
       <template v-else-if="s.tipo === 'categorias'">
+        <!--
+          Rodada 35, o workspace novo: sem categoria, a seção ensina em vez de
+          mostrar "Ver todas (0)". Quem configura cria ali mesmo; quem não
+          configura lê quem cria. Os 2 começam por um caso de uso, se quiserem.
+        -->
+        <div v-if="!filtrando && !props.categorias.length" class="ml-2 mt-1 rounded-lg border border-dashed border-default p-3">
+          <p class="text-sm font-medium text-highlighted">{{ props.t.vazioTitulo }}</p>
+          <p class="mt-1 text-xs leading-relaxed text-muted">{{ props.podeConfigurar ? props.t.vazioDescricao : props.t.vazioSemPermissao }}</p>
+          <div class="mt-2.5 flex flex-col gap-1.5">
+            <UButton
+              v-if="props.podeConfigurar"
+              :label="props.t.criarCategoriaTitulo"
+              icon="i-lucide-folder-plus"
+              size="xs"
+              color="primary"
+              variant="soft"
+              block
+              @click="janelasDaTrilha.criandoCategoria.value = true"
+            />
+            <UButton
+              :label="props.t.comecarPorCaso"
+              icon="i-lucide-package"
+              size="xs"
+              color="neutral"
+              variant="outline"
+              block
+              @click="janelasDeCasos.central.value = true"
+            />
+          </div>
+        </div>
+        <template v-for="(c, i) in categoriasF" :key="c.id">
         <LinhaDeMenu
-          v-for="(c, i) in categoriasF"
-          :key="c.id"
           :icone="c.icon ?? 'i-lucide-folder'"
           :rotulo="c.name"
           :nivel="2"
@@ -788,8 +862,10 @@ function moverSecao(s: SecaoDoInicio, passo: -1 | 1) {
           @arrastar-fim="arraste.terminar()"
           @mover="p => passoDaCategoria(c, p)"
         />
+        <DashboardsDaCategoria :t="props.t" :categoria-id="c.id" :destino-ativo="props.destinoAtivo" :flutuante="props.flutuante" @destino="id => emit('destino', id)" />
+        </template>
         <button
-          v-if="!filtrando"
+          v-if="!filtrando && props.categorias.length"
           type="button"
           class="mt-0.5 flex w-full items-center gap-2.5 rounded-md py-1.5 pl-8 pr-2.5 text-sm font-medium text-highlighted transition-colors hover:bg-primary/10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
           @click="emit('verTodas')"

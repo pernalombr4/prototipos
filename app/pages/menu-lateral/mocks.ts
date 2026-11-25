@@ -341,69 +341,6 @@ export const gruposDeConfiguracao: GrupoDeConfiguracao[] = [
    */
 ]
 
-/* ==================================================================
-   O MENU NATIVO DE HOJE, para a comparação lado a lado.
-
-   ATENÇÃO, e isto foi uma correção: esta lista é o menu **nativo**, o que
-   existe em QUALQUER workspace antes de alguém cadastrar qualquer coisa.
-   A primeira versão reproduzia o menu do workspace `teste-ux` inteiro, com a
-   categoria `leve`, o formulário `AUD Formulario` e a seção `Knowledge` que
-   alguém criou lá. Aquilo é o menu de UM workspace, não do produto.
-
-   28 itens mais 3 rótulos de grupo = 31 linhas, sem nenhuma categoria.
-   Cada categoria com menu automático soma 1 linha, e mais uma por formulário
-   quando expandida. Cada seção do workspace soma 1 mais os itens dela.
-
-   No `teste-ux`, em 16/09/2026, o menu media 36 linhas: estas 31 mais 5 que
-   eram daquele workspace (leve, Todos, AUD Formulario, Knowledge e
-   Knowledge Base).
-
-   Copiado do DOM do develop, que estava em pt-BR. Os rótulos NÃO passam pelo
-   textos.ts de propósito: são registro de uma captura, como o GIF em
-   evidencias/, e não a copy da proposta. Traduzi-los seria inventar strings
-   do produto em espanhol. A legenda do painel, essa sim, está nos três idiomas.
-================================================================== */
-
-export interface LinhaDeHoje {
-  rotulo: string
-  nivel: 0 | 1 | 2 | 3
-  grupo: 'membro' | 'configuracoes' | 'ajuda'
-}
-
-export const menuNativoDeHoje: LinhaDeHoje[] = [
-  { rotulo: 'Membro', nivel: 0, grupo: 'membro' },
-  { rotulo: 'Início', nivel: 1, grupo: 'membro' },
-  { rotulo: 'Spaceflows', nivel: 1, grupo: 'membro' },
-  { rotulo: 'Categorias', nivel: 1, grupo: 'membro' },
-  { rotulo: 'Tarefas', nivel: 1, grupo: 'membro' },
-  { rotulo: 'Agendadas', nivel: 2, grupo: 'membro' },
-  { rotulo: 'Rápidas', nivel: 2, grupo: 'membro' },
-  { rotulo: 'Agenda', nivel: 1, grupo: 'membro' },
-  { rotulo: 'Configurações', nivel: 0, grupo: 'configuracoes' },
-  { rotulo: 'Visão Geral', nivel: 1, grupo: 'configuracoes' },
-  { rotulo: 'Sistema', nivel: 1, grupo: 'configuracoes' },
-  { rotulo: 'Estrutura', nivel: 1, grupo: 'configuracoes' },
-  { rotulo: 'Categorias', nivel: 2, grupo: 'configuracoes' },
-  { rotulo: 'Listas', nivel: 2, grupo: 'configuracoes' },
-  { rotulo: 'Spaceflow', nivel: 2, grupo: 'configuracoes' },
-  { rotulo: 'Gestão de Membros', nivel: 1, grupo: 'configuracoes' },
-  { rotulo: 'Interface', nivel: 1, grupo: 'configuracoes' },
-  { rotulo: 'Menus', nivel: 2, grupo: 'configuracoes' },
-  { rotulo: 'Telas', nivel: 2, grupo: 'configuracoes' },
-  { rotulo: 'Casos de Uso', nivel: 2, grupo: 'configuracoes' },
-  { rotulo: 'E-mails', nivel: 1, grupo: 'configuracoes' },
-  { rotulo: 'E-mails Enviados', nivel: 2, grupo: 'configuracoes' },
-  { rotulo: 'Modelos de E-mail', nivel: 2, grupo: 'configuracoes' },
-  { rotulo: 'Caixas de E-mail', nivel: 2, grupo: 'configuracoes' },
-  { rotulo: 'Integrações', nivel: 1, grupo: 'configuracoes' },
-  { rotulo: 'Agentes de IA', nivel: 1, grupo: 'configuracoes' },
-  { rotulo: 'Logs', nivel: 1, grupo: 'configuracoes' },
-  { rotulo: 'Credenciais', nivel: 1, grupo: 'configuracoes' },
-  { rotulo: 'Ajuda', nivel: 0, grupo: 'ajuda' },
-  { rotulo: 'Releases', nivel: 1, grupo: 'ajuda' },
-  { rotulo: 'Documentação', nivel: 1, grupo: 'ajuda' },
-]
-
 /** O workspace do protótipo. Fictício. */
 export const workspace = {
   nome: 'Meridiano Serviços',
@@ -535,6 +472,8 @@ export interface NoDoMenu {
   painel?: string
   /** Tela informada pela Mikaela que ainda não existe no develop. */
   emBreve?: boolean
+  /** Rodada 35: o selo "Novo" que o develop põe no Painel de Tarefas. */
+  novidade?: boolean
   /**
    * De onde o item veio. É o que separa os três modos de demonstração:
    *   `nativo`    existe em qualquer workspace, sempre;
@@ -577,7 +516,17 @@ export const menuDoEditor: NoDoMenu[] = [
    */
   { id: 'n-inbox', tipo: 'destino', chave: 'inbox', icone: 'i-lucide-inbox', emBreve: true },
   { id: 'n-chat-ia', tipo: 'destino', chave: 'chatIa', icone: 'i-lucide-bot' },
-  { id: 'n-tarefas', tipo: 'destino', chave: 'tarefas', icone: 'i-lucide-square-check-big' },
+  /*
+   * RODADA 35. Tarefas, como no develop de 2026-11-24: abre 3 telas nativas,
+   * Painel (com o selo "Novo"), Agendadas e Rápidas. O Painel é o "dashboard de
+   * tarefas" que ela anunciou e que morava em Análise com "Em breve".
+   * As 3 vêm com o produto: o menu é nativo e não recebe submenu (rodada 31).
+   */
+  { id: 'n-tarefas', tipo: 'destino', chave: 'tarefas', icone: 'i-lucide-square-check-big', filhos: [
+    { id: 'n-tarefas-painel', tipo: 'tela', chave: 'tarefasPainel', icone: 'i-lucide-layout-dashboard', tipoDeTela: 'paineis', novidade: true },
+    { id: 'n-tarefas-agendadas', tipo: 'tela', chave: 'tarefasAgendadas', icone: 'i-lucide-calendar-clock', tipoDeTela: 'personalizada' },
+    { id: 'n-tarefas-rapidas', tipo: 'tela', chave: 'tarefasRapidas', icone: 'i-lucide-zap', tipoDeTela: 'personalizada' },
+  ] },
   { id: 'n-agenda', tipo: 'destino', chave: 'agenda', icone: 'i-lucide-calendar-days' },
   { id: 'n-spaceflows', tipo: 'destino', chave: 'spaceflows', icone: 'i-lucide-workflow' },
   { id: 'n-documentos', tipo: 'destino', chave: 'documentos', icone: 'i-lucide-folder-open', emBreve: true },
@@ -591,6 +540,14 @@ export const menuDoEditor: NoDoMenu[] = [
    * o que falta no produto é só a porta.
    */
   { id: 'n-relatorios', tipo: 'destino', chave: 'meusRelatorios', icone: 'i-lucide-file-chart-column' },
+  /*
+   * RODADA 35. Assinaturas, o módulo que ela deu de exemplo. No develop
+   * (2026-11-24), ligar Assinatura Eletrônica em Sistema > Módulos acrescenta
+   * o grupo "Módulos" com um item só, Assinaturas, que abre a lista de
+   * envelopes. Aqui é um destino do Início que só existe com o módulo ligado:
+   * tela única, sem painel próprio na trilha.
+   */
+  { id: 'n-assinaturas', tipo: 'destino', origem: 'modulo', moduloId: 'assinatura-eletronica', chave: 'assinaturas', icone: 'i-lucide-signature' },
   /*
    * RODADA 9. Analise saiu de dentro do painel de Dados e virou menu de
    * primeiro nivel, acima da lista de categorias, com os dashboards dentro.
@@ -610,8 +567,13 @@ export const menuDoEditor: NoDoMenu[] = [
     lugar: 'trilha',
     escopo: [],
     filhos: [
-      { id: 't-pt', tipo: 'tela', emBreve: true, rotulo: 'Dashboard de tarefas', icone: 'i-lucide-chart-column', tipoDeTela: 'paineis' },
-      { id: 't-pd', tipo: 'tela', emBreve: true, rotulo: 'Dashboard de dados', icone: 'i-lucide-chart-pie', tipoDeTela: 'paineis' },
+      /*
+       * Rodada 35: "vamos olhar para os dashboards de itens assim como o
+       * clickup olha pros relatórios de tarefas. Existe uma tela central pra
+       * eles" (Mikaela). Dashboards é essa tela: todos os dashboards de itens
+       * do workspace. O de tarefas saiu daqui e virou Tarefas > Painel.
+       */
+      { id: 't-dashboards', tipo: 'tela', chave: 'dashboards', icone: 'i-lucide-layout-dashboard', tipoDeTela: 'personalizada' },
       // "Meus relatórios" morou aqui da rodada 3 à 21. Saiu na 22 e virou destino nativo.
     ],
   },
@@ -764,6 +726,8 @@ export interface Modulo {
 export const modulos: Modulo[] = [
   { id: 'comparacoes', icone: 'i-lucide-scale', ativoPorPadrao: true },
   { id: 'correcao-monetaria', icone: 'i-lucide-percent', ativoPorPadrao: true },
+  // Rodada 35: o módulo do develop que ela deu de exemplo.
+  { id: 'assinatura-eletronica', icone: 'i-lucide-signature', ativoPorPadrao: true },
 ]
 
 /**
