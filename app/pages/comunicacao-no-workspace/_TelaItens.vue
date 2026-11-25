@@ -140,7 +140,7 @@ const colunasDoQuadro = computed<EnKanbanColumn[]>(() =>
 const cartoes = computed(() => filtrados.value.map(i => ({
   id: i.id,
   titulo: i.titulo,
-  descricao: `${i.reference} · ${principal(i)?.nome ?? principal(i)?.email ?? props.t.itens.semContato}`,
+  descricao: `${i.reference} · ${principal(i)?.nome ?? principal(i)?.email ?? principal(i)?.telefone ?? props.t.itens.semContato}`,
   etapa: i.etapa,
   created_at: i.created_at.toISOString(),
 })))
