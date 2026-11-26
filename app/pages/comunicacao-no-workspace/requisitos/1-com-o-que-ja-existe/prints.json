@@ -99,6 +99,12 @@
         "js": "(s => { s['$scnw-tela'] = \"requisicoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
         "esperar": 1500
       }
+    ],
+    "item230": [
+      {
+        "js": "(s => { s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47230; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1800
+      }
     ]
   },
   "requisitos": {
@@ -2826,7 +2832,7 @@
     "RF223": {
       "cena": "item231",
       "destacar": [
-        "Sem telefone: o WhatsApp está indisponível.",
+        "Sem telefone: o WhatsApp e o SMS estão indisponíveis.",
         "WhatsApp: Sem telefone cadastrado"
       ]
     },
@@ -2848,7 +2854,7 @@
         }
       ],
       "destacar": [
-        "Telefone inválido: o WhatsApp está indisponível.",
+        "Telefone inválido: o WhatsApp e o SMS estão indisponíveis.",
         "Corrigir telefone"
       ]
     },
@@ -3160,6 +3166,554 @@
     },
     "RS401": {
       "sem": "restrição: o cartão do quadro de tarefas continua sem botão; os atalhos ficam no clique direito (RF421 a RF425)"
+    },
+    "RF241": {
+      "cena": "item230",
+      "passos": [
+        {
+          "clicar": "Para quem",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "regex": "^\\+55 11 99876-1203$"
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "texto": "SMS",
+        "n": 0
+      }
+    },
+    "RF242": {
+      "cena": "item230",
+      "passos": [
+        {
+          "clicar": "Para quem",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "regex": "^\\+55 11 99876-1203$"
+          },
+          "esperar": 800
+        },
+        {
+          "pairar": {
+            "texto": "SMS",
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "regex": "^abre as opções de envio por sms"
+      }
+    },
+    "RF243": {
+      "cena": "item231",
+      "passos": [
+        {
+          "clicar": "Para quem",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "regex": "^\\+55 11 3456-7710$"
+          },
+          "esperar": 800
+        },
+        {
+          "pairar": "SMS: Telefone fixo não recebe SMS",
+          "esperar": 1200
+        }
+      ],
+      "destacar": "SMS: Telefone fixo não recebe SMS"
+    },
+    "RF251": {
+      "cena": "item230",
+      "passos": [
+        {
+          "clicar": "Para quem",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "regex": "^\\+55 11 99876-1203$"
+          },
+          "esperar": 800
+        },
+        {
+          "clicar": {
+            "texto": "SMS",
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Enviar SMS",
+          "exato": true
+        },
+        {
+          "regex": "^escolha como enviar"
+        }
+      ]
+    },
+    "RF252": {
+      "cena": "item230",
+      "passos": [
+        {
+          "clicar": "Para quem",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "regex": "^\\+55 11 99876-1203$"
+          },
+          "esperar": 800
+        },
+        {
+          "clicar": {
+            "texto": "SMS",
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^\\+55 11 99876-1203$",
+          "n": 0
+        },
+        "Copiar o número"
+      ]
+    },
+    "RF253": {
+      "cena": "item230",
+      "passos": [
+        {
+          "clicar": "Para quem",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "regex": "^\\+55 11 99876-1203$"
+          },
+          "esperar": 800
+        },
+        {
+          "clicar": {
+            "texto": "SMS",
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "caracteres · \\d+ sms$"
+        },
+        {
+          "regex": "^o texto tem acento"
+        }
+      ]
+    },
+    "RF254": {
+      "cena": "item230",
+      "passos": [
+        {
+          "clicar": "Para quem",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "regex": "^\\+55 11 99876-1203$"
+          },
+          "esperar": 800
+        },
+        {
+          "clicar": {
+            "texto": "SMS",
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        "Abrir no app de SMS",
+        {
+          "regex": "^no celular e no mac"
+        }
+      ]
+    },
+    "RF255": {
+      "cena": "item230",
+      "passos": [
+        {
+          "clicar": "Para quem",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "regex": "^\\+55 11 99876-1203$"
+          },
+          "esperar": 800
+        },
+        {
+          "clicar": {
+            "texto": "SMS",
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog] ul"
+      }
+    },
+    "RF256": {
+      "cena": "item230",
+      "passos": [
+        {
+          "clicar": "Para quem",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "regex": "^\\+55 11 99876-1203$"
+          },
+          "esperar": 800
+        },
+        {
+          "clicar": {
+            "texto": "SMS",
+            "n": 0
+          },
+          "esperar": 1200
+        },
+        {
+          "clicar": "Mostrar o código",
+          "esperar": 700
+        },
+        {
+          "rolar": {
+            "css": "[role=dialog] svg[role=img]"
+          },
+          "esperar": 400
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog] svg[role=img]"
+        },
+        "Ocultar o código"
+      ]
+    },
+    "RF257": {
+      "cena": "item230",
+      "passos": [
+        {
+          "clicar": "Para quem",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "regex": "^\\+55 11 99876-1203$"
+          },
+          "esperar": 800
+        },
+        {
+          "clicar": {
+            "texto": "SMS",
+            "n": 0
+          },
+          "esperar": 1200
+        },
+        {
+          "rolar": {
+            "regex": "^no windows, o vincular ao celular"
+          },
+          "esperar": 400
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^no windows, o vincular ao celular"
+        },
+        {
+          "texto": "Copiar",
+          "exato": true
+        }
+      ]
+    },
+    "RF258": {
+      "cena": "item230",
+      "passos": [
+        {
+          "clicar": "Para quem",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "regex": "^\\+55 11 99876-1203$"
+          },
+          "esperar": 800
+        },
+        {
+          "clicar": {
+            "texto": "SMS",
+            "n": 0
+          },
+          "esperar": 1200
+        },
+        {
+          "rolar": {
+            "regex": "^para celular android pareado"
+          },
+          "esperar": 400
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^para celular android pareado"
+        },
+        {
+          "texto": "Abrir",
+          "exato": true
+        }
+      ]
+    },
+    "RF234": {
+      "cena": "item230",
+      "passos": [
+        {
+          "pairar": "SMS para Telefone do contato",
+          "esperar": 1200
+        }
+      ],
+      "destacar": "SMS para Telefone do contato"
+    },
+    "RF235": {
+      "cena": "item231",
+      "passos": [
+        {
+          "pairar": "SMS para Telefone do contato: Telefone fixo não recebe SMS",
+          "esperar": 1200
+        }
+      ],
+      "destacar": "SMS para Telefone do contato: Telefone fixo não recebe SMS"
+    },
+    "RF308": {
+      "cena": "lista",
+      "passos": [
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tr')].find(r => r.innerText.includes('CTR-00230')); tr.querySelector('button[aria-label=\"Ações\"]').dataset.print = 'acoes230' })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=acoes230]"
+          },
+          "esperar": 700
+        },
+        {
+          "pairar": "SMS",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=menu]",
+          "n": 1
+        }
+      ]
+    },
+    "RF309": {
+      "cena": "lista",
+      "passos": [
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tr')].find(r => r.innerText.includes('CTR-00231')); tr.querySelector('button[aria-label=\"Ações\"]').dataset.print = 'acoes231' })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=acoes231]"
+          },
+          "esperar": 700
+        },
+        {
+          "pairar": "SMS",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "texto": "Telefone fixo não recebe SMS"
+      }
+    },
+    "RF431": {
+      "cena": "tlista",
+      "passos": [
+        {
+          "pairar": "SMS para Carla Nogueira: Sem telefone cadastrado",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "SMS para Bruno Teixeira",
+          "n": 0
+        },
+        "SMS para Carla Nogueira: Sem telefone cadastrado"
+      ]
+    },
+    "RF432": {
+      "cena": "tlista",
+      "passos": [
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Enviar minuta assinada\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Confirmar data da audiência\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Pedir ficha de cadastro\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "esperar": 600
+        }
+      ],
+      "destacar": "SMS para 3 responsáveis"
+    },
+    "RF433": {
+      "cena": "tlista",
+      "passos": [
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Coletar aprovação do orçamento\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Conferir apólice do seguro\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "pairar": "SMS para 0 responsáveis: Nenhuma pessoa com celular válido.",
+          "esperar": 1200
+        }
+      ],
+      "destacar": "SMS para 0 responsáveis: Nenhuma pessoa com celular válido."
+    },
+    "RF434": {
+      "cena": "tlista",
+      "passos": [
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Enviar minuta assinada\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Coletar aprovação do orçamento\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes(\"Confirmar data da audiência\")); tr.querySelector('[role=checkbox]').click() })()",
+          "esperar": 400
+        },
+        {
+          "clicar": "SMS para 2 responsáveis",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^conversa 1 de 2$"
+        },
+        "Abrir SMS",
+        "Copiar o número",
+        "Copiar a mensagem"
+      ]
+    },
+    "RF435": {
+      "cena": "tquadro",
+      "passos": [
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('main *')].find(e => e.children.length === 0 && e.textContent.trim() === \"Enviar minuta assinada \\u00e0 contraparte\"); el.scrollIntoView({ block: 'center' }); const r = el.getBoundingClientRect(); el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.x + 20, clientY: r.y + 5, button: 2 })) })()",
+          "esperar": 800
+        },
+        {
+          "esperar": 300
+        }
+      ],
+      "destacar": "SMS para Bruno Teixeira"
+    },
+    "RF436": {
+      "cena": "tquadro",
+      "passos": [
+        {
+          "clicar": "Enviar minuta assinada à contraparte",
+          "esperar": 1500
+        }
+      ],
+      "destacar": "SMS para Bruno Teixeira"
+    },
+    "RF514": {
+      "cena": "agenda",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "prazo: confirmar data da audiência$"
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": "SMS para Diego Martins"
+    },
+    "RF515": {
+      "cena": "agenda",
+      "passos": [
+        {
+          "clicar": {
+            "regex": "assinatura: contrato de manutenção predial$"
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        "SMS para todos (0)",
+        "WhatsApp para todos (1)"
+      ]
+    },
+    "RF607": {
+      "cena": "req",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "SMS",
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog]"
+      }
+    },
+    "RF608": {
+      "cena": "req",
+      "passos": [
+        {
+          "pairar": {
+            "texto": "SMS",
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "regex": "^abre as opções de sms com a mensagem"
+      }
     }
   }
 }

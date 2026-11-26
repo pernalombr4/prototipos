@@ -4,7 +4,7 @@
  * protótipo só, porque as 3 mexem nas mesmas telas e no mesmo botão de e-mail.
  *
  *   1. link do formulário público nas telas de uso;
- *   2. atalhos de e-mail e WhatsApp (o SMS saiu do plano na rodada 6; o WhatsApp voltou na 10);
+ *   2. atalhos de e-mail, WhatsApp e SMS (os 2 saíram na rodada 6; o WhatsApp voltou na 10 e o SMS na 11);
  *   3. o e-mail do ENSPACE de qualquer tela, com vínculo a item, e a central
  *      "E-mails" no menu, que reúne mensagens, modelos, caixas, envios do
  *      sistema e a configuração (rodada 7: o e-mail não é módulo).
@@ -26,6 +26,7 @@ import CascaDoEnspace from './_CascaDoEnspace.vue'
 import Compositor from './_Compositor.vue'
 import RascunhoMinimizado from './_RascunhoMinimizado.vue'
 import AppExterno from './_AppExterno.vue'
+import PainelDoSms from './_PainelDoSms.vue'
 import TelaInicio from './_TelaInicio.vue'
 import TelaItens from './_TelaItens.vue'
 import TelaItem from './_TelaItem.vue'
@@ -134,6 +135,7 @@ const cenarios = computed<{ value: Cenario, label: string }[]>(() => [
     <Compositor :t="t" />
     <RascunhoMinimizado :t="t" />
     <!-- ANDAIME: a simulação do app de fora (e-mail, formulário público, Microsoft) -->
+    <PainelDoSms :t="t" />
     <AppExterno :t="t" />
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->

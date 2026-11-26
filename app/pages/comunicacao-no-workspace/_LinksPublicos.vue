@@ -7,7 +7,7 @@ import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Formulario, SlugDaCategoria } from './mocks'
 import type { Textos } from './textos'
 import { TIPOS_COM_LINK, categoriaPorSlug, linkPublico } from './mocks'
-import { useAtalhos, useCopiar, useWhatsApp } from './atalhos'
+import { useAtalhos, useCopiar, useSms, useWhatsApp } from './atalhos'
 import { useComunicacao, useMarcaDeProposta } from './estado'
 
 const props = defineProps<{
@@ -22,6 +22,7 @@ const { formularios, ir } = useComunicacao()
 const { ativos, itensDeMenu, config } = useAtalhos()
 const { copiar, copiado } = useCopiar()
 const { abrirWhatsApp } = useWhatsApp()
+const { abrirSmsSemNumero } = useSms()
 const marca = useMarcaDeProposta()
 
 const publicos = computed(() => formularios.value.filter(f =>
@@ -38,6 +39,12 @@ function menuDeEnvio(f: Formulario): DropdownMenuItem[][] {
       icon: 'i-simple-icons-whatsapp',
       ui: { itemDescription: 'whitespace-normal' },
       onSelect: () => abrirWhatsApp(props.t.form.mensagemDoLink(f.nome, url)),
+    }, {
+      label: props.t.form.sms,
+      description: props.t.form.smsDica,
+      icon: 'i-lucide-message-square-text',
+      ui: { itemDescription: 'whitespace-normal' },
+      onSelect: () => abrirSmsSemNumero(props.t.form.mensagemDoLink(f.nome, url)),
     }],
   ]
 }

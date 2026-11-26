@@ -10,10 +10,11 @@
  */
 import type { Textos } from './textos'
 import { type EventoDaAgenda, HOJE, eventos, itemPorId } from './mocks'
-import { contatosDoItem, numeroDoWhatsApp, useComunicacao, useMarcaDeProposta } from './estado'
+import { contatosDoItem, ehTelefoneFixo, numeroDoWhatsApp, useComunicacao, useMarcaDeProposta } from './estado'
 import { type PessoaDaFila, useAtalhos } from './atalhos'
 import AcoesDeContato from './_AcoesDeContato.vue'
 import BotaoWhatsApp from './_BotaoWhatsApp.vue'
+import BotaoSms from './_BotaoSms.vue'
 import FilaDoWhatsApp from './_FilaDoWhatsApp.vue'
 
 const props = defineProps<{ t: Textos }>()
@@ -74,8 +75,14 @@ function textosDoLembrete(e: EventoDaAgenda, nome?: string) {
   }
 }
 
-/** WhatsApp para todos: a fila, 1 conversa por pessoa, com o lembrete no nome dela. */
+/** WhatsApp ou SMS para todos: a fila, 1 conversa por pessoa, com o lembrete no nome dela. */
 const filaAberta = ref(false)
+const canalDaFila = ref<'whatsapp' | 'sms'>('whatsapp')
+function abrirFila(canal: 'whatsapp' | 'sms') {
+  if (!(canal === 'sms' ? comCelular.value : comTelefone.value)) return
+  canalDaFila.value = canal
+  filaAberta.value = true
+}
 const pessoasDaFila = computed<PessoaDaFila[]>(() => {
   const e = aberto.value
   if (!e) return []
@@ -88,6 +95,8 @@ const pessoasDaFila = computed<PessoaDaFila[]>(() => {
 })
 
 const comTelefone = computed(() => pessoasDaFila.value.filter(p => numeroDoWhatsApp(p.telefone)).length)
+/** Quantos têm celular (o fixo não recebe SMS): é o número do botão de SMS. */
+const comCelular = computed(() => pessoasDaFila.value.filter(p => numeroDoWhatsApp(p.telefone) && !ehTelefoneFixo(p.telefone)).length)
 
 function iniciais(p: { nome?: string, email?: string, telefone?: string | null, rotulo?: string }) {
   const base = p.nome ?? p.email ?? p.rotulo ?? p.telefone ?? '?'
@@ -221,6 +230,15 @@ function iniciais(p: { nome?: string, email?: string, telefone?: string | null, 
                   :rotulo="t.whatsapp.para(p.nome ?? p.rotulo ?? p.telefone ?? '')"
                   :class="marca"
                 />
+                <BotaoSms
+                  :t="t"
+                  :destino="{ nome: p.nome ?? null, telefone: p.telefone }"
+                  :texto="textosDoLembrete(aberto, p.nome).corpo"
+                  variante="icone"
+                  tamanho="xs"
+                  :rotulo="t.sms.para(p.nome ?? p.rotulo ?? p.telefone ?? '')"
+                  :class="marca"
+                />
               </li>
             </ul>
           </div>
@@ -252,7 +270,20 @@ function iniciais(p: { nome?: string, email?: string, telefone?: string | null, 
                   :aria-disabled="comTelefone ? undefined : 'true'"
                   :aria-label="comTelefone ? undefined : `${t.whatsapp.paraTodos(0)}: ${t.whatsapp.ninguem}`"
                   :class="comTelefone ? '' : 'cursor-not-allowed opacity-50'"
-                  @click="comTelefone && (filaAberta = true)"
+                  @click="abrirFila('whatsapp')"
+                />
+              </UTooltip>
+              <UTooltip :text="comCelular ? t.sms.filaDescricao : t.sms.ninguem">
+                <UButton
+                  icon="i-lucide-message-square-text"
+                  :label="t.sms.paraTodos(comCelular)"
+                  color="neutral"
+                  variant="outline"
+                  size="sm"
+                  :aria-disabled="comCelular ? undefined : 'true'"
+                  :aria-label="comCelular ? undefined : `${t.sms.paraTodos(0)}: ${t.sms.ninguem}`"
+                  :class="comCelular ? '' : 'cursor-not-allowed opacity-50'"
+                  @click="abrirFila('sms')"
                 />
               </UTooltip>
             </div>
@@ -264,7 +295,7 @@ function iniciais(p: { nome?: string, email?: string, telefone?: string | null, 
       </template>
     </UModal>
 
-    <!-- PROPOSTA: WhatsApp para todos vira fila (o wa.me abre 1 número por vez) -->
-    <FilaDoWhatsApp v-model:open="filaAberta" :t="t" :pessoas="pessoasDaFila" />
+    <!-- PROPOSTA: WhatsApp e SMS para todos viram fila (o wa.me e o sms: abrem 1 número por vez) -->
+    <FilaDoWhatsApp v-model:open="filaAberta" :t="t" :pessoas="pessoasDaFila" :canal="canalDaFila" />
   </div>
 </template>

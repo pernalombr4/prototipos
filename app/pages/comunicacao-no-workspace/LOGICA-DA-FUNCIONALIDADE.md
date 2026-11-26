@@ -13,13 +13,14 @@ O documento do Felipe pede 3 coisas. Cada uma tem configuração e uso:
 |---|---|---|
 | Atalho de e-mail | Escreve ao contato do item, ao responsável da tarefa ou aos participantes de um evento, pelo ENSPACE ou pelo app de e-mail dela | Nada a ligar: vem sempre ligado. Na Fase 2, o cartão "Contato da categoria" |
 | Atalho de WhatsApp | Abre a conversa no WhatsApp com o mesmo contato, com o texto pronto, e envia o link do formulário público | Nada a ligar. Na Fase 2, o telefone e o texto pronto no cartão "Contato da categoria" |
+| Atalho de SMS | Abre o painel "Enviar SMS" para o mesmo telefone, com o texto pronto e os caminhos para enviar do celular | Nada a ligar. Na Fase 2, o mesmo telefone e o mesmo texto pronto do WhatsApp |
 | Link de formulário público | Copia ou envia o link do formulário público sem ir à configuração | Formulários da categoria (visibilidade, já existe) |
 | E-mail do ENSPACE em qualquer tela | Escreve o e-mail de qualquer tela. Com um item aberto, o e-mail fica no item. Lê e responde na central E-mails | Correio do Outlook no perfil de cada pessoa. Modelos, caixas e regras do workspace, na central E-mails |
 
 Regras que valem para tudo:
 
-- **Os canais são e-mail e WhatsApp.** O WhatsApp abre por um link do próprio WhatsApp, com o texto pronto; a pessoa
-  envia, e o ENSPACE não registra a conversa. O SMS fica fora do plano.
+- **Os canais são e-mail, WhatsApp e SMS.** O WhatsApp abre por um link do próprio WhatsApp, e o SMS pelo painel
+  "Enviar SMS" (5.8), com o texto pronto; a pessoa envia do celular dela, e o ENSPACE não registra a mensagem.
 - **O e-mail vem sempre ligado.** Não há chave em Sistema › Módulos nem em outro lugar, em nenhuma
   fase. O atalho aparece onde há endereço de e-mail (4.1).
 - **Tudo do e-mail fica numa central só:** "E-mails", na seção Membro do menu, com as abas
@@ -130,9 +131,10 @@ Cada fase soma à anterior.
     "Requisitante"). "Adicionar contato" cria outro;
   - **"Assunto do e-mail":** o assunto com que o e-mail abre, com as variáveis `{referencia}`,
     `{titulo}`, `{nome}` e `{categoria}` (botões em "Inserir:");
-  - **"Texto pronto do WhatsApp":** o texto com que a conversa abre, com as mesmas variáveis;
-  - **"Prévia: o que os botões E-mail e WhatsApp abrem":** para cada contato, com um item de
-    exemplo, o Para, o Assunto e o Cc (o endereço do item), e o telefone e o texto do WhatsApp.
+  - **"Texto pronto do WhatsApp e do SMS":** o texto com que a conversa e o SMS abrem, com as mesmas variáveis;
+  - **"Prévia: o que os botões E-mail, WhatsApp e SMS abrem":** para cada contato, com um item de
+    exemplo, o Para, o Assunto e o Cc (o endereço do item), e o telefone e o texto do WhatsApp e do
+    SMS; telefone fixo traz o aviso "Telefone fixo não recebe SMS".
 - Origens aceitas:
 
 | Dado | Campos que servem |
@@ -372,8 +374,8 @@ Cada fase soma à anterior.
 **Por que assim**
 
 - O mockup 3 pede 1 rascunho para todos os responsáveis.
-- O e-mail em lote cabe num e-mail. O WhatsApp em lote vira uma fila de conversas, 1 por vez, porque o link do
-  WhatsApp leva 1 número.
+- O e-mail em lote cabe num e-mail. O WhatsApp e o SMS em lote viram uma fila, 1 pessoa por vez, porque o link do
+  WhatsApp e o do SMS levam 1 número.
 
 ### 5.5 Agenda: lembrete por e-mail (Fase 1)
 
@@ -469,6 +471,46 @@ o navegador bloqueia várias abas abertas de uma vez.
 Na Fase 1, o e-mail e o telefone de um mesmo contato vêm de 2 campos e aparecem como 2 contatos
 ("E-mail do contato" e "Telefone do contato"). Só o Pessoa/Empresa junta os 2. Juntar é o cartão
 "Contato da categoria" (4.2).
+
+### 5.8 SMS em cada atalho (Fase 1)
+
+**Como funciona**
+
+- Onde há atalho de WhatsApp, há também o de SMS, ao lado: o botão no Contato do item, o ícone ao
+  lado do campo de telefone, o submenu "SMS" da lista e do quadro, o ícone na coluna Contato das
+  tarefas, o item no clique direito do cartão de tarefa, o botão no painel da tarefa, o ícone por
+  pessoa na Agenda e o link do formulário.
+- O atalho abre o painel "Enviar SMS": o Para (nome e número, com "Copiar o número"), a mensagem com o
+  texto pronto, que a pessoa pode mudar, e a contagem "<N> caracteres · <M> SMS".
+- O botão principal, "Abrir no app de SMS", abre o link `sms:+<número>?body=<texto>` (RFC 5724). No
+  celular e no Mac, o app de mensagens abre pronto; no Windows, abre o app registrado para `sms:`,
+  quando há.
+- "Outros caminhos", na ordem:
+  - **Abrir no celular:** o QR code do mesmo link; a câmera do celular abre o app de SMS pronto;
+  - **Copiar a mensagem:** para o Vincular ao Celular do Windows ou qualquer outro app;
+  - **Google Messages Web:** copia a mensagem e abre a conversa nova; a pessoa cola o número e a
+    mensagem. Só com Android.
+- O número é o do WhatsApp (5.7), com o "+". O texto pronto é o do WhatsApp.
+- Telefone fixo (DDD e 8 dígitos) deixa o SMS indisponível, com "Telefone fixo não recebe SMS"; o
+  WhatsApp continua disponível.
+- Para várias pessoas, a fila "Avisar por SMS", com "Abrir SMS" e os 2 botões de copiar por pessoa.
+
+**Depende de**
+
+| O que precisa existir | Onde se resolve | Sem isso, a pessoa vê |
+|---|---|---|
+| Celular no item | Campo Texto com máscara CEL ou Pessoa/Empresa na categoria | O atalho indisponível, com o motivo |
+| Telefone do membro (tarefas e Agenda) | Mesmo caso do WhatsApp (pergunta 15) | O atalho indisponível para cada responsável |
+| Celular da pessoa com plano de SMS | Fora do ENSPACE | Nada a enviar |
+| App para `sms:` no computador | Mac: Mensagens; Windows: o app que a pessoa definir | No Windows sem app, o QR code e o "Copiar" |
+
+**Por que assim**
+
+Nenhum caminho sem back-end funciona para todos (pesquisa em `PESQUISA.md`, "SMS no computador"). O
+Teams corporativo só envia SMS nos Estados Unidos e no Canadá. O Vincular ao Celular não tem link
+documentado que abra a conversa pronta. O Google Messages Web não aceita número nem texto no link. O
+painel junta os 4 caminhos que não pedem back-end, e o QR code garante o cliente Microsoft no
+Windows. O envio pelo próprio ENSPACE, com registro no item, pede serviço de SMS pago (pergunta 18).
 
 ## 6. Link de formulário público (Fase 1)
 
@@ -953,6 +995,7 @@ No workspace novo, o texto do próximo passo muda com o perfil:
 | Atalho de e-mail (5.1 a 5.5) | Botão dividido, ícone no campo, submenu, coluna, lote, lembrete, motivo de indisponível, contato tirado dos campos de e-mail do item | Nada |
 | Clique direito no quadro (5.3, 5.4) | Itens novos no menu que o cartão já tem | Nada |
 | WhatsApp (5.7) | Botão, ícone e submenu nas telas dos atalhos, fila para várias pessoas, link do formulário pelo WhatsApp, motivo de indisponível | Nada: o link é do próprio WhatsApp |
+| SMS (5.8) | Botão, ícone e submenu ao lado do WhatsApp, o painel "Enviar SMS" com o QR code, a contagem e os botões de copiar, a fila, o link do formulário por SMS, o motivo do telefone fixo | Nada: o link `sms:` é do aparelho |
 | Link público (6) | Cartão e menu nas telas de uso | Nada: o link e a visibilidade já existem |
 | "Novo e-mail" e compositor (7.2, 7.3) | Gaveta aberta de qualquer tela, contexto da tela, "De" e "Responder para", bloco "Item vinculado" com o item da tela de origem | Nada: o envio com item já existe |
 | Responder (7.5) | E-mail novo com "Re:", texto citado e aviso | Nada |
@@ -1019,6 +1062,14 @@ No workspace novo, o texto do próximo passo muda com o perfil:
     preenchê-lo. O perfil ganha o campo?
 16. **Máscara do telefone:** a máscara do Texto com máscara pode ser escrita à mão. O campo de
     telefone com outra máscara, como "(##) ####-####", também conta como telefone?
+17. **SMS no Windows:** com o Vincular ao Celular pareado, o link `sms:` abre a conversa com o número
+    e o texto? Teste no Windows 11, com Android e com iPhone. Se não abre, o QR code sobe para o 1º
+    lugar no Windows.
+18. **SMS pelo próprio ENSPACE:** o envio por serviço de SMS (Twilio, Zenvia, Azure Communication
+    Services pelo Messaging Connect), com registro no item, entra no roteiro? Pede back-end, custo por
+    SMS e remetente cadastrado.
+19. **QR code:** qual biblioteca gera o código no navegador, sem serviço de fora?
+20. **iPhone:** o iOS aceita `sms:+<número>?body=<texto>`? Versões antigas liam `&body=`.
 
 ## 10. O que o protótipo não faz
 
@@ -1027,6 +1078,8 @@ No workspace novo, o texto do próximo passo muda com o perfil:
   - **app de e-mail:** com o endereço do item em Cc, a cópia chega à Mail Box do item; sem ele, o
     ENSPACE não fica sabendo;
   - **página pública do formulário:** a resposta cria um item na categoria do formulário;
+  - **app de SMS e Google Messages Web:** a conversa com o número e o texto, ou vazia no Google
+    Messages Web, com "Colar" para o que foi copiado; o ENSPACE não registra o SMS;
   - **Integrar contas:** Perfil › Integrações e o consentimento da Microsoft; aceitar libera o
     compositor.
 - Não envia e-mail de verdade nem grava nada fora do navegador: tudo fica na memória e some ao
@@ -1049,6 +1102,8 @@ No workspace novo, o texto do próximo passo muda com o perfil:
   do sistema da mesma lista dos outros; no produto, são 2 listas (D24).
 - A referência do item aparece curta (ex.: CTR-00231) para leitura. No produto é o código de 32
   caracteres, e o endereço do item usa esse código.
+- O QR code do painel "Enviar SMS" é um desenho de exemplo e não abre nada na câmera; o dev usa uma
+  biblioteca que gera o código do link (pergunta 19).
 - Os ícones são do conjunto lucide, o único instalado. O develop usa o conjunto solar; o dev usa o
   ícone do produto.
 - A barra de baixo troca a fase (1 · MVP, 2 · Remetente, 3 · Tarefa), o perfil (Admin, Membro), os

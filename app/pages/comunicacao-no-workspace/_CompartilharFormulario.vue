@@ -6,7 +6,7 @@
 import type { Formulario } from './mocks'
 import type { Textos } from './textos'
 import { linkPublico } from './mocks'
-import { useCopiar, useWhatsApp } from './atalhos'
+import { useCopiar, useSms, useWhatsApp } from './atalhos'
 import { useMarcaDeProposta } from './estado'
 import { useAppExterno } from './simulador'
 import AcoesDeContato from './_AcoesDeContato.vue'
@@ -22,6 +22,7 @@ const { copiar, copiado } = useCopiar()
 const marca = useMarcaDeProposta()
 const { abrirApp } = useAppExterno()
 const { abrirWhatsApp } = useWhatsApp()
+const { abrirSmsSemNumero } = useSms()
 
 const url = computed(() => linkPublico(props.formulario))
 
@@ -89,6 +90,17 @@ function abrirNovaAba() {
           size="xs"
           class="transition-transform hover:-translate-y-0.5"
           @click="abrirWhatsApp(t.form.mensagemDoLink(formulario.nome, url))"
+        />
+      </UTooltip>
+      <UTooltip :text="t.form.smsDica">
+        <UButton
+          icon="i-lucide-message-square-text"
+          :label="t.form.sms"
+          color="neutral"
+          variant="outline"
+          size="xs"
+          class="transition-transform hover:-translate-y-0.5"
+          @click="abrirSmsSemNumero(t.form.mensagemDoLink(formulario.nome, url))"
         />
       </UTooltip>
     </div>

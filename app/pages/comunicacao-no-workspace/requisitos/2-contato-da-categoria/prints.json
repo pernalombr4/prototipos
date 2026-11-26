@@ -159,6 +159,16 @@
         "js": "(s => { s['$scnw-categoria'] = \"fornecedores\"; s['$scnw-item'] = 61000; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
         "esperar": 1800
       }
+    ],
+    "item230": [
+      {
+        "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-perfil'] = \"admin\"; s['$scnw-dados'] = \"emUso\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 600
+      },
+      {
+        "js": "(s => { s['$scnw-tela'] = \"item\"; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47230; s['$scnw-aba-item'] = \"visao\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
     ]
   },
   "requisitos": {
@@ -370,7 +380,7 @@
       "cena": "contatos",
       "passos": [
         {
-          "pairar": "Prévia: o que os botões E-mail e WhatsApp abrem"
+          "pairar": "Prévia: o que os botões E-mail, WhatsApp e SMS abrem"
         }
       ],
       "destacar": [
@@ -716,7 +726,7 @@
       "cena": "contatos",
       "passos": [
         {
-          "js": "(() => { const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim() === 'Texto pronto do WhatsApp'); h.closest('.divide-y').dataset.print = 'cartaowa'; h.closest('.divide-y').scrollIntoView({ block: 'center' }) })()",
+          "js": "(() => { const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim() === 'Texto pronto do WhatsApp e do SMS'); h.closest('.divide-y').dataset.print = 'cartaowa'; h.closest('.divide-y').scrollIntoView({ block: 'center' }) })()",
           "esperar": 500
         }
       ],
@@ -728,7 +738,7 @@
       "cena": "contatos",
       "passos": [
         {
-          "js": "(() => { const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim() === 'Texto pronto do WhatsApp'); h.closest('.divide-y').dataset.print = 'cartaowa'; h.closest('.divide-y').scrollIntoView({ block: 'center' }) })()",
+          "js": "(() => { const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim() === 'Texto pronto do WhatsApp e do SMS'); h.closest('.divide-y').dataset.print = 'cartaowa'; h.closest('.divide-y').scrollIntoView({ block: 'center' }) })()",
           "esperar": 500
         }
       ],
@@ -792,14 +802,14 @@
     "RF121": {
       "cena": "item228",
       "destacar": [
-        "Sem telefone: o WhatsApp está indisponível.",
+        "Sem telefone: o WhatsApp e o SMS estão indisponíveis.",
         "Cadastrar telefone"
       ]
     },
     "RF122": {
       "cena": "item226",
       "destacar": [
-        "Telefone inválido: o WhatsApp está indisponível.",
+        "Telefone inválido: o WhatsApp e o SMS estão indisponíveis.",
         "Corrigir telefone"
       ]
     },
@@ -837,6 +847,57 @@
       "destacar": [
         "WhatsApp para Marina Alves",
         "WhatsApp para todos (1)"
+      ]
+    },
+    "RF026": {
+      "cena": "contatos",
+      "passos": [
+        {
+          "js": "(() => { const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim().startsWith('Prévia')); const box = h.closest('aside'); box.querySelectorAll('.flex.flex-col.gap-4 > div').forEach((b, i) => { const dls = b.querySelectorAll('dl'); if (dls[1]) dls[1].dataset.print = 'wa' + i }) })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "texto": "Telefone fixo não recebe SMS",
+        "n": 0
+      }
+    },
+    "RF126": {
+      "cena": "item230",
+      "destacar": {
+        "texto": "SMS",
+        "n": 0
+      }
+    },
+    "RF127": {
+      "cena": "lista",
+      "passos": [
+        {
+          "js": "(() => { const tr = [...document.querySelectorAll('tr')].find(r => r.innerText.includes('CTR-00230')); tr.querySelector('button[aria-label=\"Ações\"]').dataset.print = 'acoes230' })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=acoes230]"
+          },
+          "esperar": 700
+        },
+        {
+          "pairar": "SMS",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=menu]",
+          "n": 1
+        }
+      ]
+    },
+    "RF128": {
+      "cena": "agenda",
+      "destacar": [
+        "SMS para Marina Alves: Telefone fixo não recebe SMS",
+        "SMS para todos (0)"
       ]
     }
   }

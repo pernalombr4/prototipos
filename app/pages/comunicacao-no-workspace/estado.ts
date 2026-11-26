@@ -208,6 +208,58 @@ export function linkDeWhatsApp(telefone: string | null, texto?: string) {
   return texto ? `${base}?text=${encodeURIComponent(texto)}` : base
 }
 
+/**
+ * O link de SMS (RFC 5724): `sms:+<número>?body=<texto>`. Com número, abre a
+ * conversa com ele; sem número (link do formulário), a pessoa escolhe para
+ * quem. O número é o mesmo do WhatsApp, com o `+` do formato E.164. No celular
+ * e no Mac abre o app de mensagens; no Windows, só se houver app registrado
+ * para `sms:` (o Vincular ao Celular nem sempre assume). Daí os outros caminhos
+ * do painel: QR code, copiar e o Google Messages Web.
+ */
+export function linkDeSms(telefone: string | null, texto?: string) {
+  const n = numeroDoWhatsApp(telefone)
+  const base = n ? `sms:+${n}` : 'sms:'
+  return texto ? `${base}?body=${encodeURIComponent(texto)}` : base
+}
+
+/**
+ * Telefone fixo do Brasil: DDD e 8 dígitos (o celular tem 9 e começa com 9).
+ * Fixo não recebe SMS; o WhatsApp pode existir no fixo (WhatsApp Business), então
+ * a regra vale só para o SMS. Número de fora do Brasil não é julgado.
+ */
+export function ehTelefoneFixo(telefone: string | null | undefined) {
+  const n = numeroDoWhatsApp(telefone)
+  return !!n && n.startsWith('55') && n.length === 12
+}
+
+/** O número para ler e copiar: +55 11 98765-4321. */
+export function telefoneLegivel(telefone: string | null | undefined) {
+  const n = numeroDoWhatsApp(telefone)
+  if (!n) return telefone ?? ''
+  if (!n.startsWith('55')) return `+${n}`
+  const d = n.slice(2)
+  const ddd = d.slice(0, 2)
+  const resto = d.slice(2)
+  const corte = resto.length - 4
+  return `+55 ${ddd} ${resto.slice(0, corte)}-${resto.slice(corte)}`
+}
+
+/**
+ * Quantos SMS o texto ocupa. Só com os caracteres do alfabeto GSM 7 bits, cabem
+ * 160 por SMS (153 por parte quando divide). Com 1 acento fora dele (ã, õ, ç, á,
+ * ê...), o SMS inteiro passa a UCS-2: 70 por SMS, 67 por parte.
+ */
+const GSM7 = '@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !"#¤%&\'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà'
+const GSM7_DUPLO = '^{}\\[~]|€'
+export function partesDoSms(texto: string) {
+  const chars = [...texto]
+  const gsm = chars.every(c => GSM7.includes(c) || GSM7_DUPLO.includes(c))
+  const tamanho = gsm ? chars.reduce((s, c) => s + (GSM7_DUPLO.includes(c) ? 2 : 1), 0) : chars.length
+  const [um, parte] = gsm ? [160, 153] : [70, 67]
+  const partes = tamanho === 0 ? 0 : tamanho <= um ? 1 : Math.ceil(tamanho / parte)
+  return { tamanho, partes, limite: um, gsm }
+}
+
 /** O `mailto:` que o "Abrir no meu app de e-mail" abre. */
 export function linkDeEmail(para: string[], assunto?: string, corpo?: string, cc?: string) {
   const q = new URLSearchParams()

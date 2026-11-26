@@ -363,6 +363,60 @@ Fonte: ajuda do WhatsApp, "Como usar o recurso de conversa em um clique"
 e a regra do número (55 na frente do telefone brasileiro de 10 ou 11 dígitos).
 **Não serve:** registrar a conversa no item; isso pede a API paga do WhatsApp Business.
 
+## SMS no computador: qual caminho serve (rodada 11)
+
+Pergunta da redatora: o Google Messages Web é a melhor escolha para o SMS, ou há outro serviço? A
+maior parte dos clientes usa Microsoft. Busca feita em 2026-11-26.
+
+| Caminho | Funciona no Brasil? | Preenche número e texto? | Pede back-end? | Veredito |
+|---|---|---|---|---|
+| Link `sms:` (RFC 5724) | Sim | Sim, no celular e no Mac; no Windows, só se houver app registrado para `sms:` | Não | **Caminho principal** |
+| QR code do link `sms:` | Sim | Sim: a câmera do celular abre o app de SMS pronto | Não | **Entra**: resolve o Windows sem pareamento |
+| Vincular ao Celular (Windows) | Sim, com Android ou iPhone pareado | Não há link documentado que abra a conversa preenchida | Não | **Entra pelo "Copiar"**: a pessoa cola o número e a mensagem |
+| Google Messages Web | Sim, só com Android | Não: o site não aceita número nem texto no link | Não | **Entra como opção secundária** |
+| SMS do Teams corporativo (Teams Phone) | **Não**: só Estados Unidos, Porto Rico e Canadá | | Licença de Calling Plan | Fora |
+| SMS do Teams gratuito | Sim, mas só na conta pessoal; não fala com o Teams corporativo | | Não | Fora |
+| Serviço de SMS (Twilio, Zenvia, Azure Communication Services) | Sim | O ENSPACE envia sozinho e registra | Sim, com custo por SMS | Fora deste épico (P909) |
+
+**O que cada fonte diz:**
+
+- **Link `sms:`:** o RFC 5724 define `sms:<número>?body=<texto>`. O guia do Google sobre links de
+  SMS usa o número no formato E.164 (`+55...`) e recomenda, para QR code, um link curto em HTTPS que
+  redireciona para o `sms:`.
+  ([RFC 5724](https://www.rfc-editor.org/rfc/rfc5724);
+  [Google, deep link de SMS](https://developers.google.com/business-communications/rcs-business-messaging/guides/build/deeplinks))
+- **Windows e o Vincular ao Celular:** a Microsoft não documenta o Vincular ao Celular como app do
+  link `sms:`. No Microsoft Q&A, há relato de que ele não aparece para escolha e de quem o definiu para
+  `tel:` e `sms:` e continuou recebendo a pergunta de qual app usar.
+  ([Q&A, links SMS](https://learn.microsoft.com/en-us/answers/questions/3857178/unable-to-select-phone-link-to-open-sms-links);
+  [Q&A, links tel](https://learn.microsoft.com/en-us/answers/questions/4007141/phone-link-tel-links))
+- **Teams corporativo:** "Teams users sending or receiving SMS messages outside of the US or Canada
+  aren't supported" (Microsoft Learn). O número de Operator Connect ou Direct Routing também fica de
+  fora. ([SMS no Teams](https://learn.microsoft.com/microsoftteams/sms-overview))
+- **Teams gratuito:** a conversa por SMS existe no Brasil, mas é da conta pessoal, e a ajuda diz que
+  não há conversa por SMS entre o Teams gratuito e o Teams corporativo.
+  ([SMS no Teams gratuito](https://support.microsoft.com/en-us/office/how-to-chat-via-sms-on-microsoft-teams-free-f026aef9-c892-49a1-a1e9-1b26fa6f3d05))
+- **Google Messages Web:** não achei parâmetro documentado que preencha o número no
+  `messages.google.com`. O endereço `https://messages.google.com/web/conversations/new` abre a
+  conversa nova vazia.
+- **Serviço de SMS, para um épico futuro:** a Twilio cobra US$ 0,0599 por segmento de SMS enviado ao
+  Brasil, nas primeiras 20 mil por mês. O Azure Communication Services não envia SMS ao Brasil por
+  número gratuito (só Estados Unidos, Porto Rico e Canadá); para o Brasil, indica o Messaging
+  Connect, por parceiros com remetente local. A Zenvia não publica preço.
+  ([Twilio, preço Brasil](https://www.twilio.com/en-us/sms/pricing/br);
+  [Azure, tipos de número](https://learn.microsoft.com/en-us/azure/communication-services/concepts/sms/sms-number-types);
+  [Azure, Messaging Connect](https://learn.microsoft.com/en-us/azure/communication-services/concepts/sms/messaging-connect))
+- **Tamanho do SMS:** 160 caracteres no alfabeto GSM 7 bits; com 1 caractere fora dele (ã, õ, ç,
+  á, ê), o SMS inteiro passa a 70. Acima disso, a mensagem chega em partes de 153 ou 67 (3GPP TS
+  23.038).
+- **Telefone fixo:** no Brasil, o celular tem 9 dígitos depois do DDD e começa com 9; o fixo tem 8.
+  O fixo não recebe SMS.
+
+**Decisão:** nenhum caminho funciona sozinho para todos. O botão SMS abre um painel com os 4 que não
+pedem back-end, na ordem do que mais funciona: app de SMS, QR code, copiar e Google Messages Web.
+Para o cliente Microsoft no Windows, o QR code e o "Copiar" para o Vincular ao Celular são o caminho
+garantido. O envio pelo próprio ENSPACE, com registro no item, fica como pergunta (P909).
+
 ## Gmail e Outlook na web
 
 - **Gmail:** "Compose" em janela flutuante no canto inferior direito, minimizável, várias ao mesmo

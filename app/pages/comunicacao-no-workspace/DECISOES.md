@@ -3,8 +3,9 @@
 ## A proposta em 1 minuto
 
 **Um protótipo para as 3 partes do documento**, porque elas mexem nas mesmas telas e no mesmo
-botão de E-mail (motivo no `BRIEFING.md`, seção 4). Os canais são **e-mail e WhatsApp**: o WhatsApp
-saiu na rodada 6 e voltou na 10, pelo link do próprio WhatsApp; o SMS continua fora.
+botão de E-mail (motivo no `BRIEFING.md`, seção 4). Os canais são **e-mail, WhatsApp e SMS**: os 2
+últimos saíram na rodada 6; o WhatsApp voltou na 10, pelo link do próprio WhatsApp, e o SMS na 11,
+pelo painel "Enviar SMS", que junta os caminhos para enviar do celular da pessoa.
 
 **O protótipo se divide em 3 fases**, escolhidas no controle "Fase" da barra de baixo:
 
@@ -17,7 +18,7 @@ saiu na rodada 6 e voltou na 10, pelo link do próprio WhatsApp; o SMS continua 
 | Parte do documento | Onde aparece no protótipo |
 |---|---|
 | (a) Link do formulário público | Requisições (cartão "Compartilhar este formulário"); lista de itens da categoria; painel da tarefa de preencher formulário |
-| (b) Atalho de e-mail e WhatsApp | Item (Contato do item na lateral e ícone ao lado do campo de e-mail e do de telefone); lista e quadro de itens (submenus "E-mail" e "WhatsApp"); tarefas (coluna Contato, e-mail em lote, fila do WhatsApp, clique direito, painel); Agenda (lembrete por e-mail e por WhatsApp) |
+| (b) Atalho de e-mail, WhatsApp e SMS | Item (Contato do item na lateral e ícone ao lado do campo de e-mail e do de telefone); lista e quadro de itens (submenus "E-mail", "WhatsApp" e "SMS"); tarefas (coluna Contato, e-mail em lote, fila do WhatsApp e do SMS, clique direito, painel); Agenda (lembrete por e-mail, por WhatsApp e por SMS); o painel "Enviar SMS" |
 | Configuração | Aba Configurações da central E-mails: a conta de envio de cada pessoa e, para quem administra, o contato do item, o remetente com o domínio da empresa e (Fase 2) as caixas no "De". Sem chave em Sistema › Módulos: o e-mail vem sempre ligado. Categorias › cartão "Contato da categoria" (Fase 2, a avaliar com os devs) |
 | E-mail do ENSPACE em todas as telas | "Novo e-mail" no topo, que reconhece o item ou a tarefa aberta; o compositor; a central "E-mails" no menu, com Mensagens (também os enviados pelo sistema, para quem tem a permissão), Modelos, Caixas de E-mail e Configurações, cada aba pela permissão de hoje; o estado vazio de cada tabela diz o próximo passo |
 
@@ -528,6 +529,49 @@ Módulos continuam fora.
 - **Requisitos:** épico 1 (RN907, RN908 e RN917 a RN923; partes 3 a 7), épico 2 (RN901, RN904 e
   RN905; partes 1 e 2) e o documento do botão no cartão (RF007 e RF008). Os prints estão em
   `evidencias/requisitos/`.
+
+## Rodada 11 · 2026-11-26 (o SMS volta)
+
+Pedido da redatora: voltar com os atalhos de SMS, com a estética e a UX do ENSPACE, e ver como
+enquadrar; depois, conferir se o Google Messages Web é a melhor escolha, porque a maior parte dos
+clientes usa Microsoft. A pesquisa está em `PESQUISA.md`, "SMS no computador".
+
+| O que entrou | Onde |
+|---|---|
+| Botão SMS ao lado do WhatsApp no Contato do item, e ícone ao lado do campo de telefone | `_TelaItem.vue`, `_BotaoSms.vue` |
+| O painel "Enviar SMS": Para com "Copiar o número", mensagem com a contagem de SMS, "Abrir no app de SMS" e os outros caminhos (QR code, copiar, Google Messages Web) | `_PainelDoSms.vue` |
+| Submenu "SMS" no menu da linha e no clique direito do cartão | `_TelaItens.vue` |
+| Tarefas: ícone na coluna Contato, item no clique direito, botão no painel e a fila "Avisar por SMS" | `_TelaTarefas.vue`, `_FilaDoWhatsApp.vue` |
+| Agenda: ícone por pessoa e "SMS para todos (N)", com a fila | `_TelaAgenda.vue` |
+| Link do formulário público por SMS, sem número | `_CompartilharFormulario.vue`, `_LinksPublicos.vue` |
+| Fase 2: o texto pronto da categoria passa a "Texto pronto do WhatsApp e do SMS"; a prévia avisa o telefone fixo | `_TelaCategoria.vue` |
+| A simulação do app de mensagens e do Google Messages Web | `_AppExterno.vue`, `simulador.ts` |
+
+- **Enquadramento:** o SMS entra no épico 1, ao lado do WhatsApp: é link, sem back-end. O envio
+  pelo próprio ENSPACE, por um serviço de SMS, com registro no item, fica fora (P909 do épico 1).
+- **Por que um painel, e não um link direto como o WhatsApp:** o `wa.me` funciona em qualquer
+  computador com navegador. O `sms:` depende do aparelho: no celular e no Mac abre o app pronto; no
+  Windows, só se houver app registrado, e o Vincular ao Celular nem sempre assume. O Teams
+  corporativo não envia SMS no Brasil. O Google Messages Web não aceita número nem texto no link e só
+  serve a quem tem Android. Então o botão abre um painel com os 4 caminhos, na ordem do que mais
+  funciona, e a pessoa escolhe o dela.
+- **O QR code é a resposta para o cliente Microsoft:** a câmera do celular lê o código e abre o app
+  de SMS com o número e o texto, sem pareamento, sem Teams e sem app no Windows. O protótipo desenha
+  um código de mentira (andaime); a biblioteca que gera o código fica com os devs (P908).
+- **Copiar é o caminho do Vincular ao Celular:** "Copiar o número" no Para e "Copiar a mensagem" nos
+  outros caminhos.
+- **Telefone fixo não recebe SMS:** número do Brasil com DDD e 8 dígitos deixa o SMS indisponível,
+  com o motivo; o WhatsApp continua, porque o fixo pode ter WhatsApp Business. CTR-00231
+  (+55 11 3456-7710) mostra o estado; CTR-00230 (+55 11 99876-1203), o painel.
+- **Contagem:** "62 caracteres · 1 SMS", com a ajuda do limite (160, ou 70 com acento). Informa e
+  não bloqueia.
+- **Texto pronto:** o mesmo do WhatsApp, em cada fase. Na Fase 2, 1 texto por categoria para os 2
+  canais.
+- **A fila do WhatsApp ficou genérica** (`canal="sms"`): "Avisar por SMS", "Abrir SMS" e os 2 botões
+  de copiar por pessoa; o fixo fica de fora, com "Ficam de fora, sem celular válido".
+- **Requisitos:** épico 1 (RN908, RN924 a RN929; partes 3 a 7, com o painel em RF251 a RF258),
+  épico 2 (RN903, RN905, RN105; partes 1 e 2) e o documento do botão no cartão (RF009). Os prints
+  estão em `evidencias/requisitos/`.
 
 ## Por que cada decisão
 

@@ -151,6 +151,10 @@ chave ("Atalhos de comunicação", sem escolher telas nem canais), pediu o "De" 
 (Outlook ou caixa do workspace) e a divisão em fases: a 1ª só com o que o produto já tem, as
 seguintes com o que é novo. O registro literal está no `DECISOES.md`, "Rodada 6".
 
+**Rodadas 10 e 11 (2026-11-25 e 2026-11-26):** o WhatsApp e o SMS voltaram, pelos links do próprio
+aparelho. O SMS abre o painel "Enviar SMS", porque a maior parte dos clientes usa Microsoft e o
+Teams não envia SMS no Brasil (`PESQUISA.md`, "SMS no computador"; `DECISOES.md`, "Rodada 11").
+
 ## 2. Telas e jornadas em jogo
 
 | Quem | Tela do develop | O que a demanda pede ali |

@@ -150,6 +150,8 @@ export interface Textos {
     mensagemDoLink: (nome: string, url: string) => string
     whatsapp: string
     whatsappDica: string
+    sms: string
+    smsDica: string
     linkCopiado: string
     linkDeFormulario: string
     copiarLinkPublico: string
@@ -478,10 +480,49 @@ export interface Textos {
     mensagemDica: string
     previa: string
   }
+  sms: {
+    rotulo: string
+    para: (nome: string) => string
+    dica: string
+    paraResponsaveis: (n: number) => string
+    paraTodos: (n: number) => string
+    filaTitulo: string
+    filaDescricao: string
+    abrirSms: string
+    painelTitulo: (nome: string | null) => string
+    painelDescricao: string
+    destinatario: string
+    semDestinatario: string
+    mensagem: string
+    contagem: (caracteres: number, partes: number) => string
+    dicaDoTamanho: (limite: number) => string
+    copiarNumero: string
+    copiarTexto: string
+    numeroCopiado: string
+    textoCopiado: string
+    abrirNoApp: string
+    abrirNoAppDica: string
+    abrirNoCelular: string
+    abrirNoCelularDica: string
+    qrAlt: string
+    qrAndaime: string
+    messagesWeb: string
+    messagesWebDica: string
+    vincular: string
+    outrosCaminhos: string
+    mostrarQr: string
+    ocultarQr: string
+    copiar: string
+    abrir: string
+    previa: string
+    telefoneFixo: string
+    foraSemCelular: (nomes: string) => string
+    ninguem: string
+  }
   simulador: {
     selo: string
-    titulo: Record<'email' | 'formulario' | 'outlook' | 'whatsapp', string>
-    noProduto: Record<'email' | 'formulario' | 'outlook' | 'whatsapp', string>
+    titulo: Record<'email' | 'formulario' | 'outlook' | 'whatsapp' | 'sms' | 'sms-web', string>
+    noProduto: Record<'email' | 'formulario' | 'outlook' | 'whatsapp' | 'sms' | 'sms-web', string>
     voltar: string
     enviar: string
     descartar: string
@@ -516,6 +557,13 @@ export interface Textos {
     digiteMensagem: string
     trocarConversa: string
     naoRegistra: string
+    smsNaoRegistra: string
+    novaConversa: string
+    colar: string
+    colarNumero: string
+    colarTexto: string
+    textoCopiadoAviso: string
+    iniciarConversa: string
   }
   andaime: {
     prototipo: string
@@ -734,6 +782,8 @@ const ptBR: Textos = {
     mensagemDoLink: (nome, url) => `Para preencher o formulário "${nome}", use este link: ${url}`,
     whatsapp: 'WhatsApp',
     whatsappDica: 'Abre o WhatsApp com a mensagem e o link. Escolha a conversa e envie.',
+    sms: 'SMS',
+    smsDica: 'Abre as opções de SMS com a mensagem e o link. Escolha o destinatário e envie.',
     linkCopiado: 'Link copiado',
     linkDeFormulario: 'Link de formulário público',
     copiarLinkPublico: 'Copiar link de formulário público',
@@ -1057,7 +1107,7 @@ const ptBR: Textos = {
     adicionarContato: 'Adicionar contato',
     assuntoDoEmail: 'Assunto do e-mail',
     inserir: 'Inserir:',
-    previa: 'Prévia: o que os botões E-mail e WhatsApp abrem',
+    previa: 'Prévia: o que os botões E-mail, WhatsApp e SMS abrem',
     semNome: 'Sem nome',
     salvo: 'Contato da categoria salvo',
     avaliarComDevs: 'A avaliar com os devs',
@@ -1069,8 +1119,8 @@ const ptBR: Textos = {
     dica: 'Abre a conversa no WhatsApp com o texto pronto. Revise o texto e envie. O ENSPACE não registra a conversa.',
     semTelefone: 'Sem telefone cadastrado',
     telefoneInvalido: 'Telefone inválido',
-    semTelefoneAviso: 'Sem telefone: o WhatsApp está indisponível.',
-    telefoneInvalidoAviso: 'Telefone inválido: o WhatsApp está indisponível.',
+    semTelefoneAviso: 'Sem telefone: o WhatsApp e o SMS estão indisponíveis.',
+    telefoneInvalidoAviso: 'Telefone inválido: o WhatsApp e o SMS estão indisponíveis.',
     cadastrarTelefone: 'Cadastrar telefone',
     corrigirTelefone: 'Corrigir telefone',
     paraResponsaveis: n => n === 1 ? 'WhatsApp para 1 responsável' : `WhatsApp para ${n} responsáveis`,
@@ -1086,18 +1136,61 @@ const ptBR: Textos = {
     fechar: 'Fechar',
     ninguem: 'Nenhuma pessoa com telefone válido.',
     campoTelefone: 'Telefone',
-    mensagem: 'Texto pronto do WhatsApp',
+    mensagem: 'Texto pronto do WhatsApp e do SMS',
     mensagemDica: 'Aceita as mesmas variáveis do assunto. Quem envia pode mudar o texto antes de enviar.',
-    previa: 'WhatsApp',
+    previa: 'WhatsApp e SMS',
+  },
+  sms: {
+    rotulo: 'SMS',
+    para: nome => `SMS para ${nome}`,
+    dica: 'Abre as opções de envio por SMS, com o texto pronto. A mensagem sai do seu celular. O ENSPACE não registra o SMS.',
+    paraResponsaveis: n => n === 1 ? 'SMS para 1 responsável' : `SMS para ${n} responsáveis`,
+    paraTodos: n => `SMS para todos (${n})`,
+    filaTitulo: 'Avisar por SMS',
+    filaDescricao: 'O SMS abre 1 conversa por vez. Abra a conversa, envie e passe para a próxima.',
+    abrirSms: 'Abrir SMS',
+    painelTitulo: nome => nome ? `Enviar SMS para ${nome}` : 'Enviar SMS',
+    painelDescricao: 'Escolha como enviar. A mensagem sai do seu celular, pelo seu plano. O ENSPACE não envia nem registra o SMS.',
+    destinatario: 'Para',
+    semDestinatario: 'Você escolhe o destinatário no app de SMS.',
+    mensagem: 'Mensagem',
+    contagem: (c, p) => `${c} caracteres · ${p} SMS`,
+    dicaDoTamanho: limite => limite === 70
+      ? 'O texto tem acento: cabem 70 caracteres por SMS. A mensagem maior chega dividida em partes.'
+      : 'Cabem 160 caracteres por SMS. A mensagem maior chega dividida em partes.',
+    copiarNumero: 'Copiar o número',
+    copiarTexto: 'Copiar a mensagem',
+    numeroCopiado: 'Número copiado',
+    textoCopiado: 'Mensagem copiada',
+    abrirNoApp: 'Abrir no app de SMS',
+    abrirNoAppDica: 'No celular e no Mac, abre o app de mensagens com o número e o texto. No Windows, abre o app definido para SMS, quando houver.',
+    abrirNoCelular: 'Abrir no celular',
+    abrirNoCelularDica: 'Aponte a câmera do celular para o código. O app de SMS abre com o número e o texto.',
+    qrAlt: 'QR code que abre o SMS no celular',
+    qrAndaime: 'Simulação: no produto, o QR code leva o link sms: com o número e o texto.',
+    messagesWeb: 'Google Messages Web',
+    messagesWebDica: 'Para celular Android pareado. Copia a mensagem e abre uma conversa nova: cole o número e a mensagem.',
+    vincular: 'No Windows, o Vincular ao Celular envia SMS pelo seu celular: copie o número e a mensagem e cole no app.',
+    outrosCaminhos: 'Outros caminhos',
+    mostrarQr: 'Mostrar o código',
+    ocultarQr: 'Ocultar o código',
+    copiar: 'Copiar',
+    abrir: 'Abrir',
+    previa: 'SMS',
+    telefoneFixo: 'Telefone fixo não recebe SMS',
+    foraSemCelular: nomes => `Ficam de fora, sem celular válido: ${nomes}.`,
+    ninguem: 'Nenhuma pessoa com celular válido.',
   },
   simulador: {
     selo: 'Simulação · fora do ENSPACE',
-    titulo: { email: 'Seu app de e-mail', formulario: 'Página pública do formulário', outlook: 'Integrar o Correio do Outlook', whatsapp: 'WhatsApp Web' },
+    titulo: { email: 'Seu app de e-mail', formulario: 'Página pública do formulário', outlook: 'Integrar o Correio do Outlook', whatsapp: 'WhatsApp Web', sms: 'App de mensagens', 'sms-web': 'Google Messages Web' },
     noProduto: {
       email: 'No produto, abre o app de e-mail padrão do computador, já preenchido.',
       formulario: 'É o que a pessoa de fora vê: o formulário sem login. Responder cria um item no ENSPACE.',
       outlook: 'No produto: Perfil › Integrações e o login da conta Microsoft corporativa.',
       whatsapp: 'No produto, abre o WhatsApp Web ou o app do WhatsApp em uma aba nova, com a mensagem no campo de texto.',
+      sms: 'No produto, o link sms: abre o app de mensagens do aparelho, com o número e o texto prontos.',
+      'sms-web': 'No produto, abre o Google Messages Web em uma aba nova. O site não aceita número nem texto no link: a pessoa cola o que copiou.',
     },
     voltar: 'Voltar ao ENSPACE',
     enviar: 'Enviar',
@@ -1133,6 +1226,13 @@ const ptBR: Textos = {
     digiteMensagem: 'Digite uma mensagem',
     trocarConversa: 'Trocar conversa',
     naoRegistra: 'O ENSPACE não registra a conversa do WhatsApp.',
+    smsNaoRegistra: 'O SMS sai do seu celular. O ENSPACE não registra o envio.',
+    novaConversa: 'Nova conversa',
+    colar: 'Colar',
+    colarNumero: 'Digite ou cole o número',
+    colarTexto: 'Cole a mensagem',
+    textoCopiadoAviso: 'A mensagem está na área de transferência. Cole o número e a mensagem.',
+    iniciarConversa: 'Iniciar conversa',
   },
   andaime: {
     prototipo: 'Protótipo',
@@ -1349,6 +1449,8 @@ const en: Textos = {
     mensagemDoLink: (nome, url) => `To fill in the form "${nome}", use this link: ${url}`,
     whatsapp: 'WhatsApp',
     whatsappDica: 'Opens WhatsApp with the message and the link. Choose the chat and send.',
+    sms: 'SMS',
+    smsDica: 'Opens the SMS options with the message and the link. Choose the recipient and send.',
     linkCopiado: 'Link copied',
     linkDeFormulario: 'Public form link',
     copiarLinkPublico: 'Copy a public form link',
@@ -1672,7 +1774,7 @@ const en: Textos = {
     adicionarContato: 'Add contact',
     assuntoDoEmail: 'Email subject',
     inserir: 'Insert:',
-    previa: 'Preview: what the Email and WhatsApp buttons open',
+    previa: 'Preview: what the Email, WhatsApp and SMS buttons open',
     semNome: 'No name',
     salvo: 'Category contact saved',
     avaliarComDevs: 'To review with the developers',
@@ -1684,8 +1786,8 @@ const en: Textos = {
     dica: 'Opens the WhatsApp chat with the ready text. Review the text and send. ENSPACE does not record the chat.',
     semTelefone: 'No phone on file',
     telefoneInvalido: 'Invalid phone',
-    semTelefoneAviso: 'No phone: WhatsApp is unavailable.',
-    telefoneInvalidoAviso: 'Invalid phone: WhatsApp is unavailable.',
+    semTelefoneAviso: 'No phone: WhatsApp and SMS are unavailable.',
+    telefoneInvalidoAviso: 'Invalid phone: WhatsApp and SMS are unavailable.',
     cadastrarTelefone: 'Add phone',
     corrigirTelefone: 'Fix phone',
     paraResponsaveis: n => n === 1 ? 'WhatsApp to 1 assignee' : `WhatsApp to ${n} assignees`,
@@ -1701,18 +1803,61 @@ const en: Textos = {
     fechar: 'Close',
     ninguem: 'No one with a valid phone.',
     campoTelefone: 'Phone',
-    mensagem: 'WhatsApp ready text',
+    mensagem: 'WhatsApp and SMS ready text',
     mensagemDica: 'Accepts the same variables as the subject. The sender can change the text before sending.',
-    previa: 'WhatsApp',
+    previa: 'WhatsApp and SMS',
+  },
+  sms: {
+    rotulo: 'SMS',
+    para: nome => `SMS to ${nome}`,
+    dica: 'Opens the SMS sending options, with the ready text. The message is sent from your phone. ENSPACE does not record the SMS.',
+    paraResponsaveis: n => n === 1 ? 'SMS to 1 assignee' : `SMS to ${n} assignees`,
+    paraTodos: n => `SMS to everyone (${n})`,
+    filaTitulo: 'Notify by SMS',
+    filaDescricao: 'SMS opens 1 conversation at a time. Open the conversation, send it and move to the next one.',
+    abrirSms: 'Open SMS',
+    painelTitulo: nome => nome ? `Send SMS to ${nome}` : 'Send SMS',
+    painelDescricao: 'Choose how to send it. The message is sent from your phone, on your plan. ENSPACE does not send or record the SMS.',
+    destinatario: 'To',
+    semDestinatario: 'You choose the recipient in the SMS app.',
+    mensagem: 'Message',
+    contagem: (c, p) => `${c} characters · ${p} SMS`,
+    dicaDoTamanho: limite => limite === 70
+      ? 'The text has accents: 70 characters fit in each SMS. A longer message arrives split into parts.'
+      : '160 characters fit in each SMS. A longer message arrives split into parts.',
+    copiarNumero: 'Copy number',
+    copiarTexto: 'Copy message',
+    numeroCopiado: 'Number copied',
+    textoCopiado: 'Message copied',
+    abrirNoApp: 'Open in the SMS app',
+    abrirNoAppDica: 'On a phone and on a Mac, opens the messages app with the number and the text. On Windows, opens the app set for SMS, when there is one.',
+    abrirNoCelular: 'Open on the phone',
+    abrirNoCelularDica: 'Point the phone camera at the code. The SMS app opens with the number and the text.',
+    qrAlt: 'QR code that opens the SMS on the phone',
+    qrAndaime: 'Simulation: in the product, the QR code carries the sms: link with the number and the text.',
+    messagesWeb: 'Google Messages for web',
+    messagesWebDica: 'For a paired Android phone. Copies the message and opens a new conversation: paste the number and the message.',
+    vincular: 'On Windows, Phone Link sends SMS through your phone: copy the number and the message and paste them in the app.',
+    outrosCaminhos: 'Other ways',
+    mostrarQr: 'Show code',
+    ocultarQr: 'Hide code',
+    copiar: 'Copy',
+    abrir: 'Open',
+    previa: 'SMS',
+    telefoneFixo: 'A landline cannot receive SMS',
+    foraSemCelular: nomes => `Left out, without a valid mobile number: ${nomes}.`,
+    ninguem: 'No one with a valid mobile number.',
   },
   simulador: {
     selo: 'Simulation · outside ENSPACE',
-    titulo: { email: 'Your email app', formulario: 'Public form page', outlook: 'Connect Outlook Mail', whatsapp: 'WhatsApp Web' },
+    titulo: { email: 'Your email app', formulario: 'Public form page', outlook: 'Connect Outlook Mail', whatsapp: 'WhatsApp Web', sms: 'Messages app', 'sms-web': 'Google Messages for web' },
     noProduto: {
       email: 'In the product, the default email app of the computer opens, already filled in.',
       formulario: 'This is what an outside person sees: the form without login. Answering creates an item in ENSPACE.',
       outlook: 'In the product: Profile › Integrations and the corporate Microsoft login.',
       whatsapp: 'In the product, opens WhatsApp Web or the WhatsApp app in a new tab, with the message in the text box.',
+      sms: 'In the product, the sms: link opens the messages app of the device, with the number and the text ready.',
+      'sms-web': 'In the product, opens Google Messages for web in a new tab. The site does not accept a number or text in the link: the person pastes what was copied.',
     },
     voltar: 'Back to ENSPACE',
     enviar: 'Send',
@@ -1748,6 +1893,13 @@ const en: Textos = {
     digiteMensagem: 'Type a message',
     trocarConversa: 'Change chat',
     naoRegistra: 'ENSPACE does not record the WhatsApp chat.',
+    smsNaoRegistra: 'The SMS is sent from your phone. ENSPACE does not record it.',
+    novaConversa: 'New conversation',
+    colar: 'Paste',
+    colarNumero: 'Type or paste the number',
+    colarTexto: 'Paste the message',
+    textoCopiadoAviso: 'The message is on the clipboard. Paste the number and the message.',
+    iniciarConversa: 'Start conversation',
   },
   andaime: {
     prototipo: 'Prototype',
@@ -1964,6 +2116,8 @@ const es: Textos = {
     mensagemDoLink: (nome, url) => `Para completar el formulario "${nome}", usa este enlace: ${url}`,
     whatsapp: 'WhatsApp',
     whatsappDica: 'Abre WhatsApp con el mensaje y el enlace. Elija la conversación y envíe.',
+    sms: 'SMS',
+    smsDica: 'Abre las opciones de SMS con el mensaje y el enlace. Elija el destinatario y envíe.',
     linkCopiado: 'Enlace copiado',
     linkDeFormulario: 'Enlace de formulario público',
     copiarLinkPublico: 'Copiar enlace de formulario público',
@@ -2287,7 +2441,7 @@ const es: Textos = {
     adicionarContato: 'Agregar contacto',
     assuntoDoEmail: 'Asunto del correo',
     inserir: 'Insertar:',
-    previa: 'Vista previa: lo que abren los botones Correo y WhatsApp',
+    previa: 'Vista previa: lo que abren los botones Correo, WhatsApp y SMS',
     semNome: 'Sin nombre',
     salvo: 'Contacto de la categoría guardado',
     avaliarComDevs: 'Para evaluar con los desarrolladores',
@@ -2299,8 +2453,8 @@ const es: Textos = {
     dica: 'Abre la conversación de WhatsApp con el texto listo. Revise el texto y envíe. ENSPACE no registra la conversación.',
     semTelefone: 'Sin teléfono registrado',
     telefoneInvalido: 'Teléfono inválido',
-    semTelefoneAviso: 'Sin teléfono: WhatsApp no está disponible.',
-    telefoneInvalidoAviso: 'Teléfono inválido: WhatsApp no está disponible.',
+    semTelefoneAviso: 'Sin teléfono: WhatsApp y SMS no están disponibles.',
+    telefoneInvalidoAviso: 'Teléfono inválido: WhatsApp y SMS no están disponibles.',
     cadastrarTelefone: 'Registrar teléfono',
     corrigirTelefone: 'Corregir teléfono',
     paraResponsaveis: n => n === 1 ? 'WhatsApp para 1 responsable' : `WhatsApp para ${n} responsables`,
@@ -2316,18 +2470,61 @@ const es: Textos = {
     fechar: 'Cerrar',
     ninguem: 'Ninguna persona con teléfono válido.',
     campoTelefone: 'Teléfono',
-    mensagem: 'Texto listo de WhatsApp',
+    mensagem: 'Texto listo de WhatsApp y SMS',
     mensagemDica: 'Acepta las mismas variables del asunto. Quien envía puede cambiar el texto antes de enviar.',
-    previa: 'WhatsApp',
+    previa: 'WhatsApp y SMS',
+  },
+  sms: {
+    rotulo: 'SMS',
+    para: nome => `SMS para ${nome}`,
+    dica: 'Abre las opciones de envío por SMS, con el texto listo. El mensaje sale de su celular. ENSPACE no registra el SMS.',
+    paraResponsaveis: n => n === 1 ? 'SMS para 1 responsable' : `SMS para ${n} responsables`,
+    paraTodos: n => `SMS para todos (${n})`,
+    filaTitulo: 'Avisar por SMS',
+    filaDescricao: 'El SMS abre 1 conversación por vez. Abra la conversación, envíe y pase a la siguiente.',
+    abrirSms: 'Abrir SMS',
+    painelTitulo: nome => nome ? `Enviar SMS a ${nome}` : 'Enviar SMS',
+    painelDescricao: 'Elija cómo enviar. El mensaje sale de su celular, por su plan. ENSPACE no envía ni registra el SMS.',
+    destinatario: 'Para',
+    semDestinatario: 'Usted elige el destinatario en la app de SMS.',
+    mensagem: 'Mensaje',
+    contagem: (c, p) => `${c} caracteres · ${p} SMS`,
+    dicaDoTamanho: limite => limite === 70
+      ? 'El texto tiene acentos: caben 70 caracteres por SMS. El mensaje más largo llega dividido en partes.'
+      : 'Caben 160 caracteres por SMS. El mensaje más largo llega dividido en partes.',
+    copiarNumero: 'Copiar el número',
+    copiarTexto: 'Copiar el mensaje',
+    numeroCopiado: 'Número copiado',
+    textoCopiado: 'Mensaje copiado',
+    abrirNoApp: 'Abrir en la app de SMS',
+    abrirNoAppDica: 'En el celular y en Mac, abre la app de mensajes con el número y el texto. En Windows, abre la app definida para SMS, cuando la hay.',
+    abrirNoCelular: 'Abrir en el celular',
+    abrirNoCelularDica: 'Apunte la cámara del celular al código. La app de SMS abre con el número y el texto.',
+    qrAlt: 'Código QR que abre el SMS en el celular',
+    qrAndaime: 'Simulación: en el producto, el código QR lleva el enlace sms: con el número y el texto.',
+    messagesWeb: 'Google Messages para web',
+    messagesWebDica: 'Para celular Android vinculado. Copia el mensaje y abre una conversación nueva: pegue el número y el mensaje.',
+    vincular: 'En Windows, Enlace Móvil envía SMS por su celular: copie el número y el mensaje y péguelos en la app.',
+    outrosCaminhos: 'Otras opciones',
+    mostrarQr: 'Mostrar el código',
+    ocultarQr: 'Ocultar el código',
+    copiar: 'Copiar',
+    abrir: 'Abrir',
+    previa: 'SMS',
+    telefoneFixo: 'Un teléfono fijo no recibe SMS',
+    foraSemCelular: nomes => `Quedan fuera, sin celular válido: ${nomes}.`,
+    ninguem: 'Ninguna persona con celular válido.',
   },
   simulador: {
     selo: 'Simulación · fuera de ENSPACE',
-    titulo: { email: 'Su app de correo', formulario: 'Página pública del formulario', outlook: 'Integrar el Correo de Outlook', whatsapp: 'WhatsApp Web' },
+    titulo: { email: 'Su app de correo', formulario: 'Página pública del formulario', outlook: 'Integrar el Correo de Outlook', whatsapp: 'WhatsApp Web', sms: 'App de mensajes', 'sms-web': 'Google Messages para web' },
     noProduto: {
       email: 'En el producto, abre la app de correo predeterminada del equipo, ya completa.',
       formulario: 'Es lo que ve la persona de afuera: el formulario sin inicio de sesión. Responder crea un ítem en ENSPACE.',
       outlook: 'En el producto: Perfil › Integraciones y el inicio de sesión de la cuenta Microsoft corporativa.',
       whatsapp: 'En el producto, abre WhatsApp Web o la app de WhatsApp en una pestaña nueva, con el mensaje en el campo de texto.',
+      sms: 'En el producto, el enlace sms: abre la app de mensajes del dispositivo, con el número y el texto listos.',
+      'sms-web': 'En el producto, abre Google Messages para web en una pestaña nueva. El sitio no acepta número ni texto en el enlace: la persona pega lo que copió.',
     },
     voltar: 'Volver a ENSPACE',
     enviar: 'Enviar',
@@ -2363,6 +2560,13 @@ const es: Textos = {
     digiteMensagem: 'Escriba un mensaje',
     trocarConversa: 'Cambiar conversación',
     naoRegistra: 'ENSPACE no registra la conversación de WhatsApp.',
+    smsNaoRegistra: 'El SMS sale de su celular. ENSPACE no registra el envío.',
+    novaConversa: 'Conversación nueva',
+    colar: 'Pegar',
+    colarNumero: 'Escriba o pegue el número',
+    colarTexto: 'Pegue el mensaje',
+    textoCopiadoAviso: 'El mensaje está en el portapapeles. Pegue el número y el mensaje.',
+    iniciarConversa: 'Iniciar conversación',
   },
   andaime: {
     prototipo: 'Prototipo',

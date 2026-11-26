@@ -10,8 +10,9 @@
  *  - o ícone de e-mail ao lado de cada campo de e-mail da Visão Geral, e o de
  *    WhatsApp ao lado de cada campo de telefone (máscara CEL e telefone de
  *    Pessoa/Empresa), sem configuração nenhuma;
- *  - o botão WhatsApp no Contato do item (rodada 10), com "Cadastrar
- *    telefone" e "Corrigir telefone" quando falta o número;
+ *  - os botões WhatsApp e SMS no Contato do item (rodadas 10 e 11), com
+ *    "Cadastrar telefone" e "Corrigir telefone" quando falta o número; o SMS
+ *    também ao lado de cada campo de telefone;
  *  - a Mail Box em todo item (`_MailBox.vue`), sem a pasta precisar ser
  *    adicionada na categoria.
  * A Visão Geral edita e o Salvar grava (em memória): é o fim da jornada de
@@ -23,6 +24,7 @@ import { contatosDoItem, numeroDoWhatsApp, useComunicacao, useMarcaDeProposta } 
 import { useAtalhos } from './atalhos'
 import AcoesDeContato from './_AcoesDeContato.vue'
 import BotaoWhatsApp from './_BotaoWhatsApp.vue'
+import BotaoSms from './_BotaoSms.vue'
 import MailBox from './_MailBox.vue'
 
 const props = defineProps<{ t: Textos }>()
@@ -240,7 +242,7 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
                 @click="irParaCampo(campoDoEmail)"
               />
             </div>
-            <!-- O motivo do WhatsApp à vista, com o caminho para o campo. -->
+            <!-- O motivo do WhatsApp e do SMS à vista, com o caminho para o campo. -->
             <div v-if="contato && (!contato.telefone || telefoneInvalido)" class="mt-1 flex flex-wrap items-center gap-x-1 px-1 text-xs text-warning">
               <UIcon name="i-lucide-info" class="size-3.5 shrink-0" />
               {{ telefoneInvalido ? t.whatsapp.telefoneInvalidoAviso : t.whatsapp.semTelefoneAviso }}
@@ -262,14 +264,22 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
               bloco
               class="mt-3"
             />
-            <BotaoWhatsApp
-              :t="t"
-              :destino="contato"
-              :item="item"
-              tamanho="sm"
-              bloco
-              class="mt-2"
-            />
+            <div class="mt-2 grid grid-cols-2 gap-2">
+              <BotaoWhatsApp
+                :t="t"
+                :destino="contato"
+                :item="item"
+                tamanho="sm"
+                bloco
+              />
+              <BotaoSms
+                :t="t"
+                :destino="contato"
+                :item="item"
+                tamanho="sm"
+                bloco
+              />
+            </div>
             <p class="mt-2 text-xs leading-relaxed text-muted">
               {{ podeEnviar ? t.item.ajudaComEnspace(item.reference) : t.item.ajudaSemEnspace }}
             </p>
@@ -385,7 +395,7 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
                 :class="marca"
               />
             </template>
-            <!-- PROPOSTA: o WhatsApp ao lado do próprio campo de telefone -->
+            <!-- PROPOSTA: o WhatsApp e o SMS ao lado do próprio campo de telefone -->
             <template v-else-if="ehTelefone(c.chave) && ativos" #trailing>
               <BotaoWhatsApp
                 :t="t"
@@ -394,6 +404,15 @@ const tarefasDoItem = computed(() => tarefas.filter(x => x.item === item.value?.
                 variante="icone"
                 tamanho="xs"
                 :rotulo="t.whatsapp.para(c.rotulo)"
+                :class="marca"
+              />
+              <BotaoSms
+                :t="t"
+                :destino="{ nome: null, telefone: edicao[c.chave] || null }"
+                :item="item"
+                variante="icone"
+                tamanho="xs"
+                :rotulo="t.sms.para(c.rotulo)"
                 :class="marca"
               />
             </template>

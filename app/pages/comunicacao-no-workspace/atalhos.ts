@@ -3,7 +3,8 @@
  *
  * O WhatsApp voltou na rodada 10, em `useWhatsApp`: o contato do item, o
  * responsável da tarefa, o lembrete da Agenda e o link do formulário público.
- * O SMS continua fora do plano. O atalho de e-mail tem 2 caminhos:
+ * O SMS voltou na rodada 11, em `useSms`, nos mesmos lugares do WhatsApp.
+ * O atalho de e-mail tem 2 caminhos:
  *  - escrever pelo ENSPACE: o compositor, com o item já vinculado. Sai da conta
  *    do Outlook da pessoa (Fase 1) ou também de uma caixa do workspace (Fase 2);
  *  - abrir o app de e-mail da pessoa (`mailto:`), com o endereço do item em
@@ -15,7 +16,7 @@ import type { DropdownMenuItem } from '@nuxt/ui'
 import { type ItemDoProtótipo, enderecoDoItem } from './mocks'
 import { useAppExterno } from './simulador'
 import { textos } from './textos'
-import { type Contato, type Rascunho, MENSAGEM_PADRAO, linkDeEmail, linkDeWhatsApp, numeroDoWhatsApp, preencher, useComunicacao } from './estado'
+import { type Contato, type Rascunho, MENSAGEM_PADRAO, ehTelefoneFixo, linkDeEmail, linkDeSms, linkDeWhatsApp, numeroDoWhatsApp, preencher, useComunicacao } from './estado'
 
 /** O mínimo de um destinatário: nome e e-mail, qualquer um pode faltar. */
 export type Destino = Pick<Contato, 'nome' | 'email'>
@@ -192,6 +193,89 @@ export function useWhatsApp() {
   }
 
   return { motivoDoWhatsApp, textoPadrao, abrirConversa, abrirWhatsApp, itemDeMenu }
+}
+
+/** O que o painel "Enviar SMS" (`_PainelDoSms.vue`) mostra. */
+export interface PedidoDeSms {
+  nome: string | null
+  telefone: string | null
+  texto: string
+}
+
+/**
+ * O atalho de SMS (rodada 11). No computador não há um caminho só que funcione
+ * para todos (PESQUISA.md, "SMS no computador"), então o botão abre um painel
+ * com os 4 caminhos, na ordem do que mais funciona:
+ *  - abrir no app de SMS: o link `sms:+<número>?body=<texto>` (RFC 5724). No
+ *    celular e no Mac abre o app de mensagens pronto; no Windows, só se houver
+ *    app registrado para `sms:`;
+ *  - abrir no celular: o QR code do mesmo link. A câmera do celular abre o app
+ *    de SMS com número e texto. Não depende de Windows, Teams nem pareamento;
+ *  - copiar o número e o texto: para o Vincular ao Celular do Windows ou
+ *    qualquer outro app;
+ *  - Google Messages Web: o site não aceita número nem texto no link, então o
+ *    botão copia o texto e abre a conversa nova; a pessoa cola.
+ * O ENSPACE não envia nem registra o SMS: quem envia é a pessoa, pelo plano do
+ * celular dela. O envio pelo próprio ENSPACE pede um serviço de SMS pago e fica
+ * fora destes épicos.
+ */
+export function useSms() {
+  const t = useTextos(textos)
+  const { textoPadrao } = useWhatsApp()
+  const { abrirApp } = useAppExterno()
+  const pedido = useState<PedidoDeSms | null>('cnw-sms', () => null)
+
+  /** Por que o SMS não está disponível para este destino. Nulo = disponível. */
+  function motivoDoSms(d: DestinoDoWhatsApp | null) {
+    if (!d) return t.value.atalho.semContato
+    if (!d.telefone) return t.value.whatsapp.semTelefone
+    if (!numeroDoWhatsApp(d.telefone)) return t.value.whatsapp.telefoneInvalido
+    return ehTelefoneFixo(d.telefone) ? t.value.sms.telefoneFixo : null
+  }
+
+  /** Abre o painel "Enviar SMS" com o destino e o texto pronto (o mesmo do WhatsApp). */
+  function abrirPainel(d: DestinoDoWhatsApp | null, o: OpcoesDoWhatsApp = {}) {
+    pedido.value = {
+      nome: d?.nome ?? null,
+      telefone: d?.telefone ?? null,
+      texto: o.texto ?? textoPadrao(o.item, d),
+    }
+  }
+
+  /** O link do formulário público: sem número, a pessoa escolhe para quem. */
+  function abrirSmsSemNumero(texto: string) {
+    pedido.value = { nome: null, telefone: null, texto }
+  }
+
+  function fecharPainel() {
+    pedido.value = null
+  }
+
+  /** Abre o app de SMS pelo link `sms:` (no produto, `window.location.href = link`). */
+  function abrirNoApp(p: PedidoDeSms) {
+    abrirApp({ tipo: 'sms', url: linkDeSms(p.telefone, p.texto || undefined), texto: p.texto, nome: p.nome, telefone: p.telefone })
+  }
+
+  /** Copia o texto e abre o Google Messages Web numa conversa nova. */
+  function abrirNoMessagesWeb(p: PedidoDeSms) {
+    navigator.clipboard?.writeText(p.texto).catch(() => {})
+    abrirApp({ tipo: 'sms-web', url: 'https://messages.google.com/web/conversations/new', texto: p.texto, nome: p.nome, telefone: p.telefone })
+  }
+
+  /** A opção "SMS" de um menu (linha da tabela, cartão, clique direito). */
+  function itemDeMenu(d: DestinoDoWhatsApp | null, o: OpcoesDoWhatsApp = {}, rotulo?: string): DropdownMenuItem {
+    const m = motivoDoSms(d)
+    return {
+      label: rotulo ?? t.value.sms.rotulo,
+      description: m ?? d?.telefone ?? undefined,
+      icon: 'i-lucide-message-square-text',
+      disabled: !!m,
+      ui: { itemDescription: 'whitespace-normal' },
+      onSelect: () => abrirPainel(d, o),
+    }
+  }
+
+  return { pedido, motivoDoSms, abrirPainel, abrirSmsSemNumero, fecharPainel, abrirNoApp, abrirNoMessagesWeb, itemDeMenu }
 }
 
 /**

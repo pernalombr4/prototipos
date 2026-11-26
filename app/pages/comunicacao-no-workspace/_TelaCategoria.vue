@@ -17,7 +17,7 @@ import type { DropdownMenuItem } from '@nuxt/ui'
 import type { EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import type { Textos } from './textos'
 import { CAMPO_REQUISITANTE, MASCARA_CEL, type Formulario, type SlugDaCategoria, campos, categoriaPorSlug, categorias, enderecoDoItem, itens, linkPublico } from './mocks'
-import { type ConfigDaCategoria, contatosDoItem, linkDeWhatsApp, numeroDoWhatsApp, preencher, useComunicacao, useMarcaDeProposta } from './estado'
+import { type ConfigDaCategoria, contatosDoItem, ehTelefoneFixo, linkDeWhatsApp, numeroDoWhatsApp, preencher, useComunicacao, useMarcaDeProposta } from './estado'
 import { useCopiar } from './atalhos'
 
 const props = defineProps<{ t: Textos }>()
@@ -300,7 +300,7 @@ function menuDoFormulario(f: Formulario): DropdownMenuItem[][] {
         <UCard>
           <template #header>
             <h2 class="flex items-center gap-2 font-semibold text-highlighted">
-              <UIcon name="i-simple-icons-whatsapp" class="size-4 text-success" />{{ t.whatsapp.mensagem }}
+              <UIcon name="i-simple-icons-whatsapp" class="size-4 text-success" /><UIcon name="i-lucide-message-square-text" class="size-4 text-info" />{{ t.whatsapp.mensagem }}
             </h2>
             <p class="mt-1 text-sm text-muted">
               {{ t.whatsapp.mensagemDica }}
@@ -367,7 +367,7 @@ function menuDoFormulario(f: Formulario): DropdownMenuItem[][] {
               <p v-else class="mt-1 flex items-center gap-1 text-xs text-warning">
                 <UIcon name="i-lucide-triangle-alert" class="size-3.5" />{{ t.atalho.semEmail }}
               </p>
-              <!-- WhatsApp: o telefone e o link que o botão abre -->
+              <!-- WhatsApp e SMS: o telefone e o texto que os botões abrem (o mesmo texto nos 2) -->
               <dl v-if="p.whatsapp" class="mt-1.5 grid grid-cols-[4.5rem_1fr] gap-x-2 gap-y-1 text-xs">
                 <dt class="text-muted">
                   {{ t.whatsapp.previa }}
@@ -384,6 +384,10 @@ function menuDoFormulario(f: Formulario): DropdownMenuItem[][] {
               </dl>
               <p v-else class="mt-1 flex items-center gap-1 text-xs text-warning">
                 <UIcon name="i-lucide-triangle-alert" class="size-3.5" />{{ p.contato.telefone ? t.whatsapp.telefoneInvalido : t.whatsapp.semTelefone }}
+              </p>
+              <!-- O fixo abre o WhatsApp, mas não recebe SMS. -->
+              <p v-if="p.whatsapp && ehTelefoneFixo(p.contato.telefone)" class="mt-1 flex items-center gap-1 text-xs text-warning">
+                <UIcon name="i-lucide-triangle-alert" class="size-3.5" />{{ t.sms.telefoneFixo }}
               </p>
             </div>
           </div>

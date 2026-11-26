@@ -10,12 +10,15 @@
  *  - WhatsApp: com número, abre a conversa com ele; sem número (link do
  *    formulário), a pessoa escolhe a conversa. A mensagem já está no campo e
  *    quem envia é ela; o ENSPACE não fica sabendo;
+ *  - SMS: o link `sms:` abre o app de mensagens com número e texto; o Google
+ *    Messages Web abre vazio, e a pessoa cola o número e a mensagem. Quem envia
+ *    é ela, pelo celular; o ENSPACE não fica sabendo;
  *  - formulário público: a resposta cria um item na categoria do formulário;
  *  - Microsoft: aceitar integra o Correio do Outlook e o compositor libera.
  */
 import type { Textos } from './textos'
 import { type Email, EU, agora, categoriaPorSlug, enderecoDoItem, itens, workspace } from './mocks'
-import { useComunicacao } from './estado'
+import { telefoneLegivel, useComunicacao } from './estado'
 import { type AppExterno, useAppExterno } from './simulador'
 
 const props = defineProps<{ t: Textos }>()
@@ -98,6 +101,18 @@ function iniciais(s: string) {
   return s.split(/[\s·]+/).filter(p => /^\p{L}/u.test(p)).slice(0, 2).map(p => p[0]!.toUpperCase()).join('')
 }
 
+/* ---------- SMS: app de mensagens e Google Messages Web ---------- */
+
+const paraDoSms = ref('')
+const smsEnviados = ref<{ texto: string, hora: string }[]>([])
+const podeEnviarSms = computed(() => paraDoSms.value.replace(/\D/g, '').length >= 10 && !!mensagem.value.trim())
+
+function enviarSms() {
+  if (!podeEnviarSms.value) return
+  smsEnviados.value.push({ texto: mensagem.value.trim(), hora: horaCurta.value.format(agora()) })
+  mensagem.value = ''
+}
+
 /* ---------- Página pública do formulário ---------- */
 
 const formulario = computed(() => app.value?.tipo === 'formulario' ? formularios.value.find(f => f.id === app.value!.formularioId) ?? null : null)
@@ -166,6 +181,18 @@ watch(app, (a) => {
     buscaDeConversa.value = ''
     mensagem.value = a.texto
     enviadas.value = []
+  }
+  if (a.tipo === 'sms') {
+    // O link sms: chega com o número e o texto; sem número, a pessoa digita.
+    paraDoSms.value = a.telefone ? telefoneLegivel(a.telefone) : ''
+    mensagem.value = a.texto
+    smsEnviados.value = []
+  }
+  if (a.tipo === 'sms-web') {
+    // O Google Messages Web abre vazio: a pessoa cola o que copiou.
+    paraDoSms.value = ''
+    mensagem.value = ''
+    smsEnviados.value = []
   }
 }, { immediate: true })
 </script>
@@ -267,6 +294,53 @@ watch(app, (a) => {
           </template>
           <p class="border-t border-default px-3 py-2 text-xs text-muted">
             {{ t.simulador.naoRegistra }}
+          </p>
+        </div>
+
+        <!-- App de mensagens do aparelho (genérico, sem marca): o link sms: chega com número e texto -->
+        <div v-else-if="app.tipo === 'sms' || app.tipo === 'sms-web'" class="flex h-112 flex-col">
+          <header class="flex items-center gap-2 border-b border-default bg-elevated px-4 py-2.5 text-sm font-semibold text-highlighted">
+            <UIcon :name="app.tipo === 'sms' ? 'i-lucide-message-square-text' : 'i-simple-icons-googlemessages'" class="size-4 text-info" />
+            {{ app.tipo === 'sms' && app.nome ? app.nome : t.simulador.novaConversa }}
+          </header>
+          <UAlert v-if="app.tipo === 'sms-web'" icon="i-lucide-clipboard" color="info" variant="subtle" :description="t.simulador.textoCopiadoAviso" class="rounded-none" />
+          <div class="flex items-center gap-2 border-b border-default px-3 py-2">
+            <span class="text-sm text-muted">{{ t.sms.destinatario }}</span>
+            <UInput v-model="paraDoSms" :placeholder="t.simulador.colarNumero" type="tel" class="flex-1" :aria-label="t.sms.destinatario" />
+            <UButton
+              v-if="app.tipo === 'sms-web' && app.telefone && !paraDoSms"
+              :label="t.simulador.colar"
+              icon="i-lucide-clipboard-paste"
+              color="neutral"
+              variant="outline"
+              size="xs"
+              @click="paraDoSms = telefoneLegivel(app.telefone)"
+            />
+          </div>
+          <div class="flex flex-1 flex-col gap-2 overflow-y-auto bg-muted p-4">
+            <div v-for="(m, i) in smsEnviados" :key="i" class="ml-auto max-w-sm rounded-2xl bg-info/15 px-3 py-2 text-sm text-highlighted shadow-sm">
+              <p class="whitespace-pre-wrap break-words">
+                {{ m.texto }}
+              </p>
+              <p class="mt-1 text-right text-xs text-muted">
+                {{ m.hora }}
+              </p>
+            </div>
+          </div>
+          <footer class="flex items-end gap-2 border-t border-default p-2">
+            <UTextarea v-model="mensagem" autoresize :rows="2" :maxrows="5" :placeholder="app.tipo === 'sms-web' ? t.simulador.colarTexto : t.simulador.digiteMensagem" class="flex-1" :aria-label="t.simulador.digiteMensagem" />
+            <UButton
+              v-if="app.tipo === 'sms-web' && !mensagem && !smsEnviados.length"
+              :label="t.simulador.colar"
+              icon="i-lucide-clipboard-paste"
+              color="neutral"
+              variant="outline"
+              @click="mensagem = app.texto"
+            />
+            <UButton icon="i-lucide-send-horizontal" color="info" :disabled="!podeEnviarSms" :aria-label="t.simulador.enviar" @click="enviarSms" />
+          </footer>
+          <p class="border-t border-default px-3 py-2 text-xs text-muted">
+            {{ t.simulador.smsNaoRegistra }}
           </p>
         </div>
 

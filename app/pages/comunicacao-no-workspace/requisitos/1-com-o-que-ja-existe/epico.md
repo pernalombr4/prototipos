@@ -2,13 +2,14 @@
 
 **O que é:** a pessoa escreve o e-mail de cada tela de uso do ENSPACE: do item, da lista e do quadro de itens, das
 tarefas, da Agenda e do "Novo e-mail" da barra do topo. Nos mesmos lugares, o atalho de WhatsApp abre a conversa com
-o contato no WhatsApp Web ou no app, com o texto pronto, e o link do formulário público também sai pelo WhatsApp. Com
+o contato no WhatsApp Web ou no app, com o texto pronto, e o atalho de SMS abre o painel "Enviar SMS", com o texto pronto
+e os caminhos para enviar pelo celular da pessoa. O link do formulário público também sai pelo WhatsApp e pelo SMS. Com
 item na tela, o e-mail fica na Mail Box do item, que passa
 a existir em todo item e no painel da tarefa. O link do formulário público aparece onde o formulário está em uso, e a
 central "E-mails" no menu junta as telas de e-mail de hoje em 4 abas. É só tela: o envio pela conta do Outlook, o
 endereço do item, o e-mail gravado com o item, a Mail Box, os campos de e-mail e de telefone, o link público, a tela
 "Emails Recebidos" e as telas de Configurações › E-mails já existem no back de hoje. O WhatsApp abre por um link do
-próprio WhatsApp, sem back-end.
+próprio WhatsApp, e o SMS pelo link `sms:` do aparelho, sem back-end.
 
 **Onde vale:** a barra do topo; o item (painel esquerdo, Visão Geral e Mail Box); a lista e o quadro de itens da
 categoria; Tarefas › Rápidas (lista, quadro e painel da tarefa); a Agenda (modal "Evento"); Requisições; Configurações
@@ -29,7 +30,8 @@ falha". A barra de baixo é ferramenta de revisão e não entra no produto. Os t
 - o botão de e-mail no cartão do quadro (documento "Botão de e-mail no cartão do quadro de itens e de tarefas"); aqui o quadro usa o clique direito;
 - atalhos e link de formulário na tela inicial: a tela inicial continua como hoje;
 - o envio pelo WhatsApp sem a pessoa apertar Enviar e o registro da conversa do WhatsApp no item;
-- SMS e integração com Google.
+- o envio de SMS pelo próprio ENSPACE, por um serviço de SMS contratado, e o registro do SMS no item (P909);
+- integração com Google.
 
 **Relevância** (coluna das tarefas): Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer,
 conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
@@ -40,11 +42,11 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 |---|---|---|---|
 | [1. Compositor e Novo e-mail na barra do topo](parte-1-compositor-e-novo-email.md) | A gaveta "Nova Mensagem" aberta de qualquer tela, com o "De" à vista, o item da tela de origem e o rascunho minimizado; o botão "Novo e-mail" e a tecla C | | Cada atalho das outras partes abre esta gaveta |
 | [2. Mail Box em todo item e na tarefa](parte-2-mail-box-do-item-e-da-tarefa.md) | A aba Mail Box em todo item e no painel da tarefa, com "Novo e-mail" e "Responder" | 1 | O e-mail que as partes 3 a 7 vinculam ao item aparece aqui |
-| [3. Atalho de e-mail e WhatsApp no item](parte-3-atalho-no-item.md) | O cartão "Contato do item", com E-mail e WhatsApp, e o ícone ao lado de cada campo de e-mail e de telefone | 1, 2 | É o atalho principal; as partes 4 a 7 repetem o mesmo botão em outras telas |
-| [4. Atalho na lista e no quadro de itens](parte-4-atalho-na-lista-e-no-quadro.md) | Os submenus "E-mail" e "WhatsApp" no menu da linha e no clique direito do cartão, e a coluna Contato | 1 | Usa os contatos do item e os 2 caminhos do atalho |
-| [5. Atalho nas tarefas](parte-5-atalho-nas-tarefas.md) | O e-mail e o WhatsApp ao responsável na lista, no lote, no quadro e no painel da tarefa | 1, 2 | O painel da tarefa ganha a aba Mail Box na parte 2 |
-| [6. Lembrete na Agenda](parte-6-lembrete-na-agenda.md) | "Enviar lembrete" no modal "Evento", por e-mail e por WhatsApp, por pessoa e para todos | 1 | Usa os contatos do item e os 2 caminhos do atalho |
-| [7. Link de formulário público](parte-7-link-de-formulario-publico.md) | Copiar e enviar o link público, por e-mail e por WhatsApp, em Requisições, na lista de itens, na tarefa de formulário e nos Formulários da categoria | 1 | "Enviar o link por" usa os atalhos de e-mail e de WhatsApp |
+| [3. Atalho de e-mail, WhatsApp e SMS no item](parte-3-atalho-no-item.md) | O cartão "Contato do item", com E-mail, WhatsApp e SMS, o painel "Enviar SMS" e o ícone ao lado de cada campo de e-mail e de telefone | 1, 2 | É o atalho principal; as partes 4 a 7 repetem os mesmos botões e o mesmo painel em outras telas |
+| [4. Atalho na lista e no quadro de itens](parte-4-atalho-na-lista-e-no-quadro.md) | Os submenus "E-mail", "WhatsApp" e "SMS" no menu da linha e no clique direito do cartão, e a coluna Contato | 1 | Usa os contatos do item e os 2 caminhos do atalho |
+| [5. Atalho nas tarefas](parte-5-atalho-nas-tarefas.md) | O e-mail, o WhatsApp e o SMS ao responsável na lista, no lote, no quadro e no painel da tarefa | 1, 2 | O painel da tarefa ganha a aba Mail Box na parte 2 |
+| [6. Lembrete na Agenda](parte-6-lembrete-na-agenda.md) | "Enviar lembrete" no modal "Evento", por e-mail, por WhatsApp e por SMS, por pessoa e para todos | 1 | Usa os contatos do item e os 2 caminhos do atalho |
+| [7. Link de formulário público](parte-7-link-de-formulario-publico.md) | Copiar e enviar o link público, por e-mail, por WhatsApp e por SMS, em Requisições, na lista de itens, na tarefa de formulário e nos Formulários da categoria | 1 | "Enviar o link por" usa os atalhos de e-mail, de WhatsApp e de SMS |
 | [8. Central E-mails](parte-8-central-emails.md) | A entrada no menu, as 4 abas pela permissão de hoje, Modelos e Caixas de E-mail na tabela nova, a aba Configurações e os itens de Configurações › E-mails | 1 | "Novo e-mail" e "Usar em um e-mail" abrem o compositor |
 | [9. Aba Mensagens](parte-9-aba-mensagens.md) | A tabela dos e-mails dos itens, com barra, filtros, menu da linha, leitura no painel lateral e o estado inicial | 8 | A aba mora na central |
 | [10. E-mails do sistema na aba Mensagens](parte-10-emails-do-sistema.md) | O filtro "Do sistema", a coluna Status e "Reenviar e-mail", para quem tem a permissão de hoje | 9 | Soma linhas, filtro e coluna à tabela da parte 9 |
@@ -60,7 +62,7 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 | RN905 | Um e-mail sem item vinculado sai pela conta do Outlook da pessoa e fica só no Outlook dela: o ENSPACE não guarda esse e-mail. | O e-mail escrito pelo "Novo e-mail" na Agenda, sem item, não aparece na aba Mensagens. | Obrigatório |
 | RN906 | O item vinculado vem só da tela de origem: o item, a tarefa com item, a Mail Box do item, um atalho com item ou o "Novo e-mail" com um item ou uma tarefa com item aberta. O vínculo grava a referência do item. | O e-mail aberto pelo atalho da tarefa T-1042, ligada a CTR-00231, sai vinculado a CTR-00231. | Obrigatório |
 | RN907 | Os contatos de um item são, na ordem dos campos da categoria: cada campo do tipo E-mail preenchido e cada campo Texto com máscara com a máscara CEL preenchido, com o nome do campo como rótulo e sem nome de pessoa; cada campo Pessoa/Empresa com E-mail de contato ou Telefone de contato, com o Nome de contato como nome e os 2 dados no mesmo contato; e, por último, o e-mail de quem abriu a requisição, com o rótulo "Requisitante". Campo vazio não vira contato. | CTR-00230 tem "E-mail do contato" e "Telefone do contato" preenchidos, "E-mail do financeiro" vazio e o E-mail do Requisitante: os contatos são "E-mail do contato", "Telefone do contato" e "Requisitante". | Obrigatório |
-| RN908 | O 1º contato do item para o e-mail é o 1º contato da lista com e-mail; para o WhatsApp, o 1º contato com telefone. | Em CTR-00231, o 1º contato do e-mail é "E-mail do contato", e o do WhatsApp, "Telefone do contato". | Obrigatório |
+| RN908 | O 1º contato do item para o e-mail é o 1º contato da lista com e-mail; para o WhatsApp e o SMS, o 1º contato com telefone. | Em CTR-00231, o 1º contato do e-mail é "E-mail do contato", e o do WhatsApp e do SMS, "Telefone do contato". | Obrigatório |
 | RN909 | Cada atalho de e-mail tem 2 caminhos: "Escrever pelo ENSPACE", que abre o compositor com o item vinculado e o contato em Para, e "Abrir no meu app de e-mail", que abre o app de e-mail padrão do computador. Escrever pelo ENSPACE é o caminho principal; o app fica atrás da seta "Outras formas de enviar e-mail" ou, onde só cabe ícone ou menu, como 2º item do menu. | No item, o clique no corpo do botão E-mail abre o compositor; a seta abre o app. | Obrigatório |
 | RN910 | Sem a conta do Outlook integrada, o atalho de e-mail abre direto o app de e-mail do computador. | Bruno, sem a integração, clica em E-mail no item e o app abre, sem o compositor. | Obrigatório |
 | RN911 | O e-mail aberto no app segue o link `mailto:<para>?cc=<endereço do item>&subject=<assunto>`: o contato em Para, o endereço do item em Cc e o assunto padrão. Sem item, o link não leva Cc. O Cc é o que traz a cópia para a Mail Box do item e a resposta de quem usa "Responder a todos". | `mailto:marina.alves@example.com?cc=ctr-00231.aurora@<domínio das caixas>&subject=<assunto padrão codificado para URL>`. | Obrigatório |
@@ -75,6 +77,12 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 | RN921 | Um destinatário sem telefone válido deixa o atalho de WhatsApp indisponível, com o motivo: "Sem telefone cadastrado", "Telefone inválido" (menos de 10 dígitos) ou "Sem contato". O atalho indisponível segue RN913: fica no Tab, com o motivo na dica e no nome acessível. | O responsável sem telefone mostra o ícone do WhatsApp cinza, com "Sem telefone cadastrado". | Obrigatório |
 | RN922 | O WhatsApp para várias pessoas abre 1 conversa por vez, numa fila: o link do WhatsApp leva 1 número, e o navegador bloqueia várias abas abertas de uma vez. A fila diz quem fica de fora por falta de telefone válido. | "WhatsApp para 3 responsáveis" abre "Conversa 1 de 3"; "Próxima" passa para a 2ª. | Obrigatório |
 | RN923 | O WhatsApp não depende da conta do Outlook nem de chave de módulo: o atalho existe em cada workspace, para cada pessoa. | Bruno, sem a integração do Outlook, abre o WhatsApp do item. | Obrigatório |
+| RN924 | Cada atalho de SMS abre o painel "Enviar SMS", com o destinatário, o texto pronto, que a pessoa pode mudar, e 4 caminhos: "Abrir no app de SMS", pelo link `sms:+<número>?body=<texto codificado para URL>` (RFC 5724), ou `sms:?body=<texto>` sem número; "Abrir no celular", com o QR code do mesmo link; "Copiar o número" e "Copiar a mensagem"; e "Google Messages Web", que copia a mensagem e abre `https://messages.google.com/web/conversations/new`. O SMS sai do celular da pessoa, pelo plano dela; o ENSPACE não envia, não grava e não fica sabendo do envio. | O SMS de CTR-00230 abre o painel com "+55 11 99876-1203", "Olá. Escrevo sobre CTR-00230 · Contrato de licença de software de gestão." e o link `sms:+5511998761203?body=Ol%C3%A1...`. | Obrigatório |
+| RN925 | O número do SMS segue RN919, com o "+" na frente, e aparece no painel no formato "+55 11 99876-1203". O texto pronto do SMS é o mesmo do WhatsApp (RN920, S905). | "(11) 99876-1203" vira `sms:+5511998761203`. | Obrigatório |
+| RN926 | Um destinatário sem celular deixa o atalho de SMS indisponível, com os motivos de RN921 e mais 1: "Telefone fixo não recebe SMS", para o número do Brasil com DDD e 8 dígitos (o celular tem 9 e começa com 9). O número de fora do Brasil não passa por essa regra. O WhatsApp continua disponível no telefone fixo. | Em CTR-00231, "+55 11 3456-7710" deixa o SMS cinza, com "Telefone fixo não recebe SMS", e o WhatsApp disponível. | Obrigatório |
+| RN927 | O painel mostra quantos caracteres o texto tem e quantos SMS ele ocupa: 160 caracteres por SMS só com o alfabeto GSM 7 bits; com 1 caractere fora dele (ã, õ, ç, á, ê), 70 por SMS; acima disso, a mensagem chega dividida em partes de 153 ou 67 caracteres. A contagem informa e não bloqueia o envio. | "Olá. Escrevo sobre CTR-00231 · Contrato de manutenção predial." mostra "62 caracteres · 1 SMS" e a ajuda do limite de 70. | Obrigatório |
+| RN928 | O SMS para várias pessoas usa a fila de RN922, com o título "Avisar por SMS" e o botão "Abrir SMS", que abre o app de SMS pelo link de RN924. Cada pessoa da fila tem também "Copiar o número" e "Copiar a mensagem", para quem envia pelo Vincular ao Celular. O telefone fixo fica de fora, com "Ficam de fora, sem celular válido: <nomes>.". | "SMS para 3 responsáveis" abre "Conversa 1 de 3"; "Abrir SMS" abre o app com o número e o texto de Bruno Teixeira. | Obrigatório |
+| RN929 | O SMS não depende da conta do Outlook nem de chave de módulo: o atalho existe em cada workspace, para cada pessoa. | Bruno, sem a integração do Outlook, abre o painel "Enviar SMS" do item. | Obrigatório |
 | RN916 | A tabela a seguir define quem vê cada aba da central "E-mails" e os e-mails do sistema, pelas permissões de leitura de hoje. Política: Única. | Linha 5: o membro sem a permissão de ver os e-mails enviados não vê os e-mails do sistema na aba Mensagens. | Obrigatório |
 
 | Linha | O que | Quem vê |
@@ -113,6 +121,9 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 | Atalho de WhatsApp | O botão, o ícone ou o item de menu que abre a conversa no WhatsApp com o texto pronto | "WhatsApp", "WhatsApp para <nome>" |
 | Campo de telefone | O campo Texto com máscara com a máscara CEL e o Telefone de contato do Pessoa/Empresa | O nome do campo |
 | Fila do WhatsApp | O modal que abre 1 conversa por vez quando o WhatsApp vai para várias pessoas | "Avisar pelo WhatsApp", "Conversa 1 de N" |
+| Atalho de SMS | O botão, o ícone ou o item de menu que abre o painel "Enviar SMS" para um telefone da tela | "SMS", "SMS para <nome>" |
+| Painel "Enviar SMS" | O modal com o destinatário, o texto pronto e os 4 caminhos para enviar o SMS pelo celular da pessoa | "Enviar SMS", "Enviar SMS para <nome>" |
+| Fila do SMS | A fila do WhatsApp com o SMS: 1 conversa por vez, com "Abrir SMS" | "Avisar por SMS", "Conversa 1 de N" |
 
 ## Em aberto
 
@@ -127,4 +138,9 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 | S903 | O texto pronto do WhatsApp é "Olá, <primeiro nome>. Escrevo sobre <referência> · <nome do item>.", como no protótipo. | produto | Muda o texto com que o WhatsApp abre nas partes 3 e 4 |
 | S904 | Sem configuração, o e-mail e o telefone de um mesmo contato aparecem como 2 contatos ("E-mail do contato" e "Telefone do contato"), porque vêm de 2 campos. Só o Pessoa/Empresa junta os 2. Juntar campos soltos é a configuração do épico "Escolher na categoria de onde vêm o nome e o e-mail do contato". | produto | Para juntar já neste épico, falta a regra de qual telefone vai com qual e-mail |
 | P905 | De onde vem o telefone do membro, para o WhatsApp ao responsável da tarefa e ao participante da Agenda? O cadastro do usuário tem o campo de telefone, mas nenhuma tela do develop deixa a pessoa preenchê-lo. | produto e dev | Sem tela para o telefone, o WhatsApp das partes 5 e 6 fica indisponível até o perfil ganhar o campo |
+| P907 | No Windows, o link `sms:` abre o app definido para SMS, e o Vincular ao Celular nem sempre aparece como opção nas Configurações (relatos no Microsoft Q&A). Com o Vincular ao Celular pareado, o link abre a conversa com o número e o texto? | dev, em teste no Windows 11 com Android e com iPhone | Se não abre, "Abrir no app de SMS" fica em 2º lugar no Windows e o QR code sobe para o 1º |
+| P908 | Qual biblioteca gera o QR code do painel "Enviar SMS", no próprio navegador e sem serviço de fora? | dev | Muda só a peça que desenha o código; o link dentro dele é o de RN924 |
+| P909 | O envio de SMS pelo próprio ENSPACE, com registro no item, entra no roteiro? Pede serviço de SMS contratado (Twilio, Zenvia, Azure Communication Services pelo Messaging Connect), custo por mensagem e remetente cadastrado. O Teams corporativo não serve: só envia SMS nos Estados Unidos e no Canadá. | produto | Se entra, vira épico próprio, com back-end, custo e registro no item |
+| P910 | O iPhone aceita o texto pronto no link `sms:+<número>?body=<texto>`? Versões antigas do iOS liam `&body=`. | dev, em teste no iPhone | Se não aceita, o link do iPhone usa `&body=` |
+| S905 | O texto pronto do SMS é o mesmo do WhatsApp (S903), e a pessoa muda o texto no painel antes de enviar. | produto | Com texto próprio, o SMS ganha um texto pronto separado, mais curto, por causa do limite de 160 caracteres |
 | P906 | A máscara do Texto com máscara pode ser escrita à mão. O campo de telefone com outra máscara, como "(##) ####-####", fica de fora? | produto e dev | Se entra, RN918 passa a aceitar uma lista de máscaras de telefone |

@@ -1,7 +1,7 @@
 # 1. Cartão "Contato da categoria"
 
 **Objetivo:** quem administra abre o cartão "Contato da categoria" no painel da categoria, escolhe de quais campos vêm
-o nome, o e-mail e o telefone de cada contato do item, ajusta o assunto do e-mail e o texto pronto do WhatsApp, confere
+o nome, o e-mail e o telefone de cada contato do item, ajusta o assunto do e-mail e o texto pronto do WhatsApp e do SMS, confere
 a prévia e salva.
 
 **Onde vale:** Configurações › Estrutura › Categorias › a categoria: o 13º cartão do painel e a página que ele abre.
@@ -42,18 +42,18 @@ a prévia e salva.
 | RF009 | O campo deve ter, em "Inserir:", 1 botão por variável: `{referencia}`, `{titulo}`, `{nome}` e `{categoria}` (RN903). | Os 4 botões aparecem embaixo do campo. | Importante | Obrigatório |
 | RF010 | O botão da variável deve acrescentar a variável no fim do assunto, separada por 1 espaço. | Assunto "Contrato"; o clique em `{nome}` deixa "Contrato {nome}". | Desejável | Desejável |
 
-## Texto pronto do WhatsApp (RF)
+## Texto pronto do WhatsApp e do SMS (RF)
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF022 | O bloco "Texto pronto do WhatsApp", depois de "Assunto do e-mail", deve ter o campo de texto da categoria, aberto com o texto salvo, e a ajuda "Aceita as mesmas variáveis do assunto. Quem envia pode mudar o texto antes de enviar." (RN905). | Contratos abre com "Olá, {nome}. Escrevo sobre {referencia} · {titulo}."; Fornecedores, com "Olá, {nome}. Escrevo sobre o cadastro de {titulo} como fornecedor.". | Essencial | Obrigatório |
+| RF022 | O bloco "Texto pronto do WhatsApp e do SMS", com os ícones do WhatsApp e do SMS no título, depois de "Assunto do e-mail", deve ter o campo de texto da categoria, aberto com o texto salvo, e a ajuda "Aceita as mesmas variáveis do assunto. Quem envia pode mudar o texto antes de enviar." (RN905). | Contratos abre com "Olá, {nome}. Escrevo sobre {referencia} · {titulo}."; Fornecedores, com "Olá, {nome}. Escrevo sobre o cadastro de {titulo} como fornecedor.". | Essencial | Obrigatório |
 | RF023 | O campo deve ter, em "Inserir:", os 4 botões de variável do assunto, que acrescentam a variável no fim do texto, separada por 1 espaço. | O clique em `{categoria}` acrescenta "{categoria}" no fim do texto, não do assunto. | Importante | Obrigatório |
 
 ## Prévia (RF)
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF011 | O bloco "Prévia: o que os botões E-mail e WhatsApp abrem" deve ter um seletor com itens da categoria que a pessoa pode ver, para escolher o item de exemplo. | Em Contratos, o seletor mostra "CTR-00231 · Contrato de manutenção predial" e outros contratos; o contrato sem permissão para a pessoa fica de fora. | Importante | Obrigatório |
+| RF011 | O bloco "Prévia: o que os botões E-mail, WhatsApp e SMS abrem" deve ter um seletor com itens da categoria que a pessoa pode ver, para escolher o item de exemplo. | Em Contratos, o seletor mostra "CTR-00231 · Contrato de manutenção predial" e outros contratos; o contrato sem permissão para a pessoa fica de fora. | Importante | Obrigatório |
 | RF012 | Para cada contato da página, a prévia deve mostrar o "Nome do contato na tela" e o nome lido no item de exemplo. | CTR-00231: "Contato da contraparte" e Marina Alves. | Essencial | Obrigatório |
 | RF013 | Para o contato com e-mail no item de exemplo, a prévia deve mostrar o Para, o Assunto e o Cc. | CTR-00231, "Contato da contraparte": Para marina.alves@example.com, Assunto "CTR-00231 · Contrato de manutenção predial" e o Cc. | Essencial | Obrigatório |
 | RF014 | O Assunto da prévia deve trocar as variáveis pelos valores do item de exemplo e do contato (RN903). | Assunto "Olá, {nome}" com CTR-00231 mostra "Olá, Marina" para "Contato da contraparte". | Essencial | Obrigatório |
@@ -61,14 +61,15 @@ a prévia e salva.
 | RF016 | Sem nome no item de exemplo, a prévia deve mostrar "Sem nome" no lugar do nome. | CTR-00231, "Requisitante": "Sem nome" e o Para carla.nogueira@example.com. | Importante | Obrigatório |
 | RF017 | Sem e-mail no item de exemplo, a prévia deve mostrar "Sem e-mail cadastrado" no lugar do Para, do Assunto e do Cc. | CTR-00229, "Contato da contraparte": Juliana Freitas e "Sem e-mail cadastrado". | Importante | Obrigatório |
 | RF018 | A prévia deve mostrar a edição da página antes do Salvar. | Trocar o E-mail de "Contato da contraparte" para "E-mail do financeiro" muda o Para da prévia sem salvar. | Importante | Obrigatório |
-| RF024 | Para o contato com telefone válido no item de exemplo, a prévia deve mostrar, embaixo do e-mail, o telefone e o texto pronto do WhatsApp com as variáveis trocadas (RN903). | CTR-00231, "Contato da contraparte": WhatsApp +55 11 3456-7710 e "Olá, Marina. Escrevo sobre CTR-00231 · Contrato de manutenção predial.". | Essencial | Obrigatório |
-| RF025 | Sem telefone ou com telefone inválido no item de exemplo, a prévia deve mostrar "Sem telefone cadastrado" ou "Telefone inválido" no lugar do WhatsApp. | CTR-00231, "Requisitante": "Sem telefone cadastrado". | Importante | Obrigatório |
+| RF024 | Para o contato com telefone válido no item de exemplo, a prévia deve mostrar, embaixo do e-mail, a linha "WhatsApp e SMS" com o telefone e o texto pronto com as variáveis trocadas (RN903). | CTR-00231, "Contato da contraparte": WhatsApp e SMS +55 11 3456-7710 e "Olá, Marina. Escrevo sobre CTR-00231 · Contrato de manutenção predial.". | Essencial | Obrigatório |
+| RF025 | Sem telefone ou com telefone inválido no item de exemplo, a prévia deve mostrar "Sem telefone cadastrado" ou "Telefone inválido" no lugar do WhatsApp e do SMS. | CTR-00231, "Requisitante": "Sem telefone cadastrado". | Importante | Obrigatório |
+| RF026 | Com telefone fixo no item de exemplo, a prévia deve mostrar, embaixo da linha "WhatsApp e SMS", o aviso "Telefone fixo não recebe SMS" (RN926 do épico "Escrever e-mail de qualquer tela e central E-mails no menu"). | CTR-00231, "Contato da contraparte", com +55 11 3456-7710: o aviso aparece; CTR-00230, com +55 11 99876-1203, fica sem aviso. | Importante | Obrigatório |
 
 ## Salvar (RF)
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF019 | "Salvar" deve gravar na categoria os contatos, as origens, o assunto e o texto pronto do WhatsApp da página. | Salvar em Contratos e reabrir o cartão mostra o que foi salvo. | Essencial | Obrigatório |
+| RF019 | "Salvar" deve gravar na categoria os contatos, as origens, o assunto e o texto pronto do WhatsApp e do SMS da página. | Salvar em Contratos e reabrir o cartão mostra o que foi salvo. | Essencial | Obrigatório |
 | RF020 | Ao sair da página sem salvar, o sistema deve descartar a edição. | Trocar o assunto, voltar ao painel e reabrir o cartão mostra o assunto salvo antes da troca. | Importante | Obrigatório |
 
 ## Em aberto

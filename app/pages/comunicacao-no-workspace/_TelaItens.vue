@@ -6,8 +6,8 @@
  *
  * PROPOSTA:
  *  - "E-mail" no menu de cada linha e no clique direito do cartão, com os
- *    contatos do item, e o submenu "WhatsApp" ao lado (rodada 10; o SMS
- *    continua fora do plano);
+ *    contatos do item, e os submenus "WhatsApp" (rodada 10) e "SMS" (rodada
+ *    11) ao lado;
  *  - o botão do link público, ao lado de "Novo registro", quando a categoria
  *    tem formulário público.
  */
@@ -16,7 +16,7 @@ import type { EnKanbanCardConfig, EnKanbanColumn, EnTableColumn } from '@be-enli
 import type { Textos } from './textos'
 import { type ItemDoProtótipo, type StatusDoItem, categoriaPorSlug, itens, workspace } from './mocks'
 import { type Contato, cliqueDireitoNoCartao, contatosDoItem, useComunicacao, useMarcaDeProposta } from './estado'
-import { useAtalhos, useCopiar, useWhatsApp } from './atalhos'
+import { useAtalhos, useCopiar, useSms, useWhatsApp } from './atalhos'
 import LinksPublicos from './_LinksPublicos.vue'
 
 const props = defineProps<{ t: Textos }>()
@@ -24,6 +24,7 @@ const props = defineProps<{ t: Textos }>()
 const { categoriaAtual, abrirItem, formularios, config, fase } = useComunicacao()
 const { ativos, itensDeMenu } = useAtalhos()
 const { itemDeMenu: itemDeWhatsApp } = useWhatsApp()
+const { itemDeMenu: itemDeSms } = useSms()
 const { copiar } = useCopiar()
 const marca = useMarcaDeProposta()
 const idioma = useIdioma()
@@ -111,9 +112,14 @@ function opcoesDeContato(i: ItemDoProtótipo): DropdownMenuItem[] {
   const whatsapp: DropdownMenuItem[] = comTelefone.length
     ? comTelefone.map(c => itemDeWhatsApp(c, { item: i }, c.nome ? `${c.rotulo} · ${c.nome}` : c.rotulo))
     : [{ label: props.t.whatsapp.semTelefone, disabled: true }]
+  // SMS: as mesmas linhas do WhatsApp; cada uma abre o painel "Enviar SMS".
+  const sms: DropdownMenuItem[] = comTelefone.length
+    ? comTelefone.map(c => itemDeSms(c, { item: i }, c.nome ? `${c.rotulo} · ${c.nome}` : c.rotulo))
+    : [{ label: props.t.whatsapp.semTelefone, disabled: true }]
   return [
     { label: props.t.atalho.email, icon: 'i-lucide-mail', children: grupos, class: marca.value },
     { label: props.t.whatsapp.rotulo, icon: 'i-simple-icons-whatsapp', children: [whatsapp], class: marca.value },
+    { label: props.t.sms.rotulo, icon: 'i-lucide-message-square-text', children: [sms], class: marca.value },
   ]
 }
 
@@ -157,7 +163,7 @@ const menuDoCartao = computed<ContextMenuItem[][]>(() => {
   const i = cartaoDoMenu.value
   if (!i) return []
   // Cópia do menu que o cartão já tem no develop (código da develop lido em 25/11/2026): Ver
-  // Detalhes, Editar, Mover para, Enviar para Lixeira e Copiar Link. A proposta soma o "E-mail" e o "WhatsApp".
+  // Detalhes, Editar, Mover para, Enviar para Lixeira e Copiar Link. A proposta soma o "E-mail", o "WhatsApp" e o "SMS".
   return [
     [{ type: 'label', label: `${i.reference} · ${i.titulo}` }],
     [

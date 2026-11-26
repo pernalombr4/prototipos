@@ -2,7 +2,7 @@
 
 **O que é:** cada categoria ganha o cartão "Contato da categoria". Nele, quem administra escolhe de quais campos vêm o
 nome, o e-mail e o telefone de cada contato do item, o assunto com que o e-mail abre e o texto pronto com que o WhatsApp
-abre. Com o cartão salvo, o "Contato do item", os submenus "E-mail" e "WhatsApp" da lista e do quadro, a coluna
+e o SMS abrem. Com o cartão salvo, o "Contato do item", os submenus "E-mail", "WhatsApp" e "SMS" da lista e do quadro, a coluna
 "Contato", o Para do compositor e o lembrete da Agenda passam a usar esses contatos, esse assunto e esse texto. É dado novo na categoria: onde guardar fica com os devs. Depende do épico "Escrever e-mail de qualquer tela e central E-mails no menu", que entrega os atalhos com o contato tirado dos campos de e-mail do item.
 
 **Onde vale:** Configurações › Estrutura › Categorias › a categoria (o 13º cartão e a página dele); a tela do item
@@ -25,8 +25,8 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 
 | Parte | O que entrega | Depende de | Por que nesta ordem |
 |---|---|---|---|
-| [1. Cartão "Contato da categoria"](parte-1-cartao-contato-da-categoria.md) | O 13º cartão do painel da categoria, com os contatos, as origens do nome, do e-mail e do telefone, o assunto e o texto pronto do WhatsApp com variáveis, a prévia e o Salvar | | Grava o contato que a parte 2 lê |
-| [2. O contato da categoria nos atalhos](parte-2-contato-nos-atalhos.md) | O "Contato do item", o assunto, o texto do WhatsApp, os submenus e a coluna da lista, o Para do compositor, a Agenda e o link da central usando o contato salvo | 1 | Lê o que a parte 1 grava |
+| [1. Cartão "Contato da categoria"](parte-1-cartao-contato-da-categoria.md) | O 13º cartão do painel da categoria, com os contatos, as origens do nome, do e-mail e do telefone, o assunto e o texto pronto do WhatsApp e do SMS com variáveis, a prévia e o Salvar | | Grava o contato que a parte 2 lê |
+| [2. O contato da categoria nos atalhos](parte-2-contato-nos-atalhos.md) | O "Contato do item", o assunto, o texto do WhatsApp e do SMS, os submenus e a coluna da lista, o Para do compositor, a Agenda e o link da central usando o contato salvo | 1 | Lê o que a parte 1 grava |
 
 ## Regras de negócio comuns (RN)
 
@@ -34,9 +34,9 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 |---|---|---|---|
 | RN901 | Cada contato da categoria tem um "Nome do contato na tela", um campo de origem do nome, um do e-mail e um do telefone. | Contratos: "Contato da contraparte" (nome no campo Contato da contraparte, e-mail no campo E-mail do contato, telefone no campo Telefone do contato) e "Requisitante" (sem nome, e-mail no E-mail do Requisitante, sem telefone). | Obrigatório |
 | RN902 | A origem do e-mail só pode ser um campo E-mail da categoria, o subcampo E-mail de contato de um campo "Pessoa/Empresa" ou o E-mail do Requisitante, o campo padrão de cada categoria. | Em Fornecedores, servem "E-mail comercial", "Pessoa/Empresa › E-mail de contato" e "E-mail do Requisitante". | Obrigatório |
-| RN903 | A tabela depois destas regras define o valor de cada variável do assunto e do texto pronto do WhatsApp. Variável sem valor no item fica vazia. Política: Única. | Linha 1 e 2: "{referencia} · {titulo}" em CTR-00231 vira "CTR-00231 · Contrato de manutenção predial". | Obrigatório |
+| RN903 | A tabela depois destas regras define o valor de cada variável do assunto e do texto pronto do WhatsApp e do SMS. Variável sem valor no item fica vazia. Política: Única. | Linha 1 e 2: "{referencia} · {titulo}" em CTR-00231 vira "CTR-00231 · Contrato de manutenção predial". | Obrigatório |
 | RN904 | A origem do telefone só pode ser um campo Texto com máscara com a máscara "CEL: (###) #####-####" ou o subcampo Telefone de contato de um campo "Pessoa/Empresa". | Em Fornecedores, servem "WhatsApp comercial" e "Pessoa/Empresa › Telefone de contato"; o CNPJ, com outra máscara, fica de fora. | Obrigatório |
-| RN905 | O texto pronto do WhatsApp da categoria aceita as variáveis do assunto (RN903). Sem texto salvo, vale o texto pronto do épico "Escrever e-mail de qualquer tela e central E-mails no menu". | Fornecedores com "Olá, {nome}. Escrevo sobre o cadastro de {titulo} como fornecedor.": FOR-00040 abre com "Olá, Rita. Escrevo sobre o cadastro de <nome do item> como fornecedor.". | Obrigatório |
+| RN905 | O texto pronto do WhatsApp e do SMS da categoria é 1 só, para os 2 atalhos, e aceita as variáveis do assunto (RN903). Sem texto salvo, vale o texto pronto do épico "Escrever e-mail de qualquer tela e central E-mails no menu". | Fornecedores com "Olá, {nome}. Escrevo sobre o cadastro de {titulo} como fornecedor.": FOR-00040 abre com "Olá, Rita. Escrevo sobre o cadastro de <nome do item> como fornecedor.". | Obrigatório |
 
 | Linha | Variável | Trocada por |
 |---|---|---|
@@ -64,7 +64,7 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 |---|---|---|
 | Contato da categoria | A regra que diz de quais campos vêm o nome, o e-mail e o telefone de 1 contato de cada item da categoria | Cada linha do bloco "Quem é o contato" |
 | Origem | O campo da categoria de onde vem o nome, o e-mail ou o telefone do contato | Os seletores "Nome", "E-mail" e "Telefone" |
-| Texto pronto do WhatsApp | O texto com que a conversa do WhatsApp abre, com as variáveis trocadas | "Texto pronto do WhatsApp" |
+| Texto pronto do WhatsApp e do SMS | O texto com que a conversa do WhatsApp e o painel "Enviar SMS" abrem, com as variáveis trocadas | "Texto pronto do WhatsApp e do SMS" |
 | Endereço do item | O e-mail próprio de cada item; o que chega nele aparece na Mail Box do item | Cc da prévia |
 
 ## Em aberto
