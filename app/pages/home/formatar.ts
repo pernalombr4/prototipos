@@ -60,3 +60,49 @@ export function horaAtual() {
 }
 
 export { HOJE }
+
+/*
+ * Telefone (rodada 11). Cópia das regras do protótipo comunicacao-no-workspace
+ * (`estado.ts`: `numeroDoWhatsApp`, `linkDeWhatsApp`, `linkDeSms`,
+ * `ehTelefoneFixo`, `telefoneLegivel`), para o widget WhatsApp e SMS da Home
+ * julgar o número igual às outras telas.
+ */
+
+/** Só os dígitos, com 55 quando vier sem país (10 ou 11 dígitos). Menos de 10: nulo. */
+export function numeroDoTelefone(telefone: string | null | undefined) {
+  if (!telefone) return null
+  const d = telefone.replace(/\D/g, '').replace(/^0+/, '')
+  if (d.length < 10) return null
+  return d.length <= 11 ? `55${d}` : d
+}
+
+/** `wa.me/<número>?text=`; sem número, a pessoa escolhe a conversa. */
+export function linkDeWhatsApp(telefone: string | null, texto?: string) {
+  const n = numeroDoTelefone(telefone)
+  const base = n ? `https://wa.me/${n}` : 'https://wa.me/'
+  return texto ? `${base}?text=${encodeURIComponent(texto)}` : base
+}
+
+/** `sms:+<número>?body=` (RFC 5724); sem número, a pessoa escolhe para quem. */
+export function linkDeSms(telefone: string | null, texto?: string) {
+  const n = numeroDoTelefone(telefone)
+  const base = n ? `sms:+${n}` : 'sms:'
+  return texto ? `${base}?body=${encodeURIComponent(texto)}` : base
+}
+
+/** Telefone fixo do Brasil (DDD e 8 dígitos): não recebe SMS. */
+export function ehTelefoneFixo(telefone: string | null | undefined) {
+  const n = numeroDoTelefone(telefone)
+  return !!n && n.startsWith('55') && n.length === 12
+}
+
+/** O número para ler: +55 11 98765-4321. */
+export function telefoneLegivel(telefone: string | null | undefined) {
+  const n = numeroDoTelefone(telefone)
+  if (!n) return telefone ?? ''
+  if (!n.startsWith('55')) return `+${n}`
+  const d = n.slice(2)
+  const resto = d.slice(2)
+  const corte = resto.length - 4
+  return `+55 ${d.slice(0, 2)} ${resto.slice(0, corte)}-${resto.slice(corte)}`
+}

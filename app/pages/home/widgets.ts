@@ -44,6 +44,12 @@
  * no MVP (Compromissos do dia, Meus itens, Itens criados recentemente,
  * Atalhos, Recentes, Agentes de IA) e os 3 do Spaceflow vão para os épicos
  * seguintes, nos requisitos.
+ *
+ * Rodada 11, a pedido da redatora ("uma das seções possíveis de widget lá deve
+ * ser de comunicação, e deve ter 2 widgets: email, whatsapp e sms"): o grupo
+ * Comunicação, com E-mail e WhatsApp e SMS. Os 2 abrem o que o épico 1 do
+ * protótipo comunicacao-no-workspace entrega (o compositor, a central E-mails,
+ * o WhatsApp pelo `wa.me` e o painel "Enviar SMS"); nenhum pede back-end novo.
  */
 import type { ItemDaGrade, LimitesDoPainel } from '~/components/ux/UxGradeDePaineis.vue'
 
@@ -86,6 +92,9 @@ export type TipoDeWidget =
   | 'execucoesFluxos'
   | 'falhasFluxos'
   | 'fluxosAndamento'
+  // Comunicação (rodada 11)
+  | 'email'
+  | 'whatsappSms'
   // Equipe e notas
   | 'comunicado'
   | 'notas'
@@ -95,7 +104,7 @@ export const LAMINAS = ['kpiAbertas', 'kpiConcluidas', 'kpiCriadas', 'kpiVencida
 export type LaminaDeTarefas = typeof LAMINAS[number]
 
 /** O 1º nível do catálogo: de onde vem o dado. */
-export type GrupoDoCatalogo = 'tarefas' | 'agenda' | 'itens' | 'ia' | 'spaceflow' | 'atalhos' | 'equipe'
+export type GrupoDoCatalogo = 'tarefas' | 'agenda' | 'itens' | 'ia' | 'spaceflow' | 'atalhos' | 'comunicacao' | 'equipe'
 
 /** As seções de Tarefas no 2º nível. */
 export type SecaoDeTarefas = 'numeros' | 'listas' | 'graficos'
@@ -197,6 +206,11 @@ export const CATALOGO: DefinicaoDoWidget[] = [
   // NOVO: a execução em andamento, a mais antiga primeiro, com o passo em que espera.
   // Fora do MVP (rodada 10): o MVP leva só Categorias e tarefas.
   { tipo: 'fluxosAndamento', permissao: 'fluxos', icone: 'i-lucide-loader', grupo: 'spaceflow', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 12 } },
+  // Comunicação (rodada 11). Fora do MVP (rodada 10): o MVP leva só Categorias e tarefas.
+  // Os e-mails que a pessoa enviou de um item: a aba Mensagens da central E-mails com "Enviado por" = a pessoa; "Novo e-mail" abre o compositor sem item.
+  { tipo: 'email', icone: 'i-lucide-mail', grupo: 'comunicacao', tamanho: { w: 6, h: 6 }, limites: { minW: 3, maxW: 8, minH: 4, maxH: 10 } },
+  // O número digitado e a mensagem: o WhatsApp abre pelo `wa.me`; o SMS, pelo painel "Enviar SMS". O ENSPACE não registra nenhum dos 2.
+  { tipo: 'whatsappSms', icone: 'i-lucide-message-circle', grupo: 'comunicacao', tamanho: { w: 6, h: 6 }, limites: { minW: 3, maxW: 8, minH: 5, maxH: 8 } },
   // Equipe e notas
   // Fora do MVP: pede modelo e rota novos.
   { tipo: 'comunicado', icone: 'i-lucide-megaphone', grupo: 'equipe', soAdmin: true, tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 12, minH: 3, maxH: 6 } },
@@ -211,6 +225,7 @@ export const GRUPOS: { grupo: GrupoDoCatalogo, icone: string }[] = [
   { grupo: 'ia', icone: 'i-lucide-sparkles' },
   { grupo: 'spaceflow', icone: 'i-lucide-workflow' },
   { grupo: 'atalhos', icone: 'i-lucide-bookmark' },
+  { grupo: 'comunicacao', icone: 'i-lucide-mail' },
   { grupo: 'equipe', icone: 'i-lucide-users' },
 ]
 
@@ -229,6 +244,9 @@ export function definicao(tipo: TipoDeWidget) {
  * categorias deve ser por padrão o widget do topo, o primeiro de todos") e o
  * BENI entra no padrão, também no workspace vazio ("pra induzir o user a usar
  * IA"), ao lado dos Compromissos do dia.
+ *
+ * Rodada 11: E-mail e WhatsApp e SMS entram logo depois do BENI, para os
+ * botões de contato ficarem à vista ao abrir a Home.
  */
 export const PADRAO_WIDGETS: Widget[] = [
   { id: 'w-categorias', tipo: 'categorias', config: { categorias: [] } },
@@ -238,6 +256,8 @@ export const PADRAO_WIDGETS: Widget[] = [
   { id: 'w-kpi-vencidas', tipo: 'kpiVencidas', config: {} },
   { id: 'w-beni', tipo: 'beni', config: {} },
   { id: 'w-agenda', tipo: 'agenda', config: {} },
+  { id: 'w-email', tipo: 'email', config: {} },
+  { id: 'w-whatsapp-sms', tipo: 'whatsappSms', config: {} },
   { id: 'w-vencidas', tipo: 'vencidas', config: {} },
   { id: 'w-vencem', tipo: 'vencemEmBreve', config: {} },
   { id: 'w-tarefas', tipo: 'minhasTarefas', config: {} },
@@ -255,6 +275,8 @@ export const PADRAO_LAYOUT: ItemDaGrade[] = [
   { id: 'w-kpi-vencidas', w: 3, h: 3 },
   { id: 'w-beni', w: 8, h: 5 },
   { id: 'w-agenda', w: 4, h: 5 },
+  { id: 'w-email', w: 6, h: 6 },
+  { id: 'w-whatsapp-sms', w: 6, h: 6 },
   { id: 'w-vencidas', w: 6, h: 6 },
   { id: 'w-vencem', w: 6, h: 6 },
   { id: 'w-tarefas', w: 6, h: 8 },

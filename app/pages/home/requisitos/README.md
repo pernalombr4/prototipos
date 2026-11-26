@@ -10,7 +10,7 @@ por widget (rodada 8)", "Spaceflow na Home (rodada 9)" e "De onde vem o dado de 
 | Ordem | Épico | Lado | O que entrega |
 |---|---|---|---|
 | 1 | [Home em widgets, com Categorias e tarefas](1-mvp-categorias-e-tarefas/epico.md) | com o que já existe | O MVP: a grade, o Personalizar, os widgets de tarefas, Minhas tarefas, Categorias e o botão Criar |
-| 2 | [Widgets de itens, agenda e atalhos](2-itens-agenda-e-atalhos/epico.md) | com o que já existe | Compromissos do dia, Meus itens, Itens criados recentemente, Atalhos, Recentes e a agenda da semana e do mês |
+| 2 | [Widgets de itens, agenda, atalhos e comunicação](2-itens-agenda-e-atalhos/epico.md) | com o que já existe | Compromissos do dia, Meus itens, Itens criados recentemente, Atalhos, Recentes, a agenda da semana e do mês, E-mail e WhatsApp e SMS |
 | 3 | [Widgets de agentes de IA e do Spaceflow](3-agentes-e-spaceflow/epico.md) | com o que já existe | Agentes de IA, Execuções dos fluxos, Falhas nos fluxos e Fluxos em andamento |
 | 4 | [Home padrão do workspace](4-home-padrao-do-workspace/epico.md) | novidade | A Home padrão que o administrador monta, o selo "Novo" e a Home guardada no workspace |
 | 5 | [BENI na Home](5-beni-na-home/epico.md) | novidade | A conversa flutuante com o agente, o rascunho de item e de tarefa e o widget BENI |

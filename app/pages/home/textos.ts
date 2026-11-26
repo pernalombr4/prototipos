@@ -318,6 +318,28 @@ export interface Textos {
     vazioMeus: string
     criadoPor: (nome: string) => string
   }
+  /** Rodada 11: os widgets do grupo Comunicação. */
+  comunicacaoW: {
+    para: (email: string) => string
+    ha: (minutos: number) => string
+    vazioEmail: string
+    novoEmail: string
+    abrirEmails: string
+    compositor: string
+    emailNaCentral: (assunto: string) => string
+    numero: string
+    numeroPlaceholder: string
+    semNumero: string
+    numeroInvalido: string
+    telefoneFixo: string
+    mensagem: string
+    mensagemPlaceholder: string
+    whatsapp: string
+    sms: string
+    naoRegistra: string
+    abreWhatsApp: (numero: string | null) => string
+    abreSms: (numero: string | null) => string
+  }
 
   ehMaquete: string
 }
@@ -370,6 +392,8 @@ const ptBR: Textos = {
     agenda: { titulo: 'Compromissos do dia', descricao: 'Compromissos, prazos de tarefa e datas de item de hoje.' },
     graficoDePainel: { titulo: 'Gráfico de um painel', descricao: 'Um painel de uma tela do tipo Dashboard.' },
     comunicado: { titulo: 'Comunicado', descricao: 'Aviso do administrador para todo o workspace.' },
+    email: { titulo: 'E-mail', descricao: 'Os e-mails que você enviou de um item, com o botão Novo e-mail.' },
+    whatsappSms: { titulo: 'WhatsApp e SMS', descricao: 'Digite o número e abra a conversa no WhatsApp ou o envio por SMS.' },
     notas: { titulo: 'Bloco de notas', descricao: 'Anotações suas. Só você vê.' },
     beni: { titulo: 'BENI', descricao: 'O resumo do dia feito pelo BENI, com o atalho para a conversa com ele.' },
     agentesIa: { titulo: 'Agentes de IA', descricao: 'Os agentes do workspace. Um clique abre a conversa com o agente.' },
@@ -382,7 +406,7 @@ const ptBR: Textos = {
     ultimosItens: { titulo: 'Itens criados recentemente', descricao: 'Os últimos itens criados nas categorias que você acessa.' },
     itensPorCategoria: { titulo: 'Itens por categoria', descricao: 'Quantos itens há em cada categoria que você acessa.' },
   },
-  grupos: { tarefas: 'Tarefas', agenda: 'Agenda', itens: 'Itens e categorias', atalhos: 'Telas e atalhos', ia: 'IA', spaceflow: 'Spaceflow', equipe: 'Equipe e notas' },
+  grupos: { tarefas: 'Tarefas', agenda: 'Agenda', itens: 'Itens e categorias', atalhos: 'Telas e atalhos', ia: 'IA', spaceflow: 'Spaceflow', comunicacao: 'Comunicação', equipe: 'Equipe e notas' },
 
   widget: {
     configurar: 'Configurar',
@@ -584,6 +608,7 @@ const ptBR: Textos = {
     atalhos: 'Atalhos, telas abertas por último e o gráfico de um painel.',
     ia: 'O BENI e os agentes do workspace.',
     spaceflow: 'As execuções dos fluxos: os números, as falhas e o que está em andamento.',
+    comunicacao: 'O e-mail, o WhatsApp e o SMS, à mão na Home.',
     equipe: 'O comunicado do administrador e o bloco de notas.',
   },
   escopoDeTarefas: { rotulo: 'De quem são as tarefas', minhas: 'Minhas tarefas', workspace: 'Workspace' },
@@ -718,6 +743,27 @@ const ptBR: Textos = {
     vazioMeus: 'Você ainda não criou nenhum item.',
     criadoPor: n => `Criado por ${n}`,
   },
+  comunicacaoW: {
+    para: e => `Para ${e}`,
+    ha: m => m < 60 ? `há ${m} min` : m < 1440 ? `há ${Math.round(m / 60)} h` : m < 2880 ? 'ontem' : `há ${Math.round(m / 1440)} dias`,
+    vazioEmail: 'Os e-mails que você enviar de um item aparecem aqui.',
+    novoEmail: 'Novo e-mail',
+    abrirEmails: 'Abrir E-mails',
+    compositor: 'o compositor de e-mail, sem item vinculado',
+    emailNaCentral: a => `o e-mail "${a}" na central E-mails`,
+    numero: 'Número',
+    numeroPlaceholder: '+55 11 91234-5678',
+    semNumero: 'Sem número, você escolhe o contato no WhatsApp ou no celular.',
+    numeroInvalido: 'Número inválido. Informe o DDD e o número.',
+    telefoneFixo: 'Telefone fixo não recebe SMS.',
+    mensagem: 'Mensagem',
+    mensagemPlaceholder: 'Opcional. Você revisa antes de enviar.',
+    whatsapp: 'WhatsApp',
+    sms: 'SMS',
+    naoRegistra: 'A mensagem sai da sua conta. O ENSPACE não registra a conversa.',
+    abreWhatsApp: n => n ? `o WhatsApp na conversa com ${n}, com a mensagem no campo` : 'o WhatsApp na escolha da conversa, com a mensagem no campo',
+    abreSms: n => n ? `o painel Enviar SMS com ${n} e a mensagem` : 'o painel Enviar SMS sem destinatário, com a mensagem',
+  },
   ehMaquete: 'Maquete',
 }
 
@@ -769,6 +815,8 @@ const en: Textos = {
     agenda: { titulo: 'Today\'s appointments', descricao: 'Today\'s events, task due dates and item dates.' },
     graficoDePainel: { titulo: 'Chart from a dashboard', descricao: 'A panel from a Dashboard screen.' },
     comunicado: { titulo: 'Announcement', descricao: 'A notice from the admin to the whole workspace.' },
+    email: { titulo: 'Email', descricao: 'The emails you sent from an item, with the New email button.' },
+    whatsappSms: { titulo: 'WhatsApp and SMS', descricao: 'Type the number and open the WhatsApp chat or the SMS options.' },
     notas: { titulo: 'Notepad', descricao: 'Your notes. Only you can see them.' },
     beni: { titulo: 'BENI', descricao: 'The day summary written by BENI, with a shortcut to the chat with him.' },
     agentesIa: { titulo: 'AI agents', descricao: 'The workspace agents. One click opens the chat with the agent.' },
@@ -781,7 +829,7 @@ const en: Textos = {
     ultimosItens: { titulo: 'Recently created items', descricao: 'The latest items created in the categories you can access.' },
     itensPorCategoria: { titulo: 'Items by category', descricao: 'How many items each category you can access has.' },
   },
-  grupos: { tarefas: 'Tasks', agenda: 'Schedule', itens: 'Items and categories', atalhos: 'Screens and shortcuts', ia: 'AI', spaceflow: 'Spaceflow', equipe: 'Team and notes' },
+  grupos: { tarefas: 'Tasks', agenda: 'Schedule', itens: 'Items and categories', atalhos: 'Screens and shortcuts', ia: 'AI', spaceflow: 'Spaceflow', comunicacao: 'Communication', equipe: 'Team and notes' },
 
   widget: {
     configurar: 'Configure',
@@ -983,6 +1031,7 @@ const en: Textos = {
     atalhos: 'Shortcuts, screens opened last and a chart from a dashboard.',
     ia: 'BENI and the workspace agents.',
     spaceflow: 'Flow runs: the numbers, the failures and what is running.',
+    comunicacao: 'Email, WhatsApp and SMS, at hand on the Home.',
     equipe: 'The administrator announcement and the notepad.',
   },
   escopoDeTarefas: { rotulo: 'Whose tasks', minhas: 'My tasks', workspace: 'Workspace' },
@@ -1117,6 +1166,27 @@ const en: Textos = {
     vazioMeus: 'You have not created any items yet.',
     criadoPor: n => `Created by ${n}`,
   },
+  comunicacaoW: {
+    para: e => `To ${e}`,
+    ha: m => m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : m < 2880 ? 'yesterday' : `${Math.round(m / 1440)} days ago`,
+    vazioEmail: 'The emails you send from an item appear here.',
+    novoEmail: 'New email',
+    abrirEmails: 'Open Emails',
+    compositor: 'the email composer, with no linked item',
+    emailNaCentral: a => `the email "${a}" in the Emails area`,
+    numero: 'Number',
+    numeroPlaceholder: '+55 11 91234-5678',
+    semNumero: 'Without a number, you choose the contact in WhatsApp or on your phone.',
+    numeroInvalido: 'Invalid number. Enter the area code and the number.',
+    telefoneFixo: 'A landline does not receive SMS.',
+    mensagem: 'Message',
+    mensagemPlaceholder: 'Optional. You review it before sending.',
+    whatsapp: 'WhatsApp',
+    sms: 'SMS',
+    naoRegistra: 'The message goes out from your account. ENSPACE does not record the chat.',
+    abreWhatsApp: n => n ? `WhatsApp in the chat with ${n}, with the message in the field` : 'WhatsApp on the chat picker, with the message in the field',
+    abreSms: n => n ? `the Send SMS panel with ${n} and the message` : 'the Send SMS panel with no recipient, with the message',
+  },
   ehMaquete: 'Mockup',
 }
 
@@ -1168,6 +1238,8 @@ const es: Textos = {
     agenda: { titulo: 'Compromisos del día', descricao: 'Compromisos, plazos de tarea y fechas de ítem de hoy.' },
     graficoDePainel: { titulo: 'Gráfico de un panel', descricao: 'Un panel de una pantalla de tipo Dashboard.' },
     comunicado: { titulo: 'Comunicado', descricao: 'Aviso del administrador para todo el workspace.' },
+    email: { titulo: 'Correo', descricao: 'Los correos que enviaste desde un ítem, con el botón Nuevo correo.' },
+    whatsappSms: { titulo: 'WhatsApp y SMS', descricao: 'Escribe el número y abre la conversación de WhatsApp o el envío por SMS.' },
     notas: { titulo: 'Bloc de notas', descricao: 'Tus notas. Solo tú las ves.' },
     beni: { titulo: 'BENI', descricao: 'El resumen del día hecho por el BENI, con el atajo a la conversación con él.' },
     agentesIa: { titulo: 'Agentes de IA', descricao: 'Los agentes del workspace. Un clic abre la conversación con el agente.' },
@@ -1180,7 +1252,7 @@ const es: Textos = {
     ultimosItens: { titulo: 'Ítems creados recientemente', descricao: 'Los últimos ítems creados en las categorías a las que accedes.' },
     itensPorCategoria: { titulo: 'Ítems por categoría', descricao: 'Cuántos ítems hay en cada categoría a la que accedes.' },
   },
-  grupos: { tarefas: 'Tareas', agenda: 'Agenda', itens: 'Ítems y categorías', atalhos: 'Pantallas y accesos', ia: 'IA', spaceflow: 'Spaceflow', equipe: 'Equipo y notas' },
+  grupos: { tarefas: 'Tareas', agenda: 'Agenda', itens: 'Ítems y categorías', atalhos: 'Pantallas y accesos', ia: 'IA', spaceflow: 'Spaceflow', comunicacao: 'Comunicación', equipe: 'Equipo y notas' },
 
   widget: {
     configurar: 'Configurar',
@@ -1382,6 +1454,7 @@ const es: Textos = {
     atalhos: 'Accesos directos, pantallas abiertas por último y el gráfico de un panel.',
     ia: 'El BENI y los agentes del workspace.',
     spaceflow: 'Las ejecuciones de los flujos: los números, las fallas y lo que está en curso.',
+    comunicacao: 'El correo, WhatsApp y SMS, a mano en la Home.',
     equipe: 'El comunicado del administrador y el bloc de notas.',
   },
   escopoDeTarefas: { rotulo: 'De quién son las tareas', minhas: 'Mis tareas', workspace: 'Workspace' },
@@ -1515,6 +1588,27 @@ const es: Textos = {
     vazio: 'Aún no hay ítems creados.',
     vazioMeus: 'Aún no has creado ningún ítem.',
     criadoPor: n => `Creado por ${n}`,
+  },
+  comunicacaoW: {
+    para: e => `Para ${e}`,
+    ha: m => m < 60 ? `hace ${m} min` : m < 1440 ? `hace ${Math.round(m / 60)} h` : m < 2880 ? 'ayer' : `hace ${Math.round(m / 1440)} días`,
+    vazioEmail: 'Los correos que envíes desde un ítem aparecen aquí.',
+    novoEmail: 'Nuevo correo',
+    abrirEmails: 'Abrir Correos',
+    compositor: 'el editor de correo, sin ítem vinculado',
+    emailNaCentral: a => `el correo "${a}" en el área Correos`,
+    numero: 'Número',
+    numeroPlaceholder: '+55 11 91234-5678',
+    semNumero: 'Sin número, eliges el contacto en WhatsApp o en el celular.',
+    numeroInvalido: 'Número no válido. Indica el código de área y el número.',
+    telefoneFixo: 'Un teléfono fijo no recibe SMS.',
+    mensagem: 'Mensaje',
+    mensagemPlaceholder: 'Opcional. Lo revisas antes de enviar.',
+    whatsapp: 'WhatsApp',
+    sms: 'SMS',
+    naoRegistra: 'El mensaje sale de tu cuenta. ENSPACE no registra la conversación.',
+    abreWhatsApp: n => n ? `WhatsApp en la conversación con ${n}, con el mensaje en el campo` : 'WhatsApp en la elección de la conversación, con el mensaje en el campo',
+    abreSms: n => n ? `el panel Enviar SMS con ${n} y el mensaje` : 'el panel Enviar SMS sin destinatario, con el mensaje',
   },
   ehMaquete: 'Maqueta',
 }

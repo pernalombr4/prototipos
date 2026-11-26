@@ -2,6 +2,20 @@
 
 Registro das rodadas. A mais recente em cima.
 
+## Rodada 11 · 2026-11-26 (o grupo Comunicação)
+
+- **Pedido (literal):** "olhe o prototipo da home no enspace da home nova. pode copiar essa ideia de home. uma das seçoes possiveis de widget lá deve ser de comunicação, e deve ter 2 widgets: email, whatsapp e sms / pra ficar na tela inicial esses botoes, nao só o enviar email".
+- **Respostas da redatora às 2 perguntas:** os 2 widgets são "E-mail" e "WhatsApp e SMS" (os 2 canais usam o mesmo telefone); a parte nova entra no épico 2, no card que já existe.
+- **Mudou no protótipo:**
+  - o catálogo ganha o grupo Comunicação, entre Telas e atalhos e Equipe e notas;
+  - E-mail: os 5 e-mails mais recentes que a pessoa enviou de um item (a aba Mensagens da central E-mails, com "Enviado por" igual à pessoa), o botão "Novo e-mail", que abre o compositor sem item, e "Abrir E-mails" no cabeçalho;
+  - WhatsApp e SMS: o campo Número, o campo Mensagem e os botões WhatsApp e SMS. Sem número, o WhatsApp abre a escolha da conversa e o SMS abre o painel "Enviar SMS" sem destinatário. Número com menos de 10 dígitos deixa os 2 indisponíveis; telefone fixo deixa só o SMS indisponível;
+  - os 2 entram na Home padrão da Proposta completa, logo abaixo do BENI. O MVP fica como na rodada 10.
+- **Por que agora tem sentido, se o comunicacao-no-workspace tirou os atalhos da tela inicial na rodada 5** ("vai pegar link do que ali? vai ter email vinculado a que?"): cada widget tem o próprio destino. O E-mail mostra os e-mails enviados de cada item e abre o compositor sem item, que diz que o e-mail fica só no Outlook. O WhatsApp e SMS pede o número na hora.
+- **O que abre fica no outro protótipo:** o compositor, a central E-mails e o painel "Enviar SMS" são do comunicacao-no-workspace. Na Home, o clique mostra o aviso de maquete com o que abre no produto e o link exato (`wa.me` e `sms:`). As regras do número são cópia das de lá (`formatar.ts`).
+- **Requisitos:** parte 5 do épico 2, "E-mail e WhatsApp e SMS" (RN401 a RN404, RF401 a RF414, P401, P402 e S401). O épico passa a "Widgets de itens, agenda, atalhos e comunicação na Home" e depende também do épico "Escrever e-mail de qualquer tela e central E-mails no menu".
+- **Fronteira:** muda só o catálogo, a Home padrão da Proposta completa e os 2 widgets novos. A casca, o MVP e os outros widgets ficam como na rodada 10.
+
 ## Cards no ENSPACE · 2026-11-25
 
 - **Pedido (literal):** "Sim, criar os 7" e "depois de criar os cards, pode mudar o status do prototipo no goithub pra aprovado".

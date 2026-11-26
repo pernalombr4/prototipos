@@ -460,4 +460,34 @@ export const execucoesDeFluxos: ExecucaoDeFluxo[] = [
   { id: 'wfe-9316', fluxo: 'Aprovação de compras', item: '#23161', status: 'working', inicio: AGORA.getTime() - 30 * 60_000, passo: { id: 'nx-73', nome: 'Aprovação do gestor', tipo: 'approval' } },
 ]
 
+/* ------------------------------------------------------------------ *
+ * Comunicação (rodada 11)                                              *
+ * ------------------------------------------------------------------ */
+
+/**
+ * Um e-mail que a pessoa enviou de um item. No produto: a aba Mensagens da
+ * central E-mails (épico 1 do protótipo comunicacao-no-workspace, parte 9),
+ * filtrada por "Enviado por" = a pessoa, a data mais recente primeiro. Só o
+ * e-mail com item fica gravado no ENSPACE; o enviado sem item fica só no
+ * Outlook de quem enviou.
+ */
+export interface EmailEnviado {
+  id: string
+  assunto: string
+  para: string
+  /** O item vinculado: `Item.reference` e o título. */
+  item: string
+  itemTitulo: string
+  /** Minutos atrás. */
+  ha: number
+}
+
+export const emailsEnviados: EmailEnviado[] = [
+  { id: 'em-1', assunto: 'Minuta do aditivo de locação', para: 'carla.prado@example.com', item: '#23203', itemTitulo: 'Locação do galpão de Jundiaí', ha: 35 },
+  { id: 'em-2', assunto: 'NDA para assinatura', para: 'marcos.lima@example.com', item: '#23217', itemTitulo: 'NDA com a Vértice Consultoria', ha: 190 },
+  { id: 'em-3', assunto: 'Cotação de 12 notebooks', para: 'vendas@example.com', item: '#23147', itemTitulo: 'Notebooks para o time de atendimento', ha: 1500 },
+  { id: 'em-4', assunto: 'Comprovantes da viagem a Curitiba', para: 'financeiro@example.com', item: '#23259', itemTitulo: 'Viagem a Curitiba, visita ao cliente', ha: 4320 },
+  { id: 'em-5', assunto: 'Documentos para o cadastro', para: 'contato@example.com', item: '#23294', itemTitulo: 'Papelaria Bom Traço', ha: 8640 },
+]
+
 export { DIA, HORA }

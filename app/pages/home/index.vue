@@ -61,6 +61,11 @@
  *   Home padrão do administrador, sem rascunho na conversa do BENI, e o
  *   agente abre a conversa em tela cheia.
  *
+ * Rodada 11:
+ * - o catálogo ganha o grupo Comunicação, com E-mail (os e-mails enviados de
+ *   um item e Novo e-mail) e WhatsApp e SMS (o número e a mensagem);
+ * - os 2 entram na Home padrão da Proposta completa, logo depois do BENI.
+ *
  * O dado é o `mocks.ts`; o catálogo e a Home padrão, o `widgets.ts`. Tudo em
  * memória: o reload volta ao começo.
  */
@@ -89,9 +94,10 @@ import WListas from './_WListas.vue'
 import WMinhasTarefas from './_WMinhasTarefas.vue'
 import WLamina from './_WLamina.vue'
 import WOutros from './_WOutros.vue'
-import type { AgenteDeIA, Atalho, Categoria, DiaDeTarefas, Evento, ExecucaoDeFluxo, Item, Recente, TarefaDaHome } from './mocks'
+import WComunicacao from './_WComunicacao.vue'
+import type { AgenteDeIA, Atalho, Categoria, DiaDeTarefas, EmailEnviado, Evento, ExecucaoDeFluxo, Item, Recente, TarefaDaHome } from './mocks'
 import {
-  AGORA, DIA, EU, HORA, agentesDeIA, atalhosIniciais, categoria, categorias as categoriasIniciais, comunicadoInicial, eventosDoCalendario,
+  AGORA, DIA, EU, HORA, agentesDeIA, atalhosIniciais, categoria, categorias as categoriasIniciais, comunicadoInicial, emailsEnviados, eventosDoCalendario,
   execucoesDeFluxos, itensIniciais, metricasDosFluxos, notaInicial, painelDeCompras, recentes as recentesIniciais, resumoDoBeni, serieDasTarefas, tarefasIniciais,
 } from './mocks'
 import type { AbaDeTarefa } from './formatar'
@@ -102,9 +108,9 @@ import { textos } from './textos'
 
 definePageMeta({
   titulo: 'Home',
-  descricao: 'Home do workspace em widgets que cada pessoa arruma (categorias, lâminas do Painel de tarefas, BENI e agentes, agenda, itens que a pessoa criou), Home padrão montada pelo administrador, um botão Criar com item, tarefa rápida e a conversa com o BENI, e a versão MVP só com o que o develop já tem.',
+  descricao: 'Home do workspace em widgets que cada pessoa arruma (categorias, lâminas do Painel de tarefas, BENI e agentes, agenda, itens que a pessoa criou, e-mail, WhatsApp e SMS), Home padrão montada pelo administrador, um botão Criar com item, tarefa rápida e a conversa com o BENI, e a versão MVP só com o que o develop já tem.',
   status: 'aprovado',
-  atualizado: '2026-11-25',
+  atualizado: '2026-11-26',
   tela: 'Início',
 })
 
@@ -149,6 +155,8 @@ const agentes = ref<AgenteDeIA[]>([])
 /* Rodada 9: o grupo Spaceflow. No workspace novo não há fluxo nem execução. */
 const fluxos = ref<ExecucaoDeFluxo[]>([])
 const metricas = ref({ ...metricasDosFluxos })
+/* Rodada 11: os e-mails que a pessoa enviou de um item. No workspace novo, nenhum. */
+const emails = ref<EmailEnviado[]>([])
 
 /**
  * Andaime. O workspace que acabou de nascer não tem tarefa, item, categoria,
@@ -169,6 +177,7 @@ function carregarDados(vazio: boolean) {
   beni.value = vazio ? { linhas: [] } : resumoDoBeni
   agentes.value = vazio ? agentesDeIA.filter(a => a.sistema) : [...agentesDeIA]
   fluxos.value = vazio ? [] : execucoesDeFluxos.map(x => ({ ...x }))
+  emails.value = vazio ? [] : [...emailsEnviados]
   metricas.value = vazio ? { working: 0, completed: 0, error: 0, canceled: 0 } : { ...metricasDosFluxos }
   recemCriados.value = []
 }
@@ -368,8 +377,8 @@ function salvarComunicado(texto: string) {
   comunicado.value = { titulo: comunicado.value?.titulo ?? t.value.widgets.comunicado.titulo, texto, autor: EU.nome, ha: 0 }
 }
 
-function abrirMaquete(destino: string) {
-  toast.add({ title: t.value.toasts.abrirMaquete(destino), icon: 'i-lucide-square-arrow-out-up-right', color: 'neutral' })
+function abrirMaquete(destino: string, link?: string) {
+  toast.add({ title: t.value.toasts.abrirMaquete(destino), description: link, icon: 'i-lucide-square-arrow-out-up-right', color: 'neutral', ui: link ? { description: 'break-all font-mono text-xs' } : undefined })
 }
 
 /* ------------------------------------------------------------------ *
@@ -779,6 +788,11 @@ function configuravel(w: Widget) {
                     <UButton icon="i-lucide-arrow-up-right" color="neutral" variant="ghost" size="xs" :aria-label="t.spaceflowW.abrirSpaceflow" @click="abrirMaquete(t.spaceflowW.abrirSpaceflow)" />
                   </UTooltip>
                 </template>
+                <template v-else-if="w.tipo === 'email'" #acoes>
+                  <UTooltip :text="t.comunicacaoW.abrirEmails">
+                    <UButton icon="i-lucide-arrow-up-right" color="neutral" variant="ghost" size="xs" :aria-label="t.comunicacaoW.abrirEmails" @click="abrirMaquete(t.comunicacaoW.abrirEmails)" />
+                  </UTooltip>
+                </template>
                 <template v-else-if="w.tipo === 'beni'" #acoes>
                   <UBadge :label="t.ehMaquete" color="warning" variant="subtle" size="sm" />
                 </template>
@@ -866,6 +880,14 @@ function configuravel(w: Widget) {
                   :execucoes="fluxos"
                   :metricas="metricas"
                   @repetir="repetirFluxo"
+                  @abrir="abrirMaquete"
+                />
+
+                <WComunicacao
+                  v-else-if="definicao(w.tipo).grupo === 'comunicacao'"
+                  :t="t"
+                  :tipo="w.tipo as 'email' | 'whatsappSms'"
+                  :emails="emails"
                   @abrir="abrirMaquete"
                 />
 
