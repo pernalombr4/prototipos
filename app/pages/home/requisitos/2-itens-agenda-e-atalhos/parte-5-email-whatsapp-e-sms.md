@@ -26,7 +26,7 @@ produto, com o link exato.
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF401 | O catálogo deve ter o grupo "Comunicação", com a descrição "O e-mail, o WhatsApp e o SMS, à mão na Home." e os widgets "E-mail" ("Os e-mails que você enviou de um item, com o botão Novo e-mail.") e "WhatsApp e SMS" ("Digite o número e abra a conversa no WhatsApp ou o envio por SMS."). | Personalizar › Adicionar widget mostra "Comunicação", com "2 opções", entre "Telas e atalhos" e "Equipe e notas". | Essencial | Obrigatório |
+| RF401 | O catálogo deve ter o grupo "Comunicação", com a descrição "O e-mail, o WhatsApp e o SMS, à mão na Home." e os widgets "E-mail" ("Os e-mails que você enviou de um item, com o botão Novo e-mail.") e "WhatsApp e SMS" ("Digite o número e abra a conversa no WhatsApp ou o envio por SMS."). | Personalizar › Adicionar widget mostra "Comunicação", com "2 opções", entre "Telas e atalhos" e "Equipe e notas"; o grupo abre com E-mail e WhatsApp e SMS. | Essencial | Obrigatório |
 
 ## E-mail (RF)
 
