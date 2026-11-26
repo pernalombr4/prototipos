@@ -1,30 +1,27 @@
 <script setup lang="ts">
 /**
- * Os 2 widgets do grupo Comunicação (rodada 11), a pedido da redatora ("uma
- * das seções possíveis de widget lá deve ser de comunicação, e deve ter 2
- * widgets: email, whatsapp e sms. pra ficar na tela inicial esses botoes, nao
- * só o enviar email").
+ * Os widgets do grupo Comunicação. Rodada 11, a pedido da redatora ("uma das
+ * seções possíveis de widget lá deve ser de comunicação"): E-mail e WhatsApp e
+ * SMS.
  *
- * Na rodada 5 do protótipo comunicacao-no-workspace, a fileira de atalhos da
- * tela inicial saiu porque ali não havia destinatário nem item ("vai pegar
- * link do que ali? vai ter email vinculado a que?"). Aqui cada widget resolve
- * isso:
- * - E-mail: a lista mostra os e-mails que a pessoa enviou de um item (a aba
- *   Mensagens da central E-mails com "Enviado por" = a pessoa), e "Novo
- *   e-mail" abre o compositor sem item, como o botão do topo faz numa tela sem
- *   item: o Outlook da pessoa no De, e o e-mail fica só no Outlook;
- * - WhatsApp e SMS: a pessoa digita o número. Sem número, o WhatsApp abre a
- *   escolha da conversa (`wa.me/?text=`) e o SMS abre o painel "Enviar SMS"
- *   sem destinatário, como o link de formulário público já faz. O número segue
- *   as regras das outras telas: menos de 10 dígitos é inválido, e o telefone
- *   fixo não recebe SMS.
+ * Rodada 12, pela pesquisa de mercado de 2026-11-26 e com o sim da redatora
+ * ("whatsapp e sms nao podem ser widgets diferentes? ficou confuso em tela"):
+ * - E-mail: só a informação. A lista mostra os e-mails que a pessoa enviou de
+ *   um item (a aba Mensagens da central E-mails com "Enviado por" = a pessoa),
+ *   e o clique abre a leitura. O botão Novo e-mail saiu: repetia o da barra do
+ *   topo, que é o ponto único do compor sem contexto;
+ * - WhatsApp e SMS: 2 widgets, cada um com o número, a mensagem e 1 ação. O
+ *   número segue as regras das outras telas: menos de 10 dígitos é inválido.
+ *   No SMS, o telefone fixo é erro do campo, porque a única ação do widget é o
+ *   SMS. Sem número, o WhatsApp abre a escolha da conversa (`wa.me/?text=`) e
+ *   o SMS abre o painel "Enviar SMS" sem destinatário.
  *
- * O compositor, a central E-mails e o painel "Enviar SMS" são do protótipo
+ * A central E-mails e o painel "Enviar SMS" são do protótipo
  * comunicacao-no-workspace. Aqui o clique mostra o aviso de maquete com o que
  * abre no produto e o link exato.
  *
  * Componentes: `UScrollArea`, `UIcon`, `UButton`, `UFormField`, `UInput`,
- * `UTextarea`, `UTooltip` (MCP nuxt-ui).
+ * `UTextarea` (MCP nuxt-ui).
  */
 import type { EmailEnviado } from './mocks'
 import type { Textos } from './textos'
@@ -32,7 +29,7 @@ import { ehTelefoneFixo, linkDeSms, linkDeWhatsApp, numeroDoTelefone, telefoneLe
 
 const props = defineProps<{
   t: Textos
-  tipo: 'email' | 'whatsappSms'
+  tipo: 'email' | 'whatsapp' | 'sms'
   emails: EmailEnviado[]
 }>()
 const emit = defineEmits<{ abrir: [destino: string, link?: string] }>()
@@ -40,32 +37,30 @@ const emit = defineEmits<{ abrir: [destino: string, link?: string] }>()
 /* E-mail */
 const recentes = computed(() => [...props.emails].sort((a, b) => a.ha - b.ha).slice(0, 5))
 
-/* WhatsApp e SMS */
+/* WhatsApp ou SMS */
+const ehSms = computed(() => props.tipo === 'sms')
 const numero = ref('')
 const mensagem = ref('')
 const temDigito = computed(() => /\d/.test(numero.value))
 const valido = computed(() => !!numeroDoTelefone(numero.value))
-const invalido = computed(() => temDigito.value && !valido.value)
-const fixo = computed(() => valido.value && ehTelefoneFixo(numero.value))
 const legivel = computed(() => valido.value ? telefoneLegivel(numero.value) : null)
 
-const motivoDoWhatsApp = computed(() => invalido.value ? props.t.comunicacaoW.numeroInvalido : null)
-const motivoDoSms = computed(() => motivoDoWhatsApp.value ?? (fixo.value ? props.t.comunicacaoW.telefoneFixo : null))
-
-const ajuda = computed(() => {
-  if (invalido.value) return undefined
-  if (fixo.value) return props.t.comunicacaoW.telefoneFixo
-  return temDigito.value ? undefined : props.t.comunicacaoW.semNumero
+/** O erro do campo, que também deixa o botão indisponível. */
+const erro = computed(() => {
+  if (temDigito.value && !valido.value) return props.t.comunicacaoW.numeroInvalido
+  if (ehSms.value && valido.value && ehTelefoneFixo(numero.value)) return props.t.comunicacaoW.telefoneFixo
+  return null
 })
+const ajuda = computed(() => temDigito.value ? undefined : ehSms.value ? props.t.comunicacaoW.semNumeroSms : props.t.comunicacaoW.semNumeroWhatsApp)
+const rotulo = computed(() => ehSms.value ? props.t.comunicacaoW.sms : props.t.comunicacaoW.whatsapp)
+const naoRegistra = computed(() => ehSms.value ? props.t.comunicacaoW.naoRegistraSms : props.t.comunicacaoW.naoRegistraWhatsApp)
 
-function abrirWhatsApp() {
-  if (motivoDoWhatsApp.value) return
-  emit('abrir', props.t.comunicacaoW.abreWhatsApp(legivel.value), linkDeWhatsApp(valido.value ? numero.value : null, mensagem.value || undefined))
-}
-
-function abrirSms() {
-  if (motivoDoSms.value) return
-  emit('abrir', props.t.comunicacaoW.abreSms(legivel.value), linkDeSms(valido.value ? numero.value : null, mensagem.value || undefined))
+function abrir() {
+  if (erro.value) return
+  const n = valido.value ? numero.value : null
+  const texto = mensagem.value || undefined
+  if (ehSms.value) emit('abrir', props.t.comunicacaoW.abreSms(legivel.value), linkDeSms(n, texto))
+  else emit('abrir', props.t.comunicacaoW.abreWhatsApp(legivel.value), linkDeWhatsApp(n, texto))
 }
 </script>
 
@@ -93,20 +88,11 @@ function abrirSms() {
         {{ t.comunicacaoW.vazioEmail }}
       </p>
     </UScrollArea>
-    <div class="mt-2 flex flex-wrap items-center gap-2 px-4">
-      <UButton
-        :label="t.comunicacaoW.novoEmail"
-        icon="i-lucide-mail-plus"
-        size="sm"
-        class="transition-transform hover:-translate-y-0.5"
-        @click="emit('abrir', t.comunicacaoW.compositor)"
-      />
-    </div>
   </div>
 
-  <!-- WhatsApp e SMS -->
-  <form v-else class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pb-3" @submit.prevent="abrirWhatsApp">
-    <UFormField :label="t.comunicacaoW.numero" :error="invalido ? t.comunicacaoW.numeroInvalido : undefined" :help="ajuda">
+  <!-- WhatsApp ou SMS -->
+  <form v-else class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pb-3" @submit.prevent="abrir">
+    <UFormField :label="t.comunicacaoW.numero" :error="erro ?? undefined" :help="ajuda">
       <UInput
         v-model="numero"
         type="tel"
@@ -127,36 +113,20 @@ function abrirSms() {
         class="w-full"
       />
     </UFormField>
-    <div class="flex flex-wrap items-center gap-2">
-      <UTooltip :text="motivoDoWhatsApp ?? t.comunicacaoW.naoRegistra">
-        <UButton
-          type="submit"
-          :label="t.comunicacaoW.whatsapp"
-          icon="i-simple-icons-whatsapp"
-          color="neutral"
-          variant="outline"
-          size="sm"
-          :aria-disabled="motivoDoWhatsApp ? 'true' : undefined"
-          :aria-label="motivoDoWhatsApp ? `${t.comunicacaoW.whatsapp}: ${motivoDoWhatsApp}` : undefined"
-          :class="motivoDoWhatsApp ? 'cursor-not-allowed opacity-50' : 'transition-transform hover:-translate-y-0.5'"
-        />
-      </UTooltip>
-      <UTooltip :text="motivoDoSms ?? t.comunicacaoW.naoRegistra">
-        <UButton
-          :label="t.comunicacaoW.sms"
-          icon="i-lucide-message-square-text"
-          color="neutral"
-          variant="outline"
-          size="sm"
-          :aria-disabled="motivoDoSms ? 'true' : undefined"
-          :aria-label="motivoDoSms ? `${t.comunicacaoW.sms}: ${motivoDoSms}` : undefined"
-          :class="motivoDoSms ? 'cursor-not-allowed opacity-50' : 'transition-transform hover:-translate-y-0.5'"
-          @click="abrirSms"
-        />
-      </UTooltip>
-    </div>
+    <UButton
+      type="submit"
+      :label="rotulo"
+      :icon="ehSms ? 'i-lucide-message-square-text' : 'i-simple-icons-whatsapp'"
+      color="neutral"
+      variant="outline"
+      size="sm"
+      class="self-start"
+      :aria-disabled="erro ? 'true' : undefined"
+      :aria-label="erro ? `${rotulo}: ${erro}` : undefined"
+      :class="erro ? 'cursor-not-allowed opacity-50' : 'transition-transform hover:-translate-y-0.5'"
+    />
     <p class="text-xs text-muted">
-      {{ t.comunicacaoW.naoRegistra }}
+      {{ naoRegistra }}
     </p>
   </form>
 </template>

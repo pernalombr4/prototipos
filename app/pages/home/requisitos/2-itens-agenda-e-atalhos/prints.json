@@ -135,6 +135,24 @@
         "clicar": "Comunicação",
         "esperar": 700
       }
+    ],
+    "comunicacao": [
+      {
+        "js": "(async () => { const espera = ms => new Promise(r => setTimeout(r, ms)); const abrirGrupo = async () => { [...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Adicionar widget').click(); await espera(700); const d = document.querySelector('[role=dialog]'); const el = [...d.querySelectorAll('*')].filter(x => x.children.length < 6 && x.innerText && x.innerText.startsWith('Comunicação\n')).pop(); (el.closest('button,[role=button],a,li') || el).click(); await espera(700); return d }; const add = async nome => { let d = document.querySelector('[role=dialog]') || await abrirGrupo(); const b = [...d.querySelectorAll('button')].filter(x => x.innerText.trim() === 'Adicionar').find(x => { let p = x.parentElement; for (let i = 0; i < 4; i++) { if (p.innerText.split('\n')[0].trim() === nome) return true; p = p.parentElement } return false }); b.click(); await espera(900) }; [...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Personalizar').click(); await espera(700); for (const n of ['SMS', 'WhatsApp', 'E-mail']) await add(n); [...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Concluir').click() })()",
+        "esperar": 5800
+      }
+    ],
+    "comunicacaoVazio": [
+      {
+        "estado": "Workspace vazio (primeiro acesso)"
+      },
+      {
+        "esperar": 800
+      },
+      {
+        "js": "(async () => { const espera = ms => new Promise(r => setTimeout(r, ms)); const abrirGrupo = async () => { [...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Adicionar widget').click(); await espera(700); const d = document.querySelector('[role=dialog]'); const el = [...d.querySelectorAll('*')].filter(x => x.children.length < 6 && x.innerText && x.innerText.startsWith('Comunicação\n')).pop(); (el.closest('button,[role=button],a,li') || el).click(); await espera(700); return d }; const add = async nome => { let d = document.querySelector('[role=dialog]') || await abrirGrupo(); const b = [...d.querySelectorAll('button')].filter(x => x.innerText.trim() === 'Adicionar').find(x => { let p = x.parentElement; for (let i = 0; i < 4; i++) { if (p.innerText.split('\n')[0].trim() === nome) return true; p = p.parentElement } return false }); b.click(); await espera(900) }; [...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Personalizar').click(); await espera(700); for (const n of ['E-mail']) await add(n); [...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Concluir').click() })()",
+        "esperar": 5800
+      }
     ]
   },
   "requisitos": {
@@ -465,6 +483,7 @@
       ]
     },
     "RF402": {
+      "cena": "comunicacao",
       "passos": [
         {
           "rolar": "Minuta do aditivo de locação"
@@ -481,7 +500,21 @@
         }
       ]
     },
+    "RF404": {
+      "cena": "comunicacao",
+      "passos": [
+        {
+          "rolar": "Minuta do aditivo de locação"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[aria-label=\"Abrir E-mails\"]"
+        }
+      ]
+    },
     "RF403": {
+      "cena": "comunicacao",
       "passos": [
         {
           "clicar": "Minuta do aditivo de locação"
@@ -497,71 +530,68 @@
         }
       ]
     },
-    "RF404": {
-      "passos": [
-        {
-          "clicar": "Novo e-mail"
-        },
-        {
-          "js": "(() => { const el = [...document.querySelectorAll('body *')].find(e => { const r = e.getBoundingClientRect(); return r.width > 100 && e.children.length === 0 && /^(No produto, abre|O passo voltou)/.test(e.textContent.trim()) }); let a = el; while (a && !a.querySelector('button')) a = a.parentElement; a.dataset.print = 'toast' })()"
-        }
-      ],
-      "destacar": [
-        "Novo e-mail",
-        {
-          "css": "[data-print=toast]"
-        }
-      ]
-    },
     "RF405": {
+      "cena": "comunicacaoVazio",
       "passos": [
         {
-          "rolar": "Minuta do aditivo de locação"
+          "rolar": "Os e-mails que você enviar de um item aparecem aqui. Para escrever um e-mail, use o botão Novo e-mail da barra do topo."
         }
       ],
       "destacar": [
-        {
-          "css": "[aria-label=\"Abrir E-mails\"]"
-        }
+        "Os e-mails que você enviar de um item aparecem aqui. Para escrever um e-mail, use o botão Novo e-mail da barra do topo."
       ]
     },
     "RF406": {
-      "cena": "vazio",
+      "cena": "comunicacao",
       "passos": [
         {
-          "rolar": "Os e-mails que você enviar de um item aparecem aqui."
-        }
-      ],
-      "destacar": [
-        "Os e-mails que você enviar de um item aparecem aqui.",
-        "Novo e-mail"
-      ]
-    },
-    "RF407": {
-      "passos": [
-        {
-          "rolar": "+55 11 91234-5678"
+          "rolar": {
+            "texto": "+55 11 91234-5678",
+            "n": 0
+          }
         }
       ],
       "destacar": {
-        "texto": "WhatsApp e SMS",
+        "texto": "WhatsApp",
         "ancestral": "section"
       }
     },
-    "RF408": {
+    "RF407": {
+      "cena": "comunicacao",
       "passos": [
         {
-          "rolar": "+55 11 91234-5678"
+          "rolar": {
+            "texto": "+55 11 91234-5678",
+            "n": 0
+          }
         }
       ],
       "destacar": [
-        "Sem número, você escolhe o contato no WhatsApp ou no celular."
+        "Sem número, você escolhe a conversa no WhatsApp."
       ]
     },
-    "RF409": {
+    "RF411": {
+      "cena": "comunicacao",
       "passos": [
         {
-          "focar": "+55 11 91234-5678"
+          "rolar": {
+            "texto": "+55 11 91234-5678",
+            "n": 0
+          }
+        }
+      ],
+      "destacar": [
+        "A mensagem sai da sua conta do WhatsApp. O ENSPACE não registra a conversa."
+      ]
+    },
+    "RF408": {
+      "cena": "comunicacao",
+      "passos": [
+        {
+          "focar": {
+            "texto": "+55 11 91234-5678",
+            "n": 0
+          }
         },
         {
           "digitar": "1234"
@@ -572,90 +602,52 @@
         {
           "css": "section [aria-disabled=true]",
           "n": 0
+        }
+      ]
+    },
+    "RF409": {
+      "cena": "comunicacao",
+      "passos": [
+        {
+          "focar": {
+            "texto": "+55 11 91234-5678",
+            "n": 0
+          }
         },
         {
-          "css": "section [aria-disabled=true]",
-          "n": 1
+          "digitar": "11 98765-4321"
+        },
+        {
+          "focar": {
+            "texto": "Opcional. Você revisa antes de enviar.",
+            "n": 0
+          }
+        },
+        {
+          "digitar": "Bom dia"
+        },
+        {
+          "clicar": "Abrir no WhatsApp"
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('body *')].find(e => { const r = e.getBoundingClientRect(); return r.width > 100 && e.children.length === 0 && /^(No produto, abre|O passo voltou)/.test(e.textContent.trim()) }); let a = el; while (a && !a.querySelector('button')) a = a.parentElement; a.dataset.print = 'toast' })()"
+        }
+      ],
+      "destacar": [
+        "Abrir no WhatsApp",
+        {
+          "css": "[data-print=toast]"
         }
       ]
     },
     "RF410": {
+      "cena": "comunicacao",
       "passos": [
         {
-          "focar": "+55 11 91234-5678"
-        },
-        {
-          "digitar": "11 3456-7710"
-        }
-      ],
-      "destacar": [
-        "Telefone fixo não recebe SMS.",
-        {
-          "css": "section [aria-disabled=true]",
-          "n": 0
-        }
-      ]
-    },
-    "RF411": {
-      "passos": [
-        {
-          "focar": "+55 11 91234-5678"
-        },
-        {
-          "digitar": "11 98765-4321"
-        },
-        {
-          "focar": "Opcional. Você revisa antes de enviar."
-        },
-        {
-          "digitar": "Bom dia"
-        },
-        {
-          "clicar": "WhatsApp"
-        },
-        {
-          "js": "(() => { const el = [...document.querySelectorAll('body *')].find(e => { const r = e.getBoundingClientRect(); return r.width > 100 && e.children.length === 0 && /^(No produto, abre|O passo voltou)/.test(e.textContent.trim()) }); let a = el; while (a && !a.querySelector('button')) a = a.parentElement; a.dataset.print = 'toast' })()"
-        }
-      ],
-      "destacar": [
-        "WhatsApp",
-        {
-          "css": "[data-print=toast]"
-        }
-      ]
-    },
-    "RF412": {
-      "passos": [
-        {
-          "focar": "+55 11 91234-5678"
-        },
-        {
-          "digitar": "11 98765-4321"
-        },
-        {
-          "focar": "Opcional. Você revisa antes de enviar."
-        },
-        {
-          "digitar": "Bom dia"
-        },
-        {
-          "clicar": "SMS"
-        },
-        {
-          "js": "(() => { const el = [...document.querySelectorAll('body *')].find(e => { const r = e.getBoundingClientRect(); return r.width > 100 && e.children.length === 0 && /^(No produto, abre|O passo voltou)/.test(e.textContent.trim()) }); let a = el; while (a && !a.querySelector('button')) a = a.parentElement; a.dataset.print = 'toast' })()"
-        }
-      ],
-      "destacar": [
-        "SMS",
-        {
-          "css": "[data-print=toast]"
-        }
-      ]
-    },
-    "RF413": {
-      "passos": [
-        {
-          "focar": "+55 11 91234-5678"
+          "focar": {
+            "texto": "+55 11 91234-5678",
+            "n": 0
+          }
         },
         {
           "digitar": "11 98765-4321"
@@ -670,6 +662,7 @@
       "destacar": [
         {
           "texto": "+55 11 91234-5678",
+          "n": 0,
           "exato": true
         },
         {
@@ -677,14 +670,133 @@
         }
       ]
     },
-    "RF414": {
+    "RF412": {
+      "cena": "comunicacao",
       "passos": [
         {
-          "rolar": "+55 11 91234-5678"
+          "rolar": {
+            "texto": "+55 11 91234-5678",
+            "n": 1
+          }
+        }
+      ],
+      "destacar": {
+        "texto": "SMS",
+        "ancestral": "section"
+      }
+    },
+    "RF413": {
+      "cena": "comunicacao",
+      "passos": [
+        {
+          "rolar": {
+            "texto": "+55 11 91234-5678",
+            "n": 1
+          }
         }
       ],
       "destacar": [
-        "A mensagem sai da sua conta. O ENSPACE não registra a conversa."
+        "Sem número, você escolhe o contato no app de SMS."
+      ]
+    },
+    "RF417": {
+      "cena": "comunicacao",
+      "passos": [
+        {
+          "rolar": {
+            "texto": "+55 11 91234-5678",
+            "n": 1
+          }
+        }
+      ],
+      "destacar": [
+        "O SMS sai do seu celular. O ENSPACE não registra a mensagem."
+      ]
+    },
+    "RF414": {
+      "cena": "comunicacao",
+      "passos": [
+        {
+          "focar": {
+            "texto": "+55 11 91234-5678",
+            "n": 1
+          }
+        },
+        {
+          "digitar": "11 3456-7710"
+        }
+      ],
+      "destacar": [
+        "Telefone fixo não recebe SMS. Informe um celular.",
+        {
+          "css": "section [aria-disabled=true]",
+          "n": 0
+        }
+      ]
+    },
+    "RF415": {
+      "cena": "comunicacao",
+      "passos": [
+        {
+          "focar": {
+            "texto": "+55 11 91234-5678",
+            "n": 1
+          }
+        },
+        {
+          "digitar": "11 98765-4321"
+        },
+        {
+          "focar": {
+            "texto": "Opcional. Você revisa antes de enviar.",
+            "n": 1
+          }
+        },
+        {
+          "digitar": "Bom dia"
+        },
+        {
+          "clicar": "Enviar SMS"
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('body *')].find(e => { const r = e.getBoundingClientRect(); return r.width > 100 && e.children.length === 0 && /^(No produto, abre|O passo voltou)/.test(e.textContent.trim()) }); let a = el; while (a && !a.querySelector('button')) a = a.parentElement; a.dataset.print = 'toast' })()"
+        }
+      ],
+      "destacar": [
+        "Enviar SMS",
+        {
+          "css": "[data-print=toast]"
+        }
+      ]
+    },
+    "RF416": {
+      "cena": "comunicacao",
+      "passos": [
+        {
+          "focar": {
+            "texto": "+55 11 91234-5678",
+            "n": 1
+          }
+        },
+        {
+          "digitar": "11 98765-4321"
+        },
+        {
+          "tecla": "Enter"
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('body *')].find(e => { const r = e.getBoundingClientRect(); return r.width > 100 && e.children.length === 0 && /^(No produto, abre|O passo voltou)/.test(e.textContent.trim()) }); let a = el; while (a && !a.querySelector('button')) a = a.parentElement; a.dataset.print = 'toast' })()"
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "+55 11 91234-5678",
+          "n": 1,
+          "exato": true
+        },
+        {
+          "css": "[data-print=toast]"
+        }
       ]
     }
   }

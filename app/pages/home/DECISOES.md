@@ -2,6 +2,17 @@
 
 Registro das rodadas. A mais recente em cima.
 
+## Rodada 12 · 2026-11-26 (comunicação pela pesquisa de mercado)
+
+- **Pedido (literal):** "pela logica de mercado, deveria mesmo ser widget de comunicaçao ou botoes fixos na home já, por padrao?" e, depois da pesquisa, "whatsapp e sms nao podem ser widgets diferentes? ficou confuso em tela. ou é o ux dele que ta ruim mesmo. fora isso pode seguir a recomendaçao em todos esses lugares".
+- **A pesquisa** (repositório pesquisa-de-mercado, `runs/2026-11-26-comunicacao-na-home/RELATORIO.md`): nenhum produto lido (CRMs, gestão de trabalho, helpdesks) põe botões de canal na Home, nem widget para mandar WhatsApp ou SMS a um número digitado. O compor sem contexto mora num ponto global, igual em toda tela, e o envio por canal sai do contato do registro. A Home mostra o que pede resposta.
+- **Mudou no protótipo:**
+  - WhatsApp e SMS viram 2 widgets. O widget junto confundia: 1 número para 2 botões com regras diferentes, e a ajuda do telefone fixo valia só para 1 deles. Agora cada um tem o número, a mensagem e 1 botão ("Abrir no WhatsApp", "Enviar SMS"); no SMS, o telefone fixo é erro do campo;
+  - o widget E-mail fica só com a informação (os enviados de um item, a leitura no clique e "Abrir E-mails"). O botão "Novo e-mail" saiu: repetia o da barra do topo, que é o ponto único do compor sem item. O estado vazio aponta esse botão;
+  - os 3 saem da Home padrão e ficam opcionais no catálogo (Comunicação, 3 opções).
+- **Requisitos:** parte 5 do épico 2 reescrita, "E-mail, WhatsApp e SMS" (RN401 a RN405, RF401 a RF417, P401 a P403 e S401).
+- **Fronteira:** muda só o grupo Comunicação e a Home padrão da Proposta completa. A casca, o MVP e os outros widgets ficam como na rodada 11.
+
 ## Rodada 11 · 2026-11-26 (o grupo Comunicação)
 
 - **Pedido (literal):** "olhe o prototipo da home no enspace da home nova. pode copiar essa ideia de home. uma das seçoes possiveis de widget lá deve ser de comunicação, e deve ter 2 widgets: email, whatsapp e sms / pra ficar na tela inicial esses botoes, nao só o enviar email".

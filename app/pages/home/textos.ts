@@ -323,20 +323,20 @@ export interface Textos {
     para: (email: string) => string
     ha: (minutos: number) => string
     vazioEmail: string
-    novoEmail: string
     abrirEmails: string
-    compositor: string
     emailNaCentral: (assunto: string) => string
     numero: string
     numeroPlaceholder: string
-    semNumero: string
+    semNumeroWhatsApp: string
+    semNumeroSms: string
     numeroInvalido: string
     telefoneFixo: string
     mensagem: string
     mensagemPlaceholder: string
     whatsapp: string
     sms: string
-    naoRegistra: string
+    naoRegistraWhatsApp: string
+    naoRegistraSms: string
     abreWhatsApp: (numero: string | null) => string
     abreSms: (numero: string | null) => string
   }
@@ -392,8 +392,9 @@ const ptBR: Textos = {
     agenda: { titulo: 'Compromissos do dia', descricao: 'Compromissos, prazos de tarefa e datas de item de hoje.' },
     graficoDePainel: { titulo: 'Gráfico de um painel', descricao: 'Um painel de uma tela do tipo Dashboard.' },
     comunicado: { titulo: 'Comunicado', descricao: 'Aviso do administrador para todo o workspace.' },
-    email: { titulo: 'E-mail', descricao: 'Os e-mails que você enviou de um item, com o botão Novo e-mail.' },
-    whatsappSms: { titulo: 'WhatsApp e SMS', descricao: 'Digite o número e abra a conversa no WhatsApp ou o envio por SMS.' },
+    email: { titulo: 'E-mail', descricao: 'Os e-mails que você enviou de um item. O clique abre a leitura.' },
+    whatsapp: { titulo: 'WhatsApp', descricao: 'Digite o número e abra a conversa no WhatsApp.' },
+    sms: { titulo: 'SMS', descricao: 'Digite o número e abra o envio por SMS no celular.' },
     notas: { titulo: 'Bloco de notas', descricao: 'Anotações suas. Só você vê.' },
     beni: { titulo: 'BENI', descricao: 'O resumo do dia feito pelo BENI, com o atalho para a conversa com ele.' },
     agentesIa: { titulo: 'Agentes de IA', descricao: 'Os agentes do workspace. Um clique abre a conversa com o agente.' },
@@ -746,21 +747,21 @@ const ptBR: Textos = {
   comunicacaoW: {
     para: e => `Para ${e}`,
     ha: m => m < 60 ? `há ${m} min` : m < 1440 ? `há ${Math.round(m / 60)} h` : m < 2880 ? 'ontem' : `há ${Math.round(m / 1440)} dias`,
-    vazioEmail: 'Os e-mails que você enviar de um item aparecem aqui.',
-    novoEmail: 'Novo e-mail',
+    vazioEmail: 'Os e-mails que você enviar de um item aparecem aqui. Para escrever um e-mail, use o botão Novo e-mail da barra do topo.',
     abrirEmails: 'Abrir E-mails',
-    compositor: 'o compositor de e-mail, sem item vinculado',
     emailNaCentral: a => `o e-mail "${a}" na central E-mails`,
     numero: 'Número',
     numeroPlaceholder: '+55 11 91234-5678',
-    semNumero: 'Sem número, você escolhe o contato no WhatsApp ou no celular.',
+    semNumeroWhatsApp: 'Sem número, você escolhe a conversa no WhatsApp.',
+    semNumeroSms: 'Sem número, você escolhe o contato no app de SMS.',
     numeroInvalido: 'Número inválido. Informe o DDD e o número.',
-    telefoneFixo: 'Telefone fixo não recebe SMS.',
+    telefoneFixo: 'Telefone fixo não recebe SMS. Informe um celular.',
     mensagem: 'Mensagem',
     mensagemPlaceholder: 'Opcional. Você revisa antes de enviar.',
-    whatsapp: 'WhatsApp',
-    sms: 'SMS',
-    naoRegistra: 'A mensagem sai da sua conta. O ENSPACE não registra a conversa.',
+    whatsapp: 'Abrir no WhatsApp',
+    sms: 'Enviar SMS',
+    naoRegistraWhatsApp: 'A mensagem sai da sua conta do WhatsApp. O ENSPACE não registra a conversa.',
+    naoRegistraSms: 'O SMS sai do seu celular. O ENSPACE não registra a mensagem.',
     abreWhatsApp: n => n ? `o WhatsApp na conversa com ${n}, com a mensagem no campo` : 'o WhatsApp na escolha da conversa, com a mensagem no campo',
     abreSms: n => n ? `o painel Enviar SMS com ${n} e a mensagem` : 'o painel Enviar SMS sem destinatário, com a mensagem',
   },
@@ -815,8 +816,9 @@ const en: Textos = {
     agenda: { titulo: 'Today\'s appointments', descricao: 'Today\'s events, task due dates and item dates.' },
     graficoDePainel: { titulo: 'Chart from a dashboard', descricao: 'A panel from a Dashboard screen.' },
     comunicado: { titulo: 'Announcement', descricao: 'A notice from the admin to the whole workspace.' },
-    email: { titulo: 'Email', descricao: 'The emails you sent from an item, with the New email button.' },
-    whatsappSms: { titulo: 'WhatsApp and SMS', descricao: 'Type the number and open the WhatsApp chat or the SMS options.' },
+    email: { titulo: 'Email', descricao: 'The emails you sent from an item. A click opens the email.' },
+    whatsapp: { titulo: 'WhatsApp', descricao: 'Type the number and open the chat in WhatsApp.' },
+    sms: { titulo: 'SMS', descricao: 'Type the number and open the SMS on your phone.' },
     notas: { titulo: 'Notepad', descricao: 'Your notes. Only you can see them.' },
     beni: { titulo: 'BENI', descricao: 'The day summary written by BENI, with a shortcut to the chat with him.' },
     agentesIa: { titulo: 'AI agents', descricao: 'The workspace agents. One click opens the chat with the agent.' },
@@ -1169,21 +1171,21 @@ const en: Textos = {
   comunicacaoW: {
     para: e => `To ${e}`,
     ha: m => m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : m < 2880 ? 'yesterday' : `${Math.round(m / 1440)} days ago`,
-    vazioEmail: 'The emails you send from an item appear here.',
-    novoEmail: 'New email',
+    vazioEmail: 'The emails you send from an item appear here. To write an email, use the New email button in the top bar.',
     abrirEmails: 'Open Emails',
-    compositor: 'the email composer, with no linked item',
     emailNaCentral: a => `the email "${a}" in the Emails area`,
     numero: 'Number',
     numeroPlaceholder: '+55 11 91234-5678',
-    semNumero: 'Without a number, you choose the contact in WhatsApp or on your phone.',
+    semNumeroWhatsApp: 'Without a number, you choose the chat in WhatsApp.',
+    semNumeroSms: 'Without a number, you choose the contact in the SMS app.',
     numeroInvalido: 'Invalid number. Enter the area code and the number.',
-    telefoneFixo: 'A landline does not receive SMS.',
+    telefoneFixo: 'A landline does not receive SMS. Enter a mobile number.',
     mensagem: 'Message',
     mensagemPlaceholder: 'Optional. You review it before sending.',
-    whatsapp: 'WhatsApp',
-    sms: 'SMS',
-    naoRegistra: 'The message goes out from your account. ENSPACE does not record the chat.',
+    whatsapp: 'Open in WhatsApp',
+    sms: 'Send SMS',
+    naoRegistraWhatsApp: 'The message is sent from your WhatsApp account. ENSPACE does not record the chat.',
+    naoRegistraSms: 'The SMS is sent from your phone. ENSPACE does not record the message.',
     abreWhatsApp: n => n ? `WhatsApp in the chat with ${n}, with the message in the field` : 'WhatsApp on the chat picker, with the message in the field',
     abreSms: n => n ? `the Send SMS panel with ${n} and the message` : 'the Send SMS panel with no recipient, with the message',
   },
@@ -1238,8 +1240,9 @@ const es: Textos = {
     agenda: { titulo: 'Compromisos del día', descricao: 'Compromisos, plazos de tarea y fechas de ítem de hoy.' },
     graficoDePainel: { titulo: 'Gráfico de un panel', descricao: 'Un panel de una pantalla de tipo Dashboard.' },
     comunicado: { titulo: 'Comunicado', descricao: 'Aviso del administrador para todo el workspace.' },
-    email: { titulo: 'Correo', descricao: 'Los correos que enviaste desde un ítem, con el botón Nuevo correo.' },
-    whatsappSms: { titulo: 'WhatsApp y SMS', descricao: 'Escribe el número y abre la conversación de WhatsApp o el envío por SMS.' },
+    email: { titulo: 'Correo', descricao: 'Los correos que enviaste desde un ítem. El clic abre la lectura.' },
+    whatsapp: { titulo: 'WhatsApp', descricao: 'Escribe el número y abre la conversación en WhatsApp.' },
+    sms: { titulo: 'SMS', descricao: 'Escribe el número y abre el envío por SMS en el celular.' },
     notas: { titulo: 'Bloc de notas', descricao: 'Tus notas. Solo tú las ves.' },
     beni: { titulo: 'BENI', descricao: 'El resumen del día hecho por el BENI, con el atajo a la conversación con él.' },
     agentesIa: { titulo: 'Agentes de IA', descricao: 'Los agentes del workspace. Un clic abre la conversación con el agente.' },
@@ -1592,21 +1595,21 @@ const es: Textos = {
   comunicacaoW: {
     para: e => `Para ${e}`,
     ha: m => m < 60 ? `hace ${m} min` : m < 1440 ? `hace ${Math.round(m / 60)} h` : m < 2880 ? 'ayer' : `hace ${Math.round(m / 1440)} días`,
-    vazioEmail: 'Los correos que envíes desde un ítem aparecen aquí.',
-    novoEmail: 'Nuevo correo',
+    vazioEmail: 'Los correos que envíes desde un ítem aparecen aquí. Para escribir un correo, usa el botón Nuevo correo de la barra superior.',
     abrirEmails: 'Abrir Correos',
-    compositor: 'el editor de correo, sin ítem vinculado',
     emailNaCentral: a => `el correo "${a}" en el área Correos`,
     numero: 'Número',
     numeroPlaceholder: '+55 11 91234-5678',
-    semNumero: 'Sin número, eliges el contacto en WhatsApp o en el celular.',
+    semNumeroWhatsApp: 'Sin número, eliges la conversación en WhatsApp.',
+    semNumeroSms: 'Sin número, eliges el contacto en la app de SMS.',
     numeroInvalido: 'Número no válido. Indica el código de área y el número.',
-    telefoneFixo: 'Un teléfono fijo no recibe SMS.',
+    telefoneFixo: 'Un teléfono fijo no recibe SMS. Indica un celular.',
     mensagem: 'Mensaje',
     mensagemPlaceholder: 'Opcional. Lo revisas antes de enviar.',
-    whatsapp: 'WhatsApp',
-    sms: 'SMS',
-    naoRegistra: 'El mensaje sale de tu cuenta. ENSPACE no registra la conversación.',
+    whatsapp: 'Abrir en WhatsApp',
+    sms: 'Enviar SMS',
+    naoRegistraWhatsApp: 'El mensaje sale de tu cuenta de WhatsApp. ENSPACE no registra la conversación.',
+    naoRegistraSms: 'El SMS sale de tu celular. ENSPACE no registra el mensaje.',
     abreWhatsApp: n => n ? `WhatsApp en la conversación con ${n}, con el mensaje en el campo` : 'WhatsApp en la elección de la conversación, con el mensaje en el campo',
     abreSms: n => n ? `el panel Enviar SMS con ${n} y el mensaje` : 'el panel Enviar SMS sin destinatario, con el mensaje',
   },

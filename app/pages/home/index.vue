@@ -66,6 +66,9 @@
  *   um item e Novo e-mail) e WhatsApp e SMS (o número e a mensagem);
  * - os 2 entram na Home padrão da Proposta completa, logo depois do BENI.
  *
+ * Rodada 12 (pesquisa de mercado e sim da redatora): WhatsApp e SMS viram 2
+ * widgets, o E-mail perde o botão Novo e-mail, e os 3 saem da Home padrão.
+ *
  * O dado é o `mocks.ts`; o catálogo e a Home padrão, o `widgets.ts`. Tudo em
  * memória: o reload volta ao começo.
  */
@@ -886,7 +889,7 @@ function configuravel(w: Widget) {
                 <WComunicacao
                   v-else-if="definicao(w.tipo).grupo === 'comunicacao'"
                   :t="t"
-                  :tipo="w.tipo as 'email' | 'whatsappSms'"
+                  :tipo="w.tipo as 'email' | 'whatsapp' | 'sms'"
                   :emails="emails"
                   @abrir="abrirMaquete"
                 />

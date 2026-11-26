@@ -1,9 +1,9 @@
 # Épico: Widgets de itens, agenda, atalhos e comunicação na Home
 
 **O que é:** o catálogo da Home ganha os widgets dos itens que a pessoa criou, dos itens mais novos, dos compromissos
-do dia, dos atalhos, das telas abertas por último, do e-mail e do WhatsApp e SMS. Todos leem o que o produto já
+do dia, dos atalhos, das telas abertas por último, do e-mail, do WhatsApp e do SMS. Todos leem o que o produto já
 guarda ou abrem o que ele já tem: o autor do item, a data de criação, as fontes da tela Agenda, os favoritos, o
-histórico de navegação, os e-mails enviados de um item, o compositor e o painel "Enviar SMS".
+histórico de navegação, os e-mails enviados de um item, a central E-mails e o painel "Enviar SMS".
 
 **Onde vale:** a Home do workspace e os grupos Agenda, Itens e categorias, Telas e atalhos e Comunicação do catálogo.
 
@@ -24,7 +24,7 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 | [2. Meus itens e itens recentes](parte-2-meus-itens-e-recentes.md) | Os widgets Meus itens e Itens criados recentemente | o épico Home em widgets, com Categorias e tarefas | Usa o filtro "Meus Itens" que a busca de itens já tem |
 | [3. Atalhos e Recentes](parte-3-atalhos-e-recentes.md) | Os favoritos da pessoa e as telas abertas por último | o épico Home em widgets, com Categorias e tarefas | Os 2 já ficam no navegador |
 | [4. Agenda da semana e do mês](parte-4-agenda-da-semana-e-do-mes.md) | A semana em colunas e o mês em miniatura | 1 | Repete visões da tela Agenda |
-| [5. E-mail e WhatsApp e SMS](parte-5-email-whatsapp-e-sms.md) | Os e-mails enviados de um item, o Novo e-mail, e o número com os botões WhatsApp e SMS | o épico "Escrever e-mail de qualquer tela e central E-mails no menu" | Abre o compositor e o painel "Enviar SMS" daquele épico; fica por último |
+| [5. E-mail, WhatsApp e SMS](parte-5-email-whatsapp-e-sms.md) | O widget E-mail, com os e-mails enviados de um item, e os widgets WhatsApp e SMS, cada um com o número e o botão; os 3 fora da Home padrão | o épico "Escrever e-mail de qualquer tela e central E-mails no menu" | Abre a central E-mails e o painel "Enviar SMS" daquele épico; fica por último |
 
 ## Regras de negócio comuns (RN)
 

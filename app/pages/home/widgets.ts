@@ -50,6 +50,16 @@
  * Comunicação, com E-mail e WhatsApp e SMS. Os 2 abrem o que o épico 1 do
  * protótipo comunicacao-no-workspace entrega (o compositor, a central E-mails,
  * o WhatsApp pelo `wa.me` e o painel "Enviar SMS"); nenhum pede back-end novo.
+ *
+ * Rodada 12, a partir da pesquisa de mercado de 2026-11-26 (pesquisa-de-mercado,
+ * runs/2026-11-26-comunicacao-na-home): nenhum produto lido põe botões de canal
+ * na Home; o compor sem contexto mora num ponto global (o "Novo e-mail" da barra
+ * do topo) e o envio por canal sai do contato do registro. Com o sim da redatora:
+ * - WhatsApp e SMS viram 2 widgets ("ficou confuso em tela"): cada um com 1
+ *   número e 1 ação, e a regra do telefone fixo fica só no SMS;
+ * - o widget E-mail fica só com a informação (os enviados de um item) e perde
+ *   o botão Novo e-mail, que repetia o da barra do topo;
+ * - os 3 saem da Home padrão e ficam opcionais no catálogo.
  */
 import type { ItemDaGrade, LimitesDoPainel } from '~/components/ux/UxGradeDePaineis.vue'
 
@@ -94,7 +104,8 @@ export type TipoDeWidget =
   | 'fluxosAndamento'
   // Comunicação (rodada 11)
   | 'email'
-  | 'whatsappSms'
+  | 'whatsapp'
+  | 'sms'
   // Equipe e notas
   | 'comunicado'
   | 'notas'
@@ -207,10 +218,12 @@ export const CATALOGO: DefinicaoDoWidget[] = [
   // Fora do MVP (rodada 10): o MVP leva só Categorias e tarefas.
   { tipo: 'fluxosAndamento', permissao: 'fluxos', icone: 'i-lucide-loader', grupo: 'spaceflow', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 12 } },
   // Comunicação (rodada 11). Fora do MVP (rodada 10): o MVP leva só Categorias e tarefas.
-  // Os e-mails que a pessoa enviou de um item: a aba Mensagens da central E-mails com "Enviado por" = a pessoa; "Novo e-mail" abre o compositor sem item.
+  // Os e-mails que a pessoa enviou de um item: a aba Mensagens da central E-mails com "Enviado por" = a pessoa. Sem botão de compor (rodada 12): o "Novo e-mail" é o da barra do topo.
   { tipo: 'email', icone: 'i-lucide-mail', grupo: 'comunicacao', tamanho: { w: 6, h: 6 }, limites: { minW: 3, maxW: 8, minH: 4, maxH: 10 } },
-  // O número digitado e a mensagem: o WhatsApp abre pelo `wa.me`; o SMS, pelo painel "Enviar SMS". O ENSPACE não registra nenhum dos 2.
-  { tipo: 'whatsappSms', icone: 'i-lucide-message-circle', grupo: 'comunicacao', tamanho: { w: 6, h: 6 }, limites: { minW: 3, maxW: 8, minH: 5, maxH: 8 } },
+  // O número digitado e a mensagem, abertos pelo `wa.me`. O ENSPACE não registra a conversa.
+  { tipo: 'whatsapp', icone: 'i-lucide-message-circle', grupo: 'comunicacao', tamanho: { w: 4, h: 6 }, limites: { minW: 3, maxW: 6, minH: 5, maxH: 8 } },
+  // O número digitado e a mensagem, abertos no painel "Enviar SMS". Telefone fixo não recebe SMS. O ENSPACE não registra a mensagem.
+  { tipo: 'sms', icone: 'i-lucide-message-square-text', grupo: 'comunicacao', tamanho: { w: 4, h: 6 }, limites: { minW: 3, maxW: 6, minH: 5, maxH: 8 } },
   // Equipe e notas
   // Fora do MVP: pede modelo e rota novos.
   { tipo: 'comunicado', icone: 'i-lucide-megaphone', grupo: 'equipe', soAdmin: true, tamanho: { w: 4, h: 5 }, limites: { minW: 3, maxW: 12, minH: 3, maxH: 6 } },
@@ -245,8 +258,8 @@ export function definicao(tipo: TipoDeWidget) {
  * BENI entra no padrão, também no workspace vazio ("pra induzir o user a usar
  * IA"), ao lado dos Compromissos do dia.
  *
- * Rodada 11: E-mail e WhatsApp e SMS entram logo depois do BENI, para os
- * botões de contato ficarem à vista ao abrir a Home.
+ * Rodada 11: E-mail e WhatsApp e SMS entraram logo depois do BENI. Rodada 12:
+ * saem do padrão e ficam opcionais no catálogo (pesquisa de mercado).
  */
 export const PADRAO_WIDGETS: Widget[] = [
   { id: 'w-categorias', tipo: 'categorias', config: { categorias: [] } },
@@ -256,8 +269,6 @@ export const PADRAO_WIDGETS: Widget[] = [
   { id: 'w-kpi-vencidas', tipo: 'kpiVencidas', config: {} },
   { id: 'w-beni', tipo: 'beni', config: {} },
   { id: 'w-agenda', tipo: 'agenda', config: {} },
-  { id: 'w-email', tipo: 'email', config: {} },
-  { id: 'w-whatsapp-sms', tipo: 'whatsappSms', config: {} },
   { id: 'w-vencidas', tipo: 'vencidas', config: {} },
   { id: 'w-vencem', tipo: 'vencemEmBreve', config: {} },
   { id: 'w-tarefas', tipo: 'minhasTarefas', config: {} },
@@ -275,8 +286,6 @@ export const PADRAO_LAYOUT: ItemDaGrade[] = [
   { id: 'w-kpi-vencidas', w: 3, h: 3 },
   { id: 'w-beni', w: 8, h: 5 },
   { id: 'w-agenda', w: 4, h: 5 },
-  { id: 'w-email', w: 6, h: 6 },
-  { id: 'w-whatsapp-sms', w: 6, h: 6 },
   { id: 'w-vencidas', w: 6, h: 6 },
   { id: 'w-vencem', w: 6, h: 6 },
   { id: 'w-tarefas', w: 6, h: 8 },
