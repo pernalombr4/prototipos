@@ -211,6 +211,22 @@ const pt = {
 
   /* Andaime */
   irParaSpaceflow: 'Spaceflow (nós de mensagem)',
+
+  /* Rodada 16: a configuração sai da central e vai para Configurações › E-mails (Comunicações, na Fase 4) */
+  separacao: {
+    configuracoes: 'Configurações',
+    configuracoesDica: 'Modelos, caixas de e-mail e regras de envio do workspace, em Configurações.',
+    tituloEmail: 'Configurações de e-mail',
+    tituloComunicacoes: 'Configurações de comunicação',
+    descricaoEmail: 'Os modelos, as caixas e as regras que valem para os e-mails do workspace.',
+    descricaoComunicacoes: 'Os modelos, as caixas, os canais e as regras que valem para as mensagens do workspace.',
+    regrasDeEnvio: 'Regras de envio',
+    canaisERegras: 'Canais e regras',
+    verMensagens: 'Ver mensagens',
+    suaConta: 'Sua conta de envio',
+    suaContaConectada: 'Conta conectada',
+    suaContaSem: 'Sem conta conectada',
+  },
 }
 
 export type TextosDeCanais = typeof pt
@@ -395,6 +411,21 @@ const en: TextosDeCanais = {
     andaimeSemTwilio: 'No Twilio',
   },
   irParaSpaceflow: 'Spaceflow (message nodes)',
+
+  separacao: {
+    configuracoes: 'Settings',
+    configuracoesDica: 'Workspace templates, mailboxes and sending rules, in Settings.',
+    tituloEmail: 'Email settings',
+    tituloComunicacoes: 'Communication settings',
+    descricaoEmail: 'The templates, mailboxes and rules for the workspace emails.',
+    descricaoComunicacoes: 'The templates, mailboxes, channels and rules for the workspace messages.',
+    regrasDeEnvio: 'Sending rules',
+    canaisERegras: 'Channels and rules',
+    verMensagens: 'View messages',
+    suaConta: 'Your sending account',
+    suaContaConectada: 'Account connected',
+    suaContaSem: 'No account connected',
+  },
 }
 
 const es: TextosDeCanais = {
@@ -577,6 +608,21 @@ const es: TextosDeCanais = {
     andaimeSemTwilio: 'Sin Twilio',
   },
   irParaSpaceflow: 'Spaceflow (nodos de mensaje)',
+
+  separacao: {
+    configuracoes: 'Configuración',
+    configuracoesDica: 'Plantillas, buzones y reglas de envío del workspace, en Configuración.',
+    tituloEmail: 'Configuración de correo',
+    tituloComunicacoes: 'Configuración de comunicaciones',
+    descricaoEmail: 'Las plantillas, los buzones y las reglas de los correos del workspace.',
+    descricaoComunicacoes: 'Las plantillas, los buzones, los canales y las reglas de los mensajes del workspace.',
+    regrasDeEnvio: 'Reglas de envío',
+    canaisERegras: 'Canales y reglas',
+    verMensagens: 'Ver mensajes',
+    suaConta: 'Tu cuenta de envío',
+    suaContaConectada: 'Cuenta conectada',
+    suaContaSem: 'Sin cuenta conectada',
+  },
 }
 
 export const textosDeCanais = { 'pt-BR': pt, en, es }

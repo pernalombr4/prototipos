@@ -57,6 +57,7 @@ import { useSms } from './atalhos'
 import { type Canal, type Entrega, type OrigemDoEnvio, type SaiuPor, type StatusDoEnvio, textosDeCanais } from './textosDeCanais'
 import BuscaDeItem from './_BuscaDeItem.vue'
 import AbasDaCentral from './_AbasDaCentral.vue'
+import ContaDeEnvio from './_ContaDeEnvio.vue'
 import TabelaDoEnspace from './_TabelaDoEnspace.vue'
 import Paginador from './_Paginador.vue'
 import FiltroDeColuna, { type Filtros } from './_FiltroDeColuna.vue'
@@ -89,9 +90,19 @@ const novaMensagem = computed<DropdownMenuItem[][]>(() => [[
 const ICONE_DA_ABA: Record<AbaDaCentral, string> = {
   mensagens: 'i-lucide-inbox', modelos: 'i-lucide-file-text', caixas: 'i-lucide-mailbox', configuracoes: 'i-lucide-settings',
 }
-const abas = computed(() => (Object.keys(ICONE_DA_ABA) as AbaDaCentral[])
-  .filter(a => ehAdmin.value || !ABAS_DE_ADMIN.includes(a))
-  .map(a => ({ value: a, label: props.t.central.abas[a], icon: ICONE_DA_ABA[a] })))
+/**
+ * Rodada 16: a lista de mensagens fica sozinha na entrada do menu, e as abas de quem administra
+ * (Modelos, Caixas de E-mail e Regras de envio, ou Canais e regras na Fase 4) viram a página de
+ * Configurações › E-mails (Comunicações, na Fase 4). O botão "Configurações" do topo leva até ela.
+ */
+const naConfiguracao = computed(() => ABAS_DE_ADMIN.includes(abaDaCentral.value))
+function rotuloDaAba(a: AbaDaCentral) {
+  if (a === 'configuracoes') return todosOsCanais.value ? tc.value.separacao.canaisERegras : tc.value.separacao.regrasDeEnvio
+  return props.t.central.abas[a]
+}
+const abas = computed(() => ABAS_DE_ADMIN.map(a => ({ value: a, label: rotuloDaAba(a), icon: ICONE_DA_ABA[a] })))
+const tituloDaConfiguracao = computed(() => todosOsCanais.value ? tc.value.separacao.tituloComunicacoes : tc.value.separacao.tituloEmail)
+const descricaoDaConfiguracao = computed(() => todosOsCanais.value ? tc.value.separacao.descricaoComunicacoes : tc.value.separacao.descricaoEmail)
 
 /** O texto do "i" de cada aba. */
 function dicaDaAba(a: AbaDaCentral) {
@@ -529,42 +540,64 @@ function nomeDaCaixa(endereco: string) {
 
 <template>
   <div class="flex min-h-0 flex-col">
-    <!-- Título -->
-    <div class="flex flex-wrap items-center gap-3 px-4 pb-2 pt-4 sm:px-6">
+    <!-- ===== Configurações › E-mails (Comunicações, na Fase 4): só quem administra (rodada 16) ===== -->
+    <template v-if="naConfiguracao">
+      <div class="flex flex-wrap items-center gap-3 px-4 pb-2 pt-4 sm:px-6" :class="marca">
+        <div class="min-w-0">
+          <h1 class="text-xl font-semibold text-highlighted">
+            {{ tituloDaConfiguracao }}
+          </h1>
+          <p class="mt-0.5 text-sm text-muted">
+            {{ descricaoDaConfiguracao }}
+          </p>
+        </div>
+        <UButton :label="tc.separacao.verMensagens" icon="i-lucide-inbox" color="neutral" variant="outline" class="ml-auto" @click="abaDaCentral = 'mensagens'" />
+      </div>
+      <UTabs
+        v-model="abaDaCentral"
+        :items="abas"
+        :content="false"
+        variant="link"
+        size="sm"
+        class="shrink-0 px-4 sm:px-6"
+        :class="marca"
+        :ui="{ list: 'border-b border-default' }"
+      >
+        <!-- O que a aba guarda: no "i", não num texto solto na barra (pedido da rodada 8) -->
+        <template #trailing="{ item }">
+          <UTooltip :text="dicaDaAba(item.value as AbaDaCentral)" :content="{ side: 'bottom' }">
+            <span role="img" :aria-label="dicaDaAba(item.value as AbaDaCentral)" class="inline-flex">
+              <UIcon name="i-lucide-info" class="size-3.5 text-dimmed" />
+            </span>
+          </UTooltip>
+        </template>
+      </UTabs>
+      <AbasDaCentral :t="t" :aba="abaDaCentral as Exclude<AbaDaCentral, 'mensagens'>" />
+    </template>
+
+    <template v-else>
+    <!-- Título da lista: a conta de envio, o atalho para as configurações e o envio (rodada 16) -->
+    <div class="flex flex-wrap items-center gap-2 px-4 pb-3 pt-4 sm:px-6">
       <h1 class="min-w-0 text-xl font-semibold text-highlighted">
         {{ titulo }}
       </h1>
-      <!-- PROPOSTA (Fase 4): uma ação para os canais que o ENSPACE envia -->
-      <UDropdownMenu v-if="todosOsCanais" :items="novaMensagem" :content="{ align: 'end' }" :ui="{ content: 'w-80' }">
-        <UButton :label="tc.novaMensagem" icon="i-lucide-plus" trailing-icon="i-lucide-chevron-down" class="ml-auto" :class="marca" />
-      </UDropdownMenu>
-      <UButton v-else :label="t.casca.novoEmail" icon="i-lucide-mail-plus" class="ml-auto" @click="abrirCompositor({ origem: 'emails' })" />
-    </div>
-
-    <!-- Abas da central -->
-    <UTabs
-      v-model="abaDaCentral"
-      :items="abas"
-      :content="false"
-      variant="link"
-      size="sm"
-      class="shrink-0 px-4 sm:px-6"
-      :class="marca"
-      :ui="{ list: 'border-b border-default' }"
-    >
-      <!-- O que a aba guarda: no "i", não num texto solto na barra (pedido da rodada 8) -->
-      <template #trailing="{ item }">
-        <UTooltip :text="dicaDaAba(item.value as AbaDaCentral)" :content="{ side: 'bottom' }">
-          <span role="img" :aria-label="dicaDaAba(item.value as AbaDaCentral)" class="inline-flex">
-            <UIcon name="i-lucide-info" class="size-3.5 text-dimmed" />
-          </span>
+      <UTooltip :text="dicaDaAba('mensagens')" :content="{ side: 'bottom' }">
+        <span role="img" :aria-label="dicaDaAba('mensagens')" class="inline-flex">
+          <UIcon name="i-lucide-info" class="size-4 text-dimmed" />
+        </span>
+      </UTooltip>
+      <div class="ml-auto flex flex-wrap items-center gap-2" :class="marca">
+        <ContaDeEnvio :t="t" />
+        <UTooltip v-if="ehAdmin" :text="tc.separacao.configuracoesDica">
+          <UButton :label="tc.separacao.configuracoes" icon="i-lucide-settings" color="neutral" variant="outline" @click="abaDaCentral = 'modelos'" />
         </UTooltip>
-      </template>
-    </UTabs>
-
-    <AbasDaCentral v-if="abaDaCentral !== 'mensagens'" :t="t" :aba="abaDaCentral" />
-
-    <template v-else>
+        <!-- PROPOSTA (Fase 4): uma ação para os canais que o ENSPACE envia -->
+        <UDropdownMenu v-if="todosOsCanais" :items="novaMensagem" :content="{ align: 'end' }" :ui="{ content: 'w-80' }">
+          <UButton :label="tc.novaMensagem" icon="i-lucide-plus" trailing-icon="i-lucide-chevron-down" />
+        </UDropdownMenu>
+        <UButton v-else :label="t.casca.novoEmail" icon="i-lucide-mail-plus" @click="abrirCompositor({ origem: 'emails' })" />
+      </div>
+    </div>
 
     <!-- Barra: TablesPartsDataToolbar -->
     <div class="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-default px-3 py-2 sm:px-4" :class="marca">

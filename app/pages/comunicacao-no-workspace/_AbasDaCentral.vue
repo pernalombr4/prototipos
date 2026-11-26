@@ -18,6 +18,11 @@
  * Lido no código do develop em 24/11/2026. Hoje as 3 telas usam a tabela
  * antiga; aqui elas ganham a tabela nova, como as outras telas do protótipo.
  *
+ * Rodada 16: as 3 abas formam a página de Configurações › E-mails (Comunicações,
+ * na Fase 4), só para quem administra. A aba Configurações passa a "Regras de
+ * envio" ("Canais e regras", na Fase 4), sem a conta de envio da pessoa, que
+ * virou o botão "Sua conta de envio" da lista de mensagens.
+ *
  * Fase 4 (rodada 14): Modelos ganha os modelos de WhatsApp aprovados pela Meta
  * (nome, idioma, categoria, status na Meta), e Configurações ganha "Canais de
  * envio do workspace": o e-mail do sistema (SendGrid), o SMS e o WhatsApp
@@ -25,10 +30,9 @@
  */
 import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
 import type { Textos } from './textos'
-import { type CaixaDeEmail, type ModeloDeEmail, type ModeloDeWhatsApp, DOMINIO_DA_EMPRESA, DOMINIO_DAS_CAIXAS, EU, NUMERO_SMS_DO_WORKSPACE, NUMERO_WHATSAPP_DO_WORKSPACE, modelosDeWhatsApp, variaveisDoModelo } from './mocks'
+import { type CaixaDeEmail, type ModeloDeEmail, type ModeloDeWhatsApp, DOMINIO_DA_EMPRESA, DOMINIO_DAS_CAIXAS, NUMERO_SMS_DO_WORKSPACE, NUMERO_WHATSAPP_DO_WORKSPACE, modelosDeWhatsApp, variaveisDoModelo } from './mocks'
 import { textosDeCanais } from './textosDeCanais'
 import { type AbaDaCentral, useComunicacao, useMarcaDeProposta } from './estado'
-import { useAppExterno } from './simulador'
 import TabelaDoEnspace from './_TabelaDoEnspace.vue'
 import Paginador from './_Paginador.vue'
 import FiltroDeColuna, { type Filtros } from './_FiltroDeColuna.vue'
@@ -36,10 +40,9 @@ import { passaNosFiltros } from './filtroPorColuna'
 
 const props = defineProps<{ t: Textos, aba: Exclude<AbaDaCentral, 'mensagens'> }>()
 
-const { fase, ehAdmin, outlookIntegrado, caixasNoDe, ir, abrirCompositor, modelosDoWorkspace, caixasDoWorkspace, twilioLigado, dados } = useComunicacao()
+const { fase, ehAdmin, caixasNoDe, ir, abrirCompositor, modelosDoWorkspace, caixasDoWorkspace, twilioLigado, dados } = useComunicacao()
 const tk = useTextos(textosDeCanais)
 const todosOsCanais = computed(() => fase.value >= 4)
-const { abrirApp } = useAppExterno()
 const marca = useMarcaDeProposta()
 const toast = useToast()
 
@@ -180,9 +183,6 @@ function verModelosWhatsApp() {
   ir('emails', { central: 'modelos' })
 }
 
-function integrar() {
-  abrirApp({ tipo: 'outlook', url: 'https://app.enspace.io/profile?tab=integrations' })
-}
 </script>
 
 <template>
@@ -433,45 +433,7 @@ function integrar() {
          uma linha (rótulo e explicação à esquerda, ação à direita), separadas
          por USeparator, como no modelo de configurações do Nuxt UI. ===== -->
     <div v-else class="flex flex-col gap-8 p-4 sm:p-6">
-      <!-- Todo perfil: a conta de envio da pessoa -->
-      <section>
-        <UPageCard :description="tc.config.contaDescricao" variant="naked" orientation="horizontal" class="mb-4" :ui="{ description: 'ps-6' }">
-          <template #title>
-            <span class="flex items-center gap-2"><UIcon name="i-lucide-user-round" class="size-4 shrink-0 text-muted" />{{ tc.config.contaTitulo }}</span>
-          </template>
-        </UPageCard>
-        <UPageCard variant="subtle" :ui="{ container: 'p-4 sm:p-6' }">
-          <!-- A conta é uma linha como as regras: nome, status na descrição, ação à direita -->
-          <UFormField
-            class="flex items-start justify-between gap-4 max-sm:flex-col"
-            :ui="{ wrapper: 'max-w-2xl', description: 'mt-1', container: 'shrink-0' }"
-          >
-            <template #label>
-              <span class="flex items-center gap-2 text-base font-semibold text-highlighted"><UIcon name="i-lucide-mail" class="size-4 shrink-0 text-muted" />{{ tc.config.outlookTitulo }}</span>
-            </template>
-            <template #description>
-              <!-- O ícone do status fica na coluna do ícone do título, e o texto na coluna do nome -->
-              <span class="flex items-center gap-2">
-                <UIcon
-                  :name="outlookIntegrado ? 'i-lucide-circle-check' : 'i-lucide-circle-alert'"
-                  class="size-4 shrink-0"
-                  :class="outlookIntegrado ? 'text-success' : 'text-warning'"
-                />
-                {{ outlookIntegrado ? tc.config.contaConectada(EU.email ?? '') : tc.config.contaSem }}
-              </span>
-            </template>
-            <UButton
-              :label="outlookIntegrado ? tc.config.gerenciar : tc.config.integrar"
-              icon="i-lucide-plug"
-              color="neutral"
-              variant="outline"
-              size="sm"
-              @click="integrar"
-            />
-          </UFormField>
-        </UPageCard>
-      </section>
-
+      <!-- A conta de envio da pessoa saiu daqui na rodada 16: é o botão "Sua conta de envio" da lista (_ContaDeEnvio.vue). -->
       <!-- Quem administra: as regras do workspace -->
       <section v-if="ehAdmin">
         <UPageCard :description="tc.config.regrasDescricao" variant="naked" orientation="horizontal" class="mb-4" :ui="{ description: 'ps-6' }">

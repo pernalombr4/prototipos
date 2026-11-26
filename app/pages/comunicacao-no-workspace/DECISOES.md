@@ -21,8 +21,8 @@ destino: a central vira "Comunicações" e guarda o e-mail, o SMS e o WhatsApp q
 |---|---|
 | (a) Link do formulário público | Requisições (cartão "Compartilhar este formulário"); lista de itens da categoria; painel da tarefa de preencher formulário |
 | (b) Atalho de e-mail, WhatsApp e SMS | Item (Contato do item na lateral e ícone ao lado do campo de e-mail e do de telefone); lista e quadro de itens (submenus "E-mail", "WhatsApp" e "SMS"); tarefas (coluna Contato, e-mail em lote, fila do WhatsApp e do SMS, clique direito, painel); Agenda (lembrete por e-mail, por WhatsApp e por SMS); o painel "Enviar SMS" |
-| Configuração | Aba Configurações da central E-mails: a conta de envio de cada pessoa e, para quem administra, o contato do item, o remetente com o domínio da empresa e (Fase 2) as caixas no "De". Sem chave em Sistema › Módulos: o e-mail vem sempre ligado. Categorias › cartão "Contato da categoria" (Fase 2, a avaliar com os devs) |
-| E-mail do ENSPACE em todas as telas | "Novo e-mail" no topo, que reconhece o item ou a tarefa aberta; o compositor; a central "E-mails" no menu, com Mensagens (também os enviados pelo sistema, para quem tem a permissão), Modelos, Caixas de E-mail e Configurações, cada aba pela permissão de hoje; o estado vazio de cada tabela diz o próximo passo |
+| Configuração | "Sua conta de envio" no topo da central (cada pessoa) e, em Configurações › E-mails › Regras de envio, para quem administra, o contato do item, o remetente com o domínio da empresa e (Fase 2) as caixas no "De". Sem chave em Sistema › Módulos: o e-mail vem sempre ligado. Categorias › cartão "Contato da categoria" (Fase 2, a avaliar com os devs) |
+| E-mail do ENSPACE em todas as telas | "Novo e-mail" no topo, que reconhece o item ou a tarefa aberta; o compositor; a central "E-mails" no menu, com a lista de mensagens (também os enviados pelo sistema, para quem tem a permissão), "Sua conta de envio" e o botão "Configurações", que leva a Configurações › E-mails (Modelos, Caixas de E-mail e Regras de envio, cada uma pela permissão de hoje); o estado vazio de cada tabela diz o próximo passo |
 
 ## O fluxo do e-mail
 
@@ -575,6 +575,19 @@ clientes usa Microsoft. A pesquisa está em `PESQUISA.md`, "SMS no computador".
   épico 2 (RN903, RN905, RN105; partes 1 e 2) e o documento do botão no cartão (RF009). Os prints
   estão em `evidencias/requisitos/`.
 
+## Rodada 16 · 2026-11-26 (o uso em Membro, a configuração em Configurações)
+
+- **Pedido (literal):** "acha que o menu de comunicações deve ser duplo? [...] opine e se eu validar voce aplica" e, depois da opinião, "gosto da ideia, mas na tela geral de comunicaçoes deve ter um botao de atalho pra ir pras configuraçoes. pode aplicar".
+- **Mudou no protótipo:**
+  - Membro › E-mails ("Comunicações", na Fase 4) abre só a lista de mensagens, sem abas;
+  - no topo da lista: "Sua conta de envio" (a conta do Outlook, num quadro, para todo perfil), "Configurações" (só quem administra, o atalho pedido) e "Novo e-mail" ou "Nova mensagem";
+  - Configurações › E-mails ("Comunicações", na Fase 4) ganha a página "Configurações de e-mail" ("Configurações de comunicação"), com as abas Modelos, Caixas de E-mail e Regras de envio ("Canais e regras", na Fase 4) e o botão "Ver mensagens";
+  - o menu de Configurações › E-mails passa a ter Modelos de E-mail, Caixas de E-mail e Regras de envio. "E-mails Enviados" sai: desde a rodada 8, é o filtro "Do sistema" da lista;
+  - a trilha diz Configurações › E-mails › <aba>, e o grupo do menu abre sozinho na página de configuração;
+  - o perfil Membro volta para a lista se estava na configuração.
+- **Revê a rodada 7,** que juntou uso e configuração em 4 abas na mesma entrada. O atalho "Configurações" mantém a configuração a 1 clique do uso.
+- **Fronteira:** muda a entrada do menu, o topo da lista e o grupo Configurações › E-mails. A lista, as tabelas e o conteúdo das abas ficam como na rodada 15.
+
 ## Rodada 15 · 2026-11-26 (filtro em toda coluna da central)
 
 - **Pedido (literal):** "a coluna canal em comunicaoçes tem que ter filtro tambem. todas as colunas devem ter. tem coluna aí sem filtro ainda."
@@ -787,9 +800,11 @@ item", a coluna Item e o vínculo depois do envio (ideia do Pipedrive):
 - **sugestão pelo remetente** na leitura: os itens em que quem escreveu é contato aparecem antes da
   busca livre.
 
-Até a rodada 6, o nome repetia o "E-mails" de Configurações. Desde a rodada 7, é 1 lugar só: a
-central reúne as telas de e-mail de hoje em abas, e os itens de Configurações › E-mails abrem a aba
-deles.
+Até a rodada 6, o nome repetia o "E-mails" de Configurações. Da rodada 7 à 15, era 1 lugar só: a
+central reunia as telas de e-mail de hoje em abas. Desde a rodada 16, a entrada de Membro fica com
+a lista, e Modelos, Caixas de E-mail e Regras de envio ficam em Configurações › E-mails, com o
+botão "Configurações" no topo da lista como atalho. O menu já separa o que se usa do que se
+configura; um submenu de configuração dentro de Membro seria um 2º caminho para o mesmo lugar.
 
 ### Os enviados pelo sistema: filtro em Mensagens, não aba
 

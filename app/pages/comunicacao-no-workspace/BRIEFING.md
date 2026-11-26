@@ -439,8 +439,10 @@ com "99+" e o avatar.
   `/request`). Cliente costuma ter; o workspace de exploração não tinha.
 - a central "E-mails" na seção Membro (todas as fases, desde a rodada 7) e "Novo e-mail" na barra
   do topo: proposta (ver `DECISOES.md`);
-- os 3 itens de Configurações › E-mails abrem a aba correspondente da central (rodada 7). O
-  rótulo e a posição no menu continuam os de hoje; muda só o destino.
+- Configurações › E-mails (rodada 16): Modelos de E-mail, Caixas de E-mail e Regras de envio
+  abrem a página de configuração na aba de mesmo nome; "E-mails Enviados" sai, porque é o filtro
+  "Do sistema" da lista. Na Fase 4, o grupo se chama "Comunicações". A posição no menu continua a
+  de hoje.
 
 **O que entra na casca na Fase 4 (rodada 14) e não é cópia:**
 

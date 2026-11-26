@@ -21,7 +21,7 @@
  */
 import type { Textos } from './textos'
 import { categorias, EU, itemPorId, workspace } from './mocks'
-import { type AbaDaCentral, type Rapido, type Tela, useComunicacao, useMarcaDeProposta } from './estado'
+import { type AbaDaCentral, ABAS_DE_ADMIN, type Rapido, type Tela, useComunicacao, useMarcaDeProposta } from './estado'
 import { textosDeCanais } from './textosDeCanais'
 
 const props = defineProps<{
@@ -40,6 +40,7 @@ interface Entrada {
   rotulo?: string
   icone: string
   tela?: Tela
+  central?: AbaDaCentral
   filhos?: { chave: string, rotulo?: string, icone: string, tela?: Tela, categoria?: string, central?: AbaDaCentral, rapido?: Rapido, proposta?: boolean }[]
   externo?: boolean
   /** Peça proposta: ganha o contorno do andaime. */
@@ -67,9 +68,10 @@ const membro = computed<Entrada[]>(() => [
   { chave: 'agenda', icone: 'i-lucide-calendar-days', tela: 'agenda' },
   // PROPOSTA (rodada 7): a central E-mails, nas 3 fases. Cada aba segue a permissão que já existe.
   // Fase 4 (rodada 14): a central guarda e-mail, SMS e WhatsApp e passa a se chamar "Comunicações".
+  // Rodada 16: a entrada abre só a lista de mensagens; a configuração fica em Configurações › E-mails.
   fase.value >= 4
-    ? { chave: 'emails', rotulo: tk.value.comunicacoes, icone: 'i-lucide-messages-square', tela: 'emails', proposta: true }
-    : { chave: 'emails', icone: 'i-lucide-mail', tela: 'emails', proposta: true },
+    ? { chave: 'emails', rotulo: tk.value.comunicacoes, icone: 'i-lucide-messages-square', tela: 'emails', central: 'mensagens', proposta: true }
+    : { chave: 'emails', icone: 'i-lucide-mail', tela: 'emails', central: 'mensagens', proposta: true },
   { chave: 'knowledge', icone: 'i-lucide-table-2', filhos: [] },
   // Menu configurado em Interface › Menus (tela nativa /request).
   { chave: 'requisicoes', icone: 'i-lucide-clipboard-pen-line', tela: 'requisicoes' },
@@ -91,13 +93,15 @@ const configuracoes = computed<Entrada[]>(() => [
   { chave: 'gestaoDeMembros', icone: 'i-lucide-contact' },
   { chave: 'interface', icone: 'i-lucide-compass', filhos: [] },
   {
+    // PROPOSTA (rodada 16): a configuração da central mora aqui. "E-mails Enviados" sai: é o filtro
+    // "Do sistema" da lista de mensagens desde a rodada 8. Fase 4: o grupo passa a "Comunicações".
     chave: 'emailsConfig',
-    icone: 'i-lucide-mails',
+    rotulo: fase.value >= 4 ? tk.value.comunicacoes : undefined,
+    icone: fase.value >= 4 ? 'i-lucide-messages-square' : 'i-lucide-mails',
     filhos: [
-      // PROPOSTA (rodada 7): os rótulos de hoje, abrindo a aba da central.
-      { chave: 'emailsEnviados', icone: 'i-lucide-send', tela: 'emails', central: 'mensagens', rapido: 'sistema', proposta: true },
-      { chave: 'modelosDeEmail', icone: 'i-lucide-file-text', tela: 'emails', central: 'modelos', proposta: true },
+      { chave: 'modelosDeEmail', rotulo: fase.value >= 4 ? props.t.central.abas.modelos : undefined, icone: 'i-lucide-file-text', tela: 'emails', central: 'modelos', proposta: true },
       { chave: 'caixasDeEmail', icone: 'i-lucide-inbox', tela: 'emails', central: 'caixas', proposta: true },
+      { chave: 'regrasDeEnvio', rotulo: fase.value >= 4 ? tk.value.separacao.canaisERegras : tk.value.separacao.regrasDeEnvio, icone: 'i-lucide-sliders-horizontal', tela: 'emails', central: 'configuracoes', proposta: true },
     ],
   },
   { chave: 'integracoes', icone: 'i-lucide-blocks' },
@@ -114,8 +118,14 @@ const ajuda: Entrada[] = [
 /** As seções que o develop deixa abertas quando a tela de dentro está ativa. */
 const abertos = ref<string[]>(['categorias', 'tarefas'])
 
-watch(tela, (t) => {
-  const secao = t === 'itens' || t === 'item' ? 'categorias' : t === 'tarefas' ? 'tarefas' : t === 'categoria' || t === 'spaceflow' ? 'estrutura' : null
+watch([tela, abaDaCentral], ([t, aba]) => {
+  const secao = t === 'itens' || t === 'item'
+    ? 'categorias'
+    : t === 'tarefas'
+      ? 'tarefas'
+      : t === 'categoria' || t === 'spaceflow'
+        ? 'estrutura'
+        : t === 'emails' && ABAS_DE_ADMIN.includes(aba) ? 'emailsConfig' : null
   if (secao && !abertos.value.includes(secao)) abertos.value = [...abertos.value, secao]
 }, { immediate: true })
 

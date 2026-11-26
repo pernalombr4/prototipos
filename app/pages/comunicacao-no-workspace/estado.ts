@@ -338,7 +338,8 @@ export type Perfil = 'admin' | 'membro'
 
 /** As abas da central "E-mails". */
 export type AbaDaCentral = 'mensagens' | 'modelos' | 'caixas' | 'configuracoes'
-export const ABAS_DE_ADMIN: AbaDaCentral[] = ['modelos', 'caixas']
+/** Rodada 16: as 3 formam a página de Configurações › E-mails (Comunicações, na Fase 4), só para quem administra. */
+export const ABAS_DE_ADMIN: AbaDaCentral[] = ['modelos', 'caixas', 'configuracoes']
 
 /** Uma opção do "De". */
 export interface Remetente {

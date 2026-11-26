@@ -84,7 +84,15 @@ const trilha = computed(() => {
     case 'tarefas': return [ws, c.itens.tarefas, c.itens.rapidas]
     case 'agenda': return [ws, c.itens.agenda]
     case 'requisicoes': return [ws, 'request']
-    case 'emails': return [ws, fase.value >= 4 ? tc.value.comunicacoes : c.itens.emails, t.value.central.abas[abaDaCentral.value]]
+    case 'emails': {
+      // Rodada 16: a lista fica em Membro; Modelos, Caixas e Regras de envio, em Configurações.
+      const nome = fase.value >= 4 ? tc.value.comunicacoes : c.itens.emails
+      if (abaDaCentral.value === 'mensagens') return [ws, nome]
+      const aba = abaDaCentral.value === 'configuracoes'
+        ? (fase.value >= 4 ? tc.value.separacao.canaisERegras : tc.value.separacao.regrasDeEnvio)
+        : t.value.central.abas[abaDaCentral.value]
+      return [ws, c.configuracoes, fase.value >= 4 ? nome : c.itens.emailsConfig, aba]
+    }
     case 'spaceflow': return [ws, c.configuracoes, c.dados, c.itens.spaceflow, tc.value.spaceflow.nomeDoFluxo]
     case 'sistema': return [ws, c.configuracoes, c.itens.sistema]
     case 'categoria': return [ws, c.configuracoes, c.dados, c.itens.estruturaCategorias, cat]
@@ -114,7 +122,7 @@ const irPara = computed<DropdownMenuItem[][]>(() => [
     ? [
         [{ type: 'label' as const, label: t.value.andaime.quemConfigura }],
         [
-          { label: t.value.andaime.configDosEmails, icon: 'i-lucide-settings', onSelect: () => ir('emails', { central: 'configuracoes' }) },
+          { label: fase.value >= 4 ? tc.value.separacao.tituloComunicacoes : tc.value.separacao.tituloEmail, icon: 'i-lucide-settings', onSelect: () => ir('emails', { central: 'modelos' }) },
           ...(fase.value >= 2 ? [{ label: t.value.andaime.atalhosDaCategoria, icon: 'i-lucide-contact', onSelect: () => ir('categoria', { categoria: 'contratos', vista: 'atalhos' }) }] : []),
           { label: t.value.andaime.formularios, icon: 'i-lucide-file-spreadsheet', onSelect: () => ir('categoria', { categoria: 'solicitacoes', vista: 'formularios' }) },
           ...(fase.value >= 4 ? [{ label: tc.value.irParaSpaceflow, icon: 'i-lucide-git-fork', onSelect: () => ir('spaceflow') }] : []),
