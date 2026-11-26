@@ -17,7 +17,7 @@ import type { Textos } from './textos'
 import RegistroDeTempo from './_RegistroDeTempo.vue'
 import SecoesDaTarefa from './_SecoesDaTarefa.vue'
 import SeletorDePrazos from './_SeletorDePrazos.vue'
-import { concluida, filhas, porId, relacionadasDe, bloqueia } from './tarefas'
+import { concluida, esperando, filhas, porId, relacionadasDe, bloqueia, travada } from './tarefas'
 import { duracao, lerDuracao, minutosDe } from './tempo'
 
 const props = defineProps<{
@@ -53,7 +53,18 @@ const itensDeStatus = computed(() => [
 ])
 function mudarStatus(s: unknown) {
   if (typeof s !== 'string' || s === status.value) return
+  /* Rodada 7: com a trava, a tarefa não começa nem termina antes das bloqueadoras. */
+  const espera = esperando(props.tarefas, props.x)
+  const b = props.t.tarefaRapida.bloqueio
+  if ((s === 'working' || s === 'completed') && travada(props.tarefas, props.x)) {
+    toast.add({ title: b.travada, description: b.travadaDescricao(espera), icon: 'i-lucide-lock', color: 'error', duration: 4000 })
+    return
+  }
   if (s === 'completed') return emit('concluir')
+  if (s === 'working' && espera) {
+    props.x.statusAntesDoBloqueio = undefined
+    toast.add({ title: b.iniciouAntes, description: b.iniciouAntesDescricao(espera), icon: 'i-lucide-triangle-alert', color: 'warning', duration: 4000 })
+  }
   if (status.value === 'completed') emit('reabrir')
   props.x.tarefa.status = s as typeof status.value
 }

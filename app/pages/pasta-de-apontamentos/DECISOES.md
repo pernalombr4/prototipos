@@ -4,6 +4,36 @@
 
 **Rodada 2, em uma linha:** as rodadas ganham vista própria e o cabeçalho perde o gráfico; a tarefa rápida ganha checklist, subtarefas de 1 nível, dependências e conclusão com motivo; o item ganha o contador da lista de tarefas; a citação com # liga apontamento, tarefa e item.
 
+## Rodada 7 · 2026-11-26
+
+- **Pedido (literal):** "sobre esse ponto de stack, atençao: tem um prototipo que fala de uma aba de reprovaçoes/aprovaçoes... especificamente ele prototipa um novo estilo de tarefas no enspace. busque por ele. é lá que voce deve aplicar essa logica. aqui nao. e aí atualiza la os docs de requisitos."
+- **Origem:** a pesquisa "Marcos, Stacks e Discussions nos Projetos" (repositório pesquisa-de-mercado, run de 2026-11-26). Do Stacks do GitHub, o que serve ao ENSPACE é a relação "Bloqueado por / Bloqueia", e não uma entidade. O GitHub tem a dependência entre issues (desde 2025-08-21); o Linear liga só de fim para início.
+- **Fronteira:**
+  - muda: a regra do bloqueio entre tarefas rápidas (status automático, trava, bloqueadora sem acesso, aviso de liberação), o modal "Concluir tarefa" quando há bloqueio, o cartão do quadro e o nome "Bloqueio" no menu Relacionar;
+  - não muda: as abas de Relacionamentos, o menu Relacionar e as tabelas da rodada 6, a aba Apontamentos, as rodadas e os 2 formulários.
+
+| Decisão | Motivo |
+|---|---|
+| "Bloqueada por" vale de fim para início: a tarefa espera a outra ser concluída | É a única ordem do Linear e a da dependência do GitHub. Início com início e fim com fim ficam de fora até alguém pedir |
+| Com bloqueadora aberta, a tarefa vai sozinha para Bloqueada; quando a última bloqueadora é concluída, ela volta ao status que tinha (Pendente ou Em andamento) | O status `blocked` já existe no modelo `tasks`, mas ninguém diz por que a tarefa está bloqueada. Agora o status tem causa e sai sozinho |
+| Reabrir uma bloqueadora devolve a tarefa a Bloqueada, com aviso | A ordem vale enquanto a bloqueadora estiver aberta |
+| A liberação avisa o responsável no sino: "<quem> concluiu a última tarefa que "<tarefa>" esperava. Ela está liberada." | Sem o aviso, a pessoa só descobre que pode começar quando abre o quadro |
+| Por padrão o bloqueio só avisa: dá para iniciar (com aviso) e concluir (pelo botão "Concluir mesmo assim", em amarelo) | A dependência do GitHub avisa e não impede. Processo real tem exceção, e travar sempre vira erro de sistema |
+| A chave "Travar até as bloqueadoras serem concluídas", na aba Bloqueada por, impede iniciar e concluir; o cartão ganha o selo Travada | A stack do GitHub trava o merge. Quem precisa da ordem rígida (assinar só depois da minuta aprovada) liga a trava naquela tarefa |
+| A trava vale só para concluir como Concluída; Não será feita e Duplicada fecham sem esperar | Fechar porque a tarefa morreu não quebra a ordem de entrega |
+| Bloqueadora em categoria que a pessoa não vê aparece como "Tarefa sem acesso", com cadeado e a dica "Está numa categoria que você não vê. Ela conta como bloqueio até ser concluída." | A relação cruza categorias e projetos. Mostrar o nome vazaria o que a permissão esconde; não mostrar nada faria a tarefa parecer bloqueada sem motivo. Segue o "Item sem acesso" do protótipo projetos |
+| O cartão diz "Bloqueada por 1 tarefa sem acesso" quando só a oculta bloqueia | O motivo continua em texto |
+| "Dependência" vira "Bloqueio" no menu Relacionar, no rótulo "Relacionar ou adicionar bloqueio" e no toast | "Dependência" já é o `enableDependency`, o filtro em cascata entre 2 campos do formulário |
+| Mover a tarefa à mão (sem trava) não é desfeito pelo status automático; ele só age quando entra, sai, termina ou reabre uma bloqueadora | O automático ajuda, sem brigar com a pessoa |
+
+- **Campos inventados (o modelo `tasks` lido em 11/11/2026 não tem):**
+  - a relação "bloqueada por" entre tarefas (já pedida na rodada 2);
+  - `lock_until_unblocked`, a trava (nome de trabalho);
+  - o status de antes do bloqueio automático, para voltar a ele.
+- **Fica para depois:** o mesmo "Bloqueado por" entre itens, como tipo de aresta no `item-link`; o filtro "Bloqueadas" na página do projeto; e o aviso no marco quando um item dele espera outro que vence depois. O documento de requisitos lista essas peças em "Fora do escopo".
+- **Requisitos:** `requisitos/bloqueio-entre-tarefas.md`. O protótipo ainda está em revisão e não tinha documento de requisitos; este cobre só o bloqueio.
+- **Ver:** https://pernalombr4.github.io/prototipos/pasta-de-apontamentos/?vista=tarefa&formulario=nova · `evidencias/rodada7-concluir-com-bloqueio.jpg` · `evidencias/rodada7-cartao-travado.jpg` · `evidencias/rodada7-liberada.jpg`
+
 ## Rodada 6 · 2026-11-12
 
 - **Pedidos (literais):**

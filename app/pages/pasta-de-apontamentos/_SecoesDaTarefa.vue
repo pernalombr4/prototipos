@@ -32,7 +32,7 @@ import type { CommandPaletteGroup, DropdownMenuItem } from '@nuxt/ui'
 import type { Task } from '@be-enlighten/enspace-sdk-schemas'
 import type { Checklist, ItemVinculavel, LinhaDeChecklist, Mencao, Pessoa, TarefaDoItem } from './mocks'
 import type { Textos } from './textos'
-import { bloqueia, concluida, desrelacionar, feitoDaLinha, filhas, linhasDe, novaChecklist, novaLinha, novaTarefa, porId, reabrirTarefa, relacionadasDe, semSecoes } from './tarefas'
+import { bloqueia, bloqueiosAbertos, concluida, desrelacionar, esperando, feitoDaLinha, filhas, linhasDe, novaChecklist, novaLinha, novaTarefa, porId, reabrirTarefa, relacionadasDe, semSecoes } from './tarefas'
 
 const props = defineProps<{
   t: Textos
@@ -260,7 +260,15 @@ const bloqueadaPor = computed(() => props.x.bloqueadaPor.map(id => porId(props.t
 const bloqueadas = computed(() => bloqueia(props.tarefas, props.x))
 const relacionadas = computed(() => relacionadasDe(props.tarefas, props.x))
 const itensVinculados = computed(() => props.x.itens.map(r => props.itens.find(i => i.reference === r)).filter((i): i is ItemVinculavel => !!i))
-const temRelacoes = computed(() => !!(bloqueadaPor.value.length || bloqueadas.value.length || relacionadas.value.length || itensVinculados.value.length))
+/* Rodada 7: bloqueadoras que a pessoa não vê e a trava. */
+const semAcesso = computed(() => props.x.bloqueiosSemAcesso ?? 0)
+const abertasQueEspera = computed(() => bloqueiosAbertos(props.tarefas, props.x))
+const emEspera = computed(() => esperando(props.tarefas, props.x))
+const trava = computed({
+  get: () => !!props.x.travaDoBloqueio,
+  set: (v: boolean) => { props.x.travaDoBloqueio = v },
+})
+const temRelacoes = computed(() => !!(semAcesso.value || bloqueadaPor.value.length || bloqueadas.value.length || relacionadas.value.length || itensVinculados.value.length))
 
 const relacionarAberto = ref(false)
 type Modo = 'tarefa' | 'bloqueia' | 'bloqueadaPor'
@@ -334,7 +342,7 @@ const gruposDeRelacao = computed<CommandPaletteGroup[]>(() => [
 type AbaDeRelacao = 'relacionadas' | 'bloqueadaPor' | 'bloqueia'
 const contagens = computed<Record<AbaDeRelacao, number>>(() => ({
   relacionadas: relacionadas.value.length + itensVinculados.value.length,
-  bloqueadaPor: bloqueadaPor.value.length,
+  bloqueadaPor: bloqueadaPor.value.length + semAcesso.value,
   bloqueia: bloqueadas.value.length,
 }))
 const abaEscolhida = ref<AbaDeRelacao | null>(null)
@@ -353,8 +361,9 @@ const abasDeRelacao = computed(() => (['relacionadas', 'bloqueadaPor', 'bloqueia
 const gruposDaAba = computed(() => {
   const a = abaDeRelacao.value
   const tarefasDaAba = a === 'relacionadas' ? relacionadas.value : a === 'bloqueadaPor' ? bloqueadaPor.value : bloqueadas.value
-  const grupos: { id: string, rotulo: string, icone: string, tarefas?: TarefaDoItem[], itens?: ItemVinculavel[] }[] = []
-  if (tarefasDaAba.length) grupos.push({ id: 'tarefas', rotulo: tn.value.relacoes.tarefas, icone: 'i-lucide-clipboard-check', tarefas: tarefasDaAba })
+  const grupos: { id: string, rotulo: string, icone: string, tarefas?: TarefaDoItem[], itens?: ItemVinculavel[], semAcesso?: number }[] = []
+  const ocultas = a === 'bloqueadaPor' ? semAcesso.value : 0
+  if (tarefasDaAba.length || ocultas) grupos.push({ id: 'tarefas', rotulo: tn.value.relacoes.tarefas, icone: 'i-lucide-clipboard-check', tarefas: tarefasDaAba, semAcesso: ocultas })
   if (a === 'relacionadas') {
     const porCategoria = new Map<string, ItemVinculavel[]>()
     for (const i of itensVinculados.value) porCategoria.set(i.categoria, [...(porCategoria.get(i.categoria) ?? []), i])
@@ -811,20 +820,24 @@ const minhasMencoes = computed(() => props.mencoes.filter(m => m.alvo === `taref
 
       <div v-show="aberta('relacoes')" class="flex flex-col gap-3">
         <UAlert
-          v-if="abaDeRelacao === 'bloqueadaPor' && bloqueadaPor.some(y => !concluida(y))"
-          :description="tr.relacoes.aviso(bloqueadaPor.find(y => !concluida(y))!.tarefa.name)"
+          v-if="abaDeRelacao === 'bloqueadaPor' && emEspera"
+          :description="abertasQueEspera.length ? tr.relacoes.aviso(abertasQueEspera[0]!.tarefa.name) : tr.bloqueio.cartaoSemAcesso(semAcesso)"
           icon="i-lucide-lock"
           color="error"
           variant="subtle"
           orientation="horizontal"
           class="py-2"
         />
+        <!-- Rodada 7: a trava. Desligada, o bloqueio só avisa. -->
+        <div v-if="abaDeRelacao === 'bloqueadaPor'" class="flex items-start gap-3 rounded-md border border-default px-3 py-2">
+          <USwitch v-model="trava" :disabled="somenteLeitura" size="sm" :label="tr.bloqueio.trava" :description="tr.bloqueio.travaDica" :ui="{ label: 'text-sm', description: 'text-xs' }" />
+        </div>
 
         <div v-for="g in gruposDaAba" :key="g.id" class="flex flex-col [animation:entrada_.2s_ease-out_both]">
           <p class="flex items-center gap-1.5 px-1 pb-1 text-xs font-medium text-highlighted">
             <UIcon :name="g.icone" class="size-3.5 text-muted" />
             {{ g.rotulo }}
-            <span class="tabular-nums text-muted">{{ (g.tarefas ?? g.itens ?? []).length }}</span>
+            <span class="tabular-nums text-muted">{{ (g.tarefas ?? g.itens ?? []).length + (g.semAcesso ?? 0) }}</span>
           </p>
           <div class="overflow-x-auto rounded-md border border-default">
             <table class="w-full min-w-[24rem] text-sm">
@@ -854,6 +867,17 @@ const minhasMencoes = computed(() => props.mencoes.filter(m => m.alvo === `taref
                     <td class="pr-1">
                       <UButton v-if="!somenteLeitura" icon="i-lucide-x" color="neutral" variant="ghost" size="xs" class="opacity-0 transition-opacity focus-visible:opacity-100 group-hover/rel:opacity-100" :aria-label="tr.relacoes.remover(y.tarefa.name)" @click="removerDaAba(y)" />
                     </td>
+                  </tr>
+                  <tr v-for="n in (g.semAcesso ?? 0)" :key="`sem-acesso-${n}`" class="text-muted">
+                    <td class="px-2.5 py-1.5" colspan="3">
+                      <UTooltip :text="tr.bloqueio.semAcessoDica">
+                        <span class="flex min-w-0 items-center gap-2">
+                          <UIcon name="i-lucide-lock" class="size-4 shrink-0 text-muted" />
+                          <span class="truncate italic">{{ tr.bloqueio.semAcesso }}</span>
+                        </span>
+                      </UTooltip>
+                    </td>
+                    <td />
                   </tr>
                 </template>
                 <template v-else>

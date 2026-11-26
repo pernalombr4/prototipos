@@ -139,10 +139,15 @@ const corDoStatus: Record<string, string> = { pending: 'text-info', working: 'te
             <p class="line-clamp-2 text-xs text-muted">{{ x.tarefa.description || t.tarefas.semDescricao }}</p>
 
             <!-- Proposta: as contagens, em texto -->
-            <div v-if="totalDaChecklist(x) || filhas(x).length || x.apontamentos.length || bloqueios(x).length" class="flex flex-col gap-1 text-xs">
+            <div v-if="totalDaChecklist(x) || filhas(x).length || x.apontamentos.length || bloqueios(x).length || x.bloqueiosSemAcesso" class="flex flex-col gap-1 text-xs">
               <p v-if="bloqueios(x).length" class="flex items-center gap-1.5 text-error">
                 <UIcon name="i-lucide-lock" class="size-3.5 shrink-0" />
                 <span class="truncate">{{ t.tarefaRapida.cartao.bloqueadaPor(bloqueios(x)[0]!.tarefa.name) }}</span>
+                <UBadge v-if="x.travaDoBloqueio" :label="t.tarefaRapida.bloqueio.cartaoTravada" icon="i-lucide-lock" color="error" variant="subtle" size="sm" class="shrink-0" />
+              </p>
+              <p v-else-if="x.bloqueiosSemAcesso && x.tarefa.status !== 'completed'" class="flex items-center gap-1.5 text-error">
+                <UIcon name="i-lucide-lock" class="size-3.5 shrink-0" />
+                <span class="truncate">{{ t.tarefaRapida.bloqueio.cartaoSemAcesso(x.bloqueiosSemAcesso) }}</span>
               </p>
               <p v-if="totalDaChecklist(x)" class="flex items-center gap-1.5 text-toned">
                 <UIcon name="i-lucide-square-check" class="size-3.5 shrink-0" :class="feitos(x) === totalDaChecklist(x) ? 'text-success' : 'text-muted'" />

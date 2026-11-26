@@ -29,8 +29,9 @@ import { CHAVE_CITACAO } from './citacao'
 import { textos } from './textos'
 import { cenarios, pastasDoSistema, secoesVazias } from './mocks'
 import { copia, pendente, responder } from './lista'
+import { ajustarAoBloqueio, chaveDoBloqueio } from './tarefas'
 import type { Aviso } from './avisos'
-import { avisos, avisosDe, marcarLidas } from './avisos'
+import { avisar, avisos, avisosDe, marcarLidas } from './avisos'
 import CascaDoWorkspace from './_CascaDoWorkspace.vue'
 import PainelDoItem from './_PainelDoItem.vue'
 import BarraDePastas from './_BarraDePastas.vue'
@@ -111,6 +112,33 @@ const quem = computed(() => papel.value === 'conferente' ? c.value.conferente : 
 
 /** As tarefas que a tela mostra: as do cenário, ou as vazias no estado vazio. */
 const tarefasDaTela = computed(() => estadoDaTela.value === 'vazio' ? d.value.tarefasVazias : c.value.tarefas)
+/*
+ * Rodada 7: bloqueio de fim para início. Quando uma bloqueadora termina ou
+ * reabre, a tarefa que a espera muda de status sozinha e o aviso sai.
+ */
+const chavesDoBloqueio = new Map<string, string>()
+watch(
+  () => tarefasDaTela.value.map(x => chaveDoBloqueio(tarefasDaTela.value, x)).join(';'),
+  () => {
+    const ts = tarefasDaTela.value
+    const b = t.value.tarefaRapida.bloqueio
+    for (const x of ts) {
+      const id = `${cenarioId.value}-${estadoDaTela.value}-${x.tarefa.id}`
+      const k = chaveDoBloqueio(ts, x)
+      const antes = chavesDoBloqueio.get(id)
+      chavesDoBloqueio.set(id, k)
+      if (antes === undefined || antes === k) continue
+      const r = ajustarAoBloqueio(ts, x)
+      if (r === 'liberada') {
+        const ultima = x.bloqueadaPor.map(i => ts.find(y => y.tarefa.id === i)).filter(y => y?.tarefa.completed_at).sort((m, n) => +new Date(n!.tarefa.completed_at!) - +new Date(m!.tarefa.completed_at!))[0]
+        avisar([x.tarefa.assigned_to ?? 0], ultima?.tarefa.completed_by ?? quem.value, { tipo: 'liberada', tarefa: x.tarefa.id, titulo: x.tarefa.name })
+      }
+      if (r === 'liberada') toast.add({ title: b.liberada(x.tarefa.name), description: b.liberadaDescricao, icon: 'i-lucide-lock-open', color: 'success', duration: 4000 })
+      else if (r === 'bloqueada') toast.add({ title: b.voltou(x.tarefa.name), description: b.voltouDescricao, icon: 'i-lucide-lock', color: 'warning', duration: 4000 })
+    }
+  },
+  { immediate: true },
+)
 const mencoesDaTela = computed(() => estadoDaTela.value === 'vazio' ? [] : c.value.mencoes)
 
 const listaPrincipal = computed<Lista>(() => estadoDaTela.value === 'vazio'
@@ -250,6 +278,10 @@ function abrirAviso(id: string) {
   const a: Aviso | undefined = avisos.find(x => x.id === id)
   if (!a) return
   a.lida = true
+  if (a.tarefa) {
+    const x = c.value.tarefas.find(y => y.tarefa.id === a.tarefa)
+    if (x) return abrirTarefa(x)
+  }
   if (!a.apontamento) return abrirNaPasta()
   if (c.value.apontamentos.some(x => x.id === a.apontamento)) return abrirNaPasta(String(a.numero))
   const x = c.value.tarefas.find(y => y.apontamentos.some(z => z.id === a.apontamento))

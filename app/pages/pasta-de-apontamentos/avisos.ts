@@ -8,7 +8,7 @@
  */
 import { reactive } from 'vue'
 
-export type TipoDeAviso = 'atribuido' | 'reaberto' | 'retorno'
+export type TipoDeAviso = 'atribuido' | 'reaberto' | 'retorno' | 'liberada'
 
 export interface Aviso {
   id: string
@@ -16,6 +16,8 @@ export interface Aviso {
   /** Quem fez a ação. */
   quem: number
   tipo: TipoDeAviso
+  /** Liberada (rodada 7): a tarefa que saiu de Bloqueada. */
+  tarefa?: number
   /** Atribuído e reaberto: o apontamento. */
   apontamento?: string
   numero?: number

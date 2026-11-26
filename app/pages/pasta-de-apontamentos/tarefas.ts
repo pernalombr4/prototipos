@@ -77,3 +77,47 @@ export function reabrirTarefa(x: TarefaDoItem) {
 let seqLinha = 9000
 export const novaLinha = (texto: string, responsavel?: number): LinhaDeChecklist => ({ id: `ck-n${++seqLinha}`, texto, feito: false, responsavel })
 export const novaChecklist = (nome: string): Checklist => ({ id: `cl-n${++seqLinha}`, nome, linhas: [] })
+
+/* ---------- rodada 7: bloqueio de fim para início ---------- */
+/**
+ * "Bloqueada por" vale de fim para início: a tarefa espera a outra terminar.
+ * Enquanto espera, ela fica Bloqueada sozinha; quando a última bloqueadora
+ * termina, ela volta ao status que tinha e o responsável recebe o aviso. Por
+ * padrão o bloqueio só avisa; com a trava ligada, a tarefa não começa nem
+ * termina antes das bloqueadoras. Inventado: o modelo `tasks` tem o status
+ * `blocked`, mas nenhum campo diz o que bloqueia.
+ */
+export const bloqueiosAbertos = (ts: TarefaDoItem[], x: TarefaDoItem) =>
+  x.bloqueadaPor.map(id => porId(ts, id)).filter((y): y is TarefaDoItem => !!y && !concluida(y))
+/** Quantas tarefas esta ainda espera, contando as que a pessoa não vê. */
+export const esperando = (ts: TarefaDoItem[], x: TarefaDoItem) => bloqueiosAbertos(ts, x).length + (x.bloqueiosSemAcesso ?? 0)
+/** A trava só impede quando ainda há o que esperar. */
+export const travada = (ts: TarefaDoItem[], x: TarefaDoItem) => !!x.travaDoBloqueio && esperando(ts, x) > 0
+
+/**
+ * Ajusta o status de 1 tarefa ao estado das bloqueadoras. Devolve 'liberada'
+ * quando ela sai de Bloqueada sozinha, para o aviso.
+ */
+export function ajustarAoBloqueio(ts: TarefaDoItem[], x: TarefaDoItem): 'bloqueada' | 'liberada' | null {
+  if (concluida(x)) return null
+  const espera = esperando(ts, x) > 0
+  if (espera && x.tarefa.status !== 'blocked') {
+    x.statusAntesDoBloqueio = x.tarefa.status === 'working' ? 'working' : 'pending'
+    x.tarefa.status = 'blocked'
+    return 'bloqueada'
+  }
+  if (!espera && x.tarefa.status === 'blocked' && x.statusAntesDoBloqueio) {
+    x.tarefa.status = x.statusAntesDoBloqueio
+    x.statusAntesDoBloqueio = undefined
+    return 'liberada'
+  }
+  return null
+}
+
+/**
+ * Chave do que a tarefa espera: muda quando entra ou sai uma bloqueadora, ou
+ * quando uma delas termina ou reabre. O status da própria tarefa fica de fora,
+ * para quem a move à mão (sem trava) não ser desfeito.
+ */
+export const chaveDoBloqueio = (ts: TarefaDoItem[], x: TarefaDoItem) =>
+  `${x.bloqueadaPor.map(id => `${id}:${concluida(porId(ts, id)) ? 1 : 0}`).join(',')}|${x.bloqueiosSemAcesso ?? 0}`

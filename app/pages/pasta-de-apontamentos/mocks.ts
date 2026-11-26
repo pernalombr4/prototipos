@@ -259,8 +259,14 @@ export interface TarefaDoItem {
   /** Id da tarefa-mãe. Um nível só: a subtarefa não tem subtarefas. */
   mae?: number
   checklists: Checklist[]
-  /** Ids das tarefas que esta espera. */
+  /** Ids das tarefas que esta espera. De fim para início: ela espera a outra terminar. */
   bloqueadaPor: number[]
+  /** Inventado (rodada 7): bloqueadoras em categoria que a pessoa não vê. Aparecem como "Tarefa sem acesso". */
+  bloqueiosSemAcesso?: number
+  /** Inventado (rodada 7): a trava. Ligada, a tarefa não começa nem termina antes das bloqueadoras. */
+  travaDoBloqueio?: boolean
+  /** Inventado (rodada 7): o status de antes do bloqueio automático, para voltar a ele. */
+  statusAntesDoBloqueio?: 'pending' | 'working'
   /** Ids das tarefas relacionadas, sem ordem de espera. Vale nos 2 sentidos. */
   relacionadas: number[]
   /** Referências dos itens vinculados, além do item da tarefa. */
@@ -580,7 +586,7 @@ const tarefasProduto: TarefaDoItem[] = [
   },
   td({ ...tarefa(904, 'Traduzir o selo de status da tarefa', 'pending', BRUNO, 'Usar o rótulo do status nos 3 idiomas.'), points: 2 }, { mae: 901, registros: [{ id: 'rt-4', quem: BRUNO, inicio: d('2026-11-11T11:00:00'), minutos: 40 }] }),
   td({ ...tarefa(905, 'Revisar os estados vazios com o design', 'completed', DEBORA), points: 3 }, { mae: 901, conclusao: { motivo: 'concluida' } }),
-  td({ ...tarefa(902, 'Revisar a migração das pastas ocultas', 'blocked', CAIO, 'Rodar de novo a migração nas pastas com hidden=true.'), priority: 'high', points: 8, tag_ids: [3] }, { bloqueadaPor: [906], prazoFinal: d('2026-11-16T18:00:00') }),
+  td({ ...tarefa(902, 'Revisar a migração das pastas ocultas', 'blocked', CAIO, 'Rodar de novo a migração nas pastas com hidden=true.'), priority: 'high', points: 8, tag_ids: [3] }, { bloqueadaPor: [906], bloqueiosSemAcesso: 1, statusAntesDoBloqueio: 'pending', prazoFinal: d('2026-11-16T18:00:00') }),
   td(tarefa(906, 'Liberar acesso de leitura ao banco de develop', 'working', CAIO)),
   td(tarefa(903, 'Atualizar a documentação da tela do item', 'completed', DEBORA), { conclusao: { motivo: 'concluida' } }),
 ]
@@ -758,7 +764,7 @@ export const cenarios: Record<Cenario['id'], Cenario> = {
     apontamentos: apontamentosJuridico,
     rodadas: rodadasJuridico,
     tarefas: [
-      td({ ...tarefa(911, 'Colher assinaturas', 'pending', RAFAEL, 'Assinaturas da versão final, depois da aprovação da minuta.'), workspace: 'juridico-consultivo', item: 52210 }, {
+      td({ ...tarefa(911, 'Colher assinaturas', 'blocked', RAFAEL, 'Assinaturas da versão final, depois da aprovação da minuta.'), workspace: 'juridico-consultivo', item: 52210 }, {
         checklists: [
           checklist([
             linha('Assinatura da contratada', false, { responsavel: RAFAEL }),
@@ -772,6 +778,8 @@ export const cenarios: Record<Cenario['id'], Cenario> = {
           ], 'Depois de assinar'),
         ],
         bloqueadaPor: [913],
+        travaDoBloqueio: true,
+        statusAntesDoBloqueio: 'pending',
         itens: ['PRO7A20E4C93B1D46F8A5C27E9B0D3F614'],
       }),
       td({ ...tarefa(912, 'Enviar a minuta final ao cliente', 'pending', RAFAEL), workspace: 'juridico-consultivo', item: 52210 }, { mae: 911 }),

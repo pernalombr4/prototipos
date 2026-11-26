@@ -38,7 +38,7 @@ import SecoesDaTarefa from './_SecoesDaTarefa.vue'
 import SeletorDePrazos from './_SeletorDePrazos.vue'
 import TarefaInterfaceNova from './_TarefaInterfaceNova.vue'
 import { pendente } from './lista'
-import { concluida, concluir, filhas, porId, reabrirTarefa } from './tarefas'
+import { concluida, concluir, esperando, filhas, porId, reabrirTarefa, travada } from './tarefas'
 
 const props = defineProps<{
   t: Textos
@@ -111,7 +111,10 @@ const opcoesDeMotivo = computed(() => (['concluida', 'naoSeraFeita', 'duplicada'
   description: tr.value.conclusao.descricoes[m]!,
 })))
 const outrasTarefas = computed(() => props.tarefas.filter(y => y !== props.x).map(y => ({ label: y.tarefa.name, value: y.tarefa.id })))
-const podeConcluir = computed(() => motivo.value !== 'duplicada' || !!duplicadaDe.value)
+/* Rodada 7: o bloqueio avisa na conclusão; com a trava, impede. Só vale para Concluída: Não será feita e Duplicada fecham sem esperar. */
+const espera = computed(() => esperando(props.tarefas, props.x))
+const presa = computed(() => travada(props.tarefas, props.x) && motivo.value === 'concluida')
+const podeConcluir = computed(() => !presa.value && (motivo.value !== 'duplicada' || !!duplicadaDe.value))
 function abrirConclusao() {
   motivo.value = 'concluida'
   duplicadaDe.value = undefined
@@ -348,6 +351,14 @@ const linhaDaConclusao = computed(() => {
   <UModal v-model:open="modalConcluir" :title="tr.conclusao.titulo" :description="x.tarefa.name" :ui="{ footer: 'justify-end gap-2' }">
     <template #body>
       <div class="flex flex-col gap-4">
+        <UAlert
+          v-if="espera && motivo === 'concluida'"
+          :description="presa ? tr.bloqueio.concluirTravada(espera) : tr.bloqueio.concluirAviso(espera)"
+          :icon="presa ? 'i-lucide-lock' : 'i-lucide-triangle-alert'"
+          :color="presa ? 'error' : 'warning'"
+          variant="subtle"
+          class="py-2"
+        />
         <URadioGroup v-model="motivo" :legend="tr.conclusao.motivo" :items="opcoesDeMotivo" variant="table" />
         <USelectMenu
           v-if="motivo === 'duplicada'"
@@ -369,7 +380,7 @@ const linhaDaConclusao = computed(() => {
     </template>
     <template #footer>
       <UButton :label="tr.conclusao.cancelar" color="neutral" variant="outline" @click="modalConcluir = false" />
-      <UButton :label="tr.conclusao.confirmar" icon="i-lucide-check" :disabled="!podeConcluir" @click="confirmarConclusao" />
+      <UButton :label="espera && motivo === 'concluida' && !presa ? tr.bloqueio.concluirMesmoAssim : tr.conclusao.confirmar" icon="i-lucide-check" :color="espera && motivo === 'concluida' && !presa ? 'warning' : 'primary'" :disabled="!podeConcluir" @click="confirmarConclusao" />
     </template>
   </UModal>
 </template>

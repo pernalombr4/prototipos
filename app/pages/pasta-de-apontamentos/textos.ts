@@ -86,6 +86,7 @@ const ptBR = {
   avisos: {
     atribuido: (quem: string, n: number, titulo: string) => `${quem} atribuiu a você o apontamento #${n}: ${titulo}`,
     reaberto: (quem: string, n: number, titulo: string) => `${quem} reabriu o apontamento #${n}: ${titulo}`,
+    liberada: (quem: string, _n: number, titulo: string) => `${quem} concluiu a última tarefa que "${titulo}" esperava. Ela está liberada.`,
     retorno: (quem: string, qtd: number, rodada: number) => `${quem} enviou o retorno da rodada ${rodada}, com ${plural(qtd, 'apontamento seu', 'apontamentos seus')}`,
     enviada: (nomes: string) => `Notificação enviada para ${nomes}.`,
     naoLidas: (n: number) => plural(n, 'notificação não lida', 'notificações não lidas'),
@@ -430,6 +431,7 @@ const en: Textos = {
   avisos: {
     atribuido: (quem: string, n: number, titulo: string) => `${quem} assigned you issue #${n}: ${titulo}`,
     reaberto: (quem: string, n: number, titulo: string) => `${quem} reopened issue #${n}: ${titulo}`,
+    liberada: (quem: string, _n: number, titulo: string) => `${quem} completed the last task "${titulo}" was waiting for. It is unblocked.`,
     retorno: (quem: string, qtd: number, rodada: number) => `${quem} sent the round ${rodada} feedback, with ${plural(qtd, 'issue', 'issues')} for you`,
     enviada: (nomes: string) => `Notification sent to ${nomes}.`,
     naoLidas: (n: number) => plural(n, 'unread notification', 'unread notifications'),
@@ -772,6 +774,7 @@ const es: Textos = {
   avisos: {
     atribuido: (quem: string, n: number, titulo: string) => `${quem} le asignó el punto #${n}: ${titulo}`,
     reaberto: (quem: string, n: number, titulo: string) => `${quem} reabrió el punto #${n}: ${titulo}`,
+    liberada: (quem: string, _n: number, titulo: string) => `${quem} completó la última tarea que "${titulo}" esperaba. Está desbloqueada.`,
     retorno: (quem: string, qtd: number, rodada: number) => `${quem} envió el retorno de la ronda ${rodada}, con ${plural(qtd, 'punto suyo', 'puntos suyos')}`,
     enviada: (nomes: string) => `Notificación enviada a ${nomes}.`,
     naoLidas: (n: number) => plural(n, 'notificación no leída', 'notificaciones no leídas'),

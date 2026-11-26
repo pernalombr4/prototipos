@@ -107,7 +107,7 @@ export const tarefaNovaPtBR = {
   },
   secoes: {
     adicionarSubtarefa: 'Adicionar subtarefa',
-    relacionar: 'Relacionar itens ou adicionar dependências',
+    relacionar: 'Relacionar itens ou adicionar bloqueios',
     criarChecklist: 'Criar checklist',
     anexar: 'Anexar arquivo',
   },
@@ -216,7 +216,7 @@ export const tarefaNovaEn: TarefaNovaTextos = {
   },
   secoes: {
     adicionarSubtarefa: 'Add subtask',
-    relacionar: 'Relate items or add dependencies',
+    relacionar: 'Relate items or add blockers',
     criarChecklist: 'Create checklist',
     anexar: 'Attach file',
   },
@@ -323,7 +323,7 @@ export const tarefaNovaEs: TarefaNovaTextos = {
   },
   secoes: {
     adicionarSubtarefa: 'Agregar subtarea',
-    relacionar: 'Relacionar ítems o agregar dependencias',
+    relacionar: 'Relacionar ítems o agregar bloqueos',
     criarChecklist: 'Crear checklist',
     anexar: 'Adjuntar archivo',
   },
