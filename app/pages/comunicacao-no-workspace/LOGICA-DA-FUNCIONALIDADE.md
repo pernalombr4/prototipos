@@ -427,7 +427,7 @@ global, e o envio por canal sai do contato do registro.
 |---|---|
 | "Novo e-mail" na barra do topo (7.2) | O e-mail sem item, de qualquer tela, inclusive da tela inicial |
 | Atalhos de cada registro (5.2 a 5.5, 5.7 e 5.8) | O e-mail, o WhatsApp e o SMS para o contato do item, da tarefa e da Agenda |
-| Widgets da Home nova | E-mail (os enviados de um item), WhatsApp e SMS, cada um opcional no catálogo, fora da Home padrão. Os requisitos estão no épico "Widgets de itens, agenda, atalhos e comunicação na Home" |
+| Widgets da Home nova | E-mail (os enviados de um item e o botão "Enviar e-mail", que abre o compositor sem item), WhatsApp e SMS, cada um opcional no catálogo, fora da Home padrão. Os requisitos estão no épico "Widgets de itens, agenda, atalhos e comunicação na Home" |
 
 O link de formulário público continua onde o formulário está em uso (6.2): a tela inicial não sabe
 qual formulário, porque o workspace tem vários.
