@@ -374,30 +374,13 @@ Protótipo em revisão ainda não leva.
 Decisão da redatora em 2026-10-29. Com o documento de requisitos pronto, o agente **confirma com
 a redatora** se cria o card. Sem o sim dela, nada vai para o ENSPACE.
 
-- **O card é o épico:** 1 card na categoria `user_story` do workspace de desenvolvimento do
-  produto (servidor MCP `enspace-desenvolvimento-enlighten2`).
-  - A descrição é o documento do épico, na estrutura fixa da skill `requisitos` (decisão da
-    redatora em 2026-10-29, a partir do retorno do dev): o que é o desenvolvimento, em 2 ou 3
-    frases diretas; onde vale; o link do protótipo; fora do escopo; a tabela do que é cada
-    parte; as regras de negócio comuns; o bloco "Padrão de qualidade"; e o que está em aberto
-    entre as partes.
-  - A descrição nunca é só o link para os documentos do GitHub.
+- **O formato do card e das tarefas mora na skill `card-enspace`** (decisão da redatora em
+  2026-11-26): o card é o épico, na categoria `user_story` do `enspace-desenvolvimento-enlighten2`,
+  com o documento do épico na descrição; as tarefas são as partes, "<n>. <nome>", cada uma com
+  todos os requisitos dela em lista de marcar; o padrão de qualidade fica só no épico; demanda de 1
+  documento só não tem tarefas; e cada épico é 1 card. Aqui fica o que é só do protótipo:
   - O texto do card e das tarefas segue também `C:\Users\JardimMikaela\agentes-base\regras\card-enspace.md`
     (decisão da redatora em 2026-10-30): nada de rodada, nota para a redatora nem documento que o dev não tem.
-- **As tarefas do card são as partes:** 1 tarefa por parte, na aba Tarefas do card, com o nome
-  "<n>. <nome>" ("1. Escolher e entrar").
-  - **Cada tarefa traz todos os requisitos da parte e se basta:** nada de
-    remeter à descrição, a outro documento ou a ID de outra parte. A regra de negócio comum que
-    a parte cita entra na tabela de RN da tarefa (decisão da redatora em 2026-10-29).
-  - **Na tarefa, o requisito é lista de marcar, não tabela** (decisão da redatora em 2026-10-29,
-    a partir do retorno do dev): cada RF e cada RI vira uma caixa que o dev marca com 1 clique,
-    "`ID` requisito", sem a coluna de critério. A prioridade e a relevância de cada requisito vão
-    entre parênteses no fim, com o nome de cada escala, porque "Desejável" existe nas 2:
-    "(prioridade: Essencial; relevância: Obrigatório)" (decisão da redatora em 2026-10-30: o dev
-    precisa saber o que é obrigatório, importante e opcional). É a Task List do editor do ENSPACE
-    (`ul data-type="taskList"`, um `li data-type="taskItem"` por requisito), nunca "[ ]"
-    escrito. Regra de negócio e pergunta viram parágrafo, e parágrafo seguido de parágrafo leva
-    1 linha em branco (`<p></p>`). O documento do GitHub continua em tabela.
   - **Abaixo das caixas de requisito, o print delas na tela do protótipo** (decisão da redatora em
     2026-10-29, a partir do retorno do dev). O print mostra a tela inteira no estado que os
     requisitos pedem, com o elemento contornado em magenta, e sai dos arquivos de
@@ -413,17 +396,6 @@ a redatora** se cria o card. Sem o sim dela, nada vai para o ENSPACE.
     - Os prints de requisito são **parte da entrega do protótipo aprovado**: o agente tira todos no
       fim do trabalho, grava no repositório e sobe com o commit da rodada, antes de escrever as
       tarefas. Print que só passou pela conversa não conta.
-  - **O padrão de qualidade não vai às tarefas:** idiomas, temas, animação, carregamento,
-    esqueleto, toast, recarregar, acessibilidade e visual do protótipo ficam só no épico, e a
-    redatora confere ao validar o épico.
-  - Demanda de 1 documento só: o card leva o documento inteiro, sem tarefas.
-- **O texto que o dev lê** (skill `requisitos`, mesma seção): campo sem valor não se escreve
-  ("Depende de: nada"); o que a estrutura já mostra não se repete ("Parte 4 de 8", "o épico é
-  esta user story"); convenção, legenda repetida, nota para a redatora, Resumo e "Fora do
-  escopo" na parte ficam de fora; comportamento repetido vira 1 regra; medida, cor e texto
-  longo ficam no protótipo.
-- **Mais de 1 épico, 1 card por épico:** com 2 épicos, 2 cards `user_story`. Cada card traz na
-  descrição o documento do seu épico, e as tarefas dele são as partes daquele épico.
 - **Na confirmação, a redatora diz** o título, o tipo, a prioridade e os outros campos do card,
   ou qual card que já existe recebe as tarefas.
   - Card que já existe: a descrição dele só muda com o ok dela.
@@ -441,7 +413,7 @@ a redatora** se cria o card. Sem o sim dela, nada vai para o ENSPACE.
      só mostra o print que já está no GitHub. Modelo: `editor-de-documentos/requisitos/prints.json`.
   1. `html <pasta requisitos/ ou REQUISITOS.md> <rascunho da sessão>`: gera a descrição do card e
      a de cada tarefa, no HTML do editor da tela, e confere o texto. Aviso se corrige no `.md`
-     antes de subir. Depois, `python -B ferramentas/tarefas_em_lista.py <rascunho>
+     antes de subir. Depois, `python -B C:\Users\JardimMikaela\agentes-base\bin\tarefas_em_lista.py <rascunho>
      app/pages/<slug>` troca as tabelas das tarefas pela lista de marcar, com o print de cada
      grupo sob as caixas dele, e para se faltar o print de um requisito (o script do `agentes-base` ainda gera
      tabela; até ele mudar, a conversão é esta).
