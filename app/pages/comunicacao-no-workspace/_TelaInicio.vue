@@ -3,10 +3,15 @@
  * Tela inicial. Cópia do develop (saudação e os 3 cartões de tarefas), sem
  * proposta. A linha "Atalhos" das rodadas 1 a 4 saiu: ali não há destinatário,
  * item para vincular nem formulário certo para o link (ver DECISOES.md).
+ *
+ * Rodada 12: a única proposta da tela são os 2 cartões de comunicação
+ * (`_ComunicacaoNoInicio.vue`), os widgets E-mail e WhatsApp e SMS da Home
+ * nova. O resto continua cópia do develop.
  */
 import type { Textos } from './textos'
 import { EU, HOJE, membroPorId, tarefas } from './mocks'
 import { useComunicacao } from './estado'
+import ComunicacaoNoInicio from './_ComunicacaoNoInicio.vue'
 
 const props = defineProps<{ t: Textos }>()
 
@@ -38,6 +43,8 @@ const cartoes = computed(() => [
     <p class="mt-1 text-sm text-muted">
       {{ t.inicio.subtitulo }}
     </p>
+
+    <ComunicacaoNoInicio :t="t" />
 
     <div class="mt-6 grid gap-5 lg:grid-cols-2">
       <UCard

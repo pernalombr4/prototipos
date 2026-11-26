@@ -28,7 +28,7 @@ falha". A barra de baixo é ferramenta de revisão e não entra no produto. Os t
 - a resposta na mesma conversa e "Encaminhar" (épico "Responder na mesma conversa e encaminhar e-mail");
 - "Vincular a tarefa", a Mail Box própria da tarefa e a coluna Tarefa da aba Mensagens (épico "Vincular e-mail a uma tarefa");
 - o botão de e-mail no cartão do quadro (documento "Botão de e-mail no cartão do quadro de itens e de tarefas"); aqui o quadro usa o clique direito;
-- atalhos e link de formulário na tela inicial: a tela inicial continua como hoje;
+- os widgets E-mail e WhatsApp e SMS da tela inicial (épico "Widgets de itens, agenda, atalhos e comunicação na Home", da Home nova). O link de formulário público continua fora da tela inicial;
 - o envio pelo WhatsApp sem a pessoa apertar Enviar e o registro da conversa do WhatsApp no item;
 - o envio de SMS pelo próprio ENSPACE, por um serviço de SMS contratado, e o registro do SMS no item (P909);
 - integração com Google.
@@ -134,7 +134,6 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 | P901 | Quem vê a tela "Emails Recebidos" hoje: todo membro, ou só quem vê o item do e-mail? Ela mostra também os enviados com item? | dev | Muda o que a aba Mensagens mostra a cada membro nas partes 8 e 9 |
 | P902 | A documentação do Correio do Outlook diz que a integração exibe a caixa de entrada dentro do ENSPACE e vincula e-mails a tarefas e registros. O develop não tem essa tela. Existe em outro lugar ou é plano? | produto e dev | Se existe, a central "E-mails" precisa conviver com ela ou substituí-la |
 | P903 | O cliente que usa Google, e não Microsoft, fica só com "Abrir no meu app de e-mail". Está aceito para este épico? | produto | Sem aceite, a integração com Google entra no roteiro |
-| P904 | A tela inicial fica sem os atalhos de e-mail, de WhatsApp e de SMS e sem o link de formulário público, como no protótipo? | produto | Se não, a tela inicial entra num épico próprio, com a escolha do formulário e do item |
 | S903 | O texto pronto do WhatsApp é "Olá, <primeiro nome>. Escrevo sobre <referência> · <nome do item>.", como no protótipo. | produto | Muda o texto com que o WhatsApp abre nas partes 3 e 4 |
 | S904 | Sem configuração, o e-mail e o telefone de um mesmo contato aparecem como 2 contatos ("E-mail do contato" e "Telefone do contato"), porque vêm de 2 campos. Só o Pessoa/Empresa junta os 2. Juntar campos soltos é a configuração do épico "Escolher na categoria de onde vêm o nome e o e-mail do contato". | produto | Para juntar já neste épico, falta a regra de qual telefone vai com qual e-mail |
 | P905 | De onde vem o telefone do membro, para o WhatsApp e o SMS ao responsável da tarefa e ao participante da Agenda? O cadastro do usuário tem o campo de telefone, mas nenhuma tela do develop deixa a pessoa preenchê-lo. | produto e dev | Sem tela para o telefone, o WhatsApp e o SMS das partes 5 e 6 ficam indisponíveis até o perfil ganhar o campo |

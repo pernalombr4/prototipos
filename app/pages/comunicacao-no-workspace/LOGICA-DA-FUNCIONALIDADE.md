@@ -415,18 +415,22 @@ alterar o texto antes do envio."
 A Agenda junta 3 origens. Só a reunião do Outlook tem participantes; nas outras, quem recebe vem do
 item ou da tarefa.
 
-### 5.6 Tela inicial: sem atalhos
+### 5.6 Tela inicial: os widgets E-mail e WhatsApp e SMS (rodada 12)
 
-O mockup 6 do Felipe põe os atalhos e o "Link de formulário público" abaixo da saudação. O
-protótipo não põe, porque a tela inicial não tem contexto para eles:
+O mockup 6 do Felipe põe os atalhos e o "Link de formulário público" abaixo da saudação. A rodada 5
+tirou a linha, porque ali não havia destinatário nem item. Na rodada 12, a redatora pediu os botões
+de e-mail, WhatsApp e SMS na tela inicial, como widgets da Home nova. Cada widget passa a ter o
+próprio destino:
 
-| Atalho | O que faltaria na tela inicial |
-|---|---|
-| E-mail | Item para vincular e contato para o Para. O e-mail sem contexto já existe no "Novo e-mail" da barra do topo (7.2) |
-| Link de formulário público | Qual formulário: o workspace tem vários, de categorias diferentes |
+| Widget | O que mostra | O que o botão abre |
+|---|---|---|
+| E-mail | Os 5 e-mails mais recentes que a pessoa enviou de um item (a aba Mensagens com "Enviado por" igual à pessoa) | "Novo e-mail": o compositor sem item, como o botão do topo numa tela sem item (7.2) |
+| WhatsApp e SMS | O campo Número e o campo Mensagem | WhatsApp: a conversa com o número, ou a escolha da conversa sem número. SMS: o painel "Enviar SMS" (5.8), com o número ou sem destinatário |
 
-O link público fica onde o formulário está em uso (6.2). **Pergunta para produto:** o Felipe
-concorda em tirar a linha da tela inicial?
+O número segue as regras das outras telas: menos de 10 dígitos é inválido, e o telefone fixo não
+recebe SMS. Os requisitos estão na Home nova, no épico "Widgets de itens, agenda, atalhos e
+comunicação na Home". O link de formulário público continua onde o formulário está em uso (6.2): a
+tela inicial não sabe qual formulário, porque o workspace tem vários.
 
 ### 5.7 WhatsApp em cada atalho (Fase 1)
 
@@ -1049,7 +1053,7 @@ No workspace novo, o texto do próximo passo muda com o perfil:
     as caixas do workspace atendem esse cliente, ou a integração com Google entra no roteiro?
 11. **Botão no cartão do quadro:** onde fica e qual o rótulo (o "Notify" do mockup 5, "E-mail" ou só
     o ícone)?
-12. **Tela inicial:** o Felipe concorda em tirar os atalhos da tela inicial (5.6)?
+12. **Tela inicial:** respondida na rodada 12. A tela inicial ganha os widgets E-mail e WhatsApp e SMS (5.6); o link de formulário público continua fora.
 13. **Aba Mensagens na Fase 1:** a tela "Emails Recebidos" de hoje basta como base da aba? Ela
     mostra também os enviados com item, ou só os recebidos? Quem a vê hoje: todo membro, ou só quem
     vê o item do e-mail?

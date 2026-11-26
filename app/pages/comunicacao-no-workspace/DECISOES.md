@@ -573,6 +573,18 @@ clientes usa Microsoft. A pesquisa está em `PESQUISA.md`, "SMS no computador".
   épico 2 (RN903, RN905, RN105; partes 1 e 2) e o documento do botão no cartão (RF009). Os prints
   estão em `evidencias/requisitos/`.
 
+## Rodada 12 · 2026-11-26 (e-mail, WhatsApp e SMS na tela inicial)
+
+- **Pedido (literal):** "uma das seçoes possiveis de widget lá deve ser de comunicação, e deve ter 2 widgets: email, whatsapp e sms / pra ficar na tela inicial esses botoes, nao só o enviar email / atualize o prototipo da home em si com essa ideia e atualize este tambem".
+- **De onde vem:** a rodada 11 da Home nova (protótipo `home`) criou o grupo Comunicação no catálogo de widgets, com E-mail e WhatsApp e SMS. Os requisitos ficam lá, na parte 5 do épico "Widgets de itens, agenda, atalhos e comunicação na Home".
+- **Mudou neste protótipo:**
+  - a tela inicial ganha 2 cartões acima das tarefas (`_ComunicacaoNoInicio.vue`), com a marca de proposta;
+  - E-mail: os e-mails que a pessoa enviou de um item e "Novo e-mail", que abre o compositor sem item;
+  - WhatsApp e SMS: o Número, a Mensagem e os 2 botões, que abrem o WhatsApp e o painel "Enviar SMS" deste protótipo.
+- **Revê a rodada 5,** que tirou a linha "Atalhos" da tela inicial ("vai pegar link do que ali? vai ter email vinculado a que?"): cada cartão tem o próprio destino. O link de formulário público continua fora, porque a tela inicial não sabe qual formulário.
+- **Requisitos:** no épico 1, sai P904 (a pergunta sobre a tela inicial, respondida pela redatora), e o fora do escopo aponta os 2 widgets para o épico da Home nova. LOGICA-DA-FUNCIONALIDADE, seção 5.6 e pergunta 12.
+- **Fronteira:** muda só a faixa dos 2 cartões na tela inicial. A saudação e os 3 cartões de tarefas continuam cópia do develop.
+
 ## Por que cada decisão
 
 ### O e-mail sai da conta do Outlook da pessoa; o item recebe a resposta
