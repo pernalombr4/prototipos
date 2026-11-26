@@ -400,3 +400,52 @@ O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras 
   - O detector de seta passou nas 4. A captura de Itens com 11 linhas tinha a barra de rolagem da página e o detector
     marcou o topo dela, como nas capturas da rodada 6; com a página sem rolagem, passou. Reforça o falso positivo da
     rodada 6.
+
+## Rodada 8 · 2026-11-26
+- **Pedido (literal):** "discussions pode prototipar somente dentro de projetos por enquanto" e "pode colocar
+  meta/iniciativa prototipado ja agora do modo como pensou." Origem: a pesquisa sobre Milestones, Stacks,
+  Projects e Discussions do GitHub (`pesquisa-de-mercado\runs\2026-11-26-github-milestones-stacks-discussions\`).
+  O bloqueio entre tarefas (os stacks) foi para a pasta-de-apontamentos, a pedido da redatora: "aqui nao".
+- **Mudou:**
+  - **Discussões, só dentro do projeto:** aba nova na página do projeto e entrada no menu do projeto, com o número de
+    abertas. 3 formatos: Discussão (conversa aberta), Pergunta (quem perguntou marca a resposta certa, que fica em
+    destaque) e Anúncio (só o administrador do projeto publica; entra fixado e escolhe quem recebe aviso). Busca,
+    filtro por formato, Abertas e Fechadas; a discussão abre no painel lateral, com Fixar, Fechar e Reabrir para quem
+    administra. Cada mensagem tem "Criar tarefa": a tarefa nasce no projeto, com o texto da mensagem, categoria,
+    responsável e data limite, e a mensagem mostra a tarefa criada;
+  - **Marcos na Visão geral:** seção só de leitura, com nome, progresso (a parte concluída das tarefas do marco),
+    data-alvo, "Data-alvo passada" em vermelho e as metas para as quais o marco contribui (o clique abre a meta).
+    Entrou como a base mínima da Meta, sem tela de criar nem editar marco: decisão do agente, para a meta ter o que
+    ligar. Não fazia parte do pedido;
+  - **Metas no workspace:** tela própria, aberta pelo pé do painel de Projetos (ao lado de "Ver todos") e pelo pé da
+    seção Projetos do menu atual. Lista no `EnTable` (Meta, Situação, Progresso, Data-alvo, Dono, Projetos e marcos),
+    com busca e ordenação. A meta abre no painel lateral: progresso, situação, data-alvo, dono, os projetos e os
+    marcos ligados (de vários projetos), cada um com o seu progresso, e as atualizações. O proprietário do workspace
+    e o dono da meta ligam projetos e marcos e publicam atualização (situação e texto); os outros só leem;
+  - **Progresso da meta:** a média do progresso dos projetos e dos marcos ligados, nunca item a item. O progresso do
+    projeto é a parte concluída das tarefas dele;
+  - **Projeto sem acesso:** quem não participa de um projeto ligado vê a linha "Projeto sem acesso", com cadeado e
+    sem nome, e o marco dele como "Marco de projeto sem acesso". O progresso continua na conta: a meta mostra o
+    mesmo número para todos;
+  - **Situação da meta:** a da última atualização, com as mesmas cores e ícones do Status do projeto.
+- **Fronteira:** muda a página do projeto (aba Discussões e seção Marcos na Visão geral) e entra a tela Metas. O menu
+  ganha só o atalho Metas e a entrada Discussões do projeto; a casca, as outras abas e o diretório ficam como na
+  rodada 7.
+- **Inventado (não existe no ENSPACE):** a discussão e as mensagens dela, o marco e a meta, com os campos em
+  `metasEDiscussoes.ts`. Todos pedem back-end novo.
+- **Em aberto:**
+  - Discussões no workspace (fora de projeto): fica para depois, pelo pedido;
+  - quem cria e edita marco, e se o marco pode ficar sem tarefa;
+  - se a meta pode ligar outra meta (meta e submeta);
+  - se o progresso da meta deve pesar projeto e marco de forma diferente.
+- **Ver:** https://pernalombr4.github.io/prototipos/projetos
+  - `evidencias/entrega-r8-discussoes.png`: a aba Discussões do Financeiro, com o anúncio fixado e a pergunta
+    respondida;
+  - `evidencias/entrega-r8-discussao-tarefa.png`: a pergunta aberta, com a resposta marcada e a tarefa criada a
+    partir da mensagem;
+  - `evidencias/entrega-r8-metas.png`: a meta aberta para a proprietária, com projetos, marcos e atualizações;
+  - `evidencias/entrega-r8-meta-sem-acesso.png`: a mesma meta vista por quem só participa do Financeiro, com o
+    Jurídico como "Projeto sem acesso".
+  - O detector de seta passou nas 4. A captura da seção Marcos tinha a barra de rolagem da página e o detector marcou
+    o topo dela (o falso positivo das rodadas 6 e 7); a captura saiu da entrega, e os marcos aparecem no painel da
+    meta.

@@ -25,6 +25,7 @@
  */
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { textos } from './textos'
+import { textosDeMetasEDiscussoes } from './textosDeMetasEDiscussoes'
 import { iniciais, secaoComercial, workspace } from './mocks'
 import { personas, useMarcaDeProposta, useProjetos, type Cenario } from './estado'
 import CascaDoMenuNovo from './_CascaDoMenuNovo.vue'
@@ -54,6 +55,7 @@ definePageMeta({
 })
 
 const t = useTextos(textos)
+const tmd = useTextos(textosDeMetasEDiscussoes)
 const prj = useProjetos()
 const { area, tela, cenario, estadoDaTela, menu, eu, souDono, souConvidado, visiveis } = prj
 const { destacar, destacarBack, marca } = useMarcaDeProposta()
@@ -117,6 +119,7 @@ const breadcrumb = computed(() => {
   if (v.tipo === 'inicio') return [ws, t.value.casca.inicio]
   if (v.tipo === 'tarefas') return [ws, t.value.casca.destinos.tarefas]
   if (v.tipo === 'diretorio') return [ws, t.value.nome.plural]
+  if (v.tipo === 'metas') return [ws, tmd.value.metas.titulo]
   if (v.tipo === 'categoria') {
     const c = prj.categorias.value.find(x => x.id === v.id)
     const p = c ? prj.projetoDa(c) : null

@@ -19,6 +19,7 @@ import type { Projeto } from './mocks'
 import ConteudoDoProjeto from './_ConteudoDoProjeto.vue'
 import AdicionarAoProjeto from './_AdicionarAoProjeto.vue'
 import { useAdicionarAoProjeto } from './adicionarAoProjeto'
+import { textosDeMetasEDiscussoes } from './textosDeMetasEDiscussoes'
 import { COR_DO_PROJETO, ICONE_DA_VISIBILIDADE, PONTO_DA_SITUACAO, useMarcaDeProposta, useProjetos } from './estado'
 
 const props = defineProps<{ t: Textos }>()
@@ -28,6 +29,7 @@ const prj = useProjetos()
 const { noMenu, visiveis, expandidos, tela, estadoDaTela, souDono, janelas } = prj
 const toast = useToast()
 const { marca } = useMarcaDeProposta()
+const tmd = useTextos(textosDeMetasEDiscussoes)
 const camadas = computed(() => [
   { icone: 'i-lucide-folder-kanban', titulo: props.t.camadas.projeto, texto: props.t.camadas.projetoTexto },
   { icone: 'i-lucide-building', titulo: props.t.camadas.secao, texto: props.t.camadas.secaoTexto },
@@ -296,16 +298,26 @@ function teclar(ev: KeyboardEvent, id: number) {
       </div>
 
       <!-- o pé: o diretório -->
-      <div v-if="visiveis.length" class="shrink-0 border-t border-default px-2 py-1">
+      <div v-if="visiveis.length" class="flex shrink-0 items-center gap-1 border-t border-default px-2 py-1">
         <UButton
           :label="t.painel.verTodos(visiveis.length)"
           icon="i-lucide-list"
           size="xs"
           color="neutral"
           variant="ghost"
-          block
-          class="justify-center text-muted hover:text-default"
+          class="min-w-0 flex-1 justify-center text-muted hover:text-default"
           @click="tela = { tipo: 'diretorio' }"
+        />
+        <!-- Rodada 8: as metas do workspace, acima dos projetos -->
+        <UButton
+          :label="tmd.metas.menu"
+          icon="i-lucide-target"
+          size="xs"
+          color="neutral"
+          :variant="tela.tipo === 'metas' ? 'soft' : 'ghost'"
+          :class="[tela.tipo === 'metas' ? 'text-primary' : 'text-muted hover:text-default', marca]"
+          :aria-current="tela.tipo === 'metas' ? 'page' : undefined"
+          @click="tela = { tipo: 'metas' }"
         />
       </div>
     </template>

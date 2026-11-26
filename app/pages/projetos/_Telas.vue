@@ -10,6 +10,7 @@ import ListaDaCategoria from './_ListaDaCategoria.vue'
 import PaginaDoProjeto from './_PaginaDoProjeto.vue'
 import DiretorioDeProjetos from './_DiretorioDeProjetos.vue'
 import SemAcesso from './_SemAcesso.vue'
+import TelaMetas from './_TelaMetas.vue'
 
 defineProps<{ t: Textos }>()
 const { tela } = useProjetos()
@@ -28,6 +29,7 @@ const { tela } = useProjetos()
     <DiretorioDeProjetos v-else-if="tela.tipo === 'diretorio'" key="diretorio" :t="t" />
     <ListaDaCategoria v-else-if="tela.tipo === 'categoria'" :key="`c-${tela.id}`" :t="t" :id="tela.id" />
     <PaginaDoProjeto v-else-if="tela.tipo === 'projeto'" :key="`p-${tela.id}`" :t="t" :id="tela.id" />
-    <SemAcesso v-else :key="`s-${tela.id}`" :t="t" :id="tela.id" />
+    <TelaMetas v-else-if="tela.tipo === 'metas'" key="metas" :t="t" />
+    <SemAcesso v-else-if="tela.tipo === 'semAcesso'" :key="`s-${tela.id}`" :t="t" :id="tela.id" />
   </Transition>
 </template>

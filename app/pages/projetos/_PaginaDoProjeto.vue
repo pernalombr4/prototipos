@@ -27,6 +27,10 @@ import StatusDoProjeto from './_StatusDoProjeto.vue'
 import ItensDoProjeto from './_ItensDoProjeto.vue'
 import AutomacoesDoProjeto from './_AutomacoesDoProjeto.vue'
 import PainelDoProjeto from './_PainelDoProjeto.vue'
+import DiscussoesDoProjeto from './_DiscussoesDoProjeto.vue'
+import MarcosDoProjeto from './_MarcosDoProjeto.vue'
+import { useMetasEDiscussoes } from './metasEDiscussoes'
+import { textosDeMetasEDiscussoes } from './textosDeMetasEDiscussoes'
 
 const props = defineProps<{ t: Textos, id: number }>()
 const prj = useProjetos()
@@ -39,6 +43,9 @@ const papel = computed(() => prj.papel(p.value))
 const admin = computed(() => prj.podeAdministrar(p.value))
 const categorias = computed(() => prj.categoriasDe(props.id))
 const r = useTextos(textosDoProjeto)
+const md = useMetasEDiscussoes()
+const tmd = useTextos(textosDeMetasEDiscussoes)
+const discussoesAbertas = computed(() => md.discussoesDo(props.id).filter(d => d.status === 'aberta').length)
 const HOJE = '2026-11-26'
 const abertas = computed(() => prj.tarefasDoProjeto(props.id).filter(x => x.status !== 'concluida'))
 const tarefas = computed(() => [...abertas.value].sort((a, b) => a.prazo.localeCompare(b.prazo)).slice(0, 5))
@@ -97,6 +104,7 @@ const abas = computed<TabsItem[]>(() => [
   { value: 'geral', label: props.t.abas.geral, icon: 'i-lucide-layout-dashboard' },
   { value: 'tarefas', label: r.value.menu.tarefas, icon: 'i-lucide-square-check', badge: abertas.value.length ? { label: String(abertas.value.length), color: 'neutral', variant: 'soft', size: 'sm' } : undefined },
   { value: 'itens', label: props.t.abas.itens, icon: 'i-lucide-list-checks' },
+  { value: 'discussoes', label: tmd.value.discussoes.aba, icon: 'i-lucide-messages-square', badge: discussoesAbertas.value ? { label: String(discussoesAbertas.value), color: 'neutral', variant: 'soft', size: 'sm' } : undefined },
   { value: 'automacoes', label: props.t.abas.automacoes, icon: 'i-lucide-workflow', badge: nFluxos.value ? { label: String(nFluxos.value), color: 'neutral', variant: 'soft', size: 'sm' } : undefined },
   { value: 'painel', label: r.value.menu.paineis, icon: 'i-lucide-chart-column', badge: prj.dashboardsDe(props.id).length ? { label: String(prj.dashboardsDe(props.id).length), color: 'neutral', variant: 'soft', size: 'sm' } : undefined },
 ])
@@ -162,6 +170,7 @@ const abas = computed<TabsItem[]>(() => [
     <ItensDoProjeto v-else-if="aba === 'itens'" :key="`i-${p.id}`" :t="t" :id="p.id" class="mt-4" />
     <AutomacoesDoProjeto v-else-if="aba === 'automacoes'" :key="`a-${p.id}`" :t="t" :id="p.id" class="mt-4" />
     <PainelDoProjeto v-else-if="aba === 'painel'" :key="`d-${p.id}`" :t="t" :id="p.id" class="mt-4" />
+    <DiscussoesDoProjeto v-else-if="aba === 'discussoes'" :key="`x-${p.id}`" :t="t" :id="p.id" class="mt-4" />
 
     <div v-else class="mt-4 grid gap-4 lg:grid-cols-3">
       <!-- rodada 5: o que o projeto reúne, em números que levam às abas -->
@@ -170,6 +179,7 @@ const abas = computed<TabsItem[]>(() => [
         <EnDashboardGrid :stats="numeros" :columns="4" clickable @stat-click="abrirNumero" />
       </section>
       <StatusDoProjeto :t="t" :id="p.id" class="lg:col-span-3" />
+      <MarcosDoProjeto :t="t" :id="p.id" class="lg:col-span-3" />
       <!-- categorias -->
       <section class="rounded-lg border border-default bg-default lg:col-span-2 animate-[entrada_0.25s_ease-out_both]" style="animation-delay: 40ms">
         <header class="flex items-center gap-2 border-b border-default px-4 py-3">

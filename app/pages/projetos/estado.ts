@@ -43,7 +43,7 @@ export type Cenario = 'semProjetos' | 'emUso' | 'volume'
 export type EstadoDaTela = 'normal' | 'carregando' | 'erro'
 export type Area = 'inicio' | 'dados' | 'projetos' | 'comercial'
 /** Rodada 3: as abas da página do projeto. */
-export type AbaDoProjeto = 'geral' | 'tarefas' | 'itens' | 'automacoes' | 'painel'
+export type AbaDoProjeto = 'geral' | 'tarefas' | 'itens' | 'automacoes' | 'painel' | 'discussoes'
 
 /** "Ver como": as pessoas que mostram as 4 experiências da proposta. */
 export const personas = [
@@ -60,6 +60,8 @@ export type Tela =
   | { tipo: 'categoria', id: number }
   | { tipo: 'projeto', id: number }
   | { tipo: 'diretorio' }
+  /** Rodada 8: as metas do workspace. */
+  | { tipo: 'metas' }
   | { tipo: 'semAcesso', id: number }
 
 function copiarProjetos(lista: Projeto[]) {

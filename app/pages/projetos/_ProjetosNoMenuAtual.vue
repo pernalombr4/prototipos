@@ -17,6 +17,7 @@ import type { Projeto } from './mocks'
 import ConteudoDoProjeto from './_ConteudoDoProjeto.vue'
 import AdicionarAoProjeto from './_AdicionarAoProjeto.vue'
 import { useAdicionarAoProjeto } from './adicionarAoProjeto'
+import { textosDeMetasEDiscussoes } from './textosDeMetasEDiscussoes'
 import { COR_DO_PROJETO, ICONE_DA_VISIBILIDADE, PONTO_DA_SITUACAO, useMarcaDeProposta, useProjetos } from './estado'
 
 const props = defineProps<{ t: Textos }>()
@@ -24,6 +25,7 @@ const props = defineProps<{ t: Textos }>()
 const prj = useProjetos()
 const { noMenu, visiveis, expandidos, tela, estadoDaTela, souDono, janelas } = prj
 const { marca } = useMarcaDeProposta()
+const tmd = useTextos(textosDeMetasEDiscussoes)
 const toast = useToast()
 
 const aberto = ref(true)
@@ -223,6 +225,17 @@ function teclar(ev: KeyboardEvent, id: number) {
         >
           <UIcon name="i-lucide-list" class="size-4 shrink-0" />
           <span class="truncate text-sm">{{ t.painel.verTodos(visiveis.length) }}</span>
+        </button>
+        <!-- Rodada 8: as metas do workspace, acima dos projetos -->
+        <button
+          type="button"
+          class="flex w-full items-center gap-2.5 py-2 pl-10 pr-4 text-left transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+          :class="[tela.tipo === 'metas' ? 'bg-primary/10 font-medium text-primary' : 'text-muted hover:bg-elevated hover:text-default', marca]"
+          :aria-current="tela.tipo === 'metas' ? 'page' : undefined"
+          @click="tela = { tipo: 'metas' }"
+        >
+          <UIcon name="i-lucide-target" class="size-4 shrink-0" />
+          <span class="truncate text-sm">{{ tmd.metas.menu }}</span>
         </button>
       </template>
     </template>

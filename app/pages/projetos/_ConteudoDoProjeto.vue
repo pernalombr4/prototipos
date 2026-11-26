@@ -17,11 +17,15 @@ import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Projeto } from './mocks'
 import type { Textos } from './textos'
 import { textosDoProjeto } from './textosDoProjeto'
+import { useMetasEDiscussoes } from './metasEDiscussoes'
+import { textosDeMetasEDiscussoes } from './textosDeMetasEDiscussoes'
 import { type AbaDoProjeto, useMarcaDeProposta, useProjetos } from './estado'
 
 const props = defineProps<{ t: Textos, p: Projeto, variante: 'painel' | 'atual' }>()
 const prj = useProjetos()
 const r = useTextos(textosDoProjeto)
+const md = useMetasEDiscussoes()
+const tmd = useTextos(textosDeMetasEDiscussoes)
 const toast = useToast()
 const { marca } = useMarcaDeProposta()
 
@@ -34,6 +38,7 @@ const nFluxos = computed(() => prj.fluxosDoProjeto(props.p.id).length)
 const fixas = computed(() => [
   { aba: 'geral' as AbaDoProjeto, rotulo: props.t.abas.geral, icone: 'i-lucide-layout-dashboard', n: 0 },
   { aba: 'tarefas' as AbaDoProjeto, rotulo: r.value.menu.tarefas, icone: 'i-lucide-square-check', n: abertas.value },
+  { aba: 'discussoes' as AbaDoProjeto, rotulo: tmd.value.discussoes.aba, icone: 'i-lucide-messages-square', n: md.discussoesDo(props.p.id).filter(d => d.status === 'aberta').length },
   { aba: 'automacoes' as AbaDoProjeto, rotulo: r.value.menu.automacoes, icone: 'i-lucide-workflow', n: nFluxos.value },
 ])
 
