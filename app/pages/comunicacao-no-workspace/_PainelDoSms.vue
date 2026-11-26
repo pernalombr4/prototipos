@@ -10,15 +10,72 @@
  * (link `sms:`), o QR code para o celular, copiar o número e a mensagem, e o
  * Google Messages Web. Quem envia é a pessoa, pelo celular dela; o ENSPACE não
  * registra o SMS.
+ *
+ * Fase 4 (rodada 14): o primeiro caminho passa a ser "Enviar pelo ENSPACE", pelo
+ * número do workspace na Twilio. O SMS fica registrado no item e na central
+ * Comunicações, com o status de entrega. Os caminhos pelo celular continuam,
+ * embaixo, para quem prefere o próprio número.
  */
 import type { Textos } from './textos'
-import { linkDeSms, partesDoSms, telefoneLegivel } from './estado'
+import { linkDeSms, numeroDoWhatsApp, partesDoSms, telefoneLegivel, useComunicacao, useMarcaDeProposta } from './estado'
 import { useSms } from './atalhos'
+import { EU, NUMERO_SMS_DO_WORKSPACE, agora, enderecoDoItem, itemPorId } from './mocks'
+import { textosDeCanais } from './textosDeCanais'
 
 const props = defineProps<{ t: Textos }>()
 
 const { pedido, fecharPainel, abrirNoApp, abrirNoMessagesWeb } = useSms()
+const { fase, twilioLigado, emails } = useComunicacao()
+const tc = useTextos(textosDeCanais)
+const marca = useMarcaDeProposta()
 const toast = useToast()
+
+/** Fase 4 com a Twilio ligada: o SMS sai do número do workspace. */
+const peloEnspace = computed(() => fase.value >= 4 && twilioLigado.value)
+/** Sem destinatário (link do formulário, "Nova mensagem" da central): na Fase 4 a pessoa digita o número. */
+const numeroDigitado = ref('')
+const destino = computed(() => pedido.value?.telefone ?? (numeroDigitado.value.trim() || null))
+const enviando = ref(false)
+
+function enviarPeloEnspace() {
+  const p = pedido.value
+  const para = destino.value
+  if (!p || !para || !numeroDoWhatsApp(para) || !texto.value.trim()) return
+  enviando.value = true
+  const item = itemPorId(p.itemId)
+  const id = Math.max(0, ...emails.value.map(e => e.id)) + 1
+  const corpo = texto.value.trim()
+  setTimeout(() => {
+    emails.value = [{
+      id,
+      direcao: 'enviado',
+      canal: 'sms',
+      de: NUMERO_SMS_DO_WORKSPACE,
+      para: [telefoneLegivel(para)],
+      cc: [],
+      assunto: corpo,
+      corpo: `<p>${corpo}</p>`,
+      data: agora(),
+      caixa: item ? enderecoDoItem(item) : EU.email!,
+      itemId: item?.id ?? null,
+      anexos: [],
+      lido: true,
+      autor: EU.id,
+      desdeFase: 4,
+      sistema: { status: 'naFila', tarefa: null, origem: 'pessoa', saiuPor: 'twilioSms' },
+    }, ...emails.value]
+    // ANDAIME: a fila e o aviso de status da Twilio, em 2 passos.
+    setTimeout(() => {
+      emails.value = emails.value.map(e => e.id === id && e.sistema ? { ...e, sistema: { ...e.sistema, status: 'enviado' } } : e)
+    }, 1500)
+    setTimeout(() => {
+      emails.value = emails.value.map(e => e.id === id && e.sistema ? { ...e, sistema: { ...e.sistema, entrega: 'entregue' } } : e)
+    }, 4000)
+    enviando.value = false
+    toast.add({ title: tc.value.smsEnviadoTitulo, description: tc.value.smsEnviadoDescricao(telefoneLegivel(para)), icon: 'i-lucide-message-square-text', color: 'success' })
+    fecharPainel()
+  }, 700)
+}
 
 const aberto = computed({ get: () => !!pedido.value, set: (v) => { if (!v) fecharPainel() } })
 const texto = ref('')
@@ -29,6 +86,7 @@ let timer: ReturnType<typeof setTimeout> | undefined
 watch(pedido, (p) => {
   if (!p) return
   texto.value = p.texto
+  numeroDigitado.value = ''
   qrAberto.value = false
   copiado.value = null
 }, { immediate: true })
@@ -100,7 +158,7 @@ const modulos = computed(() => {
   <UModal
     v-model:open="aberto"
     :title="t.sms.painelTitulo(pedido?.nome ?? null)"
-    :description="t.sms.painelDescricao"
+    :description="peloEnspace ? tc.painelDescricaoFase4 : t.sms.painelDescricao"
     :ui="{ content: 'max-w-lg', footer: 'justify-end' }"
   >
     <template #body>
@@ -123,6 +181,16 @@ const modulos = computed(() => {
               @click="copiar('numero')"
             />
           </div>
+          <!-- PROPOSTA (Fase 4): sem destinatário, digita-se o número -->
+          <UInput
+            v-else-if="peloEnspace"
+            v-model="numeroDigitado"
+            icon="i-lucide-smartphone"
+            placeholder="+55 11 98765-4321"
+            class="w-full"
+            :class="marca"
+            :aria-label="t.sms.destinatario"
+          />
           <p v-else class="text-sm text-muted">
             {{ t.sms.semDestinatario }}
           </p>
@@ -136,12 +204,32 @@ const modulos = computed(() => {
           </template>
         </UFormField>
 
-        <!-- O caminho principal -->
+        <!-- PROPOSTA (Fase 4): o envio pelo número do workspace, registrado no item e na central -->
+        <div v-if="peloEnspace" class="flex flex-col gap-1.5" :class="marca">
+          <UButton
+            :label="tc.enviarPeloEnspace"
+            icon="i-lucide-send"
+            block
+            :loading="enviando"
+            :disabled="!texto.trim() || !numeroDoWhatsApp(destino)"
+            @click="enviarPeloEnspace"
+          />
+          <p class="text-xs text-muted">
+            {{ destino ? tc.enviarPeloEnspaceDica(NUMERO_SMS_DO_WORKSPACE) : tc.enviarPeloEnspaceSemNumero }}
+          </p>
+        </div>
+
+        <!-- O caminho principal (na Fase 4, o primeiro dos caminhos pelo celular) -->
         <div class="flex flex-col gap-1.5">
+          <p v-if="peloEnspace" class="text-xs font-medium uppercase tracking-wide text-muted">
+            {{ tc.peloCelular }}
+          </p>
           <UButton
             :label="t.sms.abrirNoApp"
             icon="i-lucide-message-square-text"
             block
+            :color="peloEnspace ? 'neutral' : 'primary'"
+            :variant="peloEnspace ? 'outline' : 'solid'"
             :disabled="!texto.trim()"
             @click="abrirApp"
           />

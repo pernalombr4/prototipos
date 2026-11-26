@@ -36,12 +36,25 @@
  * Fase 1: Recebidos e Enviados com item (os que o ENSPACE já grava).
  * Fase 2: também os enviados sem item, com "Vincular a um item", e Encaminhar.
  * Fase 3: a coluna Tarefa.
+ *
+ * Rodada 14, em todas as fases (o registro do envio já tem o dado, só a tela não mostra):
+ *  - a coluna "Saiu por": Outlook de <pessoa>, caixa, ENSPACE ou domínio da empresa;
+ *  - os 5 status do envio do sistema, com "Enviado ao provedor" e a dica de que a entrega
+ *    não é confirmada;
+ *  - o motivo da falha na dica do status e na gaveta;
+ *  - a origem (Tarefa, Spaceflow, Atendimento) em "Enviado por";
+ *  - "Reenviar" também no Cancelado e indisponível no Na fila e no Em processamento.
+ * Fase 4 (o destino): a central vira "Comunicações", com e-mail, SMS e WhatsApp enviados pelo
+ * sistema, a coluna Canal, a coluna Entrega (SendGrid e Twilio), os filtros por canal e "Não
+ * entregues", o histórico do envio na gaveta e "Nova mensagem" com SMS pelo número do workspace.
  */
 import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
 import type { Textos } from './textos'
 import { EU, type Email, agora as agoraDoPrototipo, caixas, itemPorId, itens, membroPorId, tarefas } from './mocks'
-import { type AbaDaCentral, ABAS_DE_ADMIN, type Rapido, contatosDoItem, useComunicacao, useMarcaDeProposta } from './estado'
+import { type AbaDaCentral, ABAS_DE_ADMIN, type Rapido, contatosDoItem, partesDoSms, useComunicacao, useMarcaDeProposta } from './estado'
 import { useAppExterno } from './simulador'
+import { useSms } from './atalhos'
+import { type Canal, type Entrega, type OrigemDoEnvio, type SaiuPor, type StatusDoEnvio, textosDeCanais } from './textosDeCanais'
 import BuscaDeItem from './_BuscaDeItem.vue'
 import AbasDaCentral from './_AbasDaCentral.vue'
 import TabelaDoEnspace from './_TabelaDoEnspace.vue'
@@ -50,13 +63,25 @@ import FiltroDeColuna, { type Filtros } from './_FiltroDeColuna.vue'
 
 const props = defineProps<{ t: Textos }>()
 
-const { emails, config, fase, registrado, abrirCompositor, abrirItem, abaDaCentral, ehAdmin, rapidosDaCentral, dados, outlookIntegrado } = useComunicacao()
+const { emails, config, fase, registrado, abrirCompositor, abrirItem, abaDaCentral, ehAdmin, rapidosDaCentral, dados, outlookIntegrado, ir } = useComunicacao()
 const { abrirApp } = useAppExterno()
+const { abrirSmsSemNumero } = useSms()
+const tc = useTextos(textosDeCanais)
 const marca = useMarcaDeProposta()
 const idioma = useIdioma()
 const toast = useToast()
 
 const te = computed(() => props.t.emails)
+/** Fase 4: a central de todos os canais. */
+const todosOsCanais = computed(() => fase.value >= 4)
+const titulo = computed(() => todosOsCanais.value ? tc.value.comunicacoes : te.value.titulo)
+
+/** "Nova mensagem" da Fase 4: e-mail, SMS pelo número do workspace e o WhatsApp, que só sai com modelo. */
+const novaMensagem = computed<DropdownMenuItem[][]>(() => [[
+  { label: tc.value.novaMensagemOpcoes.email, icon: 'i-lucide-mail', onSelect: () => abrirCompositor({ origem: 'emails' }) },
+  { label: tc.value.novaMensagemOpcoes.sms, icon: 'i-lucide-message-square-text', onSelect: () => abrirSmsSemNumero('') },
+  { label: tc.value.novaMensagemWhatsApp, icon: 'i-simple-icons-whatsapp', description: tc.value.novaMensagemWhatsAppDica, disabled: true, ui: { itemDescription: 'whitespace-normal' } },
+]])
 
 /* ---------- abas da central ---------- */
 
@@ -69,7 +94,8 @@ const abas = computed(() => (Object.keys(ICONE_DA_ABA) as AbaDaCentral[])
 
 /** O texto do "i" de cada aba. */
 function dicaDaAba(a: AbaDaCentral) {
-  if (a !== 'mensagens') return props.t.central.dicas[a]
+  if (a !== 'mensagens') return a === 'modelos' && todosOsCanais.value ? tc.value.dicaModelos : props.t.central.dicas[a]
+  if (todosOsCanais.value) return tc.value.descricaoComunicacoes
   const base = fase.value >= 2 ? props.t.emails.descricaoFase2 : props.t.emails.descricaoFase1
   return ehAdmin.value ? `${base} ${props.t.emails.descricaoDoSistema}` : base
 }
@@ -93,15 +119,24 @@ watch(filtros, (f) => {
   if (marcouSistema && !rapidos.value.has('sistema')) rapidos.value = new Set([...rapidos.value, 'sistema'])
 }, { deep: true })
 
-const COR_DO_RAPIDO: Record<Rapido, 'info' | 'success' | 'primary' | 'neutral' | 'warning' | 'secondary'> = {
+const COR_DO_RAPIDO: Record<Rapido, 'info' | 'success' | 'primary' | 'neutral' | 'warning' | 'secondary' | 'error'> = {
   recebidos: 'info', enviados: 'success', sistema: 'secondary', naoLidos: 'primary', comAnexo: 'neutral', semItem: 'warning',
+  email: 'info', whatsapp: 'success', sms: 'secondary', naoEntregues: 'error',
 }
+const ICONE_DO_CANAL: Record<Canal, string> = { email: 'i-lucide-mail', whatsapp: 'i-simple-icons-whatsapp', sms: 'i-lucide-message-square-text' }
 const ICONE_DO_RAPIDO: Record<Rapido, string> = {
   recebidos: 'i-lucide-inbox', enviados: 'i-lucide-send', sistema: 'i-lucide-workflow', naoLidos: 'i-lucide-mail', comAnexo: 'i-lucide-paperclip', semItem: 'i-lucide-unlink',
+  ...ICONE_DO_CANAL, naoEntregues: 'i-lucide-circle-alert',
 }
+const CANAIS: Canal[] = ['email', 'whatsapp', 'sms']
 const rapidosDaFase = computed<Rapido[]>(() => [
+  ...(todosOsCanais.value ? CANAIS : []),
   'recebidos', 'enviados', ...(ehAdmin.value ? ['sistema' as const] : []), 'naoLidos', 'comAnexo', ...(fase.value >= 2 ? ['semItem' as const] : []),
+  ...(todosOsCanais.value && ehAdmin.value ? ['naoEntregues' as const] : []),
 ])
+function rotuloDoRapido(r: Rapido) {
+  return r in te.value.rapidos ? te.value.rapidos[r as keyof typeof te.value.rapidos] : tc.value.rapidos[r as keyof typeof tc.value.rapidos]
+}
 function alternarRapido(r: Rapido) {
   const s = new Set(rapidos.value)
   if (s.has(r)) s.delete(r)
@@ -140,16 +175,73 @@ function tarefaRef(id: number | null | undefined) {
 }
 function autorDe(e: Email) {
   if (e.direcao !== 'enviado') return null
-  if (e.sistema) return te.value.sistema
+  if (e.sistema) {
+    const o = origemDe(e)
+    if (o === 'pessoa') return tc.value.enviadoPorPessoa(membroPorId(e.autor)?.nome ?? '')
+    return tc.value.origem[o]
+  }
   return membroPorId(e.autor)?.nome ?? null
 }
 
-const COR_DO_STATUS = { enviado: 'success', processando: 'info', falhou: 'error' } as const
+/** A origem do envio do sistema. O registro de hoje grava a tarefa e a origem Atendimento; sem tarefa, é fluxo. */
+function origemDe(e: Email): OrigemDoEnvio {
+  return e.sistema?.origem ?? (e.sistema?.tarefa ? 'tarefa' : 'fluxo')
+}
+const ICONE_DA_ORIGEM: Record<OrigemDoEnvio, string> = { tarefa: 'i-lucide-square-check-big', fluxo: 'i-lucide-git-fork', atendimento: 'i-lucide-headset', pessoa: 'i-lucide-user' }
+
+/** O detalhe da origem: a tarefa ou o fluxo e o nó. */
+function detalheDaOrigem(e: Email) {
+  const s = e.sistema
+  if (!s) return null
+  if (s.tarefa) return s.tarefa
+  if (s.fluxo) return s.fluxo.nome
+  return null
+}
+
+/** Por onde o e-mail ou a mensagem saiu (rodada 14). O recebido não tem. */
+function saiuPorDe(e: Email): { chave: SaiuPor, rotulo: string } | null {
+  if (e.direcao !== 'enviado') return null
+  if (e.sistema) return { chave: e.sistema.saiuPor, rotulo: tc.value.saiuPor[e.sistema.saiuPor] }
+  const caixa = caixas.find(c => c.email === e.de)
+  if (caixa) return { chave: 'caixa', rotulo: tc.value.saiuPor.caixa(caixa.nome) }
+  return { chave: 'outlook', rotulo: tc.value.saiuPor.outlook(membroPorId(e.autor)?.nome?.split(' ')[0] ?? e.de) }
+}
+const ICONE_DO_SAIU_POR: Record<SaiuPor, string> = {
+  outlook: 'i-simple-icons-microsoftoutlook', caixa: 'i-lucide-mailbox', enspace: 'i-lucide-server', dominio: 'i-lucide-globe', twilioSms: 'i-lucide-smartphone', twilioWhatsApp: 'i-simple-icons-whatsapp',
+}
+
+const canalDe = (e: Email): Canal => e.canal ?? 'email'
+
+const COR_DO_STATUS: Record<StatusDoEnvio, 'neutral' | 'info' | 'success' | 'error' | 'warning'> = {
+  naFila: 'neutral', processando: 'info', enviado: 'success', falhou: 'error', cancelado: 'warning',
+}
+/** A dica do status. Falhou: o motivo gravado. Enviado: a entrega não é confirmada (até a Fase 4). */
+function dicaDoStatus(e: Email) {
+  const s = e.sistema
+  if (!s) return ''
+  if (s.status === 'falhou' && s.erro) return `${tc.value.motivoDaFalha}: ${s.erro}`
+  if (s.status === 'enviado' && todosOsCanais.value) return tc.value.dicaDoEnviadoComEntrega
+  return tc.value.dicaDoStatus[s.status]
+}
+
+/** Fase 4: a entrega, pelo aviso de eventos da SendGrid e pelo status da Twilio. */
+const COR_DA_ENTREGA: Record<Entrega, 'success' | 'warning' | 'error'> = {
+  entregue: 'success', lido: 'success', adiado: 'warning', devolvido: 'error', bloqueado: 'error', naoEntregue: 'error',
+}
+const ICONE_DA_ENTREGA: Record<Entrega, string> = {
+  entregue: 'i-lucide-check', lido: 'i-lucide-check-check', adiado: 'i-lucide-clock', devolvido: 'i-lucide-undo-2', bloqueado: 'i-lucide-shield-x', naoEntregue: 'i-lucide-circle-x',
+}
+const NAO_ENTREGUE: Entrega[] = ['devolvido', 'bloqueado', 'naoEntregue']
+function naoChegou(e: Email) {
+  return e.sistema?.status === 'falhou' || (!!e.sistema?.entrega && NAO_ENTREGUE.includes(e.sistema.entrega))
+}
 
 /** O valor de cada coluna, usado no filtro, na ordem e na busca. */
 function valor(e: Email, campo: string): string {
   switch (campo) {
     case 'tipo': return e.direcao
+    case 'canal': return canalDe(e)
+    case 'saiuPor': return saiuPorDe(e)?.rotulo ?? ''
     case 'de': return e.de
     case 'para': return e.para.join(', ')
     case 'assunto': return e.assunto
@@ -186,7 +278,8 @@ const filtrados = computed(() => {
     .filter(registrado)
     // Fase 1: os e-mails do sistema e os dos itens vêm de 2 telas de hoje, e "Do sistema" troca a fonte
     // (RF952). A lista única, com os 2 juntos, é da fase 2 (épico "E-mail sem item e lista por permissão").
-    .filter(e => !e.sistema || (ehAdmin.value && (fase.value >= 2 || r.has('sistema'))))
+    // O SMS que a pessoa enviou pelo ENSPACE (Fase 4) segue a regra do e-mail dela.
+    .filter(e => !e.sistema || e.sistema.origem === 'pessoa' || (ehAdmin.value && (fase.value >= 2 || r.has('sistema'))))
     // O e-mail sem item aparece só para quem enviou (épico "E-mail sem item e lista por permissão", RN003).
     .filter(e => !!e.itemId || !!e.sistema || e.direcao === 'recebido' || e.autor === EU.id)
     .filter(e => dentroDoPeriodo(e.data))
@@ -196,6 +289,8 @@ const filtrados = computed(() => {
     .filter(e => !r.has('naoLidos') || (e.direcao === 'recebido' && !e.lido))
     .filter(e => !r.has('comAnexo') || e.anexos.length > 0)
     .filter(e => !r.has('semItem') || !e.itemId)
+    .filter(e => !CANAIS.some(c => r.has(c)) || r.has(canalDe(e)))
+    .filter(e => !r.has('naoEntregues') || naoChegou(e))
     .filter(e => Object.entries(filtros.value).every(([k, v]) => passa(e, k, v)))
     .filter(e => !q || `${e.assunto} ${e.de} ${e.para.join(' ')} ${valor(e, 'item')} ${autorDe(e) ?? ''}`.toLowerCase().includes(q))
 })
@@ -225,17 +320,24 @@ const daPagina = computed(() => ordenados.value.slice((pagina.value - 1) * porPa
 
 /* ---------- colunas ---------- */
 
-type Coluna = 'tipo' | 'de' | 'para' | 'assunto' | 'item' | 'tarefa' | 'enviadoPor' | 'status' | 'data'
+type Coluna = 'tipo' | 'canal' | 'de' | 'para' | 'assunto' | 'item' | 'tarefa' | 'enviadoPor' | 'saiuPor' | 'status' | 'entrega' | 'data'
 /** A coluna Ações (117 px, primeira) vem do `_TabelaDoEnspace.vue`. */
 const LARGURA: Record<Coluna, number> = {
-  tipo: 120, de: 210, para: 210, assunto: 300, item: 130, tarefa: 110, enviadoPor: 170, status: 150, data: 150,
+  tipo: 120, canal: 130, de: 210, para: 210, assunto: 300, item: 130, tarefa: 110, enviadoPor: 200, saiuPor: 200, status: 180, entrega: 140, data: 150,
 }
-const OCULTAVEIS: Coluna[] = ['tipo', 'de', 'para', 'item', 'tarefa', 'enviadoPor', 'status']
+const OCULTAVEIS: Coluna[] = ['tipo', 'canal', 'de', 'para', 'item', 'tarefa', 'enviadoPor', 'saiuPor', 'status', 'entrega']
 const visiveis = ref<Record<string, boolean>>({})
 
 const colunasDaFase = computed<Coluna[]>(() => (Object.keys(LARGURA) as Coluna[])
   .filter(c => c !== 'tarefa' || fase.value >= 3)
-  .filter(c => c !== 'status' || ehAdmin.value))
+  .filter(c => !['canal', 'entrega'].includes(c) || todosOsCanais.value)
+  .filter(c => !['status', 'entrega'].includes(c) || ehAdmin.value))
+
+function rotuloDaColuna(c: Coluna) {
+  if (c === 'canal' || c === 'saiuPor' || c === 'entrega') return tc.value.col[c]
+  if (c === 'assunto' && todosOsCanais.value) return tc.value.col.assuntoOuMensagem
+  return te.value.col[c]
+}
 const colunas = computed<TableColumn<Linha>[]>(() => colunasDaFase.value.map(id => ({
   id,
   accessorKey: id,
@@ -243,7 +345,7 @@ const colunas = computed<TableColumn<Linha>[]>(() => colunasDaFase.value.map(id 
 })))
 
 const menuDeColunas = computed<DropdownMenuItem[]>(() => OCULTAVEIS.filter(c => colunasDaFase.value.includes(c)).map(c => ({
-  label: te.value.col[c],
+  label: rotuloDaColuna(c),
   type: 'checkbox' as const,
   checked: visiveis.value[c] !== false,
   onUpdateChecked: (v: boolean) => { visiveis.value = { ...visiveis.value, [c]: v } },
@@ -327,10 +429,51 @@ function responder(e: Email, encaminhar = false) {
   })
 }
 
+/** Reenviar volta o envio para a fila (rodada 14: também o Cancelado; nunca o que ainda está na fila ou em processamento). */
+function podeReenviar(e: Email) {
+  return !!e.sistema && !['naFila', 'processando'].includes(e.sistema.status) && !(canalDe(e) === 'whatsapp' && origemDe(e) === 'atendimento')
+}
+function rotuloDeReenviar(e: Email) {
+  const c = canalDe(e)
+  return c === 'sms' ? tc.value.reenviarSms : c === 'whatsapp' ? tc.value.reenviarWhatsApp : props.t.central.reenviar
+}
 function reenviar(e: Email) {
-  emails.value = emails.value.map(x => x.id === e.id && x.sistema ? { ...x, sistema: { ...x.sistema, status: 'processando' as const } } : x)
-  if (aberto.value?.id === e.id) aberto.value = emails.value.find(x => x.id === e.id) ?? null
-  toast.add({ title: props.t.central.reenviado, icon: 'i-lucide-send', color: 'success' })
+  const atualizar = (status: StatusDoEnvio) => {
+    emails.value = emails.value.map(x => x.id === e.id && x.sistema ? { ...x, sistema: { ...x.sistema, status, erro: undefined, erroCodigo: undefined, entrega: undefined, motivoEntrega: undefined } } : x)
+    if (aberto.value?.id === e.id) aberto.value = emails.value.find(x => x.id === e.id) ?? null
+  }
+  atualizar('naFila')
+  setTimeout(() => atualizar('processando'), 1200)
+  toast.add({ title: canalDe(e) === 'email' ? props.t.central.reenviado : tc.value.reenviado, icon: 'i-lucide-send', color: 'success' })
+}
+
+/** Fase 4: o histórico do envio na gaveta, montado do status e da entrega (no produto, dos eventos gravados). */
+const formatoDaHora = computed(() => new Intl.DateTimeFormat(idioma.value, { hour: '2-digit', minute: '2-digit', second: '2-digit' }))
+function linhaDoTempo(e: Email) {
+  const s = e.sistema
+  if (!s) return []
+  const em = (seg: number) => new Date(+e.data + seg * 1000)
+  const passos: { rotulo: string, quando: Date, icone: string, cor: string, detalhe?: string }[] = [
+    { rotulo: tc.value.status.naFila, quando: em(0), icone: 'i-lucide-list-ordered', cor: 'text-muted' },
+  ]
+  if (s.status === 'naFila') return passos
+  if (s.status === 'cancelado') return [...passos, { rotulo: tc.value.status.cancelado, quando: em(60), icone: 'i-lucide-ban', cor: 'text-warning' }]
+  passos.push({ rotulo: tc.value.status.processando, quando: em(2), icone: 'i-lucide-loader', cor: 'text-info' })
+  if (s.status === 'processando') return passos
+  if (s.status === 'falhou') return [...passos, { rotulo: tc.value.status.falhou, quando: em(4), icone: 'i-lucide-circle-x', cor: 'text-error', detalhe: s.erro }]
+  passos.push({ rotulo: tc.value.status.enviado, quando: em(5), icone: 'i-lucide-send', cor: 'text-success' })
+  if (!s.entrega) return passos
+  if (s.entrega === 'lido') passos.push({ rotulo: tc.value.entrega.entregue, quando: em(9), icone: ICONE_DA_ENTREGA.entregue, cor: 'text-success' })
+  passos.push({ rotulo: tc.value.entrega[s.entrega], quando: em(s.entrega === 'lido' ? 740 : 9), icone: ICONE_DA_ENTREGA[s.entrega], cor: `text-${COR_DA_ENTREGA[s.entrega]}`, detalhe: s.motivoEntrega })
+  return passos
+}
+
+function abrirConversa() {
+  toast.add({ title: tc.value.abrirConversa, description: tc.value.abreAtendimento, icon: 'i-lucide-info', color: 'neutral' })
+}
+function abrirFluxo() {
+  aberto.value = null
+  ir('spaceflow')
 }
 
 function acoesDe(e: Email): DropdownMenuItem[][] {
@@ -339,7 +482,9 @@ function acoesDe(e: Email): DropdownMenuItem[][] {
     return [
       [
         { label: a.verDetalhes, icon: 'i-lucide-eye', onSelect: () => abrir(e) },
-        { label: props.t.central.reenviar, icon: 'i-lucide-send', disabled: e.sistema.status === 'processando', onSelect: () => reenviar(e) },
+        ...(canalDe(e) === 'whatsapp' && origemDe(e) === 'atendimento'
+          ? [{ label: tc.value.abrirConversa, icon: 'i-lucide-headset', onSelect: abrirConversa }]
+          : [{ label: rotuloDeReenviar(e), icon: 'i-lucide-send', disabled: !podeReenviar(e), description: podeReenviar(e) ? undefined : tc.value.reenviarIndisponivel, onSelect: () => reenviar(e) }]),
       ],
       e.itemId ? [{ label: a.verItem, icon: 'i-lucide-file-symlink', onSelect: () => abrirItem(e.itemId!, 'visao') }] : [],
     ]
@@ -387,9 +532,13 @@ function nomeDaCaixa(endereco: string) {
     <!-- Título -->
     <div class="flex flex-wrap items-center gap-3 px-4 pb-2 pt-4 sm:px-6">
       <h1 class="min-w-0 text-xl font-semibold text-highlighted">
-        {{ te.titulo }}
+        {{ titulo }}
       </h1>
-      <UButton :label="t.casca.novoEmail" icon="i-lucide-mail-plus" class="ml-auto" @click="abrirCompositor({ origem: 'emails' })" />
+      <!-- PROPOSTA (Fase 4): uma ação para os canais que o ENSPACE envia -->
+      <UDropdownMenu v-if="todosOsCanais" :items="novaMensagem" :content="{ align: 'end' }" :ui="{ content: 'w-80' }">
+        <UButton :label="tc.novaMensagem" icon="i-lucide-plus" trailing-icon="i-lucide-chevron-down" class="ml-auto" :class="marca" />
+      </UDropdownMenu>
+      <UButton v-else :label="t.casca.novoEmail" icon="i-lucide-mail-plus" class="ml-auto" @click="abrirCompositor({ origem: 'emails' })" />
     </div>
 
     <!-- Abas da central -->
@@ -475,7 +624,7 @@ function nomeDaCaixa(endereco: string) {
       <UButton
         v-for="r in rapidosDaFase"
         :key="r"
-        :label="te.rapidos[r]"
+        :label="rotuloDoRapido(r)"
         :icon="ICONE_DO_RAPIDO[r]"
         :color="rapidos.has(r) ? COR_DO_RAPIDO[r] : 'neutral'"
         :variant="rapidos.has(r) ? 'subtle' : 'soft'"
@@ -506,10 +655,10 @@ function nomeDaCaixa(endereco: string) {
                 size="xs"
                 class="p-0"
                 :class="ordem.campo === c ? 'text-primary' : 'text-dimmed hover:text-primary'"
-                :aria-label="te.ordenar(te.col[c])"
+                :aria-label="te.ordenar(rotuloDaColuna(c))"
                 @click.stop="ordenar(c)"
               />
-              <span class="truncate">{{ te.col[c] }}</span>
+              <span class="truncate">{{ rotuloDaColuna(c) }}</span>
               <FiltroDeColuna
                 v-if="c === 'item'"
                 v-model="filtros"
@@ -551,6 +700,9 @@ function nomeDaCaixa(endereco: string) {
           </template>
           <template #status-header>
             <span class="truncate">{{ te.col.status }}</span>
+          </template>
+          <template v-for="c in (['canal', 'saiuPor', 'entrega'] as const)" :key="c" #[`${c}-header`]>
+            <span class="truncate" :class="marca">{{ rotuloDaColuna(c) }}</span>
           </template>
 
           <!-- ===== células ===== -->
@@ -607,9 +759,10 @@ function nomeDaCaixa(endereco: string) {
             <span v-else class="text-dimmed">-</span>
           </template>
           <template #enviadoPor-cell="{ row }">
-            <span v-if="row.original.email.sistema" class="flex min-w-0 items-center gap-1.5 text-default">
-              <UIcon name="i-lucide-workflow" class="size-3.5 shrink-0 text-muted" />
-              <span class="truncate">{{ te.sistema }}<template v-if="row.original.email.sistema.tarefa"> · <span class="font-mono">{{ row.original.email.sistema.tarefa }}</span></template></span>
+            <!-- Rodada 14: a origem no lugar de "Sistema" (Tarefa, Spaceflow, Atendimento) -->
+            <span v-if="row.original.email.sistema" class="flex min-w-0 items-center gap-1.5 text-default" :title="detalheDaOrigem(row.original.email) ?? undefined">
+              <UIcon :name="ICONE_DA_ORIGEM[origemDe(row.original.email)]" class="size-3.5 shrink-0 text-muted" />
+              <span class="truncate">{{ autorDe(row.original.email) }}<template v-if="detalheDaOrigem(row.original.email)"> · <span :class="row.original.email.sistema.tarefa ? 'font-mono' : ''">{{ detalheDaOrigem(row.original.email) }}</span></template></span>
             </span>
             <span v-else-if="autorDe(row.original.email)" class="block truncate text-default">{{ autorDe(row.original.email) }}</span>
             <span v-else class="text-dimmed">-</span>
@@ -618,7 +771,47 @@ function nomeDaCaixa(endereco: string) {
             <span class="whitespace-nowrap text-muted">{{ formato.format(row.original.email.data) }}</span>
           </template>
           <template #status-cell="{ row }">
-            <UBadge v-if="row.original.email.sistema" :label="t.central.status[row.original.email.sistema.status]" :color="COR_DO_STATUS[row.original.email.sistema.status]" variant="subtle" size="sm" />
+            <UTooltip v-if="row.original.email.sistema" :text="dicaDoStatus(row.original.email)">
+              <UBadge
+                :label="tc.status[row.original.email.sistema.status]"
+                :icon="row.original.email.sistema.status === 'falhou' ? 'i-lucide-circle-alert' : undefined"
+                :color="COR_DO_STATUS[row.original.email.sistema.status]"
+                variant="subtle"
+                size="sm"
+                tabindex="0"
+              />
+            </UTooltip>
+            <span v-else class="text-dimmed">-</span>
+          </template>
+          <template #canal-cell="{ row }">
+            <span class="flex items-center gap-1.5 text-default">
+              <UIcon :name="ICONE_DO_CANAL[canalDe(row.original.email)]" class="size-3.5 shrink-0 text-muted" />
+              {{ tc.canal[canalDe(row.original.email)] }}
+            </span>
+          </template>
+          <template #saiuPor-cell="{ row }">
+            <UTooltip v-if="saiuPorDe(row.original.email)" :text="tc.dicaDoSaiuPor[saiuPorDe(row.original.email)!.chave]">
+              <span class="flex min-w-0 items-center gap-1.5 text-default" tabindex="0">
+                <UIcon :name="ICONE_DO_SAIU_POR[saiuPorDe(row.original.email)!.chave]" class="size-3.5 shrink-0 text-muted" />
+                <span class="truncate">{{ saiuPorDe(row.original.email)!.rotulo }}</span>
+              </span>
+            </UTooltip>
+            <span v-else class="text-dimmed">-</span>
+          </template>
+          <template #entrega-cell="{ row }">
+            <UTooltip v-if="row.original.email.sistema?.entrega" :text="row.original.email.sistema.motivoEntrega ?? tc.entrega[row.original.email.sistema.entrega]">
+              <UBadge
+                :label="tc.entrega[row.original.email.sistema.entrega]"
+                :icon="ICONE_DA_ENTREGA[row.original.email.sistema.entrega]"
+                :color="COR_DA_ENTREGA[row.original.email.sistema.entrega]"
+                variant="subtle"
+                size="sm"
+                tabindex="0"
+              />
+            </UTooltip>
+            <UTooltip v-else-if="row.original.email.direcao === 'enviado' && !row.original.email.sistema" :text="tc.semEntrega">
+              <span class="text-dimmed" tabindex="0">-</span>
+            </UTooltip>
             <span v-else class="text-dimmed">-</span>
           </template>
 
@@ -651,16 +844,29 @@ function nomeDaCaixa(endereco: string) {
     </template>
 
     <!-- Gaveta à direita: SharedResizableDrawer -->
-    <USlideover v-model:open="gaveta" :title="aberto?.assunto" :description="aberto ? formato.format(aberto.data) : undefined" :ui="{ content: 'sm:max-w-[700px]' }">
+    <USlideover
+      v-model:open="gaveta"
+      :title="aberto ? (canalDe(aberto) === 'email' ? aberto.assunto : `${tc.canal[canalDe(aberto)]} · ${aberto.para[0]}`) : undefined"
+      :description="aberto ? formato.format(aberto.data) : undefined"
+      :ui="{ content: 'sm:max-w-[700px]' }"
+    >
       <template #body>
         <div v-if="aberto" class="flex flex-col gap-4">
-          <dl class="grid grid-cols-[6rem_1fr] gap-x-3 gap-y-1.5 text-sm">
+          <dl class="grid grid-cols-[8rem_1fr] gap-x-3 gap-y-1.5 text-sm">
             <dt class="text-muted">
               {{ te.col.tipo }}
             </dt>
             <dd>
               <UBadge :label="te.tipo[aberto.direcao]" :icon="aberto.direcao === 'recebido' ? 'i-lucide-inbox' : 'i-lucide-send'" :color="aberto.direcao === 'recebido' ? 'info' : 'success'" variant="subtle" size="sm" />
             </dd>
+            <template v-if="todosOsCanais">
+              <dt class="text-muted">
+                {{ tc.col.canal }}
+              </dt>
+              <dd class="flex items-center gap-1.5 text-highlighted">
+                <UIcon :name="ICONE_DO_CANAL[canalDe(aberto)]" class="size-4 text-muted" />{{ tc.canal[canalDe(aberto)] }}
+              </dd>
+            </template>
             <dt class="text-muted">
               {{ te.col.de }}
             </dt>
@@ -685,23 +891,79 @@ function nomeDaCaixa(endereco: string) {
               <dt class="text-muted">
                 {{ te.col.enviadoPor }}
               </dt>
-              <dd class="text-highlighted">
-                {{ autorDe(aberto) }}
+              <dd class="flex items-center gap-1.5 text-highlighted">
+                <UIcon v-if="aberto.sistema" :name="ICONE_DA_ORIGEM[origemDe(aberto)]" class="size-4 text-muted" />{{ autorDe(aberto) }}
+              </dd>
+            </template>
+            <!-- Rodada 14: por onde saiu, em todas as fases -->
+            <template v-if="saiuPorDe(aberto)">
+              <dt class="text-muted">
+                {{ tc.col.saiuPor }}
+              </dt>
+              <dd class="flex flex-col text-highlighted" :class="marca">
+                <span class="flex items-center gap-1.5"><UIcon :name="ICONE_DO_SAIU_POR[saiuPorDe(aberto)!.chave]" class="size-4 text-muted" />{{ saiuPorDe(aberto)!.rotulo }}</span>
+                <span class="text-xs text-muted">{{ tc.dicaDoSaiuPor[saiuPorDe(aberto)!.chave] }}</span>
               </dd>
             </template>
             <template v-if="aberto.sistema">
               <dt class="text-muted">
                 {{ te.col.status }}
               </dt>
-              <dd>
-                <UBadge :label="t.central.status[aberto.sistema.status]" :color="COR_DO_STATUS[aberto.sistema.status]" variant="subtle" size="sm" />
+              <dd class="flex flex-col items-start gap-0.5">
+                <UBadge :label="tc.status[aberto.sistema.status]" :color="COR_DO_STATUS[aberto.sistema.status]" variant="subtle" size="sm" />
+                <span v-if="aberto.sistema.status !== 'falhou'" class="text-xs text-muted">{{ dicaDoStatus(aberto) }}</span>
               </dd>
+              <!-- Rodada 14: o motivo que o envio já grava -->
+              <template v-if="aberto.sistema.status === 'falhou' && aberto.sistema.erro">
+                <dt class="text-muted">
+                  {{ tc.motivoDaFalha }}
+                </dt>
+                <dd class="text-error" :class="marca">
+                  {{ aberto.sistema.erro }}<span v-if="todosOsCanais && aberto.sistema.erroCodigo" class="block text-xs text-muted">{{ tc.codigoDoErro(aberto.sistema.erroCodigo) }}</span>
+                </dd>
+              </template>
+              <!-- Fase 4: a entrega, do aviso de eventos da SendGrid e do status da Twilio -->
+              <template v-if="todosOsCanais && aberto.sistema.entrega">
+                <dt class="text-muted">
+                  {{ tc.col.entrega }}
+                </dt>
+                <dd class="flex flex-col items-start gap-0.5" :class="marca">
+                  <UBadge :label="tc.entrega[aberto.sistema.entrega]" :icon="ICONE_DA_ENTREGA[aberto.sistema.entrega]" :color="COR_DA_ENTREGA[aberto.sistema.entrega]" variant="subtle" size="sm" />
+                  <span v-if="aberto.sistema.motivoEntrega" class="text-sm text-highlighted">{{ tc.motivoDaEntrega }}: {{ aberto.sistema.motivoEntrega }}</span>
+                  <span v-if="aberto.sistema.erroCodigo" class="text-xs text-muted">{{ tc.codigoDoErro(aberto.sistema.erroCodigo) }}</span>
+                </dd>
+              </template>
+              <template v-if="todosOsCanais && aberto.modeloWhatsApp">
+                <dt class="text-muted">
+                  {{ tc.modeloAprovado }}
+                </dt>
+                <dd class="font-mono text-highlighted">
+                  {{ aberto.modeloWhatsApp }}
+                </dd>
+              </template>
+              <template v-if="canalDe(aberto) === 'sms'">
+                <dt class="text-muted">
+                  {{ tc.tamanho }}
+                </dt>
+                <dd class="text-highlighted">
+                  {{ tc.segmentos(partesDoSms(aberto.assunto).partes) }}
+                </dd>
+              </template>
               <template v-if="aberto.sistema.tarefa">
                 <dt class="text-muted">
                   {{ te.col.tarefa }}
                 </dt>
                 <dd class="font-mono text-highlighted">
                   {{ aberto.sistema.tarefa }}
+                </dd>
+              </template>
+              <template v-if="aberto.sistema.fluxo">
+                <dt class="text-muted">
+                  {{ tc.origem.fluxo }}
+                </dt>
+                <dd class="flex flex-wrap items-center gap-2 text-highlighted">
+                  {{ tc.noDoFluxo(aberto.sistema.fluxo.nome, aberto.sistema.fluxo.no) }}
+                  <UButton v-if="todosOsCanais" :label="tc.abrirFluxo" icon="i-lucide-git-fork" color="neutral" variant="outline" size="xs" @click="abrirFluxo" />
                 </dd>
               </template>
             </template>
@@ -729,7 +991,7 @@ function nomeDaCaixa(endereco: string) {
                 size="sm"
                 class="min-w-0"
                 :ui="{ label: 'truncate' }"
-                @click="abrirItem(aberto.itemId!, 'mailbox'); aberto = null"
+                @click="abrirItem(aberto.itemId!, aberto.sistema ? 'visao' : 'mailbox'); aberto = null"
               />
               <UButton v-if="fase >= 2 && !aberto.sistema" :label="t.compositor.trocar" color="neutral" variant="ghost" size="xs" @click="vinculando = true" />
             </div>
@@ -757,16 +1019,45 @@ function nomeDaCaixa(endereco: string) {
             </div>
           </div>
 
+          <!-- Fase 4: SMS e WhatsApp no balão da mensagem -->
+          <div v-if="canalDe(aberto) !== 'email'" class="flex justify-end rounded-lg bg-elevated p-4">
+            <p class="max-w-[85%] rounded-2xl rounded-br-sm px-3 py-2 text-sm" :class="canalDe(aberto) === 'whatsapp' ? 'bg-success/15 text-highlighted' : 'bg-primary text-inverted'">
+              {{ aberto.assunto }}
+            </p>
+          </div>
           <!-- eslint-disable-next-line vue/no-v-html -->
-          <div class="rounded-lg border border-default p-4 text-sm text-default [&_blockquote]:border-l-2 [&_blockquote]:border-default [&_blockquote]:pl-3 [&_p]:my-1.5" v-html="aberto.corpo" />
+          <div v-else class="rounded-lg border border-default p-4 text-sm text-default [&_blockquote]:border-l-2 [&_blockquote]:border-default [&_blockquote]:pl-3 [&_p]:my-1.5" v-html="aberto.corpo" />
+
+          <!-- Fase 4: o histórico do envio -->
+          <div v-if="todosOsCanais && aberto.sistema" :class="marca">
+            <p class="mb-2 text-sm font-medium text-highlighted">
+              {{ tc.linhaDoTempo }}
+            </p>
+            <ol class="relative flex flex-col gap-3 border-l border-default pl-5">
+              <li v-for="(p, i) in linhaDoTempo(aberto)" :key="i" class="relative animate-[entrada_.25s_ease-out_both]" :style="{ animationDelay: `${i * 50}ms` }">
+                <span class="absolute -left-[1.85rem] top-0 flex size-5 items-center justify-center rounded-full bg-default ring-1 ring-default">
+                  <UIcon :name="p.icone" class="size-3" :class="p.cor" />
+                </span>
+                <span class="flex flex-wrap items-baseline gap-x-2 text-sm">
+                  <span class="font-medium text-highlighted">{{ p.rotulo }}</span>
+                  <span class="text-xs tabular-nums text-muted">{{ formatoDaHora.format(p.quando) }}</span>
+                </span>
+                <span v-if="p.detalhe" class="block text-xs text-muted">{{ p.detalhe }}</span>
+              </li>
+            </ol>
+          </div>
           <div v-if="aberto.anexos.length" class="flex flex-wrap gap-1.5">
             <UBadge v-for="a in aberto.anexos" :key="a" :label="a" icon="i-lucide-paperclip" color="neutral" variant="outline" />
           </div>
         </div>
       </template>
       <template #footer>
-        <div v-if="aberto?.sistema" class="flex flex-wrap gap-2">
-          <UButton :label="t.central.reenviar" icon="i-lucide-send" :disabled="aberto.sistema.status === 'processando'" @click="reenviar(aberto)" />
+        <div v-if="aberto?.sistema && canalDe(aberto) === 'whatsapp' && origemDe(aberto) === 'atendimento'" class="flex flex-wrap gap-2">
+          <UButton :label="tc.abrirConversa" icon="i-lucide-headset" @click="abrirConversa" />
+        </div>
+        <div v-else-if="aberto?.sistema" class="flex flex-wrap items-center gap-2">
+          <UButton :label="rotuloDeReenviar(aberto)" icon="i-lucide-send" :disabled="!podeReenviar(aberto)" @click="reenviar(aberto)" />
+          <span v-if="!podeReenviar(aberto)" class="text-xs text-muted">{{ tc.reenviarIndisponivel }}</span>
         </div>
         <div v-else-if="aberto" class="flex flex-wrap gap-2">
           <UButton :label="te.acoes.responder" icon="i-lucide-reply" @click="responder(aberto)" />

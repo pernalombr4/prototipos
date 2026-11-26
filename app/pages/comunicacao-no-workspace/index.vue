@@ -14,6 +14,10 @@
  *   Fase 2: escolher o "De" (Outlook ou caixa do workspace), responder na
  *           mesma conversa, encaminhar, registrar o e-mail sem item;
  *   Fase 3: vincular o e-mail a uma tarefa.
+ *   Fase 4 (rodada 14): o destino. A central vira "Comunicações" e guarda e-mail,
+ *           SMS e WhatsApp com o status de entrega (SendGrid e Twilio); o Spaceflow
+ *           ganha os nós Enviar SMS e Enviar WhatsApp; o painel SMS envia pelo
+ *           número do workspace.
  *
  * Uma porta: as telas se navegam pelo menu lateral, como no produto.
  */
@@ -36,6 +40,8 @@ import TelaRequisicoes from './_TelaRequisicoes.vue'
 import TelaEmails from './_TelaEmails.vue'
 import TelaSistema from './_TelaSistema.vue'
 import TelaCategoria from './_TelaCategoria.vue'
+import TelaSpaceflow from './_TelaSpaceflow.vue'
+import { textosDeCanais } from './textosDeCanais'
 
 import briefingMd from './BRIEFING.md?raw'
 import pesquisaMd from './PESQUISA.md?raw'
@@ -43,14 +49,15 @@ import decisoesMd from './DECISOES.md?raw'
 
 definePageMeta({
   titulo: 'Comunicação no workspace',
-  descricao: 'Link do formulário público, atalhos de e-mail e o e-mail do ENSPACE em qualquer tela, com a central E-mails no menu e a Mail Box no item e na tarefa. Em 3 fases: o MVP sobre o que já existe, o remetente e a tarefa.',
+  descricao: 'Link do formulário público, atalhos de e-mail, WhatsApp e SMS e o e-mail do ENSPACE em qualquer tela, com a central no menu e a Mail Box no item e na tarefa. Em 4 fases: o MVP sobre o que já existe, o remetente, a tarefa e o destino, a central Comunicações com e-mail, SMS e WhatsApp e os nós de mensagem do Spaceflow.',
   status: 'em-revisao',
-  atualizado: '2026-11-24',
-  tela: 'Início, itens, tarefas, Agenda, Requisições e a central E-mails',
+  atualizado: '2026-11-26',
+  tela: 'Início, itens, tarefas, Agenda, Requisições, a central E-mails (Comunicações na Fase 4) e o Spaceflow',
 })
 
 const t = useTextos(textos)
-const { tela, categoriaAtual, itemAberto, cenario, destacar, fase, perfil, ehAdmin, abaDaCentral, dados, ir, abrirItem } = useComunicacao()
+const { tela, categoriaAtual, itemAberto, cenario, destacar, fase, perfil, ehAdmin, abaDaCentral, dados, twilioLigado, ir, abrirItem } = useComunicacao()
+const tc = useTextos(textosDeCanais)
 
 const telas: Record<Tela, Component> = {
   inicio: TelaInicio,
@@ -62,6 +69,7 @@ const telas: Record<Tela, Component> = {
   emails: TelaEmails,
   sistema: TelaSistema,
   categoria: TelaCategoria,
+  spaceflow: TelaSpaceflow,
 }
 
 /** A trilha que o develop mostra em cada tela. */
@@ -76,7 +84,8 @@ const trilha = computed(() => {
     case 'tarefas': return [ws, c.itens.tarefas, c.itens.rapidas]
     case 'agenda': return [ws, c.itens.agenda]
     case 'requisicoes': return [ws, 'request']
-    case 'emails': return [ws, c.itens.emails, t.value.central.abas[abaDaCentral.value]]
+    case 'emails': return [ws, fase.value >= 4 ? tc.value.comunicacoes : c.itens.emails, t.value.central.abas[abaDaCentral.value]]
+    case 'spaceflow': return [ws, c.configuracoes, c.dados, c.itens.spaceflow, tc.value.spaceflow.nomeDoFluxo]
     case 'sistema': return [ws, c.configuracoes, c.itens.sistema]
     case 'categoria': return [ws, c.configuracoes, c.dados, c.itens.estruturaCategorias, cat]
   }
@@ -97,7 +106,9 @@ const irPara = computed<DropdownMenuItem[][]>(() => [
     { label: t.value.casca.itens.rapidas, icon: 'i-lucide-clipboard-check', onSelect: () => ir('tarefas') },
     { label: t.value.casca.itens.agenda, icon: 'i-lucide-calendar-days', onSelect: () => ir('agenda') },
     { label: t.value.casca.itens.requisicoes, icon: 'i-lucide-clipboard-pen-line', onSelect: () => ir('requisicoes') },
-    { label: t.value.casca.itens.emails, icon: 'i-lucide-mail', onSelect: () => ir('emails', { central: 'mensagens' }) },
+    fase.value >= 4
+      ? { label: tc.value.comunicacoes, icon: 'i-lucide-messages-square', onSelect: () => ir('emails', { central: 'mensagens' }) }
+      : { label: t.value.casca.itens.emails, icon: 'i-lucide-mail', onSelect: () => ir('emails', { central: 'mensagens' }) },
   ],
   ...(ehAdmin.value
     ? [
@@ -106,6 +117,7 @@ const irPara = computed<DropdownMenuItem[][]>(() => [
           { label: t.value.andaime.configDosEmails, icon: 'i-lucide-settings', onSelect: () => ir('emails', { central: 'configuracoes' }) },
           ...(fase.value >= 2 ? [{ label: t.value.andaime.atalhosDaCategoria, icon: 'i-lucide-contact', onSelect: () => ir('categoria', { categoria: 'contratos', vista: 'atalhos' }) }] : []),
           { label: t.value.andaime.formularios, icon: 'i-lucide-file-spreadsheet', onSelect: () => ir('categoria', { categoria: 'solicitacoes', vista: 'formularios' }) },
+          ...(fase.value >= 4 ? [{ label: tc.value.irParaSpaceflow, icon: 'i-lucide-git-fork', onSelect: () => ir('spaceflow') }] : []),
         ],
       ]
     : []),
@@ -204,6 +216,11 @@ const cenarios = computed<{ value: Cenario, label: string }[]>(() => [
           :variant="cenario === c.value ? 'solid' : 'subtle'"
           @click="cenario = c.value"
         />
+
+        <template v-if="fase >= 4">
+          <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
+          <USwitch :model-value="!twilioLigado" :label="tc.spaceflow.andaimeSemTwilio" size="sm" :ui="{ label: 'text-xs' }" @update:model-value="(v: boolean) => twilioLigado = !v" />
+        </template>
 
         <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
         <USwitch v-model="destacar" :label="t.andaime.mostrarOQueMuda" size="sm" :ui="{ label: 'text-xs' }" />

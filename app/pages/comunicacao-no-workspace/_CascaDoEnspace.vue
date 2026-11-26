@@ -22,6 +22,7 @@
 import type { Textos } from './textos'
 import { categorias, EU, itemPorId, workspace } from './mocks'
 import { type AbaDaCentral, type Rapido, type Tela, useComunicacao, useMarcaDeProposta } from './estado'
+import { textosDeCanais } from './textosDeCanais'
 
 const props = defineProps<{
   t: Textos
@@ -29,11 +30,14 @@ const props = defineProps<{
   trilha: string[]
 }>()
 
-const { tela, categoriaAtual, ir, rascunho, compositorAberto, abaDaCentral, rapidosDaCentral, ehAdmin, contextoDaTela, novoEmailNoContexto } = useComunicacao()
+const { tela, categoriaAtual, ir, rascunho, compositorAberto, abaDaCentral, rapidosDaCentral, ehAdmin, contextoDaTela, novoEmailNoContexto, fase } = useComunicacao()
+const tk = useTextos(textosDeCanais)
 const marca = useMarcaDeProposta()
 
 interface Entrada {
   chave: string
+  /** Rótulo no lugar do da casca (Fase 4: "Comunicações"). */
+  rotulo?: string
   icone: string
   tela?: Tela
   filhos?: { chave: string, rotulo?: string, icone: string, tela?: Tela, categoria?: string, central?: AbaDaCentral, rapido?: Rapido, proposta?: boolean }[]
@@ -62,13 +66,16 @@ const membro = computed<Entrada[]>(() => [
   },
   { chave: 'agenda', icone: 'i-lucide-calendar-days', tela: 'agenda' },
   // PROPOSTA (rodada 7): a central E-mails, nas 3 fases. Cada aba segue a permissão que já existe.
-  { chave: 'emails', icone: 'i-lucide-mail', tela: 'emails', proposta: true },
+  // Fase 4 (rodada 14): a central guarda e-mail, SMS e WhatsApp e passa a se chamar "Comunicações".
+  fase.value >= 4
+    ? { chave: 'emails', rotulo: tk.value.comunicacoes, icone: 'i-lucide-messages-square', tela: 'emails', proposta: true }
+    : { chave: 'emails', icone: 'i-lucide-mail', tela: 'emails', proposta: true },
   { chave: 'knowledge', icone: 'i-lucide-table-2', filhos: [] },
   // Menu configurado em Interface › Menus (tela nativa /request).
   { chave: 'requisicoes', icone: 'i-lucide-clipboard-pen-line', tela: 'requisicoes' },
 ])
 
-const configuracoes: Entrada[] = [
+const configuracoes = computed<Entrada[]>(() => [
   { chave: 'visaoGeral', icone: 'i-lucide-circle-gauge' },
   { chave: 'sistema', icone: 'i-lucide-settings', tela: 'sistema' },
   {
@@ -77,7 +84,8 @@ const configuracoes: Entrada[] = [
     filhos: [
       { chave: 'estruturaCategorias', icone: 'i-lucide-layout-grid', tela: 'categoria' },
       { chave: 'listas', icone: 'i-lucide-list-checks' },
-      { chave: 'spaceflow', icone: 'i-lucide-git-fork' },
+      // Fase 4 (rodada 14): o editor do Spaceflow, com os nós Enviar SMS e Enviar WhatsApp.
+      fase.value >= 4 ? { chave: 'spaceflow', icone: 'i-lucide-git-fork', tela: 'spaceflow' as Tela, proposta: true } : { chave: 'spaceflow', icone: 'i-lucide-git-fork' },
     ],
   },
   { chave: 'gestaoDeMembros', icone: 'i-lucide-contact' },
@@ -96,7 +104,7 @@ const configuracoes: Entrada[] = [
   { chave: 'agentesDeIa', icone: 'i-lucide-cpu' },
   { chave: 'logs', icone: 'i-lucide-activity' },
   { chave: 'credenciais', icone: 'i-lucide-key-round' },
-]
+])
 
 const ajuda: Entrada[] = [
   { chave: 'releases', icone: 'i-lucide-package' },
@@ -107,7 +115,7 @@ const ajuda: Entrada[] = [
 const abertos = ref<string[]>(['categorias', 'tarefas'])
 
 watch(tela, (t) => {
-  const secao = t === 'itens' || t === 'item' ? 'categorias' : t === 'tarefas' ? 'tarefas' : t === 'categoria' ? 'estrutura' : null
+  const secao = t === 'itens' || t === 'item' ? 'categorias' : t === 'tarefas' ? 'tarefas' : t === 'categoria' || t === 'spaceflow' ? 'estrutura' : null
   if (secao && !abertos.value.includes(secao)) abertos.value = [...abertos.value, secao]
 }, { immediate: true })
 
@@ -136,7 +144,7 @@ function clicar(e: Entrada | NonNullable<Entrada['filhos']>[number]) {
 
 const grupos = computed(() => [
   { titulo: props.t.casca.membro, itens: membro.value.filter(e => !e.quando || e.quando()) },
-  ...(ehAdmin.value ? [{ titulo: props.t.casca.configuracoes, itens: configuracoes }] : []),
+  ...(ehAdmin.value ? [{ titulo: props.t.casca.configuracoes, itens: configuracoes.value }] : []),
   { titulo: props.t.casca.ajuda, itens: ajuda },
 ])
 
@@ -205,7 +213,7 @@ const temRascunho = computed(() => !compositorAberto.value && !!(rascunho.value.
             <USeparator v-else class="my-3" />
 
             <template v-for="e in grupo.itens" :key="e.chave">
-              <UTooltip :text="t.casca.itens[e.chave]" :disabled="state === 'expanded'" :content="{ side: 'right' }">
+              <UTooltip :text="e.rotulo ?? t.casca.itens[e.chave]" :disabled="state === 'expanded'" :content="{ side: 'right' }">
                 <button
                   type="button"
                   class="flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-elevated"
@@ -219,7 +227,7 @@ const temRascunho = computed(() => !compositorAberto.value && !!(rascunho.value.
                 >
                   <UIcon :name="e.icone" class="size-4 shrink-0" :class="ativo(e) ? 'text-primary' : 'text-muted'" />
                   <template v-if="state === 'expanded'">
-                    <span class="flex-1 truncate text-sm">{{ t.casca.itens[e.chave] }}</span>
+                    <span class="flex-1 truncate text-sm">{{ e.rotulo ?? t.casca.itens[e.chave] }}</span>
                     <UIcon v-if="e.externo" name="i-lucide-arrow-up-right" class="size-3 shrink-0 text-dimmed" />
                     <UIcon
                       v-else-if="e.filhos"

@@ -1,7 +1,9 @@
 # Comunicação no workspace: lógica da funcionalidade
 
 Para dev e produto. Protótipo: https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/
-(24/11/2026, rodada 8). O controle "Fase", na barra de baixo do protótipo, troca entre as 3 fases.
+(26/11/2026, rodada 14). O controle "Fase", na barra de baixo do protótipo, troca entre as 4 fases.
+A Fase 4 é o destino: a central "Comunicações", com e-mail, SMS e WhatsApp, e os nós de mensagem do
+Spaceflow (7.10 e 7.11).
 O controle "Perfil" mostra a central E-mails pelo olhar de quem administra ou do membro. O controle
 "Dados" mostra o workspace novo, o primeiro uso e o workspace em uso (7.7).
 
@@ -28,6 +30,10 @@ Regras que valem para tudo:
   abrem as abas dela.
 - **Os e-mails que tarefas e fluxos enviam ficam na aba Mensagens**, com o filtro "Do sistema", para
   quem tem a permissão de hoje de vê-los. Não há aba própria para eles.
+- **Na Fase 4, a central vira "Comunicações"** e guarda também o SMS e o WhatsApp que o ENSPACE envia
+  pela integração Twilio do workspace: os nós do Spaceflow, o "Enviar pelo ENSPACE" do painel "Enviar
+  SMS" e o WhatsApp do atendimento. O WhatsApp e o SMS dos atalhos, que saem do aparelho da pessoa,
+  continuam fora (7.10).
 - **O e-mail do ENSPACE sai da conta do Outlook da pessoa** (Fase 1). Na Fase 2, sai também de uma
   caixa do workspace. O item vinculado define para onde a resposta volta, não o remetente.
 - **O Correio do Outlook é do perfil de cada pessoa.** Cada pessoa integra a própria conta em Perfil
@@ -38,15 +44,16 @@ Regras que valem para tudo:
 Cada ponto das seções 4 a 7 diz em que fase entra e tem um bloco **Depende de**: o que precisa
 existir, onde se resolve e o que a pessoa vê quando falta. A seção 3 junta as dependências num mapa.
 
-## 2. As 3 fases
+## 2. As 4 fases
 
 Cada fase soma à anterior.
 
 | Fase | O que entra | O que já existe no produto | O que é novo |
 |---|---|---|---|
-| 1 · MVP | Atalho de e-mail nas telas de uso, com o contato tirado dos campos de e-mail que o item já tem; "Novo e-mail" no topo, que reconhece o item ou a tarefa aberta; compositor com o "De" à vista e o item da tela de origem; Mail Box em todo item e no painel da tarefa; link do formulário público nas telas de uso; lembrete por e-mail na Agenda; central E-mails no menu, com as 4 abas, os e-mails do sistema na aba Mensagens e os estados vazios | Envio pela conta do Outlook da pessoa; endereço do item; registro do e-mail com item; Mail Box do item; campos de e-mail da categoria e E-mail do Requisitante; link público e visibilidade do formulário; tela "Emails Recebidos", sem entrada no menu; as telas Modelos de E-mail, Caixas de E-mail e E-mails Enviados, com as permissões delas; a tabela das telas novas do produto; integração SendGrid | As telas, sobre os dados, as rotas e as permissões que já existem. A lista única dos e-mails dos itens e dos enviados pelo sistema pode pedir back (D24) |
+| 1 · MVP | Atalho de e-mail nas telas de uso, com o contato tirado dos campos de e-mail que o item já tem; "Novo e-mail" no topo, que reconhece o item ou a tarefa aberta; compositor com o "De" à vista e o item da tela de origem; Mail Box em todo item e no painel da tarefa; link do formulário público nas telas de uso; lembrete por e-mail na Agenda; central E-mails no menu, com as 4 abas, os e-mails do sistema na aba Mensagens (com "Saiu por", os 5 status, o motivo da falha, a origem e o Reenviar no Cancelado) e os estados vazios | Envio pela conta do Outlook da pessoa; endereço do item; registro do e-mail com item; Mail Box do item; campos de e-mail da categoria e E-mail do Requisitante; link público e visibilidade do formulário; tela "Emails Recebidos", sem entrada no menu; as telas Modelos de E-mail, Caixas de E-mail e E-mails Enviados, com as permissões delas; a tabela das telas novas do produto; integração SendGrid | As telas, sobre os dados, as rotas e as permissões que já existem. A lista única dos e-mails dos itens e dos enviados pelo sistema pode pedir back (D24) |
 | 2 · Remetente | Contato por categoria (cartão "Contato da categoria"); busca de item entre categorias no compositor ("Vincular a item (opcional)"), com as sugestões pelo destinatário e o autocompletar do Para com contatos de outros itens; na central, a lista de mensagens por pessoa e permissão, o e-mail sem item e "Caixas como remetente"; escolher o "De" (conta do Outlook ou caixa do workspace); responder na mesma conversa; encaminhar; registrar o e-mail enviado sem item; vincular e trocar o vínculo depois | Caixas de E-mail do workspace, que hoje só recebem; configuração da categoria em JSON | O contato da categoria (dado novo, a avaliar com os devs); a busca de item entre categorias; a lista de e-mails por pessoa e permissão; envio por caixa do workspace; resposta na conversa; encaminhar; registro sem item; rota de vínculo |
 | 3 · Tarefa | "Vincular a tarefa" no compositor; Mail Box própria da tarefa ("Desta tarefa" e "Do item"); coluna Tarefa na aba Mensagens da central | Nada: a tarefa não tem vínculo com e-mail | Vínculo do e-mail com a tarefa |
+| 4 · Comunicações | A central "Comunicações", com filtro por canal, as colunas Canal e Entrega e o filtro "Não entregues"; os nós "Enviar SMS" e "Enviar WhatsApp" no Spaceflow; os modelos de WhatsApp na aba Modelos; "Canais de envio do workspace" na aba Configurações; "Enviar pelo ENSPACE" no painel "Enviar SMS"; o WhatsApp do atendimento na lista, com "Abrir a conversa no Atendimento" | A integração Twilio do workspace (só WhatsApp, só na Central de Atendimento), com o webhook de status; a SendGrid de todo e-mail do sistema, sem o id da mensagem; as mensagens das conversas do atendimento | Status de entrega do e-mail pelo Event Webhook da SendGrid (C1); envio de SMS pela Twilio do workspace, com registro (C2); envio de WhatsApp com modelo aprovado pela Meta (C3); modelos de WhatsApp no workspace |
 
 **O que o código do develop faz hoje** (lido em 17/11/2026 e 24/11/2026). É a base da Fase 1:
 
@@ -61,6 +68,8 @@ Cada fase soma à anterior.
 | Que tabela essas 3 telas usam? | A tabela antiga. Logs de Auditoria e as telas novas de itens usam a tabela nova, com a coluna Ações primeiro |
 | O e-mail que tarefas e fluxos enviam aparece na Mail Box do item? | Não. Fica só na tela E-mails Enviados, numa lista separada dos e-mails dos itens |
 | Há uma tela com os e-mails dos itens? | A tela "Emails Recebidos", sem entrada no menu |
+| O que o registro do e-mail do sistema guarda? | 5 status (Na fila, Em processamento, Enviado, Falhou, Cancelado), a mensagem de erro, o remetente e a origem (tarefa, fluxo, atendimento). "Enviado" quer dizer que a SendGrid aceitou; a entrega não é confirmada (lido em 26/11/2026) |
+| O ENSPACE envia SMS ou WhatsApp fora do atendimento? | Não. A integração Twilio do workspace só fala na conversa do atendimento, e nenhum nó do Spaceflow envia SMS ou WhatsApp |
 
 ## 3. Mapa de dependências
 
@@ -90,6 +99,10 @@ Cada fase soma à anterior.
 | D22 | Vínculo do e-mail com a tarefa | Dev (back) | Não | 3 | 7.3, 7.7, 7.9 | Sem "Vincular a tarefa"; a Mail Box da tarefa mostra os e-mails do item |
 | D23 | Desenho do botão de e-mail no cartão do quadro (o "Notify" do mockup 5) | Produtos | Não | Opcional | 5.3, 5.4 | O atalho fica só no clique direito, sem botão no cartão |
 | D24 | Lista única dos e-mails dos itens e dos enviados pelo sistema, com ordem e paginação únicas, para a aba Mensagens | Dev (back) | Não: hoje são 2 listas separadas | 1 | 7.7 | O filtro "Do sistema" troca a fonte da tabela, 1 lista por vez (9, pergunta 14) |
+| D25 | Status de entrega do e-mail do sistema: o id da mensagem na SendGrid e o Event Webhook (C1) | Dev (back) | Não: o ENSPACE não guarda o id nem recebe o webhook | 4 | 7.10 | Sem a coluna Entrega e sem o filtro "Não entregues" para o e-mail |
+| D26 | Integração Twilio do workspace com número de SMS e envio de SMS com registro (C2) | Dev (back) e administrador (Integrações) | Em parte: a integração existe, só para WhatsApp do atendimento | 4 | 7.10, 7.11 | Sem o nó "Enviar SMS" e sem "Enviar pelo ENSPACE"; o painel "Enviar SMS" fica como na Fase 1 |
+| D27 | Envio de WhatsApp iniciado pelo sistema, com modelo aprovado pela Meta (C3) | Dev (back) e administrador (Integrações, modelos) | Não | 4 | 7.10, 7.11 | Sem o nó "Enviar WhatsApp" e sem os modelos de WhatsApp na aba Modelos |
+| D28 | Consentimento e descadastro do destinatário de SMS e WhatsApp | Produtos e jurídico | Não | 4 | 7.11 | O envio pelo sistema não pode sair (pergunta 22) |
 
 ## 4. Configuração (quem administra o workspace)
 
@@ -853,12 +866,31 @@ da aba Mensagens, do tipo Enviado:
   "Do sistema", a opção "Sistema" no filtro de "Enviado por" e a coluna Status. O membro sem a
   permissão não vê nada disso;
 - **filtro:** o filtro rápido "Do sistema" e a opção "Sistema" no filtro da coluna "Enviado por";
-- **"Enviado por":** "Sistema · <tarefa>" quando há tarefa; sem tarefa, "Sistema";
-- **coluna Status:** Enviado, Em processamento ou Falhou. Nas outras linhas, "-";
-- **menu da linha:** "Ver Detalhes", "Reenviar e-mail" (indisponível com o status Em
-  processamento) e "Ver Item", que abre o item na Visão Geral. Sem "Responder" nem "Encaminhar";
-- **leitura no painel lateral:** mostra também Status e Tarefa, com o botão "Reenviar e-mail".
-  Reenviar muda o status para Em processamento e mostra o aviso "E-mail colocado na fila de
+- **"Enviado por", com a origem do envio** (rodada 14; o registro já guarda a origem):
+  - "Tarefa · <tarefa>", quando uma tarefa enviou;
+  - "Spaceflow · <fluxo>", com o nó na leitura e "Abrir o fluxo";
+  - "Atendimento", quando a Central de Atendimento enviou;
+- **coluna "Saiu por"** (rodada 14), em todas as linhas: "Outlook de <pessoa>" no e-mail da Mail
+  Box; "Caixa <nome>", na Fase 2; "ENSPACE" no e-mail do sistema com o remetente padrão; "Domínio
+  da empresa" quando o e-mail usa o remetente com o domínio. Na Fase 4, "Número do workspace" no SMS
+  e "WhatsApp do workspace" no WhatsApp. A dica explica cada um;
+- **coluna Status, com os 5 valores do registro** (rodada 14). Nas outras linhas, "-":
+
+  | Status | Quer dizer |
+  |---|---|
+  | Na fila | "O envio espera a vez na fila do ENSPACE." |
+  | Em processamento | "O ENSPACE está entregando a mensagem ao provedor." |
+  | Enviado ao provedor | "O provedor aceitou a mensagem. O ENSPACE não confirma a entrega." Na Fase 4: "A coluna Entrega mostra o que aconteceu depois." |
+  | Falhou | "O provedor recusou a mensagem. O motivo está no detalhe." |
+  | Cancelado | "O envio foi cancelado antes de sair." |
+
+- **menu da linha:** "Ver Detalhes", "Reenviar e-mail" e "Ver Item", que abre o item na Visão
+  Geral. Sem "Responder" nem "Encaminhar". "Reenviar e-mail" fica disponível no Enviado ao
+  provedor, no Falhou e no Cancelado, e indisponível no Na fila e no Em processamento, com o motivo
+  "O envio ainda está na fila ou em processamento.";
+- **leitura no painel lateral:** mostra também Saiu por, Status (com a dica), Tarefa ou o fluxo e o
+  nó, e, no Falhou, o "Motivo da falha" com a mensagem do registro (por exemplo, "Quota de emails
+  excedida"). Reenviar muda o status para Na fila e mostra o aviso "E-mail colocado na fila de
   envio";
 - **Mail Box:** o e-mail do sistema não entra na Mail Box do item, como hoje.
 
@@ -937,6 +969,132 @@ No workspace novo, o texto do próximo passo muda com o perfil:
 - O estado inicial diz o próximo passo porque a tabela vazia, sozinha, não diz o que falta: a conta
   do Outlook, os modelos, as caixas ou o 1º e-mail.
 
+### 7.10 Central "Comunicações" (Fase 4)
+
+**Como funciona**
+
+- A entrada do menu e o título da central passam a "Comunicações", com o ícone de conversas. As 4
+  abas continuam, com as mesmas permissões.
+- O botão do alto vira "Nova mensagem", com 3 opções:
+  - **E-mail:** o compositor de 7.3;
+  - **"SMS pelo número do workspace":** o painel "Enviar SMS" sem destinatário, com o campo do
+    número;
+  - **WhatsApp:** desabilitado, com "Fora de uma conversa aberta pelo contato, o WhatsApp aceita só
+    modelo aprovado. O envio sai pelo nó Enviar WhatsApp do Spaceflow ou pela conversa do
+    Atendimento."
+- **Aba Mensagens:**
+  - filtros rápidos "E-mail", "WhatsApp" e "SMS", que se somam entre si (E-mail ou SMS), e "Não
+    entregues";
+  - colunas novas: Canal, depois de Tipo, e Entrega, depois de Status. A coluna Assunto passa a
+    "Assunto ou mensagem": no SMS e no WhatsApp, o começo do texto;
+  - o SMS que a pessoa envia pelo ENSPACE aparece para todo membro, com "Enviado por" "<nome>,
+    pelo ENSPACE"; o enviado por fluxo segue a permissão dos e-mails do sistema;
+  - o WhatsApp do atendimento aparece com a origem "Atendimento" e o menu "Abrir a conversa no
+    Atendimento", sem "Reenviar".
+- **Coluna Entrega** (só para quem vê o Status):
+
+  | Entrega | Canal | Quer dizer |
+  |---|---|---|
+  | Entregue | Todos | O provedor confirmou a entrega |
+  | Lido | WhatsApp | O destinatário abriu a mensagem |
+  | Adiado | E-mail | O servidor do destinatário pediu para tentar depois |
+  | Devolvido | E-mail | O endereço não existe ou recusou; o código aparece na leitura |
+  | Bloqueado | E-mail | O servidor do destinatário bloqueou como spam |
+  | Não entregue | SMS e WhatsApp | A operadora ou a Meta recusou; o código aparece na leitura |
+
+  O e-mail da Mail Box sai pelo Outlook e não tem entrega: "-".
+- **Leitura no painel lateral do SMS e do WhatsApp:**
+  - o título é o canal e o destinatário;
+  - o corpo aparece como balão de conversa;
+  - linhas a mais: Canal, Modelo aprovado (WhatsApp), Tamanho ("<N> SMS", pelas partes de 160
+    caracteres), Entrega, com o motivo e o código do erro (por exemplo, 30003 da operadora);
+  - "Histórico do envio": os passos com a hora (Na fila, Enviado ao provedor, Entregue ou Lido);
+  - "Reenviar SMS" ou "Reenviar WhatsApp", pelas regras do e-mail, com o aviso "Mensagem colocada
+    na fila de envio".
+- **Aba Modelos:** o alternador "E-mail" e "WhatsApp". A tabela de WhatsApp mostra Nome, Texto,
+  Categoria (Utilidade, Marketing), Idioma, Variáveis e Status na Meta (Aprovado, Em análise,
+  Recusado), com "Novo modelo de WhatsApp", que envia o modelo para a aprovação da Meta (até 48
+  horas). Sem a Twilio, o estado vazio diz "O workspace não tem a integração Twilio", com "Abrir
+  Integrações".
+- **Aba Configurações:** a seção "Canais de envio do workspace", para quem administra:
+  - "E-mail do sistema": o domínio autenticado e o status de entrega ligado (o remetente com o
+    domínio sai da seção de regras);
+  - SMS: o número ligado, ou "Sem a integração Twilio no workspace";
+  - WhatsApp: o número e a quantidade de modelos aprovados, ou o mesmo aviso;
+  - cada linha com "Ver modelos" e "Abrir Integrações".
+- **Painel "Enviar SMS" (5.8):** com a Twilio ligada, ganha "Enviar pelo ENSPACE", abaixo da
+  Mensagem, com "Sai do número do workspace (<número>) e fica registrado no item e na central
+  Comunicações. O SMS tem custo na conta Twilio do workspace." O envio entra na central como Na fila, passa a Enviado ao provedor e depois a
+  Entregue. "Abrir no app de SMS", o QR code e o "Copiar" continuam, abaixo de "Ou envie pelo seu
+  celular".
+
+**Depende de**
+
+| O que precisa existir | Onde se resolve | Sem isso, a pessoa vê |
+|---|---|---|
+| Status de entrega do e-mail (D25) | Dev (back) | A coluna Entrega com "-" no e-mail; o filtro "Não entregues" só com SMS e WhatsApp |
+| Integração Twilio com número de SMS (D26) | Dev (back) e Integrações | Sem o filtro SMS, sem "Enviar pelo ENSPACE"; a linha SMS de "Canais de envio" diz "Sem a integração Twilio no workspace" |
+| WhatsApp com modelo aprovado (D27) | Dev (back) e Integrações | Sem a tabela de modelos de WhatsApp; o estado vazio pede a integração |
+| Leitura das mensagens do atendimento com a permissão do atendente | Dev (back); pergunta 24 | O WhatsApp do atendimento fica só na Central de Atendimento |
+
+**Por que assim**
+
+- O nome muda quando há 2º canal gravado fora do atendimento. Antes disso, "Comunicações"
+  prometeria o que a pessoa não acha (pesquisa de 2026-11-26, seção 1).
+- Uma tabela só, com filtro por canal: quem pergunta "o cliente recebeu?" olha num lugar.
+- Status e Entrega separados: o status diz o que o ENSPACE fez; a entrega, o que o provedor
+  respondeu. Numa coluna só, "Enviado" parece "Entregue".
+- O WhatsApp avulso não sai: fora das 24 horas depois da última mensagem do cliente, a Meta só
+  aceita modelo aprovado.
+- O WhatsApp e o SMS dos atalhos não entram: saem do aparelho da pessoa, e o ENSPACE não sabe do
+  envio.
+
+### 7.11 Nós "Enviar SMS" e "Enviar WhatsApp" no Spaceflow (Fase 4)
+
+**Como funciona**
+
+- No Spaceflow, a paleta de nós ganha "Enviar SMS" e "Enviar WhatsApp" no grupo Comunicação, ao
+  lado de "Enviar e-mail", com o selo "Novo".
+- O nó abre o modal de configuração dos nós de hoje: Variáveis de Entrada à esquerda (arrastar ou
+  clicar para preencher o último campo com foco), Variáveis de Saída abaixo e o rodapé com
+  "Modificado", "Cancelar" e "Salvar e fechar".
+- **Enviar SMS:**
+  - Para: a variável do telefone (por exemplo, o telefone do contato do item);
+  - Sai por: o número de SMS do workspace, só leitura;
+  - Mensagem, com variáveis, e a contagem "<N> caracteres · <M> SMS", calculada com os valores de
+    exemplo;
+  - a prévia com os valores de exemplo.
+- **Enviar WhatsApp:**
+  - Para: a variável do telefone;
+  - Modelo aprovado: só os aprovados ficam disponíveis; Em análise e Recusado aparecem
+    desabilitados, com "<status> na Meta. Só o modelo aprovado pode ser enviado.";
+  - 1 campo por variável do modelo ({{1}}, {{2}}…), com variáveis do fluxo;
+  - a prévia do modelo com os valores de exemplo.
+- **Nos 2 nós:**
+  - "Se o envio falhar": "Seguir para o próximo nó" ou "Parar o fluxo com erro";
+  - "Esperar a confirmação de entrega": o fluxo segue só depois que a Twilio confirmar a entrega,
+    ou depois de 1 hora;
+  - variáveis de saída: status, mensagem_id e erro;
+  - sem a integração Twilio, o aviso "O workspace não tem a integração Twilio", e o cartão do nó
+    mostra ERRO;
+  - o cartão do nó mostra o resumo: o destinatário e o começo da mensagem, ou o modelo;
+  - cada envio entra na central "Comunicações", com a origem "Spaceflow · <fluxo>" e o nó.
+
+**Depende de**
+
+| O que precisa existir | Onde se resolve | Sem isso, a pessoa vê |
+|---|---|---|
+| Envio de SMS pela Twilio (D26) | Dev (back) | Sem o nó "Enviar SMS" |
+| Envio de WhatsApp com modelo (D27) | Dev (back) | Sem o nó "Enviar WhatsApp" |
+| Consentimento e descadastro (D28) | Produtos e jurídico | O envio não pode sair |
+
+**Por que assim**
+
+- O modal é o mesmo dos nós de hoje: quem monta "Enviar e-mail" não aprende tela nova.
+- "Esperar a confirmação de entrega" serve ao fluxo que depende do aviso chegar (por exemplo, abrir tarefa se o SMS
+  não chegou), sem travar os outros.
+- O WhatsApp só com modelo porque o fluxo inicia a conversa.
+
 ### 7.8 Mail Box do item (Fase 1)
 
 **Como funciona**
@@ -1004,7 +1162,7 @@ No workspace novo, o texto do próximo passo muda com o perfil:
 | "Novo e-mail" e compositor (7.2, 7.3) | Gaveta aberta de qualquer tela, contexto da tela, "De" e "Responder para", bloco "Item vinculado" com o item da tela de origem | Nada: o envio com item já existe |
 | Responder (7.5) | E-mail novo com "Re:", texto citado e aviso | Nada |
 | Mail Box em todo item e na tarefa (7.8, 7.9) | Aba em todo item; aba no painel da tarefa | Nada |
-| Central E-mails (7.7) | Entrada no menu; 4 abas que seguem a permissão de hoje; Mensagens, Modelos e Caixas de E-mail na tabela das telas novas do produto; aba Mensagens sobre a tela "Emails Recebidos", com os e-mails do sistema (filtro "Do sistema", coluna Status e "Reenviar e-mail"); estado inicial do workspace novo e do primeiro uso; aba Configurações; os 3 itens de Configurações › E-mails abrem as abas | As telas, os dados e as permissões já existem (pergunta 13). A lista única dos e-mails dos itens e do sistema pode pedir back (D24, pergunta 14) |
+| Central E-mails (7.7) | Entrada no menu; 4 abas que seguem a permissão de hoje; Mensagens, Modelos e Caixas de E-mail na tabela das telas novas do produto; aba Mensagens sobre a tela "Emails Recebidos", com os e-mails do sistema (filtro "Do sistema", coluna Status com os 5 valores, "Saiu por", "Motivo da falha", a origem no "Enviado por" e "Reenviar e-mail" também no Cancelado); estado inicial do workspace novo e do primeiro uso; aba Configurações; os 3 itens de Configurações › E-mails abrem as abas | As telas, os dados e as permissões já existem (pergunta 13). A lista única dos e-mails dos itens e do sistema pode pedir back (D24, pergunta 14) |
 
 ### Fase 2 · Remetente
 
@@ -1026,6 +1184,19 @@ No workspace novo, o texto do próximo passo muda com o perfil:
 | Vincular a tarefa (7.3) | Campo "Vincular a tarefa" no compositor | Guardar a tarefa no registro do e-mail |
 | Mail Box da tarefa (7.9) | Seletor "Desta tarefa" e "Do item" | Listar os e-mails por tarefa |
 | Coluna Tarefa na aba Mensagens (7.7) | Coluna, filtro e campo na leitura | O mesmo dado do vínculo |
+
+### Fase 4 · Comunicações
+
+| Ponto | Front | Back |
+|---|---|---|
+| Central "Comunicações" (7.10) | Nome e ícone; "Nova mensagem"; filtros por canal e "Não entregues"; colunas Canal e Entrega; leitura do SMS e do WhatsApp; "Histórico do envio" | Lista única com os 3 canais e a entrega |
+| Status de entrega do e-mail (7.10) | Coluna Entrega, motivo e código na leitura | C1: guardar o id da SendGrid e os campos de entrega; rota pública do Event Webhook, com verificação da assinatura |
+| Modelos de WhatsApp (7.10) | Alternador na aba Modelos; tabela com o status na Meta; "Novo modelo de WhatsApp" | Guardar o modelo (Content SID e variáveis) e o status da aprovação |
+| Canais de envio do workspace (7.10) | Seção na aba Configurações | Ler o número e o estado da integração |
+| "Enviar pelo ENSPACE" no painel "Enviar SMS" (7.10) | Botão e campo do número | C2 |
+| Nó "Enviar SMS" (7.11) | Nó, modal e cartão | C2: número de SMS na integração Twilio; envio sem o prefixo do WhatsApp; registro com status; o webhook de status já existe |
+| Nó "Enviar WhatsApp" (7.11) | Nó, modal, escolha do modelo e das variáveis | C3: o de C2 e o envio por modelo aprovado |
+| WhatsApp do atendimento na lista (7.10) | Linha e "Abrir a conversa no Atendimento" | Leitura das mensagens das conversas, com a permissão do atendente |
 
 ## 9. Perguntas para dev e produto
 
@@ -1074,6 +1245,16 @@ No workspace novo, o texto do próximo passo muda com o perfil:
     SMS e remetente cadastrado.
 19. **QR code:** qual biblioteca gera o código no navegador, sem serviço de fora?
 20. **iPhone:** o iOS aceita `sms:+<número>?body=<texto>`? Versões antigas liam `&body=`.
+21. **Entrega do e-mail (Fase 4):** o webhook da SendGrid (C1) ou a consulta à Email Activity API na
+    leitura? A consulta pede complemento pago e tem histórico curto.
+22. **Consentimento (Fase 4):** quem registra que o destinatário aceitou receber SMS e WhatsApp, e
+    onde fica o descadastro (responder "SAIR")?
+23. **Custo (Fase 4):** o SMS e o WhatsApp saem da conta Twilio do cliente ou da plataforma? A
+    central mostra o custo de cada envio?
+24. **WhatsApp do atendimento na central (Fase 4):** quem vê essas mensagens fora da Central de
+    Atendimento: só o atendente da conversa, o grupo dele, ou quem vê os e-mails do sistema?
+25. **Modelos de WhatsApp (Fase 4):** o modelo nasce no ENSPACE e vai para a aprovação pela Twilio,
+    ou nasce no painel da Twilio e o ENSPACE só lê?
 
 ## 10. O que o protótipo não faz
 
@@ -1102,7 +1283,7 @@ No workspace novo, o texto do próximo passo muda com o perfil:
 - Nas abas Modelos e Caixas de E-mail, "Novo modelo", "Nova caixa", "Editar", "Excluir" e o clique
   na linha mostram o aviso "Esta ação não tem efeito no protótipo.", como o "Abrir Integrações" de
   Configurações. "Usar em um e-mail" abre o compositor com o modelo.
-- Em Mensagens, "Reenviar e-mail" muda o status para "Em processamento". O protótipo lê os e-mails
+- Em Mensagens, "Reenviar e-mail" muda o status para "Na fila" e depois para "Em processamento". O protótipo lê os e-mails
   do sistema da mesma lista dos outros; no produto, são 2 listas (D24).
 - A referência do item aparece curta (ex.: CTR-00231) para leitura. No produto é o código de 32
   caracteres, e o endereço do item usa esse código.
@@ -1110,6 +1291,10 @@ No workspace novo, o texto do próximo passo muda com o perfil:
   biblioteca que gera o código do link (pergunta 19).
 - Os ícones são do conjunto lucide, o único instalado. O develop usa o conjunto solar; o dev usa o
   ícone do produto.
-- A barra de baixo troca a fase (1 · MVP, 2 · Remetente, 3 · Tarefa), o perfil (Admin, Membro), os
-  dados (Workspace novo, Primeiro uso, Em uso) e o cenário (Normal, Sem Outlook integrado, Envio
-  falha).
+- A barra de baixo troca a fase (1 · MVP, 2 · Remetente, 3 · Tarefa, 4 · Comunicações), o perfil
+  (Admin, Membro), os dados (Workspace novo, Primeiro uso, Em uso) e o cenário (Normal, Sem Outlook
+  integrado, Envio falha). Na Fase 4, o controle "Sem Twilio" mostra os nós com erro e a central sem
+  SMS e WhatsApp.
+- Na Fase 4, nenhum SMS ou WhatsApp sai: o "Enviar pelo ENSPACE" cria a linha na central e muda o
+  status e a entrega por tempo. O Spaceflow mostra 1 fluxo de exemplo; só os nós "Enviar SMS" e
+  "Enviar WhatsApp" abrem o modal, e os outros nós são a moldura do develop.

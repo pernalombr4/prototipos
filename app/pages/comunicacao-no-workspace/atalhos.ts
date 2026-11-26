@@ -200,6 +200,8 @@ export interface PedidoDeSms {
   nome: string | null
   telefone: string | null
   texto: string
+  /** Fase 4: o item de onde o painel abriu. O SMS enviado pelo ENSPACE fica registrado nele. */
+  itemId: number | null
 }
 
 /**
@@ -217,7 +219,8 @@ export interface PedidoDeSms {
  *    botão copia o texto e abre a conversa nova; a pessoa cola.
  * O ENSPACE não envia nem registra o SMS: quem envia é a pessoa, pelo plano do
  * celular dela. O envio pelo próprio ENSPACE pede um serviço de SMS pago e fica
- * fora destes épicos.
+ * fora destes épicos. Na Fase 4 (rodada 14), o painel ganha "Enviar pelo ENSPACE",
+ * pelo número do workspace na Twilio, que registra o SMS no item e na central.
  */
 export function useSms() {
   const t = useTextos(textos)
@@ -239,12 +242,13 @@ export function useSms() {
       nome: d?.nome ?? null,
       telefone: d?.telefone ?? null,
       texto: o.texto ?? textoPadrao(o.item, d),
+      itemId: o.item?.id ?? null,
     }
   }
 
   /** O link do formulário público: sem número, a pessoa escolhe para quem. */
   function abrirSmsSemNumero(texto: string) {
-    pedido.value = { nome: null, telefone: null, texto }
+    pedido.value = { nome: null, telefone: null, texto, itemId: null }
   }
 
   function fecharPainel() {

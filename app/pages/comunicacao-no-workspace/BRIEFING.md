@@ -368,6 +368,21 @@ Lido no código do develop em 2026-11-17, pela skill `investigar-codigo`. É o q
 | Dá para responder na mesma conversa? | Não: o "Responder" está comentado na tela |
 | Tarefa tem vínculo com e-mail? | Não |
 
+### 7.6.1 O envio do sistema, a Twilio e a SendGrid (rodada 14)
+
+Lido no código do develop em 2026-11-26, pela skill `investigar-codigo`, na pesquisa
+`pesquisa-de-mercado/runs/2026-11-26-twilio-sendgrid-na-central-de-comunicacao/RELATORIO.md`:
+
+| Pergunta | O que o código faz hoje |
+|---|---|
+| Que status o e-mail do sistema tem? | 5: Na fila, Em processamento, Enviado, Falhou e Cancelado. A tela de hoje mostra 3 |
+| "Enviado" quer dizer entregue? | Não: a SendGrid aceitou. O ENSPACE não guarda o id da mensagem nem recebe o Event Webhook |
+| O registro guarda o motivo da falha e a origem? | Sim: a mensagem de erro (por exemplo, "Quota de emails excedida") e a origem, inclusive Atendimento |
+| A Twilio envia SMS? | Não. A integração do workspace só fala WhatsApp, só na Central de Atendimento |
+| Algum nó do Spaceflow envia SMS ou WhatsApp? | Não |
+
+É o que separa as 5 melhorias da central (todas as fases, sem back novo) da Fase 4 (back C1, C2 e C3).
+
 ### 7.7 A tabela e o filtro das telas novas
 
 Lido no código do develop (tabela da tela de Logs de Auditoria e da tabela nova de itens), para a
@@ -426,6 +441,14 @@ com "99+" e o avatar.
   do topo: proposta (ver `DECISOES.md`);
 - os 3 itens de Configurações › E-mails abrem a aba correspondente da central (rodada 7). O
   rótulo e a posição no menu continuam os de hoje; muda só o destino.
+
+**O que entra na casca na Fase 4 (rodada 14) e não é cópia:**
+
+- a entrada do menu passa a "Comunicações", com o ícone de conversas;
+- Estrutura › Spaceflow abre o fluxo de exemplo da proposta (`_TelaSpaceflow.vue`). A moldura do
+  editor (barra do fluxo, abas, canvas, cartões dos nós, controles de zoom, paleta e o modal de
+  configuração) é cópia do protótipo `no-de-atraso`, que a copiou do develop; o comentário do topo
+  do arquivo diz a origem. São proposta só os nós "Enviar SMS" e "Enviar WhatsApp" e o modal deles.
 
 **Permissões das telas de e-mail (lido no código do develop em 24/11/2026):** Modelos de E-mail,
 Caixas de E-mail e E-mails Enviados têm, cada uma, uma permissão de leitura própria nas

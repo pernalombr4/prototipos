@@ -17,10 +17,16 @@
  *
  * Lido no código do develop em 24/11/2026. Hoje as 3 telas usam a tabela
  * antiga; aqui elas ganham a tabela nova, como as outras telas do protótipo.
+ *
+ * Fase 4 (rodada 14): Modelos ganha os modelos de WhatsApp aprovados pela Meta
+ * (nome, idioma, categoria, status na Meta), e Configurações ganha "Canais de
+ * envio do workspace": o e-mail do sistema (SendGrid), o SMS e o WhatsApp
+ * (Twilio), cada um com o estado da integração.
  */
 import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
 import type { Textos } from './textos'
-import { type CaixaDeEmail, type ModeloDeEmail, DOMINIO_DAS_CAIXAS, EU } from './mocks'
+import { type CaixaDeEmail, type ModeloDeEmail, type ModeloDeWhatsApp, DOMINIO_DA_EMPRESA, DOMINIO_DAS_CAIXAS, EU, NUMERO_SMS_DO_WORKSPACE, NUMERO_WHATSAPP_DO_WORKSPACE, modelosDeWhatsApp, variaveisDoModelo } from './mocks'
+import { textosDeCanais } from './textosDeCanais'
 import { type AbaDaCentral, useComunicacao, useMarcaDeProposta } from './estado'
 import { useAppExterno } from './simulador'
 import TabelaDoEnspace from './_TabelaDoEnspace.vue'
@@ -28,7 +34,9 @@ import Paginador from './_Paginador.vue'
 
 const props = defineProps<{ t: Textos, aba: Exclude<AbaDaCentral, 'mensagens'> }>()
 
-const { fase, ehAdmin, outlookIntegrado, caixasNoDe, ir, abrirCompositor, modelosDoWorkspace, caixasDoWorkspace } = useComunicacao()
+const { fase, ehAdmin, outlookIntegrado, caixasNoDe, ir, abrirCompositor, modelosDoWorkspace, caixasDoWorkspace, twilioLigado, dados } = useComunicacao()
+const tk = useTextos(textosDeCanais)
+const todosOsCanais = computed(() => fase.value >= 4)
 const { abrirApp } = useAppExterno()
 const marca = useMarcaDeProposta()
 const toast = useToast()
@@ -72,6 +80,41 @@ function acoesDoModelo(m: ModeloDeEmail): DropdownMenuItem[][] {
   ]
 }
 
+/* ---------- Fase 4: modelos de WhatsApp ---------- */
+
+const tipoDeModelo = ref<'email' | 'whatsapp'>('email')
+watch(todosOsCanais, (v) => { if (!v) tipoDeModelo.value = 'email' })
+watch(tipoDeModelo, () => { busca.value = ''; pagina.value = 1 })
+const opcoesDeTipoDeModelo = computed(() => [
+  { value: 'email', label: tk.value.modelosDeEmail, icon: 'i-lucide-mail' },
+  { value: 'whatsapp', label: tk.value.modelosDeWhatsApp, icon: 'i-simple-icons-whatsapp' },
+])
+const modelosWhatsAppDoWorkspace = computed(() => dados.value === 'novo' || !twilioLigado.value ? [] : modelosDeWhatsApp)
+const modelosWhatsAppFiltrados = computed(() => daBusca(modelosWhatsAppDoWorkspace.value, ['nome', 'corpo']))
+const colunasDeModelosWhatsApp = computed<TableColumn<ModeloDeWhatsApp>[]>(() => [
+  { accessorKey: 'nome', header: tk.value.colModelo.nome },
+  { accessorKey: 'corpo', header: tk.value.previaDoModelo },
+  { id: 'categoria', header: tk.value.colModelo.categoria, meta: { style: { th: { width: '130px' }, td: { width: '130px' } } } },
+  { accessorKey: 'idioma', header: tk.value.colModelo.idioma, meta: { style: { th: { width: '100px' }, td: { width: '100px' } } } },
+  { id: 'variaveis', header: tk.value.colModelo.variaveis, meta: { style: { th: { width: '110px' }, td: { width: '110px' } } } },
+  { id: 'statusMeta', header: tk.value.colModelo.statusMeta, meta: { style: { th: { width: '150px' }, td: { width: '150px' } } } },
+])
+const COR_DO_STATUS_META = { aprovado: 'success', emAnalise: 'warning', recusado: 'error' } as const
+const ICONE_DO_STATUS_META = { aprovado: 'i-lucide-badge-check', emAnalise: 'i-lucide-hourglass', recusado: 'i-lucide-circle-x' } as const
+function novoModeloWhatsApp() {
+  toast.add({ title: tk.value.novoModeloWhatsApp, description: tk.value.modeloEnviadoParaAprovacao, icon: 'i-lucide-info', color: 'neutral' })
+}
+function acoesDoModeloWhatsApp(m: ModeloDeWhatsApp): DropdownMenuItem[][] {
+  return [
+    [
+      { label: tk.value.usarNoFluxo, icon: 'i-lucide-git-fork', disabled: m.status !== 'aprovado', onSelect: () => ir('spaceflow') },
+      { label: tc.value.editar, icon: 'i-lucide-pencil', onSelect: maquete },
+    ],
+    [{ label: tc.value.excluir, icon: 'i-lucide-trash-2', color: 'error', onSelect: maquete }],
+  ]
+}
+const modelosAprovados = computed(() => modelosWhatsAppDoWorkspace.value.filter(m => m.status === 'aprovado').length)
+
 /* ---------- Caixas ---------- */
 
 const caixasFiltradas = computed(() => daBusca(caixasDoWorkspace.value, ['nome', 'email']))
@@ -100,6 +143,17 @@ async function salvar() {
   toast.add({ title: tc.value.config.salvo, icon: 'i-lucide-check', color: 'success' })
 }
 
+/** Fase 4: os 3 canais do workspace e o estado de cada integração. */
+const canais = computed(() => [
+  { chave: 'email', icone: 'i-lucide-mail', titulo: tk.value.canalEmail, descricao: tk.value.canalEmailDescricao, ligado: true, status: tk.value.canalEmailStatus(DOMINIO_DA_EMPRESA) },
+  { chave: 'sms', icone: 'i-lucide-message-square-text', titulo: tk.value.canalSms, descricao: tk.value.canalSmsDescricao, ligado: twilioLigado.value, status: twilioLigado.value ? tk.value.canalSmsStatus(NUMERO_SMS_DO_WORKSPACE) : tk.value.spaceflow.semIntegracao },
+  { chave: 'whatsapp', icone: 'i-simple-icons-whatsapp', titulo: tk.value.canalWhatsApp, descricao: tk.value.canalWhatsAppDescricao, ligado: twilioLigado.value, status: twilioLigado.value ? tk.value.canalWhatsAppStatus(NUMERO_WHATSAPP_DO_WORKSPACE, modelosAprovados.value) : tk.value.spaceflow.semIntegracao },
+])
+function verModelosWhatsApp() {
+  tipoDeModelo.value = 'whatsapp'
+  ir('emails', { central: 'modelos' })
+}
+
 function integrar() {
   abrirApp({ tipo: 'outlook', url: 'https://app.enspace.io/profile?tab=integrations' })
 }
@@ -110,21 +164,81 @@ function integrar() {
     <!-- ===== Modelos e Caixas: barra, tabela e paginador do develop ===== -->
     <div v-if="aba === 'modelos' || aba === 'caixas'" class="flex min-h-0 flex-col">
       <div class="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-default px-3 py-2 sm:px-4">
+        <!-- PROPOSTA (Fase 4): os modelos de e-mail e os de WhatsApp -->
+        <UTabs
+          v-if="aba === 'modelos' && todosOsCanais"
+          v-model="tipoDeModelo"
+          :items="opcoesDeTipoDeModelo"
+          :content="false"
+          variant="pill"
+          size="xs"
+          :class="marca"
+        />
         <UInput
           v-model="busca"
-          :placeholder="aba === 'modelos' ? tc.pesquisarModelos : tc.pesquisarCaixas"
+          :placeholder="aba === 'modelos' ? (tipoDeModelo === 'whatsapp' ? tk.pesquisarModelosWhatsApp : tc.pesquisarModelos) : tc.pesquisarCaixas"
           icon="i-lucide-search"
           size="sm"
           variant="soft"
           class="w-56"
-          :aria-label="aba === 'modelos' ? tc.pesquisarModelos : tc.pesquisarCaixas"
+          :aria-label="aba === 'modelos' ? (tipoDeModelo === 'whatsapp' ? tk.pesquisarModelosWhatsApp : tc.pesquisarModelos) : tc.pesquisarCaixas"
         />
-        <UButton :label="aba === 'modelos' ? tc.novoModelo : tc.novaCaixa" icon="i-lucide-plus" size="sm" class="ml-auto" @click="maquete" />
+        <UButton
+          v-if="aba === 'modelos' && tipoDeModelo === 'whatsapp'"
+          :label="tk.novoModeloWhatsApp"
+          icon="i-lucide-plus"
+          size="sm"
+          class="ml-auto"
+          :disabled="!twilioLigado"
+          @click="novoModeloWhatsApp"
+        />
+        <UButton v-else :label="aba === 'modelos' ? tc.novoModelo : tc.novaCaixa" icon="i-lucide-plus" size="sm" class="ml-auto" @click="maquete" />
       </div>
 
       <div class="min-h-0 flex-1 overflow-auto">
+        <!-- Fase 4: modelos de WhatsApp -->
         <TabelaDoEnspace
-          v-if="aba === 'modelos'"
+          v-if="aba === 'modelos' && tipoDeModelo === 'whatsapp'"
+          :data="daPagina(modelosWhatsAppFiltrados)"
+          :columns="colunasDeModelosWhatsApp"
+          :acoes="acoesDoModeloWhatsApp"
+          :rotulo-acoes="tc.col.acoes"
+          :get-row-id="(m: ModeloDeWhatsApp) => m.id"
+          @select="maquete"
+        >
+          <template #nome-cell="{ row }">
+            <span class="block truncate font-mono text-xs text-highlighted" :title="row.original.nome">{{ row.original.nome }}</span>
+          </template>
+          <template #corpo-cell="{ row }">
+            <span class="block truncate text-default" :title="row.original.corpo">{{ row.original.corpo }}</span>
+          </template>
+          <template #categoria-cell="{ row }">
+            <span class="text-default">{{ tk.categoriaMeta[row.original.categoria] }}</span>
+          </template>
+          <template #idioma-cell="{ row }">
+            <span class="font-mono text-xs text-muted">{{ row.original.idioma }}</span>
+          </template>
+          <template #variaveis-cell="{ row }">
+            <span class="tabular-nums text-default">{{ variaveisDoModelo(row.original) }}</span>
+          </template>
+          <template #statusMeta-cell="{ row }">
+            <UBadge :label="tk.statusMeta[row.original.status]" :icon="ICONE_DO_STATUS_META[row.original.status]" :color="COR_DO_STATUS_META[row.original.status]" variant="subtle" size="sm" />
+          </template>
+          <template #empty>
+            <UEmpty
+              variant="naked"
+              icon="i-simple-icons-whatsapp"
+              :title="twilioLigado ? tk.semModelosWhatsAppTitulo : tk.spaceflow.modal.semIntegracaoTitulo"
+              :description="twilioLigado ? tk.semModelosWhatsAppDescricao : tk.spaceflow.modal.semIntegracaoDescricao"
+              :actions="twilioLigado ? [{ label: tk.novoModeloWhatsApp, icon: 'i-lucide-plus', onClick: novoModeloWhatsApp }] : [{ label: tk.abrirIntegracoes, icon: 'i-lucide-blocks', color: 'neutral', variant: 'outline', onClick: maquete }]"
+              class="py-12"
+              :class="marca"
+            />
+          </template>
+        </TabelaDoEnspace>
+
+        <TabelaDoEnspace
+          v-else-if="aba === 'modelos'"
           :data="daPagina(modelosFiltrados)"
           :columns="colunasDeModelos"
           :acoes="acoesDoModelo"
@@ -204,7 +318,7 @@ function integrar() {
         v-model:pagina="pagina"
         v-model:por-pagina="porPagina"
         :t="t"
-        :total="aba === 'modelos' ? modelosFiltrados.length : caixasFiltradas.length"
+        :total="aba === 'modelos' ? (tipoDeModelo === 'whatsapp' ? modelosWhatsAppFiltrados.length : modelosFiltrados.length) : caixasFiltradas.length"
       />
     </div>
 
@@ -313,10 +427,11 @@ function integrar() {
             </UFormField>
           </template>
 
-          <USeparator />
+          <USeparator v-if="!todosOsCanais" />
 
-          <!-- O domínio de envio (integração SendGrid de hoje) -->
+          <!-- O domínio de envio (integração SendGrid de hoje). Na Fase 4, vai para "Canais de envio". -->
           <UFormField
+            v-if="!todosOsCanais"
             :description="tc.config.dominioDescricao"
             class="flex items-start justify-between gap-4 max-sm:flex-col"
             :ui="{ wrapper: 'max-w-2xl', description: 'ps-6', container: 'shrink-0' }"
@@ -326,6 +441,36 @@ function integrar() {
             </template>
             <UButton :label="tc.config.abrirIntegracoes" icon="i-lucide-blocks" color="neutral" variant="outline" size="sm" @click="maquete" />
           </UFormField>
+        </UPageCard>
+      </section>
+
+      <!-- PROPOSTA (Fase 4): os canais por onde o ENSPACE envia -->
+      <section v-if="ehAdmin && todosOsCanais" :class="marca">
+        <UPageCard :description="tk.canaisDescricao" variant="naked" orientation="horizontal" class="mb-4" :ui="{ description: 'ps-6' }">
+          <template #title>
+            <span class="flex items-center gap-2"><UIcon name="i-lucide-radio-tower" class="size-4 shrink-0 text-muted" />{{ tk.canaisTitulo }}</span>
+          </template>
+        </UPageCard>
+        <UPageCard variant="subtle" :ui="{ container: 'p-4 sm:p-6 gap-y-4' }">
+          <template v-for="(c, i) in canais" :key="c.chave">
+            <USeparator v-if="i > 0" />
+            <UFormField
+              class="flex items-start justify-between gap-4 max-sm:flex-col"
+              :ui="{ wrapper: 'max-w-2xl', description: 'mt-1 ps-6', container: 'flex shrink-0 gap-2' }"
+            >
+              <template #label>
+                <span class="flex items-center gap-2 text-base font-semibold text-highlighted"><UIcon :name="c.icone" class="size-4 shrink-0 text-muted" />{{ c.titulo }}</span>
+              </template>
+              <template #description>
+                <span class="block">{{ c.descricao }}</span>
+                <span class="mt-1.5 flex items-center gap-1.5 text-sm" :class="c.ligado ? 'text-success' : 'text-warning'">
+                  <UIcon :name="c.ligado ? 'i-lucide-circle-check' : 'i-lucide-circle-alert'" class="size-4 shrink-0" />{{ c.status }}
+                </span>
+              </template>
+              <UButton v-if="c.chave === 'whatsapp' && c.ligado" :label="tk.abrirModelos" icon="i-lucide-file-text" color="neutral" variant="outline" size="sm" @click="verModelosWhatsApp" />
+              <UButton :label="tk.abrirIntegracoes" icon="i-lucide-blocks" color="neutral" variant="outline" size="sm" @click="maquete" />
+            </UFormField>
+          </template>
         </UPageCard>
       </section>
     </div>

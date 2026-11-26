@@ -12,6 +12,7 @@
  *   o SMS continua fora do plano).
  */
 import type { Field, Item, ItemType, Member, Task, Workspace } from '@be-enlighten/enspace-sdk-schemas'
+import type { Canal, Entrega, OrigemDoEnvio, StatusDoEnvio } from './textosDeCanais'
 
 /* ------------------------------------------------------------------ *
  * Datas: o protótipo vive em segunda, 05/10/2026.
@@ -583,14 +584,44 @@ export interface Email {
   /** Fase 3: a tarefa vinculada. Hoje o e-mail guarda só a referência do item. */
   tarefaId?: number | null
   /** O registro só existe a partir desta fase (e-mail sem item, e-mail saído de caixa). */
-  desdeFase?: 2 | 3
+  desdeFase?: 2 | 3 | 4
   /**
    * Enviado pelo sistema, por tarefa ou fluxo: o que hoje fica em Configurações ›
    * E-mails › E-mails Enviados (`sendmails`, lido no develop em 24/11/2026), com
    * o status do envio e "Reenviar E-mail". Desde a rodada 8 entra na aba
    * Mensagens, só para quem tem a permissão de ver os enviados.
    */
-  sistema?: { status: 'enviado' | 'processando' | 'falhou', tarefa: string | null }
+  sistema?: EnvioDoSistema
+  /** Fase 4: o canal. Sem valor, e-mail. SMS e WhatsApp só existem enviados pelo sistema, pela Twilio. */
+  canal?: Canal
+  /** Fase 4, WhatsApp: o modelo aprovado pela Meta que o envio usou. */
+  modeloWhatsApp?: string
+}
+
+/**
+ * O envio do sistema. Os 5 status e o motivo da falha existem hoje no registro do envio
+ * (`sendmail.settings.json`, lido no develop em 26/11/2026); a tela mostra 3 status e nenhum motivo.
+ */
+export interface EnvioDoSistema {
+  status: StatusDoEnvio
+  tarefa: string | null
+  /** De onde saiu. Sem valor: Tarefa, quando há tarefa; senão, Spaceflow. */
+  origem?: OrigemDoEnvio
+  /** O fluxo e o nó que enviaram (origem Spaceflow). */
+  fluxo?: { nome: string, no: string }
+  /**
+   * Por onde saiu. E-mail: o remetente padrão da plataforma ou o remetente com o domínio da
+   * empresa, os 2 pela SendGrid. Fase 4: o número de SMS ou de WhatsApp do workspace, pela Twilio.
+   */
+  saiuPor: 'enspace' | 'dominio' | 'twilioSms' | 'twilioWhatsApp'
+  /** O motivo da falha, como o envio grava hoje. */
+  erro?: string
+  /** Fase 4: o código de erro do provedor (Twilio ou SendGrid). */
+  erroCodigo?: string
+  /** Fase 4: o que aconteceu depois de o provedor aceitar (Event Webhook da SendGrid, status da Twilio). */
+  entrega?: Entrega
+  /** Fase 4: o motivo da entrega que não aconteceu. */
+  motivoEntrega?: string
 }
 
 function email(e: Omit<Email, 'cc' | 'anexos' | 'lido'> & Partial<Pick<Email, 'cc' | 'anexos' | 'lido'>>): Email {
@@ -599,6 +630,39 @@ function email(e: Omit<Email, 'cc' | 'anexos' | 'lido'> & Partial<Pick<Email, 'c
 
 /** O remetente dos e-mails que tarefas e fluxos enviam (inventado). */
 export const REMETENTE_DO_SISTEMA = 'notificacoes@example.com'
+/** Fase 4: o domínio autenticado na SendGrid e os números do workspace na Twilio (inventados). */
+export const DOMINIO_DA_EMPRESA = 'example.com'
+export const NUMERO_SMS_DO_WORKSPACE = '+55 11 93000-1234'
+export const NUMERO_WHATSAPP_DO_WORKSPACE = '+55 11 93000-5678'
+
+/**
+ * Fase 4: modelo de WhatsApp aprovado pela Meta (Content API da Twilio). Fora de uma conversa
+ * aberta pelo contato nas últimas 24 horas, o WhatsApp só aceita modelo aprovado.
+ */
+export interface ModeloDeWhatsApp {
+  id: string
+  /** O nome na Meta: minúsculas e sublinhado. */
+  nome: string
+  idioma: string
+  categoria: 'utilidade' | 'marketing'
+  status: 'aprovado' | 'emAnalise' | 'recusado'
+  /** O texto, com {{1}}, {{2}}... no lugar das variáveis. */
+  corpo: string
+}
+
+export const modelosDeWhatsApp: ModeloDeWhatsApp[] = [
+  { id: 'w-vencimento', nome: 'lembrete_vencimento', idioma: 'pt_BR', categoria: 'utilidade', status: 'aprovado', corpo: 'Olá, {{1}}. O contrato {{2}} vence em {{3}}. Fale com o jurídico para combinar a renovação.' },
+  { id: 'w-assinatura', nome: 'documento_para_assinatura', idioma: 'pt_BR', categoria: 'utilidade', status: 'aprovado', corpo: 'Olá, {{1}}. O documento {{2}} está pronto para assinatura no link enviado por e-mail.' },
+  { id: 'w-pesquisa', nome: 'pesquisa_de_satisfacao', idioma: 'pt_BR', categoria: 'utilidade', status: 'emAnalise', corpo: 'Olá, {{1}}. Como foi o atendimento do chamado {{2}}? Responda com uma nota de 1 a 5.' },
+  { id: 'w-novidades', nome: 'novidades_do_mes', idioma: 'pt_BR', categoria: 'marketing', status: 'recusado', corpo: 'Olá, {{1}}. Conheça as novidades deste mês no nosso site.' },
+]
+
+/** Quantas variáveis o modelo de WhatsApp tem. */
+export function variaveisDoModelo(m: ModeloDeWhatsApp) {
+  return new Set(m.corpo.match(/\{\{\d+\}\}/g) ?? []).size
+}
+
+const FLUXO_DE_VENCIMENTO = 'Lembrete de vencimento do contrato'
 
 const ctr231 = itens.find(i => i.reference === 'CTR-00231')!
 const ctr230 = itens.find(i => i.reference === 'CTR-00230')!
@@ -620,10 +684,22 @@ export const emails: Email[] = [
   email({ id: 8, direcao: 'enviado', de: 'ana.ribeiro@example.com', para: ['fornecedor.novo@example.com'], assunto: 'Cadastro de fornecedor', corpo: '<p>Segue o link do formulário de cadastro.</p>', data: dia(1, '15:00'), caixa: 'ana.ribeiro@example.com', itemId: null, autor: 1, desdeFase: 2 }),
   // Fase 2: enviado pela caixa do workspace, com item.
   // Enviados pelo sistema (tarefa ou fluxo). Existem hoje, fora da tela de e-mails.
-  email({ id: 21, direcao: 'enviado', de: REMETENTE_DO_SISTEMA, para: ['marina.alves@example.com'], assunto: 'CTR-00231 · Documento para assinatura', corpo: '<p>Olá,</p><p>Segue o documento para assinatura.</p>', data: dia(5, '08:02'), caixa: enderecoDoItem(ctr231), itemId: ctr231.id, sistema: { status: 'enviado', tarefa: 'T-1042' } }),
-  email({ id: 22, direcao: 'enviado', de: REMETENTE_DO_SISTEMA, para: ['juliana.freitas@example.com'], cc: ['financeiro@example.com'], assunto: 'CTR-00229 · Vencimento próximo', corpo: '<p>Olá,</p><p>O contrato vence nos próximos dias.</p>', data: dia(4, '17:45'), caixa: enderecoDoItem(ctr229), itemId: ctr229.id, sistema: { status: 'falhou', tarefa: 'T-1047' } }),
-  email({ id: 23, direcao: 'enviado', de: REMETENTE_DO_SISTEMA, para: ['lucas.almeida@example.com'], assunto: 'SOL-00088 · Solicitação recebida', corpo: '<p>Recebemos a sua solicitação. O número de acompanhamento é SOL-00088.</p>', data: dia(4, '10:10'), caixa: enderecoDoItem(sol88), itemId: sol88.id, sistema: { status: 'enviado', tarefa: null } }),
-  email({ id: 24, direcao: 'enviado', de: REMETENTE_DO_SISTEMA, para: ['caio.fernandes@example.com'], assunto: 'CTR-00223 · Visita técnica confirmada', corpo: '<p>A visita técnica está confirmada para o dia 8, às 14h.</p>', data: dia(5, '09:28'), caixa: enderecoDoItem(ctr223), itemId: ctr223.id, sistema: { status: 'processando', tarefa: null } }),
+  email({ id: 21, direcao: 'enviado', de: REMETENTE_DO_SISTEMA, para: ['marina.alves@example.com'], assunto: 'CTR-00231 · Documento para assinatura', corpo: '<p>Olá,</p><p>Segue o documento para assinatura.</p>', data: dia(5, '08:02'), caixa: enderecoDoItem(ctr231), itemId: ctr231.id, sistema: { status: 'enviado', tarefa: 'T-1042', saiuPor: 'dominio', entrega: 'entregue' } }),
+  email({ id: 22, direcao: 'enviado', de: REMETENTE_DO_SISTEMA, para: ['juliana.freitas@example.com'], cc: ['financeiro@example.com'], assunto: 'CTR-00229 · Vencimento próximo', corpo: '<p>Olá,</p><p>O contrato vence nos próximos dias.</p>', data: dia(4, '17:45'), caixa: enderecoDoItem(ctr229), itemId: ctr229.id, sistema: { status: 'falhou', tarefa: 'T-1047', saiuPor: 'dominio', erro: 'Quota de emails excedida' } }),
+  email({ id: 23, direcao: 'enviado', de: REMETENTE_DO_SISTEMA, para: ['lucas.almeida@example.com'], assunto: 'SOL-00088 · Solicitação recebida', corpo: '<p>Recebemos a sua solicitação. O número de acompanhamento é SOL-00088.</p>', data: dia(4, '10:10'), caixa: enderecoDoItem(sol88), itemId: sol88.id, sistema: { status: 'enviado', tarefa: null, fluxo: { nome: 'Abertura de solicitação', no: 'Enviar E-mail' }, saiuPor: 'enspace', entrega: 'entregue' } }),
+  email({ id: 24, direcao: 'enviado', de: REMETENTE_DO_SISTEMA, para: ['caio.fernandes@example.com'], assunto: 'CTR-00223 · Visita técnica confirmada', corpo: '<p>A visita técnica está confirmada para o dia 8, às 14h.</p>', data: dia(5, '09:28'), caixa: enderecoDoItem(ctr223), itemId: ctr223.id, sistema: { status: 'processando', tarefa: null, fluxo: { nome: 'Agendamento de visita', no: 'Enviar E-mail' }, saiuPor: 'dominio' } }),
+  // Rodada 14: os outros status de hoje (Na fila, Cancelado), a origem Atendimento e um e-mail que a SendGrid aceitou e o
+  // destinatário devolveu (até a Fase 3 aparece como "Enviado ao provedor"; na Fase 4, como "Devolvido").
+  email({ id: 25, direcao: 'enviado', de: REMETENTE_DO_SISTEMA, para: ['rafael.monteiro@example.com'], assunto: 'CTR-00230 · Licenças confirmadas', corpo: '<p>Olá,</p><p>Confirmamos a quantidade de licenças. A nota segue em seguida.</p>', data: dia(5, '09:29'), caixa: enderecoDoItem(ctr230), itemId: ctr230.id, sistema: { status: 'naFila', tarefa: null, fluxo: { nome: 'Confirmação de pedido', no: 'Enviar E-mail' }, saiuPor: 'dominio' } }),
+  email({ id: 26, direcao: 'enviado', de: REMETENTE_DO_SISTEMA, para: ['juliana.freitas@example.com'], assunto: 'CTR-00229 · Proposta de reajuste', corpo: '<p>Olá,</p><p>Segue a proposta de reajuste para este ano.</p>', data: dia(3, '15:10'), caixa: enderecoDoItem(ctr229), itemId: ctr229.id, sistema: { status: 'cancelado', tarefa: 'T-1047', saiuPor: 'dominio' } }),
+  email({ id: 27, direcao: 'enviado', de: caixas[0]!.email, para: ['natalia.couto@example.com'], assunto: 'Chamado 482 · Recebemos o seu pedido', corpo: '<p>Olá, Natália.</p><p>Recebemos o seu pedido de acesso. A equipe responde em até 1 dia útil.</p>', data: dia(4, '17:04'), caixa: enderecoDoItem(sol87), itemId: sol87.id, sistema: { status: 'enviado', tarefa: null, origem: 'atendimento', saiuPor: 'dominio', entrega: 'entregue' } }),
+  email({ id: 28, direcao: 'enviado', de: REMETENTE_DO_SISTEMA, para: ['r.monteiro@example.com'], assunto: 'CTR-00230 · Vencimento próximo', corpo: '<p>Olá,</p><p>O contrato vence nos próximos dias. Podemos conversar sobre a renovação?</p>', data: dia(2, '09:00'), caixa: enderecoDoItem(ctr230), itemId: ctr230.id, sistema: { status: 'enviado', tarefa: null, fluxo: { nome: FLUXO_DE_VENCIMENTO, no: 'Enviar E-mail' }, saiuPor: 'dominio', entrega: 'devolvido', erroCodigo: '550 5.1.1', motivoEntrega: 'A caixa de e-mail do destinatário não existe.' } }),
+  // Fase 4: SMS e WhatsApp enviados pelo sistema, pela Twilio do workspace (nós Enviar SMS e Enviar WhatsApp; Central de Atendimento).
+  email({ id: 31, direcao: 'enviado', canal: 'sms', de: NUMERO_SMS_DO_WORKSPACE, para: ['+55 11 98877-1020'], assunto: 'Olá, Caio. O contrato CTR-00223 vence em 15 dias. Fale com o jurídico para combinar a renovação.', corpo: '<p>Olá, Caio. O contrato CTR-00223 vence em 15 dias. Fale com o jurídico para combinar a renovação.</p>', data: dia(5, '09:00'), caixa: enderecoDoItem(ctr223), itemId: ctr223.id, desdeFase: 4, sistema: { status: 'enviado', tarefa: null, fluxo: { nome: FLUXO_DE_VENCIMENTO, no: 'Enviar SMS' }, saiuPor: 'twilioSms', entrega: 'entregue' } }),
+  email({ id: 32, direcao: 'enviado', canal: 'whatsapp', modeloWhatsApp: 'lembrete_vencimento', de: NUMERO_WHATSAPP_DO_WORKSPACE, para: ['+55 11 98877-1020'], assunto: 'Olá, Caio. O contrato CTR-00223 vence em 20/10/2026. Fale com o jurídico para combinar a renovação.', corpo: '<p>Olá, Caio. O contrato CTR-00223 vence em 20/10/2026. Fale com o jurídico para combinar a renovação.</p>', data: dia(5, '09:01'), caixa: enderecoDoItem(ctr223), itemId: ctr223.id, desdeFase: 4, sistema: { status: 'enviado', tarefa: null, fluxo: { nome: FLUXO_DE_VENCIMENTO, no: 'Enviar WhatsApp' }, saiuPor: 'twilioWhatsApp', entrega: 'lido' } }),
+  email({ id: 33, direcao: 'enviado', canal: 'sms', de: NUMERO_SMS_DO_WORKSPACE, para: ['+55 21 99812-0043'], assunto: 'Olá, Juliana. O contrato CTR-00229 vence em 15 dias. Fale com o jurídico para combinar a renovação.', corpo: '<p>Olá, Juliana. O contrato CTR-00229 vence em 15 dias. Fale com o jurídico para combinar a renovação.</p>', data: dia(4, '17:46'), caixa: enderecoDoItem(ctr229), itemId: ctr229.id, desdeFase: 4, sistema: { status: 'enviado', tarefa: null, fluxo: { nome: FLUXO_DE_VENCIMENTO, no: 'Enviar SMS' }, saiuPor: 'twilioSms', entrega: 'naoEntregue', erroCodigo: '30003', motivoEntrega: 'O celular do destinatário está desligado ou fora da área de cobertura.' } }),
+  email({ id: 34, direcao: 'enviado', canal: 'whatsapp', modeloWhatsApp: 'documento_para_assinatura', de: NUMERO_WHATSAPP_DO_WORKSPACE, para: ['+55 11 3221-4400'], assunto: 'Olá, Marina. O documento CTR-00231 está pronto para assinatura no link enviado por e-mail.', corpo: '<p>Olá, Marina. O documento CTR-00231 está pronto para assinatura no link enviado por e-mail.</p>', data: dia(5, '08:03'), caixa: enderecoDoItem(ctr231), itemId: ctr231.id, desdeFase: 4, sistema: { status: 'falhou', tarefa: 'T-1042', saiuPor: 'twilioWhatsApp', erroCodigo: '63003', erro: 'O número do destinatário não tem WhatsApp.' } }),
+  email({ id: 35, direcao: 'enviado', canal: 'whatsapp', de: NUMERO_WHATSAPP_DO_WORKSPACE, para: ['+55 11 97654-3210'], assunto: 'Olá, Natália. O acesso de leitura da equipe de RH foi liberado. Posso ajudar em mais alguma coisa?', corpo: '<p>Olá, Natália. O acesso de leitura da equipe de RH foi liberado. Posso ajudar em mais alguma coisa?</p>', data: dia(5, '08:42'), caixa: enderecoDoItem(sol87), itemId: sol87.id, desdeFase: 4, sistema: { status: 'enviado', tarefa: null, origem: 'atendimento', saiuPor: 'twilioWhatsApp', entrega: 'entregue' } }),
   email({ id: 13, direcao: 'enviado', de: caixas[0]!.email, para: ['natalia.couto@example.com'], assunto: 'Re: Acesso ao sistema de contratos', corpo: '<p>Natália, o acesso de leitura foi liberado para a equipe de RH.</p>', data: dia(5, '08:40'), caixa: enderecoDoItem(sol87), itemId: sol87.id, autor: 5, desdeFase: 2 }),
 ]
 

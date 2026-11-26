@@ -7,13 +7,15 @@ botão de E-mail (motivo no `BRIEFING.md`, seção 4). Os canais são **e-mail, 
 últimos saíram na rodada 6; o WhatsApp voltou na 10, pelo link do próprio WhatsApp, e o SMS na 11,
 pelo painel "Enviar SMS", que junta os caminhos para enviar do celular da pessoa.
 
-**O protótipo se divide em 3 fases**, escolhidas no controle "Fase" da barra de baixo:
+**O protótipo se divide em 4 fases**, escolhidas no controle "Fase" da barra de baixo. A Fase 4 é o
+destino: a central vira "Comunicações" e guarda o e-mail, o SMS e o WhatsApp que o ENSPACE envia.
 
 | Fase | O que entra | Base |
 |---|---|---|
-| 1 · MVP | Atalhos e telas que só usam o que o produto já tem, sem back-end novo: botão E-mail nas telas de uso (o contato vem dos campos de e-mail do item), "Novo e-mail" no topo, Mail Box na tarefa (a do item dela), link do formulário público, a central E-mails com as telas de e-mail de hoje em abas | Lido no código do develop: o envio sai do Outlook da pessoa e só fica registrado com item |
+| 1 · MVP | Atalhos e telas que só usam o que o produto já tem, sem back-end novo: botão E-mail nas telas de uso (o contato vem dos campos de e-mail do item), "Novo e-mail" no topo, Mail Box na tarefa (a do item dela), link do formulário público, a central E-mails com as telas de e-mail de hoje em abas e as 5 melhorias da rodada 14 (coluna "Saiu por", os 5 status, o motivo da falha, a origem no "Enviado por" e o Reenviar no Cancelado) | Lido no código do develop: o envio sai do Outlook da pessoa e só fica registrado com item; os 5 status, o motivo e a origem já estão no registro do envio |
 | 2 · Remetente | Escolher o "De" (Outlook ou caixa do workspace) e quais caixas entram nele, responder na mesma conversa, encaminhar, registrar e-mail sem item e vincular depois; o contato por categoria, a busca de item entre categorias e a lista de mensagens por pessoa | Funcionalidade nova, com back-end |
 | 3 · Tarefa | Vincular o e-mail a uma tarefa e a Mail Box própria da tarefa ("Desta tarefa" e "Do item") | Funcionalidade nova |
+| 4 · Comunicações | A central "Comunicações", com o e-mail, o SMS e o WhatsApp que o ENSPACE envia: filtro por canal, coluna Entrega e filtro "Não entregues"; os nós "Enviar SMS" e "Enviar WhatsApp" no Spaceflow; os modelos de WhatsApp aprovados pela Meta; "Enviar pelo ENSPACE" no painel "Enviar SMS"; a seção "Canais de envio do workspace" | Back novo: status de entrega pelo webhook da SendGrid (C1), envio de SMS pela Twilio do workspace (C2) e de WhatsApp com modelo aprovado (C3), da pesquisa de 2026-11-26 |
 
 | Parte do documento | Onde aparece no protótipo |
 |---|---|
@@ -573,6 +575,33 @@ clientes usa Microsoft. A pesquisa está em `PESQUISA.md`, "SMS no computador".
   épico 2 (RN903, RN905, RN105; partes 1 e 2) e o documento do botão no cartão (RF009). Os prints
   estão em `evidencias/requisitos/`.
 
+## Rodada 14 · 2026-11-26 (a central de comunicações e os nós de mensagem do Spaceflow)
+
+- **Pedido (literal):** "sim, põe as 5 melhorias na central / mas voce nao deve prototipar só o "por enquanto", se dá pra cehgar num desenho final, deixe na proposta completa o lugar onde queremos chegar. / pode fazer até os nós do spaceflow em abas separadas do prototipo. pode colocar la o que for neessario e fazer a central ser a central de comunicaçoes em geral guardando sms, wpp e email conforme suas recomendaçoes".
+- **A pesquisa** (repositório pesquisa-de-mercado, `runs/2026-11-26-twilio-sendgrid-na-central-de-comunicacao/RELATORIO.md`):
+  - a Twilio do ENSPACE hoje só envia WhatsApp, só na Central de Atendimento, com a credencial de cada workspace;
+  - a SendGrid leva todo e-mail do sistema, e o status "Enviado" quer dizer que ela aceitou, não que entregou;
+  - o menu vira "Comunicações" quando um 2º canal sai do sistema com registro: os nós de SMS e WhatsApp do Spaceflow;
+  - o back sai em 3 peças: C1, o status de entrega do e-mail pelo webhook da SendGrid; C2, o envio de SMS pela Twilio do workspace; C3, o envio de WhatsApp com modelo aprovado pela Meta.
+- **Mudou no protótipo, em todas as fases (as 5 melhorias):**
+  - coluna "Saiu por": o Outlook da pessoa, a caixa do workspace, o ENSPACE ou o domínio da empresa;
+  - os 5 status do registro: Na fila, Em processamento, Enviado ao provedor, Falhou e Cancelado, cada um com a dica do que quer dizer;
+  - "Motivo da falha" no painel de leitura, com a mensagem do envio, como "Quota de emails excedida";
+  - a origem no "Enviado por": Tarefa, Spaceflow (com o fluxo e o nó) ou Atendimento;
+  - "Reenviar" também no Cancelado, e indisponível no Na fila e no Em processamento, com o motivo.
+- **Mudou no protótipo, na Fase 4 nova (o destino):**
+  - o menu e a central passam a "Comunicações", e "Nova mensagem" oferece E-mail, SMS e WhatsApp (este, desabilitado, com o motivo);
+  - a aba Mensagens ganha os filtros E-mail, WhatsApp, SMS e "Não entregues", e as colunas Canal e Entrega;
+  - o painel de leitura mostra o SMS e o WhatsApp como balão de conversa, o modelo aprovado, o número de partes do SMS, o código do erro da operadora e o "Histórico do envio";
+  - o WhatsApp do atendimento aparece com "Abrir a conversa no Atendimento", sem reenviar: a conversa continua sendo do chamado;
+  - a aba Modelos alterna E-mail e WhatsApp; a de WhatsApp mostra o status da Meta (Aprovado, Em análise, Recusado);
+  - a aba Configurações ganha "Canais de envio do workspace": e-mail, SMS e WhatsApp, cada um com o estado e o atalho para Integrações;
+  - o painel "Enviar SMS" ganha "Enviar pelo ENSPACE", pelo número do workspace; o envio entra na central e passa de Na fila a Entregue; "Abrir no app" continua, como 2ª opção;
+  - Estrutura › Spaceflow abre o fluxo "Lembrete de vencimento do contrato", com os nós novos "Enviar SMS" e "Enviar WhatsApp", no modal de configuração do develop (variáveis de entrada para arrastar, de saída, "Se o envio falhar" e "Esperar a confirmação de entrega");
+  - o controle "Sem Twilio", na barra de baixo, mostra os nós com erro e a central sem SMS e WhatsApp.
+- **Requisitos:** as 5 melhorias entram nas partes 8 a 10 do épico 1. A Fase 4 pede épico próprio (back C1, C2 e C3): a confirmar com a redatora antes de escrever.
+- **Fronteira:** muda a central (as 4 abas), o painel "Enviar SMS" e a entrada Spaceflow do menu, na Fase 4. A moldura do editor do Spaceflow é cópia do protótipo `no-de-atraso`, que copiou o develop; os outros nós do fluxo ficam como no produto. As outras telas ficam como na rodada 13.
+
 ## Rodada 13 · 2026-11-26 (a tela inicial volta sem atalhos de comunicação)
 
 - **Pedido (literal):** "pela logica de mercado, deveria mesmo ser widget de comunicaçao ou botoes fixos na home já, por padrao?" e, depois da pesquisa, "pode seguir a recomendaçao em todos esses lugares".
@@ -762,6 +791,47 @@ colunas. O filtro rápido "Do sistema" dá o mesmo recorte em 1 clique, e o atal
 O risco é do back: hoje são 2 listas (os e-mails dos itens e os enviados pelo sistema). Se juntar
 as 2 com ordem e paginação únicas pedir back novo, a saída da Fase 1 é o filtro trocar a fonte da
 tabela, uma lista por vez. A pergunta está na lógica da funcionalidade.
+
+### A central vira "Comunicações" só na Fase 4
+
+Na Fase 1, a central só tem e-mail para mostrar: o WhatsApp e o SMS dos atalhos saem do aparelho
+da pessoa, e o ENSPACE não fica sabendo do envio. Chamar de "Comunicações" uma central só com e-mail
+promete o que a pessoa não acha ali. O nome muda quando o sistema passa a enviar SMS e WhatsApp com
+registro (os nós do Spaceflow e o "Enviar pelo ENSPACE"). A tabela continua 1 só, com o filtro por
+canal: quem procura "o cliente recebeu?" olha num lugar, qualquer que seja o canal.
+
+### O status do envio e a entrega ficam em 2 colunas
+
+O status diz o que o ENSPACE fez (pôs na fila, entregou ao provedor, falhou). A entrega diz o que
+o provedor respondeu depois (entregue, devolvido, bloqueado, lido). Numa coluna só, "Enviado"
+parece "Entregue", que é o engano de hoje: a SendGrid aceitou, e o e-mail pode ter voltado. O
+e-mail da Mail Box sai pelo Outlook e não tem entrega; mostra "-".
+
+### O WhatsApp do atendimento abre o chamado
+
+A conversa do WhatsApp da Central de Atendimento tem requerente, atendente e fechamento por
+inatividade. Ela aparece na central para a busca ficar num lugar, mas a ação é "Abrir a conversa no
+Atendimento": responder ali criaria 2 portas para a mesma conversa.
+
+### "Nova mensagem › WhatsApp" fica desabilitado
+
+O WhatsApp pela Twilio só aceita texto livre dentro das 24 horas depois da última mensagem do
+cliente. Fora disso, só com modelo aprovado pela Meta. Uma mensagem avulsa, sem item e sem modelo,
+não sai. O caminho é o nó "Enviar WhatsApp" do Spaceflow, com o modelo, ou o atalho do item, que
+abre o WhatsApp da pessoa. O motivo aparece no próprio menu.
+
+### O SMS pelo ENSPACE não tira o "Abrir no app"
+
+Enviar pelo número do workspace tem custo por SMS e pede a integração. Quem prefere o próprio
+celular continua com "Abrir no app", "Copiar mensagem" e o QR code, agora abaixo de "Ou envie
+pelo seu celular".
+
+### Os nós de mensagem seguem o modal de hoje
+
+Os nós "Enviar SMS" e "Enviar WhatsApp" usam o modal de configuração do develop: variáveis de
+entrada à esquerda, de saída abaixo, "Modificado" no rodapé. Quem já monta o nó "Enviar e-mail"
+não aprende tela nova. O nó de WhatsApp só lista os modelos aprovados; os outros aparecem
+desabilitados, com o status da Meta.
 
 ### O estado vazio diz o próximo passo
 

@@ -12,6 +12,9 @@
  *    back-end: o contato por categoria, a busca de item entre categorias e a
  *    área E-mails (a lista por pessoa e permissão).
  *  - Fase 3: vincular o e-mail a uma tarefa e a Mail Box da própria tarefa.
+ *  - Fase 4 (rodada 14): o destino. A central vira "Comunicações" e guarda o
+ *    e-mail, o SMS e o WhatsApp que o ENSPACE envia, com o status de entrega da
+ *    SendGrid e da Twilio; o Spaceflow ganha os nós Enviar SMS e Enviar WhatsApp.
  */
 import type { Ref } from 'vue'
 import {
@@ -38,8 +41,8 @@ import {
  * Fase
  * ------------------------------------------------------------------ */
 
-export type Fase = 1 | 2 | 3
-export const FASES: Fase[] = [1, 2, 3]
+export type Fase = 1 | 2 | 3 | 4
+export const FASES: Fase[] = [1, 2, 3, 4]
 
 /** Espelho da fase do andaime para as funções puras (contatosDoItem). Reativo: é o próprio `useState`. */
 let faseAtual: Ref<Fase> | null = null
@@ -284,6 +287,8 @@ export type Tela =
   | 'emails'
   | 'sistema'
   | 'categoria'
+  /** Fase 4: o editor do Spaceflow com os nós de mensagem. */
+  | 'spaceflow'
 
 export interface Rascunho {
   /** O endereço de onde o e-mail sai: a conta do Outlook ou, na Fase 2, uma caixa. */
@@ -320,6 +325,8 @@ export type Dados = 'novo' | 'primeiroUso' | 'emUso'
 
 /** Os filtros rápidos da aba Mensagens. Ficam no estado para o menu Configurações › E-mails › E-mails Enviados abrir já filtrado. */
 export type Rapido = 'recebidos' | 'enviados' | 'sistema' | 'naoLidos' | 'comAnexo' | 'semItem'
+  /* Fase 4: por canal e pela entrega. */
+  | 'email' | 'whatsapp' | 'sms' | 'naoEntregues'
 
 /**
  * Quem olha o protótipo (andaime). Cada aba da central segue a permissão que já
@@ -362,6 +369,8 @@ export function useComunicacao() {
   const ehAdmin = computed(() => perfil.value === 'admin')
   const rapidosDaCentral = useState<Rapido[]>('cnw-rapidos', () => [])
   const dados = useState<Dados>('cnw-dados', () => 'emUso')
+  /** Fase 4: o workspace tem a integração Twilio (andaime "Sem Twilio" desliga). */
+  const twilioLigado = useState<boolean>('cnw-twilio', () => true)
   /** Workspace novo: sem modelo e sem caixa. */
   const modelosDoWorkspace = computed(() => dados.value === 'novo' ? [] : modelos)
   const caixasDoWorkspace = computed(() => dados.value === 'novo' ? [] : caixas)
@@ -419,6 +428,12 @@ export function useComunicacao() {
     watch(dados, (d) => {
       emails.value = d === 'emUso' ? structuredClone(emailsIniciais) : []
       rapidosDaCentral.value = []
+    })
+    // Fora da Fase 4, os filtros por canal e a tela do Spaceflow não existem.
+    watch(fase, (f) => {
+      if (f >= 4) return
+      rapidosDaCentral.value = rapidosDaCentral.value.filter(r => !['email', 'whatsapp', 'sms', 'naoEntregues'].includes(r))
+      if (tela.value === 'spaceflow') tela.value = 'inicio'
     })
   }
 
@@ -511,6 +526,7 @@ export function useComunicacao() {
     abaDaCentral,
     rapidosDaCentral,
     dados,
+    twilioLigado,
     modelosDoWorkspace,
     caixasDoWorkspace,
     caixasNoDe,

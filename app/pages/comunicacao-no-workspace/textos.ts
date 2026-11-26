@@ -1256,8 +1256,8 @@ const ptBR: Textos = {
     mostrarOQueMuda: 'Mostrar o que muda',
     porTras: 'Por trás',
     fase: 'Fase',
-    fases: { 1: '1 · MVP', 2: '2 · Remetente', 3: '3 · Tarefa' },
-    fasesDica: { 1: 'Só tela, sobre o que o ENSPACE já tem', 2: 'Escolher o De, responder na conversa, encaminhar e registrar sem item', 3: 'Vincular o e-mail a uma tarefa' },
+    fases: { 1: '1 · MVP', 2: '2 · Remetente', 3: '3 · Tarefa', 4: '4 · Comunicações' },
+    fasesDica: { 1: 'Só tela, sobre o que o ENSPACE já tem', 2: 'Escolher o De, responder na conversa, encaminhar e registrar sem item', 3: 'Vincular o e-mail a uma tarefa', 4: 'O destino: a central guarda e-mail, SMS e WhatsApp, com o status de entrega, e o Spaceflow envia SMS e WhatsApp' },
   },
 }
 
@@ -1923,8 +1923,8 @@ const en: Textos = {
     mostrarOQueMuda: 'Show what changes',
     porTras: 'Behind it',
     fase: 'Phase',
-    fases: { 1: '1 · MVP', 2: '2 · Sender', 3: '3 · Task' },
-    fasesDica: { 1: 'Screen only, on what ENSPACE already has', 2: 'Choose From, reply in the thread, forward and record without item', 3: 'Link the email to a task' },
+    fases: { 1: '1 · MVP', 2: '2 · Sender', 3: '3 · Task', 4: '4 · Communications' },
+    fasesDica: { 1: 'Screen only, on what ENSPACE already has', 2: 'Choose From, reply in the thread, forward and record without item', 3: 'Link the email to a task', 4: 'The goal: the hub keeps email, SMS and WhatsApp with delivery status, and Spaceflow sends SMS and WhatsApp' },
   },
 }
 
@@ -2590,8 +2590,8 @@ const es: Textos = {
     mostrarOQueMuda: 'Mostrar lo que cambia',
     porTras: 'Detrás',
     fase: 'Fase',
-    fases: { 1: '1 · MVP', 2: '2 · Remitente', 3: '3 · Tarea' },
-    fasesDica: { 1: 'Solo pantalla, sobre lo que ENSPACE ya tiene', 2: 'Elegir el De, responder en la conversación, reenviar y registrar sin ítem', 3: 'Vincular el correo a una tarea' },
+    fases: { 1: '1 · MVP', 2: '2 · Remitente', 3: '3 · Tarea', 4: '4 · Comunicaciones' },
+    fasesDica: { 1: 'Solo pantalla, sobre lo que ENSPACE ya tiene', 2: 'Elegir el De, responder en la conversación, reenviar y registrar sin ítem', 3: 'Vincular el correo a una tarea', 4: 'El destino: la central guarda correo, SMS y WhatsApp con el estado de entrega, y Spaceflow envía SMS y WhatsApp' },
   },
 }
 
