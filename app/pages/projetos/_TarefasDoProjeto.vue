@@ -22,6 +22,8 @@ import { iniciais, pessoa, type Prioridade, type StatusDaTarefa, type TarefaDoPr
 import { textosDoProjeto } from './textosDoProjeto'
 import { useMarcaDeProposta, useProjetos } from './estado'
 import Paginador from './_Paginador.vue'
+import { useMetasEDiscussoes } from './metasEDiscussoes'
+import { textosDeMarcosEMedicao } from './textosDeMarcosEMedicao'
 
 const props = defineProps<{ t: Textos, id: number }>()
 const prj = useProjetos()
@@ -30,6 +32,14 @@ const rt = computed(() => r.value.tarefas)
 const idioma = useIdioma()
 const toast = useToast()
 const { marca } = useMarcaDeProposta()
+/** Rodada 9: a coluna Marco. */
+const md = useMetasEDiscussoes()
+const tmm = useTextos(textosDeMarcosEMedicao)
+const podeEditarMarcos = computed(() => md.podeEditarMarcos(props.id))
+const opMarcos = computed(() => [
+  { value: 0, label: tmm.value.marcos.semMarco },
+  ...md.marcosDo(props.id).filter(m => m.status === 'aberto').map(m => ({ value: m.id, label: m.nome, icon: 'i-lucide-flag' })),
+])
 
 const HOJE = '2026-11-26'
 type Fonte = 'todas' | 'rapida' | 'agendada'
@@ -105,12 +115,13 @@ const colunas = computed<EnTableColumn[]>(() => [
   { key: 'responsavel', label: rt.value.colResponsavel, sortable: true },
   { key: 'prazo', label: rt.value.colPrazo, sortable: true },
   { key: 'status', label: rt.value.colStatus, sortable: true },
+  { key: 'marco', label: tmm.value.marcos.colMarco },
   { key: 'prioridade', label: rt.value.colPrioridade, sortable: true },
   { key: 'fluxo', label: rt.value.colOrigem, sortable: true },
   { key: 'criadaEm', label: rt.value.colCriada, sortable: true },
 ])
 const colunasVisiveis = ref<EnTableColumnVisibility>({ fluxo: false, criadaEm: false })
-const larguras = ref<EnTableColumnSizing>({ titulo: 270, tipo: 140, item: 150, categoria: 160, responsavel: 170, prazo: 170, status: 140, prioridade: 110, fluxo: 240, criadaEm: 120 })
+const larguras = ref<EnTableColumnSizing>({ titulo: 270, tipo: 140, item: 150, categoria: 160, responsavel: 170, prazo: 170, status: 140, marco: 200, prioridade: 110, fluxo: 240, criadaEm: 120 })
 function verColuna(key: string, ver: boolean | 'indeterminate') {
   colunasVisiveis.value = { ...colunasVisiveis.value, [key]: ver === true }
 }
@@ -292,6 +303,24 @@ function alternar(x: TarefaDoProjeto) {
         </template>
         <template #cell-status="{ row }">
           <UBadge :label="rt.status[(row as TarefaDoProjeto).status]" :color="COR_DO_STATUS[(row as TarefaDoProjeto).status]" variant="subtle" size="sm" />
+        </template>
+        <!-- rodada 9: o marco da tarefa, trocado na própria linha por quem administra o projeto -->
+        <template #cell-marco="{ row }">
+          <span v-if="podeEditarMarcos" class="block w-full" @click.stop>
+            <USelect
+              :model-value="md.marcoDaTarefa((row as TarefaDoProjeto).id)?.id ?? 0"
+              :items="opMarcos"
+              size="xs"
+              variant="ghost"
+              class="w-full"
+              :ui="{ content: 'min-w-64' }"
+              :aria-label="tmm.marcos.colMarco"
+              @update:model-value="(v: number) => md.definirMarcoDaTarefa((row as TarefaDoProjeto).id, v || null)"
+            />
+          </span>
+          <span v-else class="truncate text-sm" :class="md.marcoDaTarefa((row as TarefaDoProjeto).id) ? 'text-default' : 'text-muted'">
+            {{ md.marcoDaTarefa((row as TarefaDoProjeto).id)?.nome ?? tmm.marcos.semMarco }}
+          </span>
         </template>
         <template #cell-prioridade="{ row }">
           <UBadge v-if="temPrioridade(row as TarefaDoProjeto)" :label="rt.prioridade[(row as TarefaDoProjeto).prioridade]" :color="COR_DA_PRIORIDADE[(row as TarefaDoProjeto).prioridade]" variant="soft" size="sm" />

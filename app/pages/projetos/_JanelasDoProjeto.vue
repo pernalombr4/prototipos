@@ -14,11 +14,16 @@ import { pessoas } from './mocks'
 import type { Gatilho, Prioridade } from './mocks'
 import { textosDoProjeto } from './textosDoProjeto'
 import { useMarcaDeProposta, useProjetos } from './estado'
+import { useMetasEDiscussoes } from './metasEDiscussoes'
+import { textosDeMarcosEMedicao } from './textosDeMarcosEMedicao'
 
 const prj = useProjetos()
 const r = useTextos(textosDoProjeto)
 const toast = useToast()
 const { marca } = useMarcaDeProposta()
+/** Rodada 9: o campo Marco da nova tarefa. */
+const md = useMetasEDiscussoes()
+const tmm = useTextos(textosDeMarcosEMedicao)
 
 const ICONES = ['i-lucide-folder', 'i-lucide-receipt', 'i-lucide-file-text', 'i-lucide-hand-coins', 'i-lucide-calendar', 'i-lucide-users-round', 'i-lucide-briefcase', 'i-lucide-truck', 'i-lucide-target', 'i-lucide-workflow', 'i-lucide-zap', 'i-lucide-bell']
 
@@ -47,7 +52,11 @@ function criarCategoria() {
 const abertaTarefa = janela('novaTarefa')
 const projTarefa = computed(() => projetoDe(prj.janelas.novaTarefa.value))
 const catsTarefa = computed(() => projTarefa.value ? prj.categoriasDe(projTarefa.value.id) : [])
-const tar = reactive({ titulo: '', categoria: 0, item: '', responsavel: 1, prazo: '2026-11-30', prioridade: 'media' as Prioridade })
+const tar = reactive({ titulo: '', categoria: 0, item: '', responsavel: 1, prazo: '2026-11-30', prioridade: 'media' as Prioridade, marco: 0 })
+const opMarcosDaTarefa = computed(() => [
+  { value: 0, label: tmm.value.marcos.semMarco },
+  ...(projTarefa.value ? md.marcosDo(projTarefa.value.id).filter(m => m.status === 'aberto').map(m => ({ value: m.id, label: m.nome, icon: 'i-lucide-flag' })) : []),
+])
 const itensDaCategoria = computed(() => {
   const c = catsTarefa.value.find(x => x.id === tar.categoria)
   if (!c) return []
@@ -56,13 +65,14 @@ const itensDaCategoria = computed(() => {
 })
 watch(abertaTarefa, (v) => {
   if (!v) return
-  Object.assign(tar, { titulo: '', categoria: catsTarefa.value[0]?.id ?? 0, item: '', responsavel: prj.eu.value, prazo: '2026-11-30', prioridade: 'media' })
+  Object.assign(tar, { titulo: '', categoria: catsTarefa.value[0]?.id ?? 0, item: '', responsavel: prj.eu.value, prazo: '2026-11-30', prioridade: 'media', marco: 0 })
 })
 watch(() => tar.categoria, () => { tar.item = itensDaCategoria.value[0] ?? '' }, { immediate: true })
 const opPessoas = computed(() => pessoas.filter(x => !x.convidado).map(x => ({ value: x.id, label: x.nome })))
 const opPrioridade = computed(() => (['alta', 'media', 'baixa'] as Prioridade[]).map(x => ({ value: x, label: r.value.tarefas.prioridade[x] })))
 function criarTarefa() {
   prj.criarTarefa({ titulo: tar.titulo.trim(), categoria: tar.categoria, item: tar.item, responsavel: tar.responsavel, prazo: tar.prazo, prioridade: tar.prioridade })
+  if (tar.marco) md.definirMarcoDaTarefa(prj.tarefas.value[0]!.id, tar.marco)
   const p = projTarefa.value!
   abertaTarefa.value = false
   toast.add({ title: r.value.novaTarefa.criada(tar.titulo.trim()), icon: 'i-lucide-check', color: 'success' })
@@ -142,6 +152,9 @@ function criarFluxo() {
         </UFormField>
         <UFormField :label="r.novaTarefa.prioridade">
           <USelect v-model="tar.prioridade" :items="opPrioridade" class="w-full" />
+        </UFormField>
+        <UFormField :label="tmm.marcos.colMarco" :class="marca">
+          <USelect v-model="tar.marco" :items="opMarcosDaTarefa" class="w-full" />
         </UFormField>
       </form>
     </template>

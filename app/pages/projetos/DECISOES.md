@@ -449,3 +449,70 @@ O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras 
   - O detector de seta passou nas 4. A captura da seção Marcos tinha a barra de rolagem da página e o detector marcou
     o topo dela (o falso positivo das rodadas 6 e 7); a captura saiu da entrega, e os marcos aparecem no painel da
     meta.
+
+## Rodada 9 · 2026-11-26
+- **Pedido (literal):** "esse botao ver todos deve sumir. metas ser um botao aí é pessimo tambem. deveria ser um menu
+  aí dentro, assim como os próprios projetos são. pode botar um menu geral de projetos tambem [...] e nao ta clara a
+  usabilidade das metas. como o progresso é marcado? [...] como os marcos sao criados. cade o crud de marcos?? [...]
+  nao ta bem amarrado como vamos criar isso aí e nem como o andamento de cada coisa é definido. automaticamente? com o
+  usuario indicando manualmente algum andamento? onde?"
+- **Mudou no menu:**
+  - o pé do painel de Projetos ("Ver todos" e o botão Metas) saiu;
+  - o topo do painel ganhou 2 itens gerais, no mesmo desenho das linhas de projeto: **Todos os projetos** (o
+    diretório, onde a pessoa já cai ao clicar em Projetos na trilha, com o número de projetos) e **Metas**. O item da
+    tela aberta fica destacado;
+  - no menu atual, Metas subiu para o topo da seção Projetos; o item "Projetos" da seção já abre o diretório.
+- **Como o andamento é definido (a cadeia):**
+  - **tarefa → marco:** o progresso do marco é automático: tarefas concluídas ÷ tarefas ligadas. Ninguém digita
+    percentual. Marco sem tarefa fica em 0%. Marco concluído conta 100%;
+  - **marco → meta automática:** a meta "Automático, pelos marcos" é a média dos marcos que contam: os ligados direto
+    à meta e todos os marcos dos projetos ligados (cada marco conta 1 vez). O projeto entra pelos marcos dele; projeto
+    sem marco aparece como "Sem marcos: não entra na conta", com o botão "Criar marco" para quem administra;
+  - **meta por valor:** para o que não vem de tarefa (receita, contratos, percentual da carteira), a meta "Por um
+    valor" tem valor inicial, valor-alvo e unidade (percentual, reais ou número). O dono informa o valor atual ao
+    publicar a atualização, junto com a situação e o texto; o histórico guarda cada valor. Os projetos e marcos
+    ligados ficam para acompanhar e não entram na conta;
+  - **situação** (No prazo, Em risco, Atrasado) continua manual, na atualização, nos 2 modos;
+  - a rodada 8 tirava a média de projetos e marcos juntos, contando o mesmo trabalho 2 vezes; a rodada 9 troca pela
+    cadeia acima.
+- **CRUD do marco: a aba Marcos do projeto** (também no menu do projeto, com o número de abertos):
+  - lista com Abertos e Concluídos, responsável, data-alvo (vermelha quando passou) e progresso; o aviso "Como o marco
+    avança" explica a regra no topo;
+  - Novo marco: nome, descrição, responsável, data-alvo e tarefas;
+  - o marco abre no painel lateral: progresso, tarefas (concluir, tirar do marco, adicionar), as metas para as quais
+    conta, e no menu "⋯" Editar, Concluir (ou Reabrir) e Excluir;
+  - concluir o marco tira dele as tarefas abertas, que continuam no projeto; a confirmação diz quantas;
+  - excluir o marco tira ele das metas;
+  - só o administrador do projeto cria, edita, conclui e exclui marco e liga tarefa; o participante vê e conclui a
+    própria tarefa.
+- **A tarefa entra no marco por 3 caminhos:** ao criar ou editar o marco, por "Adicionar tarefas" no painel do marco e
+  pelo campo Marco da tarefa (coluna nova na aba Tarefas, trocada na própria linha, e campo na janela Nova tarefa).
+  Cada tarefa fica em 1 marco; ligar a outro tira do anterior.
+- **A Visão geral** mostra só os marcos abertos, com "Ver marcos"; cada cartão abre o marco na aba Marcos.
+- **Nova meta e Editar meta:** o campo "Como medir" escolhe o modo, com a explicação de cada um; no modo por valor
+  aparecem valor inicial, valor-alvo e unidade. A lista de metas ganhou a coluna "Como medir", e o progresso da meta
+  por valor aparece como "6% de 20%". Proprietário do workspace e dono da meta editam e excluem.
+- **Fronteira:** mudam o painel de Projetos e o menu atual (itens gerais no lugar do pé), a página do projeto (aba
+  Marcos, coluna e campo Marco nas tarefas, seção da Visão geral) e a tela Metas. A casca, o diretório, as outras
+  abas e as Discussões ficam como na rodada 8.
+- **Inventado (não existe no ENSPACE):** o marco (com responsável, descrição, status e tarefas), o campo Marco da
+  tarefa, o modo de medir da meta e o valor da atualização, em `metasEDiscussoes.ts`. Todos pedem back-end novo.
+- **Em aberto:**
+  - se o participante do projeto pode ligar a própria tarefa a um marco;
+  - se a meta pode ligar outra meta (meta e submeta);
+  - se o marco pode pesar mais que outro na média da meta;
+  - se a meta por valor pode ler o número de um campo (soma de Valor Monetário de uma categoria) em vez de o dono
+    informar.
+- **Ver:** https://pernalombr4.github.io/prototipos/projetos
+  - `evidencias/entrega-r9-aba-marcos.png`: o painel com Todos os projetos e Metas no topo e a aba Marcos do
+    Financeiro;
+  - `evidencias/entrega-r9-painel-do-marco.png`: o marco aberto, com o progresso pelas tarefas e a meta para a qual
+    conta;
+  - `evidencias/entrega-r9-coluna-marco.png`: a aba Tarefas com a coluna Marco;
+  - `evidencias/entrega-r9-meta-automatica-participante.png`: a meta automática, com a fórmula e os marcos que contam
+    (pelo projeto ou ligados à meta), vista por quem só participa do Financeiro;
+  - `evidencias/entrega-r9-meta-por-valor.png`: a meta por valor, com "6% de 20%" e o campo Valor atual na
+    atualização.
+  - O detector de seta passou nas 5. A meta automática vista pela proprietária rola dentro do painel, e o detector
+    marca a barra de rolagem (o falso positivo das rodadas 6 a 8); a captura saiu, e a da participante, que cabe sem
+    rolagem, entrou no lugar.

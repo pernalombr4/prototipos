@@ -8,7 +8,7 @@
  *  - lista os projetos do menu da pessoa, na ordem dela (arrastar, ou Alt e as setas), cada um com as
  *    categorias e as telas dele;
  *  - o ••• do projeto e da categoria são os mesmos do painel;
- *  - "+" cria projeto (proprietário e Full); "Ver todos os N projetos" leva ao diretório.
+ *  - "+" cria projeto (proprietário e Full); o item da seção leva ao diretório; Metas fica no topo da seção (rodada 9).
  * Sem a busca do painel: no menu de hoje a busca é a do "Buscar...", e o diretório tem a dele.
  */
 import type { DropdownMenuItem } from '@nuxt/ui'
@@ -144,6 +144,17 @@ function teclar(ev: KeyboardEvent, id: number) {
       <template v-else>
         <p v-if="!noMenu.length" class="py-2 pl-10 pr-4 text-xs text-muted">{{ t.painel.vazioTitulo }}</p>
 
+        <!-- Rodada 9: Metas no topo da seção, como item; o item Projetos já abre o diretório e o pé "Ver todos" saiu -->
+        <button
+          type="button"
+          class="flex w-full items-center gap-2.5 py-2 pl-10 pr-4 text-left transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+          :class="[tela.tipo === 'metas' ? 'bg-primary/10 font-medium text-primary' : 'text-muted hover:bg-elevated hover:text-default', marca]"
+          :aria-current="tela.tipo === 'metas' ? 'page' : undefined"
+          @click="tela = { tipo: 'metas' }"
+        >
+          <UIcon name="i-lucide-target" class="size-4 shrink-0" />
+          <span class="truncate text-sm">{{ tmd.metas.menu }}</span>
+        </button>
         <ul>
           <li
             v-for="(p, i) in noMenu"
@@ -215,28 +226,6 @@ function teclar(ev: KeyboardEvent, id: number) {
           </li>
         </ul>
 
-        <!-- o pé da seção: o diretório -->
-        <button
-          type="button"
-          class="flex w-full items-center gap-2.5 py-2 pl-10 pr-4 text-left transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
-          :class="tela.tipo === 'diretorio' ? 'bg-primary/10 font-medium text-primary' : 'text-muted hover:bg-elevated hover:text-default'"
-          :aria-current="tela.tipo === 'diretorio' ? 'page' : undefined"
-          @click="tela = { tipo: 'diretorio' }"
-        >
-          <UIcon name="i-lucide-list" class="size-4 shrink-0" />
-          <span class="truncate text-sm">{{ t.painel.verTodos(visiveis.length) }}</span>
-        </button>
-        <!-- Rodada 8: as metas do workspace, acima dos projetos -->
-        <button
-          type="button"
-          class="flex w-full items-center gap-2.5 py-2 pl-10 pr-4 text-left transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
-          :class="[tela.tipo === 'metas' ? 'bg-primary/10 font-medium text-primary' : 'text-muted hover:bg-elevated hover:text-default', marca]"
-          :aria-current="tela.tipo === 'metas' ? 'page' : undefined"
-          @click="tela = { tipo: 'metas' }"
-        >
-          <UIcon name="i-lucide-target" class="size-4 shrink-0" />
-          <span class="truncate text-sm">{{ tmd.metas.menu }}</span>
-        </button>
       </template>
     </template>
   </div>

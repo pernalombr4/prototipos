@@ -5,7 +5,7 @@
  *  - o menu é da pessoa: os projetos que ela mostra, na ordem dela (arrastar, ou Alt e as setas);
  *  - cada projeto é uma seção com Visão geral, Tarefas, Automações, as categorias e os painéis dele (_ConteudoDoProjeto); abre e fecha por pessoa;
  *  - a busca acha também os projetos "Fora do seu menu" que ela enxerga;
- *  - "Ver todos os N projetos" leva ao diretório;
+ *  - no topo da lista, Todos os projetos (o diretório) e Metas, como itens (rodada 9; antes, "Ver todos" no pé);
  *  - o ••• do projeto: Abrir a página, Configurações (administrador), Ocultar do meu menu, Copiar o link.
  *
  * Fonte: seção 1 do relatório "Usabilidade de projetos no ENSPACE" (Notion, Asana, Jira, ClickUp).
@@ -19,7 +19,7 @@ import type { Projeto } from './mocks'
 import ConteudoDoProjeto from './_ConteudoDoProjeto.vue'
 import AdicionarAoProjeto from './_AdicionarAoProjeto.vue'
 import { useAdicionarAoProjeto } from './adicionarAoProjeto'
-import { textosDeMetasEDiscussoes } from './textosDeMetasEDiscussoes'
+import { textosDeMarcosEMedicao } from './textosDeMarcosEMedicao'
 import { COR_DO_PROJETO, ICONE_DA_VISIBILIDADE, PONTO_DA_SITUACAO, useMarcaDeProposta, useProjetos } from './estado'
 
 const props = defineProps<{ t: Textos }>()
@@ -29,7 +29,12 @@ const prj = useProjetos()
 const { noMenu, visiveis, expandidos, tela, estadoDaTela, souDono, janelas } = prj
 const toast = useToast()
 const { marca } = useMarcaDeProposta()
-const tmd = useTextos(textosDeMetasEDiscussoes)
+const tmd = useTextos(textosDeMarcosEMedicao)
+/** Rodada 9: Todos os projetos (o diretório, onde o clique na trilha já cai) e Metas, como itens do menu. */
+const geraisDoPainel = computed(() => [
+  { tipo: 'diretorio' as const, rotulo: tmd.value.menu.geral, icone: 'i-lucide-layout-list', n: visiveis.value.length },
+  { tipo: 'metas' as const, rotulo: tmd.value.menu.metas, icone: 'i-lucide-target', n: undefined as number | undefined },
+])
 const camadas = computed(() => [
   { icone: 'i-lucide-folder-kanban', titulo: props.t.camadas.projeto, texto: props.t.camadas.projetoTexto },
   { icone: 'i-lucide-building', titulo: props.t.camadas.secao, texto: props.t.camadas.secaoTexto },
@@ -204,6 +209,23 @@ function teclar(ev: KeyboardEvent, id: number) {
           <UButton :label="t.painel.vazioAcao" icon="i-lucide-list" size="sm" color="neutral" variant="outline" @click="tela = { tipo: 'diretorio' }" />
         </div>
 
+        <!-- Rodada 9: as entradas gerais, no formato das linhas dos projetos (o pé "Ver todos" saiu) -->
+        <ul v-if="!termo && visiveis.length" class="mb-1.5 space-y-0.5 border-b border-default pb-1.5">
+          <li v-for="g in geraisDoPainel" :key="g.tipo">
+            <button
+              type="button"
+              class="flex w-full items-center gap-2 rounded-md py-1.5 pl-7 pr-1 text-left transition-colors focus-visible:outline-2 focus-visible:outline-primary"
+              :class="[tela.tipo === g.tipo ? 'bg-primary/10' : 'hover:bg-elevated', g.tipo === 'metas' ? marca : '']"
+              :aria-current="tela.tipo === g.tipo ? 'page' : undefined"
+              @click="tela = { tipo: g.tipo }"
+            >
+              <span class="flex size-6 shrink-0 items-center justify-center rounded-md bg-elevated text-toned"><UIcon :name="g.icone" class="size-3.5" /></span>
+              <span class="min-w-0 flex-1 truncate text-sm font-semibold" :class="tela.tipo === g.tipo ? 'text-primary' : 'text-highlighted'">{{ g.rotulo }}</span>
+              <span v-if="g.n !== undefined" class="pr-1 text-xs tabular-nums text-muted">{{ g.n }}</span>
+            </button>
+          </li>
+        </ul>
+
         <ul class="space-y-0.5">
           <li
             v-for="(p, i) in lista"
@@ -297,29 +319,6 @@ function teclar(ev: KeyboardEvent, id: number) {
         </p>
       </div>
 
-      <!-- o pé: o diretório -->
-      <div v-if="visiveis.length" class="flex shrink-0 items-center gap-1 border-t border-default px-2 py-1">
-        <UButton
-          :label="t.painel.verTodos(visiveis.length)"
-          icon="i-lucide-list"
-          size="xs"
-          color="neutral"
-          variant="ghost"
-          class="min-w-0 flex-1 justify-center text-muted hover:text-default"
-          @click="tela = { tipo: 'diretorio' }"
-        />
-        <!-- Rodada 8: as metas do workspace, acima dos projetos -->
-        <UButton
-          :label="tmd.metas.menu"
-          icon="i-lucide-target"
-          size="xs"
-          color="neutral"
-          :variant="tela.tipo === 'metas' ? 'soft' : 'ghost'"
-          :class="[tela.tipo === 'metas' ? 'text-primary' : 'text-muted hover:text-default', marca]"
-          :aria-current="tela.tipo === 'metas' ? 'page' : undefined"
-          @click="tela = { tipo: 'metas' }"
-        />
-      </div>
     </template>
   </div>
 </template>
