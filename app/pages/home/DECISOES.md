@@ -2,6 +2,13 @@
 
 Registro das rodadas. A mais recente em cima.
 
+## Rodada 13 · 2026-11-26 (botão de enviar e-mail no widget E-mail)
+
+- **Pedido (literal):** "o widget de emails deve permitir um botao de enviar email tambem, como tem no de enviar sms e de abrir no whatsapp. aí atualiza os cards no enspace, os docs de requisitos e o protoitipo da home com isso".
+- **Mudou no protótipo:** o widget E-mail ganha o botão "Enviar e-mail" embaixo da lista, no mesmo lugar e no mesmo estilo dos botões do WhatsApp e do SMS, com a linha de aviso embaixo ("O e-mail sai da sua conta do Outlook. Sem item vinculado, ele não aparece nesta lista."). O clique abre o compositor "Nova Mensagem" sem item, o mesmo do "Novo e-mail" da barra do topo; sem o Outlook integrado, abre o app de e-mail. Isso desfaz a parte da rodada 12 que tirou o botão. O estado vazio deixa de apontar a barra do topo, e a descrição do widget no catálogo cita o botão.
+- **Requisitos:** parte 5 do épico 2 com RF406 (o botão) e RF407 (o aviso); RN405 perde a frase "nenhum dos 3 widgets repete esse botão"; RF405 com o vazio novo. Os requisitos do WhatsApp passam a RF408 a RF413, e os do SMS a RF414 a RF419.
+- **Fronteira:** muda só o widget E-mail. A Home padrão continua sem os 3 widgets de comunicação.
+
 ## Rodada 12 · 2026-11-26 (comunicação pela pesquisa de mercado)
 
 - **Pedido (literal):** "pela logica de mercado, deveria mesmo ser widget de comunicaçao ou botoes fixos na home já, por padrao?" e, depois da pesquisa, "whatsapp e sms nao podem ser widgets diferentes? ficou confuso em tela. ou é o ux dele que ta ruim mesmo. fora isso pode seguir a recomendaçao em todos esses lugares".

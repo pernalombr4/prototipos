@@ -534,14 +534,43 @@
       "cena": "comunicacaoVazio",
       "passos": [
         {
-          "rolar": "Os e-mails que você enviar de um item aparecem aqui. Para escrever um e-mail, use o botão Novo e-mail da barra do topo."
+          "rolar": "Os e-mails que você enviar de um item aparecem aqui."
         }
       ],
       "destacar": [
-        "Os e-mails que você enviar de um item aparecem aqui. Para escrever um e-mail, use o botão Novo e-mail da barra do topo."
+        "Os e-mails que você enviar de um item aparecem aqui.",
+        "Enviar e-mail"
       ]
     },
     "RF406": {
+      "cena": "comunicacao",
+      "passos": [
+        {
+          "clicar": "Enviar e-mail"
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('body *')].find(e => { const r = e.getBoundingClientRect(); return r.width > 100 && e.children.length === 0 && /^(No produto, abre|O passo voltou)/.test(e.textContent.trim()) }); let a = el; while (a && !a.querySelector('button')) a = a.parentElement; a.dataset.print = 'toast' })()"
+        }
+      ],
+      "destacar": [
+        "Enviar e-mail",
+        {
+          "css": "[data-print=toast]"
+        }
+      ]
+    },
+    "RF407": {
+      "cena": "comunicacao",
+      "passos": [
+        {
+          "rolar": "Enviar e-mail"
+        }
+      ],
+      "destacar": [
+        "O e-mail sai da sua conta do Outlook. Sem item vinculado, ele não aparece nesta lista."
+      ]
+    },
+    "RF408": {
       "cena": "comunicacao",
       "passos": [
         {
@@ -556,7 +585,7 @@
         "ancestral": "section"
       }
     },
-    "RF407": {
+    "RF409": {
       "cena": "comunicacao",
       "passos": [
         {
@@ -570,7 +599,7 @@
         "Sem número, você escolhe a conversa no WhatsApp."
       ]
     },
-    "RF411": {
+    "RF413": {
       "cena": "comunicacao",
       "passos": [
         {
@@ -584,7 +613,7 @@
         "A mensagem sai da sua conta do WhatsApp. O ENSPACE não registra a conversa."
       ]
     },
-    "RF408": {
+    "RF410": {
       "cena": "comunicacao",
       "passos": [
         {
@@ -605,7 +634,7 @@
         }
       ]
     },
-    "RF409": {
+    "RF411": {
       "cena": "comunicacao",
       "passos": [
         {
@@ -640,7 +669,7 @@
         }
       ]
     },
-    "RF410": {
+    "RF412": {
       "cena": "comunicacao",
       "passos": [
         {
@@ -670,7 +699,7 @@
         }
       ]
     },
-    "RF412": {
+    "RF414": {
       "cena": "comunicacao",
       "passos": [
         {
@@ -685,7 +714,7 @@
         "ancestral": "section"
       }
     },
-    "RF413": {
+    "RF415": {
       "cena": "comunicacao",
       "passos": [
         {
@@ -699,7 +728,7 @@
         "Sem número, você escolhe o contato no app de SMS."
       ]
     },
-    "RF417": {
+    "RF419": {
       "cena": "comunicacao",
       "passos": [
         {
@@ -713,7 +742,7 @@
         "O SMS sai do seu celular. O ENSPACE não registra a mensagem."
       ]
     },
-    "RF414": {
+    "RF416": {
       "cena": "comunicacao",
       "passos": [
         {
@@ -734,7 +763,7 @@
         }
       ]
     },
-    "RF415": {
+    "RF417": {
       "cena": "comunicacao",
       "passos": [
         {
@@ -769,7 +798,7 @@
         }
       ]
     },
-    "RF416": {
+    "RF418": {
       "cena": "comunicacao",
       "passos": [
         {

@@ -16,6 +16,14 @@
  *   SMS. Sem número, o WhatsApp abre a escolha da conversa (`wa.me/?text=`) e
  *   o SMS abre o painel "Enviar SMS" sem destinatário.
  *
+ * Rodada 13, a pedido da redatora ("o widget de emails deve permitir um botao
+ * de enviar email tambem, como tem no de enviar sms e de abrir no whatsapp"):
+ * o E-mail volta a ter 1 ação, "Enviar e-mail", embaixo da lista, no mesmo
+ * lugar e com o mesmo estilo do botão do WhatsApp e do SMS, e com a mesma
+ * linha de aviso embaixo. O clique abre o compositor sem item, o mesmo do
+ * "Novo e-mail" da barra do topo; sem o Outlook integrado, abre o app de
+ * e-mail do computador.
+ *
  * A central E-mails e o painel "Enviar SMS" são do protótipo
  * comunicacao-no-workspace. Aqui o clique mostra o aviso de maquete com o que
  * abre no produto e o link exato.
@@ -88,6 +96,20 @@ function abrir() {
         {{ t.comunicacaoW.vazioEmail }}
       </p>
     </UScrollArea>
+    <div class="flex flex-col gap-3 px-4 pt-3">
+      <UButton
+        :label="t.comunicacaoW.enviarEmail"
+        icon="i-lucide-mail-plus"
+        color="neutral"
+        variant="outline"
+        size="sm"
+        class="self-start transition-transform hover:-translate-y-0.5"
+        @click="emit('abrir', t.comunicacaoW.abreCompositor)"
+      />
+      <p class="text-xs text-muted">
+        {{ t.comunicacaoW.naoRegistraEmail }}
+      </p>
+    </div>
   </div>
 
   <!-- WhatsApp ou SMS -->

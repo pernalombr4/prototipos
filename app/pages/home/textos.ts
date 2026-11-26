@@ -323,6 +323,10 @@ export interface Textos {
     para: (email: string) => string
     ha: (minutos: number) => string
     vazioEmail: string
+    /** Rodada 13: o botão do widget E-mail, a pedido da redatora. */
+    enviarEmail: string
+    abreCompositor: string
+    naoRegistraEmail: string
     abrirEmails: string
     emailNaCentral: (assunto: string) => string
     numero: string
@@ -392,7 +396,7 @@ const ptBR: Textos = {
     agenda: { titulo: 'Compromissos do dia', descricao: 'Compromissos, prazos de tarefa e datas de item de hoje.' },
     graficoDePainel: { titulo: 'Gráfico de um painel', descricao: 'Um painel de uma tela do tipo Dashboard.' },
     comunicado: { titulo: 'Comunicado', descricao: 'Aviso do administrador para todo o workspace.' },
-    email: { titulo: 'E-mail', descricao: 'Os e-mails que você enviou de um item. O clique abre a leitura.' },
+    email: { titulo: 'E-mail', descricao: 'Os e-mails que você enviou de um item e o botão para escrever um novo.' },
     whatsapp: { titulo: 'WhatsApp', descricao: 'Digite o número e abra a conversa no WhatsApp.' },
     sms: { titulo: 'SMS', descricao: 'Digite o número e abra o envio por SMS no celular.' },
     notas: { titulo: 'Bloco de notas', descricao: 'Anotações suas. Só você vê.' },
@@ -747,7 +751,10 @@ const ptBR: Textos = {
   comunicacaoW: {
     para: e => `Para ${e}`,
     ha: m => m < 60 ? `há ${m} min` : m < 1440 ? `há ${Math.round(m / 60)} h` : m < 2880 ? 'ontem' : `há ${Math.round(m / 1440)} dias`,
-    vazioEmail: 'Os e-mails que você enviar de um item aparecem aqui. Para escrever um e-mail, use o botão Novo e-mail da barra do topo.',
+    vazioEmail: 'Os e-mails que você enviar de um item aparecem aqui.',
+    enviarEmail: 'Enviar e-mail',
+    abreCompositor: 'o compositor Nova Mensagem, sem item vinculado, com a sua conta do Outlook no De',
+    naoRegistraEmail: 'O e-mail sai da sua conta do Outlook. Sem item vinculado, ele não aparece nesta lista.',
     abrirEmails: 'Abrir E-mails',
     emailNaCentral: a => `o e-mail "${a}" na central E-mails`,
     numero: 'Número',
@@ -816,7 +823,7 @@ const en: Textos = {
     agenda: { titulo: 'Today\'s appointments', descricao: 'Today\'s events, task due dates and item dates.' },
     graficoDePainel: { titulo: 'Chart from a dashboard', descricao: 'A panel from a Dashboard screen.' },
     comunicado: { titulo: 'Announcement', descricao: 'A notice from the admin to the whole workspace.' },
-    email: { titulo: 'Email', descricao: 'The emails you sent from an item. A click opens the email.' },
+    email: { titulo: 'Email', descricao: 'The emails you sent from an item and a button to write a new one.' },
     whatsapp: { titulo: 'WhatsApp', descricao: 'Type the number and open the chat in WhatsApp.' },
     sms: { titulo: 'SMS', descricao: 'Type the number and open the SMS on your phone.' },
     notas: { titulo: 'Notepad', descricao: 'Your notes. Only you can see them.' },
@@ -1171,7 +1178,10 @@ const en: Textos = {
   comunicacaoW: {
     para: e => `To ${e}`,
     ha: m => m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : m < 2880 ? 'yesterday' : `${Math.round(m / 1440)} days ago`,
-    vazioEmail: 'The emails you send from an item appear here. To write an email, use the New email button in the top bar.',
+    vazioEmail: 'The emails you send from an item appear here.',
+    enviarEmail: 'Send email',
+    abreCompositor: 'the New Message composer, with no linked item and your Outlook account in From',
+    naoRegistraEmail: 'The email is sent from your Outlook account. Without a linked item, it does not appear in this list.',
     abrirEmails: 'Open Emails',
     emailNaCentral: a => `the email "${a}" in the Emails area`,
     numero: 'Number',
@@ -1240,7 +1250,7 @@ const es: Textos = {
     agenda: { titulo: 'Compromisos del día', descricao: 'Compromisos, plazos de tarea y fechas de ítem de hoy.' },
     graficoDePainel: { titulo: 'Gráfico de un panel', descricao: 'Un panel de una pantalla de tipo Dashboard.' },
     comunicado: { titulo: 'Comunicado', descricao: 'Aviso del administrador para todo el workspace.' },
-    email: { titulo: 'Correo', descricao: 'Los correos que enviaste desde un ítem. El clic abre la lectura.' },
+    email: { titulo: 'Correo', descricao: 'Los correos que enviaste desde un ítem y el botón para escribir uno nuevo.' },
     whatsapp: { titulo: 'WhatsApp', descricao: 'Escribe el número y abre la conversación en WhatsApp.' },
     sms: { titulo: 'SMS', descricao: 'Escribe el número y abre el envío por SMS en el celular.' },
     notas: { titulo: 'Bloc de notas', descricao: 'Tus notas. Solo tú las ves.' },
@@ -1595,7 +1605,10 @@ const es: Textos = {
   comunicacaoW: {
     para: e => `Para ${e}`,
     ha: m => m < 60 ? `hace ${m} min` : m < 1440 ? `hace ${Math.round(m / 60)} h` : m < 2880 ? 'ayer' : `hace ${Math.round(m / 1440)} días`,
-    vazioEmail: 'Los correos que envíes desde un ítem aparecen aquí. Para escribir un correo, usa el botón Nuevo correo de la barra superior.',
+    vazioEmail: 'Los correos que envíes desde un ítem aparecen aquí.',
+    enviarEmail: 'Enviar correo',
+    abreCompositor: 'el editor Nuevo mensaje, sin ítem vinculado y con tu cuenta de Outlook en De',
+    naoRegistraEmail: 'El correo sale de tu cuenta de Outlook. Sin ítem vinculado, no aparece en esta lista.',
     abrirEmails: 'Abrir Correos',
     emailNaCentral: a => `el correo "${a}" en el área Correos`,
     numero: 'Número',
