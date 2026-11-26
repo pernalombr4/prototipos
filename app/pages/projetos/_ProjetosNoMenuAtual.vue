@@ -14,7 +14,7 @@
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Textos } from './textos'
 import type { Projeto } from './mocks'
-import { COR_DO_PROJETO, ICONE_DA_VISIBILIDADE, useMarcaDeProposta, useProjetos } from './estado'
+import { COR_DO_PROJETO, ICONE_DA_VISIBILIDADE, PONTO_DA_SITUACAO, useMarcaDeProposta, useProjetos } from './estado'
 
 const props = defineProps<{ t: Textos }>()
 
@@ -187,6 +187,9 @@ function teclar(ev: KeyboardEvent, id: number) {
                   <UIcon :name="p.icone" class="size-3" />
                 </span>
                 <span class="min-w-0 flex-1 truncate text-sm" :class="projetoAtivo === p.id ? 'font-medium' : ''">{{ p.nome }}</span>
+                <UTooltip v-if="prj.statusAtual(p)" :text="t.situacao[prj.statusAtual(p)!.situacao]">
+                  <span class="size-2 shrink-0 rounded-full" :class="PONTO_DA_SITUACAO[prj.statusAtual(p)!.situacao]" role="img" :aria-label="t.situacao[prj.statusAtual(p)!.situacao]" />
+                </UTooltip>
                 <UTooltip v-if="p.visibilidade !== 'aberto'" :text="t.visibilidade[p.visibilidade]">
                   <UIcon :name="ICONE_DA_VISIBILIDADE[p.visibilidade]" class="size-3.5 shrink-0 text-muted" :aria-label="t.visibilidade[p.visibilidade]" />
                 </UTooltip>

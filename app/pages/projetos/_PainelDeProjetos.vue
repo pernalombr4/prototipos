@@ -9,11 +9,14 @@
  *  - o ••• do projeto: Abrir a página, Configurações (administrador), Ocultar do meu menu, Copiar o link.
  *
  * Fonte: seção 1 do relatório "Usabilidade de projetos no ENSPACE" (Notion, Asana, Jira, ClickUp).
+ *
+ * Rodada 3: o ponto do status ao lado do nome, e o "?" do cabeçalho, que diz quando usar projeto,
+ * seção do workspace ou favorito (as 3 camadas convivem; nenhuma sai).
  */
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Textos } from './textos'
 import type { Projeto } from './mocks'
-import { COR_DO_PROJETO, ICONE_DA_VISIBILIDADE, useProjetos } from './estado'
+import { COR_DO_PROJETO, ICONE_DA_VISIBILIDADE, PONTO_DA_SITUACAO, useMarcaDeProposta, useProjetos } from './estado'
 
 const props = defineProps<{ t: Textos }>()
 const emit = defineEmits<{ recolher: [] }>()
@@ -21,6 +24,12 @@ const emit = defineEmits<{ recolher: [] }>()
 const prj = useProjetos()
 const { noMenu, visiveis, expandidos, tela, estadoDaTela, souDono, janelas } = prj
 const toast = useToast()
+const { marca } = useMarcaDeProposta()
+const camadas = computed(() => [
+  { icone: 'i-lucide-folder-kanban', titulo: props.t.camadas.projeto, texto: props.t.camadas.projetoTexto },
+  { icone: 'i-lucide-building', titulo: props.t.camadas.secao, texto: props.t.camadas.secaoTexto },
+  { icone: 'i-lucide-star', titulo: props.t.camadas.favorito, texto: props.t.camadas.favoritoTexto },
+])
 
 const buscando = ref(false)
 const termo = ref('')
@@ -142,6 +151,21 @@ function teclar(ev: KeyboardEvent, id: number) {
     </div>
     <div v-else class="flex h-12 shrink-0 items-center gap-0.5 border-b border-default pl-3 pr-1.5">
       <h2 class="min-w-0 flex-1 truncate text-sm font-bold text-highlighted">{{ t.nome.plural }}</h2>
+      <UPopover :content="{ side: 'right', align: 'start' }">
+        <UButton icon="i-lucide-circle-help" size="xs" color="neutral" variant="ghost" :class="marca" :aria-label="t.camadas.pergunta" />
+        <template #content>
+          <div class="w-80 space-y-3 p-3">
+            <p class="text-sm font-semibold text-highlighted">{{ t.camadas.pergunta }}</p>
+            <div v-for="c in camadas" :key="c.titulo" class="flex gap-2.5">
+              <span class="flex size-7 shrink-0 items-center justify-center rounded-md bg-elevated"><UIcon :name="c.icone" class="size-4 text-toned" /></span>
+              <p class="min-w-0 text-sm">
+                <span class="block font-medium text-highlighted">{{ c.titulo }}</span>
+                <span class="block text-muted">{{ c.texto }}</span>
+              </p>
+            </div>
+          </div>
+        </template>
+      </UPopover>
       <UTooltip :text="t.painel.buscar">
         <UButton icon="i-lucide-search" size="xs" color="neutral" variant="ghost" :aria-label="t.painel.buscar" @click="abrirBusca" />
       </UTooltip>
@@ -224,6 +248,9 @@ function teclar(ev: KeyboardEvent, id: number) {
                   <UIcon :name="p.icone" class="size-3.5" />
                 </span>
                 <span class="min-w-0 flex-1 truncate text-sm font-semibold text-highlighted">{{ p.nome }}</span>
+                <UTooltip v-if="prj.statusAtual(p)" :text="t.situacao[prj.statusAtual(p)!.situacao]">
+                  <span class="size-2 shrink-0 rounded-full" :class="[PONTO_DA_SITUACAO[prj.statusAtual(p)!.situacao], marca]" role="img" :aria-label="t.situacao[prj.statusAtual(p)!.situacao]" />
+                </UTooltip>
                 <UTooltip v-if="p.visibilidade !== 'aberto'" :text="t.visibilidade[p.visibilidade]">
                   <UIcon :name="ICONE_DA_VISIBILIDADE[p.visibilidade]" class="size-3.5 shrink-0 text-muted" :aria-label="t.visibilidade[p.visibilidade]" />
                 </UTooltip>

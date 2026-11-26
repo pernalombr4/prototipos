@@ -2,13 +2,24 @@
 /**
  * PROPOSTA: a página do projeto (/workspaces/{ws}/projects/{referência}).
  *
- * Cabeçalho: ícone, nome, descrição, selo de visibilidade, o acesso de quem lê e as ações à direita.
- * Corpo: painéis como os da Home, 1 visualização por painel (memória "painel de dashboard enxuto"):
- * categorias, tarefas do projeto, participantes e atividade.
+ * Cabeçalho: ícone, nome, descrição, selo de visibilidade, status, o acesso de quem lê e as ações.
+ *
+ * Rodada 3: a página vira o lugar de trabalho do projeto, com 4 abas (o que o projeto guarda além
+ * das categorias, pela pesquisa de 2026-11-26 e pela conferência no código):
+ *   - Visão geral: o status do projeto e os painéis da rodada 1 (categorias, participantes,
+ *     tarefas, atividade), 1 visualização por painel (memória "painel de dashboard enxuto");
+ *   - Itens: os itens de todas as categorias numa visão só (peça nova no back-end);
+ *   - Automações: os fluxos e os avisos de prazo que as categorias já têm;
+ *   - Painel: widgets de 1 categoria cada, como os painéis de hoje.
  */
+import type { TabsItem } from '@nuxt/ui'
 import type { Textos } from './textos'
 import { cargos, grupos, iniciais, minhasTarefas, pessoa, type Participante } from './mocks'
-import { COR_DO_PROJETO, ICONE_DA_VISIBILIDADE, useMarcaDeProposta, useProjetos } from './estado'
+import { COR_DA_SITUACAO, COR_DO_PROJETO, ICONE_DA_SITUACAO, ICONE_DA_VISIBILIDADE, useMarcaDeProposta, useProjetos } from './estado'
+import StatusDoProjeto from './_StatusDoProjeto.vue'
+import ItensDoProjeto from './_ItensDoProjeto.vue'
+import AutomacoesDoProjeto from './_AutomacoesDoProjeto.vue'
+import PainelDoProjeto from './_PainelDoProjeto.vue'
 
 const props = defineProps<{ t: Textos, id: number }>()
 const prj = useProjetos()
@@ -52,6 +63,17 @@ function configurar(aba = 'geral') {
   prj.janelas.configurar.value = { id: p.value.id, aba }
 }
 const formatarData = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString(idioma.value)
+
+/* ---------- rodada 3 ---------- */
+const status = computed(() => prj.statusAtual(p.value))
+const aba = prj.abaDoProjeto
+const nFluxos = computed(() => prj.fluxosDoProjeto(props.id).length)
+const abas = computed<TabsItem[]>(() => [
+  { value: 'geral', label: props.t.abas.geral, icon: 'i-lucide-layout-dashboard' },
+  { value: 'itens', label: props.t.abas.itens, icon: 'i-lucide-list-checks' },
+  { value: 'automacoes', label: props.t.abas.automacoes, icon: 'i-lucide-workflow', badge: nFluxos.value ? { label: String(nFluxos.value), color: 'neutral', variant: 'soft', size: 'sm' } : undefined },
+  { value: 'painel', label: props.t.abas.painel, icon: 'i-lucide-chart-column' },
+])
 </script>
 
 <template>
@@ -79,6 +101,9 @@ const formatarData = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString
           <UTooltip :text="t.visibilidade[`${p.visibilidade}Dica`]">
             <UBadge :label="t.visibilidade[p.visibilidade]" :icon="ICONE_DA_VISIBILIDADE[p.visibilidade]" color="neutral" variant="subtle" size="sm" />
           </UTooltip>
+          <UTooltip v-if="status" :text="t.situacao[`${status.situacao}Dica`]">
+            <UBadge :label="t.situacao[status.situacao]" :icon="ICONE_DA_SITUACAO[status.situacao]" :color="COR_DA_SITUACAO[status.situacao]" variant="subtle" size="sm" :class="marca" />
+          </UTooltip>
         </div>
         <p class="mt-0.5 text-sm" :class="p.descricao ? 'text-muted' : 'text-muted italic'">{{ p.descricao || t.pagina.semDescricao }}</p>
         <p class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
@@ -86,6 +111,7 @@ const formatarData = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString
             <span class="flex items-center gap-1"><UIcon name="i-lucide-badge-check" class="size-3.5" />{{ t.pagina.seuAcesso }}: <span class="font-medium text-toned">{{ rotuloDoPapel }}</span></span>
           </UTooltip>
           <span>{{ t.pagina.criadoEm(formatarData(p.criadoEm)) }}</span>
+          <span v-if="status" class="flex items-center gap-1" :class="marca"><UIcon name="i-lucide-calendar-range" class="size-3.5" />{{ t.status.fimPrevisto(formatarData(status.fim)) }}</span>
         </p>
       </div>
       <div class="flex shrink-0 items-center gap-2">
@@ -95,7 +121,23 @@ const formatarData = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString
       </div>
     </div>
 
-    <div class="mt-6 grid gap-4 lg:grid-cols-3">
+    <!-- rodada 3: as seções do projeto -->
+    <UTabs
+      v-model="aba"
+      :items="abas"
+      variant="link"
+      :content="false"
+      class="mt-5 w-full"
+      :class="marca"
+      :aria-label="t.abas.rotulo"
+    />
+
+    <ItensDoProjeto v-if="aba === 'itens'" :key="`i-${p.id}`" :t="t" :id="p.id" class="mt-4" />
+    <AutomacoesDoProjeto v-else-if="aba === 'automacoes'" :key="`a-${p.id}`" :t="t" :id="p.id" class="mt-4" />
+    <PainelDoProjeto v-else-if="aba === 'painel'" :key="`d-${p.id}`" :t="t" :id="p.id" class="mt-4" />
+
+    <div v-else class="mt-4 grid gap-4 lg:grid-cols-3">
+      <StatusDoProjeto :t="t" :id="p.id" class="lg:col-span-3" />
       <!-- categorias -->
       <section class="rounded-lg border border-default bg-default lg:col-span-2 animate-[entrada_0.25s_ease-out_both]" style="animation-delay: 40ms">
         <header class="flex items-center gap-2 border-b border-default px-4 py-3">

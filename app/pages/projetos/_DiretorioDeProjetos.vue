@@ -10,7 +10,7 @@
 import type { EnTableColumn } from '@be-enlighten/enspace-sdk-ui/base'
 import type { Textos } from './textos'
 import { iniciais, pessoa, type Projeto } from './mocks'
-import { COR_DO_PROJETO, ICONE_DA_VISIBILIDADE, useMarcaDeProposta, useProjetos } from './estado'
+import { COR_DA_SITUACAO, COR_DO_PROJETO, ICONE_DA_SITUACAO, ICONE_DA_VISIBILIDADE, useMarcaDeProposta, useProjetos } from './estado'
 
 const props = defineProps<{ t: Textos }>()
 const prj = useProjetos()
@@ -61,6 +61,7 @@ const linhas = computed<Linha[]>(() => filtrados.value
 const colunas = computed<EnTableColumn[]>(() => [
   { key: 'nome', label: props.t.diretorio.colunaNome },
   { key: 'visibilidade', label: props.t.diretorio.colunaVisibilidade },
+  { key: 'situacao', label: props.t.situacao.coluna },
   { key: 'admins', label: props.t.diretorio.colunaAdmins },
   { key: 'participantes', label: props.t.diretorio.colunaParticipantes },
   { key: 'categorias', label: props.t.diretorio.colunaCategorias },
@@ -156,6 +157,18 @@ const formatarData = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString
               <span v-if="(row as Linha).projeto.descricao" class="block max-w-72 truncate text-xs text-muted">{{ (row as Linha).projeto.descricao }}</span>
             </span>
           </span>
+        </template>
+        <template #cell-situacao="{ row }">
+          <UBadge
+            v-if="prj.statusAtual((row as Linha).projeto)"
+            :label="t.situacao[prj.statusAtual((row as Linha).projeto)!.situacao]"
+            :icon="ICONE_DA_SITUACAO[prj.statusAtual((row as Linha).projeto)!.situacao]"
+            :color="COR_DA_SITUACAO[prj.statusAtual((row as Linha).projeto)!.situacao]"
+            variant="subtle"
+            size="sm"
+            :class="marca"
+          />
+          <span v-else class="text-sm text-dimmed">{{ t.situacao.semStatus }}</span>
         </template>
         <template #cell-visibilidade="{ row }">
           <UBadge

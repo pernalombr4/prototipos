@@ -36,8 +36,11 @@ const props = defineProps<{
   iniciais: string
   /** Item da casca que corresponde à tela aberta. */
   ativo: Chave | null
+  /** Rodada 3: a estrela da barra do topo favorita a tela aberta (projeto ou categoria). */
+  favorito?: boolean
+  favoritavel?: boolean
 }>()
-const emit = defineEmits<{ ir: [chave: Chave] }>()
+const emit = defineEmits<{ ir: [chave: Chave], favoritar: [] }>()
 
 const { marca } = useMarcaDeProposta()
 const toast = useToast()
@@ -242,7 +245,18 @@ const classeDoItem = (ativo: boolean) => [
               <span class="ml-auto hidden shrink-0 items-center gap-1 sm:flex">
                 <UKbd value="ctrl" size="sm" />
                 <UKbd value="B" size="sm" />
-                <UIcon name="i-lucide-star" class="ml-1 size-3.5 text-muted" :aria-label="t.casca.favoritar" />
+                <UButton
+                  icon="i-lucide-star"
+                  size="xs"
+                  :color="favorito ? 'warning' : 'neutral'"
+                  variant="link"
+                  class="ml-0.5 p-0.5"
+                  :class="favorito ? '[&_svg]:fill-current' : 'text-muted'"
+                  :aria-label="favorito ? t.camadas.remover : t.casca.favoritar"
+                  :aria-pressed="favorito"
+                  :disabled="!favoritavel"
+                  @click="emit('favoritar')"
+                />
               </span>
             </div>
 

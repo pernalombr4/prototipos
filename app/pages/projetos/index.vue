@@ -13,17 +13,24 @@
  *   - "Item sem acesso" no campo de vínculo e a coluna Projeto em Minhas tarefas;
  *   - o painel Dados com só as categorias do workspace.
  *
+ * Rodada 3 (o que o projeto guarda além das categorias, pela pesquisa e pelo código de 2026-11-26):
+ *   - a página do projeto com 4 abas: Visão geral (com o status), Itens, Automações e Painel;
+ *   - o mapa Campos comuns nas configurações e o modelo de projeto (salvar e começar de);
+ *   - as 3 camadas convivendo: projeto, seção do workspace (Comercial) e favoritos pessoais;
+ *   - a 2ª chave do andaime, que marca o que pede peça nova no back-end.
+ *
  * Uma porta: tudo se navega pelo menu lateral, como no produto.
  * Fonte: o relatório "Usabilidade de projetos no ENSPACE" (2026-11-25), resumido no PESQUISA.md.
  */
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { textos } from './textos'
-import { iniciais, workspace } from './mocks'
+import { iniciais, secaoComercial, workspace } from './mocks'
 import { personas, useMarcaDeProposta, useProjetos, type Cenario } from './estado'
 import CascaDoMenuNovo from './_CascaDoMenuNovo.vue'
 import PainelInicio from './_PainelInicio.vue'
 import PainelDados from './_PainelDados.vue'
 import PainelDeProjetos from './_PainelDeProjetos.vue'
+import PainelSecaoDoWorkspace from './_PainelSecaoDoWorkspace.vue'
 import CascaDoMenuAtual from './_CascaDoMenuAtual.vue'
 import ProjetosNoMenuAtual from './_ProjetosNoMenuAtual.vue'
 import TodasAsCategorias from './_TodasAsCategorias.vue'
@@ -38,16 +45,16 @@ import decisoesMd from './DECISOES.md?raw'
 
 definePageMeta({
   titulo: 'Projetos no workspace',
-  descricao: 'Um nível entre o workspace e as categorias, no menu novo ou no menu de hoje: o menu de projetos de cada pessoa, o diretório, a página do projeto, criar e configurar, mover categoria, acesso por visibilidade e o "Item sem acesso".',
+  descricao: 'Um nível entre o workspace e as categorias, no menu novo ou no menu de hoje: a página do projeto com itens de todas as categorias, automações, status e painel, o modelo de projeto, o acesso por visibilidade e as 3 camadas do menu (projeto, seção do workspace e favoritos).',
   status: 'rascunho',
-  atualizado: '2026-11-25',
+  atualizado: '2026-11-26',
   tela: 'Menu lateral (novo e atual), diretório e página do projeto, lista da categoria e Minhas tarefas',
 })
 
 const t = useTextos(textos)
 const prj = useProjetos()
 const { area, tela, cenario, estadoDaTela, menu, eu, souDono, souConvidado, visiveis } = prj
-const { destacar, marca } = useMarcaDeProposta()
+const { destacar, destacarBack, marca } = useMarcaDeProposta()
 const toast = useToast()
 
 /** O ícone Projetos só aparece depois do 1º projeto que a pessoa enxerga (como Favoritos). */
@@ -57,6 +64,8 @@ const comProjetos = computed(() => visiveis.value.length > 0)
 watch(tela, (v) => {
   if (v.tipo === 'inicio' || v.tipo === 'tarefas') return
   if (v.tipo === 'categoria') {
+    // A categoria aberta pelo atalho da seção do workspace mantém a seção ativa na trilha.
+    if (area.value === 'comercial' && secaoComercial.categorias.includes(v.id)) return
     const c = prj.categorias.value.find(x => x.id === v.id)
     area.value = c?.projeto ? 'projetos' : 'dados'
     return
@@ -67,6 +76,20 @@ watch(tela, (v) => {
 function irParaArea(id: string) {
   area.value = id as typeof area.value
   if (id === 'inicio') tela.value = { tipo: 'inicio' }
+}
+
+/* ---------- favoritos (camada pessoal) ---------- */
+const favorito = computed(() => !!prj.chaveDaTela.value && prj.ehFavorito(prj.chaveDaTela.value))
+function favoritar() {
+  const chave = prj.chaveDaTela.value
+  if (!chave) return
+  const v = tela.value
+  const nome = v.tipo === 'projeto'
+    ? prj.projetos.value.find(x => x.id === v.id)?.nome ?? ''
+    : v.tipo === 'categoria' ? prj.categorias.value.find(x => x.id === v.id)?.name ?? '' : ''
+  const era = prj.ehFavorito(chave)
+  prj.alternarFavorito(chave)
+  toast.add({ title: era ? t.value.camadas.desfavoritado(nome) : t.value.camadas.favoritado(nome), icon: 'i-lucide-star', color: era ? 'neutral' : 'warning' })
 }
 
 const maquete = () => toast.add({ title: t.value.casca.maquete, icon: 'i-lucide-info', color: 'neutral' })
@@ -144,8 +167,11 @@ const pessoaEscolhida = computed({
       :pode-configurar="souDono"
       :trilha-do-convidado="souConvidado"
       :iniciais="iniciais(prj.euPessoa.value.nome)"
+      :favorito="favorito"
+      :favoritavel="!!prj.chaveDaTela.value"
       @area="irParaArea"
       @inicio="irParaArea('inicio')"
+      @favoritar="favoritar"
     >
       <template #projetos="{ classe }">
         <UTooltip v-if="comProjetos" :text="t.trilha.projetosDica" :content="{ side: 'right' }">
@@ -164,6 +190,7 @@ const pessoaEscolhida = computed({
 
       <template #painel="{ recolher }">
         <PainelDeProjetos v-if="area === 'projetos'" key="projetos" class="animate-[entrada_0.2s_ease-out_both]" :class="marca" :t="t" @recolher="recolher" />
+        <PainelSecaoDoWorkspace v-else-if="area === 'comercial'" key="comercial" class="animate-[entrada_0.2s_ease-out_both]" :t="t" @recolher="recolher" />
         <PainelDados v-else-if="area === 'dados'" key="dados" class="animate-[entrada_0.2s_ease-out_both]" :t="t" @recolher="recolher" />
         <PainelInicio v-else key="inicio" class="animate-[entrada_0.2s_ease-out_both]" :t="t" @recolher="recolher" />
       </template>
@@ -179,7 +206,10 @@ const pessoaEscolhida = computed({
       :pode-configurar="souDono"
       :iniciais="iniciais(prj.euPessoa.value.nome)"
       :ativo="ativoNoAtual"
+      :favorito="favorito"
+      :favoritavel="!!prj.chaveDaTela.value"
       @ir="irNoAtual"
+      @favoritar="favoritar"
     >
       <template #projetos>
         <ProjetosNoMenuAtual :t="t" />
@@ -272,6 +302,7 @@ const pessoaEscolhida = computed({
 
         <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
         <USwitch v-model="destacar" :label="t.andaime.mostrarOQueMuda" size="sm" :ui="{ label: 'text-xs' }" />
+        <USwitch v-model="destacarBack" :label="t.andaime.mostrarBack" size="sm" color="info" :ui="{ label: 'text-xs' }" />
 
         <ControlesDePrototipo class="ml-auto" />
 

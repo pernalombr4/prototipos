@@ -28,8 +28,11 @@ const props = defineProps<{
   /** Proposta: o convidado vê só Início, Projetos e Ajuda. */
   trilhaDoConvidado: boolean
   iniciais: string
+  /** Rodada 3: a estrela da barra do topo favorita a tela aberta (projeto ou categoria). */
+  favorito?: boolean
+  favoritavel?: boolean
 }>()
-const emit = defineEmits<{ area: [id: string], inicio: [] }>()
+const emit = defineEmits<{ area: [id: string], inicio: [], favoritar: [] }>()
 
 const { marca } = useMarcaDeProposta()
 const toast = useToast()
@@ -58,7 +61,8 @@ function classeDaArea(id: string) {
 }
 
 function irPara(id: string) {
-  if (id === 'analise' || id === 'comercial' || id === 'config') {
+  // Rodada 3: Comercial (seção do workspace) abre o painel dela; Análise e Configurações seguem maquete.
+  if (id === 'analise' || id === 'config') {
     toast.add({ title: props.t.casca.maquete, icon: 'i-lucide-info', color: 'neutral' })
     return
   }
@@ -221,7 +225,18 @@ defineExpose({ classeDaArea })
               <span class="ml-auto hidden shrink-0 items-center gap-1 sm:flex">
                 <UKbd value="ctrl" size="sm" />
                 <UKbd value="B" size="sm" />
-                <UIcon name="i-lucide-star" class="ml-1 size-3.5 text-muted" :aria-label="t.casca.favoritar" />
+                <UButton
+                  icon="i-lucide-star"
+                  size="xs"
+                  :color="favorito ? 'warning' : 'neutral'"
+                  variant="link"
+                  class="ml-0.5 p-0.5"
+                  :class="favorito ? '[&_svg]:fill-current' : 'text-muted'"
+                  :aria-label="favorito ? t.camadas.remover : t.casca.favoritar"
+                  :aria-pressed="favorito"
+                  :disabled="!favoritavel"
+                  @click="emit('favoritar')"
+                />
               </span>
             </div>
 

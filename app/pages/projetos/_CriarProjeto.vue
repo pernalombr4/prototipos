@@ -9,15 +9,20 @@
  *  - Participantes: pessoa, grupo de membros ou cargo, cada um com o papel; quem cria entra como
  *    administrador;
  *  - "Mostrar no menu de todos os participantes", marcada.
+ *
+ * Rodada 3: "Começar de", no topo. Projeto em branco ou um modelo (caso de uso do workspace).
+ * O modelo cria categorias novas com a estrutura das de origem, os fluxos desligados, os avisos
+ * e o painel; não traz itens nem participantes. Ainda dá para somar categorias que já existem.
  */
 import type { SelectMenuItem } from '@nuxt/ui'
 import type { Textos } from './textos'
 import { cargos, grupos, iniciais, pessoas, type Participante, type Projeto, type Visibilidade } from './mocks'
-import { COR_DO_PROJETO, ICONE_DA_VISIBILIDADE, useProjetos } from './estado'
+import { COR_DO_PROJETO, ICONE_DA_VISIBILIDADE, useMarcaDeProposta, useProjetos } from './estado'
 
 const props = defineProps<{ t: Textos }>()
 const prj = useProjetos()
 const toast = useToast()
+const { marca } = useMarcaDeProposta()
 
 const aberto = computed({
   get: () => prj.janelas.criar.value,
@@ -37,9 +42,23 @@ const participantes = ref<Participante[]>([])
 const noMenuDeTodos = ref(true)
 const tentou = ref(false)
 const salvando = ref(false)
+/** Rodada 3: 0 = projeto em branco; outro número = o id do modelo. */
+const modeloId = ref(0)
+const modelo = computed(() => prj.modelos.value.find(m => m.id === modeloId.value) ?? null)
+const opcoesDeModelo = computed(() => [
+  { value: 0, label: props.t.modelo.emBranco, icon: 'i-lucide-square-dashed', dica: props.t.modelo.emBrancoDica },
+  ...prj.modelos.value.map(m => ({ value: m.id, label: m.nome, icon: m.icone, dica: `${m.descricao} ${props.t.modelo.modeloDica(m.categorias.length)}`.trim(), autor: props.t.modelo.criadoPor(pessoas.find(x => x.id === m.criadoPor)?.nome ?? '') })),
+])
+watch(modelo, (m) => {
+  if (!m) return
+  icone.value = m.icone
+  cor.value = m.cor
+  visibilidade.value = m.visibilidade
+})
 
 watch(aberto, (v) => {
   if (!v) return
+  modeloId.value = 0
   nome.value = ''
   descricao.value = ''
   icone.value = ICONES[0]!
@@ -112,10 +131,16 @@ async function criar() {
     categorias: categoriasEscolhidas.value,
     participantes: participantes.value,
     noMenuDeTodos: noMenuDeTodos.value,
+    modelo: modelo.value?.id,
   })
   salvando.value = false
   aberto.value = false
-  toast.add({ title: props.t.criar.criado(p.nome), icon: 'i-lucide-check', color: 'success' })
+  const m = modelo.value
+  toast.add({
+    title: m ? props.t.modelo.criadoComModelo(p.nome, m.categorias.length + categoriasEscolhidas.value.length, prj.fluxosDoProjeto(p.id).length) : props.t.criar.criado(p.nome),
+    icon: 'i-lucide-check',
+    color: 'success',
+  })
 }
 </script>
 
@@ -123,6 +148,29 @@ async function criar() {
   <UModal v-model:open="aberto" :title="t.criar.titulo" :description="t.criar.descricaoDaJanela" :ui="{ content: 'max-w-2xl' }">
     <template #body>
       <form class="space-y-5" @submit.prevent="criar">
+        <!-- rodada 3: começar de um modelo -->
+        <UFormField v-if="prj.modelos.value.length" :label="t.modelo.comecarDe" :class="marca">
+          <USelect v-model="modeloId" :items="opcoesDeModelo" class="w-full" :icon="modelo ? modelo.icone : 'i-lucide-square-dashed'">
+            <template #item-trailing="{ item }">
+              <span v-if="(item as any).autor" class="text-xs text-muted">{{ (item as any).autor }}</span>
+              <UTooltip :text="(item as any).dica" :content="{ side: 'right' }">
+                <UIcon name="i-lucide-circle-help" class="size-4 text-muted" :aria-label="(item as any).dica" />
+              </UTooltip>
+            </template>
+          </USelect>
+          <div v-if="modelo" class="mt-2 rounded-md border border-default bg-elevated/40 px-3 py-2.5 animate-[entrada_0.15s_ease-out_both]">
+            <p class="text-sm font-medium text-highlighted">{{ t.modelo.traz }}</p>
+            <ul class="mt-1.5 space-y-1 text-sm text-toned">
+              <li class="flex items-start gap-2"><UIcon name="i-lucide-database" class="mt-0.5 size-4 shrink-0 text-muted" />{{ t.modelo.categoriasNovas(modelo.categorias.map(c => c.nome).join(', ')) }}</li>
+              <li class="flex items-start gap-2"><UIcon name="i-lucide-columns-3" class="mt-0.5 size-4 shrink-0 text-muted" />{{ t.modelo.estrutura }}</li>
+              <li v-if="modelo.fluxos" class="flex items-start gap-2"><UIcon name="i-lucide-workflow" class="mt-0.5 size-4 shrink-0 text-muted" />{{ t.modelo.fluxos(modelo.fluxos) }}</li>
+              <li v-if="modelo.avisos" class="flex items-start gap-2"><UIcon name="i-lucide-bell-ring" class="mt-0.5 size-4 shrink-0 text-muted" />{{ t.modelo.avisos(modelo.avisos) }}</li>
+              <li v-if="modelo.paineis" class="flex items-start gap-2"><UIcon name="i-lucide-chart-column" class="mt-0.5 size-4 shrink-0 text-muted" />{{ t.modelo.paineis }}</li>
+            </ul>
+            <p class="mt-2 flex items-start gap-1.5 text-xs text-muted"><UIcon name="i-lucide-shield-check" class="mt-px size-3.5 shrink-0" />{{ t.modelo.naoTraz }}</p>
+          </div>
+        </UFormField>
+
         <div class="flex items-start gap-3">
           <UFormField :label="t.criar.icone">
             <UPopover :content="{ align: 'start' }">
@@ -182,7 +230,7 @@ async function criar() {
 
         <USeparator />
 
-        <UFormField :label="t.criar.categorias" :help="livres ? t.criar.categoriasDica : t.criar.semCategoriasLivres">
+        <UFormField :label="modelo ? t.modelo.outrasCategorias : t.criar.categorias" :help="livres ? t.criar.categoriasDica : t.criar.semCategoriasLivres">
           <USelectMenu
             v-model="categoriasEscolhidas"
             :items="opcoesDeCategoria"

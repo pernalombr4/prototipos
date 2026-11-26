@@ -157,6 +157,35 @@ resto avisa que é maquete. O convidado vê Início e Tarefas, e Configurações
 6. Marina abre o diretório, vê Obra Aurora (fechado) e pede acesso; não vê o Jurídico.
 7. Beatriz (convidada da Aurora) vê só Início, Projetos e Ajuda, com 1 projeto.
 
+## Rodada 3: o que o projeto guarda além das categorias
+
+### O que a pesquisa trouxe
+Fonte: `pesquisa-de-mercado/runs/2026-11-26-o-que-o-projeto-guarda-alem-de-categorias/`. Nos produtos
+comparados, o projeto guarda mais que as listas: uma visão dos itens de todas elas, automações, um status com
+data e texto, um painel e um modelo para começar o próximo.
+
+### O que o código do ENSPACE diz (develop, 2026-11-26)
+- A consulta de itens lê 1 categoria por vez: a visão cruzada é peça nova.
+- O gatilho de item de um fluxo do Spaceflow escuta 1 categoria. A aba Automações lista esses fluxos; o gatilho
+  do projeto inteiro fica fora.
+- Os avisos de prazo já são por categoria.
+- Cada widget de painel lê 1 categoria; somar categorias é novo.
+- O importador de estrutura (o mesmo dos casos de uso) já copia categorias, campos, formulários, visualizações
+  e fluxos, com os fluxos desligados e sem responsáveis nem credenciais.
+- O menu personalizado (Interface, Menus) é a seção do workspace do menu novo.
+- A página de projetos do develop é órfã: o back que a servia foi tirado.
+
+### O fluxo da rodada 3
+1. Lívia (administradora do Financeiro) abre o projeto e lê o status "No prazo".
+2. Em Itens, vê os 11 itens das 3 categorias; Reembolsos mostra "Sem campo" no Prazo.
+3. Nas Configurações, aba Campos comuns, escolhe o campo de cada categoria.
+4. Em Automações, desliga um fluxo; em Painel, lê os 3 widgets e o de soma.
+5. Rita (proprietária) cria "Obra Centro" a partir do modelo Obra: 2 categorias novas e 2 fluxos desligados.
+6. Rita abre Comercial, a seção do workspace, e entra em Oportunidades pelo atalho. Marina vê só Oportunidades,
+   porque não participa do Jurídico.
+7. Marina (participante do Financeiro) abre as mesmas abas sem Configurações, sem "Novo fluxo" e com as chaves
+   dos fluxos desabilitadas.
+
 ## Preparo
 
 Nenhum preparo por API: a exploração só leu o workspace de exploração.

@@ -177,3 +177,80 @@ Alternativas para decidir com ela: Projetos, Espaços, Áreas.
   - os prints da rodada 1 saíram de novo, sem o ícone do Nuxt DevTools.
 - **Ver:** https://pernalombr4.github.io/prototipos/projetos
   - `evidencias/entrega-menu-atual-projeto.png`: o menu atual com o Financeiro aberto, como proprietária.
+
+## Rodada 3 · 2026-11-26
+- **Pedido (literal):** "Sim, rodada 3", em resposta a "Faço a rodada 3 com as 3 camadas juntas, ou você quer
+  ajustar algo antes?". Antes, a redatora pediu "antes de fazer a rodada 3 ajustada pelo codigo me responda isso
+  pra considerarmos tambem esses pontos ja", sobre como projeto, seção do workspace e favoritos convivem.
+- **Base:** a pesquisa `pesquisa-de-mercado/runs/2026-11-26-o-que-o-projeto-guarda-alem-de-categorias/` e a
+  leitura do código do ENSPACE de 2026-11-26 (develop), ponto a ponto.
+- **Mudou:**
+  - a página do projeto ganha 4 abas: Visão geral, Itens, Automações e Painel;
+  - Visão geral abre com o Status do projeto: situação (No prazo, Em risco, Atrasado, Concluído), início, fim
+    previsto, texto, autor e as atualizações anteriores; quem administra publica, os demais leem;
+  - Itens mostra os itens de todas as categorias do projeto numa tabela e num quadro, com Responsável, Prazo e
+    Status de cada categoria; "Novo registro" pergunta a categoria;
+  - Configurações ganha a aba Campos comuns: por categoria, qual campo entra em Responsável, Prazo e Status, com
+    "Não usar", e em que coluna do quadro cai cada valor do status;
+  - Automações lista os fluxos do Spaceflow que escutam uma categoria do projeto e os avisos de prazo das
+    categorias; "Novo fluxo" pede a categoria e o gatilho e abre o Spaceflow;
+  - Painel mostra 1 widget "Itens por status" por categoria, mais "Itens em aberto por responsável", que soma as
+    categorias;
+  - modelo de projeto: "Salvar como modelo" nas Configurações e "Começar de" no Criar projeto;
+  - as 3 camadas no menu: o "?" do painel Projetos explica quando usar cada uma; a seção do workspace Comercial
+    abre o painel dela, com atalho para categoria de projeto; os Favoritos do Início vêm da estrela da barra do
+    topo e aceitam projeto;
+  - o ponto do status ao lado do nome do projeto no painel, no menu atual e uma coluna Status no diretório;
+  - a 2ª chave do andaime, "Mostrar o que pede back-end novo", contorna em azul o que não existe no back hoje.
+- **Fronteira:** muda a página do projeto, as Configurações, o Criar projeto, o painel Início (Favoritos) e o
+  painel da seção Comercial; não muda a casca dos 2 menus nem as telas das categorias.
+
+### Cabe hoje × pede peça nova no back-end
+
+| Parte | Cabe hoje | Pede peça nova |
+|---|---|---|
+| Status do projeto | | O projeto não existe no back; o status vai junto dele |
+| Itens de todas as categorias | | A consulta de itens lê 1 categoria por vez; a visão cruzada e o mapa de campos são novos |
+| Automações | Os fluxos já escutam 1 categoria; os avisos de prazo já são por categoria | Listar por projeto pede saber quais categorias são do projeto |
+| Gatilho do projeto inteiro | | 1 fluxo para todas as categorias do projeto; fica fora desta rodada |
+| Painel por categoria | Cada widget lê 1 categoria, como os painéis de hoje | |
+| Widget que soma categorias | | Somar categorias numa conta só é novo |
+| Modelo de projeto | O importador de estrutura do produto já copia categorias, campos, formulários, visualizações e fluxos | Guardar o modelo com o projeto e aplicar a um projeto novo |
+| Seção do workspace | É o menu personalizado de hoje (Interface, Menus) | O atalho para categoria de projeto, que segue o acesso do projeto |
+| Favoritos | Os favoritos de categoria já existem | Favoritar o projeto |
+
+### O modelo segue o importador de hoje
+O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras que o modelo herda:
+- os fluxos entram desligados: a página avisa quantos vieram do modelo e pede revisão antes de ligar;
+- o importador limpa responsáveis, destinatários, colaboradores e credenciais dos fluxos: o modelo diz que não
+  traz itens, participantes nem os responsáveis dos fluxos;
+- cada categoria do modelo vira uma categoria nova no projeto, nunca reaproveita uma que existe; quem quer
+  usar uma categoria do workspace a escolhe no campo "Categorias que já existem".
+
+### As 3 camadas convivem
+- **Projeto:** guarda as categorias e decide quem vê os itens.
+- **Seção do workspace:** atalhos que o administrador monta em Interface, Menus; não muda o acesso a nada. O
+  atalho para categoria de projeto só aparece para quem entra no projeto.
+- **Favoritos:** os atalhos de cada pessoa, pela estrela; só ela vê.
+
+- **Maquete:** as telas da seção Comercial, "Configurar avisos", "Editar painel", abrir um fluxo e "Abrir no
+  Spaceflow" dão um aviso; nada sai do protótipo.
+- **Achados, sem correção:**
+  - o quadro do SDK põe o título do cartão em maiúscula a cada palavra ("Viagem A Joinville");
+  - o menu atual não tem lugar para a seção do workspace: no menu de hoje ela é o próprio menu personalizado;
+  - o botão Salvar desabilitado das Configurações quase não se distingue do habilitado (estilo do Nuxt UI).
+- **Crítica e acessibilidade:**
+  - as abas das Configurações rolam na horizontal sem barra de rolagem visível, para os 6 rótulos caberem;
+  - o nome do fluxo quebra linha em vez de cortar;
+  - os pontos de status têm `aria-label` e dica com o nome da situação, sem depender da cor;
+  - as chaves de fluxo ficam desabilitadas para quem não administra, e "Novo fluxo", "Atualizar status" e
+    "Configurações" somem.
+- **Ver:** https://pernalombr4.github.io/prototipos/projetos
+  - `evidencias/entrega-status-do-projeto.png`: Visão geral do Financeiro, com o status;
+  - `evidencias/entrega-itens-do-projeto.png`: Itens das 3 categorias, com o contorno do back-end novo;
+  - `evidencias/entrega-automacoes.png`: os 4 fluxos e o aviso de prazo do Financeiro;
+  - `evidencias/entrega-painel-do-projeto.png`: os 3 widgets por categoria e o de soma, em azul;
+  - `evidencias/entrega-campos-comuns.png`: a aba Campos comuns, com Reembolsos sem campo de prazo;
+  - `evidencias/entrega-criar-com-modelo.png`: Criar projeto a partir do modelo Obra;
+  - `evidencias/entrega-secao-do-workspace.png`: Oportunidades aberta pela seção Comercial;
+  - `evidencias/entrega-camadas.png`: o "?" das 3 camadas.

@@ -97,6 +97,8 @@ export interface Categoria extends CamposDaApi {
   projeto: number | null
   /** Fictício: quantos itens a categoria tem, para o card e a lista. */
   itens: number
+  /** Rodada 3: a categoria criada por um modelo guarda a de origem (campos, fluxos e mapa). */
+  copiaDe?: number
 }
 
 export const categoriasBase: Categoria[] = [
@@ -173,6 +175,25 @@ export interface Projeto {
   /** Inventado. */
   criadoEm: string
   atividade: { quem: number, oque: string, quando: string }[]
+  /** Inventado (rodada 3): as atualizações de status, da mais nova para a mais antiga. */
+  atualizacoes: AtualizacaoDeStatus[]
+}
+
+/* ==================================================================
+   STATUS DO PROJETO (proposta da rodada 3)
+   Base: as status updates do GitHub Projects e o "Project overview" do Asana.
+   Campos da entidade nova de projeto, sem conflito com o que existe no código.
+================================================================== */
+
+export type Situacao = 'noPrazo' | 'emRisco' | 'atrasado' | 'concluido'
+
+export interface AtualizacaoDeStatus {
+  situacao: Situacao
+  inicio: string
+  fim: string
+  texto: string
+  autor: number
+  em: string
 }
 
 export const projetosBase: Projeto[] = [
@@ -199,6 +220,10 @@ export const projetosBase: Projeto[] = [
       { quem: 3, oque: 'adicionou o grupo Financeiro ao projeto', quando: 'há 3 dias' },
       { quem: 1, oque: 'moveu a categoria Reembolsos para o projeto', quando: 'há 1 semana' },
     ],
+    atualizacoes: [
+      { situacao: 'noPrazo', inicio: '2026-08-04', fim: '2026-12-31', texto: 'Fechamento de novembro em dia. As notas da filial Joinville entram até sexta-feira.', autor: 3, em: '2026-11-24' },
+      { situacao: 'emRisco', inicio: '2026-08-04', fim: '2026-12-31', texto: 'Atraso na conferência das notas de outubro. Reforço de 2 pessoas na equipe.', autor: 3, em: '2026-10-27' },
+    ],
   },
   {
     id: 2,
@@ -221,6 +246,9 @@ export const projetosBase: Projeto[] = [
       { quem: 7, oque: 'cadastrou o prazo PZ8841', quando: 'há 40 minutos' },
       { quem: 4, oque: 'mudou a visibilidade para Privado', quando: 'há 2 semanas' },
     ],
+    atualizacoes: [
+      { situacao: 'emRisco', inicio: '2026-08-11', fim: '2027-03-31', texto: '3 prazos fatais na próxima semana e 1 advogado de férias.', autor: 4, em: '2026-11-23' },
+    ],
   },
   {
     id: 3,
@@ -242,6 +270,7 @@ export const projetosBase: Projeto[] = [
     atividade: [
       { quem: 12, oque: 'enviou a proposta PC2290', quando: 'ontem' },
     ],
+    atualizacoes: [],
   },
   {
     id: 4,
@@ -265,6 +294,9 @@ export const projetosBase: Projeto[] = [
     atividade: [
       { quem: 10, oque: 'aprovou a medição de outubro', quando: 'há 5 horas' },
       { quem: 9, oque: 'convidou Beatriz Lemos e Fernando Aguiar', quando: 'há 1 mês' },
+    ],
+    atualizacoes: [
+      { situacao: 'atrasado', inicio: '2026-10-20', fim: '2026-12-15', texto: 'A medição de novembro depende da aprovação do cliente. A entrega da estrutura passou para 15 de janeiro.', autor: 9, em: '2026-11-25' },
     ],
   },
 ]
@@ -302,6 +334,9 @@ export const projetosVolume: Projeto[] = [
       noMenuDeTodos: false,
       criadoEm: `2026-${String(1 + (i % 10)).padStart(2, '0')}-${String(1 + (i % 27)).padStart(2, '0')}`,
       atividade: [],
+      atualizacoes: i % 4 === 3
+        ? []
+        : [{ situacao: (['noPrazo', 'emRisco', 'atrasado', 'noPrazo', 'concluido'] as const)[i % 5]!, inicio: '2026-09-01', fim: '2027-02-28', texto: '', autor: [2, 6, 9, 3][i % 4]!, em: '2026-11-20' }],
     }
   }),
 ]
@@ -364,3 +399,213 @@ export const minhasTarefas: Tarefa[] = [
   { id: 6, titulo: 'Validar medição de novembro', categoria: 12, item: 'ME0046', prazo: '2026-11-30', atrasada: false },
   { id: 7, titulo: 'Qualificar oportunidade', categoria: 10, item: 'OP0529', prazo: '2026-11-29', atrasada: false },
 ]
+
+/* ==================================================================
+   ITENS DO PROJETO NUMA VISÃO SÓ (proposta da rodada 3)
+
+   No produto, o item não tem responsável, prazo nem status nativos: são campos da categoria
+   (conferência no código de 2026-11-26). Por isso a visão do projeto lê um MAPA por categoria,
+   como a Agenda lê o campo de data de cada categoria: qual campo é o Responsável, o Prazo e o
+   Status, e em que coluna do quadro cada valor do status entra.
+   Peça nova no back-end: a leitura de itens de várias categorias numa chamada só.
+================================================================== */
+
+export type GrupoDeStatus = 'aberto' | 'andamento' | 'concluido'
+
+/** Fictício: os campos de cada categoria que servem ao mapa. O 1º de cada lista é o padrão. */
+export interface CamposDaCategoria {
+  pessoa: string[]
+  data: string[]
+  /** O campo de status e os valores dele, na ordem do fluxo. */
+  status: string
+  valores: { valor: string, grupo: GrupoDeStatus }[]
+  prefixo: string
+  titulos: string[]
+}
+
+export const camposDaCategoria: Record<number, CamposDaCategoria> = {
+  4: { pessoa: ['Aprovador', 'Solicitante'], data: ['Vencimento', 'Data de emissão'], status: 'Etapa do fluxo', prefixo: 'CP', titulos: ['Honorários periciais', 'Locação de andaimes', 'Licenças de software', 'Custas processuais', 'Energia elétrica'], valores: [{ valor: 'A lançar', grupo: 'aberto' }, { valor: 'Em aprovação', grupo: 'andamento' }, { valor: 'Aprovada', grupo: 'andamento' }, { valor: 'Paga', grupo: 'concluido' }] },
+  5: { pessoa: ['Conferente'], data: ['Data de entrada', 'Data de emissão'], status: 'Situação', prefixo: 'NF', titulos: ['Nota de entrada 88120', 'Nota de serviço 4471', 'Nota de entrada 88133'], valores: [{ valor: 'Recebida', grupo: 'aberto' }, { valor: 'Em conferência', grupo: 'andamento' }, { valor: 'Lançada', grupo: 'concluido' }] },
+  6: { pessoa: ['Aprovador', 'Solicitante'], data: [], status: 'Etapa do fluxo', prefixo: 'RE', titulos: ['Viagem a Joinville', 'Almoço com cliente', 'Combustível de outubro'], valores: [{ valor: 'Enviado', grupo: 'aberto' }, { valor: 'Em análise', grupo: 'andamento' }, { valor: 'Reembolsado', grupo: 'concluido' }] },
+  7: { pessoa: ['Advogado responsável'], data: ['Próxima audiência', 'Data de distribuição'], status: 'Fase processual', prefixo: 'PJ', titulos: ['Ação trabalhista 0012345', 'Execução fiscal 0098765', 'Ação de cobrança 0045612'], valores: [{ valor: 'Inicial', grupo: 'aberto' }, { valor: 'Instrução', grupo: 'andamento' }, { valor: 'Recurso', grupo: 'andamento' }, { valor: 'Encerrado', grupo: 'concluido' }] },
+  8: { pessoa: ['Responsável'], data: ['Data fatal'], status: 'Situação', prefixo: 'PZ', titulos: ['Contestação 0012345', 'Recurso ordinário 0045612', 'Manifestação 0098765'], valores: [{ valor: 'Aberto', grupo: 'aberto' }, { valor: 'Em elaboração', grupo: 'andamento' }, { valor: 'Protocolado', grupo: 'concluido' }] },
+  9: { pessoa: ['Parecerista'], data: ['Entrega prevista'], status: 'Etapa do fluxo', prefixo: 'PA', titulos: ['Parecer sobre aditivo', 'Parecer tributário'], valores: [{ valor: 'Solicitado', grupo: 'aberto' }, { valor: 'Em redação', grupo: 'andamento' }, { valor: 'Entregue', grupo: 'concluido' }] },
+  10: { pessoa: ['Vendedor'], data: ['Fechamento previsto'], status: 'Etapa do funil', prefixo: 'OP', titulos: ['Rede Vale Supermercados', 'Clínica Horizonte', 'Transportes Litoral', 'Colégio Araucária'], valores: [{ valor: 'Prospecção', grupo: 'aberto' }, { valor: 'Qualificada', grupo: 'andamento' }, { valor: 'Negociação', grupo: 'andamento' }, { valor: 'Ganha', grupo: 'concluido' }] },
+  11: { pessoa: ['Vendedor'], data: ['Validade'], status: 'Situação', prefixo: 'PC', titulos: ['Proposta Rede Vale', 'Proposta Clínica Horizonte'], valores: [{ valor: 'Rascunho', grupo: 'aberto' }, { valor: 'Enviada', grupo: 'andamento' }, { valor: 'Aceita', grupo: 'concluido' }] },
+  12: { pessoa: ['Fiscal da obra'], data: ['Data da medição'], status: 'Etapa do fluxo', prefixo: 'ME', titulos: ['Medição de outubro', 'Medição de novembro'], valores: [{ valor: 'Lançada', grupo: 'aberto' }, { valor: 'Em aprovação do cliente', grupo: 'andamento' }, { valor: 'Aprovada', grupo: 'concluido' }] },
+  13: { pessoa: ['Responsável', 'Registrado por'], data: ['Prazo de solução', 'Data da ocorrência'], status: 'Situação', prefixo: 'OC', titulos: ['Infiltração no bloco B', 'Atraso na entrega de aço', 'Andaime sem guarda-corpo'], valores: [{ valor: 'Aberta', grupo: 'aberto' }, { valor: 'Em tratamento', grupo: 'andamento' }, { valor: 'Resolvida', grupo: 'concluido' }] },
+}
+
+/** O mapa de um projeto, por categoria. `null` = a categoria não entra naquela coluna. */
+export interface MapaDaCategoria {
+  responsavel: string | null
+  prazo: string | null
+  status: string | null
+  grupos: Record<string, GrupoDeStatus>
+}
+
+export function mapaPadrao(categoria: number): MapaDaCategoria {
+  const c = camposDaCategoria[categoria]
+  if (!c) return { responsavel: null, prazo: null, status: null, grupos: {} }
+  return {
+    responsavel: c.pessoa[0] ?? null,
+    prazo: c.data[0] ?? null,
+    status: c.status,
+    grupos: Object.fromEntries(c.valores.map(v => [v.valor, v.grupo])),
+  }
+}
+
+export interface ItemDoProjeto {
+  id: number
+  categoria: number
+  /** Do produto: `Item.reference`. */
+  reference: string
+  titulo: string
+  /** Os valores dos campos, pelo nome do campo (pessoa: id; data: AAAA-MM-DD; status: valor). */
+  campos: Record<string, string | number>
+}
+
+/** Quem trabalha em cada categoria, para preencher os campos de pessoa. */
+const gente: Record<number, number[]> = { 4: [3, 5, 2], 5: [5, 3], 6: [3, 5], 7: [4, 7], 8: [7, 4], 9: [4], 10: [6, 12, 8], 11: [12, 6], 12: [9, 2], 13: [9, 10, 11] }
+/** Prazos em volta de hoje (2026-11-26): alguns já venceram. */
+const prazos = ['2026-11-24', '2026-11-27', '2026-11-30', '2026-12-04', '2026-11-21', '2026-12-10']
+
+let idDoItem = 0
+export const itensDoProjeto: ItemDoProjeto[] = Object.entries(camposDaCategoria).flatMap(([cat, c]) =>
+  c.titulos.map((titulo, i): ItemDoProjeto => {
+    const quem = gente[Number(cat)] ?? [1]
+    const campos: Record<string, string | number> = { [c.status]: c.valores[(i + Number(cat)) % c.valores.length]!.valor }
+    c.pessoa.forEach((campo, k) => { campos[campo] = quem[(i + k) % quem.length]! })
+    c.data.forEach((campo, k) => { campos[campo] = prazos[(i + Number(cat) + k * 2) % prazos.length]! })
+    return { id: ++idDoItem, categoria: Number(cat), reference: `${c.prefixo}${String(4200 - i * 17 + Number(cat)).padStart(4, '0')}`, titulo, campos }
+  }))
+
+/* ==================================================================
+   AUTOMAÇÕES DO PROJETO (proposta da rodada 3)
+
+   O que já existe e a página do projeto só reúne: os fluxos do Spaceflow cujo gatilho escuta
+   uma categoria do projeto (`events::c_items:<slug>::<ação>`) e os avisos de prazo de cada
+   categoria (`c-type-notifications`). Nenhum motor novo.
+================================================================== */
+
+export type Gatilho = 'criado' | 'atualizado' | 'excluido' | 'agendado'
+
+export interface Fluxo {
+  id: number
+  /** Do produto: o nome do workflow. */
+  nome: string
+  /** A categoria que o gatilho escuta. */
+  categoria: number
+  gatilho: Gatilho
+  ativo: boolean
+  /** Fictício. */
+  ultimaExecucao: string | null
+  execucoes30d: number
+}
+
+export const fluxosBase: Fluxo[] = [
+  { id: 1, nome: 'Aprovação de pagamento acima de 10 mil', categoria: 4, gatilho: 'criado', ativo: true, ultimaExecucao: '2026-11-26', execucoes30d: 214 },
+  { id: 2, nome: 'Baixa automática na conciliação', categoria: 4, gatilho: 'atualizado', ativo: true, ultimaExecucao: '2026-11-25', execucoes30d: 188 },
+  { id: 3, nome: 'Lançar nota no ERP', categoria: 5, gatilho: 'atualizado', ativo: false, ultimaExecucao: '2026-10-30', execucoes30d: 0 },
+  { id: 4, nome: 'Reembolso aprovado avisa o solicitante', categoria: 6, gatilho: 'atualizado', ativo: true, ultimaExecucao: '2026-11-24', execucoes30d: 41 },
+  { id: 5, nome: 'Prazo fatal cria tarefa para o responsável', categoria: 8, gatilho: 'criado', ativo: true, ultimaExecucao: '2026-11-26', execucoes30d: 77 },
+  { id: 6, nome: 'Encerramento do processo', categoria: 7, gatilho: 'atualizado', ativo: true, ultimaExecucao: '2026-11-19', execucoes30d: 6 },
+  { id: 7, nome: 'Oportunidade ganha gera proposta', categoria: 10, gatilho: 'atualizado', ativo: true, ultimaExecucao: '2026-11-25', execucoes30d: 23 },
+  { id: 8, nome: 'Medição enviada ao cliente para aprovação', categoria: 12, gatilho: 'criado', ativo: true, ultimaExecucao: '2026-11-03', execucoes30d: 2 },
+  { id: 9, nome: 'Ocorrência grave avisa o fiscal', categoria: 13, gatilho: 'criado', ativo: true, ultimaExecucao: '2026-11-25', execucoes30d: 19 },
+]
+
+export interface AvisoDePrazo {
+  categoria: number
+  /** O campo de data que o aviso lê. */
+  campo: string
+  diasAntes: number
+  /** Quem recebe: o campo de pessoa do item. */
+  quem: string
+}
+
+export const avisosBase: AvisoDePrazo[] = [
+  { categoria: 4, campo: 'Vencimento', diasAntes: 3, quem: 'Aprovador' },
+  { categoria: 8, campo: 'Data fatal', diasAntes: 5, quem: 'Responsável' },
+  { categoria: 8, campo: 'Data fatal', diasAntes: 1, quem: 'Responsável' },
+  { categoria: 13, campo: 'Prazo de solução', diasAntes: 2, quem: 'Responsável' },
+]
+
+/* ==================================================================
+   MODELO DE PROJETO (proposta da rodada 3)
+
+   No produto, o modelo é um caso de uso (Interface > Casos de uso), com o mesmo importador.
+   Copia a estrutura (categorias com campos, formulários e visualizações; fluxos; avisos;
+   painel; visibilidade e permissão padrão) e nunca os itens nem os participantes.
+   O importador de hoje pede 3 ajustes (exportar só as categorias do projeto, apontar o gatilho
+   para a categoria nova e refazer os participantes): está no DECISOES.md.
+================================================================== */
+
+export interface ModeloDeProjeto {
+  id: number
+  nome: string
+  descricao: string
+  icone: string
+  cor: Projeto['cor']
+  visibilidade: Visibilidade
+  /** As categorias que o modelo cria, a partir das do projeto de origem. */
+  categorias: { origem: number, nome: string, icone: string }[]
+  fluxos: number
+  avisos: number
+  paineis: number
+  criadoPor: number
+  criadoEm: string
+}
+
+export const modelosBase: ModeloDeProjeto[] = [
+  {
+    id: 1,
+    nome: 'Obra',
+    descricao: 'Medições aprovadas pelo cliente e registro de ocorrências do canteiro.',
+    icone: 'i-lucide-hard-hat',
+    cor: 'secondary',
+    visibilidade: 'fechado',
+    categorias: [
+      { origem: 12, nome: 'Medições de obra', icone: 'i-lucide-ruler' },
+      { origem: 13, nome: 'Ocorrências de obra', icone: 'i-lucide-triangle-alert' },
+    ],
+    fluxos: 2,
+    avisos: 1,
+    paineis: 1,
+    criadoPor: 9,
+    criadoEm: '2026-11-02',
+  },
+  {
+    id: 2,
+    nome: 'Contencioso',
+    descricao: 'Processos e prazos processuais, com aviso de data fatal.',
+    icone: 'i-lucide-scale',
+    cor: 'warning',
+    visibilidade: 'privado',
+    categorias: [
+      { origem: 7, nome: 'Processos judiciais', icone: 'i-lucide-scale' },
+      { origem: 8, nome: 'Prazos processuais', icone: 'i-lucide-alarm-clock' },
+    ],
+    fluxos: 2,
+    avisos: 2,
+    paineis: 1,
+    criadoPor: 4,
+    criadoEm: '2026-09-15',
+  },
+]
+
+/* ==================================================================
+   SEÇÃO DO WORKSPACE (casca do menu-lateral, rodada 35)
+   O menu personalizado de hoje (Interface > Menus): montado pelo administrador, igual para
+   todos os grupos escolhidos. A proposta acrescenta só o atalho para a categoria de projeto.
+================================================================== */
+
+export const secaoComercial = {
+  telas: [
+    { id: 'painel-vendas', rotulo: 'Painel de vendas', icone: 'i-lucide-chart-line', filhos: [{ id: 'metas', rotulo: 'Metas do trimestre', icone: 'i-lucide-target' }] },
+    { id: 'triagem', rotulo: 'Triagem de propostas', icone: 'i-lucide-list-filter', filhos: [] as { id: string, rotulo: string, icone: string }[] },
+    { id: 'minhas-req', rotulo: 'Minhas requisições', icone: 'i-lucide-inbox', filhos: [] as { id: string, rotulo: string, icone: string }[] },
+  ],
+  /** Proposta: atalhos para categorias de projeto. Seguem o acesso do projeto. */
+  categorias: [10, 7],
+}

@@ -7,11 +7,17 @@
  * Um rascunho só para as abas e um Salvar só: trocar de aba não descarta nada
  * (S3-F1 da pesquisa de UX: alteração descartada em silêncio ao trocar de aba).
  * Mover categoria abre o diálogo do que muda e vale na hora, como todo movimento.
+ *
+ * Rodada 3:
+ *  - aba Campos comuns: o mapa Responsável, Prazo e Status de cada categoria, e em que coluna do
+ *    quadro entra cada valor do status. Entra no mesmo rascunho e no mesmo Salvar;
+ *  - Geral: "Salvar como modelo", que vira caso de uso do workspace.
  */
 import type { SelectMenuItem, TabsItem } from '@nuxt/ui'
 import type { Textos } from './textos'
-import { cargos, grupos, iniciais, pessoa, pessoas, type Participante, type PermissaoPadrao, type Visibilidade } from './mocks'
-import { ICONE_DA_VISIBILIDADE, useProjetos } from './estado'
+import { camposDaCategoria, cargos, grupos, iniciais, pessoa, pessoas, type GrupoDeStatus, type MapaDaCategoria, type Participante, type PermissaoPadrao, type Visibilidade } from './mocks'
+import { ICONE_DA_VISIBILIDADE, useMarcaDeProposta, useProjetos } from './estado'
+import SalvarComoModelo from './_SalvarComoModelo.vue'
 
 const props = defineProps<{ t: Textos }>()
 const prj = useProjetos()
@@ -25,9 +31,10 @@ const p = computed(() => prj.projetos.value.find(x => x.id === prj.janelas.confi
 const admin = computed(() => !!p.value && prj.podeAdministrar(p.value))
 const aba = ref('geral')
 
-interface Rascunho { nome: string, descricao: string, noMenuDeTodos: boolean, visibilidade: Visibilidade, permissaoPadrao: PermissaoPadrao, participantes: Participante[] }
+interface Rascunho { nome: string, descricao: string, noMenuDeTodos: boolean, visibilidade: Visibilidade, permissaoPadrao: PermissaoPadrao, participantes: Participante[], mapa: Record<number, MapaDaCategoria> }
 const rascunho = ref<Rascunho | null>(null)
 const original = ref('')
+const { marca, marcaBack } = useMarcaDeProposta()
 
 function carregar() {
   if (!p.value) return
@@ -38,6 +45,10 @@ function carregar() {
     visibilidade: p.value.visibilidade,
     permissaoPadrao: { ...p.value.permissaoPadrao },
     participantes: p.value.participantes.map(x => ({ ...x })),
+    mapa: Object.fromEntries(prj.categoriasDe(p.value.id).map(c => {
+      const m = prj.mapas.value[c.id] ?? { responsavel: null, prazo: null, status: null, grupos: {} }
+      return [c.id, { ...m, grupos: { ...m.grupos } }]
+    })),
   }
   original.value = JSON.stringify(rascunho.value)
 }
@@ -52,6 +63,7 @@ const alterado = computed(() => !!rascunho.value && JSON.stringify(rascunho.valu
 const abas = computed<TabsItem[]>(() => [
   { value: 'geral', label: props.t.config.abaGeral, icon: 'i-lucide-sliders-horizontal' },
   { value: 'categorias', label: props.t.config.abaCategorias, icon: 'i-lucide-database' },
+  { value: 'campos', label: props.t.mapa.aba, icon: 'i-lucide-columns-3' },
   { value: 'participantes', label: props.t.config.abaParticipantes, icon: 'i-lucide-users-round' },
   { value: 'acesso', label: props.t.config.abaAcesso, icon: 'i-lucide-shield' },
   { value: 'arquivar', label: props.t.config.abaArquivar, icon: 'i-lucide-archive' },
@@ -66,6 +78,28 @@ watch(adicionar, (v) => {
   prj.janelas.mover.value = v
   nextTick(() => { adicionar.value = undefined })
 })
+
+/* ---------- campos comuns (rodada 3) ---------- */
+const NAO_USAR = '__nao_usar__'
+function opcoes(lista: string[]) {
+  return [...lista.map(x => ({ value: x, label: x })), { value: NAO_USAR, label: props.t.mapa.naoUsar }]
+}
+const camposDaCat = (id: number) => {
+  const c = prj.categorias.value.find(x => x.id === id)
+  return c ? camposDaCategoria[prj.camposDe(c)] : undefined
+}
+/** USelect não guarda null: "Não usar" vira null no rascunho. */
+function campo(id: number, chave: 'responsavel' | 'prazo' | 'status') {
+  return computed({
+    get: () => rascunho.value?.mapa[id]?.[chave] ?? NAO_USAR,
+    set: (v: string) => { if (rascunho.value?.mapa[id]) rascunho.value.mapa[id]![chave] = v === NAO_USAR ? null : v },
+  })
+}
+const gruposDoQuadro = computed(() => (['aberto', 'andamento', 'concluido'] as const).map(g => ({ value: g, label: props.t.itensDoProjeto.grupo[g] })))
+const abertos = ref<number[]>([])
+function setGrupo(id: number, valor: string, g: GrupoDeStatus) {
+  if (rascunho.value?.mapa[id]) rascunho.value.mapa[id]!.grupos[valor] = g
+}
 
 /* ---------- participantes ---------- */
 const herdados = computed(() => pessoas.filter(x => x.licenca === 'owner' || x.licenca === 'full'))
@@ -141,6 +175,7 @@ async function salvar() {
     permissaoPadrao: { ...rascunho.value.permissaoPadrao },
     participantes: rascunho.value.participantes.map(x => ({ ...x })),
   })
+  prj.salvarMapa(JSON.parse(JSON.stringify(rascunho.value.mapa)))
   original.value = JSON.stringify(rascunho.value)
   salvando.value = false
   toast.add({ title: props.t.config.salvo, icon: 'i-lucide-check', color: 'success' })
@@ -160,11 +195,11 @@ function excluir() {
 </script>
 
 <template>
-  <USlideover v-model:open="aberto" :title="p ? t.config.titulo(p.nome) : ''" :ui="{ content: 'max-w-2xl' }">
+  <USlideover v-model:open="aberto" :title="p ? t.config.titulo(p.nome) : ''" :ui="{ content: 'max-w-3xl' }">
     <template #body>
       <div v-if="p && rascunho">
         <UAlert v-if="!admin" :title="t.config.semPermissao" icon="i-lucide-lock" color="neutral" variant="subtle" class="mb-4" />
-        <UTabs v-model="aba" :items="abas" variant="link" :content="false" class="mb-5 w-full" />
+        <UTabs v-model="aba" :items="abas" variant="link" :content="false" class="mb-5 w-full" :ui="{ list: 'overflow-x-auto overflow-y-hidden [scrollbar-width:none]', trigger: 'flex-none', label: 'overflow-visible' }" />
 
         <fieldset :disabled="!admin" class="space-y-5">
           <!-- GERAL -->
@@ -179,6 +214,63 @@ function excluir() {
               <UInput :model-value="p.referencia" readonly class="w-full font-mono" />
             </UFormField>
             <UCheckbox v-model="rascunho.noMenuDeTodos" :label="t.criar.noMenuDeTodos" :description="t.criar.noMenuDeTodosDica" />
+
+            <!-- rodada 3: modelo de projeto -->
+            <div class="rounded-md border border-default p-4" :class="[marca, marcaBack]">
+              <p class="text-sm font-semibold text-highlighted">{{ t.modelo.salvarComo }}</p>
+              <p class="mt-1 text-sm text-muted">{{ t.modelo.salvarComoTexto }}</p>
+              <UButton :label="t.modelo.salvarComo" icon="i-lucide-copy-plus" color="neutral" variant="outline" size="sm" class="mt-3" :disabled="!categorias.length" @click="prj.janelas.modelo.value = p.id" />
+            </div>
+          </template>
+
+          <!-- CAMPOS COMUNS (rodada 3) -->
+          <template v-else-if="aba === 'campos'">
+            <p class="text-sm text-muted">{{ t.mapa.texto }}</p>
+            <p v-if="!categorias.length" class="rounded-md border border-dashed border-default px-3 py-6 text-center text-sm text-muted">{{ t.mapa.semCategorias }}</p>
+            <ul v-else class="space-y-3" :class="[marca, marcaBack]">
+              <li v-for="c in categorias" :key="c.id" class="rounded-md border border-default">
+                <div class="flex items-center gap-2 border-b border-default px-3 py-2">
+                  <UIcon :name="c.icon ?? 'i-lucide-folder'" class="size-4 shrink-0 text-muted" />
+                  <span class="min-w-0 flex-1 truncate text-sm font-medium text-highlighted">{{ c.name }}</span>
+                </div>
+                <div class="grid gap-3 p-3 sm:grid-cols-3">
+                  <UFormField :label="t.mapa.responsavel" size="sm">
+                    <USelect v-model="campo(c.id, 'responsavel').value" :items="opcoes(camposDaCat(c.id)?.pessoa ?? [])" icon="i-lucide-user-round" class="w-full" size="sm" />
+                  </UFormField>
+                  <UFormField :label="t.mapa.prazo" size="sm">
+                    <USelect v-model="campo(c.id, 'prazo').value" :items="opcoes(camposDaCat(c.id)?.data ?? [])" icon="i-lucide-calendar" class="w-full" size="sm" />
+                  </UFormField>
+                  <UFormField :label="t.mapa.status" size="sm">
+                    <USelect v-model="campo(c.id, 'status').value" :items="opcoes(camposDaCat(c.id) ? [camposDaCat(c.id)!.status] : [])" icon="i-lucide-circle-dot" class="w-full" size="sm" />
+                  </UFormField>
+                </div>
+                <div v-if="rascunho.mapa[c.id]?.status" class="border-t border-default px-3 py-2">
+                  <UButton
+                    :label="t.mapa.colunasDoQuadro"
+                    :icon="abertos.includes(c.id) ? 'i-lucide-chevron-down' : 'i-lucide-chevron-right'"
+                    size="xs"
+                    color="neutral"
+                    variant="ghost"
+                    :aria-expanded="abertos.includes(c.id)"
+                    @click="abertos = abertos.includes(c.id) ? abertos.filter(x => x !== c.id) : [...abertos, c.id]"
+                  />
+                  <div v-if="abertos.includes(c.id)" class="mt-1 space-y-1.5 pb-1 animate-[entrada_0.15s_ease-out_both]">
+                    <p class="text-xs text-muted">{{ t.mapa.colunasDoQuadroDica }}</p>
+                    <div v-for="v in camposDaCat(c.id)?.valores ?? []" :key="v.valor" class="flex items-center gap-2">
+                      <span class="min-w-0 flex-1 truncate text-sm text-toned">{{ v.valor }}</span>
+                      <USelect
+                        :model-value="rascunho.mapa[c.id]!.grupos[v.valor] ?? 'aberto'"
+                        :items="gruposDoQuadro"
+                        size="xs"
+                        class="w-40"
+                        :aria-label="`${v.valor}: ${t.mapa.colunasDoQuadro}`"
+                        @update:model-value="(g: GrupoDeStatus) => setGrupo(c.id, v.valor, g)"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ul>
           </template>
 
           <!-- CATEGORIAS -->
@@ -289,4 +381,5 @@ function excluir() {
       </div>
     </template>
   </USlideover>
+  <SalvarComoModelo :t="t" />
 </template>

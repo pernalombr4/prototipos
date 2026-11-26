@@ -9,22 +9,34 @@
  *   - convidado: só os projetos em que foi incluído.
  */
 import {
+  avisosBase,
   categoriasBase,
+  fluxosBase,
+  mapaPadrao,
+  modelosBase,
   grupos,
   MEMBROS_DO_WORKSPACE,
   pessoa,
   pessoas,
   projetosBase,
   projetosVolume,
+  type AtualizacaoDeStatus,
+  type AvisoDePrazo,
   type Categoria,
+  type Fluxo,
+  type MapaDaCategoria,
+  type ModeloDeProjeto,
   type Participante,
   type Projeto,
+  type Situacao,
   type Visibilidade,
 } from './mocks'
 
 export type Cenario = 'semProjetos' | 'emUso' | 'volume'
 export type EstadoDaTela = 'normal' | 'carregando' | 'erro'
-export type Area = 'inicio' | 'dados' | 'projetos'
+export type Area = 'inicio' | 'dados' | 'projetos' | 'comercial'
+/** Rodada 3: as abas da página do projeto. */
+export type AbaDoProjeto = 'geral' | 'itens' | 'automacoes' | 'painel'
 
 /** "Ver como": as pessoas que mostram as 4 experiências da proposta. */
 export const personas = [
@@ -50,7 +62,16 @@ function copiarProjetos(lista: Projeto[]) {
     permissaoPadrao: { ...p.permissaoPadrao },
     telas: [...p.telas],
     atividade: [...p.atividade],
+    atualizacoes: p.atualizacoes.map(a => ({ ...a })),
   }))
+}
+
+/** Os favoritos de exemplo de cada pessoa ("p:<id>" projeto, "c:<id>" categoria). Camada pessoal. */
+const favoritosBase: Record<number, string[]> = {
+  1: ['p:1', 'c:1', 'c:4'],
+  3: ['p:1', 'c:4'],
+  5: ['c:4', 'c:1'],
+  10: ['p:4'],
 }
 
 export function useProjetos() {
@@ -69,12 +90,24 @@ export function useProjetos() {
   const expandidos = useState<number[]>('prj-expandidos', () => [1])
   /** Pedidos de acesso enviados nesta sessão. */
   const pedidos = useState<number[]>('prj-pedidos', () => [])
+  /** Rodada 3: a aba aberta na página do projeto. */
+  const abaDoProjeto = useState<AbaDoProjeto>('prj-aba', () => 'geral')
+  /** Rodada 3: o mapa Responsável, Prazo e Status de cada categoria de projeto. */
+  const mapas = useState<Record<number, MapaDaCategoria>>('prj-mapas', () => Object.fromEntries(categoriasBase.map(c => [c.id, mapaPadrao(c.id)])))
+  const fluxos = useState<Fluxo[]>('prj-fluxos', () => fluxosBase.map(f => ({ ...f })))
+  const avisos = useState<AvisoDePrazo[]>('prj-avisos', () => avisosBase.map(a => ({ ...a })))
+  const modelos = useState<ModeloDeProjeto[]>('prj-modelos', () => modelosBase.map(m => ({ ...m, categorias: [...m.categorias] })))
+  /** Camada pessoal: os favoritos de cada pessoa. A estrela da barra do topo liga e desliga. */
+  const favoritos = useState<Record<number, string[]>>('prj-favoritos', () => ({ ...favoritosBase }))
 
   const janelas = {
     criar: useState<boolean>('prj-j-criar', () => false),
     configurar: useState<{ id: number, aba: string } | null>('prj-j-config', () => null),
     mover: useState<number | null>('prj-j-mover', () => null),
     item: useState<number | null>('prj-j-item', () => null),
+    status: useState<number | null>('prj-j-status', () => null),
+    modelo: useState<number | null>('prj-j-modelo', () => null),
+    novoFluxo: useState<number | null>('prj-j-fluxo', () => null),
   }
 
   const euPessoa = computed(() => pessoa(eu.value)!)
@@ -175,6 +208,10 @@ export function useProjetos() {
     categorias.value = categoriasBase.map(x => ({ ...x, projeto: c === 'semProjetos' ? null : x.projeto }))
     meuMenu.value = {}
     pedidos.value = []
+    fluxos.value = fluxosBase.map(f => ({ ...f }))
+    avisos.value = avisosBase.map(a => ({ ...a }))
+    modelos.value = c === 'semProjetos' ? [] : modelosBase.map(m => ({ ...m, categorias: [...m.categorias] }))
+    mapas.value = Object.fromEntries(categoriasBase.map(x => [x.id, mapaPadrao(x.id)]))
     expandidos.value = c === 'semProjetos' ? [] : [1]
     area.value = 'inicio'
     tela.value = { tipo: 'inicio' }
@@ -191,6 +228,7 @@ export function useProjetos() {
   function abrirProjeto(id: number) {
     const p = projetos.value.find(x => x.id === id)
     if (!p) return
+    if (!(tela.value.tipo === 'projeto' && tela.value.id === id)) abaDoProjeto.value = 'geral'
     tela.value = entra(p) ? { tipo: 'projeto', id } : { tipo: 'semAcesso', id }
     if (entra(p) && !expandidos.value.includes(id)) expandidos.value = [...expandidos.value, id]
   }
@@ -210,8 +248,10 @@ export function useProjetos() {
     categorias: number[]
     participantes: Participante[]
     noMenuDeTodos: boolean
+    modelo?: number
   }) {
     const id = ++proximoId
+    const modelo = dados.modelo ? modelos.value.find(m => m.id === dados.modelo) : undefined
     const novo: Projeto = {
       id,
       referencia: `PRJ${id.toString(16).toUpperCase()}X`,
@@ -225,11 +265,28 @@ export function useProjetos() {
       permissaoPadrao: { ver: true, criar: true, editar: true, excluir: false },
       telas: [],
       noMenuDeTodos: dados.noMenuDeTodos,
-      criadoEm: '2026-11-25',
-      atividade: [{ quem: eu.value, oque: 'criou o projeto', quando: 'agora' }],
+      criadoEm: '2026-11-26',
+      atividade: [{ quem: eu.value, oque: modelo ? `criou o projeto a partir do modelo ${modelo.nome}` : 'criou o projeto', quando: 'agora' }],
+      atualizacoes: [],
     }
     projetos.value = [...projetos.value, novo]
     categorias.value = categorias.value.map(c => dados.categorias.includes(c.id) ? { ...c, projeto: id } : c)
+    if (modelo) {
+      // O modelo cria categorias novas, com a estrutura da de origem e sem itens.
+      // Os fluxos chegam desligados e sem responsáveis: quem cria revisa antes de ligar.
+      const novas: Categoria[] = modelo.categorias.map((m, i) => {
+        const origem = categoriasBase.find(c => c.id === m.origem)
+        return { id: id * 100 + i, name: m.nome, slug: `${origem?.slug ?? 'categoria'}-${id}`, description: origem?.description ?? '', icon: m.icone, color: origem?.color ?? 'neutral', projeto: id, itens: 0, copiaDe: m.origem }
+      })
+      categorias.value = [...categorias.value, ...novas]
+      mapas.value = { ...mapas.value, ...Object.fromEntries(novas.map(c => [c.id, mapaPadrao(c.copiaDe!)])) }
+      const deOrigem = (cat: number) => novas.find(n => n.copiaDe === cat)
+      fluxos.value = [
+        ...fluxos.value,
+        ...fluxosBase.filter(f => deOrigem(f.categoria)).map((f, i) => ({ ...f, id: id * 100 + i, categoria: deOrigem(f.categoria)!.id, ativo: false, ultimaExecucao: null, execucoes30d: 0 })),
+      ]
+      avisos.value = [...avisos.value, ...avisosBase.filter(a => deOrigem(a.categoria)).map(a => ({ ...a, categoria: deOrigem(a.categoria)!.id }))]
+    }
     mostrarNoMenu(id)
     expandidos.value = [...expandidos.value, id]
     area.value = 'projetos'
@@ -258,6 +315,61 @@ export function useProjetos() {
     categorias.value = categorias.value.map(c => c.projeto === id ? { ...c, projeto: null } : c)
     tela.value = { tipo: 'diretorio' }
   }
+
+  /* ---------- rodada 3 ---------- */
+  const statusAtual = (p: Projeto) => p.atualizacoes[0] ?? null
+  function publicarStatus(id: number, a: Omit<AtualizacaoDeStatus, 'autor' | 'em'>) {
+    const p = projetos.value.find(x => x.id === id)
+    if (!p) return
+    atualizarProjeto(id, {
+      atualizacoes: [{ ...a, autor: eu.value, em: '2026-11-26' }, ...p.atualizacoes],
+      atividade: [{ quem: eu.value, oque: 'publicou uma atualização de status', quando: 'agora' }, ...p.atividade],
+    })
+  }
+  /** Os campos da categoria (a criada por modelo usa os da de origem). */
+  const camposDe = (c: Categoria) => c.copiaDe ?? c.id
+  function salvarMapa(novos: Record<number, MapaDaCategoria>) {
+    mapas.value = { ...mapas.value, ...novos }
+  }
+  const fluxosDoProjeto = (id: number) => {
+    const cats = new Set(categoriasDe(id).map(c => c.id))
+    return fluxos.value.filter(f => cats.has(f.categoria))
+  }
+  const avisosDoProjeto = (id: number) => {
+    const cats = new Set(categoriasDe(id).map(c => c.id))
+    return avisos.value.filter(a => cats.has(a.categoria))
+  }
+  function alternarFluxo(fluxoId: number) {
+    fluxos.value = fluxos.value.map(f => f.id === fluxoId ? { ...f, ativo: !f.ativo } : f)
+  }
+  function salvarComoModelo(projetoId: number, nome: string, descricao: string, inclui: { fluxos: boolean, avisos: boolean, painel: boolean }) {
+    const p = projetos.value.find(x => x.id === projetoId)!
+    const cats = categoriasDe(projetoId)
+    const m: ModeloDeProjeto = {
+      id: modelos.value.length + 100,
+      nome,
+      descricao,
+      icone: p.icone,
+      cor: p.cor,
+      visibilidade: p.visibilidade,
+      categorias: cats.map(c => ({ origem: camposDe(c), nome: c.name, icone: c.icon ?? 'i-lucide-folder' })),
+      fluxos: inclui.fluxos ? fluxosDoProjeto(projetoId).length : 0,
+      avisos: inclui.avisos ? avisosDoProjeto(projetoId).length : 0,
+      paineis: inclui.painel ? 1 : 0,
+      criadoPor: eu.value,
+      criadoEm: '2026-11-26',
+    }
+    modelos.value = [...modelos.value, m]
+    return m
+  }
+  const meusFavoritos = computed(() => favoritos.value[eu.value] ?? [])
+  const ehFavorito = (chave: string) => meusFavoritos.value.includes(chave)
+  function alternarFavorito(chave: string) {
+    const atual = meusFavoritos.value
+    favoritos.value = { ...favoritos.value, [eu.value]: atual.includes(chave) ? atual.filter(x => x !== chave) : [...atual, chave] }
+  }
+  /** A chave de favorito da tela aberta (projeto ou categoria); as outras telas não se favoritam aqui. */
+  const chaveDaTela = computed(() => tela.value.tipo === 'projeto' ? `p:${tela.value.id}` : tela.value.tipo === 'categoria' ? `c:${tela.value.id}` : null)
 
   function pedirAcesso(id: number) {
     if (!pedidos.value.includes(id)) pedidos.value = [...pedidos.value, id]
@@ -301,6 +413,9 @@ export function useProjetos() {
     categoriasDe, categoriasDoWorkspace, veCategoria, projetoDa,
     aplicarCenario, trocarPessoa, abrirProjeto, abrirCategoria,
     criarProjeto, moverCategoria, atualizarProjeto, arquivar, restaurar, excluir, pedirAcesso, alcance, quantosVeem,
+    abaDoProjeto, mapas, fluxos, avisos, modelos, statusAtual, publicarStatus, camposDe, salvarMapa,
+    fluxosDoProjeto, avisosDoProjeto, alternarFluxo, salvarComoModelo,
+    meusFavoritos, ehFavorito, alternarFavorito, chaveDaTela,
   }
 }
 
@@ -310,10 +425,35 @@ export function useProjetos() {
  */
 export function useMarcaDeProposta() {
   const destacar = useState<boolean>('prj-destacar', () => false)
+  /** Rodada 3: a 2ª chave do andaime marca o que pede peça nova no back-end (contorno azul). */
+  const destacarBack = useState<boolean>('prj-destacar-back', () => false)
   return {
     destacar,
+    destacarBack,
     marca: computed(() => destacar.value ? 'outline-2 outline-dashed outline-offset-2 outline-warning rounded-md' : ''),
+    marcaBack: computed(() => destacarBack.value ? 'outline-2 outline-dashed outline-offset-4 outline-info rounded-md' : ''),
   }
+}
+
+/** Rodada 3: a situação do projeto, igual no cabeçalho, no painel lateral e no diretório. */
+export const COR_DA_SITUACAO: Record<Situacao, 'success' | 'warning' | 'error' | 'info'> = {
+  noPrazo: 'success',
+  emRisco: 'warning',
+  atrasado: 'error',
+  concluido: 'info',
+}
+export const ICONE_DA_SITUACAO: Record<Situacao, string> = {
+  noPrazo: 'i-lucide-circle-check',
+  emRisco: 'i-lucide-circle-alert',
+  atrasado: 'i-lucide-circle-x',
+  concluido: 'i-lucide-flag',
+}
+/** O ponto colorido do painel lateral (classe estática, o Tailwind não lê classe montada). */
+export const PONTO_DA_SITUACAO: Record<Situacao, string> = {
+  noPrazo: 'bg-success',
+  emRisco: 'bg-warning',
+  atrasado: 'bg-error',
+  concluido: 'bg-info',
 }
 
 /** Proposta: o ícone de cada visibilidade, igual no painel, no diretório, na página e no seletor. */
