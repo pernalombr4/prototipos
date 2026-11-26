@@ -352,8 +352,8 @@ O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras 
   - `evidencias/entrega-r6-acoes-com-adicionar.png`: o "•••" com o submenu Adicionar aberto;
   - `evidencias/entrega-r6-pagina-larga.png`: a Visão geral na largura nova.
   - O detector de seta marca as 2 capturas no topo da barra de rolagem da página (1565,52 com a página no topo e
-    1565,103 com ela rolada); a marca acompanha a barra e a imagem não tem ponteiro. Falso positivo a confirmar com
-    a redatora; o ajuste do detector fica fora deste repositório.
+    1565,103 com ela rolada); a marca acompanha a barra e a imagem não tem ponteiro. A redatora confirmou o falso
+    positivo em 2026-11-26, e as 2 capturas ficam. O ajuste do detector fica fora deste repositório.
 
 ## Rodada 7 · 2026-11-26
 - **Pedido (literal):** "os filtros de tarefas devem estar na mesma linha, todos. inclusive o "todas, rapidas e
