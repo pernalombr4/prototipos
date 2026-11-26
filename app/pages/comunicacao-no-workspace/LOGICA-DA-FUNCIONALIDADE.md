@@ -415,22 +415,22 @@ alterar o texto antes do envio."
 A Agenda junta 3 origens. Só a reunião do Outlook tem participantes; nas outras, quem recebe vem do
 item ou da tarefa.
 
-### 5.6 Tela inicial: os widgets E-mail e WhatsApp e SMS (rodada 12)
+### 5.6 Tela inicial: sem atalhos de comunicação (rodadas 12 e 13)
 
 O mockup 6 do Felipe põe os atalhos e o "Link de formulário público" abaixo da saudação. A rodada 5
-tirou a linha, porque ali não havia destinatário nem item. Na rodada 12, a redatora pediu os botões
-de e-mail, WhatsApp e SMS na tela inicial, como widgets da Home nova. Cada widget passa a ter o
-próprio destino:
+tirou a linha, porque ali não havia destinatário nem item. A rodada 12 trouxe os cartões E-mail e
+WhatsApp e SMS para a tela inicial, e a rodada 13 os tirou de novo, pela pesquisa de mercado de
+2026-11-26: nenhum produto lido põe botões de canal na Home. O compor sem destinatário mora num ponto
+global, e o envio por canal sai do contato do registro.
 
-| Widget | O que mostra | O que o botão abre |
-|---|---|---|
-| E-mail | Os 5 e-mails mais recentes que a pessoa enviou de um item (a aba Mensagens com "Enviado por" igual à pessoa) | "Novo e-mail": o compositor sem item, como o botão do topo numa tela sem item (7.2) |
-| WhatsApp e SMS | O campo Número e o campo Mensagem | WhatsApp: a conversa com o número, ou a escolha da conversa sem número. SMS: o painel "Enviar SMS" (5.8), com o número ou sem destinatário |
+| Onde fica | O que entrega |
+|---|---|
+| "Novo e-mail" na barra do topo (7.2) | O e-mail sem item, de qualquer tela, inclusive da tela inicial |
+| Atalhos de cada registro (5.2 a 5.5, 5.7 e 5.8) | O e-mail, o WhatsApp e o SMS para o contato do item, da tarefa e da Agenda |
+| Widgets da Home nova | E-mail (os enviados de um item), WhatsApp e SMS, cada um opcional no catálogo, fora da Home padrão. Os requisitos estão no épico "Widgets de itens, agenda, atalhos e comunicação na Home" |
 
-O número segue as regras das outras telas: menos de 10 dígitos é inválido, e o telefone fixo não
-recebe SMS. Os requisitos estão na Home nova, no épico "Widgets de itens, agenda, atalhos e
-comunicação na Home". O link de formulário público continua onde o formulário está em uso (6.2): a
-tela inicial não sabe qual formulário, porque o workspace tem vários.
+O link de formulário público continua onde o formulário está em uso (6.2): a tela inicial não sabe
+qual formulário, porque o workspace tem vários.
 
 ### 5.7 WhatsApp em cada atalho (Fase 1)
 
@@ -1053,7 +1053,7 @@ No workspace novo, o texto do próximo passo muda com o perfil:
     as caixas do workspace atendem esse cliente, ou a integração com Google entra no roteiro?
 11. **Botão no cartão do quadro:** onde fica e qual o rótulo (o "Notify" do mockup 5, "E-mail" ou só
     o ícone)?
-12. **Tela inicial:** respondida na rodada 12. A tela inicial ganha os widgets E-mail e WhatsApp e SMS (5.6); o link de formulário público continua fora.
+12. **Tela inicial:** respondida na rodada 13. A tela inicial fica sem atalhos de comunicação, e os widgets E-mail, WhatsApp e SMS são opcionais na Home nova (5.6); o link de formulário público continua fora.
 13. **Aba Mensagens na Fase 1:** a tela "Emails Recebidos" de hoje basta como base da aba? Ela
     mostra também os enviados com item, ou só os recebidos? Quem a vê hoje: todo membro, ou só quem
     vê o item do e-mail?

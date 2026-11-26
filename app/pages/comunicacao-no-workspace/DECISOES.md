@@ -573,6 +573,15 @@ clientes usa Microsoft. A pesquisa está em `PESQUISA.md`, "SMS no computador".
   épico 2 (RN903, RN905, RN105; partes 1 e 2) e o documento do botão no cartão (RF009). Os prints
   estão em `evidencias/requisitos/`.
 
+## Rodada 13 · 2026-11-26 (a tela inicial volta sem atalhos de comunicação)
+
+- **Pedido (literal):** "pela logica de mercado, deveria mesmo ser widget de comunicaçao ou botoes fixos na home já, por padrao?" e, depois da pesquisa, "pode seguir a recomendaçao em todos esses lugares".
+- **A pesquisa** (repositório pesquisa-de-mercado, `runs/2026-11-26-comunicacao-na-home/RELATORIO.md`): nenhum produto lido (CRMs, gestão de trabalho, helpdesks) põe botões de canal na Home. O compor sem destinatário mora num ponto global, igual em toda tela, e o envio por canal sai do contato do registro.
+- **Mudou no protótipo:** os cartões E-mail e WhatsApp e SMS da rodada 12 saíram da tela inicial. Ela volta a ser a cópia do develop, como na rodada 5. O e-mail sem item continua no "Novo e-mail" da barra do topo, e o WhatsApp e o SMS, nos atalhos de cada registro.
+- **Na Home nova** (protótipo `home`, rodada 12): o widget E-mail fica só com os enviados de um item, WhatsApp e SMS viram 2 widgets, e os 3 ficam opcionais no catálogo, fora da Home padrão.
+- **Requisitos:** o fora do escopo do épico 1 cita os 3 widgets opcionais da Home nova e diz que a tela inicial de hoje continua sem atalhos de comunicação. A seção 5.6 e a pergunta 12 da `LOGICA-DA-FUNCIONALIDADE.md` mudam junto.
+- **Fronteira:** muda só a tela inicial. As outras telas ficam como na rodada 12.
+
 ## Rodada 12 · 2026-11-26 (e-mail, WhatsApp e SMS na tela inicial)
 
 - **Pedido (literal):** "uma das seçoes possiveis de widget lá deve ser de comunicação, e deve ter 2 widgets: email, whatsapp e sms / pra ficar na tela inicial esses botoes, nao só o enviar email / atualize o prototipo da home em si com essa ideia e atualize este tambem".

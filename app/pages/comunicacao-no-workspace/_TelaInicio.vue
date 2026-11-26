@@ -4,14 +4,14 @@
  * proposta. A linha "Atalhos" das rodadas 1 a 4 saiu: ali não há destinatário,
  * item para vincular nem formulário certo para o link (ver DECISOES.md).
  *
- * Rodada 12: a única proposta da tela são os 2 cartões de comunicação
- * (`_ComunicacaoNoInicio.vue`), os widgets E-mail e WhatsApp e SMS da Home
- * nova. O resto continua cópia do develop.
+ * Rodada 13: os cartões E-mail e WhatsApp e SMS da rodada 12 saíram. A pesquisa
+ * de mercado de 2026-11-26 não achou botões de canal na Home de nenhum produto;
+ * a comunicação fica nos widgets opcionais da Home nova (protótipo `home`), no
+ * "Novo e-mail" da barra do topo e nos atalhos de cada registro.
  */
 import type { Textos } from './textos'
 import { EU, HOJE, membroPorId, tarefas } from './mocks'
 import { useComunicacao } from './estado'
-import ComunicacaoNoInicio from './_ComunicacaoNoInicio.vue'
 
 const props = defineProps<{ t: Textos }>()
 
@@ -43,8 +43,6 @@ const cartoes = computed(() => [
     <p class="mt-1 text-sm text-muted">
       {{ t.inicio.subtitulo }}
     </p>
-
-    <ComunicacaoNoInicio :t="t" />
 
     <div class="mt-6 grid gap-5 lg:grid-cols-2">
       <UCard

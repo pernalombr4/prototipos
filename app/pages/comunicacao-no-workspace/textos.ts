@@ -56,24 +56,6 @@ export interface Textos {
     atrasadaHa: (dias: number) => string
     venceEm: (dias: number) => string
   }
-  /** Rodada 12: os 2 widgets de comunicação na tela inicial (épico 2 da Home nova). */
-  inicioW: {
-    tituloEmail: string
-    tituloWhatsApp: string
-    daHomeNova: string
-    para: (email: string) => string
-    vazioEmail: string
-    novoEmail: string
-    abrirEmails: string
-    numero: string
-    numeroPlaceholder: string
-    semNumero: string
-    numeroInvalido: string
-    telefoneFixo: string
-    mensagem: string
-    mensagemPlaceholder: string
-    naoRegistra: string
-  }
   prioridade: Record<'low' | 'normal' | 'high' | 'urgent', string>
   status: Record<'pending' | 'working' | 'blocked' | 'completed', string>
   etapa: Record<StatusDoItem, string>
@@ -691,23 +673,6 @@ const ptBR: Textos = {
     mostrando: n => `Mostrando 1-${n} de ${n} itens`,
     atrasadaHa: d => `Atrasada: há ${plural(d, 'dia', 'dias')}`,
     venceEm: d => d === 0 ? 'Vence hoje' : `Vence em ${plural(d, 'dia', 'dias')}`,
-  },
-  inicioW: {
-    tituloEmail: 'E-mail',
-    tituloWhatsApp: 'WhatsApp e SMS',
-    daHomeNova: 'Na Home nova, os 2 são widgets do grupo Comunicação.',
-    para: e => `Para ${e}`,
-    vazioEmail: 'Os e-mails que você enviar de um item aparecem aqui.',
-    novoEmail: 'Novo e-mail',
-    abrirEmails: 'Abrir E-mails',
-    numero: 'Número',
-    numeroPlaceholder: '+55 11 91234-5678',
-    semNumero: 'Sem número, você escolhe o contato no WhatsApp ou no celular.',
-    numeroInvalido: 'Número inválido. Informe o DDD e o número.',
-    telefoneFixo: 'Telefone fixo não recebe SMS.',
-    mensagem: 'Mensagem',
-    mensagemPlaceholder: 'Opcional. Você revisa antes de enviar.',
-    naoRegistra: 'A mensagem sai da sua conta. O ENSPACE não registra a conversa.',
   },
   prioridade: { low: 'Baixa', normal: 'Normal', high: 'Alta', urgent: 'Urgente' },
   status: { pending: 'Pendente', working: 'Em andamento', blocked: 'Bloqueada', completed: 'Concluída' },
@@ -1376,23 +1341,6 @@ const en: Textos = {
     atrasadaHa: d => `Overdue: ${d} ${d === 1 ? 'day' : 'days'} ago`,
     venceEm: d => d === 0 ? 'Due today' : `Due in ${d} ${d === 1 ? 'day' : 'days'}`,
   },
-  inicioW: {
-    tituloEmail: 'Email',
-    tituloWhatsApp: 'WhatsApp and SMS',
-    daHomeNova: 'On the new Home, both are widgets of the Communication group.',
-    para: e => `To ${e}`,
-    vazioEmail: 'The emails you send from an item appear here.',
-    novoEmail: 'New email',
-    abrirEmails: 'Open Emails',
-    numero: 'Number',
-    numeroPlaceholder: '+55 11 91234-5678',
-    semNumero: 'Without a number, you choose the contact in WhatsApp or on your phone.',
-    numeroInvalido: 'Invalid number. Enter the area code and the number.',
-    telefoneFixo: 'A landline does not receive SMS.',
-    mensagem: 'Message',
-    mensagemPlaceholder: 'Optional. You review it before sending.',
-    naoRegistra: 'The message goes out from your account. ENSPACE does not record the chat.',
-  },
   prioridade: { low: 'Low', normal: 'Normal', high: 'High', urgent: 'Urgent' },
   status: { pending: 'Pending', working: 'In progress', blocked: 'Blocked', completed: 'Completed' },
   etapa: { em_minuta: 'Drafting', em_assinatura: 'In signature', vigente: 'Active', em_renovacao: 'Renewing', encerrado: 'Closed' },
@@ -2059,23 +2007,6 @@ const es: Textos = {
     mostrando: n => `Mostrando 1-${n} de ${n} ítems`,
     atrasadaHa: d => `Atrasada: hace ${d} ${d === 1 ? 'día' : 'días'}`,
     venceEm: d => d === 0 ? 'Vence hoy' : `Vence en ${d} ${d === 1 ? 'día' : 'días'}`,
-  },
-  inicioW: {
-    tituloEmail: 'Correo',
-    tituloWhatsApp: 'WhatsApp y SMS',
-    daHomeNova: 'En la Home nueva, ambos son widgets del grupo Comunicación.',
-    para: e => `Para ${e}`,
-    vazioEmail: 'Los correos que envíes desde un ítem aparecen aquí.',
-    novoEmail: 'Nuevo correo',
-    abrirEmails: 'Abrir Correos',
-    numero: 'Número',
-    numeroPlaceholder: '+55 11 91234-5678',
-    semNumero: 'Sin número, eliges el contacto en WhatsApp o en el celular.',
-    numeroInvalido: 'Número no válido. Indica el código de área y el número.',
-    telefoneFixo: 'Un teléfono fijo no recibe SMS.',
-    mensagem: 'Mensaje',
-    mensagemPlaceholder: 'Opcional. Lo revisas antes de enviar.',
-    naoRegistra: 'El mensaje sale de tu cuenta. ENSPACE no registra la conversación.',
   },
   prioridade: { low: 'Baja', normal: 'Normal', high: 'Alta', urgent: 'Urgente' },
   status: { pending: 'Pendiente', working: 'En curso', blocked: 'Bloqueada', completed: 'Completada' },

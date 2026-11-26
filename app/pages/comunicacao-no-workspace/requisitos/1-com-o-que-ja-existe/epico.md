@@ -28,7 +28,7 @@ falha". A barra de baixo é ferramenta de revisão e não entra no produto. Os t
 - a resposta na mesma conversa e "Encaminhar" (épico "Responder na mesma conversa e encaminhar e-mail");
 - "Vincular a tarefa", a Mail Box própria da tarefa e a coluna Tarefa da aba Mensagens (épico "Vincular e-mail a uma tarefa");
 - o botão de e-mail no cartão do quadro (documento "Botão de e-mail no cartão do quadro de itens e de tarefas"); aqui o quadro usa o clique direito;
-- os widgets E-mail e WhatsApp e SMS da tela inicial (épico "Widgets de itens, agenda, atalhos e comunicação na Home", da Home nova). O link de formulário público continua fora da tela inicial;
+- os widgets E-mail, WhatsApp e SMS, opcionais no catálogo da Home nova (épico "Widgets de itens, agenda, atalhos e comunicação na Home"). A tela inicial de hoje continua sem atalhos de comunicação e sem o link de formulário público;
 - o envio pelo WhatsApp sem a pessoa apertar Enviar e o registro da conversa do WhatsApp no item;
 - o envio de SMS pelo próprio ENSPACE, por um serviço de SMS contratado, e o registro do SMS no item (P909);
 - integração com Google.
