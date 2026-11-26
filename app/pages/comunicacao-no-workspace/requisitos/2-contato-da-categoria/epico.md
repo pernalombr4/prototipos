@@ -13,7 +13,7 @@ central E-mails, aba Configurações, bloco "Contato do item".
 baixo, escolha "2 · Remetente" no controle "Fase". "Ir para" › "Contato da categoria Contratos" abre o cartão; "Ir
 para" › "Item CTR-00231" abre o item. Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
-**Fora do escopo:** SMS e outros canais; o contato tirado dos campos de e-mail e de telefone do item, sem
+**Fora do escopo:** canais além do e-mail, do WhatsApp e do SMS; o contato tirado dos campos de e-mail e de telefone do item, sem
 cartão (épico "Escrever e-mail de qualquer tela e central E-mails no menu"); as sugestões de item pelo destinatário no compositor e na leitura
 do e-mail, que usam este contato (épico "Gravar e-mail enviado sem item e filtrar Mensagens por permissão"); chave para ligar ou desligar os
 atalhos, que não existe em épico algum.

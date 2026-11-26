@@ -63,7 +63,7 @@ a prévia e salva.
 | RF018 | A prévia deve mostrar a edição da página antes do Salvar. | Trocar o E-mail de "Contato da contraparte" para "E-mail do financeiro" muda o Para da prévia sem salvar. | Importante | Obrigatório |
 | RF024 | Para o contato com telefone válido no item de exemplo, a prévia deve mostrar, embaixo do e-mail, a linha "WhatsApp e SMS" com o telefone e o texto pronto com as variáveis trocadas (RN903). | CTR-00231, "Contato da contraparte": WhatsApp e SMS +55 11 3456-7710 e "Olá, Marina. Escrevo sobre CTR-00231 · Contrato de manutenção predial.". | Essencial | Obrigatório |
 | RF025 | Sem telefone ou com telefone inválido no item de exemplo, a prévia deve mostrar "Sem telefone cadastrado" ou "Telefone inválido" no lugar do WhatsApp e do SMS. | CTR-00231, "Requisitante": "Sem telefone cadastrado". | Importante | Obrigatório |
-| RF026 | Com telefone fixo no item de exemplo, a prévia deve mostrar, embaixo da linha "WhatsApp e SMS", o aviso "Telefone fixo não recebe SMS" (RN926 do épico "Escrever e-mail de qualquer tela e central E-mails no menu"). | CTR-00231, "Contato da contraparte", com +55 11 3456-7710: o aviso aparece; CTR-00230, com +55 11 99876-1203, fica sem aviso. | Importante | Obrigatório |
+| RF026 | Com telefone fixo no item de exemplo, a prévia deve mostrar, embaixo da linha "WhatsApp e SMS", o aviso "Telefone fixo não recebe SMS". Telefone fixo é o número do Brasil com DDD e 8 dígitos, 12 dígitos com o 55. | CTR-00231, "Contato da contraparte", com +55 11 3456-7710: o aviso aparece; CTR-00230, com +55 11 99876-1203, fica sem aviso. | Importante | Obrigatório |
 
 ## Salvar (RF)
 
