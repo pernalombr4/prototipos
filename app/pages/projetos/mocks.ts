@@ -609,3 +609,132 @@ export const secaoComercial = {
   /** Proposta: atalhos para categorias de projeto. Seguem o acesso do projeto. */
   categorias: [10, 7],
 }
+
+/* ==================================================================
+   RODADA 5: o que o projeto reúne pelo menu (proposta)
+
+   - Workflows: no formato da lista do Spaceflow (área do membro): ícone, nome, versão, status
+     Ativo ou Inativo, descrição, o gatilho (trigger_ref) e a data de criação (código de 2026-11-26).
+   - Tarefas: as tarefas rápidas e as agendadas (criadas por workflow) dos itens das categorias do
+     projeto. O painel de tarefas de hoje já filtra por categoria.
+   - Dashboards: o painel do projeto junta os blocos do Painel de tarefas (catálogo do SDK) com os
+     painéis de itens que o administrador monta, 1 categoria por painel, como na tela Paineis.
+================================================================== */
+
+export interface DetalheDoFluxo {
+  descricao: string
+  versao: string
+  icone: string
+  criadoEm: string
+}
+
+/** Fictício, no formato do card do Spaceflow. */
+export const detalhesDoFluxo: Record<number, DetalheDoFluxo> = {
+  1: { descricao: 'Títulos acima de 10 mil vão para a diretoria aprovar antes do pagamento.', versao: '2.1.0', icone: 'i-lucide-badge-dollar-sign', criadoEm: '2026-08-06' },
+  2: { descricao: 'Marca o título como pago quando o extrato do banco confirma.', versao: '1.4.2', icone: 'i-lucide-landmark', criadoEm: '2026-08-12' },
+  3: { descricao: '', versao: '0.3.0', icone: 'i-lucide-send', criadoEm: '2026-09-01' },
+  4: { descricao: 'Envia e-mail ao solicitante quando o reembolso é aprovado.', versao: '1.0.1', icone: 'i-lucide-mail', criadoEm: '2026-08-20' },
+  5: { descricao: 'Cria a tarefa do prazo para o advogado responsável.', versao: '3.0.0', icone: 'i-lucide-alarm-clock', criadoEm: '2026-08-11' },
+  6: { descricao: '', versao: '1.0.0', icone: 'i-lucide-archive', criadoEm: '2026-08-15' },
+  7: { descricao: 'Quando a oportunidade vira Ganha, cria a proposta comercial.', versao: '1.2.0', icone: 'i-lucide-file-signature', criadoEm: '2026-09-03' },
+  8: { descricao: 'Manda a medição ao cliente e espera a aprovação.', versao: '1.1.0', icone: 'i-lucide-ruler', criadoEm: '2026-10-21' },
+  9: { descricao: 'Ocorrência marcada como grave avisa o fiscal da obra.', versao: '1.0.0', icone: 'i-lucide-siren', criadoEm: '2026-10-22' },
+}
+
+export type StatusDaTarefa = 'aberta' | 'andamento' | 'concluida'
+export type OrigemDaTarefa = 'rapida' | 'agendada'
+export type Prioridade = 'alta' | 'media' | 'baixa'
+
+export interface TarefaDoProjeto {
+  id: number
+  titulo: string
+  /** A categoria do item; o projeto sai da categoria. */
+  categoria: number
+  item: string
+  responsavel: number
+  prazo: string
+  status: StatusDaTarefa
+  prioridade: Prioridade
+  /** Rápida (criada à mão) ou agendada (criada por um workflow). */
+  origem: OrigemDaTarefa
+  /** O workflow que criou a tarefa agendada. */
+  fluxo?: number
+  criadaEm: string
+}
+
+export const tarefasBase: TarefaDoProjeto[] = [
+  { id: 101, titulo: 'Aprovar pagamento', categoria: 4, item: 'CP4204', responsavel: 3, prazo: '2026-11-26', status: 'aberta', prioridade: 'alta', origem: 'agendada', fluxo: 1, criadaEm: '2026-11-24' },
+  { id: 102, titulo: 'Aprovar pagamento', categoria: 4, item: 'CP4187', responsavel: 3, prazo: '2026-11-24', status: 'aberta', prioridade: 'alta', origem: 'agendada', fluxo: 1, criadaEm: '2026-11-20' },
+  { id: 103, titulo: 'Conferir boleto da locação', categoria: 4, item: 'CP4170', responsavel: 5, prazo: '2026-11-28', status: 'andamento', prioridade: 'media', origem: 'rapida', criadaEm: '2026-11-22' },
+  { id: 104, titulo: 'Anexar comprovante de pagamento', categoria: 4, item: 'CP4153', responsavel: 5, prazo: '2026-11-21', status: 'concluida', prioridade: 'baixa', origem: 'rapida', criadaEm: '2026-11-18' },
+  { id: 105, titulo: 'Aprovar pagamento', categoria: 4, item: 'CP4136', responsavel: 2, prazo: '2026-11-30', status: 'aberta', prioridade: 'media', origem: 'agendada', fluxo: 1, criadaEm: '2026-11-25' },
+  { id: 106, titulo: 'Conferir nota de entrada', categoria: 5, item: 'NF4205', responsavel: 5, prazo: '2026-11-24', status: 'aberta', prioridade: 'alta', origem: 'rapida', criadaEm: '2026-11-19' },
+  { id: 107, titulo: 'Corrigir CFOP da nota', categoria: 5, item: 'NF4188', responsavel: 3, prazo: '2026-12-02', status: 'andamento', prioridade: 'media', origem: 'rapida', criadaEm: '2026-11-23' },
+  { id: 108, titulo: 'Lançar nota no ERP', categoria: 5, item: 'NF4171', responsavel: 5, prazo: '2026-11-20', status: 'concluida', prioridade: 'media', origem: 'agendada', fluxo: 3, criadaEm: '2026-11-12' },
+  { id: 109, titulo: 'Analisar reembolso', categoria: 6, item: 'RE4206', responsavel: 3, prazo: '2026-11-27', status: 'aberta', prioridade: 'media', origem: 'agendada', fluxo: 4, criadaEm: '2026-11-24' },
+  { id: 110, titulo: 'Pedir nota do almoço', categoria: 6, item: 'RE4189', responsavel: 5, prazo: '2026-11-25', status: 'andamento', prioridade: 'baixa', origem: 'rapida', criadaEm: '2026-11-21' },
+  { id: 111, titulo: 'Analisar reembolso', categoria: 6, item: 'RE4172', responsavel: 3, prazo: '2026-11-19', status: 'concluida', prioridade: 'media', origem: 'agendada', fluxo: 4, criadaEm: '2026-11-15' },
+  { id: 112, titulo: 'Fechar o mês de novembro', categoria: 4, item: 'CP4119', responsavel: 2, prazo: '2026-12-04', status: 'aberta', prioridade: 'alta', origem: 'rapida', criadaEm: '2026-11-25' },
+  { id: 201, titulo: 'Protocolar contestação', categoria: 8, item: 'PZ4204', responsavel: 7, prazo: '2026-11-27', status: 'andamento', prioridade: 'alta', origem: 'agendada', fluxo: 5, criadaEm: '2026-11-18' },
+  { id: 202, titulo: 'Revisar parecer', categoria: 9, item: 'PA4205', responsavel: 4, prazo: '2026-11-27', status: 'aberta', prioridade: 'media', origem: 'rapida', criadaEm: '2026-11-22' },
+  { id: 203, titulo: 'Preparar audiência', categoria: 7, item: 'PJ4203', responsavel: 4, prazo: '2026-11-23', status: 'aberta', prioridade: 'alta', origem: 'rapida', criadaEm: '2026-11-16' },
+  { id: 204, titulo: 'Protocolar recurso', categoria: 8, item: 'PZ4187', responsavel: 4, prazo: '2026-11-21', status: 'concluida', prioridade: 'alta', origem: 'agendada', fluxo: 5, criadaEm: '2026-11-10' },
+  { id: 301, titulo: 'Qualificar oportunidade', categoria: 10, item: 'OP4206', responsavel: 6, prazo: '2026-11-29', status: 'aberta', prioridade: 'media', origem: 'rapida', criadaEm: '2026-11-24' },
+  { id: 302, titulo: 'Enviar proposta revisada', categoria: 11, item: 'PC4207', responsavel: 12, prazo: '2026-11-25', status: 'andamento', prioridade: 'alta', origem: 'agendada', fluxo: 7, criadaEm: '2026-11-20' },
+  { id: 401, titulo: 'Validar medição de novembro', categoria: 12, item: 'ME4196', responsavel: 9, prazo: '2026-11-30', status: 'aberta', prioridade: 'alta', origem: 'agendada', fluxo: 8, criadaEm: '2026-11-25' },
+  { id: 402, titulo: 'Tratar infiltração no bloco B', categoria: 13, item: 'OC4213', responsavel: 9, prazo: '2026-11-24', status: 'andamento', prioridade: 'alta', origem: 'rapida', criadaEm: '2026-11-19' },
+  { id: 403, titulo: 'Instalar guarda-corpo', categoria: 13, item: 'OC4179', responsavel: 2, prazo: '2026-11-22', status: 'concluida', prioridade: 'alta', origem: 'agendada', fluxo: 9, criadaEm: '2026-11-17' },
+]
+
+/** Do legado da tela Paineis: os tipos de gráfico do painel de itens. */
+export type TipoDeGrafico = 'bar_chart' | 'line_chart' | 'pie_chart' | 'donut_chart' | 'area_chart' | 'funnel_chart'
+/** Do legado: a função do painel de itens. */
+export type FuncaoDoPainel = 'count' | 'countDistinct' | 'mean' | 'sum' | 'median' | 'variance'
+/** Os blocos do catálogo do Painel de tarefas (SDK) que o painel do projeto usa. */
+export type BlocoDeTarefas = 'abertas' | 'concluidas' | 'vencidas' | 'vencem7' | 'porStatus' | 'carga' | 'filaDePrazos'
+
+export interface PainelDeItens {
+  id: string
+  categoria: number
+  titulo: string
+  tipo: TipoDeGrafico
+  /** O campo de agrupamento: o status da categoria ou "Criado em" (por mês). */
+  agruparPor: string
+  funcao: FuncaoDoPainel
+  /** O campo de data que o período lê. */
+  campoDeData: string
+}
+
+export interface DashboardDoProjeto {
+  id: number
+  projeto: number
+  nome: string
+  descricao: string
+  tarefas: BlocoDeTarefas[]
+  itens: PainelDeItens[]
+}
+
+export const dashboardsBase: DashboardDoProjeto[] = [
+  {
+    id: 1,
+    projeto: 1,
+    nome: 'Painel do Financeiro',
+    descricao: 'Tarefas e itens das 3 categorias do Financeiro.',
+    tarefas: ['abertas', 'concluidas', 'vencidas', 'vencem7', 'porStatus', 'carga', 'filaDePrazos'],
+    itens: [
+      { id: 'i-cp-status', categoria: 4, titulo: 'Contas a pagar por etapa', tipo: 'bar_chart', agruparPor: 'Etapa do fluxo', funcao: 'count', campoDeData: 'Vencimento' },
+      { id: 'i-nf-mes', categoria: 5, titulo: 'Notas fiscais por mês', tipo: 'area_chart', agruparPor: 'Criado em', funcao: 'count', campoDeData: 'Criado em' },
+      { id: 'i-re-status', categoria: 6, titulo: 'Reembolsos por etapa', tipo: 'donut_chart', agruparPor: 'Etapa do fluxo', funcao: 'count', campoDeData: 'Criado em' },
+    ],
+  },
+  {
+    id: 2,
+    projeto: 3,
+    nome: 'Metas do trimestre',
+    descricao: '',
+    tarefas: ['abertas', 'vencidas', 'carga'],
+    itens: [
+      { id: 'i-op-funil', categoria: 10, titulo: 'Oportunidades por etapa do funil', tipo: 'funnel_chart', agruparPor: 'Etapa do funil', funcao: 'count', campoDeData: 'Criado em' },
+    ],
+  },
+]

@@ -11,10 +11,17 @@
  *   - Itens: os itens de todas as categorias numa visão só (peça nova no back-end);
  *   - Automações: os fluxos e os avisos de prazo que as categorias já têm;
  *   - Painel: widgets de 1 categoria cada, como os painéis de hoje.
+ *
+ * Rodada 5: 5 abas (Visão geral, Tarefas, Itens, Automações, Painéis), as mesmas que o menu abre.
+ * A visão geral abre com os números do projeto (EnDashboardGrid do SDK), cada um levando à aba, e
+ * a fila de prazos sai das tarefas dos itens das categorias do projeto.
  */
 import type { TabsItem } from '@nuxt/ui'
 import type { Textos } from './textos'
-import { cargos, grupos, iniciais, minhasTarefas, pessoa, type Participante } from './mocks'
+import type { EnDashboardStatItem } from '@be-enlighten/enspace-sdk-ui/base'
+import { cargos, grupos, iniciais, pessoa, type Participante } from './mocks'
+import { textosDoProjeto } from './textosDoProjeto'
+import TarefasDoProjeto from './_TarefasDoProjeto.vue'
 import { COR_DA_SITUACAO, COR_DO_PROJETO, ICONE_DA_SITUACAO, ICONE_DA_VISIBILIDADE, useMarcaDeProposta, useProjetos } from './estado'
 import StatusDoProjeto from './_StatusDoProjeto.vue'
 import ItensDoProjeto from './_ItensDoProjeto.vue'
@@ -31,7 +38,10 @@ const p = computed(() => prj.projetos.value.find(x => x.id === props.id)!)
 const papel = computed(() => prj.papel(p.value))
 const admin = computed(() => prj.podeAdministrar(p.value))
 const categorias = computed(() => prj.categoriasDe(props.id))
-const tarefas = computed(() => minhasTarefas.filter(x => categorias.value.some(c => c.id === x.categoria)))
+const r = useTextos(textosDoProjeto)
+const HOJE = '2026-11-26'
+const abertas = computed(() => prj.tarefasDoProjeto(props.id).filter(x => x.status !== 'concluida'))
+const tarefas = computed(() => [...abertas.value].sort((a, b) => a.prazo.localeCompare(b.prazo)).slice(0, 5))
 const total = computed(() => prj.quantosVeem(p.value))
 
 const rotuloDoPapel = computed(() => papel.value ? props.t.papel[papel.value] : '')
@@ -68,16 +78,32 @@ const formatarData = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString
 const status = computed(() => prj.statusAtual(p.value))
 const aba = prj.abaDoProjeto
 const nFluxos = computed(() => prj.fluxosDoProjeto(props.id).length)
+const nAtivos = computed(() => prj.fluxosDoProjeto(props.id).filter(f => f.ativo).length)
+const numeros = computed<EnDashboardStatItem[]>(() => [
+  { key: 'tarefas', label: r.value.geral.tarefasAbertas, value: abertas.value.length, icon: 'i-lucide-square-check' },
+  { key: 'vencidas', label: r.value.geral.vencidas, value: abertas.value.filter(x => x.prazo < HOJE).length, icon: 'i-lucide-alarm-clock-off' },
+  { key: 'itens', label: r.value.geral.itens, value: categorias.value.reduce((s, c) => s + c.itens, 0).toLocaleString(idioma.value), icon: 'i-lucide-list-checks' },
+  { key: 'automacoes', label: r.value.geral.workflowsAtivos, value: `${nAtivos.value} / ${nFluxos.value}`, icon: 'i-lucide-workflow' },
+])
+const DESTINO: Record<string, 'tarefas' | 'itens' | 'automacoes' | null> = { tarefas: 'tarefas', vencidas: 'tarefas', itens: 'itens', automacoes: 'automacoes', pessoas: null }
+function abrirNumero(s: EnDashboardStatItem) {
+  const d = DESTINO[s.key]
+  if (d) aba.value = d
+  else configurar('participantes')
+}
+const raiz = useTemplateRef<HTMLElement>('raiz')
+watch(aba, () => nextTick(() => raiz.value?.scrollIntoView({ block: 'start' })))
 const abas = computed<TabsItem[]>(() => [
   { value: 'geral', label: props.t.abas.geral, icon: 'i-lucide-layout-dashboard' },
+  { value: 'tarefas', label: r.value.menu.tarefas, icon: 'i-lucide-square-check', badge: abertas.value.length ? { label: String(abertas.value.length), color: 'neutral', variant: 'soft', size: 'sm' } : undefined },
   { value: 'itens', label: props.t.abas.itens, icon: 'i-lucide-list-checks' },
   { value: 'automacoes', label: props.t.abas.automacoes, icon: 'i-lucide-workflow', badge: nFluxos.value ? { label: String(nFluxos.value), color: 'neutral', variant: 'soft', size: 'sm' } : undefined },
-  { value: 'painel', label: props.t.abas.painel, icon: 'i-lucide-chart-column' },
+  { value: 'painel', label: r.value.menu.paineis, icon: 'i-lucide-chart-column', badge: prj.dashboardsDe(props.id).length ? { label: String(prj.dashboardsDe(props.id).length), color: 'neutral', variant: 'soft', size: 'sm' } : undefined },
 ])
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-6xl px-6 py-5" :class="marca">
+  <div ref="raiz" class="mx-auto w-full max-w-6xl px-6 py-5" :class="marca">
     <!-- arquivado -->
     <UAlert
       v-if="p.status === 'arquivado'"
@@ -132,11 +158,17 @@ const abas = computed<TabsItem[]>(() => [
       :aria-label="t.abas.rotulo"
     />
 
-    <ItensDoProjeto v-if="aba === 'itens'" :key="`i-${p.id}`" :t="t" :id="p.id" class="mt-4" />
+    <TarefasDoProjeto v-if="aba === 'tarefas'" :key="`t-${p.id}`" :t="t" :id="p.id" class="mt-4" />
+    <ItensDoProjeto v-else-if="aba === 'itens'" :key="`i-${p.id}`" :t="t" :id="p.id" class="mt-4" />
     <AutomacoesDoProjeto v-else-if="aba === 'automacoes'" :key="`a-${p.id}`" :t="t" :id="p.id" class="mt-4" />
     <PainelDoProjeto v-else-if="aba === 'painel'" :key="`d-${p.id}`" :t="t" :id="p.id" class="mt-4" />
 
     <div v-else class="mt-4 grid gap-4 lg:grid-cols-3">
+      <!-- rodada 5: o que o projeto reúne, em números que levam às abas -->
+      <section class="lg:col-span-3 animate-[entrada_0.2s_ease-out_both]">
+        <p class="mb-2 text-sm text-muted">{{ r.geral.reuneTexto(p.nome) }}</p>
+        <EnDashboardGrid :stats="numeros" :columns="4" clickable @stat-click="abrirNumero" />
+      </section>
       <StatusDoProjeto :t="t" :id="p.id" class="lg:col-span-3" />
       <!-- categorias -->
       <section class="rounded-lg border border-default bg-default lg:col-span-2 animate-[entrada_0.25s_ease-out_both]" style="animation-delay: 40ms">
@@ -171,7 +203,7 @@ const abas = computed<TabsItem[]>(() => [
           <p class="max-w-sm text-sm text-muted">{{ t.pagina.vazioCategoriasTexto }}</p>
           <div v-if="admin" class="mt-1 flex flex-wrap justify-center gap-2">
             <UButton :label="t.config.adicionarCategoria" icon="i-lucide-folder-input" size="sm" color="neutral" variant="outline" @click="configurar('categorias')" />
-            <UButton :label="t.pagina.criarCategoria" icon="i-lucide-plus" size="sm" color="neutral" variant="outline" @click="toast.add({ title: t.casca.maquete, icon: 'i-lucide-info', color: 'neutral' })" />
+            <UButton :label="t.pagina.criarCategoria" icon="i-lucide-plus" size="sm" color="neutral" variant="outline" @click="prj.janelas.novaCategoria.value = p.id" />
           </div>
         </div>
       </section>
@@ -200,8 +232,9 @@ const abas = computed<TabsItem[]>(() => [
 
       <!-- tarefas do projeto -->
       <section class="rounded-lg border border-default bg-default lg:col-span-2 animate-[entrada_0.25s_ease-out_both]" style="animation-delay: 120ms">
-        <header class="border-b border-default px-4 py-3">
-          <h2 class="text-sm font-semibold text-highlighted">{{ t.pagina.tarefas }}</h2>
+        <header class="flex items-center gap-2 border-b border-default px-4 py-3">
+          <h2 class="flex-1 text-sm font-semibold text-highlighted">{{ r.geral.filaTitulo }}</h2>
+          <UButton :label="r.geral.verTodas" trailing-icon="i-lucide-arrow-right" size="xs" color="neutral" variant="outline" @click="aba = 'tarefas'" />
         </header>
         <ul v-if="tarefas.length" class="divide-y divide-default">
           <li v-for="x in tarefas" :key="x.id" class="flex items-center gap-3 px-4 py-2.5">
@@ -210,7 +243,7 @@ const abas = computed<TabsItem[]>(() => [
               <span class="block truncate text-sm text-highlighted">{{ x.titulo }}</span>
               <span class="block truncate text-xs text-muted">{{ prj.categorias.value.find(c => c.id === x.categoria)?.name }} · {{ x.item }}</span>
             </span>
-            <UBadge v-if="x.atrasada" :label="t.tarefas.atrasada" color="error" variant="subtle" size="sm" />
+            <UBadge v-if="x.prazo < HOJE" :label="t.tarefas.atrasada" color="error" variant="subtle" size="sm" />
             <span class="shrink-0 text-xs text-muted">{{ formatarData(x.prazo) }}</span>
           </li>
         </ul>

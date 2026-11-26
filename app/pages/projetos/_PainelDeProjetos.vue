@@ -3,7 +3,7 @@
  * PROPOSTA: o painel Projetos, aberto pelo ícone da trilha.
  *
  *  - o menu é da pessoa: os projetos que ela mostra, na ordem dela (arrastar, ou Alt e as setas);
- *  - cada projeto é uma seção com as categorias e as telas dele; abre e fecha por pessoa;
+ *  - cada projeto é uma seção com Visão geral, Tarefas, Automações, as categorias e os painéis dele (_ConteudoDoProjeto); abre e fecha por pessoa;
  *  - a busca acha também os projetos "Fora do seu menu" que ela enxerga;
  *  - "Ver todos os N projetos" leva ao diretório;
  *  - o ••• do projeto: Abrir a página, Configurações (administrador), Ocultar do meu menu, Copiar o link.
@@ -16,6 +16,8 @@
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Textos } from './textos'
 import type { Projeto } from './mocks'
+import ConteudoDoProjeto from './_ConteudoDoProjeto.vue'
+import AdicionarAoProjeto from './_AdicionarAoProjeto.vue'
 import { COR_DO_PROJETO, ICONE_DA_VISIBILIDADE, PONTO_DA_SITUACAO, useMarcaDeProposta, useProjetos } from './estado'
 
 const props = defineProps<{ t: Textos }>()
@@ -88,13 +90,7 @@ function acoesDoProjeto(p: Projeto): DropdownMenuItem[][] {
   ]
 }
 
-function acoesDaCategoria(id: number): DropdownMenuItem[][] {
-  return [[{ label: props.t.painel.moverCategoria, icon: 'i-lucide-folder-input', onSelect: () => { janelas.mover.value = id } }]]
-}
 
-function telaDeMaquete() {
-  toast.add({ title: props.t.casca.conteudoIlustrativo, icon: 'i-lucide-info', color: 'neutral' })
-}
 
 /* ---------- reordenar: arrastar, ou Alt e as setas ---------- */
 const arrastando = ref<number | null>(null)
@@ -255,62 +251,23 @@ function teclar(ev: KeyboardEvent, id: number) {
                   <UIcon :name="ICONE_DA_VISIBILIDADE[p.visibilidade]" class="size-3.5 shrink-0 text-muted" :aria-label="t.visibilidade[p.visibilidade]" />
                 </UTooltip>
               </button>
+              <span class="hidden shrink-0 items-center group-hover:flex group-focus-within:flex has-[[aria-expanded=true]]:flex">
+                <AdicionarAoProjeto :p="p" />
               <UDropdownMenu :items="acoesDoProjeto(p)" :content="{ align: 'start' }" :ui="{ content: 'w-60' }">
                 <UButton
                   icon="i-lucide-ellipsis"
                   size="xs"
                   color="neutral"
                   variant="ghost"
-                  class="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100"
+                  
                   :aria-label="t.painel.acoesDoProjeto(p.nome)"
                 />
               </UDropdownMenu>
+              </span>
             </div>
 
-            <!-- as categorias e as telas do projeto -->
-            <ul v-if="expandidos.includes(p.id)" class="ml-5 mt-0.5 space-y-px border-l border-default pl-2 animate-[entrada_0.15s_ease-out_both]">
-              <li v-for="c in prj.categoriasDe(p.id)" :key="c.id" class="group/cat flex items-center rounded-md transition-colors hover:bg-elevated" :class="categoriaAtiva === c.id ? 'bg-primary/10' : ''">
-                <button
-                  type="button"
-                  class="flex min-w-0 flex-1 items-center gap-2 rounded px-2 py-1.5 text-left text-sm focus-visible:outline-2 focus-visible:outline-primary"
-                  :class="categoriaAtiva === c.id ? 'font-medium text-highlighted' : 'text-default'"
-                  :aria-current="categoriaAtiva === c.id ? 'page' : undefined"
-                  @click="prj.abrirCategoria(c.id)"
-                >
-                  <UIcon :name="c.icon ?? 'i-lucide-folder'" class="size-4 shrink-0" :class="categoriaAtiva === c.id ? 'text-primary' : 'text-muted'" />
-                  <span class="truncate">{{ c.name }}</span>
-                </button>
-                <UDropdownMenu v-if="prj.podeAdministrar(p)" :items="acoesDaCategoria(c.id)" :content="{ align: 'start' }">
-                  <UButton
-                    icon="i-lucide-ellipsis"
-                    size="xs"
-                    color="neutral"
-                    variant="ghost"
-                    class="mr-1 opacity-0 transition-opacity group-hover/cat:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100"
-                    :aria-label="t.painel.acoesDaCategoria(c.name)"
-                  />
-                </UDropdownMenu>
-              </li>
-              <li v-for="s in p.telas" :key="s.nome">
-                <button type="button" class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-default transition-colors hover:bg-elevated focus-visible:outline-2 focus-visible:outline-primary" @click="telaDeMaquete">
-                  <UIcon :name="s.icone" class="size-4 shrink-0 text-muted" />
-                  <span class="truncate">{{ s.nome }}</span>
-                </button>
-              </li>
-              <li v-if="!prj.categoriasDe(p.id).length" class="px-2 py-1.5">
-                <p class="text-xs text-muted">{{ t.painel.semCategoria }}</p>
-                <UButton
-                  v-if="prj.podeAdministrar(p)"
-                  :label="t.painel.adicionarCategoria"
-                  icon="i-lucide-plus"
-                  size="xs"
-                  color="neutral"
-                  variant="outline"
-                  class="mt-1.5"
-                  @click="janelas.configurar.value = { id: p.id, aba: 'categorias' }"
-                />
-              </li>
-            </ul>
+            <!-- a árvore do projeto -->
+            <ConteudoDoProjeto v-if="expandidos.includes(p.id)" :t="t" :p="p" variante="painel" />
           </li>
         </ul>
 

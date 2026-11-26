@@ -10,6 +10,13 @@
  */
 import {
   avisosBase,
+  dashboardsBase,
+  detalhesDoFluxo,
+  tarefasBase,
+  type DashboardDoProjeto,
+  type PainelDeItens,
+  type TarefaDoProjeto,
+  type Gatilho,
   categoriasBase,
   fluxosBase,
   mapaPadrao,
@@ -36,7 +43,7 @@ export type Cenario = 'semProjetos' | 'emUso' | 'volume'
 export type EstadoDaTela = 'normal' | 'carregando' | 'erro'
 export type Area = 'inicio' | 'dados' | 'projetos' | 'comercial'
 /** Rodada 3: as abas da página do projeto. */
-export type AbaDoProjeto = 'geral' | 'itens' | 'automacoes' | 'painel'
+export type AbaDoProjeto = 'geral' | 'tarefas' | 'itens' | 'automacoes' | 'painel'
 
 /** "Ver como": as pessoas que mostram as 4 experiências da proposta. */
 export const personas = [
@@ -107,8 +114,21 @@ export function useProjetos() {
     item: useState<number | null>('prj-j-item', () => null),
     status: useState<number | null>('prj-j-status', () => null),
     modelo: useState<number | null>('prj-j-modelo', () => null),
+    /** Rodada 5: o projeto em que o Novo Workflow, a nova categoria e a nova tarefa entram. */
     novoFluxo: useState<number | null>('prj-j-fluxo', () => null),
+    novaCategoria: useState<number | null>('prj-j-categoria', () => null),
+    novaTarefa: useState<number | null>('prj-j-tarefa', () => null),
   }
+
+  /* ---------- rodada 5: o que o projeto reúne ---------- */
+  const tarefas = useState<TarefaDoProjeto[]>('prj-tarefas', () => tarefasBase.map(x => ({ ...x })))
+  const dashboards = useState<DashboardDoProjeto[]>('prj-dashboards', () => dashboardsBase.map(d => ({ ...d, tarefas: [...d.tarefas], itens: d.itens.map(i => ({ ...i })) })))
+  /** O dashboard aberto na aba Painéis e se ele está em edição (Personalizar). */
+  const dashboardAberto = useState<number | null>('prj-dash', () => null)
+  const editandoDashboard = useState<boolean>('prj-dash-edit', () => false)
+  /** Painel em renomeação no menu (edição no lugar). */
+  const renomeando = useState<string | null>('prj-renomeando', () => null)
+
 
   const euPessoa = computed(() => pessoa(eu.value)!)
   const souDono = computed(() => euPessoa.value.licenca === 'owner' || euPessoa.value.licenca === 'full')
@@ -209,6 +229,10 @@ export function useProjetos() {
     meuMenu.value = {}
     pedidos.value = []
     fluxos.value = fluxosBase.map(f => ({ ...f }))
+    tarefas.value = tarefasBase.map(x => ({ ...x }))
+    dashboards.value = c === 'semProjetos' ? [] : dashboardsBase.map(d => ({ ...d, tarefas: [...d.tarefas], itens: d.itens.map(i => ({ ...i })) }))
+    dashboardAberto.value = null
+    editandoDashboard.value = false
     avisos.value = avisosBase.map(a => ({ ...a }))
     modelos.value = c === 'semProjetos' ? [] : modelosBase.map(m => ({ ...m, categorias: [...m.categorias] }))
     mapas.value = Object.fromEntries(categoriasBase.map(x => [x.id, mapaPadrao(x.id)]))
@@ -342,6 +366,87 @@ export function useProjetos() {
   function alternarFluxo(fluxoId: number) {
     fluxos.value = fluxos.value.map(f => f.id === fluxoId ? { ...f, ativo: !f.ativo } : f)
   }
+
+  /* ---------- rodada 5: abrir, adicionar e arrumar pelo menu ---------- */
+  function abrirAba(projetoId: number, aba: AbaDoProjeto) {
+    abrirProjeto(projetoId)
+    abaDoProjeto.value = aba
+  }
+  const dashboardsDe = (projetoId: number) => dashboards.value.filter(d => d.projeto === projetoId)
+  function abrirDashboard(id: number, editar = false) {
+    const d = dashboards.value.find(x => x.id === id)
+    if (!d) return
+    dashboardAberto.value = id
+    editandoDashboard.value = editar
+    abrirAba(d.projeto, 'painel')
+  }
+  let proximoDash = 900
+  function criarDashboard(projetoId: number, nome: string) {
+    const id = ++proximoDash
+    dashboards.value = [...dashboards.value, { id, projeto: projetoId, nome, descricao: '', tarefas: ['abertas', 'vencidas', 'porStatus', 'carga'], itens: [] }]
+    abrirDashboard(id, true)
+    renomeando.value = 'd:' + id
+    return id
+  }
+  function atualizarDashboard(id: number, mudanca: Partial<DashboardDoProjeto>) {
+    dashboards.value = dashboards.value.map(d => d.id === id ? { ...d, ...mudanca } : d)
+  }
+  function duplicarDashboard(id: number, sufixo: string) {
+    const d = dashboards.value.find(x => x.id === id)
+    if (!d) return
+    const novo = ++proximoDash
+    dashboards.value = [...dashboards.value, { ...d, id: novo, nome: d.nome + ' ' + sufixo, tarefas: [...d.tarefas], itens: d.itens.map(i => ({ ...i, id: i.id + '-' + novo })) }]
+    return novo
+  }
+  function excluirDashboard(id: number) {
+    const d = dashboards.value.find(x => x.id === id)
+    dashboards.value = dashboards.value.filter(x => x.id !== id)
+    if (dashboardAberto.value === id) dashboardAberto.value = null
+    return d
+  }
+  function restaurarDashboard(d: DashboardDoProjeto) {
+    dashboards.value = [...dashboards.value, d]
+  }
+  function adicionarPainelDeItens(dashId: number, painel: PainelDeItens) {
+    dashboards.value = dashboards.value.map(d => d.id === dashId ? { ...d, itens: [...d.itens, painel] } : d)
+  }
+  /** Reordena categorias ou dashboards dentro do projeto (arrastar no menu). */
+  function reordenarNoProjeto(tipo: 'c' | 'd', projetoId: number, ids: number[]) {
+    if (tipo === 'c') {
+      const dentro = ids.map(i => categorias.value.find(c => c.id === i)!).filter(Boolean)
+      categorias.value = [...categorias.value.filter(c => c.projeto !== projetoId), ...dentro]
+    }
+    else {
+      const dentro = ids.map(i => dashboards.value.find(d => d.id === i)!).filter(Boolean)
+      dashboards.value = [...dashboards.value.filter(d => d.projeto !== projetoId), ...dentro]
+    }
+  }
+  let proximaCat = 700
+  function criarCategoria(projetoId: number, nome: string, icone: string) {
+    const id = ++proximaCat
+    const slug = nome.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+    categorias.value = [...categorias.value, { id, name: nome, slug, description: '', icon: icone, color: 'neutral', projeto: projetoId, itens: 0 }]
+    if (!expandidos.value.includes(projetoId)) expandidos.value = [...expandidos.value, projetoId]
+    return id
+  }
+  const tarefasDoProjeto = (projetoId: number) => {
+    const cats = new Set(categoriasDe(projetoId).map(c => c.id))
+    return tarefas.value.filter(x => cats.has(x.categoria))
+  }
+  let proximaTarefa = 800
+  function criarTarefa(dados: Omit<TarefaDoProjeto, 'id' | 'criadaEm' | 'status' | 'origem'>) {
+    tarefas.value = [{ ...dados, id: ++proximaTarefa, criadaEm: '2026-11-26', status: 'aberta', origem: 'rapida' }, ...tarefas.value]
+  }
+  function concluirTarefa(id: number) {
+    tarefas.value = tarefas.value.map(x => x.id === id ? { ...x, status: x.status === 'concluida' ? 'aberta' : 'concluida' } : x)
+  }
+  let proximoFluxo = 600
+  function criarFluxo(dados: { nome: string, descricao: string, icone: string, categoria: number, gatilho: Gatilho }) {
+    const id = ++proximoFluxo
+    detalhesDoFluxo[id] = { descricao: dados.descricao, versao: '0.0.1', icone: dados.icone, criadoEm: '2026-11-26' }
+    fluxos.value = [...fluxos.value, { id, nome: dados.nome, categoria: dados.categoria, gatilho: dados.gatilho, ativo: false, ultimaExecucao: null, execucoes30d: 0 }]
+    return id
+  }
   function salvarComoModelo(projetoId: number, nome: string, descricao: string, inclui: { fluxos: boolean, avisos: boolean, painel: boolean }) {
     const p = projetos.value.find(x => x.id === projetoId)!
     const cats = categoriasDe(projetoId)
@@ -416,6 +521,9 @@ export function useProjetos() {
     abaDoProjeto, mapas, fluxos, avisos, modelos, statusAtual, publicarStatus, camposDe, salvarMapa,
     fluxosDoProjeto, avisosDoProjeto, alternarFluxo, salvarComoModelo,
     meusFavoritos, ehFavorito, alternarFavorito, chaveDaTela,
+    tarefas, dashboards, dashboardAberto, editandoDashboard, renomeando,
+    abrirAba, dashboardsDe, abrirDashboard, criarDashboard, atualizarDashboard, duplicarDashboard, excluirDashboard, restaurarDashboard,
+    adicionarPainelDeItens, reordenarNoProjeto, criarCategoria, tarefasDoProjeto, criarTarefa, concluirTarefa, criarFluxo,
   }
 }
 

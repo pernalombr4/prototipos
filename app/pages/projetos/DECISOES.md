@@ -286,3 +286,52 @@ O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras 
   - `evidencias/entrega-projetos-abre-o-diretorio.png`: Todos os projetos aberto pelo clique em Projetos;
   - `evidencias/entrega-diretorio-colunas.png`: 52 projetos, o menu Colunas e a coluna Administradores escondida;
   - `evidencias/entrega-diretorio-paginador.png`: o paginador do produto, com 3 páginas de 25.
+
+## Rodada 5 · 2026-11-26
+- **Pedido (resumo do literal):** o painel não abria de dentro do projeto; não dava para criar nem editar o que
+  fica no projeto pelo menu; as tarefas do projeto não tinham lugar; faltava justificativa de produto. Automações
+  deve trazer a interface do Spaceflow, e Painéis, a lógica de construção de dashboard do produto, unindo o painel
+  de tarefas e o de itens, sem inventar padrão. Referência: o menu do espaço no ClickUp.
+- **O que o código diz (develop, 2026-11-26, pela `investigar-codigo`):**
+  - a área de membro do Spaceflow lista os workflows em cartões: ícone, nome, versão, Ativo ou Inativo, descrição
+    (ou "Nenhuma descrição informada"), o gatilho cru (`c_items:<categoria> -> create|update|delete`), data e
+    "Abrir"; o botão "Novo Workflow" abre o modal de Nome, Descrição e Ícone;
+  - o painel de tarefas tem blocos fixos que a pessoa mostra ou esconde (números, por status, carga por
+    responsável, fila de prazos e outros); o painel de itens tem painéis que a pessoa monta: título, categoria,
+    tipo de gráfico, agrupar por, função e campo de data;
+  - os 2 usam a mesma grade do SDK (`EnDashboardCanvas`, `EnDashboardCustomize`, período e o "Adicionar painel"
+    por grupo); o SDK não tem gráfico de funil nem de pizza.
+- **Mudou:**
+  - o "+" da linha do projeto abre "Adicionar em <projeto>": Nova categoria, Categoria do workspace, Nova tarefa,
+    Novo painel e Novo Workflow; quem participa sem administrar vê só Nova tarefa;
+  - a árvore do projeto (painel Projetos e menu atual, o mesmo componente) tem Visão geral, Tarefas e Automações
+    fixos, e as seções Categorias e Painéis, cada uma com o "+" no hover, o "•••" por linha, arrastar para
+    reordenar e a linha "Adicionar ..." quando está vazia;
+  - painel: clicar abre, duplo clique renomeia, e o "•••" tem Abrir, Editar painel, Renomear, Duplicar e Excluir
+    (com Desfazer); categoria: Mover para outro projeto, Tirar do projeto (com Desfazer) e Configurações;
+  - aba Tarefas: as tarefas rápidas e as agendadas dos itens das categorias do projeto, no esquema das listagens
+    (busca, filtros rápidos de Status, Responsável e Categoria, `EnTable` e paginador);
+  - aba Automações: os cartões do Spaceflow; a tabela de avisos saiu;
+  - aba Painéis: um painel só com os blocos de tarefas e os painéis de itens na mesma grade do SDK, com período,
+    Categoria e Responsável; Personalizar usa a barra do SDK; "Painel de itens" abre o modal do produto;
+  - Visão geral: 4 números clicáveis (Tarefas abertas, Vencidas, Itens, Workflows ativos), cada um abre a sua aba,
+    e a seção "Fila de prazos".
+- **Fronteira:** muda a árvore do projeto no menu, o "+" e as abas Tarefas, Automações, Painéis e Visão geral. O
+  diretório, as janelas de configurar e mover e a casca do produto ficam como na rodada 4.
+- **Escolhas por limite do SDK:** o funil aparece como barras e a pizza como rosca, com a legenda ao lado. O filtro
+  de Responsável não se aplica aos painéis de itens (o item não tem responsável nativo); a tela avisa.
+- **Fora do menu:** a linha "Itens" ficou só como aba. No menu, as categorias já levam aos itens.
+- **Pede back-end novo (marca azul):** a fonte de dados de itens no painel unificado, com o escopo do projeto e o
+  período; a estrutura de menu por projeto; "Tirar do projeto" e o filtro de categoria dos workflows. A lista de
+  tarefas filtrada pelas categorias do projeto já existe hoje.
+- **Ver:** https://pernalombr4.github.io/prototipos/projetos
+  - `evidencias/entrega-r5-menu-adicionar.png`: o "+" do projeto com o que se adiciona;
+  - `evidencias/entrega-r5-menu-do-painel.png`: o "•••" do painel no menu;
+  - `evidencias/entrega-r5-menu-atual-es.png`: a mesma árvore no menu atual, em espanhol;
+  - `evidencias/entrega-r5-visao-geral.png`: os 4 números e a fila de prazos;
+  - `evidencias/entrega-r5-tarefas.png`: a aba Tarefas;
+  - `evidencias/entrega-r5-automacoes.png` e `entrega-r5-novo-workflow.png`: os cartões do Spaceflow e o modal;
+  - `evidencias/entrega-r5-painel-do-projeto.png` e `entrega-r5-paineis-de-itens.png`: o painel unificado;
+  - `evidencias/entrega-r5-personalizar.png`, `entrega-r5-adicionar-painel.png` e
+    `entrega-r5-novo-painel-de-itens.png`: personalizar e montar um painel de itens;
+  - `evidencias/entrega-r5-paineis-de-itens-escuro.png`: tema escuro, com a marca do que pede back-end.
