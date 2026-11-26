@@ -665,11 +665,11 @@ export interface TarefaDoProjeto {
 export const tarefasBase: TarefaDoProjeto[] = [
   { id: 101, titulo: 'Aprovar pagamento', categoria: 4, item: 'CP4204', responsavel: 3, prazo: '2026-11-26', status: 'aberta', prioridade: 'alta', origem: 'agendada', fluxo: 1, criadaEm: '2026-11-24' },
   { id: 102, titulo: 'Aprovar pagamento', categoria: 4, item: 'CP4187', responsavel: 3, prazo: '2026-11-24', status: 'aberta', prioridade: 'alta', origem: 'agendada', fluxo: 1, criadaEm: '2026-11-20' },
-  { id: 103, titulo: 'Conferir boleto da locação', categoria: 4, item: 'CP4170', responsavel: 5, prazo: '2026-11-28', status: 'andamento', prioridade: 'media', origem: 'rapida', criadaEm: '2026-11-22' },
+  { id: 103, titulo: 'Conferir boleto da locação', categoria: 4, item: 'CP4170', responsavel: 1, prazo: '2026-11-28', status: 'andamento', prioridade: 'media', origem: 'rapida', criadaEm: '2026-11-22' },
   { id: 104, titulo: 'Anexar comprovante de pagamento', categoria: 4, item: 'CP4153', responsavel: 5, prazo: '2026-11-21', status: 'concluida', prioridade: 'baixa', origem: 'rapida', criadaEm: '2026-11-18' },
   { id: 105, titulo: 'Aprovar pagamento', categoria: 4, item: 'CP4136', responsavel: 2, prazo: '2026-11-30', status: 'aberta', prioridade: 'media', origem: 'agendada', fluxo: 1, criadaEm: '2026-11-25' },
   { id: 106, titulo: 'Conferir nota de entrada', categoria: 5, item: 'NF4205', responsavel: 5, prazo: '2026-11-24', status: 'aberta', prioridade: 'alta', origem: 'rapida', criadaEm: '2026-11-19' },
-  { id: 107, titulo: 'Corrigir CFOP da nota', categoria: 5, item: 'NF4188', responsavel: 3, prazo: '2026-12-02', status: 'andamento', prioridade: 'media', origem: 'rapida', criadaEm: '2026-11-23' },
+  { id: 107, titulo: 'Corrigir CFOP da nota', categoria: 5, item: 'NF4188', responsavel: 1, prazo: '2026-12-02', status: 'andamento', prioridade: 'media', origem: 'rapida', criadaEm: '2026-11-23' },
   { id: 108, titulo: 'Lançar nota no ERP', categoria: 5, item: 'NF4171', responsavel: 5, prazo: '2026-11-20', status: 'concluida', prioridade: 'media', origem: 'agendada', fluxo: 3, criadaEm: '2026-11-12' },
   { id: 109, titulo: 'Analisar reembolso', categoria: 6, item: 'RE4206', responsavel: 3, prazo: '2026-11-27', status: 'aberta', prioridade: 'media', origem: 'agendada', fluxo: 4, criadaEm: '2026-11-24' },
   { id: 110, titulo: 'Pedir nota do almoço', categoria: 6, item: 'RE4189', responsavel: 5, prazo: '2026-11-25', status: 'andamento', prioridade: 'baixa', origem: 'rapida', criadaEm: '2026-11-21' },

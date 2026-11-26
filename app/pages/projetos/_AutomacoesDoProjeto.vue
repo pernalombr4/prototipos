@@ -8,7 +8,7 @@
  *  - botões Abrir (a página de execuções) e Executar (só no gatilho Manual, desligado se inativo).
  *
  * O que o projeto acrescenta, marcado: a lista só traz os workflows cujo gatilho escuta uma categoria
- * do projeto (hoje nenhuma tela lista os workflows de uma categoria), o filtro de categoria e o
+ * do projeto (hoje nenhuma tela lista os workflows de uma categoria), e o
  * "Novo Workflow" com o gatilho já escolhido. A tabela de avisos de prazo da rodada 3 saiu: não é
  * interface do Spaceflow.
  */
@@ -29,14 +29,11 @@ const p = computed(() => prj.projetos.value.find(x => x.id === props.id)!)
 const admin = computed(() => prj.podeAdministrar(p.value))
 const categorias = computed(() => prj.categoriasDe(props.id))
 const busca = ref('')
-const fCat = ref<number | 'todas'>('todas')
 const normalizar = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 const fluxos = computed(() => prj.fluxosDoProjeto(props.id).filter((f) => {
-  if (fCat.value !== 'todas' && f.categoria !== fCat.value) return false
   const q = normalizar(busca.value.trim())
   return !q || normalizar(`${f.nome} ${detalhesDoFluxo[f.id]?.descricao ?? ''}`).includes(q)
 }))
-const opCat = computed(() => [{ value: 'todas' as const, label: rw.value.todasCategorias }, ...categorias.value.map(c => ({ value: c.id, label: c.name, icon: c.icon }))])
 
 const ACAO: Record<Gatilho, string> = { criado: 'create', atualizado: 'update', excluido: 'delete', agendado: 'timer' }
 function gatilhoCru(f: Fluxo) {
@@ -44,7 +41,6 @@ function gatilhoCru(f: Fluxo) {
   return f.gatilho === 'agendado' ? 'timer' : `c_items:${slug} -> ${ACAO[f.gatilho]}`
 }
 const formatarData = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString(idioma.value)
-const nomeDaCategoria = (id: number) => prj.categorias.value.find(c => c.id === id)?.name ?? ''
 </script>
 
 <template>
@@ -52,7 +48,6 @@ const nomeDaCategoria = (id: number) => prj.categorias.value.find(c => c.id === 
     <!-- barra: a da área Spaceflows -->
     <div class="flex flex-wrap items-center gap-2">
       <UInput v-model="busca" :placeholder="rw.buscar" icon="i-lucide-search" size="sm" class="w-64" :aria-label="rw.buscar" />
-      <USelectMenu v-model="fCat" :items="opCat" value-key="value" :search-input="false" size="sm" icon="i-lucide-folder" class="w-52" :class="marca" :aria-label="rw.filtroCategoria" />
       <span class="text-sm text-muted">{{ rw.encontrados(fluxos.length) }}</span>
       <UButton v-if="admin" :label="rw.novo" icon="i-lucide-plus" size="sm" class="ml-auto" @click="prj.janelas.novoFluxo.value = id" />
     </div>
@@ -88,7 +83,6 @@ const nomeDaCategoria = (id: number) => prj.categorias.value.find(c => c.id === 
         <div class="mt-3 space-y-1 text-xs text-muted">
           <p class="flex items-center gap-1.5"><UIcon name="i-lucide-zap" class="size-3.5 shrink-0" /><span class="truncate font-mono">{{ gatilhoCru(f) }}</span></p>
           <p class="flex items-center gap-1.5"><UIcon name="i-lucide-calendar" class="size-3.5 shrink-0" />{{ formatarData(detalhesDoFluxo[f.id]?.criadoEm ?? '2026-11-26') }}</p>
-          <p class="flex items-center gap-1.5" :class="marca"><UIcon name="i-lucide-folder" class="size-3.5 shrink-0" />{{ nomeDaCategoria(f.categoria) }}</p>
         </div>
         <footer class="mt-4 flex gap-2">
           <UButton :label="rw.abrir" icon="i-lucide-external-link" size="sm" color="neutral" variant="outline" class="flex-1 justify-center" @click="toast.add({ title: rw.abreExecucoes(f.nome), icon: 'i-lucide-info', color: 'neutral' })" />

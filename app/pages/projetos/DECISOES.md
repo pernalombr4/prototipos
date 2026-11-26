@@ -354,3 +354,49 @@ O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras 
   - O detector de seta marca as 2 capturas no topo da barra de rolagem da página (1565,52 com a página no topo e
     1565,103 com ela rolada); a marca acompanha a barra e a imagem não tem ponteiro. Falso positivo a confirmar com
     a redatora; o ajuste do detector fica fora deste repositório.
+
+## Rodada 7 · 2026-11-26
+- **Pedido (literal):** "os filtros de tarefas devem estar na mesma linha, todos. inclusive o "todas, rapidas e
+  agendadas", na msm linha dos filtros rapidos ali abaixo.", "e se tem esse filtro, deve ter coluna de qual tipo
+  de tarefa é na tabela. analise bem o modo como ta fazendo essa tabela.", "a tela de itens alem do filtro de
+  categoria deve ter o funcionamento normal de filtros que tem hoje no enspace tambem, e todas as colunas que
+  façam sentido serem mostradas a partir dos dados que vao ser usados aí" e "as automaçoes nao devem ter filtro
+  por categoria."
+- **O que o código diz (develop, 2026-11-26, pela `investigar-codigo`):**
+  - as listas de tarefas e a de itens usam a mesma barra: busca, período com o campo de data e "Limpar filtros"; à
+    direita Relatórios (na de itens), Colunas, "Filtros por campo" (um painel à esquerda com um acordeão por campo)
+    e o botão de criar; embaixo, a linha de filtros rápidos, com botões que ligam e desligam;
+  - os filtros rápidos das tarefas são Minhas tarefas, Tarefas em Aberto, Atrasadas, Atribuídas a mim, Tarefas
+    Externas e Tarefas Internas;
+  - colunas da tarefa rápida: ID, Nome, Criada em, Data limite, Status, Responsável e Prioridade; da tarefa agendada:
+    Status da Tarefa, Status de SLA, Responsáveis, Tipo (o nome da categoria), Referência do Item, Tarefa e Título.
+    A tarefa agendada não tem Prioridade;
+  - o `EnTable` do SDK aceita largura por coluna (`columnSizing`), colunas visíveis e redimensionar.
+- **Mudou:**
+  - Tarefas: todos os filtros numa linha só (Todas, Rápidas e Agendadas; Status; Responsável; Categoria; Atrasadas;
+    Minhas tarefas), com o período e o menu Colunas na barra;
+  - Tarefas, a tabela: cada informação na sua coluna (antes o item e a categoria iam numa 2ª linha do título), com
+    os nomes do produto: Tarefa, Tipo de tarefa (Rápida ou Agendada, a coluna que o filtro pede), Referência do item,
+    Categoria, Responsável, Data limite, Status e Prioridade; Workflow e Criada em ficam no menu Colunas. Prioridade
+    fica vazia na agendada, como no produto. Cada coluna tem largura própria, e o título deixou de cortar;
+  - Itens: a barra da tabela de itens do produto (busca, campo de data e período, "Limpar filtros", Relatórios,
+    Colunas, Filtros por campo, Campos comuns, Novo registro), o painel Filtros por campo (Status, Responsável,
+    Prazo e Criado por), a linha de filtros rápidos com Categoria (proposta), Somente os meus e Vencidos, a ordenação
+    nas colunas e o paginador;
+  - Itens, as colunas: Referência, Título, Categoria, Status, Responsável, Prazo e Criado em; Atualizado em e Criado
+    por no menu Colunas. Só entra coluna que vale para todas as categorias: as do item no produto e as 3 do mapa de
+    campos comuns. Campo de uma categoria só fica na tela do item;
+  - Automações: sem o filtro de categoria e sem a linha da categoria no cartão (o gatilho já diz a categoria). O
+    cartão é o do Spaceflow, sem acréscimo;
+  - 2 tarefas do Financeiro passaram para a usuária do protótipo, para "Minhas tarefas" ter resultado.
+- **Fronteira:** muda o conteúdo das abas Tarefas, Itens e Automações. O menu, a Visão geral e o Painel ficam como na
+  rodada 6.
+- **Pede back-end novo:** sai o filtro de categoria dos workflows (rodada 5). O resto da lista da rodada 5 continua.
+- **Ver:** https://pernalombr4.github.io/prototipos/projetos
+  - `evidencias/entrega-r7-tarefas.png`: os filtros numa linha e a coluna Tipo de tarefa;
+  - `evidencias/entrega-r7-itens.png`: a barra da tabela de itens, com o filtro rápido Vencidos ligado;
+  - `evidencias/entrega-r7-itens-filtros-por-campo.png`: o painel Filtros por campo com o Status aplicado;
+  - `evidencias/entrega-r7-automacoes.png`: os cartões sem o filtro de categoria.
+  - O detector de seta passou nas 4. A captura de Itens com 11 linhas tinha a barra de rolagem da página e o detector
+    marcou o topo dela, como nas capturas da rodada 6; com a página sem rolagem, passou. Reforça o falso positivo da
+    rodada 6.
