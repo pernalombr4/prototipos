@@ -10,6 +10,8 @@
  */
 import {
   avisosBase,
+  etiquetasBase,
+  type Etiqueta,
   dashboardsBase,
   detalhesDoFluxo,
   tarefasBase,
@@ -82,6 +84,16 @@ const favoritosBase: Record<number, string[]> = {
   5: ['c:4', 'c:1'],
   10: ['p:4'],
 }
+
+/**
+ * Rodada 11: os contadores de id moram fora do composable. Dentro dele, cada componente que chamava
+ * useProjetos() recomeçava a contagem, e 2 telas criavam categorias (ou tarefas) com o mesmo id.
+ */
+let proximoId = 500
+let proximoDash = 900
+let proximaCat = 700
+let proximaTarefa = 800
+let proximoFluxo = 600
 
 export function useProjetos() {
   const cenario = useState<Cenario>('prj-cenario', () => 'emUso')
@@ -264,7 +276,6 @@ export function useProjetos() {
     if (c?.projeto && !expandidos.value.includes(c.projeto)) expandidos.value = [...expandidos.value, c.projeto]
   }
 
-  let proximoId = 500
   function criarProjeto(dados: {
     nome: string
     descricao: string
@@ -382,7 +393,6 @@ export function useProjetos() {
     editandoDashboard.value = editar
     abrirAba(d.projeto, 'painel')
   }
-  let proximoDash = 900
   function criarDashboard(projetoId: number, nome: string) {
     const id = ++proximoDash
     dashboards.value = [...dashboards.value, { id, projeto: projetoId, nome, descricao: '', tarefas: ['abertas', 'vencidas', 'porStatus', 'carga'], itens: [] }]
@@ -423,13 +433,30 @@ export function useProjetos() {
       dashboards.value = [...dashboards.value.filter(d => d.projeto !== projetoId), ...dentro]
     }
   }
-  let proximaCat = 700
-  function criarCategoria(projetoId: number, nome: string, icone: string) {
+  /** Rodada 11: projetoId null cria a categoria no workspace (o atalho do Criar projeto, antes de o projeto existir). */
+  function criarCategoria(projetoId: number | null, nome: string, icone: string) {
     const id = ++proximaCat
     const slug = nome.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
     categorias.value = [...categorias.value, { id, name: nome, slug, description: '', icon: icone, color: 'neutral', projeto: projetoId, itens: 0 }]
-    if (!expandidos.value.includes(projetoId)) expandidos.value = [...expandidos.value, projetoId]
+    if (projetoId && !expandidos.value.includes(projetoId)) expandidos.value = [...expandidos.value, projetoId]
     return id
+  }
+  /** Rodada 11: as etiquetas viram estado, para o atalho "Criar etiqueta" do seletor. */
+  const etiquetas = useState<Etiqueta[]>('prj-etiquetas', () => [...etiquetasBase])
+  function criarEtiqueta(nome: string) {
+    const existe = etiquetas.value.find(e => e.nome.toLowerCase() === nome.toLowerCase())
+    if (existe) return existe.id
+    const id = `nova-${etiquetas.value.length + 1}`
+    etiquetas.value = [...etiquetas.value, { id, nome, cor: 'neutral' }]
+    return id
+  }
+  /** Rodada 11: o projeto criado pelo atalho de um seletor, só com o nome; o resto fica no padrão e se ajusta nas configurações. */
+  function criarProjetoRapido(nome: string) {
+    const onde = { area: area.value, tela: tela.value }
+    const novo = criarProjeto({ nome, descricao: '', icone: 'i-lucide-folder-kanban', cor: 'primary', visibilidade: 'aberto', categorias: [], participantes: [], noMenuDeTodos: true })
+    area.value = onde.area
+    tela.value = onde.tela
+    return novo
   }
   /** A tarefa ligada a item fica no projeto da categoria do item; a sem item, no projeto escolhido (rodada 10). */
   const projetoDaTarefa = (x: TarefaDoProjeto) => x.categoria ? (categorias.value.find(c => c.id === x.categoria)?.projeto ?? null) : (x.projeto ?? null)
@@ -453,7 +480,6 @@ export function useProjetos() {
     const prefixo = dasTarefas[0]?.slice(0, 2) ?? c.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
     return [...new Set([...dasTarefas, ...[0, 1, 2, 3].map(n => `${prefixo}${4210 - n * 17}`)])]
   }
-  let proximaTarefa = 800
   function criarTarefa(dados: Omit<TarefaDoProjeto, 'id' | 'criadaEm' | 'status'> & { status?: TarefaDoProjeto['status'] }) {
     const id = ++proximaTarefa
     tarefas.value = [{ status: 'aberta', ...dados, id, criadaEm: '2026-11-26' }, ...tarefas.value]
@@ -470,7 +496,6 @@ export function useProjetos() {
   function atualizarTarefa(id: number, dados: Partial<Omit<TarefaDoProjeto, 'id'>>) {
     tarefas.value = tarefas.value.map(x => x.id === id ? { ...x, ...dados } : x)
   }
-  let proximoFluxo = 600
   function criarFluxo(dados: { nome: string, descricao: string, icone: string, categoria: number, gatilho: Gatilho }) {
     const id = ++proximoFluxo
     detalhesDoFluxo[id] = { descricao: dados.descricao, versao: '0.0.1', icone: dados.icone, criadoEm: '2026-11-26' }
@@ -553,7 +578,7 @@ export function useProjetos() {
     meusFavoritos, ehFavorito, alternarFavorito, chaveDaTela,
     tarefas, dashboards, dashboardAberto, editandoDashboard, renomeando,
     abrirAba, dashboardsDe, abrirDashboard, criarDashboard, atualizarDashboard, duplicarDashboard, excluirDashboard, restaurarDashboard,
-    adicionarPainelDeItens, reordenarNoProjeto, criarCategoria, tarefasDoProjeto, criarTarefa, concluirTarefa, atualizarTarefa, abertasDe, concluirComSubtarefas, criarFluxo,
+    adicionarPainelDeItens, reordenarNoProjeto, criarCategoria, etiquetas, criarEtiqueta, criarProjetoRapido, tarefasDoProjeto, criarTarefa, concluirTarefa, atualizarTarefa, abertasDe, concluirComSubtarefas, criarFluxo,
     projetoDaTarefa, subtarefasDe, tarefaAberta, excluirTarefa, itensDaCategoria,
   }
 }

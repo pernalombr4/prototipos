@@ -17,6 +17,8 @@ import { useMarcaDeProposta, useProjetos } from './estado'
 import { useMetasEDiscussoes } from './metasEDiscussoes'
 import { textosDeMarcosEMedicao } from './textosDeMarcosEMedicao'
 import { textosDaTarefa } from './textosDaTarefa'
+import { textosDeAtalhos } from './textosDeAtalhos'
+import AtalhoDeCriar from './_AtalhoDeCriar.vue'
 
 const prj = useProjetos()
 const r = useTextos(textosDoProjeto)
@@ -72,6 +74,25 @@ watch(abertaTarefa, (v) => {
 watch(() => tar.categoria, () => { tar.item = itensDaCategoria.value[0] ?? '' }, { immediate: true })
 const opPessoas = computed(() => pessoas.filter(x => !x.convidado).map(x => ({ value: x.id, label: x.nome })))
 const opPrioridade = computed(() => (['urgente', 'alta', 'media', 'baixa'] as Prioridade[]).map(x => ({ value: x, label: r.value.tarefas.prioridade[x] })))
+/**
+ * Rodada 11: os seletores Categoria e Marco da nova tarefa têm o atalho de criar no pé (`_AtalhoDeCriar.vue`).
+ * A categoria nasce no projeto, sem campos; o marco, só para quem administra o projeto, com a data limite da
+ * tarefa como data-alvo. O novo já fica escolhido.
+ */
+const ta = useTextos(textosDeAtalhos)
+const buscaCategoriaDaTarefa = ref('')
+const buscaMarcoDaTarefa = ref('')
+const podeMarcoNaTarefa = computed(() => !!projTarefa.value && md.podeEditarMarcos(projTarefa.value.id))
+function criarCategoriaNaTarefa(nome: string) {
+  tar.categoria = prj.criarCategoria(projTarefa.value!.id, nome, 'i-lucide-folder')
+  toast.add({ title: ta.value.categoria.criada(nome), icon: 'i-lucide-folder-plus', color: 'success' })
+  buscaCategoriaDaTarefa.value = ''
+}
+function criarMarcoNaTarefa(nome: string) {
+  tar.marco = md.criarMarcoRapido(projTarefa.value!.id, nome, tar.prazo).id
+  toast.add({ title: ta.value.marco.criado(nome), icon: 'i-lucide-flag', color: 'success' })
+  buscaMarcoDaTarefa.value = ''
+}
 function criarTarefa() {
   const p = projTarefa.value!
   const id = prj.criarTarefa(tar.categoria
@@ -143,7 +164,11 @@ function criarFluxo() {
           <UInput v-model="tar.titulo" :placeholder="r.novaTarefa.tituloPh" class="w-full" autofocus />
         </UFormField>
         <UFormField :label="r.novaTarefa.categoria" :help="tar.categoria ? undefined : tt.novaTarefaSemItemDica" :class="tar.categoria ? '' : marca">
-          <USelect v-model="tar.categoria" :items="opCategoriasDaTarefa" class="w-full" />
+          <USelectMenu v-model="tar.categoria" v-model:search-term="buscaCategoriaDaTarefa" :items="opCategoriasDaTarefa" value-key="value" class="w-full" :ui="{ content: 'min-w-72' }">
+            <template #content-bottom>
+              <AtalhoDeCriar :termo="buscaCategoriaDaTarefa" :rotulo="ta.categoria.rotulo" :com="ta.categoria.com" :dica="ta.categoria.dica" @criar="criarCategoriaNaTarefa" />
+            </template>
+          </USelectMenu>
         </UFormField>
         <UFormField v-if="tar.categoria" :label="r.novaTarefa.item" required>
           <USelect v-model="tar.item" :items="itensDaCategoria" class="w-full" />
@@ -158,7 +183,11 @@ function criarFluxo() {
           <USelect v-model="tar.prioridade" :items="opPrioridade" class="w-full" />
         </UFormField>
         <UFormField :label="tmm.marcos.colMarco" :class="marca">
-          <USelect v-model="tar.marco" :items="opMarcosDaTarefa" class="w-full" />
+          <USelectMenu v-model="tar.marco" v-model:search-term="buscaMarcoDaTarefa" :items="opMarcosDaTarefa" value-key="value" class="w-full" :ui="{ content: 'min-w-72' }">
+            <template v-if="podeMarcoNaTarefa" #content-bottom>
+              <AtalhoDeCriar :termo="buscaMarcoDaTarefa" :rotulo="ta.marco.rotulo" :com="ta.marco.com" :dica="ta.marco.dica" @criar="criarMarcoNaTarefa" />
+            </template>
+          </USelectMenu>
         </UFormField>
       </form>
     </template>

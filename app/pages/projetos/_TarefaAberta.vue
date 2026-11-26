@@ -17,9 +17,11 @@
  * O bloqueio entre tarefas fica no protótipo pasta-de-apontamentos, como a redatora pediu na rodada 8.
  */
 import type { DropdownMenuItem } from '@nuxt/ui'
-import { etiquetasBase, iniciais, pessoa, pessoas, type Prioridade, type StatusDaTarefa, type TarefaDoProjeto } from './mocks'
+import { iniciais, pessoa, pessoas, type Prioridade, type StatusDaTarefa, type TarefaDoProjeto } from './mocks'
 import { textosDoProjeto } from './textosDoProjeto'
 import { textosDaTarefa } from './textosDaTarefa'
+import { textosDeAtalhos } from './textosDeAtalhos'
+import AtalhoDeCriar from './_AtalhoDeCriar.vue'
 import { textosDeMarcosEMedicao } from './textosDeMarcosEMedicao'
 import { useMarcaDeProposta, useProjetos } from './estado'
 import { useMetasEDiscussoes } from './metasEDiscussoes'
@@ -54,8 +56,30 @@ const COR_DA_PRIORIDADE: Record<Prioridade, 'error' | 'warning' | 'info' | 'neut
 const opPessoas = computed(() => pessoas.filter(x => !x.convidado).map(x => ({ value: x.id, label: x.nome, avatar: { text: iniciais(x.nome) } })))
 const opStatus = computed(() => (['aberta', 'andamento', 'bloqueada', 'concluida'] as StatusDaTarefa[]).map(v => ({ value: v, label: rt.value.status[v], icon: ICONE_DO_STATUS[v] })))
 const opPrioridade = computed(() => (['urgente', 'alta', 'media', 'baixa'] as Prioridade[]).map(v => ({ value: v, label: rt.value.prioridade[v] })))
-const opEtiquetas = computed(() => etiquetasBase.map(e => ({ value: e.id, label: e.nome })))
-const etiqueta = (id: string) => etiquetasBase.find(e => e.id === id)
+const opEtiquetas = computed(() => prj.etiquetas.value.map(e => ({ value: e.id, label: e.nome })))
+const etiqueta = (id: string) => prj.etiquetas.value.find(e => e.id === id)
+/**
+ * Rodada 11: o atalho de criar no pé dos seletores (`_AtalhoDeCriar.vue`). Etiqueta: cria com o nome da busca
+ * e a põe na tarefa. Marco: só quem administra o projeto; cria no projeto, com a data limite da tarefa como
+ * data-alvo, e liga a tarefa a ele.
+ */
+const ta = useTextos(textosDeAtalhos)
+const buscaEtiqueta = ref('')
+const buscaMarco = ref('')
+function criarEtiqueta(nome: string) {
+  const x = tarefa.value!
+  const id = prj.criarEtiqueta(nome)
+  salvar({ etiquetas: [...new Set([...(x.etiquetas ?? []), id])] })
+  toast.add({ title: ta.value.etiqueta.criada(nome), icon: 'i-lucide-tag', color: 'success' })
+  buscaEtiqueta.value = ''
+}
+function criarMarco(nome: string) {
+  const x = tarefa.value!
+  const m = md.criarMarcoRapido(props.id, nome, x.prazo)
+  md.definirMarcoDaTarefa(x.id, m.id)
+  toast.add({ title: ta.value.marco.criado(nome), icon: 'i-lucide-flag', color: 'success' })
+  buscaMarco.value = ''
+}
 const opMarcos = computed(() => [
   { value: 0, label: tmm.value.marcos.semMarco },
   ...md.marcosDo(props.id).filter(m => m.status === 'aberto').map(m => ({ value: m.id, label: m.nome, icon: 'i-lucide-flag' })),
@@ -365,7 +389,10 @@ function excluir() {
           </div>
           <div class="flex flex-col gap-1 px-4 py-2">
             <span class="text-xs font-medium text-muted">{{ tl.etiquetas }}</span>
-            <USelectMenu :model-value="tarefa.etiquetas ?? []" :items="opEtiquetas" value-key="value" multiple size="sm" variant="ghost" class="w-full" :placeholder="tl.semEtiqueta" :aria-label="tl.etiquetas" @update:model-value="(v: string[]) => salvar({ etiquetas: v })">
+            <USelectMenu v-model:search-term="buscaEtiqueta" :model-value="tarefa.etiquetas ?? []" :items="opEtiquetas" value-key="value" multiple size="sm" variant="ghost" class="w-full" :ui="{ content: 'min-w-64' }" :placeholder="tl.semEtiqueta" :aria-label="tl.etiquetas" @update:model-value="(v: string[]) => salvar({ etiquetas: v })">
+              <template #content-bottom>
+                <AtalhoDeCriar :termo="buscaEtiqueta" :rotulo="ta.etiqueta.rotulo" :com="ta.etiqueta.com" :dica="ta.etiqueta.dica" @criar="criarEtiqueta" />
+              </template>
               <template #default>
                 <span v-if="tarefa.etiquetas?.length" class="flex flex-wrap gap-1">
                   <UBadge v-for="e in tarefa.etiquetas" :key="e" :label="etiqueta(e)?.nome" :color="etiqueta(e)?.cor" variant="subtle" size="sm" />
@@ -388,7 +415,11 @@ function excluir() {
           <div class="flex flex-col gap-1 px-4 py-2" :class="marca">
             <span class="text-xs font-medium text-muted">{{ tl.marco }}</span>
             <UTooltip :text="tl.marcoSoAdmin" :disabled="podeMarco">
-              <USelect :model-value="md.marcoDaTarefa(tarefa.id)?.id ?? 0" :items="opMarcos" size="sm" variant="ghost" class="w-full" :disabled="!podeMarco" :ui="{ content: 'min-w-64' }" :aria-label="tl.marco" @update:model-value="(v: number) => md.definirMarcoDaTarefa(tarefa!.id, v || null)" />
+              <USelectMenu v-model:search-term="buscaMarco" :model-value="md.marcoDaTarefa(tarefa.id)?.id ?? 0" :items="opMarcos" value-key="value" size="sm" variant="ghost" class="w-full" :disabled="!podeMarco" :ui="{ content: 'min-w-64' }" :aria-label="tl.marco" @update:model-value="(v: number) => md.definirMarcoDaTarefa(tarefa!.id, v || null)">
+                <template #content-bottom>
+                  <AtalhoDeCriar :termo="buscaMarco" :rotulo="ta.marco.rotulo" :com="ta.marco.com" :dica="ta.marco.dica" @criar="criarMarco" />
+                </template>
+              </USelectMenu>
             </UTooltip>
           </div>
           <div class="px-4 py-2 text-[11px] text-dimmed">

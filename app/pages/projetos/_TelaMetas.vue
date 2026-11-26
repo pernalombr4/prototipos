@@ -21,6 +21,8 @@ import { COR_DA_SITUACAO, ICONE_DA_SITUACAO, COR_DO_PROJETO, useMarcaDeProposta,
 import { useMetasEDiscussoes, type Marco, type Medicao, type Meta, type Unidade } from './metasEDiscussoes'
 import { textosDeMetasEDiscussoes } from './textosDeMetasEDiscussoes'
 import { textosDeMarcosEMedicao } from './textosDeMarcosEMedicao'
+import { textosDeAtalhos } from './textosDeAtalhos'
+import AtalhoDeCriar from './_AtalhoDeCriar.vue'
 
 const props = defineProps<{ t: Textos }>()
 const prj = useProjetos()
@@ -28,6 +30,7 @@ const md = useMetasEDiscussoes()
 const tx = useTextos(textosDeMetasEDiscussoes)
 const tg = computed(() => tx.value.metas)
 const tmm = useTextos(textosDeMarcosEMedicao)
+const ta = useTextos(textosDeAtalhos)
 const tv = computed(() => tmm.value.medicao)
 const idioma = useIdioma()
 const toast = useToast()
@@ -93,6 +96,28 @@ const acoes = computed<DropdownMenuItem[][]>(() => {
 /** Os projetos e os marcos que a pessoa vê, para ligar; os que ela não vê continuam ligados. */
 const opProjetos = computed(() => prj.ativos.value.filter(p => prj.enxerga(p)).map(p => ({ value: p.id, label: p.nome, icon: p.icone })))
 const opMarcos = computed(() => md.marcos.value.filter(m => md.veProjeto(m.projeto)).map(m => ({ value: m.id, label: m.nome, description: projetoDe(m.projeto)?.nome })))
+/**
+ * Rodada 11: os 4 seletores da meta (projetos e marcos, no painel e na janela) têm o atalho de criar no pé
+ * (`_AtalhoDeCriar.vue`). O projeto nasce só com o nome e a pessoa como administradora; o marco nasce no
+ * projeto escolhido, entre os que a pessoa administra, com a data-alvo da meta. O novo entra ligado à meta.
+ */
+const buscas = reactive({ painelProjetos: '', painelMarcos: '', formProjetos: '', formMarcos: '' })
+const destinosDoMarco = computed(() => prj.ativos.value.filter(p => prj.podeAdministrar(p)).map(p => ({ value: p.id, label: p.nome })))
+function criarProjetoNaMeta(onde: 'painel' | 'form', nome: string) {
+  const p = prj.criarProjetoRapido(nome)
+  if (onde === 'painel' && aberta.value) ligar('projetos', [...projetosVisiveisDa(aberta.value), p.id])
+  else fProjetos.value = [...fProjetos.value, p.id]
+  toast.add({ title: ta.value.projeto.criado(nome), icon: 'i-lucide-folder-kanban', color: 'success' })
+  buscas[onde === 'painel' ? 'painelProjetos' : 'formProjetos'] = ''
+}
+function criarMarcoNaMeta(onde: 'painel' | 'form', nome: string, projeto?: number) {
+  if (!projeto) return
+  const m = md.criarMarcoRapido(projeto, nome, onde === 'painel' && aberta.value ? aberta.value.dataAlvo : fData.value)
+  if (onde === 'painel' && aberta.value) ligar('marcos', [...marcosVisiveisDa(aberta.value), m.id])
+  else fMarcos.value = [...fMarcos.value, m.id]
+  toast.add({ title: ta.value.marco.criado(nome), icon: 'i-lucide-flag', color: 'success' })
+  buscas[onde === 'painel' ? 'painelMarcos' : 'formMarcos'] = ''
+}
 function ligar(tipo: 'projetos' | 'marcos', ids: number[]) {
   const m = aberta.value
   if (!m) return
@@ -336,8 +361,11 @@ function excluir() {
                 <h3 class="text-sm font-semibold text-highlighted">{{ aberta.medicao === 'automatica' ? tg.projetos : tv.acompanhamento }}</h3>
                 <p class="text-xs text-muted">{{ aberta.medicao === 'automatica' ? tv.projetoContaPelosMarcos : tv.acompanhamentoDica }}</p>
               </div>
-              <USelectMenu v-if="podeEditar" :model-value="projetosVisiveisDa(aberta)" :items="opProjetos" value-key="value" multiple size="xs" class="w-44" :placeholder="tg.ligarProjetos" @update:model-value="ligar('projetos', $event as number[])">
+              <USelectMenu v-if="podeEditar" v-model:search-term="buscas.painelProjetos" :model-value="projetosVisiveisDa(aberta)" :items="opProjetos" value-key="value" multiple size="xs" class="w-44" :ui="{ content: 'min-w-72' }" :placeholder="tg.ligarProjetos" @update:model-value="ligar('projetos', $event as number[])">
                 <template #default>{{ tg.ligarProjetos }}</template>
+                <template #content-bottom>
+                  <AtalhoDeCriar :termo="buscas.painelProjetos" :rotulo="ta.projeto.rotulo" :com="ta.projeto.com" :dica="ta.projeto.dica" @criar="(t: string) => criarProjetoNaMeta('painel', t)" />
+                </template>
               </USelectMenu>
             </header>
             <p v-if="!aberta.projetos.length" class="text-xs text-muted">{{ tg.nenhumLigado }}</p>
@@ -377,8 +405,11 @@ function excluir() {
           <section class="flex flex-col gap-2">
             <header class="flex items-center gap-2">
               <h3 class="flex-1 text-sm font-semibold text-highlighted">{{ tg.ligarMarcos }}</h3>
-              <USelectMenu v-if="podeEditar" :model-value="marcosVisiveisDa(aberta)" :items="opMarcos" value-key="value" multiple size="xs" class="w-44" :placeholder="tg.ligarMarcos" @update:model-value="ligar('marcos', $event as number[])">
+              <USelectMenu v-if="podeEditar" v-model:search-term="buscas.painelMarcos" :model-value="marcosVisiveisDa(aberta)" :items="opMarcos" value-key="value" multiple size="xs" class="w-44" :ui="{ content: 'min-w-80' }" :placeholder="tg.ligarMarcos" @update:model-value="ligar('marcos', $event as number[])">
                 <template #default>{{ tg.ligarMarcos }}</template>
+                <template v-if="destinosDoMarco.length" #content-bottom>
+                  <AtalhoDeCriar :termo="buscas.painelMarcos" :rotulo="ta.marco.rotulo" :com="ta.marco.com" :dica="ta.marco.dica" :destinos="destinosDoMarco" @criar="(t: string, p?: number) => criarMarcoNaMeta('painel', t, p)" />
+                </template>
               </USelectMenu>
             </header>
             <p v-if="!aberta.marcos.length" class="text-xs text-muted">{{ tg.nenhumLigado }}</p>
@@ -469,10 +500,18 @@ function excluir() {
             </UFormField>
           </div>
           <UFormField :label="tg.ligarProjetos" :help="fMedicao === 'automatica' ? tv.projetoContaPelosMarcos : tv.acompanhamentoDica">
-            <USelectMenu v-model="fProjetos" :items="opProjetos" value-key="value" multiple class="w-full" />
+            <USelectMenu v-model="fProjetos" v-model:search-term="buscas.formProjetos" :items="opProjetos" value-key="value" multiple class="w-full">
+              <template #content-bottom>
+                <AtalhoDeCriar :termo="buscas.formProjetos" :rotulo="ta.projeto.rotulo" :com="ta.projeto.com" :dica="ta.projeto.dica" @criar="(t: string) => criarProjetoNaMeta('form', t)" />
+              </template>
+            </USelectMenu>
           </UFormField>
           <UFormField :label="tg.ligarMarcos">
-            <USelectMenu v-model="fMarcos" :items="opMarcos" value-key="value" multiple class="w-full" />
+            <USelectMenu v-model="fMarcos" v-model:search-term="buscas.formMarcos" :items="opMarcos" value-key="value" multiple class="w-full">
+              <template v-if="destinosDoMarco.length" #content-bottom>
+                <AtalhoDeCriar :termo="buscas.formMarcos" :rotulo="ta.marco.rotulo" :com="ta.marco.com" :dica="ta.marco.dica" :destinos="destinosDoMarco" @criar="(t: string, p?: number) => criarMarcoNaMeta('form', t, p)" />
+              </template>
+            </USelectMenu>
           </UFormField>
         </form>
       </template>

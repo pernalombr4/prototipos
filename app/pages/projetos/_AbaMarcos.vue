@@ -15,6 +15,8 @@ import { useMarcaDeProposta, useProjetos } from './estado'
 import { useMetasEDiscussoes, type Marco } from './metasEDiscussoes'
 import { textosDeMarcosEMedicao } from './textosDeMarcosEMedicao'
 import { textosDoProjeto } from './textosDoProjeto'
+import { textosDeAtalhos } from './textosDeAtalhos'
+import AtalhoDeCriar from './_AtalhoDeCriar.vue'
 
 const props = defineProps<{ t: Textos, id: number }>()
 const prj = useProjetos()
@@ -22,6 +24,7 @@ const md = useMetasEDiscussoes()
 const tx = useTextos(textosDeMarcosEMedicao)
 const tm = computed(() => tx.value.marcos)
 const rp = useTextos(textosDoProjeto)
+const ta = useTextos(textosDeAtalhos)
 const idioma = useIdioma()
 const toast = useToast()
 const { marca } = useMarcaDeProposta()
@@ -70,6 +73,23 @@ watch(paraAdicionar, (ids) => {
   md.ligarTarefas(aberto.value, ids)
   paraAdicionar.value = []
 })
+
+/**
+ * Rodada 11: o pé dos 2 seletores de tarefa do marco (no painel e na janela do marco) tem o atalho
+ * "Criar tarefa" (`_AtalhoDeCriar.vue`). Cria a tarefa rápida sem item, no projeto, com o nome da busca,
+ * a pessoa como responsável e a data-alvo do marco como data limite, e a põe no marco.
+ */
+const buscaPainel = ref('')
+const buscaForm = ref('')
+function criarPeloSeletor(onde: 'painel' | 'form', titulo: string) {
+  const prazo = onde === 'painel' && aberto.value ? aberto.value.dataAlvo : fData.value
+  const id = prj.criarTarefa({ titulo, categoria: null, item: null, projeto: props.id, responsavel: prj.eu.value, prazo, prioridade: 'media' })
+  if (onde === 'painel' && aberto.value) md.ligarTarefas(aberto.value, [id])
+  else fTarefas.value = [...fTarefas.value, id]
+  toast.add({ title: ta.value.tarefa.criada(titulo), icon: 'i-lucide-square-check', color: 'success' })
+  if (onde === 'painel') buscaPainel.value = ''
+  else buscaForm.value = ''
+}
 
 /* ---------- criar e editar ---------- */
 const form = ref(false)
@@ -241,14 +261,19 @@ const COR_DO_STATUS = { aberta: 'neutral', andamento: 'info', bloqueada: 'warnin
               <USelectMenu
                 v-if="podeEditar && aberto.status === 'aberto'"
                 v-model="paraAdicionar"
+                v-model:search-term="buscaPainel"
                 :items="opAdicionar"
                 value-key="value"
                 multiple
                 size="xs"
                 class="w-48"
+                :ui="{ content: 'seletor-painel min-w-72' }"
                 :placeholder="tm.adicionarTarefas"
               >
                 <template #default>{{ tm.adicionarTarefas }}</template>
+                <template #content-bottom>
+                  <AtalhoDeCriar :termo="buscaPainel" :rotulo="ta.tarefa.rotulo" :com="ta.tarefa.com" :dica="ta.tarefa.dica" @criar="(t: string) => criarPeloSeletor('painel', t)" />
+                </template>
               </USelectMenu>
             </header>
             <p v-if="!md.tarefasDoMarco(aberto).length" class="rounded-lg border border-dashed border-default px-3 py-4 text-center text-xs text-muted">{{ tm.semTarefas }}</p>
@@ -315,7 +340,20 @@ const COR_DO_STATUS = { aberta: 'neutral', andamento: 'info', bloqueada: 'warnin
             </UFormField>
           </div>
           <UFormField :label="tm.tarefas" :help="tm.tarefasDica">
-            <USelectMenu v-model="fTarefas" :items="opTarefas" value-key="value" multiple class="w-full" :placeholder="tm.tarefasPlaceholder" />
+            <USelectMenu
+              v-model="fTarefas"
+              v-model:search-term="buscaForm"
+              :items="opTarefas"
+              value-key="value"
+              multiple
+              class="w-full"
+              :ui="{ content: 'seletor-form' }"
+              :placeholder="tm.tarefasPlaceholder"
+            >
+              <template #content-bottom>
+                <AtalhoDeCriar :termo="buscaForm" :rotulo="ta.tarefa.rotulo" :com="ta.tarefa.com" :dica="ta.tarefa.dica" @criar="(t: string) => criarPeloSeletor('form', t)" />
+              </template>
+            </USelectMenu>
           </UFormField>
         </form>
       </template>

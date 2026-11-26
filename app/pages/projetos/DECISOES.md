@@ -604,3 +604,60 @@ O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras 
     Relationships.
   - O detector de seta passou nas 3. O quadro sem busca rola a página, e o detector marca a barra de rolagem (o falso
     positivo das rodadas 6 a 9); a captura saiu, e a com busca, que cabe sem rolagem, entrou no lugar.
+
+## Rodada 11 · 2026-11-26
+- **Pedido (literal):**
+  - "na hora de adicionar tarefas ao marco deve ter atalho pra criar uma nova na base do dropdown tambem";
+  - "na hora de criar metaas, o dorpdown deve seguir a mesma logica: deve ser possivel criar um novo projeto, rciar
+    um novo marco... veja quais dropdowns devem ter algo assim no prototipo TODO. é lógica de sempre ter atalho pra
+    facilitar o user".
+- **A regra:** todo seletor que escolhe uma coisa que a pessoa pode criar tem, no pé, o atalho de criar, como o
+  "Create new issue" no fim dos menus do GitHub. O atalho mora em `_AtalhoDeCriar.vue` e os textos em
+  `textosDeAtalhos.ts` (PT, EN e ES).
+  - Com texto na busca, o botão diz o que cria ("Criar o marco "Auditoria anual"") e cria com esse nome.
+  - Sem texto, o botão leva o foco para a busca e mostra a dica ("Digite o nome do novo marco na busca.").
+  - O novo já sai escolhido no seletor, com um aviso.
+  - O marco criado fora de um projeto (na meta) pergunta o projeto: 1 botão por projeto que a pessoa administra.
+- **Onde entrou (13 seletores):**
+
+  | Tela | Seletor | Cria | Como nasce |
+  |---|---|---|---|
+  | Painel do marco | Adicionar tarefas | Tarefa | sem item, no projeto, a pessoa responsável, data limite = data-alvo do marco; entra no marco |
+  | Novo marco e Editar marco | Tarefas | Tarefa | a mesma, com a data-alvo do formulário |
+  | Painel da meta | Ligar projetos | Projeto | só o nome, a pessoa como administradora, visibilidade Aberto; a tela fica na meta |
+  | Painel da meta | Ligar marcos | Marco | no projeto escolhido, a pessoa responsável, data-alvo = a da meta |
+  | Nova meta e Editar meta | Projetos ligados | Projeto | como no painel |
+  | Nova meta e Editar meta | Marcos ligados | Marco | como no painel, com a data-alvo do formulário |
+  | Painel da tarefa | Etiquetas | Etiqueta | só o nome; nome repetido usa a que existe |
+  | Painel da tarefa | Marco | Marco | no projeto, data-alvo = data limite da tarefa; só quem administra o projeto |
+  | Aba Tarefas, coluna Marco | Marco | Marco | como no painel da tarefa |
+  | Janela Nova tarefa | Categoria | Categoria | no projeto, sem campos |
+  | Janela Nova tarefa | Marco | Marco | como no painel da tarefa |
+  | Configurações do projeto, Categorias | Adicionar categoria do workspace | Categoria | no projeto, sem campos |
+  | Criar projeto | Categorias do projeto | Categoria | no workspace, já escolhida; entra no projeto quando ele é criado |
+
+- **Onde não entrou, e por quê:**
+  - filtros, período, paginação, ordenação, status, prioridade, situação, papel, visibilidade, unidade, formato e
+    "Como medir": a lista é fixa, nada se cria;
+  - pessoas (responsável, dono, participantes, colaboradores): pessoa entra no workspace por convite, fora do
+    projeto. Fica em aberto se o atalho "Convidar pessoa" entra aqui;
+  - Item da tarefa: criar item pede o formulário da categoria, que o protótipo não tem;
+  - "Vincular tarefa existente" da subtarefa: "Adicionar subtarefa" fica ao lado;
+  - modelo do Criar projeto, painel do Painel, categoria do Novo fluxo e da tarefa criada da discussão, destino do
+    Mover categoria: criar ali tira a pessoa da tarefa que ela está fazendo. Ficam em aberto.
+- **Corrigido de passagem:** os contadores de id ficavam dentro de `useProjetos()`, e cada componente recomeçava a
+  conta. A categoria criada nas Configurações e a criada no Criar projeto saíam com o mesmo id, e a segunda
+  aparecia com o nome da primeira. Os contadores foram para fora do composable.
+- **Comportamento a decidir:** o que o atalho cria fica criado mesmo quando a pessoa cancela a janela (a categoria
+  da Nova tarefa, o projeto da Nova meta), como a etiqueta criada no menu do GitHub.
+- **Fronteira:** mudam os 13 seletores da tabela. A casca e o resto das telas ficam como na rodada 10.
+- **Inventado (pede back-end novo):** o marco e a etiqueta da tarefa rápida criados no seletor seguem o que a
+  rodada 9 e a rodada 10 já inventaram. Projeto e categoria usam a criação que o protótipo já tinha, com menos
+  campos.
+- **Ver:** https://pernalombr4.github.io/prototipos/projetos
+  - `evidencias/entrega-r11-criar-tarefa-no-marco.png`: "Adicionar tarefas" no painel do marco, com "Criar a tarefa
+    "Separar os comprovantes"";
+  - `evidencias/entrega-r11-criar-marco-na-meta.png`: "Marcos ligados" na Nova meta, com 1 botão por projeto;
+  - `evidencias/entrega-r11-criar-projeto-na-meta.png`: "Projetos ligados" na Nova meta, com "Criar o projeto";
+  - `evidencias/entrega-r11-criar-etiqueta-na-tarefa.png`: Etiquetas no painel da tarefa, com "Criar a etiqueta".
+  - O detector de seta passou nas 4.

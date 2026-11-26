@@ -304,6 +304,10 @@ export function useMetasEDiscussoes() {
     ligarTarefas(m, dados.tarefas)
     return m
   }
+  /** Rodada 11: o marco criado pelo atalho de um seletor, só com o nome; a pessoa fica de responsável. */
+  function criarMarcoRapido(projeto: number, nome: string, dataAlvo: string) {
+    return salvarMarco({ projeto, nome, descricao: '', responsavel: prj.eu.value, dataAlvo, tarefas: [] })
+  }
   /** Concluir tira do marco as tarefas abertas; elas continuam no projeto. Devolve quantas saíram. */
   function concluirMarco(m: Marco) {
     const abertas = tarefasDoMarco(m).filter(x => x.status !== 'concluida').map(x => x.id)
@@ -385,7 +389,7 @@ export function useMetasEDiscussoes() {
   return {
     discussoes, discussaoAberta, discussoesDo, podeAbrir, podeModerar, criarDiscussao, responder, criarTarefaDaMensagem,
     marcos, marcoAberto, marcosDo, progressoDoMarco, tarefasDoMarco, marcoDaTarefa, podeEditarMarcos, ligarTarefas, tirarTarefa,
-    definirMarcoDaTarefa, salvarMarco, concluirMarco, reabrirMarco, excluirMarco, abrirMarco,
+    definirMarcoDaTarefa, salvarMarco, criarMarcoRapido, concluirMarco, reabrirMarco, excluirMarco, abrirMarco,
     metas, metaAberta, marcosQueContam, progressoDoProjeto, valorAtual, progressoDaMeta, situacaoDaMeta, metasDoProjeto, metasDoMarco,
     veProjeto, podeEditarMeta, salvarMeta, excluirMeta, publicarAtualizacao, abrirMeta,
   }

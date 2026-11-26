@@ -18,6 +18,8 @@ import type { SelectMenuItem } from '@nuxt/ui'
 import type { Textos } from './textos'
 import { cargos, grupos, iniciais, pessoas, type Participante, type Projeto, type Visibilidade } from './mocks'
 import { COR_DO_PROJETO, ICONE_DA_VISIBILIDADE, useMarcaDeProposta, useProjetos } from './estado'
+import { textosDeAtalhos } from './textosDeAtalhos'
+import AtalhoDeCriar from './_AtalhoDeCriar.vue'
 
 const props = defineProps<{ t: Textos }>()
 const prj = useProjetos()
@@ -89,6 +91,18 @@ const opcoesDeCategoria = computed(() => prj.categorias.value.map((c) => {
   return { value: c.id, label: c.name, icon: c.icon ?? 'i-lucide-folder', disabled: !!dono, dono: dono?.nome }
 }))
 const livres = computed(() => opcoesDeCategoria.value.filter(o => !o.disabled).length)
+/**
+ * Rodada 11: "Criar categoria" no pé do seletor (`_AtalhoDeCriar.vue`). O projeto ainda não existe: a categoria
+ * nasce no workspace, sem campos, já escolhida, e entra no projeto quando ele é criado.
+ */
+const ta = useTextos(textosDeAtalhos)
+const buscaCategoria = ref('')
+function criarCategoriaNoProjetoNovo(nome: string) {
+  const id = prj.criarCategoria(null, nome, 'i-lucide-folder')
+  categoriasEscolhidas.value = [...categoriasEscolhidas.value, id]
+  toast.add({ title: ta.value.categoria.criada(nome), icon: 'i-lucide-folder-plus', color: 'success' })
+  buscaCategoria.value = ''
+}
 
 /* ---------- participantes ---------- */
 const chave = (x: { tipo: string, id: number | string }) => `${x.tipo}:${x.id}`
@@ -233,6 +247,7 @@ async function criar() {
         <UFormField :label="modelo ? t.modelo.outrasCategorias : t.criar.categorias" :help="livres ? t.criar.categoriasDica : t.criar.semCategoriasLivres">
           <USelectMenu
             v-model="categoriasEscolhidas"
+            v-model:search-term="buscaCategoria"
             :items="opcoesDeCategoria"
             value-key="value"
             multiple
@@ -242,6 +257,9 @@ async function criar() {
           >
             <template #item-trailing="{ item }">
               <span v-if="(item as any).dono" class="text-xs text-muted">{{ t.criar.pertenceA((item as any).dono) }}</span>
+            </template>
+            <template #content-bottom>
+              <AtalhoDeCriar :termo="buscaCategoria" :rotulo="ta.categoria.rotulo" :com="ta.categoria.com" :dica="ta.categoria.dica" @criar="criarCategoriaNoProjetoNovo" />
             </template>
           </USelectMenu>
           <p v-if="categoriasEscolhidas.length" class="mt-1.5 flex items-start gap-1.5 text-xs text-muted">

@@ -25,6 +25,8 @@ import { useMarcaDeProposta, useProjetos } from './estado'
 import Paginador from './_Paginador.vue'
 import { useMetasEDiscussoes } from './metasEDiscussoes'
 import { textosDeMarcosEMedicao } from './textosDeMarcosEMedicao'
+import { textosDeAtalhos } from './textosDeAtalhos'
+import AtalhoDeCriar from './_AtalhoDeCriar.vue'
 
 const props = defineProps<{ t: Textos, id: number }>()
 const prj = useProjetos()
@@ -42,6 +44,16 @@ const opMarcos = computed(() => [
   { value: 0, label: tmm.value.marcos.semMarco },
   ...md.marcosDo(props.id).filter(m => m.status === 'aberto').map(m => ({ value: m.id, label: m.nome, icon: 'i-lucide-flag' })),
 ])
+
+/** Rodada 11: o seletor de Marco da linha tem o atalho "Criar marco" no pé (`_AtalhoDeCriar.vue`). */
+const ta = useTextos(textosDeAtalhos)
+const buscaMarco = ref('')
+function criarMarcoNaLinha(x: TarefaDoProjeto, nome: string) {
+  const m = md.criarMarcoRapido(props.id, nome, x.prazo)
+  md.definirMarcoDaTarefa(x.id, m.id)
+  toast.add({ title: ta.value.marco.criado(nome), icon: 'i-lucide-flag', color: 'success' })
+  buscaMarco.value = ''
+}
 
 const HOJE = '2026-11-26'
 type Periodo = 'todos' | 'd30' | 'd90' | 'ano'
@@ -383,16 +395,22 @@ function criarRapida(status: StatusDaTarefa = 'aberta') {
         <!-- rodada 9: o marco da tarefa, trocado na própria linha por quem administra o projeto -->
         <template #cell-marco="{ row }">
           <span v-if="podeEditarMarcos" class="block w-full" @click.stop>
-            <USelect
+            <USelectMenu
+              v-model:search-term="buscaMarco"
               :model-value="md.marcoDaTarefa((row as TarefaDoProjeto).id)?.id ?? 0"
               :items="opMarcos"
+              value-key="value"
               size="xs"
               variant="ghost"
               class="w-full"
               :ui="{ content: 'min-w-64' }"
               :aria-label="tmm.marcos.colMarco"
               @update:model-value="(v: number) => md.definirMarcoDaTarefa((row as TarefaDoProjeto).id, v || null)"
-            />
+            >
+              <template #content-bottom>
+                <AtalhoDeCriar :termo="buscaMarco" :rotulo="ta.marco.rotulo" :com="ta.marco.com" :dica="ta.marco.dica" @criar="(t: string) => criarMarcoNaLinha(row as TarefaDoProjeto, t)" />
+              </template>
+            </USelectMenu>
           </span>
           <span v-else class="truncate text-sm" :class="md.marcoDaTarefa((row as TarefaDoProjeto).id) ? 'text-default' : 'text-muted'">
             {{ md.marcoDaTarefa((row as TarefaDoProjeto).id)?.nome ?? tmm.marcos.semMarco }}

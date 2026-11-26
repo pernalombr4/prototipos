@@ -18,6 +18,8 @@ import type { Textos } from './textos'
 import { camposDaCategoria, cargos, grupos, iniciais, pessoa, pessoas, type GrupoDeStatus, type MapaDaCategoria, type Participante, type PermissaoPadrao, type Visibilidade } from './mocks'
 import { ICONE_DA_VISIBILIDADE, useMarcaDeProposta, useProjetos } from './estado'
 import SalvarComoModelo from './_SalvarComoModelo.vue'
+import { textosDeAtalhos } from './textosDeAtalhos'
+import AtalhoDeCriar from './_AtalhoDeCriar.vue'
 
 const props = defineProps<{ t: Textos }>()
 const prj = useProjetos()
@@ -78,6 +80,15 @@ watch(adicionar, (v) => {
   prj.janelas.mover.value = v
   nextTick(() => { adicionar.value = undefined })
 })
+
+/** Rodada 11: "Criar categoria" no pé do seletor (`_AtalhoDeCriar.vue`): a categoria nasce neste projeto, sem campos. */
+const ta = useTextos(textosDeAtalhos)
+const buscaCategoria = ref('')
+function criarCategoriaAqui(nome: string) {
+  prj.criarCategoria(p.value!.id, nome, 'i-lucide-folder')
+  toast.add({ title: ta.value.categoria.criada(nome), icon: 'i-lucide-folder-plus', color: 'success' })
+  buscaCategoria.value = ''
+}
 
 /* ---------- campos comuns (rodada 3) ---------- */
 const NAO_USAR = '__nao_usar__'
@@ -288,7 +299,11 @@ function excluir() {
             </ul>
             <p v-else class="rounded-md border border-dashed border-default px-3 py-6 text-center text-sm text-muted">{{ t.painel.semCategoria }}</p>
             <UFormField :label="t.config.adicionarCategoria">
-              <USelectMenu v-model="adicionar" :items="daWorkspace" value-key="value" icon="i-lucide-plus" class="w-full" :placeholder="t.criar.categoriasPlaceholder" :search-input="{ placeholder: t.dados.buscar }" />
+              <USelectMenu v-model="adicionar" v-model:search-term="buscaCategoria" :items="daWorkspace" value-key="value" icon="i-lucide-plus" class="w-full" :placeholder="t.criar.categoriasPlaceholder" :search-input="{ placeholder: t.dados.buscar }">
+                <template #content-bottom>
+                  <AtalhoDeCriar :termo="buscaCategoria" :rotulo="ta.categoria.rotulo" :com="ta.categoria.com" :dica="ta.categoria.dica" @criar="criarCategoriaAqui" />
+                </template>
+              </USelectMenu>
             </UFormField>
           </template>
 
