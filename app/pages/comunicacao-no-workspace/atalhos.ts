@@ -145,8 +145,10 @@ export interface OpcoesDoWhatsApp {
  */
 export function useWhatsApp() {
   const t = useTextos(textos)
-  const { config, fase } = useComunicacao()
+  const { config, fase, twilioLigado } = useComunicacao()
   const { abrirApp } = useAppExterno()
+  /** Rodada 17: o painel "Enviar WhatsApp" (`_PainelDoWhatsApp.vue`), só com a Twilio. */
+  const pedido = useState<PedidoDeSms | null>('cnw-whatsapp', () => null)
 
   /** Por que o WhatsApp não está disponível para este destino. Nulo = disponível. */
   function motivoDoWhatsApp(d: DestinoDoWhatsApp | null) {
@@ -162,8 +164,8 @@ export function useWhatsApp() {
     return preencher(modelo, item, d?.nome ?? null)
   }
 
-  /** Abre a conversa com o destino (ou, sem destino, a escolha da conversa). */
-  function abrirConversa(d: DestinoDoWhatsApp | null, o: OpcoesDoWhatsApp = {}) {
+  /** Abre a conversa no WhatsApp da pessoa (wa.me), com o texto pronto. Sem registro no ENSPACE. */
+  function abrirNoSeuWhatsApp(d: DestinoDoWhatsApp | null, o: OpcoesDoWhatsApp = {}) {
     const texto = o.texto ?? textoPadrao(o.item, d)
     abrirApp({
       tipo: 'whatsapp',
@@ -174,9 +176,41 @@ export function useWhatsApp() {
     })
   }
 
-  /** O link do formulário público: sem número, a pessoa escolhe a conversa. */
+  /**
+   * O atalho de WhatsApp de um contato. Sem a integração Twilio (Fases 1 a 3, ou Fase 4 sem
+   * Twilio), abre direto a conversa no WhatsApp da pessoa, como desde a rodada 10. Com a Twilio
+   * (rodada 17), abre o painel "Enviar WhatsApp" com as 2 opções: o WhatsApp do workspace, com
+   * modelo aprovado e registro, ou o WhatsApp da pessoa, sem registro.
+   */
+  function abrirConversa(d: DestinoDoWhatsApp | null, o: OpcoesDoWhatsApp = {}) {
+    if (fase.value >= 4 && twilioLigado.value) {
+      pedido.value = {
+        nome: d?.nome ?? null,
+        telefone: d?.telefone ?? null,
+        texto: o.texto ?? textoPadrao(o.item, d),
+        itemId: o.item?.id ?? null,
+      }
+      return
+    }
+    abrirNoSeuWhatsApp(d, o)
+  }
+
+  /** "Nova mensagem › WhatsApp" da central: o painel sem destinatário. */
+  function abrirPainelSemNumero() {
+    pedido.value = { nome: null, telefone: null, texto: '', itemId: null }
+  }
+
+  function fecharPainel() {
+    pedido.value = null
+  }
+
+  /**
+   * O link do formulário público: sem número, a pessoa escolhe a conversa ou o grupo. Fica no
+   * WhatsApp da pessoa em todas as fases: o WhatsApp do workspace só inicia conversa com modelo
+   * aprovado e com um número, e não manda para grupo.
+   */
   function abrirWhatsApp(texto: string) {
-    abrirConversa(null, { texto })
+    abrirNoSeuWhatsApp(null, { texto })
   }
 
   /** A opção "WhatsApp" de um menu (linha da tabela, cartão, clique direito). */
@@ -192,10 +226,10 @@ export function useWhatsApp() {
     }
   }
 
-  return { motivoDoWhatsApp, textoPadrao, abrirConversa, abrirWhatsApp, itemDeMenu }
+  return { pedido, motivoDoWhatsApp, textoPadrao, abrirConversa, abrirNoSeuWhatsApp, abrirPainelSemNumero, fecharPainel, abrirWhatsApp, itemDeMenu }
 }
 
-/** O que o painel "Enviar SMS" (`_PainelDoSms.vue`) mostra. */
+/** O que o painel "Enviar SMS" (`_PainelDoSms.vue`) mostra. O painel "Enviar WhatsApp" usa o mesmo formato. */
 export interface PedidoDeSms {
   nome: string | null
   telefone: string | null

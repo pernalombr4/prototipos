@@ -8,21 +8,22 @@ botão de E-mail (motivo no `BRIEFING.md`, seção 4). Os canais são **e-mail, 
 pelo painel "Enviar SMS", que junta os caminhos para enviar do celular da pessoa.
 
 **O protótipo se divide em 4 fases**, escolhidas no controle "Fase" da barra de baixo. A Fase 4 é o
-destino: a central vira "Comunicações" e guarda o e-mail, o SMS e o WhatsApp que o ENSPACE envia.
+destino: a central "Comunicações" passa a guardar também o SMS e o WhatsApp que o ENSPACE envia. O
+nome "Comunicações" vale desde a Fase 1 (rodada 17), porque o nome do menu é o da trilha e o da rota.
 
 | Fase | O que entra | Base |
 |---|---|---|
-| 1 · MVP | Atalhos e telas que só usam o que o produto já tem, sem back-end novo: botão E-mail nas telas de uso (o contato vem dos campos de e-mail do item), "Novo e-mail" no topo, Mail Box na tarefa (a do item dela), link do formulário público, a central E-mails com as telas de e-mail de hoje em abas e as 5 melhorias da rodada 14 (coluna "Saiu por", os 5 status, o motivo da falha, a origem no "Enviado por" e o Reenviar no Cancelado) | Lido no código do develop: o envio sai do Outlook da pessoa e só fica registrado com item; os 5 status, o motivo e a origem já estão no registro do envio |
+| 1 · MVP | Atalhos e telas que só usam o que o produto já tem, sem back-end novo: botão E-mail nas telas de uso (o contato vem dos campos de e-mail do item), "Novo e-mail" no topo, Mail Box na tarefa (a do item dela), link do formulário público, a central Comunicações (só com e-mail nesta fase) e as 5 melhorias da rodada 14 (coluna "Saiu por", os 5 status, o motivo da falha, a origem no "Enviado por" e o Reenviar no Cancelado) | Lido no código do develop: o envio sai do Outlook da pessoa e só fica registrado com item; os 5 status, o motivo e a origem já estão no registro do envio |
 | 2 · Remetente | Escolher o "De" (Outlook ou caixa do workspace) e quais caixas entram nele, responder na mesma conversa, encaminhar, registrar e-mail sem item e vincular depois; o contato por categoria, a busca de item entre categorias e a lista de mensagens por pessoa | Funcionalidade nova, com back-end |
 | 3 · Tarefa | Vincular o e-mail a uma tarefa e a Mail Box própria da tarefa ("Desta tarefa" e "Do item") | Funcionalidade nova |
-| 4 · Comunicações | A central "Comunicações", com o e-mail, o SMS e o WhatsApp que o ENSPACE envia: filtro por canal, coluna Entrega e filtro "Não entregues"; os nós "Enviar SMS" e "Enviar WhatsApp" no Spaceflow; os modelos de WhatsApp aprovados pela Meta; "Enviar pelo ENSPACE" no painel "Enviar SMS"; a seção "Canais de envio do workspace" | Back novo: status de entrega pelo webhook da SendGrid (C1), envio de SMS pela Twilio do workspace (C2) e de WhatsApp com modelo aprovado (C3), da pesquisa de 2026-11-26 |
+| 4 · Comunicações | A central "Comunicações" com o e-mail, o SMS e o WhatsApp que o ENSPACE envia: filtro por canal, coluna Entrega e filtro "Não entregues"; os nós "Enviar SMS" e "Enviar WhatsApp" no Spaceflow; os modelos de WhatsApp aprovados pela Meta; "Enviar pelo ENSPACE" no painel "Enviar SMS" e o painel "Enviar WhatsApp", que somam o número do workspace aos caminhos pelo celular e pelo WhatsApp da pessoa; a seção "Canais de envio do workspace" | Back novo: status de entrega pelo webhook da SendGrid (C1), envio de SMS pela Twilio do workspace (C2) e de WhatsApp com modelo aprovado (C3), da pesquisa de 2026-11-26 |
 
 | Parte do documento | Onde aparece no protótipo |
 |---|---|
 | (a) Link do formulário público | Requisições (cartão "Compartilhar este formulário"); lista de itens da categoria; painel da tarefa de preencher formulário |
-| (b) Atalho de e-mail, WhatsApp e SMS | Item (Contato do item na lateral e ícone ao lado do campo de e-mail e do de telefone); lista e quadro de itens (submenus "E-mail", "WhatsApp" e "SMS"); tarefas (coluna Contato, e-mail em lote, fila do WhatsApp e do SMS, clique direito, painel); Agenda (lembrete por e-mail, por WhatsApp e por SMS); o painel "Enviar SMS" |
-| Configuração | "Sua conta de envio" no topo da central (cada pessoa) e, em Configurações › E-mails › Regras de envio, para quem administra, o contato do item, o remetente com o domínio da empresa e (Fase 2) as caixas no "De". Sem chave em Sistema › Módulos: o e-mail vem sempre ligado. Categorias › cartão "Contato da categoria" (Fase 2, a avaliar com os devs) |
-| E-mail do ENSPACE em todas as telas | "Novo e-mail" no topo, que reconhece o item ou a tarefa aberta; o compositor; a central "E-mails" no menu, com a lista de mensagens (também os enviados pelo sistema, para quem tem a permissão), "Sua conta de envio" e o botão "Configurações", que leva a Configurações › E-mails (Modelos, Caixas de E-mail e Regras de envio, cada uma pela permissão de hoje); o estado vazio de cada tabela diz o próximo passo |
+| (b) Atalho de e-mail, WhatsApp e SMS | Item (Contato do item na lateral e ícone ao lado do campo de e-mail e do de telefone); lista e quadro de itens (submenus "E-mail", "WhatsApp" e "SMS"); tarefas (coluna Contato, e-mail em lote, fila do WhatsApp e do SMS, clique direito, painel); Agenda (lembrete por e-mail, por WhatsApp e por SMS); o painel "Enviar SMS" e, na Fase 4 com a Twilio, o painel "Enviar WhatsApp" |
+| Configuração | "Sua conta de envio" no topo da central (cada pessoa) e, em Configurações › Comunicações › Canais e regras, para quem administra, o contato do item, o remetente com o domínio da empresa e (Fase 2) as caixas no "De". Sem chave em Sistema › Módulos: o e-mail vem sempre ligado. Categorias › cartão "Contato da categoria" (Fase 2, a avaliar com os devs) |
+| E-mail do ENSPACE em todas as telas | "Novo e-mail" no topo, que reconhece o item ou a tarefa aberta; o compositor; a central "Comunicações" no menu, com a lista de mensagens (também os enviados pelo sistema, para quem tem a permissão), "Sua conta de envio" e o botão "Configurações", que leva a Configurações › Comunicações (Modelos, Caixas de E-mail e Canais e regras, cada uma pela permissão de hoje); o estado vazio de cada tabela diz o próximo passo |
 
 ## O fluxo do e-mail
 
@@ -40,9 +41,9 @@ Nova Mensagem ── De: Fase 1, o Outlook da pessoa
  Enviar ─────────────────────────────────┘
    │
    ├─ com item: Responder para = endereço do item; aparece na Mail Box do item
-   │            (e, na Fase 2, em E-mails)
+   │            (e, na Fase 2, em Comunicações)
    └─ sem item: Fase 1, nada fica no ENSPACE (só no Outlook da pessoa);
-                Fase 2, aparece em E-mails com "Vincular", para ligar ao item depois
+                Fase 2, aparece em Comunicações com "Vincular", para ligar ao item depois
 
 Sem o Correio do Outlook integrado: a gaveta mostra "Nenhuma conta integrada
 disponível" e "Integrar contas"; o botão E-mail abre o app da pessoa (mailto:).
@@ -575,6 +576,19 @@ clientes usa Microsoft. A pesquisa está em `PESQUISA.md`, "SMS no computador".
   épico 2 (RN903, RN905, RN105; partes 1 e 2) e o documento do botão no cartão (RF009). Os prints
   estão em `evidencias/requisitos/`.
 
+## Rodada 17 · 2026-11-26 ("Comunicações" desde o MVP; WhatsApp e SMS com 2 caminhos)
+
+- **Pedido (literal):** "desde o mvp, o nome do menu ja deve ser o mesmo, senao depois os devs serao obrigados a alterar a rota no backend. o nome do menu sempre acompanha o breadcrumb [...] se um dia o menu será comunicaçoes, é assim que deve ser feito edsde o inicio, mesmo que por enquanto so tenha emails no mvp" e "mesmo com twilio, ele deve ter essas 2 opçoes: mandar algo abrindo o whatsapp web dele ou usar a integraçao. [...] SMS cai no mesmo caso. se nao tiver integraçao, ele pode fazer sem integraçao, dos modos como previmos: qr code e outros. e se tiver integraçao tem MAIS uma opçao de como fazer."
+- **Mudou no protótipo:**
+  - "Comunicações" em todas as fases: Membro › Comunicações, Configurações › Comunicações, o título da central e da página de configuração, a trilha e o "Ir para". A aba de regras se chama "Canais e regras" desde a Fase 1, e "Modelos de E-mail" vira "Modelos";
+  - o atalho de WhatsApp, na Fase 4 com a Twilio, abre o painel "Enviar WhatsApp" com 2 opções: "WhatsApp do workspace" (modelo aprovado, valores sugeridos pelo item, prévia, registro no item e na central, status até "Lido") e "Seu WhatsApp" (texto livre, abre o WhatsApp Web ou o app, sem registro);
+  - sem a Twilio, em qualquer fase, o atalho abre direto o WhatsApp da pessoa, como desde a rodada 10;
+  - o link do formulário público e a fila do WhatsApp em lote ficam no WhatsApp da pessoa mesmo com a Twilio;
+  - "Nova mensagem › WhatsApp" deixa de ser desabilitado: com a Twilio, abre o painel; sem ela, o WhatsApp da pessoa. "Nova mensagem › SMS" diz, na descrição, quais caminhos há;
+  - as dicas dos botões WhatsApp e SMS dizem as 2 opções quando há a Twilio, e "Canais e regras" diz que os atalhos continuam oferecendo o celular e o WhatsApp de quem usa.
+- **Revê** "A central vira Comunicações só na Fase 4" e a recomendação da pesquisa da rodada 14 de manter "E-mails" na Fase 1, e "Nova mensagem › WhatsApp fica desabilitado".
+- **Fronteira:** muda o nome do menu, o atalho de WhatsApp e os textos de instrução. O painel "Enviar SMS" já tinha os 2 caminhos (rodada 14) e fica como estava.
+
 ## Rodada 16 · 2026-11-26 (o uso em Membro, a configuração em Configurações)
 
 - **Pedido (literal):** "acha que o menu de comunicações deve ser duplo? [...] opine e se eu validar voce aplica" e, depois da opinião, "gosto da ideia, mas na tela geral de comunicaçoes deve ter um botao de atalho pra ir pras configuraçoes. pode aplicar".
@@ -664,7 +678,7 @@ Daí o compositor global usa o mesmo envio:
 - **com item vinculado:** o mesmo envio de hoje. A resposta volta para a Mail Box do item;
 - **sem item:** o mesmo envio, sem o endereço de resposta e sem a referência do item. A resposta
   chega só no Outlook da pessoa. **Pergunta ao dev:** o envio sem item fica gravado para aparecer na
-  área E-mails?
+  área Comunicações?
 
 Isso fecha com o documento: "O vínculo com o item é uma informação interna do ENSPACE e não
 interfere no conteúdo ou envio do e-mail". O remetente não muda; o vínculo muda só o "Responder
@@ -788,11 +802,11 @@ todos", e a pessoa muda conforme a fonte:
 
 O texto do lembrete leva data, hora e, na reunião do Outlook, o local.
 
-### A área "E-mails" no menu
+### A área "Comunicações" no menu
 
 O documento pede que o e-mail apareça "na área de E-mail do usuário". Essa área existe escondida
 (a tela "Emails Recebidos"; achado S2-F1 da pesquisa de UX: telas nativas que só existem no editor
-de menus). O protótipo a põe na seção Membro como a central "E-mails" (rodada 7), com a aba
+de menus). O protótipo a põe na seção Membro como a central "Comunicações" (rodada 7, com o nome desde a rodada 17), com a aba
 Mensagens: filtros rápidos "Recebidos", "Enviados", "Do sistema", "Não lidos", "Com anexo" e "Sem
 item", a coluna Item e o vínculo depois do envio (ideia do Pipedrive):
 
@@ -802,28 +816,30 @@ item", a coluna Item e o vínculo depois do envio (ideia do Pipedrive):
 
 Até a rodada 6, o nome repetia o "E-mails" de Configurações. Da rodada 7 à 15, era 1 lugar só: a
 central reunia as telas de e-mail de hoje em abas. Desde a rodada 16, a entrada de Membro fica com
-a lista, e Modelos, Caixas de E-mail e Regras de envio ficam em Configurações › E-mails, com o
-botão "Configurações" no topo da lista como atalho. O menu já separa o que se usa do que se
+a lista, e Modelos, Caixas de E-mail e Canais e regras ficam em Configurações › Comunicações, com
+o botão "Configurações" no topo da lista como atalho. O menu já separa o que se usa do que se
 configura; um submenu de configuração dentro de Membro seria um 2º caminho para o mesmo lugar.
 
 ### Os enviados pelo sistema: filtro em Mensagens, não aba
 
 Quem quer saber se o cliente recebeu um e-mail procura num lugar só, tenha sido escrito por uma
 pessoa ou enviado por um fluxo. Uma aba a mais repetiria a mesma tabela, com quase as mesmas
-colunas. O filtro rápido "Do sistema" dá o mesmo recorte em 1 clique, e o atalho de Configurações
-› E-mails › E-mails Enviados chega com ele ligado.
+colunas. O filtro rápido "Do sistema" dá o mesmo recorte em 1 clique.
 
 O risco é do back: hoje são 2 listas (os e-mails dos itens e os enviados pelo sistema). Se juntar
 as 2 com ordem e paginação únicas pedir back novo, a saída da Fase 1 é o filtro trocar a fonte da
 tabela, uma lista por vez. A pergunta está na lógica da funcionalidade.
 
-### A central vira "Comunicações" só na Fase 4
+### A central se chama "Comunicações" desde a Fase 1
 
-Na Fase 1, a central só tem e-mail para mostrar: o WhatsApp e o SMS dos atalhos saem do aparelho
-da pessoa, e o ENSPACE não fica sabendo do envio. Chamar de "Comunicações" uma central só com e-mail
-promete o que a pessoa não acha ali. O nome muda quando o sistema passa a enviar SMS e WhatsApp com
-registro (os nós do Spaceflow e o "Enviar pelo ENSPACE"). A tabela continua 1 só, com o filtro por
-canal: quem procura "o cliente recebeu?" olha num lugar, qualquer que seja o canal.
+O nome do menu é o da trilha e o da rota. Chamar a central de "E-mails" no MVP e de "Comunicações"
+na Fase 4 obrigaria os devs a trocar a rota no back e quebraria o link salvo de quem usa. Por isso
+o nome final vale desde o MVP, mesmo com só e-mail na central (rodada 17, pedido da redatora). Até
+a rodada 16, o protótipo trocava o nome na Fase 4, como a pesquisa da rodada 14 recomendava.
+
+Na Fase 1, a central mostra só e-mail: o WhatsApp e o SMS dos atalhos saem do aparelho da pessoa,
+sem registro. O filtro por canal e a coluna Entrega entram na Fase 4. A tabela continua 1 só: quem
+procura "o cliente recebeu?" olha num lugar, qualquer que seja o canal.
 
 ### O status do envio e a entrega ficam em 2 colunas
 
@@ -838,18 +854,31 @@ A conversa do WhatsApp da Central de Atendimento tem requerente, atendente e fec
 inatividade. Ela aparece na central para a busca ficar num lugar, mas a ação é "Abrir a conversa no
 Atendimento": responder ali criaria 2 portas para a mesma conversa.
 
-### "Nova mensagem › WhatsApp" fica desabilitado
+### A integração soma um caminho; não tira o que existia
 
-O WhatsApp pela Twilio só aceita texto livre dentro das 24 horas depois da última mensagem do
-cliente. Fora disso, só com modelo aprovado pela Meta. Uma mensagem avulsa, sem item e sem modelo,
-não sai. O caminho é o nó "Enviar WhatsApp" do Spaceflow, com o modelo, ou o atalho do item, que
-abre o WhatsApp da pessoa. O motivo aparece no próprio menu.
+Vale para o WhatsApp e o SMS (rodada 17). Sem a Twilio, o atalho faz o que fazia: o WhatsApp abre a
+conversa no WhatsApp da pessoa; o SMS abre o painel com o app, o QR code, copiar e o Google Messages
+Web. Com a Twilio, o número do workspace entra como mais uma opção, e as outras ficam:
 
-### O SMS pelo ENSPACE não tira o "Abrir no app"
+| Canal | Sem a Twilio | Com a Twilio |
+|---|---|---|
+| WhatsApp | abre direto o WhatsApp da pessoa | painel "Enviar WhatsApp": "WhatsApp do workspace" ou "Seu WhatsApp" |
+| SMS | painel "Enviar SMS" com os caminhos pelo celular | o mesmo painel, com "Enviar pelo ENSPACE" em cima e "Ou envie pelo seu celular" embaixo |
 
-Enviar pelo número do workspace tem custo por SMS e pede a integração. Quem prefere o próprio
-celular continua com "Abrir no app", "Copiar mensagem" e o QR code, agora abaixo de "Ou envie
-pelo seu celular".
+O número do workspace tem custo por mensagem e, no WhatsApp, só inicia conversa com modelo aprovado
+pela Meta. A pessoa que quer escrever um texto livre, ou mandar do próprio número, continua podendo.
+
+O painel do WhatsApp separa as 2 opções em abas porque o conteúdo muda: o workspace usa modelo com
+valores, e o WhatsApp da pessoa, texto livre. O SMS usa o mesmo texto nos 2 caminhos e mostra tudo
+numa coluna.
+
+Ficam no WhatsApp da pessoa mesmo com a Twilio:
+- o link do formulário público: vai para um grupo ou para quem a pessoa escolher, e o WhatsApp do
+  workspace só envia para um número, com modelo;
+- a fila do WhatsApp em lote: o envio em lote pelo workspace é o nó "Enviar WhatsApp" do Spaceflow.
+
+"Nova mensagem › WhatsApp" da central abre o painel sem destinatário. Até a rodada 16, ficava
+desabilitado, porque o protótipo tratava só o envio pelo workspace.
 
 ### Os nós de mensagem seguem o modal de hoje
 

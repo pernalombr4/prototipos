@@ -31,6 +31,7 @@ import Compositor from './_Compositor.vue'
 import RascunhoMinimizado from './_RascunhoMinimizado.vue'
 import AppExterno from './_AppExterno.vue'
 import PainelDoSms from './_PainelDoSms.vue'
+import PainelDoWhatsApp from './_PainelDoWhatsApp.vue'
 import TelaInicio from './_TelaInicio.vue'
 import TelaItens from './_TelaItens.vue'
 import TelaItem from './_TelaItem.vue'
@@ -85,13 +86,11 @@ const trilha = computed(() => {
     case 'agenda': return [ws, c.itens.agenda]
     case 'requisicoes': return [ws, 'request']
     case 'emails': {
-      // Rodada 16: a lista fica em Membro; Modelos, Caixas e Regras de envio, em Configurações.
-      const nome = fase.value >= 4 ? tc.value.comunicacoes : c.itens.emails
-      if (abaDaCentral.value === 'mensagens') return [ws, nome]
-      const aba = abaDaCentral.value === 'configuracoes'
-        ? (fase.value >= 4 ? tc.value.separacao.canaisERegras : tc.value.separacao.regrasDeEnvio)
-        : t.value.central.abas[abaDaCentral.value]
-      return [ws, c.configuracoes, fase.value >= 4 ? nome : c.itens.emailsConfig, aba]
+      // Rodada 16: a lista fica em Membro; Modelos, Caixas e Canais e regras, em Configurações.
+      // Rodada 17: "Comunicações" em todas as fases, igual ao menu.
+      if (abaDaCentral.value === 'mensagens') return [ws, c.itens.emails]
+      const aba = abaDaCentral.value === 'configuracoes' ? tc.value.separacao.canaisERegras : t.value.central.abas[abaDaCentral.value]
+      return [ws, c.configuracoes, c.itens.emailsConfig, aba]
     }
     case 'spaceflow': return [ws, c.configuracoes, c.dados, c.itens.spaceflow, tc.value.spaceflow.nomeDoFluxo]
     case 'sistema': return [ws, c.configuracoes, c.itens.sistema]
@@ -114,15 +113,13 @@ const irPara = computed<DropdownMenuItem[][]>(() => [
     { label: t.value.casca.itens.rapidas, icon: 'i-lucide-clipboard-check', onSelect: () => ir('tarefas') },
     { label: t.value.casca.itens.agenda, icon: 'i-lucide-calendar-days', onSelect: () => ir('agenda') },
     { label: t.value.casca.itens.requisicoes, icon: 'i-lucide-clipboard-pen-line', onSelect: () => ir('requisicoes') },
-    fase.value >= 4
-      ? { label: tc.value.comunicacoes, icon: 'i-lucide-messages-square', onSelect: () => ir('emails', { central: 'mensagens' }) }
-      : { label: t.value.casca.itens.emails, icon: 'i-lucide-mail', onSelect: () => ir('emails', { central: 'mensagens' }) },
+    { label: t.value.casca.itens.emails, icon: 'i-lucide-messages-square', onSelect: () => ir('emails', { central: 'mensagens' }) },
   ],
   ...(ehAdmin.value
     ? [
         [{ type: 'label' as const, label: t.value.andaime.quemConfigura }],
         [
-          { label: fase.value >= 4 ? tc.value.separacao.tituloComunicacoes : tc.value.separacao.tituloEmail, icon: 'i-lucide-settings', onSelect: () => ir('emails', { central: 'modelos' }) },
+          { label: tc.value.separacao.tituloComunicacoes, icon: 'i-lucide-settings', onSelect: () => ir('emails', { central: 'modelos' }) },
           ...(fase.value >= 2 ? [{ label: t.value.andaime.atalhosDaCategoria, icon: 'i-lucide-contact', onSelect: () => ir('categoria', { categoria: 'contratos', vista: 'atalhos' }) }] : []),
           { label: t.value.andaime.formularios, icon: 'i-lucide-file-spreadsheet', onSelect: () => ir('categoria', { categoria: 'solicitacoes', vista: 'formularios' }) },
           ...(fase.value >= 4 ? [{ label: tc.value.irParaSpaceflow, icon: 'i-lucide-git-fork', onSelect: () => ir('spaceflow') }] : []),
@@ -156,6 +153,7 @@ const cenarios = computed<{ value: Cenario, label: string }[]>(() => [
     <RascunhoMinimizado :t="t" />
     <!-- ANDAIME: a simulação do app de fora (e-mail, formulário público, Microsoft) -->
     <PainelDoSms :t="t" />
+    <PainelDoWhatsApp :t="t" />
     <AppExterno :t="t" />
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->

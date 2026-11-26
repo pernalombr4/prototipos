@@ -68,10 +68,10 @@ const membro = computed<Entrada[]>(() => [
   { chave: 'agenda', icone: 'i-lucide-calendar-days', tela: 'agenda' },
   // PROPOSTA (rodada 7): a central E-mails, nas 3 fases. Cada aba segue a permissão que já existe.
   // Fase 4 (rodada 14): a central guarda e-mail, SMS e WhatsApp e passa a se chamar "Comunicações".
-  // Rodada 16: a entrada abre só a lista de mensagens; a configuração fica em Configurações › E-mails.
-  fase.value >= 4
-    ? { chave: 'emails', rotulo: tk.value.comunicacoes, icone: 'i-lucide-messages-square', tela: 'emails', central: 'mensagens', proposta: true }
-    : { chave: 'emails', icone: 'i-lucide-mail', tela: 'emails', central: 'mensagens', proposta: true },
+  // Rodada 16: a entrada abre só a lista de mensagens; a configuração fica em Configurações › Comunicações.
+  // Rodada 17: "Comunicações" desde a Fase 1. O nome do menu é o da trilha e o da rota; mudar depois
+  // obrigaria a trocar a rota no back.
+  { chave: 'emails', icone: 'i-lucide-messages-square', tela: 'emails', central: 'mensagens', proposta: true },
   { chave: 'knowledge', icone: 'i-lucide-table-2', filhos: [] },
   // Menu configurado em Interface › Menus (tela nativa /request).
   { chave: 'requisicoes', icone: 'i-lucide-clipboard-pen-line', tela: 'requisicoes' },
@@ -94,14 +94,14 @@ const configuracoes = computed<Entrada[]>(() => [
   { chave: 'interface', icone: 'i-lucide-compass', filhos: [] },
   {
     // PROPOSTA (rodada 16): a configuração da central mora aqui. "E-mails Enviados" sai: é o filtro
-    // "Do sistema" da lista de mensagens desde a rodada 8. Fase 4: o grupo passa a "Comunicações".
+    // "Do sistema" da lista de mensagens desde a rodada 8. Rodada 17: "Comunicações" e "Canais e
+    // regras" desde a Fase 1, pelo mesmo motivo da entrada de Membro.
     chave: 'emailsConfig',
-    rotulo: fase.value >= 4 ? tk.value.comunicacoes : undefined,
-    icone: fase.value >= 4 ? 'i-lucide-messages-square' : 'i-lucide-mails',
+    icone: 'i-lucide-messages-square',
     filhos: [
-      { chave: 'modelosDeEmail', rotulo: fase.value >= 4 ? props.t.central.abas.modelos : undefined, icone: 'i-lucide-file-text', tela: 'emails', central: 'modelos', proposta: true },
+      { chave: 'modelosDeEmail', icone: 'i-lucide-file-text', tela: 'emails', central: 'modelos', proposta: true },
       { chave: 'caixasDeEmail', icone: 'i-lucide-inbox', tela: 'emails', central: 'caixas', proposta: true },
-      { chave: 'regrasDeEnvio', rotulo: fase.value >= 4 ? tk.value.separacao.canaisERegras : tk.value.separacao.regrasDeEnvio, icone: 'i-lucide-sliders-horizontal', tela: 'emails', central: 'configuracoes', proposta: true },
+      { chave: 'regrasDeEnvio', rotulo: tk.value.separacao.canaisERegras, icone: 'i-lucide-sliders-horizontal', tela: 'emails', central: 'configuracoes', proposta: true },
     ],
   },
   { chave: 'integracoes', icone: 'i-lucide-blocks' },

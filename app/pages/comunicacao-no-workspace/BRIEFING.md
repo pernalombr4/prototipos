@@ -190,7 +190,7 @@ formulário. Há 4 achados vizinhos:
 
 - **S2-F1 (P1), "A Base nasce invisível":** telas nativas que só existem no dropdown do editor de
   menus, entre elas **Received Emails**. É a tela `/itemEmails` deste briefing. A proposta de lá
-  (tela nativa com lugar nomeado) é a mesma direção da área "E-mails" no menu.
+  (tela nativa com lugar nomeado) é a mesma direção da área "Comunicações" no menu.
 - **S3-F4 (P2), Notificações:** o campo obrigatório "Modelo de e-mail" abre com 0 opções, e a tela
   que o alimenta (Configurações › E-mails › Modelos de E-mail) não é citada. O compositor deste
   protótipo usa esses modelos no campo Template.
@@ -437,16 +437,15 @@ com "99+" e o avatar.
 
 - "Requisições" na seção Membro: entrada de menu configurada em Interface › Menus (tela nativa
   `/request`). Cliente costuma ter; o workspace de exploração não tinha.
-- a central "E-mails" na seção Membro (todas as fases, desde a rodada 7) e "Novo e-mail" na barra
-  do topo: proposta (ver `DECISOES.md`);
-- Configurações › E-mails (rodada 16): Modelos de E-mail, Caixas de E-mail e Regras de envio
-  abrem a página de configuração na aba de mesmo nome; "E-mails Enviados" sai, porque é o filtro
-  "Do sistema" da lista. Na Fase 4, o grupo se chama "Comunicações". A posição no menu continua a
-  de hoje.
+- a central "Comunicações" na seção Membro (todas as fases, desde a rodada 7; com esse nome desde a
+  rodada 17) e "Novo e-mail" na barra do topo: proposta (ver `DECISOES.md`);
+- Configurações › Comunicações, no lugar do Configurações › E-mails de hoje (rodadas 16 e 17):
+  Modelos, Caixas de E-mail e Canais e regras abrem a página de configuração na aba de mesmo nome;
+  "E-mails Enviados" sai, porque é o filtro "Do sistema" da lista. O nome vale desde a Fase 1,
+  porque o nome do menu é o da trilha e o da rota. A posição no menu continua a de hoje.
 
 **O que entra na casca na Fase 4 (rodada 14) e não é cópia:**
 
-- a entrada do menu passa a "Comunicações", com o ícone de conversas;
 - Estrutura › Spaceflow abre o fluxo de exemplo da proposta (`_TelaSpaceflow.vue`). A moldura do
   editor (barra do fluxo, abas, canvas, cartões dos nós, controles de zoom, paleta e o modal de
   configuração) é cópia do protótipo `no-de-atraso`, que a copiou do develop; o comentário do topo

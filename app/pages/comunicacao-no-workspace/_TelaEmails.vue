@@ -53,7 +53,7 @@ import type { Textos } from './textos'
 import { EU, type Email, agora as agoraDoPrototipo, caixas, itemPorId, itens, membroPorId, tarefas } from './mocks'
 import { type AbaDaCentral, ABAS_DE_ADMIN, type Rapido, contatosDoItem, partesDoSms, useComunicacao, useMarcaDeProposta } from './estado'
 import { useAppExterno } from './simulador'
-import { useSms } from './atalhos'
+import { useSms, useWhatsApp } from './atalhos'
 import { type Canal, type Entrega, type OrigemDoEnvio, type SaiuPor, type StatusDoEnvio, textosDeCanais } from './textosDeCanais'
 import BuscaDeItem from './_BuscaDeItem.vue'
 import AbasDaCentral from './_AbasDaCentral.vue'
@@ -65,9 +65,10 @@ import { SEM_VALOR, passaNosFiltros, semAsColunas } from './filtroPorColuna'
 
 const props = defineProps<{ t: Textos }>()
 
-const { emails, config, fase, registrado, abrirCompositor, abrirItem, abaDaCentral, ehAdmin, rapidosDaCentral, dados, outlookIntegrado, ir } = useComunicacao()
+const { emails, config, fase, registrado, abrirCompositor, abrirItem, abaDaCentral, ehAdmin, rapidosDaCentral, dados, outlookIntegrado, twilioLigado, ir } = useComunicacao()
 const { abrirApp } = useAppExterno()
 const { abrirSmsSemNumero } = useSms()
+const { abrirPainelSemNumero, abrirNoSeuWhatsApp } = useWhatsApp()
 const tc = useTextos(textosDeCanais)
 const marca = useMarcaDeProposta()
 const idioma = useIdioma()
@@ -76,13 +77,18 @@ const toast = useToast()
 const te = computed(() => props.t.emails)
 /** Fase 4: a central de todos os canais. */
 const todosOsCanais = computed(() => fase.value >= 4)
-const titulo = computed(() => todosOsCanais.value ? tc.value.comunicacoes : te.value.titulo)
+/** Rodada 17: "Comunicações" em todas as fases, como o menu e a trilha. */
+const titulo = computed(() => te.value.titulo)
 
-/** "Nova mensagem" da Fase 4: e-mail, SMS pelo número do workspace e o WhatsApp, que só sai com modelo. */
+/**
+ * "Nova mensagem" da Fase 4: e-mail, SMS e WhatsApp. Rodada 17: com a Twilio, o SMS e o WhatsApp
+ * abrem o painel com as 2 opções (o número do workspace ou o da pessoa); sem a Twilio, só o caminho
+ * pelo celular e pelo WhatsApp da pessoa, como nas Fases 1 a 3.
+ */
 const novaMensagem = computed<DropdownMenuItem[][]>(() => [[
   { label: tc.value.novaMensagemOpcoes.email, icon: 'i-lucide-mail', onSelect: () => abrirCompositor({ origem: 'emails' }) },
-  { label: tc.value.novaMensagemOpcoes.sms, icon: 'i-lucide-message-square-text', onSelect: () => abrirSmsSemNumero('') },
-  { label: tc.value.novaMensagemWhatsApp, icon: 'i-simple-icons-whatsapp', description: tc.value.novaMensagemWhatsAppDica, disabled: true, ui: { itemDescription: 'whitespace-normal' } },
+  { label: tc.value.novaMensagemOpcoes.sms, icon: 'i-lucide-message-square-text', description: twilioLigado.value ? tc.value.novaMensagemSmsDica : tc.value.novaMensagemSmsSemTwilio, ui: { itemDescription: 'whitespace-normal' }, onSelect: () => abrirSmsSemNumero('') },
+  { label: tc.value.novaMensagemOpcoes.whatsapp, icon: 'i-simple-icons-whatsapp', description: twilioLigado.value ? tc.value.novaMensagemWhatsAppDica : tc.value.novaMensagemWhatsAppSemTwilio, ui: { itemDescription: 'whitespace-normal' }, onSelect: () => twilioLigado.value ? abrirPainelSemNumero() : abrirNoSeuWhatsApp(null, { texto: '' }) },
 ]])
 
 /* ---------- abas da central ---------- */
@@ -97,11 +103,11 @@ const ICONE_DA_ABA: Record<AbaDaCentral, string> = {
  */
 const naConfiguracao = computed(() => ABAS_DE_ADMIN.includes(abaDaCentral.value))
 function rotuloDaAba(a: AbaDaCentral) {
-  if (a === 'configuracoes') return todosOsCanais.value ? tc.value.separacao.canaisERegras : tc.value.separacao.regrasDeEnvio
+  if (a === 'configuracoes') return tc.value.separacao.canaisERegras
   return props.t.central.abas[a]
 }
 const abas = computed(() => ABAS_DE_ADMIN.map(a => ({ value: a, label: rotuloDaAba(a), icon: ICONE_DA_ABA[a] })))
-const tituloDaConfiguracao = computed(() => todosOsCanais.value ? tc.value.separacao.tituloComunicacoes : tc.value.separacao.tituloEmail)
+const tituloDaConfiguracao = computed(() => tc.value.separacao.tituloComunicacoes)
 const descricaoDaConfiguracao = computed(() => todosOsCanais.value ? tc.value.separacao.descricaoComunicacoes : tc.value.separacao.descricaoEmail)
 
 /** O texto do "i" de cada aba. */

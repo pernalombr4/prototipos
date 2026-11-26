@@ -24,7 +24,7 @@ const props = withDefaults(defineProps<{
 
 const aberto = defineModel<boolean>('open', { default: false })
 
-const { motivoDoWhatsApp, abrirConversa } = useWhatsApp()
+const { motivoDoWhatsApp, abrirNoSeuWhatsApp } = useWhatsApp()
 const { abrirNoApp, motivoDoSms } = useSms()
 const toast = useToast()
 const sms = computed(() => props.canal === 'sms')
@@ -47,7 +47,8 @@ function abrirAtual() {
   const p = atual.value
   if (!p) return
   if (sms.value) abrirNoApp({ nome: p.nome, telefone: p.telefone, texto: p.texto, itemId: null })
-  else abrirConversa(p, { texto: p.texto })
+  // Rodada 17: a fila abre o WhatsApp da pessoa mesmo com a Twilio; o lote pelo workspace é o nó Enviar WhatsApp.
+  else abrirNoSeuWhatsApp(p, { texto: p.texto })
   abertaAtual.value = true
 }
 

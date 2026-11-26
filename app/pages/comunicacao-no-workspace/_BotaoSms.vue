@@ -8,6 +8,8 @@
 import type { ItemDoProtótipo } from './mocks'
 import type { Textos } from './textos'
 import { type DestinoDoWhatsApp, useSms } from './atalhos'
+import { useComunicacao } from './estado'
+import { textosDeCanais } from './textosDeCanais'
 
 const props = withDefaults(defineProps<{
   t: Textos
@@ -28,10 +30,13 @@ const props = withDefaults(defineProps<{
 })
 
 const { motivoDoSms, abrirPainel } = useSms()
+const { fase, twilioLigado } = useComunicacao()
+const tc = useTextos(textosDeCanais)
 
 const motivo = computed(() => motivoDoSms(props.destino))
 const nome = computed(() => props.rotulo ?? props.t.sms.rotulo)
-const dica = computed(() => motivo.value ?? props.t.sms.dica)
+/** Rodada 17: com a Twilio, o painel tem também o número do workspace; a dica diz isso. */
+const dica = computed(() => motivo.value ?? (fase.value >= 4 && twilioLigado.value ? tc.value.dicaDoSmsComTwilio : props.t.sms.dica))
 
 function abrir() {
   if (motivo.value) return

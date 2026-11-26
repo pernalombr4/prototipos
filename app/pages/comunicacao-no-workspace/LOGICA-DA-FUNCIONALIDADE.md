@@ -4,7 +4,7 @@ Para dev e produto. Protótipo: https://pernalombr4.github.io/prototipos/comunic
 (26/11/2026, rodada 14). O controle "Fase", na barra de baixo do protótipo, troca entre as 4 fases.
 A Fase 4 é o destino: a central "Comunicações", com e-mail, SMS e WhatsApp, e os nós de mensagem do
 Spaceflow (7.10 e 7.11).
-O controle "Perfil" mostra a central E-mails pelo olhar de quem administra ou do membro. O controle
+O controle "Perfil" mostra a central Comunicações pelo olhar de quem administra ou do membro. O controle
 "Dados" mostra o workspace novo, o primeiro uso e o workspace em uso (7.7).
 
 ## 1. Resumo
@@ -17,18 +17,21 @@ O documento do Felipe pede 3 coisas. Cada uma tem configuração e uso:
 | Atalho de WhatsApp | Abre a conversa no WhatsApp com o mesmo contato, com o texto pronto, e envia o link do formulário público | Nada a ligar. Na Fase 2, o telefone e o texto pronto no cartão "Contato da categoria" |
 | Atalho de SMS | Abre o painel "Enviar SMS" para o mesmo telefone, com o texto pronto e os caminhos para enviar do celular | Nada a ligar. Na Fase 2, o mesmo telefone e o mesmo texto pronto do WhatsApp |
 | Link de formulário público | Copia ou envia o link do formulário público sem ir à configuração | Formulários da categoria (visibilidade, já existe) |
-| E-mail do ENSPACE em qualquer tela | Escreve o e-mail de qualquer tela. Com um item aberto, o e-mail fica no item. Lê e responde na central E-mails | Correio do Outlook no perfil de cada pessoa. Modelos, caixas e regras do workspace, na central E-mails |
+| E-mail do ENSPACE em qualquer tela | Escreve o e-mail de qualquer tela. Com um item aberto, o e-mail fica no item. Lê e responde na central Comunicações | Correio do Outlook no perfil de cada pessoa. Modelos, caixas e regras do workspace, em Configurações › Comunicações |
 
 Regras que valem para tudo:
 
 - **Os canais são e-mail, WhatsApp e SMS.** O WhatsApp abre por um link do próprio WhatsApp, e o SMS pelo painel
   "Enviar SMS" (5.8), com o texto pronto; a pessoa envia do celular dela, e o ENSPACE não registra a mensagem.
+  Na Fase 4, com a integração Twilio, o número do workspace entra como mais uma opção, e os caminhos
+  pelo celular e pelo WhatsApp da pessoa continuam (5.7, 5.8).
 - **O e-mail vem sempre ligado.** Não há chave em Sistema › Módulos nem em outro lugar, em nenhuma
   fase. O atalho aparece onde há endereço de e-mail (4.1).
-- **Tudo do e-mail fica numa central só:** "E-mails", na seção Membro do menu, com as abas
-  Mensagens (7.7). Quem administra configura em Configurações › E-mails ("Comunicações", na Fase 4):
-  Modelos, Caixas de E-mail e Regras de envio. O botão "Configurações" no topo da lista leva até lá
-  (rodada 16).
+- **Tudo do e-mail fica numa central só:** "Comunicações", na seção Membro do menu, com a lista de
+  mensagens (7.7). Quem administra configura em Configurações › Comunicações: Modelos, Caixas de
+  E-mail e Canais e regras. O botão "Configurações" no topo da lista leva até lá (rodada 16).
+- **O nome é "Comunicações" desde a Fase 1** (rodada 17), mesmo com só e-mail no MVP: o nome do menu
+  é o da trilha e o da rota, e trocar na Fase 4 obrigaria a mudar a rota no back.
 - **Os e-mails que tarefas e fluxos enviam ficam na aba Mensagens**, com o filtro "Do sistema", para
   quem tem a permissão de hoje de vê-los. Não há aba própria para eles.
 - **Na Fase 4, a central vira "Comunicações"** e guarda também o SMS e o WhatsApp que o ENSPACE envia
@@ -90,7 +93,7 @@ Cada fase soma à anterior.
 | D12 | Tela Requisições no menu | Administrador (Interface › Menus) | Sim | 1 | 6.2 | Sem o cartão nessa tela; sobram a lista de itens e a tarefa |
 | D13 | Spaceflow que gera tarefa de formulário (nó Formulário ou Operações de Dados manual) | Administrador (Spaceflow) | Sim | 1 | 6.2 | Não há tarefa de formulário |
 | D14 | Configurações da Agenda: categorias com campo de data e tipos de tarefa marcados | Administrador (Agenda › Configurações) | Sim | 1 | 5.5 | O evento não aparece na Agenda |
-| D15 | Modelos de E-mail cadastrados | Administrador (E-mails › Modelos) | Sim | 1 | 7.3, 7.7 | Campo Template sem opções; a aba Modelos mostra "Nenhum modelo" e "Novo modelo" |
+| D15 | Modelos de E-mail cadastrados | Administrador (Configurações › Comunicações › Modelos) | Sim | 1 | 7.3, 7.7 | Campo Template sem opções; a aba Modelos mostra "Nenhum modelo" e "Novo modelo" |
 | D16 | App de e-mail padrão no computador da pessoa (`mailto:`) | Cada pessoa ou o TI | Fora do ENSPACE | 1 | 5.1, 6 | O navegador não abre nada ou pergunta qual app usar |
 | D17 | Rota de busca de item entre categorias, filtrada por permissão | Dev (back) | Não | 2 | 7.3, 7.4, 7.7 | Sem a busca de "Vincular a item"; fica o item da tela de origem, como na Fase 1 |
 | D18 | Lista de e-mails por pessoa e por permissão, para a aba Mensagens | Dev (back e front) | Em parte: os dados e a tela "Emails Recebidos" existem; a tela não tem entrada no menu | 2 | 7.7 | A aba Mensagens mostra o que a tela "Emails Recebidos" mostra hoje (9, pergunta 13) |
@@ -114,12 +117,12 @@ Cada fase soma à anterior.
 - Não há chave em Configurações › Sistema › Módulos nem em outro lugar, em nenhuma fase. O cartão
   Módulos fica como hoje: Correção Monetária, Comparações e Jurídico.
 - Desde o 1º dia aparecem os atalhos de e-mail, o "Novo e-mail" do topo, o link do formulário
-  público nas telas de uso e a central E-mails no menu.
+  público nas telas de uso e a central Comunicações no menu.
 - O atalho só aparece onde há endereço de e-mail: o campo de e-mail do item, o responsável da
   tarefa, os participantes do evento. Sem e-mail, o botão fica indisponível, com o motivo (5.1).
 - Escrever pelo ENSPACE pede a conta do Outlook integrada (D1). Sem ela, o botão abre o app de
   e-mail da pessoa.
-- O que se configura do e-mail fica em Configurações › E-mails › Regras de envio (7.7).
+- O que se configura do e-mail fica em Configurações › Comunicações › Canais e regras (7.7).
 
 **Por que assim**
 
@@ -157,7 +160,7 @@ Cada fase soma à anterior.
 | E-mail | Campo E-mail; Pessoa/Empresa › E-mail de contato; E-mail do Requisitante (campo padrão de toda categoria) |
 | Telefone | Texto com máscara com a máscara CEL; Pessoa/Empresa › Telefone de contato |
 
-- Na central, E-mails › Configurações › "Contato do item" leva ao cartão pelo link "Escolher o
+- Em Configurações › Comunicações › Canais e regras, "Contato do item" leva ao cartão pelo link "Escolher o
   contato de cada categoria".
 - Dado: a categoria já guarda configuração em JSON. O contato caberia ali, mas é dado novo. Onde
   guardar é pergunta para os devs (9, pergunta 1).
@@ -172,7 +175,7 @@ Cada fase soma à anterior.
 **Como a pessoa usa**
 
 1. Abre a categoria e o cartão "Contato da categoria", ou clica em "Escolher o contato de cada
-   categoria" em E-mails › Configurações.
+   categoria" em Configurações › Comunicações › Canais e regras.
 2. Escolhe, para cada contato, de quais campos vêm o nome e o e-mail.
 3. Ajusta o assunto e confere a prévia.
 4. Clica em Salvar.
@@ -219,10 +222,10 @@ Cada fase soma à anterior.
 
 **Como funciona**
 
-- As caixas já existem e continuam em Configurações › E-mails › Caixas de E-mail, agora como aba
+- As caixas já existem e passam a Configurações › Comunicações › Caixas de E-mail, como aba
   da página de configuração (7.7). Recebem (Central de Atendimento) e iniciam fluxo.
 - Na Fase 2, as caixas aparecem no "De" do compositor (7.3). A configuração da caixa não muda.
-- Quem administra escolhe quais entram no "De" em E-mails › Configurações › "Caixas como
+- Quem administra escolhe quais entram no "De" em Canais e regras › "Caixas como
   remetente": 1 chave "Disponível no campo De" por caixa e o botão Salvar. Só as caixas ligadas
   entram no "De".
 
@@ -470,6 +473,18 @@ qual formulário, porque o workspace tem vários.
   "Abrir conversa", "Próxima".
 - Sem telefone ou com telefone inválido, o atalho fica indisponível com o motivo ("Sem telefone
   cadastrado", "Telefone inválido"). No item, "Corrigir telefone" leva ao campo.
+- **Com a integração Twilio (Fase 4, rodada 17):** o atalho abre o painel "Enviar WhatsApp", com 2
+  abas em "Como enviar":
+  - **WhatsApp do workspace:** o modelo aprovado pela Meta (os outros aparecem desabilitados, com o
+    status), os valores de cada variável já sugeridos pelo item (primeiro nome, referência,
+    vencimento) e editáveis, a prévia e "Enviar pelo WhatsApp do workspace". Fica registrado no item
+    e na central, com o status até "Lido". Sem número, o botão fica desabilitado com "Informe o
+    número para enviar pelo WhatsApp do workspace.";
+  - **Seu WhatsApp:** o texto pronto, editável, e "Abrir no meu WhatsApp", que abre o `wa.me` como
+    sem a integração. Sem registro.
+- Sem a Twilio, em qualquer fase, o atalho abre direto o WhatsApp da pessoa. O link do formulário
+  público e a fila em lote abrem o WhatsApp da pessoa mesmo com a Twilio: o WhatsApp do workspace só
+  envia para 1 número, com modelo, e o lote pelo workspace é o nó "Enviar WhatsApp" (7.11).
 
 **Depende de**
 
@@ -512,6 +527,10 @@ Na Fase 1, o e-mail e o telefone de um mesmo contato vêm de 2 campos e aparecem
 - Telefone fixo (DDD e 8 dígitos) deixa o SMS indisponível, com "Telefone fixo não recebe SMS"; o
   WhatsApp continua disponível.
 - Para várias pessoas, a fila "Avisar por SMS", com "Abrir SMS" e os 2 botões de copiar por pessoa.
+- **Com a integração Twilio (Fase 4):** o painel ganha "Enviar pelo ENSPACE" em cima, pelo número do
+  workspace, com registro no item e na central; os caminhos de cima continuam embaixo, em "Ou envie
+  pelo seu celular". Sem a Twilio, o painel fica como acima. A dica do botão SMS diz as 2 opções
+  quando há a integração (rodada 17).
 
 **Depende de**
 
@@ -599,7 +618,7 @@ Como a gaveta "Nova Mensagem" da Mail Box funciona hoje, no develop:
 - O registro do e-mail enviado exige o item. Sem item, o e-mail sai, mas não fica no ENSPACE.
 - A resposta do destinatário chega no endereço do item e aparece em Mail Box › Recebidos. O enviado
   aparece em Mail Box › Enviados.
-- O template (em Configurações › E-mails › Modelos de E-mail, hoje e na proposta) troca as variáveis pelos dados do item.
+- O template (hoje em Configurações › E-mails › Modelos de E-mail; na proposta, em Configurações › Comunicações › Modelos) troca as variáveis pelos dados do item.
 - Há "Inserir assinatura", com a assinatura da conta do Outlook.
 
 O vínculo fica gravado pela referência do item, não pelo nome. É o que o documento pede.
@@ -660,8 +679,8 @@ O vínculo fica gravado pela referência do item, não pelo nome. É o que o doc
   - com item: "Vinculado a <referência>. As respostas voltam para o item.", com "Ver no item";
   - sem item, Fase 1: "Enviado de <remetente>. Sem item vinculado, o e-mail fica só no seu Outlook
     e não aparece no ENSPACE.";
-  - sem item, Fase 2: "Enviado de <remetente>, sem item vinculado. O e-mail fica em E-mails.", com
-    "Ver em E-mails".
+  - sem item, Fase 2: "Enviado de <remetente>, sem item vinculado. O e-mail fica em Comunicações.", com
+    "Ver em Comunicações".
 - Falha no envio: "E-mail não enviado". O rascunho continua aberto.
 - Descartar: o aviso "Rascunho descartado" traz "Desfazer".
 - A gaveta não escurece nem trava a página. Minimizar, Esc e o X guardam o rascunho numa barra no
@@ -673,7 +692,7 @@ O vínculo fica gravado pela referência do item, não pelo nome. É o que o doc
 | Dependência | Onde se resolve | Se faltar |
 |---|---|---|
 | Correio do Outlook (D1) | Perfil › Integrações | Fase 1: aviso no lugar do formulário |
-| Modelos de E-mail cadastrados (D15) | E-mails › Modelos | Campo Template vazio |
+| Modelos de E-mail cadastrados (D15) | Configurações › Comunicações › Modelos | Campo Template vazio |
 | Assinatura configurada na conta do Outlook | Outlook da pessoa | "Inserir assinatura" não insere nada |
 | Fase 2: busca de item entre categorias (D17) | Dev (back) | Fica o item da tela de origem, sem busca |
 | Fase 2: envio por caixa do workspace (D19) | Dev (back) | O "De" fica só com a conta do Outlook |
@@ -772,31 +791,32 @@ hoje aceita: um e-mail novo, com o aviso para a pessoa não esperar a mesma conv
 - Fase 2: o "De" oferece só as caixas do workspace. A pessoa escreve pelo ENSPACE sem a integração.
 - No protótipo: cenário "Sem Outlook integrado", na barra de baixo.
 
-### 7.7 Central "E-mails" no menu (Fase 1)
+### 7.7 Central "Comunicações" no menu (Fase 1)
 
 **Como funciona**
 
-O uso e a configuração ficam em 2 lugares do menu (rodada 16):
+O uso e a configuração ficam em 2 lugares do menu (rodada 16), com o nome "Comunicações" desde a
+Fase 1 (rodada 17):
 
 | Onde | O que mostra | Quem vê |
 |---|---|---|
-| Membro › E-mails ("Comunicações", na Fase 4) | A lista de mensagens (abaixo, "Aba Mensagens"). No topo: "Sua conta de envio", "Configurações" e "Novo e-mail" ("Nova mensagem", na Fase 4) | Todo membro. "Configurações", só quem administra |
-| Configurações › E-mails ("Comunicações", na Fase 4) | A página "Configurações de e-mail" ("Configurações de comunicação", na Fase 4), com as abas Modelos, Caixas de E-mail e Regras de envio ("Canais e regras", na Fase 4) e o botão "Ver mensagens" | Quem administra; cada aba pela permissão de hoje (lido em 24/11/2026) |
+| Membro › Comunicações | A lista de mensagens (abaixo, "Aba Mensagens"). No topo: "Sua conta de envio", "Configurações" e "Novo e-mail" ("Nova mensagem", na Fase 4) | Todo membro. "Configurações", só quem administra |
+| Configurações › Comunicações | A página "Configurações de comunicação", com as abas Modelos, Caixas de E-mail e Canais e regras e o botão "Ver mensagens" | Quem administra; cada aba pela permissão de hoje (lido em 24/11/2026) |
 
 - **Topo da lista:**
   - "Sua conta de envio" abre um quadro com a conta do Outlook de quem está vendo (bloco abaixo);
   - "Configurações", só para quem administra, abre a página de configuração na aba Modelos, com a
     dica "Modelos, caixas de e-mail e regras de envio do workspace, em Configurações.";
   - "Novo e-mail" abre o compositor sem vínculo.
-- **Itens de Configurações › E-mails:** "Modelos de E-mail", "Caixas de E-mail" e "Regras de envio"
-  abrem a aba de mesmo nome. "E-mails Enviados" sai do menu: é o filtro "Do sistema" da lista desde
+- **Itens de Configurações › Comunicações:** "Modelos", "Caixas de E-mail" e "Canais e regras"
+  abrem a aba de mesmo nome. O grupo substitui o Configurações › E-mails de hoje. "E-mails Enviados" sai do menu: é o filtro "Do sistema" da lista desde
   a rodada 8.
 
 | Aba da configuração | O que mostra | Quem vê |
 |---|---|---|
 | Modelos | A tela Modelos de E-mail de hoje: Ações, Nome, Assunto e Usar remetente por domínio, com "Novo modelo". Na Fase 4, também os modelos de WhatsApp (7.10) | Quem tem a permissão de hoje de ver os modelos de e-mail |
 | Caixas de E-mail | A tela Caixas de E-mail de hoje: Ações, Nome, E-mail e Provedor, com "Nova caixa" | Quem tem a permissão de hoje de ver as caixas |
-| Regras de envio | "Contato do item", "Remetente com o domínio da empresa" e, na Fase 2, "Caixas como remetente". Na Fase 4, "Canais e regras", com "Canais de envio do workspace" (7.10) | Quem administra |
+| Canais e regras | "Contato do item", "Remetente com o domínio da empresa" e, na Fase 2, "Caixas como remetente". Na Fase 4, também "Canais de envio do workspace" (7.10) | Quem administra |
 
 - O conteúdo de Modelos e Caixas de E-mail é o das telas de hoje. Mudam o endereço e a tabela.
 - O membro não vê a seção Configurações do menu nem o botão "Configurações".
@@ -826,7 +846,7 @@ Um quadro com a conta do Outlook integrada e "Gerenciar integração", ou "Nenhu
 com "Integrar contas". Os 2 abrem Perfil › Integrações (4.3). O botão mostra um sinal verde com a
 conta conectada e um aviso amarelo sem ela.
 
-**Aba Regras de envio (Configurações › E-mails)**
+**Aba Canais e regras (Configurações › Comunicações)**
 
 | Bloco | Quem vê | O que mostra |
 |---|---|---|
@@ -914,7 +934,7 @@ pelo controle "Dados" e pelo cenário "Sem Outlook integrado".
 
 | Caso | O que a pessoa vê |
 |---|---|
-| Workspace novo: nada configurado, nada enviado (sem modelo, sem caixa, sem a conta do Outlook, sem e-mail) | Mensagens mostra "Nenhum e-mail ainda", o texto do próximo passo e o botão "Integrar conta do Outlook". Quem administra vê também "Criar modelo" e "Criar caixa de e-mail", que levam às abas Modelos e Caixas de E-mail de Configurações › E-mails |
+| Workspace novo: nada configurado, nada enviado (sem modelo, sem caixa, sem a conta do Outlook, sem e-mail) | Mensagens mostra "Nenhum e-mail ainda", o texto do próximo passo e o botão "Integrar conta do Outlook". Quem administra vê também "Criar modelo" e "Criar caixa de e-mail", que levam às abas Modelos e Caixas de E-mail de Configurações › Comunicações |
 | Workspace novo, aba Modelos | "Nenhum modelo", "O modelo preenche o assunto e a mensagem de um e-mail. Crie o primeiro para a equipe usar." e "Novo modelo" |
 | Workspace novo, aba Caixas de E-mail | "Nenhuma caixa de e-mail", "A caixa recebe os e-mails enviados ao workspace e pode iniciar um fluxo." e "Nova caixa" |
 | Workspace novo, compositor | O campo Template fica sem opções |
@@ -932,7 +952,7 @@ No workspace novo, o texto do próximo passo muda com o perfil:
 
 | Dependência | Onde se resolve | Se faltar |
 |---|---|---|
-| Permissões de hoje de ver os modelos, as caixas e os e-mails enviados (D4) | Cargo (Gestão de Membros) | A pessoa não vê Configurações › E-mails, o botão "Configurações" nem os e-mails do sistema; vê a lista com "Sua conta de envio" |
+| Permissões de hoje de ver os modelos, as caixas e os e-mails enviados (D4) | Cargo (Gestão de Membros) | A pessoa não vê Configurações › Comunicações, o botão "Configurações" nem os e-mails do sistema; vê a lista com "Sua conta de envio" |
 | Lista única dos e-mails dos itens e dos enviados pelo sistema (D24) | Dev (back); 9, pergunta 14 | O filtro "Do sistema" troca a fonte da tabela, 1 lista por vez |
 | Correio do Outlook (D1), para "Sua conta de envio" | Perfil › Integrações | O bloco mostra "Nenhuma conta integrada." e "Integrar contas" |
 | Fase 1: a tela "Emails Recebidos", que existe sem entrada no menu, como base da aba Mensagens | Dev (front); 9, pergunta 13 | Sem a aba Mensagens; o e-mail fica na Mail Box do item e da tarefa (7.8, 7.9) |
@@ -947,14 +967,14 @@ No workspace novo, o texto do próximo passo muda com o perfil:
 
 **Como a pessoa usa**
 
-1. Abre E-mails no menu.
+1. Abre Comunicações no menu.
 2. Em Mensagens, filtra (por exemplo, "Não lidos"; na Fase 2, "Sem item").
 3. Clica na linha para ler e responde. Na Fase 2, sem item, clica na sugestão ou busca o item para
    vincular.
 4. Para saber se o e-mail de um fluxo saiu, quem tem a permissão filtra "Do sistema" e confere o
    Status. Se falhou, clica em "Reenviar e-mail".
-5. Quem administra clica em "Configurações", no topo da lista, ou abre Configurações › E-mails no
-   menu, para os modelos, as caixas e as regras de envio.
+5. Quem administra clica em "Configurações", no topo da lista, ou abre Configurações › Comunicações
+   no menu, para os modelos, as caixas e os canais e regras.
 6. Cada pessoa confere a conta de envio em "Sua conta de envio", no topo da lista.
 
 **Por que assim**
@@ -964,11 +984,16 @@ No workspace novo, o texto do próximo passo muda com o perfil:
 - **O uso em Membro, a configuração em Configurações** (rodada 16, aprovado pela redatora com o
   pedido do atalho: "na tela geral de comunicaçoes deve ter um botao de atalho pra ir pras
   configuraçoes"):
-  - o menu já separa o que se usa do que se configura, e o develop já tem Configurações › E-mails;
+  - o menu já separa o que se usa do que se configura, e o develop já tem Configurações › E-mails,
+    que passa a Configurações › Comunicações;
   - um submenu de configuração dentro de Membro abriria um 2º caminho para o mesmo lugar;
   - o membro fica com 1 entrada, sem abas que não são para ele;
   - o botão "Configurações" no topo da lista mantém a configuração a 1 clique do uso, como Pipefy,
     Help Scout e Bitrix24 fazem (`PESQUISA-MODULOS-E-EMAIL.md`).
+- **"Comunicações" desde a Fase 1** (rodada 17, pedido da redatora: "desde o mvp, o nome do menu ja
+  deve ser o mesmo, senao depois os devs serao obrigados a alterar a rota no backend"): o nome do
+  menu é o da trilha e o da rota. Chamar de "E-mails" no MVP e trocar na Fase 4 mudaria a rota e
+  quebraria o link salvo. A central mostra só e-mail até a Fase 4; o filtro por canal entra lá.
 - Fica na Fase 1 porque só reorganiza telas e permissões que existem. A lista por pessoa e
   permissão (D18), o e-mail sem item, "Caixas como remetente" e o contato por categoria pedem back
   e ficam na Fase 2.
@@ -991,15 +1016,17 @@ No workspace novo, o texto do próximo passo muda com o perfil:
 
 **Como funciona**
 
-- A entrada do menu e o título da central passam a "Comunicações", com o ícone de conversas. As 4
-  abas continuam, com as mesmas permissões.
+- O nome "Comunicações" e o ícone de conversas já valem desde a Fase 1 (rodada 17). A lista, a
+  configuração e as permissões continuam.
 - O botão do alto vira "Nova mensagem", com 3 opções:
   - **E-mail:** o compositor de 7.3;
-  - **"SMS pelo número do workspace":** o painel "Enviar SMS" sem destinatário, com o campo do
-    número;
-  - **WhatsApp:** desabilitado, com "Fora de uma conversa aberta pelo contato, o WhatsApp aceita só
-    modelo aprovado. O envio sai pelo nó Enviar WhatsApp do Spaceflow ou pela conversa do
-    Atendimento."
+  - **SMS:** o painel "Enviar SMS" sem destinatário. Com a Twilio, a descrição diz "Pelo número do
+    workspace ou pelo seu celular." e o painel tem o campo do número; sem ela, "Pelo seu celular. Sem
+    a integração Twilio, o ENSPACE não registra o SMS.";
+  - **WhatsApp:** com a Twilio, o painel "Enviar WhatsApp" sem destinatário (5.7), com "Pelo
+    WhatsApp do workspace, com modelo aprovado, ou pelo seu WhatsApp."; sem ela, abre o WhatsApp da
+    pessoa, com "Pelo seu WhatsApp. Sem a integração Twilio, o ENSPACE não registra a conversa."
+    Até a rodada 16, ficava desabilitado.
 - **Aba Mensagens:**
   - filtros rápidos "E-mail", "WhatsApp" e "SMS", que se somam entre si (E-mail ou SMS), e "Não
     entregues";
@@ -1180,19 +1207,19 @@ No workspace novo, o texto do próximo passo muda com o perfil:
 | "Novo e-mail" e compositor (7.2, 7.3) | Gaveta aberta de qualquer tela, contexto da tela, "De" e "Responder para", bloco "Item vinculado" com o item da tela de origem | Nada: o envio com item já existe |
 | Responder (7.5) | E-mail novo com "Re:", texto citado e aviso | Nada |
 | Mail Box em todo item e na tarefa (7.8, 7.9) | Aba em todo item; aba no painel da tarefa | Nada |
-| Central E-mails (7.7) | Entrada no menu com a lista de mensagens, "Sua conta de envio" e o botão "Configurações"; Configurações › E-mails com Modelos, Caixas de E-mail e Regras de envio, cada uma pela permissão de hoje; as 3 tabelas na tabela das telas novas do produto; aba Mensagens sobre a tela "Emails Recebidos", com os e-mails do sistema (filtro "Do sistema", coluna Status com os 5 valores, "Saiu por", "Motivo da falha", a origem no "Enviado por" e "Reenviar e-mail" também no Cancelado); estado inicial do workspace novo e do primeiro uso | As telas, os dados e as permissões já existem (pergunta 13). A lista única dos e-mails dos itens e do sistema pode pedir back (D24, pergunta 14) |
+| Central Comunicações (7.7) | Entrada "Comunicações" no menu com a lista de mensagens, "Sua conta de envio" e o botão "Configurações"; Configurações › Comunicações com Modelos, Caixas de E-mail e Canais e regras, cada uma pela permissão de hoje; as 3 tabelas na tabela das telas novas do produto; aba Mensagens sobre a tela "Emails Recebidos", com os e-mails do sistema (filtro "Do sistema", coluna Status com os 5 valores, "Saiu por", "Motivo da falha", a origem no "Enviado por" e "Reenviar e-mail" também no Cancelado); estado inicial do workspace novo e do primeiro uso | As telas, os dados e as permissões já existem (pergunta 13). A lista única dos e-mails dos itens e do sistema pode pedir back (D24, pergunta 14) |
 
 ### Fase 2 · Remetente
 
 | Ponto | Front | Back |
 |---|---|---|
-| Contato da categoria (4.2) | Cartão e página no painel da categoria, com a origem do telefone e o texto pronto do WhatsApp; "Escolher os campos de contato" no item; link em E-mails › Configurações | Guardar o contato e o texto pronto (onde: pergunta 1) |
+| Contato da categoria (4.2) | Cartão e página no painel da categoria, com a origem do telefone e o texto pronto do WhatsApp; "Escolher os campos de contato" no item; link em Canais e regras | Guardar o contato e o texto pronto (onde: pergunta 1) |
 | Vincular a item (7.4) | Campo de busca com sugestões, Trocar e remover; autocompletar do Para com contatos de outros itens | Rota de busca de item entre categorias, filtrada por permissão |
 | Aba Mensagens por pessoa e permissão (7.7) | Filtro da lista pelo que a pessoa pode ver | Lista por pessoa e permissão |
-| "De" com as caixas do workspace (4.4, 7.3, 7.7) | Lista em 2 grupos e a ajuda de para onde vão as respostas; bloco "Caixas como remetente" em E-mails › Configurações | Envio por caixa do workspace; guardar quais caixas entram no "De"; regra de quem envia por qual caixa |
+| "De" com as caixas do workspace (4.4, 7.3, 7.7) | Lista em 2 grupos e a ajuda de para onde vão as respostas; bloco "Caixas como remetente" em Canais e regras | Envio por caixa do workspace; guardar quais caixas entram no "De"; regra de quem envia por qual caixa |
 | Resposta na mesma conversa (7.5) | Religar o "Responder" | Enviar como resposta da conversa original |
 | Encaminhar (7.5, 7.7, 7.8) | Botão e ação no menu | Encaminhar com os anexos |
-| Registro sem item (7.3, 7.7) | Filtro "Sem item" e aviso com "Ver em E-mails" | Gravar o enviado sem item |
+| Registro sem item (7.3, 7.7) | Filtro "Sem item" e aviso com "Ver em Comunicações" | Gravar o enviado sem item |
 | Vincular e trocar depois (7.7) | "Vincular a um item", sugestões e "Trocar" na leitura | Rota para vincular e trocar o item de um e-mail |
 
 ### Fase 3 · Tarefa
@@ -1207,11 +1234,12 @@ No workspace novo, o texto do próximo passo muda com o perfil:
 
 | Ponto | Front | Back |
 |---|---|---|
-| Central "Comunicações" (7.10) | Nome e ícone; "Nova mensagem"; filtros por canal e "Não entregues"; colunas Canal e Entrega; leitura do SMS e do WhatsApp; "Histórico do envio" | Lista única com os 3 canais e a entrega |
+| Central "Comunicações" (7.10) | "Nova mensagem" com os 3 canais; filtros por canal e "Não entregues"; colunas Canal e Entrega; leitura do SMS e do WhatsApp; "Histórico do envio" | Lista única com os 3 canais e a entrega |
 | Status de entrega do e-mail (7.10) | Coluna Entrega, motivo e código na leitura | C1: guardar o id da SendGrid e os campos de entrega; rota pública do Event Webhook, com verificação da assinatura |
 | Modelos de WhatsApp (7.10) | Alternador na aba Modelos; tabela com o status na Meta; "Novo modelo de WhatsApp" | Guardar o modelo (Content SID e variáveis) e o status da aprovação |
 | Canais de envio do workspace (7.10) | Seção na aba Canais e regras | Ler o número e o estado da integração |
 | "Enviar pelo ENSPACE" no painel "Enviar SMS" (7.10) | Botão e campo do número | C2 |
+| Painel "Enviar WhatsApp" (5.7) | Painel com as abas "WhatsApp do workspace" e "Seu WhatsApp"; modelo, valores sugeridos pelo item, prévia; o atalho abre o painel só com a Twilio | C3: o envio por modelo aprovado de uma pessoa, com registro no item |
 | Nó "Enviar SMS" (7.11) | Nó, modal e cartão | C2: número de SMS na integração Twilio; envio sem o prefixo do WhatsApp; registro com status; o webhook de status já existe |
 | Nó "Enviar WhatsApp" (7.11) | Nó, modal, escolha do modelo e das variáveis | C3: o de C2 e o envio por modelo aprovado |
 | WhatsApp do atendimento na lista (7.10) | Linha e "Abrir a conversa no Atendimento" | Leitura das mensagens das conversas, com a permissão do atendente |
@@ -1290,7 +1318,7 @@ No workspace novo, o texto do próximo passo muda com o perfil:
 - O Salvar da Visão Geral grava no item (em memória). É o fim da jornada "Cadastrar e-mail".
 - Não tem cargo nem permissão de edição: "Cadastrar e-mail" aparece sempre (no produto, só para
   quem edita o campo).
-- O seletor "Perfil: Admin | Membro", na barra de baixo, mostra a central E-mails pelos 2 olhares.
+- O seletor "Perfil: Admin | Membro", na barra de baixo, mostra a central Comunicações pelos 2 olhares.
   O membro vê só a lista de mensagens, com "Sua conta de envio", sem o botão "Configurações" e sem
   a seção Configurações do menu. Em Mensagens, o membro não vê os e-mails do sistema, o filtro "Do sistema" nem a
   coluna Status. No produto, quem decide é a permissão de hoje de cada aba e dos e-mails enviados

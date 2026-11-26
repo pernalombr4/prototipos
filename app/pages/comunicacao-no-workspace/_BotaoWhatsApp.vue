@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /**
- * PROPOSTA. O botão de WhatsApp, igual em toda tela (rodada 10). Abre a
+ * PROPOSTA. O botão de WhatsApp, igual em toda tela (rodada 10). Com a Twilio (rodada 17), abre o
+ * painel com as 2 opções (`_PainelDoWhatsApp.vue`); sem ela, abre a
  * conversa com o telefone do destino e o texto pronto (`wa.me`). Sem telefone,
  * ou com telefone curto, fica indisponível e diz por quê: `aria-disabled`, não
  * `disabled`, para o botão continuar no Tab e o motivo chegar a quem usa
@@ -9,6 +10,8 @@
 import type { ItemDoProtótipo } from './mocks'
 import type { Textos } from './textos'
 import { type DestinoDoWhatsApp, useWhatsApp } from './atalhos'
+import { useComunicacao } from './estado'
+import { textosDeCanais } from './textosDeCanais'
 
 const props = withDefaults(defineProps<{
   t: Textos
@@ -29,10 +32,13 @@ const props = withDefaults(defineProps<{
 })
 
 const { motivoDoWhatsApp, abrirConversa } = useWhatsApp()
+const { fase, twilioLigado } = useComunicacao()
+const tc = useTextos(textosDeCanais)
 
 const motivo = computed(() => motivoDoWhatsApp(props.destino))
 const nome = computed(() => props.rotulo ?? props.t.whatsapp.rotulo)
-const dica = computed(() => motivo.value ?? props.t.whatsapp.dica)
+/** Rodada 17: com a Twilio, o botão abre as 2 opções; a dica diz isso. */
+const dica = computed(() => motivo.value ?? (fase.value >= 4 && twilioLigado.value ? tc.value.whatsappPainel.dicaDoBotao : props.t.whatsapp.dica))
 
 function abrir() {
   if (motivo.value) return
