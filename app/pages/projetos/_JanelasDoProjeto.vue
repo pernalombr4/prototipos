@@ -16,6 +16,7 @@ import { textosDoProjeto } from './textosDoProjeto'
 import { useMarcaDeProposta, useProjetos } from './estado'
 import { useMetasEDiscussoes } from './metasEDiscussoes'
 import { textosDeMarcosEMedicao } from './textosDeMarcosEMedicao'
+import { textosDaTarefa } from './textosDaTarefa'
 
 const prj = useProjetos()
 const r = useTextos(textosDoProjeto)
@@ -24,6 +25,7 @@ const { marca } = useMarcaDeProposta()
 /** Rodada 9: o campo Marco da nova tarefa. */
 const md = useMetasEDiscussoes()
 const tmm = useTextos(textosDeMarcosEMedicao)
+const tt = useTextos(textosDaTarefa)
 
 const ICONES = ['i-lucide-folder', 'i-lucide-receipt', 'i-lucide-file-text', 'i-lucide-hand-coins', 'i-lucide-calendar', 'i-lucide-users-round', 'i-lucide-briefcase', 'i-lucide-truck', 'i-lucide-target', 'i-lucide-workflow', 'i-lucide-zap', 'i-lucide-bell']
 
@@ -57,23 +59,25 @@ const opMarcosDaTarefa = computed(() => [
   { value: 0, label: tmm.value.marcos.semMarco },
   ...(projTarefa.value ? md.marcosDo(projTarefa.value.id).filter(m => m.status === 'aberto').map(m => ({ value: m.id, label: m.nome, icon: 'i-lucide-flag' })) : []),
 ])
-const itensDaCategoria = computed(() => {
-  const c = catsTarefa.value.find(x => x.id === tar.categoria)
-  if (!c) return []
-  const prefixo = c.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
-  return [0, 1, 2, 3].map(n => `${prefixo}${4210 - n * 17}`)
-})
+/** Rodada 10: o item é opcional no produto; categoria 0 é "Sem item" e a tarefa fica no projeto. */
+const itensDaCategoria = computed(() => tar.categoria ? prj.itensDaCategoria(tar.categoria) : [])
+const opCategoriasDaTarefa = computed(() => [
+  ...catsTarefa.value.map(c => ({ value: c.id, label: c.name, icon: c.icon })),
+  { value: 0, label: tt.value.novaTarefaSemItem, icon: 'i-lucide-circle-dashed' },
+])
 watch(abertaTarefa, (v) => {
   if (!v) return
   Object.assign(tar, { titulo: '', categoria: catsTarefa.value[0]?.id ?? 0, item: '', responsavel: prj.eu.value, prazo: '2026-11-30', prioridade: 'media', marco: 0 })
 })
 watch(() => tar.categoria, () => { tar.item = itensDaCategoria.value[0] ?? '' }, { immediate: true })
 const opPessoas = computed(() => pessoas.filter(x => !x.convidado).map(x => ({ value: x.id, label: x.nome })))
-const opPrioridade = computed(() => (['alta', 'media', 'baixa'] as Prioridade[]).map(x => ({ value: x, label: r.value.tarefas.prioridade[x] })))
+const opPrioridade = computed(() => (['urgente', 'alta', 'media', 'baixa'] as Prioridade[]).map(x => ({ value: x, label: r.value.tarefas.prioridade[x] })))
 function criarTarefa() {
-  prj.criarTarefa({ titulo: tar.titulo.trim(), categoria: tar.categoria, item: tar.item, responsavel: tar.responsavel, prazo: tar.prazo, prioridade: tar.prioridade })
-  if (tar.marco) md.definirMarcoDaTarefa(prj.tarefas.value[0]!.id, tar.marco)
   const p = projTarefa.value!
+  const id = prj.criarTarefa(tar.categoria
+    ? { titulo: tar.titulo.trim(), categoria: tar.categoria, item: tar.item, responsavel: tar.responsavel, prazo: tar.prazo, prioridade: tar.prioridade }
+    : { titulo: tar.titulo.trim(), categoria: null, item: null, projeto: p.id, responsavel: tar.responsavel, prazo: tar.prazo, prioridade: tar.prioridade })
+  if (tar.marco) md.definirMarcoDaTarefa(id, tar.marco)
   abertaTarefa.value = false
   toast.add({ title: r.value.novaTarefa.criada(tar.titulo.trim()), icon: 'i-lucide-check', color: 'success' })
   prj.abrirAba(p.id, 'tarefas')
@@ -134,14 +138,14 @@ function criarFluxo() {
   <!-- Nova tarefa -->
   <UModal v-model:open="abertaTarefa" :title="r.novaTarefa.titulo" :description="r.novaTarefa.descricao" :ui="{ content: 'max-w-lg' }">
     <template #body>
-      <form id="form-nova-tarefa" class="grid gap-4 sm:grid-cols-2" @submit.prevent="tar.titulo.trim() && tar.categoria && criarTarefa()">
+      <form id="form-nova-tarefa" class="grid gap-4 sm:grid-cols-2" @submit.prevent="tar.titulo.trim() && criarTarefa()">
         <UFormField :label="r.novaTarefa.tituloCampo" required class="sm:col-span-2">
           <UInput v-model="tar.titulo" :placeholder="r.novaTarefa.tituloPh" class="w-full" autofocus />
         </UFormField>
-        <UFormField :label="r.novaTarefa.categoria" required>
-          <USelect v-model="tar.categoria" :items="catsTarefa.map(c => ({ value: c.id, label: c.name, icon: c.icon }))" class="w-full" />
+        <UFormField :label="r.novaTarefa.categoria" :help="tar.categoria ? undefined : tt.novaTarefaSemItemDica" :class="tar.categoria ? '' : marca">
+          <USelect v-model="tar.categoria" :items="opCategoriasDaTarefa" class="w-full" />
         </UFormField>
-        <UFormField :label="r.novaTarefa.item" required>
+        <UFormField v-if="tar.categoria" :label="r.novaTarefa.item" required>
           <USelect v-model="tar.item" :items="itensDaCategoria" class="w-full" />
         </UFormField>
         <UFormField :label="r.novaTarefa.responsavel">
@@ -161,7 +165,7 @@ function criarFluxo() {
     <template #footer>
       <div class="flex w-full justify-end gap-2">
         <UButton :label="r.novaTarefa.cancelar" color="neutral" variant="ghost" @click="abertaTarefa = false" />
-        <UButton type="submit" form="form-nova-tarefa" :label="r.novaTarefa.criar" icon="i-lucide-square-check" :disabled="!tar.titulo.trim() || !tar.categoria" />
+        <UButton type="submit" form="form-nova-tarefa" :label="r.novaTarefa.criar" icon="i-lucide-square-check" :disabled="!tar.titulo.trim()" />
       </div>
     </template>
   </UModal>

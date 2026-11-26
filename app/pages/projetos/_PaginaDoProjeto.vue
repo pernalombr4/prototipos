@@ -30,6 +30,8 @@ import PainelDoProjeto from './_PainelDoProjeto.vue'
 import DiscussoesDoProjeto from './_DiscussoesDoProjeto.vue'
 import MarcosDoProjeto from './_MarcosDoProjeto.vue'
 import AbaMarcos from './_AbaMarcos.vue'
+import TarefaAberta from './_TarefaAberta.vue'
+import { textosDaTarefa } from './textosDaTarefa'
 import { textosDeMarcosEMedicao } from './textosDeMarcosEMedicao'
 import { useMetasEDiscussoes } from './metasEDiscussoes'
 import { textosDeMetasEDiscussoes } from './textosDeMetasEDiscussoes'
@@ -48,6 +50,7 @@ const r = useTextos(textosDoProjeto)
 const md = useMetasEDiscussoes()
 const tmd = useTextos(textosDeMetasEDiscussoes)
 const tmm = useTextos(textosDeMarcosEMedicao)
+const tt = useTextos(textosDaTarefa)
 const marcosAbertos = computed(() => md.marcosDo(props.id).filter(m => m.status === 'aberto').length)
 const discussoesAbertas = computed(() => md.discussoesDo(props.id).filter(d => d.status === 'aberta').length)
 const HOJE = '2026-11-26'
@@ -253,14 +256,16 @@ const abas = computed<TabsItem[]>(() => [
           <UButton :label="r.geral.verTodas" trailing-icon="i-lucide-arrow-right" size="xs" color="neutral" variant="outline" @click="aba = 'tarefas'" />
         </header>
         <ul v-if="tarefas.length" class="divide-y divide-default">
-          <li v-for="x in tarefas" :key="x.id" class="flex items-center gap-3 px-4 py-2.5">
+          <li v-for="x in tarefas" :key="x.id">
+            <button type="button" class="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-elevated/60 focus-visible:outline-2 focus-visible:outline-primary" @click="prj.tarefaAberta.value = x.id">
             <UIcon name="i-lucide-circle" class="size-4 shrink-0 text-muted" />
             <span class="min-w-0 flex-1">
               <span class="block truncate text-sm text-highlighted">{{ x.titulo }}</span>
-              <span class="block truncate text-xs text-muted">{{ prj.categorias.value.find(c => c.id === x.categoria)?.name }} · {{ x.item }}</span>
+              <span class="block truncate text-xs text-muted">{{ x.item ? `${prj.categorias.value.find(c => c.id === x.categoria)?.name} · ${x.item}` : tt.semItem }}</span>
             </span>
             <UBadge v-if="x.prazo < HOJE" :label="t.tarefas.atrasada" color="error" variant="subtle" size="sm" />
             <span class="shrink-0 text-xs text-muted">{{ formatarData(x.prazo) }}</span>
+            </button>
           </li>
         </ul>
         <p v-else class="px-4 py-8 text-center text-sm text-muted">{{ t.pagina.semTarefas }}</p>
@@ -283,5 +288,7 @@ const abas = computed<TabsItem[]>(() => [
         <p v-else class="px-4 py-8 text-center text-sm text-muted">{{ t.pagina.semAtividade }}</p>
       </section>
     </div>
+    <!-- rodada 10: a tarefa aberta, de qualquer lista do projeto -->
+    <TarefaAberta :id="id" />
   </div>
 </template>

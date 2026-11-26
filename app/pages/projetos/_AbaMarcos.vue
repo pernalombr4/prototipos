@@ -120,7 +120,7 @@ function excluir() {
   toast.add({ title: tm.value.excluido(m.nome), icon: 'i-lucide-trash-2', color: 'neutral' })
 }
 
-const COR_DO_STATUS = { aberta: 'neutral', andamento: 'info', concluida: 'success' } as const
+const COR_DO_STATUS = { aberta: 'neutral', andamento: 'info', bloqueada: 'warning', concluida: 'success' } as const
 </script>
 
 <template>
@@ -264,8 +264,8 @@ const COR_DO_STATUS = { aberta: 'neutral', andamento: 'info', concluida: 'succes
                     @click="prj.concluirTarefa(x.id)"
                   />
                 </UTooltip>
-                <span class="min-w-0 flex-1">
-                  <span class="block truncate text-sm" :class="x.status === 'concluida' ? 'text-muted line-through' : 'text-highlighted'">{{ x.titulo }}</span>
+                <span class="min-w-0 flex-1 cursor-pointer" role="button" tabindex="0" @click="prj.tarefaAberta.value = x.id" @keydown.enter="prj.tarefaAberta.value = x.id">
+                  <span class="block truncate text-sm hover:underline" :class="x.status === 'concluida' ? 'text-muted line-through' : 'text-highlighted'">{{ x.titulo }}</span>
                   <span class="block truncate text-xs text-muted">{{ pessoa(x.responsavel)?.nome }} · {{ data(x.prazo) }}</span>
                 </span>
                 <UBadge :label="rp.tarefas.status[x.status]" :color="COR_DO_STATUS[x.status]" variant="subtle" size="sm" />

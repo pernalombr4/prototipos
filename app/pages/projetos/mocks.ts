@@ -615,8 +615,8 @@ export const secaoComercial = {
 
    - Workflows: no formato da lista do Spaceflow (área do membro): ícone, nome, versão, status
      Ativo ou Inativo, descrição, o gatilho (trigger_ref) e a data de criação (código de 2026-11-26).
-   - Tarefas: as tarefas rápidas e as agendadas (criadas por workflow) dos itens das categorias do
-     projeto. O painel de tarefas de hoje já filtra por categoria.
+   - Tarefas: as tarefas rápidas dos itens das categorias do projeto (rodada 10: a tarefa agendada,
+     de workflow, saiu do protótipo de propósito). O painel de tarefas de hoje já filtra por categoria.
    - Dashboards: o painel do projeto junta os blocos do Painel de tarefas (catálogo do SDK) com os
      painéis de itens que o administrador monta, 1 categoria por painel, como na tela Paineis.
 ================================================================== */
@@ -641,49 +641,74 @@ export const detalhesDoFluxo: Record<number, DetalheDoFluxo> = {
   9: { descricao: 'Ocorrência marcada como grave avisa o fiscal da obra.', versao: '1.0.0', icone: 'i-lucide-siren', criadoEm: '2026-10-22' },
 }
 
-export type StatusDaTarefa = 'aberta' | 'andamento' | 'concluida'
-export type OrigemDaTarefa = 'rapida' | 'agendada'
-export type Prioridade = 'alta' | 'media' | 'baixa'
+/** Os 4 status da tarefa rápida no produto: pending (Pendente), working, blocked e completed. */
+export type StatusDaTarefa = 'aberta' | 'andamento' | 'bloqueada' | 'concluida'
+/** As 4 prioridades da tarefa rápida no produto: low, normal, high e urgent. */
+export type Prioridade = 'urgente' | 'alta' | 'media' | 'baixa'
+
+/** As etiquetas do workspace (no produto, as tags que a tarefa rápida já aceita). Valores inventados. */
+export interface Etiqueta { id: string, nome: string, cor: 'error' | 'warning' | 'info' | 'success' | 'neutral' | 'primary' }
+export const etiquetasBase: Etiqueta[] = [
+  { id: 'fiscal', nome: 'Fiscal', cor: 'warning' },
+  { id: 'fechamento', nome: 'Fechamento', cor: 'info' },
+  { id: 'cliente', nome: 'Pedido do cliente', cor: 'primary' },
+  { id: 'processo', nome: 'Processo interno', cor: 'neutral' },
+  { id: 'retrabalho', nome: 'Retrabalho', cor: 'error' },
+]
 
 export interface TarefaDoProjeto {
   id: number
   titulo: string
-  /** A categoria do item; o projeto sai da categoria. */
-  categoria: number
-  item: string
+  /** A categoria do item; o projeto sai da categoria. Null na tarefa sem item (o item é opcional no produto). */
+  categoria: number | null
+  /** A referência do item. A tarefa rápida liga a no máximo 1 item, e o item é opcional. */
+  item: string | null
+  /** Inventado (rodada 10): o projeto da tarefa sem item. A ligada a item fica no projeto da categoria. */
+  projeto?: number
   responsavel: number
   prazo: string
   status: StatusDaTarefa
   prioridade: Prioridade
-  /** Rápida (criada à mão) ou agendada (criada por um workflow). */
-  origem: OrigemDaTarefa
-  /** O workflow que criou a tarefa agendada. */
-  fluxo?: number
   criadaEm: string
+  /** No produto: description. */
+  descricao?: string
+  /** No produto: tag_ids (en-tags). */
+  etiquetas?: string[]
+  /** No produto: collaborators. */
+  colaboradores?: number[]
+  /** Inventado (rodada 10, back-end novo): a tarefa-mãe da subtarefa. 1 nível só. */
+  mae?: number
+  /** O campo `points` da tarefa rápida (existe no produto): soma nas subtarefas, como no pasta-de-apontamentos. */
+  pontos?: number
 }
 
 export const tarefasBase: TarefaDoProjeto[] = [
-  { id: 101, titulo: 'Aprovar pagamento', categoria: 4, item: 'CP4204', responsavel: 3, prazo: '2026-11-26', status: 'aberta', prioridade: 'alta', origem: 'agendada', fluxo: 1, criadaEm: '2026-11-24' },
-  { id: 102, titulo: 'Aprovar pagamento', categoria: 4, item: 'CP4187', responsavel: 3, prazo: '2026-11-24', status: 'aberta', prioridade: 'alta', origem: 'agendada', fluxo: 1, criadaEm: '2026-11-20' },
-  { id: 103, titulo: 'Conferir boleto da locação', categoria: 4, item: 'CP4170', responsavel: 1, prazo: '2026-11-28', status: 'andamento', prioridade: 'media', origem: 'rapida', criadaEm: '2026-11-22' },
-  { id: 104, titulo: 'Anexar comprovante de pagamento', categoria: 4, item: 'CP4153', responsavel: 5, prazo: '2026-11-21', status: 'concluida', prioridade: 'baixa', origem: 'rapida', criadaEm: '2026-11-18' },
-  { id: 105, titulo: 'Aprovar pagamento', categoria: 4, item: 'CP4136', responsavel: 2, prazo: '2026-11-30', status: 'aberta', prioridade: 'media', origem: 'agendada', fluxo: 1, criadaEm: '2026-11-25' },
-  { id: 106, titulo: 'Conferir nota de entrada', categoria: 5, item: 'NF4205', responsavel: 5, prazo: '2026-11-24', status: 'aberta', prioridade: 'alta', origem: 'rapida', criadaEm: '2026-11-19' },
-  { id: 107, titulo: 'Corrigir CFOP da nota', categoria: 5, item: 'NF4188', responsavel: 1, prazo: '2026-12-02', status: 'andamento', prioridade: 'media', origem: 'rapida', criadaEm: '2026-11-23' },
-  { id: 108, titulo: 'Lançar nota no ERP', categoria: 5, item: 'NF4171', responsavel: 5, prazo: '2026-11-20', status: 'concluida', prioridade: 'media', origem: 'agendada', fluxo: 3, criadaEm: '2026-11-12' },
-  { id: 109, titulo: 'Analisar reembolso', categoria: 6, item: 'RE4206', responsavel: 3, prazo: '2026-11-27', status: 'aberta', prioridade: 'media', origem: 'agendada', fluxo: 4, criadaEm: '2026-11-24' },
-  { id: 110, titulo: 'Pedir nota do almoço', categoria: 6, item: 'RE4189', responsavel: 5, prazo: '2026-11-25', status: 'andamento', prioridade: 'baixa', origem: 'rapida', criadaEm: '2026-11-21' },
-  { id: 111, titulo: 'Analisar reembolso', categoria: 6, item: 'RE4172', responsavel: 3, prazo: '2026-11-19', status: 'concluida', prioridade: 'media', origem: 'agendada', fluxo: 4, criadaEm: '2026-11-15' },
-  { id: 112, titulo: 'Fechar o mês de novembro', categoria: 4, item: 'CP4119', responsavel: 2, prazo: '2026-12-04', status: 'aberta', prioridade: 'alta', origem: 'rapida', criadaEm: '2026-11-25' },
-  { id: 201, titulo: 'Protocolar contestação', categoria: 8, item: 'PZ4204', responsavel: 7, prazo: '2026-11-27', status: 'andamento', prioridade: 'alta', origem: 'agendada', fluxo: 5, criadaEm: '2026-11-18' },
-  { id: 202, titulo: 'Revisar parecer', categoria: 9, item: 'PA4205', responsavel: 4, prazo: '2026-11-27', status: 'aberta', prioridade: 'media', origem: 'rapida', criadaEm: '2026-11-22' },
-  { id: 203, titulo: 'Preparar audiência', categoria: 7, item: 'PJ4203', responsavel: 4, prazo: '2026-11-23', status: 'aberta', prioridade: 'alta', origem: 'rapida', criadaEm: '2026-11-16' },
-  { id: 204, titulo: 'Protocolar recurso', categoria: 8, item: 'PZ4187', responsavel: 4, prazo: '2026-11-21', status: 'concluida', prioridade: 'alta', origem: 'agendada', fluxo: 5, criadaEm: '2026-11-10' },
-  { id: 301, titulo: 'Qualificar oportunidade', categoria: 10, item: 'OP4206', responsavel: 6, prazo: '2026-11-29', status: 'aberta', prioridade: 'media', origem: 'rapida', criadaEm: '2026-11-24' },
-  { id: 302, titulo: 'Enviar proposta revisada', categoria: 11, item: 'PC4207', responsavel: 12, prazo: '2026-11-25', status: 'andamento', prioridade: 'alta', origem: 'agendada', fluxo: 7, criadaEm: '2026-11-20' },
-  { id: 401, titulo: 'Validar medição de novembro', categoria: 12, item: 'ME4196', responsavel: 9, prazo: '2026-11-30', status: 'aberta', prioridade: 'alta', origem: 'agendada', fluxo: 8, criadaEm: '2026-11-25' },
-  { id: 402, titulo: 'Tratar infiltração no bloco B', categoria: 13, item: 'OC4213', responsavel: 9, prazo: '2026-11-24', status: 'andamento', prioridade: 'alta', origem: 'rapida', criadaEm: '2026-11-19' },
-  { id: 403, titulo: 'Instalar guarda-corpo', categoria: 13, item: 'OC4179', responsavel: 2, prazo: '2026-11-22', status: 'concluida', prioridade: 'alta', origem: 'agendada', fluxo: 9, criadaEm: '2026-11-17' },
+  { id: 101, titulo: 'Aprovar pagamento', categoria: 4, item: 'CP4204', responsavel: 3, prazo: '2026-11-26', status: 'aberta', prioridade: 'alta', criadaEm: '2026-11-24' },
+  { id: 102, titulo: 'Aprovar pagamento', categoria: 4, item: 'CP4187', responsavel: 3, prazo: '2026-11-24', status: 'aberta', prioridade: 'urgente', etiquetas: ['cliente'], criadaEm: '2026-11-20' },
+  { id: 103, titulo: 'Conferir boleto da locação', categoria: 4, item: 'CP4170', responsavel: 1, prazo: '2026-11-28', status: 'andamento', prioridade: 'media', criadaEm: '2026-11-22' },
+  { id: 104, titulo: 'Anexar comprovante de pagamento', categoria: 4, item: 'CP4153', responsavel: 5, prazo: '2026-11-21', status: 'concluida', prioridade: 'baixa', criadaEm: '2026-11-18' },
+  { id: 105, titulo: 'Aprovar pagamento', categoria: 4, item: 'CP4136', responsavel: 2, prazo: '2026-11-30', status: 'aberta', prioridade: 'media', criadaEm: '2026-11-25' },
+  { id: 106, titulo: 'Conferir nota de entrada', categoria: 5, item: 'NF4205', responsavel: 5, prazo: '2026-11-24', status: 'aberta', prioridade: 'alta', etiquetas: ['fiscal'], descricao: 'Comparar a nota com o pedido de compra e o recebimento no estoque.', criadaEm: '2026-11-19' },
+  { id: 107, titulo: 'Corrigir CFOP da nota', categoria: 5, item: 'NF4188', responsavel: 1, prazo: '2026-12-02', status: 'andamento', prioridade: 'media', etiquetas: ['fiscal', 'retrabalho'], colaboradores: [5], criadaEm: '2026-11-23' },
+  { id: 108, titulo: 'Lançar nota no ERP', categoria: 5, item: 'NF4171', responsavel: 5, prazo: '2026-11-20', status: 'concluida', prioridade: 'media', criadaEm: '2026-11-12' },
+  { id: 109, titulo: 'Analisar reembolso', categoria: 6, item: 'RE4206', responsavel: 3, prazo: '2026-11-27', status: 'aberta', prioridade: 'media', criadaEm: '2026-11-24' },
+  { id: 110, titulo: 'Pedir nota do almoço', categoria: 6, item: 'RE4189', responsavel: 5, prazo: '2026-11-25', status: 'bloqueada', descricao: 'O restaurante ainda não emitiu a nota. Aguardando o retorno.', prioridade: 'baixa', criadaEm: '2026-11-21' },
+  { id: 111, titulo: 'Analisar reembolso', categoria: 6, item: 'RE4172', responsavel: 3, prazo: '2026-11-19', status: 'concluida', prioridade: 'media', criadaEm: '2026-11-15' },
+  { id: 112, titulo: 'Fechar o mês de novembro', categoria: 4, item: 'CP4119', responsavel: 2, prazo: '2026-12-04', status: 'aberta', prioridade: 'alta', etiquetas: ['fechamento'], descricao: 'Fechar o mês com o extrato conciliado, as provisões conferidas e o relatório na diretoria.', colaboradores: [3, 5], criadaEm: '2026-11-25' },
+  // Rodada 10: subtarefas e tarefa sem item (inventado: a subtarefa pede back-end novo)
+  { id: 113, titulo: 'Conciliar o extrato bancário', categoria: null, item: null, projeto: 1, mae: 112, pontos: 3, responsavel: 3, prazo: '2026-11-28', status: 'concluida', prioridade: 'alta', etiquetas: ['fechamento'], criadaEm: '2026-11-25' },
+  { id: 114, titulo: 'Conferir as provisões', categoria: null, item: null, projeto: 1, mae: 112, pontos: 5, responsavel: 2, prazo: '2026-12-01', status: 'andamento', prioridade: 'media', etiquetas: ['fechamento'], criadaEm: '2026-11-25' },
+  { id: 115, titulo: 'Enviar o relatório à diretoria', categoria: null, item: null, projeto: 1, mae: 112, pontos: 2, responsavel: 2, prazo: '2026-12-04', status: 'aberta', prioridade: 'media', criadaEm: '2026-11-25' },
+  { id: 116, titulo: 'Revisar a política de reembolso', categoria: null, item: null, projeto: 1, responsavel: 1, prazo: '2026-12-10', status: 'aberta', prioridade: 'baixa', etiquetas: ['processo'], descricao: 'Atualizar o limite de refeição e o prazo para enviar a nota.', criadaEm: '2026-11-26' },
+  { id: 201, titulo: 'Protocolar contestação', categoria: 8, item: 'PZ4204', responsavel: 7, prazo: '2026-11-27', status: 'andamento', prioridade: 'alta', criadaEm: '2026-11-18' },
+  { id: 202, titulo: 'Revisar parecer', categoria: 9, item: 'PA4205', responsavel: 4, prazo: '2026-11-27', status: 'aberta', prioridade: 'media', criadaEm: '2026-11-22' },
+  { id: 203, titulo: 'Preparar audiência', categoria: 7, item: 'PJ4203', responsavel: 4, prazo: '2026-11-23', status: 'aberta', prioridade: 'alta', criadaEm: '2026-11-16' },
+  { id: 204, titulo: 'Protocolar recurso', categoria: 8, item: 'PZ4187', responsavel: 4, prazo: '2026-11-21', status: 'concluida', prioridade: 'alta', criadaEm: '2026-11-10' },
+  { id: 301, titulo: 'Qualificar oportunidade', categoria: 10, item: 'OP4206', responsavel: 6, prazo: '2026-11-29', status: 'aberta', prioridade: 'media', criadaEm: '2026-11-24' },
+  { id: 302, titulo: 'Enviar proposta revisada', categoria: 11, item: 'PC4207', responsavel: 12, prazo: '2026-11-25', status: 'andamento', prioridade: 'alta', criadaEm: '2026-11-20' },
+  { id: 401, titulo: 'Validar medição de novembro', categoria: 12, item: 'ME4196', responsavel: 9, prazo: '2026-11-30', status: 'aberta', prioridade: 'alta', criadaEm: '2026-11-25' },
+  { id: 402, titulo: 'Tratar infiltração no bloco B', categoria: 13, item: 'OC4213', responsavel: 9, prazo: '2026-11-24', status: 'andamento', prioridade: 'alta', criadaEm: '2026-11-19' },
+  { id: 403, titulo: 'Instalar guarda-corpo', categoria: 13, item: 'OC4179', responsavel: 2, prazo: '2026-11-22', status: 'concluida', prioridade: 'alta', criadaEm: '2026-11-17' },
 ]
 
 /** Do legado da tela Paineis: os tipos de gráfico do painel de itens. */

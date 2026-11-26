@@ -516,3 +516,91 @@ O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras 
   - O detector de seta passou nas 5. A meta automática vista pela proprietária rola dentro do painel, e o detector
     marca a barra de rolagem (o falso positivo das rodadas 6 a 8); a captura saiu, e a da participante, que cabe sem
     rolagem, entrou no lugar.
+
+## Rodada 10 · 2026-11-26
+- **Pedido (literal), com os prints de um GitHub Project:**
+  - quadro na aba Tarefas, além da lista;
+  - "faz sentido valer somente para tarefa rápidas, esqueça as agendadas [...] pode tirar a ideia de tarefas
+    agendadadas de todo o prototipo";
+  - usar os conceitos do GitHub Project e da issue para amarrar as entidades e a usabilidade: barra lateral editável,
+    relacionamentos, sub-issues, item e tarefa, o menu de adicionar, as visões tabela, quadro e roadmap;
+  - "é importante que voce leia a docuemntaçao do github pra entender melhor esses relacionametnos e a interatividade
+    pratica tambem";
+  - e, no meio da rodada: "naquele prototipo de tarefas que voce olhou, um que ta no meu repo no github, tem a ideia
+    de subtarefas. veja se voce fez igual, ok? pq é pra seguirem a mesma logica. pq aí quando colocarem em pratica
+    aquele prototipo a subtask será criada e depois da pra reutilizar aí".
+- **Pesquisa:** `pesquisa-de-mercado/runs/2026-11-26-github-projects-issues-relacoes/RELATORIO.md` (documentação do
+  GitHub sobre Projects, issues, sub-issues, dependências e campos). Dela vieram 4 decisões:
+  - o rascunho do GitHub (item sem repositório, que vira issue depois) é a tarefa sem item;
+  - campo da issue mora na issue e campo do projeto só no projeto: a barra lateral da tarefa separa "Da tarefa" de
+    "Neste projeto";
+  - o rodapé "+" do quadro do GitHub (digitar e Enter cria o rascunho) é o rodapé da tabela;
+  - arrastar no quadro grava o valor da coluna.
+- **De-para GitHub → ENSPACE:**
+
+  | GitHub | ENSPACE neste protótipo |
+  |---|---|
+  | Project | Projeto |
+  | Issue | Tarefa rápida |
+  | Draft issue | Tarefa sem item, só no projeto |
+  | Repositório da issue | Item vinculado (categoria) |
+  | Assignees | Responsável e Colaboradores |
+  | Labels | Etiquetas |
+  | Milestone | Marco (campo do projeto) |
+  | Sub-issue | Subtarefa |
+  | Pull request | Os itens das categorias (aba Itens) |
+  | Table, Board | Tabela, Quadro |
+  | Roadmap | Fica em aberto |
+
+- **Só tarefa rápida:** a tarefa agendada saiu do protótipo (coluna Origem, coluna Tipo, filtro e textos). O item
+  "Agendadas" do menu atual fica, porque é a casca copiada do produto (regra 37).
+- **Quadro:** o `EnKanbanBoard` do SDK, com 1 coluna por status (Pendente, Em andamento, Bloqueada, Concluída).
+  - Arrastar o cartão grava o status; "Enviar para" no menu do cartão faz o mesmo sem arrastar.
+  - O cartão mostra o responsável, a data limite e 2 etiquetas: o item (ou "Sem item") e a divisão ("1/3" na mãe,
+    "Subtarefa" na subtarefa, com o nome da mãe na dica).
+  - O cartão do SDK tem altura fixa: a descrição não cabia junto das etiquetas e saiu do cartão. O título sai com
+    cada palavra em maiúscula (comportamento do SDK).
+  - "Arquivar" no menu do cartão só mostra um aviso de maquete.
+- **A tarefa abre num painel lateral** (clique na linha ou no cartão), no modelo da issue:
+  - à esquerda: título e descrição editáveis, Subtarefas e Relacionamentos (item vinculado, com "Abrir na categoria",
+    e a tarefa-mãe);
+  - à direita, **Da tarefa:** Responsável, Colaboradores, Status, Prioridade, Data limite, Pontos, Etiquetas e Item
+    (no máximo 1);
+  - à direita, **Neste projeto:** Projeto (só leitura: vem da categoria do item, ou é o projeto da tarefa sem item) e
+    Marco (só o administrador do projeto troca);
+  - menu "⋯": Copiar link e Excluir tarefa.
+- **Subtarefas, iguais às do protótipo `pasta-de-apontamentos`** (rodadas 2 e 5 de lá), para o dev construir 1 vez e
+  usar nos 2 lugares:
+  - o mesmo campo novo `parent` (aqui `mae`), 1 nível só: a subtarefa não tem subtarefas;
+  - a subtarefa é uma tarefa rápida inteira, com responsável, data, prioridade e pontos;
+  - a linha de criação igual: título, responsável, data, prioridade e pontos; Enter salva e deixa a linha aberta; Esc
+    cancela;
+  - "Vincular tarefa existente" (tarefa do projeto, sem mãe e sem subtarefas) e "Desvincular";
+  - contagem "1 de 3 concluídas" e a soma dos pontos;
+  - na lista e no quadro, a subtarefa só aparece com "Mostrar subtarefas como cartões" ligado; a mãe mostra
+    "Subtarefas: 1 de 3" e a subtarefa, "Parte de <mãe>";
+  - concluir a mãe com subtarefa aberta oferece concluir as abertas, num aviso com o botão;
+  - os textos são os de lá, nos 3 idiomas.
+  - O bloqueio entre tarefas fica no `pasta-de-apontamentos` e não entrou aqui.
+- **Tarefa rápida no rodapé da tabela:** digitar o título e Enter cria a tarefa sem item no projeto, com a pessoa como
+  responsável e a data de hoje. "Tarefa num item" abre a janela Nova tarefa.
+- **Do produto (lido no código do ENSPACE):** a tarefa rápida tem status, prioridade, responsável, colaboradores, data
+  limite, descrição, etiquetas, pontos e até 1 item. Não tem tarefa-mãe nem relacionamento com outra tarefa.
+- **Inventado (pede back-end novo):** a tarefa-mãe (`parent`), o projeto da tarefa sem item e o marco da tarefa.
+- **Fronteira:** mudam a aba Tarefas do projeto (Tabela e Quadro, subtarefas, rodapé) e o painel da tarefa, que é
+  novo. A casca, a Visão geral, Itens, Marcos, Discussões, Automações e Metas ficam como na rodada 9.
+- **Não provado:** o gesto de arrastar o cartão. A extensão do Chrome não dispara o arraste do quadro do SDK; o
+  "Enviar para", que chama a mesma função, foi testado e move o cartão.
+- **Em aberto:**
+  - a visão Roadmap (tarefas numa linha do tempo pelas datas);
+  - "Adicionar tarefa existente" no rodapé, como o "Add item from repository" do GitHub;
+  - converter a tarefa sem item em item de uma categoria, como o rascunho que vira issue.
+- **Ver:** https://pernalombr4.github.io/prototipos/projetos
+  - `evidencias/entrega-r10-tarefa-com-subtarefas.png`: a tarefa aberta, com 3 subtarefas, os pontos e a barra
+    lateral em "Da tarefa" e "Neste projeto";
+  - `evidencias/entrega-r10-quadro-de-tarefas.png`: o quadro com a busca "fe" e as subtarefas ligadas, mostrando
+    "1/3" na mãe e "Subtarefa" no cartão da subtarefa;
+  - `evidencias/entrega-r10-subtarefa-em-ingles.png`: a subtarefa aberta em inglês, com "Part of" e a tarefa-mãe em
+    Relationships.
+  - O detector de seta passou nas 3. O quadro sem busca rola a página, e o detector marca a barra de rolagem (o falso
+    positivo das rodadas 6 a 9); a captura saiu, e a com busca, que cabe sem rolagem, entrou no lugar.

@@ -20,6 +20,7 @@ import { useDashboardLayout } from '@be-enlighten/enspace-sdk-ui/base'
 import type { BlocoDeTarefas, DashboardDoProjeto, PainelDeItens, TarefaDoProjeto } from './mocks'
 import { iniciais, pessoa } from './mocks'
 import { textosDoProjeto } from './textosDoProjeto'
+import { textosDaTarefa } from './textosDaTarefa'
 import { useMarcaDeProposta, useProjetos } from './estado'
 
 const props = defineProps<{
@@ -36,6 +37,7 @@ const emit = defineEmits<{ concluir: [], limpar: [] }>()
 
 const prj = useProjetos()
 const r = useTextos(textosDoProjeto)
+const tt = useTextos(textosDaTarefa)
 const rp = computed(() => r.value.painel)
 const idioma = useIdioma()
 const { marcaBack } = useMarcaDeProposta()
@@ -103,6 +105,7 @@ const kpi = computed<Record<string, number>>(() => ({
 const porStatus = computed<EnChartBarListItem[]>(() => [
   { key: 'aberta', label: r.value.tarefas.status.aberta, value: abertas.value.filter(x => x.status === 'aberta').length, color: 'var(--ui-color-neutral-400)' },
   { key: 'andamento', label: r.value.tarefas.status.andamento, value: abertas.value.filter(x => x.status === 'andamento').length, color: 'var(--ui-color-info-500)' },
+  { key: 'bloqueada', label: r.value.tarefas.status.bloqueada, value: abertas.value.filter(x => x.status === 'bloqueada').length, color: 'var(--ui-color-warning-500)' },
 ])
 const carga = computed<EnChartBarListItem[]>(() => {
   const conta = new Map<number, number>()
@@ -135,7 +138,7 @@ function serie(i: PainelDeItens) {
   return MESES.map((m, k) => ({ x: new Date(`${m}-15T12:00:00`).toLocaleDateString(idioma.value, { month: 'short' }), valor: Math.round(total / 6 * (0.7 + ((k * 37) % 9) / 15)) }))
 }
 const foraDoFiltro = (i: PainelDeItens) => props.categoria !== null && props.categoria !== i.categoria
-const nomeDaCategoria = (id: number) => prj.categorias.value.find(c => c.id === id)?.name ?? ''
+const nomeDaCategoria = (id: number | null) => prj.categorias.value.find(c => c.id === id)?.name ?? ''
 
 /* ---------- menus dos painéis ---------- */
 function menuDeTarefas(): DropdownMenuItem[][] | undefined {
@@ -202,7 +205,7 @@ function menuDeItens(i: PainelDeItens): DropdownMenuItem[][] | undefined {
                 <UAvatar size="2xs" :text="iniciais(pessoa(x.responsavel)?.nome ?? '')" :alt="pessoa(x.responsavel)?.nome" />
                 <span class="min-w-0 flex-1">
                   <span class="block truncate text-sm text-highlighted">{{ x.titulo }}</span>
-                  <span class="block truncate text-xs text-muted">{{ x.item }} · {{ nomeDaCategoria(x.categoria) }}</span>
+                  <span class="block truncate text-xs text-muted">{{ x.item ? `${x.item} · ${nomeDaCategoria(x.categoria)}` : tt.semItem }}</span>
                 </span>
                 <span class="shrink-0 text-xs" :class="x.prazo < HOJE ? 'font-medium text-error' : 'text-muted'">{{ formatarData(x.prazo) }}</span>
               </li>
