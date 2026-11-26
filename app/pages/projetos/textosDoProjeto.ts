@@ -8,6 +8,7 @@ const pt = {
   menu: {
     adicionar: 'Adicionar ao projeto',
     adicionarEm: (nome: string) => `Adicionar em ${nome}`,
+    adicionar: 'Adicionar',
     grupoCategoria: 'Categoria',
     novaCategoria: 'Nova categoria',
     novaCategoriaDica: 'Nasce dentro do projeto',
@@ -199,6 +200,7 @@ const en: TextosDoProjeto = {
   menu: {
     adicionar: 'Add to project',
     adicionarEm: (nome: string) => `Add to ${nome}`,
+    adicionar: 'Add',
     grupoCategoria: 'Category',
     novaCategoria: 'New category',
     novaCategoriaDica: 'Created inside the project',
@@ -388,6 +390,7 @@ const es: TextosDoProjeto = {
   menu: {
     adicionar: 'Agregar al proyecto',
     adicionarEm: (nome: string) => `Agregar en ${nome}`,
+    adicionar: 'Agregar',
     grupoCategoria: 'Categoría',
     novaCategoria: 'Nueva categoría',
     novaCategoriaDica: 'Se crea dentro del proyecto',

@@ -103,7 +103,7 @@ const abas = computed<TabsItem[]>(() => [
 </script>
 
 <template>
-  <div ref="raiz" class="mx-auto w-full max-w-6xl px-6 py-5" :class="marca">
+  <div ref="raiz" class="mx-auto w-full max-w-screen-2xl px-8 py-5" :class="marca">
     <!-- arquivado -->
     <UAlert
       v-if="p.status === 'arquivado'"
@@ -179,7 +179,7 @@ const abas = computed<TabsItem[]>(() => [
           </UTooltip>
           <UButton v-if="admin && categorias.length" :label="t.painel.adicionarCategoria" icon="i-lucide-plus" size="xs" color="neutral" variant="outline" @click="configurar('categorias')" />
         </header>
-        <div v-if="categorias.length" class="grid gap-2 p-3 sm:grid-cols-2">
+        <div v-if="categorias.length" class="grid gap-2 p-3 sm:grid-cols-2 2xl:grid-cols-3">
           <button
             v-for="c in categorias"
             :key="c.id"

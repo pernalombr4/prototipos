@@ -335,3 +335,22 @@ O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras 
   - `evidencias/entrega-r5-personalizar.png`, `entrega-r5-adicionar-painel.png` e
     `entrega-r5-novo-painel-de-itens.png`: personalizar e montar um painel de itens;
   - `evidencias/entrega-r5-paineis-de-itens-escuro.png`: tema escuro, com a marca do que pede back-end.
+
+## Rodada 6 · 2026-11-26
+- **Pedido (literal):** "as opçoes do botão "+" tambem devem aparecer quando clicar nos 3 pontinhos. o "+" é só
+  atalho." e "ta muito apertado. dá pra aumentar a largura de tudo aí. ta esquisito com muito espaço sobrando."
+- **Mudou:**
+  - o "•••" da linha do projeto abre com "Adicionar", um submenu com a mesma lista do "+" (Categoria: Nova
+    categoria e Categoria do workspace; Trabalho: Nova tarefa, Novo painel e Novo Workflow), como o "Criar novo"
+    do menu do espaço no ClickUp; vale no painel Projetos e no menu atual, e quem participa sem administrar vê
+    só Nova tarefa;
+  - a lista mora num lugar só (`adicionarAoProjeto.ts`), e o "+" virou o atalho dela;
+  - a página do projeto passou de 1152 px para até 1536 px de largura, com margem lateral maior; os cartões de
+    categoria vão a 3 por linha em tela larga.
+- **Fronteira:** muda o "•••" do projeto e a largura da página do projeto. O resto fica como na rodada 5.
+- **Ver:** https://pernalombr4.github.io/prototipos/projetos
+  - `evidencias/entrega-r6-acoes-com-adicionar.png`: o "•••" com o submenu Adicionar aberto;
+  - `evidencias/entrega-r6-pagina-larga.png`: a Visão geral na largura nova.
+  - O detector de seta marca as 2 capturas no topo da barra de rolagem da página (1565,52 com a página no topo e
+    1565,103 com ela rolada); a marca acompanha a barra e a imagem não tem ponteiro. Falso positivo a confirmar com
+    a redatora; o ajuste do detector fica fora deste repositório.

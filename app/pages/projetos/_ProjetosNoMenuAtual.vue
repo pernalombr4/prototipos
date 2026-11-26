@@ -16,6 +16,7 @@ import type { Textos } from './textos'
 import type { Projeto } from './mocks'
 import ConteudoDoProjeto from './_ConteudoDoProjeto.vue'
 import AdicionarAoProjeto from './_AdicionarAoProjeto.vue'
+import { useAdicionarAoProjeto } from './adicionarAoProjeto'
 import { COR_DO_PROJETO, ICONE_DA_VISIBILIDADE, PONTO_DA_SITUACAO, useMarcaDeProposta, useProjetos } from './estado'
 
 const props = defineProps<{ t: Textos }>()
@@ -34,8 +35,11 @@ function alternar(id: number) {
 const projetoAtivo = computed(() => tela.value.tipo === 'projeto' ? tela.value.id : null)
 const categoriaAtiva = computed(() => tela.value.tipo === 'categoria' ? tela.value.id : null)
 
+const adicionar = useAdicionarAoProjeto()
+
 function acoesDoProjeto(p: Projeto): DropdownMenuItem[][] {
   return [
+    ...adicionar.grupoDoMenu(p),
     [
       { label: props.t.painel.abrirPagina, icon: 'i-lucide-panel-top', onSelect: () => prj.abrirProjeto(p.id) },
       ...(prj.podeAdministrar(p)
