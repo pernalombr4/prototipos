@@ -575,6 +575,16 @@ clientes usa Microsoft. A pesquisa está em `PESQUISA.md`, "SMS no computador".
   épico 2 (RN903, RN905, RN105; partes 1 e 2) e o documento do botão no cartão (RF009). Os prints
   estão em `evidencias/requisitos/`.
 
+## Rodada 15 · 2026-11-26 (filtro em toda coluna da central)
+
+- **Pedido (literal):** "a coluna canal em comunicaoçes tem que ter filtro tambem. todas as colunas devem ter. tem coluna aí sem filtro ainda."
+- **Mudou no protótipo:**
+  - aba Mensagens: Canal, Saiu por, Status e Entrega ganham o filtro de seleção; Status e Entrega têm também "Sem valor (-)", para as linhas sem status ou sem entrega;
+  - coluna Data: o funil abre o período da barra (Todo o período, Hoje, Últimos 7 dias, Últimos 30 dias), 1 opção por vez, e os 2 ficam iguais. No develop, a data se filtra só pela barra;
+  - abas Modelos (e-mail e WhatsApp) e Caixas de E-mail: toda coluna ganha o funil. Texto em Nome, Assunto, Texto e E-mail; seleção em "Usar remetente por domínio", Categoria, Idioma, Variáveis, Status na Meta e Provedor;
+  - a coluna que sai da tabela (Canal e Entrega fora da Fase 4; Status e Entrega no perfil Membro) leva o filtro junto.
+- **Fronteira:** muda só o cabeçalho das tabelas da central.
+
 ## Rodada 14 · 2026-11-26 (a central de comunicações e os nós de mensagem do Spaceflow)
 
 - **Pedido (literal):** "sim, põe as 5 melhorias na central / mas voce nao deve prototipar só o "por enquanto", se dá pra cehgar num desenho final, deixe na proposta completa o lugar onde queremos chegar. / pode fazer até os nós do spaceflow em abas separadas do prototipo. pode colocar la o que for neessario e fazer a central ser a central de comunicaçoes em geral guardando sms, wpp e email conforme suas recomendaçoes".

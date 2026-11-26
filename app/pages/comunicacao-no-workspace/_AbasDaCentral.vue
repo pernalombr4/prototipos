@@ -31,6 +31,8 @@ import { type AbaDaCentral, useComunicacao, useMarcaDeProposta } from './estado'
 import { useAppExterno } from './simulador'
 import TabelaDoEnspace from './_TabelaDoEnspace.vue'
 import Paginador from './_Paginador.vue'
+import FiltroDeColuna, { type Filtros } from './_FiltroDeColuna.vue'
+import { passaNosFiltros } from './filtroPorColuna'
 
 const props = defineProps<{ t: Textos, aba: Exclude<AbaDaCentral, 'mensagens'> }>()
 
@@ -51,12 +53,16 @@ function maquete() {
 const busca = ref('')
 const pagina = ref(1)
 const porPagina = ref(25)
-watch(() => props.aba, () => { busca.value = ''; pagina.value = 1 })
-watch(busca, () => { pagina.value = 1 })
+/** Rodada 15: toda coluna tem o funil do cabeçalho, como na aba Mensagens. */
+const filtros = ref<Filtros>({})
+watch(() => props.aba, () => { busca.value = ''; filtros.value = {}; pagina.value = 1 })
+watch([busca, filtros], () => { pagina.value = 1 })
 
-function daBusca<T extends Record<string, any>>(lista: T[], campos: (keyof T)[]) {
+function daBusca<T extends Record<string, any>>(lista: T[], campos: (keyof T)[], valor: (x: T, campo: string) => string) {
   const q = busca.value.trim().toLowerCase()
-  return q ? lista.filter(x => campos.some(c => String(x[c] ?? '').toLowerCase().includes(q))) : lista
+  return lista
+    .filter(x => !q || campos.some(c => String(x[c] ?? '').toLowerCase().includes(q)))
+    .filter(x => passaNosFiltros(filtros.value, c => valor(x, c)))
 }
 function daPagina<T>(lista: T[]) {
   return lista.slice((pagina.value - 1) * porPagina.value, pagina.value * porPagina.value)
@@ -64,7 +70,12 @@ function daPagina<T>(lista: T[]) {
 
 /* ---------- Modelos ---------- */
 
-const modelosFiltrados = computed(() => daBusca(modelosDoWorkspace.value, ['nome', 'assunto']))
+function valorDoModelo(m: ModeloDeEmail, campo: string) {
+  if (campo === 'remetente') return m.remetentePorDominio ? 'sim' : 'nao'
+  return String(m[campo as keyof ModeloDeEmail] ?? '')
+}
+const modelosFiltrados = computed(() => daBusca(modelosDoWorkspace.value, ['nome', 'assunto'], valorDoModelo))
+const opcoesSimNao = computed(() => [{ value: 'sim', label: tc.value.sim }, { value: 'nao', label: tc.value.nao }])
 const colunasDeModelos = computed<TableColumn<ModeloDeEmail>[]>(() => [
   { accessorKey: 'nome', header: tc.value.col.nome },
   { accessorKey: 'assunto', header: tc.value.col.assunto },
@@ -84,13 +95,23 @@ function acoesDoModelo(m: ModeloDeEmail): DropdownMenuItem[][] {
 
 const tipoDeModelo = ref<'email' | 'whatsapp'>('email')
 watch(todosOsCanais, (v) => { if (!v) tipoDeModelo.value = 'email' })
-watch(tipoDeModelo, () => { busca.value = ''; pagina.value = 1 })
+watch(tipoDeModelo, () => { busca.value = ''; filtros.value = {}; pagina.value = 1 })
 const opcoesDeTipoDeModelo = computed(() => [
   { value: 'email', label: tk.value.modelosDeEmail, icon: 'i-lucide-mail' },
   { value: 'whatsapp', label: tk.value.modelosDeWhatsApp, icon: 'i-simple-icons-whatsapp' },
 ])
 const modelosWhatsAppDoWorkspace = computed(() => dados.value === 'novo' || !twilioLigado.value ? [] : modelosDeWhatsApp)
-const modelosWhatsAppFiltrados = computed(() => daBusca(modelosWhatsAppDoWorkspace.value, ['nome', 'corpo']))
+function valorDoModeloWhatsApp(m: ModeloDeWhatsApp, campo: string) {
+  if (campo === 'variaveis') return String(variaveisDoModelo(m))
+  if (campo === 'statusMeta') return m.status
+  return String(m[campo as keyof ModeloDeWhatsApp] ?? '')
+}
+const modelosWhatsAppFiltrados = computed(() => daBusca(modelosWhatsAppDoWorkspace.value, ['nome', 'corpo'], valorDoModeloWhatsApp))
+const opcoesDeCategoriaMeta = computed(() => (['utilidade', 'marketing'] as const).map(c => ({ value: c, label: tk.value.categoriaMeta[c] })))
+const opcoesDeIdioma = computed(() => [...new Set(modelosWhatsAppDoWorkspace.value.map(m => m.idioma))].sort().map(i => ({ value: i, label: i })))
+const opcoesDeVariaveis = computed(() => [...new Set(modelosWhatsAppDoWorkspace.value.map(m => variaveisDoModelo(m)))].sort((a, b) => a - b)
+  .map(n => ({ value: String(n), label: String(n) })))
+const opcoesDeStatusMeta = computed(() => (['aprovado', 'emAnalise', 'recusado'] as const).map(st => ({ value: st, label: tk.value.statusMeta[st], icon: ICONE_DO_STATUS_META[st] })))
 const colunasDeModelosWhatsApp = computed<TableColumn<ModeloDeWhatsApp>[]>(() => [
   { accessorKey: 'nome', header: tk.value.colModelo.nome },
   { accessorKey: 'corpo', header: tk.value.previaDoModelo },
@@ -117,7 +138,12 @@ const modelosAprovados = computed(() => modelosWhatsAppDoWorkspace.value.filter(
 
 /* ---------- Caixas ---------- */
 
-const caixasFiltradas = computed(() => daBusca(caixasDoWorkspace.value, ['nome', 'email']))
+function valorDaCaixa(c: CaixaDeEmail, campo: string) {
+  if (campo === 'provedor') return DOMINIO_DAS_CAIXAS
+  return String(c[campo as keyof CaixaDeEmail] ?? '')
+}
+const caixasFiltradas = computed(() => daBusca(caixasDoWorkspace.value, ['nome', 'email'], valorDaCaixa))
+const opcoesDeProvedor = computed(() => [{ value: DOMINIO_DAS_CAIXAS, label: DOMINIO_DAS_CAIXAS }])
 const colunasDeCaixas = computed<TableColumn<CaixaDeEmail>[]>(() => [
   { accessorKey: 'nome', header: tc.value.col.nome },
   { accessorKey: 'email', header: tc.value.col.email },
@@ -206,6 +232,42 @@ function integrar() {
           :get-row-id="(m: ModeloDeWhatsApp) => m.id"
           @select="maquete"
         >
+          <template #nome-header>
+            <div class="flex w-full items-center justify-start gap-1">
+              <span class="truncate">{{ tk.colModelo.nome }}</span>
+              <FiltroDeColuna v-model="filtros" class="ml-2" :t="t" campo="nome" :rotulo="tk.colModelo.nome" tipo="texto" />
+            </div>
+          </template>
+          <template #corpo-header>
+            <div class="flex w-full items-center justify-start gap-1">
+              <span class="truncate">{{ tk.previaDoModelo }}</span>
+              <FiltroDeColuna v-model="filtros" class="ml-2" :t="t" campo="corpo" :rotulo="tk.previaDoModelo" tipo="texto" />
+            </div>
+          </template>
+          <template #categoria-header>
+            <div class="flex w-full items-center justify-start gap-1">
+              <span class="truncate">{{ tk.colModelo.categoria }}</span>
+              <FiltroDeColuna v-model="filtros" class="ml-2" :t="t" campo="categoria" :rotulo="tk.colModelo.categoria" tipo="selecao" :opcoes="opcoesDeCategoriaMeta" />
+            </div>
+          </template>
+          <template #idioma-header>
+            <div class="flex w-full items-center justify-start gap-1">
+              <span class="truncate">{{ tk.colModelo.idioma }}</span>
+              <FiltroDeColuna v-model="filtros" class="ml-2" :t="t" campo="idioma" :rotulo="tk.colModelo.idioma" tipo="selecao" :opcoes="opcoesDeIdioma" />
+            </div>
+          </template>
+          <template #variaveis-header>
+            <div class="flex w-full items-center justify-start gap-1">
+              <span class="truncate">{{ tk.colModelo.variaveis }}</span>
+              <FiltroDeColuna v-model="filtros" class="ml-2" :t="t" campo="variaveis" :rotulo="tk.colModelo.variaveis" tipo="selecao" :opcoes="opcoesDeVariaveis" />
+            </div>
+          </template>
+          <template #statusMeta-header>
+            <div class="flex w-full items-center justify-start gap-1">
+              <span class="truncate">{{ tk.colModelo.statusMeta }}</span>
+              <FiltroDeColuna v-model="filtros" class="ml-2" :t="t" campo="statusMeta" :rotulo="tk.colModelo.statusMeta" tipo="selecao" :opcoes="opcoesDeStatusMeta" />
+            </div>
+          </template>
           <template #nome-cell="{ row }">
             <span class="block truncate font-mono text-xs text-highlighted" :title="row.original.nome">{{ row.original.nome }}</span>
           </template>
@@ -226,6 +288,7 @@ function integrar() {
           </template>
           <template #empty>
             <UEmpty
+              v-if="!modelosWhatsAppDoWorkspace.length"
               variant="naked"
               icon="i-simple-icons-whatsapp"
               :title="twilioLigado ? tk.semModelosWhatsAppTitulo : tk.spaceflow.modal.semIntegracaoTitulo"
@@ -234,6 +297,12 @@ function integrar() {
               class="py-12"
               :class="marca"
             />
+            <div v-else class="flex flex-col items-center justify-center py-12 text-muted">
+              <UIcon name="i-simple-icons-whatsapp" class="mb-3 h-12 w-12" />
+              <p class="text-sm">
+                {{ t.emails.vazioDescricao }}
+              </p>
+            </div>
           </template>
         </TabelaDoEnspace>
 
@@ -246,6 +315,24 @@ function integrar() {
           :get-row-id="(m: ModeloDeEmail) => m.id"
           @select="maquete"
         >
+          <template #nome-header>
+            <div class="flex w-full items-center justify-start gap-1">
+              <span class="truncate">{{ tc.col.nome }}</span>
+              <FiltroDeColuna v-model="filtros" class="ml-2" :t="t" campo="nome" :rotulo="tc.col.nome" tipo="texto" />
+            </div>
+          </template>
+          <template #assunto-header>
+            <div class="flex w-full items-center justify-start gap-1">
+              <span class="truncate">{{ tc.col.assunto }}</span>
+              <FiltroDeColuna v-model="filtros" class="ml-2" :t="t" campo="assunto" :rotulo="tc.col.assunto" tipo="texto" />
+            </div>
+          </template>
+          <template #remetente-header>
+            <div class="flex w-full items-center justify-start gap-1">
+              <span class="truncate">{{ tc.col.remetentePorDominio }}</span>
+              <FiltroDeColuna v-model="filtros" class="ml-2" :t="t" campo="remetente" :rotulo="tc.col.remetentePorDominio" tipo="selecao" :opcoes="opcoesSimNao" />
+            </div>
+          </template>
           <template #nome-cell="{ row }">
             <span class="block truncate text-highlighted" :title="row.original.nome">{{ row.original.nome }}</span>
           </template>
@@ -284,6 +371,24 @@ function integrar() {
           :get-row-id="(c: CaixaDeEmail) => c.id"
           @select="maquete"
         >
+          <template #nome-header>
+            <div class="flex w-full items-center justify-start gap-1">
+              <span class="truncate">{{ tc.col.nome }}</span>
+              <FiltroDeColuna v-model="filtros" class="ml-2" :t="t" campo="nome" :rotulo="tc.col.nome" tipo="texto" />
+            </div>
+          </template>
+          <template #email-header>
+            <div class="flex w-full items-center justify-start gap-1">
+              <span class="truncate">{{ tc.col.email }}</span>
+              <FiltroDeColuna v-model="filtros" class="ml-2" :t="t" campo="email" :rotulo="tc.col.email" tipo="texto" />
+            </div>
+          </template>
+          <template #provedor-header>
+            <div class="flex w-full items-center justify-start gap-1">
+              <span class="truncate">{{ tc.col.provedor }}</span>
+              <FiltroDeColuna v-model="filtros" class="ml-2" :t="t" campo="provedor" :rotulo="tc.col.provedor" tipo="selecao" :opcoes="opcoesDeProvedor" />
+            </div>
+          </template>
           <template #nome-cell="{ row }">
             <span class="block truncate text-highlighted">{{ row.original.nome }}</span>
           </template>

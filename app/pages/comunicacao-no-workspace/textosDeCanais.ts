@@ -61,6 +61,7 @@ const pt = {
   reenviarWhatsApp: 'Reenviar WhatsApp',
   reenviado: 'Mensagem colocada na fila de envio',
   semEntrega: 'O Outlook não informa a entrega.',
+  filtroVazio: 'Sem valor (-)',
   rapidos: { email: 'E-mail', whatsapp: 'WhatsApp', sms: 'SMS', naoEntregues: 'Não entregues' },
 
   /* Fase 4: a central Comunicações */
@@ -260,6 +261,7 @@ const en: TextosDeCanais = {
   reenviarWhatsApp: 'Resend WhatsApp',
   reenviado: 'Message added to the sending queue',
   semEntrega: 'Outlook does not report delivery.',
+  filtroVazio: 'No value (-)',
   rapidos: { email: 'Email', whatsapp: 'WhatsApp', sms: 'SMS', naoEntregues: 'Not delivered' },
   comunicacoes: 'Communications',
   descricaoComunicacoes: 'Item emails and the messages ENSPACE sends by email, SMS and WhatsApp, with the delivery status.',
@@ -441,6 +443,7 @@ const es: TextosDeCanais = {
   reenviarWhatsApp: 'Reenviar WhatsApp',
   reenviado: 'Mensaje puesto en la cola de envío',
   semEntrega: 'Outlook no informa la entrega.',
+  filtroVazio: 'Sin valor (-)',
   rapidos: { email: 'Correo', whatsapp: 'WhatsApp', sms: 'SMS', naoEntregues: 'No entregados' },
   comunicacoes: 'Comunicaciones',
   descricaoComunicacoes: 'Los correos de los ítems y los mensajes que ENSPACE envía por correo, SMS y WhatsApp, con el estado de entrega.',

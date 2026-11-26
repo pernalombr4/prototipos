@@ -60,6 +60,7 @@ import AbasDaCentral from './_AbasDaCentral.vue'
 import TabelaDoEnspace from './_TabelaDoEnspace.vue'
 import Paginador from './_Paginador.vue'
 import FiltroDeColuna, { type Filtros } from './_FiltroDeColuna.vue'
+import { SEM_VALOR, passaNosFiltros, semAsColunas } from './filtroPorColuna'
 
 const props = defineProps<{ t: Textos }>()
 
@@ -145,8 +146,11 @@ function alternarRapido(r: Rapido) {
 }
 watch(fase, (f) => {
   if (f < 2 && rapidos.value.has('semItem')) alternarRapido('semItem')
-  if (f < 3) filtros.value = Object.fromEntries(Object.entries(filtros.value).filter(([k]) => !k.startsWith('tarefa_')))
+  if (f < 3) filtros.value = semAsColunas(filtros.value, ['tarefa'])
+  if (f < 4) filtros.value = semAsColunas(filtros.value, ['canal', 'entrega'])
 })
+/** O membro não vê Status nem Entrega: os filtros delas saem junto. */
+watch(ehAdmin, (a) => { if (!a) filtros.value = semAsColunas(filtros.value, ['status', 'entrega']) })
 
 const qtdDeFiltros = computed(() => Object.keys(filtros.value).length + rapidos.value.size + (periodo.value !== 'todos' ? 1 : 0))
 const temFiltro = computed(() => qtdDeFiltros.value > 0 || !!busca.value.trim())
@@ -248,26 +252,9 @@ function valor(e: Email, campo: string): string {
     case 'item': return itemPorId(e.itemId)?.reference ?? ''
     case 'tarefa': return tarefaRef(e.tarefaId) ?? ''
     case 'enviadoPor': return e.sistema ? 'sistema' : e.autor ? String(e.autor) : ''
+    case 'status': return e.sistema?.status ?? ''
+    case 'entrega': return e.sistema?.entrega ?? ''
     default: return ''
-  }
-}
-
-function passa(e: Email, chave: string, alvo: string | string[]) {
-  const i = chave.lastIndexOf('_')
-  const campo = chave.slice(0, i)
-  const op = chave.slice(i + 1)
-  const v = valor(e, campo)
-  if (Array.isArray(alvo)) return alvo.includes(campo === 'item' && !v ? '__sem__' : v)
-  const a = v.toLowerCase()
-  const b = alvo.toLowerCase()
-  switch (op) {
-    case 'eq': return a === b
-    case 'ne': return a !== b
-    case 'contains': return a.includes(b)
-    case 'ncontains': return !a.includes(b)
-    case 'containss': return v.includes(alvo)
-    case 'ncontainss': return !v.includes(alvo)
-    default: return true
   }
 }
 
@@ -291,7 +278,7 @@ const filtrados = computed(() => {
     .filter(e => !r.has('semItem') || !e.itemId)
     .filter(e => !CANAIS.some(c => r.has(c)) || r.has(canalDe(e)))
     .filter(e => !r.has('naoEntregues') || naoChegou(e))
-    .filter(e => Object.entries(filtros.value).every(([k, v]) => passa(e, k, v)))
+    .filter(e => passaNosFiltros(filtros.value, c => valor(e, c)))
     .filter(e => !q || `${e.assunto} ${e.de} ${e.para.join(' ')} ${valor(e, 'item')} ${autorDe(e) ?? ''}`.toLowerCase().includes(q))
 })
 
@@ -369,6 +356,19 @@ const opcoesDeAutor = computed(() => [
   ...(ehAdmin.value ? [{ value: 'sistema', label: te.value.sistema, icon: 'i-lucide-workflow' }] : []),
   ...[...new Set(emails.value.filter(registrado).map(e => e.autor).filter(Boolean))]
     .map(id => ({ value: String(id), label: membroPorId(id)?.nome ?? String(id) })),
+])
+/* Rodada 15: as colunas Canal, Saiu por, Status e Entrega ganham o filtro de seleção. */
+const opcoesDeCanal = computed(() => CANAIS.map(c => ({ value: c, label: tc.value.canal[c], icon: ICONE_DO_CANAL[c] })))
+const opcoesDeSaiuPor = computed(() => [...new Set(emails.value.filter(registrado).map(e => saiuPorDe(e)?.rotulo).filter(Boolean) as string[])]
+  .sort((a, b) => a.localeCompare(b, idioma.value))
+  .map(r => ({ value: r, label: r })))
+const opcoesDeStatus = computed(() => [
+  ...(['naFila', 'processando', 'enviado', 'falhou', 'cancelado'] as StatusDoEnvio[]).map(s => ({ value: s, label: tc.value.status[s] })),
+  { value: SEM_VALOR, label: tc.value.filtroVazio },
+])
+const opcoesDeEntrega = computed(() => [
+  ...(['entregue', 'lido', 'adiado', 'devolvido', 'bloqueado', 'naoEntregue'] as Entrega[]).map(x => ({ value: x, label: tc.value.entrega[x], icon: ICONE_DA_ENTREGA[x] })),
+  { value: SEM_VALOR, label: tc.value.filtroVazio },
 ])
 const opcoesDeTarefa = computed(() => [...new Set(emails.value.filter(registrado).map(e => tarefaRef(e.tarefaId)).filter(Boolean) as string[])]
   .map(r => ({ value: r, label: r })))
@@ -670,12 +670,24 @@ function nomeDaCaixa(endereco: string) {
                 :opcoes="opcoesDeItem"
               />
               <FiltroDeColuna
-                v-else-if="c !== 'data'"
+                v-else-if="c === 'data'"
+                v-model="filtros"
+                v-model:unico="periodo"
+                class="ml-2"
+                :t="t"
+                campo="data"
+                :rotulo="te.col.data"
+                tipo="unico"
+                padrao="todos"
+                :opcoes="opcoesDePeriodo"
+              />
+              <FiltroDeColuna
+                v-else
                 v-model="filtros"
                 class="ml-2"
                 :t="t"
                 :campo="c"
-                :rotulo="te.col[c]"
+                :rotulo="rotuloDaColuna(c)"
                 tipo="texto"
               />
             </div>
@@ -699,10 +711,28 @@ function nomeDaCaixa(endereco: string) {
             </div>
           </template>
           <template #status-header>
-            <span class="truncate">{{ te.col.status }}</span>
+            <div class="flex w-full items-center justify-start gap-1">
+              <span class="truncate">{{ te.col.status }}</span>
+              <FiltroDeColuna v-model="filtros" class="ml-2" :t="t" campo="status" :rotulo="te.col.status" tipo="selecao" :opcoes="opcoesDeStatus" />
+            </div>
           </template>
-          <template v-for="c in (['canal', 'saiuPor', 'entrega'] as const)" :key="c" #[`${c}-header`]>
-            <span class="truncate" :class="marca">{{ rotuloDaColuna(c) }}</span>
+          <template #canal-header>
+            <div class="flex w-full items-center justify-start gap-1" :class="marca">
+              <span class="truncate">{{ rotuloDaColuna('canal') }}</span>
+              <FiltroDeColuna v-model="filtros" class="ml-2" :t="t" campo="canal" :rotulo="rotuloDaColuna('canal')" tipo="selecao" :opcoes="opcoesDeCanal" />
+            </div>
+          </template>
+          <template #saiuPor-header>
+            <div class="flex w-full items-center justify-start gap-1" :class="marca">
+              <span class="truncate">{{ rotuloDaColuna('saiuPor') }}</span>
+              <FiltroDeColuna v-model="filtros" class="ml-2" :t="t" campo="saiuPor" :rotulo="rotuloDaColuna('saiuPor')" tipo="selecao" :opcoes="opcoesDeSaiuPor" />
+            </div>
+          </template>
+          <template #entrega-header>
+            <div class="flex w-full items-center justify-start gap-1" :class="marca">
+              <span class="truncate">{{ rotuloDaColuna('entrega') }}</span>
+              <FiltroDeColuna v-model="filtros" class="ml-2" :t="t" campo="entrega" :rotulo="rotuloDaColuna('entrega')" tipo="selecao" :opcoes="opcoesDeEntrega" />
+            </div>
           </template>
 
           <!-- ===== células ===== -->

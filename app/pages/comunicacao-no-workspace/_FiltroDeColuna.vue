@@ -11,6 +11,9 @@
  *    vale uma vez;
  *  - seleção (`EntitySharedFiltersSelect`): busca, Todos, Limpar, a contagem e
  *    a lista de caixas de marcar, que aplica no clique.
+ *  - único (rodada 15, PROPOSTA): 1 opção por vez, para a coluna Data, ligada ao
+ *    período da barra. O develop filtra a data só pela barra; aqui o funil da
+ *    coluna abre o mesmo período, para toda coluna ter filtro.
  * A chave do filtro segue a da API: `<campo>_<operador>`.
  * Diferença de cópia: o develop usa os ícones do conjunto Solar; o protótipo
  * só tem o Lucide, então o funil é o `i-lucide-funnel`.
@@ -24,17 +27,23 @@ const props = defineProps<{
   t: Textos
   campo: string
   rotulo: string
-  tipo: 'texto' | 'selecao'
+  tipo: 'texto' | 'selecao' | 'unico'
   opcoes?: { value: string, label: string, icon?: string }[]
+  /** Único: a opção que quer dizer "sem filtro". */
+  padrao?: string
 }>()
 
 const filtros = defineModel<Filtros>({ required: true })
+/** Único: a opção escolhida (o período da barra, na coluna Data). */
+const unico = defineModel<string>('unico')
 const aberto = ref(false)
 
 const OPERADORES: Operador[] = ['eq', 'ne', 'contains', 'ncontains', 'containss', 'ncontainss']
 const f = computed(() => props.t.emails.filtro)
 
-const temFiltro = computed(() => Object.keys(filtros.value).some(k => k.startsWith(`${props.campo}_`)))
+const temFiltro = computed(() => props.tipo === 'unico'
+  ? unico.value !== props.padrao
+  : Object.keys(filtros.value).some(k => k.startsWith(`${props.campo}_`)))
 
 /* ---------- texto ---------- */
 
@@ -188,6 +197,29 @@ function alternar(v: string) {
             block
             @click="adicionar"
           />
+        </div>
+
+        <!-- Único -->
+        <div v-else-if="tipo === 'unico'" class="w-60 space-y-2">
+          <p class="text-sm">
+            {{ f.filtrar }} <b class="text-primary">{{ rotulo }}</b>
+          </p>
+          <USeparator />
+          <div class="space-y-0.5" role="radiogroup" :aria-label="`${f.filtrar} ${rotulo}`">
+            <button
+              v-for="o in opcoes"
+              :key="o.value"
+              type="button"
+              role="radio"
+              class="flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition"
+              :class="unico === o.value ? 'bg-primary/10 font-medium text-primary' : 'text-default hover:bg-elevated'"
+              :aria-checked="unico === o.value"
+              @click="unico = o.value; aberto = false"
+            >
+              <UIcon :name="unico === o.value ? 'i-lucide-circle-dot' : 'i-lucide-circle'" class="shrink-0" :class="unico === o.value ? 'text-primary' : 'text-muted'" />
+              <span class="truncate">{{ o.label }}</span>
+            </button>
+          </div>
         </div>
 
         <!-- Seleção -->

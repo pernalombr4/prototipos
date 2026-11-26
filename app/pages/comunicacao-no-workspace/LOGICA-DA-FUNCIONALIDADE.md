@@ -841,7 +841,10 @@ Os blocos de quem administra levam a linha "Visível só para quem administra o 
   - **colunas:** "Ações" primeiro (botão ⋮), depois Tipo, De, Para, Assunto, Item, Tarefa (Fase 3),
     Enviado por, Status (só com a permissão de ver os e-mails enviados) e Data. "Colunas" esconde e
     mostra as opcionais;
-  - **cabeçalho:** ordenar e o funil do filtro da coluna. No texto, o operador em frase ("É
+  - **cabeçalho:** ordenar e o funil do filtro da coluna, em toda coluna (rodada 15). Seleção em
+    Tipo, Canal, Item, Tarefa, Enviado por, Saiu por, Status e Entrega, com "Sem valor (-)" em
+    Status e Entrega; na Data, o funil abre o período da barra, 1 opção por vez. As tabelas das
+    abas Modelos e Caixas de E-mail seguem a mesma regra. No texto, o operador em frase ("É
     totalmente Igual a", "É totalmente Diferente De", "Contém parcialmente", "Não contém" e as
     variantes que diferenciam maiúsculas), cada operador 1 vez. Na seleção, busca, "Todos" e
     "Limpar".
