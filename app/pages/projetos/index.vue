@@ -8,6 +8,7 @@
  *     menu novo. No menu atual, Projetos é uma seção abaixo de Spaceflows (_ProjetosNoMenuAtual.vue).
  * A proposta:
  *   - o ícone Projetos na trilha, abaixo de Início, só quando a pessoa enxerga 1 projeto ou mais;
+ *   - clicar em Projetos abre o diretório (Todos os projetos), com o painel Projetos ao lado (rodada 4);
  *   - o painel Projetos, com o menu de cada pessoa, busca e "Ver todos os N projetos";
  *   - o diretório, a página do projeto, criar, configurar, mover categoria e a tela sem acesso;
  *   - "Item sem acesso" no campo de vínculo e a coluna Projeto em Minhas tarefas;
@@ -76,6 +77,8 @@ watch(tela, (v) => {
 function irParaArea(id: string) {
   area.value = id as typeof area.value
   if (id === 'inicio') tela.value = { tipo: 'inicio' }
+  // Rodada 4: clicar em Projetos abre direto Todos os projetos, com o painel ao lado.
+  if (id === 'projetos') tela.value = { tipo: 'diretorio' }
 }
 
 /* ---------- favoritos (camada pessoal) ---------- */

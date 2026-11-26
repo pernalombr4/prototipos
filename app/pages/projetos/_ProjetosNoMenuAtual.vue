@@ -102,8 +102,8 @@ function teclar(ev: KeyboardEvent, id: number) {
       <button
         type="button"
         class="flex min-w-0 flex-1 items-center gap-2.5 py-2 pl-4 text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
-        :aria-expanded="aberto"
-        @click="aberto = !aberto"
+        :aria-current="tela.tipo === 'diretorio' ? 'page' : undefined"
+        @click="tela = { tipo: 'diretorio' }; aberto = true"
       >
         <UIcon name="i-lucide-folder-kanban" class="size-4 shrink-0" />
         <span class="flex-1 truncate text-sm">{{ t.menuAtual.itens.projetos }}</span>

@@ -254,3 +254,35 @@ O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras 
   - `evidencias/entrega-criar-com-modelo.png`: Criar projeto a partir do modelo Obra;
   - `evidencias/entrega-secao-do-workspace.png`: Oportunidades aberta pela seção Comercial;
   - `evidencias/entrega-camadas.png`: o "?" das 3 camadas.
+
+## Rodada 4 · 2026-11-26
+- **Pedido (literal):** "assim que o user clicar em projetos, ele deve ja ver a tela com "ver todos os projetos",
+  essa do print, nao aquele atalho estranho" e "garanta que voce ta usando o component de tabela do enspace. use
+  /investigar-codigo e leia a sdk pra achar a tabela la (se existir). tabela, filtros... todo o esquema de talas
+  como a tela de logs, relatórios, itens...".
+- **O que o código diz (develop, 2026-11-26):**
+  - o SDK tem a tabela: `EnTable` (colunas, seleção, ordenação, paginação, colunas que se escondem e estado
+    vazio), o porte da tabela das listagens do produto; ele não traz busca nem filtros;
+  - Logs de auditoria, Relatórios, Itens, Tarefas, Execuções, Credenciais e Assinaturas montam a tela com a
+    mesma sequência: a barra de busca e filtros, a tabela e o paginador;
+  - a barra tem, à esquerda, a busca (com ponto vermelho quando há termo), o período e "Limpar filtros"; à
+    direita, Colunas e o botão que mostra ou esconde a linha de filtros rápidos; a 2ª linha recebe os filtros;
+  - o paginador mostra "Mostrando X a Y de N resultados", itens por página (25, 50, 100, 500) e as páginas,
+    numa faixa de fundo elevado.
+- **Mudou:**
+  - clicar em Projetos abre Todos os projetos, com o painel Projetos ao lado; no menu atual, clicar no título
+    da seção Projetos faz o mesmo, e a seta continua abrindo e fechando a seção;
+  - o diretório segue o esquema das listagens: barra com busca, período de criação, "Limpar filtros", Colunas
+    e o botão dos filtros rápidos; a 2ª linha tem Visibilidade, Status e Administrador, com várias escolhas;
+  - a tabela continua o `EnTable` do SDK, agora com ordenação por Projeto, Participantes, Categorias e Criado em,
+    e com as colunas que a pessoa esconde pelo botão Colunas (Projeto fica sempre);
+  - o paginador do produto entrou no lugar do rodapé do `EnTable` (`_Paginador.vue`, cópia, nada é proposta).
+- **Fronteira:** muda só a tela do diretório e o destino do clique em Projetos. O painel lateral, a página do
+  projeto e as janelas ficam como na rodada 3. "Ver todos os N projetos" continua no rodapé do painel, para voltar
+  ao diretório depois de abrir um projeto.
+- **Achado:** o `EnTable` do SDK não tem como pôr o funil de filtro no cabeçalho da coluna, como a tabela do
+  produto faz; por isso os filtros do diretório ficam na linha de filtros rápidos.
+- **Ver:** https://pernalombr4.github.io/prototipos/projetos
+  - `evidencias/entrega-projetos-abre-o-diretorio.png`: Todos os projetos aberto pelo clique em Projetos;
+  - `evidencias/entrega-diretorio-colunas.png`: 52 projetos, o menu Colunas e a coluna Administradores escondida;
+  - `evidencias/entrega-diretorio-paginador.png`: o paginador do produto, com 3 páginas de 25.
