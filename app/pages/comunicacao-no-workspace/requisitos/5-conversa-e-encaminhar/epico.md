@@ -1,14 +1,14 @@
 # Épico: Responder na mesma conversa e encaminhar e-mail
 
 **O que é:** a resposta escrita pelo ENSPACE passa a seguir na mesma conversa do e-mail original, no lugar do e-mail
-novo com "Re:" do épico "Escrever e-mail de qualquer tela e central E-mails no menu". O e-mail ganha "Encaminhar", com o texto citado e os
+novo com "Re:" do épico "Escrever e-mail de qualquer tela e central Comunicações no menu". O e-mail ganha "Encaminhar", com o texto citado e os
 anexos. Nos 2 casos, o e-mail continua no item do original.
 
-**Onde vale:** a Mail Box do item e a da tarefa (hover da linha e e-mail aberto) e a aba Mensagens da central E-mails
+**Onde vale:** a Mail Box do item e a da tarefa (hover da linha e e-mail aberto) e a lista da central Comunicações
 (menu da linha e leitura no painel lateral), com o compositor "Nova Mensagem".
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/, aprovado em 24/11/2026. Na barra de
-baixo, escolha "Fase: 2 · Remetente" e abra a Mail Box de CTR-00231 ou a aba Mensagens. Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
+baixo, escolha "Fase: 2 · Remetente" e abra a Mail Box de CTR-00231 ou a lista de mensagens. Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
 **Fora do escopo:** responder e encaminhar o e-mail enviado pelo sistema (tarefas e fluxos), que tem "Reenviar e-mail"
 no lugar; a escolha do remetente (épico "Enviar e-mail pelas Caixas de E-mail do workspace"); a tarefa vinculada (épico "Vincular e-mail a uma tarefa").
@@ -21,7 +21,7 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 | Parte | O que entrega | Depende de | Por que nesta ordem |
 |---|---|---|---|
 | [1. Responder na mesma conversa](parte-1-responder-na-conversa.md) | A resposta enviada como resposta da conversa original, com o aviso novo | | Religa o "Responder" que já aparece nas telas |
-| [2. Encaminhar](parte-2-encaminhar.md) | O botão "Encaminhar" na Mail Box e na aba Mensagens e o compositor com "Enc:", o texto citado e os anexos | | Independe da parte 1; vem depois porque pede o envio dos anexos do original |
+| [2. Encaminhar](parte-2-encaminhar.md) | O botão "Encaminhar" na Mail Box e na lista de mensagens e o compositor com "Enc:", o texto citado e os anexos | | Independe da parte 1; vem depois porque pede o envio dos anexos do original |
 
 ## Regras de negócio comuns (RN)
 

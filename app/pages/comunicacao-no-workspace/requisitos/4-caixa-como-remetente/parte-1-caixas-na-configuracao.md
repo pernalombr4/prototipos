@@ -1,12 +1,12 @@
-# 1. Caixas como remetente na aba Configurações
+# 1. Caixas como remetente na aba Canais e regras
 
 **Objetivo:** quem administra escolhe quais Caixas de E-mail do workspace aparecem no campo De do compositor.
 
-**Onde vale:** a central E-mails, aba Configurações, grupo "Regras do workspace" (o grupo de quem administra, do épico
-"Escrever e-mail de qualquer tela e central E-mails no menu").
+**Onde vale:** a aba Canais e regras de Configurações › Comunicações, grupo "Regras do workspace" (o grupo de quem administra, do épico
+"Escrever e-mail de qualquer tela e central Comunicações no menu").
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/. Com "Fase: 2 · Remetente" e
-"Perfil: Admin", abra E-mails › Configurações: o bloco "Caixas como remetente" fica entre "Contato do item" e
+"Perfil: Admin", abra Configurações › Comunicações › Canais e regras: o bloco "Caixas como remetente" fica entre "Contato do item" e
 "Remetente com o domínio da empresa".
 
 ## Regras de negócio (RN)
@@ -19,9 +19,9 @@
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF001 | O grupo "Regras do workspace" da aba Configurações deve ter o bloco "Caixas como remetente", com a descrição "Escolha as caixas do workspace que aparecem no campo De de quem escreve um e-mail.". | Com o perfil de quem administra, o bloco aparece entre "Contato do item" e "Remetente com o domínio da empresa". | Essencial | Obrigatório |
+| RF001 | O grupo "Regras do workspace" da aba Canais e regras deve ter o bloco "Caixas como remetente", com a descrição "Escolha as caixas do workspace que aparecem no campo De de quem escreve um e-mail.". | Com o perfil de quem administra, o bloco aparece entre "Contato do item" e "Remetente com o domínio da empresa". | Essencial | Obrigatório |
 | RF002 | O bloco deve listar cada caixa da aba Caixas de E-mail, com o nome, o endereço e a chave "Disponível no campo De". | Exemplo: "Atendimento jurídico" com atendimento.aurora-servicos@box.enspace.io e a chave; "Compras" com o endereço dela e a chave. | Essencial | Obrigatório |
-| RF003 | O membro sem a permissão de quem administra não deve ver o bloco. | Com o perfil de membro, a aba Configurações mostra só "Sua conta de envio". | Essencial | Obrigatório |
+| RF003 | O membro sem a permissão de quem administra não deve ver o bloco. | Com o perfil de membro, Configurações › Comunicações não aparece no menu. | Essencial | Obrigatório |
 | RF004 | Se o workspace não tem caixa, o bloco deve mostrar "Nenhuma caixa de e-mail" no lugar da lista, sem o botão Salvar. | Com "Dados: Workspace novo", o bloco mostra "Nenhuma caixa de e-mail". | Importante | Obrigatório |
 
 ## Gravar a escolha (RF)

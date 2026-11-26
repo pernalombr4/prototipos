@@ -4,7 +4,7 @@
 com ela. O envio grava a tarefa no e-mail.
 
 **Onde vale:** o compositor "Nova Mensagem", aberto de qualquer tela; as aberturas a partir da tarefa em Tarefas ›
-Rápidas (lista, quadro e painel); o "Responder" e o "Encaminhar" da Mail Box e da aba Mensagens.
+Rápidas (lista, quadro e painel); o "Responder" e o "Encaminhar" da Mail Box e da lista de mensagens.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/. Com "Fase: 3 · Tarefa", abra
 CTR-00231 e clique em E-mail: o campo "Vincular a tarefa" fica abaixo do item vinculado.
@@ -23,7 +23,7 @@ CTR-00231 e clique em E-mail: o campo "Vincular a tarefa" fica abaixo do item vi
 | RF001 | O compositor deve ter o campo "Vincular a tarefa", com "(opcional)" e a ajuda "O e-mail aparece também na Mail Box da tarefa.", abaixo do bloco do item. | O campo aparece no compositor de CTR-00231, depois do item vinculado. | Essencial | Obrigatório |
 | RF002 | Com item vinculado, a lista do campo deve ter "Nenhuma tarefa" e cada tarefa do item, no formato "<referência> · <nome>" (RN001). | Exemplo: CTR-00231 vinculado; a lista mostra "Nenhuma tarefa" e "T-1042 · Enviar minuta assinada à contraparte". | Essencial | Obrigatório |
 | RF003 | Sem tarefa escolhida, o campo deve mostrar "Nenhuma tarefa", e o e-mail sai sem tarefa. | Envio com "Nenhuma tarefa": o e-mail fica só na Mail Box do item. | Importante | Obrigatório |
-| RF004 | Quando a pessoa troca o item vinculado pelo "Trocar" de "Vincular a item (opcional)" (épico "Gravar e-mail enviado sem item e filtrar Mensagens por permissão"), o sistema deve tirar do campo a tarefa que é de outro item (RN001). | Exemplo: T-1042 escolhida e o item trocado de CTR-00231 para outro contrato; o campo volta a "Nenhuma tarefa". | Importante | Obrigatório |
+| RF004 | Quando a pessoa troca o item vinculado pelo "Trocar" de "Vincular a item (opcional)" (épico "Gravar e-mail enviado sem item e filtrar a lista de mensagens por permissão"), o sistema deve tirar do campo a tarefa que é de outro item (RN001). | Exemplo: T-1042 escolhida e o item trocado de CTR-00231 para outro contrato; o campo volta a "Nenhuma tarefa". | Importante | Obrigatório |
 
 ## A tarefa vinda da tela de origem (RF)
 

@@ -1,21 +1,21 @@
-# 9. Aba Mensagens
+# 9. Lista de mensagens
 
 **Objetivo:** a pessoa acha, filtra, lê e responde os e-mails que o ENSPACE já guarda com os itens, numa tabela só, sem
 abrir item por item. A tabela vazia diz o próximo passo.
 
-**Depende de:** 8. Central E-mails.
+**Depende de:** 8. Central Comunicações e Configurações › Comunicações.
 
-**Onde vale:** a central "E-mails", aba Mensagens, sobre a tela "Emails Recebidos" de hoje, que não tem entrada no
+**Onde vale:** a lista da central "Comunicações", sobre a tela "Emails Recebidos" de hoje, que não tem entrada no
 menu.
 
-**Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/. Abra E-mails › Mensagens; o
+**Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/. Abra Comunicações no menu; o
 controle "Dados" mostra "Workspace novo", "Primeiro uso" e "Em uso".
 
 ## Regras de negócio (RN)
 
 | ID | Regra | Exemplo | Relevância |
 |---|---|---|---|
-| RN801 | A tabela a seguir define o estado vazio da aba Mensagens, sem e-mail e sem filtro. Política: Única. | Linha 3: com a conta do Outlook integrada, a aba mostra "Escreva o primeiro e-mail." e "Novo e-mail". | Obrigatório |
+| RN801 | A tabela a seguir define o estado vazio da lista, sem e-mail e sem filtro. Política: Única. | Linha 3: com a conta do Outlook integrada, a lista mostra "Escreva o primeiro e-mail." e "Novo e-mail". | Obrigatório |
 
 | Linha | Conta do Outlook da pessoa | Quem vê | Título | Texto | Botões |
 |---|---|---|---|---|---|
@@ -27,14 +27,23 @@ controle "Dados" mostra "Workspace novo", "Primeiro uso" e "Em uso".
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF801 | A aba Mensagens deve listar os e-mails que o ENSPACE guarda com item, os que a tela "Emails Recebidos" mostra hoje (RN904, RN905). | O e-mail enviado de CTR-00231 aparece; o e-mail enviado sem item, não. | Essencial | Obrigatório |
-| RF802 | O "i" da aba deve dizer "Os e-mails recebidos e enviados pela Mail Box dos itens.". | A dica aparece ao lado do nome Mensagens. | Importante | Obrigatório |
+| RF801 | A lista deve mostrar os e-mails que o ENSPACE guarda com item, os que a tela "Emails Recebidos" mostra hoje (RN904, RN905). | O e-mail enviado de CTR-00231 aparece; o e-mail enviado sem item, não. | Essencial | Obrigatório |
+| RF802 | O "i" do título deve dizer "Os e-mails recebidos e enviados pela Mail Box dos itens.". | A dica aparece ao lado do título Comunicações. | Importante | Obrigatório |
 | RF803 | A tabela deve usar a tabela das telas novas do produto, a de Logs de Auditoria: a coluna Ações primeiro, com 1 botão ⋮ que abre o menu da linha; o clique direito na linha abre esse menu; o paginador diz "Mostrando 1 a N de N resultados", com 10, 25, 50 ou 100 por página. | O clique direito numa linha abre o menu do ⋮. | Essencial | Obrigatório |
-| RF804 | A tabela deve ter as colunas Ações, Tipo, De, Para, Assunto, Item, "Enviado por" e Data, com a Data mais recente primeiro ao abrir. | O e-mail de hoje fica na 1ª linha. | Essencial | Obrigatório |
-| RF805 | "Colunas" deve esconder e mostrar Tipo, De, Para, Item e "Enviado por". | Desmarcar Tipo tira a coluna da tabela. | Importante | Obrigatório |
+| RF804 | A tabela deve ter as colunas Ações, Tipo, De, Para, Assunto, Item, "Enviado por", "Saiu por" e Data, com a Data mais recente primeiro ao abrir. | O e-mail de hoje fica na 1ª linha. | Essencial | Obrigatório |
+| RF805 | "Colunas" deve esconder e mostrar Tipo, De, Para, Item, "Enviado por" e "Saiu por". | Desmarcar Tipo tira a coluna da tabela. | Importante | Obrigatório |
 | RF806 | O cabeçalho de De, Para, Assunto, Item e Data deve ordenar a tabela no clique. | 2 cliques em Assunto ordenam de A a Z e de Z a A. | Importante | Obrigatório |
 | RF807 | O funil de De, Para e Assunto deve filtrar por texto, com os operadores "É totalmente Igual a", "É totalmente Diferente De", "Contém parcialmente", "Não contém" e as variantes que diferenciam maiúsculas, cada operador 1 vez. | "Contém parcialmente" "rafael" em De deixa só os e-mails de rafael.monteiro@example.com. | Importante | Obrigatório |
-| RF808 | O funil de Tipo, Item e "Enviado por" deve filtrar por seleção, com busca, "Todos" e "Limpar". | Marcar CTR-00231 em Item deixa só os e-mails desse item. | Importante | Obrigatório |
+| RF808 | O funil de Tipo, Item, "Enviado por" e "Saiu por" deve filtrar por seleção, com busca, "Todos" e "Limpar". | Marcar CTR-00231 em Item deixa só os e-mails desse item. | Importante | Obrigatório |
+| RF809 | O funil de Data deve oferecer os períodos da barra ("Todo o período", "Hoje", "Últimos 7 dias", "Últimos 30 dias"), 1 por vez. Escolher o período no funil de Data deve mudar o período da barra para o escolhido, e escolher na barra deve mudar o funil. | "Hoje" no funil de Data mostra "Hoje" no período da barra. | Importante | Obrigatório |
+| RF810 | Cada coluna da tabela, fora Ações, deve ter o funil de filtro. | Cada cabeçalho, de Tipo a Data, mostra o funil. | Importante | Obrigatório |
+
+## Saiu por (RF)
+
+| ID | Requisito | Critério de aceite | Prioridade | Relevância |
+|---|---|---|---|---|
+| RF815 | A coluna "Saiu por" deve dizer por onde o e-mail enviado saiu: "Outlook de <primeiro nome>", no e-mail escrito por uma pessoa, e "-" no recebido. | O e-mail que Ana enviou de CTR-00231 mostra "Outlook de Ana". | Importante | Obrigatório |
+| RF816 | O valor de "Saiu por" deve ter uma dica com o significado do valor: no Outlook, "A conta do Outlook que a pessoa integrou ao perfil.". | Pairar em "Outlook de Ana" mostra a dica. | Desejável | Desejável |
 
 ## Barra e filtros rápidos (RF)
 
@@ -59,13 +68,13 @@ controle "Dados" mostra "Workspace novo", "Primeiro uso" e "Em uso".
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF831 | Sem e-mail na aba e sem filtro, a tabela deve mostrar o próximo passo pela tabela da RN801. | No workspace novo, o membro vê "Nenhum e-mail ainda" e "Integrar conta do Outlook". | Essencial | Obrigatório |
-| RF832 | Os botões do estado vazio devem abrir: "Integrar conta do Outlook", Perfil › Integrações; "Criar modelo" e "Criar caixa de e-mail", as abas Modelos e Caixas de E-mail; "Novo e-mail", o compositor sem vínculo. | "Criar modelo" abre E-mails › Modelos. | Importante | Obrigatório |
+| RF831 | Sem e-mail na lista e sem filtro, a tabela deve mostrar o próximo passo pela tabela da RN801. | No workspace novo, o membro vê "Nenhum e-mail ainda" e "Integrar conta do Outlook". | Essencial | Obrigatório |
+| RF832 | Os botões do estado vazio devem abrir: "Integrar conta do Outlook", Perfil › Integrações; "Criar modelo" e "Criar caixa de e-mail", as abas Modelos e Caixas de E-mail de Configurações › Comunicações; "Novo e-mail", o compositor sem vínculo. | "Criar modelo" abre Configurações › Comunicações › Modelos. | Importante | Obrigatório |
 | RF833 | Com filtro e sem resultado, a tabela deve mostrar "Nenhum e-mail com estes filtros." e "Limpar filtros". | "Com anexo" sem e-mail com anexo mostra a frase e o botão. | Importante | Obrigatório |
 
 ## Em aberto
 
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
-| P801 | A tela "Emails Recebidos" de hoje basta como base da aba, com a busca, os filtros e a paginação desta parte, sem back novo? | dev | Se não basta, a parte pede trabalho no back, ou os filtros que a tela não aceita saem |
+| P801 | A tela "Emails Recebidos" de hoje basta como base da lista, com a busca, os filtros e a paginação desta parte, sem back novo? | dev | Se não basta, a parte pede trabalho no back, ou os filtros que a tela não aceita saem |
 | S801 | Na linha 1 da RN801, "workspace sem modelo e sem caixa" é o workspace novo do protótipo; com modelo ou caixa, quem administra cai na linha 2. | produto | Muda quando quem administra vê "Criar modelo" e "Criar caixa de e-mail" |

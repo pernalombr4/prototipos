@@ -1,18 +1,17 @@
 # Épico: Enviar e-mail pelas Caixas de E-mail do workspace
 
-**O que é:** as Caixas de E-mail do workspace, que hoje só recebem, passam a enviar. Quem administra escolhe, na aba
-Configurações da central E-mails, quais caixas entram no campo De; quem escreve escolhe entre a própria conta do
+**O que é:** as Caixas de E-mail do workspace, que hoje só recebem, passam a enviar. Quem administra escolhe, na aba Canais e regras de Configurações › Comunicações, quais caixas entram no campo De; quem escreve escolhe entre a própria conta do
 Outlook e essas caixas. Quem não tem o Correio do Outlook integrado escreve pelo ENSPACE com uma caixa.
 
-**Onde vale:** a aba Configurações da central E-mails, o compositor "Nova Mensagem" aberto de qualquer tela, a Mail Box
-do item e a aba Mensagens da central.
+**Onde vale:** a aba Canais e regras de Configurações › Comunicações, o compositor "Nova Mensagem" aberto de qualquer tela, a Mail Box
+do item e a lista de mensagens da central.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/, aprovado em 24/11/2026. Na barra de
 baixo, escolha "Fase: 2 · Remetente" e "Perfil: Admin"; o cenário "Sem Outlook integrado" mostra o "De" só com as
 caixas. Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
 **Fora do escopo:** a configuração da própria caixa (aba Caixas de E-mail, que não muda); o registro do e-mail enviado
-sem item e a aba Mensagens por pessoa e permissão (épico "Gravar e-mail enviado sem item e filtrar Mensagens por permissão"); a integração com o
+sem item e a lista de mensagens por pessoa e permissão (épico "Gravar e-mail enviado sem item e filtrar a lista de mensagens por permissão"); a integração com o
 Google.
 
 **Relevância** (coluna das tarefas): Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer,
@@ -22,8 +21,8 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 
 | Parte | O que entrega | Depende de | Por que nesta ordem |
 |---|---|---|---|
-| [1. Caixas como remetente na aba Configurações](parte-1-caixas-na-configuracao.md) | O bloco "Caixas como remetente", com 1 chave por caixa, e a gravação da escolha | | O "De" só lista as caixas que esta parte liga |
-| [2. Escolher o De no compositor](parte-2-escolher-o-de.md) | O "De" com a conta do Outlook e as caixas, o envio pela caixa, o remetente na Mail Box e na aba Mensagens e o caso sem Correio do Outlook | 1 | Lê a escolha que a parte 1 grava |
+| [1. Caixas como remetente na aba Canais e regras](parte-1-caixas-na-configuracao.md) | O bloco "Caixas como remetente", com 1 chave por caixa, e a gravação da escolha | | O "De" só lista as caixas que esta parte liga |
+| [2. Escolher o De no compositor](parte-2-escolher-o-de.md) | O "De" com a conta do Outlook e as caixas, o envio pela caixa, o remetente na Mail Box e na lista de mensagens e o caso sem Correio do Outlook | 1 | Lê a escolha que a parte 1 grava |
 
 ## Regras de negócio comuns (RN)
 

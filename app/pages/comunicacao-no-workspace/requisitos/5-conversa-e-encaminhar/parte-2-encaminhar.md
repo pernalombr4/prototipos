@@ -3,11 +3,11 @@
 **Objetivo:** a pessoa encaminha um e-mail do ENSPACE a outro destinatário, com o texto e os anexos do original, e o
 encaminhamento fica no item do original.
 
-**Onde vale:** a Mail Box do item e a da tarefa (hover da linha e e-mail aberto), a aba Mensagens da central E-mails
+**Onde vale:** a Mail Box do item e a da tarefa (hover da linha e e-mail aberto), a lista da central Comunicações
 (menu da linha e leitura no painel lateral) e o compositor "Nova Mensagem".
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/. Com "Fase: 2 · Remetente", passe o
-mouse num e-mail da Mail Box de CTR-00231 ou abra o menu ⋮ de uma linha da aba Mensagens.
+mouse num e-mail da Mail Box de CTR-00231 ou abra o menu ⋮ de uma linha da lista de mensagens.
 
 ## Onde fica o Encaminhar (RF)
 
@@ -15,8 +15,8 @@ mouse num e-mail da Mail Box de CTR-00231 ou abra o menu ⋮ de uma linha da aba
 |---|---|---|---|---|
 | RF101 | Na Mail Box do item e na da tarefa, o hover da linha do e-mail deve mostrar o botão "Encaminhar" ao lado de "Responder". | Hover num e-mail de CTR-00231: os botões Responder e Encaminhar aparecem; o nome acessível de Encaminhar leva o assunto. | Essencial | Obrigatório |
 | RF102 | O e-mail aberto na Mail Box deve ter o botão "Encaminhar" entre "Responder" e "Marcar como não lido". | E-mail recebido aberto: "Responder", "Encaminhar" e "Marcar como não lido". | Essencial | Obrigatório |
-| RF103 | Na aba Mensagens, o menu da linha deve ter "Encaminhar" depois de "Responder". | Menu ⋮ de um recebido: "Ver Detalhes", "Responder", "Encaminhar", "Marcar como não lido" e "Ver Item". | Essencial | Obrigatório |
-| RF104 | A leitura no painel lateral da aba Mensagens deve ter o botão "Encaminhar" ao lado de "Responder". | Clique numa linha recebida: o painel mostra Responder e Encaminhar. | Essencial | Obrigatório |
+| RF103 | Na lista de mensagens, o menu da linha deve ter "Encaminhar" depois de "Responder". | Menu ⋮ de um recebido: "Ver Detalhes", "Responder", "Encaminhar", "Marcar como não lido" e "Ver Item". | Essencial | Obrigatório |
+| RF104 | A leitura no painel lateral da lista de mensagens deve ter o botão "Encaminhar" ao lado de "Responder". | Clique numa linha recebida: o painel mostra Responder e Encaminhar. | Essencial | Obrigatório |
 | RF105 | O e-mail enviado pelo sistema não deve ter "Encaminhar" (RN902). | Linha "Do sistema": o menu ⋮ e a leitura não mostram "Encaminhar". | Importante | Obrigatório |
 
 ## O compositor do encaminhamento (RF)

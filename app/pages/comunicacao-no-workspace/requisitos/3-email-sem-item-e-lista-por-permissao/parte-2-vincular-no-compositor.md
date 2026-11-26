@@ -3,11 +3,11 @@
 **Objetivo:** quem escreve um e-mail de qualquer tela busca e escolhe o item do e-mail entre as categorias que pode
 ver, troca ou remove o item vindo da tela de origem e recebe no Para os contatos de outros itens.
 
-**Depende de:** o épico "Escrever e-mail de qualquer tela e central E-mails no menu" (o compositor e o bloco "Item vinculado"). As sugestões
+**Depende de:** o épico "Escrever e-mail de qualquer tela e central Comunicações no menu" (o compositor e o bloco "Item vinculado"). As sugestões
 pelo destinatário dependem também do épico "Escolher na categoria de onde vêm o nome e o e-mail do contato".
 
 **Onde vale:** o compositor ("Nova Mensagem"), aberto do "Novo e-mail" da barra do topo, dos atalhos de e-mail, da
-Mail Box e da central E-mails.
+Mail Box e da central Comunicações.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/. Fase "2 · Remetente"; "Novo
 e-mail" na tela Início, e o botão E-mail do item CTR-00231.

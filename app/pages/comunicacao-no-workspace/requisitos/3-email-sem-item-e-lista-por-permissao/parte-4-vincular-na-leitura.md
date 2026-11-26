@@ -1,16 +1,15 @@
 # 4. Vincular e trocar depois, na leitura
 
-**Objetivo:** na aba Mensagens, a pessoa vincula a um item o e-mail sem item e troca o item de um e-mail já
+**Objetivo:** na lista de mensagens, a pessoa vincula a um item o e-mail sem item e troca o item de um e-mail já
 vinculado. O e-mail passa a aparecer na Mail Box do item escolhido.
 
 **Depende de:** 1. Registro do e-mail enviado sem item; 2. Vincular a item no compositor (a busca de item). As
 sugestões pelo destinatário dependem também do épico "Escolher na categoria de onde vêm o nome e o e-mail do contato".
 
-**Onde vale:** a central E-mails, aba Mensagens: menu da linha, coluna Item e leitura no painel lateral; a Mail Box do
+**Onde vale:** a lista da central Comunicações: menu da linha, coluna Item e leitura no painel lateral; a Mail Box do
 item.
 
-**Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/. Fase "2 · Remetente"; E-mails ›
-Mensagens, filtro "Sem item", menu ⋮ de "Cadastro de fornecedor" › "Vincular a um item".
+**Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/. Fase "2 · Remetente"; Comunicações, filtro "Sem item", menu ⋮ de "Cadastro de fornecedor" › "Vincular a um item".
 
 ## Regras de negócio (RN)
 
@@ -54,6 +53,6 @@ Mensagens, filtro "Sem item", menu ⋮ de "Cadastro de fornecedor" › "Vincular
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
 | P301 | Hoje não há rota para ligar um e-mail sem item a um item, nem para trocar o item. A rota é criada no back? | dev do back | Sem a rota, esta parte não sai |
-| P302 | Quem pode vincular e trocar o item de um e-mail: só quem enviou, ou quem vê o e-mail na aba Mensagens? | produto | O botão "Vincular" e o "Trocar" ganham a condição de quem enviou |
+| P302 | Quem pode vincular e trocar o item de um e-mail: só quem enviou, ou quem vê o e-mail na lista de mensagens? | produto | O botão "Vincular" e o "Trocar" ganham a condição de quem enviou |
 | P303 | O e-mail vinculado depois do envio saiu sem o endereço do item em "Responder para": a resposta do destinatário continua chegando só no Outlook de quem enviou? | produto e dev do back | Com outra regra, a resposta precisa ser levada ao item pelo back |
 | P304 | A troca do item fica no Logs de Auditoria dos 2 itens? | produto | Os 2 itens ganham a linha da troca no log |

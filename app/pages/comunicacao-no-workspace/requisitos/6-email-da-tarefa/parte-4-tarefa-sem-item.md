@@ -4,7 +4,7 @@
 esses e-mails.
 
 **Depende de:** 1. Vincular a tarefa no compositor; 2. Mail Box da tarefa; o registro do e-mail enviado sem item, do
-épico "Gravar e-mail enviado sem item e filtrar Mensagens por permissão".
+épico "Gravar e-mail enviado sem item e filtrar a lista de mensagens por permissão".
 
 **Onde vale:** o compositor sem item vinculado; Tarefas › Rápidas, o painel da tarefa sem item (aba Mail Box) e o
 quadro de tarefas.
@@ -18,7 +18,7 @@ quadro de tarefas.
 |---|---|---|---|---|
 | RF301 | Sem item vinculado, a lista de "Vincular a tarefa" deve ter "Nenhuma tarefa" e as tarefas do workspace, no formato "<referência> · <nome>". | "Novo e-mail" na tela inicial: a lista mostra T-1042, T-1045 e as outras tarefas. | Importante | Obrigatório |
 | RF302 | Cada abertura do compositor a partir de uma tarefa sem item deve trazer a tarefa vinculada, sem item: "Novo e-mail" do topo com o painel da tarefa aberto, "Novo e-mail" da Mail Box da tarefa e o e-mail para o responsável. | Painel de T-1045 aberto e "Novo e-mail" do topo: o compositor abre sem item e com T-1045. | Importante | Obrigatório |
-| RF303 | O e-mail sem item com tarefa vinculada deve ficar gravado no ENSPACE com a tarefa. | Exemplo: envio com T-1045 e sem item; o e-mail aparece na aba Mensagens com "T-1045" na coluna Tarefa e o botão "Vincular" na coluna Item. | Importante | Obrigatório |
+| RF303 | O e-mail sem item com tarefa vinculada deve ficar gravado no ENSPACE com a tarefa. | Exemplo: envio com T-1045 e sem item; o e-mail aparece na lista de mensagens com "T-1045" na coluna Tarefa e o botão "Vincular" na coluna Item. | Importante | Obrigatório |
 
 ## Mail Box da tarefa sem item (RF)
 

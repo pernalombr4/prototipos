@@ -1,18 +1,18 @@
 # Épico: Vincular e-mail a uma tarefa
 
 **O que é:** o e-mail passa a ter, além do item, uma tarefa vinculada. Quem escreve escolhe a tarefa no compositor, a
-Mail Box da tarefa separa os e-mails dela dos do item, e a aba Mensagens e a Mail Box do item mostram a tarefa de cada
+Mail Box da tarefa separa os e-mails dela dos do item, e a lista de mensagens e a Mail Box do item mostram a tarefa de cada
 e-mail. Hoje a tarefa não tem vínculo com e-mail.
 
 **Onde vale:** o compositor "Nova Mensagem", o painel da tarefa em Tarefas › Rápidas (aba Mail Box), o quadro de
-tarefas, a Mail Box do item e a aba Mensagens da central E-mails.
+tarefas, a Mail Box do item e a lista da central Comunicações.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/, aprovado em 24/11/2026. Na barra de
 baixo, escolha "Fase: 3 · Tarefa"; em Tarefas, abra "Enviar minuta assinada à contraparte" (T-1042) e a aba Mail Box.
 Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
 **Fora do escopo:** o e-mail enviado pelo sistema por uma tarefa, que já mostra "Sistema · <tarefa>" em "Enviado por"
-(épico "Escrever e-mail de qualquer tela e central E-mails no menu"); o vínculo com mais de 1 tarefa.
+(épico "Escrever e-mail de qualquer tela e central Comunicações no menu"); o vínculo com mais de 1 tarefa.
 
 **Relevância** (coluna das tarefas): Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer,
 conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
@@ -23,7 +23,7 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 |---|---|---|---|
 | [1. Vincular a tarefa no compositor](parte-1-vincular-a-tarefa.md) | O campo "Vincular a tarefa", a tarefa vinda da tela de origem e a gravação do vínculo no e-mail | | As outras partes leem o vínculo que esta grava |
 | [2. Mail Box da tarefa](parte-2-mail-box-da-tarefa.md) | Os recortes "Desta tarefa" e "Do item" na Mail Box do painel da tarefa | 1 | Mostra os e-mails vinculados na parte 1 |
-| [3. A tarefa na aba Mensagens e na Mail Box do item](parte-3-tarefa-na-lista.md) | A coluna, o filtro e o campo Tarefa na aba Mensagens e a referência da tarefa na Mail Box do item | 1 | Mostra o vínculo fora da tarefa; independe da parte 2 |
+| [3. A tarefa na lista de mensagens e na Mail Box do item](parte-3-tarefa-na-lista.md) | A coluna, o filtro e o campo Tarefa na lista de mensagens e a referência da tarefa na Mail Box do item | 1 | Mostra o vínculo fora da tarefa; independe da parte 2 |
 | [4. Tarefa sem item](parte-4-tarefa-sem-item.md) | O vínculo com a tarefa que não tem item e a Mail Box própria dessa tarefa | 1, 2 | Depende de uma pergunta em aberto e do registro do e-mail sem item; as partes 1 a 3 não esperam por ela |
 
 ## Regras de negócio comuns (RN)

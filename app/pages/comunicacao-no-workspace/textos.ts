@@ -981,7 +981,7 @@ const ptBR: Textos = {
   },
   central: {
     abas: { mensagens: 'Mensagens', modelos: 'Modelos', caixas: 'Caixas de E-mail', configuracoes: 'Configurações' },
-    dicas: { modelos: 'Os modelos que aparecem no campo Template do e-mail.', caixas: 'Os endereços do workspace que recebem e-mails e podem iniciar um fluxo.', configuracoes: 'A conta de envio de cada pessoa e as regras do e-mail no workspace.' },
+    dicas: { modelos: 'Os modelos que aparecem no campo Template do e-mail.', caixas: 'Os endereços do workspace que recebem e-mails e podem iniciar um fluxo.', configuracoes: 'As regras do e-mail que valem para todo o workspace.' },
     novoModelo: 'Novo modelo',
     novaCaixa: 'Nova caixa',
     pesquisarModelos: 'Pesquisar modelos...',
@@ -1648,7 +1648,7 @@ const en: Textos = {
   },
   central: {
     abas: { mensagens: 'Messages', modelos: 'Templates', caixas: 'Email Boxes', configuracoes: 'Settings' },
-    dicas: { modelos: 'The templates offered in the email Template field.', caixas: 'The workspace addresses that receive email and can start a flow.', configuracoes: 'Each person\'s sending account and the workspace email rules.' },
+    dicas: { modelos: 'The templates offered in the email Template field.', caixas: 'The workspace addresses that receive email and can start a flow.', configuracoes: 'The email rules that apply to the whole workspace.' },
     novoModelo: 'New template',
     novaCaixa: 'New box',
     pesquisarModelos: 'Search templates...',
@@ -2315,7 +2315,7 @@ const es: Textos = {
   },
   central: {
     abas: { mensagens: 'Mensajes', modelos: 'Plantillas', caixas: 'Buzones de correo', configuracoes: 'Configuración' },
-    dicas: { modelos: 'Las plantillas que aparecen en el campo Plantilla del correo.', caixas: 'Las direcciones del workspace que reciben correos y pueden iniciar un flujo.', configuracoes: 'La cuenta de envío de cada persona y las reglas del correo en el workspace.' },
+    dicas: { modelos: 'Las plantillas que aparecen en el campo Plantilla del correo.', caixas: 'Las direcciones del workspace que reciben correos y pueden iniciar un flujo.', configuracoes: 'Las reglas del correo que valen para todo el workspace.' },
     novoModelo: 'Nueva plantilla',
     novaCaixa: 'Nuevo buzón',
     pesquisarModelos: 'Buscar plantillas...',
