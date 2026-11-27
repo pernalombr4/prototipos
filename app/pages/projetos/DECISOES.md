@@ -791,3 +791,12 @@ O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras 
   - `evidencias/entrega-r13-usuario-comum-so-para-voce.png`: usuário comum adiciona ao menu, com "Só para você." e
     Desfazer.
   - O detector de seta passou nas 4. A da página foi refeita com a barra de rolagem escondida por CSS temporário.
+
+## Modelo de dados · 2026-11-27
+
+- **O que é:** o diagrama de entidade e relacionamento do protótipo e 18 brechas nas relações, em
+  `MODELO-DE-DADOS.md`. Nenhuma tela mudou.
+- **As que mais pesam:** mover categoria deixa o marco com tarefas de outro projeto (B9); a subtarefa entra em outro
+  marco que a mãe (B10); excluir projeto deixa marcos, discussões e painéis sem dono (B12); o marco só entra numa meta
+  pela meta (B1); ligar o projeto à meta conta todos os marcos (B6).
+- **Próximo passo:** a redatora escolhe quais brechas viram rodada e responde P1 a P5.
