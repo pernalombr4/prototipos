@@ -5,8 +5,9 @@
  * - herdada do nível de cima: tom claro da cor primária (Twenty);
  * - diferente do nível de cima: cor cheia e seta de desfazer ao lado (Twenty);
  * - parcial, quando vale só para parte dos campos: traço (Directus, Strapi);
- * - travada, quando outra ação exige esta: marcada, desabilitada, com cadeado
- *   e o motivo na dica (Appsmith, ClickUp);
+ * - travada, quando outra ação exige esta: marcada, desabilitada, com cadeado;
+ *   o motivo abre num popover no hover e no clique do cadeado ou da caixa, e o
+ *   clique fixa o popover até clicar fora ou apertar Esc (rodada 6, Appsmith, ClickUp);
  * - regra de itens: ícone à esquerda quando a ação vale só para os itens que
  *   a pessoa criou ou em que é responsável (ClickUp, HubSpot, Pipefy).
  *
@@ -29,7 +30,45 @@ const props = defineProps<{
 
 const emit = defineEmits<{ alterar: [valor: boolean], desfazer: [] }>()
 
-const textoDaDica = computed(() => props.travadaPor ?? props.dica ?? '')
+// A caixa travada não abre dica: o motivo mora no popover do cadeado.
+const textoDaDica = computed(() => props.travadaPor ? '' : props.dica ?? '')
+
+// "Exigido por Atualizar. Desmarque Atualizar para tirar Ver." vira título e texto.
+const motivo = computed(() => {
+  const texto = props.travadaPor ?? ''
+  const i = texto.indexOf('. ')
+  return i < 0 ? { titulo: texto, texto: '' } : { titulo: texto.slice(0, i + 1), texto: texto.slice(i + 2) }
+})
+
+// Popover do cadeado: abre no hover e no clique; o clique fixa até clicar fora ou Esc.
+const aberto = ref(false)
+const fixado = ref(false)
+let fechar: ReturnType<typeof setTimeout> | undefined
+function entrar() {
+  if (!props.travadaPor)
+    return
+  clearTimeout(fechar)
+  aberto.value = true
+}
+function sair() {
+  if (fixado.value)
+    return
+  clearTimeout(fechar)
+  fechar = setTimeout(() => { aberto.value = false }, 150)
+}
+function clicar() {
+  if (!props.travadaPor)
+    return
+  clearTimeout(fechar)
+  aberto.value = true
+  fixado.value = true
+}
+function aoMudar(v: boolean) {
+  aberto.value = v
+  if (!v)
+    fixado.value = false
+}
+onBeforeUnmount(() => clearTimeout(fechar))
 const clara = computed(() => props.herdada && !props.difere && props.valor !== 'indeterminate')
 </script>
 
@@ -44,7 +83,7 @@ const clara = computed(() => props.herdada && !props.difere && props.valor !== '
 
     <!-- Vaga 2: a caixa -->
     <UTooltip :text="textoDaDica" :disabled="!textoDaDica">
-      <span class="inline-flex">
+      <span class="inline-flex" @mouseenter="entrar" @mouseleave="sair" @click="clicar">
         <UCheckbox
           :model-value="valor"
           :ui="clara ? { indicator: 'bg-primary/40' } : undefined"
@@ -58,12 +97,42 @@ const clara = computed(() => props.herdada && !props.difere && props.valor !== '
 
     <!-- Vaga 3: cadeado (travada) ou desfazer (diferente do nível de cima) -->
     <span class="flex w-5 justify-center">
-      <!-- A caixa travada fica desabilitada e não abre dica: o motivo mora no cadeado. -->
-      <UTooltip v-if="travadaPor" :text="travadaPor">
-        <button type="button" class="flex cursor-help items-center rounded-sm text-muted transition-colors hover:text-highlighted focus-visible:outline-2 focus-visible:outline-primary" :aria-label="travadaPor">
-          <UIcon name="i-lucide-lock" class="size-3" />
-        </button>
-      </UTooltip>
+      <!-- A caixa travada fica desabilitada: o motivo mora no popover do cadeado. -->
+      <UPopover
+        v-if="travadaPor"
+        :open="aberto"
+        :content="{ side: 'top', sideOffset: 6, collisionPadding: 8 }"
+        arrow
+        :ui="{ content: 'w-64 p-3' }"
+        @update:open="aoMudar"
+      >
+        <template #anchor>
+          <button
+            type="button"
+            class="flex cursor-pointer items-center rounded-sm p-0.5 transition-colors focus-visible:outline-2 focus-visible:outline-primary"
+            :class="aberto ? 'text-highlighted' : 'text-muted hover:text-highlighted'"
+            :aria-label="travadaPor"
+            :aria-expanded="aberto"
+            aria-haspopup="dialog"
+            @mouseenter="entrar"
+            @mouseleave="sair"
+            @click="clicar"
+          >
+            <UIcon name="i-lucide-lock" class="size-3" />
+          </button>
+        </template>
+        <template #content>
+          <div class="flex gap-2.5" role="note" @mouseenter="entrar" @mouseleave="sair">
+            <span class="flex size-6 shrink-0 items-center justify-center rounded-md bg-elevated text-muted">
+              <UIcon name="i-lucide-lock" class="size-3.5" />
+            </span>
+            <span class="min-w-0 space-y-0.5">
+              <span class="block text-sm font-semibold text-highlighted">{{ motivo.titulo }}</span>
+              <span v-if="motivo.texto" class="block text-xs text-muted">{{ motivo.texto }}</span>
+            </span>
+          </div>
+        </template>
+      </UPopover>
       <UTooltip v-else-if="difere && rotuloDesfazer && !desabilitada" :text="rotuloDesfazer">
         <UButton
           icon="i-lucide-undo-2"

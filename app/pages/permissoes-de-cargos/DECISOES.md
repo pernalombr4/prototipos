@@ -317,4 +317,9 @@ USE87A7C6 está na develop desde 2026-11-16 e ainda não está na branch princip
 - **Pedido (literal):** "na tabelinha do padrao, falta alinhar a altura dos textos de criar, ver, atualizar, excluir e
   outras açoes". **Mudou:** os títulos do cabeçalho ficam alinhados pelo topo; antes, "Área" e "Outras ações" ficavam
   no meio da célula e as ações, com a caixa embaixo, no topo.
+- **Pedido (literal):** "esses cadeados estao com tooltips simples. nao acha que poderia ser um popover? um pouco mais
+  elaborado, e que nao só com hover do mouse aparece, mas também se o user clicar no cadeado abre". **Mudou:** o motivo
+  da caixa travada abre num popover com ícone, título ("Exigido por Atualizar.") e texto ("Desmarque Atualizar para
+  tirar Ver."). Abre no hover e no clique do cadeado ou da caixa; o clique fixa o popover até clicar fora ou apertar Esc.
+  A caixa travada não abre mais a dica simples.
 - **Em conversa:** separar o padrão (fora das categorias) e as categorias em abas. Sem decisão.
